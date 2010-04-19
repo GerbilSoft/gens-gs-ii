@@ -5,7 +5,7 @@ list (APPEND CMAKE_MODULE_PATH "${gens-gs-ii_SOURCE_DIR}/CMake")
 
 # Git version information.
 ADD_CUSTOM_TARGET(git_version ALL
-	${gens-gs-ii_SOURCE_DIR}/git_version.sh -o "${gens-gs-ii_BINARY_DIR}/git_version.h"
+	${gens-gs-ii_SOURCE_DIR}/git_version.sh -s "${gens-gs-ii_SOURCE_DIR}" -o "${gens-gs-ii_BINARY_DIR}/git_version.h"
 	VERBATIM
 )
 
