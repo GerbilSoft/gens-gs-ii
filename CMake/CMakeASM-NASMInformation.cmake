@@ -19,6 +19,11 @@ IF(APPLE)
 	SET(CMAKE_ASM-NASM_COMPILER_ARG1 "-f macho -g -F null")
 ENDIF(APPLE)
 
+# Check for a release build.
+IF(CMAKE_BUILD_TYPE MATCHES ^release$)
+	SET(CMAKE_ASM-NASM_COMPILER_ARG1 "${CMAKE_ASM-NASM_COMPILER_ARG1} -O3")
+ENDIF(CMAKE_BUILD_TYPE MATCHES ^release$)
+
 # This section exists to override the one in CMakeASMInformation.cmake 
 # (the default Information file). This removes the <FLAGS>
 # thing so that your C compiler flags that have been set via 

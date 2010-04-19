@@ -10,7 +10,7 @@ ADD_CUSTOM_TARGET(git_version ALL
 )
 
 #if you don't want the full compiler output, remove the following line
-#SET(CMAKE_VERBOSE_MAKEFILE ON)
+SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 # Hack to remove -rdynamic from CFLAGS and CXXFLAGS
 # See http://public.kitware.com/pipermail/cmake/2006-July/010404.html
@@ -22,8 +22,31 @@ ENDIF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 # Don't embed rpaths in the executables.
 SET(CMAKE_SKIP_RPATH ON)
 
-#add definitions, compiler switches, etc.
-ADD_DEFINITIONS(-Wall -Wextra -O0 -ggdb)
+# If no build type is set, default to "debug".
+IF(CMAKE_BUILD_TYPE MATCHES ^$)
+	SET(CMAKE_BUILD_TYPE "debug")
+ENDIF(CMAKE_BUILD_TYPE MATCHES ^$)
+
+# Set CFLAGS/CXXFLAGS based on build type.
+SET(CMAKE_C_FLAGS_DEBUG		"-Wall -Wextra -O0")
+SET(CMAKE_CXX_FLAGS_DEBUG	"-Wall -Wextra -O0")
+SET(CMAKE_C_FLAGS_RELEASE	"-Wall -Wextra -O2 -march=i586 -mtune=i686")
+SET(CMAKE_CXX_FLAGS_RELEASE	"-Wall -Wextra -O2 -march=i586 -mtune=i686")
+
+# Win32 CFLAGS.
+# TODO: LDFLAGS (-static-libgcc, etc)
+IF(WIN32)
+	SET(CMAKE_C_FLAGS_DEBUG		"${CMAKE_C_FLAGS_DEBUG} -gstabs -fshort-wchar")
+	SET(CMAKE_CXX_FLAGS_DEBUG	"${CMAKE_CXX_FLAGS_DEBUG} -gstabs -fshort-wchar")
+	SET(CMAKE_C_FLAGS_RELEASE	"${CMAKE_C_FLAGS_RELEASE} -gstabs -fshort-wchar")
+	SET(CMAKE_CXX_FLAGS_RELEASE	"${CMAKE_CXX_FLAGS_RELEASE} -gstabs -fshort-wchar")
+ENDIF(WIN32)
+IF(UNIX)
+	SET(CMAKE_C_FLAGS_DEBUG		"${CMAKE_C_FLAGS_DEBUG} -ggdb")
+	SET(CMAKE_CXX_FLAGS_DEBUG	"${CMAKE_CXX_FLAGS_DEBUG} -ggdb")
+	SET(CMAKE_C_FLAGS_RELEASE	"${CMAKE_C_FLAGS_RELEASE} -ggdb")
+	SET(CMAKE_CXX_FLAGS_RELEASE	"${CMAKE_CXX_FLAGS_RELEASE} -ggdb")
+ENDIF(UNIX)
 
 # Project subdirectories
 SUBDIRS(src)
