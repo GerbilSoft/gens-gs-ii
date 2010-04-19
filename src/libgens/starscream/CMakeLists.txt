@@ -21,6 +21,5 @@ ADD_CUSTOM_COMMAND(
 	)
 
 # Starscream library.
-# TODO: ASM files should be in the BUILD directory.
 ENABLE_LANGUAGE(ASM-NASM)
 ADD_LIBRARY(starscream STATIC ${CMAKE_CURRENT_BINARY_DIR}/main68k.asm ${CMAKE_CURRENT_BINARY_DIR}/sub68k.asm)
