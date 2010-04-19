@@ -467,7 +467,7 @@ section .text align=64
 	
 align 16
 	
-%%IO
+%%IO:
 %endif
  	mov	[ebp + Z80.CycleIO], edi
 	movzx	edi, ch
@@ -492,7 +492,7 @@ align 16
 %if (GENS_OPT == 1)
 
 align 16
-%%End
+%%End:
 %endif
 
 %endmacro
@@ -521,7 +521,7 @@ align 16
 	
 align 16
 	
-%%IO
+%%IO:
 %endif
 	mov	[ebp + Z80.CycleIO], edi
 %if %0 > 0
@@ -536,7 +536,7 @@ align 16
 %if (GENS_OPT == 1)
 align 16
 
-%%End
+%%End:
 %endif
 
 %endmacro
@@ -569,7 +569,7 @@ align 16
 	
 align 16
 
-%%IO
+%%IO:
 %endif
 	mov	[ebp + Z80.CycleIO], edi
 	movzx	edi, ch
@@ -595,7 +595,7 @@ align 16
 %if (GENS_OPT == 1)
 align 16
 
-%%End
+%%End:
 %endif
 
 %endmacro
@@ -624,7 +624,7 @@ align 16
 	
 align 16
 	
-%%IO
+%%IO:
 %endif
 	mov	[ebp + Z80.CycleIO], edi
 %if %0 > 0
@@ -639,7 +639,7 @@ align 16
 %if (GENS_OPT == 1)
 align 16
 
-%%End
+%%End:
 %endif
 
 %endmacro
@@ -744,12 +744,12 @@ align 16
 	
 align 8
 	
-%%NMI
+%%NMI:
 	call	_do_NMI
 	
 align 16
 	
-%%No_Int
+%%No_Int:
 
 %endmacro
 
@@ -1728,7 +1728,7 @@ Z80I_LD%1:
 	
 	or	zF, FLAG_P
 
-%%BC_zero
+%%BC_zero:
 	mov	zxDE, ecx
 	mov	zxBC, edx
 	NEXT 16
@@ -1749,7 +1749,7 @@ LDX D
 align 16
 
 Z80I_LD%1R:
-%%Loop
+%%Loop:
 	mov	ecx, zxHL
 	READ_BYTE
 	mov	ecx, zxDE
@@ -1780,7 +1780,7 @@ Z80I_LD%1R:
 
 align 16
 
-%%End
+%%End:
 	add	zxPC, byte 2
 	and	zF, FLAG_S | FLAG_Z | FLAG_C
 	NEXT 16
@@ -1823,7 +1823,7 @@ Z80I_CP%1:
 	
 	or	zF, FLAG_P
 
-%%BC_zero
+%%BC_zero:
 	mov	zxBC, ecx
 	NEXT 16
 
@@ -1844,7 +1844,7 @@ align 16
 
 Z80I_CP%1R:
 	and	zF, FLAG_C
-%%Loop
+%%Loop:
 	mov	ecx, zxHL
 	READ_BYTE
 	mov	ecx, zxBC
@@ -1875,7 +1875,7 @@ Z80I_CP%1R:
 
 align 16
 
-%%End_A_equal_mHL
+%%End_A_equal_mHL:
 	mov	dh, zF
 	cmp	zA, dl
 	lahf
@@ -1887,7 +1887,7 @@ align 16
 
 align 16
 
-%%End_BC_zero
+%%End_BC_zero:
 	mov dh, zF
 	cmp zA, dl
 	lahf
@@ -1970,7 +1970,7 @@ Z80I_%1_%2:
 
 align 16
 
-%%over
+%%over:
 	and zF, OPFLAG
 	or zF, FLAG_P
 	NEXT 4
@@ -2080,7 +2080,7 @@ Z80I_%1_N:
 
 align 16
 
-%%over
+%%over:
 	and zF, OPFLAG
 	or zF, FLAG_P
 	NEXT 7
@@ -2137,7 +2137,7 @@ Z80I_%1_mHL:
 
 align 16
 
-%%over
+%%over:
 	and zF, OPFLAG
 	or zF, FLAG_P
 	NEXT 7
@@ -2197,7 +2197,7 @@ Z80I_%1_m%2d:
 
 align 16
 
-%%over
+%%over:
 	and zF, OPFLAG
 	or zF, FLAG_P
 	NEXT 15
@@ -2556,7 +2556,7 @@ Z80I_NEG:
 
 align 16
 
-.over
+.over:
 	or	zF, FLAG_P
 	NEXT 8
 
@@ -3450,7 +3450,7 @@ Z80I_BIT%1_%2:
 
 align 16
 
-%%zero
+%%zero:
 	mov zFXY, 0
 	or zF, FLAG_Z | FLAG_H | FLAG_P
 	NEXT 8
@@ -3553,7 +3553,7 @@ Z80I_BIT%1_mHL:
 
 align 16
 
-%%zero
+%%zero:
 	mov zFXY, 0
 	or zF, FLAG_Z | FLAG_H | FLAG_P
 	NEXT 12
@@ -3605,7 +3605,7 @@ Z80I_BIT%1_m%2d:
 
 align 16
 
-%%zero
+%%zero:
 	mov zFXY, 0
 	or zF, FLAG_Z | FLAG_H | FLAG_P
 	NEXT 16
@@ -4177,7 +4177,7 @@ Z80I_JP%2%1_NN:
 
 align 16
 
-%%dont_take_it
+%%dont_take_it:
 	add	zxPC, 3
 	NEXT 10
 
@@ -4220,7 +4220,7 @@ Z80I_JR%2%1_N:
 
 align 16
 
-%%dont_take_it
+%%dont_take_it:
 	add	zxPC, 2
 	NEXT 7
 
@@ -4308,7 +4308,7 @@ Z80I_CALL%2%1_NN:
 %if %0 > 0
 align 16
 
-%%dont_take_it
+%%dont_take_it:
 	add	zxPC, 3
 	NEXT 10
 %endif
@@ -4358,7 +4358,7 @@ Z80I_RET%2%1:
 %if %0 > 0
 align 16
 
-%%dont_take_it
+%%dont_take_it:
 	inc zxPC
 	NEXT 5
 %endif
@@ -4517,7 +4517,7 @@ INX D
 align 16
 
 Z80I_IN%1R:
-%%Loop
+%%Loop:
 	movzx	ecx, zC
 	DO_IN
 	mov	ecx, zxHL
@@ -4548,7 +4548,7 @@ Z80I_IN%1R:
 	
 	or	zF, FLAG_H | FLAG_C
 
-%%no_carry1
+%%no_carry1:
 	shr	cl, 7
 	add	cl, cl
 	or	zF, cl
@@ -4556,7 +4556,7 @@ Z80I_IN%1R:
 
 align 16
 
-%%End
+%%End:
 	mov	cl, zF
 	mov	dh, zC
 	mov	zF, FLAG_Z | FLAG_P
@@ -4567,7 +4567,7 @@ align 16
 	
 	or	zF, FLAG_H | FLAG_C
 
-%%no_carry2
+%%no_carry2:
 	shr	cl, 7
 	add	zxPC, byte 2
 	add	cl, cl
@@ -4680,7 +4680,7 @@ OUTX D
 align 16
 
 Z80I_OT%1R:
-%%Loop
+%%Loop:
 	mov	ecx, zxHL
 	READ_BYTE
 	movzx	ecx, zC
@@ -4710,7 +4710,7 @@ Z80I_OT%1R:
 	
 	or	zF, FLAG_H | FLAG_C
 
-%%no_carry1
+%%no_carry1:
 	shr	cl, 7
 	add	cl, cl
 	or	zF, cl
@@ -4718,7 +4718,7 @@ Z80I_OT%1R:
 
 align 16
 
-%%End
+%%End:
 	mov	cl, zF
 	mov	dh, zL
 	mov	zF, FLAG_Z | FLAG_P
@@ -4728,7 +4728,7 @@ align 16
 	
 	or	zF, FLAG_H | FLAG_C
 
-%%no_carry2
+%%no_carry2:
 	shr	cl, 7
 	add	zxPC, byte 2
 	add	cl, cl
@@ -4879,13 +4879,13 @@ DECLF z80_Add_%1
 	cmp	ecx, edx
 	ja	short %%end
 	
-%%Loop
+%%Loop:
 	mov	[ebp + Z80.%1 + ecx * 4], eax
 	inc	ecx
 	cmp	ecx, edx
 	jbe	short %%Loop
 	
-%%end
+%%end:
 	pop	ebp
 	pop	edx
 	pop	ecx
