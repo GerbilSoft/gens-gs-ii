@@ -9,15 +9,12 @@ ADD_CUSTOM_TARGET(git_version ALL
 	VERBATIM
 )
 
-#if you don't want the full compiler output, remove the following line
-SET(CMAKE_VERBOSE_MAKEFILE ON)
-
 # Hack to remove -rdynamic from CFLAGS and CXXFLAGS
 # See http://public.kitware.com/pipermail/cmake/2006-July/010404.html
 IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
 	SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
-ENDIF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+ENDIF()
 
 # Don't embed rpaths in the executables.
 SET(CMAKE_SKIP_RPATH ON)
@@ -25,7 +22,11 @@ SET(CMAKE_SKIP_RPATH ON)
 # If no build type is set, default to "debug".
 IF(CMAKE_BUILD_TYPE MATCHES ^$)
 	SET(CMAKE_BUILD_TYPE "debug")
-ENDIF(CMAKE_BUILD_TYPE MATCHES ^$)
+ENDIF()
+
+IF (CMAKE_BUILD_TYPE MATCHES ^debug$)
+	SET(CMAKE_VERBOSE_MAKEFILE ON)
+ENDIF()
 
 # Set CFLAGS/CXXFLAGS based on build type.
 SET(CMAKE_C_FLAGS_DEBUG		"-Wall -Wextra -O0")
@@ -40,13 +41,12 @@ IF(WIN32)
 	SET(CMAKE_CXX_FLAGS_DEBUG	"${CMAKE_CXX_FLAGS_DEBUG} -gstabs -fshort-wchar")
 	SET(CMAKE_C_FLAGS_RELEASE	"${CMAKE_C_FLAGS_RELEASE} -gstabs -fshort-wchar")
 	SET(CMAKE_CXX_FLAGS_RELEASE	"${CMAKE_CXX_FLAGS_RELEASE} -gstabs -fshort-wchar")
-ENDIF(WIN32)
-IF(UNIX)
+ELSEIF(UNIX)
 	SET(CMAKE_C_FLAGS_DEBUG		"${CMAKE_C_FLAGS_DEBUG} -ggdb")
 	SET(CMAKE_CXX_FLAGS_DEBUG	"${CMAKE_CXX_FLAGS_DEBUG} -ggdb")
 	SET(CMAKE_C_FLAGS_RELEASE	"${CMAKE_C_FLAGS_RELEASE} -ggdb")
 	SET(CMAKE_CXX_FLAGS_RELEASE	"${CMAKE_CXX_FLAGS_RELEASE} -ggdb")
-ENDIF(UNIX)
+ENDIF()
 
 # Project subdirectories
 SUBDIRS(src)
