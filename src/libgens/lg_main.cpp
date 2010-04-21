@@ -154,6 +154,10 @@ int LgThread(void *param)
 	// SDL is initialized.
 	m_isInit = true;
 	
+	// Simple background stuff.
+	int bg_shade = 0;
+	bool bg_dir = false;
+	
 	// Event loop.
 	SDL_Event event;
 	bool done = false;
@@ -170,6 +174,28 @@ int LgThread(void *param)
 				break;
 			
 			default:
+				// Invert the background color.
+				if (!bg_dir)
+				{
+					bg_shade += 8;
+					if (bg_shade >= 255)
+					{
+						bg_shade = 255;
+						bg_dir = true;
+					}
+				}
+				else
+				{
+					bg_shade -= 8;
+					if (bg_shade <= 0)
+					{
+						bg_shade = 0;
+						bg_dir = false;
+					}
+				}
+				
+				SDL_FillRect(m_screen, NULL, SDL_MapRGB(m_screen->format, bg_shade, bg_shade, bg_shade));
+				SDL_UpdateRect(m_screen, 0, 0, 0, 0);
 				break;
 		}
 	}
