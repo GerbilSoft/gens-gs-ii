@@ -60,7 +60,8 @@ int main(int argc, char *argv[])
 		printf("\n");
 	}
 	
-	// TODO: Shut down the thread.
+	// Shut down LibGens.
+	LibGens::End();
 	
 	// Finished.
 	return 0;
