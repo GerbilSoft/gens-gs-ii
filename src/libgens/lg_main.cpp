@@ -82,7 +82,7 @@ int Init(const void *wid, const char *sWinTitle)
 	
 	// Print the Gens/GS startup message.
 	fprintf(stderr, "Gens/GS II (Development Build)\n");
-#ifdef LG_GIT_VERSION
+#ifdef GENS_GIT_VERSION
 	fprintf(stderr, "(" GENS_GIT_VERSION ")\n");
 #endif
 	fprintf(stderr, "\n"
