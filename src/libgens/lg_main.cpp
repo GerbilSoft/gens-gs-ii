@@ -106,7 +106,7 @@ int Init(const void *wid, const char *sWinTitle)
 		"\n");
 	
 	// Initialize SDL.
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE) < 0)
+	if (SDL_Init(SDL_INIT_NOPARACHUTE) < 0)
 	{
 		LG_MSG("Error initializing SDL: %s", SDL_GetError());
 		return -1;
@@ -220,6 +220,8 @@ static void LgProcessSDLQueue(void)
 int LgThread(void *param)
 {
 	// Initialize SDL video.
+	// TODO: Check for errors in SDL_InitSubSystem().
+	SDL_InitSubSystem(SDL_INIT_VIDEO);
 	m_screen = SDL_SetVideoMode(320, 240, 0, SDL_VideoModeFlags);
 	
 	// Set the window title.
@@ -252,6 +254,12 @@ int LgThread(void *param)
 				break;
 		}
 	}
+	
+	// Shut down SDL video.
+	// TODO: Shut down the entire SDL system somewhere?
+	SDL_FreeSurface(m_screen);
+	m_screen = NULL;
+	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	
 	// Thread exiting.
 	m_isInit = false;
