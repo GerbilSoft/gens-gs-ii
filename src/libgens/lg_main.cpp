@@ -33,6 +33,10 @@ using std::string;
 
 #include <SDL/SDL.h>
 
+#define LG_MSG(str, ...) \
+	fprintf(stderr, "LibGens::%s(): " str "\n", __func__, ##__VA_ARGS__)
+
+
 namespace LibGens
 {
 
@@ -75,7 +79,7 @@ int Init(const void *wid, const char *sWinTitle)
 	// Initialize SDL.
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE) < 0)
 	{
-		fprintf(stderr, "Error initializing SDL: %s\n", SDL_GetError());
+		LG_MSG("Error initializing SDL: %s", SDL_GetError());
 		return -1;
 	}
 	
@@ -102,7 +106,7 @@ int Init(const void *wid, const char *sWinTitle)
 	if (tmr <= 0)
 	{
 		// Error initializing the LibGens thread.
-		fprintf(stderr, "Error initializing LibGens thread.\n");
+		LG_MSG("Error initializing LibGens thread.");
 		SDL_KillThread(m_thread);
 		m_thread = NULL;
 		m_isInit = false;
@@ -110,7 +114,7 @@ int Init(const void *wid, const char *sWinTitle)
 	}
 	
 	// LibGens thread initialized.
-	fprintf(stderr, "LibGens thread initialized.\n");
+	LG_MSG("LibGens thread initialized.");
 	return 0;
 }
 
@@ -202,7 +206,7 @@ int LgThread(void *param)
 	
 	// Thread exiting.
 	m_isInit = false;
-	fprintf(stderr, "LibGens thread is exiting.\n");
+	LG_MSG("LibGens thread is exiting.");
 	return 0;
 }
 
