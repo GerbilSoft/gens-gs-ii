@@ -1,6 +1,6 @@
 /***************************************************************************
- * gens-qt4: Gens Qt4 UI.                                                  *
- * gqt4_main.hpp: Main UI code.                                            *
+ * libgens: Gens Emulation Library.                                        *
+ * MtQueue.hpp: Multithreaded queue class for IPC.                         *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,47 +21,61 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "gqt4_main.hpp"
-#include "libgens/lg_main.hpp"
+#ifndef __LIBGENS_MTQUEUE_HPP__
+#define __LIBGENS_MTQUEUE_HPP__
 
-#include <stdio.h>
-#include <unistd.h>
+#include <queue>
+#include <SDL/SDL.h>
 
+// Used for notifying SDL.
+#define SDL_EVENT_MTQ 0x51
 
-int main(int argc, char *argv[])
+namespace LibGens
 {
-	// Initialize LibGens.
-	int ret = LibGens::Init(NULL, "Gens/GS II");
-	if (ret != 0)
-		return ret;
-	
-	// Prompt for a color.
-	char buf[1024];
-	int n, r, g, b;
-	uint32_t color;
-	while (LibGens::IsRunning() && !feof(stdin))
-	{
-		printf("Enter an RGB color value as three numbers, e.g. 255 255 255.\n");
-		fgets(buf, sizeof(buf), stdin);
-		if (feof(stdin))
-			break;
+
+class MtQueue
+{
+	public:
+		MtQueue(bool notifySDL = false);
+		~MtQueue();
 		
-		// Parse the values.
-		n = sscanf(buf, "%d %d %d", &r, &g, &b);
-		if (n != 3 || r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255)
+		/**
+		* MtQ_type: MtQueue message type.
+		*/
+		enum MtQ_type
 		{
-			printf("Invalid input data. Try again.\n");
-			continue;
-		}
+			MTQ_NONE = 0,
+			
+			/**
+			* MTQ_LG_SETBGCOLOR: Test message to set the LibGens background color.
+			* @param param 24-bit RGB color value. (BGR)
+			*/
+			MTQ_LG_SETBGCOLOR,
+			
+			MTQ_MAX
+		};
+
+		struct MtQ_elem
+		{
+			MtQ_type type;
+			void *param;
+			
+			MtQ_elem(MtQ_type n_type, void *n_param)
+			{
+				this->type = n_type;
+				this->param = n_param;
+			}
+		};
 		
-		// Send the message.
-		color = (r | (g << 8) | (b << 16));
-		LibGens::qToSDL->push(LibGens::MtQueue::MTQ_LG_SETBGCOLOR, (void*)color);
-		printf("\n");
-	}
+		int push(MtQ_type type, void *param);
+		MtQ_type pop(void **r_param);
 	
-	// TODO: Shut down the thread.
-	
-	// Finished.
-	return 0;
+	private:
+		std::queue<MtQ_elem> m_queue;
+		bool m_notifySDL;
+		SDL_mutex *m_mutex;
+};
+
 }
+
+#endif /* __LIBGENS_MTQUEUE_HPP__ */

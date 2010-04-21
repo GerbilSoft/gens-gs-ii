@@ -54,6 +54,9 @@ static string m_sWinTitle;
 static const unsigned int SDL_VideoModeFlags = \
 	(SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWPALETTE | SDL_ASYNCBLIT | SDL_HWACCEL);
 
+// UI to SDL queue.
+MtQueue *qToSDL = NULL;
+
 
 /**
  * IsRunning(): Determines if LibGens is running.
@@ -115,11 +118,18 @@ int Init(const void *wid, const char *sWinTitle)
 	else
 		m_sWinTitle = "";
 	
+	// Initialize the queues.
+	qToSDL = new MtQueue(true);
+	
 	// Start the LibGens thread.
 	m_wid = wid;
 	m_thread = SDL_CreateThread(LgThread, NULL);
 	if (!m_thread)
+	{
+		delete qToSDL;
+		qToSDL = NULL;
 		return -2;
+	}
 	
 	// Wait 10s for the LibGens thread to be initialized.
 	int tmr = 10000;
@@ -169,6 +179,40 @@ int End(void)
 
 
 /**
+ * LgProcessSDLQueue(): Process the SDL queue.
+ */
+static void LgProcessSDLQueue(void)
+{
+	void *param;
+	MtQueue::MtQ_type type;
+	
+	while ((type = qToSDL->pop(&param)) != MtQueue::MTQ_NONE)
+	{
+		switch (type)
+		{
+			case MtQueue::MTQ_LG_SETBGCOLOR:
+			{
+				// Set the background color.
+				const uint32_t bgr = (uint32_t)param;
+				uint8_t r, g, b;
+				r = (bgr & 0xFF);
+				g = (bgr >> 8) & 0xFF;
+				b = (bgr >> 16) & 0xFF;
+				
+				SDL_FillRect(m_screen, NULL, SDL_MapRGB(m_screen->format, r, g, b));
+				SDL_UpdateRect(m_screen, 0, 0, 0, 0);
+				break;
+			}
+			
+			default:
+				// Unhandled message.
+				break;
+		}
+	}
+}
+
+
+/**
  * LgThread(): LibGens thread.
  * @param param Parameter from Init().
  * @return 0 on success; non-zero on error.
@@ -183,10 +227,6 @@ int LgThread(void *param)
 	
 	// SDL is initialized.
 	m_isInit = true;
-	
-	// Simple background stuff.
-	int bg_shade = 0;
-	bool bg_dir = false;
 	
 	// Event loop.
 	SDL_Event event;
@@ -203,29 +243,12 @@ int LgThread(void *param)
 				done = true;
 				break;
 			
+			case SDL_EVENT_MTQ:
+				// Multi-threaded queue event.
+				LgProcessSDLQueue();
+				break;
+			
 			default:
-				// Invert the background color.
-				if (!bg_dir)
-				{
-					bg_shade += 8;
-					if (bg_shade >= 255)
-					{
-						bg_shade = 255;
-						bg_dir = true;
-					}
-				}
-				else
-				{
-					bg_shade -= 8;
-					if (bg_shade <= 0)
-					{
-						bg_shade = 0;
-						bg_dir = false;
-					}
-				}
-				
-				SDL_FillRect(m_screen, NULL, SDL_MapRGB(m_screen->format, bg_shade, bg_shade, bg_shade));
-				SDL_UpdateRect(m_screen, 0, 0, 0, 0);
 				break;
 		}
 	}

@@ -14,6 +14,7 @@ INCLUDE_DIRECTORIES(${gens-gs-ii_BINARY_DIR})
 # Sources.
 SET(SRCS
 	lg_main.cpp
+	MtQueue.cpp
 	)
 
 # Build the library.
