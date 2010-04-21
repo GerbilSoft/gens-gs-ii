@@ -8,6 +8,9 @@ SUBDIRS(starscream mdZ80)
 FIND_PACKAGE(SDL REQUIRED)
 INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIR})
 
+# Main binary directory. Needed for git_version.h
+INCLUDE_DIRECTORIES(${gens-gs-ii_BINARY_DIR})
+
 # Sources.
 SET(SRCS
 	lg_main.cpp

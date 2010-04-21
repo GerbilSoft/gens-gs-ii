@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include "lg_main.hpp"
+#include "macros/git.h"
 
 // C includes.
 #include <stdio.h>
@@ -75,6 +76,31 @@ int Init(const void *wid, const char *sWinTitle)
 	// TODO: Reference counting?
 	if (m_isInit)
 		return 0;
+	
+	// Print the Gens/GS startup message.
+	fprintf(stderr, "Gens/GS II (Development Build)\n");
+#ifdef LG_GIT_VERSION
+	fprintf(stderr, "(" GENS_GIT_VERSION ")\n");
+#endif
+	fprintf(stderr, "\n"
+		"Copyright (c) 1999-2002 by Stéphane Dallongeville.\n"
+		"Copyright (c) 2003-2004 by Stéphane Akhoun.\n"
+		"Copyright (c) 2008-2010 by David Korth.\n"
+		"\n"
+		"This program is free software; you can redistribute it and/or modify it\n"
+		"under the terms of the GNU General Public License as published by the\n"
+		"Free Software Foundation; either version 2 of the License, or (at your\n"
+		"option) any later version.\n"
+		"\n"
+		"This program is distributed in the hope that it will be useful, but\n"
+		"WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+		"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+		"GNU General Public License for more details.\n"
+		"\n"
+		"You should have received a copy of the GNU General Public License along\n"
+		"with this program; if not, write to the Free Software Foundation, Inc.,\n"
+		"51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.\n"
+		"\n");
 	
 	// Initialize SDL.
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE) < 0)
