@@ -39,8 +39,8 @@ int End(void);
 
 int LgThread(void *param);
 
-// UI to SDL queue.
-extern MtQueue *qToSDL;
+// UI to LibGens queue.
+extern MtQueue *qToLG;
 
 }
 

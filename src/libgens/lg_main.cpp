@@ -54,8 +54,8 @@ static string m_sWinTitle;
 static const unsigned int SDL_VideoModeFlags = \
 	(SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWPALETTE | SDL_ASYNCBLIT | SDL_HWACCEL);
 
-// UI to SDL queue.
-MtQueue *qToSDL = NULL;
+// UI to LibGens queue.
+MtQueue *qToLG = NULL;
 
 
 /**
@@ -118,16 +118,16 @@ int Init(const void *wid, const char *sWinTitle)
 	else
 		m_sWinTitle = "";
 	
-	// Initialize the queues.
-	qToSDL = new MtQueue(true);
+	// Initialize the message queues.
+	qToLG = new MtQueue(true);
 	
 	// Start the LibGens thread.
 	m_wid = wid;
 	m_thread = SDL_CreateThread(LgThread, NULL);
 	if (!m_thread)
 	{
-		delete qToSDL;
-		qToSDL = NULL;
+		delete qToLG;
+		qToLG = NULL;
 		return -2;
 	}
 	
@@ -186,7 +186,7 @@ static void LgProcessSDLQueue(void)
 	void *param;
 	MtQueue::MtQ_type type;
 	
-	while ((type = qToSDL->pop(&param)) != MtQueue::MTQ_NONE)
+	while ((type = qToLG->pop(&param)) != MtQueue::MTQ_NONE)
 	{
 		switch (type)
 		{

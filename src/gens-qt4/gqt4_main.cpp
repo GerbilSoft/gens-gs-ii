@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 		
 		// Send the message.
 		color = (r | (g << 8) | (b << 16));
-		LibGens::qToSDL->push(LibGens::MtQueue::MTQ_LG_SETBGCOLOR, (void*)color);
+		LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SETBGCOLOR, (void*)color);
 		printf("\n");
 	}
 	
