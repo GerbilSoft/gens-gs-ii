@@ -204,6 +204,11 @@ static void LgProcessSDLQueue(void)
 				break;
 			}
 			
+			case MtQueue::MTQ_LG_UPDATE:
+				// Update video.
+				SDL_UpdateRect(m_screen, 0, 0, 0, 0);
+				break;
+			
 			default:
 				// Unhandled message.
 				break;
@@ -220,9 +225,22 @@ static void LgProcessSDLQueue(void)
 int LgThread(void *param)
 {
 	// Initialize SDL video.
+	
+	if (m_wid)
+	{
+		// Window ID specified.
+		char s_wid[16];
+		snprintf(s_wid, sizeof(s_wid), "%ld", (intptr_t)m_wid);
+		s_wid[sizeof(s_wid)-1] = 0x00;
+		setenv("SDL_WINDOWID", s_wid, 1);
+	}
+	
 	// TODO: Check for errors in SDL_InitSubSystem().
 	SDL_InitSubSystem(SDL_INIT_VIDEO);
 	m_screen = SDL_SetVideoMode(320, 240, 0, SDL_VideoModeFlags);
+	
+	// Unset the Window ID variable.
+	unsetenv("SDL_WINDOWID");
 	
 	// Set the window title.
 	SDL_WM_SetCaption(m_sWinTitle.c_str(), NULL);
@@ -248,6 +266,11 @@ int LgThread(void *param)
 			case SDL_EVENT_MTQ:
 				// Multi-threaded queue event.
 				LgProcessSDLQueue();
+				break;
+			
+			case SDL_VIDEOEXPOSE:
+				// Update video.
+				SDL_UpdateRect(m_screen, 0, 0, 0, 0);
 				break;
 			
 			default:

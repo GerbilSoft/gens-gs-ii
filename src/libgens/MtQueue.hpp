@@ -47,10 +47,16 @@ class MtQueue
 			MTQ_NONE = 0,
 			
 			/**
-			* MTQ_LG_SETBGCOLOR: Test message to set the LibGens background color.
-			* @param param 24-bit RGB color value. (BGR)
-			*/
+			 * MTQ_LG_SETBGCOLOR: Test message to set the LibGens background color.
+			 * @param param 24-bit RGB color value. (BGR)
+			 */
 			MTQ_LG_SETBGCOLOR,
+			
+			/**
+			 * MTQ_LG_UPDATE: Update the SDL window.
+			 * @param param Unused.
+			 */
+			MTQ_LG_UPDATE,
 			
 			MTQ_MAX
 		};
