@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include "GensWindow.hpp"
+#include "gqt4_main.hpp"
 
 namespace GensQt4
 {
@@ -32,14 +33,48 @@ namespace GensQt4
 GensWindow::GensWindow()
 {
 	setupUi(this);
-	//this->centralwidget->hide();
-	//this->setAttribute(Qt::WA_NativeWindow);
-	//this->setAttribute(Qt::WA_PaintOnScreen);
-	//this->setAttribute(Qt::WA_OpaquePaintEvent);
-	//setUpdatesEnabled(false);
 	
 	// Create the SDL widget.
 	sdl = new SdlWidget(this->centralwidget);
+}
+
+
+/**
+ * closeEvent(): Window is being closed.
+ * @param event Close event.
+ */
+void GensWindow::closeEvent(QCloseEvent *event)
+{
+	// Quit.
+	QuitGens();
+	
+	// Accept the close event.
+	event->accept();
+}
+
+
+/** Slots. **/
+
+
+/**
+ * on_mnuFileQuit_triggered(): File, Quit.
+ */
+void GensWindow::on_mnuFileQuit_triggered(void)
+{
+	// Quit.
+	QuitGens();
+	
+	// Close the window.
+	this->close();
+}
+
+
+/**
+ * on_mnuHelpAbout_triggered(): Help, About.
+ */
+void GensWindow::on_mnuHelpAbout_triggered(void)
+{
+	printf("ABOUT\n");
 }
 
 }

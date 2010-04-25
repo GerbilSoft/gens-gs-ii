@@ -25,6 +25,8 @@
 #define __GENS_QT4_GENSWINDOW_HPP__
 
 #include <QMainWindow>
+#include <QCloseEvent>
+
 #include "SdlWidget.hpp"
 #include "ui_GensWindow.h"
 
@@ -40,6 +42,14 @@ class GensWindow : public QMainWindow, public Ui::GensWindow
 		
 		// SDL widget.
 		SdlWidget *sdl;
+	
+	protected:
+		void closeEvent(QCloseEvent *event);
+	
+	protected slots:
+		// Widget signals.
+		void on_mnuFileQuit_triggered(void);
+		void on_mnuHelpAbout_triggered(void);
 };
 
 }

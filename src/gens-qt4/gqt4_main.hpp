@@ -34,4 +34,9 @@ int main(int argc, char *argv[]);
 }
 #endif
 
+namespace GensQt4
+{
+	void QuitGens(void);
+}
+
 #endif /* __GENS_QT4_GQT4_MAIN_HPP__ */

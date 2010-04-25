@@ -57,3 +57,22 @@ int main(int argc, char *argv[])
 	// Finished.
 	return 0;
 }
+
+
+namespace GensQt4
+{
+
+/**
+ * QuitGens(): Quit Gens.
+ */
+void QuitGens(void)
+{
+	// TODO: Save configuration.
+	
+	// TODO: Stop LibGens' emulation core.
+	
+	// Shut down LibGens.
+	LibGens::End();
+}
+
+}
