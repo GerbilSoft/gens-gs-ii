@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * gqt4_main.hpp: Main UI code.                                            *
+ * GensWindow.cpp: Gens Window.                                            *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,39 +21,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "gqt4_main.hpp"
-#include "libgens/lg_main.hpp"
-
-#include <QApplication>
 #include "GensWindow.hpp"
 
-#include <stdio.h>
-
-
-int main(int argc, char *argv[])
+namespace GensQt4
 {
-	// Create the main UI.
-	QApplication app(argc, argv);
-	GensQt4::GensWindow gens_window;
-	gens_window.show();
+
+/**
+ * GensWindow(): Initialize the Gens window.
+ */
+GensWindow::GensWindow()
+{
+	setupUi(this);
+	//this->centralwidget->hide();
+	//this->setAttribute(Qt::WA_NativeWindow);
+	//this->setAttribute(Qt::WA_PaintOnScreen);
+	//this->setAttribute(Qt::WA_OpaquePaintEvent);
+	//setUpdatesEnabled(false);
 	
-	// Initialize LibGens.
-	int ret = LibGens::Init((void*)gens_window.sdl->winId(), "Gens/GS II");
-	if (ret != 0)
-		return ret;
-	
-	char buf[1024];
-	int n, r, g, b;
-	uint32_t color;
-	color = (255 | (128 << 8) | (64 << 16));
-	LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SETBGCOLOR, (void*)color);
-	
-	// Run the Qt4 UI.
-	ret = app.exec();
-	
-	// Shut down LibGens.
-	LibGens::End();
-	
-	// Finished.
-	return 0;
+	// Create the SDL widget.
+	sdl = new SdlWidget(this->centralwidget);
+}
+
 }

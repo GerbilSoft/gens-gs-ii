@@ -11,13 +11,23 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../)
 # Sources.
 SET(gens-qt4_SRCS
 	gqt4_main.cpp
+	GensWindow.cpp
+	)
+
+# Headers.
+SET(gens-qt4_HEADERS
+	gqt4_main.hpp
+	SdlWidget.hpp
+	GensWindow.hpp
 	)
 
 # Create .moc files for sources that need them.
-QT4_AUTOMOC(${gens-qt4_SRCS})
+QT4_WRAP_CPP(gens-qt4_MOC_SOURCES ${gens-qt4_HEADERS})
 
 # UI files.
-SET(gens-qt4_UIS)
+SET(gens-qt4_UIS
+	ui/GensWindow.ui
+	)
 
 # Generate the header files from the UI files.
 QT4_WRAP_UI(gens-qt4_UIS_H ${gens-qt4_UIS})
@@ -32,6 +42,6 @@ SET(gens-qt4_RCC_SRCS)
 QT4_ADD_RESOURCES(gens-qt4_RCC_O ${gens-qt4_RCC_SRCS})
 
 # Build the executable.
-ADD_EXECUTABLE(gens-qt4 ${gens-qt4_SRCS} ${gens-qt4_UIS_H} ${gens-qt4_RCC_O})
+ADD_EXECUTABLE(gens-qt4 ${gens-qt4_SRCS} ${gens-qt4_MOC_SOURCES} ${gens-qt4_UIS_H} ${gens-qt4_RCC_O})
 TARGET_LINK_LIBRARIES(gens-qt4 gens ${QT_LIBRARIES})
 ADD_DEPENDENCIES(gens-qt4 gens)

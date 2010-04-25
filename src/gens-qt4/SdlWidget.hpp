@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * gqt4_main.hpp: Main UI code.                                            *
+ * SdlWidget.hpp: SDL Widget class.                                        *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,39 +21,47 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "gqt4_main.hpp"
+#ifndef __GENS_QT4_SDLWIDGET_HPP__
+#define __GENS_QT4_SDLWIDGET_HPP__
+
 #include "libgens/lg_main.hpp"
 
-#include <QApplication>
-#include "GensWindow.hpp"
+// TODO: Use something other than QX11EmbedWidget on Windows and OS X.
+// Using it on Linux because other types result in a BadWindow error,
+// thanks to Qt4's alien windows feature. (Qt 4.6.2 seems to be ignoring
+// the requests to use native windows instead of alien windows.)
 
-#include <stdio.h>
 
+#include <QObject>
+#include <QX11EmbedWidget>
 
-int main(int argc, char *argv[])
+namespace GensQt4
 {
-	// Create the main UI.
-	QApplication app(argc, argv);
-	GensQt4::GensWindow gens_window;
-	gens_window.show();
+
+class SdlWidget : public QX11EmbedWidget
+{
+	Q_OBJECT
 	
-	// Initialize LibGens.
-	int ret = LibGens::Init((void*)gens_window.sdl->winId(), "Gens/GS II");
-	if (ret != 0)
-		return ret;
+	public:
+		SdlWidget(QWidget *parent = NULL)
+		{
+			this->setParent(parent);
+			
+			// Make sure the window is embedded properly.
+			this->setAttribute(Qt::WA_NativeWindow);
+			this->setAttribute(Qt::WA_PaintOnScreen);
+			this->setAttribute(Qt::WA_OpaquePaintEvent);
+		}
 	
-	char buf[1024];
-	int n, r, g, b;
-	uint32_t color;
-	color = (255 | (128 << 8) | (64 << 16));
-	LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SETBGCOLOR, (void*)color);
-	
-	// Run the Qt4 UI.
-	ret = app.exec();
-	
-	// Shut down LibGens.
-	LibGens::End();
-	
-	// Finished.
-	return 0;
+	protected:
+		void paintEvent(QPaintEvent *event)
+		{
+			// Send an UPDATE event to LibGens.
+			// TODO: Include the coordinates to update?
+			LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_UPDATE, NULL);
+		}
+};
+
 }
+
+#endif /* __GENS_QT4_SDLWIDGET_HPP__ */
