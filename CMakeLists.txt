@@ -24,9 +24,11 @@ IF(CMAKE_BUILD_TYPE MATCHES ^$)
 	SET(CMAKE_BUILD_TYPE "debug")
 ENDIF()
 
-IF (CMAKE_BUILD_TYPE MATCHES ^debug$)
-	SET(CMAKE_VERBOSE_MAKEFILE ON)
-ENDIF()
+# Don't bother with verbose makefiles for now.
+# TODO: Make it an option?
+#IF (CMAKE_BUILD_TYPE MATCHES ^debug$)
+#	SET(CMAKE_VERBOSE_MAKEFILE ON)
+#ENDIF()
 
 # Set CFLAGS/CXXFLAGS based on build type.
 SET(CMAKE_C_FLAGS_DEBUG		"-Wall -Wextra -O0")
