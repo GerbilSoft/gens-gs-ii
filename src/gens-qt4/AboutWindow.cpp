@@ -50,8 +50,8 @@ AboutWindow::AboutWindow(QWidget *parent)
  */
 AboutWindow::~AboutWindow()
 {
+	// Clear the m_AboutWindow pointer.
 	m_AboutWindow = NULL;
-	printf("DEL\n");
 }
 
 
@@ -64,7 +64,8 @@ void AboutWindow::ShowSingle(QWidget *parent)
 	if (m_AboutWindow != NULL)
 	{
 		// About Window is already displayed.
-		// TODO
+		// NOTE: This doesn't seem to work on KDE 4.4.2...
+		QApplication::setActiveWindow(m_AboutWindow);
 	}
 	else
 	{
