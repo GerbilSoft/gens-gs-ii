@@ -26,19 +26,23 @@
 
 #include "libgens/lg_main.hpp"
 
-// TODO: Use something other than QX11EmbedWidget on Windows and OS X.
-// Using it on Linux because other types result in a BadWindow error,
-// thanks to Qt4's alien windows feature. (Qt 4.6.2 seems to be ignoring
-// the requests to use native windows instead of alien windows.)
+#include <QtCore/qglobal.h>
+#include <QtCore/QObject>
 
+#ifdef Q_WS_X11
+#include <QtGui/QX11EmbedContainer>
+#define SDLWIDGET_BASECLASS QX11EmbedContainer
+#else
+// TODO: Verify that this works properly!
+#include <QtGui/QWidget>
+#define SDLWIDGET_BASECLASS QWidget
+#endif
 
-#include <QObject>
-#include <QX11EmbedWidget>
 
 namespace GensQt4
 {
 
-class SdlWidget : public QX11EmbedContainer
+class SdlWidget : public SDLWIDGET_BASECLASS
 {
 	Q_OBJECT
 	
