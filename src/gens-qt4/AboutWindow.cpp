@@ -22,6 +22,13 @@
  ***************************************************************************/
 
 #include "AboutWindow.hpp"
+#include "libgens/macros/git.h"
+
+#include <QtCore/QString>
+
+// Text translation macro.
+#define TR(text) \
+	QApplication::translate("AboutWindow", (text), NULL, QApplication::UnicodeUTF8)
 
 namespace GensQt4
 {
@@ -41,7 +48,23 @@ AboutWindow::AboutWindow(QWidget *parent)
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
 	
-	// TODO: Git version.
+	// Build the program title text.
+	QString sPrgTitle =
+		"<b>" + TR("Gens/GS II") + "</b><br />\n" +
+		TR("Development Build") + "<br />\n";
+	
+#ifdef GENS_GIT_VERSION
+	// Append the git version to the title text.
+	sPrgTitle += QString(GENS_GIT_VERSION) + "<br />\n";
+#endif
+	
+	sPrgTitle += "<br />\n" +
+		TR("Sega Genesis / Mega Drive,") + "<br />\n" +
+		TR("Sega CD / Mega CD,") + "<br />\n" +
+		TR("Sega 32X emulator");
+	
+	// Set the text.
+        lblPrgTitle->setText(sPrgTitle);
 }
 
 

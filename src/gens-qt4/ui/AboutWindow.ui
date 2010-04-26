@@ -20,7 +20,7 @@
    <item>
     <layout class="QHBoxLayout" name="hboxPrgTitle">
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="lblGensLogo">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
          <horstretch>0</horstretch>
@@ -40,15 +40,6 @@
      </item>
      <item>
       <widget class="QLabel" name="lblPrgTitle">
-       <property name="text">
-        <string>&lt;b&gt;Gens/GS II&lt;/b&gt;&lt;br /&gt;
-Development Build&lt;br /&gt;
-git: master/TODO&lt;br /&gt;
-&lt;br /&gt;
-Sega Genesis / Mega Drive,&lt;br /&gt;
-Sega CD / Mega CD,&lt;br /&gt;
-Sega 32X emulator</string>
-       </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
        </property>

@@ -5,6 +5,9 @@ cmake_minimum_required(VERSION 2.6)
 FIND_PACKAGE(Qt4)
 INCLUDE(${QT_USE_FILE})
 
+# Main binary directory. Needed for git_version.h
+INCLUDE_DIRECTORIES(${gens-gs-ii_BINARY_DIR})
+
 # Include the previous directory.
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../)
 
