@@ -42,6 +42,10 @@ int LgThread(void *param);
 // UI to LibGens queue.
 extern MtQueue *qToLG;
 
+// SDL window size functions.
+int GetSdlWidth(void);
+int GetSdlHeight(void);
+
 }
 
 #endif /* __LIBGENS_LG_MAIN_HPP__ */

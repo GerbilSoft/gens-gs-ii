@@ -296,4 +296,29 @@ int LgThread(void *param)
 }
 
 
+/**
+ * GetSdlWidth(): Get the SDL window width.
+ * @return SDL window width, or 0 if not initialized.
+ */
+int GetSdlWidth(void)
+{
+	if (!m_screen)
+		return 0;
+	
+	return m_screen->w;
+}
+
+
+/**
+ * GetSdlHeight(): Get the SDL window height.
+ * @return SDL window height, or 0 if not initialized.
+ */
+int GetSdlHeight(void)
+{
+	if (!m_screen)
+		return 0;
+	
+	return m_screen->h;
+}
+
 }
