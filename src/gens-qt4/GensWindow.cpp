@@ -26,6 +26,8 @@
 
 #include "AboutWindow.hpp"
 
+#include <QtGui/QIcon>
+
 
 namespace GensQt4
 {
@@ -36,6 +38,14 @@ namespace GensQt4
 GensWindow::GensWindow()
 {
 	setupUi(this);
+	
+#if QT_VERSION >= 0x040600
+	// Set menu icons.
+	// QIcon::fromTheme() requires Qt 4.6 or later.
+	// TODO: Include fallback icons for Win32 and Mac OS X.
+	mnuFileQuit->setIcon(QIcon::fromTheme("application-exit"));
+	mnuHelpAbout->setIcon(QIcon::fromTheme("help-about"));
+#endif
 	
 	// Create the SDL widget.
 	sdl = new SdlWidget(this->centralwidget);
