@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * GensWindow.cpp: Gens Window.                                            *
+ * AboutWindow.cpp: About Window.                                          *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,64 +21,57 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "GensWindow.hpp"
-#include "gqt4_main.hpp"
-
 #include "AboutWindow.hpp"
-
 
 namespace GensQt4
 {
 
+// Static member initialization.
+AboutWindow *AboutWindow::m_AboutWindow = NULL;
+
+
 /**
- * GensWindow(): Initialize the Gens window.
+ * AboutWindow(): Initialize the About window.
  */
-GensWindow::GensWindow()
+AboutWindow::AboutWindow(QWidget *parent)
+	: QDialog(parent)
 {
 	setupUi(this);
 	
-	// Create the SDL widget.
-	sdl = new SdlWidget(this->centralwidget);
-}
-
-
-/**
- * closeEvent(): Window is being closed.
- * @param event Close event.
- */
-void GensWindow::closeEvent(QCloseEvent *event)
-{
-	// Quit.
-	QuitGens();
+	// Make sure the window is deleted on close.
+	this->setAttribute(Qt::WA_DeleteOnClose, true);
 	
-	// Accept the close event.
-	event->accept();
-}
-
-
-/** Slots. **/
-
-
-/**
- * on_mnuFileQuit_triggered(): File, Quit.
- */
-void GensWindow::on_mnuFileQuit_triggered(void)
-{
-	// Quit.
-	QuitGens();
-	
-	// Close the window.
-	this->close();
+	// TODO: Git version.
 }
 
 
 /**
- * on_mnuHelpAbout_triggered(): Help, About.
+ * ~AboutWindow(): Shut down the About window.
  */
-void GensWindow::on_mnuHelpAbout_triggered(void)
+AboutWindow::~AboutWindow()
 {
-	// About Gens/GS II.
-	AboutWindow::ShowSingle(this);
+	m_AboutWindow = NULL;
+	printf("DEL\n");
+}
+
+
+/**
+ * ShowSingle(): Show a single instance of the About window.
+ * @param parent Parent window.
+ */
+void AboutWindow::ShowSingle(QWidget *parent)
+{
+	if (m_AboutWindow != NULL)
+	{
+		// About Window is already displayed.
+		// TODO
+	}
+	else
+	{
+		// About Window is not displayed.
+		m_AboutWindow = new AboutWindow(parent);
+		m_AboutWindow->show();
+	}
 }
 
 }

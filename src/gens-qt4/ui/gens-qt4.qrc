@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="gens">
+    <file alias="gens_small">resources/gens_small.png</file>
+  </qresource>
+</RCC>

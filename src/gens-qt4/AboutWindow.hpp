@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * GensWindow.cpp: Gens Window.                                            *
+ * AboutWindow.hpp: About Window.                                          *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,64 +21,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "GensWindow.hpp"
-#include "gqt4_main.hpp"
+#ifndef __GENS_QT4_ABOUTWINDOW_HPP__
+#define __GENS_QT4_ABOUTWINDOW_HPP__
 
-#include "AboutWindow.hpp"
+#include <QMainWindow>
 
+#include "SdlWidget.hpp"
+#include "ui_AboutWindow.h"
 
 namespace GensQt4
 {
 
-/**
- * GensWindow(): Initialize the Gens window.
- */
-GensWindow::GensWindow()
+class AboutWindow : public QDialog, public Ui::AboutWindow
 {
-	setupUi(this);
+	Q_OBJECT
 	
-	// Create the SDL widget.
-	sdl = new SdlWidget(this->centralwidget);
-}
-
-
-/**
- * closeEvent(): Window is being closed.
- * @param event Close event.
- */
-void GensWindow::closeEvent(QCloseEvent *event)
-{
-	// Quit.
-	QuitGens();
+	public:
+		static void ShowSingle(QWidget *parent = NULL);
 	
-	// Accept the close event.
-	event->accept();
-}
-
-
-/** Slots. **/
-
-
-/**
- * on_mnuFileQuit_triggered(): File, Quit.
- */
-void GensWindow::on_mnuFileQuit_triggered(void)
-{
-	// Quit.
-	QuitGens();
+	protected:
+		AboutWindow(QWidget *parent = NULL);
+		virtual ~AboutWindow();
 	
-	// Close the window.
-	this->close();
-}
-
-
-/**
- * on_mnuHelpAbout_triggered(): Help, About.
- */
-void GensWindow::on_mnuHelpAbout_triggered(void)
-{
-	// About Gens/GS II.
-	AboutWindow::ShowSingle(this);
-}
+	private:
+		static AboutWindow *m_AboutWindow;
+};
 
 }
+
+#endif /* __GENS_QT4_ABOUTWINDOW_HPP__ */

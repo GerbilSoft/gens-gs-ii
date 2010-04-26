@@ -12,21 +12,23 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../)
 SET(gens-qt4_SRCS
 	gqt4_main.cpp
 	GensWindow.cpp
+	AboutWindow.cpp
 	)
 
-# Headers.
-SET(gens-qt4_HEADERS
-	gqt4_main.hpp
+# Headers with Qt4 objects.
+SET(gens-qt4_MOC_HEADERS
 	SdlWidget.hpp
 	GensWindow.hpp
+	AboutWindow.hpp
 	)
 
 # Create .moc files for sources that need them.
-QT4_WRAP_CPP(gens-qt4_MOC_SOURCES ${gens-qt4_HEADERS})
+QT4_WRAP_CPP(gens-qt4_MOC_SOURCES ${gens-qt4_MOC_HEADERS})
 
 # UI files.
 SET(gens-qt4_UIS
 	ui/GensWindow.ui
+	ui/AboutWindow.ui
 	)
 
 # Generate the header files from the UI files.
@@ -36,7 +38,9 @@ QT4_WRAP_UI(gens-qt4_UIS_H ${gens-qt4_UIS})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
 # Resource files.
-SET(gens-qt4_RCC_SRCS)
+SET(gens-qt4_RCC_SRCS
+	ui/gens-qt4.qrc
+	)
 
 # Add the resource files to the project.
 QT4_ADD_RESOURCES(gens-qt4_RCC_O ${gens-qt4_RCC_SRCS})
