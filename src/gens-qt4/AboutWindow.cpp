@@ -41,7 +41,7 @@ AboutWindow *AboutWindow::m_AboutWindow = NULL;
  * AboutWindow(): Initialize the About window.
  */
 AboutWindow::AboutWindow(QWidget *parent)
-	: QDialog(parent)
+	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
 {
 	setupUi(this);
 	
