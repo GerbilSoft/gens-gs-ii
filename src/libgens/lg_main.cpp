@@ -234,6 +234,11 @@ int LgThread(void *param)
 		s_wid[sizeof(s_wid)-1] = 0x00;
 		setenv("SDL_WINDOWID", s_wid, 1);
 	}
+	else
+	{
+		// Unset the Window ID variable.
+		unsetenv("SDL_WINDOWID");
+	}
 	
 	// TODO: Check for errors in SDL_InitSubSystem().
 	SDL_InitSubSystem(SDL_INIT_VIDEO);
