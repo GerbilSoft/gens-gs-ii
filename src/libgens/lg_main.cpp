@@ -193,7 +193,7 @@ static void LgProcessSDLQueue(void)
 			case MtQueue::MTQ_LG_SETBGCOLOR:
 			{
 				// Set the background color.
-				const uint32_t bgr = (uint32_t)param;
+				const uint32_t bgr = LG_POINTER_TO_UINT(param);
 				uint8_t r, g, b;
 				r = (bgr & 0xFF);
 				g = (bgr >> 8) & 0xFF;
@@ -229,8 +229,8 @@ int LgThread(void *param)
 	if (m_wid)
 	{
 		// Window ID specified.
-		char s_wid[16];
-		snprintf(s_wid, sizeof(s_wid), "%ld", (intptr_t)m_wid);
+		char s_wid[32];
+		snprintf(s_wid, sizeof(s_wid), "0x%p", m_wid);
 		s_wid[sizeof(s_wid)-1] = 0x00;
 		setenv("SDL_WINDOWID", s_wid, 1);
 	}
