@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
 	int ret = LibGens::Init((void*)gens_window.sdl->winId(), "Gens/GS II");
 	if (ret != 0)
 		return ret;
+	gens_window.gensResize();
 	
 	char buf[1024];
 	int n, r, g, b;

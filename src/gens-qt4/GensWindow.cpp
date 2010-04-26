@@ -82,13 +82,19 @@ void GensWindow::closeEvent(QCloseEvent *event)
 
 /**
  * gensResize(): Resize the Gens window to fit the SDL window.
+ * TODO: Call this when the X11 client is embedded in SdlWidget.
  */
 void GensWindow::gensResize(void)
 {
-	// TODO: Get the SDL window size.
-	// For now, assume 320x240.
-	const int sdl_width = 320;
-	const int sdl_height = 240;
+	// Get the SDL window size.
+	int sdl_width = LibGens::GetSdlWidth();
+	int sdl_height = LibGens::GetSdlHeight();
+	
+	// Enforce a minimum size of 320x240.
+	if (sdl_width < 320)
+		sdl_width = 320;
+	if (sdl_height < 240)
+		sdl_width = 240;
 	
 	// Initialize to the menu bar size.
 	int new_width = menubar->size().width();
