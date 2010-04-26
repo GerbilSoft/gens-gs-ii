@@ -38,7 +38,7 @@
 namespace GensQt4
 {
 
-class SdlWidget : public QX11EmbedWidget
+class SdlWidget : public QX11EmbedContainer
 {
 	Q_OBJECT
 	
