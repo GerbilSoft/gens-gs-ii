@@ -30,6 +30,14 @@
 // Used for notifying SDL.
 #define SDL_EVENT_MTQ 0x51
 
+// Pointer conversion macros.
+#include <stdint.h>
+#define LG_POINTER_TO_INT(x)	((unsigned int)(intptr_t)(x))
+#define LG_POINTER_TO_UINT(x)	((unsigned int)(uintptr_t)(x))
+#define LG_INT_TO_POINTER(x)	((void*)(intptr_t)(x))
+#define LG_UINT_TO_POINTER(x)	((void*)(uintptr_t)(x))
+
+
 namespace LibGens
 {
 
