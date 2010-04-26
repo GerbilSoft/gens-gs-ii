@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="gens">
+    <file alias="gensgs_16x16">resources/gensgs_16x16.png</file>
+    <file alias="gensgs_32x32">resources/gensgs_32x32.png</file>
+    <file alias="gensgs_48x48">resources/gensgs_48x48.png</file>
     <file alias="gens_small">resources/gens_small.png</file>
   </qresource>
 </RCC>

@@ -67,6 +67,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="gens-qt4.qrc"/>
+ </resources>
  <connections/>
 </ui>

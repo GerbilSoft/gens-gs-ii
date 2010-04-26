@@ -39,6 +39,13 @@ GensWindow::GensWindow()
 {
 	setupUi(this);
 	
+	// Set the window icon.
+	QIcon winIcon;
+	winIcon.addFile(":/gens/gensgs_48x48", QSize(48, 48));
+	winIcon.addFile(":/gens/gensgs_32x32", QSize(32, 32));
+	winIcon.addFile(":/gens/gensgs_16x16", QSize(16, 16));
+	this->setWindowIcon(winIcon);
+	
 #if QT_VERSION >= 0x040600
 	// Set menu icons.
 	// QIcon::fromTheme() requires Qt 4.6 or later.
