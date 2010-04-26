@@ -230,7 +230,7 @@ int LgThread(void *param)
 	{
 		// Window ID specified.
 		char s_wid[32];
-		snprintf(s_wid, sizeof(s_wid), "%p", m_wid);
+		snprintf(s_wid, sizeof(s_wid), "%lld", (long long)(intptr_t)m_wid);
 		s_wid[sizeof(s_wid)-1] = 0x00;
 		setenv("SDL_WINDOWID", s_wid, 1);
 	}
