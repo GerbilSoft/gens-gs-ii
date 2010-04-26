@@ -42,6 +42,9 @@ class GensWindow : public QMainWindow, public Ui::GensWindow
 		
 		// SDL widget.
 		SdlWidget *sdl;
+		
+		// Resize the window.
+		void gensResize(void);
 	
 	protected:
 		void closeEvent(QCloseEvent *event);

@@ -26,6 +26,10 @@
 
 #include "AboutWindow.hpp"
 
+// C++ includes.
+#include <algorithm>
+
+// Qt4 includes.
 #include <QtGui/QIcon>
 
 
@@ -56,6 +60,9 @@ GensWindow::GensWindow()
 	
 	// Create the SDL widget.
 	sdl = new SdlWidget(this->centralwidget);
+	
+	// Resize the window.
+	gensResize();
 }
 
 
@@ -70,6 +77,32 @@ void GensWindow::closeEvent(QCloseEvent *event)
 	
 	// Accept the close event.
 	event->accept();
+}
+
+
+/**
+ * gensResize(): Resize the Gens window to fit the SDL window.
+ */
+void GensWindow::gensResize(void)
+{
+	// TODO: Get the SDL window size.
+	// For now, assume 320x240.
+	const int sdl_width = 320;
+	const int sdl_height = 240;
+	
+	// Initialize to the menu bar size.
+	int new_width = menubar->size().width();
+	int new_height = menubar->size().height();
+	
+	// Add the SDL window height.
+	new_height += sdl_height;
+	
+	// Set the window width to max(menubar, SDL).
+	new_width = std::max(new_width, sdl_width);
+	
+	// Set the new window size.
+	this->setMinimumSize(new_width, new_height);
+	this->setMaximumSize(new_width, new_height);
 }
 
 
