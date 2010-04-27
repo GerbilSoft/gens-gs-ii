@@ -32,12 +32,12 @@ ENDIF()
 
 # Check what flag is needed for C99 support.
 INCLUDE(CheckC99CompilerFlag)
-CHECK_C99_COMPILER_FLAG(C99_CFLAG)
+CHECK_C99_COMPILER_FLAG(GENS_C99_CFLAG)
 
 # Set CFLAGS/CXXFLAGS based on build type.
-SET(CMAKE_C_FLAGS_DEBUG		"-Wall -Wextra -O0 ${C99_CFLAG}")
+SET(CMAKE_C_FLAGS_DEBUG		"-Wall -Wextra -O0 ${GENS_C99_CFLAG}")
 SET(CMAKE_CXX_FLAGS_DEBUG	"-Wall -Wextra -O0")
-SET(CMAKE_C_FLAGS_RELEASE	"-Wall -Wextra -O2 -march=i586 -mtune=i686 ${C99_CFLAG}")
+SET(CMAKE_C_FLAGS_RELEASE	"-Wall -Wextra -O2 -march=i586 -mtune=i686 ${GENS_C99_CFLAG}")
 SET(CMAKE_CXX_FLAGS_RELEASE	"-Wall -Wextra -O2 -march=i586 -mtune=i686")
 
 # Win32 CFLAGS.
