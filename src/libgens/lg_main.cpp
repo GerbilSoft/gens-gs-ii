@@ -238,7 +238,7 @@ int LgThread(void *param)
 	// Initialize SDL video.
 	// TODO: Move env variable setting into a separate file for Win32/UNIX separation.
 	
-	if (0 && m_wid)
+	if (m_wid)
 	{
 		// Window ID specified.
 		char s_wid[64];
