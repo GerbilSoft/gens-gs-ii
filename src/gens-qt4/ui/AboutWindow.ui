@@ -68,6 +68,12 @@
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
            <widget class="QLabel" name="lblCopyrights">
+            <property name="frameShape">
+             <enum>QFrame::Box</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Sunken</enum>
+            </property>
             <property name="text">
              <string>(c) 1999-2002 by Stéphane Dallongeville.&lt;br /&gt;
 (c) 2003-2004 by Stéphane Akhoun.&lt;br /&gt;
