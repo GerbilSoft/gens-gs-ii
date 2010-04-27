@@ -65,8 +65,8 @@ ENDFOREACH()
 
 # Platform-specific CFLAGS/CXXFLAGS.
 IF(WIN32)
-	SET(GENS_CFLAGS_PLATFORM "-gstabs -fshort_wchar")
-	SET(GENS_CXXFLAGS_PLATFORM "-gstabs -fshort_wchar")
+	SET(GENS_CFLAGS_PLATFORM "-gstabs -fshort-wchar")
+	SET(GENS_CXXFLAGS_PLATFORM "-gstabs -fshort-wchar")
 	
 	# Test for static libgcc/libstdc++.
 	SET(GENS_LDFLAGS_PLATFORM "")
