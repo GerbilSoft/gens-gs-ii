@@ -24,9 +24,13 @@
 #include "lg_main.hpp"
 #include "macros/git.h"
 
+// Win32 compatibility wrappers.
+#include "lg_win32.h"
+
 // C includes.
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 // C++ includes.
 #include <string>
@@ -222,22 +226,42 @@ static void LgProcessSDLQueue(void)
  * @param param Parameter from Init().
  * @return 0 on success; non-zero on error.
  */
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
 int LgThread(void *param)
 {
 	// Initialize SDL video.
+	// TODO: Move env variable setting into a separate file for Win32/UNIX separation.
 	
-	if (m_wid)
+	if (0 && m_wid)
 	{
 		// Window ID specified.
-		char s_wid[32];
+		char s_wid[64];
 		snprintf(s_wid, sizeof(s_wid), "%lld", (long long)(intptr_t)m_wid);
 		s_wid[sizeof(s_wid)-1] = 0x00;
+#ifdef _WIN32
+		// Win32 version.
+		SetEnvironmentVariable("SDL_WINDOWID", s_wid);
+#else
+		// Unix version.
 		setenv("SDL_WINDOWID", s_wid, 1);
+#endif
 	}
 	else
 	{
 		// Unset the Window ID variable.
+#ifdef _WIN32
+		// Win32 version.
+		SetEnvironmentVariable("SDL_WINDOWID", NULL);
+#else
+		// Unix version.
 		unsetenv("SDL_WINDOWID");
+#endif
 	}
 	
 	// TODO: Check for errors in SDL_InitSubSystem().
@@ -245,7 +269,13 @@ int LgThread(void *param)
 	m_screen = SDL_SetVideoMode(320, 240, 0, SDL_VideoModeFlags);
 	
 	// Unset the Window ID variable.
+#ifdef _WIN32
+	// Win32 version.
+	SetEnvironmentVariable("SDL_WINDOWID", NULL);
+#else
+	// Unix version.
 	unsetenv("SDL_WINDOWID");
+#endif
 	
 	// Set the window title.
 	SDL_WM_SetCaption(m_sWinTitle.c_str(), NULL);
