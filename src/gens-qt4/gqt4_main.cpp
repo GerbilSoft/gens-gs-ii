@@ -60,6 +60,24 @@ int main(int argc, char *argv[])
 }
 
 
+#ifdef _WIN32
+/**
+ * WinMain(): Win32 entry point.
+ * TODO: Add Unicode version and convert the command line to UTF-8.
+ */
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+{
+	// TODO: Convert lpCmdLine to argc/argv[].
+	int argc = 1;
+	char *argv[1] = {"gens-qt4"};
+	
+	// TODO: Handle nCmdShow.
+	// TODO: Store hInstance.
+	main(argc, argv);
+}
+#endif /* _WIN32 */
+
+
 namespace GensQt4
 {
 
