@@ -75,12 +75,17 @@ int SdlVideo::Init(void *wid)
 	// TODO: Check for errors in SDL_InitSubSystem().
 	SDL_InitSubSystem(SDL_INIT_VIDEO);
 	ms_screen = SDL_SetVideoMode(DispW, DispH, 0, SDL_VideoModeFlags);
+	if (!ms_screen)
+		return 1;
 	
 	// Unset the Window ID variable.
 	unsetenv("SDL_WINDOWID");
 	
 	// Set the window title.
-	SDL_WM_SetCaption(ms_sWinTitle.c_str(), NULL);
+	// NOTE: On Win32, setting the window title while embedded
+	// in another window causes the thread to hang!
+	if (!ms_wid)
+		SDL_WM_SetCaption(ms_sWinTitle.c_str(), NULL);
 	
 	// Video initialized.
 	return 0;
@@ -113,7 +118,9 @@ void SdlVideo::SetWinTitle(const char *newTitle)
 		ms_sWinTitle = std::string(newTitle);
 	
 	// Set the window title.
-	if (ms_screen)
+	// NOTE: On Win32, setting the window title while embedded
+	// in another window causes the thread to hang!
+	if (ms_screen && !ms_wid)
 		SDL_WM_SetCaption(ms_sWinTitle.c_str(), NULL);
 }
 
