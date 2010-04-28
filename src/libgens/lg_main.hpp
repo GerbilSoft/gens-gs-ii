@@ -34,17 +34,13 @@ namespace LibGens
 
 bool IsRunning(void);
 
-int Init(const void *wid, const char *sWinTitle = NULL);
+int Init(void *wid = NULL, const char *sWinTitle = NULL);
 int End(void);
 
 int LgThread(void *param);
 
 // UI to LibGens queue.
 extern MtQueue *qToLG;
-
-// SDL window size functions.
-int GetSdlWidth(void);
-int GetSdlHeight(void);
 
 }
 

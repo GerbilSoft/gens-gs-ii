@@ -22,6 +22,7 @@ ENDIF()
 SET(SRCS
 	lg_main.cpp
 	MtQueue.cpp
+	SdlVideo.cpp
 	${libgens_COMPAT_SRC}
 	)
 

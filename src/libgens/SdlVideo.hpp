@@ -1,6 +1,6 @@
 /***************************************************************************
- * gens-qt4: Gens Qt4 UI.                                                  *
- * gqt4_main.hpp: Main UI code.                                            *
+ * libgens: Gens Emulation Library.                                        *
+ * SdlVideo.hpp: SDL video handler.                                        *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,78 +21,53 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "gqt4_main.hpp"
-#include "libgens/lg_main.hpp"
+#ifndef __LIBGENS_SDLVIDEO_HPP__
+#define __LIBGENS_SDLVIDEO_HPP__
 
-#include <QApplication>
-#include "GensWindow.hpp"
+#include <SDL/SDL.h>
+#include <string>
 
-#include <stdio.h>
-
-
-int main(int argc, char *argv[])
-{
-	// Create the main UI.
-	QApplication app(argc, argv);
-	GensQt4::GensWindow gens_window;
-	gens_window.show();
-	
-	// Initialize LibGens.
-	int ret = LibGens::Init((void*)gens_window.sdl->winId());
-	if (ret != 0)
-		return ret;
-	// NOTE: Call gensResize() after receiving acknowledgement of the window initialization.
-	gens_window.gensResize();
-	
-	char buf[1024];
-	int n, r, g, b;
-	uint32_t color;
-	color = (255 | (128 << 8) | (64 << 16));
-	LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SETBGCOLOR, (void*)color);
-	
-	// Run the Qt4 UI.
-	ret = app.exec();
-	
-	// Shut down LibGens.
-	LibGens::End();
-	
-	// Finished.
-	return 0;
-}
-
-
-#ifdef _WIN32
-/**
- * WinMain(): Win32 entry point.
- * TODO: Add Unicode version and convert the command line to UTF-8.
- */
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
-	// TODO: Convert lpCmdLine to argc/argv[].
-	int argc = 1;
-	char *argv[1] = {"gens-qt4"};
-	
-	// TODO: Handle nCmdShow.
-	// TODO: Store hInstance.
-	main(argc, argv);
-}
-#endif /* _WIN32 */
-
-
-namespace GensQt4
+namespace LibGens
 {
 
-/**
- * QuitGens(): Quit Gens.
- */
-void QuitGens(void)
+class SdlVideo
 {
-	// TODO: Save configuration.
+	public:
+		/// NOTE: Init() and End() are to be called by LibGens ONLY!
+		static int Init(void *wid);
+		static int End(void);
+		
+		static int Width(void)
+		{
+			if (!ms_screen)
+				return 0;
+			
+			return ms_screen->w;
+		}
+		
+		static int Height(void)
+		{
+			if (!ms_screen)
+				return 0;
+			
+			return ms_screen->h;
+		}
+		
+		static void SetWinTitle(const char *newTitle);
+		
+		// TODO: Should this be publicly accessible?
+		static SDL_Surface *ms_screen;
 	
-	// TODO: Stop LibGens' emulation core.
+	protected:
+		static void *ms_wid;
+		static std::string ms_sWinTitle;
+		static const unsigned int SDL_VideoModeFlags;
 	
-	// Shut down LibGens.
-	LibGens::End();
-}
+	private:
+		SdlVideo() { }
+		~SdlVideo() { }
+};
 
 }
+
+#endif /* __LIBGENS_SDLVIDEO_HPP__ */

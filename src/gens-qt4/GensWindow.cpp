@@ -24,7 +24,11 @@
 #include "GensWindow.hpp"
 #include "gqt4_main.hpp"
 
+// Qt4 windows.
 #include "AboutWindow.hpp"
+
+// LibGens.
+#include "libgens/SdlVideo.hpp"
 
 // C++ includes.
 #include <algorithm>
@@ -87,8 +91,8 @@ void GensWindow::closeEvent(QCloseEvent *event)
 void GensWindow::gensResize(void)
 {
 	// Get the SDL window size.
-	int sdl_width = LibGens::GetSdlWidth();
-	int sdl_height = LibGens::GetSdlHeight();
+	int sdl_width = LibGens::SdlVideo::Width();
+	int sdl_height = LibGens::SdlVideo::Height();
 	
 	// Enforce a minimum size of 320x240.
 	if (sdl_width < 320)
