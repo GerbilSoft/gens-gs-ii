@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>413</width>
-    <height>398</height>
+    <width>366</width>
+    <height>379</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -60,20 +60,17 @@
        <item>
         <widget class="QFrame" name="fraCopyrights">
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::Box</enum>
          </property>
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
+         <layout class="QVBoxLayout" name="vboxCopyrights">
+          <property name="margin">
+           <number>8</number>
+          </property>
           <item>
            <widget class="QLabel" name="lblCopyrights">
-            <property name="frameShape">
-             <enum>QFrame::Box</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Sunken</enum>
-            </property>
             <property name="text">
              <string>(c) 1999-2002 by Stéphane Dallongeville.&lt;br /&gt;
 (c) 2003-2004 by Stéphane Akhoun.&lt;br /&gt;
