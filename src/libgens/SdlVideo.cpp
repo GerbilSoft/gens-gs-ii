@@ -60,24 +60,12 @@ int SdlVideo::Init(void *wid)
 		char s_wid[64];
 		snprintf(s_wid, sizeof(s_wid), "%lld", (long long)(intptr_t)ms_wid);
 		s_wid[sizeof(s_wid)-1] = 0x00;
-#ifdef _WIN32
-		// Win32 version.
-		SetEnvironmentVariable("SDL_WINDOWID", s_wid);
-#else
-		// Unix version.
 		setenv("SDL_WINDOWID", s_wid, 1);
-#endif
 	}
 	else
 	{
 		// Unset the Window ID variable.
-#ifdef _WIN32
-		// Win32 version.
-		SetEnvironmentVariable("SDL_WINDOWID", NULL);
-#else
-		// Unix version.
 		unsetenv("SDL_WINDOWID");
-#endif
 	}
 	
 	// TODO: Check for errors in SDL_InitSubSystem().
@@ -85,13 +73,7 @@ int SdlVideo::Init(void *wid)
 	ms_screen = SDL_SetVideoMode(320, 240, 0, SDL_VideoModeFlags);
 	
 	// Unset the Window ID variable.
-#ifdef _WIN32
-	// Win32 version.
-	SetEnvironmentVariable("SDL_WINDOWID", NULL);
-#else
-	// Unix version.
 	unsetenv("SDL_WINDOWID");
-#endif
 	
 	// Set the window title.
 	SDL_WM_SetCaption(ms_sWinTitle.c_str(), NULL);
