@@ -19,14 +19,13 @@ ELSE()
 ENDIF()
 
 # Sources.
-SET(SRCS
+SET(libgens_SRCS
 	lg_main.cpp
 	MtQueue.cpp
 	SdlVideo.cpp
-	${libgens_COMPAT_SRC}
 	)
 
 # Build the library.
-ADD_LIBRARY(gens STATIC ${SRCS})
+ADD_LIBRARY(gens STATIC ${libgens_SRCS} ${libgens_COMPAT_SRC})
 TARGET_LINK_LIBRARIES(gens ${SDL_LIBRARY} starscream mdZ80)
 ADD_DEPENDENCIES(gens git_version starscream mdZ80)
