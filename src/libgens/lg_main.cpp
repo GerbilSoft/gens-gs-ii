@@ -206,6 +206,11 @@ static void LgProcessSDLQueue(void)
 				SdlVideo::End();
 				SdlVideo::SetPackedRes(LG_POINTER_TO_UINT(param));
 				SdlVideo::Init();
+				
+				// Update SDL Video.
+				// Required for Win32, but not for Linux/X11.
+				SDL_UpdateRect(SdlVideo::ms_screen, 0, 0, 0, 0);
+				
 				// TODO: Notify the UI that the video has been resized.
 				break;
 			
