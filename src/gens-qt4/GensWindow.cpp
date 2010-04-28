@@ -65,6 +65,8 @@ GensWindow::GensWindow()
 	
 	// Create the SDL widget.
 	sdl = new SdlWidget(this->centralwidget);
+	QObject::connect(sdl, SIGNAL(sdlHasResized(QSize)),
+			 this, SLOT(resizeEvent(QSize)));
 	
 	// Resize the window.
 	gensResize();
@@ -122,6 +124,13 @@ void GensWindow::gensResize(void)
 
 
 /** Slots. **/
+
+
+// Window resize.
+void GensWindow::resizeEvent(QSize size)
+{
+	gensResize();
+}
 
 
 /**

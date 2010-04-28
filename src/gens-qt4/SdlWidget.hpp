@@ -47,8 +47,12 @@ class SdlWidget : public SDLWIDGET_BASECLASS
 	public:
 		SdlWidget(QWidget *parent = NULL);
 	
+	signals:
+		void sdlHasResized(QSize size);
+	
 	protected:
 		void paintEvent(QPaintEvent *event);
+		void showEvent(QShowEvent *event);
 };
 
 }

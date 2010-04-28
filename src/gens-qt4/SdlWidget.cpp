@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * GensWindow.hpp: Gens Window.                                            *
+ * SdlWidget.cpp: SDL Widget class.                                        *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,49 +21,73 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_GENSWINDOW_HPP__
-#define __GENS_QT4_GENSWINDOW_HPP__
-
-#include <QMainWindow>
-#include <QCloseEvent>
-
 #include "SdlWidget.hpp"
-#include "ui_GensWindow.h"
+
+#include "libgens/lg_main.hpp"
+#include "libgens/SdlVideo.hpp"
 
 namespace GensQt4
 {
 
-class GensWindow : public QMainWindow, public Ui::GensWindow
+SdlWidget::SdlWidget(QWidget *parent)
 {
-	Q_OBJECT
+	this->setParent(parent);
 	
-	public:
-		GensWindow();
-		
-		// SDL widget.
-		SdlWidget *sdl;
-		
-		// Resize the window.
-		void gensResize(void);
+	// Make sure the window is embedded properly.
+	this->setAttribute(Qt::WA_NativeWindow);
+	this->setAttribute(Qt::WA_PaintOnScreen);
+	this->setAttribute(Qt::WA_OpaquePaintEvent);
 	
-	protected:
-		void closeEvent(QCloseEvent *event);
+	// Don't draw the background.
+	this->setAttribute(Qt::WA_NoBackground);
+	this->setAttribute(Qt::WA_NoSystemBackground);
 	
-	protected slots:
-		// Window resize.
-		void resizeEvent(QSize size);
-		
-		// Widget signals.
-		void on_mnuFileQuit_triggered(void);
-		void on_mnuHelpAbout_triggered(void);
-		
-		// Resolution tests.
-		void on_mnuResTest1x_triggered(void);
-		void on_mnuResTest2x_triggered(void);
-		void on_mnuResTest3x_triggered(void);
-		void on_mnuResTest4x_triggered(void);
-};
-
+	// Use a fixed size policy.
+	this->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 }
 
-#endif /* __GENS_QT4_GENSWINDOW_HPP__ */
+
+/**
+ * paintEvent(): Widget needs to be repainted.
+ * @param event QPaintEvent.
+ */
+void SdlWidget::paintEvent(QPaintEvent *event)
+{
+	// Send an UPDATE event to LibGens.
+	// TODO: Include the coordinates to update?
+	LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_UPDATE, NULL);
+}
+
+
+/**
+ * showEvent(): Widget is being shown.
+ * @param event QShowEvent.
+ */
+void SdlWidget::showEvent(QShowEvent *event)
+{
+	static bool lgInit = false;
+	
+	if (lgInit)
+	{
+		// LibGens is already initialized.
+		return;
+	}
+	
+	// Initialize LibGens.
+	int ret = LibGens::Init((void*)this->winId());
+	if (ret != 0)
+	{
+		// TODO: Error handling.
+		return;
+	}
+	// NOTE: Call gensResize() after receiving acknowledgement of the window initialization.
+	//gens_window.gensResize();
+	// NOTE: Emit resizeEvent() after receiving acknowledgement of the window initialization.
+	emit sdlHasResized(QSize(LibGens::SdlVideo::Width(), LibGens::SdlVideo::Height()));
+	
+	uint32_t color;
+	color = (255 | (128 << 8) | (64 << 16));
+	LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SETBGCOLOR, (void*)color);
+}
+
+}

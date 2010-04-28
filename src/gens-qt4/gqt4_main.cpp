@@ -37,27 +37,14 @@ int main(int argc, char *argv[])
 	GensQt4::GensWindow gens_window;
 	gens_window.show();
 	
-	// Initialize LibGens.
-	int ret = LibGens::Init((void*)gens_window.sdl->winId());
-	if (ret != 0)
-		return ret;
-	// NOTE: Call gensResize() after receiving acknowledgement of the window initialization.
-	gens_window.gensResize();
-	
-	char buf[1024];
-	int n, r, g, b;
-	uint32_t color;
-	color = (255 | (128 << 8) | (64 << 16));
-	LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SETBGCOLOR, (void*)color);
-	
 	// Run the Qt4 UI.
-	ret = app.exec();
+	int ret = app.exec();
 	
 	// Shut down LibGens.
 	LibGens::End();
 	
 	// Finished.
-	return 0;
+	return ret;
 }
 
 
