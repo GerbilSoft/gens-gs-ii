@@ -28,16 +28,15 @@
 extern "C" {
 #endif
 
-int main(int argc, char *argv[]);
-
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
+/**
+ * Win32 uses WinMain(), so we need to call the
+ * main function gqt4_main(). It's renamed to main
+ * on non-Win32 platforms.
+ */
+#ifndef _WIN32
+#define gqt4_main main
 #endif
-#include <windows.h>
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow);
-#endif
+int gqt4_main(int argc, char *argv[]);
 
 #ifdef __cplusplus
 }

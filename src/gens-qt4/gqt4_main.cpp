@@ -34,8 +34,19 @@
 #include "gqt4_win32.hpp"
 #endif
 
+// Make sure SDL_main isn't defined.
+#ifdef main
+#undef main
+#endif
 
-int main(int argc, char *argv[])
+
+/**
+ * gqt4_main(): Main entry point.
+ * @param argc Number of arguments.
+ * @param argv Arguments.
+ * @return Return value.
+ */
+int gqt4_main(int argc, char *argv[])
 {
 	// Create the main UI.
 	QApplication app(argc, argv);
@@ -57,24 +68,6 @@ int main(int argc, char *argv[])
 	// Finished.
 	return ret;
 }
-
-
-#ifdef _WIN32
-/**
- * WinMain(): Win32 entry point.
- * TODO: Add Unicode version and convert the command line to UTF-8.
- */
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
-	// TODO: Convert lpCmdLine to argc/argv[].
-	int argc = 1;
-	char *argv[1] = {"gens-qt4"};
-	
-	// TODO: Handle nCmdShow.
-	// TODO: Store hInstance.
-	main(argc, argv);
-}
-#endif /* _WIN32 */
 
 
 namespace GensQt4

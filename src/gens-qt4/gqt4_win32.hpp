@@ -26,6 +26,20 @@
 
 #ifdef _WIN32
 
+#include "gqt4_main.hpp"
+
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+
+#ifdef __cplusplus
+extern "C" {
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow);
+}
+#endif
+
 namespace GensQt4
 {
 
