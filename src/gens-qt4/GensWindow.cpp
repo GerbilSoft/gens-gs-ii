@@ -37,6 +37,19 @@
 // Qt4 includes.
 #include <QtGui/QIcon>
 
+/**
+ * QICON_FROMTHEME(): Icon loading function.
+ * Qt 4.6 supports FreeDesktop.org icon themes.
+ * Older versions do not, unfortunately.
+ */
+#if QT_VERSION >= 0x040600
+#define QICON_FROMTHEME(name, fallback) \
+	(QIcon::hasThemeIcon(name) ? QIcon::fromTheme(name) : QIcon(fallback))
+#else
+#define QICON_FROMTHEME(name, fallback) \
+	QIcon(fallback)
+#endif
+
 
 namespace GensQt4
 {
@@ -55,13 +68,11 @@ GensWindow::GensWindow()
 	winIcon.addFile(":/gens/gensgs_16x16", QSize(16, 16));
 	this->setWindowIcon(winIcon);
 	
-#if QT_VERSION >= 0x040600
 	// Set menu icons.
 	// QIcon::fromTheme() requires Qt 4.6 or later.
 	// TODO: Include fallback icons for Win32 and Mac OS X.
-	mnuFileQuit->setIcon(QIcon::fromTheme("application-exit"));
-	mnuHelpAbout->setIcon(QIcon::fromTheme("help-about"));
-#endif
+	mnuFileQuit->setIcon(QICON_FROMTHEME("application-exit", ":/oxygen-16x16/application-exit"));
+	mnuHelpAbout->setIcon(QICON_FROMTHEME("help-about", ":/oxygen-16x16/help-about"));
 	
 	// Create the SDL widget.
 	sdl = new SdlWidget(this->centralwidget);

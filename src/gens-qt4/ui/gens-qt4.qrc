@@ -5,4 +5,8 @@
     <file alias="gensgs_48x48">resources/gens/gensgs_48x48.png</file>
     <file alias="gens_small">resources/gens/gens_small.png</file>
   </qresource>
+  <qresource prefix="oxygen-16x16">
+    <file alias="application-exit">resources/oxygen-16x16/application-exit.png</file>
+    <file alias="help-about">resources/oxygen-16x16/help-about.png</file>
+  </qresource>
 </RCC>
