@@ -67,7 +67,7 @@ bool IsRunning(void)
  * @param sWinTitle Initial window title.
  * @return 0 on success; non-zero on error.
  */
-int Init(void *wid, const char *sWinTitle)
+int Init(void *wid)
 {
 	// TODO: Reference counting?
 	if (m_isInit)
@@ -199,6 +199,14 @@ static void LgProcessSDLQueue(void)
 				
 				// Update video.
 				SDL_UpdateRect(SdlVideo::ms_screen, 0, 0, 0, 0);
+				break;
+			
+			case MtQueue::MTQ_LG_SDLVIDEO_RESIZE:
+				// Resize the SDL Video window.
+				SdlVideo::End();
+				SdlVideo::SetPackedRes(LG_POINTER_TO_UINT(param));
+				SdlVideo::Init();
+				// TODO: Notify the UI that the video has been resized.
 				break;
 			
 			default:

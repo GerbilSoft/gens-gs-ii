@@ -25,6 +25,8 @@
 #define __LIBGENS_SDLVIDEO_HPP__
 
 #include <SDL/SDL.h>
+#include <stdint.h>
+
 #include <string>
 
 namespace LibGens
@@ -34,6 +36,7 @@ class SdlVideo
 {
 	public:
 		/// NOTE: Init() and End() are to be called by LibGens ONLY!
+		static int Init(void) { return Init(ms_wid); }
 		static int Init(void *wid);
 		static int End(void);
 		
@@ -55,13 +58,38 @@ class SdlVideo
 		
 		static void SetWinTitle(const char *newTitle);
 		
+		// Resolution packing.
+		static inline uint32_t PackRes(uint16_t w, uint16_t h)
+		{
+			return (((uint32_t)w) | (((uint32_t)h) << 16));
+		}
+		static inline uint16_t UnPackResW(uint32_t res)
+		{
+			return (res & 0xFFFF);
+		}
+		static inline uint16_t UnPackResH(uint32_t res)
+		{
+			return ((res >> 16) & 0xFFFF);
+		}
+		
 		// TODO: Should this be publicly accessible?
 		static SDL_Surface *ms_screen;
+		
+		// TODO: Not sure how to handle the "requested" size...
+		static inline void SetPackedRes(uint32_t res)
+		{
+			DispW = UnPackResW(res);
+			DispH = UnPackResH(res);
+		}
 	
 	protected:
 		static void *ms_wid;
 		static std::string ms_sWinTitle;
 		static const unsigned int SDL_VideoModeFlags;
+		
+		// TODO: Not sure how to handle the "requested" size...
+		static int DispW;
+		static int DispH;
 	
 	private:
 		SdlVideo() { }

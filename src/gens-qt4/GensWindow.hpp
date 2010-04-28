@@ -53,6 +53,12 @@ class GensWindow : public QMainWindow, public Ui::GensWindow
 		// Widget signals.
 		void on_mnuFileQuit_triggered(void);
 		void on_mnuHelpAbout_triggered(void);
+		
+		// Resolution tests.
+		void on_mnuResTest1x_triggered(void);
+		void on_mnuResTest2x_triggered(void);
+		void on_mnuResTest3x_triggered(void);
+		void on_mnuResTest4x_triggered(void);
 };
 
 }

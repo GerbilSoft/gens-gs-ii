@@ -29,6 +29,7 @@
 
 // LibGens.
 #include "libgens/SdlVideo.hpp"
+#include "libgens/lg_main.hpp"
 
 // C++ includes.
 #include <algorithm>
@@ -113,6 +114,10 @@ void GensWindow::gensResize(void)
 	// Set the new window size.
 	this->setMinimumSize(new_width, new_height);
 	this->setMaximumSize(new_width, new_height);
+	
+	// Set the size of the SDL widget.
+	this->sdl->setMinimumSize(new_width, new_height);
+	this->sdl->setMaximumSize(new_width, new_height);
 }
 
 
@@ -139,6 +144,28 @@ void GensWindow::on_mnuHelpAbout_triggered(void)
 {
 	// About Gens/GS II.
 	AboutWindow::ShowSingle(this);
+}
+
+
+void GensWindow::on_mnuResTest1x_triggered(void)
+{
+	LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SDLVIDEO_RESIZE,
+			     LG_UINT_TO_POINTER(LibGens::SdlVideo::PackRes(320, 240)));
+}
+void GensWindow::on_mnuResTest2x_triggered(void)
+{
+	LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SDLVIDEO_RESIZE,
+			     LG_UINT_TO_POINTER(LibGens::SdlVideo::PackRes(640, 480)));
+}
+void GensWindow::on_mnuResTest3x_triggered(void)
+{
+	LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SDLVIDEO_RESIZE,
+			     LG_UINT_TO_POINTER(LibGens::SdlVideo::PackRes(960, 720)));
+}
+void GensWindow::on_mnuResTest4x_triggered(void)
+{
+	LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SDLVIDEO_RESIZE,
+			     LG_UINT_TO_POINTER(LibGens::SdlVideo::PackRes(1280, 960)));
 }
 
 }

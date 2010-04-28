@@ -14,6 +14,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../)
 # Sources.
 SET(gens-qt4_SRCS
 	gqt4_main.cpp
+	SdlWidget.cpp
 	GensWindow.cpp
 	AboutWindow.cpp
 	)

@@ -34,7 +34,7 @@ namespace LibGens
 
 bool IsRunning(void);
 
-int Init(void *wid = NULL, const char *sWinTitle = NULL);
+int Init(void *wid = NULL);
 int End(void);
 
 int LgThread(void *param);

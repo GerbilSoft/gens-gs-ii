@@ -24,8 +24,6 @@
 #ifndef __GENS_QT4_SDLWIDGET_HPP__
 #define __GENS_QT4_SDLWIDGET_HPP__
 
-#include "libgens/lg_main.hpp"
-
 #include <QtCore/qglobal.h>
 #include <QtCore/QObject>
 
@@ -47,23 +45,10 @@ class SdlWidget : public SDLWIDGET_BASECLASS
 	Q_OBJECT
 	
 	public:
-		SdlWidget(QWidget *parent = NULL)
-		{
-			this->setParent(parent);
-			
-			// Make sure the window is embedded properly.
-			this->setAttribute(Qt::WA_NativeWindow);
-			this->setAttribute(Qt::WA_PaintOnScreen);
-			this->setAttribute(Qt::WA_OpaquePaintEvent);
-		}
+		SdlWidget(QWidget *parent = NULL);
 	
 	protected:
-		void paintEvent(QPaintEvent *event)
-		{
-			// Send an UPDATE event to LibGens.
-			// TODO: Include the coordinates to update?
-			LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_UPDATE, NULL);
-		}
+		void paintEvent(QPaintEvent *event);
 };
 
 }

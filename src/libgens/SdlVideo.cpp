@@ -42,6 +42,10 @@ string SdlVideo::ms_sWinTitle;
 const unsigned int SdlVideo::SDL_VideoModeFlags =
 	(SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWPALETTE | SDL_ASYNCBLIT | SDL_HWACCEL);
 
+// TODO: Not sure how to handle the "requested" size...
+int SdlVideo::DispW = 320;
+int SdlVideo::DispH = 240;
+
 
 /**
  * Init(): Initialize SDL Video.
@@ -70,7 +74,7 @@ int SdlVideo::Init(void *wid)
 	
 	// TODO: Check for errors in SDL_InitSubSystem().
 	SDL_InitSubSystem(SDL_INIT_VIDEO);
-	ms_screen = SDL_SetVideoMode(320, 240, 0, SDL_VideoModeFlags);
+	ms_screen = SDL_SetVideoMode(DispW, DispH, 0, SDL_VideoModeFlags);
 	
 	// Unset the Window ID variable.
 	unsetenv("SDL_WINDOWID");

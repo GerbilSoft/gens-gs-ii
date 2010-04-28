@@ -66,6 +66,12 @@ class MtQueue
 			 */
 			MTQ_LG_UPDATE,
 			
+			/**
+			 * MTQ_LG_SDLVIDEO_RESIZE: Resize the SDL window.
+			 * @param param Packed resolution via SdlVideo::PackRes().
+			 */
+			MTQ_LG_SDLVIDEO_RESIZE,
+			
 			MTQ_MAX
 		};
 
