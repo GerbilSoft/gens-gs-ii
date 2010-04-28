@@ -41,6 +41,7 @@ int LgThread(void *param);
 
 // UI to LibGens queue.
 extern MtQueue *qToLG;
+void MtQ_Callback(MtQueue *mtq);
 
 }
 

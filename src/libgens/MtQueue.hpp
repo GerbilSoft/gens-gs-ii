@@ -37,14 +37,14 @@
 #define LG_INT_TO_POINTER(x)	((void*)(intptr_t)(x))
 #define LG_UINT_TO_POINTER(x)	((void*)(uintptr_t)(x))
 
-
 namespace LibGens
 {
 
 class MtQueue
 {
 	public:
-		MtQueue(bool notifySDL = false);
+		typedef void (*MtQ_callback_fn)(MtQueue *mtq);
+		MtQueue(MtQ_callback_fn callback);
 		~MtQueue();
 		
 		/**
@@ -92,7 +92,7 @@ class MtQueue
 	
 	private:
 		std::queue<MtQ_elem> m_queue;
-		bool m_notifySDL;
+		MtQ_callback_fn m_callback;
 		SDL_mutex *m_mutex;
 };
 

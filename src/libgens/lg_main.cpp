@@ -106,7 +106,7 @@ int Init(void *wid)
 	}
 	
 	// Initialize the message queues.
-	qToLG = new MtQueue(true);
+	qToLG = new MtQueue(MtQ_Callback);
 	
 	// Start the LibGens thread.
 	ms_thread = SDL_CreateThread(LgThread, wid);
@@ -270,6 +270,21 @@ int LgThread(void *param)
 	m_isInit = false;
 	LG_MSG("LibGens thread is exiting.");
 	return 0;
+}
+
+
+/**
+ * MtQ_Callback(): MtQueue callback function.
+ * @param mtq MtQueue object.
+ */
+void MtQ_Callback(MtQueue *mtq)
+{
+	// Notify SDL about the new message.
+	SDL_Event event;
+	event.type = SDL_EVENT_MTQ;
+	event.user.data1 = (void*)mtq;
+	event.user.data2 = NULL;
+	SDL_PushEvent(&event);
 }
 
 }

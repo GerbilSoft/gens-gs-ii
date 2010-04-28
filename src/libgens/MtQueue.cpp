@@ -29,9 +29,9 @@ using std::queue;
 namespace LibGens
 {
 
-MtQueue::MtQueue(bool notifySDL)
+MtQueue::MtQueue(MtQ_callback_fn callback)
 {
-	m_notifySDL = notifySDL;
+	m_callback = callback;
 	
 	// Create the SDL mutex.
 	// TODO: Throw an exception if the mutex couldn't be created.
@@ -63,15 +63,8 @@ int MtQueue::push(MtQueue::MtQ_type type, void *param)
 	m_queue.push(MtQueue::MtQ_elem(type, param));
 	SDL_UnlockMutex(m_mutex);
 	
-	if (m_notifySDL)
-	{
-		// Notify SDL about the new message.
-		SDL_Event event;
-		event.type = SDL_EVENT_MTQ;
-		event.user.data1 = (void*)this;
-		event.user.data2 = NULL;
-		SDL_PushEvent(&event);
-	}
+	if (m_callback)
+		m_callback(this);
 	
 	// Message pushed successfully.
 	return 0;
