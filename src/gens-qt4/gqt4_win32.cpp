@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * gqt4_main.cpp: Main UI code.                                            *
+ * gqt4_win32.hpp: Win32 compatibility functions.                          *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,76 +21,69 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "gqt4_main.hpp"
-#include "libgens/lg_main.hpp"
-
-#include <QApplication>
-#include "GensWindow.hpp"
-
-#include <stdio.h>
-
-// Win32 compatibility functions.
-#ifdef _WIN32
 #include "gqt4_win32.hpp"
+
+// C includes.
+#include <string.h>
+
+// Qt includes.
+#include <QtGui/QApplication>
+#include <QtGui/QFont>
+
+// Win32 includes.
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
 #endif
-
-
-int main(int argc, char *argv[])
-{
-	// Create the main UI.
-	QApplication app(argc, argv);
-	
-#ifdef _WIN32
-	// Win32: Set the application font.
-	GensQt4::Win32_SetFont();
-#endif
-	
-	GensQt4::GensWindow gens_window;
-	gens_window.show();
-	
-	// Run the Qt4 UI.
-	int ret = app.exec();
-	
-	// Shut down LibGens.
-	LibGens::End();
-	
-	// Finished.
-	return ret;
-}
-
-
-#ifdef _WIN32
-/**
- * WinMain(): Win32 entry point.
- * TODO: Add Unicode version and convert the command line to UTF-8.
- */
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
-	// TODO: Convert lpCmdLine to argc/argv[].
-	int argc = 1;
-	char *argv[1] = {"gens-qt4"};
-	
-	// TODO: Handle nCmdShow.
-	// TODO: Store hInstance.
-	main(argc, argv);
-}
-#endif /* _WIN32 */
-
+#include <windows.h>
 
 namespace GensQt4
 {
 
 /**
- * QuitGens(): Quit Gens.
+ * Win32_SetFont(): Set the Qt font to match the system font.
  */
-void QuitGens(void)
+void Win32_SetFont(void)
 {
-	// TODO: Save configuration.
+	// Get the Win32 message font.
+	NONCLIENTMETRICS ncm;
+	ncm.cbSize = sizeof(ncm);
+	::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0);
 	
-	// TODO: Stop LibGens' emulation core.
+	int nFontSize = 0;
+	HDC hDC = ::GetDC(NULL);
 	
-	// Shut down LibGens.
-	LibGens::End();
+	// Calculate the font size in points.
+	// http://www.codeguru.com/forum/showthread.php?t=476244
+	if (ncm.lfMessageFont.lfHeight < 0)
+	{
+		nFontSize = -::MulDiv(ncm.lfMessageFont.lfHeight,
+				      72, ::GetDeviceCaps(hDC, LOGPIXELSY));
+	}
+	else
+	{
+		TEXTMETRIC tm;
+		memset(&tm, 0x00, sizeof(tm));
+		::GetTextMetrics(hDC, &tm);
+		
+		nFontSize = -::MulDiv(ncm.lfMessageFont.lfHeight - tm.tmInternalLeading,
+				      72, ::GetDeviceCaps(hDC, LOGPIXELSY));
+	}
+	
+	// TODO: Scale Windows font weights to Qt font weights.
+	
+	// TODO: Update the Qt font when the system font is changed.
+	// (WM_SETTINGCHANGE)
+	
+	// TODO: Menus always use the message font, and they already
+	// respond to WM_SETTINGCHANGE. Make menus use the menu font.
+	
+	// Create the QFont.
+	QFont qAppFont(ncm.lfMessageFont.lfFaceName, nFontSize,
+		       -1, ncm.lfMessageFont.lfItalic);
+	
+	// Set the Qt application font.
+	QApplication::setFont(qAppFont);
 }
 
 }

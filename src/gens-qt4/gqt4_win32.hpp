@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * gqt4_main.cpp: Main UI code.                                            *
+ * gqt4_win32.hpp: Win32 compatibility functions.                          *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,76 +21,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "gqt4_main.hpp"
-#include "libgens/lg_main.hpp"
-
-#include <QApplication>
-#include "GensWindow.hpp"
-
-#include <stdio.h>
-
-// Win32 compatibility functions.
-#ifdef _WIN32
-#include "gqt4_win32.hpp"
-#endif
-
-
-int main(int argc, char *argv[])
-{
-	// Create the main UI.
-	QApplication app(argc, argv);
-	
-#ifdef _WIN32
-	// Win32: Set the application font.
-	GensQt4::Win32_SetFont();
-#endif
-	
-	GensQt4::GensWindow gens_window;
-	gens_window.show();
-	
-	// Run the Qt4 UI.
-	int ret = app.exec();
-	
-	// Shut down LibGens.
-	LibGens::End();
-	
-	// Finished.
-	return ret;
-}
-
+#ifndef __GENS_QT4_GQT4_WIN32_HPP__
+#define __GENS_QT4_GQT4_WIN32_HPP__
 
 #ifdef _WIN32
-/**
- * WinMain(): Win32 entry point.
- * TODO: Add Unicode version and convert the command line to UTF-8.
- */
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
-	// TODO: Convert lpCmdLine to argc/argv[].
-	int argc = 1;
-	char *argv[1] = {"gens-qt4"};
-	
-	// TODO: Handle nCmdShow.
-	// TODO: Store hInstance.
-	main(argc, argv);
-}
-#endif /* _WIN32 */
-
 
 namespace GensQt4
 {
 
-/**
- * QuitGens(): Quit Gens.
- */
-void QuitGens(void)
-{
-	// TODO: Save configuration.
-	
-	// TODO: Stop LibGens' emulation core.
-	
-	// Shut down LibGens.
-	LibGens::End();
-}
+void Win32_SetFont(void);
 
 }
+
+#endif
+
+#endif /* __GENS_QT4_GQT4_WIN32_HPP__ */

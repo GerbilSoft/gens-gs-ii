@@ -11,6 +11,13 @@ INCLUDE_DIRECTORIES(${gens-gs-ii_BINARY_DIR})
 # Include the previous directory.
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../)
 
+# Compatibility sources.
+IF(WIN32)
+	SET(gens-qt4_COMPAT_SRC lg_win32.c)
+ELSE()
+	SET(gens-qt4_COMPAT_SRC)
+ENDIF()
+
 # Sources.
 SET(gens-qt4_SRCS
 	gqt4_main.cpp
@@ -49,7 +56,14 @@ SET(gens-qt4_RCC_SRCS
 # Add the resource files to the project.
 QT4_ADD_RESOURCES(gens-qt4_RCC_O ${gens-qt4_RCC_SRCS})
 
+# Compatibility sources.
+IF(WIN32)
+	SET(gens-qt4_COMPAT_SRCS gqt4_win32.cpp)
+ELSE()
+	SET(gens-qt4_COMPAT_SRCS)
+ENDIF()
+
 # Build the executable.
-ADD_EXECUTABLE(gens-qt4 ${gens-qt4_SRCS} ${gens-qt4_MOC_SOURCES} ${gens-qt4_UIS_H} ${gens-qt4_RCC_O})
+ADD_EXECUTABLE(gens-qt4 ${gens-qt4_SRCS} ${gens-qt4_COMPAT_SRCS} ${gens-qt4_MOC_SOURCES} ${gens-qt4_UIS_H} ${gens-qt4_RCC_O})
 TARGET_LINK_LIBRARIES(gens-qt4 gens ${QT_LIBRARIES})
 ADD_DEPENDENCIES(gens-qt4 gens)
