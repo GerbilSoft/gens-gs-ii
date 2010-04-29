@@ -31,10 +31,14 @@
 #include "SdlWidget.hpp"
 #include "GensMenuBar.hpp"
 
+#ifndef Q_WS_MAC
+#define GQT4_USE_QMAINWINDOW
+#endif
+
 namespace GensQt4
 {
 
-#ifndef Q_WS_MAC
+#ifdef GQT4_USE_QMAINWINDOW
 class GensWindow : public QMainWindow, public Ui::GensWindow
 #else
 class GensWindow : public QObject
@@ -49,13 +53,26 @@ class GensWindow : public QObject
 		SdlWidget *sdl;		// SDL widget.
 		GensMenuBar *menubar;	// Gens menu bar.
 		
-#ifndef Q_WS_MAC
+#ifdef GQT4_USE_QMAINWINDOW
+		// QMainWindow-specific functions.
+		
 		// Resize the window.
 		void gensResize(void);
+#else
+		// Fake GensWindow functions for compatibility.
+		inline void show(void) { }
+		inline void gensResize(void) { }
 #endif
 	
 	protected:
+		void setupUi(void);
+		void retranslateUi(void);
+		
 		void closeEvent(QCloseEvent *event);
+		
+#ifdef GQT4_USE_QMAINWINDOW
+		QWidget *centralwidget;
+#endif
 	
 	protected slots:
 		// Window resize.

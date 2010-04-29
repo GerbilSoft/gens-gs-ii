@@ -40,7 +40,6 @@ QT4_WRAP_CPP(gens-qt4_MOC_SOURCES ${gens-qt4_MOC_HEADERS})
 
 # UI files.
 SET(gens-qt4_UIS
-	ui/GensWindow.ui
 	ui/AboutWindow.ui
 	)
 

@@ -35,7 +35,12 @@
 #include <algorithm>
 
 // Qt4 includes.
+#include <QtCore/QString>
 #include <QtGui/QIcon>
+
+// Text translation macro.
+#define TR(text) \
+	QApplication::translate("GensWindow", (text), NULL, QApplication::UnicodeUTF8)
 
 
 namespace GensQt4
@@ -46,9 +51,26 @@ namespace GensQt4
  */
 GensWindow::GensWindow()
 {
-#ifndef Q_WS_MAC
-	// Linux/Win32 initialization.
-	setupUi(this);
+	// Set up the User Interface.
+	setupUi();
+	
+	/**
+	 * TODO for non-QMainWindow version:
+	 * - Connect SDL_QUIT to closeEvent(). [actually this helps for both]
+	 */
+}
+
+
+/**
+ * setupUi(): Set up the User Interface.
+ */
+void GensWindow::setupUi(void)
+{
+	if (this->objectName().isEmpty())
+		this->setObjectName(QString::fromUtf8("GensWindow"));
+	
+#ifdef GQT4_USE_QMAINWINDOW
+	// GensWindow is a QMainWindow.
 	
 	// Set the window icon.
 	QIcon winIcon;
@@ -56,6 +78,24 @@ GensWindow::GensWindow()
 	winIcon.addFile(":/gens/gensgs_32x32.png", QSize(32, 32));
 	winIcon.addFile(":/gens/gensgs_16x16.png", QSize(16, 16));
 	this->setWindowIcon(winIcon);
+	
+	// Size policy.
+	QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	sizePolicy.setHorizontalStretch(0);
+	sizePolicy.setVerticalStretch(0);
+	sizePolicy.setHeightForWidth(this->sizePolicy().hasHeightForWidth());
+	this->setSizePolicy(sizePolicy);
+	
+	// Create the central widget.
+	centralwidget = new QWidget(this);
+	centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
+	this->setCentralWidget(centralwidget);
+	
+	// Retranslate the UI.
+	retranslateUi();
+	
+	// Connect slots by name.
+	QMetaObject::connectSlotsByName(this);
 	
 	// Create the menubar.
 	menubar = new GensMenuBar(this);
@@ -69,7 +109,7 @@ GensWindow::GensWindow()
 	// Resize the window.
 	gensResize();
 #else
-	// Mac OS X initialization.
+	// GensWindow is not a QMainWindow.
 	
 	// Create the menubar.
 	menubar = new GensMenuBar(NULL);
@@ -78,6 +118,27 @@ GensWindow::GensWindow()
 	sdl = new SdlWidget(NULL);
 	QObject::connect(sdl, SIGNAL(sdlHasResized(QSize)),
 			 this, SLOT(resizeEvent(QSize)));
+#endif
+	
+	// Retranslate the UI.
+	retranslateUi();
+}
+
+
+/**
+ * retranslateUi(): Retranslate the User Interface.
+ */
+void GensWindow::retranslateUi(void)
+{
+	// TODO: Indicate UI status.
+#ifdef GQT4_USE_QMAINWINDOW
+	// GensWindow is a QMainWindow.
+	this->setWindowTitle(TR("Gens/GS II"));
+#else	
+	// GensWindow is not a QMainWindow.
+	// TODO: LibGens title setting should be thread-safe. (Use MtQueue!)
+	// TODO: Translate this!
+	LibGens::SdlVideo::SetWindowTitle("Gens/GS II");
 #endif
 }
 
@@ -96,7 +157,7 @@ void GensWindow::closeEvent(QCloseEvent *event)
 }
 
 
-#ifndef Q_WS_MAC
+#ifdef GQT4_USE_QMAINWINDOW
 /**
  * gensResize(): Resize the Gens window to fit the SDL window.
  * TODO: Call this when the X11 client is embedded in SdlWidget.

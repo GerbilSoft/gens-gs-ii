@@ -30,20 +30,29 @@ namespace GensQt4
 {
 
 SdlWidget::SdlWidget(QWidget *parent)
+	: SDLWIDGET_BASECLASS(parent)
 {
-	this->setParent(parent);
-	
-	// Make sure the window is embedded properly.
-	this->setAttribute(Qt::WA_NativeWindow);
-	this->setAttribute(Qt::WA_PaintOnScreen);
-	this->setAttribute(Qt::WA_OpaquePaintEvent);
-	
-	// Don't draw the background.
-	this->setAttribute(Qt::WA_NoBackground);
-	this->setAttribute(Qt::WA_NoSystemBackground);
-	
-	// Use a fixed size policy.
-	this->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	if (parent != NULL)
+	{
+		// Parent widget specified.
+		
+		// Make sure the window is embedded properly.
+		this->setAttribute(Qt::WA_NativeWindow);
+		this->setAttribute(Qt::WA_PaintOnScreen);
+		this->setAttribute(Qt::WA_OpaquePaintEvent);
+		
+		// Don't draw the background.
+		this->setAttribute(Qt::WA_NoBackground);
+		this->setAttribute(Qt::WA_NoSystemBackground);
+		
+		// Use a fixed size policy.
+		this->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	}
+	else
+	{
+		// No parent widget specified. Run SDL in its own window.
+		this->showEvent(NULL);
+	}
 }
 
 
@@ -74,7 +83,9 @@ void SdlWidget::showEvent(QShowEvent *event)
 	}
 	
 	// Initialize LibGens.
-	int ret = LibGens::Init((void*)this->winId());
+	void *wId = (void*)(this->parent() ? this->winId() : 0);
+	printf("omg - wid: 0x%08X\n", wId);
+	int ret = LibGens::Init(wId);
 	if (ret != 0)
 	{
 		// TODO: Error handling.

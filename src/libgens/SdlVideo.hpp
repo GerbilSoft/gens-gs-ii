@@ -56,7 +56,7 @@ class SdlVideo
 			return ms_screen->h;
 		}
 		
-		static void SetWinTitle(const char *newTitle);
+		static void SetWindowTitle(const char *newTitle);
 		
 		// Resolution packing.
 		static inline uint32_t PackRes(uint16_t w, uint16_t h)

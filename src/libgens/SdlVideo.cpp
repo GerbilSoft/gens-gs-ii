@@ -107,10 +107,10 @@ int SdlVideo::End(void)
 
 
 /**
- * SetWinTitle(): Set the SDL Window Title.
+ * SetWindowTitle(): Set the SDL Window Title.
  * @param newTitle New window title.
  */
-void SdlVideo::SetWinTitle(const char *newTitle)
+void SdlVideo::SetWindowTitle(const char *newTitle)
 {
 	if (!newTitle)
 		ms_sWinTitle.clear();
@@ -120,6 +120,7 @@ void SdlVideo::SetWinTitle(const char *newTitle)
 	// Set the window title.
 	// NOTE: On Win32, setting the window title while embedded
 	// in another window causes the thread to hang!
+	printf("ms_screen == 0x%08X; ms_wid == 0x%08X", ms_screen, ms_wid);
 	if (ms_screen && !ms_wid)
 		SDL_WM_SetCaption(ms_sWinTitle.c_str(), NULL);
 }
