@@ -63,16 +63,16 @@ GensWindow::GensWindow()
 	
 	// Set the window icon.
 	QIcon winIcon;
-	winIcon.addFile(":/gens/gensgs_48x48", QSize(48, 48));
-	winIcon.addFile(":/gens/gensgs_32x32", QSize(32, 32));
-	winIcon.addFile(":/gens/gensgs_16x16", QSize(16, 16));
+	winIcon.addFile(":/gens/gensgs_48x48.png", QSize(48, 48));
+	winIcon.addFile(":/gens/gensgs_32x32.png", QSize(32, 32));
+	winIcon.addFile(":/gens/gensgs_16x16.png", QSize(16, 16));
 	this->setWindowIcon(winIcon);
 	
 	// Set menu icons.
 	// QIcon::fromTheme() requires Qt 4.6 or later.
 	// TODO: Include fallback icons for Win32 and Mac OS X.
-	mnuFileQuit->setIcon(QICON_FROMTHEME("application-exit", ":/oxygen-16x16/application-exit"));
-	mnuHelpAbout->setIcon(QICON_FROMTHEME("help-about", ":/oxygen-16x16/help-about"));
+	mnuFileQuit->setIcon(QICON_FROMTHEME("application-exit", ":/oxygen-16x16/application-exit.png"));
+	mnuHelpAbout->setIcon(QICON_FROMTHEME("help-about", ":/oxygen-16x16/help-about.png"));
 	
 	// Create the SDL widget.
 	sdl = new SdlWidget(this->centralwidget);

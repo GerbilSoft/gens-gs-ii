@@ -34,7 +34,7 @@
         </size>
        </property>
        <property name="pixmap">
-        <pixmap resource="gens-qt4.qrc">:/gens/gens_small</pixmap>
+        <pixmap resource="resources/gens-qt4.qrc">:/gens/gens_small.png</pixmap>
        </property>
       </widget>
      </item>
@@ -121,7 +121,7 @@ For news on Gens/GS, visit Sonic Retro:&lt;br /&gt;
   </layout>
  </widget>
  <resources>
-  <include location="gens-qt4.qrc"/>
+  <include location="resources/gens-qt4.qrc"/>
  </resources>
  <connections>
   <connection>

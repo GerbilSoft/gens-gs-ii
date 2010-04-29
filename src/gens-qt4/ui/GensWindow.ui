@@ -101,7 +101,7 @@
   </action>
  </widget>
  <resources>
-  <include location="gens-qt4.qrc"/>
+  <include location="resources/gens-qt4.qrc"/>
  </resources>
  <connections/>
 </ui>

@@ -1,0 +1,10 @@
+<RCC>
+  <qresource prefix="">
+    <file>gens/gensgs_16x16.png</file>
+    <file>gens/gensgs_32x32.png</file>
+    <file>gens/gensgs_48x48.png</file>
+    <file>gens/gens_small.png</file>
+    <file>oxygen-16x16/application-exit.png</file>
+    <file>oxygen-16x16/help-about.png</file>
+  </qresource>
+</RCC>

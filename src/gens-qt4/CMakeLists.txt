@@ -50,7 +50,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
 # Resource files.
 SET(gens-qt4_RCC_SRCS
-	ui/gens-qt4.qrc
+	ui/resources/gens-qt4.qrc
 	)
 
 # Add the resource files to the project.
