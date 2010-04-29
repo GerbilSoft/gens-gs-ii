@@ -43,6 +43,7 @@
 	QIcon(fallback)
 #endif
 
+
 namespace GensQt4
 {
 
@@ -52,48 +53,106 @@ GensMenuBar::GensMenuBar(QWidget *parent)
 	// Populate the menu bar.
 	// TODO
 	
-	// TODO: Qt4's preferred method is adding actions to the parent window,
-	// then adding actions to menus.
-	// We're going to simply add actions to menus.
-	QMenu *mnuFile = new QMenu(this);
-	mnuFile->setTitle(TR("&File"));
-	QAction *mnuFileQuit = new QAction(mnuFile);
-	mnuFileQuit->setText(TR("&Quit"));
-	mnuFileQuit->setShortcut(QKeySequence(QKeySequence::Quit));
-	mnuFileQuit->setIcon(QICON_FROMTHEME("application-exit", ":/oxygen-16x16/application-exit.png"));
+	static const GensMenuItem gmiFile[] =
+	{
+		{IDM_FILE_QUIT, GMI_NORMAL, "&Quit", NULL, "application-exit", ":/oxygen-16x16/application-exit.png"},
+		
+		{0, GMI_NORMAL, NULL, NULL, NULL, NULL}
+	};
 	
-	mnuFile->addAction(mnuFileQuit);
-	this->addMenu(mnuFile);
+	static const GensMenuItem gmiResTest[] =
+	{
+		{IDM_RESTEST_1X, GMI_NORMAL, "320x240 (&1x)", NULL, NULL, NULL},
+		{IDM_RESTEST_2X, GMI_NORMAL, "640x480 (&2x)", NULL, NULL, NULL},
+		{IDM_RESTEST_3X, GMI_NORMAL, "960x720 (&3x)", NULL, NULL, NULL},
+		{IDM_RESTEST_4X, GMI_NORMAL, "1280x960 (&4x)", NULL, NULL, NULL},
+		
+		{0, GMI_NORMAL, NULL, NULL, NULL, NULL}
+	};
 	
-	QMenu *mnuResTest = new QMenu(this);
-	mnuResTest->setTitle(TR("&ResTest"));
-	QAction *mnuResTest1x = new QAction(mnuResTest);
-	mnuResTest1x->setText(TR("320x240 (&1x)"));
-	QAction *mnuResTest2x = new QAction(mnuResTest);
-	mnuResTest2x->setText(TR("640x480 (&2x)"));
-	QAction *mnuResTest3x = new QAction(mnuResTest);
-	mnuResTest3x->setText(TR("960x720 (&3x)"));
-	QAction *mnuResTest4x = new QAction(mnuResTest);
-	mnuResTest4x->setText(TR("1280x960 (&4x)"));
+	static const GensMenuItem gmiHelp[] =
+	{
+		{IDM_HELP_ABOUT, GMI_NORMAL, "&About Gens/GS II", NULL, "help-about", ":/oxygen-16x16/help-about.png"},
+		
+		{0, GMI_NORMAL, NULL, NULL, NULL, NULL}
+	};
 	
-	mnuResTest->addAction(mnuResTest1x);
-	mnuResTest->addAction(mnuResTest2x);
-	mnuResTest->addAction(mnuResTest3x);
-	mnuResTest->addAction(mnuResTest4x);
-	this->addMenu(mnuResTest);
-
-	QMenu *mnuHelp = new QMenu(this);
-	mnuHelp->setTitle(TR("&Help"));
-	QAction *mnuHelpAbout = new QAction(mnuFile);
-	mnuHelpAbout->setText(TR("&About Gens/GS II"));
-	mnuHelpAbout->setIcon(QICON_FROMTHEME("help-about", ":/oxygen-16x16/help-about.png"));
+	static const GensMainMenuItem gmmiMain[] =
+	{
+		{IDM_FILE_MENU, "&File", &gmiFile[0]},
+		{IDM_RESTEST_MENU, "&ResTest", &gmiResTest[0]},
+		{IDM_HELP_MENU, "&Help", &gmiHelp[0]},
+		
+		{0, NULL, NULL}
+	};
 	
-	mnuHelp->addAction(mnuHelpAbout);
-	this->addMenu(mnuHelp);
+	parseMainMenu(&gmmiMain[0]);
 }
 
 GensMenuBar::~GensMenuBar()
 {
+}
+
+
+/**
+ * parseMainMenu(): Parse an array of GensMainMenuItem items.
+ * @param mainMenu Pointer to the first item in the GensMainMenuItem array.
+ */
+void GensMenuBar::parseMainMenu(const GensMainMenuItem *mainMenu)
+{
+	QMenu *mnuSubMenu;
+	
+	for (; mainMenu->id != 0; mainMenu++)
+	{
+		// Create a new submenu.
+		mnuSubMenu = new QMenu(this);
+		mnuSubMenu->setTitle(TR(mainMenu->text));
+		
+		// Parse the menu.
+		parseMenu(mainMenu->submenu, mnuSubMenu);
+		
+		// Add the menu to the menu bar.
+		this->addMenu(mnuSubMenu);
+	}
+}
+
+
+/**
+ * parseMenuBar(): Parse an array of GensMenuItem items.
+ * @param menu Pointer to the first item in the GensMenuItem array.
+ * @param parent QMenu to add the menu items to.
+ */
+void GensMenuBar::parseMenu(const GensMenuItem *menu, QMenu *parent)
+{
+	QAction *mnuItem;
+	
+	for (; menu->id != 0; menu++)
+	{
+		// TODO: Add other menu item types.
+		// For now, only GMI_NORMAL and GMI_SEPARATOR are supported.
+		
+		if (menu->type == GMI_SEPARATOR)
+		{
+			// Menu separator.
+			parent->addSeparator();
+			continue;
+		}
+		
+		if (menu->type != GMI_NORMAL)
+			continue;
+		
+		mnuItem = new QAction(parent);
+		mnuItem->setText(TR(menu->text));
+		
+		// Set the menu icon.
+		mnuItem->setIcon(QICON_FROMTHEME(menu->icon_fdo, menu->icon_qrc));
+		
+		// TODO: Accelerator.
+		//mnuItem->setShortcut(QKeySequence(QKeySequence::Quit));
+		
+		// Add the menu item to the menu.
+		parent->addAction(mnuItem);
+	}
 }
 
 }

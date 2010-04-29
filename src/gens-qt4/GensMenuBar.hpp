@@ -25,6 +25,41 @@
 #define __GENS_QT4_GENSMENUBAR_HPP__
 
 #include <QtGui/QMenuBar>
+#include <QtGui/QMenu>
+
+// TODO: Move to gens_menu_data.c or something.
+extern "C" {
+
+typedef enum
+{
+	GMI_NORMAL,
+	GMI_SEPARATOR,
+	GMI_SUBMENU,
+	
+	GMI_MAX
+} GMI_Type;
+
+typedef struct _GensMenuItem
+{
+	int id;					// Menu identifier. (-1 == separator)
+	GMI_Type type;				// Menu item type.
+	const char *text;			// Menu item text.
+	const struct _GensMenuItem *submenu;	// First element of submenu.
+	
+	const char *icon_fdo;			// FreeDesktop.org icon.
+	const char *icon_qrc;			// QRC icon. (Qt resources)
+	
+	// TODO: Accelerator.
+} GensMenuItem;
+
+typedef struct _GensMainMenuItem
+{
+	int id;				// Menu identifier.
+	const char *text;		// Menu text.
+	const GensMenuItem *submenu;	// First element of submenu.
+} GensMainMenuItem;
+
+}
 
 // Menu IDs.
 // TODO: Convert to enum?
@@ -33,8 +68,10 @@
 #define MNUID_MENU(id) (id >> 16)
 #define MNUID_ITEM(id) (id & 0xFFFF)
 
+#define IDM_SEPARATOR		-1
+
 #define IDM_FILE_MENU		MNUID(1, 0)
-#define IDM_FILE_EXIT		MNUID(1, 1)
+#define IDM_FILE_QUIT		MNUID(1, 0xFFFF)
 
 #define IDM_HELP_MENU		MNUID(7, 0)
 #define IDM_HELP_ABOUT		MNUID(7, 1)
@@ -55,6 +92,10 @@ class GensMenuBar : public QMenuBar
 	public:
 		GensMenuBar(QWidget *parent = NULL);
 		virtual ~GensMenuBar();
+	
+	protected:
+		void parseMainMenu(const GensMainMenuItem *mainMenu);
+		void parseMenu(const GensMenuItem *menu, QMenu *parent);
 	
 	signals:
 		void triggered(int id);
