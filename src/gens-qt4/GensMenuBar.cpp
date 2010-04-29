@@ -55,26 +55,26 @@ GensMenuBar::GensMenuBar(QWidget *parent)
 	
 	static const GensMenuItem gmiFile[] =
 	{
-		{IDM_FILE_QUIT, GMI_NORMAL, "&Quit", NULL, "application-exit", ":/oxygen-16x16/application-exit.png"},
+		{IDM_FILE_QUIT, GMI_NORMAL, "&Quit", NULL, QKeySequence::Quit, 0, "application-exit", ":/oxygen-16x16/application-exit.png"},
 		
-		{0, GMI_NORMAL, NULL, NULL, NULL, NULL}
+		{0, GMI_NORMAL, NULL, NULL, QKeySequence::UnknownKey, 0, NULL, NULL}
 	};
 	
 	static const GensMenuItem gmiResTest[] =
 	{
-		{IDM_RESTEST_1X, GMI_NORMAL, "320x240 (&1x)", NULL, NULL, NULL},
-		{IDM_RESTEST_2X, GMI_NORMAL, "640x480 (&2x)", NULL, NULL, NULL},
-		{IDM_RESTEST_3X, GMI_NORMAL, "960x720 (&3x)", NULL, NULL, NULL},
-		{IDM_RESTEST_4X, GMI_NORMAL, "1280x960 (&4x)", NULL, NULL, NULL},
+		{IDM_RESTEST_1X, GMI_NORMAL, "320x240 (&1x)", NULL, QKeySequence::UnknownKey, 0, NULL, NULL},
+		{IDM_RESTEST_2X, GMI_NORMAL, "640x480 (&2x)", NULL, QKeySequence::UnknownKey, 0, NULL, NULL},
+		{IDM_RESTEST_3X, GMI_NORMAL, "960x720 (&3x)", NULL, QKeySequence::UnknownKey, 0, NULL, NULL},
+		{IDM_RESTEST_4X, GMI_NORMAL, "1280x960 (&4x)", NULL, QKeySequence::UnknownKey, 0, NULL, NULL},
 		
-		{0, GMI_NORMAL, NULL, NULL, NULL, NULL}
+		{0, GMI_NORMAL, NULL, NULL, QKeySequence::UnknownKey, 0, NULL, NULL}
 	};
 	
 	static const GensMenuItem gmiHelp[] =
 	{
-		{IDM_HELP_ABOUT, GMI_NORMAL, "&About Gens/GS II", NULL, "help-about", ":/oxygen-16x16/help-about.png"},
+		{IDM_HELP_ABOUT, GMI_NORMAL, "&About Gens/GS II", NULL, QKeySequence::UnknownKey, 0, "help-about", ":/oxygen-16x16/help-about.png"},
 		
-		{0, GMI_NORMAL, NULL, NULL, NULL, NULL}
+		{0, GMI_NORMAL, NULL, NULL, QKeySequence::UnknownKey, 0, NULL, NULL}
 	};
 	
 	static const GensMainMenuItem gmmiMain[] =
@@ -147,8 +147,17 @@ void GensMenuBar::parseMenu(const GensMenuItem *menu, QMenu *parent)
 		// Set the menu icon.
 		mnuItem->setIcon(QICON_FROMTHEME(menu->icon_fdo, menu->icon_qrc));
 		
-		// TODO: Accelerator.
-		//mnuItem->setShortcut(QKeySequence(QKeySequence::Quit));
+		// Set the shortcut key.
+		if (menu->key_std != QKeySequence::UnknownKey)
+		{
+			// Standard key sequence specified.
+			mnuItem->setShortcut(QKeySequence(menu->key_std));
+		}
+		else if (menu->key_custom != 0)
+		{
+			// Custom key sequence specified.
+			mnuItem->setShortcut(menu->key_custom);
+		}
 		
 		// Add the menu item to the menu.
 		parent->addAction(mnuItem);

@@ -27,6 +27,8 @@
 #include <QtGui/QMenuBar>
 #include <QtGui/QMenu>
 
+#include <QtGui/QKeySequence>
+
 // TODO: Move to gens_menu_data.c or something.
 extern "C" {
 
@@ -45,6 +47,9 @@ typedef struct _GensMenuItem
 	GMI_Type type;				// Menu item type.
 	const char *text;			// Menu item text.
 	const struct _GensMenuItem *submenu;	// First element of submenu.
+	
+	QKeySequence::StandardKey key_std;	// Standard key sequence. (Use QKeySequence::UnknownKey to ignore.)
+	int key_custom;				// Custom key sequence. (Set key_std to QKeySequence::UnknownKey.)
 	
 	const char *icon_fdo;			// FreeDesktop.org icon.
 	const char *icon_qrc;			// QRC icon. (Qt resources)
