@@ -37,19 +37,6 @@
 // Qt4 includes.
 #include <QtGui/QIcon>
 
-/**
- * QICON_FROMTHEME(): Icon loading function.
- * Qt 4.6 supports FreeDesktop.org icon themes.
- * Older versions do not, unfortunately.
- */
-#if QT_VERSION >= 0x040600
-#define QICON_FROMTHEME(name, fallback) \
-	(QIcon::hasThemeIcon(name) ? QIcon::fromTheme(name) : QIcon(fallback))
-#else
-#define QICON_FROMTHEME(name, fallback) \
-	QIcon(fallback)
-#endif
-
 
 namespace GensQt4
 {
@@ -59,6 +46,8 @@ namespace GensQt4
  */
 GensWindow::GensWindow()
 {
+#ifndef Q_WS_MAC
+	// Linux/Win32 initialization.
 	setupUi(this);
 	
 	// Set the window icon.
@@ -68,11 +57,9 @@ GensWindow::GensWindow()
 	winIcon.addFile(":/gens/gensgs_16x16.png", QSize(16, 16));
 	this->setWindowIcon(winIcon);
 	
-	// Set menu icons.
-	// QIcon::fromTheme() requires Qt 4.6 or later.
-	// TODO: Include fallback icons for Win32 and Mac OS X.
-	mnuFileQuit->setIcon(QICON_FROMTHEME("application-exit", ":/oxygen-16x16/application-exit.png"));
-	mnuHelpAbout->setIcon(QICON_FROMTHEME("help-about", ":/oxygen-16x16/help-about.png"));
+	// Create the menubar.
+	menubar = new GensMenuBar(this);
+	this->setMenuBar(menubar);
 	
 	// Create the SDL widget.
 	sdl = new SdlWidget(this->centralwidget);
@@ -81,6 +68,17 @@ GensWindow::GensWindow()
 	
 	// Resize the window.
 	gensResize();
+#else
+	// Mac OS X initialization.
+	
+	// Create the menubar.
+	menubar = new GensMenuBar(NULL);
+	
+	// Create the SDL widget.
+	sdl = new SdlWidget(NULL);
+	QObject::connect(sdl, SIGNAL(sdlHasResized(QSize)),
+			 this, SLOT(resizeEvent(QSize)));
+#endif
 }
 
 
@@ -98,6 +96,7 @@ void GensWindow::closeEvent(QCloseEvent *event)
 }
 
 
+#ifndef Q_WS_MAC
 /**
  * gensResize(): Resize the Gens window to fit the SDL window.
  * TODO: Call this when the X11 client is embedded in SdlWidget.
@@ -132,6 +131,7 @@ void GensWindow::gensResize(void)
 	this->sdl->setMinimumSize(new_width, new_height);
 	this->sdl->setMaximumSize(new_width, new_height);
 }
+#endif
 
 
 /** Slots. **/
@@ -144,6 +144,7 @@ void GensWindow::resizeEvent(QSize size)
 }
 
 
+#if 0
 /**
  * on_mnuFileQuit_triggered(): File, Quit.
  */
@@ -187,5 +188,6 @@ void GensWindow::on_mnuResTest4x_triggered(void)
 	LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SDLVIDEO_RESIZE,
 			     LG_UINT_TO_POINTER(LibGens::SdlVideo::PackRes(1280, 960)));
 }
+#endif
 
 }

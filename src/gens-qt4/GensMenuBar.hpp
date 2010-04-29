@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * GensWindow.hpp: Gens Window.                                            *
+ * GensMenuBar.hpp: Gens Menu Bar class.                                   *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,59 +21,45 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_GENSWINDOW_HPP__
-#define __GENS_QT4_GENSWINDOW_HPP__
+#ifndef __GENS_QT4_GENSMENUBAR_HPP__
+#define __GENS_QT4_GENSMENUBAR_HPP__
 
-#include <QMainWindow>
-#include <QCloseEvent>
+#include <QtGui/QMenuBar>
 
-#include "ui_GensWindow.h"
-#include "SdlWidget.hpp"
-#include "GensMenuBar.hpp"
+// Menu IDs.
+// TODO: Convert to enum?
+// TODO: Move to separate file?
+#define MNUID(menu, item) ((menu << 16) | (item << 16))
+#define MNUID_MENU(id) (id >> 16)
+#define MNUID_ITEM(id) (id & 0xFFFF)
+
+#define IDM_FILE_MENU		MNUID(1, 0)
+#define IDM_FILE_EXIT		MNUID(1, 1)
+
+#define IDM_HELP_MENU		MNUID(7, 0)
+#define IDM_HELP_ABOUT		MNUID(7, 1)
+
+#define IDM_RESTEST_MENU	MNUID(64, 0)
+#define IDM_RESTEST_1X		MNUID(64, 1)
+#define IDM_RESTEST_2X		MNUID(64, 2)
+#define IDM_RESTEST_3X		MNUID(64, 3)
+#define IDM_RESTEST_4X		MNUID(64, 4)
 
 namespace GensQt4
 {
 
-#ifndef Q_WS_MAC
-class GensWindow : public QMainWindow, public Ui::GensWindow
-#else
-class GensWindow : public QObject
-#endif
+class GensMenuBar : public QMenuBar
 {
 	Q_OBJECT
 	
 	public:
-		GensWindow();
-		
-		// Widgets.
-		SdlWidget *sdl;		// SDL widget.
-		GensMenuBar *menubar;	// Gens menu bar.
-		
-#ifndef Q_WS_MAC
-		// Resize the window.
-		void gensResize(void);
-#endif
+		GensMenuBar(QWidget *parent = NULL);
+		virtual ~GensMenuBar();
 	
-	protected:
-		void closeEvent(QCloseEvent *event);
-	
-	protected slots:
-		// Window resize.
-		void resizeEvent(QSize size);
-		
-#if 0
-		// Widget signals.
-		void on_mnuFileQuit_triggered(void);
-		void on_mnuHelpAbout_triggered(void);
-		
-		// Resolution tests.
-		void on_mnuResTest1x_triggered(void);
-		void on_mnuResTest2x_triggered(void);
-		void on_mnuResTest3x_triggered(void);
-		void on_mnuResTest4x_triggered(void);
-#endif
+	signals:
+		void triggered(int id);
 };
 
 }
 
-#endif /* __GENS_QT4_GENSWINDOW_HPP__ */
+#endif /* __GENS_QT4_GENSMENUBAR_HPP__ */

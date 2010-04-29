@@ -54,6 +54,7 @@ FOREACH(FLAG_TEST "-Wall" "-Wextra")
 ENDFOREACH()
 
 # Test for common LDFLAGS.
+# TODO: Doesn't work on OS X. (which means it's not really testing it!)
 SET(GENS_LDFLAGS_COMMON "")
 FOREACH(FLAG_TEST "-Wl,-O1" "-Wl,--sort-common" "-Wl,--as-needed")
 	CHECK_C_COMPILER_FLAG("${FLAG_TEST}" LDFLAG_${FLAG_TEST})
