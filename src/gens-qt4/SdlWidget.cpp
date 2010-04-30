@@ -26,6 +26,16 @@
 #include "libgens/lg_main.hpp"
 #include "libgens/SdlVideo.hpp"
 
+// C includes.
+#include <stdio.h>
+
+// Qt 4.4+ defines Qt::WA_NativeWindow;
+// however, if we're compiled with Qt 4.3 or earlier,
+// we want to ensure that Qt::WA_NativeWindow is still available
+// in case the Qt libraries are upgraded later.
+#define QT_WA_NATIVEWINDOW 100
+
+
 namespace GensQt4
 {
 
@@ -36,8 +46,17 @@ SdlWidget::SdlWidget(QWidget *parent)
 	{
 		// Parent widget specified.
 		
-		// Make sure the window is embedded properly.
-		this->setAttribute(Qt::WA_NativeWindow);
+		// Check the current version of Qt.
+		int major, minor, patch;
+		int n = sscanf(qVersion(), "%d.%d.%d", &major, &minor, &patch);
+		if (n == 3 && (major > 4 || (major == 4 && minor >= 4)))
+		{
+			// Qt 4.4+ is being used.
+			// Make sure native windows are used.
+			this->setAttribute((Qt::WidgetAttribute)QT_WA_NATIVEWINDOW);
+		}
+		
+		// Set certain attributes to ensure the window is painted correctly.
 		this->setAttribute(Qt::WA_PaintOnScreen);
 		this->setAttribute(Qt::WA_OpaquePaintEvent);
 		
