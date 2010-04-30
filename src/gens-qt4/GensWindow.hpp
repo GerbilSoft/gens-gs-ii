@@ -24,25 +24,32 @@
 #ifndef __GENS_QT4_GENSWINDOW_HPP__
 #define __GENS_QT4_GENSWINDOW_HPP__
 
-#include <QMainWindow>
-#include <QCloseEvent>
-
-#include "ui_GensWindow.h"
-#include "SdlWidget.hpp"
-#include "GensMenuBar.hpp"
+// Qt4 includes.
+#include <QtCore/qglobal.h>
 
 #ifndef Q_WS_MAC
 #define GQT4_USE_QMAINWINDOW
 #endif
 
+#ifdef GQT4_USE_QMAINWINDOW
+#include <QMainWindow>
+#endif
+
+#include <QCloseEvent>
+
+#include "SdlWidget.hpp"
+#include "GensMenuBar.hpp"
+
 namespace GensQt4
 {
 
 #ifdef GQT4_USE_QMAINWINDOW
-class GensWindow : public QMainWindow, public Ui::GensWindow
+#define GENSWINDOW_BASECLASS QMainWindow
 #else
-class GensWindow : public QObject
+#define GENSWINDOW_BASECLASS QObject
 #endif
+
+class GensWindow : public GENSWINDOW_BASECLASS
 {
 	Q_OBJECT
 	
