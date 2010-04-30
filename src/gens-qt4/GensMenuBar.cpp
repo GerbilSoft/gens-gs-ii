@@ -61,6 +61,11 @@ namespace GensQt4
 GensMenuBar::GensMenuBar(QWidget *parent)
 	: QMenuBar::QMenuBar(parent)
 {
+	// Create the signal mapper.
+	m_signalMapper = new QSignalMapper(this);
+	connect(this->m_signalMapper, SIGNAL(mapped(int)),
+		this, SIGNAL(triggered(int)));
+	
 	// Populate the menu bar.
 	// TODO
 	
@@ -169,6 +174,11 @@ void GensMenuBar::parseMenu(const GensMenuItem *menu, QMenu *parent)
 			// Custom key sequence specified.
 			mnuItem->setShortcut(menu->key_custom);
 		}
+		
+		// Connect the signal to the signal mapper.
+		connect(mnuItem, SIGNAL(triggered()),
+			this->m_signalMapper, SLOT(map()));
+		m_signalMapper->setMapping(mnuItem, menu->id);
 		
 		// Add the menu item to the menu.
 		parent->addAction(mnuItem);

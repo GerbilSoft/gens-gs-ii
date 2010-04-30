@@ -98,8 +98,8 @@ void GensWindow::setupUi(void)
 	QMetaObject::connectSlotsByName(this);
 	
 	// Create the menubar.
-	menubar = new GensMenuBar(this);
-	this->setMenuBar(menubar);
+	m_menubar = new GensMenuBar(this);
+	this->setMenuBar(m_menubar);
 	
 	// Create the SDL widget.
 	sdl = new SdlWidget(this->centralwidget);
@@ -112,13 +112,17 @@ void GensWindow::setupUi(void)
 	// GensWindow is not a QMainWindow.
 	
 	// Create the menubar.
-	menubar = new GensMenuBar(NULL);
+	m_menubar = new GensMenuBar(NULL);
 	
 	// Create the SDL widget.
 	sdl = new SdlWidget(NULL);
 	QObject::connect(sdl, SIGNAL(sdlHasResized(QSize)),
 			 this, SLOT(resizeEvent(QSize)));
 #endif
+	
+	// Connect the GensMenuBar's triggered() signal.
+	connect(m_menubar, SIGNAL(triggered(int)),
+		this, SLOT(menuTriggered(int)));
 	
 	// Retranslate the UI.
 	retranslateUi();
@@ -175,13 +179,13 @@ void GensWindow::gensResize(void)
 		sdl_width = 240;
 	
 	// Initialize to the menu bar size.
-	int new_width = menubar->size().width();
-	int new_height = menubar->size().height();
+	int new_width = m_menubar->size().width();
+	int new_height = m_menubar->size().height();
 	
 	// Add the SDL window height.
 	new_height += sdl_height;
 	
-	// Set the window width to max(menubar, SDL).
+	// Set the window width to max(m_menubar, SDL).
 	new_width = std::max(new_width, sdl_width);
 	
 	// Set the new window size.
@@ -202,6 +206,16 @@ void GensWindow::gensResize(void)
 void GensWindow::resizeEvent(QSize size)
 {
 	gensResize();
+}
+
+
+/**
+ * menuTriggered(): Menu item triggered.
+ * @param id Menu item ID.
+ */
+void GensWindow::menuTriggered(int id)
+{
+	printf("MENU TRIGGER: 0x%08X\n", id);
 }
 
 

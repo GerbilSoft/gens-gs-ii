@@ -58,7 +58,7 @@ class GensWindow : public GENSWINDOW_BASECLASS
 		
 		// Widgets.
 		SdlWidget *sdl;		// SDL widget.
-		GensMenuBar *menubar;	// Gens menu bar.
+		GensMenuBar *m_menubar;	// Gens menu bar.
 		
 #ifdef GQT4_USE_QMAINWINDOW
 		// QMainWindow-specific functions.
@@ -85,17 +85,8 @@ class GensWindow : public GENSWINDOW_BASECLASS
 		// Window resize.
 		void resizeEvent(QSize size);
 		
-#if 0
-		// Widget signals.
-		void on_mnuFileQuit_triggered(void);
-		void on_mnuHelpAbout_triggered(void);
-		
-		// Resolution tests.
-		void on_mnuResTest1x_triggered(void);
-		void on_mnuResTest2x_triggered(void);
-		void on_mnuResTest3x_triggered(void);
-		void on_mnuResTest4x_triggered(void);
-#endif
+		// Menu item selection.
+		void menuTriggered(int id);
 };
 
 }

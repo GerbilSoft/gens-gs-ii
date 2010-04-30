@@ -26,6 +26,7 @@
 
 #include <QtGui/QMenuBar>
 #include <QtGui/QMenu>
+#include <QtCore/QSignalMapper>
 
 #include <QtGui/QKeySequence>
 
@@ -101,6 +102,8 @@ class GensMenuBar : public QMenuBar
 	protected:
 		void parseMainMenu(const GensMainMenuItem *mainMenu);
 		void parseMenu(const GensMenuItem *menu, QMenu *parent);
+		
+		QSignalMapper *m_signalMapper;
 	
 	signals:
 		void triggered(int id);
