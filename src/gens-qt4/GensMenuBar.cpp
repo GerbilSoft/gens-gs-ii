@@ -43,6 +43,17 @@
 	QIcon(fallback)
 #endif
 
+/**
+ * Qt key definition compatibility macros for older versions of Qt.
+ * TODO: Move this to another file.
+ */
+#if QT_VERSION >= 0x040600
+// Keys defined in Qt 4.6.
+#define QKEYSEQUENCE_QUIT QKeySequence::Quit
+#else
+#define QKEYSEQUENCE_QUIT QKeySequence::UnknownKey
+#endif
+
 
 namespace GensQt4
 {
@@ -55,7 +66,7 @@ GensMenuBar::GensMenuBar(QWidget *parent)
 	
 	static const GensMenuItem gmiFile[] =
 	{
-		{IDM_FILE_QUIT, GMI_NORMAL, "&Quit", NULL, QKeySequence::Quit, 0, "application-exit", ":/oxygen-16x16/application-exit.png"},
+		{IDM_FILE_QUIT, GMI_NORMAL, "&Quit", NULL, QKEYSEQUENCE_QUIT, Qt::CTRL + Qt::Key_Q, "application-exit", ":/oxygen-16x16/application-exit.png"},
 		
 		{0, GMI_NORMAL, NULL, NULL, QKeySequence::UnknownKey, 0, NULL, NULL}
 	};
