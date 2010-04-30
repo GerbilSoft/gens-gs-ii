@@ -70,7 +70,7 @@ typedef struct _GensMainMenuItem
 // Menu IDs.
 // TODO: Convert to enum?
 // TODO: Move to separate file?
-#define MNUID(menu, item) ((menu << 16) | (item << 16))
+#define MNUID(menu, item) ((menu << 16) | (item))
 #define MNUID_MENU(id) (id >> 16)
 #define MNUID_ITEM(id) (id & 0xFFFF)
 
