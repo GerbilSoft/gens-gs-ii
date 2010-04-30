@@ -51,7 +51,9 @@ int setenv(const char *name, const char *value, int overwrite)
 	}
 	
 	// Set the environment variable.
-	SetEnvironmentVariable(name, value);
+	// NOTE: Win32 functions return non-zero on success and zero on error.
+	// POSIX uses the other way around.
+	return !SetEnvironmentVariable(name, value);
 }
 
 /**
@@ -62,5 +64,7 @@ int setenv(const char *name, const char *value, int overwrite)
  */
 int unsetenv(const char *name)
 {
-	SetEnvironmentVariable(name, NULL);
+	// NOTE: Win32 functions return non-zero on success and zero on error.
+	// POSIX uses the other way around.
+	return !SetEnvironmentVariable(name, NULL);
 }
