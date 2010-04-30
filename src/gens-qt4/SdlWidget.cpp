@@ -103,7 +103,6 @@ void SdlWidget::showEvent(QShowEvent *event)
 	
 	// Initialize LibGens.
 	void *wId = (void*)(this->parent() ? this->winId() : 0);
-	printf("omg - wid: 0x%08X\n", wId);
 	int ret = LibGens::Init(wId);
 	if (ret != 0)
 	{
