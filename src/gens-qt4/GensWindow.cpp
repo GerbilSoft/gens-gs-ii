@@ -215,54 +215,64 @@ void GensWindow::resizeEvent(QSize size)
  */
 void GensWindow::menuTriggered(int id)
 {
-	printf("MENU TRIGGER: 0x%08X\n", id);
+	if (MNUID_MENU(id) == IDM_FILE_MENU)
+	{
+		// File menu.
+		switch (MNUID_ITEM(id))
+		{
+			case MNUID_ITEM(IDM_FILE_QUIT):
+				// Quit.
+				QuitGens();
+				this->close();
+				break;
+			
+			default:
+				break;
+		}
+	}
+	else if (MNUID_MENU(id) == IDM_HELP_MENU)
+	{
+		// Help menu.
+		switch (MNUID_ITEM(id))
+		{
+			case MNUID_ITEM(IDM_HELP_ABOUT):
+				// About Gens/GS II.
+				AboutWindow::ShowSingle(this);
+				break;
+			
+			default:
+				break;
+		}
+	}
+	else if (MNUID_MENU(id) == IDM_RESTEST_MENU)
+	{
+		// Resolution Testing.
+		switch (MNUID_ITEM(id))
+		{
+			case MNUID_ITEM(IDM_RESTEST_1X):
+				LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SDLVIDEO_RESIZE,
+						LG_UINT_TO_POINTER(LibGens::SdlVideo::PackRes(320, 240)));
+				break;
+			
+			case MNUID_ITEM(IDM_RESTEST_2X):
+				LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SDLVIDEO_RESIZE,
+						LG_UINT_TO_POINTER(LibGens::SdlVideo::PackRes(640, 480)));
+				break;
+			
+			case MNUID_ITEM(IDM_RESTEST_3X):
+				LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SDLVIDEO_RESIZE,
+						LG_UINT_TO_POINTER(LibGens::SdlVideo::PackRes(960, 720)));
+				break;
+			
+			case MNUID_ITEM(IDM_RESTEST_4X):
+				LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SDLVIDEO_RESIZE,
+						LG_UINT_TO_POINTER(LibGens::SdlVideo::PackRes(1280, 960)));
+				break;
+			
+			default:
+				break;
+		}
+	}
 }
-
-
-#if 0
-/**
- * on_mnuFileQuit_triggered(): File, Quit.
- */
-void GensWindow::on_mnuFileQuit_triggered(void)
-{
-	// Quit.
-	QuitGens();
-	
-	// Close the window.
-	this->close();
-}
-
-
-/**
- * on_mnuHelpAbout_triggered(): Help, About.
- */
-void GensWindow::on_mnuHelpAbout_triggered(void)
-{
-	// About Gens/GS II.
-	AboutWindow::ShowSingle(this);
-}
-
-
-void GensWindow::on_mnuResTest1x_triggered(void)
-{
-	LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SDLVIDEO_RESIZE,
-			     LG_UINT_TO_POINTER(LibGens::SdlVideo::PackRes(320, 240)));
-}
-void GensWindow::on_mnuResTest2x_triggered(void)
-{
-	LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SDLVIDEO_RESIZE,
-			     LG_UINT_TO_POINTER(LibGens::SdlVideo::PackRes(640, 480)));
-}
-void GensWindow::on_mnuResTest3x_triggered(void)
-{
-	LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SDLVIDEO_RESIZE,
-			     LG_UINT_TO_POINTER(LibGens::SdlVideo::PackRes(960, 720)));
-}
-void GensWindow::on_mnuResTest4x_triggered(void)
-{
-	LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SDLVIDEO_RESIZE,
-			     LG_UINT_TO_POINTER(LibGens::SdlVideo::PackRes(1280, 960)));
-}
-#endif
 
 }
