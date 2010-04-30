@@ -1,5 +1,14 @@
 PROJECT(gens-gs-ii)
-cmake_minimum_required(VERSION 2.6)
+
+# Version dependencies:
+# - BREAK(): CMake 2.6.0
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6.0)
+
+# UNSET() was added in cmake-2.6.3.
+# Define an equivalent macro for older versions.
+MACRO(UNSET var)
+	SET(${var})
+ENDMACRO(UNSET)
 
 list (APPEND CMAKE_MODULE_PATH "${gens-gs-ii_SOURCE_DIR}/CMake")
 
