@@ -166,8 +166,19 @@ void GensMenuBar::parseMenu(const GensMenuItem *menu, QMenu *parent)
 		// Set the shortcut key.
 		if (menu->key_std != QKeySequence::UnknownKey)
 		{
-			// Standard key sequence specified.
-			mnuItem->setShortcut(QKeySequence(menu->key_std));
+			// StandardKey sequence specified.
+			QKeySequence key(menu->key_std);
+			if (!key.isEmpty())
+			{
+				// Key sequence is valid.
+				mnuItem->setShortcut(QKeySequence(menu->key_std));
+			}
+			else if (menu->key_custom != 0)
+			{
+				// Key sequence is not valid.
+				// Use the custom key sequence.
+				mnuItem->setShortcut(menu->key_custom);
+			}
 		}
 		else if (menu->key_custom != 0)
 		{
