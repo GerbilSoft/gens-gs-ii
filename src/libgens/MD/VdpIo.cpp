@@ -251,10 +251,10 @@ void VdpIo::Set_Visible_Lines(void)
 
 
 /**
- * Check_NTSC_V30_VBlank(): Check if VBlank is allowed in NTSC V30 mode.
+ * VdpIo::Check_NTSC_V30_VBlank(): Check if VBlank is allowed in NTSC V30 mode.
  * TODO: LibGens porting.
  */
-void VDP_Check_NTSC_V30_VBlank(void)
+void VdpIo::Check_NTSC_V30_VBlank(void)
 {
 #if 0
 	if ((CPU_Mode == 1) || !(VDP_Reg.m5.Set2 & 0x08))
@@ -602,11 +602,11 @@ uint8_t VdpIo::Read_H_Counter(void)
 
 
 /**
- * VDP_Read_V_Counter(): Read the V Counter.
+ * VdpIo::Read_V_Counter(): Read the V Counter.
  * @return V Counter.
  * TODO: Port to LibGens.
  */
-uint8_t VDP_Read_V_Counter(void)
+uint8_t VdpIo::Read_V_Counter(void)
 {
 #if 0
 	unsigned int odo_68K = main68k_readOdometer();
