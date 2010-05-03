@@ -16,6 +16,7 @@ SET(libgens_SRCS
 	lg_main.cpp
 	MtQueue.cpp
 	SdlVideo.cpp
+	MD/VdpIo.cpp
 	)
 
 # Compatibility sources.
