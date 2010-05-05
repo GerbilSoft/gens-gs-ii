@@ -34,7 +34,7 @@ namespace LibGens
 /** Static member initialization. **/
 VdpPalette::Palette_t VdpPalette::Palette;
 int VdpPalette::Contrast = 100;
-int VdpPalette::Brightness = 0;
+int VdpPalette::Brightness = 100;
 bool VdpPalette::Grayscale = false;
 bool VdpPalette::InvertColor = false;
 VdpPalette::ColorScaleMethod_t VdpPalette::ColorScaleMethod = VdpPalette::COLSCALE_FULL_HS;
