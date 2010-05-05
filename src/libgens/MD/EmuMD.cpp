@@ -28,6 +28,12 @@
 #include "VdpRend.hpp"
 #include "VdpPalette.hpp"
 
+// ZOMG
+#include "Save/Zomg.hpp"
+
+// C includes.
+#include <stdio.h>
+
 namespace LibGens
 {
 
@@ -43,9 +49,24 @@ void EmuMD::Init_TEST(void)
 	// TODO: This would usually be done at program startup.
 	VdpPalette::Recalc();
 	
-	// Set the background color.
-	VdpIo::CRam.u16[0] = 0x888;
-	VdpIo::VDP_Flags.CRam = 1;
+	// Load the ZOMG file.
+	Zomg m_zomg("test.zomg");
+	if (!m_zomg.isOpen())
+	{
+		printf("test.zomg could not be opened. Using default gray screen.\n");
+		VdpIo::CRam.u16[0] = 0x888;
+		VdpIo::VDP_Flags.CRam = 1;
+	}
+	else
+	{
+		printf("test.zomg opened. Loading...\n");
+		m_zomg.loadVRam();
+		m_zomg.loadCRam();
+		m_zomg.loadVdpReg();
+		m_zomg.loadVSRam();
+		printf("test.zomg loaded.\n");
+	}
+	m_zomg.close();
 	
 	// TODO: VdpIo::VDP_Lines.Display.Total isn't being set properly...
 	VdpIo::VDP_Lines.Display.Total = 262;
