@@ -1,5 +1,5 @@
 PROJECT(libgens)
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.6.0)
 
 # LibGens subprojects.
 ADD_SUBDIRECTORY(starscream)
@@ -12,6 +12,9 @@ INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIR})
 # Main binary directory. Needed for git_version.h
 INCLUDE_DIRECTORIES(${gens-gs-ii_BINARY_DIR})
 
+# LibGens source directory.
+INCLUDE_DIRECTORIES(${libgens_SOURCE_DIR})
+
 # Sources.
 SET(libgens_SRCS
 	lg_main.cpp
@@ -23,6 +26,7 @@ SET(libgens_SRCS
 	MD/TAB336.c
 	MD/EmuMD.cpp
 	MD/VdpPalette.cpp
+	Save/Zomg.cpp
 	)
 
 # Compatibility sources.
@@ -34,5 +38,5 @@ ENDIF()
 
 # Build the library.
 ADD_LIBRARY(gens STATIC ${libgens_SRCS} ${libgens_COMPAT_SRCS})
-TARGET_LINK_LIBRARIES(gens ${SDL_LIBRARY} starscream mdZ80)
-ADD_DEPENDENCIES(gens git_version starscream mdZ80)
+TARGET_LINK_LIBRARIES(gens ${SDL_LIBRARY} starscream mdZ80 minizip)
+ADD_DEPENDENCIES(gens git_version starscream mdZ80 minizip)
