@@ -26,6 +26,7 @@
 // VDP I/O and renderer.
 #include "VdpIo.hpp"
 #include "VdpRend.hpp"
+#include "VdpPalette.hpp"
 
 namespace LibGens
 {
@@ -37,6 +38,10 @@ void EmuMD::Init_TEST(void)
 {
 	// Initialize the VDP.
 	VdpIo::Reset();
+	
+	// Recalculate the full MD palette.
+	// TODO: This would usually be done at program startup.
+	VdpPalette::Recalc();
 	
 	// Set the background color.
 	VdpIo::CRam.u16[0] = 0x888;
