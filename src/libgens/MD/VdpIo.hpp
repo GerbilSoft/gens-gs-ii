@@ -292,12 +292,12 @@ class VdpIo
 		static const uint8_t DMA_Timing_Table[4][4];
 		
 		/** VDP functions. **/
-		void Reset(void);
-		uint8_t Int_Ack(void);
-		void Update_IRQ_Line(void);
+		static void Reset(void);
+		static uint8_t Int_Ack(void);
+		static void Update_IRQ_Line(void);
 		
-		void Set_Visible_Lines(void);
-		void Check_NTSC_V30_VBlank(void);
+		static void Set_Visible_Lines(void);
+		static void Check_NTSC_V30_VBlank(void);
 		
 		/**
 		 * Scroll_Size_t: Convenience enum for dealing with scroll plane sizes.
@@ -310,18 +310,18 @@ class VdpIo
 			V128_H32,    V128_H64, V128_HXX, V128_H128
 		};
 		
-		void Set_Reg(int reg_num, uint8_t val);
+		static void Set_Reg(int reg_num, uint8_t val);
 		
-		uint8_t Read_H_Counter(void);
-		uint8_t Read_V_Counter(void);
-		uint16_t Read_Status(void);
-		uint16_t Read_Data(void);
+		static uint8_t Read_H_Counter(void);
+		static uint8_t Read_V_Counter(void);
+		static uint16_t Read_Status(void);
+		static uint16_t Read_Data(void);
 		
-		unsigned int Update_DMA(void);
+		static unsigned int Update_DMA(void);
 		
-		void Write_Data_Byte(uint8_t data);
-		void Write_Data_Word(uint16_t data);
-		void Write_Ctrl(uint16_t data);
+		static void Write_Data_Byte(uint8_t data);
+		static void Write_Data_Word(uint16_t data);
+		static void Write_Ctrl(uint16_t data);
 		
 		/**
 		 * GetHPix(): Get the current horizontal resolution.
@@ -363,11 +363,11 @@ class VdpIo
 		}
 	
 	protected:
-		inline void Update_Mode(void);
+		static inline void Update_Mode(void);
 		
 		/** DMA **/
 		
-		void DMA_Fill(uint16_t data);
+		static void DMA_Fill(uint16_t data);
 	
 		enum DMA_Dest_t
 		{
@@ -392,7 +392,7 @@ class VdpIo
 		#define DMA_TYPE(src, dest) (((int)src << 2) | ((int)dest))
 		
 		template<DMA_Src_t src_component, DMA_Dest_t dest_component>
-		inline void T_DMA_Loop(unsigned int src_address, unsigned int dest_address, int length);
+		static inline void T_DMA_Loop(unsigned int src_address, unsigned int dest_address, int length);
 	
 	private:
 		VdpIo() { }
