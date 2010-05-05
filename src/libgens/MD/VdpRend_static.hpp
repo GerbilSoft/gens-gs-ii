@@ -44,7 +44,7 @@ unsigned int VdpRend::Sprite_Visible[128];
 int VdpRend::Sprite_Over;
 
 // VDP layer control.
-unsigned int VdpRend::VDP_Layers;
+unsigned int VdpRend::VDP_Layers = VdpRend::VDP_LAYERS_DEFAULT;
 
 // Line buffer for current line.
 VdpRend::LineBuf_t VdpRend::LineBuf;
