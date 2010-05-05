@@ -172,7 +172,10 @@ void VdpIo::Update_IRQ_Line(void)
  */
 void VdpIo::Set_Visible_Lines(void)
 {
-#if 0
+	// TODO: Implement Game and CPU_Mode. (LibGens)
+	void *Game = NULL;
+	int CPU_Mode = 0;
+	
 	// Arrays of values.
 	// Indexes: 0 == 192 lines; 1 == 224 lines; 2 == 240 lines.
 	static const int VisLines_Total[3] = {192, 224, 240};
@@ -227,16 +230,16 @@ void VdpIo::Set_Visible_Lines(void)
 					: VisLines_Current_NTSC[LineOffset]);
 	
 	// Check interlaced mode.
-	VDP_Reg.Interlaced.HalfLine  = ((VDP_Reg.m5.Set4 & 0x02) >> 1);	// LSM0
-	VDP_Reg.Interlaced.DoubleRes = ((VDP_Reg.m5.Set4 & 0x04) >> 2);	// LSM1
+	Interlaced.HalfLine  = ((VDP_Reg.m5.Set4 & 0x02) >> 1);		// LSM0
+	Interlaced.DoubleRes = ((VDP_Reg.m5.Set4 & 0x04) >> 2);		// LSM1
 	
 	// HACK: There's a minor issue with the SegaCD firmware.
 	// The firmware turns off the VDP after the last line,
 	// which causes the entire screen to disappear if paused.
 	// TODO: Don't rerun the VDP drawing functions when paused!
-	if (Settings.Active && !Settings.Paused)
-		VDP_Reg.HasVisibleLines = 0;
-#endif
+	// TODO: Settings.Active / !Settings.Paused (LibGens)
+	//if (Settings.Active && !Settings.Paused)
+		HasVisibleLines = 0;
 }
 
 
