@@ -72,18 +72,30 @@ class GensMenuBar : public QMenuBar
 			GMI_MAX
 		};
 		
+		enum MenuItemShortcut
+		{
+			MACCEL_NONE = 0,
+			
+#if QT_VERSION >= 0x040600
+			// Keys defined in Qt 4.6.
+			MACCEL_QUIT = (int)QKeySequence::Quit,
+#else
+			MACCEL_QUIT = 0,
+#endif
+		};
+		
 		struct MenuItem
 		{
-			int id;					// Menu identifier. (-1 == separator)
-			MenuItemType type;			// Menu item type.
-			const char *text;			// Menu item text.
-			const MenuItem *submenu;		// First element of submenu.
+			int id;				// Menu identifier. (-1 == separator)
+			MenuItemType type;		// Menu item type.
+			const char *text;		// Menu item text.
+			const MenuItem *submenu;	// First element of submenu.
 			
-			QKeySequence::StandardKey key_std;	// Standard key sequence. (Use QKeySequence::UnknownKey to ignore.)
-			int key_custom;				// Custom key sequence. (Set key_std to QKeySequence::UnknownKey.)
+			MenuItemShortcut key_std;	// Menu item shortcut. (Wrapper around QKeySequence::StandardKey.)
+			int key_custom;			// Custom key sequence. (Set key_std to QKeySequence::UnknownKey.)
 			
-			const char *icon_fdo;			// FreeDesktop.org icon.
-			const char *icon_qrc;			// QRC icon. (Qt resources)
+			const char *icon_fdo;		// FreeDesktop.org icon.
+			const char *icon_qrc;		// QRC icon. (Qt resources)
 		};
 		
 		struct MainMenuItem

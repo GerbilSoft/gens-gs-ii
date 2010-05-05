@@ -43,17 +43,6 @@
 	QIcon(fallback)
 #endif
 
-/**
- * Qt key definition compatibility macros for older versions of Qt.
- * TODO: Move this to another file.
- */
-#if QT_VERSION >= 0x040600
-// Keys defined in Qt 4.6.
-#define QKEYSEQUENCE_QUIT QKeySequence::Quit
-#else
-#define QKEYSEQUENCE_QUIT QKeySequence::UnknownKey
-#endif
-
 
 namespace GensQt4
 {
@@ -71,28 +60,28 @@ GensMenuBar::GensMenuBar(QWidget *parent)
 	
 	static const MenuItem gmiFile[] =
 	{
-		{IDM_FILE_BLIT, GMI_NORMAL, "Blit!", NULL, QKeySequence::UnknownKey, Qt::CTRL + Qt::Key_B, NULL, NULL},
-		{IDM_SEPARATOR, GMI_SEPARATOR, NULL, NULL, QKeySequence::UnknownKey, 0, NULL, NULL},
-		{IDM_FILE_QUIT, GMI_NORMAL, "&Quit", NULL, QKEYSEQUENCE_QUIT, Qt::CTRL + Qt::Key_Q, "application-exit", ":/oxygen-16x16/application-exit.png"},
+		{IDM_FILE_BLIT, GMI_NORMAL, "Blit!", NULL, MACCEL_NONE, Qt::CTRL + Qt::Key_B, NULL, NULL},
+		{IDM_SEPARATOR, GMI_SEPARATOR, NULL, NULL, MACCEL_NONE, 0, NULL, NULL},
+		{IDM_FILE_QUIT, GMI_NORMAL, "&Quit", NULL, MACCEL_QUIT, Qt::CTRL + Qt::Key_Q, "application-exit", ":/oxygen-16x16/application-exit.png"},
 		
-		{0, GMI_NORMAL, NULL, NULL, QKeySequence::UnknownKey, 0, NULL, NULL}
+		{0, GMI_NORMAL, NULL, NULL, MACCEL_NONE, 0, NULL, NULL}
 	};
 	
 	static const MenuItem gmiResTest[] =
 	{
-		{IDM_RESTEST_1X, GMI_NORMAL, "320x240 (&1x)", NULL, QKeySequence::UnknownKey, 0, NULL, NULL},
-		{IDM_RESTEST_2X, GMI_NORMAL, "640x480 (&2x)", NULL, QKeySequence::UnknownKey, 0, NULL, NULL},
-		{IDM_RESTEST_3X, GMI_NORMAL, "960x720 (&3x)", NULL, QKeySequence::UnknownKey, 0, NULL, NULL},
-		{IDM_RESTEST_4X, GMI_NORMAL, "1280x960 (&4x)", NULL, QKeySequence::UnknownKey, 0, NULL, NULL},
+		{IDM_RESTEST_1X, GMI_NORMAL, "320x240 (&1x)", NULL, MACCEL_NONE, 0, NULL, NULL},
+		{IDM_RESTEST_2X, GMI_NORMAL, "640x480 (&2x)", NULL, MACCEL_NONE, 0, NULL, NULL},
+		{IDM_RESTEST_3X, GMI_NORMAL, "960x720 (&3x)", NULL, MACCEL_NONE, 0, NULL, NULL},
+		{IDM_RESTEST_4X, GMI_NORMAL, "1280x960 (&4x)", NULL, MACCEL_NONE, 0, NULL, NULL},
 		
-		{0, GMI_NORMAL, NULL, NULL, QKeySequence::UnknownKey, 0, NULL, NULL}
+		{0, GMI_NORMAL, NULL, NULL, MACCEL_NONE, 0, NULL, NULL}
 	};
 	
 	static const MenuItem gmiHelp[] =
 	{
-		{IDM_HELP_ABOUT, GMI_NORMAL, "&About Gens/GS II", NULL, QKeySequence::UnknownKey, 0, "help-about", ":/oxygen-16x16/help-about.png"},
+		{IDM_HELP_ABOUT, GMI_NORMAL, "&About Gens/GS II", NULL, MACCEL_NONE, 0, "help-about", ":/oxygen-16x16/help-about.png"},
 		
-		{0, GMI_NORMAL, NULL, NULL, QKeySequence::UnknownKey, 0, NULL, NULL}
+		{0, GMI_NORMAL, NULL, NULL, MACCEL_NONE, 0, NULL, NULL}
 	};
 	
 	static const MainMenuItem gmmiMain[] =
@@ -166,14 +155,14 @@ void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 		mnuItem->setIcon(QICON_FROMTHEME(menu->icon_fdo, menu->icon_qrc));
 		
 		// Set the shortcut key.
-		if (menu->key_std != QKeySequence::UnknownKey)
+		if (menu->key_std != MACCEL_NONE)
 		{
 			// StandardKey sequence specified.
-			QKeySequence key(menu->key_std);
+			QKeySequence key((QKeySequence::StandardKey)menu->key_std);
 			if (!key.isEmpty())
 			{
 				// Key sequence is valid.
-				mnuItem->setShortcut(QKeySequence(menu->key_std));
+				mnuItem->setShortcut(QKeySequence((QKeySequence::StandardKey)menu->key_std));
 			}
 			else if (menu->key_custom != 0)
 			{
