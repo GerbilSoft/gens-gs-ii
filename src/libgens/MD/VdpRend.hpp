@@ -89,7 +89,7 @@ class VdpRend
 			VDP_LAYER_PALETTE_LOCK		= (1 << 10),
 		};
 		
-		static const unsigned int VDP_LAYER_DEFAULT =
+		static const unsigned int VDP_LAYERS_DEFAULT =
 			(VDP_LAYER_SCROLLA_LOW	|
 			 VDP_LAYER_SCROLLA_HIGH	|
 			 VDP_LAYER_SCROLLB_LOW	|
