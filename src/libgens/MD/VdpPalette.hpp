@@ -24,12 +24,22 @@
 #ifndef __LIBGENS_MD_VDPPALETTE_HPP__
 #define __LIBGENS_MD_VDPPALETTE_HPP__
 
+#include <stdint.h>
+
 namespace LibGens
 {
 
 class VdpPalette
 {
 	public:
+		// Full MD palette.
+		union Palette_t
+		{
+			uint16_t u16[0x1000];
+			uint32_t u32[0x1000];
+		};
+		static Palette_t Palette;
+		
 		static int Contrast;
 		static int Brightness;
 		static bool Grayscale;

@@ -38,14 +38,6 @@ class VdpRend
 		 */
 		static void Reset(void);
 		
-		// Full MD palette.
-		union Palette_t
-		{
-			uint16_t u16[0x1000];
-			uint32_t u32[0x1000];
-		};
-		static Palette_t Palette;
-
 		// Active MD palette.
 		union MD_Palette_t
 		{

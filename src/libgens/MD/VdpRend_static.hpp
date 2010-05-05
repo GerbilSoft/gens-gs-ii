@@ -29,8 +29,7 @@ namespace LibGens
 
 /** Static member initialization. **/
 
-// Palettes.
-VdpRend::Palette_t VdpRend::Palette;
+// Active MD palette.
 VdpRend::MD_Palette_t VdpRend::MD_Palette;
 
 // Screen buffer.

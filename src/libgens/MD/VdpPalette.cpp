@@ -23,7 +23,6 @@
 
 #include "VdpPalette.hpp"
 #include "VdpIo.hpp"
-#include "VdpRend.hpp"
 
 // C includes.
 #include <math.h>
@@ -33,6 +32,7 @@ namespace LibGens
 {
 
 /** Static member initialization. **/
+VdpPalette::Palette_t VdpPalette::Palette;
 int VdpPalette::Contrast = 100;
 int VdpPalette::Brightness = 0;
 bool VdpPalette::Grayscale = false;
@@ -308,7 +308,7 @@ void VdpPalette::Recalc(void)
 	switch (bppMD)
 	{
 		case 15:
-			T_Recalc_MD<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(VdpRend::Palette.u16);
+			T_Recalc_MD<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(Palette.u16);
 #if 0
 			// TODO: Port to LibGens.
 			T_Recalculate_Palette_32X<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>
@@ -317,7 +317,7 @@ void VdpPalette::Recalc(void)
 			break;
 		
 		case 16:
-			T_Recalc_MD<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(VdpRend::Palette.u16);
+			T_Recalc_MD<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(Palette.u16);
 #if 0
 			// TODO: Port to LibGens.
 			T_Recalculate_Palette_32X<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>
@@ -327,7 +327,7 @@ void VdpPalette::Recalc(void)
 		
 		case 32:
 		default:
-			T_Recalc_MD<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(VdpRend::Palette.u32);
+			T_Recalc_MD<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(Palette.u32);
 #if 0
 			// TODO: Port to LibGens.
 			T_Recalculate_Palette_32X<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>

@@ -23,6 +23,7 @@
 
 #include "VdpRend.hpp"
 #include "VdpIo.hpp"
+#include "VdpPalette.hpp"
 
 /** Static member initialization. **/
 #include "VdpRend_static.hpp"
@@ -141,9 +142,9 @@ void VdpRend::Update_Palette(void)
 	// TODO: Port bppMD to LibGens.
 	const int bppMD = 16;
 	if (bppMD != 32)
-		T_Update_Palette<false>(MD_Palette.u16, Palette.u16);
+		T_Update_Palette<false>(MD_Palette.u16, VdpPalette::Palette.u16);
 	else
-		T_Update_Palette<false>(MD_Palette.u32, Palette.u32);
+		T_Update_Palette<false>(MD_Palette.u32, VdpPalette::Palette.u32);
 }
 
 
@@ -155,9 +156,9 @@ void VdpRend::Update_Palette_HS(void)
 	// TODO: Port bppMD to LibGens.
 	const int bppMD = 16;
 	if (bppMD != 32)
-		T_Update_Palette<true>(MD_Palette.u16, Palette.u16);
+		T_Update_Palette<true>(MD_Palette.u16, VdpPalette::Palette.u16);
 	else
-		T_Update_Palette<true>(MD_Palette.u32, Palette.u32);
+		T_Update_Palette<true>(MD_Palette.u32, VdpPalette::Palette.u32);
 }
 
 
