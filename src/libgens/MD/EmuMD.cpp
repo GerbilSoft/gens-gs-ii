@@ -27,7 +27,6 @@
 #include "VdpIo.hpp"
 #include "VdpRend.hpp"
 
-
 namespace LibGens
 {
 
@@ -42,6 +41,9 @@ void EmuMD::Init_TEST(void)
 	// Set the background color.
 	VdpIo::CRam.u16[0] = 0x888;
 	VdpIo::VDP_Flags.CRam = 1;
+	
+	// TODO: VdpIo::VDP_Lines.Display.Total isn't being set properly...
+	VdpIo::VDP_Lines.Display.Total = 262;
 	
 	// Run a frame with the VDP enabled.
 	T_Do_Frame<true>();
