@@ -56,6 +56,7 @@ class MtQueue
 			
 			/**
 			 * MTQ_LG_SETBGCOLOR: Test message to set the LibGens background color.
+			 * (DEBUG message: REMOVE later!)
 			 * @param param 24-bit RGB color value. (BGR)
 			 */
 			MTQ_LG_SETBGCOLOR,
@@ -71,6 +72,13 @@ class MtQueue
 			 * @param param Packed resolution via SdlVideo::PackRes().
 			 */
 			MTQ_LG_SDLVIDEO_RESIZE,
+			
+			/**
+			 * MTQ_LG_BLIT_MDSCREEN: Blit the MD screen.
+			 * (DEBUG message: REMOVE later!)
+			 * @param param Unused.
+			 */
+			MTQ_LG_BLIT_MDSCREEN,
 			
 			MTQ_MAX
 		};

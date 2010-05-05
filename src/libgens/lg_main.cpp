@@ -29,10 +29,16 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 // C++ includes.
 #include <string>
 using std::string;
+
+// VDP Rendering and MD emulation loop.
+// TODO: Move to SdlVideo?
+#include "MD/VdpRend.hpp"
+#include "MD/EmuMD.hpp"
 
 #include <SDL/SDL.h>
 
@@ -214,6 +220,24 @@ static void LgProcessSDLQueue(void)
 				// TODO: Notify the UI that the video has been resized.
 				break;
 			
+			case MtQueue::MTQ_LG_BLIT_MDSCREEN:
+			{
+				// Blit the MD screen to the SDL window.
+				// TODO: Move to SdlVideo or something.
+				SDL_LockSurface(SdlVideo::ms_screen);
+				uint16_t *dest = (uint16_t*)SdlVideo::ms_screen->pixels;
+				uint16_t *src = &VdpRend::MD_Screen.u16[8];
+				for (int y = 240; y != 0; y--)
+				{
+					memcpy(dest, src, 320*sizeof(uint16_t));
+					dest += ((SdlVideo::ms_screen->pitch) / 2);
+					src += 336;
+				}
+				SDL_UnlockSurface(SdlVideo::ms_screen);
+				SDL_UpdateRect(SdlVideo::ms_screen, 0, 0, 0, 0);
+				break;
+			}	
+			
 			default:
 				// Unhandled message.
 				break;
@@ -231,6 +255,9 @@ int LgThread(void *param)
 {
 	// Initialize SDL Video.
 	SdlVideo::Init(param);
+	
+	// DEBUG: Initialize MD.
+	EmuMD::Init_TEST();
 	
 	// LibGens SDL event loop.
 	m_isInit = true;
