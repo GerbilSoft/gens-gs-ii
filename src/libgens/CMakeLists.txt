@@ -2,7 +2,8 @@ PROJECT(libgens)
 cmake_minimum_required(VERSION 2.6)
 
 # LibGens subprojects.
-SUBDIRS(starscream mdZ80)
+ADD_SUBDIRECTORY(starscream)
+ADD_SUBDIRECTORY(mdZ80)
 
 # SDL is required for LibGens.
 FIND_PACKAGE(SDL REQUIRED)
