@@ -1261,7 +1261,7 @@ void VdpIo::Write_Ctrl(uint16_t data)
 		VDP_Ctrl.Address = (data & 0x3FFF);
 		VDP_Ctrl.Address |= ((VDP_Ctrl.Data.w[1] & 0x3) << 14);
 		
-		// Determine the destination.
+		// Determine the DMA destination.
 		unsigned int CD_Offset = ((data >> 14) & 0x3);
 		CD_Offset |= ((VDP_Ctrl.Data.w[1] & 0xF0) >> 2);
 		VDP_Ctrl.Access = (CD_Table[CD_Offset] & 0xFF);
