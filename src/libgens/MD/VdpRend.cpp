@@ -74,7 +74,12 @@ inline void VdpRend::T_Update_Palette(pixel *MD_palette, const pixel *palette)
 	// Color mask. Depends on VDP register 0, bit 2 (Palette Select).
 	// If set, allows full MD palette.
 	// If clear, only allows the LSB of each color component.
+	// TODO: Ignore this for now. (Reimplement later in LibGens.)
+#if 0
 	const uint16_t color_mask = (VdpIo::VDP_Reg.m5.Set1 & 0x04) ? 0x0EEE : 0x0222;
+#else
+	const uint16_t color_mask = 0x0EEE;
+#endif
 	
 	// Update all 64 colors.
 	for (int i = 62; i >= 0; i -= 2)
