@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include "VdpIo.hpp"
+#include "VdpRend.hpp"
 
 // C includes.
 #include <string.h>
@@ -37,19 +38,8 @@ namespace LibGens
  */
 void VdpIo::Reset(void)
 {
-	// TODO: Move vdp_rend.cpp clearing code to VdpRend::Reset().
-#if 0
-	// Clear MD_Screen.
-	memset(&MD_Screen, 0x00, sizeof(MD_Screen));
-	
-	// Clear MD_Palette.
-	if (!(VDP_Layers & VDP_LAYER_PALETTE_LOCK))
-		memset(&MD_Palette, 0x00, sizeof(MD_Palette));
-	
-	// Sprite arrays.
-	memset(&Sprite_Struct, 0x00, sizeof(Sprite_Struct));
-	memset(&Sprite_Visible, 0x00, sizeof(Sprite_Visible));
-#endif
+	// Reset the VDP rendering arrays.
+	VdpRend::Reset();
 	
 	// Clear VRam, CRam, and VSRam.
 	memset(&VRam, 0x00, sizeof(VRam));

@@ -27,8 +27,30 @@
 // Mode-specific renderers.
 #include "VdpRend_m5.hpp"
 
+// C includes.
+#include <string.h>
+
 namespace LibGens
 {
+
+/**
+ * VdpRend::Reset(): Reset the VDP rendering arrays.
+ * This function should only be called from VdpIo::Reset()!
+ */
+void VdpRend::Reset(void)
+{
+	// Clear MD_Screen.
+	memset(&MD_Screen, 0x00, sizeof(MD_Screen));
+	
+	// Clear MD_Palette.
+	if (!(VDP_Layers & VDP_LAYER_PALETTE_LOCK))
+		memset(&MD_Palette, 0x00, sizeof(MD_Palette));
+	
+	// Sprite arrays.
+	memset(&Sprite_Struct, 0x00, sizeof(Sprite_Struct));
+	memset(&Sprite_Visible, 0x00, sizeof(Sprite_Visible));
+}
+
 
 /**
  * T_VDP_Update_Palette(): VDP palette update function.
