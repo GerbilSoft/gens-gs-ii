@@ -20,6 +20,7 @@ SET(libgens_SRCS
 	MD/VdpRend.cpp
 	MD/VdpRend_m5.cpp
 	MD/TAB336.c
+	MD/EmuMD.cpp
 	)
 
 # Compatibility sources.
