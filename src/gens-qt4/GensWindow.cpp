@@ -220,6 +220,11 @@ void GensWindow::menuTriggered(int id)
 		// File menu.
 		switch (MNUID_ITEM(id))
 		{
+			case MNUID_ITEM(IDM_FILE_BLIT):
+				// Blit!
+				LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_BLIT_MDSCREEN, NULL);
+				break;
+			
 			case MNUID_ITEM(IDM_FILE_QUIT):
 				// Quit.
 				QuitGens();

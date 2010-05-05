@@ -77,6 +77,7 @@ typedef struct _GensMainMenuItem
 #define IDM_SEPARATOR		-1
 
 #define IDM_FILE_MENU		1
+#define IDM_FILE_BLIT		MNUID(IDM_FILE_MENU, 1)
 #define IDM_FILE_QUIT		MNUID(IDM_FILE_MENU, 0xFFFF)
 
 #define IDM_HELP_MENU		7
