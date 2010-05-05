@@ -203,11 +203,15 @@ FORCE_INLINE void EmuMD::T_Do_Frame(void)
 	/** Main execution loops. **/
 	
 	/** Loop 0: Top border. **/
-	for (VdpIo::VDP_Lines.Display.Current = 0;
-	     VdpIo::VDP_Lines.Visible.Current < 0;
-	     VdpIo::VDP_Lines.Display.Current++, VdpIo::VDP_Lines.Visible.Current++)
+	/** NOTE: VdpIo::VDP_Lines.Visible.Current may initially be 0! (NTSC V30) **/
+	VdpIo::VDP_Lines.Display.Current = 0;
+	while (VdpIo::VDP_Lines.Visible.Current < 0)
 	{
 		T_Do_Line<LINETYPE_BORDER, VDP>();
+		
+		// Next line.
+		VdpIo::VDP_Lines.Display.Current++;
+		VdpIo::VDP_Lines.Visible.Current++;
 	}
 	
 	/** Visible line 0. **/
@@ -215,23 +219,29 @@ FORCE_INLINE void EmuMD::T_Do_Frame(void)
 	VdpIo::VDP_Status &= ~0x0008;			// Clear VBlank status.
 	
 	/** Loop 1: Active display. **/
-	for (;
-	     VdpIo::VDP_Lines.Visible.Current < VdpIo::VDP_Lines.Visible.Total;
-	     VdpIo::VDP_Lines.Display.Current++, VdpIo::VDP_Lines.Visible.Current++)
+	do
 	{
 		T_Do_Line<LINETYPE_ACTIVEDISPLAY, VDP>();
-	}
+		
+		// Next line.
+		VdpIo::VDP_Lines.Display.Current++;
+		VdpIo::VDP_Lines.Visible.Current++;
+	} while (VdpIo::VDP_Lines.Visible.Current < VdpIo::VDP_Lines.Visible.Total);
 	
 	/** Loop 2: VBlank line. **/
 	T_Do_Line<LINETYPE_VBLANKLINE, VDP>();
+	VdpIo::VDP_Lines.Display.Current++;
+	VdpIo::VDP_Lines.Visible.Current++;
 	
 	/** Loop 3: Bottom border. **/
-	for (VdpIo::VDP_Lines.Display.Current++, VdpIo::VDP_Lines.Visible.Current++;
-	     VdpIo::VDP_Lines.Display.Current < VdpIo::VDP_Lines.Display.Total;
-	     VdpIo::VDP_Lines.Display.Current++, VdpIo::VDP_Lines.Visible.Current++)
+	do
 	{
 		T_Do_Line<LINETYPE_BORDER, VDP>();
-	}
+		
+		// Next line.
+		VdpIo::VDP_Lines.Display.Current++;
+		VdpIo::VDP_Lines.Visible.Current++;
+	} while (VdpIo::VDP_Lines.Display.Current < VdpIo::VDP_Lines.Display.Total);
 	
 	// TODO: Sound. (LibGens)
 #if 0
