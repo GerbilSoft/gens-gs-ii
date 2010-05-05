@@ -69,7 +69,7 @@ GensMenuBar::GensMenuBar(QWidget *parent)
 	// Populate the menu bar.
 	// TODO
 	
-	static const GensMenuItem gmiFile[] =
+	static const MenuItem gmiFile[] =
 	{
 		{IDM_FILE_BLIT, GMI_NORMAL, "Blit!", NULL, QKeySequence::UnknownKey, Qt::CTRL + Qt::Key_B, NULL, NULL},
 		{IDM_SEPARATOR, GMI_SEPARATOR, NULL, NULL, QKeySequence::UnknownKey, 0, NULL, NULL},
@@ -78,7 +78,7 @@ GensMenuBar::GensMenuBar(QWidget *parent)
 		{0, GMI_NORMAL, NULL, NULL, QKeySequence::UnknownKey, 0, NULL, NULL}
 	};
 	
-	static const GensMenuItem gmiResTest[] =
+	static const MenuItem gmiResTest[] =
 	{
 		{IDM_RESTEST_1X, GMI_NORMAL, "320x240 (&1x)", NULL, QKeySequence::UnknownKey, 0, NULL, NULL},
 		{IDM_RESTEST_2X, GMI_NORMAL, "640x480 (&2x)", NULL, QKeySequence::UnknownKey, 0, NULL, NULL},
@@ -88,14 +88,14 @@ GensMenuBar::GensMenuBar(QWidget *parent)
 		{0, GMI_NORMAL, NULL, NULL, QKeySequence::UnknownKey, 0, NULL, NULL}
 	};
 	
-	static const GensMenuItem gmiHelp[] =
+	static const MenuItem gmiHelp[] =
 	{
 		{IDM_HELP_ABOUT, GMI_NORMAL, "&About Gens/GS II", NULL, QKeySequence::UnknownKey, 0, "help-about", ":/oxygen-16x16/help-about.png"},
 		
 		{0, GMI_NORMAL, NULL, NULL, QKeySequence::UnknownKey, 0, NULL, NULL}
 	};
 	
-	static const GensMainMenuItem gmmiMain[] =
+	static const MainMenuItem gmmiMain[] =
 	{
 		{IDM_FILE_MENU, "&File", &gmiFile[0]},
 		{IDM_RESTEST_MENU, "&ResTest", &gmiResTest[0]},
@@ -116,7 +116,7 @@ GensMenuBar::~GensMenuBar()
  * parseMainMenu(): Parse an array of GensMainMenuItem items.
  * @param mainMenu Pointer to the first item in the GensMainMenuItem array.
  */
-void GensMenuBar::parseMainMenu(const GensMainMenuItem *mainMenu)
+void GensMenuBar::parseMainMenu(const GensMenuBar::MainMenuItem *mainMenu)
 {
 	QMenu *mnuSubMenu;
 	
@@ -140,7 +140,7 @@ void GensMenuBar::parseMainMenu(const GensMainMenuItem *mainMenu)
  * @param menu Pointer to the first item in the GensMenuItem array.
  * @param parent QMenu to add the menu items to.
  */
-void GensMenuBar::parseMenu(const GensMenuItem *menu, QMenu *parent)
+void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 {
 	QAction *mnuItem;
 	

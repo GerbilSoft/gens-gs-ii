@@ -30,43 +30,6 @@
 
 #include <QtGui/QKeySequence>
 
-// TODO: Move to gens_menu_data.c or something.
-extern "C" {
-
-typedef enum
-{
-	GMI_NORMAL,
-	GMI_SEPARATOR,
-	GMI_SUBMENU,
-	
-	GMI_MAX
-} GMI_Type;
-
-typedef struct _GensMenuItem
-{
-	int id;					// Menu identifier. (-1 == separator)
-	GMI_Type type;				// Menu item type.
-	const char *text;			// Menu item text.
-	const struct _GensMenuItem *submenu;	// First element of submenu.
-	
-	QKeySequence::StandardKey key_std;	// Standard key sequence. (Use QKeySequence::UnknownKey to ignore.)
-	int key_custom;				// Custom key sequence. (Set key_std to QKeySequence::UnknownKey.)
-	
-	const char *icon_fdo;			// FreeDesktop.org icon.
-	const char *icon_qrc;			// QRC icon. (Qt resources)
-	
-	// TODO: Accelerator.
-} GensMenuItem;
-
-typedef struct _GensMainMenuItem
-{
-	int id;				// Menu identifier.
-	const char *text;		// Menu text.
-	const GensMenuItem *submenu;	// First element of submenu.
-} GensMainMenuItem;
-
-}
-
 // Menu IDs.
 // TODO: Convert to enum?
 // TODO: Move to separate file?
@@ -100,9 +63,39 @@ class GensMenuBar : public QMenuBar
 		GensMenuBar(QWidget *parent = NULL);
 		virtual ~GensMenuBar();
 	
+		enum MenuItemType
+		{
+			GMI_NORMAL,
+			GMI_SEPARATOR,
+			GMI_SUBMENU,
+			
+			GMI_MAX
+		};
+		
+		struct MenuItem
+		{
+			int id;					// Menu identifier. (-1 == separator)
+			MenuItemType type;			// Menu item type.
+			const char *text;			// Menu item text.
+			const MenuItem *submenu;		// First element of submenu.
+			
+			QKeySequence::StandardKey key_std;	// Standard key sequence. (Use QKeySequence::UnknownKey to ignore.)
+			int key_custom;				// Custom key sequence. (Set key_std to QKeySequence::UnknownKey.)
+			
+			const char *icon_fdo;			// FreeDesktop.org icon.
+			const char *icon_qrc;			// QRC icon. (Qt resources)
+		};
+		
+		struct MainMenuItem
+		{
+			int id;				// Menu identifier.
+			const char *text;		// Menu text.
+			const MenuItem *submenu;	// First element of submenu.
+		};
+
 	protected:
-		void parseMainMenu(const GensMainMenuItem *mainMenu);
-		void parseMenu(const GensMenuItem *menu, QMenu *parent);
+		void parseMainMenu(const MainMenuItem *mainMenu);
+		void parseMenu(const MenuItem *menu, QMenu *parent);
 		
 		QSignalMapper *m_signalMapper;
 	
