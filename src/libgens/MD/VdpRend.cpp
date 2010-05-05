@@ -24,6 +24,9 @@
 #include "VdpRend.hpp"
 #include "VdpIo.hpp"
 
+/** Static member initialization. **/
+#include "VdpRend_static.hpp"
+
 // Mode-specific renderers.
 #include "VdpRend_m5.hpp"
 

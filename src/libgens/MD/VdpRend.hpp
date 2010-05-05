@@ -78,6 +78,7 @@ class VdpRend
 		static unsigned int Sprite_Visible[128];
 		
 		// Allow Sprite Overflow.
+		// TODO: Rename this variable?
 		static int Sprite_Over;
 	
 		// VDP layer flags.

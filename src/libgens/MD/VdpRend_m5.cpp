@@ -23,6 +23,9 @@
 
 #include "VdpRend_m5.hpp"
 
+/** Static member initialization. **/
+#include "VdpRend_m5_static.hpp"
+
 #include "VdpRend.hpp"
 #include "VdpIo.hpp"
 #include "TAB336.h"
