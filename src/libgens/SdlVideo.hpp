@@ -81,6 +81,39 @@ class SdlVideo
 			DispW = UnPackResW(res);
 			DispH = UnPackResH(res);
 		}
+		
+		/** Color depth. **/
+		
+		enum BppMode
+		{
+			BPP_15 = 0,	// RGB555
+			BPP_16 = 1,	// RGB565
+			BPP_32 = 2,	// RGB888
+		};
+		
+		static inline int BppModeToInt(BppMode bpp)
+		{
+			switch (bpp)
+			{
+				case BPP_15:
+					return 15;
+				case BPP_16:
+					return 16;
+				case BPP_32:
+					return 32;
+				default:
+					return 0;
+			}
+		}
+		
+		/**
+		 * BppOut(): Get the output color depth.
+		 * @return Output color depth.
+		 */
+		static inline BppMode BppOut(void)
+		{
+			return ms_bppOut;
+		}
 	
 	protected:
 		static void *ms_wid;
@@ -90,6 +123,10 @@ class SdlVideo
 		// TODO: Not sure how to handle the "requested" size...
 		static int DispW;
 		static int DispH;
+		
+		// Output color depth.
+		// TODO: Allow this to be changed at runtime.
+		static const BppMode ms_bppOut = BPP_16;
 	
 	private:
 		SdlVideo() { }

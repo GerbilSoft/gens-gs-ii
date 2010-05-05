@@ -74,7 +74,7 @@ int SdlVideo::Init(void *wid)
 	
 	// TODO: Check for errors in SDL_InitSubSystem().
 	SDL_InitSubSystem(SDL_INIT_VIDEO);
-	ms_screen = SDL_SetVideoMode(DispW, DispH, 0, SDL_VideoModeFlags);
+	ms_screen = SDL_SetVideoMode(DispW, DispH, BppModeToInt(ms_bppOut), SDL_VideoModeFlags);
 	if (!ms_screen)
 		return 1;
 	
