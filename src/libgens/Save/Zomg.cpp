@@ -90,251 +90,101 @@ void Zomg::close(void)
 
 
 /**
- * Zomg::loadVdpReg(): Load the VDP registers.
- * @return 0 on success; non-zero on error.
+ * Zomg::loadFromZomg(): Load a file from the ZOMG file.
+ * @param filename Filename to load from the ZOMG file.
+ * @param buf Buffer to store the file in.
+ * @param len Length of the buffer.
+ * @return Length of file loaded, or negative number on error.
  */
-int Zomg::loadVdpReg(void)
+int Zomg::loadFromZomg(const char *filename, void *buf, int len)
 {
 	if (!m_zFile)
 		return -1;
 	
+	// Locate the file in the ZOMG file.
+	int ret = unzLocateFile(m_zFile, filename, 2);
+	if (ret != UNZ_OK)
+	{
+		// File not found.
+		// TODO: Define return codes somewhere.
+		return -2;
+	}
+	
+	// Open the current file.
+	ret = unzOpenCurrentFile(m_zFile);
+	if (ret != UNZ_OK)
+	{
+		// Error opening the current file.
+		return -3;
+	}
+	
+	// Read the file.
+	ret = unzReadCurrentFile(m_zFile, buf, len);
+	unzCloseCurrentFile(m_zFile);	// TODO: Check the return value!
+	
+	// Return the number of bytes read.
+	return ret;
+}
+
+
+/**
+ * Zomg::load(): Load a ZOMG file.
+ * @return 0 on success; non-zero on error.
+ */
+int Zomg::load(void)
+{
+	if (!m_zFile)
+		return -1;
+	
+	// Assuming MD only.
+	// TODO: Check for errors.
+	
+	// Load VDP registers.
 	// TODO: Load a certain number depending on the system.
 	// For now, we'll assume 24 (MD).
+	loadFromZomg("common/vdp_reg.bin", m_common.VdpReg.md, sizeof(m_common.VdpReg.md));
 	
-	// Locate "common/vdp_reg.bin" in the ZOMG file.
-	int ret = unzLocateFile(m_zFile, "common/vdp_reg.bin", 2);
-	if (ret != UNZ_OK)
-	{
-		// File not found.
-		// TODO: Define return codes somewhere.
-		return 1;
-	}
+	// Load VRam.
+	loadFromZomg("common/VRam.bin", m_common.VRam.md, sizeof(m_common.VRam.md));
 	
-	// Check the file information.
-	unz_file_info zInfo;
-	unzGetCurrentFileInfo(m_zFile, &zInfo, NULL, 0, NULL, 0, NULL, 0);
-	if (zInfo.uncompressed_size != 24)
-	{
-		// Incorrect size.
-		// Vdp_Reg size should be:
-		// - 24: MD
-		return 2;
-	}
+	// Load CRam.
+	loadFromZomg("common/CRam.bin", m_common.CRam.md, sizeof(m_common.CRam.md));
 	
-	// Open the current file.
-	ret = unzOpenCurrentFile(m_zFile);
-	if (ret != UNZ_OK)
-	{
-		// Error opening the current file.
-		return 3;
-	}
+	// Load VSRam.
+	loadFromZomg("MD/VSRam.bin", m_md.VSRam, sizeof(m_md.VSRam));
 	
-	// Get the VDP registers.
-	uint8_t buf[24];
-	ret = unzReadCurrentFile(m_zFile, buf, sizeof(buf));
-	unzCloseCurrentFile(m_zFile);	// TODO: Check the return value!
-	if (ret != sizeof(buf))
-	{
-		// Error reading the file.
-		// TODO: Return an error code depending on the error.
-		return 4;
-	}
+	// Copy savestate data to the emulation memory buffers.
 	
+	// Write VDP registers.
 	// TODO: On MD, load the DMA information from the savestate.
 	// Writing to register 23 changes the DMA status.
-	for (int i = (sizeof(buf)/sizeof(buf[0]))-1; i >= 0; i--)
+	for (int i = (sizeof(m_common.VdpReg.md)/sizeof(m_common.VdpReg.md[0]))-1; i >= 0; i--)
 	{
-		VdpIo::Set_Reg(i, buf[i]);
+		VdpIo::Set_Reg(i, m_common.VdpReg.md[i]);
 	}
 	
-	// VDP registers loaded.
-	return 0;
-}
-
-
-/**
- * Zomg::loadVRam(): Load VRam.
- * @return 0 on success; non-zero on error.
- */
-int Zomg::loadVRam(void)
-{
-	if (!m_zFile)
-		return -1;
-	
-	// Locate "common/VRam.bin" in the ZOMG file.
-	int ret = unzLocateFile(m_zFile, "common/VRam.bin", 2);
-	if (ret != UNZ_OK)
-	{
-		// File not found.
-		// TODO: Define return codes somewhere.
-		return 1;
-	}
-	
-	// Check the file information.
-	unz_file_info zInfo;
-	unzGetCurrentFileInfo(m_zFile, &zInfo, NULL, 0, NULL, 0, NULL, 0);
-	if (zInfo.uncompressed_size != 65536)
-	{
-		// Incorrect size.
-		// VRam size should be:
-		// - 16384: SMS/GG
-		// - 65536: MD
-		return 2;
-	}
-	
-	// Open the current file.
-	ret = unzOpenCurrentFile(m_zFile);
-	if (ret != UNZ_OK)
-	{
-		// Error opening the current file.
-		return 3;
-	}
-	
-	// Get the VRam data.
-	// NOTE: Use uint16_t for MD, but uint8_t for SMS and GG.
-	uint16_t buf[32768];
-	ret = unzReadCurrentFile(m_zFile, buf, sizeof(buf));
-	unzCloseCurrentFile(m_zFile);	// TODO: Check the return value!
-	if (ret != sizeof(buf))
-	{
-		// Error reading the file.
-		// TODO: Return an error code depending on the error.
-		return 4;
-	}
-	
+	// Copy VRam to VdpIo.
 	// TODO: Don't byteswap on BE systems.
 	// TODO: Port byteswapping macros from Gens/GS.
-	for (int i = (sizeof(buf)/sizeof(buf[0]))-1; i >= 0; i--)
+	for (int i = (sizeof(m_common.VRam.md)/sizeof(m_common.VRam.md[0]))-1; i >= 0; i--)
 	{
-		VdpIo::VRam.u16[i] = (((buf[i] >> 8) & 0xFF) | ((buf[i] & 0xFF) << 8));
+		VdpIo::VRam.u16[i] = (((m_common.VRam.md[i] >> 8) & 0xFF) |
+				      ((m_common.VRam.md[i] & 0xFF) << 8));
 	}
 	
-	// VRam update required.
-	VdpIo::VDP_Flags.VRam = 1;
-	
-	// VRam loaded.
-	return 0;
-}
-
-
-/**
- * Zomg::loadCRam(): Load CRam.
- * @return 0 on success; non-zero on error.
- */
-int Zomg::loadCRam(void)
-{
-	if (!m_zFile)
-		return -1;
-	
-	// Locate "common/CRam.bin" in the ZOMG file.
-	int ret = unzLocateFile(m_zFile, "common/CRam.bin", 2);
-	if (ret != UNZ_OK)
-	{
-		// File not found.
-		// TODO: Define return codes somewhere.
-		return 1;
-	}
-	
-	// Check the file information.
-	unz_file_info zInfo;
-	unzGetCurrentFileInfo(m_zFile, &zInfo, NULL, 0, NULL, 0, NULL, 0);
-	if (zInfo.uncompressed_size != 128)
-	{
-		// Incorrect size.
-		// CRam size should be:
-		// - 32: SMS
-		// - 64: Game Gear
-		// - 128: MD
-		return 2;
-	}
-	
-	// Open the current file.
-	ret = unzOpenCurrentFile(m_zFile);
-	if (ret != UNZ_OK)
-	{
-		// Error opening the current file.
-		return 3;
-	}
-	
-	// Get the CRam data.
-	// NOTE: Use uint16_t for MD and GG, but uint8_t for SMS.
-	uint16_t buf[64];
-	ret = unzReadCurrentFile(m_zFile, buf, sizeof(buf));
-	unzCloseCurrentFile(m_zFile);	// TODO: Check the return value!
-	if (ret != sizeof(buf))
-	{
-		// Error reading the file.
-		// TODO: Return an error code depending on the error.
-		return 4;
-	}
-	
+	// Copy CRam to VdpIo.
 	// TODO: Don't byteswap on BE systems.
 	// TODO: Port byteswapping macros from Gens/GS.
-	for (int i = (sizeof(buf)/sizeof(buf[0]))-1; i >= 0; i--)
+	for (int i = (sizeof(m_common.CRam.md)/sizeof(m_common.CRam.md[0]))-1; i >= 0; i--)
 	{
-		VdpIo::CRam.u16[i] = (((buf[i] >> 8) & 0xFF) | ((buf[i] & 0xFF) << 8));
-	}
-	
-	// CRam update required.
-	VdpIo::VDP_Flags.CRam = 1;
-	
-	// CRam loaded.
-	return 0;
-}
-
-
-/**
- * Zomg::loadVSRam(): Load VSRam.
- * @return 0 on success; non-zero on error.
- */
-int Zomg::loadVSRam(void)
-{
-	if (!m_zFile)
-		return -1;
-	
-	// Locate "MD/VSRam.bin" in the ZOMG file.
-	int ret = unzLocateFile(m_zFile, "MD/VSRam.bin", 2);
-	if (ret != UNZ_OK)
-	{
-		// File not found.
-		// TODO: Define return codes somewhere.
-		return 1;
-	}
-	
-	// Check the file information.
-	unz_file_info zInfo;
-	unzGetCurrentFileInfo(m_zFile, &zInfo, NULL, 0, NULL, 0, NULL, 0);
-	if (zInfo.uncompressed_size != 80)
-	{
-		// Incorrect size.
-		// VSRam size should be:
-		// - 80: MD
-		return 2;
-	}
-	
-	// Open the current file.
-	ret = unzOpenCurrentFile(m_zFile);
-	if (ret != UNZ_OK)
-	{
-		// Error opening the current file.
-		return 3;
-	}
-	
-	// Get the VSRam data.
-	uint8_t buf[80];
-	ret = unzReadCurrentFile(m_zFile, buf, sizeof(buf));
-	unzCloseCurrentFile(m_zFile);	// TODO: Check the return value!
-	if (ret != sizeof(buf))
-	{
-		// Error reading the file.
-		// TODO: Return an error code depending on the error.
-		return 4;
+		VdpIo::CRam.u16[i] = (((m_common.CRam.md[i] >> 8) & 0xFF) |
+				      ((m_common.CRam.md[i] & 0xFF) << 8));
 	}
 	
 	// Copy VSRam to VdpIo.
-	memcpy(VdpIo::VSRam.u8, buf, sizeof(buf));
+	memcpy(VdpIo::VSRam.u8, m_md.VSRam, sizeof(m_md.VSRam));
 	
-	// VSRam loaded.
+	// Savestate loaded.
 	return 0;
 }
 

@@ -60,11 +60,11 @@ void EmuMD::Init_TEST(void)
 	else
 	{
 		printf("test.zomg opened. Loading...\n");
-		m_zomg.loadVRam();
-		m_zomg.loadCRam();
-		m_zomg.loadVdpReg();
-		m_zomg.loadVSRam();
-		printf("test.zomg loaded.\n");
+		int ret = m_zomg.load();
+		if (ret == 0)
+			printf("test.zomg loaded.\n");
+		else
+			printf("Error loading test.zomg. Return value: %d\n", ret);
 	}
 	m_zomg.close();
 	
