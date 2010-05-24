@@ -128,11 +128,18 @@ class M68K_Mem
 		static void M68K_Write_Byte_Misc(uint32_t address, uint8_t data);
 		static void M68K_Write_Byte_VDP(uint32_t address, uint8_t data);
 		
+		/** Write Word functions. **/
+		static void M68K_Write_Word_Default(uint32_t address, uint16_t data);
+		static void M68K_Write_Word_SRam(uint32_t address, uint16_t data);
+		static void M68K_Write_Word_Ram(uint32_t address, uint16_t data);
+		static void M68K_Write_Word_Misc(uint32_t address, uint16_t data);
+		static void M68K_Write_Word_VDP(uint32_t address, uint16_t data);
+		
 		/** Main MC68000 read/write functions. **/
 		typedef uint8_t  (*M68K_Read_Byte_fn)(uint32_t address);
 		typedef uint16_t (*M68K_Read_Word_fn)(uint32_t address);
 		typedef void     (*M68K_Write_Byte_fn)(uint32_t address, uint8_t data);
-		typedef void     (*M68K_Write_Word_fn)(uint32_t address, uint8_t data);
+		typedef void     (*M68K_Write_Word_fn)(uint32_t address, uint16_t data);
 		
 		/** Main M68K function tables. (512 KB pages; 0x20 entries.) **/
 		static M68K_Read_Byte_fn M68K_Read_Byte_Table[0x20];

@@ -391,7 +391,7 @@ uint16_t M68K_Mem::M68K_Read_Word_Rom4(uint32_t address)
 	// ROM data request.
 	address &= 0x7FFFF;
 	address ^= ((4 << 19) | 1);	// TODO: LE only!
-	return Rom_Data.u16[address>>1];
+	return Rom_Data.u16[address >> 1];
 }
 
 
@@ -897,6 +897,300 @@ void M68K_Mem::M68K_Write_Byte_VDP(uint32_t address, uint8_t data)
 }
 
 
+/** Write Word functions. **/
+
+
+/**
+ * M68K_Write_Word_Default(): Default M68K write word handler.
+ * @param address Address.
+ * @param data Word to write.
+ */
+void M68K_Mem::M68K_Write_Word_Default(uint32_t address, uint16_t data)
+{
+	// Do nothing!
+	((void)address);
+	((void)data);
+}
+
+
+/**
+ * M68K_Write_Byte_SRam(): Write a word to SRam.
+ * @param address Address.
+ * @param data Word to write.
+ */
+void M68K_Mem::M68K_Write_Word_SRam(uint32_t address, uint16_t data)
+{
+	// Mask off the high byte of the address.
+	address &= 0xFFFFFF;
+	
+	// Check if this is an SRam data request.
+	if (SRam_State.on && SRam_State.enabled &&
+	    address >= SRam_Start && address <= SRam_End)
+	{
+		// SRam data request.
+		
+		// Write the byte to SRam.
+		// Note: SRam is NOT byteswapped.
+		// TODO: Check boundaries.
+		// TODO: Proper byteswapping.
+		address -= SRam_Start;
+		SRam[address] = ((data >> 8) & 0xFF);
+		SRam[address+1] = (data & 0xFF);
+	}
+}
+
+
+/**
+ * M68K_Write_Word_Ram(): Write a word to RAM. (0xE00000 - 0xFFFFFF)
+ * RAM is 64 KB, mirrored throughout the entire range.
+ * @param address Address.
+ * @param data Word to write.
+ */
+void M68K_Mem::M68K_Write_Word_Ram(uint32_t address, uint16_t data)
+{
+	address &= 0xFFFE;
+	Ram_68k.u16[address >> 1] = data;
+}
+
+
+/**
+ * M68K_Write_Word_Misc(): Write a word to the miscellaneous data bank. (0xA00000 - 0xA7FFFF)
+ * This includes Z80 memory, Z80 control registers, and gamepads.
+ * @param address Address.
+ * @param data Word to write.
+ */
+void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
+{
+	// Mask off the high byte of the address.
+	address &= 0xFFFFFF;
+	
+	if (address <= 0xA0FFFF)
+	{
+		// Z80 memory space.
+		if (Z80_State & (Z80_STATE_BUSREQ | Z80_STATE_RESET))
+		{
+			// Z80 is either running or has the bus.
+			// Don't do anything.
+			// TODO: I don't think the Z80 needs to be stopped here...
+			return;
+		}
+		
+		// Call the Z80 write function.
+		// TODO
+#if 0
+		push	edx
+		mov	ecx, ebx
+		and	ebx, 0x7000
+		and	ecx, 0x7FFF
+		shr	ebx, 10
+		mov	edx, eax
+		call	[SYM(Z80_WriteB_Table) + ebx]
+		pop	edx
+		pop	ecx
+		pop	ebx
+		ret
+#endif
+		return;
+	}
+	else if (address == 0xA11100)
+	{
+		// Z80 BUSREQ. (0xA11100)
+		// TODO
+		
+#if 0
+		xor	ecx, ecx
+		mov	al, [SYM(Z80_State)]
+		mov	dword [SYM(Controller_1_Counter)], ecx
+		test	ah, 1	; TODO: Should this be al, Z80_STATE_ENABLED ?
+		mov	dword [SYM(Controller_1_Delay)], ecx
+		mov	dword [SYM(Controller_2_Counter)], ecx
+		mov	dword [SYM(Controller_2_Delay)], ecx
+		jnz	short .deactivated
+		
+		test	al, Z80_STATE_BUSREQ
+		jnz	short .already_activated
+		
+		or	al, Z80_STATE_BUSREQ
+		push	edx
+		mov	[SYM(Z80_State)], al
+		mov	ebx, [SYM(Cycles_M68K)]
+		call	SYM(main68k_readOdometer)
+		sub	ebx, eax
+		mov	edx, [SYM(Cycles_Z80)]
+		mov	ebx, [SYM(Z80_M68K_Cycle_Tab) + ebx * 4]
+		sub	edx, ebx
+		
+		push	edx
+		push	SYM(M_Z80)
+		call	SYM(mdZ80_set_odo)
+		add	esp, byte 8
+		pop	edx
+	
+	.already_activated:
+		pop	ecx
+		pop	ebx
+		ret
+	
+	align 16
+	
+	.deactivated:
+		call	SYM(main68k_readOdometer)
+		mov	cl, [SYM(Z80_State)]
+		mov	[SYM(Last_BUS_REQ_Cnt)], eax
+		test	cl, Z80_STATE_BUSREQ
+		setnz	[SYM(Last_BUS_REQ_St)]
+		jz	short .already_deactivated
+		
+		push	edx
+		mov	ebx, [SYM(Cycles_M68K)]
+		and	cl, ~Z80_STATE_BUSREQ
+		sub	ebx, eax
+		mov	[SYM(Z80_State)], cl
+		mov	edx, [SYM(Cycles_Z80)]
+		mov	ebx, [SYM(Z80_M68K_Cycle_Tab) + ebx * 4]
+		mov	ecx, SYM(M_Z80)
+		sub	edx, ebx
+		call	z80_Exec
+		pop	edx
+	
+	.already_deactivated:
+		pop	ecx
+		pop	ebx
+		ret
+#endif
+		return;
+	}
+	else if (address == 0xA11200)
+	{
+		// Z80 RESET. (0xA11200)
+		if (data & 0x0100)
+		{
+			// RESET is high. Start the Z80.
+			Z80_State &= ~Z80_STATE_RESET;
+		}
+		else
+		{
+			// RESET is low. Stop the Z80.
+			// TODO
+			//mdZ80_reset();
+			Z80_State |= Z80_STATE_RESET;
+			
+			// YM2612's RESET line is tied to the Z80's RESET line.
+			// TODO
+			//YM2612_Reset();
+		}
+	}
+	else if (address == 0xA130F1)
+	{
+		// SRam control register. (0xA130F1)
+		SRam_State.on = (data & 1);
+		SRam_State.write = !(data & 2);
+	}
+	else if (address >= 0xA130F2 && address <= 0xA130FF)
+	{
+		// Super Street Fighter II (SSF2) bankswitching system.
+		// TODO
+#if 0
+		mov	al, ah
+		and	ebx, 0xF
+		and	eax, 0x1F
+		shr	ebx, 1
+		mov	ecx, [SYM(Genesis_M68K_Read_Byte_Table) + eax * 4]
+		mov	[SYM(M68K_Read_Byte_Table) + ebx * 4], ecx
+		mov	ecx, [SYM(Genesis_M68K_Read_Word_Table) + eax * 4]
+		mov	[SYM(M68K_Read_Word_Table) + ebx * 4], ecx
+#endif
+	}
+	else if (address > 0xA1000D)
+	{
+		// Invalid address.
+		return;
+	}
+	
+	// MD miscellaneous registers.
+	switch (address & 0x00000E)
+	{
+		// Non-writable and not-implemented registers first.
+		case 0x00: /// 0xA10000/0xA10001: Genesis version register.
+		case 0x06: /// 0xA10006/0xA10007: Control Port 3: Data. (EXT)
+		case 0x0C: /// 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
+		default:
+			break;
+		
+		case 0x02:
+			/**
+			 * 0xA10002/0xA10003: Control Port 1: Data.
+			 */
+			// TODO
+			//WR_Controller_1(data);
+			break;
+		
+		case 0x04:
+			/**
+			 * 0xA10004/0xA10005: Control Port 2: Data.
+			 */
+			// TODO
+			//WR_Controller_2(data);
+			break;
+		
+		case 0x08:
+			/**
+			 * 0xA10008/0xA10009: Control Port 1: CTRL.
+			 */
+			// TODO
+			//Controller_1_COM = data;
+			break;
+		
+		case 0x0A:
+			/**
+			 * 0xA1000A/0xA1000B: Control Port 2: CTRL.
+			 */
+			// TODO
+			//Controller_2_COM = data;
+			break;
+	}
+}
+
+
+/**
+ * M68K_Write_Word_VDP(): Write a word to the VDP data banks. (0xC00000 - 0xDFFFFF)
+ * @param address Address.
+ * @param data Word to write.
+ */
+void M68K_Mem::M68K_Write_Word_VDP(uint32_t address, uint16_t data)
+{
+	// Valid address: ((address & 0xE700E0) == 0xC00000)
+	// Information from vdppin.txt, (c) 2008 Charles MacDonald.
+	
+	// Since this function is only called if address is in the
+	// VDP data banks, we can just check if ((address & 0x700E0) == 0).
+	if ((address & 0x700E0) != 0)
+	{
+		// Not a valid VDP address.
+		return;
+	}
+	
+	// Check the VDP address.
+	address &= 0x1F;
+	if (address < 0x04)
+	{
+		// 0xC00000 - 0xC00003: VDP Data Port.
+		VdpIo::Write_Data_Word(data);
+	}
+	else if (address < 0x08)
+	{
+		// 0xC00004 - 0xC00007: VDP Control Port.
+		VdpIo::Write_Ctrl(data);
+	}
+	else if (address == 0x11)
+	{
+		// 0xC00011: PSG control port.
+		// TODO: mem_m68k.asm doesn't support this for word writes...
+		//PSG_Write(data);
+	}
+}
+
+
 /** Default function tables. **/
 
 
@@ -1013,8 +1307,6 @@ const M68K_Mem::M68K_Write_Byte_fn M68K_Mem::MD_M68K_Write_Byte_Table[0x20] =
 
 const M68K_Mem::M68K_Write_Word_fn M68K_Mem::MD_M68K_Write_Word_Table[0x20] =
 {
-	// TODO: Implement these functions!
-#if 0	
 	M68K_Write_Word_SRam,		// 0x000000 - 0x07FFFF [Bank 0x00]
 	M68K_Write_Word_SRam,		// 0x080000 - 0x0FFFFF [Bank 0x01]
 	M68K_Write_Word_SRam,		// 0x100000 - 0x17FFFF [Bank 0x02]
@@ -1047,7 +1339,6 @@ const M68K_Mem::M68K_Write_Word_fn M68K_Mem::MD_M68K_Write_Word_Table[0x20] =
 	M68K_Write_Word_Ram,		// 0xE80000 - 0xEFFFFF [Bank 0x1D]
 	M68K_Write_Word_Ram,		// 0xF00000 - 0xF7FFFF [Bank 0x1E]
 	M68K_Write_Word_Ram,		// 0xF80000 - 0xFFFFFF [Bank 0x1F]
-#endif
 };
 
 
