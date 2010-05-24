@@ -46,7 +46,7 @@ namespace GensQt4
 #ifdef GQT4_USE_QMAINWINDOW
 #define GENSWINDOW_BASECLASS QMainWindow
 #else
-#define GENSWINDOW_BASECLASS QObject
+#define GENSWINDOW_BASECLASS QWidget
 #endif
 
 class GensWindow : public GENSWINDOW_BASECLASS
