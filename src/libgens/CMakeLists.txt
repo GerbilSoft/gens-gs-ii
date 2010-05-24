@@ -28,7 +28,7 @@ SET(libgens_SRCS
 	MD/VdpPalette.cpp
 	Save/Zomg.cpp
 	cpu/M68K.cpp
-	MD/mem_m68k.c
+	cpu/M68K_Mem.cpp
 	)
 
 # Compatibility sources.

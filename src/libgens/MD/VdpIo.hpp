@@ -25,6 +25,7 @@
 #define __LIBGENS_MD_VDPIO_HPP__
 
 #include <stdint.h>
+
 namespace LibGens
 {
 
