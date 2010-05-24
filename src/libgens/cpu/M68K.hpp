@@ -21,10 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_M68K_HPP__
-#define __LIBGENS_M68K_HPP__
+#ifndef __LIBGENS_CPU_M68K_HPP__
+#define __LIBGENS_CPU_M68K_HPP__
 
 #include "star_68k.h"
+
+namespace LibGens
+{
 
 class M68K
 {
@@ -57,4 +60,6 @@ class M68K
 		~M68K() { }
 };
 
-#endif /* __LIBGENS_M68K_HPP__ */
+}
+
+#endif /* __LIBGENS_CPU_M68K_HPP__ */

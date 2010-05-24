@@ -22,10 +22,13 @@
  ***************************************************************************/
 
 #include "M68K.hpp"
-#include "MD/mem_m68k.h"
+#include "M68K_Mem.hpp"
 
 // C includes.
 #include <string.h>
+
+namespace LibGens
+{
 
 S68000CONTEXT M68K::m_context;
 
@@ -33,38 +36,38 @@ S68000CONTEXT M68K::m_context;
 STARSCREAM_PROGRAMREGION M68K::M68K_Fetch[] =
 {
 	// RAM, including mirrors.
-	{0xE00000, 0xE0FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE00000},
-	{0xE10000, 0xE1FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE10000},
-	{0xE20000, 0xE2FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE20000},
-	{0xE30000, 0xE3FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE30000},
-	{0xE40000, 0xE4FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE40000},
-	{0xE50000, 0xE5FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE50000},
-	{0xE60000, 0xE6FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE60000},
-	{0xE70000, 0xE7FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE70000},
-	{0xE80000, 0xE8FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE80000},
-	{0xE90000, 0xE9FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE90000},
-	{0xEA0000, 0xEAFFFF, (unsigned int)&Ram_68k.u8[0] - 0xEA0000},
-	{0xEB0000, 0xEBFFFF, (unsigned int)&Ram_68k.u8[0] - 0xEB0000},
-	{0xEC0000, 0xECFFFF, (unsigned int)&Ram_68k.u8[0] - 0xEC0000},
-	{0xED0000, 0xEDFFFF, (unsigned int)&Ram_68k.u8[0] - 0xED0000},
-	{0xEE0000, 0xEEFFFF, (unsigned int)&Ram_68k.u8[0] - 0xEE0000},
-	{0xEF0000, 0xEFFFFF, (unsigned int)&Ram_68k.u8[0] - 0xEF0000},
-	{0xF00000, 0xF0FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF00000},
-	{0xF10000, 0xF1FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF10000},
-	{0xF20000, 0xF2FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF20000},
-	{0xF30000, 0xF3FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF30000},
-	{0xF40000, 0xF4FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF40000},
-	{0xF50000, 0xF5FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF50000},
-	{0xF60000, 0xF6FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF60000},
-	{0xF70000, 0xF7FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF70000},
-	{0xF80000, 0xF8FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF80000},
-	{0xF90000, 0xF9FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF90000},
-	{0xFA0000, 0xFAFFFF, (unsigned int)&Ram_68k.u8[0] - 0xFA0000},
-	{0xFB0000, 0xFBFFFF, (unsigned int)&Ram_68k.u8[0] - 0xFB0000},
-	{0xFC0000, 0xFCFFFF, (unsigned int)&Ram_68k.u8[0] - 0xFC0000},
-	{0xFD0000, 0xFDFFFF, (unsigned int)&Ram_68k.u8[0] - 0xFD0000},
-	{0xFE0000, 0xFEFFFF, (unsigned int)&Ram_68k.u8[0] - 0xFE0000},
-	{0xFF0000, 0xFFFFFF, (unsigned int)&Ram_68k.u8[0] - 0xFF0000},
+	{0xE00000, 0xE0FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xE00000},
+	{0xE10000, 0xE1FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xE10000},
+	{0xE20000, 0xE2FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xE20000},
+	{0xE30000, 0xE3FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xE30000},
+	{0xE40000, 0xE4FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xE40000},
+	{0xE50000, 0xE5FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xE50000},
+	{0xE60000, 0xE6FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xE60000},
+	{0xE70000, 0xE7FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xE70000},
+	{0xE80000, 0xE8FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xE80000},
+	{0xE90000, 0xE9FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xE90000},
+	{0xEA0000, 0xEAFFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xEA0000},
+	{0xEB0000, 0xEBFFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xEB0000},
+	{0xEC0000, 0xECFFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xEC0000},
+	{0xED0000, 0xEDFFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xED0000},
+	{0xEE0000, 0xEEFFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xEE0000},
+	{0xEF0000, 0xEFFFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xEF0000},
+	{0xF00000, 0xF0FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xF00000},
+	{0xF10000, 0xF1FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xF10000},
+	{0xF20000, 0xF2FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xF20000},
+	{0xF30000, 0xF3FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xF30000},
+	{0xF40000, 0xF4FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xF40000},
+	{0xF50000, 0xF5FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xF50000},
+	{0xF60000, 0xF6FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xF60000},
+	{0xF70000, 0xF7FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xF70000},
+	{0xF80000, 0xF8FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xF80000},
+	{0xF90000, 0xF9FFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xF90000},
+	{0xFA0000, 0xFAFFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xFA0000},
+	{0xFB0000, 0xFBFFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xFB0000},
+	{0xFC0000, 0xFCFFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xFC0000},
+	{0xFD0000, 0xFDFFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xFD0000},
+	{0xFE0000, 0xFEFFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xFE0000},
+	{0xFF0000, 0xFFFFFF, (unsigned int)&M68K_Mem::Ram_68k.u8[0] - 0xFF0000},
 	
 	// The following four entries are available for the various different systems.
 	{-1, -1, (unsigned int)NULL},	// 32
@@ -80,8 +83,8 @@ STARSCREAM_PROGRAMREGION M68K::M68K_Fetch[] =
 STARSCREAM_DATAREGION M68K::M68K_Read_Byte[4] =
 {
 	{0x000000, 0x3FFFFF, NULL, NULL},
-	{0xFF0000, 0xFFFFFF, NULL, &Ram_68k.u8[0]},
-	{0x400000, 0xFEFFFF, (void*)M68K_RB, NULL},
+	{0xFF0000, 0xFFFFFF, NULL, &M68K_Mem::Ram_68k.u8[0]},
+	{0x400000, 0xFEFFFF, (void*)M68K_Mem::M68K_RB, NULL},
 	{-1, -1, NULL, NULL}
 };
 
@@ -89,24 +92,24 @@ STARSCREAM_DATAREGION M68K::M68K_Read_Byte[4] =
 STARSCREAM_DATAREGION M68K::M68K_Read_Word[4] =
 {
 	{0x000000, 0x3FFFFF, NULL, NULL},
-	{0xFF0000, 0xFFFFFF, NULL, &Ram_68k.u8[0]},
-	{0x400000, 0xFEFFFF, (void*)M68K_RW, NULL},
+	{0xFF0000, 0xFFFFFF, NULL, &M68K_Mem::Ram_68k.u8[0]},
+	{0x400000, 0xFEFFFF, (void*)M68K_Mem::M68K_RW, NULL},
 	{-1, -1, NULL, NULL}
 };
 
 // M68K Starscream has a hack for RAM mirroring for data write.
 STARSCREAM_DATAREGION M68K::M68K_Write_Byte[3] =
 {
-	{0xFF0000, 0xFFFFFF, NULL, &Ram_68k.u8[0]},
-	{0x000000, 0xFEFFFF, (void*)M68K_WB, NULL},
+	{0xFF0000, 0xFFFFFF, NULL, &M68K_Mem::Ram_68k.u8[0]},
+	{0x000000, 0xFEFFFF, (void*)M68K_Mem::M68K_WB, NULL},
 	{-1, -1, NULL, NULL}
 };
 
 // M68K Starscream has a hack for RAM mirroring for data write.
 STARSCREAM_DATAREGION M68K::M68K_Write_Word[3] =
 {
-	{0xFF0000, 0xFFFFFF, NULL, &Ram_68k.u8[0]},
-	{0x000000, 0xFEFFFF, (void*)M68K_WW, NULL},
+	{0xFF0000, 0xFFFFFF, NULL, &M68K_Mem::Ram_68k.u8[0]},
+	{0x000000, 0xFEFFFF, (void*)M68K_Mem::M68K_WW, NULL},
 	{-1, -1, NULL, NULL}
 };
 
@@ -162,12 +165,12 @@ void M68K::InitSys(SysID system)
 	// TODO: This is not 64-bit clean!
 	
 	// Clear M68K RAM.
-	memset(Ram_68k.u8, 0x00, sizeof(Ram_68k.u8));
+	memset(M68K_Mem::Ram_68k.u8, 0x00, sizeof(M68K_Mem::Ram_68k.u8));
 	
 	// Set the ROM fetch.
 	M68K_Fetch[32].lowaddr  = 0x000000;
-	M68K_Fetch[32].highaddr = (Rom_Size - 1);
-	M68K_Fetch[32].offset   = (unsigned int)(&Rom_Data.u8[0]) - 0x000000;
+	M68K_Fetch[32].highaddr = (M68K_Mem::Rom_Size - 1);
+	M68K_Fetch[32].offset   = (unsigned int)(&M68K_Mem::Rom_Data.u8[0]) - 0x000000;
 	
 	switch (system)
 	{
@@ -221,5 +224,7 @@ void M68K::InitSys(SysID system)
 	main68k_reset();
 	
 	// Initialize the M68K memory handlers.
-	Init_Memory_M68K(system);
+	M68K_Mem::Init(system);
+}
+
 }

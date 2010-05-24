@@ -25,6 +25,7 @@
 #define __LIBGENS_CPU_M68K_MEM_HPP__
 
 #include <stdint.h>
+#include "M68K.hpp"
 
 namespace LibGens
 {
@@ -90,29 +91,12 @@ class M68K_Mem
 		static int CPU_Mode;
 		static int Gen_Mode;
 		
-		static void Init_Memory_M68K(int System_ID);
+		/** Public init and read/write functions. **/
+		static void Init(M68K::SysID system);
 		static uint8_t M68K_RB(uint32_t address);
 		static uint16_t M68K_RW(uint32_t address);
 		static void M68K_WB(uint32_t address, uint8_t data);
 		static void M68K_WW(uint32_t address, uint16_t data);
-		
-		/** Main MC68000 read/write functions. **/
-		typedef uint8_t  (*M68K_Read_Byte_fn)(uint32_t address);
-		typedef uint16_t (*M68K_Read_Word_fn)(uint32_t address);
-		typedef void     (*M68K_Write_Byte_fn)(uint32_t address, uint8_t data);
-		typedef void     (*M68K_Write_Word_fn)(uint32_t address, uint8_t data);
-		
-		/** Main M68K function tables. (512 KB pages; 0x20 entries.) **/
-		static M68K_Read_Byte_fn M68K_Read_Byte_Table[0x20];
-		static M68K_Read_Word_fn M68K_Read_Word_Table[0x20];
-		static M68K_Write_Byte_fn M68K_Write_Byte_Table[0x20];
-		static M68K_Write_Word_fn M68K_Write_Word_Table[0x20];
-		
-		/** Default M68K function tables for MD. **/
-		static const M68K_Read_Byte_fn MD_M68K_Read_Byte_Table[0x20];
-		static const M68K_Read_Word_fn MD_M68K_Read_Word_Table[0x20];
-		static const M68K_Write_Byte_fn MD_M68K_Write_Byte_Table[0x20];
-		static const M68K_Write_Word_fn MD_M68K_Write_Word_Table[0x20];
 	
 	protected:
 		/** Read Byte functions. **/
@@ -143,6 +127,24 @@ class M68K_Mem
 		static void M68K_Write_Byte_Ram(uint32_t address, uint8_t data);
 		static void M68K_Write_Byte_Misc(uint32_t address, uint8_t data);
 		static void M68K_Write_Byte_VDP(uint32_t address, uint8_t data);
+		
+		/** Main MC68000 read/write functions. **/
+		typedef uint8_t  (*M68K_Read_Byte_fn)(uint32_t address);
+		typedef uint16_t (*M68K_Read_Word_fn)(uint32_t address);
+		typedef void     (*M68K_Write_Byte_fn)(uint32_t address, uint8_t data);
+		typedef void     (*M68K_Write_Word_fn)(uint32_t address, uint8_t data);
+		
+		/** Main M68K function tables. (512 KB pages; 0x20 entries.) **/
+		static M68K_Read_Byte_fn M68K_Read_Byte_Table[0x20];
+		static M68K_Read_Word_fn M68K_Read_Word_Table[0x20];
+		static M68K_Write_Byte_fn M68K_Write_Byte_Table[0x20];
+		static M68K_Write_Word_fn M68K_Write_Word_Table[0x20];
+		
+		/** Default M68K function tables for MD. **/
+		static const M68K_Read_Byte_fn MD_M68K_Read_Byte_Table[0x20];
+		static const M68K_Read_Word_fn MD_M68K_Read_Word_Table[0x20];
+		static const M68K_Write_Byte_fn MD_M68K_Write_Byte_Table[0x20];
+		static const M68K_Write_Word_fn MD_M68K_Write_Word_Table[0x20];
 };
 
 }

@@ -24,6 +24,9 @@
 #include "M68K_Mem.hpp"
 #include "MD/VdpIo.hpp"
 
+// C includes.
+#include <string.h>
+
 namespace LibGens
 {
 
@@ -969,5 +972,158 @@ const M68K_Mem::M68K_Read_Word_fn M68K_Mem::MD_M68K_Read_Word_Table[0x20] =
 	M68K_Read_Word_Ram,		// 0xF00000 - 0xF7FFFF [Bank 0x1E]
 	M68K_Read_Word_Ram,		// 0xF80000 - 0xFFFFFF [Bank 0x1F]
 };
+
+
+const M68K_Mem::M68K_Write_Byte_fn M68K_Mem::MD_M68K_Write_Byte_Table[0x20] =
+{
+	M68K_Write_Byte_SRam,		// 0x000000 - 0x07FFFF [Bank 0x00]
+	M68K_Write_Byte_SRam,		// 0x080000 - 0x0FFFFF [Bank 0x01]
+	M68K_Write_Byte_SRam,		// 0x100000 - 0x17FFFF [Bank 0x02]
+	M68K_Write_Byte_SRam,		// 0x180000 - 0x1FFFFF [Bank 0x03]
+	M68K_Write_Byte_SRam,		// 0x200000 - 0x27FFFF [Bank 0x04]
+	M68K_Write_Byte_SRam,		// 0x280000 - 0x2FFFFF [Bank 0x05]
+	M68K_Write_Byte_SRam,		// 0x300000 - 0x37FFFF [Bank 0x06]
+	M68K_Write_Byte_SRam,		// 0x380000 - 0x3FFFFF [Bank 0x07]
+	M68K_Write_Byte_SRam,		// 0x400000 - 0x47FFFF [Bank 0x08]
+	M68K_Write_Byte_SRam,		// 0x480000 - 0x4FFFFF [Bank 0x09]
+	M68K_Write_Byte_SRam,		// 0x500000 - 0x57FFFF [Bank 0x0A]
+	M68K_Write_Byte_SRam,		// 0x580000 - 0x5FFFFF [Bank 0x0B]
+	M68K_Write_Byte_SRam,		// 0x600000 - 0x67FFFF [Bank 0x0C]
+	M68K_Write_Byte_SRam,		// 0x680000 - 0x6FFFFF [Bank 0x0D]
+	M68K_Write_Byte_SRam,		// 0x700000 - 0x77FFFF [Bank 0x0E]
+	M68K_Write_Byte_SRam,		// 0x780000 - 0x7FFFFF [Bank 0x0F]
+	M68K_Write_Byte_Default,	// 0x800000 - 0x87FFFF [Bank 0x10]
+	M68K_Write_Byte_Default,	// 0x880000 - 0x8FFFFF [Bank 0x11]
+	M68K_Write_Byte_Default,	// 0x900000 - 0x97FFFF [Bank 0x12]
+	M68K_Write_Byte_Default,	// 0x980000 - 0x9FFFFF [Bank 0x13]
+	M68K_Write_Byte_Misc,		// 0xA00000 - 0xA7FFFF [Bank 0x14]
+	M68K_Write_Byte_Default,	// 0xA80000 - 0xAFFFFF [Bank 0x15]
+	M68K_Write_Byte_Default,	// 0xB00000 - 0xB7FFFF [Bank 0x16]
+	M68K_Write_Byte_Default,	// 0xB80000 - 0xBFFFFF [Bank 0x17]
+	M68K_Write_Byte_VDP,		// 0xC00000 - 0xC7FFFF [Bank 0x18]
+	M68K_Write_Byte_VDP,		// 0xC80000 - 0xCFFFFF [Bank 0x19]
+	M68K_Write_Byte_VDP,		// 0xD00000 - 0xD7FFFF [Bank 0x1A]
+	M68K_Write_Byte_VDP,		// 0xD80000 - 0xDFFFFF [Bank 0x1B]
+	M68K_Write_Byte_Ram,		// 0xE00000 - 0xE7FFFF [Bank 0x1C]
+	M68K_Write_Byte_Ram,		// 0xE80000 - 0xEFFFFF [Bank 0x1D]
+	M68K_Write_Byte_Ram,		// 0xF00000 - 0xF7FFFF [Bank 0x1E]
+	M68K_Write_Byte_Ram,		// 0xF80000 - 0xFFFFFF [Bank 0x1F]
+};
+
+
+const M68K_Mem::M68K_Write_Word_fn M68K_Mem::MD_M68K_Write_Word_Table[0x20] =
+{
+	// TODO: Implement these functions!
+#if 0	
+	M68K_Write_Word_SRam,		// 0x000000 - 0x07FFFF [Bank 0x00]
+	M68K_Write_Word_SRam,		// 0x080000 - 0x0FFFFF [Bank 0x01]
+	M68K_Write_Word_SRam,		// 0x100000 - 0x17FFFF [Bank 0x02]
+	M68K_Write_Word_SRam,		// 0x180000 - 0x1FFFFF [Bank 0x03]
+	M68K_Write_Word_SRam,		// 0x200000 - 0x27FFFF [Bank 0x04]
+	M68K_Write_Word_SRam,		// 0x280000 - 0x2FFFFF [Bank 0x05]
+	M68K_Write_Word_SRam,		// 0x300000 - 0x37FFFF [Bank 0x06]
+	M68K_Write_Word_SRam,		// 0x380000 - 0x3FFFFF [Bank 0x07]
+	M68K_Write_Word_SRam,		// 0x400000 - 0x47FFFF [Bank 0x08]
+	M68K_Write_Word_SRam,		// 0x480000 - 0x4FFFFF [Bank 0x09]
+	M68K_Write_Word_SRam,		// 0x500000 - 0x57FFFF [Bank 0x0A]
+	M68K_Write_Word_SRam,		// 0x580000 - 0x5FFFFF [Bank 0x0B]
+	M68K_Write_Word_SRam,		// 0x600000 - 0x67FFFF [Bank 0x0C]
+	M68K_Write_Word_SRam,		// 0x680000 - 0x6FFFFF [Bank 0x0D]
+	M68K_Write_Word_SRam,		// 0x700000 - 0x77FFFF [Bank 0x0E]
+	M68K_Write_Word_SRam,		// 0x780000 - 0x7FFFFF [Bank 0x0F]
+	M68K_Write_Word_Default,	// 0x800000 - 0x87FFFF [Bank 0x10]
+	M68K_Write_Word_Default,	// 0x880000 - 0x8FFFFF [Bank 0x11]
+	M68K_Write_Word_Default,	// 0x900000 - 0x97FFFF [Bank 0x12]
+	M68K_Write_Word_Default,	// 0x980000 - 0x9FFFFF [Bank 0x13]
+	M68K_Write_Word_Misc,		// 0xA00000 - 0xA7FFFF [Bank 0x14]
+	M68K_Write_Word_Default,	// 0xA80000 - 0xAFFFFF [Bank 0x15]
+	M68K_Write_Word_Default,	// 0xB00000 - 0xB7FFFF [Bank 0x16]
+	M68K_Write_Word_Default,	// 0xB80000 - 0xBFFFFF [Bank 0x17]
+	M68K_Write_Word_VDP,		// 0xC00000 - 0xC7FFFF [Bank 0x18]
+	M68K_Write_Word_VDP,		// 0xC80000 - 0xCFFFFF [Bank 0x19]
+	M68K_Write_Word_VDP,		// 0xD00000 - 0xD7FFFF [Bank 0x1A]
+	M68K_Write_Word_VDP,		// 0xD80000 - 0xDFFFFF [Bank 0x1B]
+	M68K_Write_Word_Ram,		// 0xE00000 - 0xE7FFFF [Bank 0x1C]
+	M68K_Write_Word_Ram,		// 0xE80000 - 0xEFFFFF [Bank 0x1D]
+	M68K_Write_Word_Ram,		// 0xF00000 - 0xF7FFFF [Bank 0x1E]
+	M68K_Write_Word_Ram,		// 0xF80000 - 0xFFFFFF [Bank 0x1F]
+#endif
+};
+
+
+/** Public init and read/write functions. **/
+
+
+/**
+ * M68K_Mem::Init(): Initialize the M68K memory handler.
+ * @param system System ID.
+ */
+void M68K_Mem::Init(M68K::SysID system)
+{
+	switch (system)
+	{
+		case M68K::SYSID_MD:
+			// Sega Genesis / Mega Drive.
+			memcpy(M68K_Read_Byte_Table, MD_M68K_Read_Byte_Table, sizeof(M68K_Read_Byte_Table));
+			memcpy(M68K_Read_Word_Table, MD_M68K_Read_Word_Table, sizeof(M68K_Read_Word_Table));
+			memcpy(M68K_Write_Byte_Table, MD_M68K_Write_Byte_Table, sizeof(M68K_Write_Byte_Table));
+			memcpy(M68K_Write_Word_Table, MD_M68K_Write_Word_Table, sizeof(M68K_Write_Word_Table));
+			break;
+		
+		case M68K::SYSID_MCD:
+		case M68K::SYSID_32X:
+		default:
+			// Unsupported system.
+			break;
+	}
+}
+
+
+/**
+ * M68K_Mem::M68K_RB(): Read a byte from the M68K address space.
+ * @param address Address.
+ * @return Byte from the M68K address space.
+ */
+uint8_t M68K_Mem::M68K_RB(uint32_t address)
+{
+	address &= 0xFFFFFF;
+	return M68K_Read_Byte_Table[address >> 17](address);
+}
+
+
+/**
+ * M68K_Mem::M68K_RW(): Read a word from the M68K address space.
+ * @param address Address.
+ * @return Word from the M68K address space.
+ */
+uint16_t M68K_Mem::M68K_RW(uint32_t address)
+{
+	address &= 0xFFFFFF;
+	return M68K_Read_Word_Table[address >> 17](address);
+}
+
+
+/**
+ * M68K_Mem::M68K_WB(): Write a byte to the M68K address space.
+ * @param address Address.
+ * @param data Byte to write.
+ */
+void M68K_Mem::M68K_WB(uint32_t address, uint8_t data)
+{
+	address &= 0xFFFFFF;
+	M68K_Write_Byte_Table[address >> 17](address, data);
+}
+
+
+/**
+ * M68K_Mem::M68K_WW(): Write a word to the M68K address space.
+ * @param address Address.
+ * @param data Word to write.
+ */
+void M68K_Mem::M68K_WW(uint32_t address, uint16_t data)
+{
+	address &= 0xFFFFFF;
+	M68K_Write_Word_Table[address >> 17](address, data);
+}
 
 }
