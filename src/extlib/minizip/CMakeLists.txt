@@ -13,7 +13,7 @@ SET(minizip_SRCS
 
 # Platform-specific sources.
 IF(WIN32)
-	SET(minizip_PLATFORM_SRCS io_win32.c)
+	SET(minizip_PLATFORM_SRCS iowin32.c)
 ELSE()
 	SET(minizip_PLATFORM_SRCS ioapi.c)
 ENDIF()
