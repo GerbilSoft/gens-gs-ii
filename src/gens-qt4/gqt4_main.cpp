@@ -56,6 +56,9 @@ int gqt4_main(int argc, char *argv[])
 	GensQt4::Win32_SetFont();
 #endif
 	
+	// Initialize LibGens.
+	LibGens::Init();
+	
 	GensQt4::GensWindow gens_window;
 	gens_window.show();
 	

@@ -26,7 +26,6 @@
 
 #include <QMainWindow>
 
-#include "SdlWidget.hpp"
 #include "ui_AboutWindow.h"
 
 namespace GensQt4

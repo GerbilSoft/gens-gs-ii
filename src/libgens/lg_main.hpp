@@ -27,21 +27,13 @@
 // Needed for NULL.
 #include <string.h>
 
-#include "MtQueue.hpp"
-
 namespace LibGens
 {
 
 bool IsRunning(void);
 
-int Init(void *wid = NULL);
+int Init(void);
 int End(void);
-
-int LgThread(void *param);
-
-// UI to LibGens queue.
-extern MtQueue *qToLG;
-void MtQ_Callback(MtQueue *mtq);
 
 }
 

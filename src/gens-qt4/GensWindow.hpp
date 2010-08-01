@@ -37,7 +37,9 @@
 
 #include <QCloseEvent>
 
-#include "SdlWidget.hpp"
+#include <QtGui/QVBoxLayout>
+
+#include "GensQGLWidget.hpp"
 #include "GensMenuBar.hpp"
 
 namespace GensQt4
@@ -57,8 +59,8 @@ class GensWindow : public GENSWINDOW_BASECLASS
 		GensWindow();
 		
 		// Widgets.
-		SdlWidget *sdl;		// SDL widget.
-		GensMenuBar *m_menubar;	// Gens menu bar.
+		GensQGLWidget *m_glWidget;	// QGLWidget.
+		GensMenuBar *m_menubar;		// Gens menu bar.
 		
 #ifdef GQT4_USE_QMAINWINDOW
 		// QMainWindow-specific functions.
@@ -79,6 +81,7 @@ class GensWindow : public GENSWINDOW_BASECLASS
 		
 #ifdef GQT4_USE_QMAINWINDOW
 		QWidget *centralwidget;
+		QVBoxLayout *layout;
 #endif
 	
 	protected slots:

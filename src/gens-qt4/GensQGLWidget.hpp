@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * SdlWidget.hpp: SDL Widget class.                                        *
+ * GensQGLWidget.hpp: QGLWidget subclass.                                  *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -24,35 +24,27 @@
 #ifndef __GENS_QT4_SDLWIDGET_HPP__
 #define __GENS_QT4_SDLWIDGET_HPP__
 
-#include <QtCore/qglobal.h>
 #include <QtCore/QObject>
-
-#ifdef Q_WS_X11
-#include <QtGui/QX11EmbedContainer>
-#define SDLWIDGET_BASECLASS QX11EmbedContainer
-#else
-// TODO: Verify that this works properly!
-#include <QtGui/QWidget>
-#define SDLWIDGET_BASECLASS QWidget
-#endif
-
+#include <QtOpenGL/QGLWidget>
 
 namespace GensQt4
 {
 
-class SdlWidget : public SDLWIDGET_BASECLASS
+class GensQGLWidget : public QGLWidget
 {
 	Q_OBJECT
 	
 	public:
-		SdlWidget(QWidget *parent = NULL);
-	
-	signals:
-		void sdlHasResized(QSize size);
+		GensQGLWidget(QWidget *parent = 0);
 	
 	protected:
-		void paintEvent(QPaintEvent *event);
-		void showEvent(QShowEvent *event);
+		void initializeGL(void);
+		
+		void resizeGL(int width, int height);
+		void paintGL(void);
+		
+		// OpenGL Texture ID.
+		GLuint m_tex;
 };
 
 }

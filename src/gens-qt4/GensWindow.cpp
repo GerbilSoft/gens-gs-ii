@@ -101,15 +101,23 @@ void GensWindow::setupUi(void)
 	m_menubar = new GensMenuBar(this);
 	this->setMenuBar(m_menubar);
 	
-	// Create the SDL widget.
-	sdl = new SdlWidget(this->centralwidget);
-	QObject::connect(sdl, SIGNAL(sdlHasResized(QSize)),
-			 this, SLOT(resizeEvent(QSize)));
+	// Create the QGLWidget.
+	// TODO: Make this use a pluggable backend instead.
+	m_glWidget = new GensQGLWidget(this->centralwidget);
+	
+	// Create the layout.
+	layout = new QVBoxLayout(this->centralwidget);
+	layout->setObjectName(QString::fromUtf8("layout"));
+	layout->setMargin(0);
+	layout->setSpacing(0);
+	layout->addWidget(m_glWidget);
+	centralwidget->setLayout(layout);
 	
 	// Resize the window.
 	gensResize();
 #else
 	// GensWindow is not a QMainWindow.
+	// TODO
 	
 	// Create the menubar.
 	m_menubar = new GensMenuBar(NULL);
@@ -168,6 +176,8 @@ void GensWindow::closeEvent(QCloseEvent *event)
  */
 void GensWindow::gensResize(void)
 {
+	// TODO: Update for QGLWidget.
+#if 0
 	// Get the SDL window size.
 	int sdl_width = LibGens::SdlVideo::Width();
 	int sdl_height = LibGens::SdlVideo::Height();
@@ -195,6 +205,7 @@ void GensWindow::gensResize(void)
 	// Set the size of the SDL widget.
 	this->sdl->setMinimumSize(new_width, new_height);
 	this->sdl->setMaximumSize(new_width, new_height);
+#endif
 }
 #endif
 
@@ -222,7 +233,7 @@ void GensWindow::menuTriggered(int id)
 		{
 			case MNUID_ITEM(IDM_FILE_BLIT):
 				// Blit!
-				LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_BLIT_MDSCREEN, NULL);
+				// TODO
 				break;
 			
 			case MNUID_ITEM(IDM_FILE_QUIT):
@@ -252,6 +263,7 @@ void GensWindow::menuTriggered(int id)
 	else if (MNUID_MENU(id) == IDM_RESTEST_MENU)
 	{
 		// Resolution Testing.
+#if 0
 		switch (MNUID_ITEM(id))
 		{
 			case MNUID_ITEM(IDM_RESTEST_1X):
@@ -277,6 +289,7 @@ void GensWindow::menuTriggered(int id)
 			default:
 				break;
 		}
+#endif
 	}
 }
 

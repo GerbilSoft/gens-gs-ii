@@ -2,6 +2,8 @@ PROJECT(gens-qt4)
 cmake_minimum_required(VERSION 2.6)
 
 # Find Qt4.
+SET(QT_USE_QTGUI TRUE)
+SET(QT_USE_QTOPENGL TRUE)
 FIND_PACKAGE(Qt4)
 INCLUDE(${QT_USE_FILE})
 
@@ -21,18 +23,18 @@ ENDIF()
 # Sources.
 SET(gens-qt4_SRCS
 	gqt4_main.cpp
-	SdlWidget.cpp
 	GensWindow.cpp
 	AboutWindow.cpp
 	GensMenuBar.cpp
+	GensQGLWidget.cpp
 	)
 
 # Headers with Qt4 objects.
 SET(gens-qt4_MOC_HEADERS
-	SdlWidget.hpp
 	GensWindow.hpp
 	AboutWindow.hpp
 	GensMenuBar.hpp
+	GensQGLWidget.hpp
 	)
 
 # Create .moc files for sources that need them.
