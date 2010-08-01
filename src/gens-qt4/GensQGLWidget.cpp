@@ -47,10 +47,67 @@ GensQGLWidget::~GensQGLWidget()
 {
 	if (m_tex > 0)
 	{
+		glEnable(GL_TEXTURE_2D);
 		glDeleteTextures(1, &m_tex);
 		m_tex = 0;
+		glDisable(GL_TEXTURE_2D);
 	}
 }
+
+
+/**
+ * reallocTexture(): (Re-)Allocate the OpenGL texture.
+ */
+void GensQGLWidget::reallocTexture(void)
+{
+	if (m_tex > 0)
+		glDeleteTextures(1, &m_tex);
+	
+	// Create and initialize a GL texture.
+	glEnable(GL_TEXTURE_2D);
+	glGenTextures(1, &m_tex);
+	glBindTexture(GL_TEXTURE_2D, m_tex);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	
+	// GL filtering.
+	// TODO: Make this customizable!
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	
+	// Determine the texture format and type.
+	m_lastBpp = LibGens::VdpRend::Bpp;
+	switch (m_lastBpp)
+	{
+		case LibGens::VdpRend::BPP_15:
+			m_texFormat = GL_BGRA;
+			m_texType = GL_UNSIGNED_SHORT_1_5_5_5_REV;
+			break;
+		
+		case LibGens::VdpRend::BPP_16:
+			m_texFormat = GL_RGB;
+			m_texType = GL_UNSIGNED_SHORT_5_6_5;
+			break;
+		
+		case LibGens::VdpRend::BPP_32:
+		default:
+			m_texFormat = GL_BGRA;
+			m_texType = GL_UNSIGNED_BYTE;
+			break;
+	}
+	
+	// Allocate the texture.
+	glTexImage2D(GL_TEXTURE_2D, 0, 3,
+		     512, 256,	// 512x256 (320x240 rounded up to nearest powers of two)
+		     0,		// No border.
+		     m_texFormat, m_texType, NULL);
+	
+	glDisable(GL_TEXTURE_2D);
+	
+	// Texture is dirty.
+	m_dirty = true;
+}
+
 
 /**
  * initializeGL(): Called when GL is initialized.
@@ -63,26 +120,10 @@ void GensQGLWidget::initializeGL(void)
 	// Initialize the GL viewport and projection.
 	resizeGL(320, 240);
 	
-	// Create and initialize a GL texture.
-	glEnable(GL_TEXTURE_2D);
-	glGenTextures(1, &m_tex);
-	glBindTexture(GL_TEXTURE_2D, m_tex);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	
-	// GL filtering.
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	
 	// Allocate the texture.
-	// TODO: Use the correct GL format and type.
-	glTexImage2D(GL_TEXTURE_2D, 0, 3,
-		     512, 256,	// 512x256 (320x240 rounded up to nearest powers of two)
-		     0,		// No border.
-		     GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
-	
-	glDisable(GL_TEXTURE_2D);
+	reallocTexture();
 }
+
 
 void GensQGLWidget::resizeGL(int width, int height)
 {
@@ -128,6 +169,7 @@ void GensQGLWidget::resizeGL(int width, int height)
 	glLoadIdentity();
 }
 
+
 void GensQGLWidget::paintGL(void)
 {
 	glClearColor(1.0, 0.0, 0.0, 1.0);
@@ -139,15 +181,25 @@ void GensQGLWidget::paintGL(void)
 	if (m_dirty)
 	{
 		// MD_Screen is dirty.
-		// Reupload the texture.
+		
+		// Check if the Bpp has changed.
+		if (LibGens::VdpRend::Bpp != m_lastBpp)
+		{
+			// Bpp has changed. Reallocate the texture.
+			reallocTexture();
+		}
+		
+		// (Re-)Upload the texture.
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 336);
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 8);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 8);
 		
+		// NOTE: MD_Screen.u16 and MD_Screen.u32 are interchangeable here,
+		// since we want the start of the MD_Screen buffer.
 		glTexSubImage2D(GL_TEXTURE_2D, 0,
 				0, 0,		// x/y offset
 				320, 240,	// width/height
-				GL_RGB, GL_UNSIGNED_SHORT_5_6_5,
+				m_texFormat, m_texType,
 				LibGens::VdpRend::MD_Screen.u16);
 		
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);

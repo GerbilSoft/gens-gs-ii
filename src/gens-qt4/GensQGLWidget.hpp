@@ -27,6 +27,8 @@
 #include <QtCore/QObject>
 #include <QtOpenGL/QGLWidget>
 
+#include "libgens/MD/VdpRend.hpp"
+
 namespace GensQt4
 {
 
@@ -39,6 +41,7 @@ class GensQGLWidget : public QGLWidget
 		~GensQGLWidget();
 		
 		void setDirty(void) { m_dirty = true; }
+		void reallocTexture(void);
 		
 	protected:
 		void initializeGL(void);
@@ -51,6 +54,11 @@ class GensQGLWidget : public QGLWidget
 		
 		// Dirty flag. If set, texture must be reuploaded.
 		bool m_dirty;
+		
+		// Texture format.
+		LibGens::VdpRend::ColorDepth m_lastBpp;
+		GLenum m_texFormat;
+		GLenum m_texType;
 };
 
 }
