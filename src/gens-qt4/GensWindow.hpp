@@ -25,19 +25,9 @@
 #define __GENS_QT4_GENSWINDOW_HPP__
 
 // Qt4 includes.
-#include <QtCore/qglobal.h>
-
-#ifndef Q_WS_MAC
-#define GQT4_USE_QMAINWINDOW
-#endif
-
-#ifdef GQT4_USE_QMAINWINDOW
-#include <QMainWindow>
-#endif
-
-#include <QCloseEvent>
-
+#include <QtGui/QMainWindow>
 #include <QtGui/QVBoxLayout>
+#include <QtGui/QCloseEvent>
 
 #include "GensQGLWidget.hpp"
 #include "GensMenuBar.hpp"
@@ -45,13 +35,7 @@
 namespace GensQt4
 {
 
-#ifdef GQT4_USE_QMAINWINDOW
-#define GENSWINDOW_BASECLASS QMainWindow
-#else
-#define GENSWINDOW_BASECLASS QWidget
-#endif
-
-class GensWindow : public GENSWINDOW_BASECLASS
+class GensWindow : public QMainWindow
 {
 	Q_OBJECT
 	
@@ -62,18 +46,12 @@ class GensWindow : public GENSWINDOW_BASECLASS
 		GensQGLWidget *m_glWidget;	// QGLWidget.
 		GensMenuBar *m_menubar;		// Gens menu bar.
 		
-#ifndef GQT4_USE_QMAINWINDOW
-		// Fake GensWindow functions for compatibility.
-		inline void show(void) { }
-#endif
-	
 	protected:
 		void setupUi(void);
 		void retranslateUi(void);
 		
 		void closeEvent(QCloseEvent *event);
 		
-#ifdef GQT4_USE_QMAINWINDOW
 		QWidget *centralwidget;
 		QVBoxLayout *layout;
 		
@@ -82,7 +60,6 @@ class GensWindow : public GENSWINDOW_BASECLASS
 		
 		// GensWindow functions.
 		void gensResize(void);	// Resize the window.
-#endif
 		
 		int m_scale;		// Temporary scaling variable.
 		bool m_hasInitResize;	// Has the initial resize occurred?

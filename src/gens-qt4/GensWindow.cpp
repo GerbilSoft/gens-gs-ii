@@ -56,11 +56,6 @@ GensWindow::GensWindow()
 	
 	// Set up the User Interface.
 	setupUi();
-	
-	/**
-	 * TODO for non-QMainWindow version:
-	 * - Connect SDL_QUIT to closeEvent(). [actually this helps for both]
-	 */
 }
 
 
@@ -71,9 +66,6 @@ void GensWindow::setupUi(void)
 {
 	if (this->objectName().isEmpty())
 		this->setObjectName(QString::fromUtf8("GensWindow"));
-	
-#ifdef GQT4_USE_QMAINWINDOW
-	// GensWindow is a QMainWindow.
 	
 	// Set the window icon.
 	QIcon winIcon;
@@ -108,18 +100,6 @@ void GensWindow::setupUi(void)
 	layout->setSpacing(0);
 	layout->addWidget(m_glWidget);
 	centralwidget->setLayout(layout);
-#else
-	// GensWindow is not a QMainWindow.
-	// TODO
-	
-	// Create the menubar.
-	m_menubar = new GensMenuBar(NULL);
-	
-	// Create the SDL widget.
-	sdl = new SdlWidget(NULL);
-	QObject::connect(sdl, SIGNAL(sdlHasResized(QSize)),
-			 this, SLOT(resizeEvent(QSize)));
-#endif
 	
 	// Connect the GensMenuBar's triggered() signal.
 	connect(m_menubar, SIGNAL(triggered(int)),
@@ -136,15 +116,7 @@ void GensWindow::setupUi(void)
 void GensWindow::retranslateUi(void)
 {
 	// TODO: Indicate UI status.
-#ifdef GQT4_USE_QMAINWINDOW
-	// GensWindow is a QMainWindow.
 	this->setWindowTitle(TR("Gens/GS II"));
-#else	
-	// GensWindow is not a QMainWindow.
-	// TODO: LibGens title setting should be thread-safe. (Use MtQueue!)
-	// TODO: Translate this!
-	LibGens::SdlVideo::SetWindowTitle("Gens/GS II");
-#endif
 }
 
 
@@ -162,7 +134,6 @@ void GensWindow::closeEvent(QCloseEvent *event)
 }
 
 
-#ifdef GQT4_USE_QMAINWINDOW
 /**
  * showEvent(): Window is being shown.
  * @param event Show event.
@@ -202,7 +173,6 @@ void GensWindow::gensResize(void)
 	// Set the new window size.
 	this->resize(img_width, win_height);
 }
-#endif
 
 
 /** Slots. **/
