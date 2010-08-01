@@ -24,9 +24,6 @@
 #ifndef __LIBGENS_SOUND_PSG_HPP__
 #define __LIBGENS_SOUND_PSG_HPP__
 
-namespace LibGens
-{
-
 #include <stdint.h>
 
 #ifndef PURE
@@ -36,6 +33,9 @@ namespace LibGens
 #define PURE
 #endif /* __GNUC__ */
 #endif /* PURE */
+
+namespace LibGens
+{
 
 class Psg
 {
