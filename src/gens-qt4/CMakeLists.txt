@@ -7,6 +7,10 @@ SET(QT_USE_QTOPENGL TRUE)
 FIND_PACKAGE(Qt4)
 INCLUDE(${QT_USE_FILE})
 
+# Find OpenGL.
+# TODO: Disable OpenGL functionality if it isn't found.
+FIND_PACKAGE(OpenGL)
+
 # Main binary directory. Needed for git_version.h
 INCLUDE_DIRECTORIES(${gens-gs-ii_BINARY_DIR})
 
@@ -68,5 +72,7 @@ ENDIF()
 
 # Build the executable.
 ADD_EXECUTABLE(gens-qt4 ${gens-qt4_SRCS} ${gens-qt4_COMPAT_SRCS} ${gens-qt4_MOC_SOURCES} ${gens-qt4_UIS_H} ${gens-qt4_RCC_O})
-TARGET_LINK_LIBRARIES(gens-qt4 gens ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(gens-qt4 gens)
+TARGET_LINK_LIBRARIES(gens-qt4 ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(gens-qt4 ${OpenGL_LIBRARIES})
 ADD_DEPENDENCIES(gens-qt4 gens)
