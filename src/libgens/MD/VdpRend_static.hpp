@@ -24,6 +24,8 @@
 #ifndef __LIBGENS_MD_VDPREND_STATIC_HPP__
 #define __LIBGENS_MD_VDPREND_STATIC_HPP__
 
+#include "VdpRend.hpp"
+
 namespace LibGens
 {
 
@@ -48,6 +50,9 @@ unsigned int VdpRend::VDP_Layers = VdpRend::VDP_LAYERS_DEFAULT;
 
 // Line buffer for current line.
 VdpRend::LineBuf_t VdpRend::LineBuf;
+
+// Color depth.
+VdpRend::ColorDepth VdpRend::Bpp = BPP_16;
 
 }
 

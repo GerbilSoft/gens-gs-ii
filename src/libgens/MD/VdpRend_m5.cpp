@@ -1550,15 +1550,10 @@ void VdpRend_m5::Render_Line(void)
 	}
 	
 	// Render the image.
-	// TODO: Port bppMD to LibGens.
-#if 0
-	if (bppMD != 32)
-#endif
+	if (VdpRend::Bpp != VdpRend::BPP_32)
 		T_Render_LineBuf<uint16_t>(&VdpRend::MD_Screen.u16[LineStart], VdpRend::MD_Palette.u16);
-#if 0
 	else
 		T_Render_LineBuf<uint32_t>(&VdpRend::MD_Screen.u32[LineStart], VdpRend::MD_Palette.u32);
-#endif
 }
 
 

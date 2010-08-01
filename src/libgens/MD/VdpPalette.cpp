@@ -22,6 +22,8 @@
  ***************************************************************************/
 
 #include "VdpPalette.hpp"
+
+#include "VdpRend.hpp"
 #include "VdpIo.hpp"
 
 // C includes.
@@ -302,12 +304,9 @@ static inline void T_Recalculate_Palette_32X(pixel *pal32X, pixel *cramAdjusted3
  */
 void VdpPalette::Recalc(void)
 {
-	// TODO: Implement bppMD in LibGens.
-	const int bppMD = 16;
-	
-	switch (bppMD)
+	switch (VdpRend::Bpp)
 	{
-		case 15:
+		case VdpRend::BPP_15:
 			T_Recalc_MD<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(Palette.u16);
 #if 0
 			// TODO: Port to LibGens.
@@ -316,7 +315,7 @@ void VdpPalette::Recalc(void)
 #endif
 			break;
 		
-		case 16:
+		case VdpRend::BPP_16:
 			T_Recalc_MD<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(Palette.u16);
 #if 0
 			// TODO: Port to LibGens.
@@ -325,7 +324,7 @@ void VdpPalette::Recalc(void)
 #endif
 			break;
 		
-		case 32:
+		case VdpRend::BPP_32:
 		default:
 			T_Recalc_MD<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(Palette.u32);
 #if 0

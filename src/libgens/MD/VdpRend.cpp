@@ -144,9 +144,7 @@ inline void VdpRend::T_Update_Palette(pixel *MD_palette, const pixel *palette)
  */
 void VdpRend::Update_Palette(void)
 {
-	// TODO: Port bppMD to LibGens.
-	const int bppMD = 16;
-	if (bppMD != 32)
+	if (Bpp != BPP_32)
 		T_Update_Palette<false>(MD_Palette.u16, VdpPalette::Palette.u16);
 	else
 		T_Update_Palette<false>(MD_Palette.u32, VdpPalette::Palette.u32);
@@ -158,9 +156,7 @@ void VdpRend::Update_Palette(void)
  */
 void VdpRend::Update_Palette_HS(void)
 {
-	// TODO: Port bppMD to LibGens.
-	const int bppMD = 16;
-	if (bppMD != 32)
+	if (Bpp != BPP_32)
 		T_Update_Palette<true>(MD_Palette.u16, VdpPalette::Palette.u16);
 	else
 		T_Update_Palette<true>(MD_Palette.u32, VdpPalette::Palette.u32);

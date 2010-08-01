@@ -122,6 +122,17 @@ class VdpRend
 			uint32_t u32[336>>1];
 		};
 		static LineBuf_t LineBuf;
+		
+		// Color depth.
+		enum ColorDepth
+		{
+			BPP_15,
+			BPP_16,
+			BPP_32,
+			
+			BPP_MAX
+		};
+		static ColorDepth Bpp;
 	
 	protected:
 		template<bool hs, typename pixel>
