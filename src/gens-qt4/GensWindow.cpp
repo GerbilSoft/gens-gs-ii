@@ -171,41 +171,35 @@ void GensWindow::closeEvent(QCloseEvent *event)
 
 #ifdef GQT4_USE_QMAINWINDOW
 /**
- * gensResize(): Resize the Gens window to fit the SDL window.
- * TODO: Call this when the X11 client is embedded in SdlWidget.
+ * gensResize(): Resize the Gens window to show the image at its expected size.
  */
 void GensWindow::gensResize(void)
 {
-	// TODO: Update for QGLWidget.
-#if 0
-	// Get the SDL window size.
-	int sdl_width = LibGens::SdlVideo::Width();
-	int sdl_height = LibGens::SdlVideo::Height();
+	// Get the drawing size.
+	// TODO: Scale for larger renderers.
+	// TODO: This seems to be a bit taller than the actual size...
+	int img_width = 320;
+	int img_height = 240;
 	
 	// Enforce a minimum size of 320x240.
-	if (sdl_width < 320)
-		sdl_width = 320;
-	if (sdl_height < 240)
-		sdl_width = 240;
+	if (img_width < 320)
+		img_width = 320;
+	if (img_height < 240)
+		img_height = 240;
 	
 	// Initialize to the menu bar size.
 	int new_width = m_menubar->size().width();
 	int new_height = m_menubar->size().height();
 	
 	// Add the SDL window height.
-	new_height += sdl_height;
+	new_height += img_height;
 	
 	// Set the window width to max(m_menubar, SDL).
-	new_width = std::max(new_width, sdl_width);
+	new_width = std::max(new_width, img_width);
 	
 	// Set the new window size.
 	this->setMinimumSize(new_width, new_height);
 	this->setMaximumSize(new_width, new_height);
-	
-	// Set the size of the SDL widget.
-	this->sdl->setMinimumSize(new_width, new_height);
-	this->sdl->setMaximumSize(new_width, new_height);
-#endif
 }
 #endif
 
