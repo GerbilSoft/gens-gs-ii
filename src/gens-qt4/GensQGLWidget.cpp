@@ -27,6 +27,12 @@
 #include <stdio.h>
 #include <libgens/MD/VdpRend.hpp>
 
+// Win32 requires GL/glext.h for OpenGL 1.2/1.3.
+// TODO: Check the GL implementation to see what functionality is available at runtime.
+#ifdef _WIN32
+#include <GL/glext.h>
+#endif
+
 namespace GensQt4
 {
 
