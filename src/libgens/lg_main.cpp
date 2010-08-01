@@ -99,9 +99,6 @@ int Init(void)
 		"51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.\n"
 		"\n");
 	
-	// DEBUG: Initialize MD.
-	EmuMD::Init_TEST();
-	
 	// TODO: Clear LibGens variables.
 	return 0;
 }

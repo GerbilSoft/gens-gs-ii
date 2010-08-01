@@ -28,8 +28,8 @@
 #include "AboutWindow.hpp"
 
 // LibGens.
-#include "libgens/SdlVideo.hpp"
 #include "libgens/lg_main.hpp"
+#include "libgens/MD/EmuMD.hpp"
 
 // C++ includes.
 #include <algorithm>
@@ -233,7 +233,8 @@ void GensWindow::menuTriggered(int id)
 		{
 			case MNUID_ITEM(IDM_FILE_BLIT):
 				// Blit!
-				// TODO
+				LibGens::EmuMD::Init_TEST();
+				m_glWidget->updateGL();
 				break;
 			
 			case MNUID_ITEM(IDM_FILE_QUIT):

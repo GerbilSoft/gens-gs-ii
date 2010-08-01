@@ -33,7 +33,16 @@ namespace GensQt4
 GensQGLWidget::GensQGLWidget(QWidget *parent)
 	: QGLWidget(parent)
 {
-	// TODO: Initialize GensQGLWidget.
+	m_tex = 0;
+}
+
+GensQGLWidget::~GensQGLWidget()
+{
+	if (m_tex > 0)
+	{
+		glDeleteTextures(1, &m_tex);
+		m_tex = 0;
+	}
 }
 
 /**

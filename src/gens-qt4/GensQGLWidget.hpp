@@ -36,6 +36,7 @@ class GensQGLWidget : public QGLWidget
 	
 	public:
 		GensQGLWidget(QWidget *parent = 0);
+		~GensQGLWidget();
 	
 	protected:
 		void initializeGL(void);
