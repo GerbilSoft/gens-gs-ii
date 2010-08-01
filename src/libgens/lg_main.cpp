@@ -23,7 +23,6 @@
 
 #include "lg_main.hpp"
 #include "macros/git.h"
-#include "SdlVideo.hpp"
 
 // C includes.
 #include <stdio.h>
