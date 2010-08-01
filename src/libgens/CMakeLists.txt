@@ -24,6 +24,7 @@ SET(libgens_SRCS
 	cpu/M68K.cpp
 	cpu/M68K_Mem.cpp
 	sound/Psg.cpp
+	sound/Ym2612.cpp
 	)
 
 # Compatibility sources.
