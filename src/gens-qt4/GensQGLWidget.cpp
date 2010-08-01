@@ -34,6 +34,7 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 	: QGLWidget(parent)
 {
 	m_tex = 0;
+	m_dirty = true;
 }
 
 GensQGLWidget::~GensQGLWidget()
@@ -129,20 +130,27 @@ void GensQGLWidget::paintGL(void)
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_tex);
 	
-	// TODO: Copy MD screen to the texture.
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, 336);
-	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 8);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 8);
-	
-	glTexSubImage2D(GL_TEXTURE_2D, 0,
-			0, 0,		// x/y offset
-			320, 240,	// width/height
-			GL_RGB, GL_UNSIGNED_SHORT_5_6_5,
-			LibGens::VdpRend::MD_Screen.u16);
-	
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 0);
+	if (m_dirty)
+	{
+		// MD_Screen is dirty.
+		// Reupload the texture.
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, 336);
+		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 8);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 8);
+		
+		glTexSubImage2D(GL_TEXTURE_2D, 0,
+				0, 0,		// x/y offset
+				320, 240,	// width/height
+				GL_RGB, GL_UNSIGNED_SHORT_5_6_5,
+				LibGens::VdpRend::MD_Screen.u16);
+		
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 0);
+		
+		// Texture is no longer dirty.
+		m_dirty = false;
+	}
 	
 	// Draw the texture.
 	glBegin(GL_QUADS);

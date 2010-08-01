@@ -37,7 +37,9 @@ class GensQGLWidget : public QGLWidget
 	public:
 		GensQGLWidget(QWidget *parent = 0);
 		~GensQGLWidget();
-	
+		
+		void setDirty(void) { m_dirty = true; }
+		
 	protected:
 		void initializeGL(void);
 		
@@ -46,6 +48,9 @@ class GensQGLWidget : public QGLWidget
 		
 		// OpenGL Texture ID.
 		GLuint m_tex;
+		
+		// Dirty flag. If set, texture must be reuploaded.
+		bool m_dirty;
 };
 
 }

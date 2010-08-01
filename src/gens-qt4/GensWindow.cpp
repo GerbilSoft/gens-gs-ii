@@ -192,6 +192,7 @@ void GensWindow::menuTriggered(int id)
 			case MNUID_ITEM(IDM_FILE_BLIT):
 				// Blit!
 				LibGens::EmuMD::Init_TEST();
+				m_glWidget->setDirty();
 				m_glWidget->updateGL();
 				break;
 			
