@@ -78,6 +78,19 @@ int *PSG_Buf[2];
 /** Functions **/
 
 
+Psg::Psg()
+{
+	// TODO: Some initialization should go here!
+}
+
+
+Psg::Psg(int clock, int rate)
+{
+	// Initialize the PSG.
+	reinit(clock, rate);
+}
+
+
 /**
  * reinit(): Initialize the PSG chip.
  * @param clock Clock frequency.
