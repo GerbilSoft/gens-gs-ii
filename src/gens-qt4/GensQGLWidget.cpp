@@ -43,15 +43,9 @@ void GensQGLWidget::initializeGL(void)
 {
 	// OpenGL initialization.
 	glDisable(GL_DEPTH_TEST);
-	glViewport(0, 0, 320, 240);	// MD resolution.
 	
-	// Set the OpenGL projection.
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0, 320, 240, 0, -1, 1);
-	
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	// Initialize the GL viewport and projection.
+	resizeGL(320, 240);
 	
 	// Create and initialize a GL texture.
 	glEnable(GL_TEXTURE_2D);
@@ -77,6 +71,46 @@ void GensQGLWidget::initializeGL(void)
 void GensQGLWidget::resizeGL(int width, int height)
 {
 	printf("Resize to: %dx%d\n", width, height);
+	glViewport(0, 0, width, height);
+	
+	// Set the OpenGL projection.
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	
+	// Aspect ratio constraint.
+	bool aspect_constraint = true;	// TODO: Make this configurable.
+	if (!aspect_constraint)
+	{
+		// No aspect ratio constraint.
+		glOrtho(-1, 1, -1, 1, -1, 1);
+	}
+	else
+	{
+		// Aspect ratio constraint.
+		if ((width * 3) > (height * 4))
+		{
+			// Image is wider than 4:3.
+			glOrtho(-((double)(width * 3) / (double)(height * 4)),
+				 ((double)(width * 3) / (double)(height * 4)),
+				-1, 1, -1, 1);
+		}
+		else if ((width * 3) < (height * 4))
+		{
+			// Image is taller than 4:3.
+			glOrtho(-1, 1,
+				-((double)(height * 4) / (double)(width * 3)),
+				 ((double)(height * 4) / (double)(width * 3)),
+				-1, 1);
+		}
+		else
+		{
+			// Image has the correct aspect ratio.
+			glOrtho(-1, 1, -1, 1, -1, 1);
+		}
+	}
+	
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 }
 
 void GensQGLWidget::paintGL(void)
@@ -105,13 +139,13 @@ void GensQGLWidget::paintGL(void)
 	// Draw the texture.
 	glBegin(GL_QUADS);
 	glTexCoord2d(0.0, 0.0);
-	glVertex2i(0, 0);
+	glVertex2i(-1, 1);
 	glTexCoord2d((320.0/512.0), 0.0);
-	glVertex2i(320, 0);
+	glVertex2i(1, 1);
 	glTexCoord2d((320.0/512.0), (240.0/256.0));
-	glVertex2i(320, 240);
+	glVertex2i(1, -1);
 	glTexCoord2d(0.0, (240.0/256.0));
-	glVertex2i(0, 240);
+	glVertex2i(-1, -1);
 	glEnd();
 	
 	glDisable(GL_TEXTURE_2D);

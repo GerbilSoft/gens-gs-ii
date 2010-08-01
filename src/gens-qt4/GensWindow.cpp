@@ -51,6 +51,9 @@ namespace GensQt4
  */
 GensWindow::GensWindow()
 {
+	// Set the scale to 1x by default.
+	m_scale = 1;
+	
 	// Set up the User Interface.
 	setupUi();
 	
@@ -177,9 +180,9 @@ void GensWindow::gensResize(void)
 {
 	// Get the drawing size.
 	// TODO: Scale for larger renderers.
-	// TODO: This seems to be a bit taller than the actual size...
-	int img_width = 320;
-	int img_height = 240;
+	// TODO: This seems to be a bit taller than the actual size... (7px too big)
+	int img_width = 320 * m_scale;
+	int img_height = 240 * m_scale;
 	
 	// Enforce a minimum size of 320x240.
 	if (img_width < 320)
@@ -195,7 +198,10 @@ void GensWindow::gensResize(void)
 	new_height += img_height;
 	
 	// Set the window width to max(m_menubar, SDL).
-	new_width = std::max(new_width, img_width);
+	// TODO: This doesn't work properly.
+	// (It gets the width of the window, not the required width of the menu bar.)
+	//new_width = std::max(new_width, img_width);
+	new_width = img_width;
 	
 	// Set the new window size.
 	this->setMinimumSize(new_width, new_height);
@@ -257,33 +263,31 @@ void GensWindow::menuTriggered(int id)
 	else if (MNUID_MENU(id) == IDM_RESTEST_MENU)
 	{
 		// Resolution Testing.
-#if 0
 		switch (MNUID_ITEM(id))
 		{
 			case MNUID_ITEM(IDM_RESTEST_1X):
-				LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SDLVIDEO_RESIZE,
-						LG_UINT_TO_POINTER(LibGens::SdlVideo::PackRes(320, 240)));
+				m_scale = 1;
+				gensResize();
 				break;
 			
 			case MNUID_ITEM(IDM_RESTEST_2X):
-				LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SDLVIDEO_RESIZE,
-						LG_UINT_TO_POINTER(LibGens::SdlVideo::PackRes(640, 480)));
+				m_scale = 2;
+				gensResize();
 				break;
 			
 			case MNUID_ITEM(IDM_RESTEST_3X):
-				LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SDLVIDEO_RESIZE,
-						LG_UINT_TO_POINTER(LibGens::SdlVideo::PackRes(960, 720)));
+				m_scale = 3;
+				gensResize();
 				break;
 			
 			case MNUID_ITEM(IDM_RESTEST_4X):
-				LibGens::qToLG->push(LibGens::MtQueue::MTQ_LG_SDLVIDEO_RESIZE,
-						LG_UINT_TO_POINTER(LibGens::SdlVideo::PackRes(1280, 960)));
+				m_scale = 4;
+				gensResize();
 				break;
 			
 			default:
 				break;
 		}
-#endif
 	}
 }
 

@@ -83,6 +83,9 @@ class GensWindow : public GENSWINDOW_BASECLASS
 		QWidget *centralwidget;
 		QVBoxLayout *layout;
 #endif
+		
+		// Temporary scaling variable.
+		int m_scale;
 	
 	protected slots:
 		// Window resize.
