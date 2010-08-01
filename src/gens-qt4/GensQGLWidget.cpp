@@ -79,7 +79,6 @@ void GensQGLWidget::initializeGL(void)
 
 void GensQGLWidget::resizeGL(int width, int height)
 {
-	printf("Resize to: %dx%d\n", width, height);
 	glViewport(0, 0, width, height);
 	
 	// Set the OpenGL projection.
