@@ -347,12 +347,12 @@ void Psg::restoreState(const uint32_t state[8])
 {
 	for (int i = 0; i < 8; i++)
 	{
-		write(0x80 | (i << 4) | (state[i] & 0xF));
+		this->write(0x80 | (i << 4) | (state[i] & 0xF));
 		
 		// Only write DATA bytes for tone registers.
 		// Don't write DATA bytes for volume or noise registers.
 		if (!(i & 1) && i < 6)
-			write((state[i] >> 4) & 0x3F);
+			this->write((state[i] >> 4) & 0x3F);
 	}
 }
 
