@@ -51,8 +51,8 @@ namespace GensQt4
  */
 GensWindow::GensWindow()
 {
-	// Set the scale to 1x by default.
-	m_scale = 1;
+	m_scale = 1;		// Set the scale to 1x by default.
+	m_hasInitResize = false;
 	
 	// Set up the User Interface.
 	setupUi();
@@ -82,13 +82,6 @@ void GensWindow::setupUi(void)
 	winIcon.addFile(":/gens/gensgs_16x16.png", QSize(16, 16));
 	this->setWindowIcon(winIcon);
 	
-	// Size policy.
-	QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	sizePolicy.setHorizontalStretch(0);
-	sizePolicy.setVerticalStretch(0);
-	sizePolicy.setHeightForWidth(this->sizePolicy().hasHeightForWidth());
-	this->setSizePolicy(sizePolicy);
-	
 	// Create the central widget.
 	centralwidget = new QWidget(this);
 	centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
@@ -115,9 +108,6 @@ void GensWindow::setupUi(void)
 	layout->setSpacing(0);
 	layout->addWidget(m_glWidget);
 	centralwidget->setLayout(layout);
-	
-	// Resize the window.
-	gensResize();
 #else
 	// GensWindow is not a QMainWindow.
 	// TODO
@@ -174,13 +164,27 @@ void GensWindow::closeEvent(QCloseEvent *event)
 
 #ifdef GQT4_USE_QMAINWINDOW
 /**
+ * showEvent(): Window is being shown.
+ * @param event Show event.
+ */
+void GensWindow::showEvent(QShowEvent *event)
+{
+	if (m_hasInitResize)
+		return;
+	
+	// Run the initial resize.
+	m_hasInitResize = true;
+	gensResize();
+}
+
+
+/**
  * gensResize(): Resize the Gens window to show the image at its expected size.
  */
 void GensWindow::gensResize(void)
 {
 	// Get the drawing size.
 	// TODO: Scale for larger renderers.
-	// TODO: This seems to be a bit taller than the actual size... (7px too big)
 	int img_width = 320 * m_scale;
 	int img_height = 240 * m_scale;
 	
@@ -190,34 +194,18 @@ void GensWindow::gensResize(void)
 	if (img_height < 240)
 		img_height = 240;
 	
-	// Initialize to the menu bar size.
-	int new_width = m_menubar->size().width();
-	int new_height = m_menubar->size().height();
-	
-	// Add the SDL window height.
-	new_height += img_height;
-	
-	// Set the window width to max(m_menubar, SDL).
-	// TODO: This doesn't work properly.
-	// (It gets the width of the window, not the required width of the menu bar.)
-	//new_width = std::max(new_width, img_width);
-	new_width = img_width;
+	// Calculate the window height.
+	int win_height = img_height;
+	if (m_menubar)
+		win_height += m_menubar->size().height();
 	
 	// Set the new window size.
-	this->setMinimumSize(new_width, new_height);
-	this->setMaximumSize(new_width, new_height);
+	this->resize(img_width, win_height);
 }
 #endif
 
 
 /** Slots. **/
-
-
-// Window resize.
-void GensWindow::resizeEvent(QSize size)
-{
-	gensResize();
-}
 
 
 /**

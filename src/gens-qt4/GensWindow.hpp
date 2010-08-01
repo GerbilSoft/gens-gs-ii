@@ -62,15 +62,9 @@ class GensWindow : public GENSWINDOW_BASECLASS
 		GensQGLWidget *m_glWidget;	// QGLWidget.
 		GensMenuBar *m_menubar;		// Gens menu bar.
 		
-#ifdef GQT4_USE_QMAINWINDOW
-		// QMainWindow-specific functions.
-		
-		// Resize the window.
-		void gensResize(void);
-#else
+#ifndef GQT4_USE_QMAINWINDOW
 		// Fake GensWindow functions for compatibility.
 		inline void show(void) { }
-		inline void gensResize(void) { }
 #endif
 	
 	protected:
@@ -82,15 +76,18 @@ class GensWindow : public GENSWINDOW_BASECLASS
 #ifdef GQT4_USE_QMAINWINDOW
 		QWidget *centralwidget;
 		QVBoxLayout *layout;
+		
+		// QMainWindow virtual functions.
+		void showEvent(QShowEvent *event);
+		
+		// GensWindow functions.
+		void gensResize(void);	// Resize the window.
 #endif
 		
-		// Temporary scaling variable.
-		int m_scale;
+		int m_scale;		// Temporary scaling variable.
+		bool m_hasInitResize;	// Has the initial resize occurred?
 	
 	protected slots:
-		// Window resize.
-		void resizeEvent(QSize size);
-		
 		// Menu item selection.
 		void menuTriggered(int id);
 };
