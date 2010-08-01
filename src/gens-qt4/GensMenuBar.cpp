@@ -77,6 +77,15 @@ GensMenuBar::GensMenuBar(QWidget *parent)
 		{0, GMI_NORMAL, NULL, NULL, MACCEL_NONE, 0, NULL, NULL}
 	};
 	
+	static const MenuItem gmiBppTest[] =
+	{
+		{IDM_BPPTEST_15, GMI_NORMAL, "15-bit (555)", NULL, MACCEL_NONE, 0, NULL, NULL},
+		{IDM_BPPTEST_16, GMI_NORMAL, "16-bit (565)", NULL, MACCEL_NONE, 0, NULL, NULL},
+		{IDM_BPPTEST_32, GMI_NORMAL, "32-bit (888)", NULL, MACCEL_NONE, 0, NULL, NULL},
+		
+		{0, GMI_NORMAL, NULL, NULL, MACCEL_NONE, 0, NULL, NULL}
+	};
+	
 	static const MenuItem gmiHelp[] =
 	{
 		{IDM_HELP_ABOUT, GMI_NORMAL, "&About Gens/GS II", NULL, MACCEL_NONE, 0, "help-about", ":/oxygen-16x16/help-about.png"},
@@ -88,6 +97,7 @@ GensMenuBar::GensMenuBar(QWidget *parent)
 	{
 		{IDM_FILE_MENU, "&File", &gmiFile[0]},
 		{IDM_RESTEST_MENU, "&ResTest", &gmiResTest[0]},
+		{IDM_BPPTEST_MENU, "&BppTest", &gmiBppTest[0]},
 		{IDM_HELP_MENU, "&Help", &gmiHelp[0]},
 		
 		{0, NULL, NULL}

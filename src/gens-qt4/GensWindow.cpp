@@ -184,70 +184,101 @@ void GensWindow::gensResize(void)
  */
 void GensWindow::menuTriggered(int id)
 {
-	if (MNUID_MENU(id) == IDM_FILE_MENU)
+	switch (MNUID_MENU(id))
 	{
-		// File menu.
-		switch (MNUID_ITEM(id))
-		{
-			case MNUID_ITEM(IDM_FILE_BLIT):
-				// Blit!
-				LibGens::EmuMD::Init_TEST();
-				m_glWidget->setDirty();
-				m_glWidget->updateGL();
-				break;
-			
-			case MNUID_ITEM(IDM_FILE_QUIT):
-				// Quit.
-				QuitGens();
-				this->close();
-				break;
-			
-			default:
-				break;
-		}
-	}
-	else if (MNUID_MENU(id) == IDM_HELP_MENU)
-	{
-		// Help menu.
-		switch (MNUID_ITEM(id))
-		{
-			case MNUID_ITEM(IDM_HELP_ABOUT):
-				// About Gens/GS II.
-				AboutWindow::ShowSingle(this);
-				break;
-			
-			default:
-				break;
-		}
-	}
-	else if (MNUID_MENU(id) == IDM_RESTEST_MENU)
-	{
-		// Resolution Testing.
-		switch (MNUID_ITEM(id))
-		{
-			case MNUID_ITEM(IDM_RESTEST_1X):
-				m_scale = 1;
-				gensResize();
-				break;
-			
-			case MNUID_ITEM(IDM_RESTEST_2X):
-				m_scale = 2;
-				gensResize();
-				break;
-			
-			case MNUID_ITEM(IDM_RESTEST_3X):
-				m_scale = 3;
-				gensResize();
-				break;
-			
-			case MNUID_ITEM(IDM_RESTEST_4X):
-				m_scale = 4;
-				gensResize();
-				break;
-			
-			default:
-				break;
-		}
+		case IDM_FILE_MENU:
+			// File menu.
+			switch (MNUID_ITEM(id))
+			{
+				case MNUID_ITEM(IDM_FILE_BLIT):
+					// Blit!
+					LibGens::EmuMD::Init_TEST();
+					m_glWidget->setDirty();
+					m_glWidget->updateGL();
+					break;
+				
+				case MNUID_ITEM(IDM_FILE_QUIT):
+					// Quit.
+					QuitGens();
+					this->close();
+					break;
+				
+				default:
+					break;
+			}
+			break;
+		
+		case IDM_HELP_MENU:
+			// Help menu.
+			switch (MNUID_ITEM(id))
+			{
+				case MNUID_ITEM(IDM_HELP_ABOUT):
+					// About Gens/GS II.
+					AboutWindow::ShowSingle(this);
+					break;
+				
+				default:
+					break;
+			}
+			break;
+		
+		case IDM_RESTEST_MENU:
+			// Resolution Testing.
+			switch (MNUID_ITEM(id))
+			{
+				case MNUID_ITEM(IDM_RESTEST_1X):
+					m_scale = 1;
+					gensResize();
+					break;
+				
+				case MNUID_ITEM(IDM_RESTEST_2X):
+					m_scale = 2;
+					gensResize();
+					break;
+				
+				case MNUID_ITEM(IDM_RESTEST_3X):
+					m_scale = 3;
+					gensResize();
+					break;
+				
+				case MNUID_ITEM(IDM_RESTEST_4X):
+					m_scale = 4;
+					gensResize();
+					break;
+				
+				default:
+					break;
+			}
+			break;
+		
+		case IDM_BPPTEST_MENU:
+			// Color Depth Testing.
+			switch (MNUID_ITEM(id))
+			{
+				case MNUID_ITEM(IDM_BPPTEST_15):
+					LibGens::VdpRend::Bpp = LibGens::VdpRend::BPP_15;
+					m_glWidget->setDirty();
+					m_glWidget->updateGL();
+					break;
+				
+				case MNUID_ITEM(IDM_BPPTEST_16):
+					LibGens::VdpRend::Bpp = LibGens::VdpRend::BPP_16;
+					m_glWidget->setDirty();
+					m_glWidget->updateGL();
+					break;
+				
+				case MNUID_ITEM(IDM_BPPTEST_32):
+					LibGens::VdpRend::Bpp = LibGens::VdpRend::BPP_32;
+					m_glWidget->setDirty();
+					m_glWidget->updateGL();
+					break;
+				
+				default:
+					break;
+			}
+		
+		default:
+			break;
 	}
 }
 
