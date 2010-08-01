@@ -26,31 +26,16 @@
 
 // C includes.
 #include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdint.h>
 
 // C++ includes.
 #include <string>
 using std::string;
 
-// VDP Rendering and MD emulation loop.
-// TODO: Move to SdlVideo?
-#include "MD/VdpRend.hpp"
-#include "MD/EmuMD.hpp"
-
-#include <SDL/SDL.h>
-
-#define LG_MSG(str, ...) \
-	fprintf(stderr, "LibGens::%s(): " str "\n", __func__, ##__VA_ARGS__)
-
 
 namespace LibGens
 {
 
-
-static bool m_isInit = false;
-static SDL_Thread *ms_thread = NULL;
+static bool ms_IsInit = false;
 
 
 /**
@@ -59,7 +44,7 @@ static SDL_Thread *ms_thread = NULL;
  */
 bool IsRunning(void)
 {
-	return (m_isInit && ms_thread);
+	return ms_IsInit;
 }
 
 
@@ -70,7 +55,7 @@ bool IsRunning(void)
 int Init(void)
 {
 	// TODO: Reference counting?
-	if (m_isInit)
+	if (ms_IsInit)
 		return 0;
 	
 	// Print the Gens/GS startup message.
@@ -99,6 +84,8 @@ int Init(void)
 		"\n");
 	
 	// TODO: Clear LibGens variables.
+	
+	ms_IsInit = true;
 	return 0;
 }
 
@@ -111,6 +98,10 @@ int Init(void)
 int End(void)
 {
 	// TODO
+	if (!ms_IsInit)
+		return 1;
+	
+	ms_IsInit = false;
 	return 0;
 }
 
