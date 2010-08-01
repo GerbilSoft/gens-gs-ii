@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_SDLWIDGET_HPP__
-#define __GENS_QT4_SDLWIDGET_HPP__
+#ifndef __GENS_QT4_GENSQGLWIDGET_HPP__
+#define __GENS_QT4_GENSQGLWIDGET_HPP__
 
 #include <QtCore/QObject>
 #include <QtOpenGL/QGLWidget>
@@ -55,4 +55,4 @@ class GensQGLWidget : public QGLWidget
 
 }
 
-#endif /* __GENS_QT4_SDLWIDGET_HPP__ */
+#endif /* __GENS_QT4_GENSQGLWIDGET_HPP__ */
