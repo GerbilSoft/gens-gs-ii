@@ -23,7 +23,7 @@ SET(libgens_SRCS
 	Save/Zomg.cpp
 	cpu/M68K.cpp
 	cpu/M68K_Mem.cpp
-	sound/psg.cpp
+	sound/Psg.cpp
 	)
 
 # Compatibility sources.

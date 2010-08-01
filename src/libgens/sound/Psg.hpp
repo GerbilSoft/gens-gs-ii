@@ -1,5 +1,6 @@
 /***************************************************************************
- * Gens: TI SN76489 (PSG) emulator.                                        *
+ * libgens: Gens Emulation Library.                                        *
+ * Psg.hpp: TI SN76489 (PSG) emulator.                                     *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville                       *
  * Copyright (c) 2003-2004 by Stéphane Akhoun                              *
