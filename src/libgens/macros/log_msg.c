@@ -29,6 +29,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+// Critical error handler function pointer.
+static log_msg_critical_fn m_critical_fn = NULL;
+
 
 /**
  * log_msg(): LOG_MSG() function.
@@ -63,5 +66,17 @@ void log_msg(const char *channel, int level, const char *fn, const char *msg, ..
 	// Print the message to stderr.
 	fprintf(stderr, "%s\n", out_msg);
 	
-	// TODO: On level 0, invoke a UI function that's registered on startup.
+	// If this is a CRITICAL error, invoke the critical error handler.
+	if (level == LOG_MSG_LEVEL_CRITICAL && m_critical_fn != NULL)
+		m_critical_fn(channel, out_msg);
+}
+
+
+/**
+ * log_msg_register_critical_fn(): Register the critical error handler.
+ * @param critical_fn Critical error handler function.
+ */
+void log_msg_register_critical_fn(log_msg_critical_fn fn)
+{
+	m_critical_fn = fn;
 }
