@@ -47,9 +47,8 @@ const uint32_t Psg::ms_psgStateInit[8] = {0x00, 0x0F, 0x00, 0x0F, 0x00, 0x0F, 0x
 
 /** Gens-specific externs and variables **/
 
-/* Message logging. */ // (TODO: LibGens version.)
-//#include "macros/log_msg.h"
-#define LOG_MSG(x, ...)
+/* Message logging. */
+#include "macros/log_msg.h"
 
 #if 0
 /* GSX v7 savestate functionality. */

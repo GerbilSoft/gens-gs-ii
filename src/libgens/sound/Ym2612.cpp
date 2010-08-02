@@ -42,9 +42,8 @@
 #include <string.h>
 #include <assert.h>
 
-/* Message logging. */ // (TODO: LibGens version.)
-//#include "macros/log_msg.h"
-#define LOG_MSG(x, ...)
+/* Message logging. */
+#include "macros/log_msg.h"
 
 #if 0
 // GSX v7 savestate functionality.
