@@ -114,7 +114,7 @@ typedef void (*log_msg_critical_fn)(const char *channel, const char *msg);
  * log_msg_register_critical_fn(): Register the critical error handler.
  * @param critical_fn Critical error handler function.
  */
-void log_msg_register_critical_fn(log_msg_critical_fn fn);
+void log_msg_register_critical_fn(log_msg_critical_fn critical_fn);
 
 #ifdef __cplusplus
 }

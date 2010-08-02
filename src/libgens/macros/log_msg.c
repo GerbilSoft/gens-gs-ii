@@ -76,7 +76,7 @@ void log_msg(const char *channel, int level, const char *fn, const char *msg, ..
  * log_msg_register_critical_fn(): Register the critical error handler.
  * @param critical_fn Critical error handler function.
  */
-void log_msg_register_critical_fn(log_msg_critical_fn fn)
+void log_msg_register_critical_fn(log_msg_critical_fn critical_fn)
 {
-	m_critical_fn = fn;
+	m_critical_fn = critical_fn;
 }
