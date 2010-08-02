@@ -25,6 +25,7 @@ SET(libgens_SRCS
 	cpu/M68K_Mem.cpp
 	sound/Psg.cpp
 	sound/Ym2612.cpp
+	macros/log_msg.c
 	)
 
 # Compatibility sources.
