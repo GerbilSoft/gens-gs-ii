@@ -38,6 +38,13 @@ extern "C" {
 #endif
 int gqt4_main(int argc, char *argv[]);
 
+/**
+ * gqt4_log_msg_critical(): LOG_MSG() critical error handler.
+ * @param channel Debug channel.
+ * @param msg Message. (Preformatted)
+ */
+void gqt4_log_msg_critical(const char *channel, const char *msg);
+
 #ifdef __cplusplus
 }
 #endif

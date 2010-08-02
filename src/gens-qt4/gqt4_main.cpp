@@ -22,9 +22,14 @@
  ***************************************************************************/
 
 #include "gqt4_main.hpp"
-#include "libgens/lg_main.hpp"
 
-#include <QApplication>
+// LibGens includes.
+#include "libgens/lg_main.hpp"
+#include "libgens/macros/log_msg.h"
+
+#include <QtGui/QApplication>
+#include <QtGui/QMessageBox>
+
 #include "GensWindow.hpp"
 
 #include <stdio.h>
@@ -38,6 +43,9 @@
 #ifdef main
 #undef main
 #endif
+
+// Gens window.
+static GensQt4::GensWindow *gens_window = NULL;
 
 
 /**
@@ -59,8 +67,11 @@ int gqt4_main(int argc, char *argv[])
 	// Initialize LibGens.
 	LibGens::Init();
 	
-	GensQt4::GensWindow gens_window;
-	gens_window.show();
+	// Register the LOG_MSG() critical error handler.
+	log_msg_register_critical_fn(gqt4_log_msg_critical);
+	
+	gens_window = new GensQt4::GensWindow();
+	gens_window->show();
 	
 	// Run the Qt4 UI.
 	int ret = app.exec();
@@ -70,6 +81,18 @@ int gqt4_main(int argc, char *argv[])
 	
 	// Finished.
 	return ret;
+}
+
+
+/**
+ * gqt4_log_msg_critical(): LOG_MSG() critical error handler.
+ * @param channel Debug channel.
+ * @param msg Message. (Preformatted)
+ */
+void gqt4_log_msg_critical(const char *channel, const char *msg)
+{
+	QString title = "Gens Critical Error: " + QString(channel);
+	QMessageBox::critical(gens_window, title, QString(msg));
 }
 
 
