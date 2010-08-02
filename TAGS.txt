@@ -1,0 +1,20 @@
+Description of git tags for Gens/GS II:
+
+gens-qt4-QGLWidget-Win32: Updated the QGLWidget implementation to work
+correctly on Win32. This includes adding 32-bit color texture support,
+which is needed on my VM since Microsoft's OpenGL implementation only
+supports OpenGL 1.1, and 15-bit/16-bit color textures were added in
+OpenGL 1.2 or 1.3.
+
+gens-qt4-QGLWidget: Initial reworking of Gens/GS II to use QGLWidget
+in gens-qt4 instead of SDL Video in LibGens.
+
+libgens-vdp-loadFromZomg: Initial test of the VDP subsystem. A static
+image is loaded from a prototype ZOMG savestate file and displayed
+onscreen.
+
+libgens-initial-vdp: Initial port of Gens/GS r7+'s VDP code into Gens/GS II.
+
+gens-qt4-menubar-refactoring: Refactoring of the gens-qt4 menu bar system.
+
+gens-qt4-initial-ui: Initial Qt4 UI for Gens/GS II.
