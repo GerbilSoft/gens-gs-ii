@@ -30,6 +30,7 @@
 // LibGens.
 #include "libgens/lg_main.hpp"
 #include "libgens/MD/EmuMD.hpp"
+#include "libgens/macros/git.h"
 
 // C++ includes.
 #include <algorithm>
@@ -116,7 +117,14 @@ void GensWindow::setupUi(void)
 void GensWindow::retranslateUi(void)
 {
 	// TODO: Indicate UI status.
-	this->setWindowTitle(TR("Gens/GS II"));
+	QString title = TR("Gens/GS II");
+	title += " - ";
+	title += TR("Development Build");
+#ifdef GENS_GIT_VERSION
+	title += " (" GENS_GIT_VERSION ")";
+#endif
+	
+	this->setWindowTitle(title);
 }
 
 
