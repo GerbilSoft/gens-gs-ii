@@ -92,7 +92,7 @@ int gqt4_main(int argc, char *argv[])
 void gqt4_log_msg_critical(const char *channel, const char *msg)
 {
 	QString title = "Gens Critical Error: " + QString(channel);
-	QMessageBox::critical(gens_window, title, QString(msg));
+	QMessageBox::critical(NULL, title, QString(msg));
 }
 
 
