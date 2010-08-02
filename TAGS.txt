@@ -1,5 +1,8 @@
 Description of git tags for Gens/GS II:
 
+libgens-LOG_MSG: Ported (and updated) the LOG_MSG() subsystem from
+the original Gens/GS to Gens/GS II.
+
 gens-qt4-QGLWidget-Win32: Updated the QGLWidget implementation to work
 correctly on Win32. This includes adding 32-bit color texture support,
 which is needed on my VM since Microsoft's OpenGL implementation only
