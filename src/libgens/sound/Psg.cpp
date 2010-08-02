@@ -36,7 +36,6 @@
 #include "Psg.hpp"
 
 /* C includes. */
-#include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 
