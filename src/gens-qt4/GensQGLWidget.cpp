@@ -175,9 +175,6 @@ void GensQGLWidget::paintGL(void)
 	glClearColor(1.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, m_tex);
-	
 	if (m_dirty)
 	{
 		// MD_Screen is dirty.
@@ -188,6 +185,10 @@ void GensQGLWidget::paintGL(void)
 			// Bpp has changed. Reallocate the texture.
 			reallocTexture();
 		}
+		
+		// Bind the texture.
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, m_tex);
 		
 		// (Re-)Upload the texture.
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 336);
@@ -208,6 +209,13 @@ void GensQGLWidget::paintGL(void)
 		
 		// Texture is no longer dirty.
 		m_dirty = false;
+	}
+	else
+	{
+		// MD Screen isn't dirty.
+		// Simply bind the texture.
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, m_tex);
 	}
 	
 	// Draw the texture.
