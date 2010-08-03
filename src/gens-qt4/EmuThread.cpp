@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * GensWindow.hpp: Gens Window.                                            *
+ * EmuThread.hpp: Emulation thread.                                        *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,62 +21,70 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_GENSWINDOW_HPP__
-#define __GENS_QT4_GENSWINDOW_HPP__
-
-// Qt4 includes.
-#include <QtGui/QMainWindow>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QCloseEvent>
-
-#include "GensQGLWidget.hpp"
-#include "GensMenuBar.hpp"
 #include "EmuThread.hpp"
+
+#include "libgens/MD/EmuMD.hpp"
+#include "libgens/MD/VdpIo.hpp"
+#include "libgens/MD/VdpPalette.hpp"
 
 namespace GensQt4
 {
 
-class GensWindow : public QMainWindow
+EmuThread::EmuThread()
 {
-	Q_OBJECT
-	
-	public:
-		GensWindow();
-		~GensWindow();
-		
-		// Widgets.
-		GensQGLWidget *m_glWidget;	// QGLWidget.
-		GensMenuBar *m_menubar;		// Gens menu bar.
-		
-	protected:
-		void setupUi(void);
-		void retranslateUi(void);
-		
-		void closeEvent(QCloseEvent *event);
-		
-		QWidget *centralwidget;
-		QVBoxLayout *layout;
-		
-		// QMainWindow virtual functions.
-		void showEvent(QShowEvent *event);
-		
-		// GensWindow functions.
-		void gensResize(void);	// Resize the window.
-		
-		int m_scale;		// Temporary scaling variable.
-		bool m_hasInitResize;	// Has the initial resize occurred?
-		
-		// Emulation thread.
-		EmuThread *m_emuThread;
-	
-	protected slots:
-		// Menu item selection.
-		void menuTriggered(int id);
-		
-		// Frame done from EmuThread.
-		void emuFrameDone(void);
-};
-
+	m_stop = false;
+	m_running = false;
 }
 
-#endif /* __GENS_QT4_GENSWINDOW_HPP__ */
+EmuThread::~EmuThread()
+{
+}
+
+void EmuThread::resume(void)
+{
+	m_wait.wakeAll();
+}
+
+void EmuThread::stop(void)
+{
+	m_stop = true;
+	while (m_running)
+		m_wait.wakeAll();
+}
+
+#include <stdio.h>
+void EmuThread::run(void)
+{
+	// Initialize the VDP.
+	LibGens::VdpIo::Reset();
+	
+	// Recalculate the full MD palette.
+	// TODO: This would usually be done at program startup.
+	LibGens::VdpPalette::Recalc();
+	
+	// TODO: VdpIo::VDP_Lines.Display.Total isn't being set properly...
+	LibGens::VdpIo::VDP_Lines.Display.Total = 262;
+	
+	// Run the emulation thread.
+	m_running = true;
+	m_mutex.lock();
+	while (!m_stop)
+	{
+		// Increment CRam[0].
+		LibGens::VdpIo::CRam.u16[0]++;
+		LibGens::VdpIo::VDP_Flags.CRam = 1;
+		
+		// Draw a frame.
+		LibGens::EmuMD::Do_Frame();
+		
+		// Signal that the frame has been drawn.
+		emit frameDone();
+		
+		// Wait for a resume command.
+		m_wait.wait(&m_mutex);
+	}
+	m_mutex.unlock();
+	m_running = false;
+}
+
+}

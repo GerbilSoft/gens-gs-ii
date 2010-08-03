@@ -54,9 +54,25 @@ GensWindow::GensWindow()
 {
 	m_scale = 1;		// Set the scale to 1x by default.
 	m_hasInitResize = false;
+	m_emuThread = NULL;
 	
 	// Set up the User Interface.
 	setupUi();
+}
+
+
+/**
+ * ~GensWindow(): Free all resources acquired by the Gens window.
+ */
+GensWindow::~GensWindow()
+{
+	if (m_emuThread)
+	{
+		m_emuThread->stop();
+		m_emuThread->wait();
+		delete m_emuThread;
+		m_emuThread = NULL;
+	}
 }
 
 
@@ -205,6 +221,24 @@ void GensWindow::menuTriggered(int id)
 					m_glWidget->updateGL();
 					break;
 				
+				case MNUID_ITEM(IDM_FILE_EMUTHREAD):
+					if (m_emuThread != NULL)
+					{
+						// Emulation thread is already running. Stop it.
+						m_emuThread->stop();
+						m_emuThread->wait();
+						delete m_emuThread;
+						m_emuThread = NULL;
+						break;
+					}
+					
+					// Emulation thread isn't running. Start it.
+					m_emuThread = new EmuThread();
+					QObject::connect(m_emuThread, SIGNAL(frameDone(void)),
+							 this, SLOT(emuFrameDone(void)));
+					m_emuThread->start();
+					break;
+				
 				case MNUID_ITEM(IDM_FILE_QUIT):
 					// Quit.
 					QuitGens();
@@ -288,6 +322,45 @@ void GensWindow::menuTriggered(int id)
 		default:
 			break;
 	}
+}
+
+
+#include <time.h>
+static double getTime(void)
+{
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	return (ts.tv_sec + (ts.tv_nsec / 1000000000.0));
+}
+
+#include <stdio.h>
+void GensWindow::emuFrameDone(void)
+{
+	static double lastTime = 0;
+	static int frames = 0;
+	frames++;
+	
+	if (lastTime < 0.001)
+		lastTime = getTime();
+	else
+	{
+		double thisTime = getTime();
+		if ((thisTime - lastTime) >= 1.00)
+		{
+			// Print fps.
+			printf("fps: %f\n", ((double)frames / (thisTime - lastTime)));
+			lastTime = thisTime;
+			frames = 0;
+		}
+	}
+	
+	// Update the GensQGLWidget.
+	m_glWidget->setDirty();
+	m_glWidget->updateGL();
+	
+	// Tell the emulation thread that we're ready for another frame.
+	if (m_emuThread)
+		m_emuThread->resume();
 }
 
 }

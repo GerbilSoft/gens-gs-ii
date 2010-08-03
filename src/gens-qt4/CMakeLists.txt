@@ -31,6 +31,7 @@ SET(gens-qt4_SRCS
 	AboutWindow.cpp
 	GensMenuBar.cpp
 	GensQGLWidget.cpp
+	EmuThread.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -39,6 +40,7 @@ SET(gens-qt4_MOC_HEADERS
 	AboutWindow.hpp
 	GensMenuBar.hpp
 	GensQGLWidget.hpp
+	EmuThread.hpp
 	)
 
 # Create .moc files for sources that need them.

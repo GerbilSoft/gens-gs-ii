@@ -61,6 +61,7 @@ GensMenuBar::GensMenuBar(QWidget *parent)
 	static const MenuItem gmiFile[] =
 	{
 		{IDM_FILE_BLIT, GMI_NORMAL, "Blit!", NULL, MACCEL_NONE, Qt::CTRL + Qt::Key_B, NULL, NULL},
+		{IDM_FILE_EMUTHREAD, GMI_NORMAL, "Start/Stop EmuThread", NULL, MACCEL_NONE, 0, NULL, NULL},
 		{IDM_SEPARATOR, GMI_SEPARATOR, NULL, NULL, MACCEL_NONE, 0, NULL, NULL},
 		{IDM_FILE_QUIT, GMI_NORMAL, "&Quit", NULL, MACCEL_QUIT, Qt::CTRL + Qt::Key_Q, "application-exit", ":/oxygen-16x16/application-exit.png"},
 		

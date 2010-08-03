@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * GensWindow.hpp: Gens Window.                                            *
+ * EmuThread.hpp: Emulation thread.                                        *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,62 +21,40 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_GENSWINDOW_HPP__
-#define __GENS_QT4_GENSWINDOW_HPP__
+#ifndef __GENS_QT4_EMUTHREAD_HPP__
+#define __GENS_QT4_EMUTHREAD_HPP__
 
-// Qt4 includes.
-#include <QtGui/QMainWindow>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QCloseEvent>
-
-#include "GensQGLWidget.hpp"
-#include "GensMenuBar.hpp"
-#include "EmuThread.hpp"
+#include <QtCore/QThread>
+#include <QtCore/QWaitCondition>
+#include <QtCore/QMutex>
 
 namespace GensQt4
 {
 
-class GensWindow : public QMainWindow
+class EmuThread : public QThread
 {
 	Q_OBJECT
 	
 	public:
-		GensWindow();
-		~GensWindow();
+		EmuThread();
+		~EmuThread();
 		
-		// Widgets.
-		GensQGLWidget *m_glWidget;	// QGLWidget.
-		GensMenuBar *m_menubar;		// Gens menu bar.
-		
-	protected:
-		void setupUi(void);
-		void retranslateUi(void);
-		
-		void closeEvent(QCloseEvent *event);
-		
-		QWidget *centralwidget;
-		QVBoxLayout *layout;
-		
-		// QMainWindow virtual functions.
-		void showEvent(QShowEvent *event);
-		
-		// GensWindow functions.
-		void gensResize(void);	// Resize the window.
-		
-		int m_scale;		// Temporary scaling variable.
-		bool m_hasInitResize;	// Has the initial resize occurred?
-		
-		// Emulation thread.
-		EmuThread *m_emuThread;
+	signals:
+		void frameDone(void);
 	
-	protected slots:
-		// Menu item selection.
-		void menuTriggered(int id);
+	public slots:
+		void resume(void);
+		void stop(void);
+	
+	protected:
+		void run(void);
+		QWaitCondition m_wait;
+		QMutex m_mutex;
 		
-		// Frame done from EmuThread.
-		void emuFrameDone(void);
+		bool m_stop;
+		bool m_running;
 };
 
 }
 
-#endif /* __GENS_QT4_GENSWINDOW_HPP__ */
+#endif /* __GENS_QT4_EMUTHREAD_HPP__ */
