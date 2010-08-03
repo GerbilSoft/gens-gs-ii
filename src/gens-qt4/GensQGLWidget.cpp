@@ -115,7 +115,16 @@ void GensQGLWidget::reallocTexture(void)
 void GensQGLWidget::initializeGL(void)
 {
 	// OpenGL initialization.
+	
+	// Disable the depth buffer.
 	glDisable(GL_DEPTH_TEST);
+	
+	// Enable face culling.
+	// This disables drawing the backsides of polygons.
+	// Also, set the front face to GL_CW.
+	// TODO: GL_CCW is default; rework everything to use CCW instead?
+	glFrontFace(GL_CW);
+	glEnable(GL_CULL_FACE);
 	
 	// Initialize the GL viewport and projection.
 	resizeGL(320, 240);
