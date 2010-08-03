@@ -64,6 +64,10 @@ ENDFOREACH()
 
 # Test for common LDFLAGS.
 # TODO: Doesn't work on OS X. (which means it's not really testing it!)
+IF(APPLE)
+	# TODO: CHECK_C_COMPILER_FLAG() doesn't work properly for LDFLAGS!
+	SET(GENS_LDFLAGS_COMMON "")
+ELSE(APPLE)
 SET(GENS_LDFLAGS_COMMON "")
 FOREACH(FLAG_TEST "-Wl,-O1" "-Wl,--sort-common" "-Wl,--as-needed")
 	CHECK_C_COMPILER_FLAG("${FLAG_TEST}" LDFLAG_${FLAG_TEST})
@@ -72,6 +76,7 @@ FOREACH(FLAG_TEST "-Wl,-O1" "-Wl,--sort-common" "-Wl,--as-needed")
 	ENDIF(LDFLAG_${FLAG_TEST})
 	UNSET(LDFLAG_${FLAG_TEST})
 ENDFOREACH()
+ENDIF(APPLE)
 
 # Platform-specific CFLAGS/CXXFLAGS.
 IF(WIN32)
