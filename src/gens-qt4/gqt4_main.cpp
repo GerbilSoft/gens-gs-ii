@@ -39,25 +39,23 @@
 #include "gqt4_win32.hpp"
 #endif
 
-// Make sure SDL_main isn't defined.
-#ifdef main
-#undef main
-#endif
-
 // Gens window.
 static GensQt4::GensWindow *gens_window = NULL;
 
 
 /**
  * gqt4_main(): Main entry point.
- * @param argc Number of arguments.
- * @param argv Arguments.
+ * @param argc argc (0 on Win32)
+ * @param argv argv (NULL on Win32)
  * @return Return value.
  */
 int gqt4_main(int argc, char *argv[])
 {
 	// Create the main UI.
 	QApplication app(argc, argv);
+	
+	// TODO: Parse command line arguments.
+	// They're available in app.arguments() [QStringList].
 	
 #ifdef _WIN32
 	// Win32: Set the application font.

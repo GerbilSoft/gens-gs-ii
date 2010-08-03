@@ -45,13 +45,9 @@
  */
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	// TODO: Convert lpCmdLine to argc/argv[].
-	int argc = 1;
-	char *argv[1] = {"gens-qt4"};
-	
 	// TODO: Handle nCmdShow.
 	// TODO: Store hInstance.
-	return gqt4_main(argc, argv);
+	return gqt4_main(0, NULL);
 }
 
 

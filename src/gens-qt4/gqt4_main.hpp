@@ -36,6 +36,13 @@ extern "C" {
 #ifndef _WIN32
 #define gqt4_main main
 #endif
+
+/**
+ * gqt4_main(): Main entry point.
+ * @param argc argc (0 on Win32)
+ * @param argv argv (NULL on Win32)
+ * @return Return value.
+ */
 int gqt4_main(int argc, char *argv[]);
 
 /**
