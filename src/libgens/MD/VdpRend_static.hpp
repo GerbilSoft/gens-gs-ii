@@ -52,7 +52,8 @@ unsigned int VdpRend::VDP_Layers = VdpRend::VDP_LAYERS_DEFAULT;
 VdpRend::LineBuf_t VdpRend::LineBuf;
 
 // Color depth.
-VdpRend::ColorDepth VdpRend::Bpp = BPP_16;
+// NOTE: Set to 32 for now because radeong_dri.so is really slow with 16-bit color.
+VdpRend::ColorDepth VdpRend::Bpp = BPP_32;
 
 }
 
