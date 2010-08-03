@@ -37,7 +37,7 @@ namespace GensQt4
 {
 
 GensQGLWidget::GensQGLWidget(QWidget *parent)
-	: QGLWidget(parent)
+	: QGLWidget(QGLFormat(QGL::NoAlphaChannel | QGL::NoDepthBuffer), parent)
 {
 	m_tex = 0;
 	m_dirty = true;
@@ -80,24 +80,28 @@ void GensQGLWidget::reallocTexture(void)
 	switch (m_lastBpp)
 	{
 		case LibGens::VdpRend::BPP_15:
+			m_colorComponents = 4;
 			m_texFormat = GL_BGRA;
 			m_texType = GL_UNSIGNED_SHORT_1_5_5_5_REV;
 			break;
 		
 		case LibGens::VdpRend::BPP_16:
+			m_colorComponents = 3;
 			m_texFormat = GL_RGB;
 			m_texType = GL_UNSIGNED_SHORT_5_6_5;
 			break;
 		
 		case LibGens::VdpRend::BPP_32:
 		default:
+			m_colorComponents = 4;
 			m_texFormat = GL_BGRA;
 			m_texType = GL_UNSIGNED_BYTE;
 			break;
 	}
 	
 	// Allocate the texture.
-	glTexImage2D(GL_TEXTURE_2D, 0, 3,
+	glTexImage2D(GL_TEXTURE_2D, 0,
+		     m_colorComponents,
 		     512, 256,	// 512x256 (320x240 rounded up to nearest powers of two)
 		     0,		// No border.
 		     m_texFormat, m_texType, NULL);
@@ -116,8 +120,9 @@ void GensQGLWidget::initializeGL(void)
 {
 	// OpenGL initialization.
 	
-	// Disable the depth buffer.
-	glDisable(GL_DEPTH_TEST);
+	// Disable various OpenGL functionality.
+	glDisable(GL_DEPTH_TEST);	// Depth buffer.
+	glDisable(GL_BLEND);		// Blending.
 	
 	// Enable face culling.
 	// This disables drawing the backsides of polygons.
@@ -182,7 +187,7 @@ void GensQGLWidget::resizeGL(int width, int height)
 void GensQGLWidget::paintGL(void)
 {
 	glClearColor(1.0, 0.0, 0.0, 1.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT);
 	
 	if (m_dirty)
 	{

@@ -57,6 +57,7 @@ class GensQGLWidget : public QGLWidget
 		
 		// Texture format.
 		LibGens::VdpRend::ColorDepth m_lastBpp;
+		int m_colorComponents;
 		GLenum m_texFormat;
 		GLenum m_texType;
 };
