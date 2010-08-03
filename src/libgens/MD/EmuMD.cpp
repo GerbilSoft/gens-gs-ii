@@ -300,4 +300,9 @@ FORCE_INLINE void EmuMD::T_Do_Frame(void)
 #endif
 }
 
+void EmuMD::Do_Frame(void)
+{
+	T_Do_Frame<true>();
+}
+
 }

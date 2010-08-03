@@ -31,6 +31,8 @@ class EmuMD
 {
 	public:
 		static void Init_TEST(void);
+		
+		static void Do_Frame(void);
 	
 	protected:
 		/**
