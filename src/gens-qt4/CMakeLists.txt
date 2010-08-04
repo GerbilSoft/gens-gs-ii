@@ -82,12 +82,8 @@ ADD_EXECUTABLE(gens-qt4 ${gens-qt4_SRCS} ${gens-qt4_COMPAT_SRCS} ${gens-qt4_MOC_
 TARGET_LINK_LIBRARIES(gens-qt4 gens)
 TARGET_LINK_LIBRARIES(gens-qt4 ${QT_LIBRARIES})
 TARGET_LINK_LIBRARIES(gens-qt4 ${OPENGL_LIBRARIES})
-IF(WIN32)
-	# Do nothing.
-ELSE()
-	# Non-Win32 platforms: Add -lrt.
-	# TODO: Check for -lrt and add an appropriate #define in config.h.
+IF(HAVE_LIBRT)
 	TARGET_LINK_LIBRARIES(gens-qt4 -lrt)
-ENDIF()
+ENDIF(HAVE_LIBRT)
 
 ADD_DEPENDENCIES(gens-qt4 gens)
