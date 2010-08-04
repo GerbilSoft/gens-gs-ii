@@ -37,8 +37,12 @@
 // C includes. (Needed for fps timing.)
 #include <stdio.h>
 
+// Timing functions.
+// TODO: Move to a separate file. (Maybe move to libgens?)
 #ifdef HAVE_LIBRT
 #include <time.h>
+#else
+#include <sys/time.h>
 #endif
 
 // Qt4 includes.
@@ -331,19 +335,25 @@ void GensWindow::menuTriggered(int id)
 }
 
 
-#ifdef HAVE_LIBRT
 static double getTime(void)
 {
+	// TODO: Use integer arithmetic instead of floating-point.
+	// TODO: Add Win32-specific versions that use QueryPerformanceCounter() and/or GetTickCount().
+	// TODO: Move to a separate file. (Maybe move to libgens?)
+#ifdef HAVE_LIBRT
 	struct timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 	return (ts.tv_sec + (ts.tv_nsec / 1000000000.0));
-}
+#else
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return (tv.tv_sec + (tv.tv_usec / 1000000.0));
 #endif
+}
 
 
 void GensWindow::emuFrameDone(void)
 {
-#ifdef HAVE_LIBRT
 	static double lastTime = 0;
 	static int frames = 0;
 	frames++;
@@ -361,7 +371,6 @@ void GensWindow::emuFrameDone(void)
 			frames = 0;
 		}
 	}
-#endif
 	
 	// Update the GensQGLWidget.
 	m_glWidget->setDirty();
