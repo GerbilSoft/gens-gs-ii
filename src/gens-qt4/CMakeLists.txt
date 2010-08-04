@@ -18,6 +18,7 @@ INCLUDE_DIRECTORIES("${gens-gs-ii_BINARY_DIR}")
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../")
 
 # Check for clock_gettime() in librt.
+INCLUDE(CheckLibraryExists)
 CHECK_LIBRARY_EXISTS(rt clock_gettime "" HAVE_LIBRT)
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 
