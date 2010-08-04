@@ -26,8 +26,6 @@
 
 #ifdef _WIN32
 
-#include "gqt4_main.hpp"
-
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX
 #define NOMINMAX
