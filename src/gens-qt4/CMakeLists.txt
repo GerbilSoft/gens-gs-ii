@@ -12,10 +12,14 @@ INCLUDE(${QT_USE_FILE})
 FIND_PACKAGE(OpenGL)
 
 # Main binary directory. Needed for git_version.h
-INCLUDE_DIRECTORIES(${gens-gs-ii_BINARY_DIR})
+INCLUDE_DIRECTORIES("${gens-gs-ii_BINARY_DIR}")
 
 # Include the previous directory.
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../)
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../")
+
+# Check for clock_gettime() in librt.
+CHECK_LIBRARY_EXISTS(rt clock_gettime "" HAVE_LIBRT)
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 
 # Compatibility sources.
 IF(WIN32)
@@ -55,7 +59,7 @@ SET(gens-qt4_UIS
 QT4_WRAP_UI(gens-qt4_UIS_H ${gens-qt4_UIS})
 
 # Include the binary directory. (Required for the .h files.)
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}")
 
 # Resource files.
 SET(gens-qt4_RCC_SRCS
