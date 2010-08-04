@@ -32,8 +32,11 @@
 #include "libgens/MD/EmuMD.hpp"
 #include "libgens/macros/git.h"
 
-// C++ includes.
-#include <algorithm>
+#ifndef _WIN32
+// C includes. (Needed for fps timing.)
+#include <time.h>
+#include <stdio.h>
+#endif
 
 // Qt4 includes.
 #include <QtCore/QString>
@@ -325,17 +328,19 @@ void GensWindow::menuTriggered(int id)
 }
 
 
-#include <time.h>
+#ifndef _WIN32
 static double getTime(void)
 {
 	struct timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 	return (ts.tv_sec + (ts.tv_nsec / 1000000000.0));
 }
+#endif
 
-#include <stdio.h>
+
 void GensWindow::emuFrameDone(void)
 {
+#ifndef _WIN32
 	static double lastTime = 0;
 	static int frames = 0;
 	frames++;
@@ -353,6 +358,7 @@ void GensWindow::emuFrameDone(void)
 			frames = 0;
 		}
 	}
+#endif
 	
 	// Update the GensQGLWidget.
 	m_glWidget->setDirty();
