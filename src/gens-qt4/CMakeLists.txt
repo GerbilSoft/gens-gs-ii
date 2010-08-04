@@ -46,6 +46,7 @@ SET(gens-qt4_MOC_HEADERS
 	GensMenuBar.hpp
 	GensQGLWidget.hpp
 	EmuThread.hpp
+	GensQApplication.hpp
 	)
 
 # Create .moc files for sources that need them.

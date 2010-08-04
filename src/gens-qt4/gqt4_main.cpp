@@ -27,7 +27,7 @@
 #include "libgens/lg_main.hpp"
 #include "libgens/macros/log_msg.h"
 
-#include <QtGui/QApplication>
+#include "GensQApplication.hpp"
 #include <QtGui/QMessageBox>
 
 #include "GensWindow.hpp"
@@ -52,7 +52,7 @@ static GensQt4::GensWindow *gens_window = NULL;
 int gqt4_main(int argc, char *argv[])
 {
 	// Create the main UI.
-	QApplication app(argc, argv);
+	GensQt4::GensQApplication app(argc, argv);
 	
 	// TODO: Parse command line arguments.
 	// They're available in app.arguments() [QStringList].
