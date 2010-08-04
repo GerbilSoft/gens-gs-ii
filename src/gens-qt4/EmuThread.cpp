@@ -33,7 +33,6 @@ namespace GensQt4
 EmuThread::EmuThread()
 {
 	m_stop = false;
-	m_running = false;
 }
 
 EmuThread::~EmuThread()
@@ -42,14 +41,17 @@ EmuThread::~EmuThread()
 
 void EmuThread::resume(void)
 {
+	m_mutex.lock();
 	m_wait.wakeAll();
+	m_mutex.unlock();
 }
 
 void EmuThread::stop(void)
 {
+	m_mutex.lock();
 	m_stop = true;
-	while (m_running)
-		m_wait.wakeAll();
+	m_wait.wakeAll();
+	m_mutex.unlock();
 }
 
 #include <stdio.h>
@@ -66,7 +68,6 @@ void EmuThread::run(void)
 	LibGens::VdpIo::VDP_Lines.Display.Total = 262;
 	
 	// Run the emulation thread.
-	m_running = true;
 	m_mutex.lock();
 	while (!m_stop)
 	{
@@ -84,7 +85,6 @@ void EmuThread::run(void)
 		m_wait.wait(&m_mutex);
 	}
 	m_mutex.unlock();
-	m_running = false;
 }
 
 }

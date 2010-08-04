@@ -52,7 +52,6 @@ class EmuThread : public QThread
 		QMutex m_mutex;
 		
 		bool m_stop;
-		bool m_running;
 };
 
 }
