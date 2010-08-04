@@ -26,6 +26,7 @@ SET(libgens_SRCS
 	sound/Psg.cpp
 	sound/Ym2612.cpp
 	macros/log_msg.c
+	Effects.cpp
 	)
 
 # Compatibility sources.
