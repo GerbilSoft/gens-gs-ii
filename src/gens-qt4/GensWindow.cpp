@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <config.h>
+
 #include "GensWindow.hpp"
 #include "gqt4_main.hpp"
 
@@ -32,10 +34,11 @@
 #include "libgens/MD/EmuMD.hpp"
 #include "libgens/macros/git.h"
 
-#ifndef _WIN32
 // C includes. (Needed for fps timing.)
-#include <time.h>
 #include <stdio.h>
+
+#ifdef HAVE_LIBRT
+#include <time.h>
 #endif
 
 // Qt4 includes.
@@ -328,7 +331,7 @@ void GensWindow::menuTriggered(int id)
 }
 
 
-#ifndef _WIN32
+#ifdef HAVE_LIBRT
 static double getTime(void)
 {
 	struct timespec ts;
@@ -340,7 +343,7 @@ static double getTime(void)
 
 void GensWindow::emuFrameDone(void)
 {
-#ifndef _WIN32
+#ifdef HAVE_LIBRT
 	static double lastTime = 0;
 	static int frames = 0;
 	frames++;
