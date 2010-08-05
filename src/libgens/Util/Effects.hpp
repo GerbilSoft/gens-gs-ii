@@ -25,8 +25,8 @@
  * NOTE: The video effects here are applied to MD_Screen[].
  */
 
-#ifndef __LIBGENS_EFFECTS_HPP__
-#define __LIBGENS_EFFECTS_HPP__
+#ifndef __LIBGENS_UTIL_EFFECTS_HPP__
+#define __LIBGENS_UTIL_EFFECTS_HPP__
 
 namespace LibGens
 {
@@ -60,4 +60,4 @@ class Effects
 
 }
 
-#endif /* __LIBGENS_EFFECTS_HPP__ */
+#endif /* __LIBGENS_UTIL_EFFECTS_HPP__ */
