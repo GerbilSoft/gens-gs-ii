@@ -69,9 +69,11 @@ class Rom
 			RFMT_MGD,		// Interleaved ROM image from Multi-Game-Doctor.
 			
 			// TODO: CD-ROM image handling.
-			RFMT_CD_ISO,		// CD-ROM image, ISO-9660 format. (2048-byte sectors)
-			RFMT_CD_BIN,		// CD-ROM image, BIN format. (2352-byte sectors)
 			RFMT_CD_CUE,		// CD-ROM image, CUE sheet.
+			RFMT_CD_ISO_2048,	// CD-ROM image, ISO-9660 format. (2048-byte sectors)
+			RFMT_CD_ISO_2352,	// CD-ROM image, ISO-9660 format. (2048-byte sectors)
+			RFMT_CD_BIN_2048,	// CD-ROM image, BIN format. (2352-byte sectors)
+			RFMT_CD_BIN_2352,	// CD-ROM image, BIN format. (2352-byte sectors)
 		};
 		
 		Rom(FILE *f, MDP_SYSTEM_ID sysOverride = MDP_SYSTEM_UNKNOWN, RomFormat fmtOverride = RFMT_UNKNOWN);

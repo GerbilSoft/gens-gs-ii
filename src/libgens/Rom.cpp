@@ -75,30 +75,27 @@ Rom::RomFormat Rom::detectFormat(uint8_t header[ROM_HEADER_SIZE], size_t header_
 	const char iso9660_magic[] = {'C', 'D', '0', '0', '1'};
 	const char segacd_magic[] = {'S', 'E', 'G', 'A', 'D', 'I', 'S', 'C', 'S', 'Y', 'S', 'T', 'E', 'M'};
 	
-	if (header_size >= 0x9316)
+	if (header_size >= 65536)
 	{
-		// Possibly has "CD001" at 0x9311. (2352-byte sectors)
-		printf("header: %c%c%c%c%c\n", header[0x9311], header[0x9312], header[0x9313], header[0x9314], header[0x9315]);
+		// Check for Sega CD images.
+		
+		// ISO-9660 magic.
 		if (!memcmp(&header[0x9311], iso9660_magic, sizeof(iso9660_magic)))
-			return RFMT_CD_BIN;
-	}
-	if (header_size >= 0x8006)
-	{
-		// Possibly has "CD001" at 0x8001. (2048-byte sectors)
+			return RFMT_CD_BIN_2352;
+		if (!memcmp(&header[0x8011], iso9660_magic, sizeof(iso9660_magic)))
+			return RFMT_CD_BIN_2048;
+		if (!memcmp(&header[0x9301], iso9660_magic, sizeof(iso9660_magic)))
+			return RFMT_CD_ISO_2352;
 		if (!memcmp(&header[0x8001], iso9660_magic, sizeof(iso9660_magic)))
-			return RFMT_CD_ISO;
-	}
-	if (header_size >= 0x0024)
-	{
-		// Possibly has "SEGADISCSYSTEM" at 0x0010. (2352-byte sectors)
+			return RFMT_CD_ISO_2048;
+		
+		// SEGADISCSYSTEM magic.
+		// NOTE: We can't reliably detect the sector size using this method.
+		// Assume 2352-byte sectors for BIN, 2048-byte sectors for ISO.
 		if (!memcmp(&header[0x0010], segacd_magic, sizeof(segacd_magic)))
-			return RFMT_CD_BIN;
-	}
-	if (header_size >= 0x0014)
-	{
-		// Possibly has "SEGADISCSYSTEM" at 0x0000. (2048-byte sectors)
+			return RFMT_CD_BIN_2352;
 		if (!memcmp(&header[0x0000], segacd_magic, sizeof(segacd_magic)))
-			return RFMT_CD_ISO;
+			return RFMT_CD_ISO_2048;
 	}
 	/** END: ISO-9660 (CD-ROM) check. **/
 	
@@ -139,7 +136,7 @@ Rom::RomFormat Rom::detectFormat(uint8_t header[ROM_HEADER_SIZE], size_t header_
  */
 Rom::MDP_SYSTEM_ID Rom::detectSystem(uint8_t header[ROM_HEADER_SIZE], size_t header_size, RomFormat fmt)
 {
-	if (fmt >= RFMT_CD_ISO)
+	if (fmt >= RFMT_CD_CUE)
 	{
 		// CD-ROM. Assume Sega CD.
 		// TODO: Sega CD 32X detection.
