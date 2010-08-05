@@ -79,6 +79,9 @@ class Rom
 		
 		bool isOpen(void) { return (m_file != NULL); }
 		void close(void) { fclose(m_file); m_file = NULL; }
+		
+		MDP_SYSTEM_ID sysId(void) const { return m_sysId; }
+		RomFormat romFormat(void) const { return m_romFormat; }
 	
 	protected:
 		MDP_SYSTEM_ID m_sysId;
