@@ -81,8 +81,8 @@ class Rom
 		void close(void) { fclose(m_file); m_file = NULL; }
 	
 	protected:
-		MDP_SYSTEM_ID m_sys;
-		RomFormat m_fmt;
+		MDP_SYSTEM_ID m_sysId;
+		RomFormat m_romFormat;
 		FILE *m_file;
 		
 		static RomFormat detectFormat(uint8_t header[ROM_HEADER_SIZE], size_t header_size);

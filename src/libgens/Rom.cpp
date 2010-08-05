@@ -30,8 +30,8 @@ namespace LibGens
 
 Rom::Rom(FILE *f, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 {
-	m_sys = sysOverride;
-	m_fmt = fmtOverride;
+	m_sysId = sysOverride;
+	m_romFormat = fmtOverride;
 	
 	// Load the ROM header for detection purposes.
 	// TODO: Determine if the file is compressed.
@@ -39,11 +39,10 @@ Rom::Rom(FILE *f, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 	fseek(f, 0, SEEK_SET);
 	size_t header_size = fread(header, 1, sizeof(header), f);
 	
-	if (m_fmt == RFMT_UNKNOWN)
-		m_fmt = detectFormat(header, header_size);
-	if (m_sys == MDP_SYSTEM_UNKNOWN)
-		m_sys = detectSystem(header, header_size, m_fmt);
-	printf("Format: %d; System: %d\n", m_fmt, m_sys);
+	if (m_romFormat == RFMT_UNKNOWN)
+		m_romFormat = detectFormat(header, header_size);
+	if (m_sysId == MDP_SYSTEM_UNKNOWN)
+		m_sysId = detectSystem(header, header_size, m_romFormat);
 	
 	// Load the ROM header information.
 	// TODO
