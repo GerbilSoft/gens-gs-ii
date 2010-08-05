@@ -38,6 +38,7 @@ Rom::Rom(FILE *f, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 	uint8_t header[ROM_HEADER_SIZE];
 	fseek(f, 0, SEEK_SET);
 	size_t header_size = fread(header, 1, sizeof(header), f);
+	printf("header_size: %d\n", header_size);
 	
 	if (m_romFormat == RFMT_UNKNOWN)
 		m_romFormat = detectFormat(header, header_size);
@@ -74,25 +75,26 @@ Rom::RomFormat Rom::detectFormat(uint8_t header[ROM_HEADER_SIZE], size_t header_
 	const char iso9660_magic[] = {'C', 'D', '0', '0', '1'};
 	const char segacd_magic[] = {'S', 'E', 'G', 'A', 'D', 'I', 'S', 'C', 'S', 'Y', 'S', 'T', 'E', 'M'};
 	
-	if (header_size >= 0x9306)
+	if (header_size >= 0x9316)
 	{
-		// Possibly has "CD001" at 0x9306. (2352-byte sectors)
-		if (!memcmp(&header[0x9306], iso9660_magic, sizeof(iso9660_magic)))
+		// Possibly has "CD001" at 0x9311. (2352-byte sectors)
+		printf("header: %c%c%c%c%c\n", header[0x9311], header[0x9312], header[0x9313], header[0x9314], header[0x9315]);
+		if (!memcmp(&header[0x9311], iso9660_magic, sizeof(iso9660_magic)))
 			return RFMT_CD_BIN;
 	}
-	else if (header_size >= 0x8006)
+	if (header_size >= 0x8006)
 	{
 		// Possibly has "CD001" at 0x8001. (2048-byte sectors)
 		if (!memcmp(&header[0x8001], iso9660_magic, sizeof(iso9660_magic)))
 			return RFMT_CD_ISO;
 	}
-	else if (header_size >= 0x0024)
+	if (header_size >= 0x0024)
 	{
 		// Possibly has "SEGADISCSYSTEM" at 0x0010. (2352-byte sectors)
 		if (!memcmp(&header[0x0010], segacd_magic, sizeof(segacd_magic)))
 			return RFMT_CD_BIN;
 	}
-	else if (header_size >= 0x0014)
+	if (header_size >= 0x0014)
 	{
 		// Possibly has "SEGADISCSYSTEM" at 0x0000. (2048-byte sectors)
 		if (!memcmp(&header[0x0000], segacd_magic, sizeof(segacd_magic)))
