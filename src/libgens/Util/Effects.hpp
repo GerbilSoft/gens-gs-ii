@@ -1,6 +1,6 @@
 /***************************************************************************
- * gens-qt4: Gens Qt4 UI.                                                  *
- * EmuThread.hpp: Emulation thread.                                        *
+ * libgens: Gens Emulation Library.                                        *
+ * Effects.hpp: Special Video Effects. (Software Rendering)                *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,71 +21,43 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "EmuThread.hpp"
+/**
+ * NOTE: The video effects here are applied to MD_Screen[].
+ */
 
-#include "libgens/MD/EmuMD.hpp"
-#include "libgens/MD/VdpIo.hpp"
-#include "libgens/MD/VdpPalette.hpp"
+#ifndef __LIBGENS_EFFECTS_HPP__
+#define __LIBGENS_EFFECTS_HPP__
 
-#include "libgens/Util/Effects.hpp"
-
-namespace GensQt4
+namespace LibGens
 {
 
-EmuThread::EmuThread()
+class Effects
 {
-	m_stop = false;
-}
-
-EmuThread::~EmuThread()
-{
-}
-
-void EmuThread::resume(void)
-{
-	m_mutex.lock();
-	m_wait.wakeAll();
-	m_mutex.unlock();
-}
-
-void EmuThread::stop(void)
-{
-	m_mutex.lock();
-	m_stop = true;
-	m_wait.wakeAll();
-	m_mutex.unlock();
-}
-
-#include <stdio.h>
-void EmuThread::run(void)
-{
-	// Initialize the VDP.
-	LibGens::VdpIo::Reset();
-	
-	// Recalculate the full MD palette.
-	// TODO: This would usually be done at program startup.
-	LibGens::VdpPalette::Recalc();
-	
-	// TODO: VdpIo::VDP_Lines.Display.Total isn't being set properly...
-	LibGens::VdpIo::VDP_Lines.Display.Total = 262;
-	
-	// Run the emulation thread.
-	m_mutex.lock();
-	while (!m_stop)
-	{
-		// Do the "Crazy" effect.
-		LibGens::Effects::doCrazyEffect(LibGens::Effects::CM_WHITE);
+	public:
+		enum ColorMask
+		{
+			CM_BLACK	= 0,
+			CM_BLUE		= 1,
+			CM_GREEN	= 2,
+			CM_CYAN		= 3,
+			CM_RED		= 4,
+			CM_MAGENTA	= 5,
+			CM_YELLOW	= 6,
+			CM_WHITE	= 7,
+		};
 		
-		// Signal that the frame has been drawn.
-		emit frameDone();
-		
-		// Sleep for 10 ms.
-		usleep(10000);
-		
-		// Wait for a resume command.
-		m_wait.wait(&m_mutex);
-	}
-	m_mutex.unlock();
-}
+		static void doCrazyEffect(ColorMask colorMask);
+	
+	protected:
+		template<typename pixel, pixel Rmask, pixel Gmask, pixel Bmask,
+				  pixel Radd, pixel Gadd, pixel Badd>
+		static void T_doCrazyEffect(ColorMask colorMask, pixel *screen);
+	
+	private:
+		Effects() { }
+		~Effects() { }
+};
 
 }
+
+#endif /* __LIBGENS_EFFECTS_HPP__ */
