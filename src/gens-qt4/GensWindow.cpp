@@ -34,6 +34,9 @@
 #include "libgens/MD/EmuMD.hpp"
 #include "libgens/macros/git.h"
 
+// Test loading ROMs.
+#include "libgens/Rom.hpp"
+
 // C includes. (Needed for fps timing.)
 #include <stdio.h>
 
@@ -48,6 +51,7 @@
 // Qt4 includes.
 #include <QtCore/QString>
 #include <QtGui/QIcon>
+#include <QtGui/QFileDialog>
 
 // Text translation macro.
 #define TR(text) \
@@ -224,6 +228,39 @@ void GensWindow::menuTriggered(int id)
 			// File menu.
 			switch (MNUID_ITEM(id))
 			{
+				case MNUID_ITEM(IDM_FILE_OPEN):
+				{
+					// Open ROM.
+					// TODO: Move to another function and/or another file.
+					// TODO: Proper compressed file support.
+					#define ZLIB_EXT " *.zip *.zsg *.gz"
+					#define LZMA_EXT " *.7z"
+					#define RAR_EXT " *.rar"
+					QString filename = QFileDialog::getOpenFileName(this, tr("Open ROM"), "", 
+							tr("Sega CD / 32X / Genesis ROMs (*.bin *.smd *.gen *.32x *.cue *.iso *.raw" ZLIB_EXT LZMA_EXT RAR_EXT));
+					if (filename.isEmpty())
+						break;
+					
+					// Open the file.
+					QFile m_file(filename);
+					if (!m_file.open(QIODevice::ReadOnly))
+					{
+						// Error opening the file.
+						printf("Error opening file %s: %d\n", filename.toUtf8().constData(), m_file.error());
+						break;
+					}
+					
+					// Dup the file and open it in LibGens.
+					// LibGens::Rom will close f once it's done using it.
+					FILE *f = fdopen(dup(m_file.handle()), "rb");
+					LibGens::Rom *m_rom = new LibGens::Rom(f);
+					printf("ROM information: format == %d, system == %d\n", m_rom->romFormat(), m_rom->sysId());
+					
+					// TODO: Process the ROM image.
+					delete m_rom;
+					break;
+				}
+				
 				case MNUID_ITEM(IDM_FILE_BLIT):
 					// Blit!
 					LibGens::EmuMD::Init_TEST();

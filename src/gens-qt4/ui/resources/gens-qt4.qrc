@@ -6,5 +6,6 @@
     <file>gens/gens_small.png</file>
     <file>oxygen-16x16/application-exit.png</file>
     <file>oxygen-16x16/help-about.png</file>
+    <file>oxygen-16x16/document-open.png</file>
   </qresource>
 </RCC>

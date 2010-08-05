@@ -40,8 +40,9 @@
 #define IDM_SEPARATOR		-1
 
 #define IDM_FILE_MENU		1
-#define IDM_FILE_BLIT		MNUID(IDM_FILE_MENU, 1)
-#define IDM_FILE_EMUTHREAD	MNUID(IDM_FILE_MENU, 2)
+#define IDM_FILE_OPEN		MNUID(IDM_FILE_MENU, 1)
+#define IDM_FILE_BLIT		MNUID(IDM_FILE_MENU, 2)
+#define IDM_FILE_EMUTHREAD	MNUID(IDM_FILE_MENU, 3)
 #define IDM_FILE_QUIT		MNUID(IDM_FILE_MENU, 0xFFFF)
 
 #define IDM_HELP_MENU		7
@@ -87,6 +88,13 @@ class GensMenuBar : public QMenuBar
 			MACCEL_QUIT = (int)QKeySequence::Quit,
 #else
 			MACCEL_QUIT = 0,
+#endif
+#if QT_VERSION >= 0x040200
+			// Keys defined in Qt 4.2.
+			// (First version with StandardKey.)
+			MACCEL_OPEN = (int)QKeySequence::Open,
+#else
+			MACCEL_OPEN = 0,
 #endif
 		};
 		
