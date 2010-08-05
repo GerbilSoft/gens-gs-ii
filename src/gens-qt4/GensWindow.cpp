@@ -40,6 +40,12 @@
 // C includes. (Needed for fps timing.)
 #include <stdio.h>
 
+#ifdef _WIN32
+// Win32 needs io.h for dup().
+// TODO: Move File/Open to another file.
+#include <io.h>
+#endif
+
 // Timing functions.
 // TODO: Move to a separate file. (Maybe move to libgens?)
 #ifdef HAVE_LIBRT
