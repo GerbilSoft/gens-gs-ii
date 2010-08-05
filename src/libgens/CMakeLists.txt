@@ -28,6 +28,7 @@ SET(libgens_SRCS
 	macros/log_msg.c
 	Util/Effects.cpp
 	Util/byteswap.c
+	Rom.cpp
 	)
 
 # Compatibility sources.
