@@ -2,9 +2,9 @@ PROJECT(gens-qt4)
 cmake_minimum_required(VERSION 2.6)
 
 # Find Qt4.
-SET(QT_USE_QTGUI TRUE)
-SET(QT_USE_QTOPENGL TRUE)
-FIND_PACKAGE(Qt4)
+# TODO: Determine the actual minimum version.
+# 4.1.0: QCoreApplication::arguments()
+FIND_PACKAGE(Qt4 4.1.0 COMPONENTS QtCore QtGui QtOpenGL qtmain REQUIRED)
 INCLUDE(${QT_USE_FILE})
 
 # Find OpenGL.
@@ -81,10 +81,20 @@ ENDIF()
 # Build the executable.
 ADD_EXECUTABLE(gens-qt4 ${gens-qt4_SRCS} ${gens-qt4_COMPAT_SRCS} ${gens-qt4_MOC_SOURCES} ${gens-qt4_UIS_H} ${gens-qt4_RCC_O})
 TARGET_LINK_LIBRARIES(gens-qt4 gens)
-TARGET_LINK_LIBRARIES(gens-qt4 ${QT_LIBRARIES})
+IF(WIN32)
+	# TODO: Only link -lmingw32 if we're using MinGW.
+	TARGET_LINK_LIBRARIES(gens-qt4 -lmingw32 ${QT_QTMAIN_LIBRARY})
+ENDIF(WIN32)
+TARGET_LINK_LIBRARIES(gens-qt4 ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY})
 TARGET_LINK_LIBRARIES(gens-qt4 ${OPENGL_LIBRARIES})
 IF(HAVE_LIBRT)
 	TARGET_LINK_LIBRARIES(gens-qt4 -lrt)
 ENDIF(HAVE_LIBRT)
+
+IF(WIN32)
+	# Define -DQT_NEEDS_QMAIN in order to use qMain() on Win32.
+	SET_TARGET_PROPERTIES(gens-qt4
+		PROPERTIES COMPILE_FLAGS -DQT_NEEDS_QMAIN)
+ENDIF(WIN32)
 
 ADD_DEPENDENCIES(gens-qt4 gens)

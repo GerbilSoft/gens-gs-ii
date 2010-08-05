@@ -24,26 +24,22 @@
 #ifndef __GENS_QT4_GQT4_MAIN_HPP__
 #define __GENS_QT4_GQT4_MAIN_HPP__
 
+// Needed for qMain redefinition on Win32.
+#ifdef _WIN32
+#include <QtGui/qwindowdefs.h>
+#endif
+
+/**
+ * main(): Main entry point.
+ * @param argc Number of arguments.
+ * @param argv Array of arguments.
+ * @return Return value.
+ */
+int main(int argc, char *argv[]);
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * Win32 uses WinMain(), so we need to call the
- * main function gqt4_main(). It's renamed to main
- * on non-Win32 platforms.
- */
-#ifndef _WIN32
-#define gqt4_main main
-#endif
-
-/**
- * gqt4_main(): Main entry point.
- * @param argc argc (0 on Win32)
- * @param argv argv (NULL on Win32)
- * @return Return value.
- */
-int gqt4_main(int argc, char *argv[]);
 
 /**
  * gqt4_log_msg_critical(): LOG_MSG() critical error handler.

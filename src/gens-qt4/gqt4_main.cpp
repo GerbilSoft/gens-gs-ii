@@ -44,12 +44,12 @@ static GensQt4::GensWindow *gens_window = NULL;
 
 
 /**
- * gqt4_main(): Main entry point.
- * @param argc argc (0 on Win32)
- * @param argv argv (NULL on Win32)
+ * main(): Main entry point.
+ * @param argc Number of arguments.
+ * @param argv Array of arguments.
  * @return Return value.
  */
-int gqt4_main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	// Create the main UI.
 	GensQt4::GensQApplication app(argc, argv);

@@ -24,18 +24,8 @@
 #ifndef __GENS_QT4_GQT4_WIN32_HPP__
 #define __GENS_QT4_GQT4_WIN32_HPP__
 
-#ifdef _WIN32
-
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
-
-#ifdef __cplusplus
-extern "C" {
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow);
-}
+#ifndef _WIN32
+#error gqt4_win32.hpp should only be #include'd on Win32!
 #endif
 
 namespace GensQt4
@@ -44,7 +34,5 @@ namespace GensQt4
 void Win32_SetFont(void);
 
 }
-
-#endif
 
 #endif /* __GENS_QT4_GQT4_WIN32_HPP__ */

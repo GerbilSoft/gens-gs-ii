@@ -21,6 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#ifndef _WIN32
+#error gqt4_win32.cpp should only be compiled on Win32!
+#endif
+
 // Include "gqt4_main.hpp" first for main().
 #include "gqt4_main.hpp"
 
@@ -29,27 +33,16 @@
 // C includes.
 #include <string.h>
 
+// Win32 includes.
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+
 // Qt includes.
 #include <QtGui/QApplication>
 #include <QtGui/QFont>
-
-
-/**
- * WinMain(): ANSI Win32 entry point.
- * @param hInstance Instance handle.
- * @param hPrevInstance Previous instance handle.
- * @param lpCmdLine Command line.
- * @param nCmdShow Specifies how the window is to be shown.
- * @return Return value.
- * TODO: Add Unicode version and convert the command line to UTF-8.
- */
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
-	// TODO: Handle nCmdShow.
-	// TODO: Store hInstance.
-	return gqt4_main(0, NULL);
-}
-
 
 namespace GensQt4
 {
