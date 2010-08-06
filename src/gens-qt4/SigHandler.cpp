@@ -55,6 +55,19 @@
 #define GENS_PLATFORM "Unknown"
 #endif
 
+// derp
+#define RICKROLL
+#ifdef RICKROLL
+#include <QtGui/QIcon>
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif /* _WIN32 */
+#endif /* RICKROLL */
+
 namespace GensQt4
 {
 
@@ -245,8 +258,13 @@ void SigHandler::SignalHandler(int signum)
 	}
 	
 	// Show a message box.
+#ifdef RICKROLL
+	QString sMsg =
+		"Gens/GS II has given you up. (Signal " + QString::number(signum) + ")\n";
+#else
 	QString sMsg =
 		"Gens/GS II has crashed with Signal " + QString::number(signum) + ".\n";
+#endif
 	
 	if (signame)
 	{
@@ -282,6 +300,18 @@ void SigHandler::SignalHandler(int signum)
 	// Display the message box.
 	QMessageBox dialog(QMessageBox::Critical, "Gens/GS II Fatal Error", sMsg);
 	dialog.setTextFormat(Qt::PlainText);
+#ifdef RICKROLL
+	QPixmap pxmRickRoll(":/gens/rick-roll.png");
+	if (!pxmRickRoll.isNull())
+	{
+		dialog.setIconPixmap(pxmRickRoll);
+#ifdef _WIN32
+		// Qt on Win32 doesn't play a message sound if a
+		// custom icon is used. Let's play it outselves.
+		MessageBeep(MB_ICONSTOP);
+#endif
+	}
+#endif
 	dialog.exec();
 	
 	exit(EXIT_FAILURE);
