@@ -7,10 +7,6 @@ cmake_minimum_required(VERSION 2.6)
 FIND_PACKAGE(Qt4 4.1.0 COMPONENTS QtCore QtGui QtOpenGL qtmain REQUIRED)
 INCLUDE(${QT_USE_FILE})
 
-# Find OpenGL.
-# TODO: Disable OpenGL functionality if it isn't found.
-FIND_PACKAGE(OpenGL)
-
 # Main binary directory. Needed for git_version.h
 INCLUDE_DIRECTORIES("${gens-gs-ii_BINARY_DIR}")
 
@@ -21,7 +17,13 @@ INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../")
 INCLUDE(CheckLibraryExists)
 CHECK_LIBRARY_EXISTS(rt clock_gettime "" HAVE_LIBRT)	# librt: clock_gettime()
 
+# Find OpenGL.
+# TODO: Disable OpenGL functionality if it isn't found.
+FIND_PACKAGE(OpenGL REQUIRED)
 IF(OPENGL_LIBRARIES)
+	# Found OpenGL.
+	SET(HAVE_OPENGL 1)
+	
 	# Find GLEW.
 	SET(OLD_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
 	SET(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${OPENGL_LIBRARIES})
