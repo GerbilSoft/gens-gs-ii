@@ -9,6 +9,7 @@ ADD_SUBDIRECTORY(mdZ80)
 INCLUDE_DIRECTORIES(${gens-gs-ii_BINARY_DIR})
 
 # LibGens source and binary directories.
+# Binary directory is needed for config.h.
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
