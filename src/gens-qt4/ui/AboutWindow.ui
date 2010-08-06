@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>416</width>
-    <height>416</height>
+    <height>379</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -56,7 +56,7 @@
       <attribute name="title">
        <string>&amp;Copyrights</string>
       </attribute>
-      <layout class="QVBoxLayout" name="vboxCopyrightsTab">
+      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QFrame" name="fraCopyrights">
          <property name="frameShape">
@@ -65,41 +65,14 @@
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
-         <layout class="QVBoxLayout" name="vboxCopyrightsLabel">
+         <layout class="QVBoxLayout" name="vboxCopyrights">
           <property name="margin">
            <number>8</number>
           </property>
           <item>
-           <widget class="QScrollArea" name="scrlCopyrights">
-            <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Plain</enum>
-            </property>
-            <property name="horizontalScrollBarPolicy">
-             <enum>Qt::ScrollBarAlwaysOff</enum>
-            </property>
-            <widget class="QWidget" name="scrlareaCopyrights">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>0</y>
-               <width>374</width>
-               <height>173</height>
-              </rect>
-             </property>
-             <widget class="QLabel" name="lblCopyrights">
-              <property name="geometry">
-               <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>293</width>
-                <height>170</height>
-               </rect>
-              </property>
-              <property name="text">
-               <string>(c) 1999-2002 by Stéphane Dallongeville.&lt;br /&gt;
+           <widget class="QLabel" name="lblCopyrights">
+            <property name="text">
+             <string>(c) 1999-2002 by Stéphane Dallongeville.&lt;br /&gt;
 (c) 2003-2004 by Stéphane Akhoun.&lt;br /&gt;
 &lt;br /&gt;
 Gens/GS (c) 2008-2010 by David Korth.&lt;br /&gt;
@@ -109,18 +82,16 @@ Visit the Gens homepage:&lt;br /&gt;
 &lt;br /&gt;
 For news on Gens/GS, visit Sonic Retro:&lt;br /&gt;
 &lt;a href=&quot;http://www.sonicretro.org&quot;&gt;http://www.sonicretro.org&lt;/a&gt;</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-              </property>
-              <property name="openExternalLinks">
-               <bool>true</bool>
-              </property>
-              <property name="textInteractionFlags">
-               <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse</set>
-              </property>
-             </widget>
-            </widget>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
+            <property name="openExternalLinks">
+             <bool>true</bool>
+            </property>
+            <property name="textInteractionFlags">
+             <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse</set>
+            </property>
            </widget>
           </item>
          </layout>
@@ -137,65 +108,6 @@ For news on Gens/GS, visit Sonic Retro:&lt;br /&gt;
       <attribute name="title">
        <string>&amp;Debug Info</string>
       </attribute>
-      <layout class="QVBoxLayout" name="vboxDebugInfoTab">
-       <item>
-        <widget class="QFrame" name="fraDebugInfo">
-         <property name="frameShape">
-          <enum>QFrame::Box</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QVBoxLayout" name="vboxDebugInfoLabel">
-          <property name="margin">
-           <number>8</number>
-          </property>
-          <item>
-           <widget class="QScrollArea" name="scrlDebugInfo">
-            <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Plain</enum>
-            </property>
-            <property name="horizontalScrollBarPolicy">
-             <enum>Qt::ScrollBarAlwaysOff</enum>
-            </property>
-            <widget class="QWidget" name="scrlareaDebugInfo">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>0</y>
-               <width>374</width>
-               <height>173</height>
-              </rect>
-             </property>
-             <widget class="QLabel" name="lblDebugInfo">
-              <property name="geometry">
-               <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>7</width>
-                <height>16</height>
-               </rect>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-              </property>
-              <property name="openExternalLinks">
-               <bool>true</bool>
-              </property>
-              <property name="textInteractionFlags">
-               <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse</set>
-              </property>
-             </widget>
-            </widget>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-      </layout>
      </widget>
     </widget>
    </item>
