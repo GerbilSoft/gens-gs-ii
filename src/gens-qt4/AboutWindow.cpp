@@ -111,9 +111,8 @@ AboutWindow::AboutWindow(QWidget *parent)
 
 #endif /* HAVE_OPENGL */
 	
-	// Remove any newlines from the end of sDebugInfo.
-	while (sDebugInfo.endsWith('\n') || sDebugInfo.endsWith('\r'))
-		sDebugInfo.remove(sDebugInfo.size() - 1, 1);
+	// Trim whitespace at the end of sDebugInfo.
+	sDebugInfo = sDebugInfo.trimmed();
 	
 	// Set the text.
 	lblDebugInfo->setText(sDebugInfo);
