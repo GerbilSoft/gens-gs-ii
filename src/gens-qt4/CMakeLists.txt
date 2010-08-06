@@ -13,6 +13,11 @@ INCLUDE_DIRECTORIES("${gens-gs-ii_BINARY_DIR}")
 # Include the previous directory.
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../")
 
+# LibGens source and binary directories.
+# Binary directory is needed for config.h.
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+
 # Library checks.
 INCLUDE(CheckLibraryExists)
 CHECK_LIBRARY_EXISTS(rt clock_gettime "" HAVE_LIBRT)	# librt: clock_gettime()
@@ -81,9 +86,6 @@ SET(gens-qt4_UIS
 
 # Generate the header files from the UI files.
 QT4_WRAP_UI(gens-qt4_UIS_H ${gens-qt4_UIS})
-
-# Include the binary directory. (Required for the .h files.)
-INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}")
 
 # Resource files.
 SET(gens-qt4_RCC_SRCS
