@@ -242,8 +242,10 @@ void GensWindow::menuTriggered(int id)
 					#define ZLIB_EXT " *.zip *.zsg *.gz"
 					#define LZMA_EXT " *.7z"
 					#define RAR_EXT " *.rar"
-					QString filename = QFileDialog::getOpenFileName(this, tr("Open ROM"), "", 
-							tr("Sega CD / 32X / Genesis ROMs (*.bin *.smd *.gen *.32x *.cue *.iso *.raw" ZLIB_EXT LZMA_EXT RAR_EXT));
+					QString filename = QFileDialog::getOpenFileName(this, TR("Open ROM"), "", 
+							TR("Sega Genesis / 32X ROMs; Sega CD disc images") +
+							"(*.bin *.smd *.gen *.32x *.cue *.iso *.raw" ZLIB_EXT LZMA_EXT RAR_EXT ");;" +
+							TR("All Files") + "(*.*)");
 					if (filename.isEmpty())
 						break;
 					
