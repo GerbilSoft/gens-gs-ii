@@ -24,7 +24,9 @@
 #include "AboutWindow.hpp"
 #include "libgens/macros/git.h"
 
+// Qt includes.
 #include <QtCore/QString>
+#include <QtGui/QScrollArea>
 
 // Text translation macro.
 #define TR(text) \
@@ -36,7 +38,7 @@ namespace GensQt4
 // Static member initialization.
 AboutWindow *AboutWindow::m_AboutWindow = NULL;
 
-
+#include <stdio.h>
 /**
  * AboutWindow(): Initialize the About window.
  */
@@ -65,6 +67,76 @@ AboutWindow::AboutWindow(QWidget *parent)
 	
 	// Set the text.
         lblPrgTitle->setText(sPrgTitle);
+	
+	// Debug information.
+	QString sDebugInfo =
+		TR("Compiled using Qt") + " " + QT_VERSION_STR + "\n" +
+		TR("Using Qt") + " " + qVersion() + "\n\n";
+	
+#ifndef HAVE_OPENGL
+	sDebugInfo += TR("OpenGL disabled.\n");
+#else
+	const char *glVendor = (const char*)glGetString(GL_VENDOR);
+	const char *glRenderer = (const char*)glGetString(GL_RENDERER);
+	const char *glVersion = (const char*)glGetString(GL_VERSION);
+	sDebugInfo += TR("OpenGL vendor string:") + " " +
+			QString(glVendor ? glVendor : TR("(unknown)")) + "\n" +
+			TR("OpenGL renderer string:") + " " +
+			QString(glRenderer ? glRenderer : TR("(unknown)")) + "\n" +
+			TR("OpenGL version string:") + " " +
+			QString(glVersion ? glVersion : TR("(unknown)")) + "\n";
+	
+#ifdef GL_SHADING_LANGUAGE_VERSION
+	if (glVersion && glVersion[0] >= '2' && glVersion[1] == '.')
+	{
+		const char *glslVersion = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+		sDebugInfo += TR("GLSL version string:") + " " +
+				QString(glslVersion ? glslVersion : "(unknown)") + "\n";
+	}
+	
+	// OpenGL extensions.
+	sDebugInfo += "\n";
+#ifndef HAVE_GLEW
+	sDebugInfo += "GLEW disabled; no GL extensions supported.\n";
+#else
+	const char *glewVersion = (const char*)glewGetString(GLEW_VERSION);
+	sDebugInfo += "GLEW version " + QString(glewVersion ? glewVersion : TR("(unknown)")) + "\n" +
+			TR("GL extensions in use:") + "\n";
+	const QString sBullet = QString::fromUtf8("• ");
+	if (GLEW_ARB_fragment_program)
+		sDebugInfo += sBullet + "GL_ARB_fragment_program\n";
+#endif /* HAVE_GLEW */
+
+#endif /* GL_SHADING_LANGUAGE_VERSION */
+
+#endif /* HAVE_OPENGL */
+	
+	// Remove any newlines from the end of sDebugInfo.
+	while (sDebugInfo.endsWith('\n') || sDebugInfo.endsWith('\r'))
+		sDebugInfo.remove(sDebugInfo.size() - 1, 1);
+	
+	// Set the text.
+	lblDebugInfo->setText(sDebugInfo);
+	
+	// Create the scroll areas.
+	// Qt Designer's QScrollArea implementation is horribly broken.
+	// Also, this has to be done after the labels are set, because
+	// QScrollArea is kinda dumb.
+	QScrollArea *scrlCopyrights = new QScrollArea();
+	scrlCopyrights->setFrameShape(QFrame::NoFrame);
+	scrlCopyrights->setFrameShadow(QFrame::Plain);
+	scrlCopyrights->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	scrlCopyrights->setWidget(lblCopyrights);
+	lblCopyrights->setAutoFillBackground(false);
+	vboxCopyrights->addWidget(scrlCopyrights);
+	
+	QScrollArea *scrlDebugInfo = new QScrollArea();
+	scrlDebugInfo->setFrameShape(QFrame::NoFrame);
+	scrlDebugInfo->setFrameShadow(QFrame::Plain);
+	scrlCopyrights->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	scrlDebugInfo->setWidget(lblDebugInfo);
+	lblDebugInfo->setAutoFillBackground(false);
+	vboxDebugInfo->addWidget(scrlDebugInfo);
 }
 
 
