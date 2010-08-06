@@ -21,6 +21,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 # Library checks.
 INCLUDE(CheckLibraryExists)
 CHECK_LIBRARY_EXISTS(rt clock_gettime "" HAVE_LIBRT)	# librt: clock_gettime()
+CHECK_LIBRARY_EXISTS(c sigaction "" HAVE_SIGACTION)	# libc: sigaction()
 
 # Find OpenGL.
 # TODO: Disable OpenGL functionality if it isn't found.
@@ -64,6 +65,7 @@ SET(gens-qt4_SRCS
 	GensMenuBar.cpp
 	GensQGLWidget.cpp
 	EmuThread.cpp
+	SigHandler.cpp
 	)
 
 # Headers with Qt4 objects.

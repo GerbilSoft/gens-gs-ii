@@ -1,10 +1,10 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * config.h.in: Source file for config.h.                                  *
+ * SigHandler.hpp: Signal handler.                                         *
  *                                                                         *
- * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
- * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 1999-2002 by Stéphane Dallongeville                       *
+ * Copyright (c) 2003-2004 by Stéphane Akhoun                              *
+ * Copyright (c) 2008-2009 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,19 +21,41 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_CONFIG_H__
-#define __GENS_QT4_CONFIG_H__
+#ifndef __GENS_QT4_SIGHANDLER_HPP__
+#define __GENS_QT4_SIGHANDLER_HPP__
 
-/* Define to 1 if you have the `rt' library (-lrt). */
-#cmakedefine HAVE_LIBRT 1
+#include <config.h>
 
-/* Define to 1 if you have the `sigaction' function. */
-#cmakedefine HAVE_SIGACTION 1
+#ifdef HAVE_SIGACTION
+// C includes.
+#include <signal.h>
+#endif
 
-/* Define to 1 if you have the `GL' library (-lGL / -lopengl32). */
-#cmakedefine HAVE_OPENGL 1
+// LibGens includes
+#include "libgens/Util/siginfo.h"
 
-/* Define to 1 if you have the `GLEW' library (-lGLEW / -lglew32). */
-#cmakedefine HAVE_GLEW 1
+namespace GensQt4
+{
 
-#endif /* __GENS_QT4_CONFIG_H__ */
+class SigHandler
+{
+	public:
+		static void Init(void);
+		static void End(void);
+	
+	protected:
+#ifdef HAVE_SIGACTION
+		static const gens_signal_t *GetSigInfo(int signum, int si_code);
+		static void SignalHandler(int signum, siginfo_t *info, void *context);
+#else
+		static void SignalHandler(int signum);
+#endif
+	
+	private:
+		SigHandler() { }
+		~SigHandler() { }
+};
+
+}
+
+#endif /* __GENS_QT4_SIGHANDLER_HPP__ */

@@ -27,17 +27,17 @@
 #include "libgens/lg_main.hpp"
 #include "libgens/macros/log_msg.h"
 
-#include "GensQApplication.hpp"
+// Qt includes.
 #include <QtGui/QMessageBox>
-
-#include "GensWindow.hpp"
-
-#include <stdio.h>
 
 // Win32 compatibility functions.
 #ifdef _WIN32
 #include "gqt4_win32.hpp"
 #endif
+
+#include "GensQApplication.hpp"
+#include "GensWindow.hpp"
+#include "SigHandler.hpp"
 
 // Gens window.
 static GensQt4::GensWindow *gens_window = NULL;
@@ -51,6 +51,9 @@ static GensQt4::GensWindow *gens_window = NULL;
  */
 int main(int argc, char *argv[])
 {
+	// Register the signal handler.
+	GensQt4::SigHandler::Init();
+	
 	// Create the main UI.
 	GensQt4::GensQApplication app(argc, argv);
 	
@@ -74,8 +77,19 @@ int main(int argc, char *argv[])
 	// Run the Qt4 UI.
 	int ret = app.exec();
 	
+	/**
+	 * TODO: Put cleanup code in GensQApplication's aboutToQuit() signal.
+	 * app.exec() may not return on some platforms!
+	 *
+	 * Example: On Windows, if the user logs off while the program's running,
+	 * app.exec() won't return.
+	 */
+	
 	// Shut down LibGens.
 	LibGens::End();
+	
+	// Unregister the signal handler.
+	GensQt4::SigHandler::End();
 	
 	// Finished.
 	return ret;
