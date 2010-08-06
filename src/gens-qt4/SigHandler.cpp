@@ -279,7 +279,7 @@ void SigHandler::SignalHandler(int signum)
 	{
 		sMsg += QString(siginfo->signame);
 		if (siginfo->sigdesc)
-			sMsg += ": " + QString(sigdesc);
+			sMsg += ": " + QString(siginfo->sigdesc);
 		sMsg += "\n";
 	}
 #endif
