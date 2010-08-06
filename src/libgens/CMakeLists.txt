@@ -8,8 +8,16 @@ ADD_SUBDIRECTORY(mdZ80)
 # Main binary directory. Needed for git_version.h
 INCLUDE_DIRECTORIES(${gens-gs-ii_BINARY_DIR})
 
-# LibGens source directory.
-INCLUDE_DIRECTORIES(${libgens_SOURCE_DIR})
+# LibGens source and binary directories.
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+
+# Library checks.
+INCLUDE(CheckLibraryExists)
+CHECK_LIBRARY_EXISTS(c sigaction "" HAVE_SIGACTION)	# sigaction()
+
+# Write the config.h file.
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 
 # Sources.
 SET(libgens_SRCS
@@ -29,6 +37,7 @@ SET(libgens_SRCS
 	Util/Effects.cpp
 	Util/byteswap.c
 	Rom.cpp
+	Util/siginfo.c
 	)
 
 # Compatibility sources.
