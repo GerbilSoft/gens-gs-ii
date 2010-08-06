@@ -25,7 +25,7 @@
 #define __GENS_QT4_GQT4_WIN32_HPP__
 
 #ifndef _WIN32
-#error gqt4_win32.hpp should only be #include'd on Win32!
+#error gqt4_win32.hpp should only be #included on Win32!
 #endif
 
 namespace GensQt4
