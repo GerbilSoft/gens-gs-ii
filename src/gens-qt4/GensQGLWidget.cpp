@@ -21,11 +21,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <config.h>
+
 #include "GensQGLWidget.hpp"
 
 // C includes.
 #include <stdio.h>
-#include <libgens/MD/VdpRend.hpp>
+
+// LibGens includes.
+#include "libgens/MD/VdpRend.hpp"
+#include "libgens/macros/log_msg.h"
 
 // Win32 requires GL/glext.h for OpenGL 1.2/1.3.
 // TODO: Check the GL implementation to see what functionality is available at runtime.
@@ -33,14 +38,40 @@
 #include <GL/glext.h>
 #endif
 
+
 namespace GensQt4
 {
+
+#ifdef HAVE_GLEW
+/** Fragment programs. **/
+
+/**
+ * ms_fragPause_asm(): Pause shader.
+ * Based on grayscale shader from http://arstechnica.com/civis/viewtopic.php?f=19&t=445912
+ */
+const char *GensQGLWidget::ms_fragPause_asm =
+	"!!ARBfp1.0\n"
+	"OPTION ARB_precision_hint_fastest;\n"
+	"PARAM grayscale = {0.30, 0.59, 0.11, 0.0};\n"		// Standard RGB to Grayscale algorithm.
+	"TEMP t0, color;\n"
+	"TEX t0, fragment.texcoord[0], texture[0], 2D;\n"	// Get color coordinate.
+	"DP3 color, t0, grayscale;\n"				// Calculate grayscale value.
+	"ADD_SAT color.z, color.z, color.z;\n"			// Double the blue component.
+	"MOV result.color, color;\n"
+	"END\n";
+#endif /* HAVE_GLEW */
+
 
 GensQGLWidget::GensQGLWidget(QWidget *parent)
 	: QGLWidget(QGLFormat(QGL::NoAlphaChannel | QGL::NoDepthBuffer), parent)
 {
 	m_tex = 0;
 	m_dirty = true;
+	
+#ifdef HAVE_GLEW
+	// ARB fragment programs.
+	m_fragPause = 0;
+#endif /* HAVE_GLEW */
 }
 
 GensQGLWidget::~GensQGLWidget()
@@ -52,6 +83,14 @@ GensQGLWidget::~GensQGLWidget()
 		m_tex = 0;
 		glDisable(GL_TEXTURE_2D);
 	}
+	
+#ifdef HAVE_GLEW
+	if (m_fragPause > 0)
+	{
+		glDeleteProgramsARB(1, &m_fragPause);
+		m_fragPause = 0;
+	}
+#endif /* HAVE_GLEW */
 }
 
 
@@ -131,6 +170,30 @@ void GensQGLWidget::initializeGL(void)
 	glFrontFace(GL_CW);
 	glEnable(GL_CULL_FACE);
 	
+#ifdef HAVE_GLEW
+	// Initialize GLEW.
+	GLenum err = glewInit();
+	if (err != GLEW_OK)
+	{
+		// Error initializing GLEW!
+		LOG_MSG(gens, LOG_MSG_LEVEL_ERROR,
+			"Error initializing GLEW: %s", glewGetErrorString(err));
+	}
+	
+	if (GLEW_ARB_fragment_program)
+	{
+		// Fragment programs are supported.
+		// Load the fragment programs.
+		
+		// Load the "Pause" fragment shader.
+		// TODO: Check for errors!
+		glGenProgramsARB(1, &m_fragPause);
+		glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, m_fragPause);
+		glProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB,
+				   strlen(ms_fragPause_asm), ms_fragPause_asm);
+	}
+#endif /* HAVE_GLEW */
+
 	// Initialize the GL viewport and projection.
 	resizeGL(320, 240);
 	
@@ -232,6 +295,17 @@ void GensQGLWidget::paintGL(void)
 		glBindTexture(GL_TEXTURE_2D, m_tex);
 	}
 	
+#ifdef HAVE_GLEW
+	// Enable the fragment program.
+	// TODO: Only if paused.
+	// TODO: If ARB_fragment_program isn't supported, fall back to another method.
+	if (GLEW_ARB_fragment_program)
+	{
+		glEnable(GL_FRAGMENT_PROGRAM_ARB);
+		glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, m_fragPause);
+	}
+#endif /* HAVE_GLEW */
+	
 	// Draw the texture.
 	glBegin(GL_QUADS);
 	glTexCoord2d(0.0, 0.0);
@@ -243,6 +317,12 @@ void GensQGLWidget::paintGL(void)
 	glTexCoord2d(0.0, (240.0/256.0));
 	glVertex2i(-1, -1);
 	glEnd();
+	
+#ifdef HAVE_GLEW
+	// Disable the fragment program.
+	if (GLEW_ARB_fragment_program)
+		glDisable(GL_FRAGMENT_PROGRAM_ARB);
+#endif /* HAVE_GLEW */
 	
 	glDisable(GL_TEXTURE_2D);
 }

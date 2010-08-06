@@ -27,4 +27,7 @@
 /* Define to 1 if you have the `rt' library (-lrt). */
 #cmakedefine HAVE_LIBRT 1
 
+/* Define to 1 if you have the `glew' library (-lGLEW). */
+#cmakedefine HAVE_GLEW 1
+
 #endif /* __GENS_QT4_CONFIG_H__ */

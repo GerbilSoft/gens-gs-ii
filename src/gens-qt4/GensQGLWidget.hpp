@@ -21,8 +21,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <config.h>
+
 #ifndef __GENS_QT4_GENSQGLWIDGET_HPP__
 #define __GENS_QT4_GENSQGLWIDGET_HPP__
+
+#ifdef HAVE_GLEW
+// GL Extension Wrangler.
+#include <GL/glew.h>
+#endif
 
 #include <QtCore/QObject>
 #include <QtOpenGL/QGLWidget>
@@ -60,6 +67,14 @@ class GensQGLWidget : public QGLWidget
 		int m_colorComponents;
 		GLenum m_texFormat;
 		GLenum m_texType;
+		
+#ifdef HAVE_GLEW
+		// ARB fragment programs.
+		GLuint m_fragPause;
+		
+		// ARB fragment programs: assembly code.
+		static const char *ms_fragPause_asm;
+#endif
 };
 
 }
