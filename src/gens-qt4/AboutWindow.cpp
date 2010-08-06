@@ -102,9 +102,9 @@ AboutWindow::AboutWindow(QWidget *parent)
 	const char *glewVersion = (const char*)glewGetString(GLEW_VERSION);
 	sDebugInfo += "GLEW version " + QString(glewVersion ? glewVersion : TR("(unknown)")) + "\n" +
 			TR("GL extensions in use:") + "\n";
-	const QString sBullet = QString::fromUtf8("• ");
+	const QChar chrBullet(0x2022);	// U+2022: BULLET
 	if (GLEW_ARB_fragment_program)
-		sDebugInfo += sBullet + "GL_ARB_fragment_program\n";
+		sDebugInfo += chrBullet + QString(" ") + QString("GL_ARB_fragment_program" + QString("\n"));
 #endif /* HAVE_GLEW */
 
 #endif /* GL_SHADING_LANGUAGE_VERSION */
