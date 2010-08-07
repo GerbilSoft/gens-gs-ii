@@ -10,7 +10,7 @@ SET(minizip_SRCS
 
 # Platform-specific sources.
 IF(WIN32)
-	SET(minizip_PLATFORM_SRCS iowin32.c)
+	SET(minizip_PLATFORM_SRCS iowin32.c iowin32u.c)
 ENDIF(WIN32)
 
 # Build the library.
