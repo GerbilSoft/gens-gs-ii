@@ -1,0 +1,7 @@
+This copy of minizip-1.1 is a modified version of the original.
+
+In particular, the build system has been replaced with CMake,
+and the additional MiniZip tools and examples have been removed.
+
+To obtain the original minizip-1.1, visit
+http://www.winimage.com/zLibDll/minizip.html
