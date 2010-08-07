@@ -45,6 +45,17 @@ class VBackend
 		// Return a QWidget* version of this object.
 		// Since this is the base class, this will return NULL.
 		virtual QWidget *toQWidget(void) { return NULL; }
+		
+		bool paused(void) const { return m_paused; }
+		void setPaused(bool newPaused)
+		{
+			if (m_paused == newPaused)
+				return;
+			
+			// Update the pause status.
+			m_paused = newPaused;
+			updatePaused();
+		}
 	
 	protected:
 		// Dirty flag. If set, texture must be reuploaded.
@@ -52,6 +63,13 @@ class VBackend
 		
 		// Color depth information.
 		LibGens::VdpRend::ColorDepth m_lastBpp;
+		
+		// Effects.
+		virtual void updatePaused(void) = 0;	// TODO: Default version!
+	
+	private:
+		// Effects.
+		bool m_paused;
 };
 
 }

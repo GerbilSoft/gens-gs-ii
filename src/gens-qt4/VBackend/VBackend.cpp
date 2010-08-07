@@ -33,6 +33,9 @@ VBackend::VBackend()
 {
 	// Mark the video backend as dirty on startup.
 	m_vbDirty = true;
+	
+	// Clear the effects flags.
+	m_paused = false;
 }
 
 VBackend::~VBackend()

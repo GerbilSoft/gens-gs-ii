@@ -33,6 +33,7 @@
 
 #include "VBackend.hpp"
 #include <QtOpenGL/QGLWidget>
+#include <QtGui/QKeyEvent>
 
 #include "libgens/MD/VdpRend.hpp"
 
@@ -68,13 +69,17 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		GLenum m_texFormat;
 		GLenum m_texType;
 		
+		// Effects.
+		void updatePaused(void);
 #ifdef HAVE_GLEW
-		// ARB fragment programs.
+		// Pause effect: ARB fragment program.
 		GLuint m_fragPause;
-		
-		// ARB fragment programs: assembly code.
 		static const char *ms_fragPause_asm;
 #endif
+		
+		// Keyboard handler.
+		// TODO: Move somewhere else?
+		void keyPressEvent(QKeyEvent *event);
 };
 
 }

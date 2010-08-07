@@ -71,6 +71,9 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 	// ARB fragment programs.
 	m_fragPause = 0;
 #endif /* HAVE_GLEW */
+	
+	// Accept keyboard focus.
+	setFocusPolicy(Qt::StrongFocus);
 }
 
 GensQGLWidget::~GensQGLWidget()
@@ -175,7 +178,7 @@ void GensQGLWidget::initializeGL(void)
 	if (err != GLEW_OK)
 	{
 		// Error initializing GLEW!
-		LOG_MSG(gens, LOG_MSG_LEVEL_ERROR,
+		LOG_MSG(video, LOG_MSG_LEVEL_ERROR,
 			"Error initializing GLEW: %s", glewGetErrorString(err));
 	}
 	
@@ -184,12 +187,30 @@ void GensQGLWidget::initializeGL(void)
 		// Fragment programs are supported.
 		// Load the fragment programs.
 		
-		// Load the "Pause" fragment shader.
+		// Load the "Pause" fragment program.
 		// TODO: Check for errors!
 		glGenProgramsARB(1, &m_fragPause);
 		glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, m_fragPause);
+		glGetError();	// Clear the error flag.
 		glProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB,
 				   strlen(ms_fragPause_asm), ms_fragPause_asm);
+		
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR)
+		{
+			// An error occured while loading the fragment program.
+			// TODO: Remove the extra newline at the end of err_str.
+			const char *err_str = (const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB);
+			LOG_MSG(video, LOG_MSG_LEVEL_ERROR,
+				"Error creating Pause fragment program: %s", (err_str ? err_str : "(unknown)"));
+			
+			// Delete the fragment program.
+			if (m_fragPause > 0)
+			{
+				glDeleteProgramsARB(1, &m_fragPause);
+				m_fragPause = 0;
+			}
+		}
 	}
 #endif /* HAVE_GLEW */
 
@@ -298,7 +319,7 @@ void GensQGLWidget::paintGL(void)
 	// Enable the fragment program.
 	// TODO: Only if paused.
 	// TODO: If ARB_fragment_program isn't supported, fall back to another method.
-	if (GLEW_ARB_fragment_program)
+	if (paused() && m_fragPause > 0)
 	{
 		glEnable(GL_FRAGMENT_PROGRAM_ARB);
 		glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, m_fragPause);
@@ -319,11 +340,47 @@ void GensQGLWidget::paintGL(void)
 	
 #ifdef HAVE_GLEW
 	// Disable the fragment program.
-	if (GLEW_ARB_fragment_program)
+	if (paused() && m_fragPause > 0)
 		glDisable(GL_FRAGMENT_PROGRAM_ARB);
 #endif /* HAVE_GLEW */
 	
 	glDisable(GL_TEXTURE_2D);
+}
+
+
+/**
+ * updatePaused(): Update the Pause effect.
+ */
+void GensQGLWidget::updatePaused(void)
+{
+#ifdef HAVE_GLEW
+	if (m_fragPause > 0)
+	{
+		// Fragment shader is in use for the Pause effect.
+		// Don't do anything.
+		return;
+	}
+	else
+#endif
+	{
+		// TODO: Software fallback.
+	}
+}
+
+
+/**
+ * keyPressEvent(): Keyboard handler.
+ * TODO: Move somewhere else?
+ * @param event Key event.
+ */
+void GensQGLWidget::keyPressEvent(QKeyEvent *event)
+{
+	if (event->key() == Qt::Key_Escape)
+	{
+		// Toggle the Pause effect.
+		setPaused(!paused());
+		vbUpdate();
+	}
 }
 
 }
