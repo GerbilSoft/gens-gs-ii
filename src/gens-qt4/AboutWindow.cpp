@@ -76,7 +76,7 @@ AboutWindow::AboutWindow(QWidget *parent)
 	
 	// CPU flags.
 	// TODO: Move the array of CPU flag names to LibGens.
-	sDebugInfo += "CPU flags: ";
+	sDebugInfo += "CPU Flags: ";
 #if defined(__i386__) || defined(__amd64__)*/
 	const char *CpuFlagNames[11] =
 	{
