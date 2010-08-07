@@ -46,10 +46,10 @@ namespace GensQt4
 /** Fragment programs. **/
 
 /**
- * ms_fragPause_asm(): Pause shader.
+ * ms_fragPaused_asm(): Paused effect fragment program.
  * Based on grayscale shader from http://arstechnica.com/civis/viewtopic.php?f=19&t=445912
  */
-const char *GensQGLWidget::ms_fragPause_asm =
+const char *GensQGLWidget::ms_fragPaused_asm =
 	"!!ARBfp1.0\n"
 	"OPTION ARB_precision_hint_fastest;\n"
 	"PARAM grayscale = {0.30, 0.59, 0.11, 0.0};\n"		// Standard RGB to Grayscale algorithm.
@@ -69,7 +69,7 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 	
 #ifdef HAVE_GLEW
 	// ARB fragment programs.
-	m_fragPause = 0;
+	m_fragPaused = 0;
 #endif /* HAVE_GLEW */
 	
 	// Accept keyboard focus.
@@ -87,10 +87,10 @@ GensQGLWidget::~GensQGLWidget()
 	}
 	
 #ifdef HAVE_GLEW
-	if (m_fragPause > 0)
+	if (m_fragPaused > 0)
 	{
-		glDeleteProgramsARB(1, &m_fragPause);
-		m_fragPause = 0;
+		glDeleteProgramsARB(1, &m_fragPaused);
+		m_fragPaused = 0;
 	}
 #endif /* HAVE_GLEW */
 }
@@ -187,13 +187,13 @@ void GensQGLWidget::initializeGL(void)
 		// Fragment programs are supported.
 		// Load the fragment programs.
 		
-		// Load the "Pause" fragment program.
+		// Load the Paused effect fragment program.
 		// TODO: Check for errors!
-		glGenProgramsARB(1, &m_fragPause);
-		glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, m_fragPause);
+		glGenProgramsARB(1, &m_fragPaused);
+		glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, m_fragPaused);
 		glGetError();	// Clear the error flag.
 		glProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB,
-				   strlen(ms_fragPause_asm), ms_fragPause_asm);
+				   strlen(ms_fragPaused_asm), ms_fragPaused_asm);
 		
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR)
@@ -202,13 +202,13 @@ void GensQGLWidget::initializeGL(void)
 			// TODO: Remove the extra newline at the end of err_str.
 			const char *err_str = (const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB);
 			LOG_MSG(video, LOG_MSG_LEVEL_ERROR,
-				"Error creating Pause fragment program: %s", (err_str ? err_str : "(unknown)"));
+				"Error creating Paused effect FP: %s", (err_str ? err_str : "(unknown)"));
 			
 			// Delete the fragment program.
-			if (m_fragPause > 0)
+			if (m_fragPaused > 0)
 			{
-				glDeleteProgramsARB(1, &m_fragPause);
-				m_fragPause = 0;
+				glDeleteProgramsARB(1, &m_fragPaused);
+				m_fragPaused = 0;
 			}
 		}
 	}
@@ -283,6 +283,10 @@ void GensQGLWidget::paintGL(void)
 			reallocTexture();
 		}
 		
+		// If emulation is paused, update the pause effect.
+		if (paused())
+			updatePausedEffect();
+		
 		// Bind the texture.
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_tex);
@@ -294,11 +298,15 @@ void GensQGLWidget::paintGL(void)
 		
 		// NOTE: MD_Screen.u16 and MD_Screen.u32 are interchangeable here,
 		// since we want the start of the MD_Screen buffer.
+		const GLvoid *screen =
+			(paused() && m_fragPaused == 0)
+			? m_intScreen.u16
+			: LibGens::VdpRend::MD_Screen.u16;
+		
 		glTexSubImage2D(GL_TEXTURE_2D, 0,
 				0, 0,		// x/y offset
 				320, 240,	// width/height
-				m_texFormat, m_texType,
-				LibGens::VdpRend::MD_Screen.u16);
+				m_texFormat, m_texType, screen);
 		
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
@@ -317,12 +325,11 @@ void GensQGLWidget::paintGL(void)
 	
 #ifdef HAVE_GLEW
 	// Enable the fragment program.
-	// TODO: Only if paused.
 	// TODO: If ARB_fragment_program isn't supported, fall back to another method.
-	if (paused() && m_fragPause > 0)
+	if (paused() && m_fragPaused > 0)
 	{
 		glEnable(GL_FRAGMENT_PROGRAM_ARB);
-		glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, m_fragPause);
+		glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, m_fragPaused);
 	}
 #endif /* HAVE_GLEW */
 	
@@ -340,7 +347,7 @@ void GensQGLWidget::paintGL(void)
 	
 #ifdef HAVE_GLEW
 	// Disable the fragment program.
-	if (paused() && m_fragPause > 0)
+	if (paused() && m_fragPaused > 0)
 		glDisable(GL_FRAGMENT_PROGRAM_ARB);
 #endif /* HAVE_GLEW */
 	
@@ -349,21 +356,23 @@ void GensQGLWidget::paintGL(void)
 
 
 /**
- * updatePaused(): Update the Pause effect.
+ * updatePausedEffect(): Update the Paused effect.
  */
-void GensQGLWidget::updatePaused(void)
+void GensQGLWidget::updatePausedEffect(void)
 {
 #ifdef HAVE_GLEW
-	if (m_fragPause > 0)
+	if (m_fragPaused > 0)
 	{
-		// Fragment shader is in use for the Pause effect.
+		// Fragment program is in use for the Pause effect.
 		// Don't do anything.
 		return;
 	}
 	else
 #endif
 	{
-		// TODO: Software fallback.
+		// Fragment prorgam is not in use.
+		// Use the software fallback.
+		this->VBackend::updatePausedEffect();
 	}
 }
 

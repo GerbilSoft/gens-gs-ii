@@ -25,6 +25,9 @@
 #include "VBackend.hpp"
 #include <stdio.h>
 
+// LibGens includes.
+#include "libgens/Util/Effects.hpp"
+
 
 namespace GensQt4
 {
@@ -40,6 +43,21 @@ VBackend::VBackend()
 
 VBackend::~VBackend()
 {
+}
+
+
+/**
+ * updatePausedEffect(): Update the Paused effect.
+ * Copies the VdpRend MD_Screen[] buffer into m_intScreen[].
+ */
+void VBackend::updatePausedEffect(void)
+{
+	// Use LibGens' software paused effect function.
+	// NOTE: m_intScreen.u16 and m_intScreen.u32 are the same thing.
+	LibGens::Effects::DoPausedEffect((void*)(m_intScreen.u16));
+	
+	// Mark the video buffer as dirty.
+	setVbDirty();
 }
 
 }

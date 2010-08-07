@@ -70,11 +70,11 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		GLenum m_texType;
 		
 		// Effects.
-		void updatePaused(void);
+		void updatePausedEffect(void);
 #ifdef HAVE_GLEW
-		// Pause effect: ARB fragment program.
-		GLuint m_fragPause;
-		static const char *ms_fragPause_asm;
+		// Paused effect: ARB fragment program.
+		GLuint m_fragPaused;
+		static const char *ms_fragPaused_asm;
 #endif
 		
 		// Keyboard handler.

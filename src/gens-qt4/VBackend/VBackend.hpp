@@ -54,7 +54,7 @@ class VBackend
 			
 			// Update the pause status.
 			m_paused = newPaused;
-			updatePaused();
+			setVbDirty();
 		}
 	
 	protected:
@@ -65,7 +65,12 @@ class VBackend
 		LibGens::VdpRend::ColorDepth m_lastBpp;
 		
 		// Effects.
-		virtual void updatePaused(void) = 0;	// TODO: Default version!
+		virtual void updatePausedEffect(void);
+		
+		// Internal rendering buffer used for software effects.
+		// NOTE: This takes up ~322 KB!
+		// TODO: Dynamically allocate this buffer only if it's needed?
+		LibGens::VdpRend::Screen_t m_intScreen;
 	
 	private:
 		// Effects.
