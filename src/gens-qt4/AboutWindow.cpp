@@ -23,6 +23,7 @@
 
 #include "AboutWindow.hpp"
 #include "libgens/macros/git.h"
+#include "libgens/Util/cpuflags.h"
 
 // Qt includes.
 #include <QtCore/QString>
@@ -72,6 +73,32 @@ AboutWindow::AboutWindow(QWidget *parent)
 	QString sDebugInfo =
 		TR("Compiled using Qt") + " " + QT_VERSION_STR + ".\n" +
 		TR("Using Qt") + " " + qVersion() + ".\n\n";
+	
+	// CPU flags.
+	// TODO: Move the array of CPU flag names to LibGens.
+	sDebugInfo += "CPU flags: ";
+#if defined(__i386__) || defined(__amd64__)*/
+	const char *CpuFlagNames[11] =
+	{
+		"MMX", "MMXEXT", "3DNow!", "3DNow! EXT",
+		"SSE", "SSE2", "SSE3", "SSSE3",
+		"SSE4.1", "SSE4.2", "SSE4a"
+	};
+	unsigned int cnt = 0;
+	for (unsigned int i = 0; i < (sizeof(CpuFlagNames)/sizeof(CpuFlagNames[0])); i++)
+	{
+		if (CPU_Flags & (1 << i))
+		{
+			if (cnt != 0)
+				sDebugInfo += ", ";
+			sDebugInfo += CpuFlagNames[i];
+			cnt++;
+		}
+	}
+	sDebugInfo += "\n\n";
+#else
+	sDebugInfo += "(none)\n\n";
+#endif
 	
 #ifndef HAVE_OPENGL
 	sDebugInfo += TR("OpenGL disabled.\n");
