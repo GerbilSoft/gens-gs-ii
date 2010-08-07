@@ -50,13 +50,6 @@ ENDIF()
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 
-# Compatibility sources.
-IF(WIN32)
-	SET(gens-qt4_COMPAT_SRC lg_win32.c)
-ELSE()
-	SET(gens-qt4_COMPAT_SRC)
-ENDIF()
-
 # Sources.
 SET(gens-qt4_SRCS
 	gqt4_main.cpp
@@ -100,7 +93,7 @@ QT4_ADD_RESOURCES(gens-qt4_RCC_O ${gens-qt4_RCC_SRCS})
 
 # Compatibility sources.
 IF(WIN32)
-	SET(gens-qt4_COMPAT_SRCS gqt4_win32.cpp)
+	SET(gens-qt4_COMPAT_SRCS gqt4_win32.cpp ui/gens-qt4.rc)
 ELSE()
 	SET(gens-qt4_COMPAT_SRCS)
 ENDIF()
@@ -108,10 +101,9 @@ ENDIF()
 # Build the executable.
 ADD_EXECUTABLE(gens-qt4 ${gens-qt4_SRCS} ${gens-qt4_COMPAT_SRCS} ${gens-qt4_MOC_SOURCES} ${gens-qt4_UIS_H} ${gens-qt4_RCC_O})
 TARGET_LINK_LIBRARIES(gens-qt4 gens)
-IF(WIN32)
-	# TODO: Only link -lmingw32 if we're using MinGW.
+IF(MINGW)
 	TARGET_LINK_LIBRARIES(gens-qt4 -lmingw32 ${QT_QTMAIN_LIBRARY})
-ENDIF(WIN32)
+ENDIF(MINGW)
 TARGET_LINK_LIBRARIES(gens-qt4 ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY})
 IF(HAVE_GLEW)
 	TARGET_LINK_LIBRARIES(gens-qt4 ${GLEW_LIBRARY})
