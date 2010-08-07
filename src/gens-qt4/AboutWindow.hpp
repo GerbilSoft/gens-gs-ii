@@ -51,6 +51,9 @@ class AboutWindow : public QDialog, public Ui::AboutWindow
 		
 		// Debug information.
 		static QString GetDebugInfo(void);
+#ifdef Q_OS_WIN32
+		static QString GetCodePageInfo(void);
+#endif /* Q_OS_WIN32 */
 	
 	private:
 		static AboutWindow *m_AboutWindow;

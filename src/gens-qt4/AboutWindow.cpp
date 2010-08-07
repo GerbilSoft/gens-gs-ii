@@ -25,6 +25,9 @@
 #include "libgens/macros/git.h"
 #include "libgens/Util/cpuflags.h"
 
+// C includes.
+#include <string.h>
+
 // Qt includes.
 #include <QtCore/QString>
 #include <QtGui/QScrollArea>
@@ -160,7 +163,12 @@ QString AboutWindow::GetDebugInfo(void)
 	sDebugInfo += "\n\n";
 #else
 	sDebugInfo += "(none)\n\n";
-#endif
+#endif /* defined(__i386__) || defined(__amd64__) */
+	
+#ifdef Q_OS_WIN32
+	// Win32 code page information.
+	sDebugInfo += GetCodePageInfo() + "\n";
+#endif /* Q_OS_WIN32 */
 	
 #ifndef HAVE_OPENGL
 	sDebugInfo += TR("OpenGL disabled.\n");
@@ -206,5 +214,94 @@ QString AboutWindow::GetDebugInfo(void)
 	return sDebugInfo.trimmed();
 }
 
+
+#ifdef Q_OS_WIN32
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+
+/**
+ * GetCodePageInfo(): Get information about the system code pages.
+ * @return System code page information.
+ */
+QString AboutWindow::GetCodePageInfo(void)
+{
+	QString sCodePageInfo;
+	
+	// Get the ANSI and OEM code pages.
+	struct cpInfo
+	{
+		unsigned int cp;
+		const char *cpStr;
+	};
+	
+	cpInfo m_cpInfo[2] =
+	{
+		{CP_ACP,	"System ANSI code page"},
+		{CP_OEMCP,	"System OEM code page"}
+	};
+	
+	// TODO: GetCPInfoExU() support?
+	for (int i = 0; i < 2; i++)
+	{
+		sCodePageInfo += m_cpInfo[i].cpStr;
+		sCodePageInfo += ": ";
+		
+		// Get the code page information.
+		CPINFOEX cpix;
+		BOOL bRet = GetCPInfoExA(m_cpInfo[i].cp, 0, &cpix);
+		if (!bRet)
+		{
+			sCodePageInfo += "Unknown [GetCPInfoExA() failed]\n";
+			continue;
+		}
+		
+		sCodePageInfo += QString::number(cpix.CodePage);
+		
+		// if the code page name is blank, don't add extra parentheses.
+		if (cpix.CodePageName[0] == 0x00)
+		{
+			sCodePageInfo += "\n";
+			continue;
+		}
+		
+		// Add the code page name.
+		sCodePageInfo += " (";
+		
+		// Windows XP has the code page number in cpix.CodePageName,
+		// followed by two spaces, and then the code page name in parentheses.
+		char *parenStart = strchr(cpix.CodePageName, '(');
+		if (!parenStart)
+		{
+			// No parentheses. Use the code page name as-is.
+			sCodePageInfo += QString::fromLocal8Bit(cpix.CodePageName);
+		}
+		else
+		{
+			// Found starting parenthesis. Check for ending parenthesis.
+			char *parenEnd = strrchr(parenStart, ')');
+			if (parenEnd)
+			{
+				// Found ending parenthesis. Null it out.
+				*parenEnd = 0x00;
+			}
+			
+			sCodePageInfo += QString::fromLocal8Bit(parenStart + 1);
+		}
+		
+		sCodePageInfo += ")\n";
+	}
+	
+	// Is Gens/GS II using Unicode?
+	if (GetModuleHandleW(NULL) != NULL)
+		sCodePageInfo += "Using Unicode strings for Win32 API.\n";
+	else
+		sCodePageInfo += "Using ANSI strings for Win32 API.\n";
+	
+	return sCodePageInfo;
+}
+#endif /* Q_OS_WIN32 */
 
 }
