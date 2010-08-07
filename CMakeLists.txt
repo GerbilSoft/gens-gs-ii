@@ -119,6 +119,19 @@ IF(MINGW)
 		"<CMAKE_RC_COMPILER> --output-format=coff <FLAGS> <DEFINES> -o <OBJECT> <SOURCE>")
 ENDIF(MINGW)
 
+# Check for zlib.
+# If zlib isn't found, src/extlib/zlib/ will be used instead.
+# TODO: Figure out how to move this all to src/extlib/.
+# It's here now because otherwise the INCLUDE_DIRECTORIES() stuff
+# won't propagate to all the projects correctly.
+FIND_PACKAGE(ZLIB)
+SET(HAVE_ZLIB 1)
+IF(ZLIB_FOUND)
+	INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+ELSE(ZLIB_FOUND)
+	INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/src/extlib/zlib")
+ENDIF(ZLIB_FOUND)
+
 # Set CFLAGS/CXXFLAGS based on build type.
 SET(CMAKE_C_FLAGS_DEBUG		"-O0 ${GENS_C99_CFLAG} ${GENS_CFLAGS_COMMON} ${GENS_CFLAGS_PLATFORM}")
 SET(CMAKE_CXX_FLAGS_DEBUG	"-O0 ${GENS_CXXFLAGS_COMMON} ${GENS_CXXFLAGS_PLATFORM}")

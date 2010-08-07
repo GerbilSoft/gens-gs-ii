@@ -1,16 +1,6 @@
 PROJECT(minizip)
 cmake_minimum_required(VERSION 2.6.0)
 
-# zlib is required for MiniZip.
-IF(WIN32)
-	# Win32: use the included copy of zlib.
-	SET(ZLIB_LIBRARY zlib)
-ELSE(WIN32)
-	# Other system: use the system zlib.
-	FIND_PACKAGE(ZLIB REQUIRED)
-	INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
-ENDIF(WIN32)
-
 # Sources.
 SET(minizip_SRCS
 	unzip.c
