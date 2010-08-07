@@ -70,8 +70,8 @@ AboutWindow::AboutWindow(QWidget *parent)
 	
 	// Debug information.
 	QString sDebugInfo =
-		TR("Compiled using Qt") + " " + QT_VERSION_STR + "\n" +
-		TR("Using Qt") + " " + qVersion() + "\n\n";
+		TR("Compiled using Qt") + " " + QT_VERSION_STR + ".\n" +
+		TR("Using Qt") + " " + qVersion() + ".\n\n";
 	
 #ifndef HAVE_OPENGL
 	sDebugInfo += TR("OpenGL disabled.\n");
@@ -102,9 +102,11 @@ AboutWindow::AboutWindow(QWidget *parent)
 	const char *glewVersion = (const char*)glewGetString(GLEW_VERSION);
 	sDebugInfo += "GLEW version " + QString(glewVersion ? glewVersion : TR("(unknown)")) + "\n" +
 			TR("GL extensions in use:") + "\n";
+	
+	// TODO: Print "No GL extensions in use." if no GL extensions are in use.
 	const QChar chrBullet(0x2022);	// U+2022: BULLET
 	if (GLEW_ARB_fragment_program)
-		sDebugInfo += chrBullet + QString(" ") + QString("GL_ARB_fragment_program" + QString("\n"));
+		sDebugInfo += chrBullet + QString(" ") + "GL_ARB_fragment_program" + "\n";
 #endif /* HAVE_GLEW */
 
 #endif /* GL_SHADING_LANGUAGE_VERSION */
