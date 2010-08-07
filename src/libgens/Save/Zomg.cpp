@@ -30,7 +30,7 @@
 #include "MD/VdpIo.hpp"
 
 #ifdef _WIN32
-#include "../../extlib/minizip/iowin32.h"
+#include "../../extlib/minizip/iowin32u.h"
 #endif
 
 // C includes.
@@ -55,9 +55,8 @@ Zomg::Zomg(const char *filename)
 	
 	// Open the ZOMG file.
 #ifdef _WIN32
-	// TODO: Unicode support on Win32. [fill_win32_filefunc64W()]
 	zlib_filefunc64_def ffunc;
-	fill_win32_filefunc64A(&ffunc);
+	fill_win32_filefunc64U(&ffunc);
 	m_zFile = unzOpen2_64(filename, &ffunc);
 #else
 	m_zFile = unzOpen(filename);
