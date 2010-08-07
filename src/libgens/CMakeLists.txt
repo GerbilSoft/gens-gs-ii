@@ -39,6 +39,7 @@ SET(libgens_SRCS
 	Util/byteswap.c
 	Rom.cpp
 	Util/siginfo.c
+	Util/cpuflags.c
 	)
 
 # Compatibility sources.

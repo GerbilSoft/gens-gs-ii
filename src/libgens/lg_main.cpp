@@ -23,6 +23,7 @@
 
 #include "lg_main.hpp"
 #include "macros/git.h"
+#include "Util/cpuflags.h"
 
 // C includes.
 #include <stdio.h>
@@ -84,6 +85,9 @@ int Init(void)
 		"\n");
 	
 	// TODO: Clear LibGens variables.
+	
+	// Detect CPU flags.
+	LibGens_GetCPUFlags();
 	
 	ms_IsInit = true;
 	return 0;
