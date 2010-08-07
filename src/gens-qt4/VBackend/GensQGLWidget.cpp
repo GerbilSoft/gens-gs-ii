@@ -66,7 +66,6 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 	: QGLWidget(QGLFormat(QGL::NoAlphaChannel | QGL::NoDepthBuffer), parent)
 {
 	m_tex = 0;
-	m_dirty = true;
 	
 #ifdef HAVE_GLEW
 	// ARB fragment programs.
@@ -148,7 +147,7 @@ void GensQGLWidget::reallocTexture(void)
 	glDisable(GL_TEXTURE_2D);
 	
 	// Texture is dirty.
-	m_dirty = true;
+	m_vbDirty = true;
 }
 
 
@@ -252,7 +251,7 @@ void GensQGLWidget::paintGL(void)
 	glClearColor(1.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
-	if (m_dirty)
+	if (m_vbDirty)
 	{
 		// MD_Screen is dirty.
 		
@@ -285,7 +284,7 @@ void GensQGLWidget::paintGL(void)
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 0);
 		
 		// Texture is no longer dirty.
-		m_dirty = false;
+		m_vbDirty = false;
 	}
 	else
 	{

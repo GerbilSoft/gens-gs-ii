@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * GensWindow.hpp: Gens Window.                                            *
+ * VBackend.hpp: Video Backend class.                                      *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,62 +21,39 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_GENSWINDOW_HPP__
-#define __GENS_QT4_GENSWINDOW_HPP__
+#include <config.h>
 
-// Qt4 includes.
-#include <QtGui/QMainWindow>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QCloseEvent>
+#ifndef __GENS_QT4_VBACKEND_HPP__
+#define __GENS_QT4_VBACKEND_HPP__
 
-#include "VBackend/VBackend.hpp"
-#include "GensMenuBar.hpp"
-#include "EmuThread.hpp"
+#include <QtGui/QWidget>
+
+#include "libgens/MD/VdpRend.hpp"
 
 namespace GensQt4
 {
 
-class GensWindow : public QMainWindow
+class VBackend
 {
-	Q_OBJECT
-	
 	public:
-		GensWindow();
-		~GensWindow();
+		VBackend();
+		virtual ~VBackend();
 		
-		// Widgets.
-		VBackend *m_vBackend;	// QGLWidget.
-		GensMenuBar *m_menubar;		// Gens menu bar.
+		void setVbDirty(void) { m_vbDirty = true; }
+		virtual void vbUpdate(void) = 0;
 		
-	protected:
-		void setupUi(void);
-		void retranslateUi(void);
-		
-		void closeEvent(QCloseEvent *event);
-		
-		QWidget *centralwidget;
-		QVBoxLayout *layout;
-		
-		// QMainWindow virtual functions.
-		void showEvent(QShowEvent *event);
-		
-		// GensWindow functions.
-		void gensResize(void);	// Resize the window.
-		
-		int m_scale;		// Temporary scaling variable.
-		bool m_hasInitResize;	// Has the initial resize occurred?
-		
-		// Emulation thread.
-		EmuThread *m_emuThread;
+		// Return a QWidget* version of this object.
+		// Since this is the base class, this will return NULL.
+		virtual QWidget *toQWidget(void) { return NULL; }
 	
-	protected slots:
-		// Menu item selection.
-		void menuTriggered(int id);
+	protected:
+		// Dirty flag. If set, texture must be reuploaded.
+		bool m_vbDirty;
 		
-		// Frame done from EmuThread.
-		void emuFrameDone(void);
+		// Color depth information.
+		LibGens::VdpRend::ColorDepth m_lastBpp;
 };
 
 }
 
-#endif /* __GENS_QT4_GENSWINDOW_HPP__ */
+#endif /* __GENS_QT4_GENSQGLWIDGET_HPP__ */

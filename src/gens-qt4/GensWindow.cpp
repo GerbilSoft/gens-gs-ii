@@ -33,9 +33,13 @@
 #include "libgens/lg_main.hpp"
 #include "libgens/MD/EmuMD.hpp"
 #include "libgens/macros/git.h"
+#include "libgens/macros/log_msg.h"
 
 // Test loading ROMs.
 #include "libgens/Rom.hpp"
+
+// Video Backend classes.
+#include "VBackend/GensQGLWidget.hpp"
 
 // C includes. (Needed for fps timing.)
 #include <stdio.h>
@@ -126,17 +130,30 @@ void GensWindow::setupUi(void)
 	m_menubar = new GensMenuBar(this);
 	this->setMenuBar(m_menubar);
 	
-	// Create the QGLWidget.
-	// TODO: Make this use a pluggable backend instead.
-	m_glWidget = new GensQGLWidget(this->centralwidget);
+	// Create the Video Backend.
+	// TODO: Allow selection of all available VBackend classes.
+	m_vBackend = new GensQGLWidget(this->centralwidget);
 	
 	// Create the layout.
 	layout = new QVBoxLayout(this->centralwidget);
 	layout->setObjectName(QString::fromUtf8("layout"));
 	layout->setMargin(0);
 	layout->setSpacing(0);
-	layout->addWidget(m_glWidget);
 	centralwidget->setLayout(layout);
+	
+	// Add the Video Backend to the layout.
+	// TODO: Figure out a way to do this without RTTI.
+	QWidget *vbackend_widget = m_vBackend->toQWidget();
+	if (vbackend_widget != NULL)
+	{
+		layout->addWidget(vbackend_widget);
+	}
+	else
+	{
+		// Not a QWidget!
+		LOG_MSG(gens, LOG_MSG_LEVEL_ERROR,
+			"Windowed mode: VBackend is not a QWidget!");
+	}
 	
 	// Connect the GensMenuBar's triggered() signal.
 	connect(m_menubar, SIGNAL(triggered(int)),
@@ -272,8 +289,8 @@ void GensWindow::menuTriggered(int id)
 				case MNUID_ITEM(IDM_FILE_BLIT):
 					// Blit!
 					LibGens::EmuMD::Init_TEST();
-					m_glWidget->setDirty();
-					m_glWidget->updateGL();
+					m_vBackend->setVbDirty();
+					m_vBackend->vbUpdate();
 					break;
 				
 				case MNUID_ITEM(IDM_FILE_EMUTHREAD):
@@ -354,20 +371,20 @@ void GensWindow::menuTriggered(int id)
 			{
 				case MNUID_ITEM(IDM_BPPTEST_15):
 					LibGens::VdpRend::Bpp = LibGens::VdpRend::BPP_15;
-					m_glWidget->setDirty();
-					m_glWidget->updateGL();
+					m_vBackend->setVbDirty();
+					m_vBackend->vbUpdate();
 					break;
 				
 				case MNUID_ITEM(IDM_BPPTEST_16):
 					LibGens::VdpRend::Bpp = LibGens::VdpRend::BPP_16;
-					m_glWidget->setDirty();
-					m_glWidget->updateGL();
+					m_vBackend->setVbDirty();
+					m_vBackend->vbUpdate();
 					break;
 				
 				case MNUID_ITEM(IDM_BPPTEST_32):
 					LibGens::VdpRend::Bpp = LibGens::VdpRend::BPP_32;
-					m_glWidget->setDirty();
-					m_glWidget->updateGL();
+					m_vBackend->setVbDirty();
+					m_vBackend->vbUpdate();
 					break;
 				
 				default:
@@ -418,8 +435,8 @@ void GensWindow::emuFrameDone(void)
 	}
 	
 	// Update the GensQGLWidget.
-	m_glWidget->setDirty();
-	m_glWidget->updateGL();
+	m_vBackend->setVbDirty();
+	m_vBackend->vbUpdate();
 	
 	// Tell the emulation thread that we're ready for another frame.
 	if (m_emuThread)

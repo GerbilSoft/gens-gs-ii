@@ -31,7 +31,7 @@
 #include <GL/glew.h>
 #endif
 
-#include <QtCore/QObject>
+#include "VBackend.hpp"
 #include <QtOpenGL/QGLWidget>
 
 #include "libgens/MD/VdpRend.hpp"
@@ -39,7 +39,7 @@
 namespace GensQt4
 {
 
-class GensQGLWidget : public QGLWidget
+class GensQGLWidget : public QGLWidget, public VBackend
 {
 	Q_OBJECT
 	
@@ -47,11 +47,15 @@ class GensQGLWidget : public QGLWidget
 		GensQGLWidget(QWidget *parent = 0);
 		~GensQGLWidget();
 		
-		void setDirty(void) { m_dirty = true; }
-		void reallocTexture(void);
+		// TODO: Expand this function?
+		void vbUpdate(void) { updateGL(); }
 		
+		// Return a QWidget* version of this object.
+		QWidget *toQWidget(void) { return this; }
+	
 	protected:
 		void initializeGL(void);
+		void reallocTexture(void);
 		
 		void resizeGL(int width, int height);
 		void paintGL(void);
@@ -59,11 +63,7 @@ class GensQGLWidget : public QGLWidget
 		// OpenGL Texture ID.
 		GLuint m_tex;
 		
-		// Dirty flag. If set, texture must be reuploaded.
-		bool m_dirty;
-		
 		// Texture format.
-		LibGens::VdpRend::ColorDepth m_lastBpp;
 		int m_colorComponents;
 		GLenum m_texFormat;
 		GLenum m_texType;
