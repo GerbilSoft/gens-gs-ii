@@ -47,11 +47,16 @@ class Effects
 		};
 		
 		static void DoCrazyEffect(ColorMask colorMask);
+		static void DoPausedEffect(void *outScreen);
 	
 	protected:
 		template<typename pixel, pixel Rmask, pixel Gmask, pixel Bmask,
 				  pixel Radd, pixel Gadd, pixel Badd>
 		static void T_DoCrazyEffect(ColorMask colorMask, pixel *screen);
+	
+		template<typename pixel, pixel RMask, pixel GMask, pixel BMask,
+			 unsigned int RShift, unsigned int GShift, unsigned int BShift>
+		static void T_DoPausedEffect(const pixel *mdScreen, pixel *outScreen);
 	
 	private:
 		Effects() { }
