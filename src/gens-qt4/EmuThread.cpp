@@ -74,7 +74,7 @@ void EmuThread::run(void)
 	while (!m_stop)
 	{
 		// Do the "Crazy" effect.
-		LibGens::Effects::doCrazyEffect(LibGens::Effects::CM_WHITE);
+		LibGens::Effects::DoCrazyEffect(LibGens::Effects::CM_WHITE);
 		
 		// Signal that the frame has been drawn.
 		emit frameDone();

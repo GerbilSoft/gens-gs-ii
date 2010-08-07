@@ -39,12 +39,12 @@ namespace LibGens
 {
 
 /**
- * T_doCrazyEffect(): Do the "Crazy" effect.
+ * T_DoCrazyEffect(): Do the "Crazy" effect.
  * @param colorMask Color mask.
  */
 template<typename pixel, pixel Rmask, pixel Gmask, pixel Bmask,
 		  pixel Radd, pixel Gadd, pixel Badd>
-void Effects::T_doCrazyEffect(ColorMask colorMask, pixel *screen)
+void Effects::T_DoCrazyEffect(ColorMask colorMask, pixel *screen)
 {
 	if (colorMask == CM_BLACK)
 	{
@@ -118,26 +118,26 @@ void Effects::T_doCrazyEffect(ColorMask colorMask, pixel *screen)
 
 
 /**
- * doCrazyEffect(): Do the "Crazy" effect.
+ * DoCrazyEffect(): Do the "Crazy" effect.
  * @param colorMask Color mask.
  */
-void Effects::doCrazyEffect(ColorMask colorMask)
+void Effects::DoCrazyEffect(ColorMask colorMask)
 {
 	switch (VdpRend::Bpp)
 	{
 		case VdpRend::BPP_15:
-			T_doCrazyEffect<uint16_t, 0x7C00, 0x03E0, 0x001F,
+			T_DoCrazyEffect<uint16_t, 0x7C00, 0x03E0, 0x001F,
 					0x0400, 0x0020, 0x0001>(colorMask, VdpRend::MD_Screen.u16);
 			break;
 		
 		case VdpRend::BPP_16:
-			T_doCrazyEffect<uint16_t, 0xF800, 0x07C0, 0x001F,
+			T_DoCrazyEffect<uint16_t, 0xF800, 0x07C0, 0x001F,
 					0x0800, 0x0040, 0x0001>(colorMask, VdpRend::MD_Screen.u16);
 			break;
 		
 		case VdpRend::BPP_32:
 		default:
-			T_doCrazyEffect<uint32_t, 0xF80000, 0x00F800, 0x0000F8,
+			T_DoCrazyEffect<uint32_t, 0xF80000, 0x00F800, 0x0000F8,
 					0x080000, 0x000800, 0x000008>(colorMask, VdpRend::MD_Screen.u32);
 			break;
 	}

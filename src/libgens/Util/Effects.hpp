@@ -46,12 +46,12 @@ class Effects
 			CM_WHITE	= 7,
 		};
 		
-		static void doCrazyEffect(ColorMask colorMask);
+		static void DoCrazyEffect(ColorMask colorMask);
 	
 	protected:
 		template<typename pixel, pixel Rmask, pixel Gmask, pixel Bmask,
 				  pixel Radd, pixel Gadd, pixel Badd>
-		static void T_doCrazyEffect(ColorMask colorMask, pixel *screen);
+		static void T_DoCrazyEffect(ColorMask colorMask, pixel *screen);
 	
 	private:
 		Effects() { }
