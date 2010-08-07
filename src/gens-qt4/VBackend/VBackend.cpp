@@ -37,12 +37,21 @@ VBackend::VBackend()
 	// Mark the video backend as dirty on startup.
 	m_vbDirty = true;
 	
+	// Set the internal framebuffer to NULL by default.
+	m_intScreen = NULL;
+	
 	// Clear the effects flags.
 	m_paused = false;
 }
 
 VBackend::~VBackend()
 {
+	// Delete the internal framebuffer if it was allocated.
+	if (m_intScreen)
+	{
+		delete m_intScreen;
+		m_intScreen = NULL;
+	}
 }
 
 
@@ -52,9 +61,12 @@ VBackend::~VBackend()
  */
 void VBackend::updatePausedEffect(void)
 {
+	// Allocate the internal framebuffer, if necessary.
+	if (!m_intScreen)
+		m_intScreen = new LibGens::VdpRend::Screen_t;
+	
 	// Use LibGens' software paused effect function.
-	// NOTE: m_intScreen.u16 and m_intScreen.u32 are the same thing.
-	LibGens::Effects::DoPausedEffect((void*)(m_intScreen.u16));
+	LibGens::Effects::DoPausedEffect(m_intScreen);
 	
 	// Mark the video buffer as dirty.
 	setVbDirty();

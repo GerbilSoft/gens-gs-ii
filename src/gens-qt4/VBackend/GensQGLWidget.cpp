@@ -296,11 +296,10 @@ void GensQGLWidget::paintGL(void)
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 8);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 8);
 		
-		// NOTE: MD_Screen.u16 and MD_Screen.u32 are interchangeable here,
-		// since we want the start of the MD_Screen buffer.
+		// Determine which screen buffer we want to use.
 		const GLvoid *screen =
 			(paused() && m_fragPaused == 0)
-			? m_intScreen.u16
+			? (GLvoid*)m_intScreen
 			: LibGens::VdpRend::MD_Screen.u16;
 		
 		glTexSubImage2D(GL_TEXTURE_2D, 0,

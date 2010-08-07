@@ -68,9 +68,8 @@ class VBackend
 		virtual void updatePausedEffect(void);
 		
 		// Internal rendering buffer used for software effects.
-		// NOTE: This takes up ~322 KB!
-		// TODO: Dynamically allocate this buffer only if it's needed?
-		LibGens::VdpRend::Screen_t m_intScreen;
+		// NOTE: This takes up (336*240*4) == 322,560 bytes!
+		LibGens::VdpRend::Screen_t *m_intScreen;
 	
 	private:
 		// Effects.
