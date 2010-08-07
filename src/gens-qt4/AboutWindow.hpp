@@ -48,6 +48,9 @@ class AboutWindow : public QDialog, public Ui::AboutWindow
 	protected:
 		AboutWindow(QWidget *parent = NULL);
 		virtual ~AboutWindow();
+		
+		// Debug information.
+		static QString GetDebugInfo(void);
 	
 	private:
 		static AboutWindow *m_AboutWindow;

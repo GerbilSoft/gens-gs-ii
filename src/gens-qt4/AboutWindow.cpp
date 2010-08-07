@@ -69,6 +69,68 @@ AboutWindow::AboutWindow(QWidget *parent)
 	// Set the text.
         lblPrgTitle->setText(sPrgTitle);
 	
+	// Set the text.
+	lblDebugInfo->setText(AboutWindow::GetDebugInfo());
+	
+	// Create the scroll areas.
+	// Qt Designer's QScrollArea implementation is horribly broken.
+	// Also, this has to be done after the labels are set, because
+	// QScrollArea is kinda dumb.
+	QScrollArea *scrlCopyrights = new QScrollArea();
+	scrlCopyrights->setFrameShape(QFrame::NoFrame);
+	scrlCopyrights->setFrameShadow(QFrame::Plain);
+	scrlCopyrights->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	scrlCopyrights->setWidget(lblCopyrights);
+	lblCopyrights->setAutoFillBackground(false);
+	vboxCopyrights->addWidget(scrlCopyrights);
+	
+	QScrollArea *scrlDebugInfo = new QScrollArea();
+	scrlDebugInfo->setFrameShape(QFrame::NoFrame);
+	scrlDebugInfo->setFrameShadow(QFrame::Plain);
+	scrlCopyrights->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	scrlDebugInfo->setWidget(lblDebugInfo);
+	lblDebugInfo->setAutoFillBackground(false);
+	vboxDebugInfo->addWidget(scrlDebugInfo);
+}
+
+
+/**
+ * ~AboutWindow(): Shut down the About window.
+ */
+AboutWindow::~AboutWindow()
+{
+	// Clear the m_AboutWindow pointer.
+	m_AboutWindow = NULL;
+}
+
+
+/**
+ * ShowSingle(): Show a single instance of the About window.
+ * @param parent Parent window.
+ */
+void AboutWindow::ShowSingle(QWidget *parent)
+{
+	if (m_AboutWindow != NULL)
+	{
+		// About Window is already displayed.
+		// NOTE: This doesn't seem to work on KDE 4.4.2...
+		QApplication::setActiveWindow(m_AboutWindow);
+	}
+	else
+	{
+		// About Window is not displayed.
+		m_AboutWindow = new AboutWindow(parent);
+		m_AboutWindow->show();
+	}
+}
+
+
+/**
+ * GetDebugInfo(): Get debug information.
+ * @return Debug information.
+ */
+QString AboutWindow::GetDebugInfo(void)
+{
 	// Debug information.
 	QString sDebugInfo =
 		TR("Compiled using Qt") + " " + QT_VERSION_STR + ".\n" +
@@ -141,61 +203,8 @@ AboutWindow::AboutWindow(QWidget *parent)
 #endif /* HAVE_OPENGL */
 	
 	// Trim whitespace at the end of sDebugInfo.
-	sDebugInfo = sDebugInfo.trimmed();
-	
-	// Set the text.
-	lblDebugInfo->setText(sDebugInfo);
-	
-	// Create the scroll areas.
-	// Qt Designer's QScrollArea implementation is horribly broken.
-	// Also, this has to be done after the labels are set, because
-	// QScrollArea is kinda dumb.
-	QScrollArea *scrlCopyrights = new QScrollArea();
-	scrlCopyrights->setFrameShape(QFrame::NoFrame);
-	scrlCopyrights->setFrameShadow(QFrame::Plain);
-	scrlCopyrights->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	scrlCopyrights->setWidget(lblCopyrights);
-	lblCopyrights->setAutoFillBackground(false);
-	vboxCopyrights->addWidget(scrlCopyrights);
-	
-	QScrollArea *scrlDebugInfo = new QScrollArea();
-	scrlDebugInfo->setFrameShape(QFrame::NoFrame);
-	scrlDebugInfo->setFrameShadow(QFrame::Plain);
-	scrlCopyrights->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	scrlDebugInfo->setWidget(lblDebugInfo);
-	lblDebugInfo->setAutoFillBackground(false);
-	vboxDebugInfo->addWidget(scrlDebugInfo);
+	return sDebugInfo.trimmed();
 }
 
-
-/**
- * ~AboutWindow(): Shut down the About window.
- */
-AboutWindow::~AboutWindow()
-{
-	// Clear the m_AboutWindow pointer.
-	m_AboutWindow = NULL;
-}
-
-
-/**
- * ShowSingle(): Show a single instance of the About window.
- * @param parent Parent window.
- */
-void AboutWindow::ShowSingle(QWidget *parent)
-{
-	if (m_AboutWindow != NULL)
-	{
-		// About Window is already displayed.
-		// NOTE: This doesn't seem to work on KDE 4.4.2...
-		QApplication::setActiveWindow(m_AboutWindow);
-	}
-	else
-	{
-		// About Window is not displayed.
-		m_AboutWindow = new AboutWindow(parent);
-		m_AboutWindow->show();
-	}
-}
 
 }
