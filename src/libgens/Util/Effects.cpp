@@ -164,7 +164,7 @@ void Effects::T_DoPausedEffect(const pixel *mdScreen, pixel *outScreen)
 {
 	// TODO: Adjust this function for RGB Color Scaling.
 	uint8_t r, g, b, nr, ng, nb;
-	double monoPx;
+	float monoPx;
 	
 	for (unsigned int i = (336*240); i != 0; i--)
 	{
@@ -177,7 +177,7 @@ void Effects::T_DoPausedEffect(const pixel *mdScreen, pixel *outScreen)
 		// Convert the color components to monochrome.
 		// TODO: SSE optimization.
 		// Monochrome vector: [0.30 0.59 0.11]
-		monoPx = ((double)r * 0.30) + ((double)g * 0.59) + ((double)b * 0.11);
+		monoPx = ((float)r * 0.30f) + ((float)g * 0.59f) + ((float)b * 0.11f);
 		nr = ng = nb = (uint8_t)monoPx;
 		
 		// Left-shift the blue component to tint the image.
