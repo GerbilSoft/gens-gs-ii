@@ -27,7 +27,7 @@
 #include "libgens/MD/VdpIo.hpp"
 #include "libgens/MD/VdpPalette.hpp"
 
-#include "libgens/Util/Effects.hpp"
+#include "libgens/Effects/CrazyEffect.hpp"
 
 namespace GensQt4
 {
@@ -74,7 +74,7 @@ void EmuThread::run(void)
 	while (!m_stop)
 	{
 		// Do the "Crazy" effect.
-		LibGens::Effects::DoCrazyEffect(LibGens::Effects::CM_WHITE);
+		LibGens::CrazyEffect::DoCrazyEffect(LibGens::CrazyEffect::CM_WHITE);
 		
 		// Signal that the frame has been drawn.
 		emit frameDone();
