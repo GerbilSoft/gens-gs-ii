@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * config.h.in: Source file for config.h.                                  *
+ * timing.h: Timing functions.                                             *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,13 +21,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_CONFIG_H__
-#define __LIBGENS_CONFIG_H__
+#include "timing.h"
+#include <config.h>
 
-/* Define to 1 if you have the `sigaction' function. */
-#cmakedefine HAVE_SIGACTION 1
+// C includes. (string.h is needed for NULL)
+#include <string.h>
 
-/* Define to 1 if you have the `rt' library (-lrt). */
-#cmakedefine HAVE_LIBRT 1
+// Timing functions.
+// TODO: Mac OS X "Mach-O" monotonic clock support.
+#ifdef HAVE_LIBRT
+#include <time.h>
+#else
+#include <sys/time.h>
+#endif
 
-#endif /* __LIBGENS_CONFIG_H__ */
+
+/**
+ * LibGens_getTimeD(): Get the current time.
+ * @return Current time. (double-precision floating point)
+ */
+double LibGens_getTimeD(void)
+{
+	// TODO: Use integer arithmetic instead of floating-point.
+	// TODO: Add Win32-specific versions that use QueryPerformanceCounter() and/or GetTickCount().
+#ifdef HAVE_LIBRT
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	return (ts.tv_sec + (ts.tv_nsec / 1000000000.0));
+#else
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return (tv.tv_sec + (tv.tv_usec / 1000000.0));
+#endif
+}

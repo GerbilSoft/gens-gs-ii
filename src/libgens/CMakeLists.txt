@@ -16,6 +16,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 # Library checks.
 INCLUDE(CheckLibraryExists)
 CHECK_LIBRARY_EXISTS(c sigaction "" HAVE_SIGACTION)	# libc: sigaction()
+CHECK_LIBRARY_EXISTS(rt clock_gettime "" HAVE_LIBRT)	# librt: clock_gettime()
 
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
@@ -42,6 +43,7 @@ SET(libgens_SRCS
 	Effects/CrazyEffect.cpp
 	Effects/PausedEffect.cpp
 	Effects/FastBlur.cpp
+	Util/timing.c
 	)
 
 # Compatibility sources.
@@ -54,4 +56,7 @@ ENDIF()
 # Build the library.
 ADD_LIBRARY(gens STATIC ${libgens_SRCS} ${libgens_COMPAT_SRCS})
 TARGET_LINK_LIBRARIES(gens starscream mdZ80 minizip)
+IF(HAVE_LIBRT)
+	TARGET_LINK_LIBRARIES(gens -lrt)
+ENDIF(HAVE_LIBRT)
 ADD_DEPENDENCIES(gens git_version starscream mdZ80 minizip)

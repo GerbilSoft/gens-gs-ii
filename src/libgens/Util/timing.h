@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * config.h.in: Source file for config.h.                                  *
+ * timing.h: Timing functions.                                             *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,13 +21,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_CONFIG_H__
-#define __LIBGENS_CONFIG_H__
+#ifndef __LIBGENS_UTIL_TIMING_H__
+#define __LIBGENS_UTIL_TIMING_H__
 
-/* Define to 1 if you have the `sigaction' function. */
-#cmakedefine HAVE_SIGACTION 1
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/* Define to 1 if you have the `rt' library (-lrt). */
-#cmakedefine HAVE_LIBRT 1
+double LibGens_getTimeD(void);
 
-#endif /* __LIBGENS_CONFIG_H__ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __LIBGENS_UTIL_TIMING_H__ */
