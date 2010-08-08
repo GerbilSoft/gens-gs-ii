@@ -56,16 +56,20 @@ class Effects
 		};
 		
 		static void DoCrazyEffect(ColorMask colorMask);
-		static void DoPausedEffect(void *outScreen);
+		static void DoPausedEffect(void *outScreen, bool fromMdScreen = true);
 	
 	protected:
 		template<typename pixel, pixel Rmask, pixel Gmask, pixel Bmask,
 				  pixel Radd, pixel Gadd, pixel Badd>
-		static void T_DoCrazyEffect(ColorMask colorMask, pixel *screen);
-	
+		static inline void T_DoCrazyEffect(ColorMask colorMask, pixel *screen);
+		
 		template<typename pixel, pixel RMask, pixel GMask, pixel BMask,
 			 unsigned int RShift, unsigned int GShift, unsigned int BShift>
-		static void T_DoPausedEffect(const pixel* RESTRICT mdScreen, pixel* RESTRICT outScreen);
+		static inline void T_DoPausedEffect(const pixel* RESTRICT mdScreen, pixel* RESTRICT outScreen);
+		
+		template<typename pixel, pixel RMask, pixel GMask, pixel BMask,
+			 unsigned int RShift, unsigned int GShift, unsigned int BShift>
+		static inline void T_DoPausedEffect(pixel* RESTRICT outScreen);
 	
 	private:
 		Effects() { }
