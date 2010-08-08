@@ -34,6 +34,7 @@
 #include "libgens/MD/EmuMD.hpp"
 #include "libgens/macros/git.h"
 #include "libgens/macros/log_msg.h"
+#include "libgens/Util/timing.h"
 
 // Test loading ROMs.
 #include "libgens/Rom.hpp"
@@ -48,14 +49,6 @@
 // Win32 needs io.h for dup().
 // TODO: Move File/Open to another file.
 #include <io.h>
-#endif
-
-// Timing functions.
-// TODO: Move to a separate file. (Maybe move to libgens?)
-#ifdef HAVE_LIBRT
-#include <time.h>
-#else
-#include <sys/time.h>
 #endif
 
 // Qt4 includes.
@@ -397,23 +390,6 @@ void GensWindow::menuTriggered(int id)
 }
 
 
-static double getTime(void)
-{
-	// TODO: Use integer arithmetic instead of floating-point.
-	// TODO: Add Win32-specific versions that use QueryPerformanceCounter() and/or GetTickCount().
-	// TODO: Move to a separate file. (Maybe move to libgens?)
-#ifdef HAVE_LIBRT
-	struct timespec ts;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-	return (ts.tv_sec + (ts.tv_nsec / 1000000000.0));
-#else
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-	return (tv.tv_sec + (tv.tv_usec / 1000000.0));
-#endif
-}
-
-
 void GensWindow::emuFrameDone(void)
 {
 	static double lastTime = 0;
@@ -421,10 +397,10 @@ void GensWindow::emuFrameDone(void)
 	frames++;
 	
 	if (lastTime < 0.001)
-		lastTime = getTime();
+		lastTime = LibGens_getTimeD();
 	else
 	{
-		double thisTime = getTime();
+		double thisTime = LibGens_getTimeD();
 		if ((thisTime - lastTime) >= 1.00)
 		{
 			// Print fps.

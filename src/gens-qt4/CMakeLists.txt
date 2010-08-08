@@ -20,7 +20,6 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
 # Library checks.
 INCLUDE(CheckLibraryExists)
-CHECK_LIBRARY_EXISTS(rt clock_gettime "" HAVE_LIBRT)	# librt: clock_gettime()
 CHECK_LIBRARY_EXISTS(c sigaction "" HAVE_SIGACTION)	# libc: sigaction()
 
 # Find OpenGL.
@@ -109,9 +108,6 @@ IF(HAVE_GLEW)
 	TARGET_LINK_LIBRARIES(gens-qt4 ${GLEW_LIBRARY})
 ENDIF(HAVE_GLEW)
 TARGET_LINK_LIBRARIES(gens-qt4 ${OPENGL_LIBRARIES})
-IF(HAVE_LIBRT)
-	TARGET_LINK_LIBRARIES(gens-qt4 -lrt)
-ENDIF(HAVE_LIBRT)
 
 IF(WIN32)
 	# Define -DQT_NEEDS_QMAIN in order to use qMain() on Win32.

@@ -24,9 +24,6 @@
 #ifndef __GENS_QT4_CONFIG_H__
 #define __GENS_QT4_CONFIG_H__
 
-/* Define to 1 if you have the `rt' library (-lrt). */
-#cmakedefine HAVE_LIBRT 1
-
 /* Define to 1 if you have the `sigaction' function. */
 #cmakedefine HAVE_SIGACTION 1
 
