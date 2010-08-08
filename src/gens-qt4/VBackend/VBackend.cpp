@@ -26,7 +26,8 @@
 #include <stdio.h>
 
 // LibGens includes.
-#include "libgens/Util/Effects.hpp"
+#include "libgens/Effects/PausedEffect.hpp"
+#include "libgens/Effects/FastBlur.hpp"
 
 
 namespace GensQt4
@@ -42,6 +43,7 @@ VBackend::VBackend()
 	
 	// Clear the effects flags.
 	m_paused = false;
+	m_fastBlur = false;
 }
 
 VBackend::~VBackend()
@@ -66,7 +68,25 @@ void VBackend::updatePausedEffect(bool fromMdScreen)
 		m_intScreen = new LibGens::VdpRend::Screen_t;
 	
 	// Use LibGens' software paused effect function.
-	LibGens::Effects::DoPausedEffect(m_intScreen, fromMdScreen);
+	LibGens::PausedEffect::DoPausedEffect(m_intScreen, fromMdScreen);
+	
+	// Mark the video buffer as dirty.
+	setVbDirty();
+}
+
+
+/**
+ * updateFastBlur(): Update the Fast Blur effect.
+ * @param fromMdScreen If true, copies MD_Screen[] to m_intScreen.
+ */
+void VBackend::updateFastBlur(bool fromMdScreen)
+{
+	// Allocate the internal framebuffer, if necessary.
+	if (!m_intScreen)
+		m_intScreen = new LibGens::VdpRend::Screen_t;
+	
+	// Use LibGens' software paused effect function.
+	LibGens::FastBlur::DoFastBlur(m_intScreen, fromMdScreen);
 	
 	// Mark the video buffer as dirty.
 	setVbDirty();

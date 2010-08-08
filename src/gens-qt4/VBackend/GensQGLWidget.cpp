@@ -273,20 +273,9 @@ void GensQGLWidget::paintGL(void)
 	// TODO: Check for other effects.
 	GLvoid *outScreen = LibGens::VdpRend::MD_Screen.u16;
 	
-#ifdef HAVE_GLEW
-	bool bEnableFragPaused = false;
-	if (paused())
-	{
-		// Emulation is paused.
-		if (m_fragPaused > 0)
-			bEnableFragPaused = true;
-		else
-			outScreen = (GLvoid*)m_intScreen;
-	}
-#else
-	if (paused())
-		outScreen = (GLvoid*)m_intScreen;
-#endif
+	// If true, copy MD screen for effect.
+	// (Only true for first effect that uses software rendering.)
+	bool bFromMD = true;
 	
 	glClearColor(1.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -302,14 +291,36 @@ void GensQGLWidget::paintGL(void)
 			reallocTexture();
 		}
 		
+		/** START: Apply effects. **/
+		
+		// If Fast Blur is enabled, update the Fast Blur effect.
+		if (fastBlur())
+		{
+			updateFastBlur(bFromMD);
+			bFromMD = false;
+		}
+		
 		// If emulation is paused, update the pause effect.
 #ifdef HAVE_GLEW
 		if (paused() && m_fragPaused == 0)
-			updatePausedEffect();
+		{
+			// Paused, but the fragment program isn't usable.
+			// Apply the effect in software.
+			updatePausedEffect(bFromMD);
+			bFromMD = false;
+		}
 #else
 		if (paused())
-			updatePausedEffect();
+		{
+			updatePausedEffect(bFromMD);
+			bFromMD = false;
+		}
 #endif /* HAVE_GLEW */
+		
+		// Determine which screen buffer should be used for video output.
+		GLvoid *screen = (bFromMD ? (GLvoid*)LibGens::VdpRend::MD_Screen.u16 : (GLvoid*)m_intScreen);
+		
+		/** END: Apply effects. **/
 		
 		// Bind the texture.
 		glEnable(GL_TEXTURE_2D);
@@ -319,12 +330,6 @@ void GensQGLWidget::paintGL(void)
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 336);
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 8);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 8);
-		
-		// Determine which screen buffer we want to use.
-		const GLvoid *screen =
-			(paused() && m_fragPaused == 0)
-			? (GLvoid*)m_intScreen
-			: LibGens::VdpRend::MD_Screen.u16;
 		
 		glTexSubImage2D(GL_TEXTURE_2D, 0,
 				0, 0,		// x/y offset
@@ -348,7 +353,7 @@ void GensQGLWidget::paintGL(void)
 	
 #ifdef HAVE_GLEW
 	// Enable the fragment program.
-	if (bEnableFragPaused)
+	if (paused() && m_fragPaused > 0)
 	{
 		glEnable(GL_FRAGMENT_PROGRAM_ARB);
 		glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, m_fragPaused);
@@ -384,11 +389,22 @@ void GensQGLWidget::paintGL(void)
  */
 void GensQGLWidget::keyPressEvent(QKeyEvent *event)
 {
-	if (event->key() == Qt::Key_Escape)
+	switch (event->key())
 	{
-		// Toggle the Pause effect.
-		setPaused(!paused());
-		vbUpdate();
+		case Qt::Key_Escape:
+			// Toggle the Pause effect.
+			setPaused(!paused());
+			vbUpdate();
+			break;
+		
+		case Qt::Key_F1:
+			// Toggle the Fast Blur effect.
+			setFastBlur(!fastBlur());
+			vbUpdate();
+			break;
+		
+		default:
+			break;
 	}
 }
 

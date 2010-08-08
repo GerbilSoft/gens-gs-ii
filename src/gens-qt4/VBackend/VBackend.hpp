@@ -56,6 +56,17 @@ class VBackend
 			m_paused = newPaused;
 			setVbDirty();
 		}
+		
+		bool fastBlur(void) const { return m_fastBlur; }
+		void setFastBlur(bool newFastBlur)
+		{
+			if (m_fastBlur == newFastBlur)
+				return;
+			
+			// Update the Fast Blur setting.
+			m_fastBlur = newFastBlur;
+			setVbDirty();
+		}
 	
 	protected:
 		// Dirty flag. If set, texture must be reuploaded.
@@ -66,6 +77,7 @@ class VBackend
 		
 		// Effects.
 		void updatePausedEffect(bool fromMdScreen = true);
+		void updateFastBlur(bool fromMdScreen = true);
 		
 		// Internal rendering buffer used for software effects.
 		// NOTE: This takes up (336*240*4) == 322,560 bytes!
@@ -74,6 +86,7 @@ class VBackend
 	private:
 		// Effects.
 		bool m_paused;
+		bool m_fastBlur;
 };
 
 }
