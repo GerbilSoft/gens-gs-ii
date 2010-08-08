@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * timing.h: Timing functions.                                             *
+ * Timing.hpp: Timing functions.                                           *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,17 +21,41 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_UTIL_TIMING_H__
-#define __LIBGENS_UTIL_TIMING_H__
+#include "Timing.hpp"
+#include <config.h>
 
-#ifdef __cplusplus
-extern "C" {
+// C includes. (string.h is needed for NULL)
+#include <string.h>
+
+// Timing functions.
+// TODO: Mac OS X "Mach-O" monotonic clock support.
+#ifdef HAVE_LIBRT
+#include <time.h>
+#else
+#include <sys/time.h>
 #endif
 
-double LibGens_getTimeD(void);
 
-#ifdef __cplusplus
+namespace LibGens
+{
+
+/**
+ * GetTimeD(): Get the current time.
+ * @return Current time. (double-precision floating point)
+ */
+double Timing::GetTimeD(void)
+{
+	// TODO: Use integer arithmetic instead of floating-point.
+	// TODO: Add Win32-specific versions that use QueryPerformanceCounter() and/or GetTickCount().
+#ifdef HAVE_LIBRT
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	return (ts.tv_sec + (ts.tv_nsec / 1000000000.0));
+#else
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return (tv.tv_sec + (tv.tv_usec / 1000000.0));
+#endif
 }
-#endif
 
-#endif /* __LIBGENS_UTIL_TIMING_H__ */
+}

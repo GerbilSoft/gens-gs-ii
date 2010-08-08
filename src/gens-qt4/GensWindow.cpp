@@ -34,7 +34,7 @@
 #include "libgens/MD/EmuMD.hpp"
 #include "libgens/macros/git.h"
 #include "libgens/macros/log_msg.h"
-#include "libgens/Util/timing.h"
+#include "libgens/Util/Timing.hpp"
 
 // Test loading ROMs.
 #include "libgens/Rom.hpp"
@@ -397,10 +397,10 @@ void GensWindow::emuFrameDone(void)
 	frames++;
 	
 	if (lastTime < 0.001)
-		lastTime = LibGens_getTimeD();
+		lastTime = LibGens::Timing::GetTimeD();
 	else
 	{
-		double thisTime = LibGens_getTimeD();
+		double thisTime = LibGens::Timing::GetTimeD();
 		if ((thisTime - lastTime) >= 1.00)
 		{
 			// Print fps.

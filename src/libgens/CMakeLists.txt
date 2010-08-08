@@ -43,7 +43,7 @@ SET(libgens_SRCS
 	Effects/CrazyEffect.cpp
 	Effects/PausedEffect.cpp
 	Effects/FastBlur.cpp
-	Util/timing.c
+	Util/Timing.cpp
 	)
 
 # Compatibility sources.
