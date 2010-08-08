@@ -160,7 +160,7 @@ void Effects::DoCrazyEffect(ColorMask colorMask)
  */
 template<typename pixel, pixel RMask, pixel GMask, pixel BMask,
 	 unsigned int RShift, unsigned int GShift, unsigned int BShift>
-void Effects::T_DoPausedEffect(const pixel *mdScreen, pixel *outScreen)
+void Effects::T_DoPausedEffect(const pixel* RESTRICT mdScreen, pixel* RESTRICT outScreen)
 {
 	// TODO: Adjust this function for RGB Color Scaling.
 	uint8_t r, g, b, nr, ng, nb;

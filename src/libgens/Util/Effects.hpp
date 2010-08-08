@@ -28,6 +28,15 @@
 #ifndef __LIBGENS_UTIL_EFFECTS_HPP__
 #define __LIBGENS_UTIL_EFFECTS_HPP__
 
+// RESTRICT keyword.
+#if defined(__cplusplus) && defined(__GNUC__)
+#define RESTRICT __restrict__
+#elif __STDC_VERSION__ >= 199901L
+#define RESTRICT restrict
+#else
+#define RESTRICT
+#endif
+
 namespace LibGens
 {
 
@@ -56,7 +65,7 @@ class Effects
 	
 		template<typename pixel, pixel RMask, pixel GMask, pixel BMask,
 			 unsigned int RShift, unsigned int GShift, unsigned int BShift>
-		static void T_DoPausedEffect(const pixel *mdScreen, pixel *outScreen);
+		static void T_DoPausedEffect(const pixel* RESTRICT mdScreen, pixel* RESTRICT outScreen);
 	
 	private:
 		Effects() { }
