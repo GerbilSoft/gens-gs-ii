@@ -56,7 +56,7 @@ template<typename pixel, pixel RMask, pixel GMask, pixel BMask,
 inline void PausedEffect::T_DoPausedEffect(const pixel* RESTRICT mdScreen, pixel* RESTRICT outScreen)
 {
 	// TODO: Adjust this function for RGB Color Scaling.
-	uint8_t r, g, b, nr, ng, nb;
+	uint8_t r, g, b, nRG, nB;
 	float monoPx;
 	
 	for (unsigned int i = (336*240); i != 0; i--)
@@ -71,20 +71,17 @@ inline void PausedEffect::T_DoPausedEffect(const pixel* RESTRICT mdScreen, pixel
 		// TODO: SSE optimization.
 		// Monochrome vector: [0.30 0.59 0.11]
 		monoPx = ((float)r * 0.30f) + ((float)g * 0.59f) + ((float)b * 0.11f);
-		nr = ng = nb = (uint8_t)monoPx;
+		nRG = (uint8_t)monoPx;
+		if (nRG > 0x1F)
+			nRG = 0x1F;
 		
 		// Left-shift the blue component to tint the image.
-		nb <<= 1;
-		if (nb > 0x1F)
-			nb = 0x1F;
-		
-		// Mask off the LSB.
-		nr &= 0x1E;
-		ng &= 0x1E;
-		nb &= 0x1E;
+		nB = nRG << 1;
+		if (nB > 0x1F)
+			nB = 0x1F;
 		
 		// Put the new pixel.
-		*outScreen++ = (nr << RShift) | (ng << GShift) | (nb << BShift);
+		*outScreen++ = (nRG << RShift) | (nRG << GShift) | (nB << BShift);
 	}
 }
 
@@ -107,7 +104,7 @@ template<typename pixel, pixel RMask, pixel GMask, pixel BMask,
 inline void PausedEffect::T_DoPausedEffect(pixel* RESTRICT outScreen)
 {
 	// TODO: Adjust this function for RGB Color Scaling.
-	uint8_t r, g, b, nr, ng, nb;
+	uint8_t r, g, b, nRG, nB;
 	float monoPx;
 	
 	for (unsigned int i = (336*240); i != 0; i--)
@@ -121,20 +118,17 @@ inline void PausedEffect::T_DoPausedEffect(pixel* RESTRICT outScreen)
 		// TODO: SSE optimization.
 		// Monochrome vector: [0.30 0.59 0.11]
 		monoPx = ((float)r * 0.30f) + ((float)g * 0.59f) + ((float)b * 0.11f);
-		nr = ng = nb = (uint8_t)monoPx;
+		nRG = (uint8_t)monoPx;
+		if (nRG > 0x1F)
+			nRG = 0x1F;
 		
 		// Left-shift the blue component to tint the image.
-		nb <<= 1;
-		if (nb > 0x1F)
-			nb = 0x1F;
-		
-		// Mask off the LSB.
-		nr &= 0x1E;
-		ng &= 0x1E;
-		nb &= 0x1E;
+		nB = nRG << 1;
+		if (nB > 0x1F)
+			nB = 0x1F;
 		
 		// Put the new pixel.
-		*outScreen++ = (nr << RShift) | (ng << GShift) | (nb << BShift);
+		*outScreen++ = (nRG << RShift) | (nRG << GShift) | (nB << BShift);
 	}
 }
 
