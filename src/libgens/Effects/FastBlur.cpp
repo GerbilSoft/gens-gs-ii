@@ -27,6 +27,7 @@
 
 #include "FastBlur.hpp"
 #include "MD/VdpRend.hpp"
+#include "Util/cpuflags.h"
 
 // C includes.
 #include <math.h>
@@ -34,11 +35,9 @@
 #include <stdint.h>
 #include <string.h>
 
-// Mask constants
+// Mask constants.
 #define MASK_DIV2_15		((uint16_t)(0x3DEF))
 #define MASK_DIV2_16		((uint16_t)(0x7BCF))
-#define MASK_DIV2_15_ASM	((uint32_t)(0x3DEF3DEF))
-#define MASK_DIV2_16_ASM	((uint32_t)(0x7BCF7BCF))
 #define MASK_DIV2_32		((uint32_t)(0x007F7F7F))
 
 namespace LibGens
@@ -70,6 +69,56 @@ inline void FastBlur::T_DoFastBlur(pixel *mdScreen)
 		mdScreen++;
 	}
 }
+
+
+#ifdef HAVE_MMX
+const uint32_t FastBlur::MASK_DIV2_15_MMX[2] = {0x3DEF3DEF, 0x3DEF3DEF};
+const uint32_t FastBlur::MASK_DIV2_16_MMX[2] = {0x7BCF7BCF, 0x7BCF7BCF};
+const uint32_t FastBlur::MASK_DIV2_32_MMX[2] = {0x007F7F7F, 0x007F7F7F};
+
+void FastBlur::DoFastBlur_32_MMX(uint32_t *mdScreen)
+{
+	// Start at the 8th pixel.
+	// MD screen has an 8-pixel-wide buffer at the left-most side.
+	mdScreen += 8;
+	
+	// Load the 32-bit color mask.
+	__asm__ (
+		"movq (%0), %%mm7"
+		:
+		: "m" (MASK_DIV2_32_MMX[0])
+		);
+	
+	// Blur the pixels.
+	for (unsigned int i = ((336*240)-16)/2; i != 0; i--)
+	{
+		__asm__ (
+			/* Get source pixels. */
+			"movq	 (%0), %%mm0\n"
+			"movq	4(%0), %%mm1\n"
+			
+			/* Blur source pixels. */
+			"psrld	$1, %%mm0\n"
+			"psrld	$1, %%mm1\n"
+			"pand	%%mm7, %%mm0\n"
+			"pand	%%mm7, %%mm1\n"
+			"paddd	%%mm1, %%mm0\n"
+			
+			/* Put destination pixels. */
+			"movq	%%mm0, (%0)\n"
+			:
+			: "r" (mdScreen)
+			);
+		
+		// Next group of pixels.
+		mdScreen += 2;
+	}
+	
+	// Reset MMX state.
+	__asm__ ("emms");
+}
+
+#endif /* HAVE_MMX */
 
 
 /**
@@ -107,7 +156,12 @@ void FastBlur::DoFastBlur(void *outScreen, bool fromMdScreen)
 			break;
 		case VdpRend::BPP_32:
 		default:
-			T_DoFastBlur<uint32_t, MASK_DIV2_32>((uint32_t*)outScreen);
+#ifdef HAVE_MMX
+			if (CPU_Flags & MDP_CPUFLAG_X86_MMX)
+				DoFastBlur_32_MMX((uint32_t*)outScreen);
+			else
+#endif /* HAVE_MMX */
+				T_DoFastBlur<uint32_t, MASK_DIV2_32>((uint32_t*)outScreen);
 			break;
 	}
 }

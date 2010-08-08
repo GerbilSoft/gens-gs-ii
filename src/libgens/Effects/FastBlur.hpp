@@ -24,6 +24,13 @@
 #ifndef __LIBGENS_EFFECTS_FASTBLUR_HPP__
 #define __LIBGENS_EFFECTS_FASTBLUR_HPP__
 
+// TODO: Move this somewhere else!
+#if defined(__GNUC__) && (defined(__i386__) || defined(__amd64__))
+#define HAVE_MMX
+#endif
+
+#include <stdint.h>
+
 namespace LibGens
 {
 
@@ -35,6 +42,14 @@ class FastBlur
 	protected:
 		template<typename pixel, pixel mask>
 		static inline void T_DoFastBlur(pixel *mdScreen);
+	
+#ifdef HAVE_MMX
+		static const uint32_t MASK_DIV2_15_MMX[2];
+		static const uint32_t MASK_DIV2_16_MMX[2];
+		static const uint32_t MASK_DIV2_32_MMX[2];
+		
+		static void DoFastBlur_32_MMX(uint32_t *mdScreen);
+#endif /* HAVE_MMX */
 	
 	private:
 		FastBlur() { }
