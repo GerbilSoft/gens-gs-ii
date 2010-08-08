@@ -269,12 +269,11 @@ void GensQGLWidget::resizeGL(int width, int height)
 
 void GensQGLWidget::paintGL(void)
 {
-	// Check if the internal buffer should be used for effects.
-	// TODO: Check for other effects.
-	GLvoid *outScreen = LibGens::VdpRend::MD_Screen.u16;
-	
-	// If true, copy MD screen for effect.
-	// (Only true for first effect that uses software rendering.)
+	/**
+	 * bFromMD: If this is true after all effects are applied,
+	 * use LibGens::VDP_Rend::MD_Screen[] directly.
+	 * Otherwise, use m_intScreen[].
+	 */
 	bool bFromMD = true;
 	
 	glClearColor(1.0, 0.0, 0.0, 1.0);
