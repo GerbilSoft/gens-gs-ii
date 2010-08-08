@@ -41,6 +41,7 @@ SET(libgens_SRCS
 	Util/cpuflags.c
 	Effects/CrazyEffect.cpp
 	Effects/PausedEffect.cpp
+	Effects/FastBlur.cpp
 	)
 
 # Compatibility sources.
