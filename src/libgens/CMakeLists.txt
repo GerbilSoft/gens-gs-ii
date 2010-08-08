@@ -35,11 +35,12 @@ SET(libgens_SRCS
 	sound/Psg.cpp
 	sound/Ym2612.cpp
 	macros/log_msg.c
-	Util/Effects.cpp
 	Util/byteswap.c
 	Rom.cpp
 	Util/siginfo.c
 	Util/cpuflags.c
+	Effects/CrazyEffect.cpp
+	Effects/PausedEffect.cpp
 	)
 
 # Compatibility sources.
