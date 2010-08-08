@@ -57,16 +57,16 @@ VBackend::~VBackend()
 
 /**
  * updatePausedEffect(): Update the Paused effect.
- * Copies the VdpRend MD_Screen[] buffer into m_intScreen[].
+ * @param fromMdScreen If true, copies MD_Screen[] to m_intScreen.
  */
-void VBackend::updatePausedEffect(void)
+void VBackend::updatePausedEffect(bool fromMdScreen)
 {
 	// Allocate the internal framebuffer, if necessary.
 	if (!m_intScreen)
 		m_intScreen = new LibGens::VdpRend::Screen_t;
 	
 	// Use LibGens' software paused effect function.
-	LibGens::Effects::DoPausedEffect(m_intScreen);
+	LibGens::Effects::DoPausedEffect(m_intScreen, fromMdScreen);
 	
 	// Mark the video buffer as dirty.
 	setVbDirty();

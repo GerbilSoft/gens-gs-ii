@@ -65,7 +65,7 @@ class VBackend
 		LibGens::VdpRend::ColorDepth m_lastBpp;
 		
 		// Effects.
-		virtual void updatePausedEffect(void);
+		void updatePausedEffect(bool fromMdScreen = true);
 		
 		// Internal rendering buffer used for software effects.
 		// NOTE: This takes up (336*240*4) == 322,560 bytes!
