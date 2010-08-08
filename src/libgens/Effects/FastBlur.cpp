@@ -76,6 +76,57 @@ const uint32_t FastBlur::MASK_DIV2_15_MMX[2] = {0x3DEF3DEF, 0x3DEF3DEF};
 const uint32_t FastBlur::MASK_DIV2_16_MMX[2] = {0x7BCF7BCF, 0x7BCF7BCF};
 const uint32_t FastBlur::MASK_DIV2_32_MMX[2] = {0x007F7F7F, 0x007F7F7F};
 
+/**
+ * DoFastBlur_16_MMX(): 15/16-bit color Fast Blur, MMX-optimized.
+ * @param mdScreen MD screen buffer. (MUST BE 336x240!)
+ * @param mask Division mask to use. (MASK_DIV2_15_MMX[] or MASK_DIV2_16_MMX[])
+ */
+void FastBlur::DoFastBlur_16_MMX(uint16_t *mdScreen, const uint32_t *mask)
+{
+	// Start at the 8th pixel.
+	// MD screen has an 8-pixel-wide buffer at the left-most side.
+	mdScreen += 8;
+	
+	// Load the 15/16-bit color mask.
+	__asm__ (
+		"movq %0, %%mm7"
+		:
+		: "m" (*mask)
+		);
+	
+	// Blur the pixels.
+	for (unsigned int i = ((336*240)-16)/4; i != 0; i--)
+	{
+		__asm__ (
+			/* Get source pixels. */
+			"movq	 (%0), %%mm0\n"
+			"movq	2(%0), %%mm1\n"
+			
+			/* Blur source pixels. */
+			"psrld	$1, %%mm0\n"
+			"psrld	$1, %%mm1\n"
+			"pand	%%mm7, %%mm0\n"
+			"pand	%%mm7, %%mm1\n"
+			"paddw	%%mm1, %%mm0\n"
+			
+			/* Put destination pixels. */
+			"movq	%%mm0, (%0)\n"
+			:
+			: "r" (mdScreen)
+			);
+		
+		// Next group of pixels.
+		mdScreen += 4;
+	}
+	
+	// Reset MMX state.
+	__asm__ ("emms");
+}
+
+/**
+ * DoFastBlur_32_MMX(): 32-bit color Fast Blur, MMX-optimized.
+ * @param mdScreen MD screen buffer. (MUST BE 336x240!)
+ */
 void FastBlur::DoFastBlur_32_MMX(uint32_t *mdScreen)
 {
 	// Start at the 8th pixel.
@@ -117,7 +168,6 @@ void FastBlur::DoFastBlur_32_MMX(uint32_t *mdScreen)
 	// Reset MMX state.
 	__asm__ ("emms");
 }
-
 #endif /* HAVE_MMX */
 
 
@@ -149,10 +199,20 @@ void FastBlur::DoFastBlur(void *outScreen, bool fromMdScreen)
 	switch (VdpRend::Bpp)
 	{
 		case VdpRend::BPP_15:
-			T_DoFastBlur<uint16_t, MASK_DIV2_15>((uint16_t*)outScreen);
+#ifdef HAVE_MMX
+			if (CPU_Flags & MDP_CPUFLAG_X86_MMX)
+				DoFastBlur_16_MMX((uint16_t*)outScreen, MASK_DIV2_15_MMX);
+			else
+#endif /* HAVE_MMX */
+				T_DoFastBlur<uint16_t, MASK_DIV2_15>((uint16_t*)outScreen);
 			break;
 		case VdpRend::BPP_16:
-			T_DoFastBlur<uint16_t, MASK_DIV2_16>((uint16_t*)outScreen);
+#ifdef HAVE_MMX
+			if (CPU_Flags & MDP_CPUFLAG_X86_MMX)
+				DoFastBlur_16_MMX((uint16_t*)outScreen, MASK_DIV2_16_MMX);
+			else
+#endif /* HAVE_MMX */
+				T_DoFastBlur<uint16_t, MASK_DIV2_16>((uint16_t*)outScreen);
 			break;
 		case VdpRend::BPP_32:
 		default:

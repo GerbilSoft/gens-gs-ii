@@ -48,6 +48,7 @@ class FastBlur
 		static const uint32_t MASK_DIV2_16_MMX[2];
 		static const uint32_t MASK_DIV2_32_MMX[2];
 		
+		static void DoFastBlur_16_MMX(uint16_t *mdScreen, const uint32_t *mask);
 		static void DoFastBlur_32_MMX(uint32_t *mdScreen);
 #endif /* HAVE_MMX */
 	
