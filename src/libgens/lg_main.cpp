@@ -24,6 +24,7 @@
 #include "lg_main.hpp"
 #include "macros/git.h"
 #include "Util/cpuflags.h"
+#include "Util/Timing.hpp"
 
 // C includes.
 #include <stdio.h>
@@ -89,6 +90,9 @@ int Init(void)
 	// Detect CPU flags.
 	LibGens_GetCPUFlags();
 	
+	// Initialize LibGens subsystems.
+	Timing::Init();
+	
 	ms_IsInit = true;
 	return 0;
 }
@@ -104,6 +108,12 @@ int End(void)
 	// TODO
 	if (!ms_IsInit)
 		return 1;
+	
+	// TODO: Add CpuFlags::End() or something similar.
+	CPU_Flags = 0;
+	
+	// Shut down LibGens subsystems.
+	Timing::End();
 	
 	ms_IsInit = false;
 	return 0;

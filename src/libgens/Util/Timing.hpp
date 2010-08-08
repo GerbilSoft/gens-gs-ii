@@ -24,13 +24,55 @@
 #ifndef __LIBGENS_UTIL_TIMING_HPP__
 #define __LIBGENS_UTIL_TIMING_HPP__
 
+#include <config.h>
+
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+typedef ULONGLONG (WINAPI *GETTICKCOUNT64PROC)(void);
+#endif /* _WIN32 */
+
 namespace LibGens
 {
 
 class Timing
 {
 	public:
+		static void Init(void);
+		static void End(void);
+		
+		enum TimingMethod
+		{
+			TM_GETTIMEOFDAY,
+#ifdef HAVE_LIBRT
+			TM_CLOCK_GETTIME,
+#endif /* HAVE_LIBRT */
+#ifdef _WIN32
+			TM_GETTICKCOUNT,
+			TM_GETTICKCOUNT64,
+			TM_QUERYPERFORMANCECOUNTER,
+#endif /* _WIN32 */
+			TM_MAX
+		};
+		
+		static TimingMethod GetTimingMethod(void) { return ms_TMethod; }
+		
 		static double GetTimeD(void);
+	
+	protected:
+		static TimingMethod ms_TMethod;
+		
+#ifdef _WIN32
+		// GetTickCount64() function pointer.
+		static HMODULE ms_hKernel32;
+		static GETTICKCOUNT64PROC ms_pGetTickCount64;
+		
+		// Performance Frequency.
+		static LARGE_INTEGER ms_PerfFreq;
+#endif
 	
 	private:
 		Timing() { }
