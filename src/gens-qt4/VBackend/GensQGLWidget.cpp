@@ -269,6 +269,25 @@ void GensQGLWidget::resizeGL(int width, int height)
 
 void GensQGLWidget::paintGL(void)
 {
+	// Check if the internal buffer should be used for effects.
+	// TODO: Check for other effects.
+	GLvoid *outScreen = LibGens::VdpRend::MD_Screen.u16;
+	
+#ifdef HAVE_GLEW
+	bool bEnableFragPaused = false;
+	if (paused())
+	{
+		// Emulation is paused.
+		if (m_fragPaused > 0)
+			bEnableFragPaused = true;
+		else
+			outScreen = (GLvoid*)m_intScreen;
+	}
+#else
+	if (paused())
+		outScreen = (GLvoid*)m_intScreen;
+#endif
+	
 	glClearColor(1.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
@@ -284,8 +303,13 @@ void GensQGLWidget::paintGL(void)
 		}
 		
 		// If emulation is paused, update the pause effect.
+#ifdef HAVE_GLEW
+		if (paused() && m_fragPaused == 0)
+			updatePausedEffect();
+#else
 		if (paused())
 			updatePausedEffect();
+#endif /* HAVE_GLEW */
 		
 		// Bind the texture.
 		glEnable(GL_TEXTURE_2D);
@@ -324,8 +348,7 @@ void GensQGLWidget::paintGL(void)
 	
 #ifdef HAVE_GLEW
 	// Enable the fragment program.
-	// TODO: If ARB_fragment_program isn't supported, fall back to another method.
-	if (paused() && m_fragPaused > 0)
+	if (bEnableFragPaused)
 	{
 		glEnable(GL_FRAGMENT_PROGRAM_ARB);
 		glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, m_fragPaused);
@@ -351,28 +374,6 @@ void GensQGLWidget::paintGL(void)
 #endif /* HAVE_GLEW */
 	
 	glDisable(GL_TEXTURE_2D);
-}
-
-
-/**
- * updatePausedEffect(): Update the Paused effect.
- */
-void GensQGLWidget::updatePausedEffect(void)
-{
-#ifdef HAVE_GLEW
-	if (m_fragPaused > 0)
-	{
-		// Fragment program is in use for the Pause effect.
-		// Don't do anything.
-		return;
-	}
-	else
-#endif
-	{
-		// Fragment prorgam is not in use.
-		// Use the software fallback.
-		this->VBackend::updatePausedEffect();
-	}
 }
 
 
