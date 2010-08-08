@@ -59,6 +59,7 @@ class Timing
 		};
 		
 		static TimingMethod GetTimingMethod(void) { return ms_TMethod; }
+		static const char *GetTimingMethodName(TimingMethod tMethod);
 		
 		static double GetTimeD(void);
 	

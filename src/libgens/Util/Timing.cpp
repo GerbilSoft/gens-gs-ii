@@ -153,6 +153,35 @@ void Timing::End(void)
 
 
 /**
+ * GetTimingMethodName(): Get the name of a timing method.
+ * @param tMethod Timing method.
+ * @return Timing method name.
+ */
+const char *Timing::GetTimingMethodName(TimingMethod tMethod)
+{
+	switch (tMethod)
+	{
+		case TM_GETTIMEOFDAY:
+		default:
+			// TODO: Default timing method on Win32 is currently GetTickCount().
+			return "gettimeofday";
+#ifdef HAVE_LIBRT
+		case TM_CLOCK_GETTIME:
+			return "clock_gettime";
+#endif /* HAVE_LIBRT */
+#ifdef _WIN32
+		case TM_GETTICKCOUNT:
+			return "GetTickCount";
+		case TM_GETTICKCOUNT64:
+			return "GetTickCount64";
+		case TM_QUERYPERFORMANCECOUNTER:
+			return "QueryPerformanceCounter";
+#endif /* _WIN32 */
+	}
+}
+
+
+/**
  * GetTimeD(): Get the current time.
  * @return Current time. (double-precision floating point)
  */
