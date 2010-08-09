@@ -81,6 +81,7 @@ inline void CrazyEffect::T_DoCrazyEffect(ColorMask colorMask, pixel *screen)
 	pixel *prev_l = pix - 336;
 	pixel *prev_p = pix - 1;
 	
+	// TODO: Unroll the last-line/last-pixel code.
 	for (unsigned int i = 336*240; i != 0; i--)
 	{
 		pixel pl, pp;
