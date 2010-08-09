@@ -31,8 +31,7 @@
 #include <string.h>
 
 // Timing functions.
-// TODO: Mac OS X "Mach-O" monotonic clock support.
-#ifdef HAVE_LIBRT
+#if defined(HAVE_LIBRT) || defined(__APPLE__)
 #include <time.h>
 #else
 #include <sys/time.h>
@@ -45,11 +44,13 @@ namespace LibGens
 // Static class variables.
 Timing::TimingMethod Timing::ms_TMethod;
 		
-#ifdef _WIN32
+#if defined(_WIN32)
 HMODULE Timing::ms_hKernel32;
 GETTICKCOUNT64PROC Timing::ms_pGetTickCount64;
 LARGE_INTEGER Timing::ms_PerfFreq;
-#endif /* _WIN32 */
+#elif defined(__APPLE__)
+mach_timebase_info_data_t Timing::ms_timebase_info;
+#endif
 
 
 /**
@@ -97,6 +98,10 @@ void Timing::Init(void)
 			ms_TMethod = TM_GETTICKCOUNT;
 		}
 	}
+#elif defined(__APPLE__)
+	// Get the Mach timebase information.
+	mach_timebase_info(&ms_timebase_info);
+	ms_TMethod = TM_MACH_ABSOLUTE_TIME;
 #elif defined(HAVE_LIBRT)
 	ms_TMethod = TM_CLOCK_GETTIME;
 #else
@@ -127,7 +132,13 @@ void Timing::Init(void)
 			sTMethod = "QueryPerformanceCounter";
 			break;
 #endif /* _WIN32 */
+#ifdef __APPLE__
+		case TM_MACH_ABSOLUTE_TIME:
+			sTMethod = "mach_absolute_time";
+			break;
+#endif /* __APPLE__ */
 	}
+	
 	LOG_MSG(gens, LOG_MSG_LEVEL_INFO,
 		"Using %s() for timing.", sTMethod);
 }
@@ -148,7 +159,7 @@ void Timing::End(void)
 		FreeLibrary(ms_hKernel32);
 		ms_hKernel32 = NULL;
 	}
-#endif
+#endif /* _WIN32 */
 }
 
 
@@ -208,16 +219,23 @@ double Timing::GetTimeD(void)
 			QueryPerformanceCounter(&perf_ctr);
 			return (((double)(perf_ctr.QuadPart)) / ((double)(ms_PerfFreq.QuadPart)));
 	}
+#elif defined(__APPLE__)
+	// Mach absolute time. (Mac OS X)
+	// TODO: Make sure this doesn't overflow...
+	uint64_t abs_time = mach_absolute_time();
+	abs_time *= ms_timebase_info.numer;
+	abs_time /= ms_timebase_info.denom;
+	return ((double)abs_time / 1.0e9);
 #elif defined(HAVE_LIBRT)
 	// librt is available: use clock_gettime().
 	struct timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
-	return (ts.tv_sec + (ts.tv_nsec / 1000000000.0));
+	return ((double)ts.tv_sec + ((double)ts.tv_nsec / 1.0e9));
 #else
 	// Fall back to gettimeofday().
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
-	return (tv.tv_sec + (tv.tv_usec / 1000000.0));
+	return ((double)tv.tv_sec + ((double)tv.tv_usec / 1.0e6));
 #endif
 }
 

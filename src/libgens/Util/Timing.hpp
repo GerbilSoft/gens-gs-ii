@@ -26,14 +26,16 @@
 
 #include <config.h>
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
 #include <windows.h>
 typedef ULONGLONG (WINAPI *GETTICKCOUNT64PROC)(void);
-#endif /* _WIN32 */
+#elif defined(__APPLE__)
+#include <mach/mach_time.h>
+#endif
 
 namespace LibGens
 {
@@ -55,6 +57,10 @@ class Timing
 			TM_GETTICKCOUNT64,
 			TM_QUERYPERFORMANCECOUNTER,
 #endif /* _WIN32 */
+#ifdef __APPLE__
+			// http://www.wand.net.nz/~smr26/wordpress/2009/01/19/monotonic-time-in-mac-os-x/
+			TM_MACH_ABSOLUTE_TIME,
+#endif
 			TM_MAX
 		};
 		
@@ -66,13 +72,16 @@ class Timing
 	protected:
 		static TimingMethod ms_TMethod;
 		
-#ifdef _WIN32
+#if defined(_WIN32)
 		// GetTickCount64() function pointer.
 		static HMODULE ms_hKernel32;
 		static GETTICKCOUNT64PROC ms_pGetTickCount64;
 		
 		// Performance Frequency.
 		static LARGE_INTEGER ms_PerfFreq;
+#elif defined(__APPLE__)
+		// Mach timebase information.
+		static mach_timebase_info_data_t ms_timebase_info;
 #endif
 	
 	private:
