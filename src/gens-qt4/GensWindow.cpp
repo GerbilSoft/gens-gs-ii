@@ -287,6 +287,14 @@ void GensWindow::menuTriggered(int id)
 					break;
 				
 				case MNUID_ITEM(IDM_FILE_EMUTHREAD):
+				{
+					bool checked = m_menubar->menuItemCheckState(IDM_FILE_EMUTHREAD);
+					if (m_emuThread == NULL && !checked)
+						break;
+					else if (m_emuThread != NULL && checked)
+						break;
+					
+					// Toggle the emulation thread state.
 					if (m_emuThread != NULL)
 					{
 						// Emulation thread is already running. Stop it.
@@ -303,6 +311,7 @@ void GensWindow::menuTriggered(int id)
 							 this, SLOT(emuFrameDone(void)));
 					m_emuThread->start();
 					break;
+				}
 				
 				case MNUID_ITEM(IDM_FILE_QUIT):
 					// Quit.
