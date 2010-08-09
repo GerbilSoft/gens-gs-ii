@@ -140,7 +140,7 @@ void FastBlur::DoFastBlur_32_MMX(uint32_t *mdScreen)
 	
 	// Load the 32-bit color mask.
 	__asm__ (
-		"movq (%0), %%mm7"
+		"movq %0, %%mm7"
 		:
 		: "m" (MASK_DIV2_32_MMX[0])
 		);
