@@ -25,6 +25,7 @@
 #include <stdint.h>
 
 // Endianness defines ported from libsdl.
+// TODO: Figure out how to do this in CMake.
 #define GENS_LIL_ENDIAN 1234
 #define GENS_BIG_ENDIAN 4321
 #ifndef GENS_BYTEORDER
@@ -35,6 +36,7 @@
     defined(__powerpc__) || defined(__powerpc64__) || \
     defined(__POWERPC__) || defined(__POWERPC64__) || \
     defined(_M_PPC) || \
+    defined(__armeb__) || defined(__ARMEB__) || \
     defined(__SPARC__)
 #define GENS_BYTEORDER GENS_BIG_ENDIAN
 #else
