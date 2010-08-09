@@ -28,8 +28,10 @@
 
 #include "Zomg.hpp"
 #include "MD/VdpIo.hpp"
+#include "Util/byteswap.h"
 
 #ifdef _WIN32
+// MiniZip Win32 I/O handler.
 #include "../../extlib/minizip/iowin32u.h"
 #endif
 
@@ -175,22 +177,14 @@ int Zomg::load(void)
 	}
 	
 	// Copy VRam to VdpIo.
-	// TODO: Don't byteswap on BE systems.
-	// TODO: Port byteswapping macros from Gens/GS.
-	for (int i = (sizeof(m_common.VRam.md)/sizeof(m_common.VRam.md[0]))-1; i >= 0; i--)
-	{
-		VdpIo::VRam.u16[i] = (((m_common.VRam.md[i] >> 8) & 0xFF) |
-				      ((m_common.VRam.md[i] & 0xFF) << 8));
-	}
+	// TODO: Create a byteswapping memcpy().
+	memcpy(VdpIo::VRam.u16, m_common.VRam.md, sizeof(m_common.VRam.md));
+	be16_to_cpu_array(VdpIo::VRam.u16, sizeof(m_common.VRam.md));
 	
 	// Copy CRam to VdpIo.
-	// TODO: Don't byteswap on BE systems.
-	// TODO: Port byteswapping macros from Gens/GS.
-	for (int i = (sizeof(m_common.CRam.md)/sizeof(m_common.CRam.md[0]))-1; i >= 0; i--)
-	{
-		VdpIo::CRam.u16[i] = (((m_common.CRam.md[i] >> 8) & 0xFF) |
-				      ((m_common.CRam.md[i] & 0xFF) << 8));
-	}
+	// TODO: Create a byteswapping memcpy().
+	memcpy(VdpIo::CRam.u16, m_common.CRam.md, sizeof(m_common.CRam.md));
+	be16_to_cpu_array(VdpIo::CRam.u16, sizeof(m_common.CRam.md));
 	
 	// Copy VSRam to VdpIo.
 	memcpy(VdpIo::VSRam.u8, m_md.VSRam, sizeof(m_md.VSRam));
