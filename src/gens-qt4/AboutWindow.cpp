@@ -24,6 +24,7 @@
 #include "AboutWindow.hpp"
 #include "libgens/macros/git.h"
 #include "libgens/Util/cpuflags.h"
+#include "libgens/Util/Timing.hpp"
 
 // C includes.
 #include <string.h>
@@ -151,7 +152,7 @@ QString AboutWindow::GetDebugInfo(void)
 	
 	// CPU flags.
 	// TODO: Move the array of CPU flag names to LibGens.
-	sDebugInfo += "CPU Flags: ";
+	sDebugInfo += TR("CPU Flags") + ": ";
 #if defined(__i386__) || defined(__amd64__)
 	const char *CpuFlagNames[11] =
 	{
@@ -170,10 +171,14 @@ QString AboutWindow::GetDebugInfo(void)
 			cnt++;
 		}
 	}
-	sDebugInfo += "\n\n";
+	sDebugInfo += "\n";
 #else
-	sDebugInfo += "(none)\n\n";
+	sDebugInfo += "(none)\n";
 #endif /* defined(__i386__) || defined(__amd64__) */
+	
+	// Timing method.
+	sDebugInfo += TR("Timing Method") + ": " +
+		LibGens::Timing::GetTimingMethodName(LibGens::Timing::GetTimingMethod()) + "()\n\n";
 	
 #ifdef Q_OS_WIN32
 	// Win32 code page information.
