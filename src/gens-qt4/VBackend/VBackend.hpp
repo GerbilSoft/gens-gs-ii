@@ -26,6 +26,11 @@
 #ifndef __GENS_QT4_VBACKEND_HPP__
 #define __GENS_QT4_VBACKEND_HPP__
 
+// C includes.
+#include <stdarg.h>
+
+#include <QtCore/QString>
+#include <QtCore/QList>
 #include <QtGui/QWidget>
 
 #include "libgens/MD/VdpRend.hpp"
@@ -67,6 +72,19 @@ class VBackend
 			m_fastBlur = newFastBlur;
 			setVbDirty();
 		}
+		
+		// NOTE: Format string argument is 3 instead of 2.
+		// This is due to the implicit "this" parameter.
+		void osd_vprintf(const int duration, const char *msg, va_list ap)
+			__attribute__ ((format (printf, 3, 0)));
+		void osd_printf(const int duration, const char *msg, ...)
+			__attribute__ ((format (printf, 3, 4)))
+		{
+			va_list ap;
+			va_start(ap, msg);
+			osd_vprintf(duration, msg, ap);
+			va_end(ap);
+		}
 	
 	protected:
 		// Dirty flag. If set, texture must be reuploaded.
@@ -82,6 +100,20 @@ class VBackend
 		// Internal rendering buffer used for software effects.
 		// NOTE: This takes up (336*240*4) == 322,560 bytes!
 		LibGens::VdpRend::Screen_t *m_intScreen;
+		
+		// OSD message struct.
+		struct OsdMessage
+		{
+			OsdMessage(const char *msg, double endTime)
+			{
+				this->msg = QString(msg);
+				this->endTime = endTime;
+			}
+			
+			QString msg;
+			double endTime;
+		};
+		QList<OsdMessage> m_osdList;
 	
 	private:
 		// Effects.

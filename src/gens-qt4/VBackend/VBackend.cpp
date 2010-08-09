@@ -28,6 +28,7 @@
 // LibGens includes.
 #include "libgens/Effects/PausedEffect.hpp"
 #include "libgens/Effects/FastBlur.hpp"
+#include "libgens/Util/Timing.hpp"
 
 
 namespace GensQt4
@@ -90,6 +91,31 @@ void VBackend::updateFastBlur(bool fromMdScreen)
 	
 	// Mark the video buffer as dirty.
 	setVbDirty();
+}
+
+
+/**
+ * osd_vprintf(): Print formatted text to the screen.
+ * @param duration Duration for the message to appear, in milliseconds.
+ * @param msg Message to write. (printf-formatted)
+ * @param ap Format arguments.
+ */
+void VBackend::osd_vprintf(const int duration, const char *msg, va_list ap)
+{
+	if (duration <= 0)
+		return;
+	
+	// Format the message.
+	char msg_buf[1024];
+	vsnprintf(msg_buf, sizeof(msg_buf), msg, ap);
+	msg_buf[sizeof(msg_buf)-1] = 0x00;
+	
+	// Calculate the end time.
+	double endTime = LibGens::Timing::GetTimeD() + ((double)duration / 1000.0);
+	
+	// Create the OSD message and add it to the list.
+	OsdMessage osdMsg(msg_buf, endTime);
+	m_osdList.append(osdMsg);
 }
 
 }
