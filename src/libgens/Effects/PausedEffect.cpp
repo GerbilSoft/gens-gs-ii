@@ -34,6 +34,24 @@
 #include <stdint.h>
 #include <string.h>
 
+// Color component masks and shift values for 32-bit color.
+#include "Util/byteswap.h"
+#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+#define PAUSED_MASK32_R  0x00FF0000
+#define PAUSED_MASK32_G  0x0000FF00
+#define PAUSED_MASK32_B  0x000000FF
+#define PAUSED_SHIFT32_R (16+3)
+#define PAUSED_SHIFT32_G (8+3)
+#define PAUSED_SHIFT32_B (0+3)
+#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
+#define PAUSED_MASK32_R  0x0000FF00
+#define PAUSED_MASK32_G  0x00FF0000
+#define PAUSED_MASK32_B  0xFF000000
+#define PAUSED_SHIFT32_R (8+3)
+#define PAUSED_SHIFT32_G (16+3)
+#define PAUSED_SHIFT32_B (24+3)
+#endif
+
 namespace LibGens
 {
 
@@ -156,7 +174,8 @@ void PausedEffect::DoPausedEffect(void *outScreen, bool fromMdScreen)
 				break;
 			case VdpRend::BPP_32:
 			default:
-				T_DoPausedEffect<uint32_t, 0xFF0000, 0x00FF00, 0x0000FF, 16+3, 8+3, 0+3>
+				T_DoPausedEffect<uint32_t, PAUSED_MASK32_R, PAUSED_MASK32_G, PAUSED_MASK32_B,
+						PAUSED_SHIFT32_R, PAUSED_SHIFT32_G, PAUSED_SHIFT32_B>
 					(VdpRend::MD_Screen.u32, (uint32_t*)outScreen);
 				break;
 		}
@@ -176,7 +195,8 @@ void PausedEffect::DoPausedEffect(void *outScreen, bool fromMdScreen)
 				break;
 			case VdpRend::BPP_32:
 			default:
-				T_DoPausedEffect<uint32_t, 0xFF0000, 0x00FF00, 0x0000FF, 16+3, 8+3, 0+3>
+				T_DoPausedEffect<uint32_t, PAUSED_MASK32_R, PAUSED_MASK32_G, PAUSED_MASK32_B,
+						PAUSED_SHIFT32_R, PAUSED_SHIFT32_G, PAUSED_SHIFT32_B>
 					((uint32_t*)outScreen);
 				break;
 		}
