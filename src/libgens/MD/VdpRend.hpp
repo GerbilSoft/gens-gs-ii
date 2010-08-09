@@ -26,6 +26,12 @@
 
 #include <stdint.h>
 
+// Byteswapping macros.
+// TODO: LibGens doesn't -I the src/ directory;
+// however, gens-qt4 doesn't -I the libgens/ directory.
+// So, we're using relative paths for now.
+#include "../Util/byteswap.h"
+
 namespace LibGens
 {
 
@@ -113,8 +119,14 @@ class VdpRend
 		{
 			struct LineBuf_px_t
 			{
+				// TODO: Is byteswapping here really the best option?
+#if GENS_BYTEORDER == GENS_LIL_ENDIAN
 				uint8_t pixel;
 				uint8_t layer;
+#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
+				uint8_t layer;
+				uint8_t pixel;
+#endif
 			};
 			LineBuf_px_t px[336];
 			uint8_t  u8[336<<1];
