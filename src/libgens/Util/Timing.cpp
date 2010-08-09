@@ -195,11 +195,9 @@ double Timing::GetTimeD(void)
 	}
 #elif defined(__APPLE__)
 	// Mach absolute time. (Mac OS X)
-	// TODO: Make sure this doesn't overflow...
 	uint64_t abs_time = mach_absolute_time();
-	abs_time *= ms_timebase_info.numer;
-	abs_time /= ms_timebase_info.denom;
-	return ((double)abs_time / 1.0e9);
+	double d_abs_time = (double)abs_time * (double)ms_timebase_info.numer / (double)ms_timebase_info.denom;
+	return (d_abs_time / 1.0e9);
 #elif defined(HAVE_LIBRT)
 	// librt is available: use clock_gettime().
 	struct timespec ts;
