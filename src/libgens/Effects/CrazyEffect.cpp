@@ -27,7 +27,6 @@
 
 #include "CrazyEffect.hpp"
 #include "MD/VdpRend.hpp"
-#include "Util/byteswap.h"
 
 // C includes.
 #include <math.h>
@@ -35,6 +34,8 @@
 #include <stdint.h>
 #include <string.h>
 
+// Color component masks for 32-bit color.
+#include "Util/byteswap.h"
 #if GENS_BYTEORDER == GENS_LIL_ENDIAN
 #define CRAZY_MASK32_R 0x00F80000
 #define CRAZY_MASK32_G 0x0000F800
