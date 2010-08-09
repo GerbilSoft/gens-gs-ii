@@ -109,38 +109,8 @@ void Timing::Init(void)
 #endif /* _WIN32 */
 	
 	// Log the timing method.
-	const char *sTMethod;
-	switch (ms_TMethod)
-	{
-		case TM_GETTIMEOFDAY:
-		default:
-			sTMethod = "gettimeofday";
-			break;
-#ifdef HAVE_LIBRT
-		case TM_CLOCK_GETTIME:
-			sTMethod = "clock_gettime";
-			break;
-#endif /* HAVE_LIBRT */
-#ifdef _WIN32
-		case TM_GETTICKCOUNT:
-			sTMethod = "GetTickCount";
-			break;
-		case TM_GETTICKCOUNT64:
-			sTMethod = "GetTickCount64";
-			break;
-		case TM_QUERYPERFORMANCECOUNTER:
-			sTMethod = "QueryPerformanceCounter";
-			break;
-#endif /* _WIN32 */
-#ifdef __APPLE__
-		case TM_MACH_ABSOLUTE_TIME:
-			sTMethod = "mach_absolute_time";
-			break;
-#endif /* __APPLE__ */
-	}
-	
 	LOG_MSG(gens, LOG_MSG_LEVEL_INFO,
-		"Using %s() for timing.", sTMethod);
+		"Using %s() for timing.", GetTimingMethodName(ms_TMethod));
 }
 
 /**
@@ -188,6 +158,10 @@ const char *Timing::GetTimingMethodName(TimingMethod tMethod)
 		case TM_QUERYPERFORMANCECOUNTER:
 			return "QueryPerformanceCounter";
 #endif /* _WIN32 */
+#ifdef __APPLE__
+		case TM_MACH_ABSOLUTE_TIME:
+			return "mach_absolute_time";
+#endif /* __APPLE__ */
 	}
 }
 
