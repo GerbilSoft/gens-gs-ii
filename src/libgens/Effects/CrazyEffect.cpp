@@ -99,9 +99,8 @@ inline void CrazyEffect::T_DoCrazyEffect(ColorMask colorMask, pixel *screen)
 			RB = ((pl & RBmask) >> 1) + ((pp & RBmask) >> 1);
 		}
 		else
-#else /* GENS_BYTEORDER == GENS_LIL_ENDIAN */
+#endif /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
 		RB = ((pl & RBmask) + (pp & RBmask)) >> 1;
-#endif
 		G = ((pl & Gmask) + (pp & Gmask)) >> 1;
 		
 		if (colorMask & CM_RED)
