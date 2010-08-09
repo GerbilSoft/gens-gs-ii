@@ -63,7 +63,7 @@ GensMenuBar::GensMenuBar(QWidget *parent)
 		{IDM_FILE_OPEN, GMI_NORMAL, "&Open ROM...", NULL, MACCEL_OPEN, Qt::CTRL + Qt::Key_O, "document-open", ":/oxygen-16x16/document-open.png"},
 		{IDM_SEPARATOR, GMI_SEPARATOR, NULL, NULL, MACCEL_NONE, 0, NULL, NULL},
 		{IDM_FILE_BLIT, GMI_NORMAL, "Blit!", NULL, MACCEL_NONE, Qt::CTRL + Qt::Key_B, NULL, NULL},
-		{IDM_FILE_EMUTHREAD, GMI_NORMAL, "Start/Stop EmuThread", NULL, MACCEL_NONE, 0, NULL, NULL},
+		{IDM_FILE_EMUTHREAD, GMI_CHECK, "Start/Stop EmuThread", NULL, MACCEL_NONE, 0, NULL, NULL},
 		{IDM_SEPARATOR, GMI_SEPARATOR, NULL, NULL, MACCEL_NONE, 0, NULL, NULL},
 		{IDM_FILE_QUIT, GMI_NORMAL, "&Quit", NULL, MACCEL_QUIT, Qt::CTRL + Qt::Key_Q, "application-exit", ":/oxygen-16x16/application-exit.png"},
 		
@@ -204,11 +204,14 @@ void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 			continue;
 		}
 		
-		if (menu->type != GMI_NORMAL)
+		if (menu->type != GMI_NORMAL && menu->type != GMI_CHECK)
 			continue;
 		
 		mnuItem = new QAction(parent);
 		mnuItem->setText(TR(menu->text));
+		
+		if (menu->type == GMI_CHECK)
+			mnuItem->setCheckable(true);
 		
 		// Set the menu icon.
 		mnuItem->setIcon(QICON_FROMTHEME(menu->icon_fdo, menu->icon_qrc));
@@ -247,6 +250,47 @@ void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 		// Add the QAction to the actions map.
 		m_mapActions.insert(menu->id, mnuItem);
 	}
+}
+
+
+/**
+ * menuItemCheckState(): Get a menu item's check state.
+ * @param id Menu item ID.
+ * @return True if checked; false if not checked or not checkable.
+ */
+bool GensMenuBar::menuItemCheckState(int id)
+{
+	QMap<int, QAction*>::iterator iter = m_mapActions.find(id);
+	if (iter == m_mapActions.end())
+		return false;
+	
+	// TODO: Is the isCheckable() check needed?
+	QAction *mnuItem = (*iter);
+	if (!mnuItem->isCheckable())
+		return false;
+	return mnuItem->isChecked();
+}
+
+
+/**
+ * setMenuItemCheckState(): Set a menu item's check state.
+ * @param id Menu item ID.
+ * @param newCheck New check state.
+ * @return 0 on success; non-zero on error.
+ */
+int GensMenuBar::setMenuItemCheckState(int id, bool newCheck)
+{
+	QMap<int, QAction*>::iterator iter = m_mapActions.find(id);
+	if (iter == m_mapActions.end())
+		return 1;
+	
+	// TODO: Is the isCheckable() check needed?
+	QAction *mnuItem = (*iter);
+	if (!mnuItem->isCheckable())
+		return 2;
+	
+	mnuItem->setChecked(newCheck);
+	return 0;
 }
 
 }

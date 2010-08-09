@@ -77,6 +77,7 @@ class GensMenuBar : public QMenuBar
 			GMI_NORMAL,
 			GMI_SEPARATOR,
 			GMI_SUBMENU,
+			GMI_CHECK,
 			
 			GMI_MAX
 		};
@@ -120,7 +121,10 @@ class GensMenuBar : public QMenuBar
 			const char *text;		// Menu text.
 			const MenuItem *submenu;	// First element of submenu.
 		};
-
+		
+		bool menuItemCheckState(int id);
+		int setMenuItemCheckState(int id, bool newCheck);
+	
 	protected:
 		void parseMainMenu(const MainMenuItem *mainMenu);
 		void parseMenu(const MenuItem *menu, QMenu *parent);
