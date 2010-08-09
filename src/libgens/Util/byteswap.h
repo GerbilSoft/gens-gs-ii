@@ -31,7 +31,8 @@
 #if defined(__hppa__) || \
     defined(__m68k__) || defined(mc68000) || defined(_M_M68K) || \
     (defined(__MIPS__) && defined(__MIPSEB__)) || \
-    defined(__ppc__) || defined(__POWERPC__) || defined(_M_PPC) || \
+    defined(__ppc__) || defined(__powerpc__) || \
+    defined(__POWERPC__) || defined(_M_PPC) || \
     defined(__SPARC__)
 #define GENS_BYTEORDER GENS_BIG_ENDIAN
 #else
