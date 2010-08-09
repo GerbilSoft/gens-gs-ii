@@ -27,12 +27,32 @@
 
 #include "CrazyEffect.hpp"
 #include "MD/VdpRend.hpp"
+#include "Util/byteswap.h"
 
 // C includes.
 #include <math.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+
+#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+#define CRAZY_MASK32_R 0x00F80000
+#define CRAZY_MASK32_G 0x0000F800
+#define CRAZY_MASK32_B 0x000000F8
+#define CRAZY_ADD32_R  0x00080000
+#define CRAZY_ADD32_G  0x00000800
+#define CRAZY_ADD32_B  0x00000008
+#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
+#define CRAZY_MASK32_R 0x0000F800
+#define CRAZY_MASK32_G 0x00F80000
+#define CRAZY_MASK32_B 0xF8000000
+#define CRAZY_ADD32_R  0x00000800
+#define CRAZY_ADD32_G  0x00080000
+#define CRAZY_ADD32_B  0x08000000
+#endif
+
+#include <stdio.h>
+#include "Util/Timing.hpp"
 
 namespace LibGens
 {
@@ -54,7 +74,7 @@ inline void CrazyEffect::T_DoCrazyEffect(ColorMask colorMask, pixel *screen)
 	}
 	
 	const pixel RBmask = (Rmask | Bmask);
-	int r = 0, g = 0, b = 0;
+	pixel r = 0, g = 0, b = 0;
 	pixel RB, G;
 	
 	pixel *pix = &screen[336*240 - 1];
@@ -67,43 +87,79 @@ inline void CrazyEffect::T_DoCrazyEffect(ColorMask colorMask, pixel *screen)
 		pl = (prev_l >= screen ? *prev_l : 0);
 		pp = (prev_p >= screen ? *prev_p : 0);
 		
+#if GENS_BYTEORDER == GENS_BIG_ENDIAN
+		if (sizeof(pixel) == 4)
+		{
+			// The Blue channel occupies the high byte in 32-bit color
+			// on big-endian CPUs, so we have to right-shift the colors
+			// before we add them together
+			// (The low byte is the unused alpha channel.)
+			RB = ((pl & RBmask) >> 1) + ((pp & RBmask) >> 1);
+		}
+		else
+#else /* GENS_BYTEORDER == GENS_LIL_ENDIAN */
 		RB = ((pl & RBmask) + (pp & RBmask)) >> 1;
+#endif
 		G = ((pl & Gmask) + (pp & Gmask)) >> 1;
 		
 		if (colorMask & CM_RED)
 		{
 			// Red channel.
 			r = RB & Rmask;
-			r += (((rand() & 0x7FFF) > 0x2C00) ? Radd : -Radd);
-			
-			if (r > (int)Rmask)
-				r = Rmask;
-			else if (r < (int)Radd)
-				r = 0;
+			if ((rand() & 0x7FFF) > 0x2C00)
+			{
+				if ((Rmask - Radd) <= r)
+					r = Rmask;
+				else
+					r += Radd;
+			}
+			else
+			{
+				if (Radd >= r)
+					r = 0;
+				else
+					r -= Radd;
+			}
 		}
 		
 		if (colorMask & CM_GREEN)
 		{
 			// Green channel.
 			g = G & Gmask;
-			g += (((rand() & 0x7FFF) > 0x2C00) ? Gadd : -Gadd);
-			
-			if (g > (int)Gmask)
-				g = Gmask;
-			else if (g < (int)Gadd)
-				g = 0;
+			if ((rand() & 0x7FFF) > 0x2C00)
+			{
+				if ((Gmask - Gadd) <= g)
+					g = Gmask;
+				else
+					g += Gadd;
+			}
+			else
+			{
+				if (Gadd >= g)
+					g = 0;
+				else
+					g -= Gadd;
+			}
 		}
 		
 		if (colorMask & CM_BLUE)
 		{
 			// Blue channel.
 			b = RB & Bmask;
-			b += (((rand() & 0x7FFF) > 0x2C00) ? Badd : -Badd);
-			
-			if (b > (int)Bmask)
-				b = Bmask;
-			else if (b < (int)Badd)
-				b = 0;
+			if ((rand() & 0x7FFF) > 0x2C00)
+			{
+				if ((Bmask - Badd) <= b)
+					b = Bmask;
+				else
+					b += Badd;
+			}
+			else
+			{
+				if (Badd >= b)
+					b = 0;
+				else
+					b -= Badd;
+			}
 		}
 		
 		*pix = r | g | b;
@@ -136,8 +192,9 @@ void CrazyEffect::DoCrazyEffect(ColorMask colorMask)
 		
 		case VdpRend::BPP_32:
 		default:
-			T_DoCrazyEffect<uint32_t, 0xF80000, 0x00F800, 0x0000F8,
-					0x080000, 0x000800, 0x000008>(colorMask, VdpRend::MD_Screen.u32);
+			T_DoCrazyEffect<uint32_t, CRAZY_MASK32_R, CRAZY_MASK32_G, CRAZY_MASK32_B,
+					CRAZY_ADD32_R, CRAZY_ADD32_G, CRAZY_ADD32_B>
+					(colorMask, VdpRend::MD_Screen.u32);
 			break;
 	}
 }
