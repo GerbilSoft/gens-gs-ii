@@ -45,6 +45,9 @@ VBackend::VBackend()
 	// Clear the effects flags.
 	m_paused = false;
 	m_fastBlur = false;
+	
+	// Create the OSD font.
+	m_osdFont = QFont("Monospace", 10);
 }
 
 VBackend::~VBackend()
