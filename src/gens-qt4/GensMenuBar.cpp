@@ -60,7 +60,7 @@ GensMenuBar::GensMenuBar(QWidget *parent)
 	
 	static const MenuItem gmiFile[] =
 	{
-		{IDM_FILE_OPEN, GMI_NORMAL, "&Open ROM...", NULL, MACCEL_OPEN, Qt::CTRL + Qt::Key_O, "document-open", NULL},
+		{IDM_FILE_OPEN, GMI_NORMAL, "&Open ROM...", NULL, MACCEL_OPEN, Qt::CTRL + Qt::Key_O, "document-open", ":/oxygen-16x16/document-open.png"},
 		{IDM_SEPARATOR, GMI_SEPARATOR, NULL, NULL, MACCEL_NONE, 0, NULL, NULL},
 		{IDM_FILE_BLIT, GMI_NORMAL, "Blit!", NULL, MACCEL_NONE, Qt::CTRL + Qt::Key_B, NULL, NULL},
 		{IDM_FILE_EMUTHREAD, GMI_NORMAL, "Start/Stop EmuThread", NULL, MACCEL_NONE, 0, NULL, NULL},
