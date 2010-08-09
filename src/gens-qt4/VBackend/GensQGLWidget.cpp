@@ -31,6 +31,7 @@
 // LibGens includes.
 #include "libgens/MD/VdpRend.hpp"
 #include "libgens/macros/log_msg.h"
+#include "libgens/Util/Timing.hpp"
 
 // Win32 requires GL/glext.h for OpenGL 1.2/1.3.
 // TODO: Check the GL implementation to see what functionality is available at runtime.
@@ -378,6 +379,47 @@ void GensQGLWidget::paintGL(void)
 #endif /* HAVE_GLEW */
 	
 	glDisable(GL_TEXTURE_2D);
+	
+	// Print text to the screen.
+	// TODO:
+	// * renderText() doesn't support wordwrapping.
+	// * renderText() doesn't properly handle newlines.
+	// * fm.boundingRect() doesn't seem to handle wordwrapping correctly, either.
+	QFontMetrics fm(m_osdFont, this);
+	QRect boundRect;
+	
+	// TODO: Make the text colors customizable.
+	QColor clShadow(0, 0, 0);
+	QColor clText(255, 255, 255);
+	
+	int y = this->height();
+	double curTime = LibGens::Timing::GetTimeD();
+	
+	// NOTE: QList internally uses an array of pointers.
+	// We can use array indexing instead of iterators.
+	for (int i = (m_osdList.size() - 1); i >= 0; i--)
+	{
+		if (curTime >= m_osdList[i].endTime)
+		{
+			// Message duration has elapsed.
+			// Remove the message from the list.
+			m_osdList.removeAt(i);
+			continue;
+		}
+		
+		const QString msg = m_osdList[i].msg;
+		boundRect = fm.boundingRect(8, 0, this->width() - 16, y, 0, msg);
+		y -= boundRect.height();
+		
+		// TODO: Make the drop shadow optional or something.
+		qglColor(clShadow);
+		renderText(8+1, y+1, msg, m_osdFont);
+		qglColor(clText);
+		renderText(8-1, y-1, msg, m_osdFont);
+	}
+	
+	// Reset the GL color.
+	qglColor(QColor(255, 255, 255, 255));
 }
 
 

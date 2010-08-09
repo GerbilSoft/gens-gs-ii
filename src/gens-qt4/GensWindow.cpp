@@ -404,7 +404,7 @@ void GensWindow::emuFrameDone(void)
 		if ((thisTime - lastTime) >= 1.00)
 		{
 			// Print fps.
-			printf("fps: %f\n", ((double)frames / (thisTime - lastTime)));
+			m_vBackend->osd_printf(2500, "fps: %f", ((double)frames / (thisTime - lastTime)));
 			lastTime = thisTime;
 			frames = 0;
 		}
