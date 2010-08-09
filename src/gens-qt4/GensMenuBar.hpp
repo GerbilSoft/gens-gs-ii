@@ -24,11 +24,13 @@
 #ifndef __GENS_QT4_GENSMENUBAR_HPP__
 #define __GENS_QT4_GENSMENUBAR_HPP__
 
+// Qt includes.
+#include <QtCore/QSignalMapper>
+#include <QtCore/QMap>
 #include <QtGui/QMenuBar>
 #include <QtGui/QMenu>
-#include <QtCore/QSignalMapper>
-
 #include <QtGui/QKeySequence>
+#include <QtGui/QAction>
 
 // Menu IDs.
 // TODO: Convert to enum?
@@ -124,6 +126,14 @@ class GensMenuBar : public QMenuBar
 		void parseMenu(const MenuItem *menu, QMenu *parent);
 		
 		QSignalMapper *m_signalMapper;
+		
+		// Maps of QActions and QMenus.
+		// List of menu separators.
+		QMap<int, QAction*> m_mapActions;
+		QMap<int, QMenu*> m_mapMenus;
+		QList<QAction*> m_lstSeparators;
+		
+		void clearMaps(void);
 	
 	signals:
 		void triggered(int id);

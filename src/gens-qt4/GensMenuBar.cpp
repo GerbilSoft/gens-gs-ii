@@ -111,6 +111,46 @@ GensMenuBar::GensMenuBar(QWidget *parent)
 
 GensMenuBar::~GensMenuBar()
 {
+	// Delete the signal mapper.
+	delete m_signalMapper;
+	
+	// Clear the menu maps.
+	clearMaps();
+}
+
+
+/**
+ * clearMaps(): Clear the menu maps.
+ * - m_mapActions: Map of menu actions.
+ * - m_lstSeparators: List of menu separators.
+ * - m_mapMenus: Map of top-level menus.
+ */
+void GensMenuBar::clearMaps(void)
+{
+	// TODO: Consider using QScopedPointer or QSharedPointer instead?
+	
+	// Actions map.
+	for (QMap<int, QAction*>::iterator iter = m_mapActions.begin();
+	     iter != m_mapActions.end(); iter++)
+	{
+		delete *iter;
+	}
+	m_mapActions.clear();
+	
+	// Separators list.
+	for (int i = (m_lstSeparators.size() - 1); i >= 0; i--)
+	{
+		delete m_lstSeparators[i];
+	}
+	m_lstSeparators.clear();
+	
+	// Menus map.
+	for (QMap<int, QMenu*>::iterator iter = m_mapMenus.begin();
+	     iter != m_mapMenus.end(); iter++)
+	{
+		delete *iter;
+	}
+	m_mapMenus.clear();
 }
 
 
@@ -121,6 +161,9 @@ GensMenuBar::~GensMenuBar()
 void GensMenuBar::parseMainMenu(const GensMenuBar::MainMenuItem *mainMenu)
 {
 	QMenu *mnuSubMenu;
+	
+	// Clear the menu maps.
+	clearMaps();
 	
 	for (; mainMenu->id != 0; mainMenu++)
 	{
@@ -133,6 +176,9 @@ void GensMenuBar::parseMainMenu(const GensMenuBar::MainMenuItem *mainMenu)
 		
 		// Add the menu to the menu bar.
 		this->addMenu(mnuSubMenu);
+		
+		// Add the QMenu to the menus map.
+		m_mapMenus.insert(mainMenu->id, mnuSubMenu);
 	}
 }
 
@@ -154,7 +200,7 @@ void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 		if (menu->type == GMI_SEPARATOR)
 		{
 			// Menu separator.
-			parent->addSeparator();
+			m_lstSeparators.append(parent->addSeparator());
 			continue;
 		}
 		
@@ -197,6 +243,9 @@ void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 		
 		// Add the menu item to the menu.
 		parent->addAction(mnuItem);
+		
+		// Add the QAction to the actions map.
+		m_mapActions.insert(menu->id, mnuItem);
 	}
 }
 
