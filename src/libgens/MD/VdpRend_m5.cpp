@@ -49,6 +49,45 @@
 #define LINEBUF_SPR_W	0x2000
 #define LINEBUF_WIN_W	0x0200
 
+// Tile pixel positions.
+#include "Util/byteswap.h"
+
+#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+#define TILE_PX0	0x0000F000
+#define TILE_PX1	0x00000F00
+#define TILE_PX2	0x000000F0
+#define TILE_PX3	0x0000000F
+#define TILE_PX4	0xF0000000
+#define TILE_PX5	0x0F000000
+#define TILE_PX6	0x00F00000
+#define TILE_PX7	0x000F0000
+#define TILE_SHIFT0	12
+#define TILE_SHIFT1	8
+#define TILE_SHIFT2	4
+#define TILE_SHIFT3	0
+#define TILE_SHIFT4	28
+#define TILE_SHIFT5	24
+#define TILE_SHIFT6	20
+#define TILE_SHIFT7	16
+#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
+#define TILE_PX0	0xF0000000
+#define TILE_PX1	0x0F000000
+#define TILE_PX2	0x00F00000
+#define TILE_PX3	0x000F0000
+#define TILE_PX4	0x0000F000
+#define TILE_PX5	0x00000F00
+#define TILE_PX6	0x000000F0
+#define TILE_PX7	0x0000000F
+#define TILE_SHIFT0	28
+#define TILE_SHIFT1	24
+#define TILE_SHIFT2	20
+#define TILE_SHIFT3	16
+#define TILE_SHIFT4	12
+#define TILE_SHIFT5	8
+#define TILE_SHIFT6	4
+#define TILE_SHIFT7	0
+#endif
+
 namespace LibGens
 {
 
@@ -313,26 +352,26 @@ FORCE_INLINE void VdpRend_m5::T_PutLine_P0(int disp_pixnum, uint32_t pattern, in
 	if (!flip)
 	{
 		// No flip.
-		T_PutPixel_P0<plane, h_s, 0, 0x0000F000, 12>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 1, 0x00000F00,  8>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 2, 0x000000F0,  4>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 3, 0x0000000F,  0>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 4, 0xF0000000, 28>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 5, 0x0F000000, 24>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 6, 0x00F00000, 20>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 7, 0x000F0000, 16>(disp_pixnum, pattern, palette);
+		T_PutPixel_P0<plane, h_s, 0, TILE_PX0, TILE_SHIFT0>(disp_pixnum, pattern, palette);
+		T_PutPixel_P0<plane, h_s, 1, TILE_PX1, TILE_SHIFT1>(disp_pixnum, pattern, palette);
+		T_PutPixel_P0<plane, h_s, 2, TILE_PX2, TILE_SHIFT2>(disp_pixnum, pattern, palette);
+		T_PutPixel_P0<plane, h_s, 3, TILE_PX3, TILE_SHIFT3>(disp_pixnum, pattern, palette);
+		T_PutPixel_P0<plane, h_s, 4, TILE_PX4, TILE_SHIFT4>(disp_pixnum, pattern, palette);
+		T_PutPixel_P0<plane, h_s, 5, TILE_PX5, TILE_SHIFT5>(disp_pixnum, pattern, palette);
+		T_PutPixel_P0<plane, h_s, 6, TILE_PX6, TILE_SHIFT6>(disp_pixnum, pattern, palette);
+		T_PutPixel_P0<plane, h_s, 7, TILE_PX7, TILE_SHIFT7>(disp_pixnum, pattern, palette);
 	}
 	else
 	{
 		// Horizontal flip.
-		T_PutPixel_P0<plane, h_s, 0, 0x000F0000, 16>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 1, 0x00F00000, 20>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 2, 0x0F000000, 24>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 3, 0xF0000000, 28>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 4, 0x0000000F,  0>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 5, 0x000000F0,  4>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 6, 0x00000F00,  8>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 7, 0x0000F000, 12>(disp_pixnum, pattern, palette);
+		T_PutPixel_P0<plane, h_s, 0, TILE_PX7, TILE_SHIFT7>(disp_pixnum, pattern, palette);
+		T_PutPixel_P0<plane, h_s, 1, TILE_PX6, TILE_SHIFT6>(disp_pixnum, pattern, palette);
+		T_PutPixel_P0<plane, h_s, 2, TILE_PX5, TILE_SHIFT5>(disp_pixnum, pattern, palette);
+		T_PutPixel_P0<plane, h_s, 3, TILE_PX4, TILE_SHIFT4>(disp_pixnum, pattern, palette);
+		T_PutPixel_P0<plane, h_s, 4, TILE_PX3, TILE_SHIFT3>(disp_pixnum, pattern, palette);
+		T_PutPixel_P0<plane, h_s, 5, TILE_PX2, TILE_SHIFT2>(disp_pixnum, pattern, palette);
+		T_PutPixel_P0<plane, h_s, 6, TILE_PX1, TILE_SHIFT1>(disp_pixnum, pattern, palette);
+		T_PutPixel_P0<plane, h_s, 7, TILE_PX0, TILE_SHIFT0>(disp_pixnum, pattern, palette);
 	}
 }
 
@@ -386,26 +425,26 @@ FORCE_INLINE void VdpRend_m5::T_PutLine_P1(int disp_pixnum, uint32_t pattern, in
 	if (!flip)
 	{
 		// No flip.
-		T_PutPixel_P1<plane, h_s, 0, 0x0000F000, 12>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 1, 0x00000F00,  8>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 2, 0x000000F0,  4>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 3, 0x0000000F,  0>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 4, 0xF0000000, 28>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 5, 0x0F000000, 24>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 6, 0x00F00000, 20>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 7, 0x000F0000, 16>(disp_pixnum, pattern, palette);
+		T_PutPixel_P1<plane, h_s, 0, TILE_PX0, TILE_SHIFT0>(disp_pixnum, pattern, palette);
+		T_PutPixel_P1<plane, h_s, 1, TILE_PX1, TILE_SHIFT1>(disp_pixnum, pattern, palette);
+		T_PutPixel_P1<plane, h_s, 2, TILE_PX2, TILE_SHIFT2>(disp_pixnum, pattern, palette);
+		T_PutPixel_P1<plane, h_s, 3, TILE_PX3, TILE_SHIFT3>(disp_pixnum, pattern, palette);
+		T_PutPixel_P1<plane, h_s, 4, TILE_PX4, TILE_SHIFT4>(disp_pixnum, pattern, palette);
+		T_PutPixel_P1<plane, h_s, 5, TILE_PX5, TILE_SHIFT5>(disp_pixnum, pattern, palette);
+		T_PutPixel_P1<plane, h_s, 6, TILE_PX6, TILE_SHIFT6>(disp_pixnum, pattern, palette);
+		T_PutPixel_P1<plane, h_s, 7, TILE_PX7, TILE_SHIFT7>(disp_pixnum, pattern, palette);
 	}
 	else
 	{
 		// Horizontal flip.
-		T_PutPixel_P1<plane, h_s, 0, 0x000F0000, 16>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 1, 0x00F00000, 20>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 2, 0x0F000000, 24>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 3, 0xF0000000, 28>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 4, 0x0000000F,  0>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 5, 0x000000F0,  4>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 6, 0x00000F00,  8>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 7, 0x0000F000, 12>(disp_pixnum, pattern, palette);
+		T_PutPixel_P1<plane, h_s, 0, TILE_PX7, TILE_SHIFT7>(disp_pixnum, pattern, palette);
+		T_PutPixel_P1<plane, h_s, 1, TILE_PX6, TILE_SHIFT6>(disp_pixnum, pattern, palette);
+		T_PutPixel_P1<plane, h_s, 2, TILE_PX5, TILE_SHIFT5>(disp_pixnum, pattern, palette);
+		T_PutPixel_P1<plane, h_s, 3, TILE_PX4, TILE_SHIFT4>(disp_pixnum, pattern, palette);
+		T_PutPixel_P1<plane, h_s, 4, TILE_PX3, TILE_SHIFT3>(disp_pixnum, pattern, palette);
+		T_PutPixel_P1<plane, h_s, 5, TILE_PX2, TILE_SHIFT2>(disp_pixnum, pattern, palette);
+		T_PutPixel_P1<plane, h_s, 6, TILE_PX1, TILE_SHIFT1>(disp_pixnum, pattern, palette);
+		T_PutPixel_P1<plane, h_s, 7, TILE_PX0, TILE_SHIFT0>(disp_pixnum, pattern, palette);
 	}
 }
 
@@ -434,26 +473,26 @@ FORCE_INLINE void VdpRend_m5::T_PutLine_Sprite(int disp_pixnum, uint32_t pattern
 	if (!flip)
 	{
 		// No flip.
-		status |= T_PutPixel_Sprite<priority, h_s, 0, 0x0000F000, 12>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 1, 0x00000F00,  8>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 2, 0x000000F0,  4>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 3, 0x0000000F,  0>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 4, 0xF0000000, 28>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 5, 0x0F000000, 24>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 6, 0x00F00000, 20>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 7, 0x000F0000, 16>(disp_pixnum, pattern, palette);
+		status |= T_PutPixel_Sprite<priority, h_s, 0, TILE_PX0, TILE_SHIFT0>(disp_pixnum, pattern, palette);
+		status |= T_PutPixel_Sprite<priority, h_s, 1, TILE_PX1, TILE_SHIFT1>(disp_pixnum, pattern, palette);
+		status |= T_PutPixel_Sprite<priority, h_s, 2, TILE_PX2, TILE_SHIFT2>(disp_pixnum, pattern, palette);
+		status |= T_PutPixel_Sprite<priority, h_s, 3, TILE_PX3, TILE_SHIFT3>(disp_pixnum, pattern, palette);
+		status |= T_PutPixel_Sprite<priority, h_s, 4, TILE_PX4, TILE_SHIFT4>(disp_pixnum, pattern, palette);
+		status |= T_PutPixel_Sprite<priority, h_s, 5, TILE_PX5, TILE_SHIFT5>(disp_pixnum, pattern, palette);
+		status |= T_PutPixel_Sprite<priority, h_s, 6, TILE_PX6, TILE_SHIFT6>(disp_pixnum, pattern, palette);
+		status |= T_PutPixel_Sprite<priority, h_s, 7, TILE_PX7, TILE_SHIFT7>(disp_pixnum, pattern, palette);
 	}
 	else
 	{
 		// Horizontal flip.
-		status |= T_PutPixel_Sprite<priority, h_s, 0, 0x000F0000, 16>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 1, 0x00F00000, 20>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 2, 0x0F000000, 24>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 3, 0xF0000000, 28>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 4, 0x0000000F,  0>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 5, 0x000000F0,  4>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 6, 0x00000F00,  8>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 7, 0x0000F000, 12>(disp_pixnum, pattern, palette);
+		status |= T_PutPixel_Sprite<priority, h_s, 0, TILE_PX7, TILE_SHIFT7>(disp_pixnum, pattern, palette);
+		status |= T_PutPixel_Sprite<priority, h_s, 1, TILE_PX6, TILE_SHIFT6>(disp_pixnum, pattern, palette);
+		status |= T_PutPixel_Sprite<priority, h_s, 2, TILE_PX5, TILE_SHIFT5>(disp_pixnum, pattern, palette);
+		status |= T_PutPixel_Sprite<priority, h_s, 3, TILE_PX4, TILE_SHIFT4>(disp_pixnum, pattern, palette);
+		status |= T_PutPixel_Sprite<priority, h_s, 4, TILE_PX3, TILE_SHIFT3>(disp_pixnum, pattern, palette);
+		status |= T_PutPixel_Sprite<priority, h_s, 5, TILE_PX2, TILE_SHIFT2>(disp_pixnum, pattern, palette);
+		status |= T_PutPixel_Sprite<priority, h_s, 6, TILE_PX1, TILE_SHIFT1>(disp_pixnum, pattern, palette);
+		status |= T_PutPixel_Sprite<priority, h_s, 7, TILE_PX0, TILE_SHIFT0>(disp_pixnum, pattern, palette);
 	}
 	
 	// Check for sprite collision.
