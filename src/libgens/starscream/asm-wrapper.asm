@@ -61,7 +61,7 @@ SYM(M68K_RB):
 	; Call the function.
 	mov	eax, [ebp + arg_1]
 	push	eax
-	call Gens_M68K_RB
+	call	SYM(Gens_M68K_RB)
 	add	esp, 4
 	
 	pop	edi
@@ -92,7 +92,7 @@ SYM(M68K_RW):
 	; Call the function.
 	mov	eax, [ebp + arg_1]
 	push	eax
-	call Gens_M68K_RW
+	call	SYM(Gens_M68K_RW)
 	add	esp, 4
 	
 	pop	edi
@@ -120,7 +120,7 @@ SYM(M68K_WB):
 	mov	edx, [ebp + arg_2]
 	push	edx
 	push	eax
-	call Gens_M68K_WB
+	call	SYM(Gens_M68K_WB)
 	add	esp, 8
 	
 	; Reset the frame pointer.
@@ -143,7 +143,7 @@ SYM(M68K_WW):
 	mov	edx, [ebp + arg_2]
 	push	edx
 	push	eax
-	call Gens_M68K_WW
+	call	SYM(Gens_M68K_WW)
 	add	esp, 8
 	
 	; Reset the frame pointer.
