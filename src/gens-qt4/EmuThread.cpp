@@ -27,8 +27,6 @@
 #include "libgens/MD/VdpIo.hpp"
 #include "libgens/MD/VdpPalette.hpp"
 
-#include "libgens/Effects/CrazyEffect.hpp"
-
 namespace GensQt4
 {
 
@@ -73,14 +71,11 @@ void EmuThread::run(void)
 	m_mutex.lock();
 	while (!m_stop)
 	{
-		// Do the "Crazy" effect.
-		LibGens::CrazyEffect::DoCrazyEffect(LibGens::CrazyEffect::CM_WHITE);
+		// Run a frame of emulation.
+		LibGens::EmuMD::Do_Frame();
 		
 		// Signal that the frame has been drawn.
 		emit frameDone();
-		
-		// Sleep for 10 ms.
-		usleep(10000);
 		
 		// Wait for a resume command.
 		m_wait.wait(&m_mutex);

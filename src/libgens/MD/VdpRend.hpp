@@ -75,9 +75,8 @@ class VdpRend
 		static Sprite_Struct_t Sprite_Struct[128];
 		static unsigned int Sprite_Visible[128];
 		
-		// Allow Sprite Overflow.
-		// TODO: Rename this variable?
-		static int Sprite_Over;
+		// If set, enforces sprite limits.
+		static int Sprite_Limits;
 	
 		// VDP layer flags.
 		enum VDP_Layer_Flags

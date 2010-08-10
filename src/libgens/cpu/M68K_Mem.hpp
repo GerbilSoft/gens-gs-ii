@@ -27,12 +27,34 @@
 #include <stdint.h>
 #include "M68K.hpp"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+// TODO: Starscream accesses Ram_68k directly.
+// Move Ram_68k back to M68K once Starscream is updated.
+typedef union
+{
+	uint8_t  u8[64*1024];
+	uint16_t u16[(64*1024)>>1];
+	uint32_t u32[(64*1024)>>2];
+} Ram_68k_t;
+extern Ram_68k_t Ram_68k;
+#ifdef __cplusplus
+}
+#endif
+
 namespace LibGens
 {
 
 class M68K_Mem
 {
 	public:
+		static void Init(void);
+		static void End(void);
+		
+#if 0
+		// TODO: Starscream accesses Ram_68k directly.
+		// Move Ram_68k back here once Starscream is updated.
 		union Ram_68k_t
 		{
 			uint8_t  u8[64*1024];
@@ -40,6 +62,7 @@ class M68K_Mem
 			uint32_t u32[(64*1024)>>2];
 		};
 		static Ram_68k_t Ram_68k;
+#endif
 		
 		union Rom_Data_t
 		{
@@ -67,9 +90,6 @@ class M68K_Mem
 		static SRam_State_t SRam_State;
 		
 		static unsigned int Rom_Size;
-		
-		// Z80/M68K cycle table.
-		static int Z80_M68K_Cycle_Tab[512];
 		
 		/** Z80 state. **/
 		#define Z80_STATE_ENABLED	(1 << 0)
@@ -99,6 +119,9 @@ class M68K_Mem
 		static void M68K_WW(uint32_t address, uint16_t data);
 	
 	protected:
+		/** Z80/M68K cycle table. **/
+		static int Z80_M68K_Cycle_Tab[512];
+		
 		/** Read Byte functions. **/
 		static uint8_t M68K_Read_Byte_Default(uint32_t address);
 		

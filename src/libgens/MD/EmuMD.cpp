@@ -28,11 +28,16 @@
 #include "VdpRend.hpp"
 #include "VdpPalette.hpp"
 
+// CPUs.
+#include "cpu/M68K.cpp"
+#include "Util/byteswap.h"
+
 // ZOMG
 #include "Save/Zomg.hpp"
 
 // C includes.
 #include <stdio.h>
+#include <math.h>
 
 namespace LibGens
 {
@@ -49,30 +54,42 @@ void EmuMD::Init_TEST(void)
 	// TODO: This would usually be done at program startup.
 	VdpPalette::Recalc();
 	
-	// Load the ZOMG file.
-	Zomg m_zomg("test.zomg");
-	if (!m_zomg.isOpen())
+	// Load the ROM file.
+	FILE *f = fopen("test.bin", "rb");
+	if (!f)
 	{
-		printf("test.zomg could not be opened. Using default gray screen.\n");
-		VdpIo::CRam.u16[0] = 0x888;
-		VdpIo::VDP_Flags.CRam = 1;
+		printf("Could not open test.bin.");
 	}
-	else
-	{
-		printf("test.zomg opened. Loading...\n");
-		int ret = m_zomg.load();
-		if (ret == 0)
-			printf("test.zomg loaded.\n");
-		else
-			printf("Error loading test.zomg. Return value: %d\n", ret);
-	}
-	m_zomg.close();
+	
+	// Determine the size of the file.
+	fseek(f, 0, SEEK_END);
+	M68K_Mem::Rom_Size = ftell(f);
+	if (M68K_Mem::Rom_Size > (4*1024*1024))
+		M68K_Mem::Rom_Size = (4*1024*1024);
+	fseek(f, 0, SEEK_SET);
+	
+	// Load the ROM into memory.
+	fread(&M68K_Mem::Rom_Data.u8[0], 1, M68K_Mem::Rom_Size, f);
+	be16_to_cpu_array(&M68K_Mem::Rom_Data.u8[0], M68K_Mem::Rom_Size);
+	fclose(f);
+	
+	// Initialize the M68K.
+	M68K::InitSys(M68K::SYSID_MD);
 	
 	// TODO: VdpIo::VDP_Lines.Display.Total isn't being set properly...
 	VdpIo::VDP_Lines.Display.Total = 262;
+	VdpIo::Set_Visible_Lines();
 	
-	// Run a frame with the VDP enabled.
-	T_Do_Frame<true>();
+	// TODO: Set these elsewhere.
+	M68K_Mem::Game_Mode = 1;	// 0 == Japan; 1 == US/Europe
+	M68K_Mem::CPU_Mode = 0;		// 0 == NTSC; 1 == PAL
+	M68K_Mem::Gen_Mode = 0;		// TODO: This isn't actually used anywhere right now...
+	
+	// Initialize CPL.
+	// TODO: Initialize this somewhere else.
+	M68K_Mem::CPL_M68K = (int)rint((((double)CLOCK_NTSC / 7.0) / 60.0) / 262.0);
+	
+	printf("test.bin loaded: %d bytes. Start the emulator thread!\n", M68K_Mem::Rom_Size);
 }
 
 
@@ -94,21 +111,20 @@ FORCE_INLINE void EmuMD::T_Do_Line(void)
 	PSG_Len += Sound_Extrapol[VDP_Lines.Display.Current][1];
 		
 	Fix_Controllers();
-	Cycles_M68K += CPL_M68K;
-	Cycles_Z80 += CPL_Z80;
-	if (VDP_Reg.DMAT_Length)
-		main68k_addCycles(VDP_Update_DMA());
 #endif
+	M68K_Mem::Cycles_M68K += M68K_Mem::CPL_M68K;
+#if 0
+	Cycles_Z80 += CPL_Z80;
+#endif
+	if (VdpIo::DMAT_Length)
+		main68k_addCycles(VdpIo::Update_DMA());
 	
 	switch (LineType)
 	{
 		case LINETYPE_ACTIVEDISPLAY:
 			// In visible area.
 			VdpIo::VDP_Status |=  0x0004;	// HBlank = 1
-#if 0
-			// TODO: CPU. (LibGens)
-			main68k_exec(Cycles_M68K - 404);
-#endif
+			main68k_exec(M68K_Mem::Cycles_M68K - 404);
 			VdpIo::VDP_Status &= ~0x0004;	// HBlank = 0
 			
 			if (--VdpIo::HInt_Counter < 0)
@@ -137,9 +153,9 @@ FORCE_INLINE void EmuMD::T_Do_Line(void)
 			if (VdpIo::VDP_Lines.NTSC_V30.VBlank_Div != 0)
 				VdpIo::VDP_Status &= ~0x0008;
 			
+			main68k_exec(M68K_Mem::Cycles_M68K - 360);
 #if 0
 			// TODO: CPU, Congratulations! (LibGens)
-			main68k_exec(Cycles_M68K - 360);
 			Z80_EXEC(168);
 			CONGRATULATIONS_POSTCHECK();
 #endif
@@ -171,9 +187,9 @@ FORCE_INLINE void EmuMD::T_Do_Line(void)
 		VdpRend::Render_Line();
 	}
 	
+	main68k_exec(M68K_Mem::Cycles_M68K);
 #if 0
 	// TODO: CPU. (LibGens)
-	main68k_exec(Cycles_M68K);
 	Z80_EXEC(0);
 #endif
 }
@@ -197,12 +213,12 @@ FORCE_INLINE void EmuMD::T_Do_Frame(void)
 	YM_Buf[0] = PSG_Buf[0] = Seg_L;
 	YM_Buf[1] = PSG_Buf[1] = Seg_R;
 	YM_Len = PSG_Len = 0;
-	
-	Cycles_M68K = Cycles_Z80 = 0;
-	Last_BUS_REQ_Cnt = -1000;
-	main68k_tripOdometer();
-	mdZ80_clear_odo(&M_Z80);
 #endif
+	
+	M68K_Mem::Cycles_M68K = /*Cycles_Z80 =*/ 0;
+	//Last_BUS_REQ_Cnt = -1000;
+	main68k_tripOdometer();
+	//mdZ80_clear_odo(&M_Z80);
 	
 	// TODO: MDP. (LibGens)
 #if 0

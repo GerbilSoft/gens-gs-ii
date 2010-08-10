@@ -27,11 +27,45 @@
 // C includes.
 #include <string.h>
 
+// TODO: Starscream accesses Ram_68k directly.
+// Move Ram_68k back to M68K once Starscream is updated.
+Ram_68k_t Ram_68k;
+
+// C wrapper functions for Starscream.
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+uint8_t Gens_M68K_RB(uint32_t address)
+{
+	/** WORKAROUND for Starscream not properly saving ecx/edx. **/
+	return LibGens::M68K_Mem::M68K_RB(address);
+}
+uint16_t Gens_M68K_RW(uint32_t address)
+{
+	/** WORKAROUND for Starscream not properly saving ecx/edx. **/
+	return LibGens::M68K_Mem::M68K_RW(address);
+}
+void Gens_M68K_WB(uint32_t address, uint8_t data)
+{
+	/** WORKAROUND for Starscream not properly saving ecx/edx. **/
+	LibGens::M68K_Mem::M68K_WB(address, data);
+}
+void Gens_M68K_WW(uint32_t address, uint16_t data)
+{
+	/** WORKAROUND for Starscream not properly saving ecx/edx. **/
+	LibGens::M68K_Mem::M68K_WW(address, data);
+}
+
+#ifdef __cplusplus
+}
+#endif
+
 namespace LibGens
 {
 
 /** ROM and RAM variables. **/
-M68K_Mem::Ram_68k_t M68K_Mem::Ram_68k;
+//M68K_Mem::Ram_68k_t M68K_Mem::Ram_68k;	// TODO: Fix Starscream!
 M68K_Mem::Rom_Data_t M68K_Mem::Rom_Data;
 
 /** SRam variables. **/
@@ -40,6 +74,41 @@ uint32_t M68K_Mem::SRam_Start;
 uint32_t M68K_Mem::SRam_End;
 
 M68K_Mem::SRam_State_t M68K_Mem::SRam_State;
+
+/** Z80/M68K cycle table. **/
+int M68K_Mem::Z80_M68K_Cycle_Tab[512];
+
+// M68K static variables.
+// TODO: Improve some of these, especially the cycle counters!
+unsigned int M68K_Mem::Rom_Size;
+
+unsigned int M68K_Mem::Z80_State;
+int M68K_Mem::Last_BUS_REQ_Cnt;
+int M68K_Mem::Last_BUS_REQ_St;
+int M68K_Mem::Bank_M68K;
+int M68K_Mem::Fake_Fetch;
+
+int M68K_Mem::CPL_M68K;
+int M68K_Mem::CPL_Z80;
+int M68K_Mem::Cycles_M68K;
+int M68K_Mem::Cycles_Z80;
+
+int M68K_Mem::Game_Mode;
+int M68K_Mem::CPU_Mode;
+int M68K_Mem::Gen_Mode;
+
+
+void M68K_Mem::Init(void)
+{
+	// Initialize the Z80/M68K cycle table.
+	for (int x = 0; x < 512; x++)
+		Z80_M68K_Cycle_Tab[x] = (int)((double) x * 7.0 / 15.0);
+}
+
+
+void M68K_Mem::End(void)
+{
+}
 
 
 /** Read Byte functions. **/
@@ -63,6 +132,7 @@ uint8_t M68K_Mem::M68K_Read_Byte_Default(uint32_t address)
  * TODO: XOR by 1 on little-endian systems only.
  * @param bank ROM bank number.
  */
+#include <stdio.h>
 template<uint8_t bank>
 uint8_t M68K_Mem::T_M68K_Read_Byte_RomX(uint32_t address)
 {
@@ -191,7 +261,7 @@ uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 		pop	ebx
 		ret
 #endif
-		return 0;
+		return 0x80;
 	}
 	else if (address > 0xA1000D)
 	{
@@ -349,7 +419,8 @@ template<uint8_t bank>
 uint16_t M68K_Mem::T_M68K_Read_Word_RomX(uint32_t address)
 {
 	address &= 0x7FFFE;
-	address ^= ((bank << 19) >> 1);
+	address |= (bank << 19);
+	address >>= 1;
 	return Rom_Data.u16[address];
 }
 // TODO: Add banks C, D, E, and F for 8 MB ROM support.
@@ -487,7 +558,7 @@ uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 		mov	[SYM(Fake_Fetch)], al		; fake the next fetched instruction (random)
 		ret
 #endif
-		return 0;
+		return 0x8000;
 	}
 	else if (address > 0xA1000D)
 	{
@@ -703,67 +774,48 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 		// Z80 BUSREQ. (0xA11100)
 		// TODO
 		
+		// Zero the controller counters and delays.
+		// TODO
 #if 0
 		xor	ecx, ecx
-		mov	ah, [SYM(Z80_State)]
 		mov	dword [SYM(Controller_1_Counter)], ecx
-		test	al, 1	; TODO: Should this be ah, Z80_STATE_ENABLED ?
 		mov	dword [SYM(Controller_1_Delay)], ecx
 		mov	dword [SYM(Controller_2_Counter)], ecx
 		mov	dword [SYM(Controller_2_Delay)], ecx
-		jnz	short .deactivated
-		
-		test	ah, Z80_STATE_BUSREQ
-		jnz	short .already_activated
-		
-		or	ah, Z80_STATE_BUSREQ
-		push	edx
-		mov	[SYM(Z80_State)], ah
-		mov	ebx, [SYM(Cycles_M68K)]
-		call	SYM(main68k_readOdometer)
-		sub	ebx, eax
-		mov	edx, [SYM(Cycles_Z80)]
-		mov	ebx, [SYM(Z80_M68K_Cycle_Tab) + ebx * 4]
-		sub	edx, ebx
-		
-		push	edx
-		push	SYM(M_Z80)
-		call	SYM(mdZ80_set_odo)
-		add	esp, byte 8
-		pop	edx
-	
-	.already_activated:
-		pop	ecx
-		pop	ebx
-		ret
-	
-	align 16
-	
-	.deactivated:
-		call	SYM(main68k_readOdometer)
-		mov	cl, [SYM(Z80_State)]
-		mov	[SYM(Last_BUS_REQ_Cnt)], eax
-		test	cl, Z80_STATE_BUSREQ
-		setnz	[SYM(Last_BUS_REQ_St)]
-		jz	short .already_deactivated
-		
-		push	edx
-		mov	ebx, [SYM(Cycles_M68K)]
-		and	cl, ~Z80_STATE_BUSREQ
-		sub	ebx, eax
-		mov	[SYM(Z80_State)], cl
-		mov	edx, [SYM(Cycles_Z80)]
-		mov	ebx, [SYM(Z80_M68K_Cycle_Tab) + ebx * 4]
-		mov	ecx, SYM(M_Z80)
-		sub	edx, ebx
-		call	z80_Exec
-		pop	edx
-	
-	.already_deactivated:
-		pop	ecx
-		pop	ebx
-		ret
 #endif
+		
+		if (data & 1)
+		{
+			// Disable the Z80.
+			Last_BUS_REQ_Cnt = main68k_readOdometer();
+			if (Z80_State & Z80_STATE_BUSREQ)
+			{
+				// Z80 is running. Disable it.
+				Last_BUS_REQ_St = 1;
+				Z80_State &= ~Z80_STATE_BUSREQ;
+				
+				// TODO: Rework this.
+				int ebx = (Cycles_M68K - Last_BUS_REQ_Cnt);
+				ebx = Z80_M68K_Cycle_Tab[ebx];
+				
+				int edx = Cycles_Z80;
+				edx -= ebx;
+				//z80_Exec(M_Z80, edx); // TODO
+			}
+		}
+		else
+		{
+			// Enable the Z80.
+			Z80_State |= Z80_STATE_BUSREQ;
+			int ebx = Cycles_M68K;
+			ebx -= main68k_readOdometer();
+			int edx = Cycles_Z80;
+			ebx = Z80_M68K_Cycle_Tab[ebx];
+			edx -= ebx;
+			
+			//mdZ80_set_odo(M_Z80, edx);	// TODO
+		}
+		
 		return;
 	}
 	else if (address == 0xA11200)
@@ -1191,6 +1243,14 @@ void M68K_Mem::M68K_Write_Word_VDP(uint32_t address, uint16_t data)
 }
 
 
+/** In-use function tables. **/
+/** TODO: Convert to member variables! **/
+M68K_Mem::M68K_Read_Byte_fn M68K_Mem::M68K_Read_Byte_Table[0x20];
+M68K_Mem::M68K_Read_Word_fn M68K_Mem::M68K_Read_Word_Table[0x20];
+M68K_Mem::M68K_Write_Byte_fn M68K_Mem::M68K_Write_Byte_Table[0x20];
+M68K_Mem::M68K_Write_Word_fn M68K_Mem::M68K_Write_Word_Table[0x20];
+
+
 /** Default function tables. **/
 
 
@@ -1378,7 +1438,7 @@ void M68K_Mem::Init(M68K::SysID system)
 uint8_t M68K_Mem::M68K_RB(uint32_t address)
 {
 	address &= 0xFFFFFF;
-	return M68K_Read_Byte_Table[address >> 17](address);
+	return M68K_Read_Byte_Table[address >> 19](address);
 }
 
 
@@ -1390,7 +1450,7 @@ uint8_t M68K_Mem::M68K_RB(uint32_t address)
 uint16_t M68K_Mem::M68K_RW(uint32_t address)
 {
 	address &= 0xFFFFFF;
-	return M68K_Read_Word_Table[address >> 17](address);
+	return M68K_Read_Word_Table[address >> 19](address);
 }
 
 
@@ -1402,7 +1462,7 @@ uint16_t M68K_Mem::M68K_RW(uint32_t address)
 void M68K_Mem::M68K_WB(uint32_t address, uint8_t data)
 {
 	address &= 0xFFFFFF;
-	M68K_Write_Byte_Table[address >> 17](address, data);
+	M68K_Write_Byte_Table[address >> 19](address, data);
 }
 
 
@@ -1414,7 +1474,7 @@ void M68K_Mem::M68K_WB(uint32_t address, uint8_t data)
 void M68K_Mem::M68K_WW(uint32_t address, uint16_t data)
 {
 	address &= 0xFFFFFF;
-	M68K_Write_Word_Table[address >> 17](address, data);
+	M68K_Write_Word_Table[address >> 19](address, data);
 }
 
 }

@@ -41,9 +41,8 @@ VdpRend::Screen_t VdpRend::MD_Screen;
 VdpRend::Sprite_Struct_t VdpRend::Sprite_Struct[128];
 unsigned int VdpRend::Sprite_Visible[128];
 
-// Allow Sprite Overflow.
-// TODO: Rename this variable?
-int VdpRend::Sprite_Over;
+// If set, enforces sprite limits.
+int VdpRend::Sprite_Limits = 1;
 
 // VDP layer control.
 unsigned int VdpRend::VDP_Layers = VdpRend::VDP_LAYERS_DEFAULT;

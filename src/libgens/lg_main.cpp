@@ -25,6 +25,8 @@
 #include "macros/git.h"
 #include "Util/cpuflags.h"
 #include "Util/Timing.hpp"
+#include "cpu/M68K.hpp"
+#include "cpu/M68K_Mem.hpp"
 
 // C includes.
 #include <stdio.h>
@@ -92,6 +94,8 @@ int Init(void)
 	
 	// Initialize LibGens subsystems.
 	Timing::Init();
+	M68K::Init();
+	M68K_Mem::Init();
 	
 	ms_IsInit = true;
 	return 0;
@@ -114,6 +118,8 @@ int End(void)
 	
 	// Shut down LibGens subsystems.
 	Timing::End();
+	M68K::End();
+	M68K_Mem::End();
 	
 	ms_IsInit = false;
 	return 0;

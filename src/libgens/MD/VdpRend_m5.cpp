@@ -1155,7 +1155,7 @@ FORCE_INLINE void VdpRend_m5::T_Render_Line_Sprite(void)
 {
 	// Update the sprite masks.
 	unsigned int num_spr;
-	if (VdpRend::Sprite_Over)
+	if (VdpRend::Sprite_Limits)
 		num_spr = T_Update_Mask_Sprite<true, interlaced>();
 	else
 		num_spr = T_Update_Mask_Sprite<false, interlaced>();

@@ -27,8 +27,26 @@
 // C includes.
 #include <string.h>
 
+// M68K CPU.
+#include "cpu/star_68k.h"
+#include "cpu/M68K_Mem.hpp"
+
 /** Static member initialization. **/
 #include "VdpIo_static.hpp"
+
+// C wrapper functions for Starscream.
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+uint8_t VDP_Int_Ack(void)
+{
+	return LibGens::VdpIo::Int_Ack();
+}
+
+#ifdef __cplusplus
+}
+#endif
 
 namespace LibGens
 {
@@ -145,24 +163,18 @@ void VdpIo::Update_IRQ_Line(void)
 	if ((VDP_Reg.m5.Set2 & 0x20) && (VDP_Int & 0x08))
 	{
 		// VBlank interrupt.
-#if 0
 		main68k_interrupt(6, -1);
-#endif
 		return;
 	}
 	else if ((VDP_Reg.m5.Set1 & 0x10) && (VDP_Int & 0x04))
 	{
 		// HBlank interrupt.
-#if 0
 		main68k_interrupt(4, -1);
-#endif
 		return;
 	}
 	
 	// No VDP interrupts.
-#if 0
 	main68k_context.interrupts[0] &= 0xF0;
-#endif
 }
 
 
@@ -576,9 +588,8 @@ void VdpIo::Set_Reg(int reg_num, uint8_t val)
  */
 uint8_t VdpIo::Read_H_Counter(void)
 {
-#if 0
 	unsigned int odo_68K = main68k_readOdometer();
-	odo_68K -= (Cycles_M68K - CPL_M68K);
+	odo_68K -= (M68K_Mem::Cycles_M68K - M68K_Mem::CPL_M68K);
 	odo_68K &= 0x1FF;
 	
 	// H_Counter_Table[][0] == H32.
@@ -589,8 +600,6 @@ uint8_t VdpIo::Read_H_Counter(void)
 		return H_Counter_Table[odo_68K][1];
 	else
 		return H_Counter_Table[odo_68K][0];
-#endif
-	return 0;
 }
 
 
@@ -601,9 +610,8 @@ uint8_t VdpIo::Read_H_Counter(void)
  */
 uint8_t VdpIo::Read_V_Counter(void)
 {
-#if 0
 	unsigned int odo_68K = main68k_readOdometer();
-	odo_68K -= (Cycles_M68K - CPL_M68K);
+	odo_68K -= (M68K_Mem::Cycles_M68K - M68K_Mem::CPL_M68K);
 	odo_68K &= 0x1FF;
 	
 	unsigned int H_Counter;
@@ -656,7 +664,7 @@ uint8_t VdpIo::Read_V_Counter(void)
 	}
 	
 	// Check for 2x interlaced mode.
-	if (VDP_Reg.Interlaced.DoubleRes)
+	if (Interlaced.DoubleRes)
 	{
 		// Interlaced mode is enabled.
 		uint8_t vc_tmp = (V_Counter & 0xFF);
@@ -666,8 +674,6 @@ uint8_t VdpIo::Read_V_Counter(void)
 	
 	// Interlaced mode is not enabled.
 	return (uint8_t)(V_Counter & 0xFF);
-#endif
-	return 0;
 }
 
 
@@ -787,11 +793,7 @@ unsigned int VdpIo::Update_DMA(void)
 	}
 	
 	// Cycles elapsed is based on M68K cycles per line.
-	// TODO: Port to LibGens.
-#if 0
-	unsigned int cycles = CPL_M68K;
-#endif
-	unsigned int cycles = 488;	// LibGens temporary hack.
+	unsigned int cycles = M68K_Mem::CPL_M68K;
 	
 	// Get the DMA transfer rate.
 	const uint8_t timing = DMA_Timing_Table[DMAT_Type & 3][offset];
@@ -1042,8 +1044,6 @@ inline void VdpIo::T_DMA_Loop(unsigned int src_address, unsigned int dest_addres
 	// Mask the source address, depending on type.
 	switch (src_component)
 	{
-		// TODO: Port to LibGens.
-#if 0
 		case DMA_SRC_ROM:
 			src_address &= 0x3FFFFE;
 			break;
@@ -1052,6 +1052,8 @@ inline void VdpIo::T_DMA_Loop(unsigned int src_address, unsigned int dest_addres
 			src_address &= 0xFFFE;
 			break;
 		
+		// TODO: Port to LibGens.
+#if 0
 		case DMA_SRC_PRG_RAM:
 			src_address = ((src_address & 0x1FFFE) + Bank_M68K);
 			break;
@@ -1108,16 +1110,17 @@ inline void VdpIo::T_DMA_Loop(unsigned int src_address, unsigned int dest_addres
 		uint16_t w;
 		switch (src_component)
 		{
-			// TODO: Port to LibGens.
-#if 0
 			case DMA_SRC_ROM:
-				w = Rom_Data.u16[src_address >> 1];
+				w = M68K_Mem::Rom_Data.u16[src_address >> 1];
 				break;
 			
 			case DMA_SRC_M68K_RAM:
+				//w = M68K_Mem::Ram_68k.u16[src_address >> 1];
 				w = Ram_68k.u16[src_address >> 1];
 				break;
 			
+			// TODO: Port to LibGens.
+#if 0
 			case DMA_SRC_PRG_RAM:
 				// TODO: This is untested!
 				w = Ram_Prg.u16[src_address >> 1];
@@ -1222,10 +1225,7 @@ inline void VdpIo::T_DMA_Loop(unsigned int src_address, unsigned int dest_addres
 	
 	// Update DMA.
 	Update_DMA();
-	// TODO: Port to LibGens.
-#if 0
 	main68k_releaseCycles();
-#endif
 }
 
 

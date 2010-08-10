@@ -26,6 +26,10 @@
 
 #include "star_68k.h"
 
+// TODO: Move these elsewhere!
+#define CLOCK_NTSC 53693175
+#define CLOCK_PAL  53203424
+
 namespace LibGens
 {
 
@@ -33,6 +37,7 @@ class M68K
 {
 	public:
 		static void Init(void);
+		static void End(void);
 		
 		enum SysID
 		{
