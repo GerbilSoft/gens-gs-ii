@@ -45,6 +45,7 @@ class IoBase
 			m_ctrl = 0x00;		// input
 			m_lastData = 0xFF;	// all ones
 			m_buttons = ~0;		// no buttons pressed
+			updateSelectLine();
 		}
 		IoBase(const IoBase *other)
 		{
@@ -52,6 +53,7 @@ class IoBase
 			m_ctrl = other->m_ctrl;
 			m_lastData = other->m_lastData;
 			m_buttons = other->m_buttons;
+			updateSelectLine();
 		}
 		virtual ~IoBase() { }
 		
@@ -79,10 +81,18 @@ class IoBase
 		};
 		
 		// MD-side controller functions.
-		virtual void writeCtrl(uint8_t ctrl) { m_ctrl = ctrl; }
+		virtual void writeCtrl(uint8_t ctrl)
+		{
+			m_ctrl = ctrl;
+			updateSelectLine();
+		}
 		virtual uint8_t readCtrl(void) { return m_ctrl; }
 		
-		virtual void writeData(uint8_t data) { m_lastData = data; }
+		virtual void writeData(uint8_t data)
+		{
+			m_lastData = data;
+			updateSelectLine();
+		}
 		virtual uint8_t readData(void)
 		{
 			// Mask the data according to the tristate control.
@@ -102,6 +112,15 @@ class IoBase
 	protected:
 		uint8_t m_ctrl;		// Tristate control.
 		uint8_t m_lastData;	// Last data written to the device.
+		
+		/**
+		 * updateSelectLine(): Determine the SELECT line state.
+		 */
+		inline void updateSelectLine(void)
+		{
+			m_select = (!(m_ctrl & IOPIN_TH) || (m_lastData & IOPIN_TH));
+		}
+		inline bool isSelect(void) { return m_select; }
 		
 		/**
 		 * m_buttons: Controller bitfield.
@@ -133,6 +152,10 @@ class IoBase
 #if 0
 		std::vector<uint16_t> m_btnMap;
 #endif
+	
+	private:
+		// Select line state.
+		bool m_select;
 };
 
 }
