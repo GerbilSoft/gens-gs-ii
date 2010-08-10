@@ -330,52 +330,43 @@ void GensWindow::menuTriggered(int id)
 			}
 			break;
 		
-		case IDM_RESTEST_MENU:
-			// Resolution Testing.
+		case IDM_RESBPPTEST_MENU:
+			// Resolution / Color Depth Testing.
 			switch (MNUID_ITEM(id))
 			{
-				case MNUID_ITEM(IDM_RESTEST_1X):
+				case MNUID_ITEM(IDM_RESBPPTEST_1X):
 					m_scale = 1;
 					gensResize();
 					break;
 				
-				case MNUID_ITEM(IDM_RESTEST_2X):
+				case MNUID_ITEM(IDM_RESBPPTEST_2X):
 					m_scale = 2;
 					gensResize();
 					break;
 				
-				case MNUID_ITEM(IDM_RESTEST_3X):
+				case MNUID_ITEM(IDM_RESBPPTEST_3X):
 					m_scale = 3;
 					gensResize();
 					break;
 				
-				case MNUID_ITEM(IDM_RESTEST_4X):
+				case MNUID_ITEM(IDM_RESBPPTEST_4X):
 					m_scale = 4;
 					gensResize();
 					break;
 				
-				default:
-					break;
-			}
-			break;
-		
-		case IDM_BPPTEST_MENU:
-			// Color Depth Testing.
-			switch (MNUID_ITEM(id))
-			{
-				case MNUID_ITEM(IDM_BPPTEST_15):
+				case MNUID_ITEM(IDM_RESBPPTEST_15):
 					LibGens::VdpRend::Bpp = LibGens::VdpRend::BPP_15;
 					m_vBackend->setVbDirty();
 					m_vBackend->vbUpdate();
 					break;
 				
-				case MNUID_ITEM(IDM_BPPTEST_16):
+				case MNUID_ITEM(IDM_RESBPPTEST_16):
 					LibGens::VdpRend::Bpp = LibGens::VdpRend::BPP_16;
 					m_vBackend->setVbDirty();
 					m_vBackend->vbUpdate();
 					break;
 				
-				case MNUID_ITEM(IDM_BPPTEST_32):
+				case MNUID_ITEM(IDM_RESBPPTEST_32):
 					LibGens::VdpRend::Bpp = LibGens::VdpRend::BPP_32;
 					m_vBackend->setVbDirty();
 					m_vBackend->vbUpdate();
