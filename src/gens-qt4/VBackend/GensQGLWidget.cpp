@@ -32,6 +32,7 @@
 #include "libgens/MD/VdpRend.hpp"
 #include "libgens/macros/log_msg.h"
 #include "libgens/Util/Timing.hpp"
+#include "libgens/MD/EmuMD.hpp"
 
 // Win32 requires GL/glext.h for OpenGL 1.2/1.3.
 // TODO: Check the GL implementation to see what functionality is available at runtime.
@@ -439,7 +440,7 @@ void GensQGLWidget::paintGL(void)
 
 
 /**
- * keyPressEvent(): Keyboard handler.
+ * keyPressEvent(): Key press handler.
  * TODO: Move somewhere else?
  * @param event Key event.
  */
@@ -460,8 +461,26 @@ void GensQGLWidget::keyPressEvent(QKeyEvent *event)
 			break;
 		
 		default:
+			// Forward the key to the I/O devices.
+			// NOTE: Port E isn't forwarded, since it isn't really usable as a controller.
+			LibGens::EmuMD::m_port1->keyPress(event->key());
+			LibGens::EmuMD::m_port2->keyPress(event->key());
 			break;
 	}
+}
+
+
+/**
+ * keyReleaseEvent(): Key release handler.
+ * TODO: Move somewhere else?
+ * @param event Key event.
+ */
+void GensQGLWidget::keyReleaseEvent(QKeyEvent *event)
+{
+	// Forward the key to the I/O devices.
+	// NOTE: Port E isn't forwarded, since it isn't really usable as a controller.
+	LibGens::EmuMD::m_port1->keyRelease(event->key());
+	LibGens::EmuMD::m_port2->keyRelease(event->key());
 }
 
 }

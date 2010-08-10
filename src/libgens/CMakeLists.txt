@@ -44,6 +44,7 @@ SET(libgens_SRCS
 	Effects/PausedEffect.cpp
 	Effects/FastBlur.cpp
 	Util/Timing.cpp
+	IO/Io3Button.cpp
 	)
 
 # Compatibility sources.

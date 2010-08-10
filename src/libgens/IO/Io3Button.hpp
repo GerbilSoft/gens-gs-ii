@@ -1,6 +1,6 @@
 /***************************************************************************
- * gens-qt4: Gens Qt4 UI.                                                  *
- * GensQGLWidget.hpp: QGLWidget subclass.                                  *
+ * libgens: Gens Emulation Library.                                        *
+ * Io3Button.hpp: 3-button gamepad device.                                 *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,67 +21,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include <config.h>
+#ifndef __LIBGENS_IO_IO3BUTTON_HPP__
+#define __LIBGENS_IO_IO3BUTTON_HPP__
 
-#ifndef __GENS_QT4_GENSQGLWIDGET_HPP__
-#define __GENS_QT4_GENSQGLWIDGET_HPP__
+#include "IoBase.hpp"
 
-#ifdef HAVE_GLEW
-// GL Extension Wrangler.
-#include <GL/glew.h>
-#endif
-
-#include "VBackend.hpp"
-#include <QtOpenGL/QGLWidget>
-#include <QtGui/QKeyEvent>
-
-#include "libgens/MD/VdpRend.hpp"
-
-namespace GensQt4
+namespace LibGens
 {
 
-class GensQGLWidget : public QGLWidget, public VBackend
+class Io3Button : public IoBase
 {
-	Q_OBJECT
-	
 	public:
-		GensQGLWidget(QWidget *parent = 0);
-		~GensQGLWidget();
+		Io3Button() { m_buttons = ~0; }
+		virtual ~Io3Button() { }
 		
-		// TODO: Expand this function?
-		void vbUpdate(void) { updateGL(); }
+		uint8_t readData(void);
 		
-		// Return a QWidget* version of this object.
-		QWidget *toQWidget(void) { return this; }
+		// Keypress handling functions.
+		void keyPress(int key);
+		void keyRelease(int key);
 	
 	protected:
-		void initializeGL(void);
-		void reallocTexture(void);
-		
-		void resizeGL(int width, int height);
-		void paintGL(void);
-		
-		// OpenGL Texture ID.
-		GLuint m_tex;
-		
-		// Texture format.
-		int m_colorComponents;
-		GLenum m_texFormat;
-		GLenum m_texType;
-		
-		// Effects.
-#ifdef HAVE_GLEW
-		// Paused effect: ARB fragment program.
-		GLuint m_fragPaused;
-		static const char *ms_fragPaused_asm;
-#endif
-		
-		// Keyboard handler functions.
-		// TODO: Move somewhere else?
-		void keyPressEvent(QKeyEvent *event);
-		void keyReleaseEvent(QKeyEvent *event);
+		/**
+		 * m_buttons: Controller bitfield.
+		 * Format: BCASRLDU
+		 * NOTE: ACTIVE LOW! (1 == released; 0 == pressed)
+		 */
+		uint8_t m_buttons;
 };
 
 }
 
-#endif /* __GENS_QT4_GENSQGLWIDGET_HPP__ */
+#endif /* __LIBGENS_IO_IO3BUTTON_HPP__ */
