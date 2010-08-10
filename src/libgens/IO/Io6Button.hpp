@@ -72,10 +72,10 @@ class Io6Button : public IoBase
 			BTN_C		= 0x20,
 			BTN_A		= 0x40,
 			BTN_START	= 0x80,
-			BTN_MODE	= 0x100,
-			BTN_X		= 0x200,
-			BTN_Y		= 0x400,
-			BTN_Z		= 0x800
+			BTN_X		= 0x100,
+			BTN_Y		= 0x200,
+			BTN_Z		= 0x400,
+			BTN_MODE	= 0x800
 		};
 };
 
