@@ -69,17 +69,6 @@ class IoBase
 		
 		// Set/get button mapping.
 		
-		enum IoPinDefs
-		{
-			IOPIN_UP	= 0x01,	// D0
-			IOPIN_DOWN	= 0x02,	// D1
-			IOPIN_LEFT	= 0x04,	// D2
-			IOPIN_RIGHT	= 0x08,	// D3
-			IOPIN_TL	= 0x10,	// D4
-			IOPIN_TR	= 0x20,	// D5
-			IOPIN_TH	= 0x40	// D6
-		};
-		
 		// MD-side controller functions.
 		virtual void writeCtrl(uint8_t ctrl)
 		{
@@ -132,6 +121,18 @@ class IoBase
 		 */
 		unsigned int m_buttons;
 		
+		// I/O pin definitions.
+		enum IoPinDefs
+		{
+			IOPIN_UP	= 0x01,	// D0
+			IOPIN_DOWN	= 0x02,	// D1
+			IOPIN_LEFT	= 0x04,	// D2
+			IOPIN_RIGHT	= 0x08,	// D3
+			IOPIN_TL	= 0x10,	// D4
+			IOPIN_TR	= 0x20,	// D5
+			IOPIN_TH	= 0x40	// D6
+		};
+		
 		// Button bitfield values.
 		enum CtrlButtons
 		{
@@ -146,7 +147,11 @@ class IoBase
 			BTN_Z		= 0x100,
 			BTN_Y		= 0x200,
 			BTN_X		= 0x400,
-			BTN_MODE	= 0x800
+			BTN_MODE	= 0x800,
+			
+			// SMS/GG buttons.
+			BTN_1		= 0x10,
+			BTN_2		= 0x20
 		};
 		
 #if 0
