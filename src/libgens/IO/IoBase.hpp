@@ -45,6 +45,12 @@ class IoBase
 			m_ctrl = 0x00;		// input
 			m_lastData = 0xFF;	// all ones
 		}
+		IoBase(const IoBase *other)
+		{
+			// Copy tristate control and data buffer from another controller.
+			m_ctrl = other->m_ctrl;
+			m_lastData = other->m_lastData;
+		}
 		virtual ~IoBase() { }
 		
 #if 0

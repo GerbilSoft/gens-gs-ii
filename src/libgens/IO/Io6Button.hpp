@@ -37,6 +37,12 @@ class Io6Button : public IoBase
 			m_buttons = ~0;
 			m_counter = 0;
 		}
+		Io6Button(const IoBase *other)
+			: IoBase(other)
+		{
+			m_buttons = ~0;
+			m_counter = 0;
+		}
 		virtual ~Io6Button() { }
 		
 		void writeData(uint8_t data);
