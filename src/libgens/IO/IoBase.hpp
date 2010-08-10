@@ -118,7 +118,7 @@ class IoBase
 		 */
 		inline uint8_t applyTristate(uint8_t data) const
 		{
-			data &= (m_ctrl & 0x7F);		// Mask output bits.
+			data &= (~m_ctrl & 0x7F);		// Mask output bits.
 			data |= (m_lastData & (m_ctrl | 0x80));	// Apply data buffer.
 			return data;
 		}
