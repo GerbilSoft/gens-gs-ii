@@ -31,7 +31,6 @@
 
 #include "VBackend/VBackend.hpp"
 #include "GensMenuBar.hpp"
-#include "EmuThread.hpp"
 
 namespace GensQt4
 {
@@ -65,9 +64,6 @@ class GensWindow : public QMainWindow
 		
 		int m_scale;		// Temporary scaling variable.
 		bool m_hasInitResize;	// Has the initial resize occurred?
-		
-		// Emulation thread.
-		EmuThread *m_emuThread;
 	
 	protected slots:
 		// Menu item selection.

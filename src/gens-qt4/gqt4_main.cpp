@@ -115,6 +115,9 @@ void gqt4_log_msg_critical(const char *channel, const char *msg)
 namespace GensQt4
 {
 
+// Emulation thread.
+EmuThread *gqt4_emuThread = NULL;
+
 /**
  * QuitGens(): Quit Gens.
  */
@@ -123,6 +126,15 @@ void QuitGens(void)
 	// TODO: Save configuration.
 	
 	// TODO: Stop LibGens' emulation core.
+	
+	// Stop the emulation thread.
+	if (gqt4_emuThread)
+	{
+		gqt4_emuThread->stop();
+		gqt4_emuThread->wait();
+		delete gqt4_emuThread;
+		gqt4_emuThread = NULL;
+	}
 	
 	// Shut down LibGens.
 	LibGens::End();

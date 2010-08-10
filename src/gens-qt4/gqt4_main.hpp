@@ -52,8 +52,13 @@ void gqt4_log_msg_critical(const char *channel, const char *msg);
 }
 #endif
 
+#include "EmuThread.hpp"
+
 namespace GensQt4
 {
+	// Emulation thread.
+	extern EmuThread *gqt4_emuThread;
+	
 	void QuitGens(void);
 }
 

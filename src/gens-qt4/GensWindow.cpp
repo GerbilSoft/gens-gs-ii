@@ -71,7 +71,6 @@ GensWindow::GensWindow()
 {
 	m_scale = 1;		// Set the scale to 1x by default.
 	m_hasInitResize = false;
-	m_emuThread = NULL;
 	
 	// Set up the User Interface.
 	setupUi();
@@ -83,13 +82,6 @@ GensWindow::GensWindow()
  */
 GensWindow::~GensWindow()
 {
-	if (m_emuThread)
-	{
-		m_emuThread->stop();
-		m_emuThread->wait();
-		delete m_emuThread;
-		m_emuThread = NULL;
-	}
 }
 
 
@@ -289,27 +281,27 @@ void GensWindow::menuTriggered(int id)
 				case MNUID_ITEM(IDM_FILE_EMUTHREAD):
 				{
 					bool checked = m_menubar->menuItemCheckState(IDM_FILE_EMUTHREAD);
-					if (m_emuThread == NULL && !checked)
+					if (gqt4_emuThread == NULL && !checked)
 						break;
-					else if (m_emuThread != NULL && checked)
+					else if (gqt4_emuThread != NULL && checked)
 						break;
 					
 					// Toggle the emulation thread state.
-					if (m_emuThread != NULL)
+					if (gqt4_emuThread != NULL)
 					{
 						// Emulation thread is already running. Stop it.
-						m_emuThread->stop();
-						m_emuThread->wait();
-						delete m_emuThread;
-						m_emuThread = NULL;
+						gqt4_emuThread->stop();
+						gqt4_emuThread->wait();
+						delete gqt4_emuThread;
+						gqt4_emuThread = NULL;
 						break;
 					}
 					
 					// Emulation thread isn't running. Start it.
-					m_emuThread = new EmuThread();
-					QObject::connect(m_emuThread, SIGNAL(frameDone(void)),
+					gqt4_emuThread = new EmuThread();
+					QObject::connect(gqt4_emuThread, SIGNAL(frameDone(void)),
 							 this, SLOT(emuFrameDone(void)));
-					m_emuThread->start();
+					gqt4_emuThread->start();
 					break;
 				}
 				
@@ -425,8 +417,8 @@ void GensWindow::emuFrameDone(void)
 	m_vBackend->vbUpdate();
 	
 	// Tell the emulation thread that we're ready for another frame.
-	if (m_emuThread)
-		m_emuThread->resume();
+	if (gqt4_emuThread)
+		gqt4_emuThread->resume();
 }
 
 }
