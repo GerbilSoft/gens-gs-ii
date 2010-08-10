@@ -441,21 +441,21 @@ void GensWindow::emuFrameDone(void)
 		{
 			case 0:
 				// No controller.
-				controller = new LibGens::IoBase();
+				controller = new LibGens::IoBase(LibGens::EmuMD::m_port1);
 				// TODO: Copy settings from existing Port 1 controller.
 				m_vBackend->osd_printf(1500, "Port 1 set to NONE.");
 				break;
 			
 			case 1:
 				// 3-button controller.
-				controller = new LibGens::Io3Button();
+				controller = new LibGens::Io3Button(LibGens::EmuMD::m_port1);
 				// TODO: Copy settings from existing Port 1 controller.
 				m_vBackend->osd_printf(1500, "Port 1 set to 3-BUTTON.");
 				break;
 			
 			case 2:
 				// 6-button controller.
-				controller = new LibGens::Io6Button();
+				controller = new LibGens::Io6Button(LibGens::EmuMD::m_port1);
 				// TODO: Copy settings from existing Port 1 controller.
 				m_vBackend->osd_printf(1500, "Port 1 set to 6-BUTTON.");
 				break;
