@@ -64,6 +64,10 @@ class GensWindow : public QMainWindow
 		
 		int m_scale;		// Temporary scaling variable.
 		bool m_hasInitResize;	// Has the initial resize occurred?
+		
+		// Controller change.
+		// NOTE: DEBUG CODE: Remove this later.
+		int m_ctrlChange;
 	
 	protected slots:
 		// Menu item selection.

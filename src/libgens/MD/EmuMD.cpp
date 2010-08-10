@@ -58,7 +58,7 @@ IoBase *EmuMD::m_portE = NULL;	// EXT port.
 void EmuMD::Init(void)
 {
 	// Create base I/O devices that do nothing.
-	m_port1 = new Io3Button();
+	m_port1 = new IoBase();
 	m_port2 = new IoBase();
 	m_portE = new IoBase();
 }

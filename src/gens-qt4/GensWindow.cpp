@@ -36,6 +36,11 @@
 #include "libgens/macros/log_msg.h"
 #include "libgens/Util/Timing.hpp"
 
+// Controller devices.
+#include "libgens/IO/IoBase.hpp"
+#include "libgens/IO/Io3Button.hpp"
+//#include "libgens/IO/Io6Button.hpp"
+
 // Test loading ROMs.
 #include "libgens/Rom.hpp"
 
@@ -74,6 +79,10 @@ GensWindow::GensWindow()
 	
 	// Set up the User Interface.
 	setupUi();
+	
+	// Controller change.
+	// NOTE: DEBUG CODE: Remove this later.
+	m_ctrlChange = -1;
 }
 
 
@@ -376,6 +385,26 @@ void GensWindow::menuTriggered(int id)
 					break;
 			}
 		
+		case IDM_CTRLTEST_MENU:
+			// Controller Testing
+			switch (MNUID_ITEM(id))
+			{
+				case MNUID_ITEM(IDM_CTRLTEST_NONE):
+					m_ctrlChange = 0;
+					break;
+				
+				case MNUID_ITEM(IDM_CTRLTEST_3BT):
+					m_ctrlChange = 1;
+					break;
+				
+				case MNUID_ITEM(IDM_CTRLTEST_6BT):
+					m_ctrlChange = 2;
+					break;
+				
+				default:
+					break;
+			}
+		
 		default:
 			break;
 	}
@@ -401,6 +430,46 @@ void GensWindow::emuFrameDone(void)
 			lastTime = thisTime;
 			frames = 0;
 		}
+	}
+	
+	// Check if the controller was changed.
+	// NOTE: DEBUG CODE: Remove this later!
+	if (m_ctrlChange != -1)
+	{
+		LibGens::IoBase *controller = NULL;
+		switch (m_ctrlChange)
+		{
+			case 0:
+				// No controller.
+				controller = new LibGens::IoBase();
+				// TODO: Copy settings from existing Port 1 controller.
+				m_vBackend->osd_printf(1500, "Port 1 set to NONE.");
+				break;
+			
+			case 1:
+				// 3-button controller.
+				controller= new LibGens::Io3Button();
+				// TODO: Copy settings from existing Port 1 controller.
+				m_vBackend->osd_printf(1500, "Port 1 set to 3-BUTTON.");
+				break;
+			
+			case 2:
+				// 6-button controller.
+				// TODO
+				//m_vBackend->osd_printf(1500, "Port 1 set to 6-BUTTON.");
+				break;
+			
+			default:
+				break;
+		}
+		
+		if (controller)
+		{
+			delete LibGens::EmuMD::m_port1;
+			LibGens::EmuMD::m_port1 = controller;
+		}
+		
+		m_ctrlChange = -1;
 	}
 	
 	// Update the GensQGLWidget.
