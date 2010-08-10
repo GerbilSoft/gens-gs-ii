@@ -30,7 +30,6 @@ namespace LibGens
  * readData(): Read data from the controller.
  * @return Data from the controller.
  */
-#include <stdio.h>
 uint8_t Io3Button::readData(void)
 {
 	/**
@@ -44,7 +43,6 @@ uint8_t Io3Button::readData(void)
 	{
 		// TH=1.
 		ret |= (m_buttons & 0x3F) | 0x40;
-		printf("bitfield: 0x%02X; TH=1, 0x%02X\n", m_buttons, ret);
 		return ret;
 	}
 	else
@@ -52,7 +50,6 @@ uint8_t Io3Button::readData(void)
 		// TH=0.
 		ret |= (m_buttons & 0xC0) >> 2;
 		ret |= (m_buttons & 0x03);
-		printf("bitfield: 0x%02X; TH=0, 0x%02X\n", m_buttons, ret);
 		return ret;
 	}
 }
