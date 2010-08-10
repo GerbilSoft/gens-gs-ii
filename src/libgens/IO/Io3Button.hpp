@@ -44,7 +44,7 @@ class Io3Button : public IoBase
 	protected:
 		/**
 		 * m_buttons: Controller bitfield.
-		 * Format: BCASRLDU
+		 * Format: CBASRLDU
 		 * NOTE: ACTIVE LOW! (1 == released; 0 == pressed)
 		 */
 		uint8_t m_buttons;
