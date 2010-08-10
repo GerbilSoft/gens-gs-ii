@@ -56,10 +56,10 @@ class Io3Button : public IoBase
 			BTN_DOWN	= 0x02,
 			BTN_LEFT	= 0x04,
 			BTN_RIGHT	= 0x08,
-			BTN_START	= 0x10,
-			BTN_A		= 0x20,
-			BTN_B		= 0x40,
-			BTN_C		= 0x80
+			BTN_B		= 0x10,
+			BTN_C		= 0x20,
+			BTN_A		= 0x40,
+			BTN_START	= 0x80
 		};
 };
 
