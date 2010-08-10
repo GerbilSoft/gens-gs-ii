@@ -46,6 +46,7 @@ SET(libgens_SRCS
 	Util/Timing.cpp
 	IO/Io3Button.cpp
 	IO/Io6Button.cpp
+	IO/Io2Button.cpp
 	)
 
 # Compatibility sources.
