@@ -44,10 +44,23 @@ class Io3Button : public IoBase
 	protected:
 		/**
 		 * m_buttons: Controller bitfield.
-		 * Format: CBASRLDU
+		 * Format: SACBRLDU
 		 * NOTE: ACTIVE LOW! (1 == released; 0 == pressed)
 		 */
 		uint8_t m_buttons;
+		
+		// Button bitfield values.
+		enum CtrlButtons
+		{
+			BTN_UP		= 0x01,
+			BTN_DOWN	= 0x02,
+			BTN_LEFT	= 0x04,
+			BTN_RIGHT	= 0x08,
+			BTN_START	= 0x10,
+			BTN_A		= 0x20,
+			BTN_B		= 0x40,
+			BTN_C		= 0x80
+		};
 };
 
 }

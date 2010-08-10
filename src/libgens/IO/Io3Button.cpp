@@ -38,20 +38,18 @@ uint8_t Io3Button::readData(void)
 	 * TH=0: D0SA00DU
 	 */
 	
-	uint8_t ret;
+	uint8_t ret = (m_lastData & 0x80);
 	if (!(m_ctrl & IOPIN_TH) || (m_lastData & IOPIN_TH))
 	{
 		// TH=1.
-		ret = (m_buttons & 0x0F);
-		ret |= ((m_buttons & 0xC0) >> 2);
-		ret |= (m_lastData & 0x80) | 0x40;
+		ret |= (m_buttons & 0x3F) | 0x40;
 		return ret;
 	}
 	else
 	{
 		// TH=0.
-		ret = (m_buttons & 0x33);
-		ret |= (m_lastData & 0x80);
+		ret |= (m_buttons & 0xC0) >> 2;
+		ret |= (m_buttons & 0x03);
 		return ret;
 	}
 }

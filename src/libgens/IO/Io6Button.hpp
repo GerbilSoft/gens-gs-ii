@@ -49,7 +49,7 @@ class Io6Button : public IoBase
 	protected:
 		/**
 		 * m_buttons: Controller bitfield.
-		 * Format: ????MXYZ CBASRLDU
+		 * Format: ????MXYZ SACBRLDU
 		 * NOTE: ACTIVE LOW! (1 == released; 0 == pressed)
 		 */
 		uint16_t m_buttons;
@@ -60,6 +60,23 @@ class Io6Button : public IoBase
 		 * to return to the system.
 		 */
 		int m_counter;
+		
+		// Button bitfield values.
+		enum CtrlButtons
+		{
+			BTN_UP		= 0x01,
+			BTN_DOWN	= 0x02,
+			BTN_LEFT	= 0x04,
+			BTN_RIGHT	= 0x08,
+			BTN_START	= 0x10,
+			BTN_A		= 0x20,
+			BTN_B		= 0x40,
+			BTN_C		= 0x80,
+			BTN_MODE	= 0x100,
+			BTN_X		= 0x200,
+			BTN_Y		= 0x400,
+			BTN_Z		= 0x800
+		};
 };
 
 }

@@ -63,31 +63,32 @@ uint8_t Io6Button::readData(void)
 		case 4:
 			// Format: D1CBRLDU
 			// (Same as 3-button.)
-			ret |= (m_buttons & 0x0F) | 0x40;
-			ret |= ((m_buttons & 0xC0) >> 2);
+			ret |= (m_buttons & 0x3F) | 0x40;
 			return ret;
 		
 		case 1:
 		case 3:
 			// Format: D0SA00DU
 			// (Same as 6-button.)
-			ret |= (m_buttons & 0x33);
+			ret |= (m_buttons & 0xC0) >> 2;
+			ret |= (m_buttons & 0x03);
 			return ret;
 		
 		case 5:
 			// Format: D0SA0000
-			ret |= (m_buttons & 0x30);
+			ret |= (m_buttons & 0xC0) >> 2;
 			return ret;
 		
 		case 6:
 			// Format: D1CBMXYZ
-			ret |= ((m_buttons & 0xC0) >> 2) | 0x40;
+			ret |= (m_buttons & 0x30) | 0x40;
 			ret |= ((m_buttons & 0xF00) >> 8);
 			return ret;
 		
 		case 7:
 			// Format: D0SA1111
-			ret |= (m_buttons & 0x30);
+			ret |= (m_buttons & 0xC0) >> 2;
+			ret |= (m_buttons & 0x03);
 			ret |= 0x0F;
 			return ret;
 		
