@@ -395,6 +395,21 @@ void GensQGLWidget::paintGL(void)
 	int y = this->height();
 	double curTime = LibGens::Timing::GetTimeD();
 	
+	// Check if the FPS should be drawn.
+	// TODO: Integrate this with the for loop.
+	if (showFps())
+	{
+		QString sFps = QString::number(m_fpsAvg, 'f', 1);
+		boundRect = fm.boundingRect(8, 0, this->width() - 16, y, 0, sFps);
+		y -= boundRect.height();
+		
+		// TODO: Make the drop shadow optional or something.
+		qglColor(clShadow);
+		renderText(8+1, y+1, sFps, m_osdFont);
+		qglColor(clText);
+		renderText(8-1, y-1, sFps, m_osdFont);
+	}
+	
 	// NOTE: QList internally uses an array of pointers.
 	// We can use array indexing instead of iterators.
 	for (int i = (m_osdList.size() - 1); i >= 0; i--)

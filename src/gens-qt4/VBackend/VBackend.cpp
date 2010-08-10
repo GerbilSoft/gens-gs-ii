@@ -46,6 +46,10 @@ VBackend::VBackend()
 	m_paused = false;
 	m_fastBlur = false;
 	
+	// Initialize the FPS manager.
+	resetFps();
+	m_showFps = true;	// TODO: Load from configuration.
+	
 	// Create the OSD font.
 	m_osdFont = QFont("Monospace", 10);
 }
@@ -119,6 +123,46 @@ void VBackend::osd_vprintf(const int duration, const char *msg, va_list ap)
 	// Create the OSD message and add it to the list.
 	OsdMessage osdMsg(msg_buf, endTime);
 	m_osdList.append(osdMsg);
+}
+
+
+/**
+ * resetFps(): Reset the FPS manager.
+ */
+void VBackend::resetFps(void)
+{
+	for (int i = 0; i < (sizeof(m_fps)/sizeof(m_fps[0])); i++)
+		m_fps[i] = -1.0;
+	m_fpsAvg = 0.0;
+	m_fpsPtr = 0;
+}
+
+
+/**
+ * pushFps(): Push an FPS value.
+ * @param fps FPS value.
+ */
+void VBackend::pushFps(double fps)
+{
+	m_fpsPtr = (m_fpsPtr + 1) % (sizeof(m_fps)/sizeof(m_fps[0]));
+	m_fps[m_fpsPtr] = fps;
+	
+	// Calculate the new average.
+	int count = 0;
+	double sum = 0;
+	for (int i = 0; i < (sizeof(m_fps)/sizeof(m_fps[0])); i++)
+	{
+		if (m_fps[i] >= 0.0)
+		{
+			sum += m_fps[i];
+			count++;
+		}
+	}
+	
+	if (count <= 0)
+		m_fpsAvg = 0.0;
+	else
+		m_fpsAvg = (sum / (double)count);
 }
 
 }

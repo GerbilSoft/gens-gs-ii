@@ -86,6 +86,21 @@ class VBackend
 			osd_vprintf(duration, msg, ap);
 			va_end(ap);
 		}
+		
+		// FPS manager.
+		void resetFps(void);
+		void pushFps(double fps);
+		
+		bool showFps(void) const { return m_showFps; }
+		void setShowFps(bool newShowFps)
+		{
+			if (m_showFps == newShowFps)
+				return;
+			
+			// Update the Show FPS setting.
+			m_showFps = newShowFps;
+			setVbDirty();	// TODO: Texture doesn't really need to be reuploaded...
+		}
 	
 	protected:
 		// Dirty flag. If set, texture must be reuploaded.
@@ -118,6 +133,12 @@ class VBackend
 		
 		// Fonts.
 		QFont m_osdFont;
+		
+		// FPS manager.
+		double m_fps[8];
+		double m_fpsAvg;	// Average fps.
+		int m_fpsPtr;		// Pointer to next fps slot to use.
+		bool m_showFps;
 	
 	private:
 		// Effects.

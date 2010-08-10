@@ -410,10 +410,11 @@ void GensWindow::emuFrameDone(void)
 	else
 	{
 		double thisTime = LibGens::Timing::GetTimeD();
-		if ((thisTime - lastTime) >= 1.00)
+		if ((thisTime - lastTime) >= 0.250)
 		{
-			// Print fps.
-			m_vBackend->osd_printf(2500, "fps: %f", ((double)frames / (thisTime - lastTime)));
+			// Push the current fps.
+			// (Updated four times per second.)
+			m_vBackend->pushFps((double)frames / (thisTime - lastTime));
 			lastTime = thisTime;
 			frames = 0;
 		}
