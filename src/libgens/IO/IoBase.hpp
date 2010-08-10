@@ -44,12 +44,14 @@ class IoBase
 			// TODO: Initialize to 0xFF or 0x00?
 			m_ctrl = 0x00;		// input
 			m_lastData = 0xFF;	// all ones
+			m_buttons = ~0;		// no buttons pressed
 		}
 		IoBase(const IoBase *other)
 		{
 			// Copy tristate control and data buffer from another controller.
 			m_ctrl = other->m_ctrl;
 			m_lastData = other->m_lastData;
+			m_buttons = other->m_buttons;
 		}
 		virtual ~IoBase() { }
 		
@@ -100,6 +102,33 @@ class IoBase
 	protected:
 		uint8_t m_ctrl;		// Tristate control.
 		uint8_t m_lastData;	// Last data written to the device.
+		
+		/**
+		 * m_buttons: Controller bitfield.
+		 * Format:
+		 * - 2-button:          ??CBRLDU
+		 * - 3-button:          SACBRLDU
+		 * - 6-button: ????MXYZ SACBRLDU
+		 * NOTE: ACTIVE LOW! (1 == released; 0 == pressed)
+		 */
+		unsigned int m_buttons;
+		
+		// Button bitfield values.
+		enum CtrlButtons
+		{
+			BTN_UP		= 0x01,
+			BTN_DOWN	= 0x02,
+			BTN_LEFT	= 0x04,
+			BTN_RIGHT	= 0x08,
+			BTN_B		= 0x10,
+			BTN_C		= 0x20,
+			BTN_A		= 0x40,
+			BTN_START	= 0x80,
+			BTN_Z		= 0x100,
+			BTN_Y		= 0x200,
+			BTN_X		= 0x400,
+			BTN_MODE	= 0x800
+		};
 		
 #if 0
 		std::vector<uint16_t> m_btnMap;

@@ -32,15 +32,8 @@ namespace LibGens
 class Io3Button : public IoBase
 {
 	public:
-		Io3Button()
-		{
-			m_buttons = ~0;
-		}
-		Io3Button(const IoBase *other)
-			: IoBase(other)
-		{
-			m_buttons = ~0;
-		}
+		Io3Button() { }
+		Io3Button(const IoBase *other) : IoBase(other) { }
 		virtual ~Io3Button() { }
 		
 		uint8_t readData(void);
@@ -48,27 +41,6 @@ class Io3Button : public IoBase
 		// Keypress handling functions.
 		void keyPress(int key);
 		void keyRelease(int key);
-	
-	protected:
-		/**
-		 * m_buttons: Controller bitfield.
-		 * Format: SACBRLDU
-		 * NOTE: ACTIVE LOW! (1 == released; 0 == pressed)
-		 */
-		uint8_t m_buttons;
-		
-		// Button bitfield values.
-		enum CtrlButtons
-		{
-			BTN_UP		= 0x01,
-			BTN_DOWN	= 0x02,
-			BTN_LEFT	= 0x04,
-			BTN_RIGHT	= 0x08,
-			BTN_B		= 0x10,
-			BTN_C		= 0x20,
-			BTN_A		= 0x40,
-			BTN_START	= 0x80
-		};
 };
 
 }
