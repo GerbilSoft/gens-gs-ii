@@ -25,8 +25,11 @@
 #include "macros/git.h"
 #include "Util/cpuflags.h"
 #include "Util/Timing.hpp"
+
+// Emulation code.
 #include "cpu/M68K.hpp"
 #include "cpu/M68K_Mem.hpp"
+#include "MD/EmuMD.hpp"
 
 // C includes.
 #include <stdio.h>
@@ -97,6 +100,8 @@ int Init(void)
 	M68K::Init();
 	M68K_Mem::Init();
 	
+	EmuMD::Init();
+	
 	ms_IsInit = true;
 	return 0;
 }
@@ -120,6 +125,8 @@ int End(void)
 	Timing::End();
 	M68K::End();
 	M68K_Mem::End();
+	
+	EmuMD::End();
 	
 	ms_IsInit = false;
 	return 0;

@@ -42,6 +42,39 @@
 namespace LibGens
 {
 
+// Controllers.
+// TODO: Figure out a better place to put these!
+IoBase *EmuMD::m_port1 = NULL;	// Player 1.
+IoBase *EmuMD::m_port2 = NULL;	// Player 2.
+IoBase *EmuMD::m_portE = NULL;	// EXT port.
+
+
+/**
+ * EmuMD::Init(): Initialize EmuMD.
+ */
+void EmuMD::Init(void)
+{
+	// Create base I/O devices that do nothing.
+	m_port1 = new IoBase();
+	m_port2 = new IoBase();
+	m_portE = new IoBase();
+}
+
+
+/**
+ * EmuMD::End(): Shut down EmuMD.
+ */
+void EmuMD::End(void)
+{
+	delete m_port1;
+	m_port1 = NULL;
+	delete m_port2;
+	m_port2 = NULL;
+	delete m_portE;
+	m_portE = NULL;
+}
+
+
 /**
  * EmuMD::Init_TEST(): Test function for the MD VDP.
  */

@@ -27,6 +27,11 @@
 // C includes.
 #include <string.h>
 
+// MD emulator.
+// Required to access controller I/O ports.
+// TODO: SMS/GG?
+#include "MD/EmuMD.hpp"
+
 // TODO: Starscream accesses Ram_68k directly.
 // Move Ram_68k back to M68K once Starscream is updated.
 Ram_68k_t Ram_68k;
@@ -289,47 +294,37 @@ uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 			/**
 			 * 0xA10002/0xA10003: Control Port 1: Data.
 			 */
-			// TODO
-			//return RD_Controller_1();
-			return 0xFF;
+			return EmuMD::m_port1->readData();
 		
 		case 0x04:
 			/**
 			 * 0xA10004/0xA10005: Control Port 2: Data.
 			 */
-			// TODO
-			//return RD_Controller_2();
-			return 0xFF;
+			return EmuMD::m_port2->readData();
 		
 		case 0x06:
 			/**
 			 * 0xA10006/0xA10007: Control Port 3: Data. (EXT)
-			 * NOTE: NOT IMPLEMENTED!
 			 */
-			return 0xFF;
+			return EmuMD::m_portE->readData();
 		
 		case 0x08:
 			/**
 			 * 0xA10008/0xA10009: Control Port 1: CTRL.
 			 */
-			// TODO
-			//return Controller_1_COM;
-			return 0xFF;
+			return EmuMD::m_port1->readCtrl();
 		
 		case 0x0A:
 			/**
 			 * 0xA1000A/0xA1000B: Control Port 2: CTRL.
 			 */
-			// TODO
-			//return Controller_2_COM;
-			return 0xFF;
+			return EmuMD::m_port2->readCtrl();
 		
 		case 0x0C:
 			/**
 			 * 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
-			 * NOTE: NOT IMPLEMENTED!
 			 */
-			return 0x00;
+			return EmuMD::m_portE->readCtrl();
 		
 		default:
 			// Unknown register.
@@ -586,47 +581,37 @@ uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 			/**
 			 * 0xA10002/0xA10003: Control Port 1: Data.
 			 */
-			// TODO
-			//return RD_Controller_1();
-			return 0xFF;
+			return EmuMD::m_port1->readData();
 		
 		case 0x04:
 			/**
 			 * 0xA10004/0xA10005: Control Port 2: Data.
 			 */
-			// TODO
-			//return RD_Controller_2();
-			return 0xFF;
+			return EmuMD::m_port2->readData();
 		
 		case 0x06:
 			/**
 			 * 0xA10006/0xA10007: Control Port 3: Data. (EXT)
-			 * NOTE: NOT IMPLEMENTED!
 			 */
-			return 0xFF00;
+			return EmuMD::m_portE->readData();
 		
 		case 0x08:
 			/**
 			 * 0xA10008/0xA10009: Control Port 1: CTRL.
 			 */
-			// TODO
-			//return Controller_1_COM;
-			return 0xFF;
+			return EmuMD::m_port1->readCtrl();
 		
 		case 0x0A:
 			/**
 			 * 0xA1000A/0xA1000B: Control Port 2: CTRL.
 			 */
-			// TODO
-			//return Controller_2_COM;
-			return 0xFF;
+			return EmuMD::m_port2->readCtrl();
 		
 		case 0x0C:
 			/**
 			 * 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
-			 * NOTE: NOT IMPLEMENTED!
 			 */
-			return 0x0000;
+			return EmuMD::m_portE->readCtrl();
 		
 		default:
 			// Unknown register.
@@ -869,8 +854,6 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 	{
 		// Non-writable and not-implemented registers first.
 		case 0x00: /// 0xA10000/0xA10001: Genesis version register.
-		case 0x06: /// 0xA10006/0xA10007: Control Port 3: Data. (EXT)
-		case 0x0C: /// 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
 		default:
 			break;
 		
@@ -878,32 +861,42 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 			/**
 			 * 0xA10002/0xA10003: Control Port 1: Data.
 			 */
-			// TODO
-			//WR_Controller_1(data);
+			EmuMD::m_port1->writeData(data);
 			break;
 		
 		case 0x04:
 			/**
 			 * 0xA10004/0xA10005: Control Port 2: Data.
 			 */
-			// TODO
-			//WR_Controller_2(data);
+			EmuMD::m_port2->writeData(data);
+			break;
+		
+		case 0x06:
+			/**
+			 * 0xA10006/0xA10007: Control Port 3: Data. (EXT)
+			 */
+			EmuMD::m_portE->writeData(data);
 			break;
 		
 		case 0x08:
 			/**
 			 * 0xA10008/0xA10009: Control Port 1: CTRL.
 			 */
-			// TODO
-			//Controller_1_COM = data;
+			EmuMD::m_port1->writeCtrl(data);
 			break;
 		
 		case 0x0A:
 			/**
 			 * 0xA1000A/0xA1000B: Control Port 2: CTRL.
 			 */
-			// TODO
-			//Controller_2_COM = data;
+			EmuMD::m_port2->writeCtrl(data);
+			break;
+		
+		case 0x0C:
+			/**
+			 * 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
+			 */
+			EmuMD::m_portE->writeCtrl(data);
 			break;
 	}
 }
@@ -1164,8 +1157,6 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 	{
 		// Non-writable and not-implemented registers first.
 		case 0x00: /// 0xA10000/0xA10001: Genesis version register.
-		case 0x06: /// 0xA10006/0xA10007: Control Port 3: Data. (EXT)
-		case 0x0C: /// 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
 		default:
 			break;
 		
@@ -1173,24 +1164,28 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 			/**
 			 * 0xA10002/0xA10003: Control Port 1: Data.
 			 */
-			// TODO
-			//WR_Controller_1(data);
+			EmuMD::m_port1->writeData(data);
 			break;
 		
 		case 0x04:
 			/**
 			 * 0xA10004/0xA10005: Control Port 2: Data.
 			 */
-			// TODO
-			//WR_Controller_2(data);
+			EmuMD::m_port2->writeData(data);
+			break;
+		
+		case 0x06:
+			/**
+			 * 0xA10006/0xA10007: Control Port 3: Data. (EXT)
+			 */
+			EmuMD::m_portE->writeData(data);
 			break;
 		
 		case 0x08:
 			/**
 			 * 0xA10008/0xA10009: Control Port 1: CTRL.
 			 */
-			// TODO
-			//Controller_1_COM = data;
+			EmuMD::m_port1->writeCtrl(data);
 			break;
 		
 		case 0x0A:
@@ -1198,7 +1193,15 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 			 * 0xA1000A/0xA1000B: Control Port 2: CTRL.
 			 */
 			// TODO
-			//Controller_2_COM = data;
+			EmuMD::m_port2->writeCtrl(data);
+			break;
+		
+		case 0x0C:
+			/**
+			 * 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
+			 */
+			// TODO
+			EmuMD::m_portE->writeCtrl(data);
 			break;
 	}
 }

@@ -24,15 +24,28 @@
 #ifndef __LIBGENS_MD_EMUMD_HPP__
 #define __LIBGENS_MD_EMUMD_HPP__
 
+// Controllers.
+// TODO: Figure out a better place to put these!
+#include "../IO/IoBase.hpp"
+
 namespace LibGens
 {
 
 class EmuMD
 {
 	public:
+		static void Init(void);
+		static void End(void);
+		
 		static void Init_TEST(void);
 		
 		static void Do_Frame(void);
+		
+		// Controllers.
+		// TODO: Figure out a better place to put these!
+		static IoBase *m_port1;	// Player 1.
+		static IoBase *m_port2;	// Player 2.
+		static IoBase *m_portE;	// EXT port.
 	
 	protected:
 		/**
