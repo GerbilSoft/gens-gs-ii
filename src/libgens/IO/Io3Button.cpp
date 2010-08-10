@@ -61,7 +61,46 @@ uint8_t Io3Button::readData(void)
  */
 void Io3Button::keyPress(int key)
 {
-	// TODO
+	// TODO: Allow customizable keymaps.
+	// TODO: Use LibGens keycodes.
+	switch (key)
+	{
+		case 0x01000013:
+			// Qt::Key_Up
+			m_buttons &= ~BTN_UP;
+			break;
+		case 0x01000015:
+			// Qt::Key_Down
+			m_buttons &= ~BTN_DOWN;
+			break;
+		case 0x01000012:
+			// Qt::Key_Left
+			m_buttons &= ~BTN_LEFT;
+			break;
+		case 0x01000014:
+			// Qt::Key_Right
+			m_buttons &= ~BTN_RIGHT;
+			break;
+		case 0x01000004:
+			// Qt::Key_Return
+			m_buttons &= ~BTN_START;
+			break;
+		case 'A':
+			// Qt::Key_A
+			m_buttons &= ~BTN_A;
+			break;
+		case 'S':
+			// Qt::Key_S
+			m_buttons &= ~BTN_B;
+			break;
+		case 'D':
+			// Qt::Key_D
+			m_buttons &= ~BTN_C;
+			break;
+		
+		default:
+			break;
+	}
 }
 
 
@@ -71,7 +110,46 @@ void Io3Button::keyPress(int key)
  */
 void Io3Button::keyRelease(int key)
 {
-	// TODO
+	// TODO: Allow customizable keymaps.
+	// TODO: Use LibGens keycodes.
+	switch (key)
+	{
+		case 0x01000013:
+			// Qt::Key_Up
+			m_buttons |= BTN_UP;
+			break;
+		case 0x01000015:
+			// Qt::Key_Down
+			m_buttons |= BTN_DOWN;
+			break;
+		case 0x01000012:
+			// Qt::Key_Left
+			m_buttons |= BTN_LEFT;
+			break;
+		case 0x01000014:
+			// Qt::Key_Right
+			m_buttons |= BTN_RIGHT;
+			break;
+		case 0x01000004:
+			// Qt::Key_Return
+			m_buttons |= BTN_START;
+			break;
+		case 'A':
+			// Qt::Key_A
+			m_buttons |= BTN_A;
+			break;
+		case 'S':
+			// Qt::Key_S
+			m_buttons |= BTN_B;
+			break;
+		case 'D':
+			// Qt::Key_D
+			m_buttons |= BTN_C;
+			break;
+		
+		default:
+			break;
+	}
 }
 
 }
