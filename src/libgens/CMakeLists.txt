@@ -45,6 +45,7 @@ SET(libgens_SRCS
 	Effects/FastBlur.cpp
 	Util/Timing.cpp
 	IO/Io3Button.cpp
+	IO/Io6Button.cpp
 	)
 
 # Compatibility sources.

@@ -39,7 +39,7 @@
 // Controller devices.
 #include "libgens/IO/IoBase.hpp"
 #include "libgens/IO/Io3Button.hpp"
-//#include "libgens/IO/Io6Button.hpp"
+#include "libgens/IO/Io6Button.hpp"
 
 // Test loading ROMs.
 #include "libgens/Rom.hpp"
@@ -448,15 +448,16 @@ void GensWindow::emuFrameDone(void)
 			
 			case 1:
 				// 3-button controller.
-				controller= new LibGens::Io3Button();
+				controller = new LibGens::Io3Button();
 				// TODO: Copy settings from existing Port 1 controller.
 				m_vBackend->osd_printf(1500, "Port 1 set to 3-BUTTON.");
 				break;
 			
 			case 2:
 				// 6-button controller.
-				// TODO
-				//m_vBackend->osd_printf(1500, "Port 1 set to 6-BUTTON.");
+				controller = new LibGens::Io6Button();
+				// TODO: Copy settings from existing Port 1 controller.
+				m_vBackend->osd_printf(1500, "Port 1 set to 6-BUTTON.");
 				break;
 			
 			default:
