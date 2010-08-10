@@ -112,6 +112,18 @@ class IoBase
 		inline bool isSelect(void) { return m_select; }
 		
 		/**
+		 * applyTristate(): Apply the Tristate settings to the data value.
+		 * @param data Data value.
+		 * @return Data value with tristate settings applied.
+		 */
+		inline uint8_t applyTristate(uint8_t data) const
+		{
+			data &= ~(m_ctrl & 0x7F);		// Mask output bits.
+			data |= ((m_lastData & 0x7F) & m_ctrl);	// Apply data buffer.
+			return data;
+		}
+		
+		/**
 		 * m_buttons: Controller bitfield.
 		 * Format:
 		 * - 2-button:          ??CBRLDU

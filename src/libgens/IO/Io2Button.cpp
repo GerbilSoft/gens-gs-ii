@@ -37,17 +37,10 @@ uint8_t Io2Button::readData(void)
 	 * - xxCBRLDU
 	 * B == button 1
 	 * C == button 2
-	 * x is replaced by m_lastData for output bits.
-	 * x is replaced with 1 for input bits.
 	 */
 	
 	uint8_t ret = (0xC0 | (m_buttons & 0x3F));
-	
-	// Apply tristate settings.
-	// Tristate is 0 for input, 1 for output.
-	ret &= ~(m_ctrl & 0x7F);		// Mask output bits.
-	ret |= ((m_lastData & 0x7F) & m_ctrl);	// Apply output bits.
-	return ret;
+	return applyTristate(ret);
 }
 
 
