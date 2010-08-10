@@ -59,6 +59,17 @@ class IoBase
 		
 		// Set/get button mapping.
 		
+		enum IoPinDefs
+		{
+			IOPIN_UP	= 0x01,	// D0
+			IOPIN_DOWN	= 0x02,	// D1
+			IOPIN_LEFT	= 0x04,	// D2
+			IOPIN_RIGHT	= 0x08,	// D3
+			IOPIN_TL	= 0x10,	// D4
+			IOPIN_TR	= 0x20,	// D5
+			IOPIN_TH	= 0x40	// D6
+		};
+		
 		// MD-side controller functions.
 		virtual void writeCtrl(uint8_t ctrl) { m_ctrl = ctrl; }
 		virtual uint8_t readCtrl(void) { return m_ctrl; }
