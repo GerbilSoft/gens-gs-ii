@@ -27,22 +27,42 @@ namespace LibGens
 {
 
 /**
- * writeData(): Write data to the controller.
- * @param data Data to the controller.
+ * writeCtrl(): Set the I/O tristate value.
+ * @param ctrl I/O tristate value.
  */
-void Io6Button::writeData(uint8_t data)
+void Io6Button::writeCtrl(uint8_t ctrl)
 {
-	// TODO: Check tristate values to determine how to interpret data!
-	
-	if ((data ^ m_lastData) & IOPIN_TH)
+	// Check if the SELECT line has changed.
+	bool oldSelect = isSelect();
+	m_ctrl = ctrl;
+	updateSelectLine();
+	if (oldSelect ^ isSelect())
 	{
 		// IOPIN_TH has changed.
 		m_counter++;
 		m_counter &= 0x07;
 	}
 	
-	// Save the last data value.
+	// TODO: Reset the counter after ~8.192 ms of no TH changes.
+}
+
+
+/**
+ * writeData(): Write data to the controller.
+ * @param data Data to the controller.
+ */
+void Io6Button::writeData(uint8_t data)
+{
+	// Check if the SELECT line has changed.
+	bool oldSelect = isSelect();
 	m_lastData = data;
+	updateSelectLine();
+	if (oldSelect ^ isSelect())
+	{
+		// IOPIN_TH has changed.
+		m_counter++;
+		m_counter &= 0x07;
+	}
 	
 	// TODO: Reset the counter after ~8.192 ms of no TH changes.
 }
@@ -54,6 +74,8 @@ void Io6Button::writeData(uint8_t data)
  */
 uint8_t Io6Button::readData(void)
 {
+	// TODO: Mask input data with tristate buffer.
+	
 	// Use the TH counter to determine the controller state.
 	uint8_t ret = (m_lastData & 0x80);
 	switch (m_counter)
