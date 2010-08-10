@@ -40,6 +40,7 @@
 #include "libgens/IO/IoBase.hpp"
 #include "libgens/IO/Io3Button.hpp"
 #include "libgens/IO/Io6Button.hpp"
+#include "libgens/IO/Io2Button.hpp"
 
 // Test loading ROMs.
 #include "libgens/Rom.hpp"
@@ -402,6 +403,10 @@ void GensWindow::menuTriggered(int id)
 					m_ctrlChange = 2;
 					break;
 				
+				case MNUID_ITEM(IDM_CTRLTEST_2BT):
+					m_ctrlChange = 3;
+					break;
+				
 				default:
 					break;
 			}
@@ -459,6 +464,13 @@ void GensWindow::emuFrameDone(void)
 				controller = new LibGens::Io6Button(LibGens::EmuMD::m_port1);
 				// TODO: Copy settings from existing Port 1 controller.
 				m_vBackend->osd_printf(1500, "Port 1 set to 6-BUTTON.");
+				break;
+			
+			case 3:
+				// 2-button controller.
+				controller = new LibGens::Io2Button(LibGens::EmuMD::m_port1);
+				// TODO: Copy settings from existing Port 1 controller.
+				m_vBackend->osd_printf(1500, "Port 1 set to 2-BUTTON.");
 				break;
 			
 			default:
