@@ -1,5 +1,10 @@
 Description of git tags for Gens/GS II:
 
+libgens-controllers-v1: Support for 2-button (SMS/GG) controllers
+on Port 1. Added a function to properly apply the effects of the
+tristate buffer to the result of the readData() functions for each
+controller class.
+
 libgens-controllers-v0: Support for NULL, 3-button, and 6-button
 controllers on Port 1. A framework for devices on Port 2 and Port E
 (EXT) is implemented.
