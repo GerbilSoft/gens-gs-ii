@@ -37,22 +37,21 @@ uint8_t Io3Button::readData(void)
 	 * TH=1: D1CBRLDU
 	 * TH=0: D0SA00DU
 	 */
-	// TODO: Mask input data with tristate buffer.
 	
-	uint8_t ret = (m_lastData & 0x80);
+	uint8_t ret;
 	if (isSelect())
 	{
 		// TH=1.
-		ret |= (m_buttons & 0x3F) | 0x40;
-		return ret;
+		ret = (m_buttons & 0x3F) | 0x40;
 	}
 	else
 	{
 		// TH=0.
-		ret |= (m_buttons & 0xC0) >> 2;
+		ret = (m_buttons & 0xC0) >> 2;
 		ret |= (m_buttons & 0x03);
-		return ret;
 	}
+	
+	return applyTristate(ret);
 }
 
 

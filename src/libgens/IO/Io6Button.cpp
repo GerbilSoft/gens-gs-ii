@@ -74,10 +74,9 @@ void Io6Button::writeData(uint8_t data)
  */
 uint8_t Io6Button::readData(void)
 {
-	// TODO: Mask input data with tristate buffer.
+	uint8_t ret;
 	
 	// Use the TH counter to determine the controller state.
-	uint8_t ret = (m_lastData & 0x80);
 	switch (m_counter)
 	{
 		case 0:
@@ -85,38 +84,41 @@ uint8_t Io6Button::readData(void)
 		case 4:
 			// Format: D1CBRLDU
 			// (Same as 3-button.)
-			ret |= (m_buttons & 0x3F) | 0x40;
-			return ret;
+			ret = (m_buttons & 0x3F) | 0x40;
+			break;
 		
 		case 1:
 		case 3:
 			// Format: D0SA00DU
 			// (Same as 6-button.)
-			ret |= (m_buttons & 0xC0) >> 2;
+			ret = (m_buttons & 0xC0) >> 2;
 			ret |= (m_buttons & 0x03);
-			return ret;
+			break;
 		
 		case 5:
 			// Format: D0SA0000
-			ret |= (m_buttons & 0xC0) >> 2;
-			return ret;
+			ret = (m_buttons & 0xC0) >> 2;
+			break;
 		
 		case 6:
 			// Format: D1CBMXYZ
-			ret |= (m_buttons & 0x30) | 0x40;
+			ret = (m_buttons & 0x30) | 0x40;
 			ret |= ((m_buttons & 0xF00) >> 8);
-			return ret;
+			break;
 		
 		case 7:
 			// Format: D0SA1111
-			ret |= (m_buttons & 0xC0) >> 2;
+			ret = (m_buttons & 0xC0) >> 2;
 			ret |= (m_buttons & 0x03);
 			ret |= 0x0F;
-			return ret;
+			break;
 		
 		default:
-			return 0xFF;
+			ret = 0xFF;
+			break;
 	}
+	
+	return applyTristate(ret);
 }
 
 
