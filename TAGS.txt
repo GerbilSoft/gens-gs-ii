@@ -1,5 +1,7 @@
 Description of git tags for Gens/GS II:
 
+libgens-initial-M68K: Initial working M68K CPU core. It can run games!
+
 libgens-big-endian-v0: Fixed all big-endian problems in libgens related
 to code that's currently in use. This includes VDP and Effects. The CPU
 emulatoin cores were not enabled during testing, since they're currently
