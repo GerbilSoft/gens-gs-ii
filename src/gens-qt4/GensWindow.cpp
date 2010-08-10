@@ -384,6 +384,7 @@ void GensWindow::menuTriggered(int id)
 				default:
 					break;
 			}
+			break;
 		
 		case IDM_CTRLTEST_MENU:
 			// Controller Testing
