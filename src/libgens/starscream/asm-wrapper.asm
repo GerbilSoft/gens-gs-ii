@@ -18,6 +18,13 @@
 	%define	.rodata	.rdata
 %elifidn __OUTPUT_FORMAT__, macho
 	%define	__OBJ_MACHO
+	
+	; Mac OS X requires 16-byte aligned stacks.
+	; Otherwise, the program will randomly crash in
+	; __dyld_misaligned_stack_error().
+	; (The crash might not even be immediately after
+	; calling the C function!)
+	%define __FORCE_STACK_ALIGNMENT
 %endif
 
 %ifdef __OBJ_ELF
@@ -52,17 +59,31 @@ SYM(M68K_RB):
 	mov	ebp, esp
 	sub	esp, 4
 	
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	and	esp, ~0x0F
+%endif
+	
 	push	ebx
 	push	ecx
 	push	edx
 	push	esi
 	push	edi
 	
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	sub	esp, 8
+%endif
+	
 	; Call the function.
 	mov	eax, [ebp + arg_1]
 	push	eax
 	call	SYM(Gens_M68K_RB)
+%ifdef __FORCE_STACK_ALIGNMENT
+	add	esp, 12
+%else
 	add	esp, 4
+%endif
 	
 	pop	edi
 	pop	esi
@@ -82,6 +103,11 @@ SYM(M68K_RW):
 	push	ebp
 	mov	ebp, esp
 	sub	esp, 4
+	
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	and	esp, ~0x0F
+%endif
 	
 	push	ebx
 	push	ecx
@@ -113,7 +139,15 @@ SYM(M68K_WB):
 	push	ebp
 	mov	ebp, esp
 	sub	esp, 4
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	and	esp, ~0x0F
+%endif
 	pushad
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	sub	esp, 8
+%endif
 	
 	; Call the function.
 	mov	eax, [ebp + arg_1]
@@ -121,7 +155,11 @@ SYM(M68K_WB):
 	push	edx
 	push	eax
 	call	SYM(Gens_M68K_WB)
+%ifdef __FORCE_STACK_ALIGNMENT
+	add	esp, 16
+%else
 	add	esp, 8
+%endif
 	
 	; Reset the frame pointer.
 	popad
@@ -136,7 +174,15 @@ SYM(M68K_WW):
 	push	ebp
 	mov	ebp, esp
 	sub	esp, 4
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	and	esp, ~0x0F
+%endif
 	pushad
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	sub	esp, 8
+%endif
 	
 	; Call the function.
 	mov	eax, [ebp + arg_1]
@@ -144,7 +190,11 @@ SYM(M68K_WW):
 	push	edx
 	push	eax
 	call	SYM(Gens_M68K_WW)
+%ifdef __FORCE_STACK_ALIGNMENT
+	add	esp, 16
+%else
 	add	esp, 8
+%endif
 	
 	; Reset the frame pointer.
 	popad
