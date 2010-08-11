@@ -664,11 +664,13 @@ int GensQGLWidget::QKeyEventToKeyVal(QKeyEvent *event)
 		{
 			// Extended key.
 			int gensKey = QtKey_Extended[key & 0x7F];
-			if (gensKey == -1)
-			{
-				// Left/Right modifier key not handled by Qt.
-				return NativeModifierToKeyVal(event->nativeVirtualKey());
-			}
+			if (gensKey >= 0)
+				return gensKey;
+			
+			// Extended key is not handled by Qt.
+			// This happens with e.g. left/right shift.
+			// (Qt reports both keys as the same.)
+			return NativeModifierToKeyVal(event->nativeVirtualKey());
 		}
 			
 		default:
