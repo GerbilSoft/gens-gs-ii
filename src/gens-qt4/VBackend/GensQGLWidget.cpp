@@ -82,12 +82,13 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 	// Accept keyboard focus.
 	setFocusPolicy(Qt::StrongFocus);
 	
-	// Initialize the mouse position.
-	m_lastMousePosValid = false;
-	
-	// Enable mouse tracking.
+	// Initialize mouse tracking.
 	// TODO: Only do this if a Mega Mouse is connected.
+	// TODO: IoMegaMouse doesn't work right.
+#if 0
+	m_lastMousePosValid = false;
 	setMouseTracking(true);
+#endif
 }
 
 GensQGLWidget::~GensQGLWidget()
@@ -502,6 +503,7 @@ void GensQGLWidget::keyReleaseEvent(QKeyEvent *event)
 }
 
 
+#if 0
 /**
  * mouseMoveEvent(): Mouse movement handler.
  * TODO: Move somewhere else?
@@ -532,6 +534,7 @@ void GensQGLWidget::mouseMoveEvent(QMouseEvent *event)
 	LibGens::EmuMD::m_port1->mouseMove(posDiff.x(), posDiff.y());
 	LibGens::EmuMD::m_port2->mouseMove(posDiff.x(), posDiff.y());
 }
+#endif
 
 
 /**

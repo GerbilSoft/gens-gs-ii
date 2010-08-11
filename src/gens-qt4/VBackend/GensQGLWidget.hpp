@@ -82,7 +82,10 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		
 		// Mouse handler functions.
 		// TODO: Move somewhere else?
+#if 0
+		// TODO: Mouse movement is broken.
 		void mouseMoveEvent(QMouseEvent *event);
+#endif
 		void mousePressEvent(QMouseEvent *event);
 		void mouseReleaseEvent(QMouseEvent *event);
 		
