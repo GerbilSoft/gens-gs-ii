@@ -33,7 +33,7 @@
 #include "Util/byteswap.h"
 
 // I/O devices.
-#include "IO/Io3Button.hpp"
+#include "IO/IoBase.hpp"
 
 // ZOMG
 #include "Save/Zomg.hpp"
