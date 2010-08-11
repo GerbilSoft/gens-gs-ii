@@ -336,9 +336,15 @@ void IoMegaMouse::latchMouseMovement(void)
  */
 int IoMegaMouse::nextLogicalButton(int button) const
 {
-	if (button >= BTNI_MOUSE_LEFT && button < BTNI_MOUSE_START)
-		return (button + 1);
-	return -1;
+	switch (button)
+	{
+		case BTNI_MOUSE_LEFT:	return BTNI_MOUSE_MIDDLE;
+		case BTNI_MOUSE_MIDDLE:	return BTNI_MOUSE_RIGHT;
+		case BTNI_MOUSE_RIGHT:	return BTNI_MOUSE_START;
+		case BTNI_MOUSE_START:
+		default:
+			return -1;
+	}
 }
 
 /**
