@@ -493,6 +493,18 @@ void GensWindow::emuFrameDone(void)
 		{
 			delete LibGens::EmuMD::m_port1;
 			LibGens::EmuMD::m_port1 = controller;
+			
+			// Print controller information.
+			printf("Port 1: %s - %d buttons: ", controller->devName(), controller->numButtons());
+			int btn = 0;
+			while (btn >= 0)
+			{
+				if (btn != 0)
+					printf(", ");
+				printf("%s", controller->buttonName(btn));
+				btn = controller->nextLogicalButton(btn);
+			}
+			printf("\n");
 		}
 		
 		m_ctrlChange = -1;
