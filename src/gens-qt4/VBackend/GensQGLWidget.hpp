@@ -92,6 +92,10 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		// Last mouse position.
 		bool m_lastMousePosValid;
 		QPoint m_lastMousePos;
+		
+		// Qt::Key to LibGens Key Value.
+		// TODO: Move somewhere else?
+		int QtKeyToKeyVal(int key);
 };
 
 }

@@ -34,6 +34,7 @@
 #include "libgens/macros/log_msg.h"
 #include "libgens/Util/Timing.hpp"
 #include "libgens/MD/EmuMD.hpp"
+#include "libgens/IO/KeyManager.hpp"
 
 // Win32 requires GL/glext.h for OpenGL 1.2/1.3.
 // TODO: Check the GL implementation to see what functionality is available at runtime.
@@ -568,6 +569,124 @@ void GensQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 	// NOTE: Port E isn't forwarded, since it isn't really usable as a controller.
 	LibGens::EmuMD::m_port1->mouseRelease(event->button());
 	LibGens::EmuMD::m_port2->mouseRelease(event->button());
+}
+
+
+/**
+ * QtKeyToKeyVal(): Convert a Qt::Key to a LibGens key value.
+ * TODO: Move somewhere else?
+ * @param key Qt::Key
+ * @return LibGens key value. (0 for unknown; -1 for unhandled left/right modifier key.)
+ */
+int GensQGLWidget::QtKeyToKeyVal(int key)
+{
+	using namespace LibGens;
+	
+	// Table of Qt::Keys in range 0x00-0x7F.
+	// (Based on Qt 4.6.3)
+	static const int QtKey_Ascii[0x80] =
+	{
+		// 0x00
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		
+		// 0x20
+		KEYV_SPACE, KEYV_EXCLAIM, KEYV_QUOTEDBL, KEYV_HASH,
+		KEYV_DOLLAR, KEYV_PERCENT, KEYV_AMPERSAND, KEYV_QUOTE,
+		KEYV_LEFTPAREN, KEYV_RIGHTPAREN, KEYV_ASTERISK, KEYV_PLUS,
+		KEYV_COMMA, KEYV_MINUS, KEYV_PERIOD, KEYV_SLASH,
+		
+		// 0x30
+		KEYV_0, KEYV_1, KEYV_2, KEYV_3, KEYV_4, KEYV_5, KEYV_6, KEYV_7,
+		KEYV_8, KEYV_9, KEYV_COLON, KEYV_SEMICOLON,
+		KEYV_LESS, KEYV_EQUALS, KEYV_GREATER, KEYV_QUESTION,
+		
+		// 0x40
+		KEYV_AT, KEYV_a, KEYV_b, KEYV_c, KEYV_d, KEYV_e, KEYV_f, KEYV_g,
+		KEYV_h, KEYV_i, KEYV_j, KEYV_k, KEYV_l, KEYV_m, KEYV_n, KEYV_o,
+		KEYV_p, KEYV_q, KEYV_r, KEYV_s, KEYV_t, KEYV_u, KEYV_v, KEYV_w,
+		KEYV_x, KEYV_y, KEYV_z, KEYV_LEFTBRACKET,
+		KEYV_BACKSLASH, KEYV_RIGHTBRACKET, KEYV_CARET, KEYV_UNDERSCORE,
+		
+		// 0x60
+		KEYV_BACKQUOTE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, KEYV_BRACELEFT,
+		KEYV_BAR, KEYV_BRACERIGHT, KEYV_TILDE, KEYV_DELETE,
+	};
+	
+	// Table of Qt::Keys in range 0x01000000-0x0100007F.
+	// (Based on Qt 4.6.3)
+	// TODO: Check how numpad keys act with numlock on/off!
+	// TODO: Handle left/right modifier keys!
+	// NOTE: Media keys are not included.
+	static const int QtKey_Extended[0x80] =
+	{
+		// 0x01000000
+		KEYV_ESCAPE, KEYV_TAB, KEYV_TAB, KEYV_BACKSPACE,
+		KEYV_RETURN, KEYV_KP_ENTER, KEYV_INSERT, KEYV_DELETE,
+		KEYV_PAUSE, KEYV_PRINT, KEYV_SYSREQ, KEYV_CLEAR,
+		0, 0, 0, 0,
+		
+		// 0x01000010
+		KEYV_HOME, KEYV_END, KEYV_LEFT, KEYV_UP,
+		KEYV_RIGHT, KEYV_DOWN, KEYV_PAGEUP, KEYV_PAGEDOWN,
+		0, 0, 0, 0, 0, 0, 0, 0,
+		
+		// 0x01000020
+		-1, -1, -1, -1, KEYV_CAPSLOCK, KEYV_NUMLOCK, KEYV_SCROLLLOCK, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,
+		
+		// 0x01000030
+		KEYV_F1, KEYV_F2, KEYV_F3, KEYV_F4, KEYV_F5, KEYV_F6, KEYV_F7, KEYV_F8,
+		KEYV_F9, KEYV_F10, KEYV_F11, KEYV_F12, KEYV_F13, KEYV_F14, KEYV_F15, KEYV_F16,
+		KEYV_F17, KEYV_F18, KEYV_F19, KEYV_F20, KEYV_F21, KEYV_F22, KEYV_F23, KEYV_F24,
+		KEYV_F25, KEYV_F26, KEYV_F27, KEYV_F28, KEYV_F29, KEYV_F30, KEYV_F31, KEYV_F32,
+		
+		// 0x01000050
+		0, 0, 0, KEYV_LSUPER,
+		KEYV_RSUPER, KEYV_MENU, KEYV_LHYPER, KEYV_RHYPER,
+		KEYV_HELP, 0, 0, 0, 0, 0, 0, 0,
+		
+		// 0x01000060
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	};
+	
+	switch (key & ~0x7F)
+	{
+		case 0x00000000:
+			// ASCII key.
+			// TODO: Make sure Qt doesn't apply shifting!
+			return QtKey_Ascii[key];
+		
+		case 0x01000000:
+			// Extended key.
+			switch (key)
+			{
+				case Qt::Key_Shift:
+				case Qt::Key_Control:	// Mac OS X: Command
+				case Qt::Key_Meta:	// Mac OS X: Control
+				case Qt::Key_Alt:
+					// Modifier key.
+					// TODO
+					break;
+				
+				default:
+					return QtKey_Extended[key & 0x7F];
+			}
+			
+		default:
+			// Other key.
+			switch (key)
+			{
+				case Qt::Key_AltGr:
+					return KEYV_MODE;
+				case Qt::Key_Multi_key:
+					return KEYV_COMPOSE;
+				default:
+					return 0;
+			}
+	}
 }
 
 }
