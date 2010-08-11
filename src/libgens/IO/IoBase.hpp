@@ -105,9 +105,17 @@ class IoBase
 		virtual void mouseRelease(int button) { ((void)button); }
 		
 		// Controller configuration.
-		virtual int numButtons(void) { return 0; }
-		virtual int nextLogicalButton(int button) { ((void)button); return 0; }
-		virtual const char *buttonName(int button) { ((void)button); return NULL; }
+		virtual int numButtons(void) const { return 0; }
+		virtual int nextLogicalButton(int button) const
+		{
+			((void)button);
+			return 0;
+		}
+		virtual const char *buttonName(int button) const
+		{
+			((void)button);
+			return NULL;
+		}
 	
 	protected:
 		uint8_t m_ctrl;		// Tristate control.
