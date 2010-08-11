@@ -41,6 +41,11 @@ class Io2Button : public IoBase
 		// Keypress handling functions.
 		void keyPress(int key);
 		void keyRelease(int key);
+		
+		// Controller configuration.
+		virtual int numButtons(void) const { return 6; }
+		virtual int nextLogicalButton(int button) const;
+		virtual const char *buttonName(int button) const;
 };
 
 }

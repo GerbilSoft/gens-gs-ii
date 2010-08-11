@@ -152,4 +152,47 @@ void Io3Button::keyRelease(int key)
 	}
 }
 
+
+/** Controller Configuration. **/
+
+
+/**
+ * nextLogicalButton(): Get the next logical button.
+ * @return Next logical button, or -1 if we're at the end.
+ */
+int Io3Button::nextLogicalButton(int button) const
+{
+	switch (button)
+	{
+		case BTNI_UP:		return BTNI_DOWN;
+		case BTNI_DOWN:		return BTNI_LEFT;
+		case BTNI_LEFT:		return BTNI_RIGHT;
+		case BTNI_RIGHT:	return BTNI_START;
+		case BTNI_START:	return BTNI_A;
+		case BTNI_A:		return BTNI_B;
+		case BTNI_B:		return BTNI_C;
+		case BTNI_C:
+		default:
+			return -1;
+	}
+}
+
+/**
+ * buttonName(): Get the name for a given button index.
+ * @param button Button index.
+ * @return Button name, or NULL if the button index is invalid.
+ */
+const char *Io3Button::buttonName(int button) const
+{
+	static const char *btnNames[] =
+	{
+		"Up", "Down", "Left", "Right",
+		"B", "C", "A", "Start"
+	};
+	
+	if (button >= BTNI_UP && button <= BTNI_START)
+		return btnNames[button];
+	return NULL;
+}
+
 }

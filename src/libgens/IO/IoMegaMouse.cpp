@@ -326,4 +326,36 @@ void IoMegaMouse::latchMouseMovement(void)
 	m_relY = 0;
 }
 
+
+/** Controller Configuration. **/
+
+
+/**
+ * nextLogicalButton(): Get the next logical button.
+ * @return Next logical button, or -1 if we're at the end.
+ */
+int IoMegaMouse::nextLogicalButton(int button) const
+{
+	if (button >= BTNI_MOUSE_LEFT && button < BTNI_MOUSE_START)
+		return (button + 1);
+	return -1;
+}
+
+/**
+ * buttonName(): Get the name for a given button index.
+ * @param button Button index.
+ * @return Button name, or NULL if the button index is invalid.
+ */
+const char *IoMegaMouse::buttonName(int button) const
+{
+	static const char *btnNames[] =
+	{
+		"Left", "Right", "Middle", "Start"
+	};
+	
+	if (button >= BTNI_MOUSE_LEFT && button <= BTNI_MOUSE_START)
+		return btnNames[button];
+	return NULL;
+}
+
 }

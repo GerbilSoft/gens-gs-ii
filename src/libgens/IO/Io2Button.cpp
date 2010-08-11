@@ -133,4 +133,37 @@ void Io2Button::keyRelease(int key)
 	}
 }
 
+
+/** Controller Configuration. **/
+
+
+/**
+ * nextLogicalButton(): Get the next logical button.
+ * @return Next logical button, or -1 if we're at the end.
+ */
+int Io2Button::nextLogicalButton(int button) const
+{
+	if (button >= BTNI_UP && button < BTNI_2)
+		return (button + 1);
+	return -1;
+}
+
+/**
+ * buttonName(): Get the name for a given button index.
+ * @param button Button index.
+ * @return Button name, or NULL if the button index is invalid.
+ */
+const char *Io2Button::buttonName(int button) const
+{
+	static const char *btnNames[] =
+	{
+		"Up", "Down", "Left", "Right",
+		"1", "2"
+	};
+	
+	if (button >= BTNI_UP && button <= BTNI_2)
+		return btnNames[button];
+	return NULL;
+}
+
 }
