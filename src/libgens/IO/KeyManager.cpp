@@ -31,6 +31,7 @@ namespace LibGens
 
 // Static class variables.
 bool KeyManager::ms_KeyPress[KEYV_LAST];
+bool KeyManager::ms_MouseButton[MBTN_LAST];
 
 
 /**
@@ -38,8 +39,9 @@ bool KeyManager::ms_KeyPress[KEYV_LAST];
  */
 void KeyManager::Init(void)
 {
-	// Clear the keypress array.
+	// Clear the keypress and mouse button arrays.
 	memset(ms_KeyPress, 0x00, sizeof(ms_KeyPress));
+	memset(ms_MouseButton, 0x00, sizeof(ms_MouseButton));
 }
 
 
@@ -171,6 +173,30 @@ void KeyManager::KeyReleaseEvent(int key)
 	if (key < KEYV_UNKNOWN || key >= KEYV_LAST)
 		return;
 	ms_KeyPress[key] = 0;
+}
+
+
+/**
+ * MousePressEvent(): Mouse press event.
+ * @param button MouseButton number.
+ */
+void KeyManager::MousePressEvent(int button)
+{
+	if (button < MBTN_UNKNOWN || button >= MBTN_LAST)
+		return;
+	ms_MouseButton[button] = 1;
+}
+
+
+/**
+ * MouseReleaseEvent(): Mouse release event.
+ * @param button MouseButton number.
+ */
+void KeyManager::MouseReleaseEvent(int button)
+{
+	if (button < MBTN_UNKNOWN || button >= MBTN_LAST)
+		return;
+	ms_MouseButton[button] = 0;
 }
 
 }

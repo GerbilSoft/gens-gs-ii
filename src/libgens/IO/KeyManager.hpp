@@ -235,6 +235,23 @@ enum KeyVal
 	KEYV_LAST
 };
 
+/**
+ * @name Mouse buttons
+ */
+enum MouseButton
+{
+	MBTN_UNKNOWN	= 0,
+	MBTN_LEFT	= 1,
+	MBTN_MIDDLE	= 2,
+	MBTN_RIGHT	= 3,
+	MBTN_WHEELUP	= 4,
+	MBTN_WHEELDOWN	= 5,
+	MBTN_X1		= 6,
+	MBTN_X2		= 7,
+	
+	MBTN_LAST
+};
+
 class KeyManager
 {
 	public:
@@ -246,14 +263,29 @@ class KeyManager
 		static void KeyPressEvent(int key);
 		static void KeyReleaseEvent(int key);
 		
+		static void MousePressEvent(int button);
+		static void MouseReleaseEvent(int button);
+		
 		static inline bool IsKeyPressed(int key)
 		{
-			return ((key >= KEYV_UNKNOWN && key <= KEYV_LAST) ? ms_KeyPress[key] : false);
+			return ((key >= KEYV_UNKNOWN && key <= KEYV_LAST)
+				? ms_KeyPress[key]
+				: false);
+		}
+		
+		static inline bool IsMouseButtonPressed(int button)
+		{
+			return ((button >= MBTN_UNKNOWN && button <= MBTN_LAST)
+				? ms_MouseButton[button]
+				: false);
 		}
 	
 	protected:
 		// Keypress array.
 		static bool ms_KeyPress[KEYV_LAST];
+		
+		// Mouse button array.
+		static bool ms_MouseButton[MBTN_LAST];
 	
 	private:
 		KeyManager() { }
