@@ -564,6 +564,8 @@ void GensQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 	if (!gqt4_emuThread)
 		return;
 	
+	// Forward the mouse button release to the I/O devices.
+	// NOTE: Port E isn't forwarded, since it isn't really usable as a controller.
 	LibGens::EmuMD::m_port1->mouseRelease(event->button());
 	LibGens::EmuMD::m_port2->mouseRelease(event->button());
 }
