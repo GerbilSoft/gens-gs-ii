@@ -643,8 +643,7 @@ int GensQGLWidget::QKeyEventToKeyVal(QKeyEvent *event)
 		KEYV_F25, KEYV_F26, KEYV_F27, KEYV_F28, KEYV_F29, KEYV_F30, KEYV_F31, KEYV_F32,
 		
 		// 0x01000050
-		0, 0, 0, KEYV_LSUPER,
-		KEYV_RSUPER, KEYV_MENU, KEYV_LHYPER, KEYV_RHYPER,
+		0, 0, 0, -1, -1, KEYV_MENU, -1, -1,
 		KEYV_HELP, 0, 0, 0, 0, 0, 0, 0,
 		
 		// 0x01000060
@@ -711,6 +710,10 @@ int GensQGLWidget::NativeModifierToKeyVal(int virtKey)
 		case XK_Meta_R:		return LibGens::KEYV_RMETA;
 		case XK_Alt_L:		return LibGens::KEYV_LALT;
 		case XK_Alt_R:		return LibGens::KEYV_RALT;
+		case XK_Super_L:	return LibGens::KEYV_LSUPER;
+		case XK_Super_R:	return LibGens::KEYV_RSUPER;
+		case XK_Hyper_L:	return LibGens::KEYV_LHYPER;
+		case XK_Hyper_R:	return LibGens::KEYV_RHYPER;
 		default:		return LibGens::KEYV_UNKNOWN;
 	}
 #else
