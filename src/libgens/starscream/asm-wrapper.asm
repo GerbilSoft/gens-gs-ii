@@ -57,8 +57,6 @@ SYM(M68K_RB):
 	; Set up the frame pointer.
 	push	ebp
 	mov	ebp, esp
-	sub	esp, 4
-	
 %ifdef __FORCE_STACK_ALIGNMENT
 	; Enforce 16-byte stack alignment.
 	and	esp, ~0x0F
@@ -102,8 +100,6 @@ SYM(M68K_RW):
 	; Set up the frame pointer.
 	push	ebp
 	mov	ebp, esp
-	sub	esp, 4
-	
 %ifdef __FORCE_STACK_ALIGNMENT
 	; Enforce 16-byte stack alignment.
 	and	esp, ~0x0F
@@ -138,7 +134,6 @@ SYM(M68K_WB):
 	; Set up the frame pointer.
 	push	ebp
 	mov	ebp, esp
-	sub	esp, 4
 %ifdef __FORCE_STACK_ALIGNMENT
 	; Enforce 16-byte stack alignment.
 	and	esp, ~0x0F
@@ -173,7 +168,6 @@ SYM(M68K_WW):
 	; Set up the frame pointer.
 	push	ebp
 	mov	ebp, esp
-	sub	esp, 4
 %ifdef __FORCE_STACK_ALIGNMENT
 	; Enforce 16-byte stack alignment.
 	and	esp, ~0x0F
