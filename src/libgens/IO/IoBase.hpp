@@ -52,7 +52,7 @@ class IoBase
 			// Copy tristate control and data buffer from another controller.
 			m_ctrl = other->m_ctrl;
 			m_lastData = other->m_lastData;
-			m_buttons = other->m_buttons;
+			m_buttons = ~0;		// buttons are NOT copied!
 			updateSelectLine();
 		}
 		virtual ~IoBase() { }
