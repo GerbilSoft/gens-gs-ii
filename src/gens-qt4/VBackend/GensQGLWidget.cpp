@@ -460,28 +460,23 @@ void GensQGLWidget::paintGL(void)
  */
 void GensQGLWidget::keyPressEvent(QKeyEvent *event)
 {
-	switch (event->key())
+	int gensKey = QtKeyToKeyVal(event->key());
+	switch (gensKey)
 	{
-		case Qt::Key_Escape:
+		case LibGens::KEYV_ESCAPE:
 			// Toggle the Pause effect.
 			setPaused(!paused());
 			vbUpdate();
 			break;
 		
-		case Qt::Key_F1:
+		case LibGens::KEYV_F9:
 			// Toggle the Fast Blur effect.
 			setFastBlur(!fastBlur());
 			vbUpdate();
 			break;
 		
 		default:
-			if (!gqt4_emuThread)
-				return;
-			
-			// Forward the key to the I/O devices.
-			// NOTE: Port E isn't forwarded, since it isn't really usable as a controller.
-			LibGens::EmuMD::m_port1->keyPress(event->key());
-			LibGens::EmuMD::m_port2->keyPress(event->key());
+			LibGens::KeyManager::KeyPressEvent(gensKey);
 			break;
 	}
 }
@@ -494,13 +489,8 @@ void GensQGLWidget::keyPressEvent(QKeyEvent *event)
  */
 void GensQGLWidget::keyReleaseEvent(QKeyEvent *event)
 {
-	if (!gqt4_emuThread)
-		return;
-	
-	// Forward the key to the I/O devices.
-	// NOTE: Port E isn't forwarded, since it isn't really usable as a controller.
-	LibGens::EmuMD::m_port1->keyRelease(event->key());
-	LibGens::EmuMD::m_port2->keyRelease(event->key());
+	int gensKey = QtKeyToKeyVal(event->key());
+	LibGens::KeyManager::KeyReleaseEvent(gensKey);
 }
 
 
@@ -545,6 +535,8 @@ void GensQGLWidget::mouseMoveEvent(QMouseEvent *event)
  */
 void GensQGLWidget::mousePressEvent(QMouseEvent *event)
 {
+	// TODO
+#if 0
 	if (!gqt4_emuThread)
 		return;
 	
@@ -552,6 +544,7 @@ void GensQGLWidget::mousePressEvent(QMouseEvent *event)
 	// NOTE: Port E isn't forwarded, since it isn't really usable as a controller.
 	LibGens::EmuMD::m_port1->mousePress(event->button());
 	LibGens::EmuMD::m_port2->mousePress(event->button());
+#endif
 }
 
 
@@ -562,6 +555,8 @@ void GensQGLWidget::mousePressEvent(QMouseEvent *event)
  */
 void GensQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 {
+	// TODO
+#if 0
 	if (!gqt4_emuThread)
 		return;
 	
@@ -569,6 +564,7 @@ void GensQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 	// NOTE: Port E isn't forwarded, since it isn't really usable as a controller.
 	LibGens::EmuMD::m_port1->mouseRelease(event->button());
 	LibGens::EmuMD::m_port2->mouseRelease(event->button());
+#endif
 }
 
 
