@@ -105,6 +105,7 @@ class IoBase
 		virtual void mouseRelease(int button) { ((void)button); }
 		
 		// Controller configuration.
+		virtual const char *devName(void) const { return "None"; }
 		virtual int numButtons(void) const { return 0; }
 		virtual int nextLogicalButton(int button) const
 		{
