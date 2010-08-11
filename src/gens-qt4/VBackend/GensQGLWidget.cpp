@@ -575,7 +575,7 @@ void GensQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 /**
  * QKeyEventToKeyVal(): Convert a QKeyEvent to a LibGens key value.
  * TODO: Move somewhere else?
- * @param event QKeyEvent
+ * @param event QKeyEvent.
  * @return LibGens key value. (0 for unknown; -1 for unhandled left/right modifier key.)
  */
 int GensQGLWidget::QKeyEventToKeyVal(QKeyEvent *event)
@@ -669,7 +669,7 @@ int GensQGLWidget::QKeyEventToKeyVal(QKeyEvent *event)
 			// Extended key is not handled by Qt.
 			// This happens with e.g. left/right shift.
 			// (Qt reports both keys as the same.)
-			return NativeModifierToKeyVal(event->nativeVirtualKey());
+			return NativeModifierToKeyVal(event);
 		}
 			
 		default:
@@ -690,17 +690,17 @@ int GensQGLWidget::QKeyEventToKeyVal(QKeyEvent *event)
 /**
  * NativeModifierToKeyVal(): Convert a native virtual key for a modifier to a LibGens key value.
  * TODO: Move somewhere else?
- * @param virtKey Native virtual key.
+ * @param event QKeyEvent.
  * @return LibGens key value. (0 for unknown)
  */
 #if defined(Q_WS_X11)
 #include <X11/keysym.h>
 #endif
-int GensQGLWidget::NativeModifierToKeyVal(int virtKey)
+int GensQGLWidget::NativeModifierToKeyVal(QKeyEvent *event)
 {
 #if defined(Q_WS_X11)
 	// X11 keysym.
-	switch (virtKey)
+	switch (event->nativeVirtualKey())
 	{
 		case XK_Shift_L:	return LibGens::KEYV_LSHIFT;
 		case XK_Shift_R:	return LibGens::KEYV_RSHIFT;
@@ -714,13 +714,26 @@ int GensQGLWidget::NativeModifierToKeyVal(int virtKey)
 		case XK_Super_R:	return LibGens::KEYV_RSUPER;
 		case XK_Hyper_L:	return LibGens::KEYV_LHYPER;
 		case XK_Hyper_R:	return LibGens::KEYV_RHYPER;
-		default:		return LibGens::KEYV_UNKNOWN;
+		default:		break;
 	}
 #else
 	// Unhandled system.
 	#warning Unhandled system; modifier keys will not be usable!
-	return LibGens::KEYV_UNKNOWN;
 #endif
+	// Unhandled key. Return left key by default.
+	// TODO: Work around Qt's weird antics regarding Control/Meta/Super/etc.
+	switch (event->key())
+	{
+		case Qt::Key_Shift:	return LibGens::KEYV_LSHIFT;
+		case Qt::Key_Control:	return LibGens::KEYV_LCTRL;
+		case Qt::Key_Meta:	return LibGens::KEYV_LMETA;
+		case Qt::Key_Alt:	return LibGens::KEYV_LALT;
+		case Qt::Key_Super_L:	return LibGens::KEYV_LSUPER;
+		case Qt::Key_Super_R:	return LibGens::KEYV_RSUPER;
+		case Qt::Key_Hyper_L:	return LibGens::KEYV_LHYPER;
+		case Qt::Key_Hyper_R:	return LibGens::KEYV_RHYPER;
+		default:		return LibGens::KEYV_UNKNOWN;
+	}
 }
 
 }

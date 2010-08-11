@@ -96,7 +96,7 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		// QKeyEvent to LibGens Key Value.
 		// TODO: Move somewhere else?
 		static int QKeyEventToKeyVal(QKeyEvent *event);
-		static int NativeModifierToKeyVal(int virtKey);
+		static int NativeModifierToKeyVal(QKeyEvent *event);
 };
 
 }
