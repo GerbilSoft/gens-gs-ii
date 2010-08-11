@@ -148,6 +148,7 @@ int Io2Button::nextLogicalButton(int button) const
 	return -1;
 }
 
+
 /**
  * buttonName(): Get the name for a given button index.
  * @param button Button index.

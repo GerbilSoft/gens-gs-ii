@@ -177,6 +177,7 @@ int Io3Button::nextLogicalButton(int button) const
 	}
 }
 
+
 /**
  * buttonName(): Get the name for a given button index.
  * @param button Button index.
