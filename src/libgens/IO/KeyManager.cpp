@@ -65,6 +65,83 @@ void KeyManager::End(void)
 #define SUPER_KEYNAME "Super"
 #endif
 
+const char *KeyManager::ms_KeyNames[KEYV_LAST] =
+{
+	// 0x00
+	"Unknown", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	"Backspace", "Tab", NULL, NULL, "Clear", RETURN_KEYNAME, NULL, NULL,
+	NULL, NULL, NULL, "Pause", NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, "Escape", NULL, NULL, NULL, NULL,
+	
+	// 0x20
+	"Space", "!", "\"", "#", "$", "%", "&", "'",
+	"(", ")", "*", "+", ",", "-", ".", "/",
+	"0", "1", "2", "3", "4", "5", "6", "7",
+	"8", "9", ":", ";", "<", "=", ">", "?",
+	
+	// 0x40
+	"@", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, "[", "\\", "]", "_", "^",
+	
+	// 0x60
+	"`", "A", "B", "C", "D", "E", "F", "G",
+	"H", "I", "J", "K", "L", "M", "N", "O",
+	"P", "Q", "R", "S", "T", "U", "V", "W",
+	"X", "Y", "Z", NULL, NULL, NULL, NULL, "Delete",
+	
+	// 0x80
+	"Numpad 0", "Numpad 1", "Numpad 2", "Numpad 3",
+	"Numpad 4", "Numpad 5", "Numpad 6", "Numpad 7",
+	"Numpad 8", "Numpad 9", "Numpad .", "Numpad /",
+	"Numpad *", "Numpad -", "Numpad +", "Numpad Enter",
+	
+	// 0x90
+	"Numpad =", "Up", "Down", "Right",
+	"Left", "Insert", "Home", "End",
+	"Page Up", "Page Down", NULL, NULL,
+	NULL, NULL, NULL, NULL,
+	
+	/** @name 0xA0: Function keys */
+	"F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8",
+	"F9", "F10", "F11", "F12", "F13", "F14", "F15", "F16",
+	"F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24",
+	"F25", "F26", "F27", "F28", "F29", "F30", "F31", "F32",
+	
+	/** @name 0xC0: Key state modifier keys */
+	"Num Lock", "Caps Lock", "Scroll Lock", "Left Shift",
+	"Right Shift", "Left Ctrl", "Right Ctrl", "Left Alt",
+	"Right Alt", "Left Meta", "Right Meta", "Left " SUPER_KEYNAME,
+	"Right " SUPER_KEYNAME, "Alt-Gr", "Compose", "Left Hyper",
+	
+	/** @name 0xD0: Key state modifier keys (continued) */
+	"Right Hyper", "Left Direction", "Right Direction", NULL,
+	NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL,
+	
+	/** @name 0xE0: Miscellaneous function keys */
+	"Help", "Print Screen", "SysRq", "Break",
+	"Menu", "Power", "Euro", "Undo",
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	
+	/** @name 0xF0: Mouse buttons */
+	"Unknown Mouse Button", "Left Mouse Button",
+	"Middle Mouse Button", "Right Mouse Button",
+	"Mouse Wheel Up", "Mouse Wheel Down",
+	"Mouse Wheel Left", "Mouse Wheel Right",
+	"Extra Mouse Button 1", "Extra Mouse Button 2",
+	NULL, NULL,
+	NULL, NULL, NULL, NULL,
+	
+	/** @name 0x100: Multimedia/Internet keys */
+	// NOTE: Only back and forward are implemented,
+	// since ThinkPads have them as real keys.
+	"Back", "Forward"
+};
+
+
 /**
  * GetKeyName(): Get the name of the given key.
  * @param key Key value.
@@ -72,85 +149,8 @@ void KeyManager::End(void)
  */
 const char *KeyManager::GetKeyName(KeyVal key)
 {
-	static const char *KeyNames[KEYV_LAST] =
-	{
-		// 0x00
-		"Unknown", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-		"Backspace", "Tab", NULL, NULL, "Clear", RETURN_KEYNAME, NULL, NULL,
-		NULL, NULL, NULL, "Pause", NULL, NULL, NULL, NULL,
-		NULL, NULL, NULL, "Escape", NULL, NULL, NULL, NULL,
-		
-		// 0x20
-		"Space", "!", "\"", "#", "$", "%", "&", "'",
-		"(", ")", "*", "+", ",", "-", ".", "/",
-		"0", "1", "2", "3", "4", "5", "6", "7",
-		"8", "9", ":", ";", "<", "=", ">", "?",
-		
-		// 0x40
-		"@", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-		NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-		NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-		NULL, NULL, NULL, "[", "\\", "]", "_", "^",
-		
-		// 0x60
-		"`", "A", "B", "C", "D", "E", "F", "G",
-		"H", "I", "J", "K", "L", "M", "N", "O",
-		"P", "Q", "R", "S", "T", "U", "V", "W",
-		"X", "Y", "Z", NULL, NULL, NULL, NULL, "Delete",
-		
-		// 0x80
-		"Numpad 0", "Numpad 1", "Numpad 2", "Numpad 3",
-		"Numpad 4", "Numpad 5", "Numpad 6", "Numpad 7",
-		"Numpad 8", "Numpad 9", "Numpad .", "Numpad /",
-		"Numpad *", "Numpad -", "Numpad +", "Numpad Enter",
-		
-		// 0x90
-		"Numpad =", "Up", "Down", "Right",
-		"Left", "Insert", "Home", "End",
-		"Page Up", "Page Down", NULL, NULL,
-		NULL, NULL, NULL, NULL,
-		
-		/** @name 0xA0: Function keys */
-		"F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8",
-		"F9", "F10", "F11", "F12", "F13", "F14", "F15", "F16",
-		"F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24",
-		"F25", "F26", "F27", "F28", "F29", "F30", "F31", "F32",
-		
-		/** @name 0xC0: Key state modifier keys */
-		"Num Lock", "Caps Lock", "Scroll Lock", "Left Shift",
-		"Right Shift", "Left Ctrl", "Right Ctrl", "Left Alt",
-		"Right Alt", "Left Meta", "Right Meta", "Left " SUPER_KEYNAME,
-		"Right " SUPER_KEYNAME, "Alt-Gr", "Compose", "Left Hyper",
-		
-		/** @name 0xD0: Key state modifier keys (continued) */
-		"Right Hyper", "Left Direction", "Right Direction", NULL,
-		NULL, NULL, NULL, NULL,
-		NULL, NULL, NULL, NULL,
-		NULL, NULL, NULL, NULL,
-		
-		/** @name 0xE0: Miscellaneous function keys */
-		"Help", "Print Screen", "SysRq", "Break",
-		"Menu", "Power", "Euro", "Undo",
-		NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-		
-		/** @name 0xF0: Mouse buttons */
-		"Unknown Mouse Button", "Left Mouse Button",
-		"Middle Mouse Button", "Right Mouse Button",
-		"Mouse Wheel Up", "Mouse Wheel Down",
-		"Mouse Wheel Left", "Mouse Wheel Right",
-		"Extra Mouse Button 1", "Extra Mouse Button 2",
-		NULL, NULL,
-		NULL, NULL, NULL, NULL,
-		
-		/** @name 0x100: Multimedia/Internet keys */
-		// NOTE: Only back and forward are implemented,
-		// since ThinkPads have them as real keys.
-		"Back", "Forward"
-	};
-	
 	if (key < 0 || key >= KEYV_LAST)
 		return NULL;
-	
 	return KeyNames[key];
 }
 

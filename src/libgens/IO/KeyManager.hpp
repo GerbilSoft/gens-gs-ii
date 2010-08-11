@@ -293,6 +293,9 @@ class KeyManager
 		}
 	
 	protected:
+		// Key names.
+		static const char *ms_KeyNames[KEYV_LAST];
+		
 		// Keypress array.
 		static bool ms_KeyPress[KEYV_LAST];
 	
