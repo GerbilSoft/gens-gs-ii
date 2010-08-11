@@ -151,7 +151,7 @@ const char *KeyManager::GetKeyName(KeyVal key)
 {
 	if (key < 0 || key >= KEYV_LAST)
 		return NULL;
-	return KeyNames[key];
+	return ms_KeyNames[key];
 }
 
 
