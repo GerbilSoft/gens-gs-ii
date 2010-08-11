@@ -149,4 +149,28 @@ const char *KeyManager::GetKeyName(KeyVal key)
 	return KeyNames[key];
 }
 
+
+/**
+ * KeyPressEvent(): Key press event.
+ * @param key KeyVal keycode.
+ */
+void KeyManager::KeyPressEvent(int key)
+{
+	if (key < KEYV_UNKNOWN || key >= KEYV_LAST)
+		return;
+	ms_KeyPress[key] = 1;
+}
+
+
+/**
+ * KeyReleaseEvent(): Key release event.
+ * @param key KeyVal keycode.
+ */
+void KeyManager::KeyReleaseEvent(int key)
+{
+	if (key < KEYV_UNKNOWN || key >= KEYV_LAST)
+		return;
+	ms_KeyPress[key] = 0;
+}
+
 }

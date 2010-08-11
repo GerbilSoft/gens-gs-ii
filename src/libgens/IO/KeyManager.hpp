@@ -242,6 +242,14 @@ class KeyManager
 		static void End(void);
 		
 		static const char *GetKeyName(KeyVal key);
+		
+		static void KeyPressEvent(int key);
+		static void KeyReleaseEvent(int key);
+		
+		static inline bool IsKeyPressed(int key)
+		{
+			return ((key >= KEYV_UNKNOWN && key <= KEYV_LAST) ? ms_KeyPress[key] : false);
+		}
 	
 	protected:
 		// Keypress array.
