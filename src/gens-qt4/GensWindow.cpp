@@ -496,15 +496,23 @@ void GensWindow::emuFrameDone(void)
 			
 			// Print controller information.
 			printf("Port 1: %s - %d buttons: ", controller->devName(), controller->numButtons());
-			int btn = 0;
-			while (btn >= 0)
+			if (controller->numButtons() > 0)
 			{
-				if (btn != 0)
-					printf(", ");
-				printf("%s", controller->buttonName(btn));
-				btn = controller->nextLogicalButton(btn);
+				int btn = 0;
+				while (btn >= 0)
+				{
+					if (btn != 0)
+						printf(", ");
+					printf("%s", controller->buttonName(btn));
+					btn = controller->nextLogicalButton(btn);
+				}
+				printf("\n");
 			}
-			printf("\n");
+			else
+			{
+				// No buttons.
+				printf("(none)\n");
+			}
 		}
 		
 		m_ctrlChange = -1;
