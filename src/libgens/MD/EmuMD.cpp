@@ -244,6 +244,15 @@ FORCE_INLINE void EmuMD::T_Do_Frame(void)
 	// Check if VBlank is allowed.
 	VdpIo::Check_NTSC_V30_VBlank();
 	
+	// Update I/O devices.
+	// TODO: Determine the best place for the I/O devices to be updated:
+	// - Beginning of frame.
+	// - Before VBlank.
+	// - End of frame.
+	m_port1->update();
+	m_port2->update();
+	m_portE->update();
+	
 	// TODO: Sound, CPU. (LibGens)
 #if 0
 	YM_Buf[0] = PSG_Buf[0] = Seg_L;
