@@ -87,7 +87,7 @@ void EmuMD::Init_TEST(void)
 	FILE *f = fopen("test.bin", "rb");
 	if (!f)
 	{
-		printf("Could not open test.bin.");
+		printf("Could not open test.bin.\n");
 		return;
 	}
 	
