@@ -225,6 +225,18 @@ enum KeyVal
 	KEYV_UNDO		= 0xE7,
 	/*@}*/
 	
+	/** @name Mouse buttons */
+	KEYV_MOUSE_UNKNOWN	= 0xF0,
+	KEYV_MOUSE_LEFT		= 0xF1,
+	KEYV_MOUSE_MIDDLE	= 0xF2,
+	KEYV_MOUSE_RIGHT	= 0xF3,
+	KEYV_MOUSE_WHEELUP	= 0xF4,
+	KEYV_MOUSE_WHEELDOWN	= 0xF5,
+	KEYV_MOUSE_WHEELLEFT	= 0xF6,
+	KEYV_MOUSE_WHEELRIGHT	= 0xF7,
+	KEYV_MOUSE_X1		= 0xF8,
+	KEYV_MOUSE_X2		= 0xF9,
+	
 	/** @name Multimedia/Internet keys */
 	// NOTE: Only back and forward are implemented,
 	// since ThinkPads have them as real keys.
@@ -237,6 +249,8 @@ enum KeyVal
 
 /**
  * @name Mouse buttons
+ * These are ONLY used for MousePressEvent() / MouseReleaseEvent()!
+ * Everything else should use the KeyVal versions.
  */
 enum MouseButton
 {
@@ -277,20 +291,10 @@ class KeyManager
 				? ms_KeyPress[key]
 				: false);
 		}
-		
-		static inline bool IsMouseButtonPressed(int button)
-		{
-			return ((button >= MBTN_UNKNOWN && button <= MBTN_LAST)
-				? ms_MouseButton[button]
-				: false);
-		}
 	
 	protected:
 		// Keypress array.
 		static bool ms_KeyPress[KEYV_LAST];
-		
-		// Mouse button array.
-		static bool ms_MouseButton[MBTN_LAST];
 	
 	private:
 		KeyManager() { }

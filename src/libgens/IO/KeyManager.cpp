@@ -31,7 +31,6 @@ namespace LibGens
 
 // Static class variables.
 bool KeyManager::ms_KeyPress[KEYV_LAST];
-bool KeyManager::ms_MouseButton[MBTN_LAST];
 
 
 /**
@@ -39,9 +38,8 @@ bool KeyManager::ms_MouseButton[MBTN_LAST];
  */
 void KeyManager::Init(void)
 {
-	// Clear the keypress and mouse button arrays.
+	// Clear the keypress array.
 	memset(ms_KeyPress, 0x00, sizeof(ms_KeyPress));
-	memset(ms_MouseButton, 0x00, sizeof(ms_MouseButton));
 }
 
 
@@ -135,9 +133,14 @@ const char *KeyManager::GetKeyName(KeyVal key)
 		"Menu", "Power", "Euro", "Undo",
 		NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 		
-		/** @name 0xF0: Reserved */
-		NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-		NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+		/** @name 0xF0: Mouse buttons */
+		"Unknown Mouse Button", "Left Mouse Button",
+		"Middle Mouse Button", "Right Mouse Button",
+		"Mouse Wheel Up", "Mouse Wheel Down",
+		"Mouse Wheel Left", "Mouse Wheel Right",
+		"Extra Mouse Button 1", "Extra Mouse Button 2",
+		NULL, NULL,
+		NULL, NULL, NULL, NULL,
 		
 		/** @name 0x100: Multimedia/Internet keys */
 		// NOTE: Only back and forward are implemented,
@@ -184,7 +187,7 @@ void KeyManager::MousePressEvent(int button)
 {
 	if (button < MBTN_UNKNOWN || button >= MBTN_LAST)
 		return;
-	ms_MouseButton[button] = 1;
+	ms_KeyPress[KEYV_MOUSE_UNKNOWN + button] = 1;
 }
 
 
@@ -196,7 +199,7 @@ void KeyManager::MouseReleaseEvent(int button)
 {
 	if (button < MBTN_UNKNOWN || button >= MBTN_LAST)
 		return;
-	ms_MouseButton[button] = 0;
+	ms_KeyPress[KEYV_MOUSE_UNKNOWN + button] = 0;
 }
 
 }

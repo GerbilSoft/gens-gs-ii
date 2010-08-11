@@ -194,11 +194,11 @@ void IoMegaMouse::update(void)
 	m_buttons = 0;
 	m_buttons |= KeyManager::IsKeyPressed(KEYV_SPACE);		// Start
 	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsMouseButtonPressed(MBTN_MIDDLE);	// Middle (TODO)
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_MOUSE_MIDDLE);	// Middle (TODO)
 	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsMouseButtonPressed(MBTN_RIGHT);	// Right (TODO)
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_MOUSE_RIGHT);	// Right (TODO)
 	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsMouseButtonPressed(MBTN_LEFT);	// Left (TODO)
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_MOUSE_LEFT);		// Left (TODO)
 }
 
 
