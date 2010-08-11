@@ -535,16 +535,18 @@ void GensQGLWidget::mouseMoveEvent(QMouseEvent *event)
  */
 void GensQGLWidget::mousePressEvent(QMouseEvent *event)
 {
-	// TODO
-#if 0
-	if (!gqt4_emuThread)
-		return;
+	int gensButton;
+	switch (event->button())
+	{
+		case Qt::LeftButton:	gensButton = LibGens::MBTN_LEFT; break;
+		case Qt::MidButton:	gensButton = LibGens::MBTN_MIDDLE; break;
+		case Qt::RightButton:	gensButton = LibGens::MBTN_RIGHT; break;
+		case Qt::XButton1:	gensButton = LibGens::MBTN_X1; break;
+		case Qt::XButton2:	gensButton = LibGens::MBTN_X2; break;
+		default:		gensButton = LibGens::MBTN_UNKNOWN; break;
+	}
 	
-	// Forward the mouse button press to the I/O devices.
-	// NOTE: Port E isn't forwarded, since it isn't really usable as a controller.
-	LibGens::EmuMD::m_port1->mousePress(event->button());
-	LibGens::EmuMD::m_port2->mousePress(event->button());
-#endif
+	LibGens::KeyManager::MousePressEvent(gensButton);
 }
 
 
@@ -555,16 +557,18 @@ void GensQGLWidget::mousePressEvent(QMouseEvent *event)
  */
 void GensQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-	// TODO
-#if 0
-	if (!gqt4_emuThread)
-		return;
+	int gensButton;
+	switch (event->button())
+	{
+		case Qt::LeftButton:	gensButton = LibGens::MBTN_LEFT; break;
+		case Qt::MidButton:	gensButton = LibGens::MBTN_MIDDLE; break;
+		case Qt::RightButton:	gensButton = LibGens::MBTN_RIGHT; break;
+		case Qt::XButton1:	gensButton = LibGens::MBTN_X1; break;
+		case Qt::XButton2:	gensButton = LibGens::MBTN_X2; break;
+		default:		gensButton = LibGens::MBTN_UNKNOWN; break;
+	}
 	
-	// Forward the mouse button release to the I/O devices.
-	// NOTE: Port E isn't forwarded, since it isn't really usable as a controller.
-	LibGens::EmuMD::m_port1->mouseRelease(event->button());
-	LibGens::EmuMD::m_port2->mouseRelease(event->button());
-#endif
+	LibGens::KeyManager::MouseReleaseEvent(gensButton);
 }
 
 
