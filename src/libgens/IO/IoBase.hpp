@@ -104,39 +104,10 @@ class IoBase
 		virtual void mousePress(int button) { ((void)button); }
 		virtual void mouseRelease(int button) { ((void)button); }
 		
-		// Button index values.
-		enum ButtonIndex
-		{
-			BTNI_UP		= 0,
-			BTNI_DOWN	= 1,
-			BTNI_LEFT	= 2,
-			BTNI_RIGHT	= 3,
-			BTNI_B		= 4,
-			BTNI_C		= 5,
-			BTNI_A		= 6,
-			BTNI_START	= 7,
-			BTNI_Z		= 8,
-			BTNI_Y		= 9,
-			BTNI_X		= 10,
-			BTNI_MODE	= 11,
-			
-			// SMS/GG buttons.
-			BTNI_1		= 4,
-			BTNI_2		= 5,
-			
-			// Sega Mega Mouse buttons.
-			// NOTE: Mega Mouse buttons are active high,
-			// and they use a different bitfield layout.
-			BTNI_MOUSE_LEFT		= 0,
-			BTNI_MOUSE_RIGHT	= 1,
-			BTNI_MOUSE_MIDDLE	= 2,
-			BTNI_MOUSE_START	= 3	// Start
-		};
-		
 		// Controller configuration.
 		virtual int numButtons(void) { return 0; }
-		virtual int nextLogicalButton(ButtonIndex button) { ((void)button); return 0; }
-		virtual const char *buttonName(ButtonIndex button) { ((void)button); return NULL; }
+		virtual int nextLogicalButton(int button) { ((void)button); return 0; }
+		virtual const char *buttonName(int button) { ((void)button); return NULL; }
 	
 	protected:
 		uint8_t m_ctrl;		// Tristate control.
@@ -214,6 +185,34 @@ class IoBase
 			BTN_MOUSE_START		= 0x08	// Start
 		};
 		
+		// Button index values.
+		enum ButtonIndex
+		{
+			BTNI_UP		= 0,
+			BTNI_DOWN	= 1,
+			BTNI_LEFT	= 2,
+			BTNI_RIGHT	= 3,
+			BTNI_B		= 4,
+			BTNI_C		= 5,
+			BTNI_A		= 6,
+			BTNI_START	= 7,
+			BTNI_Z		= 8,
+			BTNI_Y		= 9,
+			BTNI_X		= 10,
+			BTNI_MODE	= 11,
+			
+			// SMS/GG buttons.
+			BTNI_1		= 4,
+			BTNI_2		= 5,
+			
+			// Sega Mega Mouse buttons.
+			// NOTE: Mega Mouse buttons are active high,
+			// and they use a different bitfield layout.
+			BTNI_MOUSE_LEFT		= 0,
+			BTNI_MOUSE_RIGHT	= 1,
+			BTNI_MOUSE_MIDDLE	= 2,
+			BTNI_MOUSE_START	= 3	// Start
+		};
 #if 0
 		std::vector<uint16_t> m_btnMap;
 #endif
