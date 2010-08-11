@@ -244,10 +244,13 @@ enum MouseButton
 	MBTN_LEFT	= 1,
 	MBTN_MIDDLE	= 2,
 	MBTN_RIGHT	= 3,
+#if 0
+	// Disabled - they don't really work well on the MD.
 	MBTN_WHEELUP	= 4,
 	MBTN_WHEELDOWN	= 5,
 	MBTN_WHEELLEFT	= 6,
 	MBTN_WHEELRIGHT	= 7,
+#endif
 	MBTN_X1		= 8,
 	MBTN_X2		= 9,
 	
