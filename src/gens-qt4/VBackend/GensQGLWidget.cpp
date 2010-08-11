@@ -460,7 +460,7 @@ void GensQGLWidget::paintGL(void)
  */
 void GensQGLWidget::keyPressEvent(QKeyEvent *event)
 {
-	int gensKey = QtKeyToKeyVal(event->key());
+	int gensKey = QKeyEventToKeyVal(event);
 	switch (gensKey)
 	{
 		case LibGens::KEYV_ESCAPE:
@@ -489,7 +489,7 @@ void GensQGLWidget::keyPressEvent(QKeyEvent *event)
  */
 void GensQGLWidget::keyReleaseEvent(QKeyEvent *event)
 {
-	int gensKey = QtKeyToKeyVal(event->key());
+	int gensKey = QKeyEventToKeyVal(event);
 	LibGens::KeyManager::KeyReleaseEvent(gensKey);
 }
 
@@ -573,12 +573,12 @@ void GensQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 
 
 /**
- * QtKeyToKeyVal(): Convert a Qt::Key to a LibGens key value.
+ * QKeyEventToKeyVal(): Convert a QKeyEvent to a LibGens key value.
  * TODO: Move somewhere else?
- * @param key Qt::Key
+ * @param event QKeyEvent
  * @return LibGens key value. (0 for unknown; -1 for unhandled left/right modifier key.)
  */
-int GensQGLWidget::QtKeyToKeyVal(int key)
+int GensQGLWidget::QKeyEventToKeyVal(QKeyEvent *event)
 {
 	using namespace LibGens;
 	
@@ -617,7 +617,7 @@ int GensQGLWidget::QtKeyToKeyVal(int key)
 	// Table of Qt::Keys in range 0x01000000-0x0100007F.
 	// (Based on Qt 4.6.3)
 	// TODO: Check how numpad keys act with numlock on/off!
-	// TODO: Handle left/right modifier keys!
+	// NOTE: Keys with a value of -1 aren't handled by Qt. (left/right modifiers)
 	// NOTE: Media keys are not included.
 	static const int QtKey_Extended[0x80] =
 	{
@@ -652,6 +652,7 @@ int GensQGLWidget::QtKeyToKeyVal(int key)
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	};
 	
+	int key = event->key();
 	switch (key & ~0x7F)
 	{
 		case 0x00000000:
@@ -660,20 +661,15 @@ int GensQGLWidget::QtKeyToKeyVal(int key)
 			return QtKey_Ascii[key];
 		
 		case 0x01000000:
+		{
 			// Extended key.
-			switch (key)
+			int gensKey = QtKey_Extended[key & 0x7F];
+			if (gensKey == -1)
 			{
-				case Qt::Key_Shift:
-				case Qt::Key_Control:	// Mac OS X: Command
-				case Qt::Key_Meta:	// Mac OS X: Control
-				case Qt::Key_Alt:
-					// Modifier key.
-					// TODO
-					break;
-				
-				default:
-					return QtKey_Extended[key & 0x7F];
+				// Left/Right modifier key not handled by Qt.
+				return NativeModifierToKeyVal(event->nativeVirtualKey());
 			}
+		}
 			
 		default:
 			// Other key.
@@ -687,6 +683,39 @@ int GensQGLWidget::QtKeyToKeyVal(int key)
 					return 0;
 			}
 	}
+}
+
+
+/**
+ * NativeModifierToKeyVal(): Convert a native virtual key for a modifier to a LibGens key value.
+ * TODO: Move somewhere else?
+ * @param virtKey Native virtual key.
+ * @return LibGens key value. (0 for unknown)
+ */
+#if defined(Q_WS_X11)
+#include <X11/keysym.h>
+#endif
+int GensQGLWidget::NativeModifierToKeyVal(int virtKey)
+{
+#if defined(Q_WS_X11)
+	// X11 keysym.
+	switch (virtKey)
+	{
+		case XK_Shift_L:	return LibGens::KEYV_LSHIFT;
+		case XK_Shift_R:	return LibGens::KEYV_RSHIFT;
+		case XK_Control_L:	return LibGens::KEYV_LCTRL;
+		case XK_Control_R:	return LibGens::KEYV_RCTRL;
+		case XK_Meta_L:		return LibGens::KEYV_LMETA;
+		case XK_Meta_R:		return LibGens::KEYV_RMETA;
+		case XK_Alt_L:		return LibGens::KEYV_LALT;
+		case XK_Alt_R:		return LibGens::KEYV_RALT;
+		default:		return LibGens::KEYV_UNKNOWN;
+	}
+#else
+	// Unhandled system.
+	#warning Unhandled system; modifier keys will not be usable!
+	return LibGens::KEYV_UNKNOWN;
+#endif
 }
 
 }

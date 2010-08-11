@@ -93,9 +93,10 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		bool m_lastMousePosValid;
 		QPoint m_lastMousePos;
 		
-		// Qt::Key to LibGens Key Value.
+		// QKeyEvent to LibGens Key Value.
 		// TODO: Move somewhere else?
-		int QtKeyToKeyVal(int key);
+		static int QKeyEventToKeyVal(QKeyEvent *event);
+		static int NativeModifierToKeyVal(int virtKey);
 };
 
 }
