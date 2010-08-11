@@ -163,7 +163,7 @@ void KeyManager::KeyPressEvent(int key)
 {
 	if (key < KEYV_UNKNOWN || key >= KEYV_LAST)
 		return;
-	ms_KeyPress[key] = 1;
+	ms_KeyPress[key] = true;
 }
 
 
@@ -175,7 +175,7 @@ void KeyManager::KeyReleaseEvent(int key)
 {
 	if (key < KEYV_UNKNOWN || key >= KEYV_LAST)
 		return;
-	ms_KeyPress[key] = 0;
+	ms_KeyPress[key] = false;
 }
 
 
@@ -187,7 +187,7 @@ void KeyManager::MousePressEvent(int button)
 {
 	if (button < MBTN_UNKNOWN || button >= MBTN_LAST)
 		return;
-	ms_KeyPress[KEYV_MOUSE_UNKNOWN + button] = 1;
+	ms_KeyPress[KEYV_MOUSE_UNKNOWN + button] = true;
 }
 
 
@@ -199,7 +199,7 @@ void KeyManager::MouseReleaseEvent(int button)
 {
 	if (button < MBTN_UNKNOWN || button >= MBTN_LAST)
 		return;
-	ms_KeyPress[KEYV_MOUSE_UNKNOWN + button] = 0;
+	ms_KeyPress[KEYV_MOUSE_UNKNOWN + button] = false;
 }
 
 }
