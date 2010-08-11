@@ -43,9 +43,10 @@ class Io3Button : public IoBase
 		void keyRelease(int key);
 		
 		// Controller configuration.
-		virtual int numButtons(void) const { return 8; }
-		virtual int nextLogicalButton(int button) const;
-		virtual const char *buttonName(int button) const;
+		const char *devName(void) const { return "3-button gamepad"; }
+		int numButtons(void) const { return 8; }
+		int nextLogicalButton(int button) const;
+		const char *buttonName(int button) const;
 };
 
 }

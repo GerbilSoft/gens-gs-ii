@@ -70,9 +70,10 @@ class IoMegaMouse : public IoBase
 		void mouseRelease(int button);
 		
 		// Controller configuration.
-		virtual int numButtons(void) const { return 12; }
-		virtual int nextLogicalButton(int button) const;
-		virtual const char *buttonName(int button) const;
+		const char *devName(void) const { return "Mega Mouse"; }
+		int numButtons(void) const { return 4; }
+		int nextLogicalButton(int button) const;
+		const char *buttonName(int button) const;
 	
 	protected:
 		/**
