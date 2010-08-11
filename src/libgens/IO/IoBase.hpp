@@ -110,7 +110,7 @@ class IoBase
 		virtual int nextLogicalButton(int button) const
 		{
 			((void)button);
-			return 0;
+			return -1;
 		}
 		virtual const char *buttonName(int button) const
 		{
