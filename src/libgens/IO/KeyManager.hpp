@@ -246,8 +246,10 @@ enum MouseButton
 	MBTN_RIGHT	= 3,
 	MBTN_WHEELUP	= 4,
 	MBTN_WHEELDOWN	= 5,
-	MBTN_X1		= 6,
-	MBTN_X2		= 7,
+	MBTN_WHEELLEFT	= 6,
+	MBTN_WHEELRIGHT	= 7,
+	MBTN_X1		= 8,
+	MBTN_X2		= 9,
 	
 	MBTN_LAST
 };
