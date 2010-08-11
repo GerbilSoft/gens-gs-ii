@@ -60,14 +60,8 @@ class IoMegaMouse : public IoBase
 		void writeData(uint8_t data);
 		uint8_t readData(void);
 		
-		// Keypress handling functions.
-		void keyPress(int key);
-		void keyRelease(int key);
-		
-		// Mouse handling functions.
-		void mouseMove(int relX, int relY);
-		void mousePress(int button);
-		void mouseRelease(int button);
+		// I/O device update function.
+		void update(void);
 		
 		// Controller configuration.
 		const char *devName(void) const { return "Mega Mouse"; }

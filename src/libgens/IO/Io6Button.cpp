@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include "Io6Button.hpp"
+#include "KeyManager.hpp"
 
 namespace LibGens
 {
@@ -123,134 +124,36 @@ uint8_t Io6Button::readData(void)
 
 
 /**
- * keyPress(): Key press handler.
- * @param key Key.
+ * update(): I/O device update function.
  */
-void Io6Button::keyPress(int key)
+void Io6Button::update(void)
 {
 	// TODO: Allow customizable keymaps.
-	// TODO: Use LibGens keycodes.
-	switch (key)
-	{
-		case 0x01000013:
-			// Qt::Key_Up
-			m_buttons &= ~BTN_UP;
-			break;
-		case 0x01000015:
-			// Qt::Key_Down
-			m_buttons &= ~BTN_DOWN;
-			break;
-		case 0x01000012:
-			// Qt::Key_Left
-			m_buttons &= ~BTN_LEFT;
-			break;
-		case 0x01000014:
-			// Qt::Key_Right
-			m_buttons &= ~BTN_RIGHT;
-			break;
-		case 0x01000004:
-			// Qt::Key_Return
-			m_buttons &= ~BTN_START;
-			break;
-		case 'A':
-			// Qt::Key_A
-			m_buttons &= ~BTN_A;
-			break;
-		case 'S':
-			// Qt::Key_S
-			m_buttons &= ~BTN_B;
-			break;
-		case 'D':
-			// Qt::Key_D
-			m_buttons &= ~BTN_C;
-			break;
-		case 0x01000020:
-			// Qt::Key_Shift
-			// TODO: Distinguish left/right shift.
-			m_buttons &= ~BTN_MODE;
-			break;
-		case 'Q':
-			// Qt::Key_Q
-			m_buttons &= ~BTN_X;
-			break;
-		case 'W':
-			// Qt::Key_W
-			m_buttons &= ~BTN_Y;
-			break;
-		case 'E':
-			// Qt::Key_E
-			m_buttons &= ~BTN_Z;
-			break;
-		
-		default:
-			break;
-	}
-}
-
-
-/**
- * keyRelease(): Key release handler.
- * @param key Key.
- */
-void Io6Button::keyRelease(int key)
-{
-	// TODO: Allow customizable keymaps.
-	// TODO: Use LibGens keycodes.
-	switch (key)
-	{
-		case 0x01000013:
-			// Qt::Key_Up
-			m_buttons |= BTN_UP;
-			break;
-		case 0x01000015:
-			// Qt::Key_Down
-			m_buttons |= BTN_DOWN;
-			break;
-		case 0x01000012:
-			// Qt::Key_Left
-			m_buttons |= BTN_LEFT;
-			break;
-		case 0x01000014:
-			// Qt::Key_Right
-			m_buttons |= BTN_RIGHT;
-			break;
-		case 0x01000004:
-			// Qt::Key_Return
-			m_buttons |= BTN_START;
-			break;
-		case 'A':
-			// Qt::Key_A
-			m_buttons |= BTN_A;
-			break;
-		case 'S':
-			// Qt::Key_S
-			m_buttons |= BTN_B;
-			break;
-		case 'D':
-			// Qt::Key_D
-			m_buttons |= BTN_C;
-			break;
-		case 0x01000020:
-			// Qt::Key_Shift
-			// TODO: Distinguish left/right shift.
-			m_buttons |= BTN_MODE;
-			break;
-		case 'Q':
-			// Qt::Key_Q
-			m_buttons |= BTN_X;
-			break;
-		case 'W':
-			// Qt::Key_W
-			m_buttons |= BTN_Y;
-			break;
-		case 'E':
-			// Qt::Key_E
-			m_buttons |= BTN_Z;
-			break;
-		
-		default:
-			break;
-	}
+	m_buttons = 0;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_RSHIFT);	// Mode
+	m_buttons <<= 1;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_q);		// X
+	m_buttons <<= 1;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_w);		// Y
+	m_buttons <<= 1;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_e);		// Z
+	m_buttons <<= 1;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_RETURN);	// Start
+	m_buttons <<= 1;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_a);		// A
+	m_buttons <<= 1;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_d);		// C
+	m_buttons <<= 1;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_s);		// B
+	m_buttons <<= 1;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_RIGHT);	// Right
+	m_buttons <<= 1;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_LEFT);	// Left
+	m_buttons <<= 1;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_DOWN);	// Down
+	m_buttons <<= 1;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_UP);		// Up
+	m_buttons = ~m_buttons;
 }
 
 

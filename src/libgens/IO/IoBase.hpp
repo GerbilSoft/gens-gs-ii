@@ -93,16 +93,9 @@ class IoBase
 			return (m_lastData | tris);
 		}
 		
-		// Keypress handling virtual functions.
-		// These need to be reimplemented by derived classes.
-		virtual void keyPress(int key) { ((void)key); }
-		virtual void keyRelease(int key) { ((void)key); }
-		
-		// Mouse handling virtual functions.
-		// These need to be reimplemented by derived classes.
-		virtual void mouseMove(int relX, int relY) { ((void)relX); ((void)relY); }
-		virtual void mousePress(int button) { ((void)button); }
-		virtual void mouseRelease(int button) { ((void)button); }
+		// I/O device update virtual function.
+		// This needs to be reimplemented by derived classes.
+		virtual void update(void) { }
 		
 		// Controller configuration.
 		virtual const char *devName(void) const { return "None"; }

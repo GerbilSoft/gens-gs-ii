@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include "Io2Button.hpp"
+#include "KeyManager.hpp"
 
 namespace LibGens
 {
@@ -45,92 +46,24 @@ uint8_t Io2Button::readData(void)
 
 
 /**
- * keyPress(): Key press handler.
- * @param key Key.
+ * update(): I/O device update function.
  */
-void Io2Button::keyPress(int key)
+void Io2Button::update(void)
 {
 	// TODO: Allow customizable keymaps.
-	// TODO: Use LibGens keycodes.
-	switch (key)
-	{
-		case 0x01000013:
-			// Qt::Key_Up
-			m_buttons &= ~BTN_UP;
-			break;
-		case 0x01000015:
-			// Qt::Key_Down
-			m_buttons &= ~BTN_DOWN;
-			break;
-		case 0x01000012:
-			// Qt::Key_Left
-			m_buttons &= ~BTN_LEFT;
-			break;
-		case 0x01000014:
-			// Qt::Key_Right
-			m_buttons &= ~BTN_RIGHT;
-			break;
-		case 0x01000004:
-			// Qt::Key_Return
-			m_buttons &= ~BTN_START;
-			break;
-		case 'S':
-			// Qt::Key_S
-			m_buttons &= ~BTN_1;
-			break;
-		case 'D':
-			// Qt::Key_D
-			m_buttons &= ~BTN_2;
-			break;
-		
-		default:
-			break;
-	}
-}
-
-
-/**
- * keyRelease(): Key release handler.
- * @param key Key.
- */
-void Io2Button::keyRelease(int key)
-{
-	// TODO: Allow customizable keymaps.
-	// TODO: Use LibGens keycodes.
-	switch (key)
-	{
-		case 0x01000013:
-			// Qt::Key_Up
-			m_buttons |= BTN_UP;
-			break;
-		case 0x01000015:
-			// Qt::Key_Down
-			m_buttons |= BTN_DOWN;
-			break;
-		case 0x01000012:
-			// Qt::Key_Left
-			m_buttons |= BTN_LEFT;
-			break;
-		case 0x01000014:
-			// Qt::Key_Right
-			m_buttons |= BTN_RIGHT;
-			break;
-		case 0x01000004:
-			// Qt::Key_Return
-			m_buttons |= BTN_START;
-			break;
-		case 'S':
-			// Qt::Key_S
-			m_buttons |= BTN_1;
-			break;
-		case 'D':
-			// Qt::Key_D
-			m_buttons |= BTN_2;
-			break;
-		
-		default:
-			break;
-	}
+	m_buttons = 0;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_d);		// 2
+	m_buttons <<= 1;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_s);		// 1
+	m_buttons <<= 1;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_RIGHT);	// Right
+	m_buttons <<= 1;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_LEFT);	// Left
+	m_buttons <<= 1;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_DOWN);	// Down
+	m_buttons <<= 1;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_UP);		// Up
+	m_buttons = ~m_buttons;
 }
 
 

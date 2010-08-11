@@ -27,6 +27,7 @@
  */
 
 #include "IoMegaMouse.hpp"
+#include "KeyManager.hpp"
 
 namespace LibGens
 {
@@ -181,39 +182,28 @@ uint8_t IoMegaMouse::readData(void)
 
 
 /**
- * keyPress(): Key press handler.
- * @param key Key.
+ * update(): I/O device update function.
  */
-void IoMegaMouse::keyPress(int key)
+void IoMegaMouse::update(void)
 {
 	// TODO: Allow customizable keymaps.
-	// TODO: Use LibGens keycodes.
+	// TODO: Add mouse handling to KeyManager.
 	// NOTE: Mega Mouse buttons are Active High.
-	if (key == ' ')
-	{
-		// Qt::Key_Space
-		m_buttons |= BTN_MOUSE_START;
-	}
+	
+	// Bitfield: [START MIDDLE RIGHT LEFT]
+	m_buttons = 0;
+	m_buttons |= KeyManager::IsKeyPressed(KEYV_SPACE);	// Start
+	m_buttons <<= 1;
+	//m_buttons |= KeyManager::IsKeyPressed(KEYV_UNKNOWN);	// Middle (TODO)
+	m_buttons <<= 1;
+	//m_buttons |= KeyManager::IsKeyPressed(KEYV_UNKNOWN);	// Right (TODO)
+	m_buttons <<= 1;
+	//m_buttons |= KeyManager::IsKeyPressed(KEYV_UNKNOWN);	// Left (TODO)
 }
 
 
-/**
- * keyRelease(): Key release handler.
- * @param key Key.
- */
-void IoMegaMouse::keyRelease(int key)
-{
-	// TODO: Allow customizable keymaps.
-	// TODO: Use LibGens keycodes.
-	// NOTE: Mega Mouse buttons are Active High.
-	if (key == ' ')
-	{
-		// Qt::Key_Space
-		m_buttons &= ~BTN_MOUSE_START;
-	}
-}
-
-
+// TODO
+#if 0
 /**
  * mouseMove(): Mouse has moved.
  * @param relX Relative X movement.
@@ -263,8 +253,9 @@ void IoMegaMouse::mouseRelease(int button)
 	if (button & 0x02)	// Qt::RightButton
 		m_buttons &= ~BTN_MOUSE_RIGHT;
 }
+#endif
 
-#include <stdio.h>
+
 /**
  * latchMouseMovement(): Latch the mouse movement variables.
  */

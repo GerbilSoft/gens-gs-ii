@@ -50,9 +50,8 @@ class Io6Button : public IoBase
 		void writeData(uint8_t data);
 		uint8_t readData(void);
 		
-		// Keypress handling functions.
-		void keyPress(int key);
-		void keyRelease(int key);
+		// I/O device update function.
+		void update(void);
 		
 		// Controller configuration.
 		const char *devName(void) const { return "6-button gamepad"; }
