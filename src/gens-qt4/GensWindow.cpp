@@ -41,6 +41,7 @@
 #include "libgens/IO/Io3Button.hpp"
 #include "libgens/IO/Io6Button.hpp"
 #include "libgens/IO/Io2Button.hpp"
+#include "libgens/IO/IoMegaMouse.hpp"
 
 // Test loading ROMs.
 #include "libgens/Rom.hpp"
@@ -407,6 +408,10 @@ void GensWindow::menuTriggered(int id)
 					m_ctrlChange = 3;
 					break;
 				
+				case MNUID_ITEM(IDM_CTRLTEST_MEGAMOUSE):
+					m_ctrlChange = 4;
+					break;
+				
 				default:
 					break;
 			}
@@ -471,6 +476,13 @@ void GensWindow::emuFrameDone(void)
 				controller = new LibGens::Io2Button(LibGens::EmuMD::m_port1);
 				// TODO: Copy settings from existing Port 1 controller.
 				m_vBackend->osd_printf(1500, "Port 1 set to 2-BUTTON.");
+				break;
+			
+			case 4:
+				// Sega Mega Mouse.
+				controller = new LibGens::IoMegaMouse(LibGens::EmuMD::m_port1);
+				// TODO: Copy settings from existing Port 1 controller.
+				m_vBackend->osd_printf(1500, "Port 1 set to SEGA MEGA MOUSE.");
 				break;
 			
 			default:

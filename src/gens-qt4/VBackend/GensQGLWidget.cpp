@@ -40,6 +40,10 @@
 #include <GL/glext.h>
 #endif
 
+// Qt includes.
+#include <QtGui/QKeyEvent>
+#include <QtGui/QMouseEvent>
+
 
 namespace GensQt4
 {
@@ -481,6 +485,43 @@ void GensQGLWidget::keyReleaseEvent(QKeyEvent *event)
 	// NOTE: Port E isn't forwarded, since it isn't really usable as a controller.
 	LibGens::EmuMD::m_port1->keyRelease(event->key());
 	LibGens::EmuMD::m_port2->keyRelease(event->key());
+}
+
+
+/**
+ * mouseMoveEvent(): Mouse movement handler.
+ * TODO: Move somewhere else?
+ * @param event Mouse event.
+ */
+void GensQGLWidget::mouseMoveEvent(QMouseEvent *event)
+{
+	// TODO
+}
+
+
+/**
+ * mousePressEvent(): Mouse button press handler.
+ * TODO: Move somewhere else?
+ * @param event Mouse event.
+ */
+void GensQGLWidget::mousePressEvent(QMouseEvent *event)
+{
+	// Forward the mouse button press to the I/O devices.
+	// NOTE: Port E isn't forwarded, since it isn't really usable as a controller.
+	LibGens::EmuMD::m_port1->mousePress(event->button());
+	LibGens::EmuMD::m_port2->mousePress(event->button());
+}
+
+
+/**
+ * mouseReleaseEvent(): Mouse button release handler.
+ * TODO: Move somewhere else?
+ * @param event Mouse event.
+ */
+void GensQGLWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+	LibGens::EmuMD::m_port1->mouseRelease(event->button());
+	LibGens::EmuMD::m_port2->mouseRelease(event->button());
 }
 
 }

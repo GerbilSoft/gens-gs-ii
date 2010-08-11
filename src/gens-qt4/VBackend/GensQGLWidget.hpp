@@ -33,7 +33,6 @@
 
 #include "VBackend.hpp"
 #include <QtOpenGL/QGLWidget>
-#include <QtGui/QKeyEvent>
 
 #include "libgens/MD/VdpRend.hpp"
 
@@ -80,6 +79,12 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		// TODO: Move somewhere else?
 		void keyPressEvent(QKeyEvent *event);
 		void keyReleaseEvent(QKeyEvent *event);
+		
+		// Mouse handler functions.
+		// TODO: Move somewhere else?
+		void mouseMoveEvent(QMouseEvent *event);
+		void mousePressEvent(QMouseEvent *event);
+		void mouseReleaseEvent(QMouseEvent *event);
 };
 
 }
