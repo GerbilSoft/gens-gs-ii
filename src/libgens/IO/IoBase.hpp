@@ -97,6 +97,12 @@ class IoBase
 		// These need to be reimplemented by derived classes.
 		virtual void keyPress(int key) { ((void)key); }
 		virtual void keyRelease(int key) { ((void)key); }
+		
+		// Mouse handling virtual functions.
+		// These need to be reimplemented by derived classes.
+		virtual void mouseMove(int relX, int relY) { ((void)relX); ((void)relY); }
+		virtual void mousePress(int button) { ((void)button); }
+		virtual void mouseRelease(int button) { ((void)button); }
 	
 	protected:
 		uint8_t m_ctrl;		// Tristate control.
@@ -163,7 +169,15 @@ class IoBase
 			
 			// SMS/GG buttons.
 			BTN_1		= 0x10,
-			BTN_2		= 0x20
+			BTN_2		= 0x20,
+			
+			// Sega Mega Mouse buttons.
+			// NOTE: Mega Mouse buttons are active high,
+			// and they use a different bitfield layout.
+			BTN_MOUSE_LEFT		= 0x01,
+			BTN_MOUSE_RIGHT		= 0x02,
+			BTN_MOUSE_MIDDLE	= 0x04,
+			BTN_MOUSE_START		= 0x08	// Start
 		};
 		
 #if 0

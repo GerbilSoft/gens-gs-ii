@@ -47,6 +47,7 @@ SET(libgens_SRCS
 	IO/Io3Button.cpp
 	IO/Io6Button.cpp
 	IO/Io2Button.cpp
+	IO/IoMegaMouse.cpp
 	)
 
 # Compatibility sources.
