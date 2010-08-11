@@ -85,6 +85,10 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		void mouseMoveEvent(QMouseEvent *event);
 		void mousePressEvent(QMouseEvent *event);
 		void mouseReleaseEvent(QMouseEvent *event);
+		
+		// Last mouse position.
+		bool m_lastMousePosValid;
+		QPoint m_lastMousePos;
 };
 
 }

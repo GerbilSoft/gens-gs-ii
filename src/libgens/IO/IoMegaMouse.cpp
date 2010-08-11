@@ -125,6 +125,7 @@ uint8_t IoMegaMouse::readData(void)
 		case 1:
 			// ID #1: $B (+BF)
 			ret = 0x1B;
+			latchMouseMovement();
 			break;
 		
 		case 2:
@@ -140,8 +141,9 @@ uint8_t IoMegaMouse::readData(void)
 		case 4:
 			// Axis sign and overflow. (-BF)
 			// Format: [YOVER XOVER YSIGN XSIGN]
-			// TODO
-			ret = 0x00;
+			// OVER == overflow occurred
+			// SIGN == 0 for positive, 1 for negative
+			ret = m_latchSignOver;
 			break;
 		
 		case 5:
@@ -152,28 +154,25 @@ uint8_t IoMegaMouse::readData(void)
 		
 		case 6:
 			// X axis MSN. (-BF)
-			ret = ((m_relX >> 4) & 0x0F);
+			ret = ((m_latchRelX >> 4) & 0x0F);
 			break;
 		
 		case 7:
 			// X axis LSN. (+BF)
-			ret = 0x10 | (m_relX & 0x0F);
+			ret = 0x10 | (m_latchRelX & 0x0F);
 			break;
 		
 		case 8:
 			// Y axis MSN. (-BF)
-			ret = ((m_relY >> 4) & 0x0F);
+			ret = ((m_latchRelY >> 4) & 0x0F);
 			break;
 		
 		case 9:
-			// Y axis LSN. (+BF)
-			ret = 0x10 | (m_relY & 0x0F);
-			break;
-		
 		default:
-			// INVALID COUNTER VALUE.
-			// The mouse may act abnormally.
-			ret = 0xFF;
+			// Y axis LSN. (+BF)
+			// Also returned if the mouse is polled
+			// more than 10 times.
+			ret = 0x10 | (m_latchRelY & 0x0F);
 			break;
 	}
 	
@@ -222,7 +221,11 @@ void IoMegaMouse::keyRelease(int key)
  */
 void IoMegaMouse::mouseMove(int relX, int relY)
 {
-	// TODO
+	// Update the mouse movement variables.
+	// NOTE: Y axis is inverted for some reason.
+	// TODO: This doesn't work too well...
+	m_relX += relX;
+	m_relY -= relY;
 }
 
 
@@ -259,6 +262,68 @@ void IoMegaMouse::mouseRelease(int button)
 		m_buttons &= ~BTN_MOUSE_MIDDLE;
 	if (button & 0x02)	// Qt::RightButton
 		m_buttons &= ~BTN_MOUSE_RIGHT;
+}
+
+#include <stdio.h>
+/**
+ * latchMouseMovement(): Latch the mouse movement variables.
+ */
+void IoMegaMouse::latchMouseMovement(void)
+{
+	// TODO: Optimize this function!
+	
+	// Format: [YOVER XOVER YSIGN XSIGN]
+	// OVER == overflow occurred
+	// SIGN == 0 for positive, 1 for negative
+	
+	m_latchSignOver = 0;
+	
+	// X axis.
+	if (m_relX > 255)
+	{
+		m_latchSignOver = 0x04;
+		m_latchRelX = 255;
+	}
+	else if (m_relX >= 0)
+	{
+		m_latchSignOver = 0x00;
+		m_latchRelX = (m_relX & 0xFF);
+	}
+	else if (m_relX < -255)
+	{
+		m_latchSignOver = 0x05;
+		m_latchRelX = 255;
+	}
+	else //if (m_relX < 0)
+	{
+		m_latchSignOver = 0x01;
+		m_latchRelX = (m_relX & 0xFF);
+	}
+	
+	// Y axis.
+	if (m_relY > 255)
+	{
+		m_latchSignOver |= 0x08;
+		m_latchRelY = 255;
+	}
+	else if (m_relY >= 0)
+	{
+		m_latchRelY = (m_relY & 0xFF);
+	}
+	else if (m_relY < -255)
+	{
+		m_latchSignOver |= 0x0A;
+		m_latchRelY = 255;
+	}
+	else //if (m_relY < 0)
+	{
+		m_latchSignOver |= 0x02;
+		m_latchRelY = (m_relY & 0xFF);
+	}
+	
+	// Clear the accumulators.
+	m_relX = 0;
+	m_relY = 0;
 }
 
 }

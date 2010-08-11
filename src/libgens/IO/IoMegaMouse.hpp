@@ -38,6 +38,9 @@ class IoMegaMouse : public IoBase
 			m_counter = 0;
 			m_relX = 0;
 			m_relY = 0;
+			m_latchSignOver = 0;
+			m_latchRelX = 0;
+			m_latchRelY = 0;
 		}
 		IoMegaMouse(const IoBase *other)
 			: IoBase(other)
@@ -46,6 +49,9 @@ class IoMegaMouse : public IoBase
 			m_counter = 0;
 			m_relX = 0;
 			m_relY = 0;
+			m_latchSignOver = 0;
+			m_latchRelX = 0;
+			m_latchRelY = 0;
 		}
 		virtual ~IoMegaMouse() { }
 		
@@ -70,8 +76,13 @@ class IoMegaMouse : public IoBase
 		 */
 		int m_counter;
 		
-		// Mouse movements.
-		uint8_t m_relX, m_relY;
+		// Current mouse movement.
+		int m_relX, m_relY;
+		
+		// Latched mouse movement.
+		void latchMouseMovement(void);
+		uint8_t m_latchSignOver;
+		uint8_t m_latchRelX, m_latchRelY;
 };
 
 }

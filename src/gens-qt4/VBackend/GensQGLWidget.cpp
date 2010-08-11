@@ -24,6 +24,7 @@
 #include <config.h>
 
 #include "GensQGLWidget.hpp"
+#include "gqt4_main.hpp"
 
 // C includes.
 #include <stdio.h>
@@ -80,6 +81,13 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 	
 	// Accept keyboard focus.
 	setFocusPolicy(Qt::StrongFocus);
+	
+	// Initialize the mouse position.
+	m_lastMousePosValid = false;
+	
+	// Enable mouse tracking.
+	// TODO: Only do this if a Mega Mouse is connected.
+	setMouseTracking(true);
 }
 
 GensQGLWidget::~GensQGLWidget()
@@ -465,6 +473,9 @@ void GensQGLWidget::keyPressEvent(QKeyEvent *event)
 			break;
 		
 		default:
+			if (!gqt4_emuThread)
+				return;
+			
 			// Forward the key to the I/O devices.
 			// NOTE: Port E isn't forwarded, since it isn't really usable as a controller.
 			LibGens::EmuMD::m_port1->keyPress(event->key());
@@ -481,6 +492,9 @@ void GensQGLWidget::keyPressEvent(QKeyEvent *event)
  */
 void GensQGLWidget::keyReleaseEvent(QKeyEvent *event)
 {
+	if (!gqt4_emuThread)
+		return;
+	
 	// Forward the key to the I/O devices.
 	// NOTE: Port E isn't forwarded, since it isn't really usable as a controller.
 	LibGens::EmuMD::m_port1->keyRelease(event->key());
@@ -495,7 +509,28 @@ void GensQGLWidget::keyReleaseEvent(QKeyEvent *event)
  */
 void GensQGLWidget::mouseMoveEvent(QMouseEvent *event)
 {
-	// TODO
+	if (!gqt4_emuThread)
+	{
+		m_lastMousePosValid = false;
+		return;
+	}
+	
+	if (!m_lastMousePosValid)
+	{
+		// Last mouse movement event was invalid.
+		m_lastMousePos = event->pos();
+		m_lastMousePosValid = true;
+		return;
+	}
+	
+	// Calculate the relative movement.
+	QPoint posDiff = (event->pos() - m_lastMousePos);
+	m_lastMousePos = event->pos();
+	
+	// Forward the relative movement to the I/O devices.
+	// NOTE: Port E isn't forwarded, since it isn't really usable as a controller.
+	LibGens::EmuMD::m_port1->mouseMove(posDiff.x(), posDiff.y());
+	LibGens::EmuMD::m_port2->mouseMove(posDiff.x(), posDiff.y());
 }
 
 
@@ -506,6 +541,9 @@ void GensQGLWidget::mouseMoveEvent(QMouseEvent *event)
  */
 void GensQGLWidget::mousePressEvent(QMouseEvent *event)
 {
+	if (!gqt4_emuThread)
+		return;
+	
 	// Forward the mouse button press to the I/O devices.
 	// NOTE: Port E isn't forwarded, since it isn't really usable as a controller.
 	LibGens::EmuMD::m_port1->mousePress(event->button());
@@ -520,6 +558,9 @@ void GensQGLWidget::mousePressEvent(QMouseEvent *event)
  */
 void GensQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 {
+	if (!gqt4_emuThread)
+		return;
+	
 	LibGens::EmuMD::m_port1->mouseRelease(event->button());
 	LibGens::EmuMD::m_port2->mouseRelease(event->button());
 }
