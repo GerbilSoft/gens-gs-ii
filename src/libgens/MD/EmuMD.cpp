@@ -83,18 +83,12 @@ void EmuMD::End(void)
  */
 void EmuMD::Init_TEST(void)
 {
-	// Initialize the VDP.
-	VdpIo::Reset();
-	
-	// Recalculate the full MD palette.
-	// TODO: This would usually be done at program startup.
-	VdpPalette::Recalc();
-	
 	// Load the ROM file.
 	FILE *f = fopen("test.bin", "rb");
 	if (!f)
 	{
 		printf("Could not open test.bin.");
+		return;
 	}
 	
 	// Determine the size of the file.
@@ -108,6 +102,21 @@ void EmuMD::Init_TEST(void)
 	fread(&M68K_Mem::Rom_Data.u8[0], 1, M68K_Mem::Rom_Size, f);
 	be16_to_cpu_array(&M68K_Mem::Rom_Data.u8[0], M68K_Mem::Rom_Size);
 	fclose(f);
+	
+	// Initialize the VDP.
+	VdpIo::Reset();
+	
+	// Recalculate the full MD palette.
+	// TODO: This would usually be done at program startup.
+	VdpPalette::Recalc();
+	
+	// Initialize SRAM.
+	// TODO: Split into a separate function.
+	M68K_Mem::SRam_State.enabled = 1;
+	M68K_Mem::SRam_State.custom = 0;
+	M68K_Mem::SRam_State.on = 0;
+	M68K_Mem::SRam_State.write = 0;
+	memset(M68K_Mem::SRam, 0xFF, sizeof(M68K_Mem::SRam));
 	
 	// Initialize the M68K.
 	M68K::InitSys(M68K::SYSID_MD);
