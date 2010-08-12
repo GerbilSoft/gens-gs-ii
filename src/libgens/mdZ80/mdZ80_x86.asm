@@ -4788,6 +4788,7 @@ SYMF(mdZ80_def_WriteW, 8):
 
 align 16
 
+global SYM(z80_Add_%1)
 SYM(z80_Add_%1):
 	
 	push	ecx
@@ -4871,6 +4872,7 @@ align 16
 ; 0  -> ok
 ; !0 -> error (status returned) or no cycle to do (-1)
 
+global SYMF(z80_Exec, 8):
 SYMF(z80_Exec, 8):
 	sub	edx, [ecx + Z80.CycleCnt]
 	jbe	near z80_Cycles_Already_done
