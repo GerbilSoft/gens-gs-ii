@@ -36,10 +36,6 @@ class IoBase
 	public:
 		IoBase()
 		{
-#if 0
-			// Initialize the button mapping vector.
-			m_btnMap.resize(GetNumButtons(), 0);
-#endif
 			// Initialize tristate control and data buffer.
 			// TODO: Initialize to 0xFF or 0x00?
 			m_ctrl = 0x00;		// input
@@ -68,18 +64,6 @@ class IoBase
 			m_buttons = ~0;
 			updateSelectLine();
 		}
-		
-#if 0
-		// Number of buttons on the controller.
-		virtual static int GetNumButtons(void) = 0;
-		virtual static const char* GetButtonName(int button) = 0;
-		
-		// Controller modes.
-		virtual static int GetNumModes(void) = 0;
-		virtual static const char* GetModeName(int mode) = 0;
-#endif
-		
-		// Set/get button mapping.
 		
 		// MD-side controller functions.
 		virtual void writeCtrl(uint8_t ctrl)
