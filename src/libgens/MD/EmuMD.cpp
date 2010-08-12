@@ -154,9 +154,13 @@ FORCE_INLINE void EmuMD::T_Do_Line(void)
 	YM2612_DacAndTimers_Update(buf, Sound_Extrapol[VDP_Lines.Display.Current][1]);
 	YM_Len += Sound_Extrapol[VDP_Lines.Display.Current][1];
 	PSG_Len += Sound_Extrapol[VDP_Lines.Display.Current][1];
-		
-	Fix_Controllers();
 #endif
+	
+	// Notify controllers that a new scanline is being drawn.
+	m_port1->doScanline();
+	m_port2->doScanline();
+	m_portE->doScanline();
+	
 	M68K_Mem::Cycles_M68K += M68K_Mem::CPL_M68K;
 #if 0
 	Cycles_Z80 += CPL_Z80;
