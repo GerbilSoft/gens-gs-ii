@@ -121,6 +121,11 @@ void EmuMD::Init_TEST(void)
 	// Initialize the M68K.
 	M68K::InitSys(M68K::SYSID_MD);
 	
+	// Reset the controller ports.
+	m_port1->reset();
+	m_port2->reset();
+	m_portE->reset();
+	
 	// TODO: VdpIo::VDP_Lines.Display.Total isn't being set properly...
 	VdpIo::VDP_Lines.Display.Total = 262;
 	VdpIo::Set_Visible_Lines();
