@@ -165,16 +165,16 @@ class M68K_Mem
 		typedef void     (*M68K_Write_Word_fn)(uint32_t address, uint16_t data);
 		
 		/** Main M68K function tables. (512 KB pages; 32 entries.) **/
-		static M68K_Read_Byte_fn M68K_Read_Byte_Table[0x20];
-		static M68K_Read_Word_fn M68K_Read_Word_Table[0x20];
-		static M68K_Write_Byte_fn M68K_Write_Byte_Table[0x20];
-		static M68K_Write_Word_fn M68K_Write_Word_Table[0x20];
+		static M68K_Read_Byte_fn M68K_Read_Byte_Table[32];
+		static M68K_Read_Word_fn M68K_Read_Word_Table[32];
+		static M68K_Write_Byte_fn M68K_Write_Byte_Table[32];
+		static M68K_Write_Word_fn M68K_Write_Word_Table[32];
 		
-		/** Default M68K function tables for MD. **/
-		static const M68K_Read_Byte_fn MD_M68K_Read_Byte_Table[0x20];
-		static const M68K_Read_Word_fn MD_M68K_Read_Word_Table[0x20];
-		static const M68K_Write_Byte_fn MD_M68K_Write_Byte_Table[0x20];
-		static const M68K_Write_Word_fn MD_M68K_Write_Word_Table[0x20];
+		/** Default M68K function tables for MD. (512 KB pages; 32 entries.) **/
+		static const M68K_Read_Byte_fn MD_M68K_Read_Byte_Table[32];
+		static const M68K_Read_Word_fn MD_M68K_Read_Word_Table[32];
+		static const M68K_Write_Byte_fn MD_M68K_Write_Byte_Table[32];
+		static const M68K_Write_Word_fn MD_M68K_Write_Word_Table[32];
 };
 
 }
