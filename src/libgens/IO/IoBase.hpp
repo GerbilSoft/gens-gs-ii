@@ -25,8 +25,9 @@
 #ifndef __LIBGENS_IO_BASE_HPP__
 #define __LIBGENS_IO_BASE_HPP__
 
+// C includes.
 #include <stdint.h>
-#include <vector>
+#include <string.h>
 
 namespace LibGens
 {
