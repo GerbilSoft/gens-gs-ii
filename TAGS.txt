@@ -1,5 +1,22 @@
 Description of git tags for Gens/GS II:
 
+libgens-controllers-v2:
+
+- Initial Controller Configuration dialog, which currently shows the type
+  of controller connected to Port 1 at the time that the dialog was opened.
+
+- Support for L/R modifier keys (e.g. Left Alt vs. Right Alt) on X11 and
+  Win32. (Mac OS X doesn't seem to expose the required functionality.)
+
+- The 6-button TH counter now only increments on a TH rising edge, which
+  improves reliability. Additionally, the TH counter is now reset after
+  25 scanlines have elapsed without a TH rising edge.
+
+- Mega Mouse doesn't check for TR transitions if it's waiting for a TH
+  falling edge.
+
+- New IoBase::reset() function to reset the controller ports on system startup.
+
 libgens-controllers-v1: Support for 2-button (SMS/GG) controllers
 on Port 1. Added a function to properly apply the effects of the
 tristate buffer to the result of the readData() functions for each
