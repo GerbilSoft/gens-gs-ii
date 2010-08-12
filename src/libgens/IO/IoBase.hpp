@@ -229,9 +229,6 @@ class IoBase
 			BTNI_MOUSE_MIDDLE	= 2,
 			BTNI_MOUSE_START	= 3	// Start
 		};
-#if 0
-		std::vector<uint16_t> m_btnMap;
-#endif
 	
 	private:
 		// Select line state.
