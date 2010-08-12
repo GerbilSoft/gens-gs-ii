@@ -286,6 +286,18 @@ int KeyHandlerQt::NativeModifierToKeyVal(QKeyEvent *event)
 		case XK_Hyper_R:	return LibGens::KEYV_RHYPER;
 		default:		break;
 	}
+#elif defined(Q_WS_WIN)
+	// Win32 virtual key.
+	// NOTE: Shift, Control, and Alt are NOT tested here.
+	// WM_KEYDOWN/WM_KEYUP report VK_SHIFT, VK_CONTORL, and VK_MENU (Alt).
+	// These are useless for testing left/right keys.
+	// Instead, GetAsyncKeyState() is used in GensWindow::emuFrameDone().
+	switch (event->nativeVirtualKey())
+	{
+		case VK_LWIN:		return LibGens::KEYV_LSUPER;
+		case VK_RWIN:		return LibGens::KEYV_RSUPER;
+		default:		break;
+	}
 #else
 	// Unhandled system.
 	#warning Unhandled system; modifier keys will fall back to Left variants!!

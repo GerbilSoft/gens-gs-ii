@@ -24,6 +24,14 @@
 #ifndef __LIBGENS_IO_KEYMANAGER_HPP__
 #define __LIBGENS_IO_KEYMANAGER_HPP__
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
+
 namespace LibGens
 {
 
@@ -291,6 +299,17 @@ class KeyManager
 				? ms_KeyPress[key]
 				: false);
 		}
+		
+#ifdef _WIN32
+		// QWidget doesn't properly differentiate L/R modifier keys,
+		// and neither do WM_KEYDOWN/WM_KEYUP.
+		static inline void WinKeySet(int key, int virtKey)
+		{
+			if (key < KEYV_UNKNOWN && key >= KEYV_LAST)
+				return;
+			ms_KeyPress[key] = !!(GetAsyncKeyState(virtKey) & 0x8000);
+		}
+#endif /* _WIN32 */
 	
 	protected:
 		// Key names.
