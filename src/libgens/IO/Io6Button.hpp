@@ -55,6 +55,7 @@ class Io6Button : public IoBase
 		
 		// Controller configuration.
 		const char *devName(void) const { return "6-button gamepad"; }
+		IoType devType(void) const { return IOT_6BTN; }
 		int numButtons(void) const { return 12; }
 		int nextLogicalButton(int button) const;
 		const char *buttonName(int button) const;

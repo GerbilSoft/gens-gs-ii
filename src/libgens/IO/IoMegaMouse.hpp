@@ -65,6 +65,7 @@ class IoMegaMouse : public IoBase
 		
 		// Controller configuration.
 		const char *devName(void) const { return "Mega Mouse"; }
+		IoType devType(void) const { return IOT_MEGA_MOUSE; }
 		int numButtons(void) const { return 4; }
 		int nextLogicalButton(int button) const;
 		const char *buttonName(int button) const;

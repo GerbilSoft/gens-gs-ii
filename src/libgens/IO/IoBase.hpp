@@ -97,8 +97,20 @@ class IoBase
 		// This needs to be reimplemented by derived classes.
 		virtual void update(void) { }
 		
+		enum IoType
+		{
+			IOT_NONE	= 0,
+			IOT_3BTN	= 1,
+			IOT_6BTN	= 2,
+			IOT_2BTN	= 3,
+			IOT_MEGA_MOUSE	= 4,
+			
+			IOT_MAX
+		};
+		
 		// Controller configuration.
 		virtual const char *devName(void) const { return "None"; }
+		virtual IoType devType(void) const { return IOT_NONE; }
 		virtual int numButtons(void) const { return 0; }
 		virtual int nextLogicalButton(int button) const
 		{
