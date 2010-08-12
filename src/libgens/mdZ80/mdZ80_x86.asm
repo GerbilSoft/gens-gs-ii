@@ -48,50 +48,20 @@ BITS 32
 	section .note.GNU-stack noalloc noexec nowrite progbits
 %endif
 
-
-;**************************
-;
-; Some usefull ASM macros
-;
-;**************************
-
-
-; function are declared in fastcall when number of arguments < 3
-; and in cdecl in other case
-
-%ifndef __PLATFORM_WINDOWS
-%macro DECLF 1-2
-
-%if %0 > 1
-	global %1%2
-%endif
-	global _%1
-	global %1
-
-%if %0 > 1
-	%1%2:
-%endif
-	_%1:
-	%1:
-
-%endmacro
+; Symbol declaration.
+%ifdef __OBJ_ELF
+	%define SYM(x) x
 %else
-%macro DECLF 1-2
-
-%if %0 > 1
-	global @%1@%2
+	%define SYM(x) _ %+ x
 %endif
-	global _%1
-	global %1
 
-%if %0 > 1
-	@%1@%2:
+; Fastcall symbol declaration.
+%ifdef __OBJ_WIN32
+	%define SYMF(sym, args) @ %+ sym %+ @ %+ args
+%else
+	%define SYMF(sym, args) sym
 %endif
-	_%1:
-	%1:
 
-%endmacro
-%endif
 
 ;*******************
 ;
@@ -106,10 +76,7 @@ section .bss align=64
 %define GENS_LOG   0
 
 %if (GENS_OPT == 1)
-	%ifdef __OBJ_ELF
-		%define _Ram_Z80 Ram_Z80
-	%endif
-	extern _Ram_Z80			; Gens stuff
+	extern SYM(Ram_Z80)		; Gens stuff
 %endif
 
 %if (GENS_LOG == 1)
@@ -231,15 +198,10 @@ section .bss align=64
 	endstruc
 	
 	
-	; Symbol redefines for ELF.
-	%ifdef __OBJ_ELF
-		%define	_mdZ80_def_mem	mdZ80_def_mem
-	%endif
-
 	alignb 32
 	
-	global _mdZ80_def_mem
-	_mdZ80_def_mem:
+	global SYM(mdZ80_def_mem)
+	SYM(mdZ80_def_mem):
 		resb 0x10000
 	
 
@@ -247,16 +209,9 @@ section .bss align=64
 
 section .rodata align=64
 	
-	; External symbol redefines for ELF.
-	%ifdef __OBJ_ELF
-		%define	_mdZ80_DAA_Table	mdZ80_DAA_Table
-		%define	_mdZ80_INC_Flags_Table	mdZ80_INC_Flags_Table
-		%define	_mdZ80_DEC_Flags_Table	mdZ80_DEC_Flags_Table
-	%endif
-	
-	extern _mdZ80_DAA_Table
-	extern _mdZ80_INC_Flags_Table
-	extern _mdZ80_DEC_Flags_Table
+	extern SYM(mdZ80_DAA_Table)
+	extern SYM(mdZ80_INC_Flags_Table)
+	extern SYM(mdZ80_DEC_Flags_Table)
 
 section .text align=64
 
@@ -453,12 +408,12 @@ section .text align=64
 	
 	and	ecx, 0x1FFF
 %ifidn %1, A
-	mov	al, [_Ram_Z80 + ecx]
+	mov	al, [SYM(Ram_Z80) + ecx]
 %elif %0 > 0
-	mov	dl, [_Ram_Z80 + ecx]
+	mov	dl, [SYM(Ram_Z80) + ecx]
 	mov	z%1, dl
 %else
-	mov	dl, [_Ram_Z80 + ecx]
+	mov	dl, [SYM(Ram_Z80) + ecx]
 %endif
 	jmp	short %%End
 	
@@ -513,7 +468,7 @@ align 16
 %if %0 > 0
 	mov	dl, z%1
 %endif
-	mov	[_Ram_Z80 + ecx], dl
+	mov	[SYM(Ram_Z80) + ecx], dl
 	jmp	short %%End
 	
 align 16
@@ -555,12 +510,12 @@ align 16
 	
 	and	ecx, 0x1FFF
 %ifidn %1, AF
-	mov	ax, [_Ram_Z80 + ecx]
+	mov	ax, [SYM(Ram_Z80) + ecx]
 %elif %0 > 0
-	mov	dx, [_Ram_Z80 + ecx]
+	mov	dx, [SYM(Ram_Z80) + ecx]
 	mov	z%1, dx
 %else
-	mov	dx, [_Ram_Z80 + ecx]
+	mov	dx, [SYM(Ram_Z80) + ecx]
 %endif
 	jmp	short %%End
 	
@@ -616,7 +571,7 @@ align 16
 %if %0 > 0
 	mov	dx, z%1
 %endif
-	mov	[_Ram_Z80 + ecx], dx
+	mov	[SYM(Ram_Z80) + ecx], dx
 	jmp	short %%End
 	
 align 16
@@ -2415,7 +2370,7 @@ Z80I_%1_%2:
 	inc	zxPC
 	movzx	ecx, rd
 	%1 rd
-	mov	dh, [_mdZ80_%1_Flags_Table + ecx]
+	mov	dh, [SYM(mdZ80_%1_Flags_Table) + ecx]
 	mov	zFXY, rd
 	or	zF, dh
 %ifidn rd, dl
@@ -2464,7 +2419,7 @@ Z80I_%1_mHL:
 	and	zF, FLAG_C
 	movzx	ecx, dl
 	%1 dl
-	mov	dh, [_mdZ80_%1_Flags_Table + ecx]
+	mov	dh, [SYM(mdZ80_%1_Flags_Table) + ecx]
 	mov	zFXY, dl
 	mov	ecx, zxHL
 	or	zF, dh
@@ -2495,7 +2450,7 @@ Z80I_%1_m%2d:
 	and	zF, FLAG_C
 	movzx	ecx, dl
 	%1 dl
-	mov	dh, [_mdZ80_%1_Flags_Table + ecx]
+	mov	dh, [SYM(mdZ80_%1_Flags_Table) + ecx]
 	mov	zFXY, dl
 	pop	ecx
 	or	zF, dh
@@ -2523,7 +2478,7 @@ Z80I_DAA:
 	mov	edx, eax
 	and	eax, 0x3FF
 	and	edx, 0x1000
-	movzx	eax, word [_mdZ80_DAA_Table + eax * 2 + edx]
+	movzx	eax, word [SYM(mdZ80_DAA_Table) + eax * 2 + edx]
 	inc	zxPC
 	mov	zFXY, zF
 	NEXT 4
@@ -4794,58 +4749,38 @@ PREFIXE_FDCB:
 ;*******************
 
 
-; External symbol redefines for ELF.
-%ifdef __OBJ_ELF
-	%define	_mdZ80_def_ReadB	mdZ80_def_ReadB
-	%define	_mdZ80_def_In		mdZ80_def_In
-	%define	_mdZ80_def_ReadW	mdZ80_def_ReadW
-	%define	_mdZ80_def_WriteB	mdZ80_def_WriteB
-	%define	_mdZ80_def_Out		mdZ80_def_Out
-	%define	_mdZ80_def_WriteW	mdZ80_def_WriteW
-%endif
-
-; Fastcall symbol redefines for Win32.
-%ifdef __OBJ_WIN32
-	%define	_mdZ80_def_ReadB	@mdZ80_def_ReadB@4
-	%define	_mdZ80_def_In		@mdZ80_def_In@4
-	%define	_mdZ80_def_ReadW	@mdZ80_def_ReadW@4
-	%define	_mdZ80_def_WriteB	@mdZ80_def_WriteB@8
-	%define	_mdZ80_def_Out		@mdZ80_def_Out@8
-	%define	_mdZ80_def_WriteW	@mdZ80_def_WriteW@8
-%endif
-
 align 16
 
-global _mdZ80_def_ReadB
-global _mdZ80_def_In
-_mdZ80_def_ReadB:
-_mdZ80_def_In:
-	mov al, [_mdZ80_def_mem + ecx]
+global SYMF(mdZ80_def_ReadB, 4)
+global SYMF(mdZ80_def_In, 4)
+SYMF(mdZ80_def_ReadB, 4):
+SYMF(mdZ80_def_In, 4):
+	mov al, [SYM(mdZ80_def_mem) + ecx]
 	ret
 
 
 align 16
 
-global _mdZ80_def_ReadW
-_mdZ80_def_ReadW:
-	mov ax, [_mdZ80_def_mem + ecx]
+global SYMF(mdZ80_def_ReadW, 4)
+SYMF(mdZ80_def_ReadW, 4):
+	mov ax, [SYM(mdZ80_def_mem) + ecx]
 	ret
 
 
 align 16
 
-global _mdZ80_def_WriteB
-global _mdZ80_def_Out
-_mdZ80_def_WriteB:
-_mdZ80_def_Out:
-	mov [_mdZ80_def_mem + ecx], dl
+global SYMF(mdZ80_def_WriteB, 8)
+global SYMF(mdZ80_def_Out, 8)
+SYMF(mdZ80_def_WriteB, 8):
+SYMF(mdZ80_def_Out, 8):
+	mov [SYM(mdZ80_def_mem) + ecx], dl
 	ret
 
 align 16
 
-global _mdZ80_def_WriteW
-_mdZ80_def_WriteW:
-	mov [_mdZ80_def_mem + ecx], dx
+global SYMF(mdZ80_def_WriteW, 8)
+SYMF(mdZ80_def_WriteW, 8):
+	mov [SYM(mdZ80_def_mem) + ecx], dx
 	ret
 
 
@@ -4853,7 +4788,7 @@ _mdZ80_def_WriteW:
 
 align 16
 
-DECLF z80_Add_%1
+SYM(z80_Add_%1):
 	
 	push	ecx
 	push	edx
@@ -4936,7 +4871,7 @@ align 16
 ; 0  -> ok
 ; !0 -> error (status returned) or no cycle to do (-1)
 
-DECLF z80_Exec, 8
+SYMF(z80_Exec, 8):
 	sub	edx, [ecx + Z80.CycleCnt]
 	jbe	near z80_Cycles_Already_done
 	
