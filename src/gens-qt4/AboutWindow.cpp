@@ -53,7 +53,6 @@ namespace GensQt4
 // Static member initialization.
 AboutWindow *AboutWindow::m_AboutWindow = NULL;
 
-#include <stdio.h>
 /**
  * AboutWindow(): Initialize the About window.
  */
