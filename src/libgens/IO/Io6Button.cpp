@@ -29,6 +29,7 @@ namespace LibGens
 
 /**
  * writeCtrl(): Set the I/O tristate value.
+ * TODO: Combine with writeData().
  * @param ctrl I/O tristate value.
  */
 void Io6Button::writeCtrl(uint8_t ctrl)
@@ -37,19 +38,23 @@ void Io6Button::writeCtrl(uint8_t ctrl)
 	bool oldSelect = isSelect();
 	m_ctrl = ctrl;
 	updateSelectLine();
-	if (oldSelect ^ isSelect())
+	
+	if (!oldSelect && isSelect())
 	{
-		// IOPIN_TH has changed.
-		m_counter++;
-		m_counter &= 0x07;
+		// IOPIN_TH rising edge.
+		// Increment the counter.
+		m_counter = ((m_counter + 2) & 0x06);
+		
+		// TODO: Reset the no-TH counter.
 	}
 	
-	// TODO: Reset the counter after ~8.192 ms of no TH changes.
+	// TODO: Reset the counter after ~8.192 ms of no TH rising edges.
 }
 
 
 /**
  * writeData(): Write data to the controller.
+ * * TODO: Combine with writeCtrl().
  * @param data Data to the controller.
  */
 void Io6Button::writeData(uint8_t data)
@@ -58,14 +63,17 @@ void Io6Button::writeData(uint8_t data)
 	bool oldSelect = isSelect();
 	m_lastData = data;
 	updateSelectLine();
-	if (oldSelect ^ isSelect())
+	
+	if (!oldSelect && isSelect())
 	{
-		// IOPIN_TH has changed.
-		m_counter++;
-		m_counter &= 0x07;
+		// IOPIN_TH rising edge.
+		// Increment the counter.
+		m_counter = ((m_counter + 2) & 0x06);
+		
+		// TODO: Reset the no-TH counter.
 	}
 	
-	// TODO: Reset the counter after ~8.192 ms of no TH changes.
+	// TODO: Reset the counter after ~8.192 ms of no TH rising edges.
 }
 
 
@@ -78,11 +86,12 @@ uint8_t Io6Button::readData(void)
 	uint8_t ret;
 	
 	// Use the TH counter to determine the controller state.
-	switch (m_counter)
+	switch (m_counter | !isSelect())
 	{
 		case 0:
 		case 2:
 		case 4:
+			// TH=1: First/Second/Third
 			// Format: D1CBRLDU
 			// (Same as 3-button.)
 			ret = (m_buttons & 0x3F) | 0x40;
@@ -90,6 +99,7 @@ uint8_t Io6Button::readData(void)
 		
 		case 1:
 		case 3:
+			// TH=0: First/Second
 			// Format: D0SA00DU
 			// (Same as 6-button.)
 			ret = (m_buttons & 0xC0) >> 2;
@@ -97,17 +107,20 @@ uint8_t Io6Button::readData(void)
 			break;
 		
 		case 5:
+			// TH=0: Third
 			// Format: D0SA0000
 			ret = (m_buttons & 0xC0) >> 2;
 			break;
 		
 		case 6:
+			// TH=1: Fourth
 			// Format: D1CBMXYZ
 			ret = (m_buttons & 0x30) | 0x40;
 			ret |= ((m_buttons & 0xF00) >> 8);
 			break;
 		
 		case 7:
+			// TH=0: Fourth
 			// Format: D0SA1111
 			ret = (m_buttons & 0xC0) >> 2;
 			ret |= (m_buttons & 0x03);
