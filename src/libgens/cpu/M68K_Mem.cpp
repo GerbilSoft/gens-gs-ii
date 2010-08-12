@@ -1101,12 +1101,12 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 		default:
 			break;
 		
-		case 0x02:	EmuMD::m_port1->writeData(data); break;
-		case 0x04:	EmuMD::m_port2->writeData(data); break;
-		case 0x06:	EmuMD::m_portE->writeData(data); break;
-		case 0x08:	EmuMD::m_port1->writeCtrl(data); break;
-		case 0x0A:	EmuMD::m_port2->writeCtrl(data); break;
-		case 0x0C:	EmuMD::m_portE->writeCtrl(data); break;
+		case 0x02:	EmuMD::m_port1->writeData(data & 0xFF); break;
+		case 0x04:	EmuMD::m_port2->writeData(data & 0xFF); break;
+		case 0x06:	EmuMD::m_portE->writeData(data & 0xFF); break;
+		case 0x08:	EmuMD::m_port1->writeCtrl(data & 0xFF); break;
+		case 0x0A:	EmuMD::m_port2->writeCtrl(data & 0xFF); break;
+		case 0x0C:	EmuMD::m_portE->writeCtrl(data & 0xFF); break;
 	}
 }
 
