@@ -55,6 +55,23 @@ class IoMegaMouse : public IoBase
 		}
 		virtual ~IoMegaMouse() { }
 		
+		/**
+		 * reset(): Reset function.
+		 * Called when the system is reset.
+		 */
+		inline void reset()
+		{
+			IoBase::reset();
+			
+			// Mega Mouse-specific variables.
+			m_counter = 0;
+			m_relX = 0;
+			m_relY = 0;
+			m_latchSignOver = 0;
+			m_latchRelX = 0;
+			m_latchRelY = 0;
+		}
+		
 		void writeCtrl(uint8_t ctrl);
 		
 		void writeData(uint8_t data);

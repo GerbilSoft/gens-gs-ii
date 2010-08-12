@@ -57,6 +57,18 @@ class IoBase
 		}
 		virtual ~IoBase() { }
 		
+		/**
+		 * reset(): Reset virtual function.
+		 * Called when the system is reset.
+		 */
+		virtual inline void reset()
+		{
+			m_ctrl = 0x00;
+			m_lastData = 0xFF;
+			m_buttons = ~0;
+			updateSelectLine();
+		}
+		
 #if 0
 		// Number of buttons on the controller.
 		virtual static int GetNumButtons(void) = 0;
