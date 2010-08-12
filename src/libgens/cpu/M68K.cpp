@@ -156,8 +156,12 @@ void M68K::Init(void)
 }
 
 
-void M68K::End()
+/**
+ * End(): Shut down the M68K CPU emulator.
+ */
+void M68K::End(void)
 {
+	// TODO
 }
 
 
