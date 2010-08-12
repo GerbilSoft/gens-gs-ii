@@ -276,18 +276,19 @@ uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 	
 	/**
 	 * MD miscellaneous registers.
-	 * 0xA10002/0xA10003: Control Port 1: Data.
-	 * 0xA10004/0xA10005: Control Port 2: Data.
-	 * 0xA10006/0xA10007: Control Port 3: Data. (EXT)
-	 * 0xA10008/0xA10009: Control Port 1: CTRL.
-	 * 0xA1000A/0xA1000B: Control Port 2: CTRL.
-	 * 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
+	 * 0xA10003: Control Port 1: Data.
+	 * 0xA10005: Control Port 2: Data.
+	 * 0xA10007: Control Port 3: Data. (EXT)
+	 * 0xA10009: Control Port 1: CTRL.
+	 * 0xA1000B: Control Port 2: CTRL.
+	 * 0xA1000D: Control Port 3: CTRL. (EXT)
 	 */
+	// TODO: Do byte reads from even addresses (e.g. 0xA10002) work?
 	switch (address & 0x00000E)
 	{
 		case 0x00:
 			/**
-			 * 0xA10000/0xA10001: Genesis version register.
+			 * 0xA10001: Genesis version register.
 			 * Format: [MODE VMOD DISK RSV VER3 VER2 VER1 VER0]
 			 * MODE: Region. (0 == East; 1 == West)
 			 * VMOD: Video mode. (0 == NTSC; 1 == PAL)
@@ -542,18 +543,18 @@ uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 	
 	/**
 	 * MD miscellaneous registers.
-	 * 0xA10002/0xA10003: Control Port 1: Data.
-	 * 0xA10004/0xA10005: Control Port 2: Data.
-	 * 0xA10006/0xA10007: Control Port 3: Data. (EXT)
-	 * 0xA10008/0xA10009: Control Port 1: CTRL.
-	 * 0xA1000A/0xA1000B: Control Port 2: CTRL.
-	 * 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
+	 * 0xA10003: Control Port 1: Data.
+	 * 0xA10005: Control Port 2: Data.
+	 * 0xA10007: Control Port 3: Data. (EXT)
+	 * 0xA10009: Control Port 1: CTRL.
+	 * 0xA1000B: Control Port 2: CTRL.
+	 * 0xA1000D: Control Port 3: CTRL. (EXT)
 	 */
 	switch (address & 0x00000E)
 	{
 		case 0x00:
 			/**
-			 * 0xA10000/0xA10001: Genesis version register.
+			 * 0xA10001: Genesis version register.
 			 * Format: [MODE VMOD DISK RSV VER3 VER2 VER1 VER0]
 			 * MODE: Region. (0 == East; 1 == West)
 			 * VMOD: Video mode. (0 == NTSC; 1 == PAL)
@@ -809,17 +810,18 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 	
 	/**
 	 * MD miscellaneous registers.
-	 * 0xA10002/0xA10003: Control Port 1: Data.
-	 * 0xA10004/0xA10005: Control Port 2: Data.
-	 * 0xA10006/0xA10007: Control Port 3: Data. (EXT)
-	 * 0xA10008/0xA10009: Control Port 1: CTRL.
-	 * 0xA1000A/0xA1000B: Control Port 2: CTRL.
-	 * 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
+	 * 0xA10003: Control Port 1: Data.
+	 * 0xA10005: Control Port 2: Data.
+	 * 0xA10007: Control Port 3: Data. (EXT)
+	 * 0xA10009: Control Port 1: CTRL.
+	 * 0xA1000B: Control Port 2: CTRL.
+	 * 0xA1000D: Control Port 3: CTRL. (EXT)
 	 */
+	// TODO: Do byte writes to even addresses (e.g. 0xA10002) work?
 	switch (address & 0x00000E)
 	{
 		// Non-writable and not-implemented registers first.
-		case 0x00: /// 0xA10000/0xA10001: Genesis version register.
+		case 0x00: /// 0xA10001: Genesis version register.
 		default:
 			break;
 		
@@ -1085,17 +1087,17 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 	
 	/**
 	 * MD miscellaneous registers.
-	 * 0xA10002/0xA10003: Control Port 1: Data.
-	 * 0xA10004/0xA10005: Control Port 2: Data.
-	 * 0xA10006/0xA10007: Control Port 3: Data. (EXT)
-	 * 0xA10008/0xA10009: Control Port 1: CTRL.
-	 * 0xA1000A/0xA1000B: Control Port 2: CTRL.
-	 * 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
+	 * 0xA10003: Control Port 1: Data.
+	 * 0xA10005: Control Port 2: Data.
+	 * 0xA10007: Control Port 3: Data. (EXT)
+	 * 0xA10009: Control Port 1: CTRL.
+	 * 0xA1000B: Control Port 2: CTRL.
+	 * 0xA1000D: Control Port 3: CTRL. (EXT)
 	 */
 	switch (address & 0x00000E)
 	{
 		// Non-writable and not-implemented registers first.
-		case 0x00: /// 0xA10000/0xA10001: Genesis version register.
+		case 0x00: /// 0xA10001: Genesis version register.
 		default:
 			break;
 		
