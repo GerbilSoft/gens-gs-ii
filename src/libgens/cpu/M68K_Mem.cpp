@@ -268,7 +268,7 @@ uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 #endif
 		return 0x80;
 	}
-	else if (address > 0xA1000D)
+	else if (address > 0xA1001F)
 	{
 		// Invalid address.
 		return 0;
@@ -282,9 +282,18 @@ uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 	 * 0xA10009: Control Port 1: CTRL.
 	 * 0xA1000B: Control Port 2: CTRL.
 	 * 0xA1000D: Control Port 3: CTRL. (EXT)
+	 * 0xA1000F: Control Port 1: Serial TxData.
+	 * 0xA10011: Control Port 1: Serial RxData. (READ-ONLY)
+	 * 0xA10013: Control Port 1: Serial Control.
+	 * 0xA10015: Control Port 2: Serial TxData.
+	 * 0xA10017: Control Port 2: Serial RxData. (READ-ONLY)
+	 * 0xA10019: Control Port 2: Serial Control.
+	 * 0xA1001B: Control Port 3: Serial TxData.
+	 * 0xA1001D: Control Port 3: Serial RxData. (READ-ONLY)
+	 * 0xA1001F: Control Port 3: Serial Control.
 	 */
 	// TODO: Do byte reads from even addresses (e.g. 0xA10002) work?
-	switch (address & 0x00000E)
+	switch (address & 0x1E)
 	{
 		case 0x00:
 			/**
@@ -299,12 +308,25 @@ uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 			 */
 			return ((Game_Mode << 7) | (CPU_Mode << 6) | 0x20);
 		
+		// Parallel I/O
 		case 0x02:	return EmuMD::m_port1->readData();
 		case 0x04:	return EmuMD::m_port2->readData();
 		case 0x06:	return EmuMD::m_portE->readData();
 		case 0x08:	return EmuMD::m_port1->readCtrl();
 		case 0x0A:	return EmuMD::m_port2->readCtrl();
 		case 0x0C:	return EmuMD::m_portE->readCtrl();
+		
+		// Serial I/O
+		// TODO: Baud rate handling, etc.
+		case 0x0E:	return EmuMD::m_port1->readSerTx();
+		case 0x10:	return EmuMD::m_port1->readSerRx();
+		case 0x12:	return EmuMD::m_port1->readSerCtrl();
+		case 0x14:	return EmuMD::m_port2->readSerTx();
+		case 0x16:	return EmuMD::m_port2->readSerRx();
+		case 0x18:	return EmuMD::m_port2->readSerCtrl();
+		case 0x1A:	return EmuMD::m_portE->readSerTx();
+		case 0x1C:	return EmuMD::m_portE->readSerRx();
+		case 0x1E:	return EmuMD::m_portE->readSerCtrl();
 		
 		default:
 			// Unknown register.
@@ -535,7 +557,7 @@ uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 #endif
 		return 0x8000;
 	}
-	else if (address > 0xA1000D)
+	else if (address > 0xA1001F)
 	{
 		// Invalid address.
 		return 0;
@@ -549,8 +571,17 @@ uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 	 * 0xA10009: Control Port 1: CTRL.
 	 * 0xA1000B: Control Port 2: CTRL.
 	 * 0xA1000D: Control Port 3: CTRL. (EXT)
+	 * 0xA1000F: Control Port 1: Serial TxData.
+	 * 0xA10011: Control Port 1: Serial RxData. (READ-ONLY)
+	 * 0xA10013: Control Port 1: Serial Control.
+	 * 0xA10015: Control Port 2: Serial TxData.
+	 * 0xA10017: Control Port 2: Serial RxData. (READ-ONLY)
+	 * 0xA10019: Control Port 2: Serial Control.
+	 * 0xA1001B: Control Port 3: Serial TxData.
+	 * 0xA1001D: Control Port 3: Serial RxData. (READ-ONLY)
+	 * 0xA1001F: Control Port 3: Serial Control.
 	 */
-	switch (address & 0x00000E)
+	switch (address & 0x1E)
 	{
 		case 0x00:
 			/**
@@ -565,12 +596,25 @@ uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 			 */
 			return ((Game_Mode << 7) | (CPU_Mode << 6) | 0x20);
 		
+		// Parallel I/O
 		case 0x02:	return EmuMD::m_port1->readData();
 		case 0x04:	return EmuMD::m_port2->readData();
 		case 0x06:	return EmuMD::m_portE->readData();
 		case 0x08:	return EmuMD::m_port1->readCtrl();
 		case 0x0A:	return EmuMD::m_port2->readCtrl();
 		case 0x0C:	return EmuMD::m_portE->readCtrl();
+		
+		// Serial I/O
+		// TODO: Baud rate handling, etc.
+		case 0x0E:	return EmuMD::m_port1->readSerTx();
+		case 0x10:	return EmuMD::m_port1->readSerRx();
+		case 0x12:	return EmuMD::m_port1->readSerCtrl();
+		case 0x14:	return EmuMD::m_port2->readSerTx();
+		case 0x16:	return EmuMD::m_port2->readSerRx();
+		case 0x18:	return EmuMD::m_port2->readSerCtrl();
+		case 0x1A:	return EmuMD::m_portE->readSerTx();
+		case 0x1C:	return EmuMD::m_portE->readSerRx();
+		case 0x1E:	return EmuMD::m_portE->readSerCtrl();
 		
 		default:
 			// Unknown register.
@@ -802,7 +846,7 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 		mov	[SYM(M68K_Read_Word_Table) + ebx * 4], ecx
 #endif
 	}
-	else if (address > 0xA1000D)
+	else if (address > 0xA1001F)
 	{
 		// Invalid address.
 		return;
@@ -816,21 +860,42 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 	 * 0xA10009: Control Port 1: CTRL.
 	 * 0xA1000B: Control Port 2: CTRL.
 	 * 0xA1000D: Control Port 3: CTRL. (EXT)
+	 * 0xA1000F: Control Port 1: Serial TxData.
+	 * 0xA10011: Control Port 1: Serial RxData. (READ-ONLY)
+	 * 0xA10013: Control Port 1: Serial Control.
+	 * 0xA10015: Control Port 2: Serial TxData.
+	 * 0xA10017: Control Port 2: Serial RxData. (READ-ONLY)
+	 * 0xA10019: Control Port 2: Serial Control.
+	 * 0xA1001B: Control Port 3: Serial TxData.
+	 * 0xA1001D: Control Port 3: Serial RxData. (READ-ONLY)
+	 * 0xA1001F: Control Port 3: Serial Control.
 	 */
 	// TODO: Do byte writes to even addresses (e.g. 0xA10002) work?
-	switch (address & 0x00000E)
+	switch (address & 0x1E)
 	{
-		// Non-writable and not-implemented registers first.
 		case 0x00: /// 0xA10001: Genesis version register.
 		default:
 			break;
 		
+		// Parallel I/O
 		case 0x02:	EmuMD::m_port1->writeData(data); break;
 		case 0x04:	EmuMD::m_port2->writeData(data); break;
 		case 0x06:	EmuMD::m_portE->writeData(data); break;
 		case 0x08:	EmuMD::m_port1->writeCtrl(data); break;
 		case 0x0A:	EmuMD::m_port2->writeCtrl(data); break;
 		case 0x0C:	EmuMD::m_portE->writeCtrl(data); break;
+		
+		// Serial I/O
+		// TODO: Baud rate handling, etc.
+		case 0x0E:	EmuMD::m_port1->writeSerTx(data); break;
+		case 0x10:	break; // READ-ONLY
+		case 0x12:	EmuMD::m_port1->writeSerCtrl(data); break;
+		case 0x14:	EmuMD::m_port2->writeSerTx(data); break;
+		case 0x16:	break; // READ-ONLY
+		case 0x18:	EmuMD::m_port2->writeSerCtrl(data); break;
+		case 0x1A:	EmuMD::m_portE->writeSerTx(data); break;
+		case 0x1C:	break; // READ-ONLY
+		case 0x1E:	EmuMD::m_portE->writeSerCtrl(data); break;
 	}
 }
 
@@ -1079,7 +1144,7 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 		mov	[SYM(M68K_Read_Word_Table) + ebx * 4], ecx
 #endif
 	}
-	else if (address > 0xA1000D)
+	else if (address > 0xA1001F)
 	{
 		// Invalid address.
 		return;
@@ -1093,20 +1158,41 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 	 * 0xA10009: Control Port 1: CTRL.
 	 * 0xA1000B: Control Port 2: CTRL.
 	 * 0xA1000D: Control Port 3: CTRL. (EXT)
+	 * 0xA1000F: Control Port 1: Serial TxData.
+	 * 0xA10011: Control Port 1: Serial RxData. (READ-ONLY)
+	 * 0xA10013: Control Port 1: Serial Control.
+	 * 0xA10015: Control Port 2: Serial TxData.
+	 * 0xA10017: Control Port 2: Serial RxData. (READ-ONLY)
+	 * 0xA10019: Control Port 2: Serial Control.
+	 * 0xA1001B: Control Port 3: Serial TxData.
+	 * 0xA1001D: Control Port 3: Serial RxData. (READ-ONLY)
+	 * 0xA1001F: Control Port 3: Serial Control.
 	 */
-	switch (address & 0x00000E)
+	switch (address & 0x1E)
 	{
-		// Non-writable and not-implemented registers first.
 		case 0x00: /// 0xA10001: Genesis version register.
 		default:
 			break;
 		
+		// Parallel I/O
 		case 0x02:	EmuMD::m_port1->writeData(data & 0xFF); break;
 		case 0x04:	EmuMD::m_port2->writeData(data & 0xFF); break;
 		case 0x06:	EmuMD::m_portE->writeData(data & 0xFF); break;
 		case 0x08:	EmuMD::m_port1->writeCtrl(data & 0xFF); break;
 		case 0x0A:	EmuMD::m_port2->writeCtrl(data & 0xFF); break;
 		case 0x0C:	EmuMD::m_portE->writeCtrl(data & 0xFF); break;
+		
+		// Serial I/O
+		// TODO: Baud rate handling, etc.
+		case 0x0E:	EmuMD::m_port1->writeSerTx(data & 0xFF); break;
+		case 0x10:	break; // READ-ONLY
+		case 0x12:	EmuMD::m_port1->writeSerCtrl(data & 0xFF); break;
+		case 0x14:	EmuMD::m_port2->writeSerTx(data & 0xFF); break;
+		case 0x16:	break; // READ-ONLY
+		case 0x18:	EmuMD::m_port2->writeSerCtrl(data & 0xFF); break;
+		case 0x1A:	EmuMD::m_portE->writeSerTx(data & 0xFF); break;
+		case 0x1C:	break; // READ-ONLY
+		case 0x1E:	EmuMD::m_portE->writeSerCtrl(data & 0xFF); break;
 	}
 }
 
