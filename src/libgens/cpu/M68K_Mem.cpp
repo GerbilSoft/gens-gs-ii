@@ -274,7 +274,15 @@ uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 		return 0;
 	}
 	
-	// MD miscellaneous registers.
+	/**
+	 * MD miscellaneous registers.
+	 * 0xA10002/0xA10003: Control Port 1: Data.
+	 * 0xA10004/0xA10005: Control Port 2: Data.
+	 * 0xA10006/0xA10007: Control Port 3: Data. (EXT)
+	 * 0xA10008/0xA10009: Control Port 1: CTRL.
+	 * 0xA1000A/0xA1000B: Control Port 2: CTRL.
+	 * 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
+	 */
 	switch (address & 0x00000E)
 	{
 		case 0x00:
@@ -290,41 +298,12 @@ uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 			 */
 			return ((Game_Mode << 7) | (CPU_Mode << 6) | 0x20);
 		
-		case 0x02:
-			/**
-			 * 0xA10002/0xA10003: Control Port 1: Data.
-			 */
-			return EmuMD::m_port1->readData();
-		
-		case 0x04:
-			/**
-			 * 0xA10004/0xA10005: Control Port 2: Data.
-			 */
-			return EmuMD::m_port2->readData();
-		
-		case 0x06:
-			/**
-			 * 0xA10006/0xA10007: Control Port 3: Data. (EXT)
-			 */
-			return EmuMD::m_portE->readData();
-		
-		case 0x08:
-			/**
-			 * 0xA10008/0xA10009: Control Port 1: CTRL.
-			 */
-			return EmuMD::m_port1->readCtrl();
-		
-		case 0x0A:
-			/**
-			 * 0xA1000A/0xA1000B: Control Port 2: CTRL.
-			 */
-			return EmuMD::m_port2->readCtrl();
-		
-		case 0x0C:
-			/**
-			 * 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
-			 */
-			return EmuMD::m_portE->readCtrl();
+		case 0x02:	return EmuMD::m_port1->readData();
+		case 0x04:	return EmuMD::m_port2->readData();
+		case 0x06:	return EmuMD::m_portE->readData();
+		case 0x08:	return EmuMD::m_port1->readCtrl();
+		case 0x0A:	return EmuMD::m_port2->readCtrl();
+		case 0x0C:	return EmuMD::m_portE->readCtrl();
 		
 		default:
 			// Unknown register.
@@ -561,7 +540,15 @@ uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 		return 0;
 	}
 	
-	// MD miscellaneous registers.
+	/**
+	 * MD miscellaneous registers.
+	 * 0xA10002/0xA10003: Control Port 1: Data.
+	 * 0xA10004/0xA10005: Control Port 2: Data.
+	 * 0xA10006/0xA10007: Control Port 3: Data. (EXT)
+	 * 0xA10008/0xA10009: Control Port 1: CTRL.
+	 * 0xA1000A/0xA1000B: Control Port 2: CTRL.
+	 * 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
+	 */
 	switch (address & 0x00000E)
 	{
 		case 0x00:
@@ -577,41 +564,12 @@ uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 			 */
 			return ((Game_Mode << 7) | (CPU_Mode << 6) | 0x20);
 		
-		case 0x02:
-			/**
-			 * 0xA10002/0xA10003: Control Port 1: Data.
-			 */
-			return EmuMD::m_port1->readData();
-		
-		case 0x04:
-			/**
-			 * 0xA10004/0xA10005: Control Port 2: Data.
-			 */
-			return EmuMD::m_port2->readData();
-		
-		case 0x06:
-			/**
-			 * 0xA10006/0xA10007: Control Port 3: Data. (EXT)
-			 */
-			return EmuMD::m_portE->readData();
-		
-		case 0x08:
-			/**
-			 * 0xA10008/0xA10009: Control Port 1: CTRL.
-			 */
-			return EmuMD::m_port1->readCtrl();
-		
-		case 0x0A:
-			/**
-			 * 0xA1000A/0xA1000B: Control Port 2: CTRL.
-			 */
-			return EmuMD::m_port2->readCtrl();
-		
-		case 0x0C:
-			/**
-			 * 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
-			 */
-			return EmuMD::m_portE->readCtrl();
+		case 0x02:	return EmuMD::m_port1->readData();
+		case 0x04:	return EmuMD::m_port2->readData();
+		case 0x06:	return EmuMD::m_portE->readData();
+		case 0x08:	return EmuMD::m_port1->readCtrl();
+		case 0x0A:	return EmuMD::m_port2->readCtrl();
+		case 0x0C:	return EmuMD::m_portE->readCtrl();
 		
 		default:
 			// Unknown register.
@@ -849,7 +807,15 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 		return;
 	}
 	
-	// MD miscellaneous registers.
+	/**
+	 * MD miscellaneous registers.
+	 * 0xA10002/0xA10003: Control Port 1: Data.
+	 * 0xA10004/0xA10005: Control Port 2: Data.
+	 * 0xA10006/0xA10007: Control Port 3: Data. (EXT)
+	 * 0xA10008/0xA10009: Control Port 1: CTRL.
+	 * 0xA1000A/0xA1000B: Control Port 2: CTRL.
+	 * 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
+	 */
 	switch (address & 0x00000E)
 	{
 		// Non-writable and not-implemented registers first.
@@ -857,47 +823,12 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 		default:
 			break;
 		
-		case 0x02:
-			/**
-			 * 0xA10002/0xA10003: Control Port 1: Data.
-			 */
-			EmuMD::m_port1->writeData(data);
-			break;
-		
-		case 0x04:
-			/**
-			 * 0xA10004/0xA10005: Control Port 2: Data.
-			 */
-			EmuMD::m_port2->writeData(data);
-			break;
-		
-		case 0x06:
-			/**
-			 * 0xA10006/0xA10007: Control Port 3: Data. (EXT)
-			 */
-			EmuMD::m_portE->writeData(data);
-			break;
-		
-		case 0x08:
-			/**
-			 * 0xA10008/0xA10009: Control Port 1: CTRL.
-			 */
-			EmuMD::m_port1->writeCtrl(data);
-			break;
-		
-		case 0x0A:
-			/**
-			 * 0xA1000A/0xA1000B: Control Port 2: CTRL.
-			 */
-			EmuMD::m_port2->writeCtrl(data);
-			break;
-		
-		case 0x0C:
-			/**
-			 * 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
-			 */
-			EmuMD::m_portE->writeCtrl(data);
-			break;
+		case 0x02:	EmuMD::m_port1->writeData(data); break;
+		case 0x04:	EmuMD::m_port2->writeData(data); break;
+		case 0x06:	EmuMD::m_portE->writeData(data); break;
+		case 0x08:	EmuMD::m_port1->writeCtrl(data); break;
+		case 0x0A:	EmuMD::m_port2->writeCtrl(data); break;
+		case 0x0C:	EmuMD::m_portE->writeCtrl(data); break;
 	}
 }
 
@@ -1152,7 +1083,15 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 		return;
 	}
 	
-	// MD miscellaneous registers.
+	/**
+	 * MD miscellaneous registers.
+	 * 0xA10002/0xA10003: Control Port 1: Data.
+	 * 0xA10004/0xA10005: Control Port 2: Data.
+	 * 0xA10006/0xA10007: Control Port 3: Data. (EXT)
+	 * 0xA10008/0xA10009: Control Port 1: CTRL.
+	 * 0xA1000A/0xA1000B: Control Port 2: CTRL.
+	 * 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
+	 */
 	switch (address & 0x00000E)
 	{
 		// Non-writable and not-implemented registers first.
@@ -1160,49 +1099,12 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 		default:
 			break;
 		
-		case 0x02:
-			/**
-			 * 0xA10002/0xA10003: Control Port 1: Data.
-			 */
-			EmuMD::m_port1->writeData(data);
-			break;
-		
-		case 0x04:
-			/**
-			 * 0xA10004/0xA10005: Control Port 2: Data.
-			 */
-			EmuMD::m_port2->writeData(data);
-			break;
-		
-		case 0x06:
-			/**
-			 * 0xA10006/0xA10007: Control Port 3: Data. (EXT)
-			 */
-			EmuMD::m_portE->writeData(data);
-			break;
-		
-		case 0x08:
-			/**
-			 * 0xA10008/0xA10009: Control Port 1: CTRL.
-			 */
-			EmuMD::m_port1->writeCtrl(data);
-			break;
-		
-		case 0x0A:
-			/**
-			 * 0xA1000A/0xA1000B: Control Port 2: CTRL.
-			 */
-			// TODO
-			EmuMD::m_port2->writeCtrl(data);
-			break;
-		
-		case 0x0C:
-			/**
-			 * 0xA1000C/0xA1000D: Control Port 3: CTRL. (EXT)
-			 */
-			// TODO
-			EmuMD::m_portE->writeCtrl(data);
-			break;
+		case 0x02:	EmuMD::m_port1->writeData(data); break;
+		case 0x04:	EmuMD::m_port2->writeData(data); break;
+		case 0x06:	EmuMD::m_portE->writeData(data); break;
+		case 0x08:	EmuMD::m_port1->writeCtrl(data); break;
+		case 0x0A:	EmuMD::m_port2->writeCtrl(data); break;
+		case 0x0C:	EmuMD::m_portE->writeCtrl(data); break;
 	}
 }
 
