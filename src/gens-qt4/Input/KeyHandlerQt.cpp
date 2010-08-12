@@ -110,6 +110,7 @@ void KeyHandlerQt::MousePressEvent(QMouseEvent *event)
 	int gensButton;
 	switch (event->button())
 	{
+		case Qt::NoButton:	return;
 		case Qt::LeftButton:	gensButton = LibGens::MBTN_LEFT; break;
 		case Qt::MidButton:	gensButton = LibGens::MBTN_MIDDLE; break;
 		case Qt::RightButton:	gensButton = LibGens::MBTN_RIGHT; break;
@@ -131,6 +132,7 @@ void KeyHandlerQt::MouseReleaseEvent(QMouseEvent *event)
 	int gensButton;
 	switch (event->button())
 	{
+		case Qt::NoButton:	return;
 		case Qt::LeftButton:	gensButton = LibGens::MBTN_LEFT; break;
 		case Qt::MidButton:	gensButton = LibGens::MBTN_MIDDLE; break;
 		case Qt::RightButton:	gensButton = LibGens::MBTN_RIGHT; break;
