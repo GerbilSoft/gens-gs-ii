@@ -102,6 +102,7 @@ class IoBase
 		// Serial I/O virtual functions.
 		// TODO: Baud rate delay handling, TL/TR handling.
 		// TODO: Trigger IRQ 2 on data receive if interrupt is enabled.
+		// NOTE: Serial mode used is 8n1: 1 start, 8 data, 1 stop = 10 baud per byte.
 		virtual void writeSerCtrl(uint8_t serCtrl) { m_serCtrl = serCtrl; }
 		virtual uint8_t readSerCtrl(void) { return m_serCtrl; }
 		virtual void writeSerTx(uint8_t data) { m_serLastTx = data; }
