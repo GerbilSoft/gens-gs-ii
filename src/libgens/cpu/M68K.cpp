@@ -229,7 +229,7 @@ void M68K::InitSys(SysID system)
 	main68k_reset();
 	
 	// Initialize the M68K memory handlers.
-	M68K_Mem::Init(system);
+	M68K_Mem::InitSys(system);
 }
 
 }

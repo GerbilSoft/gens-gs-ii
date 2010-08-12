@@ -112,7 +112,7 @@ class M68K_Mem
 		static int Gen_Mode;
 		
 		/** Public init and read/write functions. **/
-		static void Init(M68K::SysID system);
+		static void InitSys(M68K::SysID system);
 		static uint8_t M68K_RB(uint32_t address);
 		static uint16_t M68K_RW(uint32_t address);
 		static void M68K_WB(uint32_t address, uint8_t data);

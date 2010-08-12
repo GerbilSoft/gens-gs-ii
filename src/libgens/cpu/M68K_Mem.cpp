@@ -1399,10 +1399,10 @@ const M68K_Mem::M68K_Write_Word_fn M68K_Mem::MD_M68K_Write_Word_Table[0x20] =
 
 
 /**
- * M68K_Mem::Init(): Initialize the M68K memory handler.
+ * M68K_Mem::InitSys(): Initialize the M68K memory handler.
  * @param system System ID.
  */
-void M68K_Mem::Init(M68K::SysID system)
+void M68K_Mem::InitSys(M68K::SysID system)
 {
 	switch (system)
 	{
