@@ -233,12 +233,8 @@ section .bss align=64
 	
 	; Symbol redefines for ELF.
 	%ifdef __OBJ_ELF
-		%define	_M_Z80		M_Z80
 		%define	_mdZ80_def_mem	mdZ80_def_mem
 	%endif
-	global _M_Z80
-	_M_Z80:
-		Z80_CONTEXT
 
 	alignb 32
 	

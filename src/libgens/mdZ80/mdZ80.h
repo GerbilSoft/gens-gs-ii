@@ -10,7 +10,7 @@
 #define __MDZ80_H
 
 
-#include "../macros/gsft_fastcall.h"
+#include "../macros/fastcall.h"
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -272,14 +272,6 @@ struct _Z80_context
 };
 
 typedef struct _Z80_context Z80_CONTEXT;
-
-
-/*************************/
-/* Publics Z80 variables */
-/*************************/
-
-
-extern Z80_CONTEXT M_Z80;
 
 
 /**
