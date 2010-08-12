@@ -45,10 +45,9 @@ void Io6Button::writeCtrl(uint8_t ctrl)
 		// Increment the counter.
 		m_counter = ((m_counter + 2) & 0x06);
 		
-		// TODO: Reset the no-TH counter.
+		// Reset the scanline counter.
+		m_scanlines = 0;
 	}
-	
-	// TODO: Reset the counter after ~8.192 ms of no TH rising edges.
 }
 
 
@@ -70,10 +69,9 @@ void Io6Button::writeData(uint8_t data)
 		// Increment the counter.
 		m_counter = ((m_counter + 2) & 0x06);
 		
-		// TODO: Reset the no-TH counter.
+		// Reset the scanline counter.
+		m_scanlines = 0;
 	}
-	
-	// TODO: Reset the counter after ~8.192 ms of no TH rising edges.
 }
 
 
@@ -167,6 +165,22 @@ void Io6Button::update(void)
 	m_buttons <<= 1;
 	m_buttons |= KeyManager::IsKeyPressed(KEYV_UP);		// Up
 	m_buttons = ~m_buttons;
+}
+
+
+/**
+ * doScanline(): Scanling counter function.
+ */
+void Io6Button::doScanline(void)
+{
+	m_scanlines++;
+	if (m_scanlines > SCANLINE_COUNT_MAX)
+	{
+		// Scanline counter has reached its maximum value.
+		// Reset both counters.
+		m_counter = 0;
+		m_scanlines = 0;
+	}
 }
 
 

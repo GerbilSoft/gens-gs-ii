@@ -36,12 +36,14 @@ class Io6Button : public IoBase
 		{
 			m_buttons = ~0;
 			m_counter = 0;
+			m_scanlines = 0;
 		}
 		Io6Button(const IoBase *other)
 			: IoBase(other)
 		{
 			m_buttons = ~0;
 			m_counter = 0;
+			m_scanlines = 0;
 		}
 		virtual ~Io6Button() { }
 		
@@ -52,6 +54,9 @@ class Io6Button : public IoBase
 		
 		// I/O device update function.
 		void update(void);
+		
+		// Scanling counter function.
+		void doScanline(void);
 		
 		// Controller configuration.
 		const char *devName(void) const { return "6-button gamepad"; }
@@ -67,6 +72,15 @@ class Io6Button : public IoBase
 		 * to return to the system.
 		 */
 		int m_counter;
+		
+		/**
+		 * m_scanlines: Scanline counter.
+		 * This is used to determine when to reset m_counter.
+		 * (e.g. after 25 scanlines without a TH rising edge)
+		 */
+		int m_scanlines;
+		
+		static const int SCANLINE_COUNT_MAX = 25;
 };
 
 }
