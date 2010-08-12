@@ -97,6 +97,12 @@ class IoBase
 		// This needs to be reimplemented by derived classes.
 		virtual void update(void) { }
 		
+		// Scanline counter virtual function.
+		// This is used by the 6-button controller,
+		// which resets its internal counter after
+		// around 25 scanlines of no TH rising edges.
+		virtual void doScanline(void) { }
+		
 		enum IoType
 		{
 			IOT_NONE	= 0,
