@@ -27,7 +27,7 @@
 #include "libgens/IO/KeyManager.hpp"
 
 // Qt includes
-#include <Qt/qglobal.h>
+#include <qglobal.h>
 
 // Native virtual keycodes.
 #if defined(Q_WS_X11)
@@ -38,8 +38,6 @@
 #define NOMINMAX
 #endif
 #include <windows.h>
-#elif defined(Q_OS_MAC)
-#warning Mac OS X virtual keycodes are not defined!
 #endif
 
 namespace GensQt4
@@ -266,24 +264,27 @@ int KeyHandlerQt::QKeyEventToKeyVal(QKeyEvent *event)
  * @param event QKeyEvent.
  * @return LibGens key value. (0 for unknown)
  */
+#include <stdio.h>
 int KeyHandlerQt::NativeModifierToKeyVal(QKeyEvent *event)
 {
+	using namespace LibGens;
+	
 #if defined(Q_WS_X11)
 	// X11 keysym.
 	switch (event->nativeVirtualKey())
 	{
-		case XK_Shift_L:	return LibGens::KEYV_LSHIFT;
-		case XK_Shift_R:	return LibGens::KEYV_RSHIFT;
-		case XK_Control_L:	return LibGens::KEYV_LCTRL;
-		case XK_Control_R:	return LibGens::KEYV_RCTRL;
-		case XK_Meta_L:		return LibGens::KEYV_LMETA;
-		case XK_Meta_R:		return LibGens::KEYV_RMETA;
-		case XK_Alt_L:		return LibGens::KEYV_LALT;
-		case XK_Alt_R:		return LibGens::KEYV_RALT;
-		case XK_Super_L:	return LibGens::KEYV_LSUPER;
-		case XK_Super_R:	return LibGens::KEYV_RSUPER;
-		case XK_Hyper_L:	return LibGens::KEYV_LHYPER;
-		case XK_Hyper_R:	return LibGens::KEYV_RHYPER;
+		case XK_Shift_L:	return KEYV_LSHIFT;
+		case XK_Shift_R:	return KEYV_RSHIFT;
+		case XK_Control_L:	return KEYV_LCTRL;
+		case XK_Control_R:	return KEYV_RCTRL;
+		case XK_Meta_L:		return KEYV_LMETA;
+		case XK_Meta_R:		return KEYV_RMETA;
+		case XK_Alt_L:		return KEYV_LALT;
+		case XK_Alt_R:		return KEYV_RALT;
+		case XK_Super_L:	return KEYV_LSUPER;
+		case XK_Super_R:	return KEYV_RSUPER;
+		case XK_Hyper_L:	return KEYV_LHYPER;
+		case XK_Hyper_R:	return KEYV_RHYPER;
 		default:		break;
 	}
 #elif defined(Q_WS_WIN)
@@ -294,28 +295,45 @@ int KeyHandlerQt::NativeModifierToKeyVal(QKeyEvent *event)
 	// Instead, GetAsyncKeyState() is used in GensWindow::emuFrameDone().
 	switch (event->nativeVirtualKey())
 	{
-		case VK_LWIN:		return LibGens::KEYV_LSUPER;
-		case VK_RWIN:		return LibGens::KEYV_RSUPER;
+		case VK_LWIN:		return KEYV_LSUPER;
+		case VK_RWIN:		return KEYV_RSUPER;
 		default:		break;
 	}
+#elif defined(Q_WS_MAC)
+	/**
+	 * FIXME: Mac OS X doesn't allow user applications to
+	 * determine if left or right modifier keys are pressed.
+	 * (There should be flag somewhere that enables it,
+	 * since there are constants defined for both left
+	 * and right keys, but I can't seem to find them...)
+	 * 
+	 * For now, just use Left keys. (default handler)
+	 */
 #else
 	// Unhandled system.
 	#warning Unhandled system; modifier keys will fall back to Left variants!!
 #endif
 	
 	// Unhandled key. Return left key by default.
-	// TODO: Work around Qt's weird antics regarding Control/Meta/Super/etc.
 	switch (event->key())
 	{
-		case Qt::Key_Shift:	return LibGens::KEYV_LSHIFT;
-		case Qt::Key_Control:	return LibGens::KEYV_LCTRL;
-		case Qt::Key_Meta:	return LibGens::KEYV_LMETA;
-		case Qt::Key_Alt:	return LibGens::KEYV_LALT;
-		case Qt::Key_Super_L:	return LibGens::KEYV_LSUPER;
-		case Qt::Key_Super_R:	return LibGens::KEYV_RSUPER;
-		case Qt::Key_Hyper_L:	return LibGens::KEYV_LHYPER;
-		case Qt::Key_Hyper_R:	return LibGens::KEYV_RHYPER;
-		default:		return LibGens::KEYV_UNKNOWN;
+		case Qt::Key_Shift:	return KEYV_LSHIFT;
+#ifdef Q_OS_MAC
+		// Qt/Mac remaps some keys:
+		// Qt::Key_Control == Command
+		// Qt::Key_Meta == Control
+		case Qt::Key_Control:	return KEYV_LSUPER;
+		case Qt::Key_Meta:	return KEYV_LCTRL;
+#else
+		case Qt::Key_Control:	return KEYV_LCTRL;
+		case Qt::Key_Meta:	return KEYV_LMETA;
+#endif /* Q_OS_MAC */
+		case Qt::Key_Alt:	return KEYV_LALT;
+		case Qt::Key_Super_L:	return KEYV_LSUPER;
+		case Qt::Key_Super_R:	return KEYV_RSUPER;
+		case Qt::Key_Hyper_L:	return KEYV_LHYPER;
+		case Qt::Key_Hyper_R:	return KEYV_RHYPER;
+		default:		return KEYV_UNKNOWN;
 	}
 }
 

@@ -56,13 +56,20 @@ void KeyManager::End(void)
  */
 #if defined(__APPLE__)
 #define RETURN_KEYNAME "Return"
+#define ENTER_KEYNAME "Enter"
 #define SUPER_KEYNAME "Command"
+#define ALT_KEYNAME "Option"
+#define NO_MODIFIER_LR
 #elif defined(_WIN32)
 #define RETURN_KEYNAME "Enter"
+#define ENTER_KEYNAME "Numpad Enter"
 #define SUPER_KEYNAME "Win"
+#define ALT_KEYNAME "Alt"
 #else
 #define RETURN_KEYNAME "Enter"
+#define ENTER_KEYNAME "Numpad Enter"
 #define SUPER_KEYNAME "Super"
+#define ALT_KEYNAME "Alt"
 #endif
 
 const char *KeyManager::ms_KeyNames[KEYV_LAST] =
@@ -95,7 +102,7 @@ const char *KeyManager::ms_KeyNames[KEYV_LAST] =
 	"Numpad 0", "Numpad 1", "Numpad 2", "Numpad 3",
 	"Numpad 4", "Numpad 5", "Numpad 6", "Numpad 7",
 	"Numpad 8", "Numpad 9", "Numpad .", "Numpad /",
-	"Numpad *", "Numpad -", "Numpad +", "Numpad Enter",
+	"Numpad *", "Numpad -", "Numpad +", ENTER_KEYNAME,
 	
 	// 0x90
 	"Numpad =", "Up", "Down", "Right",
@@ -109,10 +116,13 @@ const char *KeyManager::ms_KeyNames[KEYV_LAST] =
 	"F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24",
 	"F25", "F26", "F27", "F28", "F29", "F30", "F31", "F32",
 	
+#ifndef NO_MODIFIER_LR
+	// System supports L/R modifiers.
+	
 	/** @name 0xC0: Key state modifier keys */
 	"Num Lock", "Caps Lock", "Scroll Lock", "Left Shift",
-	"Right Shift", "Left Ctrl", "Right Ctrl", "Left Alt",
-	"Right Alt", "Left Meta", "Right Meta", "Left " SUPER_KEYNAME,
+	"Right Shift", "Left Ctrl", "Right Ctrl", "Left " ALT_KEYNAME,
+	"Right " ALT_KEYNAME, "Left Meta", "Right Meta", "Left " SUPER_KEYNAME,
 	"Right " SUPER_KEYNAME, "Alt-Gr", "Compose", "Left Hyper",
 	
 	/** @name 0xD0: Key state modifier keys (continued) */
@@ -120,6 +130,22 @@ const char *KeyManager::ms_KeyNames[KEYV_LAST] =
 	NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL,
+#else
+	// System doesn't support L/R modifiers.
+	// Map Left keys as general keys and don't map Right keys.
+	
+	/** @name 0xC0: Key state modifier keys */
+	"Num Lock", "Caps Lock", "Scroll Lock", "Shift",
+	NULL, "Ctrl", NULL, ALT_KEYNAME,
+	NULL, "Meta", NULL, SUPER_KEYNAME,
+	NULL, "Alt-Gr", "Compose", "Hyper",
+	
+	/** @name 0xD0: Key state modifier keys (continued) */
+	NULL, "Direction", NULL, NULL,
+	NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL,
+#endif /* NO_MODIFIER_LR */
 	
 	/** @name 0xE0: Miscellaneous function keys */
 	"Help", "Print Screen", "SysRq", "Break",
