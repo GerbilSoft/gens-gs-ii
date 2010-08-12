@@ -115,7 +115,7 @@ STARSCREAM_DATAREGION M68K::M68K_Write_Word[3] =
 
 
 /**
- * M68K::M68K_Reset_Handler(): Reset handler.
+ * M68K_Reset_Handler(): Reset handler.
  * TODO: What does this function do?
  */
 void M68K::M68K_Reset_Handler(void)
@@ -125,7 +125,7 @@ void M68K::M68K_Reset_Handler(void)
 
 
 /**
- * M68K::Init(): Initialize the M68K CPU emulator.
+ * Init(): Initialize the M68K CPU emulator.
  */
 void M68K::Init(void)
 {
@@ -162,7 +162,7 @@ void M68K::End()
 
 
 /**
- * M68K::InitSys(): Initialize a specific system for the M68K CPU emulator.
+ * InitSys(): Initialize a specific system for the M68K CPU emulator.
  * @param system System ID.
  */
 void M68K::InitSys(SysID system)
