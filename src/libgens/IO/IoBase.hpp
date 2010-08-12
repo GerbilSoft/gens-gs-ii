@@ -41,6 +41,11 @@ class IoBase
 			m_ctrl = 0x00;		// input
 			m_lastData = 0xFF;	// all ones
 			m_buttons = ~0;		// no buttons pressed
+			
+			// Serial settings.
+			m_serCtrl = 0x00;	// parallel mode
+			m_serLastTx = 0xFF;
+			
 			updateSelectLine();
 		}
 		IoBase(const IoBase *other)
@@ -50,6 +55,9 @@ class IoBase
 			m_lastData = other->m_lastData;
 			m_buttons = ~0;		// buttons are NOT copied!
 			updateSelectLine();
+			
+			// Serial settings.
+			m_serCtrl = other->m_serCtrl;
 		}
 		virtual ~IoBase() { }
 		
@@ -66,6 +74,7 @@ class IoBase
 		}
 		
 		// MD-side controller functions.
+		// TODO: Trigger IRQ 2 if TH interrupt is enabled.
 		virtual void writeCtrl(uint8_t ctrl)
 		{
 			m_ctrl = ctrl;
@@ -88,6 +97,15 @@ class IoBase
 			uint8_t tris = (~m_ctrl & 0x7F);
 			return (m_lastData | tris);
 		}
+		
+		// Serial I/O virtual functions.
+		// TODO: Baud rate delay handling, TL/TR handling.
+		// TODO: Trigger IRQ 2 on data receive if interrupt is enabled.
+		virtual void writeSerCtrl(uint8_t serCtrl) { m_serCtrl = serCtrl; }
+		virtual uint8_t readSerCtrl(void) { return m_serCtrl; }
+		virtual void writeSerTx(uint8_t data) { m_serLastTx = data; }
+		virtual uint8_t readSerTx(void) { return m_serLastTx; }
+		virtual uint8_t readSerRx(void) { return 0xFF; }
 		
 		// I/O device update virtual function.
 		// This needs to be reimplemented by derived classes.
@@ -229,6 +247,39 @@ class IoBase
 			BTNI_MOUSE_MIDDLE	= 2,
 			BTNI_MOUSE_START	= 3	// Start
 		};
+		
+		/** Serial I/O definitions and variables. **/
+		
+		/**
+		 * @name Serial I/O control bitfield.
+		 */
+		enum SerCtrl
+		{
+			 SERCTRL_TFUL	= 0x01,		// TxdFull (1 == full)
+			 SERCTRL_RRDY	= 0x02,		// RxdReady (1 == ready)
+			 SERCTRL_RERR	= 0x04,		// RxdError (1 == error)
+			 SERCTRL_RINT	= 0x08,		// Rxd Interrupt (1 == on)
+			 SERCTRL_SOUT	= 0x10,		// TL mode. (1 == serial out; 0 == parallel)
+			 SERCTRL_SIN	= 0x20,		// TR mode. (1 == serial in; 0 == parallel)
+			 SERCTRL_BPS0	= 0x40,
+			 SERCTRL_BPS1	= 0x80
+		};
+		
+		/**
+		 * @name Serial I/O baud rate values.
+		 */
+		enum SerBaud
+		{
+			SERBAUD_4800	= 0x00,
+			SERBAUD_2400	= 0x01,
+			SERBAUD_1200	= 0x02,
+			SERBAUD_300	= 0x03
+		};
+		
+		// Serial I/O variables.
+		// TODO: Serial data buffer.
+		uint8_t m_serCtrl;	// Serial control.
+		uint8_t m_serLastTx;	// Last transmitted data byte.
 	
 	private:
 		// Select line state.
