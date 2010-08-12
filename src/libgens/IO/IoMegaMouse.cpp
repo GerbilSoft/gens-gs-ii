@@ -51,20 +51,24 @@ void IoMegaMouse::writeCtrl(uint8_t ctrl)
 		return;
 	}
 	
-	// Check if the TH line has gone from HI to LO.
-	if (oldSelect && !isSelect())
+	if (m_counter == 0)
 	{
-		// TH line went low.
-		// Assume oldTR == true;
-		oldTR = true;
+		// Wait for TH falling edge.
+		if (oldSelect && !isSelect())
+		{
+			// TH falling edge.
+			m_counter++;
+		}
 	}
-	
-	// Check if the TR line has changed.
-	bool newTR = (!(m_ctrl & IOPIN_TR) || (m_lastData & IOPIN_TR));
-	if (oldTR ^ newTR)
+	else
 	{
-		// IOPIN_TR has changed.
-		m_counter++;
+		// Check for TR transition.
+		bool newTR = (!(m_ctrl & IOPIN_TR) || (m_lastData & IOPIN_TR));
+		if (oldTR ^ newTR)
+		{
+			// IOPIN_TR has changed.
+			m_counter++;
+		}
 	}
 }
 
@@ -88,20 +92,24 @@ void IoMegaMouse::writeData(uint8_t data)
 		return;
 	}
 	
-	// Check if the TH line has gone from HI to LO.
-	if (oldSelect && !isSelect())
+	if (m_counter == 0)
 	{
-		// TH line went low.
-		// Assume oldTR == false;
-		oldTR = false;
+		// Wait for TH falling edge.
+		if (oldSelect && !isSelect())
+		{
+			// TH falling edge.
+			m_counter++;
+		}
 	}
-	
-	// Check if the TR line has changed.
-	bool newTR = (!(m_ctrl & IOPIN_TR) || (m_lastData & IOPIN_TR));
-	if (oldTR ^ newTR)
+	else
 	{
-		// IOPIN_TR has changed.
-		m_counter++;
+		// Check for TR transition.
+		bool newTR = (!(m_ctrl & IOPIN_TR) || (m_lastData & IOPIN_TR));
+		if (oldTR ^ newTR)
+		{
+			// IOPIN_TR has changed.
+			m_counter++;
+		}
 	}
 }
 
