@@ -1247,6 +1247,10 @@ M68K_Mem::M68K_Write_Word_fn M68K_Mem::M68K_Write_Word_Table[0x20];
 /** Default function tables. **/
 
 
+/**
+ * MD_M68K_Read_Byte_Table[]: MD Read Byte function table.
+ * 512 KB pages; 32 entries.
+ */
 const M68K_Mem::M68K_Read_Byte_fn M68K_Mem::MD_M68K_Read_Byte_Table[0x20] =
 {
 	T_M68K_Read_Byte_RomX<0x0>,	// 0x000000 - 0x07FFFF [Bank 0x00]
@@ -1284,6 +1288,10 @@ const M68K_Mem::M68K_Read_Byte_fn M68K_Mem::MD_M68K_Read_Byte_Table[0x20] =
 };
 
 
+/**
+ * MD_M68K_Read_Word_Table[]: MD Read Word function table.
+ * 512 KB pages; 32 entries.
+ */
 const M68K_Mem::M68K_Read_Word_fn M68K_Mem::MD_M68K_Read_Word_Table[0x20] =
 {
 	T_M68K_Read_Word_RomX<0x0>,	// 0x000000 - 0x07FFFF [Bank 0x00]
@@ -1321,6 +1329,10 @@ const M68K_Mem::M68K_Read_Word_fn M68K_Mem::MD_M68K_Read_Word_Table[0x20] =
 };
 
 
+/**
+ * MD_M68K_Write_Byte_Table[]: MD Write Byte function table.
+ * 512 KB pages; 32 entries.
+ */
 const M68K_Mem::M68K_Write_Byte_fn M68K_Mem::MD_M68K_Write_Byte_Table[0x20] =
 {
 	M68K_Write_Byte_SRam,		// 0x000000 - 0x07FFFF [Bank 0x00]
@@ -1358,6 +1370,10 @@ const M68K_Mem::M68K_Write_Byte_fn M68K_Mem::MD_M68K_Write_Byte_Table[0x20] =
 };
 
 
+/**
+ * MD_M68K_Write_Word_Table[]: MD Write Word function table.
+ * 512 KB pages; 32 entries.
+ */
 const M68K_Mem::M68K_Write_Word_fn M68K_Mem::MD_M68K_Write_Word_Table[0x20] =
 {
 	M68K_Write_Word_SRam,		// 0x000000 - 0x07FFFF [Bank 0x00]

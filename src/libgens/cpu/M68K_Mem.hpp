@@ -164,7 +164,7 @@ class M68K_Mem
 		typedef void     (*M68K_Write_Byte_fn)(uint32_t address, uint8_t data);
 		typedef void     (*M68K_Write_Word_fn)(uint32_t address, uint16_t data);
 		
-		/** Main M68K function tables. (512 KB pages; 0x20 entries.) **/
+		/** Main M68K function tables. (512 KB pages; 32 entries.) **/
 		static M68K_Read_Byte_fn M68K_Read_Byte_Table[0x20];
 		static M68K_Read_Word_fn M68K_Read_Word_Table[0x20];
 		static M68K_Write_Byte_fn M68K_Write_Byte_Table[0x20];
