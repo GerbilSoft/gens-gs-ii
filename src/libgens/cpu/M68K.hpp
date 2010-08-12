@@ -39,6 +39,10 @@ class M68K
 		static void Init(void);
 		static void End(void);
 		
+		/**
+		 * @name System IDs
+		 * TODO: Use MDP system IDs?
+		 */
 		enum SysID
 		{
 			SYSID_MD	= 0,
@@ -47,6 +51,7 @@ class M68K
 			
 			SYSID_MAX
 		};
+		
 		static void InitSys(SysID system);
 	
 	protected:
