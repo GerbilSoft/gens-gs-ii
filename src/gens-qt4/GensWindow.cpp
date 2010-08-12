@@ -28,6 +28,7 @@
 
 // Qt4 windows.
 #include "AboutWindow.hpp"
+#include "CtrlConfigWindow.hpp"
 
 // LibGens.
 #include "libgens/lg_main.hpp"
@@ -420,6 +421,11 @@ void GensWindow::menuTriggered(int id)
 				
 				case MNUID_ITEM(IDM_CTRLTEST_MEGAMOUSE):
 					m_ctrlChange = 4;
+					break;
+				
+				case MNUID_ITEM(IDM_CTRLTEST_CONFIG):
+					// Controller Configuration.
+					CtrlConfigWindow::ShowSingle(this);
 					break;
 				
 				default:

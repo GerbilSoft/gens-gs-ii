@@ -60,6 +60,7 @@ SET(gens-qt4_SRCS
 	VBackend/VBackend.cpp
 	VBackend/GensQGLWidget.cpp
 	Input/KeyHandlerQt.cpp
+	CtrlConfigWindow.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -70,6 +71,7 @@ SET(gens-qt4_MOC_HEADERS
 	EmuThread.hpp
 	GensQApplication.hpp
 	VBackend/GensQGLWidget.hpp
+	CtrlConfigWindow.hpp
 	)
 
 # Create .moc files for sources that need them.
@@ -78,6 +80,7 @@ QT4_WRAP_CPP(gens-qt4_MOC_SOURCES ${gens-qt4_MOC_HEADERS})
 # UI files.
 SET(gens-qt4_UIS
 	ui/AboutWindow.ui
+	ui/CtrlConfigWindow.ui
 	)
 
 # Generate the header files from the UI files.
