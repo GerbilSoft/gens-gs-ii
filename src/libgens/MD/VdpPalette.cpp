@@ -41,7 +41,7 @@ int VdpPalette::Contrast = 100;
 int VdpPalette::Brightness = 100;
 bool VdpPalette::Grayscale = false;
 bool VdpPalette::InvertColor = false;
-VdpPalette::ColorScaleMethod_t VdpPalette::ColorScaleMethod = VdpPalette::COLSCALE_FULL_HS;
+VdpPalette::ColorScaleMethod_t VdpPalette::ColorScaleMethod = VdpPalette::COLSCALE_FULL;
 
 
 /**

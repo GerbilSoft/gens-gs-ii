@@ -46,6 +46,9 @@ class VdpPalette
 		static bool InvertColor;
 		
 		// Color scale method.
+		// TODO: Possibly remove COLSCALE_FULL_HS, since it's incorrect.
+		// Normal MD(0xEEE) and highlighted MD(0xEEE) have the same brightness.
+		// This was tested by TmEE on hardware. (Genesis 2)
 		enum ColorScaleMethod_t
 		{
 			COLSCALE_RAW = 0,	// Raw colors: 0xEEE -> 0xE0E0E0
