@@ -122,6 +122,9 @@ class M68K_Mem
 		/** Z80/M68K cycle table. **/
 		static int Z80_M68K_Cycle_Tab[512];
 		
+		/** Bus acquisition timing. **/
+		static const int CYCLE_FOR_TAKE_Z80_BUS_GENESIS = 16;
+		
 		/** Read Byte functions. **/
 		static uint8_t M68K_Read_Byte_Default(uint32_t address);
 		

@@ -26,9 +26,13 @@
 #include "Util/cpuflags.h"
 #include "Util/Timing.hpp"
 
-// Emulation code.
+// CPU emulation code.
 #include "cpu/M68K.hpp"
 #include "cpu/M68K_Mem.hpp"
+#include "cpu/Z80.hpp"
+#include "cpu/Z80_MD_Mem.hpp"
+
+// System emulation code.
 #include "MD/EmuMD.hpp"
 
 // I/O devices.
@@ -102,6 +106,8 @@ int Init(void)
 	Timing::Init();
 	M68K::Init();
 	M68K_Mem::Init();
+	Z80::Init();
+	Z80_MD_Mem::Init();
 	
 	EmuMD::Init();
 	KeyManager::Init();
@@ -129,6 +135,8 @@ int End(void)
 	Timing::End();
 	M68K::End();
 	M68K_Mem::End();
+	Z80::End();
+	Z80_MD_Mem::End();
 	
 	EmuMD::End();
 	KeyManager::End();

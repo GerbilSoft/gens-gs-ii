@@ -24,6 +24,10 @@
 #include "M68K_Mem.hpp"
 #include "MD/VdpIo.hpp"
 
+// Z80 CPU emulator and memory space.
+#include "Z80.hpp"
+#include "Z80_MD_Mem.hpp"
+
 // C includes.
 #include <string.h>
 
@@ -137,7 +141,6 @@ uint8_t M68K_Mem::M68K_Read_Byte_Default(uint32_t address)
  * TODO: XOR by 1 on little-endian systems only.
  * @param bank ROM bank number.
  */
-#include <stdio.h>
 template<uint8_t bank>
 uint8_t M68K_Mem::T_M68K_Read_Byte_RomX(uint32_t address)
 {
@@ -222,25 +225,14 @@ uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 			return 0;
 		}
 		
-		// Call the Z80 read function.
-		// TODO
-#if 0
-		push	ecx
-		push	edx
-		mov	ecx, ebx
-		and	ebx, 0x7000
-		and	ecx, 0x7FFF
-		shr	ebx, 10
-		call	[SYM(Z80_ReadB_Table) + ebx]
-		pop	edx
-		pop	ecx
-		ret
-#endif
-		return 0;
+		// Call the Z80 Read Byte function.
+		// TODO: CPU lockup on accessing 0x7Fxx or >=0x8000.
+		return Z80_MD_Mem::Z80_ReadB(address & 0xFFFF);
 	}
 	else if (address == 0xA11100)
 	{
 		// Z80 BUSREQ. (0xA11100)
+		// NOTE: Genesis Plus does BUSREQ at any even 0xA111xx...
 		if (Z80_State & Z80_STATE_BUSREQ)
 		{
 			// Z80 is currently running.
@@ -248,31 +240,20 @@ uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 		}
 		
 		// Z80 is not running.
-		// TODO
-#if 0
-	.z80_off:
-		call	SYM(main68k_readOdometer)
-		sub	eax, [SYM(Last_BUS_REQ_Cnt)]
-		cmp	eax, CYCLE_FOR_TAKE_Z80_BUS_GENESIS
-		ja	short .bus_taken
-		
-		movzx	eax, byte [SYM(Last_BUS_REQ_St)]
-		pop	ebx
-		or	al, 0x80
-		ret
-		
-	.bus_taken:
-		mov	eax, 0x80
-		pop	ebx
-		ret
-#endif
-		return 0x80;
+		int odo68k = main68k_readOdometer();
+		odo68k -= Last_BUS_REQ_Cnt;
+		if (odo68k <= CYCLE_FOR_TAKE_Z80_BUS_GENESIS)
+			return ((Last_BUS_REQ_St | 0x80) & 0xFF);
+		else
+			return 0x80;
 	}
 	else if (address > 0xA1001F)
 	{
 		// Invalid address.
 		return 0;
 	}
+	
+	// TODO: 0xA11200? (Z80 RESET)
 	
 	/**
 	 * MD miscellaneous registers.
@@ -498,70 +479,56 @@ uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 			return 0;
 		}
 		
-		// Call the Z80 read function.
+		// Call the Z80 Read Word function.
 		// NOTE: Z80 doesn't support word reads.
-		// TODO
-#if 0
-		push	ecx
-		push	edx
-		mov	ecx, ebx
-		and	ebx, 0x7000
-		and	ecx, 0x7FFF
-		shr	ebx, 10
-		call	[SYM(Z80_ReadB_Table) + ebx]
-		pop	edx
-		pop	ecx
-		pop	ebx
-		ret
-#endif
-		return 0;
+		// TODO: CPU lockup on accessing 0x7Fxx or >=0x8000.
+		return Z80_MD_Mem::Z80_ReadW(address & 0xFFFF);
 	}
 	else if (address == 0xA11100)
 	{
 		// Z80 BUSREQ. (0xA11100)
+		// NOTE: Genesis Plus does BUSREQ at any even 0xA111xx...
 		if (Z80_State & Z80_STATE_BUSREQ)
 		{
 			// Z80 is currently running.
 			// NOTE: Low byte is supposed to be from
 			// the next fetched instruction.
-			Fake_Fetch ^= 0xFF;
+			Fake_Fetch ^= 0xFF;	// Fake the next fetched instruction. ("random")
 			return (0x8100 | (Fake_Fetch & 0xFF));
 		}
 		
 		// Z80 is not running.
-		// TODO
-#if 0
-	.z80_off:
-		call	SYM(main68k_readOdometer)
-		sub	eax, [SYM(Last_BUS_REQ_Cnt)]
-		cmp	eax, CYCLE_FOR_TAKE_Z80_BUS_GENESIS
-		ja	short .bus_taken
-		
-		movzx	eax, byte [SYM(Fake_Fetch)]	; mov al, [SYM(Fake_Fetch)]
-		mov	ah, [SYM(Last_BUS_REQ_St)]
-		xor	al, 0xFF
-		add	ah, 0x80
-		mov	[SYM(Fake_Fetch)], al		; fake the next fetched instruction (random)
-		pop	ebx
-		ret
-	
-	align 16
-	
-	.bus_taken:
-		movzx	eax, byte [SYM(Fake_Fetch)]	; mov al, [SYM(Fake_Fetch)]
-		mov	ah, 0x80
-		xor	al, 0xFF
-		pop	ebx
-		mov	[SYM(Fake_Fetch)], al		; fake the next fetched instruction (random)
-		ret
-#endif
-		return 0x8000;
+		int odo68k = main68k_readOdometer();
+		odo68k -= Last_BUS_REQ_Cnt;
+		if (odo68k <= CYCLE_FOR_TAKE_Z80_BUS_GENESIS)
+		{
+			// bus not taken yet
+			uint16_t ret;
+			Fake_Fetch ^= 0xFF;	// Fake the next fetched instruction. ("random")
+			ret = (Fake_Fetch & 0xFF);
+			ret |= ((Last_BUS_REQ_St & 0xFF) << 8);
+			ret ^= 0xFF;
+			ret += 0x8000;
+			return ret;
+		}
+		else
+		{
+			// bus taken
+			uint16_t ret;
+			Fake_Fetch ^= 0xFF;	// Fake the next fetched instruction. ("random")
+			ret = (Fake_Fetch & 0xFF) | 0x8000;
+			ret |= ((Last_BUS_REQ_St & 0xFF) << 8);
+			ret ^= 0xFF;
+			return ret;
+		}
 	}
 	else if (address > 0xA1001F)
 	{
 		// Invalid address.
 		return 0;
 	}
+	
+	// TODO: 0xA11200? (Z80 RESET)
 	
 	/**
 	 * MD miscellaneous registers.
@@ -724,6 +691,7 @@ void M68K_Mem::M68K_Write_Byte_Ram(uint32_t address, uint8_t data)
  * @param address Address.
  * @param data Byte to write.
  */
+#include <stdio.h>
 void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 {
 	// Mask off the high byte of the address.
@@ -740,30 +708,21 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 			return;
 		}
 		
-		// Call the Z80 write function.
-		// TODO
-#if 0
-		push	edx
-		mov	ecx, ebx
-		and	ebx, 0x7000
-		and	ecx, 0x7FFF
-		shr	ebx, 10
-		mov	edx, eax
-		call	[SYM(Z80_WriteB_Table) + ebx]
-		pop	edx
-		pop	ecx
-		pop	ebx
-		ret
-#endif
+		// Call the Z80 Write Byte function.
+		// TODO: CPU lockup on accessing 0x7Fxx or >=0x8000.
+		Z80_MD_Mem::Z80_WriteB(address & 0xFFFF, data);
 		return;
 	}
 	else if (address == 0xA11100)
 	{
 		// Z80 BUSREQ. (0xA11100)
-		// TODO
+		// NOTE: Genesis Plus does BUSREQ at any even 0xA111xx...
+		// TODO: Combine with Byte Write version?
 		
 		// Zero the controller counters and delays.
-		// TODO
+		// NOTE: Genesis Plus doesn't do this, and it doesn't make sense.
+		// The controller counters and delays are located in the controller,
+		// not in the system.
 #if 0
 		xor	ecx, ecx
 		mov	dword [SYM(Controller_1_Counter)], ecx
@@ -772,14 +731,16 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 		mov	dword [SYM(Controller_2_Delay)], ecx
 #endif
 		
-		if (data & 1)
+		if (data & 0x01)
 		{
+			// M68K requests the bus.
 			// Disable the Z80.
 			Last_BUS_REQ_Cnt = main68k_readOdometer();
+			Last_BUS_REQ_St = (Z80_State & Z80_STATE_BUSREQ);
+			
 			if (Z80_State & Z80_STATE_BUSREQ)
 			{
 				// Z80 is running. Disable it.
-				Last_BUS_REQ_St = 1;
 				Z80_State &= ~Z80_STATE_BUSREQ;
 				
 				// TODO: Rework this.
@@ -788,20 +749,29 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 				
 				int edx = Cycles_Z80;
 				edx -= ebx;
-				//z80_Exec(M_Z80, edx); // TODO
+				Z80::Exec(edx);
 			}
 		}
 		else
 		{
+			// M68K releases the bus.
 			// Enable the Z80.
-			Z80_State |= Z80_STATE_BUSREQ;
-			int ebx = Cycles_M68K;
-			ebx -= main68k_readOdometer();
-			int edx = Cycles_Z80;
-			ebx = Z80_M68K_Cycle_Tab[ebx];
-			edx -= ebx;
-			
-			//mdZ80_set_odo(M_Z80, edx);	// TODO
+			if (!(Z80_State & Z80_STATE_BUSREQ))
+			{
+				// Z80 is stopped. Enable it.
+				Z80_State |= Z80_STATE_BUSREQ;
+				
+				// TODO: Rework this.
+				int ebx = Cycles_M68K;
+				ebx -= main68k_readOdometer();
+				
+				int edx = Cycles_Z80;
+				ebx = Z80_M68K_Cycle_Tab[ebx];
+				edx -= ebx;
+				
+				// Set the Z80 odometer.
+				Z80::SetOdometer((unsigned int)edx);
+			}
 		}
 		
 		return;
@@ -809,21 +779,21 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 	else if (address == 0xA11200)
 	{
 		// Z80 RESET. (0xA11200)
-		if (data & 1)
+		// NOTE: Genesis Plus does RESET at any even 0xA112xx...
+		if (data & 0x01)
 		{
-			// RESET is high. Start the Z80.
-			Z80_State &= ~Z80_STATE_RESET;
-		}
-		else
-		{
-			// RESET is low. Stop the Z80.
-			// TODO
-			//mdZ80_reset();
+			// RESET is high. Stop the Z80.
+			Z80::Reset();
 			Z80_State |= Z80_STATE_RESET;
 			
 			// YM2612's RESET line is tied to the Z80's RESET line.
 			// TODO
 			//YM2612_Reset();
+		}
+		else
+		{
+			// RESET is low. Start the Z80.
+			Z80_State &= ~Z80_STATE_RESET;
 		}
 	}
 	else if (address == 0xA130F1)
@@ -1018,28 +988,22 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 			return;
 		}
 		
-		// Call the Z80 write function.
-		// TODO
-#if 0
-		push	edx
-		mov	ecx, ebx
-		and	ebx, 0x7000
-		and	ecx, 0x7FFF
-		shr	ebx, 10
-		mov	edx, eax
-		call	[SYM(Z80_WriteB_Table) + ebx]
-		pop	edx
-		pop	ecx
-		pop	ebx
-		ret
-#endif
-		return;
+		// Call the Z80 Write Word function.
+		// NOTE: Z80 doesn't support word writes.
+		// TODO: CPU lockup on accessing 0x7Fxx or >=0x8000.
+		Z80_MD_Mem::Z80_WriteW(address & 0xFFFF, data);
 	}
 	else if (address == 0xA11100)
 	{
 		// Z80 BUSREQ. (0xA11100)
-		// TODO
+		// NOTE: Genesis Plus does BUSREQ at any even 0xA111xx...
+		// NOTE: We're doing it at odd addresses!
+		// TODO: Combine with Byte Write version?
 		
+		// Zero the controller counters and delays.
+		// NOTE: Genesis Plus doesn't do this, and it doesn't make sense.
+		// The controller counters and delays are located in the controller,
+		// not in the system.
 #if 0
 		xor	ecx, ecx
 		mov	al, [SYM(Z80_State)]
@@ -1048,79 +1012,75 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 		mov	dword [SYM(Controller_1_Delay)], ecx
 		mov	dword [SYM(Controller_2_Counter)], ecx
 		mov	dword [SYM(Controller_2_Delay)], ecx
-		jnz	short .deactivated
-		
-		test	al, Z80_STATE_BUSREQ
-		jnz	short .already_activated
-		
-		or	al, Z80_STATE_BUSREQ
-		push	edx
-		mov	[SYM(Z80_State)], al
-		mov	ebx, [SYM(Cycles_M68K)]
-		call	SYM(main68k_readOdometer)
-		sub	ebx, eax
-		mov	edx, [SYM(Cycles_Z80)]
-		mov	ebx, [SYM(Z80_M68K_Cycle_Tab) + ebx * 4]
-		sub	edx, ebx
-		
-		push	edx
-		push	SYM(M_Z80)
-		call	SYM(mdZ80_set_odo)
-		add	esp, byte 8
-		pop	edx
-	
-	.already_activated:
-		pop	ecx
-		pop	ebx
-		ret
-	
-	align 16
-	
-	.deactivated:
-		call	SYM(main68k_readOdometer)
-		mov	cl, [SYM(Z80_State)]
-		mov	[SYM(Last_BUS_REQ_Cnt)], eax
-		test	cl, Z80_STATE_BUSREQ
-		setnz	[SYM(Last_BUS_REQ_St)]
-		jz	short .already_deactivated
-		
-		push	edx
-		mov	ebx, [SYM(Cycles_M68K)]
-		and	cl, ~Z80_STATE_BUSREQ
-		sub	ebx, eax
-		mov	[SYM(Z80_State)], cl
-		mov	edx, [SYM(Cycles_Z80)]
-		mov	ebx, [SYM(Z80_M68K_Cycle_Tab) + ebx * 4]
-		mov	ecx, SYM(M_Z80)
-		sub	edx, ebx
-		call	z80_Exec
-		pop	edx
-	
-	.already_deactivated:
-		pop	ecx
-		pop	ebx
-		ret
 #endif
+		
+		// NOTE: Test data against 0x0100, since 68000 is big-endian.
+		if (data & 0x0100)
+		{
+			// M68K requests the bus.
+			// Disable the Z80.
+			Last_BUS_REQ_Cnt = main68k_readOdometer();
+			Last_BUS_REQ_St = (Z80_State & Z80_STATE_BUSREQ);
+			
+			if (Z80_State & Z80_STATE_BUSREQ)
+			{
+				// Z80 is running. Disable it.
+				Z80_State &= ~Z80_STATE_BUSREQ;
+				
+				// TODO: Rework this.
+				int ebx = (Cycles_M68K - Last_BUS_REQ_Cnt);
+				ebx = Z80_M68K_Cycle_Tab[ebx];
+				
+				int edx = Cycles_Z80;
+				edx -= ebx;
+				Z80::Exec(edx);
+			}
+		}
+		else
+		{
+			// M68K releases the bus.
+			// Enable the Z80.
+			if (!(Z80_State & Z80_STATE_BUSREQ))
+			{
+				// Z80 is stopped. Enable it.
+				Z80_State |= Z80_STATE_BUSREQ;
+				
+				// TODO: Rework this.
+				int ebx = Cycles_M68K;
+				ebx -= main68k_readOdometer();
+				
+				int edx = Cycles_Z80;
+				ebx = Z80_M68K_Cycle_Tab[ebx];
+				edx -= ebx;
+				
+				// Set the Z80 odometer.
+				Z80::SetOdometer((unsigned int)edx);
+			}
+		}
+		
 		return;
 	}
 	else if (address == 0xA11200)
 	{
 		// Z80 RESET. (0xA11200)
+		// NOTE: Genesis Plus does RESET at any even 0xA112xx...
+		// NOTE: We're doing it at odd addresses!
+		
+		// NOTE: Test data against 0x0100, since 68000 is big-endian.
 		if (data & 0x0100)
 		{
-			// RESET is high. Start the Z80.
-			Z80_State &= ~Z80_STATE_RESET;
-		}
-		else
-		{
-			// RESET is low. Stop the Z80.
-			// TODO
-			//mdZ80_reset();
+			// RESET is high. Stop the Z80.
+			Z80::Reset();
 			Z80_State |= Z80_STATE_RESET;
 			
 			// YM2612's RESET line is tied to the Z80's RESET line.
 			// TODO
 			//YM2612_Reset();
+		}
+		else
+		{
+			// RESET is low. Start the Z80.
+			Z80_State &= ~Z80_STATE_RESET;
 		}
 	}
 	else if (address == 0xA130F1)

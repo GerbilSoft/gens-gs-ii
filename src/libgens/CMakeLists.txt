@@ -49,6 +49,8 @@ SET(libgens_SRCS
 	IO/Io2Button.cpp
 	IO/IoMegaMouse.cpp
 	IO/KeyManager.cpp
+	cpu/Z80.cpp
+	cpu/Z80_MD_Mem.cpp
 	)
 
 # Compatibility sources.

@@ -28,8 +28,11 @@
 #include "VdpRend.hpp"
 #include "VdpPalette.hpp"
 
-// CPUs.
+// CPU emulators.
 #include "cpu/M68K.cpp"
+#include "cpu/Z80.hpp"
+
+// Byteswapping macros and functions.
 #include "Util/byteswap.h"
 
 // I/O devices.
@@ -121,6 +124,10 @@ void EmuMD::Init_TEST(void)
 	// Initialize the M68K.
 	M68K::InitSys(M68K::SYSID_MD);
 	
+	// Reset the Z80.
+	M68K_Mem::Z80_State = Z80_STATE_ENABLED;	// TODO: "Sound, Z80" setting.
+	Z80::Reset();
+	
 	// Reset the controller ports.
 	m_port1->reset();
 	m_port2->reset();
@@ -138,6 +145,7 @@ void EmuMD::Init_TEST(void)
 	// Initialize CPL.
 	// TODO: Initialize this somewhere else.
 	M68K_Mem::CPL_M68K = (int)rint((((double)CLOCK_NTSC / 7.0) / 60.0) / 262.0);
+	M68K_Mem::CPL_Z80 = (int)rint((((double)CLOCK_NTSC / 15.0) / 60.0) / 262.0);
 	
 	printf("test.bin loaded: %d bytes. Start the emulator thread!\n", M68K_Mem::Rom_Size);
 }
@@ -166,10 +174,13 @@ FORCE_INLINE void EmuMD::T_Do_Line(void)
 	m_port2->doScanline();
 	m_portE->doScanline();
 	
+	// Increment the cycles counter.
+	// These values are the "last cycle to execute".
+	// e.g. if Cycles_M68K is 5000, then we'll execute instructions
+	// until the 68000's "odometer" reaches 5000.
 	M68K_Mem::Cycles_M68K += M68K_Mem::CPL_M68K;
-#if 0
-	Cycles_Z80 += CPL_Z80;
-#endif
+	M68K_Mem::Cycles_Z80 += M68K_Mem::CPL_Z80;
+	
 	if (VdpIo::DMAT_Length)
 		main68k_addCycles(VdpIo::Update_DMA());
 	
@@ -208,9 +219,9 @@ FORCE_INLINE void EmuMD::T_Do_Line(void)
 				VdpIo::VDP_Status &= ~0x0008;
 			
 			main68k_exec(M68K_Mem::Cycles_M68K - 360);
+			Z80::Exec(168);
 #if 0
-			// TODO: CPU, Congratulations! (LibGens)
-			Z80_EXEC(168);
+			// TODO: Congratulations! (LibGens)
 			CONGRATULATIONS_POSTCHECK();
 #endif
 			
@@ -221,10 +232,11 @@ FORCE_INLINE void EmuMD::T_Do_Line(void)
 				
 				VdpIo::VDP_Int |= 0x8;
 				VdpIo::Update_IRQ_Line();
-#if 0
-				// TODO: CPU. (LibGens)
-				mdZ80_interrupt(&M_Z80, 0xFF);
-#endif
+				
+				// Z80 interrupt.
+				// TODO: Does this trigger on all VBlanks,
+				// or only if VINTs are enabled in the VDP?
+				Z80::Interrupt(0xFF);
 			}
 			
 			break;
@@ -242,10 +254,7 @@ FORCE_INLINE void EmuMD::T_Do_Line(void)
 	}
 	
 	main68k_exec(M68K_Mem::Cycles_M68K);
-#if 0
-	// TODO: CPU. (LibGens)
-	Z80_EXEC(0);
-#endif
+	Z80::Exec(0);
 }
 
 
@@ -278,10 +287,12 @@ FORCE_INLINE void EmuMD::T_Do_Frame(void)
 	YM_Len = PSG_Len = 0;
 #endif
 	
-	M68K_Mem::Cycles_M68K = /*Cycles_Z80 =*/ 0;
-	//Last_BUS_REQ_Cnt = -1000;
+	// Clear all of the cycle counters.
+	M68K_Mem::Cycles_M68K = 0;
+	M68K_Mem::Cycles_Z80 = 0;
+	M68K_Mem::Last_BUS_REQ_Cnt = -1000;
 	main68k_tripOdometer();
-	//mdZ80_clear_odo(&M_Z80);
+	Z80::ClearOdometer();
 	
 	// TODO: MDP. (LibGens)
 #if 0
