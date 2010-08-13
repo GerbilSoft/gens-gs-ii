@@ -1,8 +1,8 @@
 /***************************************************************************
- * libgsft: Common Functions.                                              *
- * gsft_bool.h: FASTCALL macros.                                           *
+ * libgens: Gens Emulation Library.                                        *
+ * fastcall.h: FASTCALL macros.                                            *
  *                                                                         *
- * Copyright (c) 2008-2009 by David Korth                                  *
+ * Copyright (c) 2008-2010 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GSFT_FASTCALL_H
-#define __GSFT_FASTCALL_H
+#ifndef __LIBGENS_MACROS_FASTCALL_H__
+#define __LIBGENS_MACROS_FASTCALL_H__
 
 #if !defined(__i386__)
 
@@ -51,4 +51,4 @@
 
 #endif /* !defined(__i386__) */
 
-#endif /* __GSFT_FASTCALL_H */
+#endif /* __LIBGENS_MACROS_FASTCALL_H__ */
