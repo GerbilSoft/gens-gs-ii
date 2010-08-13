@@ -52,6 +52,7 @@ SET(libgens_SRCS
 	cpu/Z80.cpp
 	cpu/Z80_MD_Mem.cpp
 	Save/SRam.cpp
+	Save/EEPRom.cpp
 	)
 
 # Compatibility sources.
