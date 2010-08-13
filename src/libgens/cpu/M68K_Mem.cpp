@@ -76,21 +76,16 @@ namespace LibGens
 /** ROM and RAM variables. **/
 //M68K_Mem::Ram_68k_t M68K_Mem::Ram_68k;	// TODO: Fix Starscream!
 M68K_Mem::Rom_Data_t M68K_Mem::Rom_Data;
+unsigned int M68K_Mem::Rom_Size;
 
-/** SRam variables. **/
-uint8_t  M68K_Mem::SRam[64 * 1024];
-uint32_t M68K_Mem::SRam_Start;
-uint32_t M68K_Mem::SRam_End;
-
-M68K_Mem::SRam_State_t M68K_Mem::SRam_State;
+// SRam.
+SRam M68K_Mem::m_SRam;
 
 /** Z80/M68K cycle table. **/
 int M68K_Mem::Z80_M68K_Cycle_Tab[512];
 
 // M68K static variables.
 // TODO: Improve some of these, especially the cycle counters!
-unsigned int M68K_Mem::Rom_Size;
-
 unsigned int M68K_Mem::Z80_State;
 int M68K_Mem::Last_BUS_REQ_Cnt;
 int M68K_Mem::Last_BUS_REQ_St;
@@ -164,11 +159,10 @@ uint8_t M68K_Mem::M68K_Read_Byte_Rom4(uint32_t address)
 	address &= 0xFFFFFF;
 	
 	// Check if this is an SRam data request.
-	if (SRam_State.on && SRam_State.enabled &&
-	    address >= SRam_Start && address <= SRam_End)
+	if (m_SRam.canRead() && m_SRam.isAddressInRange(address))
 	{
 		// SRam data request.
-		if (SRam_State.custom)
+		if (m_SRam.isCustom())
 		{
 			// Custom SRam.
 			// TODO: The original Gens code simply returns 0.
@@ -177,9 +171,10 @@ uint8_t M68K_Mem::M68K_Read_Byte_Rom4(uint32_t address)
 		}
 		
 		// Return the byte from SRam.
-		// Note: SRam is NOT byteswapped.
+		// NOTE: SRam is NOT byteswapped.
 		// TODO: Check boundaries.
-		return SRam[address - SRam_Start];
+		// TODO: Should start/end addressing be handled here or in SRam?
+		return m_SRam.readByte(address);
 	}
 	
 	// ROM data request.
@@ -417,11 +412,10 @@ uint16_t M68K_Mem::M68K_Read_Word_Rom4(uint32_t address)
 	address &= 0xFFFFFF;
 	
 	// Check if this is an SRam data request.
-	if (SRam_State.on && SRam_State.enabled &&
-	    address >= SRam_Start && address <= SRam_End)
+	if (m_SRam.canRead() && m_SRam.isAddressInRange(address))
 	{
 		// SRam data request.
-		if (SRam_State.custom)
+		if (m_SRam.isCustom())
 		{
 			// Custom SRam.
 			// TODO: The original Gens code simply returns 0.
@@ -430,11 +424,10 @@ uint16_t M68K_Mem::M68K_Read_Word_Rom4(uint32_t address)
 		}
 		
 		// Return the byte from SRam.
-		// Note: SRam is NOT byteswapped.
+		// NOTE: SRam is NOT byteswapped.
 		// TODO: Check boundaries.
-		// TODO: Proper byteswapping.
-		address -= SRam_Start;
-		return (SRam[address] << 8) | SRam[address+1];
+		// TODO: Should start/end addressing be handled here or in SRam?
+		return m_SRam.readWord(address);
 	}
 	
 	// ROM data request.
@@ -658,24 +651,15 @@ void M68K_Mem::M68K_Write_Byte_SRam(uint32_t address, uint8_t data)
 	address &= 0xFFFFFF;
 	
 	// Check if this is an SRam data request.
-	if (!SRam_State.on || !SRam_State.write || !SRam_State.enabled)
+	if (m_SRam.canWrite() && m_SRam.isAddressInRange(address))
 	{
-		// Don't write to SRam, because either:
-		// - !SRam_State.on: Disabled by ROM.
-		// - !SRam_State.write: SRam write is disabled.
-		// - !SRam_State.enabled: Disabled by user.
-		return;
-	}
-	
-	// Check if the write address is in range.
-	if (address >= SRam_Start && address <= SRam_End)
-	{
-		// SRam address is in range.
+		// SRam data request.
 		
 		// Write the byte to SRam.
-		// Note: SRam is NOT byteswapped.
+		// NOTE: SRam is NOT byteswapped.
 		// TODO: Check boundaries.
-		SRam[address - SRam_Start] = data;
+		// TODO: Should start/end addressing be handled here or in SRam?
+		return m_SRam.writeByte(address, data);
 	}
 }
 
@@ -808,8 +792,7 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 	else if (address == 0xA130F1)
 	{
 		// SRam control register. (0xA130F1)
-		SRam_State.on = (data & 1);
-		SRam_State.write = !(data & 2);
+		m_SRam.writeCtrl(data);
 	}
 	else if (address >= 0xA130F2 && address <= 0xA130FF)
 	{
@@ -946,24 +929,15 @@ void M68K_Mem::M68K_Write_Word_SRam(uint32_t address, uint16_t data)
 	address &= 0xFFFFFF;
 	
 	// Check if this is an SRam data request.
-	if (!SRam_State.on || !SRam_State.write || !SRam_State.enabled)
+	if (m_SRam.canWrite() && m_SRam.isAddressInRange(address))
 	{
-		// Don't write to SRam, because either:
-		// - !SRam_State.on: Disabled by ROM.
-		// - !SRam_State.write: SRam write is disabled.
-		// - !SRam_State.enabled: Disabled by user.
-		return;
-	}
-	
-	// Check if the write address is in range.
-	if (address >= SRam_Start && address <= SRam_End)
-	{
-		// SRam address is in range.
+		// SRam data request.
 		
-		// Write the byte to SRam.
-		// Note: SRam is NOT byteswapped.
+		// Write the word to SRam.
+		// NOTE: SRam is NOT byteswapped.
 		// TODO: Check boundaries.
-		SRam[address - SRam_Start] = data;
+		// TODO: Should start/end addressing be handled here or in SRam?
+		return m_SRam.writeWord(address, data);
 	}
 }
 
@@ -1102,8 +1076,7 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 	{
 		// SRam control register. (0xA130F0/0xA130F1)
 		// NOTE: NOT 0xA130F1 - this is a word write.
-		SRam_State.on = (data & 1);
-		SRam_State.write = !(data & 2);
+		m_SRam.writeCtrl(data);
 	}
 	else if (address >= 0xA130F2 && address <= 0xA130FF)
 	{

@@ -25,7 +25,6 @@
 #define __LIBGENS_CPU_M68K_MEM_HPP__
 
 #include <stdint.h>
-#include "M68K.hpp"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,6 +41,9 @@ extern Ram_68k_t Ram_68k;
 #ifdef __cplusplus
 }
 #endif
+
+#include "M68K.hpp"
+#include "../Save/SRam.hpp"
 
 namespace LibGens
 {
@@ -71,25 +73,15 @@ class M68K_Mem
 			uint32_t u32[(6*1024*1024)>>2];
 		};
 		static Rom_Data_t Rom_Data;
+		static unsigned int Rom_Size;
 		
 		// Genesis TMSS ROM.
 		static uint8_t MD_TMSS_Rom[2 * 1024];
 		
 		// SRam.
-		static uint8_t SRam[64 * 1024];
-		static uint32_t SRam_Start;
-		static uint32_t SRam_End;
-		
-		struct SRam_State_t
-		{
-			uint32_t on      : 1;
-			uint32_t write   : 1;
-			uint32_t custom  : 1;
-			uint32_t enabled : 1;
-		};
-		static SRam_State_t SRam_State;
-		
-		static unsigned int Rom_Size;
+		// TODO: Make this protected!
+		// TODO: Add a function e.g. M68K_Mem::Reset() to reset all memory handling.
+		static SRam m_SRam;
 		
 		/** Z80 state. **/
 		#define Z80_STATE_ENABLED	(1 << 0)

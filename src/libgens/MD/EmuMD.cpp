@@ -116,13 +116,11 @@ void EmuMD::Init_TEST(void)
 	// Initialize SRAM.
 	// TODO: Split into a separate function.
 	// TODO: Port Gens/GS's SRam initialization code to Gens/GS II.
-	M68K_Mem::SRam_State.enabled = 1;
-	M68K_Mem::SRam_State.custom = 0;
-	M68K_Mem::SRam_State.on = 0;
-	M68K_Mem::SRam_State.write = 0;
-	M68K_Mem::SRam_Start = 0x200000;
-	M68K_Mem::SRam_End = 0x20FFFF;
-	memset(M68K_Mem::SRam, 0xFF, sizeof(M68K_Mem::SRam));
+	// TODO: Add a function e.g. M68K_Mem::Reset() to reset all memory handling.
+	M68K_Mem::m_SRam.reset();
+	M68K_Mem::m_SRam.setEnabled(true);
+	M68K_Mem::m_SRam.setStart(0x200000);
+	M68K_Mem::m_SRam.setEnd(0x20FFFF);
 	
 	// Initialize the M68K.
 	M68K::InitSys(M68K::SYSID_MD);
