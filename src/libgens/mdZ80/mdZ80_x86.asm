@@ -59,7 +59,7 @@ BITS 32
 %ifdef __OBJ_WIN32
 	%define SYMF(sym, args) @ %+ sym %+ @ %+ args
 %else
-	%define SYMF(sym, args) sym
+	%define SYMF(sym, args) SYM(sym)
 %endif
 
 
