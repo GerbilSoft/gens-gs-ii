@@ -51,6 +51,7 @@ SET(libgens_SRCS
 	IO/KeyManager.cpp
 	cpu/Z80.cpp
 	cpu/Z80_MD_Mem.cpp
+	Save/SRam.cpp
 	)
 
 # Compatibility sources.
