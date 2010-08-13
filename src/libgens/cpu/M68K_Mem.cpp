@@ -1098,9 +1098,10 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 			Z80_State &= ~Z80_STATE_RESET;
 		}
 	}
-	else if (address == 0xA130F1)
+	else if (address == 0xA130F0)
 	{
-		// SRam control register. (0xA130F1)
+		// SRam control register. (0xA130F0/0xA130F1)
+		// NOTE: NOT 0xA130F1 - this is a word write.
 		SRam_State.on = (data & 1);
 		SRam_State.write = !(data & 2);
 	}
