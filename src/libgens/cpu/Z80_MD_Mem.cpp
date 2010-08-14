@@ -178,7 +178,9 @@ uint8_t FASTCALL Z80_MD_Mem::Z80_ReadB_YM2612(uint32_t address)
 #if 0
 	return YM2612_Read();
 #endif
-	return 0xFF;
+	// FIXME: Returning 0xFF breaks "Sonic 1 SAGE 2010".
+	// Return 0 instead.
+	return 0;
 }
 
 
@@ -293,7 +295,9 @@ uint16_t FASTCALL Z80_MD_Mem::Z80_ReadW_YM2612(uint32_t address)
 #if 0
 	return (YM2612_Read() & 0xFF);
 #endif
-	return 0xFF;
+	// FIXME: Returning 0xFF breaks "Sonic 1 SAGE 2010".
+	// Return 0 instead.
+	return 0;
 }
 
 
