@@ -78,8 +78,10 @@ namespace LibGens
 M68K_Mem::Rom_Data_t M68K_Mem::Rom_Data;
 unsigned int M68K_Mem::Rom_Size;
 
-// SRam.
+// SRam and EEPRom.
+bool M68K_Mem::SaveDataEnable = true;	// Enable SRam/EEPRom by default.
 SRam M68K_Mem::m_SRam;
+EEPRom M68K_Mem::m_EEPRom;
 
 /** Z80/M68K cycle table. **/
 int M68K_Mem::Z80_M68K_Cycle_Tab[512];
@@ -155,26 +157,34 @@ uint8_t M68K_Mem::T_M68K_Read_Byte_RomX(uint32_t address)
  */
 uint8_t M68K_Mem::M68K_Read_Byte_Rom4(uint32_t address)
 {
-	// Mask off the high byte of the address.
-	address &= 0xFFFFFF;
-	
-	// Check if this is an SRam data request.
-	if (m_SRam.canRead() && m_SRam.isAddressInRange(address))
+	// Check if this is a save data request.
+	if (SaveDataEnable)
 	{
-		// SRam data request.
-		if (m_SRam.isCustom())
-		{
-			// Custom SRam.
-			// TODO: The original Gens code simply returns 0.
-			// I have no idea what this is supposed to do.
-			return 0;
-		}
+		// Mask off the high byte of the address.
+		address &= 0xFFFFFF;
 		
-		// Return the byte from SRam.
-		// NOTE: SRam is NOT byteswapped.
-		// TODO: Check boundaries.
-		// TODO: Should start/end addressing be handled here or in SRam?
-		return m_SRam.readByte(address);
+		if (m_EEPRom.isReadBytePort(address))
+		{
+			// EEPRom read port.
+			return m_EEPRom.readByte(address);
+		}
+		else if (m_SRam.canRead() && m_SRam.isAddressInRange(address))
+		{
+			// SRam data request.
+			if (m_SRam.isCustom())
+			{
+				// Custom SRam.
+				// TODO: The original Gens code simply returns 0.
+				// I have no idea what this is supposed to do.
+				return 0;
+			}
+			
+			// Return the byte from SRam.
+			// NOTE: SRam is NOT byteswapped.
+			// TODO: Check boundaries.
+			// TODO: Should start/end addressing be handled here or in SRam?
+			return m_SRam.readByte(address);
+		}
 	}
 	
 	// ROM data request.
@@ -406,28 +416,37 @@ uint16_t M68K_Mem::T_M68K_Read_Word_RomX(uint32_t address)
  * @param address Address.
  * @return Word from ROM or SRam.
  */
+#include <stdio.h>
 uint16_t M68K_Mem::M68K_Read_Word_Rom4(uint32_t address)
 {
-	// Mask off the high byte of the address.
-	address &= 0xFFFFFF;
-	
-	// Check if this is an SRam data request.
-	if (m_SRam.canRead() && m_SRam.isAddressInRange(address))
+	// Check if this is a save data request.
+	if (SaveDataEnable)
 	{
-		// SRam data request.
-		if (m_SRam.isCustom())
-		{
-			// Custom SRam.
-			// TODO: The original Gens code simply returns 0.
-			// I have no idea what this is supposed to do.
-			return 0;
-		}
+		// Mask off the high byte of the address.
+		address &= 0xFFFFFF;
 		
-		// Return the byte from SRam.
-		// NOTE: SRam is NOT byteswapped.
-		// TODO: Check boundaries.
-		// TODO: Should start/end addressing be handled here or in SRam?
-		return m_SRam.readWord(address);
+		if (m_EEPRom.isReadWordPort(address))
+		{
+			// EEPRom read port.
+			return m_EEPRom.readWord(address);
+		}
+		else if (m_SRam.canRead() && m_SRam.isAddressInRange(address))
+		{
+			// SRam data request.
+			if (m_SRam.isCustom())
+			{
+				// Custom SRam.
+				// TODO: The original Gens code simply returns 0.
+				// I have no idea what this is supposed to do.
+				return 0;
+			}
+			
+			// Return the byte from SRam.
+			// NOTE: SRam is NOT byteswapped.
+			// TODO: Check boundaries.
+			// TODO: Should start/end addressing be handled here or in SRam?
+			return m_SRam.readWord(address);
+		}
 	}
 	
 	// ROM data request.
@@ -650,8 +669,18 @@ void M68K_Mem::M68K_Write_Byte_SRam(uint32_t address, uint8_t data)
 	// Mask off the high byte of the address.
 	address &= 0xFFFFFF;
 	
-	// Check if this is an SRam data request.
-	if (m_SRam.canWrite() && m_SRam.isAddressInRange(address))
+	if (!SaveDataEnable)
+	{
+		// Save data is disabled.
+		return;
+	}
+	
+	if (m_EEPRom.isWriteBytePort(address))
+	{
+		// EEPRom write port.
+		return m_EEPRom.writeByte(address, data);
+	}
+	else if (m_SRam.canWrite() && m_SRam.isAddressInRange(address))
 	{
 		// SRam data request.
 		
@@ -659,7 +688,7 @@ void M68K_Mem::M68K_Write_Byte_SRam(uint32_t address, uint8_t data)
 		// NOTE: SRam is NOT byteswapped.
 		// TODO: Check boundaries.
 		// TODO: Should start/end addressing be handled here or in SRam?
-		return m_SRam.writeByte(address, data);
+		m_SRam.writeByte(address, data);
 	}
 }
 
@@ -928,8 +957,18 @@ void M68K_Mem::M68K_Write_Word_SRam(uint32_t address, uint16_t data)
 	// Mask off the high byte of the address.
 	address &= 0xFFFFFF;
 	
-	// Check if this is an SRam data request.
-	if (m_SRam.canWrite() && m_SRam.isAddressInRange(address))
+	if (!SaveDataEnable)
+	{
+		// Save data is disabled.
+		return;
+	}
+	
+	if (m_EEPRom.isWriteWordPort(address))
+	{
+		// EEPRom write port.
+		return m_EEPRom.writeWord(address, data);
+	}
+	else if (m_SRam.canWrite() && m_SRam.isAddressInRange(address))
 	{
 		// SRam data request.
 		
@@ -937,7 +976,7 @@ void M68K_Mem::M68K_Write_Word_SRam(uint32_t address, uint16_t data)
 		// NOTE: SRam is NOT byteswapped.
 		// TODO: Check boundaries.
 		// TODO: Should start/end addressing be handled here or in SRam?
-		return m_SRam.writeWord(address, data);
+		m_SRam.writeWord(address, data);
 	}
 }
 

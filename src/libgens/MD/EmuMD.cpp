@@ -103,8 +103,30 @@ void EmuMD::Init_TEST(void)
 	
 	// Load the ROM into memory.
 	fread(&M68K_Mem::Rom_Data.u8[0], 1, M68K_Mem::Rom_Size, f);
-	be16_to_cpu_array(&M68K_Mem::Rom_Data.u8[0], M68K_Mem::Rom_Size);
 	fclose(f);
+	
+	// Enable SRam/EEPRom by default.
+	// TODO: Make accessor/mutator functions.
+	M68K_Mem::SaveDataEnable = true;
+	
+	// Initialize SRam.
+	// TODO: Split into a separate function.
+	// TODO: Port Gens/GS's SRam initialization code to Gens/GS II.
+	// TODO: Add a function e.g. M68K_Mem::Reset() to reset all memory handling.
+	M68K_Mem::m_SRam.reset();
+	M68K_Mem::m_SRam.setStart(0x200000);
+	M68K_Mem::m_SRam.setEnd(0x20FFFF);
+	
+	// Initialize EEPRom.
+	// EEPRom is only used if the ROM is in the EEPRom class's database.
+	// Otherwise, SRam is used.
+	M68K_Mem::m_EEPRom.reset();
+	int eprType = EEPRom::DetectEEPRomType(&M68K_Mem::Rom_Data.u8[0]);
+	M68K_Mem::m_EEPRom.setEEPRomType(eprType);
+	
+	// TODO: Byteswapping flags.
+	// Until they're implemented, byteswap the ROM *after* initializing SRam/EEPRom.
+	be16_to_cpu_array(&M68K_Mem::Rom_Data.u8[0], M68K_Mem::Rom_Size);
 	
 	// Initialize the VDP.
 	VdpIo::Reset();
@@ -112,15 +134,6 @@ void EmuMD::Init_TEST(void)
 	// Recalculate the full MD palette.
 	// TODO: This would usually be done at program startup.
 	VdpPalette::Recalc();
-	
-	// Initialize SRAM.
-	// TODO: Split into a separate function.
-	// TODO: Port Gens/GS's SRam initialization code to Gens/GS II.
-	// TODO: Add a function e.g. M68K_Mem::Reset() to reset all memory handling.
-	M68K_Mem::m_SRam.reset();
-	M68K_Mem::m_SRam.setEnabled(true);
-	M68K_Mem::m_SRam.setStart(0x200000);
-	M68K_Mem::m_SRam.setEnd(0x20FFFF);
 	
 	// Initialize the M68K.
 	M68K::InitSys(M68K::SYSID_MD);

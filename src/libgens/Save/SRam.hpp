@@ -35,9 +35,6 @@ class SRam
 	public:
 		SRam()
 		{
-			// Enable SRam by default.
-			m_enabled = true;
-			
 			// Reset SRam on startup.
 			reset();
 		}
@@ -76,9 +73,6 @@ class SRam
 		bool isCustom(void) const { return m_custom; }
 		void setCustom(bool newCustom) { m_custom = newCustom; }
 		
-		bool isEnabled(void) const { return m_enabled; }
-		void setEnabled(bool newEnabled) { m_enabled = newEnabled; }
-		
 		// TODO: Mask off the high byte in addresses?
 		uint32_t start(void) const { return m_start; }
 		void setStart(uint32_t newStart) { m_start = newStart; }
@@ -94,7 +88,7 @@ class SRam
 		 */
 		bool canRead(void) const
 		{
-			return (m_on && m_enabled);
+			return (m_on);
 		}
 		
 		/**
@@ -103,7 +97,7 @@ class SRam
 		 */
 		bool canWrite(void) const
 		{
-			return (m_on && m_write && m_enabled);
+			return (m_on && m_write);
 		}
 		
 		/**
@@ -173,7 +167,6 @@ class SRam
 		bool m_on;	// Is SRam enabled?
 		bool m_write;	// Is SRam writable?
 		bool m_custom;	// ???
-		bool m_enabled;	// Is SRam enabled by the user?
 		
 		uint32_t m_start;	// SRam starting address.
 		uint32_t m_end;		// SRam ending address.
