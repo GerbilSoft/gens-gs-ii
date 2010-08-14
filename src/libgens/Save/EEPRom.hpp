@@ -40,9 +40,6 @@ class EEPRom
 		
 		void reset(void);
 		
-		uint8_t portReadByte(uint32_t address);
-		uint16_t portReadWord(uint32_t address);
-		
 		/** EEPROM type detection. **/
 		static int DetectEEPRomType(const uint8_t *header);
 		
@@ -54,13 +51,32 @@ class EEPRom
 		int setEEPRomType(int type);
 		
 		/**
-		 * isEEPRomTypeSet(): Determine if an EEPRom type is set.
-		 * @return True if an EEPRom type is set; false if not.
+		 * isReadPort(): Determine if a given address is a readable port.
+		 * @param address Address.
+		 * @return True if the address is a readable port; false if not or if EEPRom is disabled.
 		 */
-		inline bool isEEPRomTypeSet(void)
+		inline bool isReadPort(uint32_t address)
 		{
-			return (m_eprType.game_id[0] != 0x00);
+			// We don't have to check if address == 0,
+			// since EEPRom is never checked at 0x000000.
+			return (address == m_eprType.type.sda_out_adr);
 		}
+		
+		/**
+		 * isWritePort(): Determine if a given address is a writable port.
+		 * @param address Address.
+		 * @return True if the address is a writable port; false if not or if EEPRom is disabled.
+		 */
+		inline bool isWritePort(uint32_t address)
+		{
+			// We don't have to check if address == 0,
+			// since EEPRom is never checked at 0x000000.
+			return (address == m_eprType.type.scl_adr ||
+				address == m_eprType.type.sda_in_adr);
+		}
+		
+		uint8_t portReadByte(uint32_t address);
+		uint16_t portReadWord(uint32_t address);
 		
 		void portWriteByte(uint32_t address, uint8_t data);
 		void portWriteWord(uint32_t address, uint16_t data);
