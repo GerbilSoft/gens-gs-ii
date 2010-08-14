@@ -526,7 +526,6 @@ uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 			Fake_Fetch ^= 0xFF;	// Fake the next fetched instruction. ("random")
 			ret = (Fake_Fetch & 0xFF);
 			ret |= ((Last_BUS_REQ_St & 0xFF) << 8);
-			ret ^= 0xFF;
 			ret += 0x8000;
 			return ret;
 		}
@@ -536,8 +535,6 @@ uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 			uint16_t ret;
 			Fake_Fetch ^= 0xFF;	// Fake the next fetched instruction. ("random")
 			ret = (Fake_Fetch & 0xFF) | 0x8000;
-			ret |= ((Last_BUS_REQ_St & 0xFF) << 8);
-			ret ^= 0xFF;
 			return ret;
 		}
 	}
