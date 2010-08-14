@@ -51,28 +51,41 @@ class EEPRom
 		int setEEPRomType(int type);
 		
 		/**
-		 * isReadPort(): Determine if a given address is a readable port.
+		 * Address verification functions.
+		 *
+		 * Notes:
+		 *
+		 * - Address 0 doesn't need to be checked, since the M68K memory handler
+		 *   never checks EEPROM in the first bank (0x000000 - 0x07FFFF).
+		 *
+		 * - Word-wide addresses are checked by OR'ing both the specified address
+		 *   and the preset address with 1.
+		 *
 		 * @param address Address.
-		 * @return True if the address is a readable port; false if not or if EEPRom is disabled.
+		 * @return True if the address is usable for the specified purpose.
 		 */
-		inline bool isReadPort(uint32_t address)
+		
+		inline bool isReadBytePort(uint32_t address)
 		{
-			// We don't have to check if address == 0,
-			// since EEPRom is never checked at 0x000000.
 			return (address == m_eprType.type.sda_out_adr);
 		}
 		
-		/**
-		 * isWritePort(): Determine if a given address is a writable port.
-		 * @param address Address.
-		 * @return True if the address is a writable port; false if not or if EEPRom is disabled.
-		 */
-		inline bool isWritePort(uint32_t address)
+		inline bool isReadWordPort(uint32_t address)
 		{
-			// We don't have to check if address == 0,
-			// since EEPRom is never checked at 0x000000.
+			return ((address | 1) == (m_eprType.type.sda_out_adr | 1));
+		}
+		
+		inline bool isWriteBytePort(uint32_t address)
+		{
 			return (address == m_eprType.type.scl_adr ||
 				address == m_eprType.type.sda_in_adr);
+		}
+		
+		inline bool isWriteWordPort(uint32_t address)
+		{
+			address |= 1;
+			return ((address == (m_eprType.type.scl_adr | 1)) ||
+				(address == (m_eprType.type.sda_in_adr | 1)));
 		}
 		
 		uint8_t readByte(uint32_t address);
