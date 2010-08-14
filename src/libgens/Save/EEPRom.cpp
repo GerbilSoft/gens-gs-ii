@@ -176,12 +176,18 @@ int EEPRom::DetectEEPRomType(const uint8_t *header)
 
 /**
  * setEEPRomType(): Set the EEPRom type.
- * @param type EEPRom type.
+ * @param type EEPRom type. (Specify a negative number to clear)
  * @return 0 on success; non-zero on error.
  */
 int EEPRom::setEEPRomType(int type)
 {
-	if (type < 0 || type >= ((sizeof(ms_Database)/sizeof(ms_Database[0]))))
+	if (type < 0)
+	{
+		// Negative type ID. Clear the EEPRom type.
+		memset(&m_eprType, 0x00, sizeof(m_eprType));
+		return 0;
+	}
+	else if (type >= ((sizeof(ms_Database)/sizeof(ms_Database[0]))))
 	{
 		// Type ID is out of range.
 		return 1;
