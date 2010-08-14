@@ -51,6 +51,15 @@ class EEPRom
 		int setEEPRomType(int type);
 		
 		/**
+		 * isEEPRomTypeSet(): Determine if the EEPRom type is set.
+		 * @return True if the EEPRom type is set; false if not.
+		 */
+		bool isEEPRomTypeSet(void)
+		{
+			return (!(m_eprType.type.scl_adr == 0));
+		}
+		
+		/**
 		 * Address verification functions.
 		 *
 		 * Notes:

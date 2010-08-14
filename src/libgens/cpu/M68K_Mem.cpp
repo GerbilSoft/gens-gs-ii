@@ -163,10 +163,14 @@ uint8_t M68K_Mem::M68K_Read_Byte_Rom4(uint32_t address)
 		// Mask off the high byte of the address.
 		address &= 0xFFFFFF;
 		
-		if (m_EEPRom.isReadBytePort(address))
+		if (m_EEPRom.isEEPRomTypeSet())
 		{
-			// EEPRom read port.
-			return m_EEPRom.readByte(address);
+			// EEPRom is enabled.
+			if (m_EEPRom.isReadBytePort(address))
+			{
+				// EEPRom read port.
+				return m_EEPRom.readByte(address);
+			}
 		}
 		else if (m_SRam.canRead() && m_SRam.isAddressInRange(address))
 		{
@@ -425,10 +429,14 @@ uint16_t M68K_Mem::M68K_Read_Word_Rom4(uint32_t address)
 		// Mask off the high byte of the address.
 		address &= 0xFFFFFF;
 		
-		if (m_EEPRom.isReadWordPort(address))
+		if (m_EEPRom.isEEPRomTypeSet())
 		{
-			// EEPRom read port.
-			return m_EEPRom.readWord(address);
+			// EEPRom is enabled.
+			if (m_EEPRom.isReadBytePort(address))
+			{
+				// EEPRom read port.
+				return m_EEPRom.readWord(address);
+			}
 		}
 		else if (m_SRam.canRead() && m_SRam.isAddressInRange(address))
 		{
@@ -675,10 +683,15 @@ void M68K_Mem::M68K_Write_Byte_SRam(uint32_t address, uint8_t data)
 		return;
 	}
 	
-	if (m_EEPRom.isWriteBytePort(address))
+	if (m_EEPRom.isEEPRomTypeSet())
 	{
-		// EEPRom write port.
-		return m_EEPRom.writeByte(address, data);
+		// EEPRom is enabled.
+		if (m_EEPRom.isWriteBytePort(address))
+		{
+			// EEPRom write port.
+			return m_EEPRom.writeByte(address, data);
+		
+		}
 	}
 	else if (m_SRam.canWrite() && m_SRam.isAddressInRange(address))
 	{
@@ -963,10 +976,14 @@ void M68K_Mem::M68K_Write_Word_SRam(uint32_t address, uint16_t data)
 		return;
 	}
 	
-	if (m_EEPRom.isWriteWordPort(address))
+	if (m_EEPRom.isEEPRomTypeSet())
 	{
-		// EEPRom write port.
-		return m_EEPRom.writeWord(address, data);
+		// EEPRom is enabled.
+		if (m_EEPRom.isWriteWordPort(address))
+		{
+			// EEPRom write port.
+			return m_EEPRom.writeWord(address, data);
+		}
 	}
 	else if (m_SRam.canWrite() && m_SRam.isAddressInRange(address))
 	{
