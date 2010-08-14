@@ -138,9 +138,9 @@ void EmuMD::Init_TEST(void)
 	// Initialize the M68K.
 	M68K::InitSys(M68K::SYSID_MD);
 	
-	// Reset the Z80.
+	// Reinitialize the Z80.
 	M68K_Mem::Z80_State = Z80_STATE_ENABLED;	// TODO: "Sound, Z80" setting.
-	Z80::Reset();
+	Z80::ReInit();
 	
 	// Reset the controller ports.
 	m_port1->reset();

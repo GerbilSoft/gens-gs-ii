@@ -78,8 +78,8 @@ void Z80::Init(void)
 	z80_Add_WriteW(&ms_Z80, 0x70, 0x7F, Z80_MD_Mem::Z80_WriteW_PSG);
 	z80_Add_WriteW(&ms_Z80, 0x80, 0xFF, Z80_MD_Mem::Z80_WriteW_68K_Ram);
 	
-	// Reset the Z80.
-	Reset();
+	// Reinitialize the Z80.
+	ReInit();
 }
 
 
@@ -93,9 +93,9 @@ void Z80::End(void)
 
 
 /**
- * Reset(): Reset the Z80 CPU.
+ * ReInit(): Reinitialize the Z80 CPU.
  */
-void Z80::Reset(void)
+void Z80::ReInit(void)
 {
 	// Clear Z80 memory.
 	memset(Ram_Z80, 0x00, sizeof(Ram_Z80));
@@ -114,7 +114,7 @@ void Z80::Reset(void)
 	M68K_Mem::Last_BUS_REQ_St = 0;
 	
 	// Reset the Z80.
-	mdZ80_reset(&ms_Z80);
+	Reset();
 }
 
 }

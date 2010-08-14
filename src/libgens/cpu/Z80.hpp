@@ -32,6 +32,7 @@
 
 // C includes.
 #include <stdint.h>
+#include <stdio.h>
 
 namespace LibGens
 {
@@ -42,7 +43,20 @@ class Z80
 		static void Init(void);
 		static void End(void);
 		
-		static void Reset(void);
+		/**
+		 * ReInit(): Reinitialize the Z80.
+		 * This function should be called when starting emulation.
+		 */
+		static void ReInit(void);
+		
+		/**
+		 * Reset(): Reset the Z80.
+		 * This function should be called when the Z80 RESET line is asserted.
+		 */
+		static inline void Reset(void)
+		{
+			mdZ80_reset(&ms_Z80);
+		}
 		
 		/**
 		 * Exec(): Run the Z80.

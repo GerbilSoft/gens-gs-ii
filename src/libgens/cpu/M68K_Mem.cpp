@@ -420,7 +420,6 @@ uint16_t M68K_Mem::T_M68K_Read_Word_RomX(uint32_t address)
  * @param address Address.
  * @return Word from ROM or SRam.
  */
-#include <stdio.h>
 uint16_t M68K_Mem::M68K_Read_Word_Rom4(uint32_t address)
 {
 	// Check if this is a save data request.
@@ -726,7 +725,6 @@ void M68K_Mem::M68K_Write_Byte_Ram(uint32_t address, uint8_t data)
  * @param address Address.
  * @param data Byte to write.
  */
-#include <stdio.h>
 void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 {
 	// Mask off the high byte of the address.
@@ -817,18 +815,18 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 		// NOTE: Genesis Plus does RESET at any even 0xA112xx...
 		if (data & 0x01)
 		{
-			// RESET is high. Stop the Z80.
+			// RESET is high. Start the Z80.
+			Z80_State &= ~Z80_STATE_RESET;
+		}
+		else
+		{
+			// RESET is low. Stop the Z80.
 			Z80::Reset();
 			Z80_State |= Z80_STATE_RESET;
 			
 			// YM2612's RESET line is tied to the Z80's RESET line.
 			// TODO
 			//YM2612_Reset();
-		}
-		else
-		{
-			// RESET is low. Start the Z80.
-			Z80_State &= ~Z80_STATE_RESET;
 		}
 	}
 	else if (address == 0xA130F1)
@@ -1114,18 +1112,18 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 		// NOTE: Test data against 0x0100, since 68000 is big-endian.
 		if (data & 0x0100)
 		{
-			// RESET is high. Stop the Z80.
+			// RESET is high. Start the Z80.
+			Z80_State &= ~Z80_STATE_RESET;
+		}
+		else
+		{
+			// RESET is low. Stop the Z80.
 			Z80::Reset();
 			Z80_State |= Z80_STATE_RESET;
 			
 			// YM2612's RESET line is tied to the Z80's RESET line.
 			// TODO
 			//YM2612_Reset();
-		}
-		else
-		{
-			// RESET is low. Start the Z80.
-			Z80_State &= ~Z80_STATE_RESET;
 		}
 	}
 	else if (address == 0xA130F0)
