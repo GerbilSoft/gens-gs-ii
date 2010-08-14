@@ -1,5 +1,14 @@
 Description of git tags for Gens/GS II:
 
+libgens-EEPRom-v0: Initial EEPROM support. (The class is named EEPRom for
+consistency with other memory management classes in Gens/GS II.) Most of the
+code was ported from Genesis Plus GX. A lot of work then went into refactoring
+everything so that SRAM and EEPROM could co-exist, with EEPROM taking priority
+over SRAM if the loaded ROM image matches an entry in the EEPROM database.
+
+Genesis Plus GX EEPROM source:
+http://code.google.com/p/genplus-gx/source/browse/trunk/source/cart_hw/eeprom.c
+
 libgens-controllers-v2:
 
 - Initial Controller Configuration dialog, which currently shows the type
