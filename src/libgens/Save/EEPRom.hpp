@@ -54,7 +54,7 @@ class EEPRom
 		 * isEEPRomTypeSet(): Determine if the EEPRom type is set.
 		 * @return True if the EEPRom type is set; false if not.
 		 */
-		bool isEEPRomTypeSet(void)
+		inline bool isEEPRomTypeSet(void)
 		{
 			return (!(m_eprType.type.scl_adr == 0));
 		}
