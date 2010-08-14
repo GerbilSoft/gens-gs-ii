@@ -322,7 +322,48 @@ void EEPRom::portWriteInt(void)
 			break;
 		
 		case EEP_GET_WORD_ADR_7BITS:
+			/**
+			 * EEP_GET_WORD_ADR_7BITS: Get the 7-bit WORD ADDRESS.
+			 * MODE 1: 24C01 only.
+			 * Contains 7-bit address and R/W bit.
+			 */
 			// TODO
+			checkStart();
+			checkStop();
+			
+			// Wait for /SCL rising edge before starting the counter.
+			if (!m_old_scl && m_scl)
+			{
+				if (m_counter == 0)
+					m_counter++;
+			}
+			
+			// Wait for /SCL falling edge before reading the data bit.
+			if (m_old_scl && !m_scl)
+			{
+				// Data bit.
+				// Mode 1 has the following format: (MSB first)
+				// [A6 A5 A4 A3 A2 A1 A0 RW]
+				if (m_counter < 8)
+				{
+					m_word_address |= (m_old_sda << (7 - m_counter));
+				}
+				else if (m_counter == 8)
+				{
+					m_rw = m_old_sda;
+				}
+				else
+				{
+					// ACK cycle.
+					m_counter = 0;
+					m_word_address &= ms_Database[m_type].type.size_mask;
+					m_state = (m_rw ? EEP_READ_DATA : EEP_WRITE_DATA);
+				}
+				
+				// Increment the counter.
+				m_counter++;
+			}
+			
 			break;
 		
 		case EEP_GET_SLAVE_ADR:
@@ -346,10 +387,10 @@ void EEPRom::portWriteInt(void)
 			if (m_old_scl && !m_scl)
 			{
 				// Data bit.
-				// Mode 2 has the following format: (MSB first)
+				// MODE2 has the following format: (MSB first)
 				// Word 1: [x x x x DEV2 DEV1 DEV0 RW]
 				// Word 2: [A7 A6 A5 A4 A3 A2 A1 A0]
-				// (A7 is ignored for 24C01 in mode 2.)
+				// (A7 is ignored for 24C01 in MODE2.)
 				// NOTE: Only Word 1 is sent for READ operationsin Modes 2 and 3.
 				if (m_counter >= 5 && m_counter < 8)
 				{
@@ -380,14 +421,14 @@ void EEPRom::portWriteInt(void)
 					
 					if (ms_Database[m_type].type.address_bits == 16)
 					{
-						// Mode 3: Two ADDRESS bytes.
+						// MODE3: Two ADDRESS bytes.
 						// TODO
 						m_state = (m_rw ? EEP_READ_DATA : EEP_GET_WORD_ADR_HIGH);
 						m_slave_mask <<= 16;
 					}
 					else
 					{
-						// Mode 2: One ADDRESS byte.
+						// MODE2: One ADDRESS byte.
 						m_state = (m_rw ? EEP_READ_DATA : EEP_GET_WORD_ADR_LOW);
 						m_slave_mask <<= 8;
 					}
@@ -533,13 +574,13 @@ void EEPRom::checkStart(void)
 		
 		if (ms_Database[m_type].type.address_bits == 7)
 		{
-			// Mode 1. (7-bit)
+			// MODE1. (7-bit)
 			m_word_address = 0;
 			m_state = EEP_GET_WORD_ADR_7BITS;
 		}
 		else
 		{
-			// Mode 2 or 3.
+			// MODE2 or MODE3.
 			m_state = EEP_GET_SLAVE_ADR;
 		}
 	}
