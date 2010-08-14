@@ -133,7 +133,9 @@ class M68K_Mem
 		template<uint8_t bank>
 		static uint8_t T_M68K_Read_Byte_RomX(uint32_t address);
 		
-		static uint8_t M68K_Read_Byte_Rom4(uint32_t address);
+		template<uint8_t bank>
+		static uint8_t T_M68K_Read_Byte_RomX_SRam(uint32_t address);
+		
 		static uint8_t M68K_Read_Byte_Ram(uint32_t address);
 		static uint8_t M68K_Read_Byte_Misc(uint32_t address);
 		static uint8_t M68K_Read_Byte_VDP(uint32_t address);
@@ -144,7 +146,9 @@ class M68K_Mem
 		template<uint8_t bank>
 		static uint16_t T_M68K_Read_Word_RomX(uint32_t address);
 		
-		static uint16_t M68K_Read_Word_Rom4(uint32_t address);
+		template<uint8_t bank>
+		static uint16_t T_M68K_Read_Word_RomX_SRam(uint32_t address);
+		
 		static uint16_t M68K_Read_Word_Ram(uint32_t address);
 		static uint16_t M68K_Read_Word_Misc(uint32_t address);
 		static uint16_t M68K_Read_Word_VDP(uint32_t address);

@@ -123,7 +123,7 @@ void M68K_Mem::End(void)
 /**
  * M68K_Read_Byte_Default(): Default M68K read byte handler.
  * @param address Address.
- * @return 0x00.
+ * @return 0x00. (TODO: Return 0xFF?)
  */
 uint8_t M68K_Mem::M68K_Read_Byte_Default(uint32_t address)
 {
@@ -137,12 +137,14 @@ uint8_t M68K_Mem::M68K_Read_Byte_Default(uint32_t address)
  * M68K memory space is split into 32 512 KB banks. (16 MB total)
  * TODO: XOR by 1 on little-endian systems only.
  * @param bank ROM bank number.
+ * @param address Address.
+ * @return Byte from ROM.
  */
 template<uint8_t bank>
 uint8_t M68K_Mem::T_M68K_Read_Byte_RomX(uint32_t address)
 {
 	address &= 0x7FFFF;
-	address ^= ((bank << 19) | 1);
+	address ^= ((bank << 19) | 1);	// TODO: LE only!
 	return Rom_Data.u8[address];
 }
 // TODO: Add banks C, D, E, and F for 8 MB ROM support.
@@ -150,12 +152,15 @@ uint8_t M68K_Mem::T_M68K_Read_Byte_RomX(uint32_t address)
 
 
 /**
- * M68K_Read_Byte_Rom4(): Read a byte from ROM bank 4. (0x200000 - 0x27FFFF)
- * This ROM bank may be SRam.
+ * T_M68K_Read_Byte_RomX_SRam(): Read a byte from ROM bank X or SRam/EEPRom.
+ * TODO: Verify that this works for 0x300000/0x380000.
+ * TODO: XOR by 1 on little-endian systems only.
+ * @param bank ROM bank number.
  * @param address Address.
- * @return Byte from ROM or SRam.
+ * @return Byte from ROM or SRam/EEPRom.
  */
-uint8_t M68K_Mem::M68K_Read_Byte_Rom4(uint32_t address)
+template<uint8_t bank>
+uint8_t M68K_Mem::T_M68K_Read_Byte_RomX_SRam(uint32_t address)
 {
 	// Check if this is a save data request.
 	if (SaveDataEnable)
@@ -191,9 +196,8 @@ uint8_t M68K_Mem::M68K_Read_Byte_Rom4(uint32_t address)
 		}
 	}
 	
-	// ROM data request.
 	address &= 0x7FFFF;
-	address ^= ((4 << 19) | 1);	// TODO: LE only!
+	address ^= ((bank << 19) | 1);	// TODO: LE only!
 	return Rom_Data.u8[address];
 }
 
@@ -388,7 +392,7 @@ uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 /**
  * M68K_Read_Word_Default(): Default M68K read word handler.
  * @param address Address.
- * @return 0x0000.
+ * @return 0x0000. (TODO: Return 0xFFFF?)
  */
 uint16_t M68K_Mem::M68K_Read_Word_Default(uint32_t address)
 {
@@ -401,6 +405,8 @@ uint16_t M68K_Mem::M68K_Read_Word_Default(uint32_t address)
  * T_M68K_Read_Byte_RomX(): Read a word from ROM bank X.
  * M68K memory space is split into 32 512 KB banks. (16 MB total)
  * @param bank ROM bank number.
+ * @param address Address.
+ * @return Word from ROM.
  */
 template<uint8_t bank>
 uint16_t M68K_Mem::T_M68K_Read_Word_RomX(uint32_t address)
@@ -415,12 +421,14 @@ uint16_t M68K_Mem::T_M68K_Read_Word_RomX(uint32_t address)
 
 
 /**
- * M68K_Read_Word_Rom4(): Read a word from ROM bank 4. (0x200000 - 0x27FFFF)
- * This ROM bank may be SRam.
+ * T_M68K_Read_Word_RomX_SRam(): Read a word from ROM bank X or SRam/EEPRom.
+ * TODO: Verify that this works for 0x300000/0x380000.
+ * @param bank ROM bank number.
  * @param address Address.
- * @return Word from ROM or SRam.
+ * @return Word from ROM or SRam/EEPRom.
  */
-uint16_t M68K_Mem::M68K_Read_Word_Rom4(uint32_t address)
+template<uint8_t bank>
+uint16_t M68K_Mem::T_M68K_Read_Word_RomX_SRam(uint32_t address)
 {
 	// Check if this is a save data request.
 	if (SaveDataEnable)
@@ -457,9 +465,10 @@ uint16_t M68K_Mem::M68K_Read_Word_Rom4(uint32_t address)
 	}
 	
 	// ROM data request.
-	address &= 0x7FFFF;
-	address ^= ((4 << 19) | 1);	// TODO: LE only!
-	return Rom_Data.u16[address >> 1];
+	address &= 0x7FFFE;
+	address |= (bank << 19);
+	address >>= 1;
+	return Rom_Data.u16[address];
 }
 
 
@@ -1253,38 +1262,38 @@ M68K_Mem::M68K_Write_Word_fn M68K_Mem::M68K_Write_Word_Table[32];
  */
 const M68K_Mem::M68K_Read_Byte_fn M68K_Mem::MD_M68K_Read_Byte_Table[32] =
 {
-	T_M68K_Read_Byte_RomX<0x0>,	// 0x000000 - 0x07FFFF [Bank 0x00]
-	T_M68K_Read_Byte_RomX<0x1>,	// 0x080000 - 0x0FFFFF [Bank 0x01]
-	T_M68K_Read_Byte_RomX<0x2>,	// 0x100000 - 0x17FFFF [Bank 0x02]
-	T_M68K_Read_Byte_RomX<0x3>,	// 0x180000 - 0x1FFFFF [Bank 0x03]
-	M68K_Read_Byte_Rom4,		// 0x200000 - 0x27FFFF [Bank 0x04]
-	T_M68K_Read_Byte_RomX<0x5>,	// 0x280000 - 0x2FFFFF [Bank 0x05]
-	T_M68K_Read_Byte_RomX<0x6>,	// 0x300000 - 0x37FFFF [Bank 0x06]
-	T_M68K_Read_Byte_RomX<0x7>,	// 0x380000 - 0x3FFFFF [Bank 0x07]
-	T_M68K_Read_Byte_RomX<0x8>,	// 0x400000 - 0x47FFFF [Bank 0x08]
-	T_M68K_Read_Byte_RomX<0x9>,	// 0x480000 - 0x4FFFFF [Bank 0x09]
-	T_M68K_Read_Byte_RomX<0xA>,	// 0x500000 - 0x57FFFF [Bank 0x0A]
-	T_M68K_Read_Byte_RomX<0xB>,	// 0x580000 - 0x5FFFFF [Bank 0x0B]
-	M68K_Read_Byte_Default,		// 0x600000 - 0x67FFFF [Bank 0x0C]
-	M68K_Read_Byte_Default,		// 0x680000 - 0x6FFFFF [Bank 0x0D]
-	M68K_Read_Byte_Default,		// 0x700000 - 0x77FFFF [Bank 0x0E]
-	M68K_Read_Byte_Default,		// 0x780000 - 0x7FFFFF [Bank 0x0F]
-	M68K_Read_Byte_Default,		// 0x800000 - 0x87FFFF [Bank 0x10]
-	M68K_Read_Byte_Default,		// 0x880000 - 0x8FFFFF [Bank 0x11]
-	M68K_Read_Byte_Default,		// 0x900000 - 0x97FFFF [Bank 0x12]
-	M68K_Read_Byte_Default,		// 0x980000 - 0x9FFFFF [Bank 0x13]
-	M68K_Read_Byte_Misc,		// 0xA00000 - 0xA7FFFF [Bank 0x14]
-	M68K_Read_Byte_Default,		// 0xA80000 - 0xAFFFFF [Bank 0x15]
-	M68K_Read_Byte_Default,		// 0xB00000 - 0xB7FFFF [Bank 0x16]
-	M68K_Read_Byte_Default,		// 0xB80000 - 0xBFFFFF [Bank 0x17]
-	M68K_Read_Byte_VDP,		// 0xC00000 - 0xC7FFFF [Bank 0x18]
-	M68K_Read_Byte_VDP,		// 0xC80000 - 0xCFFFFF [Bank 0x19]
-	M68K_Read_Byte_VDP,		// 0xD00000 - 0xD7FFFF [Bank 0x1A]
-	M68K_Read_Byte_VDP,		// 0xD80000 - 0xDFFFFF [Bank 0x1B]
-	M68K_Read_Byte_Ram,		// 0xE00000 - 0xE7FFFF [Bank 0x1C]
-	M68K_Read_Byte_Ram,		// 0xE80000 - 0xEFFFFF [Bank 0x1D]
-	M68K_Read_Byte_Ram,		// 0xF00000 - 0xF7FFFF [Bank 0x1E]
-	M68K_Read_Byte_Ram,		// 0xF80000 - 0xFFFFFF [Bank 0x1F]
+	T_M68K_Read_Byte_RomX<0x0>,		// 0x000000 - 0x07FFFF [Bank 0x00]
+	T_M68K_Read_Byte_RomX<0x1>,		// 0x080000 - 0x0FFFFF [Bank 0x01]
+	T_M68K_Read_Byte_RomX<0x2>,		// 0x100000 - 0x17FFFF [Bank 0x02]
+	T_M68K_Read_Byte_RomX<0x3>,		// 0x180000 - 0x1FFFFF [Bank 0x03]
+	T_M68K_Read_Byte_RomX_SRam<0x4>,	// 0x200000 - 0x27FFFF [Bank 0x04]
+	T_M68K_Read_Byte_RomX<0x5>,		// 0x280000 - 0x2FFFFF [Bank 0x05]
+	T_M68K_Read_Byte_RomX_SRam<0x6>,	// 0x300000 - 0x37FFFF [Bank 0x06]
+	T_M68K_Read_Byte_RomX_SRam<0x7>,	// 0x380000 - 0x3FFFFF [Bank 0x07]
+	T_M68K_Read_Byte_RomX<0x8>,		// 0x400000 - 0x47FFFF [Bank 0x08]
+	T_M68K_Read_Byte_RomX<0x9>,		// 0x480000 - 0x4FFFFF [Bank 0x09]
+	T_M68K_Read_Byte_RomX<0xA>,		// 0x500000 - 0x57FFFF [Bank 0x0A]
+	T_M68K_Read_Byte_RomX<0xB>,		// 0x580000 - 0x5FFFFF [Bank 0x0B]
+	M68K_Read_Byte_Default,			// 0x600000 - 0x67FFFF [Bank 0x0C]
+	M68K_Read_Byte_Default,			// 0x680000 - 0x6FFFFF [Bank 0x0D]
+	M68K_Read_Byte_Default,			// 0x700000 - 0x77FFFF [Bank 0x0E]
+	M68K_Read_Byte_Default,			// 0x780000 - 0x7FFFFF [Bank 0x0F]
+	M68K_Read_Byte_Default,			// 0x800000 - 0x87FFFF [Bank 0x10]
+	M68K_Read_Byte_Default,			// 0x880000 - 0x8FFFFF [Bank 0x11]
+	M68K_Read_Byte_Default,			// 0x900000 - 0x97FFFF [Bank 0x12]
+	M68K_Read_Byte_Default,			// 0x980000 - 0x9FFFFF [Bank 0x13]
+	M68K_Read_Byte_Misc,			// 0xA00000 - 0xA7FFFF [Bank 0x14]
+	M68K_Read_Byte_Default,			// 0xA80000 - 0xAFFFFF [Bank 0x15]
+	M68K_Read_Byte_Default,			// 0xB00000 - 0xB7FFFF [Bank 0x16]
+	M68K_Read_Byte_Default,			// 0xB80000 - 0xBFFFFF [Bank 0x17]
+	M68K_Read_Byte_VDP,			// 0xC00000 - 0xC7FFFF [Bank 0x18]
+	M68K_Read_Byte_VDP,			// 0xC80000 - 0xCFFFFF [Bank 0x19]
+	M68K_Read_Byte_VDP,			// 0xD00000 - 0xD7FFFF [Bank 0x1A]
+	M68K_Read_Byte_VDP,			// 0xD80000 - 0xDFFFFF [Bank 0x1B]
+	M68K_Read_Byte_Ram,			// 0xE00000 - 0xE7FFFF [Bank 0x1C]
+	M68K_Read_Byte_Ram,			// 0xE80000 - 0xEFFFFF [Bank 0x1D]
+	M68K_Read_Byte_Ram,			// 0xF00000 - 0xF7FFFF [Bank 0x1E]
+	M68K_Read_Byte_Ram,			// 0xF80000 - 0xFFFFFF [Bank 0x1F]
 };
 
 
@@ -1294,38 +1303,38 @@ const M68K_Mem::M68K_Read_Byte_fn M68K_Mem::MD_M68K_Read_Byte_Table[32] =
  */
 const M68K_Mem::M68K_Read_Word_fn M68K_Mem::MD_M68K_Read_Word_Table[32] =
 {
-	T_M68K_Read_Word_RomX<0x0>,	// 0x000000 - 0x07FFFF [Bank 0x00]
-	T_M68K_Read_Word_RomX<0x1>,	// 0x080000 - 0x0FFFFF [Bank 0x01]
-	T_M68K_Read_Word_RomX<0x2>,	// 0x100000 - 0x17FFFF [Bank 0x02]
-	T_M68K_Read_Word_RomX<0x3>,	// 0x180000 - 0x1FFFFF [Bank 0x03]
-	M68K_Read_Word_Rom4,		// 0x200000 - 0x27FFFF [Bank 0x04]
-	T_M68K_Read_Word_RomX<0x5>,	// 0x280000 - 0x2FFFFF [Bank 0x05]
-	T_M68K_Read_Word_RomX<0x6>,	// 0x300000 - 0x37FFFF [Bank 0x06]
-	T_M68K_Read_Word_RomX<0x7>,	// 0x380000 - 0x3FFFFF [Bank 0x07]
-	T_M68K_Read_Word_RomX<0x8>,	// 0x400000 - 0x47FFFF [Bank 0x08]
-	T_M68K_Read_Word_RomX<0x9>,	// 0x480000 - 0x4FFFFF [Bank 0x09]
-	T_M68K_Read_Word_RomX<0xA>,	// 0x500000 - 0x57FFFF [Bank 0x0A]
-	T_M68K_Read_Word_RomX<0xB>,	// 0x580000 - 0x5FFFFF [Bank 0x0B]
-	M68K_Read_Word_Default,		// 0x600000 - 0x67FFFF [Bank 0x0C]
-	M68K_Read_Word_Default,		// 0x680000 - 0x6FFFFF [Bank 0x0D]
-	M68K_Read_Word_Default,		// 0x700000 - 0x77FFFF [Bank 0x0E]
-	M68K_Read_Word_Default,		// 0x780000 - 0x7FFFFF [Bank 0x0F]
-	M68K_Read_Word_Default,		// 0x800000 - 0x87FFFF [Bank 0x10]
-	M68K_Read_Word_Default,		// 0x880000 - 0x8FFFFF [Bank 0x11]
-	M68K_Read_Word_Default,		// 0x900000 - 0x97FFFF [Bank 0x12]
-	M68K_Read_Word_Default,		// 0x980000 - 0x9FFFFF [Bank 0x13]
-	M68K_Read_Word_Misc,		// 0xA00000 - 0xA7FFFF [Bank 0x14]
-	M68K_Read_Word_Default,		// 0xA80000 - 0xAFFFFF [Bank 0x15]
-	M68K_Read_Word_Default,		// 0xB00000 - 0xB7FFFF [Bank 0x16]
-	M68K_Read_Word_Default,		// 0xB80000 - 0xBFFFFF [Bank 0x17]
-	M68K_Read_Word_VDP,		// 0xC00000 - 0xC7FFFF [Bank 0x18]
-	M68K_Read_Word_VDP,		// 0xC80000 - 0xCFFFFF [Bank 0x19]
-	M68K_Read_Word_VDP,		// 0xD00000 - 0xD7FFFF [Bank 0x1A]
-	M68K_Read_Word_VDP,		// 0xD80000 - 0xDFFFFF [Bank 0x1B]
-	M68K_Read_Word_Ram,		// 0xE00000 - 0xE7FFFF [Bank 0x1C]
-	M68K_Read_Word_Ram,		// 0xE80000 - 0xEFFFFF [Bank 0x1D]
-	M68K_Read_Word_Ram,		// 0xF00000 - 0xF7FFFF [Bank 0x1E]
-	M68K_Read_Word_Ram,		// 0xF80000 - 0xFFFFFF [Bank 0x1F]
+	T_M68K_Read_Word_RomX<0x0>,		// 0x000000 - 0x07FFFF [Bank 0x00]
+	T_M68K_Read_Word_RomX<0x1>,		// 0x080000 - 0x0FFFFF [Bank 0x01]
+	T_M68K_Read_Word_RomX<0x2>,		// 0x100000 - 0x17FFFF [Bank 0x02]
+	T_M68K_Read_Word_RomX<0x3>,		// 0x180000 - 0x1FFFFF [Bank 0x03]
+	T_M68K_Read_Word_RomX_SRam<0x4>,	// 0x200000 - 0x27FFFF [Bank 0x04]
+	T_M68K_Read_Word_RomX<0x5>,		// 0x280000 - 0x2FFFFF [Bank 0x05]
+	T_M68K_Read_Word_RomX_SRam<0x6>,	// 0x300000 - 0x37FFFF [Bank 0x06]
+	T_M68K_Read_Word_RomX_SRam<0x7>,	// 0x380000 - 0x3FFFFF [Bank 0x07]
+	T_M68K_Read_Word_RomX<0x8>,		// 0x400000 - 0x47FFFF [Bank 0x08]
+	T_M68K_Read_Word_RomX<0x9>,		// 0x480000 - 0x4FFFFF [Bank 0x09]
+	T_M68K_Read_Word_RomX<0xA>,		// 0x500000 - 0x57FFFF [Bank 0x0A]
+	T_M68K_Read_Word_RomX<0xB>,		// 0x580000 - 0x5FFFFF [Bank 0x0B]
+	M68K_Read_Word_Default,			// 0x600000 - 0x67FFFF [Bank 0x0C]
+	M68K_Read_Word_Default,			// 0x680000 - 0x6FFFFF [Bank 0x0D]
+	M68K_Read_Word_Default,			// 0x700000 - 0x77FFFF [Bank 0x0E]
+	M68K_Read_Word_Default,			// 0x780000 - 0x7FFFFF [Bank 0x0F]
+	M68K_Read_Word_Default,			// 0x800000 - 0x87FFFF [Bank 0x10]
+	M68K_Read_Word_Default,			// 0x880000 - 0x8FFFFF [Bank 0x11]
+	M68K_Read_Word_Default,			// 0x900000 - 0x97FFFF [Bank 0x12]
+	M68K_Read_Word_Default,			// 0x980000 - 0x9FFFFF [Bank 0x13]
+	M68K_Read_Word_Misc,			// 0xA00000 - 0xA7FFFF [Bank 0x14]
+	M68K_Read_Word_Default,			// 0xA80000 - 0xAFFFFF [Bank 0x15]
+	M68K_Read_Word_Default,			// 0xB00000 - 0xB7FFFF [Bank 0x16]
+	M68K_Read_Word_Default,			// 0xB80000 - 0xBFFFFF [Bank 0x17]
+	M68K_Read_Word_VDP,			// 0xC00000 - 0xC7FFFF [Bank 0x18]
+	M68K_Read_Word_VDP,			// 0xC80000 - 0xCFFFFF [Bank 0x19]
+	M68K_Read_Word_VDP,			// 0xD00000 - 0xD7FFFF [Bank 0x1A]
+	M68K_Read_Word_VDP,			// 0xD80000 - 0xDFFFFF [Bank 0x1B]
+	M68K_Read_Word_Ram,			// 0xE00000 - 0xE7FFFF [Bank 0x1C]
+	M68K_Read_Word_Ram,			// 0xE80000 - 0xEFFFFF [Bank 0x1D]
+	M68K_Read_Word_Ram,			// 0xF00000 - 0xF7FFFF [Bank 0x1E]
+	M68K_Read_Word_Ram,			// 0xF80000 - 0xFFFFFF [Bank 0x1F]
 };
 
 
