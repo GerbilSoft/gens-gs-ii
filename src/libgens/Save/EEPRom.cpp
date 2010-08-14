@@ -43,55 +43,55 @@ const EEPRom::GameEEPRomInfo EEPRom::ms_Database[] =
 	/** ACCLAIM mappers **/
 	
 	/* 24C02 (old mapper) */
-	{{"T-081326"   }, 0,      {8,  0xFF,   0xFF,   0x200001, 0x200001, 0x200001, 0, 1, 1}},   /* NBA Jam (UE) */
-	{{"T-81033"    }, 0,      {8,  0xFF,   0xFF,   0x200001, 0x200001, 0x200001, 0, 1, 1}},   /* NBA Jam (J) */
+	{"T-081326"   , 0,      {8,  0xFF,   0xFF,   0x200001, 0x200001, 0x200001, 0, 1, 1}},   /* NBA Jam (UE) */
+	{"T-81033"    , 0,      {8,  0xFF,   0xFF,   0x200001, 0x200001, 0x200001, 0, 1, 1}},   /* NBA Jam (J) */
 	
 	/* 24C02 */
-	{{"T-81406"    }, 0,      {8,  0xFF,   0xFF,   0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* NBA Jam TE */
-	{{"T-081276"   }, 0,      {8,  0xFF,   0xFF,   0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* NFL Quarterback Club */
+	{"T-81406"    , 0,      {8,  0xFF,   0xFF,   0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* NBA Jam TE */
+	{"T-081276"   , 0,      {8,  0xFF,   0xFF,   0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* NFL Quarterback Club */
 	
 	/* 24C16 */
-	{{"T-081586"   }, 0,      {8,  0x7FF,  0x7FF,  0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* NFL Quarterback Club '96 */
+	{"T-081586"   , 0,      {8,  0x7FF,  0x7FF,  0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* NFL Quarterback Club '96 */
 	
 	/* 24C65 */
-	{{"T-81576"    }, 0,      {16, 0x1FFF, 0x1FFF, 0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* College Slam */
-	{{"T-81476"    }, 0,      {16, 0x1FFF, 0x1FFF, 0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* Frank Thomas Big Hurt Baseball */
+	{"T-81576"    , 0,      {16, 0x1FFF, 0x1FFF, 0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* College Slam */
+	{"T-81476"    , 0,      {16, 0x1FFF, 0x1FFF, 0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* Frank Thomas Big Hurt Baseball */
 	
 	/** EA mapper (24C01 only) **/
-	{{"T-50176"    }, 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 7, 7, 6}},   /* Rings of Power */
-	{{"T-50396"    }, 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 7, 7, 6}},   /* NHLPA Hockey 93 */
-	{{"T-50446"    }, 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 7, 7, 6}},   /* John Madden Football 93 */
-	{{"T-50516"    }, 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 7, 7, 6}},   /* John Madden Football 93 (Championship Ed.) */
-	{{"T-50606"    }, 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 7, 7, 6}},   /* Bill Walsh College Football */
+	{"T-50176"    , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 7, 7, 6}},   /* Rings of Power */
+	{"T-50396"    , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 7, 7, 6}},   /* NHLPA Hockey 93 */
+	{"T-50446"    , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 7, 7, 6}},   /* John Madden Football 93 */
+	{"T-50516"    , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 7, 7, 6}},   /* John Madden Football 93 (Championship Ed.) */
+	{"T-50606"    , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 7, 7, 6}},   /* Bill Walsh College Football */
 	
 	/** SEGA mapper (24C01 only) **/
-	{{"T-12046"    }, 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Megaman - The Wily Wars */
-	{{"T-12053"    }, 0xEA80, {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Rockman Mega World (J) [A] */
-	{{"MK-1215"    }, 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Evander 'Real Deal' Holyfield's Boxing */
-	{{"MK-1228"    }, 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Greatest Heavyweights of the Ring (U) */
-	{{"G-5538"     }, 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Greatest Heavyweights of the Ring (J) */
-	{{"PR-1993"    }, 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Greatest Heavyweights of the Ring (E) */
-	{{"G-4060"     }, 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Wonderboy in Monster World */
-	{{"00001211-00"}, 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Sports Talk Baseball */
-	{{"00004076-00"}, 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Honoo no Toukyuuji Dodge Danpei */
-	{{"G-4524"     }, 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Ninja Burai Densetsu */
+	{"T-12046"    , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Megaman - The Wily Wars */
+	{"T-12053"    , 0xEA80, {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Rockman Mega World (J) [A] */
+	{"MK-1215"    , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Evander 'Real Deal' Holyfield's Boxing */
+	{"MK-1228"    , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Greatest Heavyweights of the Ring (U) */
+	{"G-5538"     , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Greatest Heavyweights of the Ring (J) */
+	{"PR-1993"    , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Greatest Heavyweights of the Ring (E) */
+	{"G-4060"     , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Wonderboy in Monster World */
+	{"00001211-00", 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Sports Talk Baseball */
+	{"00004076-00", 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Honoo no Toukyuuji Dodge Danpei */
+	{"G-4524"     , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Ninja Burai Densetsu */
 	
 	/** CODEMASTERS mapper **/
 	
 	/* 24C01 */
-	{{"T-120106"},    0,      {7,  0x7F,   0x7F,   0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Brian Lara Cricket */
+	{"T-120106",    0,      {7,  0x7F,   0x7F,   0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Brian Lara Cricket */
 	
 	/* 24C08 */
-	{{"T-120096"   }, 0,      {8,  0x3FF,  0x3FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Micro Machines 2 - Turbo Tournament (E) */
-	{{"00000000-00"}, 0x168B, {8,  0x3FF,  0x3FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Micro Machines Military */
-	{{"00000000-00"}, 0xCEE0, {8,  0x3FF,  0x3FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Micro Machines Military (Bad)*/
+	{"T-120096"   , 0,      {8,  0x3FF,  0x3FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Micro Machines 2 - Turbo Tournament (E) */
+	{"00000000-00", 0x168B, {8,  0x3FF,  0x3FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Micro Machines Military */
+	{"00000000-00", 0xCEE0, {8,  0x3FF,  0x3FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Micro Machines Military (Bad)*/
 	
 	/* 24C16 */
-	{{"00000000-00"}, 0x165E, {8,  0x7FF,  0x7FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Micro Machines Turbo Tournament 96 */
-	{{"00000000-00"}, 0x2C41, {8,  0x7FF,  0x7FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Micro Machines Turbo Tournament 96 (Bad)*/
+	{"00000000-00", 0x165E, {8,  0x7FF,  0x7FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Micro Machines Turbo Tournament 96 */
+	{"00000000-00", 0x2C41, {8,  0x7FF,  0x7FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Micro Machines Turbo Tournament 96 (Bad)*/
 	
 	/* 24C65 */
-	{{"T-120146-50"}, 0,      {16, 0x1FFF, 0x1FFF, 0x300000, 0x380001, 0x300000, 0, 7, 1}}    /* Brian Lara Cricket 96, Shane Warne Cricket */
+	{"T-120146-50", 0,      {16, 0x1FFF, 0x1FFF, 0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Brian Lara Cricket 96, Shane Warne Cricket */
 };
 
 
@@ -100,8 +100,8 @@ const EEPRom::GameEEPRomInfo EEPRom::ms_Database[] =
  */
 EEPRom::EEPRom()
 {
-	// Set the first ROM type as the default.
-	m_type = 0;
+	// Clear the EEPRom type.
+	memset(&m_eprType, 0x00, sizeof(m_eprType));
 	
 	// Reset the EEPRom on startup.
 	reset();
@@ -109,7 +109,8 @@ EEPRom::EEPRom()
 
 
 /**
- * reset(): Clear SRam and initialize settings.
+ * reset(): Clear EEPRom and initialize settings.
+ * This function does NOT reset the EEPRom type!
  */
 void EEPRom::reset(void)
 {
@@ -136,13 +137,70 @@ void EEPRom::reset(void)
 
 
 /**
+ * DetectEEPRomType(): Detect the EEPRom type used by the specified ROM.
+ * @param header ROM header. (Must contain the full 512-byte header!)
+ * @return ROM type, or -1 if this ROM isn't known.
+ */
+int EEPRom::DetectEEPRomType(const uint8_t *header)
+{
+	// Scan the database for potential matches.
+	for (int i = 0; i < (sizeof(ms_Database)/sizeof(ms_Database[0])); i++)
+	{
+		// TODO: Figure out how to get rid of the strlen().
+		int serial_len = strlen(ms_Database[i].game_id);
+		if (!memcmp(&header[0x183], ms_Database[i].game_id, serial_len))
+		{
+			// Serial number matches.
+			if (ms_Database[i].checksum == 0)
+			{
+				// No checksum verification required.
+				return i;
+			}
+			
+			// Checksum verification is required.
+			uint16_t checksum = ((header[0x18E] << 8) | header[0x18F]);
+			if (checksum == ms_Database[i].checksum)
+			{
+				// Checksum matches.
+				return i;
+			}
+			
+			// Checksum doesn't match. Wrong ROM.
+		}
+	}
+	
+	// The ROM wasn't found in the database.
+	return -1;
+}
+
+
+/**
+ * setEEPRomType(): Set the EEPRom type.
+ * @param type EEPRom type.
+ * @return 0 on success; non-zero on error.
+ */
+int EEPRom::setEEPRomType(int type)
+{
+	if (type < 0 || type >= ((sizeof(ms_Database)/sizeof(ms_Database[0]))))
+	{
+		// Type ID is out of range.
+		return 1;
+	}
+	
+	// Set the EEPRom type.
+	memcpy(&m_eprType, &ms_Database[type], sizeof(m_eprType));
+	return 0;
+}
+
+
+/**
  * portReadByte(): Read the specified port. (byte-wide)
  * @param address Address.
  * @return Port value.
  */
 uint8_t EEPRom::portReadByte(uint32_t address)
 {
-	if (address != ms_Database[m_type].type.sda_out_adr)
+	if (address != m_eprType.type.sda_out_adr)
 	{
 		// Wrong address.
 		return 0xFF;
@@ -164,7 +222,7 @@ uint8_t EEPRom::portReadByte(uint32_t address)
 					// Word Address is incremented.
 					// NOTE: Word address wraps around at array size.
 					m_word_address++;
-					m_word_address &= ms_Database[m_type].type.size_mask;
+					m_word_address &= m_eprType.type.size_mask;
 				}
 			}
 			break;
@@ -183,7 +241,7 @@ uint8_t EEPRom::portReadByte(uint32_t address)
 	}
 	
 	// Return the data.
-	return (sda_out << ms_Database[m_type].type.sda_out_bit);
+	return (sda_out << m_eprType.type.sda_out_bit);
 }
 
 
@@ -212,7 +270,7 @@ uint16_t EEPRom::portReadWord(uint32_t address)
 					// Word Address is incremented.
 					// NOTE: Word address wraps around at array size.
 					m_word_address++;
-					m_word_address &= ms_Database[m_type].type.size_mask;
+					m_word_address &= m_eprType.type.size_mask;
 				}
 			}
 			break;
@@ -231,10 +289,10 @@ uint16_t EEPRom::portReadWord(uint32_t address)
 	}
 	
 	// Return the data.
-	if (ms_Database[m_type].type.sda_out_adr & 1)
-		return (sda_out << ms_Database[m_type].type.sda_out_bit); /* LSB */
+	if (m_eprType.type.sda_out_adr & 1)
+		return (sda_out << m_eprType.type.sda_out_bit); /* LSB */
 	else
-		return (sda_out << (ms_Database[m_type].type.sda_out_bit + 8)); /* MSB */
+		return (sda_out << (m_eprType.type.sda_out_bit + 8)); /* MSB */
 }
 
 
@@ -245,22 +303,22 @@ uint16_t EEPRom::portReadWord(uint32_t address)
  */
 void EEPRom::portWriteByte(uint32_t address, uint8_t data)
 {
-	if (address != ms_Database[m_type].type.scl_adr &&
-	    address != ms_Database[m_type].type.sda_in_adr)
+	if (address != m_eprType.type.scl_adr &&
+	    address != m_eprType.type.sda_in_adr)
 	{
 		// Invalid address.
 		return;
 	}
 	
 	// Check if this is the clock line. (/SCL)
-	if (address == ms_Database[m_type].type.scl_adr)
-		m_scl = !!(data & (1 << ms_Database[m_type].type.scl_bit));
+	if (address == m_eprType.type.scl_adr)
+		m_scl = !!(data & (1 << m_eprType.type.scl_bit));
 	else
 		m_scl = m_old_scl;
 	
 	// Check if this is the data line. (/SDA)
-	if (address == ms_Database[m_type].type.sda_in_adr)
-		m_sda = !!(data & (1 << ms_Database[m_type].type.sda_in_bit));
+	if (address == m_eprType.type.sda_in_adr)
+		m_sda = !!(data & (1 << m_eprType.type.sda_in_bit));
 	else
 		m_sda = m_old_sda;
 	
@@ -282,18 +340,18 @@ void EEPRom::portWriteWord(uint32_t address, uint16_t data)
 	address &= ~1;
 	
 	// Check if this is the clock line. (/SCL)
-	if (address == ms_Database[m_type].type.scl_adr)
-		m_scl = !!(data & (1 << (ms_Database[m_type].type.scl_bit + 8)));
-	else if ((address | 1) == ms_Database[m_type].type.scl_adr)
-		m_scl = !!(data & (1 << ms_Database[m_type].type.scl_bit));
+	if (address == m_eprType.type.scl_adr)
+		m_scl = !!(data & (1 << (m_eprType.type.scl_bit + 8)));
+	else if ((address | 1) == m_eprType.type.scl_adr)
+		m_scl = !!(data & (1 << m_eprType.type.scl_bit));
 	else
 		m_scl = m_old_scl;
 	
 	// Check if this is the data line. (/SDA)
-	if (address == ms_Database[m_type].type.sda_in_adr)
-		m_sda = !!(data & (1 << (ms_Database[m_type].type.sda_in_bit + 8)));
-	else if ((address | 1) == ms_Database[m_type].type.sda_in_adr)
-		m_sda = !!(data & (1 << ms_Database[m_type].type.sda_in_bit));
+	if (address == m_eprType.type.sda_in_adr)
+		m_sda = !!(data & (1 << (m_eprType.type.sda_in_bit + 8)));
+	else if ((address | 1) == m_eprType.type.sda_in_adr)
+		m_sda = !!(data & (1 << m_eprType.type.sda_in_bit));
 	else
 		m_sda = m_old_sda;
 	
@@ -355,7 +413,7 @@ void EEPRom::portWriteInt(void)
 				{
 					// ACK cycle.
 					m_counter = 0;
-					m_word_address &= ms_Database[m_type].type.size_mask;
+					m_word_address &= m_eprType.type.size_mask;
 					m_state = (m_rw ? EEP_READ_DATA : EEP_WRITE_DATA);
 				}
 				
@@ -393,8 +451,8 @@ void EEPRom::portWriteInt(void)
 				// NOTE: Only Word 1 is sent for READ operationsin Modes 2 and 3.
 				if (m_counter >= 5 && m_counter < 8)
 				{
-					if ((ms_Database[m_type].type.address_bits == 16) ||
-					    (ms_Database[m_type].type.size_mask < (1 << (15 - m_counter))))
+					if ((m_eprType.type.address_bits == 16) ||
+					    (m_eprType.type.size_mask < (1 << (15 - m_counter))))
 					{
 						// SLAVE ADDRESS bit.
 						m_slave_mask |= (m_old_sda << (7 - m_counter));
@@ -418,7 +476,7 @@ void EEPRom::portWriteInt(void)
 					// ACK cycle.
 					m_counter = 0;
 					
-					if (ms_Database[m_type].type.address_bits == 16)
+					if (m_eprType.type.address_bits == 16)
 					{
 						// MODE3: Two ADDRESS bytes.
 						m_state = (m_rw ? EEP_READ_DATA : EEP_GET_WORD_ADR_HIGH);
@@ -452,7 +510,7 @@ void EEPRom::portWriteInt(void)
 				// Data bit.
 				if (m_counter < 9)
 				{
-					if ((ms_Database[m_type].type.size_mask + 1) < (1 << (17 - m_counter)))
+					if ((m_eprType.type.size_mask + 1) < (1 << (17 - m_counter)))
 					{
 						// Ignored bit: slave mask should be right-shifted by one.
 						m_slave_mask >>= 1;
@@ -494,7 +552,7 @@ void EEPRom::portWriteInt(void)
 				// Data bit.
 				if (m_counter < 9)
 				{
-					if ((ms_Database[m_type].type.size_mask + 1) < (1 << (9 - m_counter)))
+					if ((m_eprType.type.size_mask + 1) < (1 << (9 - m_counter)))
 					{
 						// Ignored bit (X24C01): slave mask should be right-shifted by one.
 						m_slave_mask >>= 1;
@@ -515,7 +573,7 @@ void EEPRom::portWriteInt(void)
 				{
 					// ACK cycle.
 					m_counter = 1;
-					m_word_address &= ms_Database[m_type].type.size_mask;
+					m_word_address &= m_eprType.type.size_mask;
 					m_state = EEP_WRITE_DATA;
 				}
 			}
@@ -567,8 +625,8 @@ void EEPRom::portWriteInt(void)
 					{
 						// Word Address is incremented.
 						// NOTE: Word address wraps around at pagesize.
-						m_word_address = (m_word_address & (0xFFFF - ms_Database[m_type].type.pagewrite_mask)) |
-								 ((m_word_address + 1) & ms_Database[m_type].type.pagewrite_mask);
+						m_word_address = (m_word_address & (0xFFFF - m_eprType.type.pagewrite_mask)) |
+								 ((m_word_address + 1) & m_eprType.type.pagewrite_mask);
 					}
 					
 					// Increment the counter.
@@ -607,7 +665,7 @@ void EEPRom::checkStart(void)
 		m_counter = 0;
 		m_slave_mask = 0;
 		
-		if (ms_Database[m_type].type.address_bits == 7)
+		if (m_eprType.type.address_bits == 7)
 		{
 			// MODE1. (7-bit)
 			m_word_address = 0;

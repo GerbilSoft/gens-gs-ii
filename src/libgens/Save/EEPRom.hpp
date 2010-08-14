@@ -43,20 +43,21 @@ class EEPRom
 		uint8_t portReadByte(uint32_t address);
 		uint16_t portReadWord(uint32_t address);
 		
+		/** EEPROM type detection. **/
+		static int DetectEEPRomType(const uint8_t *header);
+		int setEEPRomType(int type);
+		
 		void portWriteByte(uint32_t address, uint8_t data);
 		void portWriteWord(uint32_t address, uint16_t data);
 		
 		// TODO: Add load/save functions.
-		
+	
 	protected:
 		void portWriteInt(void);
 		
 		// EEPRom. (8 KB)
 		static const uint16_t EEPROM_ADDRESS_MASK = 0x1FFF;
 		uint8_t m_eeprom[0x2000];
-		
-		// EEPRom type.
-		int m_type;
 		
 		// EEPRom state.
 		bool m_scl;		// /SCL: Clock.
@@ -112,6 +113,9 @@ class EEPRom
 			EEPRomType type;
 		};
 		static const GameEEPRomInfo ms_Database[];
+		
+		// Current EEPRom type.
+		GameEEPRomInfo m_eprType;
 };
 
 }
