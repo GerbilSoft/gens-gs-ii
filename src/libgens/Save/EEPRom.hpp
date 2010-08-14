@@ -75,16 +75,16 @@ class EEPRom
 				address == m_eprType.type.sda_in_adr);
 		}
 		
-		uint8_t portReadByte(uint32_t address);
-		uint16_t portReadWord(uint32_t address);
+		uint8_t readByte(uint32_t address);
+		uint16_t readWord(uint32_t address);
 		
-		void portWriteByte(uint32_t address, uint8_t data);
-		void portWriteWord(uint32_t address, uint16_t data);
+		void writeByte(uint32_t address, uint8_t data);
+		void writeWord(uint32_t address, uint16_t data);
 		
 		// TODO: Add load/save functions.
 	
 	protected:
-		void portWriteInt(void);
+		void processWriteCmd(void);
 		
 		// EEPRom. (8 KB)
 		static const uint16_t EEPROM_ADDRESS_MASK = 0x1FFF;

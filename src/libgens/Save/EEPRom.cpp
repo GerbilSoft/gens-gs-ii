@@ -200,11 +200,11 @@ int EEPRom::setEEPRomType(int type)
 
 
 /**
- * portReadByte(): Read the specified port. (byte-wide)
+ * readByte(): Read the specified port. (byte-wide)
  * @param address Address.
  * @return Port value.
  */
-uint8_t EEPRom::portReadByte(uint32_t address)
+uint8_t EEPRom::readByte(uint32_t address)
 {
 	if (address != m_eprType.type.sda_out_adr)
 	{
@@ -252,11 +252,11 @@ uint8_t EEPRom::portReadByte(uint32_t address)
 
 
 /**
- * portReadWord(): Read the specified port. (word-wide)
+ * readWord(): Read the specified port. (word-wide)
  * @param address Address.
  * @return Port value.
  */
-uint16_t EEPRom::portReadWord(uint32_t address)
+uint16_t EEPRom::readWord(uint32_t address)
 {
 	// TODO: Verify that the address is valid.
 	
@@ -303,11 +303,11 @@ uint16_t EEPRom::portReadWord(uint32_t address)
 
 
 /**
- * portWriteByte(): Write to the specified port. (byte-wide)
+ * writeByte(): Write to the specified port. (byte-wide)
  * @param address Address.
  * @param data Data.
  */
-void EEPRom::portWriteByte(uint32_t address, uint8_t data)
+void EEPRom::writeByte(uint32_t address, uint8_t data)
 {
 	if (address != m_eprType.type.scl_adr &&
 	    address != m_eprType.type.sda_in_adr)
@@ -329,16 +329,16 @@ void EEPRom::portWriteByte(uint32_t address, uint8_t data)
 		m_sda = m_old_sda;
 	
 	// Process the write command.
-	portWriteInt();
+	processWriteCmd();
 }
 
 
 /**
- * portWriteWord(): Write to the specified port. (word-wide)
+ * writeWord(): Write to the specified port. (word-wide)
  * @param address Address.
  * @param data Data.
  */
-void EEPRom::portWriteWord(uint32_t address, uint16_t data)
+void EEPRom::writeWord(uint32_t address, uint16_t data)
 {
 	// TODO: Verify that the address is valid.
 	
@@ -362,14 +362,14 @@ void EEPRom::portWriteWord(uint32_t address, uint16_t data)
 		m_sda = m_old_sda;
 	
 	// Process the write command.
-	portWriteInt();
+	processWriteCmd();
 }
 
 
 /**
- * portWriteInt(): Process a port write command.
+ * processWriteCmd(): Process a port write command.
  */
-void EEPRom::portWriteInt(void)
+void EEPRom::processWriteCmd(void)
 {
 	switch (m_state)
 	{
