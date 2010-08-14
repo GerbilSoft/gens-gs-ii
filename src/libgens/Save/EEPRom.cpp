@@ -327,7 +327,6 @@ void EEPRom::portWriteInt(void)
 			 * MODE 1: 24C01 only.
 			 * Contains 7-bit address and R/W bit.
 			 */
-			// TODO
 			checkStart();
 			checkStop();
 			
@@ -422,7 +421,6 @@ void EEPRom::portWriteInt(void)
 					if (ms_Database[m_type].type.address_bits == 16)
 					{
 						// MODE3: Two ADDRESS bytes.
-						// TODO
 						m_state = (m_rw ? EEP_READ_DATA : EEP_GET_WORD_ADR_HIGH);
 						m_slave_mask <<= 16;
 					}
@@ -441,14 +439,51 @@ void EEPRom::portWriteInt(void)
 			break;
 		
 		case EEP_GET_WORD_ADR_HIGH:
-			// TODO
+			/**
+			 * EEP_GET_WORD_ADR_HIGH: Get the word address high byte.
+			 * MODE3 only. (24C32 - 24C512)
+			 */
+			checkStart();
+			checkStop();
+			
+			// Wait for /SCL falling edge before reading the data bit.
+			if (m_old_scl && !m_scl)
+			{
+				// Data bit.
+				if (m_counter < 9)
+				{
+					if ((ms_Database[m_type].type.size_mask + 1) < (1 << (17 - m_counter)))
+					{
+						// Ignored bit: slave mask should be right-shifted by one.
+						m_slave_mask >>= 1;
+					}
+					else
+					{
+						// WORD ADDRESS high bit.
+						if (m_old_sda)
+							m_word_address |= (1 << (16 - m_counter));
+						else
+							m_word_address &= ~(1 << (16 - m_counter));
+					}
+					
+					// Increment the counter.
+					m_counter++;
+				}
+				else
+				{
+					// ACK cycle.
+					m_counter = 1;
+					m_state = EEP_GET_WORD_ADR_LOW;
+				}
+			}
+			
 			break;
 		
 		case EEP_GET_WORD_ADR_LOW:
 			/**
-			 * EEP_GET_WORD_ADR_LOW: Get the word address LSB.
+			 * EEP_GET_WORD_ADR_LOW: Get the word address low byte.
 			 * 24C01: MODE1: 7-bit address word.
-			 * 24C01-24C512: MODE2/MODE3: Word address LSB.
+			 * 24C01-24C512: MODE2/MODE3: Word address low byte.
 			 */
 			checkStart();
 			checkStop();
