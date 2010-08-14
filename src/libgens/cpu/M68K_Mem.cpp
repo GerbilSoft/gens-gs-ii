@@ -843,16 +843,12 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 	else if (address >= 0xA130F2 && address <= 0xA130FF)
 	{
 		// Super Street Fighter II (SSF2) bankswitching system.
-		// TODO
-#if 0
-		and	ebx, 0xF
-		and	eax, 0x1F
-		shr	ebx, 1
-		mov	ecx, [SYM(Genesis_M68K_Read_Byte_Table) + eax * 4]
-		mov	[SYM(M68K_Read_Byte_Table) + ebx * 4], ecx
-		mov	ecx, [SYM(Genesis_M68K_Read_Word_Table) + eax * 4]
-		mov	[SYM(M68K_Read_Word_Table) + ebx * 4], ecx
-#endif
+		// TODO: Save the bank indexes for savestates.
+		// TODO: Starscream doesn't use this for instruction fetch!
+		unsigned int phys_bank = (address & 0xF) >> 1;
+		unsigned int virt_bank = (data & 0x1F);
+		M68K_Read_Byte_Table[phys_bank] = MD_M68K_Read_Byte_Table[virt_bank];
+		M68K_Read_Word_Table[phys_bank] = MD_M68K_Read_Word_Table[virt_bank];
 	}
 	else if (address > 0xA1001F)
 	{
@@ -1141,17 +1137,12 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 	else if (address >= 0xA130F2 && address <= 0xA130FF)
 	{
 		// Super Street Fighter II (SSF2) bankswitching system.
-		// TODO
-#if 0
-		mov	al, ah
-		and	ebx, 0xF
-		and	eax, 0x1F
-		shr	ebx, 1
-		mov	ecx, [SYM(Genesis_M68K_Read_Byte_Table) + eax * 4]
-		mov	[SYM(M68K_Read_Byte_Table) + ebx * 4], ecx
-		mov	ecx, [SYM(Genesis_M68K_Read_Word_Table) + eax * 4]
-		mov	[SYM(M68K_Read_Word_Table) + ebx * 4], ecx
-#endif
+		// TODO: Save the bank indexes for savestates.
+		// TODO: Starscream doesn't use this for instruction fetch!
+		unsigned int phys_bank = (address & 0xF) >> 1;
+		unsigned int virt_bank = (data & 0x1F);
+		M68K_Read_Byte_Table[phys_bank] = MD_M68K_Read_Byte_Table[virt_bank];
+		M68K_Read_Word_Table[phys_bank] = MD_M68K_Read_Word_Table[virt_bank];
 	}
 	else if (address > 0xA1001F)
 	{
