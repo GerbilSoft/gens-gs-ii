@@ -45,7 +45,22 @@ class EEPRom
 		
 		/** EEPROM type detection. **/
 		static int DetectEEPRomType(const uint8_t *header);
+		
+		/**
+		 * setEEPRomType(): Set the EEPRom type.
+		 * @param type EEPRom type. (Specify a negative number to clear)
+		 * @return 0 on success; non-zero on error.
+		 */
 		int setEEPRomType(int type);
+		
+		/**
+		 * isEEPRomTypeSet(): Determine if an EEPRom type is set.
+		 * @return True if an EEPRom type is set; false if not.
+		 */
+		inline bool isEEPRomTypeSet(void)
+		{
+			return (m_eprType.game_id[0] != 0x00);
+		}
 		
 		void portWriteByte(uint32_t address, uint8_t data);
 		void portWriteWord(uint32_t address, uint16_t data);
