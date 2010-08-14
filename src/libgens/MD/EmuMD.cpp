@@ -97,8 +97,8 @@ void EmuMD::Init_TEST(void)
 	// Determine the size of the file.
 	fseek(f, 0, SEEK_END);
 	M68K_Mem::Rom_Size = ftell(f);
-	if (M68K_Mem::Rom_Size > (4*1024*1024))
-		M68K_Mem::Rom_Size = (4*1024*1024);
+	if (M68K_Mem::Rom_Size > sizeof(M68K_Mem::Rom_Data))
+		M68K_Mem::Rom_Size = sizeof(M68K_Mem::Rom_Data);
 	fseek(f, 0, SEEK_SET);
 	
 	// Load the ROM into memory.
