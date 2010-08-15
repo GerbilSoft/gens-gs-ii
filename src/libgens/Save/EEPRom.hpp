@@ -42,7 +42,13 @@ class EEPRom
 		
 		void reset(void);
 		
-		/** EEPROM type detection. **/
+		/**
+		 * DetectEEPRomType(): Detect the EEPRom type used by the specified ROM.
+		 * @param serial Serial number. (NOTE: This does NOT include the "GM " prefix!)
+		 * @param serial_len Length of the serial number string.
+		 * @param checksum Checksum.
+		 * @return EEPRom type, or -1 if this ROM isn't known.
+		 */
 		static int DetectEEPRomType(const char *serial, size_t serial_len, uint16_t checksum);
 		
 		/**

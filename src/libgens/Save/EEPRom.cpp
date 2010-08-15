@@ -28,7 +28,6 @@
 
 // C includes.
 #include <string.h>
-#include <stdio.h>
 
 // TODO: Port SRam file handling functions from Gens/GS!
 
@@ -138,10 +137,10 @@ void EEPRom::reset(void)
 
 /**
  * DetectEEPRomType(): Detect the EEPRom type used by the specified ROM.
- * @param serial Serial number.
+ * @param serial Serial number. (NOTE: This does NOT include the "GM " prefix!)
  * @param serial_len Length of the serial number string.
  * @param checksum Checksum.
- * @return ROM type, or -1 if this ROM isn't known.
+ * @return EEPRom type, or -1 if this ROM isn't known.
  */
 int EEPRom::DetectEEPRomType(const char *serial, size_t serial_len, uint16_t checksum)
 {
@@ -157,7 +156,7 @@ int EEPRom::DetectEEPRomType(const char *serial, size_t serial_len, uint16_t che
 			continue;
 		}
 		
-		if (!memcmp(serial, ms_Database[i].game_id, serial_len))
+		if (!memcmp(serial, ms_Database[i].game_id, dbSerial_len))
 		{
 			// Serial number matches.
 			if (ms_Database[i].checksum == 0)

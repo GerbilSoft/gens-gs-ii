@@ -73,7 +73,10 @@ Rom::Rom(const char *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 	readHeaderMD(header, header_size);
 	
 	// Detect the EEPRom type from the ROM serial number and checksum.
-	m_eprType = EEPRom::DetectEEPRomType(m_mdHeader.serialNumber, sizeof(m_mdHeader.serialNumber), m_mdHeader.checksum);
+	m_eprType = EEPRom::DetectEEPRomType(
+			&m_mdHeader.serialNumber[3],
+			(sizeof(m_mdHeader.serialNumber) - 3),
+			m_mdHeader.checksum);
 }
 
 Rom::~Rom()
