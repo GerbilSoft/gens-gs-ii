@@ -40,6 +40,9 @@
 #endif /* __GNUC__ */
 #endif /* PURE */
 
+// LibGens includes.
+#include "Save/SRam.hpp"
+
 /**
  * ROM_HEADER_SIZE: Number of bytes used for ROM type detection.
  */
@@ -94,6 +97,8 @@ class Rom
 		
 		MDP_SYSTEM_ID sysId(void) const { return m_sysId; }
 		RomFormat romFormat(void) const { return m_romFormat; }
+		
+		void initSRam(SRam *sram);
 	
 	protected:
 		MDP_SYSTEM_ID m_sysId;

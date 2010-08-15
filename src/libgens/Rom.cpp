@@ -282,4 +282,72 @@ std::string Rom::SpaceElim(const char *src, size_t len)
 	return s_elim;
 }
 
+
+/**
+ * initSRam(): Initialize an SRam class using the ROM's header information.
+ * @param sram Pointer to SRam class.
+ */
+void Rom::initSRam(SRam *sram)
+{
+	// TODO: Load SRam from a file.
+	// TODO: Should that be implemented here or in SRam.cpp?
+	
+	uint32_t start, end;
+	// Check if the ROM header has SRam information.
+	// Mask the SRam info value with 0xFFFF4000 and check
+	// if it matches the Magic Number.
+	// Magic Number: 0x52414000 ('R', 'A', 0x40, 0x00)
+	if ((m_mdHeader.sramInfo & 0xFFFF4000) == 0x52414000)
+	{
+		// ROM header has SRam information. Use these addresses..
+		// SRam starting position must be a multiple of 0xF80000.
+		start = m_mdHeader.sramStartAddr & 0xF80000;
+		end = m_mdHeader.sramEndAddr & 0xFFFFFF;
+	}
+	else
+	{
+		// ROM header does not have SRam information.
+		// Use default settings.
+		start = 0x200000;
+		end = 0x203FFF;	// 64 KB
+	}
+	
+	// Check for invalid SRam addresses.
+	if ((start > end) || ((end - start) > 0x3FFF))
+	{
+		// Invalid ending address.
+		// Set the end address to the start + 0x3FFF.
+		end = start + 0x3FFF;
+	}
+	
+	// Make sure sRam starts on an even byte and ends on an odd byte.
+	start &= ~1;
+	end |= 1;
+	
+	// Set the addresses.
+	sram->setStart(start);
+	sram->setEnd(end);
+	
+	// If the ROM is smaller than the SRam starting address, always enable SRam.
+	// TODO: Instead of hardcoding 2 MB, use SRAM_Start.
+	// TODO: Get ROM size when loading the ROM file!
+#if 0
+	if (Rom_Size <= 0x200000)
+	{
+		sram->setOn(true);
+		sram->setWrite(true);
+	}
+#endif
+	
+	// Check for custom SRam mode.
+	// TODO: Document what "custom" mode is for.
+	if ((end - start) <= 2)
+		sram->setCustom(true);
+	else
+		sram->setCustom(false);
+	
+	// Load the SRam file.
+	// TODO
+}
+
 }
