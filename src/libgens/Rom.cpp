@@ -28,6 +28,7 @@
 
 // C++ includes.
 #include <algorithm>
+using std::string;
 
 // Byteswapping macros.
 #include "Util/byteswap.h"
@@ -35,9 +36,15 @@
 namespace LibGens
 {
 
-Rom::Rom(FILE *f, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
+Rom::Rom(const char *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 {
-	// TODO: Open the file ourselves instead of getting a FILE*.
+	// Save the filename for later.
+	m_filename = string(filename);
+	
+	// TODO: Unicode conversion on Win32.
+	m_file = fopen(filename, "rb");
+	if (!m_file)
+		return;
 	
 	m_sysId = sysOverride;
 	m_romFormat = fmtOverride;
@@ -45,8 +52,8 @@ Rom::Rom(FILE *f, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 	// Load the ROM header for detection purposes.
 	// TODO: Determine if the file is compressed.
 	uint8_t header[ROM_HEADER_SIZE];
-	fseek(f, 0, SEEK_SET);
-	size_t header_size = fread(header, 1, sizeof(header), f);
+	fseek(m_file, 0, SEEK_SET);
+	size_t header_size = fread(header, 1, sizeof(header), m_file);
 	printf("header_size: %d\n", header_size);
 	
 	if (m_romFormat == RFMT_UNKNOWN)
@@ -56,9 +63,6 @@ Rom::Rom(FILE *f, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 	
 	// Load the ROM header information.
 	readHeaderMD(header, header_size);
-	
-	// Save the file handle for now.
-	m_file = f;
 }
 
 Rom::~Rom()
@@ -286,11 +290,14 @@ std::string Rom::SpaceElim(const char *src, size_t len)
 /**
  * initSRam(): Initialize an SRam class using the ROM's header information.
  * @param sram Pointer to SRam class.
+ * @return 0 on success; non-zero on error.
  */
-void Rom::initSRam(SRam *sram)
+int Rom::initSRam(SRam *sram)
 {
 	// TODO: Load SRam from a file.
 	// TODO: Should that be implemented here or in SRam.cpp?
+	if (!isOpen())
+		return 1;
 	
 	uint32_t start, end;
 	// Check if the ROM header has SRam information.
@@ -341,6 +348,8 @@ void Rom::initSRam(SRam *sram)
 	
 	// Load the SRam file.
 	// TODO
+	
+	return 0;
 }
 
 }

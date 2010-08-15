@@ -89,7 +89,7 @@ class Rom
 			RFMT_CD_BIN_2352,	// CD-ROM image, BIN format. (2352-byte sectors)
 		};
 		
-		Rom(FILE *f, MDP_SYSTEM_ID sysOverride = MDP_SYSTEM_UNKNOWN, RomFormat fmtOverride = RFMT_UNKNOWN);
+		Rom(const char *filename, MDP_SYSTEM_ID sysOverride = MDP_SYSTEM_UNKNOWN, RomFormat fmtOverride = RFMT_UNKNOWN);
 		~Rom();
 		
 		bool isOpen(void) { return (m_file != NULL); }
@@ -98,7 +98,7 @@ class Rom
 		MDP_SYSTEM_ID sysId(void) const { return m_sysId; }
 		RomFormat romFormat(void) const { return m_romFormat; }
 		
-		void initSRam(SRam *sram);
+		int initSRam(SRam *sram);
 	
 	protected:
 		MDP_SYSTEM_ID m_sysId;
@@ -116,6 +116,10 @@ class Rom
 			return (isgraph(chr) || (chr & 0x80));
 		}
 		static std::string SpaceElim(const char *src, size_t len);
+		
+		/** Variables. **/
+		
+		std::string m_filename;		// ROM filename.
 		
 		/**
 		 * MD_RomHeader: ROM header. (MD-style)

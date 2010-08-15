@@ -273,19 +273,9 @@ void GensWindow::menuTriggered(int id)
 					if (filename.isEmpty())
 						break;
 					
-					// Open the file.
-					QFile m_file(filename);
-					if (!m_file.open(QIODevice::ReadOnly))
-					{
-						// Error opening the file.
-						printf("Error opening file %s: %d\n", filename.toUtf8().constData(), m_file.error());
-						break;
-					}
-					
-					// Dup the file and open it in LibGens.
-					// LibGens::Rom will close f once it's done using it.
-					FILE *f = fdopen(dup(m_file.handle()), "rb");
-					LibGens::Rom *m_rom = new LibGens::Rom(f);
+					// Open the file using the LibGens::Rom class.
+					// TODO: This won't work for KIO...
+					LibGens::Rom *m_rom = new LibGens::Rom(filename.toUtf8().constData());
 					printf("ROM information: format == %d, system == %d\n", m_rom->romFormat(), m_rom->sysId());
 					
 					// TODO: Process the ROM image.
