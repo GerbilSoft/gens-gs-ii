@@ -1,5 +1,9 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-open-close-title: gens-qt4 now supports opening and closing ROMs
+using the appropriate entries in the File menu. It also sets the window
+title to the ROM's internal name when a ROM is running.
+
 libgens-EEPRom-v0: Initial EEPROM support. (The class is named EEPRom for
 consistency with other memory management classes in Gens/GS II.) Most of the
 code was ported from Genesis Plus GX. A lot of work then went into refactoring
