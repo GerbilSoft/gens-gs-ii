@@ -105,6 +105,10 @@ class Rom
 		int initEEPRom(EEPRom *eeprom) const;
 		
 		int loadRom(void *buf, size_t siz);
+		
+		// TODO: Add a typedef utf8_str for UTF-8 strings.
+		const char *romNameJP(void) { return m_romNameJP.c_str(); }
+		const char *romNameUS(void) { return m_romNameUS.c_str(); }
 	
 	protected:
 		MDP_SYSTEM_ID m_sysId;
