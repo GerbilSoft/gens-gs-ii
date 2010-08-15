@@ -64,10 +64,10 @@ class VdpPalette
 			BPP_MAX
 		};
 		
-		bool isDirty(void) const { return m_dirty; }
+		inline bool isDirty(void) const { return m_dirty; }
 		
 		// Properties.
-		int contrast(void) const { return m_contrast; }
+		inline int contrast(void) const { return m_contrast; }
 		void setContrast(int newContrast)
 		{
 			if (newContrast == m_contrast)
@@ -76,7 +76,7 @@ class VdpPalette
 			m_dirty = true;
 		}
 		
-		int brightness(void) const { return m_brightness; }
+		inline int brightness(void) const { return m_brightness; }
 		void setBrightness(int newBrightness)
 		{
 			if (newBrightness == m_brightness)
@@ -85,7 +85,7 @@ class VdpPalette
 			m_dirty = true;
 		}
 		
-		bool grayscale(void) const { return m_grayscale; }
+		inline bool grayscale(void) const { return m_grayscale; }
 		void setGrayscale(bool newGrayscale)
 		{
 			if (newGrayscale == m_grayscale)
@@ -94,7 +94,7 @@ class VdpPalette
 			m_dirty = true;
 		}
 		
-		bool invertColor(void) const { return m_invertColor; }
+		inline bool invertColor(void) const { return m_invertColor; }
 		void setInvertColor(bool newInvertColor)
 		{
 			if (newInvertColor == m_invertColor)
@@ -103,7 +103,7 @@ class VdpPalette
 			m_dirty = true;
 		}
 		
-		ColorDepth bpp(void) const { return m_bpp; }
+		inline ColorDepth bpp(void) const { return m_bpp; }
 		void setBpp(ColorDepth newBpp)
 		{
 			if (m_bpp == newBpp)
