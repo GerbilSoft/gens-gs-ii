@@ -90,16 +90,17 @@ GensWindow::GensWindow()
 	m_scale = 1;		// Set the scale to 1x by default.
 	m_hasInitResize = false;
 	
+	// No ROM is loaded at startup.
+	// TODO: Move this to another file.
+	// NOTE: This must be set before calling setupUi()!
+	m_rom = NULL;
+	
 	// Set up the User Interface.
 	setupUi();
 	
 	// Controller change.
 	// NOTE: DEBUG CODE: Remove this later.
 	m_ctrlChange = -1;
-	
-	// No ROM loaded at startup.
-	// TODO: Move this to another file.
-	m_rom = NULL;
 }
 
 
@@ -180,15 +181,8 @@ void GensWindow::setupUi(void)
  */
 void GensWindow::retranslateUi(void)
 {
-	// TODO: Indicate UI status.
-	QString title = TR("Gens/GS II");
-	title += " - ";
-	title += TR("Development Build");
-#ifdef GENS_GIT_VERSION
-	title += " (" GENS_GIT_VERSION ")";
-#endif
-	
-	this->setWindowTitle(title);
+	// Set the Gens title.
+	setGensTitle();
 }
 
 
@@ -272,6 +266,7 @@ void GensWindow::menuTriggered(int id)
 				
 				case MNUID_ITEM(IDM_FILE_QUIT):
 					// Quit.
+					closeRom();
 					QuitGens();
 					this->close();
 					break;
@@ -577,6 +572,9 @@ void GensWindow::openRom(void)
 	QObject::connect(gqt4_emuThread, SIGNAL(frameDone(void)),
 			 this, SLOT(emuFrameDone(void)));
 	gqt4_emuThread->start();
+	
+	// Update the Gens title.
+	setGensTitle();
 }
 
 
@@ -603,6 +601,35 @@ void GensWindow::closeRom(void)
 	}
 	
 	// TODO: Clear the screen, start the idle animation, etc.
+	
+	// Update the Gens title.
+	setGensTitle();
+}
+
+
+/**
+ * setGensTitle(): Set the Gens window title.
+ */
+void GensWindow::setGensTitle(void)
+{
+	// TODO: Indicate UI status.
+	QString title = TR("Gens/GS II");
+	title += " " + TR("dev") + " - ";
+	
+	if (!m_rom)
+	{
+		// No ROM is running.
+		title += TR("Idle");
+	}
+	else
+	{
+		// ROM is running.
+		// TODO: Determine the system. For now, assume Genesis.
+		title += "Genesis: ";
+		title += QString(m_rom->romNameUS());
+	}
+	
+	this->setWindowTitle(title);
 }
 
 }

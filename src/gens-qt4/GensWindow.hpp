@@ -77,6 +77,9 @@ class GensWindow : public QMainWindow
 		LibGens::Rom *m_rom;
 		void openRom(void);
 		void closeRom(void);
+		
+		// Set the Gens window title.
+		void setGensTitle();
 	
 	protected slots:
 		// Menu item selection.
