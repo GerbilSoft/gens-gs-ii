@@ -353,19 +353,19 @@ void GensWindow::menuTriggered(int id)
 					break;
 				
 				case MNUID_ITEM(IDM_RESBPPTEST_15):
-					LibGens::VdpRend::Bpp = LibGens::VdpPalette::BPP_15;
+					LibGens::VdpRend::m_palette.setBpp(LibGens::VdpPalette::BPP_15);
 					m_vBackend->setVbDirty();
 					m_vBackend->vbUpdate();
 					break;
 				
 				case MNUID_ITEM(IDM_RESBPPTEST_16):
-					LibGens::VdpRend::Bpp = LibGens::VdpPalette::BPP_16;
+					LibGens::VdpRend::m_palette.setBpp(LibGens::VdpPalette::BPP_16);
 					m_vBackend->setVbDirty();
 					m_vBackend->vbUpdate();
 					break;
 				
 				case MNUID_ITEM(IDM_RESBPPTEST_32):
-					LibGens::VdpRend::Bpp = LibGens::VdpPalette::BPP_32;
+					LibGens::VdpRend::m_palette.setBpp(LibGens::VdpPalette::BPP_32);
 					m_vBackend->setVbDirty();
 					m_vBackend->vbUpdate();
 					break;

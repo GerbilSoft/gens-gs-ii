@@ -132,7 +132,7 @@ void GensQGLWidget::reallocTexture(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	
 	// Determine the texture format and type.
-	m_lastBpp = LibGens::VdpRend::Bpp;
+	m_lastBpp = LibGens::VdpRend::m_palette.bpp();
 	switch (m_lastBpp)
 	{
 		case LibGens::VdpPalette::BPP_15:
@@ -299,9 +299,10 @@ void GensQGLWidget::paintGL(void)
 		// MD_Screen is dirty.
 		
 		// Check if the Bpp has changed.
-		if (LibGens::VdpRend::Bpp != m_lastBpp)
+		if (LibGens::VdpRend::m_palette.bpp() != m_lastBpp)
 		{
 			// Bpp has changed. Reallocate the texture.
+			// TODO: Recalculate palettes?
 			reallocTexture();
 		}
 		
