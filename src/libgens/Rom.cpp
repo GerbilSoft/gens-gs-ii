@@ -41,9 +41,9 @@ Rom::Rom(FILE *f, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 	printf("header_size: %d\n", header_size);
 	
 	if (m_romFormat == RFMT_UNKNOWN)
-		m_romFormat = detectFormat(header, header_size);
+		m_romFormat = DetectFormat(header, header_size);
 	if (m_sysId == MDP_SYSTEM_UNKNOWN)
-		m_sysId = detectSystem(header, header_size, m_romFormat);
+		m_sysId = DetectSystem(header, header_size, m_romFormat);
 	
 	// Load the ROM header information.
 	// TODO
@@ -63,12 +63,12 @@ Rom::~Rom()
 
 
 /**
- * detectFormat(): Detect a ROM's format.
+ * DetectFormat(): Detect a ROM's format.
  * @param header ROM header. (ROM_HEADER_SIZE bytes)
  * @param header_size ROM header size.
  * @return ROM format.
  */
-Rom::RomFormat Rom::detectFormat(uint8_t header[ROM_HEADER_SIZE], size_t header_size)
+Rom::RomFormat Rom::DetectFormat(const uint8_t *header, size_t header_size)
 {
 	/** ISO-9660 (CD-ROM) check. **/
 	// ISO-9660 magic from file-5.03: ftp://ftp.astron.com/pub/file/
@@ -127,14 +127,15 @@ Rom::RomFormat Rom::detectFormat(uint8_t header[ROM_HEADER_SIZE], size_t header_
 	return RFMT_BINARY;
 }
 
+
 /**
- * detectSystem(): Detect a ROM's system ID.
+ * DetectSystem(): Detect a ROM's system ID.
  * @param header ROM header. (ROM_HEADER_SIZE bytes)
  * @param header_size ROM header size.
  * @param fmt ROM format.
  * @return System ID.
  */
-Rom::MDP_SYSTEM_ID Rom::detectSystem(uint8_t header[ROM_HEADER_SIZE], size_t header_size, RomFormat fmt)
+Rom::MDP_SYSTEM_ID Rom::DetectSystem(const uint8_t *header, size_t header_size, RomFormat fmt)
 {
 	if (fmt >= RFMT_CD_CUE)
 	{

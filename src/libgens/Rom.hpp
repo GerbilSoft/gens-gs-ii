@@ -90,8 +90,8 @@ class Rom
 		RomFormat m_romFormat;
 		FILE *m_file;
 		
-		static RomFormat detectFormat(uint8_t header[ROM_HEADER_SIZE], size_t header_size);
-		static MDP_SYSTEM_ID detectSystem(uint8_t header[ROM_HEADER_SIZE], size_t header_size, RomFormat fmt);
+		static RomFormat DetectFormat(const uint8_t *header, size_t header_size);
+		static MDP_SYSTEM_ID DetectSystem(const uint8_t *header, size_t header_size, RomFormat fmt);
 };
 
 }
