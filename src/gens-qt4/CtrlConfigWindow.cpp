@@ -44,6 +44,7 @@ const char *CtrlConfigWindow::ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX] =
 	":/gens/controller-6btn",	// IOT_6BTN
 	":/gens/controller-2btn",	// IOT_2BTN
 	":/gens/controller-mega-mouse"	// IOT_MEGA_MOUSE (TODO)
+	":/gens/controller-teamplayer"	// IOT_TEAMPLAYER (TODO)
 };
 
 
@@ -77,14 +78,10 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 			GetShortDeviceName(LibGens::IoBase::IOT_6BTN));
 	cboDevice->addItem(QIcon(":/gens/controller-2btn"),
 			GetShortDeviceName(LibGens::IoBase::IOT_2BTN));
-	
-	// TODO:
-	// - The icon is wrong. (It's a Sega Mouse icon, not Sega Mega Mouse.)
-	// - Mega Mouse emulation isn't working properly.
-#if 0
 	cboDevice->addItem(QIcon(":/gens/controller-mouse"),
 			GetShortDeviceName(LibGens::IoBase::IOT_MEGA_MOUSE));
-#endif
+	cboDevice->addItem(QIcon(":/gens/controller-teamplayer"),
+			GetShortDeviceName(LibGens::IoBase::IOT_TEAMPLAYER));
 	
 	// Update the port settings.
 	updatePortSettings();
@@ -142,6 +139,7 @@ const QString CtrlConfigWindow::GetShortDeviceName(LibGens::IoBase::IoType devTy
 		case IoBase::IOT_6BTN:		return TR("6-button");
 		case IoBase::IOT_2BTN:		return TR("2-button");
 		case IoBase::IOT_MEGA_MOUSE:	return TR("Mega Mouse");
+		case IoBase::IOT_TEAMPLAYER:	return TR("Teamplayer");
 	}
 }
 
@@ -166,6 +164,7 @@ const QString CtrlConfigWindow::GetLongDeviceName(LibGens::IoBase::IoType devTyp
 		case IoBase::IOT_6BTN:		return TR("6-button gamepad");
 		case IoBase::IOT_2BTN:		return TR("2-button gamepad (SMS)");
 		case IoBase::IOT_MEGA_MOUSE:	return TR("Mega Mouse");
+		case IoBase::IOT_TEAMPLAYER:	return TR("Sega Teamplayer");
 	}
 }
 
