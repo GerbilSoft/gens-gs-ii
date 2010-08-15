@@ -204,7 +204,7 @@ uint8_t IoTeamplayer::readData(void)
 			    (m_ctrlIndex[adj_counter] >= DT_MAX))
 			{
 				// Invalid counter state.
-				// TODO: PWhat value should be returned?
+				// TODO: What value should be returned?
 				ret = 0xFF;
 				break;
 			}
@@ -215,6 +215,7 @@ uint8_t IoTeamplayer::readData(void)
 	}
 	
 	// TL should match TR.
+	// (from Genesis Plus GX)
 	if (m_lastData & IOPIN_TR)
 		ret |= IOPIN_TL;
 	else
