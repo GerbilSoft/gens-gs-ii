@@ -59,6 +59,7 @@ class SRam
 			memset(m_sram, 0xFF, sizeof(m_sram));
 			m_on = false;
 			m_write = false;
+			m_dirty = false;
 		}
 		
 		/** Settings. **/
@@ -143,6 +144,10 @@ class SRam
 			// TODO: Bounds checking.
 			// TODO: Write protection, SRAM enable check.
 			m_sram[address - m_start] = data;
+			
+			// Set the dirty flag.
+			// TODO: Only if the word was actually modified?
+			m_dirty = true;
 		}
 		
 		void writeWord(uint32_t address, uint16_t data)
@@ -154,9 +159,14 @@ class SRam
 			address -= m_start;
 			m_sram[address] = ((data >> 8) & 0xFF);
 			m_sram[address] = (data & 0xFF);
+			
+			// Set the dirty flag.
+			// TODO: Only if the word was actually modified?
+			m_dirty = true;
 		}
 		
 		// TODO: Add load/save functions.
+		inline bool isDirty(void) const { return m_dirty; }
 	
 	protected:
 		uint8_t m_sram[64*1024];
@@ -165,6 +175,9 @@ class SRam
 		
 		uint32_t m_start;	// SRam starting address.
 		uint32_t m_end;		// SRam ending address.
+		
+		// Dirty flag.
+		bool m_dirty;
 };
 
 }

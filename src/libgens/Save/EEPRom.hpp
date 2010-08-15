@@ -112,6 +112,7 @@ class EEPRom
 		void writeWord(uint32_t address, uint16_t data);
 		
 		// TODO: Add load/save functions.
+		inline bool isDirty(void) const { return m_dirty; }
 	
 	protected:
 		void processWriteCmd(void);
@@ -177,6 +178,9 @@ class EEPRom
 		
 		// Current EEPRom type.
 		GameEEPRomInfo m_eprType;
+		
+		// Dirty flag.
+		bool m_dirty;
 };
 
 }
