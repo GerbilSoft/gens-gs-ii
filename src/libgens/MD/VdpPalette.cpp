@@ -378,6 +378,9 @@ void VdpPalette::recalcFull(void)
 #if 0
 	GensUI::wakeup();
 #endif
+	
+	// Clear the dirty bit.
+	m_dirty = false;
 }
 
 
