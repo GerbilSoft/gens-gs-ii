@@ -59,7 +59,6 @@ class SRam
 			memset(m_sram, 0xFF, sizeof(m_sram));
 			m_on = false;
 			m_write = false;
-			m_custom = false;
 		}
 		
 		/** Settings. **/
@@ -69,9 +68,6 @@ class SRam
 		
 		bool isWrite(void) const { return m_write; }
 		void setWrite(bool newWrite) { m_write = newWrite; }
-		
-		bool isCustom(void) const { return m_custom; }
-		void setCustom(bool newCustom) { m_custom = newCustom; }
 		
 		// TODO: Mask off the high byte in addresses?
 		uint32_t start(void) const { return m_start; }
@@ -166,7 +162,6 @@ class SRam
 		uint8_t m_sram[64*1024];
 		bool m_on;	// Is SRam enabled?
 		bool m_write;	// Is SRam writable?
-		bool m_custom;	// ???
 		
 		uint32_t m_start;	// SRam starting address.
 		uint32_t m_end;		// SRam ending address.

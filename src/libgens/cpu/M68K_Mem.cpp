@@ -180,14 +180,6 @@ uint8_t M68K_Mem::T_M68K_Read_Byte_RomX_SRam(uint32_t address)
 		else if (m_SRam.canRead() && m_SRam.isAddressInRange(address))
 		{
 			// SRam data request.
-			if (m_SRam.isCustom())
-			{
-				// Custom SRam.
-				// TODO: The original Gens code simply returns 0.
-				// I have no idea what this is supposed to do.
-				return 0;
-			}
-			
 			// Return the byte from SRam.
 			// NOTE: SRam is NOT byteswapped.
 			// TODO: Check boundaries.
@@ -448,14 +440,6 @@ uint16_t M68K_Mem::T_M68K_Read_Word_RomX_SRam(uint32_t address)
 		else if (m_SRam.canRead() && m_SRam.isAddressInRange(address))
 		{
 			// SRam data request.
-			if (m_SRam.isCustom())
-			{
-				// Custom SRam.
-				// TODO: The original Gens code simply returns 0.
-				// I have no idea what this is supposed to do.
-				return 0;
-			}
-			
 			// Return the byte from SRam.
 			// NOTE: SRam is NOT byteswapped.
 			// TODO: Check boundaries.

@@ -339,13 +339,6 @@ void Rom::initSRam(SRam *sram)
 	}
 #endif
 	
-	// Check for custom SRam mode.
-	// TODO: Document what "custom" mode is for.
-	if ((end - start) <= 2)
-		sram->setCustom(true);
-	else
-		sram->setCustom(false);
-	
 	// Load the SRam file.
 	// TODO
 }
