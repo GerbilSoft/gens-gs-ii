@@ -181,17 +181,17 @@ void CrazyEffect::DoCrazyEffect(ColorMask colorMask)
 {
 	switch (VdpRend::Bpp)
 	{
-		case VdpRend::BPP_15:
+		case VdpPalette::BPP_15:
 			T_DoCrazyEffect<uint16_t, 0x7C00, 0x03E0, 0x001F,
 					0x0400, 0x0020, 0x0001>(colorMask, VdpRend::MD_Screen.u16);
 			break;
 		
-		case VdpRend::BPP_16:
+		case VdpPalette::BPP_16:
 			T_DoCrazyEffect<uint16_t, 0xF800, 0x07C0, 0x001F,
 					0x0800, 0x0040, 0x0001>(colorMask, VdpRend::MD_Screen.u16);
 			break;
 		
-		case VdpRend::BPP_32:
+		case VdpPalette::BPP_32:
 		default:
 			T_DoCrazyEffect<uint32_t, CRAZY_MASK32_R, CRAZY_MASK32_G, CRAZY_MASK32_B,
 					CRAZY_ADD32_R, CRAZY_ADD32_G, CRAZY_ADD32_B>

@@ -135,19 +135,19 @@ void GensQGLWidget::reallocTexture(void)
 	m_lastBpp = LibGens::VdpRend::Bpp;
 	switch (m_lastBpp)
 	{
-		case LibGens::VdpRend::BPP_15:
+		case LibGens::VdpPalette::BPP_15:
 			m_colorComponents = 4;
 			m_texFormat = GL_BGRA;
 			m_texType = GL_UNSIGNED_SHORT_1_5_5_5_REV;
 			break;
 		
-		case LibGens::VdpRend::BPP_16:
+		case LibGens::VdpPalette::BPP_16:
 			m_colorComponents = 3;
 			m_texFormat = GL_RGB;
 			m_texType = GL_UNSIGNED_SHORT_5_6_5;
 			break;
 		
-		case LibGens::VdpRend::BPP_32:
+		case LibGens::VdpPalette::BPP_32:
 		default:
 			m_colorComponents = 4;
 			m_texFormat = GL_BGRA;

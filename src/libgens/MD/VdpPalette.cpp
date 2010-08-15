@@ -35,17 +35,30 @@
 namespace LibGens
 {
 
-/** Static member initialization. **/
-VdpPalette::Palette_t VdpPalette::Palette;
-int VdpPalette::Contrast = 100;
-int VdpPalette::Brightness = 100;
-bool VdpPalette::Grayscale = false;
-bool VdpPalette::InvertColor = false;
-VdpPalette::ColorScaleMethod_t VdpPalette::ColorScaleMethod = VdpPalette::COLSCALE_FULL;
+VdpPalette::VdpPalette()
+{
+	// Set defaults
+	m_contrast = 100;
+	m_brightness = 100;
+	m_grayscale = false;
+	m_invertColor = false;
+	m_csm = COLSCALE_FULL;
+	m_bpp = BPP_32;
+	m_dirty = true;
+	
+	// TODO: Should we recalculate the palette now or wait?
+	recalcFull();
+}
+
+
+VdpPalette::~VdpPalette()
+{
+	// TODO
+}
 
 
 /**
- * VdpPalette::T_ConstrainColorComponent(): Constrains a color component.
+ * T_ConstrainColorComponent(): Constrains a color component.
  * @param mask Color component mask. (max value)
  * @param c Color component to constrain.
  */
@@ -60,7 +73,7 @@ FORCE_INLINE void VdpPalette::T_ConstrainColorComponent(int& c)
 
 
 /**
- * VdpPalette::CalcGrayscale(): Calculate grayscale color values.
+ * CalcGrayscale(): Calculate grayscale color values.
  * @param r Red component.
  * @param g Green component.
  * @param b Blue component.
@@ -68,7 +81,7 @@ FORCE_INLINE void VdpPalette::T_ConstrainColorComponent(int& c)
  */
 FORCE_INLINE int VdpPalette::CalcGrayscale(int r, int g, int b)
 {
-	// Standard grayscale computation: Y = R*0.30 + G*0.59 + B*0.11
+	// Standard grayscale computation: Y = (R*0.30 + G*0.59 + B*0.11)
 	r = lrint((double)r * 0.30);
 	g = lrint((double)g * 0.59);
 	b = lrint((double)b * 0.11);
@@ -94,12 +107,12 @@ FORCE_INLINE void VdpPalette::AdjustContrast(int& r, int& g, int& b, int contras
 
 
 /**
- * T_Recalc_MD(): Recalculates the MD palette for brightness, contrast, and various effects.
+ * T_recalcFullMD(): Recalculates the full MD palette for brightness, contrast, and various effects.
  */
 template<typename pixel,
 	int RBits, int GBits, int BBits,
 	int RMask, int GMask, int BMask>
-FORCE_INLINE void VdpPalette::T_Recalc_MD(pixel *palMD)
+FORCE_INLINE void VdpPalette::T_recalcFullMD(pixel *palFull)
 {
 	int r, g, b;
 	
@@ -108,11 +121,10 @@ FORCE_INLINE void VdpPalette::T_Recalc_MD(pixel *palMD)
 	// Normal brightness: (Brightness == 100)
 	// Normal contrast:   (  Contrast == 100)
 
-	const int brightness = (Brightness - 100);
-	const int contrast = Contrast;
+	const int brightness = (m_brightness - 100);
 	
 	int mdComponentScale;
-	switch (ColorScaleMethod)
+	switch (m_csm)
 	{
 		case COLSCALE_RAW:
 			mdComponentScale = 0;
@@ -135,7 +147,7 @@ FORCE_INLINE void VdpPalette::T_Recalc_MD(pixel *palMD)
 		b = (i >> 4) & 0xF0;
 		
 		// Scale the colors to full RGB.
-		if (ColorScaleMethod != COLSCALE_RAW)
+		if (m_csm != COLSCALE_RAW)
 		{
 			r = (r * 0xFF) / mdComponentScale;
 			g = (g * 0xFF) / mdComponentScale;
@@ -151,15 +163,15 @@ FORCE_INLINE void VdpPalette::T_Recalc_MD(pixel *palMD)
 		}
 		
 		// Adjust contrast.
-		AdjustContrast(r, g, b, contrast);
+		AdjustContrast(r, g, b, m_contrast);
 		
-		if (Grayscale)
+		if (m_grayscale)
 		{
 			// Convert the color to grayscale.
 			r = g = b = CalcGrayscale(r, g, b);
 		}
 		
-		if (InvertColor)
+		if (m_invertColor)
 		{
 			// Invert the color components.
 			r ^= 0xFF;
@@ -185,9 +197,9 @@ FORCE_INLINE void VdpPalette::T_Recalc_MD(pixel *palMD)
 		}
 		
 		// Create the color.
-		palMD[i] = (r << (BBits + GBits)) |
-			   (g << (BBits)) |
-			   (b);
+		palFull[i] = (r << (BBits + GBits)) |
+			     (g << (BBits)) |
+			     (b);
 		
 #if GENS_BYTEORDER == GENS_BIG_ENDIAN
 		if (sizeof(pixel) == 4)
@@ -196,7 +208,7 @@ FORCE_INLINE void VdpPalette::T_Recalc_MD(pixel *palMD)
 			// The default palette calculation ends up using RGBA (or ARGB?).
 			// (15-bit and 16-bit color appear to be fine...)
 			// TODO: Check Linux/PPC.
-			palMD[i] = le32_to_cpu(palMD[i]);
+			palFull[i] = le32_to_cpu(palFull[i]);
 		}
 #endif
 	}
@@ -313,14 +325,14 @@ static inline void T_Recalculate_Palette_32X(pixel *pal32X, pixel *cramAdjusted3
 
 
 /**
- * VdpPalette::Recalc(): Recalculate the VDP palette.
+ * recalcFull(): Recalculate the full VDP palette.
  */
-void VdpPalette::Recalc(void)
+void VdpPalette::recalcFull(void)
 {
 	switch (VdpRend::Bpp)
 	{
-		case VdpRend::BPP_15:
-			T_Recalc_MD<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(Palette.u16);
+		case BPP_15:
+			T_recalcFullMD<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(m_palette.u16);
 #if 0
 			// TODO: Port to LibGens.
 			T_Recalculate_Palette_32X<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>
@@ -328,8 +340,8 @@ void VdpPalette::Recalc(void)
 #endif
 			break;
 		
-		case VdpRend::BPP_16:
-			T_Recalc_MD<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(Palette.u16);
+		case BPP_16:
+			T_recalcFullMD<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(m_palette.u16);
 #if 0
 			// TODO: Port to LibGens.
 			T_Recalculate_Palette_32X<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>
@@ -337,9 +349,9 @@ void VdpPalette::Recalc(void)
 #endif
 			break;
 		
-		case VdpRend::BPP_32:
+		case BPP_32:
 		default:
-			T_Recalc_MD<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(Palette.u32);
+			T_recalcFullMD<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(m_palette.u32);
 #if 0
 			// TODO: Port to LibGens.
 			T_Recalculate_Palette_32X<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>
@@ -349,6 +361,8 @@ void VdpPalette::Recalc(void)
 	}
 	
 	// Set the CRam flag to force a palette update.
+	// TODO: This is being done from a class instance...
+	// Figure out a better way to handle this.
 	VdpIo::VDP_Flags.CRam = 1;
 	
 	// TODO: Do_VDP_Only() / Do_32X_VDP_Only() if paused.

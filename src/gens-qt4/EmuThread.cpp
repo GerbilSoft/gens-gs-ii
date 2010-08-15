@@ -60,10 +60,6 @@ void EmuThread::run(void)
 	// Initialize the VDP.
 	LibGens::VdpIo::Reset();
 	
-	// Recalculate the full MD palette.
-	// TODO: This would usually be done at program startup.
-	LibGens::VdpPalette::Recalc();
-	
 	// TODO: VdpIo::VDP_Lines.Display.Total isn't being set properly...
 	LibGens::VdpIo::VDP_Lines.Display.Total = 262;
 	

@@ -120,10 +120,6 @@ int EmuMD::SetRom(Rom *rom)
 	// Initialize the VDP.
 	VdpIo::Reset();
 	
-	// Recalculate the full MD palette.
-	// TODO: This would usually be done at program startup.
-	VdpPalette::Recalc();
-	
 	// Initialize the M68K.
 	M68K::InitSys(M68K::SYSID_MD);
 	

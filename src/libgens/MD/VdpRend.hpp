@@ -24,6 +24,7 @@
 #ifndef __LIBGENS_MD_VDPREND_HPP__
 #define __LIBGENS_MD_VDPREND_HPP__
 
+// C includes.
 #include <stdint.h>
 
 // Byteswapping macros.
@@ -31,6 +32,9 @@
 // however, gens-qt4 doesn't -I the libgens/ directory.
 // So, we're using relative paths for now.
 #include "../Util/byteswap.h"
+
+// VDP palette manager.
+#include "VdpPalette.hpp"
 
 namespace LibGens
 {
@@ -42,6 +46,10 @@ class VdpRend
 		static void Init(void);
 		static void End(void);
 		static void Reset(void);
+		
+		// Palette manager.
+		static VdpPalette m_palette;
+		static VdpPalette::ColorDepth Bpp;
 		
 		// Active MD palette.
 		union MD_Palette_t
@@ -132,17 +140,6 @@ class VdpRend
 			uint32_t u32[336>>1];
 		};
 		static LineBuf_t LineBuf;
-		
-		// Color depth.
-		enum ColorDepth
-		{
-			BPP_15,
-			BPP_16,
-			BPP_32,
-			
-			BPP_MAX
-		};
-		static ColorDepth Bpp;
 	
 	protected:
 		template<bool hs, typename pixel>

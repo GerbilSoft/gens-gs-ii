@@ -107,7 +107,7 @@ class VBackend
 		bool m_vbDirty;
 		
 		// Color depth information.
-		LibGens::VdpRend::ColorDepth m_lastBpp;
+		LibGens::VdpPalette::ColorDepth m_lastBpp;
 		
 		// Effects.
 		void updatePausedEffect(bool fromMdScreen = true);

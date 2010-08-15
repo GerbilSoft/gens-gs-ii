@@ -189,12 +189,12 @@ void FastBlur::DoFastBlur(void *outScreen, bool fromMdScreen)
 		// Copy MD_Screen[] to outScreen.
 		switch(VdpRend::Bpp)
 		{
-			case VdpRend::BPP_15:
-			case VdpRend::BPP_16:
+			case VdpPalette::BPP_15:
+			case VdpPalette::BPP_16:
 				memcpy(outScreen, VdpRend::MD_Screen.u16, sizeof(VdpRend::MD_Screen.u16));
 				break;
 			
-			case VdpRend::BPP_32:
+			case VdpPalette::BPP_32:
 			default:
 				memcpy(outScreen, VdpRend::MD_Screen.u32, sizeof(VdpRend::MD_Screen.u32));
 				break;
@@ -203,7 +203,7 @@ void FastBlur::DoFastBlur(void *outScreen, bool fromMdScreen)
 	
 	switch (VdpRend::Bpp)
 	{
-		case VdpRend::BPP_15:
+		case VdpPalette::BPP_15:
 #ifdef HAVE_MMX
 			if (CPU_Flags & MDP_CPUFLAG_X86_MMX)
 				DoFastBlur_16_MMX((uint16_t*)outScreen, MASK_DIV2_15_MMX);
@@ -211,7 +211,7 @@ void FastBlur::DoFastBlur(void *outScreen, bool fromMdScreen)
 #endif /* HAVE_MMX */
 				T_DoFastBlur<uint16_t, MASK_DIV2_15>((uint16_t*)outScreen);
 			break;
-		case VdpRend::BPP_16:
+		case VdpPalette::BPP_16:
 #ifdef HAVE_MMX
 			if (CPU_Flags & MDP_CPUFLAG_X86_MMX)
 				DoFastBlur_16_MMX((uint16_t*)outScreen, MASK_DIV2_16_MMX);
@@ -219,7 +219,7 @@ void FastBlur::DoFastBlur(void *outScreen, bool fromMdScreen)
 #endif /* HAVE_MMX */
 				T_DoFastBlur<uint16_t, MASK_DIV2_16>((uint16_t*)outScreen);
 			break;
-		case VdpRend::BPP_32:
+		case VdpPalette::BPP_32:
 		default:
 #ifdef HAVE_MMX
 			if (CPU_Flags & MDP_CPUFLAG_X86_MMX)

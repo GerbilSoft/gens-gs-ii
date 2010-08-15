@@ -164,15 +164,15 @@ void PausedEffect::DoPausedEffect(void *outScreen, bool fromMdScreen)
 		// Render from MD_Screen[] to outScreen.
 		switch (VdpRend::Bpp)
 		{
-			case VdpRend::BPP_15:
+			case VdpPalette::BPP_15:
 				T_DoPausedEffect<uint16_t, 0x7C00, 0x03E0, 0x001F, 10, 5, 0>
 					(VdpRend::MD_Screen.u16, (uint16_t*)outScreen);
 				break;
-			case VdpRend::BPP_16:
+			case VdpPalette::BPP_16:
 				T_DoPausedEffect<uint16_t, 0xF800, 0x07C0, 0x001F, 11, 6, 0>
 					(VdpRend::MD_Screen.u16, (uint16_t*)outScreen);
 				break;
-			case VdpRend::BPP_32:
+			case VdpPalette::BPP_32:
 			default:
 				T_DoPausedEffect<uint32_t, PAUSED_MASK32_R, PAUSED_MASK32_G, PAUSED_MASK32_B,
 						PAUSED_SHIFT32_R, PAUSED_SHIFT32_G, PAUSED_SHIFT32_B>
@@ -185,15 +185,15 @@ void PausedEffect::DoPausedEffect(void *outScreen, bool fromMdScreen)
 		// Update outScreen only.
 		switch (VdpRend::Bpp)
 		{
-			case VdpRend::BPP_15:
+			case VdpPalette::BPP_15:
 				T_DoPausedEffect<uint16_t, 0x7C00, 0x03E0, 0x001F, 10, 5, 0>
 					((uint16_t*)outScreen);
 				break;
-			case VdpRend::BPP_16:
+			case VdpPalette::BPP_16:
 				T_DoPausedEffect<uint16_t, 0xF800, 0x07C0, 0x001F, 11, 6, 0>
 					((uint16_t*)outScreen);
 				break;
-			case VdpRend::BPP_32:
+			case VdpPalette::BPP_32:
 			default:
 				T_DoPausedEffect<uint32_t, PAUSED_MASK32_R, PAUSED_MASK32_G, PAUSED_MASK32_B,
 						PAUSED_SHIFT32_R, PAUSED_SHIFT32_G, PAUSED_SHIFT32_B>

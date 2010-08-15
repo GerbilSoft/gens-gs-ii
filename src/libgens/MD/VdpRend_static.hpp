@@ -25,11 +25,17 @@
 #define __LIBGENS_MD_VDPREND_STATIC_HPP__
 
 #include "VdpRend.hpp"
+#include "VdpPalette.hpp"
 
 namespace LibGens
 {
 
 /** Static member initialization. **/
+
+// Palette manager.
+// NOTE: bpp initialized to 32 for now because radeong_dri.so is really slow with 16-bit color.
+VdpPalette VdpRend::m_palette;
+VdpPalette::ColorDepth VdpRend::Bpp = VdpPalette::BPP_32;
 
 // Active MD palette.
 VdpRend::MD_Palette_t VdpRend::MD_Palette;
@@ -49,10 +55,6 @@ unsigned int VdpRend::VDP_Layers = VdpRend::VDP_LAYERS_DEFAULT;
 
 // Line buffer for current line.
 VdpRend::LineBuf_t VdpRend::LineBuf;
-
-// Color depth.
-// NOTE: Set to 32 for now because radeong_dri.so is really slow with 16-bit color.
-VdpRend::ColorDepth VdpRend::Bpp = BPP_32;
 
 }
 
