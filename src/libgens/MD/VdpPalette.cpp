@@ -31,6 +31,7 @@
 // C includes.
 #include <math.h>
 #include <stdint.h>
+#include <string.h>
 
 namespace LibGens
 {
