@@ -43,6 +43,7 @@
 #include "libgens/IO/Io6Button.hpp"
 #include "libgens/IO/Io2Button.hpp"
 #include "libgens/IO/IoMegaMouse.hpp"
+#include "libgens/IO/IoTeamplayer.hpp"
 
 // Test loading ROMs.
 #include "libgens/Rom.hpp"
@@ -361,6 +362,10 @@ void GensWindow::menuTriggered(int id)
 					m_ctrlChange = 4;
 					break;
 				
+				case MNUID_ITEM(IDM_CTRLTEST_TEAMPLAYER):
+					m_ctrlChange = 5;
+					break;
+				
 				case MNUID_ITEM(IDM_CTRLTEST_CONFIG):
 					// Controller Configuration.
 					CtrlConfigWindow::ShowSingle(this);
@@ -437,6 +442,13 @@ void GensWindow::emuFrameDone(void)
 				controller = new LibGens::IoMegaMouse(LibGens::EmuMD::m_port1);
 				// TODO: Copy settings from existing Port 1 controller.
 				m_vBackend->osd_printf(1500, "Port 1 set to SEGA MEGA MOUSE.");
+				break;
+			
+			case 5:
+				// Sega Teamplayer.
+				controller = new LibGens::IoTeamplayer(LibGens::EmuMD::m_port1);
+				// TODO: Copy settings from existing Port 1 controller.
+				m_vBackend->osd_printf(1500, "Port 1 set to SEGA TEAMPLAYER.");
 				break;
 			
 			default:
