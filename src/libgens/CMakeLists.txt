@@ -53,6 +53,7 @@ SET(libgens_SRCS
 	cpu/Z80_MD_Mem.cpp
 	Save/SRam.cpp
 	Save/EEPRom.cpp
+	IO/IoTeamplayer.cpp
 	)
 
 # Compatibility sources.

@@ -126,6 +126,7 @@ class IoBase
 			IOT_6BTN	= 2,
 			IOT_2BTN	= 3,
 			IOT_MEGA_MOUSE	= 4,
+			IOT_TEAMPLAYER	= 5,
 			
 			IOT_MAX
 		};
