@@ -38,10 +38,9 @@ namespace LibGens
 class VdpRend
 {
 	public:
-		/**
-		 * VdpRend::Reset(): Reset the VDP rendering arrays.
-		 * This function should only be called from VdpIo::Reset()!
-		 */
+		/** NOTE: Init(), End(), and Reset() should ONLY be called from VdpIo()! **/
+		static void Init(void);
+		static void End(void);
 		static void Reset(void);
 		
 		// Active MD palette.

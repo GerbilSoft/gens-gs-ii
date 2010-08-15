@@ -34,6 +34,7 @@
 
 // System emulation code.
 #include "MD/EmuMD.hpp"
+#include "MD/VdpIo.hpp"
 
 // I/O devices.
 #include "IO/KeyManager.hpp"
@@ -110,6 +111,8 @@ int Init(void)
 	Z80_MD_Mem::Init();
 	
 	EmuMD::Init();
+	VdpIo::Init();
+	
 	KeyManager::Init();
 	
 	ms_IsInit = true;
@@ -139,6 +142,8 @@ int End(void)
 	Z80_MD_Mem::End();
 	
 	EmuMD::End();
+	VdpIo::End();
+	
 	KeyManager::End();
 	
 	ms_IsInit = false;

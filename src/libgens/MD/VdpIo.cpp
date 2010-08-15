@@ -52,6 +52,26 @@ namespace LibGens
 {
 
 /**
+ * VdpRend::Init(): Initialize the VDP subsystem.
+ */
+void VdpIo::Init(void)
+{
+	// Initialize the VDP rendering subsystem.
+	VdpRend::Init();
+}
+
+
+/**
+ * VdpIo::Init(): Shut down the VDP subsystem.
+ */
+void VdpIo::End(void)
+{
+	// shut down the VDP rendering subsystem.
+	VdpRend::End();
+}
+
+
+/**
  * VdpIo::Reset(): Reset the VDP.
  */
 void VdpIo::Reset(void)

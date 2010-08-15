@@ -32,6 +32,9 @@ namespace LibGens
 class VdpIo
 {
 	public:
+		static void Init(void);
+		static void End(void);
+		
 		/** VDP I/O registers and variables. **/
 		
 		// VDP registers.

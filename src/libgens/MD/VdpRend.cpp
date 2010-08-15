@@ -38,6 +38,28 @@ namespace LibGens
 {
 
 /**
+ * VdpRend::Init(): Initialize the VDP rendering subsystem.
+ * This function should only be called from VdpIo::Init()!
+ */
+void VdpRend::Init(void)
+{
+	// Recalculate the VDP palette.
+	// TODO: Wait until the Bpp is set?
+	VdpPalette::Recalc();
+}
+
+
+/**
+ * VdpRend::Init(): Shut down the VDP rendering subsystem.
+ * This function should only be called from VdpIo::Init()!
+ */
+void VdpRend::End(void)
+{
+	// TODO
+}
+
+
+/**
  * VdpRend::Reset(): Reset the VDP rendering arrays.
  * This function should only be called from VdpIo::Reset()!
  */
