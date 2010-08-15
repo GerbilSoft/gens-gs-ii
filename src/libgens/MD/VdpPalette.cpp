@@ -50,6 +50,9 @@ VdpPalette::VdpPalette()
 	
 	// TODO: Should we recalculate the palette now or wait?
 	recalcFull();
+	
+	// Reset the active palettes.
+	resetActive();
 }
 
 
@@ -374,6 +377,15 @@ void VdpPalette::recalcFull(void)
 #if 0
 	GensUI::wakeup();
 #endif
+}
+
+
+/**
+ * resetActive(): Reset the active palettes.
+ */
+void VdpPalette::resetActive(void)
+{
+	memset(&m_palActiveMD, 0x00, sizeof(m_palActiveMD));
 }
 
 

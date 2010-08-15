@@ -125,6 +125,9 @@ class VdpPalette
 		// Palette recalculation functions.
 		void recalcFull(void);
 		
+		// Reset the active palettes.
+		void resetActive(void);
+		
 		// Palette update functions.
 		void updateMD(const VdpIo::VDP_CRam_t *cram);
 		void updateMD_HS(const VdpIo::VDP_CRam_t *cram);
