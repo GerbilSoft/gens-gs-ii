@@ -23,13 +23,22 @@
 
 #include "Rom.hpp"
 
+// C includes.
 #include <string.h>
+
+// C++ includes.
+#include <algorithm>
+
+// Byteswapping macros.
+#include "Util/byteswap.h"
 
 namespace LibGens
 {
 
 Rom::Rom(FILE *f, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 {
+	// TODO: Open the file ourselves instead of getting a FILE*.
+	
 	m_sysId = sysOverride;
 	m_romFormat = fmtOverride;
 	
@@ -46,7 +55,7 @@ Rom::Rom(FILE *f, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 		m_sysId = DetectSystem(header, header_size, m_romFormat);
 	
 	// Load the ROM header information.
-	// TODO
+	readHeaderMD(header, header_size);
 	
 	// Save the file handle for now.
 	m_file = f;
@@ -64,7 +73,7 @@ Rom::~Rom()
 
 /**
  * DetectFormat(): Detect a ROM's format.
- * @param header ROM header. (ROM_HEADER_SIZE bytes)
+ * @param header ROM header.
  * @param header_size ROM header size.
  * @return ROM format.
  */
@@ -130,7 +139,7 @@ Rom::RomFormat Rom::DetectFormat(const uint8_t *header, size_t header_size)
 
 /**
  * DetectSystem(): Detect a ROM's system ID.
- * @param header ROM header. (ROM_HEADER_SIZE bytes)
+ * @param header ROM header.
  * @param header_size ROM header size.
  * @param fmt ROM format.
  * @return System ID.
@@ -187,6 +196,90 @@ Rom::MDP_SYSTEM_ID Rom::DetectSystem(const uint8_t *header, size_t header_size, 
 	
 	// Assume MD.
 	return MDP_SYSTEM_MD;
+}
+
+
+/**
+ * readHeaderMD(): Read the ROM header. (MD-style)
+ * @param header ROM header.
+ * @param header_size ROM header size.
+ */
+void Rom::readHeaderMD(const uint8_t *header, size_t header_size)
+{
+	// Clear the internal MD header.
+	memset(&m_mdHeader, 0x00, sizeof(m_mdHeader));
+	
+	if (header_size <= 0x100)
+	{
+		// ROM header is too small. Assume it's blank.
+		return;
+	}
+	
+	// Copy the header data first.
+	memcpy(&m_mdHeader, &header[0x100], (std::min(header_size, (size_t)0x200) - 0x100));
+	
+	// Byteswap numerical values.
+	m_mdHeader.checksum		= be16_to_cpu(m_mdHeader.checksum);
+	m_mdHeader.romStartAddr		= be32_to_cpu(m_mdHeader.romStartAddr);
+	m_mdHeader.romEndAddr		= be32_to_cpu(m_mdHeader.romEndAddr);
+	m_mdHeader.ramStartAddr		= be32_to_cpu(m_mdHeader.ramStartAddr);
+	m_mdHeader.ramEndAddr		= be32_to_cpu(m_mdHeader.ramEndAddr);
+	m_mdHeader.sramInfo		= be32_to_cpu(m_mdHeader.sramInfo);
+	m_mdHeader.sramStartAddr	= be32_to_cpu(m_mdHeader.sramStartAddr);
+	m_mdHeader.sramEndAddr		= be32_to_cpu(m_mdHeader.sramEndAddr);
+	
+	// Load the ROM names.
+	m_romNameJP = SpaceElim(m_mdHeader.romNameJP, sizeof(m_mdHeader.romNameJP));
+	m_romNameUS = SpaceElim(m_mdHeader.romNameUS, sizeof(m_mdHeader.romNameUS));
+}
+
+
+/**
+ * SpaceElim(): Eliminate excess spaces from a ROM name.
+ * TODO: Convert from cp1252/Shift-JIS to UTF-8 first.
+ * TODO: Returning an std::string is a bit wasteful...
+ * @param src ROM name.
+ * @param len Length of ROM name.
+ * @return ROM name with excess spaces eliminated.
+ */
+std::string Rom::SpaceElim(const char *src, size_t len)
+{
+	// Allocate enough space for the string initially.
+	std::string s_elim;
+	s_elim.resize(len);
+	size_t i_dest = 0;
+	
+	// Was the last character a graphics character?
+	bool lastCharIsGraph = false;
+	
+	for (size_t n = len; n != 0; n--)
+	{
+		char chr = *src++;
+		
+		if (!lastCharIsGraph && !IsGraphChar(chr))
+		{
+			// This is a space character, and the previous
+			// character was not a space character.
+			continue;
+		}
+		
+		// This is not a space character,
+		// or it is a space character and the previous character wasn't.
+		s_elim[i_dest++] = chr;
+		lastCharIsGraph = IsGraphChar(chr);
+	}
+	
+	// Resize the string to the last written character.
+	// (Make sure there's no space at the end, too.)
+	if (i_dest == 0)
+		s_elim.clear();
+	else if (!IsGraphChar(s_elim[i_dest - 1]))
+		s_elim.resize(i_dest - 1);
+	else
+		s_elim.resize(i_dest);
+	
+	// Return the string.
+	return s_elim;
 }
 
 }

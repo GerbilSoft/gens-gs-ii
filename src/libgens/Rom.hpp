@@ -24,11 +24,21 @@
 #ifndef __LIBGENS_ROM_HPP__
 #define __LIBGENS_ROM_HPP__
 
+// C includes.
 #include <stdio.h>
 #include <stdint.h>
+#include <ctype.h>
 
 // C++ includes.
 #include <string>
+
+#ifndef PURE
+#ifdef __GNUC__
+#define PURE __attribute__ ((pure))
+#else
+#define PURE
+#endif /* __GNUC__ */
+#endif /* PURE */
 
 /**
  * ROM_HEADER_SIZE: Number of bytes used for ROM type detection.
@@ -92,6 +102,57 @@ class Rom
 		
 		static RomFormat DetectFormat(const uint8_t *header, size_t header_size);
 		static MDP_SYSTEM_ID DetectSystem(const uint8_t *header, size_t header_size, RomFormat fmt);
+		
+		void readHeaderMD(const uint8_t *header, size_t header_size);
+		
+		// Space elimination algorithm.
+		static inline PURE bool IsGraphChar(char chr)
+		{
+			return (isgraph(chr) || (chr & 0x80));
+		}
+		static std::string SpaceElim(const char *src, size_t len);
+		
+		/**
+		 * MD_RomHeader: ROM header. (MD-style)
+		 * This matches the MD ROM header format exactly.
+		 * 
+		 * NOTE: Strings are NOT null-terminated!
+		 */
+		struct MD_RomHeader
+		{
+			char consoleName[16];
+			char copyright[16];
+			char romNameJP[48];	// Japanese ROM name.
+			char romNameUS[48];	// US/Europe ROM name.
+			char serialNumber[14];
+			uint16_t checksum;
+			char ioSupport[16];
+			
+			// ROM/RAM address information.
+			uint32_t romStartAddr;
+			uint32_t romEndAddr;
+			uint32_t ramStartAddr;
+			uint32_t ramEndAddr;
+			
+			// Save RAM information.
+			// Info format: 'R', 'A', %1x1yz000, 0x20
+			// x == 1 for backup (SRAM), 0 for not backup
+			// yz == 10 for even addresses, 11 for odd addresses
+			uint32_t sramInfo;
+			uint32_t sramStartAddr;
+			uint32_t sramEndAddr;
+			
+			// Miscellaneous.
+			char modemInfo[12];
+			char notes[40];
+			char countryCodes[16];
+		};
+		
+		MD_RomHeader m_mdHeader;
+		
+		// ROM names. (TODO: Convert from cp1252/Shift-JIS to UTF-8.)
+		std::string m_romNameJP;
+		std::string m_romNameUS;
 };
 
 }
