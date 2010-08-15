@@ -162,7 +162,7 @@ void PausedEffect::DoPausedEffect(void *outScreen, bool fromMdScreen)
 	if (fromMdScreen)
 	{
 		// Render from MD_Screen[] to outScreen.
-		switch (VdpRend::Bpp)
+		switch (VdpRend::m_palette.bpp())
 		{
 			case VdpPalette::BPP_15:
 				T_DoPausedEffect<uint16_t, 0x7C00, 0x03E0, 0x001F, 10, 5, 0>
@@ -183,7 +183,7 @@ void PausedEffect::DoPausedEffect(void *outScreen, bool fromMdScreen)
 	else
 	{
 		// Update outScreen only.
-		switch (VdpRend::Bpp)
+		switch (VdpRend::m_palette.bpp())
 		{
 			case VdpPalette::BPP_15:
 				T_DoPausedEffect<uint16_t, 0x7C00, 0x03E0, 0x001F, 10, 5, 0>

@@ -187,7 +187,7 @@ void FastBlur::DoFastBlur(void *outScreen, bool fromMdScreen)
 	if (fromMdScreen)
 	{
 		// Copy MD_Screen[] to outScreen.
-		switch(VdpRend::Bpp)
+		switch(VdpRend::m_palette.bpp())
 		{
 			case VdpPalette::BPP_15:
 			case VdpPalette::BPP_16:
@@ -201,7 +201,7 @@ void FastBlur::DoFastBlur(void *outScreen, bool fromMdScreen)
 		}
 	}
 	
-	switch (VdpRend::Bpp)
+	switch (VdpRend::m_palette.bpp())
 	{
 		case VdpPalette::BPP_15:
 #ifdef HAVE_MMX

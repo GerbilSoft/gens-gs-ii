@@ -37,7 +37,9 @@ namespace LibGens
 
 VdpPalette::VdpPalette()
 {
-	// Set defaults
+	// Set defaults.
+	// NOTE: bpp is initialized to 32 for now because
+	// radeong_dri.so is really slow with 16-bit color.
 	m_contrast = 100;
 	m_brightness = 100;
 	m_grayscale = false;
@@ -329,7 +331,7 @@ static inline void T_Recalculate_Palette_32X(pixel *pal32X, pixel *cramAdjusted3
  */
 void VdpPalette::recalcFull(void)
 {
-	switch (VdpRend::Bpp)
+	switch (m_bpp)
 	{
 		case BPP_15:
 			T_recalcFullMD<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(m_palette.u16);

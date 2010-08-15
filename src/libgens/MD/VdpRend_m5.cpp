@@ -1589,7 +1589,7 @@ void VdpRend_m5::Render_Line(void)
 	}
 	
 	// Render the image.
-	if (VdpRend::Bpp != VdpPalette::BPP_32)
+	if (VdpRend::m_palette.bpp() != VdpPalette::BPP_32)
 		T_Render_LineBuf<uint16_t>(&VdpRend::MD_Screen.u16[LineStart], VdpRend::MD_Palette.u16);
 	else
 		T_Render_LineBuf<uint32_t>(&VdpRend::MD_Screen.u32[LineStart], VdpRend::MD_Palette.u32);

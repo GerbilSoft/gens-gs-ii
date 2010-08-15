@@ -165,7 +165,7 @@ inline void VdpRend::T_Update_Palette(pixel *MD_palette, const pixel *palette)
  */
 void VdpRend::Update_Palette(void)
 {
-	if (Bpp != VdpPalette::BPP_32)
+	if (m_palette.bpp() != VdpPalette::BPP_32)
 		T_Update_Palette<false>(MD_Palette.u16, m_palette.m_palette.u16);
 	else
 		T_Update_Palette<false>(MD_Palette.u32, m_palette.m_palette.u32);
@@ -177,7 +177,7 @@ void VdpRend::Update_Palette(void)
  */
 void VdpRend::Update_Palette_HS(void)
 {
-	if (Bpp != VdpPalette::BPP_32)
+	if (m_palette.bpp() != VdpPalette::BPP_32)
 		T_Update_Palette<true>(MD_Palette.u16, m_palette.m_palette.u16);
 	else
 		T_Update_Palette<true>(MD_Palette.u32, m_palette.m_palette.u32);

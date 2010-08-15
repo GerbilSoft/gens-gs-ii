@@ -33,9 +33,7 @@ namespace LibGens
 /** Static member initialization. **/
 
 // Palette manager.
-// NOTE: bpp initialized to 32 for now because radeong_dri.so is really slow with 16-bit color.
 VdpPalette VdpRend::m_palette;
-VdpPalette::ColorDepth VdpRend::Bpp = VdpPalette::BPP_32;
 
 // Active MD palette.
 VdpRend::MD_Palette_t VdpRend::MD_Palette;

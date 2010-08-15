@@ -49,7 +49,6 @@ class VdpRend
 		
 		// Palette manager.
 		static VdpPalette m_palette;
-		static VdpPalette::ColorDepth Bpp;
 		
 		// Active MD palette.
 		union MD_Palette_t

@@ -179,7 +179,7 @@ inline void CrazyEffect::T_DoCrazyEffect(ColorMask colorMask, pixel *screen)
  */
 void CrazyEffect::DoCrazyEffect(ColorMask colorMask)
 {
-	switch (VdpRend::Bpp)
+	switch (VdpRend::m_palette.bpp())
 	{
 		case VdpPalette::BPP_15:
 			T_DoCrazyEffect<uint16_t, 0x7C00, 0x03E0, 0x001F,
