@@ -138,17 +138,26 @@ void EEPRom::reset(void)
 
 /**
  * DetectEEPRomType(): Detect the EEPRom type used by the specified ROM.
- * @param header ROM header. (Must contain the full 512-byte header!)
+ * @param serial Serial number.
+ * @param serial_len Length of the serial number string.
+ * @param checksum Checksum.
  * @return ROM type, or -1 if this ROM isn't known.
  */
-int EEPRom::DetectEEPRomType(const uint8_t *header)
+int EEPRom::DetectEEPRomType(const char *serial, size_t serial_len, uint16_t checksum)
 {
 	// Scan the database for potential matches.
 	for (int i = 0; i < (sizeof(ms_Database)/sizeof(ms_Database[0])); i++)
 	{
 		// TODO: Figure out how to get rid of the strlen().
-		int serial_len = strlen(ms_Database[i].game_id);
-		if (!memcmp(&header[0x183], ms_Database[i].game_id, serial_len))
+		int dbSerial_len = strlen(ms_Database[i].game_id);
+		if (dbSerial_len > serial_len)
+		{
+			// Serial number in the database is longer than
+			// the given serial number data.
+			continue;
+		}
+		
+		if (!memcmp(serial, ms_Database[i].game_id, serial_len))
 		{
 			// Serial number matches.
 			if (ms_Database[i].checksum == 0)
@@ -158,7 +167,6 @@ int EEPRom::DetectEEPRomType(const uint8_t *header)
 			}
 			
 			// Checksum verification is required.
-			uint16_t checksum = ((header[0x18E] << 8) | header[0x18F]);
 			if (checksum == ms_Database[i].checksum)
 			{
 				// Checksum matches.

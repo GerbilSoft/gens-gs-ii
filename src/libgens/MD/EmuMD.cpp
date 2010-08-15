@@ -82,47 +82,36 @@ void EmuMD::End(void)
 
 
 /**
- * EmuMD::Init_TEST(): Test function for the MD VDP.
+ * EmuMD::SetRom(): Set the ROM image for MD emulation.
+ * NOTE: This function resets the emulated system!
+ * @param rom Rom class with the ROM image.
+ * @return 0 on success; non-zero on error.
  */
-void EmuMD::Init_TEST(void)
+int EmuMD::SetRom(Rom *rom)
 {
-	// Load the ROM file.
-	FILE *f = fopen("test.bin", "rb");
-	if (!f)
+	// Check the ROM size.
+	if ((rom->romSize() == 0) || (rom->romSize() > sizeof(M68K_Mem::Rom_Data)))
 	{
-		printf("Could not open test.bin.\n");
-		return;
+		// ROM is either empty or too big.
+		// TODO: Error code constants.
+		return 1;
 	}
 	
-	// Determine the size of the file.
-	fseek(f, 0, SEEK_END);
-	M68K_Mem::Rom_Size = ftell(f);
-	if (M68K_Mem::Rom_Size > sizeof(M68K_Mem::Rom_Data))
-		M68K_Mem::Rom_Size = sizeof(M68K_Mem::Rom_Data);
-	fseek(f, 0, SEEK_SET);
-	
 	// Load the ROM into memory.
-	fread(&M68K_Mem::Rom_Data.u8[0], 1, M68K_Mem::Rom_Size, f);
-	fclose(f);
+	M68K_Mem::Rom_Size = rom->romSize();
+	rom->loadRom(&M68K_Mem::Rom_Data.u8[0], M68K_Mem::Rom_Size);
 	
 	// Enable SRam/EEPRom by default.
 	// TODO: Make accessor/mutator functions.
 	M68K_Mem::SaveDataEnable = true;
 	
 	// Initialize SRam.
-	// TODO: Split into a separate function.
-	// TODO: Port Gens/GS's SRam initialization code to Gens/GS II.
-	// TODO: Add a function e.g. M68K_Mem::Reset() to reset all memory handling.
-	M68K_Mem::m_SRam.reset();
-	M68K_Mem::m_SRam.setStart(0x200000);
-	M68K_Mem::m_SRam.setEnd(0x20FFFF);
+	rom->initSRam(&M68K_Mem::m_SRam);
 	
 	// Initialize EEPRom.
 	// EEPRom is only used if the ROM is in the EEPRom class's database.
 	// Otherwise, SRam is used.
-	M68K_Mem::m_EEPRom.reset();
-	int eprType = EEPRom::DetectEEPRomType(&M68K_Mem::Rom_Data.u8[0]);
-	M68K_Mem::m_EEPRom.setEEPRomType(eprType);
+	rom->initEEPRom(&M68K_Mem::m_EEPRom);
 	
 	// TODO: Byteswapping flags.
 	// Until they're implemented, byteswap the ROM *after* initializing SRam/EEPRom.

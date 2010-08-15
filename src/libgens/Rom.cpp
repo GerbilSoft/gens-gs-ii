@@ -40,6 +40,7 @@ Rom::Rom(const char *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 {
 	// Save the filename for later.
 	m_filename = string(filename);
+	m_romSize = 0;
 	
 	// TODO: Unicode conversion on Win32.
 	m_file = fopen(filename, "rb");
@@ -66,8 +67,13 @@ Rom::Rom(const char *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 	if (m_sysId == MDP_SYSTEM_UNKNOWN)
 		m_sysId = DetectSystem(header, header_size, m_romFormat);
 	
+	/** MD-only stuff here. **/
+	
 	// Load the ROM header information.
 	readHeaderMD(header, header_size);
+	
+	// Detect the EEPRom type from the ROM serial number and checksum.
+	m_eprType = EEPRom::DetectEEPRomType(m_mdHeader.serialNumber, sizeof(m_mdHeader.serialNumber), m_mdHeader.checksum);
 }
 
 Rom::~Rom()
@@ -297,12 +303,15 @@ std::string Rom::SpaceElim(const char *src, size_t len)
  * @param sram Pointer to SRam class.
  * @return 0 on success; non-zero on error.
  */
-int Rom::initSRam(SRam *sram)
+int Rom::initSRam(SRam *sram) const
 {
 	// TODO: Load SRam from a file.
 	// TODO: Should that be implemented here or in SRam.cpp?
 	if (!isOpen())
 		return 1;
+	
+	// Reset SRam before applying any settings.
+	sram->reset();
 	
 	uint32_t start, end;
 	// Check if the ROM header has SRam information.
@@ -351,6 +360,53 @@ int Rom::initSRam(SRam *sram)
 	// Load the SRam file.
 	// TODO
 	
+	return 0;
+}
+
+
+/**
+ * initEEPRom(): Initialize an EEPRom class using the ROM's header information.
+ * @param eeprom Pointer to EEPRom class.
+ * @return 0 on success; non-zero on error.
+ */
+int Rom::initEEPRom(EEPRom *eeprom) const
+{
+	// TODO: Load EEPRom from a file.
+	// TODO: Should that be implemented here or in SRam.cpp?
+	if (!isOpen())
+		return 1;
+	
+	// Reset the EEPRom and set the type.
+	eeprom->reset();
+	eeprom->setEEPRomType(m_eprType);
+	return 0;
+}
+
+
+/**
+ * loadRom(): Load the ROM image into a buffer.
+ * @param buf Buffer.
+ * @param siz Buffer size.
+ * @return 0 on success; non-zero on error.
+ */
+int Rom::loadRom(void *buf, size_t siz)
+{
+	// TODO: Use error code constants.
+	// NOTE: Don't check for a NULL pointer, since a crash helps diagnose problems.
+	if (!isOpen())
+		return 1;
+	
+	if (siz == 0 || siz < m_romSize)
+	{
+		// ROM buffer isn't large enough for the ROM image.
+		return 2;
+	}
+	
+	// Load the ROM image.
+	// TODO: Decompressor support.
+	// TODO: Error handling.
+	fseek(m_file, 0, SEEK_SET);
+	fread(buf, 1, m_romSize, m_file);
 	return 0;
 }
 

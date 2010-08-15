@@ -28,7 +28,9 @@
 #ifndef __LIBGENS_SAVE_EEPROM_HPP__
 #define __LIBGENS_SAVE_EEPROM_HPP__
 
+// C includes.
 #include <stdint.h>
+#include <string.h>
 
 namespace LibGens
 {
@@ -41,7 +43,7 @@ class EEPRom
 		void reset(void);
 		
 		/** EEPROM type detection. **/
-		static int DetectEEPRomType(const uint8_t *header);
+		static int DetectEEPRomType(const char *serial, size_t serial_len, uint16_t checksum);
 		
 		/**
 		 * setEEPRomType(): Set the EEPRom type.

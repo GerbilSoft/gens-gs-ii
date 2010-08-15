@@ -268,9 +268,12 @@ void GensWindow::menuTriggered(int id)
 				
 				case MNUID_ITEM(IDM_FILE_BLIT):
 					// Blit!
+					// DEPRECATED
+#if 0
 					LibGens::EmuMD::Init_TEST();
 					m_vBackend->setVbDirty();
 					m_vBackend->vbUpdate();
+#endif
 					break;
 				
 				case MNUID_ITEM(IDM_FILE_EMUTHREAD):
@@ -561,9 +564,12 @@ void GensWindow::openRom(void)
 	m_rom = new LibGens::Rom(filename.toUtf8().constData());
 	printf("ROM information: format == %d, system == %d\n", m_rom->romFormat(), m_rom->sysId());
 	
-	// TODO: Process the ROM image.
-	delete m_rom;
-	m_rom = NULL;
+	// Load the ROM image in EmuMD.
+	LibGens::EmuMD::SetRom(m_rom);
+	m_rom->close();
+	
+	// m_rom isn't deleted, since keeping it around
+	// indicates that a game is running.
 }
 
 

@@ -28,6 +28,9 @@
 // TODO: Figure out a better place to put these!
 #include "../IO/IoBase.hpp"
 
+// ROM image class.
+#include "../Rom.hpp"
+
 namespace LibGens
 {
 
@@ -37,7 +40,7 @@ class EmuMD
 		static void Init(void);
 		static void End(void);
 		
-		static void Init_TEST(void);
+		static int SetRom(Rom *rom);
 		
 		static void Do_Frame(void);
 		

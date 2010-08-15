@@ -42,6 +42,7 @@
 
 // LibGens includes.
 #include "Save/SRam.hpp"
+#include "Save/EEPRom.hpp"
 
 /**
  * ROM_HEADER_SIZE: Number of bytes used for ROM type detection.
@@ -92,13 +93,18 @@ class Rom
 		Rom(const char *filename, MDP_SYSTEM_ID sysOverride = MDP_SYSTEM_UNKNOWN, RomFormat fmtOverride = RFMT_UNKNOWN);
 		~Rom();
 		
-		bool isOpen(void) { return (m_file != NULL); }
+		bool isOpen(void) const { return (m_file != NULL); }
 		void close(void) { fclose(m_file); m_file = NULL; }
 		
-		MDP_SYSTEM_ID sysId(void) const { return m_sysId; }
-		RomFormat romFormat(void) const { return m_romFormat; }
+		inline MDP_SYSTEM_ID sysId(void) const { return m_sysId; }
+		inline RomFormat romFormat(void) const { return m_romFormat; }
 		
-		int initSRam(SRam *sram);
+		inline int romSize(void) const { return m_romSize; }
+		
+		int initSRam(SRam *sram) const;
+		int initEEPRom(EEPRom *eeprom) const;
+		
+		int loadRom(void *buf, size_t siz);
 	
 	protected:
 		MDP_SYSTEM_ID m_sysId;
@@ -121,6 +127,7 @@ class Rom
 		
 		std::string m_filename;		// ROM filename.
 		unsigned int m_romSize;		// ROM size.
+		int m_eprType;			// EEPRom type.
 		
 		/**
 		 * MD_RomHeader: ROM header. (MD-style)
