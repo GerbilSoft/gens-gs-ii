@@ -562,7 +562,34 @@ void GensWindow::openRom(void)
 	// Open the file using the LibGens::Rom class.
 	// TODO: This won't work for KIO...
 	m_rom = new LibGens::Rom(filename.toUtf8().constData());
+	if (!m_rom->isOpen())
+	{
+		// Couldn't open the ROM file.
+		printf("Error opening ROM file. (TODO: Get error information.)\n");
+		delete m_rom;
+		m_rom = NULL;
+		return;
+	}
+	
 	printf("ROM information: format == %d, system == %d\n", m_rom->romFormat(), m_rom->sysId());
+	
+	if (m_rom->sysId() != LibGens::Rom::MDP_SYSTEM_MD)
+	{
+		// Only MD ROM images are supported.
+		printf("ERROR: Only Sega Genesis / Mega Drive ROM images are supported right now.\n");
+		delete m_rom;
+		m_rom = NULL;
+		return;
+	}
+	
+	if (m_rom->romFormat() != LibGens::Rom::RFMT_BINARY)
+	{
+		// Only binary ROM images are supported.
+		printf("ERROR: Only binary ROM images are supported right now.\n");
+		delete m_rom;
+		m_rom = NULL;
+		return;
+	}
 	
 	// Load the ROM image in EmuMD.
 	LibGens::EmuMD::SetRom(m_rom);
