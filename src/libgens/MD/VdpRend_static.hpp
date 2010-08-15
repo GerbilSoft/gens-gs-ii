@@ -35,9 +35,6 @@ namespace LibGens
 // Palette manager.
 VdpPalette VdpRend::m_palette;
 
-// Active MD palette.
-VdpRend::MD_Palette_t VdpRend::MD_Palette;
-
 // Screen buffer.
 VdpRend::Screen_t VdpRend::MD_Screen;
 

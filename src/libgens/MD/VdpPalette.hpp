@@ -26,6 +26,8 @@
 
 #include <stdint.h>
 
+#include "VdpIo.hpp"
+
 namespace LibGens
 {
 
@@ -42,6 +44,14 @@ class VdpPalette
 			uint32_t u32[0x1000];
 		};
 		Palette_t m_palette;
+		
+		// Active MD palette.
+		union MD_Palette_t
+		{
+			uint16_t u16[0x100];
+			uint32_t u32[0x100];
+		};
+		MD_Palette_t m_palActiveMD;
 		
 		// Color scale method.
 		// TODO: Possibly remove COLSCALE_FULL_HS, since it's incorrect.
@@ -114,7 +124,10 @@ class VdpPalette
 		
 		// Palette recalculation functions.
 		void recalcFull(void);
-		void recalcMD(void);
+		
+		// Palette update functions.
+		void updateMD(const VdpIo::VDP_CRam_t *cram);
+		void updateMD_HS(const VdpIo::VDP_CRam_t *cram);
 		
 		// TODO
 		//static void Adjust_CRam_32X(void);
@@ -143,6 +156,9 @@ class VdpPalette
 			int RBits, int GBits, int BBits,
 			int RMask, int GMask, int BMask>
 		FORCE_INLINE void T_recalcFullMD(pixel *palMD);
+		
+		template<bool hs, typename pixel>
+		static FORCE_INLINE void T_updateMD(pixel *MD_palette, const pixel *palette, const VdpIo::VDP_CRam_t *cram);
 };
 
 }

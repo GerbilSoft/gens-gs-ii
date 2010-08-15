@@ -68,119 +68,13 @@ void VdpRend::Reset(void)
 	memset(&MD_Screen, 0x00, sizeof(MD_Screen));
 	
 	// Clear MD_Palette.
-	if (!(VDP_Layers & VDP_LAYER_PALETTE_LOCK))
-		memset(&MD_Palette, 0x00, sizeof(MD_Palette));
+	// TODO: VdpPalette
+	//if (!(VDP_Layers & VDP_LAYER_PALETTE_LOCK))
+		//memset(&MD_Palette, 0x00, sizeof(MD_Palette));
 	
 	// Sprite arrays.
 	memset(&Sprite_Struct, 0x00, sizeof(Sprite_Struct));
 	memset(&Sprite_Visible, 0x00, sizeof(Sprite_Visible));
-}
-
-
-/**
- * T_VDP_Update_Palette(): VDP palette update function.
- * @param hs If true, updates highlight/shadow.
- * @param MD_palette MD color palette.
- * @param palette Full color palette.
- */
-template<bool hs, typename pixel>
-inline void VdpRend::T_Update_Palette(pixel *MD_palette, const pixel *palette)
-{
-	if (VDP_Layers & VDP_LAYER_PALETTE_LOCK)
-		return;
-	
-	// Clear the CRam flag, since the palette is being updated.
-	VdpIo::VDP_Flags.CRam = 0;
-	
-	// Color mask. Depends on VDP register 0, bit 2 (Palette Select).
-	// If set, allows full MD palette.
-	// If clear, only allows the LSB of each color component.
-	// TODO: Ignore this for now. (Reimplement later in LibGens.)
-#if 0
-	const uint16_t color_mask = (VdpIo::VDP_Reg.m5.Set1 & 0x04) ? 0x0EEE : 0x0222;
-#else
-	const uint16_t color_mask = 0x0EEE;
-#endif
-	
-	// Update all 64 colors.
-	for (int i = 62; i >= 0; i -= 2)
-	{
-		uint16_t color1_raw = VdpIo::CRam.u16[i] & color_mask;
-		uint16_t color2_raw = VdpIo::CRam.u16[i + 1] & color_mask;
-		
-		// Get the palette color.
-		pixel color1 = palette[color1_raw];
-		pixel color2 = palette[color2_raw];
-		
-		// Set the new color.
-		MD_palette[i]     = color1;
-		MD_palette[i + 1] = color2;
-		
-		if (hs)
-		{
-			// Update the highlight and shadow colors.
-			// References:
-			// - http://www.tehskeen.com/forums/showpost.php?p=71308&postcount=1077
-			// - http://forums.sonicretro.org/index.php?showtopic=17905
-			
-			// Normal color. (xxx0)
-			MD_palette[i + 192]	= color1;
-			MD_palette[i + 1 + 192]	= color2;
-			
-			color1_raw >>= 1;
-			color2_raw >>= 1;
-			
-			// Shadow color. (0xxx)
-			MD_palette[i + 64]	= palette[color1_raw];
-			MD_palette[i + 1 + 64]	= palette[color2_raw];
-			
-			// Highlight color. (1xxx - 0001)
-			MD_palette[i + 128]	= palette[(0x888 | color1_raw) - 0x111];
-			MD_palette[i + 1 + 128]	= palette[(0x888 | color2_raw) - 0x111];
-		}
-	}
-	
-	// Update the background color.
-	unsigned int BG_Color = (VdpIo::VDP_Reg.m5.BG_Color & 0x3F);
-	MD_palette[0] = MD_palette[BG_Color];
-	
-	if (hs)
-	{
-		// Update the background color for highlight and shadow.
-		
-		// Normal color.
-		MD_palette[192] = MD_palette[BG_Color];
-		
-		// Shadow color.
-		MD_palette[64] = MD_palette[BG_Color + 64];
-		
-		// Highlight color.
-		MD_palette[128] = MD_palette[BG_Color + 128];
-	}
-}
-
-
-/**
- * VdpRend::Update_Palette(): Update the palette.
- */
-void VdpRend::Update_Palette(void)
-{
-	if (m_palette.bpp() != VdpPalette::BPP_32)
-		T_Update_Palette<false>(MD_Palette.u16, m_palette.m_palette.u16);
-	else
-		T_Update_Palette<false>(MD_Palette.u32, m_palette.m_palette.u32);
-}
-
-
-/**
- * VdpRend::Update_Palette_HS(): Update the palette, including highlight and shadow.
- */
-void VdpRend::Update_Palette_HS(void)
-{
-	if (m_palette.bpp() != VdpPalette::BPP_32)
-		T_Update_Palette<true>(MD_Palette.u16, m_palette.m_palette.u16);
-	else
-		T_Update_Palette<true>(MD_Palette.u32, m_palette.m_palette.u32);
 }
 
 

@@ -1583,16 +1583,16 @@ void VdpRend_m5::Render_Line(void)
 	{
 		// Update the palette.
 		if (VdpIo::VDP_Reg.m5.Set4 & 0x08)
-			VdpRend::Update_Palette_HS();
+			VdpRend::m_palette.updateMD_HS(&VdpIo::CRam);
 		else
-			VdpRend::Update_Palette();
+			VdpRend::m_palette.updateMD(&VdpIo::CRam);
 	}
 	
 	// Render the image.
 	if (VdpRend::m_palette.bpp() != VdpPalette::BPP_32)
-		T_Render_LineBuf<uint16_t>(&VdpRend::MD_Screen.u16[LineStart], VdpRend::MD_Palette.u16);
+		T_Render_LineBuf<uint16_t>(&VdpRend::MD_Screen.u16[LineStart], VdpRend::m_palette.m_palActiveMD.u16);
 	else
-		T_Render_LineBuf<uint32_t>(&VdpRend::MD_Screen.u32[LineStart], VdpRend::MD_Palette.u32);
+		T_Render_LineBuf<uint32_t>(&VdpRend::MD_Screen.u32[LineStart], VdpRend::m_palette.m_palActiveMD.u32);
 }
 
 

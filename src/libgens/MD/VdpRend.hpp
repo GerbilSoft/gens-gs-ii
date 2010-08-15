@@ -50,14 +50,6 @@ class VdpRend
 		// Palette manager.
 		static VdpPalette m_palette;
 		
-		// Active MD palette.
-		union MD_Palette_t
-		{
-			uint16_t u16[0x100];
-			uint32_t u32[0x100];
-		};
-		static MD_Palette_t MD_Palette;
-
 		// Screen buffer.
 		union Screen_t
 		{
@@ -110,10 +102,6 @@ class VdpRend
 		
 		// VDP layer control.
 		static unsigned int VDP_Layers;
-		
-		/** Palette update functions. **/
-		static void Update_Palette(void);
-		static void Update_Palette_HS(void);
 		
 		/** Line rendering functions. **/
 		static void Render_Line(void);
