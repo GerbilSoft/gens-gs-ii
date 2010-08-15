@@ -96,6 +96,10 @@ GensWindow::GensWindow()
 	// Controller change.
 	// NOTE: DEBUG CODE: Remove this later.
 	m_ctrlChange = -1;
+	
+	// No ROM loaded at startup.
+	// TODO: Move this to another file.
+	m_rom = NULL;
 }
 
 
@@ -259,29 +263,8 @@ void GensWindow::menuTriggered(int id)
 			switch (MNUID_ITEM(id))
 			{
 				case MNUID_ITEM(IDM_FILE_OPEN):
-				{
-					// Open ROM.
-					// TODO: Move to another function and/or another file.
-					// TODO: Proper compressed file support.
-					#define ZLIB_EXT " *.zip *.zsg *.gz"
-					#define LZMA_EXT " *.7z"
-					#define RAR_EXT " *.rar"
-					QString filename = QFileDialog::getOpenFileName(this, TR("Open ROM"), "", 
-							TR("Sega Genesis / 32X ROMs; Sega CD disc images") +
-							"(*.bin *.smd *.gen *.32x *.cue *.iso *.raw" ZLIB_EXT LZMA_EXT RAR_EXT ");;" +
-							TR("All Files") + "(*.*)");
-					if (filename.isEmpty())
-						break;
-					
-					// Open the file using the LibGens::Rom class.
-					// TODO: This won't work for KIO...
-					LibGens::Rom *m_rom = new LibGens::Rom(filename.toUtf8().constData());
-					printf("ROM information: format == %d, system == %d\n", m_rom->romFormat(), m_rom->sysId());
-					
-					// TODO: Process the ROM image.
-					delete m_rom;
+					openRom();
 					break;
-				}
 				
 				case MNUID_ITEM(IDM_FILE_BLIT):
 					// Blit!
@@ -548,5 +531,40 @@ void GensWindow::emuFrameDone(void)
 	if (gqt4_emuThread)
 		gqt4_emuThread->resume();
 }
+
+/**
+ * openRom(): Open a ROM file.
+ * TODO: Move this to another file!
+ */
+void GensWindow::openRom(void)
+{
+	// TODO: Move to another function and/or another file.
+	// TODO: Proper compressed file support.
+	#define ZLIB_EXT " *.zip *.zsg *.gz"
+	#define LZMA_EXT " *.7z"
+	#define RAR_EXT " *.rar"
+	
+	QString filename = QFileDialog::getOpenFileName(this,
+			TR("Open ROM"),		// Dialog title
+			"",			// Default filename.
+			TR("Sega Genesis ROM images") + " (*.bin *.gen);;" +
+#if 0
+			TR("Sega Genesis / 32X ROMs; Sega CD disc images") +
+			"(*.bin *.smd *.gen *.32x *.cue *.iso *.raw" ZLIB_EXT LZMA_EXT RAR_EXT ");;" +
+#endif
+			TR("All Files") + "(*.*)");
+	if (filename.isEmpty())
+		return;
+	
+	// Open the file using the LibGens::Rom class.
+	// TODO: This won't work for KIO...
+	m_rom = new LibGens::Rom(filename.toUtf8().constData());
+	printf("ROM information: format == %d, system == %d\n", m_rom->romFormat(), m_rom->sysId());
+	
+	// TODO: Process the ROM image.
+	delete m_rom;
+	m_rom = NULL;
+}
+
 
 }

@@ -32,6 +32,9 @@
 #include "VBackend/VBackend.hpp"
 #include "GensMenuBar.hpp"
 
+// LibGens includes.
+#include "libgens/Rom.hpp"
+
 namespace GensQt4
 {
 
@@ -68,6 +71,11 @@ class GensWindow : public QMainWindow
 		// Controller change.
 		// NOTE: DEBUG CODE: Remove this later.
 		int m_ctrlChange;
+	
+		// Loaded ROM.
+		// TODO: Move this somewhere else.
+		LibGens::Rom *m_rom;
+		void openRom(void);
 	
 	protected slots:
 		// Menu item selection.
