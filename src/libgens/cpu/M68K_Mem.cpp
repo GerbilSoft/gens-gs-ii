@@ -508,9 +508,10 @@ uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 		}
 		
 		// Call the Z80 Read Byte function.
-		// NOTE: Z80 doesn't support word reads.
 		// TODO: CPU lockup on accessing 0x7Fxx or >=0x8000.
-		return Z80_MD_Mem::Z80_ReadB(address & 0xFFFF);
+		// Genesis Plus duplicates the byte in both halves of the M68K word.
+		uint8_t ret = Z80_MD_Mem::Z80_ReadB(address & 0xFFFF);
+		return (ret | (ret << 8));
 	}
 	else if (address == 0xA11100)
 	{
@@ -1034,9 +1035,9 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 		}
 		
 		// Call the Z80 Write Byte function.
-		// NOTE: Z80 doesn't support word writes.
 		// TODO: CPU lockup on accessing 0x7Fxx or >=0x8000.
-		Z80_MD_Mem::Z80_WriteB(address & 0xFFFF, data & 0xFF);
+		// Genesis Plus writes the high byte of the M68K word.
+		Z80_MD_Mem::Z80_WriteB(address & 0xFFFF, (data >> 8) & 0xFF);
 	}
 	else if (address == 0xA11100)
 	{
