@@ -266,42 +266,9 @@ void GensWindow::menuTriggered(int id)
 					openRom();
 					break;
 				
-				case MNUID_ITEM(IDM_FILE_BLIT):
-					// Blit!
-					// DEPRECATED
-#if 0
-					LibGens::EmuMD::Init_TEST();
-					m_vBackend->setVbDirty();
-					m_vBackend->vbUpdate();
-#endif
+				case MNUID_ITEM(IDM_FILE_CLOSE):
+					closeRom();
 					break;
-				
-				case MNUID_ITEM(IDM_FILE_EMUTHREAD):
-				{
-					bool checked = m_menubar->menuItemCheckState(IDM_FILE_EMUTHREAD);
-					if (gqt4_emuThread == NULL && !checked)
-						break;
-					else if (gqt4_emuThread != NULL && checked)
-						break;
-					
-					// Toggle the emulation thread state.
-					if (gqt4_emuThread != NULL)
-					{
-						// Emulation thread is already running. Stop it.
-						gqt4_emuThread->stop();
-						gqt4_emuThread->wait();
-						delete gqt4_emuThread;
-						gqt4_emuThread = NULL;
-						break;
-					}
-					
-					// Emulation thread isn't running. Start it.
-					gqt4_emuThread = new EmuThread();
-					QObject::connect(gqt4_emuThread, SIGNAL(frameDone(void)),
-							 this, SLOT(emuFrameDone(void)));
-					gqt4_emuThread->start();
-					break;
-				}
 				
 				case MNUID_ITEM(IDM_FILE_QUIT):
 					// Quit.
@@ -535,6 +502,7 @@ void GensWindow::emuFrameDone(void)
 		gqt4_emuThread->resume();
 }
 
+
 /**
  * openRom(): Open a ROM file.
  * TODO: Move this to another file!
@@ -558,6 +526,12 @@ void GensWindow::openRom(void)
 			TR("All Files") + "(*.*)");
 	if (filename.isEmpty())
 		return;
+	
+	if (gqt4_emuThread || m_rom)
+	{
+		// Close the ROM first.
+		closeRom();
+	}
 	
 	// Open the file using the LibGens::Rom class.
 	// TODO: This won't work for KIO...
@@ -597,7 +571,38 @@ void GensWindow::openRom(void)
 	
 	// m_rom isn't deleted, since keeping it around
 	// indicates that a game is running.
+	
+	// Start the emulation thread.
+	gqt4_emuThread = new EmuThread();
+	QObject::connect(gqt4_emuThread, SIGNAL(frameDone(void)),
+			 this, SLOT(emuFrameDone(void)));
+	gqt4_emuThread->start();
 }
 
+
+/**
+ * openRom(): Close the loaded ROM file.
+ * TODO: Move this to another file!
+ */
+void GensWindow::closeRom(void)
+{
+	if (gqt4_emuThread)
+	{
+		// Stop the emulation thread.
+		gqt4_emuThread->stop();
+		gqt4_emuThread->wait();
+		delete gqt4_emuThread;
+		gqt4_emuThread = NULL;
+	}
+	
+	if (m_rom)
+	{
+		// Delete the Rom instance.
+		delete m_rom;
+		m_rom = NULL;
+	}
+	
+	// TODO: Clear the screen, start the idle animation, etc.
+}
 
 }

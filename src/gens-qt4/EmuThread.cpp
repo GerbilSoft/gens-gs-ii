@@ -57,11 +57,9 @@ void EmuThread::stop(void)
 #include <stdio.h>
 void EmuThread::run(void)
 {
-	// Initialize the VDP.
-	LibGens::VdpIo::Reset();
-	
-	// TODO: VdpIo::VDP_Lines.Display.Total isn't being set properly...
-	LibGens::VdpIo::VDP_Lines.Display.Total = 262;
+	// NOTE: LibGens initialization is done elsewhere.
+	// The emulation thread doesn't initialize anything;
+	// it merely runs what's already been initialized.
 	
 	// Run the emulation thread.
 	m_mutex.lock();

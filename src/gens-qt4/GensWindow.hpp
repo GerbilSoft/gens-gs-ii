@@ -76,6 +76,7 @@ class GensWindow : public QMainWindow
 		// TODO: Move this somewhere else.
 		LibGens::Rom *m_rom;
 		void openRom(void);
+		void closeRom(void);
 	
 	protected slots:
 		// Menu item selection.

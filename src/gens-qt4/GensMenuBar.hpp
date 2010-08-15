@@ -43,8 +43,7 @@
 
 #define IDM_FILE_MENU		1
 #define IDM_FILE_OPEN		MNUID(IDM_FILE_MENU, 1)
-#define IDM_FILE_BLIT		MNUID(IDM_FILE_MENU, 2)
-#define IDM_FILE_EMUTHREAD	MNUID(IDM_FILE_MENU, 3)
+#define IDM_FILE_CLOSE		MNUID(IDM_FILE_MENU, 2)
 #define IDM_FILE_QUIT		MNUID(IDM_FILE_MENU, 0xFFFF)
 
 #define IDM_HELP_MENU		7
@@ -102,8 +101,10 @@ class GensMenuBar : public QMenuBar
 			// Keys defined in Qt 4.2.
 			// (First version with StandardKey.)
 			MACCEL_OPEN = (int)QKeySequence::Open,
+			MACCEL_CLOSE = (int)QKeySequence::Close,
 #else
 			MACCEL_OPEN = 0,
+			MACCEL_CLOSE = 0,
 #endif
 		};
 		
