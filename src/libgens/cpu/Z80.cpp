@@ -54,14 +54,6 @@ void Z80::Init(void)
 	z80_Add_ReadB(&ms_Z80, 0x70, 0x7F, Z80_MD_Mem::Z80_ReadB_PSG);
 	z80_Add_ReadB(&ms_Z80, 0x80, 0xFF, Z80_MD_Mem::Z80_ReadB_68K_Ram);
 	
-	// Set Read Word handlers. (DEPRECATED)
-	z80_Add_ReadW(&ms_Z80, 0x00, 0xFF, Z80_MD_Mem::Z80_ReadW_Bad);
-	z80_Add_ReadW(&ms_Z80, 0x00, 0x3F, Z80_MD_Mem::Z80_ReadW_Ram);
-	z80_Add_ReadW(&ms_Z80, 0x40, 0x5F, Z80_MD_Mem::Z80_ReadW_YM2612);
-	z80_Add_ReadW(&ms_Z80, 0x60, 0x6F, Z80_MD_Mem::Z80_ReadW_Bank);
-	z80_Add_ReadW(&ms_Z80, 0x70, 0x7F, Z80_MD_Mem::Z80_ReadW_PSG);
-	z80_Add_ReadW(&ms_Z80, 0x80, 0xFF, Z80_MD_Mem::Z80_ReadW_68K_Ram);
-	
 	// Set Write Byte handlers.
 	z80_Add_WriteB(&ms_Z80, 0x00, 0xFF, Z80_MD_Mem::Z80_WriteB_Bad);
 	z80_Add_WriteB(&ms_Z80, 0x00, 0x3F, Z80_MD_Mem::Z80_WriteB_Ram);
@@ -69,14 +61,6 @@ void Z80::Init(void)
 	z80_Add_WriteB(&ms_Z80, 0x60, 0x6F, Z80_MD_Mem::Z80_WriteB_Bank);
 	z80_Add_WriteB(&ms_Z80, 0x70, 0x7F, Z80_MD_Mem::Z80_WriteB_PSG);
 	z80_Add_WriteB(&ms_Z80, 0x80, 0xFF, Z80_MD_Mem::Z80_WriteB_68K_Ram);
-	
-	// Set Write Word handlers. (DEPRECATED)
-	z80_Add_WriteW(&ms_Z80, 0x00, 0xFF, Z80_MD_Mem::Z80_WriteW_Bad);
-	z80_Add_WriteW(&ms_Z80, 0x00, 0x3F, Z80_MD_Mem::Z80_WriteW_Ram);
-	z80_Add_WriteW(&ms_Z80, 0x40, 0x5F, Z80_MD_Mem::Z80_WriteW_YM2612);
-	z80_Add_WriteW(&ms_Z80, 0x60, 0x6F, Z80_MD_Mem::Z80_WriteW_Bank);
-	z80_Add_WriteW(&ms_Z80, 0x70, 0x7F, Z80_MD_Mem::Z80_WriteW_PSG);
-	z80_Add_WriteW(&ms_Z80, 0x80, 0xFF, Z80_MD_Mem::Z80_WriteW_68K_Ram);
 	
 	// Reinitialize the Z80.
 	ReInit();

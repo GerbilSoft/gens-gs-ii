@@ -24,9 +24,7 @@ extern "C" {
 
 
 typedef uint8_t FASTCALL Z80_RB(uint32_t adr);
-typedef uint16_t FASTCALL Z80_RW(uint32_t adr);
 typedef void FASTCALL Z80_WB(uint32_t adr, uint8_t data);
-typedef void FASTCALL Z80_WW(uint32_t adr, uint16_t data);
 
 
 struct _Z80_context
@@ -262,8 +260,6 @@ struct _Z80_context
 	Z80_RB *ReadB[0x100];
 	Z80_WB *WriteB[0x100];
 	uint8_t *Fetch[0x100];
-	Z80_RW *ReadW[0x100];
-	Z80_WW *WriteW[0x100];
 
 	Z80_RB *IN_C;
 	Z80_WB *OUT_C;
@@ -283,9 +279,7 @@ typedef struct _Z80_context Z80_CONTEXT;
 //uint32_t FASTCALL z80_Reset(Z80_CONTEXT *z80);
 
 uint32_t z80_Add_ReadB(Z80_CONTEXT *z80, uint32_t low_adr, uint32_t high_adr, Z80_RB *Func);
-uint32_t z80_Add_ReadW(Z80_CONTEXT *z80, uint32_t low_adr, uint32_t high_adr, Z80_RW *Func);
 uint32_t z80_Add_WriteB(Z80_CONTEXT *z80, uint32_t low_adr, uint32_t high_adr, Z80_WB *Func);
-uint32_t z80_Add_WriteW(Z80_CONTEXT *z80, uint32_t low_adr, uint32_t high_adr, Z80_WW *Func);
 uint32_t z80_Add_Fetch(Z80_CONTEXT *z80, uint32_t low_adr, uint32_t high_adr, uint8_t *Region);
 
 //uint32_t FASTCALL z80_Read_Odo(Z80_CONTEXT *z80);
@@ -334,10 +328,8 @@ void mdZ80_interrupt(Z80_CONTEXT *z80, unsigned char vector);
 extern unsigned char mdZ80_def_mem[0x10000];
 unsigned char FASTCALL mdZ80_def_ReadB(uint32_t address);
 unsigned char FASTCALL mdZ80_def_In(uint32_t address);
-unsigned short FASTCALL mdZ80_def_ReadW(uint32_t address);
 void FASTCALL mdZ80_def_WriteB(uint32_t address, unsigned char data);
 void FASTCALL mdZ80_def_Out(uint32_t address, unsigned char data);
-void FASTCALL mdZ80_def_WriteW(uint32_t address, unsigned short data);
 
 
 #ifdef __cplusplus

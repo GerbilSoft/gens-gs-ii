@@ -178,8 +178,6 @@ section .bss align=64
 		.ReadB:		resd 0x100
 		.WriteB:	resd 0x100
 		.Fetch:		resd 0x100
-		.ReadW:		resd 0x100
-		.WriteW:	resd 0x100
 		
 		.IN:		resd 1
 		.OUT:		resd 1
@@ -500,7 +498,10 @@ align 16
 ; Read data from memory :
 ; - Address where read in ECX
 ; - Data returned in dest or DX if not dest
-
+;
+; TODO: Verify that the split 8-bit read method works correctly!
+; (i.e. calling Z80.ReadB twice instead of calling Z80.ReadW)
+;
 
 %macro READ_WORD 0-1
 
@@ -508,14 +509,15 @@ align 16
 	cmp	ecx, 0x3FFF
 	ja	short %%IO
 	
+	; TODO: Word read from 0x1FFF will cause a problem!
 	and	ecx, 0x1FFF
 %ifidn %1, AF
-	mov	ax, [SYM(Ram_Z80) + ecx]
+	movzx	eax, word [SYM(Ram_Z80) + ecx]
 %elif %0 > 0
-	mov	dx, [SYM(Ram_Z80) + ecx]
+	movzx	edx, word [SYM(Ram_Z80) + ecx]
 	mov	z%1, dx
 %else
-	mov	dx, [SYM(Ram_Z80) + ecx]
+	movzx	edx, word [SYM(Ram_Z80) + ecx]
 %endif
 	jmp	short %%End
 	
@@ -527,19 +529,36 @@ align 16
 	movzx	edi, ch
 %if %0 > 0
 	%ifidn %1, AF
-		call	[ebp + Z80.ReadW + edi * 4]
+		call	[ebp + Z80.ReadB + edi * 4]	; Get the low byte. (A)
+		inc	ecx
+		movzx	edi, ch
+		SAVE_A
+		call	[ebp + Z80.ReadB + edi * 4]	; Get the high byte. (F)
+		dec	ecx
+		mov	ah, al
+		RELOAD_A
 		mov	edi, [ebp + Z80.CycleIO]
 	%else
 		SAVE_AF
-		call	[ebp + Z80.ReadW + edi * 4]
-		mov	z%1, ax
+		call	[ebp + Z80.ReadB + edi * 4]	; Get the low byte.
+		inc	ecx
+		movzx	edi, ch
+		mov	zl%1, al
+		call	[ebp + Z80.ReadB + edi * 4]	; Get the high byte.
+		dec	ecx
+		mov	zh%1, al
 		mov	edi, [ebp + Z80.CycleIO]
 		RELOAD_AF
 	%endif
 %else
 	SAVE_AF
-	call	[ebp + Z80.ReadW + edi * 4]
-	mov	dx, ax
+	call	[ebp + Z80.ReadB + edi * 4]	; Get the low byte.
+	inc	ecx
+	movzx	edi, ch
+	mov	dl, al
+	call	[ebp + Z80.ReadB + edi * 4]	; Get the high byte.
+	dec	ecx
+	mov	dh, al
 	mov	edi, [ebp + Z80.CycleIO]
 	RELOAD_AF
 %endif
@@ -559,7 +578,10 @@ align 16
 ; Write data to memory :
 ; - Address where write in ECX
 ; - Data to write in src or DX if not src
-
+;
+; TODO: Verify that the split 8-bit write method works correctly!
+; (i.e. calling Z80.WriteB twice instead of calling Z80.WriteW)
+;
 
 %macro WRITE_WORD 0-1
 
@@ -567,9 +589,10 @@ align 16
 	cmp	ecx, 0x3FFF
 	ja	short %%IO
 	
+	; TODO: Word read from 0x1FFF will cause a problem!
 	and	ecx, 0x1FFF
 %if %0 > 0
-	mov	dx, z%1
+	movzx	edx, z%1
 %endif
 	mov	[SYM(Ram_Z80) + ecx], dx
 	jmp	short %%End
@@ -580,11 +603,16 @@ align 16
 %endif
 	mov	[ebp + Z80.CycleIO], edi
 %if %0 > 0
-	mov	dx, z%1
+	movzx	edx, z%1
 %endif
 	movzx	edi, ch
 	SAVE_AF
-	call	[ebp + Z80.WriteW + edi * 4]
+	call	[ebp + Z80.WriteB + edi * 4]	; Write the low byte.
+	inc	ecx
+	movzx	edi, ch
+	mov	dl, dh
+	call	[ebp + Z80.WriteB + edi * 4]	; Write the high byte.
+	dec	ecx
 	mov	edi, [ebp + Z80.CycleIO]
 	RELOAD_AF
 	
@@ -4291,7 +4319,7 @@ Z80I_RET%2%1:
 %endif
 	mov	ecx, zxSP
 %if %0 > 0
-	j%2z short %%dont_take_it
+	j%2z %%dont_take_it
 %endif
 
 	READ_WORD
@@ -4761,26 +4789,11 @@ SYMF(mdZ80_def_In, 4):
 
 align 16
 
-global SYMF(mdZ80_def_ReadW, 4)
-SYMF(mdZ80_def_ReadW, 4):
-	mov ax, [SYM(mdZ80_def_mem) + ecx]
-	ret
-
-
-align 16
-
 global SYMF(mdZ80_def_WriteB, 8)
 global SYMF(mdZ80_def_Out, 8)
 SYMF(mdZ80_def_WriteB, 8):
 SYMF(mdZ80_def_Out, 8):
 	mov [SYM(mdZ80_def_mem) + ecx], dl
-	ret
-
-align 16
-
-global SYMF(mdZ80_def_WriteW, 8)
-SYMF(mdZ80_def_WriteW, 8):
-	mov [SYM(mdZ80_def_mem) + ecx], dx
 	ret
 
 
@@ -4834,25 +4847,11 @@ SYM(z80_Add_%1):
 	ADD_HANDLER ReadB
 
 
-; UINT32 z80_Add_ReadW(Z80_CONTEXT *z80, UINT32 low_adr, UINT32 high_adr, Z80_RW *Func)
-;
-; RETURN: 0
-
-	ADD_HANDLER ReadW
-
-
 ; UINT32 z80_Add_WriteB(Z80_CONTEXT *z80, UINT32 low_adr, UINT32 high_adr, Z80_WB *Func)
 ;
 ; RETURN: 0
 
 	ADD_HANDLER WriteB
-
-
-; UINT32 z80_Add_WriteW(Z80_CONTEXT *z80, UINT32 low_adr, UINT32 high_adr, Z80_WW *Func)
-;
-; RETURN: 0
-
-	ADD_HANDLER WriteW
 
 
 ; UINT32 z80_Add_Fetch(Z80_CONTEXT *z80, UINT32 low_adr, UINT32 high_adr, UINT8 *Region)

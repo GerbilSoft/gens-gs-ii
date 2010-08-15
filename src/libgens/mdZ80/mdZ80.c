@@ -47,9 +47,7 @@ void mdZ80_init(Z80_CONTEXT *z80)
 	for (i = 0; i < 0x100; i++)
 	{
 		z80->ReadB[i] = mdZ80_def_ReadB;
-		z80->ReadW[i] = mdZ80_def_ReadW;
 		z80->WriteB[i] = mdZ80_def_WriteB;
-		z80->WriteW[i] = mdZ80_def_WriteW;
 		z80->Fetch[i] = mdZ80_def_mem;
 	}
 	

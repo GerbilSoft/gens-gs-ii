@@ -507,10 +507,10 @@ uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 			return 0;
 		}
 		
-		// Call the Z80 Read Word function.
+		// Call the Z80 Read Byte function.
 		// NOTE: Z80 doesn't support word reads.
 		// TODO: CPU lockup on accessing 0x7Fxx or >=0x8000.
-		return Z80_MD_Mem::Z80_ReadW(address & 0xFFFF);
+		return Z80_MD_Mem::Z80_ReadB(address & 0xFFFF);
 	}
 	else if (address == 0xA11100)
 	{
@@ -1033,10 +1033,10 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 			return;
 		}
 		
-		// Call the Z80 Write Word function.
+		// Call the Z80 Write Byte function.
 		// NOTE: Z80 doesn't support word writes.
 		// TODO: CPU lockup on accessing 0x7Fxx or >=0x8000.
-		Z80_MD_Mem::Z80_WriteW(address & 0xFFFF, data);
+		Z80_MD_Mem::Z80_WriteB(address & 0xFFFF, data & 0xFF);
 	}
 	else if (address == 0xA11100)
 	{

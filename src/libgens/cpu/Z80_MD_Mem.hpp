@@ -62,9 +62,7 @@ class Z80_MD_Mem
 		/** Public read/write functions. **/
 		// TODO: Make these inline!
 		static uint8_t Z80_ReadB(uint32_t address);
-		static uint16_t Z80_ReadW(uint32_t address);
 		static void Z80_WriteB(uint32_t address, uint8_t data);
-		static void Z80_WriteW(uint32_t address, uint16_t data);
 		
 		/**
 		 * NOTE: These functions *should* be marked protected,
@@ -81,14 +79,6 @@ class Z80_MD_Mem
 		static uint8_t FASTCALL Z80_ReadB_PSG(uint32_t address);
 		static uint8_t FASTCALL Z80_ReadB_68K_Ram(uint32_t address);
 		
-		/** Read Word functions. (DEPRECATED) **/
-		static uint16_t FASTCALL Z80_ReadW_Bad(uint32_t address);
-		static uint16_t FASTCALL Z80_ReadW_Ram(uint32_t address);
-		static uint16_t FASTCALL Z80_ReadW_Bank(uint32_t address);
-		static uint16_t FASTCALL Z80_ReadW_YM2612(uint32_t address);
-		static uint16_t FASTCALL Z80_ReadW_PSG(uint32_t address);
-		static uint16_t FASTCALL Z80_ReadW_68K_Ram(uint32_t address);
-		
 		/** Write Byte functions. **/
 		static void FASTCALL Z80_WriteB_Bad(uint32_t address, uint8_t data);
 		static void FASTCALL Z80_WriteB_Ram(uint32_t address, uint8_t data);
@@ -96,27 +86,15 @@ class Z80_MD_Mem
 		static void FASTCALL Z80_WriteB_YM2612(uint32_t address, uint8_t data);
 		static void FASTCALL Z80_WriteB_PSG(uint32_t address, uint8_t data);
 		static void FASTCALL Z80_WriteB_68K_Ram(uint32_t address, uint8_t data);
-		
-		/** Write Word functions. (DEPRECATED) **/
-		static void FASTCALL Z80_WriteW_Bad(uint32_t address, uint16_t data);
-		static void FASTCALL Z80_WriteW_Bank(uint32_t address, uint16_t data);
-		static void FASTCALL Z80_WriteW_Ram(uint32_t address, uint16_t data);
-		static void FASTCALL Z80_WriteW_YM2612(uint32_t address, uint16_t data);
-		static void FASTCALL Z80_WriteW_PSG(uint32_t address, uint16_t data);
-		static void FASTCALL Z80_WriteW_68K_Ram(uint32_t address, uint16_t data);
 	
 	protected:
 		/** Z80 read/write functions. **/
 		typedef uint8_t  FASTCALL (*Z80_ReadB_fn) (uint32_t address);
-		typedef uint16_t FASTCALL (*Z80_ReadW_fn) (uint32_t address); // DEPRECATED
 		typedef void     FASTCALL (*Z80_WriteB_fn)(uint32_t address, uint8_t data);
-		typedef void     FASTCALL (*Z80_WriteW_fn)(uint32_t address, uint16_t data); // DEPRECATED
 		
 		/** Z80 function tables. (4 KB pages; 16 entries.) **/
 		static const Z80_ReadB_fn Z80_ReadB_Table[0x10];
-		static const Z80_ReadW_fn Z80_ReadW_Table[0x10]; // DEPRECATED
 		static const Z80_WriteB_fn Z80_WriteB_Table[0x10];
-		static const Z80_WriteW_fn Z80_WriteW_Table[0x10]; // DEPRECATED
 };
 
 }
