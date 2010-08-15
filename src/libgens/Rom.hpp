@@ -120,6 +120,7 @@ class Rom
 		/** Variables. **/
 		
 		std::string m_filename;		// ROM filename.
+		unsigned int m_romSize;		// ROM size.
 		
 		/**
 		 * MD_RomHeader: ROM header. (MD-style)

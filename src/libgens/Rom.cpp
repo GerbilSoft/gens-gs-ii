@@ -49,10 +49,15 @@ Rom::Rom(const char *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 	m_sysId = sysOverride;
 	m_romFormat = fmtOverride;
 	
+	// Get the ROM size.
+	// TODO: If it's an MD ROM over 6 MB, return an error.
+	fseek(m_file, 0, SEEK_END);
+	m_romSize = ftell(m_file);
+	fseek(m_file, 0, SEEK_SET);
+	
 	// Load the ROM header for detection purposes.
 	// TODO: Determine if the file is compressed.
 	uint8_t header[ROM_HEADER_SIZE];
-	fseek(m_file, 0, SEEK_SET);
 	size_t header_size = fread(header, 1, sizeof(header), m_file);
 	printf("header_size: %d\n", header_size);
 	
@@ -337,14 +342,11 @@ int Rom::initSRam(SRam *sram)
 	
 	// If the ROM is smaller than the SRam starting address, always enable SRam.
 	// TODO: Instead of hardcoding 2 MB, use SRAM_Start.
-	// TODO: Get ROM size when loading the ROM file!
-#if 0
-	if (Rom_Size <= 0x200000)
+	if (m_romSize <= 0x200000)
 	{
 		sram->setOn(true);
 		sram->setWrite(true);
 	}
-#endif
 	
 	// Load the SRam file.
 	// TODO
