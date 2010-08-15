@@ -64,6 +64,8 @@ class VdpPalette
 			BPP_MAX
 		};
 		
+		bool isDirty(void) const { return m_dirty; }
+		
 		// Properties.
 		int contrast(void) const { return m_contrast; }
 		void setContrast(int newContrast)
