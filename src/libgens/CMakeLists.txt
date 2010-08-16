@@ -56,6 +56,7 @@ SET(libgens_SRCS
 	IO/IoTeamplayer.cpp
 	IO/IoBase.cpp
 	credits.c
+	lg_osd.c
 	)
 
 # Compatibility sources.
