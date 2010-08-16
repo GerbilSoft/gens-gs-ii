@@ -33,4 +33,7 @@
 /* Define to 1 if you have the `GLEW' library (-lGLEW / -lglew32). */
 #cmakedefine HAVE_GLEW 1
 
+/* Define to 1 if you have the `AL` library (-lopenal / -lOpenAL32). */
+#cmakedefine HAVE_OPENAL 1
+
 #endif /* __GENS_QT4_CONFIG_H__ */
