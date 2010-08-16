@@ -41,6 +41,9 @@
 // ZOMG
 #include "Save/Zomg.hpp"
 
+// LibGens OSD handler.
+#include "lg_osd.h"
+
 // C includes.
 #include <stdio.h>
 #include <math.h>
@@ -106,12 +109,15 @@ int EmuMD::SetRom(Rom *rom)
 	M68K_Mem::SaveDataEnable = true;
 	
 	// Initialize SRam.
-	rom->initSRam(&M68K_Mem::m_SRam);
+	int sramSize = rom->initSRam(&M68K_Mem::m_SRam);
+	if (sramSize > 0)
+		lg_osd(OSD_SRAM_LOAD, sramSize);
 	
 	// Initialize EEPRom.
 	// EEPRom is only used if the ROM is in the EEPRom class's database.
 	// Otherwise, SRam is used.
 	rom->initEEPRom(&M68K_Mem::m_EEPRom);
+	// TODO: Autoload SRam.
 	
 	// TODO: Byteswapping flags.
 	// Until they're implemented, byteswap the ROM *after* initializing SRam/EEPRom.
@@ -156,20 +162,20 @@ int EmuMD::SetRom(Rom *rom)
 int EmuMD::SaveData(Rom *rom)
 {
 	// TODO: Move SRam and EEPRom to the Rom class?
-	int ret = 0;
 	
 	if (M68K_Mem::m_EEPRom.isEEPRomTypeSet())
 	{
 		// TODO
+		return 0;
 	}
 	else
 	{
 		// Save SRam.
-		int sram_ret = M68K_Mem::m_SRam.save();
-		ret = (sram_ret > 0);
+		int sramSize = M68K_Mem::m_SRam.save();
+		if (sramSize > 0)
+			lg_osd(OSD_SRAM_SAVE, sramSize);
+		return 1;
 	}
-	
-	return ret;
 }
 
 

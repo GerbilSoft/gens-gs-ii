@@ -608,11 +608,8 @@ void GensWindow::closeRom(void)
 	if (m_rom)
 	{
 		// Make sure SRam/EEPRom data is saved.
-		int save_ret = LibGens::EmuMD::SaveData(m_rom);
-		if (save_ret == 1)
-			m_vBackend->osd_printf(1500, "SRAM saved.");
-		else if (save_ret == 2)
-			m_vBackend->osd_printf(1500, "EEPROM saved.");
+		// (SaveData() will call the LibGens OSD handler if necessary.)
+		LibGens::EmuMD::SaveData(m_rom);
 		
 		// Delete the Rom instance.
 		delete m_rom;
@@ -659,7 +656,36 @@ void GensWindow::setGensTitle(void)
  */
 void GensWindow::osd(OsdType osd_type, int param)
 {
-	// TODO
+	switch (osd_type)
+	{
+		case OSD_SRAM_LOAD:
+			m_vBackend->osd_printf(1500, "SRAM loaded. (%d bytes)", param);
+			break;
+		
+		case OSD_SRAM_SAVE:
+			m_vBackend->osd_printf(1500, "SRAM saved. (%d bytes)", param);
+			break;
+		
+		case OSD_SRAM_AUTOSAVE:
+			m_vBackend->osd_printf(1500, "SRAM autosaved. (%d bytes)", param);
+			break;
+		
+		case OSD_EEPROM_LOAD:
+			m_vBackend->osd_printf(1500, "EEPROM loaded. (%d bytes)", param);
+			break;
+		
+		case OSD_EEPROM_SAVE:
+			m_vBackend->osd_printf(1500, "EEPROM saved. (%d bytes)", param);
+			break;
+		
+		case OSD_EEPROM_AUTOSAVE:
+			m_vBackend->osd_printf(1500, "EEPROM autosaved. (%d bytes)", param);
+			break;
+		
+		default:
+			// Unknown OSD type.
+			break;
+	}
 }
 
 }

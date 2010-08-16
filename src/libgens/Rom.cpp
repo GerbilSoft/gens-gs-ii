@@ -30,8 +30,9 @@
 #include <algorithm>
 using std::string;
 
-// Byteswapping macros.
+// LibGens includes.
 #include "Util/byteswap.h"
+#include "lg_osd.h"
 
 namespace LibGens
 {
@@ -304,14 +305,12 @@ std::string Rom::SpaceElim(const char *src, size_t len)
 /**
  * initSRam(): Initialize an SRam class using the ROM's header information.
  * @param sram Pointer to SRam class.
- * @return 0 on success; non-zero on error.
+ * @return Positive value indicating SRam size on success; negative on error.
  */
 int Rom::initSRam(SRam *sram) const
 {
-	// TODO: Load SRam from a file.
-	// TODO: Should that be implemented here or in SRam.cpp?
 	if (!isOpen())
-		return 1;
+		return -1;
 	
 	// Reset SRam before applying any settings.
 	sram->reset();
@@ -361,11 +360,8 @@ int Rom::initSRam(SRam *sram) const
 	}
 	
 	// Load the SRam file.
-	// TODO: Implement OSD callback.
 	sram->setFilename(m_filename.c_str());
-	sram->load();
-	
-	return 0;
+	return sram->load();
 }
 
 
