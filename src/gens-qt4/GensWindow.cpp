@@ -607,6 +607,13 @@ void GensWindow::closeRom(void)
 	
 	if (m_rom)
 	{
+		// Make sure SRam/EEPRom data is saved.
+		int save_ret = LibGens::EmuMD::SaveData(m_rom);
+		if (save_ret == 1)
+			m_vBackend->osd_printf(1500, "SRAM saved.");
+		else if (save_ret == 2)
+			m_vBackend->osd_printf(1500, "EEPROM saved.");
+		
 		// Delete the Rom instance.
 		delete m_rom;
 		m_rom = NULL;

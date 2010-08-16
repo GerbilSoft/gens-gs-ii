@@ -361,7 +361,9 @@ int Rom::initSRam(SRam *sram) const
 	}
 	
 	// Load the SRam file.
-	// TODO
+	// TODO: Implement OSD callback.
+	sram->setFilename(m_filename.c_str());
+	sram->load();
 	
 	return 0;
 }

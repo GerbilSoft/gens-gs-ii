@@ -41,6 +41,7 @@ class EmuMD
 		static void End(void);
 		
 		static int SetRom(Rom *rom);
+		static int SaveData(Rom *rom);
 		
 		static void Do_Frame(void);
 		

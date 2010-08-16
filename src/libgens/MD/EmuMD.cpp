@@ -149,6 +149,31 @@ int EmuMD::SetRom(Rom *rom)
 
 
 /**
+ * EmuMD::SaveData(): Save SRam/EEPRom.
+ * @param rom Rom class with the ROM image.
+ * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
+ */
+int EmuMD::SaveData(Rom *rom)
+{
+	// TODO: Move SRam and EEPRom to the Rom class?
+	int ret = 0;
+	
+	if (M68K_Mem::m_EEPRom.isEEPRomTypeSet())
+	{
+		// TODO
+	}
+	else
+	{
+		// Save SRam.
+		int sram_ret = M68K_Mem::m_SRam.save();
+		ret = (sram_ret > 0);
+	}
+	
+	return ret;
+}
+
+
+/**
  * T_Do_Line(): Run a scanline.
  * @param LineType Line type.
  * @param VDP If true, VDP is updated.
