@@ -819,11 +819,13 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 			// TODO
 			//YM2612_Reset();
 		}
+		return;
 	}
 	else if (address == 0xA130F1)
 	{
 		// SRam control register. (0xA130F1)
 		m_SRam.writeCtrl(data);
+		return;
 	}
 	else if (address >= 0xA130F2 && address <= 0xA130FF)
 	{
@@ -834,6 +836,7 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 		unsigned int virt_bank = (data & 0x1F);
 		M68K_Read_Byte_Table[phys_bank] = MD_M68K_Read_Byte_Table[virt_bank];
 		M68K_Read_Word_Table[phys_bank] = MD_M68K_Read_Word_Table[virt_bank];
+		return;
 	}
 	else if (address > 0xA1001F)
 	{
@@ -1021,7 +1024,9 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 		// Call the Z80 Write Byte function.
 		// TODO: CPU lockup on accessing 0x7Fxx or >=0x8000.
 		// Genesis Plus writes the high byte of the M68K word.
+		// NOTE: Gunstar Heroes uses word write access to the Z80 area on startup.
 		Z80_MD_Mem::Z80_WriteB(address & 0xFFFF, (data >> 8) & 0xFF);
+		return;
 	}
 	else if (address == 0xA11100)
 	{
@@ -1112,12 +1117,15 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 			// TODO
 			//YM2612_Reset();
 		}
+		
+		return;
 	}
 	else if (address == 0xA130F0)
 	{
 		// SRam control register. (0xA130F0/0xA130F1)
 		// NOTE: NOT 0xA130F1 - this is a word write.
 		m_SRam.writeCtrl(data);
+		return;
 	}
 	else if (address >= 0xA130F2 && address <= 0xA130FF)
 	{
@@ -1128,6 +1136,7 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 		unsigned int virt_bank = (data & 0x1F);
 		M68K_Read_Byte_Table[phys_bank] = MD_M68K_Read_Byte_Table[virt_bank];
 		M68K_Read_Word_Table[phys_bank] = MD_M68K_Read_Word_Table[virt_bank];
+		return;
 	}
 	else if (address > 0xA1001F)
 	{
