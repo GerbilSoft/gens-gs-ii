@@ -45,16 +45,16 @@ class GensWindow : public QMainWindow
 	public:
 		GensWindow();
 		~GensWindow();
-		
-		// Widgets.
-		VBackend *m_vBackend;	// QGLWidget.
-		GensMenuBar *m_menubar;		// Gens menu bar.
-		
+	
 	protected:
 		void setupUi(void);
 		void retranslateUi(void);
 		
 		void closeEvent(QCloseEvent *event);
+		
+		// Widgets.
+		VBackend *m_vBackend;	// GensQGLWidget.
+		GensMenuBar *m_menubar;	// Gens menu bar.
 		
 		QWidget *centralwidget;
 		QVBoxLayout *layout;
