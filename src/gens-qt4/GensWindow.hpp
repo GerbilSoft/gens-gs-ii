@@ -29,7 +29,11 @@
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QCloseEvent>
 
+// Audio/Video backends.
 #include "VBackend/VBackend.hpp"
+#include "Audio/GensPortAudio.hpp"
+
+// Gens menu bar.
 #include "GensMenuBar.hpp"
 
 // LibGens includes.
@@ -59,6 +63,9 @@ class GensWindow : public QMainWindow
 		// Widgets.
 		VBackend *m_vBackend;	// GensQGLWidget.
 		GensMenuBar *m_menubar;	// Gens menu bar.
+		
+		// Audio backend.
+		GensPortAudio *m_audio;
 		
 		QWidget *centralwidget;
 		QVBoxLayout *layout;

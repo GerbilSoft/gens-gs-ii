@@ -110,6 +110,11 @@ GensWindow::GensWindow()
  */
 GensWindow::~GensWindow()
 {
+	// Delete the audio backend.
+	m_audio->stop();
+	//m_audio->close(); // TODO: close() manually, or just delete m_audio?
+	delete m_audio;
+	m_audio = NULL;
 }
 
 
@@ -146,6 +151,11 @@ void GensWindow::setupUi(void)
 	// Create the Video Backend.
 	// TODO: Allow selection of all available VBackend classes.
 	m_vBackend = new GensQGLWidget(this->centralwidget);
+	
+	// Create the Audio Backend.
+	// TODO: Allow selection of all available audio backend classes.
+	// NOTE: Audio backends are NOT QWidgets!
+	m_audio = new GensPortAudio();
 	
 	// Create the layout.
 	layout = new QVBoxLayout(this->centralwidget);
@@ -332,6 +342,14 @@ void GensWindow::menuTriggered(int id)
 					LibGens::VdpRend::m_palette.setBpp(LibGens::VdpPalette::BPP_32);
 					m_vBackend->setVbDirty();
 					m_vBackend->vbUpdate();
+					break;
+				
+				case MNUID_ITEM(IDM_RESBPPTEST_AUDIO):
+					// Start/Stop audio.
+					if (m_menubar->menuItemCheckState(IDM_RESBPPTEST_AUDIO))
+						m_audio->start();
+					else
+						m_audio->stop();
 					break;
 				
 				default:
