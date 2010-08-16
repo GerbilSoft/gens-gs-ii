@@ -28,6 +28,7 @@
 
 // C includes.
 #include <stdio.h>
+#include <stdint.h>
 
 // LibGens includes.
 #include "libgens/MD/VdpRend.hpp"
@@ -185,7 +186,7 @@ void GensQGLWidget::reallocTexOsd(void)
 	// Load the OSD texture.
 	// TODO: Handle the case where the image isn't found.
 	QImage imgOsd = QImage(":/gens/vga-charset");
-	m_texOsd = bindTexture(imgOsd, GL_TEXTURE_2D, GL_BGRA);
+	m_texOsd = bindTexture(imgOsd);
 	
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_texOsd);
@@ -413,6 +414,7 @@ void GensQGLWidget::paintGL(void)
 #endif /* HAVE_GLEW */
 	
 	// Draw the texture.
+	glBindTexture(GL_TEXTURE_2D, m_tex);
 	glBegin(GL_QUADS);
 	glTexCoord2d(0.0, 0.0);
 	glVertex2i(-1, 1);
@@ -432,19 +434,53 @@ void GensQGLWidget::paintGL(void)
 	
 	glDisable(GL_TEXTURE_2D);
 	
+	// Print the OSD text to the screen.
+	printOsdText();
+}
+
+
+/**
+ * printOsdText(): Print the OSD text to the screen.
+ */
+void GensQGLWidget::printOsdText(void)
+{
 	// Print text to the screen.
 	// TODO:
 	// * renderText() doesn't support wordwrapping.
 	// * renderText() doesn't properly handle newlines.
 	// * fm.boundingRect() doesn't seem to handle wordwrapping correctly, either.
-	QFontMetrics fm(m_osdFont, this);
-	QRect boundRect;
+	
+	// Set pixel matrices.
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glOrtho(0, (GLdouble) this->width(), this->height(), 0, -1.0f, 1.0f);
+	
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	
+	// Trick to fix up pixel alignment.
+	// See http://basic4gl.wikispaces.com/2D+Drawing+in+OpenGL
+	glTranslatef(0.375f, 0.375f, 0.0f);
+	
+	// Enable 2D textures.
+	glEnable(GL_TEXTURE_2D);
+	
+	// Enable GL blending.
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
+	// Bind the OSD texture.
+	glBindTexture(GL_TEXTURE_2D, m_texOsd);
+	glBegin(GL_QUADS);	// Start drawing quads.
 	
 	// TODO: Make the text colors customizable.
-	QColor clShadow(0, 0, 0);
-	QColor clText(255, 255, 255);
+	QColor clShadow(0, 0, 0, 255);
+	QColor clText(255, 255, 255, 255);
 	
-	int y = this->height();
+	// TODO: Constants for character sizes.
+	int y = this->height() - 16;
 	double curTime = LibGens::Timing::GetTimeD();
 	
 	// Check if the FPS should be drawn.
@@ -452,18 +488,20 @@ void GensQGLWidget::paintGL(void)
 	if (showFps())
 	{
 		QString sFps = QString::number(m_fpsAvg, 'f', 1);
-		boundRect = fm.boundingRect(8, 0, this->width() - 16, y, 0, sFps);
-		y -= boundRect.height();
+		
+		// TODO: Allow font scaling.
+		y -= 16;
 		
 		// TODO: Make the drop shadow optional or something.
 		qglColor(clShadow);
-		renderText(8+1, y+1, sFps, m_osdFont);
+		printOsdLine(8+1, y+1, sFps);
 		qglColor(clText);
-		renderText(8-1, y-1, sFps, m_osdFont);
+		printOsdLine(8-1, y-1, sFps);
 	}
 	
 	// NOTE: QList internally uses an array of pointers.
 	// We can use array indexing instead of iterators.
+	// TODO: Display lists for onscreen messages?
 	for (int i = (m_osdList.size() - 1); i >= 0; i--)
 	{
 		if (curTime >= m_osdList[i].endTime)
@@ -474,19 +512,78 @@ void GensQGLWidget::paintGL(void)
 			continue;
 		}
 		
-		const QString msg = m_osdList[i].msg;
-		boundRect = fm.boundingRect(8, 0, this->width() - 16, y, 0, msg);
-		y -= boundRect.height();
+		const QString &msg = m_osdList[i].msg;
+		
+		// TODO: Allow font scaling.
+		y -= 16;
 		
 		// TODO: Make the drop shadow optional or something.
 		qglColor(clShadow);
-		renderText(8+1, y+1, msg, m_osdFont);
+		printOsdLine(8+1, y+1, msg);
 		qglColor(clText);
-		renderText(8-1, y-1, msg, m_osdFont);
+		printOsdLine(8-1, y-1, msg);
 	}
 	
-	// Reset the GL color.
-	qglColor(QColor(255, 255, 255, 255));
+	// We're done drawing.
+	glEnd();
+	
+	// Reset the GL state.
+	qglColor(QColor(255, 255, 255, 255));	// Reset the color.
+	glDisable(GL_BLEND);			// Disable GL blending.
+	glDisable(GL_TEXTURE_2D);		// Disable 2D textures.
+	
+	// Restore the matrices.
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+}
+
+
+/**
+ * printOsdLine(): Print a line of text on the screen.
+ * NOTE: This should ONLY be called from printOsdText()!
+ * @param x X coordinate.
+ * @param y Y coordinate.
+ * @param msg Line of text.
+ */
+void GensQGLWidget::printOsdLine(int x, int y, const QString &msg)
+{
+	// TODO: Font information.
+	// TODO: Wordwrapping.
+	// TODO: Display lists?
+	const int chrW = 8;
+	const int chrH = 16;
+	
+	for (int i = 0; i < msg.size(); i++, x += chrW)
+	{
+		uint16_t chr = msg[i].unicode();
+		if (chr > 0xFF)
+		{
+			// Unicode characters over U+00FF are not supported right now.
+			// TODO: Replacement character.
+			continue;
+		}
+		
+		// Calculate the texture coordinates.
+		// TODO: The Y coordinate seems to be inverted...
+		GLfloat tx1 = ((float)(chr & 0xF) / 16.0f);
+		GLfloat ty1 = 1.0 - ((float)((chr & 0xF0) >> 4) / 16.0f);
+		GLfloat tx2 = (tx1 + (1.0f / 16.0f));
+		GLfloat ty2 = (ty1 - (1.0f / 16.0f));
+		
+		// Draw the texture.
+		// NOTE: glBegin() / glEnd() are called in printOsdText().
+		glTexCoord2f(tx1, ty1);
+		glVertex2i(x, y);
+		glTexCoord2d(tx2, ty1);
+		glVertex2i(x+chrW, y);
+		glTexCoord2d(tx2, ty2);
+		glVertex2i(x+chrW, y+chrH);
+		glTexCoord2d(tx1, ty2);
+		glVertex2i(x, y+chrH);
+	}
 }
 
 

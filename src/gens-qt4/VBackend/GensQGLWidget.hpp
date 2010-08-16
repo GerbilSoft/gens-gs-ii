@@ -76,6 +76,8 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		
 		// OSD texture.
 		GLuint m_texOsd;
+		void printOsdText(void);
+		void printOsdLine(int x, int y, const QString &msg);
 		
 		// Effects.
 #ifdef HAVE_GLEW
