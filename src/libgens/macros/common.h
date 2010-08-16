@@ -43,4 +43,14 @@
  */
 typedef char utf8_str;
 
+/** Miscellaneous. **/
+
+#ifdef _WIN32
+#define LG_PATH_SEP_CHR '\\'
+#define LG_PATH_SEP_STR "\\"
+#else
+#define LG_PATH_SEP_CHR '/'
+#define LG_PATH_SEP_STR "/"
+#endif
+
 #endif /* __LIBGENS_MACROS_COMMON_H__ */
