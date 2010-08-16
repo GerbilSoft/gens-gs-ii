@@ -31,12 +31,12 @@ extern "C" {
 typedef enum
 {
 	OSD_UNKNOWN = 0,
-	OSD_SRAM_LOAD,
-	OSD_SRAM_SAVE,
-	OSD_SRAM_AUTOSAVE,
-	OSD_EEPROM_LOAD,
-	OSD_EEPROM_SAVE,
-	OSD_EEPROM_AUTOSAVE,
+	OSD_SRAM_LOAD,		// param: Number of bytes loaded.
+	OSD_SRAM_SAVE,		// param: Number of bytes saved.
+	OSD_SRAM_AUTOSAVE,	// param: Number of bytes saved.
+	OSD_EEPROM_LOAD,	// param: Number of bytes loaded.
+	OSD_EEPROM_SAVE,	// param: Number of bytes saved.
+	OSD_EEPROM_AUTOSAVE,	// param: Number of bytes saved.
 	
 	OSD_MAX
 } OsdType;
