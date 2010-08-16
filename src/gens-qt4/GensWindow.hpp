@@ -34,6 +34,7 @@
 
 // LibGens includes.
 #include "libgens/Rom.hpp"
+#include "libgens/lg_osd.h"
 
 namespace GensQt4
 {
@@ -45,6 +46,9 @@ class GensWindow : public QMainWindow
 	public:
 		GensWindow();
 		~GensWindow();
+		
+		// LibGens OSD handler.
+		void osd(OsdType osd_type, int param);
 	
 	protected:
 		void setupUi(void);

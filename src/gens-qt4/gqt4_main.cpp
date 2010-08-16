@@ -71,6 +71,9 @@ int main(int argc, char *argv[])
 	// Register the LOG_MSG() critical error handler.
 	log_msg_register_critical_fn(gqt4_log_msg_critical);
 	
+	// Register the LibGens OSD handler.
+	lg_set_osd_fn(gqt4_osd);
+	
 	gens_window = new GensQt4::GensWindow();
 	gens_window->show();
 	
@@ -84,6 +87,10 @@ int main(int argc, char *argv[])
 	 * Example: On Windows, if the user logs off while the program's running,
 	 * app.exec() won't return.
 	 */
+	
+	// Unregister the LibGens OSD handler.
+	// TODO: Do this earlier?
+	lg_set_osd_fn(NULL);
 	
 	// Shut down LibGens.
 	LibGens::End();
@@ -109,6 +116,21 @@ void gqt4_log_msg_critical(const char *channel, const char *msg)
 			   title, QString(msg));
 	dialog.setTextFormat(Qt::PlainText);
 	dialog.exec();
+}
+
+
+/**
+ * gqt4_osd(): LibGens OSD handler.
+ * @param osd_type: OSD type.
+ * @param param: Integer parameter.
+ */
+void gqt4_osd(OsdType osd_type, int param)
+{
+	// TODO: Make sure this function doesn't run if Gens is shutting down.
+	if (!gens_window)
+		return;
+	
+	gens_window->osd(osd_type, param);
 }
 
 

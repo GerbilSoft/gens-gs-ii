@@ -651,4 +651,15 @@ void GensWindow::setGensTitle(void)
 	this->setWindowTitle(title);
 }
 
+
+/**
+ * osd(): LibGens OSD handler.
+ * @param osd_type: OSD type.
+ * @param param: Integer parameter.
+ */
+void GensWindow::osd(OsdType osd_type, int param)
+{
+	// TODO
+}
+
 }

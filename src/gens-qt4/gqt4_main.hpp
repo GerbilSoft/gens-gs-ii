@@ -24,6 +24,9 @@
 #ifndef __GENS_QT4_GQT4_MAIN_HPP__
 #define __GENS_QT4_GQT4_MAIN_HPP__
 
+// LibGens OSD handler.
+#include "libgens/lg_osd.h"
+
 // Needed for qMain redefinition on Win32.
 #ifdef _WIN32
 #include <QtGui/qwindowdefs.h>
@@ -47,6 +50,13 @@ extern "C" {
  * @param msg Message. (Preformatted)
  */
 void gqt4_log_msg_critical(const char *channel, const char *msg);
+
+/**
+ * gqt4_osd(): LibGens OSD handler.
+ * @param osd_type: OSD type.
+ * @param param: Integer parameter.
+ */
+void gqt4_osd(OsdType osd_type, int param);
 
 #ifdef __cplusplus
 }
