@@ -519,7 +519,7 @@ align 16
 %else
 	movzx	edx, word [SYM(Ram_Z80) + ecx]
 %endif
-	jmp	short %%End
+	jmp	bear %%End
 	
 align 16
 
@@ -4319,7 +4319,7 @@ Z80I_RET%2%1:
 %endif
 	mov	ecx, zxSP
 %if %0 > 0
-	j%2z %%dont_take_it
+	j%2z near %%dont_take_it
 %endif
 
 	READ_WORD
