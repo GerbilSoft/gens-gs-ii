@@ -1,5 +1,10 @@
 Description of git tags for Gens/GS II:
 
+gens-credits-v0: Initial "Credits" tab in the About dilaog. This tab lists
+all the contributors for Gens/GS and Gens/GS II, plus the original Gens
+author and the authors and contributors of the previous Gens multiplatform
+ports, e.g. Gens/BeOS and Gens/Linux.
+
 gens-qt4-open-close-title: gens-qt4 now supports opening and closing ROMs
 using the appropriate entries in the File menu. It also sets the window
 title to the ROM's internal name when a ROM is running.
