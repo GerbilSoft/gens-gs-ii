@@ -100,7 +100,7 @@ AboutWindow::AboutWindow(QWidget *parent)
 	QScrollArea *scrlDebugInfo = new QScrollArea();
 	scrlDebugInfo->setFrameShape(QFrame::NoFrame);
 	scrlDebugInfo->setFrameShadow(QFrame::Plain);
-	scrlCopyrights->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	scrlDebugInfo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	scrlDebugInfo->setWidget(lblDebugInfo);
 	lblDebugInfo->setAutoFillBackground(false);
 	vboxDebugInfo->addWidget(scrlDebugInfo);
