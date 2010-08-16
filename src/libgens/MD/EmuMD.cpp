@@ -116,8 +116,9 @@ int EmuMD::SetRom(Rom *rom)
 	// Initialize EEPRom.
 	// EEPRom is only used if the ROM is in the EEPRom class's database.
 	// Otherwise, SRam is used.
-	rom->initEEPRom(&M68K_Mem::m_EEPRom);
-	// TODO: Autoload SRam.
+	int eepromSize = rom->initEEPRom(&M68K_Mem::m_EEPRom);
+	if (eepromSize > 0)
+		lg_osd(OSD_EEPROM_LOAD, eepromSize);
 	
 	// TODO: Byteswapping flags.
 	// Until they're implemented, byteswap the ROM *after* initializing SRam/EEPRom.
@@ -162,20 +163,29 @@ int EmuMD::SetRom(Rom *rom)
 int EmuMD::SaveData(Rom *rom)
 {
 	// TODO: Move SRam and EEPRom to the Rom class?
-	
 	if (M68K_Mem::m_EEPRom.isEEPRomTypeSet())
 	{
-		// TODO
-		return 0;
+		// Save EEPRom.
+		int eepromSize = M68K_Mem::m_EEPRom.save();
+		if (eepromSize > 0)
+		{
+			lg_osd(OSD_EEPROM_SAVE, eepromSize);
+			return 2;
+		}
 	}
 	else
 	{
 		// Save SRam.
 		int sramSize = M68K_Mem::m_SRam.save();
 		if (sramSize > 0)
+		{
 			lg_osd(OSD_SRAM_SAVE, sramSize);
-		return 1;
+			return 1;
+		}
 	}
+	
+	// Nothing was saved.
+	return 0;
 }
 
 
