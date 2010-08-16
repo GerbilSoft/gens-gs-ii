@@ -128,6 +128,9 @@ int SRam::getUsedSize(void)
  */
 int SRam::save(void)
 {
+	if (!m_dirty)
+		return 0;
+	
 	int size = getUsedSize();
 	if (size <= 0)
 	{
