@@ -49,9 +49,6 @@ VBackend::VBackend()
 	// Initialize the FPS manager.
 	resetFps();
 	m_showFps = true;	// TODO: Load from configuration.
-	
-	// Create the OSD font.
-	m_osdFont = QFont("Monospace", 10);
 }
 
 VBackend::~VBackend()

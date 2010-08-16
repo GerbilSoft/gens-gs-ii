@@ -32,7 +32,6 @@
 #include <QtCore/QString>
 #include <QtCore/QList>
 #include <QtGui/QWidget>
-#include <QtGui/QFont>
 
 #include "libgens/MD/VdpRend.hpp"
 
@@ -130,9 +129,6 @@ class VBackend
 			double endTime;
 		};
 		QList<OsdMessage> m_osdList;
-		
-		// Fonts.
-		QFont m_osdFont;
 		
 		// FPS manager.
 		double m_fps[8];
