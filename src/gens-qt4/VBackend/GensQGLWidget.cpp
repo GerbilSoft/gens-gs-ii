@@ -74,6 +74,7 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 	: QGLWidget(QGLFormat(QGL::NoAlphaChannel | QGL::NoDepthBuffer), parent)
 {
 	m_tex = 0;
+	m_texOsd = 0;
 	
 #ifdef HAVE_GLEW
 	// ARB fragment programs.
@@ -95,10 +96,14 @@ GensQGLWidget::~GensQGLWidget()
 {
 	if (m_tex > 0)
 	{
-		glEnable(GL_TEXTURE_2D);
 		glDeleteTextures(1, &m_tex);
 		m_tex = 0;
-		glDisable(GL_TEXTURE_2D);
+	}
+	
+	if (m_texOsd > 0)
+	{
+		deleteTexture(m_texOsd);
+		m_texOsd = 0;
 	}
 	
 #ifdef HAVE_GLEW
@@ -170,6 +175,35 @@ void GensQGLWidget::reallocTexture(void)
 
 
 /**
+ * reallocTexOsd(): (Re-)Allocate the OSD texture.
+ */
+void GensQGLWidget::reallocTexOsd(void)
+{
+	if (m_texOsd > 0)
+		deleteTexture(m_texOsd);
+	
+	// Load the OSD texture.
+	// TODO: Handle the case where the image isn't found.
+	QImage imgOsd = QImage(":/gens/vga-charset");
+	m_texOsd = bindTexture(imgOsd, GL_TEXTURE_2D, GL_BGRA);
+	
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, m_texOsd);
+	
+	// Set texture parameters.
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	
+	// GL filtering.
+	// TODO: Make this customizable!
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	
+	glDisable(GL_TEXTURE_2D);
+}
+
+
+/**
  * initializeGL(): Called when GL is initialized.
  */
 void GensQGLWidget::initializeGL(void)
@@ -234,6 +268,9 @@ void GensQGLWidget::initializeGL(void)
 	
 	// Allocate the texture.
 	reallocTexture();
+	
+	// Allocate the OSD texture.
+	reallocTexOsd();
 }
 
 

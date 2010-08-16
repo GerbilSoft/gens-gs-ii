@@ -58,8 +58,10 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		QWidget *toQWidget(void) { return this; }
 	
 	protected:
-		void initializeGL(void);
 		void reallocTexture(void);
+		void reallocTexOsd(void);
+		
+		void initializeGL(void);
 		
 		void resizeGL(int width, int height);
 		void paintGL(void);
@@ -71,6 +73,9 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		int m_colorComponents;
 		GLenum m_texFormat;
 		GLenum m_texType;
+		
+		// OSD texture.
+		GLuint m_texOsd;
 		
 		// Effects.
 #ifdef HAVE_GLEW
