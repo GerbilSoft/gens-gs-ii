@@ -44,6 +44,7 @@
 #endif
 
 // Qt includes.
+#include <QtCore/QVector>
 #include <QtGui/QKeyEvent>
 #include <QtGui/QMouseEvent>
 
@@ -186,6 +187,54 @@ void GensQGLWidget::reallocTexOsd(void)
 	// Load the OSD texture.
 	// TODO: Handle the case where the image isn't found.
 	QImage imgOsd = QImage(":/gens/vga-charset");
+	
+	if (imgOsd.colorCount() > 0)
+	{
+		// Image uses a palette. Apply a color key.
+		// Background color (black) will be changed to transparent.
+		// TODO: Allow all 0x000000, or just opaque 0xFF000000?
+		
+		QVector<QRgb> colorTable = imgOsd.colorTable();
+		for (int i = 0; i < colorTable.size(); i++)
+		{
+			if (colorTable[i] == 0xFF000000)
+			{
+				// Found black. Make it transparent.
+				colorTable[i] = 0x00000000;
+				break;
+			}
+		}
+		
+		imgOsd.setColorTable(colorTable);
+	}
+	else if (!imgOsd.hasAlphaChannel())
+	{
+		// Image doesn't have an alpha channel.
+		// Convert it to 32-bit RGBA and apply a color key.
+		// Background color (black) will be changed to transparent.
+		imgOsd = imgOsd.convertToFormat(QImage::Format_ARGB32, Qt::ColorOnly);
+		
+		// TODO: Byte ordering on big-endian systems.
+		// TODO: Allow all 0x000000, or just opaque 0xFF000000?
+		// TODO: Handle images that don't have a color table.
+		// TODO: Images with odd widths will not have the last column updated properly.
+		
+		for (int y = 0; y < imgOsd.height(); y++)
+		{
+			QRgb *scanline = reinterpret_cast<QRgb*>(imgOsd.scanLine(y));
+			for (int x = imgOsd.width() / 2; x != 0; x--, scanline += 2)
+			{
+				if (*scanline == 0xFF000000)
+					*scanline = 0x00000000;
+				if (*(scanline+1) == 0xFF000000)
+					*(scanline+1) = 0x00000000;
+			}
+			
+			// TODO: Make this work on images with odd widths?
+		}
+	}
+	
+	// Bind the OSD image to a texture.
 	m_texOsd = bindTexture(imgOsd);
 	
 	glEnable(GL_TEXTURE_2D);
@@ -468,8 +517,8 @@ void GensQGLWidget::printOsdText(void)
 	glEnable(GL_TEXTURE_2D);
 	
 	// Enable GL blending.
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	// Bind the OSD texture.
 	glBindTexture(GL_TEXTURE_2D, m_texOsd);
@@ -502,6 +551,7 @@ void GensQGLWidget::printOsdText(void)
 	// NOTE: QList internally uses an array of pointers.
 	// We can use array indexing instead of iterators.
 	// TODO: Display lists for onscreen messages?
+	
 	for (int i = (m_osdList.size() - 1); i >= 0; i--)
 	{
 		if (curTime >= m_osdList[i].endTime)
