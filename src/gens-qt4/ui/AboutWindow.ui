@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>488</width>
-    <height>416</height>
+    <height>420</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="vboxDialog">
    <property name="spacing">
-    <number>8</number>
+    <number>12</number>
    </property>
    <item>
     <layout class="QHBoxLayout" name="hboxPrgTitle">
