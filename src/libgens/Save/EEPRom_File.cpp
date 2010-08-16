@@ -82,6 +82,9 @@ void EEPRom::setFilename(const string &filename)
  */
 int EEPRom::load(void)
 {
+	if (!isEEPRomTypeSet())
+		return -2;
+	
 	// Attempt to open the EEPRom file.
 	FILE *f = fopen(m_filename.c_str(), "rb");
 	if (!f)
@@ -126,6 +129,8 @@ int EEPRom::getUsedSize(void)
  */
 int EEPRom::save(void)
 {
+	if (!isEEPRomTypeSet())
+		return -2;
 	if (!m_dirty)
 		return 0;
 	
@@ -161,6 +166,8 @@ int EEPRom::save(void)
  */
 int EEPRom::autoSave(void)
 {
+	if (!isEEPRomTypeSet())
+		return -2;
 	if (!m_dirty)
 		return 0;
 	
