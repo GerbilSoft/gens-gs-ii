@@ -375,7 +375,7 @@ int Rom::initEEPRom(EEPRom *eeprom) const
 	// TODO: Load EEPRom from a file.
 	// TODO: Should that be implemented here or in SRam.cpp?
 	if (!isOpen())
-		return 1;
+		return -1;
 	
 	// Reset the EEPRom and set the type.
 	eeprom->reset();
