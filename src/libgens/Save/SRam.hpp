@@ -170,7 +170,10 @@ class SRam
 			m_dirty = true;
 		}
 		
-		// TODO: Add load/save functions.
+		/**
+		 * isDirty(): Determine if the SRam is dirty.
+		 * @return True if SRam has been modified since the last save; false otherwise.
+		 */
 		inline bool isDirty(void) const { return m_dirty; }
 		
 		// TODO: SRam directory path.
