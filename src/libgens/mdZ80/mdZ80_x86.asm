@@ -519,7 +519,7 @@ align 16
 %else
 	movzx	edx, word [SYM(Ram_Z80) + ecx]
 %endif
-	jmp	bear %%End
+	jmp	short %%End
 	
 align 16
 
