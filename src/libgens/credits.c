@@ -28,7 +28,7 @@ const utf8_str *GensGS_credits =
 	"Main programmer: David Korth\n"
 	"\n"
 	"Original Gens programmer: Stéphane Dallongeville\n"
-	"Gens BeOS port: Caz\n"
+	"Gens/BeOS port: Caz\n"
 	"Gens/Linux port: Stéphane Akhoun\n"
 	"\n"
 	"Gens/Linux contributors:\n"
