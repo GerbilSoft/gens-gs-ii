@@ -145,8 +145,7 @@ int EmuMD::SetRom(Rom *rom)
 	// TODO: Initialize this somewhere else.
 	M68K_Mem::CPL_M68K = (int)rint((((double)CLOCK_NTSC / 7.0) / 60.0) / 262.0);
 	M68K_Mem::CPL_Z80 = (int)rint((((double)CLOCK_NTSC / 15.0) / 60.0) / 262.0);
-	
-	printf("test.bin loaded: %d bytes. Start the emulator thread!\n", M68K_Mem::Rom_Size);
+	return 0;
 }
 
 
