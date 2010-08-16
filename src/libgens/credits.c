@@ -41,6 +41,7 @@ const utf8_str *GensGS_credits =
 	"Biafra Republic: Software testing\n"
 	"Chilly Willy: 32X PWM improvements\n"
 	"Corner-Face-Jacks: Software testing\n"
+	"CyberKitsune: Software testing\n"
 	"Delta: Software testing\n"
 	"djohe: Software testing\n"
 	"Glitch: Software testing\n"
