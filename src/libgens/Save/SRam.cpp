@@ -165,6 +165,7 @@ int SRam::autoSave(void)
 		return 0;
 	
 	// TODO
+	return 0;
 }
 
 }
