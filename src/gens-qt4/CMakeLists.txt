@@ -73,6 +73,7 @@ SET(gens-qt4_SRCS
 	VBackend/GensQGLWidget.cpp
 	Input/KeyHandlerQt.cpp
 	CtrlConfigWindow.cpp
+	Audio/GensPortAudio.cpp
 	)
 
 # Headers with Qt4 objects.
