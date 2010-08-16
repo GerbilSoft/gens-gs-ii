@@ -45,6 +45,7 @@ extern Ram_68k_t Ram_68k;
 #include "M68K.hpp"
 #include "../Save/SRam.hpp"
 #include "../Save/EEPRom.hpp"
+#include "../MD/SysRegion.hpp"
 
 namespace LibGens
 {
@@ -109,8 +110,8 @@ class M68K_Mem
 		static int Cycles_M68K;
 		static int Cycles_Z80;
 		
-		static int Game_Mode;
-		static int CPU_Mode;
+		// TODO: Move ms_Region somewhere else?
+		static SysRegion ms_Region;
 		static int Gen_Mode;
 		
 		/** Public init and read/write functions. **/

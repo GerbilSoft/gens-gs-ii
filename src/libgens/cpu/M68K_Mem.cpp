@@ -99,8 +99,8 @@ int M68K_Mem::CPL_Z80;
 int M68K_Mem::Cycles_M68K;
 int M68K_Mem::Cycles_Z80;
 
-int M68K_Mem::Game_Mode;
-int M68K_Mem::CPU_Mode;
+// TODO: Move ms_Region somewhere else?
+SysRegion M68K_Mem::ms_Region;
 int M68K_Mem::Gen_Mode;
 
 
@@ -292,7 +292,7 @@ uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 			 * VER 3-0: HW version. (0 == no TMSS; 1 = TMSS)
 			 * TODO: Set VER to 1 once TMSS support is added, if TMSS is enabled.
 			 */
-			return ((Game_Mode << 7) | (CPU_Mode << 6) | 0x20);
+			return ((ms_Region.region() << 6) | 0x20);
 		
 		// Parallel I/O
 		case 0x02:	return EmuMD::m_port1->readData();
@@ -571,7 +571,7 @@ uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 			 * VER 3-0: HW version. (0 == no TMSS; 1 = TMSS)
 			 * TODO: Set VER to 1 once TMSS support is added, if TMSS is enabled.
 			 */
-			return ((Game_Mode << 7) | (CPU_Mode << 6) | 0x20);
+			return ((ms_Region.region() << 6) | 0x20);
 		
 		// Parallel I/O
 		case 0x02:	return EmuMD::m_port1->readData();

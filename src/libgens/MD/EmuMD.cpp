@@ -137,8 +137,7 @@ int EmuMD::SetRom(Rom *rom)
 	VdpIo::Set_Visible_Lines();
 	
 	// TODO: Set these elsewhere.
-	M68K_Mem::Game_Mode = 1;	// 0 == Japan; 1 == US/Europe
-	M68K_Mem::CPU_Mode = 0;		// 0 == NTSC; 1 == PAL
+	M68K_Mem::ms_Region.setRegion(SysRegion::REGION_US_NTSC);
 	M68K_Mem::Gen_Mode = 0;		// TODO: This isn't actually used anywhere right now...
 	
 	// Initialize CPL.
