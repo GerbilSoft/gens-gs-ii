@@ -25,6 +25,7 @@
 #include "libgens/macros/git.h"
 #include "libgens/Util/cpuflags.h"
 #include "libgens/Util/Timing.hpp"
+#include "libgens/credits.h"
 
 // C includes.
 #include <string.h>
@@ -79,11 +80,14 @@ AboutWindow::AboutWindow(QWidget *parent)
 		TR("Sega CD / Mega CD,") + "<br />\n" +
 		TR("Sega 32X emulator");
 	
-	// Set the text.
+	// Set the program title text.
         lblPrgTitle->setText(sPrgTitle);
 	
-	// Set the text.
+	// Set the debug information text.
 	lblDebugInfo->setText(AboutWindow::GetDebugInfo());
+	
+	// Set the credits text.
+	lblCredits->setText(QString::fromUtf8(GensGS_credits));
 	
 	// Create the scroll areas.
 	// Qt Designer's QScrollArea implementation is horribly broken.
@@ -104,6 +108,15 @@ AboutWindow::AboutWindow(QWidget *parent)
 	scrlDebugInfo->setWidget(lblDebugInfo);
 	lblDebugInfo->setAutoFillBackground(false);
 	vboxDebugInfo->addWidget(scrlDebugInfo);
+	
+	QScrollArea *scrlCredits = new QScrollArea();
+	scrlCredits->setFrameShape(QFrame::NoFrame);
+	scrlCredits->setFrameShadow(QFrame::Plain);
+	scrlCredits->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	scrlCredits->setWidget(lblCredits);
+	scrlCredits->setWidgetResizable(true);
+	scrlCredits->setAutoFillBackground(false);
+	vboxCredits->addWidget(scrlCredits);
 }
 
 
