@@ -194,6 +194,7 @@ void GensWindow::retranslateUi(void)
 void GensWindow::closeEvent(QCloseEvent *event)
 {
 	// Quit.
+	closeRom();
 	QuitGens();
 	
 	// Accept the close event.
