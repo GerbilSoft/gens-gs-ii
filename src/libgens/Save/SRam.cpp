@@ -22,5 +22,135 @@
  ***************************************************************************/
 
 #include "SRam.hpp"
+#include "macros/common.h"
+
+// C includes.
+#include <stdio.h>
+
+// C++ includes.
+#include <string>
+using std::string;
+
+namespace LibGens
+{
+
+// Static variable initialization.
+const char *SRam::ms_FileExt = "srm";
 
 // TODO: Port SRam file handling functions from Gens/GS!
+
+// TODO: SRam directory path.
+// For now, just save in the ROM directory.
+
+/**
+ * setFilename(): Set the SRam filename based on a ROM filename.
+ * The file extension is changed to ".srm".
+ * @param filename ROM filename.
+ */
+void SRam::setFilename(const string &filename)
+{
+	if (filename.empty())
+	{
+		// Empty filename.
+		m_filename.clear();
+		return;
+	}
+	
+	// Set the filename to be the same as the ROM filename,
+	// but with a different extension.
+	m_filename = filename;
+	size_t dot_pos = m_filename.rfind('.');
+	size_t path_pos = m_filename.rfind(LG_PATH_SEP_CHR);
+	printf("dot_pos: %d, path_pos: %d\n", dot_pos, path_pos);
+	
+	if ((dot_pos == string::npos) ||
+	    (path_pos != string::npos && dot_pos < path_pos))
+	{
+		// File extension not found. Add one.
+		m_filename += '.';
+		m_filename += ms_FileExt;
+	}
+	else
+	{
+		// File extension found. Change it.
+		m_filename.resize(dot_pos + 1);
+		m_filename += ms_FileExt;
+	}
+}
+
+
+/**
+ * load(): Load the SRam file.
+ * @return Positive value indicating SRam size on success; negative on error.
+ */
+int SRam::load(void)
+{
+	// Attempt to open the SRam file.
+	FILE *f = fopen(m_filename.c_str(), "rb");
+	if (!f)
+	{
+		// Unable to open the SRam file.
+		// TODO: Error code constants.
+		return -1;
+	}
+	
+	// Erase SRam before loading the file.
+	// NOTE: Don't use reset() - reset() also resets the control logic.
+	memset(m_sram, 0xFF, sizeof(m_sram));
+	
+	// Load the SRam data.
+	int ret = fread(m_sram, 1, sizeof(m_sram), f);
+	fclose(f);
+	
+	// Return the number of bytes read.
+	m_dirty = false;
+	return ret;
+}
+
+
+/**
+ * getUsedSize(): Determine how many bytes are used in the SRam chip.
+ * @return Number of bytes used, rounded to the highest power of two.
+ */
+int SRam::getUsedSize(void)
+{
+	int i = (sizeof(m_sram) - 1);
+	while (i >= 0 && m_sram[i] == 0xFF)
+		i--;
+	
+	// Return the next-highest power of two.
+	return next_pow2u(i);
+}
+
+
+/**
+ * save(): Save the SRam file.
+ * @return Positive value indicating SRam size on success; negative on error.
+ */
+int SRam::save(void)
+{
+	int size = getUsedSize();
+	if (size <= 0)
+	{
+		// SRam is empty.
+		return 0;
+	}
+	
+	FILE *f = fopen(m_filename.c_str(), "wb");
+	if (!f)
+	{
+		// Unable to open SRam file.
+		// TODO: Error code constants.
+		return -1;
+	}
+	
+	// Save SRam to the file.
+	int ret = fwrite(m_sram, 1, size, f);
+	fclose(f);
+	
+	// Return the number of bytes saved.
+	m_dirty = false;
+	return ret;
+}
+
+}

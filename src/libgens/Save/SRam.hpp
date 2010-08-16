@@ -24,8 +24,13 @@
 #ifndef __LIBGENS_SAVE_SRAM_HPP__
 #define __LIBGENS_SAVE_SRAM_HPP__
 
+// C includes.
 #include <string.h>
 #include <stdint.h>
+#include <limits.h>
+
+// C++ includes.
+#include <string>
 
 namespace LibGens
 {
@@ -167,6 +172,24 @@ class SRam
 		
 		// TODO: Add load/save functions.
 		inline bool isDirty(void) const { return m_dirty; }
+		
+		// TODO: SRam directory path.
+		// For now, just save in the ROM directory.
+		void setFilename(const std::string &filename);
+		
+		/**
+		 * load(): Load the SRam file.
+		 * @return Positive value indicating SRam size on success; negative on error.
+		 */
+		int load(void);
+		
+		/**
+		 * save(): Save the SRam file.
+		 * @return Positive value indicating SRam size on success; negative on error.
+		 */
+		int save(void);
+		
+		int autoSave(void);
 	
 	protected:
 		uint8_t m_sram[64*1024];
@@ -178,6 +201,25 @@ class SRam
 		
 		// Dirty flag.
 		bool m_dirty;
+		
+		// Filename.
+		static const char *ms_FileExt;
+		std::string m_filename;
+		
+		// Find the next highest power of two. (unsigned integers)
+		// http://en.wikipedia.org/wiki/Power_of_two#Algorithm_to_find_the_next-highest_power_of_two
+		template <class T>
+		static inline T next_pow2u(T k)
+		{
+			if (k == 0)
+				return 1;
+			k--;
+			for (unsigned int i = 1; i < sizeof(T)*CHAR_BIT; i <<= 1)
+				k = k | k >> i;
+			return k + 1;
+		}
+		
+		int getUsedSize(void);
 };
 
 }
