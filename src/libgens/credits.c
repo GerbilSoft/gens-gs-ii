@@ -60,7 +60,7 @@ const utf8_str *GensGS_credits =
 	"theocas: Provided controller icons\n"
 	"Scarred Sun: Software testing\n"
 	"SOTI: Software testing\n"
-	"Sik: Provided test ROMs and icon for SGens\n"
+	"Sik: Provided test ROMs; also icon for SGens\n"
 	"SkyLights: Provided icon for VDP Layer Options\n"
 	"SonicAD: Software testing\n"
 	"superGear: Software testing\n"
