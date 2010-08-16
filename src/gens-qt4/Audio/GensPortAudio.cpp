@@ -64,6 +64,9 @@ GensPortAudio::GensPortAudio()
 			"Pa_OpenDefaultStream() error: %s", Pa_GetErrorText(err));
 		Pa_Terminate();
 	}
+	
+	// PortAudio stream is open.
+	m_open = true;
 }
 
 GensPortAudio::~GensPortAudio()
