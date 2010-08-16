@@ -24,9 +24,6 @@
 #ifndef __LIBGENS_LG_MAIN_HPP__
 #define __LIBGENS_LG_MAIN_HPP__
 
-// Needed for NULL.
-#include <string.h>
-
 namespace LibGens
 {
 
