@@ -35,44 +35,15 @@ namespace LibGens
 class IoBase
 {
 	public:
-		IoBase()
-		{
-			// Initialize tristate control and data buffer.
-			// TODO: Initialize to 0xFF or 0x00?
-			m_ctrl = 0x00;		// input
-			m_lastData = 0xFF;	// all ones
-			m_buttons = ~0;		// no buttons pressed
-			
-			// Serial settings.
-			m_serCtrl = 0x00;	// parallel mode
-			m_serLastTx = 0xFF;
-			
-			updateSelectLine();
-		}
-		IoBase(const IoBase *other)
-		{
-			// Copy tristate control and data buffer from another controller.
-			m_ctrl = other->m_ctrl;
-			m_lastData = other->m_lastData;
-			m_buttons = ~0;		// buttons are NOT copied!
-			updateSelectLine();
-			
-			// Serial settings.
-			m_serCtrl = other->m_serCtrl;
-		}
+		IoBase();
+		IoBase(const IoBase *other);
 		virtual ~IoBase() { }
 		
 		/**
 		 * reset(): Reset virtual function.
 		 * Called when the system is reset.
 		 */
-		virtual inline void reset()
-		{
-			m_ctrl = 0x00;
-			m_lastData = 0xFF;
-			m_buttons = ~0;
-			updateSelectLine();
-		}
+		virtual void reset();
 		
 		// MD-side controller functions.
 		// TODO: Trigger IRQ 2 if TH interrupt is enabled.
@@ -81,7 +52,10 @@ class IoBase
 			m_ctrl = ctrl;
 			updateSelectLine();
 		}
-		virtual uint8_t readCtrl(void) { return m_ctrl; }
+		virtual uint8_t readCtrl(void)
+		{
+			return m_ctrl;
+		}
 		
 		virtual void writeData(uint8_t data)
 		{
