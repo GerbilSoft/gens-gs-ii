@@ -398,12 +398,12 @@ int Rom::loadRom(void *buf, size_t siz)
 	// TODO: Use error code constants.
 	// NOTE: Don't check for a NULL pointer, since a crash helps diagnose problems.
 	if (!isOpen())
-		return 1;
+		return -1;
 	
 	if (siz == 0 || siz < m_romSize)
 	{
 		// ROM buffer isn't large enough for the ROM image.
-		return 2;
+		return -2;
 	}
 	
 	// Load the ROM image.
