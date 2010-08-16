@@ -61,7 +61,6 @@ void SRam::setFilename(const string &filename)
 	m_filename = filename;
 	size_t dot_pos = m_filename.rfind('.');
 	size_t path_pos = m_filename.rfind(LG_PATH_SEP_CHR);
-	printf("dot_pos: %d, path_pos: %d\n", dot_pos, path_pos);
 	
 	if ((dot_pos == string::npos) ||
 	    (path_pos != string::npos && dot_pos < path_pos))
