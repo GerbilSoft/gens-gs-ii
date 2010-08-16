@@ -35,7 +35,6 @@
 // TODO
 #if 0
 #include "mem_m68k.h"
-#include "gens_core/sound/psg.h"
 #include "gens_core/sound/ym2612.hpp"
 #include "gens_core/vdp/vdp_io.h"
 #endif
@@ -283,10 +282,7 @@ void FASTCALL Z80_MD_Mem::Z80_WriteB_PSG(uint32_t address, uint8_t data)
 	if (address == 0x7F11)
 	{
 		// PSG register.
-		// LibGens TODO: PSG
-#if 0
-		PSG_Write(data);
-#endif
+		M68K_Mem::m_Psg.write(data);
 		return;
 	}
 	

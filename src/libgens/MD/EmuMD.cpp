@@ -145,6 +145,11 @@ int EmuMD::SetRom(Rom *rom)
 	m_port2->reset();
 	m_portE->reset();
 	
+	// Initialize audio.
+	// TODO: Move audio chips to an "MD circuit board" class or something.
+	// TODO: Don't hardcode PSG clock and audio rate.
+	M68K_Mem::m_Psg.reinit((int)((double)CLOCK_NTSC / 15.0), 44100);
+	
 	// TODO: VdpIo::VDP_Lines.Display.Total isn't being set properly...
 	VdpIo::VDP_Lines.Display.Total = 262;
 	VdpIo::Set_Visible_Lines();

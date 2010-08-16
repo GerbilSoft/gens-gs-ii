@@ -83,6 +83,10 @@ bool M68K_Mem::SaveDataEnable = true;	// Enable SRam/EEPRom by default.
 SRam M68K_Mem::m_SRam;
 EEPRom M68K_Mem::m_EEPRom;
 
+// Audio ICs.
+// TODO: Move this elsewhere?
+Psg M68K_Mem::m_Psg;
+
 /** Z80/M68K cycle table. **/
 int M68K_Mem::Z80_M68K_Cycle_Tab[512];
 
@@ -926,8 +930,7 @@ void M68K_Mem::M68K_Write_Byte_VDP(uint32_t address, uint8_t data)
 	else if (address == 0x11)
 	{
 		// 0xC00011: PSG control port.
-		// TODO
-		//PSG_Write(data);
+		m_Psg.write(data);
 	}
 }
 
@@ -1225,7 +1228,7 @@ void M68K_Mem::M68K_Write_Word_VDP(uint32_t address, uint16_t data)
 	{
 		// 0xC00011: PSG control port.
 		// TODO: mem_m68k.asm doesn't support this for word writes...
-		//PSG_Write(data);
+		//m_Psg.write(data);
 	}
 }
 
