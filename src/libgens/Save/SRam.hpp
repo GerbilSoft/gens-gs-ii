@@ -185,10 +185,15 @@ class SRam
 		
 		/**
 		 * save(): Save the SRam file.
-		 * @return Positive value indicating SRam size on success; negative on error.
+		 * @return Positive value indicating SRam size on success; 0 if no save is needed; negative on error.
 		 */
 		int save(void);
 		
+		/**
+		 * autoSave(): Autosave the SRam file.
+		 * This saves the SRam file if its last modification time is past a certain threshold.
+		 * @return Positive value indicating SRam size on success; 0 if no save is needed; negative on error.
+		 */
 		int autoSave(void);
 	
 	protected:

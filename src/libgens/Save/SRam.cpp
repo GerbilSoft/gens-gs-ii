@@ -124,7 +124,7 @@ int SRam::getUsedSize(void)
 
 /**
  * save(): Save the SRam file.
- * @return Positive value indicating SRam size on success; negative on error.
+ * @return Positive value indicating SRam size on success; 0 if no save is needed; negative on error.
  */
 int SRam::save(void)
 {
@@ -153,6 +153,20 @@ int SRam::save(void)
 	// Return the number of bytes saved.
 	m_dirty = false;
 	return ret;
+}
+
+
+/**
+ * autoSave(): Autosave the SRam file.
+ * This saves the SRam file if its last modification time is past a certain threshold.
+ * @return Positive value indicating SRam size on success; 0 if no save is needed; negative on error.
+ */
+int SRam::autoSave(void)
+{
+	if (!m_dirty)
+		return 0;
+	
+	// TODO
 }
 
 }
