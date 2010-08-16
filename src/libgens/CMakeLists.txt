@@ -57,6 +57,7 @@ SET(libgens_SRCS
 	IO/IoBase.cpp
 	credits.c
 	lg_osd.c
+	Save/EEPRom_File.cpp
 	)
 
 # Compatibility sources.

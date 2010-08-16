@@ -26,11 +26,6 @@
 
 #include "EEPRom.hpp"
 
-// C includes.
-#include <string.h>
-
-// TODO: Port SRam file handling functions from Gens/GS!
-
 namespace LibGens
 {
 

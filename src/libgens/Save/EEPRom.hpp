@@ -31,6 +31,10 @@
 // C includes.
 #include <stdint.h>
 #include <string.h>
+#include <limits.h>
+
+// C++ includes.
+#include <string>
 
 namespace LibGens
 {
@@ -111,8 +115,34 @@ class EEPRom
 		void writeByte(uint32_t address, uint8_t data);
 		void writeWord(uint32_t address, uint16_t data);
 		
-		// TODO: Add load/save functions.
+		/**
+		 * isDirty(): Determine if the SRam is dirty.
+		 * @return True if SRam has been modified since the last save; false otherwise.
+		 */
 		inline bool isDirty(void) const { return m_dirty; }
+		
+		// TODO: EEPRom directory path.
+		// For now, just save in the ROM directory.
+		void setFilename(const std::string &filename);
+		
+		/**
+		 * load(): Load the EEPRom file.
+		 * @return Positive value indicating EEPRom size on success; negative on error.
+		 */
+		int load(void);
+		
+		/**
+		 * save(): Save the EEPRom file.
+		 * @return Positive value indicating EEPRom size on success; 0 if no save is needed; negative on error.
+		 */
+		int save(void);
+		
+		/**
+		 * autoSave(): Autosave the EEPRom file.
+		 * This saves the EEPRom file if its last modification time is past a certain threshold.
+		 * @return Positive value indicating SRam size on success; 0 if no save is needed; negative on error.
+		 */
+		int autoSave(void);
 	
 	protected:
 		void processWriteCmd(void);
@@ -181,6 +211,27 @@ class EEPRom
 		
 		// Dirty flag.
 		bool m_dirty;
+		
+		/** EEPRom file handling functions. **/
+		
+		// Filename.
+		static const char *ms_FileExt;
+		std::string m_filename;
+		
+		// Find the next highest power of two. (unsigned integers)
+		// http://en.wikipedia.org/wiki/Power_of_two#Algorithm_to_find_the_next-highest_power_of_two
+		template <class T>
+		static inline T next_pow2u(T k)
+		{
+			if (k == 0)
+				return 1;
+			k--;
+			for (unsigned int i = 1; i < sizeof(T)*CHAR_BIT; i <<= 1)
+				k = k | k >> i;
+			return k + 1;
+		}
+		
+		int getUsedSize(void);
 };
 
 }
