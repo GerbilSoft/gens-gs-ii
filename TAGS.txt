@@ -1,5 +1,10 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-osd-bitmap-v0: Use a bitmap image for the onscreen display instead
+of Qt's font renderer. The bitmap image is faster, and we don't really need
+to show the full Unicode character set onscreen. (Only U+0000 - U+FFFF are
+supported.)
+
 libgens-save-data-v0: SRam and EEPRom data is loaded and saved on ROM open
 and close, respectively. Autosave is not implemented yet. New LibGens OSD
 handler for display SRam/EEPRom load/save messages onscreen.
