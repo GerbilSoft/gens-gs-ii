@@ -106,6 +106,7 @@ AboutWindow::AboutWindow(QWidget *parent)
 	scrlDebugInfo->setFrameShadow(QFrame::Plain);
 	scrlDebugInfo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	scrlDebugInfo->setWidget(lblDebugInfo);
+	scrlDebugInfo->setWidgetResizable(true);
 	lblDebugInfo->setAutoFillBackground(false);
 	vboxDebugInfo->addWidget(scrlDebugInfo);
 	
