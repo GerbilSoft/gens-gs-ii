@@ -55,6 +55,7 @@ SET(libgens_SRCS
 	Save/EEPRom.cpp
 	IO/IoTeamplayer.cpp
 	IO/IoBase.cpp
+	credits.c
 	)
 
 # Compatibility sources.
