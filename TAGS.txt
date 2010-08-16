@@ -1,5 +1,9 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-PortAudio-v0: Initial PortAudio implementation. It does nothing but
+generate two sawtooth waves, based on the example code from the PortAudio
+website: http://www.portaudio.com/trac/wiki/TutorialDir/WritingACallback
+
 gens-qt4-osd-bitmap-v0: Use a bitmap image for the onscreen display instead
 of Qt's font renderer. The bitmap image is faster, and we don't really need
 to show the full Unicode character set onscreen. (Only U+0000 - U+FFFF are
