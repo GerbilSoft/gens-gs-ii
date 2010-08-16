@@ -32,17 +32,10 @@
 // C++ includes.
 #include <string>
 
-#ifndef PURE
-#ifdef __GNUC__
-#define PURE __attribute__ ((pure))
-#else
-#define PURE
-#endif /* __GNUC__ */
-#endif /* PURE */
-
 // LibGens includes.
 #include "Save/SRam.hpp"
 #include "Save/EEPRom.hpp"
+#include "macros/common.h"
 
 /**
  * ROM_HEADER_SIZE: Number of bytes used for ROM type detection.

@@ -26,13 +26,8 @@
 
 #include <stdint.h>
 
-#ifndef PURE
-#ifdef __GNUC__
-#define PURE __attribute__ ((pure))
-#else
-#define PURE
-#endif /* __GNUC__ */
-#endif /* PURE */
+// LibGens includes.
+#include "macros/common.h"
 
 namespace LibGens
 {
