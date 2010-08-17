@@ -63,6 +63,9 @@ void GensPortAudio::open(void)
 	
 	// TODO: Make sure the LibGens Sound Manager is initialized.
 	
+	// Clear the internal buffer.
+	memset(m_buf, 0x00, sizeof(m_buf));
+	
 	// Initialize the buffer variables.
 	m_bufLen = (LibGens::SoundMgr::GetSegLength() * 8);
 	m_bufPos = 0;
