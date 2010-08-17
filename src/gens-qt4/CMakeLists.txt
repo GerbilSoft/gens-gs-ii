@@ -74,6 +74,7 @@ SET(gens-qt4_SRCS
 	Input/KeyHandlerQt.cpp
 	CtrlConfigWindow.cpp
 	Audio/GensPortAudio.cpp
+	EmuManager.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -85,6 +86,7 @@ SET(gens-qt4_MOC_HEADERS
 	GensQApplication.hpp
 	VBackend/GensQGLWidget.hpp
 	CtrlConfigWindow.hpp
+	EmuManager.hpp
 	)
 
 # Create .moc files for sources that need them.

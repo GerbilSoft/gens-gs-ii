@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * GensWindow.hpp: Gens Window.                                            *
+ * EmuManager.hpp: Emulation manager.                                      *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,108 +21,90 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_GENSWINDOW_HPP__
-#define __GENS_QT4_GENSWINDOW_HPP__
+#ifndef __GENS_QT4_HPP__
+#define __GENS_QT4_HPP__
 
-// Qt4 includes.
-#include <QtGui/QMainWindow>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QCloseEvent>
-
-// Video backend.
-#include "VBackend/VBackend.hpp"
-
-// Gens menu bar.
-#include "GensMenuBar.hpp"
+// Qt includes.
+#include <QtCore/QObject>
+#include <QtCore/QQueue>
+#include <QtGui/QWidget>
 
 // LibGens includes.
-#include "libgens/lg_osd.h"
+#include "libgens/Rom.hpp"
+#include "libgens/IO/IoBase.hpp"
 
-// Emulation Manager.
-#include "EmuManager.hpp"
+// Audio backend.
+#include "Audio/GensPortAudio.hpp"
 
 namespace GensQt4
 {
 
-class GensWindow : public QMainWindow
+class EmuManager : public QObject
 {
 	Q_OBJECT
 	
 	public:
-		GensWindow();
-		~GensWindow();
+		EmuManager();
+		~EmuManager();
 		
-		// LibGens OSD handler.
-		void osd(OsdType osd_type, int param);
+		// TODO: Move the parent argument to EmuManager()?
+		int openRom(QWidget *parent = 0);
+		int closeRom(void);
+		
+		inline bool isRomOpen(void) const { return (m_rom != NULL); }
+		
+		/** Controller settings. **/
+		void setController(int port, LibGens::IoBase::IoType type);
+		
+		/** Rom class passthrough functions. **/
+		
+		inline LibGens::Rom::RomFormat romFormat(void) const
+		{
+			if (!m_rom)
+				return LibGens::Rom::RFMT_UNKNOWN;
+			return m_rom->romFormat();
+		}
+		
+		inline LibGens::Rom::MDP_SYSTEM_ID sysId(void) const
+		{
+			if (!m_rom)
+				return LibGens::Rom::MDP_SYSTEM_UNKNOWN;
+			return m_rom->sysId();
+		}
 	
-	protected:
-		void setupUi(void);
-		void retranslateUi(void);
-		
-		void closeEvent(QCloseEvent *event);
-		
-		// Widgets.
-		VBackend *m_vBackend;	// GensQGLWidget.
-		GensMenuBar *m_menubar;	// Gens menu bar.
-		
-		QWidget *centralwidget;
-		QVBoxLayout *layout;
-		
-		// QMainWindow virtual functions.
-		void showEvent(QShowEvent *event);
-		
-		// GensWindow functions.
-		void gensResize(void);	// Resize the window.
-		
-		int m_scale;		// Temporary scaling variable.
-		bool m_hasInitResize;	// Has the initial resize occurred?
-		
-		// Emulation Manager.
-		EmuManager m_emuManager;
-		
-		// Set the Gens window title.
-		void setGensTitle();
-	
-	protected slots:
-		// Menu item selection.
-		void menuTriggered(int id);
-		
-		/**
-		 * updateFps(): Update the FPS counter.
-		 */
-		void updateFps(double fps)
-		{
-			m_vBackend->pushFps(fps);
-		}
-		
-		/**
-		 * stateChanged(): Emulation state changed. Update the Gens title.
-		 */
-		void stateChanged(void)
-		{
-			setGensTitle();
-		}
-		
-		/**
-		 * updateVideo(): Update video.
-		 */
-		void updateVideo(void)
-		{
-			m_vBackend->setVbDirty();
-			m_vBackend->vbUpdate();
-		}
+	signals:
+		void updateFps(double fps);
+		void stateChanged(void);		// Emulation state changed. Update the Gens title.
+		void updateVideo(void);			// Update the video widget in GensWindow.
 		
 		/**
 		 * osdPrintMsg(): Print a message on the OSD.
 		 * @param duration Duration for the message to appear, in milliseconds.
 		 * @param msg Message to print.
 		 */
-		void osdPrintMsg(int duration, const QString& msg)
-		{
-			m_vBackend->osd_printf(duration, "%s", msg.toUtf8().constData());
-		}
+		void osdPrintMsg(int duration, const QString& msg);
+	
+	protected:
+		// Timing management.
+		double m_lastTime;
+		int m_frames;
+		
+		// ROM object.
+		LibGens::Rom *m_rom;
+		
+		// Audio backend.
+		GensPortAudio *m_audio;
+		
+		// Controller change requests.
+		struct CtrlChange_t { int port; LibGens::IoBase::IoType type; };
+		QQueue<CtrlChange_t> m_qCtrlChange;
+		void processQCtrlChange(void);
+	
+	protected slots:
+		// Frame done from EmuThread.
+		void emuFrameDone(void);
 };
 
 }
 
-#endif /* __GENS_QT4_GENSWINDOW_HPP__ */
+#endif /* __GENS_QT4_HPP__ */

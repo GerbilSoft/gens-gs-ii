@@ -37,19 +37,6 @@
 #include "libgens/macros/log_msg.h"
 #include "libgens/Util/Timing.hpp"
 
-// Controller devices.
-#include "libgens/IO/IoBase.hpp"
-#include "libgens/IO/Io3Button.hpp"
-#include "libgens/IO/Io6Button.hpp"
-#include "libgens/IO/Io2Button.hpp"
-#include "libgens/IO/IoMegaMouse.hpp"
-#include "libgens/IO/IoTeamplayer.hpp"
-#include "libgens/IO/Io4WPMaster.hpp"
-#include "libgens/IO/Io4WPSlave.hpp"
-
-// Test loading ROMs.
-#include "libgens/Rom.hpp"
-
 // Video Backend classes.
 #include "VBackend/GensQGLWidget.hpp"
 
@@ -93,17 +80,8 @@ GensWindow::GensWindow()
 	m_scale = 1;		// Set the scale to 1x by default.
 	m_hasInitResize = false;
 	
-	// No ROM is loaded at startup.
-	// TODO: Move this to another file.
-	// NOTE: This must be set before calling setupUi()!
-	m_rom = NULL;
-	
 	// Set up the User Interface.
 	setupUi();
-	
-	// Controller change.
-	// NOTE: DEBUG CODE: Remove this later.
-	m_ctrlChange = -1;
 }
 
 
@@ -112,10 +90,7 @@ GensWindow::GensWindow()
  */
 GensWindow::~GensWindow()
 {
-	// Delete the audio backend.
-	m_audio->close();
-	delete m_audio;
-	m_audio = NULL;
+	// TODO
 }
 
 
@@ -153,11 +128,6 @@ void GensWindow::setupUi(void)
 	// TODO: Allow selection of all available VBackend classes.
 	m_vBackend = new GensQGLWidget(this->centralwidget);
 	
-	// Create the Audio Backend.
-	// TODO: Allow selection of all available audio backend classes.
-	// NOTE: Audio backends are NOT QWidgets!
-	m_audio = new GensPortAudio();
-	
 	// Create the layout.
 	layout = new QVBoxLayout(this->centralwidget);
 	layout->setObjectName(QString::fromUtf8("layout"));
@@ -183,6 +153,17 @@ void GensWindow::setupUi(void)
 	connect(m_menubar, SIGNAL(triggered(int)),
 		this, SLOT(menuTriggered(int)));
 	
+	// Connect Emulation Manager signals to GensWindow.
+	// TODO: Make m_emuManager a pointer instead of an object?
+	connect(&m_emuManager, SIGNAL(updateFps(double)),
+		this, SLOT(updateFps(double)));
+	connect(&m_emuManager, SIGNAL(stateChanged(void)),
+		this, SLOT(stateChanged(void)));
+	connect(&m_emuManager, SIGNAL(updateVideo(void)),
+		this, SLOT(updateVideo(void)));
+	connect(&m_emuManager, SIGNAL(osdPrintMsg(int, const QString&)),
+		this, SLOT(osdPrintMsg(int, const QString&)));
+	
 	// Retranslate the UI.
 	retranslateUi();
 }
@@ -205,7 +186,7 @@ void GensWindow::retranslateUi(void)
 void GensWindow::closeEvent(QCloseEvent *event)
 {
 	// Quit.
-	closeRom();
+	m_emuManager.closeRom();
 	QuitGens();
 	
 	// Accept the close event.
@@ -270,16 +251,16 @@ void GensWindow::menuTriggered(int id)
 			switch (MNUID_ITEM(id))
 			{
 				case MNUID_ITEM(IDM_FILE_OPEN):
-					openRom();
+					m_emuManager.openRom(this);
 					break;
 				
 				case MNUID_ITEM(IDM_FILE_CLOSE):
-					closeRom();
+					m_emuManager.closeRom();
 					break;
 				
 				case MNUID_ITEM(IDM_FILE_QUIT):
 					// Quit.
-					closeRom();
+					m_emuManager.closeRom();
 					QuitGens();
 					this->close();
 					break;
@@ -355,31 +336,33 @@ void GensWindow::menuTriggered(int id)
 			switch (MNUID_ITEM(id))
 			{
 				case MNUID_ITEM(IDM_CTRLTEST_NONE):
-					m_ctrlChange = 0;
+					m_emuManager.setController(0, LibGens::IoBase::IOT_NONE);
 					break;
 				
 				case MNUID_ITEM(IDM_CTRLTEST_3BT):
-					m_ctrlChange = 1;
+					m_emuManager.setController(0, LibGens::IoBase::IOT_3BTN);
 					break;
 				
 				case MNUID_ITEM(IDM_CTRLTEST_6BT):
-					m_ctrlChange = 2;
+					m_emuManager.setController(0, LibGens::IoBase::IOT_6BTN);
 					break;
 				
 				case MNUID_ITEM(IDM_CTRLTEST_2BT):
-					m_ctrlChange = 3;
+					m_emuManager.setController(0, LibGens::IoBase::IOT_2BTN);
 					break;
 				
 				case MNUID_ITEM(IDM_CTRLTEST_MEGAMOUSE):
-					m_ctrlChange = 4;
+					m_emuManager.setController(0, LibGens::IoBase::IOT_MEGA_MOUSE);
 					break;
 				
 				case MNUID_ITEM(IDM_CTRLTEST_TEAMPLAYER):
-					m_ctrlChange = 5;
+					m_emuManager.setController(0, LibGens::IoBase::IOT_TEAMPLAYER);
 					break;
 				
 				case MNUID_ITEM(IDM_CTRLTEST_4WP):
-					m_ctrlChange = 6;
+					// TODO
+					m_emuManager.setController(0, LibGens::IoBase::IOT_4WP_SLAVE);
+					m_emuManager.setController(1, LibGens::IoBase::IOT_4WP_MASTER);
 					break;
 				
 				case MNUID_ITEM(IDM_CTRLTEST_CONFIG):
@@ -397,285 +380,6 @@ void GensWindow::menuTriggered(int id)
 }
 
 
-void GensWindow::emuFrameDone(void)
-{
-	static double lastTime = 0;
-	static int frames = 0;
-	frames++;
-	
-	if (lastTime < 0.001)
-		lastTime = LibGens::Timing::GetTimeD();
-	else
-	{
-		double thisTime = LibGens::Timing::GetTimeD();
-		if ((thisTime - lastTime) >= 0.250)
-		{
-			// Push the current fps.
-			// (Updated four times per second.)
-			m_vBackend->pushFps((double)frames / (thisTime - lastTime));
-			lastTime = thisTime;
-			frames = 0;
-		}
-	}
-	
-	// Check for SRam/EEPRom autosave.
-	// TODO: Frames elapsed; autosave on pause.
-	LibGens::EmuMD::AutoSaveData(m_rom, 1);
-	
-	// Check if the controller was changed.
-	// NOTE: DEBUG CODE: Remove this later!
-	if (m_ctrlChange != -1)
-	{
-		LibGens::IoBase *port1 = NULL;
-		LibGens::IoBase *port2 = NULL;
-		
-		switch (m_ctrlChange)
-		{
-			case 0:
-				// No controller.
-				port1 = new LibGens::IoBase(LibGens::EmuMD::m_port1);
-				// TODO: Copy settings from existing Port 1 controller.
-				m_vBackend->osd_printf(1500, "Port 1 set to NONE.");
-				break;
-			
-			case 1:
-				// 3-button controller.
-				port1 = new LibGens::Io3Button(LibGens::EmuMD::m_port1);
-				// TODO: Copy settings from existing Port 1 controller.
-				m_vBackend->osd_printf(1500, "Port 1 set to 3-BUTTON.");
-				break;
-			
-			case 2:
-				// 6-button controller.
-				port1 = new LibGens::Io6Button(LibGens::EmuMD::m_port1);
-				// TODO: Copy settings from existing Port 1 controller.
-				m_vBackend->osd_printf(1500, "Port 1 set to 6-BUTTON.");
-				break;
-			
-			case 3:
-				// 2-button controller.
-				port1 = new LibGens::Io2Button(LibGens::EmuMD::m_port1);
-				// TODO: Copy settings from existing Port 1 controller.
-				m_vBackend->osd_printf(1500, "Port 1 set to 2-BUTTON.");
-				break;
-			
-			case 4:
-				// Sega Mega Mouse.
-				port1 = new LibGens::IoMegaMouse(LibGens::EmuMD::m_port1);
-				// TODO: Copy settings from existing Port 1 controller.
-				m_vBackend->osd_printf(1500, "Port 1 set to SEGA MEGA MOUSE.");
-				break;
-			
-			case 5:
-				// Sega Teamplayer.
-				port1 = new LibGens::IoTeamplayer(LibGens::EmuMD::m_port1);
-				// TODO: Copy settings from existing Port 1 controller.
-				m_vBackend->osd_printf(1500, "Port 1 set to SEGA TEAMPLAYER.");
-				break;
-			
-			case 6:
-			{
-				// EA 4-Way Play
-				LibGens::Io4WPMaster *master = new LibGens::Io4WPMaster(LibGens::EmuMD::m_port2);
-				LibGens::Io4WPSlave *slave = new LibGens::Io4WPSlave(LibGens::EmuMD::m_port1);
-				master->setSlaveDevice(slave);
-				port2 = master;
-				port1 = slave;
-				m_vBackend->osd_printf(1500, "Port 1 set to EA 4-WAY PLAY (Slave).");
-				m_vBackend->osd_printf(1500, "Port 2 set to EA 4-WAY PLAY (Master).");
-				break;
-			}
-			
-			default:
-				break;
-		}
-		
-		if (port1)
-		{
-			delete LibGens::EmuMD::m_port1;
-			LibGens::EmuMD::m_port1 = port1;
-		}
-		
-		if (port2)
-		{
-			delete LibGens::EmuMD::m_port2;
-			LibGens::EmuMD::m_port2 = port2;
-		}
-		
-		// Make sure there's no dangling 4WP master/slave device.
-		LibGens::IoBase::IoType p1_type = LibGens::EmuMD::m_port1->devType();
-		LibGens::IoBase::IoType p2_type = LibGens::EmuMD::m_port2->devType();
-		bool p1_is4WP = (p1_type == LibGens::IoBase::IOT_4WP_MASTER || p1_type == LibGens::IoBase::IOT_4WP_SLAVE);
-		bool p2_is4WP = (p2_type == LibGens::IoBase::IOT_4WP_MASTER || p2_type == LibGens::IoBase::IOT_4WP_SLAVE);
-		
-		if (p1_is4WP ^ p2_is4WP)
-		{
-			// Dangling 4WP device.
-			if (p1_is4WP)
-			{
-				port1 = new LibGens::IoBase(LibGens::EmuMD::m_port1);
-				delete LibGens::EmuMD::m_port1;
-				LibGens::EmuMD::m_port1 = port1;
-				m_vBackend->osd_printf(1500, "Port 1 set to NONE.");
-			}
-			else
-			{
-				port2 = new LibGens::IoBase(LibGens::EmuMD::m_port2);
-				delete LibGens::EmuMD::m_port2;
-				LibGens::EmuMD::m_port2 = port2;
-				m_vBackend->osd_printf(1500, "Port 2 set to NONE.");
-			}
-		}
-		
-		m_ctrlChange = -1;
-	}
-	
-	// Update the GensQGLWidget.
-	m_vBackend->setVbDirty();
-	m_vBackend->vbUpdate();
-	
-#ifdef _WIN32
-	// Update Shift/Control/Alt states.
-	// TODO: Only do this if the input backend doesn't support L/R modifiers natively.
-	// QWidget doesn't; GLFW does.
-	// TODO: When should these key states be updated?
-	// - Beginning of frame.
-	// - Before VBlank.
-	// - End of frame.
-	LibGens::KeyManager::WinKeySet(LibGens::KEYV_LSHIFT, VK_LSHIFT);
-	LibGens::KeyManager::WinKeySet(LibGens::KEYV_RSHIFT, VK_RSHIFT);
-	LibGens::KeyManager::WinKeySet(LibGens::KEYV_LCTRL, VK_LCONTROL);
-	LibGens::KeyManager::WinKeySet(LibGens::KEYV_RCTRL, VK_RCONTROL);
-	LibGens::KeyManager::WinKeySet(LibGens::KEYV_LALT, VK_LMENU);
-	LibGens::KeyManager::WinKeySet(LibGens::KEYV_RALT, VK_RMENU);
-#endif
-	
-	// Tell the emulation thread that we're ready for another frame.
-	if (gqt4_emuThread)
-		gqt4_emuThread->resume();
-}
-
-
-/**
- * openRom(): Open a ROM file.
- * TODO: Move this to another file!
- */
-void GensWindow::openRom(void)
-{
-	// TODO: Move to another function and/or another file.
-	// TODO: Proper compressed file support.
-	#define ZLIB_EXT " *.zip *.zsg *.gz"
-	#define LZMA_EXT " *.7z"
-	#define RAR_EXT " *.rar"
-	
-	QString filename = QFileDialog::getOpenFileName(this,
-			TR("Open ROM"),		// Dialog title
-			"",			// Default filename.
-			TR("Sega Genesis ROM images") + " (*.bin *.gen);;" +
-#if 0
-			TR("Sega Genesis / 32X ROMs; Sega CD disc images") +
-			"(*.bin *.smd *.gen *.32x *.cue *.iso *.raw" ZLIB_EXT LZMA_EXT RAR_EXT ");;" +
-#endif
-			TR("All Files") + "(*.*)");
-	if (filename.isEmpty())
-		return;
-	
-	if (gqt4_emuThread || m_rom)
-	{
-		// Close the ROM first.
-		closeRom();
-	}
-	
-	// Open the file using the LibGens::Rom class.
-	// TODO: This won't work for KIO...
-	m_rom = new LibGens::Rom(filename.toUtf8().constData());
-	if (!m_rom->isOpen())
-	{
-		// Couldn't open the ROM file.
-		printf("Error opening ROM file. (TODO: Get error information.)\n");
-		delete m_rom;
-		m_rom = NULL;
-		return;
-	}
-	
-	printf("ROM information: format == %d, system == %d\n", m_rom->romFormat(), m_rom->sysId());
-	
-	if (m_rom->sysId() != LibGens::Rom::MDP_SYSTEM_MD)
-	{
-		// Only MD ROM images are supported.
-		printf("ERROR: Only Sega Genesis / Mega Drive ROM images are supported right now.\n");
-		delete m_rom;
-		m_rom = NULL;
-		return;
-	}
-	
-	if (m_rom->romFormat() != LibGens::Rom::RFMT_BINARY)
-	{
-		// Only binary ROM images are supported.
-		printf("ERROR: Only binary ROM images are supported right now.\n");
-		delete m_rom;
-		m_rom = NULL;
-		return;
-	}
-	
-	// Load the ROM image in EmuMD.
-	LibGens::EmuMD::SetRom(m_rom);
-	m_rom->close();
-	
-	// m_rom isn't deleted, since keeping it around
-	// indicates that a game is running.
-	
-	// Open audio.
-	m_audio->open();
-	
-	// Start the emulation thread.
-	gqt4_emuThread = new EmuThread();
-	gqt4_emuThread->setAudio(m_audio);
-	QObject::connect(gqt4_emuThread, SIGNAL(frameDone(void)),
-			 this, SLOT(emuFrameDone(void)));
-	gqt4_emuThread->start();
-	
-	// Update the Gens title.
-	setGensTitle();
-}
-
-
-/**
- * openRom(): Close the loaded ROM file.
- * TODO: Move this to another file!
- */
-void GensWindow::closeRom(void)
-{
-	if (gqt4_emuThread)
-	{
-		// Stop the emulation thread.
-		gqt4_emuThread->stop();
-		gqt4_emuThread->wait();
-		delete gqt4_emuThread;
-		gqt4_emuThread = NULL;
-	}
-	
-	if (m_rom)
-	{
-		// Make sure SRam/EEPRom data is saved.
-		// (SaveData() will call the LibGens OSD handler if necessary.)
-		LibGens::EmuMD::SaveData(m_rom);
-		
-		// Delete the Rom instance.
-		delete m_rom;
-		m_rom = NULL;
-	}
-	
-	// Close audio.
-	m_audio->close();
-	
-	// TODO: Clear the screen, start the idle animation, etc.
-	
-	// Update the Gens title.
-	setGensTitle();
-}
-
-
 /**
  * setGensTitle(): Set the Gens window title.
  */
@@ -685,6 +389,8 @@ void GensWindow::setGensTitle(void)
 	QString title = TR("Gens/GS II");
 	title += " " + TR("dev") + " - ";
 	
+	// TODO
+#if 0
 	if (!m_rom)
 	{
 		// No ROM is running.
@@ -697,6 +403,7 @@ void GensWindow::setGensTitle(void)
 		title += "Genesis: ";
 		title += QString(m_rom->romNameUS());
 	}
+#endif
 	
 	this->setWindowTitle(title);
 }
