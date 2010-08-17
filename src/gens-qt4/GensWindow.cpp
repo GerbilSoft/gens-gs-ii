@@ -371,8 +371,7 @@ void GensWindow::setGensTitle(void)
 	title += " " + TR("dev") + " - ";
 	
 	// TODO
-#if 0
-	if (!m_rom)
+	if (!m_emuManager.isRomOpen())
 	{
 		// No ROM is running.
 		title += TR("Idle");
@@ -380,11 +379,9 @@ void GensWindow::setGensTitle(void)
 	else
 	{
 		// ROM is running.
-		// TODO: Determine the system. For now, assume Genesis.
-		title += "Genesis: ";
-		title += QString(m_rom->romNameUS());
+		title += m_emuManager.sysName() + ": ";
+		title += m_emuManager.romName();
 	}
-#endif
 	
 	this->setWindowTitle(title);
 }
