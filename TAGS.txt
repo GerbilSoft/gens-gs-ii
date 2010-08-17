@@ -1,5 +1,9 @@
 Description of git tags for Gens/GS II:
 
+libgens-save-data-v1: SRam/EEPRom AutoSave is implemented. It currently has
+a hard-coded threshold of 1000 ms, and doesn't detect the system region yet,
+so the frame counter is always checked based on NTSC timing.
+
 gens-qt4-PortAudio-v0: Initial PortAudio implementation. It does nothing but
 generate two sawtooth waves, based on the example code from the PortAudio
 website: http://www.portaudio.com/trac/wiki/TutorialDir/WritingACallback
