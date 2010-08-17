@@ -132,7 +132,6 @@ void IoTeamplayer::writeCtrl(uint8_t ctrl)
  * * TODO: Combine with writeCtrl().
  * @param data Data to the controller.
  */
-#include <stdio.h>
 void IoTeamplayer::writeData(uint8_t data)
 {
 	// Check if either TH or TR has changed.
