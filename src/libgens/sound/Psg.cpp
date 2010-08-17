@@ -74,6 +74,7 @@ Psg::Psg()
 	// TODO: Some initialization should go here!
 	m_writeLen = 0;
 	m_enabled = true; // TODO: Make this customizable.
+	resetBufferPtrs();
 }
 
 
@@ -82,6 +83,7 @@ Psg::Psg(int clock, int rate)
 	// Initialize the PSG.
 	m_writeLen = 0;
 	m_enabled = true; // TODO: Make this customizable.
+	resetBufferPtrs();
 	reinit(clock, rate);
 }
 
