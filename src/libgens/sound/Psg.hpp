@@ -31,8 +31,6 @@
 // LibGens includes.
 #include "macros/common.h"
 
-#include "SoundMgr.hpp"
-
 namespace LibGens
 {
 
