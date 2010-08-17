@@ -25,6 +25,7 @@
 
 // C includes.
 #include <string.h>
+#include <unistd.h>
 
 // LOG_MSG() subsystem.
 #include "libgens/macros/log_msg.h"
@@ -245,6 +246,8 @@ int GensPortAudio::write(void)
 		// This seems to help limit the framerate when it's running too fast.
 		// TODO: Move somewhere else?
 		// TODO: usleep() or not?
+		// TODO: Make it configurable?
+		usleep(1000);
 	}
 	
 	// Lock the audio buffer.
