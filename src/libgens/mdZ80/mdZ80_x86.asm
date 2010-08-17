@@ -41,6 +41,13 @@ BITS 32
 	%define	.rodata	.rdata
 %elifidn __OUTPUT_FORMAT__, macho
 	%define	__OBJ_MACHO
+	
+	; Mac OS X requires 16-byte aligned stacks.
+	; Otherwise, the program will randomly crash in
+	; __dyld_misaligned_stack_error().
+	; (The crash might not even be immediately after
+	; calling the C function!)
+	%define __FORCE_STACK_ALIGNMENT
 %endif
 
 %ifdef __OBJ_ELF
@@ -2474,7 +2481,15 @@ Z80I_%1_m%2d:
 	add	zxPC, byte 2
 	and	ecx, 0xFFFF
 	push	ecx
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	sub	esp, byte 12
+%endif
 	READ_BYTE
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	add	esp, byte 12
+%endif
 	and	zF, FLAG_C
 	movzx	ecx, dl
 	%1 dl
@@ -3122,7 +3137,15 @@ Z80I_%1_m%2d:
 	add zxPC, byte 3
 	and ecx, 0xFFFF
 	push ecx
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	sub	esp, byte 12
+%endif
 	READ_BYTE
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	add	esp, byte 12
+%endif
 %ifidn %1, RLC
 	rol dl, 1
 	pop ecx
@@ -3815,7 +3838,15 @@ Z80I_%1%2_m%3d:
 	add zxPC, byte 3
 	and ecx, 0xFFFF
 	push ecx
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	sub	esp, byte 12
+%endif
 	READ_BYTE
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	add	esp, byte 12
+%endif
 %if %0 < 4
 	pop ecx
 %endif
@@ -4881,6 +4912,14 @@ SYMF(z80_Exec, 8):
 	push	esi
 	push	ebp
 	
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	mov	eax, esp
+	and	esp, ~0xF
+	sub	esp, 12
+	push	eax
+%endif
+	
 	mov	zxPC, [ecx + Z80.PC]
 	mov	edi, edx
 	mov	ebp, ecx
@@ -4965,6 +5004,12 @@ z80_Cannot_Run:
 
 .not_halted:
 	mov	[ebp + Z80.CycleCnt], ecx
+	
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	pop	esp
+%endif
+	
 	pop	ebp
 	pop	esi
 	pop	edi
