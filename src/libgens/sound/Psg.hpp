@@ -84,7 +84,7 @@ class Psg
 		/* LFSR constants. */
 		static const unsigned int LFSR_MASK_WHITE	= 0x0009;
 		static const unsigned int LFSR_MASK_PERIODIC	= 0x0001;
-		static const unsigned int LFSR_INIT		= 0x0000;
+		static const unsigned int LFSR_INIT		= 0x8000;
 		
 		/** parity16() and LFSR16_Shift() from http://www.smspower.org/dev/docs/wiki/Sound/PSG#noisegeneration **/
 		
