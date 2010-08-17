@@ -80,15 +80,32 @@ void GensPortAudio::open(void)
 		return;
 	}
 	
+	// Get the default device information.
+	const PaDeviceInfo *dev = Pa_GetDeviceInfo(0);
+	if (!dev)
+	{
+		LOG_MSG(audio, LOG_MSG_LEVEL_ERROR,
+			"Pa_GetDeviceInfo(0) returned NULL.");
+		Pa_Terminate();
+		return;
+	}
+	
+	PaStreamParameters stream_params;
+	stream_params.channelCount = (m_stereo ? 2 : 1);
+	stream_params.device = 0;
+	stream_params.hostApiSpecificStreamInfo = NULL;
+	stream_params.sampleFormat = paInt16;
+	stream_params.suggestedLatency = dev->defaultLowOutputLatency;
+	
 	// Open an audio stream.
-	err = Pa_OpenDefaultStream(&m_stream,
-					0,			// no input channels
-					(m_stereo ? 2 : 1),	// stereo output
-					paInt16,		// 16-bit signed integer
-					m_rate,			// Sample rate
-					256,
-					GensPaCallback,		// Callback function
-					this);			// Pointer to this object
+	err = Pa_OpenStream(&m_stream,
+				NULL,			// no input channels
+				&stream_params,		// output configuration
+				m_rate,			// Sample rate
+				256,			// Buffer size
+				0,			// Stream flags. (TODO)
+				GensPaCallback,		// Callback function
+				this);			// Pointer to this object
 	
 	if (err != paNoError)
 	{
