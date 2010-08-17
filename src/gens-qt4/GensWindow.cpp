@@ -343,14 +343,6 @@ void GensWindow::menuTriggered(int id)
 					m_vBackend->vbUpdate();
 					break;
 				
-				case MNUID_ITEM(IDM_RESBPPTEST_AUDIO):
-					// Start/Stop audio.
-					if (m_menubar->menuItemCheckState(IDM_RESBPPTEST_AUDIO))
-						m_audio->open();
-					else
-						m_audio->close();
-					break;
-				
 				default:
 					break;
 			}
@@ -601,6 +593,9 @@ void GensWindow::openRom(void)
 	// m_rom isn't deleted, since keeping it around
 	// indicates that a game is running.
 	
+	// Open audio.
+	m_audio->open();
+	
 	// Start the emulation thread.
 	gqt4_emuThread = new EmuThread();
 	QObject::connect(gqt4_emuThread, SIGNAL(frameDone(void)),
@@ -637,6 +632,9 @@ void GensWindow::closeRom(void)
 		delete m_rom;
 		m_rom = NULL;
 	}
+	
+	// Close audio.
+	m_audio->close();
 	
 	// TODO: Clear the screen, start the idle animation, etc.
 	
