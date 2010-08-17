@@ -500,10 +500,11 @@ void GensQGLWidget::printOsdText(void)
 	// * fm.boundingRect() doesn't seem to handle wordwrapping correctly, either.
 	
 	// Set pixel matrices.
+	// Assuming 320x240 for 1x text rendering.
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0, (GLdouble) this->width(), this->height(), 0, -1.0f, 1.0f);
+	glOrtho(0, 320, 240, 0, -1.0f, 1.0f);
 	
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
@@ -529,7 +530,7 @@ void GensQGLWidget::printOsdText(void)
 	QColor clText(255, 255, 255, 255);
 	
 	// TODO: Constants for character sizes.
-	int y = this->height() - 16;
+	int y = (240 - 16);
 	double curTime = LibGens::Timing::GetTimeD();
 	
 	// Check if the FPS should be drawn.
@@ -545,13 +546,12 @@ void GensQGLWidget::printOsdText(void)
 		qglColor(clShadow);
 		printOsdLine(8+1, y+1, sFps);
 		qglColor(clText);
-		printOsdLine(8-1, y-1, sFps);
+		printOsdLine(8, y, sFps);
 	}
 	
 	// NOTE: QList internally uses an array of pointers.
 	// We can use array indexing instead of iterators.
-	// TODO: Display lists for onscreen messages?
-	
+	// TODO: Use GL display lists for onscreen messages?
 	for (int i = (m_osdList.size() - 1); i >= 0; i--)
 	{
 		if (curTime >= m_osdList[i].endTime)
@@ -571,7 +571,7 @@ void GensQGLWidget::printOsdText(void)
 		qglColor(clShadow);
 		printOsdLine(8+1, y+1, msg);
 		qglColor(clText);
-		printOsdLine(8-1, y-1, msg);
+		printOsdLine(8, y, msg);
 	}
 	
 	// We're done drawing.
