@@ -233,7 +233,6 @@ void Psg::write(uint8_t data)
  * update(): Update the PSG audio output using square waves.
  * @param bufL Left audio buffer. (16-bit; int32_t is used for saturation.)
  * @param bufR Right audio buffer. (16-bit; int32_t is used for saturation.)
- * @param start Starting position in the buffer.
  * @param length Length to write.
  */
 void Psg::update(int32_t *bufL, int32_t *bufR, int length)
