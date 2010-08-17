@@ -102,7 +102,7 @@ void GensPortAudio::open(void)
 	
 	PaStreamParameters stream_params;
 	stream_params.channelCount = (m_stereo ? 2 : 1);
-	stream_params.device = 0;
+	stream_params.device = defaultDevIndex;
 	stream_params.hostApiSpecificStreamInfo = NULL;
 	stream_params.sampleFormat = paInt16;
 	stream_params.suggestedLatency = dev->defaultLowOutputLatency;
