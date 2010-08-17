@@ -39,6 +39,9 @@
 // I/O devices.
 #include "IO/KeyManager.hpp"
 
+// Sound Manager.
+#include "sound/SoundMgr.hpp"
+
 // C includes.
 #include <stdio.h>
 
@@ -114,6 +117,7 @@ int Init(void)
 	VdpIo::Init();
 	
 	KeyManager::Init();
+	SoundMgr::Init();
 	
 	ms_IsInit = true;
 	return 0;
@@ -145,6 +149,7 @@ int End(void)
 	VdpIo::End();
 	
 	KeyManager::End();
+	SoundMgr::End();
 	
 	ms_IsInit = false;
 	return 0;

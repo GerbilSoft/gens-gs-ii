@@ -23,8 +23,14 @@
 
 #include "GensPortAudio.hpp"
 
+// C includes.
+#include <string.h>
+
 // LOG_MSG() subsystem.
 #include "libgens/macros/log_msg.h"
+
+// LibGens Sound Manager.
+#include "libgens/sound/SoundMgr.hpp"
 
 namespace GensQt4
 {
@@ -33,6 +39,9 @@ GensPortAudio::GensPortAudio()
 {
 	// Assume PortAudio isn't open initially.
 	m_open = false;
+	
+	m_bufLen = 735*8;	// TODO: Use segment length. (This works for 44.1 kHz NTSC.)
+	m_bufPos = 0;
 	
 	// Initialize PortAudio.
 	int err = Pa_Initialize();
@@ -44,15 +53,11 @@ GensPortAudio::GensPortAudio()
 		return;
 	}
 	
-	// Initialize the sawtooth wave variables.
-	m_leftPhase = 0.0f;
-	m_rightPhase = 0.0f;
-	
 	// Open an audio stream.
 	err = Pa_OpenDefaultStream(&m_stream,
 					0,		// no input channels
 					2,		// stereo output
-					paFloat32,	// 32-bit floating point output
+					paInt16,	// 16-bit signed integer
 					44100,		// Sample rate
 					256,		// Frames per buffer
 					GensPaCallback,	// Callback function
@@ -106,6 +111,7 @@ GensPortAudio::~GensPortAudio()
 
 /**
  * gensPaCallback(): PortAudio callback function.
+ * @return ???
  */
 int GensPortAudio::gensPaCallback(const void *inputBuffer, void *outputBuffer,
 				  unsigned long framesPerBuffer,
@@ -114,26 +120,27 @@ int GensPortAudio::gensPaCallback(const void *inputBuffer, void *outputBuffer,
 {
 	// Sample sawtooth wave function.
 	// http://www.portaudio.com/trac/wiki/TutorialDir/WritingACallback
+	uint16_t *out = (uint16_t*)outputBuffer;
 	
-	/* Cast data passed through stream to our structure. */
-	float *out = (float*)outputBuffer;
-	unsigned int i;
-	((void)inputBuffer); /* Prevent unused variable warning. */
-
-	for(i = 0; i < framesPerBuffer; i++)
+	// Sample size. (16-bit stereo)
+	const int sample_size = (sizeof(uint16_t)*2);
+	
+	// Copy our audio data directly to the output buffer.
+	if (m_bufPos < framesPerBuffer)
 	{
-		*out++ = m_leftPhase;  /* left */
-		*out++ = m_rightPhase;  /* right */
+		memcpy(out, m_buf, m_bufPos*sample_size);
+		m_bufPos = 0;
 		
-		/* Generate simple sawtooth phaser that ranges between -1.0 and 1.0. */
-		m_leftPhase += 0.01f;
-		/* When signal reaches top, drop back down. */
-		if( m_leftPhase >= 1.0f ) m_leftPhase -= 2.0f;
-		/* higher pitch so we can distinguish left and right. */
-		m_rightPhase += 0.03f;
-		if( m_rightPhase >= 1.0f ) m_rightPhase -= 2.0f;
+		// Zero out the rest of the buffer.
+		memset(&out[m_bufPos], 0x00, (framesPerBuffer - m_bufPos) * sample_size);
+		return 0;
 	}
 	
+	memcpy(out, m_buf, (framesPerBuffer*sizeof(uint16_t)*2));
+	m_bufPos -= framesPerBuffer;
+	
+	// Shift all the data over.
+	memmove(m_buf, &m_buf[framesPerBuffer], m_bufPos * sample_size);
 	return 0;
 }
 
@@ -179,6 +186,49 @@ int GensPortAudio::stop(void)
 	}
 	
 	return err;
+}
+
+
+/**
+ * write(): Write to the audio buffer.
+ * TODO: Lock the internal audio buffer.
+ */
+int GensPortAudio::write(void)
+{
+	// TODO: Mono/stereo, MMX, etc.
+	// TODO: Currently uses hard-coded 735. (44.1 kHz NTSC)
+	unsigned int i = 0;
+	unsigned int bufIndex = m_bufPos;
+	
+	for (; i < 735 && bufIndex < m_bufLen; i++, bufIndex++)
+	{
+		int32_t L = LibGens::SoundMgr::ms_SegBufL[i];
+		int32_t R = LibGens::SoundMgr::ms_SegBufR[i];
+		
+		if (L < -0x8000)
+			m_buf[bufIndex][0] = -0x8000;
+		else if (L > 0x7FFF)
+			m_buf[bufIndex][0] = 0x7FFF;
+		else
+			m_buf[bufIndex][0] = (int16_t)L;
+		
+		if (R < -0x8000)
+			m_buf[bufIndex][1] = -0x8000;
+		else if (R > 0x7FFF)
+			m_buf[bufIndex][1] = 0x7FFF;
+		else
+			m_buf[bufIndex][1] = (int16_t)R;
+		
+		// Remove the sample from the segment buffers.
+		// TODO: Maybe use memset() after everything's done.
+		LibGens::SoundMgr::ms_SegBufL[i] = 0;
+		LibGens::SoundMgr::ms_SegBufR[i] = 0;
+	}
+	
+	// Increase the buffer position.
+	m_bufPos += i;
+	
+	return 0;
 }
 
 }

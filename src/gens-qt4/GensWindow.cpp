@@ -421,6 +421,10 @@ void GensWindow::emuFrameDone(void)
 		}
 	}
 	
+	// Write audio.
+	// TODO: In Gens/GS, this is done before the frame is run.
+	m_audio->write();
+	
 	// Check if the controller was changed.
 	// NOTE: DEBUG CODE: Remove this later!
 	if (m_ctrlChange != -1)

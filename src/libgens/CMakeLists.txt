@@ -58,6 +58,7 @@ SET(libgens_SRCS
 	credits.c
 	lg_osd.c
 	Save/EEPRom_File.cpp
+	sound/SoundMgr.cpp
 	)
 
 # Compatibility sources.

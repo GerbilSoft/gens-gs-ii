@@ -24,10 +24,14 @@
 #ifndef __LIBGENS_SOUND_PSG_HPP__
 #define __LIBGENS_SOUND_PSG_HPP__
 
+// C includes.
 #include <stdint.h>
+#include <stdio.h>
 
 // LibGens includes.
 #include "macros/common.h"
+
+#include "SoundMgr.hpp"
 
 namespace LibGens
 {
@@ -42,7 +46,7 @@ class Psg
 		
 		/* PSG manipulation functions. */
 		void write(uint8_t data);
-		void update(int **buffer, int length);
+		void update(int32_t *bufL, int32_t *bufR, int length);
 		
 		/* GSX savestate functions. */
 		void saveState(uint32_t state[8]);
@@ -51,6 +55,14 @@ class Psg
 		/** Gens-specific code. */
 		int getReg(int regID);
 		void specialUpdate(void);
+		
+		// PSG write length.
+		inline void addWriteLen(int len) { m_writeLen += len; }
+		inline void clearWriteLen(void) { m_writeLen = 0; }
+		
+		// Reset buffer pointers.
+		void resetBufferPtrs(void);
+		
 		
 	protected:
 		int m_curChan;	// Current channel.
@@ -111,14 +123,18 @@ class Psg
 		
 		/* Initial PSG state. */
 		static const uint32_t ms_psgStateInit[8];
+		
+		// PSG write length. (for audio output)
+		int m_writeLen;
+		bool m_enabled;
+		
+		// PSG buffer pointers.
+		// TODO: Figure out how to get rid of these!
+		int32_t *m_bufPtrL;
+		int32_t *m_bufPtrR;
 };
 
 /* Gens */
-
-// TODO: Figure out what to do with this.
-extern int PSG_Enable;
-extern int *PSG_Buf[2];
-extern int PSG_Len;
 
 #if 0
 // Full PSG save/restore functions from Gens Rerecording.

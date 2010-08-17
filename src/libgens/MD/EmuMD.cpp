@@ -38,6 +38,9 @@
 // I/O devices.
 #include "IO/IoBase.hpp"
 
+// Sound Manager.
+#include "sound/SoundMgr.hpp"
+
 // ZOMG
 #include "Save/Zomg.hpp"
 
@@ -145,23 +148,36 @@ int EmuMD::SetRom(Rom *rom)
 	m_port2->reset();
 	m_portE->reset();
 	
-	// Initialize audio.
-	// TODO: Move audio chips to an "MD circuit board" class or something.
-	// TODO: Don't hardcode PSG clock and audio rate.
-	M68K_Mem::m_Psg.reinit((int)((double)CLOCK_NTSC / 15.0), 44100);
-	
-	// TODO: VdpIo::VDP_Lines.Display.Total isn't being set properly...
-	VdpIo::VDP_Lines.Display.Total = 262;
-	VdpIo::Set_Visible_Lines();
-	
 	// TODO: Set these elsewhere.
 	M68K_Mem::ms_Region.setRegion(SysRegion::REGION_US_NTSC);
 	M68K_Mem::Gen_Mode = 0;		// TODO: This isn't actually used anywhere right now...
 	
+	// TODO: VdpIo::VDP_Lines.Display.Total isn't being set properly...
+	VdpIo::VDP_Lines.Display.Total = (M68K_Mem::ms_Region.isPal() ? 312 : 262);
+	VdpIo::Set_Visible_Lines();
+	
 	// Initialize CPL.
 	// TODO: Initialize this somewhere else.
-	M68K_Mem::CPL_M68K = (int)rint((((double)CLOCK_NTSC / 7.0) / 60.0) / 262.0);
-	M68K_Mem::CPL_Z80 = (int)rint((((double)CLOCK_NTSC / 15.0) / 60.0) / 262.0);
+	if (M68K_Mem::ms_Region.isPal())
+	{
+		M68K_Mem::CPL_M68K = (int)rint((((double)CLOCK_NTSC / 7.0) / 50.0) / 312.0);
+		M68K_Mem::CPL_Z80 = (int)rint((((double)CLOCK_NTSC / 15.0) / 50.0) / 312.0);
+	}
+	else
+	{
+		M68K_Mem::CPL_M68K = (int)rint((((double)CLOCK_NTSC / 7.0) / 60.0) / 262.0);
+		M68K_Mem::CPL_Z80 = (int)rint((((double)CLOCK_NTSC / 15.0) / 60.0) / 262.0);
+	}
+	
+	// Initialize audio.
+	// TODO: Move audio chips to an "MD circuit board" class or something.
+	// TODO: Don't hardcode PSG clock and audio rate.
+	SoundMgr::ReInit(44100, M68K_Mem::ms_Region.isPal());
+	if (M68K_Mem::ms_Region.isPal())
+		M68K_Mem::m_Psg.reinit((int)((double)CLOCK_PAL / 15.0), 44100);
+	else
+		M68K_Mem::m_Psg.reinit((int)((double)CLOCK_NTSC / 15.0), 44100);
+	
 	return 0;
 }
 
@@ -215,8 +231,9 @@ FORCE_INLINE void EmuMD::T_Do_Line(void)
 	buf[1] = Seg_R + Sound_Extrapol[VDP_Lines.Display.Current][0];
 	YM2612_DacAndTimers_Update(buf, Sound_Extrapol[VDP_Lines.Display.Current][1]);
 	YM_Len += Sound_Extrapol[VDP_Lines.Display.Current][1];
-	PSG_Len += Sound_Extrapol[VDP_Lines.Display.Current][1];
 #endif
+	int writeLen = SoundMgr::GetWriteLen(VdpIo::VDP_Lines.Display.Current);
+	M68K_Mem::m_Psg.addWriteLen(writeLen);
 	
 	// Notify controllers that a new scanline is being drawn.
 	m_port1->doScanline();
@@ -333,8 +350,10 @@ FORCE_INLINE void EmuMD::T_Do_Frame(void)
 #if 0
 	YM_Buf[0] = PSG_Buf[0] = Seg_L;
 	YM_Buf[1] = PSG_Buf[1] = Seg_R;
-	YM_Len = PSG_Len = 0;
+	YM_Len = 0;
 #endif
+	M68K_Mem::m_Psg.clearWriteLen();
+	M68K_Mem::m_Psg.resetBufferPtrs();
 	
 	// Clear all of the cycle counters.
 	M68K_Mem::Cycles_M68K = 0;
@@ -404,6 +423,8 @@ FORCE_INLINE void EmuMD::T_Do_Frame(void)
 	} while (VdpIo::VDP_Lines.Display.Current < VdpIo::VDP_Lines.Display.Total);
 	
 	// TODO: Sound. (LibGens)
+	// Update the PSG and YM2612 output.
+	M68K_Mem::m_Psg.specialUpdate();
 #if 0
 	// Update the PSG and YM2612 output.
 	PSG_Special_Update();

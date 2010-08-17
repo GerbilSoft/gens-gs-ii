@@ -35,9 +35,13 @@
 
 #include "Psg.hpp"
 
-/* C includes. */
+// C includes.
 #include <stdint.h>
 #include <string.h>
+
+// Sound Manager.
+#include "SoundMgr.hpp"
+#include "MD/VdpIo.hpp"
 
 namespace LibGens
 {
@@ -58,19 +62,8 @@ const uint32_t Psg::ms_psgStateInit[8] = {0x00, 0x0F, 0x00, 0x0F, 0x00, 0x0F, 0x
 /* GYM dumping. */
 #include "util/sound/gym.hpp"
 
-// Needed for VDP line number.
-#include "gens_core/vdp/vdp_io.h"
-
 #include "audio/audio.h"
 #endif
-
-int PSG_Enable;
-int PSG_Len = 0;
-
-// Pointers to segment buffers.
-// PSG_Buf[0] == pointer to an element in Seg_L[]
-// PSG_Buf[1] == pointer to an element in Seg_R[]
-int *PSG_Buf[2];
 
 
 /** Functions **/
@@ -79,12 +72,16 @@ int *PSG_Buf[2];
 Psg::Psg()
 {
 	// TODO: Some initialization should go here!
+	m_writeLen = 0;
+	m_enabled = true; // TODO: Make this customizable.
 }
 
 
 Psg::Psg(int clock, int rate)
 {
 	// Initialize the PSG.
+	m_writeLen = 0;
+	m_enabled = true; // TODO: Make this customizable.
 	reinit(clock, rate);
 }
 
@@ -97,6 +94,9 @@ Psg::Psg(int clock, int rate)
 void Psg::reinit(int clock, int rate)
 {
 	double out;
+	
+	// Clear the write length.
+	m_writeLen = 0;
 	
 	// Step calculation
 	for (int i = 1; i < 1024; i++)
@@ -229,10 +229,12 @@ void Psg::write(uint8_t data)
 
 /**
  * update(): Update the PSG audio output using square waves.
- * @param buffer Output buffer. (TODO: Convert to interleaved stereo instead of separate stereo.)
- * @param length Length of the output buffer.
+ * @param bufL Left audio buffer. (16-bit; int32_t is used for saturation.)
+ * @param bufR Right audio buffer. (16-bit; int32_t is used for saturation.)
+ * @param start Starting position in the buffer.
+ * @param length Length to write.
  */
-void Psg::update(int **buffer, int length)
+void Psg::update(int32_t *bufL, int32_t *bufR, int length)
 {
 	int cur_cnt, cur_step, cur_vol;
 	
@@ -261,8 +263,8 @@ void Psg::update(int **buffer, int length)
 					if (cur_cnt & 0x10000)
 					{
 						// Overflow. Apply +1 tone.
-						buffer[0][i] += cur_vol;
-						buffer[1][i] += cur_vol;
+						bufL[i] += cur_vol;
+						bufR[i] += cur_vol;
 					}
 				}
 				
@@ -276,8 +278,8 @@ void Psg::update(int **buffer, int length)
 				// (TODO: Is this correct?)
 				for (int i = 0; i < length; i++)
 				{
-					buffer[0][i] += cur_vol;
-					buffer[1][i] += cur_vol;
+					bufL[i] += cur_vol;
+					bufR[i] += cur_vol;
 				}
 				
 				// Update the counter for this channel.
@@ -305,8 +307,8 @@ void Psg::update(int **buffer, int length)
 			
 			if (m_lfsr & 1)
 			{
-				buffer[0][i] += cur_vol;
-				buffer[1][i] += cur_vol;
+				bufL[i] += cur_vol;
+				bufR[i] += cur_vol;
 			}
 			
 			// Check if the LFSR should be shifted.
@@ -377,19 +379,29 @@ int Psg::getReg(int regID)
  */
 void Psg::specialUpdate(void)
 {
-	// TODO: Update for Gens/GS II.
-	return;
-#if 0
-	if (!(PSG_Len && PSG_Enable))
+	if (!(m_writeLen > 0 && m_enabled))
 		return;
 	
-	update(PSG_Buf, PSG_Len);
+	// Update the sound buffer.
+	update(m_bufPtrL, m_bufPtrR, m_writeLen);
+	m_writeLen = 0;
 	
-	// NOTE: Seg_L and Seg_R are arrays. This is pointer arithmetic.
-	PSG_Buf[0] = Seg_L + Sound_Extrapol[VDP_Lines.Display.Current + 1][0];
-	PSG_Buf[1] = Seg_R + Sound_Extrapol[VDP_Lines.Display.Current + 1][0];
-	PSG_Len = 0;
-#endif
+	// Determine the new starting position.
+	int writePos = SoundMgr::GetWritePos(VdpIo::VDP_Lines.Display.Current + 1);
+	
+	// Update the PSG buffer pointers.
+	m_bufPtrL = &SoundMgr::ms_SegBufL[writePos];
+	m_bufPtrR = &SoundMgr::ms_SegBufR[writePos];
+}
+
+
+/**
+ * resetBufferPtrs(): Reset the PSG buffer pointers.
+ */
+void Psg::resetBufferPtrs(void)
+{
+	m_bufPtrL = &SoundMgr::ms_SegBufL[0];
+	m_bufPtrR = &SoundMgr::ms_SegBufR[0];
 }
 
 

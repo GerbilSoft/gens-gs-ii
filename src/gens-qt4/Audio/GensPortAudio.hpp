@@ -24,6 +24,9 @@
 #ifndef __GENS_QT4_AUDIO_PORTAUDIO_HPP__
 #define __GENS_QT4_AUDIO_PORTAUDIO_HPP__
 
+// C includes.
+#include <stdint.h>
+
 // PortAudio.
 #include "portaudio.h"
 
@@ -41,6 +44,7 @@ class GensPortAudio
 		// TODO: Only have the stream open when emulation is running.
 		int start(void);
 		int stop(void);
+		int write(void);
 	
 	protected:
 		bool m_open;	// True if PortAudio is initialized.
@@ -68,9 +72,11 @@ class GensPortAudio
 		// PortAudio stream.
 		PaStream *m_stream;
 		
-		// Sample sawtooth wave variables.
-		float m_leftPhase;
-		float m_rightPhase;
+		// Audio buffer.
+		// Allocate 8 segments worth of data.
+		int16_t m_buf[882*8][2];
+		unsigned int m_bufLen;
+		unsigned int m_bufPos;
 };
 
 }
