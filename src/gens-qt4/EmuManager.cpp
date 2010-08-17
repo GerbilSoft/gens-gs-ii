@@ -46,6 +46,23 @@
 #define TR(text) \
 	QApplication::translate("EmuManager", (text), NULL, QApplication::UnicodeUTF8)
 
+/** BEGIN: Win32-specific includes. **/
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+
+// Win32 needs io.h for dup().
+// TODO: Move File/Open to another file.
+#include <io.h>
+
+// QWidget doesn't differentiate between L/R modifier keys,
+// and neither do WM_KEYDOWN/WM_KEYUP.
+#include "libgens/IO/KeyManager.hpp"
+#endif
+/** END: Win32-specific includes. **/
 
 namespace GensQt4
 {
