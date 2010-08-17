@@ -40,7 +40,31 @@ GensPortAudio::GensPortAudio()
 	// Assume PortAudio isn't open initially.
 	m_open = false;
 	
-	m_bufLen = 735*8;	// TODO: Use segment length. (This works for 44.1 kHz NTSC.)
+	// Initialize settings.
+	// TODO: Allow user customization.
+	m_rate = 44100;
+	m_stereo = true;
+}
+
+
+GensPortAudio::~GensPortAudio()
+{
+	close();
+};
+
+
+/**
+ * open(): Open the audio stream.
+ */
+void GensPortAudio::open(void)
+{
+	if (m_open)
+		return;
+	
+	// TODO: Make sure the LibGens Sound Manager is initialized.
+	
+	// Initialize the buffer variables.
+	m_bufLen = (LibGens::SoundMgr::GetSegLength() * 8);
 	m_bufPos = 0;
 	
 	// Initialize PortAudio.
@@ -55,13 +79,14 @@ GensPortAudio::GensPortAudio()
 	
 	// Open an audio stream.
 	err = Pa_OpenDefaultStream(&m_stream,
-					0,		// no input channels
-					2,		// stereo output
-					paInt16,	// 16-bit signed integer
-					44100,		// Sample rate
-					256,		// Frames per buffer
-					GensPaCallback,	// Callback function
-					this);		// Pointer to this class
+					0,			// no input channels
+					(m_stereo ? 2 : 1),	// stereo output
+					paInt16,		// 16-bit signed integer
+					m_rate,			// Sample rate
+					paFramesPerBufferUnspecified,
+					GensPaCallback,		// Callback function
+					this);			// Pointer to this object
+	
 	if (err != paNoError)
 	{
 		// Error initializing the PortAudio stream.
@@ -70,16 +95,38 @@ GensPortAudio::GensPortAudio()
 		Pa_Terminate();
 	}
 	
+	// Start the PortAudio stream.
+	err = Pa_StartStream(m_stream);
+	if (err != paNoError)
+	{
+		// Error starting the PortAudio stream.
+		LOG_MSG(audio, LOG_MSG_LEVEL_ERROR,
+			"Pa_StartStream() error: %s", Pa_GetErrorText(err));
+	}
+	
 	// PortAudio stream is open.
 	m_open = true;
 }
 
-GensPortAudio::~GensPortAudio()
+
+/**
+ * close(): Close the audio stream.
+ */
+void GensPortAudio::close(void)
 {
 	if (!m_open)
 		return;
 	
 	int err;
+	
+	// Stop the PortAudio stream.
+	err = Pa_StopStream(m_stream);
+	if (err != paNoError)
+	{
+		// Error stopping the PortAudio stream.
+		LOG_MSG(audio, LOG_MSG_LEVEL_ERROR,
+			"Pa_StopStream() error: %s", Pa_GetErrorText(err));
+	}
 	
 	// Close the PortAudio stream.
 	if (m_stream)
@@ -106,7 +153,7 @@ GensPortAudio::~GensPortAudio()
 	
 	// PortAudio is shut down.
 	m_open = false;
-};
+}
 
 
 /**
@@ -146,61 +193,21 @@ int GensPortAudio::gensPaCallback(const void *inputBuffer, void *outputBuffer,
 
 
 /**
- * start(): Start the audio stream.
- * @return 0 on success; non-zero on error.
- */
-int GensPortAudio::start(void)
-{
-	if (!m_open)
-		return 1;
-	
-	// Start the PortAudio stream.
-	int err = Pa_StartStream(m_stream);
-	if (err != paNoError)
-	{
-		// Error starting the PortAudio stream.
-		LOG_MSG(audio, LOG_MSG_LEVEL_ERROR,
-			"Pa_StartStream() error: %s", Pa_GetErrorText(err));
-	}
-	
-	return err;
-}
-
-
-/**
- * stop(): Stop the audio stream.
- * @return 0 on success; non-zero on error.
- */
-int GensPortAudio::stop(void)
-{
-	if (!m_open)
-		return 1;
-	
-	// Stop the PortAudio stream.
-	int err = Pa_StopStream(m_stream);
-	if (err != paNoError)
-	{
-		// Error stopping the PortAudio stream.
-		LOG_MSG(audio, LOG_MSG_LEVEL_ERROR,
-			"Pa_StopStream() error: %s", Pa_GetErrorText(err));
-	}
-	
-	return err;
-}
-
-
-/**
- * write(): Write to the audio buffer.
+ * write(): Write the current segment to the audio buffer.
  * TODO: Lock the internal audio buffer.
  */
 int GensPortAudio::write(void)
 {
+	if (!m_open)
+		return 1;
+	
 	// TODO: Mono/stereo, MMX, etc.
 	// TODO: Currently uses hard-coded 735. (44.1 kHz NTSC)
 	unsigned int i = 0;
 	unsigned int bufIndex = m_bufPos;
+	const int SegLength = LibGens::SoundMgr::GetSegLength();
 	
-	for (; i < 735 && bufIndex < m_bufLen; i++, bufIndex++)
+	for (; i < SegLength && bufIndex < m_bufLen; i++, bufIndex++)
 	{
 		int32_t L = LibGens::SoundMgr::ms_SegBufL[i];
 		int32_t R = LibGens::SoundMgr::ms_SegBufR[i];

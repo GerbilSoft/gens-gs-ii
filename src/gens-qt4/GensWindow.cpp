@@ -111,8 +111,7 @@ GensWindow::GensWindow()
 GensWindow::~GensWindow()
 {
 	// Delete the audio backend.
-	m_audio->stop();
-	//m_audio->close(); // TODO: close() manually, or just delete m_audio?
+	m_audio->close();
 	delete m_audio;
 	m_audio = NULL;
 }
@@ -347,9 +346,9 @@ void GensWindow::menuTriggered(int id)
 				case MNUID_ITEM(IDM_RESBPPTEST_AUDIO):
 					// Start/Stop audio.
 					if (m_menubar->menuItemCheckState(IDM_RESBPPTEST_AUDIO))
-						m_audio->start();
+						m_audio->open();
 					else
-						m_audio->stop();
+						m_audio->close();
 					break;
 				
 				default:

@@ -41,9 +41,10 @@ class GensPortAudio
 		
 		bool isOpen(void) const { return m_open; }
 		
-		// TODO: Only have the stream open when emulation is running.
-		int start(void);
-		int stop(void);
+		void open(void);
+		void close(void);
+		
+		// Write the segment to the audio stream.
 		int write(void);
 	
 	protected:
@@ -77,6 +78,10 @@ class GensPortAudio
 		int16_t m_buf[882*8][2];
 		unsigned int m_bufLen;
 		unsigned int m_bufPos;
+		
+		// Audio settings.
+		int m_rate;
+		bool m_stereo;
 };
 
 }
