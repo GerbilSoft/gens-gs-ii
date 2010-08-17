@@ -45,6 +45,8 @@ const char *CtrlConfigWindow::ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX] =
 	":/gens/controller-2btn",	// IOT_2BTN
 	":/gens/controller-mega-mouse"	// IOT_MEGA_MOUSE (TODO)
 	":/gens/controller-teamplayer"	// IOT_TEAMPLAYER (TODO)
+	":/gens/controller-4wp"		// IOT_4WP_MASTER (TODO)
+	":/gens/controller-4wp"		// IOT_4WP_SLAVE (TODO)
 };
 
 
@@ -82,6 +84,9 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 			GetShortDeviceName(LibGens::IoBase::IOT_MEGA_MOUSE));
 	cboDevice->addItem(QIcon(":/gens/controller-teamplayer"),
 			GetShortDeviceName(LibGens::IoBase::IOT_TEAMPLAYER));
+	// TODO: Handle Master/Slave devices.
+	cboDevice->addItem(QIcon(":/gens/controller-4wp"),
+			GetShortDeviceName(LibGens::IoBase::IOT_4WP_MASTER));
 	
 	// Update the port settings.
 	updatePortSettings();
@@ -140,6 +145,8 @@ const QString CtrlConfigWindow::GetShortDeviceName(LibGens::IoBase::IoType devTy
 		case IoBase::IOT_2BTN:		return TR("2-button");
 		case IoBase::IOT_MEGA_MOUSE:	return TR("Mega Mouse");
 		case IoBase::IOT_TEAMPLAYER:	return TR("Teamplayer");
+		case IoBase::IOT_4WP_MASTER:	/* see below */
+		case IoBase::IOT_4WP_SLAVE:	return TR("4-Way Play");
 	}
 }
 
@@ -165,6 +172,8 @@ const QString CtrlConfigWindow::GetLongDeviceName(LibGens::IoBase::IoType devTyp
 		case IoBase::IOT_2BTN:		return TR("2-button gamepad (SMS)");
 		case IoBase::IOT_MEGA_MOUSE:	return TR("Mega Mouse");
 		case IoBase::IOT_TEAMPLAYER:	return TR("Sega Teamplayer");
+		case IoBase::IOT_4WP_MASTER:	/* see below */
+		case IoBase::IOT_4WP_SLAVE:	return TR("EA 4-Way Play");
 	}
 }
 
@@ -227,7 +236,10 @@ void CtrlConfigWindow::updatePortSettings(void)
 	grpPortSettings->setTitle(TR("Controller Settings") + ": Port " + QString::number(port + 1));
 	
 	// Set the device type in the dropdown.
-	cboDevice->setCurrentIndex(m_devType[port]);
+	int devIndex = m_devType[port];
+	if (devIndex >= LibGens::IoBase::IOT_4WP_SLAVE)
+		devIndex--;	// avoid having two 4WP devices in the dropdown
+	cboDevice->setCurrentIndex(devIndex);
 }
 
 }
