@@ -28,6 +28,10 @@
 // C includes.
 #include <stdint.h>
 
+// Audio ICs.
+#include "../sound/Psg.hpp"
+#include "../sound/Ym2612.hpp"
+
 namespace LibGens
 {
 
@@ -39,11 +43,11 @@ class SoundMgr
 		
 		static void ReInit(int rate, bool isPal);
 		
-		static int GetSegLength(void) { return ms_SegLength; }
+		static inline int GetSegLength(void) { return ms_SegLength; }
 		
 		// TODO: Bounds checking.
-		static int GetWritePos(int line) { return ms_Extrapol[line][0]; }
-		static int GetWriteLen(int line) { return ms_Extrapol[line][1]; }
+		static inline int GetWritePos(int line) { return ms_Extrapol[line][0]; }
+		static inline int GetWriteLen(int line) { return ms_Extrapol[line][1]; }
 		
 		// Segment buffer.
 		// Stores up to 882 32-bit stereo samples.
@@ -52,11 +56,39 @@ class SoundMgr
 		// TODO: Convert to interleaved stereo.
 		static int32_t ms_SegBufL[882];
 		static int32_t ms_SegBufR[882];
+		
+		// Audio ICs.
+		// TODO: Add wrapper functions?
+		static Psg ms_Psg;
+		static Ym2612 ms_Ym2612;
+		
+		/**
+		 * ResetPtrsAndLens(): Reset buffer pointers and lengths.
+		 */
+		static inline void ResetPtrsAndLens(void)
+		{
+			ms_Ym2612.resetBufferPtrs();
+			ms_Ym2612.clearWriteLen();
+			ms_Psg.resetBufferPtrs();
+			ms_Psg.clearWriteLen();
+		}
+		
+		/**
+		 * SpecialUpdate(): Run the specialUpdate() functions.
+		 */
+		static inline void SpecialUpdate(void)
+		{
+			ms_Psg.specialUpdate();
+			ms_Ym2612.specialUpdate();
+		}
 	
 	protected:
 		// Segment length.
 		static int CalcSegLength(int rate, bool isPal);
 		static int ms_SegLength;
+		
+		static int ms_Rate;
+		static bool ms_IsPal;
 		
 		// Line extrapolation values. [312 + extra room to prevent overflows]
 		// Index 0 == start; Index 1 == length

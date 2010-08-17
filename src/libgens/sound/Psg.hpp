@@ -29,7 +29,7 @@
 #include <stdio.h>
 
 // LibGens includes.
-#include "macros/common.h"
+#include "../macros/common.h"
 
 namespace LibGens
 {

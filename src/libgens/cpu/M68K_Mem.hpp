@@ -47,10 +47,6 @@ extern Ram_68k_t Ram_68k;
 #include "../Save/EEPRom.hpp"
 #include "../MD/SysRegion.hpp"
 
-// Audio ICs.
-#include "../sound/Psg.hpp"
-#include "../sound/Ym2612.hpp"
-
 namespace LibGens
 {
 
@@ -97,11 +93,6 @@ class M68K_Mem
 		// TODO: Make this protected!
 		// TODO: Add a function e.g. M68K_Mem::Reset() to reset all memory handling.
 		static EEPRom m_EEPRom;
-		
-		// Audio ICs.
-		// TODO: Move this elsewhere?
-		static Psg m_Psg;
-		static Ym2612 m_Ym2612;
 		
 		/** Z80 state. **/
 		#define Z80_STATE_ENABLED	(1 << 0)

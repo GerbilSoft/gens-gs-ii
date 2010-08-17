@@ -170,19 +170,7 @@ int EmuMD::SetRom(Rom *rom)
 	}
 	
 	// Initialize audio.
-	// TODO: Move audio chips to an "MD circuit board" class or something.
-	// TODO: Don't hardcode PSG/YM clock and audio rate.
 	SoundMgr::ReInit(44100, M68K_Mem::ms_Region.isPal());
-	if (M68K_Mem::ms_Region.isPal())
-	{
-		M68K_Mem::m_Psg.reinit((int)((double)CLOCK_PAL / 15.0), 44100);
-		M68K_Mem::m_Ym2612.reinit((int)((double)CLOCK_PAL / 7.0), 44100);
-	}
-	else
-	{
-		M68K_Mem::m_Psg.reinit((int)((double)CLOCK_NTSC / 15.0), 44100);
-		M68K_Mem::m_Ym2612.reinit((int)((double)CLOCK_NTSC / 7.0), 44100);
-	}
 	
 	return 0;
 }
@@ -236,9 +224,9 @@ FORCE_INLINE void EmuMD::T_Do_Line(void)
 	
 	// Update the sound chips.
 	int writeLen = SoundMgr::GetWriteLen(VdpIo::VDP_Lines.Display.Current);
-	M68K_Mem::m_Ym2612.updateDacAndTimers(bufL, bufR, writeLen);
-	M68K_Mem::m_Ym2612.addWriteLen(writeLen);
-	M68K_Mem::m_Psg.addWriteLen(writeLen);
+	SoundMgr::ms_Ym2612.updateDacAndTimers(bufL, bufR, writeLen);
+	SoundMgr::ms_Ym2612.addWriteLen(writeLen);
+	SoundMgr::ms_Psg.addWriteLen(writeLen);
 	
 	// Notify controllers that a new scanline is being drawn.
 	m_port1->doScanline();
@@ -352,10 +340,7 @@ FORCE_INLINE void EmuMD::T_Do_Frame(void)
 	m_portE->update();
 	
 	// Reset the sound chip buffer pointers and write length.
-	M68K_Mem::m_Ym2612.resetBufferPtrs();
-	M68K_Mem::m_Ym2612.clearWriteLen();
-	M68K_Mem::m_Psg.resetBufferPtrs();
-	M68K_Mem::m_Psg.clearWriteLen();
+	SoundMgr::ResetPtrsAndLens();
 	
 	// Clear all of the cycle counters.
 	M68K_Mem::Cycles_M68K = 0;
@@ -425,8 +410,7 @@ FORCE_INLINE void EmuMD::T_Do_Frame(void)
 	} while (VdpIo::VDP_Lines.Display.Current < VdpIo::VDP_Lines.Display.Total);
 	
 	// Update the PSG and YM2612 output.
-	M68K_Mem::m_Psg.specialUpdate();
-	M68K_Mem::m_Ym2612.specialUpdate();
+	SoundMgr::SpecialUpdate();
 	
 #if 0
 	// If WAV or GYM is being dumped, update the WAV or GYM.

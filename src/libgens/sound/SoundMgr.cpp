@@ -28,6 +28,10 @@
 #include <math.h>
 #include <string.h>
 
+// M68K.hpp has CLOCK_NTSC and CLOCK_PAL #defines.
+// TODO: Convert to static const ints and move elsewhere.
+#include "cpu/M68K.hpp"
+
 namespace LibGens
 {
 
@@ -45,6 +49,14 @@ unsigned int SoundMgr::ms_Extrapol[312+8][2];
 int32_t SoundMgr::ms_SegBufL[882];
 int32_t SoundMgr::ms_SegBufR[882];
 
+// Audio ICs.
+Psg SoundMgr::ms_Psg;
+Ym2612 SoundMgr::ms_Ym2612;
+
+// Audio settings.
+int SoundMgr::ms_Rate = 44100;
+bool SoundMgr::ms_IsPal = false;
+
 void SoundMgr::Init(void)
 {
 	// TODO
@@ -61,9 +73,11 @@ void SoundMgr::End(void)
  * @param rate Sound rate, in Hz.
  * @param isPal If true, system is PAL.
  */
-#include <stdio.h>
 void SoundMgr::ReInit(int rate, bool isPal)
 {
+	ms_Rate = rate;
+	ms_IsPal = isPal;
+	
 	// Calculate the segment length.
 	ms_SegLength = CalcSegLength(rate, isPal);
 	
@@ -78,6 +92,18 @@ void SoundMgr::ReInit(int rate, bool isPal)
 	// Clear the segment buffers.
 	memset(ms_SegBufL, 0x00, sizeof(ms_SegBufL));
 	memset(ms_SegBufR, 0x00, sizeof(ms_SegBufR));
+	
+	// Initialize the PSG and YM2612.
+	if (isPal)
+	{
+		ms_Psg.reinit((int)((double)CLOCK_PAL / 15.0), rate);
+		ms_Ym2612.reinit((int)((double)CLOCK_PAL / 7.0), rate);
+	}
+	else
+	{
+		ms_Psg.reinit((int)((double)CLOCK_NTSC / 15.0), rate);
+		ms_Ym2612.reinit((int)((double)CLOCK_NTSC / 7.0), rate);
+	}
 }
 
 

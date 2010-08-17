@@ -36,6 +36,9 @@
 // TODO: SMS/GG?
 #include "MD/EmuMD.hpp"
 
+// Sound Manager.
+#include "sound/SoundMgr.hpp"
+
 // TODO: Starscream accesses Ram_68k directly.
 // Move Ram_68k back to M68K once Starscream is updated.
 Ram_68k_t Ram_68k;
@@ -82,11 +85,6 @@ unsigned int M68K_Mem::Rom_Size;
 bool M68K_Mem::SaveDataEnable = true;	// Enable SRam/EEPRom by default.
 SRam M68K_Mem::m_SRam;
 EEPRom M68K_Mem::m_EEPRom;
-
-// Audio ICs.
-// TODO: Move this elsewhere?
-Psg M68K_Mem::m_Psg;
-Ym2612 M68K_Mem::m_Ym2612;
 
 /** Z80/M68K cycle table. **/
 int M68K_Mem::Z80_M68K_Cycle_Tab[512];
@@ -821,7 +819,7 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 			Z80_State |= Z80_STATE_RESET;
 			
 			// YM2612's RESET line is tied to the Z80's RESET line.
-			m_Ym2612.reset();
+			SoundMgr::ms_Ym2612.reset();
 		}
 		return;
 	}
@@ -930,7 +928,7 @@ void M68K_Mem::M68K_Write_Byte_VDP(uint32_t address, uint8_t data)
 	else if (address == 0x11)
 	{
 		// 0xC00011: PSG control port.
-		m_Psg.write(data);
+		SoundMgr::ms_Psg.write(data);
 	}
 }
 
@@ -1117,7 +1115,7 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 			Z80_State |= Z80_STATE_RESET;
 			
 			// YM2612's RESET line is tied to the Z80's RESET line.
-			m_Ym2612.reset();
+			SoundMgr::ms_Ym2612.reset();
 		}
 		
 		return;
