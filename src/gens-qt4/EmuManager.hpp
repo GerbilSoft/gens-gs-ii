@@ -53,6 +53,10 @@ class EmuManager : public QObject
 		
 		inline bool isRomOpen(void) const { return (m_rom != NULL); }
 		
+		// ROM information.
+		QString romName(void);
+		QString sysName(void);
+		
 		/** Controller settings. **/
 		void setController(int port, LibGens::IoBase::IoType type);
 		

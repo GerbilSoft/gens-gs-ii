@@ -28,6 +28,9 @@
 #include "libgens/Util/Timing.hpp"
 #include "libgens/MD/EmuMD.hpp"
 
+// M68K_Mem.hpp has SysRegion.
+#include "libgens/cpu/M68K_Mem.hpp"
+
 // Controller devices.
 #include "libgens/IO/IoBase.hpp"
 #include "libgens/IO/Io3Button.hpp"
@@ -212,6 +215,106 @@ int EmuManager::closeRom(void)
 	// Update the Gens title.
 	emit stateChanged();
 	return 0;
+}
+
+
+/**
+ * romName(): Get the ROM name.
+ * @return ROM name, or empty string if no ROM is loaded.
+ */
+QString EmuManager::romName(void)
+{
+	if (!m_rom)
+		return QString();
+	
+	// TODO: This is MD/MCD/32X only!
+	
+	// Check the active system region.
+	const char *s_romName;
+	if (LibGens::M68K_Mem::ms_Region.isEast())
+	{
+		// East (JP). Return the domestic ROM name.
+		s_romName = m_rom->romNameJP();
+		if (!s_romName || s_romName[0] == 0x00)
+		{
+			// Domestic ROM name is empty.
+			// Return the overseas ROM name.
+			s_romName = m_rom->romNameUS();
+		}
+	}
+	else
+	{
+		// West (US/EU). Return the overseas ROM name.
+		s_romName = m_rom->romNameUS();
+		if (!s_romName || s_romName[0] == 0x00)
+		{
+			// Overseas ROM name is empty.
+			// Return the domestic ROM name.
+			s_romName = m_rom->romNameJP();
+		}
+	}
+	
+	// Return the ROM name.
+	if (!s_romName)
+		return QString();
+	return QString::fromUtf8(s_romName);
+}
+
+
+/**
+ * sysName(): Get the system name.
+ * @return System name, or empty string if no ROM is loaded.
+ */
+QString EmuManager::sysName(void)
+{
+	if (!m_rom)
+		return QString();
+	
+	// Check the system ID.
+	const LibGens::SysRegion &region = LibGens::M68K_Mem::ms_Region;
+	
+	switch (m_rom->sysId())
+	{
+		case LibGens::Rom::MDP_SYSTEM_MD:
+			// Genesis / Mega Drive.
+			if (region.region() == LibGens::SysRegion::REGION_US_NTSC)
+				return TR("Genesis");
+			else
+				return TR("Mega Drive");
+		
+		case LibGens::Rom::MDP_SYSTEM_MCD:
+			if (region.region() == LibGens::SysRegion::REGION_US_NTSC)
+				return TR("Sega CD");
+			else
+				return TR("Mega CD");
+		
+		case LibGens::Rom::MDP_SYSTEM_32X:
+			if (region.isPal())
+				return TR("32X (PAL)");
+			else
+				return TR("32X (NTSC)");
+		
+		case LibGens::Rom::MDP_SYSTEM_MCD32X:
+			if (region.region() == LibGens::SysRegion::REGION_US_NTSC)
+				return TR("Sega CD 32X");
+			else
+				return TR("Mega CD 32X");
+		
+		case LibGens::Rom::MDP_SYSTEM_SMS:
+			return TR("Master System");
+		
+		case LibGens::Rom::MDP_SYSTEM_GG:
+			return TR("Game Gear");
+		
+		case LibGens::Rom::MDP_SYSTEM_SG1000:
+			return TR("SG-1000");
+		
+		case LibGens::Rom::MDP_SYSTEM_PICO:
+			return TR("Pico");
+		
+		default:
+			return "Unknown";
+	}
 }
 
 
