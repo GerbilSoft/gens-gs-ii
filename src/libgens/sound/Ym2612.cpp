@@ -45,6 +45,10 @@
 /* Message logging. */
 #include "macros/log_msg.h"
 
+// Sound Manager.
+#include "SoundMgr.hpp"
+#include "MD/VdpIo.hpp"
+
 #if 0
 // GSX v7 savestate functionality.
 #include "util/file/gsx_v7.h"
@@ -63,6 +67,9 @@
 /********************************************
  *            Partie variables              *
  ********************************************/
+
+namespace LibGens
+{
 
 // Static tables.
 bool Ym2612::ms_Init = false;
@@ -127,6 +134,20 @@ const unsigned int Ym2612::LFO_FMS_TAB[8] =
 	LFO_FMS_BASE * 12, LFO_FMS_BASE * 24
 };
 
+unsigned int Ym2612::NULL_RATE[32];	// Table for NULL rate. (STATIC)
+
+// LFO tables. (Static class variables)
+int Ym2612::LFO_ENV_TAB[LFO_LENGTH];		// LFO AMS TABLE (adjusted for 11.8 dB)
+int Ym2612::LFO_FREQ_TAB[LFO_LENGTH];		// LFO FMS TABLE
+
+// NOTE: INTER_TAB isn't used...
+#if 0
+int Ym2612::INTER_TAB[MAX_UPDATE_LENGTH];	// Interpolation table
+#endif
+		
+// LFO step table. (static class variable)
+int Ym2612::LFO_INC_TAB[8];		// LFO step table.
+
 
 /** Gens-specific **/
 
@@ -138,12 +159,6 @@ const unsigned int Ym2612::LFO_FMS_TAB[8] =
 // Needed for VDP line number.
 #include "gens_core/vdp/vdp_io.h"
 #endif
-
-int YM2612_Enable;
-int YM2612_Improv;
-int DAC_Enable;
-int *YM_Buf[2];
-int YM_Len = 0;
 
 /** end **/
 
@@ -1046,8 +1061,8 @@ en3 = ENV_TAB[(CH->_SLOT[S3].Ecnt >> ENV_LBITS)] + CH->_SLOT[S3].TLL + (env_LFO 
 
 #define DO_OUTPUT					\
 {							\
-	buf[0][i] += (int)(CH->OUTd & CH->LEFT);	\
-	buf[1][i] += (int)(CH->OUTd & CH->RIGHT);	\
+	bufL[i] += (int)(CH->OUTd & CH->LEFT);	\
+	bufR[i] += (int)(CH->OUTd & CH->RIGHT);	\
 }
 
 #define DO_OUTPUT_INT0						\
@@ -1055,8 +1070,8 @@ en3 = ENV_TAB[(CH->_SLOT[S3].Ecnt >> ENV_LBITS)] + CH->_SLOT[S3].TLL + (env_LFO 
 	if ((int_cnt += m_data.Inter_Step) & 0x04000)		\
 	{							\
 		int_cnt &= 0x3FFF;				\
-		buf[0][i] += (int)(CH->OUTd & CH->LEFT);	\
-		buf[1][i] += (int)(CH->OUTd & CH->RIGHT);	\
+		bufL[i] += (int)(CH->OUTd & CH->LEFT);	\
+		bufR[i] += (int)(CH->OUTd & CH->RIGHT);	\
 	}							\
 	else i--;						\
 }
@@ -1067,8 +1082,8 @@ en3 = ENV_TAB[(CH->_SLOT[S3].Ecnt >> ENV_LBITS)] + CH->_SLOT[S3].TLL + (env_LFO 
 	if ((int_cnt += m_data.Inter_Step) & 0x04000)		\
 	{							\
 		int_cnt &= 0x3FFF;				\
-		buf[0][i] += (int)(CH->Old_OUTd & CH->LEFT);	\
-		buf[1][i] += (int)(CH->Old_OUTd & CH->RIGHT);	\
+		bufL[i] += (int)(CH->Old_OUTd & CH->LEFT);	\
+		bufR[i] += (int)(CH->Old_OUTd & CH->RIGHT);	\
 	}							\
 	else i--;						\
 }
@@ -1079,8 +1094,8 @@ en3 = ENV_TAB[(CH->_SLOT[S3].Ecnt >> ENV_LBITS)] + CH->_SLOT[S3].TLL + (env_LFO 
 	{							\
 		int_cnt &= 0x3FFF;				\
 		CH->Old_OUTd = (CH->OUTd + CH->Old_OUTd) >> 1;	\
-		buf[0][i] += (int)(CH->Old_OUTd & CH->LEFT);	\
-		buf[1][i] += (int)(CH->Old_OUTd & CH->RIGHT);	\
+		bufL[i] += (int)(CH->Old_OUTd & CH->LEFT);	\
+		bufR[i] += (int)(CH->Old_OUTd & CH->RIGHT);	\
 	}							\
 	else i--;						\
 	CH->Old_OUTd = CH->OUTd;				\
@@ -1093,8 +1108,8 @@ en3 = ENV_TAB[(CH->_SLOT[S3].Ecnt >> ENV_LBITS)] + CH->_SLOT[S3].TLL + (env_LFO 
 		int_cnt &= 0x3FFF;					\
 		CH->Old_OUTd = (((int_cnt ^ 0x3FFF) * CH->OUTd) +	\
 				(int_cnt * CH->Old_OUTd)) >> 14;	\
-		buf[0][i] += (int)(CH->Old_OUTd & CH->LEFT);		\
-		buf[1][i] += (int)(CH->Old_OUTd & CH->RIGHT);		\
+		bufL[i] += (int)(CH->Old_OUTd & CH->LEFT);		\
+		bufR[i] += (int)(CH->Old_OUTd & CH->RIGHT);		\
 	}								\
 	else i--;							\
 	CH->Old_OUTd = CH->OUTd;					\
@@ -1102,7 +1117,7 @@ en3 = ENV_TAB[(CH->_SLOT[S3].Ecnt >> ENV_LBITS)] + CH->_SLOT[S3].TLL + (env_LFO 
 
 
 template<int algo>
-inline void Ym2612::T_Update_Chan(Ym2612_Channel *CH, int **buf, int length)
+inline void Ym2612::T_Update_Chan(Ym2612_Channel *CH, int32_t *bufL, int32_t *bufR, int length)
 {
 	// Check if the channel has reached the end of the update.
 	{
@@ -1171,7 +1186,7 @@ inline void Ym2612::T_Update_Chan(Ym2612_Channel *CH, int **buf, int length)
 
 
 template<int algo>
-inline void Ym2612::T_Update_Chan_LFO(Ym2612_Channel *CH, int **buf, int length)
+inline void Ym2612::T_Update_Chan_LFO(Ym2612_Channel *CH, int32_t *bufL, int32_t *bufR, int length)
 {
 	// Check if the channel has reached the end of the update.
 	{
@@ -1247,7 +1262,7 @@ inline void Ym2612::T_Update_Chan_LFO(Ym2612_Channel *CH, int **buf, int length)
 
 
 template<int algo>
-inline void Ym2612::T_Update_Chan_Int(Ym2612_Channel *CH, int **buf, int length)
+inline void Ym2612::T_Update_Chan_Int(Ym2612_Channel *CH, int32_t *bufL, int32_t *bufR, int length)
 {
 	// Check if the channel has reached the end of the update.
 	{
@@ -1318,7 +1333,7 @@ inline void Ym2612::T_Update_Chan_Int(Ym2612_Channel *CH, int **buf, int length)
 
 
 template<int algo>
-inline void Ym2612::T_Update_Chan_LFO_Int(Ym2612_Channel *CH, int **buf, int length)
+inline void Ym2612::T_Update_Chan_LFO_Int(Ym2612_Channel *CH, int32_t *bufL, int32_t *bufR, int length)
 {
 	// Check if the channel has reached the end of the update.
 	{
@@ -1393,45 +1408,45 @@ inline void Ym2612::T_Update_Chan_LFO_Int(Ym2612_Channel *CH, int **buf, int len
 // Replaces the UPDATE_CHAN function pointer table.
 // NOTE: This will probably be slower than the function pointer table.
 // TODO: Figure out how to optimize it!
-void Ym2612::Update_Chan(int algo_type, Ym2612_Channel *CH, int **buf, int length)
+void Ym2612::Update_Chan(int algo_type, Ym2612_Channel *CH, int32_t *bufL, int32_t *bufR, int length)
 {
 	switch (algo_type & 0x1F)
 	{
-		case 0x00:	T_Update_Chan<0>(CH, buf, length);		break;
-		case 0x01:	T_Update_Chan<1>(CH, buf, length);		break;
-		case 0x02:	T_Update_Chan<2>(CH, buf, length);		break;
-		case 0x03:	T_Update_Chan<3>(CH, buf, length);		break;
-		case 0x04:	T_Update_Chan<4>(CH, buf, length);		break;
-		case 0x05:	T_Update_Chan<5>(CH, buf, length);		break;
-		case 0x06:	T_Update_Chan<6>(CH, buf, length);		break;
-		case 0x07:	T_Update_Chan<7>(CH, buf, length);		break;
+		case 0x00:	T_Update_Chan<0>(CH, bufL, bufR, length);		break;
+		case 0x01:	T_Update_Chan<1>(CH, bufL, bufR, length);		break;
+		case 0x02:	T_Update_Chan<2>(CH, bufL, bufR, length);		break;
+		case 0x03:	T_Update_Chan<3>(CH, bufL, bufR, length);		break;
+		case 0x04:	T_Update_Chan<4>(CH, bufL, bufR, length);		break;
+		case 0x05:	T_Update_Chan<5>(CH, bufL, bufR, length);		break;
+		case 0x06:	T_Update_Chan<6>(CH, bufL, bufR, length);		break;
+		case 0x07:	T_Update_Chan<7>(CH, bufL, bufR, length);		break;
 		
-		case 0x08:	T_Update_Chan_LFO<0>(CH, buf, length);		break;
-		case 0x09:	T_Update_Chan_LFO<1>(CH, buf, length);		break;
-		case 0x0A:	T_Update_Chan_LFO<2>(CH, buf, length);		break;
-		case 0x0B:	T_Update_Chan_LFO<3>(CH, buf, length);		break;
-		case 0x0C:	T_Update_Chan_LFO<4>(CH, buf, length);		break;
-		case 0x0D:	T_Update_Chan_LFO<5>(CH, buf, length);		break;
-		case 0x0E:	T_Update_Chan_LFO<6>(CH, buf, length);		break;
-		case 0x0F:	T_Update_Chan_LFO<7>(CH, buf, length);		break;
+		case 0x08:	T_Update_Chan_LFO<0>(CH, bufL, bufR, length);		break;
+		case 0x09:	T_Update_Chan_LFO<1>(CH, bufL, bufR, length);		break;
+		case 0x0A:	T_Update_Chan_LFO<2>(CH, bufL, bufR, length);		break;
+		case 0x0B:	T_Update_Chan_LFO<3>(CH, bufL, bufR, length);		break;
+		case 0x0C:	T_Update_Chan_LFO<4>(CH, bufL, bufR, length);		break;
+		case 0x0D:	T_Update_Chan_LFO<5>(CH, bufL, bufR, length);		break;
+		case 0x0E:	T_Update_Chan_LFO<6>(CH, bufL, bufR, length);		break;
+		case 0x0F:	T_Update_Chan_LFO<7>(CH, bufL, bufR, length);		break;
 		
-		case 0x10:	T_Update_Chan_Int<0>(CH, buf, length);		break;
-		case 0x11:	T_Update_Chan_Int<1>(CH, buf, length);		break;
-		case 0x12:	T_Update_Chan_Int<2>(CH, buf, length);		break;
-		case 0x13:	T_Update_Chan_Int<3>(CH, buf, length);		break;
-		case 0x14:	T_Update_Chan_Int<4>(CH, buf, length);		break;
-		case 0x15:	T_Update_Chan_Int<5>(CH, buf, length);		break;
-		case 0x16:	T_Update_Chan_Int<6>(CH, buf, length);		break;
-		case 0x17:	T_Update_Chan_Int<7>(CH, buf, length);		break;
+		case 0x10:	T_Update_Chan_Int<0>(CH, bufL, bufR, length);		break;
+		case 0x11:	T_Update_Chan_Int<1>(CH, bufL, bufR, length);		break;
+		case 0x12:	T_Update_Chan_Int<2>(CH, bufL, bufR, length);		break;
+		case 0x13:	T_Update_Chan_Int<3>(CH, bufL, bufR, length);		break;
+		case 0x14:	T_Update_Chan_Int<4>(CH, bufL, bufR, length);		break;
+		case 0x15:	T_Update_Chan_Int<5>(CH, bufL, bufR, length);		break;
+		case 0x16:	T_Update_Chan_Int<6>(CH, bufL, bufR, length);		break;
+		case 0x17:	T_Update_Chan_Int<7>(CH, bufL, bufR, length);		break;
 		
-		case 0x18:	T_Update_Chan_LFO_Int<0>(CH, buf, length);	break;
-		case 0x19:	T_Update_Chan_LFO_Int<1>(CH, buf, length);	break;
-		case 0x1A:	T_Update_Chan_LFO_Int<2>(CH, buf, length);	break;
-		case 0x1B:	T_Update_Chan_LFO_Int<3>(CH, buf, length);	break;
-		case 0x1C:	T_Update_Chan_LFO_Int<4>(CH, buf, length);	break;
-		case 0x1D:	T_Update_Chan_LFO_Int<5>(CH, buf, length);	break;
-		case 0x1E:	T_Update_Chan_LFO_Int<6>(CH, buf, length);	break;
-		case 0x1F:	T_Update_Chan_LFO_Int<7>(CH, buf, length);	break;
+		case 0x18:	T_Update_Chan_LFO_Int<0>(CH, bufL, bufR, length);	break;
+		case 0x19:	T_Update_Chan_LFO_Int<1>(CH, bufL, bufR, length);	break;
+		case 0x1A:	T_Update_Chan_LFO_Int<2>(CH, bufL, bufR, length);	break;
+		case 0x1B:	T_Update_Chan_LFO_Int<3>(CH, bufL, bufR, length);	break;
+		case 0x1C:	T_Update_Chan_LFO_Int<4>(CH, bufL, bufR, length);	break;
+		case 0x1D:	T_Update_Chan_LFO_Int<5>(CH, bufL, bufR, length);	break;
+		case 0x1E:	T_Update_Chan_LFO_Int<6>(CH, bufL, bufR, length);	break;
+		case 0x1F:	T_Update_Chan_LFO_Int<7>(CH, bufL, bufR, length);	break;
 		
 		default:
 			break;
@@ -1444,15 +1459,36 @@ void Ym2612::Update_Chan(int algo_type, Ym2612_Channel *CH, int **buf, int lengt
  ***********************************************/
 
 
+Ym2612::Ym2612()
+{
+	// TODO: Some initialization should go here!
+	m_writeLen = 0;
+	m_enabled = true;	// TODO: Make this customizable.
+	m_dacEnabled = true;	// TODO: Make this customizable.
+	m_improved = true;	// TODO: Make this customizable.
+}
+
+
+Ym2612::Ym2612(int clock, int rate)
+{
+	// TODO: Some initialization should go here!
+	m_writeLen = 0;
+	m_enabled = true;	// TODO: Make this customizable.
+	m_dacEnabled = true;	// TODO: Make this customizable.
+	m_improved = true;	// TODO: Make this customizable.
+	
+	reinit(clock, rate);
+}
+
+
 /**
  * reinit(): (Re-)Initialize the YM2612.
  * @param clock YM2612 clock frequency.
  * @param rate Sound rate.
- * @param interpolation Enable YM2612 Interpolation, ("Improved" YM2612 emulation.)
  * @return 0 on success; non-zero on error.
  */
 // Initialisation de l'émulateur YM2612
-int Ym2612::reinit(int clock, int rate, bool interpolation)
+int Ym2612::reinit(int clock, int rate)
 {
 	// TODO: Eliminate these temporaries. (Move them into the for loops.)
 	double x;
@@ -1473,7 +1509,7 @@ int Ym2612::reinit(int clock, int rate, bool interpolation)
 	m_data.Frequence = ((double)(m_data.Clock) / (double)(m_data.Rate)) / 144.0;
 	m_data.TimerBase = (int)(m_data.Frequence * 4096.0);
 	
-	if (interpolation && (m_data.Frequence > 1.0))
+	if (m_improved && (m_data.Frequence > 1.0))
 	{
 		m_data.Inter_Step = (unsigned int)((1.0 / m_data.Frequence) * (double)(0x4000));
 		m_data.Inter_Cnt = 0;
@@ -1546,11 +1582,12 @@ int Ym2612::reinit(int clock, int rate, bool interpolation)
 	}
 	
 	// Tableau LFO (LFO wav) :
+	// TODO: Only calculate once, since these are static.
 	for (int i = 0; i < LFO_LENGTH; i++)
 	{
 		x = sin (2.0 * PI * (double) (i) / (double) (LFO_LENGTH));	// Sinus
 		x += 1.0;
-		x /= 2.0;			// positive only
+		x /= 2.0;		// positive only
 		x *= 11.8 / ENV_STEP;	// ajusted to MAX enveloppe modulation
 		
 		LFO_ENV_TAB[i] = (int) x;
@@ -1915,10 +1952,11 @@ int Ym2612::write(unsigned int address, uint8_t data)
 
 /**
  * update(): Update the YM2612 audio output.
- * @param buffer Output buffer. (TODO: Convert to interleaved stereo instead of separate stereo.)
- * @param length Length of the output buffer.
+ * @param bufL Left audio buffer. (16-bit; int32_t is used for saturation.)
+ * @param bufR Right audio buffer. (16-bit; int32_t is used for saturation.)
+ * @param length Length to write.
  */
-void Ym2612::update(int **buffer, int length)
+void Ym2612::update(int32_t *bufL, int32_t *bufR, int length)
 {
 	LOG_MSG(ym2612, LOG_MSG_LEVEL_DEBUG4,
 		"Starting generating sound...");
@@ -2002,13 +2040,13 @@ void Ym2612::update(int **buffer, int length)
 		algo_type |= 8;
 	}
 	
-	Update_Chan((m_data.CHANNEL[0].ALGO + algo_type), &(m_data.CHANNEL[0]), buffer, length);
-	Update_Chan((m_data.CHANNEL[1].ALGO + algo_type), &(m_data.CHANNEL[1]), buffer, length);
-	Update_Chan((m_data.CHANNEL[2].ALGO + algo_type), &(m_data.CHANNEL[2]), buffer, length);
-	Update_Chan((m_data.CHANNEL[3].ALGO + algo_type), &(m_data.CHANNEL[3]), buffer, length);
-	Update_Chan((m_data.CHANNEL[4].ALGO + algo_type), &(m_data.CHANNEL[4]), buffer, length);
+	Update_Chan((m_data.CHANNEL[0].ALGO + algo_type), &(m_data.CHANNEL[0]), bufL, bufR, length);
+	Update_Chan((m_data.CHANNEL[1].ALGO + algo_type), &(m_data.CHANNEL[1]), bufL, bufR, length);
+	Update_Chan((m_data.CHANNEL[2].ALGO + algo_type), &(m_data.CHANNEL[2]), bufL, bufR, length);
+	Update_Chan((m_data.CHANNEL[3].ALGO + algo_type), &(m_data.CHANNEL[3]), bufL, bufR, length);
+	Update_Chan((m_data.CHANNEL[4].ALGO + algo_type), &(m_data.CHANNEL[4]), bufL, bufR, length);
 	if (!(m_data.DAC))
-		Update_Chan((m_data.CHANNEL[5].ALGO + algo_type), &(m_data.CHANNEL[5]), buffer, length);
+		Update_Chan((m_data.CHANNEL[5].ALGO + algo_type), &(m_data.CHANNEL[5]), bufL, bufR, length);
 	
 	m_data.Inter_Cnt = int_cnt;
 	
@@ -2337,18 +2375,15 @@ int YM2612_Restore_Full(gsx_v7_ym2612 *save)
 
 /**
  * updateDacAndTimers(): Update the YM2612 DAC output and timers.
- * @param buffer Output buffer. (TODO: Convert to interleaved stereo instead of separate stereo.)
+ * @param bufL Left audio buffer. (16-bit; int32_t is used for saturation.)
+ * @param bufR Right audio buffer. (16-bit; int32_t is used for saturation.)
  * @param length Length of the output buffer.
  */
-void Ym2612::updateDacAndTimers(int **buffer, int length)
+void Ym2612::updateDacAndTimers(int32_t *bufL, int32_t *bufR, int length)
 {
-	int *bufL, *bufR;
-	
-	if (m_data.DAC && m_data.DACdata && DAC_Enable)
+	// Update DAC.
+	if (m_data.DAC && m_data.DACdata && m_dacEnabled)
 	{
-		bufL = buffer[0];
-		bufR = buffer[1];
-		
 		for (int i = 0; i < length; i++)
 		{
 			bufL[i] += (m_data.DACdata & m_data.CHANNEL[5].LEFT);
@@ -2395,19 +2430,21 @@ void Ym2612::updateDacAndTimers(int **buffer, int length)
  */
 void Ym2612::specialUpdate(void)
 {
-	// TODO: Update for Gens/GS II.
-	return;
-#if 0
-	if (YM_Len && YM2612_Enable)
-	{
-		update(YM_Buf, YM_Len);
-		
-		YM_Buf[0] = Seg_L + Sound_Extrapol[VDP_Lines.Display.Current + 1][0];
-		YM_Buf[1] = Seg_R + Sound_Extrapol[VDP_Lines.Display.Current + 1][0];
-		YM_Len = 0;
-	}
-#endif
+	if (!(m_writeLen > 0 && m_enabled))
+		return;
+	
+	// Update the sound buffer.
+	update(m_bufPtrL, m_bufPtrR, m_writeLen);
+	m_writeLen = 0;
+	
+	// Determine the new starting position.
+	int writePos = SoundMgr::GetWritePos(VdpIo::VDP_Lines.Display.Current + 1);
+	
+	// Update the PSG buffer pointers.
+	m_bufPtrL = &SoundMgr::ms_SegBufL[writePos];
+	m_bufPtrR = &SoundMgr::ms_SegBufR[writePos];
 }
+
 
 /**
  * getReg(): Get the value of a register.
@@ -2422,4 +2459,16 @@ int Ym2612::getReg(int regID)
 	return m_data.REG[(regID >> 8) & 1][regID & 0xFF];
 }
 
+
+/**
+ * resetBufferPtrs(): Reset the PSG buffer pointers.
+ */
+void Ym2612::resetBufferPtrs(void)
+{
+	m_bufPtrL = &SoundMgr::ms_SegBufL[0];
+	m_bufPtrR = &SoundMgr::ms_SegBufR[0];
+}
+
 /* end */
+
+}

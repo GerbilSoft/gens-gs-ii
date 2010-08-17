@@ -94,27 +94,43 @@
 #define LFO_FMS_LBITS  9	// FIXED (LFO_FMS_BASE gives somethink as 1)
 #define LFO_FMS_BASE   ((int) (0.05946309436 * 0.0338 * (double) (1 << LFO_FMS_LBITS)))
 
+namespace LibGens
+{
+
 class Ym2612
 {
 	public:
 		Ym2612();
-		Ym2612(int clock, int rate, bool interpolation);
+		Ym2612(int clock, int rate);
 		
-		int reinit(int clock, int rate, bool interpolation);
+		int reinit(int clock, int rate);
 		void reset(void);
 		
 		uint8_t read(void);
 		int write(unsigned int address, uint8_t data);
-		void update(int **buffer, int length);
+		void update(int32_t *bufL, int32_t *bufR, int length);
+		
+		// Properties.
+		// TODO: Read-only for now.
+		bool enabled(void) const { return m_enabled; }
+		bool dacEnabled(void) const { return m_dacEnabled; }
+		bool improved(void) const { return m_improved; }
 		
 		/* GSX savestate functions. */
 		int saveState(uint8_t state[0x200]);
 		int restoreState(const uint8_t state[0x200]);
 		
 		/** Gens-specific code. **/
-		void updateDacAndTimers(int **buffer, int length);
+		void updateDacAndTimers(int32_t *bufL, int32_t *bufR, int length);
 		void specialUpdate(void);
 		int getReg(int regID);
+		
+		// YM write length.
+		inline void addWriteLen(int len) { m_writeLen += len; }
+		inline void clearWriteLen(void) { m_writeLen = 0; }
+		
+		// Reset buffer pointers.
+		void resetBufferPtrs(void);
 	
 	protected:
 		enum ADSR
@@ -256,10 +272,8 @@ class Ym2612
 		static int LFO_FREQ_TAB[LFO_LENGTH];		// LFO FMS TABLE
 		
 		// LFO temporary tables. (Member variables)
-		// TODO: These are supposed to be member variables,
-		// but they're needed right now in the templated Update functions...
-		static int LFO_ENV_UP[MAX_UPDATE_LENGTH];	// Temporary calculated LFO AMS (adjusted for 11.8 dB)
-		static int LFO_FREQ_UP[MAX_UPDATE_LENGTH];	// Temporary calculated LFO FMS
+		int LFO_ENV_UP[MAX_UPDATE_LENGTH];	// Temporary calculated LFO AMS (adjusted for 11.8 dB)
+		int LFO_FREQ_UP[MAX_UPDATE_LENGTH];	// Temporary calculated LFO FMS
 		
 		// NOTE: INTER_TAB isn't used...
 #if 0
@@ -306,34 +320,32 @@ class Ym2612
 		
 		/** Update Channel templates. **/
 		template<int algo>
-		inline void T_Update_Chan(Ym2612_Channel *CH, int **buf, int length);
+		inline void T_Update_Chan(Ym2612_Channel *CH, int32_t *bufL, int32_t *bufR, int length);
 		
 		template<int algo>
-		inline void T_Update_Chan_LFO(Ym2612_Channel *CH, int **buf, int length);
+		inline void T_Update_Chan_LFO(Ym2612_Channel *CH, int32_t *bufL, int32_t *bufR, int length);
 		
 		template<int algo>
-		inline void T_Update_Chan_Int(Ym2612_Channel *CH, int **buf, int length);
+		inline void T_Update_Chan_Int(Ym2612_Channel *CH, int32_t *bufL, int32_t *bufR, int length);
 		
 		template<int algo>
-		inline void T_Update_Chan_LFO_Int(Ym2612_Channel *CH, int **buf, int length);
+		inline void T_Update_Chan_LFO_Int(Ym2612_Channel *CH, int32_t *bufL, int32_t *bufR, int length);
 		
-		void Update_Chan(int algo_type, Ym2612_Channel *CH, int **buf, int length);
+		void Update_Chan(int algo_type, Ym2612_Channel *CH, int32_t *bufL, int32_t *bufR, int length);
+		
+		// PSG write length. (for audio output)
+		int m_writeLen;
+		bool m_enabled;		// YM2612 Enabled
+		bool m_dacEnabled;	// DAC Enabled
+		bool m_improved;	// YM2612 Improved
+		
+		// YM buffer pointers.
+		// TODO: Figure out how to get rid of these!
+		int32_t *m_bufPtrL;
+		int32_t *m_bufPtrR;
 };
 
 /* Gens */
-
-// TODO: Figure out what to do with these.
-extern int YM2612_Enable;
-extern int YM2612_Improv;
-extern int DAC_Enable;
-extern int *YM_Buf[2];
-extern int YM_Len;
-
-/* end */
-
-/* Gens */
-
-int YM2612_Get_Reg(int regID);
 
 #if 0
 /* GSX v7 savestate functionality. */
@@ -343,5 +355,7 @@ int YM2612_Restore_Full(struct _gsx_v7_ym2612 *save);
 #endif
 
 /* end */
+
+}
 
 #endif /* __LIBGENS_SOUND_YM2612_HPP__ */

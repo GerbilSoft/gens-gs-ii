@@ -86,6 +86,7 @@ EEPRom M68K_Mem::m_EEPRom;
 // Audio ICs.
 // TODO: Move this elsewhere?
 Psg M68K_Mem::m_Psg;
+Ym2612 M68K_Mem::m_Ym2612;
 
 /** Z80/M68K cycle table. **/
 int M68K_Mem::Z80_M68K_Cycle_Tab[512];
@@ -820,8 +821,7 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 			Z80_State |= Z80_STATE_RESET;
 			
 			// YM2612's RESET line is tied to the Z80's RESET line.
-			// TODO
-			//YM2612_Reset();
+			m_Ym2612.reset();
 		}
 		return;
 	}
@@ -1117,8 +1117,7 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 			Z80_State |= Z80_STATE_RESET;
 			
 			// YM2612's RESET line is tied to the Z80's RESET line.
-			// TODO
-			//YM2612_Reset();
+			m_Ym2612.reset();
 		}
 		
 		return;

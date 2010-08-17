@@ -35,7 +35,6 @@
 // TODO
 #if 0
 #include "mem_m68k.h"
-#include "gens_core/sound/ym2612.hpp"
 #include "gens_core/vdp/vdp_io.h"
 #endif
 
@@ -147,13 +146,8 @@ uint8_t FASTCALL Z80_MD_Mem::Z80_ReadB_YM2612(uint32_t address)
 	if (M68K_Mem::Z80_State & Z80_STATE_RESET)
 		return 0xFF;
 	
-	// LibGens TODO: YM2612
-#if 0
-	return YM2612_Read();
-#endif
-	// FIXME: Returning 0xFF breaks "Sonic 1 SAGE 2010".
-	// Return 0 instead.
-	return 0;
+	// Return the YM2612 status register.
+	return M68K_Mem::m_Ym2612.read();
 }
 
 
@@ -262,10 +256,8 @@ void FASTCALL Z80_MD_Mem::Z80_WriteB_YM2612(uint32_t address, uint8_t data)
 	if (M68K_Mem::Z80_State & Z80_STATE_RESET)
 		return;
 	
-	// LibGens TODO: YM2612
-#if 0	
-	YM2612_Write((address & 0x03), data);
-#endif
+	// Write to the YM2612.
+	M68K_Mem::m_Ym2612.write(address & 0x03, data);
 }
 
 

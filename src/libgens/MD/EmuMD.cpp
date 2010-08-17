@@ -171,12 +171,18 @@ int EmuMD::SetRom(Rom *rom)
 	
 	// Initialize audio.
 	// TODO: Move audio chips to an "MD circuit board" class or something.
-	// TODO: Don't hardcode PSG clock and audio rate.
+	// TODO: Don't hardcode PSG/YM clock and audio rate.
 	SoundMgr::ReInit(44100, M68K_Mem::ms_Region.isPal());
 	if (M68K_Mem::ms_Region.isPal())
+	{
 		M68K_Mem::m_Psg.reinit((int)((double)CLOCK_PAL / 15.0), 44100);
+		M68K_Mem::m_Ym2612.reinit((int)((double)CLOCK_PAL / 7.0), 44100);
+	}
 	else
+	{
 		M68K_Mem::m_Psg.reinit((int)((double)CLOCK_NTSC / 15.0), 44100);
+		M68K_Mem::m_Ym2612.reinit((int)((double)CLOCK_NTSC / 7.0), 44100);
+	}
 	
 	return 0;
 }
@@ -224,15 +230,14 @@ int EmuMD::SaveData(Rom *rom)
 template<EmuMD::LineType_t LineType, bool VDP>
 FORCE_INLINE void EmuMD::T_Do_Line(void)
 {
-	// TODO: Sound, I/O, CPU. (LibGens)
-#if 0
-	int *buf[2];
-	buf[0] = Seg_L + Sound_Extrapol[VDP_Lines.Display.Current][0];
-	buf[1] = Seg_R + Sound_Extrapol[VDP_Lines.Display.Current][0];
-	YM2612_DacAndTimers_Update(buf, Sound_Extrapol[VDP_Lines.Display.Current][1]);
-	YM_Len += Sound_Extrapol[VDP_Lines.Display.Current][1];
-#endif
+	int writePos = SoundMgr::GetWritePos(VdpIo::VDP_Lines.Display.Current);
+	int32_t *bufL = &SoundMgr::ms_SegBufL[writePos];
+	int32_t *bufR = &SoundMgr::ms_SegBufR[writePos];
+	
+	// Update the sound chips.
 	int writeLen = SoundMgr::GetWriteLen(VdpIo::VDP_Lines.Display.Current);
+	M68K_Mem::m_Ym2612.updateDacAndTimers(bufL, bufR, writeLen);
+	M68K_Mem::m_Ym2612.addWriteLen(writeLen);
 	M68K_Mem::m_Psg.addWriteLen(writeLen);
 	
 	// Notify controllers that a new scanline is being drawn.
@@ -346,14 +351,11 @@ FORCE_INLINE void EmuMD::T_Do_Frame(void)
 	m_port2->update();
 	m_portE->update();
 	
-	// TODO: Sound, CPU. (LibGens)
-#if 0
-	YM_Buf[0] = PSG_Buf[0] = Seg_L;
-	YM_Buf[1] = PSG_Buf[1] = Seg_R;
-	YM_Len = 0;
-#endif
-	M68K_Mem::m_Psg.clearWriteLen();
+	// Reset the sound chip buffer pointers and write length.
+	M68K_Mem::m_Ym2612.resetBufferPtrs();
+	M68K_Mem::m_Ym2612.clearWriteLen();
 	M68K_Mem::m_Psg.resetBufferPtrs();
+	M68K_Mem::m_Psg.clearWriteLen();
 	
 	// Clear all of the cycle counters.
 	M68K_Mem::Cycles_M68K = 0;
@@ -422,14 +424,11 @@ FORCE_INLINE void EmuMD::T_Do_Frame(void)
 		VdpIo::VDP_Lines.Visible.Current++;
 	} while (VdpIo::VDP_Lines.Display.Current < VdpIo::VDP_Lines.Display.Total);
 	
-	// TODO: Sound. (LibGens)
 	// Update the PSG and YM2612 output.
 	M68K_Mem::m_Psg.specialUpdate();
-#if 0
-	// Update the PSG and YM2612 output.
-	PSG_Special_Update();
-	YM2612_Special_Update();
+	M68K_Mem::m_Ym2612.specialUpdate();
 	
+#if 0
 	// If WAV or GYM is being dumped, update the WAV or GYM.
 	// TODO: VGM dumping
 	if (WAV_Dumping)
