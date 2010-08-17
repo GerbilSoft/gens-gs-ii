@@ -34,6 +34,16 @@
 // Sound Manager.
 #include "sound/SoundMgr.hpp"
 
+#if defined(__APPLE__) && defined(__i386__) || defined(__amd64__)
+// Mac OS X requires 16-byte aligned stacks.
+// Otherwise, the program will randomly crash in
+// __dyld_misaligned_stack_error().
+// (The crash might not even be immediately after
+// calling the C function!)
+#define FORCE_STACK_ALIGNMENT
+#endif
+#define FORCE_STACK_ALIGNMENT
+
 // TODO: mdZ80 accesses Ram_Z80 directly.
 // Move Ram_Z80 back to Z80_MD_Mem once mdZ80 is updated.
 uint8_t Ram_Z80[8 * 1024];

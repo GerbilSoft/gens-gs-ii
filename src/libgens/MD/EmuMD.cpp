@@ -211,6 +211,41 @@ int EmuMD::SaveData(Rom *rom)
 
 
 /**
+ * EmuMD::AutoSaveData(): AutoSave SRam/EEPRom.
+ * @param rom Rom class with the ROM image.
+ * @param frames Number of frames elapsed, or -1 for paused (force autosave).
+ * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
+ */
+int EmuMD::AutoSaveData(Rom *rom, int framesElapsed)
+{
+	// TODO: Move SRam and EEPRom to the Rom class?
+	if (M68K_Mem::m_EEPRom.isEEPRomTypeSet())
+	{
+		// Save EEPRom.
+		int eepromSize = M68K_Mem::m_EEPRom.autoSave(framesElapsed);
+		if (eepromSize > 0)
+		{
+			lg_osd(OSD_EEPROM_AUTOSAVE, eepromSize);
+			return 2;
+		}
+	}
+	else
+	{
+		// Save SRam.
+		int sramSize = M68K_Mem::m_SRam.autoSave(framesElapsed);
+		if (sramSize > 0)
+		{
+			lg_osd(OSD_SRAM_AUTOSAVE, sramSize);
+			return 1;
+		}
+	}
+	
+	// Nothing was saved.
+	return 0;
+}
+
+
+/**
  * T_Do_Line(): Run a scanline.
  * @param LineType Line type.
  * @param VDP If true, VDP is updated.

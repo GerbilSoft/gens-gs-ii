@@ -100,7 +100,7 @@ int SRam::load(void)
 	fclose(f);
 	
 	// Return the number of bytes read.
-	m_dirty = false;
+	clearDirty();
 	return ret;
 }
 
@@ -149,7 +149,7 @@ int SRam::save(void)
 	fclose(f);
 	
 	// Return the number of bytes saved.
-	m_dirty = false;
+	clearDirty();
 	return ret;
 }
 
@@ -157,15 +157,27 @@ int SRam::save(void)
 /**
  * autoSave(): Autosave the SRam file.
  * This saves the SRam file if its last modification time is past a certain threshold.
+ * @param framesElapsed Number of frames elapsed, or 0 for paused (force autosave).
  * @return Positive value indicating SRam size on success; 0 if no save is needed; negative on error.
  */
-int SRam::autoSave(void)
+int SRam::autoSave(int framesElapsed)
 {
 	if (!m_dirty)
 		return 0;
 	
-	// TODO
-	return 0;
+	// TODO: Customizable autosave threshold.
+	// TODO: PAL/NTSC detection.
+	if (framesElapsed > 0)
+	{
+		// Check if we've passed the autosave threshold.
+		bool isPal = false;
+		m_framesElapsed += framesElapsed;
+		if (m_framesElapsed < (AUTOSAVE_THRESHOLD_DEFAULT / (isPal ? 20 : 16)))
+			return 0;
+	}
+	
+	// Autosave threshold has passed.
+	return save();
 }
 
 }

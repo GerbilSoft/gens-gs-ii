@@ -116,7 +116,7 @@ void EEPRom::reset(void)
 	
 	// Initial EEPRom state.
 	m_state = EEP_STANDBY;
-	m_dirty = false;
+	clearDirty();
 	
 	// Reset the clock and data lines
 	m_scl = false;
@@ -633,7 +633,7 @@ void EEPRom::processWriteCmd(void)
 					
 					// Set the dirty flag.
 					// TODO: Only if the bit was actually modified?
-					m_dirty = true;
+					setDirty();
 					
 					if (m_counter == 8)
 					{

@@ -140,9 +140,15 @@ class EEPRom
 		/**
 		 * autoSave(): Autosave the EEPRom file.
 		 * This saves the EEPRom file if its last modification time is past a certain threshold.
+		 * @param framesElapsed Number of frames elapsed, or 0 for paused (force autosave).
 		 * @return Positive value indicating SRam size on success; 0 if no save is needed; negative on error.
 		 */
-		int autoSave(void);
+		int autoSave(int framesElapsed);
+		
+		/**
+		 * AUTOSAVE_THRESHOLD_DEFAULT: Default autosave threshold, in milliseconds.
+		 */
+		static const int AUTOSAVE_THRESHOLD_DEFAULT = 1000;
 	
 	protected:
 		void processWriteCmd(void);
@@ -211,6 +217,10 @@ class EEPRom
 		
 		// Dirty flag.
 		bool m_dirty;
+		int m_framesElapsed;
+		
+		inline void setDirty(void) { m_dirty = true; m_framesElapsed = 0; }
+		inline void clearDirty(void) { m_dirty = false; m_framesElapsed = 0; }
 		
 		/** EEPRom file handling functions. **/
 		

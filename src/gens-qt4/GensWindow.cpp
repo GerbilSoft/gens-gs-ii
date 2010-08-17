@@ -412,6 +412,10 @@ void GensWindow::emuFrameDone(void)
 		}
 	}
 	
+	// Check for SRam/EEPRom autosave.
+	// TODO: Frames elapsed; autosave on pause.
+	LibGens::EmuMD::AutoSaveData(m_rom, 1);
+	
 	// Check if the controller was changed.
 	// NOTE: DEBUG CODE: Remove this later!
 	if (m_ctrlChange != -1)
