@@ -82,11 +82,20 @@ void GensPortAudio::open(void)
 	}
 	
 	// Get the default device information.
-	const PaDeviceInfo *dev = Pa_GetDeviceInfo(0);
+	PaDeviceIndex defaultDevIndex = Pa_GetDefaultOutputDevice();
+	if (defaultDevIndex == paNoDevice)
+	{
+		LOG_MSG(audio, LOG_MSG_LEVEL_ERROR,
+			"Pa_GetDefaultOutputDevice() returned paNoDevice.");
+		Pa_Terminate();
+		return;
+	}
+	
+	const PaDeviceInfo *dev = Pa_GetDeviceInfo(defaultDevIndex);
 	if (!dev)
 	{
 		LOG_MSG(audio, LOG_MSG_LEVEL_ERROR,
-			"Pa_GetDeviceInfo(0) returned NULL.");
+			"Pa_GetDeviceInfo(%d) returned NULL.", defaultDevIndex);
 		Pa_Terminate();
 		return;
 	}
