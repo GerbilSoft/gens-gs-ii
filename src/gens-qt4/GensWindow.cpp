@@ -44,6 +44,8 @@
 #include "libgens/IO/Io2Button.hpp"
 #include "libgens/IO/IoMegaMouse.hpp"
 #include "libgens/IO/IoTeamplayer.hpp"
+#include "libgens/IO/Io4WPMaster.hpp"
+#include "libgens/IO/Io4WPSlave.hpp"
 
 // Test loading ROMs.
 #include "libgens/Rom.hpp"
@@ -376,6 +378,10 @@ void GensWindow::menuTriggered(int id)
 					m_ctrlChange = 5;
 					break;
 				
+				case MNUID_ITEM(IDM_CTRLTEST_4WP):
+					m_ctrlChange = 6;
+					break;
+				
 				case MNUID_ITEM(IDM_CTRLTEST_CONFIG):
 					// Controller Configuration.
 					CtrlConfigWindow::ShowSingle(this);
@@ -420,78 +426,104 @@ void GensWindow::emuFrameDone(void)
 	// NOTE: DEBUG CODE: Remove this later!
 	if (m_ctrlChange != -1)
 	{
-		LibGens::IoBase *controller = NULL;
+		LibGens::IoBase *port1 = NULL;
+		LibGens::IoBase *port2 = NULL;
+		
 		switch (m_ctrlChange)
 		{
 			case 0:
 				// No controller.
-				controller = new LibGens::IoBase(LibGens::EmuMD::m_port1);
+				port1 = new LibGens::IoBase(LibGens::EmuMD::m_port1);
 				// TODO: Copy settings from existing Port 1 controller.
 				m_vBackend->osd_printf(1500, "Port 1 set to NONE.");
 				break;
 			
 			case 1:
 				// 3-button controller.
-				controller = new LibGens::Io3Button(LibGens::EmuMD::m_port1);
+				port1 = new LibGens::Io3Button(LibGens::EmuMD::m_port1);
 				// TODO: Copy settings from existing Port 1 controller.
 				m_vBackend->osd_printf(1500, "Port 1 set to 3-BUTTON.");
 				break;
 			
 			case 2:
 				// 6-button controller.
-				controller = new LibGens::Io6Button(LibGens::EmuMD::m_port1);
+				port1 = new LibGens::Io6Button(LibGens::EmuMD::m_port1);
 				// TODO: Copy settings from existing Port 1 controller.
 				m_vBackend->osd_printf(1500, "Port 1 set to 6-BUTTON.");
 				break;
 			
 			case 3:
 				// 2-button controller.
-				controller = new LibGens::Io2Button(LibGens::EmuMD::m_port1);
+				port1 = new LibGens::Io2Button(LibGens::EmuMD::m_port1);
 				// TODO: Copy settings from existing Port 1 controller.
 				m_vBackend->osd_printf(1500, "Port 1 set to 2-BUTTON.");
 				break;
 			
 			case 4:
 				// Sega Mega Mouse.
-				controller = new LibGens::IoMegaMouse(LibGens::EmuMD::m_port1);
+				port1 = new LibGens::IoMegaMouse(LibGens::EmuMD::m_port1);
 				// TODO: Copy settings from existing Port 1 controller.
 				m_vBackend->osd_printf(1500, "Port 1 set to SEGA MEGA MOUSE.");
 				break;
 			
 			case 5:
 				// Sega Teamplayer.
-				controller = new LibGens::IoTeamplayer(LibGens::EmuMD::m_port1);
+				port1 = new LibGens::IoTeamplayer(LibGens::EmuMD::m_port1);
 				// TODO: Copy settings from existing Port 1 controller.
 				m_vBackend->osd_printf(1500, "Port 1 set to SEGA TEAMPLAYER.");
 				break;
+			
+			case 6:
+			{
+				// EA 4-Way Play
+				LibGens::Io4WPMaster *master = new LibGens::Io4WPMaster(LibGens::EmuMD::m_port2);
+				LibGens::Io4WPSlave *slave = new LibGens::Io4WPSlave(LibGens::EmuMD::m_port1);
+				master->setSlaveDevice(slave);
+				port2 = master;
+				port1 = slave;
+				m_vBackend->osd_printf(1500, "Port 1 set to EA 4-WAY PLAY (Slave).");
+				m_vBackend->osd_printf(1500, "Port 2 set to EA 4-WAY PLAY (Master).");
+				break;
+			}
 			
 			default:
 				break;
 		}
 		
-		if (controller)
+		if (port1)
 		{
 			delete LibGens::EmuMD::m_port1;
-			LibGens::EmuMD::m_port1 = controller;
-			
-			// Print controller information.
-			printf("Port 1: %s - %d buttons: ", controller->devName(), controller->numButtons());
-			if (controller->numButtons() > 0)
+			LibGens::EmuMD::m_port1 = port1;
+		}
+		
+		if (port2)
+		{
+			delete LibGens::EmuMD::m_port2;
+			LibGens::EmuMD::m_port2 = port2;
+		}
+		
+		// Make sure there's no dangling 4WP master/slave device.
+		LibGens::IoBase::IoType p1_type = LibGens::EmuMD::m_port1->devType();
+		LibGens::IoBase::IoType p2_type = LibGens::EmuMD::m_port2->devType();
+		bool p1_is4WP = (p1_type == LibGens::IoBase::IOT_4WP_MASTER || p1_type == LibGens::IoBase::IOT_4WP_SLAVE);
+		bool p2_is4WP = (p2_type == LibGens::IoBase::IOT_4WP_MASTER || p2_type == LibGens::IoBase::IOT_4WP_SLAVE);
+		
+		if (p1_is4WP ^ p2_is4WP)
+		{
+			// Dangling 4WP device.
+			if (p1_is4WP)
 			{
-				int btn = 0;
-				while (btn >= 0)
-				{
-					if (btn != 0)
-						printf(", ");
-					printf("%s", controller->buttonName(btn));
-					btn = controller->nextLogicalButton(btn);
-				}
-				printf("\n");
+				port1 = new LibGens::IoBase(LibGens::EmuMD::m_port1);
+				delete LibGens::EmuMD::m_port1;
+				LibGens::EmuMD::m_port1 = port1;
+				m_vBackend->osd_printf(1500, "Port 1 set to NONE.");
 			}
 			else
 			{
-				// No buttons.
-				printf("(none)\n");
+				port2 = new LibGens::IoBase(LibGens::EmuMD::m_port2);
+				delete LibGens::EmuMD::m_port2;
+				LibGens::EmuMD::m_port2 = port2;
+				m_vBackend->osd_printf(1500, "Port 2 set to NONE.");
 			}
 		}
 		
