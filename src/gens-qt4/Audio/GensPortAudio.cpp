@@ -221,15 +221,21 @@ int GensPortAudio::write(void)
 	if (!m_open)
 		return 1;
 	
+	const int SegLength = LibGens::SoundMgr::GetSegLength();
+	while ((m_bufPos + SegLength) > m_bufLen)
+	{
+		// Buffer overflow! Wait for the buffer to decrease.
+		// This seems to help limit the framerate when it's running too fast.
+		// TODO: Move somewhere else?
+		// TODO: usleep() or not?
+	}
+	
 	// Lock the audio buffer.
 	m_mtxBuf.lock();
 	
 	// TODO: Mono/stereo, MMX, etc.
-	// TODO: Currently uses hard-coded 735. (44.1 kHz NTSC)
 	unsigned int i = 0;
 	unsigned int bufIndex = m_bufPos;
-	const int SegLength = LibGens::SoundMgr::GetSegLength();
-	
 	for (; i < SegLength && bufIndex < m_bufLen; i++, bufIndex++)
 	{
 		int32_t L = LibGens::SoundMgr::ms_SegBufL[i];
