@@ -59,6 +59,8 @@ SET(libgens_SRCS
 	lg_osd.c
 	Save/EEPRom_File.cpp
 	sound/SoundMgr.cpp
+	IO/Io4WPMaster.cpp
+	IO/Io4WPSlave.cpp
 	)
 
 # Compatibility sources.

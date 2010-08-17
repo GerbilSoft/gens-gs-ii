@@ -101,6 +101,8 @@ class IoBase
 			IOT_2BTN	= 3,
 			IOT_MEGA_MOUSE	= 4,
 			IOT_TEAMPLAYER	= 5,
+			IOT_4WP_MASTER	= 6,
+			IOT_4WP_SLAVE	= 7,
 			
 			IOT_MAX
 		};
