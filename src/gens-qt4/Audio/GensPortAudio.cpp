@@ -172,14 +172,28 @@ int GensPortAudio::gensPaCallback(const void *inputBuffer, void *outputBuffer,
 	// http://www.portaudio.com/trac/wiki/TutorialDir/WritingACallback
 	uint16_t *out = (uint16_t*)outputBuffer;
 	
+	// Lock the audio buffer.
+	m_mtxBuf.lock();
+	
 	// Sample size. (16-bit stereo)
-	const int sample_size = (sizeof(uint16_t)*2);
+	const int sample_size = (sizeof(uint16_t) * (m_stereo ? 2 : 1));
+	
+	if (m_bufPos <= 0)
+	{
+		// Audio is empty.
+		m_mtxBuf.unlock();
+		
+		// Zero the output buffer.
+		memset(out, 0x00, framesPerBuffer * sample_size);
+		return 0;
+	}
 	
 	// Copy our audio data directly to the output buffer.
 	if (m_bufPos < framesPerBuffer)
 	{
-		memcpy(out, m_buf, m_bufPos*sample_size);
+		memcpy(out, m_buf, m_bufPos * sample_size);
 		m_bufPos = 0;
+		m_mtxBuf.unlock();
 		
 		// Zero out the rest of the buffer.
 		memset(&out[m_bufPos], 0x00, (framesPerBuffer - m_bufPos) * sample_size);
@@ -191,6 +205,9 @@ int GensPortAudio::gensPaCallback(const void *inputBuffer, void *outputBuffer,
 	
 	// Shift all the data over.
 	memmove(m_buf, &m_buf[framesPerBuffer], m_bufPos * sample_size);
+	
+	// Unlock the audio buffer.
+	m_mtxBuf.unlock();
 	return 0;
 }
 
@@ -203,6 +220,9 @@ int GensPortAudio::write(void)
 {
 	if (!m_open)
 		return 1;
+	
+	// Lock the audio buffer.
+	m_mtxBuf.lock();
 	
 	// TODO: Mono/stereo, MMX, etc.
 	// TODO: Currently uses hard-coded 735. (44.1 kHz NTSC)
@@ -238,6 +258,8 @@ int GensPortAudio::write(void)
 	// Increase the buffer position.
 	m_bufPos += i;
 	
+	// Unlock the audio buffer.
+	m_mtxBuf.unlock();
 	return 0;
 }
 

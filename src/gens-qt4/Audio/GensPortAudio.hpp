@@ -30,6 +30,9 @@
 // PortAudio.
 #include "portaudio.h"
 
+// Qt includes.
+#include <QtCore/QMutex>
+
 namespace GensQt4
 {
 
@@ -78,6 +81,7 @@ class GensPortAudio
 		int16_t m_buf[882*8][2];
 		unsigned int m_bufLen;
 		unsigned int m_bufPos;
+		QMutex m_mtxBuf;
 		
 		// Audio settings.
 		int m_rate;
