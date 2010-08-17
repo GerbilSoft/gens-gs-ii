@@ -33,10 +33,12 @@ namespace GensQt4
 EmuThread::EmuThread()
 {
 	m_stop = false;
+	m_audio = NULL;
 }
 
 EmuThread::~EmuThread()
 {
+	m_audio = NULL;
 }
 
 void EmuThread::resume(void)
@@ -65,6 +67,9 @@ void EmuThread::run(void)
 	m_mutex.lock();
 	while (!m_stop)
 	{
+		// Update audio first.
+		m_audio->write();
+		
 		// Run a frame of emulation.
 		LibGens::EmuMD::Do_Frame();
 		

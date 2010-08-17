@@ -412,10 +412,6 @@ void GensWindow::emuFrameDone(void)
 		}
 	}
 	
-	// Write audio.
-	// TODO: In Gens/GS, this is done before the frame is run.
-	m_audio->write();
-	
 	// Check if the controller was changed.
 	// NOTE: DEBUG CODE: Remove this later!
 	if (m_ctrlChange != -1)
@@ -598,6 +594,7 @@ void GensWindow::openRom(void)
 	
 	// Start the emulation thread.
 	gqt4_emuThread = new EmuThread();
+	gqt4_emuThread->setAudio(m_audio);
 	QObject::connect(gqt4_emuThread, SIGNAL(frameDone(void)),
 			 this, SLOT(emuFrameDone(void)));
 	gqt4_emuThread->start();

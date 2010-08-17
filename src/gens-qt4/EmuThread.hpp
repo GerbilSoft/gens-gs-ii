@@ -28,6 +28,8 @@
 #include <QtCore/QWaitCondition>
 #include <QtCore/QMutex>
 
+#include "Audio/GensPortAudio.hpp"
+
 namespace GensQt4
 {
 
@@ -38,6 +40,8 @@ class EmuThread : public QThread
 	public:
 		EmuThread();
 		~EmuThread();
+		
+		void setAudio(GensPortAudio *audio) { m_audio = audio; }
 		
 	signals:
 		void frameDone(void);
@@ -52,6 +56,8 @@ class EmuThread : public QThread
 		QMutex m_mutex;
 		
 		bool m_stop;
+		
+		GensPortAudio *m_audio;
 };
 
 }

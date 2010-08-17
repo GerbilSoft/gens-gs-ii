@@ -86,7 +86,7 @@ void GensPortAudio::open(void)
 					(m_stereo ? 2 : 1),	// stereo output
 					paInt16,		// 16-bit signed integer
 					m_rate,			// Sample rate
-					paFramesPerBufferUnspecified,
+					256,
 					GensPaCallback,		// Callback function
 					this);			// Pointer to this object
 	
