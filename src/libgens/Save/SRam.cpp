@@ -26,6 +26,7 @@
 
 // C includes.
 #include <stdio.h>
+#include <string.h>
 
 // C++ includes.
 #include <string>
@@ -39,6 +40,30 @@ const char *SRam::ms_FileExt = "srm";
 
 // TODO: SRam directory path.
 // For now, just save in the ROM directory.
+
+/**
+ * reset(): Clear SRam and initialize settings.
+ */
+void SRam::reset(void)
+{
+	/**
+	 * SRam is initialized with 0xFF.
+	 * This is similar to how it's initialized on the actual hardware.
+	 * It's also required in order to work around bugs in at least
+	 * two games that expect factory-formatted SRam:
+	 * - Micro Machines 2
+	 * - Dino Dini's Soccer
+	 * 
+	 * NOTE: m_enabled is not set here,
+	 * since that's a user setting.
+	 */
+	
+	memset(m_sram, 0xFF, sizeof(m_sram));
+	m_on = false;
+	m_write = false;
+	clearDirty();
+}
+
 
 /**
  * setFilename(): Set the SRam filename based on a ROM filename.
