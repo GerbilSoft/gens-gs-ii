@@ -231,8 +231,7 @@ int GensPortAudio::gensPaCallback(const void *inputBuffer, void *outputBuffer,
 	m_bufPos -= framesPerBuffer;
 	
 	// Shift all the data over.
-	// RShift by 1 is necessary because m_buf is int16_t.
-	memmove(m_buf, &m_buf[(framesPerBuffer * m_sampleSize) >> 1], (m_bufPos * m_sampleSize));
+	memmove(m_buf, &m_buf[(framesPerBuffer * m_sampleSize) / sizeof(m_buf[0])], (m_bufPos * m_sampleSize));
 	
 	// Unlock the audio buffer.
 	m_mtxBuf.unlock();
