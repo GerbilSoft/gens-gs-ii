@@ -299,14 +299,8 @@ int GensPortAudio::writeMonoMMX(void)
 		dest++;
 	}
 	
-	// Load the shift value.
-	__asm__ (
-		"movl	$32, %%eax\n"
-		"movd	%%eax, %%mm5\n"
-		: // output
-		: // input
-		: "eax" // clobber
-		);
+	// NOTE: Using a shift value in a register
+	// seems to be slower for monaural...
 	
 	// Write two samples at once using MMX.
 	for (unsigned int i = (SegLength / 2); i != 0; i--, srcL += 2, srcR += 2, dest += 2)
