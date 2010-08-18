@@ -27,6 +27,39 @@
 namespace LibGens
 {
 
+Io2Button::Io2Button()
+{
+	// Resize the keymap.
+	m_keyMap.resize(numButtons());
+	
+	// Create the default keymap.
+	// TODO: Initialize elsewhere.
+	m_keyMap[BTNI_UP]	= KEYV_UP;
+	m_keyMap[BTNI_DOWN]	= KEYV_DOWN;
+	m_keyMap[BTNI_LEFT]	= KEYV_LEFT;
+	m_keyMap[BTNI_RIGHT]	= KEYV_RIGHT;
+	m_keyMap[BTNI_1]	= KEYV_s;
+	m_keyMap[BTNI_2]	= KEYV_d;
+}
+
+Io2Button::Io2Button(const IoBase *other)
+	: IoBase(other)
+{
+	// Resize the keymap.
+	m_keyMap.resize(numButtons());
+	
+	// Create the default keymap.
+	// TODO: Initialize elsewhere.
+	// TODO: Copy from other controller?
+	m_keyMap[BTNI_UP]	= KEYV_UP;
+	m_keyMap[BTNI_DOWN]	= KEYV_DOWN;
+	m_keyMap[BTNI_LEFT]	= KEYV_LEFT;
+	m_keyMap[BTNI_RIGHT]	= KEYV_RIGHT;
+	m_keyMap[BTNI_1]	= KEYV_s;
+	m_keyMap[BTNI_2]	= KEYV_d;
+}
+
+
 /**
  * readData(): Read data from the controller.
  * @return Data from the controller.
@@ -42,28 +75,6 @@ uint8_t Io2Button::readData(void)
 	
 	uint8_t ret = (0xC0 | (m_buttons & 0x3F));
 	return applyTristate(ret);
-}
-
-
-/**
- * update(): I/O device update function.
- */
-void Io2Button::update(void)
-{
-	// TODO: Allow customizable keymaps.
-	m_buttons = 0;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_d);		// 2
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_s);		// 1
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_RIGHT);	// Right
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_LEFT);	// Left
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_DOWN);	// Down
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_UP);		// Up
-	m_buttons = ~m_buttons;
 }
 
 

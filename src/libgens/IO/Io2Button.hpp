@@ -32,14 +32,11 @@ namespace LibGens
 class Io2Button : public IoBase
 {
 	public:
-		Io2Button() { }
-		Io2Button(const IoBase *other) : IoBase(other) { }
+		Io2Button();
+		Io2Button(const IoBase *other);
 		virtual ~Io2Button() { }
 		
 		uint8_t readData(void);
-		
-		// I/O device update function.
-		void update(void);
 		
 		// Controller configuration.
 		const char *devName(void) const { return "2-button gamepad (SMS)"; }
