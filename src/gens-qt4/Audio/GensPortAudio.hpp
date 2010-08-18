@@ -33,6 +33,11 @@
 // Qt includes.
 #include <QtCore/QMutex>
 
+// TODO: Move this somewhere else!
+#if defined(__GNUC__) && (defined(__i386__) || defined(__amd64__))
+#define HAVE_MMX
+#endif
+
 namespace GensQt4
 {
 
@@ -111,6 +116,20 @@ class GensPortAudio
 		 * @return 0 on success; non-zero on error.
 		 */
 		int writeMono(void);
+		
+#ifdef HAVE_MMX
+		/**
+		 * writeStereoMMX(): Write the current segment to the audio buffer. (Stereo output; MMX-optimized)
+		 * @return 0 on success; non-zero on error.
+		 */
+		int writeStereoMMX(void);
+		
+		/**
+		 * writeMonoMMX(): Write the current segment to the audio buffer. (Monaural output; MMX-optimized)
+		 * @return 0 on success; non-zero on error.
+		 */
+		int writeMonoMMX(void);
+#endif
 };
 
 }

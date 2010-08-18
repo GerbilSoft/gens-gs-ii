@@ -33,8 +33,11 @@
 // LibGens Sound Manager.
 #include "libgens/sound/SoundMgr.hpp"
 
+// CPU flags.
+#include "libgens/Util/cpuflags.h"
+
+// Timing. (TODO: Get rid of this when finished debugging!)
 #include "libgens/Util/Timing.hpp"
-#include <stdio.h>
 
 namespace GensQt4
 {
@@ -60,6 +63,17 @@ int GensPortAudio::write(void)
 	}
 	
 	// TODO: MMX versions.
+#ifdef HAVE_MMX
+	if (CPU_Flags & MDP_CPUFLAG_X86_MMX)
+	{
+		// MMX is supported.
+		if (m_stereo)
+			return writeStereoMMX();
+		else
+			return writeMonoMMX();
+	}
+	else
+#endif /* HAVE_MMX */
 	if (m_stereo)
 		return writeStereo();
 	else
@@ -158,5 +172,29 @@ int GensPortAudio::writeMono(void)
 	m_mtxBuf.unlock();
 	return 0;
 }
+
+
+#ifdef HAVE_MMX
+/**
+ * writeStereoMMX(): Write the current segment to the audio buffer. (Stereo output; MMX-optimized)
+ * @return 0 on success; non-zero on error.
+ */
+int GensPortAudio::writeStereoMMX(void)
+{
+	// TODO
+	return writeStereo();
+}
+
+
+/**
+ * writeMonoMMX(): Write the current segment to the audio buffer. (Monaural output; MMX-optimized)
+ * @return 0 on success; non-zero on error.
+ */
+int GensPortAudio::writeMonoMMX(void)
+{
+	// TODO
+	return writeMono();
+}
+#endif /* HAVE_MMX */
 
 }
