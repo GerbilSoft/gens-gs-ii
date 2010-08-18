@@ -30,7 +30,7 @@ namespace LibGens
 /** Static member initialization. **/
 
 // Interlaced rendering mode.
-VdpRend_m5::IntRend_Mode_t VdpRend_m5::IntRend_Mode;
+VdpRend_m5::IntRend_Mode_t VdpRend_m5::IntRend_Mode = VdpRend_m5::INTREND_FLICKER;
 
 // Temporary VDP data.
 unsigned int VdpRend_m5::Y_FineOffset;
