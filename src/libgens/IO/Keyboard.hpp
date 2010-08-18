@@ -1,6 +1,7 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * KeyManager.hpp: Keyboard manager.                                       *
+ * Keyboard.hpp: Keyboard class.                                           *
+ * Represents an input device of type 0x00.                                *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,60 +22,59 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_IO_KEYMANAGER_HPP__
-#define __LIBGENS_IO_KEYMANAGER_HPP__
-
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
-#endif
+#ifndef __LIBGENS_IO_KEYBOARD_HPP__
+#define __LIBGENS_IO_KEYBOARD_HPP__
 
 #include "GensKey_t.h"
 
-// Input devices.
-#include "Keyboard.hpp"
+// C includes.
+#include <string.h>
 
 namespace LibGens
 {
 
-class KeyManager
+class Keyboard
 {
 	public:
-		static void Init(void);
-		static void End(void);
+		Keyboard();
+		~Keyboard();
 		
-		static const char *GetKeyName(GensKey_t key);
-		
-		static void KeyPressEvent(GensKey_t key);
-		static void KeyReleaseEvent(GensKey_t key);
-		
-		static void MousePressEvent(int button);
-		static void MouseReleaseEvent(int button);
-		
-		static bool IsKeyPressed(GensKey_t key);
-		
-#ifdef _WIN32
-		// QWidget doesn't properly differentiate L/R modifier keys,
-		// and neither do WM_KEYDOWN/WM_KEYUP.
-		static inline void WinKeySet(GensKey_t key, int virtKey)
+		inline void keyPressEvent(uint16_t key16)
 		{
-			if (key < KEYV_UNKNOWN && key >= KEYV_LAST)
+			if (key16 >= KEYV_LAST)
 				return;
-			ms_KeyPress[key] = !!(GetAsyncKeyState(virtKey) & 0x8000);
+			m_keyPress[key16] = true;
 		}
-#endif /* _WIN32 */
-	
+		
+		inline void keyReleaseEvent(uint16_t key16)
+		{
+			if (key16 >= KEYV_LAST)
+				return;
+			m_keyPress[key16] = false;
+		}
+		
+		inline bool isKeyPressed(uint16_t key16) const
+		{
+			return ((key16 < KEYV_LAST) && m_keyPress[key16]);
+		}
+		
+		static const char *GetKeyName(GensKey_t key)
+		{
+			GensKey_u gkey;
+			gkey.keycode = key;
+			if (gkey.type != 0x00 || gkey.key16 >= KEYV_LAST)
+				return NULL;
+			return ms_KeyNames[gkey.key16];
+		}
+		
 	protected:
-		static Keyboard ms_Keyboard;
-	
-	private:
-		KeyManager() { }
-		~KeyManager() { }
+		// Key names.
+		static const char *ms_KeyNames[KEYV_LAST];
+		
+		// Keypress array.
+		bool m_keyPress[KEYV_LAST];
 };
 
 }
 
-#endif /* __LIBGENS_IO_KEYMANAGER_HPP__ */
+#endif /* __LIBGENS_IO_KEYBOARD_HPP__ */

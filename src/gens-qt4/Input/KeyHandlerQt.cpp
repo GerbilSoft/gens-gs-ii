@@ -25,6 +25,7 @@
 
 // LibGens includes.
 #include "libgens/IO/KeyManager.hpp"
+#include "libgens/IO/GensKey_t.h"
 
 // Qt includes
 #include <qglobal.h>
@@ -50,8 +51,10 @@ namespace GensQt4
 void KeyHandlerQt::KeyPressEvent(QKeyEvent *event)
 {
 	// TODO: Move effects keypresses from GensQGLWidget to KeyHandlerQt.
+	// TODO: Multiple keyboard support?
 	int gensKey = QKeyEventToKeyVal(event);
-	LibGens::KeyManager::KeyPressEvent(gensKey);
+	if (gensKey > KEYV_UNKNOWN)
+		LibGens::KeyManager::KeyPressEvent(gensKey);
 }
 
 
@@ -61,8 +64,10 @@ void KeyHandlerQt::KeyPressEvent(QKeyEvent *event)
  */
 void KeyHandlerQt::KeyReleaseEvent(QKeyEvent *event)
 {
+	// TODO: Multiple keyboard support?
 	int gensKey = QKeyEventToKeyVal(event);
-	LibGens::KeyManager::KeyReleaseEvent(gensKey);
+	if (gensKey > KEYV_UNKNOWN)
+		LibGens::KeyManager::KeyReleaseEvent(gensKey);
 }
 
 
@@ -111,12 +116,12 @@ void KeyHandlerQt::MousePressEvent(QMouseEvent *event)
 	switch (event->button())
 	{
 		case Qt::NoButton:	return;
-		case Qt::LeftButton:	gensButton = LibGens::MBTN_LEFT; break;
-		case Qt::MidButton:	gensButton = LibGens::MBTN_MIDDLE; break;
-		case Qt::RightButton:	gensButton = LibGens::MBTN_RIGHT; break;
-		case Qt::XButton1:	gensButton = LibGens::MBTN_X1; break;
-		case Qt::XButton2:	gensButton = LibGens::MBTN_X2; break;
-		default:		gensButton = LibGens::MBTN_UNKNOWN; break;
+		case Qt::LeftButton:	gensButton = MBTN_LEFT; break;
+		case Qt::MidButton:	gensButton = MBTN_MIDDLE; break;
+		case Qt::RightButton:	gensButton = MBTN_RIGHT; break;
+		case Qt::XButton1:	gensButton = MBTN_X1; break;
+		case Qt::XButton2:	gensButton = MBTN_X2; break;
+		default:		gensButton = MBTN_UNKNOWN; break;
 	}
 	
 	LibGens::KeyManager::MousePressEvent(gensButton);
@@ -133,12 +138,12 @@ void KeyHandlerQt::MouseReleaseEvent(QMouseEvent *event)
 	switch (event->button())
 	{
 		case Qt::NoButton:	return;
-		case Qt::LeftButton:	gensButton = LibGens::MBTN_LEFT; break;
-		case Qt::MidButton:	gensButton = LibGens::MBTN_MIDDLE; break;
-		case Qt::RightButton:	gensButton = LibGens::MBTN_RIGHT; break;
-		case Qt::XButton1:	gensButton = LibGens::MBTN_X1; break;
-		case Qt::XButton2:	gensButton = LibGens::MBTN_X2; break;
-		default:		gensButton = LibGens::MBTN_UNKNOWN; break;
+		case Qt::LeftButton:	gensButton = MBTN_LEFT; break;
+		case Qt::MidButton:	gensButton = MBTN_MIDDLE; break;
+		case Qt::RightButton:	gensButton = MBTN_RIGHT; break;
+		case Qt::XButton1:	gensButton = MBTN_X1; break;
+		case Qt::XButton2:	gensButton = MBTN_X2; break;
+		default:		gensButton = MBTN_UNKNOWN; break;
 	}
 	
 	LibGens::KeyManager::MouseReleaseEvent(gensButton);

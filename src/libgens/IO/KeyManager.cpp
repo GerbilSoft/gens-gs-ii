@@ -29,17 +29,16 @@
 namespace LibGens
 {
 
-// Static class variables.
-bool KeyManager::ms_KeyPress[KEYV_LAST];
-
+// Keyboard device.
+// TODO: Multiple keyboard support?
+Keyboard KeyManager::ms_Keyboard;
 
 /**
  * Init(): Initialize the Key Manager.
  */
 void KeyManager::Init(void)
 {
-	// Clear the keypress array.
-	memset(ms_KeyPress, 0x00, sizeof(ms_KeyPress));
+	// TODO
 }
 
 
@@ -48,124 +47,8 @@ void KeyManager::Init(void)
  */
 void KeyManager::End(void)
 {
+	// TODO
 }
-
-
-/**
- * OS-specific key names.
- */
-#if defined(__APPLE__)
-#define RETURN_KEYNAME "Return"
-#define ENTER_KEYNAME "Enter"
-#define SUPER_KEYNAME "Command"
-#define ALT_KEYNAME "Option"
-#define NO_MODIFIER_LR
-#elif defined(_WIN32)
-#define RETURN_KEYNAME "Enter"
-#define ENTER_KEYNAME "Numpad Enter"
-#define SUPER_KEYNAME "Win"
-#define ALT_KEYNAME "Alt"
-#else
-#define RETURN_KEYNAME "Enter"
-#define ENTER_KEYNAME "Numpad Enter"
-#define SUPER_KEYNAME "Super"
-#define ALT_KEYNAME "Alt"
-#endif
-
-const char *KeyManager::ms_KeyNames[KEYV_LAST] =
-{
-	// 0x00
-	"Unknown", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	"Backspace", "Tab", NULL, NULL, "Clear", RETURN_KEYNAME, NULL, NULL,
-	NULL, NULL, NULL, "Pause", NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, "Escape", NULL, NULL, NULL, NULL,
-	
-	// 0x20
-	"Space", "!", "\"", "#", "$", "%", "&", "'",
-	"(", ")", "*", "+", ",", "-", ".", "/",
-	"0", "1", "2", "3", "4", "5", "6", "7",
-	"8", "9", ":", ";", "<", "=", ">", "?",
-	
-	// 0x40
-	"@", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, "[", "\\", "]", "_", "^",
-	
-	// 0x60
-	"`", "A", "B", "C", "D", "E", "F", "G",
-	"H", "I", "J", "K", "L", "M", "N", "O",
-	"P", "Q", "R", "S", "T", "U", "V", "W",
-	"X", "Y", "Z", NULL, NULL, NULL, NULL, "Delete",
-	
-	// 0x80
-	"Numpad 0", "Numpad 1", "Numpad 2", "Numpad 3",
-	"Numpad 4", "Numpad 5", "Numpad 6", "Numpad 7",
-	"Numpad 8", "Numpad 9", "Numpad .", "Numpad /",
-	"Numpad *", "Numpad -", "Numpad +", ENTER_KEYNAME,
-	
-	// 0x90
-	"Numpad =", "Up", "Down", "Right",
-	"Left", "Insert", "Home", "End",
-	"Page Up", "Page Down", NULL, NULL,
-	NULL, NULL, NULL, NULL,
-	
-	/** @name 0xA0: Function keys */
-	"F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8",
-	"F9", "F10", "F11", "F12", "F13", "F14", "F15", "F16",
-	"F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24",
-	"F25", "F26", "F27", "F28", "F29", "F30", "F31", "F32",
-	
-#ifndef NO_MODIFIER_LR
-	// System supports L/R modifiers.
-	
-	/** @name 0xC0: Key state modifier keys */
-	"Num Lock", "Caps Lock", "Scroll Lock", "Left Shift",
-	"Right Shift", "Left Ctrl", "Right Ctrl", "Left " ALT_KEYNAME,
-	"Right " ALT_KEYNAME, "Left Meta", "Right Meta", "Left " SUPER_KEYNAME,
-	"Right " SUPER_KEYNAME, "Alt-Gr", "Compose", "Left Hyper",
-	
-	/** @name 0xD0: Key state modifier keys (continued) */
-	"Right Hyper", "Left Direction", "Right Direction", NULL,
-	NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL,
-#else
-	// System doesn't support L/R modifiers.
-	// Map Left keys as general keys and don't map Right keys.
-	
-	/** @name 0xC0: Key state modifier keys */
-	"Num Lock", "Caps Lock", "Scroll Lock", "Shift",
-	NULL, "Ctrl", NULL, ALT_KEYNAME,
-	NULL, "Meta", NULL, SUPER_KEYNAME,
-	NULL, "Alt-Gr", "Compose", "Hyper",
-	
-	/** @name 0xD0: Key state modifier keys (continued) */
-	NULL, "Direction", NULL, NULL,
-	NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL,
-#endif /* NO_MODIFIER_LR */
-	
-	/** @name 0xE0: Miscellaneous function keys */
-	"Help", "Print Screen", "SysRq", "Break",
-	"Menu", "Power", "Euro", "Undo",
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	
-	/** @name 0xF0: Mouse buttons */
-	"Unknown Mouse Button", "Left Mouse Button",
-	"Middle Mouse Button", "Right Mouse Button",
-	"Mouse Wheel Up", "Mouse Wheel Down",
-	"Mouse Wheel Left", "Mouse Wheel Right",
-	"Extra Mouse Button 1", "Extra Mouse Button 2",
-	NULL, NULL,
-	NULL, NULL, NULL, NULL,
-	
-	/** @name 0x100: Multimedia/Internet keys */
-	// NOTE: Only back and forward are implemented,
-	// since ThinkPads have them as real keys.
-	"Back", "Forward"
-};
 
 
 /**
@@ -175,9 +58,18 @@ const char *KeyManager::ms_KeyNames[KEYV_LAST] =
  */
 const char *KeyManager::GetKeyName(GensKey_t key)
 {
-	if (key >= KEYV_LAST)
-		return NULL;
-	return ms_KeyNames[key];
+	GensKey_u gkey;
+	gkey.keycode = key;
+	
+	// TODO: Other device types.
+	switch (gkey.type)
+	{
+		case GKT_KEYBOARD:
+			return Keyboard::GetKeyName(gkey.key16);
+		
+		default:
+			return NULL;
+	}
 }
 
 
@@ -187,9 +79,20 @@ const char *KeyManager::GetKeyName(GensKey_t key)
  */
 void KeyManager::KeyPressEvent(GensKey_t key)
 {
-	if (key >= KEYV_LAST)
-		return;
-	ms_KeyPress[key] = true;
+	GensKey_u gkey;
+	gkey.keycode = key;
+	
+	// TODO: Other device types.
+	switch (gkey.type)
+	{
+		case GKT_KEYBOARD:
+			// TODO: Multiple keyboard support.
+			ms_Keyboard.keyPressEvent(gkey.key16);
+			break;
+		
+		default:
+			break;
+	}
 }
 
 
@@ -199,9 +102,20 @@ void KeyManager::KeyPressEvent(GensKey_t key)
  */
 void KeyManager::KeyReleaseEvent(GensKey_t key)
 {
-	if (key >= KEYV_LAST)
-		return;
-	ms_KeyPress[key] = false;
+	GensKey_u gkey;
+	gkey.keycode = key;
+	
+	// TODO: Other device types.
+	switch (gkey.type)
+	{
+		case GKT_KEYBOARD:
+			// TODO: Multiple keyboard support.
+			ms_Keyboard.keyReleaseEvent(gkey.key16);
+			break;
+		
+		default:
+			break;
+	}
 }
 
 
@@ -213,7 +127,9 @@ void KeyManager::MousePressEvent(int button)
 {
 	if (button < MBTN_UNKNOWN || button >= MBTN_LAST)
 		return;
-	ms_KeyPress[KEYV_MOUSE_UNKNOWN + button] = true;
+	
+	// TODO: Make a separate mouse device?
+	ms_Keyboard.keyPressEvent(KEYV_MOUSE_UNKNOWN + button);
 }
 
 
@@ -225,7 +141,31 @@ void KeyManager::MouseReleaseEvent(int button)
 {
 	if (button < MBTN_UNKNOWN || button >= MBTN_LAST)
 		return;
-	ms_KeyPress[KEYV_MOUSE_UNKNOWN + button] = false;
+	
+	// TODO: Make a separate mouse device?
+	ms_Keyboard.keyReleaseEvent(KEYV_MOUSE_UNKNOWN + button);
+}
+
+
+/**
+ * IsKeyPressed(): Check if a key is pressed.
+ * @param key Gens keycode.
+ */
+bool KeyManager::IsKeyPressed(GensKey_t key)
+{
+	GensKey_u gkey;
+	gkey.keycode = key;
+	
+	if (gkey.type == 0)
+	{
+		// Keyboard input.
+		// TODO: Multiple keyboard support.
+		if (gkey.dev_id == 0)
+			return (ms_Keyboard.isKeyPressed(gkey.key16));
+	}
+	
+	// TODO: Other types of input.
+	return false;
 }
 
 }
