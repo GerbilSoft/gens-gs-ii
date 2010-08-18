@@ -81,7 +81,7 @@ class GensPortAudio
 		
 		// Audio buffer.
 		// Allocate 8 segments worth of data.
-		int16_t m_buf[882*8][2];
+		int16_t m_buf[882*8*2];
 		unsigned int m_bufLen;
 		unsigned int m_bufPos;
 		QMutex m_mtxBuf;
@@ -89,6 +89,9 @@ class GensPortAudio
 		// Audio settings.
 		int m_rate;
 		bool m_stereo;
+		
+		// Sample size. (Calculated on open().)
+		int m_sampleSize;
 		
 		/** Internal audio write functions. **/
 		

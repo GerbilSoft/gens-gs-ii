@@ -70,6 +70,7 @@ void GensPortAudio::open(void)
 	// Initialize the buffer variables.
 	m_bufLen = (LibGens::SoundMgr::GetSegLength() * 8);
 	m_bufPos = 0;
+	m_sampleSize = 0;
 	
 	// Initialize PortAudio.
 	int err = Pa_Initialize();
@@ -135,6 +136,7 @@ void GensPortAudio::open(void)
 	}
 	
 	// PortAudio stream is open.
+	m_sampleSize = (sizeof(int16_t) * (m_stereo ? 2 : 1));
 	m_open = true;
 }
 
@@ -183,6 +185,7 @@ void GensPortAudio::close(void)
 	
 	// PortAudio is shut down.
 	m_open = false;
+	m_sampleSize = 0;
 }
 
 
@@ -202,36 +205,34 @@ int GensPortAudio::gensPaCallback(const void *inputBuffer, void *outputBuffer,
 	// Lock the audio buffer.
 	m_mtxBuf.lock();
 	
-	// Sample size. (16-bit stereo)
-	const int sample_size = (sizeof(uint16_t) * (m_stereo ? 2 : 1));
-	
 	if (m_bufPos <= 0)
 	{
 		// Audio is empty.
 		m_mtxBuf.unlock();
 		
 		// Zero the output buffer.
-		memset(out, 0x00, framesPerBuffer * sample_size);
+		memset(out, 0x00, framesPerBuffer * m_sampleSize);
 		return 0;
 	}
 	
 	// Copy our audio data directly to the output buffer.
 	if (m_bufPos < framesPerBuffer)
 	{
-		memcpy(out, m_buf, m_bufPos * sample_size);
+		memcpy(out, m_buf, m_bufPos * m_sampleSize);
 		m_bufPos = 0;
 		m_mtxBuf.unlock();
 		
 		// Zero out the rest of the buffer.
-		memset(&out[m_bufPos], 0x00, (framesPerBuffer - m_bufPos) * sample_size);
+		memset(&out[m_bufPos], 0x00, (framesPerBuffer - m_bufPos) * m_sampleSize);
 		return 0;
 	}
 	
-	memcpy(out, m_buf, (framesPerBuffer*sizeof(uint16_t)*2));
+	memcpy(out, m_buf, (framesPerBuffer * m_sampleSize));
 	m_bufPos -= framesPerBuffer;
 	
 	// Shift all the data over.
-	memmove(m_buf, &m_buf[framesPerBuffer], m_bufPos * sample_size);
+	// RShift is because m_buf is int16_t.
+	memmove(m_buf, &m_buf[(framesPerBuffer * m_sampleSize) >> 1], (m_bufPos * m_sampleSize));
 	
 	// Unlock the audio buffer.
 	m_mtxBuf.unlock();
