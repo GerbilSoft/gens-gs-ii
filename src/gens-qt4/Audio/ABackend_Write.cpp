@@ -192,7 +192,8 @@ int GensPortAudio::writeStereoMMX(void)
 	
 	// Source buffer pointers.
 	int32_t *srcL = &LibGens::SoundMgr::ms_SegBufL[0];
-	int32_t *srcR = &LibGens::SoundMgr::ms_SegBufL[0];
+	int32_t *srcR = &LibGens::SoundMgr::ms_SegBufR[0];
+	memset(LibGens::SoundMgr::ms_SegBufL, 0x00, SegLength*sizeof(LibGens::SoundMgr::ms_SegBufL[0]));
 	
 	// If the segment length is odd, write the first sample without MMX.
 	if (SegLength & 1)
@@ -242,7 +243,7 @@ int GensPortAudio::writeStereoMMX(void)
 			"packssdw	%%mm1, %%mm0\n"		// %mm0 = [R2, L2, R1, L1]
 			"movq		%%mm0, (%2)\n"
 			: // output (dest is a ptr; it's not written to!)
-			: "r" (srcL), "r" (srcR), "r" (dest)	// input
+			: "r" (srcR), "r" (srcL), "r" (dest)	// input
 			);
 	}
 	
