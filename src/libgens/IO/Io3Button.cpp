@@ -33,6 +33,7 @@ Io3Button::Io3Button()
 	m_keyMap.resize(numButtons());
 	
 	// Create the default keymap.
+	// TODO: Initialize elsewhere.
 	m_keyMap[BTNI_UP]	= KEYV_UP;
 	m_keyMap[BTNI_DOWN]	= KEYV_DOWN;
 	m_keyMap[BTNI_LEFT]	= KEYV_LEFT;
@@ -50,6 +51,7 @@ Io3Button::Io3Button(const IoBase *other)
 	m_keyMap.resize(numButtons());
 	
 	// Create the default keymap.
+	// TODO: Initialize elsewhere.
 	// TODO: Copy from other controller?
 	m_keyMap[BTNI_UP]	= KEYV_UP;
 	m_keyMap[BTNI_DOWN]	= KEYV_DOWN;
