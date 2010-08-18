@@ -63,25 +63,29 @@ int GensPortAudio::write(void)
 	
 	// TODO: Mono/stereo, MMX, etc.
 	unsigned int i = 0;
-	unsigned int bufIndex = m_bufPos;
-	for (; i < SegLength && bufIndex < m_bufLen; i++, bufIndex++)
+	
+	// Destination buffer pointer.
+	// NOTE: We're treating it as a single interleaved stream.
+	int16_t *dest = (int16_t*)&m_buf[0][0];
+	
+	for (; i < SegLength; i++, dest += 2)
 	{
 		int32_t L = LibGens::SoundMgr::ms_SegBufL[i];
 		int32_t R = LibGens::SoundMgr::ms_SegBufR[i];
 		
 		if (L < -0x8000)
-			m_buf[bufIndex][0] = -0x8000;
+			*dest = -0x8000;
 		else if (L > 0x7FFF)
-			m_buf[bufIndex][0] = 0x7FFF;
+			*dest = 0x7FFF;
 		else
-			m_buf[bufIndex][0] = (int16_t)L;
+			*dest = (int16_t)L;
 		
 		if (R < -0x8000)
-			m_buf[bufIndex][1] = -0x8000;
+			*(dest+1) = -0x8000;
 		else if (R > 0x7FFF)
-			m_buf[bufIndex][1] = 0x7FFF;
+			*(dest+1) = 0x7FFF;
 		else
-			m_buf[bufIndex][1] = (int16_t)R;
+			*(dest+1) = (int16_t)R;
 	}
 	
 	// Clear the segment buffers.
