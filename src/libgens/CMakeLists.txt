@@ -48,7 +48,6 @@ SET(libgens_SRCS
 	IO/Io6Button.cpp
 	IO/Io2Button.cpp
 	IO/IoMegaMouse.cpp
-	IO/KeyManager.cpp
 	cpu/Z80.cpp
 	cpu/Z80_MD_Mem.cpp
 	Save/SRam.cpp
@@ -61,7 +60,8 @@ SET(libgens_SRCS
 	sound/SoundMgr.cpp
 	IO/Io4WPMaster.cpp
 	IO/Io4WPSlave.cpp
-	IO/Keyboard.cpp
+	GensInput/KeyManager.cpp
+	GensInput/Keyboard.cpp
 	)
 
 # Compatibility sources.

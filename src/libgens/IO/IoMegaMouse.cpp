@@ -27,7 +27,6 @@
  */
 
 #include "IoMegaMouse.hpp"
-#include "KeyManager.hpp"
 
 namespace LibGens
 {

@@ -22,7 +22,6 @@
  ***************************************************************************/
 
 #include "Io2Button.hpp"
-#include "KeyManager.hpp"
 
 namespace LibGens
 {

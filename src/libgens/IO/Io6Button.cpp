@@ -22,7 +22,6 @@
  ***************************************************************************/
 
 #include "Io6Button.hpp"
-#include "KeyManager.hpp"
 
 namespace LibGens
 {

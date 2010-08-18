@@ -37,7 +37,7 @@
 #include "MD/VdpIo.hpp"
 
 // I/O devices.
-#include "IO/KeyManager.hpp"
+#include "GensInput/KeyManager.hpp"
 
 // Sound Manager.
 #include "sound/SoundMgr.hpp"

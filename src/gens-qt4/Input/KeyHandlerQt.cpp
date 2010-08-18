@@ -24,8 +24,8 @@
 #include "KeyHandlerQt.hpp"
 
 // LibGens includes.
-#include "libgens/IO/KeyManager.hpp"
-#include "libgens/IO/GensKey_t.h"
+#include "libgens/GensInput/KeyManager.hpp"
+#include "libgens/GensInput/GensKey_t.h"
 
 // Qt includes
 #include <qglobal.h>

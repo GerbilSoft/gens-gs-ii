@@ -33,7 +33,7 @@
 #include <vector>
 
 // Key Manager.
-#include "KeyManager.hpp"
+#include "../GensInput/KeyManager.hpp"
 
 namespace LibGens
 {

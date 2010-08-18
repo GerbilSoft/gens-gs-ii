@@ -35,7 +35,7 @@
 #include "libgens/macros/log_msg.h"
 #include "libgens/Util/Timing.hpp"
 #include "libgens/MD/EmuMD.hpp"
-#include "libgens/IO/KeyManager.hpp"
+#include "libgens/GensInput/KeyManager.hpp"
 
 // Win32 requires GL/glext.h for OpenGL 1.2/1.3.
 // TODO: Check the GL implementation to see what functionality is available at runtime.

@@ -22,7 +22,6 @@
  ***************************************************************************/
 
 #include "IoTeamplayer.hpp"
-#include "KeyManager.hpp"
 
 // C includes.
 #include <string.h>
