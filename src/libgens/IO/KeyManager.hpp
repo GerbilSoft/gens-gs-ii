@@ -310,9 +310,19 @@ class KeyManager
 		
 		static inline bool IsKeyPressed(GensKey_t key)
 		{
-			return ((key <= KEYV_LAST)
-				? ms_KeyPress[key]
-				: false);
+			GensKey_u gkey;
+			gkey.keycode = key;
+			
+			if (gkey.type == 0)
+			{
+				// Keyboard input.
+				return ((gkey.key16 <= KEYV_LAST)
+					? ms_KeyPress[gkey.key16]
+					: false);
+			}
+			
+			// TODO: Other types of input.
+			return false;
 		}
 		
 #ifdef _WIN32
