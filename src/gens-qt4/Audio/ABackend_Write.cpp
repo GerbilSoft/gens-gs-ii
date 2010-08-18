@@ -122,10 +122,38 @@ int GensPortAudio::writeStereo(void)
  */
 int GensPortAudio::writeMono(void)
 {
-	if (!m_open)
-		return 1;
+	// Lock the audio buffer.
+	m_mtxBuf.lock();
 	
-	// TODO
+	// Segment position.
+	unsigned int i = 0;
+	
+	// Destination buffer pointer.
+	int16_t *dest = (int16_t*)&m_buf[(m_bufPos * m_sampleSize) / sizeof(m_buf[0])];
+	
+	const int SegLength = LibGens::SoundMgr::GetSegLength();
+	for (; i < SegLength; i++, dest++)
+	{
+		int32_t out = (LibGens::SoundMgr::ms_SegBufL[i] +
+			       LibGens::SoundMgr::ms_SegBufR[i]) >> 1;
+		
+		if (out < -0x8000)
+			*dest = -0x8000;
+		else if (out > 0x7FFF)
+			*dest = 0x7FFF;
+		else
+			*dest = (int16_t)out;
+	}
+	
+	// Clear the segment buffers.
+	memset(LibGens::SoundMgr::ms_SegBufL, 0x00, i*sizeof(LibGens::SoundMgr::ms_SegBufL[0]));
+	memset(LibGens::SoundMgr::ms_SegBufR, 0x00, i*sizeof(LibGens::SoundMgr::ms_SegBufR[0]));
+	
+	// Increase the buffer position.
+	m_bufPos += i;
+	
+	// Unlock the audio buffer.
+	m_mtxBuf.unlock();
 	return 0;
 }
 
