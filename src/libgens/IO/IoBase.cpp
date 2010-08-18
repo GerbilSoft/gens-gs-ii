@@ -86,4 +86,22 @@ void IoBase::reset()
 	updateSelectLine();
 }
 
+
+/**
+ * update(): I/O device update function.
+ */
+void IoBase::update(void)
+{
+	m_buttons = 0;
+	
+	for (int i = (m_keyMap.size() - 1); i >= 0; i--)
+	{
+		m_buttons <<= 1;
+		m_buttons |= KeyManager::IsKeyPressed(m_keyMap[i]);
+	}
+	
+	// Buttons typically use active-low logic.
+	m_buttons = ~m_buttons;
+}
+
 }

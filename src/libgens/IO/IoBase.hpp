@@ -89,9 +89,13 @@ class IoBase
 		virtual uint8_t readSerTx(void) { return m_serLastTx; }
 		virtual uint8_t readSerRx(void) { return 0xFF; }
 		
-		// I/O device update virtual function.
-		// This needs to be reimplemented by derived classes.
-		virtual void update(void) { }
+		/**
+		 * update(): I/O device update function.
+		 * This will work for controllers that act like regular controllers,
+		 * but will need to be reimplemented for multitaps and possibly
+		 * the Mega Mouse.
+		 */
+		virtual void update(void);
 		
 		// Scanline counter virtual function.
 		// This is used by the 6-button controller,

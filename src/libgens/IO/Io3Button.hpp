@@ -38,9 +38,6 @@ class Io3Button : public IoBase
 		
 		uint8_t readData(void);
 		
-		// I/O device update function.
-		void update(void);
-		
 		// Controller configuration.
 		const char *devName(void) const { return "3-button gamepad"; }
 		IoType devType(void) const { return IOT_3BTN; }

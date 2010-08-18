@@ -91,31 +91,6 @@ uint8_t Io3Button::readData(void)
 }
 
 
-/**
- * update(): I/O device update function.
- */
-void Io3Button::update(void)
-{
-	m_buttons = 0;
-	m_buttons |= KeyManager::IsKeyPressed(m_keyMap[BTNI_START]);	// Start
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(m_keyMap[BTNI_A]);	// A
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(m_keyMap[BTNI_C]);	// C
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(m_keyMap[BTNI_B]);	// B
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(m_keyMap[BTNI_RIGHT]);	// Right
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(m_keyMap[BTNI_LEFT]);	// Left
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(m_keyMap[BTNI_DOWN]);	// Down
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(m_keyMap[BTNI_UP]);	// Up
-	m_buttons = ~m_buttons;
-}
-
-
 /** Controller Configuration. **/
 
 
