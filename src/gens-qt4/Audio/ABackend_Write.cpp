@@ -268,8 +268,77 @@ int GensPortAudio::writeStereoMMX(void)
  */
 int GensPortAudio::writeMonoMMX(void)
 {
-	// TODO
-	return writeMono();
+	// Lock the audio buffer.
+	m_mtxBuf.lock();
+	
+	// Segment length.
+	const int SegLength = LibGens::SoundMgr::GetSegLength();
+	
+	// Destination buffer pointer.
+	int16_t *dest = (int16_t*)&m_buf[(m_bufPos * m_sampleSize) / sizeof(m_buf[0])];
+	
+	// Source buffer pointers.
+	int32_t *srcL = &LibGens::SoundMgr::ms_SegBufL[0];
+	int32_t *srcR = &LibGens::SoundMgr::ms_SegBufR[0];
+	
+	// If the segment length is odd, write the first sample without MMX.
+	if (SegLength & 1)
+	{
+		int32_t out = ((*srcL + *srcR) >> 1);
+		
+		if (out < -0x8000)
+			*dest = -0x8000;
+		else if (out > 0x7FFF)
+			*dest = 0x7FFF;
+		else
+			*dest = (int16_t)out;
+		
+		// Next sample.
+		srcL++;
+		srcR++;
+		dest++;
+	}
+	
+	// Load the shift value.
+	__asm__ (
+		"movl	$32, %%eax\n"
+		"movd	%%eax, %%mm5\n"
+		: // output
+		: // input
+		: "eax" // clobber
+		);
+	
+	// Write two samples at once using MMX.
+	for (unsigned int i = (SegLength / 2); i != 0; i--, srcL += 2, srcR += 2, dest += 2)
+	{
+		__asm__ (
+			/* Get source data. */
+			"movq		 (%0), %%mm0\n"		// %mm0 = [R2, R1]
+			"movq		 (%1), %%mm1\n"		// %mm1 = [L2, L1]
+			"packssdw	%%mm0, %%mm0\n"		// %mm0 = [0, 0, R2, R1]
+			"packssdw	%%mm1, %%mm1\n"		// %mm0 = [0, 0, L2, L1]
+			"psraw		   $1, %%mm0\n"		// NOTE: Slight loss of precision...
+			"psraw		   $1, %%mm1\n"		// NOTE: Slight loss of precision...
+			"paddw		%%mm1, %%mm0\n"		// %mm0 = [0, 0, L2+R2, L1+R1]
+			"movd		%%mm0, (%2)\n"
+			: // output (dest is a ptr; it's not written to!)
+			: "r" (srcR), "r" (srcL), "r" (dest)	// input
+			);
+	}
+	
+	// Reset the FPU state.
+	__asm__ ("emms");
+	
+	// Clear the segment buffers.
+	memset(LibGens::SoundMgr::ms_SegBufL, 0x00, SegLength*sizeof(LibGens::SoundMgr::ms_SegBufL[0]));
+	memset(LibGens::SoundMgr::ms_SegBufR, 0x00, SegLength*sizeof(LibGens::SoundMgr::ms_SegBufR[0]));
+	
+	// Increase the buffer position.
+	m_bufPos += SegLength;
+	
+	// Unlock the audio buffer.
+	m_mtxBuf.unlock();
+	return 0;
 }
 #endif /* HAVE_MMX */
 
