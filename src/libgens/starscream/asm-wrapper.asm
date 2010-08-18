@@ -111,11 +111,20 @@ SYM(M68K_RW):
 	push	esi
 	push	edi
 	
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	sub	esp, 8
+%endif
+	
 	; Call the function.
 	mov	eax, [ebp + arg_1]
 	push	eax
 	call	SYM(Gens_M68K_RW)
+%ifdef __FORCE_STACK_ALIGNMENT
+	add	esp, 12
+%else
 	add	esp, 4
+%endif
 	
 	pop	edi
 	pop	esi
