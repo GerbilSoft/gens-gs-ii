@@ -217,6 +217,15 @@ int GensPortAudio::writeStereoMMX(void)
 		dest += 2;
 	}
 	
+	// Load the shift value.
+	__asm__ (
+		"movl	$32, %%eax\n"
+		"movd	%%eax, %%mm5\n"
+		: // output
+		: // input
+		: "eax" // clobber
+		);
+	
 	// Write two samples at once using MMX.
 	for (unsigned int i = (SegLength / 2); i != 0; i--, srcL += 2, srcR += 2, dest += 4)
 	{
@@ -224,9 +233,9 @@ int GensPortAudio::writeStereoMMX(void)
 			/* Get source data. */
 			"movd		 (%0), %%mm0\n"		// %mm0 = [ 0, R1]
 			"movd		4(%0), %%mm1\n"		// %mm1 = [ 0, R2]
-			"psllq		  $32, %%mm0\n"		// %mm0 = [R1,  0]
+			"psllq		%%mm5, %%mm0\n"		// %mm0 = [R1,  0]
 			"movd		 (%1), %%mm2\n"		// %mm2 = [ 0, L1]
-			"psllq		  $32, %%mm1\n"		// %mm1 = [R2,  0]
+			"psllq		%%mm5, %%mm1\n"		// %mm1 = [R2,  0]
 			"movd		4(%1), %%mm3\n"		// %mm3 = [ 0, L2]
 			"por		%%mm2, %%mm0\n"		// %mm0 = [R1, L1]
 			"por		%%mm3, %%mm1\n"		// %mm1 = [R2, L2]
