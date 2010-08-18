@@ -33,6 +33,9 @@
 // LibGens Sound Manager.
 #include "libgens/sound/SoundMgr.hpp"
 
+#include "libgens/Util/Timing.hpp"
+#include <stdio.h>
+
 namespace GensQt4
 {
 
@@ -79,12 +82,11 @@ int GensPortAudio::write(void)
 			m_buf[bufIndex][1] = 0x7FFF;
 		else
 			m_buf[bufIndex][1] = (int16_t)R;
-		
-		// Remove the sample from the segment buffers.
-		// TODO: Maybe use memset() after everything's done.
-		LibGens::SoundMgr::ms_SegBufL[i] = 0;
-		LibGens::SoundMgr::ms_SegBufR[i] = 0;
 	}
+	
+	// Clear the segment buffers.
+	memset(LibGens::SoundMgr::ms_SegBufL, 0x00, i*sizeof(LibGens::SoundMgr::ms_SegBufL[0]));
+	memset(LibGens::SoundMgr::ms_SegBufR, 0x00, i*sizeof(LibGens::SoundMgr::ms_SegBufR[0]));
 	
 	// Increase the buffer position.
 	m_bufPos += i;
