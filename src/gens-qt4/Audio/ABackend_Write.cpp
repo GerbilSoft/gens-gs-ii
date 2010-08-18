@@ -125,17 +125,19 @@ int GensPortAudio::writeMono(void)
 	// Lock the audio buffer.
 	m_mtxBuf.lock();
 	
-	// Segment position.
-	unsigned int i = 0;
+	// Segment length.
+	const int SegLength = LibGens::SoundMgr::GetSegLength();
 	
 	// Destination buffer pointer.
 	int16_t *dest = (int16_t*)&m_buf[(m_bufPos * m_sampleSize) / sizeof(m_buf[0])];
 	
-	const int SegLength = LibGens::SoundMgr::GetSegLength();
-	for (; i < SegLength; i++, dest++)
+	// Source buffer pointers.
+	int32_t *srcL = &LibGens::SoundMgr::ms_SegBufL[0];
+	int32_t *srcR = &LibGens::SoundMgr::ms_SegBufL[0];
+	
+	for (unsigned int i = SegLength; i != 0; i--, srcL++, srcR++, dest++)
 	{
-		int32_t out = (LibGens::SoundMgr::ms_SegBufL[i] +
-			       LibGens::SoundMgr::ms_SegBufR[i]) >> 1;
+		int32_t out = ((*srcL + *srcR) >> 1);
 		
 		if (out < -0x8000)
 			*dest = -0x8000;
@@ -146,11 +148,11 @@ int GensPortAudio::writeMono(void)
 	}
 	
 	// Clear the segment buffers.
-	memset(LibGens::SoundMgr::ms_SegBufL, 0x00, i*sizeof(LibGens::SoundMgr::ms_SegBufL[0]));
-	memset(LibGens::SoundMgr::ms_SegBufR, 0x00, i*sizeof(LibGens::SoundMgr::ms_SegBufR[0]));
+	memset(LibGens::SoundMgr::ms_SegBufL, 0x00, SegLength*sizeof(LibGens::SoundMgr::ms_SegBufL[0]));
+	memset(LibGens::SoundMgr::ms_SegBufR, 0x00, SegLength*sizeof(LibGens::SoundMgr::ms_SegBufR[0]));
 	
 	// Increase the buffer position.
-	m_bufPos += i;
+	m_bufPos += SegLength;
 	
 	// Unlock the audio buffer.
 	m_mtxBuf.unlock();
