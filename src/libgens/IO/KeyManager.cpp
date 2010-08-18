@@ -173,9 +173,9 @@ const char *KeyManager::ms_KeyNames[KEYV_LAST] =
  * @param key Key value.
  * @return Key name, or NULL if the key is invalid.
  */
-const char *KeyManager::GetKeyName(KeyVal key)
+const char *KeyManager::GetKeyName(GensKey_t key)
 {
-	if (key < 0 || key >= KEYV_LAST)
+	if (key >= KEYV_LAST)
 		return NULL;
 	return ms_KeyNames[key];
 }
@@ -185,9 +185,9 @@ const char *KeyManager::GetKeyName(KeyVal key)
  * KeyPressEvent(): Key press event.
  * @param key KeyVal keycode.
  */
-void KeyManager::KeyPressEvent(int key)
+void KeyManager::KeyPressEvent(GensKey_t key)
 {
-	if (key < KEYV_UNKNOWN || key >= KEYV_LAST)
+	if (key >= KEYV_LAST)
 		return;
 	ms_KeyPress[key] = true;
 }
@@ -197,9 +197,9 @@ void KeyManager::KeyPressEvent(int key)
  * KeyReleaseEvent(): Key release event.
  * @param key KeyVal keycode.
  */
-void KeyManager::KeyReleaseEvent(int key)
+void KeyManager::KeyReleaseEvent(GensKey_t key)
 {
-	if (key < KEYV_UNKNOWN || key >= KEYV_LAST)
+	if (key >= KEYV_LAST)
 		return;
 	ms_KeyPress[key] = false;
 }

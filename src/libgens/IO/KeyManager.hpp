@@ -32,6 +32,8 @@
 #include <windows.h>
 #endif
 
+#include <stdint.h>
+
 namespace LibGens
 {
 
@@ -279,23 +281,36 @@ enum MouseButton
 	MBTN_LAST
 };
 
+/**
+ * GensKey_t: Gens keycode.
+ * Format: [TYPE ID KEYHI KEYLO]
+ * TYPE: Keyboard == 0x00; Joystick == 0x01; Wii Remote == 0x02
+ * ID == Device ID. (Keyboard is always 0)
+ * KEYHI == (keyboard) high byte of keycode; axis, hat, button for other.
+ * KEYLO == (keyboard) low byte of keycode; axis, hat, button ID for other.
+ * 
+ * For keyboards, KEYHI and KEYLO form a 16-bit keycode.
+ * Joystick and Wii Remote formats are TBD.
+ */
+typedef uint32_t GensKey_t;
+
 class KeyManager
 {
 	public:
 		static void Init(void);
 		static void End(void);
 		
-		static const char *GetKeyName(KeyVal key);
+		static const char *GetKeyName(GensKey_t key);
 		
-		static void KeyPressEvent(int key);
-		static void KeyReleaseEvent(int key);
+		static void KeyPressEvent(GensKey_t key);
+		static void KeyReleaseEvent(GensKey_t key);
 		
 		static void MousePressEvent(int button);
 		static void MouseReleaseEvent(int button);
 		
-		static inline bool IsKeyPressed(int key)
+		static inline bool IsKeyPressed(GensKey_t key)
 		{
-			return ((key >= KEYV_UNKNOWN && key <= KEYV_LAST)
+			return ((key <= KEYV_LAST)
 				? ms_KeyPress[key]
 				: false);
 		}
@@ -303,7 +318,7 @@ class KeyManager
 #ifdef _WIN32
 		// QWidget doesn't properly differentiate L/R modifier keys,
 		// and neither do WM_KEYDOWN/WM_KEYUP.
-		static inline void WinKeySet(int key, int virtKey)
+		static inline void WinKeySet(GensKey_t key, int virtKey)
 		{
 			if (key < KEYV_UNKNOWN && key >= KEYV_LAST)
 				return;
@@ -317,6 +332,22 @@ class KeyManager
 		
 		// Keypress array.
 		static bool ms_KeyPress[KEYV_LAST];
+		
+		// Gens keycode struct and union.
+		// NOTE: FOR INTERNAL USE ONLY!
+		union GensKey_u
+		{
+			GensKey_t keycode;
+			
+			// TODO: Endianness.
+			struct
+			{
+				// Key value.
+				union { uint16_t key16; uint8_t key[2]; };
+				uint8_t dev_id;
+				uint8_t type;
+			};
+		};
 	
 	private:
 		KeyManager() { }
