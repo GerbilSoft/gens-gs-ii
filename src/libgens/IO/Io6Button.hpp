@@ -32,19 +32,8 @@ namespace LibGens
 class Io6Button : public IoBase
 {
 	public:
-		Io6Button()
-		{
-			m_buttons = ~0;
-			m_counter = 0;
-			m_scanlines = 0;
-		}
-		Io6Button(const IoBase *other)
-			: IoBase(other)
-		{
-			m_buttons = ~0;
-			m_counter = 0;
-			m_scanlines = 0;
-		}
+		Io6Button();
+		Io6Button(const IoBase *other);
 		virtual ~Io6Button() { }
 		
 		/**
@@ -65,10 +54,7 @@ class Io6Button : public IoBase
 		void writeData(uint8_t data);
 		uint8_t readData(void);
 		
-		// I/O device update function.
-		void update(void);
-		
-		// Scanling counter function.
+		// Scanline counter function.
 		void doScanline(void);
 		
 		// Controller configuration.

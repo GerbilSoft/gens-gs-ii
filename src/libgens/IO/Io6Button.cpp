@@ -27,6 +27,57 @@
 namespace LibGens
 {
 
+Io6Button::Io6Button()
+{
+	// Reset 6-button variables.
+	m_buttons = ~0;
+	m_counter = 0;
+	m_scanlines = 0;
+	
+	// Resize the keymap.
+	m_keyMap.resize(numButtons());
+	
+	// Create the default keymap.
+	// TODO: Initialize elsewhere.
+	m_keyMap[BTNI_UP]	= KEYV_UP;
+	m_keyMap[BTNI_DOWN]	= KEYV_DOWN;
+	m_keyMap[BTNI_LEFT]	= KEYV_LEFT;
+	m_keyMap[BTNI_RIGHT]	= KEYV_RIGHT;
+	m_keyMap[BTNI_B]	= KEYV_s;
+	m_keyMap[BTNI_C]	= KEYV_d;
+	m_keyMap[BTNI_A]	= KEYV_a;
+	m_keyMap[BTNI_START]	= KEYV_RETURN;
+}
+
+Io6Button::Io6Button(const IoBase *other)
+	: IoBase(other)
+{
+	// Reset 6-button variables.
+	m_buttons = ~0;
+	m_counter = 0;
+	m_scanlines = 0;
+	
+	// Resize the keymap.
+	m_keyMap.resize(numButtons());
+	
+	// Create the default keymap.
+	// TODO: Initialize elsewhere.
+	// TODO: Copy from other controller?
+	m_keyMap[BTNI_UP]	= KEYV_UP;
+	m_keyMap[BTNI_DOWN]	= KEYV_DOWN;
+	m_keyMap[BTNI_LEFT]	= KEYV_LEFT;
+	m_keyMap[BTNI_RIGHT]	= KEYV_RIGHT;
+	m_keyMap[BTNI_B]	= KEYV_s;
+	m_keyMap[BTNI_C]	= KEYV_d;
+	m_keyMap[BTNI_A]	= KEYV_a;
+	m_keyMap[BTNI_START]	= KEYV_RETURN;
+	m_keyMap[BTNI_X]	= KEYV_q;
+	m_keyMap[BTNI_Y]	= KEYV_w;
+	m_keyMap[BTNI_Z]	= KEYV_e;
+	m_keyMap[BTNI_MODE]	= KEYV_RSHIFT;
+}
+
+
 /**
  * writeCtrl(): Set the I/O tristate value.
  * TODO: Combine with writeData().
@@ -131,40 +182,6 @@ uint8_t Io6Button::readData(void)
 	}
 	
 	return applyTristate(ret);
-}
-
-
-/**
- * update(): I/O device update function.
- */
-void Io6Button::update(void)
-{
-	// TODO: Allow customizable keymaps.
-	m_buttons = 0;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_RSHIFT);	// Mode
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_q);		// X
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_w);		// Y
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_e);		// Z
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_RETURN);	// Start
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_a);		// A
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_d);		// C
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_s);		// B
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_RIGHT);	// Right
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_LEFT);	// Left
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_DOWN);	// Down
-	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_UP);		// Up
-	m_buttons = ~m_buttons;
 }
 
 
