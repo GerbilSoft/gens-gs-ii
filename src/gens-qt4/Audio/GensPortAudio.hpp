@@ -79,9 +79,14 @@ class GensPortAudio
 		// PortAudio stream.
 		PaStream *m_stream;
 		
+		// Number of segments to buffer.
+		static const int SEGMENTS_TO_BUFFER = 8;
+		
 		// Audio buffer.
-		// Allocate 8 segments worth of data.
-		int16_t m_buf[882*8*2];
+		// Allocate 8 segments worth of stereo samples.
+		int16_t m_buf[882*SEGMENTS_TO_BUFFER*2];
+		
+		// Buffer length, position, and lock.
 		unsigned int m_bufLen;
 		unsigned int m_bufPos;
 		QMutex m_mtxBuf;

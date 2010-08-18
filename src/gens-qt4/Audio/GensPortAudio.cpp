@@ -68,7 +68,7 @@ void GensPortAudio::open(void)
 	memset(m_buf, 0x00, sizeof(m_buf));
 	
 	// Initialize the buffer variables.
-	m_bufLen = (LibGens::SoundMgr::GetSegLength() * 8);
+	m_bufLen = (LibGens::SoundMgr::GetSegLength() * SEGMENTS_TO_BUFFER);
 	m_bufPos = 0;
 	m_sampleSize = 0;
 	
