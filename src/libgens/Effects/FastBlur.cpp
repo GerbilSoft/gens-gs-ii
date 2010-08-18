@@ -124,7 +124,7 @@ void FastBlur::DoFastBlur_16_MMX(uint16_t *mdScreen, const uint32_t *mask)
 		mdScreen += 4;
 	}
 	
-	// Reset MMX state.
+	// Reset the FPU state.
 	__asm__ ("emms");
 }
 
@@ -170,7 +170,7 @@ void FastBlur::DoFastBlur_32_MMX(uint32_t *mdScreen)
 		mdScreen += 2;
 	}
 	
-	// Reset MMX state.
+	// Reset the FPU state.
 	__asm__ ("emms");
 }
 #endif /* HAVE_MMX */
