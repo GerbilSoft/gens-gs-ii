@@ -75,6 +75,7 @@ SET(gens-qt4_SRCS
 	CtrlConfigWindow.cpp
 	Audio/GensPortAudio.cpp
 	EmuManager.cpp
+	Audio/ABackend_Write.cpp
 	)
 
 # Headers with Qt4 objects.
