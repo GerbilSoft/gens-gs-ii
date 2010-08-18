@@ -32,8 +32,8 @@ namespace LibGens
 class Io3Button : public IoBase
 {
 	public:
-		Io3Button() { }
-		Io3Button(const IoBase *other) : IoBase(other) { }
+		Io3Button();
+		Io3Button(const IoBase *other);
 		virtual ~Io3Button() { }
 		
 		uint8_t readData(void);

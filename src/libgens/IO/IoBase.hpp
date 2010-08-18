@@ -29,6 +29,12 @@
 #include <stdint.h>
 #include <string.h>
 
+// C++ includes.
+#include <vector>
+
+// Key Manager.
+#include "KeyManager.hpp"
+
 namespace LibGens
 {
 
@@ -259,6 +265,9 @@ class IoBase
 		// TODO: Serial data buffer.
 		uint8_t m_serCtrl;	// Serial control.
 		uint8_t m_serLastTx;	// Last transmitted data byte.
+		
+		/** Controller configuration. **/
+		std::vector<GensKey_t> m_keyMap;
 	
 	private:
 		// Select line state.

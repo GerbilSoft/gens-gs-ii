@@ -46,6 +46,11 @@ IoBase::IoBase()
 	m_serLastTx = 0xFF;
 	
 	updateSelectLine();
+	
+	// Clear the keymap.
+	// NOTE: Derived classes must resize the keymap themselves!
+	// (We can't call virtual functions from the constructor.)
+	m_keyMap.clear();
 }
 
 
@@ -60,6 +65,12 @@ IoBase::IoBase(const IoBase *other)
 	m_serCtrl = other->m_serCtrl;
 	
 	updateSelectLine();
+	
+	// Clear the keymap.
+	// NOTE: Derived classes must resize the keymap themselves!
+	// (We can't call virtual functions from the constructor.)
+	// TODO: Copy the keymap from the other controller?
+	m_keyMap.clear();
 }
 
 

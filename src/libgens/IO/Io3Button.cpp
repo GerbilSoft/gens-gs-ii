@@ -27,6 +27,41 @@
 namespace LibGens
 {
 
+Io3Button::Io3Button()
+{
+	// Resize the keymap.
+	m_keyMap.resize(numButtons());
+	
+	// Create the default keymap.
+	m_keyMap[BTNI_UP]	= KEYV_UP;
+	m_keyMap[BTNI_DOWN]	= KEYV_DOWN;
+	m_keyMap[BTNI_LEFT]	= KEYV_LEFT;
+	m_keyMap[BTNI_RIGHT]	= KEYV_RIGHT;
+	m_keyMap[BTNI_B]	= KEYV_s;
+	m_keyMap[BTNI_C]	= KEYV_d;
+	m_keyMap[BTNI_A]	= KEYV_a;
+	m_keyMap[BTNI_START]	= KEYV_RETURN;
+}
+
+Io3Button::Io3Button(const IoBase *other)
+	: IoBase(other)
+{
+	// Resize the keymap.
+	m_keyMap.resize(numButtons());
+	
+	// Create the default keymap.
+	// TODO: Copy from other controller?
+	m_keyMap[BTNI_UP]	= KEYV_UP;
+	m_keyMap[BTNI_DOWN]	= KEYV_DOWN;
+	m_keyMap[BTNI_LEFT]	= KEYV_LEFT;
+	m_keyMap[BTNI_RIGHT]	= KEYV_RIGHT;
+	m_keyMap[BTNI_B]	= KEYV_s;
+	m_keyMap[BTNI_C]	= KEYV_d;
+	m_keyMap[BTNI_A]	= KEYV_a;
+	m_keyMap[BTNI_START]	= KEYV_RETURN;
+}
+
+
 /**
  * readData(): Read data from the controller.
  * @return Data from the controller.
@@ -61,23 +96,22 @@ uint8_t Io3Button::readData(void)
  */
 void Io3Button::update(void)
 {
-	// TODO: Allow customizable keymaps.
 	m_buttons = 0;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_RETURN);	// Start
+	m_buttons |= KeyManager::IsKeyPressed(m_keyMap[BTNI_START]);	// Start
 	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_a);		// A
+	m_buttons |= KeyManager::IsKeyPressed(m_keyMap[BTNI_A]);	// A
 	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_d);		// C
+	m_buttons |= KeyManager::IsKeyPressed(m_keyMap[BTNI_C]);	// C
 	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_s);		// B
+	m_buttons |= KeyManager::IsKeyPressed(m_keyMap[BTNI_B]);	// B
 	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_RIGHT);	// Right
+	m_buttons |= KeyManager::IsKeyPressed(m_keyMap[BTNI_RIGHT]);	// Right
 	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_LEFT);	// Left
+	m_buttons |= KeyManager::IsKeyPressed(m_keyMap[BTNI_LEFT]);	// Left
 	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_DOWN);	// Down
+	m_buttons |= KeyManager::IsKeyPressed(m_keyMap[BTNI_DOWN]);	// Down
 	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_UP);		// Up
+	m_buttons |= KeyManager::IsKeyPressed(m_keyMap[BTNI_UP]);	// Up
 	m_buttons = ~m_buttons;
 }
 
