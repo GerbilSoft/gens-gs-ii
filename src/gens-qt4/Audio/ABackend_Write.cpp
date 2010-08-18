@@ -81,6 +81,8 @@ int GensPortAudio::writeStereo(void)
 	
 	// Destination buffer pointer.
 	int16_t *dest = (int16_t*)&m_buf[(m_bufPos * m_sampleSize) / sizeof(m_buf[0])];
+	
+	// Source buffer pointers.
 	int32_t *srcL = &LibGens::SoundMgr::ms_SegBufL[0];
 	int32_t *srcR = &LibGens::SoundMgr::ms_SegBufL[0];
 	
