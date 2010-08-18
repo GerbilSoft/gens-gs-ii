@@ -181,8 +181,75 @@ int GensPortAudio::writeMono(void)
  */
 int GensPortAudio::writeStereoMMX(void)
 {
-	// TODO
-	return writeStereo();
+	// Lock the audio buffer.
+	m_mtxBuf.lock();
+	
+	// Segment length.
+	const int SegLength = LibGens::SoundMgr::GetSegLength();
+	
+	// Destination buffer pointer.
+	int16_t *dest = (int16_t*)&m_buf[(m_bufPos * m_sampleSize) / sizeof(m_buf[0])];
+	
+	// Source buffer pointers.
+	int32_t *srcL = &LibGens::SoundMgr::ms_SegBufL[0];
+	int32_t *srcR = &LibGens::SoundMgr::ms_SegBufL[0];
+	
+	// If the segment length is odd, write the first sample without MMX.
+	if (SegLength & 1)
+	{
+		if (*srcL < -0x8000)
+			*dest = -0x8000;
+		else if (*srcL > 0x7FFF)
+			*dest = 0x7FFF;
+		else
+			*dest = (int16_t)(*srcL);
+		
+		if (*srcR < -0x8000)
+			*(dest+1) = -0x8000;
+		else if (*srcR > 0x7FFF)
+			*(dest+1) = 0x7FFF;
+		else
+			*(dest+1) = (int16_t)(*srcR);
+		
+		// Next sample.
+		srcL++;
+		srcR++;
+		dest += 2;
+	}
+	
+	// Write two samples at once using MMX.
+	for (unsigned int i = (SegLength / 2); i != 0; i--, srcL += 2, srcR += 2, dest += 4)
+	{
+		__asm__ (
+			/* Get source data. */
+			"movd		 (%0), %%mm0\n"		// %mm0 = [ 0, R1]
+			"movd		4(%0), %%mm1\n"		// %mm1 = [ 0, R2]
+			"psllq		  $32, %%mm0\n"		// %mm0 = [R1,  0]
+			"psllq		  $32, %%mm1\n"		// %mm1 = [R2,  0]
+			"movd		 (%1), %%mm2\n"		// %mm2 = [ 0, L1]
+			"movd		4(%1), %%mm3\n"		// %mm3 = [ 0, L2]
+			"por		%%mm2, %%mm0\n"		// %mm0 = [R1, L1]
+			"por		%%mm3, %%mm1\n"		// %mm1 = [R2, L2]
+			"packssdw	%%mm1, %%mm0\n"		// %mm0 = [R2, L2, R1, L1]
+			"movq		%%mm0, (%2)\n"
+			: // output (dest is a ptr; it's not written to!)
+			: "r" (srcL), "r" (srcR), "r" (dest)	// input
+			);
+	}
+	
+	// Reset the FPU state.
+	__asm__ ("emms");
+	
+	// Clear the segment buffers.
+	memset(LibGens::SoundMgr::ms_SegBufL, 0x00, SegLength*sizeof(LibGens::SoundMgr::ms_SegBufL[0]));
+	memset(LibGens::SoundMgr::ms_SegBufR, 0x00, SegLength*sizeof(LibGens::SoundMgr::ms_SegBufR[0]));
+	
+	// Increase the buffer position.
+	m_bufPos += SegLength;
+	
+	// Unlock the audio buffer.
+	m_mtxBuf.unlock();
+	return 0;
 }
 
 
