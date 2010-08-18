@@ -326,10 +326,13 @@ QString EmuManager::sysName(void)
  */
 void EmuManager::setController(int port, LibGens::IoBase::IoType type)
 {
-	// TODO: Do the controller change immediately if no ROM is running,
-	// or if the ROM is running and the system is paused.
 	CtrlChange_t chg = {port, type};
 	m_qCtrlChange.enqueue(chg);
+	
+	// TODO: Do the controller change immediately if
+	// a ROM is running and the system is paused.
+	if (!m_rom)
+		processQCtrlChange();
 }
 
 
