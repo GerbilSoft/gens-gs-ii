@@ -47,7 +47,10 @@ class GensPortAudio
 		void open(void);
 		void close(void);
 		
-		// Write the segment to the audio stream.
+		/**
+		 * write(): Write the current segment to the audio buffer.
+		 * @return 0 on success; non-zero on error.
+		 */
 		int write(void);
 	
 	protected:
@@ -86,6 +89,20 @@ class GensPortAudio
 		// Audio settings.
 		int m_rate;
 		bool m_stereo;
+		
+		/** Internal audio write functions. **/
+		
+		/**
+		 * writeStereo(): Write the current segment to the audio buffer. (Stereo output)
+		 * @return 0 on success; non-zero on error.
+		 */
+		int writeStereo(void);
+		
+		/**
+		 * writeMono(): Write the current segment to the audio buffer. (Monaural output)
+		 * @return 0 on success; non-zero on error.
+		 */
+		int writeMono(void);
 };
 
 }

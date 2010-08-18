@@ -41,6 +41,7 @@ namespace GensQt4
 
 /**
  * write(): Write the current segment to the audio buffer.
+ * @return 0 on success; non-zero on error.
  */
 int GensPortAudio::write(void)
 {
@@ -58,16 +59,31 @@ int GensPortAudio::write(void)
 		usleep(1000);
 	}
 	
+	// TODO: MMX versions.
+	if (m_stereo)
+		return writeStereo();
+	else
+		return writeMono();
+}
+
+
+/**
+ * writeStereo(): Write the current segment to the audio buffer. (Stereo output)
+ * @return 0 on success; non-zero on error.
+ */
+int GensPortAudio::writeStereo(void)
+{
 	// Lock the audio buffer.
 	m_mtxBuf.lock();
 	
-	// TODO: Mono/stereo, MMX, etc.
+	// Segment position.
 	unsigned int i = 0;
 	
 	// Destination buffer pointer.
 	// NOTE: We're treating it as a single interleaved stream.
 	int16_t *dest = (int16_t*)&m_buf[0][0];
 	
+	const int SegLength = LibGens::SoundMgr::GetSegLength();
 	for (; i < SegLength; i++, dest += 2)
 	{
 		int32_t L = LibGens::SoundMgr::ms_SegBufL[i];
@@ -97,6 +113,20 @@ int GensPortAudio::write(void)
 	
 	// Unlock the audio buffer.
 	m_mtxBuf.unlock();
+	return 0;
+}
+
+
+/**
+ * writeMono(): Write the current segment to the audio buffer. (Monaural output)
+ * @return 0 on success; non-zero on error.
+ */
+int GensPortAudio::writeMono(void)
+{
+	if (!m_open)
+		return 1;
+	
+	// TODO
 	return 0;
 }
 
