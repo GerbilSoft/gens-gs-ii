@@ -80,7 +80,7 @@ int GensPortAudio::writeStereo(void)
 	unsigned int i = 0;
 	
 	// Destination buffer pointer.
-	int16_t *dest = (int16_t*)&m_buf[0];
+	int16_t *dest = (int16_t*)&m_buf[(m_bufPos * m_sampleSize) / sizeof(m_buf[0])];
 	
 	const int SegLength = LibGens::SoundMgr::GetSegLength();
 	for (; i < SegLength; i++, dest += 2)
