@@ -98,7 +98,7 @@ int GensPortAudio::writeStereo(void)
 	
 	// Source buffer pointers.
 	int32_t *srcL = &LibGens::SoundMgr::ms_SegBufL[0];
-	int32_t *srcR = &LibGens::SoundMgr::ms_SegBufL[0];
+	int32_t *srcR = &LibGens::SoundMgr::ms_SegBufR[0];
 	
 	for (unsigned int i = SegLength; i != 0; i--, srcL++, srcR++, dest += 2)
 	{
@@ -147,7 +147,7 @@ int GensPortAudio::writeMono(void)
 	
 	// Source buffer pointers.
 	int32_t *srcL = &LibGens::SoundMgr::ms_SegBufL[0];
-	int32_t *srcR = &LibGens::SoundMgr::ms_SegBufL[0];
+	int32_t *srcR = &LibGens::SoundMgr::ms_SegBufR[0];
 	
 	for (unsigned int i = SegLength; i != 0; i--, srcL++, srcR++, dest++)
 	{
@@ -193,7 +193,6 @@ int GensPortAudio::writeStereoMMX(void)
 	// Source buffer pointers.
 	int32_t *srcL = &LibGens::SoundMgr::ms_SegBufL[0];
 	int32_t *srcR = &LibGens::SoundMgr::ms_SegBufR[0];
-	memset(LibGens::SoundMgr::ms_SegBufL, 0x00, SegLength*sizeof(LibGens::SoundMgr::ms_SegBufL[0]));
 	
 	// If the segment length is odd, write the first sample without MMX.
 	if (SegLength & 1)
