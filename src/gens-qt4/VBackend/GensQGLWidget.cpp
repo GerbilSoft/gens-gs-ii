@@ -416,7 +416,7 @@ void GensQGLWidget::paintGL(void)
 		
 		// If emulation is paused, update the pause effect.
 #ifdef HAVE_GLEW
-		if (paused() && m_fragPaused == 0)
+		if (isPaused() && m_fragPaused == 0)
 		{
 			// Paused, but the fragment program isn't usable.
 			// Apply the effect in software.
@@ -424,7 +424,7 @@ void GensQGLWidget::paintGL(void)
 			bFromMD = false;
 		}
 #else
-		if (paused())
+		if (isPaused())
 		{
 			updatePausedEffect(bFromMD);
 			bFromMD = false;
@@ -467,7 +467,7 @@ void GensQGLWidget::paintGL(void)
 	
 #ifdef HAVE_GLEW
 	// Enable the fragment program.
-	if (paused() && m_fragPaused > 0)
+	if (isPaused() && m_fragPaused > 0)
 	{
 		glEnable(GL_FRAGMENT_PROGRAM_ARB);
 		glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, m_fragPaused);
@@ -489,7 +489,7 @@ void GensQGLWidget::paintGL(void)
 	
 #ifdef HAVE_GLEW
 	// Disable the fragment program.
-	if (paused() && m_fragPaused > 0)
+	if (isPaused() && m_fragPaused > 0)
 		glDisable(GL_FRAGMENT_PROGRAM_ARB);
 #endif /* HAVE_GLEW */
 	
@@ -676,7 +676,7 @@ void GensQGLWidget::keyPressEvent(QKeyEvent *event)
 	{
 		case Qt::Key_Escape:
 			// Toggle the Pause effect.
-			setPaused(!paused());
+			setPaused(!isPaused());
 			vbUpdate();
 			break;
 		

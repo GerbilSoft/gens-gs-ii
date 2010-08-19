@@ -51,7 +51,7 @@ class VBackend
 		// Since this is the base class, this will return NULL.
 		virtual QWidget *toQWidget(void) { return NULL; }
 		
-		bool paused(void) const { return m_paused; }
+		bool isPaused(void) const { return m_paused; }
 		void setPaused(bool newPaused)
 		{
 			if (m_paused == newPaused)
