@@ -253,14 +253,14 @@ void SigHandler::SignalHandler(int signum)
 		if (siginfo)
 		{
 			LOG_MSG(gens, LOG_MSG_LEVEL_ERROR,
-				"Signal %d (%s: %s) received in non-GUI thread. Hanging...",
+				"Signal %d (%s: %s) received in a non-GUI thread. Hanging...",
 				signum, signame, siginfo->signame);
 		}
 		else
 #endif
 		{
 			LOG_MSG(gens, LOG_MSG_LEVEL_ERROR,
-				"Signal %d (%s) received in non-GUI thread. Hanging...",
+				"Signal %d (%s) received in a non-GUI thread. Hanging...",
 				signum, signame);
 		}
 		
