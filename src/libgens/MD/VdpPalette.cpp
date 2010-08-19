@@ -195,12 +195,15 @@ FORCE_INLINE void VdpPalette::T_recalcFullMD(pixel *palFull)
 		T_ConstrainColorComponent<GMask>(g);
 		T_ConstrainColorComponent<BMask>(b);
 		
+		// TODO: Make this configurable?
+#if 0	
 		if (GMask == 0x3F)
 		{
 			// 16-bit color. (RGB565)
 			// Mask off the LSB of the green component.
 			g &= ~1;
 		}
+#endif
 		
 		// Create the color.
 		palFull[i] = (r << (BBits + GBits)) |
