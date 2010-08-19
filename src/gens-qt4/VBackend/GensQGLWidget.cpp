@@ -76,7 +76,10 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 	: QGLWidget(QGLFormat(QGL::NoAlphaChannel | QGL::NoDepthBuffer), parent)
 {
 	m_tex = 0;
+	
+	// Initialize the OSD variables.
 	m_texOsd = 0;
+	m_glListOsd = 0;
 	
 #ifdef HAVE_GLEW
 	// ARB fragment programs.
@@ -106,6 +109,12 @@ GensQGLWidget::~GensQGLWidget()
 	{
 		deleteTexture(m_texOsd);
 		m_texOsd = 0;
+	}
+	
+	if (m_glListOsd > 0)
+	{
+		glDeleteLists(m_glListOsd, 1);
+		m_glListOsd = 0;
 	}
 	
 #ifdef HAVE_GLEW
@@ -321,6 +330,9 @@ void GensQGLWidget::initializeGL(void)
 	
 	// Allocate the OSD texture.
 	reallocTexOsd();
+	
+	// Generate a display list for the OSD.
+	m_glListOsd = glGenLists(1);
 }
 
 
@@ -499,6 +511,18 @@ void GensQGLWidget::printOsdText(void)
 	// * renderText() doesn't properly handle newlines.
 	// * fm.boundingRect() doesn't seem to handle wordwrapping correctly, either.
 	
+	if (!m_osdListDirty)
+	{
+		// OSD message list isn't dirty.
+		// Render the display list.
+		glCallList(m_glListOsd);
+		return;
+	}
+	
+	// OSD message list is dirty.
+	// Create a new GL display list.
+	glNewList(m_glListOsd, GL_COMPILE_AND_EXECUTE);
+	
 	// Set pixel matrices.
 	// Assuming 320x240 for 1x text rendering.
 	glMatrixMode(GL_PROJECTION);
@@ -588,6 +612,10 @@ void GensQGLWidget::printOsdText(void)
 	
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
+	
+	// Finished creating the GL display list.
+	glEndList();
+	m_osdListDirty = false;		// OSD message list is no longer dirty.
 }
 
 

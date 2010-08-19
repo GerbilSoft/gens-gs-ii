@@ -98,7 +98,8 @@ class VBackend
 			
 			// Update the Show FPS setting.
 			m_showFps = newShowFps;
-			setVbDirty();	// TODO: Texture doesn't really need to be reuploaded...
+			setVbDirty();		// TODO: Texture doesn't really need to be reuploaded...
+			m_osdListDirty = true;	// TODO: Only if the game is running...
 		}
 	
 	protected:
@@ -129,6 +130,9 @@ class VBackend
 			double endTime;
 		};
 		QList<OsdMessage> m_osdList;
+		
+		// m_osdListDirty: Set if the OSD message list has been changed.
+		bool m_osdListDirty;
 		
 		// FPS manager.
 		double m_fps[8];

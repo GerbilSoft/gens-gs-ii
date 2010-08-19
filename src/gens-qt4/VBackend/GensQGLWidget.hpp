@@ -75,7 +75,8 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		GLenum m_texType;
 		
 		// OSD texture.
-		GLuint m_texOsd;
+		GLuint m_texOsd;	// Texture containing U+0000 - U+00FF.
+		GLuint m_glListOsd;	// Display list.
 		void printOsdText(void);
 		void printOsdLine(int x, int y, const QString &msg);
 		
