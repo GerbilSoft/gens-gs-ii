@@ -102,6 +102,9 @@ class Rom
 		// ROM names. (Obtained from the ROM headers.)
 		const utf8_str *romNameJP(void) { return m_romNameJP.c_str(); }
 		const utf8_str *romNameUS(void) { return m_romNameUS.c_str(); }
+		
+		// ROM filename.
+		const utf8_str *filename(void) { return m_filename.c_str(); }
 	
 	protected:
 		MDP_SYSTEM_ID m_sysId;
