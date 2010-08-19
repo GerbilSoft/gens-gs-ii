@@ -271,7 +271,6 @@ int KeyHandlerQt::QKeyEventToKeyVal(QKeyEvent *event)
  * @param event QKeyEvent.
  * @return LibGens key value. (0 for unknown)
  */
-#include <stdio.h>
 int KeyHandlerQt::NativeModifierToKeyVal(QKeyEvent *event)
 {
 	using namespace LibGens;
