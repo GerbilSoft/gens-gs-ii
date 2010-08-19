@@ -26,6 +26,9 @@
 
 #include <stdint.h>
 
+// Needed for FORCE_INLINE.
+#include "../macros/common.h"
+
 namespace LibGens
 {
 
@@ -50,8 +53,6 @@ class VdpRend_m5
 		static unsigned int Y_FineOffset;
 		static unsigned int TotalSprites;
 		
-		// TODO: Port FORCE_INLINE from Gens/GS.
-		#define FORCE_INLINE inline
 		template<bool interlaced>
 		static FORCE_INLINE int T_GetLineNumber(void);
 		

@@ -31,6 +31,9 @@
 // ROM image class.
 #include "../Rom.hpp"
 
+// Needed for FORCE_INLINE.
+#include "../macros/common.h"
+
 namespace LibGens
 {
 
@@ -69,9 +72,6 @@ class EmuMD
 			LINETYPE_VBLANKLINE	= 1,
 			LINETYPE_BORDER		= 2,
 		};
-		
-		// TODO: Port FORCE_INLINE from Gens/GS.
-		#define FORCE_INLINE inline
 		
 		template<LineType_t LineType, bool VDP>
 		static FORCE_INLINE void T_Do_Line(void);

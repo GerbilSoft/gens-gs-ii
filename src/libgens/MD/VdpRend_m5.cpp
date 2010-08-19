@@ -33,9 +33,6 @@
 // C includes.
 #include <string.h>
 
-// TODO: Port FORCE_INLINE from Gens/GS.
-#define FORCE_INLINE inline
-
 // TODO: Maybe move these to class enum constants?
 #define LINEBUF_HIGH_B	0x80
 #define LINEBUF_SHAD_B	0x40

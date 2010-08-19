@@ -28,6 +28,9 @@
 
 #include "VdpIo.hpp"
 
+// Needed for FORCE_INLINE.
+#include "../macros/common.h"
+
 namespace LibGens
 {
 
@@ -145,9 +148,6 @@ class VdpPalette
 		
 		// Dirty flag.
 		bool m_dirty;
-		
-		// TODO: Port FORCE_INLINE from Gens/GS.
-		#define FORCE_INLINE inline
 		
 		template<int mask>
 		static FORCE_INLINE void T_ConstrainColorComponent(int& c);
