@@ -170,7 +170,8 @@ int EmuMD::SetRom(Rom *rom)
 	}
 	
 	// Initialize audio.
-	SoundMgr::ReInit(44100, M68K_Mem::ms_Region.isPal());
+	// NOTE: Only set the region. Sound rate is set by the UI.
+	SoundMgr::SetRegion(M68K_Mem::ms_Region.isPal());
 	
 	return 0;
 }
