@@ -358,6 +358,31 @@ void GensWindow::menuTriggered(int id)
 				default:
 					break;
 			}
+			break;
+		
+		case IDM_SOUNDTEST_MENU:
+			// Audio Testing
+			switch (MNUID_ITEM(id))
+			{
+				case MNUID_ITEM(IDM_SOUNDTEST_11025):
+					m_emuManager.setAudioRate(11025);
+					break;
+				case MNUID_ITEM(IDM_SOUNDTEST_22050):
+					m_emuManager.setAudioRate(22050);
+					break;
+				case MNUID_ITEM(IDM_SOUNDTEST_44100):
+					m_emuManager.setAudioRate(44100);
+					break;
+				case MNUID_ITEM(IDM_SOUNDTEST_MONO):
+					m_emuManager.setStereo(false);
+					break;
+				case MNUID_ITEM(IDM_SOUNDTEST_STEREO):
+					m_emuManager.setStereo(true);
+					break;
+				default:
+					break;
+			}
+			break;
 		
 		default:
 			break;

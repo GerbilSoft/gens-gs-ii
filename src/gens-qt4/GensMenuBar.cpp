@@ -99,6 +99,18 @@ GensMenuBar::GensMenuBar(QWidget *parent)
 		{0, GMI_NORMAL, NULL, NULL, MACCEL_NONE, 0, NULL, NULL}
 	};
 	
+	static const MenuItem gmiSoundTest[] =
+	{
+		{IDM_SOUNDTEST_11025, GMI_NORMAL, "&11,025 Hz", NULL, MACCEL_NONE, 0, NULL, NULL},
+		{IDM_SOUNDTEST_22050, GMI_NORMAL, "&22,050 Hz", NULL, MACCEL_NONE, 0, NULL, NULL},
+		{IDM_SOUNDTEST_44100, GMI_NORMAL, "&44,100 Hz", NULL, MACCEL_NONE, 0, NULL, NULL},
+		{IDM_SEPARATOR, GMI_SEPARATOR, NULL, NULL, MACCEL_NONE, 0, NULL, NULL},
+		{IDM_SOUNDTEST_MONO, GMI_NORMAL, "Mono", NULL, MACCEL_NONE, 0, NULL, NULL},
+		{IDM_SOUNDTEST_STEREO, GMI_NORMAL, "Stereo", NULL, MACCEL_NONE, 0, NULL, NULL},
+		
+		{0, GMI_NORMAL, NULL, NULL, MACCEL_NONE, 0, NULL, NULL}
+	};
+	
 	static const MenuItem gmiHelp[] =
 	{
 		{IDM_HELP_ABOUT, GMI_NORMAL, "&About Gens/GS II", NULL, MACCEL_NONE, 0, "help-about", ":/oxygen-16x16/help-about.png"},
@@ -111,6 +123,7 @@ GensMenuBar::GensMenuBar(QWidget *parent)
 		{IDM_FILE_MENU, "&File", &gmiFile[0]},
 		{IDM_RESBPPTEST_MENU, "&ResBppTest", &gmiResBppTest[0]},
 		{IDM_CTRLTEST_MENU, "&CtrlTest", &gmiCtrlTest[0]},
+		{IDM_SOUNDTEST_MENU, "&SoundTest", &gmiSoundTest[0]},
 		{IDM_HELP_MENU, "&Help", &gmiHelp[0]},
 		
 		{0, NULL, NULL}
