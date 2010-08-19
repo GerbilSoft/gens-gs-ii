@@ -61,7 +61,7 @@ class GLShaderManager
 		inline bool hasPaused(void) const { return false; }
 #endif
 		
-		/** Set shaders. **/
+		/** Set Shader functions. **/
 #ifdef HAVE_GLEW
 		void setPaused(bool enabled);
 #else

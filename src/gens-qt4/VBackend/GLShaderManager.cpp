@@ -149,6 +149,10 @@ void GLShaderManager::end(void)
 }
 
 
+/** Set Shader functions. **/
+
+
+#ifdef HAVE_GLEW
 /**
  * setPaused(): Set the Paused shader.
  * @param enabled True to enable; false to disable.
@@ -172,5 +176,6 @@ void GLShaderManager::setPaused(bool newEnabled)
 		glDisable(GL_FRAGMENT_PROGRAM_ARB);
 	}
 }
+#endif
 
 }
