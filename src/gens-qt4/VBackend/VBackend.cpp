@@ -66,12 +66,9 @@ VBackend::~VBackend()
 	delete m_msgTimer;
 	m_msgTimer = NULL;
 	
-	// Delete the internal framebuffer if it was allocated.
-	if (m_intScreen)
-	{
-		delete m_intScreen;
-		m_intScreen = NULL;
-	}
+	// Delete the internal framebuffer.
+	delete m_intScreen;
+	m_intScreen = NULL;
 }
 
 
