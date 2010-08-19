@@ -199,7 +199,7 @@ void GensPortAudio::setRate(int newRate)
 		return;
 	
 	// TODO: Currently limited to a maximum sampling rate of 44.1 kHz.
-	if (newRate > MAX_SAMPLING_RATE)
+	if (newRate > LibGens::SoundMgr::MAX_SAMPLING_RATE)
 		return;
 	
 	if (m_open)

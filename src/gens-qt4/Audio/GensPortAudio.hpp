@@ -52,9 +52,6 @@ class GensPortAudio
 		void open(void);
 		void close(void);
 		
-		// Maximum sampling rate.
-		static const int MAX_SAMPLING_RATE = 44100;
-		
 		/**
 		 * Properties.
 		 */

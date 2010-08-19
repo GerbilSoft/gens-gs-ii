@@ -28,6 +28,10 @@
 #include "libgens/Util/Timing.hpp"
 #include "libgens/MD/EmuMD.hpp"
 
+// LibGens Sound Manager.
+// Needed for LibGens::SoundMgr::MAX_SAMPLING_RATE.
+#include "libgens/sound/SoundMgr.hpp"
+
 // LibGens video includes.
 #include "libgens/MD/VdpPalette.hpp"
 #include "libgens/MD/VdpRend.hpp"
@@ -356,7 +360,7 @@ void EmuManager::screenShot(void)
 void EmuManager::setAudioRate(int newRate)
 {
 	// TODO: Currently limited to a maximum sampling rate of 44.1 kHz.
-	if (newRate > GensPortAudio::MAX_SAMPLING_RATE)
+	if (newRate > LibGens::SoundMgr::MAX_SAMPLING_RATE)
 		return;
 	
 	EmuRequest_t rq;
