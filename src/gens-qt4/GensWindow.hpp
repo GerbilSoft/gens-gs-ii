@@ -100,11 +100,7 @@ class GensWindow : public QMainWindow
 		 * - Update the video backend "running" state.
 		 * - Update the Gens title.
 		 */
-		void stateChanged(void)
-		{
-			m_vBackend->setIsRunning(m_emuManager.isRomOpen());
-			setGensTitle();
-		}
+		void stateChanged(void);
 		
 		/**
 		 * updateVideo(): Update video.
