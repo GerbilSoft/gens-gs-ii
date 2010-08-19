@@ -331,40 +331,28 @@ class VdpIo
 		 * GetHPix(): Get the current horizontal resolution.
 		 * This should only be used for non-VDP code.
 		 * VDP code should access VDP_Reg.H_Pix directly.
+		 * NOTE: Do NOT use this if a ROM isn't loaded!
 		 * @return Horizontal resolution, in pixels.
 		 */
-		static inline int GetHPix(void)
-		{
-			// Default when no game is loaded is 320. (320x224)
-			// TODO: Port this from Gens/GS!
-			return 320;
-		}
+		static inline int GetHPix(void) { return H_Pix; }
 		
 		/**
 		 * GetHPixBegin(): Get the first horizontal pixel number.
 		 * This should only be used for non-VDP code.
 		 * VDP code should access VDP_Reg.H_Pix_Begin directly.
+		 * NOTE: Do NOT use this if a ROM isn't loaded!
 		 * @return First horizontal pixel number.
 		 */
-		static inline int GetHPixBegin(void)
-		{
-			// Default when no game is loaded is 0. (320x224)
-			// TODO: Port this from Gens/GS!
-			return 0;
-		}
+		static inline int GetHPixBegin(void) { return H_Pix_Begin; }
 		
 		/**
 		 * vdp_getVPix(): Get the current vertical resolution.
 		 * This should only be used for non-VDP code.
 		 * VDP code should access VDP_Reg.Set2 directly.
+		 * NOTE: Do NOT use this if a ROM isn't loaded!
 		 * @return Vertical resolution, in pixels.
 		 */
-		static inline int GetVPix(void)
-		{
-			// Default when no game is loaded is 224. (320x224)
-			// TODO: Port this from Gens/GS!
-			return 224;
-		}
+		static inline int GetVPix(void) { return VDP_Lines.Visible.Total; }
 	
 	protected:
 		static inline void Update_Mode(void);
