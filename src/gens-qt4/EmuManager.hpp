@@ -99,10 +99,29 @@ class EmuManager : public QObject
 		// Audio backend.
 		GensPortAudio *m_audio;
 		
-		// Controller change requests.
-		struct CtrlChange_t { int port; LibGens::IoBase::IoType type; };
-		QQueue<CtrlChange_t> m_qCtrlChange;
-		void processQCtrlChange(void);
+		// Emulation requests.
+		struct EmuRequest_t
+		{
+			enum RequestType
+			{
+				RQT_UNKNOWN	= 0,
+				RQT_CTRLCHANGE	= 1,
+			};
+			
+			RequestType rqType;
+			union
+			{
+				struct
+				{
+					int port;
+					LibGens::IoBase::IoType ctrlType;
+				} ctrlChange;
+			};
+		};
+		
+		QQueue<EmuRequest_t> m_qEmuRequest;
+		void processQEmuRequest(void);
+		void doCtrlChange(int port, LibGens::IoBase::IoType type);
 	
 	protected slots:
 		// Frame done from EmuThread.
