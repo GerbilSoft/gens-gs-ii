@@ -85,7 +85,15 @@ void VBackend::setRunning(bool newIsRunning)
 	
 	// Mark the OSD list as dirty if the FPS counter is visible.
 	if (m_showFps)
+	{
 		setOsdListDirty();
+		if (!isRunning())
+		{
+			// Emulation isn't running.
+			// Update the dispaly immediately.
+			vbUpdate();
+		}
+	}
 	
 	// If emulation isn't running, start the message timer.
 	if (!isRunning())
