@@ -680,13 +680,15 @@ void GensQGLWidget::keyPressEvent(QKeyEvent *event)
 	{
 		case Qt::Key_Escape:
 			// Toggle the Pause effect.
-			setPaused(!isPaused());
+			if (isRunning())
+				setPaused(!isPaused());
 			vbUpdate();
 			break;
 		
 		case Qt::Key_F9:
 			// Toggle the Fast Blur effect.
-			setFastBlur(!fastBlur());
+			if (isRunning())
+				setFastBlur(!fastBlur());
 			vbUpdate();
 			break;
 		
