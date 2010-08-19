@@ -60,7 +60,11 @@ class VBackend
 			// Update the paused status.
 			m_paused = newPaused;
 			if (isRunning())
+			{
 				setVbDirty();
+				if (showFps())
+					m_osdListDirty = true;
+			}
 		}
 		
 		bool fastBlur(void) const { return m_fastBlur; }

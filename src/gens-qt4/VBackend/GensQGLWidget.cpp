@@ -563,7 +563,7 @@ void GensQGLWidget::printOsdText(void)
 	
 	// Check if the FPS should be drawn.
 	// TODO: Integrate this with the for loop.
-	if (isRunning() && showFps())
+	if (isRunning() && !isPaused() && showFps())
 	{
 		QString sFps = QString::number(m_fpsAvg, 'f', 1);
 		
