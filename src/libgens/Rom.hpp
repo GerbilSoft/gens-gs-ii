@@ -83,7 +83,7 @@ class Rom
 			RFMT_CD_BIN_2352,	// CD-ROM image, BIN format. (2352-byte sectors)
 		};
 		
-		Rom(const char *filename, MDP_SYSTEM_ID sysOverride = MDP_SYSTEM_UNKNOWN, RomFormat fmtOverride = RFMT_UNKNOWN);
+		Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride = MDP_SYSTEM_UNKNOWN, RomFormat fmtOverride = RFMT_UNKNOWN);
 		~Rom();
 		
 		bool isOpen(void) const { return (m_file != NULL); }
@@ -99,9 +99,9 @@ class Rom
 		
 		int loadRom(void *buf, size_t siz);
 		
-		// TODO: Add a typedef utf8_str for UTF-8 strings.
-		const char *romNameJP(void) { return m_romNameJP.c_str(); }
-		const char *romNameUS(void) { return m_romNameUS.c_str(); }
+		// ROM names. (Obtained from the ROM headers.)
+		const utf8_str *romNameJP(void) { return m_romNameJP.c_str(); }
+		const utf8_str *romNameUS(void) { return m_romNameUS.c_str(); }
 	
 	protected:
 		MDP_SYSTEM_ID m_sysId;
