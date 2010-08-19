@@ -406,30 +406,34 @@ void GensQGLWidget::paintGL(void)
 		}
 		
 		/** START: Apply effects. **/
-		
-		// If Fast Blur is enabled, update the Fast Blur effect.
-		if (fastBlur())
+		if (isRunning())
 		{
-			updateFastBlur(bFromMD);
-			bFromMD = false;
-		}
-		
-		// If emulation is paused, update the pause effect.
+			// Emulation is running. Check if any effects should be applied.
+			
+			// If Fast Blur is enabled, update the Fast Blur effect.
+			if (fastBlur())
+			{
+				updateFastBlur(bFromMD);
+				bFromMD = false;
+			}
+			
+			// If emulation is paused, update the pause effect.
 #ifdef HAVE_GLEW
-		if (isPaused() && m_fragPaused == 0)
-		{
-			// Paused, but the fragment program isn't usable.
-			// Apply the effect in software.
-			updatePausedEffect(bFromMD);
-			bFromMD = false;
-		}
+			if (isPaused() && m_fragPaused == 0)
+			{
+				// Paused, but the fragment program isn't usable.
+				// Apply the effect in software.
+				updatePausedEffect(bFromMD);
+				bFromMD = false;
+			}
 #else
-		if (isPaused())
-		{
-			updatePausedEffect(bFromMD);
-			bFromMD = false;
-		}
+			if (isPaused())
+			{
+				updatePausedEffect(bFromMD);
+				bFromMD = false;
+			}
 #endif /* HAVE_GLEW */
+		}
 		
 		// Determine which screen buffer should be used for video output.
 		GLvoid *screen = (bFromMD ? (GLvoid*)LibGens::VdpRend::MD_Screen.u16 : (GLvoid*)m_intScreen);
@@ -467,7 +471,7 @@ void GensQGLWidget::paintGL(void)
 	
 #ifdef HAVE_GLEW
 	// Enable the fragment program.
-	if (isPaused() && m_fragPaused > 0)
+	if (isRunning() && isPaused() && m_fragPaused > 0)
 	{
 		glEnable(GL_FRAGMENT_PROGRAM_ARB);
 		glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, m_fragPaused);
@@ -489,7 +493,7 @@ void GensQGLWidget::paintGL(void)
 	
 #ifdef HAVE_GLEW
 	// Disable the fragment program.
-	if (isPaused() && m_fragPaused > 0)
+	if (isRunning() && isPaused() && m_fragPaused > 0)
 		glDisable(GL_FRAGMENT_PROGRAM_ARB);
 #endif /* HAVE_GLEW */
 	
@@ -559,7 +563,7 @@ void GensQGLWidget::printOsdText(void)
 	
 	// Check if the FPS should be drawn.
 	// TODO: Integrate this with the for loop.
-	if (showFps())
+	if (isRunning() && showFps())
 	{
 		QString sFps = QString::number(m_fpsAvg, 'f', 1);
 		

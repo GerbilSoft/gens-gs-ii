@@ -96,10 +96,13 @@ class GensWindow : public QMainWindow
 		}
 		
 		/**
-		 * stateChanged(): Emulation state changed. Update the Gens title.
+		 * stateChanged(): Emulation state changed.
+		 * - Update the video backend "running" state.
+		 * - Update the Gens title.
 		 */
 		void stateChanged(void)
 		{
+			m_vBackend->setIsRunning(m_emuManager.isRomOpen());
 			setGensTitle();
 		}
 		

@@ -57,9 +57,10 @@ class VBackend
 			if (m_paused == newPaused)
 				return;
 			
-			// Update the pause status.
+			// Update the paused status.
 			m_paused = newPaused;
-			setVbDirty();
+			if (isRunning())
+				setVbDirty();
 		}
 		
 		bool fastBlur(void) const { return m_fastBlur; }
@@ -70,7 +71,21 @@ class VBackend
 			
 			// Update the Fast Blur setting.
 			m_fastBlur = newFastBlur;
-			setVbDirty();
+			if (isRunning())
+				setVbDirty();
+		}
+		
+		bool isRunning(void) const { return m_running; }
+		void setIsRunning(bool newIsRunning)
+		{
+			if (m_running == newIsRunning)
+				return;
+			
+			m_running = newIsRunning;
+			
+			// Mark the OSD list as dirty if the FPS counter is visible.
+			if (m_showFps)
+				m_osdListDirty = true;
 		}
 		
 		// NOTE: Format string argument is 3 instead of 2.
@@ -99,7 +114,10 @@ class VBackend
 			// Update the Show FPS setting.
 			m_showFps = newShowFps;
 			setVbDirty();		// TODO: Texture doesn't really need to be reuploaded...
-			m_osdListDirty = true;	// TODO: Only if the game is running...
+			
+			// Mark the OSD list as dirty if the emulator is running.
+			if (isRunning())
+				m_osdListDirty = true;
 		}
 	
 	protected:
@@ -144,6 +162,9 @@ class VBackend
 		// Effects.
 		bool m_paused;
 		bool m_fastBlur;
+		
+		// Is the emulator running?
+		bool m_running;
 };
 
 }

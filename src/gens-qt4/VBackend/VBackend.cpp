@@ -46,6 +46,9 @@ VBackend::VBackend()
 	m_paused = false;
 	m_fastBlur = false;
 	
+	// We're not running anything initially.
+	m_running = false;
+	
 	// Initialize the FPS manager.
 	resetFps();
 	m_showFps = true;	// TODO: Load from configuration.
@@ -135,8 +138,8 @@ void VBackend::resetFps(void)
 	m_fpsAvg = 0.0;
 	m_fpsPtr = 0;
 	
-	// TODO: Only set this if the game is running.
-	m_osdListDirty = true;
+	if (isRunning())
+		m_osdListDirty = true;
 }
 
 
@@ -166,8 +169,8 @@ void VBackend::pushFps(double fps)
 	else
 		m_fpsAvg = (sum / (double)count);
 	
-	// TODO: Only set this if the game is running.
-	m_osdListDirty = true;
+	if (isRunning())
+		m_osdListDirty = true;
 }
 
 }
