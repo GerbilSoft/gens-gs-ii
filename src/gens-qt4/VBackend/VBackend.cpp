@@ -172,8 +172,7 @@ void VBackend::osd_vprintf(const int duration, const char *msg, va_list ap)
 
 /**
  * osd_process(): Process the OSD queue.
- * Do NOT call this function externally or from derived classes!
- * It is to be used exclusively with MsgTimer.
+ * This should ONLY be called by MsgTimer!
  * @return Number of messages remaining in the OSD queue.
  */
 int VBackend::osd_process(void)

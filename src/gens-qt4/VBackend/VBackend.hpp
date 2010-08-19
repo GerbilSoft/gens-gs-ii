@@ -99,14 +99,6 @@ class VBackend
 			va_end(ap);
 		}
 		
-		/**
-		 * osd_process(): Process the OSD queue.
-		 * Do NOT call this function externally or from derived classes!
-		 * It is to be used exclusively with MsgTimer.
-		 * @return Number of messages remaining in the OSD queue.
-		 */
-		int osd_process(void);
-		
 		// FPS manager.
 		void resetFps(void);
 		void pushFps(double fps);
@@ -158,6 +150,14 @@ class VBackend
 		// m_osdListDirty: Set if the OSD message list has been changed.
 		bool m_osdListDirty;
 		inline void setOsdListDirty(void) { m_osdListDirty = true; }
+		
+		/**
+		 * osd_process(): Process the OSD queue.
+		 * This should ONLY be called by MsgTimer!
+		 * @return Number of messages remaining in the OSD queue.
+		 */
+		int osd_process(void);
+		friend class MsgTimer;
 		
 		// FPS manager.
 		double m_fps[8];
