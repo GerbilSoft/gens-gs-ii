@@ -307,6 +307,10 @@ void GensWindow::menuTriggered(int id)
 					m_vBackend->vbUpdate();
 					break;
 				
+				case MNUID_ITEM(IDM_RESBPPTEST_SCRSHOT):
+					m_emuManager.screenShot();
+					break;
+				
 				default:
 					break;
 			}
