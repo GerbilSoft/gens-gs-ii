@@ -49,24 +49,6 @@
 #define TR(text) \
 	QApplication::translate("EmuManager", (text), NULL, QApplication::UnicodeUTF8)
 
-/** BEGIN: Win32-specific includes. **/
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
-
-// Win32 needs io.h for dup().
-// TODO: Move File/Open to another file.
-#include <io.h>
-
-// QWidget doesn't differentiate between L/R modifier keys,
-// and neither do WM_KEYDOWN/WM_KEYUP.
-#include "libgens/IO/KeyManager.hpp"
-#endif
-/** END: Win32-specific includes. **/
-
 namespace GensQt4
 {
 
@@ -372,21 +354,10 @@ void EmuManager::emuFrameDone(void)
 	// Update the GensQGLWidget.
 	emit updateVideo();
 	
-#ifdef _WIN32
-	// Update Shift/Control/Alt states.
-	// TODO: Only do this if the input backend doesn't support L/R modifiers natively.
-	// QWidget doesn't; GLFW does.
-	// TODO: When should these key states be updated?
-	// - Beginning of frame.
-	// - Before VBlank.
-	// - End of frame.
-	LibGens::KeyManager::WinKeySet(LibGens::KEYV_LSHIFT, VK_LSHIFT);
-	LibGens::KeyManager::WinKeySet(LibGens::KEYV_RSHIFT, VK_RSHIFT);
-	LibGens::KeyManager::WinKeySet(LibGens::KEYV_LCTRL, VK_LCONTROL);
-	LibGens::KeyManager::WinKeySet(LibGens::KEYV_RCTRL, VK_RCONTROL);
-	LibGens::KeyManager::WinKeySet(LibGens::KEYV_LALT, VK_LMENU);
-	LibGens::KeyManager::WinKeySet(LibGens::KEYV_RALT, VK_RMENU);
-#endif
+	// Update controllers.
+	// TODO: Before or after the frame?
+	// Gens/GS updates controllers before the frame...
+	LibGens::KeyManager::Update();
 	
 	// Tell the emulation thread that we're ready for another frame.
 	if (gqt4_emuThread)

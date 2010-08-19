@@ -26,6 +26,16 @@
 // C includes.
 #include <string.h>
 
+// Win32 includes.
+// Needed for getting L/R modifier key state.
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
+
 namespace LibGens
 {
 
@@ -166,6 +176,33 @@ bool KeyManager::IsKeyPressed(GensKey_t key)
 	
 	// TODO: Other types of input.
 	return false;
+}
+
+
+/**
+ * Update(): Update the GensInput subsystem.
+ * This polls joysticks and Wii Remotes.
+ * On Win32, it also polls left/right virtual keys.
+ */
+void KeyManager::Update(void)
+{
+#ifdef _WIN32
+	// Update Shift/Control/Alt states.
+	// TODO: Only do this if the input backend doesn't support L/R modifiers natively.
+	// QWidget doesn't; GLFW does.
+	// TODO: When should these key states be updated?
+	// - Beginning of frame.
+	// - Before VBlank.
+	// - End of frame.
+	ms_Keyboard.setKeyState(KEYV_LSHIFT,	(!!(GetAsyncKeyState(VK_LSHIFT) & 0x8000)));
+	ms_Keyboard.setKeyState(KEYV_RSHIFT,	(!!(GetAsyncKeyState(VK_RSHIFT) & 0x8000)));
+	ms_Keyboard.setKeyState(KEYV_LCTRL,	(!!(GetAsyncKeyState(VK_LCONTROL) & 0x8000)));
+	ms_Keyboard.setKeyState(KEYV_RCTRL,	(!!(GetAsyncKeyState(VK_RCONTROL) & 0x8000)));
+	ms_Keyboard.setKeyState(KEYV_LALT,	(!!(GetAsyncKeyState(VK_LMENU) & 0x8000)));
+	ms_Keyboard.setKeyState(KEYV_RALT,	(!!(GetAsyncKeyState(VK_RMENU) & 0x8000)));
+#endif
+	
+	// TODO: Joysticks, Wii Remotes.
 }
 
 }

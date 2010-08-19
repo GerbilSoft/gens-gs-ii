@@ -24,14 +24,6 @@
 #ifndef __LIBGENS_IO_KEYMANAGER_HPP__
 #define __LIBGENS_IO_KEYMANAGER_HPP__
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
-#endif
-
 #include "GensKey_t.h"
 
 // Input devices.
@@ -54,18 +46,19 @@ class KeyManager
 		static void MousePressEvent(int button);
 		static void MouseReleaseEvent(int button);
 		
+		/**
+		 * IsKeyPressed(): Check if a Gens Keycode is pressed.
+		 * @param key Gens Keycode.
+		 * @return True if the key is pressed; false if not.
+		 */
 		static bool IsKeyPressed(GensKey_t key);
 		
-#ifdef _WIN32
-		// QWidget doesn't properly differentiate L/R modifier keys,
-		// and neither do WM_KEYDOWN/WM_KEYUP.
-		static inline void WinKeySet(GensKey_t key, int virtKey)
-		{
-			if (key < KEYV_UNKNOWN && key >= KEYV_LAST)
-				return;
-			ms_KeyPress[key] = !!(GetAsyncKeyState(virtKey) & 0x8000);
-		}
-#endif /* _WIN32 */
+		/**
+		 * Update(): Update the GensInput subsystem.
+		 * This polls joysticks and Wii Remotes.
+		 * On Win32, it also polls left/right virtual keys.
+		 */
+		static void Update(void);
 	
 	protected:
 		static Keyboard ms_Keyboard;

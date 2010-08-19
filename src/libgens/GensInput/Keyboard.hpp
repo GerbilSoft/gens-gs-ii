@@ -58,6 +58,20 @@ class Keyboard
 			return ((key16 < KEYV_LAST) && m_keyPress[key16]);
 		}
 		
+		/**
+		 * setKeyState(): Forcibly set a key state.
+		 * This is normally only needed if the regular input subsystem
+		 * doesn't report some keys, e.g. left/right modifiers on Win32.
+		 * @param key16 Gens key value.
+		 * @param state State. (true = pressed; false = not pressed)
+		 */
+		inline void setKeyState(uint16_t key16, bool state)
+		{
+			if (key16 >= KEYV_LAST)
+				return;
+			m_keyPress[key16] = state;
+		}
+		
 		static const char *GetKeyName(GensKey_t key)
 		{
 			GensKey_u gkey;
