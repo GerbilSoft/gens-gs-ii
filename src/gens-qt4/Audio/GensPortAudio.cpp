@@ -190,6 +190,61 @@ void GensPortAudio::close(void)
 
 
 /**
+ * setRate(): Set the sampling rate.
+ * @param newRate New sampling rate.
+ */
+void GensPortAudio::setRate(int newRate)
+{
+	if (m_rate == newRate)
+		return;
+	
+	// TODO: Currently limited to a maximum sampling rate of 44.1 kHz.
+	if (newRate > MAX_SAMPLING_RATE)
+		return;
+	
+	if (m_open)
+	{
+		// Close and reopen the PortAudio stream.
+		// TODO: Insert a pause between close() and open() to prevent stuttering?
+		close();
+		m_rate = newRate;
+		// TODO: Save PSG/YM2612 state before doing this!
+		LibGens::SoundMgr::SetRate(newRate);
+		open();
+	}
+	else
+	{
+		m_rate = newRate;
+		LibGens::SoundMgr::SetRate(newRate);
+	}
+}
+
+
+/**
+ * setStereo(): Set stereo or mono.
+ * @param newStereo True for stereo; false for mono.
+ */
+void GensPortAudio::setStereo(bool newStereo)
+{
+	if (m_stereo == newStereo)
+		return;
+	
+	if (m_open)
+	{
+		// Close and reopen the PortAudio stream.
+		// TODO: Insert a pause between close() and open() to prevent stuttering?
+		close();
+		m_stereo = newStereo;
+		open();
+	}
+	else
+	{
+		m_stereo = newStereo;
+	}
+}
+
+
+/**
  * gensPaCallback(): PortAudio callback function.
  * @return ???
  */

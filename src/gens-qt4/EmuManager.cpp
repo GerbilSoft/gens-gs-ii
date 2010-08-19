@@ -53,6 +53,7 @@
 #include <QtCore/QFile>
 #include <QtGui/QImage>
 #include <QtGui/QImageWriter>
+#include <QtCore/QLocale>
 
 // Text translation macro.
 #define TR(text) \
@@ -349,6 +350,46 @@ void EmuManager::screenShot(void)
 
 
 /**
+ * setAudioRate(): Set the audio sampling rate.
+ * @param newRate New audio sampling rate.
+ */
+void EmuManager::setAudioRate(int newRate)
+{
+	// TODO: Currently limited to a maximum sampling rate of 44.1 kHz.
+	if (newRate > GensPortAudio::MAX_SAMPLING_RATE)
+		return;
+	
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_AUDIO_RATE;
+	rq.audioRate = newRate;
+	m_qEmuRequest.enqueue(rq);
+	
+	// TODO: Do the audio rate change immediately if
+	// a ROM is running and the system is paused.
+	if (!m_rom)
+		processQEmuRequest();
+}
+
+
+/**
+ * setStereo(): Set stereo or mono.
+ * @param newStereo True for stereo; false for mono.
+ */
+void EmuManager::setStereo(bool newStereo)
+{
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_AUDIO_STEREO;
+	rq.audioStereo = newStereo;
+	m_qEmuRequest.enqueue(rq);
+	
+	// TODO: Do the audio rate change immediately if
+	// a ROM is running and the system is paused.
+	if (!m_rom)
+		processQEmuRequest();
+}
+
+
+/**
  * emuFrameDone(): Emulation thread is finished rendering a frame.
  */
 void EmuManager::emuFrameDone(void)
@@ -411,6 +452,16 @@ void EmuManager::processQEmuRequest(void)
 				doScreenShot();
 				break;
 			
+			case EmuRequest_t::RQT_AUDIO_RATE:
+				// Audio sampling rate.
+				doAudioRate(rq.audioRate);
+				break;
+			
+			case EmuRequest_t::RQT_AUDIO_STEREO:
+				// Stereo / Mono.
+				doAudioStereo(rq.audioStereo);
+				break;
+			
 			case EmuRequest_t::RQT_UNKNOWN:
 			default:
 				// Unknown emulation request.
@@ -418,6 +469,9 @@ void EmuManager::processQEmuRequest(void)
 		}
 	}
 }
+
+
+/** Emulation Request Queue functions. **/
 
 
 /**
@@ -626,6 +680,45 @@ void EmuManager::doScreenShot(void)
 	// Print a message on the OSD.
 	QString osdMsg = TR("Screenshot %1 saved.");
 	osdMsg = osdMsg.arg(scrNumber);
+	emit osdPrintMsg(1500, osdMsg);
+}
+
+
+/**
+ * doAudioRate(): Set the audio sampling rate.
+ * @param newRate New audio sampling rate.
+ */
+void EmuManager::doAudioRate(int newRate)
+{
+	if (m_audio->rate() == newRate)
+		return;
+	m_audio->setRate(newRate);
+	
+	// Print a message on the OSD.
+	QString osdMsg = TR("Audio sampling rate set to %1 Hz.");
+	
+	// Format the sampling rate using the system locale.
+	QLocale sysLocale = QLocale::system();
+	osdMsg = osdMsg.arg(sysLocale.toString(newRate));
+	
+	// Emit the signal.
+	emit osdPrintMsg(1500, osdMsg);
+}
+
+
+/**
+ * doAudioStereo(): Set stereo or mono.
+ * @param newStereo True for stereo; false for mono.
+ */
+void EmuManager::doAudioStereo(bool newStereo)
+{
+	if (m_audio->isStereo() == newStereo)
+		return;
+	m_audio->setStereo(newStereo);
+	
+	// Print a message on the OSD.
+	QString osdMsg = TR("Audio set to %1.");
+	osdMsg = osdMsg.arg(newStereo ? "Stereo" : "Mono");
 	emit osdPrintMsg(1500, osdMsg);
 }
 

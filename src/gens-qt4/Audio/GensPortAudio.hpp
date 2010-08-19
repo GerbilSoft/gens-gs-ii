@@ -47,10 +47,22 @@ class GensPortAudio
 		GensPortAudio();
 		~GensPortAudio();
 		
-		bool isOpen(void) const { return m_open; }
+		inline bool isOpen(void) const { return m_open; }
 		
 		void open(void);
 		void close(void);
+		
+		// Maximum sampling rate.
+		static const int MAX_SAMPLING_RATE = 44100;
+		
+		/**
+		 * Properties.
+		 */
+		inline int rate(void) const { return m_rate; }
+		void setRate(int newRate);
+		
+		inline bool isStereo(void) const { return m_stereo; }
+		void setStereo(bool newStereo);
 		
 		/**
 		 * write(): Write the current segment to the audio buffer.
