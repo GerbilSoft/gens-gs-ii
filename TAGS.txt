@@ -1,5 +1,8 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-SigHandler-v1: Updated the signal handler to work properly in
+non-GUI threads.
+
 libgens-save-data-v1: SRam/EEPRom AutoSave is implemented. It currently has
 a hard-coded threshold of 1000 ms, and doesn't detect the system region yet,
 so the frame counter is always checked based on NTSC timing.
@@ -67,6 +70,11 @@ libgens-big-endian-v0: Fixed all big-endian problems in libgens related
 to code that's currently in use. This includes VDP and Effects. The CPU
 emulatoin cores were not enabled during testing, since they're currently
 x86 only.
+
+gens-qt4-SigHandler-v0: Initial port of the Gens/GS signal handler
+to Gens/GS II. It's slightly different from the original: instead
+of showing the system default error icon, it shows a picture of
+Rick Astley.
 
 libgens-LOG_MSG: Ported (and updated) the LOG_MSG() subsystem from
 the original Gens/GS to Gens/GS II.
