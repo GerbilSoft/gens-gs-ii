@@ -617,6 +617,7 @@ void EmuManager::doScreenShot(void)
 	}
 	
 	// TODO: Check for errors.
+	// TODO: Store timestamp, ROM filename, etc.
 	QImage img(start, LibGens::VdpIo::GetHPix(), LibGens::VdpIo::GetVPix(),
 		   bytesPerLine, imgFormat);
 	QImageWriter imgWriter(scrFilename, "png");
