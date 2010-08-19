@@ -52,8 +52,8 @@ class SoundMgr
 		static inline int GetWriteLen(int line) { return ms_Extrapol[line][1]; }
 		
 		// Maximum sampling rate and segment size.
-		static const int MAX_SAMPLING_RATE = 44100;
-		static const int MAX_SEGMENT_SIZE = 882;	// ceil(MAX_SAMPLING_RATE / 50)
+		static const int MAX_SAMPLING_RATE = 48000;
+		static const int MAX_SEGMENT_SIZE = 960;	// ceil(MAX_SAMPLING_RATE / 50)
 		
 		// Segment buffer.
 		// Stores up to MAX_SEGMENT_SIZE 16-bit stereo samples.

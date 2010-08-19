@@ -115,22 +115,23 @@ void SoundMgr::ReInit(int rate, bool isPal)
  */
 int SoundMgr::CalcSegLength(int rate, bool isPal)
 {
-	if (rate > 44100)
+	if (rate > MAX_SAMPLING_RATE)
 	{
-		// TODO: Support higher rates than 44.1 kHz.
-		rate = 44100;
+		// TODO: Support higher rates than 48 kHz.
+		rate = MAX_SAMPLING_RATE;
 	}
 	
 	switch (rate)
 	{
-		case 11025:
-			return (isPal ? 220 : 184);
-		case 22050:
-			return (isPal ? 441 : 368);
-		case 44100:
-			return (isPal ? 882 : 735);
+		case 11025:	return (isPal ? 220 : 184);
+		case 16000:	return (isPal ? 320 : 267);
+		case 22050:	return (isPal ? 441 : 368);
+		case 32000:	return (isPal ? 640 : 534);
+		case 44100:	return (isPal ? 882 : 735);
+		case 48000:	return (isPal ? 960 : 800);
 		default:
-			return rint((double)rate / (isPal ? 50 : 60));
+			// Segment size is ceil(rate / framesPerSecond).
+			return ceil((double)rate / (isPal ? 50.0 : 60.0));
 	}
 }
 
