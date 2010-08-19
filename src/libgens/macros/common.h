@@ -25,13 +25,13 @@
 /** Function attributes. **/
 
 /**
- * PURE: Indicates that a function depends only on the function's parameters.
+ * FUNC_PURE: Indicates that a function depends only on the function's parameters.
  */
-#ifndef PURE
+#ifndef FUNC_PURE
 #ifdef __GNUC__
-#define PURE __attribute__ ((pure))
+#define FUNC_PURE __attribute__ ((pure))
 #else
-#define PURE
+#define FUNC_PURE
 #endif /* __GNUC__ */
 #endif /* PURE */
 

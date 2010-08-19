@@ -114,7 +114,7 @@ class Rom
 		void readHeaderMD(const uint8_t *header, size_t header_size);
 		
 		// Space elimination algorithm.
-		static inline PURE bool IsGraphChar(char chr)
+		static inline FUNC_PURE bool IsGraphChar(char chr)
 		{
 			return (isgraph(chr) || (chr & 0x80));
 		}

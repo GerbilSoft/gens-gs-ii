@@ -93,7 +93,7 @@ class Psg
 		* @param n Value to check.
 		* @return Parity.
 		*/
-		static inline unsigned int PURE parity16(unsigned int n)
+		static inline unsigned int FUNC_PURE parity16(unsigned int n)
 		{
 			n ^= n >> 8;
 			n ^= n >> 4;
@@ -108,7 +108,7 @@ class Psg
 		* @param LFSR_Mask LFSR mask.
 		* @return Shifted LFSR value.
 		*/
-		static inline unsigned int PURE LFSR16_Shift(unsigned int LFSR, unsigned int LFSR_Mask)
+		static inline unsigned int FUNC_PURE LFSR16_Shift(unsigned int LFSR, unsigned int LFSR_Mask)
 		{
 			return (LFSR >> 1) |
 				(((LFSR_Mask > 1)
