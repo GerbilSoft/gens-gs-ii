@@ -28,6 +28,11 @@
 #include "libgens/Util/Timing.hpp"
 #include "libgens/MD/EmuMD.hpp"
 
+// LibGens video includes.
+#include "libgens/MD/VdpPalette.hpp"
+#include "libgens/MD/VdpRend.hpp"
+#include "libgens/MD/VdpIo.hpp"
+
 // M68K_Mem.hpp has SysRegion.
 #include "libgens/cpu/M68K_Mem.hpp"
 
@@ -44,6 +49,9 @@
 // Qt includes.
 #include <QtGui/QApplication>
 #include <QtGui/QFileDialog>
+#include <QtCore/QFile>
+#include <QtGui/QImage>
+#include <QtGui/QImageWriter>
 
 // Text translation macro.
 #define TR(text) \
@@ -322,6 +330,24 @@ void EmuManager::setController(int port, LibGens::IoBase::IoType type)
 
 
 /**
+ * screenShot(): Request a screenshot.
+ */
+void EmuManager::screenShot(void)
+{
+	if (!m_rom)
+	{
+		// Screenshots are kinda useless if
+		// no ROM is running.
+		return;
+	}
+	
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_SCREENSHOT;
+	m_qEmuRequest.enqueue(rq);
+}
+
+
+/**
  * emuFrameDone(): Emulation thread is finished rendering a frame.
  */
 void EmuManager::emuFrameDone(void)
@@ -379,6 +405,11 @@ void EmuManager::processQEmuRequest(void)
 				doCtrlChange(rq.ctrlChange.port, rq.ctrlChange.ctrlType);
 				break;
 			
+			case EmuRequest_t::RQT_SCREENSHOT:
+				// Screenshot.
+				doScreenShot();
+				break;
+			
 			case EmuRequest_t::RQT_UNKNOWN:
 			default:
 				// Unknown emulation request.
@@ -391,6 +422,8 @@ void EmuManager::processQEmuRequest(void)
 /**
  * doCtrlChange(): Do a controller change.
  * Called from processQEmuRequest().
+ * @param port Controller port. (0, 1, 2) [TODO: Teamplayer/4WP]
+ * @param type New controller type.
  */
 void EmuManager::doCtrlChange(int port, LibGens::IoBase::IoType type)
 {
@@ -517,6 +550,81 @@ void EmuManager::doCtrlChange(int port, LibGens::IoBase::IoType type)
 		}
 	}
 #endif
+}
+
+
+/**
+ * doScreenShot(): Do a screenshot.
+ * Called from processQEmuRequest().
+ */
+void EmuManager::doScreenShot(void)
+{
+	// TODO: Save the screenshot in a designated screenshots directory.
+	// For now, it'll save in the gens-qt4 directory.
+	QString romFilename = QString::fromUtf8(m_rom->filename());
+	
+	// Get the filename portion.
+	// TODO: Do this in the Rom class?
+	int dirSep = romFilename.lastIndexOf(QDir::separator());
+	if (dirSep != -1)
+		romFilename.remove(0, dirSep+1);
+	
+	// Remove the file extension.
+	// TODO: Do this in the Rom class?
+	int extSep = romFilename.lastIndexOf('.');
+	if (extSep != -1)
+		romFilename.remove(extSep, (romFilename.size() - extSep));
+	
+	// Add the current directory, number, and .png extension.
+	// TODO: Use a designated screenshots directory.
+	// TODO: Enumerate QImageWriter for supported image formats.
+	const QString scrFilenamePrefix = QDir::currentPath() + QChar('/') + romFilename;
+	const QString scrFilenameSuffix = ".png";
+	QString scrFilename;
+	int scrNumber = -1;
+	do
+	{
+		// TODO: Figure out how to optimize this!
+		scrNumber++;
+		scrFilename = scrFilenamePrefix + QChar('_') +
+				QString::number(scrNumber).rightJustified(3, '0') +
+				scrFilenameSuffix;
+	} while (QFile::exists(scrFilename));
+	
+	// Create the QImage.
+	const uint8_t *start;
+	const int startY = ((240 - LibGens::VdpIo::GetVPix()) / 2);
+	const int startX = (8 + LibGens::VdpIo::GetHPixBegin());
+	const int startPx = ((startY * 336) + startX); // TODO: Use TAB336?
+	int bytesPerLine;
+	QImage::Format imgFormat;
+	
+	if (LibGens::VdpRend::m_palette.bpp() == LibGens::VdpPalette::BPP_32)
+	{
+		start = (const uint8_t*)(&LibGens::VdpRend::MD_Screen.u32[startPx]);
+		bytesPerLine = (336 * sizeof(uint32_t));
+		imgFormat = QImage::Format_RGB32;
+	}
+	else
+	{
+		start = (const uint8_t*)(&LibGens::VdpRend::MD_Screen.u16[startPx]);
+		bytesPerLine = (336 * sizeof(uint16_t));
+		if (LibGens::VdpRend::m_palette.bpp() == LibGens::VdpPalette::BPP_16)
+			imgFormat = QImage::Format_RGB16;
+		else
+			imgFormat = QImage::Format_RGB555;
+	}
+	
+	// TODO: Check for errors.
+	QImage img(start, LibGens::VdpIo::GetHPix(), LibGens::VdpIo::GetVPix(),
+		   bytesPerLine, imgFormat);
+	QImageWriter imgWriter(scrFilename, "png");
+	imgWriter.write(img);
+	
+	// Print a message on the OSD.
+	QString osdMsg = TR("Screenshot %1 saved.");
+	osdMsg = osdMsg.arg(scrNumber);
+	emit osdPrintMsg(1500, osdMsg);
 }
 
 }

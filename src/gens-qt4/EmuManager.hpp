@@ -59,6 +59,7 @@ class EmuManager : public QObject
 		
 		/** Controller settings. **/
 		void setController(int port, LibGens::IoBase::IoType type);
+		void screenShot(void);
 		
 		/** Rom class passthrough functions. **/
 		
@@ -106,6 +107,7 @@ class EmuManager : public QObject
 			{
 				RQT_UNKNOWN	= 0,
 				RQT_CTRLCHANGE	= 1,
+				RQT_SCREENSHOT	= 2,
 			};
 			
 			RequestType rqType;
@@ -122,6 +124,7 @@ class EmuManager : public QObject
 		QQueue<EmuRequest_t> m_qEmuRequest;
 		void processQEmuRequest(void);
 		void doCtrlChange(int port, LibGens::IoBase::IoType type);
+		void doScreenShot(void);
 	
 	protected slots:
 		// Frame done from EmuThread.
