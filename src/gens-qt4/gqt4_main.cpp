@@ -42,7 +42,6 @@
 // Gens window.
 static GensQt4::GensWindow *gens_window = NULL;
 
-
 /**
  * main(): Main entry point.
  * @param argc Number of arguments.
@@ -54,8 +53,8 @@ int main(int argc, char *argv[])
 	// Register the signal handler.
 	GensQt4::SigHandler::Init();
 	
-	// Create the main UI.
-	GensQt4::GensQApplication app(argc, argv);
+	// Initialize the GensQApplication.
+	GensQt4::gqt4_app = new GensQt4::GensQApplication(argc, argv);
 	
 	// TODO: Parse command line arguments.
 	// They're available in app.arguments() [QStringList].
@@ -78,7 +77,7 @@ int main(int argc, char *argv[])
 	gens_window->show();
 	
 	// Run the Qt4 UI.
-	int ret = app.exec();
+	int ret = GensQt4::gqt4_app->exec();
 	
 	/**
 	 * TODO: Put cleanup code in GensQApplication's aboutToQuit() signal.
@@ -136,6 +135,9 @@ void gqt4_osd(OsdType osd_type, int param)
 
 namespace GensQt4
 {
+
+// GensQApplication.
+GensQApplication *gqt4_app = NULL;
 
 // Emulation thread.
 EmuThread *gqt4_emuThread = NULL;

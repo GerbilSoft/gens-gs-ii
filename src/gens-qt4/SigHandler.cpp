@@ -22,9 +22,11 @@
  ***************************************************************************/
 
 #include "SigHandler.hpp"
+#include "gqt4_main.hpp"
 
 // C includes
 #include <signal.h>
+#include <unistd.h>
 
 // LibGens includes.
 #include "libgens/macros/log_msg.h"
@@ -240,6 +242,43 @@ void SigHandler::SignalHandler(int signum)
 	if (info && context)
 		siginfo = GetSigInfo(signum, info->si_code);
 #endif
+	
+	// Make sure this is the GUI thread.
+	if (!GensQt4::gqt4_app->isGuiThread())
+	{
+		// This isn't the GUI thread.
+		// TODO: Signal the GUI thread.
+		// This uses LOG_MSG_LEVEL_ERROR in order to suppress the message box.
+#ifdef HAVE_SIGACTION
+		if (siginfo)
+		{
+			LOG_MSG(gens, LOG_MSG_LEVEL_ERROR,
+				"Signal %d (%s: %s) received in non-GUI thread. Hanging...",
+				signum, signame, siginfo->signame);
+		}
+		else
+#endif
+		{
+			LOG_MSG(gens, LOG_MSG_LEVEL_ERROR,
+				"Signal %d (%s) received in non-GUI thread. Hanging...",
+				signum, signame);
+		}
+		
+		// Signal the GUI thread that we crashed.
+		// TODO: Include the ID of the thread that crashed?
+		// (e.g. emulation thread, PortAudio thread)
+#ifdef HAVE_SIGACTION
+		gqt4_app->doCrash(signum, info, context);
+#else /* HAVE_SIGACTION */
+		gqt4_app->doCrash(signum);
+#endif /* HAVE_SIGACTION */
+		
+		while (true)
+		{
+			// Hang here.
+			sleep(1000);
+		}
+	}
 	
 	// This uses LOG_MSG_LEVEL_ERROR in order to suppress the message box.
 #ifdef HAVE_SIGACTION

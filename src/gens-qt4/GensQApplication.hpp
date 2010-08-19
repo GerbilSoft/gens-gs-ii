@@ -24,7 +24,12 @@
 #ifndef __GENS_QT4_GENSQAPPLICATION_HPP__
 #define __GENS_QT4_GENSQAPPLICATION_HPP__
 
+#include <config.h>
+
 #include <QtGui/QApplication>
+#include <QtCore/QThread>
+
+#include "SigHandler.hpp"
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -44,12 +49,33 @@ class GensQApplication : public QApplication
 	
 	public:
 		GensQApplication(int &argc, char **argv)
-			: QApplication(argc, argv) { }
+			: QApplication(argc, argv)
+		{
+			gqaInit();
+		}
+		
 		GensQApplication(int &argc, char **argv, bool GUIenabled)
-			: QApplication(argc, argv, GUIenabled) { }
+			: QApplication(argc, argv, GUIenabled)
+		{
+			gqaInit();
+		}
+		
 		GensQApplication(int &argc, char **argv, Type type)
-			: QApplication(argc, argv, type) { }
+			: QApplication(argc, argv, type)
+		{
+			gqaInit();
+		}
+		
 		~GensQApplication() { }
+		
+		/**
+		 * isGuiThread(): Check if the current thread is the GUI thread.
+		 * @return True if it is; false if it isn't.
+		 */
+		inline bool isGuiThread(void)
+		{
+			return (QThread::currentThread() == m_guiThread);
+		}
 		
 #ifdef _WIN32
 		/**
@@ -71,6 +97,67 @@ class GensQApplication : public QApplication
 			return false;
 		}
 #endif
+		
+		/**
+		 * HACK: The following mess is a hack to get the
+		 * custom signal handler dialog to work across
+		 * multiple threads. Don't mess around with it!
+		 */
+		
+	signals:
+#ifdef HAVE_SIGACTION
+		void signalCrash(int signum, siginfo_t *info, void *context);
+#else /* HAVE_SIGACTION */
+		void signalCrash(int signum);
+#endif /* HAVE_SIGACTION */
+	
+	protected:
+		QThread *m_guiThread;
+		
+		/**
+		 * gqaInit(): GensQApplication initialization function.
+		 * The same code is used in all three GensQApplication() constructors.
+		 */
+		inline void gqaInit(void)
+		{
+			// Save the GUI thread pointer for later.
+			m_guiThread = QThread::currentThread();
+			
+			// Connect the crash handler.
+#ifdef HAVE_SIGACTION
+			connect(this, SIGNAL(signalCrash(int, siginfo_t*, void*)),
+				this, SLOT(slotCrash(int, siginfo_t*, void*)));
+#else /* HAVE_SIGACTION */
+			connect(this, SIGNAL(signalCrash(int, siginfo_t*, void*)),
+				this, SLOT(slotCrash(int, siginfo_t*, void*)));
+#endif /* HAVE_SIGACTION */
+		}
+		
+		friend class SigHandler; // Allow SigHandler to call doCrash().
+#ifdef HAVE_SIGACTION
+		inline void doCrash(int signum, siginfo_t *info, void *context)
+		{
+			emit signalCrash(signum, info, context);
+		}
+#else /* HAVE_SIGACTION */
+		inline void doCrash(int signum)
+		{
+			emit signalCrash(signum);
+		}
+#endif /* HAVE_SIGACTION */
+	
+	protected slots:
+#ifdef HAVE_SIGACTION
+		inline void slotCrash(int signum, siginfo_t *info, void *context)
+		{
+			SigHandler::SignalHandler(signum, info, context);
+		}
+#else /* HAVE_SIGACTION */
+		inline void slotCrash(int signum)
+		{
+			SigHandler::SignalHandler(signum);
+		}
+#endif /* HAVE_SIGACTION */
 };
 
 }

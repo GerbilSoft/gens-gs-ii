@@ -37,6 +37,9 @@
 namespace GensQt4
 {
 
+// Forward declaration of GensQApplication.
+class GensQApplication;
+
 class SigHandler
 {
 	public:
@@ -50,6 +53,7 @@ class SigHandler
 #else
 		static void SignalHandler(int signum);
 #endif
+		friend class GensQApplication;
 	
 	private:
 		SigHandler() { }

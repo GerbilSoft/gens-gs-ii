@@ -62,10 +62,14 @@ void gqt4_osd(OsdType osd_type, int param);
 }
 #endif
 
+#include "GensQApplication.hpp"
 #include "EmuThread.hpp"
 
 namespace GensQt4
 {
+	// GensQApplication.
+	extern GensQApplication *gqt4_app;
+	
 	// Emulation thread.
 	extern EmuThread *gqt4_emuThread;
 	
