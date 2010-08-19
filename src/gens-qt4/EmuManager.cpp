@@ -32,6 +32,7 @@
 #include "libgens/MD/VdpPalette.hpp"
 #include "libgens/MD/VdpRend.hpp"
 #include "libgens/MD/VdpIo.hpp"
+#include "libgens/MD/TAB336.h"
 
 // M68K_Mem.hpp has SysRegion.
 #include "libgens/cpu/M68K_Mem.hpp"
@@ -595,7 +596,7 @@ void EmuManager::doScreenShot(void)
 	const uint8_t *start;
 	const int startY = ((240 - LibGens::VdpIo::GetVPix()) / 2);
 	const int startX = (8 + LibGens::VdpIo::GetHPixBegin());
-	const int startPx = ((startY * 336) + startX); // TODO: Use TAB336?
+	const int startPx = (TAB336[startY] + startX);
 	int bytesPerLine;
 	QImage::Format imgFormat;
 	
