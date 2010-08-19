@@ -1,5 +1,9 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-ScreenShot-v0: Initial screenshot support. Saves screenshots in
+the gens-qt4 directory using the same naming scheme as Gens/GS. File format
+is PNG only for onw, but may be customizable later.
+
 gens-qt4-SigHandler-v1: Updated the signal handler to work properly in
 non-GUI threads.
 
