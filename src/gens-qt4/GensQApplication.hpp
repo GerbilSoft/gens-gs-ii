@@ -35,8 +35,6 @@
 #include "gqt4_win32.hpp"
 #endif
 
-#include <stdio.h>
-
 namespace GensQt4
 {
 
@@ -51,7 +49,7 @@ class GensQApplication : public QApplication
 			: QApplication(argc, argv, GUIenabled) { }
 		GensQApplication(int &argc, char **argv, Type type)
 			: QApplication(argc, argv, type) { }
-		virtual ~GensQApplication() { }
+		~GensQApplication() { }
 		
 #ifdef _WIN32
 		/**
