@@ -370,6 +370,7 @@ FORCE_INLINE void EmuMD::T_Do_Frame(void)
 	// - Beginning of frame.
 	// - Before VBlank.
 	// - End of frame.
+	KeyManager::Update();	// Update the key manager first.
 	m_port1->update();
 	m_port2->update();
 	m_portE->update();

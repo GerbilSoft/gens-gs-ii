@@ -354,11 +354,6 @@ void EmuManager::emuFrameDone(void)
 	// Update the GensQGLWidget.
 	emit updateVideo();
 	
-	// Update controllers.
-	// TODO: Before or after the frame?
-	// Gens/GS updates controllers before the frame...
-	LibGens::KeyManager::Update();
-	
 	// Tell the emulation thread that we're ready for another frame.
 	if (gqt4_emuThread)
 		gqt4_emuThread->resume();
