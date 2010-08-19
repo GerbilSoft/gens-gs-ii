@@ -35,6 +35,16 @@
 #endif /* __GNUC__ */
 #endif /* PURE */
 
+/**
+ * FUNC_FORCE_INLINE: Force a function to be marked as inline.
+ * TODO: Only enable FORCE_INLINE on the release build!
+ */
+#if defined(__GNUC__) && (__GNUC__ >= 4)
+#define FORCE_INLINE __attribute__ ((always_inline))
+#else
+#define FORCE_INLINE __inline__
+#endif
+
 /** Typedefs. **/
 
 /**
