@@ -359,7 +359,6 @@ void EmuManager::screenShot(void)
  */
 void EmuManager::setAudioRate(int newRate)
 {
-	// TODO: Currently limited to a maximum sampling rate of 44.1 kHz.
 	if (newRate > LibGens::SoundMgr::MAX_SAMPLING_RATE)
 		return;
 	

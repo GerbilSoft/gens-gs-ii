@@ -367,11 +367,20 @@ void GensWindow::menuTriggered(int id)
 				case MNUID_ITEM(IDM_SOUNDTEST_11025):
 					m_emuManager.setAudioRate(11025);
 					break;
+				case MNUID_ITEM(IDM_SOUNDTEST_16000):
+					m_emuManager.setAudioRate(16000);
+					break;
 				case MNUID_ITEM(IDM_SOUNDTEST_22050):
 					m_emuManager.setAudioRate(22050);
 					break;
+				case MNUID_ITEM(IDM_SOUNDTEST_32000):
+					m_emuManager.setAudioRate(32000);
+					break;
 				case MNUID_ITEM(IDM_SOUNDTEST_44100):
 					m_emuManager.setAudioRate(44100);
+					break;
+				case MNUID_ITEM(IDM_SOUNDTEST_48000):
+					m_emuManager.setAudioRate(48000);
 					break;
 				case MNUID_ITEM(IDM_SOUNDTEST_MONO):
 					m_emuManager.setStereo(false);
