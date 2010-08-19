@@ -76,6 +76,7 @@ SET(gens-qt4_SRCS
 	Audio/GensPortAudio.cpp
 	EmuManager.cpp
 	Audio/ABackend_Write.cpp
+	VBackend/GLShaderManager.cpp
 	)
 
 # Headers with Qt4 objects.

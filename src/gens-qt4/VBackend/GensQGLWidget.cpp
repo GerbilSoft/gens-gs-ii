@@ -32,10 +32,12 @@
 
 // LibGens includes.
 #include "libgens/MD/VdpRend.hpp"
-#include "libgens/macros/log_msg.h"
 #include "libgens/Util/Timing.hpp"
 #include "libgens/MD/EmuMD.hpp"
 #include "libgens/GensInput/KeyManager.hpp"
+
+// LOG_MSG() subsystem.
+#include "libgens/macros/log_msg.h"
 
 // Win32 requires GL/glext.h for OpenGL 1.2/1.3.
 // TODO: Check the GL implementation to see what functionality is available at runtime.
@@ -52,26 +54,6 @@
 namespace GensQt4
 {
 
-#ifdef HAVE_GLEW
-/** Fragment programs. **/
-
-/**
- * ms_fragPaused_asm(): Paused effect fragment program.
- * Based on grayscale shader from http://arstechnica.com/civis/viewtopic.php?f=19&t=445912
- */
-const char *GensQGLWidget::ms_fragPaused_asm =
-	"!!ARBfp1.0\n"
-	"OPTION ARB_precision_hint_fastest;\n"
-	"PARAM grayscale = {0.30, 0.59, 0.11, 0.0};\n"		// Standard RGB to Grayscale algorithm.
-	"TEMP t0, color;\n"
-	"TEX t0, fragment.texcoord[0], texture[0], 2D;\n"	// Get color coordinate.
-	"DP3 color, t0, grayscale;\n"				// Calculate grayscale value.
-	"ADD_SAT color.z, color.z, color.z;\n"			// Double the blue component.
-	"MOV result.color, color;\n"
-	"END\n";
-#endif /* HAVE_GLEW */
-
-
 GensQGLWidget::GensQGLWidget(QWidget *parent)
 	: QGLWidget(QGLFormat(QGL::NoAlphaChannel | QGL::NoDepthBuffer), parent)
 {
@@ -80,11 +62,6 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 	// Initialize the OSD variables.
 	m_texOsd = 0;
 	m_glListOsd = 0;
-	
-#ifdef HAVE_GLEW
-	// ARB fragment programs.
-	m_fragPaused = 0;
-#endif /* HAVE_GLEW */
 	
 	// Accept keyboard focus.
 	setFocusPolicy(Qt::StrongFocus);
@@ -117,13 +94,8 @@ GensQGLWidget::~GensQGLWidget()
 		m_glListOsd = 0;
 	}
 	
-#ifdef HAVE_GLEW
-	if (m_fragPaused > 0)
-	{
-		glDeleteProgramsARB(1, &m_fragPaused);
-		m_fragPaused = 0;
-	}
-#endif /* HAVE_GLEW */
+	// Shut down the OpenGL Shader Manager.
+	m_shaderMgr.end();
 }
 
 
@@ -280,47 +252,8 @@ void GensQGLWidget::initializeGL(void)
 	glFrontFace(GL_CW);
 	glEnable(GL_CULL_FACE);
 	
-#ifdef HAVE_GLEW
-	// Initialize GLEW.
-	GLenum err = glewInit();
-	if (err != GLEW_OK)
-	{
-		// Error initializing GLEW!
-		LOG_MSG(video, LOG_MSG_LEVEL_ERROR,
-			"Error initializing GLEW: %s", glewGetErrorString(err));
-	}
-	
-	if (GLEW_ARB_fragment_program)
-	{
-		// Fragment programs are supported.
-		// Load the fragment programs.
-		
-		// Load the Paused effect fragment program.
-		// TODO: Check for errors!
-		glGenProgramsARB(1, &m_fragPaused);
-		glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, m_fragPaused);
-		glGetError();	// Clear the error flag.
-		glProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB,
-				   strlen(ms_fragPaused_asm), ms_fragPaused_asm);
-		
-		GLenum err = glGetError();
-		if (err != GL_NO_ERROR)
-		{
-			// An error occured while loading the fragment program.
-			// TODO: Remove the extra newline at the end of err_str.
-			const char *err_str = (const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB);
-			LOG_MSG(video, LOG_MSG_LEVEL_ERROR,
-				"Error creating Paused effect FP: %s", (err_str ? err_str : "(unknown)"));
-			
-			// Delete the fragment program.
-			if (m_fragPaused > 0)
-			{
-				glDeleteProgramsARB(1, &m_fragPaused);
-				m_fragPaused = 0;
-			}
-		}
-	}
-#endif /* HAVE_GLEW */
+	// Initialize the OpenGL Shader Manager.
+	m_shaderMgr.init();
 
 	// Initialize the GL viewport and projection.
 	resizeGL(320, 240);
@@ -418,21 +351,13 @@ void GensQGLWidget::paintGL(void)
 			}
 			
 			// If emulation is paused, update the pause effect.
-#ifdef HAVE_GLEW
-			if (isPaused() && m_fragPaused == 0)
+			if (isPaused() && !m_shaderMgr.hasPaused())
 			{
-				// Paused, but the fragment program isn't usable.
+				// Paused, but no shader is available.
 				// Apply the effect in software.
 				updatePausedEffect(bFromMD);
 				bFromMD = false;
 			}
-#else
-			if (isPaused())
-			{
-				updatePausedEffect(bFromMD);
-				bFromMD = false;
-			}
-#endif /* HAVE_GLEW */
 		}
 		
 		// Determine which screen buffer should be used for video output.
@@ -469,14 +394,11 @@ void GensQGLWidget::paintGL(void)
 		glBindTexture(GL_TEXTURE_2D, m_tex);
 	}
 	
-#ifdef HAVE_GLEW
-	// Enable the fragment program.
-	if (isRunning() && isPaused() && m_fragPaused > 0)
+	if (m_shaderMgr.hasPaused() && isRunning() && isPaused())
 	{
-		glEnable(GL_FRAGMENT_PROGRAM_ARB);
-		glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, m_fragPaused);
+		// Enable the Paused shader.
+		m_shaderMgr.setPaused(true);
 	}
-#endif /* HAVE_GLEW */
 	
 	// Draw the texture.
 	glBindTexture(GL_TEXTURE_2D, m_tex);
@@ -491,11 +413,11 @@ void GensQGLWidget::paintGL(void)
 	glVertex2i(-1, -1);
 	glEnd();
 	
-#ifdef HAVE_GLEW
-	// Disable the fragment program.
-	if (isRunning() && isPaused() && m_fragPaused > 0)
-		glDisable(GL_FRAGMENT_PROGRAM_ARB);
-#endif /* HAVE_GLEW */
+	if (m_shaderMgr.hasPaused() && isRunning() && isPaused())
+	{
+		// Disable the Paused shader.
+		m_shaderMgr.setPaused(false);
+	}
 	
 	glDisable(GL_TEXTURE_2D);
 	

@@ -26,12 +26,14 @@
 #ifndef __GENS_QT4_GENSQGLWIDGET_HPP__
 #define __GENS_QT4_GENSQGLWIDGET_HPP__
 
-#ifdef HAVE_GLEW
-// GL Extension Wrangler.
-#include <GL/glew.h>
-#endif
-
 #include "VBackend.hpp"
+
+// OpenGL Shader Manager.
+// This file MUST be before any other GL includes,
+// since it includes the GLEW headers.
+#include "GLShaderManager.hpp"
+
+// Qt includes.
 #include <QtOpenGL/QGLWidget>
 
 // Key Handler.
@@ -80,12 +82,8 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		void printOsdText(void);
 		void printOsdLine(int x, int y, const QString &msg);
 		
-		// Effects.
-#ifdef HAVE_GLEW
-		// Paused effect: ARB fragment program.
-		GLuint m_fragPaused;
-		static const char *ms_fragPaused_asm;
-#endif
+		// OpenGL Shader Manager.
+		GLShaderManager m_shaderMgr;
 		
 		// Keyboard handler functions.
 		// TODO: Move keyPressEvent() out of GensQGLWidget!
