@@ -80,7 +80,7 @@ class VBackend
 		}
 		
 		bool isRunning(void) const { return m_running; }
-		void setIsRunning(bool newIsRunning)
+		void setRunning(bool newIsRunning)
 		{
 			if (m_running == newIsRunning)
 				return;

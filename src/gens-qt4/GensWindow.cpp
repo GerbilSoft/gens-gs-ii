@@ -437,12 +437,12 @@ void GensWindow::stateChanged(void)
 	if (m_emuManager.isRomOpen())
 	{
 		// ROM is open.
-		m_vBackend->setIsRunning(m_emuManager.isRomOpen());
+		m_vBackend->setRunning(m_emuManager.isRomOpen());
 	}
 	else
 	{
 		// ROM is closed.
-		m_vBackend->setIsRunning(false);
+		m_vBackend->setRunning(false);
 		m_vBackend->setPaused(false);
 	}
 	
