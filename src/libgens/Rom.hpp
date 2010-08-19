@@ -100,11 +100,11 @@ class Rom
 		int loadRom(void *buf, size_t siz);
 		
 		// ROM names. (Obtained from the ROM headers.)
-		const utf8_str *romNameJP(void) { return m_romNameJP.c_str(); }
-		const utf8_str *romNameUS(void) { return m_romNameUS.c_str(); }
+		const utf8_str *romNameJP(void) const { return m_romNameJP.c_str(); }
+		const utf8_str *romNameUS(void) const { return m_romNameUS.c_str(); }
 		
 		// ROM filename.
-		const utf8_str *filename(void) { return m_filename.c_str(); }
+		const utf8_str *filename(void) const { return m_filename.c_str(); }
 	
 	protected:
 		MDP_SYSTEM_ID m_sysId;
