@@ -63,7 +63,7 @@ class VBackend
 			{
 				setVbDirty();
 				if (showFps())
-					m_osdListDirty = true;
+					setOsdListDirty();
 			}
 		}
 		
@@ -89,7 +89,7 @@ class VBackend
 			
 			// Mark the OSD list as dirty if the FPS counter is visible.
 			if (m_showFps)
-				m_osdListDirty = true;
+				setOsdListDirty();
 		}
 		
 		// NOTE: Format string argument is 3 instead of 2.
@@ -121,7 +121,7 @@ class VBackend
 			
 			// Mark the OSD list as dirty if the emulator is running.
 			if (isRunning())
-				m_osdListDirty = true;
+				setOsdListDirty();
 		}
 	
 	protected:
@@ -155,6 +155,7 @@ class VBackend
 		
 		// m_osdListDirty: Set if the OSD message list has been changed.
 		bool m_osdListDirty;
+		inline void setOsdListDirty(void) { m_osdListDirty = true; }
 		
 		// FPS manager.
 		double m_fps[8];

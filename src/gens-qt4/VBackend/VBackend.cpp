@@ -52,7 +52,7 @@ VBackend::VBackend()
 	// Initialize the FPS manager.
 	resetFps();
 	m_showFps = true;	// TODO: Load from configuration.
-	m_osdListDirty = true;	// TODO: Set this on startup?
+	setOsdListDirty();	// TODO: Set this on startup?
 }
 
 VBackend::~VBackend()
@@ -124,7 +124,7 @@ void VBackend::osd_vprintf(const int duration, const char *msg, va_list ap)
 	// Create the OSD message and add it to the list.
 	OsdMessage osdMsg(msg_buf, endTime);
 	m_osdList.append(osdMsg);
-	m_osdListDirty = true;
+	setOsdListDirty();
 }
 
 
@@ -138,8 +138,8 @@ void VBackend::resetFps(void)
 	m_fpsAvg = 0.0;
 	m_fpsPtr = 0;
 	
-	if (isRunning())
-		m_osdListDirty = true;
+	if (isRunning() && !isPaused())
+		setOsdListDirty();
 }
 
 
@@ -169,8 +169,8 @@ void VBackend::pushFps(double fps)
 	else
 		m_fpsAvg = (sum / (double)count);
 	
-	if (isRunning())
-		m_osdListDirty = true;
+	if (isRunning() && !isPaused())
+		setOsdListDirty();
 }
 
 }
