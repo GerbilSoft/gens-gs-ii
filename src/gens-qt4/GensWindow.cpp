@@ -448,6 +448,7 @@ void GensWindow::stateChanged(void)
 		// ROM is closed.
 		m_vBackend->setRunning(false);
 		m_vBackend->setPaused(false);
+		m_vBackend->resetFps();
 	}
 	
 	setGensTitle();
