@@ -382,6 +382,13 @@ void EmuManager::processQCtrlChange(void)
 		if (!(*prevDevPtr))
 			continue;
 		
+		if ((*prevDevPtr)->devType() == chg.type)
+		{
+			// There's no point in changing a controller
+			// to the same type that it already is...
+			continue;
+		}
+		
 		LibGens::IoBase *dev = NULL;
 		switch (chg.type)
 		{
