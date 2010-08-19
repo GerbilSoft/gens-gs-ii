@@ -30,6 +30,8 @@
 #include "libgens/Effects/FastBlur.hpp"
 #include "libgens/Util/Timing.hpp"
 
+// Message timer.
+#include "MsgTimer.hpp"
 
 namespace GensQt4
 {
@@ -53,16 +55,44 @@ VBackend::VBackend()
 	resetFps();
 	m_showFps = true;	// TODO: Load from configuration.
 	setOsdListDirty();	// TODO: Set this on startup?
+	
+	// Create the message timer.
+	m_msgTimer = new MsgTimer(this);
 }
 
 VBackend::~VBackend()
 {
+	// Delete the message timer.
+	delete m_msgTimer;
+	m_msgTimer = NULL;
+	
 	// Delete the internal framebuffer if it was allocated.
 	if (m_intScreen)
 	{
 		delete m_intScreen;
 		m_intScreen = NULL;
 	}
+}
+
+
+/**
+ * setRunning(): Set the emulation running state.
+ * @param newIsRunning True if emulation is running; false if it isn't.
+ */
+void VBackend::setRunning(bool newIsRunning)
+{
+	if (m_running == newIsRunning)
+		return;
+	
+	m_running = newIsRunning;
+	
+	// Mark the OSD list as dirty if the FPS counter is visible.
+	if (m_showFps)
+		setOsdListDirty();
+	
+	// If emulation isn't running, start the message timer.
+	if (!isRunning())
+		m_msgTimer->start();
 }
 
 
@@ -125,6 +155,49 @@ void VBackend::osd_vprintf(const int duration, const char *msg, va_list ap)
 	OsdMessage osdMsg(msg_buf, endTime);
 	m_osdList.append(osdMsg);
 	setOsdListDirty();
+	
+	if (!isRunning())
+	{
+		// Emulation isn't running.
+		// Start the message timer.
+		m_msgTimer->start();
+	}
+}
+
+
+/**
+ * osd_process(): Process the OSD queue.
+ * Do NOT call this function externally or from derived classes!
+ * It is to be used exclusively with MsgTimer.
+ * @return Number of messages remaining in the OSD queue.
+ */
+int VBackend::osd_process(void)
+{
+	// Check the message list for expired messages.
+	bool isMsgRemoved = false;
+	double curTime = LibGens::Timing::GetTimeD();
+	for (int i = (m_osdList.size() - 1); i >= 0; i--)
+	{
+		if (curTime >= m_osdList[i].endTime)
+		{
+			// Message duration has elapsed.
+			// Remove the message from the list.
+			m_osdList.removeAt(i);
+			isMsgRemoved = true;
+			continue;
+		}
+	}
+	
+	if (isMsgRemoved)
+	{
+		// At least one message was removed.
+		// Update the video backend.
+		setOsdListDirty();
+		vbUpdate();
+	}
+	
+	// Return the number of messages remaining.
+	return m_osdList.size();
 }
 
 

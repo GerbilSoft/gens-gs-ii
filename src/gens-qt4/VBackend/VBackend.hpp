@@ -38,6 +38,10 @@
 namespace GensQt4
 {
 
+// Forward declaration for MsgTimer.
+// Can't #include "MsgTimer.hpp" due to circular dependencies.
+class MsgTimer;
+
 class VBackend
 {
 	public:
@@ -80,17 +84,7 @@ class VBackend
 		}
 		
 		bool isRunning(void) const { return m_running; }
-		void setRunning(bool newIsRunning)
-		{
-			if (m_running == newIsRunning)
-				return;
-			
-			m_running = newIsRunning;
-			
-			// Mark the OSD list as dirty if the FPS counter is visible.
-			if (m_showFps)
-				setOsdListDirty();
-		}
+		void setRunning(bool newIsRunning);
 		
 		// NOTE: Format string argument is 3 instead of 2.
 		// This is due to the implicit "this" parameter.
@@ -104,6 +98,14 @@ class VBackend
 			osd_vprintf(duration, msg, ap);
 			va_end(ap);
 		}
+		
+		/**
+		 * osd_process(): Process the OSD queue.
+		 * Do NOT call this function externally or from derived classes!
+		 * It is to be used exclusively with MsgTimer.
+		 * @return Number of messages remaining in the OSD queue.
+		 */
+		int osd_process(void);
 		
 		// FPS manager.
 		void resetFps(void);
@@ -170,6 +172,9 @@ class VBackend
 		
 		// Is the emulator running?
 		bool m_running;
+		
+		// Message timer.
+		MsgTimer *m_msgTimer;
 };
 
 }

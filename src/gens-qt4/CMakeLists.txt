@@ -88,6 +88,7 @@ SET(gens-qt4_MOC_HEADERS
 	VBackend/GensQGLWidget.hpp
 	CtrlConfigWindow.hpp
 	EmuManager.hpp
+	VBackend/MsgTimer.hpp
 	)
 
 # Create .moc files for sources that need them.
