@@ -42,6 +42,8 @@ class SoundMgr
 		static void End(void);
 		
 		static void ReInit(int rate, bool isPal);
+		static inline void SetRate(int rate) { ReInit(rate, ms_IsPal); }
+		static inline void SetRegion(bool isPal) { ReInit(ms_Rate, isPal); }
 		
 		static inline int GetSegLength(void) { return ms_SegLength; }
 		
