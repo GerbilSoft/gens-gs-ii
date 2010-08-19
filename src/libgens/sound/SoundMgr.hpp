@@ -51,13 +51,17 @@ class SoundMgr
 		static inline int GetWritePos(int line) { return ms_Extrapol[line][0]; }
 		static inline int GetWriteLen(int line) { return ms_Extrapol[line][1]; }
 		
+		// Maximum sampling rate and segment size.
+		static const int MAX_SAMPLING_RATE = 44100;
+		static const int MAX_SEGMENT_SIZE = 882;	// ceil(MAX_SAMPLING_RATE / 50)
+		
 		// Segment buffer.
-		// Stores up to 882 32-bit stereo samples.
-		// (32-bit instead of 16-bit to handle oversaturation properly.)
+		// Stores up to MAX_SEGMENT_SIZE 16-bit stereo samples.
+		// (Samples are actually 32-bit in order to handle oversaturation properly.)
 		// TODO: Call the write functions from SoundMgr so this doesn't need to be public.
 		// TODO: Convert to interleaved stereo.
-		static int32_t ms_SegBufL[882];
-		static int32_t ms_SegBufR[882];
+		static int32_t ms_SegBufL[MAX_SEGMENT_SIZE];
+		static int32_t ms_SegBufR[MAX_SEGMENT_SIZE];
 		
 		// Audio ICs.
 		// TODO: Add wrapper functions?
