@@ -143,7 +143,7 @@ class IoBase
 		{
 			m_select = (!(m_ctrl & IOPIN_TH) || (m_lastData & IOPIN_TH));
 		}
-		inline bool isSelect(void) { return m_select; }
+		inline bool isSelect(void) const { return m_select; }
 		
 		/**
 		 * applyTristate(): Apply the Tristate settings to the data value.

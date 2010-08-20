@@ -46,7 +46,7 @@ class Zomg
 		Zomg(const char *filename);
 		~Zomg();
 		
-		bool isOpen(void) { return (m_zFile != NULL); }
+		bool isOpen(void) const { return (m_zFile != NULL); }
 		void close(void);
 		
 		int load(void);

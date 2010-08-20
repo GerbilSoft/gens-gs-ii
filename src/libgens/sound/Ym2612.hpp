@@ -106,7 +106,7 @@ class Ym2612
 		int reinit(int clock, int rate);
 		void reset(void);
 		
-		uint8_t read(void);
+		uint8_t read(void) const;
 		int write(unsigned int address, uint8_t data);
 		void update(int32_t *bufL, int32_t *bufR, int length);
 		

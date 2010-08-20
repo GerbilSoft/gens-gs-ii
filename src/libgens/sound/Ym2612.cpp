@@ -1816,7 +1816,7 @@ void Ym2612::reset(void)
  * read(): Read the YM2612 status register.
  * @return YM2612 status register.
  */
-uint8_t Ym2612::read(void)
+uint8_t Ym2612::read(void) const
 {
 #if 0
 	static int cnt = 0;

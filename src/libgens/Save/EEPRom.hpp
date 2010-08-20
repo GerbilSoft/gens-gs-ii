@@ -66,7 +66,7 @@ class EEPRom
 		 * isEEPRomTypeSet(): Determine if the EEPRom type is set.
 		 * @return True if the EEPRom type is set; false if not.
 		 */
-		inline bool isEEPRomTypeSet(void)
+		inline bool isEEPRomTypeSet(void) const
 		{
 			return (!(m_eprType.type.scl_adr == 0));
 		}
@@ -86,23 +86,23 @@ class EEPRom
 		 * @return True if the address is usable for the specified purpose.
 		 */
 		
-		inline bool isReadBytePort(uint32_t address)
+		inline bool isReadBytePort(uint32_t address) const
 		{
 			return (address == m_eprType.type.sda_out_adr);
 		}
 		
-		inline bool isReadWordPort(uint32_t address)
+		inline bool isReadWordPort(uint32_t address) const
 		{
 			return ((address | 1) == (m_eprType.type.sda_out_adr | 1));
 		}
 		
-		inline bool isWriteBytePort(uint32_t address)
+		inline bool isWriteBytePort(uint32_t address) const
 		{
 			return (address == m_eprType.type.scl_adr ||
 				address == m_eprType.type.sda_in_adr);
 		}
 		
-		inline bool isWriteWordPort(uint32_t address)
+		inline bool isWriteWordPort(uint32_t address) const
 		{
 			address |= 1;
 			return ((address == (m_eprType.type.scl_adr | 1)) ||
