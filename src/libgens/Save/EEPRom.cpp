@@ -460,7 +460,7 @@ void EEPRom::processWriteCmd(void)
 				// Word 1: [x x x x DEV2 DEV1 DEV0 RW]
 				// Word 2: [A7 A6 A5 A4 A3 A2 A1 A0]
 				// (A7 is ignored for 24C01 in MODE2.)
-				// NOTE: Only Word 1 is sent for READ operationsin Modes 2 and 3.
+				// NOTE: Only Word 1 is sent for READ operations in Modes 2 and 3.
 				if (m_counter >= 5 && m_counter < 8)
 				{
 					if ((m_eprType.type.address_bits == 16) ||
