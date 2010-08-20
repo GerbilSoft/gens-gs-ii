@@ -231,6 +231,7 @@ uint8_t EEPRom::readByte(uint32_t address)
 				{
 					// Word Address is incremented.
 					// NOTE: Word address wraps around at array size.
+					// TODO: This shouldn't be done on read...
 					m_word_address++;
 					m_word_address &= m_eprType.type.size_mask;
 				}
@@ -279,6 +280,7 @@ uint16_t EEPRom::readWord(uint32_t address)
 				{
 					// Word Address is incremented.
 					// NOTE: Word address wraps around at array size.
+					// TODO: This shouldn't be done on read...
 					m_word_address++;
 					m_word_address &= m_eprType.type.size_mask;
 				}
