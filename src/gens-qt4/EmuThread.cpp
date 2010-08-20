@@ -33,17 +33,17 @@ namespace GensQt4
 EmuThread::EmuThread()
 {
 	m_stop = false;
-	m_audio = NULL;
 }
 
 EmuThread::~EmuThread()
 {
-	m_audio = NULL;
+	// TODO
 }
 
-void EmuThread::resume(void)
+void EmuThread::resume(bool doFastFrame)
 {
 	m_mutex.lock();
+	m_doFastFrame = doFastFrame;
 	m_wait.wakeAll();
 	m_mutex.unlock();
 }
@@ -63,18 +63,21 @@ void EmuThread::run(void)
 	// The emulation thread doesn't initialize anything;
 	// it merely runs what's already been initialized.
 	
+	// Default to full frames.
+	m_doFastFrame = false;
+	
 	// Run the emulation thread.
 	m_mutex.lock();
 	while (!m_stop)
 	{
-		// Update audio first.
-		m_audio->write();
-		
 		// Run a frame of emulation.
-		LibGens::EmuMD::Do_Frame();
+		if (!m_doFastFrame)
+			LibGens::EmuMD::Do_Frame();
+		else
+			LibGens::EmuMD::Do_Frame_Fast();
 		
 		// Signal that the frame has been drawn.
-		emit frameDone();
+		emit frameDone(m_doFastFrame);
 		
 		// Wait for a resume command.
 		m_wait.wait(&m_mutex);

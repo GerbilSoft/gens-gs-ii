@@ -51,50 +51,42 @@ int GensPortAudio::write(void)
 	if (!m_open)
 		return 1;
 	
-	const int SegLength = LibGens::SoundMgr::GetSegLength();
-	while ((m_bufPos + SegLength) > m_bufLen)
-	{
-		// Buffer overflow! Wait for the buffer to decrease.
-		// This seems to help limit the framerate when it's running too fast.
-		// TODO: Move somewhere else?
-		// TODO: usleep() or not?
-		// TODO: Make it configurable?
-		usleep(1000);
-	}
+	// Lock the ring buffer for writing.
+	int16_t *buf = m_buffer.writeLock();
 	
 	// TODO: MMX versions.
+	int ret;
 #ifdef HAVE_MMX
 	if (CPU_Flags & MDP_CPUFLAG_X86_MMX)
 	{
 		// MMX is supported.
 		if (m_stereo)
-			return writeStereoMMX();
+			ret = writeStereoMMX(buf);
 		else
-			return writeMonoMMX();
+			ret = writeMonoMMX(buf);
 	}
 	else
 #endif /* HAVE_MMX */
 	if (m_stereo)
-		return writeStereo();
+		ret = writeStereo(buf);
 	else
-		return writeMono();
+		ret = writeMono(buf);
+	
+	// Unlock the ring buffer.
+	m_buffer.writeUnlock();
+	return ret;
 }
 
 
 /**
  * writeStereo(): Write the current segment to the audio buffer. (Stereo output)
+ * @param dest Destination buffer.
  * @return 0 on success; non-zero on error.
  */
-int GensPortAudio::writeStereo(void)
+int GensPortAudio::writeStereo(int16_t *dest)
 {
-	// Lock the audio buffer.
-	m_mtxBuf.lock();
-	
 	// Segment length.
 	const int SegLength = LibGens::SoundMgr::GetSegLength();
-	
-	// Destination buffer pointer.
-	int16_t *dest = (int16_t*)&m_buf[(m_bufPos * m_sampleSize) / sizeof(m_buf[0])];
 	
 	// Source buffer pointers.
 	int32_t *srcL = &LibGens::SoundMgr::ms_SegBufL[0];
@@ -120,30 +112,19 @@ int GensPortAudio::writeStereo(void)
 	// Clear the segment buffers.
 	memset(LibGens::SoundMgr::ms_SegBufL, 0x00, SegLength*sizeof(LibGens::SoundMgr::ms_SegBufL[0]));
 	memset(LibGens::SoundMgr::ms_SegBufR, 0x00, SegLength*sizeof(LibGens::SoundMgr::ms_SegBufR[0]));
-	
-	// Increase the buffer position.
-	m_bufPos += SegLength;
-	
-	// Unlock the audio buffer.
-	m_mtxBuf.unlock();
 	return 0;
 }
 
 
 /**
  * writeMono(): Write the current segment to the audio buffer. (Monaural output)
+ * @param dest Destination buffer.
  * @return 0 on success; non-zero on error.
  */
-int GensPortAudio::writeMono(void)
+int GensPortAudio::writeMono(int16_t *dest)
 {
-	// Lock the audio buffer.
-	m_mtxBuf.lock();
-	
 	// Segment length.
 	const int SegLength = LibGens::SoundMgr::GetSegLength();
-	
-	// Destination buffer pointer.
-	int16_t *dest = (int16_t*)&m_buf[(m_bufPos * m_sampleSize) / sizeof(m_buf[0])];
 	
 	// Source buffer pointers.
 	int32_t *srcL = &LibGens::SoundMgr::ms_SegBufL[0];
@@ -164,12 +145,6 @@ int GensPortAudio::writeMono(void)
 	// Clear the segment buffers.
 	memset(LibGens::SoundMgr::ms_SegBufL, 0x00, SegLength*sizeof(LibGens::SoundMgr::ms_SegBufL[0]));
 	memset(LibGens::SoundMgr::ms_SegBufR, 0x00, SegLength*sizeof(LibGens::SoundMgr::ms_SegBufR[0]));
-	
-	// Increase the buffer position.
-	m_bufPos += SegLength;
-	
-	// Unlock the audio buffer.
-	m_mtxBuf.unlock();
 	return 0;
 }
 
@@ -177,6 +152,7 @@ int GensPortAudio::writeMono(void)
 #ifdef HAVE_MMX
 /**
  * writeStereoMMX(): Write the current segment to the audio buffer. (Stereo output; MMX-optimized)
+ * @param dest Destination buffer.
  * @return 0 on success; non-zero on error.
  */
 int GensPortAudio::writeStereoMMX(void)
@@ -264,6 +240,7 @@ int GensPortAudio::writeStereoMMX(void)
 
 /**
  * writeMonoMMX(): Write the current segment to the audio buffer. (Monaural output; MMX-optimized)
+ * @param dest Destination buffer.
  * @return 0 on success; non-zero on error.
  */
 int GensPortAudio::writeMonoMMX(void)

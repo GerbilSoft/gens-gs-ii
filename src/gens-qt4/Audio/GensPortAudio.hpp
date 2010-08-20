@@ -33,9 +33,12 @@
 // Qt includes.
 #include <QtCore/QMutex>
 
+// Audio Ring Buffer.
+#include "ARingBuffer.hpp"
+
 // TODO: Move this somewhere else!
 #if defined(__GNUC__) && (defined(__i386__) || defined(__amd64__))
-#define HAVE_MMX
+//#define HAVE_MMX // do this later
 #endif
 
 namespace GensQt4
@@ -66,6 +69,9 @@ class GensPortAudio
 		 * @return 0 on success; non-zero on error.
 		 */
 		int write(void);
+		
+		void wpSegWait(void) const { m_buffer.wpSegWait(); }
+		bool isBufferEmpty(void) const { return m_buffer.isBufferEmpty(); }
 	
 	protected:
 		bool m_open;	// True if PortAudio is initialized.
@@ -97,13 +103,7 @@ class GensPortAudio
 		static const int SEGMENTS_TO_BUFFER = 8;
 		
 		// Audio buffer.
-		// Allocate 8 segments worth of stereo samples.
-		int16_t m_buf[882*SEGMENTS_TO_BUFFER*2];
-		
-		// Buffer length, position, and lock.
-		unsigned int m_bufLen;
-		unsigned int m_bufPos;
-		QMutex m_mtxBuf;
+		ARingBuffer m_buffer;
 		
 		// Audio settings.
 		int m_rate;
@@ -116,28 +116,32 @@ class GensPortAudio
 		
 		/**
 		 * writeStereo(): Write the current segment to the audio buffer. (Stereo output)
+		 * @param dest Destination buffer.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int writeStereo(void);
+		int writeStereo(int16_t *dest);
 		
 		/**
 		 * writeMono(): Write the current segment to the audio buffer. (Monaural output)
+		 * @param dest Destination buffer.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int writeMono(void);
+		int writeMono(int16_t *dest);
 		
 #ifdef HAVE_MMX
 		/**
 		 * writeStereoMMX(): Write the current segment to the audio buffer. (Stereo output; MMX-optimized)
+		 * @param dest Destination buffer.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int writeStereoMMX(void);
+		int writeStereoMMX(int16_t *dest);
 		
 		/**
 		 * writeMonoMMX(): Write the current segment to the audio buffer. (Monaural output; MMX-optimized)
+		 * @param dest Destination buffer.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int writeMonoMMX(void);
+		int writeMonoMMX(int16_t *dest);
 #endif
 };
 

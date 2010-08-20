@@ -135,8 +135,8 @@ class EmuManager : public QObject
 		void doAudioStereo(bool newStereo);
 	
 	protected slots:
-		// Frame done from EmuThread.
-		void emuFrameDone(void);
+		// Frame done signal from EmuThread.
+		void emuFrameDone(bool wasFastFrame);
 };
 
 }

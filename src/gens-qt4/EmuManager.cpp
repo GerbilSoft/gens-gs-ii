@@ -167,9 +167,8 @@ int EmuManager::openRom(QWidget *parent)
 	
 	// Start the emulation thread.
 	gqt4_emuThread = new EmuThread();
-	gqt4_emuThread->setAudio(m_audio);
-	QObject::connect(gqt4_emuThread, SIGNAL(frameDone(void)),
-			 this, SLOT(emuFrameDone(void)));
+	QObject::connect(gqt4_emuThread, SIGNAL(frameDone(bool)),
+			 this, SLOT(emuFrameDone(bool)));
 	gqt4_emuThread->start();
 	
 	// Update the Gens title.
@@ -394,10 +393,12 @@ void EmuManager::setStereo(bool newStereo)
 
 /**
  * emuFrameDone(): Emulation thread is finished rendering a frame.
+ * @param wasFastFrame The frame was rendered "fast", i.e. no VDP updates.
  */
-void EmuManager::emuFrameDone(void)
+void EmuManager::emuFrameDone(bool wasFastFrame)
 {
-	m_frames++;
+	if (!wasFastFrame)
+		m_frames++;
 	
 	if (m_lastTime < 0.001)
 		m_lastTime = LibGens::Timing::GetTimeD();
@@ -426,11 +427,19 @@ void EmuManager::emuFrameDone(void)
 		processQEmuRequest();
 	
 	// Update the GensQGLWidget.
-	emit updateVideo();
+	if (!wasFastFrame)
+		emit updateVideo();
+	
+	/** Auto Frame Skip **/
+	// Check if we should do a fast frame.
+	// TODO: Audio stutters a bit if the video drops below 60.0 fps.
+	m_audio->wpSegWait();	// Wait for the buffer to empty.
+	m_audio->write();	// Write audio.
+	bool doFastFrame = !m_audio->isBufferEmpty();
 	
 	// Tell the emulation thread that we're ready for another frame.
 	if (gqt4_emuThread)
-		gqt4_emuThread->resume();
+		gqt4_emuThread->resume(doFastFrame);
 }
 
 

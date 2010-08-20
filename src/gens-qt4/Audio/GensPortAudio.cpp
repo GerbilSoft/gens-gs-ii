@@ -64,14 +64,6 @@ void GensPortAudio::open(void)
 	
 	// TODO: Make sure the LibGens Sound Manager is initialized.
 	
-	// Clear the internal buffer.
-	memset(m_buf, 0x00, sizeof(m_buf));
-	
-	// Initialize the buffer variables.
-	m_bufLen = (LibGens::SoundMgr::GetSegLength() * SEGMENTS_TO_BUFFER);
-	m_bufPos = 0;
-	m_sampleSize = 0;
-	
 	// Initialize PortAudio.
 	int err = Pa_Initialize();
 	if (err != paNoError)
@@ -134,6 +126,9 @@ void GensPortAudio::open(void)
 		LOG_MSG(audio, LOG_MSG_LEVEL_ERROR,
 			"Pa_StartStream() error: %s", Pa_GetErrorText(err));
 	}
+	
+	// Initialize the Ring Buffer.
+	m_buffer.reInit(LibGens::SoundMgr::GetSegLength(), m_stereo);
 	
 	// PortAudio stream is open.
 	m_sampleSize = (sizeof(int16_t) * (m_stereo ? 2 : 1));
@@ -255,43 +250,10 @@ int GensPortAudio::gensPaCallback(const void *inputBuffer, void *outputBuffer,
 				  const PaStreamCallbackTimeInfo *timeInfo,
 				  PaStreamCallbackFlags statusFlags)
 {
-	// Sample sawtooth wave function.
-	// http://www.portaudio.com/trac/wiki/TutorialDir/WritingACallback
-	uint16_t *out = (uint16_t*)outputBuffer;
+	int16_t *out = (int16_t*)outputBuffer;
 	
-	// Lock the audio buffer.
-	m_mtxBuf.lock();
-	
-	if (m_bufPos <= 0)
-	{
-		// Audio is empty.
-		m_mtxBuf.unlock();
-		
-		// Zero the output buffer.
-		memset(out, 0x00, framesPerBuffer * m_sampleSize);
-		return 0;
-	}
-	
-	// Copy our audio data directly to the output buffer.
-	if (m_bufPos < framesPerBuffer)
-	{
-		memcpy(out, m_buf, m_bufPos * m_sampleSize);
-		m_bufPos = 0;
-		m_mtxBuf.unlock();
-		
-		// Zero out the rest of the buffer.
-		memset(&out[m_bufPos], 0x00, (framesPerBuffer - m_bufPos) * m_sampleSize);
-		return 0;
-	}
-	
-	memcpy(out, m_buf, (framesPerBuffer * m_sampleSize));
-	m_bufPos -= framesPerBuffer;
-	
-	// Shift all the data over.
-	memmove(m_buf, &m_buf[(framesPerBuffer * m_sampleSize) / sizeof(m_buf[0])], (m_bufPos * m_sampleSize));
-	
-	// Unlock the audio buffer.
-	m_mtxBuf.unlock();
+	// Get the data from the ring buffer.
+	m_buffer.read(out, framesPerBuffer);
 	return 0;
 }
 
