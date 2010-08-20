@@ -55,6 +55,7 @@ class EmuMD
 		static int AutoSaveData(Rom *rom, int framesElapsed);
 		
 		static void Do_Frame(void);
+		static void Do_Frame_Fast(void);
 		
 		// Controllers.
 		// TODO: Figure out a better place to put these!

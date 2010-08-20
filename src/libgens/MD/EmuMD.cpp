@@ -485,4 +485,9 @@ void EmuMD::Do_Frame(void)
 	T_Do_Frame<true>();
 }
 
+void EmuMD::Do_Frame_Fast(void)
+{
+	T_Do_Frame<false>();
+}
+
 }
