@@ -23,6 +23,8 @@
 
 #include "Rom.hpp"
 
+#include <config.h>
+
 // C includes.
 #include <string.h>
 
@@ -33,6 +35,11 @@ using std::string;
 // LibGens includes.
 #include "Util/byteswap.h"
 #include "lg_osd.h"
+
+// Decompressors.
+#ifdef HAVE_ZLIB
+#include "Decompressor/DcGzip.hpp"
+#endif /* HAVE_ZLIB */
 
 namespace LibGens
 {
@@ -55,6 +62,11 @@ Rom::Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverr
 	}
 	
 	// Determine which decompressor to use.
+#ifdef HAVE_ZLIB
+	if (DcGzip::DetectFormat(m_file))
+		m_decomp = new DcGzip(m_file, filename);
+	else
+#endif /* HAVE_ZLIB */
 	if (Decompressor::DetectFormat(m_file))
 		m_decomp = new Decompressor(m_file, filename);
 	else
