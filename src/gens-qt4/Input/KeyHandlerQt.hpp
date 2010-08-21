@@ -27,12 +27,17 @@
 #include <QtGui/QKeyEvent>
 #include <QtGui/QMouseEvent>
 
+#include "libgens/GensInput/DevManager.hpp"
+
 namespace GensQt4
 {
 
 class KeyHandlerQt
 {
 	public:
+		static void Init(void);
+		static void End(void);
+		
 		static void KeyPressEvent(QKeyEvent *event);
 		static void KeyReleaseEvent(QKeyEvent *event);
 		
@@ -40,10 +45,20 @@ class KeyHandlerQt
 		static void MousePressEvent(QMouseEvent *event);
 		static void MouseReleaseEvent(QMouseEvent *event);
 		
+		/**
+		 * DevHandler(): LibGens Device Handler function.
+		 * @param key Gens keycode. (~0 for Update; return value is true on success.)
+		 * @return True if the key is pressed; false if it isn't.
+		 */
+		static bool DevHandler(GensKey_t key);
+		
 	protected:
 		// QKeyEvent to LibGens Key Value.
 		static int QKeyEventToKeyVal(QKeyEvent *event);
 		static int NativeModifierToKeyVal(QKeyEvent *event);
+		
+		// Keypress array.
+		static bool ms_KeyPress[KEYV_LAST];
 		
 #if 0
 		// TODO

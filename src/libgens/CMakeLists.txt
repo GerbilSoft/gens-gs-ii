@@ -60,8 +60,8 @@ SET(libgens_SRCS
 	sound/SoundMgr.cpp
 	IO/Io4WPMaster.cpp
 	IO/Io4WPSlave.cpp
-	GensInput/KeyManager.cpp
-	GensInput/Keyboard.cpp
+	GensInput/DevManager.cpp
+	GensInput/DevManager_KeyNames.cpp
 	)
 
 # Compatibility sources.

@@ -199,13 +199,13 @@ void IoMegaMouse::update(void)
 	
 	// Bitfield: [START MIDDLE RIGHT LEFT]
 	m_buttons = 0;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_SPACE);		// Start
+	m_buttons |= DevManager::IsKeyPressed(KEYV_SPACE);		// Start
 	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_MOUSE_MIDDLE);	// Middle (TODO)
+	m_buttons |= DevManager::IsKeyPressed(KEYV_MOUSE_MIDDLE);	// Middle (TODO)
 	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_MOUSE_RIGHT);	// Right (TODO)
+	m_buttons |= DevManager::IsKeyPressed(KEYV_MOUSE_RIGHT);	// Right (TODO)
 	m_buttons <<= 1;
-	m_buttons |= KeyManager::IsKeyPressed(KEYV_MOUSE_LEFT);		// Left (TODO)
+	m_buttons |= DevManager::IsKeyPressed(KEYV_MOUSE_LEFT);		// Left (TODO)
 }
 
 

@@ -61,6 +61,10 @@ GensWindow::GensWindow()
 	m_scale = 1;		// Set the scale to 1x by default.
 	m_hasInitResize = false;
 	
+	// Initialize KeyHandlerQt.
+	// TODO: Make KeyHandlerQt a standard object?
+	KeyHandlerQt::Init();
+	
 	// Set up the User Interface.
 	setupUi();
 }
@@ -71,7 +75,9 @@ GensWindow::GensWindow()
  */
 GensWindow::~GensWindow()
 {
-	// TODO
+	// Shut down KeyHandlerQt.
+	// TODO: Make KeyHandlerQt a standard object?
+	KeyHandlerQt::End();
 }
 
 

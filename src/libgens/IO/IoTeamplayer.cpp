@@ -233,35 +233,35 @@ void IoTeamplayer::update(void)
 	
 	// Controller A: D-pad
 	m_ctrlData[0] = 0;
-	m_ctrlData[0] |= KeyManager::IsKeyPressed(KEYV_RIGHT);	// Right
+	m_ctrlData[0] |= DevManager::IsKeyPressed(KEYV_RIGHT);	// Right
 	m_ctrlData[0] <<= 1;
-	m_ctrlData[0] |= KeyManager::IsKeyPressed(KEYV_LEFT);	// Left
+	m_ctrlData[0] |= DevManager::IsKeyPressed(KEYV_LEFT);	// Left
 	m_ctrlData[0] <<= 1;
-	m_ctrlData[0] |= KeyManager::IsKeyPressed(KEYV_DOWN);	// Down
+	m_ctrlData[0] |= DevManager::IsKeyPressed(KEYV_DOWN);	// Down
 	m_ctrlData[0] <<= 1;
-	m_ctrlData[0] |= KeyManager::IsKeyPressed(KEYV_UP);	// Up
+	m_ctrlData[0] |= DevManager::IsKeyPressed(KEYV_UP);	// Up
 	m_ctrlData[0] = ~m_ctrlData[0];
 	
 	// Controller A: Start, A, C, B
 	m_ctrlData[1] = 0;
-	m_ctrlData[1] |= KeyManager::IsKeyPressed(KEYV_RETURN);	// Start
+	m_ctrlData[1] |= DevManager::IsKeyPressed(KEYV_RETURN);	// Start
 	m_ctrlData[1] <<= 1;
-	m_ctrlData[1] |= KeyManager::IsKeyPressed(KEYV_a);	// A
+	m_ctrlData[1] |= DevManager::IsKeyPressed(KEYV_a);	// A
 	m_ctrlData[1] <<= 1;
-	m_ctrlData[1] |= KeyManager::IsKeyPressed(KEYV_d);	// C
+	m_ctrlData[1] |= DevManager::IsKeyPressed(KEYV_d);	// C
 	m_ctrlData[1] <<= 1;
-	m_ctrlData[1] |= KeyManager::IsKeyPressed(KEYV_s);	// B
+	m_ctrlData[1] |= DevManager::IsKeyPressed(KEYV_s);	// B
 	m_ctrlData[1] = ~m_ctrlData[1];
 	
 	// Controller A: Mode, X, Y, Z
 	m_ctrlData[2] = 0;
-	m_ctrlData[2] |= KeyManager::IsKeyPressed(KEYV_RSHIFT);	// Mode
+	m_ctrlData[2] |= DevManager::IsKeyPressed(KEYV_RSHIFT);	// Mode
 	m_ctrlData[2] <<= 1;
-	m_ctrlData[2] |= KeyManager::IsKeyPressed(KEYV_q);	// X
+	m_ctrlData[2] |= DevManager::IsKeyPressed(KEYV_q);	// X
 	m_ctrlData[2] <<= 1;
-	m_ctrlData[2] |= KeyManager::IsKeyPressed(KEYV_w);	// Y
+	m_ctrlData[2] |= DevManager::IsKeyPressed(KEYV_w);	// Y
 	m_ctrlData[2] <<= 1;
-	m_ctrlData[2] |= KeyManager::IsKeyPressed(KEYV_e);	// Z
+	m_ctrlData[2] |= DevManager::IsKeyPressed(KEYV_e);	// Z
 	m_ctrlData[2] = ~m_ctrlData[2];
 }
 

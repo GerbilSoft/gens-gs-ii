@@ -1,7 +1,7 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * Keyboard.cpp: Keyboard class.                                           *
- * Represents an input device of type 0x00.                                *
+ * DevManager_KeyNames.cpp: Input Device Manager - Key Names.              *
+ * Provides names of all standard keyboard keys.                           *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -22,7 +22,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "Keyboard.hpp"
+#include "DevManager.hpp"
+
+// C includes.
+#include <string.h>
 
 namespace LibGens
 {
@@ -48,7 +51,7 @@ namespace LibGens
 #define ALT_KEYNAME "Alt"
 #endif
 
-const char *Keyboard::ms_KeyNames[KEYV_LAST] =
+const char *DevManager::ms_KeyNames[KEYV_LAST] =
 {
 	// 0x00
 	"Unknown", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
@@ -142,17 +145,5 @@ const char *Keyboard::ms_KeyNames[KEYV_LAST] =
 	// since ThinkPads have them as real keys.
 	"Back", "Forward"
 };
-
-
-Keyboard::Keyboard()
-{
-	// Clear the keypress array.
-	memset(m_keyPress, 0x00, sizeof(m_keyPress));
-}
-
-Keyboard::~Keyboard()
-{
-	// TODO
-}
 
 }

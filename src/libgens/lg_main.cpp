@@ -36,8 +36,8 @@
 #include "MD/EmuMD.hpp"
 #include "MD/VdpIo.hpp"
 
-// I/O devices.
-#include "GensInput/KeyManager.hpp"
+// Input Device Manager.
+#include "GensInput/DevManager.hpp"
 
 // Sound Manager.
 #include "sound/SoundMgr.hpp"
@@ -116,7 +116,7 @@ int Init(void)
 	EmuMD::Init();
 	VdpIo::Init();
 	
-	KeyManager::Init();
+	DevManager::Init();
 	SoundMgr::Init();
 	
 	ms_IsInit = true;
@@ -148,7 +148,7 @@ int End(void)
 	EmuMD::End();
 	VdpIo::End();
 	
-	KeyManager::End();
+	DevManager::End();
 	SoundMgr::End();
 	
 	ms_IsInit = false;

@@ -32,8 +32,8 @@
 // C++ includes.
 #include <vector>
 
-// Key Manager.
-#include "../GensInput/KeyManager.hpp"
+// Device Manager.
+#include "../GensInput/DevManager.hpp"
 
 namespace LibGens
 {

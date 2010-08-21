@@ -97,7 +97,7 @@ void IoBase::update(void)
 	for (int i = (m_keyMap.size() - 1); i >= 0; i--)
 	{
 		m_buttons <<= 1;
-		m_buttons |= KeyManager::IsKeyPressed(m_keyMap[i]);
+		m_buttons |= DevManager::IsKeyPressed(m_keyMap[i]);
 	}
 	
 	// Buttons typically use active-low logic.

@@ -24,11 +24,13 @@
 #include "KeyHandlerQt.hpp"
 
 // LibGens includes.
-#include "libgens/GensInput/KeyManager.hpp"
 #include "libgens/GensInput/GensKey_t.h"
 
 // Qt includes
 #include <qglobal.h>
+
+// C includes.
+#include <string.h>
 
 // Native virtual keycodes.
 #if defined(Q_WS_X11)
@@ -44,6 +46,40 @@
 namespace GensQt4
 {
 
+/** Static class variables. **/
+
+/**
+ * ms_KeyPress[]: Keypress array.
+ */
+bool KeyHandlerQt::ms_KeyPress[KEYV_LAST];
+
+
+/**
+ * Init(): Initialize KeyHandlerQt.
+ */
+void KeyHandlerQt::Init(void)
+{
+	// Clear the keypress array.
+	memset(ms_KeyPress, 0x00, sizeof(ms_KeyPress));
+	
+	// Register as LibGens device type GKT_KEYBOARD.
+	LibGens::DevManager::RegisterDeviceHandler(GKT_KEYBOARD, KeyHandlerQt::DevHandler);
+}
+
+/**
+ * End(): Shut down KeyHandlerQt.
+ */
+void KeyHandlerQt::End(void)
+{
+	// Clear the keypress array.
+	memset(ms_KeyPress, 0x00, sizeof(ms_KeyPress));
+	
+	// Unregister as LibGens device type 0.
+	// TODO: Symbolic constants for device types.
+	LibGens::DevManager::UnregisterDeviceHandler(GKT_KEYBOARD, KeyHandlerQt::DevHandler);
+}
+
+
 /**
  * KeyPressEvent(): Key press handler.
  * @param event Key event.
@@ -53,8 +89,11 @@ void KeyHandlerQt::KeyPressEvent(QKeyEvent *event)
 	// TODO: Move effects keypresses from GensQGLWidget to KeyHandlerQt.
 	// TODO: Multiple keyboard support?
 	int gensKey = QKeyEventToKeyVal(event);
-	if (gensKey > KEYV_UNKNOWN)
-		LibGens::KeyManager::KeyPressEvent(gensKey);
+	if (gensKey > KEYV_UNKNOWN && gensKey < KEYV_LAST)
+	{
+		// Mark the key as pressed.
+		ms_KeyPress[gensKey] = true;
+	}
 }
 
 
@@ -67,7 +106,10 @@ void KeyHandlerQt::KeyReleaseEvent(QKeyEvent *event)
 	// TODO: Multiple keyboard support?
 	int gensKey = QKeyEventToKeyVal(event);
 	if (gensKey > KEYV_UNKNOWN)
-		LibGens::KeyManager::KeyReleaseEvent(gensKey);
+	{
+		// Mark the key as released.
+		ms_KeyPress[gensKey] = false;
+	}
 }
 
 
@@ -124,7 +166,8 @@ void KeyHandlerQt::MousePressEvent(QMouseEvent *event)
 		default:		gensButton = MBTN_UNKNOWN; break;
 	}
 	
-	LibGens::KeyManager::MousePressEvent(gensButton);
+	// Mark the key as pressed.
+	ms_KeyPress[KEYV_MOUSE_UNKNOWN + gensButton] = true;
 }
 
 
@@ -146,7 +189,51 @@ void KeyHandlerQt::MouseReleaseEvent(QMouseEvent *event)
 		default:		gensButton = MBTN_UNKNOWN; break;
 	}
 	
-	LibGens::KeyManager::MouseReleaseEvent(gensButton);
+	// Mark the key as released.
+	ms_KeyPress[KEYV_MOUSE_UNKNOWN + gensButton] = true;
+}
+
+
+/**
+ * DevHandler(): LibGens Device Handler function.
+ * @param key Gens keycode.
+ * @return True if the key is pressed; false if it isn't.
+ */
+bool KeyHandlerQt::DevHandler(GensKey_t key)
+{
+	if (key == (GensKey_t)~0)
+	{
+		// Update event request.
+		// TODO: Copy the internal ms_KeyPress[] array to a latched array.
+#ifdef _WIN32
+		// Update Shift/Control/Alt states.
+		// TODO: Only do this if the input backend doesn't support L/R modifiers natively.
+		// QWidget doesn't; GLFW does.
+		// TODO: When should these key states be updated?
+		// - Beginning of frame.
+		// - Before VBlank.
+		// - End of frame.
+		ms_KeyPress[KEYV_LSHIFT] =	(!!(GetAsyncKeyState(VK_LSHIFT) & 0x8000));
+		ms_KeyPress[KEYV_RSHIFT] =	(!!(GetAsyncKeyState(VK_RSHIFT) & 0x8000));
+		ms_KeyPress[KEYV_LCTRL] =	(!!(GetAsyncKeyState(VK_LCONTROL) & 0x8000));
+		ms_KeyPress[KEYV_RCTRL] =	(!!(GetAsyncKeyState(VK_RCONTROL) & 0x8000));
+		ms_KeyPress[KEYV_LALT] =	(!!(GetAsyncKeyState(VK_LMENU) & 0x8000));
+		ms_KeyPress[KEYV_RALT] =	(!!(GetAsyncKeyState(VK_RMENU) & 0x8000));
+#endif
+		// Update event returns true on success.
+		return true;
+	}
+	
+	// Check the keycode.
+	GensKey_u gkey;
+	gkey.keycode = key;
+	
+	// TODO: Multiple keyboard support.
+	// For now, assume all keyboards are the primary keyboard.
+	if (gkey.key16 >= KEYV_LAST)
+		return false;
+	
+	return ms_KeyPress[gkey.key16];
 }
 
 

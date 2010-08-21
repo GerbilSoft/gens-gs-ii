@@ -34,7 +34,6 @@
 #include "libgens/MD/VdpRend.hpp"
 #include "libgens/Util/Timing.hpp"
 #include "libgens/MD/EmuMD.hpp"
-#include "libgens/GensInput/KeyManager.hpp"
 
 // LOG_MSG() subsystem.
 #include "libgens/macros/log_msg.h"
@@ -49,6 +48,9 @@
 #include <QtCore/QVector>
 #include <QtGui/QKeyEvent>
 #include <QtGui/QMouseEvent>
+
+// KeyHandlerQt.
+#include "Input/KeyHandlerQt.hpp"
 
 
 namespace GensQt4

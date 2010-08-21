@@ -1,7 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * Keyboard.hpp: Keyboard class.                                           *
- * Represents an input device of type 0x00.                                *
+ * DevManager.cpp: Input Device Manager.                                   *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -22,10 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_IO_KEYBOARD_HPP__
-#define __LIBGENS_IO_KEYBOARD_HPP__
-
-#include "GensKey_t.h"
+#include "DevManager.hpp"
 
 // C includes.
 #include <string.h>
@@ -33,62 +29,74 @@
 namespace LibGens
 {
 
-class Keyboard
-{
-	public:
-		Keyboard();
-		~Keyboard();
-		
-		inline void keyPressEvent(uint16_t key16)
-		{
-			if (key16 >= KEYV_LAST)
-				return;
-			m_keyPress[key16] = true;
-		}
-		
-		inline void keyReleaseEvent(uint16_t key16)
-		{
-			if (key16 >= KEYV_LAST)
-				return;
-			m_keyPress[key16] = false;
-		}
-		
-		inline bool isKeyPressed(uint16_t key16) const
-		{
-			return ((key16 < KEYV_LAST) && m_keyPress[key16]);
-		}
-		
-		/**
-		 * setKeyState(): Forcibly set a key state.
-		 * This is normally only needed if the regular input subsystem
-		 * doesn't report some keys, e.g. left/right modifiers on Win32.
-		 * @param key16 Gens key value.
-		 * @param state State. (true = pressed; false = not pressed)
-		 */
-		inline void setKeyState(uint16_t key16, bool state)
-		{
-			if (key16 >= KEYV_LAST)
-				return;
-			m_keyPress[key16] = state;
-		}
-		
-		static const char *GetKeyName(GensKey_t key)
-		{
-			GensKey_u gkey;
-			gkey.keycode = key;
-			if (gkey.type != 0x00 || gkey.key16 >= KEYV_LAST)
-				return NULL;
-			return ms_KeyNames[gkey.key16];
-		}
-		
-	protected:
-		// Key names.
-		static const char *ms_KeyNames[KEYV_LAST];
-		
-		// Keypress array.
-		bool m_keyPress[KEYV_LAST];
-};
+/** Static class variables. **/
 
+/**
+ * ms_DevFn[]: Device handler functions.
+ * Currently supports up to 4 device types.
+ */
+DevManager::DeviceHandler_fn DevManager::ms_DevFn[4];
+
+
+/**
+ * Init(): Initialize DevManager.
+ */
+void DevManager::Init(void)
+{
+	// Clear ms_DevFn[].
+	memset(ms_DevFn, 0x00, sizeof(ms_DevFn));
 }
 
-#endif /* __LIBGENS_IO_KEYBOARD_HPP__ */
+/**
+ * End(): Shut down DevManager.
+ */
+void DevManager::End(void)
+{
+	// Clear ms_DevFn[].
+	memset(ms_DevFn, 0x00, sizeof(ms_DevFn));
+}
+
+
+/**
+ * RegisterDeviceHandler(): Register a device handler function.
+ * @param devType Device type ID.
+ * @param fn Device handler function.
+ * @return 0 on success; non-zero on error.
+ */
+int DevManager::RegisterDeviceHandler(int devType, DeviceHandler_fn fn)
+{
+	// Make sure the device type ID is in range.
+	if (devType < 0 || devType > MAX_DEVICE_TYPES)
+		return 1;
+	
+	// Check if a function is already registered.
+	if (ms_DevFn[devType] && ms_DevFn[devType] != fn)
+		return 2;
+	
+	// Register the function.
+	ms_DevFn[devType] = fn;
+	return 0;
+}
+
+/**
+ * UnregisterDeviceHandler(): Unregister a device handler function.
+ * @param devType Device type ID.
+ * @param fn Device handler function.
+ * @return 0 on success; non-zero on error.
+ */
+int DevManager::UnregisterDeviceHandler(int devType, DeviceHandler_fn fn)
+{
+	// Make sure the device type ID is in range.
+	if (devType < 0 || devType > MAX_DEVICE_TYPES)
+		return 1;
+	
+	// Make sure the function is registered.
+	if (ms_DevFn[devType] != fn)
+		return 2;
+	
+	// Unregister the function.
+	ms_DevFn[devType] = NULL;
+	return 0;
+}
+
+}
