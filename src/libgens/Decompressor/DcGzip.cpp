@@ -28,9 +28,6 @@
 #include <string.h>
 #include <unistd.h>
 
-// LibGens includes.
-#include "Util/byteswap.h"
-
 #ifdef _WIN32
 // Win32 requires io.h for dup().
 #include <io.h>
