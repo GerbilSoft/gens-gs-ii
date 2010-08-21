@@ -36,4 +36,7 @@
 /* Define to 1 if you have the `AL` library (-lopenal / -lOpenAL32). */
 #cmakedefine HAVE_OPENAL 1
 
+/* Define to 1 if you have the `zlib` library (-lz). */
+#cmakedefine HAVE_ZLIB 1
+
 #endif /* __GENS_QT4_CONFIG_H__ */

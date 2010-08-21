@@ -107,7 +107,12 @@ int EmuManager::openRom(QWidget *parent)
 	QString filename = QFileDialog::getOpenFileName(parent,
 			TR("Open ROM"),		// Dialog title
 			"",			// Default filename.
-			TR("Sega Genesis ROM images") + " (*.bin *.gen);;" +
+			TR("Sega Genesis ROM images") +
+			" (*.bin *.gen"
+#ifdef HAVE_ZLIB
+			ZLIB_EXT
+#endif /* HAVE_ZLIB */
+			");;" +
 #if 0
 			TR("Sega Genesis / 32X ROMs; Sega CD disc images") +
 			"(*.bin *.smd *.gen *.32x *.cue *.iso *.raw" ZLIB_EXT LZMA_EXT RAR_EXT ");;" +
