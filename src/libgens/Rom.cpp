@@ -37,7 +37,7 @@ using std::string;
 namespace LibGens
 {
 
-Rom::Rom(const char *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
+Rom::Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 {
 	// Save the filename for later.
 	m_filename = string(filename);
@@ -49,12 +49,14 @@ Rom::Rom(const char *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 	{
 		// Error opening the file.
 		m_decomp = NULL;
+		m_z_entry_list = NULL;
+		m_z_entry_sel = NULL;
 		return;
 	}
 	
 	// Determine which decompressor to use.
 	if (Decompressor::DetectFormat(m_file))
-		m_decomp = new Decompressor(m_file);
+		m_decomp = new Decompressor(m_file, filename);
 	else
 	{
 		// Couldn't find a suitable decompressor.
@@ -62,15 +64,44 @@ Rom::Rom(const char *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 		fclose(m_file);
 		m_file = NULL;
 		m_decomp = NULL;
+		m_z_entry_list = NULL;
+		m_z_entry_sel = NULL;
+		return;
+	}
+	
+	// Get the list of files in the archive.
+	int ret = m_decomp->getFileInfo(&m_z_entry_list);
+	if (ret != 0) // TODO: MDP_ERR_OK
+	{
+		// Error getting the list of files.
+		m_z_entry_list = NULL;
+		m_z_entry_sel = NULL;
+		
+		// Delete the decompressor.
+		delete m_decomp;
+		m_decomp = NULL;
+		
+		// Close the file.
+		fclose(m_file);
+		m_file = NULL;
 		return;
 	}
 	
 	// TODO: Request file selection for multi-file archives.
+	// For now, select the first file.
+	m_z_entry_sel = m_z_entry_list;
+	
+	// Load the ROM header.
 	loadRomHeader(sysOverride, fmtOverride);
 }
 
 Rom::~Rom()
 {
+	// Free the mdp_z_entry_t list.
+	Decompressor::z_entry_t_free(m_z_entry_list);
+	m_z_entry_list = NULL;
+	m_z_entry_sel = NULL;
+	
 	// Delete the decompressor.
 	delete m_decomp;
 	m_decomp = NULL;
@@ -92,25 +123,24 @@ Rom::~Rom()
  */
 int Rom::loadRomHeader(MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 {
-	// TODO: For multi-file archives, make sure a file is selected.
+	if (!m_z_entry_sel)
+	{
+		// No file selected!
+		return -1;
+	}
 	
 	m_sysId = sysOverride;
 	m_romFormat = fmtOverride;
 	
 	// Get the ROM size.
 	// TODO: If it's an MD ROM over 6 MB, return an error.
-	// TODO: Get ROM size from the decompressor.
-	m_romSize = 4*1024*1024;
-#if 0
-	fseek(m_file, 0, SEEK_END);
-	m_romSize = ftell(m_file);
-	fseek(m_file, 0, SEEK_SET);
-#endif
+	// TODO: Save the internal filename for multi-file archives.
+	m_romSize = m_z_entry_sel->filesize;
 	
 	// Load the ROM header for detection purposes.
 	uint8_t header[ROM_HEADER_SIZE];
 	size_t header_size;
-	m_decomp->getFile(NULL, header, sizeof(header), &header_size);
+	m_decomp->getFile(m_z_entry_sel, header, sizeof(header), &header_size);
 	printf("header_size: %d\n", header_size);
 	
 	if (m_romFormat == RFMT_UNKNOWN)
@@ -128,6 +158,9 @@ int Rom::loadRomHeader(MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 			&m_mdHeader.serialNumber[3],
 			(sizeof(m_mdHeader.serialNumber) - 3),
 			m_mdHeader.checksum);
+	
+	// ROM header loaded.
+	return 0;
 }
 
 /**
@@ -438,7 +471,11 @@ int Rom::loadRom(void *buf, size_t siz)
 	// TODO: Use error code constants.
 	// NOTE: Don't check for a NULL pointer, since a crash helps diagnose problems.
 	if (!isOpen())
-		return -1;
+		return -1;	// File is closed!
+	else if (!m_decomp)
+		return -2;	// Decompressor error!
+	else if (!m_z_entry_sel)
+		return -3;	// No file selected!
 	
 	if (siz == 0 || siz < m_romSize)
 	{
@@ -447,10 +484,9 @@ int Rom::loadRom(void *buf, size_t siz)
 	}
 	
 	// Load the ROM image.
-	// TODO: Multi-file support.
 	// TODO: Error handling.
 	size_t ret_siz = 0;
-	m_decomp->getFile(NULL, buf, siz, &ret_siz);
+	m_decomp->getFile(m_z_entry_sel, buf, siz, &ret_siz);
 	return ret_siz;
 }
 

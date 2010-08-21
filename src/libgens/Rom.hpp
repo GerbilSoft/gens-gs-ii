@@ -118,8 +118,11 @@ class Rom
 	protected:
 		MDP_SYSTEM_ID m_sysId;
 		RomFormat m_romFormat;
+		
 		FILE *m_file;
 		Decompressor *m_decomp;
+		mdp_z_entry_t *m_z_entry_list;
+		mdp_z_entry_t *m_z_entry_sel;
 		
 		/**
 		 * loadRomHeader(): Load the ROM header from the selected ROM file.
