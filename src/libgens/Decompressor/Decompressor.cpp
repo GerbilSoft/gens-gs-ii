@@ -82,7 +82,7 @@ int Decompressor::getFileInfo(mdp_z_entry_t **z_entry_out)
 	
 	// Set the elements of the list entry.
 	z_entry->filesize = filesize;
-	z_entry->filename = (m_filename.size() > 0 ? strdup(m_filename.c_str()) : NULL);
+	z_entry->filename = (!m_filename.empty() ? strdup(m_filename.c_str()) : NULL);
 	z_entry->next = NULL;
 	
 	// Return the list.
