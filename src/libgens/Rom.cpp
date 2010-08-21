@@ -51,6 +51,10 @@ Rom::Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverr
 	m_filename = string(filename);
 	m_romSize = 0;
 	
+	// Save the system and ROM format overrides.
+	m_sysId_override = sysOverride;
+	m_romFormat_override = fmtOverride;
+	
 	// TODO: Unicode conversion on Win32.
 	m_file = fopen(filename, "rb");
 	if (!m_file)
@@ -102,12 +106,23 @@ Rom::Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverr
 		return;
 	}
 	
-	// TODO: Request file selection for multi-file archives.
-	// For now, select the first file.
-	m_z_entry_sel = m_z_entry_list;
-	
-	// Load the ROM header.
-	loadRomHeader(sysOverride, fmtOverride);
+	if (!isMultiFile())
+	{
+		// Archive is not multi-file.
+		// Load the ROM header.
+		m_z_entry_sel = m_z_entry_list;
+		loadRomHeader(sysOverride, fmtOverride);
+	}
+	else
+	{
+		// Archive is multi-file.
+		// We can't continue until the user selects a file to load.
+		m_z_entry_sel = NULL;
+		
+		// Initialize system and format to unknown for now.
+		m_sysId = MDP_SYSTEM_UNKNOWN;
+		m_romFormat = RFMT_UNKNOWN;
+	}
 }
 
 Rom::~Rom()
@@ -448,6 +463,7 @@ int Rom::initSRam(SRam *sram) const
 	}
 	
 	// Load the SRam file.
+	// TODO: Use internal filename for multi-file?
 	sram->setFilename(m_filename.c_str());
 	return sram->load();
 }
@@ -470,6 +486,7 @@ int Rom::initEEPRom(EEPRom *eeprom) const
 	eeprom->setEEPRomType(m_eprType);
 	
 	// Load the EEProm file.
+	// TODO: Use internal filename for multi-file?
 	eeprom->setFilename(m_filename.c_str());
 	return eeprom->load();
 }
@@ -503,6 +520,34 @@ int Rom::loadRom(void *buf, size_t siz)
 	size_t ret_siz = 0;
 	m_decomp->getFile(m_z_entry_sel, buf, siz, &ret_siz);
 	return ret_siz;
+}
+
+
+/** Multi-file ROM archive support. **/
+
+
+/**
+ * select_z_entry(): Select a file from a multi-file ROM archive to load.
+ * @param sel File to load.
+ * @return 0 on success; non-zero on error.
+ */
+int Rom::select_z_entry(const mdp_z_entry_t *sel)
+{
+	if (!isOpen())
+		return -1;	// File is closed!
+	if (!isMultiFile())
+		return -2;	// Not multi-file.
+	if (m_z_entry_sel != NULL)
+		return -3;	// ROM was already selected.
+	
+	// TODO: Verify that sel is actually in m_z_entry_list.
+	
+	// Select the ROM from the archive.
+	m_z_entry_sel = sel;
+	
+	// Load the ROM header.
+	loadRomHeader(m_sysId_override, m_romFormat_override);
+	return 0;
 }
 
 }

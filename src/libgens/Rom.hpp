@@ -114,6 +114,33 @@ class Rom
 		
 		// ROM filename.
 		const utf8_str *filename(void) const { return m_filename.c_str(); }
+		
+		/** Multi-file ROM archive support. **/
+		
+		/**
+		 * isMultiFile(): Determine if the loaded ROM archive has multiple files.
+		 * @return True if the ROM archive has multiple files; false if it doesn't.
+		 */
+		bool isMultiFile(void) const
+		{
+			return (m_z_entry_list && m_z_entry_list->next);
+		}
+		
+		const mdp_z_entry_t *get_z_entry_list(void) const { return m_z_entry_list; }
+		
+		/**
+		 * select_z_entry(): Select a file from a multi-file ROM archive to load.
+		 * @param sel File to load.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int select_z_entry(const mdp_z_entry_t *sel);
+		
+		/**
+		 * isRomSelected(): Determine if a ROM has been selected.
+		 * NOTE: This is only correct if the ROM file hasn't been closed.
+		 * @return True if a ROM has been selected.
+		 */
+		bool isRomSelected(void) const { return (m_z_entry_sel != NULL); }
 	
 	protected:
 		MDP_SYSTEM_ID m_sysId;
@@ -122,7 +149,11 @@ class Rom
 		FILE *m_file;
 		Decompressor *m_decomp;
 		mdp_z_entry_t *m_z_entry_list;
-		mdp_z_entry_t *m_z_entry_sel;
+		const mdp_z_entry_t *m_z_entry_sel;
+		
+		// System overrides specified in the constructor.
+		MDP_SYSTEM_ID m_sysId_override;
+		RomFormat m_romFormat_override;
 		
 		/**
 		 * loadRomHeader(): Load the ROM header from the selected ROM file.
