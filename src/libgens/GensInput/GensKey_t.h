@@ -64,9 +64,10 @@ typedef union
  */
 typedef enum
 {
-	GKT_KEYBOARD = 0,
-	GKT_JOYSTICK = 1,
-	GKT_WIIREMOTE = 2,
+	GKT_KEYBOARD	= 0,
+	GKT_MOUSE	= 1,
+	GKT_JOYSTICK	= 2,
+	GKT_WIIREMOTE	= 3,
 	
 	GKT_MAX
 } GensKeyType_t;
