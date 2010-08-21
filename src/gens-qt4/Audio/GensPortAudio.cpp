@@ -156,19 +156,15 @@ void GensPortAudio::close(void)
 	}
 	
 	// Close the PortAudio stream.
-	if (m_stream)
+	err = Pa_CloseStream(m_stream);
+	if (err != paNoError)
 	{
-		err = Pa_CloseStream(m_stream);
-		if (err != paNoError)
-		{
-			// Error shutting down PortAudio.
-			LOG_MSG(audio, LOG_MSG_LEVEL_ERROR,
-				"Pa_CloseStream() error: %s", Pa_GetErrorText(err));
-		}
-		
-		m_stream = NULL;
+		// Error shutting down PortAudio.
+		LOG_MSG(audio, LOG_MSG_LEVEL_ERROR,
+			"Pa_CloseStream() error: %s", Pa_GetErrorText(err));
 	}
-		
+	m_stream = NULL;
+	
 	// Shut down PortAudio.
 	err = Pa_Terminate();
 	if (err != paNoError)
