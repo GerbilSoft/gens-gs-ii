@@ -67,6 +67,10 @@ int Decompressor::getFileInfo(mdp_z_entry_t **z_entry_out)
 	if (!z_entry_out)
 		return -1; // TODO: return -MDP_ERR_INVALID_PARAMETERS;
 	
+	// Make sure the file is open.
+	if (!m_file)
+		return -2;
+	
 	// TODO: fseeko()/ftello()/fseeko64()/ftello64() support on Linux.
 	size_t filesize;
 	fseek(m_file, 0, SEEK_END);
