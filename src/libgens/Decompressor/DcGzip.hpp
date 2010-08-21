@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * config.h.in: Source file for config.h.                                  *
+ * DcGzip.hpp: GZip decompressor class.                                    *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,16 +21,51 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_CONFIG_H__
-#define __LIBGENS_CONFIG_H__
+#ifndef __LIBGENS_DECOMPRESSOR_DCGZIP_HPP__
+#define __LIBGENS_DECOMPRESSOR_DCGZIP_HPP__
 
-/* Define to 1 if you have the `sigaction' function. */
-#cmakedefine HAVE_SIGACTION 1
+#include "Decompressor.hpp"
+#include <zlib.h>
 
-/* Define to 1 if you have the `rt' library (-lrt). */
-#cmakedefine HAVE_LIBRT 1
+namespace LibGens
+{
 
-/* Define to 1 if you have the `zlib` library (-lz). */
-#cmakedefine HAVE_ZLIB 1
+class DcGzip : public Decompressor
+{
+	public:
+		DcGzip(FILE *f, const utf8_str *filename);
+		~DcGzip();
+		
+		/**
+		 * DetectFormat(): Detect if the file can be handled by this decompressor.
+		 * This function should be reimplemented by derived classes.
+		 * NOTE: Do NOT call this function like a virtual function!
+		 * @param f File pointer.
+		 * @return True if the file can be handled by this decompressor.
+		 */
+		static bool DetectFormat(FILE *f);
+		
+		/**
+		 * getFileInfo(): Get information about all files in the archive.
+		 * @param z_entry_out Pointer to mdp_z_entry_t*, which will contain an allocated mdp_z_entry_t.
+		 * @return MDP error code. [TODO]
+		 */
+		int getFileInfo(mdp_z_entry_t **z_entry_out);
+		
+		/**
+		 * getFile(): Get a file from the archive.
+		 * @param z_entry	[in]  Pointer to mdp_z_entry_t describing the file to extract.
+		 * @param buf		[out] Buffer to read the file into.
+		 * @param siz		[in]  Size of buf.
+		 * @param ret_siz	[out] Pointer to size_t to store the number of bytes read.
+		 * @return MDP error code. [TODO]
+		 */
+		int getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *ret_siz);
+	
+	protected:
+		gzFile m_gzFile;
+};
 
-#endif /* __LIBGENS_CONFIG_H__ */
+}
+
+#endif /* __LIBGENS_DECOMPRESSOR_DECOMPRESSOR_HPP__ */

@@ -63,6 +63,7 @@ SET(libgens_SRCS
 	GensInput/DevManager.cpp
 	GensInput/DevManager_KeyNames.cpp
 	Decompressor/Decompressor.cpp
+	Decompressor/DcGzip.cpp
 	)
 
 # Compatibility sources.
