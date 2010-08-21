@@ -134,7 +134,7 @@ int EmuManager::openRom(QWidget *parent)
 	if (!m_rom->isOpen())
 	{
 		// Couldn't open the ROM file.
-		printf("Error opening ROM file. (TODO: Get error information.)\n");
+		fprintf(stderr, "Error opening ROM file. (TODO: Get error information.)\n");
 		delete m_rom;
 		m_rom = NULL;
 		return 2;
@@ -145,7 +145,7 @@ int EmuManager::openRom(QWidget *parent)
 	if (m_rom->sysId() != LibGens::Rom::MDP_SYSTEM_MD)
 	{
 		// Only MD ROM images are supported.
-		printf("ERROR: Only Sega Genesis / Mega Drive ROM images are supported right now.\n");
+		fprintf(stderr, "ERROR: Only Sega Genesis / Mega Drive ROM images are supported right now.\n");
 		delete m_rom;
 		m_rom = NULL;
 		return 3;
@@ -154,15 +154,26 @@ int EmuManager::openRom(QWidget *parent)
 	if (m_rom->romFormat() != LibGens::Rom::RFMT_BINARY)
 	{
 		// Only binary ROM images are supported.
-		printf("ERROR: Only binary ROM images are supported right now.\n");
+		fprintf(stderr, "ERROR: Only binary ROM images are supported right now.\n");
 		delete m_rom;
 		m_rom = NULL;
 		return 4;
 	}
 	
 	// Load the ROM image in EmuMD.
-	LibGens::EmuMD::SetRom(m_rom);
+	int ret = LibGens::EmuMD::SetRom(m_rom);
 	m_rom->close();
+	
+	if (ret != 0)
+	{
+		// Error loading the ROM image in EmuMD.
+		// TODO: EmuMD error code constants.
+		// TODO: Show an error message.
+		fprintf(stderr, "Error: LibGens:EmuMD::Set_Rom(m_rom) returned %d.\n", ret);
+		delete m_rom;
+		m_rom = NULL;
+		return 5;
+	}
 	
 	// m_rom isn't deleted, since keeping it around
 	// indicates that a game is running.
