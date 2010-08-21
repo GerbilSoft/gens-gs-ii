@@ -57,6 +57,18 @@
 #define GENS_PLATFORM "Unknown"
 #endif
 
+// HANG() macro.
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#define HANG() do { Sleep(INFINITE); } while (1)
+#else
+#define HANG() do { sleep(1000); } while (1)
+#endif
+
 // derp
 #define RICKROLL
 #ifdef RICKROLL
@@ -273,11 +285,8 @@ void SigHandler::SignalHandler(int signum)
 		gqt4_app->doCrash(signum);
 #endif /* HAVE_SIGACTION */
 		
-		while (true)
-		{
-			// Hang here.
-			sleep(1000);
-		}
+		// Hang here.
+		HANG();
 	}
 	
 	// This uses LOG_MSG_LEVEL_ERROR in order to suppress the message box.
