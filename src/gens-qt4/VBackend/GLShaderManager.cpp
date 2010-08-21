@@ -38,11 +38,14 @@ namespace GensQt4
 /**
  * ms_Paused_ARBfrag_asm(): Paused effect shader. (GL_ARB_fragment_program)
  * Based on grayscale shader from http://arstechnica.com/civis/viewtopic.php?f=19&t=445912
+ *
+ * Grayscale vector: [0.299 0.587 0.114] (ITU-R BT.601)
+ * Source: http://en.wikipedia.org/wiki/YCbCr
  */
 const char *GLShaderManager::ms_Paused_ARBfrag_asm =
 	"!!ARBfp1.0\n"
 	"OPTION ARB_precision_hint_fastest;\n"
-	"PARAM grayscale = {0.30, 0.59, 0.11, 0.0};\n"		// Standard RGB to Grayscale algorithm.
+	"PARAM grayscale = {0.299, 0.587, 0.114, 0.0};\n"	// Standard RGB to Grayscale vector.
 	"TEMP t0, color;\n"
 	"TEX t0, fragment.texcoord[0], texture[0], 2D;\n"	// Get color coordinate.
 	"DP3 color, t0, grayscale;\n"				// Calculate grayscale value.
