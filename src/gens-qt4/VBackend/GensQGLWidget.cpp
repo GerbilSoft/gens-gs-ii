@@ -346,7 +346,8 @@ void GensQGLWidget::paintGL(void)
 			// Emulation is running. Check if any effects should be applied.
 			
 			// If Fast Blur is enabled, update the Fast Blur effect.
-			if (fastBlur())
+			// NOTE: Shader version is only used if we're not paused.
+			if (fastBlur() && (isPaused() || !m_shaderMgr.hasFastBlur()))
 			{
 				updateFastBlur(bFromMD);
 				bFromMD = false;
@@ -396,10 +397,20 @@ void GensQGLWidget::paintGL(void)
 		glBindTexture(GL_TEXTURE_2D, m_tex);
 	}
 	
-	if (m_shaderMgr.hasPaused() && isRunning() && isPaused())
+	// Enable shaders, if necessary.
+	if (isRunning())
 	{
-		// Enable the Paused shader.
-		m_shaderMgr.setPaused(true);
+		if (m_shaderMgr.hasFastBlur() && fastBlur() && !isPaused())
+		{
+			// Enable the Fast Blur shader.
+			// NOTE: Shader version is only used if we're not paused.
+			m_shaderMgr.setFastBlur(true);
+		}
+		else if (m_shaderMgr.hasPaused() && isPaused())
+		{
+			// Enable the Paused shader.
+			m_shaderMgr.setPaused(true);
+		}
 	}
 	
 	// Draw the texture.
@@ -415,10 +426,20 @@ void GensQGLWidget::paintGL(void)
 	glVertex2i(-1, -1);
 	glEnd();
 	
-	if (m_shaderMgr.hasPaused() && isRunning() && isPaused())
+	// Disable shaders, if necessary.
+	if (isRunning())
 	{
-		// Disable the Paused shader.
-		m_shaderMgr.setPaused(false);
+		if (m_shaderMgr.hasFastBlur() && fastBlur() && !isPaused())
+		{
+			// Disable the Fast Blur shader.
+			// NOTE: Shader version is only used if we're not paused.
+			m_shaderMgr.setFastBlur(false);
+		}
+		else if (m_shaderMgr.hasPaused() && isPaused())
+		{
+			// Disable the Paused shader.
+			m_shaderMgr.setPaused(false);
+		}
 	}
 	
 	glDisable(GL_TEXTURE_2D);

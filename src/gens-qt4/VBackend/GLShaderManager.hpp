@@ -57,13 +57,16 @@ class GLShaderManager
 		/** Query available shaders. **/
 #ifdef HAVE_GLEW
 		inline bool hasPaused(void) const { return (m_paused_ARBfrag != 0); }
+		inline bool hasFastBlur(void) const { return (m_fastBlur_ARBfrag != 0); }
 #else
 		inline bool hasPaused(void) const { return false; }
+		inline bool hasFastBlur(void) const { return false; }
 #endif
 		
 		/** Set Shader functions. **/
 #ifdef HAVE_GLEW
 		void setPaused(bool enabled);
+		void setFastBlur(bool enabled);
 #else
 		/**
 		 * NULL functions that do nothing if GLEW wasn't found at compile time.
@@ -71,6 +74,7 @@ class GLShaderManager
 		 * TODO: Should these functions be marked as inline?
 		 */
 		void setPaused(bool enabled) { ((void)enabled); }
+		void setFastBlur(bool enabled) { ((void)enabled); }
 #endif
 	
 	protected:
@@ -83,6 +87,11 @@ class GLShaderManager
 		GLuint m_paused_ARBfrag;
 		bool m_paused_enabled;
 		static const char *ms_Paused_ARBfrag_asm;
+		
+		// Fast Blur: ARB fragment program.
+		GLuint m_fastBlur_ARBfrag;
+		bool m_fastBlur_enabled;
+		static const char *ms_FastBlur_ARBfrag_asm;
 #endif
 };
 
