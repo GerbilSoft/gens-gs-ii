@@ -541,6 +541,8 @@ int Rom::select_z_entry(const mdp_z_entry_t *sel)
 		return -3;	// ROM was already selected.
 	
 	// TODO: Verify that sel is actually in m_z_entry_list.
+	if (!sel)
+		return -4;	// Invalid selection.
 	
 	// Select the ROM from the archive.
 	m_z_entry_sel = sel;
