@@ -39,6 +39,7 @@ using std::string;
 // Decompressors.
 #ifdef HAVE_ZLIB
 #include "Decompressor/DcGzip.hpp"
+#include "Decompressor/DcZip.hpp"
 #endif /* HAVE_ZLIB */
 
 namespace LibGens
@@ -65,6 +66,8 @@ Rom::Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverr
 #ifdef HAVE_ZLIB
 	if (DcGzip::DetectFormat(m_file))
 		m_decomp = new DcGzip(m_file, filename);
+	else if (DcZip::DetectFormat(m_file))
+		m_decomp = new DcZip(m_file, filename);
 	else
 #endif /* HAVE_ZLIB */
 	if (Decompressor::DetectFormat(m_file))
