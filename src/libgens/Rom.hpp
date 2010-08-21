@@ -37,6 +37,9 @@
 #include "Save/EEPRom.hpp"
 #include "macros/common.h"
 
+// Decompressor subsystem.
+#include "Decompressor/Decompressor.hpp"
+
 /**
  * ROM_HEADER_SIZE: Number of bytes used for ROM type detection.
  */
@@ -97,6 +100,12 @@ class Rom
 		int initSRam(SRam *sram) const;
 		int initEEPRom(EEPRom *eeprom) const;
 		
+		/**
+		 * loadRom(): Load the ROM image into a buffer.
+		 * @param buf Buffer.
+		 * @param siz Buffer size.
+		 * @return Positive value indicating amount of data read on success; 0 or negative on error.
+		 */
 		int loadRom(void *buf, size_t siz);
 		
 		// ROM names. (Obtained from the ROM headers.)
@@ -110,6 +119,15 @@ class Rom
 		MDP_SYSTEM_ID m_sysId;
 		RomFormat m_romFormat;
 		FILE *m_file;
+		Decompressor *m_decomp;
+		
+		/**
+		 * loadRomHeader(): Load the ROM header from the selected ROM file.
+		 * @param sysOverride System override.
+		 * @param fmtOverride Format override.
+		 * @return 0 on success; non-zero on error.
+		*/
+		int loadRomHeader(MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride);
 		
 		static RomFormat DetectFormat(const uint8_t *header, size_t header_size);
 		static MDP_SYSTEM_ID DetectSystem(const uint8_t *header, size_t header_size, RomFormat fmt);

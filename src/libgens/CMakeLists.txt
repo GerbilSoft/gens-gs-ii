@@ -62,6 +62,7 @@ SET(libgens_SRCS
 	IO/Io4WPSlave.cpp
 	GensInput/DevManager.cpp
 	GensInput/DevManager_KeyNames.cpp
+	Decompressor/Decompressor.cpp
 	)
 
 # Compatibility sources.

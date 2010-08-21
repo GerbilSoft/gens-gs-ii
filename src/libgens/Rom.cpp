@@ -46,21 +46,71 @@ Rom::Rom(const char *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 	// TODO: Unicode conversion on Win32.
 	m_file = fopen(filename, "rb");
 	if (!m_file)
+	{
+		// Error opening the file.
+		m_decomp = NULL;
 		return;
+	}
+	
+	// Determine which decompressor to use.
+	if (Decompressor::DetectFormat(m_file))
+		m_decomp = new Decompressor(m_file);
+	else
+	{
+		// Couldn't find a suitable decompressor.
+		// TODO: Indicate that a suitable decompressor couldn't be found.
+		fclose(m_file);
+		m_file = NULL;
+		m_decomp = NULL;
+		return;
+	}
+	
+	// TODO: Request file selection for multi-file archives.
+	loadRomHeader(sysOverride, fmtOverride);
+}
+
+Rom::~Rom()
+{
+	// Delete the decompressor.
+	delete m_decomp;
+	m_decomp = NULL;
+	
+	// If the file is open, close it.
+	if (m_file)
+	{
+		fclose(m_file);
+		m_file = NULL;
+	}
+}
+
+
+/**
+ * loadRomHeader(): Load the ROM header from the selected ROM file.
+ * @param sysOverride System override.
+ * @param fmtOverride Format override.
+ * @return 0 on success; non-zero on error.
+ */
+int Rom::loadRomHeader(MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
+{
+	// TODO: For multi-file archives, make sure a file is selected.
 	
 	m_sysId = sysOverride;
 	m_romFormat = fmtOverride;
 	
 	// Get the ROM size.
 	// TODO: If it's an MD ROM over 6 MB, return an error.
+	// TODO: Get ROM size from the decompressor.
+	m_romSize = 4*1024*1024;
+#if 0
 	fseek(m_file, 0, SEEK_END);
 	m_romSize = ftell(m_file);
 	fseek(m_file, 0, SEEK_SET);
+#endif
 	
 	// Load the ROM header for detection purposes.
-	// TODO: Determine if the file is compressed.
 	uint8_t header[ROM_HEADER_SIZE];
-	size_t header_size = fread(header, 1, sizeof(header), m_file);
+	size_t header_size;
+	m_decomp->getFile(NULL, header, sizeof(header), &header_size);
 	printf("header_size: %d\n", header_size);
 	
 	if (m_romFormat == RFMT_UNKNOWN)
@@ -79,16 +129,6 @@ Rom::Rom(const char *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 			(sizeof(m_mdHeader.serialNumber) - 3),
 			m_mdHeader.checksum);
 }
-
-Rom::~Rom()
-{
-	if (m_file)
-	{
-		fclose(m_file);
-		m_file = NULL;
-	}
-}
-
 
 /**
  * DetectFormat(): Detect a ROM's format.
@@ -391,7 +431,7 @@ int Rom::initEEPRom(EEPRom *eeprom) const
  * loadRom(): Load the ROM image into a buffer.
  * @param buf Buffer.
  * @param siz Buffer size.
- * @return 0 on success; non-zero on error.
+ * @return Positive value indicating amount of data read on success; 0 or negative on error.
  */
 int Rom::loadRom(void *buf, size_t siz)
 {
@@ -407,11 +447,11 @@ int Rom::loadRom(void *buf, size_t siz)
 	}
 	
 	// Load the ROM image.
-	// TODO: Decompressor support.
+	// TODO: Multi-file support.
 	// TODO: Error handling.
-	fseek(m_file, 0, SEEK_SET);
-	fread(buf, 1, m_romSize, m_file);
-	return 0;
+	size_t ret_siz = 0;
+	m_decomp->getFile(NULL, buf, siz, &ret_siz);
+	return ret_siz;
 }
 
 }
