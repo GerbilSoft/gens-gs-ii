@@ -87,10 +87,12 @@ FORCE_INLINE void VdpPalette::T_ConstrainColorComponent(int& c)
  */
 FORCE_INLINE int VdpPalette::CalcGrayscale(int r, int g, int b)
 {
-	// Standard grayscale computation: Y = (R*0.30 + G*0.59 + B*0.11)
-	r = lrint((double)r * 0.30);
-	g = lrint((double)g * 0.59);
-	b = lrint((double)b * 0.11);
+	// Convert the color components to grayscale.
+	// Grayscale vector: [0.299 0.587 0.114] (ITU-R BT.601)
+	// Source: http://en.wikipedia.org/wiki/YCbCr
+	r = lrint((double)r * 0.299);
+	g = lrint((double)g * 0.587);
+	b = lrint((double)b * 0.114);
 	return (r + g + b);
 }
 
