@@ -78,7 +78,7 @@ class Decompressor
 		
 		/**
 		 * getFile(): Get a file from the archive.
-		 * @param z_entry	[in]  Pointer to mdp_z_entry_t describing the file to extract. [TODO]
+		 * @param z_entry	[in]  Pointer to mdp_z_entry_t describing the file to extract.
 		 * @param buf		[out] Buffer to read the file into.
 		 * @param siz		[in]  Size of buf.
 		 * @param ret_siz	[out] Pointer to size_t to store the number of bytes read.
