@@ -140,6 +140,16 @@ int EmuManager::openRom(QWidget *parent)
 		return 2;
 	}
 	
+	// Check if this is a multi-file ROM archive.
+	if (m_rom->isMultiFile())
+	{
+		// Multi-file ROM archive.
+		// Prompt the user to select a file.
+		// TODO: Add "Zip File Selection Dialog".
+		// For now, always select the first file.
+		m_rom->select_z_entry(m_rom->get_z_entry_list());
+	}
+	
 	printf("ROM information: format == %d, system == %d\n", m_rom->romFormat(), m_rom->sysId());
 	
 	if (m_rom->sysId() != LibGens::Rom::MDP_SYSTEM_MD)
