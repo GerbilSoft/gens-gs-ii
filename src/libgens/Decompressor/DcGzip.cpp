@@ -88,7 +88,7 @@ DcGzip::DcGzip(FILE *f, const utf8_str *filename)
 }
 
 /**
- * ~Decompressor(): Delete the Decompressor object.
+ * ~DcGzip(): Delete the GZip decompressor object.
  */
 DcGzip::~DcGzip()
 {
