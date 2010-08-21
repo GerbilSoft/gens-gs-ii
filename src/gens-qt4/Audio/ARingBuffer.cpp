@@ -73,7 +73,6 @@ void ARingBuffer::reInit(int segSize, bool stereo)
  * writeLock(): Lock the buffer for writing one segment.
  * @return Pointer to current write segment.
  */
-#include <stdio.h>
 int16_t *ARingBuffer::writeLock(void)
 {
 	// Lock the buffer.
