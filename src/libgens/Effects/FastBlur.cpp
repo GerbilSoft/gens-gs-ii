@@ -65,6 +65,7 @@ inline void FastBlur::T_DoFastBlur(pixel *mdScreen)
 	// Process the framebuffer.
 	for (unsigned int i = ((336*240)-16); i != 0; i--)
 	{
+		// NOTE: This may lose some precision in the Red LSB on LE architectures.
 		px = (*mdScreen >> 1) & mask;	// Get pixel.
 		px_prev += px;			// Blur with previous pixel.
 		*(mdScreen - 1) = px_prev;	// Write new pixel.
@@ -103,18 +104,19 @@ void FastBlur::DoFastBlur_16_MMX(uint16_t *mdScreen, const uint32_t *mask)
 	for (unsigned int i = ((336*240)-16)/4; i != 0; i--)
 	{
 		__asm__ (
-			/* Get source pixels. */
+			// Get source pixels.
 			"movq	 (%0), %%mm0\n"
 			"movq	2(%0), %%mm1\n"
 			
-			/* Blur source pixels. */
+			// Blur source pixels.
+			// NOTE: This may lose some precision in the Red LSB on LE architectures.
 			"psrld	$1, %%mm0\n"
 			"psrld	$1, %%mm1\n"
 			"pand	%%mm7, %%mm0\n"
 			"pand	%%mm7, %%mm1\n"
 			"paddw	%%mm1, %%mm0\n"
 			
-			/* Put destination pixels. */
+			// Put destination pixels.
 			"movq	%%mm0, (%0)\n"
 			:
 			: "r" (mdScreen)
@@ -149,18 +151,19 @@ void FastBlur::DoFastBlur_32_MMX(uint32_t *mdScreen)
 	for (unsigned int i = ((336*240)-16)/2; i != 0; i--)
 	{
 		__asm__ (
-			/* Get source pixels. */
+			// Get source pixels.
 			"movq	 (%0), %%mm0\n"
 			"movq	4(%0), %%mm1\n"
 			
-			/* Blur source pixels. */
+			// Blur source pixels.
+			// NOTE: This may lose some precision in the Red LSB on LE architectures.
 			"psrld	$1, %%mm0\n"
 			"psrld	$1, %%mm1\n"
 			"pand	%%mm7, %%mm0\n"
 			"pand	%%mm7, %%mm1\n"
 			"paddd	%%mm1, %%mm0\n"
 			
-			/* Put destination pixels. */
+			// Put destination pixels.
 			"movq	%%mm0, (%0)\n"
 			:
 			: "r" (mdScreen)
