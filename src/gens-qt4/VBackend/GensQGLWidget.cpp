@@ -29,6 +29,7 @@
 // C includes.
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 // LibGens includes.
 #include "libgens/MD/VdpRend.hpp"
@@ -145,13 +146,23 @@ void GensQGLWidget::reallocTexture(void)
 			break;
 	}
 	
+	// Allocate a memory buffer to use for texture initialization.
+	// This will ensure that the entire texture is initialized to black.
+	// (This fixes garbage on the last column when using the Fast Blur shader.)
+	const size_t texSize = (512*256*(m_lastBpp == LibGens::VdpPalette::BPP_32 ? 4 : 2));
+	void *texBuf = calloc(1, texSize);
+	
 	// Allocate the texture.
 	glTexImage2D(GL_TEXTURE_2D, 0,
 		     m_colorComponents,
 		     512, 256,	// 512x256 (320x240 rounded up to nearest powers of two)
 		     0,		// No border.
-		     m_texFormat, m_texType, NULL);
+		     m_texFormat, m_texType, texBuf);
 	
+	// Free the temporary texture buffer.
+	free(texBuf);
+	
+	// Disable TEXTURE_2D.
 	glDisable(GL_TEXTURE_2D);
 	
 	// Texture is dirty.
