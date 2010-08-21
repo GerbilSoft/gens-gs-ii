@@ -48,6 +48,15 @@
 #define FORCE_INLINE
 #endif /* defined(NDEBUG) */
 
+/** Variable attributes. **/
+#if !defined(PACKED)
+#if defined(__GNUC__)
+#define PACKED __attribute__ ((packed))
+#else
+#define PACKED
+#endif /* defined(__GNUC__) */
+#endif /* !defined(PACKED) */
+
 /** Typedefs. **/
 
 /**
