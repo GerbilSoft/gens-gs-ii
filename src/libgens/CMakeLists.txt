@@ -18,6 +18,26 @@ INCLUDE(CheckLibraryExists)
 CHECK_LIBRARY_EXISTS(c sigaction "" HAVE_SIGACTION)	# libc: sigaction()
 CHECK_LIBRARY_EXISTS(rt clock_gettime "" HAVE_LIBRT)	# librt: clock_gettime()
 
+# Check for iconv() on non-Win32 systems.
+IF(WIN32)
+	# Win32 has MultiByteToWideChar() and WideCharToMultiByte().
+ELSE(WIN32)
+	# First, check libc for iconv().
+	CHECK_LIBRARY_EXISTS(c iconv "" HAVE_ICONV)	# libc: iconv()
+	IF(HAVE_ICONV)
+		# iconv() found in libc.
+		SET(ICONV_LIBRARY "-lc")
+	ELSE(HAVE_ICONV)
+		# iconv() not found in libc.
+		# Check in libiconv.
+		CHECK_LIBRARY_EXISTS(iconv iconv "" HAVE_ICONV)	# libiconv: iconv()
+		IF(HAVE_ICONV)
+			# iconv() found in libiconv.
+			SET(ICONV_LIBRARY "-liconv")
+		ENDIF(HAVE_ICONV)
+	ENDIF(HAVE_ICONV)
+ENDIF(WIN32)
+
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 
@@ -86,6 +106,9 @@ TARGET_LINK_LIBRARIES(gens starscream mdZ80 minizip)
 IF(HAVE_LIBRT)
 	TARGET_LINK_LIBRARIES(gens -lrt)
 ENDIF(HAVE_LIBRT)
+IF(HAVE_ICONV)
+	TARGET_LINK_LIBRARIES(gens ${ICONV_LIBRARY})
+ENDIF(HAVE_ICONV)
 IF(HAVE_LZMA)
 	# Link ordering matters:
 	# * 7z depends on lzmabase.
