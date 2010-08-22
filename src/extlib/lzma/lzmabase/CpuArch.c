@@ -72,13 +72,27 @@ static void MyCPUID(UInt32 function, UInt32 *a, UInt32 *b, UInt32 *c, UInt32 *d)
 
   #else
 
+#if defined(__i386__) && defined(__PIC__)
+	// CPUID code with PIC support.
+	// See http://gcc.gnu.org/ml/gcc-patches/2007-09/msg00324.html
  	__asm__ __volatile__ (
- 		"cpuid"
+		"xghcl	%%ebx, %1\n"
+		"cpuid\n"
+		"xchgl	%%ebx, %1\n"
+ 		: "=a" (*a) ,
+ 		  "=r" (*b) ,
+ 		  "=c" (*c) ,
+ 		  "=d" (*d)
+		: "0" (function)) ;
+#else
+ 	__asm__ __volatile__ (
+ 		"cpuid\n"
  		: "=a" (*a) ,
  		  "=b" (*b) ,
  		  "=c" (*c) ,
  		  "=d" (*d)
 		: "0" (function)) ;
+#endif
 
   #endif
   
