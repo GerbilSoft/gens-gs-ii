@@ -21,12 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include <config.h>
-
 #ifndef __GENS_QT4_CTRLCONFIGWINDOW_HPP__
 #define __GENS_QT4_CTRLCONFIGWINDOW_HPP__
 
-#include <QMainWindow>
+#include <QtGui/QDialog>
 #include "ui_CtrlConfigWindow.h"
 
 // LibGens includes.
