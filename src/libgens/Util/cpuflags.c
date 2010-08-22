@@ -101,7 +101,7 @@ uint32_t LibGens_GetCPUFlags(void)
 	// IA32/x86_64.
 	
 	// Check if cpuid is supported.
-	unsigned int _eax, _ebx, _ecx, _edx;
+	unsigned int __eax, __ebx, __ecx, __edx;
 	
 #if defined(__i386__)
 	__asm__ (
@@ -115,10 +115,10 @@ uint32_t LibGens_GetCPUFlags(void)
 		"popl %%eax\n"
 		"xorl %%edx, %%eax\n"
 		"andl $0x200000, %%eax"
-		:	"=a" (_eax)	// Output
+		:	"=a" (__eax)	// Output
 		);
 	
-	if (!_eax)
+	if (!__eax)
 	{
 		// CPUID is not supported.
 		// This CPU must be an early 486 or older.
@@ -129,7 +129,7 @@ uint32_t LibGens_GetCPUFlags(void)
 	// CPUID is supported.
 	// Check if the CPUID Features function (Function 1) is supported.
 	unsigned int maxFunc;
-	__cpuid(CPUID_MAX_FUNCTIONS, maxFunc, _ebx, _ecx, _edx);
+	__cpuid(CPUID_MAX_FUNCTIONS, maxFunc, __ebx, __ecx, __edx);
 	
 	if (!maxFunc)
 	{
@@ -138,20 +138,20 @@ uint32_t LibGens_GetCPUFlags(void)
 	}
 	
 	// Get the CPU feature flags.
-	__cpuid(CPUID_FAMILY_FEATURES, _eax, _ebx, _ecx, _edx);
+	__cpuid(CPUID_FAMILY_FEATURES, __eax, __ebx, __ecx, __edx);
 	
 	// Check the feature flags.
 	CPU_Flags = 0;
 	
-	if (_edx & CPUFLAG_IA32_EDX_MMX)
+	if (__edx & CPUFLAG_IA32_EDX_MMX)
 		CPU_Flags |= MDP_CPUFLAG_X86_MMX;
 	
 	int can_FXSAVE = 0;
 	
-	if (_edx & CPUFLAG_IA32_EDX_SSE)
+	if (__edx & CPUFLAG_IA32_EDX_SSE)
 	{
 		// Check if this CPU supports FXSAVE with SSE.
-		if (_edx & CPUFLAG_IA32_EDX_FXSAVE)
+		if (__edx & CPUFLAG_IA32_EDX_FXSAVE)
 		{
 			// CPU supports FXSAVE. Does the OS?
 			// TODO: smsw causes problems with Valgrind.
@@ -182,33 +182,33 @@ uint32_t LibGens_GetCPUFlags(void)
 	
 	if (can_FXSAVE)
 	{
-		if (_edx & CPUFLAG_IA32_EDX_SSE2)
+		if (__edx & CPUFLAG_IA32_EDX_SSE2)
 			CPU_Flags |= MDP_CPUFLAG_X86_SSE2;
-		if (_ecx & CPUFLAG_IA32_ECX_SSE3)
+		if (__ecx & CPUFLAG_IA32_ECX_SSE3)
 			CPU_Flags |= MDP_CPUFLAG_X86_SSE3;
-		if (_ecx & CPUFLAG_IA32_ECX_SSSE3)
+		if (__ecx & CPUFLAG_IA32_ECX_SSSE3)
 			CPU_Flags |= MDP_CPUFLAG_X86_SSSE3;
-		if (_ecx & CPUFLAG_IA32_ECX_SSE41)
+		if (__ecx & CPUFLAG_IA32_ECX_SSE41)
 			CPU_Flags |= MDP_CPUFLAG_X86_SSE41;
-		if (_ecx & CPUFLAG_IA32_ECX_SSE42)
+		if (__ecx & CPUFLAG_IA32_ECX_SSE42)
 			CPU_Flags |= MDP_CPUFLAG_X86_SSE42;
 	}
 	
 	// Check if the CPUID Extended Features function (Function 0x80000001) is supported.
-	__cpuid(CPUID_MAX_EXT_FUNCTIONS, maxFunc, _ebx, _ecx, _edx);
+	__cpuid(CPUID_MAX_EXT_FUNCTIONS, maxFunc, __ebx, __ecx, __edx);
 	if (maxFunc >= CPUID_EXT_FAMILY_FEATURES)
 	{
 		// CPUID Extended Features are supported.
-		__cpuid(CPUID_EXT_FAMILY_FEATURES, _eax, _ebx, _ecx, _edx);
+		__cpuid(CPUID_EXT_FAMILY_FEATURES, __eax, __ebx, __ecx, __edx);
 		
 		// Check the extended feature flags.
-		if (_edx & CPUFLAG_IA32_EXT_EDX_MMXEXT)
+		if (__edx & CPUFLAG_IA32_EXT_EDX_MMXEXT)
 			CPU_Flags |= MDP_CPUFLAG_X86_MMXEXT;
-		if (_edx & CPUFLAG_IA32_EXT_EDX_3DNOW)
+		if (__edx & CPUFLAG_IA32_EXT_EDX_3DNOW)
 			CPU_Flags |= MDP_CPUFLAG_X86_3DNOW;
-		if (_edx & CPUFLAG_IA32_EXT_EDX_3DNOWEXT)
+		if (__edx & CPUFLAG_IA32_EXT_EDX_3DNOWEXT)
 			CPU_Flags |= MDP_CPUFLAG_X86_3DNOWEXT;
-		if (can_FXSAVE && (_ecx & CPUFLAG_IA32_EXT_ECX_SSE4A))
+		if (can_FXSAVE && (__ecx & CPUFLAG_IA32_EXT_ECX_SSE4A))
 			CPU_Flags |= MDP_CPUFLAG_X86_SSE4A;
 	}
 	
