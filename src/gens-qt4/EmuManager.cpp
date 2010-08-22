@@ -51,6 +51,9 @@
 #include "libgens/IO/Io4WPMaster.hpp"
 #include "libgens/IO/Io4WPSlave.hpp"
 
+// Multi-File Archive Selection Dialog.
+#include "ZipSelectDialog.hpp"
+
 // Qt includes.
 #include <QtGui/QApplication>
 #include <QtGui/QFileDialog>
@@ -145,9 +148,20 @@ int EmuManager::openRom(QWidget *parent)
 	{
 		// Multi-file ROM archive.
 		// Prompt the user to select a file.
-		// TODO: Add "Zip File Selection Dialog".
-		// For now, always select the first file.
-		m_rom->select_z_entry(m_rom->get_z_entry_list());
+		ZipSelectDialog *zipsel = new ZipSelectDialog();
+		zipsel->setFileList(m_rom->get_z_entry_list());
+		int ret = zipsel->exec();
+		if (ret != QDialog::Accepted || zipsel->selectedFile() == NULL)
+		{
+			// Dialog was rejected.
+			delete m_rom;
+			m_rom = NULL;
+			return 6;
+		}
+		
+		// Get the selected file.
+		m_rom->select_z_entry(zipsel->selectedFile());
+		delete zipsel;
 	}
 	
 	printf("ROM information: format == %d, system == %d\n", m_rom->romFormat(), m_rom->sysId());
