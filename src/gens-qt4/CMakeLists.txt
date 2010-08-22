@@ -78,6 +78,7 @@ SET(gens-qt4_SRCS
 	Audio/ABackend_Write.cpp
 	VBackend/GLShaderManager.cpp
 	Audio/ARingBuffer.cpp
+	ZipSelectDialog.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -91,6 +92,7 @@ SET(gens-qt4_MOC_HEADERS
 	CtrlConfigWindow.hpp
 	EmuManager.hpp
 	VBackend/MsgTimer.hpp
+	ZipSelectDialog.hpp
 	)
 
 # Create .moc files for sources that need them.
@@ -100,6 +102,7 @@ QT4_WRAP_CPP(gens-qt4_MOC_SOURCES ${gens-qt4_MOC_HEADERS})
 SET(gens-qt4_UIS
 	ui/AboutWindow.ui
 	ui/CtrlConfigWindow.ui
+	ui/ZipSelectDialog.ui
 	)
 
 # Generate the header files from the UI files.
