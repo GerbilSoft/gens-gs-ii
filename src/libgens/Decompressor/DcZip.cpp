@@ -30,9 +30,6 @@
 #include <stdint.h>
 
 #ifdef _WIN32
-// Win32 requires io.h for dup().
-#include <io.h>
-
 // MiniZip Win32 I/O handler.
 #include "../../extlib/minizip/iowin32u.h"
 #endif /* _WIn32 */
@@ -43,16 +40,6 @@
 // C++ includes.
 #include <string>
 using std::string;
-
-// gzclose_r() and gzclose_w() were introduced in zlib-1.2.4.
-#if (ZLIB_VER_MAJOR > 1) || \
-    (ZLIB_VER_MAJOR == 1 && ZLIB_VER_MINOR > 2) || \
-    (ZLIB_VER_MAJOR == 1 && ZLIB_VER_MINOR == 2 && ZLIB_VER_REVISION >= 4)
-// zlib-1.2.4 or later
-#else
-#define gzclose_r(file) gzclose(file)
-#define gzclose_w(file) gzclose(file)
-#endif
 
 namespace LibGens
 {
