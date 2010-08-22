@@ -128,8 +128,8 @@ class GensQApplication : public QApplication
 			connect(this, SIGNAL(signalCrash(int, siginfo_t*, void*)),
 				this, SLOT(slotCrash(int, siginfo_t*, void*)));
 #else /* HAVE_SIGACTION */
-			connect(this, SIGNAL(signalCrash(int, siginfo_t*, void*)),
-				this, SLOT(slotCrash(int, siginfo_t*, void*)));
+			connect(this, SIGNAL(signalCrash(int)),
+				this, SLOT(slotCrash(int)));
 #endif /* HAVE_SIGACTION */
 		}
 		
