@@ -67,17 +67,33 @@ SET(libgens_SRCS
 	Decompressor/DcZip.cpp
 	)
 
+IF(HAVE_LZMA)
+	SET(libgens_OPTIONAL_SRCS Decompressor/Dc7z.cpp)
+ELSE()
+	SET(libgens_OPTIONAL_SRCS "")
+ENDIF()
+
 # Compatibility sources.
 IF(WIN32)
 	SET(libgens_COMPAT_SRCS lg_win32.c)
 ELSE()
-	SET(libgens_COMPAT_SRCS)
+	SET(libgens_COMPAT_SRCS "")
 ENDIF()
 
 # Build the library.
-ADD_LIBRARY(gens STATIC ${libgens_SRCS} ${libgens_COMPAT_SRCS})
+ADD_LIBRARY(gens STATIC ${libgens_SRCS} ${libgens_OPTIONAL_SRCS} ${libgens_COMPAT_SRCS})
 TARGET_LINK_LIBRARIES(gens starscream mdZ80 minizip)
 IF(HAVE_LIBRT)
 	TARGET_LINK_LIBRARIES(gens -lrt)
 ENDIF(HAVE_LIBRT)
+IF(HAVE_LZMA)
+	# Link ordering matters:
+	# * 7z depends on lzmabase.
+	# * lzmabase does NOT depend on 7z.
+	TARGET_LINK_LIBRARIES(gens 7z lzmabase)
+ENDIF(HAVE_LZMA)
+
 ADD_DEPENDENCIES(gens git_version starscream mdZ80 minizip)
+IF(HAVE_LZMA)
+	ADD_DEPENDENCIES(lzmabase 7z)
+ENDIF(HAVE_LZMA)
