@@ -51,7 +51,7 @@ const char *CtrlConfigWindow::ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX] =
 
 
 /**
- * CtrlConfigWindow(): Initialize the About window.
+ * CtrlConfigWindow(): Initialize the Controller Configuration window.
  */
 CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
@@ -94,7 +94,7 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 
 
 /**
- * ~CtrlConfigWindow(): Shut down the About window.
+ * ~CtrlConfigWindow(): Shut down the Controller Configuration window.
  */
 CtrlConfigWindow::~CtrlConfigWindow()
 {
@@ -104,20 +104,20 @@ CtrlConfigWindow::~CtrlConfigWindow()
 
 
 /**
- * ShowSingle(): Show a single instance of the About window.
+ * ShowSingle(): Show a single instance of the Controller Configuration window.
  * @param parent Parent window.
  */
 void CtrlConfigWindow::ShowSingle(QWidget *parent)
 {
 	if (m_CtrlConfigWindow != NULL)
 	{
-		// About Window is already displayed.
+		// Controller Configuration Window is already displayed.
 		// NOTE: This doesn't seem to work on KDE 4.4.2...
 		QApplication::setActiveWindow(m_CtrlConfigWindow);
 	}
 	else
 	{
-		// About Window is not displayed.
+		// Controller Configuration Window is not displayed.
 		m_CtrlConfigWindow = new CtrlConfigWindow(parent);
 		m_CtrlConfigWindow->show();
 	}
