@@ -41,6 +41,9 @@ using std::string;
 #include "Decompressor/DcGzip.hpp"
 #include "Decompressor/DcZip.hpp"
 #endif /* HAVE_ZLIB */
+#ifdef HAVE_LZMA
+#include "Decompressor/Dc7z.hpp"
+#endif /* HAVE_LZMA */
 
 namespace LibGens
 {
@@ -74,6 +77,11 @@ Rom::Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverr
 		m_decomp = new DcZip(m_file, filename);
 	else
 #endif /* HAVE_ZLIB */
+#ifdef HAVE_LZMA
+	if (Dc7z::DetectFormat(m_file))
+		m_decomp = new Dc7z(m_file, filename);
+	else
+#endif /* HAVE_LZMA */
 	if (Decompressor::DetectFormat(m_file))
 		m_decomp = new Decompressor(m_file, filename);
 	else
