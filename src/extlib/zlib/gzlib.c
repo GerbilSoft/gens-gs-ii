@@ -3,6 +3,12 @@
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
+/**
+ * gzip function redefinitions.
+ * Required for Gens/GS II because Qt4/Win32 has its own copy of gz*.c.
+ */
+#include "gzip_redefinitions.h"
+
 #include "gzguts.h"
 
 #if defined(_LARGEFILE64_SOURCE) && _LFS64_LARGEFILE-0

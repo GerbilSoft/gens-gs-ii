@@ -1153,6 +1153,13 @@ ZEXTERN int ZEXPORT uncompress OF((Bytef *dest,   uLongf *destLen,
 */
 
 
+/**
+ * gzip function redefinitions.
+ * Required for Gens/GS II because Qt4/Win32 has its own copy of gz*.c.
+ */
+#include "gzip_redefinitions.h"
+
+
                         /* gzip file access functions */
 
 /*
