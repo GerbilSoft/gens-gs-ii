@@ -31,8 +31,7 @@
 #include <GL/glew.h>
 #endif
 
-#include <QMainWindow>
-
+#include <QtGui/QDialog>
 #include "ui_AboutWindow.h"
 
 namespace GensQt4
