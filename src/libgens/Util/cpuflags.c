@@ -94,6 +94,7 @@ uint32_t CPU_Flags = 0;
  * Stores the CPU flags in the global variable CPU_Flags.
  * @return CPU flags.
  */
+#include <stdio.h>
 uint32_t LibGens_GetCPUFlags(void)
 {
 #if defined(__i386__) || defined(__amd64__)
@@ -116,28 +117,14 @@ uint32_t LibGens_GetCPUFlags(void)
 		"andl $0x200000, %%eax"
 		:	"=a" (_eax)	// Output
 		);
-#else /* defined(__amd64__) */
-	__asm__ (
-		"pushfq\n"
-		"popq %%rax\n"
-		"movl %%eax, %%edx\n"
-		"xorl $0x200000, %%eax\n"
-		"pushq %%rax\n"
-		"popfq\n"
-		"pushfq\n"
-		"popq %%rax\n"
-		"xorl %%edx, %%eax\n"
-		"andl $0x200000, %%eax"
-		:	"=a" (_eax)	// Output
-		);
-#endif
 	
 	if (!_eax)
 	{
 		// CPUID is not supported.
-		// This CPU must be a 486 or older.
+		// This CPU must be an early 486 or older.
 		return 0;
 	}
+#endif
 	
 	// CPUID is supported.
 	// Check if the CPUID Features function (Function 1) is supported.
