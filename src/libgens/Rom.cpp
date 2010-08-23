@@ -21,9 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "Rom.hpp"
-
 #include <config.h>
+
+#include "Rom.hpp"
 
 // C includes.
 #include <string.h>
@@ -35,15 +35,6 @@ using std::string;
 // LibGens includes.
 #include "Util/byteswap.h"
 #include "lg_osd.h"
-
-// Decompressors.
-#ifdef HAVE_ZLIB
-#include "Decompressor/DcGzip.hpp"
-#include "Decompressor/DcZip.hpp"
-#endif /* HAVE_ZLIB */
-#ifdef HAVE_LZMA
-#include "Decompressor/Dc7z.hpp"
-#endif /* HAVE_LZMA */
 
 namespace LibGens
 {
@@ -70,21 +61,8 @@ Rom::Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverr
 	}
 	
 	// Determine which decompressor to use.
-#ifdef HAVE_ZLIB
-	if (DcGzip::DetectFormat(m_file))
-		m_decomp = new DcGzip(m_file, filename);
-	else if (DcZip::DetectFormat(m_file))
-		m_decomp = new DcZip(m_file, filename);
-	else
-#endif /* HAVE_ZLIB */
-#ifdef HAVE_LZMA
-	if (Dc7z::DetectFormat(m_file))
-		m_decomp = new Dc7z(m_file, filename);
-	else
-#endif /* HAVE_LZMA */
-	if (Decompressor::DetectFormat(m_file))
-		m_decomp = new Decompressor(m_file, filename);
-	else
+	m_decomp = Decompressor::GetDecompressor(m_file, filename);
+	if (!m_decomp)
 	{
 		// Couldn't find a suitable decompressor.
 		// TODO: Indicate that a suitable decompressor couldn't be found.
