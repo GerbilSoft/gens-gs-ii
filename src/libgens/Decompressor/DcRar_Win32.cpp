@@ -24,6 +24,9 @@
 #include "DcRar.hpp"
 #include "UnRAR_dll.hpp"
 
+// Win32 Unicode Translation Layer.
+#include "../Win32/W32U_mini.hpp"
+
 // C includes.
 #include <stdlib.h>
 #include <string.h>
@@ -73,10 +76,6 @@ DcRar::DcRar(FILE *f, const utf8_str *filename)
 		return;
 	}
 	
-	// Check if we're using Unicode or ANSI.
-	// TODO: Move to a "Mini w32u" subsystem?
-	m_unicode = (GetModuleHandleW(NULL) != NULL);
-	
 	// Load UnRAR.dll.
 	// TODO: Set an error flag if it can't be loaded.
 	m_unrarDll.load(ms_RarBinary.c_str());
@@ -122,43 +121,6 @@ bool DcRar::DetectFormat(FILE *f)
 
 
 /**
- * mbs_to_UTF16(): Convert a multibyte string to UTF-16.
- * TODO: Move to another file.
- * @param mbs UTF-8 string.
- * @param codepage mbs codepage.
- * @return UTF-16 string, or NULL on error.
- */
-static wchar_t *mbs_to_UTF16(const utf8_str *mbs, UINT codepage)
-{
-	int cchWcs = MultiByteToWideChar(codepage, 0, mbs, -1, NULL, 0);
-	if (cchWcs <= 0)
-		return NULL;
-	
-	wchar_t *wcs = (wchar_t*)malloc(cchWcs * sizeof(wchar_t));
-	MultiByteToWideChar(CP_UTF8, 0, mbs, -1, wcs, cchWcs);
-	return wcs;
-}
-
-
-/**
- * UTF16_to_mbs(): Convert a UTF-16 string to multibyte.
- * @param wcs UTF-16 string.
- * @param codepage mbs codepage.
- * @return Multibyte string, or NULL on error.
- */
-static char *UTF16_to_mbs(const wchar_t *wcs, UINT codepage)
-{
-	int cbMbs = WideCharToMultiByte(codepage, 0, wcs, -1, NULL, 0, NULL, NULL);
-	if (cbMbs <= 0)
-		return NULL;
-	
-	char *mbs = (char*)malloc(cbMbs);
-	WideCharToMultiByte(codepage, 0, wcs, -1, mbs, cbMbs, NULL, NULL);
-	return mbs;
-}
-
-
-/**
  * getFileInfo(): Get information about all files in the archive.
  * @param z_entry_out Pointer to mdp_z_entry_t*, which will contain an allocated mdp_z_entry_t.
  * @return MDP error code. [TODO]
@@ -187,15 +149,15 @@ int DcRar::getFileInfo(mdp_z_entry_t **z_entry_out)
 	wchar_t *filenameW = NULL;
 	
 	// Convert the filename from UTF-8 to UTF-16 first.
-	filenameW = mbs_to_UTF16(m_filename.c_str(), CP_UTF8);
+	filenameW = W32U::mbs_to_UTF16(m_filename.c_str(), CP_UTF8);
 	if (!filenameW)
 		return -9; // TODO: Figure out an MDP error code for this.
 	
-	if (!m_unicode)
+	if (!W32U::IsUnicode)
 	{
 		// System isn't using Unicode.
 		// Convert the filename from UTF-16 to ANSI.
-		filenameA = UTF16_to_mbs(filenameW, CP_ACP);
+		filenameA = W32U::UTF16_to_mbs(filenameW, CP_ACP);
 		free(filenameW);
 		filenameW = NULL;
 		
@@ -209,7 +171,7 @@ int DcRar::getFileInfo(mdp_z_entry_t **z_entry_out)
 	rar_open.CmtBuf = NULL;
 	rar_open.CmtBufSize = 0;
 	
-	if (m_unicode)
+	if (W32U::IsUnicode)
 	{
 		// Unicode mode.
 		rar_open.ArcName = NULL;
@@ -353,15 +315,15 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
 	wchar_t *filenameW = NULL;
 	
 	// Convert the filename from UTF-8 to UTF-16 first.
-	filenameW = mbs_to_UTF16(m_filename.c_str(), CP_UTF8);
+	filenameW = W32U::mbs_to_UTF16(m_filename.c_str(), CP_UTF8);
 	if (!filenameW)
 		return -9; // TODO: Figure out an MDP error code for this.
 	
-	if (!m_unicode)
+	if (!W32U::IsUnicode)
 	{
 		// System isn't using Unicode.
 		// Convert the filename from UTF-16 to ANSI.
-		filenameA = UTF16_to_mbs(filenameW, CP_ACP);
+		filenameA = W32U::UTF16_to_mbs(filenameW, CP_ACP);
 		free(filenameW);
 		filenameW = NULL;
 		
@@ -375,7 +337,7 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
 	rar_open.CmtBuf = NULL;
 	rar_open.CmtBufSize = 0;
 	
-	if (m_unicode)
+	if (W32U::IsUnicode)
 	{
 		// Unicode mode.
 		rar_open.ArcName = NULL;
@@ -403,12 +365,12 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
 	wchar_t *z_filenameW = NULL;
 	
 	// Convert the z_entry filename from UTF-8 to UTF-16 first.
-	z_filenameW = mbs_to_UTF16(z_entry->filename, CP_UTF8);
+	z_filenameW = W32U::mbs_to_UTF16(z_entry->filename, CP_UTF8);
 	if (!z_filenameW)
 		return -9; // TODO: Figure out an MDP error code for this.
 	
 	// Convert the filename from UTF-16 to ANSI in case files don't have a Unicode filename.
-	z_filenameA = UTF16_to_mbs(z_filenameW, CP_ACP);
+	z_filenameA = W32U::UTF16_to_mbs(z_filenameW, CP_ACP);
 	if (!z_filenameA)
 		return -9; // TODO: Figure out an MDP error code for this.
 	

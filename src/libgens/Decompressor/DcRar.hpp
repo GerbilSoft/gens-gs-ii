@@ -78,12 +78,6 @@ class DcRar : public Decompressor
 		
 #ifdef _WIN32
 		/**
-		 * m_unicode: True if the system supports Unicode.
-		 * TODO: Move to a "mini w32u" subsystem?
-		 */
-		bool m_unicode;
-		
-		/**
 		 * m_unrarDll: UnRAR DLL.
 		 * Win32 only!
 		 */
