@@ -242,8 +242,8 @@ int Dc7z::getFileInfo(mdp_z_entry_t **z_entry_out)
 	mdp_z_entry_t *z_entry_tail = NULL;
 	
 	// Filename buffer. (UTF-16)
-	uint16_t *wFilename = NULL;
-	size_t wFilename_len = 0;
+	uint16_t *filenameW = NULL;
+	size_t filenameW_len = 0;
 	
 	// Read the filenames.
 	for (unsigned int i = 0; i < m_db.db.NumFiles; i++)
@@ -254,23 +254,29 @@ int Dc7z::getFileInfo(mdp_z_entry_t **z_entry_out)
 		
 		// Get the filename.
 		size_t len = SzArEx_GetFileNameUtf16(&m_db, i, NULL);
-		if (len > wFilename_len)
+		if (len > filenameW_len)
 		{
-			// Increase the wFilename buffer.
+			// Increase the filenameW buffer.
 			// TODO: Check for malloc() errors?
-			free(wFilename);
-			wFilename_len = len;
-			wFilename = (uint16_t*)malloc(wFilename_len * sizeof(uint16_t));
+			free(filenameW);
+			filenameW_len = len;
+			filenameW = (uint16_t*)malloc(filenameW_len * sizeof(uint16_t));
 		}
-		SzArEx_GetFileNameUtf16(&m_db, i, wFilename);
+		SzArEx_GetFileNameUtf16(&m_db, i, filenameW);
 		
 		// Convert the filename to UTF-8.
-		// TODO: For now, we'll just use the LSB of each UTF-16 character.
-		utf8_str *rom_filename = (utf8_str*)malloc(wFilename_len);
+#ifdef _WIN32
+		// Win32: Use W32U_UTF16_to_mbs().
+		utf8_str *rom_filename = W32U_UTF16_to_mbs((wchar_t*)filenameW, CP_UTF8);
+#else
+		// TODO: Use iconv() to convert the filename to UTF-8.
+		// For now, we'll just use the LSB of each UTF-16 character.
+		utf8_str *rom_filename = (utf8_str*)malloc(filenameW_len);
 		for (unsigned int chr = 0; chr < len; chr++)
 		{
-			rom_filename[chr] = (wFilename[chr] & 0xFF);
+			rom_filename[chr] = (filenameW[chr] & 0xFF);
 		}
+#endif
 		
 		// Allocate memory for the next file list element.
 		// NOTE: C-style malloc() is used because MDP is a C API.
@@ -333,9 +339,22 @@ int Dc7z::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *r
 		return -1; // TODO: Return an appropriate MDP error code.
 	}
 	
+	// Convert the z_entry filename to UTF-16.
+	uint16_t *z_entry_filenameW = NULL;
+#ifdef _WIN32
+	z_entry_filenameW = (uint16_t*)W32U_mbs_to_UTF16(z_entry->filename, CP_UTF8);
+	if (!z_entry_filenameW)
+	{
+		// Error converting the filename to Unicode.
+		return -4; // TODO: Return an appropriate MDP error code.
+	}
+#else
+	// TODO: Unix version.
+#endif
+	
 	// Filename buffer. (UTF-16)
-	uint16_t *wFilename = NULL;
-	size_t wFilename_len = 0;
+	uint16_t *filenameW = NULL;
+	size_t filenameW_len = 0;
 	
 	// Locate the file in the 7-Zip archive.
 	unsigned int i = 0;
@@ -347,39 +366,40 @@ int Dc7z::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *r
 		
 		// Get the filename.
 		size_t len = SzArEx_GetFileNameUtf16(&m_db, i, NULL);
-		if (len > wFilename_len)
+		if (len > filenameW_len)
 		{
-			// Increase the wFilename buffer.
+			// Increase the filenameW buffer.
 			// TODO: Check for malloc() errors?
-			free(wFilename);
-			wFilename_len = len;
-			wFilename = (uint16_t*)malloc(wFilename_len * sizeof(uint16_t));
+			free(filenameW);
+			filenameW_len = len;
+			filenameW = (uint16_t*)malloc(filenameW_len * sizeof(uint16_t));
 		}
-		SzArEx_GetFileNameUtf16(&m_db, i, wFilename);
+		SzArEx_GetFileNameUtf16(&m_db, i, filenameW);
 		
+		// Compare the filename against the z_entry filename.
+		int cmp;
+#ifdef _WIN32
+		cmp = _wcsicmp((wchar_t*)z_entry_filenameW, (wchar_t*)filenameW);
+#else
 		// Convert the filename to UTF-8.
 		// TODO: For now, we'll just use the LSB of each UTF-16 character.
 		// TODO: Convert the input filename to UTF-16 to improve performance?
-		utf8_str *rom_filename = (utf8_str*)malloc(wFilename_len);
+		utf8_str *rom_filename = (utf8_str*)malloc(filenameW_len);
 		for (unsigned int chr = 0; chr < len; chr++)
 		{
-			rom_filename[chr] = (wFilename[chr] & 0xFF);
+			rom_filename[chr] = (filenameW[chr] & 0xFF);
 		}
-		
-		// Check if the filename matches.
-#ifdef _WIN32
-		if (strcasecmp(z_entry->filename, rom_filename) != 0)
-#else
-		if (strcmp(z_entry->filename, rom_filename) != 0)
+		cmp = strcmp(z_entry->filename, rom_filename);
+		free(rom_filename);
 #endif
+		
+		if (cmp != 0)
 		{
 			// Not the correct file.
-			free(rom_filename);
 			continue;
 		}
 		
 		// Found the file.
-		free(rom_filename);
 		
 		// Extract the file into the buffer.
 		size_t offset;
@@ -406,10 +426,14 @@ int Dc7z::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *r
 		break;
 	}
 	
+	// Free the UTF-16 z_entry filename.
+	free(z_entry_filenameW);
+	
 	if (i >= m_db.db.NumFiles)
 	{
 		// File not found.
 		// TODO: Could also be an error in extracting the file.
+		printf("not found\n");
 		return -1; // TODO: return -MDP_ERR_Z_FILE_NOT_FOUND_IN_ARCHIVE;
 	}
 	
