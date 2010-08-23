@@ -85,7 +85,6 @@ SET(libgens_SRCS
 	Decompressor/Decompressor.cpp
 	Decompressor/DcGzip.cpp
 	Decompressor/DcZip.cpp
-	Decompressor/DcRar_Unix.cpp
 	)
 
 IF(HAVE_LZMA)
@@ -94,11 +93,11 @@ ELSE()
 	SET(libgens_OPTIONAL_SRCS "")
 ENDIF()
 
-# Compatibility sources.
+# Platform-specific sources.
 IF(WIN32)
-	SET(libgens_COMPAT_SRCS lg_win32.c)
-ELSE()
 	SET(libgens_COMPAT_SRCS "")
+ELSE()
+	SET(libgens_COMPAT_SRCS Decompressor/DcRar_Unix.cpp)
 ENDIF()
 
 # Build the library.
