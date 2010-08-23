@@ -78,10 +78,38 @@ class DcRar : public Decompressor
 		
 #ifdef _WIN32
 		/**
+		 * m_unicode: True if the system supports Unicode.
+		 * TODO: Move to a "mini w32u" subsystem?
+		 */
+		bool m_unicode;
+		
+		/**
 		 * m_unrarDll: UnRAR DLL.
 		 * Win32 only!
 		 */
-		UnRAR_dll *m_unrarDll;
+		UnRAR_dll m_unrarDll;
+		
+		/**
+		 * RarState_t: RAR state struct.
+		 */
+		struct RarState_t
+		{
+			uint8_t *buf;	// Buffer.
+			size_t siz;	// Size of buffer.
+			size_t pos;	// Current position.
+			
+			DcRar *owner;	// DcRar instance that owns this RarState_t.
+		};
+		
+		/**
+		 * RarCallback(): Win32 UnRAR.dll callback function. [STATIC]
+		 */
+		static int CALLBACK RarCallback(UINT msg, LPARAM UserData, LPARAM P1, LPARAM P2);
+		
+		/**
+		 * rarCallback(): Win32 UnRAR.dll callback function.
+		 */
+		static int CALLBACK rarCallback(UINT msg, LPARAM UserData, LPARAM P1, LPARAM P2);
 #endif
 };
 

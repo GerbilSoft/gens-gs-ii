@@ -95,7 +95,7 @@ ENDIF()
 
 # Platform-specific sources.
 IF(WIN32)
-	SET(libgens_COMPAT_SRCS "")
+	SET(libgens_COMPAT_SRCS Decompressor/DcRar_Win32.cpp Decompressor/UnRAR_dll.cpp)
 ELSE()
 	SET(libgens_COMPAT_SRCS Decompressor/DcRar_Unix.cpp)
 ENDIF()
