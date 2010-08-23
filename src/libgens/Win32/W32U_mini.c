@@ -112,7 +112,6 @@ char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage)
  */
 FILE *W32U_fopen(const utf8_str *filename, const utf8_str *mode)
 {
-	printf("W32U fopen\n");
 	// Convert the filename from UTF-8 to UTF-16.
 	wchar_t *filenameW = W32U_mbs_to_UTF16(filename, CP_UTF8);
 	if (!filenameW)
