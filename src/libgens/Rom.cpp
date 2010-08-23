@@ -161,7 +161,13 @@ int Rom::loadRomHeader(MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 	// Load the ROM header for detection purposes.
 	uint8_t header[ROM_HEADER_SIZE];
 	size_t header_size;
-	m_decomp->getFile(m_z_entry_sel, header, sizeof(header), &header_size);
+	int ret = m_decomp->getFile(m_z_entry_sel, header, sizeof(header), &header_size);
+	if (ret != 0 || header_size == 0)
+	{
+		// File read error.
+		// TODO: Error code constants.
+		return -2;
+	}
 	printf("header_size: %d\n", header_size);
 	
 	if (m_romFormat == RFMT_UNKNOWN)
