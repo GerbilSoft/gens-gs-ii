@@ -100,12 +100,18 @@ int EmuMD::SetRom(Rom *rom)
 	{
 		// ROM is either empty or too big.
 		// TODO: Error code constants.
-		return 1;
+		return -1;
 	}
 	
 	// Load the ROM into memory.
 	M68K_Mem::Rom_Size = rom->romSize();
-	rom->loadRom(&M68K_Mem::Rom_Data.u8[0], M68K_Mem::Rom_Size);
+	size_t siz_loaded = rom->loadRom(&M68K_Mem::Rom_Data.u8[0], M68K_Mem::Rom_Size);
+	if (siz_loaded != M68K_Mem::Rom_Size)
+	{
+		// Error loading the ROM.
+		// TODO: Error code constants.
+		return -2;
+	}
 	
 	// Enable SRam/EEPRom by default.
 	// TODO: Make accessor/mutator functions.
