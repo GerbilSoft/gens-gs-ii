@@ -51,7 +51,7 @@ using std::string;
 
 // Win32 Unicode Translation Layer.
 #ifdef _WIN32
-#include "Win32/W32U_mini.hpp"
+#include "Win32/W32U_mini.h"
 #endif
 
 
@@ -113,7 +113,7 @@ int Init(void)
 	
 	// Win32 Unicode Translation Layer.
 #ifdef _WIN32
-	W32U::Init();
+	W32U_Init();
 #endif
 	
 	// Initialize LibGens subsystems.
@@ -163,7 +163,7 @@ int End(void)
 	
 	// Win32 Unicode Translation Layer.
 #ifdef _WIN32
-	W32U::End();
+	W32U_End();
 #endif
 	
 	ms_IsInit = false;

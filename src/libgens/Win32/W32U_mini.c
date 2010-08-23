@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * W32U_mini.hpp: Win32 Unicode Translation Layer. (Mini Version)          *
+ * W32U_mini.c: Win32 Unicode Translation Layer. (Mini Version)            *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,50 +21,79 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __W32U_MINI_HPP__
-#define __W32U_MINI_HPP__
+#include "W32U_mini.h"
 
-// utf8_str
-#include "../macros/common.h"
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
 
-namespace W32U
-{
+// C includes.
+#include <stdlib.h>
 
-/**
- * Init(): Initialize the Win32 Unicode Translation Layer.
- * @return 0 on success; non-zero on error.
- */
-int Init(void);
 
 /**
- * End(): Shut down the Win32 Unicode Translation Layer.
- * @return 0 on success; non-zero on error.
- */
-int End(void);
-
-/**
- * IsUnicode: Indicates if the system is Unicode.
+ * W32U_IsUnicode: Indicates if the system is Unicode.
  * NOTE: Do NOT edit this variable outside of W32U!
  */
-extern bool IsUnicode;
+int W32U_IsUnicode = 0;
+
 
 /**
- * mbs_to_UTF16(): Convert a multibyte string to UTF-16.
+ * W32U_Init(): Initialize the Win32 Unicode Translation Layer.
+ * @return 0 on success; non-zero on error.
+ */
+int W32U_Init(void)
+{
+	W32U_IsUnicode = (GetModuleHandleW(NULL) != NULL);
+	return 0;
+}
+
+
+/**
+ * W32U_End(): Shut down the Win32 Unicode Translation Layer.
+ * @return 0 on success; non-zero on error.
+ */
+int W32U_End(void)
+{
+	W32U_IsUnicode = 0;
+	return 0;
+}
+
+
+/**
+ * W32U_mbs_to_UTF16(): Convert a multibyte string to UTF-16.
  * TODO: Move to another file.
  * @param mbs UTF-8 string.
  * @param codepage mbs codepage.
  * @return UTF-16 string, or NULL on error.
  */
-wchar_t *mbs_to_UTF16(const utf8_str *mbs, unsigned int codepage);
+wchar_t *W32U_mbs_to_UTF16(const utf8_str *mbs, unsigned int codepage)
+{
+	int cchWcs = MultiByteToWideChar(codepage, 0, mbs, -1, NULL, 0);
+	if (cchWcs <= 0)
+		return NULL;
+	
+	wchar_t *wcs = (wchar_t*)malloc(cchWcs * sizeof(wchar_t));
+	MultiByteToWideChar(CP_UTF8, 0, mbs, -1, wcs, cchWcs);
+	return wcs;
+}
+
 
 /**
- * UTF16_to_mbs(): Convert a UTF-16 string to multibyte.
+ * W32U_UTF16_to_mbs(): Convert a UTF-16 string to multibyte.
  * @param wcs UTF-16 string.
  * @param codepage mbs codepage.
  * @return Multibyte string, or NULL on error.
  */
-char *UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage);
-
+char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage)
+{
+	int cbMbs = WideCharToMultiByte(codepage, 0, wcs, -1, NULL, 0, NULL, NULL);
+	if (cbMbs <= 0)
+		return NULL;
+	
+	char *mbs = (char*)malloc(cbMbs);
+	WideCharToMultiByte(codepage, 0, wcs, -1, mbs, cbMbs, NULL, NULL);
+	return mbs;
 }
-
-#endif /* __W32U_MINI_HPP__ */

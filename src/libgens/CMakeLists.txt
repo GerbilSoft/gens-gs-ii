@@ -98,7 +98,7 @@ IF(WIN32)
 	SET(libgens_COMPAT_SRCS
 		Decompressor/DcRar_Win32.cpp
 		Decompressor/UnRAR_dll.cpp
-		Win32/W32U_mini.cpp
+		Win32/W32U_mini.c
 		)
 ELSE()
 	SET(libgens_COMPAT_SRCS Decompressor/DcRar_Unix.cpp)
