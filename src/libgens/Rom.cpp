@@ -32,6 +32,11 @@
 #include <algorithm>
 using std::string;
 
+// Win32 Unicode Translation Layer.
+#ifdef _WIN32
+#include "Win32/W32U_mini.h"
+#endif
+
 // LibGens includes.
 #include "Util/byteswap.h"
 #include "lg_osd.h"
@@ -49,7 +54,7 @@ Rom::Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverr
 	m_sysId_override = sysOverride;
 	m_romFormat_override = fmtOverride;
 	
-	// TODO: Unicode conversion on Win32.
+	// Open the ROM file.
 	m_file = fopen(filename, "rb");
 	if (!m_file)
 	{
