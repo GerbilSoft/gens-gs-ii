@@ -46,6 +46,11 @@ using std::string;
 #include "lzma/7z/7zVersion.h"
 #include "lzma/lzmabase/7zCrc.h"
 
+#ifdef _WIN32
+// Win32 Unicode Translation Layer.
+#include "../Win32/W32U_mini.h"
+#endif
+
 namespace LibGens
 {
 
@@ -95,9 +100,41 @@ Dc7z::Dc7z(FILE *f, const utf8_str *filename)
 		return;
 	}
 	
-	// Attempt to open the file.
-	// TODO: Unicode filename support?
-	if (InFile_Open(&m_archiveStream.file, filename))
+#ifdef _WIN32
+	// Convert the filename from UTF-8 to UTF-16.
+	wchar_t *filenameW = W32U_mbs_to_UTF16(filename, CP_UTF8);
+	if (!filenameW)
+	{
+		// Error converting the filename to UTF-16.
+		m_file = NULL;
+		m_filename.clear();
+		return; // TODO: Figure out an MDP error code for this.
+	}
+	
+	if (W32U_IsUnicode)
+		res = InFile_OpenW(&m_archiveStream.file, filenameW);
+	else
+	{
+		// System isn't using Unicode.
+		// Convert the filename from UTF-16 to ANSI.
+		char *filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
+		if (!filenameA)
+		{
+			// Error converting the filename to ANSI.
+			m_file = NULL;
+			m_filename.clear();
+			return; // TODO: Figure out an MDP error code for this.
+		}
+		res = InFile_Open(&m_archiveStream.file, filenameA);
+		free(filenameA);
+	}
+	free(filenameW);
+#else
+	// Unix system. Use UTF-8 filenames directly.
+	res = InFile_Open(&m_archiveStream.file, filename);
+#endif
+	
+	if (res != 0)
 	{
 		// Error opening the file.
 		m_file = NULL,
