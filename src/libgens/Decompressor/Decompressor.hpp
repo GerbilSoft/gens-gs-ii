@@ -70,6 +70,13 @@ class Decompressor
 		static bool DetectFormat(FILE *f) { return (f ? true : false); }
 		
 		/**
+		 * GetDecompressor(): Get a Decompressor* for the specified file.
+		* @param filename Filename.
+		* @return New Decompressor* object, or NULL if no decompressor supports it.
+		*/
+		static Decompressor *GetDecompressor(FILE *f, const char *filename);
+		
+		/**
 		 * getFileInfo(): Get information about all files in the archive.
 		 * @param z_entry_out Pointer to mdp_z_entry_t*, which will contain an allocated mdp_z_entry_t.
 		 * @return MDP error code. [TODO]

@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <config.h>
+
 #include "Decompressor.hpp"
 
 // C includes.
@@ -30,6 +32,15 @@
 // C++ includes.
 #include <string>
 using std::string;
+
+// Decompressors.
+#ifdef HAVE_ZLIB
+#include "Decompressor/DcGzip.hpp"
+#include "Decompressor/DcZip.hpp"
+#endif /* HAVE_ZLIB */
+#ifdef HAVE_LZMA
+#include "Decompressor/Dc7z.hpp"
+#endif /* HAVE_LZMA */
 
 namespace LibGens
 {
@@ -53,6 +64,35 @@ Decompressor::~Decompressor()
 {
 	// NOTE: File pointer is NOT closed by the Decompressor object.
 	m_file = NULL;
+}
+
+
+/**
+ * GetDecompressor(): Get a Decompressor* for the specified file.
+ * @param f File pointer.
+ * @param filename Filename.
+ * @return New Decompressor* object, or NULL if no decompressor supports it.
+ */
+Decompressor *Decompressor::GetDecompressor(FILE *f, const char *filename)
+{
+	// Determine which decompressor to use.
+#ifdef HAVE_ZLIB
+	if (DcGzip::DetectFormat(f))
+		return new DcGzip(f, filename);
+	else if (DcZip::DetectFormat(f))
+		return new DcZip(f, filename);
+	else
+#endif /* HAVE_ZLIB */
+#ifdef HAVE_LZMA
+	if (Dc7z::DetectFormat(f))
+		return new Dc7z(f, filename);
+	else
+#endif /* HAVE_LZMA */
+	if (Decompressor::DetectFormat(f))
+		return new Decompressor(f, filename);
+	
+	// No decompressor supports this file.
+	return NULL;
 }
 
 
