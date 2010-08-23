@@ -253,7 +253,7 @@ int DcRar::getFileInfo(mdp_z_entry_t **z_entry_out)
 		z_entry_cur->filesize = rar_header.UnpSize;
 		z_entry_cur->next = NULL;
 		
-		if (m_unicode)
+		if (rar_header.FileNameW[0] != 0x00)
 		{
 			// Use the Unicode filename. (rar_header.FileNameW)
 			// Convert UTF-16 to UTF-8.
@@ -264,15 +264,28 @@ int DcRar::getFileInfo(mdp_z_entry_t **z_entry_out)
 		else
 		{
 			// Use the ANSI filename. (rar_header.FileName)
-			// Convert ANSI to UTF-16.
-			MultiByteToWideChar(CP_ACP, 0, rar_header.FileName, -1,
-						wcs_buf, (sizeof(wcs_buf)/sizeof(wcs_buf[0])));
-			// Convert UTF-16 to UTF-8.
-			WideCharToMultiByte(CP_UTF8, 0, wcs_buf, -1,
-						utf8_buf, sizeof(utf8_buf), NULL, NULL);
-			
-			// Save the filename.
-			z_entry_cur->filename = strdup(utf8_buf);
+			// TODO: Proper codepage detection.
+			// We're using CP_ACP for archives created on MS-DOS, OS/2, or Win32.
+			// We're using UTF-8 for archives created on Unix
+			if (rar_header.HostOS < 3)
+			{
+				// MS-DOS, OS/2, Win32.
+				
+				// Convert ANSI to UTF-16.
+				MultiByteToWideChar(CP_ACP, 0, rar_header.FileName, -1,
+							wcs_buf, (sizeof(wcs_buf)/sizeof(wcs_buf[0])));
+				// Convert UTF-16 to UTF-8.
+				WideCharToMultiByte(CP_UTF8, 0, wcs_buf, -1,
+							utf8_buf, sizeof(utf8_buf), NULL, NULL);
+				
+				// Save the filename.
+				z_entry_cur->filename = strdup(utf8_buf);
+			}
+			else
+			{
+				// Unix. Assume the ANSI filename is UTF-8.
+				z_entry_cur->filename = strdup(rar_header.FileName);
+			}
 		}
 		
 		if (!z_entry_head)
@@ -394,17 +407,10 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
 	if (!z_filenameW)
 		return -9; // TODO: Figure out an MDP error code for this.
 	
-	if (!m_unicode)
-	{
-		// System isn't using Unicode.
-		// Convert the filename from UTF-16 to ANSI.
-		z_filenameA = UTF16_to_mbs(z_filenameW, CP_ACP);
-		free(z_filenameW);
-		z_filenameW = NULL;
-		
-		if (!z_filenameA)
-			return -9; // TODO: Figure out an MDP error code for this.
-	}
+	// Convert the filename from UTF-16 to ANSI in case files don't have a Unicode filename.
+	z_filenameA = UTF16_to_mbs(z_filenameW, CP_ACP);
+	if (!z_filenameA)
+		return -9; // TODO: Figure out an MDP error code for this.
 	
 	// Search for the file.
 	struct RARHeaderDataEx rar_header;
@@ -412,16 +418,29 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
 	int cmp;
 	while (m_unrarDll.pRARReadHeaderEx(hRar, &rar_header) == 0)
 	{
-		if (m_unicode)
+		if (rar_header.FileNameW[0] != 0x00)
 		{
-			// Unicode mode.
+			// Use the Unicode filename.
 			cmp = _wcsicmp(z_filenameW, rar_header.FileNameW);
 		}
 		else
 		{
-			// ANSI mode.
-			// TODO: Test this!
-			cmp = _stricmp(z_filenameA, rar_header.FileName);
+			// Use the ANSI filename. (rar_header.FileName)
+			// TODO: Proper codepage detection.
+			// We're using CP_ACP for archives created on MS-DOS, OS/2, or Win32.
+			// We're using UTF-8 for archives created on Unix
+			
+			if (rar_header.HostOS < 3)
+			{
+				// MS-DOS, OS/2, Win32.
+				// Use the ANSI codepage.
+				cmp = _stricmp(z_filenameA, rar_header.FileName);
+			}
+			else
+			{
+				// Unix. Assume the ANSI filename is UTF-8.
+				cmp = _stricmp(z_entry->filename, rar_header.FileName);
+			}
 		}
 		
 		if (cmp != 0)
