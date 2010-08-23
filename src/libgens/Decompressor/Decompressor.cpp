@@ -41,6 +41,7 @@ using std::string;
 #ifdef HAVE_LZMA
 #include "Decompressor/Dc7z.hpp"
 #endif /* HAVE_LZMA */
+#include "Decompressor/DcRar.hpp"
 
 namespace LibGens
 {
@@ -88,6 +89,8 @@ Decompressor *Decompressor::GetDecompressor(FILE *f, const char *filename)
 		return new Dc7z(f, filename);
 	else
 #endif /* HAVE_LZMA */
+	if (DcRar::DetectFormat(f))
+		return new DcRar(f, filename);
 	if (Decompressor::DetectFormat(f))
 		return new Decompressor(f, filename);
 	
