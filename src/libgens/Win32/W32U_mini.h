@@ -31,8 +31,9 @@
 // utf8_str
 #include "../macros/common.h"
 
-// wchar_t
+// C includes.
 #include <wchar.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,6 +73,17 @@ wchar_t *W32U_mbs_to_UTF16(const utf8_str *mbs, unsigned int codepage);
  * @return Multibyte string, or NULL on error.
  */
 char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage);
+
+// Redefine fopen() as W32U_fopen().
+#define fopen(filename, mode) W32U_fopen(filename, mode)
+
+/**
+ * W32U_fopen(): Open a file.
+ * @param filename Filename.
+ * @param mode File mode.
+ * @return File pointer, or NULL on error.
+ */
+FILE *W32U_fopen(const utf8_str *filename, const utf8_str *mode);
 
 #ifdef __cplusplus
 }

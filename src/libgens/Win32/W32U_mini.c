@@ -97,3 +97,66 @@ char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage)
 	WideCharToMultiByte(codepage, 0, wcs, -1, mbs, cbMbs, NULL, NULL);
 	return mbs;
 }
+
+
+// Make sure fopen() isn't redefined.
+#ifdef fopen
+#undef fopen
+#endif
+
+/**
+ * W32U_fopen(): Open a file.
+ * @param filename Filename.
+ * @param mode File mode.
+ * @return File pointer, or NULL on error.
+ */
+FILE *W32U_fopen(const utf8_str *filename, const utf8_str *mode)
+{
+	printf("W32U fopen\n");
+	// Convert the filename from UTF-8 to UTF-16.
+	wchar_t *filenameW = W32U_mbs_to_UTF16(filename, CP_UTF8);
+	if (!filenameW)
+		return NULL;
+	
+	// Convert the mode from UTF-8 to UTF-16.
+	wchar_t *modeW = W32U_mbs_to_UTF16(mode, CP_UTF8);
+	if (!modeW)
+	{
+		free(filenameW);
+		return NULL;
+	}
+	
+	FILE *fRet = NULL;
+	if (W32U_IsUnicode)
+	{
+		// Unicode version.
+		fRet = _wfopen(filenameW, modeW);
+	}
+	else
+	{
+		// ANSI version.
+		
+		// Convert the filename from UTF-16 to ANSI.
+		char *filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
+		if (!filenameA)
+			goto fail;
+		
+		// Convert the mode from UTF-16 to ANSI.
+		char *modeA = W32U_UTF16_to_mbs(modeW, CP_ACP);
+		if (!modeA)
+		{
+			free(filenameA);
+			goto fail;
+		}
+		
+		// Open the file.
+		fRet = fopen(filenameA, modeA);
+		free(filenameA);
+		free(modeA);
+	}
+	
+fail:
+	free(filenameW);
+	free(modeW);
+	return fRet;
+}
