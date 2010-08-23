@@ -85,6 +85,7 @@ SET(libgens_SRCS
 	Decompressor/Decompressor.cpp
 	Decompressor/DcGzip.cpp
 	Decompressor/DcZip.cpp
+	Decompressor/DcRar_Unix.cpp
 	)
 
 IF(HAVE_LZMA)
