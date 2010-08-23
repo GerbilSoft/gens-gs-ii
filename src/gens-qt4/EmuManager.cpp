@@ -118,6 +118,7 @@ int EmuManager::openRom(QWidget *parent)
 #ifdef HAVE_LZMA
 			LZMA_EXT
 #endif /* HAVE_LZMA */
+			RAR_EXT
 			");;" +
 #if 0
 			TR("Sega Genesis / 32X ROMs; Sega CD disc images") +
