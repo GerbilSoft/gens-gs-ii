@@ -31,6 +31,9 @@
 // LibGens includes.
 #include "../macros/common.h"
 
+// ZOMG PSG struct.
+#include "../Save/Zomg/zomg_psg.h"
+
 namespace LibGens
 {
 
@@ -46,9 +49,9 @@ class Psg
 		void write(uint8_t data);
 		void update(int32_t *bufL, int32_t *bufR, int length);
 		
-		/* GSX savestate functions. */
-		void saveState(uint32_t state[8]);
-		void restoreState(const uint32_t state[8]);
+		/** ZOMG savestate functions. **/
+		void zomgSave(Zomg_PsgSave_t *state);
+		void zomgRestore(const Zomg_PsgSave_t *state);
 		
 		/** Gens-specific code. */
 		int getReg(int regID);
@@ -60,8 +63,7 @@ class Psg
 		
 		// Reset buffer pointers.
 		void resetBufferPtrs(void);
-		
-		
+	
 	protected:
 		int m_curChan;	// Current channel.
 		int m_curReg;	// Current register.
@@ -120,7 +122,7 @@ class Psg
 		static const unsigned int MAX_OUTPUT = 0x4FFF;
 		
 		/* Initial PSG state. */
-		static const uint32_t ms_psgStateInit[8];
+		static const Zomg_PsgSave_t ms_psgStateInit;
 		
 		// PSG write length. (for audio output)
 		int m_writeLen;

@@ -47,7 +47,20 @@ namespace LibGens
 {
 
 /** Static class variables. **/
-const uint32_t Psg::ms_psgStateInit[8] = {0x00, 0x0F, 0x00, 0x0F, 0x00, 0x0F, 0x00, 0x0F};
+
+/**
+ * ms_psgStateInit: Initial PSG state.
+ */
+const Zomg_PsgSave_t Psg::ms_psgStateInit =
+{
+	{0x000, 0x000, 0x000, 0x000},	// TONE registers.
+	{  0xF,   0xF,   0xF,   0xF},	// VOLUME registers.
+	
+	{0, 0, 0, 0},			// TONE counters. (TODO)
+	
+	LFSR_INIT,	// LFSR mask
+	0x00		// Game Gear stereo register.
+};
 
 /** Gens-specific externs and variables **/
 
@@ -142,7 +155,7 @@ void Psg::reinit(int clock, int rate)
 	memset(m_cntStep, 0x00, sizeof(m_cntStep));
 	
 	// Initialize the PSG state.
-	restoreState(ms_psgStateInit);
+	zomgRestore(&ms_psgStateInit);
 }
 
 
@@ -152,6 +165,7 @@ void Psg::reinit(int clock, int rate)
  */
 void Psg::write(uint8_t data)
 {
+	printf("psg write: 0x%02X\n", data);
 	#if 0 // TODO: GYM
 	if (GYM_Dumping)
 		gym_dump_update(3, (uint8_t)data, 0);
@@ -329,32 +343,73 @@ void Psg::update(int32_t *bufL, int32_t *bufR, int length)
 }
 
 
+/** ZOMG savestate functions. **/
+
+
 /**
- * saveState(): Save the PSG state.
- * @param state 8-DWORD array to save the state to.
+ * zomgSave(): Save the PSG state.
+ * @param state Zomg_PsgSave_t struct to save to.
  */
-void Psg::saveState(uint32_t state[8])
+void Psg::zomgSave(Zomg_PsgSave_t *state)
 {
-	for (int i = 0; i < 8; i++)
-		state[i] = m_reg[i];
+	// TONE channels.
+	printf("vol 0 == 0x%01X\n", m_reg[1] & 0xF);
+	state->tone_reg[0] = (m_reg[0] & 0x3FF);
+	state->vol_reg[0]  = (m_reg[1] & 0xF);
+	state->tone_reg[1] = (m_reg[2] & 0x3FF);
+	state->vol_reg[1]  = (m_reg[3] & 0xF);
+	state->tone_reg[2] = (m_reg[4] & 0x3FF);
+	state->vol_reg[2]  = (m_reg[5] & 0xF);
+	
+	// NOISE channel.
+	state->tone_reg[3] = (m_reg[6] & 0x7); // Only 3 bits are relevant for NOISE.
+	state->vol_reg[3]  = (m_reg[7] & 0xF);
+	
+	// TODO: TONE counters.
+	// Psg uses an interpolated counter that overflows at 65,536.
+	// ZOMG counter should use the same value as the original PSG.
+	state->tone_ctr[0] = 0xFFFF;
+	state->tone_ctr[1] = 0xFFFF;
+	state->tone_ctr[2] = 0xFFFF;
+	state->tone_ctr[3] = 0xFFFF;
+	
+	// LFSR state.
+	state->lfsr_state = m_lfsr;
+	
+	// Game Gear stereo register.
+	// TODO: Implement Game Gear stereo.
+	state->gg_stereo = 0x00;
 }
 
 
 /**
- * restoreState(): Restore the PSG state.
- * @param state 8-DWORD array to load the state from.
+ * zomgRestore(): Restore the PSG state.
+ * @param state Zomg_PsgSave_t struct to restore from.
  */
-void Psg::restoreState(const uint32_t state[8])
+void Psg::zomgRestore(const Zomg_PsgSave_t *state)
 {
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 4; i++)
 	{
-		this->write(0x80 | (i << 4) | (state[i] & 0xF));
+		// Register latch and data value.
+		this->write(0x80 | ((i*2) << 4) | (state->tone_reg[i] & 0xF));
 		
-		// Only write DATA bytes for tone registers.
-		// Don't write DATA bytes for volume or noise registers.
-		if (!(i & 1) && i < 6)
-			this->write((state[i] >> 4) & 0x3F);
+		// Second data value for TONE registers.
+		if (i < 3)
+			this->write((state->tone_reg[i] >> 4) & 0x3F);
+		
+		// VOLUME register.
+		this->write(0x80 | (((i*2)+1) << 4) | (state->vol_reg[i] & 0xF));
+		
+		// TODO: TONE counters.
+		// Psg uses an interpolated counter that overflows at 65,536.
+		// ZOMG counter should use the same value as the original PSG.
 	}
+	printf("restored\n");
+	// LFSR state.
+	m_lfsr = state->lfsr_state;
+	
+	// Game Gear stereo register.
+	// TODO: Implement Game Gear stereo.
 }
 
 
