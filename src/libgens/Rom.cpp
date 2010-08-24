@@ -32,6 +32,7 @@
 #include <algorithm>
 using std::string;
 
+// Character set translation.
 #if defined(HAVE_ICONV)
 #include "Util/gens_iconv.h"
 #elif defined(_WIN32)
