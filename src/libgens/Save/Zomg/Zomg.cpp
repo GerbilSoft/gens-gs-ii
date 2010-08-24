@@ -155,39 +155,39 @@ int Zomg::load(void)
 	// Load VDP registers.
 	// TODO: Load a certain number depending on the system.
 	// For now, we'll assume 24 (MD).
-	loadFromZomg("common/vdp_reg.bin", m_common.VdpReg.md, sizeof(m_common.VdpReg.md));
+	loadFromZomg("common/vdp_reg.bin", m_vdp.vdp_reg.md, sizeof(m_vdp.vdp_reg.md));
 	
 	// Load VRam.
-	loadFromZomg("common/VRam.bin", m_common.VRam.md, sizeof(m_common.VRam.md));
+	loadFromZomg("common/VRam.bin", m_vdp.VRam.md, sizeof(m_vdp.VRam.md));
 	
 	// Load CRam.
-	loadFromZomg("common/CRam.bin", m_common.CRam.md, sizeof(m_common.CRam.md));
+	loadFromZomg("common/CRam.bin", m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
 	
 	// Load VSRam.
-	loadFromZomg("MD/VSRam.bin", m_md.VSRam, sizeof(m_md.VSRam));
+	loadFromZomg("MD/VSRam.bin", m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
 	
 	// Copy savestate data to the emulation memory buffers.
 	
 	// Write VDP registers.
 	// TODO: On MD, load the DMA information from the savestate.
 	// Writing to register 23 changes the DMA status.
-	for (int i = (sizeof(m_common.VdpReg.md)/sizeof(m_common.VdpReg.md[0]))-1; i >= 0; i--)
+	for (int i = (sizeof(m_vdp.vdp_reg.md)/sizeof(m_vdp.vdp_reg.md[0]))-1; i >= 0; i--)
 	{
-		VdpIo::Set_Reg(i, m_common.VdpReg.md[i]);
+		VdpIo::Set_Reg(i, m_vdp.vdp_reg.md[i]);
 	}
 	
 	// Copy VRam to VdpIo.
 	// TODO: Create a byteswapping memcpy().
-	memcpy(VdpIo::VRam.u16, m_common.VRam.md, sizeof(m_common.VRam.md));
-	be16_to_cpu_array(VdpIo::VRam.u16, sizeof(m_common.VRam.md));
+	memcpy(VdpIo::VRam.u16, m_vdp.VRam.md, sizeof(m_vdp.VRam.md));
+	be16_to_cpu_array(VdpIo::VRam.u16, sizeof(m_vdp.VRam.md));
 	
 	// Copy CRam to VdpIo.
 	// TODO: Create a byteswapping memcpy().
-	memcpy(VdpIo::CRam.u16, m_common.CRam.md, sizeof(m_common.CRam.md));
-	be16_to_cpu_array(VdpIo::CRam.u16, sizeof(m_common.CRam.md));
+	memcpy(VdpIo::CRam.u16, m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
+	be16_to_cpu_array(VdpIo::CRam.u16, sizeof(m_vdp.CRam.md));
 	
 	// Copy VSRam to VdpIo.
-	memcpy(VdpIo::VSRam.u8, m_md.VSRam, sizeof(m_md.VSRam));
+	memcpy(VdpIo::VSRam.u8, m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
 	
 	// Savestate loaded.
 	return 0;

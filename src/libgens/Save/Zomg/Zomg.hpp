@@ -39,6 +39,11 @@
 // C++ includes.
 #include <string>
 
+// ZOMG save structs.
+#include "zomg_vdp.h"
+#include "zomg_psg.h"
+#include "zomg_ym2612.h"
+
 namespace LibGens
 {
 
@@ -59,32 +64,8 @@ class Zomg
 		int loadFromZomg(const char *filename, void *buf, int len);
 		
 		// Savestate buffers.
-		struct ZomgCommon_t
-		{
-			union ZomgVdpReg_t
-			{
-				uint8_t tms9918[8];	// TMS9918: 0x00 - 0x07
-				uint8_t sms[11];	// SMS/GG: 0x00 - 0x0A
-				uint8_t md[24];		// MD: 0x00 - 0x17
-			};
-			ZomgVdpReg_t VdpReg;
-			
-			union ZomgVRam_t
-			{
-				uint8_t sms[16384];	// TMS9918/SMS/GG
-				uint16_t md[32768];	// MD
-			};
-			ZomgVRam_t VRam;
-			
-			union ZomgCRam_t
-			{
-				uint8_t sms[32];	// SMS only
-				uint16_t gg[32];	// GG (little-endian)
-				uint16_t md[64];	// MD (big-endian)
-			};
-			ZomgCRam_t CRam;
-		};
-		ZomgCommon_t m_common;
+		Zomg_VdpSave_t m_vdp;
+		
 		
 		struct ZomgMd_t
 		{
