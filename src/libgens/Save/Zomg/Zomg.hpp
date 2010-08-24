@@ -63,7 +63,7 @@ class Zomg
 		std::string m_filename;
 		
 		static int LoadFromZomg(unzFile unzZomg, const utf8_str *filename, void *buf, int len);
-		static int SaveToZomg(zipFile zipZomg, const char *filename, void *buf, int len);
+		static int SaveToZomg(zipFile zipZomg, const utf8_str *filename, void *buf, int len);
 		
 		// Savestate buffers.
 		Zomg_VdpSave_t m_vdp;

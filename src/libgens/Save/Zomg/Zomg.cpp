@@ -55,7 +55,7 @@ Zomg::Zomg(const utf8_str *filename)
 	if (!filename)
 		return;
 	
-	m_filename = string(m_filename);
+	m_filename = string(filename);
 	
 	// Defer opening the file until load() or save() is requested.
 }
@@ -78,7 +78,7 @@ Zomg::~Zomg()
  * @param len Length of the buffer.
  * @return Length of file loaded, or negative number on error.
  */
-int Zomg::LoadFromZomg(unzFile unzZomg, const char *filename, void *buf, int len)
+int Zomg::LoadFromZomg(unzFile unzZomg, const utf8_str *filename, void *buf, int len)
 {
 	if (!unzZomg)
 		return -1;
@@ -198,7 +198,7 @@ int Zomg::load(void)
  * @param len Length of the buffer.
  * @return 0 on success; non-zero on error.
  */
-int Zomg::SaveToZomg(zipFile zipZomg, const char *filename, void *buf, int len)
+int Zomg::SaveToZomg(zipFile zipZomg, const utf8_str *filename, void *buf, int len)
 {
 	if (!zipZomg)
 		return -1;
@@ -264,7 +264,7 @@ int Zomg::save(void)
 #else
 	zipZomg = zipOpen(m_filename.c_str(), APPEND_STATUS_CREATE);
 #endif
-	
+	printf("filename: %s; zipZomg: 0x%08X\n", m_filename.c_str(), zipZomg);
 	if (!zipZomg)
 	{
 		// Couldn't open the ZOMG file.
