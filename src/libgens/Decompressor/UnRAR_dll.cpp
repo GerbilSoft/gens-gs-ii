@@ -25,6 +25,10 @@
 
 // C includes.
 #include <string.h>
+#include <stdlib.h>
+
+// Win32 Unicode Translation Layer.
+#include "../Win32/W32U_mini.h"
 
 #define InitFuncPtr_unrar(hDll, fn) p##fn = (typeof(p##fn))GetProcAddress((hDll), #fn)
 
@@ -47,12 +51,32 @@ bool UnRAR_dll::load(const utf8_str *filename)
 	if (!filename)
 		return false;
 	
-	// Check if we're using Unicode or ANSI.
-	// TODO: Move to a "Mini w32u" subsystem?
-	m_unicode = (GetModuleHandleW(NULL) != NULL);
+	// Convert the filename from UTF-8 to UTF-16.
+	wchar_t *filenameW = W32U_mbs_to_UTF16(filename, CP_UTF8);
+	if (!filename)
+		return false;
 	
-	// TODO: Convert filename to ANSI or Unicode.
-	hUnrarDll = LoadLibraryA(filename);
+	if (W32U_IsUnicode)
+	{
+		// Use the Unicode filename.
+		hUnrarDll = LoadLibraryW(filenameW);
+	}
+	else
+	{
+		// System doesn't support Unicode.
+		// Convert the filename from UTF-16 to ANSI.
+		char *filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
+		if (!filenameA)
+		{
+			free(filenameW);
+			return false;
+		}
+		
+		// Use the ANSI filename.
+		hUnrarDll = LoadLibraryA(filename);
+	}
+	free(filenameW);
+	
 	if (!hUnrarDll)
 		return false;
 	

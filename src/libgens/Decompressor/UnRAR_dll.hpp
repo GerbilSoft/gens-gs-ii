@@ -62,12 +62,6 @@ class UnRAR_dll
 		MAKE_CLASSFUNCPTR(RARGetDllVersion);
 	
 	protected:
-		/**
-		 * m_unicode: True if the system supports Unicode.
-		 * TODO: Move to a "mini w32u" subsystem?
-		 */
-		bool m_unicode;
-		
 		bool m_loaded;
 		HINSTANCE hUnrarDll;
 };
