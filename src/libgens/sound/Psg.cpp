@@ -165,7 +165,6 @@ void Psg::reinit(int clock, int rate)
  */
 void Psg::write(uint8_t data)
 {
-	printf("psg write: 0x%02X\n", data);
 	#if 0 // TODO: GYM
 	if (GYM_Dumping)
 		gym_dump_update(3, (uint8_t)data, 0);
@@ -353,7 +352,6 @@ void Psg::update(int32_t *bufL, int32_t *bufR, int length)
 void Psg::zomgSave(Zomg_PsgSave_t *state)
 {
 	// TONE channels.
-	printf("vol 0 == 0x%01X\n", m_reg[1] & 0xF);
 	state->tone_reg[0] = (m_reg[0] & 0x3FF);
 	state->vol_reg[0]  = (m_reg[1] & 0xF);
 	state->tone_reg[1] = (m_reg[2] & 0x3FF);
@@ -404,7 +402,7 @@ void Psg::zomgRestore(const Zomg_PsgSave_t *state)
 		// Psg uses an interpolated counter that overflows at 65,536.
 		// ZOMG counter should use the same value as the original PSG.
 	}
-	printf("restored\n");
+	
 	// LFSR state.
 	m_lfsr = state->lfsr_state;
 	
