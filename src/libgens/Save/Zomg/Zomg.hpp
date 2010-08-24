@@ -72,7 +72,7 @@ class Zomg
 		/** MD specific **/
 		struct ZomgMd_t
 		{
-			Zomg_Ym2612Save_t m_ym2612;
+			Zomg_Ym2612Save_t ym2612;
 		};
 		ZomgMd_t m_md;
 };

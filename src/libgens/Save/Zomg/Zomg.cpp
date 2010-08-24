@@ -147,6 +147,7 @@ int Zomg::load(void)
 	LoadFromZomg(unzZomg, "common/CRam.bin", m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
 	LoadFromZomg(unzZomg, "MD/VSRam.bin", m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
 	LoadFromZomg(unzZomg, "common/psg.bin", &m_psg, sizeof(m_psg));
+	LoadFromZomg(unzZomg, "MD/YM2612.bin", &m_md.ym2612, sizeof(m_md.ym2612));
 	
 	// Close the ZOMG file.
 	unzClose(unzZomg);
@@ -188,8 +189,13 @@ int Zomg::load(void)
 		m_psg.tone_ctr[i] = le16_to_cpu(m_psg.tone_ctr[i]);
 	}
 	m_psg.lfsr_state = le16_to_cpu(m_psg.lfsr_state);
-	// Load PSG state.
+	// Load the PSG state.
 	SoundMgr::ms_Psg.zomgRestore(&m_psg);
+	
+	/** Audio: MD specific **/
+	
+	// Load the YM2612 state.
+	SoundMgr::ms_Ym2612.zomgRestore(&m_md.ym2612);
 	
 	// Savestate loaded.
 	return 0;
@@ -310,7 +316,7 @@ int Zomg::save(void)
 	
 	/** Audio **/
 	
-	// Save PSG state.
+	// Save the PSG state.
 	SoundMgr::ms_Psg.zomgSave(&m_psg);
 	// Byteswap PSG values.
 	// TODO: LE16 or BE16 for PSG?
@@ -321,12 +327,18 @@ int Zomg::save(void)
 	}
 	m_psg.lfsr_state = cpu_to_le16(m_psg.lfsr_state);
 	
+	/** Audio: MD specific **/
+	
+	// Save the YM2612 state.
+	SoundMgr::ms_Ym2612.zomgSave(&m_md.ym2612);
+	
 	/** Write to the ZOMG file. **/
 	SaveToZomg(zipZomg, "common/vdp_reg.bin", m_vdp.vdp_reg.md, sizeof(m_vdp.vdp_reg.md));
 	SaveToZomg(zipZomg, "common/VRam.bin", m_vdp.VRam.md, sizeof(m_vdp.VRam.md));
 	SaveToZomg(zipZomg, "common/CRam.bin", m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
 	SaveToZomg(zipZomg, "MD/VSRam.bin", m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
 	SaveToZomg(zipZomg, "common/psg.bin", &m_psg, sizeof(m_psg));
+	SaveToZomg(zipZomg, "MD/YM2612.bin", &m_md.ym2612, sizeof(m_md.ym2612));
 	
 	// Close the ZOMG file.
 	zipClose(zipZomg, NULL);
