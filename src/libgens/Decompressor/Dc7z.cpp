@@ -115,7 +115,7 @@ Dc7z::Dc7z(FILE *f, const utf8_str *filename)
 		res = InFile_OpenW(&m_archiveStream.file, filenameW);
 	else
 	{
-		// System isn't using Unicode.
+		// System doesn't support Unicode.
 		// Convert the filename from UTF-16 to ANSI.
 		char *filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
 		if (!filenameA)

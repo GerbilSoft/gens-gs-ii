@@ -321,7 +321,7 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
 	
 	if (!W32U_IsUnicode)
 	{
-		// System isn't using Unicode.
+		// System doesn't support Unicode.
 		// Convert the filename from UTF-16 to ANSI.
 		filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
 		free(filenameW);
