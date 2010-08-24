@@ -32,11 +32,10 @@
 #include <algorithm>
 using std::string;
 
-// Win32 Unicode Translation Layer.
-#if defined(_WIN32)
-#include "Win32/W32U_mini.h"
-#elif defined(HAVE_ICONV)
+#if defined(HAVE_ICONV)
 #include "Util/gens_iconv.h"
+#elif defined(_WIN32)
+#include "Win32/W32U_mini.h"
 #endif
 
 // LibGens includes.
@@ -376,7 +375,7 @@ void Rom::readHeaderMD(const uint8_t *header, size_t header_size)
 		free(jp_utf8);
 	}
 	else
-#endif /* defined(_WIN32) || defined(HAVE_ICONV) */
+#endif /* defined(HAVE_ICONV) || defined(_WIN32) */
 	{
 		// Japanese ROM header name was not converted.
 		// Use it as-is.
