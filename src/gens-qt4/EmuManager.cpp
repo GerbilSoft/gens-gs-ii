@@ -60,7 +60,6 @@
 #include <QtCore/QFile>
 #include <QtGui/QImage>
 #include <QtGui/QImageWriter>
-#include <QtCore/QLocale>
 
 // Text translation macro.
 #define TR(text) \
@@ -751,11 +750,8 @@ void EmuManager::doAudioRate(int newRate)
 	m_audio->setRate(newRate);
 	
 	// Print a message on the OSD.
-	QString osdMsg = TR("Audio sampling rate set to %1 Hz.");
-	
-	// Format the sampling rate using the system locale.
-	QLocale sysLocale = QLocale::system();
-	osdMsg = osdMsg.arg(sysLocale.toString(newRate));
+	QString osdMsg = TR("Audio sampling rate set to %L1 Hz.");
+	osdMsg = osdMsg.arg(newRate);
 	
 	// Emit the signal.
 	emit osdPrintMsg(1500, osdMsg);
