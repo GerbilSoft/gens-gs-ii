@@ -198,17 +198,19 @@ void GensPortAudio::setRate(int newRate)
 	if (m_open)
 	{
 		// Close and reopen the PortAudio stream.
+		// Make sure PSG/YM state is saved when we do this.
 		// TODO: Insert a pause between close() and open() to prevent stuttering?
 		close();
 		m_rate = newRate;
-		// TODO: Save PSG/YM2612 state before doing this!
-		LibGens::SoundMgr::SetRate(newRate);
+		LibGens::SoundMgr::SetRate(newRate, true);
 		open();
 	}
 	else
 	{
+		// Audio isn't open. Save the new audio rate.
+		// PSG/YM state doesn't need to be saved.
 		m_rate = newRate;
-		LibGens::SoundMgr::SetRate(newRate);
+		LibGens::SoundMgr::SetRate(newRate, false);
 	}
 }
 
