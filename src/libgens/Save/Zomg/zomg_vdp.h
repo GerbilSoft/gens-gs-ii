@@ -56,8 +56,8 @@ typedef struct PACKED _Zomg_VdpSave_t
 	} vdp_reg;
 	
 	/**
-	 * vram: Video RAM.
-	 * File: common/vram.bin
+	 * VRam: Video RAM.
+	 * File: common/VRam.bin
 	 */
 	union _VRam
 	{
@@ -66,8 +66,8 @@ typedef struct PACKED _Zomg_VdpSave_t
 	} VRam;
 	
 	/**
-	 * cram: Color RAM.
-	 * File: common/cram.bin
+	 * CRam: Color RAM.
+	 * File: common/CRam.bin
 	 */
 	union _CRam
 	{
@@ -79,7 +79,12 @@ typedef struct PACKED _Zomg_VdpSave_t
 	// TODO: Other common VDP stuff.
 	
 	/** MD-specific. **/
-	uint8_t MD_VSRam[80];		// Vertical Scroll RAM.
+	
+	/**
+	 * MD_VSRam: Vertical Scroll RAM.
+	 * File: MD/VSRam.bin
+	 */
+	uint8_t MD_VSRam[80];
 } Zomg_VdpSave_t;
 #pragma pack(0)
 
