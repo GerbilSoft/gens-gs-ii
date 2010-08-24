@@ -70,7 +70,7 @@ wchar_t *W32U_mbs_to_UTF16(const utf8_str *mbs, unsigned int codepage)
 		return NULL;
 	
 	wchar_t *wcs = (wchar_t*)malloc(cchWcs * sizeof(wchar_t));
-	MultiByteToWideChar(CP_UTF8, 0, mbs, -1, wcs, cchWcs);
+	MultiByteToWideChar(codepage, 0, mbs, -1, wcs, cchWcs);
 	return wcs;
 }
 
