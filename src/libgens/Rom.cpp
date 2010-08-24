@@ -33,8 +33,10 @@
 using std::string;
 
 // Win32 Unicode Translation Layer.
-#ifdef _WIN32
+#if defined(_WIN32)
 #include "Win32/W32U_mini.h"
+#elif defined(HAVE_ICONV)
+#include "Util/gens_iconv.h"
 #endif
 
 // LibGens includes.
@@ -347,8 +349,44 @@ void Rom::readHeaderMD(const uint8_t *header, size_t header_size)
 	m_mdHeader.sramStartAddr	= be32_to_cpu(m_mdHeader.sramStartAddr);
 	m_mdHeader.sramEndAddr		= be32_to_cpu(m_mdHeader.sramEndAddr);
 	
-	// Load the ROM names.
-	m_romNameJP = SpaceElim(m_mdHeader.romNameJP, sizeof(m_mdHeader.romNameJP));
+#if defined(HAVE_ICONV) || defined(_WIN32)
+	// Attempt to convert the Japanese ROM header name from Shift-JIS to UTF-8.
+	char *jp_utf8 = NULL;
+#ifdef HAVE_ICONV
+	jp_utf8 = gens_iconv(m_mdHeader.romNameJP, sizeof(m_mdHeader.romNameJP),
+				"SHIFT-JIS", "");
+#else /* HAVE_ICONV */
+	// TODO: Add version of W32U_mbs_to_UTF16 that takes a length value.
+	char jpbuf[sizeof(m_mdHeader.romNameJP)+1];
+	memcpy(jpbuf, m_mdHeader.romNameJP, sizeof(m_mdHeader.romNameJP));
+	jpbuf[sizeof(jpbuf)-1] = 0x00;
+	
+	wchar_t *jp_utf16 = W32U_mbs_to_UTF16(jpbuf, 932); // cp932 == Shift-JIS
+	if (jp_utf16)
+	{
+		jp_utf8 = W32U_UTF16_to_mbs(jp_utf16, CP_UTF8);
+		free(jp_utf16);
+	}
+#endif /* HAVE_ICONV */
+	
+	if (jp_utf8)
+	{
+		// Japanese ROM header name converted from Shift-JIS to UTF-8.
+		m_romNameJP = SpaceElim(jp_utf8, strlen(jp_utf8));
+		free(jp_utf8);
+	}
+	else
+#endif /* defined(_WIN32) || defined(HAVE_ICONV) */
+	{
+		// Japanese ROM header name was not converted.
+		// Use it as-is.
+		// TODO: Remove characters with high bit set?
+		m_romNameJP = SpaceElim(m_mdHeader.romNameJP, sizeof(m_mdHeader.romNameJP));
+	}
+	
+	// US ROM header name.
+	// TODO: Remove characters with high bit set?
+	// TODO: Convert from cp1252 to UTF-8?
 	m_romNameUS = SpaceElim(m_mdHeader.romNameUS, sizeof(m_mdHeader.romNameUS));
 }
 
