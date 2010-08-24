@@ -39,83 +39,52 @@
 #include <stdint.h>
 #include <string.h>
 
+// C++ includes.
+#include <string>
+using std::string;
+
 namespace LibGens
 {
 
 /**
- * Zomg::Zomg(): Open a ZOMG savestate file.
+ * Zomg(): Open a ZOMG savestate file.
  * @param filename ZOMG filename.
  */
-Zomg::Zomg(const char *filename)
+Zomg::Zomg(const utf8_str *filename)
 {
 	if (!filename)
-	{
-		// No filename specified.
-		m_zFile = NULL;
 		return;
-	}
 	
-	// Open the ZOMG file.
-#ifdef _WIN32
-	zlib_filefunc64_def ffunc;
-	fill_win32_filefunc64U(&ffunc);
-	m_zFile = unzOpen2_64(filename, &ffunc);
-#else
-	m_zFile = unzOpen(filename);
-#endif
+	m_filename = string(m_filename);
 	
-	if (!m_zFile)
-	{
-		// Couldn't open the ZOMG file.
-		return;
-	}
-	
-	// ZOMG file is open.
-	// TODO: Process the ZOMG format file.
+	// Defer opening the file until load() or save() is requested.
 }
 
 
 /**
- * Zomg::~Zomg(): Close the ZOMG savestate file.
+ * ~Zomg(): Close the ZOMG savestate file.
  */
 Zomg::~Zomg()
 {
-	if (!m_zFile)
-		return;
-	
-	// Close the ZOMG file.
-	unzClose(m_zFile);
+	// TODO
 }
 
 
 /**
- * Zomg::close(): Close the ZOMG savestate file.
- */
-void Zomg::close(void)
-{
-	if (!m_zFile)
-		return;
-	
-	// Close the ZOMG file.
-	unzClose(m_zFile);
-	m_zFile = NULL;
-}
-
-
-/**
- * Zomg::loadFromZomg(): Load a file from the ZOMG file.
+ * LoadFromZomg(): Load a file from the ZOMG file.
+ * @param unzZomg ZOMG file handle.
  * @param filename Filename to load from the ZOMG file.
  * @param buf Buffer to store the file in.
  * @param len Length of the buffer.
  * @return Length of file loaded, or negative number on error.
  */
-int Zomg::loadFromZomg(const char *filename, void *buf, int len)
+int Zomg::LoadFromZomg(unzFile unzZomg, const char *filename, void *buf, int len)
 {
-	if (!m_zFile)
+	if (!unzZomg)
 		return -1;
 	
 	// Locate the file in the ZOMG file.
-	int ret = unzLocateFile(m_zFile, filename, 2);
+	int ret = unzLocateFile(unzZomg, filename, 2);
 	if (ret != UNZ_OK)
 	{
 		// File not found.
@@ -124,7 +93,7 @@ int Zomg::loadFromZomg(const char *filename, void *buf, int len)
 	}
 	
 	// Open the current file.
-	ret = unzOpenCurrentFile(m_zFile);
+	ret = unzOpenCurrentFile(unzZomg);
 	if (ret != UNZ_OK)
 	{
 		// Error opening the current file.
@@ -132,8 +101,8 @@ int Zomg::loadFromZomg(const char *filename, void *buf, int len)
 	}
 	
 	// Read the file.
-	ret = unzReadCurrentFile(m_zFile, buf, len);
-	unzCloseCurrentFile(m_zFile);	// TODO: Check the return value!
+	ret = unzReadCurrentFile(unzZomg, buf, len);
+	unzCloseCurrentFile(unzZomg);	// TODO: Check the return value!
 	
 	// Return the number of bytes read.
 	return ret;
@@ -146,27 +115,52 @@ int Zomg::loadFromZomg(const char *filename, void *buf, int len)
  */
 int Zomg::load(void)
 {
-	if (!m_zFile)
+	// TODO: Error code constants.
+	
+	// Open the ZOMG file.
+	unzFile unzZomg;
+#ifdef _WIN32
+	zlib_filefunc64_def ffunc;
+	fill_win32_filefunc64U(&ffunc);
+	unzZomg = unzOpen2_64(m_filename.c_str(), &ffunc);
+#else
+	unzZomg = unzOpen(m_filename.c_str());
+#endif
+	
+	if (!unzZomg)
+	{
+		// Couldn't open the ZOMG file.
 		return -1;
+	}
+	
+	// ZOMG file is open.
+	// TODO: Process the ZOMG format file.
 	
 	// Assuming MD only.
 	// TODO: Check for errors.
 	
+	/** Load from the ZOMG file. **/
+	
 	// Load VDP registers.
 	// TODO: Load a certain number depending on the system.
 	// For now, we'll assume 24 (MD).
-	loadFromZomg("common/vdp_reg.bin", m_vdp.vdp_reg.md, sizeof(m_vdp.vdp_reg.md));
+	LoadFromZomg(unzZomg, "common/vdp_reg.bin", m_vdp.vdp_reg.md, sizeof(m_vdp.vdp_reg.md));
 	
 	// Load VRam.
-	loadFromZomg("common/VRam.bin", m_vdp.VRam.md, sizeof(m_vdp.VRam.md));
+	LoadFromZomg(unzZomg, "common/VRam.bin", m_vdp.VRam.md, sizeof(m_vdp.VRam.md));
 	
 	// Load CRam.
-	loadFromZomg("common/CRam.bin", m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
+	LoadFromZomg(unzZomg, "common/CRam.bin", m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
 	
 	// Load VSRam.
-	loadFromZomg("MD/VSRam.bin", m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
+	LoadFromZomg(unzZomg, "MD/VSRam.bin", m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
+	
+	// Close the ZOMG file.
+	unzClose(unzZomg);
 	
 	// Copy savestate data to the emulation memory buffers.
+	
+	/** VDP **/
 	
 	// Write VDP registers.
 	// TODO: On MD, load the DMA information from the savestate.
@@ -186,10 +180,148 @@ int Zomg::load(void)
 	memcpy(VdpIo::CRam.u16, m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
 	be16_to_cpu_array(VdpIo::CRam.u16, sizeof(m_vdp.CRam.md));
 	
+	/** VDP: MD specific **/
+	
 	// Copy VSRam to VdpIo.
 	memcpy(VdpIo::VSRam.u8, m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
 	
 	// Savestate loaded.
+	return 0;
+}
+
+
+/**
+ * SaveToZomg(): Save a file to the ZOMG file.
+ * @param zipZomg ZOMG file handle.
+ * @param filename Filename to save in the ZOMG file.
+ * @param buf Buffer containing the file contents.
+ * @param len Length of the buffer.
+ * @return 0 on success; non-zero on error.
+ */
+int Zomg::SaveToZomg(zipFile zipZomg, const char *filename, void *buf, int len)
+{
+	if (!zipZomg)
+		return -1;
+	
+	// Open the new file in the ZOMG file.
+	// TODO: Set the Zip timestamps.
+	zip_fileinfo zipfi;
+	zipfi.tmz_date.tm_sec = 0;
+	zipfi.tmz_date.tm_min = 0;
+	zipfi.tmz_date.tm_hour = 0;
+	zipfi.tmz_date.tm_mday = 0;
+	zipfi.tmz_date.tm_mon = 0;
+	zipfi.tmz_date.tm_year = 0;
+	zipfi.dosDate = 0;
+	zipfi.internal_fa = 0x0000; // TODO: Set to 0x0001 for text files.
+	zipfi.external_fa = 0x0000; // MS-DOS directory attribute byte.
+	
+	int ret = zipOpenNewFileInZip(
+		zipZomg,		// zipFile
+		filename,		// Filename in the Zip archive
+		&zipfi,			// File information (timestamp, attributes)
+		NULL,			// extrafield_local
+		0,			// size_extrafield_local,
+		NULL,			// extrafield_global,
+		0,			// size_extrafield_global,
+		NULL,			// comment
+		Z_DEFLATED,		// method
+		Z_DEFAULT_COMPRESSION	// level
+		);
+	
+	if (ret != UNZ_OK)
+	{
+		// Error opening the new file in the Zip archive.
+		// TODO: Define return codes somewhere.
+		return -2;
+	}
+	
+	// Write the file.
+	zipWriteInFileInZip(zipZomg, buf, len); // TODO: Check the return value!
+	zipCloseFileInZip(zipZomg);		// TODO: Check the return value!
+	
+	// TODO: What should we return?
+	return 0;
+}
+
+
+/**
+ * save(): Save a ZOMG file.
+ * @return 0 on success; non-zero on error.
+ */
+int Zomg::save(void)
+{
+	// TODO: Open the ZOMG file and load its format information first!
+	// TODO: Add a global Zip comment?
+	// TODO: Error code constants.
+	
+	// Open the ZOMG file.
+	zipFile zipZomg;
+#ifdef _WIN32
+	zlib_filefunc64_def ffunc;
+	fill_win32_filefunc64U(&ffunc);
+	zipZomg = zipOpen2_64(m_filename.c_str(), APPEND_STATUS_CREATE, NULL, &ffunc);
+#else
+	zipZomg = zipOpen(m_filename.c_str(), APPEND_STATUS_CREATE);
+#endif
+	
+	if (!zipZomg)
+	{
+		// Couldn't open the ZOMG file.
+		return -1;
+	}
+	
+	// ZOMG file is open.
+	// TODO: Create the ZOMG format file.
+	
+	// Assuming MD only.
+	// TODO: Check for errors.
+	
+	// Copy emulation memory buffers to Zomg buffers.
+	
+	/** VDP **/
+	
+	// Save VDP registers.
+	for (int i = (sizeof(m_vdp.vdp_reg.md)/sizeof(m_vdp.vdp_reg.md[0]))-1; i >= 0; i--)
+	{
+		m_vdp.vdp_reg.md[i] = VdpIo::VDP_Reg.reg[i];
+	}
+	
+	// Copy VRam from VdpIo.
+	// TODO: Create a byteswapping memcpy().
+	memcpy(m_vdp.VRam.md, VdpIo::VRam.u16, sizeof(m_vdp.VRam.md));
+	be16_to_cpu_array(m_vdp.VRam.md, sizeof(m_vdp.VRam.md));
+	
+	// Copy CRam from VdpIo.
+	// TODO: Create a byteswapping memcpy().
+	memcpy(m_vdp.CRam.md, VdpIo::CRam.u16, sizeof(m_vdp.CRam.md));
+	be16_to_cpu_array(m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
+	
+	/** VDP: MD specific **/
+	
+	// Copy VSRam from VdpIo.
+	memcpy(m_vdp.MD_VSRam, VdpIo::VSRam.u8, sizeof(m_vdp.MD_VSRam));
+	
+	/** Write to the ZOMG file. **/
+	
+	// Save VDP registers.
+	// TODO: Load a certain number depending on the system.
+	// For now, we'll assume 24 (MD).
+	SaveToZomg(zipZomg, "common/vdp_reg.bin", m_vdp.vdp_reg.md, sizeof(m_vdp.vdp_reg.md));
+	
+	// Save VRam.
+	SaveToZomg(zipZomg, "common/VRam.bin", m_vdp.VRam.md, sizeof(m_vdp.VRam.md));
+	
+	// SaveToZomg CRam.
+	SaveToZomg(zipZomg, "common/CRam.bin", m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
+	
+	// Save VSRam.
+	SaveToZomg(zipZomg, "MD/VSRam.bin", m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
+	
+	// Close the ZOMG file.
+	zipClose(zipZomg, NULL);
+	
+	// Savestate saved.
 	return 0;
 }
 

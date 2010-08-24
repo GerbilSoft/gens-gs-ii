@@ -39,6 +39,9 @@
 // C++ includes.
 #include <string>
 
+// utf8_str
+#include "../../macros/common.h"
+
 // ZOMG save structs.
 #include "zomg_vdp.h"
 #include "zomg_psg.h"
@@ -50,18 +53,17 @@ namespace LibGens
 class Zomg
 {
 	public:
-		Zomg(const char *filename);
+		Zomg(const utf8_str *filename);
 		~Zomg();
 		
-		bool isOpen(void) const { return (m_zFile != NULL); }
-		void close(void);
-		
 		int load(void);
+		int save(void);
 	
 	protected:
-		unzFile m_zFile;
+		std::string m_filename;
 		
-		int loadFromZomg(const char *filename, void *buf, int len);
+		static int LoadFromZomg(unzFile unzZomg, const utf8_str *filename, void *buf, int len);
+		static int SaveToZomg(zipFile zipZomg, const char *filename, void *buf, int len);
 		
 		// Savestate buffers.
 		Zomg_VdpSave_t m_vdp;
