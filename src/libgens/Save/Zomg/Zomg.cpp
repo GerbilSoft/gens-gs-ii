@@ -147,7 +147,7 @@ int Zomg::load(void)
 	LoadFromZomg(unzZomg, "common/CRam.bin", m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
 	LoadFromZomg(unzZomg, "MD/VSRam.bin", m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
 	LoadFromZomg(unzZomg, "common/psg.bin", &m_psg, sizeof(m_psg));
-	LoadFromZomg(unzZomg, "MD/YM2612.bin", &m_md.ym2612, sizeof(m_md.ym2612));
+	LoadFromZomg(unzZomg, "MD/YM2612_reg.bin", &m_md.ym2612, sizeof(m_md.ym2612));
 	
 	// Close the ZOMG file.
 	unzClose(unzZomg);
@@ -338,7 +338,7 @@ int Zomg::save(void)
 	SaveToZomg(zipZomg, "common/CRam.bin", m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
 	SaveToZomg(zipZomg, "MD/VSRam.bin", m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
 	SaveToZomg(zipZomg, "common/psg.bin", &m_psg, sizeof(m_psg));
-	SaveToZomg(zipZomg, "MD/YM2612.bin", &m_md.ym2612, sizeof(m_md.ym2612));
+	SaveToZomg(zipZomg, "MD/YM2612_reg.bin", &m_md.ym2612, sizeof(m_md.ym2612));
 	
 	// Close the ZOMG file.
 	zipClose(zipZomg, NULL);
