@@ -54,6 +54,9 @@
 // Multi-File Archive Selection Dialog.
 #include "ZipSelectDialog.hpp"
 
+// ZOMG savestate handler.
+#include "libgens/Save/Zomg/Zomg.hpp"
+
 // Qt includes.
 #include <QtGui/QApplication>
 #include <QtGui/QFileDialog>
@@ -435,6 +438,37 @@ void EmuManager::setStereo(bool newStereo)
 
 
 /**
+ * saveState(): Save the current emulation state.
+ * TODO: Save to save slot based on filename and slot number.
+ */
+void EmuManager::saveState(void)
+{
+	if (!m_rom)
+		return;
+	
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_SAVE_STATE;
+	rq.filename = strdup("test.zomg");
+	m_qEmuRequest.enqueue(rq);
+}
+
+/**
+ * loadState(): Load the emulation state from a file.
+ * TODO: Load from save slot based on filename and slot number.
+ */
+void EmuManager::loadState(void)
+{
+	if (!m_rom)
+		return;
+	
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_LOAD_STATE;
+	rq.filename = strdup("test.zomg");
+	m_qEmuRequest.enqueue(rq);
+}
+
+
+/**
  * emuFrameDone(): Emulation thread is finished rendering a frame.
  * @param wasFastFrame The frame was rendered "fast", i.e. no VDP updates.
  */
@@ -515,6 +549,18 @@ void EmuManager::processQEmuRequest(void)
 			case EmuRequest_t::RQT_AUDIO_STEREO:
 				// Stereo / Mono.
 				doAudioStereo(rq.audioStereo);
+				break;
+			
+			case EmuRequest_t::RQT_SAVE_STATE:
+				// Save a savestate.
+				doSaveState(rq.filename);
+				free(rq.filename);
+				break;
+			
+			case EmuRequest_t::RQT_LOAD_STATE:
+				// Load a savestate.
+				doLoadState(rq.filename);
+				free(rq.filename);
 				break;
 			
 			case EmuRequest_t::RQT_UNKNOWN:
@@ -771,6 +817,50 @@ void EmuManager::doAudioStereo(bool newStereo)
 	// Print a message on the OSD.
 	QString osdMsg = TR("Audio set to %1.");
 	osdMsg = osdMsg.arg(newStereo ? "Stereo" : "Mono");
+	emit osdPrintMsg(1500, osdMsg);
+}
+
+
+/**
+ * doSaveState(): Save the current emulation state.
+ * @param filename Filename.
+ */
+void EmuManager::doSaveState(const char *filename)
+{
+	LibGens::Zomg zomg(filename);
+	int ret = zomg.save();
+	
+	QString sFilename = QString::fromUtf8(filename);
+	QString osdMsg;
+	
+	if (ret == 0)
+		osdMsg = TR("State saved in %1.").arg(sFilename);
+	else
+		osdMsg = TR("Error saving state: %1").arg(ret);
+	
+	// Print a message on the OSD.
+	emit osdPrintMsg(1500, osdMsg);
+}
+
+
+/**
+ * doLoadState(): Load the emulation state from a file.
+ * @param filename Filename.
+ */
+void EmuManager::doLoadState(const char *filename)
+{
+	LibGens::Zomg zomg(filename);
+	int ret = zomg.load();
+	
+	QString sFilename = QString::fromUtf8(filename);
+	QString osdMsg;
+	
+	if (ret == 0)
+		osdMsg = TR("State loaded from %1.").arg(sFilename);
+	else
+		osdMsg = TR("Error loading state: %1").arg(ret);
+	
+	// Print a message on the OSD.
 	emit osdPrintMsg(1500, osdMsg);
 }
 

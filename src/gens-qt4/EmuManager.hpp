@@ -63,6 +63,10 @@ class EmuManager : public QObject
 		void setAudioRate(int newRate);
 		void setStereo(bool newStereo);
 		
+		/** Savestates. **/
+		void saveState(void); // Save to current slot.
+		void loadState(void); // Load from current slot.
+		
 		/** Rom class passthrough functions. **/
 		
 		inline LibGens::Rom::RomFormat romFormat(void) const
@@ -112,6 +116,8 @@ class EmuManager : public QObject
 				RQT_SCREENSHOT		= 2,
 				RQT_AUDIO_RATE		= 3,
 				RQT_AUDIO_STEREO	= 4,
+				RQT_SAVE_STATE		= 5,
+				RQT_LOAD_STATE		= 6,
 			};
 			
 			RequestType rqType;
@@ -122,8 +128,12 @@ class EmuManager : public QObject
 					int port;
 					LibGens::IoBase::IoType ctrlType;
 				} ctrlChange;
+				
 				int audioRate;
 				bool audioStereo;
+				
+				// Savestates.
+				char *filename;
 			};
 		};
 		
@@ -133,6 +143,10 @@ class EmuManager : public QObject
 		void doScreenShot(void);
 		void doAudioRate(int newRate);
 		void doAudioStereo(bool newStereo);
+		
+		/** Savestates. **/
+		void doSaveState(const char *filename);
+		void doLoadState(const char *filename);
 	
 	protected slots:
 		// Frame done signal from EmuThread.

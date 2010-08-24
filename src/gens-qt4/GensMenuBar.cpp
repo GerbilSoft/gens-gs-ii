@@ -63,6 +63,9 @@ GensMenuBar::GensMenuBar(QWidget *parent)
 		{IDM_FILE_OPEN, GMI_NORMAL, "&Open ROM...", NULL, MACCEL_OPEN, Qt::CTRL + Qt::Key_O, "document-open", ":/oxygen-16x16/document-open.png"},
 		{IDM_FILE_CLOSE, GMI_NORMAL, "&Close ROM", NULL, MACCEL_CLOSE, Qt::CTRL + Qt::Key_W, "document-close", ":/oxygen-16x16/document-close.png"},
 		{IDM_SEPARATOR, GMI_SEPARATOR, NULL, NULL, MACCEL_NONE, 0, NULL, NULL},
+		{IDM_FILE_SAVESTATE, GMI_NORMAL, "&Save State", NULL, MACCEL_NONE, Qt::Key_F5, NULL, NULL},
+		{IDM_FILE_LOADSTATE, GMI_NORMAL, "&Load State", NULL, MACCEL_NONE, Qt::Key_F8, NULL, NULL},
+		{IDM_SEPARATOR, GMI_SEPARATOR, NULL, NULL, MACCEL_NONE, 0, NULL, NULL},
 		{IDM_FILE_QUIT, GMI_NORMAL, "&Quit", NULL, MACCEL_QUIT, Qt::CTRL + Qt::Key_Q, "application-exit", ":/oxygen-16x16/application-exit.png"},
 		
 		{0, GMI_NORMAL, NULL, NULL, MACCEL_NONE, 0, NULL, NULL}

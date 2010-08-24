@@ -245,6 +245,14 @@ void GensWindow::menuTriggered(int id)
 					m_emuManager.closeRom();
 					break;
 				
+				case MNUID_ITEM(IDM_FILE_SAVESTATE):
+					m_emuManager.saveState();
+					break;
+				
+				case MNUID_ITEM(IDM_FILE_LOADSTATE):
+					m_emuManager.loadState();
+					break;
+				
 				case MNUID_ITEM(IDM_FILE_QUIT):
 					// Quit.
 					m_emuManager.closeRom();
