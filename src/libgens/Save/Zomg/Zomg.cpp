@@ -264,7 +264,7 @@ int Zomg::save(void)
 #else
 	zipZomg = zipOpen(m_filename.c_str(), APPEND_STATUS_CREATE);
 #endif
-	printf("filename: %s; zipZomg: 0x%08X\n", m_filename.c_str(), zipZomg);
+	
 	if (!zipZomg)
 	{
 		// Couldn't open the ZOMG file.
