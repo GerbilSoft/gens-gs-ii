@@ -93,6 +93,10 @@ ELSE()
 	SET(libgens_OPTIONAL_SRCS "")
 ENDIF()
 
+IF(HAVE_ICONV)
+	SET(libgens_OPTIONAL_SRCS ${libgens_OPTIONAL_SRCS} Util/gens_iconv.c)
+ENDIF()
+
 # Platform-specific sources.
 IF(WIN32)
 	SET(libgens_COMPAT_SRCS
