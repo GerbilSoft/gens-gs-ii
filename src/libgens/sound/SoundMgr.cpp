@@ -72,8 +72,9 @@ void SoundMgr::End(void)
  * ReInit(): Reinitialize the Sound Manager.
  * @param rate Sound rate, in Hz.
  * @param isPal If true, system is PAL.
+ * @param preserveState If true, save the PSG/YM state before reinitializing them.
  */
-void SoundMgr::ReInit(int rate, bool isPal)
+void SoundMgr::ReInit(int rate, bool isPal, bool preserveState)
 {
 	ms_Rate = rate;
 	ms_IsPal = isPal;
@@ -93,6 +94,15 @@ void SoundMgr::ReInit(int rate, bool isPal)
 	memset(ms_SegBufL, 0x00, sizeof(ms_SegBufL));
 	memset(ms_SegBufR, 0x00, sizeof(ms_SegBufR));
 	
+	// If requested, save the PSG/YM state.
+	Zomg_PsgSave_t psgState;
+	Zomg_Ym2612Save_t ym2612State;
+	if (preserveState)
+	{
+		ms_Psg.zomgSave(&psgState);
+		ms_Ym2612.zomgSave(&ym2612State);
+	}
+	
 	// Initialize the PSG and YM2612.
 	if (isPal)
 	{
@@ -103,6 +113,13 @@ void SoundMgr::ReInit(int rate, bool isPal)
 	{
 		ms_Psg.reinit((int)((double)CLOCK_NTSC / 15.0), rate);
 		ms_Ym2612.reinit((int)((double)CLOCK_NTSC / 7.0), rate);
+	}
+	
+	// If requested, restore the PSG/YM state.
+	if (preserveState)
+	{
+		ms_Psg.zomgRestore(&psgState);
+		ms_Ym2612.zomgRestore(&ym2612State);
 	}
 }
 
