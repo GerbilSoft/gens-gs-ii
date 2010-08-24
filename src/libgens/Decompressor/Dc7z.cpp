@@ -402,29 +402,7 @@ int Dc7z::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *r
 #else
 		// Unix's wchar_t is 32-bit, so we an't use wcscmp().
 		// Compare the filename manually.
-		// TODO: Move this to a separate function.
-		uint16_t *zf_ptr = z_entry_filenameW;	// z_entry filename.
-		uint16_t *sz_ptr = filenameW;		// 7-Zip filename.
-		
-		cmp = 0; // Assume both strings are equal at the beginning.
-		for (; *zf_ptr != 0x00 && *sz_ptr != 0x00; zf_ptr++, sz_ptr++)
-		{
-			if (*zf_ptr < *sz_ptr)
-			{
-				cmp = -1;
-				break;
-			}
-			else if (*zf_ptr > *sz_ptr)
-			{
-				cmp = 1;
-				break;
-			}
-		}
-		
-		if (*zf_ptr == 0x00 && *sz_ptr != 0x00)
-			cmp = 1;
-		else if (*zf_ptr != 0x00 && *sz_ptr == 0x00)
-			cmp = -1;
+		cmp = gens_utf16_ncmp(z_entry_filenameW, filenameW, filenameW_len);
 #endif
 		
 		if (cmp != 0)

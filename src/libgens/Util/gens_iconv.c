@@ -104,3 +104,41 @@ char *gens_iconv(const char *src, size_t src_bytes_len,
 	free(outbuf);
 	return NULL;
 }
+
+
+/**
+ * gens_utf16_cmp(): Compare two NULL-terminated UTF-16 strings.
+ * NOTE: This function expects platform-endian UTF-16.
+ * @param s1 String 1.
+ * @param s2 String 2.
+ * @param n Maximum number of characters to check.
+ * @return Negative value if s1 < s2; 0 if s1 == s2; positive value if s1 > s2.
+ */
+int gens_utf16_ncmp(const uint16_t *s1, const uint16_t *s2, size_t n)
+{
+	// TODO: This expects platform-endian strings.
+	// Add a parameter for LE vs. BE?
+	
+	// TODO: Surrogate support. (Maybe.)
+	// Then again, this function's only really used to check
+	// if two strings match, and isn't used for sorting.
+	
+	for (; n > 0; n--)
+	{
+		if (*s1 != *s2)
+			return ((int)((*s1) - (*s2)));
+		
+		s1++; s2++;
+		if (*s1 == 0 || *s2 == 0)
+			break;
+	}
+	
+	// Verify the last character.
+	if (*s1 == 0x00 && *s2 != 0x00)
+		return 1;
+	else if (*s1 != 0x00 && *s2 == 0x00)
+		return -1;
+	
+	// Strings match.
+	return 0;
+}

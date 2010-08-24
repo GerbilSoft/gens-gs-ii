@@ -22,7 +22,9 @@
 #ifndef __LIBGENS_UTIL_GENS_ICONV_H__
 #define __LIBGENS_UTIL_GENS_ICONV_H__
 
+// C includes.
 #include <string.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,6 +32,16 @@ extern "C" {
 
 char *gens_iconv(const char *src, size_t src_bytes_len,
 		 const char *src_charset, const char *dest_charset);
+
+/**
+ * gens_utf16_cmp(): Compare two NULL-terminated UTF-16 strings.
+ * NOTE: This function expects platform-endian UTF-16.
+ * @param s1 String 1.
+ * @param s2 String 2.
+ * @param n Maximum number of characters to check.
+ * @return Negative value if s1 < s2; 0 if s1 == s2; positive value if s1 > s2.
+ */
+int gens_utf16_ncmp(const uint16_t *s1, const uint16_t *s2, size_t n);
 
 #ifdef __cplusplus
 }
