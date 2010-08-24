@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <config.h>
+
 /**
  * Based on 7zMain.c from the LZMA SDK 9.12.
  * http://www.7-zip.org/sdk.html
@@ -46,9 +48,11 @@ using std::string;
 #include "lzma/7z/7zVersion.h"
 #include "lzma/lzmabase/7zCrc.h"
 
-#ifdef _WIN32
-// Win32 Unicode Translation Layer.
-#include "../Win32/W32U_mini.h"
+// Character set translation.
+#if defined(HAVE_ICONV)
+#include "Util/gens_iconv.h"
+#elif defined(_WIN32)
+#include "Win32/W32U_mini.h"
 #endif
 
 namespace LibGens
@@ -265,18 +269,27 @@ int Dc7z::getFileInfo(mdp_z_entry_t **z_entry_out)
 		SzArEx_GetFileNameUtf16(&m_db, i, filenameW);
 		
 		// Convert the filename to UTF-8.
-#ifdef _WIN32
+		utf8_str *z_entry_filename = NULL;
+#if defined(HAVE_ICONV)
+		// Use iconv().
+		// TODO: Determine which byteorder 7-Zip uses on PowerPC.
+		z_entry_filename = gens_iconv((char*)filenameW, filenameW_len * 2,
+					      "UTF-16LE", "UTF-8");
+#elif defined(_WIN32)
 		// Win32: Use W32U_UTF16_to_mbs().
-		utf8_str *rom_filename = W32U_UTF16_to_mbs((wchar_t*)filenameW, CP_UTF8);
-#else
-		// TODO: Use iconv() to convert the filename to UTF-8.
-		// For now, we'll just use the LSB of each UTF-16 character.
-		utf8_str *rom_filename = (utf8_str*)malloc(filenameW_len);
-		for (unsigned int chr = 0; chr < len; chr++)
-		{
-			rom_filename[chr] = (filenameW[chr] & 0xFF);
-		}
+		z_entry_filename = W32U_UTF16_to_mbs((wchar_t*)filenameW, CP_UTF8);
 #endif
+		if (!z_entry_filename)
+		{
+			// Error converting the filename to UTF-8.
+			// We'll just mask each UTF-16 character by 0x7F for ASCII-compatible filenames.
+			// TODO: Include our own UTF-16 to UTF-8 conversion function?
+			z_entry_filename = (utf8_str*)malloc(filenameW_len);
+			for (unsigned int chr = 0; chr < len; chr++)
+			{
+				z_entry_filename[chr] = (filenameW[chr] & 0x7F);
+			}
+		}
 		
 		// Allocate memory for the next file list element.
 		// NOTE: C-style malloc() is used because MDP is a C API.
@@ -284,7 +297,7 @@ int Dc7z::getFileInfo(mdp_z_entry_t **z_entry_out)
 		
 		// Store the ROM file information.
 		// TODO: f->Size is 64-bit...
-		z_entry_cur->filename = rom_filename;
+		z_entry_cur->filename = z_entry_filename;
 		z_entry_cur->filesize = (size_t)f->Size;
 		z_entry_cur->next = NULL;
 		
@@ -340,8 +353,12 @@ int Dc7z::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *r
 	}
 	
 	// Convert the z_entry filename to UTF-16.
+	// TODO: Determine which byteorder 7-Zip uses on PowerPC.
 	uint16_t *z_entry_filenameW = NULL;
-#ifdef _WIN32
+#if defined(HAVE_ICONV)
+	z_entry_filenameW = (uint16_t*)gens_iconv(z_entry->filename, strlen(z_entry->filename),
+							"UTF-8", "UTF-16LE");
+#elif defined(_WIN32)
 	z_entry_filenameW = (uint16_t*)W32U_mbs_to_UTF16(z_entry->filename, CP_UTF8);
 	if (!z_entry_filenameW)
 	{
@@ -349,7 +366,8 @@ int Dc7z::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *r
 		return -4; // TODO: Return an appropriate MDP error code.
 	}
 #else
-	// TODO: Unix version.
+	// TODO: Manual conversion from UTF-8 to UTF-16.
+#error No UTF-8 to UTF-16 conversion function found.
 #endif
 	
 	// Filename buffer. (UTF-16)
@@ -379,23 +397,39 @@ int Dc7z::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *r
 		// Compare the filename against the z_entry filename.
 		int cmp;
 #ifdef _WIN32
+		// Win32's wchar_t is 16-bit, so we can use _wcsicmp().
 		cmp = _wcsicmp((wchar_t*)z_entry_filenameW, (wchar_t*)filenameW);
 #else
-		// Convert the filename to UTF-8.
-		// TODO: For now, we'll just use the LSB of each UTF-16 character.
-		// TODO: Convert the input filename to UTF-16 to improve performance?
-		utf8_str *rom_filename = (utf8_str*)malloc(filenameW_len);
-		for (unsigned int chr = 0; chr < len; chr++)
+		// Unix's wchar_t is 32-bit, so we an't use wcscmp().
+		// Compare the filename manually.
+		// TODO: Move this to a separate function.
+		uint16_t *zf_ptr = z_entry_filenameW;	// z_entry filename.
+		uint16_t *sz_ptr = filenameW;		// 7-Zip filename.
+		
+		cmp = 0; // Assume both strings are equal at the beginning.
+		for (; *zf_ptr != 0x00 && *sz_ptr != 0x00; zf_ptr++, sz_ptr++)
 		{
-			rom_filename[chr] = (filenameW[chr] & 0xFF);
+			if (*zf_ptr < *sz_ptr)
+			{
+				cmp = -1;
+				break;
+			}
+			else if (*zf_ptr > *sz_ptr)
+			{
+				cmp = 1;
+				break;
+			}
 		}
-		cmp = strcmp(z_entry->filename, rom_filename);
-		free(rom_filename);
+		
+		if (*zf_ptr == 0x00 && *sz_ptr != 0x00)
+			cmp = 1;
+		else if (*zf_ptr != 0x00 && *sz_ptr == 0x00)
+			cmp = -1;
 #endif
 		
 		if (cmp != 0)
 		{
-			// Not the correct file.
+		// Not the correct file.
 			continue;
 		}
 		
