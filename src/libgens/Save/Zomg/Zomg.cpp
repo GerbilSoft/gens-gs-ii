@@ -27,8 +27,10 @@
  */
 
 #include "Zomg.hpp"
-#include "MD/VdpIo.hpp"
 #include "Util/byteswap.h"
+
+#include "MD/VdpIo.hpp"
+#include "sound/SoundMgr.hpp"
 
 #ifdef _WIN32
 // MiniZip Win32 I/O handler.
@@ -140,20 +142,11 @@ int Zomg::load(void)
 	// TODO: Check for errors.
 	
 	/** Load from the ZOMG file. **/
-	
-	// Load VDP registers.
-	// TODO: Load a certain number depending on the system.
-	// For now, we'll assume 24 (MD).
 	LoadFromZomg(unzZomg, "common/vdp_reg.bin", m_vdp.vdp_reg.md, sizeof(m_vdp.vdp_reg.md));
-	
-	// Load VRam.
 	LoadFromZomg(unzZomg, "common/VRam.bin", m_vdp.VRam.md, sizeof(m_vdp.VRam.md));
-	
-	// Load CRam.
 	LoadFromZomg(unzZomg, "common/CRam.bin", m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
-	
-	// Load VSRam.
 	LoadFromZomg(unzZomg, "MD/VSRam.bin", m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
+	LoadFromZomg(unzZomg, "common/psg.bin", &m_psg, sizeof(m_psg));
 	
 	// Close the ZOMG file.
 	unzClose(unzZomg);
@@ -184,6 +177,19 @@ int Zomg::load(void)
 	
 	// Copy VSRam to VdpIo.
 	memcpy(VdpIo::VSRam.u8, m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
+	
+	/** Audio **/
+	
+	// Byteswap PSG values.
+	// TODO: LE16 or BE16 for PSG?
+	for (unsigned int i = 0; i < 4; i++)
+	{
+		m_psg.tone_reg[i] = le16_to_cpu(m_psg.tone_reg[i]);
+		m_psg.tone_ctr[i] = le16_to_cpu(m_psg.tone_ctr[i]);
+	}
+	m_psg.lfsr_state = le16_to_cpu(m_psg.lfsr_state);
+	// Load PSG state.
+	SoundMgr::ms_Psg.zomgRestore(&m_psg);
 	
 	// Savestate loaded.
 	return 0;
@@ -302,21 +308,25 @@ int Zomg::save(void)
 	// Copy VSRam from VdpIo.
 	memcpy(m_vdp.MD_VSRam, VdpIo::VSRam.u8, sizeof(m_vdp.MD_VSRam));
 	
+	/** Audio **/
+	
+	// Save PSG state.
+	SoundMgr::ms_Psg.zomgSave(&m_psg);
+	// Byteswap PSG values.
+	// TODO: LE16 or BE16 for PSG?
+	for (unsigned int i = 0; i < 4; i++)
+	{
+		m_psg.tone_reg[i] = cpu_to_le16(m_psg.tone_reg[i]);
+		m_psg.tone_ctr[i] = cpu_to_le16(m_psg.tone_ctr[i]);
+	}
+	m_psg.lfsr_state = cpu_to_le16(m_psg.lfsr_state);
+	
 	/** Write to the ZOMG file. **/
-	
-	// Save VDP registers.
-	// TODO: Load a certain number depending on the system.
-	// For now, we'll assume 24 (MD).
 	SaveToZomg(zipZomg, "common/vdp_reg.bin", m_vdp.vdp_reg.md, sizeof(m_vdp.vdp_reg.md));
-	
-	// Save VRam.
 	SaveToZomg(zipZomg, "common/VRam.bin", m_vdp.VRam.md, sizeof(m_vdp.VRam.md));
-	
-	// SaveToZomg CRam.
 	SaveToZomg(zipZomg, "common/CRam.bin", m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
-	
-	// Save VSRam.
 	SaveToZomg(zipZomg, "MD/VSRam.bin", m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
+	SaveToZomg(zipZomg, "common/psg.bin", &m_psg, sizeof(m_psg));
 	
 	// Close the ZOMG file.
 	zipClose(zipZomg, NULL);

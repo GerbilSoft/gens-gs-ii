@@ -67,11 +67,12 @@ class Zomg
 		
 		// Savestate buffers.
 		Zomg_VdpSave_t m_vdp;
+		Zomg_PsgSave_t m_psg;
 		
-		
+		/** MD specific **/
 		struct ZomgMd_t
 		{
-			uint8_t VSRam[80];
+			Zomg_Ym2612Save_t m_ym2612;
 		};
 		ZomgMd_t m_md;
 };
