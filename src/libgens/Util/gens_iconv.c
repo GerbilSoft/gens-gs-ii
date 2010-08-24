@@ -62,7 +62,7 @@ char *gens_iconv(const char *src, size_t src_bytes_len,
 	
 	// Allocate the output buffer.
 	// UTF-8 is variable length, and the largest UTF-8 character is 4 bytes long.
-	const size_t out_bytes_len = (src_bytes_len * 4) + 1;
+	const size_t out_bytes_len = (src_bytes_len * 4) + 4;
 	size_t out_bytes_remaining = out_bytes_len;
 	char *outbuf = (char*)malloc(out_bytes_len);
 	
@@ -90,8 +90,11 @@ char *gens_iconv(const char *src, size_t src_bytes_len,
 		// The string was converted successfully.
 		
 		// Make sure the string is null-terminated.
-		if (out_bytes_remaining > 0)
-			*outptr = 0x00;
+		size_t null_bytes = (out_bytes_remaining > 4 ? 4 : out_bytes_remaining);
+		for (size_t i = null_bytes; i > 0; i--)
+		{
+			*outptr++ = 0x00;
+		}
 		
 		// Return the output buffer.
 		return outbuf;
