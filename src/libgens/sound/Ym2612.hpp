@@ -94,6 +94,9 @@
 #define LFO_FMS_LBITS  9	// FIXED (LFO_FMS_BASE gives somethink as 1)
 #define LFO_FMS_BASE   ((int) (0.05946309436 * 0.0338 * (double) (1 << LFO_FMS_LBITS)))
 
+// ZOMG YM2612 struct.
+#include "../Save/Zomg/zomg_ym2612.h"
+
 namespace LibGens
 {
 
@@ -116,9 +119,9 @@ class Ym2612
 		bool dacEnabled(void) const { return m_dacEnabled; }
 		bool improved(void) const { return m_improved; }
 		
-		/* GSX savestate functions. */
-		int saveState(uint8_t state[0x200]);
-		int restoreState(const uint8_t state[0x200]);
+		/** ZOMG savestate functions. **/
+		void zomgSave(Zomg_Ym2612Save_t *state);
+		void zomgRestore(const Zomg_Ym2612Save_t *state);
 		
 		/** Gens-specific code. **/
 		void updateDacAndTimers(int32_t *bufL, int32_t *bufR, int length);

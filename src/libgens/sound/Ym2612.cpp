@@ -2056,44 +2056,45 @@ void Ym2612::update(int32_t *bufL, int32_t *bufR, int length)
 }
 
 
+/** ZOMG savestate functions. **/
+
+
 /**
- * saveState(): Save the YM2612 state.
- * NOTE: This only saves registers!
- * @param state 512-byte array for the registers.
- * @return 0 on success; non-zero on error.
+ * zomgSave(): Save the YM2612 state.
+ * @param state Zomg_Ym2612Save_t struct to save to.
  */
-int Ym2612::saveState(uint8_t state[0x200])
+void Ym2612::zomgSave(Zomg_Ym2612Save_t *state)
 {
+	// Condense the registers from 32-bit to 8-bit.
 	for (int i = 0; i < 0x100; i++)
 	{
-		state[0x000 + i] = m_data.REG[0][i];
-		state[0x100 + i] = m_data.REG[1][i];
+		state->reg[0][i] = (uint8_t)(m_data.REG[0][i] & 0xFF);
+		state->reg[1][i] = (uint8_t)(m_data.REG[1][i] & 0xFF);
 	}
 	
-	return 0;
+	// TODO: Save other counters and stuff!
 }
 
 
 /**
- * restoreState(): Restore the YM2612 state.
- * NOTE: This only restores registers!
- * @param state 512-byte array with the registers.
- * @return 0 on success; non-zero on error.
+ * zomgRestore(): Restore the YM2612 state.
+ * @param state Zomg_Ym2612Save_t struct to restore from.
  */
-int Ym2612::restoreState(const uint8_t state[0x200])
+void Ym2612::zomgRestore(const Zomg_Ym2612Save_t *state)
 {
 	// Reset the YM2612 before restoring the state.
 	reset();
 	
+	// Write the registers to the YM2612.
 	for (int i = 0; i < 0x100; i++)
 	{
 		this->write(0, (uint8_t)i);
-		this->write(1, state[0x000 + i]);
+		this->write(1, state->reg[0][i]);
 		this->write(2, (uint8_t)i);
-		this->write(3, state[0x100 + i]);
+		this->write(3, state->reg[1][i]);
 	}
 	
-	return 0;
+	// TODO: Restore other counters and stuff!
 }
 
 
