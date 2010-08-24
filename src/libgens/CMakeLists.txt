@@ -50,7 +50,7 @@ SET(libgens_SRCS
 	MD/TAB336.c
 	MD/EmuMD.cpp
 	MD/VdpPalette.cpp
-	Save/Zomg.cpp
+	Save/Zomg/Zomg.cpp
 	cpu/M68K.cpp
 	cpu/M68K_Mem.cpp
 	sound/Psg.cpp
