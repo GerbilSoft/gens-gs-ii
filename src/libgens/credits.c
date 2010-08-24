@@ -42,6 +42,7 @@ const utf8_str *GensGS_credits =
 	"Chilly Willy: 32X PWM improvements\n"
 	"Corner-Face-Jacks: Software testing\n"
 	"CyberKitsune: Software testing\n"
+	"Damizean: GLSL assistance\n"
 	"Delta: Software testing\n"
 	"djohe: Software testing\n"
 	"Glitch: Software testing\n"
