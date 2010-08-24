@@ -29,14 +29,14 @@
 
 
 /**
- * gsft_iconv(): Convert a string from one character set to another.
+ * gens_iconv(): Convert a string from one character set to another.
  * @param src 		[in] Source string.
  * @param src_bytes_len [in] Source length, in bytes.
  * @param src_charset	[in] Source character set.
  * @param dest_charset	[in] Destination character set.
  * @return malloc()'d UTF-8 string, or NULL on error.
  */
-char *gsft_iconv(const char *src, size_t src_bytes_len,
+char *gens_iconv(const char *src, size_t src_bytes_len,
 		 const char *src_charset, const char *dest_charset)
 {
 	if (!src || src_bytes_len == 0)
