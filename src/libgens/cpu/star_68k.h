@@ -82,10 +82,28 @@ struct STARSCREAM_DATAREGION {
 	unsigned short contextfiller00;                       \
 
 
+/* Extra 68000 information from Gens Rerecording */
+#define STARSCREAM_CONTEXTINFO_EXTRA			\
+   unsigned       cycles_needed;				\
+   unsigned       cycles_leftover;				\
+   unsigned       fetch_region_start;				\
+   unsigned       fetch_region_end;				\
+   unsigned char  xflag;					\
+   unsigned char  execinfo;					\
+   unsigned char  trace_trickybit;				\
+   unsigned char  filler;					\
+   unsigned       io_cycle_counter;				\
+   unsigned       io_fetchbase;					\
+   unsigned       io_fetchbased_pc;				\
+   unsigned       access_address;				\
+   unsigned       save_01;					\
+   unsigned       save_02;					\
+
 struct S68000CONTEXT {
 	STARSCREAM_CONTEXTINFO_MEM16
 	STARSCREAM_CONTEXTINFO_COMMON
 	STARSCREAM_CONTEXTINFO_68000SPECIFIC
+	STARSCREAM_CONTEXTINFO_EXTRA // Modif N. -- added
 };
 
 #define STARSCREAM_IDENTIFIERS(SNC,SN)                        \
