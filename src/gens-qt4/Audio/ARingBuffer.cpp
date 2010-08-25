@@ -35,7 +35,11 @@ ARingBuffer::ARingBuffer()
 	// NOTE: ARingBuffer::reInit() MUST be called before using the ring buffer!
 	// Otherwise, SIGFPE will occur.
 	m_segLength = 0;
-	m_bufLength = 0;
+	
+	// Clear the segment pointers.
+	m_segWP = 0;
+	m_segRP = 0;
+	m_segRP_minor = 0;
 	
 	// TODO: Dynamically allocate m_buffer?
 }
@@ -55,7 +59,6 @@ void ARingBuffer::reInit(int segSize, bool stereo)
 {
 	// Calculate the segment and buffer lengths.
 	m_segLength = (segSize * (stereo ? 2 : 1));
-	m_bufLength = (m_segLength * NUM_SEGMENTS);
 	m_stereo = stereo;
 	
 	// Clear the segment buffer.
@@ -64,8 +67,7 @@ void ARingBuffer::reInit(int segSize, bool stereo)
 	// Clear the segment pointers.
 	m_segWP = 0;
 	m_segRP = 0;
-	m_segWP_wraparound = 0;
-	m_segRP_wraparound = 0;
+	m_segRP_minor = 0;
 }
 
 
@@ -75,11 +77,11 @@ void ARingBuffer::reInit(int segSize, bool stereo)
  */
 int16_t *ARingBuffer::writeLock(void)
 {
-	// Lock the buffer.
-	m_bufLock.lock();
+	// Lock the buffer segment.
+	m_bufLock[m_segWP].lock();
 	
 	// Return a pointer to the buffer at the current WP.
-	return &m_buffer[m_segWP];
+	return &m_buffer[m_segWP][0];
 }
 
 
@@ -88,16 +90,12 @@ int16_t *ARingBuffer::writeLock(void)
  */
 void ARingBuffer::writeUnlock(void)
 {
-	// Advance the WP to the next segment.
-	m_segWP += m_segLength;
-	if (m_segWP >= m_bufLength)
-	{
-		m_segWP_wraparound += (m_segWP / m_bufLength);
-		m_segWP %= m_bufLength;
-	}
+	// Unlock the buffer segment.
+	m_bufLock[m_segWP].unlock();
 	
-	// Unlock the buffer.
-	m_bufLock.unlock();
+	// Advance the WP to the next segment.
+	m_segWP++;
+	m_segWP %= NUM_SEGMENTS;
 }
 
 
@@ -108,37 +106,32 @@ void ARingBuffer::writeUnlock(void)
  */
 void ARingBuffer::read(int16_t *out, int samples)
 {
-	// TODO: Do we need to lock the buffer?
-	m_bufLock.lock();
+	// Lock the current read buffer segment.
+	m_bufLock[m_segRP].lock();
 	
 	if (m_stereo)
 		samples *= 2;
+	
+	// TODO: Optimize this!
+	for (; samples > 0; samples--)
+	{
+		*out++ = m_buffer[m_segRP][m_segRP_minor];
 		
-	if ((m_segRP + samples) < m_bufLength)
-	{
-		// No ring buffer wraparound.
-		memcpy(out, &m_buffer[m_segRP], (samples * sizeof(m_buffer[0])));
-		m_segRP += samples;
-	}
-	else
-	{
-		// TODO: Rewrite to use memcpy() with proper address rollover.
-		for (int i = samples; i != 0; i--)
+		// Next sample.
+		m_segRP_minor++;
+		if (m_segRP_minor >= m_segLength)
 		{
-			// Write a sample.
-			*out++ = m_buffer[m_segRP];
-			
-			// Increment the read pointer.
+			// Next segment.
+			m_bufLock[m_segRP].unlock();
 			m_segRP++;
-			if (m_segRP >= m_bufLength)
-			{
-				m_segRP_wraparound += (m_segRP / m_bufLength);
-				m_segRP %= m_bufLength;
-			}
+			m_segRP %= NUM_SEGMENTS;
+			m_segRP_minor = 0;
+			m_bufLock[m_segRP].lock();
 		}
 	}
 	
-	m_bufLock.unlock();
+	// Unlock the current read buffer segment.
+	m_bufLock[m_segRP].unlock();
 }
 
 }

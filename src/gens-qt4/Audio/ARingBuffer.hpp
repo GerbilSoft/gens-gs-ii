@@ -50,8 +50,8 @@ class ARingBuffer
 		 */
 		void reInit(int segSize, bool stereo);
 		
-		int getSegWP(void) const { return (m_segWP / m_segLength); }
-		int getSegRP(void) const { return (m_segRP / m_segLength); }
+		int getSegWP(void) const { return m_segWP; }
+		int getSegRP(void) const { return m_segRP; }
 		
 		/**
 		 * writeLock(): Lock the buffer for writing one segment.
@@ -76,11 +76,11 @@ class ARingBuffer
 		 */
 		void wpSegWait(void) const
 		{
-			while (getSegWP() == getSegRP())
+			while (m_segWP == m_segRP)
 			{
 				// NOTE: On Gens/GS Win32, I had to remove usleep()
 				// due to lag issues. Let's see if that happens here.
-				usleep(500);
+				usleep(100);
 			}
 		}
 		
@@ -90,23 +90,7 @@ class ARingBuffer
 		 */
 		bool isBufferEmpty(void) const
 		{
-			int WpRpDiff = (m_segWP - m_segRP);
-			
-			if (m_segRP_wraparound > m_segWP_wraparound)
-			{
-				// Read pointer is ahead of the write pointer.
-				return true;
-			}
-			else if (m_segWP_wraparound > m_segRP_wraparound)
-			{
-				// Write pointer is ahead of the read pointer.
-				WpRpDiff += ((m_segWP_wraparound - m_segRP_wraparound) * m_segLength);
-			}
-			
-			if (WpRpDiff <= m_segLength)
-				return true;
-			
-			return false;
+			return (m_segWP == m_segRP);
 		}
 		
 		static const int NUM_SEGMENTS = 8;
@@ -116,11 +100,12 @@ class ARingBuffer
 		/**
 		 * m_buffer[]: Segment buffer.
 		 * Stores up to NUM_SEGMENTS segments.
+		 * Up to 1024 samples. (1024*2 for stereo)
 		 */
-		int16_t m_buffer[MAX_SEGMENT_SIZE * NUM_SEGMENTS * 2];
+		int16_t m_buffer[NUM_SEGMENTS][1024*2];
 		
-		// TODO: Allow locking individual segments.
-		QMutex m_bufLock;
+		// Buffer segment locks.
+		QMutex m_bufLock[NUM_SEGMENTS];
 		
 		/**
 		 * m_segLength: Length of a segment, in int16_t units.
@@ -128,25 +113,18 @@ class ARingBuffer
 		int m_segLength;
 		
 		/**
-		 * m_bufLength: Length of the entire buffer.
-		 * This is usually m_segLength * MAX_SEGMENTS.
-		 */
-		int m_bufLength;
-		
-		/**
 		 * m_stereo: Stereo/Mono setting.
 		 */
 		bool m_stereo;
 		
 		/**
-		 * Read/Write pointers. (int16_t offsets)
+		 * Read/Write pointers. (segment indexes)
 		 * m_segWP: emulator to m_buffer
 		 * m_segRP: m_buffer to sound card
 		 */
 		int m_segWP;
 		int m_segRP;
-		int m_segWP_wraparound;
-		int m_segRP_wraparound;
+		int m_segRP_minor;
 };
 
 }
