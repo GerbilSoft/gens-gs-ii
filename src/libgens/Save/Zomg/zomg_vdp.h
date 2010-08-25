@@ -24,16 +24,9 @@
 #ifndef __LIBGENS_SAVE_ZOMG_ZOMG_VDP_H__
 #define __LIBGENS_SAVE_ZOMG_ZOMG_VDP_H__
 
-#include <stdint.h>
+#include "zomg_common.h"
 
-// Packed struct attribute.
-#if !defined(PACKED)
-#if defined(__GNUC__)
-#define PACKED __attribute__ ((packed))
-#else
-#define PACKED
-#endif /* defined(__GNUC__) */
-#endif /* !defined(PACKED) */
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
