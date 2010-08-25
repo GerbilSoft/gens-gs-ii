@@ -1,0 +1,282 @@
+Zipped Original Memory from Genesis
+Version 0.1, Draft Revision 0
+Copyright (c) 2008-2010 by David Korth.
+
+================================================================
+
+Permission is granted to copy, distribute and/or modify this
+document under the terms of the GNU Free Documentation License,
+Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts and
+no Back-Cover Texts.  A copy of the license is included in the
+section entitled "GNU Free Documentation License".
+
+================================================================
+
+0. Draft Document Notice
+
+WARNING: This document is a draft version of an upcoming file format.
+Please do not write an implementation of the file format using this
+document, as the file format may change during the draft process, which
+may break compatibility with the version described in this document.
+
+Upcoming release versions:
+
+- 0.8: Full Genesis/Mega Drive support.
+
+- 0.9: Support for either Sega CD or 32X, depending on which is
+       implemented first in Gens/GS II.
+
+- 1.0: Support for the other component not implemented in 0.9.
+
+================================================================
+
+1. What is Zipped Original Memory from Genesis?
+
+Zipped Original Memory from Genesis, or ZOMG, is a new savestate format
+for emulators for Sega consoles, including the Sega Master System and
+the Sega Genesis / Mega Drive. Whereas most savestate formats have hardcoded
+offsets for segments, ZOMG uses a Zip file that contains each segment as
+a separate file.
+
+The pathname convention used in this document is Unix-style; however,
+Windows-style pathnames can be used for emulators running on Windows.
+
+Due to the similarities between most of the Sega 8-bit and 16-bit systems,
+common components shared between the systems will be stored in a /common
+subdirectory. System-specific data will be stored in a system-specific
+subdirectory, e.g. /sms for Sega Master System or /md for Sega Mega Drive.
+
+Save files may have a specified endianness. They are "BE" for Big Endian
+(Motorola format) and "LE" for Little Endian (Intel format), along with
+an optional word-size specifier.
+
+All structs are packed; that is, they do not have any padding that would
+usually be added by a compiler. On gcc, this is achieved by using
+__attribute__ ((packed)). On MSVC and other compilers, this may be
+done by using #pragma pack(1), followed by #pragma pack() after the
+struct definition.
+
+================================================================
+
+2. format.ini
+
+Every ZOMG archive contains at least one file: /format.ini
+This file is a text file in INI format, encoded using UTF-8.
+Line endings may be either Unix-style ("\n") or Windows-style
+("\r\n"). Linebreaks may be embedded within values by using the
+"\n" escape sequence.
+
+Here is an example FORMAT.ini file:
+
+[ZOMG]
+FileType=Zipped Original Memory from Genesis
+Version=0.1
+System=MD
+Creator=Genesis Emulator 2.12.194
+Author=Mario Mario
+ROM=Sonic the Hedgehog (W) (REV01) [!].gen
+ROM CRC32=AFE05EEE
+Region=JUE
+Description=Sample savestate from Sonic 1.
+Extensions=
+
+Fields: ('*' indicates required; '-' indicates optional.)
+
+* FileType: Contains the filetype. Must be "Zipped Original Memory from Genesis".
+* Version: ZOMG specification version number.
+* System: Systems used for the savestate, comma-separated.
+- Creator: Program that created the savestate.
+- Author: Person who created the savestate.
+- ROM: Filename of the ROM file used to create the savestate.
+- ROM CRC32: CRC32 checksum of the ROM file used to create the savestate.
+- Region: Region code of the system used to create the savestate.
+- Description: A short description of the savestate.
+- Extensions: Any extensions to the base format, comma-separated.
+
+For the System value, System may be a combination of more than one system.
+Each system is comma-separated and case-insensitive.
+
+Acceptable values for Version 0.8:
+- MD: Mega Drive / Genesis.
+
+Planned values for Version 0.9/1.0:
+- MCD: Mega CD / Sega CD. (implies MD)
+- 32X: Sega 32X. (implies MD)
+
+Planned values for Version 1.1/1.2:
+- SMS: Sega Master System.
+- GG: Game Gear. (implies SMS)
+
+For Sega CD games, the System value would contain either "MCD" or "MD,MCD".
+Sega CD 32X games would have a System value of either "MCD,32X" or "MD,MCD,32X".
+
+The ROM field is for user reference only. It should not be used by an emulator
+to determine which ROM to load, or if a savestate is valid for a given ROM.
+
+The Extensions field is usually blank for ZOMG files conforming to the
+ZOMG version listed in the Version field. It is included to allow for
+custom extensions to the format.
+
+Note: For improved usability, the emulator may also store some of the fields
+in the Zip Comments section. The Zip Comments section is only to be used as
+a descriptive item and should not be interpreted as format information.
+
+================================================================
+
+3. Optional files in the root directory
+
+The following files are optional, but highly recommended:
+
+/preview.png: A preview screenshot of the savestate.
+
+================================================================
+
+4. Common components
+
+The following files are contained in the /common directory. These refer to
+components that are common throughout the Sega 8-bit and 16-bit hardware line.
+
++----------------+----------------+------------+
+| Filename       |  Size (bytes)  | Endianness |
++----------------+----------------+------------+
+| vdp_reg.bin    |      8; 11; 24 |    None    |
+| VRam.bin       | 16,384; 65,536 |   Varies   |
+| CRam.bin       |    32; 64; 128 |   Varies   |
+| psg.bin        |             23 |    None    |
++----------------+----------------+------------+
+
+----------------------------------------------------------------
+
+4.1. vdp_reg.bin: Sega VDP registers (TMS9918A-like)
+
+This file contains the user-accessible registers found in the VDP used
+on Sega's 8-bit and 16-bit consoles. The SG-1000 and SG-1000 Mark II
+both used a TMS9918A, while the Sega Mark III and later used custom VDPs.
+Each register is 8 bits wide.
+
+Depending on the system being emulated, the number of VDP registers
+may vary:
+
+- SG-1000 (TMS9918A):   8 registers
+- Sega Mark III (SMS): 11 registers
+- Sega Mega Drive:     24 registers
+
+vdp_reg.bin contains only the VDP registers, so the C equivalent may
+look like this:
+
+uint8_t vdp_reg_tms9918a[8];	// TMS9918A-based systems. (SG-1000, ColecoVision)
+uint8_t vdp_reg_mk3[11];	// Sega Mark III / Sega Master System.
+uint8_t vdp_reg_md[24];		// Sega Mega Drive.
+
+----------------------------------------------------------------
+
+4.2. VRam.bin: Video RAM
+
+Video RAM is directly connected to the Video Display Processor on
+the Sega 8-bit and 16-bit machines. Depending on the system, it may
+have a different size and format:
+
+- All Sega 8-bit systems: 16,384 bytes; 8-bit
+- Sega Mega Drive:        32,768 words; 16-bit BE
+
+C equivalents:
+uint8_t vram_8bit[16384];	// Sega 8-bit systems.
+uint16_t vram_md[32768];	// Sega Mega Drive. (16-bit BE)
+
+----------------------------------------------------------------
+
+4.3. CRam.bin: Color RAM
+
+Starting with the Sega Mark III, Sega's 8-bit and 16-bit VDPs
+have included Color RAM, which allows the onscreen palette to
+be remapped. There are three different Color RAM formats.
+
+- Sega Mark III (SMS):  32 bytes; 8-bit (6 bits per color usable)
+- Sega Mega Drive:     128 bytes; 16-bit BE (9 bits per color usable)
+- Sega Game Gear:       64 bytes; 16-bit LE (12 bits per color usable)
+
+C equivalents:
+uint8_t cram_mk3[32];		// Sega Mark III / Sega Master System.
+uint16_t cram_md[64];		// Sega Mega Drive. (16-bit BE)
+uint16_t cram_gg[32];		// Sega Game Gear. (16-bit LE)
+
+----------------------------------------------------------------
+
+4.4. psg.bin: TI SN76489(A) Programmable Sound Generator
+
+This file contains the register values from the TI SN76489(A) Programmable
+Sound Generator. This chip is used for generating square waves and noise.
+
+Note that the SG-1000 and SG-1000 Mark II systems used an SN76489, while
+the Sega Mark III and later used an SN76489A integrated in the VDP. The
+primary difference is the linear feedback shift register length. In the
+SN76489, the register is 15 stages, while in the SN76489, the register is
+16 stages. (This is hardware-dependent, and is not stored in psg.bin.)
+
+Additionally, the Game Gear variant of the PSG supports stereo sound.
+The stereo field in the psg.bin file is used for this purpose, and should
+be ignored for all other systems.
+
+Layout of the stereo byte: (active high)
++-----+---------+-------+
+| Bit | Channel | Side  |
++-----+---------+-------+
+|  0  |    0    | Right |
+|  1  |    1    | Right |
+|  2  |    2    | Right |
+|  3  |    3    | Right |
+|  4  |    0    | Left  |
+|  5  |    1    | Left  |
+|  6  |    2    | Left  |
+|  7  |    3    | Left  |
++-----+---------+-------+
+
+For the tone_reg[] field, the Tone channels (0-2) have 10 significant bits,
+while the Noise channel (3) has 3 significant bits.
+
+For the vol_reg[] field, each channel has 4 significant bits.
+
+For the tone_ctr[] field, if an emulator does not support saving the
+internal counters, it should write 0xFFFF to indicate this.
+
+For the gg_stereo field, 
+
+typedef struct _ZOMG_psg_t
+{
+	uint16_t tone_reg[4];	// LE16: Tone values for each channel.
+	uint8_t vol_reg[4];	// 8-bit: Volume values for each channel.
+	
+	uint16_t tone_ctr[4];	// LE16: Internal counter values for each channel.
+	uint16_t lfsr_state;	// LE16: Linear Feedback Shift Register state.
+	
+	uint8_t gg_stereo;	// 8-bit: Stereo register. (Game Gear only.)
+} ZOMG_psg_t;
+
+================================================================
+
+5. Mega Drive-specific components
+
+The following files are contained in the /MD directory. These refer to
+components that are specific to the Sega Mega Drive hardware.
+
++----------------+----------------+------------+
+| Filename       |  Size (bytes)  | Endianness |
++----------------+----------------+------------+
+| YM2612_reg.bin |            512 |    None    |
++----------------+----------------+------------+
+
+----------------------------------------------------------------
+
+5.1. YM2612_reg.bin: Yamaha YM2612 registers
+
+This file contains the user-accessible registers found in the Yamaha YM2612
+FM synthesis chip used on the Sega Mega Drive. Each register is 8 bits wide,
+and the registers are split into two 256-register banks.
+
+Note: The internal YM timer counters are not stored in this file.
+They may be added to another file later on.
+
+C equivalent for YM2612_reg.bin:
+
+uint8_t ym2612_reg[2][512];	// Yamaha YM2612 registers.
