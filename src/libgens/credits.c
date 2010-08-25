@@ -53,6 +53,7 @@ const utf8_str *GensGS_credits =
 	"mister_k81: Software testing\n"
 	"NeKit: Software testing\n"
 	"Nicolas Bondoux: Software testing\n"
+	"nineko: Game Gear PSG stereo assistance\n"
 	"Pietro Gagliardi (andlabs): Mac OS X testing\n"
 	"Phil Costin: Haiku port (in progress)\n"
 	"Puto: Mac OS X testing\n"
