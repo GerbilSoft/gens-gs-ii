@@ -33,6 +33,8 @@
 namespace LibGens
 {
 
+class Zomg;
+
 class M68K
 {
 	public:
@@ -56,6 +58,8 @@ class M68K
 	
 	protected:
 		static S68000CONTEXT m_context;
+		friend class Zomg; // Zomg needs to access m_context.
+		
 		static STARSCREAM_PROGRAMREGION M68K_Fetch[];
 		static STARSCREAM_DATAREGION M68K_Read_Byte[4];
 		static STARSCREAM_DATAREGION M68K_Read_Word[4];

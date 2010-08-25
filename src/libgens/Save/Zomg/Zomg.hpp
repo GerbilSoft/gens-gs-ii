@@ -46,6 +46,7 @@
 #include "zomg_vdp.h"
 #include "zomg_psg.h"
 #include "zomg_ym2612.h"
+#include "zomg_m68k.h"
 
 namespace LibGens
 {
@@ -73,6 +74,8 @@ class Zomg
 		struct ZomgMd_t
 		{
 			Zomg_Ym2612Save_t ym2612;
+			Zomg_M68KMemSave_t m68k_mem;
+			Zomg_M68KRegSave_t m68k_reg;
 		};
 		ZomgMd_t m_md;
 };

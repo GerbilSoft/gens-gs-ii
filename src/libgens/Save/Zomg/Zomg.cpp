@@ -31,6 +31,8 @@
 
 #include "MD/VdpIo.hpp"
 #include "sound/SoundMgr.hpp"
+#include "cpu/M68K_Mem.hpp"
+#include "cpu/M68K.hpp"
 
 #ifdef _WIN32
 // MiniZip Win32 I/O handler.
@@ -148,6 +150,8 @@ int Zomg::load(void)
 	LoadFromZomg(unzZomg, "MD/VSRam.bin", m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
 	LoadFromZomg(unzZomg, "common/psg.bin", &m_psg, sizeof(m_psg));
 	LoadFromZomg(unzZomg, "MD/YM2612_reg.bin", &m_md.ym2612, sizeof(m_md.ym2612));
+	LoadFromZomg(unzZomg, "MD/M68K_mem.bin", &m_md.m68k_mem, sizeof(m_md.m68k_mem));
+	LoadFromZomg(unzZomg, "MD/M68K_reg.bin", &m_md.m68k_reg, sizeof(m_md.m68k_reg));
 	
 	// Close the ZOMG file.
 	unzClose(unzZomg);
@@ -196,6 +200,25 @@ int Zomg::load(void)
 	
 	// Load the YM2612 state.
 	SoundMgr::ms_Ym2612.zomgRestore(&m_md.ym2612);
+	
+	/** MD: M68K **/
+	
+	// Load the M68K memory.
+	// TODO: Create a byteswapping memcpy().
+	memcpy(&Ram_68k.u16[0], m_md.m68k_mem.mem, sizeof(m_md.m68k_mem.mem));
+	be16_to_cpu_array(&Ram_68k.u16[0], sizeof(m_md.m68k_mem.mem));
+	
+	// Load the M68K registers.
+	main68k_GetContext(&M68K::m_context);
+	for (unsigned int i = 0; i < 8; i++)
+	{
+		M68K::m_context.areg[i] = be32_to_cpu(m_md.m68k_reg.areg[i]);
+		M68K::m_context.dreg[i] = be32_to_cpu(m_md.m68k_reg.dreg[i]);
+	}
+	M68K::m_context.asp = be32_to_cpu(m_md.m68k_reg.asp);
+	M68K::m_context.pc = be32_to_cpu(m_md.m68k_reg.pc);
+	M68K::m_context.sr = be16_to_cpu(m_md.m68k_reg.sr);
+	main68k_SetContext(&M68K::m_context);
 	
 	// Savestate loaded.
 	return 0;
@@ -332,6 +355,25 @@ int Zomg::save(void)
 	// Save the YM2612 state.
 	SoundMgr::ms_Ym2612.zomgSave(&m_md.ym2612);
 	
+	/** MD: M68K **/
+	
+	// Save the M68K memory.
+	// TODO: Create a byteswapping memcpy().
+	memcpy(m_md.m68k_mem.mem, &Ram_68k.u16[0], sizeof(m_md.m68k_mem));
+	be16_to_cpu_array(m_md.m68k_mem.mem, sizeof(m_md.m68k_mem));
+	
+	// Save the M68K registers.
+	struct S68000CONTEXT ZomgContext_M68K;
+	main68k_GetContext(&ZomgContext_M68K);
+	for (unsigned int i = 0; i < 8; i++)
+	{
+		m_md.m68k_reg.areg[i] = cpu_to_be32(ZomgContext_M68K.areg[i]);
+		m_md.m68k_reg.dreg[i] = cpu_to_be32(ZomgContext_M68K.dreg[i]);
+	}
+	m_md.m68k_reg.asp = cpu_to_be32(ZomgContext_M68K.asp);
+	m_md.m68k_reg.pc = cpu_to_be32(ZomgContext_M68K.pc);
+	m_md.m68k_reg.sr = cpu_to_be16(ZomgContext_M68K.sr);
+	
 	/** Write to the ZOMG file. **/
 	SaveToZomg(zipZomg, "common/vdp_reg.bin", m_vdp.vdp_reg.md, sizeof(m_vdp.vdp_reg.md));
 	SaveToZomg(zipZomg, "common/VRam.bin", m_vdp.VRam.md, sizeof(m_vdp.VRam.md));
@@ -339,6 +381,8 @@ int Zomg::save(void)
 	SaveToZomg(zipZomg, "MD/VSRam.bin", m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
 	SaveToZomg(zipZomg, "common/psg.bin", &m_psg, sizeof(m_psg));
 	SaveToZomg(zipZomg, "MD/YM2612_reg.bin", &m_md.ym2612, sizeof(m_md.ym2612));
+	SaveToZomg(zipZomg, "MD/M68K_mem.bin", &m_md.m68k_mem, sizeof(m_md.m68k_mem));
+	SaveToZomg(zipZomg, "MD/M68K_reg.bin", &m_md.m68k_reg, sizeof(m_md.m68k_reg));
 	
 	// Close the ZOMG file.
 	zipClose(zipZomg, NULL);
