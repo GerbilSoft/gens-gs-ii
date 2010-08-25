@@ -144,6 +144,8 @@ components that are common throughout the Sega 8-bit and 16-bit hardware line.
 | VRam.bin       | 16,384; 65,536 |   Varies   |
 | CRam.bin       |    32; 64; 128 |   Varies   |
 | psg.bin        |             23 |    8-bit   |
+| Z80_mem.bin    |    1, 2, 8 KiB |    8-bit   |
+| Z80_reg.bin    |             28 |     LE     |
 +----------------+----------------+------------+
 
 ----------------------------------------------------------------
@@ -180,7 +182,7 @@ have a different size and format:
 - All Sega 8-bit systems: 16,384 bytes; 8-bit
 - Sega Mega Drive:        32,768 words; 16-bit BE
 
-C equivalents:
+C equivalents for VRam.bin:
 uint8_t vram_8bit[16384];	// Sega 8-bit systems.
 uint16_t vram_md[32768];	// Sega Mega Drive. (16-bit BE)
 
@@ -196,7 +198,7 @@ be remapped. There are three different Color RAM formats.
 - Sega Mega Drive:     128 bytes; 16-bit BE (9 bits per color usable)
 - Sega Game Gear:       64 bytes; 16-bit LE (12 bits per color usable)
 
-C equivalents:
+C equivalents for CRam.bin:
 uint8_t cram_mk3[32];		// Sega Mark III / Sega Master System.
 uint16_t cram_md[64];		// Sega Mega Drive. (16-bit BE)
 uint16_t cram_gg[32];		// Sega Game Gear. (16-bit LE)
@@ -240,7 +242,10 @@ For the vol_reg[] field, each channel has 4 significant bits.
 For the tone_ctr[] field, if an emulator does not support saving the
 internal counters, it should write 0xFFFF to indicate this.
 
-For the gg_stereo field, 
+For the gg_stereo field, if an emulator does not support Game Gear stereo,
+set the field to 0xFF.
+
+C equivalent for psg.bin:
 
 typedef struct _ZOMG_psg_t
 {
@@ -252,6 +257,59 @@ typedef struct _ZOMG_psg_t
 	
 	uint8_t gg_stereo;	// 8-bit: Stereo register. (Game Gear only.)
 } ZOMG_psg_t;
+
+----------------------------------------------------------------
+
+4.5. Z80_mem.bin: Zilog Z80 memory.
+
+This file contains the system memory that is directly accessible by the
+Z80 CPU. The Z80 memory size depends on the console. Z80 memory is 8-bit,
+since the Z80 CPU is an 8-bit processor.
+
+Memory sizes:
+- Sega SG-1000:        2,048 bytes
+- ColecoVision:        1,024 bytes
+- Sega Mark III (SMS): 8,192 bytes
+- Sega Mega Drive:     8,192 bytes
+
+C equivalents for Z80_mem.bin:
+
+uint8_t Z80_mem_sg1000[2048];	// Sega SG-1000.
+uint8_t Z80_mem_cv[1024];	// ColecoVision.
+uint8_t Z80_mem_mk3[8192];	// Sega Mark III (SMS), Sega Mega Drive
+
+----------------------------------------------------------------
+
+4.6. Z80_reg.bin: Zilog Z80 registers.
+
+This file contains the registers found in the Z80 CPU.
+
+C equivalent for Z80_reg.bin:
+
+typedef struct _ZOMG_Z80_reg_t
+{
+	// Main register set.
+	uint16_t AF;	// 16-bit LE: AF register.
+	uint16_t BC;	// 16-bit LE: BC register.
+	uint16_t DE;	// 16-bit LE: DE register.
+	uint16_t HL;	// 16-bit LE: HL register.
+	uint16_t IX;	// 16-bit LE: IX register.
+	uint16_t IY;	// 16-bit LE: IY register.
+	uint16_t PC;	// 16-bit LE: PC register.
+	uint16_t SP;	// 16-bit LE: SP register.
+	
+	// Shadow register set.
+	uint16_t AF2;	// 16-bit LE: AF' register.
+	uint16_t BC2;	// 16-bit LE: BC' register.
+	uint16_t DE2;	// 16-bit LE: DE' register.
+	uint16_t HL2;	// 16-bit LE: HL' register.
+	
+	// Other registers.
+	uint8_t IFF;	// 8-bit: IFF flipflops. [0 0 0 0 0 0 IFF2 IFF1]
+	uint8_t R;	// 8-bit: R register.
+	uint8_t I;	// 8-bit: I register.
+	uint8_t IM;	// 8-bit: IM register. (0, 1, 2)
+} ZOMG_Z80_reg_t;
 
 ================================================================
 
@@ -266,6 +324,8 @@ components that are specific to the Sega Mega Drive hardware.
 | YM2612_reg.bin |            512 |    None    |
 | M68K_mem.bin   |         65,536 |  16-bit BE |
 | M68K_reg.bin   |             74 |     BE     |
+| IO.bin         |             16 |    8-bit   |
+| Z80_ctrl.bin   |              4 |    8-bit   |
 +----------------+----------------+------------+
 
 ----------------------------------------------------------------
@@ -315,3 +375,81 @@ typedef struct _ZOMG_M68K_reg_t
 	uint32_t asp;		// 32-bit BE: Alternate stack pointer.
 	uint16_t sr;		// 16-bit BE: Status register.
 } ZOMG_M68K_reg_t;
+
+----------------------------------------------------------------
+
+5.4. IO.bin: Mega Drive I/O state.
+
+This file contains the current state of the I/O ports in the $A10000 region.
+
+Each I/O port has a 16-bit address; however, only the low byte is mapped to
+an actual register, so only the low byte will be stored in IO.bin.
+
+Notes:
+
+- The version register ($A10001) only has two bits relevant for savestates:
+  NTSC/PAL and East/West. These bits should be restored by changing the
+  system region setting when loading the savestate, but this can be
+  overridden by the user.
+
+- For the Control Port Data registers, the saved value should be the last
+  value written to the port by the M68K.
+
+- If an emulator doesn't support a particular Control Port or specific
+  functionality of a Control Port, fill in the unsupported fields using
+  the following values:
+
+  * Data: 0xFF
+  * Ctrl: 0xFF
+  * Serial TxData: 0xFF
+  * Serial RxData: 0xFF
+  * Serial Control: 0x00
+
+C equivalent for IO.bin:
+
+typedef struct _ZOMG_MD_IO_t
+{
+	uint8_t version_reg;	// $A10001: Version register.
+	uint8_t port1_data;	// $A10003: Control Port 1: Data.
+	uint8_t port2_data;	// $A10005: Control Port 2: Data.
+	uint8_t port3_data;	// $A10007: Control Port 3: Data.
+	uint8_t port1_ctrl;	// $A10009: Control Port 1: Ctrl.
+	uint8_t port2_ctrl;	// $A1000B: Control Port 2: Ctrl.
+	uint8_t port3_ctrl;	// $A1000D: Control Port 3: Ctrl.
+	uint8_t port1_ser_tx;	// $A1000F: Control Port 1: Serial TxData.
+	uint8_t port1_ser_rx;	// $A10011: Control Port 1: Serial RxData.
+	uint8_t port1_ser_ctrl;	// $A10013: Control Port 1: Serial Control.
+	uint8_t port2_ser_tx;	// $A10015: Control Port 2: Serial TxData.
+	uint8_t port2_ser_rx;	// $A10017: Control Port 2: Serial RxData.
+	uint8_t port2_ser_ctrl;	// $A10019: Control Port 2: Serial Control.
+	uint8_t port3_ser_tx;	// $A1001B: Control Port 3: Serial TxData.
+	uint8_t port3_ser_rx;	// $A1001D: Control Port 3: Serial RxData.
+	uint8_t port3_ser_ctrl;	// $A1001F: Control Port 3: Serial Control.
+} ZOMG_MD_IO_t;
+
+----------------------------------------------------------------
+
+5.5. Z80_ctrl.bin: Z80 control logic.
+
+The Sega Mega Drive has a Z80 as a secondary processor. In order to control
+access to the Z80, the main 68000 has special control registers to control
+the state of the Z80 bus as well as the memory accessible in the Z80 banking
+page (0x8000-0xFFFF in Z80 space).
+
+C equivalent for Z80_ctrl.bin:
+
+typedef struct _ZOMG_MD_Z80_ctrl_t
+{
+	uint8_t busreq;		// 8-bit: BUSREQ state.
+				// 0 == M68K has the bus.
+				// 1 == Z80 has the bus.
+	
+	uint8_t reset;		// 8-bit: RESET state.
+				// 0 == Z80 is running.
+				// 1 == Z80 is RESET.
+	
+	uint16_t m68k_bank;	// 8-bit: M68K banking register.
+				// Low 9 bits of m68k_bank indicate
+				// high 9 bits of M68K address space
+				// for the Z80 banking space.
+} ZOMG_MD_Z80_ctrl_t;
