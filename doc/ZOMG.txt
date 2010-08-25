@@ -321,6 +321,7 @@ components that are specific to the Sega Mega Drive hardware.
 +----------------+----------------+------------+
 | Filename       |  Size (bytes)  | Endianness |
 +----------------+----------------+------------+
+| VSRam.bin      |             80 |  16-bit BE |
 | YM2612_reg.bin |            512 |    None    |
 | M68K_mem.bin   |         65,536 |  16-bit BE |
 | M68K_reg.bin   |             74 |     BE     |
@@ -330,7 +331,33 @@ components that are specific to the Sega Mega Drive hardware.
 
 ----------------------------------------------------------------
 
-5.1. YM2612_reg.bin: Yamaha YM2612 registers
+5.1. VSRam.bin: Vertical Scroll RAM
+
+This file contains the Vertical Scroll RAM found in the Mega Drive VDP.
+This memory controls the vertical scrolling attributes.
+
+40 words are available in VSRam. Depending on the scrolling mode, even words
+control 2-cell columns in plane A and odd words control 2-cell columns in
+plane B, or the first two words control the entirety of plane A and plane B,
+respectively.
+
+C equivalent for VSRam.bin:
+
+typedef struct _ZOMG_Z80_reg_t
+{
+	uint16_t md_vsram[40];		// 16-bit BE: Vertical Scroll RAM.
+};
+
+Alternate C equivalent for VSRam.bin with simplified A/B access:
+
+typedef struct _ZOMG_Z80_reg_t
+{
+	uint16_t md_vsram[20][2];	// 16-bit BE: Vertical Scroll RAM.
+};
+
+----------------------------------------------------------------
+
+5.2. YM2612_reg.bin: Yamaha YM2612 registers
 
 This file contains the user-accessible registers found in the Yamaha YM2612
 FM synthesis chip used on the Sega Mega Drive. Each register is 8 bits wide,
@@ -345,7 +372,7 @@ uint8_t ym2612_reg[2][512];	// 8-bit: Yamaha YM2612 registers.
 
 ----------------------------------------------------------------
 
-5.2. M68K_mem.bin: Main MC68000 memory.
+5.3. M68K_mem.bin: Main MC68000 memory.
 
 This file contains the 64 KiB main memory connected to the MC68000.
 Main memory is accessed in 16-bit words in big-endian notation.
@@ -356,7 +383,7 @@ uint16_t m68k_mem[32768];	// 16-bit BE: M68K memory.
 
 ----------------------------------------------------------------
 
-5.3. M68K_reg.bin: Main MC68000 registers.
+5.4. M68K_reg.bin: Main MC68000 registers.
 
 This file contains the registers found in the MC68000 CPU.
 
@@ -378,7 +405,7 @@ typedef struct _ZOMG_M68K_reg_t
 
 ----------------------------------------------------------------
 
-5.4. IO.bin: Mega Drive I/O state.
+5.5. IO.bin: Mega Drive I/O state.
 
 This file contains the current state of the I/O ports in the $A10000 region.
 
@@ -429,7 +456,7 @@ typedef struct _ZOMG_MD_IO_t
 
 ----------------------------------------------------------------
 
-5.5. Z80_ctrl.bin: Z80 control logic.
+5.6. Z80_ctrl.bin: Z80 control logic.
 
 The Sega Mega Drive has a Z80 as a secondary processor. In order to control
 access to the Z80, the main 68000 has special control registers to control
