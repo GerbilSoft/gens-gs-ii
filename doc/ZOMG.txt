@@ -461,12 +461,12 @@ C equivalent for Z80_ctrl.bin:
 typedef struct _ZOMG_MD_Z80_ctrl_t
 {
 	uint8_t busreq;		// 8-bit: BUSREQ state.
-				// 0 == M68K has the bus.
-				// 1 == Z80 has the bus.
+				// 0 == Z80 has the bus.
+				// 1 == M68K has the bus.
 	
 	uint8_t reset;		// 8-bit: RESET state.
-				// 0 == Z80 is running.
-				// 1 == Z80 is RESET.
+				// 0 == Z80 is RESET.
+				// 1 == Z80 is running.
 	
 	uint16_t m68k_bank;	// 8-bit: M68K banking register.
 				// Low 9 bits of m68k_bank indicate
