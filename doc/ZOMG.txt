@@ -341,6 +341,9 @@ control 2-cell columns in plane A and odd words control 2-cell columns in
 plane B, or the first two words control the entirety of plane A and plane B,
 respectively.
 
+Note: In most cases, only the lower 10 bits of each VSRam word are used.
+In interlaced mode, 11 bits are used.
+
 C equivalent for VSRam.bin:
 
 typedef struct _ZOMG_Z80_reg_t
