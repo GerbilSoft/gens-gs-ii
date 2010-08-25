@@ -180,8 +180,13 @@ int Zomg::load(void)
 	
 	/** VDP: MD specific **/
 	
-	// Copy VSRam to VdpIo.
-	memcpy(VdpIo::VSRam.u8, m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
+	// Load VSRam.
+	// TODO: Create a byteswapping memcpy().
+	for (unsigned int i = 0; i < (sizeof(m_vdp.MD_VSRam)/sizeof(m_vdp.MD_VSRam[0])); i++)
+	{
+		m_vdp.MD_VSRam[i] = be16_to_cpu(m_vdp.MD_VSRam[i]);
+	}
+	memcpy(VdpIo::VSRam.u16, m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
 	
 	/** Audio **/
 	
@@ -334,8 +339,13 @@ int Zomg::save(void)
 	
 	/** VDP: MD specific **/
 	
-	// Copy VSRam from VdpIo.
-	memcpy(m_vdp.MD_VSRam, VdpIo::VSRam.u8, sizeof(m_vdp.MD_VSRam));
+	// Save VSRam.
+	// TODO: Create a byteswapping memcpy().
+	memcpy(m_vdp.MD_VSRam, VdpIo::VSRam.u16, sizeof(m_vdp.MD_VSRam));
+	for (unsigned int i = 0; i < (sizeof(m_vdp.MD_VSRam)/sizeof(m_vdp.MD_VSRam[0])); i++)
+	{
+		m_vdp.MD_VSRam[i] = cpu_to_be16(m_vdp.MD_VSRam[i]);
+	}
 	
 	/** Audio **/
 	

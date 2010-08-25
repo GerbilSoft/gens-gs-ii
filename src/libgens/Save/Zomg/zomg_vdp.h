@@ -77,7 +77,7 @@ typedef struct PACKED _Zomg_VdpSave_t
 	 * MD_VSRam: Vertical Scroll RAM.
 	 * File: MD/VSRam.bin
 	 */
-	uint8_t MD_VSRam[80];
+	uint16_t MD_VSRam[40];
 } Zomg_VdpSave_t;
 #pragma pack(0)
 
