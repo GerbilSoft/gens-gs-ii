@@ -45,7 +45,7 @@ Windows-style pathnames can be used for emulators running on Windows.
 Due to the similarities between most of the Sega 8-bit and 16-bit systems,
 common components shared between the systems will be stored in a /common
 subdirectory. System-specific data will be stored in a system-specific
-subdirectory, e.g. /sms for Sega Master System or /md for Sega Mega Drive.
+subdirectory, e.g. /SMS for Sega Master System or /MD for Sega Mega Drive.
 
 Save files may have a specified endianness. They are "BE" for Big Endian
 (Motorola format) and "LE" for Little Endian (Intel format), along with
@@ -140,10 +140,10 @@ components that are common throughout the Sega 8-bit and 16-bit hardware line.
 +----------------+----------------+------------+
 | Filename       |  Size (bytes)  | Endianness |
 +----------------+----------------+------------+
-| vdp_reg.bin    |      8; 11; 24 |    None    |
+| vdp_reg.bin    |      8; 11; 24 |    8-bit   |
 | VRam.bin       | 16,384; 65,536 |   Varies   |
 | CRam.bin       |    32; 64; 128 |   Varies   |
-| psg.bin        |             23 |    None    |
+| psg.bin        |             23 |    8-bit   |
 +----------------+----------------+------------+
 
 ----------------------------------------------------------------
@@ -264,6 +264,8 @@ components that are specific to the Sega Mega Drive hardware.
 | Filename       |  Size (bytes)  | Endianness |
 +----------------+----------------+------------+
 | YM2612_reg.bin |            512 |    None    |
+| M68K_mem.bin   |         65,536 |  16-bit BE |
+| M68K_reg.bin   |             74 |     BE     |
 +----------------+----------------+------------+
 
 ----------------------------------------------------------------
@@ -279,4 +281,37 @@ They may be added to another file later on.
 
 C equivalent for YM2612_reg.bin:
 
-uint8_t ym2612_reg[2][512];	// Yamaha YM2612 registers.
+uint8_t ym2612_reg[2][512];	// 8-bit: Yamaha YM2612 registers.
+
+----------------------------------------------------------------
+
+5.2. M68K_mem.bin: Main MC68000 memory.
+
+This file contains the 64 KiB main memory connected to the MC68000.
+Main memory is accessed in 16-bit words in big-endian notation.
+
+C equivalent for M68K_mem.bin:
+
+uint16_t m68k_mem[32768];	// 16-bit BE: M68K memory.
+
+----------------------------------------------------------------
+
+5.3. M68K_reg.bin: Main MC68000 registers.
+
+This file contains the registers found in the MC68000 CPU.
+
+Note: The alternate stack pointer can be either the user stack pointer or
+the supervisor stack pointer, depending on the status register. The other
+stack pointer is stored as areg[7], so we don't have to differentiate between
+the two in the save file.
+
+C equivalent for M68K_reg.bin:
+
+typedef struct _ZOMG_M68K_reg_t
+{
+	uint32_t areg[8];	// 32-bit BE: Address registers.
+	uint32_t dreg[8];	// 32-bit BE: Data registers.
+	uint32_t pc;		// 32-bit BE: Program counter.
+	uint32_t asp;		// 32-bit BE: Alternate stack pointer.
+	uint16_t sr;		// 16-bit BE: Status register.
+} ZOMG_M68K_reg_t;
