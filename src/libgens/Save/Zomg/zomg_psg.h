@@ -64,7 +64,7 @@ typedef struct PACKED _Zomg_PsgSave_t
 	
 	/**
 	 * gg_stereo: Game Gear stereo register.
-	 * Set to 0x00 for other PSGs.
+	 * Set to 0xFF for other PSGs.
 	 */
 	uint8_t gg_stereo;
 } Zomg_PsgSave_t;

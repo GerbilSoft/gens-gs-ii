@@ -59,7 +59,7 @@ const Zomg_PsgSave_t Psg::ms_psgStateInit =
 	{0, 0, 0, 0},			// TONE counters. (TODO)
 	
 	LFSR_INIT,	// LFSR mask
-	0x00		// Game Gear stereo register.
+	0xFF		// Game Gear stereo register.
 };
 
 /** Gens-specific externs and variables **/
