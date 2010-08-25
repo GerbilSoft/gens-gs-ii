@@ -56,7 +56,6 @@ void EmuThread::stop(void)
 	m_mutex.unlock();
 }
 
-#include <stdio.h>
 void EmuThread::run(void)
 {
 	// NOTE: LibGens initialization is done elsewhere.
