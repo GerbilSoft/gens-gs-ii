@@ -344,19 +344,9 @@ respectively.
 Note: In most cases, only the lower 10 bits of each VSRam word are used.
 In interlaced mode, 11 bits are used.
 
-C equivalent for VSRam.bin:
-
-typedef struct _ZOMG_Z80_reg_t
-{
-	uint16_t md_vsram[40];		// 16-bit BE: Vertical Scroll RAM.
-};
-
-Alternate C equivalent for VSRam.bin with simplified A/B access:
-
-typedef struct _ZOMG_Z80_reg_t
-{
-	uint16_t md_vsram[20][2];	// 16-bit BE: Vertical Scroll RAM.
-};
+C equivalents for VSRam.bin:
+uint16_t md_vsram[40];		// 16-bit BE: Vertical Scroll RAM.
+uint16_t md_vsram[20][2];	// Alternate version with simplied A/B access.
 
 ----------------------------------------------------------------
 
