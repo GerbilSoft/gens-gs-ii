@@ -35,6 +35,7 @@
 #include "cpu/M68K.hpp"
 #include "cpu/Z80_MD_Mem.hpp"
 #include "cpu/Z80.hpp"
+#include "MD/EmuMD.hpp"
 
 #ifdef _WIN32
 // MiniZip Win32 I/O handler.
@@ -157,6 +158,7 @@ int Zomg::load(void)
 	LoadFromZomg(unzZomg, "MD/YM2612_reg.bin", &m_md.ym2612, sizeof(m_md.ym2612));
 	LoadFromZomg(unzZomg, "MD/M68K_mem.bin", &m_md.m68k_mem, sizeof(m_md.m68k_mem));
 	LoadFromZomg(unzZomg, "MD/M68K_reg.bin", &m_md.m68k_reg, sizeof(m_md.m68k_reg));
+	LoadFromZomg(unzZomg, "MD/IO.bin", &m_md.md_io, sizeof(m_md.md_io));
 	
 	// Close the ZOMG file.
 	unzClose(unzZomg);
@@ -229,6 +231,32 @@ int Zomg::load(void)
 	
 	// Load the M68K registers.
 	M68K::ZomgRestoreReg(&m_md.m68k_reg);
+	
+	/** MD: Other **/
+	
+	// Load the I/O registers. ($A10001-$A1001F, odd bytes)
+	// TODO: Create/use the version register function in M68K_Mem.cpp.
+	IoBase::Zomg_MD_IoSave_int_t io_int;
+	// TODO: Set MD version register.
+	//m_md.md_io.version_reg = ((M68K_Mem::ms_Region.region() << 6) | 0x20);
+	io_int.data     = m_md.md_io.port1_data;
+	io_int.ctrl     = m_md.md_io.port1_ctrl;
+	io_int.ser_tx   = m_md.md_io.port1_ser_tx;
+	io_int.ser_rx   = m_md.md_io.port1_ser_rx;
+	io_int.ser_ctrl = m_md.md_io.port1_ser_ctrl;
+	EmuMD::m_port1->zomgRestoreMD(&io_int);
+	io_int.data     = m_md.md_io.port2_data;
+	io_int.ctrl     = m_md.md_io.port2_ctrl;
+	io_int.ser_tx   = m_md.md_io.port2_ser_tx;
+	io_int.ser_rx   = m_md.md_io.port2_ser_rx;
+	io_int.ser_ctrl = m_md.md_io.port2_ser_ctrl;
+	EmuMD::m_port2->zomgRestoreMD(&io_int);
+	io_int.data     = m_md.md_io.port3_data;
+	io_int.ctrl     = m_md.md_io.port3_ctrl;
+	io_int.ser_tx   = m_md.md_io.port3_ser_tx;
+	io_int.ser_rx   = m_md.md_io.port3_ser_rx;
+	io_int.ser_ctrl = m_md.md_io.port3_ser_ctrl;
+	EmuMD::m_portE->zomgRestoreMD(&io_int);
 	
 	// Savestate loaded.
 	return 0;
@@ -389,6 +417,31 @@ int Zomg::save(void)
 	// Save the M68K registers.
 	M68K::ZomgSaveReg(&m_md.m68k_reg);
 	
+	/** MD: Other **/
+	
+	// Save the I/O registers. ($A10001-$A1001F, odd bytes)
+	// TODO: Create/use the version register function in M68K_Mem.cpp.
+	IoBase::Zomg_MD_IoSave_int_t io_int;
+	m_md.md_io.version_reg = ((M68K_Mem::ms_Region.region() << 6) | 0x20);
+	EmuMD::m_port1->zomgSaveMD(&io_int);
+	m_md.md_io.port1_data     = io_int.data;
+	m_md.md_io.port1_ctrl     = io_int.ctrl;
+	m_md.md_io.port1_ser_tx   = io_int.ser_tx;
+	m_md.md_io.port1_ser_rx   = io_int.ser_rx;
+	m_md.md_io.port1_ser_ctrl = io_int.ser_ctrl;
+	EmuMD::m_port2->zomgSaveMD(&io_int);
+	m_md.md_io.port2_data     = io_int.data;
+	m_md.md_io.port2_ctrl     = io_int.ctrl;
+	m_md.md_io.port2_ser_tx   = io_int.ser_tx;
+	m_md.md_io.port2_ser_rx   = io_int.ser_rx;
+	m_md.md_io.port2_ser_ctrl = io_int.ser_ctrl;
+	EmuMD::m_portE->zomgSaveMD(&io_int);
+	m_md.md_io.port3_data     = io_int.data;
+	m_md.md_io.port3_ctrl     = io_int.ctrl;
+	m_md.md_io.port3_ser_tx   = io_int.ser_tx;
+	m_md.md_io.port3_ser_rx   = io_int.ser_rx;
+	m_md.md_io.port3_ser_ctrl = io_int.ser_ctrl;
+	
 	/** Write to the ZOMG file. **/
 	SaveToZomg(zipZomg, "common/vdp_reg.bin", m_vdp.vdp_reg.md, sizeof(m_vdp.vdp_reg.md));
 	SaveToZomg(zipZomg, "common/VRam.bin", m_vdp.VRam.md, sizeof(m_vdp.VRam.md));
@@ -401,6 +454,7 @@ int Zomg::save(void)
 	SaveToZomg(zipZomg, "MD/YM2612_reg.bin", &m_md.ym2612, sizeof(m_md.ym2612));
 	SaveToZomg(zipZomg, "MD/M68K_mem.bin", &m_md.m68k_mem, sizeof(m_md.m68k_mem));
 	SaveToZomg(zipZomg, "MD/M68K_reg.bin", &m_md.m68k_reg, sizeof(m_md.m68k_reg));
+	SaveToZomg(zipZomg, "MD/IO.bin", &m_md.md_io, sizeof(m_md.md_io));
 	
 	// Close the ZOMG file.
 	zipClose(zipZomg, NULL);

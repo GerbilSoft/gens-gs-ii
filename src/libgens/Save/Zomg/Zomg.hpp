@@ -48,6 +48,7 @@
 #include "zomg_ym2612.h"
 #include "zomg_m68k.h"
 #include "zomg_z80.h"
+#include "zomg_md_io.h"
 
 namespace LibGens
 {
@@ -81,6 +82,7 @@ class Zomg
 			Zomg_Ym2612Save_t ym2612;
 			Zomg_M68KMemSave_t m68k_mem;
 			Zomg_M68KRegSave_t m68k_reg;
+			Zomg_MD_IoSave_t md_io;
 		};
 		ZomgMd_t m_md;
 };
