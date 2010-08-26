@@ -326,7 +326,7 @@ components that are specific to the Sega Mega Drive hardware.
 | M68K_mem.bin   |         65,536 |  16-bit BE |
 | M68K_reg.bin   |             74 |     BE     |
 | IO.bin         |             16 |    8-bit   |
-| Z80_ctrl.bin   |              4 |    8-bit   |
+| Z80_ctrl.bin   |              4 |   Varies   |
 +----------------+----------------+------------+
 
 ----------------------------------------------------------------
