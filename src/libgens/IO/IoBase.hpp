@@ -131,6 +131,18 @@ class IoBase
 			((void)button);
 			return NULL;
 		}
+		
+		/** ZOMG savestate functions. **/
+		struct Zomg_MD_IoSave_int_t
+		{
+			uint8_t data;
+			uint8_t ctrl;
+			uint8_t ser_tx;
+			uint8_t ser_rx;
+			uint8_t ser_ctrl;
+		};
+		void zomgSaveMD(Zomg_MD_IoSave_int_t *state);
+		void zomgRestoreMD(const Zomg_MD_IoSave_int_t *state);
 	
 	protected:
 		uint8_t m_ctrl;		// Tristate control.

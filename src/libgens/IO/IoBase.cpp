@@ -104,4 +104,40 @@ void IoBase::update(void)
 	m_buttons = ~m_buttons;
 }
 
+
+/** ZOMG savestate functions. **/
+
+
+/**
+ * zomgSaveMD(): Save the controller port state. (MD version)
+ * @param state Zomg_PsgSave_t struct to save to.
+ */
+void IoBase::zomgSaveMD(Zomg_MD_IoSave_int_t *state)
+{
+	state->data = m_lastData;
+	state->ctrl = m_ctrl;
+	
+	// Serial I/O registers.
+	state->ser_tx = m_serLastTx;
+	state->ser_rx = 0xFF; // TODO
+	state->ser_ctrl = m_serCtrl;
+}
+
+
+/**
+ * zomgRestoreMD(): Restore the controller port state. (MD version)
+ * @param state Zomg_MD_IoSave_int_t struct to restore from.
+ */
+void IoBase::zomgRestoreMD(const Zomg_MD_IoSave_int_t *state)
+{
+	// TODO: writeCtrl() / writeData() or just manually save it?
+	this->writeCtrl(state->ctrl);
+	this->writeData(state->data);
+	
+	// Serial I/O registers.
+	m_serLastTx = state->ser_tx;
+	//m_serRx = state->ser_rx; // TODO
+	m_serCtrl = state->ser_ctrl;
+}
+
 }
