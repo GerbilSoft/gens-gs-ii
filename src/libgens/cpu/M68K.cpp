@@ -24,6 +24,9 @@
 #include "M68K.hpp"
 #include "M68K_Mem.hpp"
 
+// Byteswapping macros. (Needed for ZOMG save/load.)
+#include "../Util/byteswap.h"
+
 // C includes.
 #include <string.h>
 
@@ -234,6 +237,47 @@ void M68K::InitSys(SysID system)
 	
 	// Initialize the M68K memory handlers.
 	M68K_Mem::InitSys(system);
+}
+
+
+/** ZOMG savestate functions. **/
+
+
+/**
+ * ZomgSaveReg(): Save the M68K registers.
+ * @param state Zomg_M68KRegSave_t struct to save to.
+ */
+void M68K::ZomgSaveReg(Zomg_M68KRegSave_t *state)
+{
+	struct S68000CONTEXT m68k_context;
+	main68k_GetContext(&m68k_context);
+	for (unsigned int i = 0; i < 8; i++)
+	{
+		state->areg[i] = cpu_to_be32(m68k_context.areg[i]);
+		state->dreg[i] = cpu_to_be32(m68k_context.dreg[i]);
+	}
+	state->asp = cpu_to_be32(m68k_context.asp);
+	state->pc = cpu_to_be32(m68k_context.pc);
+	state->sr = cpu_to_be16(m68k_context.sr);
+}
+
+
+/**
+ * ZomgRestoreReg(): Restore the M68K registers.
+ * @param state Zomg_M68KRegSave_t struct to restore from.
+ */
+void M68K::ZomgRestoreReg(const Zomg_M68KRegSave_t *state)
+{
+	main68k_GetContext(&m_context);
+	for (unsigned int i = 0; i < 8; i++)
+	{
+		m_context.areg[i] = be32_to_cpu(state->areg[i]);
+		m_context.dreg[i] = be32_to_cpu(state->dreg[i]);
+	}
+	m_context.asp = be32_to_cpu(state->asp);
+	m_context.pc = be32_to_cpu(state->pc);
+	m_context.sr = be16_to_cpu(state->sr);
+	main68k_SetContext(&m_context);
 }
 
 }

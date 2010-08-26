@@ -26,6 +26,9 @@
 
 #include "star_68k.h"
 
+// ZOMG M68K structs.
+#include "../Save/Zomg/zomg_m68k.h"
+
 // TODO: Move these elsewhere!
 #define CLOCK_NTSC 53693175
 #define CLOCK_PAL  53203424
@@ -55,10 +58,13 @@ class M68K
 		};
 		
 		static void InitSys(SysID system);
+		
+		/** ZOMG savestate functions. **/
+		static void ZomgSaveReg(Zomg_M68KRegSave_t *state);
+		static void ZomgRestoreReg(const Zomg_M68KRegSave_t *state);
 	
 	protected:
 		static S68000CONTEXT m_context;
-		friend class Zomg; // Zomg needs to access m_context.
 		
 		static STARSCREAM_PROGRAMREGION M68K_Fetch[];
 		static STARSCREAM_DATAREGION M68K_Read_Byte[4];

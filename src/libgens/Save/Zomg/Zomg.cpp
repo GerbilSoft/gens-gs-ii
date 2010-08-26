@@ -228,16 +228,7 @@ int Zomg::load(void)
 	be16_to_cpu_array(&Ram_68k.u16[0], sizeof(m_md.m68k_mem.mem));
 	
 	// Load the M68K registers.
-	main68k_GetContext(&M68K::m_context);
-	for (unsigned int i = 0; i < 8; i++)
-	{
-		M68K::m_context.areg[i] = be32_to_cpu(m_md.m68k_reg.areg[i]);
-		M68K::m_context.dreg[i] = be32_to_cpu(m_md.m68k_reg.dreg[i]);
-	}
-	M68K::m_context.asp = be32_to_cpu(m_md.m68k_reg.asp);
-	M68K::m_context.pc = be32_to_cpu(m_md.m68k_reg.pc);
-	M68K::m_context.sr = be16_to_cpu(m_md.m68k_reg.sr);
-	main68k_SetContext(&M68K::m_context);
+	M68K::ZomgRestoreReg(&m_md.m68k_reg);
 	
 	// Savestate loaded.
 	return 0;
@@ -396,16 +387,7 @@ int Zomg::save(void)
 	be16_to_cpu_array(m_md.m68k_mem.mem, sizeof(m_md.m68k_mem));
 	
 	// Save the M68K registers.
-	struct S68000CONTEXT ZomgContext_M68K;
-	main68k_GetContext(&ZomgContext_M68K);
-	for (unsigned int i = 0; i < 8; i++)
-	{
-		m_md.m68k_reg.areg[i] = cpu_to_be32(ZomgContext_M68K.areg[i]);
-		m_md.m68k_reg.dreg[i] = cpu_to_be32(ZomgContext_M68K.dreg[i]);
-	}
-	m_md.m68k_reg.asp = cpu_to_be32(ZomgContext_M68K.asp);
-	m_md.m68k_reg.pc = cpu_to_be32(ZomgContext_M68K.pc);
-	m_md.m68k_reg.sr = cpu_to_be16(ZomgContext_M68K.sr);
+	M68K::ZomgSaveReg(&m_md.m68k_reg);
 	
 	/** Write to the ZOMG file. **/
 	SaveToZomg(zipZomg, "common/vdp_reg.bin", m_vdp.vdp_reg.md, sizeof(m_vdp.vdp_reg.md));
