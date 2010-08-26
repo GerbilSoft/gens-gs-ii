@@ -30,6 +30,9 @@
 // M68K_Mem is needed for Z80_State.
 #include "M68K_Mem.hpp"
 
+// ZOMG Z80 structs.
+#include "../Save/Zomg/zomg_z80.h"
+
 // C includes.
 #include <stdint.h>
 #include <stdio.h>
@@ -98,6 +101,10 @@ class Z80
 		{
 			mdZ80_set_odo(&ms_Z80, odo);
 		}
+		
+		/** ZOMG savestate functions. **/
+		static void ZomgSaveReg(Zomg_Z80RegSave_t *state);
+		static void ZomgRestoreReg(const Zomg_Z80RegSave_t *state);
 	
 	protected:
 		static Z80_CONTEXT ms_Z80;

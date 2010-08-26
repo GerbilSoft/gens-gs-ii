@@ -25,6 +25,9 @@
 #include "Z80_MD_Mem.hpp"
 #include "M68K_Mem.hpp"
 
+// Byteswapping macros. (Needed for ZOMG save/load.)
+#include "../Util/byteswap.h"
+
 // C includes.
 #include <string.h>
 
@@ -99,6 +102,71 @@ void Z80::ReInit(void)
 	
 	// Reset the Z80.
 	Reset();
+}
+
+
+/** ZOMG savestate functions. **/
+
+
+/**
+ * ZomgSaveReg(): Save the Z80 registers.
+ * @param state Zomg_Z80RegSave_t struct to save to.
+ */
+void Z80::ZomgSaveReg(Zomg_Z80RegSave_t *state)
+{
+	// Main register set.
+	// TODO: Move the (uint16_t) casts to the byteswapping macros?
+	state->AF = cpu_to_le16((uint16_t)(mdZ80_get_AF(&ms_Z80)));
+	state->BC = cpu_to_le16((uint16_t)(ms_Z80.BC.w.BC));
+	state->DE = cpu_to_le16((uint16_t)(ms_Z80.DE.w.DE));
+	state->HL = cpu_to_le16((uint16_t)(ms_Z80.HL.w.HL));
+	state->IX = cpu_to_le16((uint16_t)(ms_Z80.IX.w.IX));
+	state->IY = cpu_to_le16((uint16_t)(ms_Z80.IY.w.IY));
+	state->PC = cpu_to_le16((uint16_t)(mdZ80_get_PC(&ms_Z80)));
+	state->SP = cpu_to_le16((uint16_t)(ms_Z80.SP.w.SP));
+	
+	// Shadow register set.
+	state->AF2 = cpu_to_le16((uint16_t)(mdZ80_get_AF2(&ms_Z80)));
+	state->BC2 = cpu_to_le16((uint16_t)(ms_Z80.BC2.w.BC2));
+	state->DE2 = cpu_to_le16((uint16_t)(ms_Z80.DE2.w.DE2));
+	state->HL2 = cpu_to_le16((uint16_t)(ms_Z80.HL2.w.HL2));
+	
+	// Other registers.
+	state->IFF = ((ms_Z80.IFF.b.IFF1 & 1) | ((ms_Z80.IFF.b.IFF2 & 1) << 1));
+	state->R = ms_Z80.R.b.R1;
+	state->I = ms_Z80.I;
+	state->IM = ms_Z80.IM;
+}
+
+
+/**
+ * ZomgRestoreReg(): Restore the Z80 registers.
+ * @param state Zomg_Z80RegSave_t struct to restore from.
+ */
+void Z80::ZomgRestoreReg(const Zomg_Z80RegSave_t *state)
+{
+	// Main register set.
+	mdZ80_set_AF(&ms_Z80, le16_to_cpu(state->AF));
+	ms_Z80.BC.w.BC = le16_to_cpu(state->BC);
+	ms_Z80.DE.w.DE = le16_to_cpu(state->DE);
+	ms_Z80.HL.w.HL = le16_to_cpu(state->HL);
+	ms_Z80.IX.w.IX = le16_to_cpu(state->IX);
+	ms_Z80.IY.w.IY = le16_to_cpu(state->IY);
+	mdZ80_set_PC(&ms_Z80, le16_to_cpu(state->PC));
+	ms_Z80.SP.w.SP = le16_to_cpu(state->SP);
+	
+	// Shadow register set.
+	mdZ80_set_AF2(&ms_Z80, le16_to_cpu(state->AF2));
+	ms_Z80.BC.w.BC = le16_to_cpu(state->BC2);
+	ms_Z80.DE.w.DE = le16_to_cpu(state->DE2);
+	ms_Z80.HL.w.HL = le16_to_cpu(state->HL2);
+	
+	// Other registers.
+	ms_Z80.IFF.b.IFF1 = (state->IFF & 1);
+	ms_Z80.IFF.b.IFF2 = ((state->IFF & 2) >> 1);
+	ms_Z80.R.b.R1 = state->R;
+	ms_Z80.I = state->I;
+	ms_Z80.IM = state->IM;
 }
 
 }
