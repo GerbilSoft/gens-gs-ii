@@ -468,7 +468,7 @@ typedef struct _ZOMG_MD_Z80_ctrl_t
 				// 0 == Z80 is RESET.
 				// 1 == Z80 is running.
 	
-	uint16_t m68k_bank;	// 8-bit: M68K banking register.
+	uint16_t m68k_bank;	// 16-bit BE: M68K banking register.
 				// Low 9 bits of m68k_bank indicate
 				// high 9 bits of M68K address space
 				// for the Z80 banking space.
