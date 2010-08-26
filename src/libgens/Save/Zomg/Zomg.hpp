@@ -47,6 +47,7 @@
 #include "zomg_psg.h"
 #include "zomg_ym2612.h"
 #include "zomg_m68k.h"
+#include "zomg_z80.h"
 
 namespace LibGens
 {
@@ -69,6 +70,10 @@ class Zomg
 		// Savestate buffers.
 		Zomg_VdpSave_t m_vdp;
 		Zomg_PsgSave_t m_psg;
+		
+		// Z80
+		Zomg_Z80MemSave_t m_z80_mem;
+		Zomg_Z80RegSave_t m_z80_reg;
 		
 		/** MD specific **/
 		struct ZomgMd_t

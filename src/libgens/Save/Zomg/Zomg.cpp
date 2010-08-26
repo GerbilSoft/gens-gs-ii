@@ -33,6 +33,8 @@
 #include "sound/SoundMgr.hpp"
 #include "cpu/M68K_Mem.hpp"
 #include "cpu/M68K.hpp"
+#include "cpu/Z80_MD_Mem.hpp"
+#include "cpu/Z80.hpp"
 
 #ifdef _WIN32
 // MiniZip Win32 I/O handler.
@@ -149,6 +151,9 @@ int Zomg::load(void)
 	LoadFromZomg(unzZomg, "common/CRam.bin", m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
 	LoadFromZomg(unzZomg, "MD/VSRam.bin", m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
 	LoadFromZomg(unzZomg, "common/psg.bin", &m_psg, sizeof(m_psg));
+	LoadFromZomg(unzZomg, "common/Z80_mem.bin", &m_z80_mem.mem_mk3, sizeof(m_z80_mem.mem_mk3));
+	LoadFromZomg(unzZomg, "common/Z80_reg.bin", &m_z80_reg, sizeof(m_z80_reg));
+	// MD-specific.
 	LoadFromZomg(unzZomg, "MD/YM2612_reg.bin", &m_md.ym2612, sizeof(m_md.ym2612));
 	LoadFromZomg(unzZomg, "MD/M68K_mem.bin", &m_md.m68k_mem, sizeof(m_md.m68k_mem));
 	LoadFromZomg(unzZomg, "MD/M68K_reg.bin", &m_md.m68k_reg, sizeof(m_md.m68k_reg));
@@ -205,6 +210,15 @@ int Zomg::load(void)
 	
 	// Load the YM2612 state.
 	SoundMgr::ms_Ym2612.zomgRestore(&m_md.ym2612);
+	
+	/** Z80 **/
+	
+	// Load the Z80 memory.
+	// TODO: Use the correct size based on system.
+	memcpy(Ram_Z80, m_z80_mem.mem_mk3, sizeof(m_z80_mem.mem_mk3));
+	
+	// Load the Z80 registers.
+	Z80::ZomgRestoreReg(&m_z80_reg);
 	
 	/** MD: M68K **/
 	
@@ -365,6 +379,15 @@ int Zomg::save(void)
 	// Save the YM2612 state.
 	SoundMgr::ms_Ym2612.zomgSave(&m_md.ym2612);
 	
+	/** Z80 **/
+	
+	// Load the Z80 memory.
+	// TODO: Use the correct size based on system.
+	memcpy(m_z80_mem.mem_mk3, Ram_Z80, sizeof(m_z80_mem.mem_mk3));
+	
+	// Save the Z80 registers.
+	Z80::ZomgSaveReg(&m_z80_reg);
+	
 	/** MD: M68K **/
 	
 	// Save the M68K memory.
@@ -390,6 +413,9 @@ int Zomg::save(void)
 	SaveToZomg(zipZomg, "common/CRam.bin", m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
 	SaveToZomg(zipZomg, "MD/VSRam.bin", m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
 	SaveToZomg(zipZomg, "common/psg.bin", &m_psg, sizeof(m_psg));
+	SaveToZomg(zipZomg, "common/Z80_mem.bin", &m_z80_mem.mem_mk3, sizeof(m_z80_mem.mem_mk3));
+	SaveToZomg(zipZomg, "common/Z80_reg.bin", &m_z80_reg, sizeof(m_z80_reg));
+	// MD-specific.
 	SaveToZomg(zipZomg, "MD/YM2612_reg.bin", &m_md.ym2612, sizeof(m_md.ym2612));
 	SaveToZomg(zipZomg, "MD/M68K_mem.bin", &m_md.m68k_mem, sizeof(m_md.m68k_mem));
 	SaveToZomg(zipZomg, "MD/M68K_reg.bin", &m_md.m68k_reg, sizeof(m_md.m68k_reg));
