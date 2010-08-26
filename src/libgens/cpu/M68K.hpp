@@ -64,7 +64,7 @@ class M68K
 		static void ZomgRestoreReg(const Zomg_M68KRegSave_t *state);
 	
 	protected:
-		static S68000CONTEXT m_context;
+		static S68000CONTEXT ms_Context;
 		
 		static STARSCREAM_PROGRAMREGION M68K_Fetch[];
 		static STARSCREAM_DATAREGION M68K_Read_Byte[4];

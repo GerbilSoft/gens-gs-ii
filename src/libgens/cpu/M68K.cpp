@@ -33,7 +33,7 @@
 namespace LibGens
 {
 
-S68000CONTEXT M68K::m_context;
+S68000CONTEXT M68K::ms_Context;
 
 // Instruction fetch.
 STARSCREAM_PROGRAMREGION M68K::M68K_Fetch[] =
@@ -133,28 +133,28 @@ void M68K::M68K_Reset_Handler(void)
 void M68K::Init(void)
 {
 	// Clear the 68000 context.
-	memset(&m_context, 0x00, sizeof(m_context));
+	memset(&ms_Context, 0x00, sizeof(ms_Context));
 	
 	// Initialize the memory handlers.
-	m_context.s_fetch = m_context.u_fetch =
-		m_context.fetch = M68K_Fetch;
+	ms_Context.s_fetch = ms_Context.u_fetch =
+		ms_Context.fetch = M68K_Fetch;
 	
-	m_context.s_readbyte = m_context.u_readbyte =
-		m_context.readbyte = M68K_Read_Byte;
+	ms_Context.s_readbyte = ms_Context.u_readbyte =
+		ms_Context.readbyte = M68K_Read_Byte;
 	
-	m_context.s_readword = m_context.u_readword =
-		m_context.readword = M68K_Read_Word;
+	ms_Context.s_readword = ms_Context.u_readword =
+		ms_Context.readword = M68K_Read_Word;
 	
-	m_context.s_writebyte = m_context.u_writebyte =
-		m_context.writebyte = M68K_Write_Byte;
+	ms_Context.s_writebyte = ms_Context.u_writebyte =
+		ms_Context.writebyte = M68K_Write_Byte;
 	
-	m_context.s_writeword = m_context.u_writeword =
-		m_context.writeword = M68K_Write_Word;
+	ms_Context.s_writeword = ms_Context.u_writeword =
+		ms_Context.writeword = M68K_Write_Word;
 	
-	m_context.resethandler = M68K_Reset_Handler;
+	ms_Context.resethandler = M68K_Reset_Handler;
 	
 	// Set up the main68k context.
-	main68k_SetContext(&m_context);
+	main68k_SetContext(&ms_Context);
 	main68k_init();
 }
 
@@ -268,16 +268,16 @@ void M68K::ZomgSaveReg(Zomg_M68KRegSave_t *state)
  */
 void M68K::ZomgRestoreReg(const Zomg_M68KRegSave_t *state)
 {
-	main68k_GetContext(&m_context);
+	main68k_GetContext(&ms_Context);
 	for (unsigned int i = 0; i < 8; i++)
 	{
-		m_context.areg[i] = be32_to_cpu(state->areg[i]);
-		m_context.dreg[i] = be32_to_cpu(state->dreg[i]);
+		ms_Context.areg[i] = be32_to_cpu(state->areg[i]);
+		ms_Context.dreg[i] = be32_to_cpu(state->dreg[i]);
 	}
-	m_context.asp = be32_to_cpu(state->asp);
-	m_context.pc = be32_to_cpu(state->pc);
-	m_context.sr = be16_to_cpu(state->sr);
-	main68k_SetContext(&m_context);
+	ms_Context.asp = be32_to_cpu(state->asp);
+	ms_Context.pc = be32_to_cpu(state->pc);
+	ms_Context.sr = be16_to_cpu(state->sr);
+	main68k_SetContext(&ms_Context);
 }
 
 }
