@@ -159,6 +159,7 @@ int Zomg::load(void)
 	LoadFromZomg(unzZomg, "MD/M68K_mem.bin", &m_md.m68k_mem, sizeof(m_md.m68k_mem));
 	LoadFromZomg(unzZomg, "MD/M68K_reg.bin", &m_md.m68k_reg, sizeof(m_md.m68k_reg));
 	LoadFromZomg(unzZomg, "MD/IO.bin", &m_md.md_io, sizeof(m_md.md_io));
+	LoadFromZomg(unzZomg, "MD/Z80_ctrl.bin", &m_md.md_z80_ctrl, sizeof(m_md.md_z80_ctrl));
 	
 	// Close the ZOMG file.
 	unzClose(unzZomg);
@@ -257,6 +258,14 @@ int Zomg::load(void)
 	io_int.ser_rx   = m_md.md_io.port3_ser_rx;
 	io_int.ser_ctrl = m_md.md_io.port3_ser_ctrl;
 	EmuMD::m_portE->zomgRestoreMD(&io_int);
+	
+	// Load the Z80 control registers.
+	M68K_Mem::Z80_State &= Z80_STATE_ENABLED;
+	if (!m_md.md_z80_ctrl.busreq)
+		M68K_Mem::Z80_State |= Z80_STATE_BUSREQ;
+	if (!m_md.md_z80_ctrl.reset)
+		M68K_Mem::Z80_State |= Z80_STATE_RESET;
+	M68K_Mem::Bank_M68K = ((be16_to_cpu(m_md.md_z80_ctrl.m68k_bank) & 0x1FF) << 15);
 	
 	// Savestate loaded.
 	return 0;
@@ -442,6 +451,11 @@ int Zomg::save(void)
 	m_md.md_io.port3_ser_rx   = io_int.ser_rx;
 	m_md.md_io.port3_ser_ctrl = io_int.ser_ctrl;
 	
+	// Save the Z80 control registers.
+	m_md.md_z80_ctrl.busreq    = !(M68K_Mem::Z80_State & Z80_STATE_BUSREQ);
+	m_md.md_z80_ctrl.reset     = !(M68K_Mem::Z80_State & Z80_STATE_RESET);
+	m_md.md_z80_ctrl.m68k_bank = cpu_to_be16((M68K_Mem::Bank_M68K >> 15) & 0x1FF);
+	
 	/** Write to the ZOMG file. **/
 	SaveToZomg(zipZomg, "common/vdp_reg.bin", m_vdp.vdp_reg.md, sizeof(m_vdp.vdp_reg.md));
 	SaveToZomg(zipZomg, "common/VRam.bin", m_vdp.VRam.md, sizeof(m_vdp.VRam.md));
@@ -455,6 +469,7 @@ int Zomg::save(void)
 	SaveToZomg(zipZomg, "MD/M68K_mem.bin", &m_md.m68k_mem, sizeof(m_md.m68k_mem));
 	SaveToZomg(zipZomg, "MD/M68K_reg.bin", &m_md.m68k_reg, sizeof(m_md.m68k_reg));
 	SaveToZomg(zipZomg, "MD/IO.bin", &m_md.md_io, sizeof(m_md.md_io));
+	SaveToZomg(zipZomg, "MD/Z80_ctrl.bin", &m_md.md_z80_ctrl, sizeof(m_md.md_z80_ctrl));
 	
 	// Close the ZOMG file.
 	zipClose(zipZomg, NULL);

@@ -49,6 +49,7 @@
 #include "zomg_m68k.h"
 #include "zomg_z80.h"
 #include "zomg_md_io.h"
+#include "zomg_md_z80_ctrl.h"
 
 namespace LibGens
 {
@@ -83,6 +84,7 @@ class Zomg
 			Zomg_M68KMemSave_t m68k_mem;
 			Zomg_M68KRegSave_t m68k_reg;
 			Zomg_MD_IoSave_t md_io;
+			Zomg_MD_Z80CtrlSave_t md_z80_ctrl;
 		};
 		ZomgMd_t m_md;
 };
