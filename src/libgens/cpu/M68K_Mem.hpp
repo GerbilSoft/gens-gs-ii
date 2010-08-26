@@ -102,7 +102,7 @@ class M68K_Mem
 		static unsigned int Z80_State;
 		static int Last_BUS_REQ_Cnt;
 		static int Last_BUS_REQ_St;
-		static int Bank_M68K;
+		static int Bank_M68K; // NOTE: This is for Sega CD, not Z80!
 		static int Fake_Fetch;
 		
 		static int CPL_M68K;

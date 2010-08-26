@@ -56,7 +56,7 @@ class Z80_MD_Mem
 		static uint8_t Ram_Z80[8 * 1024];
 #endif
 		
-		// 68K ROM banking address.
+		// M68K ROM banking address.
 		static int Bank_Z80;
 		
 		/** Public read/write functions. **/

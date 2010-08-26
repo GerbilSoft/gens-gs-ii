@@ -265,7 +265,7 @@ int Zomg::load(void)
 		M68K_Mem::Z80_State |= Z80_STATE_BUSREQ;
 	if (!m_md.md_z80_ctrl.reset)
 		M68K_Mem::Z80_State |= Z80_STATE_RESET;
-	M68K_Mem::Bank_M68K = ((be16_to_cpu(m_md.md_z80_ctrl.m68k_bank) & 0x1FF) << 15);
+	Z80_MD_Mem::Bank_Z80 = ((be16_to_cpu(m_md.md_z80_ctrl.m68k_bank) & 0x1FF) << 15);
 	
 	// Savestate loaded.
 	return 0;
@@ -454,7 +454,8 @@ int Zomg::save(void)
 	// Save the Z80 control registers.
 	m_md.md_z80_ctrl.busreq    = !(M68K_Mem::Z80_State & Z80_STATE_BUSREQ);
 	m_md.md_z80_ctrl.reset     = !(M68K_Mem::Z80_State & Z80_STATE_RESET);
-	m_md.md_z80_ctrl.m68k_bank = cpu_to_be16((M68K_Mem::Bank_M68K >> 15) & 0x1FF);
+	printf("Z80 bank: 0x%08X\n", Z80_MD_Mem::Bank_Z80);
+	m_md.md_z80_ctrl.m68k_bank = cpu_to_be16((Z80_MD_Mem::Bank_Z80 >> 15) & 0x1FF);
 	
 	/** Write to the ZOMG file. **/
 	SaveToZomg(zipZomg, "common/vdp_reg.bin", m_vdp.vdp_reg.md, sizeof(m_vdp.vdp_reg.md));
