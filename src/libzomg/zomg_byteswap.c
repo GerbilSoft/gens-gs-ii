@@ -1,9 +1,7 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
- * zomg_md_z80_ctrl.h: ZOMG save definitions for the MD Z80 control logic. *
+ * libzomg: Zipped Original Memory from Genesis.                           *
+ * zomg_byteswap.c: Byteswapping functions.                                *
  *                                                                         *
- * Copyright (c) 1999-2002 by Stéphane Dallongeville                       *
- * Copyright (c) 2003-2004 by Stéphane Akhoun                              *
  * Copyright (c) 2008-2010 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
@@ -21,42 +19,52 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_SAVE_ZOMG_ZOMG_MD_Z80_CTRL_H__
-#define __LIBGENS_SAVE_ZOMG_ZOMG_MD_Z80_CTRL_H__
-
-#include "zomg_common.h"
-
-#include <stdint.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "byteswap.h"
 
 /**
- * MD Z80 control logic struct.
- * ZOMG file: MD/Z80_ctrl.bin
- * NOTE: Byteswapping is done in Zomg.cpp when saving/loading.
+ * __zomg_byte_swap_16_array(): 16-bit byteswap function.
+ * @param Pointer to array to swap.
+ * @param n Number of bytes to swap. (Must be divisible by 2; an extra odd byte will be ignored.)
  */
-#pragma pack(1)
-typedef struct PACKED _Zomg_MD_Z80CtrlSave_t
+void __zomg_byte_swap_16_array(void *ptr, unsigned int n)
 {
-	uint8_t busreq;		// 8-bit: BUSREQ state.
-				// 0 == Z80 has the bus.
-				// 1 == M68K has the bus.
+	unsigned char *cptr = (unsigned char*)ptr;
+	unsigned char x;
 	
-	uint8_t reset;		// 8-bit: RESET state.
-				// 0 == Z80 is RESET.
-				// 1 == Z80 is running.
+	// Don't allow uneven lengths.
+	n &= ~1;
 	
-	uint16_t m68k_bank;	// 16-bit BE: M68K banking register.
-				// Low 9 bits of m68k_bank indicate
-				// high 9 bits of M68K address space
-				// for the Z80 banking space.
-} Zomg_MD_Z80CtrlSave_t;
-#pragma pack()
-
-#ifdef __cplusplus
+	// TODO: Add an x86-optimized version, possibly using SSE.
+	for (; n != 0; n -= 2, cptr += 2)
+	{
+		x = *cptr;
+		*cptr = *(cptr + 1);
+		*(cptr + 1) = x;
+	}
 }
-#endif
 
-#endif /* __LIBGENS_SAVE_ZOMG_ZOMG_MD_Z80_CTRL_H__ */
+/**
+ * __zomg_byte_swap_32_array(): 32-bit byteswap function.
+ * @param Pointer to array to swap.
+ * @param n Number of bytes to swap. (Must be divisible by 4; extra bytes will be ignored.)
+ */
+void __zomg_byte_swap_32_array(void *ptr, unsigned int n)
+{
+	unsigned char *cptr = (unsigned char*)ptr;
+	unsigned char x, y;
+	
+	// Don't allow lengths that aren't divisible by 4.
+	n &= ~3;
+	
+	// TODO: Add an x86-optimized version using bswap and/or SSE.
+	for (; n != 0; n -= 4, cptr += 4)
+	{
+		x = *cptr;
+		y = *(cptr + 1);
+		
+		*cptr = (*cptr + 3);
+		*(cptr + 1) = (*cptr + 2);
+		*(cptr + 2) = y;
+		*(cptr + 3) = x;
+	}
+}

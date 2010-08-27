@@ -1,9 +1,7 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
+ * libzomg: Zipped Original Memory from Genesis.                           *
  * zomg_m68k.h: ZOMG save definitions for the Motorola 68000 emulator.     *
  *                                                                         *
- * Copyright (c) 1999-2002 by Stéphane Dallongeville                       *
- * Copyright (c) 2003-2004 by Stéphane Akhoun                              *
  * Copyright (c) 2008-2010 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *

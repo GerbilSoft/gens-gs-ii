@@ -1,9 +1,7 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
+ * libzomg: Zipped Original Memory from Genesis.                           *
  * zomg_vdp.h: ZOMG save definitions for the Video Display Processor.      *
  *                                                                         *
- * Copyright (c) 1999-2002 by Stéphane Dallongeville                       *
- * Copyright (c) 2003-2004 by Stéphane Akhoun                              *
  * Copyright (c) 2008-2010 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
@@ -32,54 +30,61 @@
 extern "C" {
 #endif
 
-// VDP save struct.
-// NOTE: Byteswapping is done in Zomg.cpp when saving/loading.
+/**
+ * vdp_reg: VDP registers.
+ * File: common/vdp_reg.bin
+ * NOTE: Byteswapping is done in Zomg.cpp when saving/loading.
+ */
 #pragma pack(1)
-typedef struct PACKED _Zomg_VdpSave_t
+typedef union _vdp_reg
 {
-	/**
-	 * vdp_reg: VDP registers.
-	 * File: common/vdp_reg.bin
-	 */
-	union _vdp_reg
-	{
-		uint8_t tms9918[8];	// TMS9918: 0x00 - 0x07
-		uint8_t sms[11];	// SMS/GG: 0x00 - 0x0A
-		uint8_t md[24];		// MD: 0x00 - 0x17
-	} vdp_reg;
-	
-	/**
-	 * VRam: Video RAM.
-	 * File: common/VRam.bin
-	 */
-	union _VRam
-	{
-		uint8_t sms[16384];	// TMS9918/SMS/GG
-		uint16_t md[32768];	// MD
-	} VRam;
-	
-	/**
-	 * CRam: Color RAM.
-	 * File: common/CRam.bin
-	 */
-	union _CRam
-	{
-		uint8_t sms[32];	// SMS only
-		uint16_t gg[32];	// GG (little-endian)
-		uint16_t md[64];	// MD (big-endian)
-	} CRam;
-	
-	// TODO: Other common VDP stuff.
-	
-	/** MD-specific. **/
-	
-	/**
-	 * MD_VSRam: Vertical Scroll RAM.
-	 * File: MD/VSRam.bin
-	 */
+	uint8_t tms9918[8];	// TMS9918: 0x00 - 0x07
+	uint8_t sms[11];	// SMS/GG: 0x00 - 0x0A
+	uint8_t md[24];		// MD: 0x00 - 0x17
+} vdp_reg;
+#pragma pack()
+
+/**
+ * VRam: Video RAM.
+ * File: common/VRam.bin
+ * NOTE: Byteswapping is done in Zomg.cpp when saving/loading.
+ */
+#pragma pack(1)
+typedef union _Zomg_VRam_t
+{
+	uint8_t sms[16384];	// TMS9918/SMS/GG
+	uint16_t md[32768];	// MD
+} _Zomg_VRam_t;
+#pragma pack()
+
+/**
+ * CRam: Color RAM.
+ * File: common/CRam.bin
+ * NOTE: Byteswapping is done in Zomg.cpp when saving/loading.
+ */
+#pragma pack(1)
+typedef union _Zomg_CRam_t
+{
+	uint8_t sms[32];	// SMS only
+	uint16_t gg[32];	// GG (little-endian)
+	uint16_t md[64];	// MD (big-endian)
+} Zomg_CRam_t;
+#pragma pack()
+
+// TODO: Other common VDP stuff.
+
+/** MD-specific. **/
+
+#pragma pack(1)
+/**
+ * MD_VSRam: Vertical Scroll RAM.
+ * File: MD/VSRam.bin
+ */
+typedef struct _Zomg_MD_VSRam_t
+{
 	uint16_t MD_VSRam[40];
-} Zomg_VdpSave_t;
-#pragma pack(0)
+} Zomg_MD_VSRam_t;
+#pragma pack()
 
 #ifdef __cplusplus
 }

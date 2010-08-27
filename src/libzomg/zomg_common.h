@@ -1,9 +1,7 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
+ * libzomg: Zipped Original Memory from Genesis.                           *
  * zomg_common.h: ZOMG common macros.                                      *
  *                                                                         *
- * Copyright (c) 1999-2002 by Stéphane Dallongeville                       *
- * Copyright (c) 2003-2004 by Stéphane Akhoun                              *
  * Copyright (c) 2008-2010 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
@@ -21,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_SAVE_ZOMG_ZOMG_COMMON_H__
-#define __LIBGENS_SAVE_ZOMG_ZOMG_COMMON_H__
+#ifndef __LIBZOMG_ZOMG_COMMON_H__
+#define __LIBZOMG_ZOMG_COMMON_H__
 
 // Packed struct attribute.
 #if !defined(PACKED)
@@ -33,4 +31,4 @@
 #endif /* defined(__GNUC__) */
 #endif /* !defined(PACKED) */
 
-#endif /* __LIBGENS_SAVE_ZOMG_ZOMG_COMMON_H__ */
+#endif /* __LIBZOMG_ZOMG_COMMON_H__ */
