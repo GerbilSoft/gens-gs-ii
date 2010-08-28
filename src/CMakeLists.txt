@@ -11,5 +11,6 @@ ADD_SUBDIRECTORY(extlib)
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/extlib/")
 
 # Source Code subdirectories.
+ADD_SUBDIRECTORY(libzomg)
 ADD_SUBDIRECTORY(libgens)
 ADD_SUBDIRECTORY(gens-qt4)

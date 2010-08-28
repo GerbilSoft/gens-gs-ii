@@ -8,6 +8,9 @@ ADD_SUBDIRECTORY(mdZ80)
 # Main binary directory. Needed for git_version.h
 INCLUDE_DIRECTORIES(${gens-gs-ii_BINARY_DIR})
 
+# Include the previous directory.
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../")
+
 # LibGens source and binary directories.
 # Binary directory is needed for config.h.
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
@@ -50,7 +53,7 @@ SET(libgens_SRCS
 	MD/TAB336.c
 	MD/EmuMD.cpp
 	MD/VdpPalette.cpp
-	Save/Zomg/Zomg.cpp
+	Save/GensZomg.cpp
 	cpu/M68K.cpp
 	cpu/M68K_Mem.cpp
 	sound/Psg.cpp
@@ -110,7 +113,7 @@ ENDIF()
 
 # Build the library.
 ADD_LIBRARY(gens STATIC ${libgens_SRCS} ${libgens_OPTIONAL_SRCS} ${libgens_COMPAT_SRCS})
-TARGET_LINK_LIBRARIES(gens starscream mdZ80 minizip)
+TARGET_LINK_LIBRARIES(gens starscream mdZ80 minizip zomg)
 IF(HAVE_LIBRT)
 	TARGET_LINK_LIBRARIES(gens -lrt)
 ENDIF(HAVE_LIBRT)
@@ -124,7 +127,7 @@ IF(HAVE_LZMA)
 	TARGET_LINK_LIBRARIES(gens 7z lzmabase)
 ENDIF(HAVE_LZMA)
 
-ADD_DEPENDENCIES(gens git_version starscream mdZ80 minizip)
+ADD_DEPENDENCIES(gens git_version starscream mdZ80 minizip zomg)
 IF(HAVE_LZMA)
 	ADD_DEPENDENCIES(lzmabase 7z)
 ENDIF(HAVE_LZMA)
