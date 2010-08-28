@@ -107,7 +107,8 @@ int Zomg::saveToZomg(const utf8_str *filename, const void *buf, int len)
 int Zomg::savePreview(const void *img_buf, size_t siz)
 {
 	// Verify the PNG "magic number".
-	static const uint8_t png_magic[8] = {0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\b'};
+	static const uint8_t png_magic[8] = {0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'};
+	
 	if (siz < sizeof(png_magic) ||
 	    memcmp(img_buf, png_magic, sizeof(png_magic)) != 0)
 	{
