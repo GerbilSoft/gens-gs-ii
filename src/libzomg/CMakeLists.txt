@@ -12,6 +12,8 @@ CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY
 # Sources.
 SET(libzomg_SRCS
 	Zomg.cpp
+	ZomgLoad.cpp
+	ZomgSave.cpp
 	zomg_byteswap.c
 	)
 
