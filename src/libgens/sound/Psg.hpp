@@ -43,7 +43,7 @@ class Psg
 		Psg();
 		Psg(int clock, int rate);
 		
-		void reinit(int clock, int rate);
+		void reInit(int clock, int rate);
 		
 		/**
 		 * reset(): Reset the PSG state.

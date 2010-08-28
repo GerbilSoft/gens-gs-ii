@@ -97,16 +97,16 @@ Psg::Psg(int clock, int rate)
 	m_writeLen = 0;
 	m_enabled = true; // TODO: Make this customizable.
 	resetBufferPtrs();
-	reinit(clock, rate);
+	reInit(clock, rate);
 }
 
 
 /**
- * reinit(): Initialize the PSG chip.
+ * reInit(): (Re-)Initialize the PSG chip.
  * @param clock Clock frequency.
  * @param rate Sound rate.
  */
-void Psg::reinit(int clock, int rate)
+void Psg::reInit(int clock, int rate)
 {
 	double out;
 	

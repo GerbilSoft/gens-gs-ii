@@ -1477,18 +1477,18 @@ Ym2612::Ym2612(int clock, int rate)
 	m_dacEnabled = true;	// TODO: Make this customizable.
 	m_improved = true;	// TODO: Make this customizable.
 	
-	reinit(clock, rate);
+	reInit(clock, rate);
 }
 
 
 /**
- * reinit(): (Re-)Initialize the YM2612.
+ * reInit(): (Re-)Initialize the YM2612.
  * @param clock YM2612 clock frequency.
  * @param rate Sound rate.
  * @return 0 on success; non-zero on error.
  */
 // Initialisation de l'émulateur YM2612
-int Ym2612::reinit(int clock, int rate)
+int Ym2612::reInit(int clock, int rate)
 {
 	// TODO: Eliminate these temporaries. (Move them into the for loops.)
 	double x;

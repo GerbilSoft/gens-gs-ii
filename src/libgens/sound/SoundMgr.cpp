@@ -106,13 +106,13 @@ void SoundMgr::ReInit(int rate, bool isPal, bool preserveState)
 	// Initialize the PSG and YM2612.
 	if (isPal)
 	{
-		ms_Psg.reinit((int)((double)CLOCK_PAL / 15.0), rate);
-		ms_Ym2612.reinit((int)((double)CLOCK_PAL / 7.0), rate);
+		ms_Psg.reInit((int)((double)CLOCK_PAL / 15.0), rate);
+		ms_Ym2612.reInit((int)((double)CLOCK_PAL / 7.0), rate);
 	}
 	else
 	{
-		ms_Psg.reinit((int)((double)CLOCK_NTSC / 15.0), rate);
-		ms_Ym2612.reinit((int)((double)CLOCK_NTSC / 7.0), rate);
+		ms_Psg.reInit((int)((double)CLOCK_NTSC / 15.0), rate);
+		ms_Ym2612.reInit((int)((double)CLOCK_NTSC / 7.0), rate);
 	}
 	
 	// If requested, restore the PSG/YM state.

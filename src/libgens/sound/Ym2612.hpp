@@ -106,7 +106,7 @@ class Ym2612
 		Ym2612();
 		Ym2612(int clock, int rate);
 		
-		int reinit(int clock, int rate);
+		int reInit(int clock, int rate);
 		void reset(void);
 		
 		uint8_t read(void) const;
