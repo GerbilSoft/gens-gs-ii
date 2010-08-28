@@ -215,7 +215,7 @@ int EmuMD::SaveData(Rom *rom)
 
 
 /**
- * EmuMD::AutoSaveData(): AutoSave SRam/EEPRom.
+ * AutoSaveData(): AutoSave SRam/EEPRom.
  * @param rom Rom class with the ROM image.
  * @param frames Number of frames elapsed, or -1 for paused (force autosave).
  * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
@@ -245,6 +245,46 @@ int EmuMD::AutoSaveData(Rom *rom, int framesElapsed)
 	}
 	
 	// Nothing was saved.
+	return 0;
+}
+
+
+/**
+ * SoftReset(): Perform a soft reset.
+ * @return 0 on success; non-zero on error.
+ */
+int EmuMD::SoftReset(void)
+{
+	// Reset the M68K, Z80, and YM2612.
+	M68K::Reset();
+	Z80::Reset();
+	SoundMgr::ms_Ym2612.reset();
+	
+	// TODO: Genesis Plus randomizes the restart line.
+	// See genesis.c:176.
+	return 0;
+}
+
+
+/**
+ * HardReset(): Perform a hard reset.
+ * @return 0 on success; non-zero on error.
+ */
+int EmuMD::HardReset(void)
+{
+	// Reset the controllers.
+	m_port1->reset();
+	m_port2->reset();
+	m_portE->reset();
+	
+	// Hard-Reset the M68K, Z80, VDP, PSG, and YM2612.
+	// This includes clearing RAM.
+	M68K::InitSys(M68K::SYSID_MD);
+	Z80::ReInit();
+	VdpIo::Reset();
+	//SoundMgr::ms_Psg.reinit(); // TODO: Add a Psg::reset() function.
+	SoundMgr::ms_Ym2612.reset();
+	
 	return 0;
 }
 

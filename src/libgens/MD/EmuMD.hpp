@@ -47,12 +47,24 @@ class EmuMD
 		static int SaveData(Rom *rom);
 		
 		/**
-		 * EmuMD::AutoSaveData(): AutoSave SRam/EEPRom.
+		 * AutoSaveData(): AutoSave SRam/EEPRom.
 		 * @param rom Rom class with the ROM image.
 		 * @param frames Number of frames elapsed, or -1 for paused (force autosave).
 		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
 		 */
 		static int AutoSaveData(Rom *rom, int framesElapsed);
+		
+		/**
+		 * SoftReset(): Perform a soft reset.
+		 * @return 0 on success; non-zero on error.
+		 */
+		static int SoftReset(void);
+		
+		/**
+		 * HardReset(): Perform a hard reset.
+		 * @return 0 on success; non-zero on error.
+		 */
+		static int HardReset(void);
 		
 		static void Do_Frame(void);
 		static void Do_Frame_Fast(void);
