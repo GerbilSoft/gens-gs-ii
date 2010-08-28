@@ -181,15 +181,21 @@ int ZomgLoad(const utf8_str *filename)
 
 /**
  * ZomgSave(): Save the current state to a ZOMG file.
- * @param filename ZOMG file.
+ * @param filename	[in] ZOMG file.
+ * @param img_buf	[in, opt] Buffer containing PNG image for the ZOMG preview image.
+ * @param img_siz	[in, opt] Size of img_buf.
  * @return 0 on success; non-zero on error.
  * TODO: Error code constants.
  */
-int ZomgSave(const utf8_str *filename)
+int ZomgSave(const utf8_str *filename, const void *img_buf, size_t img_siz)
 {
 	LibZomg::Zomg zomg(filename, LibZomg::Zomg::ZOMG_SAVE);
 	if (!zomg.isOpen())
 		return -1;
+	
+	// If a preview image was specified, save it.
+	if (img_buf && img_siz > 0)
+		zomg.savePreview(img_buf, img_siz);
 	
 	// TODO: This is MD only!
 	// TODO: Check error codes from the ZOMG functions.
