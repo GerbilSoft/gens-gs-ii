@@ -27,6 +27,9 @@
 // C includes.
 #include <string.h>
 
+// LOG_MSG() subsystem.
+#include "macros/log_msg.h"
+
 // M68K CPU.
 #include "cpu/star_68k.h"
 #include "cpu/M68K_Mem.hpp"
@@ -176,8 +179,6 @@ uint8_t VdpIo::Int_Ack(void)
  */
 void VdpIo::Update_IRQ_Line(void)
 {
-	// TODO: LibGens: Add M68K interrupts.
-	
 	// TODO: HBlank interrupt should take priority over VBlank interrupt.
 	if ((VDP_Reg.m5.Set2 & 0x20) && (VDP_Int & 0x08))
 	{
@@ -203,10 +204,6 @@ void VdpIo::Update_IRQ_Line(void)
  */
 void VdpIo::Set_Visible_Lines(void)
 {
-	// TODO: Implement Game and CPU_Mode. (LibGens)
-	void *Game = NULL;
-	int CPU_Mode = 0;
-	
 	// Arrays of values.
 	// Indexes: 0 == 192 lines; 1 == 224 lines; 2 == 240 lines.
 	static const int VisLines_Total[3] = {192, 224, 240};
@@ -218,12 +215,9 @@ void VdpIo::Set_Visible_Lines(void)
 	int LineOffset;
 	
 	// Check the current video mode.
-	if (!Game)
-	{
-		// No game is running. Assume 224 lines.
-		LineOffset = 1;
-	}
-	else if (VDP_Mode & VDP_MODE_M5)
+	// NOTE: Unlike Gens/GS, we don't check if a ROM is loaded because
+	// the VDP code isn't used at all in Gens/GS II during "idle".
+	if (VDP_Mode & VDP_MODE_M5)
 	{
 		// Mode 5. Must be either 224 lines or 240 lines.
 		if (VDP_Mode & VDP_MODE_M3)
@@ -256,7 +250,7 @@ void VdpIo::Set_Visible_Lines(void)
 	
 	VDP_Lines.Visible.Total = VisLines_Total[LineOffset];
 	VDP_Lines.Visible.Border_Size = VisLines_Border_Size[LineOffset];
-	VDP_Lines.Visible.Current = ((CPU_Mode == 1)
+	VDP_Lines.Visible.Current = (M68K_Mem::ms_Region.isPal()
 					? VisLines_Current_PAL[LineOffset]
 					: VisLines_Current_NTSC[LineOffset]);
 	
@@ -276,12 +270,11 @@ void VdpIo::Set_Visible_Lines(void)
 
 /**
  * VdpIo::Check_NTSC_V30_VBlank(): Check if VBlank is allowed in NTSC V30 mode.
- * TODO: LibGens porting.
  */
 void VdpIo::Check_NTSC_V30_VBlank(void)
 {
-#if 0
-	if ((CPU_Mode == 1) || !(VDP_Reg.m5.Set2 & 0x08))
+	// TODO: Only do this in Mode 5, and maybe Mode 4 if SMS2 is in use.
+	if (M68K_Mem::ms_Region.isPal() || !(VDP_Reg.m5.Set2 & 0x08))
 	{
 		// Either we're in PAL mode, where V30 is allowed, or V30 isn't set.
 		// VBlank is always OK.
@@ -296,7 +289,11 @@ void VdpIo::Check_NTSC_V30_VBlank(void)
 	// See http://gendev.spritesmind.net/forum/viewtopic.php?p=8128#8128 for more information.
 	VDP_Lines.NTSC_V30.VBlank_Div = !VDP_Lines.NTSC_V30.VBlank_Div;
 	
+	// TODO: LibGens: Add a user-configurable option for NTSC V30 rolling.
+#if 0
 	if (Video.ntscV30rolling)
+#endif
+	if (1)
 	{
 		VDP_Lines.NTSC_V30.Offset += 11;	// TODO: Figure out a good offset increment.
 		VDP_Lines.NTSC_V30.Offset %= 240;	// Prevent overflow.
@@ -306,7 +303,6 @@ void VdpIo::Check_NTSC_V30_VBlank(void)
 		// Rolling is disabled.
 		VDP_Lines.NTSC_V30.Offset = 0;
 	}
-#endif
 }
 
 
@@ -727,16 +723,13 @@ uint16_t VdpIo::Read_Status(void)
 /**
  * VdpIo::Read_Data(): Read data from the VDP.
  * @return Data.
- * TODO: Port LOG_MSG() to LibGens.
  */
 uint16_t VdpIo::Read_Data(void)
 {
 	// TODO: Test this function.
 	// Soleil (crusader of Centry) reads from VRam.
-#if 0
 	LOG_MSG(vdp_io, LOG_MSG_LEVEL_DEBUG2,
 		"VDP_Ctrl.Access == %d", VDP_Ctrl.Access);
-#endif
 	
 	// Clear the VDP control flag.
 	// (It's set when the address is set.)
@@ -1050,12 +1043,9 @@ void VdpIo::Write_Data_Word(uint16_t data)
 template<VdpIo::DMA_Src_t src_component, VdpIo::DMA_Dest_t dest_component>
 inline void VdpIo::T_DMA_Loop(unsigned int src_address, unsigned int dest_address, int length)
 {
-	// TODO: Port LOG_MSG() to LibGens
-#if 0
 	LOG_MSG(vdp_io, LOG_MSG_LEVEL_DEBUG2,
 		"<%d, %d> src_address == 0x%06X, dest_address == 0x%04X, length == %d",
 		src_component, dest_component, src_address, dest_address, length);
-#endif
 	
 	// Save the DMA length for timing purposes.
 	DMAT_Length = length;
@@ -1407,12 +1397,7 @@ void VdpIo::Write_Ctrl(uint16_t data)
 	// Determine the source component.
 	DMA_Src_t src_component;
 	int WRam_Mode;
-	// TODO: Port Rom_Size to LibGens.
-	#if 0
-	if (src_address < Rom_Size)
-	#else
-	if (src_address < (4*1024*1024))
-	#endif
+	if (src_address < M68K_Mem::Rom_Size)
 	{
 		// Main ROM.
 		src_component = DMA_SRC_ROM;
