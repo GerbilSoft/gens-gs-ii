@@ -32,7 +32,7 @@
 #include "../macros/common.h"
 
 // ZOMG PSG struct.
-#include "../Save/Zomg/zomg_psg.h"
+#include "libzomg/zomg_psg.h"
 
 namespace LibGens
 {

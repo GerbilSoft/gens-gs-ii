@@ -27,7 +27,7 @@
 #include "star_68k.h"
 
 // ZOMG M68K structs.
-#include "../Save/Zomg/zomg_m68k.h"
+#include "libzomg/zomg_m68k.h"
 
 // TODO: Move these elsewhere!
 #define CLOCK_NTSC 53693175

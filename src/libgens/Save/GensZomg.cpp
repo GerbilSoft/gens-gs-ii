@@ -26,8 +26,7 @@
  * and is subject to change.
  */
 
-#include "Zomg.hpp"
-#include "Util/byteswap.h"
+#include "GensZomg.hpp"
 
 #include "MD/VdpIo.hpp"
 #include "sound/SoundMgr.hpp"
@@ -37,10 +36,15 @@
 #include "cpu/Z80.hpp"
 #include "MD/EmuMD.hpp"
 
-#ifdef _WIN32
-// MiniZip Win32 I/O handler.
-#include "../../extlib/minizip/iowin32u.h"
-#endif
+// ZOMG save structs.
+#include "libzomg/Zomg.hpp"
+#include "libzomg/zomg_vdp.h"
+#include "libzomg/zomg_psg.h"
+#include "libzomg/zomg_ym2612.h"
+#include "libzomg/zomg_m68k.h"
+#include "libzomg/zomg_z80.h"
+#include "libzomg/zomg_md_io.h"
+#include "libzomg/zomg_md_z80_ctrl.h"
 
 // C includes.
 #include <stdint.h>
@@ -54,218 +58,118 @@ namespace LibGens
 {
 
 /**
- * Zomg(): Open a ZOMG savestate file.
- * @param filename ZOMG filename.
- */
-Zomg::Zomg(const utf8_str *filename)
-{
-	if (!filename)
-		return;
-	
-	m_filename = string(filename);
-	
-	// Defer opening the file until load() or save() is requested.
-}
-
-
-/**
- * ~Zomg(): Close the ZOMG savestate file.
- */
-Zomg::~Zomg()
-{
-	// TODO
-}
-
-
-/**
- * LoadFromZomg(): Load a file from the ZOMG file.
- * @param unzZomg ZOMG file handle.
- * @param filename Filename to load from the ZOMG file.
- * @param buf Buffer to store the file in.
- * @param len Length of the buffer.
- * @return Length of file loaded, or negative number on error.
- */
-int Zomg::LoadFromZomg(unzFile unzZomg, const utf8_str *filename, void *buf, int len)
-{
-	if (!unzZomg)
-		return -1;
-	
-	// Locate the file in the ZOMG file.
-	int ret = unzLocateFile(unzZomg, filename, 2);
-	if (ret != UNZ_OK)
-	{
-		// File not found.
-		// TODO: Define return codes somewhere.
-		return -2;
-	}
-	
-	// Open the current file.
-	ret = unzOpenCurrentFile(unzZomg);
-	if (ret != UNZ_OK)
-	{
-		// Error opening the current file.
-		return -3;
-	}
-	
-	// Read the file.
-	ret = unzReadCurrentFile(unzZomg, buf, len);
-	unzCloseCurrentFile(unzZomg);	// TODO: Check the return value!
-	
-	// Return the number of bytes read.
-	return ret;
-}
-
-
-/**
- * Zomg::load(): Load a ZOMG file.
+ * ZomgLoad(): Load the current state from a ZOMG file.
+ * @param filename ZOMG file.
  * @return 0 on success; non-zero on error.
+ * TODO: Error code constants.
  */
-int Zomg::load(void)
+int ZomgLoad(const utf8_str *filename)
 {
-	// TODO: Error code constants.
-	
-	// Open the ZOMG file.
-	unzFile unzZomg;
-#ifdef _WIN32
-	zlib_filefunc64_def ffunc;
-	fill_win32_filefunc64U(&ffunc);
-	unzZomg = unzOpen2_64(m_filename.c_str(), &ffunc);
-#else
-	unzZomg = unzOpen(m_filename.c_str());
-#endif
-	
-	if (!unzZomg)
-	{
-		// Couldn't open the ZOMG file.
+	LibZomg::Zomg zomg(filename, LibZomg::Zomg::ZOMG_LOAD);
+	if (!zomg.isOpen())
 		return -1;
-	}
 	
-	// ZOMG file is open.
-	// TODO: Process the ZOMG format file.
-	
-	// Assuming MD only.
-	// TODO: Check for errors.
-	
-	/** Load from the ZOMG file. **/
-	LoadFromZomg(unzZomg, "common/vdp_reg.bin", m_vdp.vdp_reg.md, sizeof(m_vdp.vdp_reg.md));
-	LoadFromZomg(unzZomg, "common/VRam.bin", m_vdp.VRam.md, sizeof(m_vdp.VRam.md));
-	LoadFromZomg(unzZomg, "common/CRam.bin", m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
-	LoadFromZomg(unzZomg, "MD/VSRam.bin", m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
-	LoadFromZomg(unzZomg, "common/psg.bin", &m_psg, sizeof(m_psg));
-	LoadFromZomg(unzZomg, "common/Z80_mem.bin", &m_z80_mem.mem_mk3, sizeof(m_z80_mem.mem_mk3));
-	LoadFromZomg(unzZomg, "common/Z80_reg.bin", &m_z80_reg, sizeof(m_z80_reg));
-	// MD-specific.
-	LoadFromZomg(unzZomg, "MD/YM2612_reg.bin", &m_md.ym2612, sizeof(m_md.ym2612));
-	LoadFromZomg(unzZomg, "MD/M68K_mem.bin", &m_md.m68k_mem, sizeof(m_md.m68k_mem));
-	LoadFromZomg(unzZomg, "MD/M68K_reg.bin", &m_md.m68k_reg, sizeof(m_md.m68k_reg));
-	LoadFromZomg(unzZomg, "MD/IO.bin", &m_md.md_io, sizeof(m_md.md_io));
-	LoadFromZomg(unzZomg, "MD/Z80_ctrl.bin", &m_md.md_z80_ctrl, sizeof(m_md.md_z80_ctrl));
-	
-	// Close the ZOMG file.
-	unzClose(unzZomg);
-	
-	// Copy savestate data to the emulation memory buffers.
+	// TODO: This is MD only!
+	// TODO: Check error codes from the ZOMG functions.
+	// TODO: Load everything first, *then* copy it to LibGens.
 	
 	/** VDP **/
 	
-	// Write VDP registers.
+	// Load the VDP registers.
+	uint8_t vdp_reg[24];
+	zomg.loadVdpReg(vdp_reg, 24);
 	// TODO: On MD, load the DMA information from the savestate.
 	// Writing to register 23 changes the DMA status.
-	for (int i = (sizeof(m_vdp.vdp_reg.md)/sizeof(m_vdp.vdp_reg.md[0]))-1; i >= 0; i--)
+	for (int i = 23; i >= 0; i--)
 	{
-		VdpIo::Set_Reg(i, m_vdp.vdp_reg.md[i]);
+		VdpIo::Set_Reg(i, vdp_reg[i]);
 	}
 	
-	// Copy VRam to VdpIo.
-	// TODO: Create a byteswapping memcpy().
-	memcpy(VdpIo::VRam.u16, m_vdp.VRam.md, sizeof(m_vdp.VRam.md));
-	be16_to_cpu_array(VdpIo::VRam.u16, sizeof(m_vdp.VRam.md));
+	// Load VRam.
+	zomg.loadVRam(VdpIo::VRam.u16, sizeof(VdpIo::VRam.u16), true);
 	
-	// Copy CRam to VdpIo.
-	// TODO: Create a byteswapping memcpy().
-	memcpy(VdpIo::CRam.u16, m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
-	be16_to_cpu_array(VdpIo::CRam.u16, sizeof(m_vdp.CRam.md));
+	// Load CRam.
+	zomg.loadCRam(VdpIo::CRam.u16, sizeof(VdpIo::CRam.u16), true);
 	
-	/** VDP: MD specific **/
+	/** VDP: MD-specific **/
 	
 	// Load VSRam.
-	// TODO: Create a byteswapping memcpy().
-	for (unsigned int i = 0; i < (sizeof(m_vdp.MD_VSRam)/sizeof(m_vdp.MD_VSRam[0])); i++)
-	{
-		m_vdp.MD_VSRam[i] = be16_to_cpu(m_vdp.MD_VSRam[i]);
-	}
-	memcpy(VdpIo::VSRam.u16, m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
+	zomg.loadMD_VSRam(VdpIo::VSRam.u16, 80, true);
 	
 	/** Audio **/
 	
-	// Byteswap PSG values.
-	// TODO: LE16 or BE16 for PSG?
-	for (unsigned int i = 0; i < 4; i++)
-	{
-		m_psg.tone_reg[i] = le16_to_cpu(m_psg.tone_reg[i]);
-		m_psg.tone_ctr[i] = le16_to_cpu(m_psg.tone_ctr[i]);
-	}
-	m_psg.lfsr_state = le16_to_cpu(m_psg.lfsr_state);
 	// Load the PSG state.
-	SoundMgr::ms_Psg.zomgRestore(&m_psg);
+	Zomg_PsgSave_t psg_save;
+	zomg.loadPsgReg(&psg_save);
+	SoundMgr::ms_Psg.zomgRestore(&psg_save);
 	
-	/** Audio: MD specific **/
+	/** Audio: MD-specific **/
 	
-	// Load the YM2612 state.
-	SoundMgr::ms_Ym2612.zomgRestore(&m_md.ym2612);
+	// Load the YM2612 register state.
+	Zomg_Ym2612Save_t ym2612_save;
+	zomg.loadMD_YM2612_reg(&ym2612_save);
+	SoundMgr::ms_Ym2612.zomgRestore(&ym2612_save);
 	
 	/** Z80 **/
 	
 	// Load the Z80 memory.
 	// TODO: Use the correct size based on system.
-	memcpy(Ram_Z80, m_z80_mem.mem_mk3, sizeof(m_z80_mem.mem_mk3));
+	zomg.loadZ80Mem(Ram_Z80, 8192);
 	
 	// Load the Z80 registers.
-	Z80::ZomgRestoreReg(&m_z80_reg);
+	Zomg_Z80RegSave_t z80_reg_save;
+	zomg.loadZ80Reg(&z80_reg_save);
+	Z80::ZomgRestoreReg(&z80_reg_save);
 	
 	/** MD: M68K **/
 	
 	// Load the M68K memory.
-	// TODO: Create a byteswapping memcpy().
-	memcpy(&Ram_68k.u16[0], m_md.m68k_mem.mem, sizeof(m_md.m68k_mem.mem));
-	be16_to_cpu_array(&Ram_68k.u16[0], sizeof(m_md.m68k_mem.mem));
+	zomg.loadM68KMem(Ram_68k.u16, sizeof(Ram_68k.u16), true);
 	
 	// Load the M68K registers.
-	M68K::ZomgRestoreReg(&m_md.m68k_reg);
+	Zomg_M68KRegSave_t m68k_reg_save;
+	zomg.loadM68KReg(&m68k_reg_save);
+	M68K::ZomgRestoreReg(&m68k_reg_save);
 	
 	/** MD: Other **/
 	
 	// Load the I/O registers. ($A10001-$A1001F, odd bytes)
 	// TODO: Create/use the version register function in M68K_Mem.cpp.
 	IoBase::Zomg_MD_IoSave_int_t io_int;
+	Zomg_MD_IoSave_t md_io_save;
+	zomg.loadMD_IO(&md_io_save);
+	
 	// TODO: Set MD version register.
 	//m_md.md_io.version_reg = ((M68K_Mem::ms_Region.region() << 6) | 0x20);
-	io_int.data     = m_md.md_io.port1_data;
-	io_int.ctrl     = m_md.md_io.port1_ctrl;
-	io_int.ser_tx   = m_md.md_io.port1_ser_tx;
-	io_int.ser_rx   = m_md.md_io.port1_ser_rx;
-	io_int.ser_ctrl = m_md.md_io.port1_ser_ctrl;
+	io_int.data     = md_io_save.port1_data;
+	io_int.ctrl     = md_io_save.port1_ctrl;
+	io_int.ser_tx   = md_io_save.port1_ser_tx;
+	io_int.ser_rx   = md_io_save.port1_ser_rx;
+	io_int.ser_ctrl = md_io_save.port1_ser_ctrl;
 	EmuMD::m_port1->zomgRestoreMD(&io_int);
-	io_int.data     = m_md.md_io.port2_data;
-	io_int.ctrl     = m_md.md_io.port2_ctrl;
-	io_int.ser_tx   = m_md.md_io.port2_ser_tx;
-	io_int.ser_rx   = m_md.md_io.port2_ser_rx;
-	io_int.ser_ctrl = m_md.md_io.port2_ser_ctrl;
+	io_int.data     = md_io_save.port2_data;
+	io_int.ctrl     = md_io_save.port2_ctrl;
+	io_int.ser_tx   = md_io_save.port2_ser_tx;
+	io_int.ser_rx   = md_io_save.port2_ser_rx;
+	io_int.ser_ctrl = md_io_save.port2_ser_ctrl;
 	EmuMD::m_port2->zomgRestoreMD(&io_int);
-	io_int.data     = m_md.md_io.port3_data;
-	io_int.ctrl     = m_md.md_io.port3_ctrl;
-	io_int.ser_tx   = m_md.md_io.port3_ser_tx;
-	io_int.ser_rx   = m_md.md_io.port3_ser_rx;
-	io_int.ser_ctrl = m_md.md_io.port3_ser_ctrl;
+	io_int.data     = md_io_save.port3_data;
+	io_int.ctrl     = md_io_save.port3_ctrl;
+	io_int.ser_tx   = md_io_save.port3_ser_tx;
+	io_int.ser_rx   = md_io_save.port3_ser_rx;
+	io_int.ser_ctrl = md_io_save.port3_ser_ctrl;
 	EmuMD::m_portE->zomgRestoreMD(&io_int);
 	
 	// Load the Z80 control registers.
+	Zomg_MD_Z80CtrlSave_t md_z80_ctrl_save;
+	zomg.loadMD_Z80Ctrl(&md_z80_ctrl_save);
+	
 	M68K_Mem::Z80_State &= Z80_STATE_ENABLED;
-	if (!m_md.md_z80_ctrl.busreq)
+	if (!md_z80_ctrl_save.busreq)
 		M68K_Mem::Z80_State |= Z80_STATE_BUSREQ;
-	if (!m_md.md_z80_ctrl.reset)
+	if (!md_z80_ctrl_save.reset)
 		M68K_Mem::Z80_State |= Z80_STATE_RESET;
-	Z80_MD_Mem::Bank_Z80 = ((be16_to_cpu(m_md.md_z80_ctrl.m68k_bank) & 0x1FF) << 15);
+	Z80_MD_Mem::Bank_Z80 = ((md_z80_ctrl_save.m68k_bank & 0x1FF) << 15);
 	
 	// Savestate loaded.
 	return 0;
@@ -273,206 +177,106 @@ int Zomg::load(void)
 
 
 /**
- * SaveToZomg(): Save a file to the ZOMG file.
- * @param zipZomg ZOMG file handle.
- * @param filename Filename to save in the ZOMG file.
- * @param buf Buffer containing the file contents.
- * @param len Length of the buffer.
+ * ZomgSave(): Save the current state to a ZOMG file.
+ * @param filename ZOMG file.
  * @return 0 on success; non-zero on error.
+ * TODO: Error code constants.
  */
-int Zomg::SaveToZomg(zipFile zipZomg, const utf8_str *filename, void *buf, int len)
+int ZomgSave(const utf8_str *filename)
 {
-	if (!zipZomg)
+	LibZomg::Zomg zomg(filename, LibZomg::Zomg::ZOMG_SAVE);
+	if (!zomg.isOpen())
 		return -1;
 	
-	// Open the new file in the ZOMG file.
-	// TODO: Set the Zip timestamps.
-	zip_fileinfo zipfi;
-	zipfi.tmz_date.tm_sec = 0;
-	zipfi.tmz_date.tm_min = 0;
-	zipfi.tmz_date.tm_hour = 0;
-	zipfi.tmz_date.tm_mday = 0;
-	zipfi.tmz_date.tm_mon = 0;
-	zipfi.tmz_date.tm_year = 0;
-	zipfi.dosDate = 0;
-	zipfi.internal_fa = 0x0000; // TODO: Set to 0x0001 for text files.
-	zipfi.external_fa = 0x0000; // MS-DOS directory attribute byte.
-	
-	int ret = zipOpenNewFileInZip(
-		zipZomg,		// zipFile
-		filename,		// Filename in the Zip archive
-		&zipfi,			// File information (timestamp, attributes)
-		NULL,			// extrafield_local
-		0,			// size_extrafield_local,
-		NULL,			// extrafield_global,
-		0,			// size_extrafield_global,
-		NULL,			// comment
-		Z_DEFLATED,		// method
-		Z_DEFAULT_COMPRESSION	// level
-		);
-	
-	if (ret != UNZ_OK)
-	{
-		// Error opening the new file in the Zip archive.
-		// TODO: Define return codes somewhere.
-		return -2;
-	}
-	
-	// Write the file.
-	zipWriteInFileInZip(zipZomg, buf, len); // TODO: Check the return value!
-	zipCloseFileInZip(zipZomg);		// TODO: Check the return value!
-	
-	// TODO: What should we return?
-	return 0;
-}
-
-
-/**
- * save(): Save a ZOMG file.
- * @return 0 on success; non-zero on error.
- */
-int Zomg::save(void)
-{
-	// TODO: Open the ZOMG file and load its format information first!
-	// TODO: Add a global Zip comment?
-	// TODO: Error code constants.
-	
-	// Open the ZOMG file.
-	zipFile zipZomg;
-#ifdef _WIN32
-	zlib_filefunc64_def ffunc;
-	fill_win32_filefunc64U(&ffunc);
-	zipZomg = zipOpen2_64(m_filename.c_str(), APPEND_STATUS_CREATE, NULL, &ffunc);
-#else
-	zipZomg = zipOpen(m_filename.c_str(), APPEND_STATUS_CREATE);
-#endif
-	
-	if (!zipZomg)
-	{
-		// Couldn't open the ZOMG file.
-		return -1;
-	}
-	
-	// ZOMG file is open.
-	// TODO: Create the ZOMG format file.
-	
-	// Assuming MD only.
-	// TODO: Check for errors.
-	
-	// Copy emulation memory buffers to Zomg buffers.
+	// TODO: This is MD only!
+	// TODO: Check error codes from the ZOMG functions.
+	// TODO: Load everything first, *then* copy it to LibGens.
 	
 	/** VDP **/
 	
-	// Save VDP registers.
-	for (int i = (sizeof(m_vdp.vdp_reg.md)/sizeof(m_vdp.vdp_reg.md[0]))-1; i >= 0; i--)
-	{
-		m_vdp.vdp_reg.md[i] = VdpIo::VDP_Reg.reg[i];
-	}
+	// Save the VDP registers.
+	zomg.saveVdpReg(VdpIo::VDP_Reg.reg, 24);
 	
-	// Copy VRam from VdpIo.
-	// TODO: Create a byteswapping memcpy().
-	memcpy(m_vdp.VRam.md, VdpIo::VRam.u16, sizeof(m_vdp.VRam.md));
-	be16_to_cpu_array(m_vdp.VRam.md, sizeof(m_vdp.VRam.md));
+	// Save VRam.
+	zomg.saveVRam(VdpIo::VRam.u16, sizeof(VdpIo::VRam.u16), true);
 	
-	// Copy CRam from VdpIo.
-	// TODO: Create a byteswapping memcpy().
-	memcpy(m_vdp.CRam.md, VdpIo::CRam.u16, sizeof(m_vdp.CRam.md));
-	be16_to_cpu_array(m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
+	// Save CRam.
+	zomg.saveCRam(VdpIo::CRam.u16, sizeof(VdpIo::CRam.u16), true);
 	
-	/** VDP: MD specific **/
+	/** VDP: MD-specific **/
 	
 	// Save VSRam.
-	// TODO: Create a byteswapping memcpy().
-	memcpy(m_vdp.MD_VSRam, VdpIo::VSRam.u16, sizeof(m_vdp.MD_VSRam));
-	for (unsigned int i = 0; i < (sizeof(m_vdp.MD_VSRam)/sizeof(m_vdp.MD_VSRam[0])); i++)
-	{
-		m_vdp.MD_VSRam[i] = cpu_to_be16(m_vdp.MD_VSRam[i]);
-	}
+	zomg.saveMD_VSRam(VdpIo::VSRam.u16, 80, true);
 	
 	/** Audio **/
 	
 	// Save the PSG state.
-	SoundMgr::ms_Psg.zomgSave(&m_psg);
-	// Byteswap PSG values.
-	// TODO: LE16 or BE16 for PSG?
-	for (unsigned int i = 0; i < 4; i++)
-	{
-		m_psg.tone_reg[i] = cpu_to_le16(m_psg.tone_reg[i]);
-		m_psg.tone_ctr[i] = cpu_to_le16(m_psg.tone_ctr[i]);
-	}
-	m_psg.lfsr_state = cpu_to_le16(m_psg.lfsr_state);
+	Zomg_PsgSave_t psg_save;
+	SoundMgr::ms_Psg.zomgSave(&psg_save);
+	zomg.savePsgReg(&psg_save);
 	
-	/** Audio: MD specific **/
+	/** Audio: MD-specific **/
 	
-	// Save the YM2612 state.
-	SoundMgr::ms_Ym2612.zomgSave(&m_md.ym2612);
+	// Save the YM2612 register state.
+	Zomg_Ym2612Save_t ym2612_save;
+	SoundMgr::ms_Ym2612.zomgSave(&ym2612_save);
+	zomg.saveMD_YM2612_reg(&ym2612_save);
 	
 	/** Z80 **/
 	
-	// Load the Z80 memory.
+	// Save the Z80 memory.
 	// TODO: Use the correct size based on system.
-	memcpy(m_z80_mem.mem_mk3, Ram_Z80, sizeof(m_z80_mem.mem_mk3));
+	zomg.saveZ80Mem(Ram_Z80, 8192);
 	
 	// Save the Z80 registers.
-	Z80::ZomgSaveReg(&m_z80_reg);
+	Zomg_Z80RegSave_t z80_reg_save;
+	Z80::ZomgSaveReg(&z80_reg_save);
+	zomg.saveZ80Reg(&z80_reg_save);
 	
 	/** MD: M68K **/
 	
 	// Save the M68K memory.
-	// TODO: Create a byteswapping memcpy().
-	memcpy(m_md.m68k_mem.mem, &Ram_68k.u16[0], sizeof(m_md.m68k_mem));
-	be16_to_cpu_array(m_md.m68k_mem.mem, sizeof(m_md.m68k_mem));
+	zomg.saveM68KMem(Ram_68k.u16, sizeof(Ram_68k.u16), true);
 	
 	// Save the M68K registers.
-	M68K::ZomgSaveReg(&m_md.m68k_reg);
+	Zomg_M68KRegSave_t m68k_reg_save;
+	M68K::ZomgSaveReg(&m68k_reg_save);
+	zomg.saveM68KReg(&m68k_reg_save);
 	
 	/** MD: Other **/
 	
 	// Save the I/O registers. ($A10001-$A1001F, odd bytes)
 	// TODO: Create/use the version register function in M68K_Mem.cpp.
 	IoBase::Zomg_MD_IoSave_int_t io_int;
-	m_md.md_io.version_reg = ((M68K_Mem::ms_Region.region() << 6) | 0x20);
+	Zomg_MD_IoSave_t md_io_save;
+	
+	md_io_save.version_reg = ((M68K_Mem::ms_Region.region() << 6) | 0x20);
 	EmuMD::m_port1->zomgSaveMD(&io_int);
-	m_md.md_io.port1_data     = io_int.data;
-	m_md.md_io.port1_ctrl     = io_int.ctrl;
-	m_md.md_io.port1_ser_tx   = io_int.ser_tx;
-	m_md.md_io.port1_ser_rx   = io_int.ser_rx;
-	m_md.md_io.port1_ser_ctrl = io_int.ser_ctrl;
+	md_io_save.port1_data     = io_int.data;
+	md_io_save.port1_ctrl     = io_int.ctrl;
+	md_io_save.port1_ser_tx   = io_int.ser_tx;
+	md_io_save.port1_ser_rx   = io_int.ser_rx;
+	md_io_save.port1_ser_ctrl = io_int.ser_ctrl;
 	EmuMD::m_port2->zomgSaveMD(&io_int);
-	m_md.md_io.port2_data     = io_int.data;
-	m_md.md_io.port2_ctrl     = io_int.ctrl;
-	m_md.md_io.port2_ser_tx   = io_int.ser_tx;
-	m_md.md_io.port2_ser_rx   = io_int.ser_rx;
-	m_md.md_io.port2_ser_ctrl = io_int.ser_ctrl;
+	md_io_save.port2_data     = io_int.data;
+	md_io_save.port2_ctrl     = io_int.ctrl;
+	md_io_save.port2_ser_tx   = io_int.ser_tx;
+	md_io_save.port2_ser_rx   = io_int.ser_rx;
+	md_io_save.port2_ser_ctrl = io_int.ser_ctrl;
 	EmuMD::m_portE->zomgSaveMD(&io_int);
-	m_md.md_io.port3_data     = io_int.data;
-	m_md.md_io.port3_ctrl     = io_int.ctrl;
-	m_md.md_io.port3_ser_tx   = io_int.ser_tx;
-	m_md.md_io.port3_ser_rx   = io_int.ser_rx;
-	m_md.md_io.port3_ser_ctrl = io_int.ser_ctrl;
+	md_io_save.port3_data     = io_int.data;
+	md_io_save.port3_ctrl     = io_int.ctrl;
+	md_io_save.port3_ser_tx   = io_int.ser_tx;
+	md_io_save.port3_ser_rx   = io_int.ser_rx;
+	md_io_save.port3_ser_ctrl = io_int.ser_ctrl;
+	zomg.saveMD_IO(&md_io_save);
 	
 	// Save the Z80 control registers.
-	m_md.md_z80_ctrl.busreq    = !(M68K_Mem::Z80_State & Z80_STATE_BUSREQ);
-	m_md.md_z80_ctrl.reset     = !(M68K_Mem::Z80_State & Z80_STATE_RESET);
-	m_md.md_z80_ctrl.m68k_bank = cpu_to_be16((Z80_MD_Mem::Bank_Z80 >> 15) & 0x1FF);
-	
-	/** Write to the ZOMG file. **/
-	SaveToZomg(zipZomg, "common/vdp_reg.bin", m_vdp.vdp_reg.md, sizeof(m_vdp.vdp_reg.md));
-	SaveToZomg(zipZomg, "common/VRam.bin", m_vdp.VRam.md, sizeof(m_vdp.VRam.md));
-	SaveToZomg(zipZomg, "common/CRam.bin", m_vdp.CRam.md, sizeof(m_vdp.CRam.md));
-	SaveToZomg(zipZomg, "MD/VSRam.bin", m_vdp.MD_VSRam, sizeof(m_vdp.MD_VSRam));
-	SaveToZomg(zipZomg, "common/psg.bin", &m_psg, sizeof(m_psg));
-	SaveToZomg(zipZomg, "common/Z80_mem.bin", &m_z80_mem.mem_mk3, sizeof(m_z80_mem.mem_mk3));
-	SaveToZomg(zipZomg, "common/Z80_reg.bin", &m_z80_reg, sizeof(m_z80_reg));
-	// MD-specific.
-	SaveToZomg(zipZomg, "MD/YM2612_reg.bin", &m_md.ym2612, sizeof(m_md.ym2612));
-	SaveToZomg(zipZomg, "MD/M68K_mem.bin", &m_md.m68k_mem, sizeof(m_md.m68k_mem));
-	SaveToZomg(zipZomg, "MD/M68K_reg.bin", &m_md.m68k_reg, sizeof(m_md.m68k_reg));
-	SaveToZomg(zipZomg, "MD/IO.bin", &m_md.md_io, sizeof(m_md.md_io));
-	SaveToZomg(zipZomg, "MD/Z80_ctrl.bin", &m_md.md_z80_ctrl, sizeof(m_md.md_z80_ctrl));
-	
-	// Close the ZOMG file.
-	zipClose(zipZomg, NULL);
+	Zomg_MD_Z80CtrlSave_t md_z80_ctrl_save;
+	md_z80_ctrl_save.busreq    = !(M68K_Mem::Z80_State & Z80_STATE_BUSREQ);
+	md_z80_ctrl_save.reset     = !(M68K_Mem::Z80_State & Z80_STATE_RESET);
+	md_z80_ctrl_save.m68k_bank = ((Z80_MD_Mem::Bank_Z80 >> 15) & 0x1FF);
+	zomg.saveMD_Z80Ctrl(&md_z80_ctrl_save);
 	
 	// Savestate saved.
 	return 0;

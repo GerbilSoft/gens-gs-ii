@@ -95,7 +95,7 @@
 #define LFO_FMS_BASE   ((int) (0.05946309436 * 0.0338 * (double) (1 << LFO_FMS_LBITS)))
 
 // ZOMG YM2612 struct.
-#include "../Save/Zomg/zomg_ym2612.h"
+#include "libzomg/zomg_ym2612.h"
 
 namespace LibGens
 {

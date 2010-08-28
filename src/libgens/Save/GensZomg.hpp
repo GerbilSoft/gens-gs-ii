@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * Zomg.hpp: Zipped Original Memory from Genesis savestate handler.        *
+ * GensZomg.hpp: LibGens ZOMG wrapper.                                     *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -26,69 +26,31 @@
  * and is subject to change.
  */
 
-#ifndef __LIBGENS_SAVE_ZOMG_HPP__
-#define __LIBGENS_SAVE_ZOMG_HPP__
-
-// MiniZip
-#include "../../../extlib/minizip/zip.h"
-#include "../../../extlib/minizip/unzip.h"
-
-// C includes.
-#include <stdint.h>
-
-// C++ includes.
-#include <string>
+#ifndef __LIBGENS_SAVE_GENSZOMG_HPP__
+#define __LIBGENS_SAVE_GENSZOMG_HPP__
 
 // utf8_str
-#include "../../macros/common.h"
-
-// ZOMG save structs.
-#include "zomg_vdp.h"
-#include "zomg_psg.h"
-#include "zomg_ym2612.h"
-#include "zomg_m68k.h"
-#include "zomg_z80.h"
-#include "zomg_md_io.h"
-#include "zomg_md_z80_ctrl.h"
+#include "../macros/common.h"
 
 namespace LibGens
 {
 
-class Zomg
-{
-	public:
-		Zomg(const utf8_str *filename);
-		~Zomg();
-		
-		int load(void);
-		int save(void);
-	
-	protected:
-		std::string m_filename;
-		
-		static int LoadFromZomg(unzFile unzZomg, const utf8_str *filename, void *buf, int len);
-		static int SaveToZomg(zipFile zipZomg, const utf8_str *filename, void *buf, int len);
-		
-		// Savestate buffers.
-		Zomg_VdpSave_t m_vdp;
-		Zomg_PsgSave_t m_psg;
-		
-		// Z80
-		Zomg_Z80MemSave_t m_z80_mem;
-		Zomg_Z80RegSave_t m_z80_reg;
-		
-		/** MD specific **/
-		struct ZomgMd_t
-		{
-			Zomg_Ym2612Save_t ym2612;
-			Zomg_M68KMemSave_t m68k_mem;
-			Zomg_M68KRegSave_t m68k_reg;
-			Zomg_MD_IoSave_t md_io;
-			Zomg_MD_Z80CtrlSave_t md_z80_ctrl;
-		};
-		ZomgMd_t m_md;
-};
+/**
+ * ZomgLoad(): Load the current state from a ZOMG file.
+ * @param filename ZOMG file.
+ * @return 0 on success; non-zero on error.
+ * TODO: Error code constants.
+ */
+int ZomgLoad(const utf8_str *filename);
+
+/**
+ * ZomgSave(): Save the current state to a ZOMG file.
+ * @param filename ZOMG file.
+ * @return 0 on success; non-zero on error.
+ * TODO: Error code constants.
+ */
+int ZomgSave(const utf8_str *filename);
 
 }
 
-#endif /* __LIBGENS_SAVE_ZOMG_HPP__ */
+#endif /* __LIBGENS_SAVE_GENSZOMG_HPP__ */

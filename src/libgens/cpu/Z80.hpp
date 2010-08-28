@@ -31,7 +31,7 @@
 #include "M68K_Mem.hpp"
 
 // ZOMG Z80 structs.
-#include "../Save/Zomg/zomg_z80.h"
+#include "libzomg/zomg_z80.h"
 
 // C includes.
 #include <stdint.h>

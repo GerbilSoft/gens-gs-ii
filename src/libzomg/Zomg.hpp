@@ -24,8 +24,8 @@
  * and is subject to change.
  */
 
-#ifndef __LIBGENS_SAVE_ZOMG_HPP__
-#define __LIBGENS_SAVE_ZOMG_HPP__
+#ifndef __LIBZOMG_ZOMG_HPP__
+#define __LIBZOMG_ZOMG_HPP__
 
 // MiniZip
 #include "../extlib/minizip/zip.h"
@@ -49,7 +49,7 @@
 #include "zomg_md_io.h"
 #include "zomg_md_z80_ctrl.h"
 
-namespace LibGens
+namespace LibZomg
 {
 
 class Zomg
@@ -97,6 +97,38 @@ class Zomg
 		// MD-specific registers.
 		int loadMD_IO(Zomg_MD_IoSave_t *state);
 		int loadMD_Z80Ctrl(Zomg_MD_Z80CtrlSave_t *state);
+		
+		/**
+		 * Save savestate functions.
+		 * @param siz Number of bytes to write.
+		 * @return 0 on success; non-zero on error.
+		 * TODO: Standardize error codes.
+		 */
+		
+		// TODO: Determine siz and is16bit from the system type?
+		// (once FORMAT.ini is implemented)
+		
+		// VDP
+		int saveVdpReg(const uint8_t *reg, size_t siz);
+		int saveVRam(const void *vram, size_t siz, bool byteswap);
+		int saveCRam(const void *cram, size_t siz, bool byteswap);
+		int saveMD_VSRam(const uint16_t *vsram, size_t siz, bool byteswap);	/// MD-specific
+		
+		// Audio
+		int savePsgReg(const Zomg_PsgSave_t *state);
+		int saveMD_YM2612_reg(const Zomg_Ym2612Save_t *state);	/// MD-specific
+		
+		// Z80
+		int saveZ80Mem(const uint8_t *mem, size_t siz);
+		int saveZ80Reg(const Zomg_Z80RegSave_t *state);
+		
+		// M68K (MD-specific)
+		int saveM68KMem(const uint16_t *mem, size_t siz, bool byteswap);
+		int saveM68KReg(const Zomg_M68KRegSave_t *state);
+		
+		// MD-specific registers.
+		int saveMD_IO(const Zomg_MD_IoSave_t *state);
+		int saveMD_Z80Ctrl(const Zomg_MD_Z80CtrlSave_t *state);
 	
 	protected:
 		std::string m_filename;
@@ -110,4 +142,4 @@ class Zomg
 
 }
 
-#endif /* __LIBGENS_SAVE_ZOMG_HPP__ */
+#endif /* __LIBZOMG_ZOMG_HPP__ */

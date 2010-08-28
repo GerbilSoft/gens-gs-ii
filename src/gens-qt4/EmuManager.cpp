@@ -55,7 +55,7 @@
 #include "ZipSelectDialog.hpp"
 
 // ZOMG savestate handler.
-#include "libgens/Save/Zomg/Zomg.hpp"
+#include "libgens/Save/GensZomg.hpp"
 
 // Qt includes.
 #include <QtGui/QApplication>
@@ -827,8 +827,7 @@ void EmuManager::doAudioStereo(bool newStereo)
  */
 void EmuManager::doSaveState(const char *filename)
 {
-	LibGens::Zomg zomg(filename);
-	int ret = zomg.save();
+	int ret = LibGens::ZomgSave(filename);
 	
 	QString sFilename = QString::fromUtf8(filename);
 	QString osdMsg;
@@ -849,8 +848,7 @@ void EmuManager::doSaveState(const char *filename)
  */
 void EmuManager::doLoadState(const char *filename)
 {
-	LibGens::Zomg zomg(filename);
-	int ret = zomg.load();
+	int ret = LibGens::ZomgLoad(filename);
 	
 	QString sFilename = QString::fromUtf8(filename);
 	QString osdMsg;
