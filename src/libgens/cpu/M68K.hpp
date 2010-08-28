@@ -59,6 +59,11 @@ class M68K
 		
 		static void InitSys(SysID system);
 		
+		/**
+		 * Reset(): Reset the emulated CPU.
+		 */
+		static inline void Reset(void) { main68k_reset(); }
+		
 		/** ZOMG savestate functions. **/
 		static void ZomgSaveReg(Zomg_M68KRegSave_t *state);
 		static void ZomgRestoreReg(const Zomg_M68KRegSave_t *state);
