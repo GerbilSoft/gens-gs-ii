@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "byteswap.h"
+#include "zomg_byteswap.h"
 
 /**
  * __zomg_byte_swap_16_array(): 16-bit byteswap function.
