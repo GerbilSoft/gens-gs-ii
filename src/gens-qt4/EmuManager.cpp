@@ -547,7 +547,7 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	}
 	
 	// Check for SRam/EEPRom autosave.
-	// TODO: Frames elapsed; autosave on pause.
+	// TODO: Frames elapsed.
 	LibGens::EmuMD::AutoSaveData(m_rom, 1);
 	
 	// Check for a reset.
@@ -648,12 +648,7 @@ void EmuManager::processQEmuRequest(void)
 				break;
 			
 			case EmuRequest_t::RQT_PAUSE_TOGGLE:
-				m_paused = !m_paused;
-				if (m_paused)
-					m_audio->close();	// TODO: Add a pause() function.
-				else
-					m_audio->open();	// TODO: Add a resume() function.
-				emit stateChanged();
+				doPauseRequest();
 				break;
 			
 			case EmuRequest_t::RQT_UNKNOWN:
@@ -976,6 +971,33 @@ void EmuManager::doLoadState(const char *filename)
 	
 	// Print a message on the OSD.
 	emit osdPrintMsg(1500, osdMsg);
+}
+
+
+/**
+ * doPauseRequest(): Toggle the paused state.
+ */
+void EmuManager::doPauseRequest(void)
+{
+	// Toggle the paused state.
+	m_paused = !m_paused;
+	
+	if (m_paused)
+	{
+		// New state is paused.
+		// Turn off audio and autosave SRam/EEPRom.
+		m_audio->close();	// TODO: Add a pause() function.
+		LibGens::EmuMD::AutoSaveData(m_rom, -1);
+	}
+	else
+	{
+		// New state is unpaused.
+		// Turn on audio.
+		m_audio->open();	// TODO: Add a resume() function.
+	}
+	
+	// Emulation state has changed.
+	emit stateChanged();
 }
 
 }

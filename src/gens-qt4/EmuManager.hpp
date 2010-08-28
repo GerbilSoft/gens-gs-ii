@@ -156,6 +156,8 @@ class EmuManager : public QObject
 		/** Savestates. **/
 		void doSaveState(const char *filename);
 		void doLoadState(const char *filename);
+		
+		void doPauseRequest(void);
 	
 	protected slots:
 		// Frame done signal from EmuThread.
