@@ -171,6 +171,9 @@ int ZomgLoad(const utf8_str *filename)
 		M68K_Mem::Z80_State |= Z80_STATE_RESET;
 	Z80_MD_Mem::Bank_Z80 = ((md_z80_ctrl_save.m68k_bank & 0x1FF) << 15);
 	
+	// Close the savestate.
+	zomg.close();
+	
 	// Savestate loaded.
 	return 0;
 }
@@ -277,6 +280,9 @@ int ZomgSave(const utf8_str *filename)
 	md_z80_ctrl_save.reset     = !(M68K_Mem::Z80_State & Z80_STATE_RESET);
 	md_z80_ctrl_save.m68k_bank = ((Z80_MD_Mem::Bank_Z80 >> 15) & 0x1FF);
 	zomg.saveMD_Z80Ctrl(&md_z80_ctrl_save);
+	
+	// Close the savestate.
+	zomg.close();
 	
 	// Savestate saved.
 	return 0;
