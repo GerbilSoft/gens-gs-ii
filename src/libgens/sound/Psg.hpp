@@ -45,6 +45,11 @@ class Psg
 		
 		void reinit(int clock, int rate);
 		
+		/**
+		 * reset(): Reset the PSG state.
+		 */
+		inline void reset(void) { zomgRestore(&ms_psgStateInit); }
+		
 		/* PSG manipulation functions. */
 		void write(uint8_t data);
 		void update(int32_t *bufL, int32_t *bufR, int length);

@@ -154,8 +154,8 @@ void Psg::reinit(int clock, int rate)
 	memset(m_counter, 0x00, sizeof(m_counter));
 	memset(m_cntStep, 0x00, sizeof(m_cntStep));
 	
-	// Initialize the PSG state.
-	zomgRestore(&ms_psgStateInit);
+	// Reset the PSG state.
+	reset();
 }
 
 
