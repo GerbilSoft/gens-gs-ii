@@ -188,8 +188,6 @@ section .bss align=64
 		
 		.IN:		resd 1
 		.OUT:		resd 1
-		.RetIC:		resd 1
-		.IntAckC:	resd 1
 		
 		.Init_Size:
 		

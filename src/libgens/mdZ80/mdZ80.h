@@ -263,8 +263,6 @@ struct _Z80_context
 
 	Z80_RB *IN_C;
 	Z80_WB *OUT_C;
-	uint32_t RetIC;
-	uint32_t IntAckC;
 };
 
 typedef struct _Z80_context Z80_CONTEXT;
