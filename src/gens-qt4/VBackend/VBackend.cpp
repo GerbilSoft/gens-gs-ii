@@ -75,6 +75,31 @@ VBackend::~VBackend()
 
 
 /**
+ * setPaused(): Set the emulation paused state.
+ * @param newPaused True if emulation is paused; false if it isn't.
+ */
+void VBackend::setPaused(bool newPaused)
+{
+	if (m_paused == newPaused)
+		return;
+	
+	// Update the paused status.
+	m_paused = newPaused;
+	if (isRunning())
+	{
+		setVbDirty();
+		if (showFps())
+			setOsdListDirty();
+		vbUpdate(); // TODO: Do we really need to call this here?
+	}
+	
+	// If emulation isn't running or emulation is paused, start the message timer.
+	if (!isRunning() || isPaused())
+		m_msgTimer->start();
+}
+
+
+/**
  * setRunning(): Set the emulation running state.
  * @param newIsRunning True if emulation is running; false if it isn't.
  */
@@ -97,8 +122,8 @@ void VBackend::setRunning(bool newIsRunning)
 		}
 	}
 	
-	// If emulation isn't running, start the message timer.
-	if (!isRunning())
+	// If emulation isn't running or emulation is paused, start the message timer.
+	if (!isRunning() || isPaused())
 		m_msgTimer->start();
 }
 
@@ -163,9 +188,12 @@ void VBackend::osd_vprintf(const int duration, const char *msg, va_list ap)
 	m_osdList.append(osdMsg);
 	setOsdListDirty();
 	
-	if (!isRunning())
+	if (!isRunning() || isPaused())
 	{
-		// Emulation isn't running.
+		// Emulation is either not running or paused.
+		// Update the VBackend.
+		vbUpdate();
+		
 		// Start the message timer.
 		m_msgTimer->start();
 	}
@@ -202,6 +230,14 @@ int VBackend::osd_process(void)
 		vbUpdate();
 	}
 	
+	if (isRunning() && !isPaused())
+	{
+		// Emulation is either running or is no longer paused.
+		// Stop the message timer.
+		return 0;
+	}
+	
+	// Emulation is still either paused or not running.
 	// Return the number of messages remaining.
 	return m_osdList.size();
 }

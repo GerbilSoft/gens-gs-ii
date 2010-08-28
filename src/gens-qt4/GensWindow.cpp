@@ -151,6 +151,11 @@ void GensWindow::setupUi(void)
 	connect(&m_emuManager, SIGNAL(osdPrintMsg(int, const QString&)),
 		this, SLOT(osdPrintMsg(int, const QString&)));
 	
+	// TODO: Create a separate class for non-controller keypresses
+	// and use that for the pause request.
+	connect(vbackend_widget, SIGNAL(pauseRequest(void)),
+		&m_emuManager, SLOT(pauseRequest(void)));
+	
 	// Retranslate the UI.
 	retranslateUi();
 }
@@ -490,6 +495,7 @@ void GensWindow::stateChanged(void)
 	{
 		// ROM is open.
 		m_vBackend->setRunning(m_emuManager.isRomOpen());
+		m_vBackend->setPaused(m_emuManager.isPaused());
 	}
 	else
 	{

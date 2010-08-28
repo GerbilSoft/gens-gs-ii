@@ -53,6 +53,7 @@ class EmuManager : public QObject
 		int closeRom(void);
 		
 		inline bool isRomOpen(void) const { return (m_rom != NULL); }
+		inline bool isPaused(void) const { return m_paused; }
 		
 		// ROM information.
 		QString romName(void);
@@ -107,6 +108,9 @@ class EmuManager : public QObject
 		// Audio backend.
 		GensPortAudio *m_audio;
 		
+		// Paused state.
+		bool m_paused;
+		
 		// Emulation requests.
 		struct EmuRequest_t
 		{
@@ -119,6 +123,7 @@ class EmuManager : public QObject
 				RQT_AUDIO_STEREO	= 4,
 				RQT_SAVE_STATE		= 5,
 				RQT_LOAD_STATE		= 6,
+				RQT_PAUSE_TOGGLE	= 7,
 			};
 			
 			RequestType rqType;
@@ -155,6 +160,9 @@ class EmuManager : public QObject
 	protected slots:
 		// Frame done signal from EmuThread.
 		void emuFrameDone(bool wasFastFrame);
+		
+		// Pause toggle request.
+		void pauseRequest(void);
 };
 
 }

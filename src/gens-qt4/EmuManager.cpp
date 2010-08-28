@@ -91,6 +91,7 @@ EmuManager::EmuManager()
 	
 	// No ROM is loaded at startup.
 	m_rom = NULL;
+	m_paused = false;
 	
 	// Create the Audio Backend.
 	// TODO: Allow selection of all available audio backend classes.
@@ -104,6 +105,11 @@ EmuManager::~EmuManager()
 	m_audio->close();
 	delete m_audio;
 	m_audio = NULL;
+	
+	// Delete the ROM.
+	// TODO
+	
+	m_paused = false;
 }
 
 
@@ -224,6 +230,7 @@ int EmuManager::openRom(QWidget *parent)
 	m_audio->open();
 	
 	// Start the emulation thread.
+	m_paused = false;
 	gqt4_emuThread = new EmuThread();
 	QObject::connect(gqt4_emuThread, SIGNAL(frameDone(bool)),
 			 this, SLOT(emuFrameDone(bool)));
@@ -264,6 +271,7 @@ int EmuManager::closeRom(void)
 	m_audio->close();
 	
 	// TODO: Clear the screen, start the idle animation, etc.
+	m_paused = false;
 	
 	// Update the Gens title.
 	emit stateChanged();
@@ -385,9 +393,7 @@ void EmuManager::setController(int port, LibGens::IoBase::IoType type)
 	rq.ctrlChange.ctrlType = type;
 	m_qEmuRequest.enqueue(rq);
 	
-	// TODO: Do the controller change immediately if
-	// a ROM is running and the system is paused.
-	if (!m_rom)
+	if (!m_rom || m_paused)
 		processQEmuRequest();
 }
 
@@ -407,6 +413,9 @@ void EmuManager::screenShot(void)
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_SCREENSHOT;
 	m_qEmuRequest.enqueue(rq);
+	
+	if (m_paused)
+		processQEmuRequest();
 }
 
 
@@ -424,9 +433,7 @@ void EmuManager::setAudioRate(int newRate)
 	rq.audioRate = newRate;
 	m_qEmuRequest.enqueue(rq);
 	
-	// TODO: Do the audio rate change immediately if
-	// a ROM is running and the system is paused.
-	if (!m_rom)
+	if (!m_rom || m_paused)
 		processQEmuRequest();
 }
 
@@ -442,9 +449,7 @@ void EmuManager::setStereo(bool newStereo)
 	rq.audioStereo = newStereo;
 	m_qEmuRequest.enqueue(rq);
 	
-	// TODO: Do the audio rate change immediately if
-	// a ROM is running and the system is paused.
-	if (!m_rom)
+	if (!m_rom || m_paused)
 		processQEmuRequest();
 }
 
@@ -462,6 +467,9 @@ void EmuManager::saveState(void)
 	rq.rqType = EmuRequest_t::RQT_SAVE_STATE;
 	rq.filename = strdup("test.zomg");
 	m_qEmuRequest.enqueue(rq);
+	
+	if (m_paused)
+		processQEmuRequest();
 }
 
 /**
@@ -477,6 +485,37 @@ void EmuManager::loadState(void)
 	rq.rqType = EmuRequest_t::RQT_LOAD_STATE;
 	rq.filename = strdup("test.zomg");
 	m_qEmuRequest.enqueue(rq);
+	
+	if (m_paused)
+		processQEmuRequest();
+}
+
+
+/**
+ * pauseRequest(): Toggle the paused state.
+ */
+void EmuManager::pauseRequest(void)
+{
+	if (!m_rom)
+		return;
+	
+	if (m_paused)
+	{
+		// Unpause the ROM immediately.
+		// TODO: Reset the FPS counter?
+		m_paused = false;
+		m_audio->open();	// TODO: Add a resume() function.
+		if (gqt4_emuThread)
+			gqt4_emuThread->resume(false);
+		emit stateChanged();
+	}
+	else
+	{
+		// Queue the pause request.
+		EmuRequest_t rq;
+		rq.rqType = EmuRequest_t::RQT_PAUSE_TOGGLE;
+		m_qEmuRequest.enqueue(rq);
+	}
 }
 
 
@@ -549,6 +588,9 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	if (!wasFastFrame)
 		emit updateVideo();
 	
+	if (m_paused)
+		return;
+	
 	/** Auto Frame Skip **/
 	// Check if we should do a fast frame.
 	// TODO: Audio stutters a bit if the video drops below 60.0 fps.
@@ -603,6 +645,15 @@ void EmuManager::processQEmuRequest(void)
 				// Load a savestate.
 				doLoadState(rq.filename);
 				free(rq.filename);
+				break;
+			
+			case EmuRequest_t::RQT_PAUSE_TOGGLE:
+				m_paused = !m_paused;
+				if (m_paused)
+					m_audio->close();	// TODO: Add a pause() function.
+				else
+					m_audio->open();	// TODO: Add a resume() function.
+				emit stateChanged();
 				break;
 			
 			case EmuRequest_t::RQT_UNKNOWN:
@@ -912,6 +963,7 @@ void EmuManager::doSaveState(const char *filename)
  */
 void EmuManager::doLoadState(const char *filename)
 {
+	// TODO: Redraw the screen if emulation is paused.
 	int ret = LibGens::ZomgLoad(filename);
 	
 	QString sFilename = QString::fromUtf8(filename);

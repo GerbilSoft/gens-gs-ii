@@ -632,13 +632,12 @@ void GensQGLWidget::printOsdLine(int x, int y, const QString &msg)
  */
 void GensQGLWidget::keyPressEvent(QKeyEvent *event)
 {
+	// TODO: Add a non-controller key handler,
+	// e.g. for pressing Escape to pause emulation.
 	switch (event->key())
 	{
 		case Qt::Key_Escape:
-			// Toggle the Pause effect.
-			if (isRunning())
-				setPaused(!isPaused());
-			vbUpdate();
+			emit pauseRequest();
 			break;
 		
 		case Qt::Key_F9:

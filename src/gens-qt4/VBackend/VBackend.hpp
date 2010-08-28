@@ -56,20 +56,7 @@ class VBackend
 		virtual QWidget *toQWidget(void) { return NULL; }
 		
 		bool isPaused(void) const { return m_paused; }
-		void setPaused(bool newPaused)
-		{
-			if (m_paused == newPaused)
-				return;
-			
-			// Update the paused status.
-			m_paused = newPaused;
-			if (isRunning())
-			{
-				setVbDirty();
-				if (showFps())
-					setOsdListDirty();
-			}
-		}
+		void setPaused(bool newPaused);
 		
 		bool fastBlur(void) const { return m_fastBlur; }
 		void setFastBlur(bool newFastBlur)
