@@ -244,7 +244,7 @@ class Ym2612
 			unsigned int Inter_Step;	// Interpolation Step
 			Ym2612_Channel CHANNEL[6];	// Les 6 voies du YM2612
 			
-			int REG[2][0x100];	// Sauvegardes des valeurs de tout les registres, c'est facultatif
+			uint8_t REG[2][0x100];	// Sauvegardes des valeurs de tout les registres, c'est facultatif
 						// cela nous rend le débuggage plus facile
 		};
 		

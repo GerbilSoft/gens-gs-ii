@@ -1782,12 +1782,10 @@ void Ym2612::reset(void)
 		}
 	}
 	
-	for (int i = 0; i < 0x100; i++)
-	{
-		m_data.REG[0][i] = -1;
-		m_data.REG[1][i] = -1;
-	}
+	// Initialize registers to 0xFF.
+	memset(m_data.REG, 0xFF, sizeof(m_data.REG);
 	
+	// Initialize other registers to 0xC0.
 	for (int i = 0xB6; i >= 0xB4; i--)
 	{
 		this->write(0, (uint8_t)i);
@@ -1796,14 +1794,16 @@ void Ym2612::reset(void)
 		this->write(3, 0xC0);
 	}
 	
+	// Initialize more registers to 0x00.
 	for (int i = 0xB2; i >= 0x22; i--)
 	{
 		this->write(0, (uint8_t)i);
 		this->write(2, (uint8_t)i);
-		this->write(1, 0);
-		this->write(3, 0);
+		this->write(1, 0x00);
+		this->write(3, 0x00);
 	}
 	
+	// Initialize DAC to 0x80. (silence)
 	this->write(0, 0x2A);
 	this->write(1, 0x80);
 	
@@ -2065,12 +2065,8 @@ void Ym2612::update(int32_t *bufL, int32_t *bufR, int length)
  */
 void Ym2612::zomgSave(Zomg_Ym2612Save_t *state)
 {
-	// Condense the registers from 32-bit to 8-bit.
-	for (int i = 0; i < 0x100; i++)
-	{
-		state->reg[0][i] = (uint8_t)(m_data.REG[0][i] & 0xFF);
-		state->reg[1][i] = (uint8_t)(m_data.REG[1][i] & 0xFF);
-	}
+	// Copy the registers.
+	memcpy(state->reg, m_data.REG, sizeof(state->reg));
 	
 	// TODO: Save other counters and stuff!
 }
