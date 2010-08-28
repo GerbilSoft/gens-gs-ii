@@ -143,7 +143,8 @@ int EmuMD::SetRom(Rom *rom)
 	M68K::InitSys(M68K::SYSID_MD);
 	
 	// Reinitialize the Z80.
-	M68K_Mem::Z80_State = Z80_STATE_ENABLED;	// TODO: "Sound, Z80" setting.
+	// Z80's initial state is RESET.
+	M68K_Mem::Z80_State = (Z80_STATE_ENABLED | Z80_STATE_RESET);	// TODO: "Sound, Z80" setting.
 	Z80::ReInit();
 	
 	// Reset the controller ports.
@@ -261,7 +262,8 @@ int EmuMD::SoftReset(void)
 	SoundMgr::ms_Ym2612.reset();
 	
 	// Z80 state should be reset to the default value.
-	M68K_Mem::Z80_State &= Z80_STATE_ENABLED;
+	// Z80's initial state is RESET.
+	M68K_Mem::Z80_State = (Z80_STATE_ENABLED | Z80_STATE_RESET);	// TODO: "Sound, Z80" setting.
 	
 	// TODO: Genesis Plus randomizes the restart line.
 	// See genesis.c:176.
