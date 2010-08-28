@@ -104,6 +104,16 @@ Zomg::Zomg(const utf8_str *filename, ZomgFileMode mode)
  */
 Zomg::~Zomg()
 {
+	// Make sure the ZOMG savestate file is closed.
+	close();
+}
+
+
+/**
+ * close(): Close the ZOMG savestate file.
+ */
+void Zomg::close(void)
+{
 	if (m_unz)
 	{
 		unzClose(m_unz);

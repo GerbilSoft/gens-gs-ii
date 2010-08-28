@@ -65,6 +65,7 @@ class Zomg
 		~Zomg();
 		
 		inline bool isOpen(void) const { return (m_mode != ZOMG_CLOSED); }
+		void close(void);
 		
 		/**
 		 * Load savestate functions.
