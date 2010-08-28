@@ -30,6 +30,9 @@
 #include "VdpIo.hpp"
 #include "TAB336.h"
 
+// M68K_Mem::ms_Region is needed for region detection.
+#include "cpu/M68K_Mem.hpp"
+
 // C includes.
 #include <string.h>
 
@@ -1455,10 +1458,9 @@ void VdpRend_m5::Render_Line(void)
 	}
 	
 	// Determine the starting line in MD_Screen.
+	// TODO: LibGens: Add a user-configurable option for NTSC V30 rolling.
 	int LineStart = VdpIo::VDP_Lines.Visible.Current;
-	// TODO: Reimplement CPU_Mode and NTSC V30 scrolling. (LibGens)
-#if 0
-	if ((CPU_Mode == 0) && (VdpIo::m5.Set2 & 0x08) && Video.ntscV30rolling)
+	if (M68K_Mem::ms_Region.isNtsc() && (VdpIo::VDP_Reg.m5.Set2 & 0x08))// && Video.ntscV30rolling)
 	{
 		// NTSC V30 mode. Simulate screen rolling.
 		LineStart -= VdpIo::VDP_Lines.NTSC_V30.Offset;
@@ -1467,10 +1469,9 @@ void VdpRend_m5::Render_Line(void)
 		if (LineStart < 0)
 			LineStart += 240;
 	}
-#endif
 	LineStart = TAB336[LineStart + VdpIo::VDP_Lines.Visible.Border_Size] + 8;
 	
-	// TODO: Reimplement the borderColorEmulation option. (LibGens)
+	// TODO: LibGens: Reimplement the borderColorEmulation option.
 #if 0
 	if (in_border && !Video.borderColorEmulation)
 	{
@@ -1498,7 +1499,7 @@ void VdpRend_m5::Render_Line(void)
 		
 		if (VdpIo::VDP_Reg.m5.Set2 & 0x40)
 			VDP_Enabled = true;
-		// TODO: Reimplement Settings.Active and Settings.Paused. (LibGens)
+		// TODO: LibGens: Reimplement Settings.Active and Settings.Paused.
 #if 0
 		else if ((!Settings.Active || Settings.Paused) && VdpIo::HasVisibleLines)
 			VDP_Enabled = true;
