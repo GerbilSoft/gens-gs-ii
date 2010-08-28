@@ -176,7 +176,7 @@ class SRam
 		/**
 		 * autoSave(): Autosave the SRam file.
 		 * This saves the SRam file if its last modification time is past a certain threshold.
-		 * @param framesElapsed Number of frames elapsed, or 0 for paused (force autosave).
+		 * @param framesElapsed Number of frames elapsed, or -1 for paused. (force autosave)
 		 * @return Positive value indicating SRam size on success; 0 if no save is needed; negative on error.
 		 */
 		int autoSave(int framesElapsed);

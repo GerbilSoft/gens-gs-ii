@@ -49,7 +49,7 @@ class EmuMD
 		/**
 		 * AutoSaveData(): AutoSave SRam/EEPRom.
 		 * @param rom Rom class with the ROM image.
-		 * @param frames Number of frames elapsed, or -1 for paused (force autosave).
+		 * @param frames Number of frames elapsed, or -1 for paused. (force autosave)
 		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
 		 */
 		static int AutoSaveData(Rom *rom, int framesElapsed);
