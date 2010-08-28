@@ -98,6 +98,28 @@ int Zomg::saveToZomg(const utf8_str *filename, const void *buf, int len)
 // (once FORMAT.ini is implemented)
 
 
+/**
+ * savePreview(): Save the preview image.
+ * @param img_buf Image buffer. (Must have a PNG image.)
+ * @param siz Size of the image buffer.
+ * @return 0 on success; non-zero on error.
+ */
+int Zomg::savePreview(const void *img_buf, size_t siz)
+{
+	// Verify the PNG "magic number".
+	static const uint8_t png_magic[8] = {0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\b'};
+	if (siz < sizeof(png_magic) ||
+	    memcmp(img_buf, png_magic, sizeof(png_magic)) != 0)
+	{
+		// Invalid "magic number".
+		return -2;
+	}
+	
+	// Write the image buffer to the ZOMG file.
+	return saveToZomg("preview.png", img_buf, siz);
+}
+
+
 /** VDP **/
 
 

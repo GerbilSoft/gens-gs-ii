@@ -109,6 +109,14 @@ class Zomg
 		// TODO: Determine siz and is16bit from the system type?
 		// (once FORMAT.ini is implemented)
 		
+		/**
+		 * savePreview(): Save the preview image.
+		 * @param img_buf Image buffer. (Must have a PNG image.)
+		 * @param siz Size of the image buffer.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int savePreview(const void *img_buf, size_t siz);
+		
 		// VDP
 		int saveVdpReg(const uint8_t *reg, size_t siz);
 		int saveVRam(const void *vram, size_t siz, bool byteswap);
