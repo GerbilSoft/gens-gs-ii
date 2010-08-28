@@ -65,12 +65,23 @@
 #include <QtGui/QImageWriter>
 #include <QtCore/QBuffer>
 
+// Qt key handler.
+// TODO: Make a class for handling non-controller input, e.g. Reset.
+#include "Input/KeyHandlerQt.hpp"
+
 // Text translation macro.
 #define TR(text) \
 	QApplication::translate("EmuManager", (text), NULL, QApplication::UnicodeUTF8)
 
 namespace GensQt4
 {
+
+// Reset keys.
+// TODO: Make these customizable.
+// TODO: Make a class for handling non-controller input, e.g. Reset.
+// TODO: Add modifier keyvals or something.
+// For now, Tab == soft reset; Shift-Tab == hard reset
+static const GensKey_t ms_ResetKey = KEYV_TAB;
 
 EmuManager::EmuManager()
 {
@@ -499,6 +510,36 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	// Check for SRam/EEPRom autosave.
 	// TODO: Frames elapsed; autosave on pause.
 	LibGens::EmuMD::AutoSaveData(m_rom, 1);
+	
+	// Check for a reset.
+	// TODO: Make a non-controller keypress handler for this.
+	// TODO: Only handle keypresses once!
+	static int wasReset = 0;
+	if (KeyHandlerQt::DevHandler(ms_ResetKey))
+	{
+		if (!wasReset)
+		{
+			// Tab is pressed.
+			if (KeyHandlerQt::DevHandler(KEYV_LSHIFT) || 
+			    KeyHandlerQt::DevHandler(KEYV_RSHIFT))
+			{
+				// Shift is pressed.
+				// Do a hard reset.
+				LibGens::EmuMD::HardReset();
+				emit osdPrintMsg(2500, "Hard reset.");
+			}
+			else
+			{
+				// Shift is not pressed.
+				// Do a soft reset.
+				LibGens::EmuMD::SoftReset();
+				emit osdPrintMsg(2500, "Soft reset.");
+			}
+			wasReset = 1;
+		}
+	}
+	else if (wasReset)
+		wasReset = 0;
 	
 	// Check for controller changes.
 	if (!m_qEmuRequest.isEmpty())
