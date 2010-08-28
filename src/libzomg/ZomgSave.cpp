@@ -46,14 +46,8 @@ int Zomg::saveToZomg(const utf8_str *filename, const void *buf, int len)
 		return -1;
 	
 	// Open the new file in the ZOMG file.
-	// TODO: Set the Zip timestamps.
 	zip_fileinfo zipfi;
-	zipfi.tmz_date.tm_sec = 0;
-	zipfi.tmz_date.tm_min = 0;
-	zipfi.tmz_date.tm_hour = 0;
-	zipfi.tmz_date.tm_mday = 0;
-	zipfi.tmz_date.tm_mon = 0;
-	zipfi.tmz_date.tm_year = 0;
+	memcpy(&zipfi.tmz_date, &m_zipfi.tmz_date, sizeof(zipfi.tmz_date));
 	zipfi.dosDate = 0;
 	zipfi.internal_fa = 0x0000; // TODO: Set to 0x0001 for text files.
 	zipfi.external_fa = 0x0000; // MS-DOS directory attribute byte.

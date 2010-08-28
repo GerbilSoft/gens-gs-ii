@@ -145,6 +145,10 @@ class Zomg
 		unzFile m_unz;
 		zipFile m_zip;
 		
+		// Current time in Zip format.
+		// NOTE: Only used when saving ZOMG files.
+		zip_fileinfo m_zipfi;
+		
 		int loadFromZomg(const utf8_str *filename, void *buf, int len);
 		int saveToZomg(const utf8_str *filename, const void *buf, int len);
 };

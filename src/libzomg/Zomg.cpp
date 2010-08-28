@@ -24,6 +24,8 @@
  * and is subject to change.
  */
 
+#include <config.h>
+
 #include "Zomg.hpp"
 #include "zomg_byteswap.h"
 
@@ -35,6 +37,7 @@
 // C includes.
 #include <stdint.h>
 #include <string.h>
+#include <time.h>
 
 // C++ includes.
 #include <string>
@@ -65,6 +68,7 @@ Zomg::Zomg(const utf8_str *filename, ZomgFileMode mode)
 	fill_win32_filefunc64U(&ffunc);
 #endif
 	
+	// TODO: Split this up into multiple functions?
 	switch (mode)
 	{
 		case ZOMG_LOAD:
@@ -78,6 +82,7 @@ Zomg::Zomg(const utf8_str *filename, ZomgFileMode mode)
 			break;
 		
 		case ZOMG_SAVE:
+		{
 #ifdef _WIN32
 			m_zip = zipOpen2_64(filename, APPEND_STATUS_CREATE, NULL, &ffunc);
 #else
@@ -85,7 +90,33 @@ Zomg::Zomg(const utf8_str *filename, ZomgFileMode mode)
 #endif
 			if (!m_zip)
 				return;
+			
+			// Clear the default Zip timestamp first.
+			memset(&m_zipfi, 0x00, sizeof(m_zipfi));
+			
+			// Get the current time for the Zip archive.
+			time_t cur_time = time(NULL);
+			struct tm *tm_local;
+#ifdef HAVE_LOCALTIME_R
+			struct tm tm_local_r;
+			tm_local = localtime_r(&cur_time, &tm_local_r);
+#else
+			tm_local = localtime(&cur_time);
+#endif /* HAVE_LOCALTIME_R */
+			if (tm_local)
+			{
+				// Local time received.
+				// Convert to Zip time.
+				m_zipfi.tmz_date.tm_sec  = tm_local->tm_sec;
+				m_zipfi.tmz_date.tm_min  = tm_local->tm_min;
+				m_zipfi.tmz_date.tm_hour = tm_local->tm_hour;
+				m_zipfi.tmz_date.tm_mday = tm_local->tm_mday;
+				m_zipfi.tmz_date.tm_mon  = tm_local->tm_mon;
+				m_zipfi.tmz_date.tm_year = tm_local->tm_year;
+			}
+			
 			break;
+		}
 		
 		default:
 			return;
