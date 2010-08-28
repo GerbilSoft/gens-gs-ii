@@ -260,6 +260,9 @@ int EmuMD::SoftReset(void)
 	Z80::Reset();
 	SoundMgr::ms_Ym2612.reset();
 	
+	// Z80 state should be reset to the default value.
+	M68K_Mem::Z80_State &= Z80_STATE_ENABLED;
+	
 	// TODO: Genesis Plus randomizes the restart line.
 	// See genesis.c:176.
 	return 0;
@@ -282,7 +285,7 @@ int EmuMD::HardReset(void)
 	M68K::InitSys(M68K::SYSID_MD);
 	Z80::ReInit();
 	VdpIo::Reset();
-	//SoundMgr::ms_Psg.reinit(); // TODO: Add a Psg::reset() function.
+	SoundMgr::ms_Psg.reset();
 	SoundMgr::ms_Ym2612.reset();
 	
 	return 0;
