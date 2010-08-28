@@ -56,6 +56,19 @@ namespace LibGens
  */
 void VdpIo::Init(void)
 {
+	// Initialize the Horizontal Counter table.
+	unsigned int hc_val;
+	for (unsigned int hc = 0; hc < 512; hc++)
+	{
+		// H32
+		hc_val = ((hc * 170) / 488) - 0x18;
+		H_Counter_Table[hc][0] = (uint8_t)hc_val;
+		
+		// H40
+		hc_val = ((hc * 205) / 488) - 0x1C;
+		H_Counter_Table[hc][1] = (uint8_t)hc_val;
+	}
+	
 	// Initialize the VDP rendering subsystem.
 	VdpRend::Init();
 }
@@ -131,20 +144,6 @@ void VdpIo::Reset(void)
 	
 	// Initialize the Horizontal Interrupt counter.
 	HInt_Counter = VDP_Reg.m5.H_Int;
-	
-	// Initialize the Horizontal Counter table.
-	unsigned int hc;
-	unsigned int hc_val;
-	for (hc = 0; hc < 512; hc++)
-	{
-		// H32
-		hc_val = ((hc * 170) / 488) - 0x18;
-		H_Counter_Table[hc][0] = (unsigned char)hc_val;
-		
-		// H40
-		hc_val = ((hc * 205) / 488) - 0x1C;
-		H_Counter_Table[hc][1] = (unsigned char)hc_val;
-	}
 }
 
 
