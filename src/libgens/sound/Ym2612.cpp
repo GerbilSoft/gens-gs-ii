@@ -1783,7 +1783,7 @@ void Ym2612::reset(void)
 	}
 	
 	// Initialize registers to 0xFF.
-	memset(m_data.REG, 0xFF, sizeof(m_data.REG);
+	memset(m_data.REG, 0xFF, sizeof(m_data.REG));
 	
 	// Initialize other registers to 0xC0.
 	for (int i = 0xB6; i >= 0xB4; i--)
