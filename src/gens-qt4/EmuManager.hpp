@@ -28,6 +28,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QQueue>
 #include <QtGui/QWidget>
+#include <QtGui/QImage>
 
 // LibGens includes.
 #include "libgens/Rom.hpp"
@@ -140,7 +141,10 @@ class EmuManager : public QObject
 		QQueue<EmuRequest_t> m_qEmuRequest;
 		void processQEmuRequest(void);
 		void doCtrlChange(int port, LibGens::IoBase::IoType type);
+		
+		QImage getMDScreen(void) const;
 		void doScreenShot(void);
+		
 		void doAudioRate(int newRate);
 		void doAudioStereo(bool newStereo);
 		

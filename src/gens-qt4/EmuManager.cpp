@@ -63,6 +63,7 @@
 #include <QtCore/QFile>
 #include <QtGui/QImage>
 #include <QtGui/QImageWriter>
+#include <QtCore/QBuffer>
 
 // Text translation macro.
 #define TR(text) \
@@ -710,6 +711,44 @@ void EmuManager::doCtrlChange(int port, LibGens::IoBase::IoType type)
 
 
 /**
+ * getMDScreen(): Get the MD screen as a QImage.
+ * @return QImage of the MD screen.
+ */
+QImage EmuManager::getMDScreen(void) const
+{
+	// Create the QImage.
+	const uint8_t *start;
+	const int startY = ((240 - LibGens::VdpIo::GetVPix()) / 2);
+	const int startX = (8 + LibGens::VdpIo::GetHPixBegin());
+	const int startPx = (TAB336[startY] + startX);
+	int bytesPerLine;
+	QImage::Format imgFormat;
+	
+	if (LibGens::VdpRend::m_palette.bpp() == LibGens::VdpPalette::BPP_32)
+	{
+		start = (const uint8_t*)(&LibGens::VdpRend::MD_Screen.u32[startPx]);
+		bytesPerLine = (336 * sizeof(uint32_t));
+		imgFormat = QImage::Format_RGB32;
+	}
+	else
+	{
+		start = (const uint8_t*)(&LibGens::VdpRend::MD_Screen.u16[startPx]);
+		bytesPerLine = (336 * sizeof(uint16_t));
+		if (LibGens::VdpRend::m_palette.bpp() == LibGens::VdpPalette::BPP_16)
+			imgFormat = QImage::Format_RGB16;
+		else
+			imgFormat = QImage::Format_RGB555;
+	}
+	
+	// TODO: Check for errors.
+	// TODO: Store timestamp, ROM filename, etc.
+	return QImage(start, LibGens::VdpIo::GetHPix(),
+			LibGens::VdpIo::GetVPix(),
+			bytesPerLine, imgFormat);	
+}
+
+
+/**
  * doScreenShot(): Do a screenshot.
  * Called from processQEmuRequest().
  */
@@ -748,33 +787,7 @@ void EmuManager::doScreenShot(void)
 	} while (QFile::exists(scrFilename));
 	
 	// Create the QImage.
-	const uint8_t *start;
-	const int startY = ((240 - LibGens::VdpIo::GetVPix()) / 2);
-	const int startX = (8 + LibGens::VdpIo::GetHPixBegin());
-	const int startPx = (TAB336[startY] + startX);
-	int bytesPerLine;
-	QImage::Format imgFormat;
-	
-	if (LibGens::VdpRend::m_palette.bpp() == LibGens::VdpPalette::BPP_32)
-	{
-		start = (const uint8_t*)(&LibGens::VdpRend::MD_Screen.u32[startPx]);
-		bytesPerLine = (336 * sizeof(uint32_t));
-		imgFormat = QImage::Format_RGB32;
-	}
-	else
-	{
-		start = (const uint8_t*)(&LibGens::VdpRend::MD_Screen.u16[startPx]);
-		bytesPerLine = (336 * sizeof(uint16_t));
-		if (LibGens::VdpRend::m_palette.bpp() == LibGens::VdpPalette::BPP_16)
-			imgFormat = QImage::Format_RGB16;
-		else
-			imgFormat = QImage::Format_RGB555;
-	}
-	
-	// TODO: Check for errors.
-	// TODO: Store timestamp, ROM filename, etc.
-	QImage img(start, LibGens::VdpIo::GetHPix(), LibGens::VdpIo::GetVPix(),
-		   bytesPerLine, imgFormat);
+	QImage img = getMDScreen();
 	QImageWriter imgWriter(scrFilename, "png");
 	imgWriter.write(img);
 	
@@ -827,7 +840,17 @@ void EmuManager::doAudioStereo(bool newStereo)
  */
 void EmuManager::doSaveState(const char *filename)
 {
-	int ret = LibGens::ZomgSave(filename);
+	// Create the preview image.
+	QImage img = getMDScreen();
+	QBuffer imgBuf;
+	QImageWriter imgWriter(&imgBuf, "png");
+	imgWriter.write(img);
+	
+	// Save the ZOMG file.
+	int ret = LibGens::ZomgSave(filename,			// ZOMG filename.
+				imgBuf.buffer().constData(),	// Preview image.
+				imgBuf.buffer().size()		// Size of preview image.
+				);
 	
 	QString sFilename = QString::fromUtf8(filename);
 	QString osdMsg;
