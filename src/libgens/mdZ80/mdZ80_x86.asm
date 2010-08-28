@@ -375,6 +375,10 @@ section .text align=64
 
 %macro NEXT 1
 	
+	; WARNING: This can potentially crash the emulator
+	; if the program attempts to run past 0xFFFF!
+	; No boundary checks are performed!
+	; FIXME: Fix this in the C rewrite!
 	movzx	edx, byte [zxPC]
 	sub	edi, byte %1
 	js	near z80_Exec_Quit
@@ -4935,6 +4939,10 @@ SYMF(z80_Exec, 8):
 	mov	[ebp + Z80.CycleSup], ecx
 	mov	[ebp + Z80.Status], edx
 	mov	[ebp + Z80.CycleTD], edi
+	; WARNING: This can potentially crash the emulator
+	; if the program attempts to run past 0xFFFF!
+	; No boundary checks are performed!
+	; FIXME: Fix this in the C rewrite!
 	movzx	edx, byte [zxPC]
 	mov	zxHL, [ebp + Z80.HL]
 	
@@ -5024,6 +5032,10 @@ align 16
 
 z80_Exec_Interrupt_Happened:
 	CHECK_INT
+	; WARNING: This can potentially crash the emulator
+	; if the program attempts to run past 0xFFFF!
+	; No boundary checks are performed!
+	; FIXME: Fix this in the C rewrite!
 	movzx	edx, byte [zxPC]
 
 %if (GENS_LOG == 1)
