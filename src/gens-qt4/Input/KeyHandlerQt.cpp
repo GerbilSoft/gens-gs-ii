@@ -102,8 +102,8 @@ void KeyHandlerQt::KeyPressEvent(QKeyEvent *event)
 	int gensKey = QKeyEventToKeyVal(event);
 	
 	// If this is an event key, don't handle it as a controller key.
-	// TODO: Modifier keys.
-	if (ms_EvKeys->checkEventKey(gensKey, 0))
+	// TODO: Convert Qt modifier keys to Gens modifier keys.
+	if (ms_EvKeys->checkEventKey(gensKey, event->modifiers()))
 		return;
 	
 	if (gensKey > KEYV_UNKNOWN && gensKey < KEYV_LAST)

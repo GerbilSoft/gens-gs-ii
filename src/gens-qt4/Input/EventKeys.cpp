@@ -52,20 +52,27 @@ bool EventKeys::checkEventKey(GensKey_t key, int mod)
 	switch (key)
 	{
 		case KEYV_ESCAPE:
-			// Toggle Paused.
-			emit eventTogglePaused();
+			if (mod == Qt::NoModifier)
+			{
+				// Toggle Paused.
+				emit eventTogglePaused();
+				return true;
+			}
 			break;
 		
 		case KEYV_F9:
-			// Toggle Fast Blur.
-			emit eventToggleFastBlur();
+			if (mod == Qt::NoModifier)
+			{
+				// Toggle Fast Blur.
+				emit eventToggleFastBlur();
+				return true;
+			}
 			break;
 		
 		default:
-			// Unhandled event key.
-			return false;
+			break;
 	}
 	
-	// Event key was handled.
-	return true;
+	// Event key was not handled.
+	return false;
 }
