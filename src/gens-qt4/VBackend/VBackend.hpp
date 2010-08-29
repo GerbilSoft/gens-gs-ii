@@ -59,21 +59,7 @@ class VBackend
 		void setPaused(bool newPaused);
 		
 		bool fastBlur(void) const { return m_fastBlur; }
-		void setFastBlur(bool newFastBlur)
-		{
-			if (m_fastBlur == newFastBlur)
-				return;
-			
-			// Update the Fast Blur setting.
-			m_fastBlur = newFastBlur;
-			if (isRunning())
-			{
-				setVbDirty();
-				// TODO: Only if paused, or regardless of pause?
-				if (isPaused())
-					vbUpdate();
-			}
-		}
+		void setFastBlur(bool newFastBlur);
 		
 		bool isRunning(void) const { return m_running; }
 		void setRunning(bool newIsRunning);
@@ -96,19 +82,7 @@ class VBackend
 		void pushFps(double fps);
 		
 		bool showFps(void) const { return m_showFps; }
-		void setShowFps(bool newShowFps)
-		{
-			if (m_showFps == newShowFps)
-				return;
-			
-			// Update the Show FPS setting.
-			m_showFps = newShowFps;
-			setVbDirty();		// TODO: Texture doesn't really need to be reuploaded...
-			
-			// Mark the OSD list as dirty if the emulator is running.
-			if (isRunning())
-				setOsdListDirty();
-		}
+		void setShowFps(bool newShowFps);
 		
 		// Stretch mode.
 		enum StretchMode
@@ -120,24 +94,7 @@ class VBackend
 		};
 		
 		StretchMode stretchMode(void) const { return m_stretchMode; }
-		void setStretchMode(StretchMode newStretchMode)
-		{
-			if (m_stretchMode == newStretchMode)
-				return;
-			
-			// Update the stretch mode setting.
-			// TODO: Verify that this works properly.
-			m_stretchMode = newStretchMode;
-			if (isRunning())
-				setVbDirty();
-			if (isRunning())
-			{
-				setVbDirty();
-				// TODO: Only if paused, or regardless of pause?
-				if (isPaused())
-					vbUpdate();
-			}
-		}
+		void setStretchMode(StretchMode newStretchMode);
 	
 	protected:
 		// Dirty flag. If set, texture must be reuploaded.

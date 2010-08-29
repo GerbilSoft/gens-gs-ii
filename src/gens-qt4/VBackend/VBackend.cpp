@@ -103,6 +103,27 @@ void VBackend::setPaused(bool newPaused)
 
 
 /**
+ * setFastBlur(): Set the Fast Blur effect setting.
+ * @param newFastBlur True to enable Fast Blur; false to disable it.
+ */
+void VBackend::setFastBlur(bool newFastBlur)
+{
+	if (m_fastBlur == newFastBlur)
+		return;
+	
+	// Update the Fast Blur setting.
+	m_fastBlur = newFastBlur;
+	if (isRunning())
+	{
+		setVbDirty();
+		// TODO: Only if paused, or regardless of pause?
+		if (isPaused())
+			vbUpdate();
+	}
+}
+
+
+/**
  * setRunning(): Set the emulation running state.
  * @param newIsRunning True if emulation is running; false if it isn't.
  */
@@ -289,6 +310,49 @@ void VBackend::pushFps(double fps)
 	
 	if (isRunning() && !isPaused())
 		setOsdListDirty();
+}
+
+
+/**
+ * setShowFps(): Set the FPS visibility setting.
+ * @param newShowFps True to show FPS; false to hide FPS.
+ */
+void VBackend::setShowFps(bool newShowFps)
+{
+	if (m_showFps == newShowFps)
+		return;
+	
+	// Update the Show FPS setting.
+	m_showFps = newShowFps;
+	setVbDirty();		// TODO: Texture doesn't really need to be reuploaded...
+	
+	// Mark the OSD list as dirty if the emulator is running.
+	if (isRunning())
+		setOsdListDirty();
+}
+
+
+/**
+ * setStretchMode(): Set the stretch mode setting.
+ * @param newStretchMode New stretch mode setting.
+ */
+void VBackend::setStretchMode(StretchMode newStretchMode)
+{
+	if (m_stretchMode == newStretchMode)
+		return;
+	
+	// Update the stretch mode setting.
+	// TODO: Verify that this works properly.
+	m_stretchMode = newStretchMode;
+	if (isRunning())
+		setVbDirty();
+	if (isRunning())
+	{
+		setVbDirty();
+		// TODO: Only if paused, or regardless of pause?
+		if (isPaused())
+			vbUpdate();
+	}
 }
 
 }
