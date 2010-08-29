@@ -458,7 +458,9 @@ void EmuManager::saveState(void)
 	
 	// Create the savestate filename.
 	// TODO: Move to another function?
-	QString saveStateFilename = QString("test.%1.zomg").arg(m_saveSlot);
+	QString saveStateFilename = QString("%1.%2.zomg");
+	saveStateFilename = saveStateFilename.arg(QString::fromUtf8(m_rom->filenameBaseNoExt()));
+	saveStateFilename = saveStateFilename.arg(m_saveSlot);
 	
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_SAVE_STATE;
@@ -480,7 +482,9 @@ void EmuManager::loadState(void)
 	
 	// Create the savestate filename.
 	// TODO: Move to another function?
-	QString saveStateFilename = QString("test.%1.zomg").arg(m_saveSlot);
+	QString saveStateFilename = QString("%1.%2.zomg");
+	saveStateFilename = saveStateFilename.arg(QString::fromUtf8(m_rom->filenameBaseNoExt()));
+	saveStateFilename = saveStateFilename.arg(m_saveSlot);
 	
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_LOAD_STATE;
