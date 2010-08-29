@@ -117,7 +117,7 @@ void VBackend::setRunning(bool newIsRunning)
 		if (!isRunning())
 		{
 			// Emulation isn't running.
-			// Update the dispaly immediately.
+			// Update the display immediately.
 			vbUpdate();
 		}
 	}
