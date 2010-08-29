@@ -302,19 +302,7 @@ void EmuManager::doScreenShot(void)
 {
 	// TODO: Save the screenshot in a designated screenshots directory.
 	// For now, it'll save in the gens-qt4 directory.
-	QString romFilename = QString::fromUtf8(m_rom->filename());
-	
-	// Get the filename portion.
-	// TODO: Do this in the Rom class?
-	int dirSep = romFilename.lastIndexOf(QDir::separator());
-	if (dirSep != -1)
-		romFilename.remove(0, dirSep+1);
-	
-	// Remove the file extension.
-	// TODO: Do this in the Rom class?
-	int extSep = romFilename.lastIndexOf('.');
-	if (extSep != -1)
-		romFilename.remove(extSep, (romFilename.size() - extSep));
+	QString romFilename = QString::fromUtf8(m_rom->filenameBaseNoExt());
 	
 	// Add the current directory, number, and .png extension.
 	// TODO: Use a designated screenshots directory.
