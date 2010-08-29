@@ -29,17 +29,13 @@
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QCloseEvent>
 
-// Video backend.
 #include "VBackend/VBackend.hpp"
-
-// Gens menu bar.
 #include "GensMenuBar.hpp"
+#include "EmuManager.hpp"
+#include "Input/EventKeys.hpp"
 
 // LibGens includes.
 #include "libgens/lg_osd.h"
-
-// Emulation Manager.
-#include "EmuManager.hpp"
 
 namespace GensQt4
 {
@@ -79,6 +75,9 @@ class GensWindow : public QMainWindow
 		
 		// Emulation Manager.
 		EmuManager m_emuManager;
+		
+		// Event Keys.
+		EventKeys *m_evKeys;
 		
 		// Set the Gens window title.
 		void setGensTitle();
@@ -120,6 +119,11 @@ class GensWindow : public QMainWindow
 		{
 			m_vBackend->osd_printf(duration, "%s", msg.toUtf8().constData());
 		}
+		
+		/**
+		 * toggleFastBlur(): Toggle the Fast Blur effect.
+		 */
+		void toggleFastBlur(void);
 };
 
 }

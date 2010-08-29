@@ -163,7 +163,9 @@ class EmuManager : public QObject
 		// Frame done signal from EmuThread.
 		void emuFrameDone(bool wasFastFrame);
 		
-		// Pause toggle request.
+		/**
+		 * pauseRequest(): Toggle the paused state.
+		 */
 		void pauseRequest(void);
 };
 

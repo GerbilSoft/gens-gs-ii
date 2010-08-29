@@ -79,6 +79,7 @@ SET(gens-qt4_SRCS
 	VBackend/GLShaderManager.cpp
 	Audio/ARingBuffer.cpp
 	ZipSelectDialog.cpp
+	Input/EventKeys.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -93,6 +94,7 @@ SET(gens-qt4_MOC_HEADERS
 	EmuManager.hpp
 	VBackend/MsgTimer.hpp
 	ZipSelectDialog.hpp
+	Input/EventKeys.hpp
 	)
 
 # Create .moc files for sources that need them.

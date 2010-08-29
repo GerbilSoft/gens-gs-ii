@@ -664,32 +664,4 @@ void GensQGLWidget::printOsdLine(int x, int y, const QString &msg)
 	}
 }
 
-
-/**
- * keyPressEvent(): Key press handler.
- * TODO: Move somewhere else?
- * @param event Key event.
- */
-void GensQGLWidget::keyPressEvent(QKeyEvent *event)
-{
-	// TODO: Add a non-controller key handler,
-	// e.g. for pressing Escape to pause emulation.
-	switch (event->key())
-	{
-		case Qt::Key_Escape:
-			emit pauseRequest();
-			break;
-		
-		case Qt::Key_F9:
-			// Toggle the Fast Blur effect.
-			if (isRunning())
-				setFastBlur(!fastBlur());
-			break;
-		
-		default:
-			KeyHandlerQt::KeyPressEvent(event);
-			break;
-	}
-}
-
 }

@@ -1,6 +1,7 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * KeyHandlerQt.hpp: Qt key remapping handler.                             *
+ * EventKeys.hpp: Event key handler.                                       *
+ * Used for mapping keys to non-controller events, e.g. savestates.        *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,62 +22,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_INPUT_KEYHANDLERQT_HPP__
-#define __GENS_QT4_INPUT_KEYHANDLERQT_HPP__
+#ifndef __GENS_QT4_INPUT_EVENTKEYS_HPP__
+#define __GENS_QT4_INPUT_EVENTKEYS_HPP__
 
-#include <QtGui/QKeyEvent>
-#include <QtGui/QMouseEvent>
+// Gens Keys.
+#include "libgens/GensInput/GensKey_t.h"
 
-#include "libgens/GensInput/DevManager.hpp"
+// Qt includes.
+#include <QtCore/QObject>
 
-#include "EventKeys.hpp"
-
-namespace GensQt4
+class EventKeys : public QObject
 {
-
-class KeyHandlerQt
-{
-	public:
-		static void Init(EventKeys *evKeys);
-		static void End(void);
-		
-		static void KeyPressEvent(QKeyEvent *event);
-		static void KeyReleaseEvent(QKeyEvent *event);
-		
-		static void MouseMoveEvent(QMouseEvent *event);
-		static void MousePressEvent(QMouseEvent *event);
-		static void MouseReleaseEvent(QMouseEvent *event);
-		
-		/**
-		 * DevHandler(): LibGens Device Handler function.
-		 * @param key Gens keycode. (~0 for Update; return value is true on success.)
-		 * @return True if the key is pressed; false if it isn't.
-		 */
-		static bool DevHandler(GensKey_t key);
-		
-	protected:
-		// QKeyEvent to LibGens Key Value.
-		static int QKeyEventToKeyVal(QKeyEvent *event);
-		static int NativeModifierToKeyVal(QKeyEvent *event);
-		
-		// Event Keys handler.
-		static EventKeys *ms_EvKeys;
-		
-		// Keypress array.
-		static bool ms_KeyPress[KEYV_LAST];
-		
-#if 0
-		// TODO
-		// Last mouse position.
-		static bool m_lastMousePosValid;
-		static QPoint m_lastMousePos;
-#endif
+	Q_OBJECT
 	
-	private:
-		KeyHandlerQt() { }
-		~KeyHandlerQt() { }
+	public:
+		EventKeys();
+		~EventKeys();
+		
+		bool checkEventKey(GensKey_t key, int mod);
+	
+	signals:
+		void eventToggleFastBlur(void);
+		void eventTogglePaused(void);
 };
 
-}
-
-#endif /* __GENS_QT4_INPUT_KEYHANDLERQT_HPP__ */
+#endif /* __GENS_QT4_INPUT_EVENTKEYS_HPP__ */

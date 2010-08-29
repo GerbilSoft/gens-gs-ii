@@ -53,14 +53,22 @@ namespace GensQt4
  */
 bool KeyHandlerQt::ms_KeyPress[KEYV_LAST];
 
+// Event Keys handler.
+EventKeys *KeyHandlerQt::ms_EvKeys = NULL;
+
 
 /**
  * Init(): Initialize KeyHandlerQt.
+ * @param evKeys EventKeys object.
+ * NOTE: This class does NOT delete the EventKeys object on shutdown!
  */
-void KeyHandlerQt::Init(void)
+void KeyHandlerQt::Init(EventKeys *evKeys)
 {
 	// Clear the keypress array.
 	memset(ms_KeyPress, 0x00, sizeof(ms_KeyPress));
+	
+	// Save the Event Keys handler.
+	ms_EvKeys = evKeys;
 	
 	// Register as LibGens device type GKT_KEYBOARD.
 	LibGens::DevManager::RegisterDeviceHandler(GKT_KEYBOARD, KeyHandlerQt::DevHandler);
@@ -73,6 +81,9 @@ void KeyHandlerQt::End(void)
 {
 	// Clear the keypress array.
 	memset(ms_KeyPress, 0x00, sizeof(ms_KeyPress));
+	
+	// Clear the Event Keys handler.
+	ms_EvKeys = NULL;
 	
 	// Unregister as LibGens device type 0.
 	// TODO: Symbolic constants for device types.
@@ -89,6 +100,12 @@ void KeyHandlerQt::KeyPressEvent(QKeyEvent *event)
 	// TODO: Move effects keypresses from GensQGLWidget to KeyHandlerQt.
 	// TODO: Multiple keyboard support?
 	int gensKey = QKeyEventToKeyVal(event);
+	
+	// If this is an event key, don't handle it as a controller key.
+	// TODO: Modifier keys.
+	if (ms_EvKeys->checkEventKey(gensKey, 0))
+		return;
+	
 	if (gensKey > KEYV_UNKNOWN && gensKey < KEYV_LAST)
 	{
 		// Mark the key as pressed.

@@ -59,11 +59,6 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		// Return a QWidget* version of this object.
 		QWidget *toQWidget(void) { return this; }
 	
-	signals:
-		// TODO: Add a non-controller key handler,
-		// e.g. for pressing Escape to pause emulation.
-		void pauseRequest();
-	
 	protected:
 		void reallocTexture(void);
 		void reallocTexOsd(void);
@@ -91,8 +86,10 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		GLShaderManager m_shaderMgr;
 		
 		// Keyboard handler functions.
-		// TODO: Move keyPressEvent() out of GensQGLWidget!
-		void keyPressEvent(QKeyEvent *event);
+		void keyPressEvent(QKeyEvent *event)
+		{
+			KeyHandlerQt::KeyPressEvent(event);
+		}
 		void keyReleaseEvent(QKeyEvent *event)
 		{
 			KeyHandlerQt::KeyReleaseEvent(event);

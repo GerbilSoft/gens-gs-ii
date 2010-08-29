@@ -61,9 +61,13 @@ GensWindow::GensWindow()
 	m_scale = 1;		// Set the scale to 1x by default.
 	m_hasInitResize = false;
 	
+	// Initialize Event Keys.
+	// TODO: Load configuration from a file?
+	m_evKeys = new EventKeys();
+	
 	// Initialize KeyHandlerQt.
 	// TODO: Make KeyHandlerQt a standard object?
-	KeyHandlerQt::Init();
+	KeyHandlerQt::Init(m_evKeys);
 	
 	// Set up the User Interface.
 	setupUi();
@@ -78,6 +82,9 @@ GensWindow::~GensWindow()
 	// Shut down KeyHandlerQt.
 	// TODO: Make KeyHandlerQt a standard object?
 	KeyHandlerQt::End();
+	
+	// Delete Event Keys.
+	delete m_evKeys;
 }
 
 
@@ -151,10 +158,11 @@ void GensWindow::setupUi(void)
 	connect(&m_emuManager, SIGNAL(osdPrintMsg(int, const QString&)),
 		this, SLOT(osdPrintMsg(int, const QString&)));
 	
-	// TODO: Create a separate class for non-controller keypresses
-	// and use that for the pause request.
-	connect(vbackend_widget, SIGNAL(pauseRequest(void)),
+	// Event Keys signals.
+	connect(m_evKeys, SIGNAL(eventTogglePaused(void)),
 		&m_emuManager, SLOT(pauseRequest(void)));
+	connect(m_evKeys, SIGNAL(eventToggleFastBlur(void)),
+		this, SLOT(toggleFastBlur(void)));
 	
 	// Retranslate the UI.
 	retranslateUi();
@@ -506,6 +514,21 @@ void GensWindow::stateChanged(void)
 	}
 	
 	setGensTitle();
+}
+
+
+/**
+ * toggleFastBlur(): Toggle the Fast Blur effect.
+ */
+void GensWindow::toggleFastBlur(void)
+{
+	m_vBackend->setFastBlur(!m_vBackend->fastBlur());
+	
+	// Show a message on the OSD.
+	if (m_vBackend->fastBlur())
+		m_vBackend->osd_printf(1500, "Fast Blur enabled.");
+	else
+		m_vBackend->osd_printf(1500, "Fast Blur disabled.");
 }
 
 }
