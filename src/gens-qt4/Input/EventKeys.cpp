@@ -69,6 +69,21 @@ bool EventKeys::checkEventKey(GensKey_t key, int mod)
 			}
 			break;
 		
+		case KEYV_TAB:
+			if (mod == Qt::NoModifier)
+			{
+				// Soft Reset.
+				emit eventResetEmulator(false);
+				return true;
+			}
+			else if (mod == Qt::ShiftModifier)
+			{
+				// Hard Reset.
+				emit eventResetEmulator(true);
+				return true;
+			}
+			break;
+		
 		default:
 			break;
 	}

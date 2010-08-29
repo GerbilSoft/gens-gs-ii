@@ -163,6 +163,8 @@ void GensWindow::setupUi(void)
 		&m_emuManager, SLOT(pauseRequest(void)));
 	connect(m_evKeys, SIGNAL(eventToggleFastBlur(void)),
 		this, SLOT(toggleFastBlur(void)));
+	connect(m_evKeys, SIGNAL(eventResetEmulator(bool)),
+		&m_emuManager, SLOT(resetEmulator(bool)));
 	
 	// Retranslate the UI.
 	retranslateUi();

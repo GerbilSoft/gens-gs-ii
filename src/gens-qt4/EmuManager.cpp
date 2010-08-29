@@ -520,6 +520,26 @@ void EmuManager::pauseRequest(void)
 
 
 /**
+ * resetEmulator(): Reset the emulator.
+ * @param hardReset If true, do a hard reset; otherwise, do a soft reset.
+ */
+void EmuManager::resetEmulator(bool hardReset)
+{
+	if (!m_rom)
+		return;
+	
+	// Queue the reset request.
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_RESET;
+	rq.hardReset = hardReset;
+	m_qEmuRequest.enqueue(rq);
+	
+	if (m_paused)
+		processQEmuRequest();
+}
+
+
+/**
  * emuFrameDone(): Emulation thread is finished rendering a frame.
  * @param wasFastFrame The frame was rendered "fast", i.e. no VDP updates.
  */
@@ -550,37 +570,7 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	// TODO: Frames elapsed.
 	LibGens::EmuMD::AutoSaveData(m_rom, 1);
 	
-	// Check for a reset.
-	// TODO: Make a non-controller keypress handler for this.
-	// TODO: Only handle keypresses once!
-	static int wasReset = 0;
-	if (KeyHandlerQt::DevHandler(ms_ResetKey))
-	{
-		if (!wasReset)
-		{
-			// Tab is pressed.
-			if (KeyHandlerQt::DevHandler(KEYV_LSHIFT) || 
-			    KeyHandlerQt::DevHandler(KEYV_RSHIFT))
-			{
-				// Shift is pressed.
-				// Do a hard reset.
-				LibGens::EmuMD::HardReset();
-				emit osdPrintMsg(2500, "Hard reset.");
-			}
-			else
-			{
-				// Shift is not pressed.
-				// Do a soft reset.
-				LibGens::EmuMD::SoftReset();
-				emit osdPrintMsg(2500, "Soft reset.");
-			}
-			wasReset = 1;
-		}
-	}
-	else if (wasReset)
-		wasReset = 0;
-	
-	// Check for controller changes.
+	// Check for requests in the emulation queue.
 	if (!m_qEmuRequest.isEmpty())
 		processQEmuRequest();
 	
@@ -649,6 +639,10 @@ void EmuManager::processQEmuRequest(void)
 			
 			case EmuRequest_t::RQT_PAUSE_TOGGLE:
 				doPauseRequest();
+				break;
+			
+			case EmuRequest_t::RQT_RESET:
+				doResetEmulator(rq.hardReset);
 				break;
 			
 			case EmuRequest_t::RQT_UNKNOWN:
@@ -998,6 +992,27 @@ void EmuManager::doPauseRequest(void)
 	
 	// Emulation state has changed.
 	emit stateChanged();
+}
+
+
+/**
+ * doResetEmulator(): Reset the emulator.
+ * @param hardReset If true, do a hard reset; otherwise, do a soft reset.
+ */
+void EmuManager::doResetEmulator(bool hardReset)
+{
+	if (hardReset)
+	{
+		// Do a hard reset.
+		LibGens::EmuMD::HardReset();
+		emit osdPrintMsg(2500, "Hard Reset.");
+	}
+	else
+	{
+		// Do a soft reset.
+		LibGens::EmuMD::SoftReset();
+		emit osdPrintMsg(2500, "Soft Reset.");
+	}
 }
 
 }

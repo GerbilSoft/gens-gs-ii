@@ -124,6 +124,7 @@ class EmuManager : public QObject
 				RQT_SAVE_STATE		= 5,
 				RQT_LOAD_STATE		= 6,
 				RQT_PAUSE_TOGGLE	= 7,
+				RQT_RESET		= 8,
 			};
 			
 			RequestType rqType;
@@ -140,6 +141,9 @@ class EmuManager : public QObject
 				
 				// Savestates.
 				char *filename;
+				
+				// Emulator Reset.
+				bool hardReset;
 			};
 		};
 		
@@ -158,15 +162,23 @@ class EmuManager : public QObject
 		void doLoadState(const char *filename);
 		
 		void doPauseRequest(void);
+		void doResetEmulator(bool hardReset);
 	
-	protected slots:
-		// Frame done signal from EmuThread.
-		void emuFrameDone(bool wasFastFrame);
-		
+	public slots:
 		/**
 		 * pauseRequest(): Toggle the paused state.
 		 */
 		void pauseRequest(void);
+		
+		/**
+		 * resetEmulator(): Reset the emulator.
+		 * @param hardReset If true, do a hard reset; otherwise, do a soft reset.
+		 */
+		void resetEmulator(bool hardReset);
+	
+	protected slots:
+		// Frame done signal from EmuThread.
+		void emuFrameDone(bool wasFastFrame);
 };
 
 }

@@ -44,6 +44,12 @@ class EventKeys : public QObject
 	signals:
 		void eventToggleFastBlur(void);
 		void eventTogglePaused(void);
+		
+		/**
+		 * eventResetEmulator(): Reset the emulator.
+		 * @param hardReset If true, do a hard reset; otherwise, do a soft reset.
+		 */
+		void eventResetEmulator(bool hardReset);
 };
 
 #endif /* __GENS_QT4_INPUT_EVENTKEYS_HPP__ */
