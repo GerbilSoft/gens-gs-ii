@@ -109,6 +109,35 @@ class VBackend
 			if (isRunning())
 				setOsdListDirty();
 		}
+		
+		// Stretch mode.
+		enum StretchMode
+		{
+			STRETCH_NONE	= 0,
+			STRETCH_H	= 1,
+			STRETCH_V	= 2,
+			STRETCH_FULL	= 3
+		};
+		
+		StretchMode stretchMode(void) const { return m_stretchMode; }
+		void setStretchMode(StretchMode newStretchMode)
+		{
+			if (m_stretchMode == newStretchMode)
+				return;
+			
+			// Update the stretch mode setting.
+			// TODO: Verify that this works properly.
+			m_stretchMode = newStretchMode;
+			if (isRunning())
+				setVbDirty();
+			if (isRunning())
+			{
+				setVbDirty();
+				// TODO: Only if paused, or regardless of pause?
+				if (isPaused())
+					vbUpdate();
+			}
+		}
 	
 	protected:
 		// Dirty flag. If set, texture must be reuploaded.
@@ -156,6 +185,9 @@ class VBackend
 		double m_fpsAvg;	// Average fps.
 		int m_fpsPtr;		// Pointer to next fps slot to use.
 		bool m_showFps;
+		
+		// Stretch mode.
+		StretchMode m_stretchMode;
 	
 	private:
 		// Effects.

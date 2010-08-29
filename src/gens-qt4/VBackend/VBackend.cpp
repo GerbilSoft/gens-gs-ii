@@ -48,7 +48,7 @@ VBackend::VBackend()
 	
 	// Clear the effects flags.
 	m_paused = false;
-	m_fastBlur = false;
+	m_fastBlur = false;	// TODO: Load from configuration.
 	
 	// We're not running anything initially.
 	m_running = false;
@@ -57,6 +57,9 @@ VBackend::VBackend()
 	resetFps();
 	m_showFps = true;	// TODO: Load from configuration.
 	setOsdListDirty();	// TODO: Set this on startup?
+	
+	// Set the default stretch mode.
+	m_stretchMode = STRETCH_H;	// TODO: Load from configuration.
 	
 	// Create the message timer.
 	m_msgTimer = new MsgTimer(this);
