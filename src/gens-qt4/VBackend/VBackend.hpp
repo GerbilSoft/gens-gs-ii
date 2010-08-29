@@ -67,7 +67,12 @@ class VBackend
 			// Update the Fast Blur setting.
 			m_fastBlur = newFastBlur;
 			if (isRunning())
+			{
 				setVbDirty();
+				// TODO: Only if paused, or regardless of pause?
+				if (isPaused())
+					vbUpdate();
+			}
 		}
 		
 		bool isRunning(void) const { return m_running; }

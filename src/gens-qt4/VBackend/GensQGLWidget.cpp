@@ -644,7 +644,6 @@ void GensQGLWidget::keyPressEvent(QKeyEvent *event)
 			// Toggle the Fast Blur effect.
 			if (isRunning())
 				setFastBlur(!fastBlur());
-			vbUpdate();
 			break;
 		
 		default:
