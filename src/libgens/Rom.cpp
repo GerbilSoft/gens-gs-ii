@@ -65,7 +65,7 @@ Rom::Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverr
 	
 	// Remove the file extension.
 	// TODO: Do this in the Rom class?
-	int extSep = m_filenameBaseNoExt.rfind('.');
+	size_t extSep = m_filenameBaseNoExt.rfind('.');
 	if (extSep != string::npos)
 		m_filenameBaseNoExt.erase(extSep, (m_filenameBaseNoExt.size() - extSep));
 	
