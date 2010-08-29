@@ -80,6 +80,7 @@ SET(gens-qt4_SRCS
 	Audio/ARingBuffer.cpp
 	ZipSelectDialog.cpp
 	Input/EventKeys.cpp
+	EmuManager_qEmu.cpp
 	)
 
 # Headers with Qt4 objects.
