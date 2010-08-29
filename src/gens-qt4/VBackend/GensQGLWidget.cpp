@@ -424,16 +424,56 @@ void GensQGLWidget::paintGL(void)
 		}
 	}
 	
+	// Determine the texture coordinates.
+	// TODO: Make a separate function to recalculate stretch mode coordinates.
+	// TODO: This function would need to be called if:
+	// * MD resolution is changed.
+	// * Stretch mode is changed.
+	double img_dx, img_dy, img_dw, img_dh;
+	const double tex_w = 512.0, tex_h = 256.0;
+	
+	// Default to no stretch.
+	img_dx = 0.0;
+	img_dy = 0.0;
+	img_dw = (320.0 / tex_w);
+	img_dh = (240.0 / tex_h);
+	
+	if (m_stretchMode == STRETCH_H || m_stretchMode == STRETCH_FULL)
+	{
+		// Horizontal stretch.
+		int h_pix_begin = LibGens::VdpIo::GetHPixBegin();
+		if (h_pix_begin > 0)
+		{
+			// Less than 320 pixels wide.
+			// Adjust horizontal stretch.
+			img_dx = ((double)h_pix_begin / tex_w);
+			img_dw -= img_dx;
+		}
+	}
+	
+	if (m_stretchMode == STRETCH_V || m_stretchMode == STRETCH_FULL)
+	{
+		// Vertical stretch.
+		int v_pix = (240 - LibGens::VdpIo::GetVPix());
+		if (v_pix > 0)
+		{
+			// Less than 240 pixels tall.
+			v_pix /= 2;
+			img_dy = ((double)v_pix / tex_h);
+			img_dh -= img_dy;
+		}
+	}
+	
 	// Draw the texture.
 	glBindTexture(GL_TEXTURE_2D, m_tex);
 	glBegin(GL_QUADS);
-	glTexCoord2d(0.0, 0.0);
+	glTexCoord2d(img_dx, img_dy);
 	glVertex2i(-1, 1);
-	glTexCoord2d((320.0/512.0), 0.0);
+	glTexCoord2d(img_dw, img_dy);
 	glVertex2i(1, 1);
-	glTexCoord2d((320.0/512.0), (240.0/256.0));
+	glTexCoord2d(img_dw, img_dh);
 	glVertex2i(1, -1);
-	glTexCoord2d(0.0, (240.0/256.0));
+	glTexCoord2d(img_dx, img_dh);
 	glVertex2i(-1, -1);
 	glEnd();
 	
