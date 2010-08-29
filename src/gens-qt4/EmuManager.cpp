@@ -269,9 +269,12 @@ int EmuManager::closeRom(void)
 	
 	// Close audio.
 	m_audio->close();
-	
-	// TODO: Clear the screen, start the idle animation, etc.
 	m_paused = false;
+	
+	// TODO: Start the idle animation thread if an idle animation is specified.
+	// For now, just clear the screen.
+	LibGens::VdpIo::Reset();
+	emit updateVideo();
 	
 	// Update the Gens title.
 	emit stateChanged();
