@@ -41,6 +41,7 @@ using std::string;
 
 // LibGens includes.
 #include "Util/byteswap.h"
+#include "macros/common.h"
 #include "lg_osd.h"
 
 namespace LibGens
@@ -51,6 +52,22 @@ Rom::Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverr
 	// Save the filename for later.
 	m_filename = string(filename);
 	m_romSize = 0;
+	
+	// Remove the directories and extension from the ROM filename.
+	// TODO: Remove all extensions (e.g. ".gen.gz")?
+	m_filenameBaseNoExt = m_filename;
+	
+	// Get the filename portion.
+	// TODO: Do this in the Rom class?
+	size_t dirSep = m_filenameBaseNoExt.rfind(LG_PATH_SEP_CHR);
+	if (dirSep != string::npos)
+		m_filenameBaseNoExt.erase(0, dirSep+1);
+	
+	// Remove the file extension.
+	// TODO: Do this in the Rom class?
+	int extSep = m_filenameBaseNoExt.rfind('.');
+	if (extSep != string::npos)
+		m_filenameBaseNoExt.erase(extSep, (m_filenameBaseNoExt.size() - extSep));
 	
 	// Save the system and ROM format overrides.
 	m_sysId_override = sysOverride;

@@ -114,6 +114,7 @@ class Rom
 		
 		// ROM filename.
 		const utf8_str *filename(void) const { return m_filename.c_str(); }
+		const utf8_str *filenameBaseNoExt(void) const { return m_filenameBaseNoExt.c_str(); }
 		
 		/** Multi-file ROM archive support. **/
 		
@@ -177,9 +178,10 @@ class Rom
 		
 		/** Variables. **/
 		
-		std::string m_filename;		// ROM filename.
-		unsigned int m_romSize;		// ROM size.
-		int m_eprType;			// EEPRom type.
+		std::string m_filename;			// ROM filename.
+		std::string m_filenameBaseNoExt;	// ROM filename. (basename; no extension)
+		unsigned int m_romSize;			// ROM size.
+		int m_eprType;				// EEPRom type.
 		
 		/**
 		 * MD_RomHeader: ROM header. (MD-style)
