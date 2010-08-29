@@ -93,6 +93,9 @@ EmuManager::EmuManager()
 	m_rom = NULL;
 	m_paused = false;
 	
+	// TODO: Load the last save slot from the configuration file.
+	m_saveSlot = 0;
+	
 	// Create the Audio Backend.
 	// TODO: Allow selection of all available audio backend classes.
 	// NOTE: Audio backends are NOT QWidgets!
@@ -466,9 +469,13 @@ void EmuManager::saveState(void)
 	if (!m_rom)
 		return;
 	
+	// Create the savestate filename.
+	// TODO: Move to another function?
+	QString saveStateFilename = QString("test.%1.zomg").arg(m_saveSlot);
+	
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_SAVE_STATE;
-	rq.filename = strdup("test.zomg");
+	rq.filename = strdup(saveStateFilename.toUtf8().constData());
 	m_qEmuRequest.enqueue(rq);
 	
 	if (m_paused)
@@ -484,9 +491,13 @@ void EmuManager::loadState(void)
 	if (!m_rom)
 		return;
 	
+	// Create the savestate filename.
+	// TODO: Move to another function?
+	QString saveStateFilename = QString("test.%1.zomg").arg(m_saveSlot);
+	
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_LOAD_STATE;
-	rq.filename = strdup("test.zomg");
+	rq.filename = strdup(saveStateFilename.toUtf8().constData());
 	m_qEmuRequest.enqueue(rq);
 	
 	if (m_paused)
@@ -519,6 +530,23 @@ void EmuManager::pauseRequest(void)
 		rq.rqType = EmuRequest_t::RQT_PAUSE_TOGGLE;
 		m_qEmuRequest.enqueue(rq);
 	}
+}
+
+
+/**
+ * setSaveSlot(): Set the save slot number.
+ * @param slotNum Slot number, (0-9)
+ */
+void EmuManager::setSaveSlot(int slotNum)
+{
+	// TODO: Should this use the emulation request queue?
+	// TODO: Check if save slot is occupied; load preview.
+	if (slotNum < 0 || slotNum > 9)
+		return;
+	m_saveSlot = slotNum;
+	
+	QString osdMsg = TR("Save Slot %1: [TODO]").arg(slotNum);
+	emit osdPrintMsg(1500, osdMsg);
 }
 
 

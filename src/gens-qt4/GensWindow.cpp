@@ -166,6 +166,14 @@ void GensWindow::setupUi(void)
 	connect(m_evKeys, SIGNAL(eventResetEmulator(bool)),
 		&m_emuManager, SLOT(resetEmulator(bool)));
 	
+	// Event Keys: Save slots.
+	connect(m_evKeys, SIGNAL(eventSetSaveSlot(int)),
+		&m_emuManager, SLOT(setSaveSlot(int)));
+	connect(m_evKeys, SIGNAL(eventNextSaveSlot(void)),
+		&m_emuManager, SLOT(nextSaveSlot(void)));
+	connect(m_evKeys, SIGNAL(eventPrevSaveSlot(void)),
+		&m_emuManager, SLOT(prevSaveSlot(void)));
+	
 	// Retranslate the UI.
 	retranslateUi();
 }

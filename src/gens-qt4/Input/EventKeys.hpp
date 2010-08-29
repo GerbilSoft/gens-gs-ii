@@ -50,6 +50,22 @@ class EventKeys : public QObject
 		 * @param hardReset If true, do a hard reset; otherwise, do a soft reset.
 		 */
 		void eventResetEmulator(bool hardReset);
+		
+		/**
+		 * eventSetSaveSlot(): Set the save slot number.
+		 * @param slotNum Slot number, (0-9)
+		 */
+		void eventSetSaveSlot(int slotNum);
+		
+		/**
+		 * eventNextSaveSlot(): Select the next save slot.
+		 */
+		void eventNextSaveSlot(void);
+		
+		/**
+		 * eventPrevSaveSlot(): Select the previous save slot.
+		 */
+		void eventPrevSaveSlot(void);
 };
 
 #endif /* __GENS_QT4_INPUT_EVENTKEYS_HPP__ */

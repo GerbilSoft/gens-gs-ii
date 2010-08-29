@@ -84,6 +84,42 @@ bool EventKeys::checkEventKey(GensKey_t key, int mod)
 			}
 			break;
 		
+		case KEYV_0:
+		case KEYV_1:
+		case KEYV_2:
+		case KEYV_3:
+		case KEYV_4:
+		case KEYV_5:
+		case KEYV_6:
+		case KEYV_7:
+		case KEYV_8:
+		case KEYV_9:
+			if (mod == Qt::NoModifier)
+			{
+				// Save Slot selection.
+				emit eventSetSaveSlot(key - KEYV_0);
+				return true;
+			}
+			break;
+		
+		case KEYV_F6:
+			if (mod == Qt::NoModifier)
+			{
+				// Previous Save Slot.
+				emit eventPrevSaveSlot();
+				return true;
+			}
+			break;
+			
+		case KEYV_F7:
+			if (mod == Qt::NoModifier)
+			{
+				// Next Save Slot.
+				emit eventNextSaveSlot();
+				return true;
+			}
+			break;
+		
 		default:
 			break;
 	}

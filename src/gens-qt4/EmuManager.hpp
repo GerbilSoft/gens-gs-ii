@@ -66,6 +66,7 @@ class EmuManager : public QObject
 		void setStereo(bool newStereo);
 		
 		/** Savestates. **/
+		int saveSlot(void) const { return m_saveSlot; }
 		void saveState(void); // Save to current slot.
 		void loadState(void); // Load from current slot.
 		
@@ -158,6 +159,7 @@ class EmuManager : public QObject
 		void doAudioStereo(bool newStereo);
 		
 		/** Savestates. **/
+		int m_saveSlot;
 		void doSaveState(const char *filename);
 		void doLoadState(const char *filename);
 		
@@ -175,6 +177,22 @@ class EmuManager : public QObject
 		 * @param hardReset If true, do a hard reset; otherwise, do a soft reset.
 		 */
 		void resetEmulator(bool hardReset);
+		
+		/**
+		 * setSaveSlot(): Set the save slot number.
+		 * @param slotNum Slot number, (0-9)
+		 */
+		void setSaveSlot(int slotNum);
+		
+		/**
+		 * nextSaveSlot(): Select the next save slot.
+		 */
+		void nextSaveSlot(void) { setSaveSlot((m_saveSlot + 1) % 10); }
+		
+		/**
+		 * prevSaveSlot(): Select the previous save slot.
+		 */
+		void prevSaveSlot(void) { setSaveSlot((m_saveSlot + 9) % 10); }
 	
 	protected slots:
 		// Frame done signal from EmuThread.
