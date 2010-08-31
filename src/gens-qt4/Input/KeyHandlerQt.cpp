@@ -207,7 +207,7 @@ void KeyHandlerQt::MouseReleaseEvent(QMouseEvent *event)
 	}
 	
 	// Mark the key as released.
-	ms_KeyPress[KEYV_MOUSE_UNKNOWN + gensButton] = true;
+	ms_KeyPress[KEYV_MOUSE_UNKNOWN + gensButton] = false;
 }
 
 
