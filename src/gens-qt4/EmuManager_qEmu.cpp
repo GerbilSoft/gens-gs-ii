@@ -92,14 +92,14 @@ void EmuManager::processQEmuRequest(void)
 			
 			case EmuRequest_t::RQT_SAVE_STATE:
 				// Save a savestate.
-				doSaveState(rq.filename);
-				free(rq.filename);
+				doSaveState(rq.saveState.filename, rq.saveState.saveSlot);
+				free(rq.saveState.filename);
 				break;
 			
 			case EmuRequest_t::RQT_LOAD_STATE:
 				// Load a savestate.
-				doLoadState(rq.filename);
-				free(rq.filename);
+				doLoadState(rq.saveState.filename, rq.saveState.saveSlot);
+				free(rq.saveState.filename);
 				break;
 			
 			case EmuRequest_t::RQT_PAUSE_TOGGLE:
@@ -371,8 +371,9 @@ void EmuManager::doAudioStereo(bool newStereo)
 /**
  * doSaveState(): Save the current emulation state.
  * @param filename Filename.
+ * @param saveSlot Save slot number.
  */
-void EmuManager::doSaveState(const char *filename)
+void EmuManager::doSaveState(const char *filename, int saveSlot)
 {
 	// Create the preview image.
 	QImage img = getMDScreen();
@@ -390,9 +391,18 @@ void EmuManager::doSaveState(const char *filename)
 	QString osdMsg;
 	
 	if (ret == 0)
-		osdMsg = TR("State saved in %1.").arg(sFilename);
+	{
+		// Savestate saved.
+		if (saveSlot >= 0)
+			osdMsg = TR("State %1 saved.").arg(saveSlot);
+		else
+			osdMsg = TR("State saved in %1").arg(sFilename);
+	}
 	else
+	{
+		// Error loading savestate.
 		osdMsg = TR("Error saving state: %1").arg(ret);
+	}
 	
 	// Print a message on the OSD.
 	emit osdPrintMsg(1500, osdMsg);
@@ -402,8 +412,9 @@ void EmuManager::doSaveState(const char *filename)
 /**
  * doLoadState(): Load the emulation state from a file.
  * @param filename Filename.
+ * @param saveSlot Save slot number.
  */
-void EmuManager::doLoadState(const char *filename)
+void EmuManager::doLoadState(const char *filename, int saveSlot)
 {
 	// TODO: Redraw the screen if emulation is paused.
 	int ret = LibGens::ZomgLoad(filename);
@@ -412,9 +423,18 @@ void EmuManager::doLoadState(const char *filename)
 	QString osdMsg;
 	
 	if (ret == 0)
-		osdMsg = TR("State loaded from %1.").arg(sFilename);
+	{
+		// Savestate loaded.
+		if (saveSlot >= 0)
+			osdMsg = TR("State %1 loaded.").arg(saveSlot);
+		else
+			osdMsg = TR("State loaded from %1").arg(sFilename);
+	}
 	else
+	{
+		// Error loading savestate.
 		osdMsg = TR("Error loading state: %1").arg(ret);
+	}
 	
 	// Print a message on the OSD.
 	emit osdPrintMsg(1500, osdMsg);

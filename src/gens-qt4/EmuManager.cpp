@@ -464,7 +464,8 @@ void EmuManager::saveState(void)
 	
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_SAVE_STATE;
-	rq.filename = strdup(saveStateFilename.toUtf8().constData());
+	rq.saveState.filename = strdup(saveStateFilename.toUtf8().constData());
+	rq.saveState.saveSlot = m_saveSlot;
 	m_qEmuRequest.enqueue(rq);
 	
 	if (m_paused)
@@ -488,7 +489,8 @@ void EmuManager::loadState(void)
 	
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_LOAD_STATE;
-	rq.filename = strdup(saveStateFilename.toUtf8().constData());
+	rq.saveState.filename = strdup(saveStateFilename.toUtf8().constData());
+	rq.saveState.saveSlot = m_saveSlot;
 	m_qEmuRequest.enqueue(rq);
 	
 	if (m_paused)

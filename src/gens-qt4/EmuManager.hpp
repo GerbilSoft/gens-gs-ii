@@ -141,7 +141,11 @@ class EmuManager : public QObject
 				bool audioStereo;
 				
 				// Savestates.
-				char *filename;
+				struct
+				{
+					char *filename;
+					int saveSlot;
+				} saveState;
 				
 				// Emulator Reset.
 				bool hardReset;
@@ -160,8 +164,8 @@ class EmuManager : public QObject
 		
 		/** Savestates. **/
 		int m_saveSlot;
-		void doSaveState(const char *filename);
-		void doLoadState(const char *filename);
+		void doSaveState(const char *filename, int saveSlot);
+		void doLoadState(const char *filename, int saveSlot);
 		
 		void doPauseRequest(void);
 		void doResetEmulator(bool hardReset);
