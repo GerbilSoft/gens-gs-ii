@@ -83,6 +83,39 @@ int Zomg::loadFromZomg(const utf8_str *filename, void *buf, int len)
 // (once FORMAT.ini is implemented)
 
 
+/**
+ * loadPreview(): Load the preview image.
+ * @param img_buf Image buffer.
+ * @param siz Size of the image buffer.
+ * @return 0 on success; non-zero on error.
+ */
+int Zomg::loadPreview(void *img_buf, size_t siz)
+{
+	static const uint8_t png_magic[8] = {0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'};
+	
+	// Make sure a preview image is available to load.
+	if (m_preview_size == 0 || siz < sizeof(png_magic) || siz < m_preview_size)
+		return -4;
+	
+	// Load the preview image.
+	int ret = loadFromZomg("preview.png", img_buf, siz);
+	if (ret < 0)
+		return ret;
+	
+	// Verify the PNG "magic number".
+	if (memcmp(img_buf, png_magic, sizeof(png_magic)) != 0)
+	{
+		// Invalid "magic number".
+		// Clear the image buffer.
+		memset(img_buf, 0x00, siz);
+		return -5;
+	}
+	
+	// Preview image loaded.
+	return 0;
+}
+
+
 /** VDP **/
 
 

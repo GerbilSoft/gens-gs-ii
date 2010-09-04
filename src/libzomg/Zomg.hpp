@@ -78,6 +78,20 @@ class Zomg
 		// TODO: Determine siz and is16bit from the system type?
 		// (once FORMAT.ini is implemented)
 		
+		/**
+		 * getPreviewSize(): Get the size of the preview image.
+		 * @return Size of the preview image, or 0 if none was found.
+		 */
+		inline size_t getPreviewSize(void) const { return m_preview_size; }
+		
+		/**
+		 * loadPreview(): Load the preview image.
+		 * @param img_buf Image buffer.
+		 * @param siz Size of the image buffer.
+		 * @return Bytes read on success; negative on error.
+		 */
+		int loadPreview(void *img_buf, size_t siz);
+		
 		// VDP
 		int loadVdpReg(uint8_t *reg, size_t siz);
 		int loadVRam(void *vram, size_t siz, bool byteswap);
@@ -157,6 +171,9 @@ class Zomg
 		
 		int loadFromZomg(const utf8_str *filename, void *buf, int len);
 		int saveToZomg(const utf8_str *filename, const void *buf, int len);
+		
+		// PNG preview image.
+		size_t m_preview_size;
 };
 
 }

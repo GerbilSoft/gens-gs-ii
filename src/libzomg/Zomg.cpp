@@ -56,6 +56,9 @@ Zomg::Zomg(const utf8_str *filename, ZomgFileMode mode)
 	m_unz = NULL;
 	m_zip = NULL;
 	
+	// Assume we're not loading a preview image by default.
+	m_preview_size = 0;
+	
 	if (!filename)
 		return;
 	
@@ -133,8 +136,23 @@ int Zomg::initZomgLoad(const utf8_str *filename)
 #else
 	m_unz = unzOpen(filename);
 #endif
+	if (!m_unz)
+		return -1;
 	
-	return (m_unz ? 0 : -1);
+	// Check for a PNG preview image.
+	// TODO: Add a mode flag to indicate if we want to load the preview image automatically?
+	int ret = unzLocateFile(m_unz, "preview.png", 2);
+	if (ret == UNZ_OK)
+	{
+		// Preview image found.
+		// Get the filesize.
+		unz_file_info unzfi;
+		ret = unzGetCurrentFileInfo(m_unz, &unzfi, NULL, 0, NULL, 0, NULL, 0);
+		if (ret == UNZ_OK)
+			m_preview_size = unzfi.compressed_size;
+	}
+	
+	return 0;
 }
 
 
