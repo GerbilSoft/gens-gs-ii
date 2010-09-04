@@ -520,6 +520,7 @@ void GensWindow::stateChanged(void)
 	else
 	{
 		// ROM is closed.
+		m_vBackend->osd_show_preview(0, QImage());
 		m_vBackend->setRunning(false);
 		m_vBackend->setPaused(false);
 		m_vBackend->resetFps();
