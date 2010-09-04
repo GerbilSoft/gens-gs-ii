@@ -571,6 +571,7 @@ void EmuManager::setSaveSlot(int slotNum)
 				// No preview image.
 				zomg.close();
 				emit osdPrintMsg(1500, osdMsg);
+				emit osdShowPreview(0, QImage());
 				return;
 			}
 			
@@ -584,6 +585,7 @@ void EmuManager::setSaveSlot(int slotNum)
 			{
 				// Error loading the preview image.
 				emit osdPrintMsg(1500, osdMsg);
+				emit osdShowPreview(0, QImage());
 				return;
 			}
 			
@@ -598,6 +600,7 @@ void EmuManager::setSaveSlot(int slotNum)
 			{
 				// Error reading the preview image.
 				emit osdPrintMsg(1500, osdMsg);
+				emit osdShowPreview(0, QImage());
 				return;
 			}
 			
@@ -610,6 +613,7 @@ void EmuManager::setSaveSlot(int slotNum)
 			// Savestate doesn't exist.
 			osdMsg = osdMsg.arg(TR("EMPTY"));
 			emit osdPrintMsg(1500, osdMsg);
+			emit osdShowPreview(0, QImage());
 		}
 	}
 	else
@@ -617,6 +621,7 @@ void EmuManager::setSaveSlot(int slotNum)
 		// ROM is not loaded.
 		QString osdMsg = TR("Save Slot %1 selected.").arg(slotNum);
 		emit osdPrintMsg(1500, osdMsg);
+		emit osdShowPreview(0, QImage());
 	}
 }
 
