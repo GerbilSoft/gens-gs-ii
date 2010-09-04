@@ -149,7 +149,7 @@ int Zomg::initZomgLoad(const utf8_str *filename)
 		unz_file_info unzfi;
 		ret = unzGetCurrentFileInfo(m_unz, &unzfi, NULL, 0, NULL, 0, NULL, 0);
 		if (ret == UNZ_OK)
-			m_preview_size = unzfi.compressed_size;
+			m_preview_size = unzfi.uncompressed_size;
 	}
 	
 	return 0;
