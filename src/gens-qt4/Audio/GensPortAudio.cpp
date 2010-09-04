@@ -33,6 +33,9 @@
 // LibGens Sound Manager.
 #include "libgens/sound/SoundMgr.hpp"
 
+// CPU flags.
+#include "libgens/Util/cpuflags.h"
+
 namespace GensQt4
 {
 
