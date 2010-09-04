@@ -133,16 +133,10 @@ int ABackend::writeMono(int16_t *dest)
  * @param dest Destination buffer.
  * @return 0 on success; non-zero on error.
  */
-int ABackend::writeStereoMMX(void)
+int ABackend::writeStereoMMX(int16_t *dest)
 {
-	// Lock the audio buffer.
-	m_mtxBuf.lock();
-	
 	// Segment length.
 	const int SegLength = LibGens::SoundMgr::GetSegLength();
-	
-	// Destination buffer pointer.
-	int16_t *dest = (int16_t*)&m_buf[(m_bufPos * m_sampleSize) / sizeof(m_buf[0])];
 	
 	// Source buffer pointers.
 	int32_t *srcL = &LibGens::SoundMgr::ms_SegBufL[0];
@@ -206,12 +200,6 @@ int ABackend::writeStereoMMX(void)
 	// Clear the segment buffers.
 	memset(LibGens::SoundMgr::ms_SegBufL, 0x00, SegLength*sizeof(LibGens::SoundMgr::ms_SegBufL[0]));
 	memset(LibGens::SoundMgr::ms_SegBufR, 0x00, SegLength*sizeof(LibGens::SoundMgr::ms_SegBufR[0]));
-	
-	// Increase the buffer position.
-	m_bufPos += SegLength;
-	
-	// Unlock the audio buffer.
-	m_mtxBuf.unlock();
 	return 0;
 }
 
@@ -221,16 +209,10 @@ int ABackend::writeStereoMMX(void)
  * @param dest Destination buffer.
  * @return 0 on success; non-zero on error.
  */
-int ABackend::writeMonoMMX(void)
+int ABackend::writeMonoMMX(int16_t *dest)
 {
-	// Lock the audio buffer.
-	m_mtxBuf.lock();
-	
 	// Segment length.
 	const int SegLength = LibGens::SoundMgr::GetSegLength();
-	
-	// Destination buffer pointer.
-	int16_t *dest = (int16_t*)&m_buf[(m_bufPos * m_sampleSize) / sizeof(m_buf[0])];
 	
 	// Source buffer pointers.
 	int32_t *srcL = &LibGens::SoundMgr::ms_SegBufL[0];
@@ -281,12 +263,6 @@ int ABackend::writeMonoMMX(void)
 	// Clear the segment buffers.
 	memset(LibGens::SoundMgr::ms_SegBufL, 0x00, SegLength*sizeof(LibGens::SoundMgr::ms_SegBufL[0]));
 	memset(LibGens::SoundMgr::ms_SegBufR, 0x00, SegLength*sizeof(LibGens::SoundMgr::ms_SegBufR[0]));
-	
-	// Increase the buffer position.
-	m_bufPos += SegLength;
-	
-	// Unlock the audio buffer.
-	m_mtxBuf.unlock();
 	return 0;
 }
 #endif /* HAVE_MMX */

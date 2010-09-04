@@ -35,7 +35,7 @@
 
 // TODO: Move this somewhere else!
 #if defined(__GNUC__) && (defined(__i386__) || defined(__amd64__))
-//#define HAVE_MMX // do this later
+#define HAVE_MMX // do this later
 #endif
 
 namespace GensQt4
