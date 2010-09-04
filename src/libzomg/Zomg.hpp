@@ -152,6 +152,9 @@ class Zomg
 		// NOTE: Only used when saving ZOMG files.
 		zip_fileinfo m_zipfi;
 		
+		int initZomgLoad(const utf8_str *filename);
+		int initZomgSave(const utf8_str *filename);
+		
 		int loadFromZomg(const utf8_str *filename, void *buf, int len);
 		int saveToZomg(const utf8_str *filename, const void *buf, int len);
 };

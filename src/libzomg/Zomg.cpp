@@ -63,60 +63,18 @@ Zomg::Zomg(const utf8_str *filename, ZomgFileMode mode)
 	// TODO: Open for reading to load existing FORMAT.ini even if
 	// the current mode is ZOMG_SAVE.
 	
-#ifdef _WIN32
-	zlib_filefunc64_def ffunc;
-	fill_win32_filefunc64U(&ffunc);
-#endif
-	
 	// TODO: Split this up into multiple functions?
 	switch (mode)
 	{
 		case ZOMG_LOAD:
-#ifdef _WIN32
-			m_unz = unzOpen2_64(filename, &ffunc);
-#else
-			m_unz = unzOpen(filename);
-#endif
-			if (!m_unz)
+			if (initZomgLoad(filename) != 0)
 				return;
 			break;
 		
 		case ZOMG_SAVE:
-		{
-#ifdef _WIN32
-			m_zip = zipOpen2_64(filename, APPEND_STATUS_CREATE, NULL, &ffunc);
-#else
-			m_zip = zipOpen(filename, APPEND_STATUS_CREATE);
-#endif
-			if (!m_zip)
+			if (initZomgSave(filename) != 0)
 				return;
-			
-			// Clear the default Zip timestamp first.
-			memset(&m_zipfi, 0x00, sizeof(m_zipfi));
-			
-			// Get the current time for the Zip archive.
-			time_t cur_time = time(NULL);
-			struct tm *tm_local;
-#ifdef HAVE_LOCALTIME_R
-			struct tm tm_local_r;
-			tm_local = localtime_r(&cur_time, &tm_local_r);
-#else
-			tm_local = localtime(&cur_time);
-#endif /* HAVE_LOCALTIME_R */
-			if (tm_local)
-			{
-				// Local time received.
-				// Convert to Zip time.
-				m_zipfi.tmz_date.tm_sec  = tm_local->tm_sec;
-				m_zipfi.tmz_date.tm_min  = tm_local->tm_min;
-				m_zipfi.tmz_date.tm_hour = tm_local->tm_hour;
-				m_zipfi.tmz_date.tm_mday = tm_local->tm_mday;
-				m_zipfi.tmz_date.tm_mon  = tm_local->tm_mon;
-				m_zipfi.tmz_date.tm_year = tm_local->tm_year;
-			}
-			
 			break;
-		}
 		
 		default:
 			return;
@@ -158,6 +116,70 @@ void Zomg::close(void)
 	}
 	
 	m_mode = ZOMG_CLOSED;
+}
+
+
+/**
+ * initZomgLoad(): Initialize the Zomg class for loading a Zomg.
+ * @param filename Zomg file to load.
+ * @return 0 on success; non-zero on error.
+ */
+int Zomg::initZomgLoad(const utf8_str *filename)
+{
+#ifdef _WIN32
+	zlib_filefunc64_def ffunc;
+	fill_win32_filefunc64U(&ffunc);
+	m_unz = unzOpen2_64(filename, &ffunc);
+#else
+	m_unz = unzOpen(filename);
+#endif
+	
+	return (m_unz ? 0 : -1);
+}
+
+
+/**
+ * initZomgSave(): Initialize the Zomg class for saving a Zomg.
+ * @param filename Zomg file to save.
+ * @return 0 on success; non-zero on error.
+ */
+int Zomg::initZomgSave(const utf8_str *filename)
+{
+#ifdef _WIN32
+	zlib_filefunc64_def ffunc;
+	fill_win32_filefunc64U(&ffunc);
+	m_zip = zipOpen2_64(filename, APPEND_STATUS_CREATE, NULL, &ffunc);
+#else
+	m_zip = zipOpen(filename, APPEND_STATUS_CREATE);
+#endif
+	if (!m_zip)
+		return -1;
+	
+	// Clear the default Zip timestamp first.
+	memset(&m_zipfi, 0x00, sizeof(m_zipfi));
+	
+	// Get the current time for the Zip archive.
+	time_t cur_time = time(NULL);
+	struct tm *tm_local;
+#ifdef HAVE_LOCALTIME_R
+	struct tm tm_local_r;
+	tm_local = localtime_r(&cur_time, &tm_local_r);
+#else
+	tm_local = localtime(&cur_time);
+#endif /* HAVE_LOCALTIME_R */
+	if (tm_local)
+	{
+		// Local time received.
+		// Convert to Zip time.
+		m_zipfi.tmz_date.tm_sec  = tm_local->tm_sec;
+		m_zipfi.tmz_date.tm_min  = tm_local->tm_min;
+		m_zipfi.tmz_date.tm_hour = tm_local->tm_hour;
+		m_zipfi.tmz_date.tm_mday = tm_local->tm_mday;
+		m_zipfi.tmz_date.tm_mon  = tm_local->tm_mon;
+		m_zipfi.tmz_date.tm_year = tm_local->tm_year;
+	}
+	
+	return 0;
 }
 
 }
