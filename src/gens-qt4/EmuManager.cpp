@@ -578,7 +578,6 @@ void EmuManager::setSaveSlot(int slotNum)
 			// Preview image found.
 			QByteArray img_ByteArray;
 			img_ByteArray.resize(zomg.getPreviewSize());
-			printf("size: %d; getPreviewSize(): %d\n", img_ByteArray.size(), zomg.getPreviewSize());
 			int ret = zomg.loadPreview(img_ByteArray.data(), img_ByteArray.size());
 			zomg.close();
 			if (ret != 0)
