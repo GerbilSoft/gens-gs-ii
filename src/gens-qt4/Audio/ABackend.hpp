@@ -115,4 +115,4 @@ class ABackend
 
 }
 
-#endif /* __GENS_QT4_AUDIO_PORTAUDIO_HPP__ */
+#endif /* __GENS_QT4_AUDIO_ABACKEND_HPP__ */
