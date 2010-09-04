@@ -306,9 +306,7 @@ int ZomgSave(const utf8_str *filename, const void *img_buf, size_t img_siz)
 	if (!M68K_Mem::m_EEPRom.isEEPRomTypeSet())
 	{
 		// EEPRom is disabled. Use SRam.
-		md_time_reg_save.SRAM_ctrl = 0; // set high bits to 0 
-		md_time_reg_save.SRAM_ctrl |= (!M68K_Mem::m_SRam.isWrite() << 1);
-		md_time_reg_save.SRAM_ctrl |= (M68K_Mem::m_SRam.isOn());
+		md_time_reg_save.SRAM_ctrl = M68K_Mem::m_SRam.zomgReadCtrl();
 	}
 	zomg.saveMD_TimeReg(&md_time_reg_save);
 	
