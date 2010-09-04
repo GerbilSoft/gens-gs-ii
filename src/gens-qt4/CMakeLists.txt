@@ -81,6 +81,7 @@ SET(gens-qt4_SRCS
 	ZipSelectDialog.cpp
 	Input/EventKeys.cpp
 	EmuManager_qEmu.cpp
+	VBackend/GlTex2D.cpp
 	)
 
 # Headers with Qt4 objects.
