@@ -48,6 +48,7 @@
 #include "zomg_z80.h"
 #include "zomg_md_io.h"
 #include "zomg_md_z80_ctrl.h"
+#include "zomg_md_time_reg.h"
 
 namespace LibZomg
 {
@@ -98,6 +99,7 @@ class Zomg
 		// MD-specific registers.
 		int loadMD_IO(Zomg_MD_IoSave_t *state);
 		int loadMD_Z80Ctrl(Zomg_MD_Z80CtrlSave_t *state);
+		int loadMD_TimeReg(Zomg_MD_TimeReg_t *state);
 		
 		/**
 		 * Save savestate functions.
@@ -138,6 +140,7 @@ class Zomg
 		// MD-specific registers.
 		int saveMD_IO(const Zomg_MD_IoSave_t *state);
 		int saveMD_Z80Ctrl(const Zomg_MD_Z80CtrlSave_t *state);
+		int saveMD_TimeReg(const Zomg_MD_TimeReg_t *state);
 	
 	protected:
 		std::string m_filename;

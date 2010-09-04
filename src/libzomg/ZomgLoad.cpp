@@ -326,4 +326,16 @@ int Zomg::loadMD_Z80Ctrl(Zomg_MD_Z80CtrlSave_t *state)
 	return ret;
 }
 
+
+/**
+ * loadMD_TimeReg(): Load MD /TIME registers. (MD-specific)
+ * @param state MD /TIME register buffer.
+ * @return Number of bytes read on success; negative on error.
+ * TODO: Return an error if the system isn't MD.
+ */
+int Zomg::loadMD_TimeReg(Zomg_MD_TimeReg_t *state)
+{
+	return loadFromZomg("MD/TIME_reg.bin", state, sizeof(*state));
+}
+
 }

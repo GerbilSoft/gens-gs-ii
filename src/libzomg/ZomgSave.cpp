@@ -18,6 +18,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc., *
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
+
 /**
  * WARNING: This version of ZOMG is not the final version,
  * and is subject to change.
@@ -411,6 +412,18 @@ int Zomg::saveMD_Z80Ctrl(const Zomg_MD_Z80CtrlSave_t *state)
 #else
 	return saveToZomg("MD/Z80_ctrl.bin", state, sizeof(*state));
 #endif
+}
+
+
+/**
+ * saveMD_TimeReg(): Save MD /TIME registers. (MD-specific)
+ * @param state MD /TIME register buffer.
+ * @return 0 on success; non-zero on error.
+ * TODO: Return an error if the system isn't MD.
+ */
+int Zomg::saveMD_TimeReg(const Zomg_MD_TimeReg_t *state)
+{
+	return saveToZomg("MD/TIME_reg.bin", state, sizeof(*state));
 }
 
 }
