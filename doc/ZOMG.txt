@@ -146,6 +146,7 @@ components that are common throughout the Sega 8-bit and 16-bit hardware line.
 | psg.bin        |             23 |    8-bit   |
 | Z80_mem.bin    |    1, 2, 8 KiB |    8-bit   |
 | Z80_reg.bin    |             28 |     LE     |
+| SRAM.bin       |   up to 65,536 |  8 / 16 BE |
 +----------------+----------------+------------+
 
 ----------------------------------------------------------------
@@ -311,6 +312,33 @@ typedef struct _ZOMG_Z80_reg_t
 	uint8_t IM;	// 8-bit: IM register. (0, 1, 2)
 } ZOMG_Z80_reg_t;
 
+----------------------------------------------------------------
+
+4.7. SRAM.bin: Save RAM. [OPTIONAL]
+
+This file contains the contents of Save RAM, which is present
+in some cartridges.
+
+On Sega 8-bit systems, the Save RAM contents is stored as 8-bit data.
+
+On the Sega Mega Drive, the Save RAM is stored as 16-bit data, in Big-Endian
+format. Typically, the Save RAM chip is 8 bits wide, so only odd or even bytes
+are used; however, the full Save RAM is emulated in order to accomodate games
+that use either method.
+
+Save RAM should be initialized with 0xFF.
+
+Save RAM can be up to 65,536 bytes in the ZOMG format, and file sizes should
+be powers of 2. If the Save RAM file in a savestate is smaller than the total
+Save RAM area in the emulator, the remainder should be filled with 0xFF.
+
+Note that saving SRAM in a savestate is optional. For emulators that support
+it, there should be a user-configurable option to enable or disable saving
+SRAM in savestates.
+
+C equivalent for SRAM.bin:
+uint8_t sram[65536];	// Up to 65,536 bytes.
+
 ================================================================
 
 5. Mega Drive-specific components
@@ -327,6 +355,7 @@ components that are specific to the Sega Mega Drive hardware.
 | M68K_reg.bin   |             74 |     BE     |
 | IO.bin         |             16 |    8-bit   |
 | Z80_ctrl.bin   |              4 |   Varies   |
+| TIME_reg.bin   |            256 |    8-bit   |
 +----------------+----------------+------------+
 
 ----------------------------------------------------------------
@@ -473,3 +502,59 @@ typedef struct _ZOMG_MD_Z80_ctrl_t
 				// high 9 bits of M68K address space
 				// for the Z80 banking space.
 } ZOMG_MD_Z80_ctrl_t;
+
+----------------------------------------------------------------
+
+5.7. TIME_reg.bin: /TIME registers.
+
+These are registers accessible using the /TIME control signal on the cartridge
+slot, which is mapped to $A130xx. Typically, this control signal is used for
+Save RAM banking. It's also used for the Super Street Fighter II bankswitching
+scheme.
+
+The full 256 bytes are saved, since some other bankswitching schemes may use
+additional portions of the /TIME area that aren't discussed here. If an
+emulator does not support a certain region of the /TIME area, it should assume
+that the value is 0xFF.
+
+NOTE: The $A130Fx range consists of byte-wide registers that are accessible
+using byte writes to both odd and even addresses; however, only the odd
+addresses contain the actual register data.
+
+Format for SRAM_ctrl: [X X X X X X WP MD]
+X = Don't Care (preferred value is 0)
+WP = Write Protect: 0 = SRAM is writable; 1 == SRAM is not writable.
+MD = Mode: 0 == ROM is accessible; 1 == SRAM is accessible.
+
+NOTE: SRAM_ctrl is *not* used if the ROM in question uses EEPROM
+instead of SRAM for saving. In this case, SRAM_ctrl should be 0.
+
+C equivalent for TIME_reg.bin:
+
+typedef struct _ZOMG_MD_TIME_reg_t
+{
+	union
+	{
+		uint8_t reg[256];			// All registers.
+		struct
+		{
+			uint8_t reserved_00_EF[240];	// $A13000 - $A130EF: Reserved.
+			uint8_t reserved_F0;		// $A130F0: Reserved.
+			uint8_t SRAM_ctrl;		// $A130F1: SRAM control.
+			uint8_t reserved_F2;		// $A130F2: Reserved.
+			uint8_t SSF2_bank1;		// $A130F3: SSF2 Bank 1. ($080000 - $0FFFFF)
+			uint8_t reserved_F4;		// $A130F4: Reserved.
+			uint8_t SSF2_bank2;		// $A130F5: SSF2 Bank 2. ($100000 - $17FFFF)
+			uint8_t reserved_F6;		// $A130F6: Reserved.
+			uint8_t SSF2_bank3;		// $A130F7: SSF2 Bank 3. ($180000 - $1FFFFF)
+			uint8_t reserved_F8;		// $A130F8: Reserved.
+			uint8_t SSF2_bank4;		// $A130F9: SSF2 Bank 4. ($200000 - $27FFFF)
+			uint8_t reserved_FA;		// $A130FA: Reserved.
+			uint8_t SSF2_bank5;		// $A130FB: SSF2 Bank 5. ($280000 - $2FFFFF)
+			uint8_t reserved_FC;		// $A130FC: Reserved.
+			uint8_t SSF2_bank6;		// $A130FD: SSF2 Bank 6. ($300000 - $37FFFF)
+			uint8_t reserved_FE;		// $A130FE: Reserved.
+			uint8_t SSF2_bank7;		// $A130FF: SSF2 Bank 7. ($380000 - $3FFFFF)
+		};
+	};
+} ZOMG_MD_TIME_reg_t;
