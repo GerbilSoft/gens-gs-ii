@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * ABackend_Write.hpp: Audio Write functions.                              *
+ * ABackend.hpp: Audio Backend base class.                                 *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "GensPortAudio.hpp"
+#include "ABackend.hpp"
 
 // C includes.
 #include <string.h>
@@ -42,39 +42,20 @@
 namespace GensQt4
 {
 
-/**
- * write(): Write the current segment to the audio buffer.
- * @return 0 on success; non-zero on error.
- */
-int GensPortAudio::write(void)
+ABackend::ABackend()
 {
-	if (!m_open)
-		return 1;
+	// Assume audio isn't open initially.
+	m_open = false;
 	
-	// Lock the ring buffer for writing.
-	int16_t *buf = m_buffer.writeLock();
-	
-	// TODO: MMX versions.
-	int ret;
-#ifdef HAVE_MMX
-	if (CPU_Flags & MDP_CPUFLAG_X86_MMX)
-	{
-		// MMX is supported.
-		if (m_stereo)
-			ret = writeStereoMMX(buf);
-		else
-			ret = writeMonoMMX(buf);
-	}
-	else
-#endif /* HAVE_MMX */
-	if (m_stereo)
-		ret = writeStereo(buf);
-	else
-		ret = writeMono(buf);
-	
-	// Unlock the ring buffer.
-	m_buffer.writeUnlock();
-	return ret;
+	// Initialize settings.
+	// TODO: Allow user customization.
+	m_rate = 44100;
+	m_stereo = true;
+}
+
+ABackend::~ABackend()
+{
+	// NOTE: close() can't be called from here.
 }
 
 
@@ -83,7 +64,7 @@ int GensPortAudio::write(void)
  * @param dest Destination buffer.
  * @return 0 on success; non-zero on error.
  */
-int GensPortAudio::writeStereo(int16_t *dest)
+int ABackend::writeStereo(int16_t *dest)
 {
 	// Segment length.
 	const int SegLength = LibGens::SoundMgr::GetSegLength();
@@ -121,7 +102,7 @@ int GensPortAudio::writeStereo(int16_t *dest)
  * @param dest Destination buffer.
  * @return 0 on success; non-zero on error.
  */
-int GensPortAudio::writeMono(int16_t *dest)
+int ABackend::writeMono(int16_t *dest)
 {
 	// Segment length.
 	const int SegLength = LibGens::SoundMgr::GetSegLength();
@@ -155,7 +136,7 @@ int GensPortAudio::writeMono(int16_t *dest)
  * @param dest Destination buffer.
  * @return 0 on success; non-zero on error.
  */
-int GensPortAudio::writeStereoMMX(void)
+int ABackend::writeStereoMMX(void)
 {
 	// Lock the audio buffer.
 	m_mtxBuf.lock();
@@ -243,7 +224,7 @@ int GensPortAudio::writeStereoMMX(void)
  * @param dest Destination buffer.
  * @return 0 on success; non-zero on error.
  */
-int GensPortAudio::writeMonoMMX(void)
+int ABackend::writeMonoMMX(void)
 {
 	// Lock the audio buffer.
 	m_mtxBuf.lock();

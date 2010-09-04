@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * GensPortAudio.hpp: PortAudio audio backend.                             *
+ * ABackend.hpp: Audio Backend base class.                                 *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,10 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_AUDIO_PORTAUDIO_HPP__
-#define __GENS_QT4_AUDIO_PORTAUDIO_HPP__
-
-#include "ABackend.hpp"
+#ifndef __GENS_QT4_AUDIO_ABACKEND_HPP__
+#define __GENS_QT4_AUDIO_ABACKEND_HPP__
 
 // C includes.
 #include <stdint.h>
@@ -35,67 +33,84 @@
 // Qt includes.
 #include <QtCore/QMutex>
 
-// Audio Ring Buffer.
-#include "ARingBuffer.hpp"
+// TODO: Move this somewhere else!
+#if defined(__GNUC__) && (defined(__i386__) || defined(__amd64__))
+//#define HAVE_MMX // do this later
+#endif
 
 namespace GensQt4
 {
 
-class GensPortAudio : public ABackend
+class ABackend
 {
 	public:
-		GensPortAudio();
-		~GensPortAudio();
+		ABackend();
+		virtual ~ABackend();
 		
 		inline bool isOpen(void) const { return m_open; }
 		
-		void open(void);
-		void close(void);
+		virtual void open(void) = 0;
+		virtual void close(void) = 0;
 		
 		/**
 		 * Properties.
 		 */
-		void setRate(int newRate);
-		void setStereo(bool newStereo);
+		inline int rate(void) const { return m_rate; }
+		virtual void setRate(int newRate) = 0;
+		
+		inline bool isStereo(void) const { return m_stereo; }
+		virtual void setStereo(bool newStereo) = 0;
 		
 		/**
 		 * write(): Write the current segment to the audio buffer.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int write(void);
+		virtual int write(void) = 0;
 		
-		void wpSegWait(void) const { m_buffer.wpSegWait(); }
-		bool isBufferEmpty(void) const { return m_buffer.isBufferEmpty(); }
+		virtual void wpSegWait(void) const = 0;
+		virtual bool isBufferEmpty(void) const = 0;
 	
 	protected:
-		// Static PortAudio callback function.
-		static int GensPaCallback(const void *inputBuffer, void *outputBuffer,
-					  unsigned long framesPerBuffer,
-					  const PaStreamCallbackTimeInfo *timeInfo,
-					  PaStreamCallbackFlags statusFlags,
-					  void *userData)
-		{
-			// TODO: Verify userData.
-			return ((GensPortAudio*)userData)->gensPaCallback(
-						inputBuffer, outputBuffer,
-						framesPerBuffer,
-						timeInfo, statusFlags);
-		}
+		bool m_open;	// True if PortAudio is initialized.
 		
-		// PortAudio callback function.
-		int gensPaCallback(const void *inputBuffer, void *outputBuffer,
-				   unsigned long framesPerBuffer,
-				   const PaStreamCallbackTimeInfo *timeInfo,
-				   PaStreamCallbackFlags statusFlags);
+		// Number of segments to buffer.
+		static const int SEGMENTS_TO_BUFFER = 8;
 		
-		// PortAudio stream.
-		PaStream *m_stream;
+		// Audio settings.
+		int m_rate;
+		bool m_stereo;
 		
-		// Audio buffer.
-		ARingBuffer m_buffer;
+		/** Internal audio write functions. **/
 		
-		// Sample size. (Calculated on open().)
-		int m_sampleSize;
+		/**
+		 * writeStereo(): Write the current segment to the audio buffer. (Stereo output)
+		 * @param dest Destination buffer.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int writeStereo(int16_t *dest);
+		
+		/**
+		 * writeMono(): Write the current segment to the audio buffer. (Monaural output)
+		 * @param dest Destination buffer.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int writeMono(int16_t *dest);
+		
+#ifdef HAVE_MMX
+		/**
+		 * writeStereoMMX(): Write the current segment to the audio buffer. (Stereo output; MMX-optimized)
+		 * @param dest Destination buffer.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int writeStereoMMX(int16_t *dest);
+		
+		/**
+		 * writeMonoMMX(): Write the current segment to the audio buffer. (Monaural output; MMX-optimized)
+		 * @param dest Destination buffer.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int writeMonoMMX(int16_t *dest);
+#endif
 };
 
 }

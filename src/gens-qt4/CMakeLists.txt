@@ -75,7 +75,7 @@ SET(gens-qt4_SRCS
 	CtrlConfigWindow.cpp
 	Audio/GensPortAudio.cpp
 	EmuManager.cpp
-	Audio/ABackend_Write.cpp
+	Audio/ABackend.cpp
 	VBackend/GLShaderManager.cpp
 	Audio/ARingBuffer.cpp
 	ZipSelectDialog.cpp

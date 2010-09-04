@@ -38,18 +38,13 @@ namespace GensQt4
 
 GensPortAudio::GensPortAudio()
 {
-	// Assume PortAudio isn't open initially.
-	m_open = false;
-	
-	// Initialize settings.
-	// TODO: Allow user customization.
-	m_rate = 44100;
-	m_stereo = true;
+	// TODO
 }
 
 
 GensPortAudio::~GensPortAudio()
 {
+	// NOTE: close() can't be called from ABackend::~ABackend();
 	close();
 };
 
@@ -253,6 +248,42 @@ int GensPortAudio::gensPaCallback(const void *inputBuffer, void *outputBuffer,
 	// Get the data from the ring buffer.
 	m_buffer.read(out, framesPerBuffer);
 	return 0;
+}
+
+
+/**
+ * write(): Write the current segment to the audio buffer.
+ * @return 0 on success; non-zero on error.
+ */
+int GensPortAudio::write(void)
+{
+	if (!m_open)
+		return 1;
+	
+	// Lock the ring buffer for writing.
+	int16_t *buf = m_buffer.writeLock();
+	
+	// TODO: MMX versions.
+	int ret;
+#ifdef HAVE_MMX
+	if (CPU_Flags & MDP_CPUFLAG_X86_MMX)
+	{
+		// MMX is supported.
+		if (m_stereo)
+			ret = writeStereoMMX(buf);
+		else
+			ret = writeMonoMMX(buf);
+	}
+	else
+#endif /* HAVE_MMX */
+	if (m_stereo)
+		ret = writeStereo(buf);
+	else
+		ret = writeMono(buf);
+	
+	// Unlock the ring buffer.
+	m_buffer.writeUnlock();
+	return ret;
 }
 
 }
