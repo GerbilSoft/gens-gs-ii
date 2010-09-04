@@ -94,6 +94,17 @@ class SRam
 		}
 		
 		/**
+		 * zomgReadCtrl(): Read the SRam control register. (0xA130F1)
+		 * NOTE: This is NOT to be used by emulation code!
+		 * It is ONLY to be used by the ZOMG savestate function!
+		 * (Reading 0xA130F1 doesn't work on hardware.)
+		 */
+		uint8_t zomgReadCtrl(void)
+		{
+			return (m_on | (!m_write << 2));
+		}
+		
+		/**
 		 * isAddressInRange(): Determines if a given address is in the SRam's range.
 		 * return True if the address is in range; false if it isn't.
 		 */
