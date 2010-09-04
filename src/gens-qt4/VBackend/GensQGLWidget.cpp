@@ -103,7 +103,7 @@ GensQGLWidget::~GensQGLWidget()
 	
 	if (m_texPreview > 0)
 	{
-		deleteTexture(m_texPreview);
+		glDeleteTextures(1, &m_texPreview);
 		m_texPreview = 0;
 	}
 	
@@ -703,38 +703,9 @@ void GensQGLWidget::osd_show_preview(int duration, const QImage& img)
 		return;
 	}
 	
-	// TODO: Don't use Qt's bindTexture().
-	// bindTexture() creates mipmaps and stores the image upside-down.
-	
-	// Convert the image dimensions to a power of two.
-	int w = next_pow2s(img.width());
-	int h = next_pow2s(img.height());
-	if (w == img.width() && h == img.height())
-	{
-		// No conversion necessary.
-		m_preview_img = img;
-		
-		// Texture coordinates are (0.0, 1.0) - (1.0, 0.0).
-		// NOTE: bindTexture() stores textures upside-down!
-		m_preview_img_x1 = 0.0;
-		m_preview_img_y1 = 1.0;
-		m_preview_img_x2 = 1.0;
-		m_preview_img_y2 = 0.0;
-	}
-	else
-	{
-		// Conversion is required.
-		m_preview_img = img.copy(0, 0, w, h);
-		
-		// Calculate the texture coordinates.
-		m_preview_img_x2 = ((double)(img.width()) / (double)(w));
-		m_preview_img_y2 = ((double)(img.height()) / (double)(h));
-		m_preview_img_x1 = 0.0;
-		m_preview_img_y1 = (1.0 - m_preview_img_y2);
-		m_preview_img_y2 += m_preview_img_y1;
-	}
-	
+	// Save the image and display it on the next paintGL().
 	// TODO: Save the duration.
+	m_preview_img = img;
 	m_preview_show = true;
 }
 
@@ -762,9 +733,9 @@ void GensQGLWidget::showOsdPreview(void)
 	// Show the preview image.
 	if (m_texPreview == 0)
 	{
-		// TODO: Don't use Qt's bindTexture().
-		// bindTexture() creates mipmaps and stores the image upside-down.
-		m_texPreview = bindTexture(m_preview_img, GL_TEXTURE_2D);
+		// Create the texture for the preview image.
+		glGenTextures(1, &m_texPreview);
+		glBindTexture(GL_TEXTURE_2D, m_texPreview);
 		
 		// Set texture parameters.
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -773,6 +744,109 @@ void GensQGLWidget::showOsdPreview(void)
 		// GL filtering. (Previews are always filtered.)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		
+		// Determine the texture format and type.
+		int preview_img_components;
+		GLenum preview_img_format;
+		GLenum preview_img_type;
+		int bytes_per_pixel;
+		
+		switch (m_preview_img.format())
+		{
+			case QImage::Format_RGB32:
+			case QImage::Format_ARGB32:
+				preview_img_components = 4;
+				preview_img_format = GL_BGRA;
+				preview_img_type = GL_UNSIGNED_BYTE;
+				bytes_per_pixel = 4;
+				break;
+			
+			case QImage::Format_RGB888:
+				// TODO: Verify this!
+				preview_img_components = 3;
+				preview_img_format = GL_RGB;
+				preview_img_type = GL_UNSIGNED_BYTE;
+				bytes_per_pixel = 3;
+				break;
+			
+			case QImage::Format_RGB16:
+				// TODO: Only support this format if we have the packed pixels extension.
+				// Otherwise, force an image conversion.
+				preview_img_components = 3;
+				preview_img_format = GL_RGB;
+				preview_img_type = GL_UNSIGNED_SHORT_5_6_5;
+				bytes_per_pixel = 2;
+				break;
+			
+			case QImage::Format_RGB555:
+				// TODO: Only support this format if we have the packed pixels extension.
+				// Otherwise, force an image conversion.
+				preview_img_components = 4;
+				m_texFormat = GL_BGRA;
+				m_texType = GL_UNSIGNED_SHORT_1_5_5_5_REV;
+				bytes_per_pixel = 2;
+				break;
+			
+			default:
+				// Convert to 32-bit color.
+				m_preview_img = m_preview_img.convertToFormat(QImage::Format_ARGB32, Qt::ColorOnly);
+				preview_img_components = 4;
+				preview_img_format = GL_BGRA;
+				preview_img_type = GL_UNSIGNED_BYTE;
+				bytes_per_pixel = 4;
+		}
+		
+		// Round the image width and height to the next power of two.
+		int w = next_pow2s(m_preview_img.width());
+		int h = next_pow2s(m_preview_img.height());
+		
+		void *texBuf;
+		if (w == m_preview_img.width() && h == m_preview_img.height())
+		{
+			// Image size is already a power of two.
+			m_preview_img_w = 1.0;
+			m_preview_img_h = 1.0;
+			
+			// Don't allocate a blank texture buffer.
+			texBuf = NULL;
+		}
+		else
+		{
+			// Image size is not a power of two.
+			m_preview_img_w = ((double)(m_preview_img.width()) / (double)(w));
+			m_preview_img_h = ((double)(m_preview_img.height()) / (double)(h));
+			
+			// Allocate a memory buffer to use for texture initialization.
+			// This will ensure that the entire texture is initialized to black.
+			// (This fixes garbage on the last column when using the Fast Blur shader.)
+			const size_t texSize = (w*h*bytes_per_pixel);
+			texBuf = calloc(1, texSize);
+		}
+		
+		// Allocate the texture.
+		glTexImage2D(GL_TEXTURE_2D, 0,
+			m_colorComponents,
+			w, h,		// Texture size.
+			0,		// No border.
+			preview_img_format, preview_img_type, texBuf);
+		
+		// Free the temporary texture buffer.
+		free(texBuf);
+		
+		// Upload the image texture.
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, m_preview_img.bytesPerLine() / bytes_per_pixel);
+		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 8);
+		
+		const uchar *img_data = m_preview_img.scanLine(0);
+		glTexSubImage2D(GL_TEXTURE_2D, 0,
+				0, 0,		// x/y offset
+				m_preview_img.width(), m_preview_img.height(),	// width/height
+				preview_img_format, preview_img_type, img_data);
+		
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 0);
 	}
 	else
 	{
@@ -782,15 +856,14 @@ void GensQGLWidget::showOsdPreview(void)
 	
 	// Draw the texture.
 	// TODO: Determine where to display it and what size to use.
-	// NOTE: Qt's bindTexture() results in the texture being stored upside-down.
 	glBegin(GL_QUADS);
-	glTexCoord2d(m_preview_img_x1, m_preview_img_y2);
+	glTexCoord2i(0, 0);
 	glVertex2i(-1, 1);
-	glTexCoord2d(m_preview_img_x2, m_preview_img_y2);
+	glTexCoord2d(m_preview_img_w, 0);
 	glVertex2f(-0.5, 1);
-	glTexCoord2d(m_preview_img_x2, m_preview_img_y1);
+	glTexCoord2d(m_preview_img_w, m_preview_img_h);
 	glVertex2f(-0.5, 0.5);
-	glTexCoord2d(m_preview_img_x1, m_preview_img_y1);
+	glTexCoord2d(0, m_preview_img_h);
 	glVertex2f(-1, 0.5);
 	glEnd();
 	

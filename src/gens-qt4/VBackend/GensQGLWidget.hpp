@@ -99,10 +99,8 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		bool m_preview_show;
 		QImage m_preview_img;
 		GLuint m_texPreview;
-		GLdouble m_preview_img_x1;
-		GLdouble m_preview_img_y1;
-		GLdouble m_preview_img_x2;
-		GLdouble m_preview_img_y2;
+		GLdouble m_preview_img_w;
+		GLdouble m_preview_img_h;
 		void showOsdPreview(void);
 		
 		// Find the next highest power of two. (signed integers)
