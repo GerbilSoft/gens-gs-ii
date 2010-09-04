@@ -77,6 +77,13 @@ class VBackend
 			va_end(ap);
 		}
 		
+		/**
+		 * osd_show_preview(): Show a preview image on the OSD.
+		 * @param duration Duration for the preview image to appaer, in milliseconds.
+		 * @param img Image to show.
+		 */
+		virtual void osd_show_preview(int duration, const QImage& img) = 0;
+		
 		// FPS manager.
 		void resetFps(void);
 		void pushFps(double fps);

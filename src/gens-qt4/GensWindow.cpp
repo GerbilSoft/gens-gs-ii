@@ -157,6 +157,8 @@ void GensWindow::setupUi(void)
 		this, SLOT(updateVideo(void)));
 	connect(&m_emuManager, SIGNAL(osdPrintMsg(int, const QString&)),
 		this, SLOT(osdPrintMsg(int, const QString&)));
+	connect(&m_emuManager, SIGNAL(osdShowPreview(int, const QImage&)),
+		this, SLOT(osdShowPreview(int, const QImage&)));
 	
 	// Event Keys signals.
 	connect(m_evKeys, SIGNAL(eventTogglePaused(void)),

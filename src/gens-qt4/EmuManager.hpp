@@ -97,6 +97,13 @@ class EmuManager : public QObject
 		 * @param msg Message to print.
 		 */
 		void osdPrintMsg(int duration, const QString& msg);
+		
+		/**
+		 * osdShowPreview(): Show a preview image on the OSD.
+		 * @param duration Duration for the preview image to appaer, in milliseconds.
+		 * @param img Image to show.
+		 */
+		void osdShowPreview(int duration, const QImage& img);
 	
 	protected:
 		// Timing management.

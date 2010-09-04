@@ -66,6 +66,10 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 	m_texOsd = 0;
 	m_glListOsd = 0;
 	
+	// Clear the preview image variables.
+	m_preview_show = false;
+	m_texPreview = 0;
+	
 	// Accept keyboard focus.
 	setFocusPolicy(Qt::StrongFocus);
 	
@@ -95,6 +99,12 @@ GensQGLWidget::~GensQGLWidget()
 	{
 		glDeleteLists(m_glListOsd, 1);
 		m_glListOsd = 0;
+	}
+	
+	if (m_texPreview > 0)
+	{
+		deleteTexture(m_texPreview);
+		m_texPreview = 0;
 	}
 	
 	// Shut down the OpenGL Shader Manager.
@@ -493,7 +503,11 @@ void GensQGLWidget::paintGL(void)
 		}
 	}
 	
+	// Disable 2D textures.
 	glDisable(GL_TEXTURE_2D);
+	
+	// Display the OSD preview image.
+	showOsdPreview();
 	
 	// Print the OSD text to the screen.
 	printOsdText();
@@ -662,6 +676,125 @@ void GensQGLWidget::printOsdLine(int x, int y, const QString &msg)
 		glTexCoord2d(tx1, ty2);
 		glVertex2i(x, y+chrH);
 	}
+}
+
+
+/**
+ * osd_show_preview(): Show a preview image on the OSD.
+ * @param duration Duration for the preview image to appaer, in milliseconds.
+ * @param img Image to show.
+ */
+void GensQGLWidget::osd_show_preview(int duration, const QImage& img)
+{
+	if (m_texPreview > 0)
+	{
+		// Preview image is currently being displayed.
+		// Delete the texture to force a refresh.
+		deleteTexture(m_texPreview);
+		m_texPreview = 0;
+	}
+	
+	if (img.isNull())
+	{
+		// NULL image.
+		// TODO: Mark as dirty.
+		m_preview_img = QImage();
+		m_preview_show = false;
+	}
+	
+	// TODO: Don't use Qt's bindTexture().
+	// bindTexture() creates mipmaps and stores the image upside-down.
+	
+	// Convert the image dimensions to a power of two.
+	int w = next_pow2s(img.width());
+	int h = next_pow2s(img.height());
+	if (w == img.width() && h == img.height())
+	{
+		// No conversion necessary.
+		m_preview_img = img;
+		
+		// Texture coordinates are (0.0, 1.0) - (1.0, 0.0).
+		// NOTE: bindTexture() stores textures upside-down!
+		m_preview_img_x1 = 0.0;
+		m_preview_img_y1 = 1.0;
+		m_preview_img_x2 = 1.0;
+		m_preview_img_y2 = 0.0;
+	}
+	else
+	{
+		// Conversion is required.
+		m_preview_img = img.copy(0, 0, w, h);
+		
+		// Calculate the texture coordinates.
+		m_preview_img_x2 = ((double)(img.width()) / (double)(w));
+		m_preview_img_y2 = ((double)(img.height()) / (double)(h));
+		m_preview_img_x1 = 0.0;
+		m_preview_img_y1 = (1.0 - m_preview_img_y2);
+		m_preview_img_y2 += m_preview_img_y1;
+	}
+	
+	// TODO: Save the duration.
+	m_preview_show = true;
+}
+
+
+/**
+ * showOsdPreview(): Show the OSD preview image.
+ */
+void GensQGLWidget::showOsdPreview(void)
+{
+	// TODO: Duration, etc.
+	if (!m_preview_show)
+	{
+		// Don't show the preview image.
+		if (m_texPreview > 0)
+		{
+			deleteTexture(m_texPreview);
+			m_texPreview = 0;
+		}
+		return;
+	}
+	
+	// Enable 2D textures.
+	glEnable(GL_TEXTURE_2D);
+	
+	// Show the preview image.
+	if (m_texPreview == 0)
+	{
+		// TODO: Don't use Qt's bindTexture().
+		// bindTexture() creates mipmaps and stores the image upside-down.
+		m_texPreview = bindTexture(m_preview_img, GL_TEXTURE_2D);
+		
+		// Set texture parameters.
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		
+		// GL filtering. (Previews are always filtered.)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
+	else
+	{
+		// Bind the texture.
+		glBindTexture(GL_TEXTURE_2D, m_texPreview);
+	}
+	
+	// Draw the texture.
+	// TODO: Determine where to display it and what size to use.
+	// NOTE: Qt's bindTexture() results in the texture being stored upside-down.
+	glBegin(GL_QUADS);
+	glTexCoord2d(m_preview_img_x1, m_preview_img_y2);
+	glVertex2i(-1, 1);
+	glTexCoord2d(m_preview_img_x2, m_preview_img_y2);
+	glVertex2f(-0.5, 1);
+	glTexCoord2d(m_preview_img_x2, m_preview_img_y1);
+	glVertex2f(-0.5, 0.5);
+	glTexCoord2d(m_preview_img_x1, m_preview_img_y1);
+	glVertex2f(-1, 0.5);
+	glEnd();
+	
+	// Disable 2D textures.
+	glEnable(GL_TEXTURE_2D);
 }
 
 }

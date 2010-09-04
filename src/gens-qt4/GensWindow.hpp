@@ -28,6 +28,7 @@
 #include <QtGui/QMainWindow>
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QCloseEvent>
+#include <QtGui/QImage>
 
 #include "VBackend/VBackend.hpp"
 #include "GensMenuBar.hpp"
@@ -118,6 +119,16 @@ class GensWindow : public QMainWindow
 		void osdPrintMsg(int duration, const QString& msg)
 		{
 			m_vBackend->osd_printf(duration, "%s", msg.toUtf8().constData());
+		}
+		
+		/**
+		 * osdShowPreview(): Show a preview image on the OSD.
+		 * @param duration Duration for the preview image to appaer, in milliseconds.
+		 * @param img Image to show.
+		 */
+		void osdShowPreview(int duration, const QImage& img)
+		{
+			m_vBackend->osd_show_preview(duration, img);
 		}
 		
 		/**

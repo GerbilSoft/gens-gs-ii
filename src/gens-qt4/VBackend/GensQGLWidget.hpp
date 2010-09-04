@@ -28,6 +28,9 @@
 
 #include "VBackend.hpp"
 
+// C includes.
+#include <limits.h>
+
 // OpenGL Shader Manager.
 // This file MUST be before any other GL includes,
 // since it includes the GLEW headers.
@@ -58,6 +61,13 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		
 		// Return a QWidget* version of this object.
 		QWidget *toQWidget(void) { return this; }
+		
+		/**
+		 * osd_show_preview(): Show a preview image on the OSD.
+		 * @param duration Duration for the preview image to appaer, in milliseconds.
+		 * @param img Image to show.
+		 */
+		void osd_show_preview(int duration, const QImage& img);
 	
 	protected:
 		void reallocTexture(void);
@@ -84,6 +94,27 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		
 		// OpenGL Shader Manager.
 		GLShaderManager m_shaderMgr;
+		
+		// Preview image.
+		bool m_preview_show;
+		QImage m_preview_img;
+		GLuint m_texPreview;
+		GLdouble m_preview_img_x1;
+		GLdouble m_preview_img_y1;
+		GLdouble m_preview_img_x2;
+		GLdouble m_preview_img_y2;
+		void showOsdPreview(void);
+		
+		// Find the next highest power of two. (signed integers)
+		// http://en.wikipedia.org/wiki/Power_of_two#Algorithm_to_find_the_next-highest_power_of_two
+		template <class T>
+		static inline T next_pow2s(T k)
+		{
+			k--;
+			for (int i = 1; i < (int)(sizeof(T)*CHAR_BIT); i <<= 1)
+				k = k | k >> i;
+			return k + 1;
+		}
 		
 		// Keyboard handler functions.
 		void keyPressEvent(QKeyEvent *event)

@@ -44,12 +44,15 @@
 // Multi-File Archive Selection Dialog.
 #include "ZipSelectDialog.hpp"
 
+// libzomg. Needed for savestate preview images.
+#include "libzomg/Zomg.hpp"
+
 // Qt includes.
 #include <QtGui/QApplication>
 #include <QtGui/QFileDialog>
 #include <QtCore/QFile>
 #include <QtGui/QImage>
-#include <QtGui/QImageWriter>
+#include <QtGui/QImageReader>
 #include <QtCore/QBuffer>
 
 // Qt key handler.
@@ -548,33 +551,73 @@ void EmuManager::setSaveSlot(int slotNum)
 		return;
 	m_saveSlot = slotNum;
 	
-	QString osdMsg;
 	if (m_rom)
 	{
 		// ROM is loaded.
-		osdMsg = TR("Save Slot %1 [%2]").arg(slotNum);
+		QString osdMsg = TR("Save Slot %1 [%2]").arg(slotNum);
 		
 		// Check if the file exists.
-		if (QFile::exists(getSaveStateFilename()))
+		QString filename = getSaveStateFilename();
+		if (QFile::exists(filename))
 		{
 			// Savestate exists.
 			// TODO: Load the preview image.
 			osdMsg = osdMsg.arg(TR("OCCUPIED"));
+			
+			// Check if the savestate has a preview image.
+			LibZomg::Zomg zomg(filename.toUtf8().constData(), LibZomg::Zomg::ZOMG_LOAD);
+			if (zomg.getPreviewSize() == 0)
+			{
+				// No preview image.
+				zomg.close();
+				emit osdPrintMsg(1500, osdMsg);
+				return;
+			}
+			
+			// Preview image found.
+			QByteArray img_ByteArray;
+			img_ByteArray.resize(zomg.getPreviewSize());
+			printf("size: %d; getPreviewSize(): %d\n", img_ByteArray.size(), zomg.getPreviewSize());
+			int ret = zomg.loadPreview(img_ByteArray.data(), img_ByteArray.size());
+			zomg.close();
+			if (ret != 0)
+			{
+				// Error loading the preview image.
+				emit osdPrintMsg(1500, osdMsg);
+				return;
+			}
+			
+			// Preview image loaded from the ZOMG file.
+			
+			// Convert the preview image to a QImage.
+			QBuffer imgBuf(&img_ByteArray);
+			imgBuf.open(QIODevice::ReadOnly);
+			QImageReader imgReader(&imgBuf, "png");
+			QImage img = imgReader.read();
+			if (img.isNull())
+			{
+				// Error reading the preview image.
+				emit osdPrintMsg(1500, osdMsg);
+				return;
+			}
+			
+			// Preview image converted to QImage.
+			emit osdPrintMsg(1500, osdMsg);
+			emit osdShowPreview(1500, img);
 		}
 		else
 		{
 			// Savestate doesn't exist.
 			osdMsg = osdMsg.arg(TR("EMPTY"));
+			emit osdPrintMsg(1500, osdMsg);
 		}
 	}
 	else
 	{
 		// ROM is not loaded.
-		osdMsg = TR("Save Slot %1 selected.").arg(slotNum);
+		QString osdMsg = TR("Save Slot %1 selected.").arg(slotNum);
+		emit osdPrintMsg(1500, osdMsg);
 	}
-	
-	// Print the message onscreen.
-	emit osdPrintMsg(1500, osdMsg);
 }
 
 
