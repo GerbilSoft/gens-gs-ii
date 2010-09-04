@@ -96,8 +96,6 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		GLShaderManager m_shaderMgr;
 		
 		// Preview image.
-		bool m_preview_show;
-		QImage m_preview_img;
 		GlTex2D *m_texPreview;
 		void showOsdPreview(void);
 		

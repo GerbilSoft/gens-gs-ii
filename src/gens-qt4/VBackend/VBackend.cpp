@@ -61,6 +61,9 @@ VBackend::VBackend()
 	// Set the default stretch mode.
 	m_stretchMode = STRETCH_H;	// TODO: Load from configuration.
 	
+	// Clear the preview image.
+	m_preview_show = false;
+	
 	// Create the message timer.
 	m_msgTimer = new MsgTimer(this);
 }
@@ -351,6 +354,43 @@ void VBackend::setStretchMode(StretchMode newStretchMode)
 		setVbDirty();
 		// TODO: Only if paused, or regardless of pause?
 		if (isPaused())
+			vbUpdate();
+	}
+}
+
+
+	
+/**
+ * osd_show_preview(): Show a preview image on the OSD.
+ * @param duration Duration for the preview image to appaer, in milliseconds.
+ * @param img Image to show.
+ */
+void VBackend::osd_show_preview(int duration, const QImage& img)
+{
+	bool old_preview_show = m_preview_show;
+	
+	// TODO: Mark as dirty.
+	if (img.isNull())
+	{
+		// NULL image.
+		m_preview_img = QImage();
+		m_preview_show = false;
+	}
+	else
+	{
+		// Save the image and display it on the next paintGL().
+		// TODO: Save the duration.
+		m_preview_img = img;
+		m_preview_show = true;
+	}
+	
+	// TODO: Only if running?
+	if (m_preview_show || old_preview_show)
+	{
+		// Preivew is visible, or preview was just hidden.
+		setVbDirty();
+		// TODO: Only if paused, or regardless of pause?
+		if (!isRunning() || isPaused())
 			vbUpdate();
 	}
 }

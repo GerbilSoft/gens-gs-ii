@@ -66,8 +66,7 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 	m_texOsd = 0;
 	m_glListOsd = 0;
 	
-	// Clear the preview image variables.
-	m_preview_show = false;
+	// Initialize the preview image texture variable.
 	m_texPreview = NULL;
 	
 	// Accept keyboard focus.
@@ -683,27 +682,12 @@ void GensQGLWidget::printOsdLine(int x, int y, const QString &msg)
  */
 void GensQGLWidget::osd_show_preview(int duration, const QImage& img)
 {
-	if (m_texPreview)
-	{
-		// Preview image is currently being displayed.
-		// Delete the texture to force a refresh.
-		delete m_texPreview;
-		m_texPreview = NULL;
-	}
+	// Call the base function first.
+	VBackend::osd_show_preview(duration, img);
 	
-	if (img.isNull())
-	{
-		// NULL image.
-		// TODO: Mark as dirty.
-		m_preview_img = QImage();
-		m_preview_show = false;
-		return;
-	}
-	
-	// Save the image and display it on the next paintGL().
-	// TODO: Save the duration.
-	m_preview_img = img;
-	m_preview_show = true;
+	// Delete the preview texture to force a refresh.
+	delete m_texPreview;
+	m_texPreview = NULL;
 }
 
 

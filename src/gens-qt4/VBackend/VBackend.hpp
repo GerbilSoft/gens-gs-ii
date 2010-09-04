@@ -82,7 +82,7 @@ class VBackend
 		 * @param duration Duration for the preview image to appaer, in milliseconds.
 		 * @param img Image to show.
 		 */
-		virtual void osd_show_preview(int duration, const QImage& img) = 0;
+		virtual void osd_show_preview(int duration, const QImage& img);
 		
 		// FPS manager.
 		void resetFps(void);
@@ -152,6 +152,10 @@ class VBackend
 		
 		// Stretch mode.
 		StretchMode m_stretchMode;
+		
+		// Preview image.
+		bool m_preview_show;
+		QImage m_preview_img;
 	
 	private:
 		// Effects.
