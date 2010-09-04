@@ -59,6 +59,10 @@ class GlTex2D
 		// Pow2-adjusted image size.
 		inline GLdouble pow2_w(void) const { return m_pow2_w; }
 		inline GLdouble pow2_h(void) const { return m_pow2_h; }
+		
+		// Original image size.
+		inline int img_w(void) const { return m_img_w; }
+		inline int img_h(void) const { return m_img_h; }
 	
 	protected:
 		GLuint m_tex;
@@ -66,6 +70,10 @@ class GlTex2D
 		// Pow2-adjusted image size.
 		GLdouble m_pow2_w;
 		GLdouble m_pow2_h;
+		
+		// Original image size.
+		int m_img_w;
+		int m_img_h;
 		
 		// Image format.
 		GLenum m_format;

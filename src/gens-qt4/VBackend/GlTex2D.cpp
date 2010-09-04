@@ -37,7 +37,9 @@ GlTex2D::GlTex2D()
 	// Initialize variables.
 	m_tex = 0;
 	m_pow2_w = 0.0;
-	m_pow2_h = 0.00;
+	m_pow2_h = 0.0;
+	m_img_w = 0;
+	m_img_h = 0;
 }
 
 GlTex2D::~GlTex2D()
@@ -120,6 +122,10 @@ void GlTex2D::setImage(const QImage& img)
 			bytes_per_pixel = 4;
 			break;
 	}
+	
+	// Save the original image size.
+	m_img_w = new_img.width();
+	m_img_h = new_img.height();
 	
 	// Round the image width and height to the next power of two.
 	int pow2_w = next_pow2s(new_img.width());
