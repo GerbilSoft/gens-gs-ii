@@ -448,23 +448,37 @@ void EmuManager::setStereo(bool newStereo)
 
 
 /**
+ * getSaveStateFilename(): Get the savestate filename.
+ * TODO: Move savestate code to another file?
+ * @return Savestate filename, or empty string if no ROM is loaded.
+ */
+QString EmuManager::getSaveStateFilename(void)
+{
+	if (!m_rom)
+		return QString();
+	
+	// TODO: Move to another function?
+	QString filename = QString("%1.%2.zomg");
+	filename = filename.arg(QString::fromUtf8(m_rom->filenameBaseNoExt()));
+	filename = filename.arg(m_saveSlot);
+	return filename;
+}
+
+
+/**
  * saveState(): Save the current emulation state.
- * TODO: Save to save slot based on filename and slot number.
  */
 void EmuManager::saveState(void)
 {
 	if (!m_rom)
 		return;
 	
-	// Create the savestate filename.
-	// TODO: Move to another function?
-	QString saveStateFilename = QString("%1.%2.zomg");
-	saveStateFilename = saveStateFilename.arg(QString::fromUtf8(m_rom->filenameBaseNoExt()));
-	saveStateFilename = saveStateFilename.arg(m_saveSlot);
+	// Get the savestate filename.
+	QString filename = getSaveStateFilename();
 	
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_SAVE_STATE;
-	rq.saveState.filename = strdup(saveStateFilename.toUtf8().constData());
+	rq.saveState.filename = strdup(filename.toUtf8().constData());
 	rq.saveState.saveSlot = m_saveSlot;
 	m_qEmuRequest.enqueue(rq);
 	
@@ -474,22 +488,18 @@ void EmuManager::saveState(void)
 
 /**
  * loadState(): Load the emulation state from a file.
- * TODO: Load from save slot based on filename and slot number.
  */
 void EmuManager::loadState(void)
 {
 	if (!m_rom)
 		return;
 	
-	// Create the savestate filename.
-	// TODO: Move to another function?
-	QString saveStateFilename = QString("%1.%2.zomg");
-	saveStateFilename = saveStateFilename.arg(QString::fromUtf8(m_rom->filenameBaseNoExt()));
-	saveStateFilename = saveStateFilename.arg(m_saveSlot);
+	// Get the savestate filename.
+	QString filename = getSaveStateFilename();
 	
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_LOAD_STATE;
-	rq.saveState.filename = strdup(saveStateFilename.toUtf8().constData());
+	rq.saveState.filename = strdup(filename.toUtf8().constData());
 	rq.saveState.saveSlot = m_saveSlot;
 	m_qEmuRequest.enqueue(rq);
 	

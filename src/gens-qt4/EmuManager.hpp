@@ -164,6 +164,7 @@ class EmuManager : public QObject
 		
 		/** Savestates. **/
 		int m_saveSlot;
+		QString getSaveStateFilename(void);
 		void doSaveState(const char *filename, int saveSlot);
 		void doLoadState(const char *filename, int saveSlot);
 		
