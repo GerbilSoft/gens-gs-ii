@@ -719,17 +719,25 @@ void GensQGLWidget::showOsdPreview(void)
 	// Bind the texture.
 	glBindTexture(GL_TEXTURE_2D, m_texPreview->tex());	
 	
+	// Calculate the destination coordinates.
+	// TODO: Precalculate?
+	// TODO: Apply stretch mode?
+	GLdouble x1 = -1.0;
+	GLdouble y1 = 1.0;
+	GLdouble x2 = x1 + std::min(((m_texPreview->img_w() / 320.0) * 0.5), 0.5);
+	GLdouble y2 = y1 - std::min(((m_texPreview->img_h() / 240.0) * 0.5), 0.5);
+	
 	// Draw the texture.
 	// TODO: Determine where to display it and what size to use.
 	glBegin(GL_QUADS);
 	glTexCoord2i(0, 0);
-	glVertex2i(-1, 1);
+	glVertex2i(x1, y1);
 	glTexCoord2d(m_texPreview->pow2_w(), 0);
-	glVertex2f(-0.5, 1);
+	glVertex2f(x2, y1);
 	glTexCoord2d(m_texPreview->pow2_w(), m_texPreview->pow2_h());
-	glVertex2f(-0.5, 0.5);
+	glVertex2f(x2, y2);
 	glTexCoord2d(0, m_texPreview->pow2_h());
-	glVertex2f(-1, 0.5);
+	glVertex2f(x1, y2);
 	glEnd();
 	
 	// Disable 2D textures.
