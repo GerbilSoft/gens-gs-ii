@@ -722,10 +722,19 @@ void GensQGLWidget::showOsdPreview(void)
 	// Calculate the destination coordinates.
 	// TODO: Precalculate?
 	// TODO: Apply stretch mode?
-	GLdouble x1 = -1.0;
-	GLdouble y1 = 1.0;
-	GLdouble x2 = x1 + std::min(((m_texPreview->img_w() / 320.0) * 0.5), 0.5);
-	GLdouble y2 = y1 - std::min(((m_texPreview->img_h() / 240.0) * 0.5), 0.5);
+	const GLdouble x1 = -1.0, y1 = 1.0;
+	GLdouble x2, y2;
+	
+	// Calculate (x2, y2) based on stretch mode.
+	if (m_stretchMode == STRETCH_H || m_stretchMode == STRETCH_FULL)
+		x2 = x1 + 0.5;
+	else
+		x2 = x1 + std::min(((m_texPreview->img_w() / 320.0) * 0.5), 0.5);
+	
+	if (m_stretchMode == STRETCH_V || m_stretchMode == STRETCH_FULL)
+		y2 = y2 - 0.5;
+	else
+		y2 = y1 - std::min(((m_texPreview->img_h() / 240.0) * 0.5), 0.5);
 	
 	// Draw the texture.
 	// TODO: Determine where to display it and what size to use.
