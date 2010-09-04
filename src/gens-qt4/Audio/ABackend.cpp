@@ -33,9 +33,6 @@
 // LibGens Sound Manager.
 #include "libgens/sound/SoundMgr.hpp"
 
-// Timing. (TODO: Get rid of this when finished debugging!)
-#include "libgens/Util/Timing.hpp"
-
 namespace GensQt4
 {
 
