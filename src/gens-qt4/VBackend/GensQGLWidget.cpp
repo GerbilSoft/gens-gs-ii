@@ -721,8 +721,8 @@ void GensQGLWidget::showOsdPreview(void)
 	
 	// Calculate the destination coordinates.
 	// TODO: Precalculate?
-	// TODO: Apply stretch mode?
-	const GLdouble x1 = -1.0, y1 = 1.0;
+	// TODO: Reposition based on stretch mode and current display resolution.
+	const GLdouble x1 = (-1.0 + (0.0625 * 3.0 / 4.0)), y1 = (1.0 - 0.0625);
 	GLdouble x2, y2;
 	
 	// Calculate (x2, y2) based on stretch mode.
@@ -732,7 +732,7 @@ void GensQGLWidget::showOsdPreview(void)
 		x2 = x1 + std::min(((m_texPreview->img_w() / 320.0) * 0.5), 0.5);
 	
 	if (m_stretchMode == STRETCH_V || m_stretchMode == STRETCH_FULL)
-		y2 = y2 - 0.5;
+		y2 = y1 - 0.5;
 	else
 		y2 = y1 - std::min(((m_texPreview->img_h() / 240.0) * 0.5), 0.5);
 	
@@ -740,13 +740,13 @@ void GensQGLWidget::showOsdPreview(void)
 	// TODO: Determine where to display it and what size to use.
 	glBegin(GL_QUADS);
 	glTexCoord2i(0, 0);
-	glVertex2i(x1, y1);
+	glVertex2d(x1, y1);
 	glTexCoord2d(m_texPreview->pow2_w(), 0);
-	glVertex2f(x2, y1);
+	glVertex2d(x2, y1);
 	glTexCoord2d(m_texPreview->pow2_w(), m_texPreview->pow2_h());
-	glVertex2f(x2, y2);
+	glVertex2d(x2, y2);
 	glTexCoord2d(0, m_texPreview->pow2_h());
-	glVertex2f(x1, y2);
+	glVertex2d(x1, y2);
 	glEnd();
 	
 	// Disable 2D textures.
