@@ -700,6 +700,7 @@ void GensQGLWidget::osd_show_preview(int duration, const QImage& img)
 		// TODO: Mark as dirty.
 		m_preview_img = QImage();
 		m_preview_show = false;
+		return;
 	}
 	
 	// TODO: Don't use Qt's bindTexture().
