@@ -68,7 +68,7 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 	
 	// Clear the preview image variables.
 	m_preview_show = false;
-	m_texPreview = 0;
+	m_texPreview = NULL;
 	
 	// Accept keyboard focus.
 	setFocusPolicy(Qt::StrongFocus);
@@ -101,11 +101,8 @@ GensQGLWidget::~GensQGLWidget()
 		m_glListOsd = 0;
 	}
 	
-	if (m_texPreview > 0)
-	{
-		glDeleteTextures(1, &m_texPreview);
-		m_texPreview = 0;
-	}
+	delete m_texPreview;
+	m_texPreview = NULL;
 	
 	// Shut down the OpenGL Shader Manager.
 	m_shaderMgr.end();
@@ -686,12 +683,12 @@ void GensQGLWidget::printOsdLine(int x, int y, const QString &msg)
  */
 void GensQGLWidget::osd_show_preview(int duration, const QImage& img)
 {
-	if (m_texPreview > 0)
+	if (m_texPreview)
 	{
 		// Preview image is currently being displayed.
 		// Delete the texture to force a refresh.
-		deleteTexture(m_texPreview);
-		m_texPreview = 0;
+		delete m_texPreview;
+		m_texPreview = NULL;
 	}
 	
 	if (img.isNull())
@@ -719,11 +716,8 @@ void GensQGLWidget::showOsdPreview(void)
 	if (!m_preview_show)
 	{
 		// Don't show the preview image.
-		if (m_texPreview > 0)
-		{
-			deleteTexture(m_texPreview);
-			m_texPreview = 0;
-		}
+		delete m_texPreview;
+		m_texPreview = NULL;
 		return;
 	}
 	
@@ -731,139 +725,26 @@ void GensQGLWidget::showOsdPreview(void)
 	glEnable(GL_TEXTURE_2D);
 	
 	// Show the preview image.
-	if (m_texPreview == 0)
+	if (!m_texPreview)
 	{
 		// Create the texture for the preview image.
-		glGenTextures(1, &m_texPreview);
-		glBindTexture(GL_TEXTURE_2D, m_texPreview);
-		
-		// Set texture parameters.
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		
-		// GL filtering. (Previews are always filtered.)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		
-		// Determine the texture format and type.
-		int preview_img_components;
-		GLenum preview_img_format;
-		GLenum preview_img_type;
-		int bytes_per_pixel;
-		
-		switch (m_preview_img.format())
-		{
-			case QImage::Format_RGB32:
-			case QImage::Format_ARGB32:
-				preview_img_components = 4;
-				preview_img_format = GL_BGRA;
-				preview_img_type = GL_UNSIGNED_BYTE;
-				bytes_per_pixel = 4;
-				break;
-			
-			case QImage::Format_RGB888:
-				// TODO: Verify this!
-				preview_img_components = 3;
-				preview_img_format = GL_RGB;
-				preview_img_type = GL_UNSIGNED_BYTE;
-				bytes_per_pixel = 3;
-				break;
-			
-			case QImage::Format_RGB16:
-				// TODO: Only support this format if we have the packed pixels extension.
-				// Otherwise, force an image conversion.
-				preview_img_components = 3;
-				preview_img_format = GL_RGB;
-				preview_img_type = GL_UNSIGNED_SHORT_5_6_5;
-				bytes_per_pixel = 2;
-				break;
-			
-			case QImage::Format_RGB555:
-				// TODO: Only support this format if we have the packed pixels extension.
-				// Otherwise, force an image conversion.
-				preview_img_components = 4;
-				m_texFormat = GL_BGRA;
-				m_texType = GL_UNSIGNED_SHORT_1_5_5_5_REV;
-				bytes_per_pixel = 2;
-				break;
-			
-			default:
-				// Convert to 32-bit color.
-				m_preview_img = m_preview_img.convertToFormat(QImage::Format_ARGB32, Qt::ColorOnly);
-				preview_img_components = 4;
-				preview_img_format = GL_BGRA;
-				preview_img_type = GL_UNSIGNED_BYTE;
-				bytes_per_pixel = 4;
-		}
-		
-		// Round the image width and height to the next power of two.
-		int w = next_pow2s(m_preview_img.width());
-		int h = next_pow2s(m_preview_img.height());
-		
-		void *texBuf;
-		if (w == m_preview_img.width() && h == m_preview_img.height())
-		{
-			// Image size is already a power of two.
-			m_preview_img_w = 1.0;
-			m_preview_img_h = 1.0;
-			
-			// Don't allocate a blank texture buffer.
-			texBuf = NULL;
-		}
-		else
-		{
-			// Image size is not a power of two.
-			m_preview_img_w = ((double)(m_preview_img.width()) / (double)(w));
-			m_preview_img_h = ((double)(m_preview_img.height()) / (double)(h));
-			
-			// Allocate a memory buffer to use for texture initialization.
-			// This will ensure that the entire texture is initialized to black.
-			// (This fixes garbage on the last column when using the Fast Blur shader.)
-			const size_t texSize = (w*h*bytes_per_pixel);
-			texBuf = calloc(1, texSize);
-		}
-		
-		// Allocate the texture.
-		glTexImage2D(GL_TEXTURE_2D, 0,
-			m_colorComponents,
-			w, h,		// Texture size.
-			0,		// No border.
-			preview_img_format, preview_img_type, texBuf);
-		
-		// Free the temporary texture buffer.
-		free(texBuf);
-		
-		// Upload the image texture.
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, m_preview_img.bytesPerLine() / bytes_per_pixel);
-		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 8);
-		
-		const uchar *img_data = m_preview_img.scanLine(0);
-		glTexSubImage2D(GL_TEXTURE_2D, 0,
-				0, 0,		// x/y offset
-				m_preview_img.width(), m_preview_img.height(),	// width/height
-				preview_img_format, preview_img_type, img_data);
-		
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 0);
+		m_texPreview = new GlTex2D();
+		m_texPreview->setImage(m_preview_img);
 	}
-	else
-	{
-		// Bind the texture.
-		glBindTexture(GL_TEXTURE_2D, m_texPreview);
-	}
+	
+	// Bind the texture.
+	glBindTexture(GL_TEXTURE_2D, m_texPreview->tex());	
 	
 	// Draw the texture.
 	// TODO: Determine where to display it and what size to use.
 	glBegin(GL_QUADS);
 	glTexCoord2i(0, 0);
 	glVertex2i(-1, 1);
-	glTexCoord2d(m_preview_img_w, 0);
+	glTexCoord2d(m_texPreview->pow2_w(), 0);
 	glVertex2f(-0.5, 1);
-	glTexCoord2d(m_preview_img_w, m_preview_img_h);
+	glTexCoord2d(m_texPreview->pow2_w(), m_texPreview->pow2_h());
 	glVertex2f(-0.5, 0.5);
-	glTexCoord2d(0, m_preview_img_h);
+	glTexCoord2d(0, m_texPreview->pow2_h());
 	glVertex2f(-1, 0.5);
 	glEnd();
 	
