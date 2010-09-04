@@ -548,7 +548,32 @@ void EmuManager::setSaveSlot(int slotNum)
 		return;
 	m_saveSlot = slotNum;
 	
-	QString osdMsg = TR("Save Slot %1: [TODO]").arg(slotNum);
+	QString osdMsg;
+	if (m_rom)
+	{
+		// ROM is loaded.
+		osdMsg = TR("Save Slot %1 [%2]").arg(slotNum);
+		
+		// Check if the file exists.
+		if (QFile::exists(getSaveStateFilename()))
+		{
+			// Savestate exists.
+			// TODO: Load the preview image.
+			osdMsg = osdMsg.arg(TR("OCCUPIED"));
+		}
+		else
+		{
+			// Savestate doesn't exist.
+			osdMsg = osdMsg.arg(TR("EMPTY"));
+		}
+	}
+	else
+	{
+		// ROM is not loaded.
+		osdMsg = TR("Save Slot %1 selected.").arg(slotNum);
+	}
+	
+	// Print the message onscreen.
 	emit osdPrintMsg(1500, osdMsg);
 }
 
