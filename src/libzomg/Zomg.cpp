@@ -31,7 +31,7 @@
 
 #ifdef _WIN32
 // MiniZip Win32 I/O handler.
-#include "../../extlib/minizip/iowin32u.h"
+#include "../extlib/minizip/iowin32u.h"
 #endif
 
 // C includes.
