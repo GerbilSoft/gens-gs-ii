@@ -516,7 +516,7 @@ int Rom::initSRam(SRam *sram) const
 	
 	// Load the SRam file.
 	// TODO: Use internal filename for multi-file?
-	sram->setFilename(m_filename.c_str());
+	sram->setFilename(m_filename);
 	return sram->load();
 }
 
@@ -539,7 +539,7 @@ int Rom::initEEPRom(EEPRom *eeprom) const
 	
 	// Load the EEProm file.
 	// TODO: Use internal filename for multi-file?
-	eeprom->setFilename(m_filename.c_str());
+	eeprom->setFilename(m_filename);
 	return eeprom->load();
 }
 
