@@ -26,19 +26,21 @@ IF(WIN32)
 	# Win32 has MultiByteToWideChar() and WideCharToMultiByte().
 ELSE(WIN32)
 	# First, check libc for iconv().
-	CHECK_LIBRARY_EXISTS(c iconv "" HAVE_ICONV)	# libc: iconv()
-	IF(HAVE_ICONV)
+	CHECK_LIBRARY_EXISTS(c iconv "" HAVE_ICONV_C)	# libc: iconv()
+	IF(HAVE_ICONV_C)
 		# iconv() found in libc.
 		SET(ICONV_LIBRARY "-lc")
-	ELSE(HAVE_ICONV)
+		SET(HAVE_ICONV 1)
+	ELSE(HAVE_ICONV_C)
 		# iconv() not found in libc.
 		# Check in libiconv.
-		CHECK_LIBRARY_EXISTS(iconv iconv "" HAVE_ICONV)	# libiconv: iconv()
-		IF(HAVE_ICONV)
+		CHECK_LIBRARY_EXISTS(iconv iconv "" HAVE_ICONV_LIBICONV)	# libiconv: iconv()
+		IF(HAVE_ICONV_LIBICONV)
 			# iconv() found in libiconv.
 			SET(ICONV_LIBRARY "-liconv")
-		ENDIF(HAVE_ICONV)
-	ENDIF(HAVE_ICONV)
+			SET(HAVE_ICONV 1)
+		ENDIF(HAVE_ICONV_LIBICONV)
+	ENDIF(HAVE_ICONV_C)
 ENDIF(WIN32)
 
 # Write the config.h file.
