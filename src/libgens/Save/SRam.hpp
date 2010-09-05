@@ -196,6 +196,12 @@ class SRam
 		 * AUTOSAVE_THRESHOLD_DEFAULT: Default autosave threshold, in milliseconds.
 		 */
 		static const int AUTOSAVE_THRESHOLD_DEFAULT = 1000;
+		
+		/**
+		 * getUsedSize(): Determine how many bytes are used in the SRam chip.
+		 * @return Number of bytes used, rounded to the highest power of two.
+		 */
+		int getUsedSize(void);
 	
 	protected:
 		uint8_t m_sram[64*1024];
@@ -228,8 +234,6 @@ class SRam
 				k = k | k >> i;
 			return k + 1;
 		}
-		
-		int getUsedSize(void);
 };
 
 }
