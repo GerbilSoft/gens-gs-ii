@@ -137,8 +137,12 @@ int SRam::load(void)
 int SRam::getUsedSize(void)
 {
 	int i = (sizeof(m_sram) - 1);
-	while (i >= 0 && m_sram[i] == 0xFF)
+	while (i > 0 && m_sram[i] == 0xFF)
 		i--;
+	
+	// Make sure we return 0 if SRam is empty.
+	if (i <= 0)
+		return 0;
 	
 	// Return the next-highest power of two.
 	return next_pow2u(i);
