@@ -537,19 +537,25 @@ align 16
 	mov	[ebp + Z80.CycleIO], edi
 	movzx	edi, ch
 %if %0 > 0
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	sub	esp, byte 12
+%endif
+	push	ecx	; Z80.ReadB functions may clobber ecx.
 	%ifidn %1, AF
 		call	[ebp + Z80.ReadB + edi * 4]	; Get the low byte. (A)
+		mov	ecx, [esp]
 		inc	ecx
 		movzx	edi, ch
 		SAVE_A
 		call	[ebp + Z80.ReadB + edi * 4]	; Get the high byte. (F)
-		dec	ecx
 		mov	ah, al
 		RELOAD_A
 		mov	edi, [ebp + Z80.CycleIO]
 	%else
 		SAVE_AF
 		call	[ebp + Z80.ReadB + edi * 4]	; Get the low byte.
+		mov	ecx, [esp]
 		inc	ecx
 		movzx	edi, ch
 		mov	zl%1, al
@@ -559,17 +565,45 @@ align 16
 		mov	edi, [ebp + Z80.CycleIO]
 		RELOAD_AF
 	%endif
+	
+	pop	ecx
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	add	esp, byte 12
+%endif
 %else
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	sub	esp, byte 12
+%else
+	; Reserve space for edx.
+	sub	esp, byte 4
+%endif
+	push	ecx	; Z80.ReadB functions may clobber ecx.
+	
 	SAVE_AF
 	call	[ebp + Z80.ReadB + edi * 4]	; Get the low byte.
+	mov	ecx, [esp]
 	inc	ecx
 	movzx	edi, ch
-	mov	dl, al
+	mov	[esp + 4], al			; store the low byte on the stack to prevent clobbering
 	call	[ebp + Z80.ReadB + edi * 4]	; Get the high byte.
 	dec	ecx
-	mov	dh, al
+	movzx	edx, byte [esp + 4]
+	mov	[esp + 5], al			; store the high byte on the stack to prevent clobbering
 	mov	edi, [ebp + Z80.CycleIO]
+	movzx	edx, word [esp + 4]		; retrieve the word from the stack
 	RELOAD_AF
+	
+	pop	ecx
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	add	esp, byte 12
+%else
+	; Clear reserved space for edx.
+	add	esp, byte 4
+%endif
+
 %endif
 
 %if (GENS_OPT == 1)
@@ -614,16 +648,31 @@ align 16
 %if %0 > 0
 	movzx	edx, z%1
 %endif
+	
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	sub	esp, byte 8
+%endif
+	push	edx	; Z80.WriteB functions may clobber edx.
+	push	ecx	; Z80.WriteB functions may clobber ecx.
+	
 	movzx	edi, ch
 	SAVE_AF
 	call	[ebp + Z80.WriteB + edi * 4]	; Write the low byte.
+	mov	ecx, [esp]	; restore ecx
 	inc	ecx
+	movzx	edx, byte [esp+5]	; get high byte of edx
 	movzx	edi, ch
-	mov	dl, dh
 	call	[ebp + Z80.WriteB + edi * 4]	; Write the high byte.
-	dec	ecx
 	mov	edi, [ebp + Z80.CycleIO]
 	RELOAD_AF
+	
+	pop	ecx
+	pop	edx
+%ifdef __FORCE_STACK_ALIGNMENT
+	; Enforce 16-byte stack alignment.
+	add	esp, byte 8
+%endif
 	
 %if (GENS_OPT == 1)
 align 16
