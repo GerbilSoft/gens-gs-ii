@@ -560,7 +560,6 @@ align 16
 		movzx	edi, ch
 		mov	zl%1, al
 		call	[ebp + Z80.ReadB + edi * 4]	; Get the high byte.
-		dec	ecx
 		mov	zh%1, al
 		mov	edi, [ebp + Z80.CycleIO]
 		RELOAD_AF
@@ -588,7 +587,6 @@ align 16
 	movzx	edi, ch
 	mov	[esp + 4], al			; store the low byte on the stack to prevent clobbering
 	call	[ebp + Z80.ReadB + edi * 4]	; Get the high byte.
-	dec	ecx
 	movzx	edx, byte [esp + 4]
 	mov	[esp + 5], al			; store the high byte on the stack to prevent clobbering
 	mov	edi, [ebp + Z80.CycleIO]
