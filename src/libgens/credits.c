@@ -70,5 +70,6 @@ const utf8_str *GensGS_credits =
 	"Tets: Software testing\n"
 	"TiZ: Software testing\n"
 	"TmEE: MD hardware testing, emulation assistance\n"
+	"ValleyBell: VGM logging code\n"
 	"Zombie Ryushu: Software testing; WahCade integration"
 };
