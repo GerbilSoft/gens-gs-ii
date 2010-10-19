@@ -31,6 +31,9 @@
 // C++ includes.
 #include <string>
 
+// ZOMG
+#include "libzomg/Zomg.hpp"
+
 namespace LibGens
 {
 
@@ -202,6 +205,12 @@ class SRam
 		 * @return Number of bytes used, rounded to the highest power of two.
 		 */
 		int getUsedSize(void);
+		
+		/** ZOMG functions. **/
+		// TODO: Do we really want to access the ZOMG file from SRam.cpp directly?
+		// The other method requires accessing m_sram from GensZomg.cpp.
+		int loadFromZomg(LibZomg::Zomg &zomg);
+		int saveToZomg(LibZomg::Zomg &zomg);
 	
 	protected:
 		uint8_t m_sram[64*1024];

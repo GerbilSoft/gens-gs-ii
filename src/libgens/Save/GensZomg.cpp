@@ -182,6 +182,10 @@ int ZomgLoad(const utf8_str *filename)
 		M68K_Mem::m_SRam.writeCtrl(md_time_reg_save.SRAM_ctrl);
 	}
 	
+	// Load SRAM.
+	// TODO: Make this optional.
+	M68K_Mem::m_SRam.loadFromZomg(zomg);
+	
 	// Close the savestate.
 	zomg.close();
 	
@@ -309,6 +313,10 @@ int ZomgSave(const utf8_str *filename, const void *img_buf, size_t img_siz)
 		md_time_reg_save.SRAM_ctrl = M68K_Mem::m_SRam.zomgReadCtrl();
 	}
 	zomg.saveMD_TimeReg(&md_time_reg_save);
+	
+	// Save SRAM.
+	// TODO: Make this optional.
+	M68K_Mem::m_SRam.saveToZomg(zomg);
 	
 	// Close the savestate.
 	zomg.close();

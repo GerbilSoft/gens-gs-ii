@@ -371,4 +371,34 @@ int Zomg::loadMD_TimeReg(Zomg_MD_TimeReg_t *state)
 	return loadFromZomg("MD/TIME_reg.bin", state, sizeof(*state));
 }
 
+
+/** Miscellaneous **/
+
+
+/**
+ * loadSRam(): Load SRAM.
+ * @param sram Pointer to SRAM buffer.
+ * @param siz Size of SRAM buffer.
+ * @return Number of bytes read on success; negative on error.
+ * NOTE: If the loaded SRAM file is smaller than the specified SRAM buffer,
+ * the remainder of the SRAM buffer is initialized to 0xFF.
+ */
+int Zomg::loadSRam(uint8_t *sram, size_t siz)
+{
+	int ret = loadFromZomg("common/SRam.bin", sram, siz);
+	if (ret > 0)
+	{
+		// Data was loaded.
+		// If the data is less than the size of the SRAM buffer,
+		// set the rest of the SRAM buffer to 0xFF.
+		if (ret < (int)siz)
+		{
+			int diff = ((int)siz - ret);
+			memset(&sram[ret], 0xFF, diff);
+		}
+	}
+	
+	return ret;
+}
+
 }

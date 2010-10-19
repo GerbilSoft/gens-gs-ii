@@ -426,4 +426,19 @@ int Zomg::saveMD_TimeReg(const Zomg_MD_TimeReg_t *state)
 	return saveToZomg("MD/TIME_reg.bin", state, sizeof(*state));
 }
 
+
+/** Miscellaneous **/
+
+
+/**
+ * saveSRam(): Save SRAM.
+ * @param sram Pointer to SRAM buffer.
+ * @param siz Size of SRAM buffer.
+ * @return 0 on success; non-zero on error.
+ */
+int Zomg::saveSRam(const uint8_t *sram, size_t siz)
+{
+	return saveToZomg("common/SRam.bin", sram, siz);
+}
+
 }

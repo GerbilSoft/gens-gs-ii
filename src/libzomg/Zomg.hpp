@@ -110,10 +110,13 @@ class Zomg
 		int loadM68KMem(uint16_t *mem, size_t siz, bool byteswap);
 		int loadM68KReg(Zomg_M68KRegSave_t *state);
 		
-		// MD-specific registers.
+		// MD-specific registers
 		int loadMD_IO(Zomg_MD_IoSave_t *state);
 		int loadMD_Z80Ctrl(Zomg_MD_Z80CtrlSave_t *state);
 		int loadMD_TimeReg(Zomg_MD_TimeReg_t *state);
+		
+		// Miscellaneous
+		int loadSRam(uint8_t *sram, size_t siz);
 		
 		/**
 		 * Save savestate functions.
@@ -151,10 +154,13 @@ class Zomg
 		int saveM68KMem(const uint16_t *mem, size_t siz, bool byteswap);
 		int saveM68KReg(const Zomg_M68KRegSave_t *state);
 		
-		// MD-specific registers.
+		// MD-specific registers
 		int saveMD_IO(const Zomg_MD_IoSave_t *state);
 		int saveMD_Z80Ctrl(const Zomg_MD_Z80CtrlSave_t *state);
 		int saveMD_TimeReg(const Zomg_MD_TimeReg_t *state);
+		
+		// Miscellaneous
+		int saveSRam(const uint8_t *sram, size_t siz);
 	
 	protected:
 		std::string m_filename;
