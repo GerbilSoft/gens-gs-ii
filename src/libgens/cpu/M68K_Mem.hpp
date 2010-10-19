@@ -128,6 +128,23 @@ class M68K_Mem
 		/** Bus acquisition timing. **/
 		static const int CYCLE_FOR_TAKE_Z80_BUS_GENESIS = 16;
 		
+		/**
+		 * SSF2_BankState[]: SSF2 bankswitching state.
+		 * TODO: Make a helper class for this?
+		 * Index 0 == unused. (present for alignment and consistency)
+		 * Index 1 == $A130F3 (bank 1)
+		 * Index 2 == $A130F5 (bank 2)
+		 * Index 3 == $A130F7 (bank 3)
+		 * Index 4 == $A130F9 (bank 4)
+		 * Index 5 == $A130FB (bank 5)
+		 * Index 6 == $A130FD (bank 6)
+		 * Index 7 == $A130FF (bank 7)
+		 *
+		 * Values: 0xFF == no bankswitching; 0-63 == bank number
+		 * NOTE: Gens/GS II only implements banks 0-9.
+		 */
+		static uint8_t ms_SSF2_BankState[8];
+		
 		/** Read Byte functions. **/
 		static uint8_t M68K_Read_Byte_Default(uint32_t address);
 		

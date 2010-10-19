@@ -106,12 +106,17 @@ int M68K_Mem::Cycles_Z80;
 SysRegion M68K_Mem::ms_Region;
 int M68K_Mem::Gen_Mode;
 
+uint8_t M68K_Mem::ms_SSF2_BankState[8];
+
 
 void M68K_Mem::Init(void)
 {
 	// Initialize the Z80/M68K cycle table.
 	for (int x = 0; x < 512; x++)
 		Z80_M68K_Cycle_Tab[x] = (int)((double) x * 7.0 / 15.0);
+	
+	// Initialize the SSF2 bankswitching state.
+	memset(ms_SSF2_BankState, 0xFF, sizeof(ms_SSF2_BankState));
 }
 
 
@@ -834,8 +839,24 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 		// Super Street Fighter II (SSF2) bankswitching system.
 		// TODO: Save the bank indexes for savestates.
 		// TODO: Starscream doesn't use this for instruction fetch!
+		// TODO: Use a helper class?
+		// TODO: Only banks 0-9 are supported right now...
 		unsigned int phys_bank = (address & 0xF) >> 1;
 		unsigned int virt_bank = (data & 0x1F);
+		
+		if (virt_bank > 9)
+		{
+			// TODO: We're ignoring banks over bank 9.
+			virt_bank = phys_bank;
+			ms_SSF2_BankState[phys_bank] = 0xFF;	// no bank
+		}
+		else
+		{
+			// Save the bank number.
+			ms_SSF2_BankState[phys_bank] = virt_bank;
+		}
+		
+		// Set the banking in the read byte/word tables.
 		M68K_Read_Byte_Table[phys_bank] = MD_M68K_Read_Byte_Table[virt_bank];
 		M68K_Read_Word_Table[phys_bank] = MD_M68K_Read_Word_Table[virt_bank];
 		return;
@@ -1132,8 +1153,24 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 		// Super Street Fighter II (SSF2) bankswitching system.
 		// TODO: Save the bank indexes for savestates.
 		// TODO: Starscream doesn't use this for instruction fetch!
+		// TODO: Use a helper class?
+		// TODO: Only banks 0-9 are supported right now...
 		unsigned int phys_bank = (address & 0xF) >> 1;
 		unsigned int virt_bank = (data & 0x1F);
+		
+		if (virt_bank > 9)
+		{
+			// TODO: We're ignoring banks over bank 9.
+			virt_bank = phys_bank;
+			ms_SSF2_BankState[phys_bank] = 0xFF;	// no bank
+		}
+		else
+		{
+			// Save the bank number.
+			ms_SSF2_BankState[phys_bank] = virt_bank;
+		}
+		
+		// Set the banking in the read byte/word tables.
 		M68K_Read_Byte_Table[phys_bank] = MD_M68K_Read_Byte_Table[virt_bank];
 		M68K_Read_Word_Table[phys_bank] = MD_M68K_Read_Word_Table[virt_bank];
 		return;
@@ -1414,6 +1451,9 @@ const M68K_Mem::M68K_Write_Word_fn M68K_Mem::MD_M68K_Write_Word_Table[32] =
  */
 void M68K_Mem::InitSys(M68K::SysID system)
 {
+	// Initialize the SSF2 bankswitching state.
+	memset(ms_SSF2_BankState, 0xFF, sizeof(ms_SSF2_BankState));
+	
 	switch (system)
 	{
 		case M68K::SYSID_MD:
