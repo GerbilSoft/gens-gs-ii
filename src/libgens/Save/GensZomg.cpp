@@ -304,7 +304,6 @@ int ZomgSave(const utf8_str *filename, const void *img_buf, size_t img_siz)
 	
 	// Save the MD /TIME registers.
 	// TODO: SSF2 banking.
-	// TODO: Add a function to the SRam class to get the register value.
 	Zomg_MD_TimeReg_t md_time_reg_save;
 	memset(md_time_reg_save.reg, 0xFF, sizeof(md_time_reg_save.reg));
 	if (!M68K_Mem::m_EEPRom.isEEPRomTypeSet())
