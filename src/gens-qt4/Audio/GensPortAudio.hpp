@@ -64,8 +64,8 @@ class GensPortAudio : public ABackend
 		 */
 		int write(void);
 		
-		void wpSegWait(void) const { m_buffer.wpSegWait(); }
-		bool isBufferEmpty(void) const { return m_buffer.isBufferEmpty(); }
+		void wpSegWait(void) const { /*m_buffer.wpSegWait();*/ }
+		bool isBufferEmpty(void) const { return true; /*return m_buffer.isBufferEmpty();*/ }
 	
 	protected:
 		// Static PortAudio callback function.
@@ -92,7 +92,8 @@ class GensPortAudio : public ABackend
 		PaStream *m_stream;
 		
 		// Audio buffer.
-		ARingBuffer m_buffer;
+		int16_t m_buffer[1024*SEGMENTS_TO_BUFFER*2];
+		unsigned long m_bufferPos; // Byte position in m_buffer.
 		
 		// Sample size. (Calculated on open().)
 		int m_sampleSize;

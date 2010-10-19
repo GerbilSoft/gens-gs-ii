@@ -125,8 +125,9 @@ void GensPortAudio::open(void)
 			"Pa_StartStream() error: %s", Pa_GetErrorText(err));
 	}
 	
-	// Initialize the Ring Buffer.
-	m_buffer.reInit(LibGens::SoundMgr::GetSegLength(), m_stereo);
+	// Clear the buffer.
+	memset(m_buffer, 0x00, sizeof(m_buffer));
+	m_bufferPos = 0;
 	
 	// PortAudio stream is open.
 	m_sampleSize = (sizeof(int16_t) * (m_stereo ? 2 : 1));
@@ -246,10 +247,37 @@ int GensPortAudio::gensPaCallback(const void *inputBuffer, void *outputBuffer,
 				  const PaStreamCallbackTimeInfo *timeInfo,
 				  PaStreamCallbackFlags statusFlags)
 {
-	int16_t *out = (int16_t*)outputBuffer;
+	// NOTE: Sample size is 16-bit, but we're using 8-bit here
+	// for convenience, since everything's measured in bytes.
+	uint8_t *out = (uint8_t*)outputBuffer;
 	
-	// Get the data from the ring buffer.
-	m_buffer.read(out, framesPerBuffer);
+	// Get the data from the buffer.
+	framesPerBuffer *= m_sampleSize;
+	
+	if (m_bufferPos < framesPerBuffer)
+	{
+		// Not enough data in the buffer.
+		// Copy whatever's left.
+		memcpy(out, m_buffer, m_bufferPos);
+		memset(&out[m_bufferPos], 0x00, (framesPerBuffer - m_bufferPos));
+		m_bufferPos = 0;
+	}
+	else
+	{
+		// Enough data is available in the buffer.
+		memcpy(out, m_buffer, framesPerBuffer);
+		
+		// Shift the rest of the buffer over.
+		unsigned long diff = (m_bufferPos - framesPerBuffer);
+		if (diff == 0)
+			m_bufferPos = 0;
+		else
+		{
+			memmove(m_buffer, &m_buffer[framesPerBuffer>>1], diff);
+			m_bufferPos = diff;
+		}
+	}
+	
 	return 0;
 }
 
@@ -263,8 +291,16 @@ int GensPortAudio::write(void)
 	if (!m_open)
 		return 1;
 	
-	// Lock the ring buffer for writing.
-	int16_t *buf = m_buffer.writeLock();
+	// TODO: Lock the buffer for writing.
+	// TODO: Use the segment size.
+	int segLength = (LibGens::SoundMgr::GetSegLength() * m_sampleSize);
+	if ((m_bufferPos + segLength) > sizeof(m_buffer))
+	{
+		printf("internal buffer overflow\n");
+		return 1;
+	}
+	
+	int16_t *buf = &m_buffer[m_bufferPos>>1];
 	
 	// TODO: MMX versions.
 	int ret;
@@ -284,8 +320,12 @@ int GensPortAudio::write(void)
 	else
 		ret = writeMono(buf);
 	
+	// Increment the buffer position.
+	m_bufferPos += segLength;
+	
 	// Unlock the ring buffer.
-	m_buffer.writeUnlock();
+	// TODO
+	//m_buffer.writeUnlock();
 	return ret;
 }
 
