@@ -107,7 +107,8 @@ class EmuManager : public QObject
 	
 	protected:
 		// Timing management.
-		double m_lastTime;
+		double m_lastTime;	// Last time a frame was updated.
+		double m_lastTime_fps;	// Last time value used for FPS counter.
 		int m_frames;
 		
 		// ROM object.

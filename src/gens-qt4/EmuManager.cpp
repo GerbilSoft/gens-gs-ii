@@ -654,20 +654,31 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	if (!wasFastFrame)
 		m_frames++;
 	
+	double timeDiff;
+	double thisTime = LibGens::Timing::GetTimeD();
+	
 	if (m_lastTime < 0.001)
-		m_lastTime = LibGens::Timing::GetTimeD();
+	{
+		m_lastTime = thisTime;
+		m_lastTime_fps = m_lastTime;
+		timeDiff = 0.0;
+	}
 	else
 	{
-		double thisTime = LibGens::Timing::GetTimeD();
-		if ((thisTime - m_lastTime) >= 0.250)
+		// Get the time difference.
+		timeDiff = (thisTime - m_lastTime);
+		
+		// Check the FPS counter.
+		double timeDiff_fps = (thisTime - m_lastTime_fps);
+		if (timeDiff_fps >= 0.250)
 		{
 			// Push the current fps.
 			// (Updated four times per second.)
-			double fps = ((double)m_frames / (thisTime - m_lastTime));
+			double fps = ((double)m_frames / timeDiff_fps);
 			emit updateFps(fps);
 			
 			// Reset the timer and frame counter.
-			m_lastTime = thisTime;
+			m_lastTime_fps = thisTime;
 			m_frames = 0;
 		}
 	}
@@ -688,11 +699,40 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 		return;
 	
 	/** Auto Frame Skip **/
+	// TODO: Figure out how to properly implement the old Gens method of synchronizing to audio.
+#if 0
 	// Check if we should do a fast frame.
 	// TODO: Audio stutters a bit if the video drops below 60.0 fps.
 	m_audio->wpSegWait();	// Wait for the buffer to empty.
 	m_audio->write();	// Write audio.
 	bool doFastFrame = !m_audio->isBufferEmpty();
+#else
+	// TODO: Remove the ring buffer and just use the classic SDL-esque method.
+	m_audio->write();	// Write audio.
+#endif
+	
+	// Check if we're higher or lower than the required framerate.
+	const double frameRate = (1.0 / (LibGens::M68K_Mem::ms_Region.isPal() ? 50.0 : 60.0));
+	bool doFastFrame = false;
+	if (timeDiff > frameRate)
+	{
+		// Lower than the required framerate.
+		// Do a fast frame.
+		doFastFrame = true;
+	}
+	else if (timeDiff < (1.0 / 60.0))
+	{
+		// Higher than the required framerate.
+		// Wait for the required amount of time.
+		do
+		{
+			thisTime = LibGens::Timing::GetTimeD();
+			timeDiff = (thisTime - m_lastTime);
+		} while (timeDiff < frameRate);
+	}
+	
+	// Update the last time value.
+	m_lastTime = thisTime;
 	
 	// Tell the emulation thread that we're ready for another frame.
 	if (gqt4_emuThread)
