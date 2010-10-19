@@ -714,14 +714,15 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	// Check if we're higher or lower than the required framerate.
 	bool doFastFrame = false;
 	const double frameRate = (1.0 / (LibGens::M68K_Mem::ms_Region.isPal() ? 50.0 : 60.0));
-	if (timeDiff > (frameRate + 0.001))
+	const double threshold = 0.001;
+	if (timeDiff > (frameRate + threshold))
 	{
 		// Lower than the required framerate.
 		// Do a fast frame.
 		//printf("doing fast frame; ");
 		doFastFrame = true;
 	}
-	else if (timeDiff < (1.0 / 60.0))
+	else if (timeDiff < (frameRate - threshold))
 	{
 		// Higher than the required framerate.
 		// Wait for the required amount of time.
@@ -732,7 +733,7 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 		} while (timeDiff < frameRate);
 		
 		// TODO: This causes some issues...
-		if (timeDiff > (frameRate + 0.001))
+		if (timeDiff > (frameRate + threshold))
 			doFastFrame = true;
 	}
 	// Update the last time value.
