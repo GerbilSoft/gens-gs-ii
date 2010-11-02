@@ -48,6 +48,9 @@ section .data align=64
 
 section .text align=64
 
+; Only compile as 32-bit for now.
+bits 32
+
 arg_1	equ 8
 arg_2	equ 12
 
