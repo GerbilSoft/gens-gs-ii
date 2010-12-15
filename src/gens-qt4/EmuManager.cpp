@@ -75,8 +75,9 @@ static const GensKey_t ms_ResetKey = KEYV_TAB;
 
 EmuManager::EmuManager()
 {
-	// Reset timing information.
+	// Initialize timing information.
 	m_lastTime = 0.0;
+	m_lastTime_fps = 0.0;
 	m_frames = 0;
 	
 	// No ROM is loaded at startup.
@@ -221,6 +222,11 @@ int EmuManager::openRom(QWidget *parent)
 	
 	// Open audio.
 	m_audio->open();
+	
+	// Initialize timing information.
+	m_lastTime = LibGens::Timing::GetTimeD();
+	m_lastTime_fps = m_lastTime;
+	m_frames = 0;
 	
 	// Start the emulation thread.
 	m_paused = false;
