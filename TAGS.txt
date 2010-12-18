@@ -1,5 +1,10 @@
 Description of git tags for Gens/GS II:
 
+gens-no-emulation-build: Added support for "No-Emulation" builds, i.e.
+builds of Gens/GS II without the CPU emulators. This is useful for testing
+the Gens/GS II framework on non-x86 CPUs, since the CPU emulators are still
+written in 32-bit x86 assembly language.
+
 gens-qt4-paused-v0: Initial paused support. Emulation is paused if Escape
 is pressed, and unpaused if Escape is pressed again. I'll need to write a
 new class to handle non-controller keypresses in order to clean up the
