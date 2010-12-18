@@ -35,6 +35,7 @@ S68000CONTEXT M68K::ms_Context;
 // Instruction fetch.
 STARSCREAM_PROGRAMREGION M68K::M68K_Fetch[] =
 {
+#ifdef GENS_ENABLE_EMULATION
 	// RAM, including mirrors.
 	{0xE00000, 0xE0FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE00000},
 	{0xE10000, 0xE1FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE10000},
@@ -70,46 +71,55 @@ STARSCREAM_PROGRAMREGION M68K::M68K_Fetch[] =
 	{0xFF0000, 0xFFFFFF, (unsigned int)&Ram_68k.u8[0] - 0xFF0000},
 	
 	// The following four entries are available for the various different systems.
-	{-1, -1, (unsigned int)NULL},	// 32
-	{-1, -1, (unsigned int)NULL},	// 33
-	{-1, -1, (unsigned int)NULL},	// 34
-	{-1, -1, (unsigned int)NULL},	// 35
+	{-1, -1, 0},	// 32
+	{-1, -1, 0},	// 33
+	{-1, -1, 0},	// 34
+	{-1, -1, 0},	// 35
+#endif /* GENS_ENABLE_EMULATION */
 	
 	// Terminator.
-	{-1, -1, (unsigned int)NULL}
+	{-1, -1, 0}
 };
 
 // M68K Starscream has a hack for RAM mirroring for data read.
 STARSCREAM_DATAREGION M68K::M68K_Read_Byte[4] =
 {
+#ifdef GENS_ENABLE_EMULATION
 	{0x000000, 0x3FFFFF, NULL, NULL},
 	{0xFF0000, 0xFFFFFF, NULL, &Ram_68k.u8[0]},
 	{0x400000, 0xFEFFFF, (void*)M68K_Mem::M68K_RB, NULL},
+#endif /* GENS_ENABLE_EMULATION */
 	{-1, -1, NULL, NULL}
 };
 
 // M68K Starscream has a hack for RAM mirroring for data read.
 STARSCREAM_DATAREGION M68K::M68K_Read_Word[4] =
 {
+#ifdef GENS_ENABLE_EMULATION
 	{0x000000, 0x3FFFFF, NULL, NULL},
 	{0xFF0000, 0xFFFFFF, NULL, &Ram_68k.u8[0]},
 	{0x400000, 0xFEFFFF, (void*)M68K_Mem::M68K_RW, NULL},
+#endif /* GENS_ENABLE_EMULATION */
 	{-1, -1, NULL, NULL}
 };
 
 // M68K Starscream has a hack for RAM mirroring for data write.
 STARSCREAM_DATAREGION M68K::M68K_Write_Byte[3] =
 {
+#ifdef GENS_ENABLE_EMULATION
 	{0xFF0000, 0xFFFFFF, NULL, &Ram_68k.u8[0]},
 	{0x000000, 0xFEFFFF, (void*)M68K_Mem::M68K_WB, NULL},
+#endif /* GENS_ENABLE_EMULATION */
 	{-1, -1, NULL, NULL}
 };
 
 // M68K Starscream has a hack for RAM mirroring for data write.
 STARSCREAM_DATAREGION M68K::M68K_Write_Word[3] =
 {
+#ifdef GENS_ENABLE_EMULATION
 	{0xFF0000, 0xFFFFFF, NULL, &Ram_68k.u8[0]},
 	{0x000000, 0xFEFFFF, (void*)M68K_Mem::M68K_WW, NULL},
+#endif /* GENS_ENABLE_EMULATION */
 	{-1, -1, NULL, NULL}
 };
 
@@ -150,9 +160,11 @@ void M68K::Init(void)
 	
 	ms_Context.resethandler = M68K_Reset_Handler;
 	
+#ifdef GENS_ENABLE_EMULATION
 	// Set up the main68k context.
 	main68k_SetContext(&ms_Context);
 	main68k_init();
+#endif /* GENS_ENABLE_EMULATION */
 }
 
 
@@ -176,6 +188,7 @@ void M68K::InitSys(SysID system)
 	// Clear M68K RAM.
 	memset(Ram_68k.u8, 0x00, sizeof(Ram_68k.u8));
 	
+#ifdef GENS_ENABLE_EMULATION
 	// Set the ROM fetch.
 	M68K_Fetch[32].lowaddr  = 0x000000;
 	M68K_Fetch[32].highaddr = (M68K_Mem::Rom_Size - 1);
@@ -231,6 +244,7 @@ void M68K::InitSys(SysID system)
 	
 	// Reset the M68K CPU.
 	main68k_reset();
+#endif /* GENS_ENABLE_EMULATION */
 	
 	// Initialize the M68K memory handlers.
 	M68K_Mem::InitSys(system);
@@ -248,6 +262,7 @@ void M68K::ZomgSaveReg(Zomg_M68KRegSave_t *state)
 {
 	// NOTE: Byteswapping is done in libzomg.
 	
+#ifdef GENS_ENABLE_EMULATION
 	struct S68000CONTEXT m68k_context;
 	main68k_GetContext(&m68k_context);
 	for (unsigned int i = 0; i < 8; i++)
@@ -258,6 +273,9 @@ void M68K::ZomgSaveReg(Zomg_M68KRegSave_t *state)
 	state->asp = m68k_context.asp;
 	state->pc = m68k_context.pc;
 	state->sr = m68k_context.sr;
+#else
+	memset(state, 0x00, sizeof(*state));
+#endif /* GENS_ENABLE_EMULATION */
 }
 
 
@@ -267,6 +285,7 @@ void M68K::ZomgSaveReg(Zomg_M68KRegSave_t *state)
  */
 void M68K::ZomgRestoreReg(const Zomg_M68KRegSave_t *state)
 {
+#ifdef GENS_ENABLE_EMULATION
 	main68k_GetContext(&ms_Context);
 	for (unsigned int i = 0; i < 8; i++)
 	{
@@ -277,6 +296,7 @@ void M68K::ZomgRestoreReg(const Zomg_M68KRegSave_t *state)
 	ms_Context.pc = state->pc;
 	ms_Context.sr = state->sr;
 	main68k_SetContext(&ms_Context);
+#endif /* GENS_ENABLE_EMULATION */
 }
 
 }

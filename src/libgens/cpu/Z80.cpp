@@ -40,6 +40,7 @@ Z80_CONTEXT Z80::ms_Z80;
  */
 void Z80::Init(void)
 {
+#ifdef GENS_ENABLE_EMULATION
 	mdZ80_init(&ms_Z80);
 	
 	// Set instruction fetch handlers.
@@ -61,6 +62,7 @@ void Z80::Init(void)
 	z80_Add_WriteB(&ms_Z80, 0x60, 0x6F, Z80_MD_Mem::Z80_WriteB_Bank);
 	z80_Add_WriteB(&ms_Z80, 0x70, 0x7F, Z80_MD_Mem::Z80_WriteB_PSG);
 	z80_Add_WriteB(&ms_Z80, 0x80, 0xFF, Z80_MD_Mem::Z80_WriteB_68K_Ram);
+#endif
 	
 	// Reinitialize the Z80.
 	ReInit();
@@ -113,6 +115,7 @@ void Z80::ZomgSaveReg(Zomg_Z80RegSave_t *state)
 {
 	// NOTE: Byteswapping is done in libzomg.
 	
+#ifdef GENS_ENABLE_EMULATION
 	// Main register set.
 	state->AF = mdZ80_get_AF(&ms_Z80);
 	state->BC = ms_Z80.BC.w.BC;
@@ -136,6 +139,9 @@ void Z80::ZomgSaveReg(Zomg_Z80RegSave_t *state)
 	state->R = ms_Z80.R.b.R1;
 	state->I = ms_Z80.I;
 	state->IM = ms_Z80.IM;
+#else
+	memset(state, 0x00, sizeof(*state));
+#endif /* GENS_ENABLE_EMULATION */
 }
 
 
@@ -147,6 +153,7 @@ void Z80::ZomgRestoreReg(const Zomg_Z80RegSave_t *state)
 {
 	// NOTE: Byteswapping is done in libzomg.
 	
+#ifdef GENS_ENABLE_EMULATION
 	// Main register set.
 	mdZ80_set_AF(&ms_Z80, state->AF);
 	ms_Z80.BC.w.BC = state->BC;
@@ -171,6 +178,7 @@ void Z80::ZomgRestoreReg(const Zomg_Z80RegSave_t *state)
 	ms_Z80.R.b.R1 = state->R;
 	ms_Z80.I = state->I;
 	ms_Z80.IM = state->IM;
+#endif /* GENS_ENABLE_EMULATION */
 }
 
 }

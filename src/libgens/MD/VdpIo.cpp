@@ -183,18 +183,21 @@ void VdpIo::Update_IRQ_Line(void)
 	if ((VDP_Reg.m5.Set2 & 0x20) && (VDP_Int & 0x08))
 	{
 		// VBlank interrupt.
-		main68k_interrupt(6, -1);
+		M68K::Interrupt(6, -1);
 		return;
 	}
 	else if ((VDP_Reg.m5.Set1 & 0x10) && (VDP_Int & 0x04))
 	{
 		// HBlank interrupt.
-		main68k_interrupt(4, -1);
+		M68K::Interrupt(4, -1);
 		return;
 	}
 	
 	// No VDP interrupts.
+	// TODO: Move to M68K class.
+#ifdef GENS_ENABLE_EMULATION
 	main68k_context.interrupts[0] &= 0xF0;
+#endif /* GENS_ENABLE_EMULATION */
 }
 
 
@@ -603,7 +606,7 @@ void VdpIo::Set_Reg(int reg_num, uint8_t val)
  */
 uint8_t VdpIo::Read_H_Counter(void)
 {
-	unsigned int odo_68K = main68k_readOdometer();
+	unsigned int odo_68K = M68K::ReadOdometer();
 	odo_68K -= (M68K_Mem::Cycles_M68K - M68K_Mem::CPL_M68K);
 	odo_68K &= 0x1FF;
 	
@@ -625,7 +628,7 @@ uint8_t VdpIo::Read_H_Counter(void)
  */
 uint8_t VdpIo::Read_V_Counter(void)
 {
-	unsigned int odo_68K = main68k_readOdometer();
+	unsigned int odo_68K = M68K::ReadOdometer();
 	odo_68K -= (M68K_Mem::Cycles_M68K - M68K_Mem::CPL_M68K);
 	odo_68K &= 0x1FF;
 	
@@ -1234,7 +1237,11 @@ inline void VdpIo::T_DMA_Loop(unsigned int src_address, unsigned int dest_addres
 	
 	// Update DMA.
 	Update_DMA();
-	main68k_releaseCycles();
+	
+	// NOTE: main68k_releaseCycles() takes no parameters,
+	// but the actual function subtracts eax from __io_cycle_counter.
+	// eax was equal to DMAT_Length.
+	M68K::ReleaseCycles(DMAT_Length);
 }
 
 

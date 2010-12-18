@@ -39,4 +39,7 @@
 /* Define to 1 if you have iconv() in either libc or libiconv. */
 #cmakedefine HAVE_ICONV 1
 
+/* Define to 1 if CPU emulation code should be enabled. */
+#cmakedefine GENS_ENABLE_EMULATION 1
+
 #endif /* __LIBGENS_CONFIG_H__ */

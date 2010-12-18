@@ -24,6 +24,10 @@
 #ifndef __LIBGENS_CPU_Z80_HPP__
 #define __LIBGENS_CPU_Z80_HPP__
 
+// NOTE: This will include config.h for the current project, not necessarily libgens!
+// TODO: Make a global config.h instead?
+#include <config.h>
+
 // mdZ80: Z80 CPU emulator.
 #include "mdZ80/mdZ80.h"
 
@@ -52,13 +56,21 @@ class Z80
 		 */
 		static void ReInit(void);
 		
+		/** ZOMG savestate functions. **/
+		static void ZomgSaveReg(Zomg_Z80RegSave_t *state);
+		static void ZomgRestoreReg(const Zomg_Z80RegSave_t *state);
+		
+		/** BEGIN: mdZ80 wrapper functions. **/
+		
 		/**
 		 * Reset(): Reset the Z80.
 		 * This function should be called when the Z80 RESET line is asserted.
 		 */
 		static inline void Reset(void)
 		{
+#ifdef GENS_ENABLE_EMULATION
 			mdZ80_reset(&ms_Z80);
+#endif /* GENS_ENABLE_EMULATION */
 		}
 		
 		/**
@@ -67,6 +79,7 @@ class Z80
 		 */
 		static inline void Exec(int cyclesSubtract)
 		{
+#ifdef GENS_ENABLE_EMULATION
 			int cyclesToRun = (M68K_Mem::Cycles_Z80 - cyclesSubtract);
 			
 			// Only run the Z80 if it's enabled and it has the bus.
@@ -74,6 +87,9 @@ class Z80
 				z80_Exec(&ms_Z80, cyclesToRun);
 			else
 				mdZ80_set_odo(&ms_Z80, cyclesToRun);
+#else
+			((void)cyclesSubtract);
+#endif /* GENS_ENABLE_EMULATION */
 		}
 		
 		/**
@@ -82,7 +98,11 @@ class Z80
 		 */
 		static inline void Interrupt(uint8_t irq)
 		{
+#ifdef GENS_ENABLE_EMULATION
 			mdZ80_interrupt(&ms_Z80, irq);
+#else
+			((void)irq);
+#endif /* GENS_ENABLE_EMULATION */
 		}
 		
 		/**
@@ -90,7 +110,9 @@ class Z80
 		 */
 		static inline void ClearOdometer(void)
 		{
+#ifdef GENS_ENABLE_EMULATION
 			mdZ80_clear_odo(&ms_Z80);
+#endif /* GENS_ENABLE_EMULATION */
 		}
 		
 		/**
@@ -99,12 +121,14 @@ class Z80
 		 */
 		static inline void SetOdometer(unsigned int odo)
 		{
+#ifdef GENS_ENABLE_EMULATION
 			mdZ80_set_odo(&ms_Z80, odo);
+#else
+			((void)odo);
+#endif /* GENS_ENABLE_EMULATION */
 		}
 		
-		/** ZOMG savestate functions. **/
-		static void ZomgSaveReg(Zomg_Z80RegSave_t *state);
-		static void ZomgRestoreReg(const Zomg_Z80RegSave_t *state);
+		/** END: mdZ80 wrapper functions. **/
 	
 	protected:
 		static Z80_CONTEXT ms_Z80;

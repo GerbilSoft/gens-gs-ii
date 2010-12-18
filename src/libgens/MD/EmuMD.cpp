@@ -325,14 +325,14 @@ FORCE_INLINE void EmuMD::T_Do_Line(void)
 	M68K_Mem::Cycles_Z80 += M68K_Mem::CPL_Z80;
 	
 	if (VdpIo::DMAT_Length)
-		main68k_addCycles(VdpIo::Update_DMA());
+		M68K::AddCycles(VdpIo::Update_DMA());
 	
 	switch (LineType)
 	{
 		case LINETYPE_ACTIVEDISPLAY:
 			// In visible area.
 			VdpIo::VDP_Status |=  0x0004;	// HBlank = 1
-			main68k_exec(M68K_Mem::Cycles_M68K - 404);
+			M68K::Exec(M68K_Mem::Cycles_M68K - 404);
 			VdpIo::VDP_Status &= ~0x0004;	// HBlank = 0
 			
 			if (--VdpIo::HInt_Counter < 0)
@@ -361,7 +361,7 @@ FORCE_INLINE void EmuMD::T_Do_Line(void)
 			if (VdpIo::VDP_Lines.NTSC_V30.VBlank_Div != 0)
 				VdpIo::VDP_Status &= ~0x0008;
 			
-			main68k_exec(M68K_Mem::Cycles_M68K - 360);
+			M68K::Exec(M68K_Mem::Cycles_M68K - 360);
 			Z80::Exec(168);
 #if 0
 			// TODO: Congratulations! (LibGens)
@@ -396,7 +396,7 @@ FORCE_INLINE void EmuMD::T_Do_Line(void)
 		VdpRend::Render_Line();
 	}
 	
-	main68k_exec(M68K_Mem::Cycles_M68K);
+	M68K::Exec(M68K_Mem::Cycles_M68K);
 	Z80::Exec(0);
 }
 
@@ -431,7 +431,7 @@ FORCE_INLINE void EmuMD::T_Do_Frame(void)
 	M68K_Mem::Cycles_M68K = 0;
 	M68K_Mem::Cycles_Z80 = 0;
 	M68K_Mem::Last_BUS_REQ_Cnt = -1000;
-	main68k_tripOdometer();
+	M68K::TripOdometer();
 	Z80::ClearOdometer();
 	
 	// TODO: MDP. (LibGens)

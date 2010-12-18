@@ -253,7 +253,7 @@ uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 		}
 		
 		// Z80 is not running.
-		int odo68k = main68k_readOdometer();
+		int odo68k = M68K::ReadOdometer();
 		odo68k -= Last_BUS_REQ_Cnt;
 		if (odo68k <= CYCLE_FOR_TAKE_Z80_BUS_GENESIS)
 			return ((Last_BUS_REQ_St | 0x80) & 0xFF);
@@ -519,7 +519,7 @@ uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 		}
 		
 		// Z80 is not running.
-		int odo68k = main68k_readOdometer();
+		int odo68k = M68K::ReadOdometer();
 		odo68k -= Last_BUS_REQ_Cnt;
 		if (odo68k <= CYCLE_FOR_TAKE_Z80_BUS_GENESIS)
 		{
@@ -767,7 +767,7 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 		{
 			// M68K requests the bus.
 			// Disable the Z80.
-			Last_BUS_REQ_Cnt = main68k_readOdometer();
+			Last_BUS_REQ_Cnt = M68K::ReadOdometer();
 			Last_BUS_REQ_St = (Z80_State & Z80_STATE_BUSREQ);
 			
 			if (Z80_State & Z80_STATE_BUSREQ)
@@ -795,7 +795,7 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 				
 				// TODO: Rework this.
 				int ebx = Cycles_M68K;
-				ebx -= main68k_readOdometer();
+				ebx -= M68K::ReadOdometer();
 				
 				int edx = Cycles_Z80;
 				ebx = Z80_M68K_Cycle_Tab[ebx];
@@ -1076,7 +1076,7 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 		{
 			// M68K requests the bus.
 			// Disable the Z80.
-			Last_BUS_REQ_Cnt = main68k_readOdometer();
+			Last_BUS_REQ_Cnt = M68K::ReadOdometer();
 			Last_BUS_REQ_St = (Z80_State & Z80_STATE_BUSREQ);
 			
 			if (Z80_State & Z80_STATE_BUSREQ)
@@ -1104,7 +1104,7 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 				
 				// TODO: Rework this.
 				int ebx = Cycles_M68K;
-				ebx -= main68k_readOdometer();
+				ebx -= M68K::ReadOdometer();
 				
 				int edx = Cycles_Z80;
 				ebx = Z80_M68K_Cycle_Tab[ebx];

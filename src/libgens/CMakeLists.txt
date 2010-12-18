@@ -2,8 +2,10 @@ PROJECT(libgens)
 cmake_minimum_required(VERSION 2.6.0)
 
 # LibGens subprojects.
-ADD_SUBDIRECTORY(starscream)
-ADD_SUBDIRECTORY(mdZ80)
+IF(GENS_ENABLE_EMULATION)
+	ADD_SUBDIRECTORY(starscream)
+	ADD_SUBDIRECTORY(mdZ80)
+ENDIF(GENS_ENABLE_EMULATION)
 
 # Main binary directory. Needed for git_version.h
 INCLUDE_DIRECTORIES(${gens-gs-ii_BINARY_DIR})
@@ -115,7 +117,10 @@ ENDIF()
 
 # Build the library.
 ADD_LIBRARY(gens STATIC ${libgens_SRCS} ${libgens_OPTIONAL_SRCS} ${libgens_COMPAT_SRCS})
-TARGET_LINK_LIBRARIES(gens starscream mdZ80 minizip zomg)
+TARGET_LINK_LIBRARIES(gens minizip zomg)
+IF(GENS_ENABLE_EMULATION)
+	TARGET_LINK_LIBRARIES(starscream mdZ80)
+ENDIF(GENS_ENABLE_EMULATION)
 IF(HAVE_LIBRT)
 	TARGET_LINK_LIBRARIES(gens -lrt)
 ENDIF(HAVE_LIBRT)
@@ -129,7 +134,10 @@ IF(HAVE_LZMA)
 	TARGET_LINK_LIBRARIES(gens 7z lzmabase)
 ENDIF(HAVE_LZMA)
 
-ADD_DEPENDENCIES(gens git_version starscream mdZ80 minizip zomg)
+ADD_DEPENDENCIES(gens git_version minizip zomg)
+IF(GENS_ENABLE_EMULATION)
+	ADD_DEPENDENCIES(starscream mdZ80)
+ENDIF(GENS_ENABLE_EMULATION)
 IF(HAVE_LZMA)
 	ADD_DEPENDENCIES(lzmabase 7z)
 ENDIF(HAVE_LZMA)

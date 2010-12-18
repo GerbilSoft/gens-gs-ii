@@ -39,6 +39,15 @@ ENDIF()
 #	SET(CMAKE_VERBOSE_MAKEFILE ON)
 #ENDIF()
 
+# If we're not using x86, disable emulation functionality.
+# TODO: Port everything from asm to C/C++!
+INCLUDE(CheckSystemX8632)
+CHECK_SYSTEM_X86_32(GENS_ENABLE_EMULATION)
+IF(GENS_ENABLE_EMULATION)
+ELSE()
+	MESSAGE(WARNING "System is not X86_32; CPU emulation will be disabled. (FOR DEBUGGING ONLY)")
+ENDIF()
+
 # Check what flag is needed for C99 support.
 INCLUDE(CheckC99CompilerFlag)
 CHECK_C99_COMPILER_FLAG(GENS_C99_CFLAG)

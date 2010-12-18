@@ -24,6 +24,10 @@
 #ifndef __LIBGENS_CPU_M68K_HPP__
 #define __LIBGENS_CPU_M68K_HPP__
 
+// NOTE: This will include config.h for the current project, not necessarily libgens!
+// TODO: Make a global config.h instead?
+#include <config.h>
+
 #include "star_68k.h"
 
 // ZOMG M68K structs.
@@ -59,14 +63,109 @@ class M68K
 		
 		static void InitSys(SysID system);
 		
-		/**
-		 * Reset(): Reset the emulated CPU.
-		 */
-		static inline void Reset(void) { main68k_reset(); }
-		
 		/** ZOMG savestate functions. **/
 		static void ZomgSaveReg(Zomg_M68KRegSave_t *state);
 		static void ZomgRestoreReg(const Zomg_M68KRegSave_t *state);
+		
+		/** BEGIN: Starscream wrapper functions. **/
+		
+		/**
+		 * Reset(): Reset the emulated CPU.
+		 */
+		static inline void Reset(void)
+		{
+#ifdef GENS_ENABLE_EMULATION
+			main68k_reset();
+#endif /* GENS_ENABLE_EMULATION */
+		}
+		
+		/**
+		 * Interrupt(): Trigger an interrupt.
+		 * @param level Interrupt level.
+		 * @param vector Interrupt vector. (???)
+		 * @return ???
+		 */
+		static inline int Interrupt(int level, int vector)
+		{
+#ifdef GENS_ENABLE_EMULATION
+			main68k_interrupt(level, vector);
+#else
+			((void)level); ((void)vector);
+			return -1;
+#endif /* GENS_ENABLE_EMULATION */
+		}
+		
+		/**
+		 * ReadOdometer(): Read the M68K odometer.
+		 * @return M68K odometer.
+		 */
+		static inline unsigned int ReadOdometer(void)
+		{
+#ifdef GENS_ENABLE_EMULATION
+			return main68k_readOdometer();
+#else
+			return 0;
+#endif /* GENS_ENABLE_EMULATION */
+		}
+		
+		/**
+		 * ReleaseCycles(): Release cycles.
+		 * @param cycles Cycles to release.
+		 */
+		static inline void ReleaseCycles(int cycles)
+		{
+#ifdef GENS_ENABLE_EMULATION
+			// TODO: main68k_releaseCycles() takes no parameters,
+			// but the actual function subtracts eax from __io_cycle_counter.
+			// Use the cycles parameter instead of eax.
+			main68k_releaseCycles();
+#else
+			((void)cycles);
+#endif /* GENS_ENABLE_EMULATION */
+		}
+		
+		/**
+		 * AddCycles(): Add cycles to the M68K odometer.
+		 * @param cycles Number of cycles to add.
+		 */
+		static inline void AddCycles(int cycles)
+		{
+#ifdef GENS_ENABLE_EMULATION
+			main68k_addCycles(cycles);
+#else
+			((void)cycles);
+#endif /* GENS_ENABLE_EMULATION */
+		}
+		
+		/**
+		 * Exec(): Execute instructions for a given number of cycles.
+		 * @param n Number of cycles to execute.
+		 * @return ???
+		 */
+		static inline unsigned int Exec(int n)
+		{
+#ifdef GENS_ENABLE_EMULATION
+			return main68k_exec(n);
+#else
+			((void)n);
+			return 0;
+#endif /* GENS_ENABLE_EMULATION */
+		}
+		
+		/**
+		 * TripOdometer(): Clear the M68K odometer.
+		 * @return ???
+		 */
+		static inline unsigned int TripOdometer(void)
+		{
+#ifdef GENS_ENABLE_EMULATION
+			return main68k_tripOdometer();
+#else
+			return 0;
+#endif /* GENS_ENABLE_EMULATION */
+		}
+		
+		/** END: Starscream wrapper functions. **/
 	
 	protected:
 		static S68000CONTEXT ms_Context;
