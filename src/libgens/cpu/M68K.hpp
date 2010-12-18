@@ -88,7 +88,7 @@ class M68K
 		static inline int Interrupt(int level, int vector)
 		{
 #ifdef GENS_ENABLE_EMULATION
-			main68k_interrupt(level, vector);
+			return main68k_interrupt(level, vector);
 #else
 			((void)level); ((void)vector);
 			return -1;
