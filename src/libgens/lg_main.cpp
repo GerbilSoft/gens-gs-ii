@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <config.h>
+
 #include "lg_main.hpp"
 #include "macros/git.h"
 #include "Util/cpuflags.h"
@@ -83,7 +85,10 @@ int Init(void)
 	
 	// Print the Gens/GS startup message.
 	fprintf(stderr, "Gens/GS II (Development Build)\n");
-#ifdef GENS_GIT_VERSION
+#if !defined(GENS_ENABLE_EMULATION)
+	fprintf(stderr, "[NO-EMULATION BUILD; CPU emulation disabled.]\n");
+#endif
+#if defined(GENS_GIT_VERSION)
 	fprintf(stderr, "(" GENS_GIT_VERSION ")\n");
 #endif
 	fprintf(stderr, "\n"
