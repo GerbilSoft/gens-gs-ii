@@ -445,7 +445,11 @@ void GensWindow::setGensTitle(void)
 {
 	// TODO: Indicate UI status.
 	QString title = TR("Gens/GS II");
-	title += " " + TR("dev") + " - ";
+	title += " " + TR("dev");
+#if !defined(GENS_ENABLE_EMULATION)
+	title += " " + TR("NO-EMU");
+#endif
+	title += " - ";
 	
 	// TODO
 	if (!m_emuManager.isRomOpen())

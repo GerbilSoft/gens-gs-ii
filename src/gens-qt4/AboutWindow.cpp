@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <config.h>
+
 #include "AboutWindow.hpp"
 #include "libgens/macros/git.h"
 #include "libgens/Util/cpuflags.h"
@@ -69,6 +71,10 @@ AboutWindow::AboutWindow(QWidget *parent)
 	QString sPrgTitle =
 		"<b>" + TR("Gens/GS II") + "</b><br />\n" +
 		TR("Development Build") + "<br />\n";
+	
+#if !defined(GENS_ENABLE_EMULATION)
+	sPrgTitle += "<b>" + TR("NO-EMULATION BUILD") + "</b><br />\n";
+#endif
 	
 #ifdef GENS_GIT_VERSION
 	// Append the git version to the title text.
