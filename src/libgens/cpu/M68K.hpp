@@ -115,10 +115,7 @@ class M68K
 		static inline void ReleaseCycles(int cycles)
 		{
 #ifdef GENS_ENABLE_EMULATION
-			// TODO: main68k_releaseCycles() takes no parameters,
-			// but the actual function subtracts eax from __io_cycle_counter.
-			// Use the cycles parameter instead of eax.
-			main68k_releaseCycles();
+			main68k_releaseCycles(cycles);
 #else
 			((void)cycles);
 #endif /* GENS_ENABLE_EMULATION */

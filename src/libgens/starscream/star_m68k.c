@@ -1236,6 +1236,7 @@ emit("js near execquit\n");
 */
 	begin_source_proc("releaseCycles");
 
+	if(use_stack) emit("mov eax,[esp+4]\n");
 	emit("sub [__io_cycle_counter], eax\n");
 	emit("ret\n");
 
