@@ -265,7 +265,7 @@ void M68K::ZomgSaveReg(Zomg_M68KRegSave_t *state)
 #ifdef GENS_ENABLE_EMULATION
 	struct S68000CONTEXT m68k_context;
 	main68k_GetContext(&m68k_context);
-	for (unsigned int i = 0; i < 8; i++)
+	for (int i = 0; i < 8; i++)
 	{
 		state->areg[i] = m68k_context.areg[i];
 		state->dreg[i] = m68k_context.dreg[i];
@@ -287,7 +287,7 @@ void M68K::ZomgRestoreReg(const Zomg_M68KRegSave_t *state)
 {
 #ifdef GENS_ENABLE_EMULATION
 	main68k_GetContext(&ms_Context);
-	for (unsigned int i = 0; i < 8; i++)
+	for (int i = 0; i < 8; i++)
 	{
 		ms_Context.areg[i] = state->areg[i];
 		ms_Context.dreg[i] = state->dreg[i];
