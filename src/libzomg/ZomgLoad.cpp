@@ -368,7 +368,27 @@ int Zomg::loadMD_Z80Ctrl(Zomg_MD_Z80CtrlSave_t *state)
  */
 int Zomg::loadMD_TimeReg(Zomg_MD_TimeReg_t *state)
 {
-	return loadFromZomg("MD/TIME_reg.bin", state, sizeof(*state));
+	Zomg_MD_TimeReg_t tmp_state;
+	int ret = loadFromZomg("MD/TIME_reg.bin", &tmp_state, sizeof(tmp_state));
+	
+	if (ret < 0)
+	{
+		// Error. Fill the state with 0xFF.
+		memset(state, 0xFF, sizeof(*state));
+	}
+	else if (ret < (int)(sizeof(tmp_state)))
+	{
+		// Short read. Fill the rest of the state with 0xFF.
+		memset(state, 0xFF, sizeof(*state));
+		memcpy(state, &tmp_state, ret);
+	}
+	else
+	{
+		// Full read. Copy the entire state as-is.
+		memcpy(state, &tmp_state, sizeof(*state));
+	}
+	
+	return ret;
 }
 
 
