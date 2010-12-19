@@ -172,15 +172,20 @@ int ZomgLoad(const utf8_str *filename)
 	Z80_MD_Mem::Bank_Z80 = ((md_z80_ctrl_save.m68k_bank & 0x1FF) << 15);
 	
 	// Load the MD /TIME registers.
-	// TODO: SSF2 banking.
-	// TODO: Force SRAM on if the ROM is small enough.
 	Zomg_MD_TimeReg_t md_time_reg_save;
 	zomg.loadMD_TimeReg(&md_time_reg_save);
+	
+	// TODO: Force SRAM on if the ROM is small enough.
 	if (!M68K_Mem::m_EEPRom.isEEPRomTypeSet())
 	{
 		// EEPRom is disabled. Use SRam.
+		// Load SRam control registers from the /TIME register bank.
 		M68K_Mem::m_SRam.writeCtrl(md_time_reg_save.SRAM_ctrl);
 	}
+	
+	// Load SSF2 bank registers.
+	// TODO: Only if SSF2 is detected?
+	M68K_Mem::ZomgRestoreSSF2BankState(&md_time_reg_save);
 	
 	// Load SRAM.
 	// TODO: Make this optional.
@@ -303,14 +308,22 @@ int ZomgSave(const utf8_str *filename, const void *img_buf, size_t img_siz)
 	zomg.saveMD_Z80Ctrl(&md_z80_ctrl_save);
 	
 	// Save the MD /TIME registers.
-	// TODO: SSF2 banking.
 	Zomg_MD_TimeReg_t md_time_reg_save;
 	memset(md_time_reg_save.reg, 0xFF, sizeof(md_time_reg_save.reg));
+	
+	// SRam control registers.
 	if (!M68K_Mem::m_EEPRom.isEEPRomTypeSet())
 	{
 		// EEPRom is disabled. Use SRam.
+		// Save SRam control registers to the /TIME register bank.
 		md_time_reg_save.SRAM_ctrl = M68K_Mem::m_SRam.zomgReadCtrl();
 	}
+	
+	// Save SSF2 bank registers.
+	// TODO: Only if SSF2 is detected?
+	M68K_Mem::ZomgSaveSSF2BankState(&md_time_reg_save);
+	
+	// Write MD /TIME registers.
 	zomg.saveMD_TimeReg(&md_time_reg_save);
 	
 	// Save SRAM.

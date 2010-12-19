@@ -848,7 +848,7 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 		{
 			// TODO: We're ignoring banks over bank 9.
 			virt_bank = phys_bank;
-			ms_SSF2_BankState[phys_bank] = 0xFF;	// no bank
+			ms_SSF2_BankState[phys_bank] = 0xFF;	// default bank
 		}
 		else
 		{
@@ -1162,7 +1162,7 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 		{
 			// TODO: We're ignoring banks over bank 9.
 			virt_bank = phys_bank;
-			ms_SSF2_BankState[phys_bank] = 0xFF;	// no bank
+			ms_SSF2_BankState[phys_bank] = 0xFF;	// default bank
 		}
 		else
 		{
@@ -1518,6 +1518,62 @@ void M68K_Mem::M68K_WW(uint32_t address, uint16_t data)
 {
 	address &= 0xFFFFFF;
 	M68K_Write_Word_Table[address >> 19](address, data);
+}
+
+
+/** ZOMG savestate functions. */
+
+
+/**
+ * ZomgSaveSSF2BankState(): Save the SSF2 bankswitching state.
+ * @param state Zomg_MD_TimeReg_t struct to save to.
+ */
+void M68K_Mem::ZomgSaveSSF2BankState(Zomg_MD_TimeReg_t *state)
+{
+	// TODO: Only save if SSF2 bankswitching is active.
+	state->SSF2_bank1 = ms_SSF2_BankState[1];
+	state->SSF2_bank2 = ms_SSF2_BankState[2];
+	state->SSF2_bank3 = ms_SSF2_BankState[3];
+	state->SSF2_bank4 = ms_SSF2_BankState[4];
+	state->SSF2_bank5 = ms_SSF2_BankState[5];
+	state->SSF2_bank6 = ms_SSF2_BankState[6];
+	state->SSF2_bank7 = ms_SSF2_BankState[7];
+}
+
+
+/**
+ * ZomgRestoreSSF2BankState(): Restore the SSF2 bankswitching state.
+ * @param state Zomg_MD_TimeReg_t struct to restore from.
+ */
+void M68K_Mem::ZomgRestoreSSF2BankState(const Zomg_MD_TimeReg_t *state)
+{
+	// TODO: Only load if SSF2 bankswitching is active.
+	ms_SSF2_BankState[0] = 0xFF; // sanity-checking
+	ms_SSF2_BankState[1] = state->SSF2_bank1;
+	ms_SSF2_BankState[2] = state->SSF2_bank2;
+	ms_SSF2_BankState[3] = state->SSF2_bank3;
+	ms_SSF2_BankState[4] = state->SSF2_bank4;
+	ms_SSF2_BankState[5] = state->SSF2_bank5;
+	ms_SSF2_BankState[6] = state->SSF2_bank6;
+	ms_SSF2_BankState[7] = state->SSF2_bank7;
+	
+	// Verify the bank states.
+	// NOTE: Only banks 0-9 are supported right now.
+	for (int phys_bank = 0; phys_bank < 8; phys_bank++)
+	{
+		unsigned int virt_bank = ms_SSF2_BankState[phys_bank];
+		if (virt_bank > 9)
+		{
+			// TODO: We're ignoring banks over bank 9.
+			// This also catches 0xFF, which indicates "default bank".
+			virt_bank = phys_bank;
+			ms_SSF2_BankState[phys_bank] = 0xFF;	// default bank
+		}
+		
+		// Set the banking in the read byte/word tables.
+		M68K_Read_Byte_Table[phys_bank] = MD_M68K_Read_Byte_Table[virt_bank];
+		M68K_Read_Word_Table[phys_bank] = MD_M68K_Read_Word_Table[virt_bank];
+	}
 }
 
 }

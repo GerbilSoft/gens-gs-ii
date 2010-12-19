@@ -47,6 +47,9 @@ extern Ram_68k_t Ram_68k;
 #include "../Save/EEPRom.hpp"
 #include "../MD/SysRegion.hpp"
 
+// ZOMG TIME_reg structs.
+#include "libzomg/zomg_md_time_reg.h"
+
 namespace LibGens
 {
 
@@ -120,6 +123,10 @@ class M68K_Mem
 		static uint16_t M68K_RW(uint32_t address);
 		static void M68K_WB(uint32_t address, uint8_t data);
 		static void M68K_WW(uint32_t address, uint16_t data);
+		
+		/** ZOMG savestate functions. */
+		static void ZomgSaveSSF2BankState(Zomg_MD_TimeReg_t *state);
+		static void ZomgRestoreSSF2BankState(const Zomg_MD_TimeReg_t *state);
 	
 	protected:
 		/** Z80/M68K cycle table. **/
@@ -129,7 +136,7 @@ class M68K_Mem
 		static const int CYCLE_FOR_TAKE_Z80_BUS_GENESIS = 16;
 		
 		/**
-		 * SSF2_BankState[]: SSF2 bankswitching state.
+		 * ms_SSF2_BankState[]: SSF2 bankswitching state.
 		 * TODO: Make a helper class for this?
 		 * Index 0 == unused. (present for alignment and consistency)
 		 * Index 1 == $A130F3 (bank 1)
