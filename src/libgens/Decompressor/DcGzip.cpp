@@ -160,7 +160,7 @@ int DcGzip::getFileInfo(mdp_z_entry_t **z_entry_out)
 	z_entry->filesize = filesize;
 	z_entry->filename = (!m_filename.empty() ? strdup(m_filename.c_str()) : NULL);
 	z_entry->next = NULL;
-	printf("filesize: %d\n", filesize);
+	
 	// Return the list.
 	*z_entry_out = z_entry;
 	return 0; // TODO: return MDP_ERR_OK;
