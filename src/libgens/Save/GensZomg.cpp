@@ -87,9 +87,11 @@ int ZomgLoad(const utf8_str *filename)
 	
 	// Load VRam.
 	zomg.loadVRam(VdpIo::VRam.u16, sizeof(VdpIo::VRam.u16), true);
+	VdpIo::VDP_Flags.VRam = 1;
 	
 	// Load CRam.
 	zomg.loadCRam(VdpIo::CRam.u16, sizeof(VdpIo::CRam.u16), true);
+	VdpIo::VDP_Flags.CRam = 1;
 	
 	/** VDP: MD-specific **/
 	
