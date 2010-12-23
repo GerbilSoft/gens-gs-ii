@@ -328,23 +328,39 @@ void GensWindow::menuTriggered(int id)
 					gensResize();
 					break;
 				
+				/** TODO: bpp changes should be pushed to the emulation queue. **/
 				case MNUID_ITEM(IDM_RESBPPTEST_15):
+				{
 					LibGens::VdpRend::m_palette.setBpp(LibGens::VdpPalette::BPP_15);
 					m_vBackend->setVbDirty();
 					m_vBackend->vbUpdate();
+					
+					QString msg = TR("Color depth set to %1-bit.").arg(15);
+					m_vBackend->osd_printf(1500, "%s", msg.toUtf8().constData());
 					break;
+				}
 				
 				case MNUID_ITEM(IDM_RESBPPTEST_16):
+				{
 					LibGens::VdpRend::m_palette.setBpp(LibGens::VdpPalette::BPP_16);
 					m_vBackend->setVbDirty();
 					m_vBackend->vbUpdate();
+					
+					QString msg = TR("Color depth set to %1-bit.").arg(16);
+					m_vBackend->osd_printf(1500, "%s", msg.toUtf8().constData());
 					break;
+				}
 				
 				case MNUID_ITEM(IDM_RESBPPTEST_32):
+				{
 					LibGens::VdpRend::m_palette.setBpp(LibGens::VdpPalette::BPP_32);
 					m_vBackend->setVbDirty();
 					m_vBackend->vbUpdate();
+					
+					QString msg = TR("Color depth set to %1-bit.").arg(32);
+					m_vBackend->osd_printf(1500, "%s", msg.toUtf8().constData());
 					break;
+				}
 				
 				case MNUID_ITEM(IDM_RESBPPTEST_SCRSHOT):
 					m_emuManager.screenShot();
