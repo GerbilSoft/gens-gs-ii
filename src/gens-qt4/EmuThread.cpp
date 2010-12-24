@@ -37,7 +37,9 @@ EmuThread::EmuThread()
 
 EmuThread::~EmuThread()
 {
-	// TODO
+	// Stop the thread and wait for it to finish.
+	this->stop();
+	this->wait();
 }
 
 void EmuThread::resume(bool doFastFrame)

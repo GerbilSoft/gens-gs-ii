@@ -54,6 +54,7 @@
 #include <QtGui/QImage>
 #include <QtGui/QImageReader>
 #include <QtCore/QBuffer>
+#include <QtCore/QTimer>
 
 // Qt key handler.
 // TODO: Make a class for handling non-controller input, e.g. Reset.
@@ -110,7 +111,6 @@ EmuManager::~EmuManager()
 /**
  * openRom(): Open a ROM file.
  * Prompts the user to select a ROM file, then opens it.
- * TODO: Add a parameter to open a filename directly, e.g. from ROM History.
  * @param parent Parent window for the modal dialog box.
  * @return 0 on success; non-zero on error.
  */
@@ -143,12 +143,48 @@ int EmuManager::openRom(QWidget *parent)
 	if (filename.isEmpty())
 		return 1;
 	
+	// Open the selected ROM file.
+	return openRom(filename);
+}
+
+
+/**
+ * openRom(): Open a ROM file.
+ * Opens a ROM file using the given filename.
+ * @param filename Filename of the ROM file to open.
+ * TODO: Add parameter for z_filename.
+ * @return 0 on success; non-zero on error.
+ */
+int EmuManager::openRom(const QString& filename)
+{
 	if (gqt4_emuThread || m_rom)
 	{
 		// Close the ROM first.
 		closeRom();
+		
+		// HACK: Set a QTimer for 100 ms to actually load the ROM to make sure
+		// the emulation thread is shut down properly.
+		// If we don't do that, then loading savestates causes
+		// video corruption due to a timing mismatch.
+		// TODO: Figure out how to fix this.
+		// TODO: Proper return code.
+		openRom_int_tmr_filename = filename;
+		QTimer::singleShot(100, this, SLOT(sl_openRom_int()));
+		return 0;
 	}
 	
+	// ROM isn't running. Open the ROM directly.
+	return openRom_int(filename);
+}
+
+
+/**
+ * openRom_int(): Open a ROM file. (Internal function.)
+ * @param filename Filename of the ROM file to open.
+ * @return 0 on success; non-zero on error.
+ */
+int EmuManager::openRom_int(const QString& filename)
+{
 	// Open the file using the LibGens::Rom class.
 	// TODO: This won't work for KIO...
 	m_rom = new LibGens::Rom(filename.toUtf8().constData());
@@ -248,9 +284,7 @@ int EmuManager::closeRom(void)
 {
 	if (gqt4_emuThread)
 	{
-		// Stop the emulation thread.
-		gqt4_emuThread->stop();
-		gqt4_emuThread->wait();
+		// Stop and delete the emulation thread.
 		delete gqt4_emuThread;
 		gqt4_emuThread = NULL;
 	}
