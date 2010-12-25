@@ -175,14 +175,30 @@ int ZomgLoad(const utf8_str *filename)
 	
 	// Load the MD /TIME registers.
 	Zomg_MD_TimeReg_t md_time_reg_save;
-	zomg.loadMD_TimeReg(&md_time_reg_save);
+	int ret = zomg.loadMD_TimeReg(&md_time_reg_save);
 	
-	// TODO: Force SRAM on if the ROM is small enough.
 	if (!M68K_Mem::m_EEPRom.isEEPRomTypeSet())
 	{
 		// EEPRom is disabled. Use SRam.
 		// Load SRam control registers from the /TIME register bank.
-		M68K_Mem::m_SRam.writeCtrl(md_time_reg_save.SRAM_ctrl);
+		if (ret <= 0xF1)
+		{
+			// SRAM control register wasn't present.
+			// If the ROM is less than 2 MB, force SRAM access on, write-enabled.
+			// Otherwise, set SRAM off, write-protected.
+			// TODO: Save a flag somewhere to indicate that this should be set
+			// instead of checking M68K_Mem::Rom_Size.
+			if (M68K_Mem::Rom_Size < 0x200000)
+				M68K_Mem::m_SRam.writeCtrl(1);
+			else
+				M68K_Mem::m_SRam.writeCtrl(2);
+		}
+		else
+		{
+			// SRAM control register was present.
+			// Write the value from the savestate.
+			M68K_Mem::m_SRam.writeCtrl(md_time_reg_save.SRAM_ctrl);
+		}
 	}
 	
 	// Load SSF2 bank registers.
