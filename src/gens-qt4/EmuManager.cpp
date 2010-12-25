@@ -284,6 +284,9 @@ int EmuManager::closeRom(void)
 {
 	if (gqt4_emuThread)
 	{
+		// Disconnect the emuThread's signals.
+		gqt4_emuThread->disconnect();
+		
 		// Stop and delete the emulation thread.
 		delete gqt4_emuThread;
 		gqt4_emuThread = NULL;
