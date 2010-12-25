@@ -85,12 +85,6 @@
 
 // Actual MSG_LOG() code is below.
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <stdio.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
