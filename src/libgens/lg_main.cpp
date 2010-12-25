@@ -62,6 +62,16 @@ namespace LibGens
 
 static bool ms_IsInit = false;
 
+// libgens version. (TODO: Use MDP version macros.)
+const unsigned int version = 0x00000000U;
+const char *version_desc = "Development Build";
+
+// Version Control System revision. (May be NULL.)
+#ifdef GENS_GIT_VERSION
+const char *version_vcs = GENS_GIT_VERSION;
+#else
+const char *version_vcs = NULL;
+#endif
 
 /**
  * IsRunning(): Determines if LibGens is running.
@@ -88,9 +98,11 @@ int Init(void)
 #if !defined(GENS_ENABLE_EMULATION)
 	fprintf(stderr, "[NO-EMULATION BUILD; CPU emulation disabled.]\n");
 #endif
-#if defined(GENS_GIT_VERSION)
-	fprintf(stderr, "(" GENS_GIT_VERSION ")\n");
-#endif
+	
+	// VCS version.
+	if (version_vcs)
+		fprintf(stderr, "(%s)\n", version_vcs);
+	
 	fprintf(stderr, "\n"
 		"Copyright (c) 1999-2002 by Stéphane Dallongeville.\n"
 		"Copyright (c) 2003-2004 by Stéphane Akhoun.\n"
