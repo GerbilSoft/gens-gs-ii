@@ -24,7 +24,7 @@
 #include <config.h>
 
 #include "AboutWindow.hpp"
-#include "libgens/macros/git.h"
+#include "libgens/lg_main.hpp"
 #include "libgens/Util/cpuflags.h"
 #include "libgens/Util/Timing.hpp"
 #include "libgens/credits.h"
@@ -76,10 +76,11 @@ AboutWindow::AboutWindow(QWidget *parent)
 	sPrgTitle += "<b>" + TR("NO-EMULATION BUILD") + "</b><br />\n";
 #endif
 	
-#ifdef GENS_GIT_VERSION
-	// Append the git version to the title text.
-	sPrgTitle += QString(GENS_GIT_VERSION) + "<br />\n";
-#endif
+	if (LibGens::version_vcs != NULL)
+	{
+		// Append the VCS revision to the title text.
+		sPrgTitle += QString(LibGens::version_vcs) + "<br />\n";
+	}
 	
 	sPrgTitle += "<br />\n" +
 		TR("Sega Genesis / Mega Drive,") + "<br />\n" +

@@ -29,8 +29,8 @@
 #include <unistd.h>
 
 // LibGens includes.
+#include "libgens/lg_main.hpp"
 #include "libgens/macros/log_msg.h"
-#include "libgens/macros/git.h"
 #include "libgens/Util/siginfo.h"
 
 // Qt includes.
@@ -334,12 +334,23 @@ void SigHandler::SignalHandler(int signum)
 	
 	sMsg += "\n"
 		"Build Information:\n"
-		"- Platform: " GENS_PLATFORM "\n"
-		"- Version: 0.0.0 (Development Build)\n"	/* TODO: Add some #define for this! */
-#ifdef GENS_GIT_VERSION
-		"- " GENS_GIT_VERSION "\n"
-#endif
-		"\n"
+		"- Platform: " GENS_PLATFORM "\n";
+	
+	// TODO: Use MDP version number macros.
+	sMsg += "- Version: "
+		+ QString::number((LibGens::version >> 24) & 0xFF) + "."
+		+ QString::number((LibGens::version >> 16) & 0xFF) + "."
+		+ QString::number(LibGens::version & 0xFFFF);
+	
+	if (LibGens::version_desc)
+		sMsg += QString(" (") + LibGens::version_desc + ")";
+	sMsg += "\n";
+	
+	// VCS revision.
+	if (LibGens::version_vcs)
+		sMsg += QString("- ") + LibGens::version_vcs + "\n";
+	
+	sMsg += "\n"
 		"Please report this error to GerbilSoft.\n"
 		"- E-mail: gerbilsoft@verizon.net\n\n"
 		"Be sure to include detailed information about what you were "

@@ -33,7 +33,6 @@
 // LibGens.
 #include "libgens/lg_main.hpp"
 #include "libgens/MD/EmuMD.hpp"
-#include "libgens/macros/git.h"
 #include "libgens/macros/log_msg.h"
 #include "libgens/Util/Timing.hpp"
 
