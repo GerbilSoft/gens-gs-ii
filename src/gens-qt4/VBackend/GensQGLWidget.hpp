@@ -68,6 +68,13 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		 * @param img Image to show.
 		 */
 		void osd_show_preview(int duration, const QImage& img);
+		
+		/**
+		 * sizeHint(): Qt size hint.
+		 * TODO: Return something other than 320x240 depending on renderer?
+		 * @return Preferred widget size.
+		 */
+		QSize sizeHint(void) const { return QSize(320, 240); }
 	
 	protected:
 		void reallocTexture(void);
