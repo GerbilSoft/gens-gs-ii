@@ -65,6 +65,10 @@ namespace LibGens
  */
 int ZomgLoad(const utf8_str *filename)
 {
+	// Make sure this is a ZOMG file.
+	if (!LibZomg::Zomg::DetectFormat(filename))
+		return -2;
+	
 	LibZomg::Zomg zomg(filename, LibZomg::Zomg::ZOMG_LOAD);
 	if (!zomg.isOpen())
 		return -1;
