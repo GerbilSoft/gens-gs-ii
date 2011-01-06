@@ -46,6 +46,13 @@ class Zomg : public ZomgBase
 		void close(void);
 		
 		/**
+		 * DetectFormat(): Detect if a savestate is supported by this class.
+		 * @param filename Savestate filename.
+		 * @return True if the savestate is supported; false if not.
+		 */
+		static bool DetectFormat(const utf8_str *filename);
+		
+		/**
 		 * Load savestate functions.
 		 * @param siz Number of bytes to read.
 		 * @return Bytes read on success; negative on error.

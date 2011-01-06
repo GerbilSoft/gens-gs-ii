@@ -121,6 +121,38 @@ void Zomg::close(void)
 
 
 /**
+ * DetectFormat(): Detect if a savestate is supported by this class.
+ * @param filename Savestate filename.
+ * @return True if the savestate is supported; false if not.
+ */
+bool Zomg::DetectFormat(const utf8_str *filename)
+{
+	// TODO: This only checks if the file is a ZIP file.
+	// Check FORMAT.INI once it's implemented.
+	static const uint8_t zip_magic[] = {'P', 'K', 0x03, 0x04};
+	
+	// TODO: Win32 Unicode translation.
+	FILE *f = fopen(filename, "rb");
+	if (!f)
+		return false;
+	
+	// Read the "magic number".
+	uint8_t header[sizeof(zip_magic)];
+	size_t ret = fread(&header, 1, sizeof(header), f);
+	fclose(f);
+	
+	if (ret < sizeof(header))
+	{
+		// Error reading the "magic number".
+		return false;
+	}
+	
+	// Check the "magic number" and return true if it matches.
+	return (!memcmp(header, zip_magic, sizeof(header)));
+}
+
+
+/**
  * initZomgLoad(): Initialize the Zomg class for loading a Zomg.
  * @param filename Zomg file to load.
  * @return 0 on success; non-zero on error.
