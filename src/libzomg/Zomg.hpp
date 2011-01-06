@@ -27,43 +27,20 @@
 #ifndef __LIBZOMG_ZOMG_HPP__
 #define __LIBZOMG_ZOMG_HPP__
 
+#include "ZomgBase.hpp"
+
 // MiniZip
 #include "../extlib/minizip/zip.h"
 #include "../extlib/minizip/unzip.h"
 
-// C includes.
-#include <stdint.h>
-
-// C++ includes.
-#include <string>
-
-// utf8_str
-#include "../libgens/macros/common.h"
-
-// ZOMG save structs.
-#include "zomg_vdp.h"
-#include "zomg_psg.h"
-#include "zomg_ym2612.h"
-#include "zomg_m68k.h"
-#include "zomg_z80.h"
-#include "zomg_md_io.h"
-#include "zomg_md_z80_ctrl.h"
-#include "zomg_md_time_reg.h"
-
 namespace LibZomg
 {
 
-class Zomg
+class Zomg : public ZomgBase
 {
 	public:
-		enum ZomgFileMode
-		{
-			ZOMG_CLOSED,
-			ZOMG_LOAD,
-			ZOMG_SAVE
-		};
 		Zomg(const utf8_str *filename, ZomgFileMode mode);
-		~Zomg();
+		virtual ~Zomg(void);
 		
 		inline bool isOpen(void) const { return (m_mode != ZOMG_CLOSED); }
 		void close(void);
@@ -77,12 +54,6 @@ class Zomg
 		
 		// TODO: Determine siz and is16bit from the system type?
 		// (once FORMAT.ini is implemented)
-		
-		/**
-		 * getPreviewSize(): Get the size of the preview image.
-		 * @return Size of the preview image, or 0 if none was found.
-		 */
-		inline size_t getPreviewSize(void) const { return m_preview_size; }
 		
 		/**
 		 * loadPreview(): Load the preview image.
@@ -163,8 +134,6 @@ class Zomg
 		int saveSRam(const uint8_t *sram, size_t siz);
 	
 	protected:
-		std::string m_filename;
-		ZomgFileMode m_mode;
 		unzFile m_unz;
 		zipFile m_zip;
 		
@@ -177,9 +146,6 @@ class Zomg
 		
 		int loadFromZomg(const utf8_str *filename, void *buf, int len);
 		int saveToZomg(const utf8_str *filename, const void *buf, int len);
-		
-		// PNG preview image.
-		size_t m_preview_size;
 };
 
 }

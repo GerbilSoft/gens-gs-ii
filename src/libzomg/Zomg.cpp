@@ -49,15 +49,13 @@ namespace LibZomg
 /**
  * Zomg(): Open a ZOMG savestate file.
  * @param filename ZOMG filename.
+ * @param mode File mode.
  */
 Zomg::Zomg(const utf8_str *filename, ZomgFileMode mode)
+	: ZomgBase(filename, mode)
 {
-	m_mode = ZOMG_CLOSED;
 	m_unz = NULL;
 	m_zip = NULL;
-	
-	// Assume we're not loading a preview image by default.
-	m_preview_size = 0;
 	
 	if (!filename)
 		return;
