@@ -110,7 +110,7 @@ void IoBase::update(void)
 
 /**
  * zomgSaveMD(): Save the controller port state. (MD version)
- * @param state Zomg_PsgSave_t struct to save to.
+ * @param state Zomg_MD_IoSave_int_t struct to save to.
  */
 void IoBase::zomgSaveMD(Zomg_MD_IoSave_int_t *state)
 {
