@@ -409,21 +409,48 @@ uint16_t m68k_mem[32768];	// 16-bit BE: M68K memory.
 
 This file contains the registers found in the MC68000 CPU.
 
-Note: The alternate stack pointer can be either the user stack pointer or
-the supervisor stack pointer, depending on the status register. The other
-stack pointer is stored as areg[7], so we don't have to differentiate between
-the two in the save file.
+Note: The reserved values may be used in the future, so they should
+be set to 0 for now.
 
 C equivalent for M68K_reg.bin:
 
 typedef struct _ZOMG_M68K_reg_t
+{
+	uint32_t dreg[8];	// 32-bit BE: Data registers.
+	uint32_t areg[7];	// 32-bit BE: Address registers.
+	uint32_t ssp;		// 32-bit BE: Supervisor stack pointer.
+	uint32_t usp;		// 32-bit BE: User stack pointer.
+	uint32_t pc;		// 32-bit BE: Program counter.
+	uint16_t sr;		// 16-bit BE: Status register.
+	uint16_t reserved;	// 16-bit BE: Reserved.
+	uint32_t reserved;	// 32-bit BE: Reserved.
+} ZOMG_M68K_reg_t;
+
+***WARNING***: The layout of ZOMG_M68K_reg_t has changed:
+
+- dreg/areg order now matches the MC68000 CPU.
+
+- ssp and usp are strictly defined instead of being stored as
+  areg[7] and alternate stack pointer.
+
+Previous revisions of the ZOMG specification used the following
+layout for M68K_reg.bin:
+
+typedef struct _ZOMG_M68K_reg_OLD_t
 {
 	uint32_t areg[8];	// 32-bit BE: Address registers.
 	uint32_t dreg[8];	// 32-bit BE: Data registers.
 	uint32_t pc;		// 32-bit BE: Program counter.
 	uint32_t asp;		// 32-bit BE: Alternate stack pointer.
 	uint16_t sr;		// 16-bit BE: Status register.
-} ZOMG_M68K_reg_t;
+} ZOMG_M68K_reg_OLD_t;
+
+asp is either User Stack Pointer if sr indicates supervisor mode,
+or Supervisor Stack Pointer if sr indicates user mode.
+
+To differentiate between old and new versions, check the size of the
+data from the savestate. The new version is 80 bytes, while the old
+version is 74 bytes.
 
 ----------------------------------------------------------------
 
