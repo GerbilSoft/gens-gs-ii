@@ -65,13 +65,17 @@ namespace LibGens
  */
 int ZomgLoad(const utf8_str *filename)
 {
+	// Make sure the file exists.
+	if (access(filename, F_OK))
+		return -1;
+	
 	// Make sure this is a ZOMG file.
 	if (!LibZomg::Zomg::DetectFormat(filename))
 		return -2;
 	
 	LibZomg::Zomg zomg(filename, LibZomg::Zomg::ZOMG_LOAD);
 	if (!zomg.isOpen())
-		return -1;
+		return -3;
 	
 	// TODO: This is MD only!
 	// TODO: Check error codes from the ZOMG functions.
