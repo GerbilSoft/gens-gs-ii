@@ -311,17 +311,80 @@ int Zomg::loadM68KMem(uint16_t *mem, size_t siz, bool byteswap)
  */
 int Zomg::loadM68KReg(Zomg_M68KRegSave_t *state)
 {
-	int ret = loadFromZomg("MD/M68K_reg.bin", state, sizeof(*state));
+	uint8_t data[sizeof(Zomg_M68KRegSave_t)];
+	int ret = loadFromZomg("MD/M68K_reg.bin", &data, sizeof(data));
 	
-	// Byteswap the 16-bit and 32-bit fields.
-	for (unsigned int i = 0; i < 8; i++)
+	if (ret == sizeof(Zomg_M68KRegSave_Old_t))
 	{
-		state->areg[i] = be32_to_cpu(state->areg[i]);
-		state->dreg[i] = be32_to_cpu(state->dreg[i]);
+		// OLD VERSION. (pre-c43510fe)
+		// DEPRECATED: Remove this once ZOMG is completed.
+		fprintf(stderr, "Zomg::loadM68KReg(): %s: WARNING: Deprecated (pre-c43510fe) 74-byte MD/M68K_reg.bin found.\n",
+			m_filename.c_str());
+		Zomg_M68KRegSave_Old_t old_state;
+		memcpy(&old_state, &data, sizeof(old_state));
+		
+		// Byteswap the 32-bit fields.
+		for (int i = 0; i < 8; i++)
+			state->dreg[i] = be32_to_cpu(old_state.dreg[i]);
+		for (int i = 0; i < 7; i++)
+			state->areg[i] = be32_to_cpu(old_state.areg[i]);
+		
+		// Byteswap the program counter.
+		state->pc = be32_to_cpu(old_state.pc);
+		
+		// Byteswap the status register.
+		state->sr = be16_to_cpu(old_state.sr);
+		
+		// Byteswap the stack pointers.
+		if (state->sr & 0x2000)
+		{
+			// Supervisor mode.
+			// old_state->areg[7] == ssp
+			// old_state->asp     == usp
+			state->ssp = be32_to_cpu(old_state.areg[7]);
+			state->usp = be32_to_cpu(old_state.asp);
+		}
+		else
+		{
+			// User mode.
+			// old_state->areg[7] == usp
+			// old_state->asp     == ssp
+			state->ssp = be32_to_cpu(old_state.asp);
+			state->usp = be32_to_cpu(old_state.areg[7]);
+		}
 	}
-	state->asp = be32_to_cpu(state->asp);
-	state->pc  = be32_to_cpu(state->pc);
-	state->sr  = be16_to_cpu(state->sr);
+	else if (ret >= sizeof(Zomg_M68KRegSave_t))
+	{
+		// New version. (c43510fe or later)
+		memcpy(state, &data, sizeof(*state));
+		
+#if ZOMG_BYTEORDER == ZOMG_LIL_ENDIAN
+		// Byteswapping is required.
+		
+		// Byteswap the main registers.
+		for (int i = 0; i < 8; i++)
+			state->dreg[i] = cpu_to_be32(state->dreg[i]);
+		for (int i = 0; i < 7; i++)
+			state->areg[i] = cpu_to_be32(state->areg[i]);
+		
+		// Byteswap the other registers.
+		state->ssp = cpu_to_be32(state->ssp);
+		state->usp = cpu_to_be32(state->usp);
+		state->pc  = cpu_to_be32(state->pc);
+		state->sr  = cpu_to_be16(state->sr);
+#endif	
+	}
+	else
+	{
+		// Invalid size.
+		fprintf(stderr, "Zomg::loadM68KReg(): %s: ERROR: Invalid MD/M68K_reg.bin found. (%d bytes)\n",
+			m_filename.c_str(), ret);
+		return -1;
+	}
+	
+	// Clear the reserved fields.
+	state->reserved1 = 0;
+	state->reserved2 = 0;
 	
 	return ret;
 }

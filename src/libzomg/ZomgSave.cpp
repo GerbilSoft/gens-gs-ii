@@ -358,20 +358,24 @@ int Zomg::saveM68KReg(const Zomg_M68KRegSave_t *state)
 	Zomg_M68KRegSave_t bswap_state;
 	memcpy(&bswap_state, state, sizeof(bswap_state));
 	
-	// Byteswap the 16-bit fields.
-	
-	// Byteswap the 16-bit and 32-bit fields.
-	for (unsigned int i = 0; i < 8; i++)
-	{
-		bswap_state.areg[i] = cpu_to_be32(bswap_state.areg[i]);
+	// Byteswap the registers.
+	for (int i = 0; i < 8; i++)
 		bswap_state.dreg[i] = cpu_to_be32(bswap_state.dreg[i]);
-	}
-	bswap_state.asp = cpu_to_be32(bswap_state.asp);
+	for (int i = 0; i < 7; i++)
+		bswap_state.areg[i] = cpu_to_be32(bswap_state.areg[i]);
+	
+	bswap_state.ssp = cpu_to_be32(bswap_state.ssp);
+	bswap_state.usp = cpu_to_be32(bswap_state.usp);
 	bswap_state.pc  = cpu_to_be32(bswap_state.pc);
 	bswap_state.sr  = cpu_to_be16(bswap_state.sr);
 	
+	// Clear the reserved fields.
+	bswap_state.reserved1 = 0;
+	bswap_state.reserved2 = 0;
+	
 	return saveToZomg("MD/M68K_reg.bin", &bswap_state, sizeof(bswap_state));
 #else
+	// TODO: Make sure the reserved fields are cleared.
 	return saveToZomg("MD/M68K_reg.bin", state, sizeof(*state));
 #endif
 }
