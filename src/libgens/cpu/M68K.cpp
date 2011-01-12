@@ -265,14 +265,38 @@ void M68K::ZomgSaveReg(Zomg_M68KRegSave_t *state)
 #ifdef GENS_ENABLE_EMULATION
 	struct S68000CONTEXT m68k_context;
 	main68k_GetContext(&m68k_context);
+	
+	// Save the main registers.
 	for (int i = 0; i < 8; i++)
-	{
-		state->areg[i] = m68k_context.areg[i];
 		state->dreg[i] = m68k_context.dreg[i];
+	for (int i = 0; i < 7; i++)
+		state->areg[i] = m68k_context.areg[i];
+	
+	// Save the stack pointers.
+	if (m68k_context.sr & 0x2000)
+	{
+		// Supervisor mode.
+		// m68k_context.areg[7] == ssp
+		// m68k_context.asp     == usp
+		state->ssp = m68k_context.areg[7];
+		state->usp = m68k_context.asp;
 	}
-	state->asp = m68k_context.asp;
+	else
+	{
+		// User mode.
+		// m68k_context.areg[7] == usp
+		// m68k_context.asp     == ssp
+		state->ssp = m68k_context.asp;
+		state->usp = m68k_context.areg[7];
+	}
+	
+	// Other registers.
 	state->pc = m68k_context.pc;
 	state->sr = m68k_context.sr;
+	
+	// Reserved fields.
+	state->reserved1 = 0;
+	state->reserved2 = 0;
 #else
 	memset(state, 0x00, sizeof(*state));
 #endif /* GENS_ENABLE_EMULATION */
@@ -287,14 +311,35 @@ void M68K::ZomgRestoreReg(const Zomg_M68KRegSave_t *state)
 {
 #ifdef GENS_ENABLE_EMULATION
 	main68k_GetContext(&ms_Context);
+	
+	// Load the main registers.
 	for (int i = 0; i < 8; i++)
-	{
-		ms_Context.areg[i] = state->areg[i];
 		ms_Context.dreg[i] = state->dreg[i];
+	for (int i = 0; i < 7; i++)
+		ms_Context.areg[i] = state->areg[i];
+	
+	// Save the stack pointers.
+	if (ms_Context.sr & 0x2000)
+	{
+		// Supervisor mode.
+		// ms_Context.areg[7] == ssp
+		// ms_Context.asp     == usp
+		ms_Context.areg[7] = state->ssp;
+		ms_Context.asp     = state->usp;
 	}
-	ms_Context.asp = state->asp;
+	else
+	{
+		// User mode.
+		// ms_Context.areg[7] == usp
+		// ms_Context.asp     == ssp
+		ms_Context.asp     = state->ssp;
+		ms_Context.areg[7] = state->usp;
+	}
+	
+	// Other registers.
 	ms_Context.pc = state->pc;
 	ms_Context.sr = state->sr;
+	
 	main68k_SetContext(&ms_Context);
 #endif /* GENS_ENABLE_EMULATION */
 }
