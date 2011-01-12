@@ -318,7 +318,7 @@ void M68K::ZomgRestoreReg(const Zomg_M68KRegSave_t *state)
 	for (int i = 0; i < 7; i++)
 		ms_Context.areg[i] = state->areg[i];
 	
-	// Save the stack pointers.
+	// Load the stack pointers.
 	if (ms_Context.sr & 0x2000)
 	{
 		// Supervisor mode.
