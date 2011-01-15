@@ -361,7 +361,7 @@ uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 		uint16_t vdp_status = VdpIo::Read_Status();
 		if (!(address & 0x01))
 		{
-			// 0xC00004. Return the high byte.
+			// 0xC00004/0xC00006. Return the high byte.
 			return ((vdp_status >> 8) & 0xFF);
 		}
 		else //if (address & 0x01)
