@@ -359,14 +359,14 @@ uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 	{
 		// 0xC00004 - 0xC00007: VDP Control Port.
 		uint16_t vdp_status = VdpIo::Read_Status();
-		if (address & 0x01)
+		if (!(address & 0x01))
 		{
-			// Odd address; return the high byte.
+			// 0xC00004. Return the high byte.
 			return ((vdp_status >> 8) & 0xFF);
 		}
-		else
+		else //if (address & 0x01)
 		{
-			// Even address; return the low byte.
+			// 0xC00005/0xC00007. Return the low byte.
 			return (vdp_status & 0xFF);
 		}
 	}
