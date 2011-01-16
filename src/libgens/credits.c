@@ -23,53 +23,95 @@
 
 #include "credits.h"
 
-const utf8_str *GensGS_credits =
+// C includes.
+#include <string.h>
+
+const GensGS_credits_t GensGS_credits[] =
 {
-	"Main programmer: David Korth\n"
-	"\n"
-	"Original Gens programmer: Stéphane Dallongeville\n"
-	"Gens/BeOS port: Caz\n"
-	"Gens/Linux port: Stéphane Akhoun\n"
-	"\n"
-	"Gens/Linux contributors:\n"
-	"Lester Barrows (aryarya)\n"
-	"El Pelos (wah wah 69)\n"
-	"\n"
-	"Gens/GS contributors: (alphabetical order)\n"
-	"AamirM: Software testing, MD emulation assistance\n"
-	"Baffo32: Software testing\n"
-	"Biafra Republic: Software testing\n"
-	"Chilly Willy: 32X PWM improvements\n"
-	"Corner-Face-Jacks: Software testing\n"
-	"CyberKitsune: Software testing\n"
-	"Damizean: GLSL assistance\n"
-	"Delta: Software testing\n"
-	"djohe: Software testing\n"
-	"Glitch: Software testing\n"
-	"Jorge: Provided test ROMs, MD emulation assistance\n"
-	"Joseph Fenton: Added SH2 DMA support for PWM audio\n"
-	"Marc Gordon (Cinossu): Provided the Gens/GS icon\n"
-	"Maximal|Firestorm: Provided icon for Game Genie\n"
-	"mister_k81: Software testing\n"
-	"NeKit: Software testing\n"
-	"Nicolas Bondoux: Software testing\n"
-	"nineko: Game Gear PSG stereo assistance\n"
-	"Pietro Gagliardi (andlabs): Mac OS X testing\n"
-	"Phil Costin: Haiku port (in progress)\n"
-	"Puto: Mac OS X testing\n"
-	"segaloco: Software testing\n"
-	"sonicblur: Mac OS X testing\n"
-	"tetsuo: Software testing\n"
-	"theocas: Provided controller icons\n"
-	"Scarred Sun: Software testing\n"
-	"SOTI: Software testing\n"
-	"Sik: Provided test ROMs; also icon for SGens\n"
-	"SkyLights: Provided icon for VDP Layer Options\n"
-	"SonicAD: Software testing\n"
-	"superGear: Software testing\n"
-	"Tets: Software testing\n"
-	"TiZ: Software testing\n"
-	"TmEE: MD hardware testing, emulation assistance\n"
-	"ValleyBell: VGM logging code\n"
-	"Zombie Ryushu: Software testing; WahCade integration"
+	{"Main Programmer",		"David Korth"},
+	{"-", NULL},
+	
+	{"Original Gens Programmer",	"Stéphane Dallongeville"},
+	{"Gens/BeOS Port",		"Caz"},
+	{"Gens/Linux Port",		"Stéphane Akhoun"},
+	{"-", NULL},
+	
+	{"Gens/Linux Contributors",	"Lester Barrows (aryarya)"},
+	{NULL,				"El Pelos (wah wah 69)"},
+	{"-", NULL},
+	
+	{"Gens/GS Contributors",	NULL},
+	{"-", NULL},
+	
+	{"Software Testing",		"AamirM"},
+	{NULL,				"Baffo32"},
+	{NULL,				"Biafra Republic"},
+	{NULL,				"Corner-Face-Jacks"},
+	{NULL,				"CyberKitsnue"},
+	{NULL,				"Delta"},
+	{NULL,				"djohe"},
+	{NULL,				"Glitch"},
+	{NULL,				"mister_k81"},
+	{NULL,				"NeKit"},
+	{NULL,				"Nicolas Bondoux"},
+	{NULL,				"segaloco"},
+	{NULL,				"tetsuo"},
+	{NULL,				"SOTI"},
+	{NULL,				"SonicAD"},
+	{NULL,				"superGear"},
+	{NULL,				"Tets"},
+	{NULL,				"TiZ"},
+	{NULL,				"Zombie Ryushu"},
+	{"-", NULL},
+	
+	{"Mac OS X Testing",		"Pietro Gagliardi (andlabs)"},
+	{NULL,				"Puto"},
+	{NULL,				"sonicblur"},
+	{"-", NULL},
+	
+	{"MD Emulation Assistance",	"AamirM"},
+	{NULL,				"Jorge"},
+	{NULL,				"TmEE"},
+	{"-", NULL},
+	
+	{"Test ROMs",			"Jorge"},
+	{NULL,				"Sik"},
+	{"-", NULL},
+	
+	{"32X PWM Improvements",	"Chilly Willy"},
+	{NULL,				"Joseph Fenton"},
+	{"-", NULL},
+	
+	{"GLSL Assistance",		"Damizean"},
+	{"-", NULL},
+	
+	{"Gens/GS Application Icon",	"Marc Gordon (Cinossu)"},
+	{"-", NULL},
+	
+	{"Game Genie Icon",		"Maximal|Firestorm"},
+	{"-", NULL},
+	
+	{"SGens Icon",			"Sik"},
+	{"-", NULL},
+	
+	{"VDP Layer Options Icon",	"SkyLights"},
+	{"-", NULL},
+	
+	{"Game Gear PSG Stereo Info",	"nineko"},
+	{"-", NULL},
+	
+	{"Haiku Port (in progress)",	"Phil Costin"},
+	{"-", NULL},
+	
+	{"Controller Icons",		"theocas"},
+	{"-", NULL},
+	
+	{"WahCade Integration",		"Zombie Ryushu"},
+	{"-", NULL},
+	
+	{"VGM Logging Code",		"ValleyBell"},
+	{"-", NULL},
+	
+	{"Credits ROM",			"Sik"},
+	{NULL, NULL}
 };

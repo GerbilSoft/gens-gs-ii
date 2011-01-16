@@ -30,7 +30,13 @@
 extern "C" {
 #endif
 
-extern const utf8_str *GensGS_credits;
+typedef struct _GensGS_credits_t
+{
+	utf8_str *credit_title;
+	utf8_str *credit_name;
+} GensGS_credits_t;
+
+extern const GensGS_credits_t GensGS_credits[];
 
 #ifdef __cplusplus
 }
