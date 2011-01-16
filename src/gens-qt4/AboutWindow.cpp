@@ -32,6 +32,10 @@
 // C includes.
 #include <string.h>
 
+// C++ includes.
+#include <sstream>
+using std::stringstream;
+
 // Qt includes.
 #include <QtCore/QString>
 #include <QtGui/QScrollArea>
@@ -93,8 +97,38 @@ AboutWindow::AboutWindow(QWidget *parent)
 	// Set the debug information text.
 	lblDebugInfo->setText(AboutWindow::GetDebugInfo());
 	
+	// Build the credits text.
+	stringstream ss_credits;
+	const GensGS_credits_t *p_credits = &GensGS_credits[0];
+	for (; p_credits->credit_title || p_credits->credit_name; p_credits++)
+	{
+		if (p_credits->credit_title)
+		{
+			// Title specified.
+			if (!strncmp(p_credits->credit_title, "-", 2))
+			{
+				// Title is "-". Next line.
+				ss_credits << "<br/>\n";
+				continue;
+			}
+			else
+			{
+				// Title is not "-". Print it.
+				ss_credits << "<b>" << p_credits->credit_title << "</b><br/>\n";
+			}
+		}
+		
+		if (p_credits->credit_name)
+		{
+			// Name specified.
+			ss_credits << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+				   << p_credits->credit_name << "<br/>\n";
+		}
+	}
+	
 	// Set the credits text.
-	lblCredits->setText(QString::fromUtf8(GensGS_credits));
+	lblCredits->setText(QString::fromUtf8(ss_credits.str().c_str()));
+	lblCredits->setTextFormat(Qt::RichText);
 	
 	// Create the scroll areas.
 	// Qt Designer's QScrollArea implementation is horribly broken.
