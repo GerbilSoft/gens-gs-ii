@@ -309,17 +309,14 @@ void GensQGLWidget::resizeGL(int width, int height)
 		if ((width * 3) > (height * 4))
 		{
 			// Image is wider than 4:3.
-			glOrtho(-((double)(width * 3) / (double)(height * 4)),
-				 ((double)(width * 3) / (double)(height * 4)),
-				-1, 1, -1, 1);
+			const double ratio = ((double)(width * 3) / (double)(height * 4));
+			glOrtho(-ratio, ratio, -1, 1, -1, 1);
 		}
 		else if ((width * 3) < (height * 4))
 		{
 			// Image is taller than 4:3.
-			glOrtho(-1, 1,
-				-((double)(height * 4) / (double)(width * 3)),
-				 ((double)(height * 4) / (double)(width * 3)),
-				-1, 1);
+			const double ratio = ((double)(height * 4) / (double)(width * 3));
+			glOrtho(-1, 1, -ratio, ratio, -1, 1);
 		}
 		else
 		{
