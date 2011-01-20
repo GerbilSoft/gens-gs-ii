@@ -648,7 +648,48 @@ void GensQGLWidget::printOsdLine(int x, int y, const QString &msg)
 		{
 			// Unicode characters over U+00FF are not supported right now.
 			// TODO: Replacement character.
-			continue;
+			
+			// cp437 control characters (0x00-0x20) are now supported.
+			// Check if this is a control character.
+			// TODO: Optimize this!
+			switch (chr)
+			{
+				case 0x263A:	chr = 0x01; break;
+				case 0x263B:	chr = 0x02; break;
+				case 0x2665:	chr = 0x03; break;
+				case 0x2666:	chr = 0x04; break;
+				case 0x2663:	chr = 0x05; break;
+				case 0x2660:	chr = 0x06; break;
+				case 0x2022:	chr = 0x07; break;
+				case 0x2508:	chr = 0x08; break;
+				case 0x25CB:	chr = 0x09; break;
+				case 0x25D9:	chr = 0x0A; break;
+				case 0x2642:	chr = 0x0B; break;
+				case 0x2640:	chr = 0x0C; break;
+				case 0x266A:	chr = 0x0D; break;
+				case 0x266B:	chr = 0x0E; break;
+				case 0x263C:	chr = 0x0F; break;
+				case 0x25BA:	chr = 0x10; break;
+				case 0x25C4:	chr = 0x11; break;
+				case 0x2195:	chr = 0x12; break;
+				case 0x203C:	chr = 0x13; break;
+				//case 0x00B6:	chr = 0x14; break;	// This is part of cp1252...
+				//case 0x00A7:	chr = 0x15; break;	// This is part of cp1252...
+				case 0x25AC:	chr = 0x16; break;
+				case 0x21A8:	chr = 0x17; break;
+				case 0x2191:	chr = 0x18; break;
+				case 0x2193:	chr = 0x19; break;
+				case 0x2192:	chr = 0x1A; break;
+				case 0x2190:	chr = 0x1B; break;
+				case 0x221F:	chr = 0x1C; break;
+				case 0x2194:	chr = 0x1D; break;
+				case 0x2582:	chr = 0x1E; break;
+				case 0x25BC:	chr = 0x1F; break;
+				default:	chr = 0; break;
+			}
+			
+			if (chr == 0)
+				continue;
 		}
 		
 		// Calculate the texture coordinates.
