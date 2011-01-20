@@ -582,7 +582,6 @@ void GensQGLWidget::printOsdText(void)
 	
 	// NOTE: QList internally uses an array of pointers.
 	// We can use array indexing instead of iterators.
-	// TODO: Use GL display lists for onscreen messages?
 	for (int i = (m_osdList.size() - 1); i >= 0; i--)
 	{
 		if (curTime >= m_osdList[i].endTime)
@@ -637,7 +636,6 @@ void GensQGLWidget::printOsdLine(int x, int y, const QString &msg)
 {
 	// TODO: Font information.
 	// TODO: Wordwrapping.
-	// TODO: Display lists?
 	const int chrW = 8;
 	const int chrH = 16;
 	
