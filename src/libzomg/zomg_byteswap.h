@@ -48,8 +48,8 @@
 
 #define __swab32(x) \
 	(((x) << 24) | ((x) >> 24) | \
-		((x & 0x0000FF00UL) << 8) | \
-		((x & 0x00FF0000UL) >> 8))
+		(((x) & 0x0000FF00UL) << 8) | \
+		(((x) & 0x00FF0000UL) >> 8))
 
 #if ZOMG_BYTEORDER == ZOMG_LIL_ENDIAN
 	#define be16_to_cpu_array(ptr, n)	__zomg_byte_swap_16_array((ptr), (n));

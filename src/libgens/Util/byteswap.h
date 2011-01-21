@@ -48,8 +48,8 @@
 
 #define __swab32(x) \
 	(((x) << 24) | ((x) >> 24) | \
-		((x & 0x0000FF00UL) << 8) | \
-		((x & 0x00FF0000UL) >> 8))
+		(((x) & 0x0000FF00UL) << 8) | \
+		(((x) & 0x00FF0000UL) >> 8))
 
 #if GENS_BYTEORDER == GENS_LIL_ENDIAN
 	#define be16_to_cpu_array(ptr, n)	__byte_swap_16_array((ptr), (n));
