@@ -39,6 +39,9 @@
 // LOG_MSG() subsystem.
 #include "macros/log_msg.h"
 
+// Byteswapping macros and functions.
+#include "Util/byteswap.h"
+
 // C++ includes.
 #include <string>
 using std::string;
@@ -272,9 +275,13 @@ int Dc7z::getFileInfo(mdp_z_entry_t **z_entry_out)
 		utf8_str *z_entry_filename = NULL;
 #if defined(HAVE_ICONV)
 		// Use iconv().
-		// TODO: Determine which byteorder 7-Zip uses on PowerPC.
+#if GENS_BYTEORDER == GENS_BIG_ENDIAN
+		z_entry_filename = gens_iconv((char*)filenameW, filenameW_len * 2,
+					      "UTF-16BE", "UTF-8");
+#else /* GENS_BYTEORDER == GENS_LIL_ENDIAN */
 		z_entry_filename = gens_iconv((char*)filenameW, filenameW_len * 2,
 					      "UTF-16LE", "UTF-8");
+#endif /* GENS_BYTEORDER */
 #elif defined(_WIN32)
 		// Win32: Use W32U_UTF16_to_mbs().
 		z_entry_filename = W32U_UTF16_to_mbs((wchar_t*)filenameW, CP_UTF8);
@@ -356,9 +363,16 @@ int Dc7z::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *r
 	// TODO: Determine which byteorder 7-Zip uses on PowerPC.
 	uint16_t *z_entry_filenameW = NULL;
 #if defined(HAVE_ICONV)
+	// Use iconv().
+#if GENS_BYTEORDER == GENS_BIG_ENDIAN
 	z_entry_filenameW = (uint16_t*)gens_iconv(z_entry->filename, strlen(z_entry->filename),
-							"UTF-8", "UTF-16LE");
+						  "UTF-8", "UTF-16BE");
+#else /* GENS_BYTEORDER == GENS_LIL_ENDIAN */
+	z_entry_filenameW = (uint16_t*)gens_iconv(z_entry->filename, strlen(z_entry->filename),
+						  "UTF-8", "UTF-16LE");
+#endif /* GENS_BYTEORDER */
 #elif defined(_WIN32)
+	// Win32: Use W32U_UTF16_to_mbs().
 	z_entry_filenameW = (uint16_t*)W32U_mbs_to_UTF16(z_entry->filename, CP_UTF8);
 	if (!z_entry_filenameW)
 	{
