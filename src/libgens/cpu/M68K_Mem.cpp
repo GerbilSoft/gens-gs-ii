@@ -43,6 +43,9 @@
 // Move Ram_68k back to M68K once Starscream is updated.
 Ram_68k_t Ram_68k;
 
+// EmuContext
+#include "../EmuContext.hpp"
+
 // C wrapper functions for Starscream.
 #ifdef __cplusplus
 extern "C" {
@@ -80,11 +83,6 @@ namespace LibGens
 //M68K_Mem::Ram_68k_t M68K_Mem::Ram_68k;	// TODO: Fix Starscream!
 M68K_Mem::Rom_Data_t M68K_Mem::Rom_Data;
 unsigned int M68K_Mem::Rom_Size;
-
-// SRam and EEPRom.
-bool M68K_Mem::SaveDataEnable = true;	// Enable SRam/EEPRom by default.
-SRam M68K_Mem::m_SRam;
-EEPRom M68K_Mem::m_EEPRom;
 
 /** Z80/M68K cycle table. **/
 int M68K_Mem::Z80_M68K_Cycle_Tab[512];
@@ -171,28 +169,32 @@ template<uint8_t bank>
 uint8_t M68K_Mem::T_M68K_Read_Byte_RomX_SRam(uint32_t address)
 {
 	// Check if this is a save data request.
-	if (SaveDataEnable)
+	if (EmuContext::GetSaveDataEnable())
 	{
 		// Mask off the high byte of the address.
 		address &= 0xFFFFFF;
 		
-		if (m_EEPRom.isEEPRomTypeSet())
+		// Temporarily needed because M68K_Mem is static.
+		EEPRom *eeprom = EmuContext::GetEEPRom();
+		SRam *sram = EmuContext::GetSRam();
+		
+		if (eeprom->isEEPRomTypeSet())
 		{
 			// EEPRom is enabled.
-			if (m_EEPRom.isReadBytePort(address))
+			if (eeprom->isReadBytePort(address))
 			{
 				// EEPRom read port.
-				return m_EEPRom.readByte(address);
+				return eeprom->readByte(address);
 			}
 		}
-		else if (m_SRam.canRead() && m_SRam.isAddressInRange(address))
+		else if (sram->canRead() && sram->isAddressInRange(address))
 		{
 			// SRam data request.
 			// Return the byte from SRam.
 			// NOTE: SRam is NOT byteswapped.
 			// TODO: Check boundaries.
 			// TODO: Should start/end addressing be handled here or in SRam?
-			return m_SRam.readByte(address);
+			return sram->readByte(address);
 		}
 	}
 	
@@ -431,28 +433,32 @@ template<uint8_t bank>
 uint16_t M68K_Mem::T_M68K_Read_Word_RomX_SRam(uint32_t address)
 {
 	// Check if this is a save data request.
-	if (SaveDataEnable)
+	if (EmuContext::GetSaveDataEnable())
 	{
 		// Mask off the high byte of the address.
 		address &= 0xFFFFFF;
 		
-		if (m_EEPRom.isEEPRomTypeSet())
+		// Temporarily needed because M68K_Mem is static.
+		EEPRom *eeprom = EmuContext::GetEEPRom();
+		SRam *sram = EmuContext::GetSRam();
+		
+		if (eeprom->isEEPRomTypeSet())
 		{
 			// EEPRom is enabled.
-			if (m_EEPRom.isReadBytePort(address))
+			if (eeprom->isReadBytePort(address))
 			{
 				// EEPRom read port.
-				return m_EEPRom.readWord(address);
+				return eeprom->readWord(address);
 			}
 		}
-		else if (m_SRam.canRead() && m_SRam.isAddressInRange(address))
+		else if (sram->canRead() && sram->isAddressInRange(address))
 		{
 			// SRam data request.
 			// Return the byte from SRam.
 			// NOTE: SRam is NOT byteswapped.
 			// TODO: Check boundaries.
 			// TODO: Should start/end addressing be handled here or in SRam?
-			return m_SRam.readWord(address);
+			return sram->readWord(address);
 		}
 	}
 	
@@ -675,23 +681,27 @@ void M68K_Mem::M68K_Write_Byte_SRam(uint32_t address, uint8_t data)
 	// Mask off the high byte of the address.
 	address &= 0xFFFFFF;
 	
-	if (!SaveDataEnable)
+	if (!EmuContext::GetSaveDataEnable())
 	{
 		// Save data is disabled.
 		return;
 	}
 	
-	if (m_EEPRom.isEEPRomTypeSet())
+	// Temporarily needed because M68K_Mem is static.
+	EEPRom *eeprom = EmuContext::GetEEPRom();
+	SRam *sram = EmuContext::GetSRam();
+	
+	if (eeprom->isEEPRomTypeSet())
 	{
 		// EEPRom is enabled.
-		if (m_EEPRom.isWriteBytePort(address))
+		if (eeprom->isWriteBytePort(address))
 		{
 			// EEPRom write port.
-			return m_EEPRom.writeByte(address, data);
+			return eeprom->writeByte(address, data);
 		
 		}
 	}
-	else if (m_SRam.canWrite() && m_SRam.isAddressInRange(address))
+	else if (sram->canWrite() && sram->isAddressInRange(address))
 	{
 		// SRam data request.
 		
@@ -699,7 +709,7 @@ void M68K_Mem::M68K_Write_Byte_SRam(uint32_t address, uint8_t data)
 		// NOTE: SRam is NOT byteswapped.
 		// TODO: Check boundaries.
 		// TODO: Should start/end addressing be handled here or in SRam?
-		m_SRam.writeByte(address, data);
+		sram->writeByte(address, data);
 	}
 }
 
@@ -831,7 +841,11 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 	else if (address == 0xA130F1)
 	{
 		// SRam control register. (0xA130F1)
-		m_SRam.writeCtrl(data);
+		
+		// Temporarily needed because M68K_Mem is static.
+		SRam *sram = EmuContext::GetSRam();
+		
+		sram->writeCtrl(data);
 		return;
 	}
 	else if (address >= 0xA130F2 && address <= 0xA130FF)
@@ -980,22 +994,26 @@ void M68K_Mem::M68K_Write_Word_SRam(uint32_t address, uint16_t data)
 	// Mask off the high byte of the address.
 	address &= 0xFFFFFF;
 	
-	if (!SaveDataEnable)
+	if (!EmuContext::GetSaveDataEnable())
 	{
 		// Save data is disabled.
 		return;
 	}
 	
-	if (m_EEPRom.isEEPRomTypeSet())
+	// Temporarily needed because M68K_Mem is static.
+	EEPRom *eeprom = EmuContext::GetEEPRom();
+	SRam *sram = EmuContext::GetSRam();
+	
+	if (eeprom->isEEPRomTypeSet())
 	{
 		// EEPRom is enabled.
-		if (m_EEPRom.isWriteWordPort(address))
+		if (eeprom->isWriteWordPort(address))
 		{
 			// EEPRom write port.
-			return m_EEPRom.writeWord(address, data);
+			return eeprom->writeWord(address, data);
 		}
 	}
-	else if (m_SRam.canWrite() && m_SRam.isAddressInRange(address))
+	else if (sram->canWrite() && sram->isAddressInRange(address))
 	{
 		// SRam data request.
 		
@@ -1003,7 +1021,7 @@ void M68K_Mem::M68K_Write_Word_SRam(uint32_t address, uint16_t data)
 		// NOTE: SRam is NOT byteswapped.
 		// TODO: Check boundaries.
 		// TODO: Should start/end addressing be handled here or in SRam?
-		m_SRam.writeWord(address, data);
+		sram->writeWord(address, data);
 	}
 }
 
@@ -1145,7 +1163,11 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 	{
 		// SRam control register. (0xA130F0/0xA130F1)
 		// NOTE: NOT 0xA130F1 - this is a word write.
-		m_SRam.writeCtrl(data);
+		
+		// Temporarily needed because M68K_Mem is static.
+		SRam *sram = EmuContext::GetSRam();
+		
+		sram->writeCtrl(data);
 		return;
 	}
 	else if (address >= 0xA130F2 && address <= 0xA130FF)

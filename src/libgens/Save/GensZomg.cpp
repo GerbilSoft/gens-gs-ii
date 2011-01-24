@@ -186,10 +186,12 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 	Zomg_MD_TimeReg_t md_time_reg_save;
 	int ret = zomg.loadMD_TimeReg(&md_time_reg_save);
 	
-	if (!M68K_Mem::m_EEPRom.isEEPRomTypeSet())
+	EEPRom *eeprom = context->getEEPRom();
+	if (!eeprom->isEEPRomTypeSet())
 	{
 		// EEPRom is disabled. Use SRam.
 		// Load SRam control registers from the /TIME register bank.
+		SRam *sram = context->getSRam();
 		if (ret <= 0xF1)
 		{
 			// SRAM control register wasn't present.
@@ -198,25 +200,25 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 			// TODO: Save a flag somewhere to indicate that this should be set
 			// instead of checking M68K_Mem::Rom_Size.
 			if (M68K_Mem::Rom_Size < 0x200000)
-				M68K_Mem::m_SRam.writeCtrl(1);
+				sram->writeCtrl(1);
 			else
-				M68K_Mem::m_SRam.writeCtrl(2);
+				sram->writeCtrl(2);
 		}
 		else
 		{
 			// SRAM control register was present.
 			// Write the value from the savestate.
-			M68K_Mem::m_SRam.writeCtrl(md_time_reg_save.SRAM_ctrl);
+			sram->writeCtrl(md_time_reg_save.SRAM_ctrl);
 		}
+		
+		// Load SRAM.
+		// TODO: Make this optional.
+		sram->loadFromZomg(zomg);
 	}
 	
 	// Load SSF2 bank registers.
 	// TODO: Only if SSF2 is detected?
 	M68K_Mem::ZomgRestoreSSF2BankState(&md_time_reg_save);
-	
-	// Load SRAM.
-	// TODO: Make this optional.
-	M68K_Mem::m_SRam.loadFromZomg(zomg);
 	
 	// Close the savestate.
 	zomg.close();
@@ -341,11 +343,17 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	memset(md_time_reg_save.reg, 0xFF, sizeof(md_time_reg_save.reg));
 	
 	// SRam control registers.
-	if (!M68K_Mem::m_EEPRom.isEEPRomTypeSet())
+	const EEPRom *eeprom = context->getEEPRom();
+	if (!eeprom->isEEPRomTypeSet())
 	{
 		// EEPRom is disabled. Use SRam.
 		// Save SRam control registers to the /TIME register bank.
-		md_time_reg_save.SRAM_ctrl = M68K_Mem::m_SRam.zomgReadCtrl();
+		const SRam *sram = context->getSRam();
+		md_time_reg_save.SRAM_ctrl = sram->zomgReadCtrl();
+		
+		// Save SRAM.
+		// TODO: Make this optional.
+		sram->saveToZomg(zomg);
 	}
 	
 	// Save SSF2 bank registers.
@@ -354,10 +362,6 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	
 	// Write MD /TIME registers.
 	zomg.saveMD_TimeReg(&md_time_reg_save);
-	
-	// Save SRAM.
-	// TODO: Make this optional.
-	M68K_Mem::m_SRam.saveToZomg(zomg);
 	
 	// Close the savestate.
 	zomg.close();

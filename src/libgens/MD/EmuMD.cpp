@@ -83,28 +83,6 @@ EmuMD::EmuMD(Rom *rom)
 		return;
 	}
 	
-	// Enable SRam/EEPRom by default.
-	// TODO: Make accessor/mutator functions.
-	M68K_Mem::SaveDataEnable = true;
-	
-	// Initialize EEPRom.
-	// EEPRom is only used if the ROM is in the EEPRom class's database.
-	// Otherwise, SRam is used.
-	int eepromSize = rom->initEEPRom(&M68K_Mem::m_EEPRom);
-	if (eepromSize > 0)
-	{
-		// EEPRom was initialized.
-		lg_osd(OSD_EEPROM_LOAD, eepromSize);
-	}
-	else
-	{
-		// EEPRom was not initialized.
-		// Initialize SRam.
-		int sramSize = rom->initSRam(&M68K_Mem::m_SRam);
-		if (sramSize > 0)
-			lg_osd(OSD_SRAM_LOAD, sramSize);
-	}
-	
 	// TODO: Byteswapping flags.
 	// Until they're implemented, byteswap the ROM *after* initializing SRam/EEPRom.
 	be16_to_cpu_array(&M68K_Mem::Rom_Data.u8[0], M68K_Mem::Rom_Size);
@@ -158,73 +136,6 @@ EmuMD::EmuMD(Rom *rom)
 EmuMD::~EmuMD()
 {
 	// TODO
-}
-
-
-/**
- * saveData(): Save SRam/EEPRom.
- * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
- */
-int EmuMD::saveData(void)
-{
-	// TODO: Move SRam and EEPRom to the Rom class?
-	if (M68K_Mem::m_EEPRom.isEEPRomTypeSet())
-	{
-		// Save EEPRom.
-		int eepromSize = M68K_Mem::m_EEPRom.save();
-		if (eepromSize > 0)
-		{
-			lg_osd(OSD_EEPROM_SAVE, eepromSize);
-			return 2;
-		}
-	}
-	else
-	{
-		// Save SRam.
-		int sramSize = M68K_Mem::m_SRam.save();
-		if (sramSize > 0)
-		{
-			lg_osd(OSD_SRAM_SAVE, sramSize);
-			return 1;
-		}
-	}
-	
-	// Nothing was saved.
-	return 0;
-}
-
-
-/**
- * autoSaveData(): AutoSave SRam/EEPRom.
- * @param frames Number of frames elapsed, or -1 for paused. (force autosave)
- * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
- */
-int EmuMD::autoSaveData(int framesElapsed)
-{
-	// TODO: Move SRam and EEPRom to the Rom class?
-	if (M68K_Mem::m_EEPRom.isEEPRomTypeSet())
-	{
-		// Save EEPRom.
-		int eepromSize = M68K_Mem::m_EEPRom.autoSave(framesElapsed);
-		if (eepromSize > 0)
-		{
-			lg_osd(OSD_EEPROM_AUTOSAVE, eepromSize);
-			return 2;
-		}
-	}
-	else
-	{
-		// Save SRam.
-		int sramSize = M68K_Mem::m_SRam.autoSave(framesElapsed);
-		if (sramSize > 0)
-		{
-			lg_osd(OSD_SRAM_AUTOSAVE, sramSize);
-			return 1;
-		}
-	}
-	
-	// Nothing was saved.
-	return 0;
 }
 
 

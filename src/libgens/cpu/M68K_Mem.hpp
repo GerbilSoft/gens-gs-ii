@@ -43,8 +43,6 @@ extern Ram_68k_t Ram_68k;
 #endif
 
 #include "M68K.hpp"
-#include "../Save/SRam.hpp"
-#include "../Save/EEPRom.hpp"
 #include "../MD/SysRegion.hpp"
 
 // ZOMG TIME_reg structs.
@@ -82,20 +80,6 @@ class M68K_Mem
 		
 		// Genesis TMSS ROM.
 		static uint8_t MD_TMSS_Rom[2 * 1024];
-		
-		// SRam/EEPRom enable variables.
-		// TODO: Accessor/mutator functions.
-		static bool SaveDataEnable;
-		
-		// SRam.
-		// TODO: Make this protected!
-		// TODO: Add a function e.g. M68K_Mem::Reset() to reset all memory handling.
-		static SRam m_SRam;
-		
-		// EEPRom.
-		// TODO: Make this protected!
-		// TODO: Add a function e.g. M68K_Mem::Reset() to reset all memory handling.
-		static EEPRom m_EEPRom;
 		
 		/** Z80 state. **/
 		#define Z80_STATE_ENABLED	(1 << 0)

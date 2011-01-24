@@ -134,7 +134,7 @@ int SRam::load(void)
  * getUsedSize(): Determine how many bytes are used in the SRam chip.
  * @return Number of bytes used, rounded to the highest power of two.
  */
-int SRam::getUsedSize(void)
+int SRam::getUsedSize(void) const
 {
 	int i = (sizeof(m_sram) - 1);
 	while (i > 0 && m_sram[i] == 0xFF)
@@ -236,7 +236,7 @@ int SRam::loadFromZomg(LibZomg::Zomg &zomg)
  * @param zomg ZOMG savestate.
  * @return 0 on success; non-zero on error.
  */
-int SRam::saveToZomg(LibZomg::Zomg &zomg)
+int SRam::saveToZomg(LibZomg::Zomg &zomg) const
 {
 	// Determine how much of the SRam is currently in use.
 	int bytesUsed = getUsedSize();

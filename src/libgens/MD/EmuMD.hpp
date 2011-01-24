@@ -39,19 +39,6 @@ class EmuMD : public EmuContext
 		~EmuMD();
 		
 		/**
-		 * saveData(): Save SRam/EEPRom.
-		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
-		 */
-		int saveData(void);
-		
-		/**
-		 * autoSaveData(): AutoSave SRam/EEPRom.
-		 * @param frames Number of frames elapsed, or -1 for paused. (force autosave)
-		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
-		 */
-		int autoSaveData(int framesElapsed);
-		
-		/**
 		 * softReset(): Perform a soft reset.
 		 * @return 0 on success; non-zero on error.
 		 */

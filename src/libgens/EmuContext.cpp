@@ -28,6 +28,8 @@
 #endif
 #include <assert.h>
 
+#include "lg_osd.h"
+
 namespace LibGens
 {
 
@@ -42,13 +44,18 @@ IoBase *EmuContext::m_port1;		// Player 1.
 IoBase *EmuContext::m_port2;		// Player 2.
 IoBase *EmuContext::m_portE;		// EXT port.
 
+// Static pointer. Temporarily needed for SRam/EEPRom.
+EmuContext *EmuContext::instance = NULL;
+
 EmuContext::EmuContext(Rom *rom)
 {
 	ms_RefCount++;
 	assert(ms_RefCount == 1);
+	instance = this;
 	
 	// Initialize variables.
 	m_rom = rom;
+	m_saveDataEnable = true;	// Enabled by default. (TODO: Config setting.)
 	
 	// Create base I/O devices that do nothing.
 	// TODO: For now, we'll treat them as static.
@@ -58,12 +65,31 @@ EmuContext::EmuContext(Rom *rom)
 		m_port2 = new IoBase();
 	if (!m_portE)
 		m_portE = new IoBase();
+	
+	// Initialize EEPRom.
+	// EEPRom is only used if the ROM is in the EEPRom class's database.
+	// Otherwise, SRam is used.
+	int eepromSize = rom->initEEPRom(&m_EEPRom);
+	if (eepromSize > 0)
+	{
+		// EEPRom was initialized.
+		lg_osd(OSD_EEPROM_LOAD, eepromSize);
+	}
+	else
+	{
+		// EEPRom was not initialized.
+		// Initialize SRam.
+		int sramSize = rom->initSRam(&m_SRam);
+		if (sramSize > 0)
+			lg_osd(OSD_SRAM_LOAD, sramSize);
+	}
 }
 
 EmuContext::~EmuContext()
 {
 	ms_RefCount--;
 	assert(ms_RefCount == 0);
+	instance = NULL;
 	
 	// Delete the I/O devices.
 	// TODO: Don't do this right now.
@@ -75,6 +101,73 @@ EmuContext::~EmuContext()
 	delete m_portE;
 	m_portE = NULL;
 #endif
+}
+
+
+/**
+ * saveData(): Save SRam/EEPRom.
+ * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
+ */
+int EmuContext::saveData(void)
+{
+	// TODO: Move SRam and EEPRom to the Rom class?
+	if (m_EEPRom.isEEPRomTypeSet())
+	{
+		// Save EEPRom.
+		int eepromSize = m_EEPRom.save();
+		if (eepromSize > 0)
+		{
+			lg_osd(OSD_EEPROM_SAVE, eepromSize);
+			return 2;
+		}
+	}
+	else
+	{
+		// Save SRam.
+		int sramSize = m_SRam.save();
+		if (sramSize > 0)
+		{
+			lg_osd(OSD_SRAM_SAVE, sramSize);
+			return 1;
+		}
+	}
+	
+	// Nothing was saved.
+	return 0;
+}
+
+
+/**
+ * autoSaveData(): AutoSave SRam/EEPRom.
+ * @param frames Number of frames elapsed, or -1 for paused. (force autosave)
+ * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
+ */
+int EmuContext::autoSaveData(int framesElapsed)
+{
+	// TODO: Move SRam and EEPRom to the Rom class?
+	if (m_EEPRom.isEEPRomTypeSet())
+	{
+		// Save EEPRom.
+		int eepromSize = m_EEPRom.autoSave(framesElapsed);
+		if (eepromSize > 0)
+		{
+			lg_osd(OSD_EEPROM_AUTOSAVE, eepromSize);
+			return 2;
+		}
+	}
+	else
+	{
+		// Save SRam.
+		int sramSize = m_SRam.autoSave(framesElapsed);
+		if (sramSize > 0)
+		{
+			lg_osd(OSD_SRAM_AUTOSAVE, sramSize);
+			return 1;
+		}
+	}
+	
+	// Nothing was saved.
+	return 0;
 }
 
 }

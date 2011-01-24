@@ -102,7 +102,7 @@ class SRam
 		 * It is ONLY to be used by the ZOMG savestate function!
 		 * (Reading 0xA130F1 doesn't work on hardware.)
 		 */
-		uint8_t zomgReadCtrl(void)
+		uint8_t zomgReadCtrl(void) const
 		{
 			return (m_on | (!m_write << 2));
 		}
@@ -204,13 +204,13 @@ class SRam
 		 * getUsedSize(): Determine how many bytes are used in the SRam chip.
 		 * @return Number of bytes used, rounded to the highest power of two.
 		 */
-		int getUsedSize(void);
+		int getUsedSize(void) const;
 		
 		/** ZOMG functions. **/
 		// TODO: Do we really want to access the ZOMG file from SRam.cpp directly?
 		// The other method requires accessing m_sram from GensZomg.cpp.
 		int loadFromZomg(LibZomg::Zomg &zomg);
-		int saveToZomg(LibZomg::Zomg &zomg);
+		int saveToZomg(LibZomg::Zomg &zomg) const;
 	
 	protected:
 		uint8_t m_sram[64*1024];

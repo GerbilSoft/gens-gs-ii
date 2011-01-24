@@ -31,6 +31,10 @@
 // ROM image class.
 #include "Rom.hpp"
 
+// SRam and EEPRom.
+#include "Save/SRam.hpp"
+#include "Save/EEPRom.hpp"
+
 namespace LibGens
 {
 
@@ -44,14 +48,14 @@ class EmuContext
 		 * saveData(): Save SRam/EEPRom.
 		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
 		 */
-		virtual int saveData(void) = 0;
+		int saveData(void);
 		
 		/**
 		 * autoSaveData(): AutoSave SRam/EEPRom.
 		 * @param frames Number of frames elapsed, or -1 for paused. (force autosave)
 		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
 		 */
-		virtual int autoSaveData(int framesElapsed) = 0;
+		int autoSaveData(int framesElapsed);
 		
 		/**
 		 * softReset(): Perform a soft reset.
@@ -77,9 +81,31 @@ class EmuContext
 		static IoBase *m_port1;		// Player 1.
 		static IoBase *m_port2;		// Player 2.
 		static IoBase *m_portE;		// EXT port.
+		
+		// SRam / EEPRom access.
+		// TODO: Providing pointers like this is bad...
+		inline SRam *getSRam(void) { return &m_SRam; }
+		inline EEPRom *getEEPRom(void) { return &m_EEPRom; }
+		
+		inline const SRam *getSRam(void) const { return &m_SRam; }
+		inline const EEPRom *getEEPRom(void) const { return &m_EEPRom; }
+		
+		// Static functions. Temporarily needed for SRam/EEPRom.
+		static inline bool GetSaveDataEnable(void) { return instance->m_saveDataEnable; }
+		static inline SRam *GetSRam(void) { return instance->getSRam(); }
+		static inline EEPRom *GetEEPRom(void) { return instance->getEEPRom(); }
 	
 	protected:
 		Rom *m_rom;
+		bool m_saveDataEnable;
+		
+		// SRam and EEPRom.
+		// TODO: Add a function to reset all memory handling.
+		SRam m_SRam;
+		EEPRom m_EEPRom;
+		
+		// Static pointer. Temporarily needed for SRam/EEPRom.
+		static EmuContext *instance;
 	
 	private:
 		static int ms_RefCount;
