@@ -151,6 +151,22 @@ class EEPRom
 		static const int AUTOSAVE_THRESHOLD_DEFAULT = 1000;
 	
 	protected:
+		/**
+		 * Filename.
+		 * 
+		 * NOTE: Filename must be at the top of the protected section.
+		 * There's a bug with Mac OS X 10.5 that causes the emulator
+		 * to crash due to memory corruption if m_filename is placed
+		 * after the "EEPRom file handling functions" comment.
+		 *
+		 * Tested on:
+		 * - ppc32: powerpc-apple-darwin9-gcc-4.0.1 (GCC) 4.0.1 (Apple Inc. build 5493) [OS X 10.5.7]
+		 * - i386:  i686-apple-darwin9-gcc-4.2.1 (GCC) 4.2.1 (Apple Inc. build 5566) [andlabs] [OS X 10.5.8]
+		 */
+		static const char *ms_FileExt;
+		std::string m_filename;
+		
+		// EEPRom functions.
 		void processWriteCmd(void);
 		
 		// EEPRom. (8 KB)
@@ -223,10 +239,6 @@ class EEPRom
 		inline void clearDirty(void) { m_dirty = false; m_framesElapsed = 0; }
 		
 		/** EEPRom file handling functions. **/
-		
-		// Filename.
-		static const char *ms_FileExt;
-		std::string m_filename;
 		
 		// Find the next highest power of two. (unsigned integers)
 		// http://en.wikipedia.org/wiki/Power_of_two#Algorithm_to_find_the_next-highest_power_of_two

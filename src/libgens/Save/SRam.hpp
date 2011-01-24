@@ -213,6 +213,11 @@ class SRam
 		int saveToZomg(LibZomg::Zomg &zomg) const;
 	
 	protected:
+		// Filename.
+		static const char *ms_FileExt;
+		std::string m_filename;
+		
+		// SRam data.
 		uint8_t m_sram[64*1024];
 		bool m_on;	// Is SRam enabled?
 		bool m_write;	// Is SRam writable?
@@ -226,10 +231,6 @@ class SRam
 		
 		inline void setDirty(void) { m_dirty = true; m_framesElapsed = 0; }
 		inline void clearDirty(void) { m_dirty = false; m_framesElapsed = 0; }
-		
-		// Filename.
-		static const char *ms_FileExt;
-		std::string m_filename;
 		
 		// Find the next highest power of two. (unsigned integers)
 		// http://en.wikipedia.org/wiki/Power_of_two#Algorithm_to_find_the_next-highest_power_of_two
