@@ -77,7 +77,20 @@ char *gens_iconv(const char *src, size_t src_bytes_len,
 		if (iconv(cd, &inptr, &src_bytes_len, &outptr, &out_bytes_remaining) == (size_t)(-1))
 		{
 			// An error occurred while converting the string.
-			success = 0;
+			if (outptr == &outbuf[0])
+			{
+				// No bytes were converted.
+				success = 0;
+			}
+			else
+			{
+				// Some bytes were converted.
+				// Accept the string up to this point.
+				// Madou Monogatari I has a broken Shift-JIS sequence
+				// at position 9, which resulted in no conversion.
+				// (Reported by andlabs.)
+				success = 1;
+			}
 			break;
 		}
 	}
