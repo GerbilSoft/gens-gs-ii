@@ -58,7 +58,7 @@ class Decompressor
 {
 	public:
 		Decompressor(FILE *f, const utf8_str *filename);
-		~Decompressor();
+		virtual ~Decompressor();
 		
 		/**
 		 * DetectFormat(): Detect if the file can be handled by this decompressor.
