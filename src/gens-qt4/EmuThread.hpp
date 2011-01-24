@@ -38,6 +38,14 @@ class EmuThread : public QThread
 	public:
 		EmuThread();
 		~EmuThread();
+		
+		inline bool isStopRequested(void)
+		{
+			m_mutex.lock();
+			bool ret = m_stop;
+			m_mutex.unlock();
+			return ret;
+		}
 	
 	signals:
 		void frameDone(bool wasFastFrame);

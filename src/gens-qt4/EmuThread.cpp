@@ -38,9 +38,12 @@ EmuThread::EmuThread()
 
 EmuThread::~EmuThread()
 {
+	// NOTE: I don't think this works in the destructor...
+#if 0
 	// Stop the thread and wait for it to finish.
 	this->stop();
 	this->wait();
+#endif
 }
 
 void EmuThread::resume(bool doFastFrame)

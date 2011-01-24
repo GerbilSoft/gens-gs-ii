@@ -154,7 +154,7 @@ void QuitGens(void)
 	
 	// TODO: Stop LibGens' emulation core.
 	
-	// Stop the emulation thread.
+	// Stop and delete the emulation thread.
 	if (gqt4_emuThread)
 	{
 		gqt4_emuThread->stop();

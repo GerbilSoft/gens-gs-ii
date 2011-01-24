@@ -292,6 +292,8 @@ int EmuManager::closeRom(void)
 		gqt4_emuThread->disconnect();
 		
 		// Stop and delete the emulation thread.
+		gqt4_emuThread->stop();
+		gqt4_emuThread->wait();
 		delete gqt4_emuThread;
 		gqt4_emuThread = NULL;
 	}
@@ -703,6 +705,10 @@ void EmuManager::resetEmulator(bool hardReset)
  */
 void EmuManager::emuFrameDone(bool wasFastFrame)
 {
+	// Make sure the emulation thread is still running.
+	if (!gqt4_emuThread || gqt4_emuThread->isStopRequested())
+		return;
+	
 	if (!wasFastFrame)
 		m_frames++;
 	
