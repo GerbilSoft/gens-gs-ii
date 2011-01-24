@@ -1,5 +1,9 @@
 Description of git tags for Gens/GS II:
 
+mcd_pcm-0.1: Sega CD PCM Utility v0.1. This utility can convert Sega CD
+PCM samples to standard unsigned 8-bit WAV files with configurable
+starting position, length, and sample rate.
+
 gens-no-emulation-build: Added support for "No-Emulation" builds, i.e.
 builds of Gens/GS II without the CPU emulators. This is useful for testing
 the Gens/GS II framework on non-x86 CPUs, since the CPU emulators are still
