@@ -230,7 +230,7 @@ int Zomg::savePsgReg(const Zomg_PsgSave_t *state)
 {
 #if ZOMG_BYTEORDER == ZOMG_BIG_ENDIAN
 	Zomg_PsgSave_t bswap_state;
-	memcpy(&bswap_state, state, sizeof(bswap_state);
+	memcpy(&bswap_state, state, sizeof(bswap_state));
 	
 	// Byteswap the 16-bit fields.
 	for (unsigned int i = 0; i < 4; i++)
