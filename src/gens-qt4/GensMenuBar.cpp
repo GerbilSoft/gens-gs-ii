@@ -242,8 +242,11 @@ void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 		if (menu->type == GMI_CHECK)
 			mnuItem->setCheckable(true);
 		
+#ifndef __APPLE__
 		// Set the menu icon.
+		// (This isn't done on Mac OS X, since icons in menus look out of place there.)
 		mnuItem->setIcon(QICON_FROMTHEME(menu->icon_fdo, menu->icon_qrc));
+#endif /* __APPLE__ */
 		
 		// Set the shortcut key.
 		if (menu->key_std != MACCEL_NONE)
