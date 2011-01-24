@@ -51,53 +51,25 @@
 namespace LibGens
 {
 
-// Controllers.
-// TODO: Figure out a better place to put these!
-IoBase *EmuMD::m_port1 = NULL;	// Player 1.
-IoBase *EmuMD::m_port2 = NULL;	// Player 2.
-IoBase *EmuMD::m_portE = NULL;	// EXT port.
-
-
-/**
- * EmuMD::Init(): Initialize EmuMD.
- */
-void EmuMD::Init(void)
+EmuMD::EmuMD(Rom *rom)
+	: EmuContext(rom)
 {
-	// Create base I/O devices that do nothing.
-	m_port1 = new IoBase();
-	m_port2 = new IoBase();
-	m_portE = new IoBase();
-}
-
-
-/**
- * EmuMD::End(): Shut down EmuMD.
- */
-void EmuMD::End(void)
-{
-	delete m_port1;
-	m_port1 = NULL;
-	delete m_port2;
-	m_port2 = NULL;
-	delete m_portE;
-	m_portE = NULL;
-}
-
-
-/**
- * EmuMD::SetRom(): Set the ROM image for MD emulation.
- * NOTE: This function resets the emulated system!
- * @param rom Rom class with the ROM image.
- * @return 0 on success; non-zero on error.
- */
-int EmuMD::SetRom(Rom *rom)
-{
+	// Load the ROM image.
+	m_rom = rom;	// NOTE: This is already done in EmuContext::EmuContext()...
+	if (!m_rom)
+	{
+		// NULL specified.
+		// TODO: Set an error code.
+		return;
+	}
+	
 	// Check the ROM size.
 	if ((rom->romSize() == 0) || (rom->romSize() > sizeof(M68K_Mem::Rom_Data)))
 	{
 		// ROM is either empty or too big.
-		// TODO: Error code constants.
-		return -1;
+		// TODO: Set an error code.
+		m_rom = NULL;
+		return;
 	}
 	
 	// Load the ROM into memory.
@@ -106,8 +78,9 @@ int EmuMD::SetRom(Rom *rom)
 	if (siz_loaded != M68K_Mem::Rom_Size)
 	{
 		// Error loading the ROM.
-		// TODO: Error code constants.
-		return -2;
+		// TODO: Set an error code.
+		m_rom = NULL;
+		return;
 	}
 	
 	// Enable SRam/EEPRom by default.
@@ -177,16 +150,22 @@ int EmuMD::SetRom(Rom *rom)
 	// NOTE: Only set the region. Sound rate is set by the UI.
 	SoundMgr::SetRegion(M68K_Mem::ms_Region.isPal(), false);
 	
-	return 0;
+	// Finished initializing.
+	return;
+}
+
+
+EmuMD::~EmuMD()
+{
+	// TODO
 }
 
 
 /**
- * EmuMD::SaveData(): Save SRam/EEPRom.
- * @param rom Rom class with the ROM image.
+ * saveData(): Save SRam/EEPRom.
  * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
  */
-int EmuMD::SaveData(Rom *rom)
+int EmuMD::saveData(void)
 {
 	// TODO: Move SRam and EEPRom to the Rom class?
 	if (M68K_Mem::m_EEPRom.isEEPRomTypeSet())
@@ -216,12 +195,11 @@ int EmuMD::SaveData(Rom *rom)
 
 
 /**
- * AutoSaveData(): AutoSave SRam/EEPRom.
- * @param rom Rom class with the ROM image.
- * @param frames Number of frames elapsed, or -1 for paused.
+ * autoSaveData(): AutoSave SRam/EEPRom.
+ * @param frames Number of frames elapsed, or -1 for paused. (force autosave)
  * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
  */
-int EmuMD::AutoSaveData(Rom *rom, int framesElapsed)
+int EmuMD::autoSaveData(int framesElapsed)
 {
 	// TODO: Move SRam and EEPRom to the Rom class?
 	if (M68K_Mem::m_EEPRom.isEEPRomTypeSet())
@@ -251,10 +229,10 @@ int EmuMD::AutoSaveData(Rom *rom, int framesElapsed)
 
 
 /**
- * SoftReset(): Perform a soft reset.
+ * softReset(): Perform a soft reset.
  * @return 0 on success; non-zero on error.
  */
-int EmuMD::SoftReset(void)
+int EmuMD::softReset(void)
 {
 	// Reset the M68K, Z80, and YM2612.
 	M68K::Reset();
@@ -272,10 +250,10 @@ int EmuMD::SoftReset(void)
 
 
 /**
- * HardReset(): Perform a hard reset.
+ * hardReset(): Perform a hard reset.
  * @return 0 on success; non-zero on error.
  */
-int EmuMD::HardReset(void)
+int EmuMD::hardReset(void)
 {
 	// Reset the controllers.
 	m_port1->reset();
@@ -290,17 +268,18 @@ int EmuMD::HardReset(void)
 	SoundMgr::ms_Psg.reset();
 	SoundMgr::ms_Ym2612.reset();
 	
+	// Reset successful.
 	return 0;
 }
 
 
 /**
- * T_Do_Line(): Run a scanline.
+ * T_execLine(): Run a scanline.
  * @param LineType Line type.
  * @param VDP If true, VDP is updated.
  */
 template<EmuMD::LineType_t LineType, bool VDP>
-FORCE_INLINE void EmuMD::T_Do_Line(void)
+FORCE_INLINE void EmuMD::T_execLine(void)
 {
 	int writePos = SoundMgr::GetWritePos(VdpIo::VDP_Lines.Display.Current);
 	int32_t *bufL = &SoundMgr::ms_SegBufL[writePos];
@@ -402,11 +381,11 @@ FORCE_INLINE void EmuMD::T_Do_Line(void)
 
 
 /**
- * T_Do_Frame(): Run a frame.
+ * T_execFrame(): Run a frame.
  * @param VDP If true, VDP is updated.
  */
 template<bool VDP>
-FORCE_INLINE void EmuMD::T_Do_Frame(void)
+FORCE_INLINE void EmuMD::T_execFrame(void)
 {
 	// Initialize VDP_Lines.Display.
 	VdpIo::Set_Visible_Lines();
@@ -458,7 +437,7 @@ FORCE_INLINE void EmuMD::T_Do_Frame(void)
 	VdpIo::VDP_Lines.Display.Current = 0;
 	while (VdpIo::VDP_Lines.Visible.Current < 0)
 	{
-		T_Do_Line<LINETYPE_BORDER, VDP>();
+		T_execLine<LINETYPE_BORDER, VDP>();
 		
 		// Next line.
 		VdpIo::VDP_Lines.Display.Current++;
@@ -472,7 +451,7 @@ FORCE_INLINE void EmuMD::T_Do_Frame(void)
 	/** Loop 1: Active display. **/
 	do
 	{
-		T_Do_Line<LINETYPE_ACTIVEDISPLAY, VDP>();
+		T_execLine<LINETYPE_ACTIVEDISPLAY, VDP>();
 		
 		// Next line.
 		VdpIo::VDP_Lines.Display.Current++;
@@ -480,14 +459,14 @@ FORCE_INLINE void EmuMD::T_Do_Frame(void)
 	} while (VdpIo::VDP_Lines.Visible.Current < VdpIo::VDP_Lines.Visible.Total);
 	
 	/** Loop 2: VBlank line. **/
-	T_Do_Line<LINETYPE_VBLANKLINE, VDP>();
+	T_execLine<LINETYPE_VBLANKLINE, VDP>();
 	VdpIo::VDP_Lines.Display.Current++;
 	VdpIo::VDP_Lines.Visible.Current++;
 	
 	/** Loop 3: Bottom border. **/
 	do
 	{
-		T_Do_Line<LINETYPE_BORDER, VDP>();
+		T_execLine<LINETYPE_BORDER, VDP>();
 		
 		// Next line.
 		VdpIo::VDP_Lines.Display.Current++;
@@ -528,14 +507,14 @@ FORCE_INLINE void EmuMD::T_Do_Frame(void)
 #endif
 }
 
-void EmuMD::Do_Frame(void)
+void EmuMD::execFrame(void)
 {
-	T_Do_Frame<true>();
+	T_execFrame<true>();
 }
 
-void EmuMD::Do_Frame_Fast(void)
+void EmuMD::execFrameFast(void)
 {
-	T_Do_Frame<false>();
+	T_execFrame<false>();
 }
 
 }

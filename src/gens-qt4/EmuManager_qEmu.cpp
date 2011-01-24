@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include "EmuManager.hpp"
+#include "gqt4_main.hpp"
 
 // ZOMG savestate handler.
 #include "libgens/Save/GensZomg.hpp"
@@ -131,12 +132,17 @@ void EmuManager::processQEmuRequest(void)
 void EmuManager::doCtrlChange(int port, LibGens::IoBase::IoType type)
 {
 	// TODO: Teamplayer/4WP support.
+	// NOTE: Only works if a ROM is loaded.
+	// TODO: Replace this with standard Controller Configuration.
+	if (!gqt4_emuContext)
+		return;
+	
 	LibGens::IoBase **prevDevPtr = NULL;
 	switch (port)
 	{
-		case 0:		prevDevPtr = &LibGens::EmuMD::m_port1; break;
-		case 1:		prevDevPtr = &LibGens::EmuMD::m_port2; break;
-		case 2:		prevDevPtr = &LibGens::EmuMD::m_portE; break;
+		case 0:		prevDevPtr = &gqt4_emuContext->m_port1; break;
+		case 1:		prevDevPtr = &gqt4_emuContext->m_port2; break;
+		case 2:		prevDevPtr = &gqt4_emuContext->m_portE; break;
 		default:	break;
 	}
 	
@@ -383,6 +389,7 @@ void EmuManager::doSaveState(const char *filename, int saveSlot)
 	
 	// Save the ZOMG file.
 	int ret = LibGens::ZomgSave(filename,			// ZOMG filename.
+				gqt4_emuContext,		// Emulation context.
 				imgBuf.buffer().constData(),	// Preview image.
 				imgBuf.buffer().size()		// Size of preview image.
 				);
@@ -417,7 +424,7 @@ void EmuManager::doSaveState(const char *filename, int saveSlot)
 void EmuManager::doLoadState(const char *filename, int saveSlot)
 {
 	// TODO: Redraw the screen if emulation is paused.
-	int ret = LibGens::ZomgLoad(filename);
+	int ret = LibGens::ZomgLoad(filename, gqt4_emuContext);
 	
 	QString sFilename = QString::fromUtf8(filename);
 	QString osdMsg;
@@ -454,7 +461,7 @@ void EmuManager::doPauseRequest(void)
 		// New state is paused.
 		// Turn off audio and autosave SRam/EEPRom.
 		m_audio->close();	// TODO: Add a pause() function.
-		LibGens::EmuMD::AutoSaveData(m_rom, -1);
+		gqt4_emuContext->autoSaveData(-1);
 	}
 	else
 	{
@@ -477,13 +484,13 @@ void EmuManager::doResetEmulator(bool hardReset)
 	if (hardReset)
 	{
 		// Do a hard reset.
-		LibGens::EmuMD::HardReset();
+		gqt4_emuContext->hardReset();
 		emit osdPrintMsg(2500, "Hard Reset.");
 	}
 	else
 	{
 		// Do a soft reset.
-		LibGens::EmuMD::SoftReset();
+		gqt4_emuContext->softReset();
 		emit osdPrintMsg(2500, "Soft Reset.");
 	}
 }

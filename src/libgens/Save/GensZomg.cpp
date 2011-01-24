@@ -59,11 +59,12 @@ namespace LibGens
 
 /**
  * ZomgLoad(): Load the current state from a ZOMG file.
- * @param filename ZOMG file.
+ * @param filename	[in] ZOMG file.
+ * @param context	[out] Emulation context.
  * @return 0 on success; non-zero on error.
  * TODO: Error code constants.
  */
-int ZomgLoad(const utf8_str *filename)
+int ZomgLoad(const utf8_str *filename, EmuContext *context)
 {
 	// Make sure the file exists.
 	if (access(filename, F_OK))
@@ -156,19 +157,19 @@ int ZomgLoad(const utf8_str *filename)
 	io_int.ser_tx   = md_io_save.port1_ser_tx;
 	io_int.ser_rx   = md_io_save.port1_ser_rx;
 	io_int.ser_ctrl = md_io_save.port1_ser_ctrl;
-	EmuMD::m_port1->zomgRestoreMD(&io_int);
+	context->m_port1->zomgRestoreMD(&io_int);
 	io_int.data     = md_io_save.port2_data;
 	io_int.ctrl     = md_io_save.port2_ctrl;
 	io_int.ser_tx   = md_io_save.port2_ser_tx;
 	io_int.ser_rx   = md_io_save.port2_ser_rx;
 	io_int.ser_ctrl = md_io_save.port2_ser_ctrl;
-	EmuMD::m_port2->zomgRestoreMD(&io_int);
+	context->m_port2->zomgRestoreMD(&io_int);
 	io_int.data     = md_io_save.port3_data;
 	io_int.ctrl     = md_io_save.port3_ctrl;
 	io_int.ser_tx   = md_io_save.port3_ser_tx;
 	io_int.ser_rx   = md_io_save.port3_ser_rx;
 	io_int.ser_ctrl = md_io_save.port3_ser_ctrl;
-	EmuMD::m_portE->zomgRestoreMD(&io_int);
+	context->m_portE->zomgRestoreMD(&io_int);
 	
 	// Load the Z80 control registers.
 	Zomg_MD_Z80CtrlSave_t md_z80_ctrl_save;
@@ -228,12 +229,14 @@ int ZomgLoad(const utf8_str *filename)
 /**
  * ZomgSave(): Save the current state to a ZOMG file.
  * @param filename	[in] ZOMG file.
+ * @param context	[in] Emulation context.
  * @param img_buf	[in, opt] Buffer containing PNG image for the ZOMG preview image.
  * @param img_siz	[in, opt] Size of img_buf.
  * @return 0 on success; non-zero on error.
  * TODO: Error code constants.
  */
-int ZomgSave(const utf8_str *filename, const void *img_buf, size_t img_siz)
+int ZomgSave(const utf8_str *filename, const EmuContext *context,
+	     const void *img_buf, size_t img_siz)
 {
 	LibZomg::Zomg zomg(filename, LibZomg::Zomg::ZOMG_SAVE);
 	if (!zomg.isOpen())
@@ -306,19 +309,19 @@ int ZomgSave(const utf8_str *filename, const void *img_buf, size_t img_siz)
 	Zomg_MD_IoSave_t md_io_save;
 	
 	md_io_save.version_reg = ((M68K_Mem::ms_Region.region() << 6) | 0x20);
-	EmuMD::m_port1->zomgSaveMD(&io_int);
+	context->m_port1->zomgSaveMD(&io_int);
 	md_io_save.port1_data     = io_int.data;
 	md_io_save.port1_ctrl     = io_int.ctrl;
 	md_io_save.port1_ser_tx   = io_int.ser_tx;
 	md_io_save.port1_ser_rx   = io_int.ser_rx;
 	md_io_save.port1_ser_ctrl = io_int.ser_ctrl;
-	EmuMD::m_port2->zomgSaveMD(&io_int);
+	context->m_port2->zomgSaveMD(&io_int);
 	md_io_save.port2_data     = io_int.data;
 	md_io_save.port2_ctrl     = io_int.ctrl;
 	md_io_save.port2_ser_tx   = io_int.ser_tx;
 	md_io_save.port2_ser_rx   = io_int.ser_rx;
 	md_io_save.port2_ser_ctrl = io_int.ser_ctrl;
-	EmuMD::m_portE->zomgSaveMD(&io_int);
+	context->m_portE->zomgSaveMD(&io_int);
 	md_io_save.port3_data     = io_int.data;
 	md_io_save.port3_ctrl     = io_int.ctrl;
 	md_io_save.port3_ser_tx   = io_int.ser_tx;

@@ -238,16 +238,19 @@ int EmuManager::openRom_int(const QString& filename)
 		return 4;
 	}
 	
-	// Load the ROM image in EmuMD.
-	int ret = LibGens::EmuMD::SetRom(m_rom);
-	m_rom->close();
+	// Create a new MD emulation context.
+	delete gqt4_emuContext;
+	gqt4_emuContext = new LibGens::EmuMD(m_rom);
+	m_rom->close();	// TODO: Let EmuMD handle this...
 	
-	if (ret != 0)
+	if (!gqt4_emuContext->isRomOpened())
 	{
 		// Error loading the ROM image in EmuMD.
 		// TODO: EmuMD error code constants.
 		// TODO: Show an error message.
-		fprintf(stderr, "Error: LibGens:EmuMD::Set_Rom(m_rom) returned %d.\n", ret);
+		fprintf(stderr, "Error: Initialization of gqt4_emuContext failed. (TODO: Error code.)\n");
+		delete gqt4_emuContext;
+		gqt4_emuContext = NULL;
 		delete m_rom;
 		m_rom = NULL;
 		return 5;
@@ -255,6 +258,7 @@ int EmuManager::openRom_int(const QString& filename)
 	
 	// m_rom isn't deleted, since keeping it around
 	// indicates that a game is running.
+	// TODO: Use gqt4_emuContext instead?
 	
 	// Open audio.
 	m_audio->open();
@@ -292,13 +296,18 @@ int EmuManager::closeRom(void)
 		gqt4_emuThread = NULL;
 	}
 	
-	if (m_rom)
+	if (gqt4_emuContext)
 	{
 		// Make sure SRam/EEPRom data is saved.
 		// (SaveData() will call the LibGens OSD handler if necessary.)
-		LibGens::EmuMD::SaveData(m_rom);
+		gqt4_emuContext->saveData();
+		
+		// Delete the emulation context.
+		delete gqt4_emuContext;
+		gqt4_emuContext = NULL;
 		
 		// Delete the Rom instance.
+		// TODO: Handle this in gqt4_emuContext.
 		delete m_rom;
 		m_rom = NULL;
 	}
@@ -728,7 +737,7 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	
 	// Check for SRam/EEPRom autosave.
 	// TODO: Frames elapsed.
-	LibGens::EmuMD::AutoSaveData(m_rom, 1);
+	gqt4_emuContext->autoSaveData(1);
 	
 	// Check for requests in the emulation queue.
 	if (!m_qEmuRequest.isEmpty())

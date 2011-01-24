@@ -1,10 +1,10 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * EmuMD.cpp: MD emulation code.                                           *
+ * EmuContext.cpp: Emulation context base class.                           *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,69 +21,60 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_MD_EMUMD_HPP__
-#define __LIBGENS_MD_EMUMD_HPP__
+#include "EmuContext.hpp"
 
-#include "../EmuContext.hpp"
-
-// Needed for FORCE_INLINE.
-#include "../macros/common.h"
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
+#include <assert.h>
 
 namespace LibGens
 {
 
-class EmuMD : public EmuContext
-{
-	public:
-		EmuMD(Rom *rom);
-		~EmuMD();
-		
-		/**
-		 * saveData(): Save SRam/EEPRom.
-		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
-		 */
-		int saveData(void);
-		
-		/**
-		 * autoSaveData(): AutoSave SRam/EEPRom.
-		 * @param frames Number of frames elapsed, or -1 for paused. (force autosave)
-		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
-		 */
-		int autoSaveData(int framesElapsed);
-		
-		/**
-		 * softReset(): Perform a soft reset.
-		 * @return 0 on success; non-zero on error.
-		 */
-		int softReset(void);
-		
-		/**
-		 * hardReset(): Perform a hard reset.
-		 * @return 0 on success; non-zero on error.
-		 */
-		int hardReset(void);
-		
-		void execFrame(void);
-		void execFrameFast(void);
-	
-	protected:
-		/**
-		* LineType_t: Line types.
-		*/
-		enum LineType_t
-		{
-			LINETYPE_ACTIVEDISPLAY	= 0,
-			LINETYPE_VBLANKLINE	= 1,
-			LINETYPE_BORDER		= 2,
-		};
-		
-		template<LineType_t LineType, bool VDP>
-		FORCE_INLINE void T_execLine(void);
-		
-		template<bool VDP>
-		FORCE_INLINE void T_execFrame(void);
-};
+// Reference counter.
+// We're only allowing one emulation context at the moment.
+int EmuContext::ms_RefCount = 0;
 
+// Controllers.
+// TODO: Figure out a better place to put these!
+// TODO: Make these non-static!
+IoBase *EmuContext::m_port1;		// Player 1.
+IoBase *EmuContext::m_port2;		// Player 2.
+IoBase *EmuContext::m_portE;		// EXT port.
+
+EmuContext::EmuContext(Rom *rom)
+{
+	ms_RefCount++;
+	assert(ms_RefCount == 1);
+	
+	// Initialize variables.
+	m_rom = rom;
+	
+	// Create base I/O devices that do nothing.
+	// TODO: For now, we'll treat them as static.
+	if (!m_port1)
+		m_port1 = new IoBase();
+	if (!m_port2)
+		m_port2 = new IoBase();
+	if (!m_portE)
+		m_portE = new IoBase();
 }
 
-#endif /* __LIBGENS_MD_EMUMD_HPP__ */
+EmuContext::~EmuContext()
+{
+	ms_RefCount--;
+	assert(ms_RefCount == 0);
+	
+	// Delete the I/O devices.
+	// TODO: Don't do this right now.
+#if 0
+	delete m_port1;
+	m_port1 = NULL;
+	delete m_port2;
+	m_port2 = NULL;
+	delete m_portE;
+	m_portE = NULL;
+#endif
+}
+
+}

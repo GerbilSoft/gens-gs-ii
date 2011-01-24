@@ -64,6 +64,7 @@ void gqt4_osd(OsdType osd_type, int param);
 
 #include "GensQApplication.hpp"
 #include "EmuThread.hpp"
+#include "../libgens/EmuContext.hpp"
 
 namespace GensQt4
 {
@@ -72,6 +73,10 @@ namespace GensQt4
 	
 	// Emulation thread.
 	extern EmuThread *gqt4_emuThread;
+	
+	// Emulation context.
+	// TODO: Move this to EmuThread later.
+	extern LibGens::EmuContext *gqt4_emuContext;
 	
 	void QuitGens(void);
 }

@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include "EmuThread.hpp"
+#include "gqt4_main.hpp"
 
 #include "libgens/MD/EmuMD.hpp"
 #include "libgens/MD/VdpIo.hpp"
@@ -73,9 +74,9 @@ void EmuThread::run(void)
 	{
 		// Run a frame of emulation.
 		if (!m_doFastFrame)
-			LibGens::EmuMD::Do_Frame();
+			gqt4_emuContext->execFrame();
 		else
-			LibGens::EmuMD::Do_Frame_Fast();
+			gqt4_emuContext->execFrameFast();
 		
 		// Signal that the frame has been drawn.
 		emit frameDone(m_doFastFrame);

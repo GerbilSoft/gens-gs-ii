@@ -92,6 +92,7 @@ SET(libgens_SRCS
 	Decompressor/Decompressor.cpp
 	Decompressor/DcGzip.cpp
 	Decompressor/DcZip.cpp
+	EmuContext.cpp
 	)
 
 IF(HAVE_LZMA)

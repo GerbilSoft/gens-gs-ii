@@ -142,6 +142,9 @@ GensQApplication *gqt4_app = NULL;
 // Emulation thread.
 EmuThread *gqt4_emuThread = NULL;
 
+// Emulation context.
+LibGens::EmuContext *gqt4_emuContext = NULL;
+
 /**
  * QuitGens(): Quit Gens.
  */
@@ -159,6 +162,10 @@ void QuitGens(void)
 		delete gqt4_emuThread;
 		gqt4_emuThread = NULL;
 	}
+	
+	// Delete the emulation context.
+	delete gqt4_emuContext;
+	gqt4_emuContext = NULL;
 	
 	// Shut down LibGens.
 	LibGens::End();
