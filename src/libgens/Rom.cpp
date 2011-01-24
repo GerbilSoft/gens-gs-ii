@@ -524,7 +524,7 @@ int Rom::initSRam(SRam *sram) const
 /**
  * initEEPRom(): Initialize an EEPRom class using the ROM's header information.
  * @param eeprom Pointer to EEPRom class.
- * @return Positive value indicating SRam size on success; negative on error.
+ * @return Positive value indicating EEPRom size on success; negative on error.
  */
 int Rom::initEEPRom(EEPRom *eeprom) const
 {
@@ -536,6 +536,10 @@ int Rom::initEEPRom(EEPRom *eeprom) const
 	// Reset the EEPRom and set the type.
 	eeprom->reset();
 	eeprom->setEEPRomType(m_eprType);
+	
+	// Don't do anything if the ROM isn't in the EEPRom database.
+	if (m_eprType < 0)
+		return 0;
 	
 	// Load the EEProm file.
 	// TODO: Use internal filename for multi-file?
