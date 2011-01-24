@@ -93,6 +93,7 @@ SET(libgens_SRCS
 	Decompressor/DcGzip.cpp
 	Decompressor/DcZip.cpp
 	EmuContext.cpp
+	Save/EEPRom_DB.cpp
 	)
 
 IF(HAVE_LZMA)

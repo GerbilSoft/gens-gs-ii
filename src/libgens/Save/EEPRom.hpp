@@ -226,7 +226,7 @@ class EEPRom
 			uint16_t checksum;
 			EEPRomType type;
 		};
-		static const GameEEPRomInfo ms_Database[];
+		static const GameEEPRomInfo ms_Database[29];
 		
 		// Current EEPRom type.
 		GameEEPRomInfo m_eprType;
