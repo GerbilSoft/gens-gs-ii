@@ -233,7 +233,7 @@ int Zomg::savePsgReg(const Zomg_PsgSave_t *state)
 	memcpy(&bswap_state, state, sizeof(bswap_state));
 	
 	// Byteswap the 16-bit fields.
-	for (unsigned int i = 0; i < 4; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		bswap_state.tone_reg[i] = cpu_to_le16(bswap_state.tone_reg[i]);
 		bswap_state.tone_ctr[i] = cpu_to_le16(bswap_state.tone_ctr[i]);
