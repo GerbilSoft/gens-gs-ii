@@ -88,7 +88,7 @@
            </widget>
           </item>
           <item row="4" column="0" colspan="3">
-           <widget class="QLabel" name="lblSelectedRom">
+           <widget class="QLabel" name="lblMcdSelectedRom">
             <property name="text">
              <string>Selected ROM: (none)</string>
             </property>

@@ -45,28 +45,34 @@ GeneralConfigWindow *GeneralConfigWindow::m_GeneralConfigWindow = NULL;
 GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
 {
+	// Sega CD: Boot ROM file textboxes.
+	QString sMcdBootRom_PlaceholderText = TR("Select a %1 Boot ROM...");
+	
+	// Sega CD: Initialize Boot ROM textboxes.
+	txtMcdRomUSA = new GensLineEdit(this);
+	txtMcdRomUSA->setObjectName(QString::fromUtf8("txtMcdRomUSA"));
+	txtMcdRomEUR = new GensLineEdit(this);
+	txtMcdRomEUR->setObjectName(QString::fromUtf8("txtMcdRomEUR"));
+	txtMcdRomJPN = new GensLineEdit(this);
+	txtMcdRomJPN->setObjectName(QString::fromUtf8("txtMcdRomJPN"));
+	
+	// Initialize the Qt4 UI.
 	setupUi(this);
 	
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
 	
-	// Sega CD: Boot ROM file textboxes.
-	QString sMcdBootRom_PlaceholderText = TR("Select a %1 Boot ROM...");
+	// Sega CD: Add the Boot ROM textboxes to the grid layout.
 	
 	// Sega CD: USA Boot ROM
-	txtMcdRomUSA = new GensLineEdit(this);
 	txtMcdRomUSA->setPlaceholderText(sMcdBootRom_PlaceholderText.arg("Sega CD (U)"));
 	gridMcdRoms->addWidget(txtMcdRomUSA, 0, 1);
 	lblMcdRomUSA->setBuddy(txtMcdRomUSA);
-	
 	// Sega CD: EUR Boot ROM
-	txtMcdRomEUR = new GensLineEdit(this);
 	txtMcdRomEUR->setPlaceholderText(sMcdBootRom_PlaceholderText.arg("Mega CD (E)"));
 	gridMcdRoms->addWidget(txtMcdRomEUR, 1, 1);
 	lblMcdRomEUR->setBuddy(txtMcdRomEUR);
-	
 	// Sega CD: JPN Boot ROM
-	txtMcdRomJPN = new GensLineEdit(this);
 	txtMcdRomJPN->setPlaceholderText(sMcdBootRom_PlaceholderText.arg("Mega CD (J)"));
 	gridMcdRoms->addWidget(txtMcdRomJPN, 2, 1);
 	lblMcdRomJPN->setBuddy(txtMcdRomJPN);
@@ -112,10 +118,10 @@ void GeneralConfigWindow::ShowSingle(QWidget *parent)
 
 /**
  * mcdSelectRomFile(): Select a Sega CD Boot ROM file.
- * @param description Sega CD Boot ROM description.
+ * @param rom_id Sega CD Boot ROM ID.
  * @param txtRomFile ROM file textbox.
  */
-void GeneralConfigWindow::mcdSelectRomFile(const QString& description, QLineEdit *txtRomFile)
+void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *txtRomFile)
 {
 	// TODO: Proper compressed file support.
 	#define ZLIB_EXT " *.zip *.zsg *.gz"
@@ -123,7 +129,7 @@ void GeneralConfigWindow::mcdSelectRomFile(const QString& description, QLineEdit
 	#define RAR_EXT " *.rar"
 	
 	// Create the dialog title.
-	QString title = TR("Select %1 Boot ROM").arg(description);
+	QString title = TR("Select %1 Boot ROM").arg(rom_id);
 	
 	// TODO: Specify the current Boot ROM filename as the default filename.
 	QString filename = QFileDialog::getOpenFileName(this, title,
@@ -143,8 +149,11 @@ void GeneralConfigWindow::mcdSelectRomFile(const QString& description, QLineEdit
 	if (filename.isEmpty())
 		return;
 	
-	// TODO: Update Boot ROM description.
+	// Set the filename text.
 	txtRomFile->setText(filename);
+	
+	// Update the ROM file status.
+	mcdUpdateRomFileStatus(txtRomFile);
 }
 
 void GeneralConfigWindow::on_btnMcdRomUSA_clicked(void)
@@ -163,13 +172,38 @@ void GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile)
 {
 	// Check if the file exists.
 	QFile file(txtRomFile->text());
-	//if (!file.exists())
+	if (!file.exists())
 	{
 		// File doesn't exist.
-		// TODO: Update file notes.
-		txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxCritical));
+		// NOTE: KDE 4's Oxygen theme doesn't have a question icon.
+		// SP_MessageBoxQuestion is redirected to SP_MessageBoxInformation on KDE 4.
+		// TODO: Set ROM file notes.
+		txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 		return;
 	}
+	
+	// TODO: Check the filename.
+	txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxWarning));
 }
+
+
+/**
+ * mcdDisplayRomFileStatus(): Sega CD: Display Boot ROM file status.
+ * @param rom_id Sega CD Boot ROM ID.
+ * @param rom_desc ROM file description. (detected by examining the ROM)
+ */
+void GeneralConfigWindow::mcdDisplayRomFileStatus(const QString& rom_id, const QString &rom_desc)
+{
+	// Set the ROM description.
+	QString sel_rom = TR("Selected ROM: %1");
+	lblMcdSelectedRom->setText(sel_rom.arg(rom_id));
+}
+
+void GeneralConfigWindow::on_txtMcdRomUSA_focusIn(void)
+	{ mcdDisplayRomFileStatus(TR("Sega CD (U)"), "TODO"); }
+void GeneralConfigWindow::on_txtMcdRomEUR_focusIn(void)
+	{ mcdDisplayRomFileStatus(TR("Mega CD (E)"), "TODO"); }
+void GeneralConfigWindow::on_txtMcdRomJPN_focusIn(void)
+	{ mcdDisplayRomFileStatus(TR("Mega CD (J)"), "TODO"); }
 
 }

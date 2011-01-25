@@ -28,6 +28,7 @@
 #include <QtGui/QLineEdit>
 
 class QLabel;
+class QFocusEvent;
 
 class GensLineEdit : public QLineEdit
 {
@@ -37,8 +38,23 @@ class GensLineEdit : public QLineEdit
 		GensLineEdit(QWidget *parent = 0);
 		void setIcon(const QIcon& icon);
 	
+	signals:
+		void focusIn(void);
+		void focusOut(void);
+	
 	protected:
 		void resizeEvent(QResizeEvent *);
+		
+		void focusInEvent(QFocusEvent *event)
+		{
+			this->QLineEdit::focusInEvent(event);
+			emit focusIn();
+		}
+		void focusOutEvent(QFocusEvent *event)
+		{
+			this->QLineEdit::focusOutEvent(event);
+			emit focusOut();
+		}
 	
 	private:
 		QLabel *m_label;

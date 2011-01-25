@@ -29,6 +29,7 @@
 #include "ui_GeneralConfigWindow.h"
 
 #include "GensLineEdit.hpp"
+#include <stdio.h>
 
 namespace GensQt4
 {
@@ -53,15 +54,22 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 		static GeneralConfigWindow *m_GeneralConfigWindow;
 		
 		// Sega CD: Select Boot ROM file.
-		void mcdSelectRomFile(const QString& description, QLineEdit *txtRomFile);
+		void mcdSelectRomFile(const QString& rom_id, GensLineEdit *txtRomFile);
 		
 		// Sega CD: Update Boot ROM file status.
 		void mcdUpdateRomFileStatus(GensLineEdit *txtRomFile);
+		
+		// Sega CD: Display Boot ROM file status.
+		void mcdDisplayRomFileStatus(const QString& rom_id, const QString &rom_desc);
 	
 	private slots:
 		void on_btnMcdRomUSA_clicked(void);
 		void on_btnMcdRomEUR_clicked(void);
 		void on_btnMcdRomJPN_clicked(void);
+		
+		void on_txtMcdRomUSA_focusIn(void);
+		void on_txtMcdRomEUR_focusIn(void);
+		void on_txtMcdRomJPN_focusIn(void);
 };
 
 }
