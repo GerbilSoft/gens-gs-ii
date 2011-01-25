@@ -92,6 +92,13 @@ MCD_RegionCode_t lg_mcd_rom_GetRegion(int rom_id);
  */
 MCD_RomStatus_t lg_mcd_rom_GetSupportStatus(int rom_id);
 
+/**
+ * lg_mcd_rom_GetRegionCodeString(): Get a string describing a region code.
+ * @param region_code Region code.
+ * @return Region code string, or NULL if the region code is invalid.
+ */
+const utf8_str *lg_mcd_rom_GetRegionCodeString(MCD_RegionCode_t region_code);
+
 #ifdef __cplusplus
 }
 #endif
