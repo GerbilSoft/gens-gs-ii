@@ -83,6 +83,7 @@ SET(gens-qt4_SRCS
 	EmuManager_qEmu.cpp
 	VBackend/GlTex2D.cpp
 	GeneralConfigWindow.cpp
+	GensLineEdit.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -99,6 +100,7 @@ SET(gens-qt4_MOC_HEADERS
 	ZipSelectDialog.hpp
 	Input/EventKeys.hpp
 	GeneralConfigWindow.hpp
+	GensLineEdit.hpp
 	)
 
 # Create .moc files for sources that need them.

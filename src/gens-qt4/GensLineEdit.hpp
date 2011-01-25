@@ -1,10 +1,11 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * GeneralConfigWindow.hpp: General Configuration Window.                  *
+ * GensQLineEdit.hpp: QLineEdit class with indicator icon.                 *
  *                                                                         *
- * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
- * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2011 by David Korth.                                      *
+ *                                                                         *
+ * Based on Lineedit with a clear button.                                  *
+ * http://labs.qt.nokia.com/2007/06/06/lineedit-with-a-clear-button/       *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,49 +22,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_GENERALCONFIGWINDOW_HPP__
-#define __GENS_QT4_GENERALCONFIGWINDOW_HPP__
+#ifndef __GENS_QT4_GENSLINEEDITICON_HPP__
+#define __GENS_QT4_GENSLINEEDITICON_HPP__
 
-#include <QtGui/QDialog>
 #include <QtGui/QLineEdit>
-#include "ui_GeneralConfigWindow.h"
 
-#include "GensLineEdit.hpp"
+class QLabel;
 
-namespace GensQt4
-{
-
-class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
+class GensLineEdit : public QLineEdit
 {
 	Q_OBJECT
 	
 	public:
-		static void ShowSingle(QWidget *parent = NULL);
+		GensLineEdit(QWidget *parent = 0);
+		void setIcon(const QIcon& icon);
 	
 	protected:
-		GeneralConfigWindow(QWidget *parent = NULL);
-		virtual ~GeneralConfigWindow();
-		
-		// Sega CD: Boot ROM file textboxes.
-		GensLineEdit *txtMcdRomUSA;
-		GensLineEdit *txtMcdRomEUR;
-		GensLineEdit *txtMcdRomJPN;
-		
-	private:
-		static GeneralConfigWindow *m_GeneralConfigWindow;
-		
-		// Sega CD: Select Boot ROM file.
-		void mcdSelectRomFile(const QString& description, QLineEdit *txtRomFile);
-		
-		// Sega CD: Update Boot ROM file status.
-		void mcdUpdateRomFileStatus(GensLineEdit *txtRomFile);
+		void resizeEvent(QResizeEvent *);
 	
-	private slots:
-		void on_btnMcdRomUSA_clicked(void);
-		void on_btnMcdRomEUR_clicked(void);
-		void on_btnMcdRomJPN_clicked(void);
+	private:
+		QLabel *m_label;
 };
 
-}
-
-#endif /* __GENS_QT4_GENERALCONFIGWINDOW_HPP__ */
+#endif /* __GENS_QT4_GENSLINEEDITICON_HPP__ */

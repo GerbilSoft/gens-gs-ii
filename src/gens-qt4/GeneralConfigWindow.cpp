@@ -31,6 +31,7 @@
 
 // Qt4 includes.
 #include <QtGui/QFileDialog>
+#include <QtCore/QFile>
 
 namespace GensQt4
 {
@@ -49,7 +50,32 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
 	
-	// TODO: Initialize BIOS ROM filenames.
+	// Sega CD: Boot ROM file textboxes.
+	QString sMcdBootRom_PlaceholderText = TR("Select a %1 Boot ROM...");
+	
+	// Sega CD: USA Boot ROM
+	txtMcdRomUSA = new GensLineEdit(this);
+	txtMcdRomUSA->setPlaceholderText(sMcdBootRom_PlaceholderText.arg("Sega CD (U)"));
+	gridMcdRoms->addWidget(txtMcdRomUSA, 0, 1);
+	lblMcdRomUSA->setBuddy(txtMcdRomUSA);
+	
+	// Sega CD: EUR Boot ROM
+	txtMcdRomEUR = new GensLineEdit(this);
+	txtMcdRomEUR->setPlaceholderText(sMcdBootRom_PlaceholderText.arg("Mega CD (E)"));
+	gridMcdRoms->addWidget(txtMcdRomEUR, 1, 1);
+	lblMcdRomEUR->setBuddy(txtMcdRomEUR);
+	
+	// Sega CD: JPN Boot ROM
+	txtMcdRomJPN = new GensLineEdit(this);
+	txtMcdRomJPN->setPlaceholderText(sMcdBootRom_PlaceholderText.arg("Mega CD (J)"));
+	gridMcdRoms->addWidget(txtMcdRomJPN, 2, 1);
+	lblMcdRomJPN->setBuddy(txtMcdRomJPN);
+	
+	// Initialize BIOS ROM filenames.
+	// TODO: Copy filenames from configuration.
+	mcdUpdateRomFileStatus(txtMcdRomUSA);
+	mcdUpdateRomFileStatus(txtMcdRomEUR);
+	mcdUpdateRomFileStatus(txtMcdRomJPN);
 }
 
 
@@ -127,5 +153,23 @@ void GeneralConfigWindow::on_btnMcdRomEUR_clicked(void)
 	{ mcdSelectRomFile(TR("Mega CD (E)"), txtMcdRomEUR); }
 void GeneralConfigWindow::on_btnMcdRomJPN_clicked(void)
 	{ mcdSelectRomFile(TR("Mega CD (J)"), txtMcdRomJPN); }
+
+
+/**
+ * mcdUpdateRomFileStatus(): Sega CD: Update Boot ROM file status.
+ * @param txtRomFile ROM file textbox.
+ */
+void GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile)
+{
+	// Check if the file exists.
+	QFile file(txtRomFile->text());
+	//if (!file.exists())
+	{
+		// File doesn't exist.
+		// TODO: Update file notes.
+		txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxCritical));
+		return;
+	}
+}
 
 }

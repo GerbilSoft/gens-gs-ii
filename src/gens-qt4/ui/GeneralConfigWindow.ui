@@ -22,14 +22,14 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QGroupBox" name="grpBootROMs">
+        <widget class="QGroupBox" name="grpMcdRoms">
          <property name="title">
           <string>Boot &amp;ROMs</string>
          </property>
          <property name="flat">
           <bool>false</bool>
          </property>
-         <layout class="QGridLayout" name="gridLayout">
+         <layout class="QGridLayout" name="gridMcdRoms">
           <property name="margin">
            <number>8</number>
           </property>
@@ -41,22 +41,12 @@
             <property name="textFormat">
              <enum>Qt::PlainText</enum>
             </property>
-            <property name="buddy">
-             <cstring>txtMcdRomUSA</cstring>
-            </property>
            </widget>
           </item>
           <item row="0" column="2">
            <widget class="QPushButton" name="btnMcdRomUSA">
             <property name="text">
              <string>Browse...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="txtMcdRomUSA">
-            <property name="placeholderText">
-             <string>Select a Sega CD (U) Boot ROM...</string>
             </property>
            </widget>
           </item>
@@ -67,16 +57,6 @@
             </property>
             <property name="textFormat">
              <enum>Qt::PlainText</enum>
-            </property>
-            <property name="buddy">
-             <cstring>txtMcdRomEUR</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="txtMcdRomEUR">
-            <property name="placeholderText">
-             <string>Select a Mega CD (E) Boot ROM...</string>
             </property>
            </widget>
           </item>
@@ -94,16 +74,6 @@
             </property>
             <property name="textFormat">
              <enum>Qt::PlainText</enum>
-            </property>
-            <property name="buddy">
-             <cstring>txtMcdRomJPN</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="txtMcdRomJPN">
-            <property name="placeholderText">
-             <string>Select a Mega CD (J) Boot ROM...</string>
             </property>
            </widget>
           </item>
@@ -153,6 +123,45 @@
             </property>
            </spacer>
           </item>
+          <item row="0" column="1">
+           <spacer name="hspcMcdRomUSA">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="1" column="1">
+           <spacer name="hspcMcdRomEUR">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="2" column="1">
+           <spacer name="hspcMcdRomJPN">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
          </layout>
         </widget>
        </item>
@@ -172,7 +181,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources/gens-qt4.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>
