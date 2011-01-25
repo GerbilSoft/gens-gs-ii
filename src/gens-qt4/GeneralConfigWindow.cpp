@@ -183,6 +183,7 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, MC
 	uint32_t rom_crc32;
 	int boot_rom_id;
 	MCD_RegionCode_t boot_rom_region_code;
+	MCD_RomStatus_t boot_rom_status;
 	
 	// Check if the file exists.
 	const QString& filename = txtRomFile->text();
@@ -279,12 +280,39 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, MC
 			QString boot_rom_region = QString::fromUtf8(lg_mcd_rom_GetRegionCodeString(boot_rom_region_code));
 			
 			rom_notes += sWarning + TR("Region code is incorrect.") + "<br/>\n" +
-				     TR("(expected %1; found %2)").arg(expected_region).arg(boot_rom_region);
+				     TR("(expected %1; found %2)").arg(expected_region).arg(boot_rom_region) + "<br/>\n";
 			
 			// Set the icon to warning.
 			filename_icon = QStyle::SP_MessageBoxWarning;
 		}
 	}
+	
+	// Check the ROM's support status.
+	boot_rom_status = lg_mcd_rom_GetSupportStatus(boot_rom_id);
+	switch (boot_rom_status)
+	{
+		case RomStatus_Recommended:
+		case RomStatus_Supported:
+			// ROM is either recommended or supported.
+			// TODO: Make a distinction between the two?
+			break;
+		
+		case RomStatus_Unsupported:
+		default:
+			// ROM is unsupported.
+			rom_notes += sWarning + TR("This Boot ROM is not supported by Gens/GS II.") + "<br/>\n";
+			filename_icon = QStyle::SP_MessageBoxWarning;
+			break;
+		
+		case RomStatus_Broken:
+			// ROM is known to be broken.
+			rom_notes += sWarning + TR("This Boot ROM is known to be broken on all emulators.") + "<br/>\n";
+			filename_icon = QStyle::SP_MessageBoxCritical;
+			break;
+	}
+	
+	// Get the ROM's notes.
+	rom_notes += QString::fromUtf8(lg_mcd_rom_GetNotes(boot_rom_id)).replace('\n', "<br/>\n");
 	
 rom_identified:
 	// Free the ROM data buffer if it was allocated.
