@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include "CtrlConfigWindow.hpp"
+#include "gqt4_main.hpp"
 
 // Text translation macro.
 #define TR(text) \
@@ -63,8 +64,19 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	
 	// Copy the current controller settings.
 	// TODO: Button mapping.
-	m_devType[0] = LibGens::EmuMD::m_port1->devType();
-	m_devType[1] = LibGens::EmuMD::m_port2->devType();
+	// TODO: Load from the configuration cache instead of the emulation context.
+	if (gqt4_emuContext)
+	{
+		// Emulation is running.
+		m_devType[0] = gqt4_emuContext->m_port1->devType();
+		m_devType[1] = gqt4_emuContext->m_port2->devType();
+	}
+	else
+	{
+		// Emulation is not running.
+		m_devType[0] = LibGens::IoBase::IOT_NONE;
+		m_devType[1] = LibGens::IoBase::IOT_NONE;
+	}
 	
 	// Initialize all the settings.
 	updatePortButton(0);
