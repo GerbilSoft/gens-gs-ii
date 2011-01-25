@@ -40,14 +40,14 @@ CtrlConfigWindow *CtrlConfigWindow::m_CtrlConfigWindow = NULL;
 // Controller icon filenames.
 const char *CtrlConfigWindow::ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX] =
 {
-	":/gens/controller-none",	// IOT_NONE
-	":/gens/controller-3btn",	// IOT_3BTN
-	":/gens/controller-6btn",	// IOT_6BTN
-	":/gens/controller-2btn",	// IOT_2BTN
-	":/gens/controller-mega-mouse"	// IOT_MEGA_MOUSE (TODO)
-	":/gens/controller-teamplayer"	// IOT_TEAMPLAYER (TODO)
-	":/gens/controller-4wp"		// IOT_4WP_MASTER (TODO)
-	":/gens/controller-4wp"		// IOT_4WP_SLAVE (TODO)
+	":/gens/controller-none.png",		// IOT_NONE
+	":/gens/controller-3btn.png",		// IOT_3BTN
+	":/gens/controller-6btn.png",		// IOT_6BTN
+	":/gens/controller-2btn.png",		// IOT_2BTN
+	":/gens/controller-mega-mouse.png"	// IOT_MEGA_MOUSE (TODO)
+	":/gens/controller-teamplayer.png"	// IOT_TEAMPLAYER (TODO)
+	":/gens/controller-4wp.png"		// IOT_4WP_MASTER (TODO)
+	":/gens/controller-4wp.png"		// IOT_4WP_SLAVE (TODO)
 };
 
 
@@ -84,20 +84,20 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	
 	// Initialize the "Device" dropdown.
 	// TODO: Make a list of device names and icons.
-	cboDevice->addItem(QIcon(":/gens/controller-none"),
+	cboDevice->addItem(QIcon(":/gens/controller-none.png"),
 			GetShortDeviceName(LibGens::IoBase::IOT_NONE));
-	cboDevice->addItem(QIcon(":/gens/controller-3btn"),
+	cboDevice->addItem(QIcon(":/gens/controller-3btn.png"),
 			GetShortDeviceName(LibGens::IoBase::IOT_3BTN));
-	cboDevice->addItem(QIcon(":/gens/controller-6btn"),
+	cboDevice->addItem(QIcon(":/gens/controller-6btn.png"),
 			GetShortDeviceName(LibGens::IoBase::IOT_6BTN));
-	cboDevice->addItem(QIcon(":/gens/controller-2btn"),
+	cboDevice->addItem(QIcon(":/gens/controller-2btn.png"),
 			GetShortDeviceName(LibGens::IoBase::IOT_2BTN));
-	cboDevice->addItem(QIcon(":/gens/controller-mouse"),
+	cboDevice->addItem(QIcon(":/gens/controller-mouse.png"),
 			GetShortDeviceName(LibGens::IoBase::IOT_MEGA_MOUSE));
-	cboDevice->addItem(QIcon(":/gens/controller-teamplayer"),
+	cboDevice->addItem(QIcon(":/gens/controller-teamplayer.png"),
 			GetShortDeviceName(LibGens::IoBase::IOT_TEAMPLAYER));
 	// TODO: Handle Master/Slave devices.
-	cboDevice->addItem(QIcon(":/gens/controller-4wp"),
+	cboDevice->addItem(QIcon(":/gens/controller-4wp.png"),
 			GetShortDeviceName(LibGens::IoBase::IOT_4WP_MASTER));
 	
 	// Update the port settings.
