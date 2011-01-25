@@ -66,6 +66,8 @@ GensMenuBar::GensMenuBar(QWidget *parent)
 		{IDM_FILE_SAVESTATE, GMI_NORMAL, "&Save State", NULL, MACCEL_NONE, Qt::Key_F5, NULL, NULL},
 		{IDM_FILE_LOADSTATE, GMI_NORMAL, "&Load State", NULL, MACCEL_NONE, Qt::Key_F8, NULL, NULL},
 		{IDM_SEPARATOR, GMI_SEPARATOR, NULL, NULL, MACCEL_NONE, 0, NULL, NULL},
+		{IDM_FILE_GENCONFIG, GMI_NORMAL, "&General Configuration", NULL, MACCEL_PREFERENCES, 0, "configure", ":/oxygen-16x16/configure.png"},
+		{IDM_SEPARATOR, GMI_SEPARATOR, NULL, NULL, MACCEL_NONE, 0, NULL, NULL},
 		{IDM_FILE_QUIT, GMI_NORMAL, "&Quit", NULL, MACCEL_QUIT, Qt::CTRL + Qt::Key_Q, "application-exit", ":/oxygen-16x16/application-exit.png"},
 		
 		{0, GMI_NORMAL, NULL, NULL, MACCEL_NONE, 0, NULL, NULL}

@@ -29,6 +29,7 @@
 // Qt4 windows.
 #include "AboutWindow.hpp"
 #include "CtrlConfigWindow.hpp"
+#include "GeneralConfigWindow.hpp"
 
 // LibGens.
 #include "libgens/lg_main.hpp"
@@ -275,6 +276,10 @@ void GensWindow::menuTriggered(int id)
 				
 				case MNUID_ITEM(IDM_FILE_LOADSTATE):
 					m_emuManager.loadState();
+					break;
+				
+				case MNUID_ITEM(IDM_FILE_GENCONFIG):
+					GeneralConfigWindow::ShowSingle(this);
 					break;
 				
 				case MNUID_ITEM(IDM_FILE_QUIT):

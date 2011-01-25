@@ -82,6 +82,7 @@ SET(gens-qt4_SRCS
 	Input/EventKeys.cpp
 	EmuManager_qEmu.cpp
 	VBackend/GlTex2D.cpp
+	GeneralConfigWindow.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -97,6 +98,7 @@ SET(gens-qt4_MOC_HEADERS
 	VBackend/MsgTimer.hpp
 	ZipSelectDialog.hpp
 	Input/EventKeys.hpp
+	GeneralConfigWindow.hpp
 	)
 
 # Create .moc files for sources that need them.
@@ -107,6 +109,7 @@ SET(gens-qt4_UIS
 	ui/AboutWindow.ui
 	ui/CtrlConfigWindow.ui
 	ui/ZipSelectDialog.ui
+	ui/GeneralConfigWindow.ui
 	)
 
 # Generate the header files from the UI files.

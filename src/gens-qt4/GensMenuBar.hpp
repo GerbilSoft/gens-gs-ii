@@ -46,6 +46,7 @@
 #define IDM_FILE_CLOSE		MNUID(IDM_FILE_MENU, 2)
 #define IDM_FILE_SAVESTATE	MNUID(IDM_FILE_MENU, 3)
 #define IDM_FILE_LOADSTATE	MNUID(IDM_FILE_MENU, 4)
+#define IDM_FILE_GENCONFIG	MNUID(IDM_FILE_MENU, 5)
 #define IDM_FILE_QUIT		MNUID(IDM_FILE_MENU, 0xFFFF)
 
 #define IDM_HELP_MENU		7
@@ -109,8 +110,10 @@ class GensMenuBar : public QMenuBar
 #if QT_VERSION >= 0x040600
 			// Keys defined in Qt 4.6.
 			MACCEL_QUIT = (int)QKeySequence::Quit,
+			MACCEL_PREFERENCES = (int)QKeySequence::Preferences,
 #else
 			MACCEL_QUIT = 0,
+			MACCEL_PREFERENCES = 0,
 #endif
 #if QT_VERSION >= 0x040200
 			// Keys defined in Qt 4.2.

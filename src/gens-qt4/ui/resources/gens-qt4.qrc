@@ -13,5 +13,6 @@
     <file>oxygen-16x16/help-about.png</file>
     <file>oxygen-16x16/document-open.png</file>
     <file>oxygen-16x16/document-close.png</file>
+    <file>oxygen-16x16/configure.png</file>
   </qresource>
 </RCC>
