@@ -142,10 +142,11 @@ void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *
 	QString title = TR("Select %1 Boot ROM").arg(rom_id);
 	
 	// TODO: Specify the current Boot ROM filename as the default filename.
+	// TODO: Move the filename filters somewhere else.
 	QString filename = QFileDialog::getOpenFileName(this, title,
 			"",						// Default filename.
 			TR("Sega CD Boot ROM images") +
-			" (*.bin *.gen"
+			" (*.bin *.gen *.md *.smd"
 #ifdef HAVE_ZLIB
 			ZLIB_EXT
 #endif /* HAVE_ZLIB */

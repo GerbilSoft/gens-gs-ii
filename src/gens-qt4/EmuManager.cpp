@@ -127,7 +127,7 @@ int EmuManager::openRom(QWidget *parent)
 			TR("Open ROM"),		// Dialog title
 			"",			// Default filename.
 			TR("Sega Genesis ROM images") +
-			" (*.bin *.gen"
+			" (*.bin *.gen *.md *.smd"
 #ifdef HAVE_ZLIB
 			ZLIB_EXT
 #endif /* HAVE_ZLIB */
