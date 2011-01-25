@@ -53,6 +53,23 @@ static const mcd_rom_db_t McdRomDatabase[] =
 {
 	/** Sega CD: Model 1 **/
 	
+	// Mega CD (J) Boot ROM v1.00l (NTSC)
+	// 1991/12/02 15:20
+	{
+		0xF18DDE5B,		// CRC32
+		
+		// md5sum
+		{0x29, 0xAD, 0x9C, 0xE8, 0x48, 0xB4, 0x9D, 0x0F,
+		 0x9C, 0xEF, 0xC2, 0x94, 0x13, 0x7F, 0x65, 0x3C},
+		
+		// Region code and ROM support status.
+		Region_Japan_NTSC, RomStatus_Supported,
+		
+		// Description and notes.
+		"Mega CD (J) v1.00l (NTSC)",
+		"This ROM will also work for Japan/PAL."
+	},
+	
 	// Mega CD (J) Boot ROM v1.00p (NTSC)
 	// 1991/12/17 12:00
 	{
@@ -71,6 +88,23 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		"This ROM will also work for Japan/PAL."
 	},
 	
+	// Mega CD (J) Boot ROM v1.00S (NTSC)
+	// 1991/12/28 18:30
+	{
+		0x79F85384,		// CRC32 (with original HINT vector)
+		
+		// md5sum
+		{0xA3, 0xDD, 0xCC, 0x84, 0x83, 0xB0, 0x36, 0x81,
+		 0x41, 0xAD, 0xFD, 0x99, 0xD9, 0xA1, 0xE4, 0x66},
+		
+		// Region code and ROM support status.
+		Region_Japan_NTSC, RomStatus_Supported,
+		
+		// Description and notes.
+		"Mega CD (J) v1.00S (NTSC)",
+		"This ROM will also work for Japan/PAL."
+	},
+	
 	// Mega CD (J) Boot ROM v1.00S (PAL)
 	// 1991/12/28 20:30
 	{
@@ -86,6 +120,23 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		// Description and notes.
 		"Mega CD (J) v1.00S (PAL)",
 		"This ROM will also work for Japan/NTSC."
+	},
+	
+	// Sega CD (U) Boot ROM v1.00
+	// 1992/08/04 03:00
+	{
+		0xE7E3AFE2,		// CRC32 (with original HINT vector)
+		
+		// md5sum
+		{0x2E, 0xFD, 0x74, 0xE3, 0x23, 0x2F, 0xF2, 0x60,
+		 0xE3, 0x71, 0xB9, 0x9F, 0x84, 0x02, 0x4F, 0x7F},
+		
+		// Region code and ROM support status.
+		Region_USA, RomStatus_Supported,
+		
+		// Description and notes.
+		"Sega CD (U) v1.00",
+		""
 	},
 	
 	// Sega CD (U) Boot ROM v1.10
@@ -347,6 +398,24 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		"Sega Wondermega (J) v1.00W",
 		"Gens/GS II does not support the hardware changes"
 			" in the Sega Wondermega."
+	},
+	
+	// Sega Wondermega M2 (J) Boot ROM v2.00
+	// 1993/05/27 13:20
+	{
+		0x2B19972F,		// CRC32 (with original HINT vector)
+		
+		// md5sum
+		{0xD3, 0x2F, 0x50, 0xFB, 0x7F, 0x43, 0x55, 0xC4,
+		 0x5D, 0x5D, 0xB3, 0x06, 0xA0, 0xD3, 0x8F, 0xA4},
+		
+		// Region code and ROM support status.
+		Region_Japan_NTSC, RomStatus_Unsupported,
+		
+		// Description and notes.
+		"Sega Wondermega M2 (J) v2.00",
+		"Gens/GS II does not support the hardware changes"
+			" in the Sega Wondermega M2."
 	},
 	
 	// JVC X'Eye (U) Boot ROM v2.00
