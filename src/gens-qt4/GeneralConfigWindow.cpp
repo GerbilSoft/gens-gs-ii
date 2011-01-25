@@ -74,14 +74,18 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	txtMcdRomUSA->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(TR("Sega CD (U)")));
 	gridMcdRoms->addWidget(txtMcdRomUSA, 0, 1);
 	lblMcdRomUSA->setBuddy(txtMcdRomUSA);
+	setTabOrder(lblMcdRomUSA, txtMcdRomUSA);
+	setTabOrder(txtMcdRomUSA, btnMcdRomUSA);
 	// Sega CD: EUR Boot ROM
 	txtMcdRomEUR->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(TR("Mega CD (E)")));
 	gridMcdRoms->addWidget(txtMcdRomEUR, 1, 1);
 	lblMcdRomEUR->setBuddy(txtMcdRomEUR);
+	setTabOrder(txtMcdRomEUR, btnMcdRomEUR);
 	// Sega CD: JPN Boot ROM
 	txtMcdRomJPN->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(TR("Mega CD (J)")));
 	gridMcdRoms->addWidget(txtMcdRomJPN, 2, 1);
 	lblMcdRomJPN->setBuddy(txtMcdRomJPN);
+	setTabOrder(txtMcdRomJPN, btnMcdRomJPN);
 	
 	// Initialize BIOS ROM filenames.
 	// TODO: Copy filenames from configuration.
