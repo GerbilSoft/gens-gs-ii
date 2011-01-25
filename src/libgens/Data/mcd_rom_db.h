@@ -49,6 +49,8 @@ typedef enum
 	Region_USA		= 0x01,
 	Region_Japan_PAL	= 0x02,
 	Region_Europe		= 0x03,
+	
+	Region_MAX		= -1
 } MCD_RegionCode_t;
 
 // ROM status.
@@ -68,6 +70,27 @@ typedef enum
  * @return ROM ID, or -1 if not found.
  */
 int lg_mcd_rom_FindByCRC32(uint32_t rom_crc32);
+
+/**
+ * lg_mcd_rom_GetDescription(): Get a Boot ROM's description.
+ * @param rom_id Boot ROM ID.
+ * @return Boot ROM description, or NULL if the ID is invalid.
+ */
+const utf8_str *lg_mcd_rom_GetDescription(int rom_id);
+
+/**
+ * lg_mcd_rom_GetRegion(): Get a Boot ROM's region.
+ * @param rom_id Boot ROM ID.
+ * @return Boot ROM ID, or Region_MAX if the ID is invalid.
+ */
+MCD_RegionCode_t lg_mcd_rom_GetRegion(int rom_id);
+
+/**
+ * lg_mcd_rom_GetSupportStatus(): Get a Boot ROM's support status.
+ * @param rom_id Boot ROM ID.
+ * @return ROM support status, or RomStatus_MAX if the ID is invalid.
+ */
+MCD_RomStatus_t lg_mcd_rom_GetSupportStatus(int rom_id);
 
 #ifdef __cplusplus
 }

@@ -38,10 +38,11 @@ typedef struct _mcd_rom_db_t
 	MCD_RegionCode_t region_code;	// Region code.
 	MCD_RomStatus_t rom_status;	// ROM status.
 	
-	const char *description;	// ROM description.
-	const char *notes;		// ROM notes. (Optional)
+	const utf8_str *description;	// ROM description.
+	const utf8_str *notes;		// ROM notes. (Optional)
 } mcd_rom_db_t;
 
+#define MCD_ROM_DATABASE_ENTRIES ((int)((sizeof(McdRomDatabase) / sizeof(McdRomDatabase[0])) - 1))
 static const mcd_rom_db_t McdRomDatabase[] =
 {
 	/** Sega CD: Model 1 **/
@@ -525,4 +526,46 @@ int lg_mcd_rom_FindByCRC32(uint32_t rom_crc32)
 	
 	// CRC32 not matched.
 	return MCD_ROM_UNKNOWN;
+}
+
+
+/**
+ * lg_mcd_rom_GetDescription(): Get a Boot ROM's description.
+ * @param rom_id Boot ROM ID.
+ * @return Boot ROM description, or NULL if the ID is invalid.
+ */
+const utf8_str *lg_mcd_rom_GetDescription(int rom_id)
+{
+	if (rom_id < 0 || rom_id >= MCD_ROM_DATABASE_ENTRIES)
+		return NULL;
+	
+	return McdRomDatabase[rom_id].description;
+}
+
+
+/**
+ * lg_mcd_rom_GetRegion(): Get a Boot ROM's region.
+ * @param rom_id Boot ROM ID.
+ * @return Boot ROM ID, or Region_MAX if the ID is invalid.
+ */
+MCD_RegionCode_t lg_mcd_rom_GetRegion(int rom_id)
+{
+	if (rom_id < 0 || rom_id >= MCD_ROM_DATABASE_ENTRIES)
+		return Region_MAX;
+	
+	return McdRomDatabase[rom_id].region_code;
+}
+
+
+/**
+ * lg_mcd_rom_GetSupportStatus(): Get a Boot ROM's support status.
+ * @param rom_id Boot ROM ID.
+ * @return ROM support status, or RomStatus_MAX if the ID is invalid.
+ */
+MCD_RomStatus_t lg_mcd_rom_GetSupportStatus(int rom_id)
+{
+	if (rom_id < 0 || rom_id >= MCD_ROM_DATABASE_ENTRIES)
+		return RomStatus_MAX;
+	
+	return McdRomDatabase[rom_id].rom_status;
 }
