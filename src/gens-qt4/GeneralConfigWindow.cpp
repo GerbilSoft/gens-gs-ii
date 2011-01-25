@@ -79,9 +79,9 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	
 	// Initialize BIOS ROM filenames.
 	// TODO: Copy filenames from configuration.
-	mcdUpdateRomFileStatus(txtMcdRomUSA);
-	mcdUpdateRomFileStatus(txtMcdRomEUR);
-	mcdUpdateRomFileStatus(txtMcdRomJPN);
+	sMcdRomStatus_USA = mcdUpdateRomFileStatus(txtMcdRomUSA);
+	sMcdRomStatus_EUR = mcdUpdateRomFileStatus(txtMcdRomEUR);
+	sMcdRomStatus_JPN = mcdUpdateRomFileStatus(txtMcdRomJPN);
 }
 
 
@@ -118,10 +118,11 @@ void GeneralConfigWindow::ShowSingle(QWidget *parent)
 
 /**
  * mcdSelectRomFile(): Select a Sega CD Boot ROM file.
- * @param rom_id Sega CD Boot ROM ID.
- * @param txtRomFile ROM file textbox.
+ * @param rom_id	[in] Sega CD Boot ROM ID.
+ * @param txtRomFile	[in] ROM file textbox.
+ * @param sRomStatus	[out] Updated ROM status. (if a ROM is selected)
  */
-void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *txtRomFile)
+void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *txtRomFile, QString& sRomStatus)
 {
 	// TODO: Proper compressed file support.
 	#define ZLIB_EXT " *.zip *.zsg *.gz"
@@ -153,22 +154,28 @@ void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *
 	txtRomFile->setText(filename);
 	
 	// Update the ROM file status.
-	mcdUpdateRomFileStatus(txtRomFile);
+	QString sNewRomStatus = mcdUpdateRomFileStatus(txtRomFile);
+	if (!sNewRomStatus.isEmpty())
+	{
+		sRomStatus = sNewRomStatus;
+		mcdDisplayRomFileStatus(rom_id, sRomStatus);
+	}
 }
 
 void GeneralConfigWindow::on_btnMcdRomUSA_clicked(void)
-	{ mcdSelectRomFile(TR("Sega CD (U)"), txtMcdRomUSA); }
+	{ mcdSelectRomFile(TR("Sega CD (U)"), txtMcdRomUSA, sMcdRomStatus_USA); }
 void GeneralConfigWindow::on_btnMcdRomEUR_clicked(void)
-	{ mcdSelectRomFile(TR("Mega CD (E)"), txtMcdRomEUR); }
+	{ mcdSelectRomFile(TR("Mega CD (E)"), txtMcdRomEUR, sMcdRomStatus_EUR); }
 void GeneralConfigWindow::on_btnMcdRomJPN_clicked(void)
-	{ mcdSelectRomFile(TR("Mega CD (J)"), txtMcdRomJPN); }
+	{ mcdSelectRomFile(TR("Mega CD (J)"), txtMcdRomJPN, sMcdRomStatus_JPN); }
 
 
 /**
  * mcdUpdateRomFileStatus(): Sega CD: Update Boot ROM file status.
  * @param txtRomFile ROM file textbox.
+ * @return Updated ROM status.
  */
-void GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile)
+QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile)
 {
 	// Check if the file exists.
 	QFile file(txtRomFile->text());
@@ -179,11 +186,12 @@ void GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile)
 		// SP_MessageBoxQuestion is redirected to SP_MessageBoxInformation on KDE 4.
 		// TODO: Set ROM file notes.
 		txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
-		return;
+		return QString();
 	}
 	
 	// TODO: Check the filename.
 	txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxWarning));
+	return QString("mcdUpdateRomFileStatus TODO");
 }
 
 
@@ -192,18 +200,18 @@ void GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile)
  * @param rom_id Sega CD Boot ROM ID.
  * @param rom_desc ROM file description. (detected by examining the ROM)
  */
-void GeneralConfigWindow::mcdDisplayRomFileStatus(const QString& rom_id, const QString &rom_desc)
+void GeneralConfigWindow::mcdDisplayRomFileStatus(const QString& rom_id, const QString& rom_desc)
 {
 	// Set the ROM description.
 	QString sel_rom = TR("Selected ROM: %1");
-	lblMcdSelectedRom->setText(sel_rom.arg(rom_id));
+	lblMcdSelectedRom->setText(sel_rom.arg(rom_id) + "\n" + rom_desc);
 }
 
 void GeneralConfigWindow::on_txtMcdRomUSA_focusIn(void)
-	{ mcdDisplayRomFileStatus(TR("Sega CD (U)"), "TODO"); }
+	{ mcdDisplayRomFileStatus(TR("Sega CD (U)"), sMcdRomStatus_USA); }
 void GeneralConfigWindow::on_txtMcdRomEUR_focusIn(void)
-	{ mcdDisplayRomFileStatus(TR("Mega CD (E)"), "TODO"); }
+	{ mcdDisplayRomFileStatus(TR("Mega CD (E)"), sMcdRomStatus_EUR); }
 void GeneralConfigWindow::on_txtMcdRomJPN_focusIn(void)
-	{ mcdDisplayRomFileStatus(TR("Mega CD (J)"), "TODO"); }
+	{ mcdDisplayRomFileStatus(TR("Mega CD (J)"), sMcdRomStatus_JPN); }
 
 }
