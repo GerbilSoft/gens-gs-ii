@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
-    <height>357</height>
+    <width>494</width>
+    <height>364</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>494</width>
+    <height>364</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>General Configuration</string>
@@ -87,26 +93,6 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0" colspan="3">
-           <widget class="QLabel" name="lblMcdSelectedRom">
-            <property name="text">
-             <string>Selected ROM: (none)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0" colspan="3">
-           <spacer name="verticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
           <item row="3" column="0" colspan="3">
            <spacer name="verticalSpacer_2">
             <property name="orientation">
@@ -161,6 +147,25 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item row="4" column="0" colspan="3">
+           <widget class="QLabel" name="lblMcdSelectedRom">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Selected ROM: (none)</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
