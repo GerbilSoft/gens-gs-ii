@@ -75,6 +75,10 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 		void on_txtMcdRomUSA_focusIn(void);
 		void on_txtMcdRomEUR_focusIn(void);
 		void on_txtMcdRomJPN_focusIn(void);
+		
+		void on_txtMcdRomUSA_textChanged(void);
+		void on_txtMcdRomEUR_textChanged(void);
+		void on_txtMcdRomJPN_textChanged(void);
 };
 
 }

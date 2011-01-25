@@ -65,15 +65,15 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	// Sega CD: Add the Boot ROM textboxes to the grid layout.
 	
 	// Sega CD: USA Boot ROM
-	txtMcdRomUSA->setPlaceholderText(sMcdBootRom_PlaceholderText.arg("Sega CD (U)"));
+	txtMcdRomUSA->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(TR("Sega CD (U)")));
 	gridMcdRoms->addWidget(txtMcdRomUSA, 0, 1);
 	lblMcdRomUSA->setBuddy(txtMcdRomUSA);
 	// Sega CD: EUR Boot ROM
-	txtMcdRomEUR->setPlaceholderText(sMcdBootRom_PlaceholderText.arg("Mega CD (E)"));
+	txtMcdRomEUR->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(TR("Mega CD (E)")));
 	gridMcdRoms->addWidget(txtMcdRomEUR, 1, 1);
 	lblMcdRomEUR->setBuddy(txtMcdRomEUR);
 	// Sega CD: JPN Boot ROM
-	txtMcdRomJPN->setPlaceholderText(sMcdBootRom_PlaceholderText.arg("Mega CD (J)"));
+	txtMcdRomJPN->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(TR("Mega CD (J)")));
 	gridMcdRoms->addWidget(txtMcdRomJPN, 2, 1);
 	lblMcdRomJPN->setBuddy(txtMcdRomJPN);
 	
@@ -151,15 +151,9 @@ void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *
 		return;
 	
 	// Set the filename text.
+	// ROM file status will be updated automatically by
+	// the textChanged() signal from QLineEdit.
 	txtRomFile->setText(filename);
-	
-	// Update the ROM file status.
-	QString sNewRomStatus = mcdUpdateRomFileStatus(txtRomFile);
-	if (!sNewRomStatus.isEmpty())
-	{
-		sRomStatus = sNewRomStatus;
-		mcdDisplayRomFileStatus(rom_id, sRomStatus);
-	}
 }
 
 void GeneralConfigWindow::on_btnMcdRomUSA_clicked(void)
@@ -178,7 +172,8 @@ void GeneralConfigWindow::on_btnMcdRomJPN_clicked(void)
 QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile)
 {
 	// Check if the file exists.
-	QFile file(txtRomFile->text());
+	const QString& filename = txtRomFile->text();
+	QFile file(filename);
 	if (!file.exists())
 	{
 		// File doesn't exist.
@@ -186,7 +181,10 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile)
 		// SP_MessageBoxQuestion is redirected to SP_MessageBoxInformation on KDE 4.
 		// TODO: Set ROM file notes.
 		txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
-		return QString();
+		if (filename.isEmpty())
+			return TR("No ROM filename specified.");
+		else
+			return TR("The specified ROM file was not found.");
 	}
 	
 	// TODO: Check the filename.
@@ -204,7 +202,7 @@ void GeneralConfigWindow::mcdDisplayRomFileStatus(const QString& rom_id, const Q
 {
 	// Set the ROM description.
 	QString sel_rom = TR("Selected ROM: %1");
-	lblMcdSelectedRom->setText(sel_rom.arg(rom_id) + "\n" + rom_desc);
+	lblMcdSelectedRom->setText(sel_rom.arg(rom_id) + "\n\n" + rom_desc);
 }
 
 void GeneralConfigWindow::on_txtMcdRomUSA_focusIn(void)
@@ -213,5 +211,33 @@ void GeneralConfigWindow::on_txtMcdRomEUR_focusIn(void)
 	{ mcdDisplayRomFileStatus(TR("Mega CD (E)"), sMcdRomStatus_EUR); }
 void GeneralConfigWindow::on_txtMcdRomJPN_focusIn(void)
 	{ mcdDisplayRomFileStatus(TR("Mega CD (J)"), sMcdRomStatus_JPN); }
+
+void GeneralConfigWindow::on_txtMcdRomUSA_textChanged(void)
+{
+	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomUSA);
+	if (!sNewRomStatus.isEmpty())
+	{
+		sMcdRomStatus_USA = sNewRomStatus;
+		mcdDisplayRomFileStatus(TR("Sega CD (U)"), sMcdRomStatus_USA);
+	}
+}
+void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
+{
+	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomEUR);
+	if (!sNewRomStatus.isEmpty())
+	{
+		sMcdRomStatus_EUR = sNewRomStatus;
+		mcdDisplayRomFileStatus(TR("Mega CD (E)"), sMcdRomStatus_EUR);
+	}
+}
+void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
+{
+	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomJPN);
+	if (!sNewRomStatus.isEmpty())
+	{
+		sMcdRomStatus_JPN = sNewRomStatus;
+		mcdDisplayRomFileStatus(TR("Mega CD (J)"), sMcdRomStatus_JPN);
+	}
+}
 
 }
