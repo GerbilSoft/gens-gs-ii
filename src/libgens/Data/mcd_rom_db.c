@@ -157,8 +157,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		
 		// Description and notes.
 		"Mega CD 2 (J) v2.00c (NTSC)",
-		"Gens/GS II does not support the hardware changes"
-		"in the Mega CD model 2.\n"
+		"Gens/GS II does not support the hardware changes in the Mega CD model 2.\n"
 		"This ROM will also work for Japan/PAL."
 	},
 	
@@ -181,8 +180,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		
 		// Description and notes.
 		"Sega CD 2 (U) v2.00",
-		"This is a known bad dump, and will not work properly"
-		"in any Sega CD emulator."
+		"This is a known bad dump, and will not work properly in any Sega CD emulator."
 	},
 	
 	// Sega CD 2 (U) Boot ROM v2.00
@@ -205,7 +203,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		// Description and notes.
 		"Sega CD 2 (U) v2.00",
 		"Gens/GS II does not support the hardware changes"
-		"in the Sega CD model 2."
+			" in the Sega CD model 2."
 	},
 	
 	// Mega CD 2 (E) Boot ROM v2.00
@@ -228,7 +226,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		// Description and notes.
 		"Mega CD 2 (E) v2.00",
 		"Gens/GS II does not support the hardware changes"
-		"in the Mega CD model 2."
+			" in the Mega CD model 2."
 	},
 	
 	/** Sega CD: Model 2 (ROM revision W) **/
@@ -253,7 +251,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		// Description and notes.
 		"Sega CD 2 (U) v2.00W",
 		"Gens/GS II does not support the hardware changes"
-		"in the Sega CD model 2."
+			" in the Sega CD model 2."
 	},
 	
 	// Mega CD 2 (E) Boot ROM v2.00W
@@ -276,7 +274,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		// Description and notes.
 		"Mega CD 2 (E) v2.00W",
 		"Gens/GS II does not support the hardware changes"
-		"in the Mega CD model 2."
+			" in the Mega CD model 2."
 	},
 	
 	/** Sega CD: Model 2 (ROM revision X) **/
@@ -301,7 +299,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		// Description and notes.
 		"Sega CD 2 (U) v2.11X",
 		"Gens/GS II does not support the hardware changes"
-		"in the Sega CD model 2."
+			" in the Sega CD model 2."
 	},
 	
 	/** Sega MultiMega / CDX **/
@@ -326,7 +324,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		// Description and notes.
 		"Sega CDX (U) v2.21X",
 		"Gens/GS II does not support the hardware changes"
-		"in the Sega CDX."
+			" in the Sega CDX."
 	},
 	
 	/** Pioneer LaserActive **/
@@ -351,7 +349,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		// Description and notes.
 		"Pioneer LaserActive (J) v0.98",
 		"Gens/GS II does not support the hardware changes"
-		"in the Pioneer LaserActive."
+			" in the Pioneer LaserActive."
 	},
 	
 	// Pioneer LaserActive (U) Boot ROM v0.98
@@ -374,7 +372,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		// Description and notes.
 		"Pioneer LaserActive (U) v0.98",
 		"Gens/GS II does not support the hardware changes"
-		"in the Pioneer LaserActive."
+			" in the Pioneer LaserActive."
 	},
 	
 	// Pioneer LaserActive (U) Boot ROM v1.04
@@ -397,7 +395,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		// Description and notes.
 		"Pioneer LaserActive (U) v1.04",
 		"Gens/GS II does not support the hardware changes"
-		"in the Pioneer LaserActive."
+			" in the Pioneer LaserActive."
 	},
 	
 	/** JVC Wondermega / X'Eye **/
@@ -424,7 +422,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		// Description and notes.
 		"Sega Wondermega (J) v1.00W",
 		"Gens/GS II does not support the hardware changes"
-		"in the Sega Wondermega."
+			" in the Sega Wondermega."
 	},
 	
 	// Sega Wondermega (J) Boot ROM v1.00W
@@ -447,7 +445,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		// Description and notes.
 		"Sega Wondermega (J) v1.00W",
 		"Gens/GS II does not support the hardware changes"
-		"in the Sega Wondermega."
+			" in the Sega Wondermega."
 	},
 	
 	// JVC X'Eye (U) Boot ROM v2.00
@@ -472,7 +470,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		// Description and notes.
 		"JVC X'Eye (U) v2.00",
 		"Gens/GS II does not support the hardware changes"
-		"in the JVC X'Eye."
+			" in the JVC X'Eye."
 	},
 	
 	// JVC X'Eye (U) Boot ROM v2.00
@@ -495,7 +493,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		// Description and notes.
 		"JVC X'Eye (U) v2.00",
 		"Gens/GS II does not support the hardware changes"
-		"in the JVC X'Eye."
+			" in the JVC X'Eye."
 	},
 	
 	// End of database.
