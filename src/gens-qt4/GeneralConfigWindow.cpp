@@ -275,24 +275,8 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, MC
 		else
 		{
 			// USA or Europe Boot ROM. Region is incorrect.
-			// TODO: Add region-to-string function to mcd_rom_db.c.
-			QString expected_region, boot_rom_region;
-			switch (region_code)
-			{
-				case Region_Japan_NTSC:	expected_region = TR("Japan (NTSC)"); break;
-				case Region_USA: 	expected_region = TR("USA"); break;
-				case Region_Japan_PAL:	expected_region = TR("Japan (PAL)"); break;
-				case Region_Europe: 	expected_region = TR("Europe"); break;
-				default: break;
-			}
-			switch (boot_rom_region_code)
-			{
-				case Region_Japan_NTSC:	boot_rom_region = TR("Japan (NTSC)"); break;
-				case Region_USA: 	boot_rom_region = TR("USA"); break;
-				case Region_Japan_PAL:	boot_rom_region = TR("Japan (PAL)"); break;
-				case Region_Europe: 	boot_rom_region = TR("Europe"); break;
-				default: break;
-			}
+			QString expected_region = QString::fromUtf8(lg_mcd_rom_GetRegionCodeString(region_code));
+			QString boot_rom_region = QString::fromUtf8(lg_mcd_rom_GetRegionCodeString(boot_rom_region_code));
 			
 			rom_notes += sWarning + TR("Region code is incorrect.") + "<br/>\n" +
 				     TR("(expected %1; found %2)").arg(expected_region).arg(boot_rom_region);
