@@ -31,6 +31,9 @@
 #include "GensLineEdit.hpp"
 #include <stdio.h>
 
+// libgens: Sega CD Boot ROM database.
+#include "libgens/Data/mcd_rom_db.h"
+
 namespace GensQt4
 {
 
@@ -53,11 +56,14 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 	private:
 		static GeneralConfigWindow *m_GeneralConfigWindow;
 		
+		// Sega CD: Boot ROM filesize.
+		static const int MCD_ROM_FILESIZE = 131072;
+		
 		// Sega CD: Select Boot ROM file.
-		void mcdSelectRomFile(const QString& rom_id, GensLineEdit *txtRomFile, QString& sRomStatus);
+		void mcdSelectRomFile(const QString& rom_id, GensLineEdit *txtRomFile);
 		
 		// Sega CD: Update Boot ROM file status.
-		QString mcdUpdateRomFileStatus(GensLineEdit *txtRomFile);
+		QString mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, MCD_RegionCode_t region_code);
 		
 		// Sega CD: Display Boot ROM file status.
 		void mcdDisplayRomFileStatus(const QString& rom_id, const QString& rom_desc);

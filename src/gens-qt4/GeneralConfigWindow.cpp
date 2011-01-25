@@ -29,6 +29,12 @@
 #define TR(text) \
 	QApplication::translate("GeneralConfigWindow", (text), NULL, QApplication::UnicodeUTF8)
 
+// C includes.
+#include <stdint.h>
+
+// zlib
+#include <zlib.h>
+
 // Qt4 includes.
 #include <QtGui/QFileDialog>
 #include <QtCore/QFile>
@@ -79,9 +85,9 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	
 	// Initialize BIOS ROM filenames.
 	// TODO: Copy filenames from configuration.
-	sMcdRomStatus_USA = mcdUpdateRomFileStatus(txtMcdRomUSA);
-	sMcdRomStatus_EUR = mcdUpdateRomFileStatus(txtMcdRomEUR);
-	sMcdRomStatus_JPN = mcdUpdateRomFileStatus(txtMcdRomJPN);
+	sMcdRomStatus_USA = mcdUpdateRomFileStatus(txtMcdRomUSA, Region_USA);
+	sMcdRomStatus_EUR = mcdUpdateRomFileStatus(txtMcdRomEUR, Region_Europe);
+	sMcdRomStatus_JPN = mcdUpdateRomFileStatus(txtMcdRomJPN, Region_Japan_NTSC);
 }
 
 
@@ -120,9 +126,8 @@ void GeneralConfigWindow::ShowSingle(QWidget *parent)
  * mcdSelectRomFile(): Select a Sega CD Boot ROM file.
  * @param rom_id	[in] Sega CD Boot ROM ID.
  * @param txtRomFile	[in] ROM file textbox.
- * @param sRomStatus	[out] Updated ROM status. (if a ROM is selected)
  */
-void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *txtRomFile, QString& sRomStatus)
+void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *txtRomFile)
 {
 	// TODO: Proper compressed file support.
 	#define ZLIB_EXT " *.zip *.zsg *.gz"
@@ -157,20 +162,28 @@ void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *
 }
 
 void GeneralConfigWindow::on_btnMcdRomUSA_clicked(void)
-	{ mcdSelectRomFile(TR("Sega CD (U)"), txtMcdRomUSA, sMcdRomStatus_USA); }
+	{ mcdSelectRomFile(TR("Sega CD (U)"), txtMcdRomUSA); }
 void GeneralConfigWindow::on_btnMcdRomEUR_clicked(void)
-	{ mcdSelectRomFile(TR("Mega CD (E)"), txtMcdRomEUR, sMcdRomStatus_EUR); }
+	{ mcdSelectRomFile(TR("Mega CD (E)"), txtMcdRomEUR); }
 void GeneralConfigWindow::on_btnMcdRomJPN_clicked(void)
-	{ mcdSelectRomFile(TR("Mega CD (J)"), txtMcdRomJPN, sMcdRomStatus_JPN); }
+	{ mcdSelectRomFile(TR("Mega CD (J)"), txtMcdRomJPN); }
 
 
 /**
  * mcdUpdateRomFileStatus(): Sega CD: Update Boot ROM file status.
  * @param txtRomFile ROM file textbox.
+ * @param region_code Expected ROM region code.
  * @return Updated ROM status.
  */
-QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile)
+QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, MCD_RegionCode_t region_code)
 {
+	// ROM data buffer.
+	uint8_t *rom_data = NULL;
+	qint64 data_len;
+	uint32_t rom_crc32;
+	int boot_rom_id;
+	MCD_RegionCode_t boot_rom_region_code;
+	
 	// Check if the file exists.
 	const QString& filename = txtRomFile->text();
 	QFile file(filename);
@@ -187,9 +200,123 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile)
 			return TR("The specified ROM file was not found.");
 	}
 	
-	// TODO: Check the filename.
-	txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxWarning));
-	return QString("mcdUpdateRomFileStatus TODO");
+	// Check the ROM file.
+	// TODO: Decompressor support.
+	QStyle::StandardPixmap filename_icon = QStyle::SP_DialogYesButton;
+	QString rom_id = TR("Unknown");
+	QString rom_notes;
+	QString rom_size_warning;
+	
+	// Warning string.
+	const QString sWarning = "<span style='color: red'><b>" + TR("Warning:") + "</b></span> ";
+	
+	// Check the ROM filesize.
+	// Valid boot ROMs are 128 KB.
+	// Smaller ROMs will not work; larger ROMs may work, but warn anyway.
+	if (file.size() != MCD_ROM_FILESIZE)
+	{
+		// Wrong ROM size.
+		filename_icon = QStyle::SP_MessageBoxWarning;
+		
+		rom_size_warning = sWarning + TR("ROM size is incorrect.") + "<br/>\n" +
+				   TR("(expected %L1 bytes; found %L2 bytes)").arg(MCD_ROM_FILESIZE).arg(file.size());
+		if (file.size() < MCD_ROM_FILESIZE)
+		{
+			// ROM is too small, so it's guaranteed to not match anything in the database.
+			goto rom_identified;
+		}
+	}
+	
+	// Open the file.
+	if (!file.open(QIODevice::ReadOnly))
+	{
+		// Error opening the file.
+		rom_notes = TR("Error opening file: %1").arg(file.error());
+		goto rom_identified;
+	}
+	
+	// Read 128 KB and calculate the CRC32.
+	rom_data = (uint8_t*)malloc(MCD_ROM_FILESIZE);
+	data_len = file.read((char*)rom_data, MCD_ROM_FILESIZE);
+	if (data_len != MCD_ROM_FILESIZE)
+	{
+		// Error reading data from the file.
+		rom_notes = TR("Error reading file.") + "<br/>\n" +
+			    TR("(expected %L1 bytes; read %L2 bytes)").arg(MCD_ROM_FILESIZE).arg(data_len);
+		goto rom_identified;
+	}
+	
+	// Calculate the CRC32 using zlib.
+	rom_crc32 = crc32(0, rom_data, MCD_ROM_FILESIZE);
+	
+	// Look up the CRC32 in the Sega CD Boot ROM database.
+	boot_rom_id = lg_mcd_rom_FindByCRC32(rom_crc32);
+	if (boot_rom_id < 0)
+	{
+		// Boot ROM was not found in the database.
+		filename_icon = QStyle::SP_MessageBoxWarning;
+		goto rom_identified;
+	}
+	
+	// ROM found. Get the description and other information.
+	rom_id = QString::fromUtf8(lg_mcd_rom_GetDescription(boot_rom_id));
+	
+	// Check the region code.
+	boot_rom_region_code = lg_mcd_rom_GetRegion(boot_rom_id);
+	if (boot_rom_region_code != region_code)
+	{
+		// Region code doesn't match.
+		if ((region_code == Region_Japan_NTSC && boot_rom_region_code == Region_Japan_PAL) ||
+		    (region_code == Region_Japan_PAL && boot_rom_region_code == Region_Japan_NTSC))
+		{
+			// Japanese Boot ROM. NTSC/PAL doesn't affect region lock.
+			// Do nothing here.
+		}
+		else
+		{
+			// USA or Europe Boot ROM. Region is incorrect.
+			// TODO: Add region-to-string function to mcd_rom_db.c.
+			QString expected_region, boot_rom_region;
+			switch (region_code)
+			{
+				case Region_Japan_NTSC:	expected_region = TR("Japan (NTSC)"); break;
+				case Region_USA: 	expected_region = TR("USA"); break;
+				case Region_Japan_PAL:	expected_region = TR("Japan (PAL)"); break;
+				case Region_Europe: 	expected_region = TR("Europe"); break;
+				default: break;
+			}
+			switch (boot_rom_region_code)
+			{
+				case Region_Japan_NTSC:	boot_rom_region = TR("Japan (NTSC)"); break;
+				case Region_USA: 	boot_rom_region = TR("USA"); break;
+				case Region_Japan_PAL:	boot_rom_region = TR("Japan (PAL)"); break;
+				case Region_Europe: 	boot_rom_region = TR("Europe"); break;
+				default: break;
+			}
+			
+			rom_notes += sWarning + TR("Region code is incorrect.") + "<br/>\n" +
+				     TR("(expected %1; found %2)").arg(expected_region).arg(boot_rom_region);
+			
+			// Set the icon to warning.
+			filename_icon = QStyle::SP_MessageBoxWarning;
+		}
+	}
+	
+rom_identified:
+	// Free the ROM data buffer if it was allocated.
+	free(rom_data);
+	
+	// Set the Boot ROM filename textbox icon.
+	txtRomFile->setIcon(style()->standardIcon(filename_icon));
+	
+	// Set the Boot ROM description.
+	QString s_ret;
+	s_ret = TR("ROM identified as: %1").arg(rom_id);
+	if (!rom_notes.isEmpty())
+		s_ret += "<br/>\n<br/>\n" + rom_notes;
+	if (!rom_size_warning.isEmpty())
+		s_ret += "<br/>\n<br/>\n" + rom_size_warning;
+	return QString(s_ret);
 }
 
 
@@ -202,7 +329,8 @@ void GeneralConfigWindow::mcdDisplayRomFileStatus(const QString& rom_id, const Q
 {
 	// Set the ROM description.
 	QString sel_rom = TR("Selected ROM: %1");
-	lblMcdSelectedRom->setText(sel_rom.arg(rom_id) + "\n\n" + rom_desc);
+	lblMcdSelectedRom->setText(sel_rom.arg(rom_id) + "<br/>\n<br/>\n" + rom_desc);
+	lblMcdSelectedRom->setTextFormat(Qt::RichText);
 }
 
 void GeneralConfigWindow::on_txtMcdRomUSA_focusIn(void)
@@ -214,7 +342,7 @@ void GeneralConfigWindow::on_txtMcdRomJPN_focusIn(void)
 
 void GeneralConfigWindow::on_txtMcdRomUSA_textChanged(void)
 {
-	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomUSA);
+	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomUSA, Region_USA);
 	if (!sNewRomStatus.isEmpty())
 	{
 		sMcdRomStatus_USA = sNewRomStatus;
@@ -223,7 +351,7 @@ void GeneralConfigWindow::on_txtMcdRomUSA_textChanged(void)
 }
 void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
 {
-	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomEUR);
+	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomEUR, Region_Europe);
 	if (!sNewRomStatus.isEmpty())
 	{
 		sMcdRomStatus_EUR = sNewRomStatus;
@@ -232,7 +360,7 @@ void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
 }
 void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 {
-	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomJPN);
+	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomJPN, Region_Japan_NTSC);
 	if (!sNewRomStatus.isEmpty())
 	{
 		sMcdRomStatus_JPN = sNewRomStatus;
