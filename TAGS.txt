@@ -1,5 +1,11 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-GeneralConfigWindow-v0: Initial "General Configuration" window.
+It currently implements Sega CD Boot ROM detection, which is somewhat
+useless right now because Sega CD isn't implemented. (Changes aren't
+saved anywhere, either.) Sega Boot ROMs must be uncompressed in order
+to be detected at the moment. Decompressor support will be added later.
+
 mcd_pcm-0.1: Sega CD PCM Utility v0.1. This utility can convert Sega CD
 PCM samples to standard unsigned 8-bit WAV files with configurable
 starting position, length, and sample rate.
