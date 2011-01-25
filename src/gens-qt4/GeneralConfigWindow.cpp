@@ -252,6 +252,10 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, MC
 		goto rom_identified;
 	}
 	
+	// Fix up the ROM's Initial SP and Initial HINT vector.
+	memcpy(&rom_data[0x00], lg_mcd_rom_InitSP, sizeof(lg_mcd_rom_InitSP));
+	memcpy(&rom_data[0x70], lg_mcd_rom_InitHINT, sizeof(lg_mcd_rom_InitHINT));
+	
 	// Calculate the CRC32 using zlib.
 	rom_crc32 = crc32(0, rom_data, MCD_ROM_FILESIZE);
 	
