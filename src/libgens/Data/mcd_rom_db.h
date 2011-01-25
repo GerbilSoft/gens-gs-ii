@@ -79,6 +79,13 @@ int lg_mcd_rom_FindByCRC32(uint32_t rom_crc32);
 const utf8_str *lg_mcd_rom_GetDescription(int rom_id);
 
 /**
+ * lg_mcd_rom_GetDescription(): Get a Boot ROM's notes.
+ * @param rom_id Boot ROM ID.
+ * @return Boot ROM notes, or NULL if the ID is invalid.
+ */
+const utf8_str *lg_mcd_rom_GetNotes(int rom_id);
+
+/**
  * lg_mcd_rom_GetRegion(): Get a Boot ROM's region.
  * @param rom_id Boot ROM ID.
  * @return Boot ROM ID, or Region_MAX if the ID is invalid.
