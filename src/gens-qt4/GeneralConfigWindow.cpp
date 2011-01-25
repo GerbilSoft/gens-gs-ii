@@ -313,7 +313,7 @@ void GeneralConfigWindow::mcdDisplayRomFileStatus(const QString& rom_id, const Q
 {
 	// Set the ROM description.
 	QString sel_rom = TR("Selected ROM: %1");
-	lblMcdSelectedRom->setText(sel_rom.arg(rom_id) + "<br/>\n<br/>\n" + rom_desc);
+	lblMcdSelectedRom->setText(sel_rom.arg(rom_id) + "<br/>\n" + rom_desc);
 	lblMcdSelectedRom->setTextFormat(Qt::RichText);
 }
 
