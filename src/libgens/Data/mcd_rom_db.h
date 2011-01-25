@@ -35,6 +35,14 @@ extern "C" {
 // MCD_ROM_UNKNOWN: Unknown ROM.
 #define MCD_ROM_UNKNOWN -1
 
+/**
+ * ROM fixup data.
+ * lg_mcd_rom_InitSP: Initial SP. (0xFFFFFD00)
+ * lg_mcd_rom_InitHINT: Initial HINT vector. (0xFFFFFD0C)
+ */
+extern const uint8_t lg_mcd_rom_InitSP[4];
+extern const uint8_t lg_mcd_rom_InitHINT[4];
+
 // Region codes.
 typedef enum
 {

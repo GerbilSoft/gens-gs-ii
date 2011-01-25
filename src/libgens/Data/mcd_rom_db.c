@@ -26,6 +26,14 @@
 #include <string.h>
 
 /**
+ * ROM fixup data.
+ * lg_mcd_rom_InitSP: Initial SP. (0xFFFFFD00)
+ * lg_mcd_rom_InitHINT: Initial HINT vector. (0xFFFFFD0C)
+ */
+const uint8_t lg_mcd_rom_InitSP[4] = {0xFF, 0xFF, 0xFD, 0x00};
+const uint8_t lg_mcd_rom_InitHINT[4] = {0xFF, 0xFF, 0xFD, 0x0C};
+
+/**
  * mcd_rom_db_t: Sega CD Boot ROM database entry.
  */
 typedef struct _mcd_rom_db_t
