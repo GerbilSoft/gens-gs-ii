@@ -592,9 +592,9 @@ const utf8_str *lg_mcd_rom_GetRegionCodeString(MCD_RegionCode_t region_code)
 {
 	switch (region_code)
 	{
-		case Region_Japan_NTSC:	return "Japan (NTSC)";
+		case Region_Japan_NTSC:	return "Japan/NTSC";
 		case Region_USA: 	return "USA";
-		case Region_Japan_PAL:	return "Japan (PAL)";
+		case Region_Japan_PAL:	return "Japan/PAL";
 		case Region_Europe: 	return "Europe";
 		default:		return NULL;
 	}
