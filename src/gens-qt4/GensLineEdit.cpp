@@ -31,13 +31,12 @@ GensLineEdit::GensLineEdit(QWidget *parent)
 	: QLineEdit(parent)
 {
 	m_label = new QLabel(this);
-	m_label->setMinimumSize(16, 16);
-	m_label->setMaximumSize(16, 16);
+	m_label->setMinimumSize(18, 16);
+	m_label->setMaximumSize(18, 16);
 	
 	// Initialize the label.
 	int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
 	setStyleSheet(QString("QLineEdit { padding-right: %1px; }").arg(m_label->sizeHint().width() + frameWidth + 1));
-	m_label->setStyleSheet(QString("QLabel { padding-right: 2px; }"));
 	
 	QSize msz = minimumSizeHint();
 	setMinimumSize(qMax(msz.width(), m_label->sizeHint().height() + frameWidth * 2 + 2),
@@ -55,5 +54,5 @@ void GensLineEdit::resizeEvent(QResizeEvent *)
 #include <stdio.h>
 void GensLineEdit::setIcon(const QIcon& icon)
 {
-	m_label->setPixmap(icon.pixmap(m_label->size()));
+	m_label->setPixmap(icon.pixmap(16, 16));
 }
