@@ -28,6 +28,10 @@
 // Common macros. (Used for utf8_str.)
 #include "../macros/common.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // MCD_ROM_UNKNOWN: Unknown ROM.
 #define MCD_ROM_UNKNOWN -1
 
@@ -64,5 +68,9 @@ typedef enum
  * @return ROM ID, or -1 if not found.
  */
 int lg_mcd_rom_FindByCRC32(uint32_t rom_crc32);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __LIBGENS_MCD_ROM_DB_H__ */
