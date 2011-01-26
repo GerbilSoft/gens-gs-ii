@@ -24,6 +24,7 @@
 #include <config.h>
 
 #include "GeneralConfigWindow.hpp"
+#include "gqt4_main.hpp"
 
 // Text translation macro.
 #define TR(text) \
@@ -68,6 +69,11 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
 	
+	// Set up a signal for the Apply button.
+	QPushButton *btnApply = buttonBox->button(QDialogButtonBox::Apply);
+	if (btnApply)
+		connect(btnApply, SIGNAL(clicked()), this, SLOT(apply()));
+	
 	// Sega CD: Add the Boot ROM textboxes to the grid layout.
 	
 	// Sega CD: USA Boot ROM
@@ -87,11 +93,8 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	lblMcdRomJPN->setBuddy(txtMcdRomJPN);
 	setTabOrder(txtMcdRomJPN, btnMcdRomJPN);
 	
-	// Initialize BIOS ROM filenames.
-	// TODO: Copy filenames from configuration.
-	sMcdRomStatus_USA = mcdUpdateRomFileStatus(txtMcdRomUSA, MCD_REGION_USA);
-	sMcdRomStatus_EUR = mcdUpdateRomFileStatus(txtMcdRomEUR, MCD_REGION_EUROPE);
-	sMcdRomStatus_JPN = mcdUpdateRomFileStatus(txtMcdRomJPN, MCD_REGION_JAPAN_NTSC | MCD_REGION_JAPAN_PAL);
+	// Load configuration.
+	reload();
 }
 
 
@@ -125,6 +128,29 @@ void GeneralConfigWindow::ShowSingle(QWidget *parent)
 	}
 }
 
+
+/**
+ * reload(): Reload configuration.
+ */
+void GeneralConfigWindow::reload(void)
+{
+	// Load BIOS ROM filenames.
+	txtMcdRomUSA->setText(gqt4_config->mcdRomUSA());
+	txtMcdRomEUR->setText(gqt4_config->mcdRomEUR());
+	txtMcdRomJPN->setText(gqt4_config->mcdRomJPN());
+}
+
+
+/**
+ * apply(): Apply dialog settings.
+ */
+void GeneralConfigWindow::apply(void)
+{
+	// Save the Sega CD Boot ROMs to the configuration class.
+	gqt4_config->setMcdRomUSA(txtMcdRomUSA->text());
+	gqt4_config->setMcdRomEUR(txtMcdRomEUR->text());
+	gqt4_config->setMcdRomJPN(txtMcdRomJPN->text());
+}
 
 /**
  * mcdSelectRomFile(): Select a Sega CD Boot ROM file.

@@ -52,7 +52,13 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 		GensLineEdit *txtMcdRomUSA;
 		GensLineEdit *txtMcdRomEUR;
 		GensLineEdit *txtMcdRomJPN;
+	
+	protected slots:
+		void accept(void) { apply(); QDialog::accept(); }
+		void apply(void);
 		
+		void reload(void);
+	
 	private:
 		static GeneralConfigWindow *m_GeneralConfigWindow;
 		
