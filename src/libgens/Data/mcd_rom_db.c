@@ -41,7 +41,9 @@ typedef struct _mcd_rom_db_t
 	uint32_t crc32;			// ROM CRC32. (with original HINT vector)
 	uint8_t md5sum[16];		// ROM md5sum. (with original HINT vector)
 	
-	MCD_RegionCode_t region_code;	// Region code.
+	MCD_RegionCode_t region_code;		// Region code.
+	MCD_RegionCode_t region_primary;	// Primary region. (only one bit may be set!)
+	
 	MCD_RomStatus_t rom_status;	// ROM status.
 	
 	const utf8_str *description;	// ROM description.
@@ -63,7 +65,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0x9C, 0xEF, 0xC2, 0x94, 0x13, 0x7F, 0x65, 0x3C},
 		
 		// Region code and ROM support status.
-		Region_Japan_NTSC, RomStatus_Supported,
+		MCD_REGION_JAPAN_NTSC | MCD_REGION_JAPAN_PAL,
+		MCD_REGION_JAPAN_NTSC,
+		RomStatus_Supported,
 		
 		// Description and notes.
 		"Mega CD (J) v1.00l (NTSC)",
@@ -80,12 +84,13 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0x84, 0xE8, 0x20, 0xAC, 0x62, 0x1A, 0x8E, 0xDD},
 		
 		// Region code and ROM support status.
-		Region_Japan_NTSC, RomStatus_Recommended,
+		MCD_REGION_JAPAN_NTSC,
+		MCD_REGION_JAPAN_NTSC,
+		RomStatus_Recommended,
 		
 		// Description and notes.
 		"Mega CD (J) v1.00p (NTSC)",
-		"Recommended boot ROM for Mega CD (J).\n"
-		"This ROM will also work for Japan/PAL."
+		"Recommended boot ROM for Mega CD (J)."
 	},
 	
 	// Mega CD (J) Boot ROM v1.00S (NTSC)
@@ -98,11 +103,13 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0x41, 0xAD, 0xFD, 0x99, 0xD9, 0xA1, 0xE4, 0x66},
 		
 		// Region code and ROM support status.
-		Region_Japan_NTSC, RomStatus_Supported,
+		MCD_REGION_JAPAN_NTSC,
+		MCD_REGION_JAPAN_NTSC,
+		RomStatus_Supported,
 		
 		// Description and notes.
 		"Mega CD (J) v1.00S (NTSC)",
-		"This ROM will also work for Japan/PAL."
+		""
 	},
 	
 	// Mega CD (J) Boot ROM v1.00S (PAL)
@@ -115,7 +122,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0xD4, 0x22, 0xD9, 0x7D, 0x98, 0xB2, 0x1C, 0xDA},
 		
 		// Region code and ROM support status.
-		Region_Japan_PAL, RomStatus_Supported,
+		MCD_REGION_JAPAN_PAL | MCD_REGION_JAPAN_NTSC,
+		MCD_REGION_JAPAN_PAL,
+		RomStatus_Supported,
 		
 		// Description and notes.
 		"Mega CD (J) v1.00S (PAL)",
@@ -132,7 +141,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0xE3, 0x71, 0xB9, 0x9F, 0x84, 0x02, 0x4F, 0x7F},
 		
 		// Region code and ROM support status.
-		Region_USA, RomStatus_Supported,
+		MCD_REGION_USA,
+		MCD_REGION_USA,
+		RomStatus_Supported,
 		
 		// Description and notes.
 		"Sega CD (U) v1.00",
@@ -149,7 +160,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0xE3, 0x71, 0xB9, 0x9F, 0x84, 0x02, 0x4F, 0x7F},
 		
 		// Region code and ROM support status.
-		Region_USA, RomStatus_Recommended,
+		MCD_REGION_USA,
+		MCD_REGION_USA,
+		RomStatus_Recommended,
 		
 		// Description and notes.
 		"Sega CD (U) v1.10",
@@ -166,7 +179,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0x61, 0x1F, 0xDC, 0xDB, 0xA0, 0x66, 0x23, 0x72},
 		
 		// Region code and ROM support status.
-		Region_Europe, RomStatus_Recommended,
+		MCD_REGION_EUROPE,
+		MCD_REGION_EUROPE,
+		RomStatus_Recommended,
 		
 		// Description and notes.
 		"Mega CD (E) v1.00",
@@ -185,7 +200,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0x11, 0x72, 0x46, 0x8D, 0xFA, 0x28, 0x58, 0xEB},
 		
 		// Region code and ROM support status.
-		Region_Japan_NTSC, RomStatus_Unsupported,
+		MCD_REGION_JAPAN_NTSC | MCD_REGION_JAPAN_PAL,
+		MCD_REGION_JAPAN_NTSC,
+		RomStatus_Unsupported,
 		
 		// Description and notes.
 		"Mega CD 2 (J) v2.00c (NTSC)",
@@ -203,7 +220,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0xAF, 0xE3, 0x13, 0x93, 0x3E, 0x6F, 0x8D, 0x7B},
 		
 		// Region code and ROM support status.
-		Region_USA, RomStatus_Broken,
+		MCD_REGION_USA,
+		MCD_REGION_USA,
+		RomStatus_Broken,
 		
 		// Description and notes.
 		"Sega CD 2 (U) v2.00 (Bad Dump)",
@@ -220,7 +239,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0x16, 0xAB, 0x38, 0x81, 0x31, 0x36, 0x72, 0x5E},
 		
 		// Region code and ROM support status.
-		Region_USA, RomStatus_Unsupported,
+		MCD_REGION_USA,
+		MCD_REGION_USA,
+		RomStatus_Unsupported,
 		
 		// Description and notes.
 		"Sega CD 2 (U) v2.00",
@@ -238,7 +259,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0xDA, 0xBA, 0xDB, 0xC1, 0x88, 0x1f, 0x51, 0x9A},
 		
 		// Region code and ROM support status.
-		Region_Europe, RomStatus_Unsupported,
+		MCD_REGION_EUROPE,
+		MCD_REGION_EUROPE,
+		RomStatus_Unsupported,
 		
 		// Description and notes.
 		"Mega CD 2 (E) v2.00",
@@ -258,7 +281,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0x70, 0x15, 0x0E, 0x45, 0x66, 0xAE, 0x12, 0x90},
 		
 		// Region code and ROM support status.
-		Region_USA, RomStatus_Unsupported,
+		MCD_REGION_USA,
+		MCD_REGION_USA,
+		RomStatus_Unsupported,
 		
 		// Description and notes.
 		"Sega CD 2 (U) v2.00W",
@@ -276,7 +301,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0x84, 0x97, 0xD3, 0xFA, 0xE6, 0xAB, 0x35, 0xA4},
 		
 		// Region code and ROM support status.
-		Region_Europe, RomStatus_Unsupported,
+		MCD_REGION_EUROPE,
+		MCD_REGION_EUROPE,
+		RomStatus_Unsupported,
 		
 		// Description and notes.
 		"Mega CD 2 (E) v2.00W",
@@ -296,7 +323,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0xC6, 0xE2, 0x7E, 0x38, 0xF8, 0x28, 0xAA, 0x9A},
 		
 		// Region code and ROM support status.
-		Region_USA, RomStatus_Unsupported,
+		MCD_REGION_USA,
+		MCD_REGION_USA,
+		RomStatus_Unsupported,
 		
 		// Description and notes.
 		"Sega CD 2 (U) v2.11X",
@@ -316,7 +345,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0xE5, 0x00, 0x87, 0xC0, 0x35, 0x8F, 0x4E, 0xB5},
 		
 		// Region code and ROM support status.
-		Region_USA, RomStatus_Unsupported,
+		MCD_REGION_USA,
+		MCD_REGION_USA,
+		RomStatus_Unsupported,
 		
 		// Description and notes.
 		"Sega CDX (U) v2.21X",
@@ -336,7 +367,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0xC6, 0x6B, 0x80, 0xEE, 0x79, 0xC3, 0xDA, 0x6E},
 		
 		// Region code and ROM support status.
-		Region_Japan_NTSC, RomStatus_Unsupported,
+		MCD_REGION_JAPAN_NTSC,
+		MCD_REGION_JAPAN_NTSC,
+		RomStatus_Unsupported,
 		
 		// Description and notes.
 		"Pioneer LaserActive (J) v0.98",
@@ -354,7 +387,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0xD2, 0x68, 0x64, 0x5C, 0x0E, 0xFD, 0x2E, 0xFF},
 		
 		// Region code and ROM support status.
-		Region_USA, RomStatus_Unsupported,
+		MCD_REGION_USA,
+		MCD_REGION_USA,
+		RomStatus_Unsupported,
 		
 		// Description and notes.
 		"Pioneer LaserActive (U) v0.98",
@@ -372,7 +407,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0xE8, 0x18, 0xFC, 0xD4, 0xCD, 0x81, 0x94, 0x66},
 		
 		// Region code and ROM support status.
-		Region_USA, RomStatus_Unsupported,
+		MCD_REGION_USA,
+		MCD_REGION_USA,
+		RomStatus_Unsupported,
 		
 		// Description and notes.
 		"Pioneer LaserActive (U) v1.04",
@@ -392,7 +429,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0x3D, 0xF6, 0xB4, 0x87, 0xF3, 0x76, 0xDE, 0x69},
 		
 		// Region code and ROM support status.
-		Region_Japan_NTSC, RomStatus_Unsupported,
+		MCD_REGION_JAPAN_NTSC,
+		MCD_REGION_JAPAN_NTSC,
+		RomStatus_Unsupported,
 		
 		// Description and notes.
 		"Sega Wondermega (J) v1.00W",
@@ -410,7 +449,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0x5D, 0x5D, 0xB3, 0x06, 0xA0, 0xD3, 0x8F, 0xA4},
 		
 		// Region code and ROM support status.
-		Region_Japan_NTSC, RomStatus_Unsupported,
+		MCD_REGION_JAPAN_NTSC,
+		MCD_REGION_JAPAN_NTSC,
+		RomStatus_Unsupported,
 		
 		// Description and notes.
 		"Sega Wondermega M2 (J) v2.00",
@@ -428,7 +469,9 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0xB9, 0xC2, 0x55, 0xD3, 0x58, 0x33, 0x11, 0x8F},
 		
 		// Region code and ROM support status.
-		Region_USA, RomStatus_Unsupported,
+		MCD_REGION_USA,
+		MCD_REGION_USA,
+		RomStatus_Unsupported,
 		
 		// Description and notes.
 		"JVC X'Eye (U) v2.00",
@@ -437,7 +480,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 	},
 	
 	// End of database.
-	{0, {0}, 0, 0, NULL, NULL}
+	{0, {0}, 0, 0, 0, NULL, NULL}
 };
 
 
@@ -495,16 +538,30 @@ const utf8_str *lg_mcd_rom_GetNotes(int rom_id)
 
 
 /**
- * lg_mcd_rom_GetRegion(): Get a Boot ROM's region.
+ * lg_mcd_rom_GetRegion(): Get a Boot ROM's region code.
  * @param rom_id Boot ROM ID.
- * @return Boot ROM ID, or Region_MAX if the ID is invalid.
+ * @return Boot ROM region code, or MCD_REGION_INVALID if the ID is invalid.
  */
-MCD_RegionCode_t lg_mcd_rom_GetRegion(int rom_id)
+int lg_mcd_rom_GetRegion(int rom_id)
 {
 	if (rom_id < 0 || rom_id >= MCD_ROM_DATABASE_ENTRIES)
-		return Region_MAX;
+		return MCD_REGION_INVALID;
 	
 	return McdRomDatabase[rom_id].region_code;
+}
+
+
+/**
+ * lg_mcd_rom_GetPrimaryRegion(): Get a Boot ROM's primary region code.
+ * @param rom_id Boot ROM ID.
+ * @return Boot ROM primary region code, or MCD_REGION_INVALID if the ID is invalid.
+ */
+int lg_mcd_rom_GetPrimaryRegion(int rom_id)
+{
+	if (rom_id < 0 || rom_id >= MCD_ROM_DATABASE_ENTRIES)
+		return MCD_REGION_INVALID;
+	
+	return McdRomDatabase[rom_id].region_primary;
 }
 
 
@@ -523,18 +580,18 @@ MCD_RomStatus_t lg_mcd_rom_GetSupportStatus(int rom_id)
 
 
 /**
- * lg_mcd_rom_GetRegionCodeString(): Get a string describing a region code.
- * @param region_code Region code.
+ * lg_mcd_rom_GetRegionCodeString(): Get a string describing a primary region code.
+ * @param region_code Primary region code.
  * @return Region code string, or NULL if the region code is invalid.
  */
 const utf8_str *lg_mcd_rom_GetRegionCodeString(MCD_RegionCode_t region_code)
 {
 	switch (region_code)
 	{
-		case Region_Japan_NTSC:	return "Japan/NTSC";
-		case Region_USA: 	return "USA";
-		case Region_Japan_PAL:	return "Japan/PAL";
-		case Region_Europe: 	return "Europe";
-		default:		return NULL;
+		case MCD_REGION_JAPAN_NTSC:	return "Japan/NTSC";
+		case MCD_REGION_JAPAN_PAL:	return "Japan/PAL";
+		case MCD_REGION_USA:	 	return "USA";
+		case MCD_REGION_EUROPE: 	return "Europe";
+		default:			return NULL;
 	}
 }

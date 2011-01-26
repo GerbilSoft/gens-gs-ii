@@ -44,21 +44,17 @@ extern const uint8_t lg_mcd_rom_InitSP[4];
 extern const uint8_t lg_mcd_rom_InitHINT[4];
 
 // Region codes.
+// Matches the country code found in later MD games.
+// TODO: Move this somewhere else and make it not MCD-specific.
 typedef enum
 {
 	// Bit flags.
-	Region_East	= 0x00,
-	Region_West	= 0x01,
-	Region_NTSC	= 0x00,
-	Region_PAL	= 0x02,
+	MCD_REGION_JAPAN_NTSC	= 0x01,
+	MCD_REGION_JAPAN_PAL	= 0x02,
+	MCD_REGION_USA		= 0x04,
+	MCD_REGION_EUROPE	= 0x08,
 	
-	// Countries.
-	Region_Japan_NTSC	= 0x00,
-	Region_USA		= 0x01,
-	Region_Japan_PAL	= 0x02,
-	Region_Europe		= 0x03,
-	
-	Region_MAX		= -1
+	MCD_REGION_INVALID	= -1
 } MCD_RegionCode_t;
 
 // ROM status.
@@ -94,11 +90,18 @@ const utf8_str *lg_mcd_rom_GetDescription(int rom_id);
 const utf8_str *lg_mcd_rom_GetNotes(int rom_id);
 
 /**
- * lg_mcd_rom_GetRegion(): Get a Boot ROM's region.
+ * lg_mcd_rom_GetRegion(): Get a Boot ROM's region code.
  * @param rom_id Boot ROM ID.
- * @return Boot ROM ID, or Region_MAX if the ID is invalid.
+ * @return Boot ROM region code, or MCD_REGION_INVALID if the ID is invalid.
  */
-MCD_RegionCode_t lg_mcd_rom_GetRegion(int rom_id);
+int lg_mcd_rom_GetRegion(int rom_id);
+
+/**
+ * lg_mcd_rom_GetPrimaryRegion(): Get a Boot ROM's primary region code.
+ * @param rom_id Boot ROM ID.
+ * @return Boot ROM primary region code, or MCD_REGION_INVALID if the ID is invalid.
+ */
+int lg_mcd_rom_GetPrimaryRegion(int rom_id);
 
 /**
  * lg_mcd_rom_GetSupportStatus(): Get a Boot ROM's support status.
@@ -108,8 +111,8 @@ MCD_RegionCode_t lg_mcd_rom_GetRegion(int rom_id);
 MCD_RomStatus_t lg_mcd_rom_GetSupportStatus(int rom_id);
 
 /**
- * lg_mcd_rom_GetRegionCodeString(): Get a string describing a region code.
- * @param region_code Region code.
+ * lg_mcd_rom_GetRegionCodeString(): Get a string describing a primary region code.
+ * @param region_code Primary region code.
  * @return Region code string, or NULL if the region code is invalid.
  */
 const utf8_str *lg_mcd_rom_GetRegionCodeString(MCD_RegionCode_t region_code);
