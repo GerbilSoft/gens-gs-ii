@@ -52,9 +52,6 @@ GeneralConfigWindow *GeneralConfigWindow::m_GeneralConfigWindow = NULL;
 GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
 {
-	// Sega CD: Boot ROM file textboxes.
-	QString sMcdBootRom_PlaceholderText = TR("Select a %1 Boot ROM...");
-	
 	// Sega CD: Initialize Boot ROM textboxes.
 	txtMcdRomUSA = new GensLineEdit(this);
 	txtMcdRomUSA->setObjectName(QString::fromUtf8("txtMcdRomUSA"));
@@ -62,6 +59,10 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	txtMcdRomEUR->setObjectName(QString::fromUtf8("txtMcdRomEUR"));
 	txtMcdRomJPN = new GensLineEdit(this);
 	txtMcdRomJPN->setObjectName(QString::fromUtf8("txtMcdRomJPN"));
+	
+	// External Programs: Initialize textboxes.
+	txtExtPrgUnRAR = new GensLineEdit(this);
+	txtExtPrgUnRAR->setObjectName(QString::fromUtf8("txtExtPrgUnRAR"));
 	
 	// Initialize the Qt4 UI.
 	setupUi(this);
@@ -75,6 +76,7 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 		connect(btnApply, SIGNAL(clicked()), this, SLOT(apply()));
 	
 	// Sega CD: Add the Boot ROM textboxes to the grid layout.
+	const QString sMcdBootRom_PlaceholderText = TR("Select a %1 Boot ROM...");
 	
 	// Sega CD: USA Boot ROM
 	txtMcdRomUSA->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(TR("Sega CD (U)")));
@@ -92,6 +94,17 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	gridMcdRoms->addWidget(txtMcdRomJPN, 2, 1);
 	lblMcdRomJPN->setBuddy(txtMcdRomJPN);
 	setTabOrder(txtMcdRomJPN, btnMcdRomJPN);
+	
+	// External Programs: Add the textboxes to the grid layout.
+#ifdef _WIN32
+	lblExtPrgUnRAR->setText(TR("UnRAR DLL:"));
+	txtExtPrgUnRAR->setPlaceholderText(TR("Select an UnRAR DLL..."));
+#else
+	txtExtPrgUnRAR->setPlaceholderText(TR("Select a RAR or UnRAR binary..."));
+#endif
+	gridExtPrg->addWidget(txtExtPrgUnRAR, 0, 1);
+	lblExtPrgUnRAR->setBuddy(txtExtPrgUnRAR);
+	setTabOrder(lblExtPrgUnRAR, txtExtPrgUnRAR);
 	
 	// Load configuration.
 	reload();
@@ -418,6 +431,75 @@ void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 		sMcdRomStatus_JPN = sNewRomStatus;
 		mcdDisplayRomFileStatus(TR("Mega CD (J)"), sMcdRomStatus_JPN);
 	}
+}
+
+
+/** External Programs **/
+
+
+/**
+ * on_btnExtPrgUnRAR_clicked(): Select a RAR/UnRAR binary.
+ */
+void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
+{
+	// Create the dialog title.
+#ifdef _WIN32
+	const QString title = TR("Select UnRAR DLL");
+#else
+	const QString title = TR("Select RAR or UnRAR binary");
+#endif
+	
+	// TODO: Specify the current RAR binary filename as the default filename.
+	QString filename = QFileDialog::getOpenFileName(this, title,
+			"",						// Default filename.
+#ifdef _WIN32
+			TR("DLL files") + " (*.dll);;"
+#else
+			TR("rar or unrar") + " (rar unrar);;"
+#endif
+			+ TR("All Files") + "(*.*)");
+	
+	if (filename.isEmpty())
+		return;
+	
+	// Set the filename text.
+	// Program file status will be updated automatically by
+	// the textChanged() signal from QLineEdit.
+	txtExtPrgUnRAR->setText(filename);
+}
+
+
+/**
+ * extprgDisplayFileStatus(): Display external program file status.
+ * @param file_id File ID.
+ * @param file_desc File description. (detected by examining the file)
+ */
+void GeneralConfigWindow::extprgDisplayFileStatus(const QString& file_id, const QString& file_desc)
+{
+	// Set the file description.
+	QString sel_prg = TR("Selected Program: %1");
+	lblExtPrgSel->setText(sel_prg.arg(file_id) + "<br/>\n" + file_desc);
+	lblExtPrgSel->setTextFormat(Qt::RichText);
+}
+
+void GeneralConfigWindow::on_txtExtPrgUnRAR_focusIn(void)
+{
+#ifdef _WIN32
+	extprgDisplayFileStatus(TR("UnRAR DLL"), sExtPrgStatus_UnRAR);
+#else
+	extprgDisplayFileStatus(TR("RAR or UnRAR binary"), sExtPrgStatus_UnRAR);
+#endif
+}
+
+void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
+{
+	setApplyButtonEnabled(true);
+	
+	// TODO: Check the file to ensure it's valid.
+	
+	// TODO: Create a constant string for DLL vs. binary.
+	// For now, just call focusIn() to update the description.
+	on_txtExtPrgUnRAR_focusIn();
 }
 
 }

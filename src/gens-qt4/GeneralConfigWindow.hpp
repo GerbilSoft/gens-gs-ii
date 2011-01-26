@@ -59,6 +59,9 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 		GensLineEdit *txtMcdRomUSA;
 		GensLineEdit *txtMcdRomEUR;
 		GensLineEdit *txtMcdRomJPN;
+		
+		// External Programs
+		GensLineEdit *txtExtPrgUnRAR;
 	
 	protected slots:
 		void accept(void) { apply(); QDialog::accept(); }
@@ -68,6 +71,8 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 	
 	private:
 		static GeneralConfigWindow *m_GeneralConfigWindow;
+		
+		/** Sega CD: Boot ROM **/
 		
 		// Sega CD: Boot ROM filesize.
 		static const int MCD_ROM_FILESIZE = 131072;
@@ -85,8 +90,14 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 		QString sMcdRomStatus_USA;
 		QString sMcdRomStatus_EUR;
 		QString sMcdRomStatus_JPN;
+		
+		/** External Programs **/
+		QString sExtPrgStatus_UnRAR;
+		void extprgDisplayFileStatus(const QString& file_id, const QString& file_desc);
 	
 	private slots:
+		/** Sega CD: Boot ROM **/
+		
 		void on_btnMcdRomUSA_clicked(void);
 		void on_btnMcdRomEUR_clicked(void);
 		void on_btnMcdRomJPN_clicked(void);
@@ -98,6 +109,12 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 		void on_txtMcdRomUSA_textChanged(void);
 		void on_txtMcdRomEUR_textChanged(void);
 		void on_txtMcdRomJPN_textChanged(void);
+		
+		/** External Programs **/
+		
+		void on_btnExtPrgUnRAR_clicked(void);
+		void on_txtExtPrgUnRAR_focusIn(void);
+		void on_txtExtPrgUnRAR_textChanged(void);
 };
 
 }
