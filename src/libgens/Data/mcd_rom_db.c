@@ -592,6 +592,13 @@ const utf8_str *lg_mcd_rom_GetRegionCodeString(MCD_RegionCode_t region_code)
 		case MCD_REGION_JAPAN_PAL:	return "Japan/PAL";
 		case MCD_REGION_USA:	 	return "USA";
 		case MCD_REGION_EUROPE: 	return "Europe";
+		
+		// Japan/NTSC + Japan/PAL is allowed for the sake of
+		// the General Configuration window.
+		// TODO: Return "Japan" instead?
+		case MCD_REGION_JAPAN_NTSC | MCD_REGION_JAPAN_PAL:
+			return "Japan/NTSC or Japan/PAL";
+		
 		default:			return NULL;
 	}
 }
