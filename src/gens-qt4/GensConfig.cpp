@@ -25,6 +25,17 @@
 
 GensConfig::GensConfig()
 {
+	// Default UnRAR filename.
+#ifdef _WIN32
+	m_extprgUnRAR = "UnRAR.dll";	// TODO: Verify that a relative pathname works!
+#else
+	// TODO: Check for the existence of unrar and rar.
+	// We should:
+	// - Default to unrar if it's found.
+	// - Fall back to rar if it's found but unrar isn't.
+	// - Assume unrar if neither are found.
+	m_extprgUnRAR = "/usr/bin/unrar";
+#endif
 }
 
 GensConfig::~GensConfig()
@@ -71,4 +82,13 @@ void GensConfig::setMcdRomJPN(const QString& filename)
 	
 	m_mcdRomJPN = filename;
 	emit mcdRomJPN_changed(m_mcdRomJPN);
+}
+
+void GensConfig::setExtPrgUnRAR(const QString& filename)
+{
+	if (m_extprgUnRAR == filename)
+		return;
+	
+	m_extprgUnRAR = filename;
+	emit extprgUnRAR_changed(m_extprgUnRAR);
 }

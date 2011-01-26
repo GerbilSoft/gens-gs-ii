@@ -45,16 +45,24 @@ class GensConfig : public QObject
 		void setMcdRomEUR(const QString& filename);
 		QString mcdRomJPN(void) { return m_mcdRomJPN; }
 		void setMcdRomJPN(const QString& filename);
+		
+		// External programs.
+		QString extprgUnRAR(void) { return m_extprgUnRAR; }
+		void setExtPrgUnRAR(const QString& filename);
 	
 	protected:
 		QString m_mcdRomUSA;
 		QString m_mcdRomEUR;
 		QString m_mcdRomJPN;
+		
+		QString m_extprgUnRAR;
 	
 	signals:
 		void mcdRomUSA_changed(const QString& filename);
 		void mcdRomEUR_changed(const QString& filename);
 		void mcdRomJPN_changed(const QString& filename);
+		
+		void extprgUnRAR_changed(const QString& filename);
 };
 
 #endif /* __GENS_QT4_GENSCONFIG_HPP__ */
