@@ -123,6 +123,10 @@ class GensQApplication : public QApplication
 			// Save the GUI thread pointer for later.
 			m_guiThread = QThread::currentThread();
 			
+			// Set application information.
+			QCoreApplication::setOrganizationName("GerbilSoft");
+			QCoreApplication::setApplicationName("Gens/GS II");
+			
 			// Connect the crash handler.
 #ifdef HAVE_SIGACTION
 			connect(this, SIGNAL(signalCrash(int, siginfo_t*, void*)),
