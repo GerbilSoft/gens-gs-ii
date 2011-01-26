@@ -56,6 +56,10 @@ int main(int argc, char *argv[])
 	// Initialize the GensQApplication.
 	GensQt4::gqt4_app = new GensQt4::GensQApplication(argc, argv);
 	
+	// Load the configuration.
+	// TODO: Do this before or after command line arguments?
+	GensQt4::gqt4_config = new GensConfig();
+	
 	// TODO: Parse command line arguments.
 	// They're available in app.arguments() [QStringList].
 	
@@ -139,19 +143,18 @@ namespace GensQt4
 // GensQApplication.
 GensQApplication *gqt4_app = NULL;
 
-// Emulation thread.
-EmuThread *gqt4_emuThread = NULL;
+// Configuration. (TODO: Use a smart pointer?)
+GensConfig *gqt4_config = NULL;
 
-// Emulation context.
-LibGens::EmuContext *gqt4_emuContext = NULL;
+// Emulation objects.
+EmuThread *gqt4_emuThread = NULL;		// Thread.
+LibGens::EmuContext *gqt4_emuContext = NULL;	// Context.
 
 /**
  * QuitGens(): Quit Gens.
  */
 void QuitGens(void)
 {
-	// TODO: Save configuration.
-	
 	// TODO: Stop LibGens' emulation core.
 	
 	// Stop and delete the emulation thread.
@@ -169,6 +172,14 @@ void QuitGens(void)
 	
 	// Shut down LibGens.
 	LibGens::End();
+	
+	// Save the configuration.
+	if (gqt4_config)
+	{
+		gqt4_config->save();
+		delete gqt4_config;
+		gqt4_config = NULL;
+	}
 }
 
 }

@@ -84,6 +84,7 @@ SET(gens-qt4_SRCS
 	VBackend/GlTex2D.cpp
 	GeneralConfigWindow.cpp
 	GensLineEdit.cpp
+	GensConfig.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -101,6 +102,7 @@ SET(gens-qt4_MOC_HEADERS
 	Input/EventKeys.hpp
 	GeneralConfigWindow.hpp
 	GensLineEdit.hpp
+	GensConfig.hpp
 	)
 
 # Create .moc files for sources that need them.

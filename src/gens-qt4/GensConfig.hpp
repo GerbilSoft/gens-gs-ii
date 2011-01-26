@@ -1,10 +1,10 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * gqt4_main.hpp: Main UI code.                                            *
+ * GensConfig.hpp: Gens configuration.                                     *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,66 +21,40 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_GQT4_MAIN_HPP__
-#define __GENS_QT4_GQT4_MAIN_HPP__
+#ifndef __GENS_QT4_GENSCONFIG_HPP__
+#define __GENS_QT4_GENSCONFIG_HPP__
 
-// LibGens OSD handler.
-#include "libgens/lg_osd.h"
+#include <QtCore/QObject>
+#include <QtCore/QString>
 
-// Needed for qMain redefinition on Win32.
-#ifdef _WIN32
-#include <QtGui/qwindowdefs.h>
-#endif
-
-/**
- * main(): Main entry point.
- * @param argc Number of arguments.
- * @param argv Array of arguments.
- * @return Return value.
- */
-int main(int argc, char *argv[]);
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * gqt4_log_msg_critical(): LOG_MSG() critical error handler.
- * @param channel Debug channel.
- * @param msg Message. (Preformatted)
- */
-void gqt4_log_msg_critical(const char *channel, const char *msg);
-
-/**
- * gqt4_osd(): LibGens OSD handler.
- * @param osd_type: OSD type.
- * @param param: Integer parameter.
- */
-void gqt4_osd(OsdType osd_type, int param);
-
-#ifdef __cplusplus
-}
-#endif
-
-#include "GensQApplication.hpp"
-#include "GensConfig.hpp"
-#include "EmuThread.hpp"
-#include "../libgens/EmuContext.hpp"
-
-namespace GensQt4
+class GensConfig : public QObject
 {
-	// GensQApplication.
-	extern GensQApplication *gqt4_app;
+	Q_OBJECT
 	
-	// Configuration. (TODO: Use a smart pointer?)
-	extern GensConfig *gqt4_config;
+	public:
+		GensConfig();
+		~GensConfig();
+		
+		void save(void);
+		void reload(void);
+		
+		// Sega CD Boot ROMs.
+		QString mcdRomUSA(void) { return m_mcdRomUSA; }
+		void setMcdRomUSA(const QString& filename);
+		QString mcdRomEUR(void) { return m_mcdRomEUR; }
+		void setMcdRomEUR(const QString& filename);
+		QString mcdRomJPN(void) { return m_mcdRomJPN; }
+		void setMcdRomJPN(const QString& filename);
 	
-	// Emulation objects.
-	// TODO: Move the EmuContext to the EmuThread later.
-	extern EmuThread *gqt4_emuThread;		// Thread.
-	extern LibGens::EmuContext *gqt4_emuContext;	// Context.
+	protected:
+		QString m_mcdRomUSA;
+		QString m_mcdRomEUR;
+		QString m_mcdRomJPN;
 	
-	void QuitGens(void);
-}
+	signals:
+		void mcdRomUSA_changed(const QString& filename);
+		void mcdRomEUR_changed(const QString& filename);
+		void mcdRomJPN_changed(const QString& filename);
+};
 
-#endif /* __GENS_QT4_GQT4_MAIN_HPP__ */
+#endif /* __GENS_QT4_GENSCONFIG_HPP__ */
