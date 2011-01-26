@@ -89,9 +89,9 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	
 	// Initialize BIOS ROM filenames.
 	// TODO: Copy filenames from configuration.
-	sMcdRomStatus_USA = mcdUpdateRomFileStatus(txtMcdRomUSA, Region_USA);
-	sMcdRomStatus_EUR = mcdUpdateRomFileStatus(txtMcdRomEUR, Region_Europe);
-	sMcdRomStatus_JPN = mcdUpdateRomFileStatus(txtMcdRomJPN, Region_Japan_NTSC);
+	sMcdRomStatus_USA = mcdUpdateRomFileStatus(txtMcdRomUSA, MCD_REGION_USA);
+	sMcdRomStatus_EUR = mcdUpdateRomFileStatus(txtMcdRomEUR, MCD_REGION_EUROPE);
+	sMcdRomStatus_JPN = mcdUpdateRomFileStatus(txtMcdRomJPN, MCD_REGION_JAPAN_NTSC | MCD_REGION_JAPAN_PAL);
 }
 
 
@@ -177,17 +177,17 @@ void GeneralConfigWindow::on_btnMcdRomJPN_clicked(void)
 /**
  * mcdUpdateRomFileStatus(): Sega CD: Update Boot ROM file status.
  * @param txtRomFile ROM file textbox.
- * @param region_code Expected ROM region code.
+ * @param region_code Expected ROM region code. (bitmask)
  * @return Updated ROM status.
  */
-QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, MCD_RegionCode_t region_code)
+QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, int region_code)
 {
 	// ROM data buffer.
 	uint8_t *rom_data = NULL;
 	qint64 data_len;
 	uint32_t rom_crc32;
 	int boot_rom_id;
-	MCD_RegionCode_t boot_rom_region_code;
+	int boot_rom_region_code;
 	MCD_RomStatus_t boot_rom_status;
 	
 	// Check if the file exists.
@@ -273,27 +273,18 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, MC
 	
 	// Check the region code.
 	boot_rom_region_code = lg_mcd_rom_GetRegion(boot_rom_id);
-	if (boot_rom_region_code != region_code)
+	if ((boot_rom_region_code & region_code) == 0)
 	{
-		// Region code doesn't match.
-		if ((region_code == Region_Japan_NTSC && boot_rom_region_code == Region_Japan_PAL) ||
-		    (region_code == Region_Japan_PAL && boot_rom_region_code == Region_Japan_NTSC))
-		{
-			// Japanese Boot ROM. NTSC/PAL doesn't affect region lock.
-			// Do nothing here.
-		}
-		else
-		{
-			// USA or Europe Boot ROM. Region is incorrect.
-			QString expected_region = QString::fromUtf8(lg_mcd_rom_GetRegionCodeString(region_code));
-			QString boot_rom_region = QString::fromUtf8(lg_mcd_rom_GetRegionCodeString(boot_rom_region_code));
-			
-			rom_notes += sWarning + TR("Region code is incorrect.") + "<br/>\n" +
-				     TR("(expected %1; found %2)").arg(expected_region).arg(boot_rom_region) + "<br/>\n";
-			
-			// Set the icon to warning.
-			filename_icon = QStyle::SP_MessageBoxWarning;
-		}
+		// ROM doesn't support this region.
+		int boot_rom_region_primary = lg_mcd_rom_GetPrimaryRegion(boot_rom_id);
+		QString expected_region = QString::fromUtf8(lg_mcd_rom_GetRegionCodeString(region_code));
+		QString boot_rom_region = QString::fromUtf8(lg_mcd_rom_GetRegionCodeString(boot_rom_region_primary));
+		
+		rom_notes += sWarning + TR("Region code is incorrect.") + "<br/>\n" +
+			     TR("(expected %1; found %2)").arg(expected_region).arg(boot_rom_region) + "<br/>\n";
+		
+		// Set the icon to warning.
+		filename_icon = QStyle::SP_MessageBoxWarning;
 	}
 	
 	// Check the ROM's support status.
@@ -363,7 +354,7 @@ void GeneralConfigWindow::on_txtMcdRomJPN_focusIn(void)
 
 void GeneralConfigWindow::on_txtMcdRomUSA_textChanged(void)
 {
-	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomUSA, Region_USA);
+	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomUSA, MCD_REGION_USA);
 	if (!sNewRomStatus.isEmpty())
 	{
 		sMcdRomStatus_USA = sNewRomStatus;
@@ -372,7 +363,7 @@ void GeneralConfigWindow::on_txtMcdRomUSA_textChanged(void)
 }
 void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
 {
-	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomEUR, Region_Europe);
+	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomEUR, MCD_REGION_EUROPE);
 	if (!sNewRomStatus.isEmpty())
 	{
 		sMcdRomStatus_EUR = sNewRomStatus;
@@ -381,7 +372,7 @@ void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
 }
 void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 {
-	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomJPN, Region_Japan_NTSC);
+	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomJPN, MCD_REGION_JAPAN_NTSC | MCD_REGION_JAPAN_PAL);
 	if (!sNewRomStatus.isEmpty())
 	{
 		sMcdRomStatus_JPN = sNewRomStatus;

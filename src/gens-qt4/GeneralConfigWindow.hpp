@@ -63,7 +63,7 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 		void mcdSelectRomFile(const QString& rom_id, GensLineEdit *txtRomFile);
 		
 		// Sega CD: Update Boot ROM file status.
-		QString mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, MCD_RegionCode_t region_code);
+		QString mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, int region_code);
 		
 		// Sega CD: Display Boot ROM file status.
 		void mcdDisplayRomFileStatus(const QString& rom_id, const QString& rom_desc);
