@@ -1,5 +1,11 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-GeneralConfigWindow-v1: New GensConfig class to store configuration
+information. Added initial UnRAR binary selection to the "General Configuration"
+window and support for GensConfig for Sega CD Boot ROMs and UnRAR binary.
+TODO: Add UnRAR binary detection to determine if the selected binary (or DLL
+on Win32) is usable.
+
 gens-qt4-GeneralConfigWindow-v0: Initial "General Configuration" window.
 It currently implements Sega CD Boot ROM detection, which is somewhat
 useless right now because Sega CD isn't implemented. (Changes aren't
