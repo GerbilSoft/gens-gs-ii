@@ -138,6 +138,9 @@ void GeneralConfigWindow::reload(void)
 	txtMcdRomUSA->setText(gqt4_config->mcdRomUSA());
 	txtMcdRomEUR->setText(gqt4_config->mcdRomEUR());
 	txtMcdRomJPN->setText(gqt4_config->mcdRomJPN());
+	
+	// Disable the Apply button.
+	setApplyButtonEnabled(false);
 }
 
 
@@ -150,6 +153,11 @@ void GeneralConfigWindow::apply(void)
 	gqt4_config->setMcdRomUSA(txtMcdRomUSA->text());
 	gqt4_config->setMcdRomEUR(txtMcdRomEUR->text());
 	gqt4_config->setMcdRomJPN(txtMcdRomJPN->text());
+	
+	// Disable the Apply button.
+	// TODO: If Apply was clicked, set focus back to the main window elements.
+	// Otherwise, Cancel will receive focus.
+	setApplyButtonEnabled(false);
 }
 
 /**
@@ -380,6 +388,8 @@ void GeneralConfigWindow::on_txtMcdRomJPN_focusIn(void)
 
 void GeneralConfigWindow::on_txtMcdRomUSA_textChanged(void)
 {
+	setApplyButtonEnabled(true);
+	
 	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomUSA, MCD_REGION_USA);
 	if (!sNewRomStatus.isEmpty())
 	{
@@ -389,6 +399,8 @@ void GeneralConfigWindow::on_txtMcdRomUSA_textChanged(void)
 }
 void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
 {
+	setApplyButtonEnabled(true);
+	
 	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomEUR, MCD_REGION_EUROPE);
 	if (!sNewRomStatus.isEmpty())
 	{
@@ -398,6 +410,8 @@ void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
 }
 void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 {
+	setApplyButtonEnabled(true);
+	
 	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomJPN, MCD_REGION_JAPAN_NTSC | MCD_REGION_JAPAN_PAL);
 	if (!sNewRomStatus.isEmpty())
 	{

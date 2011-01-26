@@ -48,6 +48,13 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 		GeneralConfigWindow(QWidget *parent = NULL);
 		virtual ~GeneralConfigWindow();
 		
+		void setApplyButtonEnabled(bool enabled)
+		{
+			QPushButton *btnApply = buttonBox->button(QDialogButtonBox::Apply);
+			if (btnApply)
+				btnApply->setEnabled(enabled);
+		}
+		
 		// Sega CD: Boot ROM file textboxes.
 		GensLineEdit *txtMcdRomUSA;
 		GensLineEdit *txtMcdRomEUR;
