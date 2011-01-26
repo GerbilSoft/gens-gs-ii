@@ -152,6 +152,9 @@ void GeneralConfigWindow::reload(void)
 	txtMcdRomEUR->setText(gqt4_config->mcdRomEUR());
 	txtMcdRomJPN->setText(gqt4_config->mcdRomJPN());
 	
+	// Load external program filenames.
+	txtExtPrgUnRAR->setText(gqt4_config->extprgUnRAR());
+	
 	// Disable the Apply button.
 	setApplyButtonEnabled(false);
 }
@@ -166,6 +169,9 @@ void GeneralConfigWindow::apply(void)
 	gqt4_config->setMcdRomUSA(txtMcdRomUSA->text());
 	gqt4_config->setMcdRomEUR(txtMcdRomEUR->text());
 	gqt4_config->setMcdRomJPN(txtMcdRomJPN->text());
+	
+	// Save external program filenames.
+	gqt4_config->setExtPrgUnRAR(txtExtPrgUnRAR->text());
 	
 	// Disable the Apply button.
 	// TODO: If Apply was clicked, set focus back to the main window elements.
