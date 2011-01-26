@@ -584,7 +584,7 @@ MCD_RomStatus_t lg_mcd_rom_GetSupportStatus(int rom_id)
  * @param region_code Primary region code.
  * @return Region code string, or NULL if the region code is invalid.
  */
-const utf8_str *lg_mcd_rom_GetRegionCodeString(MCD_RegionCode_t region_code)
+const utf8_str *lg_mcd_rom_GetRegionCodeString(int region_code)
 {
 	switch (region_code)
 	{
