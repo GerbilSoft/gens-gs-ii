@@ -206,7 +206,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		Region_USA, RomStatus_Broken,
 		
 		// Description and notes.
-		"Sega CD 2 (U) v2.00",
+		"Sega CD 2 (U) v2.00 (Bad Dump)",
 		"This is a known bad dump, and will not work properly in any Sega CD emulator."
 	},
 	
