@@ -6,6 +6,8 @@
 #ifndef __ZLIB_GZIP_REDEFINITIONS_H__
 #define __ZLIB_GZIP_REDEFINITIONS_H__
 
+#define crc32		gens_crc32
+
 #define gzopen		gens_gzopen
 #define gzdopen		gens_gzdopen
 #define gzbuffer	gens_gzbuffer
