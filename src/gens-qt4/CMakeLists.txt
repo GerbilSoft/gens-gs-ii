@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.6)
 # Find Qt4.
 # TODO: Determine the actual minimum version.
 # 4.1.0: QCoreApplication::arguments()
-FIND_PACKAGE(Qt4 4.1.0 COMPONENTS QtCore QtGui QtOpenGL qtmain REQUIRED)
+FIND_PACKAGE(Qt4 4.1.0 COMPONENTS QtCore QtGui QtOpenGL REQUIRED)
 INCLUDE(${QT_USE_FILE})
 
 # Main binary directory. Needed for git_version.h
@@ -137,9 +137,9 @@ ENDIF()
 # Build the executable.
 ADD_EXECUTABLE(gens-qt4 ${gens-qt4_SRCS} ${gens-qt4_COMPAT_SRCS} ${gens-qt4_MOC_SOURCES} ${gens-qt4_UIS_H} ${gens-qt4_RCC_O})
 TARGET_LINK_LIBRARIES(gens-qt4 gens)
-IF(MINGW)
-	TARGET_LINK_LIBRARIES(gens-qt4 -lmingw32 ${QT_QTMAIN_LIBRARY})
-ENDIF(MINGW)
+IF(WIN32)
+	TARGET_LINK_LIBRARIES(gens-qt4)
+ENDIF(WIN32)
 TARGET_LINK_LIBRARIES(gens-qt4 ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY})
 IF(HAVE_GLEW)
 	TARGET_LINK_LIBRARIES(gens-qt4 ${GLEW_LIBRARY})
@@ -150,10 +150,6 @@ IF(HAVE_PORTAUDIO)
 ENDIF(HAVE_PORTAUDIO)
 
 IF(WIN32)
-	# Define -DQT_NEEDS_QMAIN in order to use qMain() on Win32.
-	SET_TARGET_PROPERTIES(gens-qt4
-		PROPERTIES COMPILE_FLAGS -DQT_NEEDS_QMAIN)
-	
 	# Use the static version of GLEW on Win32.
 	# TODO: Make sure that the DLL version isn't used by accident!
 	IF(HAVE_GLEW)

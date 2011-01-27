@@ -43,12 +43,12 @@
 static GensQt4::GensWindow *gens_window = NULL;
 
 /**
- * main(): Main entry point.
+ * gens_main(): Main entry point.
  * @param argc Number of arguments.
  * @param argv Array of arguments.
  * @return Return value.
  */
-int main(int argc, char *argv[])
+int gens_main(int argc, char *argv[])
 {
 	// Register the signal handler.
 	GensQt4::SigHandler::Init();

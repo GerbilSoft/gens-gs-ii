@@ -27,18 +27,17 @@
 // LibGens OSD handler.
 #include "libgens/lg_osd.h"
 
-// Needed for qMain redefinition on Win32.
-#ifdef _WIN32
-#include <QtGui/qwindowdefs.h>
+#ifndef _WIN32
+#define gens_main main
 #endif
 
 /**
- * main(): Main entry point.
+ * gens_main(): Main entry point.
  * @param argc Number of arguments.
  * @param argv Array of arguments.
  * @return Return value.
  */
-int main(int argc, char *argv[]);
+int gens_main(int argc, char *argv[]);
 
 #ifdef __cplusplus
 extern "C" {

@@ -27,7 +27,6 @@
 
 // Include "gqt4_main.hpp" first for main().
 #include "gqt4_main.hpp"
-
 #include "gqt4_win32.hpp"
 
 // C includes.
@@ -40,7 +39,52 @@
 #endif
 #include <windows.h>
 
-// Qt includes.
+// QtCore includes.
+#include <QtCore/qt_windows.h>
+#include <QtCore/QByteArray>
+#include <QtCore/QString>
+#include <QtCore/QVector>
+
+// qWinMain declaration.
+extern void qWinMain(HINSTANCE, HINSTANCE, LPSTR, int, int &, QVector<char *> &);
+
+/**
+ * WinMain(): Main entry point on Win32.
+ * Code based on libqtmain 4.7.1.
+ * Windows CE-specific parts have been removed.
+ * @param hInst Instance.
+ * @param hPrevInst Previous instance. (Unused on Win32)
+ * @param lpCmdLine Command line parameters. (ANSI)
+ * @param nCmdShow Main window show parameter.
+ * @return Return code.
+ */
+extern "C"
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCmdShow)
+{
+	QByteArray cmdParam;
+	
+	wchar_t *cmdW = GetCommandLineW();
+	if (cmdW)
+	{
+		// Unicode system.
+		cmdParam = QString::fromWCharArray(cmdW).toLocal8Bit();
+	}
+	else
+	{
+		// ANSI system.
+		cmdParam = QByteArray(lpCmdLine);
+	}
+	
+	// Tokenize the command line parameters.
+	int argc = 0;
+	QVector<char*> argv(8);
+	qWinMain(hInst, hPrevInst, cmdParam.data(), nCmdShow, argc, argv);
+	
+	// Call the real main function.
+	return gens_main(argc, argv.data());
+}
+
+// QtGui includes.
 #include <QtGui/QApplication>
 #include <QtGui/QFont>
 
