@@ -49,6 +49,7 @@
 // C includes.
 #include <stdint.h>
 #include <string.h>
+#include <unistd.h>
 
 // C++ includes.
 #include <string>
