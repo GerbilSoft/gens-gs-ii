@@ -586,6 +586,9 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
 		return -5;
 	}
 	
+	// This is UnRAR.dll.
+	my_prg_info.rar_type = ExtPrgInfo::RAR_ET_UNRAR_DLL;
+	
 	// RAR version obtained.
 	if (prg_info)
 		memcpy(prg_info, &my_prg_info, sizeof(*prg_info));

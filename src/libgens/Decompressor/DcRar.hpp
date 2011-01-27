@@ -83,9 +83,15 @@ class DcRar : public Decompressor
 			// API version number.
 			int api_version;
 			
-			// Is this UnRAR or RAR?
-			// false == UnRAR; true == RAR
-			bool is_rar;
+			// Executable type.
+			enum RarExecType
+			{
+				RAR_ET_UNKNOWN = 0,
+				RAR_ET_UNRAR = 1,
+				RAR_ET_RAR = 2,
+				RAR_ET_UNRAR_DLL = 3,
+			};
+			RarExecType rar_type;
 		};
 		
 		/**

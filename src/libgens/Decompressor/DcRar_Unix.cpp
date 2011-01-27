@@ -409,9 +409,9 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
 		return 0;
 	
 	if (!strncasecmp(token, "UNRAR", 6))
-		my_prg_info.is_rar = false;
+		my_prg_info.rar_type = ExtPrgInfo::RAR_ET_UNRAR;
 	else if (!strncasecmp(token, "RAR", 4))
-		my_prg_info.is_rar = false;
+		my_prg_info.rar_type = ExtPrgInfo::RAR_ET_RAR;
 	else
 		return 0;
 	
