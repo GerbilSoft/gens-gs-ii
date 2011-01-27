@@ -548,6 +548,19 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 				filename_icon = QStyle::SP_MessageBoxWarning;
 				break;
 			
+			case -3:
+				// File isn't a regular file.
+				prg_status = ms_sWarning + TR("The specified file is not a regular file.");
+				filename_icon = QStyle::SP_MessageBoxCritical;
+				break;
+			
+			case -4:
+				// Error calling lstat().
+				// TODO: Get the lstat() error code?
+				prg_status = ms_sWarning + TR("Error calling lstat().");
+				filename_icon = QStyle::SP_MessageBoxCritical;
+				break;
+			
 			default:
 				// Unknown error.
 				prg_status = ms_sWarning + TR("Unknown error code %1 received from RAR file handler.").arg(status);
