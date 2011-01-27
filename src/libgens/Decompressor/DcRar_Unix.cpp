@@ -350,10 +350,8 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
 
 /**
  * CheckExtPrg(): Check if the specified external RAR program is usable.
- * @param extprg		[in] External RAR program filename.
- * @param rar_version		[out] If not NULL, copntains RAR/UnRAR version if it's usable; 0 if not. (MDP version format)
- *				      High bit is set if the program is RAR, or clear if it's UnRAR.
- * @param rar_api_version	[out] If not NULL, contains UnRAR DLL API version. (Win32 only)
+ * @param extprg	[in] External RAR program filename.
+ * @param prginfo	[out] If not NULL, contains RAR/UnRAR version information.
  * @return Possible error codes:
  * -  0: Program is usable.
  * - -1: File not found.
@@ -363,11 +361,8 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
  * - -5: Wrong DLL API version. (Win32 only)
  * TODO: Use MDP error code constants.
  */
-uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, uint32_t *rar_version, int *rar_api_version)
+uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prginfo)
 {
-	// rar_api_version is Win32 only.
-	((void)rar_api_version);
-	
 	// Check that the RAR executable is available.
 	if (access(extprg, F_OK) != 0)
 		return -1;
@@ -399,18 +394,24 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, uint32_t *rar_version, int *
 	// RAR: "\nRAR x.xx"
 	// UnRAR: "\nUNRAR x.xx"
 	// TODO: Use strtok() on platforms that don't have strtok_r().
-	uint32_t ver;
 	char *token, *saveptr;
-	int strtol_tmp; char *strtol_endptr;
+	char *strtol_endptr;
+	
+	// Program information.
+	// Clear out fields not used by the Unix version.
+	ExtPrgInfo my_prginfo;
+	my_prginfo.dll_revision = 0;
+	my_prginfo.dll_build = 0;
+	my_prginfo.api_version = 0;
 	
 	token = strtok_r(buf, "\n ", &saveptr);
 	if (!token)
 		return 0;
 	
 	if (!strncasecmp(token, "UNRAR", 6))
-		ver = 0x00000000;
+		my_prginfo.is_rar = false;
 	else if (!strncasecmp(token, "RAR", 4))
-		ver = 0x80000000;
+		my_prginfo.is_rar = false;
 	else
 		return 0;
 	
@@ -418,23 +419,21 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, uint32_t *rar_version, int *
 	token = strtok_r(NULL, ".", &saveptr);
 	if (!token)
 		return 0;
-	strtol_tmp = strtol(token, &strtol_endptr, 10);
+	my_prginfo.dll_major = strtol(token, &strtol_endptr, 10);
 	if (!strtol_endptr || *strtol_endptr != 0x00)
 		return 0;
-	ver |= ((strtol_tmp & 0x7F) << 24);
 	
 	// Get the RAR minor version.
 	token = strtok_r(NULL, " ", &saveptr);
 	if (!token)
 		return 0;
-	strtol_tmp = strtol(token, &strtol_endptr, 10);
+	my_prginfo.dll_minor = strtol(token, &strtol_endptr, 10);
 	if (!strtol_endptr || *strtol_endptr != 0x00)
 		return 0;
-	ver |= ((strtol_tmp & 0xFF) << 16);
 	
 	// RAR version obtained.
-	if (rar_version)
-		*rar_version = ver;
+	if (prginfo)
+		memcpy(prginfo, &my_prginfo, sizeof(*prginfo));
 	
 	// RAR is usable.
 	return 0;

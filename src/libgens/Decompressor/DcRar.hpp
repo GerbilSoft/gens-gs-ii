@@ -72,12 +72,26 @@ class DcRar : public Decompressor
 		 */
 		int getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *ret_siz);
 		
+		struct ExtPrgInfo
+		{
+			// DLL version number.
+			uint16_t dll_major;
+			uint16_t dll_minor;
+			uint16_t dll_revision;
+			uint16_t dll_build;
+			
+			// API version number.
+			int api_version;
+			
+			// Is this UnRAR or RAR?
+			// false == UnRAR; true == RAR
+			bool is_rar;
+		};
+		
 		/**
 		 * CheckExtPrg(): Check if the specified external RAR program is usable.
-		 * @param extprg		[in] External RAR program filename.
-		 * @param rar_version		[out] If not NULL, copntains RAR/UnRAR version if it's usable; 0 if not. (MDP version format)
-		 *				      High bit is set if the program is RAR, or clear if it's UnRAR.
-		 * @param rar_api_version	[out] If not NULL, contains UnRAR DLL API version. (Win32 only)
+		 * @param extprg	[in] External RAR program filename.
+		 * @param prginfo	[out] If not NULL, contains RAR/UnRAR version information.
 		 * @return Possible error codes:
 		 * -  0: Program is usable.
 		 * - -1: File not found.
@@ -87,7 +101,7 @@ class DcRar : public Decompressor
 		 * - -5: Wrong DLL API version. (Win32 only)
 		 * TODO: Use MDP error code constants.
 		 */
-		static uint32_t CheckExtPrg(const utf8_str *extprg, uint32_t *rar_version, int *rar_api_version);
+		static uint32_t CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prginfo);
 	
 	protected:
 		/**
