@@ -521,7 +521,7 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 		prg_status = TR("No filename specified.");
 	else
 	{
-		int status = LibGens::DcRar::CheckExtPrg(txtExtPrgUnRAR->text().toUtf8().constData(), &prg_info);
+		status = LibGens::DcRar::CheckExtPrg(txtExtPrgUnRAR->text().toUtf8().constData(), &prg_info);
 		switch (status)
 		{
 			case 0:
@@ -568,24 +568,28 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 	
 	sExtPrgStatus_UnRAR = TR("Identified as: %1").arg(prg_id) + "<br/>\n<br/>\n";
 	
-	QString rar_version;
+	if (prg_info.dll_major != 0 && prg_info.dll_minor != 0 &&
+	    prg_info.dll_revision != 0 && prg_info.dll_build != 0)
+	{
+		QString rar_version;
 #ifdef _WIN32
-	rar_version = TR("%1 version %2.%3.%4.%5");
-	rar_version = rar_version.arg(prg_id);
-	rar_version = rar_version.arg(prg_info.dll_major);
-	rar_version = rar_version.arg(prg_info.dll_minor);
-	rar_version = rar_version.arg(prg_info.dll_revision);
-	rar_version = rar_version.arg(prg_info.dll_build);
+		rar_version = TR("%1 version %2.%3.%4.%5");
+		rar_version = rar_version.arg(prg_id);
+		rar_version = rar_version.arg(prg_info.dll_major);
+		rar_version = rar_version.arg(prg_info.dll_minor);
+		rar_version = rar_version.arg(prg_info.dll_revision);
+		rar_version = rar_version.arg(prg_info.dll_build);
 #else
-	rar_version = TR("%1 version %2.%3");
-	rar_version = rar_version.arg(prg_id);
-	rar_version = rar_version.arg(prg_info.dll_major);
-	rar_version = rar_version.arg(prg_info.dll_minor);
+		rar_version = TR("%1 version %2.%3");
+		rar_version = rar_version.arg(prg_id);
+		rar_version = rar_version.arg(prg_info.dll_major);
+		rar_version = rar_version.arg(prg_info.dll_minor);
 #endif
-	sExtPrgStatus_UnRAR += rar_version;
+		sExtPrgStatus_UnRAR += rar_version;
 #ifdef _WIN32
-	sExtPrgStatus_UnRAR += "<br/>\n" + TR("API version %1").arg(prg_info.api_version);
+		sExtPrgStatus_UnRAR += "<br/>\n" + TR("API version %1").arg(prg_info.api_version);
 #endif
+	}
 	
 	if (!prg_status.isEmpty())
 		sExtPrgStatus_UnRAR += "<br/>\n<br/>\n" + prg_status;
