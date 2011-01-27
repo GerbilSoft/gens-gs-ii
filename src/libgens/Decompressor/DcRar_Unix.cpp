@@ -363,6 +363,13 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
  */
 uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
 {
+	// Program information.
+	// Clear out fields not used by the Unix version.
+	ExtPrgInfo my_prg_info;
+	memset(&my_prg_info, 0x00, sizeof(my_prg_info));
+	if (prg_info)
+		memset(prg_info, 0x00, sizeof(*prg_info));
+	
 	// Check that the RAR executable is available.
 	if (access(extprg, F_OK) != 0)
 		return -1;
@@ -396,11 +403,6 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
 	// TODO: Use strtok() on platforms that don't have strtok_r().
 	char *token, *saveptr;
 	char *strtol_endptr;
-	
-	// Program information.
-	// Clear out fields not used by the Unix version.
-	ExtPrgInfo my_prg_info;
-	memset(&my_prg_info, 0x00, sizeof(my_prg_info));
 	
 	token = strtok_r(buf, "\n ", &saveptr);
 	if (!token)
