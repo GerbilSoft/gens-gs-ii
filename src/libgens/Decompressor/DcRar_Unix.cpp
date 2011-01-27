@@ -28,6 +28,10 @@
 #include <string.h>
 #include <unistd.h>
 
+// stat()
+#include <sys/types.h>
+#include <sys/stat.h>
+
 // LOG_MSG() subsystem.
 #include "macros/log_msg.h"
 
@@ -349,7 +353,12 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
  * @param extprg	[in] External RAR program filename.
  * @param rar_version	[out] If not NULL, copntains RAR/UnRAR version if it's usable; 0 if not. (MDP version format)
  *                            High bit is set if the program is RAR, or clear if it's UnRAR.
- * @return 0 if usable; -1 if file isn't found; -2 if file isn't executable.
+ * @return Possible error codes:
+ * -  0: Program is usable.
+ * - -1: File not found.
+ * - -2: File isn't executable
+ * - -3: File isn't a regular file. (e.g. it's a directory)
+ * - -4: Error calling lstat().
  * TODO: Use MDP error code constants.
  */
 uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, uint32_t *rar_version)
@@ -359,6 +368,13 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, uint32_t *rar_version)
 		return -1;
 	if (access(extprg, X_OK) != 0)
 		return -2;
+	
+	// Make sure that this is a regular file.
+	struct stat st_buf;
+	if (lstat(extprg, &st_buf) != 0)
+		return -4;
+	if (!S_ISREG(st_buf.st_mode))
+		return -3;
 	
 	// Build the command line.
 	string sCmdLine = "\"" + string(extprg) + "\"";
