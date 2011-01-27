@@ -39,6 +39,7 @@
 // Qt4 includes.
 #include <QtGui/QFileDialog>
 #include <QtCore/QFile>
+//#include <QtCore/QDir>
 
 // libgens: RAR decompressor
 #include "libgens/Decompressor/DcRar.hpp"
@@ -222,6 +223,9 @@ void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *
 	
 	if (filename.isEmpty())
 		return;
+	
+	// Convert to native pathname separators.
+	filename = QDir::toNativeSeparators(filename);
 	
 	// Set the filename text.
 	// ROM file status will be updated automatically by
@@ -473,6 +477,9 @@ void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
 	
 	if (filename.isEmpty())
 		return;
+	
+	// Convert to native pathname separators.
+	filename = QDir::toNativeSeparators(filename);
 	
 	// Set the filename text.
 	// Program file status will be updated automatically by
