@@ -61,14 +61,18 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	// Sega CD: Initialize Boot ROM textboxes.
 	txtMcdRomUSA = new GensLineEdit(this);
 	txtMcdRomUSA->setObjectName(QString::fromUtf8("txtMcdRomUSA"));
+	txtMcdRomUSA->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 	txtMcdRomEUR = new GensLineEdit(this);
 	txtMcdRomEUR->setObjectName(QString::fromUtf8("txtMcdRomEUR"));
+	txtMcdRomEUR->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 	txtMcdRomJPN = new GensLineEdit(this);
 	txtMcdRomJPN->setObjectName(QString::fromUtf8("txtMcdRomJPN"));
+	txtMcdRomJPN->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 	
 	// External Programs: Initialize textboxes.
 	txtExtPrgUnRAR = new GensLineEdit(this);
 	txtExtPrgUnRAR->setObjectName(QString::fromUtf8("txtExtPrgUnRAR"));
+	txtExtPrgUnRAR->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 	
 	// Initialize the Qt4 UI.
 	setupUi(this);
