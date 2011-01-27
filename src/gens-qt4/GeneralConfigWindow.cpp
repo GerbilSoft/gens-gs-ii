@@ -568,8 +568,8 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 	
 	sExtPrgStatus_UnRAR = TR("Identified as: %1").arg(prg_id) + "<br/>\n<br/>\n";
 	
-	if (prg_info.dll_major != 0 && prg_info.dll_minor != 0 &&
-	    prg_info.dll_revision != 0 && prg_info.dll_build != 0)
+	if (prg_info.dll_major != 0 || prg_info.dll_minor != 0 ||
+	    prg_info.dll_revision != 0 || prg_info.dll_build != 0)
 	{
 		QString rar_version;
 #ifdef _WIN32
