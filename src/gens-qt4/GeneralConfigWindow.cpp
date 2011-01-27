@@ -553,6 +553,15 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 				filename_icon = QStyle::SP_MessageBoxCritical;
 				break;
 			
+#ifdef _WIN32
+			case -5:
+				// UnRAR.dll API version is too old. (Win32 only)
+				prg_status = ms_sWarning + TR("UnRAR.dll API version is too old.") + "<br/>\n" +
+							   TR("Gens/GS II requires API version %1 or later.").arg(RAR_DLL_VERSION);
+				filename_icon = QStyle::SP_MessageBoxCritical;
+				break;
+#endif
+			
 			default:
 				// Unknown error.
 				prg_status = ms_sWarning + TR("Unknown error code %1 received from RAR file handler.").arg(status);
