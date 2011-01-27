@@ -521,7 +521,7 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 		prg_status = TR("No filename specified.");
 	else
 	{
-		status = LibGens::DcRar::CheckExtPrg(txtExtPrgUnRAR->text().toUtf8().constData(), &prg_info);
+		int status = LibGens::DcRar::CheckExtPrg(txtExtPrgUnRAR->text().toUtf8().constData(), &prg_info);
 		switch (status)
 		{
 			case 0:
