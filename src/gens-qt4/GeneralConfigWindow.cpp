@@ -40,11 +40,17 @@
 #include <QtGui/QFileDialog>
 #include <QtCore/QFile>
 
+// libgens: RAR decompressor
+#include "libgens/Decompressor/DcRar.hpp"
+
 namespace GensQt4
 {
 
 // Static member initialization.
 GeneralConfigWindow *GeneralConfigWindow::m_GeneralConfigWindow = NULL;
+
+// Warning string.
+const QString GeneralConfigWindow::ms_sWarning = "<span style='color: red'><b>" + TR("Warning:") + "</b></span> ";
 
 /**
  * GeneralConfigWindow(): Initialize the General Configuration window.
@@ -266,9 +272,6 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 	QString rom_notes;
 	QString rom_size_warning;
 	
-	// Warning string.
-	const QString sWarning = "<span style='color: red'><b>" + TR("Warning:") + "</b></span> ";
-	
 	// Check the ROM filesize.
 	// Valid boot ROMs are 128 KB.
 	// Smaller ROMs will not work; larger ROMs may work, but warn anyway.
@@ -277,7 +280,7 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 		// Wrong ROM size.
 		filename_icon = QStyle::SP_MessageBoxWarning;
 		
-		rom_size_warning = sWarning + TR("ROM size is incorrect.") + "<br/>\n" +
+		rom_size_warning = ms_sWarning + TR("ROM size is incorrect.") + "<br/>\n" +
 				   TR("(expected %L1 bytes; found %L2 bytes)").arg(MCD_ROM_FILESIZE).arg(file.size());
 		if (file.size() < MCD_ROM_FILESIZE)
 		{
@@ -333,7 +336,7 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 		QString expected_region = QString::fromUtf8(lg_mcd_rom_GetRegionCodeString(region_code));
 		QString boot_rom_region = QString::fromUtf8(lg_mcd_rom_GetRegionCodeString(boot_rom_region_primary));
 		
-		rom_notes += sWarning + TR("Region code is incorrect.") + "<br/>\n" +
+		rom_notes += ms_sWarning + TR("Region code is incorrect.") + "<br/>\n" +
 			     TR("(expected %1; found %2)").arg(expected_region).arg(boot_rom_region) + "<br/>\n";
 		
 		// Set the icon to warning.
@@ -353,13 +356,13 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 		case RomStatus_Unsupported:
 		default:
 			// ROM is unsupported.
-			rom_notes += sWarning + TR("This Boot ROM is not supported by Gens/GS II.") + "<br/>\n";
+			rom_notes += ms_sWarning + TR("This Boot ROM is not supported by Gens/GS II.") + "<br/>\n";
 			filename_icon = QStyle::SP_MessageBoxWarning;
 			break;
 		
 		case RomStatus_Broken:
 			// ROM is known to be broken.
-			rom_notes += sWarning + TR("This Boot ROM is known to be broken on all emulators.") + "<br/>\n";
+			rom_notes += ms_sWarning + TR("This Boot ROM is known to be broken on all emulators.") + "<br/>\n";
 			filename_icon = QStyle::SP_MessageBoxCritical;
 			break;
 	}
@@ -501,7 +504,65 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 {
 	setApplyButtonEnabled(true);
 	
-	// TODO: Check the file to ensure it's valid.
+	// Check the RAR binary to make sure it's valid.
+	// TODO: Split status detection into a separate function like Sega CD Boot ROMs?
+	QString prg_id = TR("Unknown");
+	uint32_t rar_version = 0;
+	QString prg_status;
+	QStyle::StandardPixmap filename_icon = QStyle::SP_MessageBoxQuestion;
+	
+	// Check if the file exists.
+	const QString& filename = txtExtPrgUnRAR->text();
+	if (filename.isEmpty())
+		prg_status = TR("No filename specified.");
+	else
+	{
+		int status = LibGens::DcRar::CheckExtPrg(txtExtPrgUnRAR->text().toUtf8().constData(), &rar_version);
+		switch (status)
+		{
+			case 0:
+				// RAR is usable.
+#ifdef _WIN32
+				// TODO: DLL information.
+#else
+				if (rar_version & 0x80000000)
+					prg_id = TR("RAR");
+				else
+					prg_id = TR("UnRAR");
+#endif
+				filename_icon = QStyle::SP_DialogYesButton;
+				break;
+			
+			case -1:
+				// RAR not found.
+				prg_status = TR("The specified file was not found.");
+				break;
+			
+			case -2:
+				// RAR not executable.
+				prg_status = ms_sWarning + TR("The specified file is not executable.");
+				filename_icon = QStyle::SP_MessageBoxWarning;
+				break;
+			
+			default:
+				// Unknown error.
+				prg_status = ms_sWarning + TR("Unknown error code %1 received from RAR file handler.").arg(status);
+				filename_icon = QStyle::SP_MessageBoxWarning;
+				break;
+		}
+	}
+	
+	sExtPrgStatus_UnRAR = TR("Identified as: %1").arg(prg_id);
+	if (rar_version != 0)
+	{
+		sExtPrgStatus_UnRAR += "<br/>\n<br/>\n" +
+				prg_id + " " + TR("version %1.%2").arg((rar_version >> 24) & 0x7F).arg((rar_version >> 16) & 0xFF);
+	}
+	if (!prg_status.isEmpty())
+		sExtPrgStatus_UnRAR += "<br/>\n<br/>\n" + prg_status;
+	
+	// Set the textbox's icon.
+	txtExtPrgUnRAR->setIcon(style()->standardIcon(filename_icon));
 	
 	// TODO: Create a constant string for DLL vs. binary.
 	// For now, just call focusIn() to update the description.

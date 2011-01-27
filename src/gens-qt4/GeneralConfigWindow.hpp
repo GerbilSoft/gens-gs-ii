@@ -48,6 +48,9 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 		GeneralConfigWindow(QWidget *parent = NULL);
 		virtual ~GeneralConfigWindow();
 		
+		// Warning string.
+		static const QString ms_sWarning;
+		
 		void setApplyButtonEnabled(bool enabled)
 		{
 			QPushButton *btnApply = buttonBox->button(QDialogButtonBox::Apply);
