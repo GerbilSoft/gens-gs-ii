@@ -511,9 +511,9 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 	// Check the RAR binary to make sure it's valid.
 	// TODO: Split status detection into a separate function like Sega CD Boot ROMs?
 	QString prg_id = TR("Unknown");
-	uint32_t rar_version = 0;
 	QString prg_status;
 	QStyle::StandardPixmap filename_icon = QStyle::SP_MessageBoxQuestion;
+	LibGens::DcRar::ExtPrgInfo prg_info;
 	
 	// Check if the file exists.
 	const QString& filename = txtExtPrgUnRAR->text();
@@ -521,18 +521,15 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 		prg_status = TR("No filename specified.");
 	else
 	{
-		int status = LibGens::DcRar::CheckExtPrg(txtExtPrgUnRAR->text().toUtf8().constData(), &rar_version, NULL);
+		int status = LibGens::DcRar::CheckExtPrg(txtExtPrgUnRAR->text().toUtf8().constData(), &prg_info);
 		switch (status)
 		{
 			case 0:
 				// RAR is usable.
 #ifdef _WIN32
-				// TODO: DLL information.
+				prg_id = TR("UnRAR.dll");
 #else
-				if (rar_version & 0x80000000)
-					prg_id = TR("RAR");
-				else
-					prg_id = TR("UnRAR");
+				prg_id = (prg_info.is_rar ? TR("RAR") : TR("UnRAR"));
 #endif
 				filename_icon = QStyle::SP_DialogYesButton;
 				break;
@@ -569,12 +566,27 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 		}
 	}
 	
-	sExtPrgStatus_UnRAR = TR("Identified as: %1").arg(prg_id);
-	if (rar_version != 0)
-	{
-		sExtPrgStatus_UnRAR += "<br/>\n<br/>\n" +
-				prg_id + " " + TR("version %1.%2").arg((rar_version >> 24) & 0x7F).arg((rar_version >> 16) & 0xFF);
-	}
+	sExtPrgStatus_UnRAR = TR("Identified as: %1").arg(prg_id) + "<br/>\n<br/>\n";
+	
+	QString rar_version;
+#ifdef _WIN32
+	rar_version = TR("%1 version %2.%3.%4.%5");
+	rar_version = rar_version.arg(prg_id);
+	rar_version = rar_version.arg(prg_info.dll_major);
+	rar_version = rar_version.arg(prg_info.dll_minor);
+	rar_version = rar_version.arg(prg_info.dll_revision);
+	rar_version = rar_version.arg(prg_info.dll_build);
+#else
+	rar_version = TR("%1 version %2.%3");
+	rar_version = rar_version.arg(prg_id);
+	rar_version = rar_version.arg(prg_info.dll_major);
+	rar_version = rar_version.arg(prg_info.dll_minor);
+#endif
+	sExtPrgStatus_UnRAR += rar_version;
+#ifdef _WIN32
+	sExtPrgStatus_UnRAR += "<br/>\n" + TR("API version %1").arg(prg_info.api_version);
+#endif
+	
 	if (!prg_status.isEmpty())
 		sExtPrgStatus_UnRAR += "<br/>\n<br/>\n" + prg_status;
 	
