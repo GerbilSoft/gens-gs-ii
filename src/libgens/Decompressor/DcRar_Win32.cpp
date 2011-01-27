@@ -517,6 +517,8 @@ int CALLBACK DcRar::rarCallback(UINT msg, LPARAM UserData, LPARAM P1, LPARAM P2)
  * - -3: File isn't a regular file. (e.g. it's a directory)
  * - -4: Error calling lstat().
  * - -5: Wrong DLL API version. (Win32 only)
+ * - -6: Version information not found.
+ * - -7: Not UnRAR.dll. (Win32 only)
  * TODO: Use MDP error code constants.
  */
 uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
@@ -532,6 +534,13 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
 	if (access(extprg, F_OK) != 0)
 		return -1;
 	
+	// Attempt to load the DLL manually.
+	// TODO: Use W32U?
+	HINSTANCE hDll = LoadLibrary(extprg);
+	if (!hDll)
+		return -2;
+	FreeLibrary(hDll);
+	
 	// Get the UnRAR DLL version information.
 	DWORD dwLen;
 	void *lpData, *lpVerInfo;
@@ -541,17 +550,17 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
 	// Alternatively, just use the "A" functions.
 	dwLen = GetFileVersionInfoSize(extprg, NULL);
 	if (dwLen == 0)
-		return -2;
+		return -6;
 	lpData = malloc(dwLen);
 	if (!GetFileVersionInfo(extprg, 0, dwLen, lpData))
 	{
 		free(lpData);
-		return -2;
+		return -6;
 	}
 	if (!VerQueryValue(lpData, "\\", &lpVerInfo, &lenVerInfo))
 	{
 		free(lpData);
-		return -2;
+		return -6;
 	}
 	
 	// Get the file version.
@@ -569,11 +578,11 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
 	{
 		// Error loading the DLL.
 		// TODO: Determine what the error is.
-		// Assume non-executable for now.
+		// Assume that it's not UnRAR.dll for now.
 		// (It could also be that the DLL is too old and is missing a function.)
 		if (prg_info)
 			memcpy(prg_info, &my_prg_info, sizeof(*prg_info));
-		return -2;
+		return -7;
 	}
 	
 	// Get the UnRAR DLL API version.

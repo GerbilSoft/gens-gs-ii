@@ -359,6 +359,8 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
  * - -3: File isn't a regular file. (e.g. it's a directory)
  * - -4: Error calling lstat().
  * - -5: Wrong DLL API version. (Win32 only)
+ * - -6: Version information not found.
+ * - -7: Not UnRAR.dll. (Win32 only)
  * TODO: Use MDP error code constants.
  */
 uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)

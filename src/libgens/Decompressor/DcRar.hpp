@@ -105,6 +105,8 @@ class DcRar : public Decompressor
 		 * - -3: File isn't a regular file. (e.g. it's a directory)
 		 * - -4: Error calling lstat().
 		 * - -5: Wrong DLL API version. (Win32 only)
+		 * - -6: Version information not found.
+		 * - -7: Not UnRAR.dll. (Win32 only)
 		 * TODO: Use MDP error code constants.
 		 */
 		static uint32_t CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info);
