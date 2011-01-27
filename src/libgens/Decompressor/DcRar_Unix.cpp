@@ -350,9 +350,10 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
 
 /**
  * CheckExtPrg(): Check if the specified external RAR program is usable.
- * @param extprg	[in] External RAR program filename.
- * @param rar_version	[out] If not NULL, copntains RAR/UnRAR version if it's usable; 0 if not. (MDP version format)
- *                            High bit is set if the program is RAR, or clear if it's UnRAR.
+ * @param extprg		[in] External RAR program filename.
+ * @param rar_version		[out] If not NULL, copntains RAR/UnRAR version if it's usable; 0 if not. (MDP version format)
+ *				      High bit is set if the program is RAR, or clear if it's UnRAR.
+ * @param rar_api_version	[out] If not NULL, contains UnRAR DLL API version. (Win32 only)
  * @return Possible error codes:
  * -  0: Program is usable.
  * - -1: File not found.
