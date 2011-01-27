@@ -84,6 +84,7 @@ class DcRar : public Decompressor
 		 * - -2: File isn't executable
 		 * - -3: File isn't a regular file. (e.g. it's a directory)
 		 * - -4: Error calling lstat().
+		 * - -5: Wrong DLL API version. (Win32 only)
 		 * TODO: Use MDP error code constants.
 		 */
 		static uint32_t CheckExtPrg(const utf8_str *extprg, uint32_t *rar_version, int *rar_api_version);
