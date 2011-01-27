@@ -110,6 +110,20 @@ class DcRar : public Decompressor
 		 * TODO: Use MDP error code constants.
 		 */
 		static uint32_t CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info);
+		
+		/**
+		 * SetExtPrg(): Set the external RAR program filename.
+		 * @param extprg External RAR program filename.
+		 */
+		static void SetExtPrg(const utf8_str *extprg)
+			{ ms_RarBinary = std::string(extprg); }
+		
+		/**
+		 * GetExtPrg(): Set the external RAR program filename.
+		 * @return External RAR program filename.
+		 */
+		static const utf8_str *GetExtPrg(void)
+			{ return ms_RarBinary.c_str(); }
 	
 	protected:
 		/**
