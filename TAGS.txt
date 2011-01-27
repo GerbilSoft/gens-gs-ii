@@ -1,5 +1,9 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-GeneralConfigWindow-v2: UnRAR, RAR, and UnRAR.dll files are now
+detected correctly on all platforms. The UnRAR binary is *not* yet applied
+to DcRar when settings are saved.
+
 gens-qt4-GeneralConfigWindow-v1: New GensConfig class to store configuration
 information. Added initial UnRAR binary selection to the "General Configuration"
 window and support for GensConfig for Sega CD Boot ROMs and UnRAR binary.
