@@ -562,6 +562,18 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 				break;
 #endif
 			
+			case -6:
+				// Version information not found.
+				prg_status = ms_sWarning + TR("DLL version information not found.");
+				filename_icon = QStyle::SP_MessageBoxCritical;
+				break;
+			
+			case -7:
+				// Not UnRAR.dll. (Win32 only)
+				prg_status = ms_sWarning + TR("Selected DLL is not UnRAR.dll.");
+				filename_icon = QStyle::SP_MessageBoxCritical;
+				break;
+			
 			default:
 				// Unknown error.
 				prg_status = ms_sWarning + TR("Unknown error code %1 received from RAR file handler.").arg(status);
