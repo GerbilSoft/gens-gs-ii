@@ -94,7 +94,9 @@ bool UnRAR_dll::load(const utf8_str *filename)
 	    !pRARSetCallback   || !pRARGetDllVersion)
 	{
 		// NULL pointers found. That's bad.
+		m_loaded = true;	// Needed for unload() to work.
 		unload();
+		return false;
 	}
 	
 	// UnRAR.dll loaded successfully.
