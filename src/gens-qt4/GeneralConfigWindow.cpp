@@ -574,11 +574,24 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 	if (prg_info.dll_major != 0 || prg_info.dll_minor != 0 ||
 	    prg_info.dll_revision != 0 || prg_info.dll_build != 0)
 	{
-#ifdef _WIN32
-		prg_id = TR("UnRAR.dll");
-#else
-		prg_id = (prg_info.is_rar ? TR("RAR") : TR("UnRAR"));
-#endif
+		switch (prg_info.rar_type)
+		{
+			case LibGens::DcRar::ExtPrgInfo::RAR_ET_UNKNOWN:
+			default:
+				break;
+			
+			case LibGens::DcRar::ExtPrgInfo::RAR_ET_UNRAR:
+				prg_id = TR("UnRAR");
+				break;
+			
+			case LibGens::DcRar::ExtPrgInfo::RAR_ET_RAR:
+				prg_id = TR("RAR");
+				break;
+			
+			case LibGens::DcRar::ExtPrgInfo::RAR_ET_UNRAR_DLL:
+				prg_id = TR("UnRAR.dll");
+				break;
+		}
 	}
 	sExtPrgStatus_UnRAR = TR("Identified as: %1").arg(prg_id);
 	
