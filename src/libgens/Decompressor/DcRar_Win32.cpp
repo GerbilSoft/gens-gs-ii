@@ -505,4 +505,93 @@ int CALLBACK DcRar::rarCallback(UINT msg, LPARAM UserData, LPARAM P1, LPARAM P2)
 	return 0;
 }
 
+
+/**
+ * CheckExtPrg(): Check if the specified external RAR program is usable.
+ * @param extprg	[in] External RAR program filename.
+ * @param prg_info	[out] If not NULL, contains RAR/UnRAR version information.
+ * @return Possible error codes:
+ * -  0: Program is usable.
+ * - -1: File not found.
+ * - -2: File isn't executable
+ * - -3: File isn't a regular file. (e.g. it's a directory)
+ * - -4: Error calling lstat().
+ * - -5: Wrong DLL API version. (Win32 only)
+ * TODO: Use MDP error code constants.
+ */
+uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
+{
+	// Program information.
+	ExtPrgInfo my_prg_info;
+	memset(&my_prg_info, 0x00, sizeof(my_prg_info));
+	if (prg_info)
+		memset(prg_info, 0x00, sizeof(*prg_info));
+	
+	// Check that the UnRAR DLL is available.
+	// TODO: W32U version of access()?
+	if (access(extprg, F_OK) != 0)
+		return -1;
+	
+	// Get the UnRAR DLL version information.
+	DWORD dwLen;
+	void *lpData, *lpVerInfo;
+	unsigned int lenVerInfo;
+	
+	// TODO: Do we need Unicode translation for VerQueryValue?
+	// Alternatively, just use the "A" functions.
+	dwLen = GetFileVersionInfoSize(extprg, NULL);
+	if (dwLen == 0)
+		return -2;
+	lpData = malloc(dwLen);
+	if (!GetFileVersionInfo(extprg, 0, dwLen, lpData))
+	{
+		free(lpData);
+		return -2;
+	}
+	if (!VerQueryValue(lpData, "\\", &lpVerInfo, &lenVerInfo))
+	{
+		free(lpData);
+		return -2;
+	}
+	
+	// Get the file version.
+	VS_FIXEDFILEINFO *lpFixedFileInfo = (VS_FIXEDFILEINFO*)lpVerInfo;
+	my_prg_info.dll_major    = (lpFixedFileInfo->dwFileVersionMS >> 16);
+	my_prg_info.dll_minor    = (lpFixedFileInfo->dwFileVersionMS & 0xFFFF);
+	my_prg_info.dll_revision = (lpFixedFileInfo->dwFileVersionLS >> 16);
+	my_prg_info.dll_build    = (lpFixedFileInfo->dwFileVersionLS & 0xFFFF);
+	free(lpData);
+	
+	// Attempt to load the DLL.
+	UnRAR_dll dll;
+	dll.load(extprg);
+	if (!dll.isLoaded())
+	{
+		// Error loading the DLL.
+		// TODO: Determine what the error is.
+		// Assume non-executable for now.
+		// (It could also be that the DLL is too old and is missing a function.)
+		if (prg_info)
+			memcpy(prg_info, &my_prg_info, sizeof(*prg_info));
+		return -2;
+	}
+	
+	// Get the UnRAR DLL API version.
+	my_prg_info.api_version = dll.pRARGetDllVersion();
+	if (my_prg_info.api_version < RAR_DLL_VERSION)
+	{
+		// DLL is too old.
+		if (prg_info)
+			memcpy(prg_info, &my_prg_info, sizeof(*prg_info));
+		return -5;
+	}
+	
+	// RAR version obtained.
+	if (prg_info)
+		memcpy(prg_info, &my_prg_info, sizeof(*prg_info));
+	
+	// RAR is usable.
+	return 0;
+}
+
 }

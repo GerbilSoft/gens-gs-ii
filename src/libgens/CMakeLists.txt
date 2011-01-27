@@ -136,6 +136,13 @@ IF(HAVE_LZMA)
 	# * lzmabase does NOT depend on 7z.
 	TARGET_LINK_LIBRARIES(gens 7z lzmabase)
 ENDIF(HAVE_LZMA)
+IF(WIN32)
+	# version.dll is required for DcRar_Win32.cpp, which calls these functions:
+	# - GetFileVersionInfoSize()
+	# - GetFileVersionInfo()
+	# - VerQueryValue()
+	TARGET_LINK_LIBRARIES(gens -lversion)
+ENDIF(WIN32)
 
 ADD_DEPENDENCIES(gens git_version minizip zomg)
 IF(GENS_ENABLE_EMULATION)
