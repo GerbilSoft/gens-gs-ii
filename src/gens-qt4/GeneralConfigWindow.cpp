@@ -526,11 +526,6 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 		{
 			case 0:
 				// RAR is usable.
-#ifdef _WIN32
-				prg_id = TR("UnRAR.dll");
-#else
-				prg_id = (prg_info.is_rar ? TR("RAR") : TR("UnRAR"));
-#endif
 				filename_icon = QStyle::SP_DialogYesButton;
 				break;
 			
@@ -574,6 +569,7 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 	{
 		QString rar_version;
 #ifdef _WIN32
+		prg_id = TR("UnRAR.dll");
 		rar_version = TR("%1 version %2.%3.%4.%5");
 		rar_version = rar_version.arg(prg_id);
 		rar_version = rar_version.arg(prg_info.dll_major);
@@ -581,6 +577,7 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 		rar_version = rar_version.arg(prg_info.dll_revision);
 		rar_version = rar_version.arg(prg_info.dll_build);
 #else
+		prg_id = (prg_info.is_rar ? TR("RAR") : TR("UnRAR"));
 		rar_version = TR("%1 version %2.%3");
 		rar_version = rar_version.arg(prg_id);
 		rar_version = rar_version.arg(prg_info.dll_major);
