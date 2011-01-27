@@ -359,10 +359,14 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
  * - -2: File isn't executable
  * - -3: File isn't a regular file. (e.g. it's a directory)
  * - -4: Error calling lstat().
+ * - -5: Wrong DLL API version. (Win32 only)
  * TODO: Use MDP error code constants.
  */
-uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, uint32_t *rar_version)
+uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, uint32_t *rar_version, int *rar_api_version)
 {
+	// rar_api_version is Win32 only.
+	((void)rar_api_version);
+	
 	// Check that the RAR executable is available.
 	if (access(extprg, F_OK) != 0)
 		return -1;
