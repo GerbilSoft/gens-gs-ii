@@ -23,18 +23,21 @@
 
 #include "GensConfig.hpp"
 
+// TODO: Move this to GensConfigHandler.cpp?
+#include "libgens/Decompressor/DcRar.hpp"
+
 GensConfig::GensConfig()
 {
 	// Default UnRAR filename.
 #ifdef _WIN32
-	m_extprgUnRAR = "UnRAR.dll";	// TODO: Verify that a relative pathname works!
+	setExtPrgUnRAR("UnRAR.dll");	// TODO: Verify that a relative pathname works!
 #else
 	// TODO: Check for the existence of unrar and rar.
 	// We should:
 	// - Default to unrar if it's found.
 	// - Fall back to rar if it's found but unrar isn't.
 	// - Assume unrar if neither are found.
-	m_extprgUnRAR = "/usr/bin/unrar";
+	setExtPrgUnRAR("/usr/bin/unrar");
 #endif
 }
 
@@ -91,4 +94,11 @@ void GensConfig::setExtPrgUnRAR(const QString& filename)
 	
 	m_extprgUnRAR = filename;
 	emit extprgUnRAR_changed(m_extprgUnRAR);
+	
+	// TODO: Don't set the DcRar filename here.
+	// Set it in a signal handler in gqt4_main.cpp or something.
+	// Maybe create GensConfigHandler.cpp?
+	// (Reasoning is we might have multiple GensConfig instances,
+	//  but only one may be active at any given time.)
+	LibGens::DcRar::SetExtPrg(m_extprgUnRAR.toUtf8().constData());
 }
