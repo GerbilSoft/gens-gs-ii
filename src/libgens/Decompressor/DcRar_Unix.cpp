@@ -351,7 +351,7 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
 /**
  * CheckExtPrg(): Check if the specified external RAR program is usable.
  * @param extprg	[in] External RAR program filename.
- * @param prginfo	[out] If not NULL, contains RAR/UnRAR version information.
+ * @param prg_info	[out] If not NULL, contains RAR/UnRAR version information.
  * @return Possible error codes:
  * -  0: Program is usable.
  * - -1: File not found.
@@ -361,7 +361,7 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
  * - -5: Wrong DLL API version. (Win32 only)
  * TODO: Use MDP error code constants.
  */
-uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prginfo)
+uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
 {
 	// Check that the RAR executable is available.
 	if (access(extprg, F_OK) != 0)
@@ -399,19 +399,19 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prginfo)
 	
 	// Program information.
 	// Clear out fields not used by the Unix version.
-	ExtPrgInfo my_prginfo;
-	my_prginfo.dll_revision = 0;
-	my_prginfo.dll_build = 0;
-	my_prginfo.api_version = 0;
+	ExtPrgInfo my_prg_info;
+	my_prg_info.dll_revision = 0;
+	my_prg_info.dll_build = 0;
+	my_prg_info.api_version = 0;
 	
 	token = strtok_r(buf, "\n ", &saveptr);
 	if (!token)
 		return 0;
 	
 	if (!strncasecmp(token, "UNRAR", 6))
-		my_prginfo.is_rar = false;
+		my_prg_info.is_rar = false;
 	else if (!strncasecmp(token, "RAR", 4))
-		my_prginfo.is_rar = false;
+		my_prg_info.is_rar = false;
 	else
 		return 0;
 	
@@ -419,7 +419,7 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prginfo)
 	token = strtok_r(NULL, ".", &saveptr);
 	if (!token)
 		return 0;
-	my_prginfo.dll_major = strtol(token, &strtol_endptr, 10);
+	my_prg_info.dll_major = strtol(token, &strtol_endptr, 10);
 	if (!strtol_endptr || *strtol_endptr != 0x00)
 		return 0;
 	
@@ -427,13 +427,13 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prginfo)
 	token = strtok_r(NULL, " ", &saveptr);
 	if (!token)
 		return 0;
-	my_prginfo.dll_minor = strtol(token, &strtol_endptr, 10);
+	my_prg_info.dll_minor = strtol(token, &strtol_endptr, 10);
 	if (!strtol_endptr || *strtol_endptr != 0x00)
 		return 0;
 	
 	// RAR version obtained.
-	if (prginfo)
-		memcpy(prginfo, &my_prginfo, sizeof(*prginfo));
+	if (prg_info)
+		memcpy(prg_info, &my_prg_info, sizeof(*prg_info));
 	
 	// RAR is usable.
 	return 0;
