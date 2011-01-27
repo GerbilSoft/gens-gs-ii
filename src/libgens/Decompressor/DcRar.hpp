@@ -103,7 +103,7 @@ class DcRar : public Decompressor
 		 * - -1: File not found.
 		 * - -2: File isn't executable
 		 * - -3: File isn't a regular file. (e.g. it's a directory)
-		 * - -4: Error calling lstat().
+		 * - -4: Error calling stat().
 		 * - -5: Wrong DLL API version. (Win32 only)
 		 * - -6: Version information not found.
 		 * - -7: Not UnRAR.dll. (Win32 only)

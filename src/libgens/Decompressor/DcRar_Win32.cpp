@@ -519,7 +519,7 @@ int CALLBACK DcRar::rarCallback(UINT msg, LPARAM UserData, LPARAM P1, LPARAM P2)
  * - -1: File not found.
  * - -2: File isn't executable
  * - -3: File isn't a regular file. (e.g. it's a directory)
- * - -4: Error calling lstat().
+ * - -4: Error calling stat().
  * - -5: Wrong DLL API version. (Win32 only)
  * - -6: Version information not found.
  * - -7: Not UnRAR.dll. (Win32 only)
@@ -539,8 +539,6 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
 		return -1;
 	
 	// Make sure that this is a regular file.
-	// NOTE: MinGW currently doesn't provide lstat().
-	// Perhaps we should test for lstat() in CMake.
 	struct stat st_buf;
 	if (stat(extprg, &st_buf) != 0)
 		return -4;

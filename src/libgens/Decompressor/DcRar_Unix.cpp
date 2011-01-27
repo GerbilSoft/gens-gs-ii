@@ -357,7 +357,7 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
  * - -1: File not found.
  * - -2: File isn't executable
  * - -3: File isn't a regular file. (e.g. it's a directory)
- * - -4: Error calling lstat().
+ * - -4: Error calling stat().
  * - -5: Wrong DLL API version. (Win32 only)
  * - -6: Version information not found.
  * - -7: Not UnRAR.dll. (Win32 only)
@@ -380,7 +380,7 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
 	
 	// Make sure that this is a regular file.
 	struct stat st_buf;
-	if (lstat(extprg, &st_buf) != 0)
+	if (stat(extprg, &st_buf) != 0)
 		return -4;
 	if (!S_ISREG(st_buf.st_mode))
 		return -3;
