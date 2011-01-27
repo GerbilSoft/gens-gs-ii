@@ -33,6 +33,10 @@
 #include <unistd.h>
 #include <stdint.h>
 
+// stat()
+#include <sys/types.h>
+#include <sys/stat.h>
+
 // LOG_MSG() subsystem.
 #include "macros/log_msg.h"
 
@@ -533,6 +537,15 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
 	// TODO: W32U version of access()?
 	if (access(extprg, F_OK) != 0)
 		return -1;
+	
+	// Make sure that this is a regular file.
+	// NOTE: MinGW currently doesn't provide lstat().
+	// Perhaps we should test for lstat() in CMake.
+	struct stat st_buf;
+	if (stat(extprg, &st_buf) != 0)
+		return -4;
+	if (!S_ISREG(st_buf.st_mode))
+		return -3;
 	
 	// Attempt to load the DLL manually.
 	// TODO: Use W32U?
