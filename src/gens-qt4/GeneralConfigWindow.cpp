@@ -207,7 +207,7 @@ void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *
 	// TODO: Specify the current Boot ROM filename as the default filename.
 	// TODO: Move the filename filters somewhere else.
 	QString filename = QFileDialog::getOpenFileName(this, title,
-			"",						// Default filename.
+			txtRomFile->text(),	// Default filename.
 			TR("Sega CD Boot ROM images") +
 			" (*.bin *.gen *.md *.smd"
 #ifdef HAVE_ZLIB
@@ -462,9 +462,8 @@ void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
 	const QString title = TR("Select RAR or UnRAR binary");
 #endif
 	
-	// TODO: Specify the current RAR binary filename as the default filename.
 	QString filename = QFileDialog::getOpenFileName(this, title,
-			"",						// Default filename.
+			txtExtPrgUnRAR->text(),		// Default filename.
 #ifdef _WIN32
 			TR("DLL files") + " (*.dll);;"
 #else
