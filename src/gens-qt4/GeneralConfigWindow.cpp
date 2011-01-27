@@ -566,8 +566,9 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 		}
 	}
 	
-	sExtPrgStatus_UnRAR = TR("Identified as: %1").arg(prg_id) + "<br/>\n<br/>\n";
+	sExtPrgStatus_UnRAR = TR("Identified as: %1").arg(prg_id);
 	
+	// Print DLL version information, if available.
 	if (prg_info.dll_major != 0 || prg_info.dll_minor != 0 ||
 	    prg_info.dll_revision != 0 || prg_info.dll_build != 0)
 	{
@@ -585,7 +586,7 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 		rar_version = rar_version.arg(prg_info.dll_major);
 		rar_version = rar_version.arg(prg_info.dll_minor);
 #endif
-		sExtPrgStatus_UnRAR += rar_version;
+		sExtPrgStatus_UnRAR += "<br/>\n<br/>\n" + rar_version;
 #ifdef _WIN32
 		sExtPrgStatus_UnRAR += "<br/>\n" + TR("API version %1").arg(prg_info.api_version);
 #endif
