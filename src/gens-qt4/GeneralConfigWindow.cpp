@@ -553,9 +553,9 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 				break;
 			
 			case -4:
-				// Error calling lstat().
-				// TODO: Get the lstat() error code?
-				prg_status = ms_sWarning + TR("Error calling lstat().");
+				// Error calling stat().
+				// TODO: Get the stat() error code?
+				prg_status = ms_sWarning + TR("Error calling stat().");
 				filename_icon = QStyle::SP_MessageBoxCritical;
 				break;
 			
