@@ -570,13 +570,24 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 		}
 	}
 	
+	// Set program ID.
+	if (prg_info.dll_major != 0 || prg_info.dll_minor != 0 ||
+	    prg_info.dll_revision != 0 || prg_info.dll_build != 0)
+	{
+#ifdef _WIN32
+		prg_id = TR("UnRAR.dll");
+#else
+		prg_id = (prg_info.is_rar ? TR("RAR") : TR("UnRAR"));
+#endif
+	}
+	sExtPrgStatus_UnRAR = TR("Identified as: %1").arg(prg_id);
+	
 	// Print DLL version information, if available.
 	if (prg_info.dll_major != 0 || prg_info.dll_minor != 0 ||
 	    prg_info.dll_revision != 0 || prg_info.dll_build != 0)
 	{
 		QString rar_version;
 #ifdef _WIN32
-		prg_id = TR("UnRAR.dll");
 		rar_version = TR("%1 version %2.%3.%4.%5");
 		rar_version = rar_version.arg(prg_id);
 		rar_version = rar_version.arg(prg_info.dll_major);
@@ -584,7 +595,6 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 		rar_version = rar_version.arg(prg_info.dll_revision);
 		rar_version = rar_version.arg(prg_info.dll_build);
 #else
-		prg_id = (prg_info.is_rar ? TR("RAR") : TR("UnRAR"));
 		rar_version = TR("%1 version %2.%3");
 		rar_version = rar_version.arg(prg_id);
 		rar_version = rar_version.arg(prg_info.dll_major);
@@ -596,7 +606,6 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 #endif
 	}
 	
-	sExtPrgStatus_UnRAR = TR("Identified as: %1").arg(prg_id);
 	if (!prg_status.isEmpty())
 		sExtPrgStatus_UnRAR += "<br/>\n<br/>\n" + prg_status;
 	
