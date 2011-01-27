@@ -400,9 +400,7 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
 	// Program information.
 	// Clear out fields not used by the Unix version.
 	ExtPrgInfo my_prg_info;
-	my_prg_info.dll_revision = 0;
-	my_prg_info.dll_build = 0;
-	my_prg_info.api_version = 0;
+	memset(&my_prg_info, 0x00, sizeof(my_prg_info));
 	
 	token = strtok_r(buf, "\n ", &saveptr);
 	if (!token)
