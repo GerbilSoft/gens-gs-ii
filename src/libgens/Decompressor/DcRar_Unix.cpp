@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdint.h>
 
 // LOG_MSG() subsystem.
 #include "macros/log_msg.h"
@@ -342,6 +341,82 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
 	// File extracted successfully.
 	*ret_siz = extracted_size;
 	return 0; // TODO: return MDP_ERR_OK;
+}
+
+
+/**
+ * CheckExtPrg(): Check if the specified external RAR program is usable.
+ * @param extprg	[in] External RAR program filename.
+ * @param rar_version	[out] If not NULL, copntains RAR/UnRAR version if it's usable; 0 if not. (MDP version format)
+ *                            High bit is set if the program is RAR, or clear if it's UnRAR.
+ * @return 0 if usable; -1 if file isn't found; -2 if file isn't executable.
+ * TODO: Use MDP error code constants.
+ */
+uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, uint32_t *rar_version)
+{
+	// Check that the RAR executable is available.
+	if (access(extprg, F_OK) != 0)
+		return -1;
+	if (access(extprg, X_OK) != 0)
+		return -2;
+	
+	// Build the command line.
+	string sCmdLine = "\"" + string(extprg) + "\"";
+	
+	// Open the RAR file.
+	FILE *pRar = popen(sCmdLine.c_str(), "r");
+	if (!pRar)
+		return -2;
+	
+	// Read 1 KB maximum from the pipe.
+	char buf[1024+1];
+	size_t rv = fread(buf, 1, sizeof(buf)-1, pRar);
+	buf[rv] = 0x00;
+	fclose(pRar);
+	
+	// Pipe contents should start with one of the following:
+	// RAR: "\nRAR x.xx"
+	// UnRAR: "\nUNRAR x.xx"
+	// TODO: Use strtok() on platforms that don't have strtok_r().
+	uint32_t ver;
+	char *token, *saveptr;
+	int strtol_tmp; char *strtol_endptr;
+	
+	token = strtok_r(buf, "\n ", &saveptr);
+	if (!token)
+		return 0;
+	
+	if (!strncasecmp(token, "UNRAR", 6))
+		ver = 0x00000000;
+	else if (!strncasecmp(token, "RAR", 4))
+		ver = 0x80000000;
+	else
+		return 0;
+	
+	// Get the RAR major version.
+	token = strtok_r(NULL, ".", &saveptr);
+	if (!token)
+		return 0;
+	strtol_tmp = strtol(token, &strtol_endptr, 10);
+	if (!strtol_endptr || *strtol_endptr != 0x00)
+		return 0;
+	ver |= ((strtol_tmp & 0x7F) << 24);
+	
+	// Get the RAR minor version.
+	token = strtok_r(NULL, " ", &saveptr);
+	if (!token)
+		return 0;
+	strtol_tmp = strtol(token, &strtol_endptr, 10);
+	if (!strtol_endptr || *strtol_endptr != 0x00)
+		return 0;
+	ver |= ((strtol_tmp & 0xFF) << 16);
+	
+	// RAR version obtained.
+	if (rar_version)
+		*rar_version = ver;
+	
+	// RAR is usable.
+	return 0;
 }
 
 }

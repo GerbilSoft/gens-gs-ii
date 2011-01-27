@@ -30,6 +30,10 @@
 #include "UnRAR_dll.hpp"
 #endif
 
+// C includes.
+#include <stdio.h>
+#include <stdint.h>
+
 // C++ includes.
 #include <string>
 
@@ -67,6 +71,16 @@ class DcRar : public Decompressor
 		 * @return MDP error code. [TODO]
 		 */
 		int getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *ret_siz);
+		
+		/**
+		 * CheckExtPrg(): Check if the specified external RAR program is usable.
+		 * @param extprg	[in] External RAR program filename.
+		 * @param rar_version	[out] If not NULL, copntains RAR/UnRAR version if it's usable; 0 if not. (MDP version format)
+		 *                            High bit is set if the program is RAR, or clear if it's UnRAR.
+		 * @return 0 if usable; -1 if file isn't found; -2 if file isn't executable.
+		 * TODO: Use MDP error code constants.
+		 */
+		static uint32_t CheckExtPrg(const utf8_str *extprg, uint32_t *rar_version);
 	
 	protected:
 		/**
