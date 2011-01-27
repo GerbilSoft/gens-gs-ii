@@ -602,7 +602,8 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 #endif
 		sExtPrgStatus_UnRAR += "<br/>\n<br/>\n" + rar_version;
 #ifdef _WIN32
-		sExtPrgStatus_UnRAR += "<br/>\n" + TR("API version %1").arg(prg_info.api_version);
+		if (prg_info.api_version > 0)
+			sExtPrgStatus_UnRAR += "<br/>\n" + TR("API version %1").arg(prg_info.api_version);
 #endif
 	}
 	
