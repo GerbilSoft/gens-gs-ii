@@ -129,6 +129,10 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		{
 			KeyHandlerQt::MouseReleaseEvent(event);
 		}
+	
+	protected slots:
+		void osdFpsEnabled_changed_slot(bool enable) { setOsdFpsEnabled(enable); }
+		void osdMsgEnabled_changed_slot(bool enable) { setOsdMsgEnabled(enable); }
 };
 
 }

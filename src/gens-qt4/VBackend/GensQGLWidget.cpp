@@ -53,6 +53,8 @@
 // KeyHandlerQt.
 #include "Input/KeyHandlerQt.hpp"
 
+// gqt4_main.hpp has GensConfig.
+#include "gqt4_main.hpp"
 
 namespace GensQt4
 {
@@ -78,6 +80,14 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 #if 0
 	setMouseTracking(true);
 #endif
+	
+	// Connect signals from GensConfig.
+	// TODO: Reconnect signals if GensConfig is deleted/recreated.
+	// TODO: OSD colors.
+	connect(gqt4_config, SIGNAL(osdFpsEnabled_changed(bool)),
+		this, SLOT(osdFpsEnabled_changed_slot(bool)));
+	connect(gqt4_config, SIGNAL(osdMsgEnabled_changed(bool)),
+		this, SLOT(osdMsgEnabled_changed_slot(bool)));
 }
 
 GensQGLWidget::~GensQGLWidget()
