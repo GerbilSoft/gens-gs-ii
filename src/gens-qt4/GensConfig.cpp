@@ -28,6 +28,12 @@
 
 GensConfig::GensConfig()
 {
+	// Default OSD settings.
+	setOsdFpsEnabled(true);
+	setOsdFpsColor(QColor(255, 255, 255));
+	setOsdMsgEnabled(true);
+	setOsdMsgColor(QColor(255, 255, 255));
+	
 	// Default UnRAR filename.
 #ifdef _WIN32
 	setExtPrgUnRAR("UnRAR.dll");	// TODO: Verify that a relative pathname works!
@@ -54,6 +60,46 @@ void GensConfig::save(void)
 void GensConfig::reload(void)
 {
 	// TODO
+}
+
+
+/** Onscreen Display. **/
+
+
+void GensConfig::setOsdFpsEnabled(bool enable)
+{
+	if (m_osdFpsEnabled == enable)
+		return;
+	
+	m_osdFpsEnabled = true;
+	emit osdFpsEnable_changed(m_osdFpsEnabled);
+}
+
+void GensConfig::setOsdFpsColor(const QColor& color)
+{
+	if (!color.isValid() || m_osdFpsColor == color)
+		return;
+	
+	m_osdFpsColor = color;
+	emit osdFpsColor_changed(m_osdFpsColor);
+}
+
+void GensConfig::setOsdMsgEnabled(bool enable)
+{
+	if (m_osdMsgEnabled == enable)
+		return;
+	
+	m_osdMsgEnabled = true;
+	emit osdMsgEnable_changed(m_osdMsgEnabled);
+}
+
+void GensConfig::setOsdMsgColor(const QColor& color)
+{
+	if (!color.isValid() || m_osdMsgColor == color)
+		return;
+	
+	m_osdMsgColor = color;
+	emit osdMsgColor_changed(m_osdMsgColor);
 }
 
 
@@ -86,6 +132,10 @@ void GensConfig::setMcdRomJPN(const QString& filename)
 	m_mcdRomJPN = filename;
 	emit mcdRomJPN_changed(m_mcdRomJPN);
 }
+
+
+/** External Programs. **/
+
 
 void GensConfig::setExtPrgUnRAR(const QString& filename)
 {

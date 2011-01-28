@@ -26,6 +26,7 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QString>
+#include <QtGui/QColor>
 
 class GensConfig : public QObject
 {
@@ -37,6 +38,16 @@ class GensConfig : public QObject
 		
 		void save(void);
 		void reload(void);
+		
+		// Onscreen display.
+		bool osdFpsEnabled(void) { return m_osdFpsEnabled; }
+		void setOsdFpsEnabled(bool enable);
+		QColor osdFpsColor(void) { return m_osdFpsColor; }
+		void setOsdFpsColor(const QColor& color);
+		bool osdMsgEnabled(void) { return m_osdMsgEnabled; }
+		void setOsdMsgEnabled(bool enable);
+		QColor osdMsgColor(void) { return m_osdMsgColor; }
+		void setOsdMsgColor(const QColor& color);
 		
 		// Sega CD Boot ROMs.
 		QString mcdRomUSA(void) { return m_mcdRomUSA; }
@@ -51,6 +62,11 @@ class GensConfig : public QObject
 		void setExtPrgUnRAR(const QString& filename);
 	
 	protected:
+		bool m_osdFpsEnabled;
+		QColor m_osdFpsColor;
+		bool m_osdMsgEnabled;
+		QColor m_osdMsgColor;
+		
 		QString m_mcdRomUSA;
 		QString m_mcdRomEUR;
 		QString m_mcdRomJPN;
@@ -58,6 +74,11 @@ class GensConfig : public QObject
 		QString m_extprgUnRAR;
 	
 	signals:
+		void osdFpsEnable_changed(bool enable);
+		void osdFpsColor_changed(const QColor& color);
+		void osdMsgEnable_changed(bool enable);
+		void osdMsgColor_changed(const QColor& color);
+		
 		void mcdRomUSA_changed(const QString& filename);
 		void mcdRomEUR_changed(const QString& filename);
 		void mcdRomJPN_changed(const QString& filename);

@@ -39,7 +39,8 @@
 // Qt4 includes.
 #include <QtGui/QFileDialog>
 #include <QtCore/QFile>
-//#include <QtCore/QDir>
+#include <QtCore/QDir>
+#include <QtGui/QColorDialog>
 
 // libgens: RAR decompressor
 #include "libgens/Decompressor/DcRar.hpp"
@@ -49,6 +50,10 @@ namespace GensQt4
 
 // Static member initialization.
 GeneralConfigWindow *GeneralConfigWindow::m_GeneralConfigWindow = NULL;
+
+// Button CSS colors.
+const QString GeneralConfigWindow::ms_sCssBtnColors =
+	"QPushButton { background-color: %1; color: %2; }";
 
 // Warning string.
 const QString GeneralConfigWindow::ms_sWarning = "<span style='color: red'><b>" + TR("Warning:") + "</b></span> ";
@@ -158,6 +163,28 @@ void GeneralConfigWindow::ShowSingle(QWidget *parent)
  */
 void GeneralConfigWindow::reload(void)
 {
+	// Onscreen Display.
+	
+	// TODO: If grayscale version of color is < 128, make text white.
+	// TODO: If grayscale version of color is >= 128, make text black.
+	
+	int grayI;
+	QColor colorText;
+	
+	// Onscreen Display: FPS counter.
+	chkOsdFpsEnable->setChecked(gqt4_config->osdFpsEnabled());
+	m_osdFpsColor = gqt4_config->osdFpsColor();
+	grayI = QColor_Grayscale(m_osdFpsColor);
+	colorText = (grayI >= 128 ? QColor(0,0,0) : QColor(255,255,255));
+	btnOsdFpsColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdFpsColor.name()).arg(colorText.name()));
+	
+	// Onscreen Display: Messages.
+	chkOsdMsgEnable->setChecked(gqt4_config->osdMsgEnabled());
+	m_osdMsgColor = gqt4_config->osdMsgColor();
+	grayI = QColor_Grayscale(m_osdMsgColor);
+	colorText = (grayI >= 128 ? QColor(0,0,0) : QColor(255,255,255));
+	btnOsdMsgColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdMsgColor.name()).arg(colorText.name()));
+	
 	// Load BIOS ROM filenames.
 	txtMcdRomUSA->setText(gqt4_config->mcdRomUSA());
 	txtMcdRomEUR->setText(gqt4_config->mcdRomEUR());
@@ -176,6 +203,12 @@ void GeneralConfigWindow::reload(void)
  */
 void GeneralConfigWindow::apply(void)
 {
+	// Save the OSD settings.
+	gqt4_config->setOsdFpsEnabled(chkOsdFpsEnable->isChecked());
+	gqt4_config->setOsdFpsColor(m_osdFpsColor);
+	gqt4_config->setOsdMsgEnabled(chkOsdMsgEnable->isChecked());
+	gqt4_config->setOsdMsgColor(m_osdMsgColor);
+	
 	// Save the Sega CD Boot ROMs to the configuration class.
 	gqt4_config->setMcdRomUSA(txtMcdRomUSA->text());
 	gqt4_config->setMcdRomEUR(txtMcdRomEUR->text());
@@ -189,6 +222,57 @@ void GeneralConfigWindow::apply(void)
 	// Otherwise, Cancel will receive focus.
 	setApplyButtonEnabled(false);
 }
+
+
+/** Onscren Display **/
+
+
+/**
+ * osdSelectColor(): Select a color for the OSD.
+ * @param color_id	[in] Color ID.
+ * @param init_color	[in] Initial color.
+ * @return Selected color, or invalid QColor if cancelled.
+ */
+QColor GeneralConfigWindow::osdSelectColor(const QString& color_id, const QColor& init_color)
+{
+	// Create the dialog title.
+	QString title = TR("Select OSD %1 Color").arg(color_id);
+	
+	// QColorDialog::getColor() returns an invalid color
+	// if the dialog is cancelled.
+	return QColorDialog::getColor(init_color, this, title);
+}
+
+void GeneralConfigWindow::on_btnOsdFpsColor_clicked(void)
+{
+	QColor color = osdSelectColor(TR("FPS counter"), m_osdFpsColor);
+	if (!color.isValid())
+		return;
+	
+	// TODO: If grayscale version of color is < 128, make text white.
+	// TODO: If grayscale version of color is >= 128, make text black.
+	m_osdFpsColor = color;
+	int grayI = QColor_Grayscale(m_osdFpsColor);
+	QColor colorText = (grayI >= 128 ? QColor(0,0,0) : QColor(255,255,255));
+	btnOsdFpsColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdFpsColor.name()).arg(colorText.name()));
+}
+
+void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
+{
+	QColor color = osdSelectColor(TR("Messages"), m_osdMsgColor);
+	if (!color.isValid())
+		return;
+	
+	// TODO: If grayscale version of color is < 128, make text white.
+	// TODO: If grayscale version of color is >= 128, make text black.
+	m_osdMsgColor = color;
+	int grayI = QColor_Grayscale(m_osdMsgColor);
+	QColor colorText = (grayI >= 128 ? QColor(0,0,0) : QColor(255,255,255));
+	btnOsdMsgColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdMsgColor.name()).arg(colorText.name()));
+}
+
+/** Sega CD **/
+
 
 /**
  * mcdSelectRomFile(): Select a Sega CD Boot ROM file.

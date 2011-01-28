@@ -26,10 +26,14 @@
 
 #include <QtGui/QDialog>
 #include <QtGui/QLineEdit>
+#include <QtGui/QColor>
 #include "ui_GeneralConfigWindow.h"
 
 #include "GensLineEdit.hpp"
+
+// C includes.
 #include <stdio.h>
+#include <math.h>
 
 // libgens: Sega CD Boot ROM database.
 #include "libgens/Data/mcd_rom_db.h"
@@ -48,6 +52,9 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 		GeneralConfigWindow(QWidget *parent = NULL);
 		virtual ~GeneralConfigWindow();
 		
+		// Button CSS colors.
+		static const QString ms_sCssBtnColors;
+		
 		// Warning string.
 		static const QString ms_sWarning;
 		
@@ -56,6 +63,33 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 			QPushButton *btnApply = buttonBox->button(QDialogButtonBox::Apply);
 			if (btnApply)
 				btnApply->setEnabled(enabled);
+		}
+		
+		// Onscreen Display: Colors.
+		QColor m_osdFpsColor;
+		QColor m_osdMsgColor;
+		
+		/**
+		 * QColor_Grayscale(): Convert a QColor to grayscale.
+		 * This uses the standard ITU-R BT.601 grayscale conversion matrix.
+		 * @return Grayscale component, or -1 if color is invalid.
+		 */
+		inline int QColor_Grayscale(const QColor& color)
+		{
+			if (!color.isValid())
+				return -1;
+			
+			double grayD = ((double)color.red() * 0.299) +
+				       ((double)color.green() * 0.587) +
+				       ((double)color.blue() * 0.114);
+			int grayI = rint(grayD);
+			
+			// Clamp the grayscale value at [0, 255].
+			if (grayI < 0)
+				grayI = 0;
+			if (grayI > 255)
+				grayI = 255;
+			return grayI;
 		}
 		
 		// Sega CD: Boot ROM file textboxes.
@@ -74,6 +108,9 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 	
 	private:
 		static GeneralConfigWindow *m_GeneralConfigWindow;
+		
+		/** Onscreen Display **/
+		QColor osdSelectColor(const QString& color_id, const QColor& init_color);
 		
 		/** Sega CD: Boot ROM **/
 		
@@ -99,6 +136,10 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 		void extprgDisplayFileStatus(const QString& file_id, const QString& file_desc);
 	
 	private slots:
+		/** Onscreen Display **/
+		void on_btnOsdFpsColor_clicked(void);
+		void on_btnOsdMsgColor_clicked(void);
+		
 		/** Sega CD: Boot ROM **/
 		
 		void on_btnMcdRomUSA_clicked(void);

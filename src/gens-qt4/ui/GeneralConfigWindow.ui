@@ -25,6 +25,72 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
+     <widget class="QWidget" name="tabGeneral">
+      <attribute name="title">
+       <string>&amp;General</string>
+      </attribute>
+      <widget class="QGroupBox" name="grpOsd">
+       <property name="geometry">
+        <rect>
+         <x>4</x>
+         <y>4</y>
+         <width>161</width>
+         <height>231</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>Onscreen &amp;Display</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QGroupBox" name="grpOsdFps">
+          <property name="title">
+           <string>&amp;FPS counter</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <widget class="QCheckBox" name="chkOsdFpsEnable">
+             <property name="text">
+              <string>Enable</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnOsdFpsColor">
+             <property name="text">
+              <string>Color...</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="grpOsdMsg">
+          <property name="title">
+           <string>&amp;Messages</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <item>
+            <widget class="QCheckBox" name="chkOsdMsgEnable">
+             <property name="text">
+              <string>Enable</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnOsdMsgColor">
+             <property name="text">
+              <string>Color...</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
      <widget class="QWidget" name="tabSegaCD">
       <attribute name="title">
        <string>Sega &amp;CD</string>
@@ -284,6 +350,10 @@
  </widget>
  <tabstops>
   <tabstop>tabWidget</tabstop>
+  <tabstop>chkOsdFpsEnable</tabstop>
+  <tabstop>btnOsdFpsColor</tabstop>
+  <tabstop>chkOsdMsgEnable</tabstop>
+  <tabstop>btnOsdMsgColor</tabstop>
   <tabstop>btnMcdRomUSA</tabstop>
   <tabstop>btnMcdRomEUR</tabstop>
   <tabstop>btnMcdRomJPN</tabstop>
