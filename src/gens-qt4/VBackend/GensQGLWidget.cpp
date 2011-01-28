@@ -86,8 +86,12 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 	// TODO: OSD colors.
 	connect(gqt4_config, SIGNAL(osdFpsEnabled_changed(bool)),
 		this, SLOT(osdFpsEnabled_changed_slot(bool)));
+	connect(gqt4_config, SIGNAL(osdFpsColor_changed(const QColor&)),
+		this, SLOT(osdFpsColor_changed_slot(const QColor&)));
 	connect(gqt4_config, SIGNAL(osdMsgEnabled_changed(bool)),
 		this, SLOT(osdMsgEnabled_changed_slot(bool)));
+	connect(gqt4_config, SIGNAL(osdMsgColor_changed(const QColor&)),
+		this, SLOT(osdMsgColor_changed_slot(const QColor&)));
 }
 
 GensQGLWidget::~GensQGLWidget()

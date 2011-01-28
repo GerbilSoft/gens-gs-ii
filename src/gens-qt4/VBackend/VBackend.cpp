@@ -61,8 +61,9 @@ VBackend::VBackend()
 	
 	// Initialize the OSD settings.
 	m_osdFpsEnabled = gqt4_config->osdFpsEnabled();
+	m_osdFpsColor   = gqt4_config->osdFpsColor();
 	m_osdMsgEnabled = gqt4_config->osdMsgEnabled();
-	// TODO: Text color.
+	m_osdMsgColor   = gqt4_config->osdMsgColor();
 	setOsdListDirty();	// TODO: Set this on startup?
 	
 	// Set the default stretch mode.
@@ -246,7 +247,7 @@ int VBackend::osd_process(void)
 	if (!osdMsgEnabled())
 	{
 		// Messages are disabled. Clear the message list.
-		if (!m_osdList.empty())
+		if (!m_osdList.isEmpty())
 		{
 			// Messages exist.
 			// Remove them and update the video backend.
@@ -342,7 +343,7 @@ void VBackend::pushFps(double fps)
 
 
 /**
- * setOsdFpsEnabled(): Set the OSD FPS visibility setting.
+ * setOsdFpsEnabled(): Set the OSD FPS counter visibility setting.
  * @param enable True to show FPS; false to hide FPS.
  */
 void VBackend::setOsdFpsEnabled(bool enable)
@@ -357,6 +358,28 @@ void VBackend::setOsdFpsEnabled(bool enable)
 	// Mark the OSD list as dirty if the emulator is running.
 	if (isRunning())
 		setOsdListDirty();
+}
+
+
+/**
+ * setOsdFpsColor(): Set the OSD FPS counter color.
+ * @param color New OSD FPS counter color.
+ */
+void VBackend::setOsdFpsColor(const QColor& color)
+{
+	if (!color.isValid() || m_osdFpsColor == color)
+		return;
+	
+	// Update the FPS counter color.
+	m_osdFpsColor = color;
+	
+	if (osdFpsEnabled() && isRunning())
+	{
+		// Emulator is running.
+		// Update the FPS counter.
+		setVbDirty();	// TODO: Texture doesn't really need to be reuploaded...
+		setOsdListDirty();
+	}
 }
 
 
@@ -376,6 +399,28 @@ void VBackend::setOsdMsgEnabled(bool enable)
 	// Mark the OSD list as dirty if the emulator is running.
 	if (isRunning())
 		setOsdListDirty();
+}
+
+
+/**
+ * setOsdMsgColor(): Set the OSD Message color.
+ * @param color New OSD Message color.
+ */
+void VBackend::setOsdMsgColor(const QColor& color)
+{
+	if (!color.isValid() || m_osdMsgColor == color)
+		return;
+	
+	// Update the message color.
+	m_osdMsgColor = color;
+	
+	if (osdMsgEnabled() && !m_osdList.isEmpty())
+	{
+		// Message list has messages.
+		// Redraw the messages.
+		setVbDirty();	// TODO: Texture doesn't really need to be reuploaded...
+		setOsdListDirty();
+	}
 }
 
 

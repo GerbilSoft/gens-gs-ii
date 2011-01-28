@@ -131,8 +131,14 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		}
 	
 	protected slots:
-		void osdFpsEnabled_changed_slot(bool enable) { setOsdFpsEnabled(enable); }
-		void osdMsgEnabled_changed_slot(bool enable) { setOsdMsgEnabled(enable); }
+		void osdFpsEnabled_changed_slot(bool enable)
+			{ setOsdFpsEnabled(enable); }
+		void osdFpsColor_changed_slot(const QColor& color)
+			{ setOsdFpsColor(color); }
+		void osdMsgEnabled_changed_slot(bool enable)
+			{ setOsdMsgEnabled(enable); }
+		void osdMsgColor_changed_slot(const QColor& color)
+			{ setOsdMsgColor(color); }
 };
 
 }

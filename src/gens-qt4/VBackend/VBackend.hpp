@@ -32,6 +32,7 @@
 #include <QtCore/QString>
 #include <QtCore/QList>
 #include <QtGui/QWidget>
+#include <QtGui/QColor>
 
 #include "libgens/MD/VdpRend.hpp"
 
@@ -69,8 +70,14 @@ class VBackend
 		inline bool osdFpsEnabled(void) const { return m_osdFpsEnabled; }
 		void setOsdFpsEnabled(bool enable);
 		
+		inline QColor osdFpsColor(void) const { return m_osdFpsColor; }
+		void setOsdFpsColor(const QColor& color);
+		
 		inline bool osdMsgEnabled(void) const { return m_osdMsgEnabled; }
 		void setOsdMsgEnabled(bool enable);
+		
+		inline QColor osdMsgColor(void) const { return m_osdMsgColor; }
+		void setOsdMsgColor(const QColor& color);
 		
 		/** Format strings. **/
 		
@@ -159,6 +166,10 @@ class VBackend
 		// OSD enable bits.
 		bool m_osdFpsEnabled;
 		bool m_osdMsgEnabled;
+		
+		// OSD colors.
+		QColor m_osdFpsColor;
+		QColor m_osdMsgColor;
 		
 		// Stretch mode.
 		StretchMode m_stretchMode;
