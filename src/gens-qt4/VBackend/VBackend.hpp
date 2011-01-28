@@ -55,14 +55,24 @@ class VBackend
 		// Since this is the base class, this will return NULL.
 		virtual QWidget *toQWidget(void) { return NULL; }
 		
-		bool isPaused(void) const { return m_paused; }
+		/** Properties. **/
+		
+		inline bool isPaused(void) const { return m_paused; }
 		void setPaused(bool newPaused);
 		
-		bool fastBlur(void) const { return m_fastBlur; }
+		inline bool fastBlur(void) const { return m_fastBlur; }
 		void setFastBlur(bool newFastBlur);
 		
-		bool isRunning(void) const { return m_running; }
+		inline bool isRunning(void) const { return m_running; }
 		void setRunning(bool newIsRunning);
+		
+		inline bool osdFpsEnabled(void) const { return m_osdFpsEnabled; }
+		void setOsdFpsEnabled(bool enable);
+		
+		inline bool osdMsgEnabled(void) const { return m_osdMsgEnabled; }
+		void setOsdMsgEnabled(bool enable);
+		
+		/** Format strings. **/
 		
 		// NOTE: Format string argument is 3 instead of 2.
 		// This is due to the implicit "this" parameter.
@@ -87,9 +97,6 @@ class VBackend
 		// FPS manager.
 		void resetFps(void);
 		void pushFps(double fps);
-		
-		bool showFps(void) const { return m_showFps; }
-		void setShowFps(bool newShowFps);
 		
 		// Stretch mode.
 		enum StretchMode
@@ -148,7 +155,10 @@ class VBackend
 		double m_fps[8];
 		double m_fpsAvg;	// Average fps.
 		int m_fpsPtr;		// Pointer to next fps slot to use.
-		bool m_showFps;
+		
+		// OSD enable bits.
+		bool m_osdFpsEnabled;
+		bool m_osdMsgEnabled;
 		
 		// Stretch mode.
 		StretchMode m_stretchMode;

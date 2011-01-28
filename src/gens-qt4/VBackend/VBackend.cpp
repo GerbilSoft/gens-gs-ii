@@ -35,6 +35,9 @@
 // Message timer.
 #include "MsgTimer.hpp"
 
+// gqt4_main.hpp has GensConfig.
+#include "gqt4_main.hpp"
+
 namespace GensQt4
 {
 
@@ -55,7 +58,11 @@ VBackend::VBackend()
 	
 	// Initialize the FPS manager.
 	resetFps();
-	m_showFps = true;	// TODO: Load from configuration.
+	
+	// Initialize the OSD settings.
+	m_osdFpsEnabled = gqt4_config->osdFpsEnabled();
+	m_osdMsgEnabled = gqt4_config->osdMsgEnabled();
+	// TODO: Text color.
 	setOsdListDirty();	// TODO: Set this on startup?
 	
 	// Set the default stretch mode.
@@ -94,7 +101,7 @@ void VBackend::setPaused(bool newPaused)
 	if (isRunning())
 	{
 		setVbDirty();
-		if (showFps())
+		if (osdFpsEnabled())
 			setOsdListDirty();
 		vbUpdate(); // TODO: Do we really need to call this here?
 	}
@@ -138,7 +145,7 @@ void VBackend::setRunning(bool newIsRunning)
 	m_running = newIsRunning;
 	
 	// Mark the OSD list as dirty if the FPS counter is visible.
-	if (m_showFps)
+	if (osdFpsEnabled())
 	{
 		setOsdListDirty();
 		if (!isRunning())
@@ -201,6 +208,8 @@ void VBackend::osd_vprintf(const int duration, const char *msg, va_list ap)
 {
 	if (duration <= 0)
 		return;
+	if (!osdMsgEnabled())
+		return;
 	
 	// Format the message.
 	char msg_buf[1024];
@@ -234,6 +243,22 @@ void VBackend::osd_vprintf(const int duration, const char *msg, va_list ap)
  */
 int VBackend::osd_process(void)
 {
+	if (!osdMsgEnabled())
+	{
+		// Messages are disabled. Clear the message list.
+		if (!m_osdList.empty())
+		{
+			// Messages exist.
+			// Remove them and update the video backend.
+			m_osdList.clear();
+			setOsdListDirty();
+			vbUpdate();
+		}
+		
+		// Message list is now empty.
+		return 0;
+	}
+		
 	// Check the message list for expired messages.
 	bool isMsgRemoved = false;
 	double curTime = LibGens::Timing::GetTimeD();
@@ -317,16 +342,35 @@ void VBackend::pushFps(double fps)
 
 
 /**
- * setShowFps(): Set the FPS visibility setting.
- * @param newShowFps True to show FPS; false to hide FPS.
+ * setOsdFpsEnabled(): Set the OSD FPS visibility setting.
+ * @param enable True to show FPS; false to hide FPS.
  */
-void VBackend::setShowFps(bool newShowFps)
+void VBackend::setOsdFpsEnabled(bool enable)
 {
-	if (m_showFps == newShowFps)
+	if (m_osdFpsEnabled == enable)
 		return;
 	
 	// Update the Show FPS setting.
-	m_showFps = newShowFps;
+	m_osdFpsEnabled = enable;
+	setVbDirty();		// TODO: Texture doesn't really need to be reuploaded...
+	
+	// Mark the OSD list as dirty if the emulator is running.
+	if (isRunning())
+		setOsdListDirty();
+}
+
+
+/**
+ * setOsdMsgEnabled(): Set the OSD Message visibility setting.
+ * @param enable True to show messages; false to hide messages.
+ */
+void VBackend::setOsdMsgEnabled(bool enable)
+{
+	if (m_osdMsgEnabled == enable)
+		return;
+	
+	// Update the Show FPS setting.
+	m_osdMsgEnabled = enable;
 	setVbDirty();		// TODO: Texture doesn't really need to be reuploaded...
 	
 	// Mark the OSD list as dirty if the emulator is running.

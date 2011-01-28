@@ -566,7 +566,7 @@ void GensQGLWidget::printOsdText(void)
 	
 	// Check if the FPS should be drawn.
 	// TODO: Integrate this with the for loop.
-	if (isRunning() && !isPaused() && showFps())
+	if (isRunning() && !isPaused() && osdFpsEnabled())
 	{
 		QString sFps = QString::number(m_fpsAvg, 'f', 1);
 		
@@ -580,28 +580,32 @@ void GensQGLWidget::printOsdText(void)
 		printOsdLine(8, y, sFps);
 	}
 	
-	// NOTE: QList internally uses an array of pointers.
-	// We can use array indexing instead of iterators.
-	for (int i = (m_osdList.size() - 1); i >= 0; i--)
+	// If messages are enabled, print them on the screen.
+	if (osdMsgEnabled())
 	{
-		if (curTime >= m_osdList[i].endTime)
+		// NOTE: QList internally uses an array of pointers.
+		// We can use array indexing instead of iterators.
+		for (int i = (m_osdList.size() - 1); i >= 0; i--)
 		{
-			// Message duration has elapsed.
-			// Remove the message from the list.
-			m_osdList.removeAt(i);
-			continue;
+			if (curTime >= m_osdList[i].endTime)
+			{
+				// Message duration has elapsed.
+				// Remove the message from the list.
+				m_osdList.removeAt(i);
+				continue;
+			}
+			
+			const QString &msg = m_osdList[i].msg;
+			
+			// TODO: Allow font scaling.
+			y -= 16;
+			
+			// TODO: Make the drop shadow optional or something.
+			qglColor(clShadow);
+			printOsdLine(8+1, y+1, msg);
+			qglColor(clText);
+			printOsdLine(8, y, msg);
 		}
-		
-		const QString &msg = m_osdList[i].msg;
-		
-		// TODO: Allow font scaling.
-		y -= 16;
-		
-		// TODO: Make the drop shadow optional or something.
-		qglColor(clShadow);
-		printOsdLine(8+1, y+1, msg);
-		qglColor(clText);
-		printOsdLine(8, y, msg);
 	}
 	
 	// We're done drawing.
