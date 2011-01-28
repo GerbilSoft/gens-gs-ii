@@ -137,7 +137,11 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 	
 	private slots:
 		/** Onscreen Display **/
+		void on_chkOsdFpsEnable_toggled(bool)
+			{ setApplyButtonEnabled(true); }
 		void on_btnOsdFpsColor_clicked(void);
+		void on_chkOsdMsgEnable_toggled(bool)
+			{ setApplyButtonEnabled(true); }
 		void on_btnOsdMsgColor_clicked(void);
 		
 		/** Sega CD: Boot ROM **/
