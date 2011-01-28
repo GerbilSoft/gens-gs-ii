@@ -282,6 +282,14 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>btnMcdRomUSA</tabstop>
+  <tabstop>btnMcdRomEUR</tabstop>
+  <tabstop>btnMcdRomJPN</tabstop>
+  <tabstop>btnExtPrgUnRAR</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources>
   <include location="resources/gens-qt4.qrc"/>
  </resources>
