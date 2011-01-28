@@ -570,9 +570,9 @@ void GensQGLWidget::printOsdText(void)
 	glBindTexture(GL_TEXTURE_2D, m_texOsd);
 	glBegin(GL_QUADS);	// Start drawing quads.
 	
-	// TODO: Make the text colors customizable.
-	QColor clShadow(0, 0, 0, 255);
-	QColor clText(255, 255, 255, 255);
+	// Text shadow color.
+	// TODO: Make this customizable?
+	const QColor clShadow(0, 0, 0);
 	
 	// TODO: Constants for character sizes.
 	int y = (240 - 16);
@@ -590,7 +590,7 @@ void GensQGLWidget::printOsdText(void)
 		// TODO: Make the drop shadow optional or something.
 		qglColor(clShadow);
 		printOsdLine(8+1, y+1, sFps);
-		qglColor(clText);
+		qglColor(osdFpsColor());
 		printOsdLine(8, y, sFps);
 	}
 	
@@ -617,7 +617,7 @@ void GensQGLWidget::printOsdText(void)
 			// TODO: Make the drop shadow optional or something.
 			qglColor(clShadow);
 			printOsdLine(8+1, y+1, msg);
-			qglColor(clText);
+			qglColor(osdMsgColor());	// TODO: Per-message colors?
 			printOsdLine(8, y, msg);
 		}
 	}
