@@ -246,7 +246,7 @@ QColor GeneralConfigWindow::osdSelectColor(const QString& color_id, const QColor
 void GeneralConfigWindow::on_btnOsdFpsColor_clicked(void)
 {
 	QColor color = osdSelectColor(TR("FPS counter"), m_osdFpsColor);
-	if (!color.isValid())
+	if (!color.isValid() || m_osdFpsColor == color)
 		return;
 	
 	// TODO: If grayscale version of color is < 128, make text white.
@@ -255,12 +255,15 @@ void GeneralConfigWindow::on_btnOsdFpsColor_clicked(void)
 	int grayI = QColor_Grayscale(m_osdFpsColor);
 	QColor colorText = (grayI >= 128 ? QColor(0,0,0) : QColor(255,255,255));
 	btnOsdFpsColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdFpsColor.name()).arg(colorText.name()));
+	
+	// Settings have been changed.
+	setApplyButtonEnabled(true);
 }
 
 void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
 {
 	QColor color = osdSelectColor(TR("Messages"), m_osdMsgColor);
-	if (!color.isValid())
+	if (!color.isValid() || m_osdMsgColor == color)
 		return;
 	
 	// TODO: If grayscale version of color is < 128, make text white.
@@ -269,6 +272,9 @@ void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
 	int grayI = QColor_Grayscale(m_osdMsgColor);
 	QColor colorText = (grayI >= 128 ? QColor(0,0,0) : QColor(255,255,255));
 	btnOsdMsgColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdMsgColor.name()).arg(colorText.name()));
+	
+	// Settings have been changed.
+	setApplyButtonEnabled(true);
 }
 
 /** Sega CD **/
