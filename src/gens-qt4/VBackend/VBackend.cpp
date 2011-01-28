@@ -300,7 +300,7 @@ int VBackend::osd_process(void)
  */
 void VBackend::resetFps(void)
 {
-	for (int i = 0; i < (sizeof(m_fps)/sizeof(m_fps[0])); i++)
+	for (size_t i = 0; i < (sizeof(m_fps)/sizeof(m_fps[0])); i++)
 		m_fps[i] = -1.0;
 	m_fpsAvg = 0.0;
 	m_fpsPtr = 0;
@@ -322,7 +322,7 @@ void VBackend::pushFps(double fps)
 	// Calculate the new average.
 	int count = 0;
 	double sum = 0;
-	for (int i = 0; i < (sizeof(m_fps)/sizeof(m_fps[0])); i++)
+	for (size_t i = 0; i < (sizeof(m_fps)/sizeof(m_fps[0])); i++)
 	{
 		if (m_fps[i] >= 0.0)
 		{
