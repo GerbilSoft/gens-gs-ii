@@ -71,7 +71,7 @@ void GensConfig::setOsdFpsEnabled(bool enable)
 	if (m_osdFpsEnabled == enable)
 		return;
 	
-	m_osdFpsEnabled = true;
+	m_osdFpsEnabled = enable;
 	emit osdFpsEnable_changed(m_osdFpsEnabled);
 }
 
@@ -89,7 +89,7 @@ void GensConfig::setOsdMsgEnabled(bool enable)
 	if (m_osdMsgEnabled == enable)
 		return;
 	
-	m_osdMsgEnabled = true;
+	m_osdMsgEnabled = enable;
 	emit osdMsgEnable_changed(m_osdMsgEnabled);
 }
 
