@@ -1,4 +1,4 @@
-This copy of the LZMA SDK 9.12 is a modified version of the original.
+This copy of the LZMA SDK 9.20 is a modified version of the original.
 
 The following changes have been made to the original:
 - CMake build system.
@@ -8,5 +8,5 @@ The following changes have been made to the original:
 - Threads.c/Threads.h (Windows-specific) have been removed.
 - LzfindMt.c/LzFindMt.h (Windows-specific) have been removed.
 
-To obtain the original LZMA SDK 9.12, visit
+To obtain the original LZMA SDK 9.20, visit
 http://www.7-zip.org/sdk.html

@@ -1,10 +1,10 @@
 /* 7zAlloc.h -- Allocation functions
-2009-02-07 : Igor Pavlov : Public domain */
+2010-10-29 : Igor Pavlov : Public domain */
 
 #ifndef __7Z_ALLOC_H
 #define __7Z_ALLOC_H
 
-#include <stddef.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {

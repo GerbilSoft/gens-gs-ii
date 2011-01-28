@@ -1,4 +1,4 @@
-# LZMA SDK 9.12, ANSI-C version.
+# LZMA SDK 9.20, ANSI-C version.
 # http://www.7-zip.org/sdk.html
 
 # Subdirectories
