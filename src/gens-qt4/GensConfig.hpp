@@ -74,9 +74,9 @@ class GensConfig : public QObject
 		QString m_extprgUnRAR;
 	
 	signals:
-		void osdFpsEnable_changed(bool enable);
+		void osdFpsEnabled_changed(bool enable);
 		void osdFpsColor_changed(const QColor& color);
-		void osdMsgEnable_changed(bool enable);
+		void osdMsgEnabled_changed(bool enable);
 		void osdMsgColor_changed(const QColor& color);
 		
 		void mcdRomUSA_changed(const QString& filename);

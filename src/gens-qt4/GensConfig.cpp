@@ -72,7 +72,7 @@ void GensConfig::setOsdFpsEnabled(bool enable)
 		return;
 	
 	m_osdFpsEnabled = enable;
-	emit osdFpsEnable_changed(m_osdFpsEnabled);
+	emit osdFpsEnabled_changed(m_osdFpsEnabled);
 }
 
 void GensConfig::setOsdFpsColor(const QColor& color)
@@ -90,7 +90,7 @@ void GensConfig::setOsdMsgEnabled(bool enable)
 		return;
 	
 	m_osdMsgEnabled = enable;
-	emit osdMsgEnable_changed(m_osdMsgEnabled);
+	emit osdMsgEnabled_changed(m_osdMsgEnabled);
 }
 
 void GensConfig::setOsdMsgColor(const QColor& color)
