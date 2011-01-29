@@ -37,10 +37,11 @@
 #include <zlib.h>
 
 // Qt4 includes.
-#include <QtGui/QFileDialog>
 #include <QtCore/QFile>
 #include <QtCore/QDir>
+#include <QtGui/QFileDialog>
 #include <QtGui/QColorDialog>
+#include <QtGui/QPainter>
 
 // libgens: RAR decompressor
 #include "libgens/Decompressor/DcRar.hpp"
@@ -93,41 +94,29 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	
 	/** Intro Effect **/
 	
-	// Intro Effect Color: Signal mapper.
-	// TODO: Reduce the number of lines here.
+	// Intro Effect Color: Create the icons.
+	static const QRgb intro_colors[8] =
+		{0xFF000000, 0xFF0000FF, 0xFF00FF00, 0xFF00FFFF,
+		 0xFFFF0000, 0xFFFF00FF, 0xFFFFFF00, 0xFFFFFFFF};
+	QSize iconSize = cboIntroColor->iconSize();
+	for (int i = 0; i < 8; i++)
+	{
+		// TODO: Determine an appropriate icon size.
+		QPixmap pxm(24, 16);
+		pxm.fill(QColor(intro_colors[i]));
+		
+		// Draw a black rectangle outline.
+		// TODO: Use a darkened version of the color like Mac OS X's NSColorWell?
+		QPainter painter(&pxm);
+		painter.setPen(QColor(0, 0, 0));
+		painter.drawRect(0, 0, iconSize.width()-1, iconSize.height()-1);
+		
+		// Convert to a QIcon and add it to cboIntroColor.
+		QIcon icon(pxm);
+		cboIntroColor->setItemIcon(i, icon);
+	}
 	
-	// Map all the Intro Effect Color buttons.
-	m_sigmapIntroEffectColor = new QSignalMapper(this);
-	m_sigmapIntroEffectColor->setMapping(optIntroColorK, 0);
-	m_sigmapIntroEffectColor->setMapping(optIntroColorB, 1);
-	m_sigmapIntroEffectColor->setMapping(optIntroColorG, 2);
-	m_sigmapIntroEffectColor->setMapping(optIntroColorC, 3);
-	m_sigmapIntroEffectColor->setMapping(optIntroColorR, 4);
-	m_sigmapIntroEffectColor->setMapping(optIntroColorM, 5);
-	m_sigmapIntroEffectColor->setMapping(optIntroColorY, 6);
-	m_sigmapIntroEffectColor->setMapping(optIntroColorW, 7);
-	
-	// Attach signals from the Intro Effect Color buttons to the Signal Mapper.
-	connect(optIntroColorK, SIGNAL(clicked()),
-		m_sigmapIntroEffectColor, SLOT(map()));
-	connect(optIntroColorB, SIGNAL(clicked()),
-		m_sigmapIntroEffectColor, SLOT(map()));
-	connect(optIntroColorG, SIGNAL(clicked()),
-		m_sigmapIntroEffectColor, SLOT(map()));
-	connect(optIntroColorC, SIGNAL(clicked()),
-		m_sigmapIntroEffectColor, SLOT(map()));
-	connect(optIntroColorR, SIGNAL(clicked()),
-		m_sigmapIntroEffectColor, SLOT(map()));
-	connect(optIntroColorM, SIGNAL(clicked()),
-		m_sigmapIntroEffectColor, SLOT(map()));
-	connect(optIntroColorY, SIGNAL(clicked()),
-		m_sigmapIntroEffectColor, SLOT(map()));
-	connect(optIntroColorW, SIGNAL(clicked()),
-		m_sigmapIntroEffectColor, SLOT(map()));
-	
-	// Connect the Signal Mapper to the introEffectColor_selected(int) slot.
-	connect(m_sigmapIntroEffectColor, SIGNAL(mapped(int)),
-		this, SLOT(introEffectColor_selected(int)));
+	// TODO
 	
 	/** Sega CD **/
 	
@@ -218,17 +207,15 @@ void GeneralConfigWindow::reload(void)
 	colorText = (grayI >= 128 ? QColor(0,0,0) : QColor(255,255,255));
 	btnOsdFpsColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdFpsColor.name()).arg(colorText.name()));
 	
-	// TODO: Get intro effect config from GensConfig.
-	// NOTE: Calling setChecked() doesn't trigger the clicked() signal.
-	optIntroColorW->setChecked(true);
-	m_introEffectColor = 7;
-	
 	// Onscreen Display: Messages.
 	chkOsdMsgEnable->setChecked(gqt4_config->osdMsgEnabled());
 	m_osdMsgColor = gqt4_config->osdMsgColor();
 	grayI = QColor_Grayscale(m_osdMsgColor);
 	colorText = (grayI >= 128 ? QColor(0,0,0) : QColor(255,255,255));
 	btnOsdMsgColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdMsgColor.name()).arg(colorText.name()));
+	
+	// TODO: Get intro effect config from GensConfig.
+	cboIntroColor->setCurrentIndex(7);
 	
 	// Load BIOS ROM filenames.
 	txtMcdRomUSA->setText(gqt4_config->mcdRomUSA());
@@ -253,6 +240,9 @@ void GeneralConfigWindow::apply(void)
 	gqt4_config->setOsdFpsColor(m_osdFpsColor);
 	gqt4_config->setOsdMsgEnabled(chkOsdMsgEnable->isChecked());
 	gqt4_config->setOsdMsgColor(m_osdMsgColor);
+	
+	// TODO: Save intro effect config to GensConfig.
+	//gqt4_config->setIntroColor(cboIntroColor->currentIndex());
 	
 	// Save the Sega CD Boot ROMs to the configuration class.
 	gqt4_config->setMcdRomUSA(txtMcdRomUSA->text());
@@ -327,19 +317,16 @@ void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
 
 
 /**
- * introEffectColor_selected(): An intro effect color was selected.
- * @param color_index Color index.
+ * on_cboIntroColor_currentIndexChanged(): The intro effect color was changed.
+ * @param index Color index.
  */
-void GeneralConfigWindow::introEffectColor_selected(int color_index)
+void GeneralConfigWindow::on_cboIntroColor_currentIndexChanged(int index)
 {
-	if (color_index < 0 || color_index > 7)
-		return;
-	if (m_introEffectColor == color_index)
+	if (index < 0 || index > 7)
 		return;
 	
-	// Save the color index.
-	m_introEffectColor = color_index;
-	printf("Intro Effect Color: %d\n", m_introEffectColor);
+	// TODO: I don't think we really need to do anything here...
+	printf("Intro Effect Color: %d\n", index);
 	
 	// Enable the Apply button.
 	setApplyButtonEnabled(true);

@@ -115,10 +115,6 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 		QColor m_osdFpsColor;
 		QColor m_osdMsgColor;
 		
-		/** Intro Effect **/
-		int m_introEffectColor;
-		QSignalMapper *m_sigmapIntroEffectColor;
-		
 		/** Sega CD: Boot ROM **/
 		
 		// Sega CD: Boot ROM filesize.
@@ -152,7 +148,7 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 		void on_btnOsdMsgColor_clicked(void);
 		
 		/** Intro Effect **/
-		void introEffectColor_selected(int color_index);
+		void on_cboIntroColor_currentIndexChanged(int index);
 		
 		/** Sega CD: Boot ROM **/
 		

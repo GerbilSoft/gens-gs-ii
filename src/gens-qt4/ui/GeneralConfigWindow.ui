@@ -32,6 +32,12 @@
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="1">
         <widget class="QGroupBox" name="grpEmulationOptions">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>&amp;Emulation Options</string>
          </property>
@@ -138,8 +144,11 @@ on NTSC models.</string>
           </item>
           <item row="0" column="2">
            <widget class="QComboBox" name="cboIntroStyle">
-            <property name="currentIndex">
-             <number>0</number>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
             <item>
              <property name="text">
@@ -167,171 +176,65 @@ on NTSC models.</string>
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
             <property name="buddy">
-             <cstring>optIntroColorW</cstring>
+             <cstring>cboIntroColor</cstring>
             </property>
            </widget>
           </item>
           <item row="1" column="2">
-           <layout class="QHBoxLayout" name="hboxIntroColor">
-            <property name="spacing">
-             <number>0</number>
+           <widget class="QComboBox" name="cboIntroColor">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>16</height>
+             </size>
             </property>
             <item>
-             <widget class="QPushButton" name="optIntroColorK">
-              <property name="styleSheet">
-               <string notr="true">QPushButton
-	{ background-color: #000000 }
-QPushButton:checked, QPushButton:hover
-	{ background-color: #555555 }</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="autoExclusive">
-               <bool>true</bool>
-              </property>
-             </widget>
+             <property name="text">
+              <string>Black</string>
+             </property>
             </item>
             <item>
-             <widget class="QPushButton" name="optIntroColorB">
-              <property name="styleSheet">
-               <string notr="true">QPushButton
-	{ background-color: #0000FF }
-QPushButton:checked, QPushButton:hover
-	{ background-color: #5555FF }</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="autoExclusive">
-               <bool>true</bool>
-              </property>
-             </widget>
+             <property name="text">
+              <string>Blue</string>
+             </property>
             </item>
             <item>
-             <widget class="QPushButton" name="optIntroColorG">
-              <property name="styleSheet">
-               <string notr="true">QPushButton
-	{ background-color: #00FF00 }
-QPushButton:checked, QPushButton:hover
-	{ background-color: #55FF55 }</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="autoExclusive">
-               <bool>true</bool>
-              </property>
-             </widget>
+             <property name="text">
+              <string>Green</string>
+             </property>
             </item>
             <item>
-             <widget class="QPushButton" name="optIntroColorC">
-              <property name="styleSheet">
-               <string notr="true">QPushButton
-	{ background-color: #00FFFF }
-QPushButton:checked, QPushButton:hover
-	{ background-color: #55FFFF }</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="autoExclusive">
-               <bool>true</bool>
-              </property>
-             </widget>
+             <property name="text">
+              <string>Cyan</string>
+             </property>
             </item>
             <item>
-             <widget class="QPushButton" name="optIntroColorR">
-              <property name="styleSheet">
-               <string notr="true">QPushButton
-	{ background-color: #FF0000 }
-QPushButton:checked, QPushButton:hover
-	{ background-color: #FF5555 }</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="autoExclusive">
-               <bool>true</bool>
-              </property>
-             </widget>
+             <property name="text">
+              <string>Red</string>
+             </property>
             </item>
             <item>
-             <widget class="QPushButton" name="optIntroColorM">
-              <property name="styleSheet">
-               <string notr="true">QPushButton
-	{ background-color: #FF00FF }
-QPushButton:checked, QPushButton:hover
-	{ background-color: #FF55FF }</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="autoExclusive">
-               <bool>true</bool>
-              </property>
-             </widget>
+             <property name="text">
+              <string>Magenta</string>
+             </property>
             </item>
             <item>
-             <widget class="QPushButton" name="optIntroColorY">
-              <property name="styleSheet">
-               <string notr="true">QPushButton
-	{ background-color: #FFFF00 }
-QPushButton:checked, QPushButton:hover
-	{ background-color: #FFFF55 }</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="autoExclusive">
-               <bool>true</bool>
-              </property>
-             </widget>
+             <property name="text">
+              <string>Yellow</string>
+             </property>
             </item>
             <item>
-             <widget class="QPushButton" name="optIntroColorW">
-              <property name="styleSheet">
-               <string notr="true">QPushButton
-	{ background-color: #FFFFFF }
-QPushButton:checked, QPushButton:hover
-	{ background-color: #EEEEEE }</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-              <property name="autoExclusive">
-               <bool>true</bool>
-              </property>
-             </widget>
+             <property name="text">
+              <string>White</string>
+             </property>
             </item>
-           </layout>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -691,14 +594,6 @@ QPushButton:checked, QPushButton:hover
   <tabstop>chkPauseTint</tabstop>
   <tabstop>chkNtscV30Rolling</tabstop>
   <tabstop>cboIntroStyle</tabstop>
-  <tabstop>optIntroColorK</tabstop>
-  <tabstop>optIntroColorB</tabstop>
-  <tabstop>optIntroColorG</tabstop>
-  <tabstop>optIntroColorC</tabstop>
-  <tabstop>optIntroColorR</tabstop>
-  <tabstop>optIntroColorM</tabstop>
-  <tabstop>optIntroColorY</tabstop>
-  <tabstop>optIntroColorW</tabstop>
   <tabstop>btnMcdRomUSA</tabstop>
   <tabstop>btnMcdRomEUR</tabstop>
   <tabstop>btnMcdRomJPN</tabstop>
