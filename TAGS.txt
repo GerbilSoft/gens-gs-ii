@@ -1,5 +1,11 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-McdControlWindow-v0: Initial "Sega CD Control Panel" window.
+It currently displays any detected CD-ROM drives using the new
+FindCdromUDisks class, which is based on the FindCdromBase class.
+Disc icon, drive model, and disc label information are displayed,
+as well as the device filename.
+
 gens-qt4-GeneralConfigWindow-v3: Added a "General" tab, which allows for
 configuration of various options, including OSD settings. OSD settings are
 applied to GensConfig and GensQGLWidget; other settings don't do anything
