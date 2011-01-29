@@ -88,6 +88,7 @@ SET(gens-qt4_SRCS
 	widgets/GensLineEdit.cpp
 	GensConfig.cpp
 	cdrom/FindCdromBase.cpp
+	McdControlWindow.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -107,6 +108,7 @@ SET(gens-qt4_MOC_HEADERS
 	widgets/GensLineEdit.hpp
 	GensConfig.hpp
 	cdrom/FindCdromBase.hpp
+	McdControlWindow.hpp
 	)
 
 IF(QT_QTDBUS_FOUND)
@@ -132,6 +134,7 @@ SET(gens-qt4_UIS
 	ui/CtrlConfigWindow.ui
 	ui/ZipSelectDialog.ui
 	ui/GeneralConfigWindow.ui
+	ui/McdControlWindow.ui
 	)
 
 # Generate the header files from the UI files.

@@ -30,6 +30,7 @@
 #include "AboutWindow.hpp"
 #include "CtrlConfigWindow.hpp"
 #include "GeneralConfigWindow.hpp"
+#include "McdControlWindow.hpp"
 
 // LibGens.
 #include "libgens/lg_main.hpp"
@@ -280,6 +281,10 @@ void GensWindow::menuTriggered(int id)
 				
 				case MNUID_ITEM(IDM_FILE_GENCONFIG):
 					GeneralConfigWindow::ShowSingle(this);
+					break;
+				
+				case MNUID_ITEM(IDM_FILE_MCDCONTROL):
+					McdControlWindow::ShowSingle(this);
 					break;
 				
 				case MNUID_ITEM(IDM_FILE_QUIT):

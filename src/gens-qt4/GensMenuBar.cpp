@@ -67,6 +67,7 @@ GensMenuBar::GensMenuBar(QWidget *parent)
 		{IDM_FILE_LOADSTATE, GMI_NORMAL, "&Load State", NULL, MACCEL_NONE, Qt::Key_F8, NULL, NULL},
 		{IDM_SEPARATOR, GMI_SEPARATOR, NULL, NULL, MACCEL_NONE, 0, NULL, NULL},
 		{IDM_FILE_GENCONFIG, GMI_NORMAL, "&General Configuration", NULL, MACCEL_PREFERENCES, 0, "configure", ":/oxygen-16x16/configure.png"},
+		{IDM_FILE_MCDCONTROL, GMI_NORMAL, "Sega C&D Control Panel", NULL, MACCEL_NONE, 0, "media-optical", ":/oxygen-16x16/media-optical.png"},
 		{IDM_SEPARATOR, GMI_SEPARATOR, NULL, NULL, MACCEL_NONE, 0, NULL, NULL},
 		{IDM_FILE_QUIT, GMI_NORMAL, "&Quit", NULL, MACCEL_QUIT, Qt::CTRL + Qt::Key_Q, "application-exit", ":/oxygen-16x16/application-exit.png"},
 		
