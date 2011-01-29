@@ -594,6 +594,7 @@ on NTSC models.</string>
   <tabstop>chkPauseTint</tabstop>
   <tabstop>chkNtscV30Rolling</tabstop>
   <tabstop>cboIntroStyle</tabstop>
+  <tabstop>cboIntroColor</tabstop>
   <tabstop>btnMcdRomUSA</tabstop>
   <tabstop>btnMcdRomEUR</tabstop>
   <tabstop>btnMcdRomJPN</tabstop>
