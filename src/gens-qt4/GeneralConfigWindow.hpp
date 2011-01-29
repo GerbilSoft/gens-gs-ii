@@ -24,10 +24,13 @@
 #ifndef __GENS_QT4_GENERALCONFIGWINDOW_HPP__
 #define __GENS_QT4_GENERALCONFIGWINDOW_HPP__
 
+#include "ui_GeneralConfigWindow.h"
+
+// Qt includes.
 #include <QtGui/QDialog>
 #include <QtGui/QLineEdit>
 #include <QtGui/QColor>
-#include "ui_GeneralConfigWindow.h"
+#include <QtCore/QSignalMapper>
 
 #include "GensLineEdit.hpp"
 
@@ -64,10 +67,6 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 			if (btnApply)
 				btnApply->setEnabled(enabled);
 		}
-		
-		// Onscreen Display: Colors.
-		QColor m_osdFpsColor;
-		QColor m_osdMsgColor;
 		
 		/**
 		 * QColor_Grayscale(): Convert a QColor to grayscale.
@@ -112,6 +111,14 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 		/** Onscreen Display **/
 		QColor osdSelectColor(const QString& color_id, const QColor& init_color);
 		
+		// Onscreen Display: Colors.
+		QColor m_osdFpsColor;
+		QColor m_osdMsgColor;
+		
+		/** Intro Effect **/
+		int m_introEffectColor;
+		QSignalMapper *m_sigmapIntroEffectColor;
+		
 		/** Sega CD: Boot ROM **/
 		
 		// Sega CD: Boot ROM filesize.
@@ -143,6 +150,9 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 		void on_chkOsdMsgEnable_toggled(bool)
 			{ setApplyButtonEnabled(true); }
 		void on_btnOsdMsgColor_clicked(void);
+		
+		/** Intro Effect **/
+		void introEffectColor_selected(int color_index);
 		
 		/** Sega CD: Boot ROM **/
 		
