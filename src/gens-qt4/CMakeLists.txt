@@ -5,6 +5,15 @@ cmake_minimum_required(VERSION 2.6)
 # TODO: Determine the actual minimum version.
 # 4.1.0: QCoreApplication::arguments()
 FIND_PACKAGE(Qt4 4.1.0 COMPONENTS QtCore QtGui QtOpenGL REQUIRED)
+IF(UNIX)
+	IF(APPLE)
+		# Don't enable QtDBus on Mac OS X.
+	ELSE(APPLE)
+		# Other Unix.
+		# Check for QtDBus.
+		FIND_PACKAGE(Qt4 4.1.0 COMPONENTS QtDBus)
+	ENDIF(APPLE)
+ENDIF(UNIX)
 FIND_PACKAGE(Qt4 4.1.0 COMPONENTS QtDBus)
 INCLUDE(${QT_USE_FILE})
 
