@@ -30,7 +30,6 @@
 #include <QtGui/QDialog>
 #include <QtGui/QLineEdit>
 #include <QtGui/QColor>
-#include <QtCore/QSignalMapper>
 
 #include "widgets/GensLineEdit.hpp"
 
