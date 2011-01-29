@@ -26,19 +26,10 @@
 
 #include <config.h>
 
-#include <QtGui/QApplication>
-#include <QtCore/QThread>
-
 #include "SigHandler.hpp"
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
-#include "gqt4_win32.hpp"
-#endif
+#include <QtGui/QApplication>
+#include <QtCore/QThread>
 
 namespace GensQt4
 {
@@ -50,21 +41,15 @@ class GensQApplication : public QApplication
 	public:
 		GensQApplication(int &argc, char **argv)
 			: QApplication(argc, argv)
-		{
-			gqaInit();
-		}
+		{ gqaInit(); }
 		
 		GensQApplication(int &argc, char **argv, bool GUIenabled)
 			: QApplication(argc, argv, GUIenabled)
-		{
-			gqaInit();
-		}
+		{ gqaInit(); }
 		
 		GensQApplication(int &argc, char **argv, Type type)
 			: QApplication(argc, argv, type)
-		{
-			gqaInit();
-		}
+		{ gqaInit(); }
 		
 		~GensQApplication() { }
 		
@@ -78,24 +63,8 @@ class GensQApplication : public QApplication
 		}
 		
 #ifdef _WIN32
-		/**
-		 * winEventFilter(): Win32 event filter.
-		 * @param msg Win32 message.
-		 * @param result Return value for the window procedure.
-		 * @return True if we're handling the message; false if we should let Qt handle the message.
-		 */
-		bool winEventFilter(MSG *msg, long *result)
-		{
-			if (msg->message != WM_SETTINGCHANGE)
-				return false;
-			if (msg->wParam != SPI_SETNONCLIENTMETRICS)
-				return false;
-			
-			// WM_SETTINGCHANGE / SPI_SETNONCLIENTMETRICS.
-			// Update the Qt font.
-			Win32_SetFont();
-			return false;
-		}
+		// Win32 event filter.
+		bool winEventFilter(MSG *msg, long *result);
 #endif
 		
 		/**
@@ -112,30 +81,10 @@ class GensQApplication : public QApplication
 #endif /* HAVE_SIGACTION */
 	
 	protected:
-		QThread *m_guiThread;
+		void gqaInit(void);
 		
-		/**
-		 * gqaInit(): GensQApplication initialization function.
-		 * The same code is used in all three GensQApplication() constructors.
-		 */
-		inline void gqaInit(void)
-		{
-			// Save the GUI thread pointer for later.
-			m_guiThread = QThread::currentThread();
-			
-			// Set application information.
-			QCoreApplication::setOrganizationName("GerbilSoft");
-			QCoreApplication::setApplicationName("Gens/GS II");
-			
-			// Connect the crash handler.
-#ifdef HAVE_SIGACTION
-			connect(this, SIGNAL(signalCrash(int, siginfo_t*, void*)),
-				this, SLOT(slotCrash(int, siginfo_t*, void*)));
-#else /* HAVE_SIGACTION */
-			connect(this, SIGNAL(signalCrash(int)),
-				this, SLOT(slotCrash(int)));
-#endif /* HAVE_SIGACTION */
-		}
+		// GUI thread.
+		QThread *m_guiThread;
 		
 		friend class SigHandler; // Allow SigHandler to call doCrash().
 #ifdef HAVE_SIGACTION
