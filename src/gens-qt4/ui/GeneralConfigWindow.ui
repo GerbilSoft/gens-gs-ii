@@ -100,81 +100,7 @@ on NTSC models.</string>
            </widget>
           </item>
           <item>
-           <spacer name="verticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QGroupBox" name="grpOsd">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="title">
-          <string>Onscreen &amp;Display</string>
-         </property>
-         <layout class="QVBoxLayout" name="gridOsd">
-          <item>
-           <widget class="QGroupBox" name="grpOsdFps">
-            <property name="title">
-             <string>&amp;FPS counter</string>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_5">
-             <item>
-              <widget class="QCheckBox" name="chkOsdFpsEnable">
-               <property name="text">
-                <string>Enable</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btnOsdFpsColor">
-               <property name="text">
-                <string>Color...</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="grpOsdMsg">
-            <property name="title">
-             <string>&amp;Messages</string>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_6">
-             <item>
-              <widget class="QCheckBox" name="chkOsdMsgEnable">
-               <property name="text">
-                <string>Enable</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btnOsdMsgColor">
-               <property name="text">
-                <string>Color...</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_4">
+           <spacer name="vspcEmulationOptions">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>
@@ -413,6 +339,84 @@ QPushButton:checked, QPushButton:hover
           </item>
          </layout>
         </widget>
+       </item>
+       <item row="0" column="0">
+        <layout class="QVBoxLayout" name="vboxOsd">
+         <item>
+          <widget class="QGroupBox" name="grpOsd">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="title">
+            <string>Onscreen &amp;Display</string>
+           </property>
+           <layout class="QVBoxLayout" name="gridOsd">
+            <item>
+             <widget class="QGroupBox" name="grpOsdFps">
+              <property name="title">
+               <string>&amp;FPS counter</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_5">
+               <item>
+                <widget class="QCheckBox" name="chkOsdFpsEnable">
+                 <property name="text">
+                  <string>Enable</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnOsdFpsColor">
+                 <property name="text">
+                  <string>Color...</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="grpOsdMsg">
+              <property name="title">
+               <string>&amp;Messages</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_6">
+               <item>
+                <widget class="QCheckBox" name="chkOsdMsgEnable">
+                 <property name="text">
+                  <string>Enable</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnOsdMsgColor">
+                 <property name="text">
+                  <string>Color...</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="vspcOsd">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
