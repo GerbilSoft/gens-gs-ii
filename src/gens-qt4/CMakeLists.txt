@@ -119,7 +119,7 @@ IF(QT_QTDBUS_FOUND)
 		cdrom/FindCdromUDisks.cpp
 		)
 
-	SET(gens-qt4_MOD_HEADERS
+	SET(gens-qt4_MOC_HEADERS
 		${gens-qt4_MOC_HEADERS}
 		cdrom/FindCdromUDisks.hpp
 		)
