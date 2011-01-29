@@ -430,9 +430,6 @@ QPushButton:checked, QPushButton:hover
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridMcdRoms">
-          <property name="margin">
-           <number>8</number>
-          </property>
           <item row="0" column="0">
            <widget class="QLabel" name="lblMcdRomUSA">
             <property name="text">
@@ -583,9 +580,6 @@ QPushButton:checked, QPushButton:hover
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridExtPrg">
-          <property name="margin">
-           <number>8</number>
-          </property>
           <item row="0" column="0">
            <widget class="QLabel" name="lblExtPrgUnRAR">
             <property name="text">
