@@ -84,7 +84,7 @@ SET(gens-qt4_SRCS
 	EmuManager_qEmu.cpp
 	VBackend/GlTex2D.cpp
 	GeneralConfigWindow.cpp
-	GensLineEdit.cpp
+	widgets/GensLineEdit.cpp
 	GensConfig.cpp
 	)
 
@@ -102,7 +102,7 @@ SET(gens-qt4_MOC_HEADERS
 	ZipSelectDialog.hpp
 	Input/EventKeys.hpp
 	GeneralConfigWindow.hpp
-	GensLineEdit.hpp
+	widgets/GensLineEdit.hpp
 	GensConfig.hpp
 	)
 

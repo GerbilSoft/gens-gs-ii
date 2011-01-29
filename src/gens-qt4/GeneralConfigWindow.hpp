@@ -32,7 +32,7 @@
 #include <QtGui/QColor>
 #include <QtCore/QSignalMapper>
 
-#include "GensLineEdit.hpp"
+#include "widgets/GensLineEdit.hpp"
 
 // C includes.
 #include <stdio.h>
