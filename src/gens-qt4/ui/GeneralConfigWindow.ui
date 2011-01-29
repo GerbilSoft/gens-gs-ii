@@ -134,6 +134,9 @@ on NTSC models.</string>
             <property name="text">
              <string>&amp;Style:</string>
             </property>
+            <property name="textFormat">
+             <enum>Qt::PlainText</enum>
+            </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
@@ -171,6 +174,9 @@ on NTSC models.</string>
            <widget class="QLabel" name="lblIntroColor">
             <property name="text">
              <string>&amp;Color:</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::PlainText</enum>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -316,6 +322,213 @@ on NTSC models.</string>
           </spacer>
          </item>
         </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabGraphics">
+      <attribute name="title">
+       <string>G&amp;raphics</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QGroupBox" name="grpGraphics">
+         <property name="title">
+          <string>Rendering Options</string>
+         </property>
+         <layout class="QVBoxLayout" name="vboxGraphics">
+          <item>
+           <widget class="QCheckBox" name="chkAspectRatioConstraint">
+            <property name="text">
+             <string>Constrain &amp;aspect ratio to 4:3</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chkFastBlur">
+            <property name="text">
+             <string>Fast &amp;Blur</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="grpColorAdjustment">
+         <property name="title">
+          <string>Color Adjustment</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
+           <widget class="QLabel" name="lblContrastTitle">
+            <property name="text">
+             <string>Co&amp;ntrast:</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::PlainText</enum>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="buddy">
+             <cstring>hsldContrast</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSlider" name="hsldContrast">
+            <property name="minimum">
+             <number>-100</number>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="lblContrastValue">
+            <property name="minimumSize">
+             <size>
+              <width>36</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>0</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lblBrightnessTitle">
+            <property name="text">
+             <string>&amp;Brightness:</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::PlainText</enum>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="buddy">
+             <cstring>hsldBrightness</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSlider" name="hsldBrightness">
+            <property name="minimum">
+             <number>-100</number>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="lblBrightnessValue">
+            <property name="minimumSize">
+             <size>
+              <width>36</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>0</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="chkGrayscale">
+            <property name="text">
+             <string>Gra&amp;yscale</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="chkInverted">
+            <property name="text">
+             <string>&amp;Inverted</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLabel" name="lblColorScaleMethod">
+            <property name="text">
+             <string>Color &amp;Scale Method:</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::PlainText</enum>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="buddy">
+             <cstring>cboColorScaleMethod</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <layout class="QHBoxLayout" name="hboxColorScaleMethod">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetDefaultConstraint</enum>
+            </property>
+            <item>
+             <widget class="QComboBox" name="cboColorScaleMethod">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="currentIndex">
+               <number>2</number>
+              </property>
+              <item>
+               <property name="text">
+                <string>Raw</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Full</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Full with S/H</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -595,6 +808,13 @@ on NTSC models.</string>
   <tabstop>chkNtscV30Rolling</tabstop>
   <tabstop>cboIntroStyle</tabstop>
   <tabstop>cboIntroColor</tabstop>
+  <tabstop>chkAspectRatioConstraint</tabstop>
+  <tabstop>chkFastBlur</tabstop>
+  <tabstop>hsldContrast</tabstop>
+  <tabstop>hsldBrightness</tabstop>
+  <tabstop>chkGrayscale</tabstop>
+  <tabstop>chkInverted</tabstop>
+  <tabstop>cboColorScaleMethod</tabstop>
   <tabstop>btnMcdRomUSA</tabstop>
   <tabstop>btnMcdRomEUR</tabstop>
   <tabstop>btnMcdRomJPN</tabstop>
@@ -612,8 +832,8 @@ on NTSC models.</string>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>252</x>
+     <y>411</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -628,12 +848,76 @@ on NTSC models.</string>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>320</x>
+     <y>411</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>hsldContrast</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>lblContrastValue</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>178</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>474</x>
+     <y>178</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>hsldContrast</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lblContrastValue</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>178</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>474</x>
+     <y>178</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>hsldBrightness</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>lblBrightnessValue</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>205</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>474</x>
+     <y>205</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>hsldBrightness</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lblBrightnessValue</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>205</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>474</x>
+     <y>205</y>
     </hint>
    </hints>
   </connection>
