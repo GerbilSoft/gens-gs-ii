@@ -438,6 +438,9 @@ QPushButton:checked, QPushButton:hover
             <property name="textFormat">
              <enum>Qt::PlainText</enum>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
            </widget>
           </item>
           <item row="0" column="2">
@@ -455,6 +458,9 @@ QPushButton:checked, QPushButton:hover
             <property name="textFormat">
              <enum>Qt::PlainText</enum>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
            </widget>
           </item>
           <item row="1" column="2">
@@ -471,6 +477,9 @@ QPushButton:checked, QPushButton:hover
             </property>
             <property name="textFormat">
              <enum>Qt::PlainText</enum>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
@@ -587,6 +596,9 @@ QPushButton:checked, QPushButton:hover
             </property>
             <property name="textFormat">
              <enum>Qt::PlainText</enum>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
