@@ -19,10 +19,6 @@
   <property name="windowTitle">
    <string>General Configuration</string>
   </property>
-  <property name="toolTip">
-   <string>Use the background color in the border area
-instead of always drawing a black border.</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTabWidget" name="tabWidget">
