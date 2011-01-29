@@ -219,7 +219,9 @@ void GeneralConfigWindow::reload(void)
 	btnOsdFpsColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdFpsColor.name()).arg(colorText.name()));
 	
 	// TODO: Get intro effect config from GensConfig.
+	// NOTE: Calling setChecked() doesn't trigger the clicked() signal.
 	optIntroColorW->setChecked(true);
+	m_introEffectColor = 7;
 	
 	// Onscreen Display: Messages.
 	chkOsdMsgEnable->setChecked(gqt4_config->osdMsgEnabled());
@@ -331,6 +333,8 @@ void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
 void GeneralConfigWindow::introEffectColor_selected(int color_index)
 {
 	if (color_index < 0 || color_index > 7)
+		return;
+	if (m_introEffectColor == color_index)
 		return;
 	
 	// Save the color index.
