@@ -1,10 +1,8 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * config.h.in: Source file for config.h.                                  *
+ * FindCdromUDisks.hpp: Find CD-ROM drives using UDisks.                   *
  *                                                                         *
- * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
- * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2011 by David Korth.                                      *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,31 +19,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_CONFIG_H__
-#define __GENS_QT4_CONFIG_H__
+#ifndef __GENS_QT4_CDROM_FINDCDROMUDISKS_HPP__
+#define __GENS_QT4_CDROM_FINDCDROMUDISKS_HPP__
 
-/* Define to 1 if you have the `sigaction' function. */
-#cmakedefine HAVE_SIGACTION 1
+#include <config.h>
 
-/* Define to 1 if you have the `GL' library (-lGL / -lopengl32). */
-#cmakedefine HAVE_OPENGL 1
+#include "FindCdromBase.hpp"
 
-/* Define to 1 if you have the `GLEW' library (-lGLEW / -lglew32). */
-#cmakedefine HAVE_GLEW 1
+// QtDBus includes.
+#include <QtDBus/QDBusInterface>
 
-/* Define to 1 if you have the `AL` library (-lopenal / -lOpenAL32). */
-#cmakedefine HAVE_OPENAL 1
+namespace GensQt4
+{
 
-/* Define to 1 if you have the `zlib` library (-lz). */
-#cmakedefine HAVE_ZLIB 1
+class FindCdromUDisks : public FindCdromBase
+{
+	Q_OBJECT
+	
+	public:
+		void query(void);
+		
+	protected:
+		static const char *ms_UDisks_DriveID[20];
+		
+		QString getStringProperty(QDBusInterface *dbus_if, const char *prop);
+		bool getBoolProperty(QDBusInterface *dbus_if, const char *prop);
+};
 
-/* Define to 1 if LibGens is built with LZMA support using the included LZMA SDK. */
-#cmakedefine HAVE_LZMA 1
+}
 
-/* Define to 1 if CPU emulation code should be enabled. */
-#cmakedefine GENS_ENABLE_EMULATION 1
-
-/* Define to 1 if QtDBus is available. */
-#cmakedefine QT_QTDBUS_FOUND 1
-
-#endif /* __GENS_QT4_CONFIG_H__ */
+#endif /* __GENS_QT4_CDROM_FINDCDROMUDISKS_HPP__ */

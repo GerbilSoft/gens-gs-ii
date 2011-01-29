@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 2.6)
 # TODO: Determine the actual minimum version.
 # 4.1.0: QCoreApplication::arguments()
 FIND_PACKAGE(Qt4 4.1.0 COMPONENTS QtCore QtGui QtOpenGL REQUIRED)
+FIND_PACKAGE(Qt4 4.1.0 COMPONENTS QtDBus)
 INCLUDE(${QT_USE_FILE})
 
 # Main binary directory. Needed for git_version.h
@@ -86,6 +87,7 @@ SET(gens-qt4_SRCS
 	GeneralConfigWindow.cpp
 	widgets/GensLineEdit.cpp
 	GensConfig.cpp
+	cdrom/FindCdromBase.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -104,7 +106,22 @@ SET(gens-qt4_MOC_HEADERS
 	GeneralConfigWindow.hpp
 	widgets/GensLineEdit.hpp
 	GensConfig.hpp
+	cdrom/FindCdromBase.hpp
 	)
+
+IF(QT_QTDBUS_FOUND)
+	# QtDBus found.
+	# Enable UDisks support.
+	SET(gens-qt4_SRCS
+		${gens-qt4_SRCS}
+		cdrom/FindCdromUDisks.cpp
+		)
+
+	SET(gens-qt4_MOD_HEADERS
+		${gens-qt4_MOC_HEADERS}
+		cdrom/FindCdromUDisks.hpp
+		)
+ENDIF(QT_QTDBUS_FOUND)
 
 # Create .moc files for sources that need them.
 QT4_WRAP_CPP(gens-qt4_MOC_SOURCES ${gens-qt4_MOC_HEADERS})
@@ -142,6 +159,9 @@ IF(WIN32)
 	TARGET_LINK_LIBRARIES(gens-qt4)
 ENDIF(WIN32)
 TARGET_LINK_LIBRARIES(gens-qt4 ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY})
+IF(QT_QTDBUS_FOUND)
+	TARGET_LINK_LIBRARIES(gens-qt4 ${QT_QTDBUS_LIBRARY})
+ENDIF(QT_QTDBUS_FOUND)
 IF(HAVE_GLEW)
 	TARGET_LINK_LIBRARIES(gens-qt4 ${GLEW_LIBRARY})
 ENDIF(HAVE_GLEW)
