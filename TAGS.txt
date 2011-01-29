@@ -1,5 +1,10 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-GeneralConfigWindow-v3: Added a "General" tab, which allows for
+configuration of various options, including OSD settings. OSD settings are
+applied to GensConfig and GensQGLWidget; other settings don't do anything
+yet. UnRAR settings are now applied to both GensConfig and DcRar.
+
 gens-qt4-GeneralConfigWindow-v2: UnRAR, RAR, and UnRAR.dll files are now
 detected correctly on all platforms. The UnRAR binary is *not* yet applied
 to DcRar when settings are saved.
