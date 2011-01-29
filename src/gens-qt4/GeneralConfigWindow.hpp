@@ -139,16 +139,17 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 		void extprgDisplayFileStatus(const QString& file_id, const QString& file_desc);
 	
 	private slots:
-		/** Onscreen Display **/
-		void on_chkOsdFpsEnable_toggled(bool)
+		/**
+		 * settingChanged(): A setting has changed.
+		 * The "Apply" button should be enabled.
+		 * TODO: On Mac OS X, apply the change immediately.
+		 */
+		void settingChanged(void)
 			{ setApplyButtonEnabled(true); }
-		void on_btnOsdFpsColor_clicked(void);
-		void on_chkOsdMsgEnable_toggled(bool)
-			{ setApplyButtonEnabled(true); }
-		void on_btnOsdMsgColor_clicked(void);
 		
-		/** Intro Effect **/
-		void on_cboIntroColor_currentIndexChanged(int index);
+		/** Onscreen Display **/
+		void on_btnOsdFpsColor_clicked(void);
+		void on_btnOsdMsgColor_clicked(void);
 		
 		/** Sega CD: Boot ROM **/
 		

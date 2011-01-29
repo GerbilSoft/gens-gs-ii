@@ -313,26 +313,6 @@ void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
 }
 
 
-/** Intro Effect **/
-
-
-/**
- * on_cboIntroColor_currentIndexChanged(): The intro effect color was changed.
- * @param index Color index.
- */
-void GeneralConfigWindow::on_cboIntroColor_currentIndexChanged(int index)
-{
-	if (index < 0 || index > 7)
-		return;
-	
-	// TODO: I don't think we really need to do anything here...
-	printf("Intro Effect Color: %d\n", index);
-	
-	// Enable the Apply button.
-	setApplyButtonEnabled(true);
-}
-
-
 /** Sega CD **/
 
 
