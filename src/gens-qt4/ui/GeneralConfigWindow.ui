@@ -171,7 +171,7 @@ on NTSC models.</string>
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
             <property name="buddy">
-             <cstring>btnIntroColorW</cstring>
+             <cstring>optIntroColorW</cstring>
             </property>
            </widget>
           </item>
@@ -181,7 +181,7 @@ on NTSC models.</string>
              <number>0</number>
             </property>
             <item>
-             <widget class="QPushButton" name="btnIntroColorK">
+             <widget class="QPushButton" name="optIntroColorK">
               <property name="styleSheet">
                <string notr="true">QPushButton
 	{ background-color: #000000 }
@@ -200,7 +200,7 @@ QPushButton:checked, QPushButton:hover
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="btnIntroColorB">
+             <widget class="QPushButton" name="optIntroColorB">
               <property name="styleSheet">
                <string notr="true">QPushButton
 	{ background-color: #0000FF }
@@ -219,7 +219,7 @@ QPushButton:checked, QPushButton:hover
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="btnIntroColorG">
+             <widget class="QPushButton" name="optIntroColorG">
               <property name="styleSheet">
                <string notr="true">QPushButton
 	{ background-color: #00FF00 }
@@ -238,7 +238,7 @@ QPushButton:checked, QPushButton:hover
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="btnIntroColorC">
+             <widget class="QPushButton" name="optIntroColorC">
               <property name="styleSheet">
                <string notr="true">QPushButton
 	{ background-color: #00FFFF }
@@ -257,7 +257,7 @@ QPushButton:checked, QPushButton:hover
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="btnIntroColorR">
+             <widget class="QPushButton" name="optIntroColorR">
               <property name="styleSheet">
                <string notr="true">QPushButton
 	{ background-color: #FF0000 }
@@ -276,7 +276,7 @@ QPushButton:checked, QPushButton:hover
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="btnIntroColorM">
+             <widget class="QPushButton" name="optIntroColorM">
               <property name="styleSheet">
                <string notr="true">QPushButton
 	{ background-color: #FF00FF }
@@ -295,7 +295,7 @@ QPushButton:checked, QPushButton:hover
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="btnIntroColorY">
+             <widget class="QPushButton" name="optIntroColorY">
               <property name="styleSheet">
                <string notr="true">QPushButton
 	{ background-color: #FFFF00 }
@@ -314,7 +314,7 @@ QPushButton:checked, QPushButton:hover
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="btnIntroColorW">
+             <widget class="QPushButton" name="optIntroColorW">
               <property name="styleSheet">
                <string notr="true">QPushButton
 	{ background-color: #FFFFFF }
@@ -683,14 +683,14 @@ QPushButton:checked, QPushButton:hover
   <tabstop>chkPauseTint</tabstop>
   <tabstop>chkNtscV30Rolling</tabstop>
   <tabstop>cboIntroStyle</tabstop>
-  <tabstop>btnIntroColorK</tabstop>
-  <tabstop>btnIntroColorB</tabstop>
-  <tabstop>btnIntroColorG</tabstop>
-  <tabstop>btnIntroColorC</tabstop>
-  <tabstop>btnIntroColorR</tabstop>
-  <tabstop>btnIntroColorM</tabstop>
-  <tabstop>btnIntroColorY</tabstop>
-  <tabstop>btnIntroColorW</tabstop>
+  <tabstop>optIntroColorK</tabstop>
+  <tabstop>optIntroColorB</tabstop>
+  <tabstop>optIntroColorG</tabstop>
+  <tabstop>optIntroColorC</tabstop>
+  <tabstop>optIntroColorR</tabstop>
+  <tabstop>optIntroColorM</tabstop>
+  <tabstop>optIntroColorY</tabstop>
+  <tabstop>optIntroColorW</tabstop>
   <tabstop>btnMcdRomUSA</tabstop>
   <tabstop>btnMcdRomEUR</tabstop>
   <tabstop>btnMcdRomJPN</tabstop>
