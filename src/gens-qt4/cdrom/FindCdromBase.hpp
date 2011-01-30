@@ -96,13 +96,14 @@ class FindCdromBase : public QObject
 		static QString GetDriveTypeName(DriveType drive_type);
 		static QString GetDiscTypeName(uint32_t disc_type);
 		
-		// Get drive type and disc type icons.
-		static QIcon GetDriveTypeIcon(DriveType drive_type);
-		static QIcon GetDiscTypeIcon(uint32_t disc_type);
-		
 		struct drive_entry_t
 		{
 			QString path;
+			
+			// Device icon.
+			// Usually has the drive icon if no disc is detected,
+			// or the disc icon if a disc was found.
+			QIcon icon;
 			
 			// Drive information.
 			uint32_t discs_supported;	// Bitfield indicating supported media.
@@ -121,6 +122,10 @@ class FindCdromBase : public QObject
 	protected:
 		static DriveType GetDriveType(uint32_t discs_supported);
 		QList<drive_entry_t> m_drives;
+		
+		// Get drive type and disc type icons.
+		static QIcon GetDriveTypeIcon(DriveType drive_type);
+		static QIcon GetDiscTypeIcon(uint32_t disc_type);
 };
 
 }

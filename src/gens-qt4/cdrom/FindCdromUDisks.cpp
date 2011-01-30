@@ -211,6 +211,12 @@ void FindCdromUDisks::query(void)
 			}
 		}
 		
+		// Set the device icon.
+		if (drive.disc_type == 0)
+			drive.icon = GetDriveTypeIcon(drive.drive_type);
+		else
+			drive.icon = GetDiscTypeIcon(drive.disc_type);
+		
 		// Add the drive to m_drives.
 		m_drives.append(drive);
 		

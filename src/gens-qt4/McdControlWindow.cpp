@@ -151,23 +151,13 @@ void McdControlWindow::query(void)
 					drive_entry.drive_firmware + "\n" +
 					drive_entry.path + ": ";
 		
-		// Icon should be the drive if no disc is found,
-		// or the disc if a disc is found.
-		QIcon item_icon;
+		// Add the disc label if a disc is present.
 		if (drive_entry.disc_type == 0)
-		{
-			// No disc found. Use the drive type icon.
-			item_icon = m_drives->GetDriveTypeIcon(drive_entry.drive_type);
 			item_desc += TR("No medium found.");
-		}
 		else
-		{
-			// Disc found. Use the disc type icon.
-			item_icon = m_drives->GetDiscTypeIcon(drive_entry.disc_type);
 			item_desc += drive_entry.disc_label;
-		}
 		
-		cboCdDrives->addItem(item_icon, item_desc, drive_entry.path);
+		cboCdDrives->addItem(drive_entry.icon, item_desc, drive_entry.path);
 	}
 	
 	// Set cboCdDrive's selected index to 0 so that the
