@@ -37,7 +37,11 @@ class FindCdromUDisks : public FindCdromBase
 	Q_OBJECT
 	
 	public:
-		void query(void);
+		/**
+		 * query(): Query for CD-ROM drives.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int query(void);
 		
 	protected:
 		static const char *ms_UDisks_DriveID[20];

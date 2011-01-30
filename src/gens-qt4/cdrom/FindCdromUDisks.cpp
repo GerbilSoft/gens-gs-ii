@@ -90,7 +90,11 @@ bool FindCdromUDisks::getBoolProperty(QDBusInterface *dbus_if, const char *prop)
 }
 
 
-void FindCdromUDisks::query(void)
+/**
+ * query(): Query for CD-ROM drives.
+ * @return 0 on success; non-zero on error.
+ */
+int FindCdromUDisks::query(void)
 {
 	// Find all CD-ROM devices.
 	// TODO: Make a base class and return standard values.
@@ -107,7 +111,7 @@ void FindCdromUDisks::query(void)
 	{
 		// Interface is invalid.
 		printf("Error attaching interface: %s\n", interface->lastError().message().toLocal8Bit().constData());
-		return;
+		return -1;
 	}
 	
 	// Attempt to get all disk devices.
@@ -117,7 +121,7 @@ void FindCdromUDisks::query(void)
 	if (!reply_EnumerateDevices.isValid())
 	{
 		printf("EnumerateDevices failed: %s\n", interface->lastError().message().toLocal8Bit().constData());
-		return;
+		return -2;
 	}
 	
 	// Received disk devices.
@@ -224,6 +228,9 @@ void FindCdromUDisks::query(void)
 		printf("Drive: %s - drive is type %d, disc is 0x%08X\n",
 		       drive.path.toLocal8Bit().constData(), (int)drive.drive_type, drive.disc_type);
 	}
+	
+	// Devices queried.
+	return 0;
 }
 
 }
