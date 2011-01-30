@@ -119,6 +119,7 @@ class FindCdromBase : public QObject
 			// Disc information.
 			uint32_t disc_type;		// Single bit indicating current media.
 			QString disc_label;		// Disc label.
+			bool disc_blank;		// True if the disc is blank.
 		};
 		
 		const QList<drive_entry_t>& getDriveList(void) { return m_drives; }

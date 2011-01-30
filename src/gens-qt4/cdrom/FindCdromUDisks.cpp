@@ -35,6 +35,11 @@
 #include <QtDBus/QDBusReply>
 #include <QtDBus/QDBusObjectPath>
 
+// Text translation macro.
+#include <QtCore/QCoreApplication>
+#define TR(text) \
+	QCoreApplication::translate("FindCdromUDisks", (text), NULL, QCoreApplication::UnicodeUTF8)
+
 namespace GensQt4
 {
 
@@ -171,6 +176,7 @@ int FindCdromUDisks::query(void)
 		drive.drive_model	= getStringProperty(drive_if.data(), "DriveModel");
 		drive.drive_firmware	= getStringProperty(drive_if.data(), "DriveRevision");
 		drive.disc_label	= getStringProperty(drive_if.data(), "IdLabel");
+		drive.disc_blank	= getBoolProperty(drive_if.data(), "OpticalDiscIsBlank");
 		
 		// Determine the drive media support.
 		// TODO: Convert ms_UDisks_DriveID[] to a QMap.
@@ -214,6 +220,11 @@ int FindCdromUDisks::query(void)
 				}
 			}
 		}
+		
+		// If the disc is blank, set the disc label to "Blank [disc_type]".
+		// TODO: Make this a common FindCdromBase function?
+		if (drive.disc_type != DISC_TYPE_NONE && drive.disc_blank)
+			drive.disc_label = TR("Blank %1").arg(GetDiscTypeName(drive.disc_type));
 		
 		// Set the device icon.
 		if (drive.disc_type == 0)
