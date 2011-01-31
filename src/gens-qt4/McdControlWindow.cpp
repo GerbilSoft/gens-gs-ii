@@ -28,7 +28,7 @@
 
 // Text translation macro.
 #define TR(text) \
-	QApplication::translate("McdControlWindow", (text), NULL, QApplication::UnicodeUTF8)
+	QCoreApplication::translate("McdControlWindow", (text), NULL, QCoreApplication::UnicodeUTF8)
 
 /**
  * QICON_FROMTHEME(): Icon loading function.

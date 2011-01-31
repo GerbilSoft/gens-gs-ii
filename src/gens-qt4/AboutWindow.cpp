@@ -52,7 +52,7 @@ using std::stringstream;
 
 // Text translation macro.
 #define TR(text) \
-	QApplication::translate("AboutWindow", (text), NULL, QApplication::UnicodeUTF8)
+	QCoreApplication::translate("AboutWindow", (text), NULL, QCoreApplication::UnicodeUTF8)
 
 namespace GensQt4
 {

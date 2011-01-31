@@ -28,7 +28,7 @@
 
 // Text translation macro.
 #define TR(text) \
-	QApplication::translate("GensMenuBar", (text), NULL, QApplication::UnicodeUTF8)
+	QCoreApplication::translate("GensMenuBar", (text), NULL, QCoreApplication::UnicodeUTF8)
 
 /**
  * QICON_FROMTHEME(): Icon loading function.

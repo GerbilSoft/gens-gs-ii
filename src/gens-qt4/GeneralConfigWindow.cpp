@@ -28,7 +28,7 @@
 
 // Text translation macro.
 #define TR(text) \
-	QApplication::translate("GeneralConfigWindow", (text), NULL, QApplication::UnicodeUTF8)
+	QCoreApplication::translate("GeneralConfigWindow", (text), NULL, QCoreApplication::UnicodeUTF8)
 
 // C includes.
 #include <stdint.h>

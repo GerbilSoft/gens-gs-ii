@@ -55,7 +55,7 @@
 
 // Text translation macro.
 #define TR(text) \
-	QApplication::translate("EmuManager_qEmu", (text), NULL, QApplication::UnicodeUTF8)
+	QCoreApplication::translate("EmuManager_qEmu", (text), NULL, QCoreApplication::UnicodeUTF8)
 
 namespace GensQt4
 {

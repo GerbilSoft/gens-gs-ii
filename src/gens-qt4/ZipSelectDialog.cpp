@@ -25,7 +25,7 @@
 
 // Text translation macro.
 #define TR(text) \
-	QApplication::translate("ZipSelectDialog", (text), NULL, QApplication::UnicodeUTF8)
+	QCoreApplication::translate("ZipSelectDialog", (text), NULL, QCoreApplication::UnicodeUTF8)
 
 namespace GensQt4
 {

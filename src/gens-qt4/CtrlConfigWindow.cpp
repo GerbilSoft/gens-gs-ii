@@ -26,7 +26,7 @@
 
 // Text translation macro.
 #define TR(text) \
-	QApplication::translate("CtrlConfigWindow", (text), NULL, QApplication::UnicodeUTF8)
+	QCoreApplication::translate("CtrlConfigWindow", (text), NULL, QCoreApplication::UnicodeUTF8)
 
 // EmuMD has the I/O devices.
 #include "libgens/MD/EmuMD.hpp"
