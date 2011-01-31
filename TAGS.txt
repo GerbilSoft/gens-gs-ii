@@ -1,5 +1,16 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-McdControlWindow-v1: Initial Win32 CD-ROM detection.
+
+- The disc label is read using GetVolumeLabel(), and icons are obtained
+  using SHGetFileInfo(). Disc type and drive type are assumed to be CD-ROM,
+  since that information isn't as easily obtainable as with UDisks. It's
+  also not necessary in order to determine the icon on Win32, since the
+  icon is obtained from the system.
+
+- Initial SPTI wrapper. This wrapper will also be used for the Win32
+  McdReader class later on.
+
 gens-qt4-McdControlWindow-v0: Initial "Sega CD Control Panel" window.
 It currently displays any detected CD-ROM drives using the new
 FindCdromUDisks class, which is based on the FindCdromBase class.
