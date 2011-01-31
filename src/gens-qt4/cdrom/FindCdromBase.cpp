@@ -30,12 +30,9 @@
 #if QT_VERSION >= 0x040600
 #define QICON_FROMTHEME(name, fallback) \
 	(QIcon::hasThemeIcon(name) ? QIcon::fromTheme(name) : QIcon(fallback))
-#define QICON_FROMTHEME_NF(name) \
-	(QIcon::hasThemeIcon(name) ? QIcon::fromTheme(name) : QIcon())
 #else
 #define QICON_FROMTHEME(name, fallback) \
 	QIcon(fallback)
-#define QICON_FROMTHEME_NF(name)
 #endif
 
 namespace GensQt4
@@ -191,7 +188,7 @@ QIcon FindCdromBase::GetDriveTypeIcon(DriveType drive_type)
 	
 	// TODO: Add icons for different types of drives.
 	((void)drive_type);
-	return QICON_FROMTHEME_NF("drive-optical");
+	return QICON_FROMTHEME("drive-optical", ":/oxygen-64x64/drive-optical.png");
 }
 
 
@@ -211,29 +208,45 @@ QIcon FindCdromBase::GetDiscTypeIcon(uint32_t disc_type)
 	switch (disc_type)
 	{
 		case DISC_TYPE_NONE:
-		default:			return QIcon();
-		case DISC_TYPE_CDROM:		return QICON_FROMTHEME_NF("media-optical");
-		case DISC_TYPE_CD_R:		return QICON_FROMTHEME_NF("media-optical-recordable");
-		case DISC_TYPE_CD_RW:		return QICON_FROMTHEME_NF("media-optical-recordable");
-		case DISC_TYPE_DVD:		return QICON_FROMTHEME_NF("media-optical-dvd");
-		case DISC_TYPE_DVD_R:		return QICON_FROMTHEME_NF("media-optical-recordable");
-		case DISC_TYPE_DVD_RW:		return QICON_FROMTHEME_NF("media-optical-recordable");
-		case DISC_TYPE_DVD_RAM:		return QICON_FROMTHEME_NF("media-optical-recordable");
-		case DISC_TYPE_DVD_PLUS_R:	return QICON_FROMTHEME_NF("media-optical-recordable");
-		case DISC_TYPE_DVD_PLUS_RW:	return QICON_FROMTHEME_NF("media-optical-recordable");
-		case DISC_TYPE_DVD_PLUS_R_DL:	return QICON_FROMTHEME_NF("media-optical-recordable");
-		case DISC_TYPE_DVD_PLUS_RW_DL:	return QICON_FROMTHEME_NF("media-optical-recordable");
-		case DISC_TYPE_BDROM:		return QICON_FROMTHEME_NF("media-optical-blu-ray");
-		case DISC_TYPE_BD_R:		return QICON_FROMTHEME_NF("media-optical-blu-ray");
-		case DISC_TYPE_BD_RE:		return QICON_FROMTHEME_NF("media-optical-blu-ray");
-		case DISC_TYPE_HDDVD:		return QICON_FROMTHEME_NF("media-optical-dvd");;
-		case DISC_TYPE_HDDVD_R:		return QICON_FROMTHEME_NF("media-optical-recordable");
-		case DISC_TYPE_HDDVD_RW:	return QICON_FROMTHEME_NF("media-optical-recordable");
+		default:
+			return QIcon();
+		
+		case DISC_TYPE_CDROM:
+			return QICON_FROMTHEME("media-optical", ":/oxygen-64x64/media-optical.png");
+		
+		case DISC_TYPE_CD_R:
+		case DISC_TYPE_CD_RW:
+			return QICON_FROMTHEME("media-optical-recordable", ":/oxygen-64x64/media-optical-recordable.png");
+		
+		case DISC_TYPE_DVD:
+			return QICON_FROMTHEME("media-optical-dvd", ":/oxygen-64x64/media-optical-dvd.png");
+		
+		case DISC_TYPE_DVD_R:
+		case DISC_TYPE_DVD_RW:
+		case DISC_TYPE_DVD_RAM:
+		case DISC_TYPE_DVD_PLUS_R:
+		case DISC_TYPE_DVD_PLUS_RW:
+		case DISC_TYPE_DVD_PLUS_R_DL:
+		case DISC_TYPE_DVD_PLUS_RW_DL:
+			return QICON_FROMTHEME("media-optical-recordable", ":/oxygen-64x64/media-optical-recordable.png");
+		
+		case DISC_TYPE_BDROM:
+		case DISC_TYPE_BD_R:
+		case DISC_TYPE_BD_RE:
+			return QICON_FROMTHEME("media-optical-blu-ray", ":/oxygen-64x64/media-optical-blu-ray.png");
+		
+		case DISC_TYPE_HDDVD:
+			return QICON_FROMTHEME("media-optical-dvd", ":/oxygen-64x64/media-optical-dvd.png");
+		
+		case DISC_TYPE_HDDVD_R:	
+		case DISC_TYPE_HDDVD_RW:
+			return QICON_FROMTHEME("media-optical-recordable", ":/oxygen-64x64/media-optical-recordable.png");
 		
 		// TODO: Do we really need to handle these?
-		case DISC_TYPE_MO:		return QICON_FROMTHEME_NF("media-optical-recordable");
-		case DISC_TYPE_MRW:		return QICON_FROMTHEME_NF("media-optical-recordable");
-		case DISC_TYPE_MRW_W:		return QICON_FROMTHEME_NF("media-optical-recordable");
+		case DISC_TYPE_MO:
+		case DISC_TYPE_MRW:
+		case DISC_TYPE_MRW_W:
+			return QICON_FROMTHEME("media-optical-recordable", ":/oxygen-64x64/media-optical-recordable.png");
 	}
 }
 
