@@ -438,6 +438,23 @@ typedef struct PACKED _CDB_SCSI
 } CDB_SCSI;
 
 /**
+ * CDB_SCSI_RD_CAPAC: SCSI CDB for SCSI_RD_CAPAC.
+ * Reference: http://en.wikipedia.org/wiki/SCSI_Read_Capacity_Command
+ */
+typedef struct PACKED _CDB_SCSI_RD_CAPAC
+{
+	UCHAR OperationCode;
+	UCHAR RelAdr : 1;
+	UCHAR Reserved1 : 4;
+	UCHAR LogicalUnitNumber : 3;
+	uint32_t LBA;			// BE32: LBA for use with relative addressing. (if RelAdr == 1)
+	UCHAR Reserved2[2];
+	UCHAR PMI : 1;
+	UCHAR Reserved3 : 7;
+	UCHAR Control;
+} CDB_SCSI_RD_CAPAC;
+
+/**
  * SCSI_DATA_TST_U_RDY: SCSI_TST_U_RDY returned data.
  * Reference: http://en.wikipedia.org/wiki/SCSI_Test_Unit_Ready_Command
  */
@@ -453,7 +470,7 @@ typedef struct PACKED _SCSI_DATA_TST_U_RDY
 } SCSI_DATA_TST_U_RDY;
 
 /**
- * SCSI_DATA_REQ_SENSE: SCSI_REQ_SENSE command data block.
+ * SCSI_DATA_REQ_SENSE: SCSI_REQ_SENSE returned data.
  * Reference: http://en.wikipedia.org/wiki/SCSI_Request_Sense_Command
  */
 typedef struct PACKED _SCSI_DATA_REQ_SENSE
@@ -499,6 +516,16 @@ typedef struct PACKED _SCSI_INQUIRY_STD_DATA
 	char		product_id[16];
 	char		product_revision_level[4];
 } SCSI_INQUIRY_STD_DATA;
+
+/**
+ * SCSI_DATA_RD_CAPAC: SCSI_RD_CAPAC returned data.
+ * Reference: http://en.wikipedia.org/wiki/SCSI_Read_Capacity_Command
+ */
+typedef struct PACKED _SCSI_DATA_RD_CAPAC
+{
+	uint32_t LBA;		// BE32: Maximum LBA
+	uint32_t BlockLength;	// BE32: Block length (in bytes)
+} SCSI_DATA_RD_CAPAC;
 
 // On Windows, pshpack1.h is needed to byte-pack structs.
 // poppack.h turns off pshpack1.h, since byte-packing is only needed for the ASPI structs.

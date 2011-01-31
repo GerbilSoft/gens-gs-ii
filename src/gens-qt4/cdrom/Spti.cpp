@@ -26,10 +26,15 @@
 // C includes.
 #include <ctype.h>
 #include <stdio.h>
+// Win32 error.h has Win32-specific error codes.
+#include <error.h>
 
 // C++ includes.
 #include <string>
 using std::string;
+
+// Byteswapping macros.
+#include "libgens/Util/byteswap.h"
 
 // SPTI/SCSI headers.
 #include <devioctl.h>
@@ -97,8 +102,8 @@ void Spti::TrimEndSpaces(char *buf, int len)
 
 
 /**
- * ScsiSendCdb(): Send a SCSI command buffer to m_hDevice.
- * @return 0 on error; non-zero on success. (Win32-style)
+ * scsiSendCdb(): Send a SCSI command buffer to m_hDevice.
+ * @return 0 on success; Win32 error code on error.
  */
 int Spti::scsiSendCdb(void *cdb, unsigned char cdb_length,
 			void *buffer, unsigned int buffer_length,
@@ -106,7 +111,6 @@ int Spti::scsiSendCdb(void *cdb, unsigned char cdb_length,
 {
 	// Based on http://www.codeproject.com/KB/system/mydvdregion.aspx
 	DWORD returned;
-	int ret;
 	
 	// Size of SCSI_PASS_THROUGH + 96 bytes for sense data.
 	uint8_t cmd[sizeof(SCSI_PASS_THROUGH_DIRECT) + 96];
@@ -126,18 +130,20 @@ int Spti::scsiSendCdb(void *cdb, unsigned char cdb_length,
 	pcmd->Length = sizeof(SCSI_PASS_THROUGH_DIRECT);
 	pcmd->SenseInfoLength = (sizeof(cmd) - sizeof(SCSI_PASS_THROUGH_DIRECT));
 	pcmd->SenseInfoOffset = sizeof(SCSI_PASS_THROUGH_DIRECT);
-	pcmd->TimeOutValue = 6000; // TODO: 6000?
+	pcmd->TimeOutValue = 5; // 5-second timeout.
 	
-	ret = DeviceIoControl(m_hDevice, IOCTL_SCSI_PASS_THROUGH_DIRECT,
-				(LPVOID)&cmd, sizeof(cmd),
-				(LPVOID)&cmd, sizeof(cmd),
-				&returned, NULL);
+	DeviceIoControl(m_hDevice, IOCTL_SCSI_PASS_THROUGH_DIRECT,
+			(LPVOID)&cmd, sizeof(cmd),
+			(LPVOID)&cmd, sizeof(cmd),
+			&returned, NULL);
 	
 	// TODO: Better error handling.
 	DWORD err = GetLastError();
 	if (err != ERROR_SUCCESS)
 		fprintf(stderr, "%s(): Error: 0x%08X\n", __func__, (unsigned int)err);
-	return ret;
+	
+	// Return the error code.
+	return err;
 }
 
 
@@ -162,7 +168,7 @@ int Spti::scsiInquiry(void)
 	inquiry.AllocationLength = sizeof(data);
 	
 	// Send the SCSI CDB.
-	if (!scsiSendCdb(&inquiry, sizeof(inquiry), &data, sizeof(data)))
+	if (scsiSendCdb(&inquiry, sizeof(inquiry), &data, sizeof(data)))
 		return -1;
 	
 	// Drive inquiry successful.
@@ -202,31 +208,41 @@ int Spti::scsiInquiry(void)
 bool Spti::isMediumPresent(void)
 {
 	// TODO: This doesn't seem to work if e.g. START/STOP wasn't requested first.
-	CDB_SCSI tst_u_rdy;
-	memset(&tst_u_rdy, 0x00, sizeof(tst_u_rdy));
-	tst_u_rdy.OperationCode = SCSI_TST_U_RDY;
+	CDB_SCSI scsi_req;
+	memset(&scsi_req, 0x00, sizeof(scsi_req));
+	scsi_req.OperationCode = SCSI_TST_U_RDY;
 	
-	if (!scsiSendCdb(&tst_u_rdy, sizeof(tst_u_rdy), NULL, 0))
+	int ret = scsiSendCdb(&scsi_req, sizeof(scsi_req), NULL, 0);
+	if (ret != ERROR_SUCCESS)
 		return false;
 	
-	// Request sense data.
-	CDB_SCSI req_sense;
-	SCSI_DATA_REQ_SENSE data_req_sense;
+	// TODO: SCSI_REQ_SENSE results in Error 87.
+	// (The parameter is incorrect.)
+	// Use READ_CAPACITY instead.
+	// http://www.koders.com/cpp/fidC9882458DF1082A17CDA120DB38031FF93C8F373.aspx?s=mdef%3Ahuffman
 	
-	memset(&req_sense, 0x00, sizeof(req_sense));
-	memset(&data_req_sense, 0x00, sizeof(data_req_sense));
+	// Read capacity.
+	// TODO: Verify that this works on audio-only CDs.
+	CDB_SCSI_RD_CAPAC scsi_req_rd_capac;
+	SCSI_DATA_RD_CAPAC data_rd_capac;
+	memset(&scsi_req_rd_capac, 0x00, sizeof(scsi_req_rd_capac));
+	memset(&data_rd_capac, 0x00, sizeof(data_rd_capac));
 	
-	req_sense.OperationCode = SCSI_REQ_SENSE;
-	req_sense.AllocationLength = sizeof(data_req_sense);
+	// Set the SCSI operation code.
+	// SCSI_RD_CAPAC doesn't have an allocation length.
+	scsi_req_rd_capac.OperationCode = SCSI_RD_CAPAC;
 	
-	if (scsiSendCdb(&req_sense, sizeof(req_sense), &data_req_sense, sizeof(data_req_sense)))
+	ret = scsiSendCdb(&scsi_req_rd_capac, sizeof(scsi_req_rd_capac),
+				&data_rd_capac, sizeof(data_rd_capac));
+	if (ret != ERROR_SUCCESS || be32_to_cpu(data_rd_capac.BlockLength) == 0)
 	{
-		// REQ_SENSE successful.
-		return (data_req_sense.SenseKey == 0);
+		// Command error, or block length is 0.
+		// Assume no disc is present.
+		return false;
 	}
 	
-	// REQ_SENSE was not successful.
-	return false;
+	// Command was successful.
+	return true;
 }
 
 }
