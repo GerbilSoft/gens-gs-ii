@@ -26,12 +26,18 @@
 
 #include "FindCdromBase.hpp"
 
+// Qt includes.
+#include <QtGui/QIcon>
+
 namespace GensQt4
 {
 
 class FindCdromWin32 : public FindCdromBase
 {
 	Q_OBJECT
+	
+	public:
+		QIcon getDriveIcon(const CdromDriveEntry& drive);
 	
 	protected:
 		/**

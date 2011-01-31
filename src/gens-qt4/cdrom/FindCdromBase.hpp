@@ -148,8 +148,6 @@ class FindCdromBase : public QObject
 		 */
 		virtual QIcon getDriveIcon(const CdromDriveEntry& drive)
 		{
-			// TODO: On Win32, convert HICON to QIcon or something similar.
-			// This is a virtual function, so we can do that in FindCdromWin32.
 			if (drive.disc_type == 0)
 				return GetDriveTypeIcon(drive.drive_type);
 			else

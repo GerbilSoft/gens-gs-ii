@@ -38,6 +38,7 @@
 #define NOMINMAX
 #endif
 #include <windows.h>
+#include <shellapi.h>
 
 // SPTI handler.
 #include "Spti.hpp"
@@ -152,6 +153,59 @@ int FindCdromWin32::query_int(void)
 	
 	// Devices queried.
 	return 0;
+}
+
+
+/**
+ * getDriveIcon(): Get the icon for a given CdromDriveEntry.
+ * If a disc type is set, gets the disc icon.
+ * Otherwise, gets the drive icon.
+ * @param drive CdromDriveEntry.
+ * @return Icon for either the drive or the disc.
+ */
+QIcon FindCdromWin32::getDriveIcon(const CdromDriveEntry& drive)
+{
+	// Get the icon using SHGetFileInfo().
+	// This requires shell32.dll v4.0 or later.
+	// TODO: Check shell32.dll version first!
+	QIcon ret_icon;
+	
+	SHFILEINFOA sfi;
+	memset(&sfi, 0x00, sizeof(sfi));
+	
+	// TODO: Make sure we get a 64x64 icon.
+	HRESULT hr = SHGetFileInfoA(drive.path.toLocal8Bit().constData(),
+					0, &sfi, sizeof(sfi),
+					SHGFI_ICON | SHGFI_LARGEICON);
+	if (SUCCEEDED(hr))
+	{
+		// Icon retrieved. It's available in sfi.hIcon.
+		// NOTE: QPixmap::fromWinHICON() was added in Qt 4.6, but we're
+		// going to use QPixmap::fromWinHBITMAP() for compatibility.
+		// http://lists.trolltech.com/qt-interest/2007-07/thread00170-0.html
+		ICONINFO info;
+		if (GetIconInfo(sfi.hIcon, &info))
+		{
+			// Retrieved the icon information.
+			QPixmap pxm_icon = QPixmap::fromWinHBITMAP(info.hbmColor, QPixmap::Alpha);
+			if (pxm_icon.width() != 64 && pxm_icon.height() != 64)
+			{
+				// Pixmap is not 64x64.
+				// TODO: Does Qt::KeepAspectRatio result in a centered image
+				// on a 64x64 pixmap, or will it result in a smaller pixmap?
+				// TODO: Transparency is hideous for some reason...
+				pxm_icon = pxm_icon.scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+			}
+			
+			// Convert the QPixmap to a QIcon.
+			ret_icon = QIcon(pxm_icon);
+		}
+		
+		// Delete the retrieved icon.
+		DestroyIcon(sfi.hIcon);
+	}
+	
+	return ret_icon;
 }
 
 }
