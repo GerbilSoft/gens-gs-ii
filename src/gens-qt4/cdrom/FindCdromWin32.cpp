@@ -33,12 +33,18 @@
 	QCoreApplication::translate("FindCdromWin32", (text), NULL, QCoreApplication::UnicodeUTF8)
 
 // Win32 includes.
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
+// Common Controls 6 is needed for SHGetImageList().
+#define _WIN32_IE 0x0600
 #include <shellapi.h>
+#include <commctrl.h>
+#include <commoncontrols.h>
+
+// NOTE: mingw64-runtime 2010/10/03 does not have IID_IImageList in libuuid.
+static const GUID Gens_IID_IImageList = {0x46EB5926, 0x582E, 0x4017, {0x9F, 0xDF, 0xE8, 0x99, 0x8D, 0xAA, 0x09, 0x50}};
+
+#ifndef MAKE_FUNCPTR
+#define MAKE_FUNCPTR(f) typeof(f) * p##f
+#endif
 
 // SPTI handler.
 #include "Spti.hpp"
@@ -173,39 +179,112 @@ QIcon FindCdromWin32::getDriveIcon(const CdromDriveEntry& drive)
 	SHFILEINFOA sfi;
 	memset(&sfi, 0x00, sizeof(sfi));
 	
-	// TODO: Make sure we get a 64x64 icon.
+	// Get the icon information.
 	HRESULT hr = SHGetFileInfoA(drive.path.toLocal8Bit().constData(),
 					0, &sfi, sizeof(sfi),
 					SHGFI_ICON | SHGFI_LARGEICON);
-	if (SUCCEEDED(hr))
+	if (FAILED(hr))
+		return QIcon();
+	
+	// Icon information retrieved.
+	
+	// Attempt to get the SHIL_EXTRALARGE ImageList from the shell.
+	HICON hIcon = getShilIcon(sfi.iIcon, SHIL_EXTRALARGE);
+	if (!hIcon)
 	{
-		// Icon retrieved. It's available in sfi.hIcon.
-		// NOTE: QPixmap::fromWinHICON() was added in Qt 4.6, but we're
-		// going to use QPixmap::fromWinHBITMAP() for compatibility.
-		// http://lists.trolltech.com/qt-interest/2007-07/thread00170-0.html
-		ICONINFO info;
-		if (GetIconInfo(sfi.hIcon, &info))
-		{
-			// Retrieved the icon information.
-			QPixmap pxm_icon = QPixmap::fromWinHBITMAP(info.hbmColor, QPixmap::Alpha);
-			if (pxm_icon.width() != 64 && pxm_icon.height() != 64)
-			{
-				// Pixmap is not 64x64.
-				// TODO: Does Qt::KeepAspectRatio result in a centered image
-				// on a 64x64 pixmap, or will it result in a smaller pixmap?
-				// TODO: Transparency is hideous for some reason...
-				pxm_icon = pxm_icon.scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-			}
-			
-			// Convert the QPixmap to a QIcon.
-			ret_icon = QIcon(pxm_icon);
-		}
-		
-		// Delete the retrieved icon.
+		// getShilIcon() isn't usable.
+		hIcon = sfi.hIcon;
+	}
+	else
+	{
+		// getShilIcon() is usable.
+		// Delete the icon retrieved by SHGetFileInfoA().
 		DestroyIcon(sfi.hIcon);
 	}
 	
+	// Convert the HICON to a QIcon.
+	// NOTE: QPixmap::fromWinHICON() was added in Qt 4.6, but we're
+	// going to use QPixmap::fromWinHBITMAP() for compatibility.
+	// http://lists.trolltech.com/qt-interest/2007-07/thread00170-0.html
+	ICONINFO info;
+	if (!GetIconInfo(hIcon, &info))
+		return QIcon();
+	
+	// Retrieved the icon information.
+	QPixmap pxm_icon = QPixmap::fromWinHBITMAP(info.hbmColor, QPixmap::Alpha);
+	if (pxm_icon.width() != 64 && pxm_icon.height() != 64)
+	{
+		// Pixmap is not 64x64.
+		// TODO: Does Qt::KeepAspectRatio result in a centered image
+		// on a 64x64 pixmap, or will it result in a smaller pixmap?
+		// TODO: Transparency is hideous for some reason...
+		pxm_icon = pxm_icon.scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	}
+	
+	// Convert the QPixmap to a QIcon.
+	ret_icon = QIcon(pxm_icon);
+	
+	// Delete the retrieved icon.
+	DestroyIcon(hIcon);
+	
 	return ret_icon;
+}
+
+
+/**
+ * getShilIcon(): Get an icon from the shell image list.
+ * Requires Windows XP or later.
+ * @param iIcon Index in the shell image list.
+ * @param iImageList Image list index. (default == SHIL_LARGE == 0)
+ * @return Icon from shell image list, or NULL on error.
+ */
+HICON FindCdromWin32::getShilIcon(int iIcon, int iImageList)
+{
+	// Open shell32.dll.
+	HINSTANCE hShell32 = LoadLibraryA("shell32.dll");
+	if (!hShell32)
+		return NULL;
+	
+	// Attempt to get the process address for shell32.dll::SHGetImageList().
+	MAKE_FUNCPTR(SHGetImageList);
+	pSHGetImageList = (typeof(pSHGetImageList))GetProcAddress(hShell32, "SHGetImageList");
+	if (!pSHGetImageList)
+	{
+		printf("GETPROCADDR FAILED\n");
+		// SHGetImageList() not found.
+		FreeLibrary(hShell32);
+		return NULL;
+	}
+	
+	// SHGetImageList() found.
+	// Get the image list.
+	// NOTE: mingw64-runtime 2010/10/03 does not have IID_IImageList in libuuid.
+	IImageList *imgl;
+	HRESULT hr = pSHGetImageList(iImageList, Gens_IID_IImageList, (void**)&imgl);
+	if (FAILED(hr))
+	{
+		printf("IMGL FAILED\n");
+		// Failed to retrieve the image list.
+		FreeLibrary(hShell32);
+		return NULL;
+	}
+	
+	// Image list obtained.
+	// Get the requested icon.
+	HICON hIcon;
+	hr = imgl->GetIcon(iIcon, ILS_NORMAL, &hIcon);
+	if (FAILED(hr))
+	{
+		// Failed to retrieve the icon.
+		printf("ICON RETRIEVAL FAILED\n");
+		FreeLibrary(hShell32);
+		return NULL;
+	}
+	
+	// Icon retrieved.
+	FreeLibrary(hShell32);
+	printf("ICON: 0x%08X\n", hIcon);
+	return hIcon;
 }
 
 }

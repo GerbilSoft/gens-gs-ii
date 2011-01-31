@@ -29,6 +29,13 @@
 // Qt includes.
 #include <QtGui/QIcon>
 
+// Win32 includes.
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+
 namespace GensQt4
 {
 
@@ -48,6 +55,15 @@ class FindCdromWin32 : public FindCdromBase
 		int query_int(void);
 		
 		static QString GetVolumeLabel(char drive_letter);
+		
+		/**
+		 * getShilIcon(): Get an icon from the shell image list.
+		 * Requires Windows XP or later.
+		 * @param iIcon Index in the shell image list.
+		 * @param iImageList Image list index. (default == SHIL_LARGE == 0)
+		 * @return Icon from shell image list, or NULL on error.
+		 */
+		HICON getShilIcon(int iIcon, int iImageList = 0);
 };
 
 }
