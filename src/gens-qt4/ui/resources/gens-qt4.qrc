@@ -16,5 +16,10 @@
     <file>oxygen-16x16/configure.png</file>
     <file>oxygen-16x16/media-optical.png</file>
     <file>oxygen-16x16/view-refresh.png</file>
+    <file>oxygen-64x64/drive-optical.png</file>
+    <file>oxygen-64x64/media-optical.png</file>
+    <file>oxygen-64x64/media-optical-recordable.png</file>
+    <file>oxygen-64x64/media-optical-dvd.png</file>
+    <file>oxygen-64x64/media-optical-blu-ray.png</file>
   </qresource>
 </RCC>
