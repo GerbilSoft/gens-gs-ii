@@ -38,13 +38,29 @@ class FindCdromUDisks : public FindCdromBase
 	
 	public:
 		/**
-		 * query(): Query for CD-ROM drives.
+		 * query(): Asynchronously query for CD-ROM drives.
+		 * The driveUpdated() signal will be emitted once for each detected drive.
 		 * @return 0 on success; non-zero on error.
+		 * TODO: Determine if the backend is usable. If not, return an error code.
 		 */
-		int query(void);
-		
+		int query(void)
+		{
+			// NOTE: QDBusConnection is not thread-safe.
+			// See http://bugreports.qt.nokia.com/browse/QTBUG-11413
+			
+			// Override the thread mechanism for now.
+			return query_int();
+		}
+	
 	protected:
 		static const char *ms_UDisks_DriveID[20];
+		
+		/**
+		 * query_int(): Asynchronously query for CD-ROM drives. (INTERNAL FUNCTION)
+		 * The driveUpdated() signal will be emitted once for each detected drive.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int query_int(void);
 		
 		QString getStringProperty(QDBusInterface *dbus_if, const char *prop);
 		bool getBoolProperty(QDBusInterface *dbus_if, const char *prop);

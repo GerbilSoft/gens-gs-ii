@@ -88,6 +88,10 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 	m_drives = NULL;
 #endif
 	
+	// Set up the driveUpdated() signal.
+	connect(m_drives, SIGNAL(driveUpdated(const CdromDriveEntry&)),
+		this, SLOT(driveUpdated(const CdromDriveEntry&)));
+	
 	// Query CD-ROM drives.
 	query();
 }
@@ -136,33 +140,40 @@ void McdControlWindow::query(void)
 	// Clear the dropdown.
 	cboCdDrives->clear();
 	
+	// TODO: If m_drives is invalid, show an error in the dropdown.
 	if (!m_drives)
 		return;
 	
+	// TODO: Add a "Scanning for drives..." entry.
 	m_drives->query();
-	
-	// Add the drives tothe list.
-	// TODO: Asynchronous scanning.
-	FindCdromBase::drive_entry_t drive_entry;
-	foreach(drive_entry, m_drives->getDriveList())
-	{
-		QString item_desc = drive_entry.drive_vendor + " " +
-					drive_entry.drive_model + " " +
-					drive_entry.drive_firmware + "\n" +
-					drive_entry.path + ": ";
-		
-		// Add the disc label if a disc is present.
-		if (drive_entry.disc_type == 0)
-			item_desc += TR("No medium found.");
-		else
-			item_desc += drive_entry.disc_label;
-		
-		cboCdDrives->addItem(drive_entry.icon, item_desc, drive_entry.path);
-	}
 	
 	// Set cboCdDrive's selected index to 0 so that the
 	// first CD-ROM drive is displayed.
 	cboCdDrives->setCurrentIndex(0);
+}
+
+
+/**
+ * driveUpdated(): A drive was updated.
+ * @param drive CdromDriveEntry.
+ */
+void McdControlWindow::driveUpdated(const CdromDriveEntry& drive)
+{
+	// Add the drives to the list.
+	// TODO: Asynchronous scanning.
+	// TODO: If the drive's already in the list, update it.
+	QString item_desc = drive.drive_vendor + " " +
+				drive.drive_model + " " +
+				drive.drive_firmware + "\n" +
+				drive.path + ": ";
+	
+	// Add the disc label if a disc is present.
+	if (drive.disc_type == 0)
+		item_desc += TR("No medium found.");
+	else
+		item_desc += drive.disc_label;
+	
+	cboCdDrives->addItem(m_drives->getDriveIcon(drive), item_desc, drive.path);
 }
 
 }

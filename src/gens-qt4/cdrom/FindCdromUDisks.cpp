@@ -96,17 +96,18 @@ bool FindCdromUDisks::getBoolProperty(QDBusInterface *dbus_if, const char *prop)
 
 
 /**
- * query(): Query for CD-ROM drives.
+ * query_int(): Asynchronously query for CD-ROM drives. (INTERNAL FUNCTION)
+ * The driveUpdated() signal will be emitted once for each detected drive.
  * @return 0 on success; non-zero on error.
  */
-int FindCdromUDisks::query(void)
+int FindCdromUDisks::query_int(void)
 {
 	// Find all CD-ROM devices.
 	// TODO: Make a base class and return standard values.
 	// TODO: Get qdbusxml2cpp working with UDisks.
 	
-	// Clear the existing list of CD-ROM devices.
-	m_drives.clear();
+	// NOTE: QDBusConnection is not thread-safe.
+	// See http://bugreports.qt.nokia.com/browse/QTBUG-11413
 	
 	QDBusConnection bus = QDBusConnection::systemBus();
 	QScopedPointer<QDBusInterface> interface(new QDBusInterface("org.freedesktop.UDisks",
@@ -164,8 +165,8 @@ int FindCdromUDisks::query(void)
 			continue;
 		}
 		
-		// Construct the drive_entry_t.
-		drive_entry_t drive;
+		// Construct the CdromDriveEntry.
+		CdromDriveEntry drive;
 		drive.discs_supported = 0;
 		drive.drive_type = DRIVE_TYPE_NONE;
 		drive.disc_type = 0;
@@ -226,14 +227,9 @@ int FindCdromUDisks::query(void)
 		if (drive.disc_type != DISC_TYPE_NONE && drive.disc_blank)
 			drive.disc_label = TR("Blank %1").arg(GetDiscTypeName(drive.disc_type));
 		
-		// Set the device icon.
-		if (drive.disc_type == 0)
-			drive.icon = GetDriveTypeIcon(drive.drive_type);
-		else
-			drive.icon = GetDiscTypeIcon(drive.disc_type);
-		
-		// Add the drive to m_drives.
-		m_drives.append(drive);
+		// Emit the driveUpdated() signal for this drive.
+		// TODO: If scanning all drives, notify when all drives are scanned.
+		emit driveUpdated(drive);
 		
 		// Print drive information.
 		printf("Drive: %s - drive is type %d, disc is 0x%08X\n",

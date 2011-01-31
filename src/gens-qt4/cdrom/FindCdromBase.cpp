@@ -41,12 +41,15 @@
 namespace GensQt4
 {
 
+// Qt metatype ID for CdromDriveEntry.
+int FindCdromBase::ms_MetaType_CdromDriveEntry = 0;
+
 /**
  * GetDriveType(): Get the drive name from a given drive specifier.
  * @param discs_supported Supported discs.
  * @return DriveType.
  */
-FindCdromBase::DriveType FindCdromBase::GetDriveType(uint32_t discs_supported)
+DriveType FindCdromBase::GetDriveType(uint32_t discs_supported)
 {
 	// TODO: Find various permutations like DVD/CD-RW.
 	// Also, check for multi-format DVD±RW drives.

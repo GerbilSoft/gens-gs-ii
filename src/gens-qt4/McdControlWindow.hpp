@@ -53,6 +53,7 @@ class McdControlWindow : public QDialog, public Ui::McdControlWindow
 	
 	protected slots:
 		void query(void);
+		void driveUpdated(const CdromDriveEntry& drive);
 	
 	private:
 		static McdControlWindow *m_McdControlWindow;
