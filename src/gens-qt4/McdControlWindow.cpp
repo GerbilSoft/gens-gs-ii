@@ -48,8 +48,10 @@
 #include <stdint.h>
 
 // Find CD-ROM drives.
-// TODO: Add Win32, Mac OS X, and non-UDisks classes.
-#ifdef QT_QTDBUS_FOUND
+// TODO: Add Mac OS X, and non-UDisks classes.
+#if defined(Q_OS_WIN)
+#include "cdrom/FindCdromWin32.hpp"
+#elif defined(QT_QTDBUS_FOUND)
 #include "cdrom/FindCdromUDisks.hpp"
 #endif
 
@@ -81,7 +83,9 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 	buttonBox->addButton(btnRefresh, QDialogButtonBox::ResetRole);
 	
 	// Initialize the FindCdromBase class.
-#ifdef QT_QTDBUS_FOUND
+#if defined(Q_OS_WIN)
+	m_drives = new FindCdromWin32();
+#elif defined(QT_QTDBUS_FOUND)
 	m_drives = new FindCdromUDisks();
 #else
 	// TODO: Implement versions for Win32, Mac OS X, and non-UDisks.
