@@ -125,7 +125,7 @@ int FindCdromWin32::query_int(void)
 			
 			// Check if a disc is inserted.
 			// NOTE: Label may be empty, so this check isn't necessarily correct.
-			if (!drive.disc_label.isEmpty())
+			if (drive.disc_label.isEmpty())
 				drive.disc_type = DISC_TYPE_NONE;
 			else
 			{
