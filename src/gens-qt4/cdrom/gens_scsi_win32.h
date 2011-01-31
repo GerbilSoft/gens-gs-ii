@@ -424,18 +424,60 @@ typedef struct
 
 // Reference [2]
 /**
- * CDB_INQUIRY: SCSI_INQUIRY command data block.
+ * CDB_SCSI: SCSI command data block.
  */
-typedef struct PACKED _CDB_INQUIRY 
+typedef struct PACKED _CDB_SCSI
 {
-	UCHAR OperationCode6;    // 0x12 - SCSIOP_INQUIRY
+	UCHAR OperationCode;
 	UCHAR Reserved1 : 5;
 	UCHAR LogicalUnitNumber : 3;
 	UCHAR PageCode;
 	UCHAR IReserved;
 	UCHAR AllocationLength;
 	UCHAR Control;
-} CDB_INQUIRY6;
+} CDB_SCSI;
+
+/**
+ * SCSI_DATA_TST_U_RDY: SCSI_TST_U_RDY returned data.
+ * Reference: http://en.wikipedia.org/wiki/SCSI_Test_Unit_Ready_Command
+ */
+typedef struct PACKED _SCSI_DATA_TST_U_RDY 
+{
+	UCHAR OperationCode;	// SCSI_TST_U_RDY == 0x00
+	UCHAR Reserved1 : 5;
+	UCHAR LogicalUnitNumber : 3;
+	UCHAR Reserved2;
+	UCHAR Reserved3;
+	UCHAR Reserved4;
+	UCHAR Control;
+} SCSI_DATA_TST_U_RDY;
+
+/**
+ * SCSI_DATA_REQ_SENSE: SCSI_REQ_SENSE command data block.
+ * Reference: http://en.wikipedia.org/wiki/SCSI_Request_Sense_Command
+ */
+typedef struct PACKED _SCSI_DATA_REQ_SENSE
+{
+	UCHAR ResponseCode : 7;
+	UCHAR Valid : 1;
+	UCHAR SegmentNumber;
+	UCHAR SenseKey : 4;
+	UCHAR Reserved1 : 1;
+	UCHAR ILI : 1;
+	UCHAR EOM : 1;
+	UCHAR Filemark : 1;
+	UCHAR Information;
+	UCHAR AdditionalSenseLength;
+	UCHAR CmdSpecificInfo[4];
+	UCHAR AdditionalSenseCode;
+	UCHAR AdditionalSenseCodeQualifier;
+	UCHAR FieldReplaceableUnitCode;
+	UCHAR SenseKeySpecific1 : 7;
+	UCHAR SKSV : 1;
+	UCHAR SenseKeySpecific2;
+	UCHAR SenseKeySpecific3;
+	UCHAR AdditionalSenseBytes[4];
+} SCSI_DATA_REQ_SENSE;
 
 /**
  * SCSI_INQUIRY_STD_DATA: Returned data from SCSI_INQUIRY.

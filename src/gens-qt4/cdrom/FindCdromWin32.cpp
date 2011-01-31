@@ -172,15 +172,15 @@ int FindCdromWin32::query_int(void)
 		{
 			// Drive opened for SPTI.
 			// Do a drive inquiry.
-			CDB_INQUIRY6 inquiry;
+			CDB_SCSI inquiry;
 			SCSI_INQUIRY_STD_DATA data;
 			
 			memset(&inquiry, 0x00, sizeof(inquiry));
 			memset(&data, 0x00, sizeof(data));
 			
 			// Set SCSI operation type.
+			inquiry.OperationCode = SCSI_INQUIRY;
 			inquiry.AllocationLength = sizeof(data);
-			inquiry.OperationCode6 = SCSI_INQUIRY;
 			
 			if (ScsiSendCdb(hDrive, &inquiry, sizeof(inquiry), &data, sizeof(data)))
 			{
@@ -189,6 +189,34 @@ int FindCdromWin32::query_int(void)
 				drive.drive_vendor   = QString::fromLatin1(data.vendor_id, sizeof(data.vendor_id)).trimmed();
 				drive.drive_model    = QString::fromLatin1(data.product_id, sizeof(data.product_id)).trimmed();
 				drive.drive_firmware = QString::fromLatin1(data.product_revision_level, sizeof(data.product_revision_level)).trimmed();
+			}
+			
+			// Check if a disc is inserted.
+			if (!drive.disc_label.isEmpty())
+				drive.disc_type = DISC_TYPE_NONE;
+			else
+			{
+				// TODO: This doesn't seem to work if e.g. START/STOP wasn't requested first.
+				CDB_SCSI tst_u_rdy;
+				memset(&tst_u_rdy, 0x00, sizeof(tst_u_rdy));
+				tst_u_rdy.OperationCode = SCSI_TST_U_RDY;
+				int ret = ScsiSendCdb(hDrive, &tst_u_rdy, sizeof(tst_u_rdy), NULL, 0);
+				
+				// Request sense data.
+				CDB_SCSI req_sense;
+				SCSI_DATA_REQ_SENSE data_req_sense;
+				
+				memset(&req_sense, 0x00, sizeof(req_sense));
+				memset(&data_req_sense, 0x00, sizeof(data_req_sense));
+				
+				req_sense.OperationCode = SCSI_REQ_SENSE;
+				req_sense.AllocationLength = sizeof(data_req_sense);
+				
+				if (ScsiSendCdb(hDrive, &req_sense, sizeof(req_sense), &data_req_sense, sizeof(data_req_sense)))
+				{
+					// REQ_SENSE successful.
+					drive.disc_type = (data_req_sense.SenseKey == 0 ? DISC_TYPE_CDROM : DISC_TYPE_NONE);
+				}
 			}
 		}
 		
