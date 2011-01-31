@@ -127,12 +127,23 @@ IF(QT_QTDBUS_FOUND)
 		${gens-qt4_SRCS}
 		cdrom/FindCdromUDisks.cpp
 		)
-
 	SET(gens-qt4_MOC_HEADERS
 		${gens-qt4_MOC_HEADERS}
 		cdrom/FindCdromUDisks.hpp
 		)
 ENDIF(QT_QTDBUS_FOUND)
+
+IF(WIN32)
+	# Win32: Enable Win32 CD-ROM suport.
+	SET(gens-qt4_SRCS
+		${gens-qt4_SRCS}
+		cdrom/FindCdromWin32.cpp
+		)
+	SET(gens-qt4_MOC_HEADERS
+		${gens-qt4_MOC_HEADERS}
+		cdrom/FindCdromWin32.hpp
+		)
+ENDIF(WIN32)
 
 # Create .moc files for sources that need them.
 QT4_WRAP_CPP(gens-qt4_MOC_SOURCES ${gens-qt4_MOC_HEADERS})
