@@ -230,10 +230,6 @@ int FindCdromUDisks::query_int(void)
 		// Emit the driveUpdated() signal for this drive.
 		// TODO: If scanning all drives, notify when all drives are scanned.
 		emit driveUpdated(drive);
-		
-		// Print drive information.
-		printf("Drive: %s - drive is type %d, disc is 0x%08X\n",
-		       drive.path.toLocal8Bit().constData(), (int)drive.drive_type, drive.disc_type);
 	}
 	
 	// Devices queried.
