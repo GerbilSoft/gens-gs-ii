@@ -140,7 +140,7 @@ class FindCdromBase : public QObject
 		static QString GetDiscTypeName(uint32_t disc_type);
 		
 		/**
-		 * GetDriveIcon(): Get the icon for a given CdromDriveEntry.
+		 * getDriveIcon(): Get the icon for a given CdromDriveEntry.
 		 * If a disc type is set, gets the disc icon.
 		 * Otherwise, gets the drive icon.
 		 * @param drive CdromDriveEntry.
