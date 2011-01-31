@@ -250,7 +250,6 @@ HICON FindCdromWin32::getShilIcon(int iIcon, int iImageList)
 	pSHGetImageList = (typeof(pSHGetImageList))GetProcAddress(hShell32, "SHGetImageList");
 	if (!pSHGetImageList)
 	{
-		printf("GETPROCADDR FAILED\n");
 		// SHGetImageList() not found.
 		FreeLibrary(hShell32);
 		return NULL;
@@ -263,7 +262,6 @@ HICON FindCdromWin32::getShilIcon(int iIcon, int iImageList)
 	HRESULT hr = pSHGetImageList(iImageList, Gens_IID_IImageList, (void**)&imgl);
 	if (FAILED(hr))
 	{
-		printf("IMGL FAILED\n");
 		// Failed to retrieve the image list.
 		FreeLibrary(hShell32);
 		return NULL;
@@ -276,14 +274,12 @@ HICON FindCdromWin32::getShilIcon(int iIcon, int iImageList)
 	if (FAILED(hr))
 	{
 		// Failed to retrieve the icon.
-		printf("ICON RETRIEVAL FAILED\n");
 		FreeLibrary(hShell32);
 		return NULL;
 	}
 	
 	// Icon retrieved.
 	FreeLibrary(hShell32);
-	printf("ICON: 0x%08X\n", hIcon);
 	return hIcon;
 }
 
