@@ -203,21 +203,29 @@ QIcon FindCdromWin32::getDriveIcon(const CdromDriveEntry& drive)
 	}
 	
 	// Convert the HICON to a QIcon.
-	// NOTE: QPixmap::fromWinHICON() was added in Qt 4.6, but we're
-	// going to use QPixmap::fromWinHBITMAP() for compatibility.
+#if QT_VERSION >= 0x040600
+	// QPixmap::fromWinHICON() was added in Qt 4.6.
+	QPixmap pxm_icon = QPixmap::fromWinHICON(hIcon);
+#else
+	// Convert the HICON to a QIcon.
 	// http://lists.trolltech.com/qt-interest/2007-07/thread00170-0.html
 	ICONINFO info;
 	if (!GetIconInfo(hIcon, &info))
+	{
+		DestroyIcon(hIcon);
 		return QIcon();
-	
-	// Retrieved the icon information.
+	}
 	QPixmap pxm_icon = QPixmap::fromWinHBITMAP(info.hbmColor, QPixmap::Alpha);
+#endif
+	
 	if (pxm_icon.width() != 64 && pxm_icon.height() != 64)
 	{
 		// Pixmap is not 64x64.
 		// TODO: Does Qt::KeepAspectRatio result in a centered image
 		// on a 64x64 pixmap, or will it result in a smaller pixmap?
-		// TODO: Transparency is hideous for some reason...
+		// TODO: Scaling QPixmap::fromWinHBITMAP results in horrible transparency.
+		// QPixmap::fromWinHICON is good, but is only available in Qt 4.6 and later.
+		// Maybe I should copy the function from Qt 4.6's source code?
 		pxm_icon = pxm_icon.scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 	}
 	
