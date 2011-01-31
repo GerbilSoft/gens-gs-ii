@@ -218,7 +218,7 @@ QIcon FindCdromWin32::getDriveIcon(const CdromDriveEntry& drive)
 	QPixmap pxm_icon = QPixmap::fromWinHBITMAP(info.hbmColor, QPixmap::Alpha);
 #endif
 	
-	if (pxm_icon.width() != 64 && pxm_icon.height() != 64)
+	if (pxm_icon.width() != 64 || pxm_icon.height() != 64)
 	{
 		// Pixmap is not 64x64.
 		// TODO: Does Qt::KeepAspectRatio result in a centered image
