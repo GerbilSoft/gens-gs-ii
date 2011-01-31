@@ -39,60 +39,11 @@
 #endif
 #include <windows.h>
 
-// NTDDSCSI is required for SPTI.
-// TODO: Create a separate SPTI class for Win32.
-#include <ntddscsi.h>
-#include <devioctl.h>
-#include "gens_scsi_win32.h"
+// SPTI handler.
+#include "Spti.hpp"
 
 namespace GensQt4
 {
-
-// TODO: Create a separate SPTI class for Win32.
-/**
- * ScsiSendCdb(): Send a SCSI command buffer.
- * @return 0 on error; non-zero on success. (Win32-style)
- */
-int FindCdromWin32::ScsiSendCdb(HANDLE device, void *cdb, unsigned char cdb_length,
-					void *buffer, unsigned int buffer_length,
-					int data_in)
-{
-	// Based on http://www.codeproject.com/KB/system/mydvdregion.aspx
-	DWORD returned;
-	int ret;
-	
-	// Size of SCSI_PASS_THROUGH + 96 bytes for sense data.
-	uint8_t cmd[sizeof(SCSI_PASS_THROUGH_DIRECT) + 96];
-	memset(cmd, 0x00, sizeof(cmd));
-	
-	// Shortcut to the buffer.
-	SCSI_PASS_THROUGH_DIRECT *pcmd = (SCSI_PASS_THROUGH_DIRECT*)cmd;
-	
-	// Copy the CDB to the SCSI_PASS_THROUGH structure.
-	memcpy(pcmd->Cdb, cdb, cdb_length);
-	
-	// Initialize the other SCSI command variables.
-	pcmd->DataBuffer = buffer;
-	pcmd->DataTransferLength = buffer_length;
-	pcmd->DataIn = data_in;
-	pcmd->CdbLength = cdb_length;
-	pcmd->Length = sizeof(SCSI_PASS_THROUGH_DIRECT);
-	pcmd->SenseInfoLength = (sizeof(cmd) - sizeof(SCSI_PASS_THROUGH_DIRECT));
-	pcmd->SenseInfoOffset = sizeof(SCSI_PASS_THROUGH_DIRECT);
-	pcmd->TimeOutValue = 6000; // TODO: 6000?
-	
-	ret = DeviceIoControl(device, IOCTL_SCSI_PASS_THROUGH_DIRECT,
-				(LPVOID)&cmd, sizeof(cmd),
-				(LPVOID)&cmd, sizeof(cmd),
-				&returned, NULL);
-	
-	// TODO: Check for errors.
-	DWORD err = GetLastError();
-	if (err != ERROR_SUCCESS)
-		fprintf(stderr, "%s(): Error: 0x%08X\n", __func__, (unsigned int)err);
-	return ret;
-}
-
 
 /**
  * GetVolumeLabel(): Get the label of the given drive.
@@ -135,7 +86,6 @@ int FindCdromWin32::query_int(void)
 	// Go through the 26 drive letters and find CD-ROM drives.
 	// TODO: Get special information like supported disc types.
 	char drive_path[4] = {0, ':', '\\', 0};
-	char spti_drive_path[7] = {'\\', '\\', '.', '\\', 0, ':', 0};
 	unsigned int drive_type;
 	for (int i = 0; i < 26; i++)
 	{
@@ -159,69 +109,35 @@ int FindCdromWin32::query_int(void)
 		drive.disc_label = GetVolumeLabel(drive_path[0]);
 		
 		// Open the drive using SPTI.
-		// TODO: Move SPTI-specific code to McdReader later.
-		spti_drive_path[4] = drive_path[0];
-		HANDLE hDrive = CreateFileA(spti_drive_path,			// lpFileName
-					GENERIC_READ | GENERIC_WRITE,		// dwDesiredAccess
-					FILE_SHARE_READ | FILE_SHARE_WRITE,	// dwShareMode
-					NULL,					// lpSecurityAttributes
-					OPEN_EXISTING,				// dwCreationDisposition,
-					FILE_ATTRIBUTE_NORMAL,			// dwFlagsAndAttributes
-					NULL);					// hTemplateFile
-		if (hDrive != INVALID_HANDLE_VALUE)
+		Spti drive_spti(drive_path[0]);
+		if (drive_spti.isOpen())
 		{
 			// Drive opened for SPTI.
 			// Do a drive inquiry.
-			CDB_SCSI inquiry;
-			SCSI_INQUIRY_STD_DATA data;
-			
-			memset(&inquiry, 0x00, sizeof(inquiry));
-			memset(&data, 0x00, sizeof(data));
-			
-			// Set SCSI operation type.
-			inquiry.OperationCode = SCSI_INQUIRY;
-			inquiry.AllocationLength = sizeof(data);
-			
-			if (ScsiSendCdb(hDrive, &inquiry, sizeof(inquiry), &data, sizeof(data)))
+			if (!drive_spti.scsiInquiry())
 			{
 				// Drive inquiry successful.
 				// Get the information.
-				drive.drive_vendor   = QString::fromLatin1(data.vendor_id, sizeof(data.vendor_id)).trimmed();
-				drive.drive_model    = QString::fromLatin1(data.product_id, sizeof(data.product_id)).trimmed();
-				drive.drive_firmware = QString::fromLatin1(data.product_revision_level, sizeof(data.product_revision_level)).trimmed();
+				drive.drive_vendor   = QString::fromLatin1(drive_spti.inqVendor());
+				drive.drive_model    = QString::fromLatin1(drive_spti.inqModel());
+				drive.drive_firmware = QString::fromLatin1(drive_spti.inqFirmware());
 			}
 			
 			// Check if a disc is inserted.
+			// NOTE: Label may be empty, so this check isn't necessarily correct.
 			if (!drive.disc_label.isEmpty())
 				drive.disc_type = DISC_TYPE_NONE;
 			else
 			{
-				// TODO: This doesn't seem to work if e.g. START/STOP wasn't requested first.
-				CDB_SCSI tst_u_rdy;
-				memset(&tst_u_rdy, 0x00, sizeof(tst_u_rdy));
-				tst_u_rdy.OperationCode = SCSI_TST_U_RDY;
-				int ret = ScsiSendCdb(hDrive, &tst_u_rdy, sizeof(tst_u_rdy), NULL, 0);
-				
-				// Request sense data.
-				CDB_SCSI req_sense;
-				SCSI_DATA_REQ_SENSE data_req_sense;
-				
-				memset(&req_sense, 0x00, sizeof(req_sense));
-				memset(&data_req_sense, 0x00, sizeof(data_req_sense));
-				
-				req_sense.OperationCode = SCSI_REQ_SENSE;
-				req_sense.AllocationLength = sizeof(data_req_sense);
-				
-				if (ScsiSendCdb(hDrive, &req_sense, sizeof(req_sense), &data_req_sense, sizeof(data_req_sense)))
-				{
-					// REQ_SENSE successful.
-					drive.disc_type = (data_req_sense.SenseKey == 0 ? DISC_TYPE_CDROM : DISC_TYPE_NONE);
-				}
+				if (drive_spti.isMediumPresent())
+					drive.disc_type = DISC_TYPE_CDROM;
+				else
+					drive.disc_type = DISC_TYPE_NONE;
 			}
 		}
 		
 		// Close the drive handle.
-		CloseHandle(hDrive);
+		drive_spti.close();
 		
 		// TODO: Get optical disc type and drive type information.
 		drive.disc_blank = false;

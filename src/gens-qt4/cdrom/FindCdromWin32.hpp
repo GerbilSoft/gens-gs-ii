@@ -26,17 +26,6 @@
 
 #include "FindCdromBase.hpp"
 
-// Win32 includes.
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
-
-// NTDDSCSI is required for SPTI.
-// TODO: Create a separate SPTI class for Win32.
-#include <ntddscsi.h>
-
 namespace GensQt4
 {
 
@@ -51,11 +40,6 @@ class FindCdromWin32 : public FindCdromBase
 		 * @return 0 on success; non-zero on error.
 		 */
 		int query_int(void);
-		
-		// TODO: Create a separate SPTI class for Win32.
-		static int ScsiSendCdb(HANDLE device, void *cdb, unsigned char cdb_length,
-					void *buffer, unsigned int buffer_length,
-					int data_in = SCSI_IOCTL_DATA_IN);
 		
 		static QString GetVolumeLabel(char drive_letter);
 };

@@ -138,6 +138,7 @@ IF(WIN32)
 	SET(gens-qt4_SRCS
 		${gens-qt4_SRCS}
 		cdrom/FindCdromWin32.cpp
+		cdrom/Spti.cpp
 		)
 	SET(gens-qt4_MOC_HEADERS
 		${gens-qt4_MOC_HEADERS}

@@ -484,7 +484,7 @@ typedef struct PACKED _SCSI_DATA_REQ_SENSE
  */
 typedef struct PACKED _SCSI_INQUIRY_STD_DATA
 {
-	UCHAR preipheral_device_type : 5;
+	UCHAR peripheral_device_type : 5;
 	UCHAR peripheral_qualifier: 3;
 	UCHAR rsvrd : 7;
 	UCHAR rmb: 1;
