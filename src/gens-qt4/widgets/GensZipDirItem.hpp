@@ -75,6 +75,8 @@ class GensZipDirItem
 			{ return m_itemData.z_entry; }
 		void setZEntry(const mdp_z_entry_t *z_entry)
 			{ m_itemData.z_entry = z_entry; }
+		
+		void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 	
 	protected:
 		struct zdata
@@ -90,6 +92,38 @@ class GensZipDirItem
 		QList<GensZipDirItem*> m_childItems;
 		GensZipDirItem *m_parentItem;
 		zdata m_itemData;
+		
+		static inline bool SortFilenameLessThan(const GensZipDirItem *z1, const GensZipDirItem *z2)
+		{
+			// If one item is a directory and one isn't, the directory comes first.
+			if (z1->childCount() && !z2->childCount())
+				return true;
+			else if (!z1->childCount() && z2->childCount())
+				return false;
+			
+			// Both are directories, or both are files.
+#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
+			return (z1->data(0).toString().toLower() < z2->data(0).toString().toLower());
+#else
+			return (z1->data(0).toString() < z2->data(0).toString());
+#endif
+		}
+		
+		static inline bool SortFilenameGreaterThan(const GensZipDirItem *z1, const GensZipDirItem *z2)
+		{
+			// If one item is a directory and one isn't, the directory comes last.
+			if (z1->childCount() && !z2->childCount())
+				return false;
+			else if (!z1->childCount() && z2->childCount())
+				return true;
+			
+			// Both are directories, or both are files.
+#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
+			return (z1->data(0).toString().toLower() > z2->data(0).toString().toLower());
+#else
+			return (z1->data(0).toString() > z2->data(0).toString());
+#endif
+		}
 };
 
 }

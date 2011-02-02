@@ -273,4 +273,20 @@ bool GensZipDirModel::insertZEntry(const mdp_z_entry_t *z_entry,
 	return true;
 }
 
+
+/**
+ * sort(): Sort the data model.
+ * @param column Column to sort by.
+ * @param order Sort order.
+ */
+void GensZipDirModel::sort(int column, Qt::SortOrder order)
+{
+	if (!m_rootItem)
+		return;
+	
+	emit layoutAboutToBeChanged();
+	m_rootItem->sort(column, order);
+	emit layoutChanged();
+}
+
 }

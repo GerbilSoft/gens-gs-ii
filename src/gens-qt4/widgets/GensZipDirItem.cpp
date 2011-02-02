@@ -103,4 +103,25 @@ bool GensZipDirItem::setData(int column, const QVariant& value)
 	return true;
 }
 
+/**
+ * sort(): Sort the data item.
+ * @param column Column to sort by.
+ * @param order Sort order.
+ */
+void GensZipDirItem::sort(int column, Qt::SortOrder order)
+{
+	// Sort the child items.
+	// NOTE: We're ignoring the column argument for now.
+	// We're always sorting by display filename.
+	if (order == Qt::AscendingOrder)
+		qSort(m_childItems.begin(), m_childItems.end(), SortFilenameLessThan);
+	else
+		qSort(m_childItems.begin(), m_childItems.end(), SortFilenameGreaterThan);
+	
+	// Sort child items of child items.
+	GensZipDirItem *item;
+	foreach(item, m_childItems)
+		item->sort(column, order);
+}
+
 }

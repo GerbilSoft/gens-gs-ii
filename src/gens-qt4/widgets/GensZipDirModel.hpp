@@ -71,6 +71,8 @@ class GensZipDirModel : public QAbstractItemModel
 		bool insertZEntry(const mdp_z_entry_t *z_entry,
 				  const QIcon& icon = QIcon());
 		const mdp_z_entry_t *getZEntry(const QModelIndex& index) const;
+		
+		void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 
 protected:
 		GensZipDirItem *m_rootItem;
