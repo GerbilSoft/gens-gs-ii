@@ -23,6 +23,7 @@
 
 // C includes.
 #include <stdio.h>
+#include <paths.h>
 
 // stat(2)
 #include <sys/types.h>
@@ -81,7 +82,7 @@ int FindCdromUnix::query_int(void)
 	// Find all CD-ROM devices.
 	
 	// Open the /dev/ directory.
-	QDir dir("/dev/");
+	QDir dir(_PATH_DEV);
 	if (!dir.exists())
 		return -1;
 	
