@@ -116,6 +116,14 @@ class VBackend
 		
 		StretchMode stretchMode(void) const { return m_stretchMode; }
 		void setStretchMode(StretchMode newStretchMode);
+		
+		// Recording OSD.
+		int recSetStatus(const QString& component, bool isRecording);
+		int recSetDuration(const QString& component, int duration);
+		inline int recStart(const QString& component)
+			{ return recSetStatus(component, true); }
+		inline int recStop(const QString& component)
+			{ return recSetStatus(component, false); }
 	
 	protected:
 		// Dirty flag. If set, texture must be reuploaded.
@@ -177,6 +185,15 @@ class VBackend
 		// Preview image.
 		bool m_preview_show;
 		QImage m_preview_img;
+		
+		struct RecOsd
+		{
+			QString component;
+			int duration;		// ms
+			double lastUpdate;	// ms
+			bool isRecording;	// True if recording; false if stopped.
+		};
+		QList<RecOsd> m_osdRecList;
 	
 	private:
 		// Effects.

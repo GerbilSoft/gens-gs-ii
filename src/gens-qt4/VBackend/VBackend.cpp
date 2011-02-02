@@ -275,6 +275,8 @@ int VBackend::osd_process(void)
 		}
 	}
 	
+	// TODO: Check m_osdList for REC_STOPPED status over a given duration. (2000 ms?)
+	
 	if (isMsgRemoved)
 	{
 		// At least one message was removed.
@@ -482,6 +484,85 @@ void VBackend::osd_show_preview(int duration, const QImage& img)
 		if (!isRunning() || isPaused())
 			vbUpdate();
 	}
+}
+
+
+/**
+ * recSetStatus(): Set recording status for a given component.
+ * @param component	[in] Component.
+ * @param isRecording	[in] True if recording; false if stopped.
+ * @return 0 on success; non-zero on error.
+ */
+int VBackend::recSetStatus(const QString& component, bool isRecording)
+{
+	// Find the component in m_osdList.
+	int recIdx;
+	for (recIdx = 0; recIdx < m_osdRecList.size(); recIdx++)
+	{
+		if (m_osdRecList[recIdx].component == component)
+			break;
+	}
+	
+	const double curTime = LibGens::Timing::GetTimeD();
+	
+	if (recIdx >= m_osdRecList.size())
+	{
+		// Not found. Add a new component.
+		RecOsd recOsd;
+		recOsd.component = component;
+		recOsd.isRecording = isRecording;
+		recOsd.duration = 0;
+		recOsd.lastUpdate = curTime;
+		m_osdRecList.append(recOsd);
+	}
+	else
+	{
+		// Component found.
+		m_osdRecList[recIdx].isRecording = isRecording;
+		m_osdRecList[recIdx].lastUpdate = curTime;
+	}
+	
+	// Update the OSD.
+	setVbDirty();	// TODO: Texture doesn't really need to be reuploaded...
+	setOsdListDirty();
+	// TODO: Only if paused, or regardless of pause?
+	if (!isRunning() || isPaused())
+		vbUpdate();
+	return 0;
+}
+
+
+/**
+ * recSetDuration(): Set the recording duration for a component.
+ * @param component Component.
+ * @param duration Recording duration.
+ * @return 0 on success; non-zero on error.
+ */
+int VBackend::recSetDuration(const QString& component, int duration)
+{
+	// Find the component in m_osdList.
+	int recIdx;
+	for (recIdx = 0; recIdx < m_osdRecList.size(); recIdx++)
+	{
+		if (m_osdRecList[recIdx].component == component)
+			break;
+	}
+	
+	if (recIdx >= m_osdRecList.size())
+		return -1;
+	
+	// Set the recording duration.
+	const double curTime = LibGens::Timing::GetTimeD();
+	m_osdRecList[recIdx].duration = duration;
+	m_osdRecList[recIdx].lastUpdate = curTime;
+	
+	// Update the OSD.
+	setVbDirty();	// TODO: Texture doesn't really need to be reuploaded...
+	setOsdListDirty();
+	// TODO: Only if paused, or regardless of pause?
+	if (!isRunning() || isPaused())
+		vbUpdate();
+	return 0;
 }
 
 }

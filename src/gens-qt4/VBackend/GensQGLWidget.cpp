@@ -532,6 +532,10 @@ void GensQGLWidget::printOsdText(void)
 	// * renderText() doesn't properly handle newlines.
 	// * fm.boundingRect() doesn't seem to handle wordwrapping correctly, either.
 	
+	// TODO: Font information.
+	static const int chrW = 8;
+	static const int chrH = 16;
+	
 	if (!m_osdListDirty)
 	{
 		// OSD message list isn't dirty.
@@ -575,7 +579,7 @@ void GensQGLWidget::printOsdText(void)
 	const QColor clShadow(0, 0, 0);
 	
 	// TODO: Constants for character sizes.
-	int y = (240 - 16);
+	int y = (240 - chrH);
 	double curTime = LibGens::Timing::GetTimeD();
 	
 	// Check if the FPS should be drawn.
@@ -585,13 +589,13 @@ void GensQGLWidget::printOsdText(void)
 		QString sFps = QString::number(m_fpsAvg, 'f', 1);
 		
 		// TODO: Allow font scaling.
-		y -= 16;
+		y -= chrH;
 		
 		// TODO: Make the drop shadow optional or something.
 		qglColor(clShadow);
-		printOsdLine(8+1, y+1, sFps);
+		printOsdLine(chrW+1, y+1, sFps);
 		qglColor(osdFpsColor());
-		printOsdLine(8, y, sFps);
+		printOsdLine(chrW, y, sFps);
 	}
 	
 	// If messages are enabled, print them on the screen.
@@ -612,13 +616,71 @@ void GensQGLWidget::printOsdText(void)
 			const QString &msg = m_osdList[i].msg;
 			
 			// TODO: Allow font scaling.
-			y -= 16;
+			y -= chrH;
 			
 			// TODO: Make the drop shadow optional or something.
 			qglColor(clShadow);
-			printOsdLine(8+1, y+1, msg);
+			printOsdLine(chrW+1, y+1, msg);
 			qglColor(osdMsgColor());	// TODO: Per-message colors?
-			printOsdLine(8, y, msg);
+			printOsdLine(chrW, y, msg);
+		}
+	}
+	
+	// Check if there's any recording status messages.
+	if (!m_osdRecList.isEmpty())
+	{
+		// Recording status messages are present.
+		// Print at the upper-right of the screen.
+		y = chrH;
+		QColor clStopped(255, 255, 255);
+		
+		QColor clRec;
+		QString sRec;
+		if (isRunning())
+		{
+			if (isPaused())
+			{
+				clRec = QColor(255, 255, 255);
+				sRec = QChar(0x25CF);
+				sRec += QChar(0xF8FE);
+			}
+			else
+			{
+				clRec = QColor(255, 0, 0);
+				sRec = QChar(0x25CF);
+			}
+		}
+		else
+		{
+			clRec = QColor(255, 255, 255);
+			sRec = QChar(0x25A0);
+		}
+		
+		QString msg;
+		for (int i = 0; i < m_osdRecList.size(); i++)
+		{
+			const RecOsd &recOsd = m_osdRecList[i];
+			msg = (recOsd.isRecording ? sRec : QChar(0x25A0)) +
+				recOsd.component + ' ';
+			
+			// Format the duration.
+			int secs = (recOsd.duration / 1000);
+			int mins = (secs / 60);
+			secs %= 60;
+			msg += QString("%1:%2").arg(mins).arg(QString::number(secs), 2, '0');
+			
+			// Calculate the message width.
+			const int msgW = ((msg.size() + 1) * chrW);
+			const int x = (320 - msgW);
+			
+			// TODO: Make the drop shadow optional or something.
+			qglColor(clShadow);
+			printOsdLine(x+1, y+1, msg);
+			qglColor(recOsd.isRecording ? clRec : clStopped);	// TODO: Per-message colors?
+			printOsdLine(x, y, msg);
+			
+			// TODO: Allow font scaling. (?)
+			y += chrH;
 		}
 	}
 	
@@ -654,8 +716,8 @@ void GensQGLWidget::printOsdLine(int x, int y, const QString &msg)
 {
 	// TODO: Font information.
 	// TODO: Wordwrapping.
-	const int chrW = 8;
-	const int chrH = 16;
+	static const int chrW = 8;
+	static const int chrH = 16;
 	
 	for (int i = 0; i < msg.size(); i++, x += chrW)
 	{
