@@ -128,10 +128,6 @@ int FindCdromUnix::query_int(void)
 		drive.path = devFilename;
 		
 		// Get various properties.
-		// TODO: Get the properties.
-		drive.drive_type = DRIVE_TYPE_CDROM;
-		drive.discs_supported = DISC_TYPE_CDROM;
-		drive.disc_type = DISC_TYPE_CDROM;
 		
 		// Open the device file.
 		const char *c_devFilename = devFilename.toLocal8Bit().constData();
@@ -145,14 +141,22 @@ int FindCdromUnix::query_int(void)
 			// Get the drive and disc types.
 			drive.drive_type = os_GetDriveType(fd_drive);
 			drive.disc_type  = os_GetDiscType(fd_drive);
+			if (drive.disc_type != DISC_TYPE_NONE)
+				drive.disc_label = os_GetDiscLabel(fd_drive);
 			
-			// TODO: Get disc label and other properties.
+			// TODO: Get other properties.
+			drive.disc_blank = false;
 			close(fd_drive);
 		}
-		
-		// TODO
-		drive.disc_label	= "Disc Label";
-		drive.disc_blank	= false;
+		else
+		{
+			// TODO
+			drive.drive_type	= DRIVE_TYPE_CDROM;
+			drive.discs_supported	= DISC_TYPE_CDROM;
+			drive.disc_type		= DISC_TYPE_CDROM;
+			drive.disc_label	= "Disc Label";
+			drive.disc_blank	= false;
+		}
 		
 		// TODO: Check if a disc is in the drive.
 		
@@ -265,6 +269,51 @@ uint32_t FindCdromUnix::os_GetDiscType(int fd)
 	// TODO
 	return DISC_TYPE_NONE;
 #endif
+}
+
+
+/**
+ * os_GetDiscType(): Get disc label.
+ * @param fd	[in] File descriptor.
+ * @return Disc label, or empty string on error.
+ * TODO: Return something else on error?
+ */
+QString FindCdromUnix::os_GetDiscLabel(int fd)
+{
+	// TODO: This only gets the ISO-9660 disc label.
+	// Add support for Joliet, Rock Ridge, UDF, and HFS.
+	QString discLabel = TR("Unknown disc type.");
+	
+	// Read a sector (2,048 bytes) at 0x8000.
+	// TODO: Use standard lseek()/read(), or Linux ioctl?
+	// NOTE: We're using char for QString compatibility.
+	char sector_buf[0x800];
+	int ret = 0;
+	do
+	{
+		ret = lseek(fd, 0x8000, SEEK_SET);
+	} while (ret == -1 && errno == EAGAIN);
+	if (ret == -1)
+		return discLabel;
+	
+	do
+	{
+		ret = read(fd, sector_buf, sizeof(sector_buf));
+	} while (ret == -1 && errno == EAGAIN);
+	if (ret != sizeof(sector_buf))
+		return discLabel;
+	
+	// Sector read. Verify its contents.
+	// TODO: Include the primary volume descriptor?
+	static const char ISO9660_ID[5] = {'C', 'D', '0', '0', '1'};
+	if (memcmp(&sector_buf[1], ISO9660_ID, sizeof(ISO9660_ID)) != 0)
+		return discLabel;
+	
+	// This is an ISO-9660 disc.
+	// Volume label is located at sector offset 0x28 (32 bytes)
+	discLabel = QString::fromLatin1(&sector_buf[0x28], 32).trimmed();
+	
+	return discLabel;
 }
 
 }
