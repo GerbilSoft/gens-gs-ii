@@ -291,6 +291,8 @@ int FindCdromUDisks::queryUDisksDevice(const QDBusObjectPath& objectPath)
 		}
 	}
 	
+	// TODO: Determine if UDisks is checking what type of disc is present.
+	
 	// If the disc is blank, set the disc label to "Blank [disc_type]".
 	// TODO: Make this a common FindCdromBase function?
 	if (drive.disc_type != DISC_TYPE_NONE && drive.disc_blank)
