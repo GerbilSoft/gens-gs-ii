@@ -142,8 +142,9 @@ int FindCdromUnix::query_int(void)
 			// Get the device information.
 			os_GetDevIdentity(fd_drive, drive);
 			
-			// Get the drive type.
+			// Get the drive and disc types.
 			drive.drive_type = os_GetDriveType(fd_drive);
+			drive.disc_type  = os_GetDiscType(fd_drive);
 			
 			// TODO: Get disc label and other properties.
 			close(fd_drive);
@@ -238,6 +239,31 @@ DriveType FindCdromUnix::os_GetDriveType(int fd)
 	// Other Unix system.
 	// TODO
 	return DRIVE_TYPE_NONE;
+#endif
+}
+
+
+/**
+ * os_GetDiscType(): Get disc type.
+ * @param fd	[in] File descriptor.
+ * @return Disc type, or DISC_TYPE_NONE on error.
+ */
+uint32_t FindCdromUnix::os_GetDiscType(int fd)
+{
+#if defined(Q_OS_LINUX) && defined(CDROM_DRIVE_STATUS)
+	int status = ioctl(fd, CDROM_DRIVE_STATUS, CDSL_CURRENT);
+	if (status < 0)
+		return DISC_TYPE_NONE;
+	
+	// TODO: Figure out some way to get the actual disc type.
+	// For now, we can only determine if a disc is present.
+	if (status == CDS_DISC_OK)
+		return DISC_TYPE_CDROM;
+	return DISC_TYPE_NONE;
+#else
+	// Other Unix system.
+	// TODO
+	return DISC_TYPE_NONE;
 #endif
 }
 

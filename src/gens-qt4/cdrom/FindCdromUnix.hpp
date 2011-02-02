@@ -46,6 +46,7 @@ class FindCdromUnix : public FindCdromBase
 		/** OS-specific functions. **/
 		static int os_GetDevIdentity(int fd, CdromDriveEntry &entry);
 		static DriveType os_GetDriveType(int fd);
+		static uint32_t os_GetDiscType(int fd);
 };
 
 }
