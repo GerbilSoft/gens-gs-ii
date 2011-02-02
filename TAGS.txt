@@ -1,5 +1,12 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-McdControlWindow-v2: Added signal-based updating when using
+FindCdromUDisks. The dropdown box is automatically updated whenever
+a signal is received from UDisks. Additionally, a simple filename-based
+FindCdromUnix backend has been added. This backend only supports Linux
+at the moment, but will be expanded to support other Unix systems later.
+(Mac OS X will have its own backend based on IOKit.)
+
 gens-qt4-ZipSelectDialog-v1: Rewrote ZipSelectDialog to use a QTreeView
 and a custom QAbstractItemModel subclass. Files are now shown in a
 hierarchical view if directories are present within the archive.
