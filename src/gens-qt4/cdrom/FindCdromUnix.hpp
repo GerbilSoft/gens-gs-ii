@@ -42,6 +42,9 @@ class FindCdromUnix : public FindCdromBase
 		 * @return 0 on success; non-zero on error.
 		 */
 		int query_int(void);
+		
+		/** OS-specific functions. **/
+		int getDevIdentity(int fd, CdromDriveEntry &entry);
 };
 
 }

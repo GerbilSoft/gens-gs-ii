@@ -29,6 +29,17 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+// open(2)
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+// ioctl(2)
+#include <sys/ioctl.h>
+
+// errno
+#include <errno.h>
+
 // Qt includes.
 #include <QtCore/qglobal.h>
 #include <QtCore/QList>
@@ -40,6 +51,11 @@
 #include <QtCore/QCoreApplication>
 #define TR(text) \
 	QCoreApplication::translate("FindCdromUnix", (text), NULL, QCoreApplication::UnicodeUTF8)
+
+#ifdef Q_OS_LINUX
+// HDIO_GET_IDENTITY
+#include <linux/hdreg.h>
+#endif
 
 namespace GensQt4
 {
@@ -83,7 +99,6 @@ int FindCdromUnix::query_int(void)
 	QStringList devicesUsable;
 	foreach(fileInfo, devFiles)
 	{
-		printf("file: %s\n", fileInfo.absoluteFilePath().toLocal8Bit().constData());
 		if (fileInfo.isDir() || !fileInfo.isReadable())
 			continue;
 		
@@ -108,16 +123,25 @@ int FindCdromUnix::query_int(void)
 	{
 		// Construct the CdromDriveEntry.
 		CdromDriveEntry drive;
-		drive.discs_supported = 0;
-		drive.drive_type = DRIVE_TYPE_NONE;
-		drive.disc_type = 0;
+		drive.path = devFilename;
 		
 		// Get various properties.
 		// TODO: Get the properties.
-		drive.path		= devFilename;
-		drive.drive_vendor	= "TODO:";
-		drive.drive_model	= "Get drive info";
-		drive.drive_firmware	= "1.23";
+		
+		// Open the device file.
+		const char *c_devFilename = devFilename.toLocal8Bit().constData();
+		int fd_drive = open(c_devFilename, (O_RDONLY | O_NONBLOCK));
+		if (fd_drive >= 0)
+		{
+			// Device file descriptor is open.
+			// Get the device information.
+			getDevIdentity(fd_drive, drive);
+			
+			// TODO: Get disc label and other properties.
+			close(fd_drive);
+		}
+		
+		// TODO
 		drive.disc_label	= "Disc Label";
 		drive.disc_blank	= false;
 		
@@ -140,6 +164,38 @@ int FindCdromUnix::query_int(void)
 	
 	// Devices queried.
 	return 0;
+}
+
+
+/**
+ * getDevVendor(): Get device identity.
+ * This includes vendor, model, and firmware revision.
+ * @param fd	[in] File descriptor.
+ * @param entry	[out] CD-ROM device entry.
+ * @return 0 on success; non-zero on error.
+ */
+int FindCdromUnix::getDevIdentity(int fd, CdromDriveEntry &entry)
+{
+#if defined(Q_OS_LINUX) && defined(HDIO_GET_IDENTITY)
+	struct hd_driveid drive_id;
+	if (ioctl(fd, HDIO_GET_IDENTITY, &drive_id) != 0)
+	{
+		// Error calling ioctl().
+		return -errno;
+	}
+	
+	// Get the device identity from the struct hd_driveid.
+	entry.drive_vendor   = QString::fromLatin1((const char*)drive_id.model, 8).trimmed();
+	entry.drive_model    = QString::fromLatin1((const char*)&drive_id.model[8],
+						   (sizeof(drive_id.model) - 8)).trimmed();
+	entry.drive_firmware = QString::fromLatin1((const char*)drive_id.fw_rev,
+						   sizeof(drive_id.fw_rev)).trimmed();
+	return 0;
+#else
+	// Other Unix system.
+	// TODO
+	return -EIMPL;
+#endif
 }
 
 }
