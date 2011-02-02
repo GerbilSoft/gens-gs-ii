@@ -195,7 +195,7 @@ void McdControlWindow::query(void)
  * addDriveEntry(): Add a CdromDriveEntry to the dropdown box.
  * @param drive Drive entry.
  */
-void McdControlWindow::addDriveEntry(const CdromDriveEntry& drive)
+void McdControlWindow::addDriveEntry(const CdromDriveEntry& drive, int index)
 {
 	// Add the drive to the dropdown box.
 	QString item_desc = drive.drive_vendor + " " +
@@ -209,7 +209,19 @@ void McdControlWindow::addDriveEntry(const CdromDriveEntry& drive)
 	else
 		item_desc += drive.disc_label;
 	
-	cboCdDrives->addItem(m_drives->getDriveIcon(drive), item_desc, drive.path);
+	// Get the drive/disc icon.
+	QIcon icon = m_drives->getDriveIcon(drive);
+	
+	// If index is >= 0, this is an existing item.
+	if (index >= 0)
+	{
+		cboCdDrives->setItemText(index, item_desc);
+		cboCdDrives->setItemIcon(index, icon);
+	}
+	else
+	{
+		cboCdDrives->addItem(icon, item_desc, drive.path);
+	}
 }
 
 
@@ -230,7 +242,15 @@ void McdControlWindow::driveUpdated(const CdromDriveEntry& drive)
 		// Not querying drives.
 		// This is an actual drive update signal.
 		// TODO: If the drive's already in the list, update it.
-		addDriveEntry(drive);
+		int index = cboCdDrives->findData(drive.path, Qt::UserRole,
+#if defined(Q_OS_WIN)
+						(Qt::MatchFixedString | Qt::MatchCaseSensitive)
+#else
+						Qt::MatchFixedString
+#endif
+				       );
+		
+		addDriveEntry(drive, index);
 	}
 }
 

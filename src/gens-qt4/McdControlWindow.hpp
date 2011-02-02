@@ -52,7 +52,7 @@ class McdControlWindow : public QDialog, public Ui::McdControlWindow
 		FindCdromBase *m_drives;
 		bool m_isQuerying;
 		QList<CdromDriveEntry> m_queryList;
-		void addDriveEntry(const CdromDriveEntry& drive);
+		void addDriveEntry(const CdromDriveEntry& drive, int index = -1);
 	
 	protected slots:
 		void query(void);
