@@ -301,4 +301,19 @@ void GensZipDirModel::sort(int column, Qt::SortOrder order)
 	emit layoutChanged();
 }
 
+
+/**
+ * hasChildren(): Check if a given item has children.
+ * @param parent Parent item.
+ * @return True if the item has children.
+ */
+bool GensZipDirModel::hasChildren(const QModelIndex& parent)
+{
+	if (!parent.isValid())
+		return false;
+	
+	GensZipDirItem *item = getItem(parent);
+	return (item->childCount() > 0);
+}
+
 }
