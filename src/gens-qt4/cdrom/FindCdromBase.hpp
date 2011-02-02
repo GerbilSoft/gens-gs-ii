@@ -190,6 +190,7 @@ class FindCdromBase : public QObject
 	
 	signals:
 		void driveUpdated(const CdromDriveEntry& drive);
+		void driveQueryFinished(void);
 };
 
 }

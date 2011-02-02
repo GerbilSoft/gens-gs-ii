@@ -254,6 +254,7 @@ int FindCdromUDisks::query_int(void)
 	}
 	
 	// Devices queried.
+	emit driveQueryFinished();
 	return 0;
 }
 

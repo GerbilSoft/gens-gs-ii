@@ -171,6 +171,7 @@ int FindCdromUnix::query_int(void)
 	}
 	
 	// Devices queried.
+	emit driveQueryFinished();
 	return 0;
 }
 

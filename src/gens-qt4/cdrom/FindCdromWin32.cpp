@@ -158,6 +158,7 @@ int FindCdromWin32::query_int(void)
 	}
 	
 	// Devices queried.
+	emit driveQueryFinished();
 	return 0;
 }
 
