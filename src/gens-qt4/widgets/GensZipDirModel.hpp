@@ -75,6 +75,7 @@ class GensZipDirModel : public QAbstractItemModel
 		void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 		
 		bool hasChildren(const QModelIndex& parent = QModelIndex());
+		bool setDirIconState(const QModelIndex& dirIndex, bool isOpen);
 
 protected:
 		GensZipDirItem *m_rootItem;

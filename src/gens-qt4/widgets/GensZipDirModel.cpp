@@ -250,7 +250,7 @@ bool GensZipDirModel::insertZEntry(const mdp_z_entry_t *z_entry,
 				itemIndex = createIndex(0, 0, parentItem);
 				
 				// Set the icon.
-				parentItem->setIcon(QApplication::style()->standardIcon(QStyle::SP_DirIcon));
+				parentItem->setIcon(QApplication::style()->standardIcon(QStyle::SP_DirClosedIcon));
 				
 				// Add the directory to m_dirMap.
 				m_dirMap.insert(cur_path, itemIndex);
@@ -314,6 +314,33 @@ bool GensZipDirModel::hasChildren(const QModelIndex& parent)
 	
 	GensZipDirItem *item = getItem(parent);
 	return (item->childCount() > 0);
+}
+
+
+/**
+ * setDirIconState(): Set the icon state for a directory item.
+ * @param dirIndex Directory item index.
+ * @param isOpen If true, directory is open; otherwise, directory is closed.
+ * @return True on success; false on failure.
+ */
+bool GensZipDirModel::setDirIconState(const QModelIndex& dirIndex, bool isOpen)
+{
+	if (!dirIndex.isValid())
+		return false;
+	
+	GensZipDirItem *item = getItem(dirIndex);
+	if (!item)
+		return false;
+	
+	// Make sure this is a directory entry.
+	if (item->childCount() <= 0)
+		return;
+	
+	// Set the directory icon.
+	const QStyle::StandardPixmap pxm = (isOpen ? QStyle::SP_DirOpenIcon : QStyle::SP_DirClosedIcon);
+	item->setIcon(QApplication::style()->standardIcon(pxm));
+	emit dataChanged(dirIndex, dirIndex);
+	return true;
 }
 
 }
