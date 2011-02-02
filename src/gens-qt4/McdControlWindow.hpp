@@ -58,6 +58,7 @@ class McdControlWindow : public QDialog, public Ui::McdControlWindow
 		void query(void);
 		void driveUpdated(const CdromDriveEntry& drive);
 		void driveQueryFinished(void);
+		void driveRemoved(const QString& path);
 	
 	private:
 		static McdControlWindow *m_McdControlWindow;

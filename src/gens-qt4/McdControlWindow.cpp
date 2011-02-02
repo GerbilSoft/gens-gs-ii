@@ -109,11 +109,13 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 	
 	if (m_drives)
 	{
-		// Set up the driveUpdated() and driveQueryFinished() signals.
+		// Set up the FindCdromBase signals
 		connect(m_drives, SIGNAL(driveUpdated(const CdromDriveEntry&)),
 			this, SLOT(driveUpdated(const CdromDriveEntry&)));
 		connect(m_drives, SIGNAL(driveQueryFinished(void)),
 			this, SLOT(driveQueryFinished(void)));
+		connect(m_drives, SIGNAL(driveRemoved(const QString&)),
+			this, SLOT(driveRemoved(const QString&)));
 	}
 	
 	// Query CD-ROM drives.
@@ -212,8 +214,15 @@ void McdControlWindow::addDriveEntry(const CdromDriveEntry& drive, int index)
 	// Get the drive/disc icon.
 	QIcon icon = m_drives->getDriveIcon(drive);
 	
+	// Remove the "No CD-ROM drives found." entry if it's there.
+	if (!cboCdDrives->isEnabled())
+	{
+		cboCdDrives->clear();
+		cboCdDrives->setEnabled(true);
+	}
+	
 	// If index is >= 0, this is an existing item.
-	if (index >= 0)
+	if (index >= 0 && index < cboCdDrives->count())
 	{
 		cboCdDrives->setItemText(index, item_desc);
 		cboCdDrives->setItemIcon(index, icon);
@@ -222,6 +231,10 @@ void McdControlWindow::addDriveEntry(const CdromDriveEntry& drive, int index)
 	{
 		cboCdDrives->addItem(icon, item_desc, drive.path);
 	}
+	
+	// Make sure a drive is selected.
+	if (cboCdDrives->currentIndex() < 0)
+		cboCdDrives->setCurrentIndex(0);
 }
 
 
@@ -255,6 +268,9 @@ void McdControlWindow::driveUpdated(const CdromDriveEntry& drive)
 }
 
 
+/**
+ * driveQueryFinished(): A FindCdromBase::query() request has finished.
+ */
 void McdControlWindow::driveQueryFinished(void)
 {
 	// Unset the mouse pointer.
@@ -287,6 +303,40 @@ void McdControlWindow::driveQueryFinished(void)
 	// Clear the query list.
 	m_queryList.clear();
 	m_isQuerying = false;
+}
+
+
+/**
+ * driveRemoved(): A drive was removed.
+ * @param path Device path.
+ */
+void McdControlWindow::driveRemoved(const QString& path)
+{
+	if (m_isQuerying)
+		return;
+	if (!cboCdDrives->isEnabled())
+		return;
+	
+	// If the drive exists in the dropdown, remove it.
+	int index = cboCdDrives->findData(path, Qt::UserRole,
+#if defined(Q_OS_WIN)
+					(Qt::MatchFixedString | Qt::MatchCaseSensitive)
+#else
+					Qt::MatchFixedString
+#endif
+			       );
+	
+	if (index >= 0 && index < cboCdDrives->count())
+	{
+		cboCdDrives->removeItem(index);
+		if (cboCdDrives->count() <= 0)
+		{
+			// No drives left.
+			cboCdDrives->setEnabled(false);
+			cboCdDrives->addItem(TR("No CD-ROM drives found."));
+			cboCdDrives->setCurrentIndex(0);
+		}
+	}
 }
 
 }
