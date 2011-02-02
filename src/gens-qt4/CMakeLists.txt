@@ -136,6 +136,18 @@ IF(QT_QTDBUS_FOUND)
 		)
 ENDIF(QT_QTDBUS_FOUND)
 
+IF(UNIX)
+	# Unix: Enable Unix CD-ROM support.
+	SET(gens-qt4_SRCS
+		${gens-qt4_SRCS}
+		cdrom/FindCdromUnix.cpp
+		)
+	SET(gens-qt4_MOC_HEADERS
+		${gens-qt4_MOC_HEADERS}
+		cdrom/FindCdromUnix.hpp
+		)
+ENDIF(UNIX)
+
 IF(WIN32)
 	# Win32: Enable Win32 CD-ROM suport.
 	SET(gens-qt4_SRCS
