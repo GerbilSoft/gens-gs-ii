@@ -244,34 +244,54 @@ void VBackend::osd_vprintf(const int duration, const char *msg, va_list ap)
  */
 int VBackend::osd_process(void)
 {
+	bool isMsgRemoved = false;
+	int msgRemaining = 0;
+	
+	// Get the current time.
+	const double curTime = LibGens::Timing::GetTimeD();
+	
 	if (!osdMsgEnabled())
 	{
 		// Messages are disabled. Clear the message list.
 		if (!m_osdList.isEmpty())
 		{
-			// Messages exist.
-			// Remove them and update the video backend.
+			// Messages exist. Remove them.
 			m_osdList.clear();
-			setOsdListDirty();
-			vbUpdate();
+			isMsgRemoved = true;
+		}
+	}
+	else
+	{
+		// Check the message list for expired messages.
+		for (int i = (m_osdList.size() - 1); i >= 0; i--)
+		{
+			if (curTime >= m_osdList[i].endTime)
+			{
+				// Message duration has elapsed.
+				// Remove the message from the list.
+				m_osdList.removeAt(i);
+				isMsgRemoved = true;
+			}
 		}
 		
-		// Message list is now empty.
-		return 0;
+		msgRemaining = m_osdList.size();
 	}
-		
-	// Check the message list for expired messages.
-	bool isMsgRemoved = false;
-	double curTime = LibGens::Timing::GetTimeD();
-	for (int i = (m_osdList.size() - 1); i >= 0; i--)
+	
+	// Check if the preview image has expired.
+	if (m_preview_show)
 	{
-		if (curTime >= m_osdList[i].endTime)
+		if (curTime >= m_preview_endTime)
 		{
-			// Message duration has elapsed.
-			// Remove the message from the list.
-			m_osdList.removeAt(i);
+			// Preview duration has elapsed.
+			m_preview_show = false;
+			m_preview_img = QImage();
 			isMsgRemoved = true;
-			continue;
+		}
+		else
+		{
+			// Preview is still visible.
+			// Treat it as a message.
+			msgRemaining++;
 		}
 	}
 	
@@ -294,7 +314,7 @@ int VBackend::osd_process(void)
 	
 	// Emulation is still either paused or not running.
 	// Return the number of messages remaining.
-	return m_osdList.size();
+	return msgRemaining;
 }
 
 
@@ -470,9 +490,9 @@ void VBackend::osd_show_preview(int duration, const QImage& img)
 	else
 	{
 		// Save the image and display it on the next paintGL().
-		// TODO: Save the duration.
 		m_preview_img = img;
 		m_preview_show = true;
+		m_preview_endTime = LibGens::Timing::GetTimeD() + ((double)duration / 1000.0);
 	}
 	
 	// TODO: Only if running?
@@ -480,9 +500,16 @@ void VBackend::osd_show_preview(int duration, const QImage& img)
 	{
 		// Preivew is visible, or preview was just hidden.
 		setVbDirty();
-		// TODO: Only if paused, or regardless of pause?
+		
 		if (!isRunning() || isPaused())
+		{
+			// Emulation is either not running or paused.
+			// Update the VBackend.
 			vbUpdate();
+			
+			// Start the message timer.
+			m_msgTimer->start();
+		}
 	}
 }
 

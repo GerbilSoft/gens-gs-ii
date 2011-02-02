@@ -814,10 +814,20 @@ void GensQGLWidget::osd_show_preview(int duration, const QImage& img)
  */
 void GensQGLWidget::showOsdPreview(void)
 {
-	// TODO: Duration, etc.
 	if (!m_preview_show)
 	{
 		// Don't show the preview image.
+		delete m_texPreview;
+		m_texPreview = NULL;
+		return;
+	}
+	
+	// Check if the duration has elapsed.
+	const double curTime = LibGens::Timing::GetTimeD();
+	if (curTime >= m_preview_endTime)
+	{
+		// Preview duration has elapsed.
+		// TODO: Combine this code with the !m_preview_show code.
 		delete m_texPreview;
 		m_texPreview = NULL;
 		return;

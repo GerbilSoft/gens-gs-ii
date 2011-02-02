@@ -190,6 +190,7 @@ class VBackend
 		// Preview image.
 		bool m_preview_show;
 		QImage m_preview_img;
+		double m_preview_endTime;
 		
 		struct RecOsd
 		{
