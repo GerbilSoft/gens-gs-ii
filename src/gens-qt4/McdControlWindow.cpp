@@ -55,7 +55,7 @@
 #include "cdrom/FindCdromUDisks.hpp"
 #endif
 
-#if defined(Q_OS_UNIX)
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
 #include "cdrom/FindCdromUnix.hpp"
 #endif
 
@@ -101,7 +101,7 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 	m_drives = NULL;
 #endif
 	
-#if defined(Q_OS_UNIX)
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
 	// UNIX fallback.
 	if (!m_drives)
 		m_drives = new FindCdromUnix();
