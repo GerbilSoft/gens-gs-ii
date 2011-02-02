@@ -104,6 +104,14 @@ void ZipSelectDialog::accept(void)
 	if (indexList.size() != 1)
 		return;
 	
+	if (m_dirModel->hasChildren(indexList[0]))
+	{
+		// This is a directory.
+		// Don't do anything.
+		return;
+	}
+	
+	// This is a file.
 	// Get the selected z_entry.
 	m_z_entry_sel = m_dirModel->getZEntry(indexList[0]);
 	
@@ -118,11 +126,16 @@ void ZipSelectDialog::accept(void)
  */
 void ZipSelectDialog::on_treeView_clicked(const QModelIndex& index)
 {
-	// Enable the "OK" button.
-	// TODO: Disable the "OK" button if the item is a directory.
+	// Get the selected item.
+	QModelIndexList indexList = treeView->selectionModel()->selectedIndexes();
+	if (indexList.size() != 1)
+		return;
+	
+	// If this item is a directory, disable the "OK" button.
+	// If this item is a file, enable the "OK" button.
 	QPushButton *button = buttonBox->button(QDialogButtonBox::Ok);
 	if (button)
-		button->setEnabled(true);
+		button->setEnabled(!m_dirModel->hasChildren(indexList[0]));
 }
 
 }
