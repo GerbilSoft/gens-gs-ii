@@ -98,6 +98,8 @@ SET(gens-qt4_SRCS
 	GensConfig.cpp
 	cdrom/FindCdromBase.cpp
 	McdControlWindow.cpp
+	widgets/GensZipDirModel.cpp
+	widgets/GensZipDirItem.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -118,6 +120,7 @@ SET(gens-qt4_MOC_HEADERS
 	GensConfig.hpp
 	cdrom/FindCdromBase.hpp
 	McdControlWindow.hpp
+	widgets/GensZipDirModel.hpp
 	)
 
 IF(QT_QTDBUS_FOUND)

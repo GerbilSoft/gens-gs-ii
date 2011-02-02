@@ -37,6 +37,9 @@ ZipSelectDialog::ZipSelectDialog(QWidget *parent)
 	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
 {
 	setupUi(this);
+	
+	m_dirModel = new GensZipDirModel(this);
+	treeView->setModel(m_dirModel);
 }
 
 
@@ -57,8 +60,8 @@ void ZipSelectDialog::setFileList(const mdp_z_entry_t* z_entry)
 	// TODO: Figure out Model/View Controller and implement
 	// an mdp_z_entry_t model.
 	
-	// Clear the tree widget first.
-	treeWidget->clear();
+	// Clear the tree model first.
+	m_dirModel->clear();
 	
 	// Save the list pointer and clear the selected file pointer.
 	m_z_entry_list = z_entry;
@@ -67,29 +70,19 @@ void ZipSelectDialog::setFileList(const mdp_z_entry_t* z_entry)
 	// TODO: Hierarchical file view.
 	// For now, let's just do a standard list view.
 	const mdp_z_entry_t *cur = m_z_entry_list;
-	while (cur != NULL)
+	for (; cur != NULL; cur = cur->next)
 	{
-		QTreeWidgetItem *item = new QTreeWidgetItem();
 		if (!cur->filename)
 		{
 			// No filename. Go to the next file.
-			cur = cur->next;
 			continue;
 		}
 		
 		QString filename = QString::fromUtf8(cur->filename);
-		item->setText(0, filename);
 		
 		// TODO: Set icon based on file extension.
-		item->setIcon(0, this->style()->standardIcon(QStyle::SP_FileIcon));
-		
-		// TODO: This is probably a bad idea...
-		qulonglong data_ptr = (qulonglong)(cur);
-		item->setData(0, Qt::UserRole, QVariant(data_ptr));
-		treeWidget->addTopLevelItem(item);
-		
-		// Go to the next file.
-		cur = cur->next;
+		QIcon icon = this->style()->standardIcon(QStyle::SP_FileIcon);
+		m_dirModel->insertZEntry(cur, icon);
 	}
 }
 
@@ -100,21 +93,12 @@ void ZipSelectDialog::setFileList(const mdp_z_entry_t* z_entry)
 void ZipSelectDialog::accept(void)
 {
 	// Get the selected item.
-	QList<QTreeWidgetItem*> lstItems = treeWidget->selectedItems();
-	if (lstItems.isEmpty())
-	{
-		// No item was selected!
-		m_z_entry_sel = NULL;
-	}
-	else
-	{
-		// An item was selected.
-		QTreeWidgetItem *item = lstItems.at(0);
-		
-		// TODO: This is probably a bad idea...
-		qulonglong data_ptr = item->data(0, Qt::UserRole).toULongLong();
-		m_z_entry_sel = (const mdp_z_entry_t*)data_ptr;
-	}
+	QModelIndexList indexList = treeView->selectionModel()->selectedIndexes();
+	if (indexList.size() != 1)
+		return;
+	
+	// Get the selected z_entry.
+	m_z_entry_sel = m_dirModel->getZEntry(indexList[0]);
 	
 	// Call the base accept() function.
 	this->QDialog::accept();

@@ -29,6 +29,9 @@
 #include <QtGui/QDialog>
 #include "ui_ZipSelectDialog.h"
 
+// Zip Directory Tree Model.
+#include "widgets/GensZipDirModel.hpp"
+
 // LibGens includes.
 // TODO: Use MDP's mdp_z_entry_t instead of LibGens::Decompressor.
 #include "libgens/Decompressor/Decompressor.hpp"
@@ -62,6 +65,8 @@ class ZipSelectDialog : public QDialog, public Ui::ZipSelectDialog
 	protected:
 		const mdp_z_entry_t *m_z_entry_list;
 		const mdp_z_entry_t *m_z_entry_sel;
+		
+		GensZipDirModel *m_dirModel;
 };
 
 }
