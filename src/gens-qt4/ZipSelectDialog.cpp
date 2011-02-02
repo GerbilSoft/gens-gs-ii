@@ -23,6 +23,9 @@
 
 #include "ZipSelectDialog.hpp"
 
+// Qt includes.
+#include <QtGui/QPushButton>
+
 // Text translation macro.
 #define TR(text) \
 	QCoreApplication::translate("ZipSelectDialog", (text), NULL, QCoreApplication::UnicodeUTF8)
@@ -37,6 +40,11 @@ ZipSelectDialog::ZipSelectDialog(QWidget *parent)
 	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
 {
 	setupUi(this);
+	
+	// Disable the "OK" button initially.
+	QPushButton *button = buttonBox->button(QDialogButtonBox::Ok);
+	if (button)
+		button->setEnabled(false);
 	
 	m_dirModel = new GensZipDirModel(this);
 	treeView->setModel(m_dirModel);
@@ -102,6 +110,20 @@ void ZipSelectDialog::accept(void)
 	
 	// Call the base accept() function.
 	this->QDialog::accept();
+}
+
+
+/**
+ * on_treeView_clicked(): An item in the QTreeView was clicked.
+ * @param index Item index.
+ */
+void ZipSelectDialog::on_treeView_clicked(const QModelIndex& index)
+{
+	// Enable the "OK" button.
+	// TODO: Disable the "OK" button if the item is a directory.
+	QPushButton *button = buttonBox->button(QDialogButtonBox::Ok);
+	if (button)
+		button->setEnabled(true);
 }
 
 }

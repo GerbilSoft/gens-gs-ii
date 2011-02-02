@@ -61,6 +61,9 @@ class ZipSelectDialog : public QDialog, public Ui::ZipSelectDialog
 	
 	public slots:
 		void accept(void);
+		
+		// Widget signals.
+		void on_treeView_clicked(const QModelIndex& index);
 	
 	protected:
 		const mdp_z_entry_t *m_z_entry_list;
