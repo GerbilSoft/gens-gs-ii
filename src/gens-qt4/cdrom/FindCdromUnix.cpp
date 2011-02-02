@@ -166,7 +166,6 @@ int FindCdromUnix::query_int(void)
 			drive.disc_label = TR("Blank %1").arg(GetDiscTypeName(drive.disc_type));
 		
 		// Emit the driveUpdated() signal for this drive.
-		// TODO: If scanning all drives, notify when all drives are scanned.
 		emit driveUpdated(drive);
 	}
 	
