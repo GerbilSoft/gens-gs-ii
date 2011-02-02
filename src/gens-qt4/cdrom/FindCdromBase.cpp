@@ -51,7 +51,9 @@ DriveType FindCdromBase::GetDriveType(uint32_t discs_supported)
 	// TODO: Find various permutations like DVD/CD-RW.
 	// Also, check for multi-format DVD±RW drives.
 	// For now, just get the maximum disc type.
-	if (discs_supported & DISC_TYPE_HDDVD_RW)
+	if (discs_supported & DISC_TYPE_MO)
+		return DRIVE_TYPE_MO;
+	else if (discs_supported & DISC_TYPE_HDDVD_RW)
 		return DRIVE_TYPE_HDDVD_RW;
 	else if (discs_supported & DISC_TYPE_HDDVD_R)
 		return DRIVE_TYPE_HDDVD_R;
@@ -133,6 +135,7 @@ QString FindCdromBase::GetDriveTypeName(DriveType drive_type)
 		case DRIVE_TYPE_HDDVD_DVD_RW:	return "HD-DVD/DVD±RW";
 		case DRIVE_TYPE_HDDVD_R:	return "HD-DVD-R";
 		case DRIVE_TYPE_HDDVD_RW:	return "HD-DVD-RW";
+		case DRIVE_TYPE_MO:		return "MO";
 	}
 }
 
