@@ -27,7 +27,9 @@
 #include "FindCdromBase.hpp"
 
 // QtDBus includes.
+#include <QtDBus/QDBusConnection>
 #include <QtDBus/QDBusInterface>
+#include <QtDBus/QDBusObjectPath>
 
 namespace GensQt4
 {
@@ -37,7 +39,11 @@ class FindCdromUDisks : public FindCdromBase
 	Q_OBJECT
 	
 	public:
-		bool isUsable(void) const;
+		FindCdromUDisks();
+		~FindCdromUDisks();
+		
+		inline bool isUsable(void) const
+			{ return (m_ifUDisks != NULL); }
 		
 		/**
 		 * query(): Asynchronously query for CD-ROM drives.
@@ -66,6 +72,13 @@ class FindCdromUDisks : public FindCdromBase
 		
 		static QString GetStringProperty(QDBusInterface *dbus_if, const char *prop);
 		static bool GetBoolProperty(QDBusInterface *dbus_if, const char *prop);
+		
+		// D-BUS interface to UDisks.
+		QDBusInterface *m_ifUDisks;
+		int queryUDisksDevice(const QDBusObjectPath& objectPath);
+	
+	protected slots:
+		void deviceChanged(const QDBusObjectPath& objectPath);
 };
 
 }

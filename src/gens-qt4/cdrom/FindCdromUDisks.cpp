@@ -29,11 +29,8 @@
 #include <QtCore/QScopedPointer>
 
 // QtDBus includes.
-#include <QtDBus/QDBusConnection>
-#include <QtDBus/QDBusInterface>
 #include <QtDBus/QDBusMessage>
 #include <QtDBus/QDBusReply>
-#include <QtDBus/QDBusObjectPath>
 
 // Text translation macro.
 #include <QtCore/QCoreApplication>
@@ -95,24 +92,48 @@ bool FindCdromUDisks::GetBoolProperty(QDBusInterface *dbus_if, const char *prop)
 }
 
 
-/**
- * isUsable(): Determine if UDisks is usable.
- * @return True if UDisks is usable.
- */
-bool FindCdromUDisks::isUsable(void) const
+FindCdromUDisks::FindCdromUDisks()
 {
+	// Connect to UDisks over D-BUS.
 	QDBusConnection bus = QDBusConnection::systemBus();
-	QScopedPointer<QDBusInterface> interface(new QDBusInterface("org.freedesktop.UDisks",
-									"/org/freedesktop/UDisks",
-									QString(), bus));
-	if (!interface->isValid())
-		return false;
+	m_ifUDisks = new QDBusInterface("org.freedesktop.UDisks",
+					"/org/freedesktop/UDisks",
+					QString(), bus);
+	if (!m_ifUDisks->isValid())
+	{
+		// Error connecting to D-BUS.
+		delete m_ifUDisks;
+		m_ifUDisks = NULL;
+		return;
+	}
 	
 	// Run a simple query.
 	// If the returned string is empty, UDisks isn't working.
 	// Otherwise, UDisks is working.
-	QString daemonVersion = GetStringProperty(interface.data(), "DaemonVersion");
-	return (!daemonVersion.isEmpty());
+	QString daemonVersion = GetStringProperty(m_ifUDisks, "DaemonVersion");
+	if (daemonVersion.isEmpty())
+	{
+		// UDisks is not available.
+		delete m_ifUDisks;
+		m_ifUDisks = NULL;
+		return;
+	}
+	
+	// D-BUS is initialized.
+	// Connect the UDisks DeviceChanged signal.
+	connect(m_ifUDisks, SIGNAL(DeviceChanged(const QDBusObjectPath&)),
+		this, SLOT(deviceChanged(const QDBusObjectPath&)));
+}
+
+
+FindCdromUDisks::~FindCdromUDisks()
+{
+	// Make sure D-BUS is disconnected.
+	if (m_ifUDisks)
+	{
+		delete m_ifUDisks;
+		m_ifUDisks = NULL;
+	}
 }
 
 
@@ -129,25 +150,16 @@ int FindCdromUDisks::query_int(void)
 	
 	// NOTE: QDBusConnection is not thread-safe.
 	// See http://bugreports.qt.nokia.com/browse/QTBUG-11413
-	
-	QDBusConnection bus = QDBusConnection::systemBus();
-	QScopedPointer<QDBusInterface> interface(new QDBusInterface("org.freedesktop.UDisks",
-									"/org/freedesktop/UDisks",
-									QString(), bus));
-	if (!interface->isValid())
-	{
-		// Interface is invalid.
-		printf("Error attaching interface: %s\n", interface->lastError().message().toLocal8Bit().constData());
+	if (!m_ifUDisks)
 		return -1;
-	}
 	
 	// Attempt to get all disk devices.
 	// Method: EnumerateDevices
 	// Return type: ao (QList<QDBusObjectPath>)
-	QDBusReply<QtDBus_ao_t> reply_EnumerateDevices = interface->call("EnumerateDevices");
+	QDBusReply<QtDBus_ao_t> reply_EnumerateDevices = m_ifUDisks->call("EnumerateDevices");
 	if (!reply_EnumerateDevices.isValid())
 	{
-		printf("EnumerateDevices failed: %s\n", interface->lastError().message().toLocal8Bit().constData());
+		printf("EnumerateDevices failed: %s\n", m_ifUDisks->lastError().message().toLocal8Bit().constData());
 		return -2;
 	}
 	
@@ -157,104 +169,135 @@ int FindCdromUDisks::query_int(void)
 	QDBusObjectPath cur_disk;
 	foreach(cur_disk, disks)
 	{
-		QScopedPointer<QDBusInterface> drive_if(new QDBusInterface("org.freedesktop.UDisks",
-										cur_disk.path(),
-										"org.freedesktop.UDisks.Device", bus));
-		if (!interface->isValid())
-		{
-			// Drive interface is invalid.
-			printf("Error attaching interface %s: %s\n",
-			       cur_disk.path().toLocal8Bit().constData(),
-			       drive_if->lastError().message().toLocal8Bit().constData());
-			continue;
-		}
-		
-		// Verify that this drive is removable.
-		bool DeviceIsRemovable = GetBoolProperty(drive_if.data(), "DeviceIsRemovable");
-		if (!DeviceIsRemovable)
-			continue;
-		
-		// Get the media compatibility.
-		// Method: DriveMediaCompatibility
-		// Return type: as (QStringList)
-		QVariant reply_DriveMediaCompatibility = drive_if->property("DriveMediaCompatibility");
-		if (!reply_DriveMediaCompatibility.isValid())
-		{
-			printf("DriveMediaCompatibility failed for %s: %s\n",
-			       cur_disk.path().toLocal8Bit().constData(),
-			       drive_if->lastError().message().toLocal8Bit().constData());
-			continue;
-		}
-		
-		// Construct the CdromDriveEntry.
-		CdromDriveEntry drive;
-		drive.discs_supported = 0;
-		drive.drive_type = DRIVE_TYPE_NONE;
-		drive.disc_type = 0;
-		
-		// Get various properties.
-		drive.path		= GetStringProperty(drive_if.data(), "DeviceFile");
-		drive.drive_vendor	= GetStringProperty(drive_if.data(), "DriveVendor");
-		drive.drive_model	= GetStringProperty(drive_if.data(), "DriveModel");
-		drive.drive_firmware	= GetStringProperty(drive_if.data(), "DriveRevision");
-		drive.disc_label	= GetStringProperty(drive_if.data(), "IdLabel");
-		drive.disc_blank	= GetBoolProperty(drive_if.data(), "OpticalDiscIsBlank");
-		
-		// Determine the drive media support.
-		// TODO: Convert ms_UDisks_DriveID[] to a QMap.
-		// TODO: Verify that reply_DriveMediaCompatibility is a QStringList.
-		const QStringList& DriveMediaCompatibility = reply_DriveMediaCompatibility.toStringList();
-		QString drive_media_id;
-		foreach (drive_media_id, DriveMediaCompatibility)
-		{
-			// Check the drive media table.
-			for (size_t i = 0; i < sizeof(ms_UDisks_DriveID)/sizeof(ms_UDisks_DriveID[0]); i++)
-			{
-				if (drive_media_id == ms_UDisks_DriveID[i])
-				{
-					// Found a match.
-					drive.discs_supported |= (1 << i);
-					break;
-				}
-			}
-		}
-		if (drive.discs_supported == 0)
-		{
-			// This is not an optical drive.
-			// TODO: Should we check the "Removable" property first?
-			continue;
-		}
-		
-		// Get the drive type.
-		drive.drive_type = GetDriveType(drive.discs_supported);
-		
-		// Determine the type of disc in the drive.
-		QString DriveMedia = GetStringProperty(drive_if.data(), "DriveMedia");
-		if (!DriveMedia.isEmpty())
-		{
-			for (size_t i = 0; i < sizeof(ms_UDisks_DriveID)/sizeof(ms_UDisks_DriveID[0]); i++)
-			{
-				if (DriveMedia == ms_UDisks_DriveID[i])
-				{
-					// Found a match.
-					drive.disc_type = (1 << i);
-					break;
-				}
-			}
-		}
-		
-		// If the disc is blank, set the disc label to "Blank [disc_type]".
-		// TODO: Make this a common FindCdromBase function?
-		if (drive.disc_type != DISC_TYPE_NONE && drive.disc_blank)
-			drive.disc_label = TR("Blank %1").arg(GetDiscTypeName(drive.disc_type));
-		
-		// Emit the driveUpdated() signal for this drive.
-		// TODO: If scanning all drives, notify when all drives are scanned.
-		emit driveUpdated(drive);
+		queryUDisksDevice(cur_disk);
 	}
 	
 	// Devices queried.
 	emit driveQueryFinished();
+	return 0;
+}
+
+
+/**
+ * deviceChanged(): A device has changed.
+ * @param objectPath Device object path.
+ */
+void FindCdromUDisks::deviceChanged(const QDBusObjectPath& objectPath)
+{
+	// Query the device for changes.
+	queryUDisksDevice(objectPath);
+}
+
+
+/**
+ * queryUDisksDevice(): Query a UDisks device object.
+ * @param objectPath UDisks device object path.
+ * @return Error code: (TODO: Use an enum?)
+ * - 0: success
+ * - 1: not an optical drive
+ * - negative: error
+ */
+int FindCdromUDisks::queryUDisksDevice(const QDBusObjectPath& objectPath)
+{
+	QDBusConnection bus = QDBusConnection::systemBus();
+	
+	QScopedPointer<QDBusInterface> drive_if(
+					new QDBusInterface("org.freedesktop.UDisks",
+								objectPath.path(),
+								"org.freedesktop.UDisks.Device", bus));
+	if (!drive_if->isValid())
+	{
+		// Drive interface is invalid.
+		printf("Error attaching interface %s: %s\n",
+			objectPath.path().toLocal8Bit().constData(),
+			drive_if->lastError().message().toLocal8Bit().constData());
+		return -1;
+	}
+	
+	// Verify that this drive is removable.
+	bool DeviceIsRemovable = GetBoolProperty(drive_if.data(), "DeviceIsRemovable");
+	if (!DeviceIsRemovable)
+	{
+		// This drive does not support removable media.
+		// Hence, it isn't an optical drive.
+		return 1;
+	}
+	
+	// Get the media compatibility.
+	// Method: DriveMediaCompatibility
+	// Return type: as (QStringList)
+	QVariant reply_DriveMediaCompatibility = drive_if->property("DriveMediaCompatibility");
+	if (!reply_DriveMediaCompatibility.isValid())
+	{
+		printf("DriveMediaCompatibility failed for %s: %s\n",
+			objectPath.path().toLocal8Bit().constData(),
+			drive_if->lastError().message().toLocal8Bit().constData());
+		return -2;
+	}
+	
+	// Construct the CdromDriveEntry.
+	CdromDriveEntry drive;
+	drive.discs_supported = 0;
+	drive.drive_type = DRIVE_TYPE_NONE;
+	drive.disc_type = 0;
+	
+	// Get various properties.
+	drive.path		= GetStringProperty(drive_if.data(), "DeviceFile");
+	drive.drive_vendor	= GetStringProperty(drive_if.data(), "DriveVendor");
+	drive.drive_model	= GetStringProperty(drive_if.data(), "DriveModel");
+	drive.drive_firmware	= GetStringProperty(drive_if.data(), "DriveRevision");
+	drive.disc_label	= GetStringProperty(drive_if.data(), "IdLabel");
+	drive.disc_blank	= GetBoolProperty(drive_if.data(), "OpticalDiscIsBlank");
+	
+	// Determine the drive media support.
+	// TODO: Convert ms_UDisks_DriveID[] to a QMap.
+	// TODO: Verify that reply_DriveMediaCompatibility is a QStringList.
+	const QStringList& DriveMediaCompatibility = reply_DriveMediaCompatibility.toStringList();
+	QString drive_media_id;
+	foreach (drive_media_id, DriveMediaCompatibility)
+	{
+		// Check the drive media table.
+		for (size_t i = 0; i < sizeof(ms_UDisks_DriveID)/sizeof(ms_UDisks_DriveID[0]); i++)
+		{
+			if (drive_media_id == ms_UDisks_DriveID[i])
+			{
+				// Found a match.
+				drive.discs_supported |= (1 << i);
+				break;
+			}
+		}
+	}
+	if (drive.discs_supported == 0)
+	{
+		// This is not an optical drive.
+		return 1;
+	}
+	
+	// Get the drive type.
+	drive.drive_type = GetDriveType(drive.discs_supported);
+	
+	// Determine the type of disc in the drive.
+	QString DriveMedia = GetStringProperty(drive_if.data(), "DriveMedia");
+	if (!DriveMedia.isEmpty())
+	{
+		for (size_t i = 0; i < sizeof(ms_UDisks_DriveID)/sizeof(ms_UDisks_DriveID[0]); i++)
+		{
+			if (DriveMedia == ms_UDisks_DriveID[i])
+			{
+				// Found a match.
+				drive.disc_type = (1 << i);
+				break;
+			}
+		}
+	}
+	
+	// If the disc is blank, set the disc label to "Blank [disc_type]".
+	// TODO: Make this a common FindCdromBase function?
+	if (drive.disc_type != DISC_TYPE_NONE && drive.disc_blank)
+		drive.disc_label = TR("Blank %1").arg(GetDiscTypeName(drive.disc_type));
+	
+	// Emit the driveUpdated() signal for this drive.
+	emit driveUpdated(drive);
 	return 0;
 }
 
