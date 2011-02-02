@@ -50,10 +50,14 @@ class McdControlWindow : public QDialog, public Ui::McdControlWindow
 		QPushButton *btnRefresh;
 		
 		FindCdromBase *m_drives;
+		bool m_isQuerying;
+		QList<CdromDriveEntry> m_queryList;
+		void addDriveEntry(const CdromDriveEntry& drive);
 	
 	protected slots:
 		void query(void);
 		void driveUpdated(const CdromDriveEntry& drive);
+		void driveQueryFinished(void);
 	
 	private:
 		static McdControlWindow *m_McdControlWindow;

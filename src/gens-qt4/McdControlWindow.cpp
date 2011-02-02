@@ -97,7 +97,7 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 		m_drives = NULL;
 	}
 #else
-	// TODO: Implement versions for Win32, Mac OS X, and non-UDisks.
+	// TODO: Implement FindCdromBase subclass for Mac OS X.
 	m_drives = NULL;
 #endif
 	
@@ -109,9 +109,11 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 	
 	if (m_drives)
 	{
-		// Set up the driveUpdated() signal.
+		// Set up the driveUpdated() and driveQueryFinished() signals.
 		connect(m_drives, SIGNAL(driveUpdated(const CdromDriveEntry&)),
 			this, SLOT(driveUpdated(const CdromDriveEntry&)));
+		connect(m_drives, SIGNAL(driveQueryFinished(void)),
+			this, SLOT(driveQueryFinished(void)));
 	}
 	
 	// Query CD-ROM drives.
@@ -162,28 +164,40 @@ void McdControlWindow::query(void)
 	// Clear the dropdown.
 	cboCdDrives->clear();
 	
-	// TODO: If m_drives is invalid, show an error in the dropdown.
 	if (!m_drives)
+	{
+		// No CD-ROM drive handler is available.
+		// TODO: Center-align the text by using QItemDelegate.
+		cboCdDrives->setEnabled(false);
+		cboCdDrives->addItem(TR("No CD-ROM drive handler is available."));
+		cboCdDrives->setCurrentIndex(0);
 		return;
+	}
 	
-	// TODO: Add a "Scanning for drives..." entry.
-	m_drives->query();
+	// Set the mouse pointer.
+	setCursor(Qt::WaitCursor);
 	
-	// Set cboCdDrive's selected index to 0 so that the
-	// first CD-ROM drive is displayed.
+	// Indicate that drives are being scanned.
+	// TODO: Center-align the text by using QItemDelegate.
+	// TODO: Add an animated "Searching..." icon.
+	cboCdDrives->setEnabled(false);
+	cboCdDrives->addItem(TR("Searching for CD-ROM drives..."));
 	cboCdDrives->setCurrentIndex(0);
+	
+	// Query the drives.
+	m_queryList.clear();
+	m_isQuerying = true;
+	m_drives->query();
 }
 
 
 /**
- * driveUpdated(): A drive was updated.
- * @param drive CdromDriveEntry.
+ * addDriveEntry(): Add a CdromDriveEntry to the dropdown box.
+ * @param drive Drive entry.
  */
-void McdControlWindow::driveUpdated(const CdromDriveEntry& drive)
+void McdControlWindow::addDriveEntry(const CdromDriveEntry& drive)
 {
-	// Add the drives to the list.
-	// TODO: Asynchronous scanning.
-	// TODO: If the drive's already in the list, update it.
+	// Add the drive to the dropdown box.
 	QString item_desc = drive.drive_vendor + " " +
 				drive.drive_model + " " +
 				drive.drive_firmware + "\n" +
@@ -196,6 +210,63 @@ void McdControlWindow::driveUpdated(const CdromDriveEntry& drive)
 		item_desc += drive.disc_label;
 	
 	cboCdDrives->addItem(m_drives->getDriveIcon(drive), item_desc, drive.path);
+}
+
+
+/**
+ * driveUpdated(): A drive was updated.
+ * @param drive CdromDriveEntry.
+ */
+void McdControlWindow::driveUpdated(const CdromDriveEntry& drive)
+{
+	if (m_isQuerying)
+	{
+		// Querying all drives.
+		// Add the drive entry to m_queryList.
+		m_queryList.append(drive);
+	}
+	else
+	{
+		// Not querying drives.
+		// This is an actual drive update signal.
+		// TODO: If the drive's already in the list, update it.
+		addDriveEntry(drive);
+	}
+}
+
+
+void McdControlWindow::driveQueryFinished(void)
+{
+	// Unset the mouse pointer.
+	unsetCursor();
+	
+	// Remove the "Searching" text from the dropdown box.
+	cboCdDrives->clear();
+	
+	if (m_queryList.isEmpty())
+	{
+		// Query list is empty.
+		// TODO: Center-align the text by using QItemDelegate.
+		cboCdDrives->setEnabled(false);
+		cboCdDrives->addItem(TR("No CD-ROM drives found."));
+		cboCdDrives->setCurrentIndex(0);
+		return;
+	}
+	
+	CdromDriveEntry drive;
+	foreach(drive, m_queryList)
+	{
+		addDriveEntry(drive);
+	}
+	
+	// Set cboCdDrive's selected index to 0 so that the
+	// first CD-ROM drive is displayed.
+	cboCdDrives->setCurrentIndex(0);
+	cboCdDrives->setEnabled(true);
+	
+	// Clear the query list.
+	m_queryList.clear();
+	m_isQuerying = false;
 }
 
 }
