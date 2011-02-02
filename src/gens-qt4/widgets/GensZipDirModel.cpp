@@ -53,6 +53,7 @@ int GensZipDirModel::columnCount(const QModelIndex& parent) const
 	//return m_rootItem->columnCount();
 	
 	// Only show the first column. (short filename)
+	((void)parent);
 	return 1;
 }
 
@@ -153,12 +154,18 @@ QModelIndex GensZipDirModel::parent(const QModelIndex& index) const
 bool GensZipDirModel::insertColumns(int position, int columns, const QModelIndex& parent)
 {
 	// Columns are fixed.
+	((void)position);
+	((void)columns);
+	((void)parent);
 	return false;
 }
 
 bool GensZipDirModel::removeColumns(int position, int columns, const QModelIndex& parent)
 {
 	// Columns are fixed.
+	((void)position);
+	((void)columns);
+	((void)parent);
 	return false;
 }
 
