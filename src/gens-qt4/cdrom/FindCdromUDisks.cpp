@@ -60,12 +60,12 @@ const char *FindCdromUDisks::ms_UDisks_DriveID[20] =
 
 
 /**
- * getStringProperty(): Get a string property from the given DBus interface.
+ * GetStringProperty(): Get a string property from the given DBus interface.
  * @param dbus-if	[in] QDBusInterface.
  * @param prop		[in] Property name.
  * @return String property. (If an error occurred, the string will be empty.)
  */
-QString FindCdromUDisks::getStringProperty(QDBusInterface *dbus_if, const char *prop)
+QString FindCdromUDisks::GetStringProperty(QDBusInterface *dbus_if, const char *prop)
 {
 	QVariant dbus_reply = dbus_if->property(prop);
 	if (dbus_reply.isValid())
@@ -78,12 +78,12 @@ QString FindCdromUDisks::getStringProperty(QDBusInterface *dbus_if, const char *
 
 
 /**
- * getBoolProperty(): Get a bool property from the given DBus interface.
+ * GetBoolProperty(): Get a bool property from the given DBus interface.
  * @param dbus-if	[in] QDBusInterface.
  * @param prop		[in] Property name.
  * @return Bool property. (If an error occurred, the value will be false.)
  */
-bool FindCdromUDisks::getBoolProperty(QDBusInterface *dbus_if, const char *prop)
+bool FindCdromUDisks::GetBoolProperty(QDBusInterface *dbus_if, const char *prop)
 {
 	QVariant dbus_reply = dbus_if->property(prop);
 	if (dbus_reply.isValid())
@@ -92,6 +92,27 @@ bool FindCdromUDisks::getBoolProperty(QDBusInterface *dbus_if, const char *prop)
 	// DBus reply is invalid.
 	// Return false.
 	return false;
+}
+
+
+/**
+ * isUsable(): Determine if UDisks is usable.
+ * @return True if UDisks is usable.
+ */
+bool FindCdromUDisks::isUsable(void) const
+{
+	QDBusConnection bus = QDBusConnection::systemBus();
+	QScopedPointer<QDBusInterface> interface(new QDBusInterface("org.freedesktop.UDisks",
+									"/org/freedesktop/UDisks",
+									QString(), bus));
+	if (!interface->isValid())
+		return false;
+	
+	// Run a simple query.
+	// If the returned string is empty, UDisks isn't working.
+	// Otherwise, UDisks is working.
+	QString daemonVersion = GetStringProperty(interface.data(), "DaemonVersion");
+	return (!daemonVersion.isEmpty());
 }
 
 
@@ -149,7 +170,7 @@ int FindCdromUDisks::query_int(void)
 		}
 		
 		// Verify that this drive is removable.
-		bool DeviceIsRemovable = getBoolProperty(drive_if.data(), "DeviceIsRemovable");
+		bool DeviceIsRemovable = GetBoolProperty(drive_if.data(), "DeviceIsRemovable");
 		if (!DeviceIsRemovable)
 			continue;
 		
@@ -172,12 +193,12 @@ int FindCdromUDisks::query_int(void)
 		drive.disc_type = 0;
 		
 		// Get various properties.
-		drive.path		= getStringProperty(drive_if.data(), "DeviceFile");
-		drive.drive_vendor	= getStringProperty(drive_if.data(), "DriveVendor");
-		drive.drive_model	= getStringProperty(drive_if.data(), "DriveModel");
-		drive.drive_firmware	= getStringProperty(drive_if.data(), "DriveRevision");
-		drive.disc_label	= getStringProperty(drive_if.data(), "IdLabel");
-		drive.disc_blank	= getBoolProperty(drive_if.data(), "OpticalDiscIsBlank");
+		drive.path		= GetStringProperty(drive_if.data(), "DeviceFile");
+		drive.drive_vendor	= GetStringProperty(drive_if.data(), "DriveVendor");
+		drive.drive_model	= GetStringProperty(drive_if.data(), "DriveModel");
+		drive.drive_firmware	= GetStringProperty(drive_if.data(), "DriveRevision");
+		drive.disc_label	= GetStringProperty(drive_if.data(), "IdLabel");
+		drive.disc_blank	= GetBoolProperty(drive_if.data(), "OpticalDiscIsBlank");
 		
 		// Determine the drive media support.
 		// TODO: Convert ms_UDisks_DriveID[] to a QMap.
@@ -208,7 +229,7 @@ int FindCdromUDisks::query_int(void)
 		drive.drive_type = GetDriveType(drive.discs_supported);
 		
 		// Determine the type of disc in the drive.
-		QString DriveMedia = getStringProperty(drive_if.data(), "DriveMedia");
+		QString DriveMedia = GetStringProperty(drive_if.data(), "DriveMedia");
 		if (!DriveMedia.isEmpty())
 		{
 			for (size_t i = 0; i < sizeof(ms_UDisks_DriveID)/sizeof(ms_UDisks_DriveID[0]); i++)

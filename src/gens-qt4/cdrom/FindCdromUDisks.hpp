@@ -37,6 +37,8 @@ class FindCdromUDisks : public FindCdromBase
 	Q_OBJECT
 	
 	public:
+		bool isUsable(void) const;
+		
 		/**
 		 * query(): Asynchronously query for CD-ROM drives.
 		 * The driveUpdated() signal will be emitted once for each detected drive.
@@ -62,8 +64,8 @@ class FindCdromUDisks : public FindCdromBase
 		 */
 		int query_int(void);
 		
-		QString getStringProperty(QDBusInterface *dbus_if, const char *prop);
-		bool getBoolProperty(QDBusInterface *dbus_if, const char *prop);
+		static QString GetStringProperty(QDBusInterface *dbus_if, const char *prop);
+		static bool GetBoolProperty(QDBusInterface *dbus_if, const char *prop);
 };
 
 }

@@ -123,6 +123,9 @@ class FindCdromBase : public QObject
 			delete m_thread;
 		}
 		
+		virtual bool isUsable(void) const
+			{ return true; }
+		
 		/**
 		 * query(): Asynchronously query for CD-ROM drives.
 		 * The driveUpdated() signal will be emitted once for each detected drive.
