@@ -1,5 +1,9 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-ZipSelectDialog-v1: Rewrote ZipSelectDialog to use a QTreeView
+and a custom QAbstractItemModel subclass. Files are now shown in a
+hierarchical view if directories are present within the archive.
+
 gens-qt4-McdControlWindow-v1: Initial Win32 CD-ROM detection.
 
 - The disc label is read using GetVolumeLabel(), and icons are obtained
@@ -51,6 +55,12 @@ gens-qt4-paused-v0: Initial paused support. Emulation is paused if Escape
 is pressed, and unpaused if Escape is pressed again. I'll need to write a
 new class to handle non-controller keypresses in order to clean up the
 paused code. This class will also handle stuff like savestate slot keys.
+
+gens-qt4-ZipSelectDialog-v0: Initial implementation of the Multi-File
+Archive Selection Dialog. Files are not shown in a hierarchical view yet,
+so it's essentially the same as ZipSelectDialog from Gens/GS. QTreeWidget
+is used instead of QTreeView, since QTreeWidget doesn't require creating
+a QAbstractItemModel subclass.
 
 gens-qt4-ScreenShot-v0: Initial screenshot support. Saves screenshots in
 the gens-qt4 directory using the same naming scheme as Gens/GS. File format
