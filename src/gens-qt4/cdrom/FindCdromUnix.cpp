@@ -140,10 +140,10 @@ int FindCdromUnix::query_int(void)
 		{
 			// Device file descriptor is open.
 			// Get the device information.
-			GetDevIdentity(fd_drive, drive);
+			os_GetDevIdentity(fd_drive, drive);
 			
 			// Get the drive type.
-			drive.drive_type = GetDriveType(fd_drive);
+			drive.drive_type = os_GetDriveType(fd_drive);
 			
 			// TODO: Get disc label and other properties.
 			close(fd_drive);
@@ -171,13 +171,13 @@ int FindCdromUnix::query_int(void)
 
 
 /**
- * GetDevVendor(): Get device identity.
+ * os_GetDevVendor(): Get device identity.
  * This includes vendor, model, and firmware revision.
  * @param fd	[in] File descriptor.
  * @param entry	[out] CD-ROM device entry.
  * @return 0 on success; non-zero on error.
  */
-int FindCdromUnix::GetDevIdentity(int fd, CdromDriveEntry &entry)
+int FindCdromUnix::os_GetDevIdentity(int fd, CdromDriveEntry &entry)
 {
 #if defined(Q_OS_LINUX) && defined(HDIO_GET_IDENTITY)
 	struct hd_driveid drive_id;
@@ -203,11 +203,11 @@ int FindCdromUnix::GetDevIdentity(int fd, CdromDriveEntry &entry)
 
 
 /**
- * GetDriveType(): Get drive type.
+ * os_GetDriveType(): Get drive type.
  * @param fd	[in] File descriptor.
  * @return Drive type, or DRIVE_TYPE_NONE on error.
  */
-DriveType FindCdromUnix::GetDriveType(int fd)
+DriveType FindCdromUnix::os_GetDriveType(int fd)
 {
 #if defined(Q_OS_LINUX) && defined(CDROM_GET_CAPABILITY)
 	int caps = ioctl(fd, CDROM_GET_CAPABILITY, 0);
@@ -218,7 +218,6 @@ DriveType FindCdromUnix::GetDriveType(int fd)
 	// TODO: Blu-ray / HD-DVD?
 	// TODO: DVD+RW?
 	// TODO: Is there such a thing as DVD/CD-R, or just DVD/CD-RW?
-	printf("caps: 0x%08X\n", caps);
 	if (caps & CDC_MO_DRIVE)
 		return DRIVE_TYPE_MO;
 	else if (caps & CDC_DVD_RAM)
