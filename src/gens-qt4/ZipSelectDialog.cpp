@@ -65,9 +65,6 @@ ZipSelectDialog::~ZipSelectDialog()
  */
 void ZipSelectDialog::setFileList(const mdp_z_entry_t* z_entry)
 {
-	// TODO: Figure out Model/View Controller and implement
-	// an mdp_z_entry_t model.
-	
 	// Clear the tree model first.
 	m_dirModel->clear();
 	
@@ -75,7 +72,6 @@ void ZipSelectDialog::setFileList(const mdp_z_entry_t* z_entry)
 	m_z_entry_list = z_entry;
 	m_z_entry_sel = NULL;
 	
-	// TODO: Hierarchical file view.
 	// For now, let's just do a standard list view.
 	const mdp_z_entry_t *cur = m_z_entry_list;
 	for (; cur != NULL; cur = cur->next)
