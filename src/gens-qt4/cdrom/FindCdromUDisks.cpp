@@ -23,6 +23,7 @@
 
 // C includes.
 #include <stdio.h>
+#include <paths.h>
 
 // Qt includes.
 #include <QtCore/QList>
@@ -120,9 +121,19 @@ FindCdromUDisks::FindCdromUDisks()
 	}
 	
 	// D-BUS is initialized.
-	// Connect the UDisks DeviceChanged signal.
+	// Connect the UDisks signals.
+	// * DeviceChanged(): A device has changed.
+	// * DeviceRemoved(): A device has been removed.
+	// * NOTE: DeviceAdded() is not needed, since UDisks emits
+	//   DeviceChanged() immediately after the device is added.
 	connect(m_ifUDisks, SIGNAL(DeviceChanged(const QDBusObjectPath&)),
 		this, SLOT(deviceChanged(const QDBusObjectPath&)));
+#if 0
+	connect(m_ifUDisks, SIGNAL(DeviceAdded(const QDBusObjectPath&)),
+		this, SLOT(deviceChanged(const QDBusObjectPath&)));
+#endif
+	connect(m_ifUDisks, SIGNAL(DeviceRemoved(const QDBusObjectPath&)),
+		this, SLOT(deviceRemoved(const QDBusObjectPath&)));
 }
 
 
@@ -175,17 +186,6 @@ int FindCdromUDisks::query_int(void)
 	// Devices queried.
 	emit driveQueryFinished();
 	return 0;
-}
-
-
-/**
- * deviceChanged(): A device has changed.
- * @param objectPath Device object path.
- */
-void FindCdromUDisks::deviceChanged(const QDBusObjectPath& objectPath)
-{
-	// Query the device for changes.
-	queryUDisksDevice(objectPath);
 }
 
 
@@ -301,6 +301,32 @@ int FindCdromUDisks::queryUDisksDevice(const QDBusObjectPath& objectPath)
 	// Emit the driveUpdated() signal for this drive.
 	emit driveUpdated(drive);
 	return 0;
+}
+
+
+/**
+ * deviceChanged(): A device has changed.
+ * @param objectPath Device object path.
+ */
+void FindCdromUDisks::deviceChanged(const QDBusObjectPath& objectPath)
+{
+	// Query the device for changes.
+	queryUDisksDevice(objectPath);
+}
+
+
+/**
+ * deviceRemoved(): A device has been removed.
+ * @param objectPath Device object path.
+ */
+void FindCdromUDisks::deviceRemoved(const QDBusObjectPath& objectPath)
+{
+	// NOTE: The device file cannot be retrieved, since the object is deleted.
+	// Assume the device file is _PATH_DEV + the last component of objectPath.
+	// TODO: Store the device filenames locally.
+	// TODO: Use QDir::separator()?
+	QString devFile = QString(_PATH_DEV) + objectPath.path().section('/', -1);
+	emit driveRemoved(devFile);
 }
 
 }

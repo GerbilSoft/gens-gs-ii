@@ -79,6 +79,7 @@ class FindCdromUDisks : public FindCdromBase
 	
 	protected slots:
 		void deviceChanged(const QDBusObjectPath& objectPath);
+		void deviceRemoved(const QDBusObjectPath& objectPath);
 };
 
 }
