@@ -334,7 +334,7 @@ bool GensZipDirModel::setDirIconState(const QModelIndex& dirIndex, bool isOpen)
 	
 	// Make sure this is a directory entry.
 	if (item->childCount() <= 0)
-		return;
+		return false;
 	
 	// Set the directory icon.
 	const QStyle::StandardPixmap pxm = (isOpen ? QStyle::SP_DirOpenIcon : QStyle::SP_DirClosedIcon);
