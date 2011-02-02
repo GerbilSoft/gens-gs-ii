@@ -92,6 +92,9 @@ void ZipSelectDialog::setFileList(const mdp_z_entry_t* z_entry)
 		QIcon icon = this->style()->standardIcon(QStyle::SP_FileIcon);
 		m_dirModel->insertZEntry(cur, icon);
 	}
+	
+	// Sort the tree model.
+	m_dirModel->sort(0);
 }
 
 
