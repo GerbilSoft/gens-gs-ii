@@ -55,6 +55,10 @@
 #include "cdrom/FindCdromUDisks.hpp"
 #endif
 
+#if defined(Q_OS_UNIX)
+#include "cdrom/FindCdromUnix.hpp"
+#endif
+
 namespace GensQt4
 {
 
@@ -87,14 +91,28 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 	m_drives = new FindCdromWin32();
 #elif defined(QT_QTDBUS_FOUND)
 	m_drives = new FindCdromUDisks();
+	if (!m_drives->isUsable())
+	{
+		delete m_drives;
+		m_drives = NULL;
+	}
 #else
 	// TODO: Implement versions for Win32, Mac OS X, and non-UDisks.
 	m_drives = NULL;
 #endif
 	
-	// Set up the driveUpdated() signal.
-	connect(m_drives, SIGNAL(driveUpdated(const CdromDriveEntry&)),
-		this, SLOT(driveUpdated(const CdromDriveEntry&)));
+#if defined(Q_OS_UNIX)
+	// UNIX fallback.
+	if (!m_drives)
+		m_drives = new FindCdromUnix();
+#endif
+	
+	if (m_drives)
+	{
+		// Set up the driveUpdated() signal.
+		connect(m_drives, SIGNAL(driveUpdated(const CdromDriveEntry&)),
+			this, SLOT(driveUpdated(const CdromDriveEntry&)));
+	}
 	
 	// Query CD-ROM drives.
 	query();
