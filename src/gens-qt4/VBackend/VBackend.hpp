@@ -140,6 +140,11 @@ class VBackend
 		// NOTE: This takes up (336*240*4) == 322,560 bytes!
 		LibGens::VdpRend::Screen_t *m_intScreen;
 		
+		// OSG font information.
+		// TODO: Maybe make the font customizable in the future.
+		static const int ms_Osd_chrW = 8;
+		static const int ms_Osd_chrH = 16;
+		
 		// OSD message struct.
 		struct OsdMessage
 		{

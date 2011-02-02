@@ -369,6 +369,7 @@ void GensQGLWidget::paintGL(void)
 		}
 		
 		/** START: Apply effects. **/
+		
 		if (isRunning())
 		{
 			// Emulation is running. Check if any effects should be applied.
@@ -532,10 +533,6 @@ void GensQGLWidget::printOsdText(void)
 	// * renderText() doesn't properly handle newlines.
 	// * fm.boundingRect() doesn't seem to handle wordwrapping correctly, either.
 	
-	// TODO: Font information.
-	static const int chrW = 8;
-	static const int chrH = 16;
-	
 	if (!m_osdListDirty)
 	{
 		// OSD message list isn't dirty.
@@ -576,11 +573,10 @@ void GensQGLWidget::printOsdText(void)
 	
 	// Text shadow color.
 	// TODO: Make this customizable?
-	const QColor clShadow(0, 0, 0);
+	static const QColor clShadow(Qt::black);
 	
-	// TODO: Constants for character sizes.
-	int y = (240 - chrH);
-	double curTime = LibGens::Timing::GetTimeD();
+	int y = (240 - ms_Osd_chrH);
+	const double curTime = LibGens::Timing::GetTimeD();
 	
 	// Check if the FPS should be drawn.
 	// TODO: Integrate this with the for loop.
@@ -588,14 +584,14 @@ void GensQGLWidget::printOsdText(void)
 	{
 		QString sFps = QString::number(m_fpsAvg, 'f', 1);
 		
-		// TODO: Allow font scaling.
-		y -= chrH;
+		// Next line.
+		y -= ms_Osd_chrH;
 		
 		// TODO: Make the drop shadow optional or something.
 		qglColor(clShadow);
-		printOsdLine(chrW+1, y+1, sFps);
+		printOsdLine(ms_Osd_chrW+1, y+1, sFps);
 		qglColor(osdFpsColor());
-		printOsdLine(chrW, y, sFps);
+		printOsdLine(ms_Osd_chrW, y, sFps);
 	}
 	
 	// If messages are enabled, print them on the screen.
@@ -615,14 +611,14 @@ void GensQGLWidget::printOsdText(void)
 			
 			const QString &msg = m_osdList[i].msg;
 			
-			// TODO: Allow font scaling.
-			y -= chrH;
+			// Next line.
+			y -= ms_Osd_chrH;
 			
 			// TODO: Make the drop shadow optional or something.
 			qglColor(clShadow);
-			printOsdLine(chrW+1, y+1, msg);
+			printOsdLine(ms_Osd_chrW+1, y+1, msg);
 			qglColor(osdMsgColor());	// TODO: Per-message colors?
-			printOsdLine(chrW, y, msg);
+			printOsdLine(ms_Osd_chrW, y, msg);
 		}
 	}
 	
@@ -631,8 +627,8 @@ void GensQGLWidget::printOsdText(void)
 	{
 		// Recording status messages are present.
 		// Print at the upper-right of the screen.
-		y = chrH;
-		QColor clStopped(255, 255, 255);
+		y = ms_Osd_chrH;
+		const QColor clStopped(Qt::white);
 		
 		QColor clRec;
 		QString sRec;
@@ -640,19 +636,19 @@ void GensQGLWidget::printOsdText(void)
 		{
 			if (isPaused())
 			{
-				clRec = QColor(255, 255, 255);
+				clRec = QColor(Qt::white);
 				sRec = QChar(0x25CF);
 				sRec += QChar(0xF8FE);
 			}
 			else
 			{
-				clRec = QColor(255, 0, 0);
+				clRec = QColor(Qt::red);
 				sRec = QChar(0x25CF);
 			}
 		}
 		else
 		{
-			clRec = QColor(255, 255, 255);
+			clRec = QColor(Qt::white);
 			sRec = QChar(0x25A0);
 		}
 		
@@ -663,6 +659,8 @@ void GensQGLWidget::printOsdText(void)
 			msg = (recOsd.isRecording ? sRec : QChar(0x25A0)) +
 				recOsd.component + ' ';
 			
+			// TODO: If stopped, remove the message after a certain duration has passed.
+			
 			// Format the duration.
 			int secs = (recOsd.duration / 1000);
 			int mins = (secs / 60);
@@ -670,7 +668,7 @@ void GensQGLWidget::printOsdText(void)
 			msg += QString("%1:%2").arg(mins).arg(QString::number(secs), 2, '0');
 			
 			// Calculate the message width.
-			const int msgW = ((msg.size() + 1) * chrW);
+			const int msgW = ((msg.size() + 1) * ms_Osd_chrW);
 			const int x = (320 - msgW);
 			
 			// TODO: Make the drop shadow optional or something.
@@ -679,8 +677,8 @@ void GensQGLWidget::printOsdText(void)
 			qglColor(recOsd.isRecording ? clRec : clStopped);	// TODO: Per-message colors?
 			printOsdLine(x, y, msg);
 			
-			// TODO: Allow font scaling. (?)
-			y += chrH;
+			// Next line.
+			y += ms_Osd_chrH;
 		}
 	}
 	
@@ -688,7 +686,7 @@ void GensQGLWidget::printOsdText(void)
 	glEnd();
 	
 	// Reset the GL state.
-	qglColor(QColor(255, 255, 255, 255));	// Reset the color.
+	qglColor(QColor(Qt::white));	// Reset the color.
 	glDisable(GL_BLEND);			// Disable GL blending.
 	glDisable(GL_TEXTURE_2D);		// Disable 2D textures.
 	
@@ -716,10 +714,8 @@ void GensQGLWidget::printOsdLine(int x, int y, const QString &msg)
 {
 	// TODO: Font information.
 	// TODO: Wordwrapping.
-	static const int chrW = 8;
-	static const int chrH = 16;
 	
-	for (int i = 0; i < msg.size(); i++, x += chrW)
+	for (int i = 0; i < msg.size(); i++, x += ms_Osd_chrW)
 	{
 		uint16_t chr = msg[i].unicode();
 		if (chr > 0xFF)
@@ -788,11 +784,11 @@ void GensQGLWidget::printOsdLine(int x, int y, const QString &msg)
 		glTexCoord2f(tx1, ty1);
 		glVertex2i(x, y);
 		glTexCoord2d(tx2, ty1);
-		glVertex2i(x+chrW, y);
+		glVertex2i(x+ms_Osd_chrW, y);
 		glTexCoord2d(tx2, ty2);
-		glVertex2i(x+chrW, y+chrH);
+		glVertex2i(x+ms_Osd_chrW, y+ms_Osd_chrH);
 		glTexCoord2d(tx1, ty2);
-		glVertex2i(x, y+chrH);
+		glVertex2i(x, y+ms_Osd_chrH);
 	}
 }
 
