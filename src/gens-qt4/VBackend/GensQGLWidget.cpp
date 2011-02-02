@@ -701,6 +701,12 @@ void GensQGLWidget::printOsdLine(int x, int y, const QString &msg)
 				case 0x2194:	chr = 0x1D; break;
 				case 0x2582:	chr = 0x1E; break;
 				case 0x25BC:	chr = 0x1F; break;
+				
+				// VCR symbols.
+				case 0x25CF:	chr = 0x80; break;	// Record. (BLACK CIRCLE)
+				case 0xF8FE:	chr = 0x81; break;	// Pause. (Private Use Area)
+				case 0x25A0:	chr = 0x82; break;	// Stop. (BLACK SQUARE)
+				
 				default:	chr = 0; break;
 			}
 			
