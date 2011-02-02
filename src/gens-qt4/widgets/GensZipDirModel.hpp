@@ -26,6 +26,9 @@
 
 // Qt includes.
 #include <QtCore/QAbstractItemModel>
+#include <QtCore/QMap>
+#include <QtCore/QPersistentModelIndex>
+#include <QtCore/QString>
 #include <QtGui/QIcon>
 
 // GensZipDirItem.
@@ -71,8 +74,9 @@ class GensZipDirModel : public QAbstractItemModel
 
 protected:
 		GensZipDirItem *m_rootItem;
-		
 		GensZipDirItem *getItem(const QModelIndex& index) const;
+		
+		QMap<QString, QPersistentModelIndex> m_dirMap;
 };
 
 }

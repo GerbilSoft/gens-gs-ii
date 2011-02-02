@@ -196,6 +196,7 @@ bool GensZipDirModel::clear(void)
 	QModelIndex index = createIndex(0, 0, m_rootItem);
 	beginRemoveRows(index, 0, rows - 1);
 	success = m_rootItem->removeChildren(0, rows);
+	m_dirMap.clear();
 	endRemoveRows();
 	
 	return success;
@@ -204,26 +205,71 @@ bool GensZipDirModel::clear(void)
 bool GensZipDirModel::insertZEntry(const mdp_z_entry_t *z_entry,
 				   const QIcon& icon)
 {
-	// TODO: Break up the ZFile into its directory components.
-	QModelIndex index = createIndex(0, 0, m_rootItem);
+	GensZipDirItem *parentItem = m_rootItem;
+	QModelIndex itemIndex = createIndex(0, 0, parentItem);
+	QString full_filename = QString::fromUtf8(z_entry->filename);
+	QString disp_filename;
+	
+	// TODO: Use '\\' on Win32?
+	QStringList dirList = full_filename.split('/', QString::SkipEmptyParts);
+	if (dirList.size() > 1)
+	{
+		// More than one component.
+		QString cur_path;
+		QMap<QString, QPersistentModelIndex>::iterator dirIter;
+		
+		for (int i = 0; i < (dirList.size() - 1); i++)
+		{
+			// Get the directory component.
+			cur_path += dirList[i] + '/';
+			dirIter = m_dirMap.find(cur_path);
+			if (dirIter == m_dirMap.end())
+			{
+				// Directory not found. Add it.
+				
+				// Insert a row at the end.
+				int row = rowCount(itemIndex);
+				beginInsertRows(itemIndex, row, row);
+				parentItem->insertChildren(row, 1, parentItem->columnCount());
+				endInsertRows();
+				
+				// Get the item as the new parent item.
+				parentItem = parentItem->child(row);
+				parentItem->setData(0, dirList[i]);
+				itemIndex = createIndex(0, 0, parentItem);
+				// TODO: Get the directory icon from somewhere.
+				//parentItem->setIcon(this->style()->standardIcon(QStyle::SP_DirectoryIcon));
+				
+				// Add the directory to m_dirMap.
+				m_dirMap.insert(cur_path, itemIndex);
+			}
+			else
+			{
+				// Directory found.
+				itemIndex = *dirIter;
+				parentItem = getItem(itemIndex);
+			}
+		}
+	}
+	
+	// Set the display filename.
+	disp_filename = dirList[dirList.size() - 1];
 	
 	// Insert a row at the end.
-	int row = rowCount(index);
-	beginInsertRows(index, row, row);
-	m_rootItem->insertChildren(row, 1, m_rootItem->columnCount());
+	int row = rowCount(itemIndex);
+	beginInsertRows(itemIndex, row, row);
+	parentItem->insertChildren(row, 1, parentItem->columnCount());
 	endInsertRows();
 	
-	QString filename = QString::fromUtf8(z_entry->filename);
-	
-	GensZipDirItem *item = m_rootItem->child(row);
-	item->setData(0, QVariant(filename));
-	item->setData(1, QVariant(filename));
-	item->setData(2, QVariant((int)z_entry->filesize));
+	GensZipDirItem *item = parentItem->child(row);
+	item->setData(0, disp_filename);
+	item->setData(1, full_filename);
+	item->setData(2, (int)z_entry->filesize);
 	item->setIcon(icon);
 	item->setZEntry(z_entry);
 	
 	// Data has changed.
-	emit dataChanged(index, index);
+	emit dataChanged(itemIndex, itemIndex);
 	return true;
 }
 
