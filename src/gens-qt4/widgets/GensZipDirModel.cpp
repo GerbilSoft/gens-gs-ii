@@ -23,6 +23,10 @@
 
 #include "GensZipDirModel.hpp"
 
+// QApplication::QStyle() is needed to get the directory icon.
+#include <QtGui/QApplication>
+#include <QtGui/QStyle>
+
 // Text translation macro.
 #include <QtCore/QCoreApplication>
 #define TR(text) \
@@ -244,8 +248,9 @@ bool GensZipDirModel::insertZEntry(const mdp_z_entry_t *z_entry,
 				parentItem = parentItem->child(row);
 				parentItem->setData(0, dirList[i]);
 				itemIndex = createIndex(0, 0, parentItem);
-				// TODO: Get the directory icon from somewhere.
-				//parentItem->setIcon(this->style()->standardIcon(QStyle::SP_DirectoryIcon));
+				
+				// Set the icon.
+				parentItem->setIcon(QApplication::style()->standardIcon(QStyle::SP_DirIcon));
 				
 				// Add the directory to m_dirMap.
 				m_dirMap.insert(cur_path, itemIndex);
