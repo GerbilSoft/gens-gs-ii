@@ -138,4 +138,24 @@ void ZipSelectDialog::on_treeView_clicked(const QModelIndex& index)
 		button->setEnabled(!m_dirModel->hasChildren(indexList[0]));
 }
 
+
+/**
+ * on_treeView_collapsed(): An item in the QTreeView was collapsed.
+ * @param index Item index.
+ */
+void ZipSelectDialog::on_treeView_collapsed(const QModelIndex& index)
+{
+	m_dirModel->setDirIconState(index, false);
+}
+
+
+/**
+ * on_treeView_expanded(): An item in the QTreeView was expanded.
+ * @param index Item index.
+ */
+void ZipSelectDialog::on_treeView_expanded(const QModelIndex& index)
+{
+	m_dirModel->setDirIconState(index, true);
+}
+
 }
