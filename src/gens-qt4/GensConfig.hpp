@@ -35,6 +35,30 @@ class GensConfig : public QObject
 {
 	Q_OBJECT
 	
+	/** Properties. **/
+	
+	/** Onscreen display. **/
+	Q_PROPERTY(bool osdFpsEnabled READ osdFpsEnabled WRITE setOsdFpsEnabled NOTIFY osdFpsEnabled_changed)
+	Q_PROPERTY(QColor osdFpsColor READ osdFpsColor WRITE setOsdFpsColor NOTIFY osdFpsColor_changed)
+	Q_PROPERTY(bool osdMsgEnabled READ osdMsgEnabled WRITE setOsdMsgEnabled NOTIFY osdMsgEnabled_changed)
+	Q_PROPERTY(QColor osdMsgColor READ osdMsgColor WRITE setOsdMsgColor NOTIFY osdMsgColor_changed)
+	
+	/** Sega CD Boot ROMs. **/
+	Q_PROPERTY(QString mcdRomUSA READ mcdRomUSA WRITE setMcdRomUSA NOTIFY mcdRomUSA_changed)
+	Q_PROPERTY(QString mcdRomEUR READ mcdRomEUR WRITE setMcdRomEUR NOTIFY mcdRomEUR_changed)
+	Q_PROPERTY(QString mcdRomJPN READ mcdRomJPN WRITE setMcdRomJPN NOTIFY mcdRomJPN_changed)
+	
+	/** External programs. **/
+	Q_PROPERTY(QString extprgUnRAR READ extprgUnRAR WRITE setExtPrgUnRAR NOTIFY extprgUnRAR_changed)
+	
+	/** Graphics settings. **/
+	Q_PROPERTY(bool aspectRatioConstraint READ aspectRatioConstraint WRITE setAspectRatioConstraint NOTIFY aspectRatioConstraint_changed)
+	Q_PROPERTY(bool fastBlur READ fastBlur WRITE setFastBlur NOTIFY fastBlur_changed)
+	Q_PROPERTY(int contrast READ contrast WRITE setContrast NOTIFY contrast_changed)
+	Q_PROPERTY(int brightness READ brightness WRITE setBrightness NOTIFY brightness_changed)
+	Q_PROPERTY(bool grayscale READ grayscale WRITE setGrayscale NOTIFY grayscale_changed)
+	Q_PROPERTY(bool inverted READ inverted WRITE setInverted NOTIFY inverted_changed)
+	
 	public:
 		GensConfig();
 		~GensConfig();
