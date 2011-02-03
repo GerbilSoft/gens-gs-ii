@@ -21,9 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-// Enable fast QString concatenation on Qt 4.6+.
-#define QT_USE_FAST_CONCATENATION
-#define QT_USE_FAST_OPERATOR_PLUS
+#include <config.h>
 
 #include "GensQGLWidget.hpp"
 #include "gqt4_main.hpp"

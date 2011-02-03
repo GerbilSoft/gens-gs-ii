@@ -21,10 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <config.h>
+
 #ifndef __GENS_QT4_GENSQGLWIDGET_HPP__
 #define __GENS_QT4_GENSQGLWIDGET_HPP__
-
-#include <config.h>
 
 #include "VBackend.hpp"
 

@@ -21,10 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <config.h>
+
 #ifndef __GENS_QT4_ABOUTWINDOW_HPP__
 #define __GENS_QT4_ABOUTWINDOW_HPP__
-
-#include <config.h>
 
 #ifdef HAVE_GLEW
 // GL Extension Wrangler.
