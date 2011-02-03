@@ -50,7 +50,7 @@ GensConfig::GensConfig()
 #endif
 	
 	// Default graphics settings.
-	m_constrainAspectRatio = true;
+	m_aspectRatioConstraint = true;
 	m_fastBlur = false;
 	m_contrast = 0;
 	m_brightness = 0;
@@ -169,13 +169,13 @@ void GensConfig::setExtPrgUnRAR(const QString& filename)
 /** Graphics settings. **/
 
 
-void GensConfig::setConstrainAspectRatio(bool newConstrainAspectRatio)
+void GensConfig::setAspectRatioConstraint(bool newAspectRatioConstraint)
 {
-	if (m_constrainAspectRatio == newConstrainAspectRatio)
+	if (m_aspectRatioConstraint == newAspectRatioConstraint)
 		return;
 	
-	m_constrainAspectRatio = newConstrainAspectRatio;
-	emit constrainAspectRatio_changed(m_constrainAspectRatio);
+	m_aspectRatioConstraint = newAspectRatioConstraint;
+	emit aspectRatioConstraint_changed(m_aspectRatioConstraint);
 }
 
 void GensConfig::setFastBlur(bool newFastBlur)

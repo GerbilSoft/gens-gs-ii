@@ -65,8 +65,8 @@ class GensConfig : public QObject
 		void setExtPrgUnRAR(const QString& filename);
 		
 		/** Graphics settings. **/
-		bool constrainAspectRatio(void) { return m_constrainAspectRatio; }
-		void setConstrainAspectRatio(bool newConstrainAspectRatio);
+		bool aspectRatioConstraint(void) { return m_aspectRatioConstraint; }
+		void setAspectRatioConstraint(bool newAspectRatioConstraint);
 		bool fastBlur(void) { return m_fastBlur; }
 		void setFastBlur(bool newFastBlur);
 		int contrast(void) { return m_contrast; }
@@ -95,7 +95,7 @@ class GensConfig : public QObject
 		QString m_extprgUnRAR;
 		
 		/** Graphics settings. **/
-		bool m_constrainAspectRatio;
+		bool m_aspectRatioConstraint;
 		bool m_fastBlur;
 		int m_contrast;
 		int m_brightness;
@@ -119,7 +119,7 @@ class GensConfig : public QObject
 		void extprgUnRAR_changed(const QString& filename);
 		
 		/** Graphics settings. **/
-		void constrainAspectRatio_changed(bool newConstrainAspectRatio);
+		void aspectRatioConstraint_changed(bool newAspectRatioConstraint);
 		void fastBlur_changed(bool newFastBlur);
 		void contrast_changed(int newContrast);
 		void brightness_changed(int newBrightness);
