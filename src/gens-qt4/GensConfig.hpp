@@ -67,39 +67,53 @@ class GensConfig : public QObject
 		void reload(void);
 		
 		/** Onscreen display. **/
-		bool osdFpsEnabled(void) { return m_osdFpsEnabled; }
+		bool osdFpsEnabled(void) const
+			{ return m_osdFpsEnabled; }
 		void setOsdFpsEnabled(bool enable);
-		QColor osdFpsColor(void) { return m_osdFpsColor; }
+		QColor osdFpsColor(void) const
+			{ return m_osdFpsColor; }
 		void setOsdFpsColor(const QColor& color);
-		bool osdMsgEnabled(void) { return m_osdMsgEnabled; }
+		bool osdMsgEnabled(void) const
+			{ return m_osdMsgEnabled; }
 		void setOsdMsgEnabled(bool enable);
-		QColor osdMsgColor(void) { return m_osdMsgColor; }
+		QColor osdMsgColor(void) const
+			{ return m_osdMsgColor; }
 		void setOsdMsgColor(const QColor& color);
 		
 		/** Sega CD Boot ROMs. **/
-		QString mcdRomUSA(void) { return m_mcdRomUSA; }
+		QString mcdRomUSA(void) const
+			{ return m_mcdRomUSA; }
 		void setMcdRomUSA(const QString& filename);
-		QString mcdRomEUR(void) { return m_mcdRomEUR; }
+		QString mcdRomEUR(void) const
+			{ return m_mcdRomEUR; }
 		void setMcdRomEUR(const QString& filename);
-		QString mcdRomJPN(void) { return m_mcdRomJPN; }
+		QString mcdRomJPN(void) const
+			{ return m_mcdRomJPN; }
 		void setMcdRomJPN(const QString& filename);
 		
 		/** External programs. **/
-		QString extprgUnRAR(void) { return m_extprgUnRAR; }
+		QString extprgUnRAR(void) const
+			{ return m_extprgUnRAR; }
 		void setExtPrgUnRAR(const QString& filename);
 		
 		/** Graphics settings. **/
-		bool aspectRatioConstraint(void) { return m_aspectRatioConstraint; }
+		bool aspectRatioConstraint(void) const
+			{ return m_aspectRatioConstraint; }
 		void setAspectRatioConstraint(bool newAspectRatioConstraint);
-		bool fastBlur(void) { return m_fastBlur; }
+		bool fastBlur(void) const
+			{ return m_fastBlur; }
 		void setFastBlur(bool newFastBlur);
-		int contrast(void) { return m_contrast; }
+		int contrast(void) const
+			{ return m_contrast; }
 		void setContrast(int newContrast);
-		int brightness(void) { return m_brightness; }
+		int brightness(void) const
+			{ return m_brightness; }
 		void setBrightness(int newBrightness);
-		bool grayscale(void) { return m_grayscale; }
+		bool grayscale(void) const
+			{ return m_grayscale; }
 		void setGrayscale(bool newGrayscale);
-		bool inverted(void) { return m_inverted; }
+		bool inverted(void) const
+			{ return m_inverted; }
 		void setInverted(bool newInverted);
 		// TODO: Color Scale Method.
 	
