@@ -209,6 +209,13 @@ ENDIF()
 # Build the executable.
 ADD_EXECUTABLE(gens-qt4 ${gens-qt4_SRCS} ${gens-qt4_COMPAT_SRCS} ${gens-qt4_MOC_SOURCES} ${gens-qt4_UIS_H} ${gens-qt4_RCC_O})
 TARGET_LINK_LIBRARIES(gens-qt4 gens)
+
+# Fast QString concatenation.
+# Introduced with Qt 4.6.
+SET_TARGET_PROPERTIES(gens-qt4
+	PROPERTIES COMPILE_DEFINITIONS "QT_USE_FAST_CONCATENATION;QT_USE_FAST_OPERATOR_PLUS")
+
+# Additional libraries.
 IF(WIN32)
 	TARGET_LINK_LIBRARIES(gens-qt4)
 ENDIF(WIN32)
