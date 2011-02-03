@@ -34,12 +34,14 @@ GensConfig::GensConfig()
 	/** Initialize GensConfig with default settings. **/
 	
 	/** Onscreen display. **/
-	setOsdFpsEnabled(true);
-	setOsdFpsColor(QColor(Qt::white));
-	setOsdMsgEnabled(true);
-	setOsdMsgColor(QColor(Qt::white));
+	m_osdFpsEnabled = true;
+	m_osdFpsColor = QColor(Qt::white);
+	m_osdMsgEnabled = true;
+	m_osdMsgColor = QColor(Qt::white);
 	
 	/** External programs. **/
+	// TODO: Don't use setExtPrgUnRAR.
+	// Instead, set the filename directly.
 #ifdef _WIN32
 	setExtPrgUnRAR("UnRAR.dll");	// TODO: Verify that a relative pathname works!
 #else
@@ -66,6 +68,9 @@ GensConfig::GensConfig()
 	m_borderColor = true;
 	m_pauseTint = true;
 	m_ntscV30Rolling = true;
+	
+	// TODO: Emit signals for all the configuration options?
+	// Alternatively, add another function to do that, e.g. refresh().
 }
 
 GensConfig::~GensConfig()
