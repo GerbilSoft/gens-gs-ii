@@ -288,12 +288,11 @@ void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
  */
 bool GensMenuBar::menuItemCheckState(int id)
 {
-	QHash<int, QAction*>::const_iterator iter = m_hashActions.find(id);
-	if (iter == m_hashActions.end())
+	QAction *mnuItem = m_hashActions.value(id, NULL);
+	if (!mnuItem)
 		return false;
 	
 	// TODO: Is the isCheckable() check needed?
-	QAction *mnuItem = (*iter);
 	if (!mnuItem->isCheckable())
 		return false;
 	return mnuItem->isChecked();
@@ -308,14 +307,13 @@ bool GensMenuBar::menuItemCheckState(int id)
  */
 int GensMenuBar::setMenuItemCheckState(int id, bool newCheck)
 {
-	QHash<int, QAction*>::const_iterator iter = m_hashActions.find(id);
-	if (iter == m_hashActions.end())
-		return 1;
+	QAction *mnuItem = m_hashActions.value(id, NULL);
+	if (!mnuItem)
+		return -1;
 	
 	// TODO: Is the isCheckable() check needed?
-	QAction *mnuItem = (*iter);
 	if (!mnuItem->isCheckable())
-		return 2;
+		return -2;
 	
 	mnuItem->setChecked(newCheck);
 	return 0;
