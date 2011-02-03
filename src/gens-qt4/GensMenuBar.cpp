@@ -162,26 +162,19 @@ void GensMenuBar::clearMaps(void)
 	// TODO: Consider using QScopedPointer or QSharedPointer instead?
 	
 	// Actions map.
-	for (QMap<int, QAction*>::iterator iter = m_mapActions.begin();
-	     iter != m_mapActions.end(); iter++)
-	{
-		delete *iter;
-	}
+	QAction *action;
+	foreach(action, m_mapActions)
+		delete action;
 	m_mapActions.clear();
 	
 	// Separators list.
-	for (int i = (m_lstSeparators.size() - 1); i >= 0; i--)
-	{
-		delete m_lstSeparators[i];
-	}
-	m_lstSeparators.clear();
+	while (!m_lstSeparators.isEmpty())
+		delete m_lstSeparators.takeFirst();
 	
 	// Menus map.
-	for (QMap<int, QMenu*>::iterator iter = m_mapMenus.begin();
-	     iter != m_mapMenus.end(); iter++)
-	{
-		delete *iter;
-	}
+	QMenu *menu;
+	foreach(menu, m_mapMenus)
+		delete menu;
 	m_mapMenus.clear();
 }
 
