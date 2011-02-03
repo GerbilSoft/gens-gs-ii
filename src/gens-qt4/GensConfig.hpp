@@ -28,6 +28,9 @@
 #include <QtCore/QString>
 #include <QtGui/QColor>
 
+namespace GensQt4
+{
+
 class GensConfig : public QObject
 {
 	Q_OBJECT
@@ -85,5 +88,7 @@ class GensConfig : public QObject
 		
 		void extprgUnRAR_changed(const QString& filename);
 };
+
+}
 
 #endif /* __GENS_QT4_GENSCONFIG_HPP__ */

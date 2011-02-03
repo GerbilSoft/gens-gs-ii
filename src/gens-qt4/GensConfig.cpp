@@ -26,6 +26,9 @@
 // TODO: Move this to GensConfigHandler.cpp?
 #include "libgens/Decompressor/DcRar.hpp"
 
+namespace GensQt4
+{
+
 GensConfig::GensConfig()
 {
 	// Default OSD settings.
@@ -151,4 +154,6 @@ void GensConfig::setExtPrgUnRAR(const QString& filename)
 	// (Reasoning is we might have multiple GensConfig instances,
 	//  but only one may be active at any given time.)
 	LibGens::DcRar::SetExtPrg(m_extprgUnRAR.toUtf8().constData());
+}
+
 }

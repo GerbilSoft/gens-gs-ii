@@ -58,7 +58,7 @@ int gens_main(int argc, char *argv[])
 	
 	// Load the configuration.
 	// TODO: Do this before or after command line arguments?
-	GensQt4::gqt4_config = new GensConfig();
+	GensQt4::gqt4_config = new GensQt4::GensConfig();
 	
 	// TODO: Parse command line arguments.
 	// They're available in app.arguments() [QStringList].
