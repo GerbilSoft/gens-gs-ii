@@ -62,9 +62,6 @@
 // TODO: Make a class for handling non-controller input, e.g. Reset.
 #include "Input/KeyHandlerQt.hpp"
 
-// Text translation macro.
-#define TR(text) \
-	QCoreApplication::translate("EmuManager", (text), NULL, QCoreApplication::UnicodeUTF8)
 
 namespace GensQt4
 {
@@ -125,9 +122,9 @@ int EmuManager::openRom(QWidget *parent)
 	
 	// TODO: Set the default filename.
 	QString filename = QFileDialog::getOpenFileName(parent,
-			TR("Open ROM"),		// Dialog title
+			tr("Open ROM"),		// Dialog title
 			QString(),		// Default filename.
-			TR("Sega Genesis ROM images") +
+			tr("Sega Genesis ROM images") +
 			QString::fromLatin1(
 				" (*.bin *.gen *.md *.smd"
 #ifdef HAVE_ZLIB
@@ -140,10 +137,10 @@ int EmuManager::openRom(QWidget *parent)
 				");;"
 				) +
 #if 0
-			TR("Sega Genesis / 32X ROMs; Sega CD disc images") +
+			tr("Sega Genesis / 32X ROMs; Sega CD disc images") +
 			"(*.bin *.smd *.gen *.32x *.cue *.iso *.raw" ZLIB_EXT LZMA_EXT RAR_EXT ");;" +
 #endif
-			TR("All Files") + QString::fromLatin1("(*.*)"));
+			tr("All Files") + QString::fromLatin1("(*.*)"));
 	
 	if (filename.isEmpty())
 		return 1;
@@ -394,42 +391,42 @@ QString EmuManager::sysName(void)
 		case LibGens::Rom::MDP_SYSTEM_MD:
 			// Genesis / Mega Drive.
 			if (region.region() == LibGens::SysRegion::REGION_US_NTSC)
-				return TR("Genesis");
+				return tr("Genesis");
 			else
-				return TR("Mega Drive");
+				return tr("Mega Drive");
 		
 		case LibGens::Rom::MDP_SYSTEM_MCD:
 			if (region.region() == LibGens::SysRegion::REGION_US_NTSC)
-				return TR("Sega CD");
+				return tr("Sega CD");
 			else
-				return TR("Mega CD");
+				return tr("Mega CD");
 		
 		case LibGens::Rom::MDP_SYSTEM_32X:
 			if (region.isPal())
-				return TR("32X (PAL)");
+				return tr("32X (PAL)");
 			else
-				return TR("32X (NTSC)");
+				return tr("32X (NTSC)");
 		
 		case LibGens::Rom::MDP_SYSTEM_MCD32X:
 			if (region.region() == LibGens::SysRegion::REGION_US_NTSC)
-				return TR("Sega CD 32X");
+				return tr("Sega CD 32X");
 			else
-				return TR("Mega CD 32X");
+				return tr("Mega CD 32X");
 		
 		case LibGens::Rom::MDP_SYSTEM_SMS:
-			return TR("Master System");
+			return tr("Master System");
 		
 		case LibGens::Rom::MDP_SYSTEM_GG:
-			return TR("Game Gear");
+			return tr("Game Gear");
 		
 		case LibGens::Rom::MDP_SYSTEM_SG1000:
-			return TR("SG-1000");
+			return tr("SG-1000");
 		
 		case LibGens::Rom::MDP_SYSTEM_PICO:
-			return TR("Pico");
+			return tr("Pico");
 		
 		default:
-			return TR("Unknown");
+			return tr("Unknown");
 	}
 }
 
@@ -613,7 +610,7 @@ void EmuManager::setSaveSlot(int slotNum)
 	if (m_rom)
 	{
 		// ROM is loaded.
-		QString osdMsg = TR("Save Slot %1 [%2]").arg(slotNum);
+		QString osdMsg = tr("Save Slot %1 [%2]").arg(slotNum);
 		
 		// Check if the file exists.
 		QString filename = getSaveStateFilename();
@@ -621,7 +618,7 @@ void EmuManager::setSaveSlot(int slotNum)
 		{
 			// Savestate exists.
 			// TODO: Load the preview image.
-			osdMsg = osdMsg.arg(TR("OCCUPIED"));
+			osdMsg = osdMsg.arg(tr("OCCUPIED"));
 			
 			// Check if the savestate has a preview image.
 			LibZomg::Zomg zomg(filename.toUtf8().constData(), LibZomg::Zomg::ZOMG_LOAD);
@@ -669,7 +666,7 @@ void EmuManager::setSaveSlot(int slotNum)
 		else
 		{
 			// Savestate doesn't exist.
-			osdMsg = osdMsg.arg(TR("EMPTY"));
+			osdMsg = osdMsg.arg(tr("EMPTY"));
 			emit osdPrintMsg(1500, osdMsg);
 			emit osdShowPreview(0, QImage());
 		}
@@ -677,7 +674,7 @@ void EmuManager::setSaveSlot(int slotNum)
 	else
 	{
 		// ROM is not loaded.
-		QString osdMsg = TR("Save Slot %1 selected.").arg(slotNum);
+		QString osdMsg = tr("Save Slot %1 selected.").arg(slotNum);
 		emit osdPrintMsg(1500, osdMsg);
 		emit osdShowPreview(0, QImage());
 	}

@@ -26,10 +26,6 @@
 // Qt includes.
 #include <QtGui/QPushButton>
 
-// Text translation macro.
-#define TR(text) \
-	QCoreApplication::translate("ZipSelectDialog", (text), NULL, QCoreApplication::UnicodeUTF8)
-
 namespace GensQt4
 {
 

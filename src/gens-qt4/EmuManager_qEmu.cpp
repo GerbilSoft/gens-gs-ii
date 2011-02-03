@@ -53,9 +53,6 @@
 #include <QtGui/QImage>
 #include <QtGui/QImageWriter>
 
-// Text translation macro.
-#define TR(text) \
-	QCoreApplication::translate("EmuManager_qEmu", (text), NULL, QCoreApplication::UnicodeUTF8)
 
 namespace GensQt4
 {
@@ -226,7 +223,7 @@ void EmuManager::doCtrlChange(int port, LibGens::IoBase::IoType type)
 	*prevDevPtr = dev;
 	
 	// Print a message on the OSD.
-	QString osdMsg = TR("Port %1 set to %2.");
+	QString osdMsg = tr("Port %1 set to %2.");
 	osdMsg = osdMsg.arg(port + 1);	// TODO: Use "E" for Port 3.
 	osdMsg = osdMsg.arg(QString::fromLatin1(dev->devName()));
 	
@@ -332,7 +329,7 @@ void EmuManager::doScreenShot(void)
 	imgWriter.write(img);
 	
 	// Print a message on the OSD.
-	QString osdMsg = TR("Screenshot %1 saved.");
+	QString osdMsg = tr("Screenshot %1 saved.");
 	osdMsg = osdMsg.arg(scrNumber);
 	emit osdPrintMsg(1500, osdMsg);
 }
@@ -349,7 +346,7 @@ void EmuManager::doAudioRate(int newRate)
 	m_audio->setRate(newRate);
 	
 	// Print a message on the OSD.
-	QString osdMsg = TR("Audio sampling rate set to %L1 Hz.");
+	QString osdMsg = tr("Audio sampling rate set to %L1 Hz.");
 	osdMsg = osdMsg.arg(newRate);
 	
 	// Emit the signal.
@@ -368,8 +365,8 @@ void EmuManager::doAudioStereo(bool newStereo)
 	m_audio->setStereo(newStereo);
 	
 	// Print a message on the OSD.
-	QString osdMsg = TR("Audio set to %1.");
-	osdMsg = osdMsg.arg(newStereo ? TR("Stereo") : TR("Mono"));
+	QString osdMsg = tr("Audio set to %1.");
+	osdMsg = osdMsg.arg(newStereo ? tr("Stereo") : tr("Mono"));
 	emit osdPrintMsg(1500, osdMsg);
 }
 
@@ -401,14 +398,14 @@ void EmuManager::doSaveState(const char *filename, int saveSlot)
 	{
 		// Savestate saved.
 		if (saveSlot >= 0)
-			osdMsg = TR("State %1 saved.").arg(saveSlot);
+			osdMsg = tr("State %1 saved.").arg(saveSlot);
 		else
-			osdMsg = TR("State saved in %1").arg(sFilename);
+			osdMsg = tr("State saved in %1").arg(sFilename);
 	}
 	else
 	{
 		// Error loading savestate.
-		osdMsg = TR("Error saving state: %1").arg(ret);
+		osdMsg = tr("Error saving state: %1").arg(ret);
 	}
 	
 	// Print a message on the OSD.
@@ -433,14 +430,14 @@ void EmuManager::doLoadState(const char *filename, int saveSlot)
 	{
 		// Savestate loaded.
 		if (saveSlot >= 0)
-			osdMsg = TR("State %1 loaded.").arg(saveSlot);
+			osdMsg = tr("State %1 loaded.").arg(saveSlot);
 		else
-			osdMsg = TR("State loaded from %1").arg(sFilename);
+			osdMsg = tr("State loaded from %1").arg(sFilename);
 	}
 	else
 	{
 		// Error loading savestate.
-		osdMsg = TR("Error loading state: %1").arg(ret);
+		osdMsg = tr("Error loading state: %1").arg(ret);
 	}
 	
 	// Print a message on the OSD.
@@ -485,13 +482,13 @@ void EmuManager::doResetEmulator(bool hardReset)
 	{
 		// Do a hard reset.
 		gqt4_emuContext->hardReset();
-		emit osdPrintMsg(2500, TR("Hard Reset."));
+		emit osdPrintMsg(2500, tr("Hard Reset."));
 	}
 	else
 	{
 		// Do a soft reset.
 		gqt4_emuContext->softReset();
-		emit osdPrintMsg(2500, TR("Soft Reset."));
+		emit osdPrintMsg(2500, tr("Soft Reset."));
 	}
 }
 

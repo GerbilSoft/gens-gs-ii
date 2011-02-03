@@ -46,17 +46,13 @@
 #include <QtCore/QDir>
 #include <QtCore/QStringList>
 
-// Text translation macro.
-#include <QtCore/QCoreApplication>
-#define TR(text) \
-	QCoreApplication::translate("FindCdromUnix", (text), NULL, QCoreApplication::UnicodeUTF8)
-
 #ifdef Q_OS_LINUX
 // HDIO_GET_IDENTITY
 #include <linux/hdreg.h>
 // CDROM_GET_CAPABILITY
 #include <linux/cdrom.h>
 #endif
+
 
 namespace GensQt4
 {
@@ -162,7 +158,7 @@ int FindCdromUnix::query_int(void)
 		// If the disc is blank, set the disc label to "Blank [disc_type]".
 		// TODO: Make this a common FindCdromBase function?
 		if (drive.disc_type != DISC_TYPE_NONE && drive.disc_blank)
-			drive.disc_label = TR("Blank %1").arg(GetDiscTypeName(drive.disc_type));
+			drive.disc_label = tr("Blank %1").arg(GetDiscTypeName(drive.disc_type));
 		
 		// Emit the driveUpdated() signal for this drive.
 		emit driveUpdated(drive);
@@ -281,7 +277,7 @@ QString FindCdromUnix::os_GetDiscLabel(int fd)
 {
 	// TODO: This only gets the ISO-9660 disc label.
 	// Add support for Joliet, Rock Ridge, UDF, and HFS.
-	QString discLabel = TR("Unknown disc type.");
+	QString discLabel = tr("Unknown disc type.");
 	
 	// Read a sector (2,048 bytes) at 0x8000.
 	// TODO: Use standard lseek()/read(), or Linux ioctl?

@@ -26,10 +26,6 @@
 #include "McdControlWindow.hpp"
 #include "gqt4_main.hpp"
 
-// Text translation macro.
-#define TR(text) \
-	QCoreApplication::translate("McdControlWindow", (text), NULL, QCoreApplication::UnicodeUTF8)
-
 /**
  * QICON_FROMTHEME(): Icon loading function.
  * Qt 4.6 supports FreeDesktop.org icon themes.
@@ -82,7 +78,7 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 	const QString iconRefreshFdo = QString::fromLatin1("view-refresh");
 	const QString iconRefreshQrc = QString::fromLatin1(":/oxygen-16x16/view-refresh.png");
 	btnRefresh = new QPushButton(QICON_FROMTHEME(iconRefreshFdo, iconRefreshQrc),
-					TR("&Refresh"), this);
+					tr("&Refresh"), this);
 	connect(btnRefresh, SIGNAL(clicked()), this, SLOT(query()));
 	// NOTE: "ResetRole" isn't exactly the right thing, but it works.
 	// On KDE, the button's on the left side of the dialog, whereas "Close" is on the right.
@@ -173,7 +169,7 @@ void McdControlWindow::query(void)
 		// No CD-ROM drive handler is available.
 		// TODO: Center-align the text by using QItemDelegate.
 		cboCdDrives->setEnabled(false);
-		cboCdDrives->addItem(TR("No CD-ROM drive handler is available."));
+		cboCdDrives->addItem(tr("No CD-ROM drive handler is available."));
 		cboCdDrives->setCurrentIndex(0);
 		return;
 	}
@@ -185,7 +181,7 @@ void McdControlWindow::query(void)
 	// TODO: Center-align the text by using QItemDelegate.
 	// TODO: Add an animated "Searching..." icon.
 	cboCdDrives->setEnabled(false);
-	cboCdDrives->addItem(TR("Searching for CD-ROM drives..."));
+	cboCdDrives->addItem(tr("Searching for CD-ROM drives..."));
 	cboCdDrives->setCurrentIndex(0);
 	
 	// Query the drives.
@@ -209,7 +205,7 @@ void McdControlWindow::addDriveEntry(const CdromDriveEntry& drive, int index)
 	
 	// Add the disc label if a disc is present.
 	if (drive.disc_type == 0)
-		item_desc += TR("No medium found.");
+		item_desc += tr("No medium found.");
 	else
 		item_desc += drive.disc_label;
 	
@@ -286,7 +282,7 @@ void McdControlWindow::driveQueryFinished(void)
 		// Query list is empty.
 		// TODO: Center-align the text by using QItemDelegate.
 		cboCdDrives->setEnabled(false);
-		cboCdDrives->addItem(TR("No CD-ROM drives found."));
+		cboCdDrives->addItem(tr("No CD-ROM drives found."));
 		cboCdDrives->setCurrentIndex(0);
 		return;
 	}
@@ -335,7 +331,7 @@ void McdControlWindow::driveRemoved(const QString& path)
 		{
 			// No drives left.
 			cboCdDrives->setEnabled(false);
-			cboCdDrives->addItem(TR("No CD-ROM drives found."));
+			cboCdDrives->addItem(tr("No CD-ROM drives found."));
 			cboCdDrives->setCurrentIndex(0);
 		}
 	}

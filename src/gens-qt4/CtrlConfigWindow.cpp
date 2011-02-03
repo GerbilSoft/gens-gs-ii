@@ -24,12 +24,9 @@
 #include "CtrlConfigWindow.hpp"
 #include "gqt4_main.hpp"
 
-// Text translation macro.
-#define TR(text) \
-	QCoreApplication::translate("CtrlConfigWindow", (text), NULL, QCoreApplication::UnicodeUTF8)
-
 // EmuMD has the I/O devices.
 #include "libgens/MD/EmuMD.hpp"
+
 
 namespace GensQt4
 {
@@ -140,15 +137,15 @@ const QString CtrlConfigWindow::GetShortDeviceName(LibGens::IoBase::IoType devTy
 	{
 		case IoBase::IOT_NONE:
 		default:
-			return TR("None");
+			return tr("None");
 		
-		case IoBase::IOT_3BTN:		return TR("3-button");
-		case IoBase::IOT_6BTN:		return TR("6-button");
-		case IoBase::IOT_2BTN:		return TR("2-button");
-		case IoBase::IOT_MEGA_MOUSE:	return TR("Mega Mouse");
-		case IoBase::IOT_TEAMPLAYER:	return TR("Teamplayer");
+		case IoBase::IOT_3BTN:		return tr("3-button");
+		case IoBase::IOT_6BTN:		return tr("6-button");
+		case IoBase::IOT_2BTN:		return tr("2-button");
+		case IoBase::IOT_MEGA_MOUSE:	return tr("Mega Mouse");
+		case IoBase::IOT_TEAMPLAYER:	return tr("Teamplayer");
 		case IoBase::IOT_4WP_MASTER:	/* see below */
-		case IoBase::IOT_4WP_SLAVE:	return TR("4-Way Play");
+		case IoBase::IOT_4WP_SLAVE:	return tr("4-Way Play");
 	}
 }
 
@@ -167,15 +164,15 @@ const QString CtrlConfigWindow::GetLongDeviceName(LibGens::IoBase::IoType devTyp
 	{
 		case IoBase::IOT_NONE:
 		default:
-			return TR("No device connected.");
+			return tr("No device connected.");
 		
-		case IoBase::IOT_3BTN:		return TR("3-button gamepad");
-		case IoBase::IOT_6BTN:		return TR("6-button gamepad");
-		case IoBase::IOT_2BTN:		return TR("2-button gamepad (SMS)");
-		case IoBase::IOT_MEGA_MOUSE:	return TR("Mega Mouse");
-		case IoBase::IOT_TEAMPLAYER:	return TR("Sega Teamplayer");
+		case IoBase::IOT_3BTN:		return tr("3-button gamepad");
+		case IoBase::IOT_6BTN:		return tr("6-button gamepad");
+		case IoBase::IOT_2BTN:		return tr("2-button gamepad (SMS)");
+		case IoBase::IOT_MEGA_MOUSE:	return tr("Mega Mouse");
+		case IoBase::IOT_TEAMPLAYER:	return tr("Sega Teamplayer");
 		case IoBase::IOT_4WP_MASTER:	/* see below */
-		case IoBase::IOT_4WP_SLAVE:	return TR("EA 4-Way Play");
+		case IoBase::IOT_4WP_SLAVE:	return tr("EA 4-Way Play");
 	}
 }
 
@@ -235,7 +232,7 @@ void CtrlConfigWindow::updatePortSettings(void)
 	
 	// Set the "Port Settings" text.
 	// TODO: Port names for when e.g. EXT, J-Cart, etc. are added.
-	grpPortSettings->setTitle(TR("Controller Settings: Port %1").arg(port + 1));
+	grpPortSettings->setTitle(tr("Controller Settings: Port %1").arg(port + 1));
 	
 	// Set the device type in the dropdown.
 	int devIndex = m_devType[port];

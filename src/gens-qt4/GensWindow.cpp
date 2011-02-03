@@ -46,10 +46,6 @@
 #include <QtGui/QIcon>
 #include <QtGui/QFileDialog>
 
-// Text translation macro.
-#define TR(text) \
-	QCoreApplication::translate("GensWindow", (text), NULL, QCoreApplication::UnicodeUTF8)
-
 
 namespace GensQt4
 {
@@ -344,7 +340,7 @@ void GensWindow::menuTriggered(int id)
 					m_vBackend->setVbDirty();
 					m_vBackend->vbUpdate();
 					
-					QString msg = TR("Color depth set to %1-bit.").arg(15);
+					QString msg = tr("Color depth set to %1-bit.").arg(15);
 					m_vBackend->osd_printf(1500, "%s", msg.toUtf8().constData());
 					break;
 				}
@@ -355,7 +351,7 @@ void GensWindow::menuTriggered(int id)
 					m_vBackend->setVbDirty();
 					m_vBackend->vbUpdate();
 					
-					QString msg = TR("Color depth set to %1-bit.").arg(16);
+					QString msg = tr("Color depth set to %1-bit.").arg(16);
 					m_vBackend->osd_printf(1500, "%s", msg.toUtf8().constData());
 					break;
 				}
@@ -366,7 +362,7 @@ void GensWindow::menuTriggered(int id)
 					m_vBackend->setVbDirty();
 					m_vBackend->vbUpdate();
 					
-					QString msg = TR("Color depth set to %1-bit.").arg(32);
+					QString msg = tr("Color depth set to %1-bit.").arg(32);
 					m_vBackend->osd_printf(1500, "%s", msg.toUtf8().constData());
 					break;
 				}
@@ -469,10 +465,10 @@ void GensWindow::menuTriggered(int id)
 void GensWindow::setGensTitle(void)
 {
 	// TODO: Indicate UI status.
-	QString title = TR("Gens/GS II");
-	title += QChar(L' ') + TR("dev");
+	QString title = tr("Gens/GS II");
+	title += QChar(L' ') + tr("dev");
 #if !defined(GENS_ENABLE_EMULATION)
-	title += QChar(L' ') + TR("NO-EMU");
+	title += QChar(L' ') + tr("NO-EMU");
 #endif
 	title += QString::fromLatin1(" - ");
 	
@@ -480,7 +476,7 @@ void GensWindow::setGensTitle(void)
 	if (!m_emuManager.isRomOpen())
 	{
 		// No ROM is running.
-		title += TR("Idle");
+		title += tr("Idle");
 	}
 	else
 	{

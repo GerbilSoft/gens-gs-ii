@@ -27,10 +27,6 @@
 #include <QtGui/QApplication>
 #include <QtGui/QStyle>
 
-// Text translation macro.
-#include <QtCore/QCoreApplication>
-#define TR(text) \
-	QCoreApplication::translate("GensZipDirModel", (text), NULL, QCoreApplication::UnicodeUTF8)
 
 namespace GensQt4
 {
@@ -117,9 +113,9 @@ QVariant GensZipDirModel::headerData(int section, Qt::Orientation orientation, i
 	{
 		switch (section)
 		{
-			case 0:		return TR("Filename");
-			case 1:		return TR("Full Filename");
-			case 2:		return TR("Filesize");
+			case 0:		return tr("Filename");
+			case 1:		return tr("Full Filename");
+			case 2:		return tr("Filesize");
 			default:	return QVariant();
 		}
 	}

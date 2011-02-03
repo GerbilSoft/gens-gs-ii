@@ -24,11 +24,6 @@
 // C includes.
 #include <stdio.h>
 
-// Text translation macro.
-#include <QtCore/QCoreApplication>
-#define TR(text) \
-	QCoreApplication::translate("FindCdromWin32", (text), NULL, QCoreApplication::UnicodeUTF8)
-
 // Win32 includes.
 // Common Controls 6 is required for SHGetImageList().
 #define _WIN32_IE 0x0600
@@ -45,6 +40,7 @@ static const GUID Gens_IID_IImageList = {0x46EB5926, 0x582E, 0x4017, {0x9F, 0xDF
 
 // SPTI handler.
 #include "Spti.hpp"
+
 
 namespace GensQt4
 {
@@ -143,7 +139,7 @@ int FindCdromWin32::query_int(void)
 		// If the disc is blank, set the disc label to "Blank [disc_type]".
 		// TODO: Make this a common FindCdromBase function?
 		if (drive.disc_type != DISC_TYPE_NONE && drive.disc_blank)
-			drive.disc_label = TR("Blank %1").arg(GetDiscTypeName(drive.disc_type));
+			drive.disc_label = tr("Blank %1").arg(GetDiscTypeName(drive.disc_type));
 		
 		// Emit the driveUpdated() signal for this drive.
 		emit driveUpdated(drive);

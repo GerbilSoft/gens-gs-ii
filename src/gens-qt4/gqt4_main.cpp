@@ -46,6 +46,7 @@
 // Gens window.
 static GensQt4::GensWindow *gens_window = NULL;
 
+
 /**
  * gens_main(): Main entry point.
  * @param argc Number of arguments.

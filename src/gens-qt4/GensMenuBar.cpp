@@ -26,10 +26,6 @@
 // Qt includes.
 #include <QtGui/QApplication>
 
-// Text translation macro.
-#define TR(text) \
-	QCoreApplication::translate("GensMenuBar", (text), NULL, QCoreApplication::UnicodeUTF8)
-
 /**
  * QICON_FROMTHEME(): Icon loading function.
  * Qt 4.6 supports FreeDesktop.org icon themes.
@@ -194,7 +190,7 @@ void GensMenuBar::parseMainMenu(const GensMenuBar::MainMenuItem *mainMenu)
 	{
 		// Create a new submenu.
 		mnuSubMenu = new QMenu(this);
-		mnuSubMenu->setTitle(TR(mainMenu->text));
+		mnuSubMenu->setTitle(tr(mainMenu->text));
 		
 		// Parse the menu.
 		parseMenu(mainMenu->submenu, mnuSubMenu);
@@ -233,7 +229,7 @@ void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 			continue;
 		
 		mnuItem = new QAction(parent);
-		mnuItem->setText(TR(menu->text));
+		mnuItem->setText(tr(menu->text));
 		
 		if (menu->type == GMI_CHECK)
 			mnuItem->setCheckable(true);

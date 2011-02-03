@@ -33,10 +33,6 @@
 #include <QtDBus/QDBusMessage>
 #include <QtDBus/QDBusReply>
 
-// Text translation macro.
-#include <QtCore/QCoreApplication>
-#define TR(text) \
-	QCoreApplication::translate("FindCdromUDisks", (text), NULL, QCoreApplication::UnicodeUTF8)
 
 namespace GensQt4
 {
@@ -296,7 +292,7 @@ int FindCdromUDisks::queryUDisksDevice(const QDBusObjectPath& objectPath)
 	// If the disc is blank, set the disc label to "Blank [disc_type]".
 	// TODO: Make this a common FindCdromBase function?
 	if (drive.disc_type != DISC_TYPE_NONE && drive.disc_blank)
-		drive.disc_label = TR("Blank %1").arg(GetDiscTypeName(drive.disc_type));
+		drive.disc_label = tr("Blank %1").arg(GetDiscTypeName(drive.disc_type));
 	
 	// Emit the driveUpdated() signal for this drive.
 	emit driveUpdated(drive);
