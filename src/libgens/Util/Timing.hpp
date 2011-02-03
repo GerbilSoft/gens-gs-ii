@@ -65,6 +65,12 @@ class Timing
 		};
 		
 		static TimingMethod GetTimingMethod(void) { return ms_TMethod; }
+		
+		/**
+		 * GetTimingMethodName(): Get the name of a timing method.
+		 * @param tMethod Timing method.
+		 * @return Timing method name. (ASCII)
+		 */
 		static const char *GetTimingMethodName(TimingMethod tMethod);
 		
 		static double GetTimeD(void);

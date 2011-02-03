@@ -136,7 +136,7 @@ void Timing::End(void)
 /**
  * GetTimingMethodName(): Get the name of a timing method.
  * @param tMethod Timing method.
- * @return Timing method name.
+ * @return Timing method name. (ASCII)
  */
 const char *Timing::GetTimingMethodName(TimingMethod tMethod)
 {
