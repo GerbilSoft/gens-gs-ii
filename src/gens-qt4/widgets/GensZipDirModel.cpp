@@ -232,7 +232,7 @@ bool GensZipDirModel::insertZEntry(const mdp_z_entry_t *z_entry,
 		for (int i = 0; i < (dirList.size() - 1); i++)
 		{
 			// Get the directory component.
-			cur_path += dirList[i] + QChar(L'/');
+			cur_path += dirList.at(i) + QChar(L'/');
 			dirIter = m_dirMap.find(cur_path);
 			if (dirIter == m_dirMap.end())
 			{
@@ -265,7 +265,7 @@ bool GensZipDirModel::insertZEntry(const mdp_z_entry_t *z_entry,
 	}
 	
 	// Set the display filename.
-	disp_filename = dirList[dirList.size() - 1];
+	disp_filename = dirList.at(dirList.size() - 1);
 	
 	// Insert a row at the end.
 	int row = rowCount(itemIndex);
