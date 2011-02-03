@@ -71,24 +71,29 @@ AboutWindow::AboutWindow(QWidget *parent)
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
 	
+	// Line break string.
+	const QString sLineBreak = QString::fromLatin1("<br/>");
+	
 	// Build the program title text.
 	QString sPrgTitle =
-		"<b>" + TR("Gens/GS II") + "</b><br />\n" +
-		TR("Development Build") + "<br />\n";
+		QString::fromLatin1("<b>") + TR("Gens/GS II") + QString::fromLatin1("</b>") + sLineBreak +
+		TR("Development Build") + sLineBreak;
 	
 #if !defined(GENS_ENABLE_EMULATION)
-	sPrgTitle += "<b>" + TR("NO-EMULATION BUILD") + "</b><br />\n";
+	sPrgTitle += QString::fromLatin1("<b>") +
+			TR("NO-EMULATION BUILD") +
+			QString::fromLatin1("</b>") + sLineBreak;
 #endif
 	
 	if (LibGens::version_vcs != NULL)
 	{
 		// Append the VCS revision to the title text.
-		sPrgTitle += QString(LibGens::version_vcs) + "<br />\n";
+		sPrgTitle += QString::fromLatin1(LibGens::version_vcs) + sLineBreak;
 	}
 	
-	sPrgTitle += "<br />\n" +
-		TR("Sega Genesis / Mega Drive,") + "<br />\n" +
-		TR("Sega CD / Mega CD,") + "<br />\n" +
+	sPrgTitle += sLineBreak +
+		TR("Sega Genesis / Mega Drive,") + sLineBreak +
+		TR("Sega CD / Mega CD,") + sLineBreak +
 		TR("Sega 32X emulator");
 	
 	// Set the program title text.
@@ -98,6 +103,7 @@ AboutWindow::AboutWindow(QWidget *parent)
 	lblDebugInfo->setText(AboutWindow::GetDebugInfo());
 	
 	// Build the credits text.
+	// TODO: Use QString instead of stringstream?
 	stringstream ss_credits;
 	const GensGS_credits_t *p_credits = &GensGS_credits[0];
 	for (; p_credits->credit_title || p_credits->credit_name; p_credits++)
@@ -201,12 +207,12 @@ QString AboutWindow::GetDebugInfo(void)
 {
 	// Debug information.
 	QString sDebugInfo =
-		TR("Compiled using Qt") + " " + QT_VERSION_STR + ".\n" +
-		TR("Using Qt") + " " + qVersion() + ".\n\n";
+		TR("Compiled using Qt") + QChar(L' ') + QString::fromLatin1(QT_VERSION_STR) + QString::fromLatin1(".\n") +
+		TR("Using Qt") + QChar(L' ') + QString::fromLatin1(qVersion()) + QString::fromLatin1(".\n\n");
 	
 	// CPU flags.
 	// TODO: Move the array of CPU flag names to LibGens.
-	sDebugInfo += TR("CPU Flags") + ": ";
+	sDebugInfo += TR("CPU Flags") + QString::fromLatin1(": ");
 #if defined(__i386__) || defined(__amd64__)
 	const char *CpuFlagNames[11] =
 	{
@@ -220,23 +226,24 @@ QString AboutWindow::GetDebugInfo(void)
 		if (CPU_Flags & (1 << i))
 		{
 			if (cnt != 0)
-				sDebugInfo += ", ";
-			sDebugInfo += CpuFlagNames[i];
+				sDebugInfo += QString::fromLatin1(", ");
+			sDebugInfo += QString::fromLatin1(CpuFlagNames[i]);
 			cnt++;
 		}
 	}
-	sDebugInfo += "\n";
+	sDebugInfo += QChar(L'\n');
 #else
-	sDebugInfo += "(none)\n";
+	sDebugInfo += QString::fromLatin1("(none)\n");
 #endif /* defined(__i386__) || defined(__amd64__) */
 	
 	// Timing method.
-	sDebugInfo += TR("Timing Method") + ": " +
-		LibGens::Timing::GetTimingMethodName(LibGens::Timing::GetTimingMethod()) + "()\n\n";
+	sDebugInfo += TR("Timing Method") + QString::fromLatin1(": ") +
+		QString::fromLatin1(LibGens::Timing::GetTimingMethodName(LibGens::Timing::GetTimingMethod())) +
+		QString::fromLatin1("()\n\n");
 	
 #ifdef Q_OS_WIN32
 	// Win32 code page information.
-	sDebugInfo += GetCodePageInfo() + "\n";
+	sDebugInfo += GetCodePageInfo() + QChar(L'\n');
 #endif /* Q_OS_WIN32 */
 	
 #ifndef HAVE_OPENGL
@@ -245,34 +252,42 @@ QString AboutWindow::GetDebugInfo(void)
 	const char *glVendor = (const char*)glGetString(GL_VENDOR);
 	const char *glRenderer = (const char*)glGetString(GL_RENDERER);
 	const char *glVersion = (const char*)glGetString(GL_VERSION);
-	sDebugInfo += TR("OpenGL vendor string:") + " " +
-			QString(glVendor ? glVendor : TR("(unknown)")) + "\n" +
-			TR("OpenGL renderer string:") + " " +
-			QString(glRenderer ? glRenderer : TR("(unknown)")) + "\n" +
-			TR("OpenGL version string:") + " " +
-			QString(glVersion ? glVersion : TR("(unknown)")) + "\n";
+	sDebugInfo += TR("OpenGL vendor string:") + QChar(L' ') +
+			QString(glVendor ? QString::fromLatin1(glVendor) : TR("(unknown)")) + QChar(L'\n') +
+			TR("OpenGL renderer string:") + QChar(L' ') +
+			QString(glRenderer ? QString::fromLatin1(glRenderer) : TR("(unknown)")) + QChar(L'\n') +
+			TR("OpenGL version string:") + QChar(L' ') +
+			QString(glVersion ? QString::fromLatin1(glVersion) : TR("(unknown)")) + QChar(L'\n');
 	
 #ifdef GL_SHADING_LANGUAGE_VERSION
 	if (glVersion && glVersion[0] >= '2' && glVersion[1] == '.')
 	{
 		const char *glslVersion = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
-		sDebugInfo += TR("GLSL version string:") + " " +
-				QString(glslVersion ? glslVersion : "(unknown)") + "\n";
+		sDebugInfo += TR("GLSL version string:") + QChar(L' ') +
+				QString(glslVersion
+					? QString::fromLatin1(glslVersion)
+					: TR("(unknown)")) + QChar(L'\n');
 	}
 	
 	// OpenGL extensions.
-	sDebugInfo += "\n";
+	sDebugInfo += QChar(L'\n');
 #ifndef HAVE_GLEW
-	sDebugInfo += "GLEW disabled; no GL extensions supported.\n";
+	sDebugInfo += TR("GLEW disabled; no GL extensions supported.") + QChar(L'\n');
 #else
 	const char *glewVersion = (const char*)glewGetString(GLEW_VERSION);
-	sDebugInfo += "GLEW version " + QString(glewVersion ? glewVersion : TR("(unknown)")) + "\n" +
-			TR("GL extensions in use:") + "\n";
+	sDebugInfo += QString::fromLatin1("GLEW version ") +
+			QString(glewVersion
+				? QString::fromLatin1(glewVersion)
+				: TR("(unknown)")) + QChar(L'\n') +
+			TR("GL extensions in use:") + QChar(L'\n');
 	
 	// TODO: Print "No GL extensions in use." if no GL extensions are in use.
 	const QChar chrBullet(0x2022);	// U+2022: BULLET
 	if (GLEW_ARB_fragment_program)
-		sDebugInfo += chrBullet + QString(" ") + "GL_ARB_fragment_program" + "\n";
+	{
+		sDebugInfo += chrBullet + QString::fromLatin1(" ") +
+			QString::fromLatin1("GL_ARB_fragment_program") + QChar(L'\n');
+	}
 #endif /* HAVE_GLEW */
 
 #endif /* GL_SHADING_LANGUAGE_VERSION */

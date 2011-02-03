@@ -97,8 +97,8 @@ FindCdromUDisks::FindCdromUDisks()
 {
 	// Connect to UDisks over D-BUS.
 	QDBusConnection bus = QDBusConnection::systemBus();
-	m_ifUDisks = new QDBusInterface("org.freedesktop.UDisks",
-					"/org/freedesktop/UDisks",
+	m_ifUDisks = new QDBusInterface(QString::fromLatin1("org.freedesktop.UDisks"),
+					QString::fromLatin1("/org/freedesktop/UDisks"),
 					QString(), bus);
 	if (!m_ifUDisks->isValid())
 	{
@@ -167,7 +167,7 @@ int FindCdromUDisks::query_int(void)
 	// Attempt to get all disk devices.
 	// Method: EnumerateDevices
 	// Return type: ao (QList<QDBusObjectPath>)
-	QDBusReply<QtDBus_ao_t> reply_EnumerateDevices = m_ifUDisks->call("EnumerateDevices");
+	QDBusReply<QtDBus_ao_t> reply_EnumerateDevices = m_ifUDisks->call(QString::fromLatin1("EnumerateDevices"));
 	if (!reply_EnumerateDevices.isValid())
 	{
 		printf("EnumerateDevices failed: %s\n", m_ifUDisks->lastError().message().toLocal8Bit().constData());
@@ -202,9 +202,9 @@ int FindCdromUDisks::queryUDisksDevice(const QDBusObjectPath& objectPath)
 	QDBusConnection bus = QDBusConnection::systemBus();
 	
 	QScopedPointer<QDBusInterface> drive_if(
-					new QDBusInterface("org.freedesktop.UDisks",
+					new QDBusInterface(QString::fromLatin1("org.freedesktop.UDisks"),
 								objectPath.path(),
-								"org.freedesktop.UDisks.Device", bus));
+								QString::fromLatin1("org.freedesktop.UDisks.Device"), bus));
 	if (!drive_if->isValid())
 	{
 		// Drive interface is invalid.
@@ -259,7 +259,7 @@ int FindCdromUDisks::queryUDisksDevice(const QDBusObjectPath& objectPath)
 		// Check the drive media table.
 		for (size_t i = 0; i < sizeof(ms_UDisks_DriveID)/sizeof(ms_UDisks_DriveID[0]); i++)
 		{
-			if (drive_media_id == ms_UDisks_DriveID[i])
+			if (drive_media_id == QString::fromLatin1(ms_UDisks_DriveID[i]))
 			{
 				// Found a match.
 				drive.discs_supported |= (1 << i);
@@ -282,7 +282,7 @@ int FindCdromUDisks::queryUDisksDevice(const QDBusObjectPath& objectPath)
 	{
 		for (size_t i = 0; i < sizeof(ms_UDisks_DriveID)/sizeof(ms_UDisks_DriveID[0]); i++)
 		{
-			if (DriveMedia == ms_UDisks_DriveID[i])
+			if (DriveMedia == QString::fromLatin1(ms_UDisks_DriveID[i]))
 			{
 				// Found a match.
 				drive.disc_type = (1 << i);
@@ -325,7 +325,7 @@ void FindCdromUDisks::deviceRemoved(const QDBusObjectPath& objectPath)
 	// Assume the device file is _PATH_DEV + the last component of objectPath.
 	// TODO: Store the device filenames locally.
 	// TODO: Use QDir::separator()?
-	QString devFile = QString(_PATH_DEV) + objectPath.path().section('/', -1);
+	QString devFile = QString::fromLatin1(_PATH_DEV) + objectPath.path().section(QChar(L'/'), -1);
 	emit driveRemoved(devFile);
 }
 

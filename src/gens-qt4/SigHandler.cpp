@@ -307,60 +307,67 @@ void SigHandler::SignalHandler(int signum)
 	
 	// Show a message box.
 #ifdef RICKROLL
-	QString sMsg =
-		"Gens/GS II has given you up. (Signal " + QString::number(signum) + ")\n";
+	QString sMsg = QString::fromLatin1("Gens/GS II has given you up. (Signal %1)\n").arg(signum);
 #else
-	QString sMsg =
-		"Gens/GS II has crashed with Signal " + QString::number(signum) + ".\n";
+	QString sMsg = QString::fromLatin1("Gens/GS II has crashed with Signal %1.\n").arg(signum);
 #endif
 	
 	if (signame)
 	{
-		sMsg += QString(signame);
+		sMsg += QString::fromLatin1(signame);
 		if (sigdesc)
-			sMsg += ": " + QString(sigdesc);
-		sMsg += "\n";
+			sMsg += QString::fromLatin1(": ") + QString::fromLatin1(sigdesc);
+		sMsg += QChar(L'\n');
 	}
 	
 #ifdef HAVE_SIGACTION
 	if (siginfo && siginfo->signame)
 	{
-		sMsg += QString(siginfo->signame);
+		sMsg += QString::fromLatin1(siginfo->signame);
 		if (siginfo->sigdesc)
-			sMsg += ": " + QString(siginfo->sigdesc);
-		sMsg += "\n";
+			sMsg += QString::fromLatin1(": ") + QString::fromLatin1(siginfo->sigdesc);
+		sMsg += QChar(L'\n');
 	}
 #endif
 	
-	sMsg += "\n"
-		"Build Information:\n"
-		"- Platform: " GENS_PLATFORM "\n";
+	sMsg += QString::fromLatin1("\n"
+			"Build Information:\n"
+			"- Platform: " GENS_PLATFORM "\n"
+			);
 	
 	// TODO: Use MDP version number macros.
-	sMsg += "- Version: "
-		+ QString::number((LibGens::version >> 24) & 0xFF) + "."
-		+ QString::number((LibGens::version >> 16) & 0xFF) + "."
-		+ QString::number(LibGens::version & 0xFFFF);
+	sMsg += QString::fromLatin1("- Version: ") +
+			QString::number((LibGens::version >> 24) & 0xFF) + QChar(L'.') +
+			QString::number((LibGens::version >> 16) & 0xFF) + QChar(L'.') +
+			QString::number(LibGens::version & 0xFFFF);
 	
 	if (LibGens::version_desc)
-		sMsg += QString(" (") + LibGens::version_desc + ")";
-	sMsg += "\n";
+	{
+		sMsg += QString::fromLatin1(" (") +
+				QString::fromLatin1(LibGens::version_desc) + QChar(L')');
+	}
+	sMsg += QChar(L'\n');
 	
 	// VCS revision.
 	if (LibGens::version_vcs)
-		sMsg += QString("- ") + LibGens::version_vcs + "\n";
+	{
+		sMsg += QString::fromLatin1("- ") +
+				QString::fromLatin1(LibGens::version_vcs) + QChar(L'\n');
+	}
 	
-	sMsg += "\n"
-		"Please report this error to GerbilSoft.\n"
-		"- E-mail: gerbilsoft@verizon.net\n\n"
-		"Be sure to include detailed information about what you were "
-		"doing when this error occurred.";
+	sMsg += QString::fromLatin1("\n"
+			"Please report this error to GerbilSoft.\n"
+			"- E-mail: gerbilsoft@verizon.net\n\n"
+			"Be sure to include detailed information about what you were "
+			"doing when this error occurred."
+			);
 	
 	// Display the message box.
-	QMessageBox dialog(QMessageBox::Critical, "Gens/GS II Fatal Error", sMsg);
+	QMessageBox dialog(QMessageBox::Critical,
+				QString::fromLatin1("Gens/GS II Fatal Error"), sMsg);
 	dialog.setTextFormat(Qt::PlainText);
 #ifdef RICKROLL
-	QPixmap pxmRickRoll(":/gens/rick-roll.png");
+	QPixmap pxmRickRoll(QString::fromLatin1(":/gens/rick-roll.png"));
 	if (!pxmRickRoll.isNull())
 	{
 		dialog.setIconPixmap(pxmRickRoll);

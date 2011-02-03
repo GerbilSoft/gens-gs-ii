@@ -83,22 +83,12 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	updatePortButton(1);
 	
 	// Initialize the "Device" dropdown.
-	// TODO: Make a list of device names and icons.
-	cboDevice->addItem(QIcon(":/gens/controller-none.png"),
-			GetShortDeviceName(LibGens::IoBase::IOT_NONE));
-	cboDevice->addItem(QIcon(":/gens/controller-3btn.png"),
-			GetShortDeviceName(LibGens::IoBase::IOT_3BTN));
-	cboDevice->addItem(QIcon(":/gens/controller-6btn.png"),
-			GetShortDeviceName(LibGens::IoBase::IOT_6BTN));
-	cboDevice->addItem(QIcon(":/gens/controller-2btn.png"),
-			GetShortDeviceName(LibGens::IoBase::IOT_2BTN));
-	cboDevice->addItem(QIcon(":/gens/controller-mouse.png"),
-			GetShortDeviceName(LibGens::IoBase::IOT_MEGA_MOUSE));
-	cboDevice->addItem(QIcon(":/gens/controller-teamplayer.png"),
-			GetShortDeviceName(LibGens::IoBase::IOT_TEAMPLAYER));
 	// TODO: Handle Master/Slave devices.
-	cboDevice->addItem(QIcon(":/gens/controller-4wp.png"),
-			GetShortDeviceName(LibGens::IoBase::IOT_4WP_MASTER));
+	for (int i = LibGens::IoBase::IOT_NONE; i <= LibGens::IoBase::IOT_4WP_MASTER; i++)
+	{
+		cboDevice->addItem(QIcon(QString::fromLatin1(ms_CtrlIconFilenames[i])),
+				GetShortDeviceName((LibGens::IoBase::IoType)i));
+	}
 	
 	// Update the port settings.
 	updatePortSettings();
@@ -218,7 +208,7 @@ void CtrlConfigWindow::updatePortButton(int port)
 	}
 	
 	// Update the port icon and tooltip.
-	btnPort->setIcon(QIcon(ms_CtrlIconFilenames[m_devType[port]]));
+	btnPort->setIcon(QIcon(QString::fromLatin1(ms_CtrlIconFilenames[m_devType[port]])));
 	btnPort->setToolTip(GetLongDeviceName(m_devType[port]));
 }
 
@@ -245,7 +235,7 @@ void CtrlConfigWindow::updatePortSettings(void)
 	
 	// Set the "Port Settings" text.
 	// TODO: Port names for when e.g. EXT, J-Cart, etc. are added.
-	grpPortSettings->setTitle(TR("Controller Settings") + ": Port " + QString::number(port + 1));
+	grpPortSettings->setTitle(TR("Controller Settings: Port %1").arg(port + 1));
 	
 	// Set the device type in the dropdown.
 	int devIndex = m_devType[port];

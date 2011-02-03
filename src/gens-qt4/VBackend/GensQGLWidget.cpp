@@ -200,7 +200,7 @@ void GensQGLWidget::reallocTexOsd(void)
 	
 	// Load the OSD texture.
 	// TODO: Handle the case where the image isn't found.
-	QImage imgOsd = QImage(":/gens/vga-charset");
+	QImage imgOsd = QImage(QString::fromLatin1(":/gens/vga-charset.png"));
 	
 	if (imgOsd.colorCount() > 0)
 	{
@@ -657,7 +657,7 @@ void GensQGLWidget::printOsdText(void)
 		{
 			const RecOsd &recOsd = m_osdRecList[i];
 			msg = (recOsd.isRecording ? sRec : QChar(0x25A0)) +
-				recOsd.component + ' ';
+				recOsd.component + QChar(L' ');
 			
 			// TODO: If stopped, remove the message after a certain duration has passed.
 			
@@ -665,7 +665,7 @@ void GensQGLWidget::printOsdText(void)
 			int secs = (recOsd.duration / 1000);
 			int mins = (secs / 60);
 			secs %= 60;
-			msg += QString("%1:%2").arg(mins).arg(QString::number(secs), 2, '0');
+			msg += QString::fromLatin1("%1:%2").arg(mins).arg(QString::number(secs), 2, QChar(L'0'));
 			
 			// Calculate the message width.
 			const int msgW = ((msg.size() + 1) * ms_Osd_chrW);

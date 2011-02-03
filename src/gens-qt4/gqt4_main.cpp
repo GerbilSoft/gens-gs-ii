@@ -39,6 +39,10 @@
 #include "GensWindow.hpp"
 #include "SigHandler.hpp"
 
+// Text translation macro.
+#define TR(text) \
+	QCoreApplication::translate("gqt4_main", (text), NULL, QCoreApplication::UnicodeUTF8)
+
 // Gens window.
 static GensQt4::GensWindow *gens_window = NULL;
 
@@ -108,15 +112,14 @@ int gens_main(int argc, char *argv[])
 
 /**
  * gqt4_log_msg_critical(): LOG_MSG() critical error handler.
- * @param channel Debug channel.
- * @param msg Message. (Preformatted)
+ * @param channel Debug channel. (ASCII)
+ * @param msg Message. (Preformatted UTF-8)
  */
-void gqt4_log_msg_critical(const char *channel, const char *msg)
+void gqt4_log_msg_critical(const char *channel, const utf8_str *msg)
 {
-	QString title = "Gens Critical Error: " + QString(channel);
+	QString title = TR("Gens Critical Error: %1").arg(QString::fromLatin1(channel));
 	
-	QMessageBox dialog(QMessageBox::Critical,
-			   title, QString(msg));
+	QMessageBox dialog(QMessageBox::Critical, title, QString::fromUtf8(msg));
 	dialog.setTextFormat(Qt::PlainText);
 	dialog.exec();
 }

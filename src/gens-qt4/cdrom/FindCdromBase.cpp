@@ -116,26 +116,26 @@ QString FindCdromBase::GetDriveTypeName(DriveType drive_type)
 	{
 		case DRIVE_TYPE_NONE:
 		default:			return QString();
-		case DRIVE_TYPE_CDROM:		return "CD-ROM";
-		case DRIVE_TYPE_CD_R:		return "CD-R";
-		case DRIVE_TYPE_CD_RW:		return "CD-RW";
-		case DRIVE_TYPE_DVD:		return "DVD-ROM";
-		case DRIVE_TYPE_DVD_CD_RW:	return "DVD/CD-RW";
-		case DRIVE_TYPE_DVD_R:		return "DVD-R";
-		case DRIVE_TYPE_DVD_RW:		return "DVD-RW";
-		case DRIVE_TYPE_DVD_RAM:	return "DVD-RAM";
-		case DRIVE_TYPE_DVD_PLUS_RW:	return "DVD+RW";
-		case DRIVE_TYPE_DVD_PLUS_R_DL:	return "DVD+R DL";
-		case DRIVE_TYPE_DVD_PLUS_RW_DL:	return "DVD+RW DL";
-		case DRIVE_TYPE_BDROM:		return "Blu-ray";
-		case DRIVE_TYPE_BDROM_DVD_RW:	return "BD/DVD±RW";
-		case DRIVE_TYPE_BD_R:		return "BD-R";
-		case DRIVE_TYPE_BD_RE:		return "BD-RE";
-		case DRIVE_TYPE_HDDVD:		return "HD-DVD";
-		case DRIVE_TYPE_HDDVD_DVD_RW:	return "HD-DVD/DVD±RW";
-		case DRIVE_TYPE_HDDVD_R:	return "HD-DVD-R";
-		case DRIVE_TYPE_HDDVD_RW:	return "HD-DVD-RW";
-		case DRIVE_TYPE_MO:		return "MO";
+		case DRIVE_TYPE_CDROM:		return QString::fromLatin1("CD-ROM");
+		case DRIVE_TYPE_CD_R:		return QString::fromLatin1("CD-R");
+		case DRIVE_TYPE_CD_RW:		return QString::fromLatin1("CD-RW");
+		case DRIVE_TYPE_DVD:		return QString::fromLatin1("DVD-ROM");
+		case DRIVE_TYPE_DVD_CD_RW:	return QString::fromLatin1("DVD/CD-RW");
+		case DRIVE_TYPE_DVD_R:		return QString::fromLatin1("DVD-R");
+		case DRIVE_TYPE_DVD_RW:		return QString::fromLatin1("DVD-RW");
+		case DRIVE_TYPE_DVD_RAM:	return QString::fromLatin1("DVD-RAM");
+		case DRIVE_TYPE_DVD_PLUS_RW:	return QString::fromLatin1("DVD+RW");
+		case DRIVE_TYPE_DVD_PLUS_R_DL:	return QString::fromLatin1("DVD+R DL");
+		case DRIVE_TYPE_DVD_PLUS_RW_DL:	return QString::fromLatin1("DVD+RW DL");
+		case DRIVE_TYPE_BDROM:		return QString::fromLatin1("Blu-ray");
+		case DRIVE_TYPE_BDROM_DVD_RW:	return QString::fromUtf8("BD/DVD±RW");
+		case DRIVE_TYPE_BD_R:		return QString::fromLatin1("BD-R");
+		case DRIVE_TYPE_BD_RE:		return QString::fromLatin1("BD-RE");
+		case DRIVE_TYPE_HDDVD:		return QString::fromLatin1("HD-DVD");
+		case DRIVE_TYPE_HDDVD_DVD_RW:	return QString::fromUtf8("HD-DVD/DVD±RW");
+		case DRIVE_TYPE_HDDVD_R:	return QString::fromLatin1("HD-DVD-R");
+		case DRIVE_TYPE_HDDVD_RW:	return QString::fromLatin1("HD-DVD-RW");
+		case DRIVE_TYPE_MO:		return QString::fromLatin1("MO");
 	}
 }
 
@@ -152,28 +152,28 @@ QString FindCdromBase::GetDiscTypeName(uint32_t disc_type)
 	{
 		case DISC_TYPE_NONE:
 		default:			return QString();
-		case DISC_TYPE_CDROM:		return "CD-ROM";
-		case DISC_TYPE_CD_R:		return "CD-R";
-		case DISC_TYPE_CD_RW:		return "CD-RW";
-		case DISC_TYPE_DVD:		return "DVD-ROM";
-		case DISC_TYPE_DVD_R:		return "DVD-R";
-		case DISC_TYPE_DVD_RW:		return "DVD-RW";
-		case DISC_TYPE_DVD_RAM:		return "DVD-RAM";
-		case DISC_TYPE_DVD_PLUS_R:	return "DVD+R";
-		case DISC_TYPE_DVD_PLUS_RW:	return "DVD+RW";
-		case DISC_TYPE_DVD_PLUS_R_DL:	return "DVD+R DL";
-		case DISC_TYPE_DVD_PLUS_RW_DL:	return "DVD+RW DL";
-		case DISC_TYPE_BDROM:		return "Blu-ray";
-		case DISC_TYPE_BD_R:		return "BD-R";
-		case DISC_TYPE_BD_RE:		return "BD-RE";
-		case DISC_TYPE_HDDVD:		return "HD-DVD";
-		case DISC_TYPE_HDDVD_R:		return "HD-DVD-R";
-		case DISC_TYPE_HDDVD_RW:	return "HD-DVD-RW";
+		case DISC_TYPE_CDROM:		return QString::fromLatin1("CD-ROM");
+		case DISC_TYPE_CD_R:		return QString::fromLatin1("CD-R");
+		case DISC_TYPE_CD_RW:		return QString::fromLatin1("CD-RW");
+		case DISC_TYPE_DVD:		return QString::fromLatin1("DVD-ROM");
+		case DISC_TYPE_DVD_R:		return QString::fromLatin1("DVD-R");
+		case DISC_TYPE_DVD_RW:		return QString::fromLatin1("DVD-RW");
+		case DISC_TYPE_DVD_RAM:		return QString::fromLatin1("DVD-RAM");
+		case DISC_TYPE_DVD_PLUS_R:	return QString::fromLatin1("DVD+R");
+		case DISC_TYPE_DVD_PLUS_RW:	return QString::fromLatin1("DVD+RW");
+		case DISC_TYPE_DVD_PLUS_R_DL:	return QString::fromLatin1("DVD+R DL");
+		case DISC_TYPE_DVD_PLUS_RW_DL:	return QString::fromLatin1("DVD+RW DL");
+		case DISC_TYPE_BDROM:		return QString::fromLatin1("Blu-ray");
+		case DISC_TYPE_BD_R:		return QString::fromLatin1("BD-R");
+		case DISC_TYPE_BD_RE:		return QString::fromLatin1("BD-RE");
+		case DISC_TYPE_HDDVD:		return QString::fromLatin1("HD-DVD");
+		case DISC_TYPE_HDDVD_R:		return QString::fromLatin1("HD-DVD-R");
+		case DISC_TYPE_HDDVD_RW:	return QString::fromLatin1("HD-DVD-RW");
 		
 		// TODO: Do we really need to handle these?
-		case DISC_TYPE_MO:		return "MO";
-		case DISC_TYPE_MRW:		return "MRW";
-		case DISC_TYPE_MRW_W:		return "MRW-W";
+		case DISC_TYPE_MO:		return QString::fromLatin1("MO");
+		case DISC_TYPE_MRW:		return QString::fromLatin1("MRW");
+		case DISC_TYPE_MRW_W:		return QString::fromLatin1("MRW-W");
 	}
 }
 
@@ -191,7 +191,10 @@ QIcon FindCdromBase::GetDriveTypeIcon(DriveType drive_type)
 	
 	// TODO: Add icons for different types of drives.
 	((void)drive_type);
-	return QICON_FROMTHEME("drive-optical", ":/oxygen-64x64/drive-optical.png");
+	
+	const QString iconFdo = QString::fromLatin1("drive-optical");
+	const QString iconQrc = QString::fromLatin1(":/oxygen-16x16/drive-optical.png");
+	return QICON_FROMTHEME(iconFdo, iconQrc);
 }
 
 
@@ -208,6 +211,8 @@ QIcon FindCdromBase::GetDiscTypeIcon(uint32_t disc_type)
 	// TODO: Figure out what QStyle::SP_DriveCDIcon and QStyle::SP_DriveDVDIcon are.
 	
 	// TODO: Add more unique icons.
+	QString iconFdo;
+	QString iconQrc;
 	switch (disc_type)
 	{
 		case DISC_TYPE_NONE:
@@ -215,14 +220,20 @@ QIcon FindCdromBase::GetDiscTypeIcon(uint32_t disc_type)
 			return QIcon();
 		
 		case DISC_TYPE_CDROM:
-			return QICON_FROMTHEME("media-optical", ":/oxygen-64x64/media-optical.png");
+			iconFdo = QString::fromLatin1("media-optical");
+			iconQrc = QString::fromLatin1(":/oxygen-64x64/media-optical.png");
+			break;
 		
 		case DISC_TYPE_CD_R:
 		case DISC_TYPE_CD_RW:
-			return QICON_FROMTHEME("media-optical-recordable", ":/oxygen-64x64/media-optical-recordable.png");
+			iconFdo = QString::fromLatin1("media-optical-recordable");
+			iconQrc = QString::fromLatin1(":/oxygen-64x64/media-optical-recordable.png");
+			break;
 		
 		case DISC_TYPE_DVD:
-			return QICON_FROMTHEME("media-optical-dvd", ":/oxygen-64x64/media-optical-dvd.png");
+			iconFdo = QString::fromLatin1("media-optical-dvd");
+			iconQrc = QString::fromLatin1(":/oxygen-64x64/media-optical-dvd.png");
+			break;
 		
 		case DISC_TYPE_DVD_R:
 		case DISC_TYPE_DVD_RW:
@@ -231,26 +242,38 @@ QIcon FindCdromBase::GetDiscTypeIcon(uint32_t disc_type)
 		case DISC_TYPE_DVD_PLUS_RW:
 		case DISC_TYPE_DVD_PLUS_R_DL:
 		case DISC_TYPE_DVD_PLUS_RW_DL:
-			return QICON_FROMTHEME("media-optical-recordable", ":/oxygen-64x64/media-optical-recordable.png");
+			iconFdo = QString::fromLatin1("media-optical-recordable");
+			iconQrc = QString::fromLatin1(":/oxygen-64x64/media-optical-recordable.png");
+			break;
 		
 		case DISC_TYPE_BDROM:
 		case DISC_TYPE_BD_R:
 		case DISC_TYPE_BD_RE:
-			return QICON_FROMTHEME("media-optical-blu-ray", ":/oxygen-64x64/media-optical-blu-ray.png");
+			iconFdo = QString::fromLatin1("media-optical-blu-ray");
+			iconQrc = QString::fromLatin1(":/oxygen-64x64/media-optical-blu-ray.png");
+			break;
 		
 		case DISC_TYPE_HDDVD:
-			return QICON_FROMTHEME("media-optical-dvd", ":/oxygen-64x64/media-optical-dvd.png");
+			iconFdo = QString::fromLatin1("media-optical-dvd");
+			iconQrc = QString::fromLatin1(":/oxygen-64x64/media-optical-dvd.png");
+			break;
 		
 		case DISC_TYPE_HDDVD_R:	
 		case DISC_TYPE_HDDVD_RW:
-			return QICON_FROMTHEME("media-optical-recordable", ":/oxygen-64x64/media-optical-recordable.png");
+			iconFdo = QString::fromLatin1("media-optical-recordable");
+			iconQrc = QString::fromLatin1(":/oxygen-64x64/media-optical-recordable.png");
+			break;
 		
 		// TODO: Do we really need to handle these?
 		case DISC_TYPE_MO:
 		case DISC_TYPE_MRW:
 		case DISC_TYPE_MRW_W:
-			return QICON_FROMTHEME("media-optical-recordable", ":/oxygen-64x64/media-optical-recordable.png");
+			iconFdo = QString::fromLatin1("media-optical-recordable");
+			iconQrc = QString::fromLatin1(":/oxygen-64x64/media-optical-recordable.png");
+			break;
 	}
+	
+	return QICON_FROMTHEME(iconFdo, iconQrc);
 }
 
 }

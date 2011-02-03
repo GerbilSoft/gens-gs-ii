@@ -123,24 +123,27 @@ int EmuManager::openRom(QWidget *parent)
 	#define LZMA_EXT " *.7z"
 	#define RAR_EXT " *.rar"
 	
+	// TODO: Set the default filename.
 	QString filename = QFileDialog::getOpenFileName(parent,
 			TR("Open ROM"),		// Dialog title
-			"",			// Default filename.
+			QString(),		// Default filename.
 			TR("Sega Genesis ROM images") +
-			" (*.bin *.gen *.md *.smd"
+			QString::fromLatin1(
+				" (*.bin *.gen *.md *.smd"
 #ifdef HAVE_ZLIB
-			ZLIB_EXT
+				ZLIB_EXT
 #endif /* HAVE_ZLIB */
 #ifdef HAVE_LZMA
-			LZMA_EXT
+				LZMA_EXT
 #endif /* HAVE_LZMA */
-			RAR_EXT
-			");;" +
+				RAR_EXT
+				");;"
+				) +
 #if 0
 			TR("Sega Genesis / 32X ROMs; Sega CD disc images") +
 			"(*.bin *.smd *.gen *.32x *.cue *.iso *.raw" ZLIB_EXT LZMA_EXT RAR_EXT ");;" +
 #endif
-			TR("All Files") + "(*.*)");
+			TR("All Files") + QString::fromLatin1("(*.*)"));
 	
 	if (filename.isEmpty())
 		return 1;
@@ -426,7 +429,7 @@ QString EmuManager::sysName(void)
 			return TR("Pico");
 		
 		default:
-			return "Unknown";
+			return TR("Unknown");
 	}
 }
 
@@ -517,7 +520,7 @@ QString EmuManager::getSaveStateFilename(void)
 		return QString();
 	
 	// TODO: Move to another function?
-	QString filename = QString("%1.%2.zomg");
+	QString filename = QString::fromLatin1("%1.%2.zomg");
 	filename = filename.arg(QString::fromUtf8(m_rom->filenameBaseNoExt()));
 	filename = filename.arg(m_saveSlot);
 	return filename;

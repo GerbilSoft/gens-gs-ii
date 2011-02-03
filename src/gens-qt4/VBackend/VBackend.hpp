@@ -150,7 +150,7 @@ class VBackend
 		{
 			OsdMessage(const char *msg, double endTime)
 			{
-				this->msg = QString(msg);
+				this->msg = QString::fromUtf8(msg);
 				this->endTime = endTime;
 			}
 			

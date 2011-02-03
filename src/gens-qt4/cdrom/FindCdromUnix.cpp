@@ -80,7 +80,7 @@ int FindCdromUnix::query_int(void)
 	// Find all CD-ROM devices.
 	
 	// Open the /dev/ directory.
-	QDir dir(_PATH_DEV);
+	QDir dir = QString::fromLatin1(_PATH_DEV);
 	if (!dir.exists())
 		return -1;
 	
@@ -153,7 +153,7 @@ int FindCdromUnix::query_int(void)
 			drive.drive_type	= DRIVE_TYPE_CDROM;
 			drive.discs_supported	= DISC_TYPE_CDROM;
 			drive.disc_type		= DISC_TYPE_CDROM;
-			drive.disc_label	= "Disc Label";
+			drive.disc_label	= QString::fromLatin1("Disc Label");
 			drive.disc_blank	= false;
 		}
 		

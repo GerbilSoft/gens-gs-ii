@@ -79,7 +79,9 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 	
 	// Create the "Refresh" button.
 	// TODO: Don't load an icon on systems that don't use icons on buttons.
-	btnRefresh = new QPushButton(QICON_FROMTHEME("view-refresh", ":/oxygen-16x16/view-refresh.png"),
+	const QString iconRefreshFdo = QString::fromLatin1("view-refresh");
+	const QString iconRefreshQrc = QString::fromLatin1(":/oxygen-16x16/view-refresh.png");
+	btnRefresh = new QPushButton(QICON_FROMTHEME(iconRefreshFdo, iconRefreshQrc),
 					TR("&Refresh"), this);
 	connect(btnRefresh, SIGNAL(clicked()), this, SLOT(query()));
 	// NOTE: "ResetRole" isn't exactly the right thing, but it works.
@@ -200,10 +202,10 @@ void McdControlWindow::query(void)
 void McdControlWindow::addDriveEntry(const CdromDriveEntry& drive, int index)
 {
 	// Add the drive to the dropdown box.
-	QString item_desc = drive.drive_vendor + " " +
-				drive.drive_model + " " +
-				drive.drive_firmware + "\n" +
-				drive.path + ": ";
+	QString item_desc = drive.drive_vendor + QChar(L' ') +
+				drive.drive_model + QChar(L' ') +
+				drive.drive_firmware + QChar(L'\n') +
+				drive.path + QString::fromLatin1(": ");
 	
 	// Add the disc label if a disc is present.
 	if (drive.disc_type == 0)

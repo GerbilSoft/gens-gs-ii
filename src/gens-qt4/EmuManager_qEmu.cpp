@@ -228,7 +228,7 @@ void EmuManager::doCtrlChange(int port, LibGens::IoBase::IoType type)
 	// Print a message on the OSD.
 	QString osdMsg = TR("Port %1 set to %2.");
 	osdMsg = osdMsg.arg(port + 1);	// TODO: Use "E" for Port 3.
-	osdMsg = osdMsg.arg(dev->devName());
+	osdMsg = osdMsg.arg(QString::fromLatin1(dev->devName()));
 	
 	emit osdPrintMsg(1500, osdMsg);
 	
@@ -313,16 +313,16 @@ void EmuManager::doScreenShot(void)
 	// Add the current directory, number, and .png extension.
 	// TODO: Use a designated screenshots directory.
 	// TODO: Enumerate QImageWriter for supported image formats.
-	const QString scrFilenamePrefix = QDir::currentPath() + QChar('/') + romFilename;
-	const QString scrFilenameSuffix = ".png";
+	const QString scrFilenamePrefix = QDir::currentPath() + QChar(L'/') + romFilename;
+	const QString scrFilenameSuffix = QString::fromLatin1(".png");
 	QString scrFilename;
 	int scrNumber = -1;
 	do
 	{
 		// TODO: Figure out how to optimize this!
 		scrNumber++;
-		scrFilename = scrFilenamePrefix + QChar('_') +
-				QString::number(scrNumber).rightJustified(3, '0') +
+		scrFilename = scrFilenamePrefix + QChar(L'_') +
+				QString::number(scrNumber).rightJustified(3, QChar(L'0')) +
 				scrFilenameSuffix;
 	} while (QFile::exists(scrFilename));
 	
@@ -369,7 +369,7 @@ void EmuManager::doAudioStereo(bool newStereo)
 	
 	// Print a message on the OSD.
 	QString osdMsg = TR("Audio set to %1.");
-	osdMsg = osdMsg.arg(newStereo ? "Stereo" : "Mono");
+	osdMsg = osdMsg.arg(newStereo ? TR("Stereo") : TR("Mono"));
 	emit osdPrintMsg(1500, osdMsg);
 }
 
@@ -485,13 +485,13 @@ void EmuManager::doResetEmulator(bool hardReset)
 	{
 		// Do a hard reset.
 		gqt4_emuContext->hardReset();
-		emit osdPrintMsg(2500, "Hard Reset.");
+		emit osdPrintMsg(2500, TR("Hard Reset."));
 	}
 	else
 	{
 		// Do a soft reset.
 		gqt4_emuContext->softReset();
-		emit osdPrintMsg(2500, "Soft Reset.");
+		emit osdPrintMsg(2500, TR("Soft Reset."));
 	}
 }
 

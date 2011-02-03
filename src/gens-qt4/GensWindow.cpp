@@ -99,14 +99,14 @@ void GensWindow::setupUi(void)
 	
 	// Set the window icon.
 	QIcon winIcon;
-	winIcon.addFile(":/gens/gensgs_48x48.png", QSize(48, 48));
-	winIcon.addFile(":/gens/gensgs_32x32.png", QSize(32, 32));
-	winIcon.addFile(":/gens/gensgs_16x16.png", QSize(16, 16));
+	winIcon.addFile(QString::fromLatin1(":/gens/gensgs_48x48.png"), QSize(48, 48));
+	winIcon.addFile(QString::fromLatin1(":/gens/gensgs_32x32.png"), QSize(32, 32));
+	winIcon.addFile(QString::fromLatin1(":/gens/gensgs_16x16.png"), QSize(16, 16));
 	this->setWindowIcon(winIcon);
 	
 	// Create the central widget.
 	centralwidget = new QWidget(this);
-	centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
+	centralwidget->setObjectName(QString::fromLatin1("centralwidget"));
 	this->setCentralWidget(centralwidget);
 	
 	// Retranslate the UI.
@@ -125,7 +125,7 @@ void GensWindow::setupUi(void)
 	
 	// Create the layout.
 	layout = new QVBoxLayout(this->centralwidget);
-	layout->setObjectName(QString::fromUtf8("layout"));
+	layout->setObjectName(QString::fromLatin1("layout"));
 	layout->setMargin(0);
 	layout->setSpacing(0);
 	centralwidget->setLayout(layout);
@@ -470,11 +470,11 @@ void GensWindow::setGensTitle(void)
 {
 	// TODO: Indicate UI status.
 	QString title = TR("Gens/GS II");
-	title += " " + TR("dev");
+	title += QChar(L' ') + TR("dev");
 #if !defined(GENS_ENABLE_EMULATION)
-	title += " " + TR("NO-EMU");
+	title += QChar(L' ') + TR("NO-EMU");
 #endif
-	title += " - ";
+	title += QString::fromLatin1(" - ");
 	
 	// TODO
 	if (!m_emuManager.isRomOpen())
@@ -485,7 +485,7 @@ void GensWindow::setGensTitle(void)
 	else
 	{
 		// ROM is running.
-		title += m_emuManager.sysName() + ": ";
+		title += m_emuManager.sysName() + QString::fromLatin1(": ");
 		title += m_emuManager.romName();
 	}
 	

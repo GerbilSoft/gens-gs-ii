@@ -24,7 +24,8 @@
 #ifndef __GENS_QT4_GQT4_MAIN_HPP__
 #define __GENS_QT4_GQT4_MAIN_HPP__
 
-// LibGens OSD handler.
+// LibGens includes.
+#include "libgens/macros/common.h"
 #include "libgens/lg_osd.h"
 
 #ifndef _WIN32
@@ -45,10 +46,10 @@ extern "C" {
 
 /**
  * gqt4_log_msg_critical(): LOG_MSG() critical error handler.
- * @param channel Debug channel.
- * @param msg Message. (Preformatted)
+ * @param channel Debug channel. (ASCII)
+ * @param msg Message. (Preformatted UTF-8)
  */
-void gqt4_log_msg_critical(const char *channel, const char *msg);
+void gqt4_log_msg_critical(const char *channel, const utf8_str *msg);
 
 /**
  * gqt4_osd(): LibGens OSD handler.

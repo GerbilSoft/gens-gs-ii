@@ -36,7 +36,7 @@ GensLineEdit::GensLineEdit(QWidget *parent)
 	
 	// Initialize the label.
 	int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
-	setStyleSheet(QString("QLineEdit { padding-right: %1px; }").arg(m_label->sizeHint().width() + frameWidth + 1));
+	setStyleSheet(QString::fromLatin1("QLineEdit { padding-right: %1px; }").arg(m_label->sizeHint().width() + frameWidth + 1));
 	
 	QSize msz = minimumSizeHint();
 	setMinimumSize(qMax(msz.width(), m_label->sizeHint().height() + frameWidth * 2 + 2),

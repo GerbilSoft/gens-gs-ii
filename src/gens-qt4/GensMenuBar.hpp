@@ -24,6 +24,9 @@
 #ifndef __GENS_QT4_GENSMENUBAR_HPP__
 #define __GENS_QT4_GENSMENUBAR_HPP__
 
+// LibGens includes. (utf8_str)
+#include "libgens/macros/common.h"
+
 // Qt includes.
 #include <QtCore/QSignalMapper>
 #include <QtCore/QHash>
@@ -131,7 +134,7 @@ class GensMenuBar : public QMenuBar
 		{
 			int id;				// Menu identifier. (-1 == separator)
 			MenuItemType type;		// Menu item type.
-			const char *text;		// Menu item text.
+			const utf8_str *text;		// Menu item text.
 			const MenuItem *submenu;	// First element of submenu.
 			
 			MenuItemShortcut key_std;	// Menu item shortcut. (Wrapper around QKeySequence::StandardKey.)
@@ -144,7 +147,7 @@ class GensMenuBar : public QMenuBar
 		struct MainMenuItem
 		{
 			int id;				// Menu identifier.
-			const char *text;		// Menu text.
+			const utf8_str *text;		// Menu text.
 			const MenuItem *submenu;	// First element of submenu.
 		};
 		

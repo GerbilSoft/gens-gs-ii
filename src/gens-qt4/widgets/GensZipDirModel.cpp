@@ -222,7 +222,7 @@ bool GensZipDirModel::insertZEntry(const mdp_z_entry_t *z_entry,
 	QString disp_filename;
 	
 	// TODO: Use '\\' on Win32?
-	QStringList dirList = full_filename.split('/', QString::SkipEmptyParts);
+	QStringList dirList = full_filename.split(QChar(L'/'), QString::SkipEmptyParts);
 	if (dirList.size() > 1)
 	{
 		// More than one component.
@@ -232,7 +232,7 @@ bool GensZipDirModel::insertZEntry(const mdp_z_entry_t *z_entry,
 		for (int i = 0; i < (dirList.size() - 1); i++)
 		{
 			// Get the directory component.
-			cur_path += dirList[i] + '/';
+			cur_path += dirList[i] + QChar(L'/');
 			dirIter = m_dirMap.find(cur_path);
 			if (dirIter == m_dirMap.end())
 			{

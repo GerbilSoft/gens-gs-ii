@@ -54,10 +54,11 @@ GeneralConfigWindow *GeneralConfigWindow::m_GeneralConfigWindow = NULL;
 
 // Button CSS colors.
 const QString GeneralConfigWindow::ms_sCssBtnColors =
-	"QPushButton { background-color: %1; color: %2; }";
+	QString::fromLatin1("QPushButton { background-color: %1; color: %2; }");
 
 // Warning string.
-const QString GeneralConfigWindow::ms_sWarning = "<span style='color: red'><b>" + TR("Warning:") + "</b></span> ";
+const QString GeneralConfigWindow::ms_sWarning =
+	QString::fromLatin1("<span style='color: red'><b>") + TR("Warning:") + QString::fromLatin1("</b></span> ");
 
 /**
  * GeneralConfigWindow(): Initialize the General Configuration window.
@@ -294,7 +295,7 @@ void GeneralConfigWindow::apply(void)
 }
 
 
-/** Onscren Display **/
+/** Onscreen display **/
 
 
 /**
@@ -371,16 +372,17 @@ void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *
 	QString filename = QFileDialog::getOpenFileName(this, title,
 			txtRomFile->text(),	// Default filename.
 			TR("Sega CD Boot ROM images") +
-			" (*.bin *.gen *.md *.smd"
+			QString::fromLatin1(
+				" (*.bin *.gen *.md *.smd"
 #ifdef HAVE_ZLIB
-			ZLIB_EXT
+				ZLIB_EXT
 #endif /* HAVE_ZLIB */
 #ifdef HAVE_LZMA
-			LZMA_EXT
+				LZMA_EXT
 #endif /* HAVE_LZMA */
-			RAR_EXT
-			");;" +
-			TR("All Files") + "(*.*)");
+				RAR_EXT
+				");;") +
+			TR("All Files") + QString::fromLatin1("(*.*)"));
 	
 	if (filename.isEmpty())
 		return;
@@ -434,6 +436,9 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 			return TR("The specified ROM file was not found.");
 	}
 	
+	// Line break string.
+	const QString sLineBreak = QString::fromLatin1("<br/>");
+	
 	// Check the ROM file.
 	// TODO: Decompressor support.
 	QStyle::StandardPixmap filename_icon = QStyle::SP_DialogYesButton;
@@ -449,7 +454,7 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 		// Wrong ROM size.
 		filename_icon = QStyle::SP_MessageBoxWarning;
 		
-		rom_size_warning = ms_sWarning + TR("ROM size is incorrect.") + "<br/>\n" +
+		rom_size_warning = ms_sWarning + TR("ROM size is incorrect.") + sLineBreak +
 				   TR("(expected %L1 bytes; found %L2 bytes)").arg(MCD_ROM_FILESIZE).arg(file.size());
 		if (file.size() < MCD_ROM_FILESIZE)
 		{
@@ -472,7 +477,7 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 	if (data_len != MCD_ROM_FILESIZE)
 	{
 		// Error reading data from the file.
-		rom_notes = TR("Error reading file.") + "<br/>\n" +
+		rom_notes = TR("Error reading file.") + sLineBreak +
 			    TR("(expected %L1 bytes; read %L2 bytes)").arg(MCD_ROM_FILESIZE).arg(data_len);
 		goto rom_identified;
 	}
@@ -505,8 +510,8 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 		QString expected_region = QString::fromUtf8(lg_mcd_rom_GetRegionCodeString(region_code));
 		QString boot_rom_region = QString::fromUtf8(lg_mcd_rom_GetRegionCodeString(boot_rom_region_primary));
 		
-		rom_notes += ms_sWarning + TR("Region code is incorrect.") + "<br/>\n" +
-			     TR("(expected %1; found %2)").arg(expected_region).arg(boot_rom_region) + "<br/>\n";
+		rom_notes += ms_sWarning + TR("Region code is incorrect.") + sLineBreak +
+			     TR("(expected %1; found %2)").arg(expected_region).arg(boot_rom_region) + sLineBreak;
 		
 		// Set the icon to warning.
 		filename_icon = QStyle::SP_MessageBoxWarning;
@@ -525,19 +530,19 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 		case RomStatus_Unsupported:
 		default:
 			// ROM is unsupported.
-			rom_notes += ms_sWarning + TR("This Boot ROM is not supported by Gens/GS II.") + "<br/>\n";
+			rom_notes += ms_sWarning + TR("This Boot ROM is not supported by Gens/GS II.") + sLineBreak;
 			filename_icon = QStyle::SP_MessageBoxWarning;
 			break;
 		
 		case RomStatus_Broken:
 			// ROM is known to be broken.
-			rom_notes += ms_sWarning + TR("This Boot ROM is known to be broken on all emulators.") + "<br/>\n";
+			rom_notes += ms_sWarning + TR("This Boot ROM is known to be broken on all emulators.") + sLineBreak;
 			filename_icon = QStyle::SP_MessageBoxCritical;
 			break;
 	}
 	
 	// Get the ROM's notes.
-	rom_notes += QString::fromUtf8(lg_mcd_rom_GetNotes(boot_rom_id)).replace('\n', "<br/>\n");
+	rom_notes += QString::fromUtf8(lg_mcd_rom_GetNotes(boot_rom_id)).replace(QChar(L'\n'), sLineBreak);
 	
 rom_identified:
 	// Free the ROM data buffer if it was allocated.
@@ -550,9 +555,9 @@ rom_identified:
 	QString s_ret;
 	s_ret = TR("ROM identified as: %1").arg(rom_id);
 	if (!rom_notes.isEmpty())
-		s_ret += "<br/>\n<br/>\n" + rom_notes;
+		s_ret += sLineBreak + sLineBreak + rom_notes;
 	if (!rom_size_warning.isEmpty())
-		s_ret += "<br/>\n<br/>\n" + rom_size_warning;
+		s_ret += sLineBreak + sLineBreak + rom_size_warning;
 	return QString(s_ret);
 }
 
@@ -566,7 +571,8 @@ void GeneralConfigWindow::mcdDisplayRomFileStatus(const QString& rom_id, const Q
 {
 	// Set the ROM description.
 	QString sel_rom = TR("Selected ROM: %1");
-	lblMcdSelectedRom->setText(sel_rom.arg(rom_id) + "<br/>\n" + rom_desc);
+	lblMcdSelectedRom->setText(sel_rom.arg(rom_id) +
+				QString::fromLatin1("<br/>\n") + rom_desc);
 	lblMcdSelectedRom->setTextFormat(Qt::RichText);
 }
 
@@ -612,7 +618,7 @@ void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 }
 
 
-/** External Programs **/
+/** External programs **/
 
 
 /**
@@ -630,11 +636,11 @@ void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
 	QString filename = QFileDialog::getOpenFileName(this, title,
 			txtExtPrgUnRAR->text(),		// Default filename.
 #ifdef _WIN32
-			TR("DLL files") + " (*.dll);;"
+			TR("DLL files") + QString::fromLatin1(" (*.dll);;")
 #else
-			TR("rar or unrar") + " (rar unrar);;"
+			TR("rar or unrar") + QString::fromLatin1(" (rar unrar);;")
 #endif
-			+ TR("All Files") + "(*.*)");
+			+ TR("All Files") + QString::fromLatin1("(*.*)"));
 	
 	if (filename.isEmpty())
 		return;
@@ -658,7 +664,8 @@ void GeneralConfigWindow::extprgDisplayFileStatus(const QString& file_id, const 
 {
 	// Set the file description.
 	QString sel_prg = TR("Selected Program: %1");
-	lblExtPrgSel->setText(sel_prg.arg(file_id) + "<br/>\n" + file_desc);
+	lblExtPrgSel->setText(sel_prg.arg(file_id) +
+				QString::fromLatin1("<br/>\n") + file_desc);
 	lblExtPrgSel->setTextFormat(Qt::RichText);
 }
 
@@ -774,6 +781,9 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 	}
 	sExtPrgStatus_UnRAR = TR("Identified as: %1").arg(prg_id);
 	
+	// Line break string.
+	const QString sLineBreak = QString::fromLatin1("<br/>");
+	
 	// Print DLL version information, if available.
 	if (prg_info.dll_major != 0 || prg_info.dll_minor != 0 ||
 	    prg_info.dll_revision != 0 || prg_info.dll_build != 0)
@@ -792,15 +802,15 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 		rar_version = rar_version.arg(prg_info.dll_major);
 		rar_version = rar_version.arg(prg_info.dll_minor);
 #endif
-		sExtPrgStatus_UnRAR += "<br/>\n<br/>\n" + rar_version;
+		sExtPrgStatus_UnRAR += sLineBreak + sLineBreak + rar_version;
 #ifdef _WIN32
 		if (prg_info.api_version > 0)
-			sExtPrgStatus_UnRAR += "<br/>\n" + TR("API version %1").arg(prg_info.api_version);
+			sExtPrgStatus_UnRAR += sLineBreak + TR("API version %1").arg(prg_info.api_version);
 #endif
 	}
 	
 	if (!prg_status.isEmpty())
-		sExtPrgStatus_UnRAR += "<br/>\n<br/>\n" + prg_status;
+		sExtPrgStatus_UnRAR += sLineBreak + sLineBreak + prg_status;
 	
 	// Set the textbox's icon.
 	txtExtPrgUnRAR->setIcon(style()->standardIcon(filename_icon));

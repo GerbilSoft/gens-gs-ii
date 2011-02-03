@@ -43,14 +43,14 @@ GensConfig::GensConfig()
 	// TODO: Don't use setExtPrgUnRAR.
 	// Instead, set the filename directly.
 #ifdef _WIN32
-	setExtPrgUnRAR("UnRAR.dll");	// TODO: Verify that a relative pathname works!
+	setExtPrgUnRAR(QString::fromLatin1("UnRAR.dll"));	// TODO: Verify that a relative pathname works!
 #else
 	// TODO: Check for the existence of unrar and rar.
 	// We should:
 	// - Default to unrar if it's found.
 	// - Fall back to rar if it's found but unrar isn't.
 	// - Assume unrar if neither are found.
-	setExtPrgUnRAR("/usr/bin/unrar");
+	setExtPrgUnRAR(QString::fromLatin1("/usr/bin/unrar"));
 #endif
 	
 	/** Graphics settings. **/

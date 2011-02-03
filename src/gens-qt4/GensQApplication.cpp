@@ -48,8 +48,8 @@ void GensQApplication::gqaInit(void)
 	m_guiThread = QThread::currentThread();
 	
 	// Set application information.
-	QCoreApplication::setOrganizationName("GerbilSoft");
-	QCoreApplication::setApplicationName("Gens/GS II");
+	QCoreApplication::setOrganizationName(QString::fromLatin1("GerbilSoft"));
+	QCoreApplication::setApplicationName(QString::fromLatin1("Gens/GS II"));
 	
 	// Connect the crash handler.
 #ifdef HAVE_SIGACTION
