@@ -204,8 +204,8 @@ QString AboutWindow::GetDebugInfo(void)
 {
 	// Debug information.
 	QString sDebugInfo =
-		tr("Compiled using Qt") + QChar(L' ') + QString::fromLatin1(QT_VERSION_STR) + QString::fromLatin1(".\n") +
-		tr("Using Qt") + QChar(L' ') + QString::fromLatin1(qVersion()) + QString::fromLatin1(".\n\n");
+		tr("Compiled using Qt %1.").arg(QString::fromLatin1(QT_VERSION_STR)) + QChar(L'\n') +
+		tr("Using Qt %1.").arg(QString::fromLatin1(qVersion())) + QChar(L'\n') + QChar(L'\n');
 	
 	// CPU flags.
 	// TODO: Move the array of CPU flag names to LibGens.
