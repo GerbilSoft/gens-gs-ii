@@ -26,7 +26,7 @@
 
 // Qt includes.
 #include <QtCore/QSignalMapper>
-#include <QtCore/QMap>
+#include <QtCore/QHash>
 #include <QtGui/QMenuBar>
 #include <QtGui/QMenu>
 #include <QtGui/QKeySequence>
@@ -157,13 +157,13 @@ class GensMenuBar : public QMenuBar
 		
 		QSignalMapper *m_signalMapper;
 		
-		// Maps of QActions and QMenus.
+		// Hash tables of QActions and QMenus.
 		// List of menu separators.
-		QMap<int, QAction*> m_mapActions;
-		QMap<int, QMenu*> m_mapMenus;
+		QHash<int, QAction*> m_hashActions;
+		QHash<int, QMenu*> m_hashMenus;
 		QList<QAction*> m_lstSeparators;
 		
-		void clearMaps(void);
+		void clearHashTables(void);
 	
 	signals:
 		void triggered(int id);

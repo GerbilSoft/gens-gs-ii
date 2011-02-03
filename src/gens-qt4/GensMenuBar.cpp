@@ -147,25 +147,25 @@ GensMenuBar::~GensMenuBar()
 	delete m_signalMapper;
 	
 	// Clear the menu maps.
-	clearMaps();
+	clearHashTables();
 }
 
 
 /**
- * clearMaps(): Clear the menu maps.
- * - m_mapActions: Map of menu actions.
+ * clearHashTables(): Clear the menu hash tables and lists.
+ * - m_hashActions: Hash table of menu actions.
  * - m_lstSeparators: List of menu separators.
- * - m_mapMenus: Map of top-level menus.
+ * - m_hashMenus: Hash table of top-level menus.
  */
-void GensMenuBar::clearMaps(void)
+void GensMenuBar::clearHashTables(void)
 {
 	// TODO: Consider using QScopedPointer or QSharedPointer instead?
 	
 	// Actions map.
 	QAction *action;
-	foreach(action, m_mapActions)
+	foreach(action, m_hashActions)
 		delete action;
-	m_mapActions.clear();
+	m_hashActions.clear();
 	
 	// Separators list.
 	while (!m_lstSeparators.isEmpty())
@@ -173,9 +173,9 @@ void GensMenuBar::clearMaps(void)
 	
 	// Menus map.
 	QMenu *menu;
-	foreach(menu, m_mapMenus)
+	foreach(menu, m_hashMenus)
 		delete menu;
-	m_mapMenus.clear();
+	m_hashMenus.clear();
 }
 
 
@@ -187,8 +187,8 @@ void GensMenuBar::parseMainMenu(const GensMenuBar::MainMenuItem *mainMenu)
 {
 	QMenu *mnuSubMenu;
 	
-	// Clear the menu maps.
-	clearMaps();
+	// Clear the menu hash tables and lists.
+	clearHashTables();
 	
 	for (; mainMenu->id != 0; mainMenu++)
 	{
@@ -203,7 +203,7 @@ void GensMenuBar::parseMainMenu(const GensMenuBar::MainMenuItem *mainMenu)
 		this->addMenu(mnuSubMenu);
 		
 		// Add the QMenu to the menus map.
-		m_mapMenus.insert(mainMenu->id, mnuSubMenu);
+		m_hashMenus.insert(mainMenu->id, mnuSubMenu);
 	}
 }
 
@@ -276,7 +276,7 @@ void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 		parent->addAction(mnuItem);
 		
 		// Add the QAction to the actions map.
-		m_mapActions.insert(menu->id, mnuItem);
+		m_hashActions.insert(menu->id, mnuItem);
 	}
 }
 
@@ -288,8 +288,8 @@ void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
  */
 bool GensMenuBar::menuItemCheckState(int id)
 {
-	QMap<int, QAction*>::iterator iter = m_mapActions.find(id);
-	if (iter == m_mapActions.end())
+	QHash<int, QAction*>::const_iterator iter = m_hashActions.find(id);
+	if (iter == m_hashActions.end())
 		return false;
 	
 	// TODO: Is the isCheckable() check needed?
@@ -308,8 +308,8 @@ bool GensMenuBar::menuItemCheckState(int id)
  */
 int GensMenuBar::setMenuItemCheckState(int id, bool newCheck)
 {
-	QMap<int, QAction*>::iterator iter = m_mapActions.find(id);
-	if (iter == m_mapActions.end())
+	QHash<int, QAction*>::const_iterator iter = m_hashActions.find(id);
+	if (iter == m_hashActions.end())
 		return 1;
 	
 	// TODO: Is the isCheckable() check needed?
