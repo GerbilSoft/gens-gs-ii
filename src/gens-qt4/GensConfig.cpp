@@ -48,6 +48,15 @@ GensConfig::GensConfig()
 	// - Assume unrar if neither are found.
 	setExtPrgUnRAR("/usr/bin/unrar");
 #endif
+	
+	// Default graphics settings.
+	m_constrainAspectRatio = true;
+	m_fastBlur = false;
+	m_contrast = 0;
+	m_brightness = 0;
+	m_grayscale = false;
+	m_inverted = false;
+	// TODO: Color Scale Method.
 }
 
 GensConfig::~GensConfig()
@@ -66,7 +75,7 @@ void GensConfig::reload(void)
 }
 
 
-/** Onscreen Display. **/
+/** Onscreen display. **/
 
 
 void GensConfig::setOsdFpsEnabled(bool enable)
@@ -137,7 +146,7 @@ void GensConfig::setMcdRomJPN(const QString& filename)
 }
 
 
-/** External Programs. **/
+/** External programs. **/
 
 
 void GensConfig::setExtPrgUnRAR(const QString& filename)
@@ -155,5 +164,65 @@ void GensConfig::setExtPrgUnRAR(const QString& filename)
 	//  but only one may be active at any given time.)
 	LibGens::DcRar::SetExtPrg(m_extprgUnRAR.toUtf8().constData());
 }
+
+
+/** Graphics settings. **/
+
+
+void GensConfig::setConstrainAspectRatio(bool newConstrainAspectRatio)
+{
+	if (m_constrainAspectRatio == newConstrainAspectRatio)
+		return;
+	
+	m_constrainAspectRatio = newConstrainAspectRatio;
+	emit constrainAspectRatio_changed(m_constrainAspectRatio);
+}
+
+void GensConfig::setFastBlur(bool newFastBlur)
+{
+	if (m_fastBlur == newFastBlur)
+		return;
+	
+	m_fastBlur = newFastBlur;
+	emit fastBlur_changed(m_fastBlur);
+}
+
+void GensConfig::setContrast(int newContrast)
+{
+	if (m_contrast == newContrast)
+		return;
+	
+	m_contrast = newContrast;
+	emit contrast_changed(m_contrast);
+}
+
+void GensConfig::setBrightness(int newBrightness)
+{
+	if (m_brightness == newBrightness)
+		return;
+	
+	m_brightness = newBrightness;
+	emit brightness_changed(m_brightness);
+}
+
+void GensConfig::setGrayscale(bool newGrayscale)
+{
+	if (m_grayscale == newGrayscale)
+		return;
+	
+	m_grayscale = newGrayscale;
+	emit grayscale_changed(m_grayscale);
+}
+
+void GensConfig::setInverted(bool newInverted)
+{
+	if (m_inverted == newInverted)
+		return;
+	
+	m_inverted = newInverted;
+	emit inverted_changed(m_inverted);
+}
+
+// TODO: Color Scale Method.
 
 }
