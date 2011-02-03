@@ -37,13 +37,13 @@ static log_msg_critical_fn m_critical_fn = NULL;
  * log_msg(): LOG_MSG() function.
  * This function is executed if the corresponding log message
  * is enabled via the LOG_MSG_* defines.
- * @param channel Debug channel.
+ * @param channel Debug channel. (ASCII)
  * @param level Debug level.
  * @param fn Function name.
- * @param msg Message.
+ * @param msg Message. (UTF-8)
  * @param ... Parameters.
  */
-void log_msg(const char *channel, int level, const char *fn, const char *msg, ...)
+void log_msg(const char *channel, int level, const char *fn, const utf8_str *msg, ...)
 {
 	char out_msg[1024];
 	int ret;

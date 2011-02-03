@@ -23,6 +23,8 @@
 #ifndef __LIBGENS_LOG_MSG_H__
 #define __LIBGENS_LOG_MSG_H__
 
+#include "common.h"
+
 /**
  * Log levels:
  * LOG_MSG_LEVEL_CRITICAL	== critical error. A message box is shown.
@@ -92,12 +94,12 @@ extern "C" {
 /**
  * log_msg(): Internal message logging function.
  * DO NOT USE OUTSIDE OF log_msg.h!
- * @param channel Debug channel.
+ * @param channel Debug channel. (ASCII)
  * @param level Debug level.
- * @param msg Message.
+ * @param msg Message. (UTF-8)
  * @param ... Parameters.
  */
-void log_msg(const char *channel, int level, const char *fn, const char *msg, ...);
+void log_msg(const char *channel, int level, const char *fn, const utf8_str *msg, ...);
 
 /**
  * log_msg_critical_fn(): Function pointer for critical error handler.
@@ -121,9 +123,9 @@ void log_msg_register_critical_fn(log_msg_critical_fn critical_fn);
 
 /**
  * LOG_MSG(): Output a debug message.
- * @param channel Debug channel. (string)
+ * @param channel Debug channel. (ASCII string)
  * @param level Debug level. (integer)
- * @param msg Message.
+ * @param msg Message. (UTF-8)
  * @param ... Parameters.
  */
 #define LOG_MSG(channel, level, msg, ...) \
@@ -134,9 +136,9 @@ do { \
 
 /**
  * LOG_MSG_ONCE(): Output a debug message one time only.
- * @param channel Debug channel. (string)
+ * @param channel Debug channel. (ASCII string)
  * @param level Debug level. (integer)
- * @param msg Message.
+ * @param msg Message. (UTF-8)
  * @param ... Parameters.
  */
 #define LOG_MSG_ONCE(channel, level, msg, ...)	\
