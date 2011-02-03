@@ -43,8 +43,6 @@
 
 // Qt includes.
 #include <QtCore/qglobal.h>
-#include <QtCore/QList>
-#include <QtCore/QScopedPointer>
 #include <QtCore/QDir>
 #include <QtCore/QStringList>
 

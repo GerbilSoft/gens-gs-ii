@@ -24,16 +24,13 @@
 // C includes.
 #include <stdio.h>
 
-// Qt includes.
-#include <QtCore/QList>
-
 // Text translation macro.
 #include <QtCore/QCoreApplication>
 #define TR(text) \
 	QCoreApplication::translate("FindCdromWin32", (text), NULL, QCoreApplication::UnicodeUTF8)
 
 // Win32 includes.
-// Common Controls 6 is needed for SHGetImageList().
+// Common Controls 6 is required for SHGetImageList().
 #define _WIN32_IE 0x0600
 #include <shellapi.h>
 #include <commctrl.h>
