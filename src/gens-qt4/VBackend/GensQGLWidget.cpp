@@ -814,7 +814,7 @@ void GensQGLWidget::osd_show_preview(int duration, const QImage& img)
  */
 void GensQGLWidget::showOsdPreview(void)
 {
-	if (!m_preview_show)
+	if (!m_preview_show || m_preview_img.isNull())
 	{
 		// Don't show the preview image.
 		delete m_texPreview;
