@@ -225,6 +225,15 @@ void GeneralConfigWindow::reload(void)
 	// Load external program filenames.
 	txtExtPrgUnRAR->setText(gqt4_config->extprgUnRAR());
 	
+	// Graphics settings.
+	chkAspectRatioConstraint->setChecked(gqt4_config->aspectRatioConstraint());
+	chkFastBlur->setChecked(gqt4_config->fastBlur());
+	hsldContrast->setValue(gqt4_config->contrast());
+	hsldBrightness->setValue(gqt4_config->brightness());
+	chkGrayscale->setChecked(gqt4_config->grayscale());
+	chkInverted->setChecked(gqt4_config->inverted());
+	// TODO: Color Scale Method.
+	
 	// Disable the Apply button.
 	setApplyButtonEnabled(false);
 }
@@ -251,6 +260,15 @@ void GeneralConfigWindow::apply(void)
 	
 	// Save external program filenames.
 	gqt4_config->setExtPrgUnRAR(txtExtPrgUnRAR->text());
+	
+	// Graphics settings.
+	gqt4_config->setAspectRatioConstraint(chkAspectRatioConstraint->isChecked());
+	gqt4_config->setFastBlur(chkFastBlur->isChecked());
+	gqt4_config->setContrast(hsldContrast->value());
+	gqt4_config->setBrightness(hsldBrightness->value());
+	gqt4_config->setGrayscale(chkGrayscale->isChecked());
+	gqt4_config->setInverted(chkInverted->isChecked());
+	// TODO: Color Scale Method.
 	
 	// Disable the Apply button.
 	// TODO: If Apply was clicked, set focus back to the main window elements.
