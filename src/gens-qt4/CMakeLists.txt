@@ -4,7 +4,15 @@ cmake_minimum_required(VERSION 2.6)
 # Find Qt4.
 # TODO: Determine the actual minimum version.
 # 4.1.0: QCoreApplication::arguments()
-FIND_PACKAGE(Qt4 4.1.0 COMPONENTS QtCore QtGui QtOpenGL REQUIRED)
+# 4.2.0: QString::fromWCharArray() [Win32]
+# 4.6.0: QPixmap::fromWinHICON() [Win32] (fallbacks to QPixmap::fromWinHBITMAP() are in place)
+IF(WIN32)
+	SET(GENS_QT4_MIN_VERSION 4.2.0)
+ELSE(WIN32)
+	SET(GENS_QT4_MIN_VERSION 4.1.0)
+ENDIF(WIN32)
+
+FIND_PACKAGE(Qt4 ${GENS_QT4_MIN_VERSION} COMPONENTS QtCore QtGui QtOpenGL REQUIRED)
 IF(UNIX)
 	IF(APPLE)
 		# Don't enable QtDBus on Mac OS X.
