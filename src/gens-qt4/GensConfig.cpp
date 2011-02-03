@@ -31,13 +31,15 @@ namespace GensQt4
 
 GensConfig::GensConfig()
 {
-	// Default OSD settings.
-	setOsdFpsEnabled(true);
-	setOsdFpsColor(QColor(255, 255, 255));
-	setOsdMsgEnabled(true);
-	setOsdMsgColor(QColor(255, 255, 255));
+	/** Initialize GensConfig with default settings. **/
 	
-	// Default UnRAR filename.
+	/** Onscreen display. **/
+	setOsdFpsEnabled(true);
+	setOsdFpsColor(QColor(Qt::white));
+	setOsdMsgEnabled(true);
+	setOsdMsgColor(QColor(Qt::white));
+	
+	/** External programs. **/
 #ifdef _WIN32
 	setExtPrgUnRAR("UnRAR.dll");	// TODO: Verify that a relative pathname works!
 #else
@@ -49,7 +51,7 @@ GensConfig::GensConfig()
 	setExtPrgUnRAR("/usr/bin/unrar");
 #endif
 	
-	// Default graphics settings.
+	/** Graphics settings. **/
 	m_aspectRatioConstraint = true;
 	m_fastBlur = false;
 	m_contrast = 0;
@@ -57,6 +59,13 @@ GensConfig::GensConfig()
 	m_grayscale = false;
 	m_inverted = false;
 	// TODO: Color Scale Method.
+	
+	/** General settings. **/
+	m_autoFixChecksum = true;
+	m_autoPause = false;
+	m_borderColor = true;
+	m_pauseTint = true;
+	m_ntscV30Rolling = true;
 }
 
 GensConfig::~GensConfig()
@@ -224,5 +233,54 @@ void GensConfig::setInverted(bool newInverted)
 }
 
 // TODO: Color Scale Method.
+
+
+/** General settings. **/
+
+
+void GensConfig::setAutoFixChecksum(bool newAutoFixChecksum)
+{
+	if (m_autoFixChecksum == newAutoFixChecksum)
+		return;
+	
+	m_autoFixChecksum = newAutoFixChecksum;
+	emit autoFixChecksum_changed(m_autoFixChecksum);
+}
+
+void GensConfig::setAutoPause(bool newAutoPause)
+{
+	if (m_autoPause == newAutoPause)
+		return;
+	
+	m_autoPause = newAutoPause;
+	emit autoPause_changed(m_autoPause);
+}
+
+void GensConfig::setBorderColor(bool newBorderColor)
+{
+	if (m_borderColor == newBorderColor)
+		return;
+	
+	m_borderColor = newBorderColor;
+	emit borderColor_changed(m_borderColor);
+}
+
+void GensConfig::setPauseTint(bool newPauseTint)
+{
+	if (m_pauseTint == newPauseTint)
+		return;
+	
+	m_pauseTint = newPauseTint;
+	emit pauseTint_changed(m_pauseTint);
+}
+
+void GensConfig::setNtscV30Rolling(bool newNtscV30Rolling)
+{
+	if (m_ntscV30Rolling == newNtscV30Rolling)
+		return;
+	
+	m_ntscV30Rolling = newNtscV30Rolling;
+	emit ntscV30Rolling_changed(m_ntscV30Rolling);
+}
 
 }

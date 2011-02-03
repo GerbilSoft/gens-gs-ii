@@ -59,6 +59,13 @@ class GensConfig : public QObject
 	Q_PROPERTY(bool grayscale READ grayscale WRITE setGrayscale NOTIFY grayscale_changed)
 	Q_PROPERTY(bool inverted READ inverted WRITE setInverted NOTIFY inverted_changed)
 	
+	/** General settings. **/
+	Q_PROPERTY(bool autoFixChecksum READ autoFixChecksum WRITE setAutoFixChecksum NOTIFY autoFixChecksum_changed)
+	Q_PROPERTY(bool autoPause READ autoPause WRITE setAutoPause NOTIFY autoPause_changed)
+	Q_PROPERTY(bool borderColor READ borderColor WRITE setBorderColor NOTIFY borderColor_changed)
+	Q_PROPERTY(bool pauseTint READ pauseTint WRITE setPauseTint NOTIFY pauseTint_changed)
+	Q_PROPERTY(bool ntscV30Rolling READ ntscV30Rolling WRITE setNtscV30Rolling NOTIFY ntscV30Rolling_changed)
+	
 	public:
 		GensConfig();
 		~GensConfig();
@@ -116,6 +123,23 @@ class GensConfig : public QObject
 			{ return m_inverted; }
 		void setInverted(bool newInverted);
 		// TODO: Color Scale Method.
+		
+		/** General settings. **/
+		bool autoFixChecksum(void) const
+			{ return m_autoFixChecksum; }
+		void setAutoFixChecksum(bool newAutoFixChecksum);
+		bool autoPause(void) const
+			{ return m_autoPause; }
+		void setAutoPause(bool newAutoPause);
+		bool borderColor(void) const
+			{ return m_borderColor; }
+		void setBorderColor(bool newBorderColor);
+		bool pauseTint(void) const
+			{ return m_pauseTint; }
+		void setPauseTint(bool newPauseTint);
+		bool ntscV30Rolling(void) const
+			{ return m_ntscV30Rolling; }
+		void setNtscV30Rolling(bool newNtscV30Rolling);
 	
 	protected:
 		/** Onscreen display. **/
@@ -140,6 +164,13 @@ class GensConfig : public QObject
 		bool m_grayscale;
 		bool m_inverted;
 		// TODO: Color Scale Method.
+		
+		/** General settings. **/
+		bool m_autoFixChecksum;
+		bool m_autoPause;
+		bool m_borderColor;
+		bool m_pauseTint;
+		bool m_ntscV30Rolling;
 	
 	signals:
 		/** Onscreen display. **/
@@ -164,6 +195,13 @@ class GensConfig : public QObject
 		void grayscale_changed(bool newGrayscale);
 		void inverted_changed(bool newInverted);
 		// TODO: Color Scale Method.
+		
+		/** General settings. **/
+		void autoFixChecksum_changed(bool newAutoFixChecksum);
+		void autoPause_changed(bool newAutoPause);
+		void borderColor_changed(bool newBorderColor);
+		void pauseTint_changed(bool newPauseTint);
+		void ntscV30Rolling_changed(bool newNtscV30Rolling);
 };
 
 }
