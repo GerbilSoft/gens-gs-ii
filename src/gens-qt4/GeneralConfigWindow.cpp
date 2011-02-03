@@ -200,14 +200,17 @@ void GeneralConfigWindow::reload(void)
 	int grayI;
 	QColor colorText;
 	
-	// Onscreen Display: FPS counter.
+	// TODO: Split button coloring into a separate function.
+	// Alternatively, subclass QPushButton and create GensColorButton.
+	
+	/** Onscreen display: FPS counter. **/
 	chkOsdFpsEnable->setChecked(gqt4_config->osdFpsEnabled());
 	m_osdFpsColor = gqt4_config->osdFpsColor();
 	grayI = QColor_Grayscale(m_osdFpsColor);
 	colorText = (grayI >= 128 ? QColor(0,0,0) : QColor(255,255,255));
 	btnOsdFpsColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdFpsColor.name()).arg(colorText.name()));
 	
-	// Onscreen Display: Messages.
+	/** Onscreen display: Messages. **/
 	chkOsdMsgEnable->setChecked(gqt4_config->osdMsgEnabled());
 	m_osdMsgColor = gqt4_config->osdMsgColor();
 	grayI = QColor_Grayscale(m_osdMsgColor);
@@ -217,15 +220,15 @@ void GeneralConfigWindow::reload(void)
 	// TODO: Get intro effect config from GensConfig.
 	cboIntroColor->setCurrentIndex(7);
 	
-	// Load BIOS ROM filenames.
+	/** Sega CD Boot ROMs. **/
 	txtMcdRomUSA->setText(gqt4_config->mcdRomUSA());
 	txtMcdRomEUR->setText(gqt4_config->mcdRomEUR());
 	txtMcdRomJPN->setText(gqt4_config->mcdRomJPN());
 	
-	// Load external program filenames.
+	/** External programs. **/
 	txtExtPrgUnRAR->setText(gqt4_config->extprgUnRAR());
 	
-	// Graphics settings.
+	/** Graphics settings. **/
 	chkAspectRatioConstraint->setChecked(gqt4_config->aspectRatioConstraint());
 	chkFastBlur->setChecked(gqt4_config->fastBlur());
 	hsldContrast->setValue(gqt4_config->contrast());
@@ -233,6 +236,13 @@ void GeneralConfigWindow::reload(void)
 	chkGrayscale->setChecked(gqt4_config->grayscale());
 	chkInverted->setChecked(gqt4_config->inverted());
 	// TODO: Color Scale Method.
+	
+	/** General settings. **/
+	chkAutoFixChecksum->setChecked(gqt4_config->autoFixChecksum());
+	chkAutoPause->setChecked(gqt4_config->autoPause());
+	chkBorderColor->setChecked(gqt4_config->borderColor());
+	chkPauseTint->setChecked(gqt4_config->pauseTint());
+	chkNtscV30Rolling->setChecked(gqt4_config->ntscV30Rolling());
 	
 	// Disable the Apply button.
 	setApplyButtonEnabled(false);
@@ -244,7 +254,7 @@ void GeneralConfigWindow::reload(void)
  */
 void GeneralConfigWindow::apply(void)
 {
-	// Save the OSD settings.
+	/** Onscreen display. **/
 	gqt4_config->setOsdFpsEnabled(chkOsdFpsEnable->isChecked());
 	gqt4_config->setOsdFpsColor(m_osdFpsColor);
 	gqt4_config->setOsdMsgEnabled(chkOsdMsgEnable->isChecked());
@@ -253,15 +263,15 @@ void GeneralConfigWindow::apply(void)
 	// TODO: Save intro effect config to GensConfig.
 	//gqt4_config->setIntroColor(cboIntroColor->currentIndex());
 	
-	// Save the Sega CD Boot ROMs to the configuration class.
+	/** Sega CD Boot ROMs. **/
 	gqt4_config->setMcdRomUSA(txtMcdRomUSA->text());
 	gqt4_config->setMcdRomEUR(txtMcdRomEUR->text());
 	gqt4_config->setMcdRomJPN(txtMcdRomJPN->text());
 	
-	// Save external program filenames.
+	/** External programs. **/
 	gqt4_config->setExtPrgUnRAR(txtExtPrgUnRAR->text());
 	
-	// Graphics settings.
+	/** Graphics settings. **/
 	gqt4_config->setAspectRatioConstraint(chkAspectRatioConstraint->isChecked());
 	gqt4_config->setFastBlur(chkFastBlur->isChecked());
 	gqt4_config->setContrast(hsldContrast->value());
@@ -269,6 +279,13 @@ void GeneralConfigWindow::apply(void)
 	gqt4_config->setGrayscale(chkGrayscale->isChecked());
 	gqt4_config->setInverted(chkInverted->isChecked());
 	// TODO: Color Scale Method.
+	
+	/** General settings. **/
+	gqt4_config->setAutoFixChecksum(chkAutoFixChecksum->isChecked());
+	gqt4_config->setAutoPause(chkAutoPause->isChecked());
+	gqt4_config->setBorderColor(chkBorderColor->isChecked());
+	gqt4_config->setPauseTint(chkPauseTint->isChecked());
+	gqt4_config->setNtscV30Rolling(chkNtscV30Rolling->isChecked());
 	
 	// Disable the Apply button.
 	// TODO: If Apply was clicked, set focus back to the main window elements.
