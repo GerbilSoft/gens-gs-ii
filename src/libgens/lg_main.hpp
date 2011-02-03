@@ -34,8 +34,8 @@ int End(void);
 
 // libgens version. (TODO: Use MDP version macros.)
 extern const unsigned int version;	// Version number.
-extern const char *version_desc;	// Version description. (May be NULL.)
-extern const char *version_vcs;		// Version Control System revision. (May be NULL.)
+extern const char *version_desc;	// Version description. (ASCII) (May be NULL.)
+extern const char *version_vcs;		// Version Control System revision. (ASCII) (May be NULL.)
 
 }
 

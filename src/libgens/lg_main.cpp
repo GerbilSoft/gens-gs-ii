@@ -63,9 +63,9 @@ static bool ms_IsInit = false;
 
 // libgens version. (TODO: Use MDP version macros.)
 const unsigned int version = 0x00000000U;
-const char *version_desc = "Development Build";
+const char *version_desc = "Development Build";	// ASCII
 
-// Version Control System revision. (May be NULL.)
+// Version Control System revision. (ASCII) (May be NULL.)
 #ifdef GENS_GIT_VERSION
 const char *version_vcs = GENS_GIT_VERSION;
 #else
