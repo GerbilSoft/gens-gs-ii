@@ -21,6 +21,10 @@
 
 // Based on http://doc.trolltech.com/4.7/itemviews-editabletreemodel.html
 
+// Enable fast QString concatenation on Qt 4.6+.
+#define QT_USE_FAST_CONCATENATION
+#define QT_USE_FAST_OPERATOR_PLUS
+
 #include "GensZipDirModel.hpp"
 
 // QApplication::QStyle() is needed to get the directory icon.
