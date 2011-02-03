@@ -186,7 +186,10 @@ SET(gens-qt4_RCC_SRCS
 	)
 
 # Add the resource files to the project.
-QT4_ADD_RESOURCES(gens-qt4_RCC_O ${gens-qt4_RCC_SRCS})
+QT4_ADD_RESOURCES(
+	gens-qt4_RCC_O ${gens-qt4_RCC_SRCS}
+	OPTIONS -no-compress
+	)
 
 # Compatibility sources.
 IF(WIN32)
