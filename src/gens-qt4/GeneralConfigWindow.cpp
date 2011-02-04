@@ -718,8 +718,12 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 				break;
 			
 			case -7:
-				// Not UnRAR.dll. (Win32 only)
+				// Not RAR, UnRAR, or UnRAR.dll.
+#ifdef Q_OS_WIN32
 				prg_status = ms_sWarning + tr("Selected DLL is not UnRAR.dll.");
+#else
+				prg_status = ms_sWarning + tr("Selected program is neither RAR nor UnRAR.");
+#endif
 				filename_icon = QStyle::SP_MessageBoxCritical;
 				break;
 			
