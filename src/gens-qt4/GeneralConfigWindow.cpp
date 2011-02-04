@@ -579,7 +579,8 @@ void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 {
 	setApplyButtonEnabled(true);
 	
-	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomJPN, MCD_REGION_JAPAN_NTSC | MCD_REGION_JAPAN_PAL);
+	// TODO: Add a separate "Mega CD (Asia)" boot ROM?
+	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomJPN, MCD_REGION_JAPAN | MCD_REGION_ASIA);
 	if (!sNewRomStatus.isEmpty())
 	{
 		sMcdRomStatus_JPN = sNewRomStatus;
