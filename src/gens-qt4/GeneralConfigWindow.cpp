@@ -114,7 +114,7 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	
 	// External Programs: Set the textbox icon and placeholder text.
 	txtExtPrgUnRAR->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
-#ifdef _WIN32
+#ifdef Q_OS_WIN32
 	lblExtPrgUnRAR->setText(tr("UnRAR DLL:"));
 	txtExtPrgUnRAR->setPlaceholderText(tr("Select an UnRAR DLL..."));
 #else
@@ -599,7 +599,7 @@ void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
 {
 	// Create the dialog title.
-#ifdef _WIN32
+#ifdef Q_OS_WIN32
 	const QString title = tr("Select UnRAR DLL");
 #else
 	const QString title = tr("Select RAR or UnRAR binary");
@@ -607,7 +607,7 @@ void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
 	
 	QString filename = QFileDialog::getOpenFileName(this, title,
 			txtExtPrgUnRAR->text(),		// Default filename.
-#ifdef _WIN32
+#ifdef Q_OS_WIN32
 			tr("DLL files") + QString::fromLatin1(" (*.dll);;")
 #else
 			tr("rar or unrar") + QString::fromLatin1(" (rar unrar);;")
@@ -646,7 +646,7 @@ void GeneralConfigWindow::extprgDisplayFileStatus(const QString& file_id, const 
 
 void GeneralConfigWindow::on_txtExtPrgUnRAR_focusIn(void)
 {
-#ifdef _WIN32
+#ifdef Q_OS_WIN32
 	extprgDisplayFileStatus(tr("UnRAR DLL"), sExtPrgStatus_UnRAR);
 #else
 	extprgDisplayFileStatus(tr("RAR or UnRAR binary"), sExtPrgStatus_UnRAR);
@@ -702,7 +702,7 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 				filename_icon = QStyle::SP_MessageBoxCritical;
 				break;
 			
-#ifdef _WIN32
+#ifdef Q_OS_WIN32
 			case -5:
 				// UnRAR.dll API version is too old. (Win32 only)
 				prg_status = ms_sWarning + tr("UnRAR.dll API version is too old.") + "<br/>\n" +
@@ -764,7 +764,7 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 	    prg_info.dll_revision != 0 || prg_info.dll_build != 0)
 	{
 		QString rar_version;
-#ifdef _WIN32
+#ifdef Q_OS_WIN32
 		rar_version = tr("%1 version %2.%3.%4.%5");
 		rar_version = rar_version.arg(prg_id);
 		rar_version = rar_version.arg(prg_info.dll_major);
@@ -778,7 +778,7 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 		rar_version = rar_version.arg(prg_info.dll_minor);
 #endif
 		sExtPrgStatus_UnRAR += sLineBreak + sLineBreak + rar_version;
-#ifdef _WIN32
+#ifdef Q_OS_WIN32
 		if (prg_info.api_version > 0)
 			sExtPrgStatus_UnRAR += sLineBreak + tr("API version %1").arg(prg_info.api_version);
 #endif
