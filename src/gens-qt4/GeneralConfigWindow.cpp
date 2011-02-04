@@ -363,6 +363,9 @@ void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *
 	// ROM file status will be updated automatically by
 	// the textChanged() signal from QLineEdit.
 	txtRomFile->setText(filename);
+	
+	// Set focus to the textbox.
+	txtRomFile->setFocus(Qt::OtherFocusReason);
 }
 
 void GeneralConfigWindow::on_btnMcdRomUSA_clicked(void)
@@ -621,6 +624,9 @@ void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
 	// Program file status will be updated automatically by
 	// the textChanged() signal from QLineEdit.
 	txtExtPrgUnRAR->setText(filename);
+	
+	// Set focus to the textbox.
+	txtExtPrgUnRAR->setFocus(Qt::OtherFocusReason);
 }
 
 
