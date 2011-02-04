@@ -713,7 +713,11 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 			
 			case -6:
 				// Version information not found.
+#ifdef Q_OS_WIN32
 				prg_status = ms_sWarning + tr("DLL version information not found.");
+#else
+				prg_status = ms_sWarning + tr("Program version information not found.");
+#endif
 				filename_icon = QStyle::SP_MessageBoxCritical;
 				break;
 			
