@@ -588,6 +588,12 @@ const utf8_str *lg_mcd_rom_GetRegionCodeString(int region_code)
 		case MCD_REGION_JAPAN | MCD_REGION_ASIA:
 			return "Japan or Asia";
 		
+		case MCD_REGION_JAPAN | MCD_REGION_ASIA | MCD_REGION_EUROPE:
+			return "Japan, Asia, or Europe"
+		
+		case MCD_REGION_JAPAN | MCD_REGION_ASIA | MCD_REGION_USA | MCD_REGION_EUROPE:
+			return "Any Region";
+		
 		default:			return NULL;
 	}
 }
