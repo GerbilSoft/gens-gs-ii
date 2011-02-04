@@ -33,12 +33,16 @@
 #include <zlib.h>
 
 // Qt4 includes.
+#include <QtCore/QScopedPointer>
 #include <QtGui/QFileDialog>
 #include <QtGui/QColorDialog>
 #include <QtGui/QPainter>
 
 // libgens: RAR decompressor
 #include "libgens/Decompressor/DcRar.hpp"
+
+// libgens: ROM class.
+#include "libgens/Rom.hpp"
 
 namespace GensQt4
 {
@@ -384,16 +388,18 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 {
 	// ROM data buffer.
 	uint8_t *rom_data = NULL;
-	qint64 data_len;
+	int data_len;
 	uint32_t rom_crc32;
 	int boot_rom_id;
 	int boot_rom_region_code;
 	MCD_RomStatus_t boot_rom_status;
 	
+	// Line break string.
+	const QString sLineBreak = QString::fromLatin1("<br/>");
+	
 	// Check if the file exists.
 	const QString& filename = txtRomFile->text();
-	QFile file(filename);
-	if (!file.exists())
+	if (!QFile::exists(filename))
 	{
 		// File doesn't exist.
 		// NOTE: KDE 4's Oxygen theme doesn't have a question icon.
@@ -401,13 +407,10 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 		// TODO: Set ROM file notes.
 		txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 		if (filename.isEmpty())
-			return tr("No ROM filename specified.");
+			return sLineBreak + tr("No ROM filename specified.");
 		else
-			return tr("The specified ROM file was not found.");
+			return sLineBreak + tr("The specified ROM file was not found.");
 	}
-	
-	// Line break string.
-	const QString sLineBreak = QString::fromLatin1("<br/>");
 	
 	// Check the ROM file.
 	// TODO: Decompressor support.
@@ -416,34 +419,47 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 	QString rom_notes;
 	QString rom_size_warning;
 	
+	// Open the ROM file using LibGens::Rom.
+	QScopedPointer<LibGens::Rom> rom(new LibGens::Rom(filename.toUtf8().constData()));
+	if (!rom->isOpen())
+	{
+		// Error opening ROM file.
+		txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
+		return sLineBreak + tr("Error opening ROM file.");
+	}
+	
+	// Multi-file ROM archives are not supported for Sega CD Boot ROMs.
+	if (rom->isMultiFile())
+	{
+		txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxWarning));
+		return (sLineBreak + ms_sWarning +
+				tr("This archive has multiple files.") + sLineBreak +
+				tr("Multi-file ROM archives are not currently supported for Sega CD Boot ROMs."));
+	}
+	
 	// Check the ROM filesize.
 	// Valid boot ROMs are 128 KB.
 	// Smaller ROMs will not work; larger ROMs may work, but warn anyway.
-	if (file.size() != MCD_ROM_FILESIZE)
+	if (rom->romSize() != MCD_ROM_FILESIZE)
 	{
 		// Wrong ROM size.
 		filename_icon = QStyle::SP_MessageBoxWarning;
 		
 		rom_size_warning = ms_sWarning + tr("ROM size is incorrect.") + sLineBreak +
-				   tr("(expected %L1 bytes; found %L2 bytes)").arg(MCD_ROM_FILESIZE).arg(file.size());
-		if (file.size() < MCD_ROM_FILESIZE)
+				tr("(expected %L1 bytes; found %L2 bytes)").arg(MCD_ROM_FILESIZE).arg(rom->romSize());
+		
+		// TODO: LibGens::Rom::loadRom() fails if the ROM buffer isn't >= the ROM size.
+		//if (file.size() < MCD_ROM_FILESIZE)
 		{
 			// ROM is too small, so it's guaranteed to not match anything in the database.
 			goto rom_identified;
 		}
 	}
 	
-	// Open the file.
-	if (!file.open(QIODevice::ReadOnly))
-	{
-		// Error opening the file.
-		rom_notes = tr("Error opening file: %1").arg(file.error());
-		goto rom_identified;
-	}
-	
-	// Read 128 KB and calculate the CRC32.
+	// Load the ROM data and calculate the CRC32.
+	// TODO: LibGens::Rom::loadRom() fails if the ROM buffer isn't >= the ROM size.
 	rom_data = (uint8_t*)malloc(MCD_ROM_FILESIZE);
-	data_len = file.read((char*)rom_data, MCD_ROM_FILESIZE);
+	data_len = rom->loadRom(rom_data, MCD_ROM_FILESIZE);
 	if (data_len != MCD_ROM_FILESIZE)
 	{
 		// Error reading data from the file.
