@@ -65,13 +65,13 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0x9C, 0xEF, 0xC2, 0x94, 0x13, 0x7F, 0x65, 0x3C},
 		
 		// Region code and ROM support status.
-		MCD_REGION_JAPAN | MCD_REGION_ASIA,
+		MCD_REGION_JAPAN | MCD_REGION_ASIA | MCD_REGION_USA | MCD_REGION_EUROPE,
 		MCD_REGION_JAPAN,
 		RomStatus_Supported,
 		
 		// Description and notes.
 		"Mega CD (J) v1.00l",
-		"This ROM will also work for Mega CD (Asia)."
+		"This ROM will work on all regions, but will only run Japanese games."
 	},
 	
 	// Mega CD (J) Boot ROM v1.00p
@@ -122,13 +122,13 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0xD4, 0x22, 0xD9, 0x7D, 0x98, 0xB2, 0x1C, 0xDA},
 		
 		// Region code and ROM support status.
-		MCD_REGION_ASIA | MCD_REGION_JAPAN,
+		MCD_REGION_ASIA | MCD_REGION_JAPAN | MCD_REGION_EUROPE,
 		MCD_REGION_ASIA,
 		RomStatus_Supported,
 		
 		// Description and notes.
 		"Mega CD (Asia) v1.00S",
-		"This ROM will also work for Mega CD (J)."
+		"This ROM will work on all regions except USA, but will only run Japanese games."
 	},
 	
 	// Sega CD (U) Boot ROM v1.00
@@ -200,14 +200,14 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0x11, 0x72, 0x46, 0x8D, 0xFA, 0x28, 0x58, 0xEB},
 		
 		// Region code and ROM support status.
-		MCD_REGION_JAPAN | MCD_REGION_ASIA,
+		MCD_REGION_JAPAN | MCD_REGION_ASIA | MCD_REGION_USA | MCD_REGION_EUROPE,
 		MCD_REGION_JAPAN,
 		RomStatus_Unsupported,
 		
 		// Description and notes.
 		"Mega CD 2 (J) v2.00c",
 		"Gens/GS II does not support the hardware changes in the Mega CD model 2.\n"
-		"This ROM will also work for Mega CD (Asia)."
+		"This ROM will work on all regions, but will only run Japanese games."
 	},
 	
 	// Sega CD 2 (U) Boot ROM v2.00 (Bad Dump)
@@ -245,8 +245,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		
 		// Description and notes.
 		"Sega CD 2 (U) v2.00",
-		"Gens/GS II does not support the hardware changes"
-			" in the Sega CD model 2."
+		"Gens/GS II does not support the hardware changes in the Sega CD model 2."
 	},
 	
 	// Mega CD 2 (E) Boot ROM v2.00
@@ -265,8 +264,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		
 		// Description and notes.
 		"Mega CD 2 (E) v2.00",
-		"Gens/GS II does not support the hardware changes"
-			" in the Mega CD model 2."
+		"Gens/GS II does not support the hardware changes in the Mega CD model 2."
 	},
 	
 	/** Sega CD: Model 2 (ROM revision W) **/
@@ -287,8 +285,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		
 		// Description and notes.
 		"Sega CD 2 (U) v2.00W",
-		"Gens/GS II does not support the hardware changes"
-			" in the Sega CD model 2."
+		"Gens/GS II does not support the hardware changes in the Sega CD model 2."
 	},
 	
 	// Mega CD 2 (E) Boot ROM v2.00W
@@ -307,8 +304,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		
 		// Description and notes.
 		"Mega CD 2 (E) v2.00W",
-		"Gens/GS II does not support the hardware changes"
-			" in the Mega CD model 2."
+		"Gens/GS II does not support the hardware changes in the Mega CD model 2."
 	},
 	
 	/** Sega CD: Model 2 (ROM revision X) **/
@@ -329,8 +325,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		
 		// Description and notes.
 		"Sega CD 2 (U) v2.11X",
-		"Gens/GS II does not support the hardware changes"
-			" in the Sega CD model 2."
+		"Gens/GS II does not support the hardware changes in the Sega CD model 2."
 	},
 	
 	/** Sega MultiMega / CDX **/
@@ -351,8 +346,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		
 		// Description and notes.
 		"Sega CDX (U) v2.21X",
-		"Gens/GS II does not support the hardware changes"
-			" in the Sega CDX."
+		"Gens/GS II does not support the hardware changes in the Sega CDX."
 	},
 	
 	/** Pioneer LaserActive **/
@@ -373,8 +367,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		
 		// Description and notes.
 		"Pioneer LaserActive (J) v0.98",
-		"Gens/GS II does not support the hardware changes"
-			" in the Pioneer LaserActive."
+		"Gens/GS II does not support the hardware changes in the Pioneer LaserActive."
 	},
 	
 	// Pioneer LaserActive (U) Boot ROM v0.98
@@ -393,8 +386,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		
 		// Description and notes.
 		"Pioneer LaserActive (U) v0.98",
-		"Gens/GS II does not support the hardware changes"
-			" in the Pioneer LaserActive."
+		"Gens/GS II does not support the hardware changes in the Pioneer LaserActive."
 	},
 	
 	// Pioneer LaserActive (U) Boot ROM v1.04
@@ -413,8 +405,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		
 		// Description and notes.
 		"Pioneer LaserActive (U) v1.04",
-		"Gens/GS II does not support the hardware changes"
-			" in the Pioneer LaserActive."
+		"Gens/GS II does not support the hardware changes in the Pioneer LaserActive."
 	},
 	
 	/** JVC Wondermega / X'Eye **/
@@ -435,8 +426,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		
 		// Description and notes.
 		"Sega Wondermega (J) v1.00W",
-		"Gens/GS II does not support the hardware changes"
-			" in the Sega Wondermega."
+		"Gens/GS II does not support the hardware changes in the Sega Wondermega."
 	},
 	
 	// Sega Wondermega M2 (J) Boot ROM v2.00
@@ -455,8 +445,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		
 		// Description and notes.
 		"Sega Wondermega M2 (J) v2.00",
-		"Gens/GS II does not support the hardware changes"
-			" in the Sega Wondermega M2."
+		"Gens/GS II does not support the hardware changes in the Sega Wondermega M2."
 	},
 	
 	// JVC X'Eye (U) Boot ROM v2.00
@@ -469,14 +458,14 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0xB9, 0xC2, 0x55, 0xD3, 0x58, 0x33, 0x11, 0x8F},
 		
 		// Region code and ROM support status.
-		MCD_REGION_USA,
+		MCD_REGION_JAPAN | MCD_REGION_ASIA | MCD_REGION_USA | MCD_REGION_EUROPE,
 		MCD_REGION_USA,
 		RomStatus_Unsupported,
 		
 		// Description and notes.
 		"JVC X'Eye (U) v2.00",
-		"Gens/GS II does not support the hardware changes"
-			" in the JVC X'Eye."
+		"Gens/GS II does not support the hardware changes in the JVC X'Eye.\n"
+		"This ROM will work on all regions, but will only run USA games."
 	},
 	
 	// End of database.
