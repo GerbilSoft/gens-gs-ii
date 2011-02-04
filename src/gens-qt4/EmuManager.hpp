@@ -49,7 +49,7 @@ class EmuManager : public QObject
 		
 		// TODO: Move the parent argument to EmuManager()?
 		int openRom(QWidget *parent = 0);
-		int openRom(const QString& filename);
+		int loadRom(LibGens::Rom *rom);
 		int closeRom(void);
 		
 		inline bool isRomOpen(void) const { return (m_rom != NULL); }
@@ -106,11 +106,11 @@ class EmuManager : public QObject
 		void osdShowPreview(int duration, const QImage& img);
 	
 	protected:
-		// Open ROM.
+		// Load ROM.
 		// HACK: Works around the threading issue when opening a new ROM without closing the old one.
 		// TODO: Fix the threading issue!
-		int openRom_int(const QString& filename);
-		QString openRom_int_tmr_filename;
+		int loadRom_int(LibGens::Rom *rom);
+		LibGens::Rom *m_loadRom_int_tmr_rom;
 		
 		// Timing management.
 		double m_lastTime;	// Last time a frame was updated.
@@ -219,10 +219,10 @@ class EmuManager : public QObject
 		
 		// Calls openRom_int() with the stored filename.
 		// HACK: Works around the threading issue when opening a new ROM without closing the old one.
-		void sl_openRom_int(void)
+		void sl_loadRom_int(void)
 		{
-			openRom_int(openRom_int_tmr_filename);
-			openRom_int_tmr_filename.clear();
+			loadRom_int(m_loadRom_int_tmr_rom);
+			m_loadRom_int_tmr_rom = NULL;
 		}
 };
 

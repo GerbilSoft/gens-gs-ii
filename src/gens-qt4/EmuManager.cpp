@@ -55,6 +55,7 @@
 // Qt includes.
 #include <QtCore/QBuffer>
 #include <QtCore/QTimer>
+#include <QtCore/QScopedPointer>
 #include <QtGui/QApplication>
 #include <QtGui/QFileDialog>
 #include <QtGui/QImageReader>
@@ -144,21 +145,50 @@ int EmuManager::openRom(QWidget *parent)
 			tr("All Files") + QString::fromLatin1("(*.*)"));
 	
 	if (filename.isEmpty())
-		return 1;
+		return -1;
 	
-	// Open the selected ROM file.
-	return openRom(filename);
+	// Open the file using the LibGens::Rom class.
+	// TODO: This won't work for KIO...
+	LibGens::Rom *rom = new LibGens::Rom(filename.toUtf8().constData());
+	if (!rom->isOpen())
+	{
+		// Couldn't open the ROM file.
+		fprintf(stderr, "Error opening ROM file. (TODO: Get error information.)\n");
+		delete rom;
+		return -2;
+	}
+	
+	// Check if this is a multi-file ROM archive.
+	if (rom->isMultiFile())
+	{
+		// Multi-file ROM archive.
+		// Prompt the user to select a file.
+		QScopedPointer<ZipSelectDialog> zipsel(new ZipSelectDialog());
+		zipsel->setFileList(rom->get_z_entry_list());
+		int ret = zipsel->exec();
+		if (ret != QDialog::Accepted || zipsel->selectedFile() == NULL)
+		{
+			// Dialog was rejected.
+			delete rom;
+			return -3;
+		}
+		
+		// Get the selected file.
+		rom->select_z_entry(zipsel->selectedFile());
+	}
+	
+	// Load the selected ROM file.
+	return loadRom(rom);
 }
 
 
 /**
- * openRom(): Open a ROM file.
- * Opens a ROM file using the given filename.
- * @param filename Filename of the ROM file to open.
- * TODO: Add parameter for z_filename.
+ * loadRom(): Load a ROM file.
+ * Loads a ROM file previously opened via LibGens::Rom().
+ * @param rom [in] Previously opened ROM object.
  * @return 0 on success; non-zero on error.
  */
-int EmuManager::openRom(const QString& filename)
+int EmuManager::loadRom(LibGens::Rom *rom)
 {
 	if (gqt4_emuThread || m_rom)
 	{
@@ -171,56 +201,39 @@ int EmuManager::openRom(const QString& filename)
 		// video corruption due to a timing mismatch.
 		// TODO: Figure out how to fix this.
 		// TODO: Proper return code.
-		openRom_int_tmr_filename = filename;
-		QTimer::singleShot(100, this, SLOT(sl_openRom_int()));
+		m_loadRom_int_tmr_rom = rom;
+		QTimer::singleShot(100, this, SLOT(sl_loadRom_int()));
 		return 0;
 	}
 	
 	// ROM isn't running. Open the ROM directly.
-	return openRom_int(filename);
+	return loadRom_int(rom);
 }
 
 
 /**
- * openRom_int(): Open a ROM file. (Internal function.)
- * @param filename Filename of the ROM file to open.
+ * loadRom_int(): Load a ROM file. (Internal function.)
+ * Loads a ROM file previously opened via LibGens::Rom().
+ * @param rom [in] Previously opened ROM object.
  * @return 0 on success; non-zero on error.
  */
-int EmuManager::openRom_int(const QString& filename)
+int EmuManager::loadRom_int(LibGens::Rom *rom)
 {
-	// Open the file using the LibGens::Rom class.
-	// TODO: This won't work for KIO...
-	m_rom = new LibGens::Rom(filename.toUtf8().constData());
-	if (!m_rom->isOpen())
-	{
-		// Couldn't open the ROM file.
-		fprintf(stderr, "Error opening ROM file. (TODO: Get error information.)\n");
-		delete m_rom;
-		m_rom = NULL;
-		return 2;
-	}
+	if (m_rom)
+		return -1;
 	
 	// Check if this is a multi-file ROM archive.
-	if (m_rom->isMultiFile())
+	if (rom->isMultiFile() && !rom->isRomSelected())
 	{
-		// Multi-file ROM archive.
-		// Prompt the user to select a file.
-		ZipSelectDialog *zipsel = new ZipSelectDialog();
-		zipsel->setFileList(m_rom->get_z_entry_list());
-		int ret = zipsel->exec();
-		if (ret != QDialog::Accepted || zipsel->selectedFile() == NULL)
-		{
-			// Dialog was rejected.
-			delete m_rom;
-			m_rom = NULL;
-			return 6;
-		}
-		
-		// Get the selected file.
-		m_rom->select_z_entry(zipsel->selectedFile());
-		delete zipsel;
+		// Multi-file ROM archive, but a ROM hasn't been selected.
+		return -2;
 	}
 	
+	// Save the ROM as m_rom.
+	m_rom = rom;
+	
+	// Print ROM information.
+	// TODO: OSD, or remove this entirely.
 	printf("ROM information: format == %d, system == %d\n", m_rom->romFormat(), m_rom->sysId());
 	
 	if (m_rom->sysId() != LibGens::Rom::MDP_SYSTEM_MD)
