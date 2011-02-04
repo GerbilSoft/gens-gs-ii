@@ -26,6 +26,9 @@
 #include "GensWindow.hpp"
 #include "gqt4_main.hpp"
 
+// Menu definitions.
+#include "GensMenuBar_menus.hpp"
+
 // Qt4 windows.
 #include "AboutWindow.hpp"
 #include "CtrlConfigWindow.hpp"

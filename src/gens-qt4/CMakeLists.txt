@@ -85,6 +85,7 @@ SET(gens-qt4_SRCS
 	GensWindow.cpp
 	AboutWindow.cpp
 	GensMenuBar.cpp
+	GensMenuBar_menus.cpp
 	EmuThread.cpp
 	GensQApplication.cpp
 	SigHandler.cpp
