@@ -106,7 +106,7 @@ class DcRar : public Decompressor
 		 * - -4: Error calling stat().
 		 * - -5: Wrong DLL API version. (Win32 only)
 		 * - -6: Version information not found.
-		 * - -7: Not UnRAR.dll. (Win32 only)
+		 * - -7: Not RAR, UnRAR, or UnRAR.dll.
 		 * TODO: Use MDP error code constants.
 		 */
 		static uint32_t CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info);

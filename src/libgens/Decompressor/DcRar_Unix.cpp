@@ -360,7 +360,7 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
  * - -4: Error calling stat().
  * - -5: Wrong DLL API version. (Win32 only)
  * - -6: Version information not found.
- * - -7: Not UnRAR.dll. (Win32 only)
+ * - -7: Not RAR, UnRAR, or UnRAR.dll.
  * TODO: Use MDP error code constants.
  */
 uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
@@ -408,30 +408,30 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
 	
 	token = strtok_r(buf, "\n ", &saveptr);
 	if (!token)
-		return 0;
+		return -7;
 	
 	if (!strncasecmp(token, "UNRAR", 6))
 		my_prg_info.rar_type = ExtPrgInfo::RAR_ET_UNRAR;
 	else if (!strncasecmp(token, "RAR", 4))
 		my_prg_info.rar_type = ExtPrgInfo::RAR_ET_RAR;
 	else
-		return 0;
+		return -7;
 	
 	// Get the RAR major version.
 	token = strtok_r(NULL, ".", &saveptr);
 	if (!token)
-		return 0;
+		return -6;
 	my_prg_info.dll_major = strtol(token, &strtol_endptr, 10);
 	if (!strtol_endptr || *strtol_endptr != 0x00)
-		return 0;
+		return -6;
 	
 	// Get the RAR minor version.
 	token = strtok_r(NULL, " ", &saveptr);
 	if (!token)
-		return 0;
+		return -6;
 	my_prg_info.dll_minor = strtol(token, &strtol_endptr, 10);
 	if (!strtol_endptr || *strtol_endptr != 0x00)
-		return 0;
+		return -6;
 	
 	// RAR version obtained.
 	if (prg_info)
