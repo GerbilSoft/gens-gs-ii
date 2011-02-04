@@ -563,6 +563,9 @@ on NTSC models.</string>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
+            <property name="buddy">
+             <cstring>txtMcdRomUSA</cstring>
+            </property>
            </widget>
           </item>
           <item row="0" column="2">
@@ -583,6 +586,9 @@ on NTSC models.</string>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
+            <property name="buddy">
+             <cstring>txtMcdRomEUR</cstring>
+            </property>
            </widget>
           </item>
           <item row="1" column="2">
@@ -602,6 +608,9 @@ on NTSC models.</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="buddy">
+             <cstring>txtMcdRomJPN</cstring>
             </property>
            </widget>
           </item>
@@ -631,45 +640,6 @@ on NTSC models.</string>
             </property>
            </spacer>
           </item>
-          <item row="0" column="1">
-           <spacer name="hspcMcdRomUSA">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="1" column="1">
-           <spacer name="hspcMcdRomEUR">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="2" column="1">
-           <spacer name="hspcMcdRomJPN">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
           <item row="4" column="0" colspan="3">
            <widget class="QLabel" name="lblMcdSelectedRom">
             <property name="sizePolicy">
@@ -691,6 +661,15 @@ on NTSC models.</string>
              <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
             </property>
            </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="GensLineEdit" name="txtMcdRomUSA"/>
+          </item>
+          <item row="1" column="1">
+           <widget class="GensLineEdit" name="txtMcdRomEUR"/>
+          </item>
+          <item row="2" column="1">
+           <widget class="GensLineEdit" name="txtMcdRomJPN"/>
           </item>
          </layout>
         </widget>
@@ -724,19 +703,6 @@ on NTSC models.</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <spacer name="hspcMcdRomUSA_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
           <item row="0" column="2">
            <widget class="QPushButton" name="btnExtPrgUnRAR">
             <property name="text">
@@ -744,7 +710,7 @@ on NTSC models.</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="0" colspan="3">
+          <item row="2" column="0" colspan="3">
            <spacer name="verticalSpacer_3">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -760,7 +726,7 @@ on NTSC models.</string>
             </property>
            </spacer>
           </item>
-          <item row="2" column="0" colspan="3">
+          <item row="3" column="0" colspan="3">
            <widget class="QLabel" name="lblExtPrgSel">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -782,6 +748,9 @@ on NTSC models.</string>
             </property>
            </widget>
           </item>
+          <item row="0" column="1">
+           <widget class="GensLineEdit" name="txtExtPrgUnRAR"/>
+          </item>
          </layout>
         </widget>
        </item>
@@ -801,6 +770,13 @@ on NTSC models.</string>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>GensLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>widgets/GensLineEdit.hpp</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>chkOsdFpsEnable</tabstop>
@@ -821,9 +797,13 @@ on NTSC models.</string>
   <tabstop>chkGrayscale</tabstop>
   <tabstop>chkInverted</tabstop>
   <tabstop>cboColorScaleMethod</tabstop>
+  <tabstop>txtMcdRomUSA</tabstop>
   <tabstop>btnMcdRomUSA</tabstop>
+  <tabstop>txtMcdRomEUR</tabstop>
   <tabstop>btnMcdRomEUR</tabstop>
+  <tabstop>txtMcdRomJPN</tabstop>
   <tabstop>btnMcdRomJPN</tabstop>
+  <tabstop>txtExtPrgUnRAR</tabstop>
   <tabstop>btnExtPrgUnRAR</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>

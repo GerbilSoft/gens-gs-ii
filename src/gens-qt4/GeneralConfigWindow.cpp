@@ -62,22 +62,6 @@ const QString GeneralConfigWindow::ms_sWarning =
 GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
 {
-	// Sega CD: Initialize Boot ROM textboxes.
-	txtMcdRomUSA = new GensLineEdit(this);
-	txtMcdRomUSA->setObjectName(QString::fromUtf8("txtMcdRomUSA"));
-	txtMcdRomUSA->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
-	txtMcdRomEUR = new GensLineEdit(this);
-	txtMcdRomEUR->setObjectName(QString::fromUtf8("txtMcdRomEUR"));
-	txtMcdRomEUR->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
-	txtMcdRomJPN = new GensLineEdit(this);
-	txtMcdRomJPN->setObjectName(QString::fromUtf8("txtMcdRomJPN"));
-	txtMcdRomJPN->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
-	
-	// External Programs: Initialize textboxes.
-	txtExtPrgUnRAR = new GensLineEdit(this);
-	txtExtPrgUnRAR->setObjectName(QString::fromUtf8("txtExtPrgUnRAR"));
-	txtExtPrgUnRAR->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
-	
 	// Initialize the Qt4 UI.
 	setupUi(this);
 	
@@ -117,36 +101,25 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	
 	/** Sega CD **/
 	
-	// Sega CD: Add the Boot ROM textboxes to the grid layout.
+	// Sega CD: Initialize the Boot ROM textbox icons.
+	txtMcdRomUSA->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
+	txtMcdRomEUR->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
+	txtMcdRomJPN->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
+	
+	// Sega CD: Set the placeholder text.
 	const QString sMcdBootRom_PlaceholderText = tr("Select a %1 Boot ROM...");
-	
-	// Sega CD: USA Boot ROM
 	txtMcdRomUSA->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Sega CD (U)")));
-	gridMcdRoms->addWidget(txtMcdRomUSA, 0, 1);
-	lblMcdRomUSA->setBuddy(txtMcdRomUSA);
-	setTabOrder(lblMcdRomUSA, txtMcdRomUSA);
-	setTabOrder(txtMcdRomUSA, btnMcdRomUSA);
-	// Sega CD: EUR Boot ROM
 	txtMcdRomEUR->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Mega CD (E)")));
-	gridMcdRoms->addWidget(txtMcdRomEUR, 1, 1);
-	lblMcdRomEUR->setBuddy(txtMcdRomEUR);
-	setTabOrder(txtMcdRomEUR, btnMcdRomEUR);
-	// Sega CD: JPN Boot ROM
 	txtMcdRomJPN->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Mega CD (J)")));
-	gridMcdRoms->addWidget(txtMcdRomJPN, 2, 1);
-	lblMcdRomJPN->setBuddy(txtMcdRomJPN);
-	setTabOrder(txtMcdRomJPN, btnMcdRomJPN);
 	
-	// External Programs: Add the textboxes to the grid layout.
+	// External Programs: Set the textbox icon and placeholder text.
+	txtExtPrgUnRAR->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 #ifdef _WIN32
 	lblExtPrgUnRAR->setText(tr("UnRAR DLL:"));
 	txtExtPrgUnRAR->setPlaceholderText(tr("Select an UnRAR DLL..."));
 #else
 	txtExtPrgUnRAR->setPlaceholderText(tr("Select a RAR or UnRAR binary..."));
 #endif
-	gridExtPrg->addWidget(txtExtPrgUnRAR, 0, 1);
-	lblExtPrgUnRAR->setBuddy(txtExtPrgUnRAR);
-	setTabOrder(lblExtPrgUnRAR, txtExtPrgUnRAR);
 	
 	// Load configuration.
 	reload();

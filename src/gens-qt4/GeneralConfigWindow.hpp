@@ -89,14 +89,6 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 				grayI = 255;
 			return grayI;
 		}
-		
-		// Sega CD: Boot ROM file textboxes.
-		GensLineEdit *txtMcdRomUSA;
-		GensLineEdit *txtMcdRomEUR;
-		GensLineEdit *txtMcdRomJPN;
-		
-		// External Programs
-		GensLineEdit *txtExtPrgUnRAR;
 	
 	protected slots:
 		void accept(void) { apply(); QDialog::accept(); }
