@@ -81,7 +81,7 @@ class GensWindow : public QMainWindow
 		EventKeys *m_evKeys;
 		
 		// Set the Gens window title.
-		void setGensTitle();
+		void setGensTitle(void);
 	
 	protected slots:
 		// Menu item selection.
