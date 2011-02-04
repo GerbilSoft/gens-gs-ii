@@ -49,8 +49,8 @@ extern const uint8_t lg_mcd_rom_InitHINT[4];
 typedef enum
 {
 	// Bit flags.
-	MCD_REGION_JAPAN_NTSC	= 0x01,
-	MCD_REGION_JAPAN_PAL	= 0x02,
+	MCD_REGION_JAPAN	= 0x01,
+	MCD_REGION_ASIA		= 0x02,
 	MCD_REGION_USA		= 0x04,
 	MCD_REGION_EUROPE	= 0x08,
 	

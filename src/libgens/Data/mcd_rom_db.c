@@ -55,7 +55,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 {
 	/** Sega CD: Model 1 **/
 	
-	// Mega CD (J) Boot ROM v1.00l (NTSC)
+	// Mega CD (J) Boot ROM v1.00l
 	// 1991/12/02 15:20
 	{
 		0xF18DDE5B,		// CRC32
@@ -65,16 +65,16 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0x9C, 0xEF, 0xC2, 0x94, 0x13, 0x7F, 0x65, 0x3C},
 		
 		// Region code and ROM support status.
-		MCD_REGION_JAPAN_NTSC | MCD_REGION_JAPAN_PAL,
-		MCD_REGION_JAPAN_NTSC,
+		MCD_REGION_JAPAN | MCD_REGION_ASIA,
+		MCD_REGION_JAPAN,
 		RomStatus_Supported,
 		
 		// Description and notes.
-		"Mega CD (J) v1.00l (NTSC)",
-		"This ROM will also work for Japan/PAL."
+		"Mega CD (J) v1.00l",
+		"This ROM will also work for Mega CD (Asia)."
 	},
 	
-	// Mega CD (J) Boot ROM v1.00p (NTSC)
+	// Mega CD (J) Boot ROM v1.00p
 	// 1991/12/17 12:00
 	{
 		0x9D2DA8F2,		// CRC32
@@ -84,16 +84,16 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0x84, 0xE8, 0x20, 0xAC, 0x62, 0x1A, 0x8E, 0xDD},
 		
 		// Region code and ROM support status.
-		MCD_REGION_JAPAN_NTSC,
-		MCD_REGION_JAPAN_NTSC,
+		MCD_REGION_JAPAN,
+		MCD_REGION_JAPAN,
 		RomStatus_Recommended,
 		
 		// Description and notes.
-		"Mega CD (J) v1.00p (NTSC)",
+		"Mega CD (J) v1.00p",
 		"Recommended boot ROM for Mega CD (J)."
 	},
 	
-	// Mega CD (J) Boot ROM v1.00S (NTSC)
+	// Mega CD (J) Boot ROM v1.00S
 	// 1991/12/28 18:30
 	{
 		0x79F85384,		// CRC32 (with original HINT vector)
@@ -103,16 +103,16 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0x41, 0xAD, 0xFD, 0x99, 0xD9, 0xA1, 0xE4, 0x66},
 		
 		// Region code and ROM support status.
-		MCD_REGION_JAPAN_NTSC,
-		MCD_REGION_JAPAN_NTSC,
+		MCD_REGION_JAPAN,
+		MCD_REGION_JAPAN,
 		RomStatus_Supported,
 		
 		// Description and notes.
-		"Mega CD (J) v1.00S (NTSC)",
+		"Mega CD (J) v1.00S",
 		""
 	},
 	
-	// Mega CD (J) Boot ROM v1.00S (PAL)
+	// Mega CD (Asia) Boot ROM v1.00S
 	// 1991/12/28 20:30
 	{
 		0x550F30BB,		// CRC32 (with original HINT vector)
@@ -122,13 +122,13 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0xD4, 0x22, 0xD9, 0x7D, 0x98, 0xB2, 0x1C, 0xDA},
 		
 		// Region code and ROM support status.
-		MCD_REGION_JAPAN_PAL | MCD_REGION_JAPAN_NTSC,
-		MCD_REGION_JAPAN_PAL,
+		MCD_REGION_ASIA | MCD_REGION_JAPAN,
+		MCD_REGION_ASIA,
 		RomStatus_Supported,
 		
 		// Description and notes.
-		"Mega CD (J) v1.00S (PAL)",
-		"This ROM will also work for Japan/NTSC."
+		"Mega CD (Asia) v1.00S",
+		"This ROM will also work for Mega CD (J)."
 	},
 	
 	// Sega CD (U) Boot ROM v1.00
@@ -190,7 +190,7 @@ static const mcd_rom_db_t McdRomDatabase[] =
 	
 	/** Sega CD: Model 2 **/
 	
-	// Mega CD 2 (J) Boot ROM v2.00c (NTSC)
+	// Mega CD 2 (J) Boot ROM v2.00c
 	// 1992/12/22 14:00
 	{
 		0xDD6CC972,		// CRC32 (with original HINT vector)
@@ -200,14 +200,14 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0x11, 0x72, 0x46, 0x8D, 0xFA, 0x28, 0x58, 0xEB},
 		
 		// Region code and ROM support status.
-		MCD_REGION_JAPAN_NTSC | MCD_REGION_JAPAN_PAL,
-		MCD_REGION_JAPAN_NTSC,
+		MCD_REGION_JAPAN | MCD_REGION_ASIA,
+		MCD_REGION_JAPAN,
 		RomStatus_Unsupported,
 		
 		// Description and notes.
-		"Mega CD 2 (J) v2.00c (NTSC)",
+		"Mega CD 2 (J) v2.00c",
 		"Gens/GS II does not support the hardware changes in the Mega CD model 2.\n"
-		"This ROM will also work for Japan/PAL."
+		"This ROM will also work for Mega CD (Asia)."
 	},
 	
 	// Sega CD 2 (U) Boot ROM v2.00 (Bad Dump)
@@ -367,8 +367,8 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0xC6, 0x6B, 0x80, 0xEE, 0x79, 0xC3, 0xDA, 0x6E},
 		
 		// Region code and ROM support status.
-		MCD_REGION_JAPAN_NTSC,
-		MCD_REGION_JAPAN_NTSC,
+		MCD_REGION_JAPAN,
+		MCD_REGION_JAPAN,
 		RomStatus_Unsupported,
 		
 		// Description and notes.
@@ -429,8 +429,8 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0x3D, 0xF6, 0xB4, 0x87, 0xF3, 0x76, 0xDE, 0x69},
 		
 		// Region code and ROM support status.
-		MCD_REGION_JAPAN_NTSC,
-		MCD_REGION_JAPAN_NTSC,
+		MCD_REGION_JAPAN,
+		MCD_REGION_JAPAN,
 		RomStatus_Unsupported,
 		
 		// Description and notes.
@@ -449,8 +449,8 @@ static const mcd_rom_db_t McdRomDatabase[] =
 		 0x5D, 0x5D, 0xB3, 0x06, 0xA0, 0xD3, 0x8F, 0xA4},
 		
 		// Region code and ROM support status.
-		MCD_REGION_JAPAN_NTSC,
-		MCD_REGION_JAPAN_NTSC,
+		MCD_REGION_JAPAN,
+		MCD_REGION_JAPAN,
 		RomStatus_Unsupported,
 		
 		// Description and notes.
@@ -588,16 +588,16 @@ const utf8_str *lg_mcd_rom_GetRegionCodeString(int region_code)
 {
 	switch (region_code)
 	{
-		case MCD_REGION_JAPAN_NTSC:	return "Japan/NTSC";
-		case MCD_REGION_JAPAN_PAL:	return "Japan/PAL";
+		case MCD_REGION_JAPAN:		return "Japan";
+		case MCD_REGION_ASIA:		return "Asia";
 		case MCD_REGION_USA:	 	return "USA";
 		case MCD_REGION_EUROPE: 	return "Europe";
 		
-		// Japan/NTSC + Japan/PAL is allowed for the sake of
+		// Japan + Asia is allowed for the sake of
 		// the General Configuration window.
 		// TODO: Return "Japan" instead?
-		case MCD_REGION_JAPAN_NTSC | MCD_REGION_JAPAN_PAL:
-			return "Japan/NTSC or Japan/PAL";
+		case MCD_REGION_JAPAN | MCD_REGION_ASIA:
+			return "Japan or Asia";
 		
 		default:			return NULL;
 	}
