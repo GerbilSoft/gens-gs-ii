@@ -26,6 +26,7 @@
 #define __GENS_QT4_GENSLINEEDITICON_HPP__
 
 #include <QtGui/QLineEdit>
+#include <QtGui/QIcon>
 
 class QLabel;
 class QFocusEvent;
@@ -34,8 +35,12 @@ class GensLineEdit : public QLineEdit
 {
 	Q_OBJECT
 	
+	Q_PROPERTY(QIcon icon READ icon WRITE setIcon)
+	
 	public:
 		GensLineEdit(QWidget *parent = 0);
+		
+		QIcon icon(void) const { return m_icon; }
 		void setIcon(const QIcon& icon);
 	
 	signals:
@@ -58,6 +63,7 @@ class GensLineEdit : public QLineEdit
 	
 	private:
 		QLabel *m_label;
+		QIcon m_icon;
 };
 
 #endif /* __GENS_QT4_GENSLINEEDITICON_HPP__ */

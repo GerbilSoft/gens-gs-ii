@@ -51,8 +51,8 @@ void GensLineEdit::resizeEvent(QResizeEvent *)
 		      (rect().bottom() + 1 - sz.height()) / 2);
 }
 
-#include <stdio.h>
 void GensLineEdit::setIcon(const QIcon& icon)
 {
+	m_icon = icon;
 	m_label->setPixmap(icon.pixmap(16, 16));
 }
