@@ -24,12 +24,13 @@
 #ifndef __GENS_QT4_INPUT_KEYHANDLERQT_HPP__
 #define __GENS_QT4_INPUT_KEYHANDLERQT_HPP__
 
-#include <QtGui/QKeyEvent>
-#include <QtGui/QMouseEvent>
-
 #include "libgens/GensInput/DevManager.hpp"
 
 #include "EventKeys.hpp"
+
+// Qt forward declarations.
+class QKeyEvent;
+class QMouseEvent;
 
 namespace GensQt4
 {

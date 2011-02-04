@@ -26,6 +26,9 @@
 #include "McdControlWindow.hpp"
 #include "gqt4_main.hpp"
 
+// Qt includes.
+#include <QtGui/QPushButton>
+
 /**
  * QICON_FROMTHEME(): Icon loading function.
  * Qt 4.6 supports FreeDesktop.org icon themes.

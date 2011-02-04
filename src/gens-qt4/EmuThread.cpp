@@ -24,10 +24,6 @@
 #include "EmuThread.hpp"
 #include "gqt4_main.hpp"
 
-#include "libgens/MD/EmuMD.hpp"
-#include "libgens/MD/VdpIo.hpp"
-#include "libgens/MD/VdpPalette.hpp"
-
 namespace GensQt4
 {
 

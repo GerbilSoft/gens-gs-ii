@@ -28,6 +28,8 @@
 
 // Qt includes
 #include <qglobal.h>
+#include <QtGui/QKeyEvent>
+#include <QtGui/QMouseEvent>
 
 // C includes.
 #include <string.h>

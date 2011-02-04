@@ -33,8 +33,6 @@
 #include <zlib.h>
 
 // Qt4 includes.
-#include <QtCore/QFile>
-#include <QtCore/QDir>
 #include <QtGui/QFileDialog>
 #include <QtGui/QColorDialog>
 #include <QtGui/QPainter>

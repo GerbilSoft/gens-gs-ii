@@ -45,6 +45,9 @@
 #include "libgens/IO/Io4WPMaster.hpp"
 #include "libgens/IO/Io4WPSlave.hpp"
 
+// Audio backend.
+#include "Audio/GensPortAudio.hpp"
+
 // Qt includes.
 #include <QtCore/QBuffer>
 #include <QtCore/QDir>

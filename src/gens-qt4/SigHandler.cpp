@@ -37,6 +37,9 @@
 #include <QtCore/QString>
 #include <QtGui/QMessageBox>
 
+// Gens QApplication.
+#include "GensQApplication.hpp"
+
 // OS platform.
 // TODO: Move this somewhere else!
 #if defined(Q_OS_WIN32)

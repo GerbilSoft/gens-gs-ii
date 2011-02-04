@@ -24,9 +24,6 @@
 #ifndef __GENS_QT4_WIDGETS_GENSZIPDIRITEM_HPP__
 #define __GENS_QT4_WIDGETS_GENSZIPDIRITEM_HPP__
 
-// C includes.
-#include <stdlib.h>
-
 // Qt includes.
 #include <QtCore/QString>
 #include <QtCore/QList>

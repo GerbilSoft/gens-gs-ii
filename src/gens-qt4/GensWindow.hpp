@@ -24,22 +24,27 @@
 #ifndef __GENS_QT4_GENSWINDOW_HPP__
 #define __GENS_QT4_GENSWINDOW_HPP__
 
-// Qt4 includes.
+// Qt includes.
 #include <QtGui/QMainWindow>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QCloseEvent>
 #include <QtGui/QImage>
 
-#include "VBackend/VBackend.hpp"
-#include "GensMenuBar.hpp"
-#include "EmuManager.hpp"
-#include "Input/EventKeys.hpp"
+// Qt forward declarations.
+class QVBoxLayout;
+class QCloseEvent;
 
 // LibGens includes.
 #include "libgens/lg_osd.h"
 
+// gens-qt4 classes.
+#include "VBackend/VBackend.hpp"
+#include "EmuManager.hpp"
+#include "Input/EventKeys.hpp"
+
 namespace GensQt4
 {
+
+// Class declarations.
+class GensMenuBar;
 
 class GensWindow : public QMainWindow
 {
@@ -91,9 +96,7 @@ class GensWindow : public QMainWindow
 		 * updateFps(): Update the FPS counter.
 		 */
 		void updateFps(double fps)
-		{
-			m_vBackend->pushFps(fps);
-		}
+			{ m_vBackend->pushFps(fps); }
 		
 		/**
 		 * stateChanged(): Emulation state changed.
@@ -117,9 +120,7 @@ class GensWindow : public QMainWindow
 		 * @param msg Message to print.
 		 */
 		void osdPrintMsg(int duration, const QString& msg)
-		{
-			m_vBackend->osd_printf(duration, "%s", msg.toUtf8().constData());
-		}
+			{ m_vBackend->osd_printf(duration, "%s", msg.toUtf8().constData()); }
 		
 		/**
 		 * osdShowPreview(): Show a preview image on the OSD.
@@ -127,9 +128,7 @@ class GensWindow : public QMainWindow
 		 * @param img Image to show.
 		 */
 		void osdShowPreview(int duration, const QImage& img)
-		{
-			m_vBackend->osd_show_preview(duration, img);
-		}
+			{ m_vBackend->osd_show_preview(duration, img); }
 		
 		/**
 		 * toggleFastBlur(): Toggle the Fast Blur effect.

@@ -30,6 +30,8 @@
 #include <QtCore/QScopedPointer>
 
 // QtDBus includes.
+#include <QtDBus/QDBusConnection>
+#include <QtDBus/QDBusInterface>
 #include <QtDBus/QDBusMessage>
 #include <QtDBus/QDBusReply>
 

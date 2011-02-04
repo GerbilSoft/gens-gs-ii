@@ -28,9 +28,9 @@
 
 // Qt includes.
 #include <QtGui/QDialog>
-#include <QtGui/QLineEdit>
 #include <QtGui/QColor>
 
+// GensLineEdit widget.
 #include "widgets/GensLineEdit.hpp"
 
 // C includes.

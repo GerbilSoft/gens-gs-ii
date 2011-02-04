@@ -31,9 +31,7 @@
 #include <QtCore/QSignalMapper>
 #include <QtCore/QHash>
 #include <QtGui/QMenuBar>
-#include <QtGui/QMenu>
 #include <QtGui/QKeySequence>
-#include <QtGui/QAction>
 
 namespace GensQt4
 {

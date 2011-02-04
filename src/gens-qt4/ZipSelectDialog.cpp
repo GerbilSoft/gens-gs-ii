@@ -26,6 +26,9 @@
 // Qt includes.
 #include <QtGui/QPushButton>
 
+// Zip Directory Tree Model.
+#include "widgets/GensZipDirModel.hpp"
+
 namespace GensQt4
 {
 

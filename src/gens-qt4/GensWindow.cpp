@@ -29,25 +29,23 @@
 // Menu definitions.
 #include "GensMenuBar_menus.hpp"
 
-// Qt4 windows.
+// Qt windows.
 #include "AboutWindow.hpp"
 #include "CtrlConfigWindow.hpp"
 #include "GeneralConfigWindow.hpp"
 #include "McdControlWindow.hpp"
 
-// LibGens.
-#include "libgens/lg_main.hpp"
-#include "libgens/MD/EmuMD.hpp"
+// Qt includes.
+#include <QtGui/QCloseEvent>
+
+// LibGens includes.
 #include "libgens/macros/log_msg.h"
-#include "libgens/Util/Timing.hpp"
 
 // Video Backend classes.
 #include "VBackend/GensQGLWidget.hpp"
 
-// Qt4 includes.
-#include <QtCore/QString>
-#include <QtGui/QIcon>
-#include <QtGui/QFileDialog>
+// gens-qt4 classes.
+#include "GensMenuBar.hpp"
 
 
 namespace GensQt4

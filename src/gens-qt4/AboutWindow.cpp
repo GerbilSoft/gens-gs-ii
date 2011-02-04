@@ -23,6 +23,11 @@
 
 #include <config.h>
 
+#ifdef HAVE_GLEW
+// GL Extension Wrangler.
+#include <GL/glew.h>
+#endif
+
 #include "AboutWindow.hpp"
 #include "libgens/lg_main.hpp"
 #include "libgens/Util/cpuflags.h"

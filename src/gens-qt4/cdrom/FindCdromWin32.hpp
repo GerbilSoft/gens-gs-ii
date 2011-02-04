@@ -22,8 +22,6 @@
 #ifndef __GENS_QT4_CDROM_FINDCDROMWIN32_HPP__
 #define __GENS_QT4_CDROM_FINDCDROMWIN32_HPP__
 
-#include <config.h>
-
 #include "FindCdromBase.hpp"
 
 // Qt includes.

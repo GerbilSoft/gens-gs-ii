@@ -21,24 +21,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_HPP__
-#define __GENS_QT4_HPP__
+#ifndef __GENS_QT4_EMUMANAGER_HPP__
+#define __GENS_QT4_EMUMANAGER_HPP__
 
 // Qt includes.
 #include <QtCore/QObject>
 #include <QtCore/QQueue>
-#include <QtGui/QWidget>
 #include <QtGui/QImage>
 
 // LibGens includes.
 #include "libgens/Rom.hpp"
 #include "libgens/IO/IoBase.hpp"
 
-// Audio backend.
-#include "Audio/GensPortAudio.hpp"
-
 namespace GensQt4
 {
+
+// Audio backend.
+class GensPortAudio;
 
 class EmuManager : public QObject
 {
@@ -229,4 +228,4 @@ class EmuManager : public QObject
 
 }
 
-#endif /* __GENS_QT4_HPP__ */
+#endif /* __GENS_QT4_EMUMANAGER_HPP__ */

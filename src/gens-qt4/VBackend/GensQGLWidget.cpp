@@ -47,8 +47,6 @@
 
 // Qt includes.
 #include <QtCore/QVector>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QMouseEvent>
 
 // KeyHandlerQt.
 #include "Input/KeyHandlerQt.hpp"

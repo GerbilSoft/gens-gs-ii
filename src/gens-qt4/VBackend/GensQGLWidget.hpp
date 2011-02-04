@@ -108,27 +108,17 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		
 		// Keyboard handler functions.
 		void keyPressEvent(QKeyEvent *event)
-		{
-			KeyHandlerQt::KeyPressEvent(event);
-		}
+			{ KeyHandlerQt::KeyPressEvent(event); }
 		void keyReleaseEvent(QKeyEvent *event)
-		{
-			KeyHandlerQt::KeyReleaseEvent(event);
-		}
+			{ KeyHandlerQt::KeyReleaseEvent(event); }
 		
 		// Mouse handler functions.
 		void mouseMoveEvent(QMouseEvent *event)
-		{
-			KeyHandlerQt::MouseMoveEvent(event);
-		}
+			{ KeyHandlerQt::MouseMoveEvent(event); }
 		void mousePressEvent(QMouseEvent *event)
-		{
-			KeyHandlerQt::MousePressEvent(event);
-		}
+			{ KeyHandlerQt::MousePressEvent(event); }
 		void mouseReleaseEvent(QMouseEvent *event)
-		{
-			KeyHandlerQt::MouseReleaseEvent(event);
-		}
+			{ KeyHandlerQt::MouseReleaseEvent(event); }
 	
 	protected slots:
 		void osdFpsEnabled_changed_slot(bool enable)

@@ -28,9 +28,11 @@
 
 // Qt includes.
 #include <QtGui/QDialog>
-#include <QtGui/QPushButton>
 
-// Find CD-ROM base class.
+// Qt forward declarations.
+class QPushButton;
+
+// Find CD-ROM drives base class.
 #include "cdrom/FindCdromBase.hpp"
 
 namespace GensQt4

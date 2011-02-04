@@ -22,14 +22,13 @@
 #ifndef __GENS_QT4_CDROM_FINDCDROMUDISKS_HPP__
 #define __GENS_QT4_CDROM_FINDCDROMUDISKS_HPP__
 
-#include <config.h>
-
 #include "FindCdromBase.hpp"
 
 // QtDBus includes.
-#include <QtDBus/QDBusConnection>
-#include <QtDBus/QDBusInterface>
 #include <QtDBus/QDBusObjectPath>
+
+// QtDBus forward declarations.
+class QDBusInterface;
 
 namespace GensQt4
 {

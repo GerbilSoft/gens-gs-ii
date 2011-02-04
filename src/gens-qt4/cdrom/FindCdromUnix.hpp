@@ -22,8 +22,6 @@
 #ifndef __GENS_QT4_CDROM_FINDCDROMUNIX_HPP__
 #define __GENS_QT4_CDROM_FINDCDROMUNIX_HPP__
 
-#include <config.h>
-
 #include "FindCdromBase.hpp"
 
 namespace GensQt4

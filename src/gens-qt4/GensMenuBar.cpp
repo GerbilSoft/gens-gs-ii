@@ -23,9 +23,6 @@
 
 #include "GensMenuBar.hpp"
 
-// Qt includes.
-#include <QtGui/QApplication>
-
 // Menu definitions.
 #include "GensMenuBar_menus.hpp"
 

@@ -34,6 +34,9 @@
 // Needed for LibGens::SoundMgr::MAX_SAMPLING_RATE.
 #include "libgens/sound/SoundMgr.hpp"
 
+// Audio backend.
+#include "Audio/GensPortAudio.hpp"
+
 // LibGens video includes.
 #include "libgens/MD/VdpPalette.hpp"
 #include "libgens/MD/VdpRend.hpp"
@@ -50,13 +53,11 @@
 #include "libzomg/Zomg.hpp"
 
 // Qt includes.
-#include <QtGui/QApplication>
-#include <QtGui/QFileDialog>
-#include <QtCore/QFile>
-#include <QtGui/QImage>
-#include <QtGui/QImageReader>
 #include <QtCore/QBuffer>
 #include <QtCore/QTimer>
+#include <QtGui/QApplication>
+#include <QtGui/QFileDialog>
+#include <QtGui/QImageReader>
 
 // Qt key handler.
 // TODO: Make a class for handling non-controller input, e.g. Reset.

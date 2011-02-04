@@ -58,9 +58,7 @@ class GensQApplication : public QApplication
 		 * @return True if it is; false if it isn't.
 		 */
 		inline bool isGuiThread(void)
-		{
-			return (QThread::currentThread() == m_guiThread);
-		}
+			{ return (QThread::currentThread() == m_guiThread); }
 		
 #ifdef _WIN32
 		// Win32 event filter.
@@ -89,27 +87,19 @@ class GensQApplication : public QApplication
 		friend class SigHandler; // Allow SigHandler to call doCrash().
 #ifdef HAVE_SIGACTION
 		inline void doCrash(int signum, siginfo_t *info, void *context)
-		{
-			emit signalCrash(signum, info, context);
-		}
+			{ emit signalCrash(signum, info, context); }
 #else /* HAVE_SIGACTION */
 		inline void doCrash(int signum)
-		{
-			emit signalCrash(signum);
-		}
+			{ emit signalCrash(signum); }
 #endif /* HAVE_SIGACTION */
 	
 	protected slots:
 #ifdef HAVE_SIGACTION
 		inline void slotCrash(int signum, siginfo_t *info, void *context)
-		{
-			SigHandler::SignalHandler(signum, info, context);
-		}
+			{ SigHandler::SignalHandler(signum, info, context); }
 #else /* HAVE_SIGACTION */
 		inline void slotCrash(int signum)
-		{
-			SigHandler::SignalHandler(signum);
-		}
+			{ SigHandler::SignalHandler(signum); }
 #endif /* HAVE_SIGACTION */
 };
 

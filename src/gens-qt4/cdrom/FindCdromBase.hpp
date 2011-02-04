@@ -22,8 +22,6 @@
 #ifndef __GENS_QT4_CDROM_FINDCDROMBASE_HPP__
 #define __GENS_QT4_CDROM_FINDCDROMBASE_HPP__
 
-#include <config.h>
-
 // C includes.
 #include <stdint.h>
 
@@ -31,8 +29,6 @@
 #include <QtCore/QObject>
 #include <QtCore/QMetaType>
 #include <QtCore/QThread>
-#include <QtCore/QString>
-#include <QtCore/QList>
 #include <QtGui/QIcon>
 
 namespace GensQt4

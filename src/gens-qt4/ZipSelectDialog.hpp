@@ -29,15 +29,15 @@
 #include <QtGui/QDialog>
 #include "ui_ZipSelectDialog.h"
 
-// Zip Directory Tree Model.
-#include "widgets/GensZipDirModel.hpp"
-
 // LibGens includes.
 // TODO: Use MDP's mdp_z_entry_t instead of LibGens::Decompressor.
 #include "libgens/Decompressor/Decompressor.hpp"
 
 namespace GensQt4
 {
+
+// Zip Directory Tree Model.
+class GensZipDirModel;
 
 class ZipSelectDialog : public QDialog, public Ui::ZipSelectDialog
 {

@@ -62,13 +62,15 @@ void gqt4_osd(OsdType osd_type, int param);
 }
 #endif
 
-#include "GensQApplication.hpp"
 #include "GensConfig.hpp"
 #include "EmuThread.hpp"
 #include "../libgens/EmuContext.hpp"
 
 namespace GensQt4
 {
+	// Class forward declarations.
+	class GensQApplication;
+	
 	// GensQApplication.
 	extern GensQApplication *gqt4_app;
 	
