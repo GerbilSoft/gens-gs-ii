@@ -118,7 +118,28 @@ void AboutWindow::ShowSingle(QWidget *parent)
 void AboutWindow::initAboutWindowText(void)
 {
 	// Line break string.
-	const QString sLineBreak = QString::fromLatin1("<br/>");
+	const QString sLineBreak = QString::fromLatin1("<br/>\n");
+	
+	// Build the copyright string.
+	QString sCopyrights = QString::fromUtf8(
+			"(c) 1999-2002 by Stéphane Dallongeville.<br/>\n"
+			"(c) 2003-2004 by Stéphane Akhoun.<br />\n<br />\n"
+			"Gens/GS (c) 2008-2011 by David Korth.<br />\n<br />\n");
+	
+	sCopyrights += tr("Visit the Gens homepage:") + sLineBreak +
+			QString::fromLatin1(
+				"<a href=\"http://gens.consolemul.com\">"
+				"http://gens.consolemul.com</a>") +
+			sLineBreak + sLineBreak;
+	
+	sCopyrights += tr("For news on Gens/GS, visit Sonic Retro:") + sLineBreak +
+			QString::fromLatin1(
+				"<a href=\"http://www.sonicretro.org\">"
+				"http://www.sonicretro.org</a>");
+	
+	// Set the copyright string.
+	lblCopyrights->setText(sCopyrights);
+	lblCopyrights->setTextFormat(Qt::RichText);
 	
 	// Build the program title text.
 	QString sPrgTitle =

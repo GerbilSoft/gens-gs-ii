@@ -71,17 +71,8 @@
           </property>
           <item>
            <widget class="QLabel" name="lblCopyrights">
-            <property name="text">
-             <string>(c) 1999-2002 by Stéphane Dallongeville.&lt;br /&gt;
-(c) 2003-2004 by Stéphane Akhoun.&lt;br /&gt;
-&lt;br /&gt;
-Gens/GS (c) 2008-2010 by David Korth.&lt;br /&gt;
-&lt;br /&gt;
-Visit the Gens homepage:&lt;br /&gt;
-&lt;a href=&quot;http://gens.consolemul.com&quot;&gt;http://gens.consolemul.com&lt;/a&gt;&lt;br /&gt;
-&lt;br /&gt;
-For news on Gens/GS, visit Sonic Retro:&lt;br /&gt;
-&lt;a href=&quot;http://www.sonicretro.org&quot;&gt;http://www.sonicretro.org&lt;/a&gt;</string>
+            <property name="textFormat">
+             <enum>Qt::RichText</enum>
             </property>
             <property name="alignment">
              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
