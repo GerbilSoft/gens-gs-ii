@@ -48,3 +48,16 @@ ADD_SUBDIRECTORY(minizip)
 IF(HAVE_LZMA)
 ADD_SUBDIRECTORY(lzma)
 ENDIF(HAVE_LZMA)
+
+# Check for system glew.
+IF(GLEW_FOUND)
+	# System zlib was found.
+ELSE(GLEW_FOUND)
+	# System glew was not found.
+	# Use the internal copy of glew.
+	ADD_SUBDIRECTORY(glew)
+	SET(GLEW_LIBRARY glew)
+	SET(GLEW_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/glew")
+	SET(GLEW_FOUND 1)
+	SET(HAVE_GLEW 1)
+ENDIF(GLEW_FOUND)

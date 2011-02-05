@@ -133,18 +133,62 @@ ENDIF(MINGW)
 # TODO: Figure out how to move this all to src/extlib/.
 # It's here now because otherwise the INCLUDE_DIRECTORIES() stuff
 # won't propagate to all the projects correctly.
-IF(NOT WIN32)
+IF(WIN32)
+	MESSAGE(STATUS "Win32: using internal ZLIB")
+ELSE(WIN32)
 	# Only search for zlib on non-Win32 platforms.
 	# Use the built-in zlib on Win32.
 	FIND_PACKAGE(ZLIB)
-ENDIF(NOT WIN32)
+ENDIF(WIN32)
 SET(HAVE_ZLIB 1)
 IF(ZLIB_FOUND)
 	INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 ELSE(ZLIB_FOUND)
 	INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/src/extlib/zlib")
 	INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/src/extlib/zlib")
+	MESSAGE(STATUS "ZLIB library not found; using internal ZLIB.")
 ENDIF(ZLIB_FOUND)
+
+# Check for glew.
+# If glew isn't found, src/extlib/glew/ will be used instead.
+# TODO: Figure out how to move this all to src/extlib/.
+# It's here now because otherwise the INCLUDE_DIRECTORIES() stuff
+# won't propagate to all the projects correctly.
+# TODO: Moved OpenGL check from gens-qt4 to root.
+# Maybe we should move it back later?
+
+# Find OpenGL first.
+FIND_PACKAGE(OpenGL)
+IF(OPENGL_LIBRARIES)
+	# Found OpenGL.
+	SET(HAVE_OPENGL 1)
+	MESSAGE(STATUS "Found OpenGL: ${OPENGL_gl_LIBRARY}")
+	IF(WIN32)
+		# Always use internal GLEW on Win32.
+		SET(HAVE_GLEW 1)
+		SET(GLEW_LIBRARY glew)
+		SET(GLEW_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/extlib/glew/include/")
+		MESSAGE(STATUS "Win32: using internal GLEW")
+	ELSE(WIN32)
+		# Find GLEW.
+		SET(OLD_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
+		SET(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${OPENGL_gl_LIBRARY})
+		SET(CHECK_GLEW_LIBRARY "GLEW")
+		CHECK_LIBRARY_EXISTS(${CHECK_GLEW_LIBRARY} glewInit "" HAVE_GLEW)
+		IF(HAVE_GLEW)
+			SET(GLEW_FOUND 1)
+			SET(GLEW_LIBRARY "-l${CHECK_GLEW_LIBRARY}")
+		ELSE(HAVE_GLEW)
+			SET(HAVE_GLEW 1)
+			SET(GLEW_LIBRARY glew)
+			SET(GLEW_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/extlib/glew/include/")
+			MESSAGE(STATUS "GLEW library not found; using internal GLEW.")
+		ENDIF(HAVE_GLEW)
+		UNSET(CHECK_GLEW_LIBRARY)
+		SET(CMAKE_REQUIRED_LIBRARIES ${OLD_CMAKE_REQUIRED_LIBRARIES})
+		UNSET(OLD_CMAKE_REQUIRED_LIBRARIES)
+	ENDIF(WIN32)
+ENDIF(OPENGL_LIBRARIES)
 
 # Set CFLAGS/CXXFLAGS based on build type.
 # TODO: Move -DQT_NO_DEBUG to gens-qt4?
