@@ -209,14 +209,6 @@ void AboutWindow::initAboutWindowText(void)
 		// Qt Designer's QScrollArea implementation is horribly broken.
 		// Also, this has to be done after the labels are set, because
 		// QScrollArea is kinda dumb.
-		QScrollArea *scrlCopyrights = new QScrollArea();
-		scrlCopyrights->setFrameShape(QFrame::NoFrame);
-		scrlCopyrights->setFrameShadow(QFrame::Plain);
-		scrlCopyrights->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-		scrlCopyrights->setWidget(lblCopyrights);
-		lblCopyrights->setAutoFillBackground(false);
-		vboxCopyrights->addWidget(scrlCopyrights);
-		
 		QScrollArea *scrlDebugInfo = new QScrollArea();
 		scrlDebugInfo->setFrameShape(QFrame::NoFrame);
 		scrlDebugInfo->setFrameShadow(QFrame::Plain);
