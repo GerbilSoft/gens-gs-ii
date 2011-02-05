@@ -166,6 +166,8 @@ void AboutWindow::initAboutWindowText(void)
 	// Set the program title text.
         lblPrgTitle->setText(sPrgTitle);
 	
+	// TODO: Included libraries.
+	
 	// Set the debug information text.
 	lblDebugInfo->setText(AboutWindow::GetDebugInfo());
 	
@@ -209,6 +211,15 @@ void AboutWindow::initAboutWindowText(void)
 		// Qt Designer's QScrollArea implementation is horribly broken.
 		// Also, this has to be done after the labels are set, because
 		// QScrollArea is kinda dumb.
+		QScrollArea *scrlIncLibraries = new QScrollArea();
+		scrlIncLibraries->setFrameShape(QFrame::NoFrame);
+		scrlIncLibraries->setFrameShadow(QFrame::Plain);
+		scrlIncLibraries->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+		scrlIncLibraries->setWidget(lblIncLibraries);
+		scrlIncLibraries->setWidgetResizable(true);
+		lblIncLibraries->setAutoFillBackground(false);
+		vboxIncLibraries->addWidget(scrlIncLibraries);
+		
 		QScrollArea *scrlDebugInfo = new QScrollArea();
 		scrlDebugInfo->setFrameShape(QFrame::NoFrame);
 		scrlDebugInfo->setFrameShadow(QFrame::Plain);

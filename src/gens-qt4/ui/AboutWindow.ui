@@ -94,6 +94,36 @@
       <attribute name="title">
        <string>Included &amp;Libraries</string>
       </attribute>
+      <layout class="QVBoxLayout" name="vboxIncLibrariesTab">
+       <item>
+        <widget class="QFrame" name="fraIncLibraries">
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QVBoxLayout" name="vboxIncLibraries">
+          <property name="margin">
+           <number>8</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="lblIncLibraries">
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
+            <property name="openExternalLinks">
+             <bool>true</bool>
+            </property>
+            <property name="textInteractionFlags">
+             <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
      </widget>
      <widget class="QWidget" name="tabDebugInfo">
       <attribute name="title">
