@@ -132,14 +132,14 @@ void AboutWindow::initAboutWindowText(void)
 	
 	sCopyrights += tr("Visit the Gens homepage:") + sLineBreak +
 			QString::fromLatin1(
-				"<a href=\"http://gens.consolemul.com\">"
-				"http://gens.consolemul.com</a>") +
+				"<a href=\"http://www.gens.me/\">"
+				"http://www.gens.me/</a>") +
 			sLineBreak + sLineBreak;
 	
 	sCopyrights += tr("For news on Gens/GS, visit Sonic Retro:") + sLineBreak +
 			QString::fromLatin1(
-				"<a href=\"http://www.sonicretro.org\">"
-				"http://www.sonicretro.org</a>");
+				"<a href=\"http://www.sonicretro.org/\">"
+				"http://www.sonicretro.org/</a>");
 	
 	// Set the copyright string.
 	lblCopyrights->setText(sCopyrights);
