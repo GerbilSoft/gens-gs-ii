@@ -28,6 +28,10 @@
 #include <GL/glew.h>
 #endif
 
+// Included libraries.
+#include <zlib.h>
+#include "lzma/7z/7zVersion.h"
+
 #include "AboutWindow.hpp"
 #include "libgens/lg_main.hpp"
 #include "libgens/Util/cpuflags.h"
@@ -166,7 +170,8 @@ void AboutWindow::initAboutWindowText(void)
 	// Set the program title text.
         lblPrgTitle->setText(sPrgTitle);
 	
-	// TODO: Included libraries.
+	// Set the included libraries text.
+	lblIncLibraries->setText(AboutWindow::GetIncLibraries());
 	
 	// Set the debug information text.
 	lblDebugInfo->setText(AboutWindow::GetDebugInfo());
@@ -241,6 +246,71 @@ void AboutWindow::initAboutWindowText(void)
 		// Scroll areas initialized.
 		m_scrlAreaInit = true;
 	}
+}
+
+
+/**
+ * GetIncLibraries(): Get included libraries.
+ * @return Included libraries.
+ */
+QString AboutWindow::GetIncLibraries(void)
+{
+	// Common strings.
+	const QString sIntCopyOf = tr("Internal copy of %1.");
+	const QString sLineBreak = QString::fromLatin1("<br/>\n");
+	
+	// Included libraries string.
+	QString sIncLibraries;
+	
+#if defined(HAVE_ZLIB) && !defined(ZLIB_FOUND)
+	// ZLIB is included.
+	sIncLibraries += sIntCopyOf.arg(QString::fromLatin1(ZLIB_VERSION)) + sLineBreak +
+		QString::fromLatin1("Copyright (c) 1995-2010 Jean-loup Gailly and Mark Adler.") + sLineBreak +
+		QString::fromLatin1("<a href=\"http://www.zlib.net/\">http://www.zlib.net/</a>");
+#endif
+	
+#if defined(HAVE_ZLIB)
+	// MiniZip is included.
+	// TODO: Find a MiniZip version macro.
+	if (!sIncLibraries.isEmpty())
+		sIncLibraries += sLineBreak + sLineBreak;
+	sIncLibraries += sIntCopyOf.arg(QString::fromLatin1("MiniZip 1.1")) + sLineBreak +
+		QString::fromLatin1("Copyright (c) 1998-2010 by Gilles Vollant.") + sLineBreak +
+		QString::fromLatin1("<a href=\"http://www.winimage.com/zLibDll/minizip.html\">"
+					"http://www.winimage.com/zLibDll/minizip.html</a>") + sLineBreak +
+		QString::fromLatin1("Zip64/Unzip Copyright (c) 2007-2008 by Even Rouault.") + sLineBreak +
+		QString::fromLatin1("Zip64/Zip Copyright (c) 2009-2001 by Mathias Svensson.");
+#endif
+	
+#if defined(HAVE_LZMA) && !defined(LZMA_FOUND)
+	// LZMA is included.
+	if (!sIncLibraries.isEmpty())
+		sIncLibraries += sLineBreak + sLineBreak;
+	sIncLibraries += sIntCopyOf.arg(QString::fromLatin1("the LZMA SDK " MY_VERSION)) + sLineBreak +
+		QString::fromLatin1("Copyright (c) 1999-2010 by Igor Pavlov.") + sLineBreak +
+		QString::fromLatin1("<a href=\"http://www.7-zip.org/sdk.html\">"
+					"http://www.7-zip.org/sdk.html</a>");
+#endif
+	
+#if defined(HAVE_GLEW) && !defined(GLEW_FOUND)
+	// GLEW is included.
+	if (!sIncLibraries.isEmpty())
+		sIncLibraries += sLineBreak + sLineBreak;
+	
+	const char *glewVersion = (const char*)glewGetString(GLEW_VERSION);
+	QString sGlewVersion = (glewVersion ? QString::fromLatin1(glewVersion) : QString());
+	sIncLibraries += sIntCopyOf.arg(QString::fromLatin1("GLEW ") + sGlewVersion) + sLineBreak +
+		QString::fromLatin1("Copyright (c) 2002-2008 by Milan Ikits.") + sLineBreak +
+		QString::fromLatin1("Copyright (c) 2002-2008 by Marcelo E. Magallon.") + sLineBreak +
+		QString::fromLatin1("Copyright (c) 2002 by Lev Povalahev.") + sLineBreak +
+		QString::fromLatin1("Mesa 3D code Copyright (c) 1999-2007 by Brian Paul.") + sLineBreak +
+		QString::fromLatin1("OpenGL code Copyright (c) 2007 The Khronos Group Inc.") + sLineBreak +
+		QString::fromLatin1("<a href=\"http://glew.sourceforge.net/\'>"
+					"http://glew.sourceforge.net/</a>");
+#endif
+	
+	// Return the included libraries string.
+	return sIncLibraries;
 }
 
 

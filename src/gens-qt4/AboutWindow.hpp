@@ -45,6 +45,9 @@ class AboutWindow : public QDialog, public Ui::AboutWindow
 		void initAboutWindowText(void);
 		bool m_scrlAreaInit;
 		
+		// Included libraries.
+		static QString GetIncLibraries(void);
+		
 		// Debug information.
 		static QString GetDebugInfo(void);
 #ifdef Q_OS_WIN32
