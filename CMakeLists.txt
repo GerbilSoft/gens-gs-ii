@@ -141,20 +141,22 @@ ELSE(WIN32)
 	FIND_PACKAGE(ZLIB)
 ENDIF(WIN32)
 SET(HAVE_ZLIB 1)
-IF(ZLIB_FOUND)
-	INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
-ELSE(ZLIB_FOUND)
-	INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/src/extlib/zlib")
-	INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/src/extlib/zlib")
-	MESSAGE(STATUS "ZLIB library not found; using internal ZLIB.")
-ENDIF(ZLIB_FOUND)
+IF(NOT ZLIB_FOUND)
+	SET(ZLIB_INCLUDE_DIR
+		"${CMAKE_CURRENT_SOURCE_DIR}/src/extlib/zlib/"
+		"${CMAKE_CURRENT_BINARY_DIR}/src/extlib/zlib/"
+		)
+	IF(NOT WIN32)
+		MESSAGE(STATUS "ZLIB library not found; using internal ZLIB.")
+	ENDIF(NOT WIN32)
+ENDIF(NOT ZLIB_FOUND)
 
 # Check for glew.
 # If glew isn't found, src/extlib/glew/ will be used instead.
 # TODO: Figure out how to move this all to src/extlib/.
 # It's here now because otherwise the INCLUDE_DIRECTORIES() stuff
 # won't propagate to all the projects correctly.
-# TODO: Moved OpenGL check from gens-qt4 to root.
+# TODO: Moved OpenGL check from gens-qt4 to root CMakeLists.txt.
 # Maybe we should move it back later?
 
 # Find OpenGL first.
