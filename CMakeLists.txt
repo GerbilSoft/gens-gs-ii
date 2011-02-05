@@ -133,7 +133,11 @@ ENDIF(MINGW)
 # TODO: Figure out how to move this all to src/extlib/.
 # It's here now because otherwise the INCLUDE_DIRECTORIES() stuff
 # won't propagate to all the projects correctly.
-FIND_PACKAGE(ZLIB)
+IF(NOT WIN32)
+	# Only search for zlib on non-Win32 platforms.
+	# Use the built-in zlib on Win32.
+	FIND_PACKAGE(ZLIB)
+ENDIF(NOT WIN32)
 SET(HAVE_ZLIB 1)
 IF(ZLIB_FOUND)
 	INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
