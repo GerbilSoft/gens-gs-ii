@@ -94,13 +94,6 @@ void GensWindow::setupUi(void)
 	if (this->objectName().isEmpty())
 		this->setObjectName(QString::fromUtf8("GensWindow"));
 	
-	// Set the window icon.
-	QIcon winIcon;
-	winIcon.addFile(QString::fromLatin1(":/gens/gensgs_48x48.png"), QSize(48, 48));
-	winIcon.addFile(QString::fromLatin1(":/gens/gensgs_32x32.png"), QSize(32, 32));
-	winIcon.addFile(QString::fromLatin1(":/gens/gensgs_16x16.png"), QSize(16, 16));
-	this->setWindowIcon(winIcon);
-	
 	// Create the central widget.
 	centralwidget = new QWidget(this);
 	centralwidget->setObjectName(QString::fromLatin1("centralwidget"));

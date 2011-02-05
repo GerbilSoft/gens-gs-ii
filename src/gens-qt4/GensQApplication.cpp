@@ -23,6 +23,9 @@
 
 #include "GensQApplication.hpp"
 
+// Qt includes.
+#include <QtGui/QIcon>
+
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX
@@ -47,6 +50,13 @@ void GensQApplication::gqaInit(void)
 	// Set application information.
 	QCoreApplication::setOrganizationName(QString::fromLatin1("GerbilSoft"));
 	QCoreApplication::setApplicationName(QString::fromLatin1("Gens/GS II"));
+	
+	// Set the application icon.
+	QIcon iconApp;
+	iconApp.addFile(QString::fromLatin1(":/gens/gensgs_48x48.png"), QSize(48, 48));
+	iconApp.addFile(QString::fromLatin1(":/gens/gensgs_32x32.png"), QSize(32, 32));
+	iconApp.addFile(QString::fromLatin1(":/gens/gensgs_16x16.png"), QSize(16, 16));
+	setWindowIcon(iconApp);
 	
 	// Connect the crash handler.
 #ifdef HAVE_SIGACTION
