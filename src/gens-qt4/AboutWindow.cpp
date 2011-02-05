@@ -305,7 +305,7 @@ QString AboutWindow::GetIncLibraries(void)
 		QString::fromLatin1("Copyright (c) 2002 by Lev Povalahev.") + sLineBreak +
 		QString::fromLatin1("Mesa 3D code Copyright (c) 1999-2007 by Brian Paul.") + sLineBreak +
 		QString::fromLatin1("OpenGL code Copyright (c) 2007 The Khronos Group Inc.") + sLineBreak +
-		QString::fromLatin1("<a href=\"http://glew.sourceforge.net/\'>"
+		QString::fromLatin1("<a href=\"http://glew.sourceforge.net/\">"
 					"http://glew.sourceforge.net/</a>");
 #endif
 	
