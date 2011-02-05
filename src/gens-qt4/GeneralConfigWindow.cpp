@@ -395,7 +395,7 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 	MCD_RomStatus_t boot_rom_status;
 	
 	// Line break string.
-	const QString sLineBreak = QString::fromLatin1("<br/>");
+	const QString sLineBreak = QString::fromLatin1("<br/>\n");
 	
 	// Check if the file exists.
 	const QString& filename = txtRomFile->text();
@@ -780,7 +780,7 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 	sExtPrgStatus_UnRAR = tr("Identified as: %1").arg(prg_id);
 	
 	// Line break string.
-	const QString sLineBreak = QString::fromLatin1("<br/>");
+	const QString sLineBreak = QString::fromLatin1("<br/>\n");
 	
 	// Print DLL version information, if available.
 	if (prg_info.dll_major != 0 || prg_info.dll_minor != 0 ||
