@@ -61,7 +61,13 @@ class GensWindow : public QMainWindow
 		void setupUi(void);
 		void retranslateUi(void);
 		
+		// QMainWindow virtual functions.
 		void closeEvent(QCloseEvent *event);
+		void showEvent(QShowEvent *event);
+		
+		// QMainWindow virtual functions: drag and drop.
+		void dragEnterEvent(QDragEnterEvent *event);
+		void dropEvent(QDropEvent *event);
 		
 		// Widgets.
 		VBackend *m_vBackend;	// GensQGLWidget.
@@ -69,9 +75,6 @@ class GensWindow : public QMainWindow
 		
 		QWidget *centralwidget;
 		QVBoxLayout *layout;
-		
-		// QMainWindow virtual functions.
-		void showEvent(QShowEvent *event);
 		
 		// GensWindow functions.
 		void gensResize(void);	// Resize the window.

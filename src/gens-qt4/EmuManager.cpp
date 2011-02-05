@@ -147,6 +147,22 @@ int EmuManager::openRom(QWidget *parent)
 	if (filename.isEmpty())
 		return -1;
 	
+	// Convert the filename to native separators.
+	filename = QDir::toNativeSeparators(filename);
+	
+	// Open the ROM file.
+	return openRom(filename);
+}
+
+
+/**
+ * openRom(): Open a ROM file.
+ * @param filename ROM filename. (Must have native separators!)
+ * TODO: Add a z_entry parameter?
+ * @return 0 on success; non-zero on error.
+ */
+int EmuManager::openRom(const QString& filename)
+{
 	// Open the file using the LibGens::Rom class.
 	// TODO: This won't work for KIO...
 	LibGens::Rom *rom = new LibGens::Rom(filename.toUtf8().constData());

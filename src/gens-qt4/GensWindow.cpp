@@ -36,7 +36,12 @@
 #include "McdControlWindow.hpp"
 
 // Qt includes.
+#include <QtCore/QUrl>
+#include <QtCore/QDir>
 #include <QtGui/QCloseEvent>
+#include <QtGui/QShowEvent>
+#include <QtGui/QDragEnterEvent>
+#include <QtGui/QDropEvent>
 
 // LibGens includes.
 #include "libgens/macros/log_msg.h"
@@ -134,6 +139,9 @@ void GensWindow::setupUi(void)
 			"Windowed mode: VBackend is not a QWidget!");
 	}
 	
+	// Enable drag and drop.
+	setAcceptDrops(true);
+	
 	// Connect the GensMenuBar's triggered() signal.
 	connect(m_menubar, SIGNAL(triggered(int)),
 		this, SLOT(menuTriggered(int)));
@@ -209,6 +217,83 @@ void GensWindow::showEvent(QShowEvent *event)
 	// Run the initial resize.
 	m_hasInitResize = true;
 	gensResize();
+}
+
+
+/**
+ * dragEnterEvent(): An item is being dragged onto the window.
+ * @param event QDragEnterEvent describing the item.
+ */
+void GensWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+	if (!event->mimeData()->hasUrls())
+		return;
+	
+	// One or more URLs have been dragged onto the window.
+	const QList<QUrl>& lstUrls = event->mimeData()->urls();
+	if (lstUrls.size() != 1)
+	{
+		// More than one file dragged onto the window.
+		// We only accept one at a time.
+		return;
+	}
+	
+	// One URL has been dropped.
+	const QUrl& url = lstUrls.at(0);
+	
+	// Make sure the URL is file://.
+	// TODO: Add support for other protocols later.
+	if (url.scheme() != QString::fromLatin1("file"))
+		return;
+	
+	// Override the propsed action with Copy, and accept it.
+	event->setDropAction(Qt::CopyAction);
+	event->accept();
+}
+
+
+/**
+ * dropEvent(): An item has been dropped onto the window.
+ * @param event QDropEvent describing the item.
+ */
+void GensWindow::dropEvent(QDropEvent *event)
+{
+	if (!event->mimeData()->hasUrls())
+		return;
+	
+	// One or more URLs have been dragged onto the window.
+	const QList<QUrl>& lstUrls = event->mimeData()->urls();
+	if (lstUrls.size() != 1)
+	{
+		// More than one file dragged onto the window.
+		// We only accept one at a time.
+		return;
+	}
+	
+	// One URL has been dropped.
+	const QUrl& url = lstUrls.at(0);
+	
+	// Make sure the URL is file://.
+	// TODO: Add support for other protocols later.
+	if (url.scheme() != QString::fromLatin1("file"))
+		return;
+	
+	// Get the local filename.
+	// NOTE: url.toLocalFile() returns an empty string if this isn't file://,
+	// but we're already checking for file:// above...
+	QString filename = url.toLocalFile();
+	if (filename.isEmpty())
+		return;
+	
+	// Override the propsed action with Copy, and accept it.
+	event->setDropAction(Qt::CopyAction);
+	event->accept();
+	
+	// Convert the filename to native separators.
+	filename = QDir::toNativeSeparators(filename);
+	
+	// Open the ROM.
+	m_emuManager.openRom(filename);
 }
 
 
