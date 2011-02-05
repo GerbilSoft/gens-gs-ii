@@ -2,7 +2,10 @@ PROJECT(src)
 cmake_minimum_required(VERSION 2.6.0)
 
 # TODO: Make 7-Zip support optional.
+# TODO: Set LZMA_FOUND if we're using an external LZMA.
+# (That is, if we ever decide to add support for external LZMA.)
 SET(HAVE_LZMA 1)
+#SET(LZMA_FOUND 1)
 
 # External libraries.
 ADD_SUBDIRECTORY(extlib)
