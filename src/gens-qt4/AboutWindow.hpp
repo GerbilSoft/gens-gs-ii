@@ -41,6 +41,10 @@ class AboutWindow : public QDialog, public Ui::AboutWindow
 		AboutWindow(QWidget *parent = NULL);
 		virtual ~AboutWindow();
 		
+		// Initialize the About Window text.
+		void initAboutWindowText(void);
+		bool m_scrlAreaInit;
+		
 		// Debug information.
 		static QString GetDebugInfo(void);
 #ifdef Q_OS_WIN32

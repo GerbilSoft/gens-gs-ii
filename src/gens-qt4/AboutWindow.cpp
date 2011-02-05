@@ -73,6 +73,50 @@ AboutWindow::AboutWindow(QWidget *parent)
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
 	
+	// Scroll areas aren't initialized.
+	m_scrlAreaInit = false;
+	
+	// Initialize the About window teXt.
+	initAboutWindowText();
+}
+
+
+/**
+ * ~AboutWindow(): Shut down the About window.
+ */
+AboutWindow::~AboutWindow()
+{
+	// Clear the m_AboutWindow pointer.
+	m_AboutWindow = NULL;
+}
+
+
+/**
+ * ShowSingle(): Show a single instance of the About window.
+ * @param parent Parent window.
+ */
+void AboutWindow::ShowSingle(QWidget *parent)
+{
+	if (m_AboutWindow != NULL)
+	{
+		// About Window is already displayed.
+		// NOTE: This doesn't seem to work on KDE 4.4.2...
+		QApplication::setActiveWindow(m_AboutWindow);
+	}
+	else
+	{
+		// About Window is not displayed.
+		m_AboutWindow = new AboutWindow(parent);
+		m_AboutWindow->show();
+	}
+}
+
+
+/**
+ * initAboutWindowText(): Initialize the About Window text.
+ */
+void AboutWindow::initAboutWindowText(void)
+{
 	// Line break string.
 	const QString sLineBreak = QString::fromLatin1("<br/>");
 	
@@ -138,65 +182,40 @@ AboutWindow::AboutWindow(QWidget *parent)
 	lblCredits->setText(QString::fromUtf8(ss_credits.str().c_str()));
 	lblCredits->setTextFormat(Qt::RichText);
 	
-	// Create the scroll areas.
-	// Qt Designer's QScrollArea implementation is horribly broken.
-	// Also, this has to be done after the labels are set, because
-	// QScrollArea is kinda dumb.
-	QScrollArea *scrlCopyrights = new QScrollArea();
-	scrlCopyrights->setFrameShape(QFrame::NoFrame);
-	scrlCopyrights->setFrameShadow(QFrame::Plain);
-	scrlCopyrights->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	scrlCopyrights->setWidget(lblCopyrights);
-	lblCopyrights->setAutoFillBackground(false);
-	vboxCopyrights->addWidget(scrlCopyrights);
-	
-	QScrollArea *scrlDebugInfo = new QScrollArea();
-	scrlDebugInfo->setFrameShape(QFrame::NoFrame);
-	scrlDebugInfo->setFrameShadow(QFrame::Plain);
-	scrlDebugInfo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	scrlDebugInfo->setWidget(lblDebugInfo);
-	scrlDebugInfo->setWidgetResizable(true);
-	lblDebugInfo->setAutoFillBackground(false);
-	vboxDebugInfo->addWidget(scrlDebugInfo);
-	
-	QScrollArea *scrlCredits = new QScrollArea();
-	scrlCredits->setFrameShape(QFrame::NoFrame);
-	scrlCredits->setFrameShadow(QFrame::Plain);
-	scrlCredits->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	scrlCredits->setWidget(lblCredits);
-	scrlCredits->setWidgetResizable(true);
-	scrlCredits->setAutoFillBackground(false);
-	vboxCredits->addWidget(scrlCredits);
-}
-
-
-/**
- * ~AboutWindow(): Shut down the About window.
- */
-AboutWindow::~AboutWindow()
-{
-	// Clear the m_AboutWindow pointer.
-	m_AboutWindow = NULL;
-}
-
-
-/**
- * ShowSingle(): Show a single instance of the About window.
- * @param parent Parent window.
- */
-void AboutWindow::ShowSingle(QWidget *parent)
-{
-	if (m_AboutWindow != NULL)
+	if (!m_scrlAreaInit)
 	{
-		// About Window is already displayed.
-		// NOTE: This doesn't seem to work on KDE 4.4.2...
-		QApplication::setActiveWindow(m_AboutWindow);
-	}
-	else
-	{
-		// About Window is not displayed.
-		m_AboutWindow = new AboutWindow(parent);
-		m_AboutWindow->show();
+		// Create the scroll areas.
+		// Qt Designer's QScrollArea implementation is horribly broken.
+		// Also, this has to be done after the labels are set, because
+		// QScrollArea is kinda dumb.
+		QScrollArea *scrlCopyrights = new QScrollArea();
+		scrlCopyrights->setFrameShape(QFrame::NoFrame);
+		scrlCopyrights->setFrameShadow(QFrame::Plain);
+		scrlCopyrights->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+		scrlCopyrights->setWidget(lblCopyrights);
+		lblCopyrights->setAutoFillBackground(false);
+		vboxCopyrights->addWidget(scrlCopyrights);
+		
+		QScrollArea *scrlDebugInfo = new QScrollArea();
+		scrlDebugInfo->setFrameShape(QFrame::NoFrame);
+		scrlDebugInfo->setFrameShadow(QFrame::Plain);
+		scrlDebugInfo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+		scrlDebugInfo->setWidget(lblDebugInfo);
+		scrlDebugInfo->setWidgetResizable(true);
+		lblDebugInfo->setAutoFillBackground(false);
+		vboxDebugInfo->addWidget(scrlDebugInfo);
+		
+		QScrollArea *scrlCredits = new QScrollArea();
+		scrlCredits->setFrameShape(QFrame::NoFrame);
+		scrlCredits->setFrameShadow(QFrame::Plain);
+		scrlCredits->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+		scrlCredits->setWidget(lblCredits);
+		scrlCredits->setWidgetResizable(true);
+		scrlCredits->setAutoFillBackground(false);
+		vboxCredits->addWidget(scrlCredits);
+		
+		// Scroll areas initialized.
+		m_scrlAreaInit = true;
 	}
 }
 
