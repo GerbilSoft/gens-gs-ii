@@ -29,12 +29,6 @@
 // Menu definitions.
 #include "actions/GensMenuBar_menus.hpp"
 
-// Qt windows.
-#include "AboutWindow.hpp"
-#include "CtrlConfigWindow.hpp"
-#include "GeneralConfigWindow.hpp"
-#include "McdControlWindow.hpp"
-
 // Qt includes.
 #include <QtCore/QUrl>
 #include <QtCore/QDir>
@@ -42,6 +36,7 @@
 #include <QtGui/QShowEvent>
 #include <QtGui/QDragEnterEvent>
 #include <QtGui/QDropEvent>
+#include <QtGui/QVBoxLayout>
 
 // LibGens includes.
 #include "libgens/macros/log_msg.h"
@@ -66,7 +61,7 @@ GensWindow::GensWindow()
 	
 	// Initialize the Gens Action Manager.
 	// TODO: Load configuration from a file?
-	m_gensActions = new GensActions();
+	m_gensActions = new GensActions(this);
 	
 	// Initialize KeyHandlerQt.
 	// TODO: Make KeyHandlerQt a standard object?
@@ -144,7 +139,7 @@ void GensWindow::setupUi(void)
 	
 	// Connect the GensMenuBar's triggered() signal.
 	connect(m_menubar, SIGNAL(triggered(int)),
-		this, SLOT(menuTriggered(int)));
+		m_gensActions, SLOT(doAction(int)));
 	
 	// Connect Emulation Manager signals to GensWindow.
 	// TODO: Make m_emuManager a pointer instead of an object?
@@ -317,218 +312,6 @@ void GensWindow::gensResize(void)
 
 
 /**
- * menuTriggered(): Menu item triggered.
- * @param id Menu item ID.
- */
-void GensWindow::menuTriggered(int id)
-{
-	switch (MNUID_MENU(id))
-	{
-		case IDM_FILE_MENU:
-			// File menu.
-			switch (MNUID_ITEM(id))
-			{
-				case MNUID_ITEM(IDM_FILE_OPEN):
-					m_emuManager.openRom(this);
-					break;
-				
-				case MNUID_ITEM(IDM_FILE_CLOSE):
-					m_emuManager.closeRom();
-					break;
-				
-				case MNUID_ITEM(IDM_FILE_SAVESTATE):
-					m_emuManager.saveState();
-					break;
-				
-				case MNUID_ITEM(IDM_FILE_LOADSTATE):
-					m_emuManager.loadState();
-					break;
-				
-				case MNUID_ITEM(IDM_FILE_GENCONFIG):
-					GeneralConfigWindow::ShowSingle(this);
-					break;
-				
-				case MNUID_ITEM(IDM_FILE_MCDCONTROL):
-					McdControlWindow::ShowSingle(this);
-					break;
-				
-				case MNUID_ITEM(IDM_FILE_QUIT):
-					// Quit.
-					m_emuManager.closeRom();
-					QuitGens();
-					this->close();
-					break;
-				
-				default:
-					break;
-			}
-			break;
-		
-		case IDM_HELP_MENU:
-			// Help menu.
-			switch (MNUID_ITEM(id))
-			{
-				case MNUID_ITEM(IDM_HELP_ABOUT):
-					// About Gens/GS II.
-					AboutWindow::ShowSingle(this);
-					break;
-				
-				default:
-					break;
-			}
-			break;
-		
-		case IDM_RESBPPTEST_MENU:
-			// Resolution / Color Depth Testing.
-			switch (MNUID_ITEM(id))
-			{
-				case MNUID_ITEM(IDM_RESBPPTEST_1X):
-					m_scale = 1;
-					gensResize();
-					break;
-				
-				case MNUID_ITEM(IDM_RESBPPTEST_2X):
-					m_scale = 2;
-					gensResize();
-					break;
-				
-				case MNUID_ITEM(IDM_RESBPPTEST_3X):
-					m_scale = 3;
-					gensResize();
-					break;
-				
-				case MNUID_ITEM(IDM_RESBPPTEST_4X):
-					m_scale = 4;
-					gensResize();
-					break;
-				
-				/** TODO: bpp changes should be pushed to the emulation queue. **/
-				case MNUID_ITEM(IDM_RESBPPTEST_15):
-				{
-					LibGens::VdpRend::m_palette.setBpp(LibGens::VdpPalette::BPP_15);
-					m_vBackend->setVbDirty();
-					m_vBackend->vbUpdate();
-					
-					QString msg = tr("Color depth set to %1-bit.").arg(15);
-					m_vBackend->osd_printf(1500, "%s", msg.toUtf8().constData());
-					break;
-				}
-				
-				case MNUID_ITEM(IDM_RESBPPTEST_16):
-				{
-					LibGens::VdpRend::m_palette.setBpp(LibGens::VdpPalette::BPP_16);
-					m_vBackend->setVbDirty();
-					m_vBackend->vbUpdate();
-					
-					QString msg = tr("Color depth set to %1-bit.").arg(16);
-					m_vBackend->osd_printf(1500, "%s", msg.toUtf8().constData());
-					break;
-				}
-				
-				case MNUID_ITEM(IDM_RESBPPTEST_32):
-				{
-					LibGens::VdpRend::m_palette.setBpp(LibGens::VdpPalette::BPP_32);
-					m_vBackend->setVbDirty();
-					m_vBackend->vbUpdate();
-					
-					QString msg = tr("Color depth set to %1-bit.").arg(32);
-					m_vBackend->osd_printf(1500, "%s", msg.toUtf8().constData());
-					break;
-				}
-				
-				case MNUID_ITEM(IDM_RESBPPTEST_SCRSHOT):
-					m_emuManager.screenShot();
-					break;
-				
-				default:
-					break;
-			}
-			break;
-		
-		case IDM_CTRLTEST_MENU:
-			// Controller Testing
-			switch (MNUID_ITEM(id))
-			{
-				case MNUID_ITEM(IDM_CTRLTEST_NONE):
-					m_emuManager.setController(0, LibGens::IoBase::IOT_NONE);
-					break;
-				
-				case MNUID_ITEM(IDM_CTRLTEST_3BT):
-					m_emuManager.setController(0, LibGens::IoBase::IOT_3BTN);
-					break;
-				
-				case MNUID_ITEM(IDM_CTRLTEST_6BT):
-					m_emuManager.setController(0, LibGens::IoBase::IOT_6BTN);
-					break;
-				
-				case MNUID_ITEM(IDM_CTRLTEST_2BT):
-					m_emuManager.setController(0, LibGens::IoBase::IOT_2BTN);
-					break;
-				
-				case MNUID_ITEM(IDM_CTRLTEST_MEGAMOUSE):
-					m_emuManager.setController(0, LibGens::IoBase::IOT_MEGA_MOUSE);
-					break;
-				
-				case MNUID_ITEM(IDM_CTRLTEST_TEAMPLAYER):
-					m_emuManager.setController(0, LibGens::IoBase::IOT_TEAMPLAYER);
-					break;
-				
-				case MNUID_ITEM(IDM_CTRLTEST_4WP):
-					// TODO
-					m_emuManager.setController(0, LibGens::IoBase::IOT_4WP_SLAVE);
-					m_emuManager.setController(1, LibGens::IoBase::IOT_4WP_MASTER);
-					break;
-				
-				case MNUID_ITEM(IDM_CTRLTEST_CONFIG):
-					// Controller Configuration.
-					CtrlConfigWindow::ShowSingle(this);
-					break;
-				
-				default:
-					break;
-			}
-			break;
-		
-		case IDM_SOUNDTEST_MENU:
-			// Audio Testing
-			switch (MNUID_ITEM(id))
-			{
-				case MNUID_ITEM(IDM_SOUNDTEST_11025):
-					m_emuManager.setAudioRate(11025);
-					break;
-				case MNUID_ITEM(IDM_SOUNDTEST_16000):
-					m_emuManager.setAudioRate(16000);
-					break;
-				case MNUID_ITEM(IDM_SOUNDTEST_22050):
-					m_emuManager.setAudioRate(22050);
-					break;
-				case MNUID_ITEM(IDM_SOUNDTEST_32000):
-					m_emuManager.setAudioRate(32000);
-					break;
-				case MNUID_ITEM(IDM_SOUNDTEST_44100):
-					m_emuManager.setAudioRate(44100);
-					break;
-				case MNUID_ITEM(IDM_SOUNDTEST_48000):
-					m_emuManager.setAudioRate(48000);
-					break;
-				case MNUID_ITEM(IDM_SOUNDTEST_MONO):
-					m_emuManager.setStereo(false);
-					break;
-				case MNUID_ITEM(IDM_SOUNDTEST_STEREO):
-					m_emuManager.setStereo(true);
-					break;
-				default:
-					break;
-			}
-			break;
-		
-		default:
-			break;
-	}
-}
-
-
-/**
  * setGensTitle(): Set the Gens window title.
  */
 void GensWindow::setGensTitle(void)
@@ -595,6 +378,41 @@ void GensWindow::osd(OsdType osd_type, int param)
 			// Unknown OSD type.
 			break;
 	}
+}
+
+
+/**
+ * setBpp(): Set color depth.
+ * TODO: Should this be a public function or a slot?
+ * @param bpp Color depth.
+ */
+void GensWindow::setBpp(LibGens::VdpPalette::ColorDepth bpp)
+{
+	// TODO: bpp changes should be pushed to the emulation queue.
+	// TODO: Maybe this should be a slot called by GensConfig.
+	int bppVal;
+	switch (bpp)
+	{
+		case LibGens::VdpPalette::BPP_15:
+			bppVal = 15;
+			break;
+		case LibGens::VdpPalette::BPP_16:
+			bppVal = 16;
+			break;
+		case LibGens::VdpPalette::BPP_32:
+			bppVal = 32;
+			break;
+		default:
+			return;
+	}
+	
+	// Set the color depth.
+	LibGens::VdpRend::m_palette.setBpp(bpp);
+	m_vBackend->setVbDirty();
+	m_vBackend->vbUpdate();
+	
+	QString msg = tr("Color depth set to %1-bit.").arg(bppVal);
+	m_vBackend->osd_printf(1500, "%s", msg.toUtf8().constData());
 }
 
 

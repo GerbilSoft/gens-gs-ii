@@ -34,17 +34,33 @@
 namespace GensQt4
 {
 
+// Gens window.
+class GensWindow;
+
 class GensActions : public QObject
 {
 	Q_OBJECT
 	
 	public:
+		GensActions(GensWindow *parent);
+		
 		/**
 		 * checkEventKey(): Check for non-menu event keys.
 		 * @param key Gens Keycode. (WITH MODIFIERS)
 		 * @return True if an event key was processed; false if not.
 		 */
 		bool checkEventKey(GensKey_t key);
+	
+	public slots:
+		/**
+		 * doAction(): Do an action.
+		 * @param id Action ID. (from GensMenuBar_menus.hpp)
+		 * @return True if handled; false if not.
+		 */
+		bool doAction(int id);
+	
+	protected:
+		GensWindow *m_parent;
 	
 	signals:
 		void actionTogglePaused(void);

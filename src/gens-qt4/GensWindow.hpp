@@ -34,6 +34,7 @@ class QCloseEvent;
 
 // LibGens includes.
 #include "libgens/lg_osd.h"
+#include "libgens/MD/VdpPalette.hpp"
 
 // gens-qt4 classes.
 #include "gqt4_main.hpp"
@@ -57,6 +58,19 @@ class GensWindow : public QMainWindow
 		
 		// LibGens OSD handler.
 		void osd(OsdType osd_type, int param);
+		
+		// Rescale the window.
+		void rescale(int scale)
+		{
+			if (scale <= 0 || scale > 8)
+				return;
+			m_scale = scale;
+			gensResize();
+		}
+		
+		// Set color depth.
+		// TODO: Should this really be here, or should it be a slot?
+		void setBpp(LibGens::VdpPalette::ColorDepth bpp);
 	
 	protected:
 		void setupUi(void);
@@ -88,14 +102,13 @@ class GensWindow : public QMainWindow
 		
 		// Actions manager.
 		GensActions *m_gensActions;
+		// FIXME: Massive hack to allow GensActions to access GensWindow protected members.
+		friend class GensActions;
 		
 		// Set the Gens window title.
 		void setGensTitle(void);
 	
 	protected slots:
-		// Menu item selection.
-		void menuTriggered(int id);
-		
 		/**
 		 * updateFps(): Update the FPS counter.
 		 */

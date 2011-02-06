@@ -30,8 +30,27 @@
 // Menu actions.
 #include "GensMenuBar_menus.hpp"
 
+// Gens Window.
+#include "../GensWindow.hpp"
+
+// Other windows.
+#include "../AboutWindow.hpp"
+#include "../CtrlConfigWindow.hpp"
+#include "../GeneralConfigWindow.hpp"
+#include "../McdControlWindow.hpp"
+
+// LibGens includes.
+#include "libgens/MD/VdpPalette.hpp"
+
 namespace GensQt4
 {
+
+GensActions::GensActions(GensWindow *parent)
+	: QObject(parent)
+{
+	m_parent = parent;
+}
+
 
 /**
  * checkEventKey(): Check for non-menu event keys.
@@ -101,6 +120,196 @@ bool GensActions::checkEventKey(GensKey_t key)
 	}
 	
 	// Event key was not handled.
+	return false;
+}
+
+
+/**
+ * doAction(): Do an action.
+ * @param id Action ID. (from GensMenuBar_menus.hpp)
+ * @return True if handled; false if not.
+ */
+bool GensActions::doAction(int id)
+{
+	switch (MNUID_MENU(id))
+	{
+		case IDM_FILE_MENU:
+			// File menu.
+			switch (MNUID_ITEM(id))
+			{
+				case MNUID_ITEM(IDM_FILE_OPEN):
+					m_parent->m_emuManager.openRom(m_parent);
+					return true;
+				
+				case MNUID_ITEM(IDM_FILE_CLOSE):
+					m_parent->m_emuManager.closeRom();
+					return true;
+				
+				case MNUID_ITEM(IDM_FILE_SAVESTATE):
+					m_parent->m_emuManager.saveState();
+					return true;
+				
+				case MNUID_ITEM(IDM_FILE_LOADSTATE):
+					m_parent->m_emuManager.loadState();
+					return true;
+				
+				case MNUID_ITEM(IDM_FILE_GENCONFIG):
+					GeneralConfigWindow::ShowSingle(m_parent);
+					return true;
+				
+				case MNUID_ITEM(IDM_FILE_MCDCONTROL):
+					McdControlWindow::ShowSingle(m_parent);
+					return true;
+				
+				case MNUID_ITEM(IDM_FILE_QUIT):
+					// Quit.
+					m_parent->m_emuManager.closeRom();
+					QuitGens();
+					m_parent->close();
+					return true;
+				
+				default:
+					break;
+			}
+			break;
+		
+		case IDM_HELP_MENU:
+			// Help menu.
+			switch (MNUID_ITEM(id))
+			{
+				case MNUID_ITEM(IDM_HELP_ABOUT):
+					// About Gens/GS II.
+					AboutWindow::ShowSingle(m_parent);
+					return true;
+				
+				default:
+					break;
+			}
+			break;
+		
+		case IDM_RESBPPTEST_MENU:
+			// Resolution / Color Depth Testing.
+			switch (MNUID_ITEM(id))
+			{
+				case MNUID_ITEM(IDM_RESBPPTEST_1X):
+					m_parent->rescale(1);
+					return true;
+				
+				case MNUID_ITEM(IDM_RESBPPTEST_2X):
+					m_parent->rescale(2);
+					return true;
+				
+				case MNUID_ITEM(IDM_RESBPPTEST_3X):
+					m_parent->rescale(3);
+					return true;
+				
+				case MNUID_ITEM(IDM_RESBPPTEST_4X):
+					m_parent->rescale(4);
+					return true;
+				
+				case MNUID_ITEM(IDM_RESBPPTEST_15):
+					m_parent->setBpp(LibGens::VdpPalette::BPP_15);
+					return true;
+				
+				case MNUID_ITEM(IDM_RESBPPTEST_16):
+					m_parent->setBpp(LibGens::VdpPalette::BPP_16);
+					return true;
+				
+				case MNUID_ITEM(IDM_RESBPPTEST_32):
+					m_parent->setBpp(LibGens::VdpPalette::BPP_32);
+					return true;
+				
+				case MNUID_ITEM(IDM_RESBPPTEST_SCRSHOT):
+					m_parent->m_emuManager.screenShot();
+					return true;
+				
+				default:
+					break;
+			}
+			break;
+		
+		case IDM_CTRLTEST_MENU:
+			// Controller Testing
+			switch (MNUID_ITEM(id))
+			{
+				case MNUID_ITEM(IDM_CTRLTEST_NONE):
+					m_parent->m_emuManager.setController(0, LibGens::IoBase::IOT_NONE);
+					return true;
+				
+				case MNUID_ITEM(IDM_CTRLTEST_3BT):
+					m_parent->m_emuManager.setController(0, LibGens::IoBase::IOT_3BTN);
+					return true;
+				
+				case MNUID_ITEM(IDM_CTRLTEST_6BT):
+					m_parent->m_emuManager.setController(0, LibGens::IoBase::IOT_6BTN);
+					return true;
+				
+				case MNUID_ITEM(IDM_CTRLTEST_2BT):
+					m_parent->m_emuManager.setController(0, LibGens::IoBase::IOT_2BTN);
+					return true;
+				
+				case MNUID_ITEM(IDM_CTRLTEST_MEGAMOUSE):
+					m_parent->m_emuManager.setController(0, LibGens::IoBase::IOT_MEGA_MOUSE);
+					return true;
+				
+				case MNUID_ITEM(IDM_CTRLTEST_TEAMPLAYER):
+					m_parent->m_emuManager.setController(0, LibGens::IoBase::IOT_TEAMPLAYER);
+					return true;
+				
+				case MNUID_ITEM(IDM_CTRLTEST_4WP):
+					// TODO
+					m_parent->m_emuManager.setController(0, LibGens::IoBase::IOT_4WP_SLAVE);
+					m_parent->m_emuManager.setController(1, LibGens::IoBase::IOT_4WP_MASTER);
+					return true;
+				
+				case MNUID_ITEM(IDM_CTRLTEST_CONFIG):
+					// Controller Configuration.
+					CtrlConfigWindow::ShowSingle(m_parent);
+					return true;
+				
+				default:
+					break;
+			}
+			break;
+		
+		case IDM_SOUNDTEST_MENU:
+			// Audio Testing
+			switch (MNUID_ITEM(id))
+			{
+				case MNUID_ITEM(IDM_SOUNDTEST_11025):
+					m_parent->m_emuManager.setAudioRate(11025);
+					return true;
+				case MNUID_ITEM(IDM_SOUNDTEST_16000):
+					m_parent->m_emuManager.setAudioRate(16000);
+					return true;
+				case MNUID_ITEM(IDM_SOUNDTEST_22050):
+					m_parent->m_emuManager.setAudioRate(22050);
+					return true;
+				case MNUID_ITEM(IDM_SOUNDTEST_32000):
+					m_parent->m_emuManager.setAudioRate(32000);
+					return true;
+				case MNUID_ITEM(IDM_SOUNDTEST_44100):
+					m_parent->m_emuManager.setAudioRate(44100);
+					return true;
+				case MNUID_ITEM(IDM_SOUNDTEST_48000):
+					m_parent->m_emuManager.setAudioRate(48000);
+					return true;
+				case MNUID_ITEM(IDM_SOUNDTEST_MONO):
+					m_parent->m_emuManager.setStereo(false);
+					return true;
+				case MNUID_ITEM(IDM_SOUNDTEST_STEREO):
+					m_parent->m_emuManager.setStereo(true);
+					return true;
+				default:
+					break;
+			}
+			break;
+		
+		default:
+			break;
+	}
+	
+	// Action wasn't handled.
 	return false;
 }
 
