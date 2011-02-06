@@ -64,78 +64,23 @@ bool GensActions::checkEventKey(GensKey_t key)
 	if (action == 0)
 		return false;
 	
-	switch (action)
-	{
-		case IDM_NOMENU_HARDRESET:
-			// Hard Reset.
-			emit actionResetEmulator(true);
-			return true;
-		
-		case IDM_NOMENU_SOFTRESET:
-			// Soft Reset.
-			emit actionResetEmulator(false);
-			return true;
-		
-		case IDM_NOMENU_PAUSE:
-			// Toggle Paused.
-			emit actionTogglePaused();
-			return true;
-		
-		case IDM_NOMENU_FASTBLUR:
-			// Toggle Fast Blur.
-			gqt4_config->setFastBlur(!gqt4_config->fastBlur());
-			return true;
-		
-		case IDM_NOMENU_SAVESLOT_0:
-		case IDM_NOMENU_SAVESLOT_1:
-		case IDM_NOMENU_SAVESLOT_2:
-		case IDM_NOMENU_SAVESLOT_3:
-		case IDM_NOMENU_SAVESLOT_4:
-		case IDM_NOMENU_SAVESLOT_5:
-		case IDM_NOMENU_SAVESLOT_6:
-		case IDM_NOMENU_SAVESLOT_7:
-		case IDM_NOMENU_SAVESLOT_8:
-		case IDM_NOMENU_SAVESLOT_9:
-			// Save slot selection.
-			gqt4_config->setSaveSlot(action - IDM_NOMENU_SAVESLOT_0);
-			return true;
-		
-		case IDM_NOMENU_SAVESLOT_PREV:
-			// Previous Save Slot.
-			gqt4_config->setSaveSlot_Prev();
-			return true;
-			
-		case IDM_NOMENU_SAVESLOT_NEXT:
-			// Next Save Slot.
-			gqt4_config->setSaveSlot_Next();
-			return true;
-		
-		case IDM_NOMENU_SAVESLOT_LOADFROM:
-		case IDM_NOMENU_SAVESLOT_SAVEAS:
-			// TODO
-			return false;
-		
-		default:
-			break;
-	}
-	
-	// Event key was not handled.
-	return false;
+	// Do the action.
+	return doAction(action);
 }
 
 
 /**
  * doAction(): Do an action.
- * @param id Action ID. (from GensMenuBar_menus.hpp)
+ * @param action Action ID. (from GensMenuBar_menus.hpp)
  * @return True if handled; false if not.
  */
-bool GensActions::doAction(int id)
+bool GensActions::doAction(int action)
 {
-	switch (MNUID_MENU(id))
+	switch (MNUID_MENU(action))
 	{
 		case IDM_FILE_MENU:
 			// File menu.
-			switch (MNUID_ITEM(id))
+			switch (MNUID_ITEM(action))
 			{
 				case MNUID_ITEM(IDM_FILE_OPEN):
 					m_parent->m_emuManager.openRom(m_parent);
@@ -175,7 +120,7 @@ bool GensActions::doAction(int id)
 		
 		case IDM_HELP_MENU:
 			// Help menu.
-			switch (MNUID_ITEM(id))
+			switch (MNUID_ITEM(action))
 			{
 				case MNUID_ITEM(IDM_HELP_ABOUT):
 					// About Gens/GS II.
@@ -189,7 +134,7 @@ bool GensActions::doAction(int id)
 		
 		case IDM_RESBPPTEST_MENU:
 			// Resolution / Color Depth Testing.
-			switch (MNUID_ITEM(id))
+			switch (MNUID_ITEM(action))
 			{
 				case MNUID_ITEM(IDM_RESBPPTEST_1X):
 					m_parent->rescale(1);
@@ -230,7 +175,7 @@ bool GensActions::doAction(int id)
 		
 		case IDM_CTRLTEST_MENU:
 			// Controller Testing
-			switch (MNUID_ITEM(id))
+			switch (MNUID_ITEM(action))
 			{
 				case MNUID_ITEM(IDM_CTRLTEST_NONE):
 					m_parent->m_emuManager.setController(0, LibGens::IoBase::IOT_NONE);
@@ -274,7 +219,7 @@ bool GensActions::doAction(int id)
 		
 		case IDM_SOUNDTEST_MENU:
 			// Audio Testing
-			switch (MNUID_ITEM(id))
+			switch (MNUID_ITEM(action))
 			{
 				case MNUID_ITEM(IDM_SOUNDTEST_11025):
 					m_parent->m_emuManager.setAudioRate(11025);
@@ -304,6 +249,63 @@ bool GensActions::doAction(int id)
 					break;
 			}
 			break;
+		
+		case IDM_NOMENU:
+			// Non-Menu Actions.
+			switch (MNUID_ITEM(action))
+			{
+				case MNUID_ITEM(IDM_NOMENU_HARDRESET):
+					// Hard Reset.
+					emit actionResetEmulator(true);
+					return true;
+				
+				case MNUID_ITEM(IDM_NOMENU_SOFTRESET):
+					// Soft Reset.
+					emit actionResetEmulator(false);
+					return true;
+				
+				case MNUID_ITEM(IDM_NOMENU_PAUSE):
+					// Toggle Paused.
+					emit actionTogglePaused();
+					return true;
+				
+				case MNUID_ITEM(IDM_NOMENU_FASTBLUR):
+					// Toggle Fast Blur.
+					gqt4_config->setFastBlur(!gqt4_config->fastBlur());
+					return true;
+				
+				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_0):
+				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_1):
+				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_2):
+				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_3):
+				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_4):
+				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_5):
+				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_6):
+				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_7):
+				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_8):
+				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_9):
+					// Save slot selection.
+					gqt4_config->setSaveSlot(action - IDM_NOMENU_SAVESLOT_0);
+					return true;
+				
+				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_PREV):
+					// Previous Save Slot.
+					gqt4_config->setSaveSlot_Prev();
+					return true;
+					
+				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_NEXT):
+					// Next Save Slot.
+					gqt4_config->setSaveSlot_Next();
+					return true;
+				
+				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_LOADFROM):
+				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_SAVEAS):
+					// TODO
+					return false;
+				
+				default:
+					break;
+			}
 		
 		default:
 			break;

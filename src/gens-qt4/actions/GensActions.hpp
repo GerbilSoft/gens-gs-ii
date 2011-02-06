@@ -57,7 +57,7 @@ class GensActions : public QObject
 		 * @param id Action ID. (from GensMenuBar_menus.hpp)
 		 * @return True if handled; false if not.
 		 */
-		bool doAction(int id);
+		bool doAction(int action);
 	
 	protected:
 		GensWindow *m_parent;
