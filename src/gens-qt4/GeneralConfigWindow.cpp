@@ -354,7 +354,7 @@ void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *
 #endif /* HAVE_LZMA */
 				RAR_EXT
 				");;") +
-			tr("All Files") + QString::fromLatin1("(*.*)"));
+			tr("All Files") + QString::fromLatin1(" (*.*)"));
 	
 	if (filename.isEmpty())
 		return;
@@ -624,11 +624,11 @@ void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
 	QString filename = QFileDialog::getOpenFileName(this, title,
 			txtExtPrgUnRAR->text(),		// Default filename.
 #ifdef Q_OS_WIN32
-			tr("DLL files") + QString::fromLatin1(" (*.dll);;")
+			tr("DLL files") + QString::fromLatin1(" (*.dll);;") +
 #else
-			tr("rar or unrar") + QString::fromLatin1(" (rar unrar);;")
+			tr("rar or unrar") + QString::fromLatin1(" (rar unrar);;") +
 #endif
-			+ tr("All Files") + QString::fromLatin1("(*.*)"));
+			tr("All Files") + QString::fromLatin1(" (*.*)"));
 	
 	if (filename.isEmpty())
 		return;
