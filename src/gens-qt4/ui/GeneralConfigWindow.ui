@@ -663,13 +663,13 @@ on NTSC models.</string>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="GensLineEdit" name="txtMcdRomUSA"/>
+           <widget class="GensQt4::GensLineEdit" name="txtMcdRomUSA"/>
           </item>
           <item row="1" column="1">
-           <widget class="GensLineEdit" name="txtMcdRomEUR"/>
+           <widget class="GensQt4::GensLineEdit" name="txtMcdRomEUR"/>
           </item>
           <item row="2" column="1">
-           <widget class="GensLineEdit" name="txtMcdRomJPN"/>
+           <widget class="GensQt4::GensLineEdit" name="txtMcdRomJPN"/>
           </item>
          </layout>
         </widget>
@@ -749,7 +749,7 @@ on NTSC models.</string>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="GensLineEdit" name="txtExtPrgUnRAR"/>
+           <widget class="GensQt4::GensLineEdit" name="txtExtPrgUnRAR"/>
           </item>
          </layout>
         </widget>
@@ -772,7 +772,7 @@ on NTSC models.</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>GensLineEdit</class>
+   <class>GensQt4::GensLineEdit</class>
    <extends>QLineEdit</extends>
    <header>widgets/GensLineEdit.hpp</header>
   </customwidget>
