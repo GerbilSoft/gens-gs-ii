@@ -53,6 +53,11 @@ typedef union
 	struct
 	{
 		// Key value.
+		// NOTE: key16 can contain modifier keys.
+		// Format: mmmmmmmk kkkkkkkk
+		// K = 9-bit key ID.
+		// M = 7-bit modifiers.
+		// Gamepad input should ignore modifiers.
 		union { uint16_t key16; uint8_t key[2]; };
 		uint8_t dev_id;
 		uint8_t type;
@@ -71,6 +76,7 @@ typedef enum
 	
 	GKT_MAX
 } GensKeyType_t;
+
 
 /**
  * @name Key values
@@ -289,8 +295,26 @@ typedef enum
 	KEYV_FORWARD		= 0x101,
 	
 	/* End of key listing. */
-	KEYV_LAST
+	KEYV_LAST,
+	
+	/* Maximum key value. */
+	KEYV_MAX		= 0x1FF
 } GensKeyVal_t;
+
+
+/**
+ * @name Modifier keys.
+ * Used for menus and special hotkeys
+ */
+typedef enum
+{
+	KEYM_SHIFT	= 0x0200,
+	KEYM_CTRL	= 0x0400,
+	KEYM_ALT	= 0x0800,
+	KEYM_META	= 0x1000,
+	
+	// TODO: Add more modifiers?
+} GensKeyMod_t;
 
 
 /**
