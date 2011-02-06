@@ -146,7 +146,7 @@ int EmuManager::openRom(QWidget *parent)
 			tr("Sega Genesis / 32X ROMs; Sega CD disc images") +
 			"(*.bin *.smd *.gen *.32x *.cue *.iso *.raw" ZLIB_EXT LZMA_EXT RAR_EXT ");;" +
 #endif
-			tr("All Files") + QString::fromLatin1("(*.*)"));
+			tr("All Files") + QString::fromLatin1(" (*.*)"));
 	
 	if (filename.isEmpty())
 		return -1;
