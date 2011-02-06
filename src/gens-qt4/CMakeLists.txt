@@ -94,6 +94,7 @@ SET(gens-qt4_SRCS
 	actions/GensMenuBar.cpp
 	actions/GensMenuBar_menus.cpp
 	actions/GensActions.cpp
+	widgets/GensColorComboBox.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -116,6 +117,7 @@ SET(gens-qt4_MOC_HEADERS
 	actions/GensKeyConfig.hpp
 	actions/GensMenuBar.hpp
 	actions/GensActions.hpp
+	widgets/GensColorComboBox.hpp
 	)
 
 IF(QT_QTDBUS_FOUND)
