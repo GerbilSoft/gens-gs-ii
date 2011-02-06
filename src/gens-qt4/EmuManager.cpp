@@ -93,6 +93,10 @@ EmuManager::EmuManager()
 	// TODO: Allow selection of all available audio backend classes.
 	// NOTE: Audio backends are NOT QWidgets!
 	m_audio = new GensPortAudio();
+	
+	// Connect the configuration slots.
+	connect(gqt4_config, SIGNAL(saveSlot_changed(int)),
+		this, SLOT(saveSlot_changed_slot(int)));
 }
 
 EmuManager::~EmuManager()
@@ -626,13 +630,12 @@ void EmuManager::pauseRequest(void)
 
 
 /**
- * setSaveSlot(): Set the save slot number.
+ * saveSlot_changed_slot(): Save slot changed.
  * @param slotNum Slot number, (0-9)
  */
-void EmuManager::setSaveSlot(int slotNum)
+void EmuManager::saveSlot_changed_slot(int slotNum)
 {
 	// TODO: Should this use the emulation request queue?
-	// TODO: Check if save slot is occupied; load preview.
 	if (slotNum < 0 || slotNum > 9)
 		return;
 	m_saveSlot = slotNum;
@@ -647,7 +650,6 @@ void EmuManager::setSaveSlot(int slotNum)
 		if (QFile::exists(filename))
 		{
 			// Savestate exists.
-			// TODO: Load the preview image.
 			osdMsg = osdMsg.arg(tr("OCCUPIED"));
 			
 			// Check if the savestate has a preview image.

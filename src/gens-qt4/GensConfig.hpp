@@ -66,6 +66,9 @@ class GensConfig : public QObject
 	Q_PROPERTY(bool pauseTint READ pauseTint WRITE setPauseTint NOTIFY pauseTint_changed)
 	Q_PROPERTY(bool ntscV30Rolling READ ntscV30Rolling WRITE setNtscV30Rolling NOTIFY ntscV30Rolling_changed)
 	
+	/** Savestates. **/
+	Q_PROPERTY(int saveSlot READ saveSlot WRITE setSaveSlot NOTIFY saveSlot_changed)
+	
 	public:
 		GensConfig();
 		~GensConfig();
@@ -140,6 +143,15 @@ class GensConfig : public QObject
 		bool ntscV30Rolling(void) const
 			{ return m_ntscV30Rolling; }
 		void setNtscV30Rolling(bool newNtscV30Rolling);
+		
+		/** Savestates. **/
+		int saveSlot(void) const
+			{ return m_saveSlot; }
+		void setSaveSlot(int newSaveSlot);
+		void setSaveSlot_Prev(void)
+			{ setSaveSlot((m_saveSlot + 1) % 10); }
+		void setSaveSlot_Next(void)
+			{ setSaveSlot((m_saveSlot + 9) % 10); }
 	
 	protected:
 		/** Onscreen display. **/
@@ -171,6 +183,9 @@ class GensConfig : public QObject
 		bool m_borderColor;
 		bool m_pauseTint;
 		bool m_ntscV30Rolling;
+		
+		/** Savestates. **/
+		int m_saveSlot;
 	
 	signals:
 		/** Onscreen display. **/
@@ -202,6 +217,9 @@ class GensConfig : public QObject
 		void borderColor_changed(bool newBorderColor);
 		void pauseTint_changed(bool newPauseTint);
 		void ntscV30Rolling_changed(bool newNtscV30Rolling);
+		
+		/** Savestates. **/
+		void saveSlot_changed(int newSaveSlot);
 };
 
 }

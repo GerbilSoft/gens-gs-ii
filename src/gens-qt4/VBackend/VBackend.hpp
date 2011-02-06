@@ -61,9 +61,6 @@ class VBackend
 		inline bool isPaused(void) const { return m_paused; }
 		void setPaused(bool newPaused);
 		
-		inline bool fastBlur(void) const { return m_fastBlur; }
-		void setFastBlur(bool newFastBlur);
-		
 		inline bool isRunning(void) const { return m_running; }
 		void setRunning(bool newIsRunning);
 		
@@ -200,6 +197,13 @@ class VBackend
 			bool isRecording;	// True if recording; false if stopped.
 		};
 		QList<RecOsd> m_osdRecList;
+		
+		/** Properties. **/
+		/** These properties should only be set by subclasses. **/
+		/** GensQGLWidget calls these property functions in slots. **/
+		inline bool fastBlur(void) const
+			{ return m_fastBlur; }
+		void setFastBlur(bool newFastBlur);
 	
 	private:
 		// Effects.

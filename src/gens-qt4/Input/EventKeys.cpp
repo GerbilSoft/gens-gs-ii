@@ -24,6 +24,12 @@
 
 #include "EventKeys.hpp"
 
+// gqt4_main has gqt4_config.
+#include "gqt4_main.hpp"
+
+namespace GensQt4
+{
+
 // TODO: Customizable event keys.
 // NOTE: Menu items currently have their own events.
 // TODO: Remap them to EventKeys?
@@ -64,7 +70,7 @@ bool EventKeys::checkEventKey(GensKey_t key, int mod)
 			if (mod == Qt::NoModifier)
 			{
 				// Toggle Fast Blur.
-				emit eventToggleFastBlur();
+				gqt4_config->setFastBlur(!gqt4_config->fastBlur());
 				return true;
 			}
 			break;
@@ -97,7 +103,7 @@ bool EventKeys::checkEventKey(GensKey_t key, int mod)
 			if (mod == Qt::NoModifier)
 			{
 				// Save Slot selection.
-				emit eventSetSaveSlot(key - KEYV_0);
+				gqt4_config->setSaveSlot(key - KEYV_0);
 				return true;
 			}
 			break;
@@ -106,7 +112,7 @@ bool EventKeys::checkEventKey(GensKey_t key, int mod)
 			if (mod == Qt::NoModifier)
 			{
 				// Previous Save Slot.
-				emit eventPrevSaveSlot();
+				gqt4_config->setSaveSlot_Prev();
 				return true;
 			}
 			break;
@@ -115,7 +121,7 @@ bool EventKeys::checkEventKey(GensKey_t key, int mod)
 			if (mod == Qt::NoModifier)
 			{
 				// Next Save Slot.
-				emit eventNextSaveSlot();
+				gqt4_config->setSaveSlot_Next();
 				return true;
 			}
 			break;
@@ -126,4 +132,6 @@ bool EventKeys::checkEventKey(GensKey_t key, int mod)
 	
 	// Event key was not handled.
 	return false;
+}
+
 }

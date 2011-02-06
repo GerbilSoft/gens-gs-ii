@@ -90,6 +90,9 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 		this, SLOT(osdMsgEnabled_changed_slot(bool)));
 	connect(gqt4_config, SIGNAL(osdMsgColor_changed(const QColor&)),
 		this, SLOT(osdMsgColor_changed_slot(const QColor&)));
+	
+	connect(gqt4_config, SIGNAL(fastBlur_changed(bool)),
+		this, SLOT(fastBlur_changed_slot(bool)));
 }
 
 GensQGLWidget::~GensQGLWidget()

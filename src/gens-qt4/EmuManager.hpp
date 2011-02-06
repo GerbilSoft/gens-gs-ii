@@ -197,22 +197,6 @@ class EmuManager : public QObject
 		 * @param hardReset If true, do a hard reset; otherwise, do a soft reset.
 		 */
 		void resetEmulator(bool hardReset);
-		
-		/**
-		 * setSaveSlot(): Set the save slot number.
-		 * @param slotNum Slot number, (0-9)
-		 */
-		void setSaveSlot(int slotNum);
-		
-		/**
-		 * nextSaveSlot(): Select the next save slot.
-		 */
-		void nextSaveSlot(void) { setSaveSlot((m_saveSlot + 1) % 10); }
-		
-		/**
-		 * prevSaveSlot(): Select the previous save slot.
-		 */
-		void prevSaveSlot(void) { setSaveSlot((m_saveSlot + 9) % 10); }
 	
 	protected slots:
 		// Frame done signal from EmuThread.
@@ -225,6 +209,12 @@ class EmuManager : public QObject
 			loadRom_int(m_loadRom_int_tmr_rom);
 			m_loadRom_int_tmr_rom = NULL;
 		}
+		
+		/**
+		 * setSaveSlot(): Set the save slot number.
+		 * @param slotNum Slot number, (0-9)
+		 */
+		void saveSlot_changed_slot(int slotNum);
 };
 
 }

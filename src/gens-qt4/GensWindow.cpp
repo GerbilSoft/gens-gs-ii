@@ -162,18 +162,8 @@ void GensWindow::setupUi(void)
 	// Event Keys signals.
 	connect(m_evKeys, SIGNAL(eventTogglePaused(void)),
 		&m_emuManager, SLOT(pauseRequest(void)));
-	connect(m_evKeys, SIGNAL(eventToggleFastBlur(void)),
-		this, SLOT(toggleFastBlur(void)));
 	connect(m_evKeys, SIGNAL(eventResetEmulator(bool)),
 		&m_emuManager, SLOT(resetEmulator(bool)));
-	
-	// Event Keys: Save slots.
-	connect(m_evKeys, SIGNAL(eventSetSaveSlot(int)),
-		&m_emuManager, SLOT(setSaveSlot(int)));
-	connect(m_evKeys, SIGNAL(eventNextSaveSlot(void)),
-		&m_emuManager, SLOT(nextSaveSlot(void)));
-	connect(m_evKeys, SIGNAL(eventPrevSaveSlot(void)),
-		&m_emuManager, SLOT(prevSaveSlot(void)));
 	
 	// Retranslate the UI.
 	retranslateUi();
@@ -631,21 +621,6 @@ void GensWindow::stateChanged(void)
 	}
 	
 	setGensTitle();
-}
-
-
-/**
- * toggleFastBlur(): Toggle the Fast Blur effect.
- */
-void GensWindow::toggleFastBlur(void)
-{
-	m_vBackend->setFastBlur(!m_vBackend->fastBlur());
-	
-	// Show a message on the OSD.
-	if (m_vBackend->fastBlur())
-		m_vBackend->osd_printf(1500, "Fast Blur enabled.");
-	else
-		m_vBackend->osd_printf(1500, "Fast Blur disabled.");
 }
 
 }

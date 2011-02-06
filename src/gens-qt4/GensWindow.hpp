@@ -36,6 +36,7 @@ class QCloseEvent;
 #include "libgens/lg_osd.h"
 
 // gens-qt4 classes.
+#include "gqt4_main.hpp"
 #include "VBackend/VBackend.hpp"
 #include "EmuManager.hpp"
 #include "Input/EventKeys.hpp"
@@ -132,11 +133,6 @@ class GensWindow : public QMainWindow
 		 */
 		void osdShowPreview(int duration, const QImage& img)
 			{ m_vBackend->osd_show_preview(duration, img); }
-		
-		/**
-		 * toggleFastBlur(): Toggle the Fast Blur effect.
-		 */
-		void toggleFastBlur(void);
 };
 
 }

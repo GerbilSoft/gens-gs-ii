@@ -129,6 +129,9 @@ class GensQGLWidget : public QGLWidget, public VBackend
 			{ setOsdMsgEnabled(enable); }
 		void osdMsgColor_changed_slot(const QColor& color)
 			{ setOsdMsgColor(color); }
+		
+		void fastBlur_changed_slot(bool newFastBlur)
+			{ setFastBlur(newFastBlur); }
 };
 
 }

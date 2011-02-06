@@ -69,6 +69,9 @@ GensConfig::GensConfig()
 	m_pauseTint = true;
 	m_ntscV30Rolling = true;
 	
+	/** Savestates. **/
+	m_saveSlot = 0;
+	
 	// TODO: Emit signals for all the configuration options?
 	// Alternatively, add another function to do that, e.g. refresh().
 }
@@ -287,5 +290,23 @@ void GensConfig::setNtscV30Rolling(bool newNtscV30Rolling)
 	m_ntscV30Rolling = newNtscV30Rolling;
 	emit ntscV30Rolling_changed(m_ntscV30Rolling);
 }
+
+
+/** Savestates. **/
+
+
+void GensConfig::setSaveSlot(int newSaveSlot)
+{
+	if (m_saveSlot == newSaveSlot ||
+	    newSaveSlot < 0 ||
+	    newSaveSlot > 9)
+	{
+		return;
+	}
+	
+	m_saveSlot = newSaveSlot;
+	emit saveSlot_changed(m_saveSlot);
+}
+
 
 }
