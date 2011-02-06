@@ -31,6 +31,9 @@
 class QLabel;
 class QFocusEvent;
 
+namespace GensQt4
+{
+
 class GensLineEdit : public QLineEdit
 {
 	Q_OBJECT
@@ -65,5 +68,7 @@ class GensLineEdit : public QLineEdit
 		QLabel *m_label;
 		QIcon m_icon;
 };
+
+}
 
 #endif /* __GENS_QT4_GENSLINEEDITICON_HPP__ */

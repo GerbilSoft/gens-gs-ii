@@ -27,6 +27,9 @@
 #include <QtGui/QLabel>
 #include <QtGui/QStyle>
 
+namespace GensQt4
+{
+
 GensLineEdit::GensLineEdit(QWidget *parent)
 	: QLineEdit(parent)
 {
@@ -55,4 +58,6 @@ void GensLineEdit::setIcon(const QIcon& icon)
 {
 	m_icon = icon;
 	m_label->setPixmap(icon.pixmap(16, 16));
+}
+
 }
