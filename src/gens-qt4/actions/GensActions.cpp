@@ -1,11 +1,11 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * EventKeys.cpp: Event key handler.                                       *
- * Used for mapping keys to non-controller events, e.g. savestates.        *
+ * GensActions.cpp: Actions handler.                                       *
+ * Handles menu events and non-menu actions.                               *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -22,10 +22,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "EventKeys.hpp"
+#include "GensActions.hpp"
 
 // gqt4_main has gqt4_config.
-#include "gqt4_main.hpp"
+#include "../gqt4_main.hpp"
 
 // Menu actions.
 #include "GensMenuBar_menus.hpp"
@@ -33,28 +33,13 @@
 namespace GensQt4
 {
 
-// TODO: Customizable event keys.
-// NOTE: Menu items currently have their own events.
-// TODO: Remap them to EventKeys?
-
-EventKeys::EventKeys()
-{
-	// TODO
-}
-
-EventKeys::~EventKeys()
-{
-	// TODO
-}
-
-
 /**
  * checkEventKey(): Check for non-menu event keys.
  * @param key Gens Keycode.
  * @param mod Modifier keys. (TODO)
  * @return True if an event key was processed; false if not.
  */
-bool EventKeys::checkEventKey(GensKey_t key, int mod)
+bool GensActions::checkEventKey(GensKey_t key, int mod)
 {
 	// Apply the modifiers to the key value.
 	// Qt's modifiers conveniently map to GensKeyMod_t.
@@ -69,17 +54,17 @@ bool EventKeys::checkEventKey(GensKey_t key, int mod)
 	{
 		case IDM_NOMENU_HARDRESET:
 			// Hard Reset.
-			emit eventResetEmulator(true);
+			emit actionResetEmulator(true);
 			return true;
 		
 		case IDM_NOMENU_SOFTRESET:
 			// Soft Reset.
-			emit eventResetEmulator(false);
+			emit actionResetEmulator(false);
 			return true;
 		
 		case IDM_NOMENU_PAUSE:
 			// Toggle Paused.
-			emit eventTogglePaused();
+			emit actionTogglePaused();
 			return true;
 		
 		case IDM_NOMENU_FASTBLUR:

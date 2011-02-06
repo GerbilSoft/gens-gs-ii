@@ -68,8 +68,6 @@ SET(gens-qt4_SRCS
 	gqt4_main.cpp
 	GensWindow.cpp
 	AboutWindow.cpp
-	GensMenuBar.cpp
-	GensMenuBar_menus.cpp
 	EmuThread.cpp
 	GensQApplication.cpp
 	SigHandler.cpp
@@ -83,7 +81,6 @@ SET(gens-qt4_SRCS
 	VBackend/GLShaderManager.cpp
 	Audio/ARingBuffer.cpp
 	ZipSelectDialog.cpp
-	Input/EventKeys.cpp
 	EmuManager_qEmu.cpp
 	VBackend/GlTex2D.cpp
 	GeneralConfigWindow.cpp
@@ -93,14 +90,16 @@ SET(gens-qt4_SRCS
 	McdControlWindow.cpp
 	widgets/GensZipDirModel.cpp
 	widgets/GensZipDirItem.cpp
-	GensKeyConfig.cpp
+	actions/GensKeyConfig.cpp
+	actions/GensMenuBar.cpp
+	actions/GensMenuBar_menus.cpp
+	actions/GensActions.cpp
 	)
 
 # Headers with Qt4 objects.
 SET(gens-qt4_MOC_HEADERS
 	GensWindow.hpp
 	AboutWindow.hpp
-	GensMenuBar.hpp
 	EmuThread.hpp
 	GensQApplication.hpp
 	VBackend/GensQGLWidget.hpp
@@ -108,14 +107,15 @@ SET(gens-qt4_MOC_HEADERS
 	EmuManager.hpp
 	VBackend/MsgTimer.hpp
 	ZipSelectDialog.hpp
-	Input/EventKeys.hpp
 	GeneralConfigWindow.hpp
 	widgets/GensLineEdit.hpp
 	GensConfig.hpp
 	cdrom/FindCdromBase.hpp
 	McdControlWindow.hpp
 	widgets/GensZipDirModel.hpp
-	GensKeyConfig.hpp
+	actions/GensKeyConfig.hpp
+	actions/GensMenuBar.hpp
+	actions/GensActions.hpp
 	)
 
 IF(QT_QTDBUS_FOUND)

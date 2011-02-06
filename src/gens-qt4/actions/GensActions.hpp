@@ -1,11 +1,11 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * EventKeys.hpp: Event key handler.                                       *
- * Used for mapping keys to non-controller events, e.g. savestates.        *
+ * GensActions.hpp: Actions handler.                                       *
+ * Handles menu events and non-menu actions.                               *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -22,8 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_INPUT_EVENTKEYS_HPP__
-#define __GENS_QT4_INPUT_EVENTKEYS_HPP__
+#ifndef __GENS_QT4_INPUT_ACTIONS_GENSACTIONS_HPP__
+#define __GENS_QT4_INPUT_ACTIONS_GENSACTIONS_HPP__
 
 // Gens Keys.
 #include "libgens/GensInput/GensKey_t.h"
@@ -34,26 +34,23 @@
 namespace GensQt4
 {
 
-class EventKeys : public QObject
+class GensActions : public QObject
 {
 	Q_OBJECT
 	
 	public:
-		EventKeys();
-		~EventKeys();
-		
 		bool checkEventKey(GensKey_t key, int mod);
 	
 	signals:
-		void eventTogglePaused(void);
+		void actionTogglePaused(void);
 		
 		/**
-		 * eventResetEmulator(): Reset the emulator.
+		 * actionResetEmulator(): Reset the emulator.
 		 * @param hardReset If true, do a hard reset; otherwise, do a soft reset.
 		 */
-		void eventResetEmulator(bool hardReset);
+		void actionResetEmulator(bool hardReset);
 };
 
 }
 
-#endif /* __GENS_QT4_INPUT_EVENTKEYS_HPP__ */
+#endif /* __GENS_QT4_INPUT_ACTIONS_GENSACTIONS_HPP__ */

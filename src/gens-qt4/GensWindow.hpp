@@ -39,7 +39,7 @@ class QCloseEvent;
 #include "gqt4_main.hpp"
 #include "VBackend/VBackend.hpp"
 #include "EmuManager.hpp"
-#include "Input/EventKeys.hpp"
+#include "actions/GensActions.hpp"
 
 namespace GensQt4
 {
@@ -86,8 +86,8 @@ class GensWindow : public QMainWindow
 		// Emulation Manager.
 		EmuManager m_emuManager;
 		
-		// Event Keys.
-		EventKeys *m_evKeys;
+		// Actions manager.
+		GensActions *m_gensActions;
 		
 		// Set the Gens window title.
 		void setGensTitle(void);

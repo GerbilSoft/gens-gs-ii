@@ -27,7 +27,7 @@
 #include "gqt4_main.hpp"
 
 // Menu definitions.
-#include "GensMenuBar_menus.hpp"
+#include "actions/GensMenuBar_menus.hpp"
 
 // Qt windows.
 #include "AboutWindow.hpp"
@@ -50,7 +50,7 @@
 #include "VBackend/GensQGLWidget.hpp"
 
 // gens-qt4 classes.
-#include "GensMenuBar.hpp"
+#include "actions/GensMenuBar.hpp"
 
 
 namespace GensQt4
@@ -64,13 +64,13 @@ GensWindow::GensWindow()
 	m_scale = 1;		// Set the scale to 1x by default.
 	m_hasInitResize = false;
 	
-	// Initialize Event Keys.
+	// Initialize the Gens Action Manager.
 	// TODO: Load configuration from a file?
-	m_evKeys = new EventKeys();
+	m_gensActions = new GensActions();
 	
 	// Initialize KeyHandlerQt.
 	// TODO: Make KeyHandlerQt a standard object?
-	KeyHandlerQt::Init(m_evKeys);
+	KeyHandlerQt::Init(m_gensActions);
 	
 	// Set up the User Interface.
 	setupUi();
@@ -86,8 +86,8 @@ GensWindow::~GensWindow()
 	// TODO: Make KeyHandlerQt a standard object?
 	KeyHandlerQt::End();
 	
-	// Delete Event Keys.
-	delete m_evKeys;
+	// Delete the Gens Actions Manager.
+	delete m_gensActions;
 }
 
 
@@ -159,10 +159,10 @@ void GensWindow::setupUi(void)
 	connect(&m_emuManager, SIGNAL(osdShowPreview(int, const QImage&)),
 		this, SLOT(osdShowPreview(int, const QImage&)));
 	
-	// Event Keys signals.
-	connect(m_evKeys, SIGNAL(eventTogglePaused(void)),
+	// Gens Action Manager signals.
+	connect(m_gensActions, SIGNAL(actionTogglePaused(void)),
 		&m_emuManager, SLOT(pauseRequest(void)));
-	connect(m_evKeys, SIGNAL(eventResetEmulator(bool)),
+	connect(m_gensActions, SIGNAL(actionResetEmulator(bool)),
 		&m_emuManager, SLOT(resetEmulator(bool)));
 	
 	// Retranslate the UI.

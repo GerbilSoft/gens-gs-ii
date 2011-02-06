@@ -30,7 +30,7 @@
 #include <QtGui/QColor>
 
 // Key configuration.
-#include "GensKeyConfig.hpp"
+#include "actions/GensKeyConfig.hpp"
 
 namespace GensQt4
 {

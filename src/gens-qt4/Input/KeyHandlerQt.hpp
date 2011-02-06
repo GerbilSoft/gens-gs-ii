@@ -26,7 +26,8 @@
 
 #include "libgens/GensInput/DevManager.hpp"
 
-#include "EventKeys.hpp"
+// Gens Action Manager.
+#include "../actions/GensActions.hpp"
 
 // Qt forward declarations.
 class QKeyEvent;
@@ -38,7 +39,7 @@ namespace GensQt4
 class KeyHandlerQt
 {
 	public:
-		static void Init(EventKeys *evKeys);
+		static void Init(GensActions *gensActions);
 		static void End(void);
 		
 		static void KeyPressEvent(QKeyEvent *event);
@@ -60,8 +61,8 @@ class KeyHandlerQt
 		static int QKeyEventToKeyVal(QKeyEvent *event);
 		static int NativeModifierToKeyVal(QKeyEvent *event);
 		
-		// Event Keys handler.
-		static EventKeys *ms_EvKeys;
+		// Gens Actions Manager.
+		static GensActions *ms_GensActions;
 		
 		// Keypress array.
 		static bool ms_KeyPress[KEYV_LAST];

@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_GENSKEYCONFIG_HPP__
-#define __GENS_QT4_GENSKEYCONFIG_HPP__
+#ifndef __GENS_QT4_ACTIONS_GENSKEYCONFIG_HPP__
+#define __GENS_QT4_ACTIONS_GENSKEYCONFIG_HPP__
 
 // Qt includes.
 #include <QtCore/QObject>
@@ -69,4 +69,4 @@ class GensKeyConfig : public QObject
 
 }
 
-#endif /* __GENS_QT4_GENSKEYCONFIG_HPP__ */
+#endif /* __GENS_QT4_ACTIONS_GENSKEYCONFIG_HPP__ */

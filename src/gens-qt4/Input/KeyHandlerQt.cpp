@@ -55,22 +55,22 @@ namespace GensQt4
  */
 bool KeyHandlerQt::ms_KeyPress[KEYV_LAST];
 
-// Event Keys handler.
-EventKeys *KeyHandlerQt::ms_EvKeys = NULL;
+// Gens Actions Manager.
+GensActions *KeyHandlerQt::ms_GensActions = NULL;
 
 
 /**
  * Init(): Initialize KeyHandlerQt.
- * @param evKeys EventKeys object.
- * NOTE: This class does NOT delete the EventKeys object on shutdown!
+ * @param gensActions Gens Actions Manager.
+ * NOTE: This class does NOT delete the GensActions object on shutdown!
  */
-void KeyHandlerQt::Init(EventKeys *evKeys)
+void KeyHandlerQt::Init(GensActions *gensActions)
 {
 	// Clear the keypress array.
 	memset(ms_KeyPress, 0x00, sizeof(ms_KeyPress));
 	
-	// Save the Event Keys handler.
-	ms_EvKeys = evKeys;
+	// Save the Gens Actions Manager.
+	ms_GensActions = gensActions;
 	
 	// Register as LibGens device type GKT_KEYBOARD.
 	LibGens::DevManager::RegisterDeviceHandler(GKT_KEYBOARD, KeyHandlerQt::DevHandler);
@@ -84,8 +84,8 @@ void KeyHandlerQt::End(void)
 	// Clear the keypress array.
 	memset(ms_KeyPress, 0x00, sizeof(ms_KeyPress));
 	
-	// Clear the Event Keys handler.
-	ms_EvKeys = NULL;
+	// Clear the Gens Actions Manager.
+	ms_GensActions = NULL;
 	
 	// Unregister as LibGens device type 0.
 	// TODO: Symbolic constants for device types.
@@ -105,7 +105,7 @@ void KeyHandlerQt::KeyPressEvent(QKeyEvent *event)
 	
 	// If this is an event key, don't handle it as a controller key.
 	// TODO: Convert Qt modifier keys to Gens modifier keys.
-	if (ms_EvKeys->checkEventKey(gensKey, event->modifiers()))
+	if (ms_GensActions->checkEventKey(gensKey, event->modifiers()))
 		return;
 	
 	if (gensKey > KEYV_UNKNOWN && gensKey < KEYV_LAST)
