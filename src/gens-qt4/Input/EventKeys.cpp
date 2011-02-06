@@ -27,6 +27,9 @@
 // gqt4_main has gqt4_config.
 #include "gqt4_main.hpp"
 
+// Menu actions.
+#include "GensMenuBar_menus.hpp"
+
 namespace GensQt4
 {
 
@@ -46,85 +49,72 @@ EventKeys::~EventKeys()
 
 
 /**
- * checkEventKey(): Check for event keys.
+ * checkEventKey(): Check for non-menu event keys.
  * @param key Gens Keycode.
  * @param mod Modifier keys. (TODO)
  * @return True if an event key was processed; false if not.
  */
 bool EventKeys::checkEventKey(GensKey_t key, int mod)
 {
-	// TODO: Customizable event keys.
+	// Apply the modifiers to the key value.
+	// Qt's modifiers conveniently map to GensKeyMod_t.
+	key |= ((mod >> 16) & 0x1E00);
 	
-	switch (key)
+	// Look up the action from GensConfig.
+	int action = gqt4_config->keyToAction(key);
+	if (action == 0)
+		return false;
+	
+	switch (action)
 	{
-		case KEYV_ESCAPE:
-			if (mod == Qt::NoModifier)
-			{
-				// Toggle Paused.
-				emit eventTogglePaused();
-				return true;
-			}
-			break;
+		case IDM_NOMENU_HARDRESET:
+			// Hard Reset.
+			emit eventResetEmulator(true);
+			return true;
 		
-		case KEYV_F9:
-			if (mod == Qt::NoModifier)
-			{
-				// Toggle Fast Blur.
-				gqt4_config->setFastBlur(!gqt4_config->fastBlur());
-				return true;
-			}
-			break;
+		case IDM_NOMENU_SOFTRESET:
+			// Soft Reset.
+			emit eventResetEmulator(false);
+			return true;
 		
-		case KEYV_TAB:
-			if (mod == Qt::NoModifier)
-			{
-				// Soft Reset.
-				emit eventResetEmulator(false);
-				return true;
-			}
-			else if (mod == Qt::ShiftModifier)
-			{
-				// Hard Reset.
-				emit eventResetEmulator(true);
-				return true;
-			}
-			break;
+		case IDM_NOMENU_PAUSE:
+			// Toggle Paused.
+			emit eventTogglePaused();
+			return true;
 		
-		case KEYV_0:
-		case KEYV_1:
-		case KEYV_2:
-		case KEYV_3:
-		case KEYV_4:
-		case KEYV_5:
-		case KEYV_6:
-		case KEYV_7:
-		case KEYV_8:
-		case KEYV_9:
-			if (mod == Qt::NoModifier)
-			{
-				// Save Slot selection.
-				gqt4_config->setSaveSlot(key - KEYV_0);
-				return true;
-			}
-			break;
+		case IDM_NOMENU_FASTBLUR:
+			// Toggle Fast Blur.
+			gqt4_config->setFastBlur(!gqt4_config->fastBlur());
+			return true;
 		
-		case KEYV_F6:
-			if (mod == Qt::NoModifier)
-			{
-				// Previous Save Slot.
-				gqt4_config->setSaveSlot_Prev();
-				return true;
-			}
-			break;
+		case IDM_NOMENU_SAVESLOT_0:
+		case IDM_NOMENU_SAVESLOT_1:
+		case IDM_NOMENU_SAVESLOT_2:
+		case IDM_NOMENU_SAVESLOT_3:
+		case IDM_NOMENU_SAVESLOT_4:
+		case IDM_NOMENU_SAVESLOT_5:
+		case IDM_NOMENU_SAVESLOT_6:
+		case IDM_NOMENU_SAVESLOT_7:
+		case IDM_NOMENU_SAVESLOT_8:
+		case IDM_NOMENU_SAVESLOT_9:
+			// Save slot selection.
+			gqt4_config->setSaveSlot(action - IDM_NOMENU_SAVESLOT_0);
+			return true;
+		
+		case IDM_NOMENU_SAVESLOT_PREV:
+			// Previous Save Slot.
+			gqt4_config->setSaveSlot_Prev();
+			return true;
 			
-		case KEYV_F7:
-			if (mod == Qt::NoModifier)
-			{
-				// Next Save Slot.
-				gqt4_config->setSaveSlot_Next();
-				return true;
-			}
-			break;
+		case IDM_NOMENU_SAVESLOT_NEXT:
+			// Next Save Slot.
+			gqt4_config->setSaveSlot_Next();
+			return true;
+		
+		case IDM_NOMENU_SAVESLOT_LOADFROM:
+		case IDM_NOMENU_SAVESLOT_SAVEAS:
+			// TODO
+			return false;
 		
 		default:
 			break;

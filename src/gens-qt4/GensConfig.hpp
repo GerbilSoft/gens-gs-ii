@@ -24,9 +24,13 @@
 #ifndef __GENS_QT4_GENSCONFIG_HPP__
 #define __GENS_QT4_GENSCONFIG_HPP__
 
+// Qt includes.
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtGui/QColor>
+
+// Key configuration.
+#include "GensKeyConfig.hpp"
 
 namespace GensQt4
 {
@@ -152,6 +156,10 @@ class GensConfig : public QObject
 			{ setSaveSlot((m_saveSlot + 1) % 10); }
 		void setSaveSlot_Next(void)
 			{ setSaveSlot((m_saveSlot + 9) % 10); }
+		
+		/** Key configuration. **/
+		int keyToAction(GensKey_t key)
+			{ return m_keyConfig.keyToAction(key); }
 	
 	protected:
 		/** Onscreen display. **/
@@ -186,6 +194,9 @@ class GensConfig : public QObject
 		
 		/** Savestates. **/
 		int m_saveSlot;
+		
+		/** Key configuration. **/
+		GensKeyConfig m_keyConfig;
 	
 	signals:
 		/** Onscreen display. **/
