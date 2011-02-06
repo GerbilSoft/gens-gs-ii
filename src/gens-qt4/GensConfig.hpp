@@ -47,6 +47,10 @@ class GensConfig : public QObject
 	Q_PROPERTY(bool osdMsgEnabled READ osdMsgEnabled WRITE setOsdMsgEnabled NOTIFY osdMsgEnabled_changed)
 	Q_PROPERTY(QColor osdMsgColor READ osdMsgColor WRITE setOsdMsgColor NOTIFY osdMsgColor_changed)
 	
+	/** Intro effect. **/
+	Q_PROPERTY(int introStyle READ introStyle WRITE setIntroStyle NOTIFY introStyle_changed)
+	Q_PROPERTY(int introColor READ introColor WRITE setIntroColor NOTIFY introColor_changed)
+	
 	/** Sega CD Boot ROMs. **/
 	Q_PROPERTY(QString mcdRomUSA READ mcdRomUSA WRITE setMcdRomUSA NOTIFY mcdRomUSA_changed)
 	Q_PROPERTY(QString mcdRomEUR READ mcdRomEUR WRITE setMcdRomEUR NOTIFY mcdRomEUR_changed)
@@ -62,6 +66,7 @@ class GensConfig : public QObject
 	Q_PROPERTY(int brightness READ brightness WRITE setBrightness NOTIFY brightness_changed)
 	Q_PROPERTY(bool grayscale READ grayscale WRITE setGrayscale NOTIFY grayscale_changed)
 	Q_PROPERTY(bool inverted READ inverted WRITE setInverted NOTIFY inverted_changed)
+	Q_PROPERTY(int colorScaleMethod READ colorScaleMethod WRITE setColorScaleMethod NOTIFY colorScaleMethod_changed)
 	
 	/** General settings. **/
 	Q_PROPERTY(bool autoFixChecksum READ autoFixChecksum WRITE setAutoFixChecksum NOTIFY autoFixChecksum_changed)
@@ -93,6 +98,14 @@ class GensConfig : public QObject
 		QColor osdMsgColor(void) const
 			{ return m_osdMsgColor; }
 		void setOsdMsgColor(const QColor& color);
+		
+		/** Intro effect. **/
+		int introStyle(void) const
+			{ return m_introStyle; }
+		void setIntroStyle(int style);
+		int introColor(void) const
+			{ return m_introColor; }
+		void setIntroColor(int color);
 		
 		/** Sega CD Boot ROMs. **/
 		QString mcdRomUSA(void) const
@@ -129,7 +142,9 @@ class GensConfig : public QObject
 		bool inverted(void) const
 			{ return m_inverted; }
 		void setInverted(bool newInverted);
-		// TODO: Color Scale Method.
+		int colorScaleMethod(void) const
+			{ return m_colorScaleMethod; }
+		void setColorScaleMethod(int newColorScaleMethod);
 		
 		/** General settings. **/
 		bool autoFixChecksum(void) const
@@ -168,6 +183,10 @@ class GensConfig : public QObject
 		bool m_osdMsgEnabled;
 		QColor m_osdMsgColor;
 		
+		/** Intro effect. **/
+		int m_introStyle;
+		int m_introColor;
+		
 		/** Sega CD Boot ROMs. **/
 		QString m_mcdRomUSA;
 		QString m_mcdRomEUR;
@@ -183,7 +202,7 @@ class GensConfig : public QObject
 		int m_brightness;
 		bool m_grayscale;
 		bool m_inverted;
-		// TODO: Color Scale Method.
+		int m_colorScaleMethod;
 		
 		/** General settings. **/
 		bool m_autoFixChecksum;
@@ -205,6 +224,10 @@ class GensConfig : public QObject
 		void osdMsgEnabled_changed(bool enable);
 		void osdMsgColor_changed(const QColor& color);
 		
+		/** Intro effect. **/
+		void introStyle_changed(int style);
+		void introColor_changed(int color);
+		
 		/** Sega CD Boot ROMs. **/
 		void mcdRomUSA_changed(const QString& filename);
 		void mcdRomEUR_changed(const QString& filename);
@@ -220,7 +243,7 @@ class GensConfig : public QObject
 		void brightness_changed(int newBrightness);
 		void grayscale_changed(bool newGrayscale);
 		void inverted_changed(bool newInverted);
-		// TODO: Color Scale Method.
+		void colorScaleMethod_changed(int newColorScaleMethod);
 		
 		/** General settings. **/
 		void autoFixChecksum_changed(bool newAutoFixChecksum);

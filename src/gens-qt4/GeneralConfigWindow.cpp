@@ -189,8 +189,9 @@ void GeneralConfigWindow::reload(void)
 	colorText = (grayI >= 128 ? QColor(0,0,0) : QColor(255,255,255));
 	btnOsdMsgColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdMsgColor.name()).arg(colorText.name()));
 	
-	// TODO: Get intro effect config from GensConfig.
-	cboIntroColor->setCurrentIndex(7);
+	/** Intro effect. **/
+	cboIntroStyle->setCurrentIndex(gqt4_config->introStyle());
+	cboIntroColor->setCurrentIndex(gqt4_config->introColor());
 	
 	/** Sega CD Boot ROMs. **/
 	txtMcdRomUSA->setText(gqt4_config->mcdRomUSA());
@@ -207,7 +208,7 @@ void GeneralConfigWindow::reload(void)
 	hsldBrightness->setValue(gqt4_config->brightness());
 	chkGrayscale->setChecked(gqt4_config->grayscale());
 	chkInverted->setChecked(gqt4_config->inverted());
-	// TODO: Color Scale Method.
+	cboColorScaleMethod->setCurrentIndex(gqt4_config->colorScaleMethod());
 	
 	/** General settings. **/
 	chkAutoFixChecksum->setChecked(gqt4_config->autoFixChecksum());
@@ -232,8 +233,9 @@ void GeneralConfigWindow::apply(void)
 	gqt4_config->setOsdMsgEnabled(chkOsdMsgEnable->isChecked());
 	gqt4_config->setOsdMsgColor(m_osdMsgColor);
 	
-	// TODO: Save intro effect config to GensConfig.
-	//gqt4_config->setIntroColor(cboIntroColor->currentIndex());
+	/** Intro effect. **/
+	gqt4_config->setIntroStyle(cboIntroStyle->currentIndex());
+	gqt4_config->setIntroColor(cboIntroColor->currentIndex());
 	
 	/** Sega CD Boot ROMs. **/
 	gqt4_config->setMcdRomUSA(txtMcdRomUSA->text());
@@ -250,7 +252,7 @@ void GeneralConfigWindow::apply(void)
 	gqt4_config->setBrightness(hsldBrightness->value());
 	gqt4_config->setGrayscale(chkGrayscale->isChecked());
 	gqt4_config->setInverted(chkInverted->isChecked());
-	// TODO: Color Scale Method.
+	gqt4_config->setColorScaleMethod(cboColorScaleMethod->currentIndex());
 	
 	/** General settings. **/
 	gqt4_config->setAutoFixChecksum(chkAutoFixChecksum->isChecked());

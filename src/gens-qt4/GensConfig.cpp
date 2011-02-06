@@ -26,6 +26,9 @@
 // TODO: Move this to GensConfigHandler.cpp?
 #include "libgens/Decompressor/DcRar.hpp"
 
+// Color Scale Method.
+#include "libgens/MD/VdpPalette.hpp"
+
 namespace GensQt4
 {
 
@@ -38,6 +41,11 @@ GensConfig::GensConfig()
 	m_osdFpsColor = QColor(Qt::white);
 	m_osdMsgEnabled = true;
 	m_osdMsgColor = QColor(Qt::white);
+	
+	/** Intro effect. **/
+	// TODO: Enums.
+	m_introStyle = 0;		// none
+	m_introColor = 7;		// white
 	
 	/** External programs. **/
 	// TODO: Don't use setExtPrgUnRAR.
@@ -60,7 +68,7 @@ GensConfig::GensConfig()
 	m_brightness = 0;
 	m_grayscale = false;
 	m_inverted = false;
-	// TODO: Color Scale Method.
+	m_colorScaleMethod = (int)LibGens::VdpPalette::COLSCALE_FULL;	// using int to prevent Qt issues
 	
 	/** General settings. **/
 	m_autoFixChecksum = true;
@@ -129,6 +137,31 @@ void GensConfig::setOsdMsgColor(const QColor& color)
 	
 	m_osdMsgColor = color;
 	emit osdMsgColor_changed(m_osdMsgColor);
+}
+
+
+/** Intro effect. **/
+
+
+void GensConfig::setIntroStyle(int style)
+{
+	// TODO: Enums.
+	if (style < 0 || style > 2)
+		return;
+	
+	m_introStyle = style;
+	emit introStyle_changed(style);
+}
+
+
+void GensConfig::setIntroColor(int color)
+{
+	// TODO: Enums.
+	if (color < 0 || color > 7)
+		return;
+	
+	m_introColor = color;
+	emit introColor_changed(color);
 }
 
 
@@ -240,7 +273,20 @@ void GensConfig::setInverted(bool newInverted)
 	emit inverted_changed(m_inverted);
 }
 
-// TODO: Color Scale Method.
+void GensConfig::setColorScaleMethod(int newColorScaleMethod)
+{
+	if (m_colorScaleMethod == newColorScaleMethod)
+		return;
+	if (newColorScaleMethod < (int)LibGens::VdpPalette::COLSCALE_RAW ||
+	    newColorScaleMethod > (int)LibGens::VdpPalette::COLSCALE_FULL_HS)
+	{
+		// Invalid color scale method.
+		return;
+	}
+	
+	m_colorScaleMethod = newColorScaleMethod;
+	emit colorScaleMethod_changed(m_colorScaleMethod);
+}
 
 
 /** General settings. **/
