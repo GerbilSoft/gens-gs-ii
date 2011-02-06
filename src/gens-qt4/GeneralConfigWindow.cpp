@@ -75,31 +75,17 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	if (btnApply)
 		connect(btnApply, SIGNAL(clicked()), this, SLOT(apply()));
 	
-	/** Intro Effect **/
+	/** Intro effect. **/
 	
-	// Intro Effect Color: Create the icons.
-	static const QRgb intro_colors[8] =
-		{0xFF000000, 0xFF0000FF, 0xFF00FF00, 0xFF00FFFF,
-		 0xFFFF0000, 0xFFFF00FF, 0xFFFFFF00, 0xFFFFFFFF};
-	QSize iconSize = cboIntroColor->iconSize();
-	for (int i = 0; i < 8; i++)
-	{
-		// TODO: Determine an appropriate icon size.
-		QPixmap pxm(24, 16);
-		pxm.fill(QColor(intro_colors[i]));
-		
-		// Draw a black rectangle outline.
-		// TODO: Use a darkened version of the color like Mac OS X's NSColorWell?
-		QPainter painter(&pxm);
-		painter.setPen(QColor(0, 0, 0));
-		painter.drawRect(0, 0, iconSize.width()-1, iconSize.height()-1);
-		
-		// Convert to a QIcon and add it to cboIntroColor.
-		QIcon icon(pxm);
-		cboIntroColor->setItemIcon(i, icon);
-	}
-	
-	// TODO
+	// Intro Effect Color: Add the color entries.
+	cboIntroColor->addItem(Qt::black);
+	cboIntroColor->addItem(Qt::red);
+	cboIntroColor->addItem(Qt::green);
+	cboIntroColor->addItem(Qt::cyan);
+	cboIntroColor->addItem(Qt::blue);
+	cboIntroColor->addItem(Qt::magenta);
+	cboIntroColor->addItem(Qt::yellow);
+	cboIntroColor->addItem(Qt::white);
 	
 	/** Sega CD **/
 	
