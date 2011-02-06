@@ -58,11 +58,20 @@ const QString GeneralConfigWindow::ms_sCssBtnColors =
 const QString GeneralConfigWindow::ms_sWarning =
 	QString::fromLatin1("<span style='color: red'><b>") + tr("Warning:") + QString::fromLatin1("</b></span> ");
 
+// Qt window flags.
+const Qt::WindowFlags GeneralConfigWindow::ms_WindowFlags =
+			(Qt::CustomizeWindowHint |
+				Qt::Dialog |
+				Qt::WindowTitleHint |
+				Qt::WindowSystemMenuHint |
+				Qt::WindowMinimizeButtonHint |
+				Qt::WindowCloseButtonHint);
+
 /**
  * GeneralConfigWindow(): Initialize the General Configuration window.
  */
 GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
-	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
+	: QDialog(parent, ms_WindowFlags)
 {
 	// Initialize the Qt4 UI.
 	setupUi(this);
@@ -74,6 +83,10 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	QPushButton *btnApply = buttonBox->button(QDialogButtonBox::Apply);
 	if (btnApply)
 		connect(btnApply, SIGNAL(clicked()), this, SLOT(apply()));
+	
+#ifdef Q_WS_MAC
+	vboxWidgets->setContentsMargins(16, 16, 16, 16);
+#endif
 	
 	/** Intro effect. **/
 	

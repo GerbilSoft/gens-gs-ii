@@ -60,6 +60,9 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 		// Warning string.
 		static const QString ms_sWarning;
 		
+		// Qt window flags.
+		static const Qt::WindowFlags ms_WindowFlags;
+		
 		void setApplyButtonEnabled(bool enabled)
 		{
 			QPushButton *btnApply = buttonBox->button(QDialogButtonBox::Apply);

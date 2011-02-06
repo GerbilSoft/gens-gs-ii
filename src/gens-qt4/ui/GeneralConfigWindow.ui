@@ -7,726 +7,748 @@
     <x>0</x>
     <y>0</y>
     <width>494</width>
-    <height>416</height>
+    <height>417</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
     <width>494</width>
-    <height>416</height>
+    <height>417</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>494</width>
+    <height>417</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>General Configuration</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="vboxDialog">
+   <property name="margin">
+    <number>0</number>
+   </property>
    <item>
-    <widget class="QTabWidget" name="tabWidget">
-     <property name="currentIndex">
-      <number>0</number>
+    <layout class="QVBoxLayout" name="vboxWidgets">
+     <property name="margin">
+      <number>8</number>
      </property>
-     <widget class="QWidget" name="tabGeneral">
-      <attribute name="title">
-       <string>&amp;General</string>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="1">
-        <widget class="QGroupBox" name="grpEmulationOptions">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="title">
-          <string>&amp;Emulation Options</string>
-         </property>
-         <layout class="QVBoxLayout" name="gridEmulationOptions">
-          <item>
-           <widget class="QCheckBox" name="chkAutoFixChecksum">
-            <property name="toolTip">
-             <string>Automatically fix the ROM checksum.
-
-This fixes red screens on some
-games, but may break games
-that use non-standard checksums.</string>
-            </property>
-            <property name="text">
-             <string>Auto &amp;Fix Checksum</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="chkAutoPause">
-            <property name="toolTip">
-             <string>Automatically pause the emulator when
-the window loses focus.</string>
-            </property>
-            <property name="text">
-             <string>Auto &amp;Pause</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="chkBorderColor">
-            <property name="toolTip">
-             <string>Use the background color in the border area
-instead of drawing a black border.</string>
-            </property>
-            <property name="text">
-             <string>&amp;Border Color Emulation</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="chkPauseTint">
-            <property name="toolTip">
-             <string>Tints the emulator window purple when
-emulation is paused.</string>
-            </property>
-            <property name="text">
-             <string>Pause &amp;Tint</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="chkNtscV30Rolling">
-            <property name="toolTip">
-             <string>Simulates the &quot;rolling&quot; effect observed on the
-Mega Drive hardware if 320x240 mode is set
-on NTSC models.</string>
-            </property>
-            <property name="text">
-             <string>&amp;NTSC V30 Rolling</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="vspcEmulationOptions">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QGroupBox" name="grpIntroEffect">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="title">
-          <string>&amp;Intro Effect</string>
-         </property>
-         <layout class="QGridLayout" name="gridIntroEffect">
-          <item row="0" column="0">
-           <widget class="QLabel" name="lblintroStyle">
-            <property name="text">
-             <string>&amp;Style:</string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::PlainText</enum>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-            <property name="buddy">
-             <cstring>cboIntroStyle</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QComboBox" name="cboIntroStyle">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <item>
-             <property name="text">
-              <string>None</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Gens Logo</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>&quot;Crazy&quot; Effect</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="lblIntroColor">
-            <property name="text">
-             <string>&amp;Color:</string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::PlainText</enum>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-            <property name="buddy">
-             <cstring>cboIntroColor</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="GensQt4::GensColorComboBox" name="cboIntroColor">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>24</width>
-              <height>16</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <layout class="QVBoxLayout" name="vboxOsd">
-         <item>
-          <widget class="QGroupBox" name="grpOsd">
+     <item>
+      <widget class="QTabWidget" name="tabWidget">
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="tabGeneral">
+        <attribute name="title">
+         <string>&amp;General</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="1">
+          <widget class="QGroupBox" name="grpEmulationOptions">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="title">
-            <string>Onscreen &amp;Display</string>
+            <string>&amp;Emulation Options</string>
            </property>
-           <layout class="QVBoxLayout" name="gridOsd">
+           <layout class="QVBoxLayout" name="gridEmulationOptions">
             <item>
-             <widget class="QGroupBox" name="grpOsdFps">
-              <property name="title">
-               <string>&amp;FPS counter</string>
+             <widget class="QCheckBox" name="chkAutoFixChecksum">
+              <property name="toolTip">
+               <string>Automatically fix the ROM checksum.
+
+This fixes red screens on some
+games, but may break games
+that use non-standard checksums.</string>
               </property>
-              <layout class="QVBoxLayout" name="verticalLayout_5">
-               <item>
-                <widget class="QCheckBox" name="chkOsdFpsEnable">
-                 <property name="text">
-                  <string>Enable</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="btnOsdFpsColor">
-                 <property name="text">
-                  <string>Color...</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
+              <property name="text">
+               <string>Auto &amp;Fix Checksum</string>
+              </property>
              </widget>
             </item>
             <item>
-             <widget class="QGroupBox" name="grpOsdMsg">
-              <property name="title">
-               <string>&amp;Messages</string>
+             <widget class="QCheckBox" name="chkAutoPause">
+              <property name="toolTip">
+               <string>Automatically pause the emulator when
+the window loses focus.</string>
               </property>
-              <layout class="QVBoxLayout" name="verticalLayout_6">
-               <item>
-                <widget class="QCheckBox" name="chkOsdMsgEnable">
-                 <property name="text">
-                  <string>Enable</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="btnOsdMsgColor">
-                 <property name="text">
-                  <string>Color...</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
+              <property name="text">
+               <string>Auto &amp;Pause</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="chkBorderColor">
+              <property name="toolTip">
+               <string>Use the background color in the border area
+instead of drawing a black border.</string>
+              </property>
+              <property name="text">
+               <string>&amp;Border Color Emulation</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="chkPauseTint">
+              <property name="toolTip">
+               <string>Tints the emulator window purple when
+emulation is paused.</string>
+              </property>
+              <property name="text">
+               <string>Pause &amp;Tint</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="chkNtscV30Rolling">
+              <property name="toolTip">
+               <string>Simulates the &quot;rolling&quot; effect observed on the
+Mega Drive hardware if 320x240 mode is set
+on NTSC models.</string>
+              </property>
+              <property name="text">
+               <string>&amp;NTSC V30 Rolling</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="vspcEmulationOptions">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QGroupBox" name="grpIntroEffect">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="title">
+            <string>&amp;Intro Effect</string>
+           </property>
+           <layout class="QGridLayout" name="gridIntroEffect">
+            <item row="0" column="0">
+             <widget class="QLabel" name="lblintroStyle">
+              <property name="text">
+               <string>&amp;Style:</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="buddy">
+               <cstring>cboIntroStyle</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QComboBox" name="cboIntroStyle">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <item>
+               <property name="text">
+                <string>None</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Gens Logo</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>&quot;Crazy&quot; Effect</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="lblIntroColor">
+              <property name="text">
+               <string>&amp;Color:</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="buddy">
+               <cstring>cboIntroColor</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="GensQt4::GensColorComboBox" name="cboIntroColor">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>24</width>
+                <height>16</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <layout class="QVBoxLayout" name="vboxOsd">
+           <item>
+            <widget class="QGroupBox" name="grpOsd">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="title">
+              <string>Onscreen &amp;Display</string>
+             </property>
+             <layout class="QVBoxLayout" name="gridOsd">
+              <item>
+               <widget class="QGroupBox" name="grpOsdFps">
+                <property name="title">
+                 <string>&amp;FPS counter</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_5">
+                 <item>
+                  <widget class="QCheckBox" name="chkOsdFpsEnable">
+                   <property name="text">
+                    <string>Enable</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="btnOsdFpsColor">
+                   <property name="text">
+                    <string>Color...</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="grpOsdMsg">
+                <property name="title">
+                 <string>&amp;Messages</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_6">
+                 <item>
+                  <widget class="QCheckBox" name="chkOsdMsgEnable">
+                   <property name="text">
+                    <string>Enable</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="btnOsdMsgColor">
+                   <property name="text">
+                    <string>Color...</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <spacer name="vspcOsd">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>0</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tabGraphics">
+        <attribute name="title">
+         <string>G&amp;raphics</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <widget class="QGroupBox" name="grpGraphics">
+           <property name="title">
+            <string>Rendering Options</string>
+           </property>
+           <layout class="QVBoxLayout" name="vboxGraphics">
+            <item>
+             <widget class="QCheckBox" name="chkAspectRatioConstraint">
+              <property name="text">
+               <string>Constrain &amp;aspect ratio to 4:3</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="chkFastBlur">
+              <property name="text">
+               <string>Fast &amp;Blur</string>
+              </property>
              </widget>
             </item>
            </layout>
           </widget>
          </item>
          <item>
-          <spacer name="vspcOsd">
+          <widget class="QGroupBox" name="grpColorAdjustment">
+           <property name="title">
+            <string>Color Adjustment</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="0">
+             <widget class="QLabel" name="lblContrastTitle">
+              <property name="text">
+               <string>Co&amp;ntrast:</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="buddy">
+               <cstring>hsldContrast</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSlider" name="hsldContrast">
+              <property name="minimum">
+               <number>-100</number>
+              </property>
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="tracking">
+               <bool>false</bool>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="lblContrastValue">
+              <property name="minimumSize">
+               <size>
+                <width>36</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="lblBrightnessTitle">
+              <property name="text">
+               <string>&amp;Brightness:</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="buddy">
+               <cstring>hsldBrightness</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QSlider" name="hsldBrightness">
+              <property name="minimum">
+               <number>-100</number>
+              </property>
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="tracking">
+               <bool>false</bool>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QLabel" name="lblBrightnessValue">
+              <property name="minimumSize">
+               <size>
+                <width>36</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QCheckBox" name="chkGrayscale">
+              <property name="text">
+               <string>Gra&amp;yscale</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QCheckBox" name="chkInverted">
+              <property name="text">
+               <string>&amp;Inverted</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="lblColorScaleMethod">
+              <property name="text">
+               <string>Color &amp;Scale Method:</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="buddy">
+               <cstring>cboColorScaleMethod</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <layout class="QHBoxLayout" name="hboxColorScaleMethod">
+              <property name="sizeConstraint">
+               <enum>QLayout::SetDefaultConstraint</enum>
+              </property>
+              <item>
+               <widget class="QComboBox" name="cboColorScaleMethod">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="currentIndex">
+                 <number>2</number>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Raw</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Full</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Full with S/H</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>0</height>
+             <height>40</height>
             </size>
            </property>
           </spacer>
          </item>
         </layout>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tabGraphics">
-      <attribute name="title">
-       <string>G&amp;raphics</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <item>
-        <widget class="QGroupBox" name="grpGraphics">
-         <property name="title">
-          <string>Rendering Options</string>
-         </property>
-         <layout class="QVBoxLayout" name="vboxGraphics">
-          <item>
-           <widget class="QCheckBox" name="chkAspectRatioConstraint">
-            <property name="text">
-             <string>Constrain &amp;aspect ratio to 4:3</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="chkFastBlur">
-            <property name="text">
-             <string>Fast &amp;Blur</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="grpColorAdjustment">
-         <property name="title">
-          <string>Color Adjustment</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="0">
-           <widget class="QLabel" name="lblContrastTitle">
-            <property name="text">
-             <string>Co&amp;ntrast:</string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::PlainText</enum>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-            <property name="buddy">
-             <cstring>hsldContrast</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QSlider" name="hsldContrast">
-            <property name="minimum">
-             <number>-100</number>
-            </property>
-            <property name="maximum">
-             <number>100</number>
-            </property>
-            <property name="tracking">
-             <bool>false</bool>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="lblContrastValue">
-            <property name="minimumSize">
-             <size>
-              <width>36</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>0</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="lblBrightnessTitle">
-            <property name="text">
-             <string>&amp;Brightness:</string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::PlainText</enum>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-            <property name="buddy">
-             <cstring>hsldBrightness</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QSlider" name="hsldBrightness">
-            <property name="minimum">
-             <number>-100</number>
-            </property>
-            <property name="maximum">
-             <number>100</number>
-            </property>
-            <property name="tracking">
-             <bool>false</bool>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="lblBrightnessValue">
-            <property name="minimumSize">
-             <size>
-              <width>36</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>0</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="chkGrayscale">
-            <property name="text">
-             <string>Gra&amp;yscale</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QCheckBox" name="chkInverted">
-            <property name="text">
-             <string>&amp;Inverted</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLabel" name="lblColorScaleMethod">
-            <property name="text">
-             <string>Color &amp;Scale Method:</string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::PlainText</enum>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-            <property name="buddy">
-             <cstring>cboColorScaleMethod</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <layout class="QHBoxLayout" name="hboxColorScaleMethod">
-            <property name="sizeConstraint">
-             <enum>QLayout::SetDefaultConstraint</enum>
-            </property>
-            <item>
-             <widget class="QComboBox" name="cboColorScaleMethod">
+       </widget>
+       <widget class="QWidget" name="tabSegaCD">
+        <attribute name="title">
+         <string>Sega &amp;CD</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QGroupBox" name="grpMcdRoms">
+           <property name="title">
+            <string>Boot &amp;ROMs</string>
+           </property>
+           <property name="flat">
+            <bool>false</bool>
+           </property>
+           <layout class="QGridLayout" name="gridMcdRoms">
+            <item row="0" column="0">
+             <widget class="QLabel" name="lblMcdRomUSA">
+              <property name="text">
+               <string>&amp;USA:</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="buddy">
+               <cstring>txtMcdRomUSA</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QPushButton" name="btnMcdRomUSA">
+              <property name="text">
+               <string>Browse...</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="lblMcdRomEUR">
+              <property name="text">
+               <string>&amp;Europe:</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="buddy">
+               <cstring>txtMcdRomEUR</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QPushButton" name="btnMcdRomEUR">
+              <property name="text">
+               <string>Browse...</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="lblMcdRomJPN">
+              <property name="text">
+               <string>&amp;Japan:</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="buddy">
+               <cstring>txtMcdRomJPN</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QPushButton" name="btnMcdRomJPN">
+              <property name="text">
+               <string>Browse...</string>
+              </property>
+              <property name="flat">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0" colspan="3">
+             <spacer name="verticalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>8</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="4" column="0" colspan="3">
+             <widget class="QLabel" name="lblMcdSelectedRom">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="currentIndex">
-               <number>2</number>
+              <property name="text">
+               <string>Selected ROM: (none)</string>
               </property>
-              <item>
-               <property name="text">
-                <string>Raw</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Full</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Full with S/H</string>
-               </property>
-              </item>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+              </property>
              </widget>
             </item>
+            <item row="0" column="1">
+             <widget class="GensQt4::GensLineEdit" name="txtMcdRomUSA"/>
+            </item>
+            <item row="1" column="1">
+             <widget class="GensQt4::GensLineEdit" name="txtMcdRomEUR"/>
+            </item>
+            <item row="2" column="1">
+             <widget class="GensQt4::GensLineEdit" name="txtMcdRomJPN"/>
+            </item>
            </layout>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tabSegaCD">
-      <attribute name="title">
-       <string>Sega &amp;CD</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QGroupBox" name="grpMcdRoms">
-         <property name="title">
-          <string>Boot &amp;ROMs</string>
-         </property>
-         <property name="flat">
-          <bool>false</bool>
-         </property>
-         <layout class="QGridLayout" name="gridMcdRoms">
-          <item row="0" column="0">
-           <widget class="QLabel" name="lblMcdRomUSA">
-            <property name="text">
-             <string>&amp;USA:</string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::PlainText</enum>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-            <property name="buddy">
-             <cstring>txtMcdRomUSA</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QPushButton" name="btnMcdRomUSA">
-            <property name="text">
-             <string>Browse...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="lblMcdRomEUR">
-            <property name="text">
-             <string>&amp;Europe:</string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::PlainText</enum>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-            <property name="buddy">
-             <cstring>txtMcdRomEUR</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QPushButton" name="btnMcdRomEUR">
-            <property name="text">
-             <string>Browse...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="lblMcdRomJPN">
-            <property name="text">
-             <string>&amp;Japan:</string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::PlainText</enum>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-            <property name="buddy">
-             <cstring>txtMcdRomJPN</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QPushButton" name="btnMcdRomJPN">
-            <property name="text">
-             <string>Browse...</string>
-            </property>
-            <property name="flat">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0" colspan="3">
-           <spacer name="verticalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Fixed</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>8</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="4" column="0" colspan="3">
-           <widget class="QLabel" name="lblMcdSelectedRom">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Selected ROM: (none)</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-            <property name="textInteractionFlags">
-             <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="GensQt4::GensLineEdit" name="txtMcdRomUSA"/>
-          </item>
-          <item row="1" column="1">
-           <widget class="GensQt4::GensLineEdit" name="txtMcdRomEUR"/>
-          </item>
-          <item row="2" column="1">
-           <widget class="GensQt4::GensLineEdit" name="txtMcdRomJPN"/>
-          </item>
-         </layout>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tabExtPrg">
-      <attribute name="title">
-       <string>E&amp;xternal Programs</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item>
-        <widget class="QGroupBox" name="grpExtPrg">
-         <property name="title">
-          <string>Data &amp;Compression</string>
-         </property>
-         <property name="flat">
-          <bool>false</bool>
-         </property>
-         <layout class="QGridLayout" name="gridExtPrg">
-          <item row="0" column="0">
-           <widget class="QLabel" name="lblExtPrgUnRAR">
-            <property name="text">
-             <string>Un&amp;RAR:</string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::PlainText</enum>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QPushButton" name="btnExtPrgUnRAR">
-            <property name="text">
-             <string>Browse...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0" colspan="3">
-           <spacer name="verticalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Fixed</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>8</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="3" column="0" colspan="3">
-           <widget class="QLabel" name="lblExtPrgSel">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Selected Program: (none)</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-            <property name="textInteractionFlags">
-             <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="GensQt4::GensLineEdit" name="txtExtPrgUnRAR"/>
-          </item>
-         </layout>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </widget>
-   </item>
-   <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Apply|QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tabExtPrg">
+        <attribute name="title">
+         <string>E&amp;xternal Programs</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="QGroupBox" name="grpExtPrg">
+           <property name="title">
+            <string>Data &amp;Compression</string>
+           </property>
+           <property name="flat">
+            <bool>false</bool>
+           </property>
+           <layout class="QGridLayout" name="gridExtPrg">
+            <item row="0" column="0">
+             <widget class="QLabel" name="lblExtPrgUnRAR">
+              <property name="text">
+               <string>Un&amp;RAR:</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QPushButton" name="btnExtPrgUnRAR">
+              <property name="text">
+               <string>Browse...</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" colspan="3">
+             <spacer name="verticalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>8</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="3" column="0" colspan="3">
+             <widget class="QLabel" name="lblExtPrgSel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Selected Program: (none)</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="GensQt4::GensLineEdit" name="txtExtPrgUnRAR"/>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDialogButtonBox" name="buttonBox">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Apply|QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
