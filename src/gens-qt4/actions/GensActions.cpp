@@ -35,16 +35,11 @@ namespace GensQt4
 
 /**
  * checkEventKey(): Check for non-menu event keys.
- * @param key Gens Keycode.
- * @param mod Modifier keys. (TODO)
+ * @param key Gens Keycode. (WITH MODIFIERS)
  * @return True if an event key was processed; false if not.
  */
-bool GensActions::checkEventKey(GensKey_t key, int mod)
+bool GensActions::checkEventKey(GensKey_t key)
 {
-	// Apply the modifiers to the key value.
-	// Qt's modifiers conveniently map to GensKeyMod_t.
-	key |= ((mod >> 16) & 0x1E00);
-	
 	// Look up the action from GensConfig.
 	int action = gqt4_config->keyToAction(key);
 	if (action == 0)

@@ -58,8 +58,8 @@ class KeyHandlerQt
 		
 	protected:
 		// QKeyEvent to LibGens Key Value.
-		static int QKeyEventToKeyVal(QKeyEvent *event);
-		static int NativeModifierToKeyVal(QKeyEvent *event);
+		static GensKey_t QKeyEventToKeyVal(QKeyEvent *event);
+		static GensKey_t NativeModifierToKeyVal(QKeyEvent *event);
 		
 		// Gens Actions Manager.
 		static GensActions *ms_GensActions;

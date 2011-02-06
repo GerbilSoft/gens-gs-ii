@@ -39,7 +39,12 @@ class GensActions : public QObject
 	Q_OBJECT
 	
 	public:
-		bool checkEventKey(GensKey_t key, int mod);
+		/**
+		 * checkEventKey(): Check for non-menu event keys.
+		 * @param key Gens Keycode. (WITH MODIFIERS)
+		 * @return True if an event key was processed; false if not.
+		 */
+		bool checkEventKey(GensKey_t key);
 	
 	signals:
 		void actionTogglePaused(void);

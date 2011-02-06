@@ -101,13 +101,20 @@ void KeyHandlerQt::KeyPressEvent(QKeyEvent *event)
 {
 	// TODO: Move effects keypresses from GensQGLWidget to KeyHandlerQt.
 	// TODO: Multiple keyboard support?
-	int gensKey = QKeyEventToKeyVal(event);
+	GensKey_t gensKey = QKeyEventToKeyVal(event);
 	
 	// If this is an event key, don't handle it as a controller key.
-	// TODO: Convert Qt modifier keys to Gens modifier keys.
-	if (ms_GensActions->checkEventKey(gensKey, event->modifiers()))
+	// We need to apply the modifiers for this to work.
+	// Qt's modifiers conveniently map to GensKeyMod_t.
+	// TODO: Use GensKeyM_t to indicate modifiers?
+	GensKey_t gensKeyMod = (gensKey | ((event->modifiers() >> 16) & 0x1E00));
+	if (ms_GensActions->checkEventKey(gensKeyMod))
+	{
+		// Key was handled as an event key.
 		return;
+	}
 	
+	// Not an event key. Mark it as pressed.
 	if (gensKey > KEYV_UNKNOWN && gensKey < KEYV_LAST)
 	{
 		// Mark the key as pressed.
@@ -262,7 +269,7 @@ bool KeyHandlerQt::DevHandler(GensKey_t key)
  * @param event QKeyEvent.
  * @return LibGens key value. (0 for unknown; -1 for unhandled left/right modifier key.)
  */
-int KeyHandlerQt::QKeyEventToKeyVal(QKeyEvent *event)
+GensKey_t KeyHandlerQt::QKeyEventToKeyVal(QKeyEvent *event)
 {
 	using namespace LibGens;
 	
@@ -377,7 +384,7 @@ int KeyHandlerQt::QKeyEventToKeyVal(QKeyEvent *event)
  * @param event QKeyEvent.
  * @return LibGens key value. (0 for unknown)
  */
-int KeyHandlerQt::NativeModifierToKeyVal(QKeyEvent *event)
+GensKey_t KeyHandlerQt::NativeModifierToKeyVal(QKeyEvent *event)
 {
 	using namespace LibGens;
 	
