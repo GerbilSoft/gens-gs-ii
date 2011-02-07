@@ -40,6 +40,11 @@ ZipSelectDialog::ZipSelectDialog(QWidget *parent)
 {
 	setupUi(this);
 	
+#ifdef Q_WS_MAC
+	// Remove the window icon. (Mac "proxy icon")
+	this->setWindowIcon(QIcon());
+#endif
+	
 	// Disable the "OK" button initially.
 	QPushButton *button = buttonBox->button(QDialogButtonBox::Ok);
 	if (button)

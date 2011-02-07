@@ -77,6 +77,11 @@ AboutWindow::AboutWindow(QWidget *parent)
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
 	
+#ifdef Q_WS_MAC
+	// Remove the window icon. (Mac "proxy icon")
+	this->setWindowIcon(QIcon());
+#endif
+	
 	// Scroll areas aren't initialized.
 	m_scrlAreaInit = false;
 	

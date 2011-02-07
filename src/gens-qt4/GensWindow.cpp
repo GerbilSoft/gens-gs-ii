@@ -100,6 +100,11 @@ void GensWindow::setupUi(void)
 	if (this->objectName().isEmpty())
 		this->setObjectName(QString::fromUtf8("GensWindow"));
 	
+#ifdef Q_WS_MAC
+	// Remove the window icon. (Mac "proxy icon")
+	this->setWindowIcon(QIcon());
+#endif
+	
 	// Create the central widget.
 	centralwidget = new QWidget(this);
 	centralwidget->setObjectName(QString::fromLatin1("centralwidget"));

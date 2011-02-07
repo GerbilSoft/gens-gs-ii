@@ -76,6 +76,11 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
 	
+#ifdef Q_WS_MAC
+	// Remove the window icon. (Mac "proxy icon")
+	this->setWindowIcon(QIcon());
+#endif
+	
 	// Create the "Refresh" button.
 	// TODO: Don't load an icon on systems that don't use icons on buttons.
 	const QString iconRefreshFdo = QString::fromLatin1("view-refresh");
