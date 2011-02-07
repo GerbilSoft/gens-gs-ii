@@ -83,19 +83,19 @@ bool GensActions::doAction(int action)
 			switch (MNUID_ITEM(action))
 			{
 				case MNUID_ITEM(IDM_FILE_OPEN):
-					m_parent->m_emuManager->openRom(m_parent);
+					m_parent->openRom();
 					return true;
 				
 				case MNUID_ITEM(IDM_FILE_CLOSE):
-					m_parent->m_emuManager->closeRom();
+					m_parent->closeRom();
 					return true;
 				
 				case MNUID_ITEM(IDM_FILE_SAVESTATE):
-					m_parent->m_emuManager->saveState();
+					m_parent->saveState();
 					return true;
 				
 				case MNUID_ITEM(IDM_FILE_LOADSTATE):
-					m_parent->m_emuManager->loadState();
+					m_parent->loadState();
 					return true;
 				
 				case MNUID_ITEM(IDM_FILE_GENCONFIG):
@@ -108,7 +108,7 @@ bool GensActions::doAction(int action)
 				
 				case MNUID_ITEM(IDM_FILE_QUIT):
 					// Quit.
-					m_parent->m_emuManager->closeRom();
+					m_parent->closeRom();
 					QuitGens();
 					m_parent->close();
 					return true;
@@ -165,7 +165,7 @@ bool GensActions::doAction(int action)
 					return true;
 				
 				case MNUID_ITEM(IDM_RESBPPTEST_SCRSHOT):
-					m_parent->m_emuManager->screenShot();
+					m_parent->screenShot();
 					return true;
 				
 				default:
@@ -178,33 +178,33 @@ bool GensActions::doAction(int action)
 			switch (MNUID_ITEM(action))
 			{
 				case MNUID_ITEM(IDM_CTRLTEST_NONE):
-					m_parent->m_emuManager->setController(0, LibGens::IoBase::IOT_NONE);
+					m_parent->setController(0, LibGens::IoBase::IOT_NONE);
 					return true;
 				
 				case MNUID_ITEM(IDM_CTRLTEST_3BT):
-					m_parent->m_emuManager->setController(0, LibGens::IoBase::IOT_3BTN);
+					m_parent->setController(0, LibGens::IoBase::IOT_3BTN);
 					return true;
 				
 				case MNUID_ITEM(IDM_CTRLTEST_6BT):
-					m_parent->m_emuManager->setController(0, LibGens::IoBase::IOT_6BTN);
+					m_parent->setController(0, LibGens::IoBase::IOT_6BTN);
 					return true;
 				
 				case MNUID_ITEM(IDM_CTRLTEST_2BT):
-					m_parent->m_emuManager->setController(0, LibGens::IoBase::IOT_2BTN);
+					m_parent->setController(0, LibGens::IoBase::IOT_2BTN);
 					return true;
 				
 				case MNUID_ITEM(IDM_CTRLTEST_MEGAMOUSE):
-					m_parent->m_emuManager->setController(0, LibGens::IoBase::IOT_MEGA_MOUSE);
+					m_parent->setController(0, LibGens::IoBase::IOT_MEGA_MOUSE);
 					return true;
 				
 				case MNUID_ITEM(IDM_CTRLTEST_TEAMPLAYER):
-					m_parent->m_emuManager->setController(0, LibGens::IoBase::IOT_TEAMPLAYER);
+					m_parent->setController(0, LibGens::IoBase::IOT_TEAMPLAYER);
 					return true;
 				
 				case MNUID_ITEM(IDM_CTRLTEST_4WP):
 					// TODO
-					m_parent->m_emuManager->setController(0, LibGens::IoBase::IOT_4WP_SLAVE);
-					m_parent->m_emuManager->setController(1, LibGens::IoBase::IOT_4WP_MASTER);
+					m_parent->setController(0, LibGens::IoBase::IOT_4WP_SLAVE);
+					m_parent->setController(1, LibGens::IoBase::IOT_4WP_MASTER);
 					return true;
 				
 				case MNUID_ITEM(IDM_CTRLTEST_CONFIG):
@@ -222,28 +222,28 @@ bool GensActions::doAction(int action)
 			switch (MNUID_ITEM(action))
 			{
 				case MNUID_ITEM(IDM_SOUNDTEST_11025):
-					m_parent->m_emuManager->setAudioRate(11025);
+					m_parent->setAudioRate(11025);
 					return true;
 				case MNUID_ITEM(IDM_SOUNDTEST_16000):
-					m_parent->m_emuManager->setAudioRate(16000);
+					m_parent->setAudioRate(16000);
 					return true;
 				case MNUID_ITEM(IDM_SOUNDTEST_22050):
-					m_parent->m_emuManager->setAudioRate(22050);
+					m_parent->setAudioRate(22050);
 					return true;
 				case MNUID_ITEM(IDM_SOUNDTEST_32000):
-					m_parent->m_emuManager->setAudioRate(32000);
+					m_parent->setAudioRate(32000);
 					return true;
 				case MNUID_ITEM(IDM_SOUNDTEST_44100):
-					m_parent->m_emuManager->setAudioRate(44100);
+					m_parent->setAudioRate(44100);
 					return true;
 				case MNUID_ITEM(IDM_SOUNDTEST_48000):
-					m_parent->m_emuManager->setAudioRate(48000);
+					m_parent->setAudioRate(48000);
 					return true;
 				case MNUID_ITEM(IDM_SOUNDTEST_MONO):
-					m_parent->m_emuManager->setStereo(false);
+					m_parent->setStereo(false);
 					return true;
 				case MNUID_ITEM(IDM_SOUNDTEST_STEREO):
-					m_parent->m_emuManager->setStereo(true);
+					m_parent->setStereo(true);
 					return true;
 				default:
 					break;

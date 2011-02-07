@@ -447,4 +447,25 @@ void GensWindow::stateChanged(void)
 	setGensTitle();
 }
 
+
+/** Wrapper functions for GensActions. **/
+/** TODO: Have GensActions emit signals, and link them to EmuManager slots. **/
+
+void GensWindow::openRom(void)
+	{ m_emuManager->openRom(this); }
+void GensWindow::closeRom(void)
+	{ m_emuManager->closeRom(); }
+void GensWindow::saveState(void)
+	{ m_emuManager->saveState(); }
+void GensWindow::loadState(void)
+	{ m_emuManager->loadState(); }
+void GensWindow::screenShot(void)
+	{ m_emuManager->screenShot(); }
+void GensWindow::setController(int port, LibGens::IoBase::IoType type)
+	{ m_emuManager->setController(port, type); }
+void GensWindow::setAudioRate(int newRate)
+	{ m_emuManager->setAudioRate(newRate); }
+void GensWindow::setStereo(bool newStereo)
+	{ m_emuManager->setStereo(newStereo); }
+
 }

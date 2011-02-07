@@ -72,6 +72,27 @@ class GensWindow : public QMainWindow
 		// TODO: Should this really be here, or should it be a slot?
 		void setBpp(LibGens::VdpPalette::ColorDepth bpp);
 	
+	public slots:
+		/** Wrapper functions for GensActions. **/
+		/** TODO: Have GensActions emit signals, and link them to EmuManager slots. **/
+		
+		// NOTE: Calling m_emuManager functions directly via
+		// friend classes, or using inline functions here,
+		// results in wacky memory corruption on Mac OS X.
+		// (Mac OS X 10.5.7, PowerPC, gcc-4.0.1)
+		// Specifically, the m_emuManager pointer is misread as
+		// e.g. 0x101b4 when it should be 0x1b43210. It looks like
+		// it's off by two bytes when reading the address from
+		// the GensWindow instance.
+		void openRom(void);
+		void closeRom(void);
+		void saveState(void);
+		void loadState(void);
+		void screenShot(void);
+		void setController(int port, LibGens::IoBase::IoType type);
+		void setAudioRate(int newRate);
+		void setStereo(bool newStereo);
+	
 	protected:
 		void setupUi(void);
 		void retranslateUi(void);
@@ -102,8 +123,6 @@ class GensWindow : public QMainWindow
 		
 		// Actions manager.
 		GensActions *m_gensActions;
-		// FIXME: Massive hack to allow GensActions to access GensWindow protected members.
-		friend class GensActions;
 		
 		// Set the Gens window title.
 		void setGensTitle(void);
