@@ -225,7 +225,9 @@ QT4_ADD_RESOURCES(
 
 # Compatibility sources.
 IF(WIN32)
-	SET(gens-qt4_COMPAT_SRCS gqt4_win32.cpp ui/gens-qt4.rc)
+	SET(gens-qt4_COMPAT_SRCS gqt4_win32.cpp
+		ui/resources/win32/gens-qt4.rc
+		)
 ELSEIF(APPLE)
 	# Mac OS X icons.
 	SET(gens-qt4_MAC_ICONS

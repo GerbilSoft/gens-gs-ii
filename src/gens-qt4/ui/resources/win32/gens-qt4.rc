@@ -32,11 +32,11 @@
 #include "libgens/macros/git.h"
 
 // Icons.
-IDI_GENS_APP		ICON		"resources/win32/gensgs.ico"
-IDI_GENS_APP_OLD	ICON		"resources/win32/gens.ico"
-IDI_GENS_MD		ICON		"resources/win32/gens_md.ico"
-IDI_SONIC		ICON		"resources/win32/sonic.ico"
-IDI_SONIC_WAITING	ICON		"resources/win32/sonic_wait.ico"
+IDI_GENS_APP		ICON		"gensgs.ico"
+IDI_GENS_APP_OLD	ICON		"gens.ico"
+IDI_GENS_MD		ICON		"gens_md.ico"
+IDI_SONIC		ICON		"sonic.ico"
+IDI_SONIC_WAITING	ICON		"sonic_wait.ico"
 
 // Manifest.
 CREATEPROCESS_MANIFEST_RESOURCE_ID	RT_MANIFEST	"gens-qt4.exe.manifest"
