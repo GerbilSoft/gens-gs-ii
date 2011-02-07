@@ -1,5 +1,10 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-GeneralConfigWindow-v5: Massive UI overhaul for Mac OS X.
+The tabs are now replaced with a unified titlebar/toolbar, and
+changes are applied immediately. GeneralConfigWindow still works
+the same way it worked previously on other platforms.
+
 gens-qt4-GeneralConfigWindow-v4: Qt Desginer improvements for the
 GensLineEdit widget and some improvements in UnRAR warning messages
 on Unix systems.
