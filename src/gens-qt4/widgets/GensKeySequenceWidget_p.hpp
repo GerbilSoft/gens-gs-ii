@@ -52,6 +52,7 @@ class GensKeySequenceButton : public QPushButton
 		bool event(QEvent *event);
 		void keyPressEvent(QKeyEvent *event);
 		void keyReleaseEvent(QKeyEvent *event);
+		void focusOutEvent(QFocusEvent *event);
 	
 	private:
 		GensKeySequenceWidgetPrivate *const d;

@@ -32,8 +32,11 @@
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QKeySequence>
 #include <QtGui/QToolButton>
-#include <QtGui/QKeyEvent>
 #include <QtGui/QIcon>
+
+// Qt events.
+#include <QtGui/QKeyEvent>
+#include <QtGui/QFocusEvent>
 
 /**
  * QICON_FROMTHEME(): Icon loading function.
@@ -583,6 +586,22 @@ void GensKeySequenceButton::keyReleaseEvent(QKeyEvent *e)
 		d->controlModifierlessTimout();
 		d->updateShortcutDisplay();
 	}
+}
+
+
+/**
+ * GensKeySequenceButton::focusOutEvent(): Focus out event.
+ * @param e QFocusEvent.
+ */
+void GensKeySequenceButton::focusOutEvent(QFocusEvent *e)
+{
+	// Event parameter is unused.
+	((void)e);
+	
+	// Key sequence recording should be cancelled if the
+	// GensKeySequenceButton loses focus.
+	if (d->isRecording)
+		d->cancelRecording();
 }
 
 }
