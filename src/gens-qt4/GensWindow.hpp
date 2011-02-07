@@ -98,7 +98,7 @@ class GensWindow : public QMainWindow
 		bool m_hasInitResize;	// Has the initial resize occurred?
 		
 		// Emulation Manager.
-		EmuManager m_emuManager;
+		EmuManager *m_emuManager;
 		
 		// Actions manager.
 		GensActions *m_gensActions;

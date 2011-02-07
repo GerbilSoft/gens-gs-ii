@@ -59,6 +59,9 @@ GensWindow::GensWindow()
 	m_scale = 1;		// Set the scale to 1x by default.
 	m_hasInitResize = false;
 	
+	// Initialize the Emulation Manager.
+	m_emuManager = new EmuManager();
+	
 	// Initialize the Gens Action Manager.
 	// TODO: Load configuration from a file?
 	m_gensActions = new GensActions(this);
@@ -83,6 +86,9 @@ GensWindow::~GensWindow()
 	
 	// Delete the Gens Actions Manager.
 	delete m_gensActions;
+	
+	// Delete the Emulation Manager.
+	delete m_emuManager;
 }
 
 
@@ -143,22 +149,22 @@ void GensWindow::setupUi(void)
 	
 	// Connect Emulation Manager signals to GensWindow.
 	// TODO: Make m_emuManager a pointer instead of an object?
-	connect(&m_emuManager, SIGNAL(updateFps(double)),
+	connect(m_emuManager, SIGNAL(updateFps(double)),
 		this, SLOT(updateFps(double)));
-	connect(&m_emuManager, SIGNAL(stateChanged(void)),
+	connect(m_emuManager, SIGNAL(stateChanged(void)),
 		this, SLOT(stateChanged(void)));
-	connect(&m_emuManager, SIGNAL(updateVideo(void)),
+	connect(m_emuManager, SIGNAL(updateVideo(void)),
 		this, SLOT(updateVideo(void)));
-	connect(&m_emuManager, SIGNAL(osdPrintMsg(int, const QString&)),
+	connect(m_emuManager, SIGNAL(osdPrintMsg(int, const QString&)),
 		this, SLOT(osdPrintMsg(int, const QString&)));
-	connect(&m_emuManager, SIGNAL(osdShowPreview(int, const QImage&)),
+	connect(m_emuManager, SIGNAL(osdShowPreview(int, const QImage&)),
 		this, SLOT(osdShowPreview(int, const QImage&)));
 	
 	// Gens Action Manager signals.
 	connect(m_gensActions, SIGNAL(actionTogglePaused(void)),
-		&m_emuManager, SLOT(pauseRequest(void)));
+		m_emuManager, SLOT(pauseRequest(void)));
 	connect(m_gensActions, SIGNAL(actionResetEmulator(bool)),
-		&m_emuManager, SLOT(resetEmulator(bool)));
+		m_emuManager, SLOT(resetEmulator(bool)));
 	
 	// Retranslate the UI.
 	retranslateUi();
@@ -182,7 +188,7 @@ void GensWindow::retranslateUi(void)
 void GensWindow::closeEvent(QCloseEvent *event)
 {
 	// Quit.
-	m_emuManager.closeRom();
+	m_emuManager->closeRom();
 	QuitGens();
 	
 	// Accept the close event.
@@ -278,7 +284,7 @@ void GensWindow::dropEvent(QDropEvent *event)
 	filename = QDir::toNativeSeparators(filename);
 	
 	// Open the ROM.
-	m_emuManager.openRom(filename);
+	m_emuManager->openRom(filename);
 }
 
 
@@ -325,7 +331,7 @@ void GensWindow::setGensTitle(void)
 	title += QString::fromLatin1(" - ");
 	
 	// TODO
-	if (!m_emuManager.isRomOpen())
+	if (!m_emuManager->isRomOpen())
 	{
 		// No ROM is running.
 		title += tr("Idle");
@@ -333,8 +339,8 @@ void GensWindow::setGensTitle(void)
 	else
 	{
 		// ROM is running.
-		title += m_emuManager.sysName() + QString::fromLatin1(": ");
-		title += m_emuManager.romName();
+		title += m_emuManager->sysName() + QString::fromLatin1(": ");
+		title += m_emuManager->romName();
 	}
 	
 	this->setWindowTitle(title);
@@ -423,11 +429,11 @@ void GensWindow::setBpp(LibGens::VdpPalette::ColorDepth bpp)
  */
 void GensWindow::stateChanged(void)
 {
-	if (m_emuManager.isRomOpen())
+	if (m_emuManager->isRomOpen())
 	{
 		// ROM is open.
-		m_vBackend->setRunning(m_emuManager.isRomOpen());
-		m_vBackend->setPaused(m_emuManager.isPaused());
+		m_vBackend->setRunning(m_emuManager->isRomOpen());
+		m_vBackend->setPaused(m_emuManager->isPaused());
 	}
 	else
 	{
