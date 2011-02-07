@@ -34,6 +34,18 @@
 #include <QtGui/QActionGroup>
 #include <QtGui/QStyle>
 
+// Mac OS X includes.
+#ifdef QT_MAC_USE_COCOA
+// TODO: Cocoa window.
+#else
+// Carbon window.
+#include <Carbon/Carbon.h>
+#ifndef kWindowToolbarButtonAttribute
+#define kWindowToolbarButtonAttribute (1 << 6)
+#endif
+#endif
+
+
 namespace GensQt4
 {
 
@@ -47,8 +59,6 @@ void GeneralConfigWindow::setupUi_mac(void)
 	// This property was added in Qt 4.3.
 	setUnifiedTitleAndToolBarOnMac(true);
 #endif
-	
-	// TODO: Carbon/Cocoa-specific code to hide the toolbar button.
 	
 	// Create the toolbar.
 	toolBar = new QToolBar(this);
@@ -138,6 +148,17 @@ void GeneralConfigWindow::setupUi_mac(void)
 	// TODO: Remove QDialogButtonBox on Mac OS X,
 	// and have settings apply immediately.
 	vboxButtonBox->setContentsMargins(16, 16, 16, 16);
+	
+	// Hide the toolbar show/hide button in the titlebar.
+	// TODO: Do this on a window update event too?
+#ifdef QT_MAC_USE_COCOA
+	// Qt is using Cocoa.
+	// TODO
+#else
+	// Qt is using Carbon.
+	ChangeWindowAttributes(qt_mac_window_for(this),
+				0, kWindowToolbarButtonAttribute);
+#endif
 }
 
 
