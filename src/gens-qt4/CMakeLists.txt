@@ -226,12 +226,23 @@ QT4_ADD_RESOURCES(
 # Compatibility sources.
 IF(WIN32)
 	SET(gens-qt4_COMPAT_SRCS gqt4_win32.cpp ui/gens-qt4.rc)
+ELSEIF(APPLE)
+	# Mac OS X icons.
+	SET(gens-qt4_MAC_ICONS
+		"${CMAKE_CURRENT_SOURCE_DIR}/ui/resources/mac/gensgs.icns"
+		)
+	SET_SOURCE_FILES_PROPERTIES(${gens-qt4_MAC_ICONS}
+		PROPERTIES MACOSX_PACKAGE_LOCATION Resources
+		)
+	SET(gens-qt4_COMPAT_SRCS ${gens-qt4_MAC_ICONS})
 ELSE()
-	SET(gens-qt4_COMPAT_SRCS)
+	SET(gens-qt4_COMPAT_SRCS "")
 ENDIF()
 
 # Build the executable.
-ADD_EXECUTABLE(gens-qt4 ${gens-qt4_SRCS} ${gens-qt4_COMPAT_SRCS} ${gens-qt4_MOC_SOURCES} ${gens-qt4_UIS_H} ${gens-qt4_RCC_O})
+# TODO: Set Win32 when compiling release build
+# to disable the command prompt window.
+ADD_EXECUTABLE(gens-qt4 MACOSX_BUNDLE ${gens-qt4_SRCS} ${gens-qt4_COMPAT_SRCS} ${gens-qt4_MOC_SOURCES} ${gens-qt4_UIS_H} ${gens-qt4_RCC_O})
 TARGET_LINK_LIBRARIES(gens-qt4 gens)
 
 # Fast QString concatenation.
@@ -273,3 +284,18 @@ ADD_DEPENDENCIES(gens-qt4 gens)
 IF(NOT GLEW_FOUND)
 	ADD_DEPENDENCIES(gens-qt4 glew)
 ENDIF(NOT GLEW_FOUND)
+
+# Mac OS X bundle information.
+# TODO: Add "NO-EMU" if necessary.
+SET(MACOSX_BUNDLE_GUI_IDENTIFIER "gsft.gerbilsoft.GensGSII")
+SET(MACOSX_BUNDLE_BUNDLE_NAME "Gens/GS II")
+SET(MACOSX_BUNDLE_ICON_FILE "gensgs.icns")
+SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "0.0.0")
+SET(MACOSX_BUNDLE_LONG_VERSION_STRING "0.0.0 (Development Build)")
+IF(NOT GENS_ENABLE_EMULATION)
+	SET(MACOSX_BUNDLE_LONG_VERSION_STRING "${MACOSX_BUNDLE_LONG_VERSION_STRING} (NO-EMU)")
+ENDIF(NOT GENS_ENABLE_EMULATION)
+
+# Mac OS X: Set a custom info.plist file for the application bundle.
+SET_TARGET_PROPERTIES(gens-qt4
+	PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/ui/resources/mac/Info-CMake.plist")
