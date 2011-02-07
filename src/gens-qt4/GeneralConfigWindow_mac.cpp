@@ -32,7 +32,6 @@
 #include <QtGui/QToolBar>
 #include <QtGui/QAction>
 #include <QtGui/QActionGroup>
-#include <QtGui/QStyle>
 
 // Mac OS X includes.
 #ifdef QT_MAC_USE_COCOA
@@ -60,12 +59,19 @@ void GeneralConfigWindow::setupUi_mac(void)
 	setUnifiedTitleAndToolBarOnMac(true);
 #endif
 	
+	// Remove the window icon.
+	// SuitCase says the window icon is only used if there's
+	// a document open in the window, i.e. a "proxy icon".
+	this->setWindowIcon(QIcon());
+	
 	// Create the toolbar.
 	toolBar = new QToolBar(this);
 	toolBar->setIconSize(QSize(32, 32));
 	toolBar->setMovable(false);
 	toolBar->setFloatable(false);
 	toolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+	toolBar->layout()->setSpacing(0);
+	toolBar->layout()->setMargin(0);
 	addToolBar(Qt::TopToolBarArea, toolBar);
 	
 	// Toolbar buttons.
@@ -87,14 +93,6 @@ void GeneralConfigWindow::setupUi_mac(void)
 		// End of list.
 		{NULL, NULL}
 	};
-	
-	// Center-align the toolbar buttons: Insert a space before the buttons.
-	// Finder and Firefox both use left-aligned, but I prefer center-aligned.
-	// http://www.ffuts.org/blog/right-aligning-a-button-in-a-qtoolbar/
-	// TODO: See if this needs to be deleted manually.
-	QWidget *spaceBefore = new QWidget(this);
-	spaceBefore->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	toolBar->addWidget(spaceBefore);
 	
 	// Create the action group for the toolbar buttons.
 	QActionGroup *agBtnGroup = new QActionGroup(this);
@@ -119,14 +117,6 @@ void GeneralConfigWindow::setupUi_mac(void)
 		agBtnGroup->addAction(action);
 		toolBar->addAction(action);
 	}
-	
-	// Center-align the toolbar buttons: Insert a space after the buttons.
-	// Finder and Firefox both use left-aligned, but I prefer center-aligned.
-	// http://www.ffuts.org/blog/right-aligning-a-button-in-a-qtoolbar/
-	// TODO: See if this needs to be deleted manually.
-	QWidget *spaceAfter = new QWidget(this);
-	spaceAfter->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	toolBar->addWidget(spaceAfter);
 	
 	// Create a stacked widget and move the tab contents over.
 	stackedWidget = new QStackedWidget(this);
