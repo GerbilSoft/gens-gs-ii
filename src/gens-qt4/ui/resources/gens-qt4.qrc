@@ -21,5 +21,9 @@
     <file>oxygen-64x64/media-optical-recordable.png</file>
     <file>oxygen-64x64/media-optical-dvd.png</file>
     <file>oxygen-64x64/media-optical-blu-ray.png</file>
+    <file>oxygen-32x32/configure.png</file>
+    <file>oxygen-32x32/applications-graphics.png</file>
+    <file>oxygen-32x32/media-optical.png</file>
+    <file>oxygen-32x32/utilities-terminal.png</file>
   </qresource>
 </RCC>

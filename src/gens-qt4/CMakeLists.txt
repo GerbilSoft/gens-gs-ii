@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 2.6)
 # TODO: Determine the actual minimum version.
 # 4.1.0: QCoreApplication::arguments()
 # 4.2.0: QString::fromWCharArray() [Win32]
+# 4.3.0: QMainWindow::setUnifiedTitleAndToolBarOnMac() [Mac OS X]
 # 4.6.0: QPixmap::fromWinHICON() [Win32] (fallbacks to QPixmap::fromWinHBITMAP() are in place)
 IF(WIN32)
 	SET(GENS_QT4_MIN_VERSION 4.2.0)
@@ -133,6 +134,10 @@ IF(QT_QTDBUS_FOUND)
 		)
 ENDIF(QT_QTDBUS_FOUND)
 
+#########################################
+# System-specific CD-ROM drive support. #
+#########################################
+
 IF(UNIX)
 	IF(APPLE)
 		# Don't enable FindCdromUnix on Mac OS X.
@@ -161,6 +166,16 @@ IF(WIN32)
 		cdrom/FindCdromWin32.hpp
 		)
 ENDIF(WIN32)
+
+######################################
+# Mac OS X: System-specific UI code. #
+######################################
+IF(APPLE)
+	SET(gens-qt4_SRCS
+		${gens-qt4_SRCS}
+		GeneralConfigWindow_mac.cpp
+		)
+ENDIF(APPLE)
 
 # Create .moc files for sources that need them.
 QT4_WRAP_CPP(gens-qt4_MOC_SOURCES ${gens-qt4_MOC_HEADERS})

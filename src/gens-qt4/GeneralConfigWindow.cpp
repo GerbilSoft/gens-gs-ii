@@ -71,7 +71,7 @@ const Qt::WindowFlags GeneralConfigWindow::ms_WindowFlags =
  * GeneralConfigWindow(): Initialize the General Configuration window.
  */
 GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
-	: QDialog(parent, ms_WindowFlags)
+	: QMainWindow(parent, ms_WindowFlags)
 {
 	// Initialize the Qt4 UI.
 	setupUi(this);
@@ -85,7 +85,8 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 		connect(btnApply, SIGNAL(clicked()), this, SLOT(apply()));
 	
 #ifdef Q_WS_MAC
-	vboxWidgets->setContentsMargins(16, 16, 16, 16);
+	// Set up the Mac OS X-specific UI elements.
+	setupUi_mac();
 #endif
 	
 	/** Intro effect. **/
@@ -265,6 +266,18 @@ void GeneralConfigWindow::apply(void)
 	// Otherwise, Cancel will receive focus.
 	setApplyButtonEnabled(false);
 }
+
+
+/**
+ * toolbarTriggered(): A toolbar button was clicked.
+ * @param action Toolbar button.
+ * NOTE: Only used on Mac OS X.
+ * The Mac OS X version is in GeneralConfigWindow_mac.cpp.
+ * We need to implement this slot here anyway due to moc limitations.
+ */
+#ifndef Q_WS_MAC
+void GeneralConfigWindow::toolbarTriggered(QAction* action) { }
+#endif
 
 
 /** Onscreen display **/

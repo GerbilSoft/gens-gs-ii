@@ -27,8 +27,16 @@
 #include "ui_GeneralConfigWindow.h"
 
 // Qt includes.
-#include <QtGui/QDialog>
+#include <QtGui/QMainWindow>
 #include <QtGui/QColor>
+
+#ifdef Q_WS_MAC
+// Mac OS X:
+// Use a unified toolbar instead of tabs.
+class QStackedWidget;
+class QToolBar;
+class QAction;
+#endif
 
 // GensLineEdit widget.
 #include "widgets/GensLineEdit.hpp"
@@ -43,7 +51,7 @@
 namespace GensQt4
 {
 
-class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
+class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 {
 	Q_OBJECT
 	
@@ -92,12 +100,26 @@ class GeneralConfigWindow : public QDialog, public Ui::GeneralConfigWindow
 				grayI = 255;
 			return grayI;
 		}
+		
+#ifdef Q_WS_MAC
+		// Mac OS X:
+		// Use a unified toolbar instead of tabs.
+		QStackedWidget *stackedWidget;
+		QToolBar *toolBar;
+		void setupUi_mac(void);
+#endif
 	
 	protected slots:
-		void accept(void) { apply(); QDialog::accept(); }
+		void accept(void) { apply(); this->close(); }
 		void apply(void);
+		void reject(void) { this->close(); }
 		
 		void reload(void);
+	
+		// Mac OS X: Toolbar action group.
+		// moc doesn't properly support OS-specific slots,
+		// so we need to define this slot on all systems.
+		void toolbarTriggered(QAction *action);
 	
 	private:
 		static GeneralConfigWindow *m_GeneralConfigWindow;
