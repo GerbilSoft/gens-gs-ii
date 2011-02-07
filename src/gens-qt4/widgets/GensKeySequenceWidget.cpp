@@ -605,9 +605,3 @@ void GensKeySequenceButton::focusOutEvent(QFocusEvent *e)
 }
 
 }
-
-
-// NOTE: moc needs to be included here due to the private class setup.
-// Otherwise, we'll get an error because GensKeySequenceWidgetPrivate
-// has only been forward-declared and hasn't been defined.
-//#include "widgets/moc_GensKeySequenceWidget.cxx"
