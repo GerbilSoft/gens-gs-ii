@@ -37,6 +37,7 @@
 #include <QtGui/QFileDialog>
 #include <QtGui/QColorDialog>
 #include <QtGui/QPainter>
+#include <QtGui/QKeyEvent>
 
 // libgens: RAR decompressor
 #include "libgens/Decompressor/DcRar.hpp"
@@ -175,6 +176,54 @@ void GeneralConfigWindow::ShowSingle(QWidget *parent)
 		m_GeneralConfigWindow = new GeneralConfigWindow(parent);
 		m_GeneralConfigWindow->show();
 	}
+}
+
+
+/**
+ * keyPressEvent(): Key press handler.
+ * @param event Key event.
+ */
+void GeneralConfigWindow::keyPressEvent(QKeyEvent *event)
+{
+	// TODO: Handle Cmd-Period on Mac?
+	// NOTE: Cmd-W triggers the "Close ROM" action...
+#ifndef GCW_APPLY_IMMED
+	// Changes are not applied immediately.
+	// Check for special dialog keys.
+	// Adapted from QDialog::keyPressEvent().
+	
+	if (!event->modifiers() || ((event->modifiers() & Qt::KeypadModifier) && event->key() == Qt::Key_Enter))
+	{
+		switch (event->key())
+		{
+			case Qt::Key_Enter:
+			case Qt::Key_Return:
+				// Accept the dialog changes.
+				accept();
+				break;
+			
+			case Qt::Key_Escape:
+				// Reject the dialog changes.
+				reject();
+				break;
+			
+			default:
+				// Pass the event to the base class.
+				this->QMainWindow::keyPressEvent(event);
+				return;
+		}
+	}
+	else
+	{
+		// Pass the event to the base class.
+		this->QMainWindow::keyPressEvent(event);
+	}
+#else /* !GCW_APPLY_IMMED */
+	// Changes are applied immediately.
+	// Don't handle special dialog keys.
+	((void)event);
+	return;
+#endif /* GCW_APPLY_IMMED */
 }
 
 

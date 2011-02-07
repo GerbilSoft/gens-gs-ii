@@ -71,6 +71,8 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		GeneralConfigWindow(QWidget *parent = NULL);
 		virtual ~GeneralConfigWindow();
 		
+		virtual void keyPressEvent(QKeyEvent *event);
+		
 		// Button CSS colors.
 		static const QString ms_sCssBtnColors;
 		
