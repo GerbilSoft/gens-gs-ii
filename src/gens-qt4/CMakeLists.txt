@@ -101,6 +101,7 @@ SET(gens-qt4_SRCS
 	EmuManager_qEmu.cpp
 	VBackend/GlTex2D.cpp
 	GeneralConfigWindow.cpp
+	GeneralConfigWindow_slots.cpp
 	widgets/GensLineEdit.cpp
 	GensConfig.cpp
 	cdrom/FindCdromBase.cpp

@@ -36,7 +36,16 @@
 class QStackedWidget;
 class QToolBar;
 class QAction;
+
+// Apply changes immediately.
+#ifdef Q_WS_MAC
+#define GCW_APPLY_IMMED
 #endif
+#else /* !Q_WS_MAC */
+#ifdef GCW_APPLY_IMMED
+#undef GCW_APPLY_IMMED
+#endif /* GCW_APPLY_IMMED */
+#endif /* Q_WS_MAC */
 
 // GensLineEdit widget.
 #include "widgets/GensLineEdit.hpp"
@@ -71,12 +80,14 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		// Qt window flags.
 		static const Qt::WindowFlags ms_WindowFlags;
 		
+#ifndef GCW_APPLY_IMMED
 		void setApplyButtonEnabled(bool enabled)
 		{
 			QPushButton *btnApply = buttonBox->button(QDialogButtonBox::Apply);
 			if (btnApply)
 				btnApply->setEnabled(enabled);
 		}
+#endif
 		
 		/**
 		 * QColor_Grayscale(): Convert a QColor to grayscale.
@@ -110,11 +121,11 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 #endif
 	
 	protected slots:
-		void accept(void) { apply(); this->close(); }
-		void apply(void);
-		void reject(void) { this->close(); }
+		void accept(void);
+		void reject(void);
 		
 		void reload(void);
+		void apply(void);
 	
 		// Mac OS X: Toolbar action group.
 		// moc doesn't properly support OS-specific slots,
@@ -155,14 +166,6 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		void extprgDisplayFileStatus(const QString& file_id, const QString& file_desc);
 	
 	private slots:
-		/**
-		 * settingChanged(): A setting has changed.
-		 * The "Apply" button should be enabled.
-		 * TODO: On Mac OS X, apply the change immediately.
-		 */
-		void settingChanged(void)
-			{ setApplyButtonEnabled(true); }
-		
 		/** Onscreen Display **/
 		void on_btnOsdFpsColor_clicked(void);
 		void on_btnOsdMsgColor_clicked(void);
@@ -186,6 +189,31 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		void on_btnExtPrgUnRAR_clicked(void);
 		void on_txtExtPrgUnRAR_focusIn(void);
 		void on_txtExtPrgUnRAR_textChanged(void);
+		
+		/**
+		 * Setting change notifications.
+		 * On Mac OS X, settings are applied immediately.
+		 * On other systems, they aren't.
+		 * TODO: GNOME apparently applies settings immediately as well...
+		 */
+		void on_chkOsdFpsEnable_toggled(bool checked);
+		void on_chkOsdMsgEnable_toggled(bool checked);
+		void on_chkAutoFixChecksum_toggled(bool checked);
+		void on_chkAutoPause_toggled(bool checked);
+		void on_chkBorderColor_toggled(bool checked);
+		void on_chkPauseTint_toggled(bool checked);
+		void on_chkNtscV30Rolling_toggled(bool checked);
+		void on_cboIntroStyle_currentIndexChanged(int index);
+		void on_cboIntroColor_currentIndexChanged(int index);
+		
+		void on_chkAspectRatioConstraint_toggled(bool checked);
+		void on_chkFastBlur_toggled(bool checked);
+		
+		void on_hsldContrast_valueChanged(int value);
+		void on_hsldBrightness_valueChanged(int value);
+		void on_chkGrayscale_toggled(bool checked);
+		void on_chkInverted_toggled(bool checked);
+		void on_cboColorScaleMethod_currentIndexChanged(int index);
 };
 
 }

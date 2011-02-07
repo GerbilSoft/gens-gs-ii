@@ -825,264 +825,71 @@ on NTSC models.</string>
    </hints>
   </connection>
   <connection>
-   <sender>cboIntroStyle</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>GeneralConfigWindow</receiver>
-   <slot>settingChanged()</slot>
+   <sender>hsldContrast</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>lblContrastValue</receiver>
+   <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>437</x>
-     <y>322</y>
+     <x>356</x>
+     <y>162</y>
     </hint>
     <hint type="destinationlabel">
-     <x>492</x>
-     <y>320</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cboIntroColor</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>GeneralConfigWindow</receiver>
-   <slot>settingChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>439</x>
-     <y>344</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>491</x>
-     <y>357</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>chkOsdFpsEnable</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>GeneralConfigWindow</receiver>
-   <slot>settingChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>43</x>
-     <y>115</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>0</x>
-     <y>117</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>chkOsdMsgEnable</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>GeneralConfigWindow</receiver>
-   <slot>settingChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>39</x>
-     <y>210</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>3</x>
-     <y>210</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>chkAutoFixChecksum</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>GeneralConfigWindow</receiver>
-   <slot>settingChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>458</x>
-     <y>80</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>493</x>
-     <y>83</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>chkAutoPause</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>GeneralConfigWindow</receiver>
-   <slot>settingChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>458</x>
-     <y>110</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>493</x>
-     <y>112</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>chkBorderColor</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>GeneralConfigWindow</receiver>
-   <slot>settingChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>460</x>
-     <y>131</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>493</x>
-     <y>137</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>chkPauseTint</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>GeneralConfigWindow</receiver>
-   <slot>settingChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>460</x>
-     <y>155</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>487</x>
-     <y>163</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>chkNtscV30Rolling</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>GeneralConfigWindow</receiver>
-   <slot>settingChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>462</x>
-     <y>181</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>490</x>
-     <y>194</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>chkAspectRatioConstraint</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>GeneralConfigWindow</receiver>
-   <slot>settingChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>419</x>
-     <y>81</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>490</x>
-     <y>55</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>chkFastBlur</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>GeneralConfigWindow</receiver>
-   <slot>settingChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>459</x>
-     <y>104</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>490</x>
-     <y>108</y>
+     <x>451</x>
+     <y>164</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>hsldContrast</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>GeneralConfigWindow</receiver>
-   <slot>settingChanged()</slot>
+   <receiver>lblContrastValue</receiver>
+   <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>133</x>
-     <y>170</y>
+     <x>356</x>
+     <y>178</y>
     </hint>
     <hint type="destinationlabel">
-     <x>5</x>
-     <y>149</y>
+     <x>451</x>
+     <y>180</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>hsldBrightness</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>lblBrightnessValue</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>383</x>
+     <y>190</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>452</x>
+     <y>192</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>hsldBrightness</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>GeneralConfigWindow</receiver>
-   <slot>settingChanged()</slot>
+   <receiver>lblBrightnessValue</receiver>
+   <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>154</x>
-     <y>198</y>
+     <x>379</x>
+     <y>206</y>
     </hint>
     <hint type="destinationlabel">
-     <x>3</x>
-     <y>185</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>chkGrayscale</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>GeneralConfigWindow</receiver>
-   <slot>settingChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>52</x>
-     <y>225</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>2</x>
-     <y>238</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>chkInverted</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>GeneralConfigWindow</receiver>
-   <slot>settingChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>56</x>
-     <y>255</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1</x>
-     <y>281</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cboColorScaleMethod</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>GeneralConfigWindow</receiver>
-   <slot>settingChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>312</x>
-     <y>253</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>490</x>
-     <y>254</y>
+     <x>455</x>
+     <y>205</y>
     </hint>
    </hints>
   </connection>
  </connections>
  <slots>
-  <slot>settingChanged()</slot>
   <slot>accept()</slot>
   <slot>reject()</slot>
  </slots>

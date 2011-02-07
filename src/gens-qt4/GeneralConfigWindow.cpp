@@ -78,11 +78,30 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
-	
+
+#ifndef GCW_APPLY_IMMED
 	// Set up a signal for the Apply button.
 	QPushButton *btnApply = buttonBox->button(QDialogButtonBox::Apply);
 	if (btnApply)
 		connect(btnApply, SIGNAL(clicked()), this, SLOT(apply()));
+#else
+	{
+		// Apply settings immediately.
+		// Remove the buttonBox.
+		QSize szBbox = buttonBox->size();
+		delete buttonBox;
+		buttonBox = NULL;
+		
+		// Reduce the size of the QMainWindow.
+		QSize szWindow = this->maximumSize();
+		int left, top, right, bottom;
+		vboxDialog->getContentsMargins(&left, &top, &right, &bottom);
+		szWindow.rheight() -= (szBbox.height() + ((top + bottom) / 2));
+		this->setMinimumSize(szWindow);
+		this->setMaximumSize(szWindow);
+		this->setBaseSize(szWindow);
+	}
+#endif
 	
 #ifdef Q_WS_MAC
 	// Set up the Mac OS X-specific UI elements.
@@ -160,6 +179,27 @@ void GeneralConfigWindow::ShowSingle(QWidget *parent)
 
 
 /**
+ * accept(): Accept the configuration changes.
+ * Triggered if "OK" is clicked.
+ */
+void GeneralConfigWindow::accept(void)
+{
+	apply();
+	this->close();
+}
+
+
+/**
+ * reject(): Reject the configuration changes.
+ * Triggered if "Cancel" is clicked.
+ */
+void GeneralConfigWindow::reject(void)
+{
+	this->close();
+}
+
+
+/**
  * reload(): Reload configuration.
  */
 void GeneralConfigWindow::reload(void)
@@ -217,16 +257,20 @@ void GeneralConfigWindow::reload(void)
 	chkPauseTint->setChecked(gqt4_config->pauseTint());
 	chkNtscV30Rolling->setChecked(gqt4_config->ntscV30Rolling());
 	
+#ifndef GCW_APPLY_IMMED
 	// Disable the Apply button.
 	setApplyButtonEnabled(false);
+#endif
 }
 
 
 /**
- * apply(): Apply dialog settings.
+ * apply(): Apply the configuration changes.
+ * Triggered if "Apply" is clicked.
  */
 void GeneralConfigWindow::apply(void)
 {
+#ifndef GCW_APPLY_IMMED
 	/** Onscreen display. **/
 	gqt4_config->setOsdFpsEnabled(chkOsdFpsEnable->isChecked());
 	gqt4_config->setOsdFpsColor(m_osdFpsColor);
@@ -265,6 +309,7 @@ void GeneralConfigWindow::apply(void)
 	// TODO: If Apply was clicked, set focus back to the main window elements.
 	// Otherwise, Cancel will receive focus.
 	setApplyButtonEnabled(false);
+#endif
 }
 
 
@@ -276,7 +321,8 @@ void GeneralConfigWindow::apply(void)
  * We need to implement this slot here anyway due to moc limitations.
  */
 #ifndef Q_WS_MAC
-void GeneralConfigWindow::toolbarTriggered(QAction* action) { }
+void GeneralConfigWindow::toolbarTriggered(QAction* action)
+	{ ((void)action); }
 #endif
 
 
@@ -313,7 +359,11 @@ void GeneralConfigWindow::on_btnOsdFpsColor_clicked(void)
 	btnOsdFpsColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdFpsColor.name()).arg(colorText.name()));
 	
 	// Settings have been changed.
+#ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
+#else
+	gqt4_config->setOsdFpsColor(m_osdFpsColor);
+#endif
 }
 
 void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
@@ -330,7 +380,11 @@ void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
 	btnOsdMsgColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdMsgColor.name()).arg(colorText.name()));
 	
 	// Settings have been changed.
+#ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
+#else
+	gqt4_config->setOsdMsgColor(m_osdMsgColor);
+#endif
 }
 
 
@@ -585,30 +639,40 @@ void GeneralConfigWindow::on_txtMcdRomJPN_focusIn(void)
 
 void GeneralConfigWindow::on_txtMcdRomUSA_textChanged(void)
 {
-	setApplyButtonEnabled(true);
-	
 	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomUSA, MCD_REGION_USA);
 	if (!sNewRomStatus.isEmpty())
 	{
 		sMcdRomStatus_USA = sNewRomStatus;
 		mcdDisplayRomFileStatus(tr("Sega CD (U)"), sMcdRomStatus_USA);
 	}
+	
+	// Settings have been changed.
+#ifndef GCW_APPLY_IMMED
+	setApplyButtonEnabled(true);
+#else
+	gqt4_config->setMcdRomUSA(txtMcdRomUSA->text());
+#endif
 }
+
 void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
 {
-	setApplyButtonEnabled(true);
-	
 	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomEUR, MCD_REGION_EUROPE);
 	if (!sNewRomStatus.isEmpty())
 	{
 		sMcdRomStatus_EUR = sNewRomStatus;
 		mcdDisplayRomFileStatus(tr("Mega CD (E)"), sMcdRomStatus_EUR);
 	}
+	
+	// Settings have been changed.
+#ifndef GCW_APPLY_IMMED
+	setApplyButtonEnabled(true);
+#else
+	gqt4_config->setMcdRomEUR(txtMcdRomEUR->text());
+#endif
 }
+
 void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 {
-	setApplyButtonEnabled(true);
-	
 	// TODO: Add a separate "Mega CD (Asia)" boot ROM?
 	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomJPN, MCD_REGION_JAPAN | MCD_REGION_ASIA);
 	if (!sNewRomStatus.isEmpty())
@@ -616,6 +680,13 @@ void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 		sMcdRomStatus_JPN = sNewRomStatus;
 		mcdDisplayRomFileStatus(tr("Mega CD (J)"), sMcdRomStatus_JPN);
 	}
+	
+	// Settings have been changed.
+#ifndef GCW_APPLY_IMMED
+	setApplyButtonEnabled(true);
+#else
+	gqt4_config->setMcdRomJPN(txtMcdRomJPN->text());
+#endif
 }
 
 
@@ -684,8 +755,6 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_focusIn(void)
 
 void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 {
-	setApplyButtonEnabled(true);
-	
 	// Check the RAR binary to make sure it's valid.
 	// TODO: Split status detection into a separate function like Sega CD Boot ROMs?
 	QString prg_id = tr("Unknown");
@@ -830,6 +899,13 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 	// TODO: Create a constant string for DLL vs. binary.
 	// For now, just call focusIn() to update the description.
 	on_txtExtPrgUnRAR_focusIn();
+	
+	// Settings have been changed.
+#ifndef GCW_APPLY_IMMED
+	setApplyButtonEnabled(true);
+#else
+	gqt4_config->setExtPrgUnRAR(txtExtPrgUnRAR->text());
+#endif
 }
 
 }
