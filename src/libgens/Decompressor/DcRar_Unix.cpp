@@ -397,7 +397,7 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
 	char buf[1024+1];
 	size_t rv = fread(buf, 1, sizeof(buf)-1, pRar);
 	buf[rv] = 0x00;
-	fclose(pRar);
+	pclose(pRar);
 	
 	// Pipe contents should start with one of the following:
 	// RAR: "\nRAR x.xx"
