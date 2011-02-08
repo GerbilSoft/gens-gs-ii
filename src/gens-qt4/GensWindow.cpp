@@ -499,15 +499,11 @@ void GensWindow::qAppFocusChanged(QWidget *old, QWidget *now)
 	// Assume window doesn't have focus by default.
 	bool paused = true;
 	
-	if (now != NULL)
+	// Check if the currently-focused widget is a child widget of GensWindow.
+	if (this->isAncestorOf(NULL))
 	{
-		if (now == m_vBackend->toQWidget() ||
-		    now == m_menubar ||
-		    now == this)
-		{
-			// Window has focus.
-			paused = false;
-		}
+		// Window has focus.
+		paused = false;
 	}
 	
 	// Send the pause request.
