@@ -71,7 +71,7 @@ GensConfig::GensConfig()
 	m_colorScaleMethod = (int)LibGens::VdpPalette::COLSCALE_FULL;	// using int to prevent Qt issues
 	
 	/** General settings. **/
-	m_autoFixChecksum = true;
+	m_autoFixChecksum = false;
 	m_autoPause = false;
 	m_borderColor = true;
 	m_pauseTint = true;
@@ -97,6 +97,52 @@ void GensConfig::save(void)
 void GensConfig::reload(void)
 {
 	// TODO
+}
+
+
+/**
+ * emitAll(): Emit all configuration settings.
+ * Useful when starting the emulator.
+ */
+void GensConfig::emitAll(void)
+{
+	/** Onscreen display. **/
+	emit osdFpsEnabled_changed(m_osdFpsEnabled);
+	emit osdFpsColor_changed(m_osdFpsColor);
+	emit osdMsgEnabled_changed(m_osdMsgEnabled);
+	emit osdMsgColor_changed(m_osdMsgColor);
+	
+	/** Intro effect. **/
+	emit introStyle_changed(m_introStyle);
+	emit introColor_changed(m_introColor);
+	
+	/** Sega CD Boot ROMs. **/
+	emit mcdRomUSA_changed(m_mcdRomUSA);
+	emit mcdRomEUR_changed(m_mcdRomEUR);
+	emit mcdRomJPN_changed(m_mcdRomJPN);
+	
+	/** External programs. **/
+	emit extprgUnRAR_changed(m_extprgUnRAR);
+	
+	/** Graphics settings. **/
+	// TODO: Optimize palette calculation so it's only done once.
+	emit aspectRatioConstraint_changed(m_aspectRatioConstraint);
+	emit fastBlur_changed(m_fastBlur);
+	emit contrast_changed(m_contrast);
+	emit brightness_changed(m_brightness);
+	emit grayscale_changed(m_grayscale);
+	emit inverted_changed(m_inverted);
+	emit colorScaleMethod_changed(m_colorScaleMethod);
+	
+	/** General settings. **/
+	emit autoFixChecksum_changed(m_autoFixChecksum);
+	emit autoPause_changed(m_autoPause);
+	emit borderColor_changed(m_borderColor);
+	emit pauseTint_changed(m_pauseTint);
+	emit ntscV30Rolling_changed(m_ntscV30Rolling);
+	
+	/** Savestates. **/
+	emit saveSlot_changed(m_saveSlot);
 }
 
 
@@ -150,7 +196,7 @@ void GensConfig::setIntroStyle(int style)
 		return;
 	
 	m_introStyle = style;
-	emit introStyle_changed(style);
+	emit introStyle_changed(m_introStyle);
 }
 
 
@@ -161,7 +207,7 @@ void GensConfig::setIntroColor(int color)
 		return;
 	
 	m_introColor = color;
-	emit introColor_changed(color);
+	emit introColor_changed(m_introColor);
 }
 
 

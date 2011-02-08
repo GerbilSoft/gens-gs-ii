@@ -85,6 +85,8 @@ class GensConfig : public QObject
 		void save(void);
 		void reload(void);
 		
+		void emitAll(void);
+		
 		/** Onscreen display. **/
 		bool osdFpsEnabled(void) const
 			{ return m_osdFpsEnabled; }

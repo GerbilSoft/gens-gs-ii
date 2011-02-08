@@ -72,6 +72,9 @@ GensWindow::GensWindow()
 	
 	// Set up the User Interface.
 	setupUi();
+	
+	// Make sure all user configuration settings are applied.
+	gqt4_config->emitAll();
 }
 
 
