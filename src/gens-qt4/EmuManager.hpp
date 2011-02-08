@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -33,6 +33,9 @@
 #include "libgens/Rom.hpp"
 #include "libgens/IO/IoBase.hpp"
 
+// paused_t
+#include "gqt4_datatypes.h"
+
 namespace GensQt4
 {
 
@@ -53,8 +56,10 @@ class EmuManager : public QObject
 		int loadRom(LibGens::Rom *rom);
 		int closeRom(void);
 		
-		inline bool isRomOpen(void) const { return (m_rom != NULL); }
-		inline bool isPaused(void) const { return m_paused; }
+		inline bool isRomOpen(void) const
+			{ return (m_rom != NULL); }
+		inline paused_t paused(void) const
+			{ return m_paused; }
 		
 		// ROM information.
 		QString romName(void);
@@ -125,7 +130,7 @@ class EmuManager : public QObject
 		GensPortAudio *m_audio;
 		
 		// Paused state.
-		bool m_paused;
+		paused_t m_paused;
 		
 		// Emulation requests.
 		struct EmuRequest_t
@@ -163,6 +168,9 @@ class EmuManager : public QObject
 					int saveSlot;
 				} saveState;
 				
+				// Paused settings.
+				paused_t newPaused;
+				
 				// Emulator Reset.
 				bool hardReset;
 				
@@ -187,7 +195,7 @@ class EmuManager : public QObject
 		void doSaveState(const char *filename, int saveSlot);
 		void doLoadState(const char *filename, int saveSlot);
 		
-		void doPauseRequest(void);
+		void doPauseRequest(paused_t newPaused);
 		void doResetEmulator(bool hardReset);
 	
 	public slots:
@@ -195,7 +203,8 @@ class EmuManager : public QObject
 		 * pauseRequest(): Toggle the paused state.
 		 */
 		void pauseRequest(void);
-		void pauseRequest(bool paused);
+		void pauseRequest(paused_t newPaused);
+		void pauseRequest(paused_t paused_set, paused_t paused_clear);
 		
 		/**
 		 * resetEmulator(): Reset the emulator.

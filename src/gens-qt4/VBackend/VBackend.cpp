@@ -53,7 +53,7 @@ VBackend::VBackend()
 	m_osdLockCnt = 0;
 	
 	// Clear the effects flags.
-	m_paused = false;
+	m_paused.data = 0;
 	m_fastBlur = false;	// TODO: Load from configuration.
 	
 	// We're not running anything initially.
@@ -93,21 +93,30 @@ VBackend::~VBackend()
 
 /**
  * setPaused(): Set the emulation paused state.
- * @param newPaused True if emulation is paused; false if it isn't.
+ * @param newPaused Paused state.
  */
-void VBackend::setPaused(bool newPaused)
+void VBackend::setPaused(paused_t newPaused)
 {
-	if (m_paused == newPaused)
+	if (m_paused.data == newPaused.data)
 		return;
 	
 	// Update the paused status.
-	m_paused = newPaused;
-	if (isRunning())
+	const bool pause_manual_changed = (m_paused.paused_manual != newPaused.paused_manual);
+	m_paused.data = newPaused.data;
+	
+	// Update VBackend on one of the following conditions:
+	// - Manual pause changed and pause tint is enabled.
+	// - FPS is enabled.
+	if ((pause_manual_changed && gqt4_config->pauseTint()) || osdFpsEnabled())
 	{
-		setVbDirty();
-		if (osdFpsEnabled())
-			setOsdListDirty();
-		vbUpdate(); // TODO: Do we really need to call this here?
+		// Update the video backend.
+		if (isRunning())
+		{
+			setVbDirty();
+			if (osdFpsEnabled())
+				setOsdListDirty();
+			vbUpdate(); // TODO: Do we really need to call this here?
+		}
 	}
 	
 	// If emulation isn't running or emulation is paused, start the message timer.

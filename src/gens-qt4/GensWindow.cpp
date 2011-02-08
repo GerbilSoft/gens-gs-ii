@@ -464,14 +464,17 @@ void GensWindow::stateChanged(void)
 	{
 		// ROM is open.
 		m_vBackend->setRunning(m_emuManager->isRomOpen());
-		m_vBackend->setPaused(m_emuManager->isPaused());
+		m_vBackend->setPaused(m_emuManager->paused());
 	}
 	else
 	{
 		// ROM is closed.
+		paused_t unPause;
+		unPause.data = 0;
+		
 		m_vBackend->osd_show_preview(0, QImage());
 		m_vBackend->setRunning(false);
-		m_vBackend->setPaused(false);
+		m_vBackend->setPaused(unPause);
 		m_vBackend->resetFps();
 	}
 	
@@ -497,18 +500,26 @@ void GensWindow::qAppFocusChanged(QWidget *old, QWidget *now)
 	((void)old);
 	
 	// Assume window doesn't have focus by default.
-	bool paused = true;
+	bool paused_auto = true;
 	
 	// Check if the currently-focused widget is a child widget of GensWindow.
 	if (this->isAncestorOf(now))
 	{
 		// Window has focus.
-		paused = false;
+		paused_auto = false;
 	}
 	
 	// Send the pause request.
-	if (paused != m_emuManager->isPaused())
-		m_emuManager->pauseRequest(paused);
+	paused_t paused_set;
+	paused_t paused_clear;
+	paused_set.data = 0;
+	paused_clear.data = 0;
+	if (paused_auto)
+		paused_set.paused_auto = 1;
+	else
+		paused_clear.paused_auto = 1;
+	
+	m_emuManager->pauseRequest(paused_set, paused_clear);
 }
 
 
@@ -518,9 +529,23 @@ void GensWindow::qAppFocusChanged(QWidget *old, QWidget *now)
  */
 void GensWindow::autoPause_changed_slot(bool newAutoPause)
 {
-	// TODO: If Auto Pause is disabled, undo Auto Pause.
 	if (newAutoPause)
+	{
+		// Auto Pause is enabled.
 		qAppFocusChanged(NULL, gqt4_app->focusWidget());
+	}
+	else
+	{
+		// Auto Pause is disabled.
+		// Undo auto pause.
+		paused_t paused_set;
+		paused_t paused_clear;
+		paused_set.data = 0;
+		paused_clear.data = 0;
+		paused_clear.paused_auto = 1;
+		
+		m_emuManager->pauseRequest(paused_set, paused_clear);
+	}
 }
 
 

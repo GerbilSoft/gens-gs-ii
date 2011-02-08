@@ -106,7 +106,7 @@ void EmuManager::processQEmuRequest(void)
 			case EmuRequest_t::RQT_PAUSE_EMULATION:
 				// Pause emulation.
 				// Unpausing emulation is handled in EmuManager::pauseRequest().
-				doPauseRequest();
+				doPauseRequest(rq.newPaused);
 				break;
 			
 			case EmuRequest_t::RQT_RESET:
@@ -459,12 +459,21 @@ void EmuManager::doLoadState(const char *filename, int saveSlot)
 /**
  * doPauseRequest(): Pause emulation.
  * Unpausing emulation is handled in EmuManager::pauseRequest().
+ * @param newPaused New paused state.
  */
-void EmuManager::doPauseRequest(void)
+void EmuManager::doPauseRequest(paused_t newPaused)
 {
-	if (m_paused)
+	if (m_paused.data)
+	{
+		// Emulator is already paused.
+		// Simply update the paused state.
+		m_paused = newPaused;
+		emit stateChanged();
 		return;
-	m_paused = true;
+	}
+	
+	// Pause the emulator.
+	m_paused = newPaused;
 	
 	// Turn off audio and autosave SRam/EEPRom.
 	m_audio->close();	// TODO: Add a pause() function.

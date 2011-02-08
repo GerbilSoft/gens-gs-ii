@@ -84,7 +84,7 @@ EmuManager::EmuManager()
 	
 	// No ROM is loaded at startup.
 	m_rom = NULL;
-	m_paused = false;
+	m_paused.data = 0;
 	
 	// TODO: Load the last save slot from the configuration file.
 	m_saveSlot = 0;
@@ -111,7 +111,8 @@ EmuManager::~EmuManager()
 	// Delete the ROM.
 	// TODO
 	
-	m_paused = false;
+	// TODO: Do we really need to clear this?
+	m_paused.data = 0;
 }
 
 
@@ -307,7 +308,7 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	m_frames = 0;
 	
 	// Start the emulation thread.
-	m_paused = false;
+	m_paused.data = 0;
 	gqt4_emuThread = new EmuThread();
 	QObject::connect(gqt4_emuThread, SIGNAL(frameDone(bool)),
 			 this, SLOT(emuFrameDone(bool)));
@@ -354,7 +355,7 @@ int EmuManager::closeRom(void)
 	
 	// Close audio.
 	m_audio->close();
-	m_paused = false;
+	m_paused.data = 0;
 	
 	// TODO: Start the idle animation thread if an idle animation is specified.
 	// For now, just clear the screen.
@@ -481,7 +482,7 @@ void EmuManager::setController(int port, LibGens::IoBase::IoType type)
 	rq.ctrlChange.ctrlType = type;
 	m_qEmuRequest.enqueue(rq);
 	
-	if (!m_rom || m_paused)
+	if (!m_rom || m_paused.data)
 		processQEmuRequest();
 }
 
@@ -502,7 +503,7 @@ void EmuManager::screenShot(void)
 	rq.rqType = EmuRequest_t::RQT_SCREENSHOT;
 	m_qEmuRequest.enqueue(rq);
 	
-	if (m_paused)
+	if (m_paused.data)
 		processQEmuRequest();
 }
 
@@ -521,7 +522,7 @@ void EmuManager::setAudioRate(int newRate)
 	rq.audioRate = newRate;
 	m_qEmuRequest.enqueue(rq);
 	
-	if (!m_rom || m_paused)
+	if (!m_rom || m_paused.data)
 		processQEmuRequest();
 }
 
@@ -537,7 +538,7 @@ void EmuManager::setStereo(bool newStereo)
 	rq.audioStereo = newStereo;
 	m_qEmuRequest.enqueue(rq);
 	
-	if (!m_rom || m_paused)
+	if (!m_rom || m_paused.data)
 		processQEmuRequest();
 }
 
@@ -577,7 +578,7 @@ void EmuManager::saveState(void)
 	rq.saveState.saveSlot = m_saveSlot;
 	m_qEmuRequest.enqueue(rq);
 	
-	if (m_paused)
+	if (m_paused.data)
 		processQEmuRequest();
 }
 
@@ -598,38 +599,60 @@ void EmuManager::loadState(void)
 	rq.saveState.saveSlot = m_saveSlot;
 	m_qEmuRequest.enqueue(rq);
 	
-	if (m_paused)
+	if (m_paused.data)
 		processQEmuRequest();
 }
 
 
 /**
- * pauseRequest(): Toggle the paused state.
- * @param paused New paused state. (If omitted, toggles the paused state.)
+ * pauseRequest(): Set the paused state.
+ * @param paused_set Paused flags to set.
+ * @param paused_clear Paused flags to clear.
  */
-void EmuManager::pauseRequest(bool paused)
+void EmuManager::pauseRequest(paused_t paused_set, paused_t paused_clear)
 {
-	// TODO: Convert m_paused to a reference counter.
-	// This is needed for auto pause.
-	// TODO: Also set some value indicating non-auto pause
-	// to determine if the pause tint should be applied.
-	if (m_paused == paused)
-		return;
+	paused_t newPause = m_paused;
+	newPause.data |= paused_set.data;
+	newPause.data &= ~paused_clear.data;
 	
 	// Toggle the paused state.
-	pauseRequest();
+	pauseRequest(newPause);
 }
 
+/**
+ * pauseRequest(): Toggle the manual paused state.
+ */
 void EmuManager::pauseRequest(void)
+{
+	paused_t newPause = m_paused;
+	newPause.paused_manual = !newPause.paused_manual;
+	pauseRequest(newPause);
+}
+
+/**
+ * pauseRequest(): Set the paused state.
+ * @param newPaused New paused state.
+ */
+void EmuManager::pauseRequest(paused_t newPaused)
 {
 	if (!m_rom)
 		return;
 	
-	if (m_paused)
+	if (!!(m_paused.data) == !!(newPaused.data))
+	{
+		// Paused state is effectively the same.
+		// Simply update the emulator state.
+		m_paused = newPaused;
+		emit stateChanged();
+		return;
+	}
+	
+	// Check if we should pause or unpause the emulator.
+	if (!newPaused.data)
 	{
 		// Unpause the ROM immediately.
 		// TODO: Reset the FPS counter?
-		m_paused = false;
+		m_paused = newPaused;
 		m_audio->open();	// TODO: Add a resume() function.
 		if (gqt4_emuThread)
 			gqt4_emuThread->resume(false);
@@ -640,6 +663,7 @@ void EmuManager::pauseRequest(void)
 		// Queue the pause request.
 		EmuRequest_t rq;
 		rq.rqType = EmuRequest_t::RQT_PAUSE_EMULATION;
+		rq.newPaused = newPaused;
 		m_qEmuRequest.enqueue(rq);
 	}
 }
@@ -741,7 +765,7 @@ void EmuManager::autoFixChecksum_changed_slot(bool newAutoFixChecksum)
 	rq.autoFixChecksum = newAutoFixChecksum;
 	m_qEmuRequest.enqueue(rq);
 	
-	if (!m_rom || m_paused)
+	if (!m_rom || m_paused.data)
 		processQEmuRequest();
 }
 
@@ -761,7 +785,7 @@ void EmuManager::resetEmulator(bool hardReset)
 	rq.hardReset = hardReset;
 	m_qEmuRequest.enqueue(rq);
 	
-	if (m_paused)
+	if (m_paused.data)
 		processQEmuRequest();
 }
 
@@ -820,7 +844,8 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	if (!wasFastFrame)
 		emit updateVideo();
 	
-	if (m_paused)
+	// If emulation is paused, don't resume the emulation thread.
+	if (m_paused.data)
 		return;
 	
 	/** Auto Frame Skip **/

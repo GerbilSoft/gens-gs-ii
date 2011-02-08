@@ -376,15 +376,15 @@ void GensQGLWidget::paintGL(void)
 			// Emulation is running. Check if any effects should be applied.
 			
 			// If Fast Blur is enabled, update the Fast Blur effect.
-			// NOTE: Shader version is only used if we're not paused.
-			if (fastBlur() && (isPaused() || !m_shaderMgr.hasFastBlur()))
+			// NOTE: Shader version is only used if we're not paused manually.
+			if (fastBlur() && (isManualPaused() || !m_shaderMgr.hasFastBlur()))
 			{
 				updateFastBlur(bFromMD);
 				bFromMD = false;
 			}
 			
-			// If emulation is paused, update the pause effect.
-			if (isPaused() && !m_shaderMgr.hasPaused())
+			// If emulation is manually paused, update the pause effect.
+			if (isManualPaused() && !m_shaderMgr.hasPaused())
 			{
 				// Paused, but no shader is available.
 				// Apply the effect in software.
@@ -430,13 +430,13 @@ void GensQGLWidget::paintGL(void)
 	// Enable shaders, if necessary.
 	if (isRunning())
 	{
-		if (m_shaderMgr.hasFastBlur() && fastBlur() && !isPaused())
+		if (m_shaderMgr.hasFastBlur() && fastBlur() && !isManualPaused())
 		{
 			// Enable the Fast Blur shader.
-			// NOTE: Shader version is only used if we're not paused.
+			// NOTE: Shader version is only used if we're not paused manually.
 			m_shaderMgr.setFastBlur(true);
 		}
-		else if (m_shaderMgr.hasPaused() && isPaused())
+		else if (m_shaderMgr.hasPaused() && isManualPaused())
 		{
 			// Enable the Paused shader.
 			m_shaderMgr.setPaused(true);
@@ -499,13 +499,13 @@ void GensQGLWidget::paintGL(void)
 	// Disable shaders, if necessary.
 	if (isRunning())
 	{
-		if (m_shaderMgr.hasFastBlur() && fastBlur() && !isPaused())
+		if (m_shaderMgr.hasFastBlur() && fastBlur() && !isManualPaused())
 		{
 			// Disable the Fast Blur shader.
-			// NOTE: Shader version is only used if we're not paused.
+			// NOTE: Shader version is only used if we're not paused manually.
 			m_shaderMgr.setFastBlur(false);
 		}
-		else if (m_shaderMgr.hasPaused() && isPaused())
+		else if (m_shaderMgr.hasPaused() && isManualPaused())
 		{
 			// Disable the Paused shader.
 			m_shaderMgr.setPaused(false);
