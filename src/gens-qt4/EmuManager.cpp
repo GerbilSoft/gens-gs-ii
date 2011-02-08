@@ -639,7 +639,7 @@ void EmuManager::pauseRequest(void)
 	{
 		// Queue the pause request.
 		EmuRequest_t rq;
-		rq.rqType = EmuRequest_t::RQT_PAUSE_TOGGLE;
+		rq.rqType = EmuRequest_t::RQT_PAUSE_EMULATION;
 		m_qEmuRequest.enqueue(rq);
 	}
 }

@@ -139,7 +139,7 @@ class EmuManager : public QObject
 				RQT_AUDIO_STEREO	= 4,
 				RQT_SAVE_STATE		= 5,
 				RQT_LOAD_STATE		= 6,
-				RQT_PAUSE_TOGGLE	= 7,
+				RQT_PAUSE_EMULATION	= 7,
 				RQT_RESET		= 8,
 				RQT_AUTOFIX_CHANGE	= 9,
 			};

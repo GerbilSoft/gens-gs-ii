@@ -172,6 +172,12 @@ class GensWindow : public QMainWindow
 		 * @param now New widget.
 		 */
 		void qAppFocusChanged(QWidget *old, QWidget *now);
+		
+		/**
+		 * autoPause_changed_slot(): Auto Pause setting has changed.
+		 * @param newAutoPause New Auto Pause setting.
+		 */
+		void autoPause_changed_slot(bool newAutoPause);
 };
 
 }

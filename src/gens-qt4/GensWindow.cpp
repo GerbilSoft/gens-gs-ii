@@ -181,9 +181,11 @@ void GensWindow::setupUi(void)
 	connect(m_gensActions, SIGNAL(actionResetEmulator(bool)),
 		m_emuManager, SLOT(resetEmulator(bool)));
 	
-	// Application Focus Changed signal.
+	// Auto Pause: Application Focus Changed signal, and setting change signal.
 	connect(gqt4_app, SIGNAL(focusChanged(QWidget*, QWidget*)),
 		this, SLOT(qAppFocusChanged(QWidget*, QWidget*)));
+	connect(gqt4_config, SIGNAL(autoPause_changed(bool)),
+		this, SLOT(autoPause_changed_slot(bool)));
 	
 	// Retranslate the UI.
 	retranslateUi();
@@ -511,6 +513,18 @@ void GensWindow::qAppFocusChanged(QWidget *old, QWidget *now)
 	// Send the pause request.
 	if (paused != m_emuManager->isPaused())
 		m_emuManager->pauseRequest(paused);
+}
+
+
+/**
+ * autoPause_changed_slot(): Auto Pause setting has changed.
+ * @param newAutoPause New Auto Pause setting.
+ */
+void GensWindow::autoPause_changed_slot(bool newAutoPause)
+{
+	// TODO: If Auto Pause is disabled, undo Auto Pause.
+	if (newAutoPause)
+		qAppFocusChanged(NULL, gqt4_app->focusWidget());
 }
 
 

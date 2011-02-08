@@ -103,7 +103,9 @@ void EmuManager::processQEmuRequest(void)
 				free(rq.saveState.filename);
 				break;
 			
-			case EmuRequest_t::RQT_PAUSE_TOGGLE:
+			case EmuRequest_t::RQT_PAUSE_EMULATION:
+				// Pause emulation.
+				// Unpausing emulation is handled in EmuManager::pauseRequest().
 				doPauseRequest();
 				break;
 			
@@ -455,26 +457,18 @@ void EmuManager::doLoadState(const char *filename, int saveSlot)
 
 
 /**
- * doPauseRequest(): Toggle the paused state.
+ * doPauseRequest(): Pause emulation.
+ * Unpausing emulation is handled in EmuManager::pauseRequest().
  */
 void EmuManager::doPauseRequest(void)
 {
-	// Toggle the paused state.
-	m_paused = !m_paused;
-	
 	if (m_paused)
-	{
-		// New state is paused.
-		// Turn off audio and autosave SRam/EEPRom.
-		m_audio->close();	// TODO: Add a pause() function.
-		gqt4_emuContext->autoSaveData(-1);
-	}
-	else
-	{
-		// New state is unpaused.
-		// Turn on audio.
-		m_audio->open();	// TODO: Add a resume() function.
-	}
+		return;
+	m_paused = true;
+	
+	// Turn off audio and autosave SRam/EEPRom.
+	m_audio->close();	// TODO: Add a pause() function.
+	gqt4_emuContext->autoSaveData(-1);
 	
 	// Emulation state has changed.
 	emit stateChanged();
