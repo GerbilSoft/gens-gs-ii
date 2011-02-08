@@ -82,8 +82,19 @@ class GensConfig : public QObject
 		GensConfig();
 		~GensConfig();
 		
-		void save(void);
-		void reload(void);
+		/**
+		 * reload(): Load the user's configuration file.
+		 * @param filename Filename. (If empty, uses the default filename.)
+		 * @return 0 on success; non-zero on error.
+		 */
+		int reload(const QString& filename = QString());
+		
+		/**
+		 * save(): Save the user's configuration file.
+		 * @param filename Filename. (If empty, uses the default filename.)
+		 * @return 0 on success; non-zero on error.
+		 */
+		int save(const QString& filename = QString());
 		
 		void emitAll(void);
 		
