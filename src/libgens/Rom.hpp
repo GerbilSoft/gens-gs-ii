@@ -108,13 +108,25 @@ class Rom
 		 */
 		int loadRom(void *buf, size_t siz);
 		
-		// ROM names. (Obtained from the ROM headers.)
-		const utf8_str *romNameJP(void) const { return m_romNameJP.c_str(); }
-		const utf8_str *romNameUS(void) const { return m_romNameUS.c_str(); }
-		
 		// ROM filename.
-		const utf8_str *filename(void) const { return m_filename.c_str(); }
-		const utf8_str *filenameBaseNoExt(void) const { return m_filenameBaseNoExt.c_str(); }
+		const utf8_str *filename(void) const
+			{ return m_filename.c_str(); }
+		const utf8_str *filenameBaseNoExt(void) const
+			{ return m_filenameBaseNoExt.c_str(); }
+		
+		/********************
+		 * ROM header data. *
+		 ********************/
+		
+		/// ROM names. (Obtained from the ROM headers.)
+		const utf8_str *romNameJP(void) const
+			{ return m_romNameJP.c_str(); }
+		const utf8_str *romNameUS(void) const
+			{ return m_romNameUS.c_str(); }
+		
+		/// ROM checksum.
+		uint16_t checksum(void) const
+			{ return m_mdHeader.checksum; }
 		
 		/** Multi-file ROM archive support. **/
 		
@@ -123,11 +135,10 @@ class Rom
 		 * @return True if the ROM archive has multiple files; false if it doesn't.
 		 */
 		bool isMultiFile(void) const
-		{
-			return (m_z_entry_list && m_z_entry_list->next);
-		}
+			{ return (m_z_entry_list && m_z_entry_list->next); }
 		
-		const mdp_z_entry_t *get_z_entry_list(void) const { return m_z_entry_list; }
+		const mdp_z_entry_t *get_z_entry_list(void) const
+			{ return m_z_entry_list; }
 		
 		/**
 		 * select_z_entry(): Select a file from a multi-file ROM archive to load.
