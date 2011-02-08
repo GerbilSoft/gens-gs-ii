@@ -22,8 +22,17 @@
     <height>417</height>
    </size>
   </property>
+  <property name="baseSize">
+   <size>
+    <width>494</width>
+    <height>417</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>General Configuration</string>
+  </property>
+  <property name="unifiedTitleAndToolBarOnMac">
+   <bool>true</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="vboxDialog">

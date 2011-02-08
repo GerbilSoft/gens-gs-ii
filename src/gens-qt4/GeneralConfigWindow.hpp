@@ -71,6 +71,9 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		GeneralConfigWindow(QWidget *parent = NULL);
 		virtual ~GeneralConfigWindow();
 		
+		QSize sizeHint(void) const
+			{ return this->baseSize(); }
+		
 		virtual void keyPressEvent(QKeyEvent *event);
 		
 		// Button CSS colors.
@@ -78,9 +81,6 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		
 		// Warning string.
 		static const QString ms_sWarning;
-		
-		// Qt window flags.
-		static const Qt::WindowFlags ms_WindowFlags;
 		
 #ifndef GCW_APPLY_IMMED
 		void setApplyButtonEnabled(bool enabled)

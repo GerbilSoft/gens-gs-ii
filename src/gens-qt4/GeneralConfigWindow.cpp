@@ -59,27 +59,24 @@ const QString GeneralConfigWindow::ms_sCssBtnColors =
 const QString GeneralConfigWindow::ms_sWarning =
 	QString::fromLatin1("<span style='color: red'><b>") + tr("Warning:") + QString::fromLatin1("</b></span> ");
 
-// Qt window flags.
-const Qt::WindowFlags GeneralConfigWindow::ms_WindowFlags =
-			(Qt::CustomizeWindowHint |
-				Qt::Dialog |
-				Qt::WindowTitleHint |
-				Qt::WindowSystemMenuHint |
-				Qt::WindowMinimizeButtonHint |
-				Qt::WindowCloseButtonHint);
 
 /**
  * GeneralConfigWindow(): Initialize the General Configuration window.
  */
 GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
-	: QMainWindow(parent, ms_WindowFlags)
+	: QMainWindow(parent,
+		Qt::Dialog |
+		Qt::WindowTitleHint |
+		Qt::WindowSystemMenuHint |
+		Qt::WindowMinimizeButtonHint |
+		Qt::WindowCloseButtonHint)
 {
 	// Initialize the Qt4 UI.
 	setupUi(this);
 	
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
-
+	
 #ifndef GCW_APPLY_IMMED
 	// Set up a signal for the Apply button.
 	QPushButton *btnApply = buttonBox->button(QDialogButtonBox::Apply);

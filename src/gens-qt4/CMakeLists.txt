@@ -9,9 +9,11 @@ cmake_minimum_required(VERSION 2.6)
 # 4.6.0: QPixmap::fromWinHICON() [Win32] (fallbacks to QPixmap::fromWinHBITMAP() are in place)
 IF(WIN32)
 	SET(GENS_QT4_MIN_VERSION 4.2.0)
-ELSE(WIN32)
+ELSEIF(APPLE)
+	SET(GENS_QT4_MIN_VERSION 4.3.0)
+ELSE()
 	SET(GENS_QT4_MIN_VERSION 4.1.0)
-ENDIF(WIN32)
+ENDIF()
 
 # Find Qt4.
 # Components used:

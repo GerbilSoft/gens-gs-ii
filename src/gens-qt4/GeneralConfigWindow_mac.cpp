@@ -53,12 +53,6 @@ namespace GensQt4
  */
 void GeneralConfigWindow::setupUi_mac(void)
 {
-#if QT_VERSION > 0x040300
-	// Set the unified titlebar / toolbar property.
-	// This property was added in Qt 4.3.
-	setUnifiedTitleAndToolBarOnMac(true);
-#endif
-	
 	// Remove the window icon.
 	// SuitCase says the window icon is only used if there's
 	// a document open in the window, i.e. a "proxy icon".
@@ -118,8 +112,17 @@ void GeneralConfigWindow::setupUi_mac(void)
 		toolBar->addAction(action);
 	}
 	
-	// Create a stacked widget and move the tab contents over.
+	// Create a stacked widget.
+	// Size obtained from Qt Designer.
+	// (We need to specify the size here because of the fixed layout hack.)
+	// TODO: Remove extra height from the tabs.
+	const QSize szStacked(478, 369);
 	stackedWidget = new QStackedWidget(this);
+	stackedWidget->setMinimumSize(szStacked);
+	stackedWidget->setMaximumSize(szStacked);
+	stackedWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	
+	// Move the tabs to the stacked widget.
 	stackedWidget->addWidget(tabGeneral);
 	tabGeneral->setContentsMargins(0, 0, 0, 0);
 	stackedWidget->addWidget(tabGraphics);
@@ -138,6 +141,13 @@ void GeneralConfigWindow::setupUi_mac(void)
 	// TODO: Remove QDialogButtonBox on Mac OS X,
 	// and have settings apply immediately.
 	vboxButtonBox->setContentsMargins(16, 16, 16, 16);
+	
+	// Force a fixed-size layout.
+	// Mac OS X's Carbon and Cocoa libraries are annoying and
+	// will enable the Zoom button if the layout isn't fixed.
+	// (On Cocoa, using Qt::CustomizeWindowHint breaks the
+	//  unified titlebar/toolbar setup.)
+	this->layout()->setSizeConstraint(QLayout::SetFixedSize);
 	
 	// Hide the toolbar show/hide button in the titlebar.
 	// TODO: Do this on a window update event too?
