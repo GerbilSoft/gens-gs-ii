@@ -727,7 +727,7 @@ void EmuManager::autoFixChecksum_changed_slot(bool newAutoFixChecksum)
 	rq.autoFixChecksum = newAutoFixChecksum;
 	m_qEmuRequest.enqueue(rq);
 	
-	if (m_paused)
+	if (!m_rom || m_paused)
 		processQEmuRequest();
 }
 
