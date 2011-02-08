@@ -71,7 +71,7 @@ GensConfig::GensConfig()
 	m_colorScaleMethod = (int)LibGens::VdpPalette::COLSCALE_FULL;	// using int to prevent Qt issues
 	
 	/** General settings. **/
-	m_autoFixChecksum = false;
+	m_autoFixChecksum = true;
 	m_autoPause = false;
 	m_borderColor = true;
 	m_pauseTint = true;
