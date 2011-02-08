@@ -59,6 +59,7 @@ class VBackend
 		
 		/** Properties. **/
 		
+		/** Video settings. **/
 		inline bool isPaused(void) const
 			{ return !!(m_paused.data); }
 		inline bool isAutoPaused(void) const
@@ -67,19 +68,33 @@ class VBackend
 			{ return !!(m_paused.paused_manual); }
 		void setPaused(paused_t newPaused);
 		
+		// Stretch mode.
+		enum StretchMode
+		{
+			STRETCH_NONE	= 0,
+			STRETCH_H	= 1,
+			STRETCH_V	= 2,
+			STRETCH_FULL	= 3
+		};
+		
+		StretchMode stretchMode(void) const { return m_stretchMode; }
+		void setStretchMode(StretchMode newStretchMode);
+		
 		inline bool isRunning(void) const { return m_running; }
 		void setRunning(bool newIsRunning);
 		
-		inline bool osdFpsEnabled(void) const { return m_osdFpsEnabled; }
+		/** Onscreen display. **/
+		inline bool osdFpsEnabled(void) const
+			{ return m_osdFpsEnabled; }
 		void setOsdFpsEnabled(bool enable);
-		
-		inline QColor osdFpsColor(void) const { return m_osdFpsColor; }
+		inline QColor osdFpsColor(void) const
+			{ return m_osdFpsColor; }
 		void setOsdFpsColor(const QColor& color);
-		
-		inline bool osdMsgEnabled(void) const { return m_osdMsgEnabled; }
+		inline bool osdMsgEnabled(void) const
+			{ return m_osdMsgEnabled; }
 		void setOsdMsgEnabled(bool enable);
-		
-		inline QColor osdMsgColor(void) const { return m_osdMsgColor; }
+		inline QColor osdMsgColor(void) const
+			{ return m_osdMsgColor; }
 		void setOsdMsgColor(const QColor& color);
 		
 		/** Format strings. **/
@@ -117,18 +132,6 @@ class VBackend
 		// FPS manager.
 		void resetFps(void);
 		void pushFps(double fps);
-		
-		// Stretch mode.
-		enum StretchMode
-		{
-			STRETCH_NONE	= 0,
-			STRETCH_H	= 1,
-			STRETCH_V	= 2,
-			STRETCH_FULL	= 3
-		};
-		
-		StretchMode stretchMode(void) const { return m_stretchMode; }
-		void setStretchMode(StretchMode newStretchMode);
 		
 		// Recording OSD.
 		int recSetStatus(const QString& component, bool isRecording);
@@ -200,7 +203,11 @@ class VBackend
 		QColor m_osdFpsColor;
 		QColor m_osdMsgColor;
 		
-		// Stretch mode.
+		// Video settings.
+		// TODO: Mark aspectRatioConstraint variables as private.
+		// (Subclasses should use the accessor functions.)
+		bool m_aspectRatioConstraint;
+		bool m_aspectRatioConstraint_changed;
 		StretchMode m_stretchMode;
 		
 		// Preview image.
@@ -223,6 +230,15 @@ class VBackend
 		inline bool fastBlur(void) const
 			{ return m_fastBlur; }
 		void setFastBlur(bool newFastBlur);
+		
+		inline bool aspectRatioConstraint(void) const
+			{ return m_aspectRatioConstraint; }
+		void setAspectRatioConstraint(bool newAspectRatioConstraint);
+		
+		inline bool hasAspectRatioConstraintChanged(void) const
+			{ return m_aspectRatioConstraint_changed; }
+		inline void resetAspectRatioConstraintChanged(void)
+			{ m_aspectRatioConstraint_changed = false; }
 	
 	private:
 		// Effects.

@@ -52,12 +52,15 @@ VBackend::VBackend()
 	// Reset the OSD lock counter.
 	m_osdLockCnt = 0;
 	
-	// Clear the effects flags.
-	m_paused.data = 0;
-	m_fastBlur = false;	// TODO: Load from configuration.
-	
 	// We're not running anything initially.
 	m_running = false;
+	
+	// Set default video settings.
+	m_paused.data = 0;
+	m_fastBlur = false;
+	m_stretchMode = STRETCH_H;	// TODO: Load from configuration.
+	m_aspectRatioConstraint = true;
+	m_aspectRatioConstraint_changed = true;
 	
 	// Initialize the FPS manager.
 	resetFps();
@@ -68,9 +71,6 @@ VBackend::VBackend()
 	m_osdMsgEnabled = gqt4_config->osdMsgEnabled();
 	m_osdMsgColor   = gqt4_config->osdMsgColor();
 	setOsdListDirty();	// TODO: Set this on startup?
-	
-	// Set the default stretch mode.
-	m_stretchMode = STRETCH_H;	// TODO: Load from configuration.
 	
 	// Clear the preview image.
 	m_preview_show = false;
@@ -126,6 +126,30 @@ void VBackend::setPaused(paused_t newPaused)
 
 
 /**
+ * setStretchMode(): Set the stretch mode setting.
+ * @param newStretchMode New stretch mode setting.
+ */
+void VBackend::setStretchMode(StretchMode newStretchMode)
+{
+	if (m_stretchMode == newStretchMode)
+		return;
+	
+	// Update the stretch mode setting.
+	// TODO: Verify that this works properly.
+	m_stretchMode = newStretchMode;
+	if (isRunning())
+		setVbDirty();
+	if (isRunning())
+	{
+		setVbDirty();
+		// TODO: Only if paused, or regardless of pause?
+		if (isPaused())
+			vbUpdate();
+	}
+}
+
+
+/**
  * setFastBlur(): Set the Fast Blur effect setting.
  * @param newFastBlur True to enable Fast Blur; false to disable it.
  */
@@ -143,6 +167,28 @@ void VBackend::setFastBlur(bool newFastBlur)
 		if (isPaused())
 			vbUpdate();
 	}
+}
+
+
+/**
+ * setAspectRatioConstraint(): Set the aspect ratio constraint setting.
+ * @param newAspectRatioConstraint True to enable Aspect Ratio Constraint; false to disable it.
+ */
+void VBackend::setAspectRatioConstraint(bool newAspectRatioConstraint)
+{
+	if (m_aspectRatioConstraint == newAspectRatioConstraint)
+		return;
+	
+	// Update the Aspect Ratio Constraint setting.
+	m_aspectRatioConstraint = newAspectRatioConstraint;
+	m_aspectRatioConstraint_changed = true;
+	
+	// Update the Video Backend even when not running.
+	setVbDirty();
+	
+	// TODO: Only if paused, or regardless of pause?
+	if (!isRunning() || isPaused())
+		vbUpdate();
 }
 
 
@@ -482,31 +528,6 @@ void VBackend::setOsdMsgColor(const QColor& color)
 }
 
 
-/**
- * setStretchMode(): Set the stretch mode setting.
- * @param newStretchMode New stretch mode setting.
- */
-void VBackend::setStretchMode(StretchMode newStretchMode)
-{
-	if (m_stretchMode == newStretchMode)
-		return;
-	
-	// Update the stretch mode setting.
-	// TODO: Verify that this works properly.
-	m_stretchMode = newStretchMode;
-	if (isRunning())
-		setVbDirty();
-	if (isRunning())
-	{
-		setVbDirty();
-		// TODO: Only if paused, or regardless of pause?
-		if (isPaused())
-			vbUpdate();
-	}
-}
-
-
-	
 /**
  * osd_show_preview(): Show a preview image on the OSD.
  * @param duration Duration for the preview image to appaer, in milliseconds.

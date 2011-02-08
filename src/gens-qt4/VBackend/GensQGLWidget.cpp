@@ -91,8 +91,11 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 	connect(gqt4_config, SIGNAL(osdMsgColor_changed(const QColor&)),
 		this, SLOT(osdMsgColor_changed_slot(const QColor&)));
 	
+	// Video effect settings.
 	connect(gqt4_config, SIGNAL(fastBlur_changed(bool)),
 		this, SLOT(fastBlur_changed_slot(bool)));
+	connect(gqt4_config, SIGNAL(aspectRatioConstraint_changed(bool)),
+		this, SLOT(aspectRatioConstraint_changed_slot(bool)));
 }
 
 GensQGLWidget::~GensQGLWidget()
@@ -312,8 +315,7 @@ void GensQGLWidget::resizeGL(int width, int height)
 	glLoadIdentity();
 	
 	// Aspect ratio constraint.
-	bool aspect_constraint = true;	// TODO: Make this configurable.
-	if (!aspect_constraint)
+	if (!aspectRatioConstraint())
 	{
 		// No aspect ratio constraint.
 		glOrtho(-1, 1, -1, 1, -1, 1);
@@ -356,6 +358,13 @@ void GensQGLWidget::paintGL(void)
 	
 	glClearColor(1.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
+	
+	if (hasAspectRatioConstraintChanged())
+	{
+		// Aspect ratio constraint has changed.
+		resizeGL(this->width(), this->height());
+		resetAspectRatioConstraintChanged();
+	}
 	
 	if (m_vbDirty)
 	{
