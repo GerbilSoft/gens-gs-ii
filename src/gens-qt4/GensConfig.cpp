@@ -389,7 +389,8 @@ void GensConfig::setNtscV30Rolling(bool newNtscV30Rolling)
 
 void GensConfig::setSaveSlot(int newSaveSlot)
 {
-	if (m_saveSlot == newSaveSlot ||
+	// Allow setting the same save slot for preview functionality.
+	if (/*m_saveSlot == newSaveSlot ||*/
 	    newSaveSlot < 0 ||
 	    newSaveSlot > 9)
 	{
