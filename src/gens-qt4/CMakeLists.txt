@@ -13,17 +13,27 @@ ELSE(WIN32)
 	SET(GENS_QT4_MIN_VERSION 4.1.0)
 ENDIF(WIN32)
 
-FIND_PACKAGE(Qt4 ${GENS_QT4_MIN_VERSION} COMPONENTS QtCore QtGui QtOpenGL REQUIRED)
-IF(UNIX)
-	IF(APPLE)
-		# Don't enable QtDBus on Mac OS X.
-	ELSE(APPLE)
-		# Other Unix.
-		# Check for QtDBus.
-		FIND_PACKAGE(Qt4 4.1.0 COMPONENTS QtDBus)
-	ENDIF(APPLE)
-ENDIF(UNIX)
-FIND_PACKAGE(Qt4 4.1.0 COMPONENTS QtDBus)
+# Find Qt4.
+# Components used:
+# - QtCore
+# - QtGui
+# - QtOpenGl
+# - QtDBus (Unix only, and not Mac OS X)
+FIND_PACKAGE(Qt4 ${GENS_QT4_MIN_VERSION}
+	COMPONENTS QtCore QtGui QtOpenGL QtDBus)
+IF(NOT QT_QTCORE_FOUND)
+	MESSAGE(FATAL_ERROR "QtCore not found! Please install Qt ${GENS_QT4_MIN_VERSION} or higher.")
+ELSEIF(NOT QT_QTGUI_FOUND)
+	MESSAGE(FATAL_ERROR "QtGui not found! Please install Qt ${GENS_QT4_MIN_VERSION} or higher.")
+ELSEIF(NOT QT_QTOPENGL_FOUND)
+	MESSAGE(FATAL_ERROR "QtOpenGL not found! Please install Qt ${GENS_QT4_MIN_VERSION} or higher.")
+ENDIF()
+
+IF(APPLE)
+	# Don't enable QtDBus on Mac OS X.
+	UNSET(QT_QTDBUS_FOUND)
+ENDIF(APPLE)
+
 INCLUDE(${QT_USE_FILE})
 
 # Link to Carbon on Mac OS X.
