@@ -205,7 +205,7 @@ ENDIF(WIN32)
 IF(APPLE)
 	SET(gens-qt4_SRCS
 		${gens-qt4_SRCS}
-		GeneralConfigWindow_mac.cpp
+		GeneralConfigWindow_mac.mm
 		)
 ENDIF(APPLE)
 

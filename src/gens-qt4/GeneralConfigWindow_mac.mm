@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * GeneralConfigWindow_mac.cpp: General Configuration Window. (Mac OS X)   *
+ * GeneralConfigWindow_mac.mm: General Configuration Window. (Mac OS X)    *
  *                                                                         *
  * Copyright (c) 2011 by David Korth.                                      *
  *                                                                         *
@@ -34,10 +34,7 @@
 #include <QtGui/QActionGroup>
 
 // Mac OS X includes.
-#ifdef QT_MAC_USE_COCOA
-// TODO: Cocoa window.
-#else
-// Carbon window.
+#ifndef QT_MAC_USE_COCOA
 #include <Carbon/Carbon.h>
 #ifndef kWindowToolbarButtonAttribute
 #define kWindowToolbarButtonAttribute (1 << 6)
@@ -153,7 +150,8 @@ void GeneralConfigWindow::setupUi_mac(void)
 	// TODO: Do this on a window update event too?
 #ifdef QT_MAC_USE_COCOA
 	// Qt is using Cocoa.
-	// TODO
+	OSWindowRef window = qt_mac_window_for(this);
+	[window setShowsToolbarButton:false];
 #else
 	// Qt is using Carbon.
 	ChangeWindowAttributes(qt_mac_window_for(this),
