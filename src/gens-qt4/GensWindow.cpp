@@ -500,7 +500,7 @@ void GensWindow::qAppFocusChanged(QWidget *old, QWidget *now)
 	bool paused = true;
 	
 	// Check if the currently-focused widget is a child widget of GensWindow.
-	if (this->isAncestorOf(NULL))
+	if (this->isAncestorOf(now))
 	{
 		// Window has focus.
 		paused = false;
