@@ -605,7 +605,21 @@ void EmuManager::loadState(void)
 
 /**
  * pauseRequest(): Toggle the paused state.
+ * @param paused New paused state. (If omitted, toggles the paused state.)
  */
+void EmuManager::pauseRequest(bool paused)
+{
+	// TODO: Convert m_paused to a reference counter.
+	// This is needed for auto pause.
+	// TODO: Also set some value indicating non-auto pause
+	// to determine if the pause tint should be applied.
+	if (m_paused == paused)
+		return;
+	
+	// Toggle the paused state.
+	pauseRequest();
+}
+
 void EmuManager::pauseRequest(void)
 {
 	if (!m_rom)

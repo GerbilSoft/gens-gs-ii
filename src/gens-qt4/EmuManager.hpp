@@ -195,6 +195,7 @@ class EmuManager : public QObject
 		 * pauseRequest(): Toggle the paused state.
 		 */
 		void pauseRequest(void);
+		void pauseRequest(bool paused);
 		
 		/**
 		 * resetEmulator(): Reset the emulator.
