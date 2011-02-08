@@ -30,6 +30,12 @@
 
 #include "lg_osd.h"
 
+// ROM data access.
+// TODO: Move ROM data to a cartridge class?
+// NOTE: Currently only needed for fixChecksum() / restoreChecksum().
+// Maybe fixChecksum() / restoreChecksum() should be moved to EmuMD.
+#include "cpu/M68K_Mem.hpp"
+
 namespace LibGens
 {
 
@@ -69,7 +75,7 @@ EmuContext::EmuContext(Rom *rom)
 	// Initialize EEPRom.
 	// EEPRom is only used if the ROM is in the EEPRom class's database.
 	// Otherwise, SRam is used.
-	int eepromSize = rom->initEEPRom(&m_EEPRom);
+	int eepromSize = m_rom->initEEPRom(&m_EEPRom);
 	if (eepromSize > 0)
 	{
 		// EEPRom was initialized.
@@ -79,7 +85,7 @@ EmuContext::EmuContext(Rom *rom)
 	{
 		// EEPRom was not initialized.
 		// Initialize SRam.
-		int sramSize = rom->initSRam(&m_SRam);
+		int sramSize = m_rom->initSRam(&m_SRam);
 		if (sramSize > 0)
 			lg_osd(OSD_SRAM_LOAD, sramSize);
 	}
@@ -104,6 +110,62 @@ EmuContext::~EmuContext()
 }
 
 
+/**
+ * fixChecksum(): Fix the ROM checksum.
+ * This function uses the standard Sega checksum formula.
+ * Results are applied to M68K_Mem::Rom_Data[] only.
+ * The ROM header checksum will remain the same.
+ * 
+ * NOTE: This function may be overridden for e.g. SMS,
+ * which uses a different checksum method.
+ * 
+ * @return 0 on success; non-zero on error.
+ */
+int EmuContext::fixChecksum(void)
+{
+	if (!m_rom || M68K_Mem::Rom_Size <= 0x200)
+		return -1;
+	
+	// Calculate the ROM checksum.
+	// TODO: We're assuming the ROM has already been byteswapped.
+	// Add byteswapping flags somewhere!
+	// NOTE: If ROM is an odd number of bytes, it'll be padded by 1 byte.
+	uint16_t checksum = 0;
+	uint16_t *rom_ptr = &M68K_Mem::Rom_Data.u16[0x200>>1];
+	for (int i = (M68K_Mem::Rom_Size - 0x200); i >= 0; i--)
+	{
+		checksum += *rom_ptr++;
+	}
+	
+	// Set the new checksum.
+	M68K_Mem::Rom_Data.u16[0x18E>>1] = checksum;
+	return 0;
+}
+
+
+/**
+ * restoreChecksum(): Restore the ROM checksum.
+ * This restores the ROM checksum in M68K_Mem::Rom_Data[]
+ * from the previously-loaded header information.
+ * 
+ * NOTE: This function may be overridden for e.g. SMS,
+ * which uses a different checksum method.
+ * 
+ * @return 0 on success; non-zero on error.
+ */
+int EmuContext::restoreChecksum(void)
+{
+	if (!m_rom || M68K_Mem::Rom_Size <= 0x200)
+		return -1;
+	
+	// Restore the ROM checksum.
+	// TODO: We're assuming the ROM has already been byteswapped.
+	// Add byteswapping flags somewhere!
+	M68K_Mem::Rom_Data.u16[0x18E>>1] = m_rom->checksum();
+	return 0;
+}
+
+	
 /**
  * saveData(): Save SRam/EEPRom.
  * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)

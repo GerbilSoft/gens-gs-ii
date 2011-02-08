@@ -45,6 +45,31 @@ class EmuContext
 		virtual ~EmuContext();
 		
 		/**
+		 * fixChecksum(): Fix the ROM checksum.
+		 * This function uses the standard Sega checksum formula.
+		 * Results are applied to M68K_Mem::Rom_Data[] only.
+		 * The ROM header checksum will remain the same.
+		 * 
+		 * NOTE: This function may be overridden for e.g. SMS,
+		 * which uses a different checksum method.
+		 * 
+		 * @return 0 on success; non-zero on error.
+		 */
+		virtual int fixChecksum(void);
+		
+		/**
+		 * restoreChecksum(): Restore the ROM checksum.
+		 * This restores the ROM checksum in M68K_Mem::Rom_Data[]
+		 * from the previously-loaded header information.
+		 * 
+		 * NOTE: This function may be overridden for e.g. SMS,
+		 * which uses a different checksum method.
+		 * 
+		 * @return 0 on success; non-zero on error.
+		 */
+		virtual int restoreChecksum(void);
+		
+		/**
 		 * saveData(): Save SRam/EEPRom.
 		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
 		 */
@@ -69,6 +94,7 @@ class EmuContext
 		 */
 		virtual int hardReset(void) = 0;
 		
+		/** Frame execution functions. **/
 		virtual void execFrame(void) = 0;
 		virtual void execFrameFast(void) = 0;
 		
