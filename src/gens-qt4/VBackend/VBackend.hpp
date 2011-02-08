@@ -21,8 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include <config.h>
-
 #ifndef __GENS_QT4_VBACKEND_HPP__
 #define __GENS_QT4_VBACKEND_HPP__
 
@@ -92,6 +90,16 @@ class VBackend
 		}
 		
 		/**
+		 * osd_lock() / osd_unlock(): Temporarily lock the OSD.
+		 * Primarily used when loading settings all at once.
+		 * Calls are cumulative; 2 locks requires 2 unlocks.
+		 * Calling osd_unlock() when not locked will return an error.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int osd_lock(void);
+		int osd_unlock(void);
+		
+		/**
 		 * osd_show_preview(): Show a preview image on the OSD.
 		 * @param duration Duration for the preview image to appaer, in milliseconds.
 		 * @param img Image to show.
@@ -125,6 +133,9 @@ class VBackend
 	protected:
 		// Dirty flag. If set, texture must be reuploaded.
 		bool m_vbDirty;
+		
+		// OSD lock counter.
+		int m_osdLockCnt;
 		
 		// Color depth information.
 		LibGens::VdpPalette::ColorDepth m_lastBpp;

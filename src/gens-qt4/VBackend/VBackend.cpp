@@ -21,11 +21,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include <config.h>
 #include "VBackend.hpp"
 
 // C includes.
 #include <stdio.h>
+#include <assert.h>
 
 // LibGens includes.
 #include "libgens/Effects/PausedEffect.hpp"
@@ -48,6 +48,9 @@ VBackend::VBackend()
 	
 	// Set the internal framebuffer to NULL by default.
 	m_intScreen = NULL;
+	
+	// Reset the OSD lock counter.
+	m_osdLockCnt = 0;
 	
 	// Clear the effects flags.
 	m_paused = false;
@@ -207,10 +210,14 @@ void VBackend::updateFastBlur(bool fromMdScreen)
  */
 void VBackend::osd_vprintf(const int duration, const char *msg, va_list ap)
 {
-	if (duration <= 0)
+	assert(m_osdLockCnt >= 0);
+	if (duration <= 0 ||		// Invalid duration.
+	    !osdMsgEnabled() ||		// Messages disabled.
+	    m_osdLockCnt > 0)		// OSD locked.
+	{
+		// Don't write anything to the message buffer.
 		return;
-	if (!osdMsgEnabled())
-		return;
+	}
 	
 	// Format the message.
 	char msg_buf[1024];
@@ -234,6 +241,26 @@ void VBackend::osd_vprintf(const int duration, const char *msg, va_list ap)
 		// Start the message timer.
 		m_msgTimer->start();
 	}
+}
+
+
+/**
+ * osd_lock() / osd_unlock(): Temporarily lock the OSD.
+ * Primarily used when loading settings all at once.
+ * Calls are cumulative; 2 locks requires 2 unlocks.
+ * Calling osd_unlock() when not locked will return an error.
+ * @return 0 on success; non-zero on error.
+ */
+int VBackend::osd_lock(void)
+	{ m_osdLockCnt++; return 0; }
+int VBackend::osd_unlock(void)
+{
+	assert(m_osdLockCnt >= 0);
+	if (m_osdLockCnt <= 0)
+		return -1;
+	
+	m_osdLockCnt--;
+	return 0;
 }
 
 
@@ -478,6 +505,12 @@ void VBackend::setStretchMode(StretchMode newStretchMode)
  */
 void VBackend::osd_show_preview(int duration, const QImage& img)
 {
+	// If the OSD is locked, don't do anything.
+	assert(m_osdLockCnt >= 0);
+	if (m_osdLockCnt > 0)
+		return;
+	
+	// Save the current preview visibility state.
 	bool old_preview_show = m_preview_show;
 	
 	// TODO: Mark as dirty.
