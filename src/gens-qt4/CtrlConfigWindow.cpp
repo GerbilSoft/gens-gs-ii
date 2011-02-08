@@ -26,6 +26,7 @@
 
 // EmuMD has the I/O devices.
 #include "libgens/MD/EmuMD.hpp"
+#include "widgets/GensKeySequenceWidget.hpp"
 
 
 namespace GensQt4
@@ -63,6 +64,8 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	// Remove the window icon. (Mac "proxy icon")
 	this->setWindowIcon(QIcon());
 #endif
+	GensKeySequenceWidget *w = new GensKeySequenceWidget(this);
+	verticalLayout->addWidget(w);
 	
 	// Copy the current controller settings.
 	// TODO: Button mapping.

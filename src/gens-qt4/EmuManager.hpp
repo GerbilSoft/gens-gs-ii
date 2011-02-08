@@ -141,6 +141,7 @@ class EmuManager : public QObject
 				RQT_LOAD_STATE		= 6,
 				RQT_PAUSE_TOGGLE	= 7,
 				RQT_RESET		= 8,
+				RQT_AUTOFIX_CHANGE	= 9,
 			};
 			
 			RequestType rqType;
@@ -164,6 +165,9 @@ class EmuManager : public QObject
 				
 				// Emulator Reset.
 				bool hardReset;
+				
+				// Auto Fix Checksum.
+				bool autoFixChecksum;
 			};
 		};
 		
@@ -211,10 +215,16 @@ class EmuManager : public QObject
 		}
 		
 		/**
-		 * setSaveSlot(): Set the save slot number.
+		 * saveSlot_changed_slot(): Set the save slot number.
 		 * @param slotNum Slot number, (0-9)
 		 */
 		void saveSlot_changed_slot(int slotNum);
+		
+		/**
+		 * autoFixChecksum_changed_slot(): Change the Auto Fix Checksum setting.
+		 * @param newAutoFixChecksum New Auto Fix Checksum setting.
+		 */
+		void autoFixChecksum_changed_slot(bool newAutoFixChecksum);
 };
 
 }

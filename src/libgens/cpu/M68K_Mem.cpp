@@ -82,7 +82,7 @@ namespace LibGens
 /** ROM and RAM variables. **/
 //M68K_Mem::Ram_68k_t M68K_Mem::Ram_68k;	// TODO: Fix Starscream!
 M68K_Mem::Rom_Data_t M68K_Mem::Rom_Data;
-unsigned int M68K_Mem::Rom_Size;
+unsigned int M68K_Mem::Rom_Size = 0;
 
 /** Z80/M68K cycle table. **/
 int M68K_Mem::Z80_M68K_Cycle_Tab[512];

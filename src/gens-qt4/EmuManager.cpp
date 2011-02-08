@@ -97,6 +97,8 @@ EmuManager::EmuManager()
 	// Connect the configuration slots.
 	connect(gqt4_config, SIGNAL(saveSlot_changed(int)),
 		this, SLOT(saveSlot_changed_slot(int)));
+	connect(gqt4_config, SIGNAL(autoFixChecksum_changed(bool)),
+		this, SLOT(autoFixChecksum_changed_slot(bool)));
 }
 
 EmuManager::~EmuManager()
@@ -295,12 +297,6 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	// m_rom isn't deleted, since keeping it around
 	// indicates that a game is running.
 	// TODO: Use gqt4_emuContext instead?
-	
-	// Autofix ROM checksum, if enabled.
-	// TODO: Move this call to EmuMD::EmuMD()?
-	// (That'll require setting a static option in EmuContext.)
-	if (gqt4_config->autoFixChecksum())
-		gqt4_emuContext->fixChecksum();
 	
 	// Open audio.
 	m_audio->open();
@@ -716,6 +712,23 @@ void EmuManager::saveSlot_changed_slot(int slotNum)
 		emit osdPrintMsg(1500, osdMsg);
 		emit osdShowPreview(0, QImage());
 	}
+}
+
+
+/**
+ * autoFixChecksum_changed_slot(): Change the Auto Fix Checksum setting.
+ * @param newAutoFixChecksum New Auto Fix Checksum setting.
+ */
+void EmuManager::autoFixChecksum_changed_slot(bool newAutoFixChecksum)
+{
+	// Queue the autofix checksum change request.
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_AUTOFIX_CHANGE;
+	rq.autoFixChecksum = newAutoFixChecksum;
+	m_qEmuRequest.enqueue(rq);
+	
+	if (m_paused)
+		processQEmuRequest();
 }
 
 

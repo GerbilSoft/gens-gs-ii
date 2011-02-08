@@ -53,6 +53,12 @@ IoBase *EmuContext::m_portE;		// EXT port.
 // Static pointer. Temporarily needed for SRam/EEPRom.
 EmuContext *EmuContext::instance = NULL;
 
+/**
+ * Global settings.
+ */
+bool EmuContext::ms_AutoFixChecksum = true;
+
+
 EmuContext::EmuContext(Rom *rom)
 {
 	ms_RefCount++;
@@ -127,8 +133,7 @@ int EmuContext::fixChecksum(void)
 		return -1;
 	
 	// Calculate the ROM checksum.
-	// TODO: We're assuming the ROM has already been byteswapped.
-	// Add byteswapping flags somewhere!
+	// NOTE: ROM is byteswapped. (Header data is read before calling Rom::loadRom().)
 	// NOTE: If ROM is an odd number of bytes, it'll be padded by 1 byte.
 	uint16_t checksum = 0;
 	uint16_t *rom_ptr = &M68K_Mem::Rom_Data.u16[0x200>>1];
@@ -159,8 +164,7 @@ int EmuContext::restoreChecksum(void)
 		return -1;
 	
 	// Restore the ROM checksum.
-	// TODO: We're assuming the ROM has already been byteswapped.
-	// Add byteswapping flags somewhere!
+	// NOTE: ROM is byteswapped. (Header data is read before calling Rom::loadRom().)
 	M68K_Mem::Rom_Data.u16[0x18E>>1] = m_rom->checksum();
 	return 0;
 }

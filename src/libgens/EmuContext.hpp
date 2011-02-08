@@ -120,6 +120,15 @@ class EmuContext
 		static inline bool GetSaveDataEnable(void) { return instance->m_saveDataEnable; }
 		static inline SRam *GetSRam(void) { return instance->getSRam(); }
 		static inline EEPRom *GetEEPRom(void) { return instance->getEEPRom(); }
+		
+		/**
+		 * Global settings.
+		 */
+		// TODO: Maybe autofix/unfix checksums in active contexts when this is changed?
+		static inline bool AutoFixChecksum(void)
+			{ return ms_AutoFixChecksum; }
+		static inline void SetAutoFixChecksum(bool newAutoFixChecksum)
+			{ ms_AutoFixChecksum = newAutoFixChecksum; }
 	
 	protected:
 		Rom *m_rom;
@@ -132,6 +141,11 @@ class EmuContext
 		
 		// Static pointer. Temporarily needed for SRam/EEPRom.
 		static EmuContext *instance;
+		
+		/**
+		 * Global settings.
+		 */
+		static bool ms_AutoFixChecksum;
 	
 	private:
 		static int ms_RefCount;

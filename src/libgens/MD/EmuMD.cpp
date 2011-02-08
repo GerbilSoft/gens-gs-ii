@@ -83,9 +83,12 @@ EmuMD::EmuMD(Rom *rom)
 		return;
 	}
 	
-	// TODO: Byteswapping flags.
-	// Until they're implemented, byteswap the ROM *after* initializing SRam/EEPRom.
+	// Byteswap the ROM data.
 	be16_to_cpu_array(&M68K_Mem::Rom_Data.u8[0], M68K_Mem::Rom_Size);
+	
+	// Autofix the ROM checksum, if enabled.
+	if (AutoFixChecksum())
+		fixChecksum();
 	
 	// Initialize the VDP.
 	VdpIo::Reset();
@@ -145,6 +148,14 @@ EmuMD::~EmuMD()
  */
 int EmuMD::softReset(void)
 {
+	// ROM checksum:
+	// - If autofix is enabled, fix the checksum.
+	// - If autofix is disabled, restore the checksum.
+	if (AutoFixChecksum())
+		fixChecksum();
+	else
+		restoreChecksum();
+	
 	// Reset the M68K, Z80, and YM2612.
 	M68K::Reset();
 	Z80::Reset();
@@ -170,6 +181,14 @@ int EmuMD::hardReset(void)
 	m_port1->reset();
 	m_port2->reset();
 	m_portE->reset();
+	
+	// ROM checksum:
+	// - If autofix is enabled, fix the checksum.
+	// - If autofix is disabled, restore the checksum.
+	if (AutoFixChecksum())
+		fixChecksum();
+	else
+		restoreChecksum();
 	
 	// Hard-Reset the M68K, Z80, VDP, PSG, and YM2612.
 	// This includes clearing RAM.

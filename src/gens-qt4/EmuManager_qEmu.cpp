@@ -111,6 +111,12 @@ void EmuManager::processQEmuRequest(void)
 				doResetEmulator(rq.hardReset);
 				break;
 			
+			case EmuRequest_t::RQT_AUTOFIX_CHANGE:
+				// Set the Auto Fix Checksum setting.
+				// TODO: Apply changes immediately?
+				LibGens::EmuContext::SetAutoFixChecksum(rq.autoFixChecksum);
+				break;
+			
 			case EmuRequest_t::RQT_UNKNOWN:
 			default:
 				// Unknown emulation request.
