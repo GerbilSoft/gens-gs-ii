@@ -296,6 +296,12 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	// indicates that a game is running.
 	// TODO: Use gqt4_emuContext instead?
 	
+	// Autofix ROM checksum, if enabled.
+	// TODO: Move this call to EmuMD::EmuMD()?
+	// (That'll require setting a static option in EmuContext.)
+	if (gqt4_config->autoFixChecksum())
+		gqt4_emuContext->fixChecksum();
+	
 	// Open audio.
 	m_audio->open();
 	

@@ -481,6 +481,16 @@ void EmuManager::doPauseRequest(void)
  */
 void EmuManager::doResetEmulator(bool hardReset)
 {
+	// If autofix checksum is enabled, re-fix the checksum.
+	// Otherwise, restore the checksum.
+	// TODO: Move this call to EmuMD::hardReset() / EmuMD::softReset()?
+	// (That'll require setting a static option in EmuContext.)
+	// TODO: Automatically fix/unfix checksum when the option is changed?
+	if (gqt4_config->autoFixChecksum())
+		gqt4_emuContext->fixChecksum();
+	else
+		gqt4_emuContext->restoreChecksum();
+	
 	if (hardReset)
 	{
 		// Do a hard reset.
