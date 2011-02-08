@@ -38,6 +38,10 @@
 #include <QtGui/QDropEvent>
 #include <QtGui/QVBoxLayout>
 
+// GensQApplication.hpp is needed in order to connect signals from gqt4_app.
+// Otherwise, g++ won't realize it inherits from QObject.
+#include "GensQApplication.hpp"
+
 // LibGens includes.
 #include "libgens/macros/log_msg.h"
 
@@ -74,7 +78,10 @@ GensWindow::GensWindow()
 	setupUi();
 	
 	// Make sure all user configuration settings are applied.
+	// (Lock the OSD first to prevent random messages from appearing.)
+	m_vBackend->osd_lock();
 	gqt4_config->emitAll();
+	m_vBackend->osd_unlock();
 }
 
 
@@ -174,6 +181,10 @@ void GensWindow::setupUi(void)
 	connect(m_gensActions, SIGNAL(actionResetEmulator(bool)),
 		m_emuManager, SLOT(resetEmulator(bool)));
 	
+	// Application Focus Changed signal.
+	connect(gqt4_app, SIGNAL(focusChanged(QWidget*, QWidget*)),
+		this, SLOT(qAppFocusChanged(QWidget*, QWidget*)));
+	
 	// Retranslate the UI.
 	retranslateUi();
 }
@@ -195,6 +206,13 @@ void GensWindow::retranslateUi(void)
  */
 void GensWindow::closeEvent(QCloseEvent *event)
 {
+	// Remove the Application Focus Changed signal to
+	// prevent segmentation faults.
+	// (e.g. caused by a signal being received after the
+	//  GensWindow has been deleted)
+	disconnect(gqt4_app, SIGNAL(focusChanged(QWidget*, QWidget*)),
+		   this, SLOT(qAppFocusChanged(QWidget*, QWidget*)));
+	
 	// Quit.
 	m_emuManager->closeRom();
 	QuitGens();
@@ -210,6 +228,9 @@ void GensWindow::closeEvent(QCloseEvent *event)
  */
 void GensWindow::showEvent(QShowEvent *event)
 {
+	// TODO: Check the event type.
+	((void)event);
+	
 	if (m_hasInitResize)
 		return;
 	
@@ -453,6 +474,43 @@ void GensWindow::stateChanged(void)
 	}
 	
 	setGensTitle();
+}
+
+
+/**
+ * qAppFocusChanged(): Application focus has changed.
+ * @param old Old widget.
+ * @param now New widget.
+ */
+void GensWindow::qAppFocusChanged(QWidget *old, QWidget *now)
+{
+	if (!gqt4_config->autoPause() ||
+	    !m_emuManager->isRomOpen())
+	{
+		// Auto Pause is disabled,
+		// or no ROM is running.
+		return;
+	}
+	
+	((void)old);
+	
+	// Assume window doesn't have focus by default.
+	bool paused = true;
+	
+	if (now != NULL)
+	{
+		if (now == m_vBackend->toQWidget() ||
+		    now == m_menubar ||
+		    now == this)
+		{
+			// Window has focus.
+			paused = false;
+		}
+	}
+	
+	// Send the pause request.
+	if (paused != m_emuManager->isPaused())
+		m_emuManager->pauseRequest(paused);
 }
 
 

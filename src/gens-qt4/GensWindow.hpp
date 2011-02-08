@@ -165,6 +165,13 @@ class GensWindow : public QMainWindow
 		 */
 		void osdShowPreview(int duration, const QImage& img)
 			{ m_vBackend->osd_show_preview(duration, img); }
+		
+		/**
+		 * qAppFocusChanged(): Application focus has changed.
+		 * @param old Old widget.
+		 * @param now New widget.
+		 */
+		void qAppFocusChanged(QWidget *old, QWidget *now);
 };
 
 }
