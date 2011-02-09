@@ -70,7 +70,9 @@ int GensConfig::reload(const QString& filename)
 	{
 		// Filename was not specified.
 		// Use the default filename.
-		settings = new QSettings(QLatin1String("gens-gs-ii"), QLatin1String("gens-gs-ii"), this);
+		settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
+						QLatin1String("gens-gs-ii"),
+						QLatin1String("gens-gs-ii"), this);
 	}
 	settings->setIniCodec(QTextCodec::codecForName("UTF-8"));
 	
@@ -176,7 +178,9 @@ int GensConfig::save(const QString& filename)
 	{
 		// Filename was not specified.
 		// Use the default filename.
-		settings = new QSettings(QLatin1String("gens-gs-ii"), QLatin1String("gens-gs-ii"), this);
+		settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
+						QLatin1String("gens-gs-ii"),
+						QLatin1String("gens-gs-ii"), this);
 	}
 	settings->setIniCodec(QTextCodec::codecForName("UTF-8"));
 	
