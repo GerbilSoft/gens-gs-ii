@@ -329,6 +329,13 @@ on NTSC models.</string>
              </property>
             </widget>
            </item>
+           <item>
+            <widget class="QCheckBox" name="chkBilinearFilter">
+             <property name="text">
+              <string>Enable bi&amp;linear filtering</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </item>
@@ -784,6 +791,7 @@ on NTSC models.</string>
   <tabstop>cboIntroColor</tabstop>
   <tabstop>chkAspectRatioConstraint</tabstop>
   <tabstop>chkFastBlur</tabstop>
+  <tabstop>chkBilinearFilter</tabstop>
   <tabstop>hsldContrast</tabstop>
   <tabstop>hsldBrightness</tabstop>
   <tabstop>chkGrayscale</tabstop>
@@ -840,12 +848,12 @@ on NTSC models.</string>
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>356</x>
-     <y>162</y>
+     <x>430</x>
+     <y>207</y>
     </hint>
     <hint type="destinationlabel">
-     <x>451</x>
-     <y>164</y>
+     <x>470</x>
+     <y>207</y>
     </hint>
    </hints>
   </connection>
@@ -856,12 +864,12 @@ on NTSC models.</string>
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>356</x>
-     <y>178</y>
+     <x>430</x>
+     <y>207</y>
     </hint>
     <hint type="destinationlabel">
-     <x>451</x>
-     <y>180</y>
+     <x>470</x>
+     <y>207</y>
     </hint>
    </hints>
   </connection>
@@ -872,12 +880,12 @@ on NTSC models.</string>
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>383</x>
-     <y>190</y>
+     <x>430</x>
+     <y>234</y>
     </hint>
     <hint type="destinationlabel">
-     <x>452</x>
-     <y>192</y>
+     <x>470</x>
+     <y>234</y>
     </hint>
    </hints>
   </connection>
@@ -888,12 +896,12 @@ on NTSC models.</string>
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>379</x>
-     <y>206</y>
+     <x>430</x>
+     <y>234</y>
     </hint>
     <hint type="destinationlabel">
-     <x>455</x>
-     <y>205</y>
+     <x>470</x>
+     <y>234</y>
     </hint>
    </hints>
   </connection>

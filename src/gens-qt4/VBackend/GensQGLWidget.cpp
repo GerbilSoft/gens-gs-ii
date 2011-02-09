@@ -96,6 +96,8 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 		this, SLOT(fastBlur_changed_slot(bool)));
 	connect(gqt4_config, SIGNAL(aspectRatioConstraint_changed(bool)),
 		this, SLOT(aspectRatioConstraint_changed_slot(bool)));
+	connect(gqt4_config, SIGNAL(bilinearFilter_changed(bool)),
+		this, SLOT(bilinearFilter_changed_slot(bool)));
 }
 
 GensQGLWidget::~GensQGLWidget()
@@ -262,10 +264,10 @@ void GensQGLWidget::reallocTexOsd(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	
-	// GL filtering.
-	// TODO: Make this customizable!
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	// Bilinear filtering.
+	const GLint filterMethod = (this->bilinearFilter() ? GL_LINEAR : GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMethod);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMethod);
 	
 	glDisable(GL_TEXTURE_2D);
 }
@@ -410,6 +412,13 @@ void GensQGLWidget::paintGL(void)
 		// Bind the texture.
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_tex);
+		
+		// Bilinear filtering.
+		// TODO: Should we only run this if the setting is changed?
+		// (It's probably more efficient to just run it every time...)
+		const GLint filterMethod = (this->bilinearFilter() ? GL_LINEAR : GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMethod);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMethod);
 		
 		// (Re-)Upload the texture.
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 336);

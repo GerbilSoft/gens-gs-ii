@@ -134,6 +134,8 @@ class GensQGLWidget : public QGLWidget, public VBackend
 			{ setFastBlur(newFastBlur); }
 		void aspectRatioConstraint_changed_slot(bool newAspectRatioConstraint)
 			{ setAspectRatioConstraint(newAspectRatioConstraint); }
+		void bilinearFilter_changed_slot(bool newBilinearFilter)
+			{ setBilinearFilter(newBilinearFilter); }
 };
 
 }

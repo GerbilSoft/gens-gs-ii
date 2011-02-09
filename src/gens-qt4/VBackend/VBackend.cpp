@@ -56,11 +56,13 @@ VBackend::VBackend()
 	m_running = false;
 	
 	// Set default video settings.
+	// TODO: Load default video settings from configuration.
 	m_paused.data = 0;
-	m_fastBlur = false;
-	m_stretchMode = STRETCH_H;	// TODO: Load from configuration.
-	m_aspectRatioConstraint = true;
+	m_fastBlur = gqt4_config->fastBlur();
+	m_stretchMode = STRETCH_H;
+	m_aspectRatioConstraint = gqt4_config->aspectRatioConstraint();
 	m_aspectRatioConstraint_changed = true;
+	m_bilinearFilter = gqt4_config->bilinearFilter();
 	
 	// Initialize the FPS manager.
 	resetFps();
@@ -182,6 +184,27 @@ void VBackend::setAspectRatioConstraint(bool newAspectRatioConstraint)
 	// Update the Aspect Ratio Constraint setting.
 	m_aspectRatioConstraint = newAspectRatioConstraint;
 	m_aspectRatioConstraint_changed = true;
+	
+	// Update the Video Backend even when not running.
+	setVbDirty();
+	
+	// TODO: Only if paused, or regardless of pause?
+	if (!isRunning() || isPaused())
+		vbUpdate();
+}
+
+
+/**
+ * setBilinearFilter(): Set the bilinear filter setting.
+ * @param newBilinearFilter True to enable bilinear filtering; false to disable it.
+ */
+void VBackend::setBilinearFilter(bool newBilinearFilter)
+{
+	if (m_bilinearFilter == newBilinearFilter)
+		return;
+	
+	// Update the Aspect Ratio Constraint setting.
+	m_bilinearFilter = newBilinearFilter;
 	
 	// Update the Video Backend even when not running.
 	setVbDirty();

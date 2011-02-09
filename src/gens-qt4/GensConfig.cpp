@@ -135,6 +135,7 @@ int GensConfig::reload(const QString& filename)
 	settings->beginGroup(QLatin1String("Graphics"));
 	m_aspectRatioConstraint = settings->value(QLatin1String("aspectRatioConstraint"), true).toBool();
 	m_fastBlur = settings->value(QLatin1String("fastBlur"), false).toBool();
+	m_bilinearFilter = settings->value(QLatin1String("bilinearFilter"), false).toBool();
 	m_contrast = settings->value(QLatin1String("contrast"), 0).toInt();
 	m_brightness = settings->value(QLatin1String("brightness"), 0).toInt();
 	m_grayscale = settings->value(QLatin1String("grayscale"), false).toBool();
@@ -257,6 +258,7 @@ int GensConfig::save(const QString& filename)
 	settings->beginGroup(QLatin1String("Graphics"));
 	settings->setValue(QLatin1String("aspectRatioConstraint"), m_aspectRatioConstraint);
 	settings->setValue(QLatin1String("fastBlur"), m_fastBlur);
+	settings->setValue(QLatin1String("bilinearFilter"), m_bilinearFilter);
 	settings->setValue(QLatin1String("contrast"), m_contrast);
 	settings->setValue(QLatin1String("brightness"), m_brightness);
 	settings->setValue(QLatin1String("grayscale"), m_grayscale);
@@ -457,6 +459,15 @@ void GensConfig::setFastBlur(bool newFastBlur)
 	
 	m_fastBlur = newFastBlur;
 	emit fastBlur_changed(m_fastBlur);
+}
+
+void GensConfig::setBilinearFilter(bool newBilinearFilter)
+{
+	if (m_bilinearFilter == newBilinearFilter)
+		return;
+	
+	m_bilinearFilter = newBilinearFilter;
+	emit bilinearFilter_changed(m_bilinearFilter);
 }
 
 void GensConfig::setContrast(int newContrast)

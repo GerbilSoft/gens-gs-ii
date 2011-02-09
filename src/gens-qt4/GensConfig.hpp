@@ -62,6 +62,7 @@ class GensConfig : public QObject
 	/** Graphics settings. **/
 	Q_PROPERTY(bool aspectRatioConstraint READ aspectRatioConstraint WRITE setAspectRatioConstraint NOTIFY aspectRatioConstraint_changed)
 	Q_PROPERTY(bool fastBlur READ fastBlur WRITE setFastBlur NOTIFY fastBlur_changed)
+	Q_PROPERTY(bool bilinearFilter READ bilinearFilter WRITE setBilinearFilter NOTIFY bilinearFilter_changed)
 	Q_PROPERTY(int contrast READ contrast WRITE setContrast NOTIFY contrast_changed)
 	Q_PROPERTY(int brightness READ brightness WRITE setBrightness NOTIFY brightness_changed)
 	Q_PROPERTY(bool grayscale READ grayscale WRITE setGrayscale NOTIFY grayscale_changed)
@@ -143,6 +144,9 @@ class GensConfig : public QObject
 		bool fastBlur(void) const
 			{ return m_fastBlur; }
 		void setFastBlur(bool newFastBlur);
+		bool bilinearFilter(void) const
+			{ return m_bilinearFilter; }
+		void setBilinearFilter(bool newBilinearFilter);
 		int contrast(void) const
 			{ return m_contrast; }
 		void setContrast(int newContrast);
@@ -211,6 +215,7 @@ class GensConfig : public QObject
 		/** Graphics settings. **/
 		bool m_aspectRatioConstraint;
 		bool m_fastBlur;
+		bool m_bilinearFilter;
 		int m_contrast;
 		int m_brightness;
 		bool m_grayscale;
@@ -252,6 +257,7 @@ class GensConfig : public QObject
 		/** Graphics settings. **/
 		void aspectRatioConstraint_changed(bool newAspectRatioConstraint);
 		void fastBlur_changed(bool newFastBlur);
+		void bilinearFilter_changed(bool newBilinearFilter);
 		void contrast_changed(int newContrast);
 		void brightness_changed(int newBrightness);
 		void grayscale_changed(bool newGrayscale);

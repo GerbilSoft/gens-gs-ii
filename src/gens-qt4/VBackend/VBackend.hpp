@@ -208,6 +208,7 @@ class VBackend
 		// (Subclasses should use the accessor functions.)
 		bool m_aspectRatioConstraint;
 		bool m_aspectRatioConstraint_changed;
+		bool m_bilinearFilter;
 		StretchMode m_stretchMode;
 		
 		// Preview image.
@@ -239,6 +240,10 @@ class VBackend
 			{ return m_aspectRatioConstraint_changed; }
 		inline void resetAspectRatioConstraintChanged(void)
 			{ m_aspectRatioConstraint_changed = false; }
+		
+		inline bool bilinearFilter(void) const
+			{ return m_bilinearFilter; }
+		void setBilinearFilter(bool newBilinearFilter);
 	
 	private:
 		// Effects.
