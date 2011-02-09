@@ -77,7 +77,7 @@ class GensKeySequenceWidget : public QWidget
 		friend class GensKeySequenceWidgetPrivate;
 		GensKeySequenceWidgetPrivate *const d;
 		
-		Q_DISABLE_COPY(GensKeySequenceWidget);
+		Q_DISABLE_COPY(GensKeySequenceWidget)
 };
 
 }
