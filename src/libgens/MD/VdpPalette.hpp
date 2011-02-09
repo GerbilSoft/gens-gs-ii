@@ -77,53 +77,31 @@ class VdpPalette
 			BPP_MAX
 		};
 		
-		inline bool isDirty(void) const { return m_dirty; }
+		inline bool isDirty(void) const
+			{ return m_dirty; }
 		
 		// Properties.
-		inline int contrast(void) const { return m_contrast; }
-		void setContrast(int newContrast)
-		{
-			if (newContrast == m_contrast)
-				return;
-			m_contrast = newContrast;
-			m_dirty = true;
-		}
+		inline int contrast(void) const
+			{ return m_contrast; }
+		void setContrast(int newContrast);
 		
-		inline int brightness(void) const { return m_brightness; }
-		void setBrightness(int newBrightness)
-		{
-			if (newBrightness == m_brightness)
-				return;
-			m_brightness = newBrightness;
-			m_dirty = true;
-		}
+		inline int brightness(void) const
+			{ return m_brightness; }
+		void setBrightness(int newBrightness);
 		
-		inline bool grayscale(void) const { return m_grayscale; }
-		void setGrayscale(bool newGrayscale)
-		{
-			if (newGrayscale == m_grayscale)
-				return;
-			m_grayscale = newGrayscale;
-			m_dirty = true;
-		}
+		inline bool grayscale(void) const
+			{ return m_grayscale; }
+		void setGrayscale(bool newGrayscale);
 		
-		inline bool invertColor(void) const { return m_invertColor; }
-		void setInvertColor(bool newInvertColor)
-		{
-			if (newInvertColor == m_invertColor)
-				return;
-			m_invertColor = newInvertColor;
-			m_dirty = true;
-		}
+		inline bool inverted(void) const
+			{ return m_inverted; }
+		void setInverted(bool newInverted);
 		
-		inline ColorDepth bpp(void) const { return m_bpp; }
-		void setBpp(ColorDepth newBpp)
-		{
-			if (m_bpp == newBpp)
-				return;
-			m_bpp = newBpp;
-			m_dirty = true;
-		}
+		inline ColorDepth bpp(void) const
+			{ return m_bpp; }
+		void setBpp(ColorDepth newBpp);
+		
+		/** Palette manipulation functions. **/
 		
 		// Palette recalculation functions.
 		void recalcFull(void);
@@ -138,11 +116,11 @@ class VdpPalette
 		// TODO
 		//static void Adjust_CRam_32X(void);
 	
-	protected:
+	private:
 		int m_contrast;
 		int m_brightness;
 		bool m_grayscale;
-		bool m_invertColor;
+		bool m_inverted;
 		ColorScaleMethod_t m_csm;
 		ColorDepth m_bpp;
 		
@@ -161,7 +139,9 @@ class VdpPalette
 		FORCE_INLINE void T_recalcFullMD(pixel *palMD);
 		
 		template<bool hs, typename pixel>
-		static FORCE_INLINE void T_updateMD(pixel *MD_palette, const pixel *palette, const VdpIo::VDP_CRam_t *cram);
+		static FORCE_INLINE void T_updateMD(pixel *MD_palette,
+						const pixel *palette,
+						const VdpIo::VDP_CRam_t *cram);
 };
 
 }

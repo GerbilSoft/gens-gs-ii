@@ -44,7 +44,7 @@ VdpPalette::VdpPalette()
 	m_contrast = 100;
 	m_brightness = 100;
 	m_grayscale = false;
-	m_invertColor = false;
+	m_inverted = false;
 	m_csm = COLSCALE_FULL;
 	m_bpp = BPP_32;
 	m_dirty = true;
@@ -61,6 +61,27 @@ VdpPalette::~VdpPalette()
 {
 	// TODO
 }
+
+
+/**
+ * PAL_PROPERTY_WRITE(): Property write function macro..
+ */
+#define PAL_PROPERTY_WRITE(propName, setPropType, setPropName) \
+void VdpPalette::set##setPropName(setPropType new##setPropName) \
+{ \
+	if (m_##propName == (new##setPropName)) \
+		return; \
+	m_##propName = (new##setPropName); \
+	m_dirty = true; \
+}
+
+
+/** Property write functions. **/
+PAL_PROPERTY_WRITE(contrast, int, Contrast)
+PAL_PROPERTY_WRITE(brightness, int, Brightness)
+PAL_PROPERTY_WRITE(grayscale, bool, Grayscale)
+PAL_PROPERTY_WRITE(inverted, bool, Inverted)
+PAL_PROPERTY_WRITE(bpp, ColorDepth, Bpp)
 
 
 /**
@@ -179,7 +200,7 @@ FORCE_INLINE void VdpPalette::T_recalcFullMD(pixel *palFull)
 			r = g = b = CalcGrayscale(r, g, b);
 		}
 		
-		if (m_invertColor)
+		if (m_inverted)
 		{
 			// Invert the color components.
 			r ^= 0xFF;
@@ -406,7 +427,9 @@ void VdpPalette::resetActive(void)
  * @param cram CRam.
  */
 template<bool hs, typename pixel>
-FORCE_INLINE void VdpPalette::T_updateMD(pixel *MD_palette, const pixel *palette, const VdpIo::VDP_CRam_t *cram)
+FORCE_INLINE void VdpPalette::T_updateMD(pixel *MD_palette,
+					const pixel *palette,
+					const VdpIo::VDP_CRam_t *cram)
 {
 	// TODO: Figure out a better way to handle this.
 	if (VdpRend::VDP_Layers & VdpRend::VDP_LAYER_PALETTE_LOCK)
@@ -527,3 +550,4 @@ void Adjust_CRam_32X(void)
 #endif
 
 }
+
