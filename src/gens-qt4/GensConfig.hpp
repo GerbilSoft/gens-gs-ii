@@ -97,6 +97,10 @@ class GensConfig : public QObject
 		 */
 		int save(const QString& filename = QString());
 		
+		/**
+		 * emitAll(): Emit all configuration settings.
+		 * Useful when starting the emulator.
+		 */
 		void emitAll(void);
 		
 		/** Onscreen display. **/
