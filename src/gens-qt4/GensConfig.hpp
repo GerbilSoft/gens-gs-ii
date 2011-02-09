@@ -32,56 +32,22 @@
 // Key configuration.
 #include "actions/GensKeyConfig.hpp"
 
+// Property function macro.
+// NOTE: We can't include Q_PROPERTY() or signals here due to moc limitations.
+#define GC_PROPERTY(propType, propName, setPropType, setPropName) \
+	public: \
+		propType propName(void) const \
+			{ return m_##propName; } \
+		void set##setPropName(setPropType new##setPropName); \
+	private: \
+		propType m_##propName
+
 namespace GensQt4
 {
 
 class GensConfig : public QObject
 {
 	Q_OBJECT
-	
-	/** Properties. **/
-	
-	/** Configuration path. **/
-	// TODO: Mark cfgPath as CONSTANT?
-	Q_PROPERTY(QString cfgPath READ cfgPath)
-	
-	/** Onscreen display. **/
-	Q_PROPERTY(bool osdFpsEnabled READ osdFpsEnabled WRITE setOsdFpsEnabled NOTIFY osdFpsEnabled_changed)
-	Q_PROPERTY(QColor osdFpsColor READ osdFpsColor WRITE setOsdFpsColor NOTIFY osdFpsColor_changed)
-	Q_PROPERTY(bool osdMsgEnabled READ osdMsgEnabled WRITE setOsdMsgEnabled NOTIFY osdMsgEnabled_changed)
-	Q_PROPERTY(QColor osdMsgColor READ osdMsgColor WRITE setOsdMsgColor NOTIFY osdMsgColor_changed)
-	
-	/** Intro effect. **/
-	Q_PROPERTY(int introStyle READ introStyle WRITE setIntroStyle NOTIFY introStyle_changed)
-	Q_PROPERTY(int introColor READ introColor WRITE setIntroColor NOTIFY introColor_changed)
-	
-	/** Sega CD Boot ROMs. **/
-	Q_PROPERTY(QString mcdRomUSA READ mcdRomUSA WRITE setMcdRomUSA NOTIFY mcdRomUSA_changed)
-	Q_PROPERTY(QString mcdRomEUR READ mcdRomEUR WRITE setMcdRomEUR NOTIFY mcdRomEUR_changed)
-	Q_PROPERTY(QString mcdRomJPN READ mcdRomJPN WRITE setMcdRomJPN NOTIFY mcdRomJPN_changed)
-	
-	/** External programs. **/
-	Q_PROPERTY(QString extprgUnRAR READ extprgUnRAR WRITE setExtPrgUnRAR NOTIFY extprgUnRAR_changed)
-	
-	/** Graphics settings. **/
-	Q_PROPERTY(bool aspectRatioConstraint READ aspectRatioConstraint WRITE setAspectRatioConstraint NOTIFY aspectRatioConstraint_changed)
-	Q_PROPERTY(bool fastBlur READ fastBlur WRITE setFastBlur NOTIFY fastBlur_changed)
-	Q_PROPERTY(bool bilinearFilter READ bilinearFilter WRITE setBilinearFilter NOTIFY bilinearFilter_changed)
-	Q_PROPERTY(int contrast READ contrast WRITE setContrast NOTIFY contrast_changed)
-	Q_PROPERTY(int brightness READ brightness WRITE setBrightness NOTIFY brightness_changed)
-	Q_PROPERTY(bool grayscale READ grayscale WRITE setGrayscale NOTIFY grayscale_changed)
-	Q_PROPERTY(bool inverted READ inverted WRITE setInverted NOTIFY inverted_changed)
-	Q_PROPERTY(int colorScaleMethod READ colorScaleMethod WRITE setColorScaleMethod NOTIFY colorScaleMethod_changed)
-	
-	/** General settings. **/
-	Q_PROPERTY(bool autoFixChecksum READ autoFixChecksum WRITE setAutoFixChecksum NOTIFY autoFixChecksum_changed)
-	Q_PROPERTY(bool autoPause READ autoPause WRITE setAutoPause NOTIFY autoPause_changed)
-	Q_PROPERTY(bool borderColor READ borderColor WRITE setBorderColor NOTIFY borderColor_changed)
-	Q_PROPERTY(bool pauseTint READ pauseTint WRITE setPauseTint NOTIFY pauseTint_changed)
-	Q_PROPERTY(bool ntscV30Rolling READ ntscV30Rolling WRITE setNtscV30Rolling NOTIFY ntscV30Rolling_changed)
-	
-	/** Savestates. **/
-	Q_PROPERTY(int saveSlot READ saveSlot WRITE setSaveSlot NOTIFY saveSlot_changed)
 	
 	public:
 		GensConfig();
@@ -109,148 +75,90 @@ class GensConfig : public QObject
 		 */
 		void emitAll(void);
 		
+	/** Properties. **/
+		
 		/** Configuration path. **/
-		QString cfgPath(void) const
-			{ return m_cfgPath; }
+		// TODO: Mark cfgPath as CONSTANT?
+		Q_PROPERTY(QString cfgPath READ cfgPath)
+		private:
+			QString m_cfgPath;
+		public:
+			QString cfgPath(void) const
+				{ return m_cfgPath; }
 		
 		/** Onscreen display. **/
-		bool osdFpsEnabled(void) const
-			{ return m_osdFpsEnabled; }
-		void setOsdFpsEnabled(bool enable);
-		QColor osdFpsColor(void) const
-			{ return m_osdFpsColor; }
-		void setOsdFpsColor(const QColor& color);
-		bool osdMsgEnabled(void) const
-			{ return m_osdMsgEnabled; }
-		void setOsdMsgEnabled(bool enable);
-		QColor osdMsgColor(void) const
-			{ return m_osdMsgColor; }
-		void setOsdMsgColor(const QColor& color);
+		Q_PROPERTY(bool osdFpsEnabled READ osdFpsEnabled WRITE setOsdFpsEnabled NOTIFY osdFpsEnabled_changed)
+		GC_PROPERTY(bool, osdFpsEnabled, bool, OsdFpsEnabled);
+		Q_PROPERTY(QColor osdFpsColor READ osdFpsColor WRITE setOsdFpsColor NOTIFY osdFpsColor_changed)
+		GC_PROPERTY(QColor, osdFpsColor, const QColor&, OsdFpsColor);
+		Q_PROPERTY(bool osdMsgEnabled READ osdMsgEnabled WRITE setOsdMsgEnabled NOTIFY osdMsgEnabled_changed)
+		GC_PROPERTY(bool, osdMsgEnabled, bool, OsdMsgEnabled);
+		Q_PROPERTY(QColor osdMsgColor READ osdMsgColor WRITE setOsdMsgColor NOTIFY osdMsgColor_changed)
+		GC_PROPERTY(QColor, osdMsgColor, const QColor&, OsdMsgColor);
 		
 		/** Intro effect. **/
-		int introStyle(void) const
-			{ return m_introStyle; }
-		void setIntroStyle(int style);
-		int introColor(void) const
-			{ return m_introColor; }
-		void setIntroColor(int color);
+		Q_PROPERTY(int introStyle READ introStyle WRITE setIntroStyle NOTIFY introStyle_changed)
+		GC_PROPERTY(int, introStyle, int, IntroStyle);
+		Q_PROPERTY(int introColor READ introColor WRITE setIntroColor NOTIFY introColor_changed)
+		GC_PROPERTY(int, introColor, int, IntroColor);
 		
 		/** Sega CD Boot ROMs. **/
-		QString mcdRomUSA(void) const
-			{ return m_mcdRomUSA; }
-		void setMcdRomUSA(const QString& filename);
-		QString mcdRomEUR(void) const
-			{ return m_mcdRomEUR; }
-		void setMcdRomEUR(const QString& filename);
-		QString mcdRomJPN(void) const
-			{ return m_mcdRomJPN; }
-		void setMcdRomJPN(const QString& filename);
+		Q_PROPERTY(QString mcdRomUSA READ mcdRomUSA WRITE setMcdRomUSA NOTIFY mcdRomUSA_changed)
+		GC_PROPERTY(QString, mcdRomUSA, const QString&, McdRomUSA);
+		Q_PROPERTY(QString mcdRomEUR READ mcdRomEUR WRITE setMcdRomEUR NOTIFY mcdRomEUR_changed)
+		GC_PROPERTY(QString, mcdRomEUR, const QString&, McdRomEUR);
+		Q_PROPERTY(QString mcdRomJPN READ mcdRomJPN WRITE setMcdRomJPN NOTIFY mcdRomJPN_changed)
+		GC_PROPERTY(QString, mcdRomJPN, const QString&, McdRomJPN);
 		
 		/** External programs. **/
-		QString extprgUnRAR(void) const
-			{ return m_extprgUnRAR; }
-		void setExtPrgUnRAR(const QString& filename);
+		Q_PROPERTY(QString extprgUnRAR READ extprgUnRAR WRITE setExtPrgUnRAR NOTIFY extprgUnRAR_changed)
+		GC_PROPERTY(QString, extprgUnRAR, const QString&, ExtPrgUnRAR);
 		
 		/** Graphics settings. **/
-		bool aspectRatioConstraint(void) const
-			{ return m_aspectRatioConstraint; }
-		void setAspectRatioConstraint(bool newAspectRatioConstraint);
-		bool fastBlur(void) const
-			{ return m_fastBlur; }
-		void setFastBlur(bool newFastBlur);
-		bool bilinearFilter(void) const
-			{ return m_bilinearFilter; }
-		void setBilinearFilter(bool newBilinearFilter);
-		int contrast(void) const
-			{ return m_contrast; }
-		void setContrast(int newContrast);
-		int brightness(void) const
-			{ return m_brightness; }
-		void setBrightness(int newBrightness);
-		bool grayscale(void) const
-			{ return m_grayscale; }
-		void setGrayscale(bool newGrayscale);
-		bool inverted(void) const
-			{ return m_inverted; }
-		void setInverted(bool newInverted);
-		int colorScaleMethod(void) const
-			{ return m_colorScaleMethod; }
-		void setColorScaleMethod(int newColorScaleMethod);
+		Q_PROPERTY(bool aspectRatioConstraint READ aspectRatioConstraint WRITE setAspectRatioConstraint NOTIFY aspectRatioConstraint_changed)
+		GC_PROPERTY(bool, aspectRatioConstraint, bool, AspectRatioConstraint);
+		Q_PROPERTY(bool fastBlur READ fastBlur WRITE setFastBlur NOTIFY fastBlur_changed)
+		GC_PROPERTY(bool, fastBlur, bool, FastBlur);
+		Q_PROPERTY(bool bilinearFilter READ bilinearFilter WRITE setBilinearFilter NOTIFY bilinearFilter_changed)
+		GC_PROPERTY(bool, bilinearFilter, bool, BilinearFilter);
+		Q_PROPERTY(int contrast READ contrast WRITE setContrast NOTIFY contrast_changed)
+		GC_PROPERTY(int, contrast, int, Contrast);
+		Q_PROPERTY(int brightness READ brightness WRITE setBrightness NOTIFY brightness_changed)
+		GC_PROPERTY(int, brightness, int, Brightness);
+		Q_PROPERTY(bool grayscale READ grayscale WRITE setGrayscale NOTIFY grayscale_changed)
+		GC_PROPERTY(bool, grayscale, bool, Grayscale);
+		Q_PROPERTY(bool inverted READ inverted WRITE setInverted NOTIFY inverted_changed)
+		GC_PROPERTY(bool, inverted, bool, Inverted);
+		Q_PROPERTY(int colorScaleMethod READ colorScaleMethod WRITE setColorScaleMethod NOTIFY colorScaleMethod_changed)
+		GC_PROPERTY(int, colorScaleMethod, int, ColorScaleMethod);
 		
 		/** General settings. **/
-		bool autoFixChecksum(void) const
-			{ return m_autoFixChecksum; }
-		void setAutoFixChecksum(bool newAutoFixChecksum);
-		bool autoPause(void) const
-			{ return m_autoPause; }
-		void setAutoPause(bool newAutoPause);
-		bool borderColor(void) const
-			{ return m_borderColor; }
-		void setBorderColor(bool newBorderColor);
-		bool pauseTint(void) const
-			{ return m_pauseTint; }
-		void setPauseTint(bool newPauseTint);
-		bool ntscV30Rolling(void) const
-			{ return m_ntscV30Rolling; }
-		void setNtscV30Rolling(bool newNtscV30Rolling);
+		Q_PROPERTY(bool autoFixChecksum READ autoFixChecksum WRITE setAutoFixChecksum NOTIFY autoFixChecksum_changed)
+		GC_PROPERTY(bool, autoFixChecksum, bool, AutoFixChecksum);
+		Q_PROPERTY(bool autoPause READ autoPause WRITE setAutoPause NOTIFY autoPause_changed)
+		GC_PROPERTY(bool, autoPause, bool, AutoPause);
+		Q_PROPERTY(bool borderColor READ borderColor WRITE setBorderColor NOTIFY borderColor_changed)
+		GC_PROPERTY(bool, borderColor, bool, BorderColor);
+		Q_PROPERTY(bool pauseTint READ pauseTint WRITE setPauseTint NOTIFY pauseTint_changed)
+		GC_PROPERTY(bool, pauseTint, bool, PauseTint);
+		Q_PROPERTY(bool ntscV30Rolling READ ntscV30Rolling WRITE setNtscV30Rolling NOTIFY ntscV30Rolling_changed)
+		GC_PROPERTY(bool, ntscV30Rolling, bool, NtscV30Rolling);
 		
 		/** Savestates. **/
-		int saveSlot(void) const
-			{ return m_saveSlot; }
-		void setSaveSlot(int newSaveSlot);
-		void setSaveSlot_Prev(void)
-			{ setSaveSlot((m_saveSlot + 9) % 10); }
-		void setSaveSlot_Next(void)
-			{ setSaveSlot((m_saveSlot + 1) % 10); }
+		Q_PROPERTY(int saveSlot READ saveSlot WRITE setSaveSlot NOTIFY saveSlot_changed)
+		GC_PROPERTY(int, saveSlot, int, SaveSlot);
+		public:
+			void setSaveSlot_Prev(void)
+				{ setSaveSlot((m_saveSlot + 9) % 10); }
+			void setSaveSlot_Next(void)
+				{ setSaveSlot((m_saveSlot + 1) % 10); }
 		
 		/** Key configuration. **/
-		int keyToAction(GensKey_t key)
-			{ return m_keyConfig.keyToAction(key); }
-	
-	protected:
-		/** Configuration path. **/
-		QString m_cfgPath;
-		
-		/** Onscreen display. **/
-		bool m_osdFpsEnabled;
-		QColor m_osdFpsColor;
-		bool m_osdMsgEnabled;
-		QColor m_osdMsgColor;
-		
-		/** Intro effect. **/
-		int m_introStyle;
-		int m_introColor;
-		
-		/** Sega CD Boot ROMs. **/
-		QString m_mcdRomUSA;
-		QString m_mcdRomEUR;
-		QString m_mcdRomJPN;
-		
-		/** External programs. **/
-		QString m_extprgUnRAR;
-		
-		/** Graphics settings. **/
-		bool m_aspectRatioConstraint;
-		bool m_fastBlur;
-		bool m_bilinearFilter;
-		int m_contrast;
-		int m_brightness;
-		bool m_grayscale;
-		bool m_inverted;
-		int m_colorScaleMethod;
-		
-		/** General settings. **/
-		bool m_autoFixChecksum;
-		bool m_autoPause;
-		bool m_borderColor;
-		bool m_pauseTint;
-		bool m_ntscV30Rolling;
-		
-		/** Savestates. **/
-		int m_saveSlot;
-		
-		/** Key configuration. **/
-		GensKeyConfig m_keyConfig;
+		private:
+			GensKeyConfig m_keyConfig;
+		public:
+			int keyToAction(GensKey_t key)
+				{ return m_keyConfig.keyToAction(key); }
 	
 	signals:
 		/** Onscreen display. **/
