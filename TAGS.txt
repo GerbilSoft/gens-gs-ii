@@ -1,5 +1,11 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-GensConfig-v1: GensConfig now saves all configuration settings
+to an INI file in ~/.config/gens-gs-ii/gens-gs-ii.conf (Linux and Mac)
+or %APPDATA%/gens-gs-ii/gens-gs-ii.conf (Win32). The configuration file
+is loaded on startup. Aspect ratio constraints, fast blur, and
+(new) bilinear filtering are all handled by VBackend and GensQGLWidget.
+
 gens-qt4-GeneralConfigWindow-v5: Massive UI overhaul for Mac OS X.
 The tabs are now replaced with a unified titlebar/toolbar, and
 changes are applied immediately. GeneralConfigWindow still works
