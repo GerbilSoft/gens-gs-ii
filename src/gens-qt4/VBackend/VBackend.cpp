@@ -162,6 +162,14 @@ void VBackend::setFastBlur(bool newFastBlur)
 	
 	// Update the Fast Blur setting.
 	m_fastBlur = newFastBlur;
+	
+	// Print a message to the OSD.
+	if (m_fastBlur)
+		osd_printf(1500, "Fast Blur enabled.");
+	else
+		osd_printf(1500, "Fast Blur disabled.");
+	
+	// Update the video backend if emulation is running.
 	if (isRunning())
 	{
 		setVbDirty();
