@@ -335,100 +335,56 @@ void GensConfig::emitAll(void)
 }
 
 
+/**
+ * GC_PROPERTY_WRITE(): Property write function macro.
+ * NOTE: emit *does* work here, since moc doesn't process implementation files.
+ */
+#define GC_PROPERTY_WRITE(propName, setPropType, setPropName) \
+void GensConfig::set##setPropName(setPropType new##setPropName) \
+{ \
+	if (m_##propName == (new##setPropName)) \
+		return; \
+	\
+	m_##propName = (new##setPropName); \
+	emit propName##_changed(m_##propName); \
+}
+
+
+/**
+ * GC_PROPERTY_WRITE_RANGE(): Property write function macro, with range checking.
+ * NOTE: emit *does* work here, since moc doesn't process implementation files.
+ */
+#define GC_PROPERTY_WRITE_RANGE(propName, setPropType, setPropName, rangeMin, rangeMax) \
+void GensConfig::set##setPropName(setPropType new##setPropName) \
+{ \
+	if (m_##propName == (new##setPropName) || \
+	    (new##setPropName < (rangeMin) || \
+	     new##setPropName > (rangeMax))) \
+	{ \
+		return; \
+	} \
+	\
+	m_##propName = (new##setPropName); \
+	emit propName##_changed(m_##propName); \
+}
+
+
 /** Onscreen display. **/
-
-
-void GensConfig::setOsdFpsEnabled(bool enable)
-{
-	if (m_osdFpsEnabled == enable)
-		return;
-	
-	m_osdFpsEnabled = enable;
-	emit osdFpsEnabled_changed(m_osdFpsEnabled);
-}
-
-void GensConfig::setOsdFpsColor(const QColor& color)
-{
-	if (!color.isValid() || m_osdFpsColor == color)
-		return;
-	
-	m_osdFpsColor = color;
-	emit osdFpsColor_changed(m_osdFpsColor);
-}
-
-void GensConfig::setOsdMsgEnabled(bool enable)
-{
-	if (m_osdMsgEnabled == enable)
-		return;
-	
-	m_osdMsgEnabled = enable;
-	emit osdMsgEnabled_changed(m_osdMsgEnabled);
-}
-
-void GensConfig::setOsdMsgColor(const QColor& color)
-{
-	if (!color.isValid() || m_osdMsgColor == color)
-		return;
-	
-	m_osdMsgColor = color;
-	emit osdMsgColor_changed(m_osdMsgColor);
-}
+GC_PROPERTY_WRITE(osdFpsEnabled, bool, OsdFpsEnabled)
+GC_PROPERTY_WRITE(osdFpsColor, const QColor&, OsdFpsColor)
+GC_PROPERTY_WRITE(osdMsgEnabled, bool, OsdMsgEnabled)
+GC_PROPERTY_WRITE(osdMsgColor, const QColor&, OsdMsgColor)
 
 
 /** Intro effect. **/
-
-
-void GensConfig::setIntroStyle(int style)
-{
-	// TODO: Enums.
-	if (style < 0 || style > 2)
-		return;
-	
-	m_introStyle = style;
-	emit introStyle_changed(m_introStyle);
-}
-
-
-void GensConfig::setIntroColor(int color)
-{
-	// TODO: Enums.
-	if (color < 0 || color > 7)
-		return;
-	
-	m_introColor = color;
-	emit introColor_changed(m_introColor);
-}
+GC_PROPERTY_WRITE_RANGE(introStyle, int, IntroStyle, 0, 2)
+GC_PROPERTY_WRITE_RANGE(introColor, int, IntroColor, 0, 7)
 
 
 /** Sega CD Boot ROMs. **/
-
-
-void GensConfig::setMcdRomUSA(const QString& filename)
-{
-	if (m_mcdRomUSA == filename)
-		return;
-	
-	m_mcdRomUSA = filename;
-	emit mcdRomUSA_changed(m_mcdRomUSA);
-}
-
-void GensConfig::setMcdRomEUR(const QString& filename)
-{
-	if (m_mcdRomEUR == filename)
-		return;
-	
-	m_mcdRomEUR = filename;
-	emit mcdRomEUR_changed(m_mcdRomEUR);
-}
-
-void GensConfig::setMcdRomJPN(const QString& filename)
-{
-	if (m_mcdRomJPN == filename)
-		return;
-	
-	m_mcdRomJPN = filename;
-	emit mcdRomJPN_changed(m_mcdRomJPN);
-}
+GC_PROPERTY_WRITE(mcdRomUSA, const QString&, McdRomUSA)
+GC_PROPERTY_WRITE(mcdRomEUR, const QString&, McdRomEUR)
+GC_PROPERTY_WRITE(mcdRomJPN, const QString&, McdRomJPN)
 
 
 /** External programs. **/
@@ -452,134 +408,24 @@ void GensConfig::setExtPrgUnRAR(const QString& filename)
 
 
 /** Graphics settings. **/
-
-
-void GensConfig::setAspectRatioConstraint(bool newAspectRatioConstraint)
-{
-	if (m_aspectRatioConstraint == newAspectRatioConstraint)
-		return;
-	
-	m_aspectRatioConstraint = newAspectRatioConstraint;
-	emit aspectRatioConstraint_changed(m_aspectRatioConstraint);
-}
-
-void GensConfig::setFastBlur(bool newFastBlur)
-{
-	if (m_fastBlur == newFastBlur)
-		return;
-	
-	m_fastBlur = newFastBlur;
-	emit fastBlur_changed(m_fastBlur);
-}
-
-void GensConfig::setBilinearFilter(bool newBilinearFilter)
-{
-	if (m_bilinearFilter == newBilinearFilter)
-		return;
-	
-	m_bilinearFilter = newBilinearFilter;
-	emit bilinearFilter_changed(m_bilinearFilter);
-}
-
-void GensConfig::setContrast(int newContrast)
-{
-	if (m_contrast == newContrast)
-		return;
-	
-	m_contrast = newContrast;
-	emit contrast_changed(m_contrast);
-}
-
-void GensConfig::setBrightness(int newBrightness)
-{
-	if (m_brightness == newBrightness)
-		return;
-	
-	m_brightness = newBrightness;
-	emit brightness_changed(m_brightness);
-}
-
-void GensConfig::setGrayscale(bool newGrayscale)
-{
-	if (m_grayscale == newGrayscale)
-		return;
-	
-	m_grayscale = newGrayscale;
-	emit grayscale_changed(m_grayscale);
-}
-
-void GensConfig::setInverted(bool newInverted)
-{
-	if (m_inverted == newInverted)
-		return;
-	
-	m_inverted = newInverted;
-	emit inverted_changed(m_inverted);
-}
-
-void GensConfig::setColorScaleMethod(int newColorScaleMethod)
-{
-	if (m_colorScaleMethod == newColorScaleMethod)
-		return;
-	if (newColorScaleMethod < (int)LibGens::VdpPalette::COLSCALE_RAW ||
-	    newColorScaleMethod > (int)LibGens::VdpPalette::COLSCALE_FULL_HS)
-	{
-		// Invalid color scale method.
-		return;
-	}
-	
-	m_colorScaleMethod = newColorScaleMethod;
-	emit colorScaleMethod_changed(m_colorScaleMethod);
-}
+GC_PROPERTY_WRITE(aspectRatioConstraint, bool, AspectRatioConstraint)
+GC_PROPERTY_WRITE(fastBlur, bool, FastBlur)
+GC_PROPERTY_WRITE(bilinearFilter, bool, BilinearFilter)
+GC_PROPERTY_WRITE(contrast, int, Contrast)
+GC_PROPERTY_WRITE(brightness, int, Brightness)
+GC_PROPERTY_WRITE(grayscale, bool, Grayscale)
+GC_PROPERTY_WRITE(inverted, bool, Inverted)
+GC_PROPERTY_WRITE_RANGE(colorScaleMethod, int, ColorScaleMethod,
+			(int)LibGens::VdpPalette::COLSCALE_RAW,
+			(int)LibGens::VdpPalette::COLSCALE_FULL_HS)
 
 
 /** General settings. **/
-
-
-void GensConfig::setAutoFixChecksum(bool newAutoFixChecksum)
-{
-	if (m_autoFixChecksum == newAutoFixChecksum)
-		return;
-	
-	m_autoFixChecksum = newAutoFixChecksum;
-	emit autoFixChecksum_changed(m_autoFixChecksum);
-}
-
-void GensConfig::setAutoPause(bool newAutoPause)
-{
-	if (m_autoPause == newAutoPause)
-		return;
-	
-	m_autoPause = newAutoPause;
-	emit autoPause_changed(m_autoPause);
-}
-
-void GensConfig::setBorderColor(bool newBorderColor)
-{
-	if (m_borderColor == newBorderColor)
-		return;
-	
-	m_borderColor = newBorderColor;
-	emit borderColor_changed(m_borderColor);
-}
-
-void GensConfig::setPauseTint(bool newPauseTint)
-{
-	if (m_pauseTint == newPauseTint)
-		return;
-	
-	m_pauseTint = newPauseTint;
-	emit pauseTint_changed(m_pauseTint);
-}
-
-void GensConfig::setNtscV30Rolling(bool newNtscV30Rolling)
-{
-	if (m_ntscV30Rolling == newNtscV30Rolling)
-		return;
-	
-	m_ntscV30Rolling = newNtscV30Rolling;
-	emit ntscV30Rolling_changed(m_ntscV30Rolling);
-}
+GC_PROPERTY_WRITE(autoFixChecksum, bool, AutoFixChecksum)
+GC_PROPERTY_WRITE(autoPause, bool, AutoPause)
+GC_PROPERTY_WRITE(borderColor, bool, BorderColor)
+GC_PROPERTY_WRITE(pauseTint, bool, PauseTint)
+GC_PROPERTY_WRITE(ntscV30Rolling, bool, NtscV30Rolling)
 
 
 /** Savestates. **/
