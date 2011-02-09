@@ -41,6 +41,10 @@ class GensConfig : public QObject
 	
 	/** Properties. **/
 	
+	/** Configuration path. **/
+	// TODO: Mark cfgPath as CONSTANT?
+	Q_PROPERTY(QString cfgPath READ cfgPath)
+	
 	/** Onscreen display. **/
 	Q_PROPERTY(bool osdFpsEnabled READ osdFpsEnabled WRITE setOsdFpsEnabled NOTIFY osdFpsEnabled_changed)
 	Q_PROPERTY(QColor osdFpsColor READ osdFpsColor WRITE setOsdFpsColor NOTIFY osdFpsColor_changed)
@@ -85,23 +89,29 @@ class GensConfig : public QObject
 		
 		/**
 		 * reload(): Load the user's configuration file.
-		 * @param filename Filename. (If empty, uses the default filename.)
+		 * @param filename Filename. (If not specified, uses the default filename.)
 		 * @return 0 on success; non-zero on error.
 		 */
-		int reload(const QString& filename = QString());
+		int reload(void);
+		int reload(const QString& filename);
 		
 		/**
 		 * save(): Save the user's configuration file.
-		 * @param filename Filename. (If empty, uses the default filename.)
+		 * @param filename Filename. (If not specified, uses the default filename.)
 		 * @return 0 on success; non-zero on error.
 		 */
-		int save(const QString& filename = QString());
+		int save(void);
+		int save(const QString& filename);
 		
 		/**
 		 * emitAll(): Emit all configuration settings.
 		 * Useful when starting the emulator.
 		 */
 		void emitAll(void);
+		
+		/** Configuration path. **/
+		QString cfgPath(void) const
+			{ return m_cfgPath; }
 		
 		/** Onscreen display. **/
 		bool osdFpsEnabled(void) const
@@ -198,6 +208,9 @@ class GensConfig : public QObject
 			{ return m_keyConfig.keyToAction(key); }
 	
 	protected:
+		/** Configuration path. **/
+		QString m_cfgPath;
+		
 		/** Onscreen display. **/
 		bool m_osdFpsEnabled;
 		QColor m_osdFpsColor;
@@ -277,6 +290,9 @@ class GensConfig : public QObject
 		
 		/** Savestates. **/
 		void saveSlot_changed(int newSaveSlot);
+	
+	private:
+		Q_DISABLE_COPY(GensConfig)
 };
 
 }

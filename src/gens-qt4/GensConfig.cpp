@@ -35,13 +35,27 @@
 // Qt includes.
 #include <QtCore/QSettings>
 #include <QtCore/QTextCodec>
+#include <QtCore/QDir>
 
-
+#include <stdio.h>
 namespace GensQt4
 {
 
 GensConfig::GensConfig()
 {
+	// Determine the configuration path.
+	// TODO: Portable mode.
+	// TODO: Fallback if the user directory isn't writable.
+	QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+				QLatin1String("gens-gs-ii"),
+				QLatin1String("gens-gs-ii"), this);
+	
+	// TODO: Figure out if QDir has a function to remove the filename portion of the pathname.
+	m_cfgPath = settings.fileName();
+	int sepChr = m_cfgPath.lastIndexOf(QChar(L'/'));
+	if (sepChr >= 0)
+		m_cfgPath.remove(sepChr + 1, m_cfgPath.size());
+	
 	// Load the user's configuration file.
 	reload();
 }
@@ -53,28 +67,25 @@ GensConfig::~GensConfig()
 
 /**
  * reload(): Load the user's configuration file.
- * @param filename Filename. (If empty, the uses default filename.)
+ * No filename specified; use the default filename.
+ * @return 0 on success; non-zero on error.
+ */
+int GensConfig::reload(void)
+{
+	// TODO: Combine with save().
+	const QString cfgFilename = m_cfgPath + QLatin1String("gens-gs-ii.conf");
+	return reload(cfgFilename);
+}
+
+
+/**
+ * reload(): Load the user's configuration file.
+ * @param filename Filename.
  * @return 0 on success; non-zero on error.
  */
 int GensConfig::reload(const QString& filename)
 {
-	QSettings *settings;
-	// TODO: Combine filename code with save().
-	if (!filename.isEmpty())
-	{
-		// Filename is specified.
-		// Use it instead of the default filename.
-		settings = new QSettings(filename, QSettings::IniFormat, this);
-	}
-	else
-	{
-		// Filename was not specified.
-		// Use the default filename.
-		settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
-						QLatin1String("gens-gs-ii"),
-						QLatin1String("gens-gs-ii"), this);
-	}
-	settings->setIniCodec(QTextCodec::codecForName("UTF-8"));
+	QSettings settings(filename, QSettings::IniFormat, this);
 	
 	// TODO: Check if the file was opened successfully.
 	// TODO: QVariant type checking.
@@ -82,39 +93,39 @@ int GensConfig::reload(const QString& filename)
 	/** General settings. **/
 	// NOTE: The "General" section is reserved for keys with no section.
 	// In order to use it, we shouldn't set a group name.
-	//settings->beginGroup(QLatin1String("General"));
-	m_autoFixChecksum = settings->value(QLatin1String("autoFixChecksum"), true).toBool();
-	m_autoPause = settings->value(QLatin1String("autoPause"), false).toBool();
-	m_borderColor = settings->value(QLatin1String("borderColorEmulation"), true).toBool();
-	m_pauseTint = settings->value(QLatin1String("pauseTint"), true).toBool();
-	m_ntscV30Rolling = settings->value(QLatin1String("ntscV30Rolling"), true).toBool();
-	//settings->endGroup();
+	//settings.beginGroup(QLatin1String("General"));
+	m_autoFixChecksum = settings.value(QLatin1String("autoFixChecksum"), true).toBool();
+	m_autoPause = settings.value(QLatin1String("autoPause"), false).toBool();
+	m_borderColor = settings.value(QLatin1String("borderColorEmulation"), true).toBool();
+	m_pauseTint = settings.value(QLatin1String("pauseTint"), true).toBool();
+	m_ntscV30Rolling = settings.value(QLatin1String("ntscV30Rolling"), true).toBool();
+	//settings.endGroup();
 	
 	/** Onscreen display. **/
-	settings->beginGroup(QLatin1String("OSD"));
-	m_osdFpsEnabled = settings->value(QLatin1String("fpsEnabled"), true).toBool();
-	m_osdFpsColor   = settings->value(QLatin1String("fpsColor"), QColor()).value<QColor>();
+	settings.beginGroup(QLatin1String("OSD"));
+	m_osdFpsEnabled = settings.value(QLatin1String("fpsEnabled"), true).toBool();
+	m_osdFpsColor   = settings.value(QLatin1String("fpsColor"), QColor()).value<QColor>();
 	if (!m_osdFpsColor.isValid())
 		m_osdFpsColor = QColor(Qt::white);
-	m_osdMsgEnabled = settings->value(QLatin1String("msgEnabled"), true).toBool();
-	m_osdMsgColor   = settings->value(QLatin1String("msgColor"), QColor()).value<QColor>();
+	m_osdMsgEnabled = settings.value(QLatin1String("msgEnabled"), true).toBool();
+	m_osdMsgColor   = settings.value(QLatin1String("msgColor"), QColor()).value<QColor>();
 	if (!m_osdMsgColor.isValid())
 		m_osdMsgColor = QColor(Qt::white);
-	settings->endGroup();
+	settings.endGroup();
 	
 	/** Intro effect. **/
 	// TODO: Enums.
-	settings->beginGroup(QLatin1String("IntroEffect"));
-	m_introStyle = settings->value(QLatin1String("introStyle"), 0).toInt();	// none
-	m_introColor = settings->value(QLatin1String("introColor"), 7).toInt();	// white
-	settings->endGroup();
+	settings.beginGroup(QLatin1String("IntroEffect"));
+	m_introStyle = settings.value(QLatin1String("introStyle"), 0).toInt();	// none
+	m_introColor = settings.value(QLatin1String("introColor"), 7).toInt();	// white
+	settings.endGroup();
 	
 	/** Sega CD Boot ROMs. **/
-	settings->beginGroup(QLatin1String("Sega_CD"));
-	m_mcdRomUSA = settings->value(QLatin1String("bootRomUSA"), QString()).toString();
-	m_mcdRomEUR = settings->value(QLatin1String("bootRomEUR"), QString()).toString();
-	m_mcdRomJPN = settings->value(QLatin1String("bootRomJPN"), QString()).toString();
-	settings->endGroup();
+	settings.beginGroup(QLatin1String("Sega_CD"));
+	m_mcdRomUSA = settings.value(QLatin1String("bootRomUSA"), QString()).toString();
+	m_mcdRomEUR = settings.value(QLatin1String("bootRomEUR"), QString()).toString();
+	m_mcdRomJPN = settings.value(QLatin1String("bootRomJPN"), QString()).toString();
+	settings.endGroup();
 	
 	/** External programs. **/
 	// TODO: Don't use setExtPrgUnRAR.
@@ -129,60 +140,57 @@ int GensConfig::reload(const QString& filename)
 	// - Assume unrar if neither are found.
 	const QLatin1String sExtPrgUnRAR_default("/usr/bin/unrar");
 #endif
-	settings->beginGroup(QLatin1String("External_Programs"));
-	setExtPrgUnRAR(settings->value(QLatin1String("UnRAR"), sExtPrgUnRAR_default).toString());
-	settings->endGroup();
+	settings.beginGroup(QLatin1String("External_Programs"));
+	setExtPrgUnRAR(settings.value(QLatin1String("UnRAR"), sExtPrgUnRAR_default).toString());
+	settings.endGroup();
 	
 	/** Graphics settings. **/
-	settings->beginGroup(QLatin1String("Graphics"));
-	m_aspectRatioConstraint = settings->value(QLatin1String("aspectRatioConstraint"), true).toBool();
-	m_fastBlur = settings->value(QLatin1String("fastBlur"), false).toBool();
-	m_bilinearFilter = settings->value(QLatin1String("bilinearFilter"), false).toBool();
-	m_contrast = settings->value(QLatin1String("contrast"), 0).toInt();
-	m_brightness = settings->value(QLatin1String("brightness"), 0).toInt();
-	m_grayscale = settings->value(QLatin1String("grayscale"), false).toBool();
-	m_inverted = settings->value(QLatin1String("inverted"), false).toBool();
+	settings.beginGroup(QLatin1String("Graphics"));
+	m_aspectRatioConstraint = settings.value(QLatin1String("aspectRatioConstraint"), true).toBool();
+	m_fastBlur = settings.value(QLatin1String("fastBlur"), false).toBool();
+	m_bilinearFilter = settings.value(QLatin1String("bilinearFilter"), false).toBool();
+	m_contrast = settings.value(QLatin1String("contrast"), 0).toInt();
+	m_brightness = settings.value(QLatin1String("brightness"), 0).toInt();
+	m_grayscale = settings.value(QLatin1String("grayscale"), false).toBool();
+	m_inverted = settings.value(QLatin1String("inverted"), false).toBool();
 	// using int to prevent Qt issues
-	m_colorScaleMethod = settings->value(QLatin1String("colorScaleMethod"),
+	m_colorScaleMethod = settings.value(QLatin1String("colorScaleMethod"),
 				(int)LibGens::VdpPalette::COLSCALE_FULL).toInt();
-	settings->endGroup();
+	settings.endGroup();
 	
 	/** Savestates. **/
-	settings->beginGroup(QLatin1String("Savestates"));
-	m_saveSlot = settings->value(QLatin1String("saveSlot"), 0).toInt();
-	settings->endGroup();
+	settings.beginGroup(QLatin1String("Savestates"));
+	m_saveSlot = settings.value(QLatin1String("saveSlot"), 0).toInt();
+	settings.endGroup();
 	
 	// Finished loading settings.
 	// NOTE: Caller must call emitAll() for settings to take effect.
-	delete settings;
 	return 0;
 }
 
 
 /**
  * save(): Save the user's configuration file.
- * @param filename Filename. (If empty, uses the default filename.)
+ * No filename specified; use the default filename.
+ * @return 0 on success; non-zero on error.
+ */
+int GensConfig::save(void)
+{
+	// TODO: Combine with reload().
+	const QString cfgFilename = m_cfgPath + QLatin1String("gens-gs-ii.conf");
+	return save(cfgFilename);
+}
+
+
+/**
+ * save(): Save the user's configuration file.
+ * @param filename Filename.
  * @return 0 on success; non-zero on error.
  */
 int GensConfig::save(const QString& filename)
 {
-	QSettings *settings;
-	// TODO: Combine filename code with reload().
-	if (!filename.isEmpty())
-	{
-		// Filename is specified.
-		// Use it instead of the default filename.
-		settings = new QSettings(filename, QSettings::IniFormat, this);
-	}
-	else
-	{
-		// Filename was not specified.
-		// Use the default filename.
-		settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
-						QLatin1String("gens-gs-ii"),
-						QLatin1String("gens-gs-ii"), this);
-	}
-	settings->setIniCodec(QTextCodec::codecForName("UTF-8"));
+	QSettings settings(filename, QSettings::IniFormat, this);
+	settings.setIniCodec(QTextCodec::codecForName("UTF-8"));
 	
 	// TODO: Check if the file was opened successfully.
 	
@@ -197,87 +205,86 @@ int GensConfig::save(const QString& filename)
 					.arg((LibGens::version >> 16) & 0xFF)
 					.arg(LibGens::version & 0xFFFF);
 	
-	settings->setValue(QLatin1String("_Application"), QLatin1String("Gens/GS II"));
-	settings->setValue(QLatin1String("_Version"), sVersion);
+	settings.setValue(QLatin1String("_Application"), QLatin1String("Gens/GS II"));
+	settings.setValue(QLatin1String("_Version"), sVersion);
 	
 	if (LibGens::version_desc)
 	{
-		settings->setValue(QLatin1String("_VersionExt"),
+		settings.setValue(QLatin1String("_VersionExt"),
 					QString::fromUtf8(LibGens::version_desc));
 	}
 	else
 	{
-		settings->remove(QLatin1String("_VersionExt"));
+		settings.remove(QLatin1String("_VersionExt"));
 	}
 	
 	if (LibGens::version_vcs)
 	{
-		settings->setValue(QLatin1String("_VersionVcs"),
+		settings.setValue(QLatin1String("_VersionVcs"),
 					QString::fromUtf8(LibGens::version_vcs));
 	}
 	else
 	{
-		settings->remove(QLatin1String("_VersionVcs"));
+		settings.remove(QLatin1String("_VersionVcs"));
 	}
 	
 	/** General settings. **/
 	// NOTE: The "General" section is reserved for keys with no section.
 	// In order to use it, we shouldn't set a group name.
-	//settings->beginGroup(QLatin1String("General"));
-	settings->setValue(QLatin1String("autoFixChecksum"), m_autoFixChecksum);
-	settings->setValue(QLatin1String("autoPause"), m_autoPause);
-	settings->setValue(QLatin1String("borderColorEmulation"), m_borderColor);
-	settings->setValue(QLatin1String("pauseTint"), m_pauseTint);
-	settings->setValue(QLatin1String("ntscV30Rolling"), m_ntscV30Rolling);
-	//settings->endGroup();
+	//settings.beginGroup(QLatin1String("General"));
+	settings.setValue(QLatin1String("autoFixChecksum"), m_autoFixChecksum);
+	settings.setValue(QLatin1String("autoPause"), m_autoPause);
+	settings.setValue(QLatin1String("borderColorEmulation"), m_borderColor);
+	settings.setValue(QLatin1String("pauseTint"), m_pauseTint);
+	settings.setValue(QLatin1String("ntscV30Rolling"), m_ntscV30Rolling);
+	//settings.endGroup();
 	
 	/** Onscreen display. **/
-	settings->beginGroup(QLatin1String("OSD"));
-	settings->setValue(QLatin1String("fpsEnabled"), m_osdFpsEnabled);
-	settings->setValue(QLatin1String("fpsColor"),   m_osdFpsColor.name());
-	settings->setValue(QLatin1String("msgEnabled"), m_osdMsgEnabled);
-	settings->setValue(QLatin1String("msgColor"),   m_osdMsgColor.name());
-	settings->endGroup();
+	settings.beginGroup(QLatin1String("OSD"));
+	settings.setValue(QLatin1String("fpsEnabled"), m_osdFpsEnabled);
+	settings.setValue(QLatin1String("fpsColor"),   m_osdFpsColor.name());
+	settings.setValue(QLatin1String("msgEnabled"), m_osdMsgEnabled);
+	settings.setValue(QLatin1String("msgColor"),   m_osdMsgColor.name());
+	settings.endGroup();
 	
 	/** Intro effect. **/
 	// TODO: Enums.
-	settings->beginGroup(QLatin1String("Intro_Effect"));
-	settings->setValue(QLatin1String("introStyle"), m_introStyle);
-	settings->setValue(QLatin1String("introColor"), m_introColor);
-	settings->endGroup();
+	settings.beginGroup(QLatin1String("Intro_Effect"));
+	settings.setValue(QLatin1String("introStyle"), m_introStyle);
+	settings.setValue(QLatin1String("introColor"), m_introColor);
+	settings.endGroup();
 	
 	/** Sega CD Boot ROMs. **/
-	settings->beginGroup(QLatin1String("Sega_CD"));
-	settings->setValue(QLatin1String("bootRomUSA"), m_mcdRomUSA);
-	settings->setValue(QLatin1String("bootRomEUR"), m_mcdRomEUR);
-	settings->setValue(QLatin1String("bootRomJPN"), m_mcdRomJPN);
-	settings->endGroup();
+	settings.beginGroup(QLatin1String("Sega_CD"));
+	settings.setValue(QLatin1String("bootRomUSA"), m_mcdRomUSA);
+	settings.setValue(QLatin1String("bootRomEUR"), m_mcdRomEUR);
+	settings.setValue(QLatin1String("bootRomJPN"), m_mcdRomJPN);
+	settings.endGroup();
 	
 	/** External programs. **/
-	settings->beginGroup(QLatin1String("External_Programs"));
-	settings->setValue(QLatin1String("UnRAR"), m_extprgUnRAR);
-	settings->endGroup();
+	settings.beginGroup(QLatin1String("External_Programs"));
+	settings.setValue(QLatin1String("UnRAR"), m_extprgUnRAR);
+	settings.endGroup();
 	
 	/** Graphics settings. **/
-	settings->beginGroup(QLatin1String("Graphics"));
-	settings->setValue(QLatin1String("aspectRatioConstraint"), m_aspectRatioConstraint);
-	settings->setValue(QLatin1String("fastBlur"), m_fastBlur);
-	settings->setValue(QLatin1String("bilinearFilter"), m_bilinearFilter);
-	settings->setValue(QLatin1String("contrast"), m_contrast);
-	settings->setValue(QLatin1String("brightness"), m_brightness);
-	settings->setValue(QLatin1String("grayscale"), m_grayscale);
-	settings->setValue(QLatin1String("inverted"), m_inverted);
+	settings.beginGroup(QLatin1String("Graphics"));
+	settings.setValue(QLatin1String("aspectRatioConstraint"), m_aspectRatioConstraint);
+	settings.setValue(QLatin1String("fastBlur"), m_fastBlur);
+	settings.setValue(QLatin1String("bilinearFilter"), m_bilinearFilter);
+	settings.setValue(QLatin1String("contrast"), m_contrast);
+	settings.setValue(QLatin1String("brightness"), m_brightness);
+	settings.setValue(QLatin1String("grayscale"), m_grayscale);
+	settings.setValue(QLatin1String("inverted"), m_inverted);
 	// using int to prevent Qt issues
-	settings->setValue(QLatin1String("colorScaleMethod"), m_colorScaleMethod);
-	settings->endGroup();
+	settings.setValue(QLatin1String("colorScaleMethod"), m_colorScaleMethod);
+	settings.endGroup();
 	
 	/** Savestates. **/
-	settings->beginGroup(QLatin1String("Savestates"));
-	settings->setValue(QLatin1String("saveSlot"), m_saveSlot);
-	settings->endGroup();
+	settings.beginGroup(QLatin1String("Savestates"));
+	settings.setValue(QLatin1String("saveSlot"), m_saveSlot);
+	settings.endGroup();
 	
 	// Finished saving settings.
-	delete settings;
 	return 0;
 }
 
@@ -594,3 +601,4 @@ void GensConfig::setSaveSlot(int newSaveSlot)
 
 
 }
+
