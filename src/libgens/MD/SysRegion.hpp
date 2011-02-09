@@ -39,27 +39,32 @@ class SysRegion
 		enum RegionCode
 		{
 			REGION_JP_NTSC	= 0,	// Japan (NTSC)
-			REGION_JP_PAL	= 1,	// Japan (PAL)
+			REGION_ASIA_PAL	= 1,	// Asia (PAL)
 			REGION_US_NTSC	= 2,	// USA (NTSC)
 			REGION_EU_PAL	= 3	// Europe (PAL)
 		};
 		
-		SysRegion() { m_region = REGION_US_NTSC; }
-		SysRegion(RegionCode initRegion) { m_region = initRegion; }
+		SysRegion()
+			{ m_region = REGION_US_NTSC; }
+		SysRegion(RegionCode initRegion)
+			{ m_region = initRegion; }
 		
-		RegionCode region(void) const { return m_region; }
+		inline RegionCode region(void) const
+			{ return m_region; }
 		void setRegion(RegionCode newRegion)
-		{
-			m_region = (RegionCode)((int)newRegion & 0x03);
-		}
+			{ m_region = (RegionCode)((int)newRegion & 0x03); }
 		
 		// Convenience functions.
-		bool isNtsc(void) const { return !(m_region & 1); }
-		bool isPal(void) const { return (m_region & 1); }
-		bool isEast(void) const { return !(m_region & 2); }
-		bool isWest(void) const { return !!(m_region & 2); }
+		inline bool isNtsc(void) const
+			{ return !((int)m_region & 1); }
+		inline bool isPal(void) const
+			{ return ((int)m_region & 1); }
+		inline bool isEast(void) const
+			{ return !((int)m_region & 2); }
+		inline bool isWest(void) const
+			{ return !!((int)m_region & 2); }
 	
-	protected:
+	private:
 		RegionCode m_region;
 };
 
