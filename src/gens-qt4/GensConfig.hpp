@@ -181,9 +181,9 @@ class GensConfig : public QObject
 			{ return m_saveSlot; }
 		void setSaveSlot(int newSaveSlot);
 		void setSaveSlot_Prev(void)
-			{ setSaveSlot((m_saveSlot + 1) % 10); }
-		void setSaveSlot_Next(void)
 			{ setSaveSlot((m_saveSlot + 9) % 10); }
+		void setSaveSlot_Next(void)
+			{ setSaveSlot((m_saveSlot + 1) % 10); }
 		
 		/** Key configuration. **/
 		int keyToAction(GensKey_t key)
