@@ -136,6 +136,8 @@ class GensQGLWidget : public QGLWidget, public VBackend
 			{ setAspectRatioConstraint(newAspectRatioConstraint); }
 		void bilinearFilter_changed_slot(bool newBilinearFilter)
 			{ setBilinearFilter(newBilinearFilter); }
+		void pauseTint_changed_slot(bool newPauseTint)
+			{ setPauseTint(newPauseTint); }
 };
 
 }

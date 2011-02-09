@@ -98,6 +98,8 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 		this, SLOT(aspectRatioConstraint_changed_slot(bool)));
 	connect(gqt4_config, SIGNAL(bilinearFilter_changed(bool)),
 		this, SLOT(bilinearFilter_changed_slot(bool)));
+	connect(gqt4_config, SIGNAL(pauseTint_changed(bool)),
+		this, SLOT(pauseTint_changed_slot(bool)));
 }
 
 GensQGLWidget::~GensQGLWidget()
@@ -358,6 +360,12 @@ void GensQGLWidget::paintGL(void)
 	 */
 	bool bFromMD = true;
 	
+	/**
+	 * bDoPausedEffect: Indicates if the paused effect should be applied.
+	 * This is true if we're manually paused and the pause tint is enabled.
+	 */
+	const bool bDoPausedEffect = (isManualPaused() && pauseTint());
+	
 	glClearColor(1.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
@@ -386,16 +394,18 @@ void GensQGLWidget::paintGL(void)
 		{
 			// Emulation is running. Check if any effects should be applied.
 			
+			/** Software rendering path. **/
+			
 			// If Fast Blur is enabled, update the Fast Blur effect.
 			// NOTE: Shader version is only used if we're not paused manually.
-			if (fastBlur() && (isManualPaused() || !m_shaderMgr.hasFastBlur()))
+			if (fastBlur() && (bDoPausedEffect || !m_shaderMgr.hasFastBlur()))
 			{
 				updateFastBlur(bFromMD);
 				bFromMD = false;
 			}
 			
 			// If emulation is manually paused, update the pause effect.
-			if (isManualPaused() && !m_shaderMgr.hasPaused())
+			if (bDoPausedEffect && !m_shaderMgr.hasPaused())
 			{
 				// Paused, but no shader is available.
 				// Apply the effect in software.
@@ -448,13 +458,13 @@ void GensQGLWidget::paintGL(void)
 	// Enable shaders, if necessary.
 	if (isRunning())
 	{
-		if (m_shaderMgr.hasFastBlur() && fastBlur() && !isManualPaused())
+		if (m_shaderMgr.hasFastBlur() && fastBlur() && !bDoPausedEffect)
 		{
 			// Enable the Fast Blur shader.
 			// NOTE: Shader version is only used if we're not paused manually.
 			m_shaderMgr.setFastBlur(true);
 		}
-		else if (m_shaderMgr.hasPaused() && isManualPaused())
+		else if (m_shaderMgr.hasPaused() && bDoPausedEffect)
 		{
 			// Enable the Paused shader.
 			m_shaderMgr.setPaused(true);
@@ -517,13 +527,13 @@ void GensQGLWidget::paintGL(void)
 	// Disable shaders, if necessary.
 	if (isRunning())
 	{
-		if (m_shaderMgr.hasFastBlur() && fastBlur() && !isManualPaused())
+		if (m_shaderMgr.hasFastBlur() && fastBlur() && !bDoPausedEffect)
 		{
 			// Disable the Fast Blur shader.
 			// NOTE: Shader version is only used if we're not paused manually.
 			m_shaderMgr.setFastBlur(false);
 		}
-		else if (m_shaderMgr.hasPaused() && isManualPaused())
+		else if (m_shaderMgr.hasPaused() && bDoPausedEffect)
 		{
 			// Disable the Paused shader.
 			m_shaderMgr.setPaused(false);

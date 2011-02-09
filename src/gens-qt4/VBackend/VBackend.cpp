@@ -58,11 +58,12 @@ VBackend::VBackend()
 	// Set default video settings.
 	// TODO: Load default video settings from configuration.
 	m_paused.data = 0;
-	m_fastBlur = gqt4_config->fastBlur();
 	m_stretchMode = STRETCH_H;
+	m_fastBlur = gqt4_config->fastBlur();
 	m_aspectRatioConstraint = gqt4_config->aspectRatioConstraint();
 	m_aspectRatioConstraint_changed = true;
 	m_bilinearFilter = gqt4_config->bilinearFilter();
+	m_pauseTint = gqt4_config->pauseTint();
 	
 	// Initialize the FPS manager.
 	resetFps();
@@ -220,6 +221,28 @@ void VBackend::setBilinearFilter(bool newBilinearFilter)
 	// TODO: Only if paused, or regardless of pause?
 	if (!isRunning() || isPaused())
 		vbUpdate();
+}
+
+
+/**
+ * setPauseTint(): Set the Pause Tint effect setting.
+ * @param newFastBlur True to enable Pause Tint; false to disable it.
+ */
+void VBackend::setPauseTint(bool newPauseTint)
+{
+	if (m_pauseTint == newPauseTint)
+		return;
+	
+	// Update the Pause Tint setting.
+	m_pauseTint = newPauseTint;
+	
+	// Update the video backend if emulation is running,
+	// and if we're currently paused manually.
+	if (isRunning() && isManualPaused())
+	{
+		setVbDirty();
+		vbUpdate();
+	}
 }
 
 

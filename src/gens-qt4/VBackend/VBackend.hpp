@@ -228,6 +228,7 @@ class VBackend
 		/** Properties. **/
 		/** These properties should only be set by subclasses. **/
 		/** GensQGLWidget calls these property functions in slots. **/
+		// TODO: Should we keep these properties here, or just get them from gqt4_config?
 		inline bool fastBlur(void) const
 			{ return m_fastBlur; }
 		void setFastBlur(bool newFastBlur);
@@ -244,11 +245,16 @@ class VBackend
 		inline bool bilinearFilter(void) const
 			{ return m_bilinearFilter; }
 		void setBilinearFilter(bool newBilinearFilter);
+		
+		inline bool pauseTint(void) const
+			{ return m_pauseTint; }
+		void setPauseTint(bool newPauseTint);
 	
 	private:
 		// Effects.
 		paused_t m_paused;
 		bool m_fastBlur;
+		bool m_pauseTint;
 		
 		// Is the emulator running?
 		bool m_running;
