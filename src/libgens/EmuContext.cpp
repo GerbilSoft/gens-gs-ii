@@ -137,9 +137,13 @@ int EmuContext::fixChecksum(void)
 	// NOTE: If ROM is an odd number of bytes, it'll be padded by 1 byte.
 	uint16_t checksum = 0;
 	uint16_t *rom_ptr = &M68K_Mem::Rom_Data.u16[0x200>>1];
-	for (int i = (M68K_Mem::Rom_Size - 0x200); i >= 0; i--)
+	uint16_t *end_ptr = rom_ptr + ((M68K_Mem::Rom_Size - 0x200) >> 1);
+	if (M68K_Mem::Rom_Size & 1)
+		end_ptr++;
+	
+	for (; rom_ptr != end_ptr; rom_ptr++)
 	{
-		checksum += *rom_ptr++;
+		checksum += *rom_ptr;
 	}
 	
 	// Set the new checksum.
