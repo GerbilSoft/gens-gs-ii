@@ -325,6 +325,19 @@ void GensWindow::dropEvent(QDropEvent *event)
 
 
 /**
+ * rescale(): Rescale the window.
+ * @param scale New scale value.
+ */
+void GensWindow::rescale(int scale)
+{
+	if (scale <= 0 || scale > 8)
+		return;
+	m_scale = scale;
+	gensResize();
+}
+
+
+/**
  * gensResize(): Resize the Gens window to show the image at its expected size.
  */
 void GensWindow::gensResize(void)
@@ -342,8 +355,10 @@ void GensWindow::gensResize(void)
 	
 	// Calculate the window height.
 	int win_height = img_height;
+#ifdef Q_WS_MAC
 	if (m_menubar)
 		win_height += m_menubar->size().height();
+#endif
 	
 	// Set the new window size.
 	this->resize(img_width, win_height);

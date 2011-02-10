@@ -59,14 +59,11 @@ class GensWindow : public QMainWindow
 		// LibGens OSD handler.
 		void osd(OsdType osd_type, int param);
 		
-		// Rescale the window.
-		void rescale(int scale)
-		{
-			if (scale <= 0 || scale > 8)
-				return;
-			m_scale = scale;
-			gensResize();
-		}
+		/**
+		 * rescale(): Rescale the window.
+		 * @param scale New scale value.
+		 */
+		void rescale(int scale);
 		
 		// Set color depth.
 		// TODO: Should this really be here, or should it be a slot?
