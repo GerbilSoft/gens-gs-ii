@@ -553,10 +553,11 @@ QString EmuManager::getSaveStateFilename(void)
 	if (!m_rom)
 		return QString();
 	
-	// TODO: Move to another function?
-	QString filename = QString::fromLatin1("%1.%2.zomg");
-	filename = filename.arg(QString::fromUtf8(m_rom->filenameBaseNoExt()));
-	filename = filename.arg(m_saveSlot);
+	const QString filename =
+		gqt4_config->userPath(GensConfig::GCPATH_SAVESTATES) +
+		QString::fromUtf8(m_rom->filenameBaseNoExt()) +
+		QChar(L'.') + QString::number(m_saveSlot) +
+		QLatin1String(".zomg");
 	return filename;
 }
 
