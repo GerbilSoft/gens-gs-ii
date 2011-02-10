@@ -47,6 +47,7 @@ using std::stringstream;
 
 // Qt includes.
 #include <QtCore/QString>
+#include <QtCore/QStringList>
 #include <QtGui/QScrollArea>
 
 // OpenGL includes.
@@ -58,6 +59,11 @@ using std::stringstream;
 #else
 #include <OpenGL/gl.h>
 #endif
+
+// GensQGLWidget required to obtain list of extensions.
+// TODO: Split common GL stuff into a separate file?
+// (e.g. if GLFW is added for fullscreen)
+#include "VBackend/GensQGLWidget.hpp"
 
 
 namespace GensQt4
@@ -398,16 +404,30 @@ QString AboutWindow::GetDebugInfo(void)
 	sDebugInfo += QString::fromLatin1("GLEW version ") +
 			QString(glewVersion
 				? QString::fromLatin1(glewVersion)
-				: tr("(unknown)")) + QChar(L'\n') +
-			tr("GL extensions in use:") + QChar(L'\n');
+				: tr("(unknown)")) + QChar(L'\n');
 	
 	// TODO: Print "No GL extensions in use." if no GL extensions are in use.
 	const QChar chrBullet(0x2022);	// U+2022: BULLET
-	if (GLEW_ARB_fragment_program)
+	const QStringList& extsInUse = GensQGLWidget::GLExtsInUse();
+	
+	if (extsInUse.isEmpty())
 	{
-		sDebugInfo += chrBullet + QString::fromLatin1(" ") +
-			QString::fromLatin1("GL_ARB_fragment_program") + QChar(L'\n');
+		// No OpenGL extensions are being used.
+		sDebugInfo += tr("No GL extensions in use.");
 	}
+	else
+	{
+		// Print a list of OpenGL extensions.
+		sDebugInfo += tr("Using GL extensions:");
+		foreach (const QString& ext, extsInUse)
+		{
+			sDebugInfo += QChar(L'\n');
+			sDebugInfo += chrBullet;
+			sDebugInfo += QChar(L' ');
+			sDebugInfo += ext;
+		}
+	}
+	
 #endif /* HAVE_GLEW */
 
 #endif /* GL_SHADING_LANGUAGE_VERSION */
