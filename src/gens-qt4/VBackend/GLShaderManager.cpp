@@ -236,6 +236,8 @@ QStringList GLShaderManager::GLExtsInUse(void)
 void GLShaderManager::setPaused(bool newEnabled)
 {
 	// TODO: Check if any other shaders are enabled?
+	if (!m_init)
+		return;
 	if (m_paused_ARBfrag == 0 || newEnabled == m_paused_enabled)
 		return;
 	
@@ -261,6 +263,8 @@ void GLShaderManager::setPaused(bool newEnabled)
 void GLShaderManager::setFastBlur(bool newEnabled)
 {
 	// TODO: Check if any other shaders are enabled?
+	if (!m_init)
+		return;
 	if (m_fastBlur_ARBfrag == 0 || newEnabled == m_fastBlur_ARBfrag)
 		return;
 	
