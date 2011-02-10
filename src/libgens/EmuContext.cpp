@@ -28,6 +28,10 @@
 #endif
 #include <assert.h>
 
+// C++ includes.
+#include <string>
+using std::string;
+
 #include "lg_osd.h"
 
 // ROM data access.
@@ -57,6 +61,7 @@ EmuContext *EmuContext::instance = NULL;
  * Global settings.
  */
 bool EmuContext::ms_AutoFixChecksum = true;
+string EmuContext::ms_PathSRam;
 
 
 EmuContext::EmuContext(Rom *rom)
@@ -77,6 +82,11 @@ EmuContext::EmuContext(Rom *rom)
 		m_port2 = new IoBase();
 	if (!m_portE)
 		m_portE = new IoBase();
+	
+	// Set the SRam and EEPRom pathnames.
+	// TODO: Update them if the pathname is changed.
+	m_SRam.setPathname(ms_PathSRam);
+	m_EEPRom.setPathname(ms_PathSRam);
 	
 	// Initialize EEPRom.
 	// EEPRom is only used if the ROM is in the EEPRom class's database.
@@ -238,6 +248,21 @@ int EmuContext::autoSaveData(int framesElapsed)
 	
 	// Nothing was saved.
 	return 0;
+}
+
+
+/**
+ * SetPathSRam(): Set the SRam/EEPRom save path [static]
+ * @param newPathSRam New SRam/EEPRom save path.
+ */
+void EmuContext::SetPathSRam(const char *newPathSRam)
+{
+	if (!newPathSRam)
+		ms_PathSRam.clear();
+	else
+		ms_PathSRam = string(newPathSRam);
+	
+	// TODO: Update SRam/EEPRom classes in active contexts.
 }
 
 }

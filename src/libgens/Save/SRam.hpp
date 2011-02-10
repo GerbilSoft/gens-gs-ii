@@ -171,9 +171,9 @@ class SRam
 		 */
 		inline bool isDirty(void) const { return m_dirty; }
 		
-		// TODO: SRam directory path.
-		// For now, just save in the ROM directory.
-		void setFilename(const std::string &filename);
+		// SRam filename and pathname.
+		void setFilename(const std::string& filename);
+		void setPathname(const std::string& pathname);
 		
 		/**
 		 * load(): Load the SRam file.
@@ -215,7 +215,9 @@ class SRam
 	protected:
 		// Filename.
 		static const char *ms_FileExt;
-		std::string m_filename;
+		std::string m_filename;		// SRam base filename.
+		std::string m_pathname;		// SRam pathname.
+		std::string m_fullPathname;	// Full pathname. (m_pathname + m_filename)
 		
 		// SRam data.
 		uint8_t m_sram[64*1024];

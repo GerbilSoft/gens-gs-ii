@@ -121,9 +121,9 @@ class EEPRom
 		 */
 		inline bool isDirty(void) const { return m_dirty; }
 		
-		// TODO: EEPRom directory path.
-		// For now, just save in the ROM directory.
-		void setFilename(const std::string &filename);
+		// EEPRom filename and pathname.
+		void setFilename(const std::string& filename);
+		void setPathname(const std::string& pathname);
 		
 		/**
 		 * load(): Load the EEPRom file.
@@ -164,7 +164,9 @@ class EEPRom
 		 * - i386:  i686-apple-darwin9-gcc-4.2.1 (GCC) 4.2.1 (Apple Inc. build 5566) [andlabs] [OS X 10.5.8]
 		 */
 		static const char *ms_FileExt;
-		std::string m_filename;
+		std::string m_filename;		// EEPRom base filename.
+		std::string m_pathname;		// EEPRom pathname.
+		std::string m_fullPathname;	// Full pathname. (m_pathname + m_filename)
 		
 		// EEPRom functions.
 		void processWriteCmd(void);

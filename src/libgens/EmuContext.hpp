@@ -35,6 +35,9 @@
 #include "Save/SRam.hpp"
 #include "Save/EEPRom.hpp"
 
+// C++ includes.
+#include <string>
+
 namespace LibGens
 {
 
@@ -129,6 +132,13 @@ class EmuContext
 			{ return ms_AutoFixChecksum; }
 		static inline void SetAutoFixChecksum(bool newAutoFixChecksum)
 			{ ms_AutoFixChecksum = newAutoFixChecksum; }
+		
+		/**
+		 * Pathnames.
+		 */
+		static inline const char *PathSRam(void)
+			{ return ms_PathSRam.c_str(); }
+		static void SetPathSRam(const char *newPathSRam);
 	
 	protected:
 		Rom *m_rom;
@@ -146,6 +156,7 @@ class EmuContext
 		 * Global settings.
 		 */
 		static bool ms_AutoFixChecksum;
+		static std::string ms_PathSRam;
 	
 	private:
 		static int ms_RefCount;

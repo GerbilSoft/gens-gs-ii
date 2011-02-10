@@ -70,23 +70,32 @@ void SRam::reset(void)
  * The file extension is changed to ".srm".
  * @param filename ROM filename.
  */
-void SRam::setFilename(const string &filename)
+void SRam::setFilename(const string& filename)
 {
 	if (filename.empty())
 	{
 		// Empty filename.
 		m_filename.clear();
+		m_fullPathname = m_pathname;
 		return;
 	}
 	
-	// Set the filename to be the same as the ROM filename,
-	// but with a different extension.
+	// Remove any subdirectories from the ROM filename.
 	m_filename = filename;
-	size_t dot_pos = m_filename.rfind('.');
 	size_t path_pos = m_filename.rfind(LG_PATH_SEP_CHR);
+	if (path_pos != string::npos)
+	{
+		// Found a subdirectory.
+		if (path_pos == m_filename.size())
+			m_filename.clear();
+		else
+			m_filename = m_filename.substr(path_pos+1);
+	}
 	
-	if ((dot_pos == string::npos) ||
-	    (path_pos != string::npos && dot_pos < path_pos))
+	// Replace the file extension.
+	size_t dot_pos = m_filename.rfind('.');
+	
+	if (dot_pos == string::npos)
 	{
 		// File extension not found. Add one.
 		m_filename += '.';
@@ -98,6 +107,32 @@ void SRam::setFilename(const string &filename)
 		m_filename.resize(dot_pos + 1);
 		m_filename += ms_FileExt;
 	}
+	
+	// Set the full pathname.
+	m_fullPathname = m_pathname + m_filename;
+}
+
+
+/**
+ * setPathname(): Set the SRam pathname.
+ * @param pathname SRam pathname.
+ */
+void SRam::setPathname(const string& pathname)
+{
+	m_pathname = pathname;
+	
+	// Rebuild the full pathname.
+	if (m_pathname.empty())
+		m_fullPathname = m_filename;
+	else
+	{
+		// Make sure the pathname ends with a separator.
+		if (m_pathname.at(m_pathname.size()-1) != LG_PATH_SEP_CHR)
+			m_pathname += LG_PATH_SEP_CHR;
+		
+		// Create the full pathname.
+		m_fullPathname = m_pathname + m_filename;
+	}
 }
 
 
@@ -108,7 +143,7 @@ void SRam::setFilename(const string &filename)
 int SRam::load(void)
 {
 	// Attempt to open the SRam file.
-	FILE *f = fopen(m_filename.c_str(), "rb");
+	FILE *f = fopen(m_fullPathname.c_str(), "rb");
 	if (!f)
 	{
 		// Unable to open the SRam file.
@@ -165,7 +200,7 @@ int SRam::save(void)
 		return 0;
 	}
 	
-	FILE *f = fopen(m_filename.c_str(), "wb");
+	FILE *f = fopen(m_fullPathname.c_str(), "wb");
 	if (!f)
 	{
 		// Unable to open SRam file.
