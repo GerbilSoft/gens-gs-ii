@@ -76,7 +76,12 @@ AboutWindow *AboutWindow::m_AboutWindow = NULL;
  * AboutWindow(): Initialize the About window.
  */
 AboutWindow::AboutWindow(QWidget *parent)
-	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
+	: QDialog(parent,
+		Qt::Dialog |
+		Qt::WindowTitleHint |
+		Qt::WindowSystemMenuHint |
+		Qt::WindowMinimizeButtonHint |
+		Qt::WindowCloseButtonHint)
 {
 	setupUi(this);
 	
@@ -86,6 +91,16 @@ AboutWindow::AboutWindow(QWidget *parent)
 #ifdef Q_WS_MAC
 	// Remove the window icon. (Mac "proxy icon")
 	this->setWindowIcon(QIcon());
+	
+	// Hide the frames.
+	fraCopyrights->setFrameShape(QFrame::NoFrame);
+	fraCopyrights->layout()->setContentsMargins(0, 0, 0, 0);
+	fraIncLibraries->setFrameShape(QFrame::NoFrame);
+	fraIncLibraries->layout()->setContentsMargins(0, 0, 0, 0);
+	fraDebugInfo->setFrameShape(QFrame::NoFrame);
+	fraDebugInfo->layout()->setContentsMargins(0, 0, 0, 0);
+	fraCredits->setFrameShape(QFrame::NoFrame);
+	fraCredits->layout()->setContentsMargins(0, 0, 0, 0);
 #endif
 	
 	// Scroll areas aren't initialized.
@@ -233,8 +248,8 @@ void AboutWindow::initAboutWindowText(void)
 		scrlIncLibraries->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 		scrlIncLibraries->setWidget(lblIncLibraries);
 		scrlIncLibraries->setWidgetResizable(true);
-		lblIncLibraries->setAutoFillBackground(false);
 		vboxIncLibraries->addWidget(scrlIncLibraries);
+		scrlIncLibraries->setAutoFillBackground(false);
 		
 		QScrollArea *scrlDebugInfo = new QScrollArea();
 		scrlDebugInfo->setFrameShape(QFrame::NoFrame);
@@ -242,8 +257,8 @@ void AboutWindow::initAboutWindowText(void)
 		scrlDebugInfo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 		scrlDebugInfo->setWidget(lblDebugInfo);
 		scrlDebugInfo->setWidgetResizable(true);
-		lblDebugInfo->setAutoFillBackground(false);
 		vboxDebugInfo->addWidget(scrlDebugInfo);
+		scrlDebugInfo->setAutoFillBackground(false);
 		
 		QScrollArea *scrlCredits = new QScrollArea();
 		scrlCredits->setFrameShape(QFrame::NoFrame);
@@ -251,8 +266,8 @@ void AboutWindow::initAboutWindowText(void)
 		scrlCredits->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 		scrlCredits->setWidget(lblCredits);
 		scrlCredits->setWidgetResizable(true);
-		scrlCredits->setAutoFillBackground(false);
 		vboxCredits->addWidget(scrlCredits);
+		scrlCredits->setAutoFillBackground(false);
 		
 		// Scroll areas initialized.
 		m_scrlAreaInit = true;
