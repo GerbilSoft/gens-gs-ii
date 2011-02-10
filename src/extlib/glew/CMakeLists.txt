@@ -1,10 +1,10 @@
-PROJECT(glew)
+PROJECT(GLEW)
 cmake_minimum_required(VERSION 2.6.0)
 
 # TODO: Search for OpenGL here?
 
 # Sources.
-SET(glew_SRCS
+SET(GLEW_SRCS
 	glew.c
 	)
 
@@ -12,9 +12,9 @@ SET(glew_SRCS
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/include/")
 
 # Build the library.
-ADD_LIBRARY(glew STATIC ${glew_SRCS})
-TARGET_LINK_LIBRARIES(glew ${OPENGL_gl_LIBRARY})
+ADD_LIBRARY(GLEW STATIC ${GLEW_SRCS})
+TARGET_LINK_LIBRARIES(GLEW ${OPENGL_gl_LIBRARY})
 
 # GLEW_STATIC needs to be defined for the static version.
-SET_TARGET_PROPERTIES(glew
+SET_TARGET_PROPERTIES(GLEW
 	PROPERTIES COMPILE_DEFINITIONS "GLEW_STATIC")

@@ -171,7 +171,7 @@ IF(OPENGL_LIBRARIES)
 	IF(WIN32)
 		# Always use internal GLEW on Win32.
 		SET(HAVE_GLEW 1)
-		SET(GLEW_LIBRARY glew)
+		SET(GLEW_LIBRARY GLEW)
 		SET(GLEW_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/extlib/glew/include/")
 		MESSAGE(STATUS "Win32: using internal GLEW")
 	ELSE(WIN32)
