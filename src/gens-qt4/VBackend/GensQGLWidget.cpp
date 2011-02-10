@@ -258,7 +258,7 @@ void GensQGLWidget::reallocTexture(void)
 	// Check if it exists manually.
 	// For now, we're always assuming it exists on Mac OS X.
 #ifndef Q_WS_MAC
-	if (m_texType != GL_UNSIGNED_BYTE && !GLEW_EXT_packed_pixels
+	if (m_texType != GL_UNSIGNED_BYTE && !GLEW_EXT_packed_pixels)
 	{
 		LOG_MSG_ONCE(video, LOG_MSG_LEVEL_ERROR,
 				"GL_EXT_packed_pixels is missing.");
