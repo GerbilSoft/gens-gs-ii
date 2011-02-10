@@ -68,11 +68,15 @@ class GLShaderManager
 		
 		/** Query available shaders. **/
 #ifdef HAVE_GLEW
-		inline bool hasPaused(void) const { return (m_paused_ARBfrag != 0); }
-		inline bool hasFastBlur(void) const { return (m_fastBlur_ARBfrag != 0); }
+		inline bool hasPaused(void) const
+			{ return (m_paused_type != ST_NONE); }
+		inline bool hasFastBlur(void) const
+			{ return (m_fastBlur_ARB != 0); }
 #else /* !HAVE_GLEW */
-		inline bool hasPaused(void) const { return false; }
-		inline bool hasFastBlur(void) const { return false; }
+		inline bool hasPaused(void) const
+			{ return false; }
+		inline bool hasFastBlur(void) const
+			{ return false; }
 #endif /* HAVE_GLEW */
 		
 		/** Set Shader functions. **/
@@ -92,18 +96,30 @@ class GLShaderManager
 	protected:
 		bool m_init;	// True if the GL Shader Manager is initialized.
 		
+		enum ShaderType
+		{
+			ST_NONE				= 0,
+			ST_GL_ARB_FRAGMENT_PROGRAM	= 1,
+			ST_GL_ATI_TEXT_FRAGMENT_SHADER	= 2,
+			
+			ST_MAX
+		};
+		
 		/** OpenGL shaders. **/
 		
 #ifdef HAVE_GLEW
-		// Paused effect: ARB fragment program.
-		GLuint m_paused_ARBfrag;
+		// Paused effect.
 		bool m_paused_enabled;
-		static const char *ms_Paused_ARBfrag_asm;
+		ShaderType m_paused_type;
+		GLuint m_paused_ARB;
+		static const char *ms_Paused_ARB_fragment_program_src;
+		static const char *ms_Paused_ATI_text_fragment_shader_src;
 		
-		// Fast Blur: ARB fragment program.
-		GLuint m_fastBlur_ARBfrag;
+		// Fast Blur effect.
 		bool m_fastBlur_enabled;
-		static const char *ms_FastBlur_ARBfrag_asm;
+		ShaderType m_fastBlur_type;
+		GLuint m_fastBlur_ARB;
+		static const char *ms_FastBlur_ARB_fragment_program_src;
 #endif /* HAVE_GLEW */
 };
 
