@@ -141,8 +141,6 @@ void VBackend::setStretchMode(StretchMode newStretchMode)
 	// TODO: Verify that this works properly.
 	m_stretchMode = newStretchMode;
 	if (isRunning())
-		setVbDirty();
-	if (isRunning())
 	{
 		setVbDirty();
 		// TODO: Only if paused, or regardless of pause?
