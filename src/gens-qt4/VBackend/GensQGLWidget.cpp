@@ -149,8 +149,16 @@ QStringList GensQGLWidget::GLExtsInUse(void)
 	
 	if (GLEW_EXT_bgra)
 		exts.append(QLatin1String("GL_EXT_bgra"));
+	
+	// TODO: GLEW doesn't have GL_APPLE_packed_pixels.
+	// Check if it exists manually.
+	// For now, we're always assuming it exists on Mac OS X.
 	if (GLEW_EXT_packed_pixels)
 		exts.append(QLatin1String("GL_EXT_packed_pixels"));
+#ifdef Q_WS_MAC
+	else
+		exts.append(QLatin1String("GL_APPLE_packed_pixels"));
+#endif
 	
 	// TODO: Vertical sync.
 #if 0
@@ -246,15 +254,20 @@ void GensQGLWidget::reallocTexture(void)
 	}
 	
 	// 15-bit and 16-bit color requires GL_EXT_packed_pixels.
-	if (m_texType != GL_UNSIGNED_BYTE && !GLEW_EXT_packed_pixels)
+	// TODO: GLEW doesn't have GL_APPLE_packed_pixels.
+	// Check if it exists manually.
+	// For now, we're always assuming it exists on Mac OS X.
+#ifndef Q_WS_MAC
+	if (m_texType != GL_UNSIGNED_BYTE && !GLEW_EXT_packed_pixels
 	{
 		LOG_MSG_ONCE(video, LOG_MSG_LEVEL_ERROR,
 				"GL_EXT_packed_pixels is missing.");
 		LOG_MSG_ONCE(video, LOG_MSG_LEVEL_ERROR,
 				"15/16-bit color may not work properly.");
 	}
-#endif
-	
+#endif /* Q_WS_MAC */
+#endif /* HAVE_GLEW */
+
 	// Allocate a memory buffer to use for texture initialization.
 	// This will ensure that the entire texture is initialized to black.
 	// (This fixes garbage on the last column when using the Fast Blur shader.)
