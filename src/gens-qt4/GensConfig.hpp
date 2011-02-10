@@ -79,13 +79,32 @@ class GensConfig : public QObject
 		
 		/** Configuration path. **/
 		// TODO: Mark cfgPath as CONSTANT?
+		// NOTE: This uses Qt directory separators.
 		Q_PROPERTY(QString cfgPath READ cfgPath)
-		private:
-			QString m_cfgPath;
 		public:
 			QString cfgPath(void) const
 				{ return m_cfgPath; }
+		private:
+			QString m_cfgPath;
 		
+		/** User configuration paths. **/
+		// TODO: Make these configurable?
+		// NOTE: These use Qt directory separators.
+		public:
+			enum ConfigPath
+			{
+				GCPATH_CONFIG		= 0,	// Same as cfgPath.
+				GCPATH_SAVESTATES	= 1,	// Savestates.
+				GCPATH_SRAM		= 2,	// Cartridge SRAM.
+				GCPATH_BRAM		= 3,	// Sega CD BRAM.
+				GCPATH_WAV		= 4,	// WAV dumping.
+				GCPATH_VGM		= 5,	// VGM dumping.
+				GCPATH_SCREENSHOTS	= 6,	// Screemshots.
+				
+				GCPATH_MAX
+			};
+			QString userPath(ConfigPath pathID);
+			
 		/** Onscreen display. **/
 		Q_PROPERTY(bool osdFpsEnabled READ osdFpsEnabled WRITE setOsdFpsEnabled NOTIFY osdFpsEnabled_changed)
 		GC_PROPERTY(bool, osdFpsEnabled, bool, OsdFpsEnabled);

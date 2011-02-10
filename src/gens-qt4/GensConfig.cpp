@@ -56,6 +56,12 @@ GensConfig::GensConfig()
 	if (sepChr >= 0)
 		m_cfgPath.remove(sepChr + 1, m_cfgPath.size());
 	
+	// Make sure the directory exists.
+	// If it doesn't exist, create it.
+	QDir dir(m_cfgPath);
+	if (!dir.exists())
+		dir.mkpath(m_cfgPath);
+	
 	// Load the user's configuration file.
 	reload();
 }
@@ -332,6 +338,62 @@ void GensConfig::emitAll(void)
 	
 	/** Savestates. **/
 	emit saveSlot_changed(m_saveSlot);
+}
+
+
+/**
+ * userPath(): Get a user configuration path.
+ * @param pathID Path ID.
+ * @return User configuration path, or empty string on error.
+ */
+QString GensConfig::userPath(ConfigPath pathID)
+{
+	if (pathID == GCPATH_CONFIG)
+		return m_cfgPath;
+	
+	// TODO: MDP directories.
+	// TODO: Allow users to configure these.
+	QString path = m_cfgPath;
+	switch (pathID)
+	{
+		case GCPATH_SAVESTATES:
+			path += QLatin1String("Savestates/");
+			break;
+		case GCPATH_SRAM:
+			path += QLatin1String("SRAM/");
+			break;
+		case GCPATH_BRAM:
+			path += QLatin1String("BRAM/");
+			break;
+		case GCPATH_WAV:
+			path += QLatin1String("WAV/");
+			break;
+		case GCPATH_VGM:
+			path += QLatin1String("VGM/");
+			break;
+		case GCPATH_SCREENSHOTS:
+			path += QLatin1String("Screenshots/");
+			break;
+		default:
+			return m_cfgPath;
+	}
+	
+	// Check if the directory exists.
+	QDir dir(path);
+	if (!dir.exists())
+	{
+		// Directory does not exist. Create it.
+		dir.mkpath(path);
+		if (!dir.cd(path))
+		{
+			// Could not create the directory.
+			// Use the default configuration directory.
+			return m_cfgPath;
+		}
+	}
+	
+	// Return the directory.
+	return path;
 }
 
 
