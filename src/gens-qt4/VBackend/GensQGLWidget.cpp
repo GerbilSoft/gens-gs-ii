@@ -387,8 +387,17 @@ void GensQGLWidget::initializeGL(void)
 	glFrontFace(GL_CW);
 	glEnable(GL_CULL_FACE);
 	
-	// Initialize the OpenGL Shader Manager.
-	m_shaderMgr.init();
+#ifdef HAVE_GLEW
+	// Initialize GLEW.
+	GLenum err = glewInit();
+	if (err != GLEW_OK)
+	{
+		// GLEW initialized successfully.
+		
+		// Initialize the OpenGL Shader Manager.
+		m_shaderMgr.init();
+	}
+#endif
 
 	// Initialize the GL viewport and projection.
 	resizeGL(320, 240);

@@ -96,14 +96,8 @@ GLShaderManager::~GLShaderManager()
 void GLShaderManager::init(void)
 {
 #ifdef HAVE_GLEW
-	// Initialize GLEW.
-	GLenum err = glewInit();
-	if (err != GLEW_OK)
-	{
-		// Error initializing GLEW.
-		LOG_MSG(video, LOG_MSG_LEVEL_ERROR,
-			"Error initializing GLEW: %s", glewGetErrorString(err));
-	}
+	// NOTE: GLEW must have been initialized previously.
+	GLenum err;
 	
 	// Check what extensions are supported.
 	if (GLEW_ARB_fragment_program)
