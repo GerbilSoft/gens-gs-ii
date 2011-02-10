@@ -398,7 +398,7 @@ void GensQGLWidget::initializeGL(void)
 #ifdef HAVE_GLEW
 	// Initialize GLEW.
 	GLenum err = glewInit();
-	if (err != GLEW_OK)
+	if (err == GLEW_OK)
 	{
 		// GLEW initialized successfully.
 		
