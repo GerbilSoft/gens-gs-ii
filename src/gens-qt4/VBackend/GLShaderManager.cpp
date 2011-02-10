@@ -102,12 +102,10 @@ GLShaderManager::GLShaderManager()
 	// Initialize shader variables.
 	m_paused_enabled = false;
 	m_paused_type = ST_NONE;
+	m_paused_ARB = 0;
 	
 	m_fastBlur_enabled = false;
 	m_fastBlur_type = ST_NONE;
-	
-	// Clear the shader pointers.
-	m_paused_ARB = 0;
 	m_fastBlur_ARB = 0;
 #endif
 }
@@ -271,6 +269,7 @@ void GLShaderManager::end(void)
 		default:
 			break;
 	}
+	m_paused_type = ST_NONE;
 	
 	switch (m_fastBlur_type)
 	{
@@ -288,6 +287,7 @@ void GLShaderManager::end(void)
 		default:
 			break;
 	}
+	m_fastBlur_type = ST_NONE;
 #endif
 	
 	// OpenGL Shader Manager is shut down.
@@ -413,12 +413,7 @@ void GLShaderManager::setFastBlur(bool newEnabled)
 	// TODO: Check if any other shaders are enabled?
 	if (!m_init)
 		return;
-	if (newEnabled == m_paused_enabled)
-		return;
-	
-	if (!m_init)
-		return;
-	if (m_fastBlur_ARB == 0 || newEnabled == m_fastBlur_ARB)
+	if (newEnabled == m_fastBlur_enabled)
 		return;
 	
 	switch (m_paused_type)

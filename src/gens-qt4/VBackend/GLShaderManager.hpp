@@ -75,7 +75,7 @@ class GLShaderManager
 		inline bool hasPaused(void) const
 			{ return (m_paused_type != ST_NONE); }
 		inline bool hasFastBlur(void) const
-			{ return (m_fastBlur_ARB != 0); }
+			{ return (m_fastBlur_type != ST_NONE); }
 #else /* !HAVE_GLEW */
 		inline bool hasPaused(void) const
 			{ return false; }
