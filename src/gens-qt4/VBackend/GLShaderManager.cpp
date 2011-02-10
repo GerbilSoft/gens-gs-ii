@@ -196,7 +196,7 @@ QStringList GLShaderManager::GLExtsInUse(void)
 {
 	QStringList exts;
 	
-	if (GLEW_ARB_fragment_program)
+	if (GLEW_ARB_fragment_program || GLEW_VERSION_2_0)
 		exts.append(QLatin1String("GL_ARB_fragment_program"));
 	
 	// TODO: Other GL extensions.
