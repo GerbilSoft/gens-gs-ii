@@ -34,6 +34,10 @@
 // Qt includes.
 #include <QtCore/QStringList>
 
+// Disabled for now due to problems with Mac OS X 10.5.7 PPC.
+// (Radeon 9000 series video card)
+//#define ENABLE_ATI_TEXT_FRAGMENT_SHADER
+
 namespace GensQt4
 {
 
@@ -100,7 +104,9 @@ class GLShaderManager
 		{
 			ST_NONE				= 0,
 			ST_GL_ARB_FRAGMENT_PROGRAM	= 1,
+#ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
 			ST_GL_ATI_TEXT_FRAGMENT_SHADER	= 2,
+#endif
 			
 			ST_MAX
 		};
@@ -113,7 +119,9 @@ class GLShaderManager
 		ShaderType m_paused_type;
 		GLuint m_paused_ARB;
 		static const char *ms_Paused_ARB_fragment_program_src;
+#if ENABLE_ATI_TEXT_FRAGMENT_SHADER
 		static const char *ms_Paused_ATI_text_fragment_shader_src;
+#endif
 		
 		// Fast Blur effect.
 		bool m_fastBlur_enabled;

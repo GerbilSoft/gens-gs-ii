@@ -54,6 +54,7 @@ const char *GLShaderManager::ms_Paused_ARB_fragment_program_src =
 	"MOV result.color, color;\n"
 	"END\n";
 
+#ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
 /**
  * ms_Paused_ATI_text_fragment_shader_src(): Paused effect shader.
  * GL_ATI_text_fragment_shader
@@ -72,6 +73,7 @@ const char *GLShaderManager::ms_Paused_ATI_text_fragment_shader_src =
 	"  DOT3 r0.rgb, r0, c0;\n"			// Calculate grayscale value.
 	"  ADD r0.b.sat, r0.b, r0.b;\n"			// Double the blue component.
 	"EndPass;\n";
+#endif
 
 /**
  * ms_FastBlur_ARB_fragment_program_src(): Fast Blur effect shader.
@@ -192,6 +194,7 @@ void GLShaderManager::init(void)
 			}
 		}
 	}
+#ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
 	else if (GLEW_ATI_text_fragment_shader)
 	{
 		// ATI text fragment shaders are supported
@@ -231,6 +234,7 @@ void GLShaderManager::init(void)
 			}
 		}
 	}
+#endif /* ENABLE_ATI_TEXT_FRAGMENT_SHADER */
 #endif /* HAVE_GLEW */
 	
 	// OpenGL Shader Manager is initialized.
@@ -254,7 +258,9 @@ void GLShaderManager::end(void)
 	switch (m_paused_type)
 	{
 		case ST_GL_ARB_FRAGMENT_PROGRAM:
+#ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
 		case ST_GL_ATI_TEXT_FRAGMENT_SHADER:
+#endif
 			if (m_paused_ARB > 0)
 			{
 				glDeleteProgramsARB(1, &m_paused_ARB);
@@ -269,7 +275,9 @@ void GLShaderManager::end(void)
 	switch (m_fastBlur_type)
 	{
 		case ST_GL_ARB_FRAGMENT_PROGRAM:
+#ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
 		case ST_GL_ATI_TEXT_FRAGMENT_SHADER:
+#endif
 			if (m_fastBlur_ARB > 0)
 			{
 				glDeleteProgramsARB(1, &m_fastBlur_ARB);
@@ -298,8 +306,10 @@ QStringList GLShaderManager::GLExtsInUse(void)
 	
 	if (GLEW_ARB_fragment_program || GLEW_VERSION_2_0)
 		exts.append(QLatin1String("GL_ARB_fragment_program"));
+#ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
 	else if (GLEW_ATI_text_fragment_shader)
 		exts.append(QLatin1String("GL_ATI_text_fragment_shader"));
+#endif
 	
 	// TODO: Other GL extensions.
 #if 0
@@ -346,7 +356,9 @@ void GLShaderManager::setPaused(bool newEnabled)
 	switch (m_paused_type)
 	{
 		case ST_GL_ARB_FRAGMENT_PROGRAM:
+#ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
 		case ST_GL_ATI_TEXT_FRAGMENT_SHADER:
+#endif
 		{
 			if (m_paused_ARB == 0)
 				break;
@@ -367,6 +379,7 @@ void GLShaderManager::setPaused(bool newEnabled)
 			{
 				// Disable the shader.
 				glDisable(prgType);
+#ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
 				if (m_paused_type == ST_GL_ATI_TEXT_FRAGMENT_SHADER)
 				{
 					// HACK: at least the Mac OS X 10.5 PPC Radeon drivers are broken and
@@ -376,6 +389,7 @@ void GLShaderManager::setPaused(bool newEnabled)
 					// NOTE: It doesn't seem to help any...
 					glFlush();
 				}
+#endif
 			}
 			break;
 		}
