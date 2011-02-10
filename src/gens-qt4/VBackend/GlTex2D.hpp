@@ -71,6 +71,7 @@ class GlTex2D
 	
 	private:
 		GLuint m_tex;
+		bool m_hasPackedPixels;
 		
 		// Pow2-adjusted image size.
 		GLdouble m_pow2_w;

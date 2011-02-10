@@ -29,6 +29,9 @@
 #include <GL/glext.h>
 #endif
 
+// LOG_MSG() subsystem.
+#include "libgens/macros/log_msg.h"
+
 // Byteswapping macros.
 #include "libgens/Util/byteswap.h"
 
@@ -51,6 +54,19 @@ GlTex2D::GlTex2D()
 	m_pow2_h = 0.0;
 	m_img_w = 0;
 	m_img_h = 0;
+	
+	// Determine if we have the packed pixel extension.
+	// TODO: GLEW doesn't have GL_APPLE_packed_pixels.
+	// Check if it exists manually.
+	// For now, we're always assuming it exists on Mac OS X.
+#ifdef Q_WS_MAC
+	m_hasPackedPixels = true;
+#else
+	m_hasPackedPixels = (GLEW_EXT_packed_pixels ||
+				/*GLEW_APPLE_PACKED_PIXELS ||*/
+				GLEW_VERSION_1_2
+				);
+#endif
 }
 
 GlTex2D::~GlTex2D()
@@ -62,7 +78,7 @@ GlTex2D::~GlTex2D()
 	}
 }
 
-#include <stdio.h>
+
 /**
  * setImage(): Set the texture image from a QImage.
  * @param img QImage.
@@ -86,10 +102,9 @@ void GlTex2D::setImage(const QImage& img)
 	
 	// Determine the texture format.
 	int bytes_per_pixel;
+	bool needsPackedPixels = false;
 	QImage new_img = img;
 	
-	// NOTE: Packed pixels are required on PowerPC.
-	// TODO: Print a warning if the packed pixel extension isn't found.
 	switch (new_img.format())
 	{
 		case QImage::Format_RGB32:
@@ -109,20 +124,18 @@ void GlTex2D::setImage(const QImage& img)
 			break;
 		
 		case QImage::Format_RGB16:
-			// TODO: Only support this format if we have the packed pixels extension.
-			// Otherwise, force an image conversion.
 			m_components = 3;
 			m_format = GL_RGB;
 			m_type = GL_UNSIGNED_SHORT_5_6_5;
+			needsPackedPixels = true;
 			bytes_per_pixel = 2;
 			break;
 		
 		case QImage::Format_RGB555:
-			// TODO: Only support this format if we have the packed pixels extension.
-			// Otherwise, force an image conversion.
 			m_components = 4;
 			m_format = GL_BGRA;
 			m_type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
+			needsPackedPixels = true;
 			bytes_per_pixel = 2;
 			break;
 		
@@ -135,6 +148,31 @@ void GlTex2D::setImage(const QImage& img)
 			m_type = GLTEX2D_FORMAT_32BIT;
 			bytes_per_pixel = 4;
 			break;
+	}
+	
+#if GENS_BYTEORDER == GENS_BIG_ENDIAN
+	// GL_UNSIGNED_INT_8_8_8_8_REV requires the packed pixels extension.
+	if (m_type == GLTEX2D_FORMAT_32BIT)
+		needsPackedPixels = true;
+#endif
+	
+	if (needsPackedPixels && !m_hasPackedPixels)
+	{
+		// Packed pixels extension isn't available.
+		// Convert to 32-bit color.
+		new_img = img.convertToFormat(QImage::Format_ARGB32, Qt::ColorOnly);
+		m_components = 4;
+		m_format = GL_BGRA;
+		m_type = GLTEX2D_FORMAT_32BIT;
+		bytes_per_pixel = 4;
+		
+		// TODO: Byteswap the data on big-endian.
+#if GENS_BYTEORDER == GENS_BIG_ENDIAN
+		LOG_MSG_ONCE(video, LOG_MSG_LEVEL_WARNING,
+				"GL_EXT_packed_pixels not available.");
+		LOG_MSG_ONCE(video, LOG_MSG_LEVEL_WARNING,
+				"Textures may appear garbled.");
+#endif
 	}
 	
 	// Save the original image size.
