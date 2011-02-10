@@ -82,6 +82,11 @@ int gens_main(int argc, char *argv[])
 	// Register the LibGens OSD handler.
 	lg_set_osd_fn(gqt4_osd);
 	
+	// Set the EmuContext paths.
+	// TODO: Do this here or in GensWindow initialization?
+	LibGens::EmuContext::SetPathSRam(
+		GensQt4::gqt4_config->userPath(GensQt4::GensConfig::GCPATH_SRAM).toUtf8().constData());
+	
 	gens_window = new GensQt4::GensWindow();
 	gens_window->show();
 	
