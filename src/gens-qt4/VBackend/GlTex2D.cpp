@@ -29,6 +29,17 @@
 #include <GL/glext.h>
 #endif
 
+// Byteswapping macros.
+#include "libgens/Util/byteswap.h"
+
+// GL_UNSIGNED_INT_8_8_8_8_REV is needed for native byte-order on PowerPC.
+// When used with GL_BGRA, it's effectively the same as GL_ARGB.
+#if GENS_BYTEORDER == GENS_BIG_ENDIAN
+#define GLTEX2D_FORMAT_32BIT GL_UNSIGNED_INT_8_8_8_8_REV
+#else
+#define GLTEX2D_FORMAT_32BIT GL_UNSIGNED_BYTE
+#endif
+
 namespace GensQt4
 {
 
@@ -51,7 +62,7 @@ GlTex2D::~GlTex2D()
 	}
 }
 
-
+#include <stdio.h>
 /**
  * setImage(): Set the texture image from a QImage.
  * @param img QImage.
@@ -77,13 +88,15 @@ void GlTex2D::setImage(const QImage& img)
 	int bytes_per_pixel;
 	QImage new_img = img;
 	
+	// NOTE: Packed pixels are required on PowerPC.
+	// TODO: Print a warning if the packed pixel extension isn't found.
 	switch (new_img.format())
 	{
 		case QImage::Format_RGB32:
 		case QImage::Format_ARGB32:
 			m_components = 4;
 			m_format = GL_BGRA;
-			m_type = GL_UNSIGNED_BYTE;
+			m_type = GLTEX2D_FORMAT_32BIT;
 			bytes_per_pixel = 4;
 			break;
 		
@@ -91,7 +104,7 @@ void GlTex2D::setImage(const QImage& img)
 			// TODO: Verify this!
 			m_components = 3;
 			m_format = GL_RGB;
-			m_type = GL_UNSIGNED_BYTE;
+			m_type = GL_UNSIGNED_BYTE;	// TODO: Big-endian support.
 			bytes_per_pixel = 3;
 			break;
 		
@@ -115,10 +128,11 @@ void GlTex2D::setImage(const QImage& img)
 		
 		default:
 			// Convert to 32-bit color.
+			// TODO: Big-endian support.
 			new_img = img.convertToFormat(QImage::Format_ARGB32, Qt::ColorOnly);
 			m_components = 4;
 			m_format = GL_BGRA;
-			m_type = GL_UNSIGNED_BYTE;
+			m_type = GLTEX2D_FORMAT_32BIT;
 			bytes_per_pixel = 4;
 			break;
 	}
