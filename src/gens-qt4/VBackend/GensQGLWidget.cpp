@@ -174,6 +174,28 @@ void GensQGLWidget::reallocTexture(void)
 			break;
 	}
 	
+#ifdef HAVE_GLEW
+	// TODO: Show an OSD message.
+	
+	// GL_BGRA format requires GL_EXT_bgra.
+	if (m_texFormat == GL_BGRA && !GLEW_EXT_bgra)
+	{
+		LOG_MSG_ONCE(video, LOG_MSG_LEVEL_ERROR,
+				"GL_EXT_bgra is missing.");
+		LOG_MSG_ONCE(video, LOG_MSG_LEVEL_ERROR,
+				"15/32-bit color may not work properly.");
+	}
+	
+	// 15-bit and 16-bit color requires GL_EXT_packed_pixels.
+	if (m_texType != GL_UNSIGNED_BYTE && !GLEW_EXT_packed_pixels)
+	{
+		LOG_MSG_ONCE(video, LOG_MSG_LEVEL_ERROR,
+				"GL_EXT_packed_pixels is missing.");
+		LOG_MSG_ONCE(video, LOG_MSG_LEVEL_ERROR,
+				"15/16-bit color may not work properly.");
+	}
+#endif
+	
 	// Allocate a memory buffer to use for texture initialization.
 	// This will ensure that the entire texture is initialized to black.
 	// (This fixes garbage on the last column when using the Fast Blur shader.)
