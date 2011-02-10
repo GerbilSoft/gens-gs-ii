@@ -363,10 +363,14 @@ void GLShaderManager::setPaused(bool newEnabled)
 			if (m_paused_ARB == 0)
 				break;
 			
+#ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
 			const GLenum prgType = (m_paused_type == ST_GL_ARB_FRAGMENT_PROGRAM
 						? GL_FRAGMENT_PROGRAM_ARB
 						: GL_TEXT_FRAGMENT_SHADER_ATI
 						);
+#else
+			const GLenum prgType = GL_FRAGMENT_PROGRAM_ARB;
+#endif
 			
 			m_paused_enabled = newEnabled;
 			if (m_paused_enabled)
