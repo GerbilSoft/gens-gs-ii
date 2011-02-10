@@ -100,7 +100,7 @@ void GLShaderManager::init(void)
 	GLenum err;
 	
 	// Check what extensions are supported.
-	if (GLEW_ARB_fragment_program)
+	if (GLEW_ARB_fragment_program || GLEW_VERSION_2_0)
 	{
 		// Fragment programs are supported.
 		// Load the fragment programs.

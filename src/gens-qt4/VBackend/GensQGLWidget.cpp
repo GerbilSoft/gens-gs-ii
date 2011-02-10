@@ -147,18 +147,19 @@ QStringList GensQGLWidget::GLExtsInUse(void)
 {
 	QStringList exts;
 	
-	if (GLEW_EXT_bgra)
+	if (GLEW_EXT_bgra || GLEW_VERSION_1_2)
 		exts.append(QLatin1String("GL_EXT_bgra"));
 	
 	// TODO: GLEW doesn't have GL_APPLE_packed_pixels.
 	// Check if it exists manually.
 	// For now, we're always assuming it exists on Mac OS X.
-	if (GLEW_EXT_packed_pixels)
-		exts.append(QLatin1String("GL_EXT_packed_pixels"));
 #ifdef Q_WS_MAC
-	else
+	if (/*GLEW_APPLE_PACKED_PIXELS ||*/ GLEW_VERSION_1_2)
 		exts.append(QLatin1String("GL_APPLE_packed_pixels"));
+	else
 #endif
+	if (GLEW_EXT_packed_pixels || GLEW_VERSION_1_2)
+		exts.append(QLatin1String("GL_EXT_packed_pixels"));
 	
 	// TODO: Vertical sync.
 #if 0
@@ -180,7 +181,7 @@ QStringList GensQGLWidget::GLExtsInUse(void)
 	
 #if 0
 	// TODO: Rectangular texture.
-	if (GLEW_ARB_texture_rectangle)
+	if (GLEW_ARB_texture_rectangle || GLEW_VERSION_2_0)
 		exts.append(QLatin1String("GL_ARB_texture_rectangle"));
 	else if (GLEW_EXT_texture_rectangle)
 		exts.append(QLatin1String("GL_EXT_texture_rectangle"));
@@ -245,7 +246,8 @@ void GensQGLWidget::reallocTexture(void)
 	// TODO: Show an OSD message.
 	
 	// GL_BGRA format requires GL_EXT_bgra.
-	if (m_texFormat == GL_BGRA && !GLEW_EXT_bgra)
+	const bool hasExtBgra = (GLEW_EXT_bgra || GLEW_VERSION_1_2);
+	if (m_texFormat == GL_BGRA && !hasExtBgra)
 	{
 		LOG_MSG_ONCE(video, LOG_MSG_LEVEL_ERROR,
 				"GL_EXT_bgra is missing.");
@@ -256,16 +258,22 @@ void GensQGLWidget::reallocTexture(void)
 	// 15-bit and 16-bit color requires GL_EXT_packed_pixels.
 	// TODO: GLEW doesn't have GL_APPLE_packed_pixels.
 	// Check if it exists manually.
-	// For now, we're always assuming it exists on Mac OS X.
-#ifndef Q_WS_MAC
-	if (m_texType != GL_UNSIGNED_BYTE && !GLEW_EXT_packed_pixels)
+	const bool hasExtPackedPixels = (GLEW_VERSION_1_2
+						|| GLEW_EXT_packed_pixels
+						/*|| GLEW_APPLE_packed_pixels*/
+						);
+	if (m_texType != GL_UNSIGNED_BYTE && !hasExtPackedPixels)
 	{
+#ifdef Q_WS_MAC
+		LOG_MSG_ONCE(video, LOG_MSG_LEVEL_ERROR,
+				"GL_APPLE_packed_pixels is missing.");
+#else
 		LOG_MSG_ONCE(video, LOG_MSG_LEVEL_ERROR,
 				"GL_EXT_packed_pixels is missing.");
+#endif
 		LOG_MSG_ONCE(video, LOG_MSG_LEVEL_ERROR,
 				"15/16-bit color may not work properly.");
 	}
-#endif /* Q_WS_MAC */
 #endif /* HAVE_GLEW */
 
 	// Allocate a memory buffer to use for texture initialization.
