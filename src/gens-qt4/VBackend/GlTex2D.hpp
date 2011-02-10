@@ -54,17 +54,22 @@ class GlTex2D
 		
 		void setImage(const QImage& img);
 		
-		inline GLuint tex(void) const { return m_tex; }
+		inline GLuint tex(void) const
+			{ return m_tex; }
 		
 		// Pow2-adjusted image size.
-		inline GLdouble pow2_w(void) const { return m_pow2_w; }
-		inline GLdouble pow2_h(void) const { return m_pow2_h; }
+		inline GLdouble pow2_w(void) const
+			{ return m_pow2_w; }
+		inline GLdouble pow2_h(void) const
+			{ return m_pow2_h; }
 		
 		// Original image size.
-		inline int img_w(void) const { return m_img_w; }
-		inline int img_h(void) const { return m_img_h; }
+		inline int img_w(void) const
+			{ return m_img_w; }
+		inline int img_h(void) const
+			{ return m_img_h; }
 	
-	protected:
+	private:
 		GLuint m_tex;
 		
 		// Pow2-adjusted image size.
