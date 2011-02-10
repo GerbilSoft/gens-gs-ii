@@ -47,7 +47,11 @@
 
 // Win32 requires GL/glext.h for OpenGL 1.2/1.3.
 // TODO: Check the GL implementation to see what functionality is available at runtime.
+#if defined(Q_WS_MAC)
+#include <OpenGL/glext.h>
+#else
 #include <GL/glext.h>
+#endif
 
 // Qt includes.
 #include <QtCore/QVector>
