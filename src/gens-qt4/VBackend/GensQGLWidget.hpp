@@ -35,6 +35,7 @@
 
 // Qt includes.
 #include <QtOpenGL/QGLWidget>
+#include <QtCore/QStringList>
 
 // OpenGL GL_TEXTURE_2D wrapper.
 #include "GlTex2D.hpp"
@@ -75,6 +76,14 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		 * @return Preferred widget size.
 		 */
 		QSize sizeHint(void) const { return QSize(320, 240); }
+		
+#ifdef HAVE_GLEW
+		/**
+		 * GLExtsInUse(): Get a list of the OpenGL extensions in use.
+		 * @return List of OpenGL extensions in use.
+		 */
+		static QStringList GLExtsInUse(void);
+#endif /* HAVE_GLEW */
 	
 	protected:
 		void reallocTexture(void);

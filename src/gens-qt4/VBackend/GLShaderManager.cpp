@@ -193,6 +193,44 @@ void GLShaderManager::end(void)
 }
 
 
+#ifdef HAVE_GLEW
+/**
+ * GLExtsInUse(): Get a list of the OpenGL extensions in use.
+ * @return List of OpenGL extensions in use.
+ */
+QStringList GLShaderManager::GLExtsInUse(void)
+{
+	QStringList exts;
+	
+	if (GLEW_ARB_fragment_program)
+		exts.append(QLatin1String("GL_ARB_fragment_program"));
+	
+	// TODO: Other GL extensions.
+#if 0
+	if (GLEW_ARB_vertex_program)
+		exts.append(QLatin1String("GL_ARB_vertex_program"));
+	
+	if (GLEW_ARB_vertex_shader)
+		exts.append(QLatin1String("GL_ARB_vertex_shader"));
+	else if (GLEW_EXT_vertex_shader)
+		exts.append(QLatin1String("GL_EXT_vertex_shader"));
+	
+	if (GLEW_ARB_fragment_shader)
+		exts.append(QLatin1String("GL_ARB_fragment_shader"));
+	if (GLEW_ARB_fragment_shader)
+		exts.append(QLatin1String("GL_ARB_fragment_shader"));
+	if (GLEW_ARB_shading_language_100)
+		exts.append(QLatin1String("GL_ARB_shading_language_100"));
+	if (GLEW_ARB_shader_objects)
+		exts.append(QLatin1String("GL_ARB_shader_objects"));
+#endif
+	
+	// Return the list of extensions.
+	return exts;
+}
+#endif /* HAVE_GLEW */
+
+
 /** Set Shader functions. **/
 
 

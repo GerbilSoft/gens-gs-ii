@@ -39,11 +39,15 @@
 // LOG_MSG() subsystem.
 #include "libgens/macros/log_msg.h"
 
+#if defined(Q_WS_WIN)
+#include <GL/wglew.h>
+#elif defined(Q_WS_X11)
+#include <GL/glxew.h>
+#endif
+
 // Win32 requires GL/glext.h for OpenGL 1.2/1.3.
 // TODO: Check the GL implementation to see what functionality is available at runtime.
-#ifdef _WIN32
 #include <GL/glext.h>
-#endif
 
 // Qt includes.
 #include <QtCore/QVector>
@@ -128,6 +132,57 @@ GensQGLWidget::~GensQGLWidget()
 	// Shut down the OpenGL Shader Manager.
 	m_shaderMgr.end();
 }
+
+
+#ifdef HAVE_GLEW
+/**
+ * GLExtsInUse(): Get a list of the OpenGL extensions in use.
+ * @return List of OpenGL extensions in use.
+ */
+QStringList GensQGLWidget::GLExtsInUse(void)
+{
+	QStringList exts;
+	
+	if (GLEW_EXT_bgra)
+		exts.append(QLatin1String("GL_EXT_bgra"));
+	if (GLEW_EXT_packed_pixels)
+		exts.append(QLatin1String("GL_EXT_packed_pixels"));
+	
+	// TODO: Vertical sync.
+#if 0
+#if defined(Q_WS_WIN)
+	if (WGLEW_EXT_swap_control)
+		exts.append(QLatin1String("WGL_EXT_swap_control"));
+#elif defined(Q_WS_X11)
+	if (GLXEW_EXT_swap_control)
+		exts.append(QLatin1String("GLX_EXT_swap_control"));
+	if (GLXEW_SGI_swap_control)
+		exts.append(QLatin1String("GLX_SGI_swap_control"));
+	// TODO: GLX_MESA_swap_control (not defined in GLEW)
+	//if (GLXEW_MESA_swap_control)
+		//exts.append(QLatin1String("GLX_MESA_swap_control"));
+#elif defined(Q_WS_MAC)
+	// TODO: Mac VSync.
+#endif
+#endif
+	
+#if 0
+	// TODO: Rectangular texture.
+	if (GLEW_ARB_texture_rectangle)
+		exts.append(QLatin1String("GL_ARB_texture_rectangle"));
+	else if (GLEW_EXT_texture_rectangle)
+		exts.append(QLatin1String("GL_EXT_texture_rectangle"));
+	else if (GLEW_NV_texture_rectangle)
+		exts.append(QLatin1String("GL_NV_texture_rectangle"));
+#endif
+	
+	// GL shader extensions from GLShaderManager.
+	exts += GLShaderManager::GLExtsInUse();
+	
+	// Return the list of extensions.
+	return exts;
+}
+#endif /* HAVE_GLEW */
 
 
 /**

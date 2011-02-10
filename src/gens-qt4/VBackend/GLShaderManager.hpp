@@ -31,6 +31,9 @@
 #include <GL/glew.h>
 #endif
 
+// Qt includes.
+#include <QtCore/QStringList>
+
 namespace GensQt4
 {
 
@@ -52,22 +55,31 @@ class GLShaderManager
 		 */
 		void end(void);
 		
-		inline bool isInit(void) const { return m_init; }
+		inline bool isInit(void) const
+			{ return m_init; }
+		
+#ifdef HAVE_GLEW
+		/**
+		 * GLExtsInUse(): Get a list of the OpenGL extensions in use.
+		 * @return List of OpenGL extensions in use.
+		 */
+		static QStringList GLExtsInUse(void);
+#endif /* HAVE_GLEW */
 		
 		/** Query available shaders. **/
 #ifdef HAVE_GLEW
 		inline bool hasPaused(void) const { return (m_paused_ARBfrag != 0); }
 		inline bool hasFastBlur(void) const { return (m_fastBlur_ARBfrag != 0); }
-#else
+#else /* !HAVE_GLEW */
 		inline bool hasPaused(void) const { return false; }
 		inline bool hasFastBlur(void) const { return false; }
-#endif
+#endif /* HAVE_GLEW */
 		
 		/** Set Shader functions. **/
 #ifdef HAVE_GLEW
 		void setPaused(bool enabled);
 		void setFastBlur(bool enabled);
-#else
+#else /* !HAVE_GLEW */
 		/**
 		 * NULL functions that do nothing if GLEW wasn't found at compile time.
 		 * These functions are provided for a consistent interface.
@@ -75,7 +87,7 @@ class GLShaderManager
 		 */
 		void setPaused(bool enabled) { ((void)enabled); }
 		void setFastBlur(bool enabled) { ((void)enabled); }
-#endif
+#endif /* HAVE_GLEW */
 	
 	protected:
 		bool m_init;	// True if the GL Shader Manager is initialized.
@@ -92,7 +104,7 @@ class GLShaderManager
 		GLuint m_fastBlur_ARBfrag;
 		bool m_fastBlur_enabled;
 		static const char *ms_FastBlur_ARBfrag_asm;
-#endif
+#endif /* HAVE_GLEW */
 };
 
 }
