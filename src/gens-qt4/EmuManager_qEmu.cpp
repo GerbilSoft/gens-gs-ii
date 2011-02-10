@@ -314,14 +314,15 @@ QImage EmuManager::getMDScreen(void) const
  */
 void EmuManager::doScreenShot(void)
 {
-	// TODO: Save the screenshot in a designated screenshots directory.
-	// For now, it'll save in the gens-qt4 directory.
-	QString romFilename = QString::fromUtf8(m_rom->filenameBaseNoExt());
+	// Get the ROM filename (without extension).
+	// TODO: Remove all extensions, not just the base?
+	// Otherwise, S1.bin.gz will save as S1.bin_000.png.
+	const QString romFilename = QString::fromUtf8(m_rom->filenameBaseNoExt());
 	
 	// Add the current directory, number, and .png extension.
-	// TODO: Use a designated screenshots directory.
 	// TODO: Enumerate QImageWriter for supported image formats.
-	const QString scrFilenamePrefix = QDir::currentPath() + QChar(L'/') + romFilename;
+	const QString scrFilenamePrefix =
+		gqt4_config->userPath(GensConfig::GCPATH_SCREENSHOTS) + QChar(L'/') + romFilename;
 	const QString scrFilenameSuffix = QString::fromLatin1(".png");
 	QString scrFilename;
 	int scrNumber = -1;
