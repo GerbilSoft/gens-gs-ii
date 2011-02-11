@@ -238,7 +238,7 @@ void GensQGLWidget::reallocTexture(void)
 		default:
 			m_colorComponents = 4;
 			m_texFormat = GL_BGRA;
-			m_texType = GL_UNSIGNED_BYTE;
+			m_texType = GLTEX2D_FORMAT_32BIT;
 			break;
 	}
 	
@@ -256,6 +256,7 @@ void GensQGLWidget::reallocTexture(void)
 	}
 	
 	// 15-bit and 16-bit color requires GL_EXT_packed_pixels.
+	// 32-bit color requires GL_EXT_packed_pixels on big-endian systems.
 	// TODO: GLEW doesn't have GL_APPLE_packed_pixels.
 	// Check if it exists manually.
 	const bool hasExtPackedPixels = (GLEW_VERSION_1_2
