@@ -81,6 +81,8 @@ EmuManager::EmuManager()
 	// Save slot.
 	m_saveSlot = gqt4_config->saveSlot();
 	
+	// TODO: Load initial VdpPalette settings.
+	
 	// Create the Audio Backend.
 	// TODO: Allow selection of all available audio backend classes.
 	// NOTE: Audio backends are NOT QWidgets!
@@ -91,6 +93,18 @@ EmuManager::EmuManager()
 		this, SLOT(saveSlot_changed_slot(int)));
 	connect(gqt4_config, SIGNAL(autoFixChecksum_changed(bool)),
 		this, SLOT(autoFixChecksum_changed_slot(bool)));
+	
+	// Graphics settings.
+	connect(gqt4_config, SIGNAL(contrast_changed(int)),
+		this, SLOT(contrast_changed_slot(int)));
+	connect(gqt4_config, SIGNAL(brightness_changed(int)),
+		this, SLOT(brightness_changed_slot(int)));
+	connect(gqt4_config, SIGNAL(grayscale_changed(bool)),
+		this, SLOT(grayscale_changed_slot(bool)));
+	connect(gqt4_config, SIGNAL(inverted_changed(bool)),
+		this, SLOT(inverted_changed_slot(bool)));
+	connect(gqt4_config, SIGNAL(colorScaleMethod_changed(int)),
+		this, SLOT(colorScaleMethod_changed_slot(int)));
 }
 
 EmuManager::~EmuManager()
@@ -779,6 +793,25 @@ void EmuManager::resetEmulator(bool hardReset)
 	m_qEmuRequest.enqueue(rq);
 	
 	if (m_paused.data)
+		processQEmuRequest();
+}
+
+
+/**
+ * changePaletteSetting(): Change a palette setting.
+ * @param type Type of palette setting.
+ * @param val New value.
+ */
+void EmuManager::changePaletteSetting(EmuRequest_t::PaletteSettingType type, int val)
+{
+	// Queue the graphics setting request.
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_PALETTE_SETTING;
+	rq.PaletteSettings.ps_type = type;
+	rq.PaletteSettings.ps_val = val;
+	m_qEmuRequest.enqueue(rq);
+	
+	if (!m_rom || m_paused.data)
 		processQEmuRequest();
 }
 

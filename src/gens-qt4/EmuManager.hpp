@@ -147,6 +147,18 @@ class EmuManager : public QObject
 				RQT_PAUSE_EMULATION	= 7,
 				RQT_RESET		= 8,
 				RQT_AUTOFIX_CHANGE	= 9,
+				RQT_PALETTE_SETTING	= 10,
+			};
+			
+			// RQT_PALETTE_SETTING types.
+			enum PaletteSettingType
+			{
+				RQT_PS_UNKNOWN		= 0,
+				RQT_PS_CONTRAST,
+				RQT_PS_BRIGHTNESS,
+				RQT_PS_GRAYSCALE,
+				RQT_PS_INVERTED,
+				RQT_PS_COLORSCALEMETHOD,
 			};
 			
 			RequestType rqType;
@@ -176,8 +188,20 @@ class EmuManager : public QObject
 				
 				// Auto Fix Checksum.
 				bool autoFixChecksum;
+				
+				// Palette Settings.
+				struct
+				{
+					PaletteSettingType ps_type;
+					int ps_val;
+				} PaletteSettings;
 			};
 		};
+		
+		// Graphics settings.
+		void changePaletteSetting(EmuRequest_t::PaletteSettingType type, int val);
+		
+		/** Emulation Queue. **/
 		
 		QQueue<EmuRequest_t> m_qEmuRequest;
 		void processQEmuRequest(void);
@@ -197,6 +221,8 @@ class EmuManager : public QObject
 		
 		void doPauseRequest(paused_t newPaused);
 		void doResetEmulator(bool hardReset);
+		
+		void doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, int val);
 	
 	public slots:
 		/**
@@ -235,6 +261,19 @@ class EmuManager : public QObject
 		 * @param newAutoFixChecksum New Auto Fix Checksum setting.
 		 */
 		void autoFixChecksum_changed_slot(bool newAutoFixChecksum);
+		
+		/** Graphics settings. **/
+		// TODO: Verify that this doesn't break on Mac OS X.
+		void contrast_changed_slot(int newContrast)
+			{ changePaletteSetting(EmuRequest_t::RQT_PS_CONTRAST, newContrast); }
+		void brightness_changed_slot(int newBrightness)
+			{ changePaletteSetting(EmuRequest_t::RQT_PS_BRIGHTNESS, newBrightness); }
+		void grayscale_changed_slot(bool newGrayscale)
+			{ changePaletteSetting(EmuRequest_t::RQT_PS_GRAYSCALE, (int)newGrayscale); }
+		void inverted_changed_slot(bool newInverted)
+			{ changePaletteSetting(EmuRequest_t::RQT_PS_INVERTED, (int)newInverted); }
+		void colorScaleMethod_changed_slot(int newColorScaleMethod)
+			{ changePaletteSetting(EmuRequest_t::RQT_PS_COLORSCALEMETHOD, newColorScaleMethod); }
 };
 
 }

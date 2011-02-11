@@ -119,6 +119,11 @@ void EmuManager::processQEmuRequest(void)
 				LibGens::EmuContext::SetAutoFixChecksum(rq.autoFixChecksum);
 				break;
 			
+			case EmuRequest_t::RQT_PALETTE_SETTING:
+				// Set a palette setting.
+				doChangePaletteSetting(rq.PaletteSettings.ps_type, rq.PaletteSettings.ps_val);
+				break;
+			
 			case EmuRequest_t::RQT_UNKNOWN:
 			default:
 				// Unknown emulation request.
@@ -512,6 +517,45 @@ void EmuManager::doResetEmulator(bool hardReset)
 		// Do a soft reset.
 		gqt4_emuContext->softReset();
 		emit osdPrintMsg(2500, tr("Soft Reset."));
+	}
+}
+
+
+/**
+ * doChangePaletteSetting(): Change a palette setting.
+ * @param type Type of palette setting.
+ * @param val New value.
+ */
+void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, int val)
+{
+	// NOTE: gens-qt4 uses values [-100,100] for contrast and brightness.
+	// libgens uses [0,200] for contrast and brightness.
+	
+	switch (type)
+	{
+		case EmuRequest_t::RQT_PS_CONTRAST:
+			LibGens::VdpRend::m_palette.setContrast(val + 100);
+			break;
+		
+		case EmuRequest_t::RQT_PS_BRIGHTNESS:
+			LibGens::VdpRend::m_palette.setBrightness(val + 100);
+			break;
+		
+		case EmuRequest_t::RQT_PS_GRAYSCALE:
+			LibGens::VdpRend::m_palette.setGrayscale((bool)(!!val));
+			break;
+		
+		case EmuRequest_t::RQT_PS_INVERTED:
+			LibGens::VdpRend::m_palette.setInverted((bool)(!!val));
+			break;
+		
+		case EmuRequest_t::RQT_PS_COLORSCALEMETHOD:
+			LibGens::VdpRend::m_palette.setColorScaleMethod(
+						(LibGens::VdpPalette::ColorScaleMethod_t)val);
+			break;
+		
+		default:
+			break;
 	}
 }
 
