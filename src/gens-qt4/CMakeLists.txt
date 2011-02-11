@@ -226,11 +226,23 @@ SET(gens-qt4_UIS
 # Generate the header files from the UI files.
 QT4_WRAP_UI(gens-qt4_UIS_H ${gens-qt4_UIS})
 
+# Always include the Oxygen icons on Win32 and Mac OS X.
+IF(WIN32)
+	SET(GENS_INCLUDE_OXYGEN_ICONS 1)
+ELSEIF(APPLE)
+	SET(GENS_INCLUDE_OXYGEN_ICONS 1)
+ENDIF()
+
 # Resource files.
 SET(gens-qt4_RCC_SRCS
 	ui/resources/gens-qt4.qrc
-	ui/resources/oxygen/oxygen.qrc
 	)
+IF(GENS_INCLUDE_OXYGEN_ICONS)
+	SET(gens-qt4_RCC_SRCS
+		${gens-qt4_RCC_SRCS}
+		ui/resources/oxygen/oxygen.qrc
+		)
+ENDIF(GENS_INCLUDE_OXYGEN_ICONS)
 
 # Add the resource files to the project.
 QT4_ADD_RESOURCES(
