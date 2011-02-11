@@ -214,12 +214,12 @@ void VBackend::setBilinearFilter(bool newBilinearFilter)
 	// Update the Aspect Ratio Constraint setting.
 	m_bilinearFilter = newBilinearFilter;
 	
-	// Update the Video Backend even when not running.
-	setVbDirty();
-	
 	// TODO: Only if paused, or regardless of pause?
 	if (!isRunning() || isPaused())
+	{
+		setVbDirty();
 		vbUpdate();
+	}
 }
 
 
