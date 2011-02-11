@@ -546,13 +546,6 @@ void GensQGLWidget::paintGL(void)
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_tex);
 		
-		// Bilinear filtering.
-		// TODO: Should we only run this if the setting is changed?
-		// (It's probably more efficient to just run it every time...)
-		const GLint filterMethod = (this->bilinearFilter() ? GL_LINEAR : GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMethod);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMethod);
-		
 		// (Re-)Upload the texture.
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 336);
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 8);
@@ -1034,6 +1027,35 @@ void GensQGLWidget::showOsdPreview(void)
 	
 	// Disable 2D textures.
 	glEnable(GL_TEXTURE_2D);
+}
+
+
+/**
+ * bilinearFilter_changed_slot(): Bilinear filter setting has changed.
+ * @param newBilinearFilter New bilinear filter setting.
+ */
+void GensQGLWidget::bilinearFilter_changed_slot(bool newBilinearFilter)
+{
+	if (m_tex > 0)
+	{
+		// Get the current OpenGL context.
+		this->makeCurrent();
+		
+		// Bind the texture.
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, m_tex);
+		
+		// Set the texture filter setting.
+		const GLint filterMethod = (newBilinearFilter ? GL_LINEAR : GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMethod);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMethod);
+		
+		// Finished updating the texture.
+		glDisable(GL_TEXTURE_2D);
+	}
+	
+	// Update VBackend's bilinear filter setting.
+	setBilinearFilter(newBilinearFilter);
 }
 
 }
