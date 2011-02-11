@@ -143,7 +143,7 @@ class GensWindow : public QMainWindow
 		 */
 		void updateVideo(void)
 		{
-			m_vBackend->setVbDirty();
+			m_vBackend->setMdScreenDirty();
 			m_vBackend->vbUpdate();
 		}
 		

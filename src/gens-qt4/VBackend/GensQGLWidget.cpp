@@ -460,11 +460,19 @@ void GensQGLWidget::resizeGL(int width, int height)
 	
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	
+	// Mark the video buffer as dirty.
+	setVbDirty();
 }
 
 
 void GensQGLWidget::paintGL(void)
 {
+	// If nothing's dirty, don't paint anything.
+	// TODO: Verify this on all platforms.
+	if (!m_vbDirty && !m_mdScreenDirty)
+		return;
+	
 	/**
 	 * bFromMD: If this is true after all effects are applied,
 	 * use LibGens::VDP_Rend::MD_Screen[] directly.
@@ -488,7 +496,7 @@ void GensQGLWidget::paintGL(void)
 		resetAspectRatioConstraintChanged();
 	}
 	
-	if (m_vbDirty)
+	if (m_mdScreenDirty)
 	{
 		// MD_Screen is dirty.
 		
@@ -557,7 +565,7 @@ void GensQGLWidget::paintGL(void)
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 0);
 		
 		// Texture is no longer dirty.
-		m_vbDirty = false;
+		m_mdScreenDirty = false;
 	}
 	else
 	{
@@ -660,6 +668,9 @@ void GensQGLWidget::paintGL(void)
 	
 	// Print the OSD text to the screen.
 	printOsdText();
+	
+	// Video backend is no longer dirty.
+	m_vbDirty = false;
 }
 
 

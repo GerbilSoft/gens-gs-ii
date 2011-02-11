@@ -50,7 +50,10 @@ class VBackend
 		VBackend();
 		virtual ~VBackend();
 		
-		void setVbDirty(void) { m_vbDirty = true; }
+		void setVbDirty(void)
+			{ m_vbDirty = true; }
+		void setMdScreenDirty(void)
+			{ m_mdScreenDirty = true; }
 		virtual void vbUpdate(void) = 0;
 		
 		// Return a QWidget* version of this object.
@@ -142,8 +145,11 @@ class VBackend
 			{ return recSetStatus(component, false); }
 	
 	protected:
-		// Dirty flag. If set, texture must be reuploaded.
+		// Video Backend dirty flag. If true, video must be updated.
 		bool m_vbDirty;
+		
+		// MD Screen dirty flag. If true, MD screen texture must be reuploaded.
+		bool m_mdScreenDirty;
 		
 		// OSD lock counter.
 		int m_osdLockCnt;

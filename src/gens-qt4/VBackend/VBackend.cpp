@@ -45,6 +45,7 @@ VBackend::VBackend()
 {
 	// Mark the video backend as dirty on startup.
 	m_vbDirty = true;
+	m_mdScreenDirty = true;
 	
 	// Set the internal framebuffer to NULL by default.
 	m_intScreen = NULL;
@@ -286,7 +287,7 @@ void VBackend::updatePausedEffect(bool fromMdScreen)
 	// Use LibGens' software paused effect function.
 	LibGens::PausedEffect::DoPausedEffect(m_intScreen, fromMdScreen);
 	
-	// Mark the video buffer as dirty.
+	// Mark the video backend as dirty.
 	setVbDirty();
 }
 
@@ -304,7 +305,7 @@ void VBackend::updateFastBlur(bool fromMdScreen)
 	// Use LibGens' software paused effect function.
 	LibGens::FastBlur::DoFastBlur(m_intScreen, fromMdScreen);
 	
-	// Mark the video buffer as dirty.
+	// Mark the video backend as dirty.
 	setVbDirty();
 }
 
@@ -708,3 +709,4 @@ int VBackend::recSetDuration(const QString& component, int duration)
 }
 
 }
+
