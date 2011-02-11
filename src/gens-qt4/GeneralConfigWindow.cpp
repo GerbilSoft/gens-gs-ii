@@ -28,6 +28,7 @@
 
 // C includes.
 #include <stdint.h>
+#include <math.h>
 
 // zlib
 #include <zlib.h>
@@ -53,11 +54,12 @@ GeneralConfigWindow *GeneralConfigWindow::m_GeneralConfigWindow = NULL;
 
 // Button CSS colors.
 const QString GeneralConfigWindow::ms_sCssBtnColors =
-	QString::fromLatin1("QPushButton { background-color: %1; color: %2; }");
+	QLatin1String("QPushButton { background-color: %1; color: %2; }");
 
 // Warning string.
 const QString GeneralConfigWindow::ms_sWarning =
-	QString::fromLatin1("<span style='color: red'><b>") + tr("Warning:") + QString::fromLatin1("</b></span> ");
+	QLatin1String("<span style='color: red'><b>") +
+	tr("Warning:") + QLatin1String("</b></span> ");
 
 
 /**
@@ -245,17 +247,26 @@ void GeneralConfigWindow::reject(void)
 }
 
 
+#ifndef GCW_APPLY_IMMED
+/**
+ * setApplyButtonEnabled(): Enable or disable the Apply button.
+ * @param enabled True to enable; false to disable.
+ */
+void GeneralConfigWindow::setApplyButtonEnabled(bool enabled)
+{
+	QPushButton *btnApply = buttonBox->button(QDialogButtonBox::Apply);
+	if (btnApply)
+		btnApply->setEnabled(enabled);
+}
+#endif
+
+
 /**
  * reload(): Reload configuration.
  */
 void GeneralConfigWindow::reload(void)
 {
 	// Onscreen Display.
-	
-	// TODO: If grayscale version of color is < 128, make text white.
-	// TODO: If grayscale version of color is >= 128, make text black.
-	
-	int grayI;
 	QColor colorText;
 	
 	// TODO: Split button coloring into a separate function.
@@ -264,15 +275,13 @@ void GeneralConfigWindow::reload(void)
 	/** Onscreen display: FPS counter. **/
 	chkOsdFpsEnable->setChecked(gqt4_config->osdFpsEnabled());
 	m_osdFpsColor = gqt4_config->osdFpsColor();
-	grayI = QColor_Grayscale(m_osdFpsColor);
-	colorText = (grayI >= 128 ? QColor(0,0,0) : QColor(255,255,255));
+	colorText = TextColor_For_BGColor(m_osdFpsColor);
 	btnOsdFpsColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdFpsColor.name()).arg(colorText.name()));
 	
 	/** Onscreen display: Messages. **/
 	chkOsdMsgEnable->setChecked(gqt4_config->osdMsgEnabled());
 	m_osdMsgColor = gqt4_config->osdMsgColor();
-	grayI = QColor_Grayscale(m_osdMsgColor);
-	colorText = (grayI >= 128 ? QColor(0,0,0) : QColor(255,255,255));
+	colorText = TextColor_For_BGColor(m_osdMsgColor);
 	btnOsdMsgColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdMsgColor.name()).arg(colorText.name()));
 	
 	/** Intro effect. **/
@@ -378,6 +387,19 @@ void GeneralConfigWindow::toolbarTriggered(QAction* action)
 
 
 /**
+ * TextColor_For_BGColor(): Get the text color for a given background color.
+ * If the luminance is < 128, this returns white.
+ * Otherwise, this returns black.
+ * @return Text color for the given background color.
+ */
+
+QColor GeneralConfigWindow::TextColor_For_BGColor(const QColor& color)
+{
+	return (color.value() < 128 ? QColor(Qt::white) : QColor(Qt::black));
+}
+
+
+/**
  * osdSelectColor(): Select a color for the OSD.
  * @param color_id	[in] Color ID.
  * @param init_color	[in] Initial color.
@@ -399,11 +421,8 @@ void GeneralConfigWindow::on_btnOsdFpsColor_clicked(void)
 	if (!color.isValid() || m_osdFpsColor == color)
 		return;
 	
-	// TODO: If grayscale version of color is < 128, make text white.
-	// TODO: If grayscale version of color is >= 128, make text black.
 	m_osdFpsColor = color;
-	int grayI = QColor_Grayscale(m_osdFpsColor);
-	QColor colorText = (grayI >= 128 ? QColor(0,0,0) : QColor(255,255,255));
+	QColor colorText = TextColor_For_BGColor(m_osdFpsColor);
 	btnOsdFpsColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdFpsColor.name()).arg(colorText.name()));
 	
 	// Settings have been changed.
@@ -420,11 +439,8 @@ void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
 	if (!color.isValid() || m_osdMsgColor == color)
 		return;
 	
-	// TODO: If grayscale version of color is < 128, make text white.
-	// TODO: If grayscale version of color is >= 128, make text black.
 	m_osdMsgColor = color;
-	int grayI = QColor_Grayscale(m_osdMsgColor);
-	QColor colorText = (grayI >= 128 ? QColor(0,0,0) : QColor(255,255,255));
+	QColor colorText = TextColor_For_BGColor(m_osdMsgColor);
 	btnOsdMsgColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdMsgColor.name()).arg(colorText.name()));
 	
 	// Settings have been changed.

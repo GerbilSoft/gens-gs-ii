@@ -50,10 +50,6 @@ class QAction;
 // GensLineEdit widget.
 #include "widgets/GensLineEdit.hpp"
 
-// C includes.
-#include <stdio.h>
-#include <math.h>
-
 // libgens: Sega CD Boot ROM database.
 #include "libgens/Data/mcd_rom_db.h"
 
@@ -74,7 +70,7 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		QSize sizeHint(void) const
 			{ return this->baseSize(); }
 		
-		virtual void keyPressEvent(QKeyEvent *event);
+		void keyPressEvent(QKeyEvent *event);
 		
 		// Button CSS colors.
 		static const QString ms_sCssBtnColors;
@@ -83,36 +79,12 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		static const QString ms_sWarning;
 		
 #ifndef GCW_APPLY_IMMED
-		void setApplyButtonEnabled(bool enabled)
-		{
-			QPushButton *btnApply = buttonBox->button(QDialogButtonBox::Apply);
-			if (btnApply)
-				btnApply->setEnabled(enabled);
-		}
-#endif
-		
 		/**
-		 * QColor_Grayscale(): Convert a QColor to grayscale.
-		 * This uses the standard ITU-R BT.601 grayscale conversion matrix.
-		 * @return Grayscale component, or -1 if color is invalid.
+		 * setApplyButtonEnabled(): Enable or disable the Apply button.
+		 * @param enabled True to enable; false to disable.
 		 */
-		inline int QColor_Grayscale(const QColor& color)
-		{
-			if (!color.isValid())
-				return -1;
-			
-			double grayD = ((double)color.red() * 0.299) +
-				       ((double)color.green() * 0.587) +
-				       ((double)color.blue() * 0.114);
-			int grayI = rint(grayD);
-			
-			// Clamp the grayscale value at [0, 255].
-			if (grayI < 0)
-				grayI = 0;
-			if (grayI > 255)
-				grayI = 255;
-			return grayI;
-		}
+		void setApplyButtonEnabled(bool enabled);
+#endif
 		
 #ifdef Q_WS_MAC
 		// Mac OS X:
@@ -138,6 +110,15 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		static GeneralConfigWindow *m_GeneralConfigWindow;
 		
 		/** Onscreen Display **/
+		
+		/**
+		 * TextColor_For_BGColor(): Get the text color for a given background color.
+		 * If the luminance is < 128, this returns white.
+		 * Otherwise, this returns black.
+		 * @return Text color for the given background color.
+		 */
+		static QColor TextColor_For_BGColor(const QColor& color);
+		
 		QColor osdSelectColor(const QString& color_id, const QColor& init_color);
 		
 		// Onscreen Display: Colors.
