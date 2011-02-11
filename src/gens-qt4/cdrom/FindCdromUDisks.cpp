@@ -149,6 +149,24 @@ FindCdromUDisks::~FindCdromUDisks()
 
 
 /**
+ * query(): Asynchronously query for CD-ROM drives.
+ * The driveUpdated() signal will be emitted once for each detected drive.
+ * @return 0 on success; non-zero on error.
+ */
+int FindCdromUDisks::query(void)
+{
+	if (!isUsable())
+		return -1;
+	
+	// NOTE: QDBusConnection is not thread-safe.
+	// See http://bugreports.qt.nokia.com/browse/QTBUG-11413
+	
+	// Override the thread mechanism for now.
+	return query_int();
+}
+
+
+/**
  * query_int(): Asynchronously query for CD-ROM drives. (INTERNAL FUNCTION)
  * The driveUpdated() signal will be emitted once for each detected drive.
  * @return 0 on success; non-zero on error.

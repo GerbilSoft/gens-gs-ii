@@ -48,16 +48,8 @@ class FindCdromUDisks : public FindCdromBase
 		 * query(): Asynchronously query for CD-ROM drives.
 		 * The driveUpdated() signal will be emitted once for each detected drive.
 		 * @return 0 on success; non-zero on error.
-		 * TODO: Determine if the backend is usable. If not, return an error code.
 		 */
-		int query(void)
-		{
-			// NOTE: QDBusConnection is not thread-safe.
-			// See http://bugreports.qt.nokia.com/browse/QTBUG-11413
-			
-			// Override the thread mechanism for now.
-			return query_int();
-		}
+		int query(void);
 	
 	protected:
 		/**
