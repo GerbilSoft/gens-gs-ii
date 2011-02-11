@@ -52,7 +52,8 @@ class UnRAR_dll
 		bool load(const utf8_str *filename);
 		void unload(void);
 		
-		inline bool isLoaded(void) const { return m_loaded; }
+		inline bool isLoaded(void) const
+			{ return m_loaded; }
 		
 		MAKE_CLASSFUNCPTR(RAROpenArchiveEx);
 		MAKE_CLASSFUNCPTR(RARCloseArchive);
@@ -61,7 +62,7 @@ class UnRAR_dll
 		MAKE_CLASSFUNCPTR(RARSetCallback);
 		MAKE_CLASSFUNCPTR(RARGetDllVersion);
 	
-	protected:
+	private:
 		bool m_loaded;
 		HINSTANCE hUnrarDll;
 };

@@ -34,7 +34,7 @@ class DcZip : public Decompressor
 {
 	public:
 		DcZip(FILE *f, const utf8_str *filename);
-		~DcZip();
+		virtual ~DcZip();
 		
 		/**
 		 * DetectFormat(): Detect if the file can be handled by this decompressor.
@@ -62,7 +62,7 @@ class DcZip : public Decompressor
 		 */
 		int getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *ret_siz);
 	
-	protected:
+	private:
 		unzFile m_unzFile;
 };
 

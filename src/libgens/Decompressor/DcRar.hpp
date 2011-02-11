@@ -44,7 +44,7 @@ class DcRar : public Decompressor
 {
 	public:
 		DcRar(FILE *f, const utf8_str *filename);
-		~DcRar();
+		virtual ~DcRar();
 		
 		/**
 		 * DetectFormat(): Detect if the file can be handled by this decompressor.
@@ -125,7 +125,7 @@ class DcRar : public Decompressor
 		static const utf8_str *GetExtPrg(void)
 			{ return ms_RarBinary.c_str(); }
 	
-	protected:
+	private:
 		/**
 		 * ms_RarBinary: RAR executable filename.
 		 * Unix: Filename of "rar" or "unrar".

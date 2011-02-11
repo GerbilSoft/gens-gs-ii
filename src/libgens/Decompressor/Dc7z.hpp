@@ -40,7 +40,7 @@ class Dc7z : public Decompressor
 {
 	public:
 		Dc7z(FILE *f, const utf8_str *filename);
-		~Dc7z();
+		virtual ~Dc7z();
 		
 		/**
 		 * DetectFormat(): Detect if the file can be handled by this decompressor.
@@ -68,7 +68,7 @@ class Dc7z : public Decompressor
 		 */
 		int getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *ret_siz);
 	
-	protected:
+	private:
 		CFileInStream m_archiveStream;
 		CLookToRead m_lookStream;
 		CSzArEx m_db;

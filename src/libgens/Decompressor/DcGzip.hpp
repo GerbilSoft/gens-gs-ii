@@ -34,7 +34,7 @@ class DcGzip : public Decompressor
 {
 	public:
 		DcGzip(FILE *f, const utf8_str *filename);
-		~DcGzip();
+		virtual ~DcGzip();
 		
 		/**
 		 * DetectFormat(): Detect if the file can be handled by this decompressor.
