@@ -30,11 +30,6 @@
 // Qt includes.
 #include <QtGui/QMessageBox>
 
-// Win32 compatibility functions.
-#ifdef _WIN32
-#include "gqt4_win32.hpp"
-#endif
-
 #include "GensQApplication.hpp"
 #include "GensWindow.hpp"
 #include "SigHandler.hpp"
@@ -67,11 +62,6 @@ int gens_main(int argc, char *argv[])
 	
 	// TODO: Parse command line arguments.
 	// They're available in app.arguments() [QStringList].
-	
-#ifdef _WIN32
-	// Win32: Set the application font.
-	GensQt4::Win32_SetFont();
-#endif
 	
 	// Initialize LibGens.
 	LibGens::Init();

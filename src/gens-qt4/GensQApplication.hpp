@@ -51,8 +51,6 @@ class GensQApplication : public QApplication
 			: QApplication(argc, argv, type)
 		{ gqaInit(); }
 		
-		~GensQApplication() { }
-		
 		/**
 		 * isGuiThread(): Check if the current thread is the GUI thread.
 		 * @return True if it is; false if it isn't.
@@ -60,10 +58,10 @@ class GensQApplication : public QApplication
 		inline bool isGuiThread(void)
 			{ return (QThread::currentThread() == m_guiThread); }
 		
-#ifdef _WIN32
+#ifdef Q_OS_WIN32
 		// Win32 event filter.
 		bool winEventFilter(MSG *msg, long *result);
-#endif
+#endif /* Q_OS_WIN32 */
 		
 		/**
 		 * HACK: The following mess is a hack to get the
@@ -78,11 +76,18 @@ class GensQApplication : public QApplication
 		void signalCrash(int signum);
 #endif /* HAVE_SIGACTION */
 	
-	protected:
+	private:
 		void gqaInit(void);
 		
 		// GUI thread.
 		QThread *m_guiThread;
+		
+#ifdef Q_OS_WIN32
+		/**
+		 * SetFont_Win32(): Set the Qt font to match the system font.
+		 */
+		void SetFont_Win32(void);
+#endif /* Q_OS_WIN32 */
 		
 		friend class SigHandler; // Allow SigHandler to call doCrash().
 #ifdef HAVE_SIGACTION
@@ -93,7 +98,7 @@ class GensQApplication : public QApplication
 			{ emit signalCrash(signum); }
 #endif /* HAVE_SIGACTION */
 	
-	protected slots:
+	private slots:
 #ifdef HAVE_SIGACTION
 		inline void slotCrash(int signum, siginfo_t *info, void *context)
 			{ SigHandler::SignalHandler(signum, info, context); }

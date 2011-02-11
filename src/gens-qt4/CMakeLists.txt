@@ -239,7 +239,8 @@ QT4_ADD_RESOURCES(
 
 # Compatibility sources.
 IF(WIN32)
-	SET(gens-qt4_COMPAT_SRCS gqt4_win32.cpp
+	SET(gens-qt4_COMPAT_SRCS
+		GensQApplication_win32.cpp
 		ui/resources/win32/gens-qt4.rc
 		)
 ELSEIF(APPLE)

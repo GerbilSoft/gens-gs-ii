@@ -1,10 +1,11 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * gqt4_win32.hpp: Win32 compatibility functions.                          *
+ * GensQApplication_win32.cpp: QApplication subclass.                      *
+ * Win32-specific functions.                                               *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -22,12 +23,13 @@
  ***************************************************************************/
 
 #ifndef _WIN32
-#error gqt4_win32.cpp should only be compiled on Win32!
+#error GensQApplication_win32.cpp should only be compiled on Win32!
 #endif
+
+#include "GensQApplication.hpp"
 
 // Include "gqt4_main.hpp" first for main().
 #include "gqt4_main.hpp"
-#include "gqt4_win32.hpp"
 
 // C includes.
 #include <string.h>
@@ -85,16 +87,39 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
 }
 
 // QtGui includes.
-#include <QtGui/QApplication>
 #include <QtGui/QFont>
 
 namespace GensQt4
 {
 
 /**
- * Win32_SetFont(): Set the Qt font to match the system font.
+ * winEventFilter(): Win32 event filter.
+ * @param msg Win32 message.
+ * @param result Return value for the window procedure.
+ * @return True if we're handling the message; false if we should let Qt handle the message.
  */
-void Win32_SetFont(void)
+bool GensQApplication::winEventFilter(MSG *msg, long *result)
+{
+	if (msg->message != WM_SETTINGCHANGE &&
+	    msg->wParam != SPI_SETNONCLIENTMETRICS)
+	{
+		// GensQApplication doesn't handle this message.
+		return false;
+	}
+	
+	// WM_SETTINGCHANGE / SPI_SETNONCLIENTMETRICS.
+	// Update the Qt font.
+	SetFont_Win32();
+	
+	// Allow QApplication to handle this message anyway.
+	return false;
+}
+
+
+/**
+ * SetFont_Win32(): Set the Qt font to match the system font.
+ */
+void GensQApplication::SetFont_Win32(void)
 {
 	// Get the Win32 message font.
 	NONCLIENTMETRICS ncm;
@@ -122,9 +147,6 @@ void Win32_SetFont(void)
 	}
 	
 	// TODO: Scale Windows font weights to Qt font weights.
-	
-	// TODO: Update the Qt font when the system font is changed.
-	// (WM_SETTINGCHANGE)
 	
 	// TODO: Menus always use the message font, and they already
 	// respond to WM_SETTINGCHANGE. Make menus use the menu font.

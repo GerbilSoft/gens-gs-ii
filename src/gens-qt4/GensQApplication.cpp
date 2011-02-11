@@ -26,15 +26,6 @@
 // Qt includes.
 #include <QtGui/QIcon>
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
-#include "gqt4_win32.hpp"
-#endif
-
 namespace GensQt4
 {
 
@@ -58,6 +49,11 @@ void GensQApplication::gqaInit(void)
 	iconApp.addFile(QString::fromLatin1(":/gens/gensgs_16x16.png"), QSize(16, 16));
 	setWindowIcon(iconApp);
 	
+#ifdef Q_OS_WIN32
+	// Set the application font.
+	SetFont_Win32();
+#endif /* Q_OS_WIN32 */
+	
 	// Connect the crash handler.
 #ifdef HAVE_SIGACTION
 	connect(this, SIGNAL(signalCrash(int, siginfo_t*, void*)),
@@ -67,27 +63,5 @@ void GensQApplication::gqaInit(void)
 		this, SLOT(slotCrash(int)));
 #endif /* HAVE_SIGACTION */
 }
-
-
-#ifdef Q_OS_WIN32
-/**
- * winEventFilter(): Win32 event filter.
- * @param msg Win32 message.
- * @param result Return value for the window procedure.
- * @return True if we're handling the message; false if we should let Qt handle the message.
- */
-bool GensQApplication::winEventFilter(MSG *msg, long *result)
-{
-	if (msg->message != WM_SETTINGCHANGE)
-		return false;
-	if (msg->wParam != SPI_SETNONCLIENTMETRICS)
-		return false;
-	
-	// WM_SETTINGCHANGE / SPI_SETNONCLIENTMETRICS.
-	// Update the Qt font.
-	Win32_SetFont();
-	return false;
-}
-#endif /* Q_OS_WIN32 */
 
 }
