@@ -25,6 +25,7 @@
 
 // Qt includes.
 #include <QtGui/QIcon>
+#include <QtGui/QStyle>
 
 
 namespace GensQt4
@@ -84,13 +85,21 @@ void GensQApplication::gqaInit(void)
  */
 QIcon GensQApplication::IconFromTheme(QString name)
 {
+#ifndef Q_WS_X11
+	// Check if a system icon exists.
+	// TODO: Add standardPixmap parameter to reduce string comparisons?
+	// TODO: Native Win32 icons for everything else.
+	QStyle *style = GensQApplication::style();
+	if (name == QLatin1String("document-open"))
+		return style->standardPixmap(QStyle::SP_DirOpenIcon);
+#endif
+	
 #if QT_VERSION >= 0x040600
 	if (QIcon::hasThemeIcon(name))
 		return QIcon::fromTheme(name);
 #endif
 	
-	// TODO: Get system theme icons on Win32 and Mac OS X.
-	
+	// System icon doesn't exist.
 	// Get the fallback icon.
 	QIcon icon;
 	icon.addFile(QLatin1String(":/oxygen/64x64/") + name + QLatin1String(".png"), QSize(64, 64));
