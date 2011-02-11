@@ -116,13 +116,8 @@ class FindCdromBase : public QObject
 		 * query(): Asynchronously query for CD-ROM drives.
 		 * The driveUpdated() signal will be emitted once for each detected drive.
 		 * @return 0 on success; non-zero on error.
-		 * TODO: Determine if the backend is usable. If not, return an error code.
 		 */
-		virtual int query(void)
-		{
-			m_thread->start();
-			return 0;
-		}
+		virtual int query(void);
 		
 		// Get drive type and disc type names.
 		static QString GetDriveTypeName(DriveType drive_type);

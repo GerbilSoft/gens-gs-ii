@@ -59,6 +59,21 @@ FindCdromBase::~FindCdromBase()
 
 
 /**
+ * query(): Asynchronously query for CD-ROM drives.
+ * The driveUpdated() signal will be emitted once for each detected drive.
+ * @return 0 on success; non-zero on error.
+ */
+int FindCdromBase::query(void)
+{
+	if (!isUsable())
+		return -1;
+	
+	m_thread->start();
+	return 0;
+}
+
+
+/**
  * GetDriveType(): Get the drive name from a given drive specifier.
  * @param discs_supported Supported discs.
  * @return DriveType.
