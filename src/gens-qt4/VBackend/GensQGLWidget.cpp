@@ -468,10 +468,13 @@ void GensQGLWidget::resizeGL(int width, int height)
 
 void GensQGLWidget::paintGL(void)
 {
+#if 0
 	// If nothing's dirty, don't paint anything.
 	// TODO: Verify this on all platforms.
+	// NOTE: Causes problems on Windows XP; disabled for now.
 	if (!m_vbDirty && !m_mdScreenDirty)
 		return;
+#endif
 	
 	/**
 	 * bFromMD: If this is true after all effects are applied,
