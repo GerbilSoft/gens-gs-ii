@@ -42,6 +42,18 @@ class FindCdromWin32 : public FindCdrom
 	Q_OBJECT
 	
 	public:
+		/**
+		 * isUsable(): Determine if this CD-ROM backend is usable.
+		 * @return True if this CD-ROM backend is usable; false if not.
+		 */
+		bool isUsable(void) const
+			{ return true; }
+		
+		/**
+		 * getDriveIcon(): Get the icon for a given CdromDriveEntry.
+		 * @param drive CdromDriveEntry.
+		 * @return Icon for either the drive or the disc.
+		 */
 		QIcon getDriveIcon(const CdromDriveEntry& drive);
 	
 	protected:

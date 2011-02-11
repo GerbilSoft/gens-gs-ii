@@ -109,8 +109,11 @@ class FindCdrom : public QObject
 		FindCdrom();
 		virtual ~FindCdrom();
 		
-		virtual bool isUsable(void) const
-			{ return true; }
+		/**
+		 * isUsable(): Determine if this CD-ROM backend is usable.
+		 * @return True if this CD-ROM backend is usable; false if not.
+		 */
+		virtual bool isUsable(void) const = 0;
 		
 		/**
 		 * query(): Asynchronously query for CD-ROM drives.

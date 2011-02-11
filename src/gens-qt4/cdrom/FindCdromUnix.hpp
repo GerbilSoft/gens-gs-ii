@@ -31,6 +31,14 @@ class FindCdromUnix : public FindCdrom
 {
 	Q_OBJECT
 	
+	public:
+		/**
+		 * isUsable(): Determine if this CD-ROM backend is usable.
+		 * @return True if this CD-ROM backend is usable; false if not.
+		 */
+		bool isUsable(void) const
+			{ return true; }
+
 	protected:
 		/**
 		 * query_int(): Asynchronously query for CD-ROM drives. (INTERNAL FUNCTION)
