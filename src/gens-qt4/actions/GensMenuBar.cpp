@@ -26,18 +26,8 @@
 // Menu definitions.
 #include "GensMenuBar_menus.hpp"
 
-/**
- * QICON_FROMTHEME(): Icon loading function.
- * Qt 4.6 supports FreeDesktop.org icon themes.
- * Older versions do not, unfortunately.
- */
-#if QT_VERSION >= 0x040600
-#define QICON_FROMTHEME(name, fallback) \
-	(QIcon::hasThemeIcon(name) ? QIcon::fromTheme(name) : QIcon(fallback))
-#else
-#define QICON_FROMTHEME(name, fallback) \
-	QIcon(fallback)
-#endif
+// GensQApplication::IconFromTheme()
+#include "../GensQApplication.hpp"
 
 
 namespace GensQt4
@@ -157,7 +147,7 @@ void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 		// (This isn't done on Mac OS X, since icons in menus look out of place there.)
 		QString iconFdo = QString::fromLatin1(menu->icon_fdo);
 		QString iconQrc = QString::fromLatin1(menu->icon_qrc);
-		mnuItem->setIcon(QICON_FROMTHEME(iconFdo, iconQrc));
+		mnuItem->setIcon(GensQApplication::IconFromTheme(iconFdo, iconQrc));
 #endif /* __APPLE__ */
 		
 		// Set the shortcut key.

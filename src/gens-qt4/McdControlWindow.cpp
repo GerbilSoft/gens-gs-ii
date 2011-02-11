@@ -25,23 +25,10 @@
 
 #include "McdControlWindow.hpp"
 #include "gqt4_main.hpp"
+#include "GensQApplication.hpp"
 
 // Qt includes.
 #include <QtGui/QPushButton>
-
-/**
- * QICON_FROMTHEME(): Icon loading function.
- * Qt 4.6 supports FreeDesktop.org icon themes.
- * Older versions do not, unfortunately.
- * TODO: Combine with GensMenuBar's QICON_FROMTHEME()?
- */
-#if QT_VERSION >= 0x040600
-#define QICON_FROMTHEME(name, fallback) \
-	(QIcon::hasThemeIcon(name) ? QIcon::fromTheme(name) : QIcon(fallback))
-#else
-#define QICON_FROMTHEME(name, fallback) \
-	QIcon(fallback)
-#endif
 
 // C includes.
 #include <stdint.h>
@@ -85,7 +72,7 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 	// TODO: Don't load an icon on systems that don't use icons on buttons.
 	const QString iconRefreshFdo = QString::fromLatin1("view-refresh");
 	const QString iconRefreshQrc = QString::fromLatin1(":/oxygen-16x16/view-refresh.png");
-	btnRefresh = new QPushButton(QICON_FROMTHEME(iconRefreshFdo, iconRefreshQrc),
+	btnRefresh = new QPushButton(GensQApplication::IconFromTheme(iconRefreshFdo, iconRefreshQrc),
 					tr("&Refresh"), this);
 	connect(btnRefresh, SIGNAL(clicked()), this, SLOT(query()));
 	// NOTE: "ResetRole" isn't exactly the right thing, but it works.

@@ -20,20 +20,7 @@
  ***************************************************************************/
 
 #include "FindCdromBase.hpp"
-
-/**
- * QICON_FROMTHEME(): Icon loading function.
- * Qt 4.6 supports FreeDesktop.org icon themes.
- * Older versions do not, unfortunately.
- * TODO: Combine with GensMenuBar's QICON_FROMTHEME()?
- */
-#if QT_VERSION >= 0x040600
-#define QICON_FROMTHEME(name, fallback) \
-	(QIcon::hasThemeIcon(name) ? QIcon::fromTheme(name) : QIcon(fallback))
-#else
-#define QICON_FROMTHEME(name, fallback) \
-	QIcon(fallback)
-#endif
+#include "../GensQApplication.hpp"
 
 namespace GensQt4
 {
@@ -226,7 +213,7 @@ QIcon FindCdromBase::GetDriveTypeIcon(DriveType drive_type)
 	
 	const QString iconFdo = QLatin1String("drive-optical");
 	const QString iconQrc = QLatin1String(":/oxygen-16x16/drive-optical.png");
-	return QICON_FROMTHEME(iconFdo, iconQrc);
+	return GensQApplication::IconFromTheme(iconFdo, iconQrc);
 }
 
 
@@ -305,7 +292,7 @@ QIcon FindCdromBase::GetDiscTypeIcon(uint32_t disc_type)
 			break;
 	}
 	
-	return QICON_FROMTHEME(iconFdo, iconQrc);
+	return GensQApplication::IconFromTheme(iconFdo, iconQrc);
 }
 
 }

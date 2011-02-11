@@ -38,19 +38,9 @@
 #include <QtGui/QKeyEvent>
 #include <QtGui/QFocusEvent>
 
-/**
- * QICON_FROMTHEME(): Icon loading function.
- * Qt 4.6 supports FreeDesktop.org icon themes.
- * Older versions do not, unfortunately.
- * TODO: Combine with GensMenuBar's QICON_FROMTHEME()?
- */
-#if QT_VERSION >= 0x040600
-#define QICON_FROMTHEME(name, fallback) \
-	(QIcon::hasThemeIcon(name) ? QIcon::fromTheme(name) : QIcon(fallback))
-#else
-#define QICON_FROMTHEME(name, fallback) \
-	QIcon(fallback)
-#endif
+// GensQApplication::IconFromTheme()
+#include "../GensQApplication.hpp"
+
 
 namespace GensQt4
 {
@@ -172,9 +162,9 @@ void GensKeySequenceWidgetPrivate::init(void)
 	// Create the key button.
 	keyButton = new GensKeySequenceButton(this, q);
 	keyButton->setFocusPolicy(Qt::StrongFocus);
-	keyButton->setIcon(QICON_FROMTHEME(
-				QString::fromLocal8Bit("configure"),
-				QString::fromLocal8Bit(":/oxygen-16x16/configure.png")
+	keyButton->setIcon(GensQApplication::IconFromTheme(
+				QLatin1String("configure"),
+				QLatin1String(":/oxygen-16x16/configure.png")
 				));
 	layout->addWidget(keyButton);
 	
@@ -185,16 +175,16 @@ void GensKeySequenceWidgetPrivate::init(void)
 	// Determine which icon to use for the clear button.
 	if (QApplication::isLeftToRight())
 	{
-		clearButton->setIcon(QICON_FROMTHEME(
-					QString::fromLocal8Bit("edit-clear-locationbar-rtl"),
-					QString::fromLocal8Bit(":/oxygen-16x16/edit-clear-locationbar-rtl.png")
+		clearButton->setIcon(GensQApplication::IconFromTheme(
+					QLatin1String("edit-clear-locationbar-rtl"),
+					QLatin1String(":/oxygen-16x16/edit-clear-locationbar-rtl.png")
 					));
 	}
 	else
 	{
-		clearButton->setIcon(QICON_FROMTHEME(
-					QString::fromLocal8Bit("edit-clear-locationbar-ltr"),
-					QString::fromLocal8Bit(":/oxygen-16x16/edit-clear-locationbar-ltr.png")
+		clearButton->setIcon(GensQApplication::IconFromTheme(
+					QLatin1String("edit-clear-locationbar-ltr"),
+					QLatin1String(":/oxygen-16x16/edit-clear-locationbar-ltr.png")
 					));
 	}
 }
