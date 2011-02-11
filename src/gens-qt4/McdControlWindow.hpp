@@ -33,7 +33,7 @@
 class QPushButton;
 
 // Find CD-ROM drives base class.
-#include "cdrom/FindCdromBase.hpp"
+#include "cdrom/FindCdrom.hpp"
 
 namespace GensQt4
 {
@@ -51,7 +51,7 @@ class McdControlWindow : public QDialog, public Ui::McdControlWindow
 		
 		QPushButton *btnRefresh;
 		
-		FindCdromBase *m_drives;
+		FindCdrom *m_drives;
 		bool m_isQuerying;
 		QList<CdromDriveEntry> m_queryList;
 		void addDriveEntry(const CdromDriveEntry& drive, int index = -1);

@@ -22,12 +22,12 @@
 #ifndef __GENS_QT4_CDROM_FINDCDROMUNIX_HPP__
 #define __GENS_QT4_CDROM_FINDCDROMUNIX_HPP__
 
-#include "FindCdromBase.hpp"
+#include "FindCdrom.hpp"
 
 namespace GensQt4
 {
 
-class FindCdromUnix : public FindCdromBase
+class FindCdromUnix : public FindCdrom
 {
 	Q_OBJECT
 	

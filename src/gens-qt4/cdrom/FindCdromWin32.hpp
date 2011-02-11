@@ -22,7 +22,7 @@
 #ifndef __GENS_QT4_CDROM_FINDCDROMWIN32_HPP__
 #define __GENS_QT4_CDROM_FINDCDROMWIN32_HPP__
 
-#include "FindCdromBase.hpp"
+#include "FindCdrom.hpp"
 
 // Qt includes.
 #include <QtGui/QIcon>
@@ -37,7 +37,7 @@
 namespace GensQt4
 {
 
-class FindCdromWin32 : public FindCdromBase
+class FindCdromWin32 : public FindCdrom
 {
 	Q_OBJECT
 	

@@ -19,16 +19,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "FindCdromBase.hpp"
+#include "FindCdrom.hpp"
 #include "../GensQApplication.hpp"
 
 namespace GensQt4
 {
 
 // Qt metatype ID for CdromDriveEntry.
-int FindCdromBase::ms_MetaType_CdromDriveEntry = 0;
+int FindCdrom::ms_MetaType_CdromDriveEntry = 0;
 
-FindCdromBase::FindCdromBase()
+FindCdrom::FindCdrom()
 {
 	if (!ms_MetaType_CdromDriveEntry)
 		ms_MetaType_CdromDriveEntry = qRegisterMetaType<CdromDriveEntry>("CdromDriveEntry");
@@ -36,7 +36,7 @@ FindCdromBase::FindCdromBase()
 	m_thread = new FindCdromThread(this);
 }
 
-FindCdromBase::~FindCdromBase()
+FindCdrom::~FindCdrom()
 {
 	if (m_thread->isRunning())
 		m_thread->terminate();
@@ -50,7 +50,7 @@ FindCdromBase::~FindCdromBase()
  * The driveUpdated() signal will be emitted once for each detected drive.
  * @return 0 on success; non-zero on error.
  */
-int FindCdromBase::query(void)
+int FindCdrom::query(void)
 {
 	if (!isUsable())
 		return -1;
@@ -65,7 +65,7 @@ int FindCdromBase::query(void)
  * @param discs_supported Supported discs.
  * @return DriveType.
  */
-DriveType FindCdromBase::GetDriveType(uint32_t discs_supported)
+DriveType FindCdrom::GetDriveType(uint32_t discs_supported)
 {
 	// TODO: Find various permutations like DVD/CD-RW.
 	// Also, check for multi-format DVD±RW drives.
@@ -129,7 +129,7 @@ DriveType FindCdromBase::GetDriveType(uint32_t discs_supported)
  * @param drive_type Drive type.
  * @return Drive type name, or empty string if the drive type is DRIVE_TYPE_NONE or invalid.
  */
-QString FindCdromBase::GetDriveTypeName(DriveType drive_type)
+QString FindCdrom::GetDriveTypeName(DriveType drive_type)
 {
 	switch (drive_type)
 	{
@@ -165,7 +165,7 @@ QString FindCdromBase::GetDriveTypeName(DriveType drive_type)
  * @return Disc type name, or empty string if the disc type is DISC_TYPE_NONE or invalid.
  * The disc type MUST be a single bit! (Combinations are treated as invalid.)
  */
-QString FindCdromBase::GetDiscTypeName(uint32_t disc_type)
+QString FindCdrom::GetDiscTypeName(uint32_t disc_type)
 {
 	switch (disc_type)
 	{
@@ -202,7 +202,7 @@ QString FindCdromBase::GetDiscTypeName(uint32_t disc_type)
  * @param drive_type Drive type.
  * @return Drive type icon, or invalid icon if the drive type is DRIVE_TYPE_NONE or invalid.
  */
-QIcon FindCdromBase::GetDriveTypeIcon(DriveType drive_type)
+QIcon FindCdrom::GetDriveTypeIcon(DriveType drive_type)
 {
 	// TODO: Fallback icons.
 	// Possibly use Windows or Mac system icons.
@@ -220,7 +220,7 @@ QIcon FindCdromBase::GetDriveTypeIcon(DriveType drive_type)
  * @return Disc type icon, or invalid icon if the disc type is DISC_TYPE_NONE or invalid.
  * The disc type MUST be a single bit! (Combinations are treated as invalid.)
  */
-QIcon FindCdromBase::GetDiscTypeIcon(uint32_t disc_type)
+QIcon FindCdrom::GetDiscTypeIcon(uint32_t disc_type)
 {
 	// TODO: Fallback icons.
 	// Possibly use Windows or Mac system icons.

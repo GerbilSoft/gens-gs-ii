@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_CDROM_FINDCDROMBASE_HPP__
-#define __GENS_QT4_CDROM_FINDCDROMBASE_HPP__
+#ifndef __GENS_QT4_CDROM_FINDCDROM_HPP__
+#define __GENS_QT4_CDROM_FINDCDROM_HPP__
 
 // C includes.
 #include <stdint.h>
@@ -101,13 +101,13 @@ struct CdromDriveEntry
 	bool disc_blank;		// True if the disc is blank.
 };
 
-class FindCdromBase : public QObject
+class FindCdrom : public QObject
 {
 	Q_OBJECT
 	
 	public:
-		FindCdromBase();
-		virtual ~FindCdromBase();
+		FindCdrom();
+		virtual ~FindCdrom();
 		
 		virtual bool isUsable(void) const
 			{ return true; }
@@ -159,13 +159,13 @@ class FindCdromBase : public QObject
 		class FindCdromThread : public QThread
 		{
 			public:
-				FindCdromThread(FindCdromBase *base)
-					{ m_cdromBase = base; }
+				FindCdromThread(FindCdrom *base)
+					{ m_cdrom = base; }
 				
-				void run(void) { m_cdromBase->query_int(); }
+				void run(void) { m_cdrom->query_int(); }
 			
 			protected:
-				FindCdromBase *m_cdromBase;
+				FindCdrom *m_cdrom;
 		};
 		FindCdromThread *m_thread;
 	
@@ -177,4 +177,4 @@ class FindCdromBase : public QObject
 
 }
 
-#endif /* __GENS_QT4_CDROM_FINDCDROMBASE_HPP__ */
+#endif /* __GENS_QT4_CDROM_FINDCDROM_HPP__ */

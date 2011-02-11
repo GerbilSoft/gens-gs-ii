@@ -118,7 +118,7 @@ SET(gens-qt4_SRCS
 	GeneralConfigWindow_slots.cpp
 	widgets/GensLineEdit.cpp
 	GensConfig.cpp
-	cdrom/FindCdromBase.cpp
+	cdrom/FindCdrom.cpp
 	McdControlWindow.cpp
 	widgets/GensZipDirModel.cpp
 	widgets/GensZipDirItem.cpp
@@ -144,7 +144,7 @@ SET(gens-qt4_MOC_HEADERS
 	GeneralConfigWindow.hpp
 	widgets/GensLineEdit.hpp
 	GensConfig.hpp
-	cdrom/FindCdromBase.hpp
+	cdrom/FindCdrom.hpp
 	McdControlWindow.hpp
 	widgets/GensZipDirModel.hpp
 	actions/GensKeyConfig.hpp
