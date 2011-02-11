@@ -64,4 +64,24 @@ void GensQApplication::gqaInit(void)
 #endif /* HAVE_SIGACTION */
 }
 
+
+/**
+ * IconFromTheme(): Get an icon from the system theme.
+ * @param name Icon name.
+ * @param fallback Fallback icon filename from Qt resource file.
+ * @return QIcon.
+ */
+QIcon GensQApplication::IconFromTheme(QString name, QString fallback)
+{
+#if QT_VERSION >= 0x040600
+	if (QIcon::hasThemeIcon(name))
+		return QIcon::fromTheme(name);
+#endif
+	
+	// TODO: Get system theme icons on Win32 and Mac OS X.
+	
+	// Get the fallback icon.
+	return QIcon(fallback);
+}
+
 }

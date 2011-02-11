@@ -29,6 +29,7 @@
 #include "SigHandler.hpp"
 
 #include <QtGui/QApplication>
+#include <QtGui/QIcon>
 #include <QtCore/QThread>
 
 namespace GensQt4
@@ -57,6 +58,14 @@ class GensQApplication : public QApplication
 		 */
 		inline bool isGuiThread(void)
 			{ return (QThread::currentThread() == m_guiThread); }
+		
+		/**
+		 * IconFromTheme(): Get an icon from the system theme.
+		 * @param name Icon name.
+		 * @param fallback Fallback icon filename from Qt resource file.
+		 * @return QIcon.
+		 */
+		static QIcon IconFromTheme(QString name, QString fallback);
 		
 #ifdef Q_OS_WIN32
 		// Win32 event filter.
