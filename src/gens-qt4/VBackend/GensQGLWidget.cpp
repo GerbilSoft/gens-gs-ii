@@ -214,9 +214,9 @@ void GensQGLWidget::reallocTexture(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	
 	// GL filtering.
-	// TODO: Make this customizable!
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	const GLint filterMethod = (this->bilinearFilter() ? GL_LINEAR : GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMethod);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMethod);
 	
 	// Determine the texture format and type.
 	m_lastBpp = LibGens::VdpRend::m_palette.bpp();
