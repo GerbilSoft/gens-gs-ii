@@ -99,7 +99,7 @@ class GensZipDirItem
 				return false;
 			
 			// Both are directories, or both are files.
-#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
+#if defined(Q_OS_WIN32) || defined(Q_OS_MAC)
 			return (z1->data(0).toString().toLower() < z2->data(0).toString().toLower());
 #else
 			return (z1->data(0).toString() < z2->data(0).toString());
@@ -115,7 +115,7 @@ class GensZipDirItem
 				return true;
 			
 			// Both are directories, or both are files.
-#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
+#if defined(Q_OS_WIN32) || defined(Q_OS_MAC)
 			return (z1->data(0).toString().toLower() > z2->data(0).toString().toLower());
 #else
 			return (z1->data(0).toString() > z2->data(0).toString());
