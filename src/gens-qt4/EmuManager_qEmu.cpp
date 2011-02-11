@@ -54,11 +54,337 @@
 #include <QtCore/QFile>
 #include <QtGui/QApplication>
 #include <QtGui/QImage>
+#include <QtGui/QImageReader>
 #include <QtGui/QImageWriter>
 
 
 namespace GensQt4
 {
+
+/** Emulation Request Queue: Submission functions. **/
+
+/**
+ * setController(): Set a controller type.
+ * @param port Controller port. (0, 1, 2)
+ * TODO: Teamplayer/4WP support.
+ * TODO: Replace this with full controller config update.
+ * @param type Controller type.
+ */
+void EmuManager::setController(int port, LibGens::IoBase::IoType type)
+{
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_CTRLCHANGE;
+	rq.ctrlChange.port = port;
+	rq.ctrlChange.ctrlType = type;
+	m_qEmuRequest.enqueue(rq);
+	
+	if (!m_rom || m_paused.data)
+		processQEmuRequest();
+}
+
+
+/**
+ * screenShot(): Request a screenshot.
+ */
+void EmuManager::screenShot(void)
+{
+	if (!m_rom)
+		return;
+	
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_SCREENSHOT;
+	m_qEmuRequest.enqueue(rq);
+	
+	if (m_paused.data)
+		processQEmuRequest();
+}
+
+
+/**
+ * setAudioRate(): Set the audio sampling rate.
+ * @param newRate New audio sampling rate.
+ */
+void EmuManager::setAudioRate(int newRate)
+{
+	if (newRate > LibGens::SoundMgr::MAX_SAMPLING_RATE)
+		return;
+	
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_AUDIO_RATE;
+	rq.audioRate = newRate;
+	m_qEmuRequest.enqueue(rq);
+	
+	if (!m_rom || m_paused.data)
+		processQEmuRequest();
+}
+
+
+/**
+ * setStereo(): Set stereo or mono.
+ * @param newStereo True for stereo; false for mono.
+ */
+void EmuManager::setStereo(bool newStereo)
+{
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_AUDIO_STEREO;
+	rq.audioStereo = newStereo;
+	m_qEmuRequest.enqueue(rq);
+	
+	if (!m_rom || m_paused.data)
+		processQEmuRequest();
+}
+
+
+/**
+ * saveState(): Save the current emulation state.
+ */
+void EmuManager::saveState(void)
+{
+	if (!m_rom)
+		return;
+	
+	// Get the savestate filename.
+	QString filename = getSaveStateFilename();
+	
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_SAVE_STATE;
+	rq.saveState.filename = strdup(filename.toUtf8().constData());
+	rq.saveState.saveSlot = m_saveSlot;
+	m_qEmuRequest.enqueue(rq);
+	
+	if (m_paused.data)
+		processQEmuRequest();
+}
+
+/**
+ * loadState(): Load the emulation state from a file.
+ */
+void EmuManager::loadState(void)
+{
+	if (!m_rom)
+		return;
+	
+	// Get the savestate filename.
+	QString filename = getSaveStateFilename();
+	
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_LOAD_STATE;
+	rq.saveState.filename = strdup(filename.toUtf8().constData());
+	rq.saveState.saveSlot = m_saveSlot;
+	m_qEmuRequest.enqueue(rq);
+	
+	if (m_paused.data)
+		processQEmuRequest();
+}
+
+
+/**
+ * pauseRequest(): Set the paused state.
+ * @param paused_set Paused flags to set.
+ * @param paused_clear Paused flags to clear.
+ */
+void EmuManager::pauseRequest(paused_t paused_set, paused_t paused_clear)
+{
+	paused_t newPause = m_paused;
+	newPause.data |= paused_set.data;
+	newPause.data &= ~paused_clear.data;
+	
+	// Toggle the paused state.
+	pauseRequest(newPause);
+}
+
+/**
+ * pauseRequest(): Toggle the manual paused state.
+ */
+void EmuManager::pauseRequest(void)
+{
+	paused_t newPause = m_paused;
+	newPause.paused_manual = !newPause.paused_manual;
+	pauseRequest(newPause);
+}
+
+/**
+ * pauseRequest(): Set the paused state.
+ * @param newPaused New paused state.
+ */
+void EmuManager::pauseRequest(paused_t newPaused)
+{
+	if (!m_rom)
+		return;
+	
+	if (!!(m_paused.data) == !!(newPaused.data))
+	{
+		// Paused state is effectively the same.
+		// Simply update the emulator state.
+		m_paused = newPaused;
+		emit stateChanged();
+		return;
+	}
+	
+	// Check if we should pause or unpause the emulator.
+	if (!newPaused.data)
+	{
+		// Unpause the ROM immediately.
+		// TODO: Reset the FPS counter?
+		m_paused = newPaused;
+		m_audio->open();	// TODO: Add a resume() function.
+		if (gqt4_emuThread)
+			gqt4_emuThread->resume(false);
+		emit stateChanged();
+	}
+	else
+	{
+		// Queue the pause request.
+		EmuRequest_t rq;
+		rq.rqType = EmuRequest_t::RQT_PAUSE_EMULATION;
+		rq.newPaused = newPaused;
+		m_qEmuRequest.enqueue(rq);
+	}
+}
+
+
+/**
+ * saveSlot_changed_slot(): Save slot changed.
+ * @param slotNum Slot number, (0-9)
+ */
+void EmuManager::saveSlot_changed_slot(int slotNum)
+{
+	// TODO: Should this use the emulation request queue?
+	if (slotNum < 0 || slotNum > 9)
+		return;
+	m_saveSlot = slotNum;
+	
+	if (m_rom)
+	{
+		// ROM is loaded.
+		QString osdMsg = tr("Save Slot %1 [%2]").arg(slotNum);
+		
+		// Check if the file exists.
+		QString filename = getSaveStateFilename();
+		if (QFile::exists(filename))
+		{
+			// Savestate exists.
+			osdMsg = osdMsg.arg(tr("OCCUPIED"));
+			
+			// Check if the savestate has a preview image.
+			LibZomg::Zomg zomg(filename.toUtf8().constData(), LibZomg::Zomg::ZOMG_LOAD);
+			if (zomg.getPreviewSize() == 0)
+			{
+				// No preview image.
+				zomg.close();
+				emit osdPrintMsg(1500, osdMsg);
+				emit osdShowPreview(0, QImage());
+				return;
+			}
+			
+			// Preview image found.
+			QByteArray img_ByteArray;
+			img_ByteArray.resize(zomg.getPreviewSize());
+			int ret = zomg.loadPreview(img_ByteArray.data(), img_ByteArray.size());
+			zomg.close();
+			if (ret != 0)
+			{
+				// Error loading the preview image.
+				emit osdPrintMsg(1500, osdMsg);
+				emit osdShowPreview(0, QImage());
+				return;
+			}
+			
+			// Preview image loaded from the ZOMG file.
+			
+			// Convert the preview image to a QImage.
+			QBuffer imgBuf(&img_ByteArray);
+			imgBuf.open(QIODevice::ReadOnly);
+			QImageReader imgReader(&imgBuf, "png");
+			QImage img = imgReader.read();
+			if (img.isNull())
+			{
+				// Error reading the preview image.
+				emit osdPrintMsg(1500, osdMsg);
+				emit osdShowPreview(0, QImage());
+				return;
+			}
+			
+			// Preview image converted to QImage.
+			emit osdPrintMsg(1500, osdMsg);
+			emit osdShowPreview(1500, img);
+		}
+		else
+		{
+			// Savestate doesn't exist.
+			osdMsg = osdMsg.arg(tr("EMPTY"));
+			emit osdPrintMsg(1500, osdMsg);
+			emit osdShowPreview(0, QImage());
+		}
+	}
+	else
+	{
+		// ROM is not loaded.
+		QString osdMsg = tr("Save Slot %1 selected.").arg(slotNum);
+		emit osdPrintMsg(1500, osdMsg);
+		emit osdShowPreview(0, QImage());
+	}
+}
+
+
+/**
+ * autoFixChecksum_changed_slot(): Change the Auto Fix Checksum setting.
+ * @param newAutoFixChecksum New Auto Fix Checksum setting.
+ */
+void EmuManager::autoFixChecksum_changed_slot(bool newAutoFixChecksum)
+{
+	// Queue the autofix checksum change request.
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_AUTOFIX_CHANGE;
+	rq.autoFixChecksum = newAutoFixChecksum;
+	m_qEmuRequest.enqueue(rq);
+	
+	if (!m_rom || m_paused.data)
+		processQEmuRequest();
+}
+
+
+/**
+ * resetEmulator(): Reset the emulator.
+ * @param hardReset If true, do a hard reset; otherwise, do a soft reset.
+ */
+void EmuManager::resetEmulator(bool hardReset)
+{
+	if (!m_rom)
+		return;
+	
+	// Queue the reset request.
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_RESET;
+	rq.hardReset = hardReset;
+	m_qEmuRequest.enqueue(rq);
+	
+	if (m_paused.data)
+		processQEmuRequest();
+}
+
+
+/**
+ * changePaletteSetting(): Change a palette setting.
+ * @param type Type of palette setting.
+ * @param val New value.
+ */
+void EmuManager::changePaletteSetting(EmuRequest_t::PaletteSettingType type, int val)
+{
+	// Queue the graphics setting request.
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_PALETTE_SETTING;
+	rq.PaletteSettings.ps_type = type;
+	rq.PaletteSettings.ps_val = val;
+	m_qEmuRequest.enqueue(rq);
+	
+	if (!m_rom || m_paused.data)
+		processQEmuRequest();
+}
+
+
+/** Emulation Request Queue: Processing functions. **/
+
 
 /**
  * processQEmuRequest(): Process the Emulation Request queue.
@@ -131,9 +457,6 @@ void EmuManager::processQEmuRequest(void)
 		}
 	}
 }
-
-
-/** Emulation Request Queue functions. **/
 
 
 /**

@@ -56,25 +56,17 @@ class EmuManager : public QObject
 		int loadRom(LibGens::Rom *rom);
 		int closeRom(void);
 		
+		// Emulation status and properties.
 		inline bool isRomOpen(void) const
 			{ return (m_rom != NULL); }
 		inline paused_t paused(void) const
 			{ return m_paused; }
+		inline int saveSlot(void) const
+			{ return m_saveSlot; }
 		
 		// ROM information.
 		QString romName(void);
 		QString sysName(void);
-		
-		/** Emulation settings. **/
-		void setController(int port, LibGens::IoBase::IoType type);
-		void screenShot(void);
-		void setAudioRate(int newRate);
-		void setStereo(bool newStereo);
-		
-		/** Savestates. **/
-		int saveSlot(void) const { return m_saveSlot; }
-		void saveState(void); // Save to current slot.
-		void loadState(void); // Load from current slot.
 		
 		/** Rom class passthrough functions. **/
 		
@@ -132,7 +124,28 @@ class EmuManager : public QObject
 		// Paused state.
 		paused_t m_paused;
 		
-		// Emulation requests.
+		// Savestates.
+		int m_saveSlot;
+		QString getSaveStateFilename(void);
+	
+	protected slots:
+		// Frame done signal from EmuThread.
+		void emuFrameDone(bool wasFastFrame);
+		
+		// Calls openRom_int() with the stored filename.
+		// HACK: Works around the threading issue when opening a new ROM without closing the old one.
+		void sl_loadRom_int(void)
+		{
+			loadRom_int(m_loadRom_int_tmr_rom);
+			m_loadRom_int_tmr_rom = NULL;
+		}
+	
+	/** Emulation Request Struct. **/
+	
+	protected:
+		/**
+		 * EmuRequest_t: Emulation Request struct.
+		 */
 		struct EmuRequest_t
 		{
 			enum RequestType
@@ -198,58 +211,32 @@ class EmuManager : public QObject
 			};
 		};
 		
-		// Graphics settings.
-		void changePaletteSetting(EmuRequest_t::PaletteSettingType type, int val);
-		
-		/** Emulation Queue. **/
-		
+		/**
+		 * m_qEmuRequest: Emulation Request Queue.
+		 */
 		QQueue<EmuRequest_t> m_qEmuRequest;
-		void processQEmuRequest(void);
-		void doCtrlChange(int port, LibGens::IoBase::IoType type);
-		
-		QImage getMDScreen(void) const;
-		void doScreenShot(void);
-		
-		void doAudioRate(int newRate);
-		void doAudioStereo(bool newStereo);
-		
-		/** Savestates. **/
-		int m_saveSlot;
-		QString getSaveStateFilename(void);
-		void doSaveState(const char *filename, int saveSlot);
-		void doLoadState(const char *filename, int saveSlot);
-		
-		void doPauseRequest(paused_t newPaused);
-		void doResetEmulator(bool hardReset);
-		
-		void doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, int val);
+	
+	/** Emulation Request Queue: Submission functions. **/
 	
 	public slots:
+		/** Emulation settings. **/
+		void setController(int port, LibGens::IoBase::IoType type);
+		void screenShot(void);
+		void setAudioRate(int newRate);
+		void setStereo(bool newStereo);
+		
+		/** Savestates. **/
+		void saveState(void); // Save to current slot.
+		void loadState(void); // Load from current slot.
+		
 		/**
 		 * pauseRequest(): Toggle the paused state.
 		 */
 		void pauseRequest(void);
 		void pauseRequest(paused_t newPaused);
 		void pauseRequest(paused_t paused_set, paused_t paused_clear);
-		
-		/**
-		 * resetEmulator(): Reset the emulator.
-		 * @param hardReset If true, do a hard reset; otherwise, do a soft reset.
-		 */
-		void resetEmulator(bool hardReset);
 	
 	protected slots:
-		// Frame done signal from EmuThread.
-		void emuFrameDone(bool wasFastFrame);
-		
-		// Calls openRom_int() with the stored filename.
-		// HACK: Works around the threading issue when opening a new ROM without closing the old one.
-		void sl_loadRom_int(void)
-		{
-			loadRom_int(m_loadRom_int_tmr_rom);
-			m_loadRom_int_tmr_rom = NULL;
-		}
-		
 		/**
 		 * saveSlot_changed_slot(): Set the save slot number.
 		 * @param slotNum Slot number, (0-9)
@@ -261,7 +248,22 @@ class EmuManager : public QObject
 		 * @param newAutoFixChecksum New Auto Fix Checksum setting.
 		 */
 		void autoFixChecksum_changed_slot(bool newAutoFixChecksum);
+	
+	public slots:
+		/**
+		 * resetEmulator(): Reset the emulator.
+		 * @param hardReset If true, do a hard reset; otherwise, do a soft reset.
+		 */
+		void resetEmulator(bool hardReset);
 		
+		/**
+		 * changePaletteSetting(): Change a palette setting.
+		 * @param type Type of palette setting.
+		 * @param val New value.
+		 */
+		void changePaletteSetting(EmuRequest_t::PaletteSettingType type, int val);
+	
+	protected slots:
 		/** Graphics settings. **/
 		// TODO: Verify that this doesn't break on Mac OS X.
 		void contrast_changed_slot(int newContrast)
@@ -274,6 +276,27 @@ class EmuManager : public QObject
 			{ changePaletteSetting(EmuRequest_t::RQT_PS_INVERTED, (int)newInverted); }
 		void colorScaleMethod_changed_slot(int newColorScaleMethod)
 			{ changePaletteSetting(EmuRequest_t::RQT_PS_COLORSCALEMETHOD, newColorScaleMethod); }
+	
+	/** Emulation Request Queue: Processing functions. **/
+	
+	private:
+		void processQEmuRequest(void);
+		void doCtrlChange(int port, LibGens::IoBase::IoType type);
+		
+		QImage getMDScreen(void) const;
+		void doScreenShot(void);
+		
+		void doAudioRate(int newRate);
+		void doAudioStereo(bool newStereo);
+		
+		/** Savestates. **/
+		void doSaveState(const char *filename, int saveSlot);
+		void doLoadState(const char *filename, int saveSlot);
+		
+		void doPauseRequest(paused_t newPaused);
+		void doResetEmulator(bool hardReset);
+		
+		void doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, int val);
 };
 
 }
