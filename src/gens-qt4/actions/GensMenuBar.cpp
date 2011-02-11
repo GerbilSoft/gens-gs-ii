@@ -145,9 +145,7 @@ void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 #ifndef __APPLE__
 		// Set the menu icon.
 		// (This isn't done on Mac OS X, since icons in menus look out of place there.)
-		QString iconFdo = QString::fromLatin1(menu->icon_fdo);
-		QString iconQrc = QString::fromLatin1(menu->icon_qrc);
-		mnuItem->setIcon(GensQApplication::IconFromTheme(iconFdo, iconQrc));
+		mnuItem->setIcon(GensQApplication::IconFromTheme(QLatin1String(menu->icon_fdo)));
 #endif /* __APPLE__ */
 		
 		// Set the shortcut key.

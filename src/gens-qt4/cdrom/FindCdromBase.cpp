@@ -210,10 +210,7 @@ QIcon FindCdromBase::GetDriveTypeIcon(DriveType drive_type)
 	
 	// TODO: Add icons for different types of drives.
 	((void)drive_type);
-	
-	const QString iconFdo = QLatin1String("drive-optical");
-	const QString iconQrc = QLatin1String(":/oxygen-16x16/drive-optical.png");
-	return GensQApplication::IconFromTheme(iconFdo, iconQrc);
+	return GensQApplication::IconFromTheme(QLatin1String("drive-optical"));
 }
 
 
@@ -231,7 +228,6 @@ QIcon FindCdromBase::GetDiscTypeIcon(uint32_t disc_type)
 	
 	// TODO: Add more unique icons.
 	QString iconFdo;
-	QString iconQrc;
 	switch (disc_type)
 	{
 		case DISC_TYPE_NONE:
@@ -240,18 +236,15 @@ QIcon FindCdromBase::GetDiscTypeIcon(uint32_t disc_type)
 		
 		case DISC_TYPE_CDROM:
 			iconFdo = QLatin1String("media-optical");
-			iconQrc = QLatin1String(":/oxygen-64x64/media-optical.png");
 			break;
 		
 		case DISC_TYPE_CD_R:
 		case DISC_TYPE_CD_RW:
 			iconFdo = QLatin1String("media-optical-recordable");
-			iconQrc = QLatin1String(":/oxygen-64x64/media-optical-recordable.png");
 			break;
 		
 		case DISC_TYPE_DVD:
 			iconFdo = QLatin1String("media-optical-dvd");
-			iconQrc = QLatin1String(":/oxygen-64x64/media-optical-dvd.png");
 			break;
 		
 		case DISC_TYPE_DVD_R:
@@ -262,25 +255,21 @@ QIcon FindCdromBase::GetDiscTypeIcon(uint32_t disc_type)
 		case DISC_TYPE_DVD_PLUS_R_DL:
 		case DISC_TYPE_DVD_PLUS_RW_DL:
 			iconFdo = QLatin1String("media-optical-recordable");
-			iconQrc = QLatin1String(":/oxygen-64x64/media-optical-recordable.png");
 			break;
 		
 		case DISC_TYPE_BDROM:
 		case DISC_TYPE_BD_R:
 		case DISC_TYPE_BD_RE:
 			iconFdo = QLatin1String("media-optical-blu-ray");
-			iconQrc = QLatin1String(":/oxygen-64x64/media-optical-blu-ray.png");
 			break;
 		
 		case DISC_TYPE_HDDVD:
 			iconFdo = QLatin1String("media-optical-dvd");
-			iconQrc = QLatin1String(":/oxygen-64x64/media-optical-dvd.png");
 			break;
 		
 		case DISC_TYPE_HDDVD_R:	
 		case DISC_TYPE_HDDVD_RW:
 			iconFdo = QLatin1String("media-optical-recordable");
-			iconQrc = QLatin1String(":/oxygen-64x64/media-optical-recordable.png");
 			break;
 		
 		// TODO: Do we really need to handle these?
@@ -288,11 +277,10 @@ QIcon FindCdromBase::GetDiscTypeIcon(uint32_t disc_type)
 		case DISC_TYPE_MRW:
 		case DISC_TYPE_MRW_W:
 			iconFdo = QLatin1String("media-optical-recordable");
-			iconQrc = QLatin1String(":/oxygen-64x64/media-optical-recordable.png");
 			break;
 	}
 	
-	return GensQApplication::IconFromTheme(iconFdo, iconQrc);
+	return GensQApplication::IconFromTheme(iconFdo);
 }
 
 }

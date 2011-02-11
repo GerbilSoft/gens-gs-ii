@@ -62,10 +62,9 @@ class GensQApplication : public QApplication
 		/**
 		 * IconFromTheme(): Get an icon from the system theme.
 		 * @param name Icon name.
-		 * @param fallback Fallback icon filename from Qt resource file.
 		 * @return QIcon.
 		 */
-		static QIcon IconFromTheme(QString name, QString fallback);
+		static QIcon IconFromTheme(QString name);
 		
 #ifdef Q_OS_WIN32
 		// Win32 event filter.

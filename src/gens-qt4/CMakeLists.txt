@@ -229,6 +229,7 @@ QT4_WRAP_UI(gens-qt4_UIS_H ${gens-qt4_UIS})
 # Resource files.
 SET(gens-qt4_RCC_SRCS
 	ui/resources/gens-qt4.qrc
+	ui/resources/oxygen/oxygen.qrc
 	)
 
 # Add the resource files to the project.

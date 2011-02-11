@@ -162,10 +162,7 @@ void GensKeySequenceWidgetPrivate::init(void)
 	// Create the key button.
 	keyButton = new GensKeySequenceButton(this, q);
 	keyButton->setFocusPolicy(Qt::StrongFocus);
-	keyButton->setIcon(GensQApplication::IconFromTheme(
-				QLatin1String("configure"),
-				QLatin1String(":/oxygen-16x16/configure.png")
-				));
+	keyButton->setIcon(GensQApplication::IconFromTheme(QLatin1String("configure")));
 	layout->addWidget(keyButton);
 	
 	// Create the clear button.
@@ -176,15 +173,13 @@ void GensKeySequenceWidgetPrivate::init(void)
 	if (QApplication::isLeftToRight())
 	{
 		clearButton->setIcon(GensQApplication::IconFromTheme(
-					QLatin1String("edit-clear-locationbar-rtl"),
-					QLatin1String(":/oxygen-16x16/edit-clear-locationbar-rtl.png")
+					QLatin1String("edit-clear-locationbar-rtl")
 					));
 	}
 	else
 	{
 		clearButton->setIcon(GensQApplication::IconFromTheme(
-					QLatin1String("edit-clear-locationbar-ltr"),
-					QLatin1String(":/oxygen-16x16/edit-clear-locationbar-ltr.png")
+					QLatin1String("edit-clear-locationbar-ltr")
 					));
 	}
 }

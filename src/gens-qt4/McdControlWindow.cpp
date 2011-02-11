@@ -70,9 +70,7 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 	
 	// Create the "Refresh" button.
 	// TODO: Don't load an icon on systems that don't use icons on buttons.
-	const QString iconRefreshFdo = QString::fromLatin1("view-refresh");
-	const QString iconRefreshQrc = QString::fromLatin1(":/oxygen-16x16/view-refresh.png");
-	btnRefresh = new QPushButton(GensQApplication::IconFromTheme(iconRefreshFdo, iconRefreshQrc),
+	btnRefresh = new QPushButton(GensQApplication::IconFromTheme(QLatin1String("view-refresh")),
 					tr("&Refresh"), this);
 	connect(btnRefresh, SIGNAL(clicked()), this, SLOT(query()));
 	// NOTE: "ResetRole" isn't exactly the right thing, but it works.

@@ -1,0 +1,78 @@
+<RCC>
+  <qresource prefix="icons/oxygen">
+    <file>index.theme</file>
+    <file>16x16/application-exit.png</file>
+    <file>16x16/applications-graphics.png</file>
+    <file>16x16/configure.png</file>
+    <file>16x16/document-close.png</file>
+    <file>16x16/document-open.png</file>
+    <file>16x16/drive-optical.png</file>
+    <file>16x16/edit-clear-locationbar-ltr.png</file>
+    <file>16x16/edit-clear-locationbar-rtl.png</file>
+    <file>16x16/help-about.png</file>
+    <file>16x16/media-optical-blu-ray.png</file>
+    <file>16x16/media-optical-dvd.png</file>
+    <file>16x16/media-optical.png</file>
+    <file>16x16/media-optical-recordable.png</file>
+    <file>16x16/utilities-terminal.png</file>
+    <file>16x16/view-refresh.png</file>
+
+    <file>22x22/application-exit.png</file>
+    <file>22x22/applications-graphics.png</file>
+    <file>22x22/configure.png</file>
+    <file>22x22/document-close.png</file>
+    <file>22x22/document-open.png</file>
+    <file>22x22/drive-optical.png</file>
+    <file>22x22/edit-clear-locationbar-ltr.png</file>
+    <file>22x22/edit-clear-locationbar-rtl.png</file>
+    <file>22x22/help-about.png</file>
+    <file>22x22/media-optical-blu-ray.png</file>
+    <file>22x22/media-optical-dvd.png</file>
+    <file>22x22/media-optical.png</file>
+    <file>22x22/media-optical-recordable.png</file>
+    <file>22x22/utilities-terminal.png</file>
+    <file>22x22/view-refresh.png</file>
+
+    <file>32x32/application-exit.png</file>
+    <file>32x32/applications-graphics.png</file>
+    <file>32x32/configure.png</file>
+    <file>32x32/document-close.png</file>
+    <file>32x32/document-open.png</file>
+    <file>32x32/drive-optical.png</file>
+    <file>32x32/edit-clear-locationbar-ltr.png</file>
+    <file>32x32/edit-clear-locationbar-rtl.png</file>
+    <file>32x32/help-about.png</file>
+    <file>32x32/media-optical-blu-ray.png</file>
+    <file>32x32/media-optical-dvd.png</file>
+    <file>32x32/media-optical.png</file>
+    <file>32x32/media-optical-recordable.png</file>
+    <file>32x32/utilities-terminal.png</file>
+    <file>32x32/view-refresh.png</file>
+
+    <file>48x48/application-exit.png</file>
+    <file>48x48/applications-graphics.png</file>
+    <file>48x48/configure.png</file>
+    <file>48x48/document-close.png</file>
+    <file>48x48/document-open.png</file>
+    <file>48x48/drive-optical.png</file>
+    <file>48x48/edit-clear-locationbar-ltr.png</file>
+    <file>48x48/edit-clear-locationbar-rtl.png</file>
+    <file>48x48/help-about.png</file>
+    <file>48x48/media-optical-blu-ray.png</file>
+    <file>48x48/media-optical-dvd.png</file>
+    <file>48x48/media-optical.png</file>
+    <file>48x48/media-optical-recordable.png</file>
+    <file>48x48/utilities-terminal.png</file>
+    <file>48x48/view-refresh.png</file>
+
+    <file>64x64/application-exit.png</file>
+    <file>64x64/applications-graphics.png</file>
+    <file>64x64/configure.png</file>
+    <file>64x64/drive-optical.png</file>
+    <file>64x64/media-optical-blu-ray.png</file>
+    <file>64x64/media-optical-dvd.png</file>
+    <file>64x64/media-optical.png</file>
+    <file>64x64/media-optical-recordable.png</file>
+    <file>64x64/utilities-terminal.png</file>
+  </qresource>
+</RCC>

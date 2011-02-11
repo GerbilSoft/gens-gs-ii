@@ -26,6 +26,7 @@
 // Qt includes.
 #include <QtGui/QIcon>
 
+
 namespace GensQt4
 {
 
@@ -39,15 +40,26 @@ void GensQApplication::gqaInit(void)
 	m_guiThread = QThread::currentThread();
 	
 	// Set application information.
-	QCoreApplication::setOrganizationName(QString::fromLatin1("GerbilSoft"));
-	QCoreApplication::setApplicationName(QString::fromLatin1("Gens/GS II"));
+	QCoreApplication::setOrganizationName(QLatin1String("GerbilSoft"));
+	QCoreApplication::setApplicationName(QLatin1String("Gens/GS II"));
 	
 	// Set the application icon.
 	QIcon iconApp;
-	iconApp.addFile(QString::fromLatin1(":/gens/gensgs_48x48.png"), QSize(48, 48));
-	iconApp.addFile(QString::fromLatin1(":/gens/gensgs_32x32.png"), QSize(32, 32));
-	iconApp.addFile(QString::fromLatin1(":/gens/gensgs_16x16.png"), QSize(16, 16));
+	iconApp.addFile(QLatin1String(":/gens/gensgs_48x48.png"), QSize(48, 48));
+	iconApp.addFile(QLatin1String(":/gens/gensgs_32x32.png"), QSize(32, 32));
+	iconApp.addFile(QLatin1String(":/gens/gensgs_16x16.png"), QSize(16, 16));
 	setWindowIcon(iconApp);
+	
+#if QT_VERSION >= 0x040600
+	// Check if an icon theme is available.
+	if (!QIcon::hasThemeIcon(QLatin1String("application-exit")))
+	{
+		// Icon theme is not available.
+		// Use built-in Oxygen icon theme.
+		// Reference: http://tkrotoff.blogspot.com/2010/02/qiconfromtheme-under-windows.html
+		QIcon::setThemeName(QLatin1String("oxygen"));
+	}
+#endif
 	
 #ifdef Q_OS_WIN32
 	// Set the application font.
@@ -68,10 +80,9 @@ void GensQApplication::gqaInit(void)
 /**
  * IconFromTheme(): Get an icon from the system theme.
  * @param name Icon name.
- * @param fallback Fallback icon filename from Qt resource file.
  * @return QIcon.
  */
-QIcon GensQApplication::IconFromTheme(QString name, QString fallback)
+QIcon GensQApplication::IconFromTheme(QString name)
 {
 #if QT_VERSION >= 0x040600
 	if (QIcon::hasThemeIcon(name))
@@ -81,7 +92,13 @@ QIcon GensQApplication::IconFromTheme(QString name, QString fallback)
 	// TODO: Get system theme icons on Win32 and Mac OS X.
 	
 	// Get the fallback icon.
-	return QIcon(fallback);
+	QIcon icon;
+	icon.addFile(QLatin1String(":/oxygen/64x64/") + name + QLatin1String(".png"), QSize(64, 64));
+	icon.addFile(QLatin1String(":/oxygen/48x48/") + name + QLatin1String(".png"), QSize(48, 48));
+	icon.addFile(QLatin1String(":/oxygen/32x32/") + name + QLatin1String(".png"), QSize(32, 32));
+	icon.addFile(QLatin1String(":/oxygen/22x22/") + name + QLatin1String(".png"), QSize(22, 22));
+	icon.addFile(QLatin1String(":/oxygen/16x16/") + name + QLatin1String(".png"), QSize(16, 16));
+	return icon;
 }
 
 }

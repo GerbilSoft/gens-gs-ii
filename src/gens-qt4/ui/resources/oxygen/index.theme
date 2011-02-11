@@ -1,0 +1,17 @@
+[Icon Theme]
+Name=Oxygen
+Comment=Minimal KDE Oxygen Theme for Gens/GS II
+Inherits=default
+Directories=16x16,32x32,48x48,64x64
+
+[16x16]
+Size=16
+
+[32x32]
+Size=32
+
+[48x48]
+Size=48
+
+[64x64]
+Size=64
