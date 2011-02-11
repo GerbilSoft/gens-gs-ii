@@ -125,6 +125,7 @@ void Io4WPMaster::setSlaveDevice(Io4WPSlave *slave)
 int Io4WPMaster::nextLogicalButton(int button) const
 {
 	// 4WP Master device has no buttons.
+	((void)button);
 	return -1;
 }
 
@@ -137,6 +138,7 @@ int Io4WPMaster::nextLogicalButton(int button) const
 const char *Io4WPMaster::buttonName(int button) const
 {
 	// 4WP Master device has no buttons.
+	((void)button);
 	return NULL;
 }
 

@@ -78,7 +78,7 @@ IoBase::IoBase(const IoBase *other)
  * reset(): Reset virtual function.
  * Called when the system is reset.
  */
-void IoBase::reset()
+void IoBase::reset(void)
 {
 	m_ctrl = 0x00;
 	m_lastData = 0xFF;

@@ -40,7 +40,7 @@ class IoTeamplayer : public IoBase
 		 * reset(): Reset function.
 		 * Called when the system is reset.
 		 */
-		void reset();
+		void reset(void);
 		
 		void writeCtrl(uint8_t ctrl);
 		

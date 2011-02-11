@@ -39,9 +39,12 @@ class Io3Button : public IoBase
 		uint8_t readData(void);
 		
 		// Controller configuration.
-		const char *devName(void) const { return "3-button gamepad"; }
-		IoType devType(void) const { return IOT_3BTN; }
-		int numButtons(void) const { return 8; }
+		const char *devName(void) const
+			{ return "3-button gamepad"; }
+		IoType devType(void) const
+			{ return IOT_3BTN; }
+		int numButtons(void) const
+			{ return 8; }
 		int nextLogicalButton(int button) const;
 		const char *buttonName(int button) const;
 };

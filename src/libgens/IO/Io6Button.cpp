@@ -78,6 +78,20 @@ Io6Button::Io6Button(const IoBase *other)
 
 
 /**
+ * reset(): Reset function.
+ * Called when the system is reset.
+ */
+void Io6Button::reset()
+{
+	IoBase::reset();
+	
+	// 6-button specific variables.
+	m_counter = 0;
+	m_scanlines = 0;
+}
+
+
+/**
  * writeCtrl(): Set the I/O tristate value.
  * TODO: Combine with writeData().
  * @param ctrl I/O tristate value.

@@ -32,45 +32,15 @@ namespace LibGens
 class IoMegaMouse : public IoBase
 {
 	public:
-		IoMegaMouse()
-		{
-			m_buttons = 0;	// Mega Mouse uses Active High logic.
-			m_counter = 0;
-			m_relX = 0;
-			m_relY = 0;
-			m_latchSignOver = 0;
-			m_latchRelX = 0;
-			m_latchRelY = 0;
-		}
-		IoMegaMouse(const IoBase *other)
-			: IoBase(other)
-		{
-			m_buttons = 0;	// Mega Mouse uses Active High logic.
-			m_counter = 0;
-			m_relX = 0;
-			m_relY = 0;
-			m_latchSignOver = 0;
-			m_latchRelX = 0;
-			m_latchRelY = 0;
-		}
+		IoMegaMouse();
+		IoMegaMouse(const IoBase *other);
 		virtual ~IoMegaMouse() { }
 		
 		/**
 		 * reset(): Reset function.
 		 * Called when the system is reset.
 		 */
-		inline void reset()
-		{
-			IoBase::reset();
-			
-			// Mega Mouse-specific variables.
-			m_counter = 0;
-			m_relX = 0;
-			m_relY = 0;
-			m_latchSignOver = 0;
-			m_latchRelX = 0;
-			m_latchRelY = 0;
-		}
+		void reset();
 		
 		void writeCtrl(uint8_t ctrl);
 		
@@ -81,9 +51,12 @@ class IoMegaMouse : public IoBase
 		void update(void);
 		
 		// Controller configuration.
-		const char *devName(void) const { return "Mega Mouse"; }
-		IoType devType(void) const { return IOT_MEGA_MOUSE; }
-		int numButtons(void) const { return 4; }
+		const char *devName(void) const
+			{ return "Mega Mouse"; }
+		IoType devType(void) const
+			{ return IOT_MEGA_MOUSE; }
+		int numButtons(void) const
+			{ return 4; }
 		int nextLogicalButton(int button) const;
 		const char *buttonName(int button) const;
 	

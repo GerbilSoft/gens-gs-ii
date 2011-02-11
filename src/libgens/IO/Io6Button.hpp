@@ -40,14 +40,7 @@ class Io6Button : public IoBase
 		 * reset(): Reset function.
 		 * Called when the system is reset.
 		 */
-		inline void reset()
-		{
-			IoBase::reset();
-			
-			// 6-button specific variables.
-			m_counter = 0;
-			m_scanlines = 0;
-		}
+		void reset(void);
 		
 		void writeCtrl(uint8_t ctrl);
 		

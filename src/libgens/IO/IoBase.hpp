@@ -49,7 +49,7 @@ class IoBase
 		 * reset(): Reset virtual function.
 		 * Called when the system is reset.
 		 */
-		virtual void reset();
+		virtual void reset(void);
 		
 		// MD-side controller functions.
 		// TODO: Trigger IRQ 2 if TH interrupt is enabled.
@@ -59,9 +59,7 @@ class IoBase
 			updateSelectLine();
 		}
 		virtual uint8_t readCtrl(void)
-		{
-			return m_ctrl;
-		}
+			{ return m_ctrl; }
 		
 		virtual void writeData(uint8_t data)
 		{
@@ -83,11 +81,16 @@ class IoBase
 		// TODO: Baud rate delay handling, TL/TR handling.
 		// TODO: Trigger IRQ 2 on data receive if interrupt is enabled.
 		// NOTE: Serial mode used is 8n1: 1 start, 8 data, 1 stop = 10 baud per byte.
-		virtual void writeSerCtrl(uint8_t serCtrl) { m_serCtrl = serCtrl; }
-		virtual uint8_t readSerCtrl(void) { return m_serCtrl & 0xF8; }
-		virtual void writeSerTx(uint8_t data) { m_serLastTx = data; }
-		virtual uint8_t readSerTx(void) { return m_serLastTx; }
-		virtual uint8_t readSerRx(void) { return 0xFF; }
+		virtual void writeSerCtrl(uint8_t serCtrl)
+			{ m_serCtrl = serCtrl; }
+		virtual uint8_t readSerCtrl(void)
+			{ return m_serCtrl & 0xF8; }
+		virtual void writeSerTx(uint8_t data)
+			{ m_serLastTx = data; }
+		virtual uint8_t readSerTx(void)
+			{ return m_serLastTx; }
+		virtual uint8_t readSerRx(void)
+			{ return 0xFF; }
 		
 		/**
 		 * update(): I/O device update function.
@@ -152,10 +155,9 @@ class IoBase
 		 * updateSelectLine(): Determine the SELECT line state.
 		 */
 		inline void updateSelectLine(void)
-		{
-			m_select = (!(m_ctrl & IOPIN_TH) || (m_lastData & IOPIN_TH));
-		}
-		inline bool isSelect(void) const { return m_select; }
+			{ m_select = (!(m_ctrl & IOPIN_TH) || (m_lastData & IOPIN_TH)); }
+		inline bool isSelect(void) const
+			{ return m_select; }
 		
 		/**
 		 * applyTristate(): Apply the Tristate settings to the data value.

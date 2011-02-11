@@ -70,11 +70,12 @@ IoTeamplayer::IoTeamplayer(const IoBase *other)
 	rebuildCtrlIndexTable();
 }
 
+
 /**
  * reset(): Reset function.
  * Called when the system is reset.
  */
-void IoTeamplayer::reset()
+void IoTeamplayer::reset(void)
 {
 	IoBase::reset();
 	
@@ -198,7 +199,7 @@ uint8_t IoTeamplayer::readData(void)
 		default:
 			// Check the controller data index table.
 			int adj_counter = (m_counter - DT_PADA_RLDU);
-			if ((adj_counter > (sizeof(m_ctrlIndex)/sizeof(m_ctrlIndex[0]))) ||
+			if ((adj_counter > (int)(sizeof(m_ctrlIndex)/sizeof(m_ctrlIndex[0]))) ||
 			    (m_ctrlIndex[adj_counter] >= DT_MAX))
 			{
 				// Invalid counter state.

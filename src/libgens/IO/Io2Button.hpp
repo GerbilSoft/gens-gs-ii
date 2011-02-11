@@ -39,9 +39,12 @@ class Io2Button : public IoBase
 		uint8_t readData(void);
 		
 		// Controller configuration.
-		const char *devName(void) const { return "2-button gamepad (SMS)"; }
-		IoType devType(void) const { return IOT_2BTN; }
-		int numButtons(void) const { return 6; }
+		const char *devName(void) const
+			{ return "2-button gamepad (SMS)"; }
+		IoType devType(void) const
+			{ return IOT_2BTN; }
+		int numButtons(void) const
+			{ return 6; }
 		int nextLogicalButton(int button) const;
 		const char *buttonName(int button) const;
 };
