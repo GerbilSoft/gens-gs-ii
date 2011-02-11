@@ -136,16 +136,16 @@ int GensConfig::reload(const QString& filename)
 	/** External programs. **/
 	// TODO: Don't use setExtPrgUnRAR.
 	// Instead, set the filename directly.
-#ifdef Q_OS_WIN
+#ifdef Q_OS_WIN32
 	const QLatin1String sExtPrgUnRAR_default("UnRAR.dll");
-#else
+#else /* !Q_OS_WIN32 */
 	// TODO: Check for the existence of unrar and rar.
 	// We should:
 	// - Default to unrar if it's found.
 	// - Fall back to rar if it's found but unrar isn't.
 	// - Assume unrar if neither are found.
 	const QLatin1String sExtPrgUnRAR_default("/usr/bin/unrar");
-#endif
+#endif /* Q_OS_WIN32 */
 	settings.beginGroup(QLatin1String("External_Programs"));
 	setExtPrgUnRAR(settings.value(QLatin1String("UnRAR"), sExtPrgUnRAR_default).toString());
 	settings.endGroup();
