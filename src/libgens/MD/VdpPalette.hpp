@@ -80,7 +80,8 @@ class VdpPalette
 		inline bool isDirty(void) const
 			{ return m_dirty; }
 		
-		// Properties.
+		/** Properties. **/
+		
 		inline int contrast(void) const
 			{ return m_contrast; }
 		void setContrast(int newContrast);
@@ -96,6 +97,10 @@ class VdpPalette
 		inline bool inverted(void) const
 			{ return m_inverted; }
 		void setInverted(bool newInverted);
+		
+		inline ColorScaleMethod_t colorScaleMethod(void) const
+			{ return m_colorScaleMethod; }
+		void setColorScaleMethod(ColorScaleMethod_t newColorScaleMethod);
 		
 		inline ColorDepth bpp(void) const
 			{ return m_bpp; }
@@ -121,7 +126,7 @@ class VdpPalette
 		int m_brightness;
 		bool m_grayscale;
 		bool m_inverted;
-		ColorScaleMethod_t m_csm;
+		ColorScaleMethod_t m_colorScaleMethod;
 		ColorDepth m_bpp;
 		
 		// Dirty flag.

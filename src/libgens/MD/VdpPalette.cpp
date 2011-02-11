@@ -45,7 +45,7 @@ VdpPalette::VdpPalette()
 	m_brightness = 100;
 	m_grayscale = false;
 	m_inverted = false;
-	m_csm = COLSCALE_FULL;
+	m_colorScaleMethod = COLSCALE_FULL;
 	m_bpp = BPP_32;
 	m_dirty = true;
 	
@@ -81,6 +81,7 @@ PAL_PROPERTY_WRITE(contrast, int, Contrast)
 PAL_PROPERTY_WRITE(brightness, int, Brightness)
 PAL_PROPERTY_WRITE(grayscale, bool, Grayscale)
 PAL_PROPERTY_WRITE(inverted, bool, Inverted)
+PAL_PROPERTY_WRITE(colorScaleMethod, ColorScaleMethod_t, ColorScaleMethod)
 PAL_PROPERTY_WRITE(bpp, ColorDepth, Bpp)
 
 
@@ -153,7 +154,7 @@ FORCE_INLINE void VdpPalette::T_recalcFullMD(pixel *palFull)
 	const int brightness = (m_brightness - 100);
 	
 	int mdComponentScale;
-	switch (m_csm)
+	switch (m_colorScaleMethod)
 	{
 		case COLSCALE_RAW:
 			mdComponentScale = 0;
@@ -176,7 +177,7 @@ FORCE_INLINE void VdpPalette::T_recalcFullMD(pixel *palFull)
 		b = (i >> 4) & 0xF0;
 		
 		// Scale the colors to full RGB.
-		if (m_csm != COLSCALE_RAW)
+		if (m_colorScaleMethod != COLSCALE_RAW)
 		{
 			r = (r * 0xFF) / mdComponentScale;
 			g = (g * 0xFF) / mdComponentScale;
