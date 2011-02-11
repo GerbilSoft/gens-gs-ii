@@ -201,14 +201,6 @@ FORCE_INLINE void VdpPalette::T_recalcFullMD(pixel *palFull)
 			r = g = b = CalcGrayscale(r, g, b);
 		}
 		
-		if (m_inverted)
-		{
-			// Invert the color components.
-			r ^= 0xFF;
-			g ^= 0xFF;
-			b ^= 0xFF;
-		}
-		
 		// Reduce color components to original color depth.
 		r >>= (8 - RBits);
 		g >>= (8 - GBits);
@@ -218,6 +210,14 @@ FORCE_INLINE void VdpPalette::T_recalcFullMD(pixel *palFull)
 		T_ConstrainColorComponent<RMask>(r);
 		T_ConstrainColorComponent<GMask>(g);
 		T_ConstrainColorComponent<BMask>(b);
+		
+		if (m_inverted)
+		{
+			// Invert the color components.
+			r ^= RMask;
+			g ^= GMask;
+			b ^= BMask;
+		}
 		
 		// TODO: Make this configurable?
 #if 0	
