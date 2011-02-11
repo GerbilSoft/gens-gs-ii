@@ -233,17 +233,6 @@ FORCE_INLINE void VdpPalette::T_recalcFullMD(pixel *palFull)
 		palFull[i] = (r << (BBits + GBits)) |
 			     (g << (BBits)) |
 			     (b);
-		
-#if GENS_BYTEORDER == GENS_BIG_ENDIAN
-		if (sizeof(pixel) == 4)
-		{
-			// HACK: Mac OS X on PowerPC uses BGRA format for 32-bit color.
-			// The default palette calculation ends up using RGBA (or ARGB?).
-			// (15-bit and 16-bit color appear to be fine...)
-			// TODO: Check Linux/PPC.
-			palFull[i] = le32_to_cpu(palFull[i]);
-		}
-#endif
 	}
 }
 
