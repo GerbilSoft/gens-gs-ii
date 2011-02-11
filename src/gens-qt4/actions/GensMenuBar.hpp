@@ -91,8 +91,7 @@ class GensMenuBar : public QMenuBar
 			MenuItemShortcut key_std;	// Menu item shortcut. (Wrapper around QKeySequence::StandardKey.)
 			int key_custom;			// Custom key sequence. (Set key_std to QKeySequence::UnknownKey.)
 			
-			const char *icon_fdo;		// FreeDesktop.org icon.
-			const char *icon_qrc;		// QRC icon. (Qt resources)
+			const char *icon_fdo;		// FreeDesktop.org icon name.
 		};
 		
 		struct MainMenuItem
