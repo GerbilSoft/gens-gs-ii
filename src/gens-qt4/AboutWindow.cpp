@@ -421,7 +421,7 @@ QString AboutWindow::GetDebugInfo(void)
 				? QString::fromLatin1(glewVersion)
 				: tr("(unknown)")) + QChar(L'\n');
 	
-	// TODO: Print "No GL extensions in use." if no GL extensions are in use.
+	// Get a list of OpenGL extensions that are in use.
 	const QChar chrBullet(0x2022);	// U+2022: BULLET
 	const QStringList& extsInUse = GensQGLWidget::GLExtsInUse();
 	

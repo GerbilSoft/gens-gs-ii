@@ -61,19 +61,11 @@
 #include <QtGui/QImageReader>
 
 // Qt key handler.
-// TODO: Make a class for handling non-controller input, e.g. Reset.
 #include "Input/KeyHandlerQt.hpp"
 
 
 namespace GensQt4
 {
-
-// Reset keys.
-// TODO: Make these customizable.
-// TODO: Make a class for handling non-controller input, e.g. Reset.
-// TODO: Add modifier keyvals or something.
-// For now, Tab == soft reset; Shift-Tab == hard reset
-static const GensKey_t ms_ResetKey = KEYV_TAB;
 
 EmuManager::EmuManager()
 {
@@ -86,8 +78,8 @@ EmuManager::EmuManager()
 	m_rom = NULL;
 	m_paused.data = 0;
 	
-	// TODO: Load the last save slot from the configuration file.
-	m_saveSlot = 0;
+	// Save slot.
+	m_saveSlot = gqt4_config->saveSlot();
 	
 	// Create the Audio Backend.
 	// TODO: Allow selection of all available audio backend classes.

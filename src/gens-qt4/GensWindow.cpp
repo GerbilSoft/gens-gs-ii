@@ -168,7 +168,6 @@ void GensWindow::setupUi(void)
 		m_gensActions, SLOT(doAction(int)));
 	
 	// Connect Emulation Manager signals to GensWindow.
-	// TODO: Make m_emuManager a pointer instead of an object?
 	connect(m_emuManager, SIGNAL(updateFps(double)),
 		this, SLOT(updateFps(double)));
 	connect(m_emuManager, SIGNAL(stateChanged(void)),
@@ -235,9 +234,10 @@ void GensWindow::closeEvent(QCloseEvent *event)
  */
 void GensWindow::showEvent(QShowEvent *event)
 {
-	// TODO: Check the event type.
+	// Event type isn't useful here.
 	((void)event);
 	
+	// If we've already run the initial resize, don't run it again.
 	if (m_hasInitResize)
 		return;
 	
@@ -371,15 +371,14 @@ void GensWindow::gensResize(void)
  */
 void GensWindow::setGensTitle(void)
 {
-	// TODO: Indicate UI status.
+	// Update the window title to reflect the emulation status.
 	QString title = tr("Gens/GS II");
 	title += QChar(L' ') + tr("dev");
 #if !defined(GENS_ENABLE_EMULATION)
 	title += QChar(L' ') + tr("NO-EMU");
 #endif
-	title += QString::fromLatin1(" - ");
+	title += QLatin1String(" - ");
 	
-	// TODO
 	if (!m_emuManager->isRomOpen())
 	{
 		// No ROM is running.
@@ -388,7 +387,7 @@ void GensWindow::setGensTitle(void)
 	else
 	{
 		// ROM is running.
-		title += m_emuManager->sysName() + QString::fromLatin1(": ");
+		title += m_emuManager->sysName() + QLatin1String(": ");
 		title += m_emuManager->romName();
 	}
 	
