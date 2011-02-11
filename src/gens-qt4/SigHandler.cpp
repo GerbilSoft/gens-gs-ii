@@ -35,6 +35,7 @@
 
 // Qt includes.
 #include <QtCore/QString>
+#include <QtCore/QLatin1String>
 #include <QtGui/QMessageBox>
 
 // Gens QApplication.
@@ -61,7 +62,7 @@
 #endif
 
 // HANG() macro.
-#ifdef _WIN32
+#ifdef Q_OS_WIN32
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -100,7 +101,7 @@ void SigHandler::Init(void)
 	sa.sa_flags = SA_RESTART | SA_SIGINFO;
 #endif
 	
-	for (unsigned int i = 0; gens_signals[i].signum != 0; i++)
+	for (int i = 0; gens_signals[i].signum != 0; i++)
 	{
 #ifdef HAVE_SIGACTION
 		sigaction(gens_signals[i].signum, &sa, NULL);
@@ -116,7 +117,7 @@ void SigHandler::Init(void)
  */
 void SigHandler::End(void)
 {
-	for (unsigned int i = 0; gens_signals[i].signum != 0; i++)
+	for (int i = 0; gens_signals[i].signum != 0; i++)
 	{
 		signal(gens_signals[i].signum, SIG_DFL);
 	}
@@ -240,7 +241,7 @@ void SigHandler::SignalHandler(int signum)
 	// Check what signal this is.
 	const char *signame = "SIGUNKNOWN";
 	const char *sigdesc = "Unknown signal";
-	for (unsigned int i = 0; gens_signals[i].signum != 0; i++)
+	for (int i = 0; gens_signals[i].signum != 0; i++)
 	{
 		if (gens_signals[i].signum == signum)
 		{
@@ -319,7 +320,7 @@ void SigHandler::SignalHandler(int signum)
 	{
 		sMsg += QString::fromLatin1(signame);
 		if (sigdesc)
-			sMsg += QString::fromLatin1(": ") + QString::fromLatin1(sigdesc);
+			sMsg += QLatin1String(": ") + QLatin1String(sigdesc);
 		sMsg += QChar(L'\n');
 	}
 	
@@ -328,37 +329,37 @@ void SigHandler::SignalHandler(int signum)
 	{
 		sMsg += QString::fromLatin1(siginfo->signame);
 		if (siginfo->sigdesc)
-			sMsg += QString::fromLatin1(": ") + QString::fromLatin1(siginfo->sigdesc);
+			sMsg += QLatin1String(": ") + QLatin1String(siginfo->sigdesc);
 		sMsg += QChar(L'\n');
 	}
 #endif
 	
-	sMsg += QString::fromLatin1("\n"
+	sMsg += QLatin1String("\n"
 			"Build Information:\n"
 			"- Platform: " GENS_PLATFORM "\n"
 			);
 	
 	// TODO: Use MDP version number macros.
-	sMsg += QString::fromLatin1("- Version: ") +
+	sMsg += QLatin1String("- Version: ") +
 			QString::number((LibGens::version >> 24) & 0xFF) + QChar(L'.') +
 			QString::number((LibGens::version >> 16) & 0xFF) + QChar(L'.') +
 			QString::number(LibGens::version & 0xFFFF);
 	
 	if (LibGens::version_desc)
 	{
-		sMsg += QString::fromLatin1(" (") +
-				QString::fromLatin1(LibGens::version_desc) + QChar(L')');
+		sMsg += QLatin1String(" (") +
+				QLatin1String(LibGens::version_desc) + QChar(L')');
 	}
 	sMsg += QChar(L'\n');
 	
 	// VCS revision.
 	if (LibGens::version_vcs)
 	{
-		sMsg += QString::fromLatin1("- ") +
-				QString::fromLatin1(LibGens::version_vcs) + QChar(L'\n');
+		sMsg += QLatin1String("- ") +
+				QLatin1String(LibGens::version_vcs) + QChar(L'\n');
 	}
 	
-	sMsg += QString::fromLatin1("\n"
+	sMsg += QLatin1String("\n"
 			"Please report this error to GerbilSoft.\n"
 			"- E-mail: gerbilsoft@verizon.net\n\n"
 			"Be sure to include detailed information about what you were "
@@ -367,10 +368,10 @@ void SigHandler::SignalHandler(int signum)
 	
 	// Display the message box.
 	QMessageBox dialog(QMessageBox::Critical,
-				QString::fromLatin1("Gens/GS II Fatal Error"), sMsg);
+				QLatin1String("Gens/GS II Fatal Error"), sMsg);
 	dialog.setTextFormat(Qt::PlainText);
 #ifdef RICKROLL
-	QPixmap pxmRickRoll(QString::fromLatin1(":/gens/rick-roll.png"));
+	QPixmap pxmRickRoll(QLatin1String(":/gens/rick-roll.png"));
 	if (!pxmRickRoll.isNull())
 	{
 		dialog.setIconPixmap(pxmRickRoll);

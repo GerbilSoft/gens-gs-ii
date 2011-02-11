@@ -46,7 +46,11 @@ class SigHandler
 		static void Init(void);
 		static void End(void);
 	
-	protected:
+	private:
+		// Static class; prevent instantiation.
+		SigHandler() { }
+		~SigHandler() { }
+		
 #ifdef HAVE_SIGACTION
 		static const gens_signal_t *GetSigInfo(int signum, int si_code);
 		static void SignalHandler(int signum, siginfo_t *info, void *context);
@@ -54,10 +58,6 @@ class SigHandler
 		static void SignalHandler(int signum);
 #endif
 		friend class GensQApplication;
-	
-	private:
-		SigHandler() { }
-		~SigHandler() { }
 };
 
 }
