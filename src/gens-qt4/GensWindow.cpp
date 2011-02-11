@@ -355,10 +355,8 @@ void GensWindow::gensResize(void)
 	
 	// Calculate the window height.
 	int win_height = img_height;
-#ifdef Q_WS_MAC
 	if (m_menubar)
 		win_height += m_menubar->size().height();
-#endif
 	
 	// Set the new window size.
 	this->resize(img_width, win_height);
