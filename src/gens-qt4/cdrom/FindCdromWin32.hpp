@@ -51,7 +51,13 @@ class FindCdromWin32 : public FindCdromBase
 		 * @return 0 on success; non-zero on error.
 		 */
 		int query_int(void);
-		
+	
+	private:
+		/**
+		 * GetVolumeLabel(): Get the volume label of the specified drive.
+		 * @param drive_letter Drive letter.
+		 * @return Volume label, or empty string on error.
+		 */
 		static QString GetVolumeLabel(char drive_letter);
 		
 		/**

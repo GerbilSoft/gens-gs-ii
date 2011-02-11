@@ -60,14 +60,15 @@ class FindCdromUDisks : public FindCdromBase
 		}
 	
 	protected:
-		static const char *ms_UDisks_DriveID[20];
-		
 		/**
 		 * query_int(): Asynchronously query for CD-ROM drives. (INTERNAL FUNCTION)
 		 * The driveUpdated() signal will be emitted once for each detected drive.
 		 * @return 0 on success; non-zero on error.
 		 */
 		int query_int(void);
+	
+	private:
+		static const char *ms_UDisks_DriveID[20];
 		
 		static QString GetStringProperty(QDBusInterface *dbus_if, const char *prop);
 		static bool GetBoolProperty(QDBusInterface *dbus_if, const char *prop);
@@ -76,7 +77,7 @@ class FindCdromUDisks : public FindCdromBase
 		QDBusInterface *m_ifUDisks;
 		int queryUDisksDevice(const QDBusObjectPath& objectPath);
 	
-	protected slots:
+	private slots:
 		void deviceChanged(const QDBusObjectPath& objectPath);
 		void deviceRemoved(const QDBusObjectPath& objectPath);
 };

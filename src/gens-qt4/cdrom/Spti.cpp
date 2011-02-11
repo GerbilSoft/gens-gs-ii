@@ -55,7 +55,8 @@ Spti::Spti(char drive_letter)
 	}
 	
 	// Create the pathname.
-	char spti_pathname[7] = {'\\', '\\', '.', '\\', drive_letter, ':', 0};
+	const char spti_pathname[7] =
+		{'\\', '\\', '.', '\\', drive_letter, ':', 0};
 	
 	// Open the specified drive using SPTI.
 	m_hDevice = CreateFileA(spti_pathname,				// lpFileName

@@ -89,7 +89,8 @@ int FindCdromUnix::query_int(void)
 	}
 	
 	// Get a list of filenames.
-	QFileInfoList devFiles = dir.entryInfoList(nameFilters, (QDir::NoSymLinks | QDir::System), QDir::Name);
+	QFileInfoList devFiles = dir.entryInfoList(nameFilters,
+					(QDir::NoSymLinks | QDir::System), QDir::Name);
 	
 	// Search for block devices that are readable by the user.
 	QFileInfo fileInfo;
@@ -149,7 +150,7 @@ int FindCdromUnix::query_int(void)
 			drive.drive_type	= DRIVE_TYPE_CDROM;
 			drive.discs_supported	= DISC_TYPE_CDROM;
 			drive.disc_type		= DISC_TYPE_CDROM;
-			drive.disc_label	= QString::fromLatin1("Disc Label");
+			drive.disc_label	= QLatin1String("Disc Label");
 			drive.disc_blank	= false;
 		}
 		
@@ -190,9 +191,9 @@ int FindCdromUnix::os_GetDevIdentity(int fd, CdromDriveEntry &entry)
 	// Get the device identity from the struct hd_driveid.
 	entry.drive_vendor   = QString::fromLatin1((const char*)drive_id.model, 8).trimmed();
 	entry.drive_model    = QString::fromLatin1((const char*)&drive_id.model[8],
-						   (sizeof(drive_id.model) - 8)).trimmed();
+							(sizeof(drive_id.model) - 8)).trimmed();
 	entry.drive_firmware = QString::fromLatin1((const char*)drive_id.fw_rev,
-						   sizeof(drive_id.fw_rev)).trimmed();
+							sizeof(drive_id.fw_rev)).trimmed();
 	return 0;
 #else
 	// Other Unix system.

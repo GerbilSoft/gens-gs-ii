@@ -106,19 +106,8 @@ class FindCdromBase : public QObject
 	Q_OBJECT
 	
 	public:
-		FindCdromBase()
-		{
-			if (!ms_MetaType_CdromDriveEntry)
-				ms_MetaType_CdromDriveEntry = qRegisterMetaType<CdromDriveEntry>("CdromDriveEntry");
-			
-			m_thread = new FindCdromThread(this);
-		}
-		~FindCdromBase()
-		{
-			if (m_thread->isRunning())
-				m_thread->terminate();
-			delete m_thread;
-		}
+		FindCdromBase();
+		virtual ~FindCdromBase();
 		
 		virtual bool isUsable(void) const
 			{ return true; }
@@ -155,6 +144,20 @@ class FindCdromBase : public QObject
 		}
 	
 	protected:
+		static DriveType GetDriveType(uint32_t discs_supported);
+		
+		// Get drive type and disc type icons.
+		static QIcon GetDriveTypeIcon(DriveType drive_type);
+		static QIcon GetDiscTypeIcon(uint32_t disc_type);
+	
+		/**
+		 * query_int(): Asynchronously query for CD-ROM drives. (INTERNAL FUNCTION)
+		 * The driveUpdated() signal will be emitted once for each detected drive.
+		 * @return 0 on success; non-zero on error.
+		 */
+		virtual int query_int(void) = 0;
+	
+	private:
 		// Qt metatype ID for CdromDriveEntry.
 		static int ms_MetaType_CdromDriveEntry;
 		
@@ -170,19 +173,6 @@ class FindCdromBase : public QObject
 				FindCdromBase *m_cdromBase;
 		};
 		FindCdromThread *m_thread;
-		
-		/**
-		 * query_int(): Asynchronously query for CD-ROM drives. (INTERNAL FUNCTION)
-		 * The driveUpdated() signal will be emitted once for each detected drive.
-		 * @return 0 on success; non-zero on error.
-		 */
-		virtual int query_int(void) = 0;
-		
-		static DriveType GetDriveType(uint32_t discs_supported);
-		
-		// Get drive type and disc type icons.
-		static QIcon GetDriveTypeIcon(DriveType drive_type);
-		static QIcon GetDiscTypeIcon(uint32_t disc_type);
 	
 	signals:
 		void driveUpdated(const CdromDriveEntry& drive);

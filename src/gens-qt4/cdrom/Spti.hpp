@@ -69,7 +69,7 @@ class Spti
 		const char *inqFirmware(void)
 			{ return m_inq_firmware.c_str(); }
 	
-	protected:
+	private:
 		// Drive handle.
 		HANDLE m_hDevice;
 		

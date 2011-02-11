@@ -46,13 +46,14 @@ namespace GensQt4
 {
 
 /**
- * GetVolumeLabel(): Get the label of the given drive.
+ * GetVolumeLabel(): Get the volume label of the specified drive.
  * @param drive_letter Drive letter.
- * @return Volume label, or empty string if no device is present.
+ * @return Volume label, or empty string on error.
  */
 QString FindCdromWin32::GetVolumeLabel(char drive_letter)
 {
 	// TODO: ANSI version.
+	// TODO: Long volume labels on Joliet/UDF CDs are truncated...
 	wchar_t fsNameBuf[MAX_PATH+1];
 	wchar_t drive_path[4] = {0, L':', L'\\', 0};
 	drive_path[0] = drive_letter;
@@ -103,7 +104,7 @@ int FindCdromWin32::query_int(void)
 		drive.disc_blank = false;		// TODO
 		
 		// Save the drive path.
-		drive.path = QString::fromLatin1(drive_path);
+		drive.path = QLatin1String(drive_path);
 		
 		// Get the disc label.
 		drive.disc_label = GetVolumeLabel(drive_path[0]);
@@ -118,9 +119,9 @@ int FindCdromWin32::query_int(void)
 			{
 				// Drive inquiry successful.
 				// Get the information.
-				drive.drive_vendor   = QString::fromLatin1(drive_spti.inqVendor());
-				drive.drive_model    = QString::fromLatin1(drive_spti.inqModel());
-				drive.drive_firmware = QString::fromLatin1(drive_spti.inqFirmware());
+				drive.drive_vendor   = QLatin1String(drive_spti.inqVendor());
+				drive.drive_model    = QLatin1String(drive_spti.inqModel());
+				drive.drive_firmware = QLatin1String(drive_spti.inqFirmware());
 			}
 			
 			// Check if a disc is inserted.
@@ -145,7 +146,7 @@ int FindCdromWin32::query_int(void)
 		emit driveUpdated(drive);
 		
 		// Print drive information.
-		printf("Drive: %s - drive is type %d, disc is 0x%08X\n",
+		fprintf(stderr, "Drive: %s - drive is type %d, disc is 0x%08X\n",
 		       drive.path.toLocal8Bit().constData(), (int)drive.drive_type, drive.disc_type);
 	}
 	

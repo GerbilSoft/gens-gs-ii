@@ -32,14 +32,15 @@ class FindCdromUnix : public FindCdromBase
 	Q_OBJECT
 	
 	protected:
-		static const char *ms_Unix_DevNames[];
-		
 		/**
 		 * query_int(): Asynchronously query for CD-ROM drives. (INTERNAL FUNCTION)
 		 * The driveUpdated() signal will be emitted once for each detected drive.
 		 * @return 0 on success; non-zero on error.
 		 */
 		int query_int(void);
+	
+	private:
+		static const char *ms_Unix_DevNames[];
 		
 		/** OS-specific functions. **/
 		static int os_GetDevIdentity(int fd, CdromDriveEntry &entry);
