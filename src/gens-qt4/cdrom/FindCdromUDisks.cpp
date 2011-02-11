@@ -174,7 +174,6 @@ int FindCdromUDisks::query(void)
 int FindCdromUDisks::query_int(void)
 {
 	// Find all CD-ROM devices.
-	// TODO: Make a base class and return standard values.
 	// TODO: Get qdbusxml2cpp working with UDisks.
 	
 	// NOTE: QDBusConnection is not thread-safe.
@@ -270,7 +269,6 @@ int FindCdromUDisks::queryUDisksDevice(const QDBusObjectPath& objectPath)
 	
 	// Determine the drive media support.
 	// TODO: Convert ms_UDisks_DriveID[] to a QMap.
-	// TODO: Verify that reply_DriveMediaCompatibility is a QStringList.
 	const QStringList& DriveMediaCompatibility = reply_DriveMediaCompatibility.toStringList();
 	QString drive_media_id;
 	foreach (drive_media_id, DriveMediaCompatibility)
