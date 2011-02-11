@@ -45,7 +45,6 @@ class ZipSelectDialog : public QDialog, public Ui::ZipSelectDialog
 	
 	public:
 		ZipSelectDialog(QWidget *parent = NULL);
-		virtual ~ZipSelectDialog();
 		
 		/**
 		 * setFileList(): Set the file list.
@@ -57,9 +56,10 @@ class ZipSelectDialog : public QDialog, public Ui::ZipSelectDialog
 		 * selectedFile(): Get the selected file.
 		 * @return Selected file, or NULL if no file was selected.
 		 */
-		const mdp_z_entry_t *selectedFile(void) const { return m_z_entry_sel; }
+		const mdp_z_entry_t *selectedFile(void) const
+			{ return m_z_entry_sel; }
 	
-	public slots:
+	private slots:
 		void accept(void);
 		
 		// Widget signals.
@@ -67,7 +67,7 @@ class ZipSelectDialog : public QDialog, public Ui::ZipSelectDialog
 		void on_treeView_collapsed(const QModelIndex& index);
 		void on_treeView_expanded(const QModelIndex& index);
 	
-	protected:
+	private:
 		const mdp_z_entry_t *m_z_entry_list;
 		const mdp_z_entry_t *m_z_entry_sel;
 		

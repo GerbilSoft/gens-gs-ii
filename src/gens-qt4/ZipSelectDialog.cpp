@@ -56,14 +56,6 @@ ZipSelectDialog::ZipSelectDialog(QWidget *parent)
 
 
 /**
- * ~ZipSelectDialog(): Shut down the Multi-File Archive Selection Dialog.
- */
-ZipSelectDialog::~ZipSelectDialog()
-{
-}
-
-
-/**
  * setFileList(): Set the file list.
  * @param z_entry File list.
  */
