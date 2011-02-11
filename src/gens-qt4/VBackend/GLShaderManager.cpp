@@ -176,7 +176,12 @@ void GLShaderManager::init(void)
 					ms_FastBlur_ARB_fragment_program_src);
 		
 		err = glGetError();
-		if (err != GL_NO_ERROR)
+		if (err == GL_NO_ERROR)
+		{
+			// Fragment program loaded.
+			m_fastBlur_type = ST_GL_ARB_FRAGMENT_PROGRAM;
+		}
+		else
 		{
 			// An error occured while loading the fragment program.
 			// TODO: Remove the extra newline at the end of err_str.
