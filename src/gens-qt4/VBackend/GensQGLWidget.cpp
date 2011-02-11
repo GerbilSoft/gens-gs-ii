@@ -1031,11 +1031,36 @@ void GensQGLWidget::showOsdPreview(void)
 
 
 /**
+ * fastBlur_changed_slot(): Fast Blur setting has changed.
+ * @param newFastBlur New fast blur setting.
+ */
+void GensQGLWidget::fastBlur_changed_slot(bool newFastBlur)
+{
+	if (fastBlur() == newFastBlur)
+		return;
+	
+	if (isRunning() && isPaused())
+	{
+		// Emulation is running, but is currently paused.
+		// (TODO: Check shader status, and only update if
+		// we're not using the Fast Blur shader.)
+		// Update the MD screen.
+		m_mdScreenDirty = true;
+	}
+	
+	setFastBlur(newFastBlur);
+}
+
+
+/**
  * bilinearFilter_changed_slot(): Bilinear filter setting has changed.
  * @param newBilinearFilter New bilinear filter setting.
  */
 void GensQGLWidget::bilinearFilter_changed_slot(bool newBilinearFilter)
 {
+	if (bilinearFilter() == newBilinearFilter)
+		return;
+	
 	if (m_tex > 0)
 	{
 		// Get the current OpenGL context.
@@ -1056,6 +1081,28 @@ void GensQGLWidget::bilinearFilter_changed_slot(bool newBilinearFilter)
 	
 	// Update VBackend's bilinear filter setting.
 	setBilinearFilter(newBilinearFilter);
+}
+
+
+/**
+ * pauseTint_changed_slot(): Pause Tint setting has changed.
+ * @param newPauseTint New pause tint setting.
+ */
+void GensQGLWidget::pauseTint_changed_slot(bool newPauseTint)
+{
+	if (pauseTint() == newPauseTint)
+		return;
+	
+	if (!m_shaderMgr.hasPaused() &&
+	    (isRunning() && isPaused()))
+	{
+		// Emulation is running, but is currently paused.
+		// Shader isn't available.
+		// Update the MD screen.
+		m_mdScreenDirty = true;
+	}
+	
+	setPauseTint(newPauseTint);
 }
 
 }

@@ -139,13 +139,11 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		void osdMsgColor_changed_slot(const QColor& color)
 			{ setOsdMsgColor(color); }
 		
-		void fastBlur_changed_slot(bool newFastBlur)
-			{ setFastBlur(newFastBlur); }
+		void fastBlur_changed_slot(bool newFastBlur);
 		void aspectRatioConstraint_changed_slot(bool newAspectRatioConstraint)
 			{ setAspectRatioConstraint(newAspectRatioConstraint); }
 		void bilinearFilter_changed_slot(bool newBilinearFilter);
-		void pauseTint_changed_slot(bool newPauseTint)
-			{ setPauseTint(newPauseTint); }
+		void pauseTint_changed_slot(bool newPauseTint);
 };
 
 }
