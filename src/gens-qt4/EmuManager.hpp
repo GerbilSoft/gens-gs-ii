@@ -161,17 +161,18 @@ class EmuManager : public QObject
 				RQT_RESET		= 8,
 				RQT_AUTOFIX_CHANGE	= 9,
 				RQT_PALETTE_SETTING	= 10,
+				RQT_SAVE_SLOT		= 11,
 			};
 			
 			// RQT_PALETTE_SETTING types.
 			enum PaletteSettingType
 			{
 				RQT_PS_UNKNOWN		= 0,
-				RQT_PS_CONTRAST,
-				RQT_PS_BRIGHTNESS,
-				RQT_PS_GRAYSCALE,
-				RQT_PS_INVERTED,
-				RQT_PS_COLORSCALEMETHOD,
+				RQT_PS_CONTRAST		= 1,
+				RQT_PS_BRIGHTNESS	= 2,
+				RQT_PS_GRAYSCALE	= 3,
+				RQT_PS_INVERTED		= 4,
+				RQT_PS_COLORSCALEMETHOD	= 5,
 			};
 			
 			RequestType rqType;
@@ -239,9 +240,9 @@ class EmuManager : public QObject
 	protected slots:
 		/**
 		 * saveSlot_changed_slot(): Set the save slot number.
-		 * @param slotNum Slot number, (0-9)
+		 * @param newSaveSlot Save slot number, (0-9)
 		 */
-		void saveSlot_changed_slot(int slotNum);
+		void saveSlot_changed_slot(int newSaveSlot);
 		
 		/**
 		 * autoFixChecksum_changed_slot(): Change the Auto Fix Checksum setting.
@@ -292,6 +293,7 @@ class EmuManager : public QObject
 		/** Savestates. **/
 		void doSaveState(const char *filename, int saveSlot);
 		void doLoadState(const char *filename, int saveSlot);
+		void doSaveSlot(int newSaveSlot);
 		
 		void doPauseRequest(paused_t newPaused);
 		void doResetEmulator(bool hardReset);

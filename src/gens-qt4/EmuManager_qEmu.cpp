@@ -245,85 +245,23 @@ void EmuManager::pauseRequest(paused_t newPaused)
 
 /**
  * saveSlot_changed_slot(): Save slot changed.
- * @param slotNum Slot number, (0-9)
+ * @param newSaveSlot Save slot number, (0-9)
  */
-void EmuManager::saveSlot_changed_slot(int slotNum)
+void EmuManager::saveSlot_changed_slot(int newSaveSlot)
 {
-	// TODO: Should this use the emulation request queue?
-	if (slotNum < 0 || slotNum > 9)
+	// NOTE: Don't check if the save slot is the same.
+	// This allows users to recheck a savestate's preview image.
+	if (newSaveSlot < 0 || newSaveSlot > 9)
 		return;
-	m_saveSlot = slotNum;
 	
-	if (m_rom)
-	{
-		// ROM is loaded.
-		QString osdMsg = tr("Save Slot %1 [%2]").arg(slotNum);
-		
-		// Check if the file exists.
-		QString filename = getSaveStateFilename();
-		if (QFile::exists(filename))
-		{
-			// Savestate exists.
-			osdMsg = osdMsg.arg(tr("OCCUPIED"));
-			
-			// Check if the savestate has a preview image.
-			LibZomg::Zomg zomg(filename.toUtf8().constData(), LibZomg::Zomg::ZOMG_LOAD);
-			if (zomg.getPreviewSize() == 0)
-			{
-				// No preview image.
-				zomg.close();
-				emit osdPrintMsg(1500, osdMsg);
-				emit osdShowPreview(0, QImage());
-				return;
-			}
-			
-			// Preview image found.
-			QByteArray img_ByteArray;
-			img_ByteArray.resize(zomg.getPreviewSize());
-			int ret = zomg.loadPreview(img_ByteArray.data(), img_ByteArray.size());
-			zomg.close();
-			if (ret != 0)
-			{
-				// Error loading the preview image.
-				emit osdPrintMsg(1500, osdMsg);
-				emit osdShowPreview(0, QImage());
-				return;
-			}
-			
-			// Preview image loaded from the ZOMG file.
-			
-			// Convert the preview image to a QImage.
-			QBuffer imgBuf(&img_ByteArray);
-			imgBuf.open(QIODevice::ReadOnly);
-			QImageReader imgReader(&imgBuf, "png");
-			QImage img = imgReader.read();
-			if (img.isNull())
-			{
-				// Error reading the preview image.
-				emit osdPrintMsg(1500, osdMsg);
-				emit osdShowPreview(0, QImage());
-				return;
-			}
-			
-			// Preview image converted to QImage.
-			emit osdPrintMsg(1500, osdMsg);
-			emit osdShowPreview(1500, img);
-		}
-		else
-		{
-			// Savestate doesn't exist.
-			osdMsg = osdMsg.arg(tr("EMPTY"));
-			emit osdPrintMsg(1500, osdMsg);
-			emit osdShowPreview(0, QImage());
-		}
-	}
-	else
-	{
-		// ROM is not loaded.
-		QString osdMsg = tr("Save Slot %1 selected.").arg(slotNum);
-		emit osdPrintMsg(1500, osdMsg);
-		emit osdShowPreview(0, QImage());
-	}
+	// Queue the save slot request.
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_SAVE_SLOT;
+	rq.saveState.saveSlot = newSaveSlot;
+	m_qEmuRequest.enqueue(rq);
+	
+	if (!m_rom || m_paused.data)
+		processQEmuRequest();
 }
 
 
@@ -427,6 +365,11 @@ void EmuManager::processQEmuRequest(void)
 				// Load a savestate.
 				doLoadState(rq.saveState.filename, rq.saveState.saveSlot);
 				free(rq.saveState.filename);
+				break;
+			
+			case EmuRequest_t::RQT_SAVE_SLOT:
+				// Set the save slot.
+				doSaveSlot(rq.saveState.saveSlot);
 				break;
 			
 			case EmuRequest_t::RQT_PAUSE_EMULATION:
@@ -712,9 +655,9 @@ void EmuManager::doAudioStereo(bool newStereo)
 
 
 /**
- * doSaveState(): Save the current emulation state.
+ * doSaveState(): Save the current emulation state to a file.
  * @param filename Filename.
- * @param saveSlot Save slot number.
+ * @param saveSlot Save slot number. (0-9)
  */
 void EmuManager::doSaveState(const char *filename, int saveSlot)
 {
@@ -756,7 +699,7 @@ void EmuManager::doSaveState(const char *filename, int saveSlot)
 /**
  * doLoadState(): Load the emulation state from a file.
  * @param filename Filename.
- * @param saveSlot Save slot number.
+ * @param saveSlot Save slot number. (0-9)
  */
 void EmuManager::doLoadState(const char *filename, int saveSlot)
 {
@@ -782,6 +725,77 @@ void EmuManager::doLoadState(const char *filename, int saveSlot)
 	
 	// Print a message on the OSD.
 	emit osdPrintMsg(1500, osdMsg);
+}
+
+
+/**
+ * saveSlot(): Set the current savestate slot.
+ * @param newSaveSlot Save slot number. (0-9)
+ */
+void EmuManager::doSaveSlot(int newSaveSlot)
+{
+	if (newSaveSlot < 0 || newSaveSlot > 9)
+		return;
+	m_saveSlot = newSaveSlot;
+	
+	// Standard OSD duration for save slot selection.
+	static const int OsdDuration = 1500;
+	
+	// Preview image.
+	QImage imgPreview;
+	
+	if (!m_rom)
+	{
+		// No ROM is loaded.
+		QString osdMsg = tr("Save Slot %1 selected.").arg(m_saveSlot);
+		emit osdPrintMsg(OsdDuration, osdMsg);
+		emit osdShowPreview(0, imgPreview);
+		return;
+	}
+	
+	// ROM is loaded.
+	QString osdMsg = tr("Save Slot %1 [%2]").arg(m_saveSlot);
+	
+	// Check if the file exists.
+	QString filename = getSaveStateFilename();
+	if (QFile::exists(filename))
+	{
+		// Savestate exists.
+		osdMsg = osdMsg.arg(tr("OCCUPIED"));
+		
+		// Check if the savestate has a preview image.
+		LibZomg::Zomg zomg(filename.toUtf8().constData(), LibZomg::Zomg::ZOMG_LOAD);
+		if (zomg.getPreviewSize() >= 0)
+		{
+			// Preview image found.
+			QByteArray img_ByteArray;
+			img_ByteArray.resize(zomg.getPreviewSize());
+			int ret = zomg.loadPreview(img_ByteArray.data(), img_ByteArray.size());
+			
+			if (ret == 0)
+			{
+				// Preview image loaded from the ZOMG file.
+				
+				// Convert the preview image to a QImage.
+				QBuffer imgBuf(&img_ByteArray);
+				imgBuf.open(QIODevice::ReadOnly);
+				QImageReader imgReader(&imgBuf, "png");
+				imgPreview = imgReader.read();
+			}
+		}
+		
+		// Close the savestate.
+		zomg.close();
+	}
+	else
+	{
+		// Savestate doesn't exist.
+		osdMsg = osdMsg.arg(tr("EMPTY"));
+	}
+	
+	// Print the OSD.
+	emit osdPrintMsg(OsdDuration, osdMsg);
+	emit osdShowPreview((imgPreview.isNull() ? 0 : OsdDuration), imgPreview);
 }
 
 
