@@ -141,12 +141,12 @@ void VBackend::setStretchMode(StretchMode newStretchMode)
 	// Update the stretch mode setting.
 	// TODO: Verify that this works properly.
 	m_stretchMode = newStretchMode;
-	if (isRunning())
+	
+	// TODO: Only if paused, or regardless of pause?
+	if (!isRunning() || isPaused())
 	{
 		setVbDirty();
-		// TODO: Only if paused, or regardless of pause?
-		if (isPaused())
-			vbUpdate();
+		vbUpdate();
 	}
 }
 
@@ -169,13 +169,11 @@ void VBackend::setFastBlur(bool newFastBlur)
 	else
 		osd_printf(1500, "Fast Blur disabled.");
 	
-	// Update the video backend if emulation is running.
-	if (isRunning())
+	// If paused, update the VBackend.
+	if (isRunning() && isPaused())
 	{
 		setVbDirty();
-		// TODO: Only if paused, or regardless of pause?
-		if (isPaused())
-			vbUpdate();
+		vbUpdate();
 	}
 }
 
