@@ -51,6 +51,7 @@ using std::stringstream;
 // Qt includes.
 #include <QtCore/QString>
 #include <QtCore/QStringList>
+#include <QtCore/QDir>
 #include <QtGui/QScrollArea>
 
 // OpenGL includes.
@@ -388,7 +389,7 @@ QString AboutWindow::GetDebugInfo(void)
 	// Save directory.
 	// TODO: Make it a link.
 	sDebugInfo += tr("Save directory") + QLatin1String(":\n") +
-		gqt4_config->cfgPath() + QLatin1String("\n\n");
+		QDir::toNativeSeparators(gqt4_config->cfgPath()) + QLatin1String("\n\n");
 	
 #ifdef Q_OS_WIN32
 	// Win32 code page information.
