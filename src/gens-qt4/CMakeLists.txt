@@ -110,6 +110,9 @@ SET(gens-qt4_SRCS
 	EmuManager.cpp
 	Audio/ABackend.cpp
 	VBackend/GLShaderManager.cpp
+	VBackend/GLShader.cpp
+	VBackend/GLShaderPaused.cpp
+	VBackend/GLShaderFastBlur.cpp
 	Audio/ARingBuffer.cpp
 	ZipSelectDialog.cpp
 	EmuManager_qEmu.cpp
