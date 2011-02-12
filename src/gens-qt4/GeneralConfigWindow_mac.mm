@@ -73,7 +73,7 @@ void GeneralConfigWindow::setupUi_mac(void)
 		const char *iconFdo;
 	};
 	
-	ToolBarBtn btns[] =
+	static const ToolBarBtn btns[] =
 	{
 		// TODO: Use a Sega CD icon instead of a generic CD-ROM icon.
 		// TODO: Use Mac generic program icon instead of Oxygen.
