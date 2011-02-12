@@ -28,11 +28,13 @@
 #include <GL/glew.h>
 #endif
 
+#include "AboutWindow.hpp"
+
 // Included libraries.
 #include <zlib.h>
 #include "lzma/7z/7zVersion.h"
 
-#include "AboutWindow.hpp"
+// LibGens includes.
 #include "libgens/lg_main.hpp"
 #include "libgens/Util/cpuflags.h"
 #include "libgens/Util/Timing.hpp"
@@ -148,7 +150,7 @@ void AboutWindow::ShowSingle(QWidget *parent)
 void AboutWindow::initAboutWindowText(void)
 {
 	// Line break string.
-	const QString sLineBreak = QString::fromLatin1("<br/>\n");
+	const QString sLineBreak = QLatin1String("<br/>\n");
 	
 	// Build the copyright string.
 	QString sCopyrights = QString::fromUtf8(
@@ -157,13 +159,13 @@ void AboutWindow::initAboutWindowText(void)
 			"Gens/GS (c) 2008-2011 by David Korth.<br />\n<br />\n");
 	
 	sCopyrights += tr("Visit the Gens homepage:") + sLineBreak +
-			QString::fromLatin1(
+			QLatin1String(
 				"<a href=\"http://www.gens.me/\">"
 				"http://www.gens.me/</a>") +
 			sLineBreak + sLineBreak;
 	
 	sCopyrights += tr("For news on Gens/GS, visit Sonic Retro:") + sLineBreak +
-			QString::fromLatin1(
+			QLatin1String(
 				"<a href=\"http://www.sonicretro.org/\">"
 				"http://www.sonicretro.org/</a>");
 	
@@ -173,19 +175,19 @@ void AboutWindow::initAboutWindowText(void)
 	
 	// Build the program title text.
 	QString sPrgTitle =
-		QString::fromLatin1("<b>") + tr("Gens/GS II") + QString::fromLatin1("</b>") + sLineBreak +
+		QLatin1String("<b>") + tr("Gens/GS II") + QLatin1String("</b>") + sLineBreak +
 		tr("Development Build") + sLineBreak;
 	
 #if !defined(GENS_ENABLE_EMULATION)
-	sPrgTitle += QString::fromLatin1("<b>") +
+	sPrgTitle += QLatin1String("<b>") +
 			tr("NO-EMULATION BUILD") +
-			QString::fromLatin1("</b>") + sLineBreak;
+			QLatin1String("</b>") + sLineBreak;
 #endif
 	
 	if (LibGens::version_vcs != NULL)
 	{
 		// Append the VCS revision to the title text.
-		sPrgTitle += QString::fromLatin1(LibGens::version_vcs) + sLineBreak;
+		sPrgTitle += QLatin1String(LibGens::version_vcs) + sLineBreak;
 	}
 	
 	sPrgTitle += sLineBreak +
@@ -283,16 +285,16 @@ QString AboutWindow::GetIncLibraries(void)
 {
 	// Common strings.
 	const QString sIntCopyOf = tr("Internal copy of %1.");
-	const QString sLineBreak = QString::fromLatin1("<br/>\n");
+	const QString sLineBreak = QLatin1String("<br/>\n");
 	
 	// Included libraries string.
 	QString sIncLibraries;
 	
 #if defined(HAVE_ZLIB) && !defined(ZLIB_FOUND)
 	// ZLIB is included.
-	sIncLibraries += sIntCopyOf.arg(QString::fromLatin1(ZLIB_VERSION)) + sLineBreak +
-		QString::fromLatin1("Copyright (c) 1995-2010 Jean-loup Gailly and Mark Adler.") + sLineBreak +
-		QString::fromLatin1("<a href=\"http://www.zlib.net/\">http://www.zlib.net/</a>");
+	sIncLibraries += sIntCopyOf.arg(QLatin1String(ZLIB_VERSION)) + sLineBreak +
+		QLatin1String("Copyright (c) 1995-2010 Jean-loup Gailly and Mark Adler.") + sLineBreak +
+		QLatin1String("<a href=\"http://www.zlib.net/\">http://www.zlib.net/</a>");
 #endif
 	
 #if defined(HAVE_ZLIB)
@@ -300,21 +302,21 @@ QString AboutWindow::GetIncLibraries(void)
 	// TODO: Find a MiniZip version macro.
 	if (!sIncLibraries.isEmpty())
 		sIncLibraries += sLineBreak + sLineBreak;
-	sIncLibraries += sIntCopyOf.arg(QString::fromLatin1("MiniZip 1.1")) + sLineBreak +
-		QString::fromLatin1("Copyright (c) 1998-2010 by Gilles Vollant.") + sLineBreak +
-		QString::fromLatin1("<a href=\"http://www.winimage.com/zLibDll/minizip.html\">"
+	sIncLibraries += sIntCopyOf.arg(QLatin1String("MiniZip 1.1")) + sLineBreak +
+		QLatin1String("Copyright (c) 1998-2010 by Gilles Vollant.") + sLineBreak +
+		QLatin1String("<a href=\"http://www.winimage.com/zLibDll/minizip.html\">"
 					"http://www.winimage.com/zLibDll/minizip.html</a>") + sLineBreak +
-		QString::fromLatin1("Zip64/Unzip Copyright (c) 2007-2008 by Even Rouault.") + sLineBreak +
-		QString::fromLatin1("Zip64/Zip Copyright (c) 2009-2001 by Mathias Svensson.");
+		QLatin1String("Zip64/Unzip Copyright (c) 2007-2008 by Even Rouault.") + sLineBreak +
+		QLatin1String("Zip64/Zip Copyright (c) 2009-2001 by Mathias Svensson.");
 #endif
 	
 #if defined(HAVE_LZMA) && !defined(LZMA_FOUND)
 	// LZMA is included.
 	if (!sIncLibraries.isEmpty())
 		sIncLibraries += sLineBreak + sLineBreak;
-	sIncLibraries += sIntCopyOf.arg(QString::fromLatin1("the LZMA SDK " MY_VERSION)) + sLineBreak +
-		QString::fromLatin1("Copyright (c) 1999-2010 by Igor Pavlov.") + sLineBreak +
-		QString::fromLatin1("<a href=\"http://www.7-zip.org/sdk.html\">"
+	sIncLibraries += sIntCopyOf.arg(QLatin1String("the LZMA SDK " MY_VERSION)) + sLineBreak +
+		QLatin1String("Copyright (c) 1999-2010 by Igor Pavlov.") + sLineBreak +
+		QLatin1String("<a href=\"http://www.7-zip.org/sdk.html\">"
 					"http://www.7-zip.org/sdk.html</a>");
 #endif
 	
@@ -324,14 +326,14 @@ QString AboutWindow::GetIncLibraries(void)
 		sIncLibraries += sLineBreak + sLineBreak;
 	
 	const char *glewVersion = (const char*)glewGetString(GLEW_VERSION);
-	QString sGlewVersion = (glewVersion ? QString::fromLatin1(glewVersion) : QString());
-	sIncLibraries += sIntCopyOf.arg(QString::fromLatin1("GLEW ") + sGlewVersion) + sLineBreak +
-		QString::fromLatin1("Copyright (c) 2002-2008 by Milan Ikits.") + sLineBreak +
-		QString::fromLatin1("Copyright (c) 2002-2008 by Marcelo E. Magallon.") + sLineBreak +
-		QString::fromLatin1("Copyright (c) 2002 by Lev Povalahev.") + sLineBreak +
-		QString::fromLatin1("Mesa 3D code Copyright (c) 1999-2007 by Brian Paul.") + sLineBreak +
-		QString::fromLatin1("OpenGL code Copyright (c) 2007 The Khronos Group Inc.") + sLineBreak +
-		QString::fromLatin1("<a href=\"http://glew.sourceforge.net/\">"
+	QString sGlewVersion = (glewVersion ? QLatin1String(glewVersion) : QString());
+	sIncLibraries += sIntCopyOf.arg(QLatin1String("GLEW ") + sGlewVersion) + sLineBreak +
+		QLatin1String("Copyright (c) 2002-2008 by Milan Ikits.") + sLineBreak +
+		QLatin1String("Copyright (c) 2002-2008 by Marcelo E. Magallon.") + sLineBreak +
+		QLatin1String("Copyright (c) 2002 by Lev Povalahev.") + sLineBreak +
+		QLatin1String("Mesa 3D code Copyright (c) 1999-2007 by Brian Paul.") + sLineBreak +
+		QLatin1String("OpenGL code Copyright (c) 2007 The Khronos Group Inc.") + sLineBreak +
+		QLatin1String("<a href=\"http://glew.sourceforge.net/\">"
 					"http://glew.sourceforge.net/</a>");
 #endif
 	
@@ -348,12 +350,12 @@ QString AboutWindow::GetDebugInfo(void)
 {
 	// Debug information.
 	QString sDebugInfo =
-		tr("Compiled using Qt %1.").arg(QString::fromLatin1(QT_VERSION_STR)) + QChar(L'\n') +
-		tr("Using Qt %1.").arg(QString::fromLatin1(qVersion())) + QChar(L'\n') + QChar(L'\n');
+		tr("Compiled using Qt %1.").arg(QLatin1String(QT_VERSION_STR)) + QChar(L'\n') +
+		tr("Using Qt %1.").arg(QLatin1String(qVersion())) + QChar(L'\n') + QChar(L'\n');
 	
 	// CPU flags.
 	// TODO: Move the array of CPU flag names to LibGens.
-	sDebugInfo += tr("CPU Flags") + QString::fromLatin1(": ");
+	sDebugInfo += tr("CPU flags") + QLatin1String(": ");
 #if defined(__i386__) || defined(__amd64__)
 	const char *CpuFlagNames[11] =
 	{
@@ -367,20 +369,20 @@ QString AboutWindow::GetDebugInfo(void)
 		if (CPU_Flags & (1 << i))
 		{
 			if (cnt != 0)
-				sDebugInfo += QString::fromLatin1(", ");
-			sDebugInfo += QString::fromLatin1(CpuFlagNames[i]);
+				sDebugInfo += QLatin1String(", ");
+			sDebugInfo += QLatin1String(CpuFlagNames[i]);
 			cnt++;
 		}
 	}
 	sDebugInfo += QChar(L'\n');
 #else
-	sDebugInfo += QString::fromLatin1("(none)\n");
+	sDebugInfo += QLatin1String("(none)\n");
 #endif /* defined(__i386__) || defined(__amd64__) */
 	
 	// Timing method.
-	sDebugInfo += tr("Timing Method") + QString::fromLatin1(": ") +
-		QString::fromLatin1(LibGens::Timing::GetTimingMethodName(LibGens::Timing::GetTimingMethod())) +
-		QString::fromLatin1("()\n\n");
+	sDebugInfo += tr("Timing method") + QLatin1String(": ") +
+		QLatin1String(LibGens::Timing::GetTimingMethodName(LibGens::Timing::GetTimingMethod())) +
+		QLatin1String("()\n\n");
 	
 #ifdef Q_OS_WIN32
 	// Win32 code page information.
@@ -394,11 +396,11 @@ QString AboutWindow::GetDebugInfo(void)
 	const char *glRenderer = (const char*)glGetString(GL_RENDERER);
 	const char *glVersion = (const char*)glGetString(GL_VERSION);
 	sDebugInfo += tr("OpenGL vendor string:") + QChar(L' ') +
-			QString(glVendor ? QString::fromLatin1(glVendor) : tr("(unknown)")) + QChar(L'\n') +
+			QString(glVendor ? QLatin1String(glVendor) : tr("(unknown)")) + QChar(L'\n') +
 			tr("OpenGL renderer string:") + QChar(L' ') +
-			QString(glRenderer ? QString::fromLatin1(glRenderer) : tr("(unknown)")) + QChar(L'\n') +
+			QString(glRenderer ? QLatin1String(glRenderer) : tr("(unknown)")) + QChar(L'\n') +
 			tr("OpenGL version string:") + QChar(L' ') +
-			QString(glVersion ? QString::fromLatin1(glVersion) : tr("(unknown)")) + QChar(L'\n');
+			QString(glVersion ? QLatin1String(glVersion) : tr("(unknown)")) + QChar(L'\n');
 	
 #ifdef GL_SHADING_LANGUAGE_VERSION
 	if (glVersion && glVersion[0] >= '2' && glVersion[1] == '.')
@@ -406,7 +408,7 @@ QString AboutWindow::GetDebugInfo(void)
 		const char *glslVersion = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
 		sDebugInfo += tr("GLSL version string:") + QChar(L' ') +
 				QString(glslVersion
-					? QString::fromLatin1(glslVersion)
+					? QLatin1String(glslVersion)
 					: tr("(unknown)")) + QChar(L'\n');
 	}
 	
@@ -416,9 +418,9 @@ QString AboutWindow::GetDebugInfo(void)
 	sDebugInfo += tr("GLEW disabled; no GL extensions supported.") + QChar(L'\n');
 #else
 	const char *glewVersion = (const char*)glewGetString(GLEW_VERSION);
-	sDebugInfo += QString::fromLatin1("GLEW version ") +
+	sDebugInfo += QLatin1String("GLEW version ") +
 			QString(glewVersion
-				? QString::fromLatin1(glewVersion)
+				? QLatin1String(glewVersion)
 				: tr("(unknown)")) + QChar(L'\n');
 	
 	// Get a list of OpenGL extensions that are in use.
@@ -544,3 +546,4 @@ QString AboutWindow::GetCodePageInfo(void)
 #endif /* Q_OS_WIN32 */
 
 }
+
