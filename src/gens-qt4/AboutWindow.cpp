@@ -29,6 +29,7 @@
 #endif
 
 #include "AboutWindow.hpp"
+#include "gqt4_main.hpp"
 
 // Included libraries.
 #include <zlib.h>
@@ -383,6 +384,11 @@ QString AboutWindow::GetDebugInfo(void)
 	sDebugInfo += tr("Timing method") + QLatin1String(": ") +
 		QLatin1String(LibGens::Timing::GetTimingMethodName(LibGens::Timing::GetTimingMethod())) +
 		QLatin1String("()\n\n");
+	
+	// Save directory.
+	// TODO: Make it a link.
+	sDebugInfo += tr("Save directory") + QLatin1String(":\n") +
+		gqt4_config->cfgPath() + QLatin1String("\n\n");
 	
 #ifdef Q_OS_WIN32
 	// Win32 code page information.
