@@ -26,6 +26,7 @@
 #endif
 
 #include "GeneralConfigWindow.hpp"
+#include "GensQApplication.hpp"
 
 // Qt includes.
 #include <QtGui/QStackedWidget>
@@ -69,17 +70,17 @@ void GeneralConfigWindow::setupUi_mac(void)
 	struct ToolBarBtn
 	{
 		const char *text;
-		const char *iconQrc;
+		const char *iconFdo;
 	};
 	
 	ToolBarBtn btns[] =
 	{
 		// TODO: Use a Sega CD icon instead of a generic CD-ROM icon.
 		// TODO: Use Mac generic program icon instead of Oxygen.
-		{"&General",		":/oxygen-32x32/configure.png"},
-		{"G&raphics",		":/oxygen-32x32/applications-graphics.png"},
-		{"Sega &CD",		":/oxygen-32x32/media-optical.png"},
-		{"E&xternal Programs",	":/oxygen-32x32/utilities-terminal.png"},
+		{"&General",		"configure"},
+		{"G&raphics",		"applications-graphics"},
+		{"Sega &CD",		"media-optical"},
+		{"E&xternal Programs",	"utilities-terminal"},
 		
 		// End of list.
 		{NULL, NULL}
@@ -95,8 +96,9 @@ void GeneralConfigWindow::setupUi_mac(void)
 	// TODO: See if these need to be deleted manually.
 	for (int i = 0; i < (int)(sizeof(btns)/sizeof(btns[0])-1); i++)
 	{
-		QAction *action = new QAction(QIcon(QString::fromLatin1(btns[i].iconQrc)),
-						tr(btns[i].text), this);
+		QAction *action = new QAction(
+				GensQApplication::IconFromTheme(QLatin1String(btns[i].iconQrc)),
+				tr(btns[i].text), this);
 		action->setCheckable(true);
 		action->setData(i);	// used for tab selection
 		if (i == 0)
