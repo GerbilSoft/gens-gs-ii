@@ -136,6 +136,15 @@ bool GensActions::doAction(int action)
 			// Graphics.
 			switch (MNUID_ITEM(action))
 			{
+				case MNUID_ITEM(IDM_GRAPHICS_STRETCH):
+				{
+					// Next stretch mode.
+					int stretch_tmp = (int)gqt4_config->stretchMode();
+					stretch_tmp = (stretch_tmp + 1) % 4;
+					gqt4_config->setStretchMode((GensConfig::StretchMode)stretch_tmp);
+					return true;
+				}
+				
 				case MNUID_ITEM(IDM_GRAPHICS_SCRSHOT):
 					m_parent->screenShot();
 					return true;
@@ -184,6 +193,31 @@ bool GensActions::doAction(int action)
 				
 				case MNUID_ITEM(IDM_GRAPHICS_BPP_32):
 					m_parent->setBpp(LibGens::VdpPalette::BPP_32);
+					return true;
+				
+				default:
+					break;
+			}
+			break;
+		
+		case IDM_GRAPHICS_STRETCH_MENU:
+			// Graphics, Stretch Mode.
+			switch (MNUID_ITEM(action))
+			{
+				case MNUID_ITEM(IDM_GRAPHICS_STRETCH_NONE):
+					gqt4_config->setStretchMode(GensConfig::STRETCH_NONE);
+					return true;
+				
+				case MNUID_ITEM(IDM_GRAPHICS_STRETCH_H):
+					gqt4_config->setStretchMode(GensConfig::STRETCH_H);
+					return true;
+				
+				case MNUID_ITEM(IDM_GRAPHICS_STRETCH_V):
+					gqt4_config->setStretchMode(GensConfig::STRETCH_V);
+					return true;
+				
+				case MNUID_ITEM(IDM_GRAPHICS_STRETCH_FULL):
+					gqt4_config->setStretchMode(GensConfig::STRETCH_FULL);
 					return true;
 				
 				default:

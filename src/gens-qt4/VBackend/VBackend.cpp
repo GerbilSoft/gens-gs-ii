@@ -57,9 +57,8 @@ VBackend::VBackend()
 	m_running = false;
 	
 	// Set default video settings.
-	// TODO: Load default video settings from configuration.
 	m_paused.data = 0;
-	m_stretchMode = STRETCH_H;
+	m_stretchMode = gqt4_config->stretchMode();
 	m_fastBlur = gqt4_config->fastBlur();
 	m_aspectRatioConstraint = gqt4_config->aspectRatioConstraint();
 	m_aspectRatioConstraint_changed = true;
@@ -133,14 +132,41 @@ void VBackend::setPaused(paused_t newPaused)
  * setStretchMode(): Set the stretch mode setting.
  * @param newStretchMode New stretch mode setting.
  */
-void VBackend::setStretchMode(StretchMode newStretchMode)
+void VBackend::setStretchMode(GensConfig::StretchMode newStretchMode)
 {
-	if (m_stretchMode == newStretchMode)
+	if ((m_stretchMode == newStretchMode) ||
+	    (m_stretchMode < GensConfig::STRETCH_NONE) ||
+	    (m_stretchMode > GensConfig::STRETCH_FULL))
+	{
 		return;
+	}
 	
 	// Update the stretch mode setting.
-	// TODO: Verify that this works properly.
 	m_stretchMode = newStretchMode;
+	
+	// Print a message to the OSD.
+	// TODO: Use Qt translations.
+	const char *msg;
+	switch (m_stretchMode)
+	{
+		case GensConfig::STRETCH_NONE:
+			msg = "Stretch Mode set to None.";
+			break;
+		case GensConfig::STRETCH_H:
+			msg = "Stretch Mode set to Horizontal.";
+			break;
+		case GensConfig::STRETCH_V:
+			msg = "Stretch Mode set to Vertical.";
+			break;
+		case GensConfig::STRETCH_FULL:
+			msg = "Stretch Mode set to Full.";
+			break;
+		default:
+			msg = "";
+			break;
+	}
+	
+	osd_printf(1500, "%s", msg);
 	
 	// TODO: Only if paused, or regardless of pause?
 	if (!isRunning() || isPaused())

@@ -601,7 +601,9 @@ void GensQGLWidget::paintGL(void)
 	img_dw = (320.0 / tex_w);
 	img_dh = (240.0 / tex_h);
 	
-	if (m_stretchMode == STRETCH_H || m_stretchMode == STRETCH_FULL)
+	// Horizontal stretch.
+	if (m_stretchMode == GensConfig::STRETCH_H ||
+	    m_stretchMode == GensConfig::STRETCH_FULL)
 	{
 		// Horizontal stretch.
 		int h_pix_begin = LibGens::VdpIo::GetHPixBegin();
@@ -614,7 +616,9 @@ void GensQGLWidget::paintGL(void)
 		}
 	}
 	
-	if (m_stretchMode == STRETCH_V || m_stretchMode == STRETCH_FULL)
+	// Vertical stretch.
+	if (m_stretchMode == GensConfig::STRETCH_V ||
+	    m_stretchMode == GensConfig::STRETCH_FULL)
 	{
 		// Vertical stretch.
 		int v_pix = (240 - LibGens::VdpIo::GetVPix());
@@ -1002,12 +1006,15 @@ void GensQGLWidget::showOsdPreview(void)
 	GLdouble x2, y2;
 	
 	// Calculate (x2, y2) based on stretch mode.
-	if (m_stretchMode == STRETCH_H || m_stretchMode == STRETCH_FULL)
+	
+	// Horizontal stretch.
+	if (m_stretchMode == GensConfig::STRETCH_H || m_stretchMode == GensConfig::STRETCH_FULL)
 		x2 = x1 + 0.5;
 	else
 		x2 = x1 + std::min(((m_texPreview->img_w() / 320.0) * 0.5), 0.5);
 	
-	if (m_stretchMode == STRETCH_V || m_stretchMode == STRETCH_FULL)
+	// Vertical stretch.
+	if (m_stretchMode == GensConfig::STRETCH_V || m_stretchMode == GensConfig::STRETCH_FULL)
 		y2 = y1 - 0.5;
 	else
 		y2 = y1 - std::min(((m_texPreview->img_h() / 240.0) * 0.5), 0.5);

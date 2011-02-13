@@ -151,6 +151,18 @@ class GensConfig : public QObject
 		Q_PROPERTY(int colorScaleMethod READ colorScaleMethod WRITE setColorScaleMethod NOTIFY colorScaleMethod_changed)
 		GC_PROPERTY(int, colorScaleMethod, int, ColorScaleMethod);
 		
+		public:
+			enum StretchMode
+			{
+				STRETCH_NONE	= 0,
+				STRETCH_H	= 1,
+				STRETCH_V	= 2,
+				STRETCH_FULL	= 3
+			};
+		Q_ENUMS(StretchMode);
+		Q_PROPERTY(StretchMode stretchMode READ stretchMode WRITE setStretchMode NOTIFY stretchMode_changed)
+		GC_PROPERTY(StretchMode, stretchMode, StretchMode, StretchMode);
+		
 		/** General settings. **/
 		Q_PROPERTY(bool autoFixChecksum READ autoFixChecksum WRITE setAutoFixChecksum NOTIFY autoFixChecksum_changed)
 		GC_PROPERTY(bool, autoFixChecksum, bool, AutoFixChecksum);
@@ -207,6 +219,7 @@ class GensConfig : public QObject
 		void grayscale_changed(bool newGrayscale);
 		void inverted_changed(bool newInverted);
 		void colorScaleMethod_changed(int newColorScaleMethod);
+		void stretchMode_changed(GensConfig::StretchMode newStretchMode);
 		
 		/** General settings. **/
 		void autoFixChecksum_changed(bool newAutoFixChecksum);

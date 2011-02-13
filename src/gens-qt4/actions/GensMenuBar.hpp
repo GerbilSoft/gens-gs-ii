@@ -114,6 +114,7 @@ class GensMenuBar : public QMenuBar
 		static const MenuItem ms_gmiGraphics[];
 			static const MenuItem ms_gmiGraphicsRes[];
 			static const MenuItem ms_gmiGraphicsBpp[];
+			static const MenuItem ms_gmiGraphicsStretch[];
 		static const MenuItem ms_gmiCtrlTest[];
 		static const MenuItem ms_gmiSoundTest[];
 		static const MenuItem ms_gmiHelp[];

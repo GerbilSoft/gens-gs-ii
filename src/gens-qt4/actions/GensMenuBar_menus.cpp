@@ -52,6 +52,8 @@ const GensMenuBar::MenuItem GensMenuBar::ms_gmiGraphics[] =
 {
 	{IDM_GRAPHICS_RES, GMI_SUBMENU, "&Resolution", IDM_GRAPHICS_RES_MENU, &ms_gmiGraphicsRes[0], MACCEL_NONE, 0, NULL},
 	{IDM_GRAPHICS_BPP, GMI_SUBMENU, "&Color Depth", IDM_GRAPHICS_BPP_MENU, &ms_gmiGraphicsBpp[0], MACCEL_NONE, 0, NULL},
+	{IDM_GRAPHICS_STRETCH, GMI_SUBMENU, "S&tretch Mode", IDM_GRAPHICS_STRETCH_MENU,
+		&ms_gmiGraphicsStretch[0], MACCEL_NONE, Qt::SHIFT + Qt::Key_F2, NULL},
 	{IDM_SEPARATOR, GMI_SEPARATOR, NULL, 0, NULL, MACCEL_NONE, 0, NULL},
 	{IDM_GRAPHICS_SCRSHOT, GMI_NORMAL, "&Screenshot", 0, NULL, MACCEL_NONE, Qt::SHIFT + Qt::Key_Backspace, NULL},
 	
@@ -75,6 +77,17 @@ const GensMenuBar::MenuItem GensMenuBar::ms_gmiGraphicsBpp[] =
 	{IDM_GRAPHICS_BPP_15, GMI_RADIO, "15-bit (555)", 0, NULL, MACCEL_NONE, 0, NULL},
 	{IDM_GRAPHICS_BPP_16, GMI_RADIO, "16-bit (565)", 0, NULL, MACCEL_NONE, 0, NULL},
 	{IDM_GRAPHICS_BPP_32, GMI_RADIO, "32-bit (888)", 0, NULL, MACCEL_NONE, 0, NULL},
+	
+	{0, GMI_NORMAL, NULL, 0, NULL, MACCEL_NONE, 0, NULL}
+};
+
+/** Graphics, Stretch Mode submenu. **/
+const GensMenuBar::MenuItem GensMenuBar::ms_gmiGraphicsStretch[] =
+{
+	{IDM_GRAPHICS_STRETCH_NONE, GMI_RADIO, "None", 0, NULL, MACCEL_NONE, 0, NULL},
+	{IDM_GRAPHICS_STRETCH_H, GMI_RADIO, "Horizontal Only", 0, NULL, MACCEL_NONE, 0, NULL},
+	{IDM_GRAPHICS_STRETCH_V, GMI_RADIO, "Vertical Only", 0, NULL, MACCEL_NONE, 0, NULL},
+	{IDM_GRAPHICS_STRETCH_FULL, GMI_RADIO, "Full Stretch", 0, NULL, MACCEL_NONE, 0, NULL},
 	
 	{0, GMI_NORMAL, NULL, 0, NULL, MACCEL_NONE, 0, NULL}
 };

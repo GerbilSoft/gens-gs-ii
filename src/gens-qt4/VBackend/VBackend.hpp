@@ -37,6 +37,11 @@
 // paused_t
 #include "gqt4_datatypes.h"
 
+// StretchMode is in GensConfig.
+// TODO: Move somewhere else, or use int?
+#include "GensConfig.hpp"
+
+
 namespace GensQt4
 {
 
@@ -72,16 +77,9 @@ class VBackend
 		void setPaused(paused_t newPaused);
 		
 		// Stretch mode.
-		enum StretchMode
-		{
-			STRETCH_NONE	= 0,
-			STRETCH_H	= 1,
-			STRETCH_V	= 2,
-			STRETCH_FULL	= 3
-		};
-		
-		StretchMode stretchMode(void) const { return m_stretchMode; }
-		void setStretchMode(StretchMode newStretchMode);
+		GensConfig::StretchMode stretchMode(void) const
+			{ return m_stretchMode; }
+		void setStretchMode(GensConfig::StretchMode newStretchMode);
 		
 		inline bool isRunning(void) const { return m_running; }
 		void setRunning(bool newIsRunning);
@@ -215,7 +213,7 @@ class VBackend
 		bool m_aspectRatioConstraint;
 		bool m_aspectRatioConstraint_changed;
 		bool m_bilinearFilter;
-		StretchMode m_stretchMode;
+		GensConfig::StretchMode m_stretchMode;
 		
 		// Preview image.
 		bool m_preview_show;

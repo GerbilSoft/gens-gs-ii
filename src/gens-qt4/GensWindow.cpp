@@ -191,6 +191,10 @@ void GensWindow::setupUi(void)
 	connect(gqt4_config, SIGNAL(autoPause_changed(bool)),
 		this, SLOT(autoPause_changed_slot(bool)));
 	
+	// Stretch Mode Changed signal.
+	connect(gqt4_config, SIGNAL(stretchMode_changed(GensConfig::StretchMode)),
+		this, SLOT(stretchMode_changed_slot(GensConfig::StretchMode)));
+	
 	// Retranslate the UI.
 	retranslateUi();
 }
@@ -566,6 +570,19 @@ void GensWindow::autoPause_changed_slot(bool newAutoPause)
 		
 		m_emuManager->pauseRequest(paused_set, paused_clear);
 	}
+}
+
+
+/**
+ * stretchMode_changed_slot(): Stretch Mode setting has changed.
+ * @param newStretchMode New Stretch Mode setting.
+ */
+void GensWindow::stretchMode_changed_slot(GensConfig::StretchMode newStretchMode)
+{
+	// TODO: Update the submenu radio button selection.
+	
+	// Update the video backend.
+	m_vBackend->setStretchMode(newStretchMode);
 }
 
 
