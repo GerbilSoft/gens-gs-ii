@@ -34,6 +34,7 @@
 #include "libgens/MD/VdpRend.hpp"
 #include "libgens/MD/VdpIo.hpp"
 #include "libgens/MD/TAB336.h"
+#include "libgens/MD/VdpRend_m5.hpp"
 
 // Controller devices.
 #include "libgens/IO/IoBase.hpp"
@@ -890,6 +891,44 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 			LibGens::VdpRend::m_palette.setColorScaleMethod(
 						(LibGens::VdpPalette::ColorScaleMethod_t)val);
 			break;
+		
+		case EmuRequest_t::RQT_PS_INTERLACEDMODE:
+		{
+			// Interlaced Mode isn't exactly a "palette" setting.
+			// TODO: Rename to "VDP setting"?
+			// TODO: Consolidate the two interlaced rendering mode enums.
+			LibGens::VdpRend_m5::IntRend_Mode =
+					((LibGens::VdpRend_m5::IntRend_Mode_t)val);
+			
+			// Gens/GS r7+ prints a message to the OSD, so we'll do that too.
+			const char *msg;
+			switch (LibGens::VdpRend_m5::IntRend_Mode)
+			{
+				case LibGens::VdpRend_m5::INTREND_EVEN:
+					msg = "Interlaced: Even lines only.";
+					break;
+				
+				case LibGens::VdpRend_m5::INTREND_ODD:
+					msg = "Interlaced: Odd lines only.";
+					break;
+				
+				case LibGens::VdpRend_m5::INTREND_FLICKER:
+					msg = "Interlaced: Alternating lines.";
+					break;
+				
+				case LibGens::VdpRend_m5::INTREND_2X:
+					msg = "Interlaced: 2x resolution.";
+					break;
+				
+				default:
+					msg = NULL;
+					break;
+			}
+			
+			if (msg)
+				emit osdPrintMsg(1500, QLatin1String(msg));
+			break;
+		}
 		
 		default:
 			break;

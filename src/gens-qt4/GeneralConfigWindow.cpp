@@ -300,6 +300,7 @@ void GeneralConfigWindow::reload(void)
 	chkAspectRatioConstraint->setChecked(gqt4_config->aspectRatioConstraint());
 	chkFastBlur->setChecked(gqt4_config->fastBlur());
 	chkBilinearFilter->setChecked(gqt4_config->bilinearFilter());
+	cboInterlacedMode->setCurrentIndex((int)gqt4_config->interlacedMode());
 	hsldContrast->setValue(gqt4_config->contrast());
 	hsldBrightness->setValue(gqt4_config->brightness());
 	chkGrayscale->setChecked(gqt4_config->grayscale());
@@ -349,6 +350,7 @@ void GeneralConfigWindow::apply(void)
 	gqt4_config->setAspectRatioConstraint(chkAspectRatioConstraint->isChecked());
 	gqt4_config->setFastBlur(chkFastBlur->isChecked());
 	gqt4_config->setBilinearFilter(chkBilinearFilter->isChecked());
+	gqt4_config->setInterlacedMode((GensConfig::InterlacedMode)cboInterlacedMode->currentIndex());
 	gqt4_config->setContrast(hsldContrast->value());
 	gqt4_config->setBrightness(hsldBrightness->value());
 	gqt4_config->setGrayscale(chkGrayscale->isChecked());

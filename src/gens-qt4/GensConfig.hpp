@@ -141,6 +141,19 @@ class GensConfig : public QObject
 		Q_PROPERTY(bool bilinearFilter READ bilinearFilter WRITE setBilinearFilter NOTIFY bilinearFilter_changed)
 		GC_PROPERTY(bool, bilinearFilter, bool, BilinearFilter);
 		Q_PROPERTY(int contrast READ contrast WRITE setContrast NOTIFY contrast_changed)
+		
+		public:
+			enum InterlacedMode
+			{
+				INTERLACED_EVEN		= 0,
+				INTERLACED_ODD		= 1,
+				INTERLACED_FLICKER	= 2,
+				INTERLACED_2X		= 3,
+			};
+		Q_ENUMS(InterlacedMode);
+		GC_PROPERTY(InterlacedMode, interlacedMode, InterlacedMode, InterlacedMode);
+		Q_PROPERTY(InterlacedMode interlacedMode READ interlacedMode WRITE setInterlacedMode NOTIFY interlacedMode_changed)
+		
 		GC_PROPERTY(int, contrast, int, Contrast);
 		Q_PROPERTY(int brightness READ brightness WRITE setBrightness NOTIFY brightness_changed)
 		GC_PROPERTY(int, brightness, int, Brightness);
@@ -214,6 +227,7 @@ class GensConfig : public QObject
 		void aspectRatioConstraint_changed(bool newAspectRatioConstraint);
 		void fastBlur_changed(bool newFastBlur);
 		void bilinearFilter_changed(bool newBilinearFilter);
+		void interlacedMode_changed(GensConfig::InterlacedMode newInterlacedMode);
 		void contrast_changed(int newContrast);
 		void brightness_changed(int newBrightness);
 		void grayscale_changed(bool newGrayscale);

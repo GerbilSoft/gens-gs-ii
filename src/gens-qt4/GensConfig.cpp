@@ -155,6 +155,11 @@ int GensConfig::reload(const QString& filename)
 	m_aspectRatioConstraint = settings.value(QLatin1String("aspectRatioConstraint"), true).toBool();
 	m_fastBlur = settings.value(QLatin1String("fastBlur"), false).toBool();
 	m_bilinearFilter = settings.value(QLatin1String("bilinearFilter"), false).toBool();
+	// TODO: Add support for INTERLACED_2X.
+	int interlaced_tmp = settings.value(QLatin1String("interlacedMode"), (int)INTERLACED_FLICKER).toInt();
+	if ((interlaced_tmp < (int)INTERLACED_EVEN) || (interlaced_tmp > (int)INTERLACED_FLICKER))
+		interlaced_tmp = (int)INTERLACED_FLICKER;
+	m_interlacedMode = (InterlacedMode)interlaced_tmp;
 	m_contrast = settings.value(QLatin1String("contrast"), 0).toInt();
 	m_brightness = settings.value(QLatin1String("brightness"), 0).toInt();
 	m_grayscale = settings.value(QLatin1String("grayscale"), false).toBool();
@@ -284,6 +289,7 @@ int GensConfig::save(const QString& filename)
 	settings.setValue(QLatin1String("aspectRatioConstraint"), m_aspectRatioConstraint);
 	settings.setValue(QLatin1String("fastBlur"), m_fastBlur);
 	settings.setValue(QLatin1String("bilinearFilter"), m_bilinearFilter);
+	settings.setValue(QLatin1String("interlacedMode"), (int)m_interlacedMode);
 	settings.setValue(QLatin1String("contrast"), m_contrast);
 	settings.setValue(QLatin1String("brightness"), m_brightness);
 	settings.setValue(QLatin1String("grayscale"), m_grayscale);
@@ -332,6 +338,7 @@ void GensConfig::emitAll(void)
 	emit aspectRatioConstraint_changed(m_aspectRatioConstraint);
 	emit fastBlur_changed(m_fastBlur);
 	emit bilinearFilter_changed(m_bilinearFilter);
+	emit interlacedMode_changed(m_interlacedMode);
 	emit contrast_changed(m_contrast);
 	emit brightness_changed(m_brightness);
 	emit grayscale_changed(m_grayscale);
@@ -483,6 +490,9 @@ void GensConfig::setExtPrgUnRAR(const QString& filename)
 GC_PROPERTY_WRITE(aspectRatioConstraint, bool, AspectRatioConstraint)
 GC_PROPERTY_WRITE(fastBlur, bool, FastBlur)
 GC_PROPERTY_WRITE(bilinearFilter, bool, BilinearFilter)
+// TODO: Add support for INTERLACED_2X.
+GC_PROPERTY_WRITE_RANGE(interlacedMode, InterlacedMode, InterlacedMode,
+			(int)INTERLACED_EVEN, (int)INTERLACED_FLICKER);
 GC_PROPERTY_WRITE(contrast, int, Contrast)
 GC_PROPERTY_WRITE(brightness, int, Brightness)
 GC_PROPERTY_WRITE(grayscale, bool, Grayscale)

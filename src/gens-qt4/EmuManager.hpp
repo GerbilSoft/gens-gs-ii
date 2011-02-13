@@ -36,6 +36,10 @@
 // paused_t
 #include "gqt4_datatypes.h"
 
+// InterlacedMode
+// TODO: Move somewhere else?
+#include "GensConfig.hpp"
+
 namespace GensQt4
 {
 
@@ -173,6 +177,7 @@ class EmuManager : public QObject
 				RQT_PS_GRAYSCALE	= 3,
 				RQT_PS_INVERTED		= 4,
 				RQT_PS_COLORSCALEMETHOD	= 5,
+				RQT_PS_INTERLACEDMODE	= 6,
 			};
 			
 			RequestType rqType;
@@ -277,6 +282,8 @@ class EmuManager : public QObject
 			{ changePaletteSetting(EmuRequest_t::RQT_PS_INVERTED, (int)newInverted); }
 		void colorScaleMethod_changed_slot(int newColorScaleMethod)
 			{ changePaletteSetting(EmuRequest_t::RQT_PS_COLORSCALEMETHOD, newColorScaleMethod); }
+		void interlacedMode_changed_slot(GensConfig::InterlacedMode newInterlacedMode)
+			{ changePaletteSetting(EmuRequest_t::RQT_PS_INTERLACEDMODE, (int)newInterlacedMode); }
 	
 	/** Emulation Request Queue: Processing functions. **/
 	
