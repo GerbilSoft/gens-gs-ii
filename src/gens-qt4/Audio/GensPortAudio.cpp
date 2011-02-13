@@ -41,7 +41,9 @@ namespace GensQt4
 
 GensPortAudio::GensPortAudio()
 {
-	// TODO
+	// Clear internal variables.
+	m_bufferPos = 0;
+	m_sampleSize = 0;
 }
 
 
@@ -61,6 +63,12 @@ void GensPortAudio::open(void)
 		return;
 	
 	// TODO: Make sure the LibGens Sound Manager is initialized.
+	
+	// Initialize the buffer before initializing PortAudio.
+	// This prevents a race condition.
+	memset(m_buffer, 0x00, sizeof(m_buffer));
+	m_bufferPos = 0;
+	m_sampleSize = (sizeof(int16_t) * (m_stereo ? 2 : 1));
 	
 	// Initialize PortAudio.
 	int err = Pa_Initialize();
@@ -125,12 +133,7 @@ void GensPortAudio::open(void)
 			"Pa_StartStream() error: %s", Pa_GetErrorText(err));
 	}
 	
-	// Clear the buffer.
-	memset(m_buffer, 0x00, sizeof(m_buffer));
-	m_bufferPos = 0;
-	
 	// PortAudio stream is open.
-	m_sampleSize = (sizeof(int16_t) * (m_stereo ? 2 : 1));
 	m_open = true;
 }
 
