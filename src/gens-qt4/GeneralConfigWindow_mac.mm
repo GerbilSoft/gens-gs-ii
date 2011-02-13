@@ -97,7 +97,7 @@ void GeneralConfigWindow::setupUi_mac(void)
 	for (int i = 0; i < (int)(sizeof(btns)/sizeof(btns[0])-1); i++)
 	{
 		QAction *action = new QAction(
-				GensQApplication::IconFromTheme(QLatin1String(btns[i].iconQrc)),
+				GensQApplication::IconFromTheme(QLatin1String(btns[i].iconFdo)),
 				tr(btns[i].text), this);
 		action->setCheckable(true);
 		action->setData(i);	// used for tab selection
