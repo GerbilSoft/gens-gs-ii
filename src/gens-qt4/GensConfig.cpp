@@ -336,6 +336,7 @@ void GensConfig::emitAll(void)
 	emit grayscale_changed(m_grayscale);
 	emit inverted_changed(m_inverted);
 	emit colorScaleMethod_changed(m_colorScaleMethod);
+	emit stretchMode_changed(m_stretchMode);
 	
 	/** General settings. **/
 	emit autoFixChecksum_changed(m_autoFixChecksum);
