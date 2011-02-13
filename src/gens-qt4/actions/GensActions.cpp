@@ -132,40 +132,58 @@ bool GensActions::doAction(int action)
 			}
 			break;
 		
-		case IDM_RESBPPTEST_MENU:
-			// Resolution / Color Depth Testing.
+		case IDM_GRAPHICS_MENU:
+			// Graphics.
 			switch (MNUID_ITEM(action))
 			{
-				case MNUID_ITEM(IDM_RESBPPTEST_1X):
+				case MNUID_ITEM(IDM_GRAPHICS_SCRSHOT):
+					m_parent->screenShot();
+					return true;
+				
+				default:
+					break;
+			}
+			break;
+		
+		case IDM_GRAPHICS_RES_MENU:
+			// Graphics, Resolution.
+			switch (MNUID_ITEM(action))
+			{
+				case MNUID_ITEM(IDM_GRAPHICS_RES_1X):
 					m_parent->rescale(1);
 					return true;
 				
-				case MNUID_ITEM(IDM_RESBPPTEST_2X):
+				case MNUID_ITEM(IDM_GRAPHICS_RES_2X):
 					m_parent->rescale(2);
 					return true;
 				
-				case MNUID_ITEM(IDM_RESBPPTEST_3X):
+				case MNUID_ITEM(IDM_GRAPHICS_RES_3X):
 					m_parent->rescale(3);
 					return true;
 				
-				case MNUID_ITEM(IDM_RESBPPTEST_4X):
+				case MNUID_ITEM(IDM_GRAPHICS_RES_4X):
 					m_parent->rescale(4);
 					return true;
 				
-				case MNUID_ITEM(IDM_RESBPPTEST_15):
+				default:
+					break;
+			}
+			break;
+		
+		case IDM_GRAPHICS_BPP_MENU:
+			// Graphics, Color Depth.
+			switch (MNUID_ITEM(action))
+			{
+				case MNUID_ITEM(IDM_GRAPHICS_BPP_15):
 					m_parent->setBpp(LibGens::VdpPalette::BPP_15);
 					return true;
 				
-				case MNUID_ITEM(IDM_RESBPPTEST_16):
+				case MNUID_ITEM(IDM_GRAPHICS_BPP_16):
 					m_parent->setBpp(LibGens::VdpPalette::BPP_16);
 					return true;
 				
-				case MNUID_ITEM(IDM_RESBPPTEST_32):
+				case MNUID_ITEM(IDM_GRAPHICS_BPP_32):
 					m_parent->setBpp(LibGens::VdpPalette::BPP_32);
-					return true;
-				
-				case MNUID_ITEM(IDM_RESBPPTEST_SCRSHOT):
-					m_parent->screenShot();
 					return true;
 				
 				default:

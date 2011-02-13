@@ -54,6 +54,7 @@ class GensMenuBar : public QMenuBar
 			GMI_SEPARATOR,
 			GMI_SUBMENU,
 			GMI_CHECK,
+			GMI_RADIO,
 			
 			GMI_MAX
 		};
@@ -86,6 +87,8 @@ class GensMenuBar : public QMenuBar
 			int id;				// Menu identifier. (-1 == separator)
 			MenuItemType type;		// Menu item type.
 			const utf8_str *text;		// Menu item text.
+			
+			int submenu_id;			// Submenu ID.
 			const MenuItem *submenu;	// First element of submenu.
 			
 			MenuItemShortcut key_std;	// Menu item shortcut. (Wrapper around QKeySequence::StandardKey.)
@@ -108,7 +111,9 @@ class GensMenuBar : public QMenuBar
 		
 		// Top-level menus.
 		static const MenuItem ms_gmiFile[];
-		static const MenuItem ms_gmiResBppTest[];
+		static const MenuItem ms_gmiGraphics[];
+			static const MenuItem ms_gmiGraphicsRes[];
+			static const MenuItem ms_gmiGraphicsBpp[];
 		static const MenuItem ms_gmiCtrlTest[];
 		static const MenuItem ms_gmiSoundTest[];
 		static const MenuItem ms_gmiHelp[];

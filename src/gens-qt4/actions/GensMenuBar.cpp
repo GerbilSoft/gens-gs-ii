@@ -120,6 +120,8 @@ void GensMenuBar::parseMainMenu(const GensMenuBar::MainMenuItem *mainMenu)
 void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 {
 	QAction *mnuItem;
+	QMenu *mnuSubMenu;			// QMenu for GMI_SUBMENU items.
+	QActionGroup *actionGroup = NULL;	// QActionGroup for GMI_RADIO items.
 	
 	for (; menu->id != 0; menu++)
 	{
@@ -133,14 +135,46 @@ void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 			continue;
 		}
 		
-		if (menu->type != GMI_NORMAL && menu->type != GMI_CHECK)
-			continue;
-		
 		mnuItem = new QAction(parent);
 		mnuItem->setText(tr(menu->text));
 		
-		if (menu->type == GMI_CHECK)
-			mnuItem->setCheckable(true);
+		switch (menu->type)
+		{
+			case GMI_CHECK:
+				mnuItem->setCheckable(true);
+				break;
+			
+			case GMI_SUBMENU:
+				// Parse the submenu.
+				mnuSubMenu = new QMenu(this);
+				mnuSubMenu->setTitle(tr(menu->text));
+				parseMenu(menu->submenu, mnuSubMenu);
+				mnuItem->setMenu(mnuSubMenu);
+				m_hashMenus.insert(menu->submenu_id, mnuSubMenu);
+				break;
+			
+			case GMI_RADIO:
+				// Check for the QActionGroup.
+				// TODO: Do we need to save references to QActionGroup to delete them later?
+				if (!actionGroup)
+				{
+					// Not currently in a QActionGroup.
+					actionGroup = new QActionGroup(this);
+					actionGroup->setExclusive(true);
+				}
+				
+				// Mark the menu item as a radio button.
+				// (checkable == true; part of exclusive QActionGroup)
+				mnuItem->setCheckable(true);
+				actionGroup->addAction(mnuItem);
+				break;
+			
+			default:
+				break;
+		}
+		
+		if (menu->type != GMI_RADIO)
+			actionGroup = NULL;
 		
 #ifndef __APPLE__
 		// Set the menu icon.
