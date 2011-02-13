@@ -438,14 +438,17 @@ void GensWindow::osd(OsdType osd_type, int param)
 /**
  * setBpp(): Set color depth.
  * TODO: Should this be a public function or a slot?
- * @param bpp Color depth.
+ * @param newBpp Color depth.
  */
-void GensWindow::setBpp(LibGens::VdpPalette::ColorDepth bpp)
+void GensWindow::setBpp(LibGens::VdpPalette::ColorDepth newBpp)
 {
 	// TODO: bpp changes should be pushed to the emulation queue.
 	// TODO: Maybe this should be a slot called by GensConfig.
+	if (LibGens::VdpRend::m_palette.bpp() == newBpp)
+		return;
+	
 	int bppVal;
-	switch (bpp)
+	switch (newBpp)
 	{
 		case LibGens::VdpPalette::BPP_15:
 			bppVal = 15;
@@ -461,9 +464,9 @@ void GensWindow::setBpp(LibGens::VdpPalette::ColorDepth bpp)
 	}
 	
 	// Set the color depth.
-	LibGens::VdpRend::m_palette.setBpp(bpp);
+	LibGens::VdpRend::m_palette.setBpp(newBpp);
 	m_vBackend->setVbDirty();
-	m_vBackend->vbUpdate();
+	//m_vBackend->vbUpdate();	// TODO: Don't update immediately?
 	
 	QString msg = tr("Color depth set to %1-bit.").arg(bppVal);
 	m_vBackend->osd_printf(1500, "%s", msg.toUtf8().constData());

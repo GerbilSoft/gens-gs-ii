@@ -67,7 +67,7 @@ class GensWindow : public QMainWindow
 		
 		// Set color depth.
 		// TODO: Should this really be here, or should it be a slot?
-		void setBpp(LibGens::VdpPalette::ColorDepth bpp);
+		void setBpp(LibGens::VdpPalette::ColorDepth newBpp);
 	
 	public slots:
 		/** Wrapper functions for GensActions. **/
