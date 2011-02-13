@@ -765,7 +765,7 @@ void EmuManager::doSaveSlot(int newSaveSlot)
 		
 		// Check if the savestate has a preview image.
 		LibZomg::Zomg zomg(filename.toUtf8().constData(), LibZomg::Zomg::ZOMG_LOAD);
-		if (zomg.getPreviewSize() >= 0)
+		if (zomg.getPreviewSize() > 0)
 		{
 			// Preview image found.
 			QByteArray img_ByteArray;
