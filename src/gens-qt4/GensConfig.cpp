@@ -331,6 +331,7 @@ void GensConfig::emitAll(void)
 	// TODO: Optimize palette calculation so it's only done once.
 	emit aspectRatioConstraint_changed(m_aspectRatioConstraint);
 	emit fastBlur_changed(m_fastBlur);
+	emit bilinearFilter_changed(m_bilinearFilter);
 	emit contrast_changed(m_contrast);
 	emit brightness_changed(m_brightness);
 	emit grayscale_changed(m_grayscale);
