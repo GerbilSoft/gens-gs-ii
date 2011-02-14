@@ -7,25 +7,25 @@
     <x>0</x>
     <y>0</y>
     <width>494</width>
-    <height>417</height>
+    <height>457</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>494</width>
-    <height>417</height>
+    <height>457</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>494</width>
-    <height>417</height>
+    <height>457</height>
    </size>
   </property>
   <property name="baseSize">
    <size>
     <width>494</width>
-    <height>417</height>
+    <height>457</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -662,8 +662,8 @@ on NTSC models.</string>
              </property>
             </widget>
            </item>
-           <item row="3" column="0" colspan="3">
-            <spacer name="verticalSpacer_2">
+           <item row="4" column="0" colspan="3">
+            <spacer name="vspcMcdRom">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
              </property>
@@ -678,7 +678,7 @@ on NTSC models.</string>
              </property>
             </spacer>
            </item>
-           <item row="4" column="0" colspan="3">
+           <item row="5" column="0" colspan="3">
             <widget class="QLabel" name="lblMcdSelectedRom">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -708,6 +708,35 @@ on NTSC models.</string>
            </item>
            <item row="2" column="1">
             <widget class="GensQt4::GensLineEdit" name="txtMcdRomJPN"/>
+           </item>
+           <item row="3" column="1">
+            <widget class="GensQt4::GensLineEdit" name="txtMcdRomAsia"/>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="lblMcdRomAsia">
+             <property name="text">
+              <string>&amp;Asia:</string>
+             </property>
+             <property name="textFormat">
+              <enum>Qt::PlainText</enum>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+             <property name="buddy">
+              <cstring>txtMcdRomJPN</cstring>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QPushButton" name="btnMcdRomAsia">
+             <property name="text">
+              <string>Browse...</string>
+             </property>
+             <property name="flat">
+              <bool>false</bool>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -844,6 +873,7 @@ on NTSC models.</string>
   <tabstop>chkAspectRatioConstraint</tabstop>
   <tabstop>chkFastBlur</tabstop>
   <tabstop>chkBilinearFilter</tabstop>
+  <tabstop>cboInterlacedMode</tabstop>
   <tabstop>hsldContrast</tabstop>
   <tabstop>hsldBrightness</tabstop>
   <tabstop>chkGrayscale</tabstop>
@@ -855,6 +885,8 @@ on NTSC models.</string>
   <tabstop>btnMcdRomEUR</tabstop>
   <tabstop>txtMcdRomJPN</tabstop>
   <tabstop>btnMcdRomJPN</tabstop>
+  <tabstop>txtMcdRomAsia</tabstop>
+  <tabstop>btnMcdRomAsia</tabstop>
   <tabstop>txtExtPrgUnRAR</tabstop>
   <tabstop>btnExtPrgUnRAR</tabstop>
   <tabstop>buttonBox</tabstop>
@@ -901,11 +933,11 @@ on NTSC models.</string>
    <hints>
     <hint type="sourcelabel">
      <x>430</x>
-     <y>207</y>
+     <y>239</y>
     </hint>
     <hint type="destinationlabel">
      <x>470</x>
-     <y>207</y>
+     <y>239</y>
     </hint>
    </hints>
   </connection>
@@ -917,11 +949,11 @@ on NTSC models.</string>
    <hints>
     <hint type="sourcelabel">
      <x>430</x>
-     <y>207</y>
+     <y>239</y>
     </hint>
     <hint type="destinationlabel">
      <x>470</x>
-     <y>207</y>
+     <y>239</y>
     </hint>
    </hints>
   </connection>
@@ -933,11 +965,11 @@ on NTSC models.</string>
    <hints>
     <hint type="sourcelabel">
      <x>430</x>
-     <y>234</y>
+     <y>266</y>
     </hint>
     <hint type="destinationlabel">
      <x>470</x>
-     <y>234</y>
+     <y>266</y>
     </hint>
    </hints>
   </connection>
@@ -949,11 +981,11 @@ on NTSC models.</string>
    <hints>
     <hint type="sourcelabel">
      <x>430</x>
-     <y>234</y>
+     <y>266</y>
     </hint>
     <hint type="destinationlabel">
      <x>470</x>
-     <y>234</y>
+     <y>266</y>
     </hint>
    </hints>
   </connection>

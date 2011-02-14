@@ -143,6 +143,7 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		QString sMcdRomStatus_USA;
 		QString sMcdRomStatus_EUR;
 		QString sMcdRomStatus_JPN;
+		QString sMcdRomStatus_Asia;
 		
 		/** External Programs **/
 		QString sExtPrgStatus_UnRAR;
@@ -158,14 +159,17 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		void on_btnMcdRomUSA_clicked(void);
 		void on_btnMcdRomEUR_clicked(void);
 		void on_btnMcdRomJPN_clicked(void);
+		void on_btnMcdRomAsia_clicked(void);
 		
 		void on_txtMcdRomUSA_focusIn(void);
 		void on_txtMcdRomEUR_focusIn(void);
 		void on_txtMcdRomJPN_focusIn(void);
+		void on_txtMcdRomAsia_focusIn(void);
 		
 		void on_txtMcdRomUSA_textChanged(void);
 		void on_txtMcdRomEUR_textChanged(void);
 		void on_txtMcdRomJPN_textChanged(void);
+		void on_txtMcdRomAsia_textChanged(void);
 		
 		/** External Programs **/
 		

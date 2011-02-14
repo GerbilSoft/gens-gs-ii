@@ -131,6 +131,7 @@ int GensConfig::reload(const QString& filename)
 	m_mcdRomUSA = settings.value(QLatin1String("bootRomUSA"), QString()).toString();
 	m_mcdRomEUR = settings.value(QLatin1String("bootRomEUR"), QString()).toString();
 	m_mcdRomJPN = settings.value(QLatin1String("bootRomJPN"), QString()).toString();
+	m_mcdRomAsia = settings.value(QLatin1String("bootRomAsia"), QString()).toString();
 	settings.endGroup();
 	
 	/** External programs. **/
@@ -277,6 +278,7 @@ int GensConfig::save(const QString& filename)
 	settings.setValue(QLatin1String("bootRomUSA"), m_mcdRomUSA);
 	settings.setValue(QLatin1String("bootRomEUR"), m_mcdRomEUR);
 	settings.setValue(QLatin1String("bootRomJPN"), m_mcdRomJPN);
+	settings.setValue(QLatin1String("bootRomAsia"), m_mcdRomAsia);
 	settings.endGroup();
 	
 	/** External programs. **/
@@ -329,6 +331,7 @@ void GensConfig::emitAll(void)
 	emit mcdRomUSA_changed(m_mcdRomUSA);
 	emit mcdRomEUR_changed(m_mcdRomEUR);
 	emit mcdRomJPN_changed(m_mcdRomJPN);
+	emit mcdRomAsia_changed(m_mcdRomAsia);
 	
 	/** External programs. **/
 	emit extprgUnRAR_changed(m_extprgUnRAR);
@@ -464,6 +467,7 @@ GC_PROPERTY_WRITE_RANGE(introColor, int, IntroColor, 0, 7)
 GC_PROPERTY_WRITE(mcdRomUSA, const QString&, McdRomUSA)
 GC_PROPERTY_WRITE(mcdRomEUR, const QString&, McdRomEUR)
 GC_PROPERTY_WRITE(mcdRomJPN, const QString&, McdRomJPN)
+GC_PROPERTY_WRITE(mcdRomAsia, const QString&, McdRomAsia)
 
 
 /** External programs. **/

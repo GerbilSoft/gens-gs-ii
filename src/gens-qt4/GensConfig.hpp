@@ -128,6 +128,8 @@ class GensConfig : public QObject
 		GC_PROPERTY(QString, mcdRomEUR, const QString&, McdRomEUR);
 		Q_PROPERTY(QString mcdRomJPN READ mcdRomJPN WRITE setMcdRomJPN NOTIFY mcdRomJPN_changed)
 		GC_PROPERTY(QString, mcdRomJPN, const QString&, McdRomJPN);
+		Q_PROPERTY(QString mcdRomAsia READ mcdRomJPN WRITE setMcdRomAsia NOTIFY mcdRomAsia_changed)
+		GC_PROPERTY(QString, mcdRomAsia, const QString&, McdRomAsia);
 		
 		/** External programs. **/
 		Q_PROPERTY(QString extprgUnRAR READ extprgUnRAR WRITE setExtPrgUnRAR NOTIFY extprgUnRAR_changed)
@@ -219,6 +221,7 @@ class GensConfig : public QObject
 		void mcdRomUSA_changed(const QString& filename);
 		void mcdRomEUR_changed(const QString& filename);
 		void mcdRomJPN_changed(const QString& filename);
+		void mcdRomAsia_changed(const QString& filename);
 		
 		/** External programs. **/
 		void extprgUnRAR_changed(const QString& filename);

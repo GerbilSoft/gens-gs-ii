@@ -115,7 +115,7 @@ void GeneralConfigWindow::setupUi_mac(void)
 	// Size obtained from Qt Designer.
 	// (We need to specify the size here because of the fixed layout hack.)
 	// TODO: Remove extra height from the tabs.
-	const QSize szStacked(478, 369);
+	const QSize szStacked(478, 409);
 	stackedWidget = new QStackedWidget(this);
 	stackedWidget->setMinimumSize(szStacked);
 	stackedWidget->setMaximumSize(szStacked);

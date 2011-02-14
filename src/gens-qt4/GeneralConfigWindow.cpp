@@ -126,12 +126,14 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	txtMcdRomUSA->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 	txtMcdRomEUR->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 	txtMcdRomJPN->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
+	txtMcdRomAsia->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 	
 	// Sega CD: Set the placeholder text.
 	const QString sMcdBootRom_PlaceholderText = tr("Select a %1 Boot ROM...");
 	txtMcdRomUSA->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Sega CD (U)")));
 	txtMcdRomEUR->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Mega CD (E)")));
 	txtMcdRomJPN->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Mega CD (J)")));
+	txtMcdRomAsia->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Mega CD (Asia)")));
 	
 	// External Programs: Set the textbox icon and placeholder text.
 	txtExtPrgUnRAR->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
@@ -292,6 +294,8 @@ void GeneralConfigWindow::reload(void)
 	txtMcdRomUSA->setText(gqt4_config->mcdRomUSA());
 	txtMcdRomEUR->setText(gqt4_config->mcdRomEUR());
 	txtMcdRomJPN->setText(gqt4_config->mcdRomJPN());
+	txtMcdRomAsia->setText(gqt4_config->mcdRomAsia());
+	on_txtMcdRomUSA_focusIn();
 	
 	/** External programs. **/
 	txtExtPrgUnRAR->setText(gqt4_config->extprgUnRAR());
@@ -342,6 +346,7 @@ void GeneralConfigWindow::apply(void)
 	gqt4_config->setMcdRomUSA(txtMcdRomUSA->text());
 	gqt4_config->setMcdRomEUR(txtMcdRomEUR->text());
 	gqt4_config->setMcdRomJPN(txtMcdRomJPN->text());
+	gqt4_config->setMcdRomAsia(txtMcdRomAsia->text());
 	
 	/** External programs. **/
 	gqt4_config->setExtPrgUnRAR(txtExtPrgUnRAR->text());
@@ -510,6 +515,8 @@ void GeneralConfigWindow::on_btnMcdRomEUR_clicked(void)
 	{ mcdSelectRomFile(tr("Mega CD (E)"), txtMcdRomEUR); }
 void GeneralConfigWindow::on_btnMcdRomJPN_clicked(void)
 	{ mcdSelectRomFile(tr("Mega CD (J)"), txtMcdRomJPN); }
+void GeneralConfigWindow::on_btnMcdRomAsia_clicked(void)
+	{ mcdSelectRomFile(tr("Mega CD (Asia)"), txtMcdRomAsia); }
 
 
 /**
@@ -702,6 +709,8 @@ void GeneralConfigWindow::on_txtMcdRomEUR_focusIn(void)
 	{ mcdDisplayRomFileStatus(tr("Mega CD (E)"), sMcdRomStatus_EUR); }
 void GeneralConfigWindow::on_txtMcdRomJPN_focusIn(void)
 	{ mcdDisplayRomFileStatus(tr("Mega CD (J)"), sMcdRomStatus_JPN); }
+void GeneralConfigWindow::on_txtMcdRomAsia_focusIn(void)
+	{ mcdDisplayRomFileStatus(tr("Mega CD (Asia)"), sMcdRomStatus_Asia); }
 
 void GeneralConfigWindow::on_txtMcdRomUSA_textChanged(void)
 {
@@ -739,8 +748,7 @@ void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
 
 void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 {
-	// TODO: Add a separate "Mega CD (Asia)" boot ROM?
-	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomJPN, MCD_REGION_JAPAN | MCD_REGION_ASIA);
+	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomJPN, MCD_REGION_JAPAN);
 	if (!sNewRomStatus.isEmpty())
 	{
 		sMcdRomStatus_JPN = sNewRomStatus;
@@ -752,6 +760,24 @@ void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 	setApplyButtonEnabled(true);
 #else
 	gqt4_config->setMcdRomJPN(txtMcdRomJPN->text());
+#endif
+}
+
+void GeneralConfigWindow::on_txtMcdRomAsia_textChanged(void)
+{
+	// TODO: Add a separate "Mega CD (Asia)" boot ROM?
+	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomAsia, MCD_REGION_ASIA);
+	if (!sNewRomStatus.isEmpty())
+	{
+		sMcdRomStatus_Asia = sNewRomStatus;
+		mcdDisplayRomFileStatus(tr("Mega CD (Asia)"), sMcdRomStatus_Asia);
+	}
+	
+	// Settings have been changed.
+#ifndef GCW_APPLY_IMMED
+	setApplyButtonEnabled(true);
+#else
+	gqt4_config->setMcdRomAsia(txtMcdRomAsia->text());
 #endif
 }
 
