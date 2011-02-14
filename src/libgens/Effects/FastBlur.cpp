@@ -28,7 +28,6 @@
 #include "FastBlur.hpp"
 #include "MD/VdpRend.hpp"
 #include "Util/cpuflags.h"
-#include "Util/byteswap.h"
 
 // C includes.
 #include <math.h>
@@ -39,11 +38,7 @@
 // Mask constants.
 #define MASK_DIV2_15		((uint16_t)(0x3DEF))
 #define MASK_DIV2_16		((uint16_t)(0x7BCF))
-#if GENS_BYTEORDER == GENS_LIL_ENDIAN
 #define MASK_DIV2_32		((uint32_t)(0x007F7F7F))
-#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
-#define MASK_DIV2_32		((uint32_t)(0x7F7F7F00))
-#endif
 
 namespace LibGens
 {
