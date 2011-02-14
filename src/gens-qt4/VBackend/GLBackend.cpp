@@ -352,8 +352,7 @@ void GLBackend::reallocTexOsd(void)
 	}
 	
 	// Create a new OpenGL texture.
-	m_texOsd = new GLTex2D();
-	m_texOsd->setImage(imgOsd);
+	m_texOsd = new GLTex2D(imgOsd);
 	
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_texOsd->tex());
@@ -989,8 +988,7 @@ void GLBackend::showOsdPreview(void)
 	if (!m_texPreview)
 	{
 		// Create the texture for the preview image.
-		m_texPreview = new GLTex2D();
-		m_texPreview->setImage(m_preview_img);
+		m_texPreview = new GLTex2D(m_preview_img);
 	}
 	
 	// Bind the texture.
