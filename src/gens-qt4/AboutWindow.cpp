@@ -64,10 +64,8 @@ using std::stringstream;
 #include <OpenGL/gl.h>
 #endif
 
-// GensQGLWidget required to obtain list of extensions.
-// TODO: Split common GL stuff into a separate file?
-// (e.g. if GLFW is added for fullscreen)
-#include "VBackend/GensQGLWidget.hpp"
+// GLBackend is required in order to obtain list of extensions.
+#include "VBackend/GLBackend.hpp"
 
 
 namespace GensQt4
@@ -432,7 +430,7 @@ QString AboutWindow::GetDebugInfo(void)
 	
 	// Get a list of OpenGL extensions that are in use.
 	const QChar chrBullet(0x2022);	// U+2022: BULLET
-	const QStringList& extsInUse = GensQGLWidget::GLExtsInUse();
+	const QStringList& extsInUse = GLBackend::GLExtsInUse();
 	
 	if (extsInUse.isEmpty())
 	{

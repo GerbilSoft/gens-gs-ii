@@ -104,6 +104,7 @@ SET(gens-qt4_SRCS
 	SigHandler.cpp
 	VBackend/VBackend.cpp
 	VBackend/GensQGLWidget.cpp
+	VBackend/GLBackend.cpp
 	Input/KeyHandlerQt.cpp
 	CtrlConfigWindow.cpp
 	Audio/GensPortAudio.cpp

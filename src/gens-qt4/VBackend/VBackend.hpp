@@ -248,11 +248,11 @@ class VBackend
 		
 		inline bool bilinearFilter(void) const
 			{ return m_bilinearFilter; }
-		void setBilinearFilter(bool newBilinearFilter);
+		virtual void setBilinearFilter(bool newBilinearFilter);
 		
 		inline bool pauseTint(void) const
 			{ return m_pauseTint; }
-		void setPauseTint(bool newPauseTint);
+		virtual void setPauseTint(bool newPauseTint);
 	
 	private:
 		// Effects.

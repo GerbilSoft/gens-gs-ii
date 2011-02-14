@@ -24,22 +24,12 @@
 #ifndef __GENS_QT4_GENSQGLWIDGET_HPP__
 #define __GENS_QT4_GENSQGLWIDGET_HPP__
 
-#include <config.h>
-
-#include "VBackend.hpp"
-
-// OpenGL Shader Manager.
-// This file MUST be before any other GL includes,
-// since it includes the GLEW headers.
-#include "GLShaderManager.hpp"
+#include "GLBackend.hpp"
 
 // Qt includes.
 #include <QtOpenGL/QGLWidget>
 #include <QtCore/QStringList>
 #include <QtCore/QRectF>
-
-// OpenGL GL_TEXTURE_2D wrapper.
-#include "GlTex2D.hpp"
 
 // Key Handler.
 #include "Input/KeyHandlerQt.hpp"
@@ -50,7 +40,7 @@
 namespace GensQt4
 {
 
-class GensQGLWidget : public QGLWidget, public VBackend
+class GensQGLWidget : public QGLWidget, public GLBackend
 {
 	Q_OBJECT
 	
@@ -65,57 +55,17 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		QWidget *toQWidget(void) { return this; }
 		
 		/**
-		 * osd_show_preview(): Show a preview image on the OSD.
-		 * @param duration Duration for the preview image to appaer, in milliseconds.
-		 * @param img Image to show.
-		 */
-		void osd_show_preview(int duration, const QImage& img);
-		
-		/**
 		 * sizeHint(): Qt size hint.
 		 * TODO: Return something other than 320x240 depending on renderer?
 		 * @return Preferred widget size.
 		 */
 		QSize sizeHint(void) const { return QSize(320, 240); }
-		
-#ifdef HAVE_GLEW
-		/**
-		 * GLExtsInUse(): Get a list of the OpenGL extensions in use.
-		 * @return List of OpenGL extensions in use.
-		 */
-		static QStringList GLExtsInUse(void);
-#endif /* HAVE_GLEW */
 	
 	protected:
-		void reallocTexture(void);
-		void reallocTexOsd(void);
-		
 		void initializeGL(void);
 		
 		void resizeGL(int width, int height);
 		void paintGL(void);
-		
-		// OpenGL Texture ID.
-		GLuint m_tex;
-		
-		// Texture format.
-		int m_colorComponents;
-		GLenum m_texFormat;
-		GLenum m_texType;
-		
-		// OSD texture.
-		GLuint m_texOsd;	// Texture containing U+0000 - U+00FF.
-		GLuint m_glListOsd;	// Display list.
-		void printOsdText(void);
-		void printOsdLine(int x, int y, const QString &msg);
-		QRectF m_rectfOsd;
-		
-		// OpenGL Shader Manager.
-		GLShaderManager m_shaderMgr;
-		
-		// Preview image.
-		GlTex2D *m_texPreview;
-		void showOsdPreview(void);
 		
 		// Keyboard handler functions.
 		void keyPressEvent(QKeyEvent *event)
@@ -147,6 +97,29 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		void bilinearFilter_changed_slot(bool newBilinearFilter);
 		void pauseTint_changed_slot(bool newPauseTint);
 };
+
+
+/**
+ * initializeGL(): Called when GL is initialized.
+ */
+inline void GensQGLWidget::initializeGL(void)
+	{ glb_initializeGL(); }
+
+
+/**
+ * resizeGL(): Window has been resized.
+ * @param width Window width.
+ * @param height Window height.
+ */
+inline void GensQGLWidget::resizeGL(int width, int height)
+	{ glb_resizeGL(width, height); }
+
+
+/**
+ * paintGL(): OpenGL paint event.
+ */
+inline void GensQGLWidget::paintGL(void)
+	{ glb_paintGL(); }
 
 }
 
