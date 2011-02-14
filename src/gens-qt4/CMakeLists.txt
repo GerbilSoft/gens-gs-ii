@@ -117,7 +117,7 @@ SET(gens-qt4_SRCS
 	Audio/ARingBuffer.cpp
 	ZipSelectDialog.cpp
 	EmuManager_qEmu.cpp
-	VBackend/GlTex2D.cpp
+	VBackend/GLTex2D.cpp
 	GeneralConfigWindow.cpp
 	GeneralConfigWindow_slots.cpp
 	widgets/GensLineEdit.cpp

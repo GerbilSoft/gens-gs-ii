@@ -37,7 +37,7 @@
 #include "GLShaderManager.hpp"
 
 // OpenGL GL_TEXTURE_2D wrapper.
-#include "GlTex2D.hpp"
+#include "GLTex2D.hpp"
 
 // Video Backend.
 #include "VBackend.hpp"
@@ -122,7 +122,7 @@ class GLBackend : public VBackend
 		GLenum m_texType;	// Texture type. (GL_UNSIGNED_BYTE, etc.)
 		
 		// OSD texture.
-		GlTex2D *m_texOsd;	// Texture containing U+0000 - U+00FF.
+		GLTex2D *m_texOsd;	// Texture containing U+0000 - U+00FF.
 		GLuint m_glListOsd;	// Display list.
 		QRectF m_rectfOsd;	// Projection rectangle.
 		
@@ -135,7 +135,7 @@ class GLBackend : public VBackend
 		void printOsdLine(int x, int y, const QString &msg);
 		
 		// OSD preview image.
-		GlTex2D *m_texPreview;
+		GLTex2D *m_texPreview;
 		void showOsdPreview(void);
 		
 		// OpenGL Shader Manager.

@@ -1,10 +1,10 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * GlTex2D.hpp: GL_TEXTURE_2D wrapper class.                               *
+ * GLTex2D.hpp: GL_TEXTURE_2D wrapper class.                               *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -57,11 +57,11 @@
 namespace GensQt4
 {
 
-class GlTex2D
+class GLTex2D
 {
 	public:
-		GlTex2D();
-		~GlTex2D();
+		GLTex2D();
+		~GLTex2D();
 		
 		void setImage(const QImage& img);
 		

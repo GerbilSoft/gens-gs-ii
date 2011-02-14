@@ -1,10 +1,10 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * GlTex2D.cpp: GL_TEXTURE_2D wrapper class.                               *
+ * GLTex2D.cpp: GL_TEXTURE_2D wrapper class.                               *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "GlTex2D.hpp"
+#include "GLTex2D.hpp"
 
 // Win32 requires GL/glext.h for OpenGL 1.2/1.3.
 // TODO: Check the GL implementation to see what functionality is available at runtime.
@@ -35,7 +35,7 @@
 namespace GensQt4
 {
 
-GlTex2D::GlTex2D()
+GLTex2D::GLTex2D()
 {
 	// Initialize variables.
 	m_tex = 0;
@@ -58,7 +58,7 @@ GlTex2D::GlTex2D()
 #endif
 }
 
-GlTex2D::~GlTex2D()
+GLTex2D::~GLTex2D()
 {
 	if (m_tex > 0)
 	{
@@ -72,7 +72,7 @@ GlTex2D::~GlTex2D()
  * setImage(): Set the texture image from a QImage.
  * @param img QImage.
  */
-void GlTex2D::setImage(const QImage& img)
+void GLTex2D::setImage(const QImage& img)
 {
 	if (m_tex == 0)
 		glGenTextures(1, &m_tex);
@@ -222,3 +222,4 @@ void GlTex2D::setImage(const QImage& img)
 }
 
 }
+
