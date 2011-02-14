@@ -267,6 +267,12 @@ void GLBackend::glb_initializeGL(void)
 	glEnable(GL_CULL_FACE);
 	
 #ifdef HAVE_GLEW
+	// Gallium3D doesn't expose the GL_ATI_fragment_shader extension,
+	// although it does have the functions available.
+	// Setting glewExperimental to GL_TRUE detects this,
+	// and enables GLEW_ATI_fragment_shader.
+	glewExperimental = GL_TRUE;
+	
 	// Initialize GLEW.
 	GLenum err = glewInit();
 	if (err == GLEW_OK)
