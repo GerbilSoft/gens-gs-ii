@@ -1071,8 +1071,6 @@ void GLBackend::setPauseTint(bool newPauseTint)
 	if (pauseTint() == newPauseTint)
 		return;
 	
-	// Update GLBackend's pause tint setting.
-	setPauseTint(newPauseTint);
 	if (!m_shaderMgr.hasPaused() &&
 	    (isRunning() && isPaused()))
 	{
