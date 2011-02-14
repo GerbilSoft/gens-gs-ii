@@ -343,6 +343,10 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 	M68K::TripOdometer();
 	Z80::ClearOdometer();
 	
+	// If the full palette is dirty, force a CRam update.
+	if (VdpRend::m_palette.isDirty())
+		VdpIo::VDP_Flags.CRam = 1;
+	
 	// TODO: MDP. (LibGens)
 #if 0
 	// Raise the MDP_EVENT_PRE_FRAME event.
