@@ -61,9 +61,13 @@ class VBackend
 			{ m_mdScreenDirty = true; }
 		virtual void vbUpdate(void) = 0;
 		
-		// Return a QWidget* version of this object.
-		// Since this is the base class, this will return NULL.
-		virtual QWidget *toQWidget(void) { return NULL; }
+		/**
+		 * toQWidget(): Get the QWidget* version of this object.
+		 * Since this is the base class, this will return NULL.
+		 * @return NULL.
+		 */
+		virtual QWidget *toQWidget(void)
+			{ return NULL; }
 		
 		/** Properties. **/
 		
@@ -105,13 +109,7 @@ class VBackend
 		void osd_vprintf(const int duration, const char *msg, va_list ap)
 			__attribute__ ((format (printf, 3, 0)));
 		void osd_printf(const int duration, const char *msg, ...)
-			__attribute__ ((format (printf, 3, 4)))
-		{
-			va_list ap;
-			va_start(ap, msg);
-			osd_vprintf(duration, msg, ap);
-			va_end(ap);
-		}
+			__attribute__ ((format (printf, 3, 4)));
 		
 		/**
 		 * osd_lock() / osd_unlock(): Temporarily lock the OSD.
@@ -184,7 +182,8 @@ class VBackend
 		
 		// m_osdListDirty: Set if the OSD message list has been changed.
 		bool m_osdListDirty;
-		inline void setOsdListDirty(void) { m_osdListDirty = true; }
+		inline void setOsdListDirty(void)
+			{ m_osdListDirty = true; }
 		
 		/**
 		 * osd_process(): Process the OSD queue.
@@ -266,6 +265,21 @@ class VBackend
 		// Message timer.
 		MsgTimer *m_msgTimer;
 };
+
+
+/**
+ * osd_vprintf(): Print formatted text to the screen.
+ * @param duration Duration for the message to appear, in milliseconds.
+ * @param msg Message to write. (printf-formatted)
+ * @param ... Format arguments.
+ */
+inline void VBackend::osd_printf(const int duration, const char *msg, ...)
+{
+	va_list ap;
+	va_start(ap, msg);
+	osd_vprintf(duration, msg, ap);
+	va_end(ap);
+}
 
 }
 
