@@ -61,6 +61,7 @@ class GLTex2D
 {
 	public:
 		GLTex2D();
+		GLTex2D(const QImage& img);
 		~GLTex2D();
 		
 		void setImage(const QImage& img);

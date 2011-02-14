@@ -28,7 +28,7 @@
 #ifdef _WIN32
 #include <GL/glext.h>
 #endif
-
+#include <stdio.h>
 // LOG_MSG() subsystem.
 #include "libgens/macros/log_msg.h"
 
@@ -58,6 +58,16 @@ GLTex2D::GLTex2D()
 #endif
 }
 
+GLTex2D::GLTex2D(const QImage& img)
+{
+	// Do main initialization.
+	GLTex2D();
+	
+	// Set the image.
+	setImage(img);
+}
+
+
 GLTex2D::~GLTex2D()
 {
 	if (m_tex > 0)
@@ -74,6 +84,9 @@ GLTex2D::~GLTex2D()
  */
 void GLTex2D::setImage(const QImage& img)
 {
+	if (img.isNull())
+		return;
+	
 	if (m_tex == 0)
 		glGenTextures(1, &m_tex);
 	
