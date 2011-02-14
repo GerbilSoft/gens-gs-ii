@@ -36,6 +36,7 @@
 // Qt includes.
 #include <QtOpenGL/QGLWidget>
 #include <QtCore/QStringList>
+#include <QtCore/QRectF>
 
 // OpenGL GL_TEXTURE_2D wrapper.
 #include "GlTex2D.hpp"
@@ -107,6 +108,7 @@ class GensQGLWidget : public QGLWidget, public VBackend
 		GLuint m_glListOsd;	// Display list.
 		void printOsdText(void);
 		void printOsdLine(int x, int y, const QString &msg);
+		QRectF m_rectfOsd;
 		
 		// OpenGL Shader Manager.
 		GLShaderManager m_shaderMgr;

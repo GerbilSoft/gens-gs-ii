@@ -435,6 +435,7 @@ void GensQGLWidget::resizeGL(int width, int height)
 	{
 		// No aspect ratio constraint.
 		glOrtho(-1, 1, -1, 1, -1, 1);
+		m_rectfOsd = QRectF(0, 0, 320, 240);
 	}
 	else
 	{
@@ -444,25 +445,43 @@ void GensQGLWidget::resizeGL(int width, int height)
 			// Image is wider than 4:3.
 			const double ratio = ((double)(width * 3) / (double)(height * 4));
 			glOrtho(-ratio, ratio, -1, 1, -1, 1);
+			
+			// Adjust the OSD rectangle.
+			m_rectfOsd.setTop(0);
+			m_rectfOsd.setHeight(240);
+			
+			const double osdWidth = (320.0 * ratio);
+			m_rectfOsd.setLeft(-((osdWidth - 320.0) / 2.0));
+			m_rectfOsd.setWidth(osdWidth);
 		}
 		else if ((width * 3) < (height * 4))
 		{
 			// Image is taller than 4:3.
 			const double ratio = ((double)(height * 4) / (double)(width * 3));
 			glOrtho(-1, 1, -ratio, ratio, -1, 1);
+			
+			// Adjust the OSD rectangle.
+			m_rectfOsd.setLeft(0);
+			m_rectfOsd.setWidth(320);
+			
+			const double osdHeight = (240.0 * ratio);
+			m_rectfOsd.setTop(-((osdHeight - 240.0) / 2.0));
+			m_rectfOsd.setHeight(osdHeight);
 		}
 		else
 		{
 			// Image has the correct aspect ratio.
 			glOrtho(-1, 1, -1, 1, -1, 1);
+			m_rectfOsd = QRectF(0, 0, 320, 240);
 		}
 	}
 	
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	
-	// Mark the video buffer as dirty.
+	// Mark the video buffer and OSD as dirty.
 	setVbDirty();
+	setOsdListDirty();
 }
 
 
@@ -702,7 +721,10 @@ void GensQGLWidget::printOsdText(void)
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0, 320, 240, 0, -1.0f, 1.0f);
+	//glOrtho(0, 320, 240, 0, -1.0f, 1.0f);
+	glOrtho(m_rectfOsd.left(), m_rectfOsd.right(),
+		m_rectfOsd.bottom(), m_rectfOsd.top(),
+		-1.0f, 1.0f);
 	
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
