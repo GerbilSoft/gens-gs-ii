@@ -35,22 +35,12 @@
 #include <string.h>
 
 // Color component masks and shift values for 32-bit color.
-#include "Util/byteswap.h"
-#if GENS_BYTEORDER == GENS_LIL_ENDIAN
 #define PAUSED_MASK32_R  0x00FF0000
 #define PAUSED_MASK32_G  0x0000FF00
 #define PAUSED_MASK32_B  0x000000FF
 #define PAUSED_SHIFT32_R (16+3)
 #define PAUSED_SHIFT32_G (8+3)
 #define PAUSED_SHIFT32_B (0+3)
-#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
-#define PAUSED_MASK32_R  0x0000FF00
-#define PAUSED_MASK32_G  0x00FF0000
-#define PAUSED_MASK32_B  0xFF000000
-#define PAUSED_SHIFT32_R (8+3)
-#define PAUSED_SHIFT32_G (16+3)
-#define PAUSED_SHIFT32_B (24+3)
-#endif
 
 namespace LibGens
 {
