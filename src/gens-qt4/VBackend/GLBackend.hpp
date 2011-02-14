@@ -66,6 +66,27 @@ class GLBackend : public VBackend
 #endif /* HAVE_GLEW */
 		
 		/**
+		 * osd_show_preview(): Show a preview image on the OSD.
+		 * @param duration Duration for the preview image to appaer, in milliseconds.
+		 * @param img Image to show.
+		 */
+		void osd_show_preview(int duration, const QImage& img);
+		
+		/**
+		 * setBilinearFilter(): Set the bilinear filter setting.inline
+		 * NOTE: This function MUST be called from within an active OpenGL context!
+		 * @param newBilinearFilter True to enable bilinear filtering; false to disable it.
+		 */
+		void setBilinearFilter(bool newBilinearFilter);
+		
+		/**
+		 * setPauseTint(): Set the Pause Tint effect setting.
+		 * @param newFastBlur True to enable Pause Tint; false to disable it.
+		 */
+		void setPauseTint(bool newPauseTint);
+	
+	protected:
+		/**
 		 * glb_initializeGL(): Called when OpenGL is initialized.
 		 * NOTE: This function MUST be called from within an active OpenGL context!
 		 */
@@ -90,26 +111,6 @@ class GLBackend : public VBackend
 		 * TODO: Does this function need to be called from within an active OpenGL context?
 		 */
 		void glb_clearPreviewTex();
-		
-		/**
-		 * osd_show_preview(): Show a preview image on the OSD.
-		 * @param duration Duration for the preview image to appaer, in milliseconds.
-		 * @param img Image to show.
-		 */
-		void osd_show_preview(int duration, const QImage& img);
-		
-		/**
-		 * setBilinearFilter(): Set the bilinear filter setting.inline
-		 * NOTE: This function MUST be called from within an active OpenGL context!
-		 * @param newBilinearFilter True to enable bilinear filtering; false to disable it.
-		 */
-		void setBilinearFilter(bool newBilinearFilter);
-		
-		/**
-		 * setPauseTint(): Set the Pause Tint effect setting.
-		 * @param newFastBlur True to enable Pause Tint; false to disable it.
-		 */
-		void setPauseTint(bool newPauseTint);
 	
 	private:
 		// Window size.
