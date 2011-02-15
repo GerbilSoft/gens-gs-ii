@@ -122,16 +122,11 @@ void ZipSelectDialog::accept(void)
  */
 void ZipSelectDialog::on_treeView_clicked(const QModelIndex& index)
 {
-	// Get the selected item.
-	QModelIndexList indexList = treeView->selectionModel()->selectedIndexes();
-	if (indexList.size() != 1)
-		return;
-	
 	// If this item is a directory, disable the "OK" button.
 	// If this item is a file, enable the "OK" button.
 	QPushButton *button = buttonBox->button(QDialogButtonBox::Ok);
 	if (button)
-		button->setEnabled(!m_dirModel->hasChildren(indexList[0]));
+		button->setEnabled(!m_dirModel->hasChildren(index));
 }
 
 
