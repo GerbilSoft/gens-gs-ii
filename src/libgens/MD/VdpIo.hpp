@@ -205,6 +205,11 @@ class VdpIo
 		#define VDP_MODE_M5	(1 << 4)
 		static unsigned int VDP_Mode;
 		
+		/**
+		 * VRam: Video RAM.
+		 * SMS/GG: 16 KB.
+		 * MD: 64 KB. (32 KW)
+		 */
 		union VDP_VRam_t
 		{
 			uint8_t  u8[64*1024];
@@ -213,6 +218,12 @@ class VdpIo
 		};
 		static VDP_VRam_t VRam;
 		
+		/**
+		 * CRam: Color RAM.
+		 * SMS: 32 bytes.
+		 * MD: 128 bytes. (64 words)
+		 * GG: 64 bytes. (32 words)
+		 */
 		union VDP_CRam_t
 		{
 			uint8_t  u8[64<<1];
@@ -221,11 +232,16 @@ class VdpIo
 		};
 		static VDP_CRam_t CRam;
 		
-		// TODO: Shrink VSRam[] to 80 bytes (40 words).
+		/**
+		 * VSRam: Vertical Scroll RAM.
+		 * MD: 40 words.
+		 */
 		union VSRam_t
 		{
-			uint8_t  u8[128<<1];	// Only 80 bytes on the actual system!
-			uint16_t u16[128];	// Only 40 words on the actual system!
+			uint8_t  u8[40<<1];
+			uint16_t u16[40];
+			
+			uint8_t  reserved[128];		// TODO: Figure out how to remove this.
 		};
 		static VSRam_t VSRam;
 		
