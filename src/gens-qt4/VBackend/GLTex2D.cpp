@@ -43,19 +43,6 @@ GLTex2D::GLTex2D()
 	m_pow2_h = 0.0;
 	m_img_w = 0;
 	m_img_h = 0;
-	
-	// Determine if we have the packed pixel extension.
-	// TODO: GLEW doesn't have GL_APPLE_packed_pixels.
-	// Check if it exists manually.
-	// For now, we're always assuming it exists on Mac OS X.
-#ifdef Q_WS_MAC
-	m_hasPackedPixels = true;
-#else
-	m_hasPackedPixels = (GLEW_EXT_packed_pixels ||
-				/*GLEW_APPLE_PACKED_PIXELS ||*/
-				GLEW_VERSION_1_2
-				);
-#endif
 }
 
 GLTex2D::GLTex2D(const QImage& img)
@@ -158,7 +145,15 @@ void GLTex2D::setImage(const QImage& img)
 		needsPackedPixels = true;
 #endif
 	
-	if (needsPackedPixels && !m_hasPackedPixels)
+	// 15-bit and 16-bit color requires GL_EXT_packed_pixels.
+	// 32-bit color requires GL_EXT_packed_pixels on big-endian systems.
+	// TODO: GLEW doesn't have GL_APPLE_packed_pixels.
+	// Check if it exists manually.
+	const bool hasExtPackedPixels = (GLEW_VERSION_1_2
+						|| GLEW_EXT_packed_pixels
+						/*|| GLEW_APPLE_packed_pixels*/
+						);
+	if (needsPackedPixels && !hasExtPackedPixels)
 	{
 		// Packed pixels extension isn't available.
 		// Convert to 32-bit color.
@@ -170,11 +165,16 @@ void GLTex2D::setImage(const QImage& img)
 		
 		// TODO: Byteswap the data on big-endian.
 #if GENS_BYTEORDER == GENS_BIG_ENDIAN
-		LOG_MSG_ONCE(video, LOG_MSG_LEVEL_WARNING,
-				"GL_EXT_packed_pixels not available.");
+#ifdef Q_WS_MAC
+		LOG_MSG_ONCE(video, LOG_MSG_LEVEL_ERROR,
+				"GL_APPLE_packed_pixels is missing.");
+#else /* !Q_WS_MAC */
+		LOG_MSG_ONCE(video, LOG_MSG_LEVEL_ERROR,
+				"GL_EXT_packed_pixels is missing.");
+#endif /* Q_WS_MAC */
 		LOG_MSG_ONCE(video, LOG_MSG_LEVEL_WARNING,
 				"Textures may appear garbled.");
-#endif
+#endif /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
 	}
 	
 	// Save the original image size.
