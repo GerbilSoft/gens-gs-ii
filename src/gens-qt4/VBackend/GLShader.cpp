@@ -58,6 +58,11 @@ void GLShader::end(void)
 				glDeleteProgramsARB(1, &m_ARB_program);
 			break;
 		
+		case ST_GL_ATI_FRAGMENT_SHADER:
+			if (m_ATI_fragment_shader > 0)
+				glDeleteFragmentShaderATI(m_ATI_fragment_shader);
+			break;
+		
 		default:
 			break;
 	}
@@ -76,7 +81,7 @@ void GLShader::enable(void)
 		case ST_GL_ATI_TEXT_FRAGMENT_SHADER:
 #endif /* ENABLE_ATI_TEXT_FRAGMENT_SHADER */
 		{
-			if (m_ARB_program <= 0)
+			if (m_ARB_program == 0)
 				break;
 			
 #ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
@@ -93,6 +98,14 @@ void GLShader::enable(void)
 			glBindProgramARB(prgType, m_ARB_program);
 			break;
 		}
+		
+		case ST_GL_ATI_FRAGMENT_SHADER:
+			if (m_ATI_fragment_shader == 0)
+				break;
+			
+			glEnable(GL_FRAGMENT_SHADER_ATI);
+			glBindFragmentShaderATI(m_ATI_fragment_shader);
+			break;
 		
 		default:
 			break;
@@ -139,6 +152,13 @@ void GLShader::disable(void)
 #endif /* ENABLE_ATI_TEXT_FRAGMENT_SHADER */
 			break;
 		}
+		
+		case ST_GL_ATI_FRAGMENT_SHADER:
+			if (m_ATI_fragment_shader == 0)
+				break;
+			
+			glDisable(GL_FRAGMENT_SHADER_ATI);
+			break;
 		
 		default:
 			break;

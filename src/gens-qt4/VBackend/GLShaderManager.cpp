@@ -96,6 +96,8 @@ QStringList GLShaderManager::GLExtsInUse(void)
 	else if (GLEW_ATI_text_fragment_shader)
 		exts.append(QLatin1String("GL_ATI_text_fragment_shader"));
 #endif
+	else if (GLEW_ATI_fragment_shader)
+		exts.append(QLatin1String("GL_ATI_fragment_shader"));
 	
 	// TODO: Other GL extensions.
 #if 0

@@ -69,9 +69,10 @@ class GLShader
 		enum GLShaderType
 		{
 			ST_NONE				= 0,
-			ST_GL_ARB_FRAGMENT_PROGRAM	= 1,
+			ST_GL_ARB_FRAGMENT_PROGRAM,
+			ST_GL_ATI_FRAGMENT_SHADER,
 #ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
-			ST_GL_ATI_TEXT_FRAGMENT_SHADER	= 2,
+			ST_GL_ATI_TEXT_FRAGMENT_SHADER,
 #endif
 			
 			ST_MAX
@@ -97,6 +98,11 @@ class GLShader
 		 * m_ARB_program: ID of either GL_ARB_vertex_program or GL_ARB_fragment_program.
 		 */
 		GLuint m_ARB_program;
+		
+		/**
+		 * m_ATI_fragment_shader: ID of GL_ATI_fragment_shader.
+		 */
+		GLuint m_ATI_fragment_shader;
 #endif /* HAVE_GLEW */
 	
 	private:

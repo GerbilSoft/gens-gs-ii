@@ -155,6 +155,37 @@ void GLShaderPaused::init()
 		}
 	}
 #endif /* ENABLE_ATI_TEXT_FRAGMENT_SHADER */
+	else if (GLEW_ATI_fragment_shader)
+	{
+		// ATI fragment shaders are supported.
+		m_ATI_fragment_shader = glGenFragmentShadersATI(1);
+		glBindFragmentShaderATI(m_ATI_fragment_shader);
+		glBeginFragmentShaderATI();
+		
+		// Constants.
+		static const float RGBtoGrayscale[4] = {0.299, 0.587, 0.114, 0.0};
+		glSetFragmentShaderConstantATI(GL_CON_0_ATI, RGBtoGrayscale);
+		
+		// SampleMap r0, t0.str;
+		glSampleMapATI(GL_REG_0_ATI, GL_TEXTURE0_ARB, GL_SWIZZLE_STR_ATI);
+		
+		// DOT3 r0.rgb, r0, c0;
+		glColorFragmentOp2ATI(GL_DOT3_ATI,
+				GL_REG_0_ATI, (GL_RED_BIT_ATI | GL_GREEN_BIT_ATI | GL_BLUE_BIT_ATI), GL_NONE,
+				GL_REG_0_ATI, GL_NONE, GL_NONE,
+				GL_CON_0_ATI, GL_NONE, GL_NONE);
+		
+		// ADD r0.b.sat, r0.b, r0.b;
+		glColorFragmentOp2ATI(GL_ADD_ATI,
+				GL_REG_0_ATI, GL_BLUE_BIT_ATI, GL_SATURATE_BIT_ATI,
+				GL_REG_0_ATI, GL_BLUE_BIT_ATI, GL_NONE,
+				GL_REG_0_ATI, GL_BLUE_BIT_ATI, GL_NONE);
+		
+		glEndFragmentShaderATI();
+		
+		// Set the shader type.
+		setShaderType(ST_GL_ATI_FRAGMENT_SHADER);
+	}
 #endif /* HAVE_GLEW */
 }
 
