@@ -30,6 +30,7 @@ namespace GensQt4
 EmuThread::EmuThread()
 {
 	m_stop = false;
+	m_doFastFrame = false;
 }
 
 EmuThread::~EmuThread()
