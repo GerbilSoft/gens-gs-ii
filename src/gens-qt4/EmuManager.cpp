@@ -223,7 +223,9 @@ int EmuManager::loadRom(LibGens::Rom *rom)
 	if (gqt4_emuThread || m_rom)
 	{
 		// Close the ROM first.
-		closeRom();
+		// Don't emit a stateChanged() signal, since
+		// we're opening a ROM immediately afterwards.
+		closeRom(false);
 		
 		// HACK: Set a QTimer for 100 ms to actually load the ROM to make sure
 		// the emulation thread is shut down properly.
@@ -329,8 +331,9 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 
 /**
  * closeRom(): Close the open ROM file and stop emulation.
+ * @param emitStateChanged If true, emits the stateChanged() signal after the ROM is closed.
  */
-int EmuManager::closeRom(void)
+int EmuManager::closeRom(bool emitStateChanged)
 {
 	if (!isRomOpen())
 		return 0;
@@ -367,16 +370,24 @@ int EmuManager::closeRom(void)
 	m_audio->close();
 	m_paused.data = 0;
 	
-	if (gqt4_config->introStyle() == 0)
+	// Only clear the screen if we're emitting stateChanged().
+	// If we're not emitting stateChanged(), this usually means
+	// we're loading a new ROM immediately afterwards, so
+	// clearing the screen is a waste of time.
+	if (emitStateChanged)
 	{
-		// No intro effect specified.
-		// Clear the screen.
-		LibGens::VdpIo::Reset();
-		emit updateVideo();
+		if (gqt4_config->introStyle() == 0)
+		{
+			// Intro Effect is disabled.
+			// Clear the screen.
+			LibGens::VdpIo::Reset();
+			emit updateVideo();
+		}
+		
+		// Update the Gens title.
+		emit stateChanged();
 	}
 	
-	// Update the Gens title.
-	emit stateChanged();
 	return 0;
 }
 

@@ -58,6 +58,10 @@ class EmuManager : public QObject
 		int openRom(QWidget *parent = 0);
 		int openRom(const QString& filename);
 		int loadRom(LibGens::Rom *rom);
+		
+		/**
+		 * closeRom(): Close the open ROM file and stop emulation.
+		 */
 		int closeRom(void);
 		
 		// Emulation status and properties.
@@ -113,6 +117,12 @@ class EmuManager : public QObject
 		// TODO: Fix the threading issue!
 		int loadRom_int(LibGens::Rom *rom);
 		LibGens::Rom *m_loadRom_int_tmr_rom;
+		
+		/**
+		 * closeRom(): Close the open ROM file and stop emulation.
+		 * @param emitStateChanged If true, emits the stateChanged() signal after the ROM is closed.
+		 */
+		int closeRom(bool emitStateChanged);
 		
 		// Timing management.
 		double m_lastTime;	// Last time a frame was updated.
@@ -307,6 +317,13 @@ class EmuManager : public QObject
 		
 		void doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, int val);
 };
+
+
+/**
+ * closeRom(): Close the open ROM file and stop emulation.
+ */
+inline int EmuManager::closeRom(void)
+	{ return closeRom(true); }
 
 }
 
