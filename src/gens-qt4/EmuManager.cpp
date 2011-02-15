@@ -54,7 +54,6 @@
 
 // Qt includes.
 #include <QtCore/QTimer>
-#include <QtCore/QScopedPointer>
 #include <QtGui/QApplication>
 #include <QtGui/QFileDialog>
 
@@ -192,18 +191,20 @@ int EmuManager::openRom(const QString& filename)
 	{
 		// Multi-file ROM archive.
 		// Prompt the user to select a file.
-		QScopedPointer<ZipSelectDialog> zipsel(new ZipSelectDialog());
+		ZipSelectDialog *zipsel = new ZipSelectDialog();
 		zipsel->setFileList(rom->get_z_entry_list());
 		int ret = zipsel->exec();
 		if (ret != QDialog::Accepted || zipsel->selectedFile() == NULL)
 		{
 			// Dialog was rejected.
 			delete rom;
+			delete zipsel;
 			return -3;
 		}
 		
 		// Get the selected file.
 		rom->select_z_entry(zipsel->selectedFile());
+		delete zipsel;
 	}
 	
 	// Load the selected ROM file.

@@ -30,11 +30,14 @@
 #include <stdint.h>
 #include <math.h>
 
+// C++ includes.
+#include <memory>
+using std::auto_ptr;
+
 // zlib
 #include <zlib.h>
 
 // Qt4 includes.
-#include <QtCore/QScopedPointer>
 #include <QtGui/QFileDialog>
 #include <QtGui/QColorDialog>
 #include <QtGui/QPainter>
@@ -561,7 +564,7 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 	QString rom_size_warning;
 	
 	// Open the ROM file using LibGens::Rom.
-	QScopedPointer<LibGens::Rom> rom(new LibGens::Rom(filename.toUtf8().constData()));
+	auto_ptr<LibGens::Rom> rom(new LibGens::Rom(filename.toUtf8().constData()));
 	if (!rom->isOpen())
 	{
 		// Error opening ROM file.
