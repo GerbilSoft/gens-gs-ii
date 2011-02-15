@@ -101,6 +101,10 @@ int gens_main(int argc, char *argv[])
 	// Unregister the signal handler.
 	GensQt4::SigHandler::End();
 	
+	// Delete the configuration object.
+	delete GensQt4::gqt4_config;
+	GensQt4::gqt4_config = NULL;
+	
 	// Finished.
 	return ret;
 }
@@ -174,11 +178,7 @@ void QuitGens(void)
 	
 	// Save the configuration.
 	if (gqt4_config)
-	{
 		gqt4_config->save();
-		delete gqt4_config;
-		gqt4_config = NULL;
-	}
 }
 
 }
