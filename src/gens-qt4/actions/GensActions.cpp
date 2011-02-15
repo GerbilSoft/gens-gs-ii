@@ -108,6 +108,7 @@ bool GensActions::doAction(int action)
 				
 				case MNUID_ITEM(IDM_FILE_QUIT):
 					// Quit.
+					m_parent->setIdleThreadAllowed(false);
 					m_parent->closeRom();
 					QuitGens();
 					m_parent->close();

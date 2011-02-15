@@ -332,6 +332,9 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
  */
 int EmuManager::closeRom(void)
 {
+	if (!isRomOpen())
+		return 0;
+	
 	if (gqt4_emuThread)
 	{
 		// Disconnect the emuThread's signals.
@@ -364,10 +367,13 @@ int EmuManager::closeRom(void)
 	m_audio->close();
 	m_paused.data = 0;
 	
-	// TODO: Start the idle animation thread if an idle animation is specified.
-	// For now, just clear the screen.
-	LibGens::VdpIo::Reset();
-	emit updateVideo();
+	if (gqt4_config->introStyle() == 0)
+	{
+		// No intro effect specified.
+		// Clear the screen.
+		LibGens::VdpIo::Reset();
+		emit updateVideo();
+	}
 	
 	// Update the Gens title.
 	emit stateChanged();

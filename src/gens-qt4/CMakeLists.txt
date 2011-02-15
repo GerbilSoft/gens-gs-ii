@@ -100,6 +100,7 @@ SET(gens-qt4_SRCS
 	GensWindow.cpp
 	AboutWindow.cpp
 	EmuThread.cpp
+	IdleThread.cpp
 	GensQApplication.cpp
 	SigHandler.cpp
 	VBackend/VBackend.cpp
@@ -139,6 +140,7 @@ SET(gens-qt4_MOC_HEADERS
 	GensWindow.hpp
 	AboutWindow.hpp
 	EmuThread.hpp
+	IdleThread.hpp
 	GensQApplication.hpp
 	VBackend/GensQGLWidget.hpp
 	CtrlConfigWindow.hpp

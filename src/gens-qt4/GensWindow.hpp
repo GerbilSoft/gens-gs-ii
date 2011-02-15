@@ -42,6 +42,9 @@ class QCloseEvent;
 #include "EmuManager.hpp"
 #include "actions/GensActions.hpp"
 
+// Idle thread.
+#include "IdleThread.hpp"
+
 namespace GensQt4
 {
 
@@ -68,6 +71,11 @@ class GensWindow : public QMainWindow
 		// Set color depth.
 		// TODO: Should this really be here, or should it be a slot?
 		void setBpp(LibGens::VdpPalette::ColorDepth newBpp);
+		
+		// Idle thread.
+		inline bool idleThreadAllowed(void)
+			{ return m_idleThreadAllowed; }
+		void setIdleThreadAllowed(bool newIdleThreadAllowed);
 	
 	public slots:
 		/** Wrapper functions for GensActions. **/
@@ -92,7 +100,6 @@ class GensWindow : public QMainWindow
 	
 	protected:
 		void setupUi(void);
-		void retranslateUi(void);
 		
 		// QMainWindow virtual functions.
 		void closeEvent(QCloseEvent *event);
@@ -181,6 +188,21 @@ class GensWindow : public QMainWindow
 		 * @param newStretchMode New Stretch Mode setting.
 		 */
 		void stretchMode_changed_slot(GensConfig::StretchMode newStretchMode);
+	
+	private:
+		/** Idle thread. **/
+		IdleThread *m_idleThread;
+		bool m_idleThreadAllowed;
+		void checkIdleThread(void);
+	
+	private slots:
+		void idleThread_frameDone(void);
+		
+		/**
+		 * introStyle_changed_slot(): Intro Style setting has changed.
+		 * @param newIntroStyle New Intro Style setting.
+		 */
+		void introStyle_changed_slot(int newIntroStyle);
 };
 
 }

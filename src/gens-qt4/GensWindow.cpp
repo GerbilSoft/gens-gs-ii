@@ -60,8 +60,10 @@ namespace GensQt4
  */
 GensWindow::GensWindow()
 {
-	m_scale = 1;		// Set the scale to 1x by default.
-	m_hasInitResize = false;
+	m_scale = 1;			// Set the scale to 1x by default.
+	m_hasInitResize = false;	// Initial resize hasn't occurred yet.
+	m_idleThread = NULL;		// Clear the idle thread.
+	m_idleThreadAllowed = false;	// Not allowed yet.
 	
 	// Initialize the Emulation Manager.
 	m_emuManager = new EmuManager();
@@ -82,6 +84,10 @@ GensWindow::GensWindow()
 	m_vBackend->osd_lock();
 	gqt4_config->emitAll();
 	m_vBackend->osd_unlock();
+	
+	// Initialize the emulation state.
+	m_idleThreadAllowed = true;
+	stateChanged();
 }
 
 
@@ -124,9 +130,6 @@ void GensWindow::setupUi(void)
 	centralwidget = new QWidget(this);
 	centralwidget->setObjectName(QString::fromLatin1("centralwidget"));
 	this->setCentralWidget(centralwidget);
-	
-	// Retranslate the UI.
-	retranslateUi();
 	
 	// Connect slots by name.
 	QMetaObject::connectSlotsByName(this);
@@ -195,18 +198,9 @@ void GensWindow::setupUi(void)
 	connect(gqt4_config, SIGNAL(stretchMode_changed(GensConfig::StretchMode)),
 		this, SLOT(stretchMode_changed_slot(GensConfig::StretchMode)));
 	
-	// Retranslate the UI.
-	retranslateUi();
-}
-
-
-/**
- * retranslateUi(): Retranslate the User Interface.
- */
-void GensWindow::retranslateUi(void)
-{
-	// Set the Gens title.
-	setGensTitle();
+	// Intro Style Changed signal.
+	connect(gqt4_config, SIGNAL(introStyle_changed(int)),
+		this, SLOT(introStyle_changed_slot(int)));
 }
 
 
@@ -502,6 +496,10 @@ void GensWindow::stateChanged(void)
 		m_vBackend->resetFps();
 	}
 	
+	// Check the idle thread state.
+	checkIdleThread();
+	
+	// Update the Gens window title.
 	setGensTitle();
 }
 
@@ -605,5 +603,88 @@ void GensWindow::setAudioRate(int newRate)
 	{ m_emuManager->setAudioRate(newRate); }
 void GensWindow::setStereo(bool newStereo)
 	{ m_emuManager->setStereo(newStereo); }
+
+
+void GensWindow::setIdleThreadAllowed(bool newIdleThreadAllowed)
+{
+	m_idleThreadAllowed = newIdleThreadAllowed;
+	checkIdleThread();
+}
+
+
+void GensWindow::checkIdleThread(void)
+{
+	if (m_emuManager->isRomOpen() ||
+		!m_idleThreadAllowed ||
+		gqt4_config->introStyle() == 0)
+	{
+		// Make sure the idle thread isn't running.
+		// TODO: Check for race conditions.
+		if (m_idleThread)
+		{
+			m_idleThread->stop();
+			m_idleThread->wait();
+			delete m_idleThread;
+			m_idleThread = NULL;
+		}
+	}
+	else
+	{
+		// Make sure the idle thread is running.
+		// TODO: Check for race conditions.
+		if (!m_idleThread || !m_idleThread->isRunning())
+		{
+			// Idle thread isn't running.
+			delete m_idleThread;	// if it exists but isn't running
+			m_idleThread = new IdleThread(this);
+			connect(m_idleThread, SIGNAL(frameDone()),
+				this, SLOT(idleThread_frameDone()));
+			
+			// Start the idle thread.
+			m_idleThread->start();
+		}
+	}
+}
+
+
+/**
+ * idleThread_frameDone(): The Idle thread is finished rendering a frame.
+ */
+void GensWindow::idleThread_frameDone(void)
+{
+	// Make sure the idle thread is still running.
+	if (!m_idleThread || m_idleThread->isStopRequested())
+		return;
+	if (m_emuManager->isRomOpen())
+		return;
+	
+	// Update video.
+	emit updateVideo();
+	
+	// Resume the idle thread.
+	m_idleThread->resume();
+}
+
+
+/**
+ * introStyle_changed_slot(): Intro Style setting has changed.
+ * @param newIntroStyle New Intro Style setting.
+ */
+void GensWindow::introStyle_changed_slot(int newIntroStyle)
+{
+	checkIdleThread();
+	
+	// Prevent race conditions.
+	if (!m_emuManager)
+		return;
+	
+	if (!m_emuManager->isRomOpen() && newIntroStyle == 0)
+	{
+		// Intro style was changed to "None", and emulation isn't running.
+		// Clear the screen.
+		LibGens::VdpIo::Reset();
+		updateVideo();
+	}
+}
 
 }
