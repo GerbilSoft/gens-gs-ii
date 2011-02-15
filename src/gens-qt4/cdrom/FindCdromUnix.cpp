@@ -93,9 +93,8 @@ int FindCdromUnix::query_int(void)
 					(QDir::NoSymLinks | QDir::System), QDir::Name);
 	
 	// Search for block devices that are readable by the user.
-	QFileInfo fileInfo;
 	QStringList devicesUsable;
-	foreach(fileInfo, devFiles)
+	foreach (const QFileInfo& fileInfo, devFiles)
 	{
 		if (fileInfo.isDir() || !fileInfo.isReadable())
 			continue;
@@ -116,8 +115,7 @@ int FindCdromUnix::query_int(void)
 	
 	// Get drive information.
 	// TODO: We're just getting the pathname right now.
-	QString devFilename;
-	foreach(devFilename, devicesUsable)
+	foreach (const QString& devFilename, devicesUsable)
 	{
 		// Construct the CdromDriveEntry.
 		CdromDriveEntry drive;

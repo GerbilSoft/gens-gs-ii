@@ -280,11 +280,8 @@ void McdControlWindow::driveQueryFinished(void)
 		return;
 	}
 	
-	CdromDriveEntry drive;
-	foreach(drive, m_queryList)
-	{
+	foreach (const CdromDriveEntry& drive, m_queryList)
 		addDriveEntry(drive);
-	}
 	
 	// Set cboCdDrive's selected index to 0 so that the
 	// first CD-ROM drive is displayed.

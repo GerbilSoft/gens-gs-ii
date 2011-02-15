@@ -122,8 +122,7 @@ void GensZipDirItem::sort(int column, Qt::SortOrder order)
 		qSort(m_childItems.begin(), m_childItems.end(), SortFilenameGreaterThan);
 	
 	// Sort child items of child items.
-	GensZipDirItem *item;
-	foreach(item, m_childItems)
+	foreach (GensZipDirItem *item, m_childItems)
 		item->sort(column, order);
 }
 

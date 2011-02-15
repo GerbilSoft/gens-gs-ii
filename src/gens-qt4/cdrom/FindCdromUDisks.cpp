@@ -198,11 +198,8 @@ int FindCdromUDisks::query_int(void)
 	// Received disk devices.
 	// Query each disk device to see if it's a CD-ROM drive.
 	const QtDBus_ao_t& disks = reply_EnumerateDevices.value();
-	QDBusObjectPath cur_disk;
-	foreach(cur_disk, disks)
-	{
+	foreach (const QDBusObjectPath& cur_disk, disks)
 		queryUDisksDevice(cur_disk);
-	}
 	
 	// Devices queried.
 	emit driveQueryFinished();
@@ -273,8 +270,7 @@ int FindCdromUDisks::queryUDisksDevice(const QDBusObjectPath& objectPath)
 	// Determine the drive media support.
 	// TODO: Convert ms_UDisks_DriveID[] to a QMap.
 	const QStringList& DriveMediaCompatibility = reply_DriveMediaCompatibility.toStringList();
-	QString drive_media_id;
-	foreach (drive_media_id, DriveMediaCompatibility)
+	foreach (const QString& drive_media_id, DriveMediaCompatibility)
 	{
 		// Check the drive media table.
 		for (size_t i = 0; i < sizeof(ms_UDisks_DriveID)/sizeof(ms_UDisks_DriveID[0]); i++)

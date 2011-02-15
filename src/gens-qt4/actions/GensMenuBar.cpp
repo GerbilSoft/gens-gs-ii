@@ -66,8 +66,7 @@ void GensMenuBar::clearHashTables(void)
 	// TODO: Consider using QScopedPointer or QSharedPointer instead?
 	
 	// Actions map.
-	QAction *action;
-	foreach(action, m_hashActions)
+	foreach (QAction *action, m_hashActions)
 		delete action;
 	m_hashActions.clear();
 	
@@ -76,8 +75,7 @@ void GensMenuBar::clearHashTables(void)
 		delete m_lstSeparators.takeFirst();
 	
 	// Menus map.
-	QMenu *menu;
-	foreach(menu, m_hashMenus)
+	foreach (QMenu *menu, m_hashMenus)
 		delete menu;
 	m_hashMenus.clear();
 }
