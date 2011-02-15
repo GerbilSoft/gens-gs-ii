@@ -538,6 +538,10 @@ int main(int argc, char *argv[])
 	int ret = process_pcm(f_pcm, f_wav, start_pos, max_length,
 			      sample_rate, &samples_processed);
 	
+	// Close the files.
+	fclose(f_wav);
+	fclose(f_pcm);
+	
 	// Print statistics.
 	const int mins = (samples_processed / sample_rate / 60);
 	const int secs = (samples_processed / sample_rate % 60);
