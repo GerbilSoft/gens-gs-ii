@@ -131,7 +131,9 @@ inline void SysVersion::setDisk(bool newDisk)
  */
 inline uint8_t SysVersion::readData(void) const
 {
-	return (((uint8_t)m_region) << 6 | (!!m_disk << 5));
+	// NOTE: m_disk uses active-high logic.
+	// The version register uses active-low logic for /DISK.
+	return (((uint8_t)m_region) << 6 | (!m_disk << 5));
 }
 
 }
