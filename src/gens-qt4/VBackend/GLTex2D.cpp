@@ -47,8 +47,12 @@ GLTex2D::GLTex2D()
 
 GLTex2D::GLTex2D(const QImage& img)
 {
-	// Do main initialization.
-	GLTex2D();
+	// Initialize variables.
+	m_tex = 0;
+	m_pow2_w = 0.0;
+	m_pow2_h = 0.0;
+	m_img_w = 0;
+	m_img_h = 0;
 	
 	// Set the image.
 	setImage(img);
