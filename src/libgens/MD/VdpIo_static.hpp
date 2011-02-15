@@ -24,6 +24,8 @@
 #ifndef __LIBGENS_MD_VDPIO_STATIC_HPP__
 #define __LIBGENS_MD_VDPIO_STATIC_HPP__
 
+#include "VdpIo.hpp"
+
 namespace LibGens
 {
 
