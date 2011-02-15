@@ -125,8 +125,9 @@ inline void PausedEffect::T_DoPausedEffect(pixel* RESTRICT outScreen)
 		
 		// Convert the color components to monochrome.
 		// TODO: SSE optimization.
-		// Monochrome vector: [0.30 0.59 0.11]
-		monoPx = ((float)r * 0.30f) + ((float)g * 0.59f) + ((float)b * 0.11f);
+		// Grayscale vector: [0.299 0.587 0.114] (ITU-R BT.601)
+		// Source: http://en.wikipedia.org/wiki/YCbCr
+		monoPx = ((float)r * 0.299f) + ((float)g * 0.587f) + ((float)b * 0.114f);
 		nRG = (uint8_t)monoPx;
 		if (nRG > 0x1F)
 			nRG = 0x1F;
