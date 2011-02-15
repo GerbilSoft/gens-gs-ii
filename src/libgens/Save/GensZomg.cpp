@@ -106,7 +106,7 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 	/** VDP: MD-specific **/
 	
 	// Load VSRam.
-	zomg.loadMD_VSRam(VdpIo::VSRam.u16, 80, true);
+	zomg.loadMD_VSRam(VdpIo::VSRam.u16, sizeof(VdpIo::VSRam.u16), true);
 	
 	/** Audio **/
 	
@@ -267,7 +267,7 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	/** VDP: MD-specific **/
 	
 	// Save VSRam.
-	zomg.saveMD_VSRam(VdpIo::VSRam.u16, 80, true);
+	zomg.saveMD_VSRam(VdpIo::VSRam.u16, sizeof(VdpIo::VSRam.u16), true);
 	
 	/** Audio **/
 	
