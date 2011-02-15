@@ -49,9 +49,6 @@ VdpPalette::VdpPalette()
 	m_bpp = BPP_32;
 	m_dirty = true;
 	
-	// TODO: Should we recalculate the palette now or wait?
-	recalcFull();
-	
 	// Reset the active palettes.
 	resetActive();
 }

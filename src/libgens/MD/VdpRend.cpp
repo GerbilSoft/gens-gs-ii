@@ -42,9 +42,7 @@ namespace LibGens
  */
 void VdpRend::Init(void)
 {
-	// Recalculate the VDP palette.
-	// TODO: Wait until the Bpp is set?
-	m_palette.recalcFull();
+	// TODO
 }
 
 
