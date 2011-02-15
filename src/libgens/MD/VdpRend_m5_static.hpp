@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -23,6 +23,8 @@
 
 #ifndef __LIBGENS_MD_VDPREND_M5_STATIC_HPP__
 #define __LIBGENS_MD_VDPREND_M5_STATIC_HPP__
+
+#include "VdpRend_m5.hpp"
 
 namespace LibGens
 {
