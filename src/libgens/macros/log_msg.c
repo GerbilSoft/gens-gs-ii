@@ -50,8 +50,7 @@ void log_msg(const char *channel, int level, const char *fn, const utf8_str *msg
 	
 	// First part of the message.
 	ret = snprintf(out_msg, sizeof(out_msg), "%s:%d:%s(): ", channel, level, fn);
-	out_msg[sizeof(out_msg)-1] = 0x00;
-	if (ret <= 0 || ret >= sizeof(out_msg))
+	if (ret <= 0 || ret >= (int)sizeof(out_msg))
 	{
 		// Error writing the first part of the message.
 		return;
@@ -62,6 +61,7 @@ void log_msg(const char *channel, int level, const char *fn, const utf8_str *msg
 	va_start(ap, msg);
 	vsnprintf(&out_msg[ret], (sizeof(out_msg)-ret), msg, ap);
 	va_end(ap);
+	out_msg[sizeof(out_msg)-1] = 0x00;
 	
 	// Print the message to stderr.
 	fprintf(stderr, "%s\n", out_msg);

@@ -85,7 +85,7 @@ int EEPRom::setEEPRomType(int type)
 		memset(&m_eprType, 0x00, sizeof(m_eprType));
 		return 0;
 	}
-	else if (type >= ((sizeof(ms_Database)/sizeof(ms_Database[0]))))
+	else if (type >= (int)((sizeof(ms_Database)/sizeof(ms_Database[0]))))
 	{
 		// Type ID is out of range.
 		return 1;

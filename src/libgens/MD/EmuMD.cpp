@@ -64,7 +64,7 @@ EmuMD::EmuMD(Rom *rom)
 	}
 	
 	// Check the ROM size.
-	if ((rom->romSize() == 0) || (rom->romSize() > sizeof(M68K_Mem::Rom_Data)))
+	if ((rom->romSize() == 0) || (rom->romSize() > (int)sizeof(M68K_Mem::Rom_Data)))
 	{
 		// ROM is either empty or too big.
 		// TODO: Set an error code.

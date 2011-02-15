@@ -314,7 +314,7 @@ int Zomg::loadM68KReg(Zomg_M68KRegSave_t *state)
 	uint8_t data[sizeof(Zomg_M68KRegSave_t)];
 	int ret = loadFromZomg("MD/M68K_reg.bin", &data, sizeof(data));
 	
-	if (ret == sizeof(Zomg_M68KRegSave_Old_t))
+	if (ret == (int)sizeof(Zomg_M68KRegSave_Old_t))
 	{
 		// OLD VERSION. (pre-c43510fe)
 		// DEPRECATED: Remove this once ZOMG is completed.
@@ -353,7 +353,7 @@ int Zomg::loadM68KReg(Zomg_M68KRegSave_t *state)
 			state->usp = be32_to_cpu(old_state.areg[7]);
 		}
 	}
-	else if (ret >= sizeof(Zomg_M68KRegSave_t))
+	else if (ret >= (int)sizeof(Zomg_M68KRegSave_t))
 	{
 		// New version. (c43510fe or later)
 		memcpy(state, &data, sizeof(*state));

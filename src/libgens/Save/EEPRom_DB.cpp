@@ -99,10 +99,10 @@ const EEPRom::GameEEPRomInfo EEPRom::ms_Database[29] =
 int EEPRom::DetectEEPRomType(const char *serial, size_t serial_len, uint16_t checksum)
 {
 	// Scan the database for potential matches.
-	for (int i = 0; i < (sizeof(ms_Database)/sizeof(ms_Database[0])); i++)
+	for (size_t i = 0; i < (sizeof(ms_Database)/sizeof(ms_Database[0])); i++)
 	{
 		// TODO: Figure out how to get rid of the strlen().
-		int dbSerial_len = strlen(ms_Database[i].game_id);
+		size_t dbSerial_len = strlen(ms_Database[i].game_id);
 		if (dbSerial_len > serial_len)
 		{
 			// Serial number in the database is longer than
