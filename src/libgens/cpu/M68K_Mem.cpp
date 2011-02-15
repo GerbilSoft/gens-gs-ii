@@ -102,7 +102,6 @@ int M68K_Mem::Cycles_Z80;
 
 // TODO: Move ms_Region somewhere else?
 SysVersion M68K_Mem::ms_SysVersion;
-int M68K_Mem::Gen_Mode;
 
 uint8_t M68K_Mem::ms_SSF2_BankState[8];
 

@@ -99,7 +99,6 @@ class M68K_Mem
 		
 		// TODO: Move ms_SysVersion somewhere else?
 		static SysVersion ms_SysVersion;
-		static int Gen_Mode;
 		
 		/** Public init and read/write functions. **/
 		static void InitSys(M68K::SysID system);

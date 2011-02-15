@@ -109,7 +109,6 @@ EmuMD::EmuMD(Rom *rom)
 	// TODO: Set these elsewhere.
 	M68K_Mem::ms_SysVersion.setRegion(SysVersion::REGION_US_NTSC);
 	M68K_Mem::ms_SysVersion.setDisk(false);		// No MCD connected.
-	M68K_Mem::Gen_Mode = 0;		// TODO: This isn't actually used anywhere right now...
 	
 	// TODO: VdpIo::VDP_Lines.Display.Total isn't being set properly...
 	VdpIo::VDP_Lines.Display.Total = (M68K_Mem::ms_SysVersion.isPal() ? 312 : 262);
