@@ -200,6 +200,7 @@ void AboutWindow::initAboutWindowText(void)
 	
 	// Set the included libraries text.
 	lblIncLibraries->setText(AboutWindow::GetIncLibraries());
+	lblIncLibraries->setTextFormat(Qt::RichText);
 	
 	// Set the debug information text.
 	lblDebugInfo->setText(AboutWindow::GetDebugInfo());
