@@ -83,12 +83,6 @@ VdpIo::Interlaced_t VdpIo::Interlaced;
 // This is needed to properly implement Sprite Masking in S1.
 int VdpIo::SpriteDotOverflow;
 
-// HACK: There's a minor issue with the SegaCD firmware.
-// The firmware turns off the VDP after the last line,
-// which causes the entire screen to disappear if paused.
-// TODO: Don't rerun the VDP drawing functions when paused!
-int VdpIo::HasVisibleLines;	// 0 if VDP was off for the whole frame.
-
 // Horizontal Interrupt Counter.
 int VdpIo::HInt_Counter;
 

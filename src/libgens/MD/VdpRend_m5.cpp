@@ -1480,24 +1480,7 @@ void VdpRend_m5::Render_Line(void)
 #endif
 	
 	// Check if the VDP is enabled.
-	bool VDP_Enabled = false;
-	if (!in_border)
-	{
-		// HACK: There's a minor issue with the SegaCD firmware.
-		// The firmware turns off the VDP after the last line,
-		// which causes the entire screen to disappear if paused.
-		// TODO: Don't rerun the VDP drawing functions when paused!
-		
-		if (VdpIo::VDP_Reg.m5.Set2 & 0x40)
-			VDP_Enabled = true;
-		// TODO: LibGens: Reimplement Settings.Active and Settings.Paused.
-#if 0
-		else if ((!Settings.Active || Settings.Paused) && VdpIo::HasVisibleLines)
-			VDP_Enabled = true;
-#endif
-	}
-	
-	if (!VDP_Enabled)
+	if (!(VdpIo::VDP_Reg.m5.Set2 & 0x40) || in_border)
 	{
 		// VDP is disabled, or this is the border region.
 		// Clear the line buffer.
@@ -1512,12 +1495,6 @@ void VdpRend_m5::Render_Line(void)
 	else
 	{
 		// VDP is enabled.
-		
-		// HACK: There's a minor issue with the SegaCD firmware.
-		// The firmware turns off the VDP after the last line,
-		// which causes the entire screen to disappear if paused.
-		// TODO: Don't rerun the VDP drawing functions when paused!
-		VdpIo::HasVisibleLines = 1;
 		
 		// Check if sprite structures need to be updated.
 		if (VdpIo::Interlaced.DoubleRes)

@@ -166,12 +166,6 @@ class VdpIo
 		// This is needed to properly implement Sprite Masking in S1.
 		static int SpriteDotOverflow;
 		
-		// HACK: There's a minor issue with the SegaCD firmware.
-		// The firmware turns off the VDP after the last line,
-		// which causes the entire screen to disappear if paused.
-		// TODO: Don't rerun the VDP drawing functions when paused!
-		static int HasVisibleLines;	// 0 if VDP was off for the whole frame.
-		
 		// Horizontal Interrupt Counter.
 		static int HInt_Counter;
 		

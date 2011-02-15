@@ -260,14 +260,6 @@ void VdpIo::Set_Visible_Lines(void)
 	// Check interlaced mode.
 	Interlaced.HalfLine  = ((VDP_Reg.m5.Set4 & 0x02) >> 1);		// LSM0
 	Interlaced.DoubleRes = ((VDP_Reg.m5.Set4 & 0x04) >> 2);		// LSM1
-	
-	// HACK: There's a minor issue with the SegaCD firmware.
-	// The firmware turns off the VDP after the last line,
-	// which causes the entire screen to disappear if paused.
-	// TODO: Don't rerun the VDP drawing functions when paused!
-	// TODO: Settings.Active / !Settings.Paused (LibGens)
-	//if (Settings.Active && !Settings.Paused)
-		HasVisibleLines = 0;
 }
 
 
