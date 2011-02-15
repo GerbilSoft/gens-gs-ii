@@ -232,7 +232,7 @@ class Rom
 		
 		MD_RomHeader m_mdHeader;
 		
-		// ROM names. (TODO: Convert from cp1252/Shift-JIS to UTF-8.)
+		// ROM names.
 		std::string m_romNameJP;
 		std::string m_romNameUS;
 };

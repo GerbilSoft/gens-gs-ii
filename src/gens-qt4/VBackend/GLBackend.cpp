@@ -35,7 +35,6 @@
 #include "libgens/MD/EmuMD.hpp"
 
 // Win32 requires GL/glext.h for OpenGL 1.2/1.3.
-// TODO: Check the GL implementation to see what functionality is available at runtime.
 #if defined(Q_WS_MAC)
 #include <OpenGL/glext.h>
 #else
@@ -487,7 +486,7 @@ void GLBackend::glb_paintGL(void)
 		if (LibGens::VdpRend::m_palette.bpp() != m_lastBpp)
 		{
 			// Bpp has changed. Reallocate the texture.
-			// TODO: Recalculate palettes?
+			// VDP palettes will be recalculated on the next frame.
 			reallocTexture();
 		}
 		
@@ -716,7 +715,6 @@ void GLBackend::printOsdText(void)
 	const double curTime = LibGens::Timing::GetTimeD();
 	
 	// Check if the FPS should be drawn.
-	// TODO: Integrate this with the for loop.
 	if (isRunning() && !isPaused() && osdFpsEnabled())
 	{
 		QString sFps = QString::number(m_fpsAvg, 'f', 1);
@@ -795,8 +793,6 @@ void GLBackend::printOsdText(void)
 			const RecOsd &recOsd = m_osdRecList[i];
 			msg = (recOsd.isRecording ? sRec : QChar(0x25A0)) +
 				recOsd.component + QChar(L' ');
-			
-			// TODO: If stopped, remove the message after a certain duration has passed.
 			
 			// Format the duration.
 			int secs = (recOsd.duration / 1000);

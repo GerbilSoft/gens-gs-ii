@@ -58,13 +58,11 @@ Rom::Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverr
 	m_filenameBaseNoExt = m_filename;
 	
 	// Get the filename portion.
-	// TODO: Do this in the Rom class?
 	size_t dirSep = m_filenameBaseNoExt.rfind(LG_PATH_SEP_CHR);
 	if (dirSep != string::npos)
 		m_filenameBaseNoExt.erase(0, dirSep+1);
 	
 	// Remove the file extension.
-	// TODO: Do this in the Rom class?
 	size_t extSep = m_filenameBaseNoExt.rfind('.');
 	if (extSep != string::npos)
 		m_filenameBaseNoExt.erase(extSep, (m_filenameBaseNoExt.size() - extSep));
@@ -410,7 +408,6 @@ void Rom::readHeaderMD(const uint8_t *header, size_t header_size)
 
 /**
  * SpaceElim(): Eliminate excess spaces from a ROM name.
- * TODO: Convert from cp1252/Shift-JIS to UTF-8 first.
  * TODO: Returning an std::string is a bit wasteful...
  * @param src ROM name.
  * @param len Length of ROM name.
