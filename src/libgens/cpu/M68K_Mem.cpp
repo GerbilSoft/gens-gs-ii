@@ -272,6 +272,7 @@ uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 	
 	/**
 	 * MD miscellaneous registers.
+	 * 0xA10001: Genesis version register.
 	 * 0xA10003: Control Port 1: Data.
 	 * 0xA10005: Control Port 2: Data.
 	 * 0xA10007: Control Port 3: Data. (EXT)
@@ -292,17 +293,8 @@ uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 	switch (address & 0x1E)
 	{
 		case 0x00:
-			/**
-			 * 0xA10001: Genesis version register.
-			 * Format: [MODE VMOD DISK RSV VER3 VER2 VER1 VER0]
-			 * MODE: Region. (0 == East; 1 == West)
-			 * VMOD: Video mode. (0 == NTSC; 1 == PAL)
-			 * DISK: Floppy disk drive. (0 == connected; 1 == not connected.)
-			 * RSV: Reserved. (I think this is used for SegaCD.)
-			 * VER 3-0: HW version. (0 == no TMSS; 1 = TMSS)
-			 * TODO: Set VER to 1 once TMSS support is added, if TMSS is enabled.
-			 */
-			return ((ms_SysVersion.region() << 6) | 0x20);
+			// 0xA10001: Genesis version register.
+			return ms_SysVersion.readData();
 		
 		// Parallel I/O
 		case 0x02:	return EmuMD::m_port1->readData();
@@ -556,6 +548,7 @@ uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 	
 	/**
 	 * MD miscellaneous registers.
+	 * 0xA10001: Genesis version register.
 	 * 0xA10003: Control Port 1: Data.
 	 * 0xA10005: Control Port 2: Data.
 	 * 0xA10007: Control Port 3: Data. (EXT)
@@ -575,17 +568,8 @@ uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 	switch (address & 0x1E)
 	{
 		case 0x00:
-			/**
-			 * 0xA10001: Genesis version register.
-			 * Format: [MODE VMOD DISK RSV VER3 VER2 VER1 VER0]
-			 * MODE: Region. (0 == East; 1 == West)
-			 * VMOD: Video mode. (0 == NTSC; 1 == PAL)
-			 * DISK: Floppy disk drive. (0 == connected; 1 == not connected.)
-			 * RSV: Reserved. (I think this is used for SegaCD.)
-			 * VER 3-0: HW version. (0 == no TMSS; 1 = TMSS)
-			 * TODO: Set VER to 1 once TMSS support is added, if TMSS is enabled.
-			 */
-			return ((ms_SysVersion.region() << 6) | 0x20);
+			// 0xA10001: Genesis version register.
+			return ms_SysVersion.readData();
 		
 		// Parallel I/O
 		case 0x02:	return EmuMD::m_port1->readData();
@@ -883,6 +867,7 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 	
 	/**
 	 * MD miscellaneous registers.
+	 * 0xA10001: Genesis version register.
 	 * 0xA10003: Control Port 1: Data.
 	 * 0xA10005: Control Port 2: Data.
 	 * 0xA10007: Control Port 3: Data. (EXT)
@@ -1205,6 +1190,7 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 	
 	/**
 	 * MD miscellaneous registers.
+	 * 0xA10001: Genesis version register.
 	 * 0xA10003: Control Port 1: Data.
 	 * 0xA10005: Control Port 2: Data.
 	 * 0xA10007: Control Port 3: Data. (EXT)
