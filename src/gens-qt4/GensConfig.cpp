@@ -37,7 +37,6 @@
 #include <QtCore/QTextCodec>
 #include <QtCore/QDir>
 
-#include <stdio.h>
 namespace GensQt4
 {
 
@@ -121,7 +120,7 @@ int GensConfig::reload(const QString& filename)
 	
 	/** Intro effect. **/
 	// TODO: Enums.
-	settings.beginGroup(QLatin1String("IntroEffect"));
+	settings.beginGroup(QLatin1String("Intro_Effect"));
 	m_introStyle = settings.value(QLatin1String("introStyle"), 0).toInt();	// none
 	m_introColor = settings.value(QLatin1String("introColor"), 7).toInt();	// white
 	settings.endGroup();
