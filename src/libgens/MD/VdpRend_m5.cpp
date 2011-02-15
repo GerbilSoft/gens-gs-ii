@@ -1460,7 +1460,7 @@ void VdpRend_m5::Render_Line(void)
 	// Determine the starting line in MD_Screen.
 	// TODO: LibGens: Add a user-configurable option for NTSC V30 rolling.
 	int LineStart = VdpIo::VDP_Lines.Visible.Current;
-	if (M68K_Mem::ms_Region.isNtsc() && (VdpIo::VDP_Reg.m5.Set2 & 0x08))// && Video.ntscV30rolling)
+	if (M68K_Mem::ms_SysVersion.isNtsc() && (VdpIo::VDP_Reg.m5.Set2 & 0x08))// && Video.ntscV30rolling)
 	{
 		// NTSC V30 mode. Simulate screen rolling.
 		LineStart -= VdpIo::VDP_Lines.NTSC_V30.Offset;

@@ -107,16 +107,16 @@ EmuMD::EmuMD(Rom *rom)
 	m_portE->reset();
 	
 	// TODO: Set these elsewhere.
-	M68K_Mem::ms_Region.setRegion(SysRegion::REGION_US_NTSC);
+	M68K_Mem::ms_SysVersion.setRegion(SysVersion::REGION_US_NTSC);
 	M68K_Mem::Gen_Mode = 0;		// TODO: This isn't actually used anywhere right now...
 	
 	// TODO: VdpIo::VDP_Lines.Display.Total isn't being set properly...
-	VdpIo::VDP_Lines.Display.Total = (M68K_Mem::ms_Region.isPal() ? 312 : 262);
+	VdpIo::VDP_Lines.Display.Total = (M68K_Mem::ms_SysVersion.isPal() ? 312 : 262);
 	VdpIo::Set_Visible_Lines();
 	
 	// Initialize CPL.
 	// TODO: Initialize this somewhere else.
-	if (M68K_Mem::ms_Region.isPal())
+	if (M68K_Mem::ms_SysVersion.isPal())
 	{
 		M68K_Mem::CPL_M68K = (int)rint((((double)CLOCK_PAL / 7.0) / 50.0) / 312.0);
 		M68K_Mem::CPL_Z80 = (int)rint((((double)CLOCK_PAL / 15.0) / 50.0) / 312.0);
@@ -129,7 +129,7 @@ EmuMD::EmuMD(Rom *rom)
 	
 	// Initialize audio.
 	// NOTE: Only set the region. Sound rate is set by the UI.
-	SoundMgr::SetRegion(M68K_Mem::ms_Region.isPal(), false);
+	SoundMgr::SetRegion(M68K_Mem::ms_SysVersion.isPal(), false);
 	
 	// Finished initializing.
 	return;

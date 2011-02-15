@@ -388,7 +388,7 @@ QString EmuManager::romName(void)
 	
 	// Check the active system region.
 	const char *s_romName;
-	if (LibGens::M68K_Mem::ms_Region.isEast())
+	if (LibGens::M68K_Mem::ms_SysVersion.isEast())
 	{
 		// East (JP). Return the domestic ROM name.
 		s_romName = m_rom->romNameJP();
@@ -428,19 +428,19 @@ QString EmuManager::sysName(void)
 		return QString();
 	
 	// Check the system ID.
-	const LibGens::SysRegion &region = LibGens::M68K_Mem::ms_Region;
+	const LibGens::SysVersion &region = LibGens::M68K_Mem::ms_SysVersion;
 	
 	switch (m_rom->sysId())
 	{
 		case LibGens::Rom::MDP_SYSTEM_MD:
 			// Genesis / Mega Drive.
-			if (region.region() == LibGens::SysRegion::REGION_US_NTSC)
+			if (region.region() == LibGens::SysVersion::REGION_US_NTSC)
 				return tr("Genesis");
 			else
 				return tr("Mega Drive");
 		
 		case LibGens::Rom::MDP_SYSTEM_MCD:
-			if (region.region() == LibGens::SysRegion::REGION_US_NTSC)
+			if (region.region() == LibGens::SysVersion::REGION_US_NTSC)
 				return tr("Sega CD");
 			else
 				return tr("Mega CD");
@@ -452,7 +452,7 @@ QString EmuManager::sysName(void)
 				return tr("32X (NTSC)");
 		
 		case LibGens::Rom::MDP_SYSTEM_MCD32X:
-			if (region.region() == LibGens::SysRegion::REGION_US_NTSC)
+			if (region.region() == LibGens::SysVersion::REGION_US_NTSC)
 				return tr("Sega CD 32X");
 			else
 				return tr("Mega CD 32X");
@@ -567,7 +567,7 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	
 	// Check if we're higher or lower than the required framerate.
 	bool doFastFrame = false;
-	const double frameRate = (1.0 / (LibGens::M68K_Mem::ms_Region.isPal() ? 50.0 : 60.0));
+	const double frameRate = (1.0 / (LibGens::M68K_Mem::ms_SysVersion.isPal() ? 50.0 : 60.0));
 	const double threshold = 0.001;
 	if (timeDiff > (frameRate + threshold))
 	{

@@ -253,7 +253,7 @@ void VdpIo::Set_Visible_Lines(void)
 	
 	VDP_Lines.Visible.Total = VisLines_Total[LineOffset];
 	VDP_Lines.Visible.Border_Size = VisLines_Border_Size[LineOffset];
-	VDP_Lines.Visible.Current = (M68K_Mem::ms_Region.isPal()
+	VDP_Lines.Visible.Current = (M68K_Mem::ms_SysVersion.isPal()
 					? VisLines_Current_PAL[LineOffset]
 					: VisLines_Current_NTSC[LineOffset]);
 	
@@ -277,7 +277,7 @@ void VdpIo::Set_Visible_Lines(void)
 void VdpIo::Check_NTSC_V30_VBlank(void)
 {
 	// TODO: Only do this in Mode 5, and maybe Mode 4 if SMS2 is in use.
-	if (M68K_Mem::ms_Region.isPal() || !(VDP_Reg.m5.Set2 & 0x08))
+	if (M68K_Mem::ms_SysVersion.isPal() || !(VDP_Reg.m5.Set2 & 0x08))
 	{
 		// Either we're in PAL mode, where V30 is allowed, or V30 isn't set.
 		// VBlank is always OK.
