@@ -25,9 +25,12 @@
 #include <stdio.h>
 #include <paths.h>
 
+// C++ includes.
+#include <memory>
+using std::auto_ptr;
+
 // Qt includes.
 #include <QtCore/QList>
-#include <QtCore/QScopedPointer>
 
 // QtDBus includes.
 #include <QtDBus/QDBusConnection>
@@ -219,7 +222,7 @@ int FindCdromUDisks::queryUDisksDevice(const QDBusObjectPath& objectPath)
 {
 	QDBusConnection bus = QDBusConnection::systemBus();
 	
-	QScopedPointer<QDBusInterface> drive_if(
+	auto_ptr<QDBusInterface> drive_if(
 					new QDBusInterface(QLatin1String("org.freedesktop.UDisks"),
 								objectPath.path(),
 								QLatin1String("org.freedesktop.UDisks.Device"), bus));
@@ -233,7 +236,7 @@ int FindCdromUDisks::queryUDisksDevice(const QDBusObjectPath& objectPath)
 	}
 	
 	// Verify that this drive is removable.
-	bool DeviceIsRemovable = GetBoolProperty(drive_if.data(), "DeviceIsRemovable");
+	bool DeviceIsRemovable = GetBoolProperty(drive_if.get(), "DeviceIsRemovable");
 	if (!DeviceIsRemovable)
 	{
 		// This drive does not support removable media.
@@ -260,12 +263,12 @@ int FindCdromUDisks::queryUDisksDevice(const QDBusObjectPath& objectPath)
 	drive.disc_type = 0;
 	
 	// Get various properties.
-	drive.path		= GetStringProperty(drive_if.data(), "DeviceFile");
-	drive.drive_vendor	= GetStringProperty(drive_if.data(), "DriveVendor");
-	drive.drive_model	= GetStringProperty(drive_if.data(), "DriveModel");
-	drive.drive_firmware	= GetStringProperty(drive_if.data(), "DriveRevision");
-	drive.disc_label	= GetStringProperty(drive_if.data(), "IdLabel");
-	drive.disc_blank	= GetBoolProperty(drive_if.data(), "OpticalDiscIsBlank");
+	drive.path		= GetStringProperty(drive_if.get(), "DeviceFile");
+	drive.drive_vendor	= GetStringProperty(drive_if.get(), "DriveVendor");
+	drive.drive_model	= GetStringProperty(drive_if.get(), "DriveModel");
+	drive.drive_firmware	= GetStringProperty(drive_if.get(), "DriveRevision");
+	drive.disc_label	= GetStringProperty(drive_if.get(), "IdLabel");
+	drive.disc_blank	= GetBoolProperty(drive_if.get(), "OpticalDiscIsBlank");
 	
 	// Determine the drive media support.
 	// TODO: Convert ms_UDisks_DriveID[] to a QMap.
@@ -294,7 +297,7 @@ int FindCdromUDisks::queryUDisksDevice(const QDBusObjectPath& objectPath)
 	drive.drive_type = GetDriveType(drive.discs_supported);
 	
 	// Determine the type of disc in the drive.
-	QString DriveMedia = GetStringProperty(drive_if.data(), "DriveMedia");
+	QString DriveMedia = GetStringProperty(drive_if.get(), "DriveMedia");
 	if (!DriveMedia.isEmpty())
 	{
 		for (size_t i = 0; i < sizeof(ms_UDisks_DriveID)/sizeof(ms_UDisks_DriveID[0]); i++)
