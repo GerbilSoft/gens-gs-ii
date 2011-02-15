@@ -304,14 +304,13 @@ void GLBackend::reallocTexOsd(void)
 	// Load the OSD texture.
 	// TODO: Handle the case where the image isn't found.
 	QImage imgOsd = QImage(QString::fromLatin1(":/gens/vga-charset.png"));
+	QVector<QRgb> colorTable = imgOsd.colorTable();
 	
-	if (imgOsd.colorCount() > 0)
+	if (!colorTable.isEmpty())
 	{
 		// Image uses a palette. Apply a color key.
 		// Background color (black) will be changed to transparent.
 		// TODO: Allow all 0x000000, or just opaque 0xFF000000?
-		
-		QVector<QRgb> colorTable = imgOsd.colorTable();
 		for (int i = 0; i < colorTable.size(); i++)
 		{
 			if (colorTable[i] == 0xFF000000)
