@@ -63,6 +63,9 @@ QVariant GensZipDirItem::data(int column) const
 
 bool GensZipDirItem::insertChildren(int position, int count, int columns)
 {
+	// Columns are fixed.
+	((void)columns);
+	
 	if (position < 0 || position > m_childItems.size())
 		return false;
 	
