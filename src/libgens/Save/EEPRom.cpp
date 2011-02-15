@@ -157,7 +157,13 @@ uint8_t EEPRom::readByte(uint32_t address)
  */
 uint16_t EEPRom::readWord(uint32_t address)
 {
-	// TODO: Verify that the address is valid.
+	// TODO: address probably doesn't need to be masked,
+	// since M68K is word-aligned...
+	if ((address & ~1) != (m_eprType.type.sda_out_adr & ~1))
+	{
+		// Wrong address.
+		return 0xFFFF;
+	}
 	
 	uint8_t sda_out = m_sda;
 	switch (m_state)
