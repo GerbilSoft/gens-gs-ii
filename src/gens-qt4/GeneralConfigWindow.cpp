@@ -132,20 +132,26 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	txtMcdRomAsia->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 	
 	// Sega CD: Set the placeholder text.
+#if QT_VERSION >= 0x040700
 	const QString sMcdBootRom_PlaceholderText = tr("Select a %1 Boot ROM...");
 	txtMcdRomUSA->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Sega CD (U)")));
 	txtMcdRomEUR->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Mega CD (E)")));
 	txtMcdRomJPN->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Mega CD (J)")));
 	txtMcdRomAsia->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Mega CD (Asia)")));
+#endif /* QT_VERSION >= 0x040700 */
 	
 	// External Programs: Set the textbox icon and placeholder text.
 	txtExtPrgUnRAR->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 #ifdef Q_OS_WIN32
 	lblExtPrgUnRAR->setText(tr("UnRAR DLL:"));
+#if QT_VERSION >= 0x040700
 	txtExtPrgUnRAR->setPlaceholderText(tr("Select an UnRAR DLL..."));
-#else
+#endif /* QT_VERSION >= 0x040700 */
+#else /* !Q_OS_WIN32 */
+#if QT_VERSION >= 0x040700
 	txtExtPrgUnRAR->setPlaceholderText(tr("Select a RAR or UnRAR binary..."));
-#endif
+#endif /* QT_VERSION >= 0x040700 */
+#endif /* Q_OS_WIN32 */
 	
 	// Load configuration.
 	reload();
