@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -145,8 +145,6 @@ FORCE_INLINE int VdpRend_m5::T_GetLineNumber(void)
 template<bool plane, bool h_s, int pat_pixnum, uint32_t mask, int shift>
 FORCE_INLINE void VdpRend_m5::T_PutPixel_P0(int disp_pixnum, uint32_t pattern, unsigned int palette)
 {
-	// TODO: Convert mask and shift to template parameters.
-	
 	// Check if this is a transparent pixel.
 	if (!(pattern & mask))
 		return;
@@ -190,8 +188,6 @@ FORCE_INLINE void VdpRend_m5::T_PutPixel_P0(int disp_pixnum, uint32_t pattern, u
 template<bool plane, bool h_s, int pat_pixnum, uint32_t mask, int shift>
 FORCE_INLINE void VdpRend_m5::T_PutPixel_P1(int disp_pixnum, uint32_t pattern, unsigned int palette)
 {
-	// TODO: Convert mask and shift to template parameters.
-	
 	// Check if this is a transparent pixel.
 	unsigned int px = (pattern & mask);
 	if (px == 0)
@@ -233,8 +229,6 @@ FORCE_INLINE void VdpRend_m5::T_PutPixel_P1(int disp_pixnum, uint32_t pattern, u
 template<bool priority, bool h_s, int pat_pixnum, uint32_t mask, int shift>
 FORCE_INLINE uint8_t VdpRend_m5::T_PutPixel_Sprite(int disp_pixnum, uint32_t pattern, unsigned int palette)
 {
-	// TODO: Convert mask and shift to template parameters.
-	
 	// Check if this is a transparent pixel.
 	unsigned int px = (pattern & mask);
 	if (px == 0)
@@ -242,8 +236,6 @@ FORCE_INLINE uint8_t VdpRend_m5::T_PutPixel_Sprite(int disp_pixnum, uint32_t pat
 	
 	// Get the pixel number in the linebuffer.
 	const unsigned int LineBuf_pixnum = (disp_pixnum + pat_pixnum + 8);
-	
-	// TODO: Endianness conversions.
 	uint8_t layer_bits = VdpRend::LineBuf.px[LineBuf_pixnum].layer;
 	
 	if (layer_bits & (LINEBUF_PRIO_B + LINEBUF_SPR_B - priority))
@@ -1162,8 +1154,8 @@ FORCE_INLINE void VdpRend_m5::T_Render_Line_Sprite(void)
 	
 	for (unsigned int spr_vis = 0; spr_vis < num_spr; spr_vis++)
 	{
-		// Get the sprite number. (TODO: Eliminate the sizeof division.)
-		unsigned int spr_num = VdpRend::Sprite_Visible[spr_vis];
+		// Get the sprite number.
+		const unsigned int spr_num = VdpRend::Sprite_Visible[spr_vis];
 		
 		// Determine the cell and line offsets.
 		unsigned int cell_offset = (T_GetLineNumber<interlaced>() - VdpRend::Sprite_Struct[spr_num].Pos_Y);
@@ -1375,7 +1367,6 @@ FORCE_INLINE void VdpRend_m5::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 	for (unsigned int i = ((160 - VdpIo::H_Pix_Begin) / 4);
 	     i != 0; i--, dest += 8, src += 8)
 	{
-		// TODO: Endianness conversions.
 		*dest     = md_palette[src->pixel];
 		*(dest+1) = md_palette[(src+1)->pixel];
 		*(dest+2) = md_palette[(src+2)->pixel];
@@ -1393,7 +1384,7 @@ FORCE_INLINE void VdpRend_m5::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 	// NOTE: S/H is ignored if we're in the border region.
 	
 	// Get the border color.
-	// TODO: Add the "borderColorEmulation" variable somewhere. (LibGens)
+	// TODO: LibGens: Add the "borderColorEmulation" variable somewhere.
 #if 0
 	register const pixel border_color = (Video.borderColorEmulation ? md_palette[0] : 0);
 #else

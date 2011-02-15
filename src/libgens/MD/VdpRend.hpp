@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -28,9 +28,6 @@
 #include <stdint.h>
 
 // Byteswapping macros.
-// TODO: LibGens doesn't -I the src/ directory;
-// however, gens-qt4 doesn't -I the libgens/ directory.
-// So, we're using relative paths for now.
 #include "../Util/byteswap.h"
 
 // VDP palette manager.
@@ -107,12 +104,10 @@ class VdpRend
 		static void Render_Line(void);
 		
 		// Line buffer for current line.
-		// TODO: Endianness conversions.
 		union LineBuf_t
 		{
 			struct LineBuf_px_t
 			{
-				// TODO: Is byteswapping here really the best option?
 #if GENS_BYTEORDER == GENS_LIL_ENDIAN
 				uint8_t pixel;
 				uint8_t layer;
