@@ -133,7 +133,6 @@ void M68K_Mem::End(void)
 /**
  * M68K_Read_Byte_Rom(): Read a byte from ROM.
  * TODO: XOR by 1 on little-endian systems only.
- * @param bank ROM bank number.
  * @param address Address.
  * @return Byte from ROM.
  */
@@ -149,15 +148,13 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Rom(uint32_t address)
 
 
 /**
- * T_M68K_Read_Byte_RomX_SRam(): Read a byte from ROM bank X or SRam/EEPRom.
+ * M68K_Read_Byte_Rom_SRam(): Read a byte from ROM or SRam/EEPRom.
  * TODO: Verify that this works for 0x300000/0x380000.
  * TODO: XOR by 1 on little-endian systems only.
- * @param bank ROM bank number.
  * @param address Address.
  * @return Byte from ROM or SRam/EEPRom.
  */
-template<uint8_t bank>
-inline uint8_t M68K_Mem::T_M68K_Read_Byte_RomX_SRam(uint32_t address)
+inline uint8_t M68K_Mem::M68K_Read_Byte_Rom_SRam(uint32_t address)
 {
 	// Check if this is a save data request.
 	if (EmuContext::GetSaveDataEnable())
@@ -186,9 +183,8 @@ inline uint8_t M68K_Mem::T_M68K_Read_Byte_RomX_SRam(uint32_t address)
 		}
 	}
 	
-	address &= 0x7FFFF;
-	address ^= ((bank << 19) | 1);	// TODO: LE only!
-	return Rom_Data.u8[address];
+	// Not SRam/EEPRom. Return the ROM data.
+	return M68K_Read_Byte_Rom(address);
 }
 
 
@@ -369,8 +365,7 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 
 
 /**
- * M68K_Read_Byte_RomX(): Read a word from ROM.
- * @param bank ROM bank number.
+ * M68K_Read_Word_Rom(): Read a word from ROM.
  * @param address Address.
  * @return Word from ROM.
  */
@@ -388,14 +383,12 @@ inline uint16_t M68K_Mem::M68K_Read_Word_Rom(uint32_t address)
 
 
 /**
- * T_M68K_Read_Word_RomX_SRam(): Read a word from ROM bank X or SRam/EEPRom.
+ * M68K_Read_Word_Rom_SRam(): Read a word from ROM or SRam/EEPRom.
  * TODO: Verify that this works for 0x300000/0x380000.
- * @param bank ROM bank number.
  * @param address Address.
  * @return Word from ROM or SRam/EEPRom.
  */
-template<uint8_t bank>
-inline uint16_t M68K_Mem::T_M68K_Read_Word_RomX_SRam(uint32_t address)
+inline uint16_t M68K_Mem::M68K_Read_Word_Rom_SRam(uint32_t address)
 {
 	// Check if this is a save data request.
 	if (EmuContext::GetSaveDataEnable())
@@ -424,11 +417,8 @@ inline uint16_t M68K_Mem::T_M68K_Read_Word_RomX_SRam(uint32_t address)
 		}
 	}
 	
-	// ROM data request.
-	address &= 0x7FFFE;
-	address |= (bank << 19);
-	address >>= 1;
-	return Rom_Data.u16[address];
+	// Not SRam/EEPRom. Return the ROM data.
+	return M68K_Read_Word_Rom(address);
 }
 
 
@@ -1241,10 +1231,10 @@ uint8_t M68K_Mem::M68K_RB(uint32_t address)
 		case 0x02:	return M68K_Read_Byte_Rom(address);
 		case 0x03:	return M68K_Read_Byte_Rom(address);
 		
-		case 0x04:	return T_M68K_Read_Byte_RomX_SRam<0x4>(address);
+		case 0x04:	return M68K_Read_Byte_Rom_SRam(address);
 		case 0x05:	return M68K_Read_Byte_Rom(address);
-		case 0x06:	return T_M68K_Read_Byte_RomX_SRam<0x6>(address);
-		case 0x07:	return T_M68K_Read_Byte_RomX_SRam<0x7>(address);
+		case 0x06:	return M68K_Read_Byte_Rom_SRam(address);
+		case 0x07:	return M68K_Read_Byte_Rom_SRam(address);
 		
 		case 0x08:	return 0xFF;
 		case 0x09:	return 0xFF;
@@ -1301,10 +1291,10 @@ uint16_t M68K_Mem::M68K_RW(uint32_t address)
 		case 0x02:	return M68K_Read_Word_Rom(address);
 		case 0x03:	return M68K_Read_Word_Rom(address);
 		
-		case 0x04:	return T_M68K_Read_Word_RomX_SRam<0x4>(address);
+		case 0x04:	return M68K_Read_Word_Rom_SRam(address);
 		case 0x05:	return M68K_Read_Word_Rom(address);
-		case 0x06:	return T_M68K_Read_Word_RomX_SRam<0x6>(address);
-		case 0x07:	return T_M68K_Read_Word_RomX_SRam<0x7>(address);
+		case 0x06:	return M68K_Read_Word_Rom_SRam(address);
+		case 0x07:	return M68K_Read_Word_Rom_SRam(address);
 		
 		case 0x08:	return 0xFFFF;
 		case 0x09:	return 0xFFFF;
