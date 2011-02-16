@@ -140,8 +140,9 @@ class M68K_Mem
 		 * Used with SSF2 bankswitching.
 		 * Each pointer refers to a 512 KB page of ROM.
 		 * 
-		 * NOTE: These pointers map to PHYSICAL pages.
-		 * e.g. ms_RomData_ptrs[4] == physical 0x200000
+		 * NOTE: These pointers map virtual to PHYSICAL pages.
+		 * e.g. ms_RomData_ptrs[4] maps to any page in ROM,
+		 * but is accessed by the M68K as if it's 0x200000.
 		 */
 		static uint8_t *ms_RomData_ptrs[8];
 		
