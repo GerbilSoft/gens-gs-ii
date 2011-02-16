@@ -158,9 +158,6 @@ inline uint8_t M68K_Mem::T_M68K_Read_Byte_RomX_SRam(uint32_t address)
 	// Check if this is a save data request.
 	if (EmuContext::GetSaveDataEnable())
 	{
-		// Mask off the high byte of the address.
-		address &= 0xFFFFFF;
-		
 		// Temporarily needed because M68K_Mem is static.
 		EEPRom *eeprom = EmuContext::GetEEPRom();
 		SRam *sram = EmuContext::GetSRam();
@@ -213,9 +210,6 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Ram(uint32_t address)
  */
 inline uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 {
-	// Mask off the high byte of the address.
-	address &= 0xFFFFFF;
-	
 	if (address <= 0xA0FFFF)
 	{
 		// Z80 memory space.
@@ -402,9 +396,6 @@ inline uint16_t M68K_Mem::T_M68K_Read_Word_RomX_SRam(uint32_t address)
 	// Check if this is a save data request.
 	if (EmuContext::GetSaveDataEnable())
 	{
-		// Mask off the high byte of the address.
-		address &= 0xFFFFFF;
-		
 		// Temporarily needed because M68K_Mem is static.
 		EEPRom *eeprom = EmuContext::GetEEPRom();
 		SRam *sram = EmuContext::GetSRam();
@@ -458,9 +449,6 @@ inline uint16_t M68K_Mem::M68K_Read_Word_Ram(uint32_t address)
  */
 inline uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 {
-	// Mask off the high byte of the address.
-	address &= 0xFFFFFF;
-	
 	if (address <= 0xA0FFFF)
 	{
 		// Z80 memory space.
@@ -624,9 +612,6 @@ inline uint16_t M68K_Mem::M68K_Read_Word_VDP(uint32_t address)
  */
 inline void M68K_Mem::M68K_Write_Byte_SRam(uint32_t address, uint8_t data)
 {
-	// Mask off the high byte of the address.
-	address &= 0xFFFFFF;
-	
 	if (!EmuContext::GetSaveDataEnable())
 	{
 		// Save data is disabled.
@@ -682,9 +667,6 @@ inline void M68K_Mem::M68K_Write_Byte_Ram(uint32_t address, uint8_t data)
  */
 inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 {
-	// Mask off the high byte of the address.
-	address &= 0xFFFFFF;
-	
 	if (address <= 0xA0FFFF)
 	{
 		// Z80 memory space.
@@ -927,9 +909,6 @@ inline void M68K_Mem::M68K_Write_Byte_VDP(uint32_t address, uint8_t data)
  */
 inline void M68K_Mem::M68K_Write_Word_SRam(uint32_t address, uint16_t data)
 {
-	// Mask off the high byte of the address.
-	address &= 0xFFFFFF;
-	
 	if (!EmuContext::GetSaveDataEnable())
 	{
 		// Save data is disabled.
@@ -983,9 +962,6 @@ inline void M68K_Mem::M68K_Write_Word_Ram(uint32_t address, uint16_t data)
  */
 inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 {
-	// Mask off the high byte of the address.
-	address &= 0xFFFFFF;
-	
 	if (address <= 0xA0FFFF)
 	{
 		// Z80 memory space.
