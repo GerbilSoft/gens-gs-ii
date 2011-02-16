@@ -47,7 +47,7 @@ const GensGS_credits_t GensGS_credits[] =
 	{NULL,				"Baffo32"},
 	{NULL,				"Biafra Republic"},
 	{NULL,				"Corner-Face-Jacks"},
-	{NULL,				"CyberKitsnue"},
+	{NULL,				"CyberKitsune"},
 	{NULL,				"Delta"},
 	{NULL,				"djohe"},
 	{NULL,				"Glitch"},
