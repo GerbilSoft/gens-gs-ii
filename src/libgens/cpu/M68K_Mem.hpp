@@ -140,9 +140,10 @@ class M68K_Mem
 		 * Used with SSF2 bankswitching.
 		 * Each pointer refers to a 512 KB page of ROM.
 		 * 
-		 * NOTE: Gens/GS II only implements banks 0-9.
+		 * NOTE: These pointers map to PHYSICAL pages.
+		 * e.g. ms_RomData_ptrs[4] == physical 0x200000
 		 */
-		static uint8_t *ms_RomData_ptrs[10];
+		static uint8_t *ms_RomData_ptrs[8];
 		
 		/** Read Byte functions. **/
 		static uint8_t M68K_Read_Byte_Rom(uint32_t address);

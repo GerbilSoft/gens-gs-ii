@@ -104,7 +104,7 @@ int M68K_Mem::Cycles_Z80;
 SysVersion M68K_Mem::ms_SysVersion;
 
 uint8_t M68K_Mem::ms_SSF2_BankState[8];
-uint8_t *M68K_Mem::ms_RomData_ptrs[10];
+uint8_t *M68K_Mem::ms_RomData_ptrs[8];
 
 
 void M68K_Mem::Init(void)
@@ -117,7 +117,7 @@ void M68K_Mem::Init(void)
 	memset(ms_SSF2_BankState, 0xFF, sizeof(ms_SSF2_BankState));
 	
 	// Initialize the ROM data pointers.
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 8; i++)
 		ms_RomData_ptrs[i] = &Rom_Data.u8[i * 0x80000];
 }
 
@@ -372,6 +372,7 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 inline uint16_t M68K_Mem::M68K_Read_Word_Rom(uint32_t address)
 {
 	const uint8_t bank = (address >> 19) & 0x07;
+	uint32_t old_addr = address;
 	address &= 0x7FFFE;
 	address >>= 1;
 	
@@ -773,13 +774,11 @@ inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 	else if (address >= 0xA130F2 && address <= 0xA130FF)
 	{
 		// Super Street Fighter II (SSF2) bankswitching system.
-		// TODO: Port to integrated dispatch function.
-#if 0
 		// TODO: Starscream doesn't use this for instruction fetch!
 		// TODO: Use a helper class?
 		// TODO: Only banks 0-9 are supported right now...
-		unsigned int phys_bank = (address & 0xF) >> 1;
-		unsigned int virt_bank = (data & 0x1F);
+		const uint8_t phys_bank = (address & 0xF) >> 1;
+		uint8_t virt_bank = (data & 0x1F);
 		
 		if (virt_bank > 9)
 		{
@@ -793,10 +792,8 @@ inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 			ms_SSF2_BankState[phys_bank] = virt_bank;
 		}
 		
-		// Set the banking in the read byte/word tables.
-		M68K_Read_Byte_Table[phys_bank] = MD_M68K_Read_Byte_Table[virt_bank];
-		M68K_Read_Word_Table[phys_bank] = MD_M68K_Read_Word_Table[virt_bank];
-#endif
+		// Update the ROM data pointers.
+		ms_RomData_ptrs[phys_bank] = &Rom_Data.u8[virt_bank * 0x80000];
 		return;
 	}
 	else if (address > 0xA1001F)
@@ -1079,13 +1076,11 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 	else if (address >= 0xA130F2 && address <= 0xA130FF)
 	{
 		// Super Street Fighter II (SSF2) bankswitching system.
-		// TODO: Port to integrated dispatch function.
-#if 0
 		// TODO: Starscream doesn't use this for instruction fetch!
 		// TODO: Use a helper class?
 		// TODO: Only banks 0-9 are supported right now...
-		unsigned int phys_bank = (address & 0xF) >> 1;
-		unsigned int virt_bank = (data & 0x1F);
+		const uint8_t phys_bank = (address & 0xF) >> 1;
+		uint8_t virt_bank = (data & 0x1F);
 		
 		if (virt_bank > 9)
 		{
@@ -1099,10 +1094,8 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 			ms_SSF2_BankState[phys_bank] = virt_bank;
 		}
 		
-		// Set the banking in the read byte/word tables.
-		M68K_Read_Byte_Table[phys_bank] = MD_M68K_Read_Byte_Table[virt_bank];
-		M68K_Read_Word_Table[phys_bank] = MD_M68K_Read_Word_Table[virt_bank];
-#endif
+		// Update the ROM data pointers.
+		ms_RomData_ptrs[phys_bank] = &Rom_Data.u8[virt_bank * 0x80000];
 		return;
 	}
 	else if (address > 0xA1001F)
@@ -1424,7 +1417,7 @@ void M68K_Mem::ZomgRestoreSSF2BankState(const Zomg_MD_TimeReg_t *state)
 	// NOTE: Only banks 0-9 are supported right now.
 	for (int phys_bank = 0; phys_bank < 8; phys_bank++)
 	{
-		unsigned int virt_bank = ms_SSF2_BankState[phys_bank];
+		uint8_t virt_bank = ms_SSF2_BankState[phys_bank];
 		if (virt_bank > 9)
 		{
 			// TODO: We're ignoring banks over bank 9.
@@ -1433,12 +1426,8 @@ void M68K_Mem::ZomgRestoreSSF2BankState(const Zomg_MD_TimeReg_t *state)
 			ms_SSF2_BankState[phys_bank] = 0xFF;	// default bank
 		}
 		
-		// Set the banking in the read byte/word tables.
-		// TODO: Port SSF2 bankswitching to the dispatch functions.
-#if 0
-		M68K_Read_Byte_Table[phys_bank] = MD_M68K_Read_Byte_Table[virt_bank];
-		M68K_Read_Word_Table[phys_bank] = MD_M68K_Read_Word_Table[virt_bank];
-#endif
+		// Update the ROM data pointers.
+		ms_RomData_ptrs[phys_bank] = &Rom_Data.u8[virt_bank * 0x80000];
 	}
 }
 
