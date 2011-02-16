@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -135,9 +135,17 @@ class M68K_Mem
 		 */
 		static uint8_t ms_SSF2_BankState[8];
 		
+		/**
+		 * ms_RomData_ptrs[]: ROM data pointers.
+		 * Used with SSF2 bankswitching.
+		 * Each pointer refers to a 512 KB page of ROM.
+		 * 
+		 * NOTE: Gens/GS II only implements banks 0-9.
+		 */
+		static uint8_t *ms_RomData_ptrs[10];
+		
 		/** Read Byte functions. **/
-		template<uint8_t bank>
-		static uint8_t T_M68K_Read_Byte_RomX(uint32_t address);
+		static uint8_t M68K_Read_Byte_Rom(uint32_t address);
 		
 		template<uint8_t bank>
 		static uint8_t T_M68K_Read_Byte_RomX_SRam(uint32_t address);
@@ -147,8 +155,7 @@ class M68K_Mem
 		static uint8_t M68K_Read_Byte_VDP(uint32_t address);
 		
 		/** Read Word functions. **/
-		template<uint8_t bank>
-		static uint16_t T_M68K_Read_Word_RomX(uint32_t address);
+		static uint16_t M68K_Read_Word_Rom(uint32_t address);
 		
 		template<uint8_t bank>
 		static uint16_t T_M68K_Read_Word_RomX_SRam(uint32_t address);

@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -104,6 +104,7 @@ int M68K_Mem::Cycles_Z80;
 SysVersion M68K_Mem::ms_SysVersion;
 
 uint8_t M68K_Mem::ms_SSF2_BankState[8];
+uint8_t *M68K_Mem::ms_RomData_ptrs[10];
 
 
 void M68K_Mem::Init(void)
@@ -114,6 +115,10 @@ void M68K_Mem::Init(void)
 	
 	// Initialize the SSF2 bankswitching state.
 	memset(ms_SSF2_BankState, 0xFF, sizeof(ms_SSF2_BankState));
+	
+	// Initialize the ROM data pointers.
+	for (int i = 0; i < 10; i++)
+		ms_RomData_ptrs[i] = &Rom_Data.u8[i * 0x80000];
 }
 
 
@@ -126,19 +131,18 @@ void M68K_Mem::End(void)
 
 
 /**
- * T_M68K_Read_Byte_RomX(): Read a byte from ROM bank X.
- * M68K memory space is split into 32 512 KB banks. (16 MB total)
+ * M68K_Read_Byte_Rom(): Read a byte from ROM.
  * TODO: XOR by 1 on little-endian systems only.
  * @param bank ROM bank number.
  * @param address Address.
  * @return Byte from ROM.
  */
-template<uint8_t bank>
-inline uint8_t M68K_Mem::T_M68K_Read_Byte_RomX(uint32_t address)
+inline uint8_t M68K_Mem::M68K_Read_Byte_Rom(uint32_t address)
 {
+	const uint8_t bank = (address >> 19) & 0x07;
 	address &= 0x7FFFF;
-	address ^= ((bank << 19) | 1);	// TODO: LE only!
-	return Rom_Data.u8[address];
+	address ^= 1;	// TODO: LE only!
+	return ms_RomData_ptrs[bank][address];
 }
 // TODO: Add banks C, D, E, and F for 8 MB ROM support.
 // For now, they will return 0x00.
@@ -365,19 +369,19 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 
 
 /**
- * T_M68K_Read_Byte_RomX(): Read a word from ROM bank X.
- * M68K memory space is split into 32 512 KB banks. (16 MB total)
+ * M68K_Read_Byte_RomX(): Read a word from ROM.
  * @param bank ROM bank number.
  * @param address Address.
  * @return Word from ROM.
  */
-template<uint8_t bank>
-inline uint16_t M68K_Mem::T_M68K_Read_Word_RomX(uint32_t address)
+inline uint16_t M68K_Mem::M68K_Read_Word_Rom(uint32_t address)
 {
+	const uint8_t bank = (address >> 19) & 0x07;
 	address &= 0x7FFFE;
-	address |= (bank << 19);
 	address >>= 1;
-	return Rom_Data.u16[address];
+	
+	// TODO: ms_RomData_ptrs should provide u8 and u16.
+	return ((uint16_t*)ms_RomData_ptrs[bank])[address];
 }
 // TODO: Add banks C, D, E, and F for 8 MB ROM support.
 // For now, they will return 0x00.
@@ -1232,20 +1236,20 @@ uint8_t M68K_Mem::M68K_RB(uint32_t address)
 	
 	switch (page & 0x1F)
 	{
-		case 0x00:	return T_M68K_Read_Byte_RomX<0x0>(address);
-		case 0x01:	return T_M68K_Read_Byte_RomX<0x1>(address);
-		case 0x02:	return T_M68K_Read_Byte_RomX<0x2>(address);
-		case 0x03:	return T_M68K_Read_Byte_RomX<0x3>(address);
+		case 0x00:	return M68K_Read_Byte_Rom(address);
+		case 0x01:	return M68K_Read_Byte_Rom(address);
+		case 0x02:	return M68K_Read_Byte_Rom(address);
+		case 0x03:	return M68K_Read_Byte_Rom(address);
 		
 		case 0x04:	return T_M68K_Read_Byte_RomX_SRam<0x4>(address);
-		case 0x05:	return T_M68K_Read_Byte_RomX<0x5>(address);
+		case 0x05:	return M68K_Read_Byte_Rom(address);
 		case 0x06:	return T_M68K_Read_Byte_RomX_SRam<0x6>(address);
 		case 0x07:	return T_M68K_Read_Byte_RomX_SRam<0x7>(address);
 		
-		case 0x08:	return T_M68K_Read_Byte_RomX<0x8>(address);
-		case 0x09:	return T_M68K_Read_Byte_RomX<0x9>(address);
-		case 0x0A:	return T_M68K_Read_Byte_RomX<0xA>(address);
-		case 0x0B:	return T_M68K_Read_Byte_RomX<0xB>(address);
+		case 0x08:	return 0xFF;
+		case 0x09:	return 0xFF;
+		case 0x0A:	return 0xFF;
+		case 0x0B:	return 0xFF;
 		
 		case 0x0C:	return 0xFF;
 		case 0x0D:	return 0xFF;
@@ -1292,20 +1296,20 @@ uint16_t M68K_Mem::M68K_RW(uint32_t address)
 	
 	switch (page & 0x1F)
 	{
-		case 0x00:	return T_M68K_Read_Word_RomX<0x0>(address);
-		case 0x01:	return T_M68K_Read_Word_RomX<0x1>(address);
-		case 0x02:	return T_M68K_Read_Word_RomX<0x2>(address);
-		case 0x03:	return T_M68K_Read_Word_RomX<0x3>(address);
+		case 0x00:	return M68K_Read_Word_Rom(address);
+		case 0x01:	return M68K_Read_Word_Rom(address);
+		case 0x02:	return M68K_Read_Word_Rom(address);
+		case 0x03:	return M68K_Read_Word_Rom(address);
 		
 		case 0x04:	return T_M68K_Read_Word_RomX_SRam<0x4>(address);
-		case 0x05:	return T_M68K_Read_Word_RomX<0x5>(address);
+		case 0x05:	return M68K_Read_Word_Rom(address);
 		case 0x06:	return T_M68K_Read_Word_RomX_SRam<0x6>(address);
 		case 0x07:	return T_M68K_Read_Word_RomX_SRam<0x7>(address);
 		
-		case 0x08:	return T_M68K_Read_Word_RomX<0x8>(address);
-		case 0x09:	return T_M68K_Read_Word_RomX<0x9>(address);
-		case 0x0A:	return T_M68K_Read_Word_RomX<0xA>(address);
-		case 0x0B:	return T_M68K_Read_Word_RomX<0xB>(address);
+		case 0x08:	return 0xFFFF;
+		case 0x09:	return 0xFFFF;
+		case 0x0A:	return 0xFFFF;
+		case 0x0B:	return 0xFFFF;
 		
 		case 0x0C:	return 0xFFFF;
 		case 0x0D:	return 0xFFFF;
