@@ -372,7 +372,6 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 inline uint16_t M68K_Mem::M68K_Read_Word_Rom(uint32_t address)
 {
 	const uint8_t bank = (address >> 19) & 0x07;
-	uint32_t old_addr = address;
 	address &= 0x7FFFE;
 	address >>= 1;
 	
