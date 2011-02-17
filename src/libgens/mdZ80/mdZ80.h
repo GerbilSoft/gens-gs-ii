@@ -280,7 +280,7 @@ void mdZ80_Set_ReadB(Z80_CONTEXT *z80, Z80_RB *func);
 void mdZ80_Set_WriteB(Z80_CONTEXT *z80, Z80_WB *func);
 void mdZ80_Set_In(Z80_CONTEXT *z80, Z80_RB *func);
 void mdZ80_Set_Out(Z80_CONTEXT *z80, Z80_WB *func);
-void z80_Add_Fetch(Z80_CONTEXT *z80, uint32_t low_adr, uint32_t high_adr, uint8_t *Region);
+void mdZ80_Add_Fetch(Z80_CONTEXT *z80, uint8_t low_adr, uint8_t high_adr, uint8_t *region);
 
 //uint32_t FASTCALL z80_Read_Odo(Z80_CONTEXT *z80);
 //void FASTCALL z80_Clear_Odo(Z80_CONTEXT *z80);

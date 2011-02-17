@@ -359,3 +359,18 @@ void mdZ80_Set_Out(Z80_CONTEXT *z80, Z80_WB *func)
 {
 	z80->OUT_C = (func ? func : mdZ80_def_Out);
 }
+
+/**
+ * mdZ80_Add_Fetch(): Add an instruction fetch handler.
+ * TODO: Convert instruction fetch to use standard memory read.
+ * @param z80 Z80 context.
+ * @param low_adr Low page.
+ * @param high_adr High page.
+ * @param region Memory region.
+ */
+void mdZ80_Add_Fetch(Z80_CONTEXT *z80, uint8_t low_adr, uint8_t high_adr, uint8_t *region)
+{
+	region -= (low_adr << 8);
+	for (int i = low_adr; i < high_adr; i++)
+		z80->Fetch[i] = region;
+}

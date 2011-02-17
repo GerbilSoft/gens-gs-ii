@@ -44,8 +44,8 @@ void Z80::Init(void)
 	mdZ80_init(&ms_Z80);
 	
 	// Set instruction fetch handlers.
-	z80_Add_Fetch(&ms_Z80, 0x00, 0x1F, &Ram_Z80[0]);
-	z80_Add_Fetch(&ms_Z80, 0x20, 0x3F, &Ram_Z80[0]);
+	mdZ80_Add_Fetch(&ms_Z80, 0x00, 0x1F, &Ram_Z80[0]);
+	mdZ80_Add_Fetch(&ms_Z80, 0x20, 0x3F, &Ram_Z80[0]);
 	
 	// Set memory read/write handlers.
 	mdZ80_Set_ReadB(&ms_Z80, Z80_MD_Mem::Z80_ReadB);

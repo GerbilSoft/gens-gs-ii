@@ -4833,56 +4833,6 @@ PREFIXE_FDCB:
 ;*******************
 
 
-%macro ADD_HANDLER 1
-
-align 16
-
-global SYM(z80_Add_%1)
-SYM(z80_Add_%1):
-	
-	push	ecx
-	push	edx
-	push	ebp
-	
-	mov ebp, [esp + 16]		; context
-	mov ecx, [esp + 20]		; low adr
-	mov edx, [esp + 24]		; high adr
-	mov eax, [esp + 28]		; *func
-	
-	and	ecx, 0xFF
-	and	edx, 0xFF
-	
-%ifidn %1, Fetch
-	shl	ecx, 8
-	sub	eax, ecx
-	shr	ecx, 8
-%endif
-	
-	cmp	ecx, edx
-	ja	short %%end
-	
-%%Loop:
-	mov	[ebp + Z80.%1 + ecx * 4], eax
-	inc	ecx
-	cmp	ecx, edx
-	jbe	short %%Loop
-	
-%%end:
-	pop	ebp
-	pop	edx
-	pop	ecx
-	ret
-
-%endmacro
-
-
-; void z80_Add_Fetch(Z80_CONTEXT *z80, UINT32 low_adr, UINT32 high_adr, UINT8 *Region)
-;
-; RETURN: 0
-
-	ADD_HANDLER Fetch
-
-
 align 16
 
 ; UINT32 FASTCALL z80_Exec(Z80_CONTEXT *z80, UINT32 odo)
