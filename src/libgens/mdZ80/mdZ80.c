@@ -371,6 +371,6 @@ void mdZ80_Set_Out(Z80_CONTEXT *z80, Z80_WB *func)
 void mdZ80_Add_Fetch(Z80_CONTEXT *z80, uint8_t low_adr, uint8_t high_adr, uint8_t *region)
 {
 	region -= (low_adr << 8);
-	for (int i = low_adr; i < high_adr; i++)
+	for (int i = low_adr; i <= high_adr; i++)
 		z80->Fetch[i] = region;
 }
