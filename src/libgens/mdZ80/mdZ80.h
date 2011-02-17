@@ -319,15 +319,12 @@ void mdZ80_interrupt(Z80_CONTEXT *z80, unsigned char vector);
 
 
 /**
- * Default Read/Write functions.
- * TODO: Port these to C.
- * This requires the Read/Write function prototype to be changed to non-fastcall.
+ * Default read/write functions.
  */
-extern unsigned char mdZ80_def_mem[0x10000];
-unsigned char FASTCALL mdZ80_def_ReadB(uint32_t address);
-unsigned char FASTCALL mdZ80_def_In(uint32_t address);
-void FASTCALL mdZ80_def_WriteB(uint32_t address, unsigned char data);
-void FASTCALL mdZ80_def_Out(uint32_t address, unsigned char data);
+uint8_t FASTCALL mdZ80_def_ReadB(uint32_t address);
+uint8_t FASTCALL mdZ80_def_In(uint32_t address);
+void FASTCALL mdZ80_def_WriteB(uint32_t address, uint8_t data);
+void FASTCALL mdZ80_def_Out(uint32_t address, uint8_t data);
 
 
 #ifdef __cplusplus

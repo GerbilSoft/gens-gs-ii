@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville                       *
  * Copyright (c) 2003-2004 by Stéphane Akhoun                              *
- * Copyright (c) 2008 by David Korth                                       *
+ * Copyright (c) 2008-2011 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -39,16 +39,13 @@ void mdZ80_init(Z80_CONTEXT *z80)
 	// Clear the entire Z80 struct.
 	memset(z80, 0x00, sizeof(Z80_CONTEXT));
 	
-	// Clear the default Z80 memory buffer.
-	memset(mdZ80_def_mem, 0x00, sizeof(mdZ80_def_mem));
-	
 	// Set up the Z80 function pointer variables.
 	unsigned int i;
 	for (i = 0; i < 0x100; i++)
 	{
 		z80->ReadB[i] = mdZ80_def_ReadB;
 		z80->WriteB[i] = mdZ80_def_WriteB;
-		z80->Fetch[i] = mdZ80_def_mem;
+		z80->Fetch[i] = NULL;	// Fetch must be initialized before use!
 	}
 	
 	// Set up the I/O handlers.
@@ -285,3 +282,39 @@ void mdZ80_interrupt(Z80_CONTEXT *z80, unsigned char vector)
 	z80->CycleSup = z80->CycleIO;
 	z80->CycleIO = 0;
 }
+
+
+/** Default memory and I/O handlers. **/
+
+
+/**
+ * mdZ80_def_ReadB(): Default memory read handler.
+ * @param address Address.
+ * @return 0xFF.
+ */
+uint8_t FASTCALL mdZ80_def_ReadB(uint32_t address)
+	{ ((void)address); return 0xFF; }
+
+/**
+ * mdZ80_def_In(): Default I/O read handler.
+ * @param address Address.
+ * @return 0xFF.
+ */
+uint8_t FASTCALL mdZ80_def_In(uint32_t address)
+	{ ((void)address); return 0xFF; }
+
+/**
+ * mdZ80_def_WriteB(): Default memory write handler.
+ * @param address Address.
+ * @param data Data.
+ */
+void FASTCALL mdZ80_def_WriteB(uint32_t address, uint8_t data)
+	{ ((void)address); ((void)data); }
+
+/**
+ * mdZ80_def_ReadB(): Default I/O write handler.
+ * @param address Address.
+ * @param data Data.
+ */
+void FASTCALL mdZ80_def_Out(uint32_t address, uint8_t data)
+	{ ((void)address); ((void)data); }

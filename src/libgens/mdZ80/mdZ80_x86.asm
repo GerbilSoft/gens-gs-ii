@@ -200,13 +200,6 @@ section .bss align=64
 		
 	endstruc
 	
-	
-	alignb 32
-	
-	global SYM(mdZ80_def_mem)
-	SYM(mdZ80_def_mem):
-		resb 0x10000
-	
 
 ; External read-only data symbols.
 
@@ -4855,26 +4848,6 @@ PREFIXE_FDCB:
 ; Publics functions
 ;
 ;*******************
-
-
-align 16
-
-global SYMF(mdZ80_def_ReadB, 4)
-global SYMF(mdZ80_def_In, 4)
-SYMF(mdZ80_def_ReadB, 4):
-SYMF(mdZ80_def_In, 4):
-	mov al, [SYM(mdZ80_def_mem) + ecx]
-	ret
-
-
-align 16
-
-global SYMF(mdZ80_def_WriteB, 8)
-global SYMF(mdZ80_def_Out, 8)
-SYMF(mdZ80_def_WriteB, 8):
-SYMF(mdZ80_def_Out, 8):
-	mov [SYM(mdZ80_def_mem) + ecx], dl
-	ret
 
 
 %macro ADD_HANDLER 1
