@@ -256,11 +256,11 @@ struct _Z80_context
 	uint32_t CycleTD;
 	uint32_t CycleIO;
 	uint32_t CycleSup;
-
-	Z80_RB *ReadB[0x100];
-	Z80_WB *WriteB[0x100];
 	uint8_t *Fetch[0x100];
-
+	
+	Z80_RB *ReadB;
+	Z80_WB *WriteB;
+	
 	Z80_RB *IN_C;
 	Z80_WB *OUT_C;
 };
@@ -276,9 +276,11 @@ typedef struct _Z80_context Z80_CONTEXT;
 //uint32_t FASTCALL z80_Init(Z80_CONTEXT *z80);
 //uint32_t FASTCALL z80_Reset(Z80_CONTEXT *z80);
 
-uint32_t z80_Add_ReadB(Z80_CONTEXT *z80, uint32_t low_adr, uint32_t high_adr, Z80_RB *Func);
-uint32_t z80_Add_WriteB(Z80_CONTEXT *z80, uint32_t low_adr, uint32_t high_adr, Z80_WB *Func);
-uint32_t z80_Add_Fetch(Z80_CONTEXT *z80, uint32_t low_adr, uint32_t high_adr, uint8_t *Region);
+void mdZ80_Set_ReadB(Z80_CONTEXT *z80, Z80_RB *func);
+void mdZ80_Set_WriteB(Z80_CONTEXT *z80, Z80_WB *func);
+void mdZ80_Set_In(Z80_CONTEXT *z80, Z80_RB *func);
+void mdZ80_Set_Out(Z80_CONTEXT *z80, Z80_WB *func);
+void z80_Add_Fetch(Z80_CONTEXT *z80, uint32_t low_adr, uint32_t high_adr, uint8_t *Region);
 
 //uint32_t FASTCALL z80_Read_Odo(Z80_CONTEXT *z80);
 //void FASTCALL z80_Clear_Odo(Z80_CONTEXT *z80);

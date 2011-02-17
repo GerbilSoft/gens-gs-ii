@@ -61,8 +61,8 @@ class Z80_MD_Mem
 		
 		/** Public read/write functions. **/
 		// TODO: Make these inline!
-		static uint8_t Z80_ReadB(uint32_t address);
-		static void Z80_WriteB(uint32_t address, uint8_t data);
+		static uint8_t FASTCALL Z80_ReadB(uint32_t address);
+		static void FASTCALL Z80_WriteB(uint32_t address, uint8_t data);
 		
 		/**
 		 * NOTE: These functions *should* be marked protected,

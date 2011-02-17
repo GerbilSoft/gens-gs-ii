@@ -39,16 +39,13 @@ void mdZ80_init(Z80_CONTEXT *z80)
 	// Clear the entire Z80 struct.
 	memset(z80, 0x00, sizeof(Z80_CONTEXT));
 	
-	// Set up the Z80 function pointer variables.
-	unsigned int i;
-	for (i = 0; i < 0x100; i++)
-	{
-		z80->ReadB[i] = mdZ80_def_ReadB;
-		z80->WriteB[i] = mdZ80_def_WriteB;
-		z80->Fetch[i] = NULL;	// Fetch must be initialized before use!
-	}
+	// Clear Fetch[].
+	// NOTE: Fetch[] must be initialized by the main emulator before use!
+	memset(z80->Fetch, 0x00, sizeof(z80->Fetch));
 	
-	// Set up the I/O handlers.
+	// Set up the default memory and I/O handlers.
+	z80->ReadB = mdZ80_def_ReadB;
+	z80->WriteB = mdZ80_def_WriteB;
 	z80->IN_C = mdZ80_def_In;
 	z80->OUT_C = mdZ80_def_Out;
 }
@@ -318,3 +315,47 @@ void FASTCALL mdZ80_def_WriteB(uint32_t address, uint8_t data)
  */
 void FASTCALL mdZ80_def_Out(uint32_t address, uint8_t data)
 	{ ((void)address); ((void)data); }
+
+
+/** Set memory and I/O handlers. **/
+
+
+/**
+ * mdZ80_Set_ReadB(): Set the ReadB handler.
+ * @param z80 Z80 context.
+ * @param func ReadB handler.
+ */
+void mdZ80_Set_ReadB(Z80_CONTEXT *z80, Z80_RB *func)
+{
+	z80->ReadB = (func ? func : mdZ80_def_ReadB);
+}
+
+/**
+ * mdZ80_Set_ReadB(): Set the WriteB handler.
+ * @param z80 Z80 context.
+ * @param func WriteB handler.
+ */
+void mdZ80_Set_WriteB(Z80_CONTEXT *z80, Z80_WB *func)
+{
+	z80->WriteB = (func ? func : mdZ80_def_WriteB);
+}
+
+/**
+ * mdZ80_Set_In(): Set the I/O IN handler.
+ * @param z80 Z80 context.
+ * @param func I/O IN handler.
+ */
+void mdZ80_Set_In(Z80_CONTEXT *z80, Z80_RB *func)
+{
+	z80->IN_C = (func ? func : mdZ80_def_In);
+}
+
+/**
+ * mdZ80_Set_In(): Set the I/O OUT handler.
+ * @param z80 Z80 context.
+ * @param func I/O OUT handler.
+ */
+void mdZ80_Set_Out(Z80_CONTEXT *z80, Z80_WB *func)
+{
+	z80->OUT_C = (func ? func : mdZ80_def_Out);
+}
