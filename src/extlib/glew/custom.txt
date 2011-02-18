@@ -30,6 +30,14 @@ GL_ARB_texture_rectangle
 GL_EXT_texture_rectangle
 GL_NV_texture_rectangle
 
+# GL_ARB_multitexture.
+# (required by shaders)
+GL_ARB_multitexture
+
+# ATI fragment shaders.
+GL_ATI_fragment_shader
+GL_ATI_text_fragment_shader
+
 # GL Shading Language.
 GL_ARB_fragment_program
 GL_ARB_vertex_program

@@ -545,6 +545,41 @@ PFNGLBLENDFUNCSEPARATEIPROC __glewBlendFuncSeparatei = NULL;
 PFNGLBLENDFUNCIPROC __glewBlendFunci = NULL;
 PFNGLMINSAMPLESHADINGPROC __glewMinSampleShading = NULL;
 
+PFNGLACTIVETEXTUREARBPROC __glewActiveTextureARB = NULL;
+PFNGLCLIENTACTIVETEXTUREARBPROC __glewClientActiveTextureARB = NULL;
+PFNGLMULTITEXCOORD1DARBPROC __glewMultiTexCoord1dARB = NULL;
+PFNGLMULTITEXCOORD1DVARBPROC __glewMultiTexCoord1dvARB = NULL;
+PFNGLMULTITEXCOORD1FARBPROC __glewMultiTexCoord1fARB = NULL;
+PFNGLMULTITEXCOORD1FVARBPROC __glewMultiTexCoord1fvARB = NULL;
+PFNGLMULTITEXCOORD1IARBPROC __glewMultiTexCoord1iARB = NULL;
+PFNGLMULTITEXCOORD1IVARBPROC __glewMultiTexCoord1ivARB = NULL;
+PFNGLMULTITEXCOORD1SARBPROC __glewMultiTexCoord1sARB = NULL;
+PFNGLMULTITEXCOORD1SVARBPROC __glewMultiTexCoord1svARB = NULL;
+PFNGLMULTITEXCOORD2DARBPROC __glewMultiTexCoord2dARB = NULL;
+PFNGLMULTITEXCOORD2DVARBPROC __glewMultiTexCoord2dvARB = NULL;
+PFNGLMULTITEXCOORD2FARBPROC __glewMultiTexCoord2fARB = NULL;
+PFNGLMULTITEXCOORD2FVARBPROC __glewMultiTexCoord2fvARB = NULL;
+PFNGLMULTITEXCOORD2IARBPROC __glewMultiTexCoord2iARB = NULL;
+PFNGLMULTITEXCOORD2IVARBPROC __glewMultiTexCoord2ivARB = NULL;
+PFNGLMULTITEXCOORD2SARBPROC __glewMultiTexCoord2sARB = NULL;
+PFNGLMULTITEXCOORD2SVARBPROC __glewMultiTexCoord2svARB = NULL;
+PFNGLMULTITEXCOORD3DARBPROC __glewMultiTexCoord3dARB = NULL;
+PFNGLMULTITEXCOORD3DVARBPROC __glewMultiTexCoord3dvARB = NULL;
+PFNGLMULTITEXCOORD3FARBPROC __glewMultiTexCoord3fARB = NULL;
+PFNGLMULTITEXCOORD3FVARBPROC __glewMultiTexCoord3fvARB = NULL;
+PFNGLMULTITEXCOORD3IARBPROC __glewMultiTexCoord3iARB = NULL;
+PFNGLMULTITEXCOORD3IVARBPROC __glewMultiTexCoord3ivARB = NULL;
+PFNGLMULTITEXCOORD3SARBPROC __glewMultiTexCoord3sARB = NULL;
+PFNGLMULTITEXCOORD3SVARBPROC __glewMultiTexCoord3svARB = NULL;
+PFNGLMULTITEXCOORD4DARBPROC __glewMultiTexCoord4dARB = NULL;
+PFNGLMULTITEXCOORD4DVARBPROC __glewMultiTexCoord4dvARB = NULL;
+PFNGLMULTITEXCOORD4FARBPROC __glewMultiTexCoord4fARB = NULL;
+PFNGLMULTITEXCOORD4FVARBPROC __glewMultiTexCoord4fvARB = NULL;
+PFNGLMULTITEXCOORD4IARBPROC __glewMultiTexCoord4iARB = NULL;
+PFNGLMULTITEXCOORD4IVARBPROC __glewMultiTexCoord4ivARB = NULL;
+PFNGLMULTITEXCOORD4SARBPROC __glewMultiTexCoord4sARB = NULL;
+PFNGLMULTITEXCOORD4SVARBPROC __glewMultiTexCoord4svARB = NULL;
+
 PFNGLATTACHOBJECTARBPROC __glewAttachObjectARB = NULL;
 PFNGLCOMPILESHADERARBPROC __glewCompileShaderARB = NULL;
 PFNGLCREATEPROGRAMOBJECTARBPROC __glewCreateProgramObjectARB = NULL;
@@ -652,6 +687,21 @@ PFNGLBINDATTRIBLOCATIONARBPROC __glewBindAttribLocationARB = NULL;
 PFNGLGETACTIVEATTRIBARBPROC __glewGetActiveAttribARB = NULL;
 PFNGLGETATTRIBLOCATIONARBPROC __glewGetAttribLocationARB = NULL;
 
+PFNGLALPHAFRAGMENTOP1ATIPROC __glewAlphaFragmentOp1ATI = NULL;
+PFNGLALPHAFRAGMENTOP2ATIPROC __glewAlphaFragmentOp2ATI = NULL;
+PFNGLALPHAFRAGMENTOP3ATIPROC __glewAlphaFragmentOp3ATI = NULL;
+PFNGLBEGINFRAGMENTSHADERATIPROC __glewBeginFragmentShaderATI = NULL;
+PFNGLBINDFRAGMENTSHADERATIPROC __glewBindFragmentShaderATI = NULL;
+PFNGLCOLORFRAGMENTOP1ATIPROC __glewColorFragmentOp1ATI = NULL;
+PFNGLCOLORFRAGMENTOP2ATIPROC __glewColorFragmentOp2ATI = NULL;
+PFNGLCOLORFRAGMENTOP3ATIPROC __glewColorFragmentOp3ATI = NULL;
+PFNGLDELETEFRAGMENTSHADERATIPROC __glewDeleteFragmentShaderATI = NULL;
+PFNGLENDFRAGMENTSHADERATIPROC __glewEndFragmentShaderATI = NULL;
+PFNGLGENFRAGMENTSHADERSATIPROC __glewGenFragmentShadersATI = NULL;
+PFNGLPASSTEXCOORDATIPROC __glewPassTexCoordATI = NULL;
+PFNGLSAMPLEMAPATIPROC __glewSampleMapATI = NULL;
+PFNGLSETFRAGMENTSHADERCONSTANTATIPROC __glewSetFragmentShaderConstantATI = NULL;
+
 PFNGLBEGINVERTEXSHADEREXTPROC __glewBeginVertexShaderEXT = NULL;
 PFNGLBINDLIGHTPARAMETEREXTPROC __glewBindLightParameterEXT = NULL;
 PFNGLBINDMATERIALPARAMETEREXTPROC __glewBindMaterialParameterEXT = NULL;
@@ -715,11 +765,14 @@ GLboolean __GLEW_VERSION_4_0 = GL_FALSE;
 GLboolean __GLEW_VERSION_4_1 = GL_FALSE;
 GLboolean __GLEW_ARB_fragment_program = GL_FALSE;
 GLboolean __GLEW_ARB_fragment_shader = GL_FALSE;
+GLboolean __GLEW_ARB_multitexture = GL_FALSE;
 GLboolean __GLEW_ARB_shader_objects = GL_FALSE;
 GLboolean __GLEW_ARB_shading_language_100 = GL_FALSE;
 GLboolean __GLEW_ARB_texture_rectangle = GL_FALSE;
 GLboolean __GLEW_ARB_vertex_program = GL_FALSE;
 GLboolean __GLEW_ARB_vertex_shader = GL_FALSE;
+GLboolean __GLEW_ATI_fragment_shader = GL_FALSE;
+GLboolean __GLEW_ATI_text_fragment_shader = GL_FALSE;
 GLboolean __GLEW_EXT_bgra = GL_FALSE;
 GLboolean __GLEW_EXT_packed_pixels = GL_FALSE;
 GLboolean __GLEW_EXT_texture_rectangle = GL_FALSE;
@@ -1159,6 +1212,52 @@ static GLboolean _glewInit_GL_VERSION_4_0 (GLEW_CONTEXT_ARG_DEF_INIT)
 
 #endif /* GL_ARB_fragment_shader */
 
+#ifdef GL_ARB_multitexture
+
+static GLboolean _glewInit_GL_ARB_multitexture (GLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)glewGetProcAddress((const GLubyte*)"glActiveTextureARB")) == NULL) || r;
+  r = ((glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC)glewGetProcAddress((const GLubyte*)"glClientActiveTextureARB")) == NULL) || r;
+  r = ((glMultiTexCoord1dARB = (PFNGLMULTITEXCOORD1DARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1dARB")) == NULL) || r;
+  r = ((glMultiTexCoord1dvARB = (PFNGLMULTITEXCOORD1DVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1dvARB")) == NULL) || r;
+  r = ((glMultiTexCoord1fARB = (PFNGLMULTITEXCOORD1FARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1fARB")) == NULL) || r;
+  r = ((glMultiTexCoord1fvARB = (PFNGLMULTITEXCOORD1FVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1fvARB")) == NULL) || r;
+  r = ((glMultiTexCoord1iARB = (PFNGLMULTITEXCOORD1IARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1iARB")) == NULL) || r;
+  r = ((glMultiTexCoord1ivARB = (PFNGLMULTITEXCOORD1IVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1ivARB")) == NULL) || r;
+  r = ((glMultiTexCoord1sARB = (PFNGLMULTITEXCOORD1SARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1sARB")) == NULL) || r;
+  r = ((glMultiTexCoord1svARB = (PFNGLMULTITEXCOORD1SVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1svARB")) == NULL) || r;
+  r = ((glMultiTexCoord2dARB = (PFNGLMULTITEXCOORD2DARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2dARB")) == NULL) || r;
+  r = ((glMultiTexCoord2dvARB = (PFNGLMULTITEXCOORD2DVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2dvARB")) == NULL) || r;
+  r = ((glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2fARB")) == NULL) || r;
+  r = ((glMultiTexCoord2fvARB = (PFNGLMULTITEXCOORD2FVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2fvARB")) == NULL) || r;
+  r = ((glMultiTexCoord2iARB = (PFNGLMULTITEXCOORD2IARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2iARB")) == NULL) || r;
+  r = ((glMultiTexCoord2ivARB = (PFNGLMULTITEXCOORD2IVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2ivARB")) == NULL) || r;
+  r = ((glMultiTexCoord2sARB = (PFNGLMULTITEXCOORD2SARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2sARB")) == NULL) || r;
+  r = ((glMultiTexCoord2svARB = (PFNGLMULTITEXCOORD2SVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2svARB")) == NULL) || r;
+  r = ((glMultiTexCoord3dARB = (PFNGLMULTITEXCOORD3DARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3dARB")) == NULL) || r;
+  r = ((glMultiTexCoord3dvARB = (PFNGLMULTITEXCOORD3DVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3dvARB")) == NULL) || r;
+  r = ((glMultiTexCoord3fARB = (PFNGLMULTITEXCOORD3FARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3fARB")) == NULL) || r;
+  r = ((glMultiTexCoord3fvARB = (PFNGLMULTITEXCOORD3FVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3fvARB")) == NULL) || r;
+  r = ((glMultiTexCoord3iARB = (PFNGLMULTITEXCOORD3IARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3iARB")) == NULL) || r;
+  r = ((glMultiTexCoord3ivARB = (PFNGLMULTITEXCOORD3IVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3ivARB")) == NULL) || r;
+  r = ((glMultiTexCoord3sARB = (PFNGLMULTITEXCOORD3SARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3sARB")) == NULL) || r;
+  r = ((glMultiTexCoord3svARB = (PFNGLMULTITEXCOORD3SVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3svARB")) == NULL) || r;
+  r = ((glMultiTexCoord4dARB = (PFNGLMULTITEXCOORD4DARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4dARB")) == NULL) || r;
+  r = ((glMultiTexCoord4dvARB = (PFNGLMULTITEXCOORD4DVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4dvARB")) == NULL) || r;
+  r = ((glMultiTexCoord4fARB = (PFNGLMULTITEXCOORD4FARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4fARB")) == NULL) || r;
+  r = ((glMultiTexCoord4fvARB = (PFNGLMULTITEXCOORD4FVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4fvARB")) == NULL) || r;
+  r = ((glMultiTexCoord4iARB = (PFNGLMULTITEXCOORD4IARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4iARB")) == NULL) || r;
+  r = ((glMultiTexCoord4ivARB = (PFNGLMULTITEXCOORD4IVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4ivARB")) == NULL) || r;
+  r = ((glMultiTexCoord4sARB = (PFNGLMULTITEXCOORD4SARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4sARB")) == NULL) || r;
+  r = ((glMultiTexCoord4svARB = (PFNGLMULTITEXCOORD4SVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4svARB")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GL_ARB_multitexture */
+
 #ifdef GL_ARB_shader_objects
 
 static GLboolean _glewInit_GL_ARB_shader_objects (GLEW_CONTEXT_ARG_DEF_INIT)
@@ -1306,6 +1405,36 @@ static GLboolean _glewInit_GL_ARB_vertex_shader (GLEW_CONTEXT_ARG_DEF_INIT)
 }
 
 #endif /* GL_ARB_vertex_shader */
+
+#ifdef GL_ATI_fragment_shader
+
+static GLboolean _glewInit_GL_ATI_fragment_shader (GLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glAlphaFragmentOp1ATI = (PFNGLALPHAFRAGMENTOP1ATIPROC)glewGetProcAddress((const GLubyte*)"glAlphaFragmentOp1ATI")) == NULL) || r;
+  r = ((glAlphaFragmentOp2ATI = (PFNGLALPHAFRAGMENTOP2ATIPROC)glewGetProcAddress((const GLubyte*)"glAlphaFragmentOp2ATI")) == NULL) || r;
+  r = ((glAlphaFragmentOp3ATI = (PFNGLALPHAFRAGMENTOP3ATIPROC)glewGetProcAddress((const GLubyte*)"glAlphaFragmentOp3ATI")) == NULL) || r;
+  r = ((glBeginFragmentShaderATI = (PFNGLBEGINFRAGMENTSHADERATIPROC)glewGetProcAddress((const GLubyte*)"glBeginFragmentShaderATI")) == NULL) || r;
+  r = ((glBindFragmentShaderATI = (PFNGLBINDFRAGMENTSHADERATIPROC)glewGetProcAddress((const GLubyte*)"glBindFragmentShaderATI")) == NULL) || r;
+  r = ((glColorFragmentOp1ATI = (PFNGLCOLORFRAGMENTOP1ATIPROC)glewGetProcAddress((const GLubyte*)"glColorFragmentOp1ATI")) == NULL) || r;
+  r = ((glColorFragmentOp2ATI = (PFNGLCOLORFRAGMENTOP2ATIPROC)glewGetProcAddress((const GLubyte*)"glColorFragmentOp2ATI")) == NULL) || r;
+  r = ((glColorFragmentOp3ATI = (PFNGLCOLORFRAGMENTOP3ATIPROC)glewGetProcAddress((const GLubyte*)"glColorFragmentOp3ATI")) == NULL) || r;
+  r = ((glDeleteFragmentShaderATI = (PFNGLDELETEFRAGMENTSHADERATIPROC)glewGetProcAddress((const GLubyte*)"glDeleteFragmentShaderATI")) == NULL) || r;
+  r = ((glEndFragmentShaderATI = (PFNGLENDFRAGMENTSHADERATIPROC)glewGetProcAddress((const GLubyte*)"glEndFragmentShaderATI")) == NULL) || r;
+  r = ((glGenFragmentShadersATI = (PFNGLGENFRAGMENTSHADERSATIPROC)glewGetProcAddress((const GLubyte*)"glGenFragmentShadersATI")) == NULL) || r;
+  r = ((glPassTexCoordATI = (PFNGLPASSTEXCOORDATIPROC)glewGetProcAddress((const GLubyte*)"glPassTexCoordATI")) == NULL) || r;
+  r = ((glSampleMapATI = (PFNGLSAMPLEMAPATIPROC)glewGetProcAddress((const GLubyte*)"glSampleMapATI")) == NULL) || r;
+  r = ((glSetFragmentShaderConstantATI = (PFNGLSETFRAGMENTSHADERCONSTANTATIPROC)glewGetProcAddress((const GLubyte*)"glSetFragmentShaderConstantATI")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GL_ATI_fragment_shader */
+
+#ifdef GL_ATI_text_fragment_shader
+
+#endif /* GL_ATI_text_fragment_shader */
 
 #ifdef GL_EXT_bgra
 
@@ -1492,6 +1621,10 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
 #ifdef GL_ARB_fragment_shader
   CONST_CAST(GLEW_ARB_fragment_shader) = glewGetExtension("GL_ARB_fragment_shader");
 #endif /* GL_ARB_fragment_shader */
+#ifdef GL_ARB_multitexture
+  CONST_CAST(GLEW_ARB_multitexture) = glewGetExtension("GL_ARB_multitexture");
+  if (glewExperimental || GLEW_ARB_multitexture) CONST_CAST(GLEW_ARB_multitexture) = !_glewInit_GL_ARB_multitexture(GLEW_CONTEXT_ARG_VAR_INIT);
+#endif /* GL_ARB_multitexture */
 #ifdef GL_ARB_shader_objects
   CONST_CAST(GLEW_ARB_shader_objects) = glewGetExtension("GL_ARB_shader_objects");
   if (glewExperimental || GLEW_ARB_shader_objects) CONST_CAST(GLEW_ARB_shader_objects) = !_glewInit_GL_ARB_shader_objects(GLEW_CONTEXT_ARG_VAR_INIT);
@@ -1510,6 +1643,13 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
   CONST_CAST(GLEW_ARB_vertex_shader) = glewGetExtension("GL_ARB_vertex_shader");
   if (glewExperimental || GLEW_ARB_vertex_shader) CONST_CAST(GLEW_ARB_vertex_shader) = !_glewInit_GL_ARB_vertex_shader(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GL_ARB_vertex_shader */
+#ifdef GL_ATI_fragment_shader
+  CONST_CAST(GLEW_ATI_fragment_shader) = glewGetExtension("GL_ATI_fragment_shader");
+  if (glewExperimental || GLEW_ATI_fragment_shader) CONST_CAST(GLEW_ATI_fragment_shader) = !_glewInit_GL_ATI_fragment_shader(GLEW_CONTEXT_ARG_VAR_INIT);
+#endif /* GL_ATI_fragment_shader */
+#ifdef GL_ATI_text_fragment_shader
+  CONST_CAST(GLEW_ATI_text_fragment_shader) = glewGetExtension("GL_ATI_text_fragment_shader");
+#endif /* GL_ATI_text_fragment_shader */
 #ifdef GL_EXT_bgra
   CONST_CAST(GLEW_EXT_bgra) = glewGetExtension("GL_EXT_bgra");
 #endif /* GL_EXT_bgra */
@@ -2073,6 +2213,13 @@ GLboolean glewIsSupported (const char* name)
           continue;
         }
 #endif
+#ifdef GL_ARB_multitexture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"multitexture", 12))
+        {
+          ret = GLEW_ARB_multitexture;
+          continue;
+        }
+#endif
 #ifdef GL_ARB_shader_objects
         if (_glewStrSame3(&pos, &len, (const GLubyte*)"shader_objects", 14))
         {
@@ -2105,6 +2252,23 @@ GLboolean glewIsSupported (const char* name)
         if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_shader", 13))
         {
           ret = GLEW_ARB_vertex_shader;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"ATI_", 4))
+      {
+#ifdef GL_ATI_fragment_shader
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fragment_shader", 15))
+        {
+          ret = GLEW_ATI_fragment_shader;
+          continue;
+        }
+#endif
+#ifdef GL_ATI_text_fragment_shader
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"text_fragment_shader", 20))
+        {
+          ret = GLEW_ATI_text_fragment_shader;
           continue;
         }
 #endif

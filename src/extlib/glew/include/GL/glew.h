@@ -2444,6 +2444,121 @@ typedef void (GLAPIENTRY * PFNGLMINSAMPLESHADINGPROC) (GLclampf value);
 
 #endif /* GL_ARB_fragment_shader */
 
+/* -------------------------- GL_ARB_multitexture -------------------------- */
+
+#ifndef GL_ARB_multitexture
+#define GL_ARB_multitexture 1
+
+#define GL_TEXTURE0_ARB 0x84C0
+#define GL_TEXTURE1_ARB 0x84C1
+#define GL_TEXTURE2_ARB 0x84C2
+#define GL_TEXTURE3_ARB 0x84C3
+#define GL_TEXTURE4_ARB 0x84C4
+#define GL_TEXTURE5_ARB 0x84C5
+#define GL_TEXTURE6_ARB 0x84C6
+#define GL_TEXTURE7_ARB 0x84C7
+#define GL_TEXTURE8_ARB 0x84C8
+#define GL_TEXTURE9_ARB 0x84C9
+#define GL_TEXTURE10_ARB 0x84CA
+#define GL_TEXTURE11_ARB 0x84CB
+#define GL_TEXTURE12_ARB 0x84CC
+#define GL_TEXTURE13_ARB 0x84CD
+#define GL_TEXTURE14_ARB 0x84CE
+#define GL_TEXTURE15_ARB 0x84CF
+#define GL_TEXTURE16_ARB 0x84D0
+#define GL_TEXTURE17_ARB 0x84D1
+#define GL_TEXTURE18_ARB 0x84D2
+#define GL_TEXTURE19_ARB 0x84D3
+#define GL_TEXTURE20_ARB 0x84D4
+#define GL_TEXTURE21_ARB 0x84D5
+#define GL_TEXTURE22_ARB 0x84D6
+#define GL_TEXTURE23_ARB 0x84D7
+#define GL_TEXTURE24_ARB 0x84D8
+#define GL_TEXTURE25_ARB 0x84D9
+#define GL_TEXTURE26_ARB 0x84DA
+#define GL_TEXTURE27_ARB 0x84DB
+#define GL_TEXTURE28_ARB 0x84DC
+#define GL_TEXTURE29_ARB 0x84DD
+#define GL_TEXTURE30_ARB 0x84DE
+#define GL_TEXTURE31_ARB 0x84DF
+#define GL_ACTIVE_TEXTURE_ARB 0x84E0
+#define GL_CLIENT_ACTIVE_TEXTURE_ARB 0x84E1
+#define GL_MAX_TEXTURE_UNITS_ARB 0x84E2
+
+typedef void (GLAPIENTRY * PFNGLACTIVETEXTUREARBPROC) (GLenum texture);
+typedef void (GLAPIENTRY * PFNGLCLIENTACTIVETEXTUREARBPROC) (GLenum texture);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD1DARBPROC) (GLenum target, GLdouble s);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD1DVARBPROC) (GLenum target, const GLdouble *v);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD1FARBPROC) (GLenum target, GLfloat s);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD1FVARBPROC) (GLenum target, const GLfloat *v);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD1IARBPROC) (GLenum target, GLint s);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD1IVARBPROC) (GLenum target, const GLint *v);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD1SARBPROC) (GLenum target, GLshort s);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD1SVARBPROC) (GLenum target, const GLshort *v);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD2DARBPROC) (GLenum target, GLdouble s, GLdouble t);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD2DVARBPROC) (GLenum target, const GLdouble *v);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD2FARBPROC) (GLenum target, GLfloat s, GLfloat t);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD2FVARBPROC) (GLenum target, const GLfloat *v);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD2IARBPROC) (GLenum target, GLint s, GLint t);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD2IVARBPROC) (GLenum target, const GLint *v);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD2SARBPROC) (GLenum target, GLshort s, GLshort t);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD2SVARBPROC) (GLenum target, const GLshort *v);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD3DARBPROC) (GLenum target, GLdouble s, GLdouble t, GLdouble r);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD3DVARBPROC) (GLenum target, const GLdouble *v);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD3FARBPROC) (GLenum target, GLfloat s, GLfloat t, GLfloat r);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD3FVARBPROC) (GLenum target, const GLfloat *v);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD3IARBPROC) (GLenum target, GLint s, GLint t, GLint r);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD3IVARBPROC) (GLenum target, const GLint *v);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD3SARBPROC) (GLenum target, GLshort s, GLshort t, GLshort r);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD3SVARBPROC) (GLenum target, const GLshort *v);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD4DARBPROC) (GLenum target, GLdouble s, GLdouble t, GLdouble r, GLdouble q);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD4DVARBPROC) (GLenum target, const GLdouble *v);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD4FARBPROC) (GLenum target, GLfloat s, GLfloat t, GLfloat r, GLfloat q);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD4FVARBPROC) (GLenum target, const GLfloat *v);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD4IARBPROC) (GLenum target, GLint s, GLint t, GLint r, GLint q);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD4IVARBPROC) (GLenum target, const GLint *v);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD4SARBPROC) (GLenum target, GLshort s, GLshort t, GLshort r, GLshort q);
+typedef void (GLAPIENTRY * PFNGLMULTITEXCOORD4SVARBPROC) (GLenum target, const GLshort *v);
+
+#define glActiveTextureARB GLEW_GET_FUN(__glewActiveTextureARB)
+#define glClientActiveTextureARB GLEW_GET_FUN(__glewClientActiveTextureARB)
+#define glMultiTexCoord1dARB GLEW_GET_FUN(__glewMultiTexCoord1dARB)
+#define glMultiTexCoord1dvARB GLEW_GET_FUN(__glewMultiTexCoord1dvARB)
+#define glMultiTexCoord1fARB GLEW_GET_FUN(__glewMultiTexCoord1fARB)
+#define glMultiTexCoord1fvARB GLEW_GET_FUN(__glewMultiTexCoord1fvARB)
+#define glMultiTexCoord1iARB GLEW_GET_FUN(__glewMultiTexCoord1iARB)
+#define glMultiTexCoord1ivARB GLEW_GET_FUN(__glewMultiTexCoord1ivARB)
+#define glMultiTexCoord1sARB GLEW_GET_FUN(__glewMultiTexCoord1sARB)
+#define glMultiTexCoord1svARB GLEW_GET_FUN(__glewMultiTexCoord1svARB)
+#define glMultiTexCoord2dARB GLEW_GET_FUN(__glewMultiTexCoord2dARB)
+#define glMultiTexCoord2dvARB GLEW_GET_FUN(__glewMultiTexCoord2dvARB)
+#define glMultiTexCoord2fARB GLEW_GET_FUN(__glewMultiTexCoord2fARB)
+#define glMultiTexCoord2fvARB GLEW_GET_FUN(__glewMultiTexCoord2fvARB)
+#define glMultiTexCoord2iARB GLEW_GET_FUN(__glewMultiTexCoord2iARB)
+#define glMultiTexCoord2ivARB GLEW_GET_FUN(__glewMultiTexCoord2ivARB)
+#define glMultiTexCoord2sARB GLEW_GET_FUN(__glewMultiTexCoord2sARB)
+#define glMultiTexCoord2svARB GLEW_GET_FUN(__glewMultiTexCoord2svARB)
+#define glMultiTexCoord3dARB GLEW_GET_FUN(__glewMultiTexCoord3dARB)
+#define glMultiTexCoord3dvARB GLEW_GET_FUN(__glewMultiTexCoord3dvARB)
+#define glMultiTexCoord3fARB GLEW_GET_FUN(__glewMultiTexCoord3fARB)
+#define glMultiTexCoord3fvARB GLEW_GET_FUN(__glewMultiTexCoord3fvARB)
+#define glMultiTexCoord3iARB GLEW_GET_FUN(__glewMultiTexCoord3iARB)
+#define glMultiTexCoord3ivARB GLEW_GET_FUN(__glewMultiTexCoord3ivARB)
+#define glMultiTexCoord3sARB GLEW_GET_FUN(__glewMultiTexCoord3sARB)
+#define glMultiTexCoord3svARB GLEW_GET_FUN(__glewMultiTexCoord3svARB)
+#define glMultiTexCoord4dARB GLEW_GET_FUN(__glewMultiTexCoord4dARB)
+#define glMultiTexCoord4dvARB GLEW_GET_FUN(__glewMultiTexCoord4dvARB)
+#define glMultiTexCoord4fARB GLEW_GET_FUN(__glewMultiTexCoord4fARB)
+#define glMultiTexCoord4fvARB GLEW_GET_FUN(__glewMultiTexCoord4fvARB)
+#define glMultiTexCoord4iARB GLEW_GET_FUN(__glewMultiTexCoord4iARB)
+#define glMultiTexCoord4ivARB GLEW_GET_FUN(__glewMultiTexCoord4ivARB)
+#define glMultiTexCoord4sARB GLEW_GET_FUN(__glewMultiTexCoord4sARB)
+#define glMultiTexCoord4svARB GLEW_GET_FUN(__glewMultiTexCoord4svARB)
+
+#define GLEW_ARB_multitexture GLEW_GET_VAR(__GLEW_ARB_multitexture)
+
+#endif /* GL_ARB_multitexture */
+
 /* ------------------------- GL_ARB_shader_objects ------------------------- */
 
 #ifndef GL_ARB_shader_objects
@@ -2837,6 +2952,111 @@ typedef GLint (GLAPIENTRY * PFNGLGETATTRIBLOCATIONARBPROC) (GLhandleARB programO
 #define GLEW_ARB_vertex_shader GLEW_GET_VAR(__GLEW_ARB_vertex_shader)
 
 #endif /* GL_ARB_vertex_shader */
+
+/* ------------------------- GL_ATI_fragment_shader ------------------------ */
+
+#ifndef GL_ATI_fragment_shader
+#define GL_ATI_fragment_shader 1
+
+#define GL_RED_BIT_ATI 0x00000001
+#define GL_2X_BIT_ATI 0x00000001
+#define GL_4X_BIT_ATI 0x00000002
+#define GL_GREEN_BIT_ATI 0x00000002
+#define GL_COMP_BIT_ATI 0x00000002
+#define GL_BLUE_BIT_ATI 0x00000004
+#define GL_8X_BIT_ATI 0x00000004
+#define GL_NEGATE_BIT_ATI 0x00000004
+#define GL_BIAS_BIT_ATI 0x00000008
+#define GL_HALF_BIT_ATI 0x00000008
+#define GL_QUARTER_BIT_ATI 0x00000010
+#define GL_EIGHTH_BIT_ATI 0x00000020
+#define GL_SATURATE_BIT_ATI 0x00000040
+#define GL_FRAGMENT_SHADER_ATI 0x8920
+#define GL_REG_0_ATI 0x8921
+#define GL_REG_1_ATI 0x8922
+#define GL_REG_2_ATI 0x8923
+#define GL_REG_3_ATI 0x8924
+#define GL_REG_4_ATI 0x8925
+#define GL_REG_5_ATI 0x8926
+#define GL_CON_0_ATI 0x8941
+#define GL_CON_1_ATI 0x8942
+#define GL_CON_2_ATI 0x8943
+#define GL_CON_3_ATI 0x8944
+#define GL_CON_4_ATI 0x8945
+#define GL_CON_5_ATI 0x8946
+#define GL_CON_6_ATI 0x8947
+#define GL_CON_7_ATI 0x8948
+#define GL_MOV_ATI 0x8961
+#define GL_ADD_ATI 0x8963
+#define GL_MUL_ATI 0x8964
+#define GL_SUB_ATI 0x8965
+#define GL_DOT3_ATI 0x8966
+#define GL_DOT4_ATI 0x8967
+#define GL_MAD_ATI 0x8968
+#define GL_LERP_ATI 0x8969
+#define GL_CND_ATI 0x896A
+#define GL_CND0_ATI 0x896B
+#define GL_DOT2_ADD_ATI 0x896C
+#define GL_SECONDARY_INTERPOLATOR_ATI 0x896D
+#define GL_NUM_FRAGMENT_REGISTERS_ATI 0x896E
+#define GL_NUM_FRAGMENT_CONSTANTS_ATI 0x896F
+#define GL_NUM_PASSES_ATI 0x8970
+#define GL_NUM_INSTRUCTIONS_PER_PASS_ATI 0x8971
+#define GL_NUM_INSTRUCTIONS_TOTAL_ATI 0x8972
+#define GL_NUM_INPUT_INTERPOLATOR_COMPONENTS_ATI 0x8973
+#define GL_NUM_LOOPBACK_COMPONENTS_ATI 0x8974
+#define GL_COLOR_ALPHA_PAIRING_ATI 0x8975
+#define GL_SWIZZLE_STR_ATI 0x8976
+#define GL_SWIZZLE_STQ_ATI 0x8977
+#define GL_SWIZZLE_STR_DR_ATI 0x8978
+#define GL_SWIZZLE_STQ_DQ_ATI 0x8979
+#define GL_SWIZZLE_STRQ_ATI 0x897A
+#define GL_SWIZZLE_STRQ_DQ_ATI 0x897B
+
+typedef void (GLAPIENTRY * PFNGLALPHAFRAGMENTOP1ATIPROC) (GLenum op, GLuint dst, GLuint dstMod, GLuint arg1, GLuint arg1Rep, GLuint arg1Mod);
+typedef void (GLAPIENTRY * PFNGLALPHAFRAGMENTOP2ATIPROC) (GLenum op, GLuint dst, GLuint dstMod, GLuint arg1, GLuint arg1Rep, GLuint arg1Mod, GLuint arg2, GLuint arg2Rep, GLuint arg2Mod);
+typedef void (GLAPIENTRY * PFNGLALPHAFRAGMENTOP3ATIPROC) (GLenum op, GLuint dst, GLuint dstMod, GLuint arg1, GLuint arg1Rep, GLuint arg1Mod, GLuint arg2, GLuint arg2Rep, GLuint arg2Mod, GLuint arg3, GLuint arg3Rep, GLuint arg3Mod);
+typedef void (GLAPIENTRY * PFNGLBEGINFRAGMENTSHADERATIPROC) (void);
+typedef void (GLAPIENTRY * PFNGLBINDFRAGMENTSHADERATIPROC) (GLuint id);
+typedef void (GLAPIENTRY * PFNGLCOLORFRAGMENTOP1ATIPROC) (GLenum op, GLuint dst, GLuint dstMask, GLuint dstMod, GLuint arg1, GLuint arg1Rep, GLuint arg1Mod);
+typedef void (GLAPIENTRY * PFNGLCOLORFRAGMENTOP2ATIPROC) (GLenum op, GLuint dst, GLuint dstMask, GLuint dstMod, GLuint arg1, GLuint arg1Rep, GLuint arg1Mod, GLuint arg2, GLuint arg2Rep, GLuint arg2Mod);
+typedef void (GLAPIENTRY * PFNGLCOLORFRAGMENTOP3ATIPROC) (GLenum op, GLuint dst, GLuint dstMask, GLuint dstMod, GLuint arg1, GLuint arg1Rep, GLuint arg1Mod, GLuint arg2, GLuint arg2Rep, GLuint arg2Mod, GLuint arg3, GLuint arg3Rep, GLuint arg3Mod);
+typedef void (GLAPIENTRY * PFNGLDELETEFRAGMENTSHADERATIPROC) (GLuint id);
+typedef void (GLAPIENTRY * PFNGLENDFRAGMENTSHADERATIPROC) (void);
+typedef GLuint (GLAPIENTRY * PFNGLGENFRAGMENTSHADERSATIPROC) (GLuint range);
+typedef void (GLAPIENTRY * PFNGLPASSTEXCOORDATIPROC) (GLuint dst, GLuint coord, GLenum swizzle);
+typedef void (GLAPIENTRY * PFNGLSAMPLEMAPATIPROC) (GLuint dst, GLuint interp, GLenum swizzle);
+typedef void (GLAPIENTRY * PFNGLSETFRAGMENTSHADERCONSTANTATIPROC) (GLuint dst, const GLfloat* value);
+
+#define glAlphaFragmentOp1ATI GLEW_GET_FUN(__glewAlphaFragmentOp1ATI)
+#define glAlphaFragmentOp2ATI GLEW_GET_FUN(__glewAlphaFragmentOp2ATI)
+#define glAlphaFragmentOp3ATI GLEW_GET_FUN(__glewAlphaFragmentOp3ATI)
+#define glBeginFragmentShaderATI GLEW_GET_FUN(__glewBeginFragmentShaderATI)
+#define glBindFragmentShaderATI GLEW_GET_FUN(__glewBindFragmentShaderATI)
+#define glColorFragmentOp1ATI GLEW_GET_FUN(__glewColorFragmentOp1ATI)
+#define glColorFragmentOp2ATI GLEW_GET_FUN(__glewColorFragmentOp2ATI)
+#define glColorFragmentOp3ATI GLEW_GET_FUN(__glewColorFragmentOp3ATI)
+#define glDeleteFragmentShaderATI GLEW_GET_FUN(__glewDeleteFragmentShaderATI)
+#define glEndFragmentShaderATI GLEW_GET_FUN(__glewEndFragmentShaderATI)
+#define glGenFragmentShadersATI GLEW_GET_FUN(__glewGenFragmentShadersATI)
+#define glPassTexCoordATI GLEW_GET_FUN(__glewPassTexCoordATI)
+#define glSampleMapATI GLEW_GET_FUN(__glewSampleMapATI)
+#define glSetFragmentShaderConstantATI GLEW_GET_FUN(__glewSetFragmentShaderConstantATI)
+
+#define GLEW_ATI_fragment_shader GLEW_GET_VAR(__GLEW_ATI_fragment_shader)
+
+#endif /* GL_ATI_fragment_shader */
+
+/* ---------------------- GL_ATI_text_fragment_shader ---------------------- */
+
+#ifndef GL_ATI_text_fragment_shader
+#define GL_ATI_text_fragment_shader 1
+
+#define GL_TEXT_FRAGMENT_SHADER_ATI 0x8200
+
+#define GLEW_ATI_text_fragment_shader GLEW_GET_VAR(__GLEW_ATI_text_fragment_shader)
+
+#endif /* GL_ATI_text_fragment_shader */
 
 /* ------------------------------ GL_EXT_bgra ------------------------------ */
 
@@ -3412,6 +3632,41 @@ GLEW_FUN_EXPORT PFNGLBLENDFUNCSEPARATEIPROC __glewBlendFuncSeparatei;
 GLEW_FUN_EXPORT PFNGLBLENDFUNCIPROC __glewBlendFunci;
 GLEW_FUN_EXPORT PFNGLMINSAMPLESHADINGPROC __glewMinSampleShading;
 
+GLEW_FUN_EXPORT PFNGLACTIVETEXTUREARBPROC __glewActiveTextureARB;
+GLEW_FUN_EXPORT PFNGLCLIENTACTIVETEXTUREARBPROC __glewClientActiveTextureARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD1DARBPROC __glewMultiTexCoord1dARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD1DVARBPROC __glewMultiTexCoord1dvARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD1FARBPROC __glewMultiTexCoord1fARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD1FVARBPROC __glewMultiTexCoord1fvARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD1IARBPROC __glewMultiTexCoord1iARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD1IVARBPROC __glewMultiTexCoord1ivARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD1SARBPROC __glewMultiTexCoord1sARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD1SVARBPROC __glewMultiTexCoord1svARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD2DARBPROC __glewMultiTexCoord2dARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD2DVARBPROC __glewMultiTexCoord2dvARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD2FARBPROC __glewMultiTexCoord2fARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD2FVARBPROC __glewMultiTexCoord2fvARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD2IARBPROC __glewMultiTexCoord2iARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD2IVARBPROC __glewMultiTexCoord2ivARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD2SARBPROC __glewMultiTexCoord2sARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD2SVARBPROC __glewMultiTexCoord2svARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD3DARBPROC __glewMultiTexCoord3dARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD3DVARBPROC __glewMultiTexCoord3dvARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD3FARBPROC __glewMultiTexCoord3fARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD3FVARBPROC __glewMultiTexCoord3fvARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD3IARBPROC __glewMultiTexCoord3iARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD3IVARBPROC __glewMultiTexCoord3ivARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD3SARBPROC __glewMultiTexCoord3sARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD3SVARBPROC __glewMultiTexCoord3svARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD4DARBPROC __glewMultiTexCoord4dARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD4DVARBPROC __glewMultiTexCoord4dvARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD4FARBPROC __glewMultiTexCoord4fARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD4FVARBPROC __glewMultiTexCoord4fvARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD4IARBPROC __glewMultiTexCoord4iARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD4IVARBPROC __glewMultiTexCoord4ivARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD4SARBPROC __glewMultiTexCoord4sARB;
+GLEW_FUN_EXPORT PFNGLMULTITEXCOORD4SVARBPROC __glewMultiTexCoord4svARB;
+
 GLEW_FUN_EXPORT PFNGLATTACHOBJECTARBPROC __glewAttachObjectARB;
 GLEW_FUN_EXPORT PFNGLCOMPILESHADERARBPROC __glewCompileShaderARB;
 GLEW_FUN_EXPORT PFNGLCREATEPROGRAMOBJECTARBPROC __glewCreateProgramObjectARB;
@@ -3519,6 +3774,21 @@ GLEW_FUN_EXPORT PFNGLBINDATTRIBLOCATIONARBPROC __glewBindAttribLocationARB;
 GLEW_FUN_EXPORT PFNGLGETACTIVEATTRIBARBPROC __glewGetActiveAttribARB;
 GLEW_FUN_EXPORT PFNGLGETATTRIBLOCATIONARBPROC __glewGetAttribLocationARB;
 
+GLEW_FUN_EXPORT PFNGLALPHAFRAGMENTOP1ATIPROC __glewAlphaFragmentOp1ATI;
+GLEW_FUN_EXPORT PFNGLALPHAFRAGMENTOP2ATIPROC __glewAlphaFragmentOp2ATI;
+GLEW_FUN_EXPORT PFNGLALPHAFRAGMENTOP3ATIPROC __glewAlphaFragmentOp3ATI;
+GLEW_FUN_EXPORT PFNGLBEGINFRAGMENTSHADERATIPROC __glewBeginFragmentShaderATI;
+GLEW_FUN_EXPORT PFNGLBINDFRAGMENTSHADERATIPROC __glewBindFragmentShaderATI;
+GLEW_FUN_EXPORT PFNGLCOLORFRAGMENTOP1ATIPROC __glewColorFragmentOp1ATI;
+GLEW_FUN_EXPORT PFNGLCOLORFRAGMENTOP2ATIPROC __glewColorFragmentOp2ATI;
+GLEW_FUN_EXPORT PFNGLCOLORFRAGMENTOP3ATIPROC __glewColorFragmentOp3ATI;
+GLEW_FUN_EXPORT PFNGLDELETEFRAGMENTSHADERATIPROC __glewDeleteFragmentShaderATI;
+GLEW_FUN_EXPORT PFNGLENDFRAGMENTSHADERATIPROC __glewEndFragmentShaderATI;
+GLEW_FUN_EXPORT PFNGLGENFRAGMENTSHADERSATIPROC __glewGenFragmentShadersATI;
+GLEW_FUN_EXPORT PFNGLPASSTEXCOORDATIPROC __glewPassTexCoordATI;
+GLEW_FUN_EXPORT PFNGLSAMPLEMAPATIPROC __glewSampleMapATI;
+GLEW_FUN_EXPORT PFNGLSETFRAGMENTSHADERCONSTANTATIPROC __glewSetFragmentShaderConstantATI;
+
 GLEW_FUN_EXPORT PFNGLBEGINVERTEXSHADEREXTPROC __glewBeginVertexShaderEXT;
 GLEW_FUN_EXPORT PFNGLBINDLIGHTPARAMETEREXTPROC __glewBindLightParameterEXT;
 GLEW_FUN_EXPORT PFNGLBINDMATERIALPARAMETEREXTPROC __glewBindMaterialParameterEXT;
@@ -3583,11 +3853,14 @@ GLEW_VAR_EXPORT GLboolean __GLEW_VERSION_4_0;
 GLEW_VAR_EXPORT GLboolean __GLEW_VERSION_4_1;
 GLEW_VAR_EXPORT GLboolean __GLEW_ARB_fragment_program;
 GLEW_VAR_EXPORT GLboolean __GLEW_ARB_fragment_shader;
+GLEW_VAR_EXPORT GLboolean __GLEW_ARB_multitexture;
 GLEW_VAR_EXPORT GLboolean __GLEW_ARB_shader_objects;
 GLEW_VAR_EXPORT GLboolean __GLEW_ARB_shading_language_100;
 GLEW_VAR_EXPORT GLboolean __GLEW_ARB_texture_rectangle;
 GLEW_VAR_EXPORT GLboolean __GLEW_ARB_vertex_program;
 GLEW_VAR_EXPORT GLboolean __GLEW_ARB_vertex_shader;
+GLEW_VAR_EXPORT GLboolean __GLEW_ATI_fragment_shader;
+GLEW_VAR_EXPORT GLboolean __GLEW_ATI_text_fragment_shader;
 GLEW_VAR_EXPORT GLboolean __GLEW_EXT_bgra;
 GLEW_VAR_EXPORT GLboolean __GLEW_EXT_packed_pixels;
 GLEW_VAR_EXPORT GLboolean __GLEW_EXT_texture_rectangle;
