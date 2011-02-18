@@ -63,38 +63,22 @@ class Z80_MD_Mem
 		// TODO: Make these inline!
 		static uint8_t FASTCALL Z80_ReadB(uint32_t address);
 		static void FASTCALL Z80_WriteB(uint32_t address, uint8_t data);
-		
-		/**
-		 * NOTE: These functions *should* be marked protected,
-		 * but they're needed by the Z80 class to initialize mdZ80.
-		 * 
-		 * TODO: Maybe move the mdZ80 initialization here?
-		 */
-		
-		/** Read Byte functions. **/
-		static uint8_t FASTCALL Z80_ReadB_Bad(uint32_t address);
-		static uint8_t FASTCALL Z80_ReadB_Ram(uint32_t address);
-		static uint8_t FASTCALL Z80_ReadB_Bank(uint32_t address);
-		static uint8_t FASTCALL Z80_ReadB_YM2612(uint32_t address);
-		static uint8_t FASTCALL Z80_ReadB_PSG(uint32_t address);
-		static uint8_t FASTCALL Z80_ReadB_68K_Ram(uint32_t address);
-		
-		/** Write Byte functions. **/
-		static void FASTCALL Z80_WriteB_Bad(uint32_t address, uint8_t data);
-		static void FASTCALL Z80_WriteB_Ram(uint32_t address, uint8_t data);
-		static void FASTCALL Z80_WriteB_Bank(uint32_t address, uint8_t data);
-		static void FASTCALL Z80_WriteB_YM2612(uint32_t address, uint8_t data);
-		static void FASTCALL Z80_WriteB_PSG(uint32_t address, uint8_t data);
-		static void FASTCALL Z80_WriteB_68K_Ram(uint32_t address, uint8_t data);
 	
-	protected:
+	private:
 		/** Z80 read/write functions. **/
 		typedef uint8_t  FASTCALL (*Z80_ReadB_fn) (uint32_t address);
 		typedef void     FASTCALL (*Z80_WriteB_fn)(uint32_t address, uint8_t data);
 		
-		/** Z80 function tables. (4 KB pages; 16 entries.) **/
-		static const Z80_ReadB_fn Z80_ReadB_Table[0x10];
-		static const Z80_WriteB_fn Z80_WriteB_Table[0x10];
+		/** Read Byte functions. **/
+		static uint8_t Z80_ReadB_YM2612(uint32_t address);
+		static uint8_t Z80_ReadB_VDP(uint32_t address);
+		static uint8_t Z80_ReadB_68K_Rom(uint32_t address);
+		
+		/** Write Byte functions. **/
+		static void Z80_WriteB_Bank(uint32_t address, uint8_t data);
+		static void Z80_WriteB_YM2612(uint32_t address, uint8_t data);
+		static void Z80_WriteB_VDP(uint32_t address, uint8_t data);
+		static void Z80_WriteB_68K_Rom(uint32_t address, uint8_t data);
 };
 
 }
