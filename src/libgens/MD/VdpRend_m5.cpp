@@ -900,7 +900,11 @@ FORCE_INLINE void VdpRend_m5::T_Make_Sprite_Struct(void)
 	// H40 allows 80 sprites; H32 allows 64 sprites.
 	// Essentially, it's (H_Cell * 2).
 	// [Nemesis' Sprite Masking and Overflow Test ROM: Test #9]
-	const unsigned int max_spr = (VdpIo::H_Cell * 2);
+	// TODO: 80 sprites with Sprite Limit disabled, or 128?
+	// (Old Gens limited to 80 sprites regardless of video mode.)
+	const unsigned int max_spr = (VdpRend::Sprite_Limits
+					? (VdpIo::H_Cell * 2)
+					: 80);
 	
 	do
 	{
