@@ -820,10 +820,6 @@ FORCE_INLINE void VdpRend_m5::T_Render_Line_ScrollA(void)
 		// (Window is not scrollable.)
 		unsigned int disp_pixnum = (Win_Start * 8) + 8;
 		
-		// Get the cell offsets.
-		// TODO: Is this affected by interlaced mode?
-		unsigned int X_offset_cell = Win_Start;
-		
 		// Calculate the fine offsets.
 		const int vdp_line = T_GetLineNumber<interlaced>();
 		if (interlaced)
@@ -833,10 +829,10 @@ FORCE_INLINE void VdpRend_m5::T_Render_Line_ScrollA(void)
 		
 		// Window row start address.
 		const unsigned int Y_offset_cell = (VdpIo::VDP_Lines.Visible.Current / 8);
-		const uint16_t *Win_Row_Addr = &VdpIo::Win_Addr[Y_offset_cell << VdpIo::H_Win_Shift];
+		const uint16_t *Win_Row_Addr = &VdpIo::Win_Addr[Y_offset_cell << VdpIo::H_Win_Shift] + Win_Start;
 		
 		// Loop through the cells.
-		for (int x = Win_Length; x > 0; x--)
+		for (int x = Win_Length; x > 0; x--, disp_pixnum += 8)
 		{
 			// Get the pattern info and data for the current tile.
 			register uint16_t pattern_info = *Win_Row_Addr++;
@@ -867,12 +863,6 @@ FORCE_INLINE void VdpRend_m5::T_Render_Line_ScrollA(void)
 				else
 					T_PutLine_P0<true, h_s, false>(disp_pixnum, pattern_data, palette);
 			}
-			
-			// Go to the next H cell.
-			X_offset_cell++;
-			
-			// Go to the next pattern.
-			disp_pixnum += 8;
 		}
 		
 		// Mark window pixels.
