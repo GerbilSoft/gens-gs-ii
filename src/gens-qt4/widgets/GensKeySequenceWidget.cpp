@@ -249,7 +249,7 @@ void GensKeySequenceWidgetPrivate::doneRecording(void)
 	updateShortcutDisplay();
 }
 
-#include <stdio.h>
+
 /**
  * GensKeySequenceWidgetPrivate::updateShortcutDisplay(): Update shortcut display.
  */
@@ -447,7 +447,7 @@ bool GensKeySequenceButton::event(QEvent* e)
 	return QPushButton::event(e);
 }
 
-#include <stdio.h>
+
 /**
  * GensKeySequenceButton::keyPressEvent(): Key press event.
  * @param e QKeyEvent.
