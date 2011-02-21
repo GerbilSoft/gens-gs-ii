@@ -341,8 +341,12 @@ int GensPortAudio::write(void)
 		blip_sample_t *buf = &m_buffer[m_bufferPos>>1];
 		long max_samples = (sizeof(m_buffer) - m_bufferPos) / m_sampleSize;
 		long samplesRead = LibGens::SoundMgr::Blip_Buffer_Read(buf, max_samples, m_stereo);
+		
+		// FIXME: Make this work for all sample rates, not just 48,000 Hz.
+#if 0
 		if (samplesRead < 800)
 			fprintf(stderr, "GensPortAudio::%s(): Internal buffer overflow.\n", __func__);
+#endif
 		
 		// Increment the buffer position.
 		m_bufferPos += ((int)samplesRead * m_sampleSize);
