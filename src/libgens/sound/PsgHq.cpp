@@ -147,25 +147,47 @@ void PsgHq::write(uint8_t data)
 		}
 	}
 	
+	// TODO: Optimize this?
 	if (m_curReg & 1)
 	{
 		// Volume register.
 		// Update m_volume[m_curChan] with the associated volume.
 		m_volume[m_curChan] = ms_VolTable[data & 0x0F];
 	}
-	else if (m_curChan == 3)
+	else
 	{
-		// TONE register: NOISE channel.
-		// TODO: Update NOISE if TONE 2 is changed and NOISE is set to use TONE 2.
+		// TONE register.
+		// Special updates need to be done for registers 2 and 3.
 		
-		// Reset the noise LFSR.
-		m_lfsr = LFSR_INIT;
-		
-		// Check if we should use white noise or periodic noise.
-		if (data & 4)
-			m_lfsrMask = LFSR_MASK_WHITE;
-		else
-			m_lfsrMask = LFSR_MASK_PERIODIC;
+		if (m_curChan == 2)
+		{
+			// TONE register 2.
+			// If NOISE is set to use Tone2, update m_noise_resetVal.
+			if ((m_reg[3<<1] & 0x3) == 3)
+				m_noise_resetVal = m_reg[2<<1];
+		}
+		else if (m_curChan == 3)
+		{
+			// TONE register: NOISE channel.
+			switch (m_reg[3<<1] & 0x3)
+			{
+				case 0:		m_noise_resetVal = 0x10; break;
+				case 1:		m_noise_resetVal = 0x20; break;
+				case 2:		m_noise_resetVal = 0x40; break;
+				case 3:		m_noise_resetVal = m_reg[2<<1]; break;
+			}
+			
+			// TODO: Update NOISE if TONE 2 is changed and NOISE is set to use TONE 2.
+			
+			// Reset the noise LFSR.
+			m_lfsr = LFSR_INIT;
+			
+			// Check if we should use white noise or periodic noise.
+			if (data & 4)
+				m_lfsrMask = LFSR_MASK_WHITE;
+			else
+				m_lfsrMask = LFSR_MASK_PERIODIC;
+		}
 	}
 }
 
@@ -207,7 +229,24 @@ void PsgHq::runCycles(int cycles)
 			}
 		}
 		
-		// NOISE channel (TODO)
+		// NOISE channel.
+		m_counter[3]--;
+		if (m_counter[3] <= 0)
+		{
+			// Counter has hit 0. Shift the register.
+			// TODO: Optimize tone=0 checking.
+			m_lfsr = LFSR16_Shift(m_lfsr, m_lfsrMask);
+			m_isOutput[3] = (m_lfsr & 1);
+			
+			// Reset the tone counter.
+			m_counter[3] = m_noise_resetVal;
+			if (m_counter[3] == 0)
+				m_counter[3] = 0;
+			
+			// Update the synth buffer.
+			m_synthNoise.update(m_cycles,
+					(m_isOutput[3] ? m_volume[3] : 0));
+		}
 	}
 	
 	// Store the overflow cycles.

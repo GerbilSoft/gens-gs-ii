@@ -81,6 +81,7 @@ class PsgHq
 		/* Noise channel variables. */
 		unsigned int m_lfsrMask;	// Linear Feedback Shift Register mask.
 		unsigned int m_lfsr;		// Linear Feedback Shift Register contents.
+		int m_noise_resetVal;		// Noise reset value.
 		
 		// Lookup tables.
 		static const int8_t ms_VolTable[16];
