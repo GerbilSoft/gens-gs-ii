@@ -276,7 +276,7 @@ long SoundMgr::Blip_Buffer_Read(blip_sample_t *dest, long max_samples, bool ster
 	// Clear the cycle counters.
 	ms_PsgHq->clearCycles();
 	
-	// Return the number of bytes read.
+	// Return the number of samples read.
 	return ret;
 }
 
