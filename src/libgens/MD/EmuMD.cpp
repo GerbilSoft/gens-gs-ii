@@ -196,6 +196,7 @@ int EmuMD::hardReset(void)
 	Z80::ReInit();
 	VdpIo::Reset();
 	SoundMgr::ms_Psg.reset();
+	SoundMgr::ms_PsgHq.reset();
 	SoundMgr::ms_Ym2612.reset();
 	
 	// Reset successful.
@@ -208,6 +209,7 @@ int EmuMD::hardReset(void)
  * @param LineType Line type.
  * @param VDP If true, VDP is updated.
  */
+#include <stdio.h>
 template<EmuMD::LineType_t LineType, bool VDP>
 FORCE_INLINE void EmuMD::T_execLine(void)
 {
@@ -220,6 +222,7 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 	SoundMgr::ms_Ym2612.updateDacAndTimers(bufL, bufR, writeLen);
 	SoundMgr::ms_Ym2612.addWriteLen(writeLen);
 	SoundMgr::ms_Psg.addWriteLen(writeLen);
+	SoundMgr::ms_PsgHq.runCycles(M68K_Mem::CPL_Z80);	// Z80 uses the same frequency as the PSG.
 	
 	// Notify controllers that a new scanline is being drawn.
 	m_port1->doScanline();

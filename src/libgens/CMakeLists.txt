@@ -64,6 +64,7 @@ SET(libgens_SRCS
 	cpu/M68K.cpp
 	cpu/M68K_Mem.cpp
 	sound/Psg.cpp
+	sound/PsgHq.cpp
 	sound/Ym2612.cpp
 	macros/log_msg.c
 	Util/byteswap.c
@@ -123,7 +124,7 @@ ENDIF()
 
 # Build the library.
 ADD_LIBRARY(gens STATIC ${libgens_SRCS} ${libgens_OPTIONAL_SRCS} ${libgens_COMPAT_SRCS})
-TARGET_LINK_LIBRARIES(gens minizip zomg)
+TARGET_LINK_LIBRARIES(gens minizip zomg Blip_Buffer)
 IF(GENS_ENABLE_EMULATION)
 	TARGET_LINK_LIBRARIES(gens starscream mdZ80)
 ENDIF(GENS_ENABLE_EMULATION)

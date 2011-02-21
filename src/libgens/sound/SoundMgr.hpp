@@ -30,6 +30,7 @@
 
 // Audio ICs.
 #include "../sound/Psg.hpp"
+#include "../sound/PsgHq.hpp"
 #include "../sound/Ym2612.hpp"
 
 namespace LibGens
@@ -72,6 +73,7 @@ class SoundMgr
 		// Audio ICs.
 		// TODO: Add wrapper functions?
 		static Psg ms_Psg;
+		static PsgHq ms_PsgHq;
 		static Ym2612 ms_Ym2612;
 		
 		/**
@@ -90,7 +92,11 @@ class SoundMgr
 		 */
 		static inline void SpecialUpdate(void)
 		{
-			ms_Psg.specialUpdate();
+			//ms_Psg.specialUpdate();
+			
+			// PSG HQ: Render to the buffer.
+			ms_PsgHq.render(ms_SegBufL, ms_SegBufR);
+			
 			ms_Ym2612.specialUpdate();
 		}
 	

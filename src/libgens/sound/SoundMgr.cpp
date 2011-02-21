@@ -14,7 +14,7 @@
  *                                                                         *
  * This program is distributed in the hope that it will be useful, but     *
  * WITHOUT ANY WARRANTY; without even the implied warranty of              *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
+int i  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
  * GNU General Public License for more details.                            *
  *                                                                         *
  * You should have received a copy of the GNU General Public License along *
@@ -51,6 +51,7 @@ int32_t SoundMgr::ms_SegBufR[MAX_SEGMENT_SIZE];
 
 // Audio ICs.
 Psg SoundMgr::ms_Psg;
+PsgHq SoundMgr::ms_PsgHq;
 Ym2612 SoundMgr::ms_Ym2612;
 
 // Audio settings.
@@ -96,10 +97,12 @@ void SoundMgr::ReInit(int rate, bool isPal, bool preserveState)
 	
 	// If requested, save the PSG/YM state.
 	Zomg_PsgSave_t psgState;
+	Zomg_PsgSave_t psghqState;
 	Zomg_Ym2612Save_t ym2612State;
 	if (preserveState)
 	{
 		ms_Psg.zomgSave(&psgState);
+		ms_PsgHq.zomgSave(&psghqState);
 		ms_Ym2612.zomgSave(&ym2612State);
 	}
 	
@@ -107,11 +110,13 @@ void SoundMgr::ReInit(int rate, bool isPal, bool preserveState)
 	if (isPal)
 	{
 		ms_Psg.reInit((int)((double)CLOCK_PAL / 15.0), rate);
+		ms_PsgHq.reInit((int)((double)CLOCK_PAL / 15.0), rate);
 		ms_Ym2612.reInit((int)((double)CLOCK_PAL / 7.0), rate);
 	}
 	else
 	{
 		ms_Psg.reInit((int)((double)CLOCK_NTSC / 15.0), rate);
+		ms_PsgHq.reInit((int)((double)CLOCK_NTSC / 15.0), rate);
 		ms_Ym2612.reInit((int)((double)CLOCK_NTSC / 7.0), rate);
 	}
 	
@@ -119,6 +124,7 @@ void SoundMgr::ReInit(int rate, bool isPal, bool preserveState)
 	if (preserveState)
 	{
 		ms_Psg.zomgRestore(&psgState);
+		ms_PsgHq.zomgRestore(&psghqState);
 		ms_Ym2612.zomgRestore(&ym2612State);
 	}
 }
