@@ -118,13 +118,13 @@ EmuMD::EmuMD(Rom *rom)
 	// TODO: Initialize this somewhere else.
 	if (M68K_Mem::ms_SysVersion.isPal())
 	{
-		M68K_Mem::CPL_M68K = (int)rint((((double)CLOCK_PAL / 7.0) / 50.0) / 312.0);
-		M68K_Mem::CPL_Z80 = (int)rint((((double)CLOCK_PAL / 15.0) / 50.0) / 312.0);
+		M68K_Mem::CPL_M68K = (int)floor((((double)CLOCK_PAL / 7.0) / 50.0) / 312.0);
+		M68K_Mem::CPL_Z80 = (int)floor((((double)CLOCK_PAL / 15.0) / 50.0) / 312.0);
 	}
 	else
 	{
-		M68K_Mem::CPL_M68K = (int)rint((((double)CLOCK_NTSC / 7.0) / 60.0) / 262.0);
-		M68K_Mem::CPL_Z80 = (int)rint((((double)CLOCK_NTSC / 15.0) / 60.0) / 262.0);
+		M68K_Mem::CPL_M68K = (int)floor((((double)CLOCK_NTSC / 7.0) / 60.0) / 262.0);
+		M68K_Mem::CPL_Z80 = (int)floor((((double)CLOCK_NTSC / 15.0) / 60.0) / 262.0);
 	}
 	
 	// Initialize audio.
