@@ -92,6 +92,7 @@ class GensPortAudio : public ABackend
 		PaStream *m_stream;
 		
 		// Audio buffer.
+		QMutex m_bufferLock;
 		int16_t m_buffer[1024*SEGMENTS_TO_BUFFER*2];
 		unsigned long m_bufferPos; // Byte position in m_buffer.
 		

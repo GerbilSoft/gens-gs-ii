@@ -257,6 +257,7 @@ int GensPortAudio::gensPaCallback(const void *inputBuffer, void *outputBuffer,
 	// Get the data from the buffer.
 	framesPerBuffer *= m_sampleSize;
 	
+	m_bufferLock.lock();
 	if (m_bufferPos < framesPerBuffer)
 	{
 		// Not enough data in the buffer.
@@ -280,6 +281,7 @@ int GensPortAudio::gensPaCallback(const void *inputBuffer, void *outputBuffer,
 			m_bufferPos = diff;
 		}
 	}
+	m_bufferLock.unlock();
 	
 	return 0;
 }
@@ -294,6 +296,7 @@ int GensPortAudio::write(void)
 	if (!m_open)
 		return 1;
 	
+	m_bufferLock.lock();
 	int ret = 0;
 	if (!LibGens::SoundMgr::IsUsingBlipBuffer())
 	{
@@ -303,7 +306,7 @@ int GensPortAudio::write(void)
 		int segLength = (LibGens::SoundMgr::GetSegLength() * m_sampleSize);
 		if ((m_bufferPos + segLength) > sizeof(m_buffer))
 		{
-			printf("internal buffer overflow\n");
+			fprintf(stderr, "GensPortAudio::%s(): Internal buffer overflow.\n", __func__);
 			return 1;
 		}
 		
@@ -338,10 +341,14 @@ int GensPortAudio::write(void)
 		blip_sample_t *buf = &m_buffer[m_bufferPos>>1];
 		long max_samples = (sizeof(m_buffer) - m_bufferPos) / m_sampleSize;
 		long samplesRead = LibGens::SoundMgr::Blip_Buffer_Read(buf, max_samples, m_stereo);
+		if (samplesRead < 800)
+			fprintf(stderr, "GensPortAudio::%s(): Internal buffer overflow.\n", __func__);
 		
 		// Increment the buffer position.
 		m_bufferPos += ((int)samplesRead * m_sampleSize);
 	}
+	m_bufferLock.unlock();
+	
 	return ret;
 }
 
