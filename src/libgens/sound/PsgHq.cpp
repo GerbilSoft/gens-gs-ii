@@ -222,6 +222,8 @@ void PsgHq::runCycles(int cycles)
 	const int end_cycles = (m_cycles + cycles);
 	
 	// PSG uses 16 "real" cycles per sample.
+	// NOTE: Blip_Buffer uses the Master Clock, so we have to multiply
+	// real_cycle_pos*15 after processing each sample.
 	const int sample_count = ((end_cycles / 16) - (m_cycles / 16));
 	
 	// TONE channels.
@@ -249,12 +251,12 @@ void PsgHq::runCycles(int cycles)
 				// Reference: http://www.smspower.org/Development/SN76489#ToneChannels
 				m_isOutput[i] = 0;
 				sample_cycles = 0;
-				m_synthTone[i].update(real_cycle_pos, 0);
+				m_synthTone[i].update(real_cycle_pos*15, 0);
 				break;
 			}
 			
 			// Update the synth buffer.
-			m_synthTone[i].update(real_cycle_pos,
+			m_synthTone[i].update(real_cycle_pos*15,
 					(m_isOutput[i] ? m_volume[i] : 0));
 		}
 		
@@ -285,12 +287,12 @@ void PsgHq::runCycles(int cycles)
 				// Don't output anything.
 				m_isOutput[3] = 0;
 				sample_cycles = 0;
-				m_synthNoise.update(real_cycle_pos, 0);
+				m_synthNoise.update(real_cycle_pos*15, 0);
 				break;
 			}
 			
 			// Update the synth buffer.
-			m_synthNoise.update(real_cycle_pos,
+			m_synthNoise.update(real_cycle_pos*15,
 					(m_isOutput[3] ? m_volume[3] : 0));
 		}
 		

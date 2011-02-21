@@ -65,7 +65,7 @@ bool SoundMgr::ms_IsPal = false;
 void SoundMgr::Init(void)
 {
 	// Don't use Blip_Buffer by default.
-	SetUsingBlipBuffer_int(false);
+	SetUsingBlipBuffer_int(true);
 }
 
 void SoundMgr::End(void)
@@ -156,9 +156,11 @@ void SoundMgr::ReInit(int rate, bool isPal, bool preserveState)
 	}
 	else
 	{
-		// TODO: Use the master clock for the Blip_Buffer?
-		// Currently using PSG clock only.
-		ms_BlipBuffer->clock_rate((double)master_clock / 15.0);
+		// NOTE: Master Clock is being used.
+		// PSG will do its own /15.
+		// YM2612 will need to do its own /7.
+		// TODO: Figure out how to handle PWM, CDDA, and PCM.
+		ms_BlipBuffer->clock_rate(master_clock);
 		ms_BlipBuffer->sample_rate(rate);
 		ms_BlipBuffer->clear();
 	}
@@ -232,7 +234,7 @@ void SoundMgr::SpecialUpdate(void)
 	{
 		// Blip_Buffer audio subsystem.
 		// TODO: Make a separate function for Blip_Buffer.
-		ms_BlipBuffer->end_frame(ms_PsgHq->cycles());
+		ms_BlipBuffer->end_frame(ms_PsgHq->cycles()*15);
 	}
 }
 
