@@ -65,7 +65,7 @@ bool SoundMgr::ms_IsPal = false;
 void SoundMgr::Init(void)
 {
 	// Don't use Blip_Buffer by default.
-	SetUsingBlipBuffer_int(true);
+	SetUsingBlipBuffer_int(false);
 }
 
 void SoundMgr::End(void)
@@ -258,6 +258,10 @@ long SoundMgr::Blip_Buffer_Read(blip_sample_t *dest, long max_samples, bool ster
 	{
 		blip_sample_t stereo_buf[65536];
 		ret = ms_BlipBuffer->read_samples(stereo_buf, 65536, 0);
+		if (ret > max_samples)
+			ret = max_samples;
+		
+		// Convert the mono audio to stereo.
 		for (int i = 0; i < (int)ret; i++, dest += 2)
 		{
 			*dest = stereo_buf[i];
