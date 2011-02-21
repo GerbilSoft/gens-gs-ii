@@ -158,7 +158,7 @@ void SoundMgr::ReInit(int rate, bool isPal, bool preserveState)
 	{
 		// TODO: Use the master clock for the Blip_Buffer?
 		// Currently using PSG clock only.
-		ms_BlipBuffer->clock_rate((double)master_clock / 7.0);
+		ms_BlipBuffer->clock_rate((double)master_clock / 15.0);
 		ms_BlipBuffer->sample_rate(rate);
 		ms_BlipBuffer->clear();
 	}
@@ -233,11 +233,45 @@ void SoundMgr::SpecialUpdate(void)
 		// Blip_Buffer audio subsystem.
 		// TODO: Make a separate function for Blip_Buffer.
 		ms_BlipBuffer->end_frame(ms_PsgHq->cycles());
-		ms_PsgHq->clearCycles();
-		
-		// TODO: Read the samples somewhere.
-		ms_BlipBuffer->clear();
 	}
+}
+
+
+/**
+ * Blip_Buffer_Read(): Read samples from Blip_Buffer.
+ * @param dest Destination buffer.
+ * @param max_samples Maximum number of samples in the destination buffer.
+ * @param stereo If true, write stereo channels using interleaved stereo.
+ * @return Number of samples written to the destination buffer.
+ */
+long SoundMgr::Blip_Buffer_Read(blip_sample_t *dest, long max_samples, bool stereo)
+{
+	if (!ms_UseBlipBuffer)
+		return 0;
+	
+	// TODO: Currently only using one Blip_Buffer, since PSG is mono.
+	// Add a second Blip_Buffer later.
+	long ret;
+	if (stereo)
+	{
+		blip_sample_t stereo_buf[65536];
+		ret = ms_BlipBuffer->read_samples(stereo_buf, 65536, 0);
+		for (int i = 0; i < (int)ret; i++, dest += 2)
+		{
+			*dest = stereo_buf[i];
+			*(dest+1) = stereo_buf[i];
+		}
+	}
+	else
+	{
+		ret = ms_BlipBuffer->read_samples(dest, max_samples, 0);
+	}
+	
+	// Clear the cycle counters.
+	ms_PsgHq->clearCycles();
+	
+	// Return the number of bytes read.
+	return ret;
 }
 
 }

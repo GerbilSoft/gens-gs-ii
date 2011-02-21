@@ -92,6 +92,15 @@ class SoundMgr
 		 */
 		static void SpecialUpdate(void);
 		
+		/**
+		 * Blip_Buffer_Read(): Read samples from Blip_Buffer.
+		 * @param dest Destination buffer.
+		 * @param max_samples Maximum number of samples in the destination buffer.
+		 * @param stereo If true, write stereo channels using interleaved stereo.
+		 * @return Number of samples written to the destination buffer.
+		 */
+		static long Blip_Buffer_Read(blip_sample_t *dest, long max_samples, bool stereo);
+		
 		// IC wrapper functions.
 		static void ResetPSG(void);
 		static void UpdatePSG(int writeLen, int cycles);
