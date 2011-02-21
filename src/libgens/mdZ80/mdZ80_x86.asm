@@ -69,6 +69,14 @@ BITS 32
 	%define SYMF(sym, args) SYM(sym)
 %endif
 
+; Global symbol declaration.
+%ifdef __OBJ_ELF
+	%define GLOBAL_SYM(sym, type)		global SYM(sym):type (sym %+ _end - sym)
+	%define GLOBAL_SYMF(sym, args, type)	global SYMF(sym, args):type (sym %+ _end - sym)
+%else
+	%define GLOBAL_SYM(sym, type)		global SYM(sym)
+	%define GLOBAL_SYMF(sym, args, type)	global SYMF(sym, args)
+%endif
 
 ;*******************
 ;
@@ -4843,7 +4851,7 @@ align 16
 ; 0  -> ok
 ; !0 -> error (status returned) or no cycle to do (-1)
 
-global SYMF(z80_Exec, 8)
+GLOBAL_SYMF(z80_Exec, 8, function)
 SYMF(z80_Exec, 8):
 	sub	edx, [ecx + Z80.CycleCnt]
 	jbe	near z80_Cycles_Already_done
@@ -4990,6 +4998,8 @@ z80_Exec_Interrupt_Happened:
 %endif
 	
 	jmp	dword [OP_Table + edx * 4]
+
+z80_Exec_end:
 
 
 ;*********************
