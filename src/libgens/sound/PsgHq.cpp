@@ -245,6 +245,8 @@ void PsgHq::runCycles(int cycles)
 			{
 				// Reset value is 0.
 				// Don't output anything.
+				// TODO: If the reset value is 0 or 1, output +1.
+				// Reference: http://www.smspower.org/Development/SN76489#ToneChannels
 				m_isOutput[i] = 0;
 				sample_cycles = 0;
 				m_synthTone[i].update(real_cycle_pos, 0);
