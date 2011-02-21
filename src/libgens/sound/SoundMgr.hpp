@@ -239,7 +239,7 @@ inline uint8_t SoundMgr::ReadYM2612(void)
 	if (!ms_UseBlipBuffer)
 		return ms_Ym2612->read();
 	else
-		return 0xFF;
+		return 0;
 	// TODO: Blip_Buffer YM2612.
 }
 
