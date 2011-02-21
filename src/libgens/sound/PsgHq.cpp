@@ -76,25 +76,13 @@ const int8_t PsgHq::ms_VolTable[16] =
 /** Functions **/
 
 
-PsgHq::PsgHq()
+PsgHq::PsgHq(Blip_Buffer *blipBuffer)
 {
 	//m_enabled = true; // TODO: Make this customizable.
-}
-
-
-PsgHq::PsgHq(int clock, int rate)
-{
-	//m_enabled = true; // TODO: Make this customizable.
-	reInit(clock, rate);
-}
-
-
-void PsgHq::reInit(int clock, int rate)
-{
-	// Initialize the Blip Buffer.
-	m_output.clock_rate(clock);
-	m_output.sample_rate(rate);
-	m_output.clear();
+	
+	// Save the Blip_Buffer pointer.
+	// TODO: Is this necessary?
+	m_blipBuffer = blipBuffer;
 	
 	// Initialize the synths.
 	// MAX_OUTPUT in Psg == 0x4FFF
@@ -105,10 +93,10 @@ void PsgHq::reInit(int clock, int rate)
 	for (int i = 0; i < 3; i++)
 	{
 		m_synthTone[i].volume(vol);
-		m_synthTone[i].output(&m_output);
+		m_synthTone[i].output(m_blipBuffer);
 	}
 	m_synthNoise.volume(vol);
-	m_synthNoise.output(&m_output);
+	m_synthNoise.output(m_blipBuffer);
 	
 	// Clear PSG registers.
 	m_curChan = 0;
@@ -224,32 +212,6 @@ void PsgHq::runCycles(int cycles)
 	
 	// Store the overflow cycles.
 	m_cycles = end_cycles;
-}
-
-
-/**
- * render(): Render the PSG output.
- * This function should be called *after* the entire frame is processed.
- * @param bufL Left audio buffer.
- * @param bufR Right audio buffer.
- */
-void PsgHq::render(int32_t *bufL, int32_t *bufR)
-{
-	// End the current output frame.
-	m_output.end_frame(m_cycles);
-	m_cycles = 0;
-	
-	// Convert the buffer to split format.
-	// TODO: Don't do this. Instead, have a global Blip_Buffer.
-	// A global Blip_Buffer is also needed because the number of
-	// samples read may not be exactly 735 for 44,100 Hz.
-	blip_sample_t sample_buf[65536];
-	long samples_read = m_output.read_samples(sample_buf, sizeof(sample_buf)/sizeof(sample_buf[0]), 0);
-	for (long i = 0; i < samples_read; i++)
-	{
-		*bufL++ += sample_buf[i];
-		*bufR++ += sample_buf[i];
-	}
 }
 
 

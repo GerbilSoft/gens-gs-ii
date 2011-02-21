@@ -28,6 +28,9 @@
 // C includes.
 #include <stdint.h>
 
+// Blip_Buffer.
+#include "Blip_Buffer/Blip_Buffer.h"
+
 // Audio ICs.
 #include "../sound/Psg.hpp"
 #include "../sound/PsgHq.hpp"
@@ -73,32 +76,21 @@ class SoundMgr
 		// Audio ICs.
 		// TODO: Add wrapper functions?
 		static Psg ms_Psg;
-		static PsgHq ms_PsgHq;
 		static Ym2612 ms_Ym2612;
+		
+		// Blip_Buffer high-quality Audio ICs.
+		// TODO: Add wrapper functions?
+		static PsgHq *ms_PsgHq;
 		
 		/**
 		 * ResetPtrsAndLens(): Reset buffer pointers and lengths.
 		 */
-		static inline void ResetPtrsAndLens(void)
-		{
-			ms_Ym2612.resetBufferPtrs();
-			ms_Ym2612.clearWriteLen();
-			ms_Psg.resetBufferPtrs();
-			ms_Psg.clearWriteLen();
-		}
+		static void ResetPtrsAndLens(void);
 		
 		/**
 		 * SpecialUpdate(): Run the specialUpdate() functions.
 		 */
-		static inline void SpecialUpdate(void)
-		{
-			//ms_Psg.specialUpdate();
-			
-			// PSG HQ: Render to the buffer.
-			ms_PsgHq.render(ms_SegBufL, ms_SegBufR);
-			
-			ms_Ym2612.specialUpdate();
-		}
+		static void SpecialUpdate(void);
 	
 	protected:
 		// Segment length.
@@ -111,6 +103,9 @@ class SoundMgr
 		// Line extrapolation values. [312 + extra room to prevent overflows]
 		// Index 0 == start; Index 1 == length
 		static unsigned int ms_Extrapol[312+8][2];
+		
+		// Blip_Buffer.
+		static Blip_Buffer *ms_BlipBuffer;
 	
 	private:
 		SoundMgr() { }

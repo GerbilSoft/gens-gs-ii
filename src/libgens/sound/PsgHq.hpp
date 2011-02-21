@@ -43,20 +43,20 @@ namespace LibGens
 class PsgHq
 {
 	public:
-		PsgHq();
-		PsgHq(int clock, int rate);
-		
-		void reInit(int clock, int rate);
+		PsgHq(Blip_Buffer *blipBuffer);
 		
 		/**
 		 * reset(): Reset the PSG state.
 		 */
 		inline void reset(void) { zomgRestore(&ms_psgStateInit); }
 		
-		/* PSG manipulation functions. */
+		// PSG manipulation functions.
 		void write(uint8_t data);
 		void runCycles(int cycles);
-		void render(int32_t *bufL, int32_t *bufR);
+		inline void clearCycles(void)
+			{ m_cycles = 0; }
+		inline int cycles(void)
+			{ return m_cycles; }
 		
 		/** ZOMG savestate functions. **/
 		void zomgSave(Zomg_PsgSave_t *state);
@@ -128,7 +128,7 @@ class PsgHq
 		
 	private:
 		// Blip Buffer objects.
-		Blip_Buffer m_output;					// Output buffer.
+		Blip_Buffer *m_blipBuffer;				// Output buffer.
 		Blip_Synth<blip_good_quality, 64*2> m_synthTone[3];	// Tone generators.
 		Blip_Synth<blip_low_quality, 64*2>  m_synthNoise;	// Noise generator.
 		

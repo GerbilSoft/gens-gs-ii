@@ -948,7 +948,7 @@ void M68K_Mem::M68K_Write_Byte_VDP(uint32_t address, uint8_t data)
 	{
 		// 0xC00011: PSG control port.
 		SoundMgr::ms_Psg.write(data);
-		SoundMgr::ms_PsgHq.write(data);
+		SoundMgr::ms_PsgHq->write(data);
 	}
 }
 
