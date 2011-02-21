@@ -159,7 +159,7 @@ int EmuMD::softReset(void)
 	// Reset the M68K, Z80, and YM2612.
 	M68K::Reset();
 	Z80::Reset();
-	SoundMgr::ms_Ym2612.reset();
+	SoundMgr::ResetYM2612();
 	
 	// Z80 state should be reset to the default value.
 	// Z80's initial state is RESET.
@@ -195,9 +195,8 @@ int EmuMD::hardReset(void)
 	M68K::InitSys(M68K::SYSID_MD);
 	Z80::ReInit();
 	VdpIo::Reset();
-	SoundMgr::ms_Psg.reset();
-	SoundMgr::ms_PsgHq->reset();
-	SoundMgr::ms_Ym2612.reset();
+	SoundMgr::ResetPSG();
+	SoundMgr::ResetYM2612();
 	
 	// Reset successful.
 	return 0;
@@ -219,10 +218,8 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 	
 	// Update the sound chips.
 	int writeLen = SoundMgr::GetWriteLen(VdpIo::VDP_Lines.Display.Current);
-	SoundMgr::ms_Ym2612.updateDacAndTimers(bufL, bufR, writeLen);
-	SoundMgr::ms_Ym2612.addWriteLen(writeLen);
-	SoundMgr::ms_Psg.addWriteLen(writeLen);
-	SoundMgr::ms_PsgHq->runCycles(M68K_Mem::CPL_Z80);	// Z80 uses the same frequency as the PSG.
+	SoundMgr::UpdateYM2612(bufL, bufR, writeLen);
+	SoundMgr::UpdatePSG(writeLen, M68K_Mem::CPL_Z80);	// Z80 uses the same frequency as the PSG.
 	
 	// Notify controllers that a new scanline is being drawn.
 	m_port1->doScanline();

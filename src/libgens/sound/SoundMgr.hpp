@@ -36,6 +36,10 @@
 #include "../sound/PsgHq.hpp"
 #include "../sound/Ym2612.hpp"
 
+// ZOMG save structs.
+#include "libzomg/zomg_psg.h"
+#include "libzomg/zomg_ym2612.h"
+
 namespace LibGens
 {
 
@@ -73,14 +77,10 @@ class SoundMgr
 		static int32_t ms_SegBufL[MAX_SEGMENT_SIZE];
 		static int32_t ms_SegBufR[MAX_SEGMENT_SIZE];
 		
-		// Audio ICs.
-		// TODO: Add wrapper functions?
-		static Psg ms_Psg;
-		static Ym2612 ms_Ym2612;
-		
-		// Blip_Buffer high-quality Audio ICs.
-		// TODO: Add wrapper functions?
-		static PsgHq *ms_PsgHq;
+		// Use Blip_Buffer?
+		static inline bool IsUsingBlipBuffer(void)
+			{ return ms_UseBlipBuffer; }
+		static void SetUsingBlipBuffer(bool newUsingBlipBuffer);
 		
 		/**
 		 * ResetPtrsAndLens(): Reset buffer pointers and lengths.
@@ -91,6 +91,20 @@ class SoundMgr
 		 * SpecialUpdate(): Run the specialUpdate() functions.
 		 */
 		static void SpecialUpdate(void);
+		
+		// IC wrapper functions.
+		static void ResetPSG(void);
+		static void UpdatePSG(int writeLen, int cycles);
+		static void WritePSG(uint8_t data);
+		static void ZomgRestorePSG(const Zomg_PsgSave_t *psg_save);
+		static void ZomgSavePSG(Zomg_PsgSave_t *psg_save);
+		
+		static void ResetYM2612(void);
+		static void UpdateYM2612(int32_t *bufL, int32_t *bufR, int writeLen);
+		static void WriteYM2612(uint32_t address, uint8_t data);
+		static uint8_t ReadYM2612(void);
+		static void ZomgRestoreYM2612(const Zomg_Ym2612Save_t *ym2612_save);
+		static void ZomgSaveYM2612(Zomg_Ym2612Save_t *ym2612_save);
 	
 	protected:
 		// Segment length.
@@ -104,13 +118,143 @@ class SoundMgr
 		// Index 0 == start; Index 1 == length
 		static unsigned int ms_Extrapol[312+8][2];
 		
-		// Blip_Buffer.
+		// Audio ICs.
+		static Psg *ms_Psg;
+		static Ym2612 *ms_Ym2612;
+		
+		// Blip_Buffer and high-quality audio ICs.
+		static void SetUsingBlipBuffer_int(bool newUsingBlipBuffer);
+		static bool ms_UseBlipBuffer;
 		static Blip_Buffer *ms_BlipBuffer;
+		static PsgHq *ms_PsgHq;
 	
 	private:
 		SoundMgr() { }
 		~SoundMgr() { }
 };
+
+
+// TODO: Make Psg and PsgHq inherit from a common base class?
+
+
+inline void SoundMgr::SetUsingBlipBuffer(bool newUsingBlipBuffer)
+{
+	if (ms_UseBlipBuffer == newUsingBlipBuffer)
+		return;
+	
+	SetUsingBlipBuffer_int(newUsingBlipBuffer);
+}
+
+
+/** PSG wrapper functions. **/
+
+
+/**
+ * ResetPSG(): Reset the PSG.
+ */
+inline void SoundMgr::ResetPSG(void)
+{
+	if (!ms_UseBlipBuffer)
+		ms_Psg->reset();
+	else
+		ms_PsgHq->reset();
+}
+
+/**
+ * UpdatePSG(): Update the PSG.
+ * @param writeLen Write length. (classic only)
+ * @param cycles PSG cycles. (Blip_Buffer only)
+ */
+inline void SoundMgr::UpdatePSG(int writeLen, int cycles)
+{
+	if (!ms_UseBlipBuffer)
+		ms_Psg->addWriteLen(writeLen);
+	else
+		ms_PsgHq->runCycles(cycles);
+}
+
+inline void SoundMgr::WritePSG(uint8_t data)
+{
+	if (!ms_UseBlipBuffer)
+		ms_Psg->write(data);
+	else
+		ms_PsgHq->write(data);
+}
+
+inline void SoundMgr::ZomgRestorePSG(const Zomg_PsgSave_t *psg_save)
+{
+	if (!ms_UseBlipBuffer)
+		ms_Psg->zomgRestore(psg_save);
+	else
+		ms_PsgHq->zomgRestore(psg_save);
+}
+
+inline void SoundMgr::ZomgSavePSG(Zomg_PsgSave_t *psg_save)
+{
+	if (!ms_UseBlipBuffer)
+		ms_Psg->zomgSave(psg_save);
+	else
+		ms_PsgHq->zomgSave(psg_save);
+}
+
+
+/** YM2612 wrapper functions. **/
+
+
+/**
+ * ResetYM2612(): Reset the YM2612.
+ */
+inline void SoundMgr::ResetYM2612(void)
+{
+	if (!ms_UseBlipBuffer)
+		ms_Ym2612->reset();
+	// TODO: Blip_Buffer YM2612.
+}
+
+/**
+ * UpdateYM2612(): Update the YM2612.
+ * @param bufL Left buffer. (classic only)
+ * @param bufR Right buffer. (classic only)
+ * @param writeLen Write length. (classic only)
+ */
+inline void SoundMgr::UpdateYM2612(int32_t *bufL, int32_t *bufR, int writeLen)
+{
+	if (!ms_UseBlipBuffer)
+	{
+		ms_Ym2612->updateDacAndTimers(bufL, bufR, writeLen);
+		ms_Ym2612->addWriteLen(writeLen);
+	}
+	// TODO: Blip_Buffer YM2612.
+}
+
+inline void SoundMgr::WriteYM2612(uint32_t address, uint8_t data)
+{
+	if (!ms_UseBlipBuffer)
+		ms_Ym2612->write(address, data);
+	// TODO: Blip_Buffer YM2612.
+}
+
+inline uint8_t SoundMgr::ReadYM2612(void)
+{
+	if (!ms_UseBlipBuffer)
+		return ms_Ym2612->read();
+	else
+		return 0xFF;
+	// TODO: Blip_Buffer YM2612.
+}
+
+inline void SoundMgr::ZomgRestoreYM2612(const Zomg_Ym2612Save_t *ym2612_save)
+{
+	if (!ms_UseBlipBuffer)
+		ms_Ym2612->zomgRestore(ym2612_save);
+	// TODO: Blip_Buffer YM2612.
+}
+
+inline void SoundMgr::ZomgSaveYM2612(Zomg_Ym2612Save_t *ym2612_save)
+{
+	if (!ms_UseBlipBuffer)
+		ms_Ym2612->zomgSave(ym2612_save);
+}
 
 }
 

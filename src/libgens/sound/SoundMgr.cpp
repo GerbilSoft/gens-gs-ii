@@ -50,12 +50,13 @@ int32_t SoundMgr::ms_SegBufL[MAX_SEGMENT_SIZE];
 int32_t SoundMgr::ms_SegBufR[MAX_SEGMENT_SIZE];
 
 // Audio ICs.
-Psg SoundMgr::ms_Psg;
-Ym2612 SoundMgr::ms_Ym2612;
+Psg *SoundMgr::ms_Psg = NULL;
+Ym2612 *SoundMgr::ms_Ym2612 = NULL;
 
 // Blip_Buffer and high-quality Audio ICs.
-Blip_Buffer *SoundMgr::ms_BlipBuffer;
-PsgHq *SoundMgr::ms_PsgHq;
+bool SoundMgr::ms_UseBlipBuffer = false;
+Blip_Buffer *SoundMgr::ms_BlipBuffer = NULL;
+PsgHq *SoundMgr::ms_PsgHq = NULL;
 
 // Audio settings.
 int SoundMgr::ms_Rate = 44100;
@@ -63,22 +64,49 @@ bool SoundMgr::ms_IsPal = false;
 
 void SoundMgr::Init(void)
 {
-	// Create the Blip_Buffer object.
-	ms_BlipBuffer = new Blip_Buffer();
-	
-	// Create the high-quality Blip_Buffer IC objects.
-	ms_PsgHq = new PsgHq(ms_BlipBuffer);
+	// Don't use Blip_Buffer by default.
+	SetUsingBlipBuffer_int(false);
 }
 
 void SoundMgr::End(void)
 {
-	// Delete the Blip_Buffer high-quality Audio ICs.
-	delete ms_PsgHq;
-	ms_PsgHq = NULL;
+	// Delete "classic" audio objects.
+	delete ms_Psg;		ms_Psg = NULL;
+	delete ms_Ym2612;	ms_Ym2612 = NULL;
 	
-	// Delete the Blip_Buffer object.
-	delete ms_BlipBuffer;
-	ms_BlipBuffer = NULL;
+	// Delete Blip_Buffer audio objects.
+	delete ms_PsgHq;	ms_PsgHq = NULL;
+	delete ms_BlipBuffer;	ms_BlipBuffer = NULL;
+}
+
+
+void SoundMgr::SetUsingBlipBuffer_int(bool newUsingBlipBuffer)
+{
+	ms_UseBlipBuffer = newUsingBlipBuffer;
+	
+	if (ms_UseBlipBuffer)
+	{
+		// Enable Blip_Buffer.
+		ms_BlipBuffer = new Blip_Buffer();
+		ms_PsgHq = new PsgHq(ms_BlipBuffer);
+		
+		// Disable "classic" audio subsystem.
+		delete ms_Psg;		ms_Psg = NULL;
+		delete ms_Ym2612;	ms_Ym2612 = NULL;
+	}
+	else
+	{
+		// Enable "classic" audio subsystem.
+		ms_Ym2612 = new Ym2612();
+		ms_Psg = new Psg();
+		
+		// Disable Blip_Buffer.
+		delete ms_PsgHq;	ms_PsgHq = NULL;
+		delete ms_BlipBuffer;	ms_BlipBuffer = NULL;
+	}
+	
+	// TODO: Reinitialize the Sound Manager.
+	// TODO: Save/restore PSG and YM2612 settings.
 }
 
 
@@ -109,48 +137,37 @@ void SoundMgr::ReInit(int rate, bool isPal, bool preserveState)
 	memset(ms_SegBufR, 0x00, sizeof(ms_SegBufR));
 	
 	// If requested, save the PSG/YM state.
+	// NOTE: Blip_Buffer versions don't handle sample rate themselves,
+	// so they don't need the state saved/restored.
 	Zomg_PsgSave_t psgState;
-	Zomg_PsgSave_t psghqState;
 	Zomg_Ym2612Save_t ym2612State;
-	if (preserveState)
+	if (preserveState && !ms_BlipBuffer)
 	{
-		ms_Psg.zomgSave(&psgState);
-		ms_PsgHq->zomgSave(&psghqState);
-		ms_Ym2612.zomgSave(&ym2612State);
+		ms_Psg->zomgSave(&psgState);
+		ms_Ym2612->zomgSave(&ym2612State);
 	}
 	
 	// Initialize the PSG and YM2612.
-	if (isPal)
+	const int master_clock = (isPal ? CLOCK_PAL : CLOCK_NTSC);
+	if (!ms_BlipBuffer)
 	{
-		ms_Psg.reInit((int)((double)CLOCK_PAL / 15.0), rate);
-		//ms_PsgHq->reInit((int)((double)CLOCK_PAL / 15.0), rate);
-		ms_Ym2612.reInit((int)((double)CLOCK_PAL / 7.0), rate);
-		
-		// TODO: Use the master clock for the Blip_Buffer?
-		// Currently using PSG clock only.
-		ms_BlipBuffer->clock_rate((double)CLOCK_PAL / 7.0);
-		ms_BlipBuffer->sample_rate(rate);
-		ms_BlipBuffer->clear();
+		ms_Psg->reInit((int)((double)master_clock / 15.0), rate);
+		ms_Ym2612->reInit((int)((double)master_clock / 7.0), rate);
 	}
 	else
 	{
-		ms_Psg.reInit((int)((double)CLOCK_NTSC / 15.0), rate);
-		//ms_PsgHq->reInit((int)((double)CLOCK_NTSC / 15.0), rate);
-		ms_Ym2612.reInit((int)((double)CLOCK_NTSC / 7.0), rate);
-		
 		// TODO: Use the master clock for the Blip_Buffer?
 		// Currently using PSG clock only.
-		ms_BlipBuffer->clock_rate((double)CLOCK_NTSC / 7.0);
+		ms_BlipBuffer->clock_rate((double)master_clock / 7.0);
 		ms_BlipBuffer->sample_rate(rate);
 		ms_BlipBuffer->clear();
 	}
 	
 	// If requested, restore the PSG/YM state.
-	if (preserveState)
+	if (preserveState && !ms_BlipBuffer)
 	{
-		ms_Psg.zomgRestore(&psgState);
-		//ms_PsgHq->zomgRestore(&psghqState);
-		ms_Ym2612.zomgRestore(&ym2612State);
+		ms_Psg->zomgRestore(&psgState);
+		ms_Ym2612->zomgRestore(&ym2612State);
 	}
 }
 
@@ -186,13 +203,17 @@ int SoundMgr::CalcSegLength(int rate, bool isPal)
 
 /**
  * ResetPtrsAndLens(): Reset buffer pointers and lengths.
+ * Classic mode only!
  */
 void SoundMgr::ResetPtrsAndLens(void)
 {
-	ms_Ym2612.resetBufferPtrs();
-	ms_Ym2612.clearWriteLen();
-	ms_Psg.resetBufferPtrs();
-	ms_Psg.clearWriteLen();
+	if (ms_BlipBuffer)
+		return;
+	
+	ms_Ym2612->resetBufferPtrs();
+	ms_Ym2612->clearWriteLen();
+	ms_Psg->resetBufferPtrs();
+	ms_Psg->clearWriteLen();
 }
 
 
@@ -201,15 +222,22 @@ void SoundMgr::ResetPtrsAndLens(void)
  */
 void SoundMgr::SpecialUpdate(void)
 {
-	ms_Psg.specialUpdate();
-	ms_Ym2612.specialUpdate();
-	
-	// TODO: Make a separate function for Blip_Buffer.
-	ms_BlipBuffer->end_frame(ms_PsgHq->cycles());
-	ms_PsgHq->clearCycles();
-	
-	// TODO: Read the samples somewhere.
-	ms_BlipBuffer->clear();
+	if (!ms_BlipBuffer)
+	{
+		// "Classic" audio subsystem.
+		ms_Psg->specialUpdate();
+		ms_Ym2612->specialUpdate();
+	}
+	else
+	{
+		// Blip_Buffer audio subsystem.
+		// TODO: Make a separate function for Blip_Buffer.
+		ms_BlipBuffer->end_frame(ms_PsgHq->cycles());
+		ms_PsgHq->clearCycles();
+		
+		// TODO: Read the samples somewhere.
+		ms_BlipBuffer->clear();
+	}
 }
 
 }

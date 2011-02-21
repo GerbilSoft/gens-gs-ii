@@ -817,7 +817,7 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 			Z80_State |= Z80_STATE_RESET;
 			
 			// YM2612's RESET line is tied to the Z80's RESET line.
-			SoundMgr::ms_Ym2612.reset();
+			SoundMgr::ResetYM2612();
 		}
 		return;
 	}
@@ -947,8 +947,7 @@ void M68K_Mem::M68K_Write_Byte_VDP(uint32_t address, uint8_t data)
 	else if (address == 0x11)
 	{
 		// 0xC00011: PSG control port.
-		SoundMgr::ms_Psg.write(data);
-		SoundMgr::ms_PsgHq->write(data);
+		SoundMgr::WritePSG(data);
 	}
 }
 
@@ -1139,7 +1138,7 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 			Z80_State |= Z80_STATE_RESET;
 			
 			// YM2612's RESET line is tied to the Z80's RESET line.
-			SoundMgr::ms_Ym2612.reset();
+			SoundMgr::ResetYM2612();
 		}
 		
 		return;

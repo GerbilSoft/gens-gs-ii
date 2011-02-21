@@ -153,7 +153,7 @@ uint8_t FASTCALL Z80_MD_Mem::Z80_ReadB_YM2612(uint32_t address)
 		return 0xFF;
 	
 	// Return the YM2612 status register.
-	return SoundMgr::ms_Ym2612.read();
+	return SoundMgr::ReadYM2612();
 }
 
 
@@ -263,7 +263,7 @@ void FASTCALL Z80_MD_Mem::Z80_WriteB_YM2612(uint32_t address, uint8_t data)
 		return;
 	
 	// Write to the YM2612.
-	SoundMgr::ms_Ym2612.write(address & 0x03, data);
+	SoundMgr::WriteYM2612(address & 0x03, data);
 }
 
 
@@ -280,7 +280,7 @@ void FASTCALL Z80_MD_Mem::Z80_WriteB_PSG(uint32_t address, uint8_t data)
 	if (address == 0x7F11)
 	{
 		// PSG register.
-		SoundMgr::ms_Psg.write(data);
+		SoundMgr::WritePSG(data);
 		return;
 	}
 	

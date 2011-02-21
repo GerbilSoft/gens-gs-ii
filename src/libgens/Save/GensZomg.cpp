@@ -113,14 +113,14 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 	// Load the PSG state.
 	Zomg_PsgSave_t psg_save;
 	zomg.loadPsgReg(&psg_save);
-	SoundMgr::ms_Psg.zomgRestore(&psg_save);
+	SoundMgr::ZomgRestorePSG(&psg_save);
 	
 	/** Audio: MD-specific **/
 	
 	// Load the YM2612 register state.
 	Zomg_Ym2612Save_t ym2612_save;
 	zomg.loadMD_YM2612_reg(&ym2612_save);
-	SoundMgr::ms_Ym2612.zomgRestore(&ym2612_save);
+	SoundMgr::ZomgRestoreYM2612(&ym2612_save);
 	
 	/** Z80 **/
 	
@@ -273,14 +273,14 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	
 	// Save the PSG state.
 	Zomg_PsgSave_t psg_save;
-	SoundMgr::ms_Psg.zomgSave(&psg_save);
+	SoundMgr::ZomgSavePSG(&psg_save);
 	zomg.savePsgReg(&psg_save);
 	
 	/** Audio: MD-specific **/
 	
 	// Save the YM2612 register state.
 	Zomg_Ym2612Save_t ym2612_save;
-	SoundMgr::ms_Ym2612.zomgSave(&ym2612_save);
+	SoundMgr::ZomgSaveYM2612(&ym2612_save);
 	zomg.saveMD_YM2612_reg(&ym2612_save);
 	
 	/** Z80 **/
