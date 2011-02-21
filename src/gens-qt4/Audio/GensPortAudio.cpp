@@ -294,41 +294,54 @@ int GensPortAudio::write(void)
 	if (!m_open)
 		return 1;
 	
-	// TODO: Lock the buffer for writing.
-	// TODO: Use the segment size.
-	int segLength = (LibGens::SoundMgr::GetSegLength() * m_sampleSize);
-	if ((m_bufferPos + segLength) > sizeof(m_buffer))
+	int ret = 0;
+	if (!LibGens::SoundMgr::IsUsingBlipBuffer())
 	{
-		printf("internal buffer overflow\n");
-		return 1;
-	}
-	
-	int16_t *buf = &m_buffer[m_bufferPos>>1];
-	
-	// TODO: MMX versions.
-	int ret;
+		// "Classic" audio subsystem.
+		
+		// TODO: Lock the buffer for writing.
+		int segLength = (LibGens::SoundMgr::GetSegLength() * m_sampleSize);
+		if ((m_bufferPos + segLength) > sizeof(m_buffer))
+		{
+			printf("internal buffer overflow\n");
+			return 1;
+		}
+		
+		int16_t *buf = &m_buffer[m_bufferPos>>1];
+		
 #ifdef HAVE_MMX
-	if (CPU_Flags & MDP_CPUFLAG_X86_MMX)
-	{
-		// MMX is supported.
-		if (m_stereo)
-			ret = writeStereoMMX(buf);
+		if (CPU_Flags & MDP_CPUFLAG_X86_MMX)
+		{
+			// MMX is supported.
+			if (m_stereo)
+				ret = writeStereoMMX(buf);
+			else
+				ret = writeMonoMMX(buf);
+		}
 		else
-			ret = writeMonoMMX(buf);
+#endif /* HAVE_MMX */
+		if (m_stereo)
+			ret = writeStereo(buf);
+		else
+			ret = writeMono(buf);
+		
+		// Increment the buffer position.
+		m_bufferPos += segLength;
+		
+		// Unlock the ring buffer.
+		// TODO
+		//m_buffer.writeUnlock();
 	}
 	else
-#endif /* HAVE_MMX */
-	if (m_stereo)
-		ret = writeStereo(buf);
-	else
-		ret = writeMono(buf);
-	
-	// Increment the buffer position.
-	m_bufferPos += segLength;
-	
-	// Unlock the ring buffer.
-	// TODO
-	//m_buffer.writeUnlock();
+	{
+		// Blip_Buffer audio subsystem.
+		blip_sample_t *buf = &m_buffer[m_bufferPos>>1];
+		long max_samples = (sizeof(m_buffer) - m_bufferPos) / m_sampleSize;
+		long samplesRead = LibGens::SoundMgr::Blip_Buffer_Read(buf, max_samples, m_stereo);
+		
+		// Increment the buffer position.
+		m_bufferPos += ((int)samplesRead * m_sampleSize);
+	}
 	return ret;
 }
 
