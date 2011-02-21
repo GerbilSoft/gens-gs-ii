@@ -109,6 +109,10 @@ PsgHq::PsgHq(Blip_Buffer *blipBuffer)
 	memset(m_counter, 0x00, sizeof(m_counter));
 	memset(m_isOutput, 0x00, sizeof(m_isOutput));
 	
+	// Clear the registers.
+	memset(m_reg, 0x00, sizeof(m_reg));
+	m_noise_resetVal = 0;
+	
 	// Clear the cycle counter.
 	m_cycles = 0;
 	
@@ -164,7 +168,16 @@ void PsgHq::write(uint8_t data)
 			// TONE register 2.
 			// If NOISE is set to use Tone2, update m_noise_resetVal.
 			if ((m_reg[3<<1] & 0x3) == 3)
+			{
 				m_noise_resetVal = m_reg[2<<1];
+				
+				// NOTE: Classic Psg treats a noise tone of 0 like 1.
+				// SMS Power shows tones 0 and 1 result in +1 output.
+				// Figure out the correct value.
+				// (This fixes white noise on the Sonic 1 title screen.)
+				if (m_noise_resetVal == 0)
+					m_noise_resetVal = 1;
+			}
 		}
 		else if (m_curChan == 3)
 		{
@@ -174,10 +187,17 @@ void PsgHq::write(uint8_t data)
 				case 0:		m_noise_resetVal = 0x10; break;
 				case 1:		m_noise_resetVal = 0x20; break;
 				case 2:		m_noise_resetVal = 0x40; break;
-				case 3:		m_noise_resetVal = m_reg[2<<1]; break;
+				case 3:
+					m_noise_resetVal = m_reg[2<<1];
+					
+					// NOTE: Classic Psg treats a noise tone of 0 like 1.
+					// SMS Power shows tones 0 and 1 result in +1 output.
+					// Figure out the correct value.
+					// (This fixes white noise on the Sonic 1 title screen.)
+					if (m_noise_resetVal == 0)
+						m_noise_resetVal = 1;
+					break;
 			}
-			
-			// TODO: Update NOISE if TONE 2 is changed and NOISE is set to use TONE 2.
 			
 			// Reset the noise LFSR.
 			m_lfsr = LFSR_INIT;
@@ -199,54 +219,81 @@ void PsgHq::write(uint8_t data)
  */
 void PsgHq::runCycles(int cycles)
 {
-	// PSG uses 16 "real" cycles per sample.
-	int end_cycles = (m_cycles + cycles);
-	int div16_cycles = (end_cycles & ~0xF);
+	const int end_cycles = (m_cycles + cycles);
 	
-	for (; m_cycles < div16_cycles; m_cycles += 16)
+	// PSG uses 16 "real" cycles per sample.
+	const int sample_count = ((end_cycles / 16) - (m_cycles / 16));
+	
+	// TONE channels.
+	for (int i = 2; i >= 0; i--)
 	{
-		// Process the PSG channels.
-		// TODO: Optimize this! (e.g. only run one iteration per transition)
+		int sample_cycles = sample_count;
+		int real_cycle_pos = m_cycles;
 		
-		// TONE channels 0-2 (in reverse order)
-		for (int j = 2; j >= 0; j--)
+		while (m_counter[i] <= sample_cycles)
 		{
-			m_counter[j]--; // Decrement the tone counter.
-			if (m_counter[j] <= 0)
+			// Timer for this channel will overflow.
+			sample_cycles -= m_counter[i];
+			real_cycle_pos += (m_counter[i] * 16);
+			
+			// Flip the output bit.
+			m_isOutput[i] = !m_isOutput[i];
+			
+			// Reset the tone counter.
+			m_counter[i] = m_reg[i << 1];
+			if (m_counter[i] == 0)
 			{
-				// Counter has hit 0. Flip the output bit.
-				// TODO: Optimize tone=0 checking.
-				m_isOutput[j] = !m_isOutput[j];
-				
-				// Reset the tone counter.
-				m_counter[j] = m_reg[j << 1];
-				if (m_counter[j] == 0)
-					m_isOutput[j] = 0;
-				
-				// Update the synth buffer.
-				m_synthTone[j].update(m_cycles,
-						(m_isOutput[j] ? m_volume[j] : 0));
+				// Reset value is 0.
+				// Don't output anything.
+				m_isOutput[i] = 0;
+				sample_cycles = 0;
+				m_synthTone[i].update(real_cycle_pos, 0);
+				break;
 			}
+			
+			// Update the synth buffer.
+			m_synthTone[i].update(real_cycle_pos,
+					(m_isOutput[i] ? m_volume[i] : 0));
 		}
 		
-		// NOISE channel.
-		m_counter[3]--;
-		if (m_counter[3] <= 0)
+		// Subtract the remaining cycles from the tone counter.
+		m_counter[i] -= sample_cycles;
+	}
+	
+	// NOISE channel.
+	{
+		int sample_cycles = sample_count;
+		int real_cycle_pos = m_cycles;
+		
+		while (m_counter[3] <= sample_cycles)
 		{
-			// Counter has hit 0. Shift the register.
-			// TODO: Optimize tone=0 checking.
+			// Timer for this channel will overflow.
+			sample_cycles -= m_counter[3];
+			real_cycle_pos += (m_counter[3] * 16);
+			
+			// Shift the LFSR.
 			m_lfsr = LFSR16_Shift(m_lfsr, m_lfsrMask);
 			m_isOutput[3] = (m_lfsr & 1);
 			
 			// Reset the tone counter.
 			m_counter[3] = m_noise_resetVal;
 			if (m_counter[3] == 0)
-				m_counter[3] = 0;
+			{
+				// Reset value is 0.
+				// Don't output anything.
+				m_isOutput[3] = 0;
+				sample_cycles = 0;
+				m_synthNoise.update(real_cycle_pos, 0);
+				break;
+			}
 			
 			// Update the synth buffer.
-			m_synthNoise.update(m_cycles,
+			m_synthNoise.update(real_cycle_pos,
 					(m_isOutput[3] ? m_volume[3] : 0));
 		}
+		
+		// Subtract the remaining cycles from the tone counter.
+		m_counter[3] -= sample_cycles;
 	}
 	
 	// Store the overflow cycles.
