@@ -26,50 +26,105 @@
 // Menu actions.
 #include "GensMenuBar_menus.hpp"
 
+// Qt includes.
+#include <QtCore/QSettings>
+
 // TODO: Create a typedef GensKeyM_t to indicate "with modifiers"?
 
 namespace GensQt4
 {
 
+/**
+ * ms_DefKeySettings[]: Default key settings.
+ */
+const GensKeyConfig::DefKeySetting GensKeyConfig::ms_DefKeySettings[] =
+{
+	// Non-menu keys.
+	{IDM_NOMENU_HARDRESET, KEYV_TAB | KEYM_SHIFT,		"other/hardReset"},
+	{IDM_NOMENU_SOFTRESET, KEYV_TAB,			"other/softReset"},
+	{IDM_NOMENU_PAUSE, KEYV_ESCAPE,				"other/pause"},
+	
+	{IDM_NOMENU_FASTBLUR, KEYV_F9,				"other/fastBlur"},
+	
+	{IDM_NOMENU_SAVESLOT_0, KEYV_0,				"other/saveSlot0"},
+	{IDM_NOMENU_SAVESLOT_1, KEYV_1,				"other/saveSlot1"},
+	{IDM_NOMENU_SAVESLOT_2, KEYV_2,				"other/saveSlot2"},
+	{IDM_NOMENU_SAVESLOT_3, KEYV_3,				"other/saveSlot3"},
+	{IDM_NOMENU_SAVESLOT_4, KEYV_4,				"other/saveSlot4"},
+	{IDM_NOMENU_SAVESLOT_5, KEYV_5,				"other/saveSlot5"},
+	{IDM_NOMENU_SAVESLOT_6, KEYV_6,				"other/saveSlot6"},
+	{IDM_NOMENU_SAVESLOT_7, KEYV_7,				"other/saveSlot7"},
+	{IDM_NOMENU_SAVESLOT_8, KEYV_8,				"other/saveSlot8"},
+	{IDM_NOMENU_SAVESLOT_9, KEYV_9,				"other/saveSlot9"},
+	{IDM_NOMENU_SAVESLOT_PREV, KEYV_F6,			"other/saveSlotPrev"},
+	{IDM_NOMENU_SAVESLOT_NEXT, KEYV_F7,			"other/saveSlotNext"},
+	{IDM_NOMENU_SAVESLOT_LOADFROM, KEYV_F8 | KEYM_SHIFT,	"other/saveLoadFrom"},
+	{IDM_NOMENU_SAVESLOT_SAVEAS, KEYV_F5 | KEYM_SHIFT,	"other/saveSaveAs"},
+	
+	// End of default keys.
+	{0, 0, NULL}
+};
+
+
 GensKeyConfig::GensKeyConfig()
 {
-	/** Key configuration. **/
-	// TODO: Set default menu keys from GensMenuBar?
-	// TODO: Move to another file?
-	// TODO: Load from GensConfig?
-	
-	// TODO: Improve this!
-	int keys[][2] =
+	// Load the default key configuration.
+	for (const DefKeySetting *key = &ms_DefKeySettings[0];
+	    key->action != 0; key++)
 	{
-		{IDM_NOMENU_HARDRESET, KEYV_TAB | KEYM_SHIFT},
-		{IDM_NOMENU_SOFTRESET, KEYV_TAB},
-		{IDM_NOMENU_PAUSE, KEYV_ESCAPE},
-		
-		{IDM_NOMENU_FASTBLUR, KEYV_F9},
-		
-		{IDM_NOMENU_SAVESLOT_0, KEYV_0},
-		{IDM_NOMENU_SAVESLOT_1, KEYV_1},
-		{IDM_NOMENU_SAVESLOT_2, KEYV_2},
-		{IDM_NOMENU_SAVESLOT_3, KEYV_3},
-		{IDM_NOMENU_SAVESLOT_4, KEYV_4},
-		{IDM_NOMENU_SAVESLOT_5, KEYV_5},
-		{IDM_NOMENU_SAVESLOT_6, KEYV_6},
-		{IDM_NOMENU_SAVESLOT_7, KEYV_7},
-		{IDM_NOMENU_SAVESLOT_8, KEYV_8},
-		{IDM_NOMENU_SAVESLOT_9, KEYV_9},
-		{IDM_NOMENU_SAVESLOT_PREV, KEYV_F6},
-		{IDM_NOMENU_SAVESLOT_NEXT, KEYV_F7},
-		{IDM_NOMENU_SAVESLOT_LOADFROM, KEYV_F8 | KEYM_SHIFT},
-		{IDM_NOMENU_SAVESLOT_SAVEAS, KEYV_F5 | KEYM_SHIFT},
-		
-		{0, 0}
-	};
-	
-	for (int *key = &keys[0][0]; key[0]  != 0; key += 2)
-	{
-		m_hashActionToKey.insert(key[0], (uint32_t)key[1]);
-		m_hashKeyToAction.insert((uint32_t)key[1], key[0]);
+		m_hashActionToKey.insert(key->action, key->gensKey);
+		m_hashKeyToAction.insert(key->gensKey, key->action);
 	}
+}
+
+
+/**
+ * load(): Load key configuration from a settings file.
+ * NOTE: The group must be selected in the QSettings before calling this function!
+ * @param settings Settings file.
+ * @return 0 on success; non-zero on error.
+ */
+int GensKeyConfig::load(const QSettings& settings)
+{
+	// Clear the hash tables before loading.
+	m_hashActionToKey.clear();
+	m_hashKeyToAction.clear();
+	
+	// Load the key configuration.
+	for (const DefKeySetting *key = &ms_DefKeySettings[0];
+	    key->action != 0; key++)
+	{
+		const GensKey_t gensKey = settings.value(QLatin1String(key->setting), key->gensKey).toString().toUInt(NULL, 0);
+		m_hashActionToKey.insert(key->action, gensKey);
+		m_hashKeyToAction.insert(gensKey, key->action);
+	}
+	
+	// Key configuration loaded.
+	return 0;
+}
+
+
+/**
+ * save(): Save key configuration to a settings file.
+ * NOTE: The group must be selected in the QSettings before calling this function!
+ * @param settings Settings file.
+ * @return 0 on success; non-zero on error.
+ */
+int GensKeyConfig::save(QSettings& settings)
+{
+	// Save the key configuration.
+	for (const DefKeySetting *key = &ms_DefKeySettings[0];
+	    key->action != 0; key++)
+	{
+		const GensKey_t gensKey = m_hashActionToKey.value(key->action, 0);
+		QString gensKey_str = QLatin1String("0x") +
+				QString::number(gensKey, 16).toUpper().rightJustified(4, QChar(L'0'));
+		
+		settings.setValue(QLatin1String(key->setting), gensKey_str);
+	}
+	
+	// Key configuration saved.
+	return 0;
 }
 
 }

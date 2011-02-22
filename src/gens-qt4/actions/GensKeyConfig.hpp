@@ -28,6 +28,9 @@
 #include <QtCore/QObject>
 #include <QtCore/QHash>
 
+// Qt classes.
+class QSettings;
+
 // Gens keys.
 #include "libgens/GensInput/GensKey_t.h"
 
@@ -52,7 +55,23 @@ class GensKeyConfig : public QObject
 			return m_hashKeyToAction.value(key, 0);
 		}
 	
-	protected:
+                /**
+		 * load(): Load key configuration from a settings file.
+		 * NOTE: The group must be selected in the QSettings before calling this function!
+		 * @param settings Settings file.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int load(const QSettings& settings);
+		
+		/**
+		 * save(): Save key configuration to a settings file.
+		 * NOTE: The group must be selected in the QSettings before calling this function!
+		 * @param settings Settings file.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int save(QSettings& settings);
+		
+	private:
 		/**
 		 * Key configuration.
 		 * 
@@ -65,6 +84,20 @@ class GensKeyConfig : public QObject
 		
 		/// m_hashActionToKey: Converts a GensKey_t to a GensMenuBar_menus.hpp value.
 		QHash<GensKey_t, int> m_hashKeyToAction;
+		
+		struct DefKeySetting
+		{
+			int action;		// GensMenuBar_menus.hpp value.
+			GensKey_t gensKey;	// Default GensKey_t.
+			
+			const char *setting;	// Settings location.
+			// TODO: Padding on 32-bit.
+		};
+		
+		/**
+		 * ms_DefKeySettings[]: Default key settings.
+		 */
+		static const DefKeySetting ms_DefKeySettings[];
 };
 
 }

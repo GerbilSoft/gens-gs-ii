@@ -181,6 +181,11 @@ int GensConfig::reload(const QString& filename)
 	m_saveSlot = settings.value(QLatin1String("saveSlot"), 0).toInt();
 	settings.endGroup();
 	
+	/** Key configuration. **/
+	settings.beginGroup(QLatin1String("Shortcut_Keys"));
+	m_keyConfig.load(settings);
+	settings.endGroup();
+	
 	// Finished loading settings.
 	// NOTE: Caller must call emitAll() for settings to take effect.
 	return 0;
@@ -303,6 +308,11 @@ int GensConfig::save(const QString& filename)
 	/** Savestates. **/
 	settings.beginGroup(QLatin1String("Savestates"));
 	settings.setValue(QLatin1String("saveSlot"), m_saveSlot);
+	settings.endGroup();
+	
+	/** Key configuration. **/
+	settings.beginGroup(QLatin1String("Shortcut_Keys"));
+	m_keyConfig.save(settings);
 	settings.endGroup();
 	
 	// Finished saving settings.
