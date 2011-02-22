@@ -203,8 +203,8 @@ class GensConfig : public QObject
 		private:
 			GensKeyConfig m_keyConfig;
 		public:
-			int keyToAction(GensKey_t key)
-				{ return m_keyConfig.keyToAction(key); }
+			int keyToAction(GensKey_t key);
+			GensKey_t actionToKey(int action);
 	
 	signals:
 		/** Onscreen display. **/
@@ -251,6 +251,13 @@ class GensConfig : public QObject
 	private:
 		Q_DISABLE_COPY(GensConfig)
 };
+
+
+inline int GensConfig::keyToAction(GensKey_t key)
+	{ return m_keyConfig.keyToAction(key); }
+
+inline GensKey_t GensConfig::actionToKey(int action)
+	{ return m_keyConfig.actionToKey(action); }
 
 }
 

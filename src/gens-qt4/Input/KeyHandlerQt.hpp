@@ -56,6 +56,13 @@ class KeyHandlerQt
 		 */
 		static bool DevHandler(GensKey_t key);
 		
+		/**
+		 * KeyValMToQtKey(): Convert a GensKey_t to a Qt key value, with GensKey modifiers.
+		 * @param keyM Gens keycode, with modifiers.
+		 * @return Qt key value, or 0 on error.
+		 */
+		static int KeyValMToQtKey(GensKey_t keyM);
+		
 	protected:
 		// QKeyEvent to LibGens Key Value.
 		static GensKey_t QKeyEventToKeyVal(QKeyEvent *event);

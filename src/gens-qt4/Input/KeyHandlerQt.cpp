@@ -427,6 +427,7 @@ GensKey_t KeyHandlerQt::NativeModifierToKeyVal(QKeyEvent *event)
 	 * and right keys, but I can't seem to find them...)
 	 * 
 	 * For now, just use Left keys. (default handler)
+	 * TODO: Swap Ctrl/Meta.
 	 */
 #else
 	// Unhandled system.
@@ -454,6 +455,140 @@ GensKey_t KeyHandlerQt::NativeModifierToKeyVal(QKeyEvent *event)
 		case Qt::Key_Hyper_R:	return KEYV_RHYPER;
 		default:		return KEYV_UNKNOWN;
 	}
+}
+
+
+/**
+ * KeyValMToQtKey(): Convert a GensKey_t to a Qt key value, with GensKey modifiers.
+ * @param keyM Gens keycode, with modifiers.
+ * @return Qt key value, or 0 on error.
+ */
+int KeyHandlerQt::KeyValMToQtKey(GensKey_t keyM)
+{
+	GensKey_u keyU;
+	keyU.keycode = keyM;
+	if (keyU.type != 0)
+		return 0;
+	
+	// Get the modifiers first.
+	int qtKey = (keyM & 0x1E00) << 16;
+	
+#ifdef Q_WS_MAC
+	static const int QtKeyCtrl = Qt::Key_Meta;
+	static const int QtKeyMeta = Qt::Key_Control;
+	
+	// Swap Ctrl/Meta modifiers.
+	switch (qtKey & (Qt::ControlModifier | Qt::MetaModifier))
+	{
+		case Qt::ControlModifier:
+			qtKey = ((qtKey & ~Qt::ControlModifier) | Qt::MetaModifier);
+			break;
+		case Qt::MetaModifier:
+			qtKey = ((qtKey & ~Qt::MetaModifier) | Qt::ControlModifier);
+			break;
+		default:
+			break;
+	}
+#else /* !Q_WS_MAC */
+	static const int QtKeyCtrl = Qt::Key_Control;
+	static const int QtKeyMeta = Qt::Key_Meta;
+#endif /* Q_WS_MAC */
+
+	// Determine the key.
+	keyM &= 0x1FF;
+	if (keyM > KEYV_LAST)
+		return 0;
+	else if (keyM == KEYV_FORWARD)
+		return (qtKey | Qt::Key_Forward);
+	else if (keyM == KEYV_BACK)
+		return (qtKey | Qt::Key_Back);
+	
+	// Other keys. Use a lookup table.
+	// TODO: Numeric keypad modifier.
+	static const int keyvalMtoQtKey_tbl[0x100] =
+	{
+		// 0x00
+		0, 0, 0, 0, 0, 0, 0, 0,
+		Qt::Key_Backspace, Qt::Key_Tab, 0, 0,
+		Qt::Key_Clear, Qt::Key_Return, 0, 0,
+		0, 0, 0, Qt::Key_Pause, 0, 0, 0, 0,
+		0, 0, 0, Qt::Key_Escape, 0, 0, 0, 0,
+		
+		// 0x20
+		Qt::Key_Space, Qt::Key_Exclam, Qt::Key_QuoteDbl, Qt::Key_NumberSign,
+		Qt::Key_Dollar, Qt::Key_Percent, Qt::Key_Ampersand, Qt::Key_Apostrophe,
+		Qt::Key_ParenLeft, Qt::Key_ParenRight, Qt::Key_Asterisk, Qt::Key_Plus,
+		Qt::Key_Comma, Qt::Key_Minus, Qt::Key_Period, Qt::Key_Slash,
+		
+		// 0x30
+		Qt::Key_0, Qt::Key_1, Qt::Key_2, Qt::Key_3,
+		Qt::Key_4, Qt::Key_5, Qt::Key_6, Qt::Key_7,
+		Qt::Key_8, Qt::Key_9, Qt::Key_Colon, Qt::Key_Semicolon,
+		Qt::Key_Less, Qt::Key_Equal, Qt::Key_Greater, Qt::Key_Question,
+		
+		// 0x40
+		Qt::Key_At, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, Qt::Key_BracketLeft,
+		Qt::Key_Backslash, Qt::Key_BracketRight, Qt::Key_AsciiCircum, Qt::Key_Underscore,
+		
+		// 0x60
+		Qt::Key_QuoteLeft, Qt::Key_A, Qt::Key_B, Qt::Key_C, Qt::Key_D, Qt::Key_E, Qt::Key_F, Qt::Key_G,
+		Qt::Key_H, Qt::Key_I, Qt::Key_J, Qt::Key_K, Qt::Key_L, Qt::Key_M, Qt::Key_N, Qt::Key_O,
+		Qt::Key_P, Qt::Key_Q, Qt::Key_R, Qt::Key_S, Qt::Key_T, Qt::Key_U, Qt::Key_V, Qt::Key_W,
+		Qt::Key_X, Qt::Key_Y, Qt::Key_Z, Qt::Key_BraceLeft,
+		Qt::Key_Bar, Qt::Key_BraceRight, Qt::Key_AsciiTilde, Qt::Key_Delete,
+		
+		// 0x80: Numeric keypad.
+		// TODO: Numeric keypad modifier; verify division and multiply.
+		Qt::Key_0, Qt::Key_1, Qt::Key_2, Qt::Key_3,
+		Qt::Key_4, Qt::Key_5, Qt::Key_6, Qt::Key_7,
+		Qt::Key_8, Qt::Key_9, Qt::Key_Period, Qt::Key_division,
+		Qt::Key_multiply, Qt::Key_Minus, Qt::Key_Plus, Qt::Key_Enter,
+		
+		// 0x90
+		Qt::Key_Equal, Qt::Key_Up, Qt::Key_Down, Qt::Key_Right,
+		Qt::Key_Left, Qt::Key_Insert, Qt::Key_Home, Qt::Key_End,
+		Qt::Key_PageUp, Qt::Key_PageDown, 0, 0,
+		0, 0, 0, 0,
+		
+		// 0xA0: Function keys. (F1-F16)
+		Qt::Key_F1, Qt::Key_F2, Qt::Key_F3, Qt::Key_F4,
+		Qt::Key_F5, Qt::Key_F6, Qt::Key_F7, Qt::Key_F8,
+		Qt::Key_F9, Qt::Key_F10, Qt::Key_F11, Qt::Key_F12,
+		Qt::Key_F13, Qt::Key_F14, Qt::Key_F15, Qt::Key_F16,
+		
+		// 0xB0: Function keys. (F17-F32)
+		Qt::Key_F17, Qt::Key_F18, Qt::Key_F19, Qt::Key_F20,
+		Qt::Key_F21, Qt::Key_F22, Qt::Key_F23, Qt::Key_F24,
+		Qt::Key_F25, Qt::Key_F26, Qt::Key_F27, Qt::Key_F28,
+		Qt::Key_F29, Qt::Key_F30, Qt::Key_F31, Qt::Key_F32,
+		
+		// 0xC0: Key state modifier keys.
+		// TODO: Left/Right modifiers.
+		// TODO: Ctrl/Meta key reversal on Mac.
+		Qt::Key_NumLock, Qt::Key_CapsLock, Qt::Key_ScrollLock, Qt::Key_Shift,
+		Qt::Key_Shift, QtKeyCtrl, QtKeyCtrl, Qt::Key_Alt,
+		Qt::Key_Alt, QtKeyMeta, QtKeyMeta, Qt::Key_Super_L,
+		Qt::Key_Super_R, Qt::Key_AltGr, Qt::Key_Multi_key, Qt::Key_Hyper_L,
+		
+		// 0xD0
+		Qt::Key_Hyper_R, Qt::Key_Direction_L, Qt::Key_Direction_R, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		
+		// 0xE0: Miscellaneous function keys.
+		// TODO: KEYV_BREAK, Key_PowerOff vs. Key_PowerDown; KEYV_EURO, KEYV_UNDO
+		Qt::Key_Help, Qt::Key_Print, Qt::Key_SysReq, 0,
+		Qt::Key_Menu, Qt::Key_PowerOff, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,
+		
+		// 0xF0: Mouse buttons.
+		0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0
+	};
+	
+	qtKey |= keyvalMtoQtKey_tbl[keyM & 0xFF];
+	return qtKey;
 }
 
 }

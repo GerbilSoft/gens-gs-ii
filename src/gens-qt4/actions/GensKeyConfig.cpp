@@ -76,8 +76,49 @@ class GensKeyConfigPrivate
  */
 const GensKeyConfigPrivate::DefKeySetting_t GensKeyConfigPrivate::DefKeySettings[] =
 {
+	// File menu.
+	{IDM_FILE_OPEN, KEYM_CTRL | KEYV_o,			"file/open"},
+	{IDM_FILE_CLOSE, KEYM_CTRL | KEYV_w,			"file/close"},
+	{IDM_FILE_SAVESTATE, KEYV_F5,				"file/saveState"},
+	{IDM_FILE_LOADSTATE, KEYV_F8,				"file/loadState"},
+#ifdef Q_WS_MAC
+	{IDM_FILE_GENCONFIG, KEYM_META | KEYV_COMMA,		"file/genConfig"},
+#else
+	{IDM_FILE_GENCONFIG, 0,					"file/genConfig"},
+#endif
+	{IDM_FILE_MCDCONTROL, 0,				"file/mcdControl"},
+	{IDM_FILE_QUIT, KEYM_CTRL | KEYV_q,			"file/quit"},
+	
+	// Graphics menu.
+	{IDM_GRAPHICS_RES, 0,					"graphics/resolution"},
+	// Graphics, Resolution submenu.
+	{IDM_GRAPHICS_RES_1X, 0,				"graphics/resolution/1x"},
+	{IDM_GRAPHICS_RES_2X, 0,				"graphics/resolution/2x"},
+	{IDM_GRAPHICS_RES_3X, 0,				"graphics/resolution/3x"},
+	{IDM_GRAPHICS_RES_4X, 0,				"graphics/resolution/4x"},
+	// Graphics menu.
+	{IDM_GRAPHICS_BPP, 0,					"graphics/bpp"},
+	// Graphics, Color Depth submenu.
+	{IDM_GRAPHICS_BPP_15, 0,				"graphics/bpp/15"},
+	{IDM_GRAPHICS_BPP_16, 0,				"graphics/bpp/16"},
+	{IDM_GRAPHICS_BPP_32, 0,				"graphics/bpp/32"},
+	// Graphics menu.
+	{IDM_GRAPHICS_STRETCH, KEYM_SHIFT | KEYV_F2,		"graphics/stretch"},
+	// Graphics, Stretch submenu.
+	{IDM_GRAPHICS_STRETCH_NONE, 0,				"graphics/stretch/none"},
+	{IDM_GRAPHICS_STRETCH_H, 0,				"graphics/stretch/horizontal"},
+	{IDM_GRAPHICS_STRETCH_V, 0,				"graphics/stretch/vertical"},
+	{IDM_GRAPHICS_STRETCH_FULL, 0,				"graphics/stretch/full"},
+	// Graphics menu.
+	{IDM_GRAPHICS_SCRSHOT, KEYM_SHIFT | KEYV_BACKSPACE,	"graphics/screenShot"},
+	
+	// NOTE: Test menus aren't going to be added here.
+	
+	// Help menu.
+	{IDM_HELP_ABOUT, 0,					"help/about"},
+	
 	// Non-menu keys.
-	{IDM_NOMENU_HARDRESET, KEYV_TAB | KEYM_SHIFT,		"other/hardReset"},
+	{IDM_NOMENU_HARDRESET, KEYM_SHIFT | KEYV_TAB,		"other/hardReset"},
 	{IDM_NOMENU_SOFTRESET, KEYV_TAB,			"other/softReset"},
 	{IDM_NOMENU_PAUSE, KEYV_ESCAPE,				"other/pause"},
 	
@@ -129,8 +170,18 @@ GensKeyConfig::~GensKeyConfig()
  */
 int GensKeyConfig::keyToAction(GensKey_t key)
 {
-	// TODO: Menus. This only works for non-menu actions right now.
 	return d->hashKeyToAction.value(key, 0);
+}
+
+
+/**
+ * actionToKey(): Look up a GensKey_t based on an action value.
+ * @param action Action value.
+ * @return GensKey_t (WITH MODIFIERS), or 0 if no key was found.
+ */
+int GensKeyConfig::actionToKey(int action)
+{
+	return d->hashActionToKey.value(action, 0);
 }
 
 

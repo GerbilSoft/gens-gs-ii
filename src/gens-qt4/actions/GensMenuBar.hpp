@@ -68,8 +68,6 @@ class GensMenuBar : public QMenuBar
 			int submenu_id;			// Submenu ID.
 			const MenuItem *submenu;	// First element of submenu.
 			
-			int key_shortcut;		// Key sequence.
-			
 			const char *icon_fdo;		// FreeDesktop.org icon name.
 		};
 		

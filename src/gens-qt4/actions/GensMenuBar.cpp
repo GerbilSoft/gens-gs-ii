@@ -29,6 +29,11 @@
 // GensQApplication::IconFromTheme()
 #include "../GensQApplication.hpp"
 
+// gqt4_config
+#include "../gqt4_main.hpp"
+
+// Needed for KeyValMToQtKey().
+#include "../Input/KeyHandlerQt.hpp"
 
 namespace GensQt4
 {
@@ -182,7 +187,8 @@ void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 #endif /* __APPLE__ */
 		
 		// Set the shortcut key.
-		mnuItem->setShortcut(menu->key_shortcut);
+		GensKey_t gensKey = gqt4_config->actionToKey(menu->id);
+		mnuItem->setShortcut(KeyHandlerQt::KeyValMToQtKey(gensKey));
 		
 		// Connect the signal to the signal mapper.
 		connect(mnuItem, SIGNAL(triggered()),

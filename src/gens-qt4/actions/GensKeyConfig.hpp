@@ -53,8 +53,15 @@ class GensKeyConfig : public QObject
 		 * @return Action, or 0 if no action was found.
 		 */
 		int keyToAction(GensKey_t key);
-	
-                /**
+		
+		/**
+		 * actionToKey(): Look up a GensKey_t based on an action value.
+		 * @param action Action value.
+		 * @return GensKey_t (WITH MODIFIERS), or 0 if no key was found.
+		 */
+		int actionToKey(int action);
+		
+		/**
 		 * load(): Load key configuration from a settings file.
 		 * NOTE: The group must be selected in the QSettings before calling this function!
 		 * @param settings Settings file.
