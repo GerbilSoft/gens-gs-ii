@@ -37,23 +37,22 @@ class QSettings;
 namespace GensQt4
 {
 
+class GensKeyConfigPrivate;
+
 class GensKeyConfig : public QObject
 {
 	Q_OBJECT
 	
 	public:
 		GensKeyConfig();
+		~GensKeyConfig();
 		
 		/**
 		 * keyToAction(): Look up an action based on a GensKey_t value.
 		 * @param key GensKey_t value. (WITH MODIFIERS)
 		 * @return Action, or 0 if no action was found.
 		 */
-		int keyToAction(GensKey_t key)
-		{
-			// TODO: Menus. This only works for non-menu actions right now.
-			return m_hashKeyToAction.value(key, 0);
-		}
+		int keyToAction(GensKey_t key);
 	
                 /**
 		 * load(): Load key configuration from a settings file.
@@ -70,34 +69,10 @@ class GensKeyConfig : public QObject
 		 * @return 0 on success; non-zero on error.
 		 */
 		int save(QSettings& settings);
-		
+	
 	private:
-		/**
-		 * Key configuration.
-		 * 
-		 * NOTE: Key configuration expects modifiers in high 7 bits of GensKey_t.
-		 * See libgens/GensInput/GensKey_t.h for more information.
-		 */
-		
-		/// m_hashActionToKey: Converts a GensMenuBar_menus.hpp value to a GensKey_t.
-		QHash<int, GensKey_t> m_hashActionToKey;
-		
-		/// m_hashActionToKey: Converts a GensKey_t to a GensMenuBar_menus.hpp value.
-		QHash<GensKey_t, int> m_hashKeyToAction;
-		
-		struct DefKeySetting
-		{
-			int action;		// GensMenuBar_menus.hpp value.
-			GensKey_t gensKey;	// Default GensKey_t.
-			
-			const char *setting;	// Settings location.
-			// TODO: Padding on 32-bit.
-		};
-		
-		/**
-		 * ms_DefKeySettings[]: Default key settings.
-		 */
-		static const DefKeySetting ms_DefKeySettings[];
+		GensKeyConfigPrivate *d;
+		Q_DISABLE_COPY(GensKeyConfig);
 };
 
 }

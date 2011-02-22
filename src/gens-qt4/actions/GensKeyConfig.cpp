@@ -34,10 +34,47 @@
 namespace GensQt4
 {
 
+class GensKeyConfigPrivate
+{
+	public:
+		GensKeyConfigPrivate() { }
+		
+		/**
+		 * Key configuration.
+		 * 
+		 * NOTE: Key configuration expects modifiers in high 7 bits of GensKey_t.
+		 * See libgens/GensInput/GensKey_t.h for more information.
+		 */
+		
+		/// m_hashActionToKey: Converts a GensMenuBar_menus.hpp value to a GensKey_t.
+		QHash<int, GensKey_t> hashActionToKey;
+		
+		/// m_hashActionToKey: Converts a GensKey_t to a GensMenuBar_menus.hpp value.
+		QHash<GensKey_t, int> hashKeyToAction;
+		
+		struct DefKeySetting_t
+		{
+			int action;		// GensMenuBar_menus.hpp value.
+			GensKey_t gensKey;	// Default GensKey_t.
+			
+			const char *setting;	// Settings location.
+			// TODO: Padding on 32-bit.
+		};
+		
+		/**
+		 * DefKeySettings[]: Default key settings.
+		 */
+		static const DefKeySetting_t DefKeySettings[];
+	
+	private:
+		Q_DISABLE_COPY(GensKeyConfigPrivate);
+};
+
+
 /**
  * ms_DefKeySettings[]: Default key settings.
  */
-const GensKeyConfig::DefKeySetting GensKeyConfig::ms_DefKeySettings[] =
+const GensKeyConfigPrivate::DefKeySetting_t GensKeyConfigPrivate::DefKeySettings[] =
 {
 	// Non-menu keys.
 	{IDM_NOMENU_HARDRESET, KEYV_TAB | KEYM_SHIFT,		"other/hardReset"},
@@ -68,13 +105,32 @@ const GensKeyConfig::DefKeySetting GensKeyConfig::ms_DefKeySettings[] =
 
 GensKeyConfig::GensKeyConfig()
 {
+	d = new GensKeyConfigPrivate();
+	
 	// Load the default key configuration.
-	for (const DefKeySetting *key = &ms_DefKeySettings[0];
+	for (const GensKeyConfigPrivate::DefKeySetting_t *key = &d->DefKeySettings[0];
 	    key->action != 0; key++)
 	{
-		m_hashActionToKey.insert(key->action, key->gensKey);
-		m_hashKeyToAction.insert(key->gensKey, key->action);
+		d->hashActionToKey.insert(key->action, key->gensKey);
+		d->hashKeyToAction.insert(key->gensKey, key->action);
 	}
+}
+
+GensKeyConfig::~GensKeyConfig()
+{
+	delete d;
+}
+
+
+/**
+ * keyToAction(): Look up an action based on a GensKey_t value.
+ * @param key GensKey_t value. (WITH MODIFIERS)
+ * @return Action, or 0 if no action was found.
+ */
+int GensKeyConfig::keyToAction(GensKey_t key)
+{
+	// TODO: Menus. This only works for non-menu actions right now.
+	return d->hashKeyToAction.value(key, 0);
 }
 
 
@@ -87,16 +143,16 @@ GensKeyConfig::GensKeyConfig()
 int GensKeyConfig::load(const QSettings& settings)
 {
 	// Clear the hash tables before loading.
-	m_hashActionToKey.clear();
-	m_hashKeyToAction.clear();
+	d->hashActionToKey.clear();
+	d->hashKeyToAction.clear();
 	
 	// Load the key configuration.
-	for (const DefKeySetting *key = &ms_DefKeySettings[0];
+	for (const GensKeyConfigPrivate::DefKeySetting_t *key = &d->DefKeySettings[0];
 	    key->action != 0; key++)
 	{
 		const GensKey_t gensKey = settings.value(QLatin1String(key->setting), key->gensKey).toString().toUInt(NULL, 0);
-		m_hashActionToKey.insert(key->action, gensKey);
-		m_hashKeyToAction.insert(gensKey, key->action);
+		d->hashActionToKey.insert(key->action, gensKey);
+		d->hashKeyToAction.insert(gensKey, key->action);
 	}
 	
 	// Key configuration loaded.
@@ -113,10 +169,10 @@ int GensKeyConfig::load(const QSettings& settings)
 int GensKeyConfig::save(QSettings& settings)
 {
 	// Save the key configuration.
-	for (const DefKeySetting *key = &ms_DefKeySettings[0];
+	for (const GensKeyConfigPrivate::DefKeySetting_t *key = &d->DefKeySettings[0];
 	    key->action != 0; key++)
 	{
-		const GensKey_t gensKey = m_hashActionToKey.value(key->action, 0);
+		const GensKey_t gensKey = d->hashActionToKey.value(key->action, 0);
 		QString gensKey_str = QLatin1String("0x") +
 				QString::number(gensKey, 16).toUpper().rightJustified(4, QChar(L'0'));
 		
