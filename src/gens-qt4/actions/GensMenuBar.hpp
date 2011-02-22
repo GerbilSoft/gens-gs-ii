@@ -59,29 +59,6 @@ class GensMenuBar : public QMenuBar
 			GMI_MAX
 		};
 		
-		enum MenuItemShortcut
-		{
-			MACCEL_NONE = 0,
-			
-#if QT_VERSION >= 0x040600
-			// Keys defined in Qt 4.6.
-			MACCEL_QUIT = (int)QKeySequence::Quit,
-			MACCEL_PREFERENCES = (int)QKeySequence::Preferences,
-#else
-			MACCEL_QUIT = 0,
-			MACCEL_PREFERENCES = 0,
-#endif
-#if QT_VERSION >= 0x040200
-			// Keys defined in Qt 4.2.
-			// (First version with StandardKey.)
-			MACCEL_OPEN = (int)QKeySequence::Open,
-			MACCEL_CLOSE = (int)QKeySequence::Close,
-#else
-			MACCEL_OPEN = 0,
-			MACCEL_CLOSE = 0,
-#endif
-		};
-		
 		struct MenuItem
 		{
 			int id;				// Menu identifier. (-1 == separator)
@@ -91,8 +68,7 @@ class GensMenuBar : public QMenuBar
 			int submenu_id;			// Submenu ID.
 			const MenuItem *submenu;	// First element of submenu.
 			
-			MenuItemShortcut key_std;	// Menu item shortcut. (Wrapper around QKeySequence::StandardKey.)
-			int key_custom;			// Custom key sequence. (Set key_std to QKeySequence::UnknownKey.)
+			int key_shortcut;		// Key sequence.
 			
 			const char *icon_fdo;		// FreeDesktop.org icon name.
 		};

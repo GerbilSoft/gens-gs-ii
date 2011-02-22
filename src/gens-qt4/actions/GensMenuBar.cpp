@@ -182,27 +182,7 @@ void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 #endif /* __APPLE__ */
 		
 		// Set the shortcut key.
-		if (menu->key_std != MACCEL_NONE)
-		{
-			// StandardKey sequence specified.
-			QKeySequence key((QKeySequence::StandardKey)menu->key_std);
-			if (!key.isEmpty())
-			{
-				// Key sequence is valid.
-				mnuItem->setShortcut(QKeySequence((QKeySequence::StandardKey)menu->key_std));
-			}
-			else if (menu->key_custom != 0)
-			{
-				// Key sequence is not valid.
-				// Use the custom key sequence.
-				mnuItem->setShortcut(menu->key_custom);
-			}
-		}
-		else if (menu->key_custom != 0)
-		{
-			// Custom key sequence specified.
-			mnuItem->setShortcut(menu->key_custom);
-		}
+		mnuItem->setShortcut(menu->key_shortcut);
 		
 		// Connect the signal to the signal mapper.
 		connect(mnuItem, SIGNAL(triggered()),
