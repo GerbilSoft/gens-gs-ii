@@ -25,7 +25,7 @@
 #include "GensMenuBar_menus.hpp"
 
 // Qt includes.
-#include <QtCore/qnamespace.h>
+#include <QtCore/qglobal.h>
 
 namespace GensQt4
 {
@@ -39,9 +39,18 @@ const GensMenuBar::MenuItem GensMenuBar::ms_gmiFile[] =
 	{IDM_FILE_SAVESTATE, GMI_NORMAL, "&Save State", 0, NULL, NULL},
 	{IDM_FILE_LOADSTATE, GMI_NORMAL, "&Load State", 0, NULL, NULL},
 	{IDM_SEPARATOR, GMI_SEPARATOR, NULL, 0, NULL, NULL},
+#ifdef Q_WS_MAC
+	// Qt/Mac moves the "Preferences" item to the Application menu.
+	{IDM_FILE_GENCONFIG, GMI_NORMAL, "&Preferences...", 0, NULL, "configure"},
+#else
 	{IDM_FILE_GENCONFIG, GMI_NORMAL, "&General Configuration", 0, NULL, "configure"},
+#endif
 	{IDM_FILE_MCDCONTROL, GMI_NORMAL, "Sega C&D Control Panel", 0, NULL, "media-optical"},
+	
+	// Qt/Mac moves the "Quit" item to the Application menu.
+#ifndef Q_WS_MAC
 	{IDM_SEPARATOR, GMI_SEPARATOR, NULL, 0, NULL, NULL},
+#endif
 	{IDM_FILE_QUIT, GMI_NORMAL, "&Quit", 0, NULL, "application-exit"},
 	
 	{0, GMI_NORMAL, NULL, 0, NULL, NULL}
