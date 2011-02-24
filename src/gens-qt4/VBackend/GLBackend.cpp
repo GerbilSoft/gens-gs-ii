@@ -223,17 +223,23 @@ void GLBackend::reallocTexture(void)
 				"15/16-bit color may not work properly.");
 	}
 #endif /* HAVE_GLEW */
-
+	
+	// TODO: Determine size based on renderer.
+	m_texVisSize = QSize(320, 240);
+	m_texSize.setWidth(next_pow2s(m_texVisSize.width()));
+	m_texSize.setHeight(next_pow2s(m_texVisSize.height()));
+	
 	// Allocate a memory buffer to use for texture initialization.
 	// This will ensure that the entire texture is initialized to black.
 	// (This fixes garbage on the last column when using the Fast Blur shader.)
-	const size_t texSize = (512*256*(m_lastBpp == LibGens::VdpPalette::BPP_32 ? 4 : 2));
+	const size_t texSize = (m_texSize.width() * m_texSize.height() *
+				(m_lastBpp == LibGens::VdpPalette::BPP_32 ? 4 : 2));
 	void *texBuf = calloc(1, texSize);
 	
 	// Allocate the texture.
 	glTexImage2D(GL_TEXTURE_2D, 0,
 		     m_colorComponents,
-		     512, 256,	// 512x256 (320x240 rounded up to nearest powers of two)
+		     m_texSize.width(), m_texSize.height(),
 		     0,		// No border.
 		     m_texFormat, m_texType, texBuf);
 	
@@ -529,14 +535,17 @@ void GLBackend::glb_paintGL(void)
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_tex);
 		
+		// TODO: This only works for 1x.
+		// For other renderers, use non-MD screen buffer.
+		
 		// (Re-)Upload the texture.
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 336);
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 8);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 8);
 		
 		glTexSubImage2D(GL_TEXTURE_2D, 0,
-				0, 0,		// x/y offset
-				320, 240,	// width/height
+				0, 0,						// x/y offset
+				m_texVisSize.width(), m_texVisSize.height(),	// width/height
 				m_texFormat, m_texType, screen);
 		
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);

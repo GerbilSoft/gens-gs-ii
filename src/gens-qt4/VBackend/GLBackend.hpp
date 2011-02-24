@@ -31,6 +31,9 @@
 
 #include <config.h>
 
+// C includes.
+#include <limits.h>
+
 // OpenGL Shader Manager.
 // This file MUST be before any other GL includes,
 // since it includes the GLEW headers.
@@ -120,11 +123,24 @@ class GLBackend : public VBackend
 		// Window size.
 		QSize m_winSize;
 		
+		// Find the next highest power of two. (signed integers)
+		// http://en.wikipedia.org/wiki/Power_of_two#Algorithm_to_find_the_next-highest_power_of_two
+		template <class T>
+		static inline T next_pow2s(T k)
+		{
+			k--;
+			for (int i = 1; i < (int)(sizeof(T)*CHAR_BIT); i <<= 1)
+				k = k | k >> i;
+			return k + 1;
+		}
+		
 		// Main texture.
 		GLuint m_tex;		// Texture ID.
 		int m_colorComponents;	// Number of color components. (3 == RGB; 4 == BGRA)
 		GLenum m_texFormat;	// Texture format. (GL_RGB, GL_BGRA)
 		GLenum m_texType;	// Texture type. (GL_UNSIGNED_BYTE, etc.)
+		QSize m_texSize;	// Texture size. (1x == 512x256 for power-of-two textures.)
+		QSize m_texVisSize;	// Texture visible size. (1x == 320x240)
 		
 		// OSD texture.
 		GLTex2D *m_texOsd;	// Texture containing U+0000 - U+00FF.
