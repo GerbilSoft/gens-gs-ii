@@ -91,6 +91,12 @@ class GLBackend : public VBackend
 		 * @param newFastBlur True to enable Pause Tint; false to disable it.
 		 */
 		virtual void setPauseTint(bool newPauseTint);
+		
+		/**
+		 * setStretchMode(): Set the stretch mode setting.
+		 * @param newStretchMode New stretch mode setting.
+		 */
+		void setStretchMode(GensConfig::StretchMode newStretchMode);
 	
 	protected:
 		/**
@@ -142,6 +148,12 @@ class GLBackend : public VBackend
 		QSize m_texSize;	// Texture size. (1x == 512x256 for power-of-two textures.)
 		QSize m_texVisSize;	// Texture visible size. (1x == 320x240)
 		
+		// Stretch mode.
+		QRectF m_stretchRectF;		// Current stretch coordinates.
+		QSize m_stretchLastRes;		// Last MD screen resolution.
+		void recalcStretchRectF(void);
+		void recalcStretchRectF(GensConfig::StretchMode mode);
+		
 		// OSD texture.
 		GLTex2D *m_texOsd;	// Texture containing U+0000 - U+00FF.
 		GLuint m_glListOsd;	// Display list.
@@ -173,6 +185,16 @@ class GLBackend : public VBackend
 		 */
 		void glb_setColor(const QColor& color);
 };
+
+
+/**
+ * recalcStretchRectF(): Recalculate the stretch mode rectangle.
+ * This version uses the current stretch mode.
+ */
+inline void GLBackend::recalcStretchRectF(void)
+{
+	recalcStretchRectF(stretchMode());
+}
 
 
 /**

@@ -186,7 +186,7 @@ class VBackend : public QWidget
 		virtual void setAspectRatioConstraint(bool newAspectRatioConstraint);
 		virtual void setBilinearFilter(bool newBilinearFilter);
 		virtual void setPauseTint(bool newPauseTint);
-		void setStretchMode(GensConfig::StretchMode newStretchMode);
+		virtual void setStretchMode(GensConfig::StretchMode newStretchMode);
 	
 	private:
 		// Effects.

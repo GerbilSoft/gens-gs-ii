@@ -249,6 +249,9 @@ void GLBackend::reallocTexture(void)
 	// Disable TEXTURE_2D.
 	glDisable(GL_TEXTURE_2D);
 	
+	// Recalculate the stretch mode rectangle.
+	recalcStretchRectF();
+	
 	// Texture is dirty.
 	m_vbDirty = true;
 }
@@ -579,63 +582,23 @@ void GLBackend::glb_paintGL(void)
 		}
 	}
 	
-	// Determine the texture coordinates.
-	// TODO: Make a separate function to recalculate stretch mode coordinates.
-	// TODO: This function would need to be called if:
-	// * MD resolution is changed.
-	// * Stretch mode is changed.
-	
-	// Default to no stretch.
-	QRectF img_dest(
-		0.0,		// X coordinate.
-		0.0,		// Y coordinate.
-		((double)m_texVisSize.width() / (double)m_texSize.width()),	// Width.
-		((double)m_texVisSize.height() / (double)m_texSize.height())	// Height.
-		);
-	
-	// Horizontal stretch.
-	if (stretchMode() == GensConfig::STRETCH_H ||
-	    stretchMode() == GensConfig::STRETCH_FULL)
-	{
-		// Horizontal stretch.
-		const int h_pix_begin = LibGens::VdpIo::GetHPixBegin();
-		if (h_pix_begin > 0)
-		{
-			// Less than 320 pixels wide.
-			// Adjust horizontal stretch.
-			// NOTE: Width is adjusted automatically by QRectF when setting X.
-			img_dest.setX((double)h_pix_begin / (double)m_texSize.width());
-			//img_dest.setWidth(img_dest.width() - img_dest.x());
-		}
-	}
-	
-	// Vertical stretch.
-	if (stretchMode() == GensConfig::STRETCH_V ||
-	    stretchMode() == GensConfig::STRETCH_FULL)
-	{
-		// Vertical stretch.
-		int v_pix = (240 - LibGens::VdpIo::GetVPix());
-		if (v_pix > 0)
-		{
-			// Less than 240 pixels tall.
-			// Adjust vertical stretch.
-			// NOTE: Height is adjusted automatically by QRectF when setting Y.
-			v_pix /= 2;
-			img_dest.setY((double)v_pix / (double)m_texSize.height());
-			//img_dest.setHeight(img_dest.height() - img_dest.y());
-		}
-	}
+	// Check if the MD resolution has changed.
+	// If it has, recalculate the stretch mode rectangle.
+	const QSize mdResCur(LibGens::VdpIo::GetHPix(),
+			     LibGens::VdpIo::GetVPix());
+	if (mdResCur != m_stretchLastRes)
+		recalcStretchRectF();
 	
 	// Draw the texture.
 	glBindTexture(GL_TEXTURE_2D, m_tex);
 	glBegin(GL_QUADS);
-	glTexCoord2d(img_dest.x(), img_dest.y());
+	glTexCoord2d(m_stretchRectF.x(), m_stretchRectF.y());
 	glVertex2i(-1, 1);
-	glTexCoord2d(img_dest.width(), img_dest.y());
+	glTexCoord2d(m_stretchRectF.width(), m_stretchRectF.y());
 	glVertex2i(1, 1);
-	glTexCoord2d(img_dest.width(), img_dest.height());
+	glTexCoord2d(m_stretchRectF.width(), m_stretchRectF.height());
 	glVertex2i(1, -1);
-	glTexCoord2d(img_dest.x(), img_dest.height());
+	glTexCoord2d(m_stretchRectF.x(), m_stretchRectF.height());
 	glVertex2i(-1, -1);
 	glEnd();
 	
@@ -666,6 +629,64 @@ void GLBackend::glb_paintGL(void)
 	
 	// Video backend is no longer dirty.
 	m_vbDirty = false;
+}
+
+
+/**
+ * recalcStretchRectF(): Recalculate the stretch mode rectangle.
+ * @param mode Stretch mode.
+ */
+void GLBackend::recalcStretchRectF(GensConfig::StretchMode mode)
+{
+	// Store the current MD screen resolution.
+	m_stretchLastRes.setWidth(LibGens::VdpIo::GetHPix());
+	m_stretchLastRes.setHeight(LibGens::VdpIo::GetVPix());
+	
+	// Default to no stretch.
+	m_stretchRectF = QRectF(
+		0.0,		// X coordinate.
+		0.0,		// Y coordinate.
+		((double)m_texVisSize.width() / (double)m_texSize.width()),	// Width.
+		((double)m_texVisSize.height() / (double)m_texSize.height())	// Height.
+		);
+	
+	// If stretch is disabled, we're done here.
+	// Also, stretch shouldn't be applied if emulation isn't running.
+	if (mode == GensConfig::STRETCH_NONE || !isRunning())
+		return;
+	
+	// Horizontal stretch.
+	if (mode == GensConfig::STRETCH_H ||
+	    mode == GensConfig::STRETCH_FULL)
+	{
+		// Horizontal stretch.
+		const int h_pix_begin = LibGens::VdpIo::GetHPixBegin();
+		if (h_pix_begin > 0)
+		{
+			// Less than 320 pixels wide.
+			// Adjust horizontal stretch.
+			// NOTE: Width is adjusted automatically by QRectF when setting X.
+			m_stretchRectF.setX((double)h_pix_begin / (double)m_texSize.width());
+			//m_stretchRectF.setWidth(img_dest.width() - img_dest.x());
+		}
+	}
+	
+	// Vertical stretch.
+	if (mode == GensConfig::STRETCH_V ||
+	    mode == GensConfig::STRETCH_FULL)
+	{
+		// Vertical stretch.
+		int v_pix = (240 - LibGens::VdpIo::GetVPix());
+		if (v_pix > 0)
+		{
+			// Less than 240 pixels tall.
+			// Adjust vertical stretch.
+			// NOTE: Height is adjusted automatically by QRectF when setting Y.
+			v_pix /= 2;
+			m_stretchRectF.setY((double)v_pix / (double)m_texSize.height());
+			//m_stretchRectF.setHeight(img_dest.height() - img_dest.y());
+		}
+	}
 }
 
 
@@ -1100,5 +1121,23 @@ void GLBackend::setPauseTint(bool newPauseTint)
 	// Update VBackend's pause tint effect setting.
 	VBackend::setPauseTint(newPauseTint);
 }
+
+
+void GLBackend::setStretchMode(GensConfig::StretchMode newStretchMode)
+{
+	if ((stretchMode() == newStretchMode) ||
+	    (newStretchMode < GensConfig::STRETCH_NONE) ||
+	    (newStretchMode > GensConfig::STRETCH_FULL))
+	{
+		return;
+	}
+	
+	// Recalculate the stretch mode rectangle.
+	recalcStretchRectF(newStretchMode);
+	
+	// Set the stretch mode setting.
+	VBackend::setStretchMode(newStretchMode);
+}
+
 
 }
