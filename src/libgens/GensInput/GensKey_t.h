@@ -26,6 +26,8 @@
 
 #include <stdint.h>
 
+#include "../Util/byteswap.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -53,14 +55,21 @@ typedef union
 	struct
 	{
 		// Key value.
+		// WARNING: key[] may be byteswapped based on host-endian!
 		// NOTE: key16 can contain modifier keys.
 		// Format: mmmmmmmk kkkkkkkk
 		// K = 9-bit key ID.
 		// M = 7-bit modifiers.
 		// Gamepad input should ignore modifiers.
+#if GENS_BYTEORDER == GENS_LIL_ENDIAN
 		union { uint16_t key16; uint8_t key[2]; };
 		uint8_t dev_id;
 		uint8_t type;
+#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
+		uint8_t type;
+		uint8_t dev_id;
+		union { uint16_t key16; uint8_t key[2]; };
+#endif
 	};
 } GensKey_u;
 
