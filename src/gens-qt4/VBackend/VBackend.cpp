@@ -153,8 +153,8 @@ void VBackend::setPaused(paused_t newPaused)
 void VBackend::setStretchMode(GensConfig::StretchMode newStretchMode)
 {
 	if ((m_stretchMode == newStretchMode) ||
-	    (m_stretchMode < GensConfig::STRETCH_NONE) ||
-	    (m_stretchMode > GensConfig::STRETCH_FULL))
+	    (newStretchMode < GensConfig::STRETCH_NONE) ||
+	    (newStretchMode > GensConfig::STRETCH_FULL))
 	{
 		return;
 	}
