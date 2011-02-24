@@ -153,7 +153,8 @@ GensKeyConfig::GensKeyConfig()
 	    key->action != 0; key++)
 	{
 		d->hashActionToKey.insert(key->action, key->gensKey);
-		d->hashKeyToAction.insert(key->gensKey, key->action);
+		if (key->gensKey != KEYV_UNKNOWN)
+			d->hashKeyToAction.insert(key->gensKey, key->action);
 	}
 }
 
@@ -203,7 +204,8 @@ int GensKeyConfig::load(const QSettings& settings)
 	{
 		const GensKey_t gensKey = settings.value(QLatin1String(key->setting), key->gensKey).toString().toUInt(NULL, 0);
 		d->hashActionToKey.insert(key->action, gensKey);
-		d->hashKeyToAction.insert(gensKey, key->action);
+		if (key->gensKey != KEYV_UNKNOWN)
+			d->hashKeyToAction.insert(gensKey, key->action);
 	}
 	
 	// Key configuration loaded.
