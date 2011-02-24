@@ -102,6 +102,8 @@ void KeyHandlerQt::KeyPressEvent(QKeyEvent *event)
 	// TODO: Move effects keypresses from GensQGLWidget to KeyHandlerQt.
 	// TODO: Multiple keyboard support?
 	GensKey_t gensKey = QKeyEventToKeyVal(event);
+	if (gensKey == KEYV_UNKNOWN)
+		return;
 	
 	// If this is an event key, don't handle it as a controller key.
 	// We need to apply the modifiers for this to work.
