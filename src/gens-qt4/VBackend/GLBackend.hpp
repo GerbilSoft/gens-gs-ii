@@ -46,6 +46,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QRectF>
 #include <QtCore/QSize>
+#include <QtGui/QWidget>
 #include <QtGui/QColor>
 
 namespace GensQt4
@@ -53,8 +54,10 @@ namespace GensQt4
 
 class GLBackend : public VBackend
 {
+	Q_OBJECT
+	
 	public:
-		GLBackend();
+		GLBackend(QWidget *parent);
 		virtual ~GLBackend();
 		
 #ifdef HAVE_GLEW
@@ -71,19 +74,20 @@ class GLBackend : public VBackend
 		 * @param img Image to show.
 		 */
 		void osd_show_preview(int duration, const QImage& img);
-		
+	
+	protected slots:
 		/**
 		 * setBilinearFilter(): Set the bilinear filter setting.inline
 		 * NOTE: This function MUST be called from within an active OpenGL context!
 		 * @param newBilinearFilter True to enable bilinear filtering; false to disable it.
 		 */
-		void setBilinearFilter(bool newBilinearFilter);
+		virtual void setBilinearFilter(bool newBilinearFilter);
 		
 		/**
 		 * setPauseTint(): Set the Pause Tint effect setting.
 		 * @param newFastBlur True to enable Pause Tint; false to disable it.
 		 */
-		void setPauseTint(bool newPauseTint);
+		virtual void setPauseTint(bool newPauseTint);
 	
 	protected:
 		/**
@@ -138,6 +142,11 @@ class GLBackend : public VBackend
 		// OSD preview image.
 		GLTex2D *m_texPreview;
 		void showOsdPreview(void);
+		
+		// OSD font information.
+		// TODO: Maybe make the font customizable in the future.
+		static const int ms_Osd_chrW = 8;
+		static const int ms_Osd_chrH = 16;
 		
 		// OpenGL Shader Manager.
 		GLShaderManager m_shaderMgr;

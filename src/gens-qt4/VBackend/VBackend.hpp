@@ -49,10 +49,12 @@ namespace GensQt4
 // Can't #include "MsgTimer.hpp" due to circular dependencies.
 class MsgTimer;
 
-class VBackend
+class VBackend : public QWidget
 {
+	Q_OBJECT
+	
 	public:
-		VBackend();
+		VBackend(QWidget *parent = 0);
 		virtual ~VBackend();
 		
 		void setVbDirty(void)
@@ -60,14 +62,6 @@ class VBackend
 		void setMdScreenDirty(void)
 			{ m_mdScreenDirty = true; }
 		virtual void vbUpdate(void) = 0;
-		
-		/**
-		 * toQWidget(): Get the QWidget* version of this object.
-		 * Since this is the base class, this will return NULL.
-		 * @return NULL.
-		 */
-		virtual QWidget *toQWidget(void)
-			{ return NULL; }
 		
 		/** Properties. **/
 		
@@ -80,27 +74,14 @@ class VBackend
 			{ return !!(m_paused.paused_manual); }
 		void setPaused(paused_t newPaused);
 		
-		// Stretch mode.
-		GensConfig::StretchMode stretchMode(void) const
-			{ return m_stretchMode; }
-		void setStretchMode(GensConfig::StretchMode newStretchMode);
-		
 		inline bool isRunning(void) const { return m_running; }
 		void setRunning(bool newIsRunning);
 		
 		/** Onscreen display. **/
-		inline bool osdFpsEnabled(void) const
-			{ return m_osdFpsEnabled; }
-		void setOsdFpsEnabled(bool enable);
-		inline QColor osdFpsColor(void) const
-			{ return m_osdFpsColor; }
-		void setOsdFpsColor(const QColor& color);
-		inline bool osdMsgEnabled(void) const
-			{ return m_osdMsgEnabled; }
-		void setOsdMsgEnabled(bool enable);
-		inline QColor osdMsgColor(void) const
-			{ return m_osdMsgColor; }
-		void setOsdMsgColor(const QColor& color);
+		bool osdFpsEnabled(void) const;
+		QColor osdFpsColor(void) const;
+		bool osdMsgEnabled(void) const;
+		QColor osdMsgColor(void) const;
 		
 		/** Format strings. **/
 		
@@ -135,20 +116,13 @@ class VBackend
 		// Recording OSD.
 		int recSetStatus(const QString& component, bool isRecording);
 		int recSetDuration(const QString& component, int duration);
-		inline int recStart(const QString& component)
-			{ return recSetStatus(component, true); }
-		inline int recStop(const QString& component)
-			{ return recSetStatus(component, false); }
+		int recStart(const QString& component);
+		int recStop(const QString& component);
 	
 	protected:
-		// Video Backend dirty flag. If true, video must be updated.
-		bool m_vbDirty;
-		
-		// MD Screen dirty flag. If true, MD screen texture must be reuploaded.
-		bool m_mdScreenDirty;
-		
-		// OSD lock counter.
-		int m_osdLockCnt;
+		// Dirty flags.
+		bool m_vbDirty;		// VBackend dirty: screen must be redrawn.
+		bool m_mdScreenDirty;	// MD Screen dirty: texture must be reuploaded.
 		
 		// Color depth information.
 		LibGens::VdpPalette::ColorDepth m_lastBpp;
@@ -161,58 +135,22 @@ class VBackend
 		// NOTE: This takes up (336*240*4) == 322,560 bytes!
 		LibGens::VdpRend::Screen_t *m_intScreen;
 		
-		// OSG font information.
-		// TODO: Maybe make the font customizable in the future.
-		static const int ms_Osd_chrW = 8;
-		static const int ms_Osd_chrH = 16;
+		// Get the current average FPS.
+		inline double fpsAvg(void)
+			{ return m_fpsAvg; }
 		
 		// OSD message struct.
 		struct OsdMessage
 		{
-			OsdMessage(const char *msg, double endTime)
-			{
-				this->msg = QString::fromUtf8(msg);
-				this->endTime = endTime;
-			}
-			
+			OsdMessage(const char *msg, double endTime);
 			QString msg;
 			double endTime;
 		};
 		QList<OsdMessage> m_osdList;
 		
-		// m_osdListDirty: Set if the OSD message list has been changed.
-		bool m_osdListDirty;
-		inline void setOsdListDirty(void)
-			{ m_osdListDirty = true; }
-		
-		/**
-		 * osd_process(): Process the OSD queue.
-		 * This should ONLY be called by MsgTimer!
-		 * @return Number of messages remaining in the OSD queue.
-		 */
-		int osd_process(void);
-		friend class MsgTimer;
-		
-		// FPS manager.
-		double m_fps[8];
-		double m_fpsAvg;	// Average fps.
-		int m_fpsPtr;		// Pointer to next fps slot to use.
-		
-		// OSD enable bits.
-		bool m_osdFpsEnabled;
-		bool m_osdMsgEnabled;
-		
-		// OSD colors.
-		QColor m_osdFpsColor;
-		QColor m_osdMsgColor;
-		
-		// Video settings.
-		// TODO: Mark aspectRatioConstraint variables as private.
-		// (Subclasses should use the accessor functions.)
-		bool m_aspectRatioConstraint;
-		bool m_aspectRatioConstraint_changed;
-		bool m_bilinearFilter;
-		GensConfig::StretchMode m_stretchMode;
+		bool isOsdListDirty(void);
+		void setOsdListDirty(void);
+		void clearOsdListDirty(void);
 		
 		// Preview image.
 		bool m_preview_show;
@@ -229,29 +167,26 @@ class VBackend
 		QList<RecOsd> m_osdRecList;
 		
 		/** Properties. **/
-		/** These properties should only be set by subclasses. **/
-		/** GensQGLWidget calls these property functions in slots. **/
 		// TODO: Should we keep these properties here, or just get them from gqt4_config?
-		inline bool fastBlur(void) const
-			{ return m_fastBlur; }
-		void setFastBlur(bool newFastBlur);
+		bool fastBlur(void) const;
+		bool aspectRatioConstraint(void) const;
+		bool hasAspectRatioConstraintChanged(void) const;
+		void resetAspectRatioConstraintChanged(void);
+		bool bilinearFilter(void) const;
+		bool pauseTint(void) const;
+		GensConfig::StretchMode stretchMode(void) const;
+	
+	protected slots:
+		void setOsdFpsEnabled(bool enable);
+		void setOsdFpsColor(const QColor& color);
+		void setOsdMsgEnabled(bool enable);
+		void setOsdMsgColor(const QColor& color);
 		
-		inline bool aspectRatioConstraint(void) const
-			{ return m_aspectRatioConstraint; }
-		void setAspectRatioConstraint(bool newAspectRatioConstraint);
-		
-		inline bool hasAspectRatioConstraintChanged(void) const
-			{ return m_aspectRatioConstraint_changed; }
-		inline void resetAspectRatioConstraintChanged(void)
-			{ m_aspectRatioConstraint_changed = false; }
-		
-		inline bool bilinearFilter(void) const
-			{ return m_bilinearFilter; }
+		virtual void setFastBlur(bool newFastBlur);
+		virtual void setAspectRatioConstraint(bool newAspectRatioConstraint);
 		virtual void setBilinearFilter(bool newBilinearFilter);
-		
-		inline bool pauseTint(void) const
-			{ return m_pauseTint; }
 		virtual void setPauseTint(bool newPauseTint);
+		void setStretchMode(GensConfig::StretchMode newStretchMode);
 	
 	private:
 		// Effects.
@@ -264,8 +199,53 @@ class VBackend
 		
 		// Message timer.
 		MsgTimer *m_msgTimer;
+		
+		/** Onscreen Display. **/
+		
+		// FPS manager.
+		double m_fps[8];
+		double m_fpsAvg;	// Average fps.
+		int m_fpsPtr;		// Pointer to next fps slot to use.
+		
+		// m_osdListDirty: Set if the OSD message list has been changed.
+		bool m_osdListDirty;
+		
+		// OSD enable bits.
+		bool m_osdFpsEnabled;
+		bool m_osdMsgEnabled;
+		
+		// OSD colors.
+		QColor m_osdFpsColor;
+		QColor m_osdMsgColor;
+		
+		// OSD lock counter.
+		int m_osdLockCnt;
+		
+		/**
+		 * osd_process(): Process the OSD queue.
+		 * This should ONLY be called by MsgTimer!
+		 * @return Number of messages remaining in the OSD queue.
+		 */
+		int osd_process(void);
+		friend class MsgTimer;
+		
+		/** Video settings. **/
+		bool m_aspectRatioConstraint;
+		bool m_aspectRatioConstraint_changed;
+		bool m_bilinearFilter;
+		GensConfig::StretchMode m_stretchMode;
 };
 
+/** Onscreen display. **/
+
+inline bool VBackend::osdFpsEnabled(void) const
+	{ return m_osdFpsEnabled; }
+inline QColor VBackend::osdFpsColor(void) const
+	{ return m_osdFpsColor; }
+inline bool VBackend::osdMsgEnabled(void) const
+	{ return m_osdMsgEnabled; }
+inline QColor VBackend::osdMsgColor(void) const
+	{ return m_osdMsgColor; }
 
 /**
  * osd_vprintf(): Print formatted text to the screen.
@@ -280,6 +260,44 @@ inline void VBackend::osd_printf(const int duration, const char *msg, ...)
 	osd_vprintf(duration, msg, ap);
 	va_end(ap);
 }
+
+/** OSD message struct constructor. **/
+inline VBackend::OsdMessage::OsdMessage(const char *msg, double endTime)
+{
+	this->msg = QString::fromUtf8(msg);
+	this->endTime = endTime;
+}
+
+/** OSD list dirty flag functions. **/
+inline bool VBackend::isOsdListDirty(void)
+	{ return m_osdListDirty; }
+inline void VBackend::setOsdListDirty(void)
+	{ m_osdListDirty = true; }
+inline void VBackend::clearOsdListDirty(void)
+	{ m_osdListDirty = false; }
+
+/** Recording OSD. **/
+inline int VBackend::recStart(const QString& component)
+	{ return recSetStatus(component, true); }
+inline int VBackend::recStop(const QString& component)
+	{ return recSetStatus(component, false); }
+
+/** Property read functions. **/
+// TODO: Should we keep these properties here, or just get them from gqt4_config?
+inline bool VBackend::fastBlur(void) const
+	{ return m_fastBlur; }
+inline bool VBackend::aspectRatioConstraint(void) const
+	{ return m_aspectRatioConstraint; }
+inline bool VBackend::hasAspectRatioConstraintChanged(void) const
+	{ return m_aspectRatioConstraint_changed; }
+inline void VBackend::resetAspectRatioConstraintChanged(void)
+	{ m_aspectRatioConstraint_changed = false; }
+inline bool VBackend::bilinearFilter(void) const
+	{ return m_bilinearFilter; }
+inline bool VBackend::pauseTint(void) const
+	{ return m_pauseTint; }
+inline GensConfig::StretchMode VBackend::stretchMode(void) const
+	{ return m_stretchMode; }
 
 }
 

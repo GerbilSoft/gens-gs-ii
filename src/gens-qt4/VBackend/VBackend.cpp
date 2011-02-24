@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -41,7 +41,8 @@
 namespace GensQt4
 {
 
-VBackend::VBackend()
+VBackend::VBackend(QWidget *parent)
+	: QWidget(parent)
 {
 	// Mark the video backend as dirty on startup.
 	m_vbDirty = true;
@@ -49,9 +50,6 @@ VBackend::VBackend()
 	
 	// Set the internal framebuffer to NULL by default.
 	m_intScreen = NULL;
-	
-	// Reset the OSD lock counter.
-	m_osdLockCnt = 0;
 	
 	// We're not running anything initially.
 	m_running = false;
@@ -73,6 +71,7 @@ VBackend::VBackend()
 	m_osdFpsColor   = gqt4_config->osdFpsColor();
 	m_osdMsgEnabled = gqt4_config->osdMsgEnabled();
 	m_osdMsgColor   = gqt4_config->osdMsgColor();
+	m_osdLockCnt = 0;	// OSD lock counter.
 	setOsdListDirty();	// TODO: Set this on startup?
 	
 	// Clear the preview image.
@@ -80,17 +79,36 @@ VBackend::VBackend()
 	
 	// Create the message timer.
 	m_msgTimer = new MsgTimer(this);
+	
+	// Connect signals from GensConfig.
+	// TODO: Reconnect signals if GensConfig is deleted/recreated.
+	connect(gqt4_config, SIGNAL(osdFpsEnabled_changed(bool)),
+		this, SLOT(setOsdFpsEnabled(bool)));
+	connect(gqt4_config, SIGNAL(osdFpsColor_changed(const QColor&)),
+		this, SLOT(setOsdFpsColor(const QColor&)));
+	connect(gqt4_config, SIGNAL(osdMsgEnabled_changed(bool)),
+		this, SLOT(setOsdMsgEnabled(bool)));
+	connect(gqt4_config, SIGNAL(osdMsgColor_changed(const QColor&)),
+		this, SLOT(setOsdMsgColor(const QColor&)));
+	
+	// Video effect settings.
+	connect(gqt4_config, SIGNAL(fastBlur_changed(bool)),
+		this, SLOT(setFastBlur(bool)));
+	connect(gqt4_config, SIGNAL(aspectRatioConstraint_changed(bool)),
+		this, SLOT(setAspectRatioConstraint(bool)));
+	connect(gqt4_config, SIGNAL(bilinearFilter_changed(bool)),
+		this, SLOT(setBilinearFilter(bool)));
+	connect(gqt4_config, SIGNAL(pauseTint_changed(bool)),
+		this, SLOT(setPauseTint(bool)));
+	connect(gqt4_config, SIGNAL(stretchMode_changed(GensConfig::StretchMode)),
+		this, SLOT(setStretchMode(GensConfig::StretchMode)));
 }
 
 VBackend::~VBackend()
 {
-	// Delete the message timer.
-	delete m_msgTimer;
-	m_msgTimer = NULL;
-	
-	// Delete the internal framebuffer.
-	delete m_intScreen;
-	m_intScreen = NULL;
+	// Delete internal objects.
+	delete m_msgTimer;	// Message timer.
+	delete m_intScreen;	// Internal screen buffer.
 }
 
 

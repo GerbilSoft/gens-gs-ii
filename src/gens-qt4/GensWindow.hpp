@@ -151,6 +151,7 @@ class GensWindow : public QMainWindow
 		void updateVideo(void)
 		{
 			m_vBackend->setMdScreenDirty();
+			m_vBackend->setVbDirty();
 			m_vBackend->vbUpdate();
 		}
 		
@@ -182,12 +183,6 @@ class GensWindow : public QMainWindow
 		 * @param newAutoPause New Auto Pause setting.
 		 */
 		void autoPause_changed_slot(bool newAutoPause);
-		
-		/**
-		 * stretchMode_changed_slot(): Stretch Mode setting has changed.
-		 * @param newStretchMode New Stretch Mode setting.
-		 */
-		void stretchMode_changed_slot(GensConfig::StretchMode newStretchMode);
 	
 	private:
 		/** Idle thread. **/

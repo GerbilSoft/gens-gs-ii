@@ -1,6 +1,7 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GensQGLWidget.hpp: QGLWidget subclass.                                  *
+ * (PRIVATE HEADER)                                                        *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,61 +22,68 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_VBACKEND_GENSQGLWIDGET_HPP__
-#define __GENS_QT4_VBACKEND_GENSQGLWIDGET_HPP__
+#ifndef __GENS_QT4_VBACKEND_GENSQGLWIDGET_P_HPP__
+#define __GENS_QT4_VBACKEND_GENSQGLWIDGET_P_HPP__
 
-#include "GLBackend.hpp"
+#include "GensQGLWidget.hpp"
+#include "../Input/KeyHandlerQt.hpp"
 
 // Qt includes.
-#include <QtOpenGL/QGLWidget>
-#include <QtCore/QStringList>
-#include <QtCore/QRectF>
-
-// Qt classes.
-class QVBoxLayout;
-
-// Key Handler.
-#include "Input/KeyHandlerQt.hpp"
-
-// LibGens includes.
-#include "libgens/MD/VdpRend.hpp"
-
+#include <QtGui/QWidget>
 
 namespace GensQt4
 {
 
-class GensQGLWidgetPrivate;
-
-class GensQGLWidget : public GLBackend
+class GensQGLWidgetPrivate : public QGLWidget
 {
 	Q_OBJECT
 	
 	public:
-		GensQGLWidget(QWidget *parent = 0);
-		~GensQGLWidget() { }
-		
-		void vbUpdate(void);
-		
-		/**
-		 * sizeHint(): Qt size hint.
-		 * TODO: Return something other than 320x240 depending on renderer?
-		 * @return Preferred widget size.
-		 */
-		QSize sizeHint(void) const { return QSize(320, 240); }
+		GensQGLWidgetPrivate(GensQGLWidget *q);
 	
-	protected slots:
-		void setFastBlur(bool newFastBlur);
-		void setBilinearFilter(bool newBilinearFilter);
-		void setPauseTint(bool newPauseTint);
+	protected:
+		// Keyboard handler functions.
+		void keyPressEvent(QKeyEvent *event)
+			{ KeyHandlerQt::KeyPressEvent(event); }
+		void keyReleaseEvent(QKeyEvent *event)
+			{ KeyHandlerQt::KeyReleaseEvent(event); }
+		
+		// Mouse handler functions.
+		void mouseMoveEvent(QMouseEvent *event)
+			{ KeyHandlerQt::MouseMoveEvent(event); }
+		void mousePressEvent(QMouseEvent *event)
+			{ KeyHandlerQt::MousePressEvent(event); }
+		void mouseReleaseEvent(QMouseEvent *event)
+			{ KeyHandlerQt::MouseReleaseEvent(event); }
+		
+		// QGLWidget protected functions.
+		void initializeGL(void);
+		void resizeGL(int width, int height);
+		void paintGL(void);
 	
 	private:
-		friend class GensQGLWidgetPrivate;
-		GensQGLWidgetPrivate *d;
-		Q_DISABLE_COPY(GensQGLWidget);
-		
-		QVBoxLayout *m_layout;
+		GensQGLWidget *q;
+		Q_DISABLE_COPY(GensQGLWidgetPrivate);
 };
+
+inline GensQGLWidgetPrivate::GensQGLWidgetPrivate(GensQGLWidget *q)
+	: QGLWidget(QGLFormat(QGL::NoAlphaChannel | QGL::NoDepthBuffer), q)
+	, q(q)
+{
+	// Accept keyboard focus.
+	setFocusPolicy(Qt::StrongFocus);
+	
+}
+
+inline void GensQGLWidgetPrivate::initializeGL(void)
+	{ q->glb_initializeGL(); }
+
+inline void GensQGLWidgetPrivate::resizeGL(int width, int height)
+	{ q->glb_resizeGL(width, height); }
+
+inline void GensQGLWidgetPrivate::paintGL(void)
+	{ q->glb_paintGL(); }
 
 }
 
-#endif /* __GENS_QT4_VBACKEND_GENSQGLWIDGET_HPP__ */
+#endif /* __GENS_QT4_VBACKEND_GENSQGLWIDGET_P_HPP__ */

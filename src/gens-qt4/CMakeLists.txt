@@ -142,7 +142,10 @@ SET(gens-qt4_MOC_HEADERS
 	EmuThread.hpp
 	IdleThread.hpp
 	GensQApplication.hpp
+	VBackend/VBackend.hpp
+	VBackend/GLBackend.hpp
 	VBackend/GensQGLWidget.hpp
+	VBackend/GensQGLWidget_p.hpp
 	CtrlConfigWindow.hpp
 	EmuManager.hpp
 	VBackend/MsgTimer.hpp

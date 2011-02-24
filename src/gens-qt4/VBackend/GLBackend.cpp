@@ -54,7 +54,8 @@ namespace GensQt4
 /**
  * GLBackend(): Initialize the common OpenGL backend.
  */
-GLBackend::GLBackend()
+GLBackend::GLBackend(QWidget *parent = 0)
+	: VBackend(parent)
 {
 	// Initialize the OpenGL variables.
 	m_tex = 0;		// Main texture.
@@ -152,6 +153,7 @@ void GLBackend::reallocTexture(void)
 		glDeleteTextures(1, &m_tex);
 	
 	// Create and initialize a GL texture.
+	// TODO: Add support for NPOT textures and/or GL_TEXTURE_RECTANGLE_ARB.
 	glEnable(GL_TEXTURE_2D);
 	glGenTextures(1, &m_tex);
 	glBindTexture(GL_TEXTURE_2D, m_tex);
@@ -276,16 +278,14 @@ void GLBackend::glb_initializeGL(void)
 		m_shaderMgr.init();
 	}
 #endif
-
+	
 	// Initialize the GL viewport and projection.
 	// TODO: Get the actual window size.
 	glb_resizeGL(320, 240);
 	
-	// Allocate the texture.
-	reallocTexture();
-	
-	// Allocate the OSD texture.
-	reallocTexOsd();
+	// Allocate textures.
+	reallocTexture();	// Main texture.
+	reallocTexOsd();	// OSD texture.
 	
 	// Generate a display list for the OSD.
 	m_glListOsd = glGenLists(1);
@@ -333,7 +333,6 @@ void GLBackend::reallocTexOsd(void)
 		// TODO: Allow all 0x000000, or just opaque 0xFF000000?
 		// TODO: Handle images that don't have a color table.
 		// TODO: Images with odd widths will not have the last column updated properly.
-		
 		for (int y = 0; y < imgOsd.height(); y++)
 		{
 			QRgb *scanline = reinterpret_cast<QRgb*>(imgOsd.scanLine(y));
@@ -396,10 +395,13 @@ void GLBackend::glb_resizeGL(int width, int height)
 	else
 	{
 		// Aspect ratio constraint.
-		if ((width * 3) > (height * 4))
+		const int w3 = (width * 3);
+		const int h4 = (height * 4);
+		
+		if (w3 > h4)
 		{
 			// Image is wider than 4:3.
-			const double ratio = ((double)(width * 3) / (double)(height * 4));
+			const double ratio = ((double)w3 / (double)h4);
 			glOrtho(-ratio, ratio, -1, 1, -1, 1);
 			
 			// Adjust the OSD rectangle.
@@ -410,10 +412,10 @@ void GLBackend::glb_resizeGL(int width, int height)
 			m_rectfOsd.setLeft(-((osdWidth - 320.0) / 2.0));
 			m_rectfOsd.setWidth(osdWidth);
 		}
-		else if ((width * 3) < (height * 4))
+		else if (w3 < h4)
 		{
 			// Image is taller than 4:3.
-			const double ratio = ((double)(height * 4) / (double)(width * 3));
+			const double ratio = ((double)h4 / (double)w3);
 			glOrtho(-1, 1, -ratio, ratio, -1, 1);
 			
 			// Adjust the OSD rectangle.
@@ -573,6 +575,7 @@ void GLBackend::glb_paintGL(void)
 	// TODO: This function would need to be called if:
 	// * MD resolution is changed.
 	// * Stretch mode is changed.
+	// TODO: Use float instead of double?
 	double img_dx, img_dy, img_dw, img_dh;
 	const double tex_w = 512.0, tex_h = 256.0;
 	
@@ -583,8 +586,8 @@ void GLBackend::glb_paintGL(void)
 	img_dh = (240.0 / tex_h);
 	
 	// Horizontal stretch.
-	if (m_stretchMode == GensConfig::STRETCH_H ||
-	    m_stretchMode == GensConfig::STRETCH_FULL)
+	if (stretchMode() == GensConfig::STRETCH_H ||
+	    stretchMode() == GensConfig::STRETCH_FULL)
 	{
 		// Horizontal stretch.
 		int h_pix_begin = LibGens::VdpIo::GetHPixBegin();
@@ -598,8 +601,8 @@ void GLBackend::glb_paintGL(void)
 	}
 	
 	// Vertical stretch.
-	if (m_stretchMode == GensConfig::STRETCH_V ||
-	    m_stretchMode == GensConfig::STRETCH_FULL)
+	if (stretchMode() == GensConfig::STRETCH_V ||
+	    stretchMode() == GensConfig::STRETCH_FULL)
 	{
 		// Vertical stretch.
 		int v_pix = (240 - LibGens::VdpIo::GetVPix());
@@ -666,7 +669,7 @@ void GLBackend::printOsdText(void)
 	// * renderText() doesn't properly handle newlines.
 	// * fm.boundingRect() doesn't seem to handle wordwrapping correctly, either.
 	
-	if (!m_osdListDirty)
+	if (!isOsdListDirty())
 	{
 		// OSD message list isn't dirty.
 		// Call the display list.
@@ -717,7 +720,7 @@ void GLBackend::printOsdText(void)
 	// Check if the FPS should be drawn.
 	if (isRunning() && !isPaused() && osdFpsEnabled())
 	{
-		QString sFps = QString::number(m_fpsAvg, 'f', 1);
+		const QString sFps = QString::number(fpsAvg(), 'f', 1);
 		
 		// Next line.
 		y -= ms_Osd_chrH;
@@ -788,15 +791,14 @@ void GLBackend::printOsdText(void)
 		}
 		
 		QString msg;
-		for (int i = 0; i < m_osdRecList.size(); i++)
+		foreach(const RecOsd &recOsd, m_osdRecList)
 		{
-			const RecOsd &recOsd = m_osdRecList[i];
 			msg = (recOsd.isRecording ? sRec : QChar(0x25A0)) +
 				recOsd.component + QChar(L' ');
 			
 			// Format the duration.
 			int secs = (recOsd.duration / 1000);
-			int mins = (secs / 60);
+			const int mins = (secs / 60);
 			secs %= 60;
 			msg += QString::fromLatin1("%1:%2").arg(mins).arg(QString::number(secs), 2, QChar(L'0'));
 			
@@ -832,7 +834,7 @@ void GLBackend::printOsdText(void)
 	
 	// Finished creating the GL display list.
 	glEndList();
-	m_osdListDirty = false;		// OSD message list is no longer dirty.
+	clearOsdListDirty();	// OSD message list is no longer dirty.
 }
 
 
@@ -906,21 +908,20 @@ void GLBackend::printOsdLine(int x, int y, const QString &msg)
 		}
 		
 		// Calculate the texture coordinates.
-		// TODO: The Y coordinate seems to be inverted...
-		GLfloat tx1 = ((float)(chr & 0xF) / 16.0f);
-		GLfloat ty1 = ((float)((chr & 0xF0) >> 4) / 16.0f);
-		GLfloat tx2 = (tx1 + (1.0f / 16.0f));
-		GLfloat ty2 = (ty1 + (1.0f / 16.0f));
+		const GLfloat tx1 = ((float)(chr & 0xF) / 16.0f);
+		const GLfloat ty1 = ((float)((chr & 0xF0) >> 4) / 16.0f);
+		const GLfloat tx2 = (tx1 + (1.0f / 16.0f));
+		const GLfloat ty2 = (ty1 + (1.0f / 16.0f));
 		
 		// Draw the texture.
 		// NOTE: glBegin() / glEnd() are called in printOsdText().
 		glTexCoord2f(tx1, ty1);
 		glVertex2i(x, y);
-		glTexCoord2d(tx2, ty1);
+		glTexCoord2f(tx2, ty1);
 		glVertex2i(x+ms_Osd_chrW, y);
-		glTexCoord2d(tx2, ty2);
+		glTexCoord2f(tx2, ty2);
 		glVertex2i(x+ms_Osd_chrW, y+ms_Osd_chrH);
-		glTexCoord2d(tx1, ty2);
+		glTexCoord2f(tx1, ty2);
 		glVertex2i(x, y+ms_Osd_chrH);
 	}
 }
@@ -998,16 +999,26 @@ void GLBackend::showOsdPreview(void)
 	// Calculate (x2, y2) based on stretch mode.
 	
 	// Horizontal stretch.
-	if (m_stretchMode == GensConfig::STRETCH_H || m_stretchMode == GensConfig::STRETCH_FULL)
+	if (stretchMode() == GensConfig::STRETCH_H ||
+	    stretchMode() == GensConfig::STRETCH_FULL)
+	{
 		x2 = x1 + 0.5;
+	}
 	else
+	{
 		x2 = x1 + std::min(((m_texPreview->img_w() / 320.0) * 0.5), 0.5);
+	}
 	
 	// Vertical stretch.
-	if (m_stretchMode == GensConfig::STRETCH_V || m_stretchMode == GensConfig::STRETCH_FULL)
+	if (stretchMode() == GensConfig::STRETCH_V ||
+	    stretchMode() == GensConfig::STRETCH_FULL)
+	{
 		y2 = y1 - 0.5;
+	}
 	else
+	{
 		y2 = y1 - std::min(((m_texPreview->img_h() / 240.0) * 0.5), 0.5);
+	}
 	
 	// Draw the texture.
 	// TODO: Determine where to display it and what size to use.

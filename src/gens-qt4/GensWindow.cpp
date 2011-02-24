@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -150,18 +150,7 @@ void GensWindow::setupUi(void)
 	centralwidget->setLayout(layout);
 	
 	// Add the Video Backend to the layout.
-	// TODO: Figure out a way to do this without RTTI.
-	QWidget *vbackend_widget = m_vBackend->toQWidget();
-	if (vbackend_widget != NULL)
-	{
-		layout->addWidget(vbackend_widget);
-	}
-	else
-	{
-		// Not a QWidget!
-		LOG_MSG(gens, LOG_MSG_LEVEL_ERROR,
-			"Windowed mode: VBackend is not a QWidget!");
-	}
+	layout->addWidget(m_vBackend);
 	
 	// Enable drag and drop.
 	setAcceptDrops(true);
@@ -193,10 +182,6 @@ void GensWindow::setupUi(void)
 		this, SLOT(qAppFocusChanged(QWidget*, QWidget*)));
 	connect(gqt4_config, SIGNAL(autoPause_changed(bool)),
 		this, SLOT(autoPause_changed_slot(bool)));
-	
-	// Stretch Mode Changed signal.
-	connect(gqt4_config, SIGNAL(stretchMode_changed(GensConfig::StretchMode)),
-		this, SLOT(stretchMode_changed_slot(GensConfig::StretchMode)));
 	
 	// Intro Style Changed signal.
 	connect(gqt4_config, SIGNAL(introStyle_changed(int)),
@@ -568,19 +553,6 @@ void GensWindow::autoPause_changed_slot(bool newAutoPause)
 		
 		m_emuManager->pauseRequest(paused_set, paused_clear);
 	}
-}
-
-
-/**
- * stretchMode_changed_slot(): Stretch Mode setting has changed.
- * @param newStretchMode New Stretch Mode setting.
- */
-void GensWindow::stretchMode_changed_slot(GensConfig::StretchMode newStretchMode)
-{
-	// TODO: Update the submenu radio button selection.
-	
-	// Update the video backend.
-	m_vBackend->setStretchMode(newStretchMode);
 }
 
 

@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -24,7 +24,7 @@
 #include <config.h>
 
 #include "GensQGLWidget.hpp"
-#include "gqt4_main.hpp"
+#include "GensQGLWidget_p.hpp"
 
 // KeyHandlerQt.
 #include "Input/KeyHandlerQt.hpp"
@@ -32,14 +32,23 @@
 // gqt4_main.hpp has GensConfig.
 #include "gqt4_main.hpp"
 
+// Qt includes.
+#include <QtGui/QVBoxLayout>
+
 namespace GensQt4
 {
 
 GensQGLWidget::GensQGLWidget(QWidget *parent)
-	: QGLWidget(QGLFormat(QGL::NoAlphaChannel | QGL::NoDepthBuffer), parent)
+	: GLBackend(parent)
+	, d(new GensQGLWidgetPrivate(this))
 {
-	// Accept keyboard focus.
-	setFocusPolicy(Qt::StrongFocus);
+	// NOTE: QVBoxLayout is required for proper resizing.
+	m_layout = new QVBoxLayout(this);
+	m_layout->setMargin(0);
+	m_layout->addWidget(d);
+	
+	// Set the GensQGLWidgetPrivate object as the focus proxy.
+	setFocusProxy(d);
 	
 	// Initialize mouse tracking.
 	// TODO: Only do this if a Mega Mouse is connected.
@@ -47,40 +56,25 @@ GensQGLWidget::GensQGLWidget(QWidget *parent)
 #if 0
 	setMouseTracking(true);
 #endif
-	
-	// Connect signals from GensConfig.
-	// TODO: Reconnect signals if GensConfig is deleted/recreated.
-	// TODO: OSD colors.
-	connect(gqt4_config, SIGNAL(osdFpsEnabled_changed(bool)),
-		this, SLOT(osdFpsEnabled_changed_slot(bool)));
-	connect(gqt4_config, SIGNAL(osdFpsColor_changed(const QColor&)),
-		this, SLOT(osdFpsColor_changed_slot(const QColor&)));
-	connect(gqt4_config, SIGNAL(osdMsgEnabled_changed(bool)),
-		this, SLOT(osdMsgEnabled_changed_slot(bool)));
-	connect(gqt4_config, SIGNAL(osdMsgColor_changed(const QColor&)),
-		this, SLOT(osdMsgColor_changed_slot(const QColor&)));
-	
-	// Video effect settings.
-	connect(gqt4_config, SIGNAL(fastBlur_changed(bool)),
-		this, SLOT(fastBlur_changed_slot(bool)));
-	connect(gqt4_config, SIGNAL(aspectRatioConstraint_changed(bool)),
-		this, SLOT(aspectRatioConstraint_changed_slot(bool)));
-	connect(gqt4_config, SIGNAL(bilinearFilter_changed(bool)),
-		this, SLOT(bilinearFilter_changed_slot(bool)));
-	connect(gqt4_config, SIGNAL(pauseTint_changed(bool)),
-		this, SLOT(pauseTint_changed_slot(bool)));
-}
-
-GensQGLWidget::~GensQGLWidget()
-{
 }
 
 
 /**
- * fastBlur_changed_slot(): Fast Blur setting has changed.
+ * vbUpdate(): Video Backend update function.
+ */
+void GensQGLWidget::vbUpdate(void)
+{
+	// TODO: Expand this function?
+	d->makeCurrent();
+	d->updateGL();
+}
+
+
+/**
+ * setFastBlur(): Fast Blur setting has changed.
  * @param newFastBlur New fast blur setting.
  */
-void GensQGLWidget::fastBlur_changed_slot(bool newFastBlur)
+void GensQGLWidget::setFastBlur(bool newFastBlur)
 {
 	if (fastBlur() == newFastBlur)
 		return;
@@ -94,35 +88,36 @@ void GensQGLWidget::fastBlur_changed_slot(bool newFastBlur)
 		m_mdScreenDirty = true;
 	}
 	
-	setFastBlur(newFastBlur);
+	VBackend::setFastBlur(newFastBlur);
 }
 
 
 /**
- * bilinearFilter_changed_slot(): Bilinear filter setting has changed.
+ * setBilinearFilter(): Bilinear filter setting has changed.
  * @param newBilinearFilter New bilinear filter setting.
  */
-void GensQGLWidget::bilinearFilter_changed_slot(bool newBilinearFilter)
+void GensQGLWidget::setBilinearFilter(bool newBilinearFilter)
 {
 	if (bilinearFilter() == newBilinearFilter)
 		return;
 	
 	// Update GLBackend's bilinear filter setting.
-	this->makeCurrent();
+	d->makeCurrent();
 	GLBackend::setBilinearFilter(newBilinearFilter);
 }
 
 
 /**
- * pauseTint_changed_slot(): Pause Tint setting has changed.
+ * setPauseTint(): Pause Tint setting has changed.
  * @param newPauseTint New pause tint setting.
  */
-void GensQGLWidget::pauseTint_changed_slot(bool newPauseTint)
+void GensQGLWidget::setPauseTint(bool newPauseTint)
 {
 	if (pauseTint() == newPauseTint)
 		return;
 	
 	// Update GLBackend's pause tint setting.
+	d->makeCurrent();
 	GLBackend::setPauseTint(newPauseTint);
 }
 
