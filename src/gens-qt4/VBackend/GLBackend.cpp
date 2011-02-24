@@ -584,28 +584,28 @@ void GLBackend::glb_paintGL(void)
 	// TODO: This function would need to be called if:
 	// * MD resolution is changed.
 	// * Stretch mode is changed.
-	// TODO: Use float instead of double?
-	double img_dx, img_dy, img_dw, img_dh;
-	const double tex_w = 512.0, tex_h = 256.0;
 	
 	// Default to no stretch.
-	img_dx = 0.0;
-	img_dy = 0.0;
-	img_dw = (320.0 / tex_w);
-	img_dh = (240.0 / tex_h);
+	QRectF img_dest(
+		0.0,		// X coordinate.
+		0.0,		// Y coordinate.
+		((double)m_texVisSize.width() / (double)m_texSize.width()),	// Width.
+		((double)m_texVisSize.height() / (double)m_texSize.height())	// Height.
+		);
 	
 	// Horizontal stretch.
 	if (stretchMode() == GensConfig::STRETCH_H ||
 	    stretchMode() == GensConfig::STRETCH_FULL)
 	{
 		// Horizontal stretch.
-		int h_pix_begin = LibGens::VdpIo::GetHPixBegin();
+		const int h_pix_begin = LibGens::VdpIo::GetHPixBegin();
 		if (h_pix_begin > 0)
 		{
 			// Less than 320 pixels wide.
 			// Adjust horizontal stretch.
-			img_dx = ((double)h_pix_begin / tex_w);
-			img_dw -= img_dx;
+			// NOTE: Width is adjusted automatically by QRectF when setting X.
+			img_dest.setX((double)h_pix_begin / (double)m_texSize.width());
+			//img_dest.setWidth(img_dest.width() - img_dest.x());
 		}
 	}
 	
@@ -618,22 +618,24 @@ void GLBackend::glb_paintGL(void)
 		if (v_pix > 0)
 		{
 			// Less than 240 pixels tall.
+			// Adjust vertical stretch.
+			// NOTE: Height is adjusted automatically by QRectF when setting Y.
 			v_pix /= 2;
-			img_dy = ((double)v_pix / tex_h);
-			img_dh -= img_dy;
+			img_dest.setY((double)v_pix / (double)m_texSize.height());
+			//img_dest.setHeight(img_dest.height() - img_dest.y());
 		}
 	}
 	
 	// Draw the texture.
 	glBindTexture(GL_TEXTURE_2D, m_tex);
 	glBegin(GL_QUADS);
-	glTexCoord2d(img_dx, img_dy);
+	glTexCoord2d(img_dest.x(), img_dest.y());
 	glVertex2i(-1, 1);
-	glTexCoord2d(img_dw, img_dy);
+	glTexCoord2d(img_dest.width(), img_dest.y());
 	glVertex2i(1, 1);
-	glTexCoord2d(img_dw, img_dh);
+	glTexCoord2d(img_dest.width(), img_dest.height());
 	glVertex2i(1, -1);
-	glTexCoord2d(img_dx, img_dh);
+	glTexCoord2d(img_dest.x(), img_dest.height());
 	glVertex2i(-1, -1);
 	glEnd();
 	
