@@ -471,7 +471,7 @@ int KeyHandlerQt::KeyValMToQtKey(GensKey_t keyM)
 	
 	// Get the modifiers first.
 	int qtKey = (keyM & 0x1E00) << 16;
-
+	
 	// Determine the key.
 	keyM &= 0x1FF;
 	if (keyM > KEYV_LAST)
