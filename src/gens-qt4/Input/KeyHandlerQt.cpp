@@ -338,8 +338,10 @@ GensKey_t KeyHandlerQt::QKeyEventToKeyVal(QKeyEvent *event)
 		KEYV_HELP, 0, 0, 0, 0, 0, 0, 0,
 		
 		// 0x01000060
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+		0, KEYV_BACK, KEYV_FORWARD, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0
 	};
 	
 	int key = event->key();
