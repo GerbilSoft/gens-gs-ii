@@ -427,7 +427,6 @@ GensKey_t KeyHandlerQt::NativeModifierToKeyVal(QKeyEvent *event)
 	 * and right keys, but I can't seem to find them...)
 	 * 
 	 * For now, just use Left keys. (default handler)
-	 * TODO: Swap Ctrl/Meta.
 	 */
 #else
 	// Unhandled system.
@@ -472,27 +471,6 @@ int KeyHandlerQt::KeyValMToQtKey(GensKey_t keyM)
 	
 	// Get the modifiers first.
 	int qtKey = (keyM & 0x1E00) << 16;
-	
-#ifdef Q_WS_MAC
-	static const int QtKeyCtrl = Qt::Key_Meta;
-	static const int QtKeyMeta = Qt::Key_Control;
-	
-	// Swap Ctrl/Meta modifiers.
-	switch (qtKey & (Qt::ControlModifier | Qt::MetaModifier))
-	{
-		case Qt::ControlModifier:
-			qtKey = ((qtKey & ~Qt::ControlModifier) | Qt::MetaModifier);
-			break;
-		case Qt::MetaModifier:
-			qtKey = ((qtKey & ~Qt::MetaModifier) | Qt::ControlModifier);
-			break;
-		default:
-			break;
-	}
-#else /* !Q_WS_MAC */
-	static const int QtKeyCtrl = Qt::Key_Control;
-	static const int QtKeyMeta = Qt::Key_Meta;
-#endif /* Q_WS_MAC */
 
 	// Determine the key.
 	keyM &= 0x1FF;
@@ -566,10 +544,9 @@ int KeyHandlerQt::KeyValMToQtKey(GensKey_t keyM)
 		
 		// 0xC0: Key state modifier keys.
 		// TODO: Left/Right modifiers.
-		// TODO: Ctrl/Meta key reversal on Mac.
 		Qt::Key_NumLock, Qt::Key_CapsLock, Qt::Key_ScrollLock, Qt::Key_Shift,
-		Qt::Key_Shift, QtKeyCtrl, QtKeyCtrl, Qt::Key_Alt,
-		Qt::Key_Alt, QtKeyMeta, QtKeyMeta, Qt::Key_Super_L,
+		Qt::Key_Shift, Qt::Key_Control, Qt::Key_Control, Qt::Key_Alt,
+		Qt::Key_Alt, Qt::Key_Meta, Qt::Key_Meta, Qt::Key_Super_L,
 		Qt::Key_Super_R, Qt::Key_AltGr, Qt::Key_Multi_key, Qt::Key_Hyper_L,
 		
 		// 0xD0

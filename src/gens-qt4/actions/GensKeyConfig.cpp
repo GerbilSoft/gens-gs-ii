@@ -82,7 +82,7 @@ const GensKeyConfigPrivate::DefKeySetting_t GensKeyConfigPrivate::DefKeySettings
 	{IDM_FILE_SAVESTATE, KEYV_F5,				"file/saveState"},
 	{IDM_FILE_LOADSTATE, KEYV_F8,				"file/loadState"},
 #ifdef Q_WS_MAC
-	{IDM_FILE_GENCONFIG, KEYM_META | KEYV_COMMA,		"file/genConfig"},
+	{IDM_FILE_GENCONFIG, KEYM_CTRL | KEYV_COMMA,		"file/genConfig"},
 #else
 	{IDM_FILE_GENCONFIG, 0,					"file/genConfig"},
 #endif
