@@ -128,6 +128,10 @@ class Rom
 		uint16_t checksum(void) const
 			{ return m_mdHeader.checksum; }
 		
+		/// Region code. (MD hex format)
+		int regionCode(void) const
+			{ return m_regionCode; }
+		
 		/** Multi-file ROM archive support. **/
 		
 		/**
@@ -154,7 +158,7 @@ class Rom
 		 */
 		bool isRomSelected(void) const { return (m_z_entry_sel != NULL); }
 	
-	protected:
+	private:
 		MDP_SYSTEM_ID m_sysId;
 		RomFormat m_romFormat;
 		
@@ -235,6 +239,10 @@ class Rom
 		// ROM names.
 		std::string m_romNameJP;
 		std::string m_romNameUS;
+		
+		// Region code. Same format as the newer hex format used in MD ROMs.
+		int m_regionCode;
+		int detectRegionCodeMD(const char countryCodes[16]);
 };
 
 }

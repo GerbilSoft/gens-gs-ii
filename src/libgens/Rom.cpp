@@ -52,6 +52,7 @@ Rom::Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverr
 	// Save the filename for later.
 	m_filename = string(filename);
 	m_romSize = 0;
+	m_regionCode = 0;
 	
 	// Remove the directories and extension from the ROM filename.
 	// TODO: Remove all extensions (e.g. ".gen.gz")?
@@ -368,6 +369,9 @@ void Rom::readHeaderMD(const uint8_t *header, size_t header_size)
 	m_mdHeader.sramStartAddr	= be32_to_cpu(m_mdHeader.sramStartAddr);
 	m_mdHeader.sramEndAddr		= be32_to_cpu(m_mdHeader.sramEndAddr);
 	
+	// Detect the ROM's region code.
+	m_regionCode = detectRegionCodeMD(m_mdHeader.countryCodes);
+	
 #if defined(HAVE_ICONV) || defined(_WIN32)
 	// Attempt to convert the Japanese ROM header name from Shift-JIS to UTF-8.
 	char *jp_utf8 = NULL;
@@ -607,6 +611,66 @@ int Rom::select_z_entry(const mdp_z_entry_t *sel)
 	// Load the ROM header.
 	loadRomHeader(m_sysId_override, m_romFormat_override);
 	return 0;
+}
+
+
+/** Region code detection. **/
+
+
+/**
+ * detectRegionCodeMD(): Detect an MD region code.
+ * @param countryCodes Country codes section of MD ROM header.
+ * @return Region code, or -1 on error.
+ */
+int Rom::detectRegionCodeMD(const char countryCodes[16])
+{
+	int code = 0;
+	
+	/**
+	 * The Rom class internally uses the hex format used in later MD games.
+	 * Format:
+	 * - Bit 0: Japan (NTSC)
+	 * - Bit 1: Asia (PAL)
+	 * - Bit 2: USA (NTSC)
+	 * - Bit 3: Europe (PAL)
+	 */
+	
+	// Check for string codes first.
+	// Some games incorrectly use these.
+	if (!strncasecmp(countryCodes, "EUR", 3))
+		code = (1 << 3);
+	else if (!strncasecmp(countryCodes, "USA", 3))
+		code = (1 << 2);
+	else if (!strncasecmp(countryCodes, "JPN", 3))
+		code = (1 << 0);
+	else
+	{
+		// Check for other country codes.
+		for (int i = 0; i < 4; i++)
+		{
+			char c = toupper(countryCodes[i]);
+			
+			// NOTE: 'E' is used for both Europe and hex codes,
+			// but it's not seen often as a hex code, so we'll
+			// assume its use indicates Europe.
+			
+			if (c == 'U')
+				code |= (1 << 2);
+			else if (c == 'J')
+				code |= (1 << 0);
+			else if (c == 'E')
+				code |= (1 << 3);
+			else if (c < 16)	// hex code not mapped to ASCII
+				code |= c;
+			else if ((c >= '0') && (c <= '9'))
+				code |= (c - '0');
+			else if ((c >= 'A' && c <= 'E'))
+				code |= (c - 'A' + 10);
+		}
+	}
+	
+	// Country code detection complete.
+	return code;
 }
 
 }
