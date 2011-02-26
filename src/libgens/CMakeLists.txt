@@ -99,6 +99,8 @@ SET(libgens_SRCS
 	Save/EEPRom_DB.cpp
 	Data/mcd_rom_db.c
 	Data/32X/fw_32x.c
+	MD/VdpRend_Err.cpp
+	MD/VGA_charset.c
 	)
 
 IF(HAVE_LZMA)

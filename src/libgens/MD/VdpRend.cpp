@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -29,6 +29,7 @@
 
 // Mode-specific renderers.
 #include "VdpRend_m5.hpp"
+#include "VdpRend_Err.hpp"
 
 // C includes.
 #include <string.h>
@@ -95,17 +96,11 @@ void VdpRend::Render_Line(void)
 	else
 	{
 		// Unsupported mode.
-		// TODO: Port to LibGens.
-#if 0
-		VDP_Render_Error();
-#endif
+		VdpRend_Err::Render_Line();
 	}
 	
 	// Update the VDP render error cache.
-	// TODO: Port to LibGens.
-#if 0
-	VDP_Render_Error_Update();
-#endif
+	VdpRend_Err::Update();
 }
 
 }
