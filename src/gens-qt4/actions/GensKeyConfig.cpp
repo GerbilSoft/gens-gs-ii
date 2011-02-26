@@ -124,6 +124,8 @@ const GensKeyConfigPrivate::DefKeySetting_t GensKeyConfigPrivate::DefKeySettings
 	{IDM_SYSTEM_HARDRESET, KEYM_SHIFT | KEYV_TAB,		"system/hardReset"},
 	{IDM_SYSTEM_SOFTRESET, KEYV_TAB,			"system/softReset"},
 	{IDM_SYSTEM_PAUSE, KEYV_ESCAPE,				"system/pause"},
+	{IDM_SYSTEM_CPURESET_M68K, 0,				"system/resetM68K"},
+	{IDM_SYSTEM_CPURESET_Z80, 0,				"system/resetZ80"},
 	
 	// NOTE: Test menus aren't going to be added here.
 	
