@@ -246,7 +246,18 @@ bool GensActions::doAction(int action)
 					emit actionTogglePaused();
 					return true;
 				
-				// TODO: Other items.
+				case MNUID_ITEM(IDM_SYSTEM_CPURESET_M68K):
+					// Reset Main 68000.
+					// TODO: Emit a signal.
+					m_parent->resetCpu(EmuManager::RQT_CPU_M68K);
+					return true;
+				
+				case MNUID_ITEM(IDM_SYSTEM_CPURESET_Z80):
+					// Reset Z80.
+					// TODO: Emit a signal.
+					m_parent->resetCpu(EmuManager::RQT_CPU_Z80);
+					return true;
+				
 				default:
 					break;
 			}

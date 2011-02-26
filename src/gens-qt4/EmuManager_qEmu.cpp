@@ -46,6 +46,10 @@
 #include "libgens/IO/Io4WPMaster.hpp"
 #include "libgens/IO/Io4WPSlave.hpp"
 
+// LibGens CPU includes.
+#include "libgens/cpu/M68K.hpp"
+#include "libgens/cpu/Z80.hpp"
+
 // Audio backend.
 #include "Audio/GensPortAudio.hpp"
 
@@ -132,6 +136,26 @@ void EmuManager::setStereo(bool newStereo)
 	m_qEmuRequest.enqueue(rq);
 	
 	if (!m_rom || m_paused.data)
+		processQEmuRequest();
+}
+
+
+/**
+ * resetCpu(): Reset a CPU.
+ * @param cpu_idx CPU index.
+ * TODO: Use MDP CPU indexes.
+ */
+void EmuManager::resetCpu(EmuManager::ResetCpuIndex cpu_idx)
+{
+	if (!m_rom)
+		return;
+	
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_RESET_CPU;
+	rq.cpu_idx = cpu_idx;
+	m_qEmuRequest.enqueue(rq);
+	
+	if (m_paused.data)
 		processQEmuRequest();
 }
 
@@ -392,6 +416,11 @@ void EmuManager::processQEmuRequest(void)
 			case EmuRequest_t::RQT_PALETTE_SETTING:
 				// Set a palette setting.
 				doChangePaletteSetting(rq.PaletteSettings.ps_type, rq.PaletteSettings.ps_val);
+				break;
+			
+			case EmuRequest_t::RQT_RESET_CPU:
+				// Reset a CPU.
+				doResetCpu(rq.cpu_idx);
 				break;
 			
 			case EmuRequest_t::RQT_UNKNOWN:
@@ -933,6 +962,36 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 		default:
 			break;
 	}
+}
+
+
+/**
+ * doResetCpu(): Reset a CPU.
+ * @param cpu_idx CPU index.
+ * TODO: Use MDP CPU indexes.
+ */
+void EmuManager::doResetCpu(ResetCpuIndex cpu_idx)
+{
+	// TODO: Reset CPUs through the emulation context using MDP CPU indexes.
+	const char *msg = NULL;
+	switch (cpu_idx)
+	{
+		case RQT_CPU_M68K:
+			LibGens::M68K::Reset();
+			msg = "68000 reset.";
+			break;
+		
+		case RQT_CPU_Z80:
+			LibGens::Z80::Reset();
+			msg = "Z80 reset.";
+			break;
+		
+		default:
+			break;
+	}
+	
+	if (msg)
+		emit osdPrintMsg(1500, QLatin1String(msg));
 }
 
 }

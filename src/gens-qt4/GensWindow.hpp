@@ -97,6 +97,7 @@ class GensWindow : public QMainWindow
 		void setController(int port, LibGens::IoBase::IoType type);
 		void setAudioRate(int newRate);
 		void setStereo(bool newStereo);
+		void resetCpu(EmuManager::ResetCpuIndex cpu_idx);
 	
 	protected:
 		void setupUi(void);

@@ -156,6 +156,18 @@ class EmuManager : public QObject
 	
 	/** Emulation Request Struct. **/
 	
+	public:
+		// RQT_RESET_CPU indexes.
+		// TODO: Use MDP CPU indexes.
+		enum ResetCpuIndex
+		{
+			RQT_CPU_M68K		= 0,
+			RQT_CPU_Z80		= 1,
+			RQT_CPU_S68K		= 2,
+			RQT_CPU_MSH2		= 3,
+			RQT_CPU_SSH2		= 4,
+		};
+	
 	protected:
 		/**
 		 * EmuRequest_t: Emulation Request struct.
@@ -176,6 +188,7 @@ class EmuManager : public QObject
 				RQT_AUTOFIX_CHANGE	= 9,
 				RQT_PALETTE_SETTING	= 10,
 				RQT_SAVE_SLOT		= 11,
+				RQT_RESET_CPU		= 12,
 			};
 			
 			// RQT_PALETTE_SETTING types.
@@ -224,6 +237,9 @@ class EmuManager : public QObject
 					PaletteSettingType ps_type;
 					int ps_val;
 				} PaletteSettings;
+				
+				// Reset CPU.
+				ResetCpuIndex cpu_idx;
 			};
 		};
 		
@@ -240,6 +256,7 @@ class EmuManager : public QObject
 		void screenShot(void);
 		void setAudioRate(int newRate);
 		void setStereo(bool newStereo);
+		void resetCpu(ResetCpuIndex cpu_idx);
 		
 		/** Savestates. **/
 		void saveState(void); // Save to current slot.
@@ -316,6 +333,7 @@ class EmuManager : public QObject
 		void doResetEmulator(bool hardReset);
 		
 		void doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, int val);
+		void doResetCpu(ResetCpuIndex cpu_idx);
 };
 
 

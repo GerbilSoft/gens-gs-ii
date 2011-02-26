@@ -575,6 +575,8 @@ void GensWindow::setAudioRate(int newRate)
 	{ m_emuManager->setAudioRate(newRate); }
 void GensWindow::setStereo(bool newStereo)
 	{ m_emuManager->setStereo(newStereo); }
+void GensWindow::resetCpu(EmuManager::ResetCpuIndex cpu_idx)
+	{ m_emuManager->resetCpu(cpu_idx); }
 
 
 void GensWindow::setIdleThreadAllowed(bool newIdleThreadAllowed)
