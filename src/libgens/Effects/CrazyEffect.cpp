@@ -46,15 +46,21 @@
 namespace LibGens
 {
 
+CrazyEffect::CrazyEffect()
+{
+	// Initialize the color mask to CM_WHITE.
+	m_colorMask = CM_WHITE;
+}
+
 /**
- * T_DoCrazyEffect(): Do the "Crazy" effect.
- * @param colorMask Color mask.
+ * T_doCrazyEffect(): Do the "Crazy" effect.
+ * @param screen MD screen.
  */
 template<typename pixel, pixel Rmask, pixel Gmask, pixel Bmask,
 		  pixel Radd, pixel Gadd, pixel Badd>
-inline void CrazyEffect::T_DoCrazyEffect(ColorMask colorMask, pixel *screen)
+inline void CrazyEffect::T_doCrazyEffect(pixel *screen)
 {
-	if (colorMask == CM_BLACK)
+	if (m_colorMask == CM_BLACK)
 	{
 		// Intro effect color is black.
 		// Simply clear the screen.
@@ -81,7 +87,7 @@ inline void CrazyEffect::T_DoCrazyEffect(ColorMask colorMask, pixel *screen)
 		RB = ((pl & RBmask) + (pp & RBmask)) >> 1;
 		G = ((pl & Gmask) + (pp & Gmask)) >> 1;
 		
-		if (colorMask & CM_RED)
+		if (m_colorMask & CM_RED)
 		{
 			// Red channel.
 			r = RB & Rmask;
@@ -101,7 +107,7 @@ inline void CrazyEffect::T_DoCrazyEffect(ColorMask colorMask, pixel *screen)
 			}
 		}
 		
-		if (colorMask & CM_GREEN)
+		if (m_colorMask & CM_GREEN)
 		{
 			// Green channel.
 			g = G & Gmask;
@@ -121,7 +127,7 @@ inline void CrazyEffect::T_DoCrazyEffect(ColorMask colorMask, pixel *screen)
 			}
 		}
 		
-		if (colorMask & CM_BLUE)
+		if (m_colorMask & CM_BLUE)
 		{
 			// Blue channel.
 			b = RB & Bmask;
@@ -152,28 +158,27 @@ inline void CrazyEffect::T_DoCrazyEffect(ColorMask colorMask, pixel *screen)
 
 
 /**
- * DoCrazyEffect(): Do the "Crazy" effect.
- * @param colorMask Color mask.
+ * run(): Run the "Crazy" effect.
  */
-void CrazyEffect::DoCrazyEffect(ColorMask colorMask)
+void CrazyEffect::run(void)
 {
 	switch (VdpRend::m_palette.bpp())
 	{
 		case VdpPalette::BPP_15:
-			T_DoCrazyEffect<uint16_t, 0x7C00, 0x03E0, 0x001F,
-					0x0400, 0x0020, 0x0001>(colorMask, VdpRend::MD_Screen.u16);
+			T_doCrazyEffect<uint16_t, 0x7C00, 0x03E0, 0x001F,
+					0x0400, 0x0020, 0x0001>(VdpRend::MD_Screen.u16);
 			break;
 		
 		case VdpPalette::BPP_16:
-			T_DoCrazyEffect<uint16_t, 0xF800, 0x07C0, 0x001F,
-					0x0800, 0x0040, 0x0001>(colorMask, VdpRend::MD_Screen.u16);
+			T_doCrazyEffect<uint16_t, 0xF800, 0x07C0, 0x001F,
+					0x0800, 0x0040, 0x0001>(VdpRend::MD_Screen.u16);
 			break;
 		
 		case VdpPalette::BPP_32:
 		default:
-			T_DoCrazyEffect<uint32_t, CRAZY_MASK32_R, CRAZY_MASK32_G, CRAZY_MASK32_B,
+			T_doCrazyEffect<uint32_t, CRAZY_MASK32_R, CRAZY_MASK32_G, CRAZY_MASK32_B,
 					CRAZY_ADD32_R, CRAZY_ADD32_G, CRAZY_ADD32_B>
-					(colorMask, VdpRend::MD_Screen.u32);
+					(VdpRend::MD_Screen.u32);
 			break;
 	}
 }

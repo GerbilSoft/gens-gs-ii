@@ -24,12 +24,17 @@
 #ifndef __LIBGENS_EFFECTS_CRAZYEFFECT_HPP__
 #define __LIBGENS_EFFECTS_CRAZYEFFECT_HPP__
 
+#include <stdint.h>
+#include "../macros/common.h"
+
 namespace LibGens
 {
 
 class CrazyEffect
 {
 	public:
+		CrazyEffect();
+		
 		enum ColorMask
 		{
 			CM_BLACK	= 0,
@@ -42,17 +47,42 @@ class CrazyEffect
 			CM_WHITE	= 7,
 		};
 		
-		static void DoCrazyEffect(ColorMask colorMask);
-	
-	protected:
-		template<typename pixel, pixel Rmask, pixel Gmask, pixel Bmask,
-				  pixel Radd, pixel Gadd, pixel Badd>
-		static inline void T_DoCrazyEffect(ColorMask colorMask, pixel *screen);
+		// Color mask property.
+		ColorMask colorMask(void);
+		void setColorMask(ColorMask newColorMask);
+		
+		/**
+		 * run(): Run the "Crazy Effect" on the MD screen.
+		 */
+		void run();
+		void run(ColorMask newColorMask);
 	
 	private:
-		CrazyEffect() { }
-		~CrazyEffect() { }
+		template<typename pixel, pixel Rmask, pixel Gmask, pixel Bmask,
+				  pixel Radd, pixel Gadd, pixel Badd>
+		void T_doCrazyEffect(pixel *screen);
+		
+		// Color mask.
+		ColorMask m_colorMask;
 };
+
+inline CrazyEffect::ColorMask CrazyEffect::colorMask(void)
+	{ return m_colorMask; }
+
+inline void CrazyEffect::setColorMask(CrazyEffect::ColorMask newColorMask)
+{
+	if (newColorMask < CM_BLACK || newColorMask > CM_WHITE)
+		return;
+	
+	m_colorMask = newColorMask;
+}
+
+
+inline void CrazyEffect::run(ColorMask newColorMask)
+{
+	setColorMask(newColorMask);
+	run();
+}
 
 }
 

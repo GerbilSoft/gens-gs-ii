@@ -37,6 +37,9 @@ IdleThread::IdleThread(QObject *parent)
 	: QThread(parent)
 {
 	m_stop = false;
+	
+	// Clear the effect classes.
+	m_crazyEffect = NULL;
 }
 
 IdleThread::~IdleThread()
@@ -67,13 +70,23 @@ void IdleThread::stop(void)
 void IdleThread::run(void)
 {
 	// TODO: Use an enum for the Intro Effect Style.
+	int prevIntroStyle = gqt4_config->introStyle();
 	
 	// Run the idle thread.
 	m_mutex.lock();
 	while (!m_stop)
 	{
+		// Check if the intro effect has changed.
+		if (prevIntroStyle != gqt4_config->introStyle())
+		{
+			// Intro effect has changed. Delete existing effects.
+			delete m_crazyEffect;
+			m_crazyEffect = NULL;
+		}
+		
 		// Run the intro effect.
-		switch (gqt4_config->introStyle())
+		prevIntroStyle = gqt4_config->introStyle();
+		switch (prevIntroStyle)
 		{
 			case 0:
 			default:
@@ -90,7 +103,10 @@ void IdleThread::run(void)
 			
 			case 2:
 				// "Crazy" effect.
-				LibGens::CrazyEffect::DoCrazyEffect(
+				if (!m_crazyEffect)
+					m_crazyEffect = new LibGens::CrazyEffect();
+				
+				m_crazyEffect->run(
 					(LibGens::CrazyEffect::ColorMask)gqt4_config->introColor());
 				emit frameDone();
 				usleep(20000);

@@ -29,6 +29,9 @@
 #include <QtCore/QWaitCondition>
 #include <QtCore/QMutex>
 
+// Crazy Effect class.
+#include "libgens/Effects/CrazyEffect.hpp"
+
 namespace GensQt4
 {
 
@@ -51,10 +54,13 @@ class IdleThread : public QThread
 	
 	protected:
 		void run(void);
+	
+	private:
 		QWaitCondition m_wait;
 		QMutex m_mutex;
-		
 		bool m_stop;
+		
+		LibGens::CrazyEffect *m_crazyEffect;
 };
 
 
