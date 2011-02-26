@@ -347,21 +347,22 @@ inline void VdpRend_Err::T_DrawVDPErrorMessage(pixel *screen)
 	// Determine the starting position.
 	const int barY_1 = ((VdpIo::VDP_Lines.Visible.Total * 2) / 3);
 	int y = VdpIo::VDP_Lines.Visible.Border_Size + ((barY_1 - (16*5)) / 2);
-	int x = ((VdpIo::GetHPix() - (26*8)) / 2) + VdpIo::GetHPixBegin();
+	int x = ((VdpIo::GetHPix() - (29*8)) / 2) + VdpIo::GetHPixBegin();
 	
 	T_DrawText<pixel, text_color>(screen, x, y,    "Gens/GS II does not currently");
-	T_DrawText<pixel, text_color>(screen, x, y+16, "    support this VDP mode.");
+	T_DrawText<pixel, text_color>(screen, x+((8*7)/2), y+16, "support this VDP mode.");
 	y += 48;
 	
 	// Mode bits.
 	char buf[32];
-	snprintf(buf, sizeof(buf), "     Mode Bits: %d%d%d%d%d",
+	snprintf(buf, sizeof(buf), "Mode Bits: %d%d%d%d%d",
 			(VdpIo::VDP_Mode & VDP_MODE_M5) >> 4,
 			(VdpIo::VDP_Mode & VDP_MODE_M4) >> 3,
 			(VdpIo::VDP_Mode & VDP_MODE_M3) >> 2,
 			(VdpIo::VDP_Mode & VDP_MODE_M2) >> 1,
 			(VdpIo::VDP_Mode & VDP_MODE_M1));
 	buf[sizeof(buf)-1] = 0x00;
+	x = ((VdpIo::GetHPix() - (16*8)) / 2) + VdpIo::GetHPixBegin();
 	T_DrawText<pixel, text_color>(screen, x, y, buf);
 	
 	// TMS9918 modes.
