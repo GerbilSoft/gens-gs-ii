@@ -29,7 +29,7 @@
 #include <config.h>
 
 // mdZ80: Z80 CPU emulator.
-#include "mdZ80/mdZ80.h"
+#include "../mdZ80/mdZ80.h"
 
 // M68K_Mem is needed for Z80_State.
 #include "M68K_Mem.hpp"
