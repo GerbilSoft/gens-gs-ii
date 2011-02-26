@@ -1,0 +1,183 @@
+; Poorman's 32X Bios Set
+; By DevSter (Joseph Norman)
+; http://devster.retrodev.com
+; SH2 Slave CPU Bootup
+; Feel free to use this code, recompile the code, redistribute the unmodified code,
+; modify it with your own name on it and redistribute it as yours if you
+; so wish to do so without getting caught looking stupid, but you may not sell it for
+; cash monies, or for in exchange of hot prostitutes, nor include it with any other
+; redistributable software packages without consent from DevSter. This code is IS AS,
+; which is latin for jibber jabber, to DevSter and the holder of this code, means
+; there are no other further attatchments, absolutely no guarantees in it "working",
+; comes with no lifetime waranty, et al, and you will gain nothing more than to play
+; your super cool Sega Genesis 32X (names reserved to their rightful owners) without
+; having to resort to using the actual copyrighted bios files. Let it further be noted
+; that the use of the word "code" in this exclaimer refers to both the source code, and
+; the pre-compiled code that was distributed.
+
+	opt pc+
+	opt risc+
+
+__VECTORS:							; STARTUP VECTOR TABLE
+	ORG	0x000
+	dc.l	_reset			; 0: POWER ON RESET PC
+	dc.l	0x0603F800		; 1: POWER ON RESER SP
+	dc.l	_reset			; 2: MANUAL RESET PC
+	dc.l	0x0603F800		; 3: MANUAL RESET SP
+	dc.l	_forever		; 4: GENERAL ILLEGAL INSTRUCTION
+	dc.l	0x00000000		; 5: SEGA RESERVED
+	dc.l	_forever		; 6: SLOT ILLEGAL INSTRUCTION
+	dc.l	0x20100400		; 7: SEGA RESERVED
+	dc.l	0x20100420		; 8: SEGA RESERVED
+	dc.l	_forever		; CPU ADDRESS ERROR
+	dc.l	_forever		; DMA ADDRESS ERROR
+	dc.l	_forever		; NMI INTERRUPT
+	dc.l	_forever		; USER BREAK INTERRUPT
+
+__RESERVE_HT:							; SEGA RESERVE
+	dc.b	"Poorman's Bios By DevSter"
+	dc.b	0
+	dc.b	"http://devster.retrodev.com"
+	dc.b	0
+	dc.w	0,0,0,0,0,0,0,0,0,0,0
+
+__CPUTRAPS:							; INSTRUCTION TRAPS
+	dc.l	_forever,_forever,_forever,_forever
+	dc.l	_forever,_forever,_forever,_forever
+	dc.l	_forever,_forever,_forever,_forever
+	dc.l	_forever,_forever,_forever,_forever
+	dc.l	_forever,_forever,_forever,_forever
+	dc.l	_forever,_forever,_forever,_forever
+	dc.l	_forever,_forever,_forever,_forever
+	dc.l	_forever,_forever,_forever,_forever
+
+__INTERRUPTS:							; INTERRUPTS
+	dc.l	_forever,_forever,_forever,_forever
+	dc.l	_forever,_forever,_forever,_forever
+
+__PERIPHERALS:							; PERIPHERALS
+	dc.l	_forever,_forever,_forever,_forever
+	dc.l	_forever,_forever,_forever
+
+_forever:
+	BRA	_forever
+	NOP
+
+_reset:
+	MOV.L 	@(@_dat_sr, PC), R0
+	LDC 	R0, SR
+
+	; Set up the Bus State Controller
+	MOV.L 	@(_dat_config, PC), R1 			;	Configuration Data Pointer
+	MOV.L 	@(_dat_sh2reg, PC), R2 			;	SH2 Register Pointer
+	MOV.L 	@R1+, R0
+	MOV.L 	R0, @(0, R2)				;	Bus Control Register 1
+	MOV.L 	@R1+, R0
+	MOV.L 	R0, @(4, R2)				;	Bus Control Register 2
+	MOV.L 	@R1+, R0
+	MOV.L 	R0, @(8, R2)				;	Wait Control Register
+	MOV.L 	@R1+, R0
+	MOV.L 	R0, @(12, R2)				;	Individual Memory Control Register
+	MOV.L 	@R1+, R0
+	MOV.L 	R0, @(16, R2)				;	Refresh Control Register
+	MOV.L 	@R1+, R0
+	MOV.L 	R0, @(20, R2)				;	Refresh Timer Counter
+	MOV.L 	@R1+, R0
+	MOV.L 	R0, @(24, R2)				;	Refresh Time Constant Register
+
+	MOV.L 	@(_dat_intmask, PC), R0			;	Interrupter Mask Pointer
+	LDC 	R0, GBR					;		-> GBR
+
+	MOV.B 	@(0, GBR), R0
+	TST 	#$02, R0				;	Did the sega genesis enable the adapter?
+	BF 	_adapter_enabled			;		Yes
+	SLEEP						;		No
+@_loop:							;	Looop forever until the Sega genesis issues a reset
+	BRA 	@_loop
+	NOP
+@_dat_sr:	dc.l	0x000000F0
+
+	; The adapter is enabled, so get the execution of the program
+_adapter_enabled:
+	MOV.L 	@(_dat_sh2_reg1, PC), R1 		;	Standby Control Register
+	MOV 	#$00, R0
+	MOV.B 	R0, @R1
+
+	MOV.L 	@(_dat_sh2_reg2, PC), R1 		;	Cache Control Register
+	MOV 	#$11, R0
+	MOV.B 	R0, @R1
+
+	MOV.B 	@(0, GBR), R0				;	Is a cartrdige running?
+	TST 	#$01, R0
+	BF 	_nocart					;		No, assume Sega CD
+	BSR 	_wait_master				;		Yes, wait for master cpu
+	NOP
+
+	; Read cartridge header for VBR, and start of execution point
+	MOV.L 	@(_dat_carthdr, PC), R1
+	MOV.L 	@(8, R1), R0				;	@ = 0x220003EC (Cartridge)
+	LDC 	R0, VBR					;	Setup Vector Base Register Address
+	MOV.L 	@R1, R1					;	@ = 0x220003E4 (Cartridge)
+	MOV.L 	@(_dat_slaveok, PC), R0			;	Signal Slave SH2 ok!
+	MOV.L 	R0, @(36, GBR)				;	@ = 0x20004024 (Cartridge)
+	JMP 	@R1					;	Jump to Slave Program Code
+	NOP
+
+	; Wait for the master CPU to signal its ready for slave cpu to start execution
+_wait_master:
+@_loop:
+	MOV	#$28, R0				;	Setup Delay
+	MOV	#$01, R1
+@_delay:
+	SUB 	R1, R0
+	CMP/EQ 	#00, R0
+	BF 	@_delay					;	Delay for 240 cycles
+	MOV.L 	@(32, GBR), R0				;	@ = 0x20004020 (Communications RAM)
+	MOV.L	@(@_dat_masterok, PC), R1
+	CMP/EQ 	R0, R1
+	BF 	@_loop					;	Master not ready? loop again
+	RTS
+	NOP
+@_dat_masterok:	dc.l	"M_OK"
+
+	; If no cartridge has told that a cartridge exists, then assume the sega CD is running
+_nocart:
+	MOV.L 	@(_dat_cdfound, PC), R1		;	Sega CD 32x specific games will signal "_CD_"
+@_loop:
+	MOV.L 	@(32, GBR), R0			;	@ = 0x20004020 (Communications RAM)
+	CMP/EQ 	R0, R1
+	BF 	@_loop 				;	Keep looping
+	BSR 	_wait_master 			;	Now wait for the master cpu to synchronize
+	NOP
+
+	; Read the header sent by the genesis side in the frame buffer
+	; when the master signals "M_OK", the master has already request frame buffer access for both CPUs
+	MOV.L 	@(_dat_cdhdr, PC), R1		;	Header start
+	MOV.L 	@(12, R1), R2			;	@ = 0x24000024
+	MOV.L 	@(20, R1), R1			;	@ = 0x2400002C
+	MOV.L 	@(_dat_slaveok, PC), R0
+	MOV.L 	R0, @(36, GBR)		 	;	Signal that the slave cpu is ok!
+	LDC 	R1, VBR				;	Setup vector base register address
+	JMP 	@R2				;	Execute sh2 code
+	NOP
+
+_dat_intmask:	dc.l	0x20004000
+_dat_config:	dc.l	_sh2_config
+_dat_sh2reg:	dc.l	0xFFFFFFE0
+_dat_sh2_reg1:	dc.l	0xFFFFFE91
+_dat_sh2_reg2:	dc.l	0xFFFFFE92
+_dat_cdfound:	dc.l	"_CD_"
+_dat_slaveok:	dc.l	"S_OK"
+_dat_carthdr:	dc.l	0x220003E4
+_dat_cdhdr:	dc.l	0x24000018
+
+_sh2_config:
+	dc.l	0xA55A0001
+	dc.l	0xA55A00A8
+	dc.l	0xA55A0055
+	dc.l	0xA55A0AB8 
+	dc.l	0xA55A0008
+	dc.l	0xA55A0000
+	dc.l	0xA55A0059
+
+	END

@@ -1,0 +1,285 @@
+; Poorman's 32X Bios Set
+; By DevSter (Joseph Norman)
+; http://devster.retrodev.com
+; SH2 Master CPU Bootstrap
+; Feel free to use this code, recompile the code, redistribute the unmodified code,
+; modify it with your own name on it and redistribute it as yours if you
+; so wish to do so without getting caught looking stupid, but you may not sell it for
+; cash monies, or for in exchange of hot prostitutes, nor include it with any other
+; redistributable software packages without consent from DevSter. This code is IS AS,
+; which is latin for jibber jabber, to DevSter and the holder of this code, means
+; there are no other further attatchments, absolutely no guarantees in it "working",
+; comes with no lifetime waranty, et al, and you will gain nothing more than to play
+; your super cool Sega Genesis 32X (names reserved to their rightful owners) without
+; having to resort to using the actual copyrighted bios files. Let it further be noted
+; that the use of the word "code" in this exclaimer refers to both the source code, and
+; the pre-compiled code that was distributed.
+
+	opt pc+
+	opt risc+
+
+__VECTORS:		; STARTUP VECTOR TABLE
+	ORG	0x000
+	dc.l	_reset			; 0: POWER ON RESET PC
+	dc.l	0x06040000		; 1: POWER ON RESER SP
+	dc.l	_reset			; 2: MANUAL RESET PC
+	dc.l	0x06040000		; 3: MANUAL RESET SP
+	dc.l	_forever		; 4: GENERAL ILLEGAL INSTRUCTION
+	dc.l	0x00000000		; 5: SEGA RESERVED
+	dc.l	_forever		; 6: SLOT ILLEGAL INSTRUCTION
+	dc.l	0x20100400		; 7: SEGA RESERVED
+	dc.l	0x20100420		; 8: SEGA RESERVED
+	dc.l	_forever		; CPU ADDRESS ERROR
+	dc.l	_forever		; DMA ADDRESS ERROR
+	dc.l	_forever		; NMI INTERRUPT
+	dc.l	_forever		; USER BREAK INTERRUPT
+
+__RESERVE_HT:							; SEGA RESERVE
+	dc.b	"Poorman's Bios By DevSter"
+	dc.b	0
+	dc.b	"http://devster.retrodev.com"
+	dc.b	0
+	dc.w	0,0,0,0,0,0,0,0,0,0,0
+
+__CPUTRAPS:							; INSTRUCTION TRAPS
+	dc.l	_forever,_forever,_forever,_forever
+	dc.l	_forever,_forever,_forever,_forever
+	dc.l	_forever,_forever,_forever,_forever
+	dc.l	_forever,_forever,_forever,_forever
+	dc.l	_forever,_forever,_forever,_forever
+	dc.l	_forever,_forever,_forever,_forever
+	dc.l	_forever,_forever,_forever,_forever
+	dc.l	_forever,_forever,_forever,_forever
+
+__INTERRUPTS:							; INTERRUPTS
+	dc.l	_forever,_forever,_forever,_forever
+	dc.l	_forever,_forever,_forever,_forever
+
+__PERIPHERALS:							; PERIPHERALS
+	dc.l	_forever,_forever,_forever,_forever
+	dc.l	_forever,_forever,_forever
+
+_forever:
+	BRA	_forever
+	NOP
+
+_reset:
+	MOV.L	@(@_dat_sr, PC), R0
+	LDC	R0, SR
+
+	; Set up the Bus State Controller
+	MOV.L 	@(_dat_config, PC), R1 			;	Configuration Data Pointer
+	MOV.L 	@(_dat_sh2reg, PC), R2 			;	SH2 Register Pointer
+	MOV.L 	@R1+, R0
+	MOV.L 	R0, @(0, R2)				;	Bus Control Register 1
+	MOV.L 	@R1+, R0
+	MOV.L 	R0, @(4, R2)				;	Bus Control Register 2
+	MOV.L 	@R1+, R0
+	MOV.L 	R0, @(8, R2)				;	Wait Control Register
+	MOV.L 	@R1+, R0
+	MOV.L 	R0, @(12, R2)				;	Individual Memory Control Register
+	MOV.L 	@R1+, R0
+	MOV.L 	R0, @(16, R2)				;	Refresh Control Register
+	MOV.L 	@R1+, R0
+	MOV.L 	R0, @(20, R2)				;	Refresh Timer Counter
+	MOV.L 	@R1+, R0
+	MOV.L 	R0, @(24, R2)				;	Refresh Time Constant Register
+
+	MOV.L	@(_dat_intmask, PC), R0 		;	Interrupter Mask Pointer
+	LDC	R0, GBR					;		-> GBR
+
+	MOV.L	@(_dat_caslat, PC), R1 			;	@ = 0xFFFF8446
+	MOV	#$00, R0				;	After the Bus Controller has been setup,
+	MOV.W	R0, @R1					;	synchronize DRAM for CAS latency of 2
+
+	MOV.B	@(0, GBR), R0				;	Check to see if the adapter will be used
+	TST	#$02, R0
+	BF	_adapter_ready				;	Yes
+
+	MOV.L	@(@_dat_delay, PC), R0 			;	No
+	MOV	#1, R1
+@_delay:						;	Delay for 0x00060000 cycles
+	SUB	R1, R0
+	CMP/EQ	#00, R0
+	BF	@_delay
+	MOV.W	R0, @(2, GBR)				;	No SH2 command interrupts
+	MOV.L	@(_dat_scr, PC), R1 			;	Standby Control Register
+	MOV	#-$61, R0
+	MOV.B	R0, @R1					;	Put chip in standby mode, and halt all other
+	SLEEP						;	peripherals when SLEEP encountered
+@_forever:
+	BRA	@_forever
+	NOP
+@_dat_sr:	dc.l	0x000000F0
+@_dat_delay:	dc.l	0x00010000
+
+	; 32x adapter will be used
+_adapter_ready:
+	MOV.L	@(_dat_scr, PC), R1 			;	Standby Control Register
+	MOV	#$00, R0
+	MOV.B	R0, @R1
+
+	MOV.L	@(_dat_ccr, PC), R1 			;	Cache Control Register
+	MOV	#$11, R0
+	MOV.B	R0, @R1
+
+	; Skip the sdram memory check, assume memory is good
+
+	; Clear the memory to 0
+	MOV.L	@(_dat_topsdram, PC), R1		;	= 0x26040000 top of sdram
+	MOV.L	@(_dat_lowsdram, PC), R2		;	= 0x26000000 bottem of sdram
+	MOV	#$00, R0
+@_cleanmem:
+	MOV.L	R0, @-R1
+	MOV.L	R0, @-R1
+	MOV.L	R0, @-R1
+	MOV.L	R0, @-R1
+	CMP/EQ	R1, R2
+	BF	@_cleanmem
+
+	MOV.B	@(0, GBR), R0				;	Check if the genesis has claimed that a cartridge
+	TST	#$01, R0				;	is used
+	BF	_segacd 				;	-> nope
+
+	; Sega Security check has been skipped, and will automatically assume a 32x cart is inserted
+	; because we'll be using this for emulators
+
+	; Calculate checksum because the genesis will compare it with its own checksum
+	; If no checksum exists, then checksum is 0
+
+	MOV.L	@(_dat_cartcode, PC), R4 		;	Begining of Cartridge Data
+	MOV.L	@(_dat_chksum, PC), R0 			;	Actual checksum
+	MOV.W	@R0, R0
+	EXTU.W	R0, R0					;	Upper word will be 0
+	CMP/EQ	#00, R0
+	BT	@_no_chksum				;	If checksum is 0, then no checksum
+	MOV.L	@(_dat_chklen, PC), R0			;	ROM Capacity
+	MOV.L	@R0, R1
+	MOV.L	@(_dat_codelen, PC), R0 		;	Begining of Physical Cartridge Data
+	SUB	R0, R1					;	R1 = [ROM Capacity] - 0x200
+	SHLR	R1					;	R1 = R1 / 2
+	MOV.L	@(_dat_cartlen, PC), R0			;	Maximum size of a cartridge
+	AND 	R0, R1					;	R1 = R1 & 0x003FFFFF
+	ADD 	#$01, R1				;	R1 = R1 + 1 (R1 = the size of the cartridge)
+	MOV 	#$00, R0
+	MOV.L 	@(_dat_ffff, PC), R3 			;	0xFFFF ANDing mask
+@_calcchksum:
+	MOV.W	@R4+, R2				;	Store whatever's in the cartridge in R2
+	AND	R3, R2					;	R2 = R2 & 0x0000FFFF
+	ADD	R2, R0					;	R0 = R0 + R2
+	AND	R3, R0					;	R0 = R0 & 0x0000FFFF
+	DT	R1					;	Number of words
+	BF	@_calcchksum
+
+	; R0 will contain the calculated checksum
+@_no_chksum:
+	MOV.W	R0, @(40, GBR)				;	Data Request Length???
+
+	; Now copy memory from the cartrdige to sdram
+	MOV.L	@(_dat_carthdr, PC), R1 		;	= 0x220003D4
+	MOV.L	@R1+, R2				;	Source in cartridge
+	MOV.L	@R1+, R3				;	Destination in SDRAM
+	MOV.L	@R1+, R0				;	Number of bytes to copy aligned to 4 bytes
+	MOV.L	@(@_dat_cart, PC), R1 			;	Begining of cart address for sh2
+	ADD	R1, R2					;	R2 will be actual address of cartrdige for sh2
+	MOV.L	@(@_dat_sdram_c, PC), R1 		;	Begining of SDRAM
+	ADD	R1, R3					;	R3 will be the actual address of SDRAM
+	MOV	#$04, R4				;	-4 bytes
+@_copymem:
+	MOV.L	@R2+, R1				;	Read
+	MOV.L	R1, @R3					;	Write
+	ADD	#$04, R3				;	No post increment for destination
+	SUB	R4, R0					;	-4 bytes
+	CMP/EQ	#00, R0
+	BF	@_copymem
+
+	MOV.L	@(_dat_carthdr, PC), R1 		;	= 0x220003D4
+	MOV.L	@(20, R1), R0
+	LDC	R0, VBR					;	Setup Vector Base Register
+	MOV.L	@(12, R1), R1
+	MOV.L	@(_dat_masterok, PC), R0 		;	Master is ok! Slave cpu can go
+	MOV.L	R0, @(32, GBR)
+@frvr:
+	JMP	@R1					;	Jump to execution code
+;	NOP
+	NOP
+
+@_dat_cart:	dc.l	0x22000000
+@_dat_sdram_c:	dc.l	0x06000000
+
+	; If a sega cd 32x game is being played, don't signal that a cartridge is inserted
+_segacd:
+	MOV.L	@(_dat_segacd, PC), R1	 		;	Wait for genesis to send "_CD_" in comm ram
+@_loop:
+	MOV.L	@(32, GBR), R0				;	Communications RAM
+	CMP/EQ	R0, R1
+	BF	@_loop 					;	If no then branch
+
+	; Now request frame buffer access because all sh2 code data will be tranfered through the frame buffer
+	MOV	#-$80, R0
+	MOV.B	R0, @(0, GBR)				;	Request
+@_waitfm:
+	MOV.B	@(0, GBR), R0
+	TST	#$80, R0
+	BT	@_waitfm 				;	Wait for request to be granted
+
+	; Initialize to copy the code in fram buffer to sdram
+	MOV.L	@(_dat_cdhdr, PC), R8 			;	Header = 0x24000018
+	MOV.L	@(0, R8), R9				;	R9 = [0x24000018] Adress to start copying to
+	MOV.L	@(4, R8), R0				;	R0 = [0x2400001C] Number of bytes
+	MOV.L	@(8, R8), R10				;	R10 = [0x24000020] Jump address
+	MOV.L	@(12, R8), R11				;	R11 = [0x24000024] New vector base address
+
+	ADD	#$20, R8				;	R8 = 0x24000038
+	MOV.L	@(_dat_lenfm, PC), R3 			;	R3 = 0x0001FFE0
+	MOV	#$00, R4
+	MOV	#$04, R2
+@_copyfm:
+	MOV.L	@R8+, R1
+	MOV.L	R1, @R9					;	(R8) -> (R9)
+	ADD	#$04, R9				;	R8++, R9++
+	SUB	R2, R0
+	SUB	R2, R3
+	CMP/EQ	R4, R3					;	Make sure transfer does not exceed 32760*4 bytes
+	BT	@_copydone 				;	yes
+	CMP/EQ	#00, R0					;	no, check to see if we've finished the quere
+	BF	@_copyfm				;	no
+@_copydone:						;	yes
+
+	MOV.L	@(_dat_masterok, PC), R0 		;	master ok! slave is now ready to execute
+	MOV.L	R0, @(32, GBR)				;	comm ram
+	LDC	R11, VBR				;	Vector base register
+	JMP	@R10					;	Jump to code within sdram
+	NOP
+
+_dat_intmask:	dc.l	0x20004000
+_dat_config:	dc.l	_sh2_config
+_dat_sh2reg:	dc.l	0xFFFFFFE0
+_dat_caslat:	dc.l	0xFFFF8446
+_dat_scr:	dc.l	0xFFFFFE91
+_dat_ccr:	dc.l	0xFFFFFE92
+_dat_topsdram:	dc.l	0x26040000
+_dat_lowsdram:	dc.l	0x26000000
+_dat_lensdram:	dc.l	0x0000FFFF
+_dat_carthdr:	dc.l	0x220003D4
+_dat_masterok:	dc.l	"M_OK"
+_dat_segacd:	dc.l	"_CD_"
+_dat_cdhdr:	dc.l	0x24000018
+_dat_lenfm:	dc.l	0x0001FFE0
+_dat_cartcode:	dc.l	0x22000200
+_dat_chksum:	dc.l	0x2200018E
+_dat_chklen:	dc.l	0x220001A4
+_dat_codelen:	dc.l	0x00000200
+_dat_cartlen:	dc.l	0x003FFFFF
+_dat_ffff:	dc.l	0x0000FFFF
+
+_sh2_config:
+	dc.l	0xA55A0001
+	dc.l	0xA55A00A8
+	dc.l	0xA55A0055
+	dc.l	0xA55A0AB8
+	dc.l	0xA55A0008
+	dc.l	0xA55A0000
+	dc.l	0xA55A0059 
+
+	END

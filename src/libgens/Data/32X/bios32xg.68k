@@ -1,0 +1,91 @@
+; Poorman's 32X Bios Set
+; By DevSter (Joseph Norman)
+; http://devster.retrodev.com
+; Sega Genesis Vector Table
+; Feel free to use this code, recompile the code, redistribute the unmodified code,
+; modify it with your own name on it and redistribute it as yours if you
+; so wish to do so without getting caught looking stupid, but you may not sell it for
+; cash monies, or for in exchange of hot prostitutes, nor include it with any other
+; redistributable software packages without consent from DevSter. This code is IS AS,
+; which is latin for jibber jabber, to DevSter and the holder of this code, means
+; there are no other further attatchments, absolutely no guarantees in it "working",
+; comes with no lifetime waranty, et al, and you will gain nothing more than to play
+; your super cool Sega Genesis 32X (names reserved to their rightful owners) without
+; having to resort to using the actual copyrighted bios files. Let it further be noted
+; that the use of the word "code" in this exclaimer refers to both the source code, and
+; the pre-compiled code that was distributed.
+
+	ORG	$000
+
+	; Exception processing vectors
+	dc.l	$00000000			; STARTUP STACK POINTER
+	dc.l	$41880200			; STARTUP PROGRAM COUNTER
+	dc.l	$42880206			; Bus Error
+	dc.l	$4388020C			; Address Error
+	dc.l	$44880212			; Illegal Instruction
+	dc.l	$45880218			; Divide by 0
+	dc.l	$4688021E			; CHK
+	dc.l	$47880224			; TRAPV
+	dc.l	$4888022A			; Privillege Violation
+	dc.l	$49880230			; Trace
+	dc.l	$4A880236			; Line 1010
+	dc.l	$4B88023C			; Line 1111
+	dc.l	$4C880242			; SEGA RESERVED
+	dc.l	$4D880248			; SEGA RESERVED
+	dc.l	$4E88024E			; SEGA RESERVED
+	dc.l	$4F880254			; Uninitialized Interrupt
+	dc.l	$5088025A			; SEGA RESERVED
+	dc.l	$51880260			; SEGA RESERVED
+	dc.l	$52880266			; SEGA RESERVED
+	dc.l	$5388026C			; SEGA RESERVED
+	dc.l	$54880272			; SEGA RESERVED
+	dc.l	$55880278			; SEGA RESERVED
+	dc.l	$5688027E			; SEGA RESERVED
+	dc.l	$57880284			; SEGA RESERVED
+	dc.l	$5888028A			; Spurious Interrupt
+	dc.l	$59880290			; Level 1 Interrupt
+	dc.l	$5A880296			; Level 2 Interrupt (VBLANK)
+	dc.l	$5988029C			; Level 3 Interrupt
+	dc.l	$588802A2			; Level 4 Interrupt (HBLANK)
+	dc.l	$578802A8			; Level 5 Interrupt
+	dc.l	$568802AE			; Level 6 Interrupt (HINT)
+	dc.l	$558802B4			; Level 7 Interrupt
+	dc.l	$548802BA			; TRAP #0
+	dc.l	$538802C0			; TRAP #1
+	dc.l	$528802C6			; TRAP #2
+	dc.l	$518802CC			; TRAP #3
+	dc.l	$508802D2			; TRAP #4
+	dc.l	$4F8802D8			; TRAP #5
+	dc.l	$4E8802DE			; TRAP #6
+	dc.l	$4D8802E4			; TRAP #7
+	dc.l	$4C8802EA			; TRAP #8
+	dc.l	$4B8802F0			; TRAP #9
+	dc.l	$4A8802F6			; TRAP #10
+	dc.l	$498802FC			; TRAP #11
+	dc.l	$48880302			; TRAP #12
+	dc.l	$47880308			; TRAP #13
+	dc.l	$4688030E			; TRAP #14
+	dc.l	$45880314			; TRAP #15
+
+dreq_p:
+	bset.b	#0,($A15107)
+	move.b	D0,(A1)
+	bclr.b	#0,($A15107)
+	rts
+
+dreq_d:
+	movem.l	d0/a2,-(a7)
+	bset.b	#0,($A15107)
+	lea	($A130F1),a2
+	moveq	#7,d7
+@loop:
+	move.b	(a0)+,(a2)
+	add.w	#2,a2
+	dbf	d0,@loop
+	bclr.b	#0,($A15107)
+	movem.l	(A7)+,d0/a2
+	rts
+
+	dc.b	"Bios By DevSter "
+
+	END

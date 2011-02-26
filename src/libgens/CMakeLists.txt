@@ -98,6 +98,7 @@ SET(libgens_SRCS
 	EmuContext.cpp
 	Save/EEPRom_DB.cpp
 	Data/mcd_rom_db.c
+	Data/32X/fw_32x.c
 	)
 
 IF(HAVE_LZMA)

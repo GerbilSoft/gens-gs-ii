@@ -1,0 +1,65 @@
+The Poorman's Sega 32x BIOS files
+	By Devster (Joseph Norman)
+		http://devster.retrodev.com/
+
+
+About
+-----
+Say now, these are freeware "bios" files that work almost like the ones Sega
+has put into the hardware of the 32x. whatcha can do with these files is play
+your favorite 32x games without having to download the illegal copyright
+versions of the "bios" files and get caught by the fbi and go to jail for a tiny
+misdemeanor.
+
+	There are 3 binary files provided:
+		BIOS32Xg.bin	-	"BIOS" for the Sega Genesis CPU
+		BIOS32Xm.bin	-	"BIOS" for the Master SH2 CPU
+		BIOS32Xs.bin	-	"BIOS" for the SLave SH2 CPU
+
+	And also there are 3 text files included, excluding the one you are reading now:
+		BIOS32Xg.68k	-	"BIOS" source code for the Sega Genesis CPU
+		BIOS32Xm.sh2	-	"BIOS" source code for the Master SH2 CPU
+		BIOS32Xs.sh2	-	"BIOS" source code for the SLave SH2 CPU
+
+How to use
+----------
+To use these files, I assume you have a sega genesis emulator that will emulate
+the 32x adapter, and also you should also have images of the cartridges you own
+dumped on your computer, for use in the emulator. If you don't have any of the
+above, then go find some. To use these "bios" files your handy dandy emulator,
+go into your options, or configuration, or BIOS file menu, find the tab/frame
+that specifies where the files are for your bios's, and then put BIOS32Xg.bin
+under the sega genesis bios, BIOS32Xm.bin under the master sh2 bios, and
+BIOS32Xs.bin in the slave sh2 bios after having so extracted these bios files
+into any directory of your choice.
+
+Exclaimer
+---------
+; Feel free to use this code, recompile the code, redistribute the unmodified code,
+; modify it with your own name on it and redistribute it as yours if you
+; so wish to do so without getting caught looking stupid, but you may not sell it for
+; cash monies, or for in exchange of hot prostitutes, nor include it with any other
+; redistributable software packages without consent from DevSter. This code is IS AS,
+; which is latin for jibber jabber, to DevSter and the holder of this code, means
+; there are no other further attatchments, absolutely no guarantees in it "working",
+; comes with no lifetime waranty, et al, and you will gain nothing more than to play
+; your super cool Sega Genesis 32X (names reserved to their rightful owners) without
+; having to resort to using the actual copyrighted bios files. Let it further be noted
+; that the use of the word "code" in this exclaimer refers to both the source code, and
+; the pre-compiled code that was distributed.
+
+Source Code
+-----------
+Source code for the bios files I made are provided to you at free of charge. I
+used SNASM68K for compiling the small sega genesis "bios", and SNASMSH2 to compile
+the master and slave sh2 "bios" sources.
+
+What are the differences between the actual bios files and the ones you've made?
+--------------------------------------------------------------------------------
+As you can see, the genesis "bios" functions exactly the same as the original. The
+salve SH2 cpu functions like the original too, however, i've taken a lot out of
+the Master SH2 "bios" that, in the begining, Sega has required. This includes
+the SDRAM memory check, and the security code check. The master SH2 cpu will
+function exactly the same as the original. The differences in source codes
+from the original are that I've added some other quirks, and recoded some of the
+original.
