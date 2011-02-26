@@ -256,7 +256,7 @@ class EmuManager : public QObject
 		void screenShot(void);
 		void setAudioRate(int newRate);
 		void setStereo(bool newStereo);
-		void resetCpu(ResetCpuIndex cpu_idx);
+		void resetCpu(int cpu_idx);
 		
 		/** Savestates. **/
 		void saveState(void); // Save to current slot.

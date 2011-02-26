@@ -145,14 +145,14 @@ void EmuManager::setStereo(bool newStereo)
  * @param cpu_idx CPU index.
  * TODO: Use MDP CPU indexes.
  */
-void EmuManager::resetCpu(EmuManager::ResetCpuIndex cpu_idx)
+void EmuManager::resetCpu(int cpu_idx)
 {
 	if (!m_rom)
 		return;
 	
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_RESET_CPU;
-	rq.cpu_idx = cpu_idx;
+	rq.cpu_idx = (ResetCpuIndex)cpu_idx;
 	m_qEmuRequest.enqueue(rq);
 	
 	if (m_paused.data)
@@ -970,7 +970,7 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
  * @param cpu_idx CPU index.
  * TODO: Use MDP CPU indexes.
  */
-void EmuManager::doResetCpu(ResetCpuIndex cpu_idx)
+void EmuManager::doResetCpu(EmuManager::ResetCpuIndex cpu_idx)
 {
 	// TODO: Reset CPUs through the emulation context using MDP CPU indexes.
 	const char *msg = NULL;

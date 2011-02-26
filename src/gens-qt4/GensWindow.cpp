@@ -176,6 +176,8 @@ void GensWindow::setupUi(void)
 		m_emuManager, SLOT(pauseRequest(void)));
 	connect(m_gensActions, SIGNAL(actionResetEmulator(bool)),
 		m_emuManager, SLOT(resetEmulator(bool)));
+	connect(m_gensActions, SIGNAL(actionResetCpu(int)),
+		m_emuManager, SLOT(resetCpu(int)));
 	
 	// Auto Pause: Application Focus Changed signal, and setting change signal.
 	connect(gqt4_app, SIGNAL(focusChanged(QWidget*, QWidget*)),
@@ -575,8 +577,6 @@ void GensWindow::setAudioRate(int newRate)
 	{ m_emuManager->setAudioRate(newRate); }
 void GensWindow::setStereo(bool newStereo)
 	{ m_emuManager->setStereo(newStereo); }
-void GensWindow::resetCpu(EmuManager::ResetCpuIndex cpu_idx)
-	{ m_emuManager->resetCpu(cpu_idx); }
 
 
 void GensWindow::setIdleThreadAllowed(bool newIdleThreadAllowed)

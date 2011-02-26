@@ -70,6 +70,12 @@ class GensActions : public QObject
 		 * @param hardReset If true, do a hard reset; otherwise, do a soft reset.
 		 */
 		void actionResetEmulator(bool hardReset);
+		
+		/**
+		 * actionResetCpu(): Reset a CPU.
+		 * @param cpu_idx CPU index. (TODO: MDP CPU indexes.)
+		 */
+		void actionResetCpu(int cpu_idx);
 };
 
 }
