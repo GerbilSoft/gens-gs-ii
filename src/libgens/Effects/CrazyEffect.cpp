@@ -36,24 +36,12 @@
 
 // Color component masks for 32-bit color.
 #include "Util/byteswap.h"
-#if GENS_BYTEORDER == GENS_LIL_ENDIAN
 #define CRAZY_MASK32_R 0x00F80000
 #define CRAZY_MASK32_G 0x0000F800
 #define CRAZY_MASK32_B 0x000000F8
 #define CRAZY_ADD32_R  0x00080000
 #define CRAZY_ADD32_G  0x00000800
 #define CRAZY_ADD32_B  0x00000008
-#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
-#define CRAZY_MASK32_R 0x0000F800
-#define CRAZY_MASK32_G 0x00F80000
-#define CRAZY_MASK32_B 0xF8000000
-#define CRAZY_ADD32_R  0x00000800
-#define CRAZY_ADD32_G  0x00080000
-#define CRAZY_ADD32_B  0x08000000
-#endif
-
-#include <stdio.h>
-#include "Util/Timing.hpp"
 
 namespace LibGens
 {
@@ -89,17 +77,7 @@ inline void CrazyEffect::T_DoCrazyEffect(ColorMask colorMask, pixel *screen)
 		pl = (prev_l >= screen ? *prev_l : 0);
 		pp = (prev_p >= screen ? *prev_p : 0);
 		
-#if GENS_BYTEORDER == GENS_BIG_ENDIAN
-		if (sizeof(pixel) == 4)
-		{
-			// The Blue channel occupies the high byte in 32-bit color
-			// on big-endian CPUs, so we have to right-shift the colors
-			// before we add them together
-			// (The low byte is the unused alpha channel.)
-			RB = ((pl & RBmask) >> 1) + ((pp & RBmask) >> 1);
-		}
-		else
-#endif /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
+		// Separate RB and G components.
 		RB = ((pl & RBmask) + (pp & RBmask)) >> 1;
 		G = ((pl & Gmask) + (pp & Gmask)) >> 1;
 		
