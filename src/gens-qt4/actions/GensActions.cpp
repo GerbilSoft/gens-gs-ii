@@ -226,6 +226,32 @@ bool GensActions::doAction(int action)
 			}
 			break;
 		
+		case IDM_SYSTEM_MENU:
+			// System menu.
+			switch (MNUID_ITEM(action))
+			{
+				case MNUID_ITEM(IDM_SYSTEM_HARDRESET):
+					// Hard Reset.
+					emit actionResetEmulator(true);
+					return true;
+				
+				case MNUID_ITEM(IDM_SYSTEM_SOFTRESET):
+					// Soft Reset.
+					emit actionResetEmulator(false);
+					return true;
+				
+				case MNUID_ITEM(IDM_SYSTEM_PAUSE):
+					// Toggle Paused.
+					// TODO: Menu check synchronization.
+					emit actionTogglePaused();
+					return true;
+				
+				// TODO: Other items.
+				default:
+					break;
+			}
+			break;
+		
 		case IDM_CTRLTEST_MENU:
 			// Controller Testing
 			switch (MNUID_ITEM(action))
@@ -307,21 +333,6 @@ bool GensActions::doAction(int action)
 			// Non-Menu Actions.
 			switch (MNUID_ITEM(action))
 			{
-				case MNUID_ITEM(IDM_NOMENU_HARDRESET):
-					// Hard Reset.
-					emit actionResetEmulator(true);
-					return true;
-				
-				case MNUID_ITEM(IDM_NOMENU_SOFTRESET):
-					// Soft Reset.
-					emit actionResetEmulator(false);
-					return true;
-				
-				case MNUID_ITEM(IDM_NOMENU_PAUSE):
-					// Toggle Paused.
-					emit actionTogglePaused();
-					return true;
-				
 				case MNUID_ITEM(IDM_NOMENU_FASTBLUR):
 					// Toggle Fast Blur.
 					gqt4_config->setFastBlur(!gqt4_config->fastBlur());

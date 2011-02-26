@@ -101,6 +101,33 @@ const GensMenuBar::MenuItem GensMenuBar::ms_gmiGraphicsStretch[] =
 	{0, GMI_NORMAL, NULL, 0, NULL, NULL}
 };
 
+/** System menu. **/
+const GensMenuBar::MenuItem GensMenuBar::ms_gmiSystem[] =
+{
+	{IDM_SYSTEM_REGION, GMI_SUBMENU, "&Region", IDM_SYSTEM_REGION_MENU, &ms_gmiSystemRegion[0], NULL},
+	{IDM_SEPARATOR, GMI_SEPARATOR, NULL, 0, NULL, NULL},
+	{IDM_SYSTEM_HARDRESET, GMI_NORMAL, "&Hard Reset", 0, NULL, NULL},
+	{IDM_SYSTEM_SOFTRESET, GMI_NORMAL, "&Soft Reset", 0, NULL, NULL},
+	{IDM_SYSTEM_PAUSE, GMI_CHECK, "&Pause", 0, NULL, NULL},
+	{IDM_SEPARATOR, GMI_SEPARATOR, NULL, 0, NULL, NULL},
+	{IDM_SYSTEM_CPURESET_M68K, GMI_NORMAL, "Reset &68000", 0, NULL, NULL},
+	{IDM_SYSTEM_CPURESET_Z80, GMI_NORMAL, "Reset &Z80", 0, NULL, NULL},
+	
+	{0, GMI_NORMAL, NULL, 0, NULL, NULL}
+};
+
+/** System, Region submenu. **/
+const GensMenuBar::MenuItem GensMenuBar::ms_gmiSystemRegion[] =
+{
+	{IDM_SYSTEM_REGION_AUTODETECT, GMI_RADIO, "&Auto Detect", 0, NULL, NULL},
+	{IDM_SYSTEM_REGION_JAPAN, GMI_RADIO, "&Japan (NTSC)", 0, NULL, NULL},
+	{IDM_SYSTEM_REGION_ASIA, GMI_RADIO, "&Asia (PAL)", 0, NULL, NULL},
+	{IDM_SYSTEM_REGION_USA, GMI_RADIO, "&USA (NTSC)", 0, NULL, NULL},
+	{IDM_SYSTEM_REGION_EUROPE, GMI_RADIO, "&Europe (PAL)", 0, NULL, NULL},
+	
+	{0, GMI_NORMAL, NULL, 0, NULL, NULL}
+};
+
 /** CtrlTest menu. **/
 const GensMenuBar::MenuItem GensMenuBar::ms_gmiCtrlTest[] =
 {
@@ -146,6 +173,7 @@ const GensMenuBar::MainMenuItem GensMenuBar::ms_gmmiMain[] =
 {
 	{IDM_FILE_MENU, "&File", &ms_gmiFile[0]},
 	{IDM_GRAPHICS_MENU, "&Graphics", &ms_gmiGraphics[0]},
+	{IDM_SYSTEM_MENU, "&System", &ms_gmiSystem[0]},
 	{IDM_CTRLTEST_MENU, "&CtrlTest", &ms_gmiCtrlTest[0]},
 	{IDM_SOUNDTEST_MENU, "&SoundTest", &ms_gmiSoundTest[0]},
 	{IDM_HELP_MENU, "&Help", &ms_gmiHelp[0]},

@@ -112,16 +112,25 @@ const GensKeyConfigPrivate::DefKeySetting_t GensKeyConfigPrivate::DefKeySettings
 	// Graphics menu.
 	{IDM_GRAPHICS_SCRSHOT, KEYM_SHIFT | KEYV_BACKSPACE,	"graphics/screenShot"},
 	
+	// System menu.
+	{IDM_SYSTEM_REGION, 0,					"system/region"},
+	// System, Region submenu.
+	{IDM_SYSTEM_REGION_AUTODETECT, 0,			"system/region/autoDetect"},
+	{IDM_SYSTEM_REGION_JAPAN, 0,				"system/region/japan"},
+	{IDM_SYSTEM_REGION_ASIA, 0,				"system/region/asia"},
+	{IDM_SYSTEM_REGION_USA, 0,				"system/region/usa"},
+	{IDM_SYSTEM_REGION_EUROPE, 0,				"system/region/europe"},
+	// System menu.
+	{IDM_SYSTEM_HARDRESET, KEYM_SHIFT | KEYV_TAB,		"system/hardReset"},
+	{IDM_SYSTEM_SOFTRESET, KEYV_TAB,			"system/softReset"},
+	{IDM_SYSTEM_PAUSE, KEYV_ESCAPE,				"system/pause"},
+	
 	// NOTE: Test menus aren't going to be added here.
 	
 	// Help menu.
 	{IDM_HELP_ABOUT, 0,					"help/about"},
 	
 	// Non-menu keys.
-	{IDM_NOMENU_HARDRESET, KEYM_SHIFT | KEYV_TAB,		"other/hardReset"},
-	{IDM_NOMENU_SOFTRESET, KEYV_TAB,			"other/softReset"},
-	{IDM_NOMENU_PAUSE, KEYV_ESCAPE,				"other/pause"},
-	
 	{IDM_NOMENU_FASTBLUR, KEYV_F9,				"other/fastBlur"},
 	
 	{IDM_NOMENU_SAVESLOT_0, KEYV_0,				"other/saveSlot0"},
@@ -192,6 +201,7 @@ int GensKeyConfig::actionToKey(int action)
  * @param settings Settings file.
  * @return 0 on success; non-zero on error.
  */
+#include <stdio.h>
 int GensKeyConfig::load(const QSettings& settings)
 {
 	// Clear the hash tables before loading.
