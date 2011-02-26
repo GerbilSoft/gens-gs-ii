@@ -238,7 +238,7 @@ int DcZip::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
 	
 	// Decompress the ROM.
 	int zResult = unzReadCurrentFile(m_unzFile, buf, siz);
-	if ((zResult <= 0) || ((size_t)zResult != siz))
+	if (zResult <= 0)
 	{
 		const char *zip_err;
 		
