@@ -680,7 +680,7 @@ FORCE_INLINE void VdpRend_m5::T_Render_Line_Scroll(int cell_start, int cell_leng
 	}
 	
 	// Loop through the cells.
-	for (int x = (plane ? cell_length : VdpIo::H_Cell);
+	for (int x = (plane ? cell_length : VdpIo::GetHCells());
 	     x >= 0; x--, VSRam_Cell++)
 	{
 		if (vscroll)
@@ -778,7 +778,7 @@ FORCE_INLINE void VdpRend_m5::T_Render_Line_ScrollA(void)
 			ScrA_Start = 0;
 			ScrA_Length = 0;
 			Win_Start = 0;
-			Win_Length = VdpIo::H_Cell;
+			Win_Length = VdpIo::GetHCells();
 		}
 	}
 	else if (vdp_cells < VdpIo::Win_Y_Pos)
@@ -788,7 +788,7 @@ FORCE_INLINE void VdpRend_m5::T_Render_Line_ScrollA(void)
 		ScrA_Start = 0;
 		ScrA_Length = 0;
 		Win_Start = 0;
-		Win_Length = VdpIo::H_Cell;
+		Win_Length = VdpIo::GetHCells();
 	}
 	
 	if (Win_Length == 0)
@@ -800,7 +800,7 @@ FORCE_INLINE void VdpRend_m5::T_Render_Line_ScrollA(void)
 			ScrA_Start = 0;
 			ScrA_Length = VdpIo::Win_X_Pos;
 			Win_Start = VdpIo::Win_X_Pos;
-			Win_Length = (VdpIo::H_Cell - VdpIo::Win_X_Pos);
+			Win_Length = (VdpIo::GetHCells() - VdpIo::Win_X_Pos);
 		}
 		else
 		{
@@ -808,7 +808,7 @@ FORCE_INLINE void VdpRend_m5::T_Render_Line_ScrollA(void)
 			Win_Start = 0;
 			Win_Length = VdpIo::Win_X_Pos;
 			ScrA_Start = VdpIo::Win_X_Pos;
-			ScrA_Length = (VdpIo::H_Cell - VdpIo::Win_X_Pos);
+			ScrA_Length = (VdpIo::GetHCells() - VdpIo::Win_X_Pos);
 		}
 	}
 	
@@ -898,12 +898,12 @@ FORCE_INLINE void VdpRend_m5::T_Make_Sprite_Struct(void)
 	unsigned int link;
 	
 	// H40 allows 80 sprites; H32 allows 64 sprites.
-	// Essentially, it's (H_Cell * 2).
+	// Essentially, it's (VdpIo::GetHCells() * 2).
 	// [Nemesis' Sprite Masking and Overflow Test ROM: Test #9]
 	// TODO: 80 sprites with Sprite Limit disabled, or 128?
 	// (Old Gens limited to 80 sprites regardless of video mode.)
 	const unsigned int max_spr = (VdpRend::Sprite_Limits
-					? (VdpIo::H_Cell * 2)
+					? (VdpIo::GetHCells() * 2)
 					: 80);
 	
 	do
@@ -991,8 +991,8 @@ FORCE_INLINE unsigned int VdpRend_m5::T_Update_Mask_Sprite(void)
 	// If Sprite Limit is on, the following limits are enforced: (H32/H40)
 	// - Maximum sprite dots per line: 256/320
 	// - Maximum sprites per line: 16/20
-	int max_cells = VdpIo::H_Cell;
-	int max_sprites = (VdpIo::H_Cell / 2);
+	int max_cells = VdpIo::GetHCells();
+	int max_sprites = (max_cells / 2);
 	
 	bool overflow = false;
 	
@@ -1058,7 +1058,7 @@ FORCE_INLINE unsigned int VdpRend_m5::T_Update_Mask_Sprite(void)
 			
 			// Check if the sprite is onscreen.
 			if (!sprite_mask_active &&
-				VdpRend::Sprite_Struct[spr_num].Pos_X < VdpIo::H_Pix &&
+				VdpRend::Sprite_Struct[spr_num].Pos_X < VdpIo::GetHPix() &&
 				VdpRend::Sprite_Struct[spr_num].Pos_X_Max >= 0)
 			{
 				// Sprite is onscreen.
@@ -1248,7 +1248,7 @@ FORCE_INLINE void VdpRend_m5::T_Render_Line_Sprite(void)
 			H_Pos_Max = VdpRend::Sprite_Struct[spr_num].Pos_X_Max_Vis;
 			
 			H_Pos_Max -= 7;				// to post the last pattern in first
-			while (H_Pos_Max >= VdpIo::H_Pix)
+			while (H_Pos_Max >= VdpIo::GetHPix())
 			{
 				H_Pos_Max -= 8;			// move back to the preceding pattern (screen)
 				tile_num += Y_cell_size;	// go to the next pattern (VRam)
@@ -1282,8 +1282,8 @@ FORCE_INLINE void VdpRend_m5::T_Render_Line_Sprite(void)
 			// Check the minimum edge of the sprite.
 			H_Pos_Min = VdpRend::Sprite_Struct[spr_num].Pos_X;
 			H_Pos_Max = VdpRend::Sprite_Struct[spr_num].Pos_X_Max_Vis;
-			if (H_Pos_Max >= VdpIo::H_Pix)
-				H_Pos_Max = VdpIo::H_Pix;
+			if (H_Pos_Max >= VdpIo::GetHPix())
+				H_Pos_Max = VdpIo::GetHPix();
 			
 			while (H_Pos_Min < -7)
 			{
@@ -1357,8 +1357,9 @@ FORCE_INLINE void VdpRend_m5::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 	const VdpRend::LineBuf_t::LineBuf_px_t *src = &VdpRend::LineBuf.px[8];
 	
 	// Render the line buffer to the destination surface.
-	dest += VdpIo::H_Pix_Begin;
-	for (unsigned int i = ((160 - VdpIo::H_Pix_Begin) / 4);
+	const int HPixBegin = VdpIo::GetHPixBegin();
+	dest += HPixBegin;
+	for (int i = ((160 - HPixBegin) / 4);
 	     i != 0; i--, dest += 8, src += 8)
 	{
 		*dest     = md_palette[src->pixel];
@@ -1371,7 +1372,7 @@ FORCE_INLINE void VdpRend_m5::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 		*(dest+7) = md_palette[(src+7)->pixel];
 	}
 	
-	if (VdpIo::H_Pix_Begin == 0)
+	if (HPixBegin == 0)
 		return;
 	
 	// Draw the borders.
@@ -1386,9 +1387,10 @@ FORCE_INLINE void VdpRend_m5::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 #endif
 	
 	// Left border.
-	dest -= VdpIo::H_Pix_Begin;
-	dest -= VdpIo::H_Pix;
-	for (unsigned int i = (VdpIo::H_Pix_Begin / 8); i != 0; i--, dest += 8)
+	const int HPix = VdpIo::GetHPix();
+	dest -= HPixBegin;
+	dest -= HPix;
+	for (int i = (HPixBegin / 8); i != 0; i--, dest += 8)
 	{
 		*dest     = border_color;
 		*(dest+1) = border_color;
@@ -1401,8 +1403,8 @@ FORCE_INLINE void VdpRend_m5::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 	}
 	
 	// Right border.
-	dest += VdpIo::H_Pix;
-	for (unsigned int i = (VdpIo::H_Pix_Begin / 8); i != 0; i--, dest += 8)
+	dest += HPix;
+	for (int i = (HPixBegin / 8); i != 0; i--, dest += 8)
 	{
 		*dest     = border_color;
 		*(dest+1) = border_color;
@@ -1580,7 +1582,7 @@ static FORCE_INLINE void T_Render_LineBuf_32X(pixel *dest, pixel *md_palette,
 	
 	// Adjust the destination pointer for the horizontal resolution.
 	// TODO: Draw horizontal borders, if necessary.
-	dest += VDP_Reg.H_Pix_Begin;
+	dest += VdpIo::GetHPixBegin();
 	
 	// Pixel registers.
 	register unsigned int px1, px2;
@@ -1602,7 +1604,7 @@ static FORCE_INLINE void T_Render_LineBuf_32X(pixel *dest, pixel *md_palette,
 		case 8:
 		case 12:
 			//POST_LINE_32X_M00;
-			for (unsigned int px = VDP_Reg.H_Pix; px != 0; px -= 4, dest += 4, lbptr += 4)
+			for (unsigned int px = VdpIo::GetHPix(); px != 0; px -= 4, dest += 4, lbptr += 4)
 			{
 				*dest = md_palette[lbptr->pixel];
 				*(dest+1) = md_palette[(lbptr+1)->pixel];
@@ -1617,7 +1619,7 @@ static FORCE_INLINE void T_Render_LineBuf_32X(pixel *dest, pixel *md_palette,
 		{
 			// TODO: Endianness conversions.
 			const uint8_t *src = &_32X_VDP_Ram.u8[VRam_Ind << 1];
-			for (unsigned int px = VDP_Reg.H_Pix; px != 0; px -= 2, src += 2, dest += 2, lbptr += 2)
+			for (unsigned int px = VdpIo::GetHPix(); px != 0; px -= 2, src += 2, dest += 2, lbptr += 2)
 			{
 				// NOTE: Destination pixels are swapped.
 				px1 = *src;
@@ -1641,7 +1643,7 @@ static FORCE_INLINE void T_Render_LineBuf_32X(pixel *dest, pixel *md_palette,
 		{
 			//POST_LINE_32X_M01;
 			const uint16_t *src = &_32X_VDP_Ram.u16[VRam_Ind];
-			for (unsigned int px = VDP_Reg.H_Pix; px != 0; px -= 2, src += 2, dest += 2, lbptr += 2)
+			for (unsigned int px = VdpIo::GetHPix(); px != 0; px -= 2, src += 2, dest += 2, lbptr += 2)
 			{
 				// NOTE: Destination pixels are NOT swapped.
 				px1 = *src;
@@ -1670,7 +1672,7 @@ static FORCE_INLINE void T_Render_LineBuf_32X(pixel *dest, pixel *md_palette,
 			int px = 0;
 			int px_end;
 			const uint8_t *src = &_32X_VDP_Ram.u8[VRam_Ind << 1];
-			while (px < VDP_Reg.H_Pix)
+			while (px < VdpIo::GetHPix())
 			{
 #if GSFT_BYTEORDER == GSFT_LIL_ENDIAN
 				px1 = _32X_vdp_cram_adjusted[*src];
@@ -1682,8 +1684,8 @@ static FORCE_INLINE void T_Render_LineBuf_32X(pixel *dest, pixel *md_palette,
 				src += 2;
 				
 				// Make sure it doesn't go out of bounds.
-				if (px_end >= VDP_Reg.H_Pix)
-					px_end = (VDP_Reg.H_Pix - 1);
+				if (px_end >= VdpIo::GetHPix())
+					px_end = (VdpIo::GetHPix() - 1);
 				
 				for (; px <= px_end; px++)
 				{
@@ -1698,7 +1700,7 @@ static FORCE_INLINE void T_Render_LineBuf_32X(pixel *dest, pixel *md_palette,
 			//POST_LINE_32X_M01_P;
 			// TODO: Endianness conversions.
 			const uint8_t *src = &_32X_VDP_Ram.u8[VRam_Ind << 1];
-			for (unsigned int px = VDP_Reg.H_Pix; px != 0; px -= 2, src += 2, dest += 2, lbptr += 2)
+			for (unsigned int px = VdpIo::GetHPix(); px != 0; px -= 2, src += 2, dest += 2, lbptr += 2)
 			{
 				// NOTE: Destination pixels are swapped.
 				px1 = *src;
@@ -1721,7 +1723,7 @@ static FORCE_INLINE void T_Render_LineBuf_32X(pixel *dest, pixel *md_palette,
 		case 14:
 			//POST_LINE_32X_M10_P;
 			// TODO: Optimize this!
-			for (unsigned int px = VDP_Reg.H_Pix; px != 0; px--, dest++, lbptr++)
+			for (unsigned int px = VdpIo::GetHPix(); px != 0; px--, dest++, lbptr++)
 			{
 				pixS = _32X_VDP_Ram.u16[VRam_Ind++];
 				
@@ -1737,7 +1739,7 @@ static FORCE_INLINE void T_Render_LineBuf_32X(pixel *dest, pixel *md_palette,
 			// TODO: Optimize this!
 			// TODO: Endianness conversions.
 			VRam_Ind *= 2;
-			for (unsigned int px = VDP_Reg.H_Pix; px != 0; px--, dest++, lbptr++)
+			for (unsigned int px = VdpIo::GetHPix(); px != 0; px--, dest++, lbptr++)
 			{
 				pixC = _32X_VDP_Ram.u8[VRam_Ind++ ^ 1];
 				pixS = _32X_VDP_CRam[pixC];
@@ -1801,9 +1803,9 @@ void VDP_Render_Line_m5_32X(void)
 		// Clear the border area.
 		// TODO: Only clear this if the option changes or V/H mode changes.
 		if (bppMD == 32)
-			memset(&MD_Screen.u32[LineStart], 0x00, VDP_Reg.H_Pix*sizeof(uint32_t));
+			memset(&MD_Screen.u32[LineStart], 0x00, VdpIo::GetHPix()*sizeof(uint32_t));
 		else
-			memset(&MD_Screen.u16[LineStart], 0x00, VDP_Reg.H_Pix*sizeof(uint16_t));
+			memset(&MD_Screen.u16[LineStart], 0x00, VdpIo::GetHPix()*sizeof(uint16_t));
 		
 		// ...and we're done here.
 		return;

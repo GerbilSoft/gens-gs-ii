@@ -130,12 +130,6 @@ class VdpIo
 		static uint16_t *Spr_Addr;
 		static uint16_t *H_Scroll_Addr;
 		
-		// VDP convenience values: Horizontal.
-		// NOTE: These must be signed for VDP arithmetic to work properly!
-		static int H_Cell;
-		static int H_Pix;
-		static int H_Pix_Begin;
-		
 		// Window row shift.
 		// H40: 6. (64x32 window)
 		// H32: 5. (32x32 window)
@@ -339,38 +333,44 @@ class VdpIo
 		
 		/**
 		 * GetHPix(): Get the current horizontal resolution.
-		 * This should only be used for non-VDP code.
-		 * VDP code should access VDP_Reg.H_Pix directly.
 		 * NOTE: Do NOT use this if a ROM isn't loaded!
 		 * @return Horizontal resolution, in pixels.
 		 */
-		static inline int GetHPix(void) { return H_Pix; }
+		static int GetHPix(void);
 		
 		/**
 		 * GetHPixBegin(): Get the first horizontal pixel number.
-		 * This should only be used for non-VDP code.
-		 * VDP code should access VDP_Reg.H_Pix_Begin directly.
 		 * NOTE: Do NOT use this if a ROM isn't loaded!
 		 * @return First horizontal pixel number.
 		 */
-		static inline int GetHPixBegin(void) { return H_Pix_Begin; }
+		static int GetHPixBegin(void);
 		
 		/**
-		 * vdp_getVPix(): Get the current vertical resolution.
-		 * This should only be used for non-VDP code.
-		 * VDP code should access VDP_Reg.Set2 directly.
+		 * GetHCells(): Get the current horizontal resolution, in cells.
+		 * @return Horizontal resolution, in cells.
+		 */
+		static int GetHCells(void);
+		
+		/**
+		 * GetVPix(): Get the current vertical resolution.
 		 * NOTE: Do NOT use this if a ROM isn't loaded!
 		 * @return Vertical resolution, in pixels.
 		 */
-		static inline int GetVPix(void) { return VDP_Lines.Visible.Total; }
+		static int GetVPix(void);
 	
-	protected:
+	private:
 		static inline void Update_Mode(void);
+		
+		// VDP convenience values: Horizontal.
+		// NOTE: These must be signed for VDP arithmetic to work properly!
+		static int H_Cell;
+		static int H_Pix;
+		static int H_Pix_Begin;
 		
 		/** DMA **/
 		
 		static void DMA_Fill(uint16_t data);
-	
+		
 		enum DMA_Dest_t
 		{
 			DMA_DEST_VRAM	= 1,
@@ -400,6 +400,18 @@ class VdpIo
 		VdpIo() { }
 		~VdpIo() { }
 };
+
+inline int VdpIo::GetHPix(void)
+	{ return H_Pix; }
+
+inline int VdpIo::GetHPixBegin(void)
+	{ return H_Pix_Begin; }
+
+inline int VdpIo::GetHCells(void)
+	{ return H_Cell; }
+
+inline int VdpIo::GetVPix(void)
+	{ return VDP_Lines.Visible.Total; }
 
 }
 
