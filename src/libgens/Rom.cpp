@@ -185,7 +185,11 @@ int Rom::loadRomHeader(MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 		// TODO: Error code constants.
 		return -2;
 	}
-	printf("header_size: %zu\n", header_size);
+	
+	// If the header size is smaller than the header buffer,
+	// clear the rest of the header buffer.
+	if (header_size < sizeof(header))
+		memset(&header[header_size], 0x00, (sizeof(header) - header_size));
 	
 	if (m_romFormat == RFMT_UNKNOWN)
 		m_romFormat = DetectFormat(header, header_size);
