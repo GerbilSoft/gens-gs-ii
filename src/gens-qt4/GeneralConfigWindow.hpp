@@ -36,6 +36,7 @@
 class QStackedWidget;
 class QToolBar;
 class QAction;
+class QModelIndexList;
 
 // Apply changes immediately.
 #ifdef Q_WS_MAC
@@ -153,6 +154,10 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		/** Onscreen Display **/
 		void on_btnOsdFpsColor_clicked(void);
 		void on_btnOsdMsgColor_clicked(void);
+		
+		/** System. **/
+		void on_btnRegionDetectUp_clicked(void);
+		void on_btnRegionDetectDown_clicked(void);
 		
 		/** Sega CD: Boot ROM **/
 		

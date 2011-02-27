@@ -25,6 +25,7 @@
 
 #include "GeneralConfigWindow.hpp"
 #include "gqt4_main.hpp"
+#include "GensQApplication.hpp"
 
 // C includes.
 #include <stdint.h>
@@ -123,7 +124,13 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	cboIntroColor->addItem(Qt::yellow);
 	cboIntroColor->addItem(Qt::white);
 	
-	/** Sega CD **/
+	/** System. **/
+	
+	// Set the icons for the up/down buttons.
+	btnRegionDetectUp->setIcon(GensQApplication::IconFromTheme(QLatin1String("arrow-up")));
+	btnRegionDetectDown->setIcon(GensQApplication::IconFromTheme(QLatin1String("arrow-down")));
+	
+	/** Sega CD. **/
 	
 	// Sega CD: Initialize the Boot ROM textbox icons.
 	txtMcdRomUSA->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
@@ -299,6 +306,10 @@ void GeneralConfigWindow::reload(void)
 	cboIntroStyle->setCurrentIndex(gqt4_config->introStyle());
 	cboIntroColor->setCurrentIndex(gqt4_config->introColor());
 	
+	/** System. **/
+	// TODO: Load current region code setting.
+	// TODO: Load region auto-detection settings.
+	
 	/** Sega CD Boot ROMs. **/
 	txtMcdRomUSA->setText(gqt4_config->mcdRomUSA());
 	txtMcdRomEUR->setText(gqt4_config->mcdRomEUR());
@@ -350,6 +361,10 @@ void GeneralConfigWindow::apply(void)
 	/** Intro effect. **/
 	gqt4_config->setIntroStyle(cboIntroStyle->currentIndex());
 	gqt4_config->setIntroColor(cboIntroColor->currentIndex());
+	
+	/** System. **/
+	// TODO: Apply current region code setting.
+	// TODO: Apply region auto-detection settings.
 	
 	/** Sega CD Boot ROMs. **/
 	gqt4_config->setMcdRomUSA(txtMcdRomUSA->text());
@@ -468,7 +483,61 @@ void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
 }
 
 
-/** Sega CD **/
+/** System. **/
+// TODO: Detect drag-and-drop of items within the QListWidget.
+
+
+/**
+ * on_btnRegionDetectUp_clicked(): Up button was clicked.
+ */
+void GeneralConfigWindow::on_btnRegionDetectUp_clicked(void)
+{
+	QListWidgetItem *cur = lstRegionDetect->currentItem();
+	if (!cur)
+		return;
+	int cur_idx = lstRegionDetect->row(cur);
+	
+	QListWidgetItem *prev = lstRegionDetect->takeItem(cur_idx - 1);
+	if (!prev)
+		return;
+	
+	lstRegionDetect->insertItem(cur_idx, prev);
+	
+	// Settings have been changed.
+#ifndef GCW_APPLY_IMMED
+	setApplyButtonEnabled(true);
+#else
+	// TODO: Apply region auto-detection settings.
+#endif
+}
+
+
+/**
+ * on_btnRegionDetectDown_clicked(): Down button was clicked.
+ */
+void GeneralConfigWindow::on_btnRegionDetectDown_clicked(void)
+{
+	QListWidgetItem *cur = lstRegionDetect->currentItem();
+	if (!cur)
+		return;
+	int cur_idx = lstRegionDetect->row(cur);
+	
+	QListWidgetItem *next = lstRegionDetect->takeItem(cur_idx + 1);
+	if (!next)
+		return;
+	
+	lstRegionDetect->insertItem(cur_idx, next);
+	
+	// Settings have been changed.
+#ifndef GCW_APPLY_IMMED
+	setApplyButtonEnabled(true);
+#else
+	// TODO: Apply region auto-detection settings.
+#endif
+}
+
+
+/** Sega CD. **/
 
 
 /**
