@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 2.6)
 # TODO: Determine the actual minimum version.
 # 4.1.0: QCoreApplication::arguments()
 # 4.2.0: QString::fromWCharArray() [Win32]
+# 4.2.0: QMainWindow::menuWidget()
 # 4.3.0: QMainWindow::setUnifiedTitleAndToolBarOnMac() [Mac OS X]
 # 4.6.0: QPixmap::fromWinHICON() [Win32] (fallbacks to QPixmap::fromWinHBITMAP() are in place)
 IF(WIN32)
@@ -12,7 +13,7 @@ IF(WIN32)
 ELSEIF(APPLE)
 	SET(GENS_QT4_MIN_VERSION 4.3.0)
 ELSE()
-	SET(GENS_QT4_MIN_VERSION 4.1.0)
+	SET(GENS_QT4_MIN_VERSION 4.2.0)
 ENDIF()
 
 # Find Qt4.
