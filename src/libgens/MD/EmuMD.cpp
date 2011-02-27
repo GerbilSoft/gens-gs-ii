@@ -112,29 +112,8 @@ EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
 	m_portE->reset();
 	
 	// Set the system version settings.
-	M68K_Mem::ms_SysVersion.setRegion(region);
 	M68K_Mem::ms_SysVersion.setDisk(false);		// No MCD connected.
-	
-	// TODO: VdpIo::VDP_Lines.Display.Total isn't being set properly...
-	VdpIo::VDP_Lines.Display.Total = (M68K_Mem::ms_SysVersion.isPal() ? 312 : 262);
-	VdpIo::Set_Visible_Lines();
-	
-	// Initialize CPL.
-	// TODO: Initialize this somewhere else.
-	if (M68K_Mem::ms_SysVersion.isPal())
-	{
-		M68K_Mem::CPL_M68K = (int)floor((((double)CLOCK_PAL / 7.0) / 50.0) / 312.0);
-		M68K_Mem::CPL_Z80 = (int)floor((((double)CLOCK_PAL / 15.0) / 50.0) / 312.0);
-	}
-	else
-	{
-		M68K_Mem::CPL_M68K = (int)floor((((double)CLOCK_NTSC / 7.0) / 60.0) / 262.0);
-		M68K_Mem::CPL_Z80 = (int)floor((((double)CLOCK_NTSC / 15.0) / 60.0) / 262.0);
-	}
-	
-	// Initialize audio.
-	// NOTE: Only set the region. Sound rate is set by the UI.
-	SoundMgr::SetRegion(M68K_Mem::ms_SysVersion.isPal(), false);
+	setRegion_int(region, false);			// Initialize region code.
 	
 	// Finished initializing.
 	return;
@@ -204,6 +183,50 @@ int EmuMD::hardReset(void)
 	SoundMgr::ms_Ym2612.reset();
 	
 	// Reset successful.
+	return 0;
+}
+
+
+/**
+ * setRegion(): Set the region code.
+ * @param region Region code.
+ * @return 0 on success; non-zero on error.
+ */
+int EmuMD::setRegion(SysVersion::RegionCode_t region)
+	{ return setRegion_int(region, true); }
+
+/**
+ * setRegion_int(): Set the region code. (INTERNAL VERSION)
+ * @param region Region code.
+ * @param preserveState If true, preserve the audio IC state.
+ * @return 0 on success; non-zero on error.
+ */
+int EmuMD::setRegion_int(SysVersion::RegionCode_t region, bool preserveState)
+{
+	// Set the region.
+	M68K_Mem::ms_SysVersion.setRegion(region);
+	
+	// TODO: VdpIo::VDP_Lines.Display.Total isn't being set properly...
+	VdpIo::VDP_Lines.Display.Total = (M68K_Mem::ms_SysVersion.isPal() ? 312 : 262);
+	VdpIo::Set_Visible_Lines();
+	
+	// Initialize CPL.
+	if (M68K_Mem::ms_SysVersion.isPal())
+	{
+		M68K_Mem::CPL_M68K = (int)floor((((double)CLOCK_PAL / 7.0) / 50.0) / 312.0);
+		M68K_Mem::CPL_Z80 = (int)floor((((double)CLOCK_PAL / 15.0) / 50.0) / 312.0);
+	}
+	else
+	{
+		M68K_Mem::CPL_M68K = (int)floor((((double)CLOCK_NTSC / 7.0) / 60.0) / 262.0);
+		M68K_Mem::CPL_Z80 = (int)floor((((double)CLOCK_NTSC / 15.0) / 60.0) / 262.0);
+	}
+	
+	// Initialize audio.
+	// NOTE: Only set the region. Sound rate is set by the UI.
+	SoundMgr::SetRegion(M68K_Mem::ms_SysVersion.isPal(), preserveState);
+	
+	// Region set successfully.
 	return 0;
 }
 

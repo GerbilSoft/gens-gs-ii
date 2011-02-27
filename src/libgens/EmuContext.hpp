@@ -101,6 +101,13 @@ class EmuContext
 		 */
 		virtual int hardReset(void) = 0;
 		
+		/**
+		 * setRegion(): Set the region code.
+		 * @param region Region code.
+		 * @return 0 on success; non-zero on error.
+		 */
+		virtual int setRegion(SysVersion::RegionCode_t region) = 0;
+		
 		/** Frame execution functions. **/
 		virtual void execFrame(void) = 0;
 		virtual void execFrameFast(void) = 0;

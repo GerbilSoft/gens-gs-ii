@@ -50,6 +50,14 @@ class EmuMD : public EmuContext
 		 */
 		int hardReset(void);
 		
+		/**
+		 * setRegion(): Set the region code.
+		 * @param region Region code.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int setRegion(SysVersion::RegionCode_t region);
+		
+		/** Frame execution functions. **/
 		void execFrame(void);
 		void execFrameFast(void);
 	
@@ -69,6 +77,14 @@ class EmuMD : public EmuContext
 		
 		template<bool VDP>
 		FORCE_INLINE void T_execFrame(void);
+		
+		/**
+		 * setRegion_int(): Set the region code. (INTERNAL VERSION)
+		 * @param region Region code.
+		 * @param preserveState If true, preserve the audio IC state.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int setRegion_int(SysVersion::RegionCode_t region, bool preserveState);
 };
 
 }
