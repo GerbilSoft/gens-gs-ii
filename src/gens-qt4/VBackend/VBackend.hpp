@@ -174,7 +174,7 @@ class VBackend : public QWidget
 		void resetAspectRatioConstraintChanged(void);
 		bool bilinearFilter(void) const;
 		bool pauseTint(void) const;
-		GensConfig::StretchMode stretchMode(void) const;
+		GensConfig::StretchMode_t stretchMode(void) const;
 	
 	protected slots:
 		void setOsdFpsEnabled(bool enable);
@@ -186,7 +186,7 @@ class VBackend : public QWidget
 		virtual void setAspectRatioConstraint(bool newAspectRatioConstraint);
 		virtual void setBilinearFilter(bool newBilinearFilter);
 		virtual void setPauseTint(bool newPauseTint);
-		virtual void setStretchMode(GensConfig::StretchMode newStretchMode);
+		virtual void setStretchMode(GensConfig::StretchMode_t newStretchMode);
 	
 	private:
 		// Effects.
@@ -233,7 +233,7 @@ class VBackend : public QWidget
 		bool m_aspectRatioConstraint;
 		bool m_aspectRatioConstraint_changed;
 		bool m_bilinearFilter;
-		GensConfig::StretchMode m_stretchMode;
+		GensConfig::StretchMode_t m_stretchMode;
 };
 
 /** Onscreen display. **/
@@ -296,7 +296,7 @@ inline bool VBackend::bilinearFilter(void) const
 	{ return m_bilinearFilter; }
 inline bool VBackend::pauseTint(void) const
 	{ return m_pauseTint; }
-inline GensConfig::StretchMode VBackend::stretchMode(void) const
+inline GensConfig::StretchMode_t VBackend::stretchMode(void) const
 	{ return m_stretchMode; }
 
 }

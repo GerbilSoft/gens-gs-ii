@@ -96,7 +96,7 @@ class GLBackend : public VBackend
 		 * setStretchMode(): Set the stretch mode setting.
 		 * @param newStretchMode New stretch mode setting.
 		 */
-		void setStretchMode(GensConfig::StretchMode newStretchMode);
+		void setStretchMode(GensConfig::StretchMode_t newStretchMode);
 	
 	protected:
 		/**
@@ -152,7 +152,7 @@ class GLBackend : public VBackend
 		QRectF m_stretchRectF;		// Current stretch coordinates.
 		QSize m_stretchLastRes;		// Last MD screen resolution.
 		void recalcStretchRectF(void);
-		void recalcStretchRectF(GensConfig::StretchMode mode);
+		void recalcStretchRectF(GensConfig::StretchMode_t mode);
 		
 		// OSD texture.
 		GLTex2D *m_texOsd;	// Texture containing U+0000 - U+00FF.

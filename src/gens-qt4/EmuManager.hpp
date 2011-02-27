@@ -309,7 +309,7 @@ class EmuManager : public QObject
 			{ changePaletteSetting(EmuRequest_t::RQT_PS_INVERTED, (int)newInverted); }
 		void colorScaleMethod_changed_slot(int newColorScaleMethod)
 			{ changePaletteSetting(EmuRequest_t::RQT_PS_COLORSCALEMETHOD, newColorScaleMethod); }
-		void interlacedMode_changed_slot(GensConfig::InterlacedMode newInterlacedMode)
+		void interlacedMode_changed_slot(GensConfig::InterlacedMode_t newInterlacedMode)
 			{ changePaletteSetting(EmuRequest_t::RQT_PS_INTERLACEDMODE, (int)newInterlacedMode); }
 	
 	/** Emulation Request Queue: Processing functions. **/

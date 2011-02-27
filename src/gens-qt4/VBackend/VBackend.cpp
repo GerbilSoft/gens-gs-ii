@@ -150,7 +150,7 @@ void VBackend::setPaused(paused_t newPaused)
  * setStretchMode(): Set the stretch mode setting.
  * @param newStretchMode New stretch mode setting.
  */
-void VBackend::setStretchMode(GensConfig::StretchMode newStretchMode)
+void VBackend::setStretchMode(GensConfig::StretchMode_t newStretchMode)
 {
 	if ((m_stretchMode == newStretchMode) ||
 	    (newStretchMode < GensConfig::STRETCH_NONE) ||

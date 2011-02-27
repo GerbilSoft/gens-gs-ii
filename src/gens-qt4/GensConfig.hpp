@@ -121,6 +121,21 @@ class GensConfig : public QObject
 		Q_PROPERTY(int introColor READ introColor WRITE setIntroColor NOTIFY introColor_changed)
 		GC_PROPERTY(int, introColor, int, IntroColor);
 		
+		/** System. **/
+		
+		public:
+			enum ConfRegionCode_t
+			{
+				CONFREGION_AUTODETECT = -1,
+				CONFREGION_JP_NTSC    = 0,
+				CONFREGION_ASIA_PAL   = 1,
+				CONFREGION_USA_NTSC   = 2,
+				CONFREGION_EU_PAL     = 3
+			};
+		Q_ENUMS(ConfRegionCode_t);
+		Q_PROPERTY(ConfRegionCode_t regionCode READ regionCode WRITE setRegionCode NOTIFY regionCode_changed);
+		GC_PROPERTY(ConfRegionCode_t, regionCode, ConfRegionCode_t, RegionCode);
+		
 		/** Sega CD Boot ROMs. **/
 		Q_PROPERTY(QString mcdRomUSA READ mcdRomUSA WRITE setMcdRomUSA NOTIFY mcdRomUSA_changed)
 		GC_PROPERTY(QString, mcdRomUSA, const QString&, McdRomUSA);
@@ -145,16 +160,16 @@ class GensConfig : public QObject
 		Q_PROPERTY(int contrast READ contrast WRITE setContrast NOTIFY contrast_changed)
 		
 		public:
-			enum InterlacedMode
+			enum InterlacedMode_t
 			{
 				INTERLACED_EVEN		= 0,
 				INTERLACED_ODD		= 1,
 				INTERLACED_FLICKER	= 2,
 				INTERLACED_2X		= 3,
 			};
-		Q_ENUMS(InterlacedMode);
-		GC_PROPERTY(InterlacedMode, interlacedMode, InterlacedMode, InterlacedMode);
-		Q_PROPERTY(InterlacedMode interlacedMode READ interlacedMode WRITE setInterlacedMode NOTIFY interlacedMode_changed)
+		Q_ENUMS(InterlacedMode_t);
+		GC_PROPERTY(InterlacedMode_t, interlacedMode, InterlacedMode_t, InterlacedMode);
+		Q_PROPERTY(InterlacedMode_t interlacedMode READ interlacedMode WRITE setInterlacedMode NOTIFY interlacedMode_changed)
 		
 		GC_PROPERTY(int, contrast, int, Contrast);
 		Q_PROPERTY(int brightness READ brightness WRITE setBrightness NOTIFY brightness_changed)
@@ -167,16 +182,16 @@ class GensConfig : public QObject
 		GC_PROPERTY(int, colorScaleMethod, int, ColorScaleMethod);
 		
 		public:
-			enum StretchMode
+			enum StretchMode_t
 			{
 				STRETCH_NONE	= 0,
 				STRETCH_H	= 1,
 				STRETCH_V	= 2,
 				STRETCH_FULL	= 3
 			};
-		Q_ENUMS(StretchMode);
-		Q_PROPERTY(StretchMode stretchMode READ stretchMode WRITE setStretchMode NOTIFY stretchMode_changed)
-		GC_PROPERTY(StretchMode, stretchMode, StretchMode, StretchMode);
+		Q_ENUMS(StretchMode_t);
+		Q_PROPERTY(StretchMode_t stretchMode READ stretchMode WRITE setStretchMode NOTIFY stretchMode_changed)
+		GC_PROPERTY(StretchMode_t, stretchMode, StretchMode_t, StretchMode);
 		
 		/** General settings. **/
 		Q_PROPERTY(bool autoFixChecksum READ autoFixChecksum WRITE setAutoFixChecksum NOTIFY autoFixChecksum_changed)
@@ -213,6 +228,9 @@ class GensConfig : public QObject
 		void osdMsgEnabled_changed(bool enable);
 		void osdMsgColor_changed(const QColor& color);
 		
+		/** System. **/
+		void regionCode_changed(GensConfig::ConfRegionCode_t newRegionCode);
+		
 		/** Intro effect. **/
 		void introStyle_changed(int style);
 		void introColor_changed(int color);
@@ -230,13 +248,13 @@ class GensConfig : public QObject
 		void aspectRatioConstraint_changed(bool newAspectRatioConstraint);
 		void fastBlur_changed(bool newFastBlur);
 		void bilinearFilter_changed(bool newBilinearFilter);
-		void interlacedMode_changed(GensConfig::InterlacedMode newInterlacedMode);
+		void interlacedMode_changed(GensConfig::InterlacedMode_t newInterlacedMode);
 		void contrast_changed(int newContrast);
 		void brightness_changed(int newBrightness);
 		void grayscale_changed(bool newGrayscale);
 		void inverted_changed(bool newInverted);
 		void colorScaleMethod_changed(int newColorScaleMethod);
-		void stretchMode_changed(GensConfig::StretchMode newStretchMode);
+		void stretchMode_changed(GensConfig::StretchMode_t newStretchMode);
 		
 		/** General settings. **/
 		void autoFixChecksum_changed(bool newAutoFixChecksum);

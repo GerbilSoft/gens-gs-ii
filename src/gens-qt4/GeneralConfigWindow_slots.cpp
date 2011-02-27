@@ -76,7 +76,7 @@ void GeneralConfigWindow::on_chkFastBlur_toggled(bool checked)
 void GeneralConfigWindow::on_chkBilinearFilter_toggled(bool checked)
 	{ GENERIC_OPTION(setBilinearFilter, checked); }
 void GeneralConfigWindow::on_cboInterlacedMode_currentIndexChanged(int index)
-	{ GENERIC_OPTION(setInterlacedMode, (GensConfig::InterlacedMode)index); }
+	{ GENERIC_OPTION(setInterlacedMode, (GensConfig::InterlacedMode_t)index); }
 
 void GeneralConfigWindow::on_hsldContrast_valueChanged(int value)
 	{ GENERIC_OPTION(setContrast, value); }

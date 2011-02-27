@@ -151,7 +151,7 @@ bool GensActions::doAction(int action)
 					// Next stretch mode.
 					int stretch_tmp = (int)gqt4_config->stretchMode();
 					stretch_tmp = (stretch_tmp + 1) % 4;
-					gqt4_config->setStretchMode((GensConfig::StretchMode)stretch_tmp);
+					gqt4_config->setStretchMode((GensConfig::StretchMode_t)stretch_tmp);
 					return true;
 				}
 				

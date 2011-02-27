@@ -636,7 +636,7 @@ void GLBackend::glb_paintGL(void)
  * recalcStretchRectF(): Recalculate the stretch mode rectangle.
  * @param mode Stretch mode.
  */
-void GLBackend::recalcStretchRectF(GensConfig::StretchMode mode)
+void GLBackend::recalcStretchRectF(GensConfig::StretchMode_t mode)
 {
 	// Store the current MD screen resolution.
 	m_stretchLastRes.setWidth(LibGens::VdpIo::GetHPix());
@@ -1123,7 +1123,7 @@ void GLBackend::setPauseTint(bool newPauseTint)
 }
 
 
-void GLBackend::setStretchMode(GensConfig::StretchMode newStretchMode)
+void GLBackend::setStretchMode(GensConfig::StretchMode_t newStretchMode)
 {
 	if ((stretchMode() == newStretchMode) ||
 	    (newStretchMode < GensConfig::STRETCH_NONE) ||

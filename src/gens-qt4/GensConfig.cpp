@@ -125,6 +125,14 @@ int GensConfig::reload(const QString& filename)
 	m_introColor = settings.value(QLatin1String("introColor"), 7).toInt();	// white
 	settings.endGroup();
 	
+	/** System. **/
+	settings.beginGroup(QLatin1String("System"));
+	int regionCode_tmp = settings.value(QLatin1String("regionCode"), (int)CONFREGION_AUTODETECT).toInt();
+	if ((regionCode_tmp < (int)CONFREGION_AUTODETECT) || (regionCode_tmp > (int)CONFREGION_EU_PAL))
+		regionCode_tmp = (int)CONFREGION_AUTODETECT;
+	m_regionCode = (ConfRegionCode_t)regionCode_tmp;
+	settings.endGroup();
+	
 	/** Sega CD Boot ROMs. **/
 	settings.beginGroup(QLatin1String("Sega_CD"));
 	m_mcdRomUSA = settings.value(QLatin1String("bootRomUSA"), QString()).toString();
@@ -159,7 +167,7 @@ int GensConfig::reload(const QString& filename)
 	int interlaced_tmp = settings.value(QLatin1String("interlacedMode"), (int)INTERLACED_FLICKER).toInt();
 	if ((interlaced_tmp < (int)INTERLACED_EVEN) || (interlaced_tmp > (int)INTERLACED_FLICKER))
 		interlaced_tmp = (int)INTERLACED_FLICKER;
-	m_interlacedMode = (InterlacedMode)interlaced_tmp;
+	m_interlacedMode = (InterlacedMode_t)interlaced_tmp;
 	m_contrast = settings.value(QLatin1String("contrast"), 0).toInt();
 	m_brightness = settings.value(QLatin1String("brightness"), 0).toInt();
 	m_grayscale = settings.value(QLatin1String("grayscale"), false).toBool();
@@ -172,7 +180,7 @@ int GensConfig::reload(const QString& filename)
 	int stretch_tmp = settings.value(QLatin1String("stretchMode"), (int)STRETCH_H).toInt();
 	if ((stretch_tmp < (int)STRETCH_NONE) || (stretch_tmp > (int)STRETCH_FULL))
 		stretch_tmp = (int)STRETCH_H;
-	m_stretchMode = (StretchMode)stretch_tmp;
+	m_stretchMode = (StretchMode_t)stretch_tmp;
 	
 	settings.endGroup();
 	
@@ -275,6 +283,11 @@ int GensConfig::save(const QString& filename)
 	settings.beginGroup(QLatin1String("Intro_Effect"));
 	settings.setValue(QLatin1String("introStyle"), m_introStyle);
 	settings.setValue(QLatin1String("introColor"), m_introColor);
+	settings.endGroup();
+	
+	/** System. **/
+	settings.beginGroup(QLatin1String("System"));
+	settings.setValue(QLatin1String("regionCode"), (int)m_regionCode);
 	settings.endGroup();
 	
 	/** Sega CD Boot ROMs. **/
@@ -459,18 +472,20 @@ void GensConfig::set##setPropName(setPropType new##setPropName) \
 	emit propName##_changed(m_##propName); \
 }
 
-
 /** Onscreen display. **/
 GC_PROPERTY_WRITE(osdFpsEnabled, bool, OsdFpsEnabled)
 GC_PROPERTY_WRITE(osdFpsColor, const QColor&, OsdFpsColor)
 GC_PROPERTY_WRITE(osdMsgEnabled, bool, OsdMsgEnabled)
 GC_PROPERTY_WRITE(osdMsgColor, const QColor&, OsdMsgColor)
 
-
 /** Intro effect. **/
 GC_PROPERTY_WRITE_RANGE(introStyle, int, IntroStyle, 0, 2)
 GC_PROPERTY_WRITE_RANGE(introColor, int, IntroColor, 0, 7)
 
+/** System. **/
+GC_PROPERTY_WRITE_RANGE(regionCode, ConfRegionCode_t, RegionCode,
+			(int)CONFREGION_AUTODETECT,
+		        (int)CONFREGION_EU_PAL)
 
 /** Sega CD Boot ROMs. **/
 GC_PROPERTY_WRITE(mcdRomUSA, const QString&, McdRomUSA)
@@ -504,7 +519,7 @@ GC_PROPERTY_WRITE(aspectRatioConstraint, bool, AspectRatioConstraint)
 GC_PROPERTY_WRITE(fastBlur, bool, FastBlur)
 GC_PROPERTY_WRITE(bilinearFilter, bool, BilinearFilter)
 // TODO: Add support for INTERLACED_2X.
-GC_PROPERTY_WRITE_RANGE(interlacedMode, InterlacedMode, InterlacedMode,
+GC_PROPERTY_WRITE_RANGE(interlacedMode, InterlacedMode_t, InterlacedMode,
 			(int)INTERLACED_EVEN, (int)INTERLACED_FLICKER);
 GC_PROPERTY_WRITE(contrast, int, Contrast)
 GC_PROPERTY_WRITE(brightness, int, Brightness)
@@ -513,7 +528,7 @@ GC_PROPERTY_WRITE(inverted, bool, Inverted)
 GC_PROPERTY_WRITE_RANGE(colorScaleMethod, int, ColorScaleMethod,
 			(int)LibGens::VdpPalette::COLSCALE_RAW,
 			(int)LibGens::VdpPalette::COLSCALE_FULL_HS)
-GC_PROPERTY_WRITE_RANGE(stretchMode, StretchMode, StretchMode,
+GC_PROPERTY_WRITE_RANGE(stretchMode, StretchMode_t, StretchMode,
 			(int)STRETCH_NONE, (int)STRETCH_FULL)
 
 

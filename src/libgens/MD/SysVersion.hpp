@@ -49,7 +49,7 @@ namespace LibGens
 class SysVersion
 {
 	public:
-		enum RegionCode
+		enum RegionCode_t
 		{
 			REGION_JP_NTSC	= 0,	// Japan (NTSC)
 			REGION_ASIA_PAL	= 1,	// Asia (PAL)
@@ -58,7 +58,7 @@ class SysVersion
 		};
 		
 		SysVersion();
-		SysVersion(RegionCode initRegion);
+		SysVersion(RegionCode_t initRegion);
 		
 		/**
 		 * readData(): Read the register contents.
@@ -66,8 +66,8 @@ class SysVersion
 		 */
 		uint8_t readData(void) const;
 		
-		RegionCode region(void) const;
-		void setRegion(RegionCode newRegion);
+		RegionCode_t region(void) const;
+		void setRegion(RegionCode_t newRegion);
 		
 		/**
 		 * Region code: Convenience functions.
@@ -84,7 +84,7 @@ class SysVersion
 		void setDisk(bool newDisk);
 	
 	private:
-		RegionCode m_region;
+		RegionCode_t m_region;
 		bool m_disk;	// True if MCD is connected.
 };
 
@@ -94,16 +94,16 @@ inline SysVersion::SysVersion()
 	m_disk = false;
 }
 
-inline SysVersion::SysVersion(RegionCode initRegion)
+inline SysVersion::SysVersion(RegionCode_t initRegion)
 {
 	m_region = initRegion;
 	m_disk = false;
 }
 
-inline SysVersion::RegionCode SysVersion::region(void) const
+inline SysVersion::RegionCode_t SysVersion::region(void) const
 	{ return m_region; }
-inline void SysVersion::setRegion(RegionCode newRegion)
-	{ m_region = (RegionCode)((int)newRegion & 0x03); }
+inline void SysVersion::setRegion(RegionCode_t newRegion)
+	{ m_region = (RegionCode_t)((int)newRegion & 0x03); }
 
 /**
  * Region code: Convenience functions.
