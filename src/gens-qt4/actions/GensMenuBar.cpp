@@ -38,15 +38,18 @@
 namespace GensQt4
 {
 
-GensMenuBar::GensMenuBar(QWidget *parent)
-	: QMenuBar::QMenuBar(parent)
+GensMenuBar::GensMenuBar(QObject *parent)
+	: QObject(parent)
 {
 	// Create the signal mapper.
 	m_signalMapper = new QSignalMapper(this);
 	connect(this->m_signalMapper, SIGNAL(mapped(int)),
 		this, SIGNAL(triggered(int)));
 	
-	// Populate the menu bar.
+	// Create the popup menu.
+	m_popupMenu = new QMenu();
+	
+	// Populate the popup menu.
 	parseMainMenu(&ms_gmmiMain[0]);
 }
 
@@ -57,6 +60,9 @@ GensMenuBar::~GensMenuBar()
 	
 	// Clear the menu maps.
 	clearHashTables();
+	
+	// Delete the popup menu.
+	delete m_popupMenu;
 }
 
 
@@ -87,7 +93,23 @@ void GensMenuBar::clearHashTables(void)
 
 
 /**
+ * createMenuBar(): Create a menu bar.
+ * @return QMenuBar containing the Gens menus.
+ */
+QMenuBar *GensMenuBar::createMenuBar(void)
+{
+	QMenuBar *menuBar = new QMenuBar();
+	
+	foreach(QAction* action, m_popupMenu->actions())
+		menuBar->addAction(action);
+	
+	return menuBar;
+}
+
+
+/**
  * parseMainMenu(): Parse an array of GensMainMenuItem items.
+ * The menus are added to m_popupMenu.
  * @param mainMenu Pointer to the first item in the GensMainMenuItem array.
  */
 void GensMenuBar::parseMainMenu(const GensMenuBar::MainMenuItem *mainMenu)
@@ -100,14 +122,14 @@ void GensMenuBar::parseMainMenu(const GensMenuBar::MainMenuItem *mainMenu)
 	for (; mainMenu->id != 0; mainMenu++)
 	{
 		// Create a new submenu.
-		mnuSubMenu = new QMenu(this);
+		mnuSubMenu = new QMenu();
 		mnuSubMenu->setTitle(tr(mainMenu->text));
 		
 		// Parse the menu.
 		parseMenu(mainMenu->submenu, mnuSubMenu);
 		
-		// Add the menu to the menu bar.
-		this->addMenu(mnuSubMenu);
+		// Add the menu to the popup menu.
+		m_popupMenu->addMenu(mnuSubMenu);
 		
 		// Add the QMenu to the menus map.
 		m_hashMenus.insert(mainMenu->id, mnuSubMenu);
@@ -138,7 +160,7 @@ void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 			continue;
 		}
 		
-		mnuItem = new QAction(parent);
+		mnuItem = new QAction(this);
 		mnuItem->setText(tr(menu->text));
 		
 		switch (menu->type)
@@ -149,7 +171,7 @@ void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 			
 			case GMI_SUBMENU:
 				// Parse the submenu.
-				mnuSubMenu = new QMenu(this);
+				mnuSubMenu = new QMenu(parent);
 				mnuSubMenu->setTitle(tr(menu->text));
 				parseMenu(menu->submenu, mnuSubMenu);
 				mnuItem->setMenu(mnuSubMenu);

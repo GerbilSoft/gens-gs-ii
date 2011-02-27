@@ -59,6 +59,10 @@ const GensMenuBar::MenuItem GensMenuBar::ms_gmiFile[] =
 /** Graphics menu. **/
 const GensMenuBar::MenuItem GensMenuBar::ms_gmiGraphics[] =
 {
+#ifndef Q_WS_MAC
+	{IDM_GRAPHICS_MENUBAR, GMI_CHECK, "Show &Menu Bar", IDM_GRAPHICS_MENUBAR, NULL, NULL},
+	{IDM_SEPARATOR, GMI_SEPARATOR, NULL, 0, NULL, NULL},
+#endif /* !Q_WS_MAC */
 	{IDM_GRAPHICS_RES, GMI_SUBMENU, "&Resolution", IDM_GRAPHICS_RES_MENU, &ms_gmiGraphicsRes[0], NULL},
 	{IDM_GRAPHICS_BPP, GMI_SUBMENU, "&Color Depth", IDM_GRAPHICS_BPP_MENU, &ms_gmiGraphicsBpp[0], NULL},
 	{IDM_GRAPHICS_STRETCH, GMI_SUBMENU, "S&tretch Mode", IDM_GRAPHICS_STRETCH_MENU,

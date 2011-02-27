@@ -97,6 +97,12 @@ class GensWindow : public QMainWindow
 		void setController(int port, LibGens::IoBase::IoType type);
 		void setAudioRate(int newRate);
 		void setStereo(bool newStereo);
+		
+		/**
+		 * toggleMenuBar(): Toggle menu bar visibility.
+		 * TODO: Add to GensConfig.
+		 */
+		void toggleMenuBar(void);
 	
 	protected:
 		void setupUi(void);
@@ -110,8 +116,8 @@ class GensWindow : public QMainWindow
 		void dropEvent(QDropEvent *event);
 		
 		// Widgets.
-		VBackend *m_vBackend;	// GensQGLWidget.
-		GensMenuBar *m_menubar;	// Gens menu bar.
+		VBackend *m_vBackend;		// GensQGLWidget.
+		GensMenuBar *m_gensMenuBar;	// Gens menu bar.
 		
 		QWidget *centralwidget;
 		QVBoxLayout *layout;
@@ -198,6 +204,12 @@ class GensWindow : public QMainWindow
 		 * @param newIntroStyle New Intro Style setting.
 		 */
 		void introStyle_changed_slot(int newIntroStyle);
+		
+		/**
+		 * showContextMenu(): Show the context menu.
+		 * @param pos Position to show the context menu. (widget coordinates)
+		 */
+		void showContextMenu(const QPoint& pos);
 };
 
 }

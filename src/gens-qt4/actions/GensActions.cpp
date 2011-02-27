@@ -137,6 +137,15 @@ bool GensActions::doAction(int action)
 			// Graphics.
 			switch (MNUID_ITEM(action))
 			{
+#ifndef Q_WS_MAC
+				case MNUID_ITEM(IDM_GRAPHICS_MENUBAR):
+					// Show Menu Bar.
+					// TODO: Use the menu check state.
+					// TODO: Synchronize the checkbox.
+					m_parent->toggleMenuBar();
+					break;
+#endif /* !Q_WS_MAC */
+				
 				case MNUID_ITEM(IDM_GRAPHICS_STRETCH):
 				{
 					// Next stretch mode.

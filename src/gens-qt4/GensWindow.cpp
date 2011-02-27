@@ -88,6 +88,13 @@ GensWindow::GensWindow()
 	// Initialize the emulation state.
 	m_idleThreadAllowed = true;
 	stateChanged();
+	
+#ifndef Q_WS_MAC
+	// Enable the context menu.
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
+		this, SLOT(showContextMenu(const QPoint&)));
+	setContextMenuPolicy(Qt::CustomContextMenu);
+#endif
 }
 
 
@@ -135,8 +142,8 @@ void GensWindow::setupUi(void)
 	QMetaObject::connectSlotsByName(this);
 	
 	// Create the menubar.
-	m_menubar = new GensMenuBar(this);
-	this->setMenuBar(m_menubar);
+	m_gensMenuBar = new GensMenuBar(this);
+	this->setMenuBar(m_gensMenuBar->createMenuBar());
 	
 	// Create the Video Backend.
 	// TODO: Allow selection of all available VBackend classes.
@@ -156,7 +163,7 @@ void GensWindow::setupUi(void)
 	setAcceptDrops(true);
 	
 	// Connect the GensMenuBar's triggered() signal.
-	connect(m_menubar, SIGNAL(triggered(int)),
+	connect(m_gensMenuBar, SIGNAL(triggered(int)),
 		m_gensActions, SLOT(doAction(int)));
 	
 	// Connect Emulation Manager signals to GensWindow.
@@ -340,8 +347,8 @@ void GensWindow::gensResize(void)
 	
 	// Calculate the window height.
 	int win_height = img_height;
-	if (m_menubar)
-		win_height += m_menubar->size().height();
+	if (this->menuWidget())
+		win_height += this->menuWidget()->size().height();
 	
 	// Set the new window size.
 	this->resize(img_width, win_height);
@@ -579,6 +586,25 @@ void GensWindow::setStereo(bool newStereo)
 	{ m_emuManager->setStereo(newStereo); }
 
 
+/**
+ * toggleMenuBar(): Toggle menu bar visibility.
+ * TODO: Add to GensConfig.
+ */
+void GensWindow::toggleMenuBar(void)
+{
+	if (this->menuWidget())
+	{
+		// Window has a menu bar. Remove it.
+		this->setMenuBar(NULL);
+	}
+	else
+	{
+		// Window does not have a menu bar. Add it.
+		this->setMenuBar(m_gensMenuBar->createMenuBar());
+	}
+}
+
+
 void GensWindow::setIdleThreadAllowed(bool newIdleThreadAllowed)
 {
 	m_idleThreadAllowed = newIdleThreadAllowed;
@@ -659,6 +685,28 @@ void GensWindow::introStyle_changed_slot(int newIntroStyle)
 		LibGens::VdpIo::Reset();
 		updateVideo();
 	}
+}
+
+
+/**
+ * showContextMenu(): Show the context menu.
+ * @param pos Position to show the context menu. (widget coordinates)
+ */
+void GensWindow::showContextMenu(const QPoint& pos)
+{
+#ifdef Q_WS_MAC
+	// Mac OS X has a global menu bar, so this isn't necessary.
+	// TODO: Enable the context menu in full-screen mode?
+	((void)pos);
+	return;
+#else /* !Q_WS_MAC */
+	// Don't do anything if the menu bar is visible.
+	if (this->menuWidget() != NULL)
+		return;
+	
+	QPoint globalPos = this->mapToGlobal(pos);
+	m_gensMenuBar->popupMenu()->popup(globalPos);
+#endif
 }
 
 }

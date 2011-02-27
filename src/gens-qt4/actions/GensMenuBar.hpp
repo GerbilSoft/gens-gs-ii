@@ -36,18 +36,21 @@
 namespace GensQt4
 {
 
-class GensMenuBar : public QMenuBar
+class GensMenuBar : public QObject
 {
 	Q_OBJECT
 	
 	public:
-		GensMenuBar(QWidget *parent = NULL);
+		GensMenuBar(QObject *parent = NULL);
 		virtual ~GensMenuBar();
-	
+		
+		QMenuBar *createMenuBar(void);
+		QMenu *popupMenu(void);
+		
 		bool menuItemCheckState(int id);
 		int setMenuItemCheckState(int id, bool newCheck);
 	
-	protected:
+	private:
 		enum MenuItemType
 		{
 			GMI_NORMAL,
@@ -112,10 +115,19 @@ class GensMenuBar : public QMenuBar
 		QList<QAction*> m_lstSeparators;
 		
 		void clearHashTables(void);
+		
+		// Popup menu.
+		QMenu *m_popupMenu;
 	
 	signals:
 		void triggered(int id);
+	
+	private:
+		Q_DISABLE_COPY(GensMenuBar);
 };
+
+inline QMenu *GensMenuBar::popupMenu(void)
+	{ return m_popupMenu; }
 
 }
 
