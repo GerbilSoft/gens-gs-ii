@@ -60,7 +60,7 @@
              <item>
               <widget class="QCheckBox" name="chkOsdFpsEnable">
                <property name="text">
-                <string>Show FPS counter in</string>
+                <string>Show &amp;FPS counter in</string>
                </property>
               </widget>
              </item>
@@ -97,7 +97,7 @@
              <item>
               <widget class="QCheckBox" name="chkOsdMsgEnable">
                <property name="text">
-                <string>Show onscreen messages in</string>
+                <string>Show onscreen &amp;messages in</string>
                </property>
               </widget>
              </item>
@@ -146,7 +146,7 @@ but may break games that use
 non-standard checksums.</string>
              </property>
              <property name="text">
-              <string>&amp;Fix incorrect ROM checksums.</string>
+              <string>Fix incorrect ROM c&amp;hecksums.</string>
              </property>
             </widget>
            </item>
