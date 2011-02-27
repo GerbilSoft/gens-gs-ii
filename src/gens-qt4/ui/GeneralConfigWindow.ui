@@ -48,86 +48,85 @@
        <attribute name="title">
         <string>&amp;General</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <layout class="QVBoxLayout" name="vboxOsd">
-          <item>
-           <widget class="QGroupBox" name="grpOsd">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="title">
-             <string>Onscreen &amp;Display</string>
-            </property>
-            <layout class="QVBoxLayout" name="gridOsd">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QGroupBox" name="grpOsd">
+          <property name="title">
+           <string>Onscreen &amp;Display</string>
+          </property>
+          <layout class="QVBoxLayout" name="gridOsd">
+           <item>
+            <layout class="QHBoxLayout" name="hboxOsdFps">
              <item>
-              <widget class="QGroupBox" name="grpOsdFps">
-               <property name="title">
-                <string>&amp;FPS counter</string>
+              <widget class="QCheckBox" name="chkOsdFpsEnable">
+               <property name="text">
+                <string>Show FPS counter in</string>
                </property>
-               <layout class="QVBoxLayout" name="verticalLayout_5">
-                <item>
-                 <widget class="QCheckBox" name="chkOsdFpsEnable">
-                  <property name="text">
-                   <string>Enable</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="btnOsdFpsColor">
-                  <property name="text">
-                   <string>Color...</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
               </widget>
              </item>
              <item>
-              <widget class="QGroupBox" name="grpOsdMsg">
-               <property name="title">
-                <string>&amp;Messages</string>
+              <widget class="QPushButton" name="btnOsdFpsColor">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
                </property>
-               <layout class="QVBoxLayout" name="verticalLayout_6">
-                <item>
-                 <widget class="QCheckBox" name="chkOsdMsgEnable">
-                  <property name="text">
-                   <string>Enable</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="btnOsdMsgColor">
-                  <property name="text">
-                   <string>Color...</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+               <property name="text">
+                <string>this color.</string>
+               </property>
               </widget>
+             </item>
+             <item>
+              <spacer name="hspcOsdFps">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
              </item>
             </layout>
-           </widget>
-          </item>
-          <item>
-           <spacer name="vspcOsd">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>0</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="hboxOsdMsg">
+             <item>
+              <widget class="QCheckBox" name="chkOsdMsgEnable">
+               <property name="text">
+                <string>Show onscreen messages in</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnOsdMsgColor">
+               <property name="text">
+                <string>this color.</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="hspcOsdMsg">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
         </item>
-        <item row="0" column="1">
+        <item>
          <widget class="QGroupBox" name="grpEmulationOptions">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
@@ -142,14 +141,12 @@
            <item>
             <widget class="QCheckBox" name="chkAutoFixChecksum">
              <property name="toolTip">
-              <string>Automatically fix the ROM checksum.
-
-This fixes red screens on some
-games, but may break games
-that use non-standard checksums.</string>
+              <string>This fixes red screens on some games,
+but may break games that use
+non-standard checksums.</string>
              </property>
              <property name="text">
-              <string>Auto &amp;Fix Checksum</string>
+              <string>&amp;Fix incorrect ROM checksums.</string>
              </property>
             </widget>
            </item>
@@ -157,10 +154,10 @@ that use non-standard checksums.</string>
             <widget class="QCheckBox" name="chkAutoPause">
              <property name="toolTip">
               <string>Automatically pause the emulator when
-the window loses focus.</string>
+the emulation window loses focus.</string>
              </property>
              <property name="text">
-              <string>Auto &amp;Pause</string>
+              <string>&amp;Pause emulation when the window loses focus.</string>
              </property>
             </widget>
            </item>
@@ -171,7 +168,7 @@ the window loses focus.</string>
 instead of drawing a black border.</string>
              </property>
              <property name="text">
-              <string>&amp;Border Color Emulation</string>
+              <string>&amp;Border color emulation</string>
              </property>
             </widget>
            </item>
@@ -182,7 +179,7 @@ instead of drawing a black border.</string>
 emulation is paused.</string>
              </property>
              <property name="text">
-              <string>Pause &amp;Tint</string>
+              <string>&amp;Tint the window purple when paused.</string>
              </property>
             </widget>
            </item>
@@ -198,23 +195,10 @@ on NTSC models.</string>
              </property>
             </widget>
            </item>
-           <item>
-            <spacer name="vspcEmulationOptions">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
           </layout>
          </widget>
         </item>
-        <item row="1" column="1">
+        <item>
          <widget class="QGroupBox" name="grpIntroEffect">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -302,6 +286,19 @@ on NTSC models.</string>
           </layout>
          </widget>
         </item>
+        <item>
+         <spacer name="vspcGeneral">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="tabGraphics">
@@ -317,6 +314,13 @@ on NTSC models.</string>
           <layout class="QVBoxLayout" name="vboxGraphics">
            <item>
             <widget class="QCheckBox" name="chkAspectRatioConstraint">
+             <property name="toolTip">
+              <string>Constrains the viewable image to a 4:3 aspect ratio.
+
+This prevents image artifacting on widescreen
+displays by showing black bars on the sides of
+the screen if the emulation window is maximized.</string>
+             </property>
              <property name="text">
               <string>Constrain &amp;aspect ratio to 4:3</string>
              </property>
@@ -324,6 +328,10 @@ on NTSC models.</string>
            </item>
            <item>
             <widget class="QCheckBox" name="chkFastBlur">
+             <property name="toolTip">
+              <string>Enables the &quot;Fast Blur&quot; effect, which simulates
+dithering artifacting as seen on the original system.</string>
+             </property>
              <property name="text">
               <string>Fast &amp;Blur</string>
              </property>
@@ -331,6 +339,10 @@ on NTSC models.</string>
            </item>
            <item>
             <widget class="QCheckBox" name="chkBilinearFilter">
+             <property name="toolTip">
+              <string>Smoothes the image when scaling the emulation
+window to a larger size than its original resolution.</string>
+             </property>
              <property name="text">
               <string>Enable bi&amp;linear filtering</string>
              </property>
@@ -859,10 +871,6 @@ on NTSC models.</string>
  </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
-  <tabstop>chkOsdFpsEnable</tabstop>
-  <tabstop>btnOsdFpsColor</tabstop>
-  <tabstop>chkOsdMsgEnable</tabstop>
-  <tabstop>btnOsdMsgColor</tabstop>
   <tabstop>chkAutoFixChecksum</tabstop>
   <tabstop>chkAutoPause</tabstop>
   <tabstop>chkBorderColor</tabstop>
