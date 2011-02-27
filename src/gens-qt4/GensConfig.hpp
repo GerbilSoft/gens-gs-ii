@@ -129,7 +129,7 @@ class GensConfig : public QObject
 				CONFREGION_AUTODETECT = -1,
 				CONFREGION_JP_NTSC    = 0,
 				CONFREGION_ASIA_PAL   = 1,
-				CONFREGION_USA_NTSC   = 2,
+				CONFREGION_US_NTSC   = 2,
 				CONFREGION_EU_PAL     = 3
 			};
 		Q_ENUMS(ConfRegionCode_t);

@@ -35,6 +35,10 @@
 #include "Save/SRam.hpp"
 #include "Save/EEPRom.hpp"
 
+// Region code.
+// TODO: Make the region code non-console-specific.
+#include "MD/SysVersion.hpp"
+
 // C++ includes.
 #include <string>
 
@@ -44,7 +48,7 @@ namespace LibGens
 class EmuContext
 {
 	public:
-		EmuContext(Rom *rom);
+		EmuContext(Rom *rom, SysVersion::RegionCode_t region = SysVersion::REGION_US_NTSC);
 		virtual ~EmuContext();
 		
 		/**

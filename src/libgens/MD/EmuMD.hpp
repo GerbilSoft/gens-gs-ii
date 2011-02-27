@@ -35,7 +35,7 @@ namespace LibGens
 class EmuMD : public EmuContext
 {
 	public:
-		EmuMD(Rom *rom);
+		EmuMD(Rom *rom, SysVersion::RegionCode_t region = SysVersion::REGION_US_NTSC);
 		~EmuMD();
 		
 		/**

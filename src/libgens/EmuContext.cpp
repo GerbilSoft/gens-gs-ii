@@ -64,8 +64,17 @@ bool EmuContext::ms_AutoFixChecksum = true;
 string EmuContext::ms_PathSRam;
 
 
-EmuContext::EmuContext(Rom *rom)
+/**
+ * EmuContext(): Initialize an emulation context.
+ * @param rom ROM.
+ * @param region System region. (not used in the base class)
+ */
+EmuContext::EmuContext(Rom *rom, SysVersion::RegionCode_t region)
 {
+	// NOTE: Region code isn't used in the base class.
+	// This may change later on.
+	((void)region);
+	
 	ms_RefCount++;
 	assert(ms_RefCount == 1);
 	instance = this;

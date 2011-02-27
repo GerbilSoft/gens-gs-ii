@@ -51,8 +51,13 @@
 namespace LibGens
 {
 
-EmuMD::EmuMD(Rom *rom)
-	: EmuContext(rom)
+/**
+ * EmuMD(): Initialize a Mega Drive context.
+ * @param rom MD ROM.
+ * @param region System region.
+ */
+EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
+	: EmuContext(rom, region)
 {
 	// Load the ROM image.
 	m_rom = rom;	// NOTE: This is already done in EmuContext::EmuContext()...
@@ -106,8 +111,8 @@ EmuMD::EmuMD(Rom *rom)
 	m_port2->reset();
 	m_portE->reset();
 	
-	// TODO: Set these elsewhere.
-	M68K_Mem::ms_SysVersion.setRegion(SysVersion::REGION_US_NTSC);
+	// Set the system version settings.
+	M68K_Mem::ms_SysVersion.setRegion(region);
 	M68K_Mem::ms_SysVersion.setDisk(false);		// No MCD connected.
 	
 	// TODO: VdpIo::VDP_Lines.Display.Total isn't being set properly...
