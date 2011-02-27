@@ -871,6 +871,10 @@ window to a larger size than its original resolution.</string>
  </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
+  <tabstop>chkOsdFpsEnable</tabstop>
+  <tabstop>btnOsdFpsColor</tabstop>
+  <tabstop>chkOsdMsgEnable</tabstop>
+  <tabstop>btnOsdMsgColor</tabstop>
   <tabstop>chkAutoFixChecksum</tabstop>
   <tabstop>chkAutoPause</tabstop>
   <tabstop>chkBorderColor</tabstop>
