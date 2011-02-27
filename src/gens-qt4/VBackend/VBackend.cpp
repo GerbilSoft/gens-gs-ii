@@ -100,8 +100,8 @@ VBackend::VBackend(QWidget *parent)
 		this, SLOT(setBilinearFilter(bool)));
 	connect(gqt4_config, SIGNAL(pauseTint_changed(bool)),
 		this, SLOT(setPauseTint(bool)));
-	connect(gqt4_config, SIGNAL(stretchMode_changed(GensConfig::StretchMode)),
-		this, SLOT(setStretchMode(GensConfig::StretchMode)));
+	connect(gqt4_config, SIGNAL(stretchMode_changed(GensConfig::StretchMode_t)),
+		this, SLOT(setStretchMode(GensConfig::StretchMode_t)));
 }
 
 VBackend::~VBackend()

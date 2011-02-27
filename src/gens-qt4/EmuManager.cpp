@@ -102,8 +102,8 @@ EmuManager::EmuManager()
 		this, SLOT(inverted_changed_slot(bool)));
 	connect(gqt4_config, SIGNAL(colorScaleMethod_changed(int)),
 		this, SLOT(colorScaleMethod_changed_slot(int)));
-	connect(gqt4_config, SIGNAL(interlacedMode_changed(GensConfig::InterlacedMode)),
-		this, SLOT(interlacedMode_changed_slot(GensConfig::InterlacedMode)));
+	connect(gqt4_config, SIGNAL(interlacedMode_changed(GensConfig::InterlacedMode_t)),
+		this, SLOT(interlacedMode_changed_slot(GensConfig::InterlacedMode_t)));
 }
 
 EmuManager::~EmuManager()
