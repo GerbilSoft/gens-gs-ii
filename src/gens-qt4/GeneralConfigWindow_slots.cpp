@@ -50,6 +50,7 @@ do { \
 } while (0)
 #endif
 
+/** Onscreen display. **/
 void GeneralConfigWindow::on_chkOsdFpsEnable_toggled(bool checked)
 	{ GENERIC_OPTION(setOsdFpsEnabled, checked); }
 void GeneralConfigWindow::on_chkOsdMsgEnable_toggled(bool checked)
@@ -64,11 +65,18 @@ void GeneralConfigWindow::on_chkPauseTint_toggled(bool checked)
 	{ GENERIC_OPTION(setPauseTint, checked); }
 void GeneralConfigWindow::on_chkNtscV30Rolling_toggled(bool checked)
 	{ GENERIC_OPTION(setNtscV30Rolling, checked); }
+
+/** Intro effect. **/
 void GeneralConfigWindow::on_cboIntroStyle_currentIndexChanged(int index)
 	{ GENERIC_OPTION(setIntroStyle, index); }
 void GeneralConfigWindow::on_cboIntroColor_currentIndexChanged(int index)
 	{ GENERIC_OPTION(setIntroColor, index); }
 
+/** System. **/
+void GeneralConfigWindow::on_cboRegionCurrent_currentIndexChanged(int index)
+	{ GENERIC_OPTION(setRegionCode, (index - 1)); }
+
+/** Graphics settings. **/
 void GeneralConfigWindow::on_chkAspectRatioConstraint_toggled(bool checked)
 	{ GENERIC_OPTION(setAspectRatioConstraint, checked); }
 void GeneralConfigWindow::on_chkFastBlur_toggled(bool checked)

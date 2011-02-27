@@ -177,7 +177,6 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		void on_txtMcdRomAsia_textChanged(void);
 		
 		/** External Programs **/
-		
 		void on_btnExtPrgUnRAR_clicked(void);
 		void on_txtExtPrgUnRAR_focusIn(void);
 		void on_txtExtPrgUnRAR_textChanged(void);
@@ -188,6 +187,8 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		 * On other systems, they aren't.
 		 * TODO: GNOME apparently applies settings immediately as well...
 		 */
+		
+		/** Onscreen display. **/
 		void on_chkOsdFpsEnable_toggled(bool checked);
 		void on_chkOsdMsgEnable_toggled(bool checked);
 		void on_chkAutoFixChecksum_toggled(bool checked);
@@ -198,10 +199,14 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		void on_cboIntroStyle_currentIndexChanged(int index);
 		void on_cboIntroColor_currentIndexChanged(int index);
 		
+		/** Graphics settings. **/
 		void on_chkAspectRatioConstraint_toggled(bool checked);
 		void on_chkFastBlur_toggled(bool checked);
 		void on_chkBilinearFilter_toggled(bool checked);
 		void on_cboInterlacedMode_currentIndexChanged(int index);
+		
+		/** System. **/
+		void on_cboRegionCurrent_currentIndexChanged(int index);
 		
 		void on_hsldContrast_valueChanged(int value);
 		void on_hsldBrightness_valueChanged(int value);

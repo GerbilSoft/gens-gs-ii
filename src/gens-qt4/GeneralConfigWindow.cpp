@@ -306,10 +306,6 @@ void GeneralConfigWindow::reload(void)
 	cboIntroStyle->setCurrentIndex(gqt4_config->introStyle());
 	cboIntroColor->setCurrentIndex(gqt4_config->introColor());
 	
-	/** System. **/
-	// TODO: Load current region code setting.
-	// TODO: Load region auto-detection settings.
-	
 	/** Sega CD Boot ROMs. **/
 	txtMcdRomUSA->setText(gqt4_config->mcdRomUSA());
 	txtMcdRomEUR->setText(gqt4_config->mcdRomEUR());
@@ -338,6 +334,10 @@ void GeneralConfigWindow::reload(void)
 	chkPauseTint->setChecked(gqt4_config->pauseTint());
 	chkNtscV30Rolling->setChecked(gqt4_config->ntscV30Rolling());
 	
+	/** System. **/
+	cboRegionCurrent->setCurrentIndex((int)gqt4_config->regionCode() + 1);
+	// TODO: Load region auto-detection settings.
+	
 #ifndef GCW_APPLY_IMMED
 	// Disable the Apply button.
 	setApplyButtonEnabled(false);
@@ -361,10 +361,6 @@ void GeneralConfigWindow::apply(void)
 	/** Intro effect. **/
 	gqt4_config->setIntroStyle(cboIntroStyle->currentIndex());
 	gqt4_config->setIntroColor(cboIntroColor->currentIndex());
-	
-	/** System. **/
-	// TODO: Apply current region code setting.
-	// TODO: Apply region auto-detection settings.
 	
 	/** Sega CD Boot ROMs. **/
 	gqt4_config->setMcdRomUSA(txtMcdRomUSA->text());
@@ -392,6 +388,10 @@ void GeneralConfigWindow::apply(void)
 	gqt4_config->setBorderColor(chkBorderColor->isChecked());
 	gqt4_config->setPauseTint(chkPauseTint->isChecked());
 	gqt4_config->setNtscV30Rolling(chkNtscV30Rolling->isChecked());
+	
+	/** System. **/
+	gqt4_config->setRegionCode((GensConfig::ConfRegionCode_t)(cboRegionCurrent->currentIndex() - 1));
+	// TODO: Apply region auto-detection settings.
 	
 	// Disable the Apply button.
 	// TODO: If Apply was clicked, set focus back to the main window elements.
