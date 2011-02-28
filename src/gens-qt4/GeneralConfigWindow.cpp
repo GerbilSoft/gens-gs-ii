@@ -116,10 +116,10 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	
 	// Intro Effect Color: Add the color entries.
 	cboIntroColor->addItem(Qt::black);
-	cboIntroColor->addItem(Qt::red);
+	cboIntroColor->addItem(Qt::blue);
 	cboIntroColor->addItem(Qt::green);
 	cboIntroColor->addItem(Qt::cyan);
-	cboIntroColor->addItem(Qt::blue);
+	cboIntroColor->addItem(Qt::red);
 	cboIntroColor->addItem(Qt::magenta);
 	cboIntroColor->addItem(Qt::yellow);
 	cboIntroColor->addItem(Qt::white);
