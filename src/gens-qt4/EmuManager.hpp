@@ -195,6 +195,7 @@ class EmuManager : public QObject
 				RQT_PALETTE_SETTING	= 10,
 				RQT_SAVE_SLOT		= 11,
 				RQT_RESET_CPU		= 12,
+				RQT_REGION_CODE		= 13,
 			};
 			
 			// RQT_PALETTE_SETTING types.
@@ -246,6 +247,9 @@ class EmuManager : public QObject
 				
 				// Reset CPU.
 				ResetCpuIndex cpu_idx;
+				
+				// Region code.
+				GensConfig::ConfRegionCode_t region;
 			};
 		};
 		
@@ -287,6 +291,12 @@ class EmuManager : public QObject
 		 * @param newAutoFixChecksum New Auto Fix Checksum setting.
 		 */
 		void autoFixChecksum_changed_slot(bool newAutoFixChecksum);
+	
+		/**
+		 * regionCode_changed_slot(): Region code has changed.
+		 * @param newRegionCode New region code setting.
+		 */
+		void regionCode_changed_slot(GensConfig::ConfRegionCode_t newRegionCode);
 	
 	public slots:
 		/**
@@ -340,6 +350,8 @@ class EmuManager : public QObject
 		
 		void doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, int val);
 		void doResetCpu(ResetCpuIndex cpu_idx);
+		
+		void doRegionCode(GensConfig::ConfRegionCode_t region);
 };
 
 

@@ -104,6 +104,10 @@ EmuManager::EmuManager()
 		this, SLOT(colorScaleMethod_changed_slot(int)));
 	connect(gqt4_config, SIGNAL(interlacedMode_changed(GensConfig::InterlacedMode_t)),
 		this, SLOT(interlacedMode_changed_slot(GensConfig::InterlacedMode_t)));
+	
+	// Region code settings.
+	connect(gqt4_config, SIGNAL(regionCode_changed(GensConfig::ConfRegionCode_t)),
+		this, SLOT(regionCode_changed_slot(GensConfig::ConfRegionCode_t)));
 }
 
 EmuManager::~EmuManager()

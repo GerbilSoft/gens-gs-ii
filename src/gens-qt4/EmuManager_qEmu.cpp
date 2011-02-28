@@ -308,6 +308,26 @@ void EmuManager::autoFixChecksum_changed_slot(bool newAutoFixChecksum)
 
 
 /**
+ * regionCode_changed_slot(): Region code has changed.
+ * @param newRegionCode New region code setting.
+ */
+void EmuManager::regionCode_changed_slot(GensConfig::ConfRegionCode_t newRegionCode)
+{
+	// NOTE: Region code change is processed even if a ROM isn't loaded,
+	// since we're printing a message to the screen.
+	
+	// Queue the region code change.
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_REGION_CODE;
+	rq.region = newRegionCode;
+	m_qEmuRequest.enqueue(rq);
+	
+	if (!m_rom || m_paused.data)
+		processQEmuRequest();
+}
+
+
+/**
  * resetEmulator(): Reset the emulator.
  * @param hardReset If true, do a hard reset; otherwise, do a soft reset.
  */
@@ -421,6 +441,11 @@ void EmuManager::processQEmuRequest(void)
 			case EmuRequest_t::RQT_RESET_CPU:
 				// Reset a CPU.
 				doResetCpu(rq.cpu_idx);
+				break;
+			
+			case EmuRequest_t::RQT_REGION_CODE:
+				// Set the region code.
+				doRegionCode(rq.region);
 				break;
 			
 			case EmuRequest_t::RQT_UNKNOWN:
@@ -992,6 +1017,50 @@ void EmuManager::doResetCpu(EmuManager::ResetCpuIndex cpu_idx)
 	
 	if (msg)
 		emit osdPrintMsg(1500, QLatin1String(msg));
+}
+
+
+/**
+ * doRegionCode(): Set the region code.
+ * @param region New region code setting.
+ */
+void EmuManager::doRegionCode(GensConfig::ConfRegionCode_t region)
+{
+	// TODO: Verify if this is an actual change.
+	// If it isn't, don't do anything.
+	
+	if (m_rom)
+	{
+		// Emulation is running. Change the region.
+		LibGens::SysVersion::RegionCode_t lg_region = GetLgRegionCode(
+					region, m_rom->regionCode());
+		gqt4_emuContext->setRegion(lg_region);
+	}
+	
+	// Print a message to the OSD.
+	QString region_str;
+	switch (region)
+	{
+		case GensConfig::CONFREGION_AUTODETECT:
+		default:
+			region_str = tr("Auto-Detect");
+			break;
+		case GensConfig::CONFREGION_JP_NTSC:
+			region_str = tr("Japan (NTSC)");
+			break;
+		case GensConfig::CONFREGION_ASIA_PAL:
+			region_str = tr("Asia (PAL)");
+			break;
+		case GensConfig::CONFREGION_US_NTSC:
+			region_str = tr("USA (NTSC)");
+			break;
+		case GensConfig::CONFREGION_EU_PAL:
+			region_str = tr("Europe (PAL)");
+			break;
+	}
+	
+	const QString str = tr("System region set to %1.");
+	emit osdPrintMsg(1500, str.arg(region_str));
 }
 
 }
