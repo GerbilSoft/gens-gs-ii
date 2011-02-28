@@ -239,6 +239,16 @@ bool GensActions::doAction(int action)
 			// System menu.
 			switch (MNUID_ITEM(action))
 			{
+				case MNUID_ITEM(IDM_SYSTEM_REGION):
+				{
+					// Switch to the next region setting.
+					int region = (int)gqt4_config->regionCode() + 1;
+					if (region > (int)GensConfig::CONFREGION_EU_PAL)
+						region = (int)GensConfig::CONFREGION_AUTODETECT;
+					gqt4_config->setRegionCode((GensConfig::ConfRegionCode_t)region);
+					break;
+				}
+					
 				case MNUID_ITEM(IDM_SYSTEM_HARDRESET):
 					// Hard Reset.
 					emit actionResetEmulator(true);
@@ -268,6 +278,21 @@ bool GensActions::doAction(int action)
 				default:
 					break;
 			}
+			break;
+		
+		case IDM_SYSTEM_REGION_MENU:
+			// System, Region menu.
+			if (MNUID_ITEM(action) < MNUID_ITEM(IDM_SYSTEM_REGION_AUTODETECT) ||
+			    MNUID_ITEM(action) > MNUID_ITEM(IDM_SYSTEM_REGION_EUROPE))
+			{
+				// Invalid region.
+				break;
+			}
+			
+			// Set the region code.
+			gqt4_config->setRegionCode(
+				(GensConfig::ConfRegionCode_t)
+					(MNUID_ITEM(action) - MNUID_ITEM(IDM_SYSTEM_REGION_AUTODETECT) - 1));
 			break;
 		
 		case IDM_CTRLTEST_MENU:
