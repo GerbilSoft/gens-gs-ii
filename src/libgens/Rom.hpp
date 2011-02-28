@@ -40,6 +40,10 @@
 // Decompressor subsystem.
 #include "Decompressor/Decompressor.hpp"
 
+// SysVersion::RegionCode_t
+// TODO: Move somewhere else.
+#include "MD/SysVersion.hpp"
+
 /**
  * ROM_HEADER_SIZE: Number of bytes used for ROM type detection.
  */
@@ -132,13 +136,14 @@ class Rom
 		// TODO: Change to uint8_t?
 		int regionCode(void) const
 			{ return m_regionCode; }
+		
 		/**
-		 * RegionCodeStr(): Get a string identifying a given region code. (MD hex format)
+		 * RegionCodeStr(): Get a string identifying a given region code.
 		 * NOTE: This function returns an ASCII string, suitable for translation.
-		 * @param region Region code. (1, 2, 4, 8)
+		 * @param region Region code.
 		 * @return Region code string, or NULL on error.
 		 */
-		static const char *RegionCodeStr(int region);
+		static const char *RegionCodeStr(SysVersion::RegionCode_t region);
 		
 		/** Multi-file ROM archive support. **/
 		
