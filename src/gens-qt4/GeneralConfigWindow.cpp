@@ -336,7 +336,38 @@ void GeneralConfigWindow::reload(void)
 	
 	/** System. **/
 	cboRegionCurrent->setCurrentIndex((int)gqt4_config->regionCode() + 1);
-	// TODO: Load region auto-detection settings.
+	
+	// Region auto-detection settings.
+	lstRegionDetect->clear();
+	uint16_t regionCodeOrder = gqt4_config->regionCodeOrder();
+	for (int i = 0; i < 4; i++, regionCodeOrder >>= 4)
+	{
+		QListWidgetItem *item;
+		switch (regionCodeOrder & 0xF)
+		{
+			case 0x1:
+				item = new QListWidgetItem(tr("Japan (NTSC)"));
+				break;
+			case 0x2:
+				item = new QListWidgetItem(tr("Asia (PAL)"));
+				break;
+			case 0x4:
+				item = new QListWidgetItem(tr("USA (NTSC)"));
+				break;
+			case 0x8:
+				item = new QListWidgetItem(tr("Europe (PAL)"));
+				break;
+			default:
+				item = NULL;
+				break;
+		}
+		
+		if (item)
+		{
+			item->setData(Qt::UserRole, (regionCodeOrder & 0xF));
+			lstRegionDetect->insertItem(0, item);
+		}
+	}
 	
 #ifndef GCW_APPLY_IMMED
 	// Disable the Apply button.

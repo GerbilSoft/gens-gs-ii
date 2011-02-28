@@ -668,26 +668,6 @@ window to a larger size than its original resolution.</string>
                 <property name="dragDropMode">
                  <enum>QAbstractItemView::InternalMove</enum>
                 </property>
-                <item>
-                 <property name="text">
-                  <string>USA (NTSC)</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Europe (PAL)</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Japan (NTSC)</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Asia (PAL)</string>
-                 </property>
-                </item>
                </widget>
               </item>
               <item>
