@@ -36,7 +36,6 @@
 class QStackedWidget;
 class QToolBar;
 class QAction;
-class QModelIndexList;
 
 // Apply changes immediately.
 #ifdef Q_WS_MAC
