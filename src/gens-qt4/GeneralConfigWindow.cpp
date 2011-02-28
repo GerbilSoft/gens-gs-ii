@@ -404,7 +404,7 @@ void GeneralConfigWindow::apply(void)
 	
 	/** System. **/
 	gqt4_config->setRegionCode((GensConfig::ConfRegionCode_t)(cboRegionCurrent->currentIndex() - 1));
-	// TODO: Apply region auto-detection settings.
+	gqt4_config->setRegionCodeOrder(regionCodeOrder());
 	
 	// Disable the Apply button.
 	// TODO: If Apply was clicked, set focus back to the main window elements.
@@ -520,7 +520,7 @@ void GeneralConfigWindow::on_btnRegionDetectUp_clicked(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	// TODO: Apply region auto-detection settings.
+	gqt4_config->setRegionCodeOrder(regionCodeOrder());
 #endif
 }
 
@@ -545,8 +545,25 @@ void GeneralConfigWindow::on_btnRegionDetectDown_clicked(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	// TODO: Apply region auto-detection settings.
+	gqt4_config->setRegionCodeOrder(regionCodeOrder());
 #endif
+}
+
+
+/**
+ * regionCodeOrder(): Get the region code order from lstRegionDetect.
+ * @return Region code order.
+ */
+uint16_t GeneralConfigWindow::regionCodeOrder(void) const
+{
+	uint16_t ret = 0;
+	for (int i = 0; i < lstRegionDetect->count(); i++)
+	{
+		const QListWidgetItem *item = lstRegionDetect->item(i);
+		ret <<= 4;
+		ret |= (uint16_t)item->data(Qt::UserRole).toUInt();
+	}
+	return ret;
 }
 
 

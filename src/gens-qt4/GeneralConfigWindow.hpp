@@ -125,6 +125,9 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		QColor m_osdFpsColor;
 		QColor m_osdMsgColor;
 		
+		/** System. **/
+		uint16_t regionCodeOrder(void) const;
+		
 		/** Sega CD: Boot ROM **/
 		
 		// Sega CD: Boot ROM filesize.
@@ -157,6 +160,7 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		/** System. **/
 		void on_btnRegionDetectUp_clicked(void);
 		void on_btnRegionDetectDown_clicked(void);
+		// TODO: Detect changes in lstRegionDetect.
 		
 		/** Sega CD: Boot ROM **/
 		
