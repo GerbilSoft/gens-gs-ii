@@ -33,6 +33,9 @@
 #include <QtGui/QMenuBar>
 #include <QtGui/QKeySequence>
 
+// GensConfig is needed for synchronization.
+#include "GensConfig.hpp"
+
 namespace GensQt4
 {
 
@@ -49,6 +52,8 @@ class GensMenuBar : public QObject
 		
 		bool menuItemCheckState(int id);
 		int setMenuItemCheckState(int id, bool newCheck);
+		
+		bool isLocked(void);
 	
 	private:
 		enum MenuItemType
@@ -122,12 +127,44 @@ class GensMenuBar : public QObject
 	signals:
 		void triggered(int id);
 	
+	protected:
+		/**
+		 * syncAll(): Synchronize all menus.
+		 */
+		void syncAll(void);
+		
+		/**
+		 * syncConnect(): Connect menu synchronization slots.
+		 */
+		void syncConnect(void);
+		
+		/**
+		 * lock(), unlock(): Temporarily lock menu actions.
+		 * Calls are cumulative; 2 locks requires 2 unlocks.
+		 * Calling unlock() when not locked will return an error.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int lock(void);
+		int unlock(void);
+	
 	private:
 		Q_DISABLE_COPY(GensMenuBar);
+		
+		// Lock counter.
+		int m_lockCnt;
+		bool m_connected;
+	
+	private slots:
+		/** Menu synchronization slots. **/
+		void stretchMode_changed_slot(GensConfig::StretchMode_t newStretchMode);
+		void regionCode_changed_slot(GensConfig::ConfRegionCode_t newRegionCode);
 };
 
 inline QMenu *GensMenuBar::popupMenu(void)
 	{ return m_popupMenu; }
+
+inline bool GensMenuBar::isLocked(void)
+	{ return (m_lockCnt > 0); }
 
 }
 

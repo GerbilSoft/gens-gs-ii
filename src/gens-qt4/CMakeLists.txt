@@ -131,6 +131,7 @@ SET(gens-qt4_SRCS
 	actions/GensKeyConfig.cpp
 	actions/GensMenuBar.cpp
 	actions/GensMenuBar_menus.cpp
+	actions/GensMenuBar_sync.cpp
 	actions/GensActions.cpp
 	widgets/GensColorComboBox.cpp
 	widgets/GensKeySequenceWidget.cpp

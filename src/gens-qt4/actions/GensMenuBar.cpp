@@ -23,6 +23,9 @@
 
 #include "GensMenuBar.hpp"
 
+// C includes.
+#include <assert.h>
+
 // Menu definitions.
 #include "GensMenuBar_menus.hpp"
 
@@ -41,16 +44,22 @@ namespace GensQt4
 GensMenuBar::GensMenuBar(QObject *parent)
 	: QObject(parent)
 {
+	// Initialize the lock counter.
+	m_lockCnt = 0;
+	
 	// Create the signal mapper.
 	m_signalMapper = new QSignalMapper(this);
 	connect(this->m_signalMapper, SIGNAL(mapped(int)),
 		this, SIGNAL(triggered(int)));
+	m_connected = true;
 	
 	// Create the popup menu.
 	m_popupMenu = new QMenu();
+	parseMainMenu(&ms_gmmiMain[0]);	// Populate the popup menu.
 	
-	// Populate the popup menu.
-	parseMainMenu(&ms_gmmiMain[0]);
+	// Synchronization.
+	syncAll();	// Synchronize the menus.
+	syncConnect();	// Connect synchronization slots.
 }
 
 GensMenuBar::~GensMenuBar()
@@ -261,6 +270,45 @@ int GensMenuBar::setMenuItemCheckState(int id, bool newCheck)
 		return -2;
 	
 	mnuItem->setChecked(newCheck);
+	return 0;
+}
+
+
+/**
+ * lock(), unlock(): Temporarily lock menu actions.
+ * Calls are cumulative; 2 locks requires 2 unlocks.
+ * Calling unlock() when not locked will return an error.
+ * @return 0 on success; non-zero on error.
+ */
+int GensMenuBar::lock(void)
+{
+	m_lockCnt++;
+	if (m_connected)
+	{
+		// Disconnect the signal while locked.
+		disconnect(this->m_signalMapper, SIGNAL(mapped(int)),
+			   this, SIGNAL(triggered(int)));
+		m_connected = false;
+	}
+	
+	return 0;
+}
+
+int GensMenuBar::unlock(void)
+{
+	assert(m_lockCnt >= 0);
+	if (m_lockCnt <= 0)
+		return -1;
+	
+	m_lockCnt--;
+	if (m_lockCnt == 0 && !m_connected)
+	{
+		// Reconnect the signal.
+		connect(this->m_signalMapper, SIGNAL(mapped(int)),
+			this, SIGNAL(triggered(int)));
+		m_connected = true;
+	}
+	
 	return 0;
 }
 
