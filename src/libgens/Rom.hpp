@@ -131,6 +131,13 @@ class Rom
 		/// Region code. (MD hex format)
 		int regionCode(void) const
 			{ return m_regionCode; }
+		/**
+		 * RegionCodeStr(): Get a string identifying a given region code. (MD hex format)
+		 * NOTE: This function returns an ASCII string, suitable for translation.
+		 * @param region Region code. (1, 2, 4, 8)
+		 * @return Region code string, or NULL on error.
+		 */
+		static const char *RegionCodeStr(int region);
 		
 		/** Multi-file ROM archive support. **/
 		
