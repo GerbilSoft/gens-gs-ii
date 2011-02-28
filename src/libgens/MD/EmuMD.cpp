@@ -203,6 +203,15 @@ int EmuMD::setRegion(SysVersion::RegionCode_t region)
  */
 int EmuMD::setRegion_int(SysVersion::RegionCode_t region, bool preserveState)
 {
+	SysVersion newRegion(region);
+	if (preserveState && (M68K_Mem::ms_SysVersion.isPal() == newRegion.isPal()))
+	{
+		// preserveState was specified, and the current NTSC/PAL setting
+		// matches the new NTSC/PAL setting. Don't reset anything.
+		M68K_Mem::ms_SysVersion.setRegion(region);
+		return 0;
+	}
+	
 	// Set the region.
 	M68K_Mem::ms_SysVersion.setRegion(region);
 	
