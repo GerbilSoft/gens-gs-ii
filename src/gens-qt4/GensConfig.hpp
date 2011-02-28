@@ -24,6 +24,9 @@
 #ifndef __GENS_QT4_GENSCONFIG_HPP__
 #define __GENS_QT4_GENSCONFIG_HPP__
 
+// C includes.
+#include <stdint.h>
+
 // Qt includes.
 #include <QtCore/QObject>
 #include <QtCore/QString>
@@ -136,6 +139,12 @@ class GensConfig : public QObject
 		Q_PROPERTY(ConfRegionCode_t regionCode READ regionCode WRITE setRegionCode NOTIFY regionCode_changed);
 		GC_PROPERTY(ConfRegionCode_t, regionCode, ConfRegionCode_t, RegionCode);
 		
+		// Region code auto-detection order.
+		private:
+			static bool IsRegionCodeOrderValid(uint16_t order);
+		Q_PROPERTY(uint16_t regionCodeOrder READ regionCodeOrder WRITE setRegionCodeOrder NOTIFY regionCodeOrder_changed);
+		GC_PROPERTY(uint16_t, regionCodeOrder, uint16_t, RegionCodeOrder);
+		
 		/** Sega CD Boot ROMs. **/
 		Q_PROPERTY(QString mcdRomUSA READ mcdRomUSA WRITE setMcdRomUSA NOTIFY mcdRomUSA_changed)
 		GC_PROPERTY(QString, mcdRomUSA, const QString&, McdRomUSA);
@@ -230,6 +239,7 @@ class GensConfig : public QObject
 		
 		/** System. **/
 		void regionCode_changed(GensConfig::ConfRegionCode_t newRegionCode);
+		void regionCodeOrder_changed(uint16_t newRegionCodeOrder);
 		
 		/** Intro effect. **/
 		void introStyle_changed(int style);

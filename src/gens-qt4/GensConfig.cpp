@@ -131,6 +131,12 @@ int GensConfig::reload(const QString& filename)
 	if ((regionCode_tmp < (int)CONFREGION_AUTODETECT) || (regionCode_tmp > (int)CONFREGION_EU_PAL))
 		regionCode_tmp = (int)CONFREGION_AUTODETECT;
 	m_regionCode = (ConfRegionCode_t)regionCode_tmp;
+	
+	uint16_t regionCodeOrder_tmp = settings.value(
+			QLatin1String("regionCodeOrder"), QLatin1String("0x4812")).toString().toUShort(NULL, 0);
+	if (!IsRegionCodeOrderValid(regionCodeOrder_tmp))
+		regionCodeOrder_tmp = 0x4812;
+	m_regionCodeOrder = regionCodeOrder_tmp;
 	settings.endGroup();
 	
 	/** Sega CD Boot ROMs. **/
@@ -288,6 +294,9 @@ int GensConfig::save(const QString& filename)
 	/** System. **/
 	settings.beginGroup(QLatin1String("System"));
 	settings.setValue(QLatin1String("regionCode"), (int)m_regionCode);
+	QString regionCodeOrder = QLatin1String("0x") +
+			QString::number(m_regionCodeOrder, 16).toUpper().rightJustified(4, QChar(L'0'));
+	settings.setValue(QLatin1String("regionCodeOrder"), regionCodeOrder);
 	settings.endGroup();
 	
 	/** Sega CD Boot ROMs. **/
@@ -351,6 +360,7 @@ void GensConfig::emitAll(void)
 	
 	/** System. **/
 	emit regionCode_changed(m_regionCode);
+	emit regionCodeOrder_changed(m_regionCodeOrder);
 	
 	/** Sega CD Boot ROMs. **/
 	emit mcdRomUSA_changed(m_mcdRomUSA);
@@ -489,6 +499,44 @@ GC_PROPERTY_WRITE_RANGE(introColor, int, IntroColor, 0, 7)
 GC_PROPERTY_WRITE_RANGE(regionCode, ConfRegionCode_t, RegionCode,
 			(int)CONFREGION_AUTODETECT,
 		        (int)CONFREGION_EU_PAL)
+
+/**
+ * IsRegionCodeOrderValid(): Check if a region code order is valid.
+ * @param order Region code order.
+ * @return True if the region code order is valid; false if it isn't.
+ */
+bool GensConfig::IsRegionCodeOrderValid(uint16_t order)
+{
+	static const uint16_t ms_RegionCodeOrder_tbl[24] =
+	{
+		0x4812, 0x4821, 0x4182, 0x4128, 0x4281, 0x4218, 
+		0x8412, 0x8421, 0x8124, 0x8142, 0x8241, 0x8214,
+		0x1482, 0x1428, 0x1824, 0x1842, 0x1248, 0x1284,
+		0x2481, 0x2418,	0x2814, 0x2841, 0x2148, 0x2184
+	};
+	
+	for (size_t i = 0; i < (sizeof(ms_RegionCodeOrder_tbl)/sizeof(ms_RegionCodeOrder_tbl[0])); i++)
+	{
+		if (ms_RegionCodeOrder_tbl[i] == order)
+			return true;
+	}
+	
+	// Region code order is not valid.
+	return false;
+}
+
+// Region code auto-detection order.
+void GensConfig::setRegionCodeOrder(uint16_t newRegionCodeOrder)
+{
+	if (m_regionCodeOrder == newRegionCodeOrder)
+		return;
+	if (!IsRegionCodeOrderValid(newRegionCodeOrder))
+		return;
+	
+	m_regionCodeOrder = newRegionCodeOrder;
+	emit regionCodeOrder_changed(m_regionCodeOrder);
+}
+
 
 /** Sega CD Boot ROMs. **/
 GC_PROPERTY_WRITE(mcdRomUSA, const QString&, McdRomUSA)
