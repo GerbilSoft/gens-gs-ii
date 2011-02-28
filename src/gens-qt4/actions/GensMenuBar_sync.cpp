@@ -167,27 +167,46 @@ void GensMenuBar::stateChanged(void)
 	// Lock menu actions to prevent errant signals from being emitted.
 	this->lock();
 	
-	if (m_emuManager && m_emuManager->isRomOpen())
+	const bool isRomOpen = (m_emuManager && m_emuManager->isRomOpen());
+	const bool isPaused = (isRomOpen ? m_emuManager->paused().paused_manual : false);
+	
+	// TODO: Do we really need to check for NULL actions?
+	
+	// Update menu actions.
+	if (actionPause)
 	{
-		// ROM is open.
-		
-		// Manual paused state.
-		if (actionPause)
-		{
-			actionPause->setEnabled(true);
-			actionPause->setChecked(m_emuManager->paused().paused_manual);
-		}
+		actionPause->setEnabled(isRomOpen);
+		actionPause->setChecked(isPaused);
 	}
-	else
+	
+	// Simple enable-if-ROM-open actions.
+	static const int EnableIfOpen[] =
 	{
-		// ROM is closed.
-		
-		// Manual paused state.
-		if (actionPause)
-		{
-			actionPause->setChecked(false);
-			actionPause->setEnabled(false);
-		}
+		IDM_FILE_CLOSE, IDM_FILE_SAVESTATE, IDM_FILE_LOADSTATE,
+		IDM_GRAPHICS_SCRSHOT, IDM_SYSTEM_HARDRESET, IDM_SYSTEM_SOFTRESET,
+		0
+	};
+	
+	for (int i = ((sizeof(EnableIfOpen)/sizeof(EnableIfOpen[0]))-2); i >= 0; i--)
+	{
+		QAction *actionEnableIfOpen = m_hashActions.value(EnableIfOpen[i]);
+		if (actionEnableIfOpen)
+			actionEnableIfOpen->setEnabled(isRomOpen);
+	}
+	
+	// System-specifc Reset CPU actions.
+	// TODO: Determine the active system.
+	QAction *actionCpuResetM68K = m_hashActions.value(IDM_SYSTEM_CPURESET_M68K);
+	QAction *actionCpuResetZ80 = m_hashActions.value(IDM_SYSTEM_CPURESET_Z80);
+	if (actionCpuResetM68K)
+	{
+		actionCpuResetM68K->setEnabled(isRomOpen);
+		actionCpuResetM68K->setVisible(isRomOpen);
+	}
+	if (actionCpuResetZ80)
+	{
+		actionCpuResetZ80->setEnabled(isRomOpen);
+		actionCpuResetZ80->setVisible(isRomOpen);
 	}
 	
 	// Unlock menu actions.
