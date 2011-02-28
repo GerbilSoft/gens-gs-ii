@@ -328,6 +328,30 @@ void EmuManager::regionCode_changed_slot(GensConfig::ConfRegionCode_t newRegionC
 
 
 /**
+ * regionCodeOrder_changed_slot(): Region code auto-detection order has changed.
+ * @param newRegionCodeOrder New region code auto-detection order setting.
+ */
+void EmuManager::regionCodeOrder_changed_slot(uint16_t newRegionCodeOrder)
+{
+	if (!m_rom)
+		return;
+	if (gqt4_config->regionCode() != GensConfig::CONFREGION_AUTODETECT)
+		return;
+	
+	// Auto-detect order has changed, and we're currently using auto-detect.
+	// Handle it as a regular region code change.
+	// Queue the region code change.
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_REGION_CODE;
+	rq.region = GensConfig::CONFREGION_AUTODETECT;
+	m_qEmuRequest.enqueue(rq);
+	
+	if (!m_rom || m_paused.data)
+		processQEmuRequest();
+}
+
+
+/**
  * resetEmulator(): Reset the emulator.
  * @param hardReset If true, do a hard reset; otherwise, do a soft reset.
  */

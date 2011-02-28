@@ -108,6 +108,8 @@ EmuManager::EmuManager()
 	// Region code settings.
 	connect(gqt4_config, SIGNAL(regionCode_changed(GensConfig::ConfRegionCode_t)),
 		this, SLOT(regionCode_changed_slot(GensConfig::ConfRegionCode_t)));
+	connect(gqt4_config, SIGNAL(regionCodeOrder_changed(uint16_t)),
+		this, SLOT(regionCodeOrder_changed_slot(uint16_t)));
 }
 
 EmuManager::~EmuManager()

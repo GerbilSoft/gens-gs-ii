@@ -303,6 +303,12 @@ class EmuManager : public QObject
 		 * @param newRegionCode New region code setting.
 		 */
 		void regionCode_changed_slot(GensConfig::ConfRegionCode_t newRegionCode);
+		
+		/**
+		 * regionCodeOrder_changed_slot(): Region code auto-detection order has changed.
+		 * @param newRegionCodeOrder New region code auto-detection order setting.
+		 */
+		void regionCodeOrder_changed_slot(uint16_t newRegionCodeOrder);
 	
 	public slots:
 		/**
