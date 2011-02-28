@@ -206,7 +206,6 @@ int GensKeyConfig::actionToKey(int action)
  * @param settings Settings file.
  * @return 0 on success; non-zero on error.
  */
-#include <stdio.h>
 int GensKeyConfig::load(const QSettings& settings)
 {
 	// Clear the hash tables before loading.
