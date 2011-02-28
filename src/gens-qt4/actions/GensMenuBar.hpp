@@ -36,6 +36,9 @@
 // GensConfig is needed for synchronization.
 #include "GensConfig.hpp"
 
+// EmuManager is needed for some settings.
+#include "../EmuManager.hpp"
+
 namespace GensQt4
 {
 
@@ -44,7 +47,7 @@ class GensMenuBar : public QObject
 	Q_OBJECT
 	
 	public:
-		GensMenuBar(QObject *parent = NULL);
+		GensMenuBar(QObject *parent = NULL, EmuManager *emuManager = NULL);
 		virtual ~GensMenuBar();
 		
 		QMenuBar *createMenuBar(void);
@@ -125,7 +128,7 @@ class GensMenuBar : public QObject
 		QMenu *m_popupMenu;
 	
 	signals:
-		void triggered(int id);
+		void triggered(int id, bool state);
 	
 	protected:
 		/**
@@ -150,11 +153,26 @@ class GensMenuBar : public QObject
 	private:
 		Q_DISABLE_COPY(GensMenuBar);
 		
+	/** Menu synchronization. **/
+	
+	public:
+		void setEmuManager(EmuManager *newEmuManager);
+	
+	private:
 		// Lock counter.
 		int m_lockCnt;
-		bool m_connected;
+		
+		// Emulation Manager.
+		EmuManager *m_emuManager;
+	
+	public slots:
+		/** Emulation state has changed. **/
+		void stateChanged(void);
 	
 	private slots:
+		/** Menu item selection slot. **/
+		void menuItemSelected(int id);
+		
 		/** Menu synchronization slots. **/
 		void stretchMode_changed_slot(GensConfig::StretchMode_t newStretchMode);
 		void regionCode_changed_slot(GensConfig::ConfRegionCode_t newRegionCode);

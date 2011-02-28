@@ -219,12 +219,13 @@ void EmuManager::pauseRequest(paused_t paused_set, paused_t paused_clear)
 }
 
 /**
- * pauseRequest(): Toggle the manual paused state.
+ * pauseRequest(): Set the manual paused state.
+ * @param newManualPaused New manual paused state.
  */
-void EmuManager::pauseRequest(void)
+void EmuManager::pauseRequest(bool newManualPaused)
 {
 	paused_t newPause = m_paused;
-	newPause.paused_manual = !newPause.paused_manual;
+	newPause.paused_manual = !!newManualPaused;
 	pauseRequest(newPause);
 }
 

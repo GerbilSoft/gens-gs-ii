@@ -41,15 +41,13 @@ class QCloseEvent;
 #include "VBackend/VBackend.hpp"
 #include "EmuManager.hpp"
 #include "actions/GensActions.hpp"
+#include "actions/GensMenuBar.hpp"
 
 // Idle thread.
 #include "IdleThread.hpp"
 
 namespace GensQt4
 {
-
-// Class declarations.
-class GensMenuBar;
 
 class GensWindow : public QMainWindow
 {
@@ -76,6 +74,9 @@ class GensWindow : public QMainWindow
 		inline bool idleThreadAllowed(void)
 			{ return m_idleThreadAllowed; }
 		void setIdleThreadAllowed(bool newIdleThreadAllowed);
+		
+		// Wrapper for GensActions.
+		bool menuItemCheckState(int action);
 	
 	public slots:
 		/** Wrapper functions for GensActions. **/
@@ -211,6 +212,10 @@ class GensWindow : public QMainWindow
 		 */
 		void showContextMenu(const QPoint& pos);
 };
+
+// Wrapper for GensActions.
+inline bool GensWindow::menuItemCheckState(int action)
+	{ return m_gensMenuBar->menuItemCheckState(action); }
 
 }
 

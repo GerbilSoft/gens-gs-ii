@@ -48,10 +48,6 @@
 // Video Backend classes.
 #include "VBackend/GensQGLWidget.hpp"
 
-// gens-qt4 classes.
-#include "actions/GensMenuBar.hpp"
-
-
 namespace GensQt4
 {
 
@@ -142,7 +138,7 @@ void GensWindow::setupUi(void)
 	QMetaObject::connectSlotsByName(this);
 	
 	// Create the menubar.
-	m_gensMenuBar = new GensMenuBar(this);
+	m_gensMenuBar = new GensMenuBar(this, m_emuManager);
 	this->setMenuBar(m_gensMenuBar->createMenuBar());
 	
 	// Create the Video Backend.
@@ -163,8 +159,8 @@ void GensWindow::setupUi(void)
 	setAcceptDrops(true);
 	
 	// Connect the GensMenuBar's triggered() signal.
-	connect(m_gensMenuBar, SIGNAL(triggered(int)),
-		m_gensActions, SLOT(doAction(int)));
+	connect(m_gensMenuBar, SIGNAL(triggered(int, bool)),
+		m_gensActions, SLOT(doAction(int, bool)));
 	
 	// Connect Emulation Manager signals to GensWindow.
 	connect(m_emuManager, SIGNAL(updateFps(double)),
@@ -179,8 +175,8 @@ void GensWindow::setupUi(void)
 		this, SLOT(osdShowPreview(int, const QImage&)));
 	
 	// Gens Action Manager signals.
-	connect(m_gensActions, SIGNAL(actionTogglePaused(void)),
-		m_emuManager, SLOT(pauseRequest(void)));
+	connect(m_gensActions, SIGNAL(actionSetPaused(bool)),
+		m_emuManager, SLOT(pauseRequest(bool)));
 	connect(m_gensActions, SIGNAL(actionResetEmulator(bool)),
 		m_emuManager, SLOT(resetEmulator(bool)));
 	connect(m_gensActions, SIGNAL(actionResetCpu(int)),

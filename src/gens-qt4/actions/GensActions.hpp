@@ -58,15 +58,16 @@ class GensActions : public QObject
 		/**
 		 * doAction(): Do an action.
 		 * @param id Action ID. (from GensMenuBar_menus.hpp)
+		 * @param state Menu item check state.
 		 * @return True if handled; false if not.
 		 */
-		bool doAction(int action);
+		bool doAction(int action, bool state);
 	
 	protected:
 		GensWindow *m_parent;
 	
 	signals:
-		void actionTogglePaused(void);
+		void actionSetPaused(bool paused);
 		
 		/**
 		 * actionResetEmulator(): Reset the emulator.

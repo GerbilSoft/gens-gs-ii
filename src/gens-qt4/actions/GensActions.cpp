@@ -65,16 +65,17 @@ bool GensActions::checkEventKey(GensKey_t key)
 		return false;
 	
 	// Do the action.
-	return doAction(action);
+	return doAction(action, !m_parent->menuItemCheckState(action));
 }
 
 
 /**
  * doAction(): Do an action.
  * @param action Action ID. (from GensMenuBar_menus.hpp)
+ * @param state Menu item check state.
  * @return True if handled; false if not.
  */
-bool GensActions::doAction(int action)
+bool GensActions::doAction(int action, bool state)
 {
 	switch (MNUID_MENU(action))
 	{
@@ -260,9 +261,8 @@ bool GensActions::doAction(int action)
 					return true;
 				
 				case MNUID_ITEM(IDM_SYSTEM_PAUSE):
-					// Toggle Paused.
-					// TODO: Menu check synchronization.
-					emit actionTogglePaused();
+					// Set manual Paused state.
+					emit actionSetPaused(state);
 					return true;
 				
 				case MNUID_ITEM(IDM_SYSTEM_CPURESET_M68K):

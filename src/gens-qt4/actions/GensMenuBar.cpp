@@ -41,8 +41,9 @@
 namespace GensQt4
 {
 
-GensMenuBar::GensMenuBar(QObject *parent)
+GensMenuBar::GensMenuBar(QObject *parent, EmuManager *emuManager)
 	: QObject(parent)
+	, m_emuManager(emuManager)
 {
 	// Initialize the lock counter.
 	m_lockCnt = 0;
@@ -50,8 +51,7 @@ GensMenuBar::GensMenuBar(QObject *parent)
 	// Create the signal mapper.
 	m_signalMapper = new QSignalMapper(this);
 	connect(this->m_signalMapper, SIGNAL(mapped(int)),
-		this, SIGNAL(triggered(int)));
-	m_connected = true;
+		this, SLOT(menuItemSelected(int)));
 	
 	// Create the popup menu.
 	m_popupMenu = new QMenu();
@@ -283,14 +283,6 @@ int GensMenuBar::setMenuItemCheckState(int id, bool newCheck)
 int GensMenuBar::lock(void)
 {
 	m_lockCnt++;
-	if (m_connected)
-	{
-		// Disconnect the signal while locked.
-		disconnect(this->m_signalMapper, SIGNAL(mapped(int)),
-			   this, SIGNAL(triggered(int)));
-		m_connected = false;
-	}
-	
 	return 0;
 }
 
@@ -301,15 +293,24 @@ int GensMenuBar::unlock(void)
 		return -1;
 	
 	m_lockCnt--;
-	if (m_lockCnt == 0 && !m_connected)
-	{
-		// Reconnect the signal.
-		connect(this->m_signalMapper, SIGNAL(mapped(int)),
-			this, SIGNAL(triggered(int)));
-		m_connected = true;
-	}
-	
 	return 0;
+}
+
+
+/**
+ * menuItemSelected(): A menu item has been selected.
+ * @param id Menu item ID.
+ */
+void GensMenuBar::menuItemSelected(int id)
+{
+	if (m_lockCnt > 0)
+		return;
+	
+	// Get the menu item check state.
+	bool state = menuItemCheckState(id);
+	
+	// Emit the menu item triggered() signal.
+	emit triggered(id, state);
 }
 
 }

@@ -31,6 +31,35 @@ namespace GensQt4
 {
 
 /**
+ * setEmuManager(): Set the emulation manager.
+ * @param newEmuManager New emulation manager.
+ */
+void GensMenuBar::setEmuManager(EmuManager *newEmuManager)
+{
+	if (m_emuManager == newEmuManager)
+		return;
+	
+	if (m_emuManager)
+	{
+		// Disconnect emulation manager signals.
+		disconnect(m_emuManager, SIGNAL(stateChanged(void)),
+			this, SLOT(stateChanged(void)));
+	}
+	
+	m_emuManager = newEmuManager;
+	if (m_emuManager)
+	{
+		// Connect emulation manager signals.
+		connect(m_emuManager, SIGNAL(stateChanged(void)),
+			this, SLOT(stateChanged(void)));
+	}
+	
+	// Emulation state has changed.
+	stateChanged();
+}
+
+
+/**
  * syncAll(): Synchronize all menus.
  */
 void GensMenuBar::syncAll(void)
@@ -40,6 +69,7 @@ void GensMenuBar::syncAll(void)
 	// Do synchronization.
 	stretchMode_changed_slot(gqt4_config->stretchMode());
 	regionCode_changed_slot(gqt4_config->regionCode());
+	stateChanged();
 	
 	this->unlock();
 }
@@ -54,6 +84,13 @@ void GensMenuBar::syncConnect(void)
 		this, SLOT(stretchMode_changed_slot(GensConfig::StretchMode_t)));
 	connect(gqt4_config, SIGNAL(regionCode_changed(GensConfig::ConfRegionCode_t)),
 		this, SLOT(regionCode_changed_slot(GensConfig::ConfRegionCode_t)));
+	
+	if (m_emuManager)
+	{
+		// Connect emulation manager signals.
+		connect(m_emuManager, SIGNAL(stateChanged(void)),
+			this, SLOT(stateChanged(void)));
+	}
 }
 
 
@@ -115,6 +152,45 @@ void GensMenuBar::regionCode_changed_slot(GensConfig::ConfRegionCode_t newRegion
 	// Set the region code.
 	this->lock();
 	action->setChecked(true);
+	this->unlock();
+}
+
+
+/**
+ * stateChanged(): Emulation state has changed.
+ */
+void GensMenuBar::stateChanged(void)
+{
+	// Update various menu items.
+	QAction *actionPause = m_hashActions.value(IDM_SYSTEM_PAUSE);
+	
+	// Lock menu actions to prevent errant signals from being emitted.
+	this->lock();
+	
+	if (m_emuManager && m_emuManager->isRomOpen())
+	{
+		// ROM is open.
+		
+		// Manual paused state.
+		if (actionPause)
+		{
+			actionPause->setEnabled(true);
+			actionPause->setChecked(m_emuManager->paused().paused_manual);
+		}
+	}
+	else
+	{
+		// ROM is closed.
+		
+		// Manual paused state.
+		if (actionPause)
+		{
+			actionPause->setChecked(false);
+			actionPause->setEnabled(false);
+		}
+	}
+	
+	// Unlock menu actions.
 	this->unlock();
 }
 
