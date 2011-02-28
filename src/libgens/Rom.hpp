@@ -129,6 +129,7 @@ class Rom
 			{ return m_mdHeader.checksum; }
 		
 		/// Region code. (MD hex format)
+		// TODO: Change to uint8_t?
 		int regionCode(void) const
 			{ return m_regionCode; }
 		/**
