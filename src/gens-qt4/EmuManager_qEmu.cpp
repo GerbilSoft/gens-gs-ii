@@ -1064,11 +1064,12 @@ void EmuManager::doRegionCode(GensConfig::ConfRegionCode_t region)
 		if (region == GensConfig::CONFREGION_AUTODETECT)
 		{
 			// Print the auto-detected region.
-			region_str = GetLgRegionStr(lg_region);
-			if (!region_str.isEmpty())
+			const char *region_cstr = LibGens::Rom::RegionCodeStr(lg_region);
+			if (region_cstr)
 			{
-				const QString auto_str = tr("ROM region detected as %1.");
-				emit osdPrintMsg(1500, auto_str.arg(region_str));
+				const QString auto_QStr = tr("ROM region detected as %1.");
+				const QString region_QStr = tr(region_cstr);
+				emit osdPrintMsg(1500, auto_QStr.arg(region_QStr));
 			}
 		}
 	}

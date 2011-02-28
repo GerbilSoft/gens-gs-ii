@@ -123,7 +123,6 @@ class EmuManager : public QObject
 		static LibGens::SysVersion::RegionCode_t GetLgRegionCode(
 			GensConfig::ConfRegionCode_t confRegionCode,
 			int mdHexRegionCode);
-		static QString GetLgRegionStr(LibGens::SysVersion::RegionCode_t lg_region);
 		
 		/**
 		 * closeRom(): Close the open ROM file and stop emulation.

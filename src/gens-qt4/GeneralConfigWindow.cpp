@@ -342,28 +342,10 @@ void GeneralConfigWindow::reload(void)
 	uint16_t regionCodeOrder = gqt4_config->regionCodeOrder();
 	for (int i = 0; i < 4; i++, regionCodeOrder >>= 4)
 	{
-		QListWidgetItem *item;
-		switch (regionCodeOrder & 0xF)
+		const char *str = LibGens::Rom::RegionCodeStrMD(regionCodeOrder & 0xF);
+		if (str)
 		{
-			case 0x1:
-				item = new QListWidgetItem(tr("Japan (NTSC)"));
-				break;
-			case 0x2:
-				item = new QListWidgetItem(tr("Asia (PAL)"));
-				break;
-			case 0x4:
-				item = new QListWidgetItem(tr("USA (NTSC)"));
-				break;
-			case 0x8:
-				item = new QListWidgetItem(tr("Europe (PAL)"));
-				break;
-			default:
-				item = NULL;
-				break;
-		}
-		
-		if (item)
-		{
+			QListWidgetItem *item = new QListWidgetItem(tr(str));
 			item->setData(Qt::UserRole, (regionCodeOrder & 0xF));
 			lstRegionDetect->insertItem(0, item);
 		}
