@@ -1,5 +1,11 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-region-code-v0: The system region code can now be changed
+using either the System, Region menu or the General Configuration
+window. Automatic region code detection currently uses a hard-coded
+ordering, although the UI for changing it is present in the
+General Configuration window. (It currently does nothing.)
+
 gens-qt4-GensConfig-v1: GensConfig now saves all configuration settings
 to an INI file in ~/.config/gens-gs-ii/gens-gs-ii.conf (Linux and Mac)
 or %APPDATA%/gens-gs-ii/gens-gs-ii.conf (Win32). The configuration file
