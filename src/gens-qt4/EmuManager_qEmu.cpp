@@ -1058,7 +1058,8 @@ void EmuManager::doRegionCode(GensConfig::ConfRegionCode_t region)
 	{
 		// Emulation is running. Change the region.
 		LibGens::SysVersion::RegionCode_t lg_region = GetLgRegionCode(
-					region, m_rom->regionCode());
+					region, m_rom->regionCode(),
+					gqt4_config->regionCodeOrder());
 		gqt4_emuContext->setRegion(lg_region);
 		
 		if (region == GensConfig::CONFREGION_AUTODETECT)

@@ -119,10 +119,16 @@ class EmuManager : public QObject
 		int loadRom_int(LibGens::Rom *rom);
 		LibGens::Rom *m_loadRom_int_tmr_rom;
 		
-		// Determine region code to use.
+		/**
+		 * GetLgRegionCode(): Determine the LibGens region code to use.
+		 * @param confRegionCode Current GensConfig region code.
+		 * @param mdHexRegionCode ROM region code, in MD hex format.
+		 * @param regionCodeOrder Region code order for auto-detection. (MSN == highest priority)
+		 * @return LibGens region code to use.
+		 */
 		static LibGens::SysVersion::RegionCode_t GetLgRegionCode(
 			GensConfig::ConfRegionCode_t confRegionCode,
-			int mdHexRegionCode);
+			int mdHexRegionCode, uint16_t regionCodeOrder);
 		
 		/**
 		 * closeRom(): Close the open ROM file and stop emulation.

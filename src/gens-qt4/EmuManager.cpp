@@ -292,7 +292,8 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	
 	// Determine the system region code.
 	LibGens::SysVersion::RegionCode_t lg_region = GetLgRegionCode(
-				gqt4_config->regionCode(), rom->regionCode());
+				gqt4_config->regionCode(), rom->regionCode(),
+				gqt4_config->regionCodeOrder());
 	
 	if (gqt4_config->regionCode() == GensConfig::CONFREGION_AUTODETECT)
 	{
@@ -353,11 +354,12 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
  * GetLgRegionCode(): Determine the LibGens region code to use.
  * @param confRegionCode Current GensConfig region code.
  * @param mdHexRegionCode ROM region code, in MD hex format.
+ * @param regionCodeOrder Region code order for auto-detection. (MSN == highest priority)
  * @return LibGens region code to use.
  */
 LibGens::SysVersion::RegionCode_t EmuManager::GetLgRegionCode(
 		GensConfig::ConfRegionCode_t confRegionCode,
-		int mdHexRegionCode)
+		int mdHexRegionCode, uint16_t regionCodeOrder)
 {
 	// TODO: Consolidate LibGens::SysVersion::RegionCode_t and GensConfig::ConfRegion_t.
 	LibGens::SysVersion::RegionCode_t lg_region;
@@ -380,18 +382,34 @@ LibGens::SysVersion::RegionCode_t EmuManager::GetLgRegionCode(
 		default:
 		{
 			// Use the detected region from the ROM image.
-			// TODO: Apply country code ordering.
-			// For now, assume US, EU, JP, Asia.
-			if (mdHexRegionCode & 0x4)
-				lg_region = LibGens::SysVersion::REGION_US_NTSC;
-			else if (mdHexRegionCode & 0x8)
-				lg_region = LibGens::SysVersion::REGION_EU_PAL;
-			else if (mdHexRegionCode & 0x1)
-				lg_region = LibGens::SysVersion::REGION_JP_NTSC;
-			else if (mdHexRegionCode & 0x2)
-				lg_region = LibGens::SysVersion::REGION_ASIA_PAL;
-			else
-				lg_region = LibGens::SysVersion::REGION_US_NTSC;
+			int regionMatch = 0;
+			int orderTmp = regionCodeOrder;
+			for (int i = 0; i < 4; i++, orderTmp <<= 4)
+			{
+				int orderN = ((orderTmp >> 12) & 0xF);
+				if (mdHexRegionCode & orderN)
+				{
+					// Found a match.
+					regionMatch = orderN;
+					break;
+				}
+			}
+			
+			if (regionMatch == 0)
+			{
+				// No region matched.
+				// Use the highest-priority region.
+				regionMatch = ((regionCodeOrder >> 12) & 0xF);
+			}
+			
+			switch (regionMatch & 0xF)
+			{
+				default:
+				case 0x4:	lg_region = LibGens::SysVersion::REGION_US_NTSC; break;
+				case 0x8:	lg_region = LibGens::SysVersion::REGION_EU_PAL; break;
+				case 0x1:	lg_region = LibGens::SysVersion::REGION_JP_NTSC; break;
+				case 0x2:	lg_region = LibGens::SysVersion::REGION_ASIA_PAL; break;
+			}
 		}
 	}
 	
