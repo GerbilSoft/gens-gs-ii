@@ -1029,14 +1029,6 @@ void EmuManager::doRegionCode(GensConfig::ConfRegionCode_t region)
 	// TODO: Verify if this is an actual change.
 	// If it isn't, don't do anything.
 	
-	if (m_rom)
-	{
-		// Emulation is running. Change the region.
-		LibGens::SysVersion::RegionCode_t lg_region = GetLgRegionCode(
-					region, m_rom->regionCode());
-		gqt4_emuContext->setRegion(lg_region);
-	}
-	
 	// Print a message to the OSD.
 	QString region_str;
 	switch (region)
@@ -1061,6 +1053,25 @@ void EmuManager::doRegionCode(GensConfig::ConfRegionCode_t region)
 	
 	const QString str = tr("System region set to %1.");
 	emit osdPrintMsg(1500, str.arg(region_str));
+	
+	if (m_rom)
+	{
+		// Emulation is running. Change the region.
+		LibGens::SysVersion::RegionCode_t lg_region = GetLgRegionCode(
+					region, m_rom->regionCode());
+		gqt4_emuContext->setRegion(lg_region);
+		
+		if (region == GensConfig::CONFREGION_AUTODETECT)
+		{
+			// Print the auto-detected region.
+			region_str = GetLgRegionStr(lg_region);
+			if (!region_str.isEmpty())
+			{
+				const QString auto_str = tr("ROM region detected as %1.");
+				emit osdPrintMsg(1500, auto_str.arg(region_str));
+			}
+		}
+	}
 }
 
 }

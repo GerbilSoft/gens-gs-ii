@@ -294,6 +294,17 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	LibGens::SysVersion::RegionCode_t lg_region = GetLgRegionCode(
 				gqt4_config->regionCode(), rom->regionCode());
 	
+	if (gqt4_config->regionCode() == GensConfig::CONFREGION_AUTODETECT)
+	{
+		// Print the auto-detected region.
+		const QString region_str = GetLgRegionStr(lg_region);
+		if (!region_str.isEmpty())
+		{
+			const QString auto_str = tr("ROM region detected as %1.");
+			emit osdPrintMsg(1500, auto_str.arg(region_str));
+		}
+	}
+	
 	// Create a new MD emulation context.
 	delete gqt4_emuContext;
 	gqt4_emuContext = new LibGens::EmuMD(m_rom, lg_region);
@@ -385,6 +396,33 @@ LibGens::SysVersion::RegionCode_t EmuManager::GetLgRegionCode(
 	
 	// Return the region code.
 	return lg_region;
+}
+
+
+/**
+ * GetLgRegionStr(): Get a string identifying a LibGens region code.
+ * TODO: Move this to LibGens.
+ * @param region LibGens region code.
+ * @return String identifying the LibGens region code.
+ */
+QString EmuManager::GetLgRegionStr(LibGens::SysVersion::RegionCode_t lg_region)
+{
+	switch (lg_region)
+	{
+		case LibGens::SysVersion::REGION_JP_NTSC:
+			return tr("Japan (NTSC)");
+		case LibGens::SysVersion::REGION_ASIA_PAL:
+			return tr("Asia (PAL)");
+		case LibGens::SysVersion::REGION_US_NTSC:
+			return tr("USA (NTSC)");
+		case LibGens::SysVersion::REGION_EU_PAL:
+			return tr("Europe (PAL)");
+		default:
+			return QString();
+	}
+	
+	// Should not get here...
+	return QString();
 }
 
 
