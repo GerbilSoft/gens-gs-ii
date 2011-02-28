@@ -287,42 +287,8 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	}
 	
 	// Determine the system region code.
-	// TODO: Move this to another function.
-	// TODO: Consolidate LibGens::SysVersion::RegionCode_t and GensConfig::ConfRegion_t.
-	LibGens::SysVersion::RegionCode_t lg_region;
-	switch (gqt4_config->regionCode())
-	{
-		case GensConfig::CONFREGION_JP_NTSC:
-			lg_region = LibGens::SysVersion::REGION_JP_NTSC;
-			break;
-		case GensConfig::CONFREGION_ASIA_PAL:
-			lg_region = LibGens::SysVersion::REGION_ASIA_PAL;
-			break;
-		case GensConfig::CONFREGION_US_NTSC:
-			lg_region = LibGens::SysVersion::REGION_US_NTSC;
-			break;
-		case GensConfig::CONFREGION_EU_PAL:
-			lg_region = LibGens::SysVersion::REGION_EU_PAL;
-			break;
-		case GensConfig::CONFREGION_AUTODETECT:
-		default:
-		{
-			// Use the detected region from the ROM image.
-			// TODO: Apply country code ordering.
-			// For now, assume US, EU, JP, Asia.
-			int romRegion = rom->regionCode();
-			if (romRegion & 0x4)
-				lg_region = LibGens::SysVersion::REGION_US_NTSC;
-			else if (romRegion & 0x8)
-				lg_region = LibGens::SysVersion::REGION_EU_PAL;
-			else if (romRegion & 0x1)
-				lg_region = LibGens::SysVersion::REGION_JP_NTSC;
-			else if (romRegion & 0x2)
-				lg_region = LibGens::SysVersion::REGION_ASIA_PAL;
-			else
-				lg_region = LibGens::SysVersion::REGION_US_NTSC;
-		}
-	}
+	LibGens::SysVersion::RegionCode_t lg_region = GetLgRegionCode(
+				gqt4_config->regionCode(), rom->regionCode());
 	
 	// Create a new MD emulation context.
 	delete gqt4_emuContext;
@@ -364,6 +330,57 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	// Update the Gens title.
 	emit stateChanged();
 	return 0;
+}
+
+
+/**
+ * GetLgRegionCode(): Determine the LibGens region code to use.
+ * @param confRegionCode Current GensConfig region code.
+ * @param mdHexRegionCode ROM region code, in MD hex format.
+ * @return LibGens region code to use.
+ */
+LibGens::SysVersion::RegionCode_t EmuManager::GetLgRegionCode(
+		GensConfig::ConfRegionCode_t confRegionCode,
+		int mdHexRegionCode)
+{
+	// TODO: Consolidate LibGens::SysVersion::RegionCode_t and GensConfig::ConfRegion_t.
+	LibGens::SysVersion::RegionCode_t lg_region;
+	
+	switch (confRegionCode)
+	{
+		case GensConfig::CONFREGION_JP_NTSC:
+			lg_region = LibGens::SysVersion::REGION_JP_NTSC;
+			break;
+		case GensConfig::CONFREGION_ASIA_PAL:
+			lg_region = LibGens::SysVersion::REGION_ASIA_PAL;
+			break;
+		case GensConfig::CONFREGION_US_NTSC:
+			lg_region = LibGens::SysVersion::REGION_US_NTSC;
+			break;
+		case GensConfig::CONFREGION_EU_PAL:
+			lg_region = LibGens::SysVersion::REGION_EU_PAL;
+			break;
+		case GensConfig::CONFREGION_AUTODETECT:
+		default:
+		{
+			// Use the detected region from the ROM image.
+			// TODO: Apply country code ordering.
+			// For now, assume US, EU, JP, Asia.
+			if (mdHexRegionCode & 0x4)
+				lg_region = LibGens::SysVersion::REGION_US_NTSC;
+			else if (mdHexRegionCode & 0x8)
+				lg_region = LibGens::SysVersion::REGION_EU_PAL;
+			else if (mdHexRegionCode & 0x1)
+				lg_region = LibGens::SysVersion::REGION_JP_NTSC;
+			else if (mdHexRegionCode & 0x2)
+				lg_region = LibGens::SysVersion::REGION_ASIA_PAL;
+			else
+				lg_region = LibGens::SysVersion::REGION_US_NTSC;
+		}
+	}
+	
+	// Return the region code.
+	return lg_region;
 }
 
 

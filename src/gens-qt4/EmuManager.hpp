@@ -32,6 +32,7 @@
 // LibGens includes.
 #include "libgens/Rom.hpp"
 #include "libgens/IO/IoBase.hpp"
+#include "libgens/MD/SysVersion.hpp"
 
 // paused_t
 #include "gqt4_datatypes.h"
@@ -117,6 +118,11 @@ class EmuManager : public QObject
 		// TODO: Fix the threading issue!
 		int loadRom_int(LibGens::Rom *rom);
 		LibGens::Rom *m_loadRom_int_tmr_rom;
+		
+		// Determine region code to use.
+		static LibGens::SysVersion::RegionCode_t GetLgRegionCode(
+			GensConfig::ConfRegionCode_t confRegionCode,
+			int mdHexRegionCode);
 		
 		/**
 		 * closeRom(): Close the open ROM file and stop emulation.
