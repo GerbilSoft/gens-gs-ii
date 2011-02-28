@@ -1,5 +1,13 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-region-code-v1: Region auto-detection is mostly implemented.
+GeneralConfigWindow doesn't yet enable the Apply button or save changes
+if regions are dragged and dropped in lstRegionDetect, but it does work
+if the Up/Down buttons are used instead. Everything else works basically
+as expected.
+- TODO: Too many messages are printed to the OSD if the auto-detection
+  region is changed while system region is set to auto-detect.
+
 gens-qt4-region-code-v0: The system region code can now be changed
 using either the System, Region menu or the General Configuration
 window. Automatic region code detection currently uses a hard-coded
