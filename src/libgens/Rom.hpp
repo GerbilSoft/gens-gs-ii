@@ -145,6 +145,14 @@ class Rom
 		 */
 		static const char *RegionCodeStr(SysVersion::RegionCode_t region);
 		
+		/**
+		 * RegionCodeStrMD(): Get a string identifying a given region code. (MD hex code)
+		 * NOTE: This function returns an ASCII string, suitable for translation.
+		 * @param region Region code.
+		 * @return Region code string, or NULL on error.
+		 */
+		static const char *RegionCodeStrMD(int region);
+		
 		/** Multi-file ROM archive support. **/
 		
 		/**
