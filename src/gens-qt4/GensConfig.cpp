@@ -349,6 +349,9 @@ void GensConfig::emitAll(void)
 	emit introStyle_changed(m_introStyle);
 	emit introColor_changed(m_introColor);
 	
+	/** System. **/
+	emit regionCode_changed(m_regionCode);
+	
 	/** Sega CD Boot ROMs. **/
 	emit mcdRomUSA_changed(m_mcdRomUSA);
 	emit mcdRomEUR_changed(m_mcdRomEUR);
