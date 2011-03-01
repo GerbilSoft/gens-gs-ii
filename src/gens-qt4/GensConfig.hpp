@@ -38,15 +38,13 @@
 // Property function macro.
 // NOTE: We can't include Q_PROPERTY() or signals here due to moc limitations.
 #define GC_PROPERTY(propType, propName, setPropType, setPropName) \
-	public: \
-		propType propName(void) const \
-			{ return m_##propName; } \
+		propType propName(void) const; \
 		void set##setPropName(setPropType new##setPropName); \
-	private: \
-		propType m_##propName
 
 namespace GensQt4
 {
+
+class GensConfigPrivate;
 
 class GensConfig : public QObject
 {
@@ -84,11 +82,7 @@ class GensConfig : public QObject
 		// TODO: Mark cfgPath as CONSTANT?
 		// NOTE: This uses Qt directory separators.
 		Q_PROPERTY(QString cfgPath READ cfgPath)
-		public:
-			QString cfgPath(void) const
-				{ return m_cfgPath; }
-		private:
-			QString m_cfgPath;
+		QString cfgPath(void) const;
 		
 		/** User configuration paths. **/
 		// TODO: Make these configurable?
@@ -126,22 +120,19 @@ class GensConfig : public QObject
 		
 		/** System. **/
 		
-		public:
-			enum ConfRegionCode_t
-			{
-				CONFREGION_AUTODETECT = -1,
-				CONFREGION_JP_NTSC    = 0,
-				CONFREGION_ASIA_PAL   = 1,
-				CONFREGION_US_NTSC   = 2,
-				CONFREGION_EU_PAL     = 3
-			};
+		enum ConfRegionCode_t
+		{
+			CONFREGION_AUTODETECT = -1,
+			CONFREGION_JP_NTSC    = 0,
+			CONFREGION_ASIA_PAL   = 1,
+			CONFREGION_US_NTSC   = 2,
+			CONFREGION_EU_PAL     = 3
+		};
 		Q_ENUMS(ConfRegionCode_t);
 		Q_PROPERTY(ConfRegionCode_t regionCode READ regionCode WRITE setRegionCode NOTIFY regionCode_changed);
 		GC_PROPERTY(ConfRegionCode_t, regionCode, ConfRegionCode_t, RegionCode);
 		
 		// Region code auto-detection order.
-		private:
-			static bool IsRegionCodeOrderValid(uint16_t order);
 		Q_PROPERTY(uint16_t regionCodeOrder READ regionCodeOrder WRITE setRegionCodeOrder NOTIFY regionCodeOrder_changed);
 		GC_PROPERTY(uint16_t, regionCodeOrder, uint16_t, RegionCodeOrder);
 		
@@ -166,20 +157,19 @@ class GensConfig : public QObject
 		GC_PROPERTY(bool, fastBlur, bool, FastBlur);
 		Q_PROPERTY(bool bilinearFilter READ bilinearFilter WRITE setBilinearFilter NOTIFY bilinearFilter_changed)
 		GC_PROPERTY(bool, bilinearFilter, bool, BilinearFilter);
-		Q_PROPERTY(int contrast READ contrast WRITE setContrast NOTIFY contrast_changed)
 		
-		public:
-			enum InterlacedMode_t
-			{
-				INTERLACED_EVEN		= 0,
-				INTERLACED_ODD		= 1,
-				INTERLACED_FLICKER	= 2,
-				INTERLACED_2X		= 3,
-			};
+		enum InterlacedMode_t
+		{
+			INTERLACED_EVEN		= 0,
+			INTERLACED_ODD		= 1,
+			INTERLACED_FLICKER	= 2,
+			INTERLACED_2X		= 3,
+		};
 		Q_ENUMS(InterlacedMode_t);
 		GC_PROPERTY(InterlacedMode_t, interlacedMode, InterlacedMode_t, InterlacedMode);
 		Q_PROPERTY(InterlacedMode_t interlacedMode READ interlacedMode WRITE setInterlacedMode NOTIFY interlacedMode_changed)
 		
+		Q_PROPERTY(int contrast READ contrast WRITE setContrast NOTIFY contrast_changed)
 		GC_PROPERTY(int, contrast, int, Contrast);
 		Q_PROPERTY(int brightness READ brightness WRITE setBrightness NOTIFY brightness_changed)
 		GC_PROPERTY(int, brightness, int, Brightness);
@@ -217,22 +207,16 @@ class GensConfig : public QObject
 		/** Savestates. **/
 		Q_PROPERTY(int saveSlot READ saveSlot WRITE setSaveSlot NOTIFY saveSlot_changed)
 		GC_PROPERTY(int, saveSlot, int, SaveSlot);
-		public:
-			void setSaveSlot_Prev(void)
-				{ setSaveSlot((m_saveSlot + 9) % 10); }
-			void setSaveSlot_Next(void)
-				{ setSaveSlot((m_saveSlot + 1) % 10); }
+		void setSaveSlot_Prev(void);
+		void setSaveSlot_Next(void);
 		
 		/** GensWindow configuration. **/
 		Q_PROPERTY(bool showMenuBar READ showMenuBar WRITE setShowMenuBar NOTIFY showMenuBar_changed)
 		GC_PROPERTY(bool, showMenuBar, bool, ShowMenuBar);
 		
 		/** Key configuration. **/
-		private:
-			GensKeyConfig m_keyConfig;
-		public:
-			int keyToAction(GensKey_t key);
-			GensKey_t actionToKey(int action);
+		int keyToAction(GensKey_t key);
+		GensKey_t actionToKey(int action);
 	
 	signals:
 		/** Onscreen display. **/
@@ -284,15 +268,10 @@ class GensConfig : public QObject
 		void showMenuBar_changed(bool newShowMenuBar);
 	
 	private:
+		friend class GensConfigPrivate;
+		GensConfigPrivate *d;
 		Q_DISABLE_COPY(GensConfig)
 };
-
-
-inline int GensConfig::keyToAction(GensKey_t key)
-	{ return m_keyConfig.keyToAction(key); }
-
-inline GensKey_t GensConfig::actionToKey(int action)
-	{ return m_keyConfig.actionToKey(action); }
 
 }
 
