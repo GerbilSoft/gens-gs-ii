@@ -46,10 +46,10 @@ const char *CtrlConfigWindow::ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX] =
 	":/gens/controller-3btn.png",		// IOT_3BTN
 	":/gens/controller-6btn.png",		// IOT_6BTN
 	":/gens/controller-2btn.png",		// IOT_2BTN
-	":/gens/controller-mega-mouse.png"	// IOT_MEGA_MOUSE (TODO)
-	":/gens/controller-teamplayer.png"	// IOT_TEAMPLAYER (TODO)
-	":/gens/controller-4wp.png"		// IOT_4WP_MASTER (TODO)
-	":/gens/controller-4wp.png"		// IOT_4WP_SLAVE (TODO)
+	":/gens/controller-mega-mouse.png",	// IOT_MEGA_MOUSE (TODO)
+	":/gens/controller-teamplayer.png",	// IOT_TEAMPLAYER (TODO)
+	":/gens/controller-4wp.png",		// IOT_4WP_MASTER (TODO)
+	":/gens/controller-4wp.png",		// IOT_4WP_SLAVE (TODO)
 };
 
 
@@ -306,7 +306,7 @@ void CtrlConfigWindow::updatePortButton(int port)
 	}
 	
 	// Update the port icon and tooltip.
-	actionPort->setIcon(QIcon(QString::fromLatin1(ms_CtrlIconFilenames[m_devType[port]])));
+	actionPort->setIcon(QIcon(QLatin1String(ms_CtrlIconFilenames[m_devType[port]])));
 	actionPort->setToolTip(GetLongDeviceName(m_devType[port]));
 	
 	if (port == 0)
