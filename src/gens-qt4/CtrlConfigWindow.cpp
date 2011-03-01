@@ -118,6 +118,16 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 		}
 	}
 	
+	// Initialize the "Device" dropdown.
+	// TODO: Handle Master/Slave devices.
+	cboDevice_lock();
+	for (int i = LibGens::IoBase::IOT_NONE; i <= LibGens::IoBase::IOT_TEAMPLAYER; i++)
+	{
+		cboDevice->addItem(QIcon(QLatin1String(ms_CtrlIconFilenames[i])),
+				GetShortDeviceName((LibGens::IoBase::IoType)i));
+	}
+	cboDevice_unlock();
+	
 	// Clear controller settings.
 	memset(m_devType, 0x00, sizeof(m_devType));
 	
@@ -412,30 +422,41 @@ void CtrlConfigWindow::selectPort(int port)
 	
 	// Device setting is valid.
 	m_selPort = port;
-	
-	// Rebuild cboDevice.
-	rebuildCboDevice(isTP);
-	
-	// Update the port settings.
-	updatePortSettings(port);
+	cboDevice_setTP(isTP);		// Update Team Player device availability.
+	updatePortSettings(port);	// Update the port settings.
 }
 
 
 /**
- * rebuildCboDevice(): Rebuild cboDevice.
+ * cboDevice_setTP(): Set cboDevice's Team Player device availability.
  * @param isTP If true, don't show devices that can't be connected to a TeamPlayer/4WP/etc device.
  */
-void CtrlConfigWindow::rebuildCboDevice(bool isTP)
+void CtrlConfigWindow::cboDevice_setTP(bool isTP)
 {
-	// Initialize the "Device" dropdown.
-	// TODO: Handle Master/Slave devices.
-	const int devMax = (isTP ? LibGens::IoBase::IOT_6BTN : LibGens::IoBase::IOT_TEAMPLAYER);
+	const int devCount = (isTP ? LibGens::IoBase::IOT_6BTN : LibGens::IoBase::IOT_TEAMPLAYER) + 1;
+	if (cboDevice->count() == devCount)
+		return;
+	
+	// Dropdown needs to be updated.
 	cboDevice_lock();
-	cboDevice->clear();
-	for (int i = LibGens::IoBase::IOT_NONE; i <= devMax; i++)
+	if (cboDevice->count() > devCount)
 	{
-		cboDevice->addItem(QIcon(QLatin1String(ms_CtrlIconFilenames[i])),
-				GetShortDeviceName((LibGens::IoBase::IoType)i));
+		// Remove the extra items.
+		for (int i = LibGens::IoBase::IOT_TEAMPLAYER;
+		     i > LibGens::IoBase::IOT_6BTN; i--)
+		{
+			cboDevice->removeItem(i);
+		}
+	}
+	else
+	{
+		// Add the extra items.
+		for (int i = LibGens::IoBase::IOT_2BTN;
+		     i <= LibGens::IoBase::IOT_TEAMPLAYER; i++)
+		{
+			cboDevice->addItem(QIcon(QLatin1String(ms_CtrlIconFilenames[i])),
+					GetShortDeviceName((LibGens::IoBase::IoType)i));
+		}
 	}
 	cboDevice_unlock();
 }

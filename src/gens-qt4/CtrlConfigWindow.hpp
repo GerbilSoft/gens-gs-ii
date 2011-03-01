@@ -126,7 +126,7 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		
 		// Select a port.
 		void selectPort(int port);
-		void rebuildCboDevice(bool isTP);
+		void cboDevice_setTP(bool isTP);
 		
 		// Dropdown device lock.
 		// Used when rebuilding cboDevice.
