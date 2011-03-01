@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>494</width>
+    <width>591</width>
     <height>457</height>
    </rect>
   </property>
@@ -166,6 +166,21 @@
    </attribute>
    <addaction name="actionPort1"/>
    <addaction name="actionPort2"/>
+   <addaction name="separator"/>
+   <addaction name="actionPortTP1A"/>
+   <addaction name="actionPortTP1B"/>
+   <addaction name="actionPortTP1C"/>
+   <addaction name="actionPortTP1D"/>
+   <addaction name="separator"/>
+   <addaction name="actionPortTP2A"/>
+   <addaction name="actionPortTP2B"/>
+   <addaction name="actionPortTP2C"/>
+   <addaction name="actionPortTP2D"/>
+   <addaction name="separator"/>
+   <addaction name="actionPort4WPA"/>
+   <addaction name="actionPort4WPB"/>
+   <addaction name="actionPort4WPC"/>
+   <addaction name="actionPort4WPD"/>
   </widget>
   <action name="actionPort1">
    <property name="checkable">
@@ -195,6 +210,150 @@
    </property>
    <property name="toolTip">
     <string>Configure the device connected to the emulated Port 2.</string>
+   </property>
+  </action>
+  <action name="actionPortTP1A">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/gens-qt4.qrc">
+     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
+   </property>
+   <property name="text">
+    <string>TP-1A</string>
+   </property>
+  </action>
+  <action name="actionPortTP1B">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/gens-qt4.qrc">
+     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
+   </property>
+   <property name="text">
+    <string>TP-1B</string>
+   </property>
+  </action>
+  <action name="actionPortTP1C">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/gens-qt4.qrc">
+     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
+   </property>
+   <property name="text">
+    <string>TP-1C</string>
+   </property>
+  </action>
+  <action name="actionPortTP1D">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/gens-qt4.qrc">
+     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
+   </property>
+   <property name="text">
+    <string>TP-1D</string>
+   </property>
+  </action>
+  <action name="actionPortTP2A">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/gens-qt4.qrc">
+     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
+   </property>
+   <property name="text">
+    <string>TP-2A</string>
+   </property>
+  </action>
+  <action name="actionPortTP2B">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/gens-qt4.qrc">
+     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
+   </property>
+   <property name="text">
+    <string>TP-2B</string>
+   </property>
+  </action>
+  <action name="actionPortTP2C">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/gens-qt4.qrc">
+     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
+   </property>
+   <property name="text">
+    <string>TP-2C</string>
+   </property>
+  </action>
+  <action name="actionPortTP2D">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/gens-qt4.qrc">
+     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
+   </property>
+   <property name="text">
+    <string>TP-2D</string>
+   </property>
+  </action>
+  <action name="actionPort4WPA">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/gens-qt4.qrc">
+     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
+   </property>
+   <property name="text">
+    <string>4WP-A</string>
+   </property>
+  </action>
+  <action name="actionPort4WPB">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/gens-qt4.qrc">
+     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
+   </property>
+   <property name="text">
+    <string>4WP-B</string>
+   </property>
+  </action>
+  <action name="actionPort4WPC">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/gens-qt4.qrc">
+     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
+   </property>
+   <property name="text">
+    <string>4WP-C</string>
+   </property>
+  </action>
+  <action name="actionPort4WPD">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/gens-qt4.qrc">
+     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
+   </property>
+   <property name="text">
+    <string>4WP-D</string>
    </property>
   </action>
  </widget>

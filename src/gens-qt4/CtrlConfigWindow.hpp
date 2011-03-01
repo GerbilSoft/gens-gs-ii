@@ -33,6 +33,25 @@ class QActionGroup;
 // LibGens includes.
 #include "libgens/IO/IoBase.hpp"
 
+/**
+ * Controller Configuration ports.
+ * 0: Port 1
+ * 1: Port 2
+ * 2-5: Ports TP1A-TP1D
+ * 6-9: Ports TP2A-TP2D
+ * 10-13: Ports 4WPA-4WPD
+ */
+#define CTRL_CFG_MAX_PORTS 14
+#define CTRL_CFG_PORT_TP1A 2
+#define CTRL_CFG_PORT_TP2A 6
+#define CTRL_CFG_PORT_4WPA 10
+
+// Toolbar separators.
+#define CTRL_CFG_TBSEP_TP1 0
+#define CTRL_CFG_TBSEP_TP2 1
+#define CTRL_CFG_TBSEP_4WP 2
+#define CTRL_CFG_TBSEP_MAX 3
+
 namespace GensQt4
 {
 
@@ -51,21 +70,18 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		static const char *ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX];
 		static const QString GetShortDeviceName(LibGens::IoBase::IoType devType);
 		static const QString GetLongDeviceName(LibGens::IoBase::IoType devType);
+		static const QString GetPortName(int port);
 		
 		// Internal controller settings.
-		LibGens::IoBase::IoType m_devType[2];
+		LibGens::IoBase::IoType m_devType[CTRL_CFG_MAX_PORTS];
 		
 		QActionGroup *m_actgrpSelPort;
 		
-		/**
-		 * selectedPort(): Determine which port is selected.
-		 * TODO: There has to be some way to optimize this...
-		 * @return Selected port index, or -1 if no port is selected.
-		 */
-		inline int selectedPort(void) const;
-		
-		void updatePortButton(int port);
-		void updatePortSettings(int port);
+		// Dropdown device lock.
+		// Used when rebuilding cboDevice.
+		int cboDevice_lock(void);
+		int cboDevice_unlock(void);
+		bool isCboDeviceLocked(void) const;
 	
 	protected slots:
 		void accept(void);
@@ -78,27 +94,47 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		void on_actionPort1_toggled(bool checked);
 		void on_actionPort2_toggled(bool checked);
 		
+		void on_actionPortTP1A_toggled(bool checked);
+		void on_actionPortTP1B_toggled(bool checked);
+		void on_actionPortTP1C_toggled(bool checked);
+		void on_actionPortTP1D_toggled(bool checked);
+		
+		void on_actionPortTP2A_toggled(bool checked);
+		void on_actionPortTP2B_toggled(bool checked);
+		void on_actionPortTP2C_toggled(bool checked);
+		void on_actionPortTP2D_toggled(bool checked);
+		
+		void on_actionPort4WPA_toggled(bool checked);
+		void on_actionPort4WPB_toggled(bool checked);
+		void on_actionPort4WPC_toggled(bool checked);
+		void on_actionPort4WPD_toggled(bool checked);
+		
 		void on_cboDevice_currentIndexChanged(int index);
 	
 	private:
 		static CtrlConfigWindow *m_CtrlConfigWindow;
+		
+		// Selected port.
+		int m_selPort;
+		
+		// Toolbar separators.
+		QAction *m_tbSep[CTRL_CFG_TBSEP_MAX];
+		
+		// Update port information.
+		void updatePortButton(int port);
+		void updatePortSettings(int port);
+		
+		// Select a port.
+		void selectPort(int port);
+		void rebuildCboDevice(bool isTP);
+		
+		// Dropdown device lock.
+		// Used when rebuilding cboDevice.
+		int m_cboDeviceLockCnt;
 };
 
-/**
- * selectedPort(): Determine which port is selected.
- * TODO: There has to be some way to optimize this...
- * @return Selected port index, or -1 if no port is selected.
- */
-inline int CtrlConfigWindow::selectedPort(void) const
-{
-	if (actionPort1->isChecked())
-		return 0;
-	else if (actionPort2->isChecked())
-		return 1;
-	
-	// No port selected.
-	return -1;
-}
+inline bool CtrlConfigWindow::isCboDeviceLocked(void) const
+	{ return (m_cboDeviceLockCnt > 0); }
 
 }
 
