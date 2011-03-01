@@ -37,8 +37,6 @@
 #include "libgens/IO/Io2Button.hpp"
 
 #define MAX_CFG_BTNS 12
-#define MAX_COL_CFG_BTNS 4
-#define NUM_COLS ((MAX_CFG_BTNS / MAX_COL_CFG_BTNS) + !!(MAX_CFG_BTNS % MAX_COL_CFG_BTNS))
 
 namespace GensQt4
 {
@@ -59,10 +57,6 @@ class GensCtrlCfgWidgetPrivate
 		QGridLayout *m_layout;
 		QLabel *m_lblCfg[MAX_CFG_BTNS];
 		GensKeySequenceWidget *m_btnCfg[MAX_CFG_BTNS];
-		
-		// NOTE: Ownership of QSpacerItems is taken by m_layout.
-		// Do NOT delete these objects manually!
-		QSpacerItem *m_spcItem[NUM_COLS - 1];
 };
 
 
@@ -90,7 +84,7 @@ GensCtrlCfgWidgetPrivate::~GensCtrlCfgWidgetPrivate()
 {
 	// Delete all the labels and buttons.
 	// TODO: Is this necessary?
-	for (int i = 0; i < (sizeof(m_lblCfg)/sizeof(m_lblCfg[0])); i++)
+	for (size_t i = 0; i < (sizeof(m_lblCfg)/sizeof(m_lblCfg[0])); i++)
 	{
 		delete m_lblCfg[i];
 		delete m_btnCfg[i];
@@ -104,29 +98,14 @@ GensCtrlCfgWidgetPrivate::~GensCtrlCfgWidgetPrivate()
 void GensCtrlCfgWidgetPrivate::init(void)
 {
 	// Add MAX_CFG_BTNS items to the grid layout.
-	int colBase = -3; // needed for initial iteration
-	int rowNum = 0;
-	for (int i = 0; i < (sizeof(m_lblCfg)/sizeof(m_lblCfg[0])); i++)
+	for (size_t i = 0; i < (sizeof(m_lblCfg)/sizeof(m_lblCfg[0])); i++)
 	{
-		if ((i % MAX_COL_CFG_BTNS) == 0)
-			{ rowNum = 0; colBase += 3; }
-		else
-			{ rowNum++; }
-		
 		m_lblCfg[i] = new QLabel();
 		m_lblCfg[i]->setVisible(false);
 		m_btnCfg[i] = new GensKeySequenceWidget();
 		m_btnCfg[i]->setVisible(false);
-		m_layout->addWidget(m_lblCfg[i], rowNum, colBase, Qt::AlignLeft);
-		m_layout->addWidget(m_btnCfg[i], rowNum, (colBase + 1), Qt::AlignRight);
-	}
-	
-	// Add spacers to the grid between columns.
-	colBase = 2;
-	for (int i = 0; i < (sizeof(m_spcItem)/sizeof(m_spcItem[0])); i++, colBase += 3)
-	{
-		m_spcItem[i] = new QSpacerItem(8, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
-		m_layout->addItem(m_spcItem[i], 0, colBase, Qt::AlignCenter);
+		m_layout->addWidget(m_lblCfg[i], i, 0, Qt::AlignLeft);
+		m_layout->addWidget(m_btnCfg[i], i, 1, Qt::AlignRight);
 	}
 }
 
