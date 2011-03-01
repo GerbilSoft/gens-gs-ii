@@ -51,7 +51,7 @@ class IoTeamplayer : public IoBase
 		void update(void);
 		
 		// Controller configuration.
-		const char *devName(void) const { return "Sega Teamplayer"; }
+		const char *devName(void) const { return "Sega Team Player"; }
 		IoType devType(void) const { return IOT_TEAMPLAYER; }
 		int numButtons(void) const { return 12; }
 		int nextLogicalButton(int button) const;
