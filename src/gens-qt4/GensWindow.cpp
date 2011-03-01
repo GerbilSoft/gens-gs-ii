@@ -191,6 +191,10 @@ void GensWindow::setupUi(void)
 	// Intro Style Changed signal.
 	connect(gqt4_config, SIGNAL(introStyle_changed(int)),
 		this, SLOT(introStyle_changed_slot(int)));
+	
+	// Show Menu Bar Changed signal.
+	connect(gqt4_config, SIGNAL(showMenuBar_changed(bool)),
+		this, SLOT(showMenuBar_changed_slot(bool)));
 }
 
 
@@ -561,6 +565,25 @@ void GensWindow::autoPause_changed_slot(bool newAutoPause)
 }
 
 
+/**
+ * showMenuBar_changed_slot(): Show Menu Bar setting has changed.
+ * @param newShowMenuBar New Show Menu Bar setting.
+ */
+void GensWindow::showMenuBar_changed_slot(bool newShowMenuBar)
+{
+	if (!newShowMenuBar)
+	{
+		// Hide the menu bar.
+		this->setMenuBar(NULL);
+	}
+	else if (!this->menuWidget())
+	{
+		// Show the menu bar.
+		this->setMenuBar(m_gensMenuBar->createMenuBar());
+	}
+}
+
+
 /** Wrapper functions for GensActions. **/
 /** TODO: Have GensActions emit signals, and link them to EmuManager slots. **/
 
@@ -580,25 +603,6 @@ void GensWindow::setAudioRate(int newRate)
 	{ m_emuManager->setAudioRate(newRate); }
 void GensWindow::setStereo(bool newStereo)
 	{ m_emuManager->setStereo(newStereo); }
-
-
-/**
- * toggleMenuBar(): Toggle menu bar visibility.
- * TODO: Add to GensConfig.
- */
-void GensWindow::toggleMenuBar(void)
-{
-	if (this->menuWidget())
-	{
-		// Window has a menu bar. Remove it.
-		this->setMenuBar(NULL);
-	}
-	else
-	{
-		// Window does not have a menu bar. Add it.
-		this->setMenuBar(m_gensMenuBar->createMenuBar());
-	}
-}
 
 
 void GensWindow::setIdleThreadAllowed(bool newIdleThreadAllowed)

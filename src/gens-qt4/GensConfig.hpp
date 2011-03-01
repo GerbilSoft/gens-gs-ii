@@ -107,7 +107,7 @@ class GensConfig : public QObject
 				GCPATH_MAX
 			};
 			QString userPath(ConfigPath pathID);
-			
+		
 		/** Onscreen display. **/
 		Q_PROPERTY(bool osdFpsEnabled READ osdFpsEnabled WRITE setOsdFpsEnabled NOTIFY osdFpsEnabled_changed)
 		GC_PROPERTY(bool, osdFpsEnabled, bool, OsdFpsEnabled);
@@ -223,6 +223,10 @@ class GensConfig : public QObject
 			void setSaveSlot_Next(void)
 				{ setSaveSlot((m_saveSlot + 1) % 10); }
 		
+		/** GensWindow configuration. **/
+		Q_PROPERTY(bool showMenuBar READ showMenuBar WRITE setShowMenuBar NOTIFY showMenuBar_changed)
+		GC_PROPERTY(bool, showMenuBar, bool, ShowMenuBar);
+		
 		/** Key configuration. **/
 		private:
 			GensKeyConfig m_keyConfig;
@@ -275,6 +279,9 @@ class GensConfig : public QObject
 		
 		/** Savestates. **/
 		void saveSlot_changed(int newSaveSlot);
+		
+		/** GensWindow configuration. **/
+		void showMenuBar_changed(bool newShowMenuBar);
 	
 	private:
 		Q_DISABLE_COPY(GensConfig)

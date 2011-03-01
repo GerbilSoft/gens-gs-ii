@@ -195,6 +195,13 @@ int GensConfig::reload(const QString& filename)
 	m_saveSlot = settings.value(QLatin1String("saveSlot"), 0).toInt();
 	settings.endGroup();
 	
+	/** GensWindow configuration. **/
+	settings.beginGroup(QLatin1String("GensWindow"));
+#ifndef Q_WS_MAC
+	m_showMenuBar = settings.value(QLatin1String("showMenuBar"), true).toBool();
+#endif /* !Q_WS_MAC */
+	settings.endGroup();
+	
 	/** Key configuration. **/
 	settings.beginGroup(QLatin1String("Shortcut_Keys"));
 	m_keyConfig.load(settings);
@@ -332,6 +339,13 @@ int GensConfig::save(const QString& filename)
 	settings.setValue(QLatin1String("saveSlot"), m_saveSlot);
 	settings.endGroup();
 	
+	/** GensWindow configuration. **/
+	settings.beginGroup(QLatin1String("GensWindow"));
+#ifndef Q_WS_MAC
+	settings.setValue(QLatin1String("showMenuBar"), m_showMenuBar);
+#endif /* !Q_WS_MAC */
+	settings.endGroup();
+	
 	/** Key configuration. **/
 	settings.beginGroup(QLatin1String("Shortcut_Keys"));
 	m_keyConfig.save(settings);
@@ -393,6 +407,11 @@ void GensConfig::emitAll(void)
 	
 	/** Savestates. **/
 	emit saveSlot_changed(m_saveSlot);
+	
+	/** GensWindow configuration. **/
+#ifndef Q_WS_MAC
+	emit showMenuBar_changed(m_showMenuBar);
+#endif /* !Q_WS_MAC */
 }
 
 
@@ -608,6 +627,9 @@ void GensConfig::setSaveSlot(int newSaveSlot)
 	emit saveSlot_changed(m_saveSlot);
 }
 
+
+/** GensWindow configuration. **/
+GC_PROPERTY_WRITE(showMenuBar, bool, ShowMenuBar)
 
 }
 

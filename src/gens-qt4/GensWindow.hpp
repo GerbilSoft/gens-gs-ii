@@ -98,12 +98,6 @@ class GensWindow : public QMainWindow
 		void setController(int port, LibGens::IoBase::IoType type);
 		void setAudioRate(int newRate);
 		void setStereo(bool newStereo);
-		
-		/**
-		 * toggleMenuBar(): Toggle menu bar visibility.
-		 * TODO: Add to GensConfig.
-		 */
-		void toggleMenuBar(void);
 	
 	protected:
 		void setupUi(void);
@@ -191,6 +185,12 @@ class GensWindow : public QMainWindow
 		 */
 		void autoPause_changed_slot(bool newAutoPause);
 	
+		/**
+		 * showMenuBar_changed_slot(): Show Menu Bar setting has changed.
+		 * @param newShowMenuBar New Show Menu Bar setting.
+		 */
+		void showMenuBar_changed_slot(bool newShowMenuBar);
+		
 	private:
 		/** Idle thread. **/
 		IdleThread *m_idleThread;

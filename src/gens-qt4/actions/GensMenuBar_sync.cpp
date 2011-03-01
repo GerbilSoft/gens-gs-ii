@@ -194,6 +194,11 @@ void GensMenuBar::stateChanged(void)
 			actionEnableIfOpen->setEnabled(isRomOpen);
 	}
 	
+	// Show Menu Bar.
+	QAction *actionShowMenuBar = m_hashActions.value(IDM_GRAPHICS_MENUBAR);
+	if (actionShowMenuBar)
+		actionShowMenuBar->setChecked(gqt4_config->showMenuBar());
+	
 	// System-specifc Reset CPU actions.
 	// TODO: Determine the active system.
 	QAction *actionCpuResetM68K = m_hashActions.value(IDM_SYSTEM_CPURESET_M68K);
