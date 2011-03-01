@@ -288,8 +288,8 @@ void GensKeySequenceWidgetPrivate::updateShortcutDisplay(void)
 #if defined(Q_WS_MAC)
 			if (modifierKeys & Qt::META)	s += sModMeta;
 			if (modifierKeys & Qt::ALT)	s += sModAlt;
-			if (modifierKeys & Qt::CTRL)	s += sModCtrl;
 			if (modifierKeys & Qt::SHIFT)	s += sModShift;
+			if (modifierKeys & Qt::CTRL)	s += sModCtrl;
 			
 			if (modifierKeys & (Qt::META | Qt::ALT | Qt::CTRL | Qt::SHIFT))
 				 s += QChar(L'+');
