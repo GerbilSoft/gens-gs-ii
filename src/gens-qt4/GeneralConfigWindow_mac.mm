@@ -79,6 +79,7 @@ void GeneralConfigWindow::setupUi_mac(void)
 		// TODO: Use Mac generic program icon instead of Oxygen.
 		{"&General",		"configure"},
 		{"G&raphics",		"applications-graphics"},
+		{"&System",		"applications-system"},
 		{"Sega &CD",		"media-optical"},
 		{"E&xternal Programs",	"utilities-terminal"},
 		
@@ -126,6 +127,8 @@ void GeneralConfigWindow::setupUi_mac(void)
 	tabGeneral->setContentsMargins(0, 0, 0, 0);
 	stackedWidget->addWidget(tabGraphics);
 	tabGraphics->setContentsMargins(0, 0, 0, 0);
+	stackedWidget->addWidget(tabSystem);
+	tabSystem->setContentsMargins(0, 0, 0, 0);
 	stackedWidget->addWidget(tabSegaCD);
 	tabSegaCD->setContentsMargins(0, 0, 0, 0);
 	stackedWidget->addWidget(tabExtPrg);

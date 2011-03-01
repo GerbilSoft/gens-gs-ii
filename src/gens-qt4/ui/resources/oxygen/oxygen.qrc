@@ -3,6 +3,7 @@
     <file>index.theme</file>
     <file>16x16/application-exit.png</file>
     <file>16x16/applications-graphics.png</file>
+    <file>16x16/applications-system.png</file>
     <file>16x16/arrow-down.png</file>
     <file>16x16/arrow-up.png</file>
     <file>16x16/configure.png</file>
@@ -21,6 +22,7 @@
 
     <file>22x22/application-exit.png</file>
     <file>22x22/applications-graphics.png</file>
+    <file>22x22/applications-system.png</file>
     <file>22x22/arrow-down.png</file>
     <file>22x22/arrow-up.png</file>
     <file>22x22/configure.png</file>
@@ -39,6 +41,7 @@
 
     <file>32x32/application-exit.png</file>
     <file>32x32/applications-graphics.png</file>
+    <file>32x32/applications-system.png</file>
     <file>32x32/arrow-down.png</file>
     <file>32x32/arrow-up.png</file>
     <file>32x32/configure.png</file>
@@ -57,6 +60,7 @@
 
     <file>48x48/application-exit.png</file>
     <file>48x48/applications-graphics.png</file>
+    <file>48x48/applications-system.png</file>
     <file>48x48/arrow-down.png</file>
     <file>48x48/arrow-up.png</file>
     <file>48x48/configure.png</file>
@@ -75,6 +79,7 @@
 
     <file>64x64/application-exit.png</file>
     <file>64x64/applications-graphics.png</file>
+    <file>64x64/applications-system.png</file>
     <file>64x64/configure.png</file>
     <file>64x64/drive-optical.png</file>
     <file>64x64/media-optical-blu-ray.png</file>
