@@ -262,7 +262,7 @@ void GensKeySequenceWidgetPrivate::updateShortcutDisplay(void)
 	static const QString sModCtrl  = QChar(0x2318);	// Command symbol.
 	static const QString sModAlt   = QChar(0x2325);	// Option symbol.
 	static const QString sModMeta  = QChar(L'^');	// Control symbol.
-	static const QString sModShift = q->tr("Shift");
+	static const QString sModShift = QChar(0x21E7); // Shift symbol.
 #elif defined(Q_WS_WIN)
 	static const QString sModCtrl  = q->tr("Ctrl");
 	static const QString sModAlt   = q->tr("Alt");
@@ -283,15 +283,21 @@ void GensKeySequenceWidgetPrivate::updateShortcutDisplay(void)
 	{
 		if (modifierKeys)
 		{
-			if (modifierKeys & Qt::META)	s += sModMeta;
+			
 #if defined(Q_WS_MAC)
-			if (modifierKeys & Qt::ALT)	s += sModAlt;
-			if (modifierKeys & Qt::CTRL)	s += sModCtrl;
-#else
-			if (modifierKeys & Qt::CTRL)	s += sModCtrl;
-			if (modifierKeys & Qt::ALT)	s += sModAlt;
-#endif
-			if (modifierKeys & Qt::SHIFT)	s += sModShift;
+			if (modifierKeys & Qt::META)	s += sModMeta
+			if (modifierKeys & Qt::ALT)	s += sModAlt
+			if (modifierKeys & Qt::CTRL)	s += sModCtrl
+			if (modifierKeys & Qt::SHIFT)	s += sModShift
+			
+			if (modifierKeys & (Qt::META | Qt::ALT | Qt::CTRL | Qt::SHIFT))
+				 s += QChar(L'+');
+#else /* !Q_WS_MAC */
+			if (modifierKeys & Qt::META)	s += sModMeta + QChar(L'+');
+			if (modifierKeys & Qt::CTRL)	s += sModCtrl + QChar(L'+');
+			if (modifierKeys & Qt::ALT)	s += sModAlt + QChar(L'+');
+			if (modifierKeys & Qt::SHIFT)	s += sModShift + QChar(L'+');
+#endif /* Q_WS_MAC */
 		}
 		else if (nKey == 0)
 		{
