@@ -27,6 +27,9 @@
 // gqt4_config
 #include "gqt4_main.hpp"
 
+// Qt includes.
+#include <QtCore/qglobal.h>
+
 namespace GensQt4
 {
 
@@ -194,10 +197,12 @@ void GensMenuBar::stateChanged(void)
 			actionEnableIfOpen->setEnabled(isRomOpen);
 	}
 	
+#ifndef Q_WS_MAC
 	// Show Menu Bar.
 	QAction *actionShowMenuBar = m_hashActions.value(IDM_GRAPHICS_MENUBAR);
 	if (actionShowMenuBar)
 		actionShowMenuBar->setChecked(gqt4_config->showMenuBar());
+#endif /* Q_WS_MAC */
 	
 	// System-specifc Reset CPU actions.
 	// TODO: Determine the active system.
