@@ -36,6 +36,7 @@
 #include "libgens/IO/Io3Button.hpp"
 #include "libgens/IO/Io6Button.hpp"
 #include "libgens/IO/Io2Button.hpp"
+#include "libgens/IO/IoMegaMouse.hpp"
 
 #define MAX_CFG_BTNS 12
 
@@ -133,10 +134,11 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoBase::IoType newIoType)
 	switch (newIoType)
 	{
 		default:
-		case LibGens::IoBase::IOT_NONE:	ctrl = new LibGens::IoBase(); break;
-		case LibGens::IoBase::IOT_3BTN:	ctrl = new LibGens::Io3Button(); break;
-		case LibGens::IoBase::IOT_6BTN:	ctrl = new LibGens::Io6Button(); break;
-		case LibGens::IoBase::IOT_2BTN:	ctrl = new LibGens::Io2Button(); break;
+		case LibGens::IoBase::IOT_NONE: ctrl = new LibGens::IoBase(); break;
+		case LibGens::IoBase::IOT_3BTN: ctrl = new LibGens::Io3Button(); break;
+		case LibGens::IoBase::IOT_6BTN: ctrl = new LibGens::Io6Button(); break;
+		case LibGens::IoBase::IOT_2BTN: ctrl = new LibGens::Io2Button(); break;
+		case LibGens::IoBase::IOT_MEGA_MOUSE: ctrl = new LibGens::IoMegaMouse(); break;
 		
 		// TODO: Other devices.
 #if 0
