@@ -49,6 +49,7 @@ class GensCtrlCfgWidgetPrivate
 		~GensCtrlCfgWidgetPrivate();
 		void init(void);
 		
+		inline LibGens::IoBase::IoType ioType(void);
 		void setIoType(LibGens::IoBase::IoType newIoType);
 	
 	private:
@@ -107,6 +108,13 @@ void GensCtrlCfgWidgetPrivate::init(void)
 	}
 }
 
+
+/**
+ * GensCtrlCfgWidget::ioType(): Get the current I/O type.
+ * @return Current I/O type.
+ */
+inline LibGens::IoBase::IoType GensCtrlCfgWidgetPrivate::ioType(void)
+	{ return m_ioType; }
 
 /**
  * GensCtrlCfgWidgetPrivate::setIoType(): Set the I/O type.
@@ -182,15 +190,26 @@ GensCtrlCfgWidget::GensCtrlCfgWidget(QWidget* parent)
 {
 	// Initialize the private members.
 	d->init();
-	
-	// TODO: Configurable I/O type.
-	// For now, just set IOT_3BTN.
-	d->setIoType(LibGens::IoBase::IOT_6BTN);
 }
 
 GensCtrlCfgWidget::~GensCtrlCfgWidget()
 {
 	delete d;
 }
+
+
+/**
+ * GensCtrlCfgWidget::ioType(): Get the current I/O type.
+ * @return Current I/O type.
+ */
+LibGens::IoBase::IoType GensCtrlCfgWidget::ioType(void)
+	{ return d->ioType(); }
+
+/**
+ * GensCtrlCfgWidget::setIoType(): Set the current I/O type.
+ * @param newIoType New I/O type.
+ */
+void GensCtrlCfgWidget::setIoType(LibGens::IoBase::IoType newIoType)
+	{ d->setIoType(newIoType); }
 
 }

@@ -40,6 +40,9 @@ class GensCtrlCfgWidget : public QWidget
 	public:
 		GensCtrlCfgWidget(QWidget* parent = 0);
 		~GensCtrlCfgWidget();
+		
+		LibGens::IoBase::IoType ioType(void);
+		void setIoType(LibGens::IoBase::IoType newIoType);
 	
 	private:
 		friend class GensCtrlCfgWidgetPrivate;
