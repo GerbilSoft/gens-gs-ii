@@ -148,9 +148,9 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 		m_devType[1] = LibGens::IoBase::IOT_NONE;
 	}
 	
-	// Initialize all the settings.
-	updatePortButton(0);
-	updatePortButton(1);
+	// Initialize all the port buttons.
+	for (int i = 0; i < CTRL_CFG_MAX_PORTS; i++)
+		updatePortButton(i);
 	
 	// Set Port 1 as active.
 	actionPort1->setChecked(true);
