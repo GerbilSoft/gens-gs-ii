@@ -259,9 +259,10 @@ void GensKeySequenceWidgetPrivate::updateShortcutDisplay(void)
 	// on Mac OS X,but does print a trailing '+' on other systems.
 	// Hence, we're using built-in strings for now.
 #if defined(Q_WS_MAC)
+	// http://macbiblioblog.blogspot.com/2005/05/special-key-symbols.html
 	static const QString sModCtrl  = QChar(0x2318);	// Command symbol.
 	static const QString sModAlt   = QChar(0x2325);	// Option symbol.
-	static const QString sModMeta  = QChar(L'^');	// Control symbol.
+	static const QString sModMeta  = QChar(0x2303);	// Control symbol.
 	static const QString sModShift = QChar(0x21E7); // Shift symbol.
 #elif defined(Q_WS_WIN)
 	static const QString sModCtrl  = q->tr("Ctrl");
