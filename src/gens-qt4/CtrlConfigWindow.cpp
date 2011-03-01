@@ -259,6 +259,10 @@ void CtrlConfigWindow::updatePortSettings(int port)
 	if (devIndex >= LibGens::IoBase::IOT_4WP_SLAVE)
 		devIndex--;	// avoid having two 4WP devices in the dropdown
 	cboDevice->setCurrentIndex(devIndex);
+	
+	// Set the device type in the CtrlCfgWidget.
+	// TODO: Load the configuration, and save the previous configuration.
+	ctrlCfgWidget->setIoType((LibGens::IoBase::IoType)devIndex);
 }
 
 
@@ -285,6 +289,33 @@ void CtrlConfigWindow::on_actionPort2_toggled(bool checked)
 {
 	if (checked)
 		updatePortSettings(1);
+}
+
+
+/**
+ * on_cboDevice_currentIndexChanged(): Device type has been changed.
+ * @param index Device type index.
+ */
+void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
+{
+	int port = selectedPort();
+	if (port < 0 || port > 1)
+		return;
+	
+	// Check if the device type has been changed.
+	if (m_devType[port] == index)
+		return;
+	if (m_devType[port] < LibGens::IoBase::IOT_NONE ||
+	    m_devType[port] >= LibGens::IoBase::IOT_MAX)
+	{
+		// Invalid device type.
+		return;
+	}
+	
+	// Device type has been changed.
+	m_devType[port] = (LibGens::IoBase::IoType)index;
+	updatePortButton(port);
+	updatePortSettings(port);
 }
 
 }

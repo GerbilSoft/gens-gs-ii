@@ -77,6 +77,8 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		/** Widget slots. **/
 		void on_actionPort1_toggled(bool checked);
 		void on_actionPort2_toggled(bool checked);
+		
+		void on_cboDevice_currentIndexChanged(int index);
 	
 	private:
 		static CtrlConfigWindow *m_CtrlConfigWindow;
