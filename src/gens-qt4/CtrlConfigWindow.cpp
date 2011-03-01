@@ -351,7 +351,6 @@ void CtrlConfigWindow::updatePortButton(int port)
  */
 void CtrlConfigWindow::updatePortSettings(int port)
 {
-	printf("updatePortSettings: %d\n", port);
 	if (port < 0 || port >= CTRL_CFG_MAX_PORTS)
 		return;
 	
