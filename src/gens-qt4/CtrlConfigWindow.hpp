@@ -66,6 +66,8 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		CtrlConfigWindow(QWidget *parent = NULL);
 		virtual ~CtrlConfigWindow();
 		
+		void keyPressEvent(QKeyEvent *event);
+		
 		// Constant data.
 		static const char *ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX];
 		static const QString GetShortDeviceName(LibGens::IoBase::IoType devType);
