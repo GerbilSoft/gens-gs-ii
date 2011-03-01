@@ -27,6 +27,8 @@
 // EmuMD has the I/O devices.
 #include "libgens/MD/EmuMD.hpp"
 
+// Qt includes.
+#include <QtGui/QActionGroup>
 
 namespace GensQt4
 {
@@ -52,8 +54,14 @@ const char *CtrlConfigWindow::ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX] =
  * CtrlConfigWindow(): Initialize the Controller Configuration window.
  */
 CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
-	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
+	: QMainWindow(parent,
+		Qt::Dialog |
+		Qt::WindowTitleHint |
+		Qt::WindowSystemMenuHint |
+		Qt::WindowMinimizeButtonHint |
+		Qt::WindowCloseButtonHint)
 {
+	// Initialize the Qt4 UI.
 	setupUi(this);
 	
 	// Make sure the window is deleted on close.
@@ -63,6 +71,12 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	// Remove the window icon. (Mac "proxy icon")
 	this->setWindowIcon(QIcon());
 #endif
+	
+	// Initialize the toolbar.
+	m_actgrpSelPort = new QActionGroup(this);
+	m_actgrpSelPort->setExclusive(true);
+	m_actgrpSelPort->addAction(actionPort1);
+	m_actgrpSelPort->addAction(actionPort2);
 	
 	// Copy the current controller settings.
 	// TODO: Button mapping.
@@ -92,8 +106,8 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 				GetShortDeviceName((LibGens::IoBase::IoType)i));
 	}
 	
-	// Update the port settings.
-	updatePortSettings();
+	// Set Port 1 as active.
+	actionPort1->setChecked(true);
 }
 
 
@@ -188,14 +202,14 @@ const QString CtrlConfigWindow::GetLongDeviceName(LibGens::IoBase::IoType devTyp
  */
 void CtrlConfigWindow::updatePortButton(int port)
 {
-	QPushButton *btnPort;
+	QAction *actionPort;
 	switch (port)
 	{
 		case 0:
-			btnPort = this->btnPort1;
+			actionPort = actionPort1;
 			break;
 		case 1:
-			btnPort = this->btnPort2;
+			actionPort = actionPort2;
 			break;
 		default:
 			return;
@@ -210,18 +224,19 @@ void CtrlConfigWindow::updatePortButton(int port)
 	}
 	
 	// Update the port icon and tooltip.
-	btnPort->setIcon(QIcon(QString::fromLatin1(ms_CtrlIconFilenames[m_devType[port]])));
-	btnPort->setToolTip(GetLongDeviceName(m_devType[port]));
+	actionPort->setIcon(QIcon(QString::fromLatin1(ms_CtrlIconFilenames[m_devType[port]])));
+	actionPort->setToolTip(GetLongDeviceName(m_devType[port]));
 }
 
 
 /**
  * updatePortSettings(): Update port settings.
+ * @param port Port to display.
  */
-void CtrlConfigWindow::updatePortSettings(void)
+void CtrlConfigWindow::updatePortSettings(int port)
 {
-	int port = selectedPort();
-	if (port < 0)
+	// TODO: Port 3 support?
+	if (port < 0 || port > 1)
 		return;
 	
 	// Update the port settings.
@@ -244,6 +259,32 @@ void CtrlConfigWindow::updatePortSettings(void)
 	if (devIndex >= LibGens::IoBase::IOT_4WP_SLAVE)
 		devIndex--;	// avoid having two 4WP devices in the dropdown
 	cboDevice->setCurrentIndex(devIndex);
+}
+
+
+/** TODO **/
+
+void CtrlConfigWindow::accept(void)
+	{ close(); }
+void CtrlConfigWindow::reject(void)
+	{ close(); }
+
+void CtrlConfigWindow::reload(void) { }
+void CtrlConfigWindow::apply(void) { }
+
+
+/** Widget slots. **/
+
+void CtrlConfigWindow::on_actionPort1_toggled(bool checked)
+{
+	if (checked)
+		updatePortSettings(0);
+}
+
+void CtrlConfigWindow::on_actionPort2_toggled(bool checked)
+{
+	if (checked)
+		updatePortSettings(1);
 }
 
 }

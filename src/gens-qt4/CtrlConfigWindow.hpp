@@ -24,8 +24,11 @@
 #ifndef __GENS_QT4_CTRLCONFIGWINDOW_HPP__
 #define __GENS_QT4_CTRLCONFIGWINDOW_HPP__
 
-#include <QtGui/QDialog>
+#include <QtGui/QMainWindow>
 #include "ui_CtrlConfigWindow.h"
+
+// Qt classes.
+class QActionGroup;
 
 // LibGens includes.
 #include "libgens/IO/IoBase.hpp"
@@ -33,7 +36,7 @@
 namespace GensQt4
 {
 
-class CtrlConfigWindow : public QDialog, public Ui::CtrlConfigWindow
+class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 {
 	Q_OBJECT
 	
@@ -52,28 +55,48 @@ class CtrlConfigWindow : public QDialog, public Ui::CtrlConfigWindow
 		// Internal controller settings.
 		LibGens::IoBase::IoType m_devType[2];
 		
+		QActionGroup *m_actgrpSelPort;
+		
 		/**
 		 * selectedPort(): Determine which port is selected.
 		 * TODO: There has to be some way to optimize this...
 		 * @return Selected port index, or -1 if no port is selected.
 		 */
-		inline int selectedPort(void) const
-		{
-			if (btnPort1->isChecked())
-				return 0;
-			else if (btnPort2->isChecked())
-				return 1;
-			
-			// No port selected.
-			return -1;
-		}
+		inline int selectedPort(void) const;
 		
 		void updatePortButton(int port);
-		void updatePortSettings(void);
+		void updatePortSettings(int port);
+	
+	protected slots:
+		void accept(void);
+		void reject(void);
+		
+		void reload(void);
+		void apply(void);
+		
+		/** Widget slots. **/
+		void on_actionPort1_toggled(bool checked);
+		void on_actionPort2_toggled(bool checked);
 	
 	private:
 		static CtrlConfigWindow *m_CtrlConfigWindow;
 };
+
+/**
+ * selectedPort(): Determine which port is selected.
+ * TODO: There has to be some way to optimize this...
+ * @return Selected port index, or -1 if no port is selected.
+ */
+inline int CtrlConfigWindow::selectedPort(void) const
+{
+	if (actionPort1->isChecked())
+		return 0;
+	else if (actionPort2->isChecked())
+		return 1;
+	
+	// No port selected.
+	return -1;
+}
 
 }
 
