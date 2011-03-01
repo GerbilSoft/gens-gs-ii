@@ -22,6 +22,7 @@
 #include "GensCtrlCfgWidget.hpp"
 
 // Qt includes.
+#include <QtGui/QLayout>
 #include <QtGui/QGridLayout>
 #include <QtGui/QLabel>
 #include <QtGui/QSpacerItem>
@@ -69,11 +70,8 @@ GensCtrlCfgWidgetPrivate::GensCtrlCfgWidgetPrivate(GensCtrlCfgWidget *q)
 	, m_ioType(LibGens::IoBase::IOT_NONE)
 	, m_layout(new QGridLayout(q))
 {
-	/**
-	 * TODO: Setting the layout of the parent widget results in a warning:
-	 * "QLayout: Attempting to add QLayout "" to GensQt4::GensCtrlCfgWidget "ctrlCfgWidget", which already has a layout"
-	 * Figure out why this warning is being printed!
-	 */
+	// Eliminate margins.
+	m_layout->setContentsMargins(0, 0, 0, 0);
 	
 	// Reduce vertical spacing in the grid layout.
 	m_layout->setVerticalSpacing(0);
