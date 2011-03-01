@@ -421,6 +421,15 @@ void CtrlConfigWindow::selectPort(int port)
 	}
 	
 	// Device setting is valid.
+	
+	// Make sure the dropdown index is set properly to reduce flicker.
+	cboDevice_lock();
+	const int idx = (int)m_devType[port];
+	if (idx < cboDevice->count())
+		cboDevice->setCurrentIndex(idx);
+	cboDevice_unlock();
+	
+	// Update the port settings.
 	m_selPort = port;
 	cboDevice_setTP(isTP);		// Update Team Player device availability.
 	updatePortSettings(port);	// Update the port settings.
