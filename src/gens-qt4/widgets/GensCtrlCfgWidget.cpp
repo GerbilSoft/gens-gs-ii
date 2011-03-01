@@ -125,6 +125,9 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoBase::IoType newIoType)
 	if (m_ioType == newIoType)
 		return;
 	
+	// Save the new I/O type.
+	m_ioType = newIoType;
+	
 	// Update the grid layout based on the specified controller type.
 	LibGens::IoBase *ctrl;
 	switch (newIoType)
