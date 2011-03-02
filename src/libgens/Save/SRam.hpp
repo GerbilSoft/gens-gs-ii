@@ -68,108 +68,27 @@ class SRam
 		
 		/** Convenience functions. **/
 		
-		/**
-		 * canRead(): Determines if the M68K can read from SRam.
-		 * @return True if SRam is readable by the M68K; false if it can't.
-		 */
-		bool canRead(void) const
-		{
-			return (m_on);
-		}
+		bool canRead(void) const;
+		bool canWrite(void) const;
 		
-		/**
-		 * canWrite(): Determines if the M68K can write to SRam.
-		 * @return True if SRam is writable by the M68K; false if it can't.
-		 */
-		bool canWrite(void) const
-		{
-			return (m_on && m_write);
-		}
+		void writeCtrl(uint8_t data);
+		uint8_t zomgReadCtrl(void) const;
 		
-		/**
-		 * writeCtrl(): Write the SRam control register. (0xA130F1)
-		 * @param ctrl Control register data.
-		 */
-		void writeCtrl(uint8_t data)
-		{
-			m_on = (data & 1);
-			m_write = !(data & 2);
-		}
-		
-		/**
-		 * zomgReadCtrl(): Read the SRam control register. (0xA130F1)
-		 * NOTE: This is NOT to be used by emulation code!
-		 * It is ONLY to be used by the ZOMG savestate function!
-		 * (Reading 0xA130F1 doesn't work on hardware.)
-		 */
-		uint8_t zomgReadCtrl(void) const
-		{
-			return (m_on | (!m_write << 2));
-		}
-		
-		/**
-		 * isAddressInRange(): Determines if a given address is in the SRam's range.
-		 * return True if the address is in range; false if it isn't.
-		 */
-		bool isAddressInRange(uint32_t address) const
-		{
-			return (address >= m_start && address <= m_end);
-		}
+		bool isAddressInRange(uint32_t address) const;
 		
 		/** Memory read/write. **/
 		/** NOTE: These functions use absolute addresses! **/
 		/** e.g. 0x200000 - 0x20FFFF **/
-		
-		uint8_t readByte(uint32_t address) const
-		{
-			// Note: SRam is NOT byteswapped.
-			// TODO: Bounds checking.
-			// TODO: SRAM enable check.
-			return m_sram[address - m_start];
-		}
-		
-		uint16_t readWord(uint32_t address) const
-		{
-			// Note: SRam is NOT byteswapped.
-			// TODO: Bounds checking.
-			// TODO: Proper byteswapping.
-			// TODO: SRAM enable check.
-			address -= m_start;
-			return ((m_sram[address] << 8) | m_sram[address + 1]);
-		}
-		
-		void writeByte(uint32_t address, uint8_t data)
-		{
-			// Note: SRam is NOT byteswapped.
-			// TODO: Bounds checking.
-			// TODO: Write protection, SRAM enable check.
-			m_sram[address - m_start] = data;
-			
-			// Set the dirty flag.
-			// TODO: Only if the word was actually modified?
-			setDirty();
-		}
-		
-		void writeWord(uint32_t address, uint16_t data)
-		{
-			// Note: SRam is NOT byteswapped.
-			// TODO: Bounds checking.
-			// TODO: Proper byteswapping.
-			// TODO: Write protection, SRAM enable check.
-			address -= m_start;
-			m_sram[address] = ((data >> 8) & 0xFF);
-			m_sram[address] = (data & 0xFF);
-			
-			// Set the dirty flag.
-			// TODO: Only if the word was actually modified?
-			setDirty();
-		}
+		uint8_t readByte(uint32_t address) const;
+		uint16_t readWord(uint32_t address) const;
+		void writeByte(uint32_t address, uint8_t data);
+		void writeWord(uint32_t address, uint16_t data);
 		
 		/**
 		 * isDirty(): Determine if the SRam is dirty.
 		 * @return True if SRam has been modified since the last save; false otherwise.
 		 */
-		inline bool isDirty(void) const { return m_dirty; }
+		bool isDirty(void) const;
 		
 		// SRam filename and pathname.
 		void setFilename(const std::string& filename);
@@ -213,6 +132,11 @@ class SRam
 		int saveToZomg(LibZomg::Zomg &zomg) const;
 	
 	protected:
+		// Dirty flag.
+		void setDirty(void);
+		void clearDirty(void);
+	
+	private:
 		// Filename.
 		static const char *ms_FileExt;
 		std::string m_filename;		// SRam base filename.
@@ -231,9 +155,6 @@ class SRam
 		bool m_dirty;
 		int m_framesElapsed;
 		
-		inline void setDirty(void) { m_dirty = true; m_framesElapsed = 0; }
-		inline void clearDirty(void) { m_dirty = false; m_framesElapsed = 0; }
-		
 		// Find the next highest power of two. (unsigned integers)
 		// http://en.wikipedia.org/wiki/Power_of_two#Algorithm_to_find_the_next-highest_power_of_two
 		template <class T>
@@ -247,6 +168,115 @@ class SRam
 			return k + 1;
 		}
 };
+
+
+/** Inline public functions. **/
+
+
+/**
+ * canRead(): Determines if the M68K can read from SRam.
+ * @return True if SRam is readable by the M68K; false if it can't.
+ */
+inline bool SRam::canRead(void) const
+	{ return (m_on); }
+
+/**
+ * canWrite(): Determines if the M68K can write to SRam.
+ * @return True if SRam is writable by the M68K; false if it can't.
+ */
+inline bool SRam::canWrite(void) const
+	{ return (m_on && m_write); }
+
+/**
+ * writeCtrl(): Write the SRam control register. (0xA130F1)
+ * @param ctrl Control register data.
+ */
+inline void SRam::writeCtrl(uint8_t data)
+{
+	m_on = (data & 1);
+	m_write = !(data & 2);
+}
+
+/**
+ * zomgReadCtrl(): Read the SRam control register. (0xA130F1)
+ * NOTE: This is NOT to be used by emulation code!
+ * It is ONLY to be used by the ZOMG savestate function!
+ * (Reading 0xA130F1 doesn't work on hardware.)
+ */
+inline uint8_t SRam::zomgReadCtrl(void) const
+	{ return (m_on | (!m_write << 2)); }
+
+/**
+ * isAddressInRange(): Determines if a given address is in the SRam's range.
+ * return True if the address is in range; false if it isn't.
+ */
+inline bool SRam::isAddressInRange(uint32_t address) const
+	{ return (address >= m_start && address <= m_end); }
+
+/** Memory read/write. **/
+/** NOTE: These functions use absolute addresses! **/
+/** e.g. 0x200000 - 0x20FFFF **/
+
+inline uint8_t SRam::readByte(uint32_t address) const
+{
+	// Note: SRam is NOT byteswapped.
+	// TODO: Bounds checking.
+	// TODO: SRAM enable check.
+	return m_sram[address - m_start];
+}
+
+inline uint16_t SRam::readWord(uint32_t address) const
+{
+	// Note: SRam is NOT byteswapped.
+	// TODO: Bounds checking.
+	// TODO: Proper byteswapping.
+	// TODO: SRAM enable check.
+	address -= m_start;
+	return ((m_sram[address] << 8) | m_sram[address + 1]);
+}
+
+inline void SRam::writeByte(uint32_t address, uint8_t data)
+{
+	// Note: SRam is NOT byteswapped.
+	// TODO: Bounds checking.
+	// TODO: Write protection, SRAM enable check.
+	m_sram[address - m_start] = data;
+	
+	// Set the dirty flag.
+	// TODO: Only if the word was actually modified?
+	setDirty();
+}
+
+inline void SRam::writeWord(uint32_t address, uint16_t data)
+{
+	// Note: SRam is NOT byteswapped.
+	// TODO: Bounds checking.
+	// TODO: Proper byteswapping.
+	// TODO: Write protection, SRAM enable check.
+	address -= m_start;
+	m_sram[address] = ((data >> 8) & 0xFF);
+	m_sram[address] = (data & 0xFF);
+	
+	// Set the dirty flag.
+	// TODO: Only if the word was actually modified?
+	setDirty();
+}
+
+/**
+ * isDirty(): Determine if the SRam is dirty.
+ * @return True if SRam has been modified since the last save; false otherwise.
+ */
+inline bool SRam::isDirty(void) const
+	{ return m_dirty; }
+
+
+/** Inline protected functions. **/
+
+inline void SRam::setDirty(void)
+	{ m_dirty = true; m_framesElapsed = 0; }
+
+inline void SRam::clearDirty(void)
+	{ m_dirty = false; m_framesElapsed = 0; }
 
 }
 
