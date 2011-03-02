@@ -29,6 +29,9 @@
 
 // Qt includes.
 #include <QtGui/QMessageBox>
+#include <QtCore/QTranslator>
+#include <QtCore/QLocale>
+#include <QtCore/QLibraryInfo>
 
 #include "GensQApplication.hpp"
 #include "GensWindow.hpp"
@@ -62,6 +65,18 @@ int gens_main(int argc, char *argv[])
 	
 	// TODO: Parse command line arguments.
 	// They're available in app.arguments() [QStringList].
+	
+	// Initialize the Qt translation system.
+	// TODO: Allow switching languages on the fly?
+	// TODO: Translations subdirectory.
+	QTranslator qt_translator;
+	qt_translator.load(QLatin1String("qt_") + QLocale::system().name(),
+		QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+	GensQt4::gqt4_app->installTranslator(&qt_translator);
+	
+	QTranslator gqt4_translator;
+	gqt4_translator.load(QLatin1String("gens-qt4_") + QLocale::system().name());
+	GensQt4::gqt4_app->installTranslator(&gqt4_translator);
 	
 	// Initialize LibGens.
 	LibGens::Init();
