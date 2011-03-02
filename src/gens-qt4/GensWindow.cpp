@@ -394,36 +394,37 @@ void GensWindow::setGensTitle(void)
  */
 void GensWindow::osd(OsdType osd_type, int param)
 {
+	QString msg;
 	switch (osd_type)
 	{
 		case OSD_SRAM_LOAD:
-			m_vBackend->osd_printf(1500, "SRAM loaded. (%d bytes)", param);
+			msg = tr("SRAM loaded. (%n byte(s))", "Onscreen Display", param);
 			break;
-		
 		case OSD_SRAM_SAVE:
-			m_vBackend->osd_printf(1500, "SRAM saved. (%d bytes)", param);
+			msg = tr("SRAM saved. (%n byte(s))", "Onscreen Display", param);
 			break;
-		
 		case OSD_SRAM_AUTOSAVE:
-			m_vBackend->osd_printf(1500, "SRAM autosaved. (%d bytes)", param);
+			msg = tr("SRAM autosaved. (%n byte(s))", "Onscreen Display", param);
 			break;
-		
 		case OSD_EEPROM_LOAD:
-			m_vBackend->osd_printf(1500, "EEPROM loaded. (%d bytes)", param);
+			msg = tr("EEPROM loaded. (%n byte(s))", "Onscreen Display", param);
 			break;
-		
 		case OSD_EEPROM_SAVE:
-			m_vBackend->osd_printf(1500, "EEPROM saved. (%d bytes)", param);
+			msg = tr("EEPROM saved. (%n byte(s))", "Onscreen Display", param);
 			break;
-		
 		case OSD_EEPROM_AUTOSAVE:
-			m_vBackend->osd_printf(1500, "EEPROM autosaved. (%d bytes)", param);
+			msg = tr("EEPROM autosaved. (%n byte(s))", "Onscreen Display", param);
 			break;
-		
 		default:
 			// Unknown OSD type.
 			break;
 	}
+	
+	if (msg.isEmpty())
+		return;
+	
+	// TODO: Add an OSD Print QString function.
+	m_vBackend->osd_printf(1500, "%s", msg.toUtf8().constData());
 }
 
 
