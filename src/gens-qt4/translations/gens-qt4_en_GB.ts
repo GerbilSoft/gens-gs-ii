@@ -140,6 +140,10 @@
 <context>
     <name>GeneralConfigWindow</name>
     <message>
+        <source>this color.</source>
+        <translation type="obsolete">this colour.</translation>
+    </message>
+    <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="32"/>
         <source>General Configuration</source>
         <translation type="unfinished"></translation>
@@ -156,19 +160,13 @@
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="66"/>
-        <source>Show &amp;FPS counter in</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="79"/>
-        <location filename="../ui/GeneralConfigWindow.ui" line="110"/>
-        <source>this color.</source>
-        <translation type="unfinished"></translation>
+        <source>Show &amp;FPS counter in this color:</source>
+        <translation>Show &amp;FPS counter in this colour:</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="103"/>
-        <source>Show onscreen &amp;messages in</source>
-        <translation type="unfinished"></translation>
+        <source>Show onscreen &amp;messages in this color:</source>
+        <translation>Show onscreen &amp;messages in this colour:</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="141"/>
@@ -202,12 +200,13 @@ the emulation window loses focus.</source>
         <location filename="../ui/GeneralConfigWindow.ui" line="170"/>
         <source>Use the background color in the border area
 instead of drawing a black border.</source>
-        <translation type="unfinished"></translation>
+        <translation>Use the background colour in the border area
+instead of drawing a black border.</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="174"/>
         <source>&amp;Border color emulation</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Border colour emulation</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="181"/>
@@ -260,7 +259,7 @@ on NTSC models.</source>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="260"/>
         <source>&amp;Color:</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Colour:</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="309"/>
@@ -331,7 +330,7 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="412"/>
         <source>Color Adjustment</source>
-        <translation type="unfinished"></translation>
+        <translation>Colour Adjustment</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="418"/>
@@ -362,7 +361,7 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="528"/>
         <source>Color &amp;Scale Method:</source>
-        <translation type="unfinished"></translation>
+        <translation>Colour &amp;Scale Method:</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="559"/>
@@ -427,7 +426,8 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="784"/>
         <source>Sega &amp;CD</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Sega CD is known as Mega CD in Europe.</translatorcomment>
+        <translation>Mega &amp;CD</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="790"/>
@@ -494,83 +494,83 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../AboutWindow.cpp" line="161"/>
         <source>Visit the Gens homepage:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="167"/>
         <source>For news on Gens/GS, visit Sonic Retro:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="178"/>
         <source>Gens/GS II</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="179"/>
         <source>Development Build</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="183"/>
         <source>NO-EMULATION BUILD</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="194"/>
         <source>Sega Genesis / Mega Drive,</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="195"/>
         <source>Sega CD / Mega CD,</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="196"/>
         <source>Sega 32X emulator</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="288"/>
         <source>Internal copy of %1.</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="354"/>
         <source>Compiled using Qt %1.</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="355"/>
         <source>Using Qt %1.</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="359"/>
         <source>CPU flags</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="384"/>
         <source>Timing method</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="390"/>
         <source>Save directory</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="399"/>
         <source>OpenGL disabled.
 </source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="404"/>
         <source>OpenGL vendor string:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="405"/>
@@ -579,37 +579,37 @@ window to a larger size than its original resolution.</source>
         <location filename="../AboutWindow.cpp" line="418"/>
         <location filename="../AboutWindow.cpp" line="430"/>
         <source>(unknown)</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="406"/>
         <source>OpenGL renderer string:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="408"/>
         <source>OpenGL version string:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="415"/>
         <source>GLSL version string:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="424"/>
         <source>GLEW disabled; no GL extensions supported.</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="439"/>
         <source>No GL extensions in use.</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="444"/>
         <source>Using GL extensions:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -617,84 +617,86 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="246"/>
         <source>None</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="248"/>
         <source>3-button</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="249"/>
         <source>6-button</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="250"/>
         <source>2-button</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="251"/>
         <location filename="../CtrlConfigWindow.cpp" line="278"/>
         <source>Mega Mouse</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="252"/>
         <source>Team Player</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Sega Team Player is known as &quot;Multiplayer&quot; in Europe.</translatorcomment>
+        <translation>Multiplayer</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="254"/>
         <source>4-Way Play</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="273"/>
         <source>No device connected.</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="275"/>
         <source>3-button gamepad</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="276"/>
         <source>6-button gamepad</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="277"/>
         <source>2-button gamepad (SMS)</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="279"/>
         <source>Sega Team Player</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Sega Team Player is known as &quot;Multiplayer&quot; in Europe.</translatorcomment>
+        <translation>Sega Multiplayer</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="281"/>
         <source>EA 4-Way Play</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="294"/>
         <source>Port %1</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="297"/>
         <location filename="../CtrlConfigWindow.cpp" line="302"/>
         <source>Team Player %1, Port %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Multiplayer %1, Port %2</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="307"/>
         <source>EA 4-Way Play, Port %1</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -954,33 +956,33 @@ window to a larger size than its original resolution.</source>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="145"/>
-        <location filename="../GeneralConfigWindow.cpp" line="622"/>
-        <location filename="../GeneralConfigWindow.cpp" line="816"/>
-        <location filename="../GeneralConfigWindow.cpp" line="830"/>
+        <location filename="../GeneralConfigWindow.cpp" line="626"/>
+        <location filename="../GeneralConfigWindow.cpp" line="820"/>
+        <location filename="../GeneralConfigWindow.cpp" line="834"/>
         <source>Sega CD (U)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="146"/>
-        <location filename="../GeneralConfigWindow.cpp" line="624"/>
-        <location filename="../GeneralConfigWindow.cpp" line="818"/>
-        <location filename="../GeneralConfigWindow.cpp" line="847"/>
+        <location filename="../GeneralConfigWindow.cpp" line="628"/>
+        <location filename="../GeneralConfigWindow.cpp" line="822"/>
+        <location filename="../GeneralConfigWindow.cpp" line="851"/>
         <source>Mega CD (E)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="147"/>
-        <location filename="../GeneralConfigWindow.cpp" line="626"/>
-        <location filename="../GeneralConfigWindow.cpp" line="820"/>
-        <location filename="../GeneralConfigWindow.cpp" line="864"/>
+        <location filename="../GeneralConfigWindow.cpp" line="630"/>
+        <location filename="../GeneralConfigWindow.cpp" line="824"/>
+        <location filename="../GeneralConfigWindow.cpp" line="868"/>
         <source>Mega CD (J)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="148"/>
-        <location filename="../GeneralConfigWindow.cpp" line="628"/>
-        <location filename="../GeneralConfigWindow.cpp" line="822"/>
-        <location filename="../GeneralConfigWindow.cpp" line="882"/>
+        <location filename="../GeneralConfigWindow.cpp" line="632"/>
+        <location filename="../GeneralConfigWindow.cpp" line="826"/>
+        <location filename="../GeneralConfigWindow.cpp" line="886"/>
         <source>Mega CD (Asia)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1000,244 +1002,244 @@ window to a larger size than its original resolution.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="456"/>
+        <location filename="../GeneralConfigWindow.cpp" line="459"/>
         <source>Select OSD %1 Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Select OSD %1 Colour</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="465"/>
+        <location filename="../GeneralConfigWindow.cpp" line="468"/>
         <source>FPS counter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="483"/>
-        <source>Messages</source>
+        <location filename="../GeneralConfigWindow.cpp" line="487"/>
+        <source>messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="587"/>
+        <location filename="../GeneralConfigWindow.cpp" line="591"/>
         <source>Select %1 Boot ROM</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="593"/>
+        <location filename="../GeneralConfigWindow.cpp" line="597"/>
         <source>Sega CD Boot ROM images</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="604"/>
-        <location filename="../GeneralConfigWindow.cpp" line="916"/>
+        <location filename="../GeneralConfigWindow.cpp" line="608"/>
+        <location filename="../GeneralConfigWindow.cpp" line="920"/>
         <source>All Files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="660"/>
+        <location filename="../GeneralConfigWindow.cpp" line="664"/>
         <source>No ROM filename specified.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="662"/>
+        <location filename="../GeneralConfigWindow.cpp" line="666"/>
         <source>The specified ROM file was not found.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="668"/>
-        <location filename="../GeneralConfigWindow.cpp" line="961"/>
+        <location filename="../GeneralConfigWindow.cpp" line="672"/>
+        <location filename="../GeneralConfigWindow.cpp" line="965"/>
         <source>Unknown</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="678"/>
+        <location filename="../GeneralConfigWindow.cpp" line="682"/>
         <source>Error opening ROM file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="686"/>
+        <location filename="../GeneralConfigWindow.cpp" line="690"/>
         <source>This archive has multiple files.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="687"/>
+        <location filename="../GeneralConfigWindow.cpp" line="691"/>
         <source>Multi-file ROM archives are not currently supported for Sega CD Boot ROMs.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="698"/>
+        <location filename="../GeneralConfigWindow.cpp" line="702"/>
         <source>ROM size is incorrect.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="699"/>
+        <location filename="../GeneralConfigWindow.cpp" line="703"/>
         <source>(expected %L1 bytes; found %L2 bytes)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="716"/>
+        <location filename="../GeneralConfigWindow.cpp" line="720"/>
         <source>Error reading file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="717"/>
+        <location filename="../GeneralConfigWindow.cpp" line="721"/>
         <source>(expected %L1 bytes; read %L2 bytes)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="749"/>
+        <location filename="../GeneralConfigWindow.cpp" line="753"/>
         <source>Region code is incorrect.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="750"/>
+        <location filename="../GeneralConfigWindow.cpp" line="754"/>
         <source>(expected %1; found %2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="769"/>
+        <location filename="../GeneralConfigWindow.cpp" line="773"/>
         <source>This Boot ROM is not supported by Gens/GS II.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="775"/>
+        <location filename="../GeneralConfigWindow.cpp" line="779"/>
         <source>This Boot ROM is known to be broken on all emulators.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="792"/>
+        <location filename="../GeneralConfigWindow.cpp" line="796"/>
         <source>ROM identified as: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="809"/>
+        <location filename="../GeneralConfigWindow.cpp" line="813"/>
         <source>Selected ROM: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="904"/>
+        <location filename="../GeneralConfigWindow.cpp" line="908"/>
         <source>Select UnRAR DLL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="906"/>
+        <location filename="../GeneralConfigWindow.cpp" line="910"/>
         <source>Select RAR or UnRAR binary</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="912"/>
+        <location filename="../GeneralConfigWindow.cpp" line="916"/>
         <source>DLL files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="914"/>
+        <location filename="../GeneralConfigWindow.cpp" line="918"/>
         <source>rar or unrar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="942"/>
+        <location filename="../GeneralConfigWindow.cpp" line="946"/>
         <source>Selected Program: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="951"/>
+        <location filename="../GeneralConfigWindow.cpp" line="955"/>
         <source>UnRAR DLL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="953"/>
+        <location filename="../GeneralConfigWindow.cpp" line="957"/>
         <source>RAR or UnRAR binary</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="969"/>
+        <location filename="../GeneralConfigWindow.cpp" line="973"/>
         <source>No filename specified.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="982"/>
+        <location filename="../GeneralConfigWindow.cpp" line="986"/>
         <source>The specified file was not found.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="987"/>
+        <location filename="../GeneralConfigWindow.cpp" line="991"/>
         <source>The specified file is not executable.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="993"/>
+        <location filename="../GeneralConfigWindow.cpp" line="997"/>
         <source>The specified file is not a regular file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1000"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1004"/>
         <source>Error calling stat().</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1007"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1011"/>
         <source>UnRAR.dll API version is too old.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1008"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1012"/>
         <source>Gens/GS II requires API version %1 or later.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1016"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1020"/>
         <source>DLL version information not found.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1018"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1022"/>
         <source>Program version information not found.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1026"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1030"/>
         <source>Selected DLL is not UnRAR.dll.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1028"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1032"/>
         <source>Selected program is neither RAR nor UnRAR.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1035"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1039"/>
         <source>Unknown error code %1 received from RAR file handler.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1052"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1056"/>
         <source>UnRAR</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1056"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1060"/>
         <source>RAR</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1060"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1064"/>
         <source>UnRAR.dll</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1064"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1068"/>
         <source>Identified as: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1075"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1079"/>
         <source>%1 version %2.%3.%4.%5</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1082"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1086"/>
         <source>%1 version %2.%3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1090"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1094"/>
         <source>API version %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1377,6 +1379,220 @@ window to a larger size than its original resolution.</source>
     </message>
 </context>
 <context>
+    <name>GensQt4::GensMenuBar</name>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="36"/>
+        <source>&amp;Open ROM...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="37"/>
+        <source>&amp;Close ROM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="39"/>
+        <source>&amp;Save State</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="40"/>
+        <source>&amp;Load State</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="44"/>
+        <source>&amp;Preferences...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="46"/>
+        <source>&amp;General Configuration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="48"/>
+        <source>Sega C&amp;D Control Panel</source>
+        <translatorcomment>Sega CD is known as Mega CD in Europe.</translatorcomment>
+        <translation>Mega C&amp;D Control Panel</translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="54"/>
+        <source>&amp;Quit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="63"/>
+        <source>Show &amp;Menu Bar</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="66"/>
+        <source>&amp;Resolution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="67"/>
+        <source>&amp;Color Depth</source>
+        <translation>&amp;Colour Depth</translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="68"/>
+        <source>S&amp;tretch Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="71"/>
+        <source>&amp;Screenshot</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="79"/>
+        <source>320x240 (&amp;1x)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="80"/>
+        <source>640x480 (&amp;2x)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="81"/>
+        <source>960x720 (&amp;3x)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="82"/>
+        <source>1280x960 (&amp;4x)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="90"/>
+        <source>15-bit (555)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="91"/>
+        <source>16-bit (565)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="92"/>
+        <source>32-bit (888)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="100"/>
+        <source>None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="101"/>
+        <source>Horizontal Only</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="102"/>
+        <source>Vertical Only</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="103"/>
+        <source>Full Stretch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="111"/>
+        <source>&amp;Region</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="113"/>
+        <source>&amp;Hard Reset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="114"/>
+        <source>&amp;Soft Reset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="115"/>
+        <source>&amp;Pause</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="117"/>
+        <source>Reset &amp;68000</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="118"/>
+        <source>Reset &amp;Z80</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="126"/>
+        <source>&amp;Auto Detect</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="127"/>
+        <source>&amp;Japan (NTSC)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="128"/>
+        <source>A&amp;sia (PAL)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="129"/>
+        <source>&amp;USA (NTSC)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="130"/>
+        <source>&amp;Europe (PAL)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="161"/>
+        <source>Mono</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="162"/>
+        <source>Stereo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="170"/>
+        <source>&amp;About Gens/GS II</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="178"/>
+        <source>&amp;File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="179"/>
+        <source>&amp;Graphics</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="180"/>
+        <source>&amp;System</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="183"/>
+        <source>&amp;Help</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>GensQt4::GensWindow</name>
     <message>
         <location filename="../GensWindow.cpp" line="367"/>
@@ -1401,7 +1617,7 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../GensWindow.cpp" line="463"/>
         <source>Color depth set to %1-bit.</source>
-        <translation type="unfinished"></translation>
+        <translation>Colour depth set to %1-bit.</translation>
     </message>
 </context>
 <context>
@@ -1456,41 +1672,12 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../ui/McdControlWindow.ui" line="14"/>
         <source>Sega CD Control Panel</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Sega CD is known as Mega CD in Europe.</translatorcomment>
+        <translation>Mega CD Control Panel</translation>
     </message>
     <message>
         <location filename="../ui/McdControlWindow.ui" line="20"/>
         <source>CD-ROM Drives</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>OmgColors</name>
-    <message>
-        <location filename="../ui/OmgColors.ui" line="32"/>
-        <source>OMG! Colors!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/OmgColors.ui" line="42"/>
-        <source>&amp;R</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/OmgColors.ui" line="71"/>
-        <location filename="../ui/OmgColors.ui" line="110"/>
-        <location filename="../ui/OmgColors.ui" line="149"/>
-        <source>0</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/OmgColors.ui" line="81"/>
-        <source>&amp;G</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/OmgColors.ui" line="120"/>
-        <source>&amp;B</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
