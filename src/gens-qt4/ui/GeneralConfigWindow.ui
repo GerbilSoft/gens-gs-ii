@@ -63,7 +63,7 @@
              <item>
               <widget class="QCheckBox" name="chkOsdFpsEnable">
                <property name="text">
-                <string>Show &amp;FPS counter in</string>
+                <string>Show &amp;FPS counter in this color:</string>
                </property>
               </widget>
              </item>
@@ -76,7 +76,7 @@
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>this color.</string>
+                <string notr="true">#FFFFFF</string>
                </property>
               </widget>
              </item>
@@ -100,14 +100,14 @@
              <item>
               <widget class="QCheckBox" name="chkOsdMsgEnable">
                <property name="text">
-                <string>Show onscreen &amp;messages in</string>
+                <string>Show onscreen &amp;messages in this color:</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QPushButton" name="btnOsdMsgColor">
                <property name="text">
-                <string>this color.</string>
+                <string notr="true">#FFFFFF</string>
                </property>
               </widget>
              </item>

@@ -296,12 +296,14 @@ void GeneralConfigWindow::reload(void)
 	m_osdFpsColor = gqt4_config->osdFpsColor();
 	colorText = TextColor_For_BGColor(m_osdFpsColor);
 	btnOsdFpsColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdFpsColor.name()).arg(colorText.name()));
+	btnOsdFpsColor->setText(m_osdFpsColor.name().toUpper());
 	
 	/** Onscreen display: Messages. **/
 	chkOsdMsgEnable->setChecked(gqt4_config->osdMsgEnabled());
 	m_osdMsgColor = gqt4_config->osdMsgColor();
 	colorText = TextColor_For_BGColor(m_osdMsgColor);
 	btnOsdMsgColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdMsgColor.name()).arg(colorText.name()));
+	btnOsdMsgColor->setText(m_osdMsgColor.name().toUpper());
 	
 	/** Intro effect. **/
 	cboIntroStyle->setCurrentIndex(gqt4_config->introStyle());
@@ -469,6 +471,7 @@ void GeneralConfigWindow::on_btnOsdFpsColor_clicked(void)
 	m_osdFpsColor = color;
 	QColor colorText = TextColor_For_BGColor(m_osdFpsColor);
 	btnOsdFpsColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdFpsColor.name()).arg(colorText.name()));
+	btnOsdFpsColor->setText(m_osdFpsColor.name().toUpper());
 	
 	// Settings have been changed.
 #ifndef GCW_APPLY_IMMED
