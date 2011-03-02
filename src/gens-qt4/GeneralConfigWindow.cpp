@@ -345,6 +345,7 @@ void GeneralConfigWindow::reload(void)
 	uint16_t regionCodeOrder = gqt4_config->regionCodeOrder();
 	for (int i = 0; i < 4; i++, regionCodeOrder >>= 4)
 	{
+		// TODO: Translate RegionCodeStrMD somehow.
 		const char *str = LibGens::Rom::RegionCodeStrMD(regionCodeOrder & 0xF);
 		if (str)
 		{
@@ -483,7 +484,7 @@ void GeneralConfigWindow::on_btnOsdFpsColor_clicked(void)
 
 void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
 {
-	QColor color = osdSelectColor(tr("Messages"), m_osdMsgColor);
+	QColor color = osdSelectColor(tr("messages"), m_osdMsgColor);
 	if (!color.isValid() || m_osdMsgColor == color)
 		return;
 	
