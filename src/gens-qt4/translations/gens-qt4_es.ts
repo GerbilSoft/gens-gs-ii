@@ -1630,8 +1630,62 @@ window to a larger size than its original resolution.</source>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
+    <message numerus="yes">
+        <location filename="../GensWindow.cpp" line="401"/>
+        <source>SRAM loaded. (%n byte(s))</source>
+        <comment>Onscreen Display</comment>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../GensWindow.cpp" line="404"/>
+        <source>SRAM saved. (%n byte(s))</source>
+        <comment>Onscreen Display</comment>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../GensWindow.cpp" line="407"/>
+        <source>SRAM autosaved. (%n byte(s))</source>
+        <comment>Onscreen Display</comment>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../GensWindow.cpp" line="410"/>
+        <source>EEPROM loaded. (%n byte(s))</source>
+        <comment>Onscreen Display</comment>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../GensWindow.cpp" line="413"/>
+        <source>EEPROM saved. (%n byte(s))</source>
+        <comment>Onscreen Display</comment>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../GensWindow.cpp" line="416"/>
+        <source>EEPROM autosaved. (%n byte(s))</source>
+        <comment>Onscreen Display</comment>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
     <message>
-        <location filename="../GensWindow.cpp" line="463"/>
+        <location filename="../GensWindow.cpp" line="464"/>
         <source>Color depth set to %1-bit.</source>
         <translation type="unfinished"></translation>
     </message>

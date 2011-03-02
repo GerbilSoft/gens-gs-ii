@@ -140,10 +140,6 @@
 <context>
     <name>GeneralConfigWindow</name>
     <message>
-        <source>this color.</source>
-        <translation type="obsolete">this colour.</translation>
-    </message>
-    <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="32"/>
         <source>General Configuration</source>
         <translation type="unfinished"></translation>
@@ -1243,6 +1239,31 @@ window to a larger size than its original resolution.</source>
         <source>API version %1</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../GeneralConfigWindow_mac.mm" line="80"/>
+        <source>&amp;General</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../GeneralConfigWindow_mac.mm" line="81"/>
+        <source>G&amp;raphics</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../GeneralConfigWindow_mac.mm" line="82"/>
+        <source>&amp;System</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../GeneralConfigWindow_mac.mm" line="83"/>
+        <source>Sega &amp;CD</source>
+        <translation type="unfinished">Mega &amp;CD</translation>
+    </message>
+    <message>
+        <location filename="../GeneralConfigWindow_mac.mm" line="84"/>
+        <source>E&amp;xternal Programs</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>GensQt4::GensColorComboBox</name>
@@ -1614,8 +1635,62 @@ window to a larger size than its original resolution.</source>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
+    <message numerus="yes">
+        <location filename="../GensWindow.cpp" line="401"/>
+        <source>SRAM loaded. (%n byte(s))</source>
+        <comment>Onscreen Display</comment>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../GensWindow.cpp" line="404"/>
+        <source>SRAM saved. (%n byte(s))</source>
+        <comment>Onscreen Display</comment>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../GensWindow.cpp" line="407"/>
+        <source>SRAM autosaved. (%n byte(s))</source>
+        <comment>Onscreen Display</comment>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../GensWindow.cpp" line="410"/>
+        <source>EEPROM loaded. (%n byte(s))</source>
+        <comment>Onscreen Display</comment>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../GensWindow.cpp" line="413"/>
+        <source>EEPROM saved. (%n byte(s))</source>
+        <comment>Onscreen Display</comment>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../GensWindow.cpp" line="416"/>
+        <source>EEPROM autosaved. (%n byte(s))</source>
+        <comment>Onscreen Display</comment>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
     <message>
-        <location filename="../GensWindow.cpp" line="463"/>
+        <location filename="../GensWindow.cpp" line="464"/>
         <source>Color depth set to %1-bit.</source>
         <translation>Colour depth set to %1-bit.</translation>
     </message>
