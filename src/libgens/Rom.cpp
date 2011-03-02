@@ -475,7 +475,11 @@ int Rom::initSRam(SRam *sram) const
 	// Reset SRam before applying any settings.
 	sram->reset();
 	
+	// TODO; Move some of this to the SRam class?
+	
+	// SRam addresses.
 	uint32_t start, end;
+	
 	// Check if the ROM header has SRam information.
 	// Mask the SRam info value with 0xFFFF4000 and check
 	// if it matches the Magic Number.
@@ -484,6 +488,7 @@ int Rom::initSRam(SRam *sram) const
 	{
 		// ROM header has SRam information. Use these addresses..
 		// SRam starting position must be a multiple of 0xF80000.
+		// TODO: Is that really necessary?
 		start = m_mdHeader.sramStartAddr & 0xF80000;
 		end = m_mdHeader.sramEndAddr & 0xFFFFFF;
 	}
@@ -492,24 +497,20 @@ int Rom::initSRam(SRam *sram) const
 		// ROM header does not have SRam information.
 		// Use default settings.
 		start = 0x200000;
-		end = 0x203FFF;	// 64 KB
+		end = 0x20FFFF;	// 64 KB
 	}
 	
 	// Check for invalid SRam addresses.
-	if ((start > end) || ((end - start) > 0x3FFF))
+	if ((start > end) || ((end - start) > 0xFFFF))
 	{
 		// Invalid ending address.
-		// Set the end address to the start + 0x3FFF.
-		end = start + 0x3FFF;
+		// Set the end address to the start + 0xFFFF.
+		end = start + 0xFFFF;
 	}
 	
-	// Make sure sRam starts on an even byte and ends on an odd byte.
+	// Make sure SRam starts on an even byte and ends on an odd byte.
 	start &= ~1;
 	end |= 1;
-	
-	// Set the addresses.
-	sram->setStart(start);
-	sram->setEnd(end);
 	
 	// If the ROM is smaller than the SRam starting address, always enable SRam.
 	// TODO: Instead of hardcoding 2 MB, use SRAM_Start.
@@ -518,6 +519,10 @@ int Rom::initSRam(SRam *sram) const
 		sram->setOn(true);
 		sram->setWrite(true);
 	}
+	
+	// Set the addresses.
+	sram->setStart(start);
+	sram->setEnd(end);
 	
 	// Load the SRam file.
 	// TODO: Use internal filename for multi-file?
