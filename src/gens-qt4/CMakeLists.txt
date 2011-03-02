@@ -96,7 +96,7 @@ ENDIF()
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 
 # Sources.
-SET(gens-qt4_SRCS
+SET(gens-qt4_COMMON_SRCS
 	gqt4_main.cpp
 	GensWindow.cpp
 	AboutWindow.cpp
@@ -139,7 +139,7 @@ SET(gens-qt4_SRCS
 	)
 
 # Headers with Qt4 objects.
-SET(gens-qt4_MOC_HEADERS
+SET(gens-qt4_COMMON_MOC_HEADERS
 	GensWindow.hpp
 	AboutWindow.hpp
 	EmuThread.hpp
@@ -168,64 +168,8 @@ SET(gens-qt4_MOC_HEADERS
 	widgets/GensCtrlCfgWidget.hpp
 	)
 
-IF(QT_QTDBUS_FOUND)
-	# QtDBus found.
-	# Enable UDisks support.
-	SET(gens-qt4_SRCS
-		${gens-qt4_SRCS}
-		cdrom/FindCdromUDisks.cpp
-		)
-	SET(gens-qt4_MOC_HEADERS
-		${gens-qt4_MOC_HEADERS}
-		cdrom/FindCdromUDisks.hpp
-		)
-ENDIF(QT_QTDBUS_FOUND)
-
-#########################################
-# System-specific CD-ROM drive support. #
-#########################################
-
-IF(UNIX)
-	IF(APPLE)
-		# Don't enable FindCdromUnix on Mac OS X.
-	ELSE(APPLE)
-		# Unix: Enable Unix CD-ROM support.
-		SET(gens-qt4_SRCS
-			${gens-qt4_SRCS}
-			cdrom/FindCdromUnix.cpp
-			)
-		SET(gens-qt4_MOC_HEADERS
-			${gens-qt4_MOC_HEADERS}
-			cdrom/FindCdromUnix.hpp
-			)
-	ENDIF(APPLE)
-ENDIF(UNIX)
-
-IF(WIN32)
-	# Win32: Enable Win32 CD-ROM suport.
-	SET(gens-qt4_SRCS
-		${gens-qt4_SRCS}
-		cdrom/FindCdromWin32.cpp
-		cdrom/Spti.cpp
-		)
-	SET(gens-qt4_MOC_HEADERS
-		${gens-qt4_MOC_HEADERS}
-		cdrom/FindCdromWin32.hpp
-		)
-ENDIF(WIN32)
-
-######################################
-# Mac OS X: System-specific UI code. #
-######################################
-IF(APPLE)
-	SET(gens-qt4_SRCS
-		${gens-qt4_SRCS}
-		GeneralConfigWindow_mac.mm
-		)
-ENDIF(APPLE)
-
-# Create .moc files for sources that need them.
-QT4_WRAP_CPP(gens-qt4_MOC_SOURCES ${gens-qt4_MOC_HEADERS})
+SET(gens-qt4_SRCS ${gens-qt4_COMMON_SRCS})
+SET(gens-qt4_MOC_HEADERS ${gens-qt4_COMMON_MOC_HEADERS})
 
 # UI files.
 SET(gens-qt4_UIS
@@ -238,6 +182,91 @@ SET(gens-qt4_UIS
 
 # Generate the header files from the UI files.
 QT4_WRAP_UI(gens-qt4_UIS_H ${gens-qt4_UIS})
+
+#########################################
+# System-specific CD-ROM drive support. #
+#########################################
+
+SET(gens-qt4_CDROM_UDISKS_SRCS cdrom/FindCdromUDisks.cpp)
+SET(gens-qt4_CDROM_UDISKS_MOC_HEADERS cdrom/FindCdromUDisks.hpp)
+
+SET(gens-qt4_CDROM_UNIX_SRCS cdrom/FindCdromUnix.cpp)
+SET(gens-qt4_CDROM_UNIX_MOC_HEADERS cdrom/FindCdromUnix.hpp)
+
+SET(gens-qt4_CDROM_WIN32_SRCS
+	cdrom/FindCdromWin32.cpp
+	cdrom/Spti.cpp
+	)
+SET(gens-qt4_CDROM_WIN32_MOC_HEADERS
+	cdrom/FindCdromWin32.hpp
+	)
+
+IF(QT_QTDBUS_FOUND)
+	# QtDBus found.
+	# Enable UDisks support.
+	SET(gens-qt4_SRCS
+		${gens-qt4_SRCS}
+		${gens-qt4_CDROM_UDISKS_SRCS}
+		)
+	SET(gens-qt4_MOC_HEADERS
+		${gens-qt4_MOC_HEADERS}
+		${gens-qt4_CDROM_UDISKS_MOC_HEADERS}
+		)
+ENDIF(QT_QTDBUS_FOUND)
+
+IF(UNIX)
+	IF(NOT APPLE)
+		SET(gens-qt4_SRCS
+			${gens-qt4_SRCS}
+			${gens-qt4_CDROM_UNIX_SRCS}
+			)
+		SET(gens-qt4_MOC_HEADERS
+			${gens-qt4_MOC_HEADERS}
+			${gens-qt4_CDROM_UNIX_MOC_HEADERS}
+			)
+	ENDIF(NOT APPLE)
+ELSEIF(WIN32)
+	# Win32: Enable Win32 CD-ROM suport.
+	SET(gens-qt4_SRCS
+		${gens-qt4_SRCS}
+		${gens-qt4_CDROM_WIN32_SRCS}
+		)
+	SET(gens-qt4_MOC_HEADERS
+		${gens-qt4_MOC_HEADERS}
+		${gens-qt4_CDROM_WIN32_MOC_HEADERS}
+		)
+ENDIF()
+
+############################
+# System-specific UI code. #
+############################
+
+SET(gens-qt4_WIN32_UI_SRCS
+	GensQApplication_win32.cpp
+	ui/resources/win32/gens-qt4.rc
+	)
+SET(gens-qt4_MAC_UI_SRCS
+	GeneralConfigWindow_mac.mm
+	)
+SET(gens-qt4_MAC_ICONS
+	"${CMAKE_CURRENT_SOURCE_DIR}/ui/resources/mac/gensgs.icns"
+	)
+
+IF(WIN32)
+	SET(gens-qt4_SRCS
+		${gens-qt4_SRCS}
+		${gens-qt4_WIN32_UI_SRCS}
+		)
+ELSEIF(APPLE)
+	SET(gens-qt4_SRCS
+		${gens-qt4_SRCS}
+		${gens-qt4_MAC_UI_SRCS}
+		${gens-qt4_MAC_ICONS}
+		)
+ENDIF()
+
+# Create .moc files for sources that need them.
+QT4_WRAP_CPP(gens-qt4_MOC_SOURCES ${gens-qt4_MOC_HEADERS})
 
 # Always include the Oxygen icons on Win32 and Mac OS X.
 IF(WIN32)
@@ -263,29 +292,60 @@ QT4_ADD_RESOURCES(
 	OPTIONS -no-compress
 	)
 
-# Compatibility sources.
-IF(WIN32)
-	SET(gens-qt4_COMPAT_SRCS
-		GensQApplication_win32.cpp
-		ui/resources/win32/gens-qt4.rc
-		)
-ELSEIF(APPLE)
-	# Mac OS X icons.
-	SET(gens-qt4_MAC_ICONS
-		"${CMAKE_CURRENT_SOURCE_DIR}/ui/resources/mac/gensgs.icns"
-		)
+# Mac OS X bundle.
+IF(APPLE)
 	SET_SOURCE_FILES_PROPERTIES(${gens-qt4_MAC_ICONS}
 		PROPERTIES MACOSX_PACKAGE_LOCATION Resources
 		)
-	SET(gens-qt4_COMPAT_SRCS ${gens-qt4_MAC_ICONS})
-ELSE()
-	SET(gens-qt4_COMPAT_SRCS "")
-ENDIF()
+ENDIF(APPLE)
 
-# Build the executable.
+#################
+# Translations. #
+#################
+
+# Translate all files.
+FILE(GLOB ALL_HEADER_FILES
+	*.h *.hpp
+	*/*.h */*.hpp
+	ui/resources/win32/*.h
+	)
+FILE(GLOB ALL_SRC_FILES
+	*.c *.cpp *.m *.mm
+	*/*.c */*.cpp */*.m */*.mm)
+FILE(GLOB ALL_UI_FILES ui/*.ui)
+SET(FILES_TO_TRANSLATE
+	${ALL_HEADER_FILES}
+	${ALL_SRC_FILES}
+	${ALL_UI_FILES}
+	)
+
+# Reference: http://www.vtk.org/Wiki/CMake:How_To_Build_Qt4_Software
+FILE(GLOB TRANSLATIONS_FILES translations/*.ts)
+OPTION(UPDATE_TRANSLATIONS "Update source translation translations/*.ts
+files (WARNING: make clean will delete the source .ts files! Danger!)")
+IF(UPDATE_TRANSLATIONS)
+	QT4_CREATE_TRANSLATION(QM_FILES ${FILES_TO_TRANSLATE} ${TRANSLATIONS_FILES})
+ELSE(UPDATE_TRANSLATIONS)
+	QT4_ADD_TRANSLATION(QM_FILES ${TRANSLATIONS_FILES})
+ENDIF(UPDATE_TRANSLATIONS)
+
+ADD_CUSTOM_TARGET(translations_target DEPENDS ${QM_FILES})
+INSTALL(FILES ${QM_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/translations)
+# TODO: Mac OS X bundle location.
+
+#########################
+# Build the executable. #
+#########################
+
 # TODO: Set Win32 when compiling release build
 # to disable the command prompt window.
-ADD_EXECUTABLE(gens-qt4 MACOSX_BUNDLE ${gens-qt4_SRCS} ${gens-qt4_COMPAT_SRCS} ${gens-qt4_MOC_SOURCES} ${gens-qt4_UIS_H} ${gens-qt4_RCC_O})
+ADD_EXECUTABLE(gens-qt4 MACOSX_BUNDLE
+	${gens-qt4_SRCS}
+	${gens-qt4_COMPAT_SRCS}
+	${gens-qt4_MOC_SOURCES}
+	${gens-qt4_UIS_H}
+	${gens-qt4_RCC_O}
+	${QM_FILES})
 TARGET_LINK_LIBRARIES(gens-qt4 gens)
 
 # Fast QString concatenation.

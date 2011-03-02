@@ -265,15 +265,15 @@ void GensKeySequenceWidgetPrivate::updateShortcutDisplay(void)
 	static const QString sModMeta  = QChar(0x2303);	// Control symbol.
 	static const QString sModShift = QChar(0x21E7); // Shift symbol.
 #elif defined(Q_WS_WIN)
-	static const QString sModCtrl  = q->tr("Ctrl");
-	static const QString sModAlt   = q->tr("Alt");
-	static const QString sModMeta  = q->tr("Win");
-	static const QString sModShift = q->tr("Shift");
+	static const QString sModCtrl  = GensKeySequenceWidget::tr("Ctrl");
+	static const QString sModAlt   = GensKeySequenceWidget::tr("Alt");
+	static const QString sModMeta  = GensKeySequenceWidget::tr("Win");
+	static const QString sModShift = GensKeySequenceWidget::tr("Shift");
 #else
-	static const QString sModCtrl  = q->tr("Ctrl");
-	static const QString sModAlt   = q->tr("Alt");
-	static const QString sModMeta  = q->tr("Meta");
-	static const QString sModShift = q->tr("Shift");
+	static const QString sModCtrl  = GensKeySequenceWidget::tr("Ctrl");
+	static const QString sModAlt   = GensKeySequenceWidget::tr("Alt");
+	static const QString sModMeta  = GensKeySequenceWidget::tr("Meta");
+	static const QString sModShift = GensKeySequenceWidget::tr("Shift");
 #endif
 	
 	// Empty string if no non-modifier was pressed.
@@ -302,7 +302,7 @@ void GensKeySequenceWidgetPrivate::updateShortcutDisplay(void)
 		}
 		else if (nKey == 0)
 		{
-			s = q->tr("Input");
+			s = GensKeySequenceWidget::tr("Input");
 		}
 		
 		//make it clear that input is still going on
@@ -310,7 +310,7 @@ void GensKeySequenceWidgetPrivate::updateShortcutDisplay(void)
 	}
 	
 	if (s.isEmpty())
-		s = q->tr("None");
+		s = GensKeySequenceWidget::tr("None");
 	
 	s.prepend(QChar(L' '));
 	s.append(QChar(L' '));

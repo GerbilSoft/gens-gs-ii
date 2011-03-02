@@ -117,7 +117,8 @@ int gens_main(int argc, char *argv[])
  */
 void gqt4_log_msg_critical(const char *channel, const utf8_str *msg)
 {
-	QString title = TR("Gens Critical Error: %1").arg(QString::fromLatin1(channel));
+	QString title = QLatin1String("Gens Critical Error:") + QChar(L' ') +
+			QLatin1String(channel);
 	
 	QMessageBox dialog(QMessageBox::Critical, title, QString::fromUtf8(msg));
 	dialog.setTextFormat(Qt::PlainText);

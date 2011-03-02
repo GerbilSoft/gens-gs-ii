@@ -63,7 +63,8 @@ const QString GeneralConfigWindow::ms_sCssBtnColors =
 // Warning string.
 const QString GeneralConfigWindow::ms_sWarning =
 	QLatin1String("<span style='color: red'><b>") +
-	tr("Warning:") + QLatin1String("</b></span> ");
+	GeneralConfigWindow::tr("Warning:") +
+	QLatin1String("</b></span> ");
 
 
 /**
