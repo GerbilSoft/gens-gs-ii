@@ -530,13 +530,13 @@ int Rom::initSRam(SRam *sram) const
 		sram->setEnd(0);
 		return 0;
 	}
-#if 0
 	else if (!strncmp("T-26013", &m_mdHeader.serialNumber[3], 7))
 	{
 		// Psy-O-Blade: Incorrect header.
 		start = 0x200000;
 		end = 0x203FFF;
 	}
+#if 0
 	else if (m_mdHeader.checksum == 0x8104)
 	{
 		/**
