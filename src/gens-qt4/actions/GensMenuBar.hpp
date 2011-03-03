@@ -75,6 +75,7 @@ class GensMenuBar : public QObject
 			int id;				// Menu identifier. (-1 == separator)
 			MenuItemType type;		// Menu item type.
 			const utf8_str *text;		// Menu item text.
+			QAction::MenuRole menuRole;	// (Mac OS X) Menu item role.
 			
 			int submenu_id;			// Submenu ID.
 			const MenuItem *submenu;	// First element of submenu.
