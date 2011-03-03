@@ -33,7 +33,7 @@
     <name>CtrlConfigWindow</name>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="17"/>
-        <source>General Configuration</source>
+        <source>Controller Configuration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -330,12 +330,6 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="418"/>
         <source>Co&amp;ntrast:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="456"/>
-        <location filename="../ui/GeneralConfigWindow.ui" line="504"/>
-        <source>0</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
