@@ -543,27 +543,55 @@ QString EmuManager::sysName(void)
 		case LibGens::Rom::MDP_SYSTEM_MD:
 			// Genesis / Mega Drive.
 			if (region.region() == LibGens::SysVersion::REGION_US_NTSC)
-				return tr("Genesis");
+			{
+				//: MD ROM region is US/NTSC. System name should be the equivalent of "Genesis".
+				return tr("Genesis", "rom-region");
+			}
 			else
-				return tr("Mega Drive");
+			{
+				//: MD ROM region is not US/NTSC. System name should be the equivalent of "Mega Drive".
+				return tr("Mega Drive", "rom-region");
+			}
 		
 		case LibGens::Rom::MDP_SYSTEM_MCD:
 			if (region.region() == LibGens::SysVersion::REGION_US_NTSC)
-				return tr("Sega CD");
+			{
+				//: MCD disc region is US/NTSC. System name should be the equivalent of "Sega CD".
+				return tr("Sega CD", "rom-region");
+			}
 			else
-				return tr("Mega CD");
+			{
+				//: MCD disc region is not US/NTSC. System name should be the equivalent of "Mega CD".
+				return tr("Mega CD", "rom-region");
+			}
 		
 		case LibGens::Rom::MDP_SYSTEM_32X:
-			if (region.isPal())
-				return tr("32X (PAL)");
-			else
-				return tr("32X (NTSC)");
+			switch (region.region())
+			{
+				default:
+				case LibGens::SysVersion::REGION_US_NTSC:
+					//: 32X ROM is US/NTSC. System name should be the equivalent of "Sega 32X".
+					return tr("Sega 32X", "rom-region");
+				case LibGens::SysVersion::REGION_EU_PAL:
+					//: 32X ROM is EU/PAL. System name should be the equivalent of "Mega Drive 32X".
+					return tr("Mega Drive 32X", "rom-region");
+				case LibGens::SysVersion::REGION_JP_NTSC:
+				case LibGens::SysVersion::REGION_ASIA_PAL:
+					//: 32X ROM is JP or ASIA. System name should be the equivalent of "Super 32X".
+					return tr("Super 32X", "rom-region");
+			}
 		
 		case LibGens::Rom::MDP_SYSTEM_MCD32X:
 			if (region.region() == LibGens::SysVersion::REGION_US_NTSC)
-				return tr("Sega CD 32X");
+			{
+				//: Sega CD 32X disc region is US/NTSC. System name should be the equivalent of "Sega CD 32X".
+				return tr("Sega CD 32X", "rom-region");
+			}
 			else
-				return tr("Mega CD 32X");
+			{
+				//: Sega CD 32X disc region is US/NTSC. System name should be the equivalent of "Mega CD 32X".
+				return tr("Mega CD 32X", "rom-region");
+			}
 		
 		case LibGens::Rom::MDP_SYSTEM_SMS:
 			return tr("Master System");

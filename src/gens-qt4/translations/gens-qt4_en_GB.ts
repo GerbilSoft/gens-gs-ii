@@ -718,67 +718,90 @@ window to a larger size than its original resolution.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="546"/>
-        <source>Genesis</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../EmuManager.cpp" line="548"/>
+        <source>Genesis</source>
+        <comment>rom-region</comment>
+        <extracomment>MD ROM region is US/NTSC. System name should be the equivalent of &quot;Genesis&quot;.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../EmuManager.cpp" line="553"/>
         <source>Mega Drive</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../EmuManager.cpp" line="552"/>
-        <source>Sega CD</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../EmuManager.cpp" line="554"/>
-        <source>Mega CD</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../EmuManager.cpp" line="558"/>
-        <source>32X (PAL)</source>
+        <comment>rom-region</comment>
+        <extracomment>MD ROM region is not US/NTSC. System name should be the equivalent of &quot;Mega Drive&quot;.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="560"/>
-        <source>32X (NTSC)</source>
+        <source>Sega CD</source>
+        <comment>rom-region</comment>
+        <extracomment>MCD disc region is US/NTSC. System name should be the equivalent of &quot;Sega CD&quot;.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="564"/>
-        <source>Sega CD 32X</source>
+        <location filename="../EmuManager.cpp" line="565"/>
+        <source>Mega CD</source>
+        <comment>rom-region</comment>
+        <extracomment>MCD disc region is not US/NTSC. System name should be the equivalent of &quot;Mega CD&quot;.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="566"/>
-        <source>Mega CD 32X</source>
+        <location filename="../EmuManager.cpp" line="574"/>
+        <source>Sega 32X</source>
+        <comment>rom-region</comment>
+        <extracomment>32X ROM is US/NTSC. System name should be the equivalent of &quot;Sega 32X&quot;.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="569"/>
-        <source>Master System</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../EmuManager.cpp" line="572"/>
-        <source>Game Gear</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../EmuManager.cpp" line="575"/>
-        <source>SG-1000</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../EmuManager.cpp" line="578"/>
-        <source>Pico</source>
+        <location filename="../EmuManager.cpp" line="577"/>
+        <source>Mega Drive 32X</source>
+        <comment>rom-region</comment>
+        <extracomment>32X ROM is EU/PAL. System name should be the equivalent of &quot;Mega Drive 32X&quot;.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="581"/>
+        <source>Super 32X</source>
+        <comment>rom-region</comment>
+        <extracomment>32X ROM is JP or ASIA. System name should be the equivalent of &quot;Super 32X&quot;.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../EmuManager.cpp" line="588"/>
+        <source>Sega CD 32X</source>
+        <comment>rom-region</comment>
+        <extracomment>Sega CD 32X disc region is US/NTSC. System name should be the equivalent of &quot;Sega CD 32X&quot;.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../EmuManager.cpp" line="593"/>
+        <source>Mega CD 32X</source>
+        <comment>rom-region</comment>
+        <extracomment>Sega CD 32X disc region is US/NTSC. System name should be the equivalent of &quot;Mega CD 32X&quot;.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../EmuManager.cpp" line="597"/>
+        <source>Master System</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../EmuManager.cpp" line="600"/>
+        <source>Game Gear</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../EmuManager.cpp" line="603"/>
+        <source>SG-1000</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../EmuManager.cpp" line="606"/>
+        <source>Pico</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../EmuManager.cpp" line="609"/>
         <source>Unknown</source>
         <translation type="unfinished"></translation>
     </message>
