@@ -162,7 +162,7 @@ class GensWindow : public QMainWindow
 		 * @param msg Message to print.
 		 */
 		void osdPrintMsg(int duration, const QString& msg)
-			{ m_vBackend->osd_printf(duration, "%s", msg.toUtf8().constData()); }
+			{ m_vBackend->osd_printqs(duration, msg); }
 		
 		/**
 		 * osdShowPreview(): Show a preview image on the OSD.

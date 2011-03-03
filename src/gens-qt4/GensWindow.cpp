@@ -423,8 +423,8 @@ void GensWindow::osd(OsdType osd_type, int param)
 	if (msg.isEmpty())
 		return;
 	
-	// TODO: Add an OSD Print QString function.
-	m_vBackend->osd_printf(1500, "%s", msg.toUtf8().constData());
+	// Print the message to the screen.
+	m_vBackend->osd_printqs(1500, msg);
 }
 
 
@@ -461,8 +461,8 @@ void GensWindow::setBpp(LibGens::VdpPalette::ColorDepth newBpp)
 	m_vBackend->setVbDirty();
 	//m_vBackend->vbUpdate();	// TODO: Don't update immediately?
 	
-	QString msg = tr("Color depth set to %1-bit.").arg(bppVal);
-	m_vBackend->osd_printf(1500, "%s", msg.toUtf8().constData());
+	const QString msg = tr("Color depth set to %1-bit.").arg(bppVal);
+	m_vBackend->osd_printqs(1500, msg);
 }
 
 
