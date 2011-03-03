@@ -14,7 +14,7 @@
    <enum>Qt::NoContextMenu</enum>
   </property>
   <property name="windowTitle">
-   <string>General Configuration</string>
+   <string>Controller Configuration</string>
   </property>
   <property name="iconSize">
    <size>
