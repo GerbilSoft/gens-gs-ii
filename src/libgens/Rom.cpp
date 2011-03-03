@@ -520,6 +520,49 @@ int Rom::initSRam(SRam *sram) const
 		sram->setWrite(true);
 	}
 	
+	// Apply hacks for certain ROMs.
+	if (!strncmp("T-113016", &m_mdHeader.serialNumber[3], 8))
+	{
+		// Puggsy: Shows an anti-piracy message after the third level if SRAM is detected.
+		sram->setOn(false);
+		sram->setWrite(false);
+		sram->setStart(1);
+		sram->setEnd(0);
+		return 0;
+	}
+#if 0
+	else if (!strncmp("T-26013", &m_mdHeader.serialNumber[3], 7))
+	{
+		// Psy-O-Blade: Incorrect header.
+		start = 0x200000;
+		end = 0x203FFF;
+	}
+	else if (m_mdHeader.checksum == 0x8104)
+	{
+		/**
+		 * TODO: Check ROM CRC32s.
+		 * ROM doesn't have original MD headers.
+		 * 
+		 * Genesis Plus calculates the ROM checksum,
+		 * but this isn't reliable. Also, it'd require
+		 * moving checksum functionality out of EmuContext,
+		 * which I don't want to do.
+		 * 
+		 * CRC32s:
+		 * - Xin Qi Gai Wang Zi (Ch).gen:	DD2F38B5
+		 * - Xin Qi Gai Wang Zi (Ch) [a1].gen:	DA5A4BFE
+		 */
+		
+		// Xin Qi Gai Wangzi, aka Beggar Prince.
+		// ROM uses 0x400000-0x40FFFF for SRAM.
+		// TODO: Update M68K_Mem to handle this.
+		start = 0x400000;
+		end = 0x40FFFF;
+		sram->setOn(true);
+		sram->setWrite(true);
+	}
+#endif
+	
 	// Set the addresses.
 	sram->setStart(start);
 	sram->setEnd(end);
