@@ -255,7 +255,7 @@ inline void SRam::writeWord(uint32_t address, uint16_t data)
 	// TODO: Write protection, SRAM enable check.
 	address -= m_start;
 	m_sram[address] = ((data >> 8) & 0xFF);
-	m_sram[address] = (data & 0xFF);
+	m_sram[address + 1] = (data & 0xFF);
 	
 	// Set the dirty flag.
 	// TODO: Only if the word was actually modified?
