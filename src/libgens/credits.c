@@ -43,6 +43,31 @@ const GensGS_credits_t GensGS_credits[] =
 	{"Gens/GS Contributors",	NULL},
 	{"-", NULL},
 	
+	{"32X PWM Improvements",	"Chilly Willy"},
+	{NULL,				"Joseph Fenton"},
+	{"-", NULL},
+	
+	{"Controller Icons",		"theocas"},
+	{"-", NULL},
+	
+	{"Credits ROM",			"Sik"},
+	{"-", NULL},
+	
+	{"Game Gear PSG Stereo Info",	"nineko"},
+	{"-", NULL},
+	
+	{"Game Genie Icon",		"Maximal|Firestorm"},
+	{"-", NULL},
+	
+	{"Gens/GS Application Icon",	"Marc Gordon (Cinossu)"},
+	{"-", NULL},
+	
+	{"GLSL Assistance",		"Damizean"},
+	{"-", NULL},
+	
+	{"Haiku Port (in progress)",	"Phil Costin"},
+	{"-", NULL},
+	
 	{"Mac OS X Testing",		"Pietro Gagliardi (andlabs)"},
 	{NULL,				"Puto"},
 	{NULL,				"sonicblur"},
@@ -53,45 +78,20 @@ const GensGS_credits_t GensGS_credits[] =
 	{NULL,				"TmEE"},
 	{"-", NULL},
 	
+	{"SGens Icon",			"Sik"},
+	{"-", NULL},
+	
 	{"Test ROMs",			"Jorge"},
 	{NULL,				"Sik"},
-	{"-", NULL},
-	
-	{"32X PWM Improvements",	"Chilly Willy"},
-	{NULL,				"Joseph Fenton"},
-	{"-", NULL},
-	
-	{"GLSL Assistance",		"Damizean"},
-	{"-", NULL},
-	
-	{"Gens/GS Application Icon",	"Marc Gordon (Cinossu)"},
-	{"-", NULL},
-	
-	{"Game Genie Icon",		"Maximal|Firestorm"},
-	{"-", NULL},
-	
-	{"SGens Icon",			"Sik"},
 	{"-", NULL},
 	
 	{"VDP Layer Options Icon",	"SkyLights"},
 	{"-", NULL},
 	
-	{"Game Gear PSG Stereo Info",	"nineko"},
-	{"-", NULL},
-	
-	{"Haiku Port (in progress)",	"Phil Costin"},
-	{"-", NULL},
-	
-	{"Controller Icons",		"theocas"},
-	{"-", NULL},
-	
-	{"WahCade Integration",		"Zombie Ryushu"},
-	{"-", NULL},
-	
 	{"VGM Logging Code",		"ValleyBell"},
 	{"-", NULL},
 	
-	{"Credits ROM",			"Sik"},
+	{"WahCade Integration",		"Zombie Ryushu"},
 	{"-", NULL},
 	
 	{"Software Testing",		"AamirM"},
