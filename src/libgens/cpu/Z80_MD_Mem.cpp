@@ -98,30 +98,50 @@ inline uint8_t Z80_MD_Mem::Z80_ReadB_YM2612(uint32_t address)
  */
 inline uint8_t Z80_MD_Mem::Z80_ReadB_VDP(uint32_t address)
 {
-	// TODO: Add more VDP registers;
-	if (address < 0x7F04 || address > 0x7F09)
+	if (address < 0x7F00 || address > 0x7F1F)
 	{
-		// TODO: Invalid address. This should do something other than return 0.
+		// Invalid address.
+		// TODO: Crash the system?
 		return 0;
 	}
 	
-	if (address < 0x7F08)
+	// TODO: Add all supported VDP ports.
+	switch (address & 0x1F)
 	{
-		// VDP status.
-		int rval = VdpIo::Read_Status();
-		if (address & 1)
-			return (rval & 0xFF);
-		else
-			return ((rval >> 8) & 0xFF);
-	}
-	else //if (address >= 0x7F08 && address <= 0x7F09)
-	{
-		// VDP counter.
-		if (address & 1)
-			return VdpIo::Read_H_Counter();
-		else
+		case 0x00: case 0x01: case 0x02: case 0x03:
+			// VDP data port.
+			// TODO: Gens doesn't support reading this from the Z80...
+			return 0;
+		
+		case 0x04: case 0x06:
+		{
+			// VDP control port. (high byte)
+			uint16_t vdp_status = VdpIo::Read_Status();
+			return ((vdp_status >> 8) & 0xFF);
+		}
+		
+		case 0x05: case 0x07:
+		{
+			// VDP control port. (low byte)
+			uint16_t vdp_status = VdpIo::Read_Status();
+			return (vdp_status & 0xFF);
+		}
+		
+		case 0x08:
+			// V counter.
 			return VdpIo::Read_V_Counter();
+		
+		case 0x09:
+			// H counter.
+			return VdpIo::Read_H_Counter();
+		
+		default:
+			// Invalid or unsupported VDP port.
+			return 0x00;
 	}
+	
+	// Should not get here...
+	return 0x00;
 }
 
 
@@ -186,24 +206,30 @@ inline void Z80_MD_Mem::Z80_WriteB_YM2612(uint32_t address, uint8_t data)
  */
 inline void Z80_MD_Mem::Z80_WriteB_VDP(uint32_t address, uint8_t data)
 {
-	// TODO: All VDP registers should be writable here...
-	// Z80 [0x7F00, 0x7F1F] maps to 68000 [0xC00000, 0xC0001F].
-	
-	if (address == 0x7F11)
+	if (address < 0x7F00 || address > 0x7F1F)
 	{
-		// PSG register.
-		SoundMgr::ms_Psg.write(data);
+		// Invalid address.
+		// TODO: Crash the system?
 		return;
 	}
 	
-	if (address > 0x7F03)
+	// TODO: Add all supported VDP ports.
+	switch (address & 0x1F)
 	{
-		// TODO: Invalid address. This should do something.
-		return;
+		case 0x00: case 0x01: case 0x02: case 0x03:
+			// VDP data port.
+			VdpIo::Write_Data_Byte(data);
+			break;
+		
+		case 0x11:
+			// PSG control port.
+			SoundMgr::ms_Psg.write(data);
+			break;
+		
+		default:
+			// Invalid or unsupported VDP port.
+			break;
 	}
-	
-	// VDP register. (TODO: WTF?)
-	VdpIo::Write_Data_Byte(data);
 }
 
 
