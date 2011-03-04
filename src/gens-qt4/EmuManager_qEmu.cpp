@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -516,41 +516,48 @@ void EmuManager::doCtrlChange(int port, LibGens::IoBase::IoType type)
 	}
 	
 	LibGens::IoBase *dev = NULL;
+	QString devName;
 	switch (type)
 	{
 		case LibGens::IoBase::IOT_NONE:
 			// No controller.
 			dev = new LibGens::IoBase(*prevDevPtr);
+			devName = QLatin1String("None");
 			// TODO: Copy settings from existing Port 1 controller.
 			break;
 		
 		case LibGens::IoBase::IOT_3BTN:
 			// 3-button controller.
 			dev = new LibGens::Io3Button(*prevDevPtr);
+			devName = QLatin1String("3-button");
 			// TODO: Copy settings from existing Port 1 controller.
 			break;
 		
 		case LibGens::IoBase::IOT_6BTN:
 			// 6-button controller.
 			dev = new LibGens::Io6Button(*prevDevPtr);
+			devName = QLatin1String("6-button");
 			// TODO: Copy settings from existing Port 1 controller.
 			break;
 		
 		case LibGens::IoBase::IOT_2BTN:
 			// 2-button controller.
 			dev = new LibGens::Io2Button(*prevDevPtr);
+			devName = QLatin1String("2-button (SMS)");
 			// TODO: Copy settings from existing Port 1 controller.
 			break;
 		
 		case LibGens::IoBase::IOT_MEGA_MOUSE:
 			// Sega Mega Mouse.
 			dev = new LibGens::IoMegaMouse(*prevDevPtr);
+			devName = QLatin1String("Mega Mouse");
 			// TODO: Copy settings from existing Port 1 controller.
 			break;
 		
 		case LibGens::IoBase::IOT_TEAMPLAYER:
 			// Sega Teamplayer.
 			dev = new LibGens::IoTeamplayer(*prevDevPtr);
+			devName = QLatin1String("Team Player");
 			// TODO: Copy settings from existing Port 1 controller.
 			break;
 		
@@ -587,7 +594,7 @@ void EmuManager::doCtrlChange(int port, LibGens::IoBase::IoType type)
 	// Print a message on the OSD.
 	QString osdMsg = tr("Port %1 set to %2.");
 	osdMsg = osdMsg.arg(port + 1);	// TODO: Use "E" for Port 3.
-	osdMsg = osdMsg.arg(QString::fromLatin1(dev->devName()));
+	osdMsg = osdMsg.arg(devName);
 	
 	emit osdPrintMsg(1500, osdMsg);
 	
@@ -607,14 +614,14 @@ void EmuManager::doCtrlChange(int port, LibGens::IoBase::IoType type)
 			port1 = new LibGens::IoBase(LibGens::EmuMD::m_port1);
 			delete LibGens::EmuMD::m_port1;
 			LibGens::EmuMD::m_port1 = port1;
-			m_vBackend->osd_printf(1500, "Port 1 set to NONE.");
+			m_vBackend->osd_printf(1500, "Port 1 set to None.");
 		}
 		else
 		{
 			port2 = new LibGens::IoBase(LibGens::EmuMD::m_port2);
 			delete LibGens::EmuMD::m_port2;
 			LibGens::EmuMD::m_port2 = port2;
-			m_vBackend->osd_printf(1500, "Port 2 set to NONE.");
+			m_vBackend->osd_printf(1500, "Port 2 set to None.");
 		}
 	}
 #endif
