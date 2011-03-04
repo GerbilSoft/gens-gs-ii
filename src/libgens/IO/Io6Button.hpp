@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -51,9 +51,10 @@ class Io6Button : public IoBase
 		void doScanline(void);
 		
 		// Controller configuration.
-		const char *devName(void) const { return "6-button gamepad"; }
-		IoType devType(void) const { return IOT_6BTN; }
-		int numButtons(void) const { return 12; }
+		IoType devType(void) const
+			{ return IOT_6BTN; }
+		int numButtons(void) const
+			{ return 12; }
 		int nextLogicalButton(int button) const;
 		const char *buttonName(int button) const;
 	

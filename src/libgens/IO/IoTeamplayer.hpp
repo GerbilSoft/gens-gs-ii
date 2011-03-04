@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -51,9 +51,10 @@ class IoTeamplayer : public IoBase
 		void update(void);
 		
 		// Controller configuration.
-		const char *devName(void) const { return "Sega Team Player"; }
-		IoType devType(void) const { return IOT_TEAMPLAYER; }
-		int numButtons(void) const { return 12; }
+		IoType devType(void) const
+			{ return IOT_TEAMPLAYER; }
+		int numButtons(void) const
+			{ return 12; }
 		int nextLogicalButton(int button) const;
 		const char *buttonName(int button) const;
 	
