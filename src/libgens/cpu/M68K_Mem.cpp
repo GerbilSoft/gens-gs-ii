@@ -323,40 +323,42 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 	}
 	
 	// Check the VDP address.
-	address &= 0x1F;
-	if (address < 0x04)
+	switch (address & 0x1F)
 	{
-		// Invalid address.
-		// NOTE: VDP Data port should still be readable...
-		return 0x00;
-	}
-	else if (address < 0x08)
-	{
-		// 0xC00004 - 0xC00007: VDP Control Port.
-		uint16_t vdp_status = VdpIo::Read_Status();
-		if (!(address & 0x01))
+		case 0x00: case 0x01: case 0x02: case 0x03:
+			// VDP data port.
+			// FIXME: Gens doesn't read the data port here.
+			// It should still be readable...
+			return 0x00;
+		
+		case 0x04: case 0x06:
 		{
-			// 0xC00004/0xC00006. Return the high byte.
+			// VDP control port. (high byte)
+			uint16_t vdp_status = VdpIo::Read_Status();
 			return ((vdp_status >> 8) & 0xFF);
 		}
-		else //if (address & 0x01)
+		
+		case 0x05: case 0x07:
 		{
-			// 0xC00005/0xC00007. Return the low byte.
+			// VDP control port. (low byte)
+			uint16_t vdp_status = VdpIo::Read_Status();
 			return (vdp_status & 0xFF);
 		}
-	}
-	else if (address == 0x08)
-	{
-		// 0xC00008: V counter.
-		return VdpIo::Read_V_Counter();
-	}
-	else if (address == 0x09)
-	{
-		// 0xC00009: H counter.
-		return VdpIo::Read_H_Counter();
+		
+		case 0x08:
+			// V counter.
+			return VdpIo::Read_V_Counter();
+		
+		case 0x09:
+			// H counter.
+			return VdpIo::Read_H_Counter();
+		
+		default:
+			// Invalid or unsupported VDP port.
+			return 0x00;
 	}
 	
-	// Invalid VDP address.
+	// Should not get here...
 	return 0x00;
 }
 
@@ -570,29 +572,31 @@ inline uint16_t M68K_Mem::M68K_Read_Word_VDP(uint32_t address)
 	if ((address & 0x700E0) != 0)
 	{
 		// Not a valid VDP address.
-		return 0x00;
+		return 0x0000;
 	}
 	
 	// Check the VDP address.
-	address &= 0x1F;
-	if (address < 0x04)
+	switch (address & 0x1E)
 	{
-		// 0xC00000 - 0xC00003: VDP Data Port.
-		return VdpIo::Read_Data();
-	}
-	else if (address < 0x08)
-	{
-		// 0xC00004 - 0xC00007: VDP Control port.
-		return VdpIo::Read_Status();
-	}
-	else if (address < 0x0A)
-	{
-		// 0xC00008 - 0xC00009: HV counter.
-		return ((VdpIo::Read_V_Counter() << 8) | VdpIo::Read_H_Counter());
+		case 0x00: case 0x02:
+			// VDP data port.
+			return VdpIo::Read_Data();
+		
+		case 0x04: case 0x06:
+			// VDP control port.
+			return VdpIo::Read_Status();
+		
+		case 0x08:
+			// HV counter.
+			return ((VdpIo::Read_V_Counter() << 8) | VdpIo::Read_H_Counter());
+		
+		default:
+			// Invalid or unsupported VDP port.
+			return 0x0000;
 	}
 	
-	// Invalid VDP address.
-	return 0x00;
+	// Should not get here...
+	return 0x0000;
 }
 
 
@@ -869,22 +873,27 @@ inline void M68K_Mem::M68K_Write_Byte_VDP(uint32_t address, uint8_t data)
 	}
 	
 	// Check the VDP address.
-	address &= 0x1F;
-	if (address < 0x04)
+	switch (address & 0x1F)
 	{
-		// 0xC00000 - 0xC00003: VDP Data Port.
-		VdpIo::Write_Data_Byte(data);
-	}
-	else if (address < 0x08)
-	{
-		// 0xC00004 - 0xC00007: VDP Control Port.
-		// TODO: This should still be writable.
-		// Gens' mem_m68k.asm doesn't implement this.
-	}
-	else if (address == 0x11)
-	{
-		// 0xC00011: PSG control port.
-		SoundMgr::ms_Psg.write(data);
+		case 0x00: case 0x01: case 0x02: case 0x03:
+			// VDP data port.
+			VdpIo::Write_Data_Byte(data);
+			break;
+		
+		case 0x04: case 0x05: case 0x06: case 0x07:
+			// VDP control port.
+			// TODO: This should still be writable.
+			// Gens' mem_m68k.asm doesn't implement this.
+			break;
+		
+		case 0x11:
+			// PSG control port.
+			SoundMgr::ms_Psg.write(data);
+			break;
+		
+		default:
+			// Invalid or unsupported VDP port.
+			break;
 	}
 }
 
@@ -1170,22 +1179,27 @@ inline void M68K_Mem::M68K_Write_Word_VDP(uint32_t address, uint16_t data)
 	}
 	
 	// Check the VDP address.
-	address &= 0x1F;
-	if (address < 0x04)
+	switch (address & 0x1E)
 	{
-		// 0xC00000 - 0xC00003: VDP Data Port.
-		VdpIo::Write_Data_Word(data);
-	}
-	else if (address < 0x08)
-	{
-		// 0xC00004 - 0xC00007: VDP Control Port.
-		VdpIo::Write_Ctrl(data);
-	}
-	else if (address == 0x11)
-	{
-		// 0xC00011: PSG control port.
-		// TODO: mem_m68k.asm doesn't support this for word writes...
-		//m_Psg.write(data);
+		case 0x00: case 0x02:
+			// VDP data port.
+			VdpIo::Write_Data_Word(data);
+			break;
+		
+		case 0x04: case 0x06:
+			// VDP control port.
+			VdpIo::Write_Ctrl(data);
+			break;
+		
+		case 0x10:
+			// PSG control port.
+			// TODO: mem_m68k.asm doesn't support this for word writes...
+			//SoundMgr::ms_Psg.write(data);
+			break;
+		
+		default:
+			// Invalid or unsupported VDP port.
+			break;
 	}
 }
 
