@@ -96,7 +96,7 @@ int Init(void)
 	fprintf(stderr, "Gens/GS II");
 	if (version_desc)
 		fprintf(stderr, " (%s)", version_desc);
-	putchar('\n');
+	fputc('\n', stderr);
 	
 #if !defined(GENS_ENABLE_EMULATION)
 	fprintf(stderr, "[NO-EMULATION BUILD; CPU emulation disabled.]\n");
