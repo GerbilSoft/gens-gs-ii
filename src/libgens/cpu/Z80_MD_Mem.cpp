@@ -67,73 +67,7 @@ void Z80_MD_Mem::End(void)
 }
 
 
-/** Z80 General Read/Write functions. **/
-
-
-/**
- * Z80_ReadB(): Read a byte from the Z80 address space.
- * @param address Address to read from.
- * @return Byte from the Z80 address space.
- */
-uint8_t Z80_MD_Mem::Z80_ReadB(uint32_t address)
-{
-	unsigned int fn = (address & 0xF000) >> 12;
-	return Z80_ReadB_Table[fn](address & 0x7FFF);
-}
-
-
-/**
- * Z80_WriteB(): Write a byte to the Z80 address space.
- * @param address Address to write to.
- * @param data Byte to write to the Z80 address space.
- */
-void Z80_MD_Mem::Z80_WriteB(uint32_t address, uint8_t data)
-{
-	unsigned int fn = (address & 0xF000) >> 12;
-	Z80_WriteB_Table[fn](address & 0x7FFF, data);
-}
-
-
 /** Z80 Read Byte functions. **/
-
-
-/**
- * Z80_ReadB_Bad(): Read a byte from an invalid location in the Z80 address space.
- * @param address Address to read from.
- * @return 0.
- */
-uint8_t FASTCALL Z80_MD_Mem::Z80_ReadB_Bad(uint32_t address)
-{
-	UNUSED(address);
-	
-	// TODO: Invalid address. This should do something other than return 0.
-	return 0;
-}
-
-
-/**
- * Z80_ReadB_Ram(): Read a byte from Z80 RAM.
- * @param address Address to read from.
- * @return Byte from Z80 RAM.
- */
-uint8_t FASTCALL Z80_MD_Mem::Z80_ReadB_Ram(uint32_t address)
-{
-	return (Ram_Z80[address & 0x1FFF]);
-}
-
-
-/**
- * Z80_ReadB_Bank(): Read the Z80's 68K ROM banking register. (INVALID)
- * @param address Address to read from.
- * @return
- */
-uint8_t FASTCALL Z80_MD_Mem::Z80_ReadB_Bank(uint32_t address)
-{
-	UNUSED(address);
-	
-	// TODO: Invalid address. This should do something other than return 0.
-	return 0;
-}
 
 
 /**
@@ -141,7 +75,7 @@ uint8_t FASTCALL Z80_MD_Mem::Z80_ReadB_Bank(uint32_t address)
  * @param address Address to read from.
  * @return YM2612 register.
  */
-uint8_t FASTCALL Z80_MD_Mem::Z80_ReadB_YM2612(uint32_t address)
+inline uint8_t Z80_MD_Mem::Z80_ReadB_YM2612(uint32_t address)
 {
 	// According to the Genesis Software Manual, all four addresses return
 	// the same value for YM2612_Read().
@@ -158,45 +92,69 @@ uint8_t FASTCALL Z80_MD_Mem::Z80_ReadB_YM2612(uint32_t address)
 
 
 /**
- * Z80_ReadB_PSG(): Read a byte from the PSG or VDP.
+ * Z80_ReadB_VDP(): Read a byte from the VDP.
  * @param address Address to read from.
- * @return PSG register.
+ * @return VDP register.
  */
-uint8_t FASTCALL Z80_MD_Mem::Z80_ReadB_PSG(uint32_t address)
+inline uint8_t Z80_MD_Mem::Z80_ReadB_VDP(uint32_t address)
 {
-	if (address < 0x7F04 || address > 0x7F09)
+	if (address < 0x7F00 || address > 0x7F1F)
 	{
-		// TODO: Invalid address. This should do something other than return 0.
+		// Invalid address.
+		// TODO: Crash the system?
 		return 0;
 	}
 	
-	if (address < 0x7F08)
+	// TODO: Add all supported VDP ports.
+	switch (address & 0x1F)
 	{
-		// VDP status.
-		int rval = VdpIo::Read_Status();
-		if (address & 1)
-			return (rval & 0xFF);
-		else
-			return ((rval >> 8) & 0xFF);
-	}
-	else //if (address >= 0x7F08 && address <= 0x7F09)
-	{
-		// VDP counter.
-		if (address & 1)
-			return VdpIo::Read_H_Counter();
-		else
+		case 0x00: case 0x01: case 0x02: case 0x03:
+			// VDP data port.
+			// TODO: Gens doesn't support reading this from the Z80...
+			return 0;
+		
+		case 0x04: case 0x06:
+		{
+			// VDP control port. (high byte)
+			uint16_t vdp_status = VdpIo::Read_Status();
+			return ((vdp_status >> 8) & 0xFF);
+		}
+		
+		case 0x05: case 0x07:
+		{
+			// VDP control port. (low byte)
+			uint16_t vdp_status = VdpIo::Read_Status();
+			return (vdp_status & 0xFF);
+		}
+		
+		case 0x08:
+			// V counter.
 			return VdpIo::Read_V_Counter();
+		
+		case 0x09:
+			// H counter.
+			return VdpIo::Read_H_Counter();
+		
+		default:
+			// Invalid or unsupported VDP port.
+			return 0x00;
 	}
+	
+	// Should not get here...
+	return 0x00;
 }
 
 
 /**
- * Z80_ReadB_68K_Ram(): Read a byte from MC68000 RAM.
+ * Z80_ReadB_68K_Rom(): Read a byte from MC68000 ROM.
  * @param address Address to read from.
- * @return Byte from MC68000 RAM.
+ * @return Byte from MC68000 ROM.
  */
-uint8_t FASTCALL Z80_MD_Mem::Z80_ReadB_68K_Ram(uint32_t address)
+inline uint8_t Z80_MD_Mem::Z80_ReadB_68K_Rom(uint32_t address)
 {
+	// TODO: Only allow ROM reads.
+	// RAM reads should return 0xFF.
+	// Other reads should crash.
 	return M68K_Mem::M68K_RB(Bank_Z80 + (address & 0x7FFF));
 }
 
@@ -205,37 +163,11 @@ uint8_t FASTCALL Z80_MD_Mem::Z80_ReadB_68K_Ram(uint32_t address)
 
 
 /**
- * Z80_WriteB_Bad(): Write a byte to an invalid location in the Z80 address space.
- * @param address Address to write to.
- * @param data Byte to write.
- */
-void FASTCALL Z80_MD_Mem::Z80_WriteB_Bad(uint32_t address, uint8_t data)
-{
-	UNUSED(address);
-	UNUSED(data);
-	
-	// TODO: Invalid address. This should do something.
-	return;
-}
-
-
-/**
- * Z80_WriteB_Ram(): Write a byte to Z80 RAM.
- * @param address Address to write to.
- * @param data Byte to write.
- */
-void FASTCALL Z80_MD_Mem::Z80_WriteB_Ram(uint32_t address, uint8_t data)
-{
-	Ram_Z80[address & 0x1FFF] = data;
-}
-
-
-/**
  * Z80_WriteB_Bank(): Shift a bit into the Z80's 68K ROM banking register.
  * @param address Address to write to.
  * @param data Byte to write.
  */
-void FASTCALL Z80_MD_Mem::Z80_WriteB_Bank(uint32_t address, uint8_t data)
+inline void Z80_MD_Mem::Z80_WriteB_Bank(uint32_t address, uint8_t data)
 {
 	if (address > 0x60FF)
 	{
@@ -256,7 +188,7 @@ void FASTCALL Z80_MD_Mem::Z80_WriteB_Bank(uint32_t address, uint8_t data)
  * @param address Address to write to.
  * @param data Byte to write.
  */
-void FASTCALL Z80_MD_Mem::Z80_WriteB_YM2612(uint32_t address, uint8_t data)
+inline void Z80_MD_Mem::Z80_WriteB_YM2612(uint32_t address, uint8_t data)
 {
 	// The YM2612's RESET line is tied to the Z80's RESET line.
 	if (M68K_Mem::Z80_State & Z80_STATE_RESET)
@@ -268,39 +200,45 @@ void FASTCALL Z80_MD_Mem::Z80_WriteB_YM2612(uint32_t address, uint8_t data)
 
 
 /**
- * Z80_WriteB_PSG(): Write a byte to the PSG or VDP.
+ * Z80_WriteB_VDP(): Write a byte to the VDP.
  * @param address Address to write to.
  * @param data Byte to write.
  */
-void FASTCALL Z80_MD_Mem::Z80_WriteB_PSG(uint32_t address, uint8_t data)
+inline void Z80_MD_Mem::Z80_WriteB_VDP(uint32_t address, uint8_t data)
 {
-	// TODO: All VDP registers should be writable here...
-	// Z80 [0x7F00, 0x7F1F] maps to 68000 [0xC00000, 0xC0001F].
-	
-	if (address == 0x7F11)
+	if (address < 0x7F00 || address > 0x7F1F)
 	{
-		// PSG register.
-		SoundMgr::ms_Psg.write(data);
+		// Invalid address.
+		// TODO: Crash the system?
 		return;
 	}
 	
-	if (address > 0x7F03)
+	// TODO: Add all supported VDP ports.
+	switch (address & 0x1F)
 	{
-		// TODO: Invalid address. This should do something.
-		return;
+		case 0x00: case 0x01: case 0x02: case 0x03:
+			// VDP data port.
+			VdpIo::Write_Data_Byte(data);
+			break;
+		
+		case 0x11:
+			// PSG control port.
+			SoundMgr::ms_Psg.write(data);
+			break;
+		
+		default:
+			// Invalid or unsupported VDP port.
+			break;
 	}
-	
-	// VDP register. (TODO: WTF?)
-	VdpIo::Write_Data_Byte(data);
 }
 
 
 /**
- * Z80_WriteB_68K_Ram(): Write a byte to MC68000 RAM.
+ * Z80_WriteB_68K_Rom(): Write a byte to MC68000 ROM.
  * @param address Address to write to.
  * @param data Byte to write.
  */
-void FASTCALL Z80_MD_Mem::Z80_WriteB_68K_Ram(uint32_t address, uint8_t data)
+inline void Z80_MD_Mem::Z80_WriteB_68K_Rom(uint32_t address, uint8_t data)
 {
 	address &= 0x7FFF;
 	address += Bank_Z80;
@@ -309,56 +247,87 @@ void FASTCALL Z80_MD_Mem::Z80_WriteB_68K_Ram(uint32_t address, uint8_t data)
 }
 
 
-/** Default function tables. **/
+/** Z80 General Read/Write functions. **/
 
 
 /**
- * Z80_ReadB_Table[]: Read Byte function table.
- * 4 KB pages; 16 entries.
+ * Z80_ReadB(): Read a byte from the Z80 address space.
+ * @param address Address to read from.
+ * @return Byte from the Z80 address space.
  */
-const Z80_MD_Mem::Z80_ReadB_fn Z80_MD_Mem::Z80_ReadB_Table[16] =
+uint8_t Z80_MD_Mem::Z80_ReadB(uint32_t address)
 {
-	Z80_ReadB_Ram,		// 0x0000 - 0x0FFF
-	Z80_ReadB_Ram,		// 0x1000 - 0x1FFF
-	Z80_ReadB_Ram,		// 0x2000 - 0x2FFF
-	Z80_ReadB_Ram,		// 0x3000 - 0x3FFF
-	Z80_ReadB_YM2612,	// 0x4000 - 0x4FFF
-	Z80_ReadB_YM2612,	// 0x5000 - 0x5FFF
-	Z80_ReadB_Bank,		// 0x6000 - 0x6FFF
-	Z80_ReadB_PSG,		// 0x7000 - 0x7FFF
-	Z80_ReadB_68K_Ram,	// 0x8000 - 0x8FFF
-	Z80_ReadB_68K_Ram,	// 0x9000 - 0x9FFF
-	Z80_ReadB_68K_Ram,	// 0xA000 - 0xAFFF
-	Z80_ReadB_68K_Ram,	// 0xB000 - 0xBFFF
-	Z80_ReadB_68K_Ram,	// 0xC000 - 0xCFFF
-	Z80_ReadB_68K_Ram,	// 0xD000 - 0xDFFF
-	Z80_ReadB_68K_Ram,	// 0xE000 - 0xEFFF
-	Z80_ReadB_68K_Ram,	// 0xF000 - 0xFFFF
-};
+	const uint8_t page = ((address >> 12) & 0x0F);
+	switch (page & 0x0F)
+	{
+		case 0x00: case 0x01:
+		case 0x02: case 0x03:
+			// 0x0000-0x1FFF: Z80 RAM.
+			// 0x2000-0x3FFF: Z80 RAM. (mirror)
+			return Ram_Z80[address & 0x1FFF];
+		
+		case 0x04: case 0x05:
+			// 0x4000-0x5FFF: YM2612.
+			return Z80_ReadB_YM2612(address);
+		
+		case 0x06:
+			// 0x6000-0x6FFF: Bank.
+			// NOTE: Reading from the bank register is undefined...
+			return 0xFF;
+		
+		case 0x07:
+			// 0x7000-0x7FFF: VDP.
+			return Z80_ReadB_VDP(address);
+		
+		case 0x08: case 0x09: case 0x0A: case 0x0B:
+		case 0x0C: case 0x0D: case 0x0E: case 0x0F:
+			// 0x8000-0xFFFF: 68K ROM bank.
+			return Z80_ReadB_68K_Rom(address);
+	}
+	
+	// Should not get here...
+	return 0xFF;
+}
 
 
 /**
- * Z80_WriteB_Table[]: Write Byte function table.
- * 4 KB pages; 16 entries.
+ * Z80_WriteB(): Write a byte to the Z80 address space.
+ * @param address Address to write to.
+ * @param data Byte to write to the Z80 address space.
  */
-const Z80_MD_Mem::Z80_WriteB_fn Z80_MD_Mem::Z80_WriteB_Table[16] =
+void Z80_MD_Mem::Z80_WriteB(uint32_t address, uint8_t data)
 {
-	Z80_WriteB_Ram,		// 0x0000 - 0x0FFF
-	Z80_WriteB_Ram,		// 0x1000 - 0x1FFF
-	Z80_WriteB_Ram,		// 0x2000 - 0x2FFF
-	Z80_WriteB_Ram,		// 0x3000 - 0x3FFF
-	Z80_WriteB_YM2612,	// 0x4000 - 0x4FFF
-	Z80_WriteB_YM2612,	// 0x5000 - 0x5FFF
-	Z80_WriteB_Bank,	// 0x6000 - 0x6FFF
-	Z80_WriteB_PSG,		// 0x7000 - 0x7FFF
-	Z80_WriteB_68K_Ram,	// 0x8000 - 0x8FFF
-	Z80_WriteB_68K_Ram,	// 0x9000 - 0x9FFF
-	Z80_WriteB_68K_Ram,	// 0xA000 - 0xAFFF
-	Z80_WriteB_68K_Ram,	// 0xB000 - 0xBFFF
-	Z80_WriteB_68K_Ram,	// 0xC000 - 0xCFFF
-	Z80_WriteB_68K_Ram,	// 0xD000 - 0xDFFF
-	Z80_WriteB_68K_Ram,	// 0xE000 - 0xEFFF
-	Z80_WriteB_68K_Ram,	// 0xF000 - 0xFFFF
-};
+	const uint8_t page = ((address >> 12) & 0x0F);
+	switch (page & 0x0F)
+	{
+		case 0x00: case 0x01:
+		case 0x02: case 0x03:
+			// 0x0000-0x1FFF: Z80 RAM.
+			// 0x2000-0x3FFF: Z80 RAM. (mirror)
+			Ram_Z80[address & 0x1FFF] = data;
+			break;
+		
+		case 0x04: case 0x05:
+			// 0x4000-0x5FFF: YM2612.
+			Z80_WriteB_YM2612(address, data);
+			break;
+		
+		case 0x06:
+			// 0x6000-0x6FFF: Bank.
+			Z80_WriteB_Bank(address, data);
+			break;
+		
+		case 0x07:
+			// 0x7000-0x7FFF: VDP.
+			Z80_WriteB_VDP(address, data);
+			break;
+		
+		case 0x08: case 0x09: case 0x0A: case 0x0B:
+		case 0x0C: case 0x0D: case 0x0E: case 0x0F:
+			// 0x8000-0xFFFF: 68K ROM bank.
+			Z80_WriteB_68K_Rom(address, data);
+			break;
+	}
+}
 
 }

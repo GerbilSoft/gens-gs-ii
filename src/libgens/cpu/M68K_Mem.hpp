@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -111,7 +111,7 @@ class M68K_Mem
 		static void ZomgSaveSSF2BankState(Zomg_MD_TimeReg_t *state);
 		static void ZomgRestoreSSF2BankState(const Zomg_MD_TimeReg_t *state);
 	
-	protected:
+	private:
 		/** Z80/M68K cycle table. **/
 		static int Z80_M68K_Cycle_Tab[512];
 		
@@ -135,63 +135,42 @@ class M68K_Mem
 		 */
 		static uint8_t ms_SSF2_BankState[8];
 		
+		/**
+		 * ms_RomData_ptrs[]: ROM data pointers.
+		 * Used with SSF2 bankswitching.
+		 * Each pointer refers to a 512 KB page of ROM.
+		 * 
+		 * NOTE: These pointers map virtual to PHYSICAL pages.
+		 * e.g. ms_RomData_ptrs[4] maps to any page in ROM,
+		 * but is accessed by the M68K as if it's 0x200000.
+		 */
+		static uint8_t *ms_RomData_ptrs[8];
+		
 		/** Read Byte functions. **/
-		static uint8_t M68K_Read_Byte_Default(uint32_t address);
-		
-		template<uint8_t bank>
-		static uint8_t T_M68K_Read_Byte_RomX(uint32_t address);
-		
-		template<uint8_t bank>
-		static uint8_t T_M68K_Read_Byte_RomX_SRam(uint32_t address);
-		
+		static uint8_t M68K_Read_Byte_Rom(uint32_t address);
+		static uint8_t M68K_Read_Byte_Rom_SRam(uint32_t address);
 		static uint8_t M68K_Read_Byte_Ram(uint32_t address);
 		static uint8_t M68K_Read_Byte_Misc(uint32_t address);
 		static uint8_t M68K_Read_Byte_VDP(uint32_t address);
 		
 		/** Read Word functions. **/
-		static uint16_t M68K_Read_Word_Default(uint32_t address);
-		
-		template<uint8_t bank>
-		static uint16_t T_M68K_Read_Word_RomX(uint32_t address);
-		
-		template<uint8_t bank>
-		static uint16_t T_M68K_Read_Word_RomX_SRam(uint32_t address);
-		
+		static uint16_t M68K_Read_Word_Rom(uint32_t address);
+		static uint16_t M68K_Read_Word_Rom_SRam(uint32_t address);
 		static uint16_t M68K_Read_Word_Ram(uint32_t address);
 		static uint16_t M68K_Read_Word_Misc(uint32_t address);
 		static uint16_t M68K_Read_Word_VDP(uint32_t address);
 		
 		/** Write Byte functions. **/
-		static void M68K_Write_Byte_Default(uint32_t address, uint8_t data);
 		static void M68K_Write_Byte_SRam(uint32_t address, uint8_t data);
 		static void M68K_Write_Byte_Ram(uint32_t address, uint8_t data);
 		static void M68K_Write_Byte_Misc(uint32_t address, uint8_t data);
 		static void M68K_Write_Byte_VDP(uint32_t address, uint8_t data);
 		
 		/** Write Word functions. **/
-		static void M68K_Write_Word_Default(uint32_t address, uint16_t data);
 		static void M68K_Write_Word_SRam(uint32_t address, uint16_t data);
 		static void M68K_Write_Word_Ram(uint32_t address, uint16_t data);
 		static void M68K_Write_Word_Misc(uint32_t address, uint16_t data);
 		static void M68K_Write_Word_VDP(uint32_t address, uint16_t data);
-		
-		/** Main MC68000 read/write functions. **/
-		typedef uint8_t  (*M68K_Read_Byte_fn)(uint32_t address);
-		typedef uint16_t (*M68K_Read_Word_fn)(uint32_t address);
-		typedef void     (*M68K_Write_Byte_fn)(uint32_t address, uint8_t data);
-		typedef void     (*M68K_Write_Word_fn)(uint32_t address, uint16_t data);
-		
-		/** Main M68K function tables. (512 KB pages; 32 entries.) **/
-		static M68K_Read_Byte_fn M68K_Read_Byte_Table[32];
-		static M68K_Read_Word_fn M68K_Read_Word_Table[32];
-		static M68K_Write_Byte_fn M68K_Write_Byte_Table[32];
-		static M68K_Write_Word_fn M68K_Write_Word_Table[32];
-		
-		/** Default M68K function tables for MD. (512 KB pages; 32 entries.) **/
-		static const M68K_Read_Byte_fn MD_M68K_Read_Byte_Table[32];
-		static const M68K_Read_Word_fn MD_M68K_Read_Word_Table[32];
-		static const M68K_Write_Byte_fn MD_M68K_Write_Byte_Table[32];
-		static const M68K_Write_Word_fn MD_M68K_Write_Word_Table[32];
 };
 
 }

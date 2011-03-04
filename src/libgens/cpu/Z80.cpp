@@ -44,24 +44,12 @@ void Z80::Init(void)
 	mdZ80_init(&ms_Z80);
 	
 	// Set instruction fetch handlers.
-	z80_Add_Fetch(&ms_Z80, 0x00, 0x1F, &Ram_Z80[0]);
-	z80_Add_Fetch(&ms_Z80, 0x20, 0x3F, &Ram_Z80[0]);
+	mdZ80_Add_Fetch(&ms_Z80, 0x00, 0x1F, &Ram_Z80[0]);
+	mdZ80_Add_Fetch(&ms_Z80, 0x20, 0x3F, &Ram_Z80[0]);
 	
-	// Set Read Byte handlers.
-	z80_Add_ReadB(&ms_Z80, 0x00, 0xFF, Z80_MD_Mem::Z80_ReadB_Bad);
-	z80_Add_ReadB(&ms_Z80, 0x00, 0x3F, Z80_MD_Mem::Z80_ReadB_Ram);
-	z80_Add_ReadB(&ms_Z80, 0x40, 0x5F, Z80_MD_Mem::Z80_ReadB_YM2612);
-	z80_Add_ReadB(&ms_Z80, 0x60, 0x6F, Z80_MD_Mem::Z80_ReadB_Bank);
-	z80_Add_ReadB(&ms_Z80, 0x70, 0x7F, Z80_MD_Mem::Z80_ReadB_PSG);
-	z80_Add_ReadB(&ms_Z80, 0x80, 0xFF, Z80_MD_Mem::Z80_ReadB_68K_Ram);
-	
-	// Set Write Byte handlers.
-	z80_Add_WriteB(&ms_Z80, 0x00, 0xFF, Z80_MD_Mem::Z80_WriteB_Bad);
-	z80_Add_WriteB(&ms_Z80, 0x00, 0x3F, Z80_MD_Mem::Z80_WriteB_Ram);
-	z80_Add_WriteB(&ms_Z80, 0x40, 0x5F, Z80_MD_Mem::Z80_WriteB_YM2612);
-	z80_Add_WriteB(&ms_Z80, 0x60, 0x6F, Z80_MD_Mem::Z80_WriteB_Bank);
-	z80_Add_WriteB(&ms_Z80, 0x70, 0x7F, Z80_MD_Mem::Z80_WriteB_PSG);
-	z80_Add_WriteB(&ms_Z80, 0x80, 0xFF, Z80_MD_Mem::Z80_WriteB_68K_Ram);
+	// Set memory read/write handlers.
+	mdZ80_Set_ReadB(&ms_Z80, Z80_MD_Mem::Z80_ReadB);
+	mdZ80_Set_WriteB(&ms_Z80, Z80_MD_Mem::Z80_WriteB);
 #endif
 	
 	// Reinitialize the Z80.

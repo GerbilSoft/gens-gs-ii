@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -104,6 +104,7 @@ int M68K_Mem::Cycles_Z80;
 SysVersion M68K_Mem::ms_SysVersion;
 
 uint8_t M68K_Mem::ms_SSF2_BankState[8];
+uint8_t *M68K_Mem::ms_RomData_ptrs[8];
 
 
 void M68K_Mem::Init(void)
@@ -114,6 +115,10 @@ void M68K_Mem::Init(void)
 	
 	// Initialize the SSF2 bankswitching state.
 	memset(ms_SSF2_BankState, 0xFF, sizeof(ms_SSF2_BankState));
+	
+	// Initialize the ROM data pointers.
+	for (int i = 0; i < 8; i++)
+		ms_RomData_ptrs[i] = &Rom_Data.u8[i * 0x80000];
 }
 
 
@@ -126,53 +131,34 @@ void M68K_Mem::End(void)
 
 
 /**
- * M68K_Read_Byte_Default(): Default M68K read byte handler.
- * @param address Address.
- * @return 0x00. (TODO: Return 0xFF?)
- */
-uint8_t M68K_Mem::M68K_Read_Byte_Default(uint32_t address)
-{
-	((void)address);
-	return 0x00;
-}
-
-
-/**
- * T_M68K_Read_Byte_RomX(): Read a byte from ROM bank X.
- * M68K memory space is split into 32 512 KB banks. (16 MB total)
+ * M68K_Read_Byte_Rom(): Read a byte from ROM.
  * TODO: XOR by 1 on little-endian systems only.
- * @param bank ROM bank number.
  * @param address Address.
  * @return Byte from ROM.
  */
-template<uint8_t bank>
-uint8_t M68K_Mem::T_M68K_Read_Byte_RomX(uint32_t address)
+inline uint8_t M68K_Mem::M68K_Read_Byte_Rom(uint32_t address)
 {
+	const uint8_t bank = (address >> 19) & 0x07;
 	address &= 0x7FFFF;
-	address ^= ((bank << 19) | 1);	// TODO: LE only!
-	return Rom_Data.u8[address];
+	address ^= 1;	// TODO: LE only!
+	return ms_RomData_ptrs[bank][address];
 }
 // TODO: Add banks C, D, E, and F for 8 MB ROM support.
 // For now, they will return 0x00.
 
 
 /**
- * T_M68K_Read_Byte_RomX_SRam(): Read a byte from ROM bank X or SRam/EEPRom.
+ * M68K_Read_Byte_Rom_SRam(): Read a byte from ROM or SRam/EEPRom.
  * TODO: Verify that this works for 0x300000/0x380000.
  * TODO: XOR by 1 on little-endian systems only.
- * @param bank ROM bank number.
  * @param address Address.
  * @return Byte from ROM or SRam/EEPRom.
  */
-template<uint8_t bank>
-uint8_t M68K_Mem::T_M68K_Read_Byte_RomX_SRam(uint32_t address)
+inline uint8_t M68K_Mem::M68K_Read_Byte_Rom_SRam(uint32_t address)
 {
 	// Check if this is a save data request.
 	if (EmuContext::GetSaveDataEnable())
 	{
-		// Mask off the high byte of the address.
-		address &= 0xFFFFFF;
-		
 		// Temporarily needed because M68K_Mem is static.
 		EEPRom *eeprom = EmuContext::GetEEPRom();
 		SRam *sram = EmuContext::GetSRam();
@@ -197,9 +183,8 @@ uint8_t M68K_Mem::T_M68K_Read_Byte_RomX_SRam(uint32_t address)
 		}
 	}
 	
-	address &= 0x7FFFF;
-	address ^= ((bank << 19) | 1);	// TODO: LE only!
-	return Rom_Data.u8[address];
+	// Not SRam/EEPRom. Return the ROM data.
+	return M68K_Read_Byte_Rom(address);
 }
 
 
@@ -209,7 +194,7 @@ uint8_t M68K_Mem::T_M68K_Read_Byte_RomX_SRam(uint32_t address)
  * @param address Address.
  * @return Byte from RAM.
  */
-uint8_t M68K_Mem::M68K_Read_Byte_Ram(uint32_t address)
+inline uint8_t M68K_Mem::M68K_Read_Byte_Ram(uint32_t address)
 {
 	address &= 0xFFFF;
 	address ^= 1;	// TODO: LE only!
@@ -223,11 +208,8 @@ uint8_t M68K_Mem::M68K_Read_Byte_Ram(uint32_t address)
  * @param address Address.
  * @return Miscellaneous data byte.
  */
-uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
+inline uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 {
-	// Mask off the high byte of the address.
-	address &= 0xFFFFFF;
-	
 	if (address <= 0xA0FFFF)
 	{
 		// Z80 memory space.
@@ -327,7 +309,7 @@ uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
  * @param address Address.
  * @return VDP data byte.
  */
-uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
+inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 {
 	// Valid address: ((address & 0xE700E0) == 0xC00000)
 	// Information from vdppin.txt, (c) 2008 Charles MacDonald.
@@ -341,40 +323,42 @@ uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 	}
 	
 	// Check the VDP address.
-	address &= 0x1F;
-	if (address < 0x04)
+	switch (address & 0x1F)
 	{
-		// Invalid address.
-		// NOTE: VDP Data port should still be readable...
-		return 0x00;
-	}
-	else if (address < 0x08)
-	{
-		// 0xC00004 - 0xC00007: VDP Control Port.
-		uint16_t vdp_status = VdpIo::Read_Status();
-		if (!(address & 0x01))
+		case 0x00: case 0x01: case 0x02: case 0x03:
+			// VDP data port.
+			// FIXME: Gens doesn't read the data port here.
+			// It should still be readable...
+			return 0x00;
+		
+		case 0x04: case 0x06:
 		{
-			// 0xC00004/0xC00006. Return the high byte.
+			// VDP control port. (high byte)
+			uint16_t vdp_status = VdpIo::Read_Status();
 			return ((vdp_status >> 8) & 0xFF);
 		}
-		else //if (address & 0x01)
+		
+		case 0x05: case 0x07:
 		{
-			// 0xC00005/0xC00007. Return the low byte.
+			// VDP control port. (low byte)
+			uint16_t vdp_status = VdpIo::Read_Status();
 			return (vdp_status & 0xFF);
 		}
-	}
-	else if (address == 0x08)
-	{
-		// 0xC00008: V counter.
-		return VdpIo::Read_V_Counter();
-	}
-	else if (address == 0x09)
-	{
-		// 0xC00009: H counter.
-		return VdpIo::Read_H_Counter();
+		
+		case 0x08:
+			// V counter.
+			return VdpIo::Read_V_Counter();
+		
+		case 0x09:
+			// H counter.
+			return VdpIo::Read_H_Counter();
+		
+		default:
+			// Invalid or unsupported VDP port.
+			return 0x00;
 	}
 	
-	// Invalid VDP address.
+	// Should not get here...
 	return 0x00;
 }
 
@@ -383,52 +367,34 @@ uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 
 
 /**
- * M68K_Read_Word_Default(): Default M68K read word handler.
- * @param address Address.
- * @return 0x0000. (TODO: Return 0xFFFF?)
- */
-uint16_t M68K_Mem::M68K_Read_Word_Default(uint32_t address)
-{
-	((void)address);
-	return 0x0000;
-}
-
-
-/**
- * T_M68K_Read_Byte_RomX(): Read a word from ROM bank X.
- * M68K memory space is split into 32 512 KB banks. (16 MB total)
- * @param bank ROM bank number.
+ * M68K_Read_Word_Rom(): Read a word from ROM.
  * @param address Address.
  * @return Word from ROM.
  */
-template<uint8_t bank>
-uint16_t M68K_Mem::T_M68K_Read_Word_RomX(uint32_t address)
+inline uint16_t M68K_Mem::M68K_Read_Word_Rom(uint32_t address)
 {
+	const uint8_t bank = (address >> 19) & 0x07;
 	address &= 0x7FFFE;
-	address |= (bank << 19);
 	address >>= 1;
-	return Rom_Data.u16[address];
+	
+	// TODO: ms_RomData_ptrs should provide u8 and u16.
+	return ((uint16_t*)ms_RomData_ptrs[bank])[address];
 }
 // TODO: Add banks C, D, E, and F for 8 MB ROM support.
 // For now, they will return 0x00.
 
 
 /**
- * T_M68K_Read_Word_RomX_SRam(): Read a word from ROM bank X or SRam/EEPRom.
+ * M68K_Read_Word_Rom_SRam(): Read a word from ROM or SRam/EEPRom.
  * TODO: Verify that this works for 0x300000/0x380000.
- * @param bank ROM bank number.
  * @param address Address.
  * @return Word from ROM or SRam/EEPRom.
  */
-template<uint8_t bank>
-uint16_t M68K_Mem::T_M68K_Read_Word_RomX_SRam(uint32_t address)
+inline uint16_t M68K_Mem::M68K_Read_Word_Rom_SRam(uint32_t address)
 {
 	// Check if this is a save data request.
 	if (EmuContext::GetSaveDataEnable())
 	{
-		// Mask off the high byte of the address.
-		address &= 0xFFFFFF;
-		
 		// Temporarily needed because M68K_Mem is static.
 		EEPRom *eeprom = EmuContext::GetEEPRom();
 		SRam *sram = EmuContext::GetSRam();
@@ -453,11 +419,8 @@ uint16_t M68K_Mem::T_M68K_Read_Word_RomX_SRam(uint32_t address)
 		}
 	}
 	
-	// ROM data request.
-	address &= 0x7FFFE;
-	address |= (bank << 19);
-	address >>= 1;
-	return Rom_Data.u16[address];
+	// Not SRam/EEPRom. Return the ROM data.
+	return M68K_Read_Word_Rom(address);
 }
 
 
@@ -467,7 +430,7 @@ uint16_t M68K_Mem::T_M68K_Read_Word_RomX_SRam(uint32_t address)
  * @param address Address.
  * @return Word from RAM.
  */
-uint16_t M68K_Mem::M68K_Read_Word_Ram(uint32_t address)
+inline uint16_t M68K_Mem::M68K_Read_Word_Ram(uint32_t address)
 {
 	address &= 0xFFFE;
 	return Ram_68k.u16[address >> 1];
@@ -480,11 +443,8 @@ uint16_t M68K_Mem::M68K_Read_Word_Ram(uint32_t address)
  * @param address Address.
  * @return Miscellaneous data word.
  */
-uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
+inline uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 {
-	// Mask off the high byte of the address.
-	address &= 0xFFFFFF;
-	
 	if (address <= 0xA0FFFF)
 	{
 		// Z80 memory space.
@@ -602,7 +562,7 @@ uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
  * @param address Address.
  * @return VDP data byte.
  */
-uint16_t M68K_Mem::M68K_Read_Word_VDP(uint32_t address)
+inline uint16_t M68K_Mem::M68K_Read_Word_VDP(uint32_t address)
 {
 	// Valid address: ((address & 0xE700E0) == 0xC00000)
 	// Information from vdppin.txt, (c) 2008 Charles MacDonald.
@@ -612,29 +572,31 @@ uint16_t M68K_Mem::M68K_Read_Word_VDP(uint32_t address)
 	if ((address & 0x700E0) != 0)
 	{
 		// Not a valid VDP address.
-		return 0x00;
+		return 0x0000;
 	}
 	
 	// Check the VDP address.
-	address &= 0x1F;
-	if (address < 0x04)
+	switch (address & 0x1E)
 	{
-		// 0xC00000 - 0xC00003: VDP Data Port.
-		return VdpIo::Read_Data();
-	}
-	else if (address < 0x08)
-	{
-		// 0xC00004 - 0xC00007: VDP Control port.
-		return VdpIo::Read_Status();
-	}
-	else if (address < 0x0A)
-	{
-		// 0xC00008 - 0xC00009: HV counter.
-		return ((VdpIo::Read_V_Counter() << 8) | VdpIo::Read_H_Counter());
+		case 0x00: case 0x02:
+			// VDP data port.
+			return VdpIo::Read_Data();
+		
+		case 0x04: case 0x06:
+			// VDP control port.
+			return VdpIo::Read_Status();
+		
+		case 0x08:
+			// HV counter.
+			return ((VdpIo::Read_V_Counter() << 8) | VdpIo::Read_H_Counter());
+		
+		default:
+			// Invalid or unsupported VDP port.
+			return 0x0000;
 	}
 	
-	// Invalid VDP address.
-	return 0x00;
+	// Should not get here...
+	return 0x0000;
 }
 
 
@@ -642,28 +604,12 @@ uint16_t M68K_Mem::M68K_Read_Word_VDP(uint32_t address)
 
 
 /**
- * M68K_Write_Byte_Default(): Default M68K write byte handler.
- * @param address Address.
- * @param data Byte to write.
- */
-void M68K_Mem::M68K_Write_Byte_Default(uint32_t address, uint8_t data)
-{
-	// Do nothing!
-	((void)address);
-	((void)data);
-}
-
-
-/**
  * M68K_Write_Byte_SRam(): Write a byte to SRam.
  * @param address Address.
  * @param data Byte to write.
  */
-void M68K_Mem::M68K_Write_Byte_SRam(uint32_t address, uint8_t data)
+inline void M68K_Mem::M68K_Write_Byte_SRam(uint32_t address, uint8_t data)
 {
-	// Mask off the high byte of the address.
-	address &= 0xFFFFFF;
-	
 	if (!EmuContext::GetSaveDataEnable())
 	{
 		// Save data is disabled.
@@ -703,7 +649,7 @@ void M68K_Mem::M68K_Write_Byte_SRam(uint32_t address, uint8_t data)
  * @param address Address.
  * @param data Byte to write.
  */
-void M68K_Mem::M68K_Write_Byte_Ram(uint32_t address, uint8_t data)
+inline void M68K_Mem::M68K_Write_Byte_Ram(uint32_t address, uint8_t data)
 {
 	address &= 0xFFFF;
 	address ^= 1;	// TODO: LE only!
@@ -717,11 +663,8 @@ void M68K_Mem::M68K_Write_Byte_Ram(uint32_t address, uint8_t data)
  * @param address Address.
  * @param data Byte to write.
  */
-void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
+inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 {
-	// Mask off the high byte of the address.
-	address &= 0xFFFFFF;
-	
 	if (address <= 0xA0FFFF)
 	{
 		// Z80 memory space.
@@ -834,12 +777,11 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 	else if (address >= 0xA130F2 && address <= 0xA130FF)
 	{
 		// Super Street Fighter II (SSF2) bankswitching system.
-		// TODO: Save the bank indexes for savestates.
 		// TODO: Starscream doesn't use this for instruction fetch!
 		// TODO: Use a helper class?
 		// TODO: Only banks 0-9 are supported right now...
-		unsigned int phys_bank = (address & 0xF) >> 1;
-		unsigned int virt_bank = (data & 0x1F);
+		const uint8_t phys_bank = (address & 0xF) >> 1;
+		uint8_t virt_bank = (data & 0x1F);
 		
 		if (virt_bank > 9)
 		{
@@ -853,9 +795,8 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 			ms_SSF2_BankState[phys_bank] = virt_bank;
 		}
 		
-		// Set the banking in the read byte/word tables.
-		M68K_Read_Byte_Table[phys_bank] = MD_M68K_Read_Byte_Table[virt_bank];
-		M68K_Read_Word_Table[phys_bank] = MD_M68K_Read_Word_Table[virt_bank];
+		// Update the ROM data pointers.
+		ms_RomData_ptrs[phys_bank] = &Rom_Data.u8[virt_bank * 0x80000];
 		return;
 	}
 	else if (address > 0xA1001F)
@@ -918,7 +859,7 @@ void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
  * @param address Address.
  * @param data Byte to write.
  */
-void M68K_Mem::M68K_Write_Byte_VDP(uint32_t address, uint8_t data)
+inline void M68K_Mem::M68K_Write_Byte_VDP(uint32_t address, uint8_t data)
 {
 	// Valid address: ((address & 0xE700E0) == 0xC00000)
 	// Information from vdppin.txt, (c) 2008 Charles MacDonald.
@@ -932,22 +873,27 @@ void M68K_Mem::M68K_Write_Byte_VDP(uint32_t address, uint8_t data)
 	}
 	
 	// Check the VDP address.
-	address &= 0x1F;
-	if (address < 0x04)
+	switch (address & 0x1F)
 	{
-		// 0xC00000 - 0xC00003: VDP Data Port.
-		VdpIo::Write_Data_Byte(data);
-	}
-	else if (address < 0x08)
-	{
-		// 0xC00004 - 0xC00007: VDP Control Port.
-		// TODO: This should still be writable.
-		// Gens' mem_m68k.asm doesn't implement this.
-	}
-	else if (address == 0x11)
-	{
-		// 0xC00011: PSG control port.
-		SoundMgr::ms_Psg.write(data);
+		case 0x00: case 0x01: case 0x02: case 0x03:
+			// VDP data port.
+			VdpIo::Write_Data_Byte(data);
+			break;
+		
+		case 0x04: case 0x05: case 0x06: case 0x07:
+			// VDP control port.
+			// TODO: This should still be writable.
+			// Gens' mem_m68k.asm doesn't implement this.
+			break;
+		
+		case 0x11:
+			// PSG control port.
+			SoundMgr::ms_Psg.write(data);
+			break;
+		
+		default:
+			// Invalid or unsupported VDP port.
+			break;
 	}
 }
 
@@ -956,28 +902,12 @@ void M68K_Mem::M68K_Write_Byte_VDP(uint32_t address, uint8_t data)
 
 
 /**
- * M68K_Write_Word_Default(): Default M68K write word handler.
- * @param address Address.
- * @param data Word to write.
- */
-void M68K_Mem::M68K_Write_Word_Default(uint32_t address, uint16_t data)
-{
-	// Do nothing!
-	((void)address);
-	((void)data);
-}
-
-
-/**
  * M68K_Write_Byte_SRam(): Write a word to SRam.
  * @param address Address.
  * @param data Word to write.
  */
-void M68K_Mem::M68K_Write_Word_SRam(uint32_t address, uint16_t data)
+inline void M68K_Mem::M68K_Write_Word_SRam(uint32_t address, uint16_t data)
 {
-	// Mask off the high byte of the address.
-	address &= 0xFFFFFF;
-	
 	if (!EmuContext::GetSaveDataEnable())
 	{
 		// Save data is disabled.
@@ -1016,7 +946,7 @@ void M68K_Mem::M68K_Write_Word_SRam(uint32_t address, uint16_t data)
  * @param address Address.
  * @param data Word to write.
  */
-void M68K_Mem::M68K_Write_Word_Ram(uint32_t address, uint16_t data)
+inline void M68K_Mem::M68K_Write_Word_Ram(uint32_t address, uint16_t data)
 {
 	address &= 0xFFFE;
 	Ram_68k.u16[address >> 1] = data;
@@ -1029,11 +959,8 @@ void M68K_Mem::M68K_Write_Word_Ram(uint32_t address, uint16_t data)
  * @param address Address.
  * @param data Word to write.
  */
-void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
+inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 {
-	// Mask off the high byte of the address.
-	address &= 0xFFFFFF;
-	
 	if (address <= 0xA0FFFF)
 	{
 		// Z80 memory space.
@@ -1157,12 +1084,11 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 	else if (address >= 0xA130F2 && address <= 0xA130FF)
 	{
 		// Super Street Fighter II (SSF2) bankswitching system.
-		// TODO: Save the bank indexes for savestates.
 		// TODO: Starscream doesn't use this for instruction fetch!
 		// TODO: Use a helper class?
 		// TODO: Only banks 0-9 are supported right now...
-		unsigned int phys_bank = (address & 0xF) >> 1;
-		unsigned int virt_bank = (data & 0x1F);
+		const uint8_t phys_bank = (address & 0xF) >> 1;
+		uint8_t virt_bank = (data & 0x1F);
 		
 		if (virt_bank > 9)
 		{
@@ -1176,9 +1102,8 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 			ms_SSF2_BankState[phys_bank] = virt_bank;
 		}
 		
-		// Set the banking in the read byte/word tables.
-		M68K_Read_Byte_Table[phys_bank] = MD_M68K_Read_Byte_Table[virt_bank];
-		M68K_Read_Word_Table[phys_bank] = MD_M68K_Read_Word_Table[virt_bank];
+		// Update the ROM data pointers.
+		ms_RomData_ptrs[phys_bank] = &Rom_Data.u8[virt_bank * 0x80000];
 		return;
 	}
 	else if (address > 0xA1001F)
@@ -1240,7 +1165,7 @@ void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
  * @param address Address.
  * @param data Word to write.
  */
-void M68K_Mem::M68K_Write_Word_VDP(uint32_t address, uint16_t data)
+inline void M68K_Mem::M68K_Write_Word_VDP(uint32_t address, uint16_t data)
 {
 	// Valid address: ((address & 0xE700E0) == 0xC00000)
 	// Information from vdppin.txt, (c) 2008 Charles MacDonald.
@@ -1254,199 +1179,29 @@ void M68K_Mem::M68K_Write_Word_VDP(uint32_t address, uint16_t data)
 	}
 	
 	// Check the VDP address.
-	address &= 0x1F;
-	if (address < 0x04)
+	switch (address & 0x1E)
 	{
-		// 0xC00000 - 0xC00003: VDP Data Port.
-		VdpIo::Write_Data_Word(data);
-	}
-	else if (address < 0x08)
-	{
-		// 0xC00004 - 0xC00007: VDP Control Port.
-		VdpIo::Write_Ctrl(data);
-	}
-	else if (address == 0x11)
-	{
-		// 0xC00011: PSG control port.
-		// TODO: mem_m68k.asm doesn't support this for word writes...
-		//m_Psg.write(data);
+		case 0x00: case 0x02:
+			// VDP data port.
+			VdpIo::Write_Data_Word(data);
+			break;
+		
+		case 0x04: case 0x06:
+			// VDP control port.
+			VdpIo::Write_Ctrl(data);
+			break;
+		
+		case 0x10:
+			// PSG control port.
+			// TODO: mem_m68k.asm doesn't support this for word writes...
+			//SoundMgr::ms_Psg.write(data);
+			break;
+		
+		default:
+			// Invalid or unsupported VDP port.
+			break;
 	}
 }
-
-
-/** In-use function tables. **/
-/** TODO: Convert to member variables! **/
-M68K_Mem::M68K_Read_Byte_fn M68K_Mem::M68K_Read_Byte_Table[32];
-M68K_Mem::M68K_Read_Word_fn M68K_Mem::M68K_Read_Word_Table[32];
-M68K_Mem::M68K_Write_Byte_fn M68K_Mem::M68K_Write_Byte_Table[32];
-M68K_Mem::M68K_Write_Word_fn M68K_Mem::M68K_Write_Word_Table[32];
-
-
-/** Default function tables. **/
-
-
-/**
- * MD_M68K_Read_Byte_Table[]: MD Read Byte function table.
- * 512 KB pages; 32 entries.
- */
-const M68K_Mem::M68K_Read_Byte_fn M68K_Mem::MD_M68K_Read_Byte_Table[32] =
-{
-	T_M68K_Read_Byte_RomX<0x0>,		// 0x000000 - 0x07FFFF [Bank 0x00]
-	T_M68K_Read_Byte_RomX<0x1>,		// 0x080000 - 0x0FFFFF [Bank 0x01]
-	T_M68K_Read_Byte_RomX<0x2>,		// 0x100000 - 0x17FFFF [Bank 0x02]
-	T_M68K_Read_Byte_RomX<0x3>,		// 0x180000 - 0x1FFFFF [Bank 0x03]
-	T_M68K_Read_Byte_RomX_SRam<0x4>,	// 0x200000 - 0x27FFFF [Bank 0x04]
-	T_M68K_Read_Byte_RomX<0x5>,		// 0x280000 - 0x2FFFFF [Bank 0x05]
-	T_M68K_Read_Byte_RomX_SRam<0x6>,	// 0x300000 - 0x37FFFF [Bank 0x06]
-	T_M68K_Read_Byte_RomX_SRam<0x7>,	// 0x380000 - 0x3FFFFF [Bank 0x07]
-	T_M68K_Read_Byte_RomX<0x8>,		// 0x400000 - 0x47FFFF [Bank 0x08]
-	T_M68K_Read_Byte_RomX<0x9>,		// 0x480000 - 0x4FFFFF [Bank 0x09]
-	T_M68K_Read_Byte_RomX<0xA>,		// 0x500000 - 0x57FFFF [Bank 0x0A]
-	T_M68K_Read_Byte_RomX<0xB>,		// 0x580000 - 0x5FFFFF [Bank 0x0B]
-	M68K_Read_Byte_Default,			// 0x600000 - 0x67FFFF [Bank 0x0C]
-	M68K_Read_Byte_Default,			// 0x680000 - 0x6FFFFF [Bank 0x0D]
-	M68K_Read_Byte_Default,			// 0x700000 - 0x77FFFF [Bank 0x0E]
-	M68K_Read_Byte_Default,			// 0x780000 - 0x7FFFFF [Bank 0x0F]
-	M68K_Read_Byte_Default,			// 0x800000 - 0x87FFFF [Bank 0x10]
-	M68K_Read_Byte_Default,			// 0x880000 - 0x8FFFFF [Bank 0x11]
-	M68K_Read_Byte_Default,			// 0x900000 - 0x97FFFF [Bank 0x12]
-	M68K_Read_Byte_Default,			// 0x980000 - 0x9FFFFF [Bank 0x13]
-	M68K_Read_Byte_Misc,			// 0xA00000 - 0xA7FFFF [Bank 0x14]
-	M68K_Read_Byte_Default,			// 0xA80000 - 0xAFFFFF [Bank 0x15]
-	M68K_Read_Byte_Default,			// 0xB00000 - 0xB7FFFF [Bank 0x16]
-	M68K_Read_Byte_Default,			// 0xB80000 - 0xBFFFFF [Bank 0x17]
-	M68K_Read_Byte_VDP,			// 0xC00000 - 0xC7FFFF [Bank 0x18]
-	M68K_Read_Byte_VDP,			// 0xC80000 - 0xCFFFFF [Bank 0x19]
-	M68K_Read_Byte_VDP,			// 0xD00000 - 0xD7FFFF [Bank 0x1A]
-	M68K_Read_Byte_VDP,			// 0xD80000 - 0xDFFFFF [Bank 0x1B]
-	M68K_Read_Byte_Ram,			// 0xE00000 - 0xE7FFFF [Bank 0x1C]
-	M68K_Read_Byte_Ram,			// 0xE80000 - 0xEFFFFF [Bank 0x1D]
-	M68K_Read_Byte_Ram,			// 0xF00000 - 0xF7FFFF [Bank 0x1E]
-	M68K_Read_Byte_Ram,			// 0xF80000 - 0xFFFFFF [Bank 0x1F]
-};
-
-
-/**
- * MD_M68K_Read_Word_Table[]: MD Read Word function table.
- * 512 KB pages; 32 entries.
- */
-const M68K_Mem::M68K_Read_Word_fn M68K_Mem::MD_M68K_Read_Word_Table[32] =
-{
-	T_M68K_Read_Word_RomX<0x0>,		// 0x000000 - 0x07FFFF [Bank 0x00]
-	T_M68K_Read_Word_RomX<0x1>,		// 0x080000 - 0x0FFFFF [Bank 0x01]
-	T_M68K_Read_Word_RomX<0x2>,		// 0x100000 - 0x17FFFF [Bank 0x02]
-	T_M68K_Read_Word_RomX<0x3>,		// 0x180000 - 0x1FFFFF [Bank 0x03]
-	T_M68K_Read_Word_RomX_SRam<0x4>,	// 0x200000 - 0x27FFFF [Bank 0x04]
-	T_M68K_Read_Word_RomX<0x5>,		// 0x280000 - 0x2FFFFF [Bank 0x05]
-	T_M68K_Read_Word_RomX_SRam<0x6>,	// 0x300000 - 0x37FFFF [Bank 0x06]
-	T_M68K_Read_Word_RomX_SRam<0x7>,	// 0x380000 - 0x3FFFFF [Bank 0x07]
-	T_M68K_Read_Word_RomX<0x8>,		// 0x400000 - 0x47FFFF [Bank 0x08]
-	T_M68K_Read_Word_RomX<0x9>,		// 0x480000 - 0x4FFFFF [Bank 0x09]
-	T_M68K_Read_Word_RomX<0xA>,		// 0x500000 - 0x57FFFF [Bank 0x0A]
-	T_M68K_Read_Word_RomX<0xB>,		// 0x580000 - 0x5FFFFF [Bank 0x0B]
-	M68K_Read_Word_Default,			// 0x600000 - 0x67FFFF [Bank 0x0C]
-	M68K_Read_Word_Default,			// 0x680000 - 0x6FFFFF [Bank 0x0D]
-	M68K_Read_Word_Default,			// 0x700000 - 0x77FFFF [Bank 0x0E]
-	M68K_Read_Word_Default,			// 0x780000 - 0x7FFFFF [Bank 0x0F]
-	M68K_Read_Word_Default,			// 0x800000 - 0x87FFFF [Bank 0x10]
-	M68K_Read_Word_Default,			// 0x880000 - 0x8FFFFF [Bank 0x11]
-	M68K_Read_Word_Default,			// 0x900000 - 0x97FFFF [Bank 0x12]
-	M68K_Read_Word_Default,			// 0x980000 - 0x9FFFFF [Bank 0x13]
-	M68K_Read_Word_Misc,			// 0xA00000 - 0xA7FFFF [Bank 0x14]
-	M68K_Read_Word_Default,			// 0xA80000 - 0xAFFFFF [Bank 0x15]
-	M68K_Read_Word_Default,			// 0xB00000 - 0xB7FFFF [Bank 0x16]
-	M68K_Read_Word_Default,			// 0xB80000 - 0xBFFFFF [Bank 0x17]
-	M68K_Read_Word_VDP,			// 0xC00000 - 0xC7FFFF [Bank 0x18]
-	M68K_Read_Word_VDP,			// 0xC80000 - 0xCFFFFF [Bank 0x19]
-	M68K_Read_Word_VDP,			// 0xD00000 - 0xD7FFFF [Bank 0x1A]
-	M68K_Read_Word_VDP,			// 0xD80000 - 0xDFFFFF [Bank 0x1B]
-	M68K_Read_Word_Ram,			// 0xE00000 - 0xE7FFFF [Bank 0x1C]
-	M68K_Read_Word_Ram,			// 0xE80000 - 0xEFFFFF [Bank 0x1D]
-	M68K_Read_Word_Ram,			// 0xF00000 - 0xF7FFFF [Bank 0x1E]
-	M68K_Read_Word_Ram,			// 0xF80000 - 0xFFFFFF [Bank 0x1F]
-};
-
-
-/**
- * MD_M68K_Write_Byte_Table[]: MD Write Byte function table.
- * 512 KB pages; 32 entries.
- */
-const M68K_Mem::M68K_Write_Byte_fn M68K_Mem::MD_M68K_Write_Byte_Table[32] =
-{
-	M68K_Write_Byte_SRam,		// 0x000000 - 0x07FFFF [Bank 0x00]
-	M68K_Write_Byte_SRam,		// 0x080000 - 0x0FFFFF [Bank 0x01]
-	M68K_Write_Byte_SRam,		// 0x100000 - 0x17FFFF [Bank 0x02]
-	M68K_Write_Byte_SRam,		// 0x180000 - 0x1FFFFF [Bank 0x03]
-	M68K_Write_Byte_SRam,		// 0x200000 - 0x27FFFF [Bank 0x04]
-	M68K_Write_Byte_SRam,		// 0x280000 - 0x2FFFFF [Bank 0x05]
-	M68K_Write_Byte_SRam,		// 0x300000 - 0x37FFFF [Bank 0x06]
-	M68K_Write_Byte_SRam,		// 0x380000 - 0x3FFFFF [Bank 0x07]
-	M68K_Write_Byte_SRam,		// 0x400000 - 0x47FFFF [Bank 0x08]
-	M68K_Write_Byte_SRam,		// 0x480000 - 0x4FFFFF [Bank 0x09]
-	M68K_Write_Byte_SRam,		// 0x500000 - 0x57FFFF [Bank 0x0A]
-	M68K_Write_Byte_SRam,		// 0x580000 - 0x5FFFFF [Bank 0x0B]
-	M68K_Write_Byte_SRam,		// 0x600000 - 0x67FFFF [Bank 0x0C]
-	M68K_Write_Byte_SRam,		// 0x680000 - 0x6FFFFF [Bank 0x0D]
-	M68K_Write_Byte_SRam,		// 0x700000 - 0x77FFFF [Bank 0x0E]
-	M68K_Write_Byte_SRam,		// 0x780000 - 0x7FFFFF [Bank 0x0F]
-	M68K_Write_Byte_Default,	// 0x800000 - 0x87FFFF [Bank 0x10]
-	M68K_Write_Byte_Default,	// 0x880000 - 0x8FFFFF [Bank 0x11]
-	M68K_Write_Byte_Default,	// 0x900000 - 0x97FFFF [Bank 0x12]
-	M68K_Write_Byte_Default,	// 0x980000 - 0x9FFFFF [Bank 0x13]
-	M68K_Write_Byte_Misc,		// 0xA00000 - 0xA7FFFF [Bank 0x14]
-	M68K_Write_Byte_Default,	// 0xA80000 - 0xAFFFFF [Bank 0x15]
-	M68K_Write_Byte_Default,	// 0xB00000 - 0xB7FFFF [Bank 0x16]
-	M68K_Write_Byte_Default,	// 0xB80000 - 0xBFFFFF [Bank 0x17]
-	M68K_Write_Byte_VDP,		// 0xC00000 - 0xC7FFFF [Bank 0x18]
-	M68K_Write_Byte_VDP,		// 0xC80000 - 0xCFFFFF [Bank 0x19]
-	M68K_Write_Byte_VDP,		// 0xD00000 - 0xD7FFFF [Bank 0x1A]
-	M68K_Write_Byte_VDP,		// 0xD80000 - 0xDFFFFF [Bank 0x1B]
-	M68K_Write_Byte_Ram,		// 0xE00000 - 0xE7FFFF [Bank 0x1C]
-	M68K_Write_Byte_Ram,		// 0xE80000 - 0xEFFFFF [Bank 0x1D]
-	M68K_Write_Byte_Ram,		// 0xF00000 - 0xF7FFFF [Bank 0x1E]
-	M68K_Write_Byte_Ram,		// 0xF80000 - 0xFFFFFF [Bank 0x1F]
-};
-
-
-/**
- * MD_M68K_Write_Word_Table[]: MD Write Word function table.
- * 512 KB pages; 32 entries.
- */
-const M68K_Mem::M68K_Write_Word_fn M68K_Mem::MD_M68K_Write_Word_Table[32] =
-{
-	M68K_Write_Word_SRam,		// 0x000000 - 0x07FFFF [Bank 0x00]
-	M68K_Write_Word_SRam,		// 0x080000 - 0x0FFFFF [Bank 0x01]
-	M68K_Write_Word_SRam,		// 0x100000 - 0x17FFFF [Bank 0x02]
-	M68K_Write_Word_SRam,		// 0x180000 - 0x1FFFFF [Bank 0x03]
-	M68K_Write_Word_SRam,		// 0x200000 - 0x27FFFF [Bank 0x04]
-	M68K_Write_Word_SRam,		// 0x280000 - 0x2FFFFF [Bank 0x05]
-	M68K_Write_Word_SRam,		// 0x300000 - 0x37FFFF [Bank 0x06]
-	M68K_Write_Word_SRam,		// 0x380000 - 0x3FFFFF [Bank 0x07]
-	M68K_Write_Word_SRam,		// 0x400000 - 0x47FFFF [Bank 0x08]
-	M68K_Write_Word_SRam,		// 0x480000 - 0x4FFFFF [Bank 0x09]
-	M68K_Write_Word_SRam,		// 0x500000 - 0x57FFFF [Bank 0x0A]
-	M68K_Write_Word_SRam,		// 0x580000 - 0x5FFFFF [Bank 0x0B]
-	M68K_Write_Word_SRam,		// 0x600000 - 0x67FFFF [Bank 0x0C]
-	M68K_Write_Word_SRam,		// 0x680000 - 0x6FFFFF [Bank 0x0D]
-	M68K_Write_Word_SRam,		// 0x700000 - 0x77FFFF [Bank 0x0E]
-	M68K_Write_Word_SRam,		// 0x780000 - 0x7FFFFF [Bank 0x0F]
-	M68K_Write_Word_Default,	// 0x800000 - 0x87FFFF [Bank 0x10]
-	M68K_Write_Word_Default,	// 0x880000 - 0x8FFFFF [Bank 0x11]
-	M68K_Write_Word_Default,	// 0x900000 - 0x97FFFF [Bank 0x12]
-	M68K_Write_Word_Default,	// 0x980000 - 0x9FFFFF [Bank 0x13]
-	M68K_Write_Word_Misc,		// 0xA00000 - 0xA7FFFF [Bank 0x14]
-	M68K_Write_Word_Default,	// 0xA80000 - 0xAFFFFF [Bank 0x15]
-	M68K_Write_Word_Default,	// 0xB00000 - 0xB7FFFF [Bank 0x16]
-	M68K_Write_Word_Default,	// 0xB80000 - 0xBFFFFF [Bank 0x17]
-	M68K_Write_Word_VDP,		// 0xC00000 - 0xC7FFFF [Bank 0x18]
-	M68K_Write_Word_VDP,		// 0xC80000 - 0xCFFFFF [Bank 0x19]
-	M68K_Write_Word_VDP,		// 0xD00000 - 0xD7FFFF [Bank 0x1A]
-	M68K_Write_Word_VDP,		// 0xD80000 - 0xDFFFFF [Bank 0x1B]
-	M68K_Write_Word_Ram,		// 0xE00000 - 0xE7FFFF [Bank 0x1C]
-	M68K_Write_Word_Ram,		// 0xE80000 - 0xEFFFFF [Bank 0x1D]
-	M68K_Write_Word_Ram,		// 0xF00000 - 0xF7FFFF [Bank 0x1E]
-	M68K_Write_Word_Ram,		// 0xF80000 - 0xFFFFFF [Bank 0x1F]
-};
 
 
 /** Public init and read/write functions. **/
@@ -1460,23 +1215,6 @@ void M68K_Mem::InitSys(M68K::SysID system)
 {
 	// Initialize the SSF2 bankswitching state.
 	memset(ms_SSF2_BankState, 0xFF, sizeof(ms_SSF2_BankState));
-	
-	switch (system)
-	{
-		case M68K::SYSID_MD:
-			// Sega Genesis / Mega Drive.
-			memcpy(M68K_Read_Byte_Table, MD_M68K_Read_Byte_Table, sizeof(M68K_Read_Byte_Table));
-			memcpy(M68K_Read_Word_Table, MD_M68K_Read_Word_Table, sizeof(M68K_Read_Word_Table));
-			memcpy(M68K_Write_Byte_Table, MD_M68K_Write_Byte_Table, sizeof(M68K_Write_Byte_Table));
-			memcpy(M68K_Write_Word_Table, MD_M68K_Write_Word_Table, sizeof(M68K_Write_Word_Table));
-			break;
-		
-		case M68K::SYSID_MCD:
-		case M68K::SYSID_32X:
-		default:
-			// Unsupported system.
-			break;
-	}
 }
 
 
@@ -1487,8 +1225,56 @@ void M68K_Mem::InitSys(M68K::SysID system)
  */
 uint8_t M68K_Mem::M68K_RB(uint32_t address)
 {
+	// TODO: This is MD only. Add MCD/32X later.
+	// TODO: SSF2 bankswitching.
 	address &= 0xFFFFFF;
-	return M68K_Read_Byte_Table[address >> 19](address);
+	const uint8_t page = (address >> 19);
+	
+	switch (page & 0x1F)
+	{
+		case 0x00:	return M68K_Read_Byte_Rom(address);
+		case 0x01:	return M68K_Read_Byte_Rom(address);
+		case 0x02:	return M68K_Read_Byte_Rom(address);
+		case 0x03:	return M68K_Read_Byte_Rom(address);
+		
+		case 0x04:	return M68K_Read_Byte_Rom_SRam(address);
+		case 0x05:	return M68K_Read_Byte_Rom(address);
+		case 0x06:	return M68K_Read_Byte_Rom_SRam(address);
+		case 0x07:	return M68K_Read_Byte_Rom_SRam(address);
+		
+		case 0x08:	return 0xFF;
+		case 0x09:	return 0xFF;
+		case 0x0A:	return 0xFF;
+		case 0x0B:	return 0xFF;
+		
+		case 0x0C:	return 0xFF;
+		case 0x0D:	return 0xFF;
+		case 0x0E:	return 0xFF;
+		case 0x0F:	return 0xFF;
+		
+		case 0x10:	return 0xFF;
+		case 0x11:	return 0xFF;
+		case 0x12:	return 0xFF;
+		case 0x13:	return 0xFF;
+		
+		case 0x14:	return M68K_Read_Byte_Misc(address);
+		case 0x15:	return 0xFF;
+		case 0x16:	return 0xFF;
+		case 0x17:	return 0xFF;
+		
+		case 0x18:	return M68K_Read_Byte_VDP(address);
+		case 0x19:	return M68K_Read_Byte_VDP(address);
+		case 0x1A:	return M68K_Read_Byte_VDP(address);
+		case 0x1B:	return M68K_Read_Byte_VDP(address);
+		
+		case 0x1C:	return M68K_Read_Byte_Ram(address);
+		case 0x1D:	return M68K_Read_Byte_Ram(address);
+		case 0x1E:	return M68K_Read_Byte_Ram(address);
+		case 0x1F:	return M68K_Read_Byte_Ram(address);
+	}
+	
+	// Should not get here...
+	return 0xFF;
 }
 
 
@@ -1499,8 +1285,56 @@ uint8_t M68K_Mem::M68K_RB(uint32_t address)
  */
 uint16_t M68K_Mem::M68K_RW(uint32_t address)
 {
+	// TODO: This is MD only. Add MCD/32X later.
+	// TODO: SSF2 bankswitching.
 	address &= 0xFFFFFF;
-	return M68K_Read_Word_Table[address >> 19](address);
+	const uint8_t page = (address >> 19);
+	
+	switch (page & 0x1F)
+	{
+		case 0x00:	return M68K_Read_Word_Rom(address);
+		case 0x01:	return M68K_Read_Word_Rom(address);
+		case 0x02:	return M68K_Read_Word_Rom(address);
+		case 0x03:	return M68K_Read_Word_Rom(address);
+		
+		case 0x04:	return M68K_Read_Word_Rom_SRam(address);
+		case 0x05:	return M68K_Read_Word_Rom(address);
+		case 0x06:	return M68K_Read_Word_Rom_SRam(address);
+		case 0x07:	return M68K_Read_Word_Rom_SRam(address);
+		
+		case 0x08:	return 0xFFFF;
+		case 0x09:	return 0xFFFF;
+		case 0x0A:	return 0xFFFF;
+		case 0x0B:	return 0xFFFF;
+		
+		case 0x0C:	return 0xFFFF;
+		case 0x0D:	return 0xFFFF;
+		case 0x0E:	return 0xFFFF;
+		case 0x0F:	return 0xFFFF;
+		
+		case 0x10:	return 0xFFFF;
+		case 0x11:	return 0xFFFF;
+		case 0x12:	return 0xFFFF;
+		case 0x13:	return 0xFFFF;
+		
+		case 0x14:	return M68K_Read_Word_Misc(address);
+		case 0x15:	return 0xFFFF;
+		case 0x16:	return 0xFFFF;
+		case 0x17:	return 0xFFFF;
+		
+		case 0x18:	return M68K_Read_Word_VDP(address);
+		case 0x19:	return M68K_Read_Word_VDP(address);
+		case 0x1A:	return M68K_Read_Word_VDP(address);
+		case 0x1B:	return M68K_Read_Word_VDP(address);
+		
+		case 0x1C:	return M68K_Read_Word_Ram(address);
+		case 0x1D:	return M68K_Read_Word_Ram(address);
+		case 0x1E:	return M68K_Read_Word_Ram(address);
+		case 0x1F:	return M68K_Read_Word_Ram(address);
+	}
+	
+	// Should not get here...
+	return 0xFFFF;
 }
 
 
@@ -1511,8 +1345,22 @@ uint16_t M68K_Mem::M68K_RW(uint32_t address)
  */
 void M68K_Mem::M68K_WB(uint32_t address, uint8_t data)
 {
+	// TODO: This is MD only. Add MCD/32X later.
+	// TODO: SSF2 bankswitching.
 	address &= 0xFFFFFF;
-	M68K_Write_Byte_Table[address >> 19](address, data);
+	const uint8_t page = (address >> 21);
+	
+	switch (page & 0x07)
+	{
+		case 0x00:	M68K_Write_Byte_SRam(address, data); break;
+		case 0x01:	M68K_Write_Byte_SRam(address, data); break;
+		case 0x02:	break;
+		case 0x03:	break;
+		case 0x04:	break;
+		case 0x05:	M68K_Write_Byte_Misc(address, data); break;
+		case 0x06:	M68K_Write_Byte_VDP(address, data); break;
+		case 0x07:	M68K_Write_Byte_Ram(address, data); break;
+	}
 }
 
 
@@ -1523,8 +1371,22 @@ void M68K_Mem::M68K_WB(uint32_t address, uint8_t data)
  */
 void M68K_Mem::M68K_WW(uint32_t address, uint16_t data)
 {
+	// TODO: This is MD only. Add MCD/32X later.
+	// TODO: SSF2 bankswitching.
 	address &= 0xFFFFFF;
-	M68K_Write_Word_Table[address >> 19](address, data);
+	const uint8_t page = (address >> 21);
+	
+	switch (page & 0x07)
+	{
+		case 0x00:	M68K_Write_Word_SRam(address, data); break;
+		case 0x01:	M68K_Write_Word_SRam(address, data); break;
+		case 0x02:	break;
+		case 0x03:	break;
+		case 0x04:	break;
+		case 0x05:	M68K_Write_Word_Misc(address, data); break;
+		case 0x06:	M68K_Write_Word_VDP(address, data); break;
+		case 0x07:	M68K_Write_Word_Ram(address, data); break;
+	}
 }
 
 
@@ -1568,7 +1430,7 @@ void M68K_Mem::ZomgRestoreSSF2BankState(const Zomg_MD_TimeReg_t *state)
 	// NOTE: Only banks 0-9 are supported right now.
 	for (int phys_bank = 0; phys_bank < 8; phys_bank++)
 	{
-		unsigned int virt_bank = ms_SSF2_BankState[phys_bank];
+		uint8_t virt_bank = ms_SSF2_BankState[phys_bank];
 		if (virt_bank > 9)
 		{
 			// TODO: We're ignoring banks over bank 9.
@@ -1577,9 +1439,8 @@ void M68K_Mem::ZomgRestoreSSF2BankState(const Zomg_MD_TimeReg_t *state)
 			ms_SSF2_BankState[phys_bank] = 0xFF;	// default bank
 		}
 		
-		// Set the banking in the read byte/word tables.
-		M68K_Read_Byte_Table[phys_bank] = MD_M68K_Read_Byte_Table[virt_bank];
-		M68K_Read_Word_Table[phys_bank] = MD_M68K_Read_Word_Table[virt_bank];
+		// Update the ROM data pointers.
+		ms_RomData_ptrs[phys_bank] = &Rom_Data.u8[virt_bank * 0x80000];
 	}
 }
 

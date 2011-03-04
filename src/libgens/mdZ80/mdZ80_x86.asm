@@ -69,6 +69,14 @@ BITS 32
 	%define SYMF(sym, args) SYM(sym)
 %endif
 
+; Global symbol declaration.
+%ifdef __OBJ_ELF
+	%define GLOBAL_SYM(sym, type)		global SYM(sym):type (sym %+ _end - sym)
+	%define GLOBAL_SYMF(sym, args, type)	global SYMF(sym, args):type (sym %+ _end - sym)
+%else
+	%define GLOBAL_SYM(sym, type)		global SYM(sym)
+	%define GLOBAL_SYMF(sym, args, type)	global SYMF(sym, args)
+%endif
 
 ;*******************
 ;
@@ -182,10 +190,10 @@ section .bss align=64
 		
 		.Reset_Size:
 		
-		.ReadB:		resd 0x100
-		.WriteB:	resd 0x100
 		.Fetch:		resd 0x100
 		
+		.ReadB:		resd 1
+		.WriteB:	resd 1
 		.IN:		resd 1
 		.OUT:		resd 1
 		
@@ -199,13 +207,6 @@ section .bss align=64
 		Z80_CONTEXT
 		
 	endstruc
-	
-	
-	alignb 32
-	
-	global SYM(mdZ80_def_mem)
-	SYM(mdZ80_def_mem):
-		resb 0x10000
 	
 
 ; External read-only data symbols.
@@ -428,13 +429,11 @@ align 16
 	
 %%IO:
 %endif
- 	mov	[ebp + Z80.CycleIO], edi
-	movzx	edi, ch
 %ifnidn %1, A
 	SAVE_A
 %endif
 	SAVE_F
-	call	[ebp + Z80.ReadB + edi * 4]
+	call	[ebp + Z80.ReadB]
 %ifnidn %1, A
 	%if %0 > 0
 		mov	z%1, al
@@ -442,7 +441,6 @@ align 16
 		mov	dl, al
 	%endif
 %endif
-	mov	edi, [ebp + Z80.CycleIO]
 %ifnidn %1, A
 	RELOAD_A
 %endif
@@ -482,14 +480,11 @@ align 16
 	
 %%IO:
 %endif
-	mov	[ebp + Z80.CycleIO], edi
 %if %0 > 0
 	mov	dl, z%1
 %endif
-	movzx	edi, ch
 	SAVE_AF
-	call	[ebp + Z80.WriteB + edi * 4]
-	mov	edi, [ebp + Z80.CycleIO]
+	call	[ebp + Z80.WriteB]
 	RELOAD_AF
 	
 %if (GENS_OPT == 1)
@@ -535,7 +530,6 @@ align 16
 %%IO:
 %endif
 	mov	[ebp + Z80.CycleIO], edi
-	movzx	edi, ch
 %if %0 > 0
 %ifdef __FORCE_STACK_ALIGNMENT
 	; Enforce 16-byte stack alignment.
@@ -543,25 +537,21 @@ align 16
 %endif
 	push	ecx	; Z80.ReadB functions may clobber ecx.
 	%ifidn %1, AF
-		call	[ebp + Z80.ReadB + edi * 4]	; Get the low byte. (A)
+		call	[ebp + Z80.ReadB]	; Get the low byte. (A)
 		mov	ecx, [esp]
 		inc	ecx
-		movzx	edi, ch
 		SAVE_A
-		call	[ebp + Z80.ReadB + edi * 4]	; Get the high byte. (F)
+		call	[ebp + Z80.ReadB]	; Get the high byte. (F)
 		mov	ah, al
 		RELOAD_A
-		mov	edi, [ebp + Z80.CycleIO]
 	%else
 		SAVE_AF
-		call	[ebp + Z80.ReadB + edi * 4]	; Get the low byte.
+		call	[ebp + Z80.ReadB]	; Get the low byte.
 		mov	ecx, [esp]
 		inc	ecx
-		movzx	edi, ch
 		mov	zl%1, al
-		call	[ebp + Z80.ReadB + edi * 4]	; Get the high byte.
+		call	[ebp + Z80.ReadB]	; Get the high byte.
 		mov	zh%1, al
-		mov	edi, [ebp + Z80.CycleIO]
 		RELOAD_AF
 	%endif
 	
@@ -578,19 +568,17 @@ align 16
 	; Reserve space for edx.
 	sub	esp, byte 4
 %endif
-	push	ecx	; Z80.ReadB functions may clobber ecx.
+	push	ecx	; x86 ABI says %ecx is caller-save.
 	
 	SAVE_AF
-	call	[ebp + Z80.ReadB + edi * 4]	; Get the low byte.
+	call	[ebp + Z80.ReadB]	; Get the low byte.
 	mov	ecx, [esp]
 	inc	ecx
-	movzx	edi, ch
-	mov	[esp + 4], al			; store the low byte on the stack to prevent clobbering
-	call	[ebp + Z80.ReadB + edi * 4]	; Get the high byte.
+	mov	[esp + 4], al		; store the low byte on the stack to prevent clobbering
+	call	[ebp + Z80.ReadB]	; Get the high byte.
 	movzx	edx, byte [esp + 4]
-	mov	[esp + 5], al			; store the high byte on the stack to prevent clobbering
-	mov	edi, [ebp + Z80.CycleIO]
-	movzx	edx, word [esp + 4]		; retrieve the word from the stack
+	mov	[esp + 5], al		; store the high byte on the stack to prevent clobbering
+	movzx	edx, word [esp + 4]	; retrieve the word from the stack
 	RELOAD_AF
 	
 	pop	ecx
@@ -642,7 +630,6 @@ align 16
 	
 %%IO:
 %endif
-	mov	[ebp + Z80.CycleIO], edi
 %if %0 > 0
 	movzx	edx, z%1
 %endif
@@ -651,18 +638,15 @@ align 16
 	; Enforce 16-byte stack alignment.
 	sub	esp, byte 8
 %endif
-	push	edx	; Z80.WriteB functions may clobber edx.
-	push	ecx	; Z80.WriteB functions may clobber ecx.
+	push	edx	; x86 ABI says %edx is caller-save.
+	push	ecx	; x86 ABI says %ecx is caller-save.
 	
-	movzx	edi, ch
 	SAVE_AF
-	call	[ebp + Z80.WriteB + edi * 4]	; Write the low byte.
-	mov	ecx, [esp]	; restore ecx
+	call	[ebp + Z80.WriteB]	; Write the low byte.
+	mov	ecx, [esp]		; restore ecx
 	inc	ecx
 	movzx	edx, byte [esp+5]	; get high byte of edx
-	movzx	edi, ch
-	call	[ebp + Z80.WriteB + edi * 4]	; Write the high byte.
-	mov	edi, [ebp + Z80.CycleIO]
+	call	[ebp + Z80.WriteB]	; Write the high byte.
 	RELOAD_AF
 	
 	pop	ecx
@@ -4859,90 +4843,6 @@ PREFIXE_FDCB:
 
 align 16
 
-global SYMF(mdZ80_def_ReadB, 4)
-global SYMF(mdZ80_def_In, 4)
-SYMF(mdZ80_def_ReadB, 4):
-SYMF(mdZ80_def_In, 4):
-	mov al, [SYM(mdZ80_def_mem) + ecx]
-	ret
-
-
-align 16
-
-global SYMF(mdZ80_def_WriteB, 8)
-global SYMF(mdZ80_def_Out, 8)
-SYMF(mdZ80_def_WriteB, 8):
-SYMF(mdZ80_def_Out, 8):
-	mov [SYM(mdZ80_def_mem) + ecx], dl
-	ret
-
-
-%macro ADD_HANDLER 1
-
-align 16
-
-global SYM(z80_Add_%1)
-SYM(z80_Add_%1):
-	
-	push	ecx
-	push	edx
-	push	ebp
-	
-	mov ebp, [esp + 16]		; context
-	mov ecx, [esp + 20]		; low adr
-	mov edx, [esp + 24]		; high adr
-	mov eax, [esp + 28]		; *func
-	
-	and	ecx, 0xFF
-	and	edx, 0xFF
-	
-%ifidn %1, Fetch
-	shl	ecx, 8
-	sub	eax, ecx
-	shr	ecx, 8
-%endif
-	
-	cmp	ecx, edx
-	ja	short %%end
-	
-%%Loop:
-	mov	[ebp + Z80.%1 + ecx * 4], eax
-	inc	ecx
-	cmp	ecx, edx
-	jbe	short %%Loop
-	
-%%end:
-	pop	ebp
-	pop	edx
-	pop	ecx
-	ret
-
-%endmacro
-
-
-; UINT32 z80_Add_ReadB(Z80_CONTEXT *z80, UINT32 low_adr, UINT32 high_adr, Z80_RB *Func)
-;
-; RETURN: 0
-
-	ADD_HANDLER ReadB
-
-
-; UINT32 z80_Add_WriteB(Z80_CONTEXT *z80, UINT32 low_adr, UINT32 high_adr, Z80_WB *Func)
-;
-; RETURN: 0
-
-	ADD_HANDLER WriteB
-
-
-; UINT32 z80_Add_Fetch(Z80_CONTEXT *z80, UINT32 low_adr, UINT32 high_adr, UINT8 *Region)
-;
-; RETURN: 0
-
-	ADD_HANDLER Fetch
-
-
-align 16
-
 ; UINT32 FASTCALL z80_Exec(Z80_CONTEXT *z80, UINT32 odo)
 ; ecx = context pointer
 ; edx = odometer to raise
@@ -4951,7 +4851,7 @@ align 16
 ; 0  -> ok
 ; !0 -> error (status returned) or no cycle to do (-1)
 
-global SYMF(z80_Exec, 8)
+GLOBAL_SYMF(z80_Exec, 8, function)
 SYMF(z80_Exec, 8):
 	sub	edx, [ecx + Z80.CycleCnt]
 	jbe	near z80_Cycles_Already_done
@@ -5098,6 +4998,8 @@ z80_Exec_Interrupt_Happened:
 %endif
 	
 	jmp	dword [OP_Table + edx * 4]
+
+z80_Exec_end:
 
 
 ;*********************
