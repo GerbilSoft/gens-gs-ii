@@ -346,6 +346,36 @@ GensKey_t KeyHandlerQt::QKeyEventToKeyVal(QKeyEvent *event)
 		0, 0, 0, 0, 0, 0, 0, 0
 	};
 	
+	if (event->modifiers() & Qt::KeypadModifier)
+	{
+		// Numeric keypad key.
+		// TODO: Optimize this to use lookup tables instead of switch/case.
+		switch (event->key())
+		{
+			case Qt::Key_0: case Qt::Key_Insert:	return KEYV_KP0;
+			case Qt::Key_1: case Qt::Key_End:	return KEYV_KP1;
+			case Qt::Key_2: case Qt::Key_Down:	return KEYV_KP2;
+			case Qt::Key_3: case Qt::Key_PageDown:	return KEYV_KP3;
+			case Qt::Key_4: case Qt::Key_Left:	return KEYV_KP4;
+			// TODO: Qt::Key_Clear maps to '5' with numlock off on Linux.
+			// Verify how this functions on Mac OS X.
+			case Qt::Key_5: case Qt::Key_Clear:	return KEYV_KP5;
+			case Qt::Key_6: case Qt::Key_Right:	return KEYV_KP6;
+			case Qt::Key_7: case Qt::Key_Home:	return KEYV_KP7;
+			case Qt::Key_8: case Qt::Key_Up:	return KEYV_KP8;
+			case Qt::Key_9: case Qt::Key_PageUp:	return KEYV_KP9;
+			case Qt::Key_Period: case Qt::Key_Delete: return KEYV_KP_PERIOD;
+			case Qt::Key_Slash:			return KEYV_KP_DIVIDE;
+			case Qt::Key_Asterisk:			return KEYV_KP_MULTIPLY;
+			case Qt::Key_Minus:			return KEYV_KP_MINUS;
+			case Qt::Key_Plus:			return KEYV_KP_PLUS;
+			case Qt::Key_Enter:			return KEYV_KP_ENTER;
+			// TODO: Verify on Mac OS X.
+			case Qt::Key_Equal:			return KEYV_KP_EQUALS;
+			default:	break;
+		}
+	}
+	
 	int key = event->key();
 	switch (key & ~0x7F)
 	{
@@ -474,6 +504,9 @@ int KeyHandlerQt::KeyValMToQtKey(GensKey_t keyM)
 		return 0;
 	
 	// Get the modifiers first.
+	// TODO: Convert GensKeys with numeric keypad modifier.
+	// (There are dedicated key values for numpad keys,
+	// but Qt uses a modifier so it may get confused.)
 	int qtKey = (keyM & 0x1E00) << 16;
 	
 	// Determine the key.
@@ -522,14 +555,19 @@ int KeyHandlerQt::KeyValMToQtKey(GensKey_t keyM)
 		Qt::Key_Bar, Qt::Key_BraceRight, Qt::Key_AsciiTilde, Qt::Key_Delete,
 		
 		// 0x80: Numeric keypad.
-		// TODO: Numeric keypad modifier; verify division and multiply.
-		Qt::Key_0, Qt::Key_1, Qt::Key_2, Qt::Key_3,
-		Qt::Key_4, Qt::Key_5, Qt::Key_6, Qt::Key_7,
-		Qt::Key_8, Qt::Key_9, Qt::Key_Period, Qt::Key_division,
-		Qt::Key_multiply, Qt::Key_Minus, Qt::Key_Plus, Qt::Key_Enter,
+		// TODO: Verify numeric keypad modifier.
+		(Qt::KeypadModifier | Qt::Key_0), (Qt::KeypadModifier | Qt::Key_1),
+		(Qt::KeypadModifier | Qt::Key_2), (Qt::KeypadModifier | Qt::Key_3),
+		(Qt::KeypadModifier | Qt::Key_4), (Qt::KeypadModifier | Qt::Key_5),
+		(Qt::KeypadModifier | Qt::Key_6), (Qt::KeypadModifier | Qt::Key_7),
+		(Qt::KeypadModifier | Qt::Key_8), (Qt::KeypadModifier | Qt::Key_9),
+		(Qt::KeypadModifier | Qt::Key_Period), (Qt::KeypadModifier | Qt::Key_Slash),
+		(Qt::KeypadModifier | Qt::Key_Asterisk), (Qt::KeypadModifier | Qt::Key_Minus),
+		(Qt::KeypadModifier | Qt::Key_Plus), (Qt::KeypadModifier | Qt::Key_Enter),
 		
 		// 0x90
-		Qt::Key_Equal, Qt::Key_Up, Qt::Key_Down, Qt::Key_Right,
+		(Qt::KeypadModifier | Qt::Key_Equal), Qt::Key_Up,
+		Qt::Key_Down, Qt::Key_Right,
 		Qt::Key_Left, Qt::Key_Insert, Qt::Key_Home, Qt::Key_End,
 		Qt::Key_PageUp, Qt::Key_PageDown, 0, 0,
 		0, 0, 0, 0,
