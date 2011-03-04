@@ -47,8 +47,8 @@ using std::auto_ptr;
 // libgens: RAR decompressor
 #include "libgens/Decompressor/DcRar.hpp"
 
-// libgens: ROM class.
-#include "libgens/Rom.hpp"
+// EmuManager is needed for region code strings.
+#include "EmuManager.hpp"
 
 namespace GensQt4
 {
@@ -345,11 +345,10 @@ void GeneralConfigWindow::reload(void)
 	uint16_t regionCodeOrder = gqt4_config->regionCodeOrder();
 	for (int i = 0; i < 4; i++, regionCodeOrder >>= 4)
 	{
-		// TODO: Translate RegionCodeStrMD somehow.
-		const char *str = LibGens::Rom::RegionCodeStrMD(regionCodeOrder & 0xF);
-		if (str)
+		const QString str = EmuManager::LgRegionCodeStrMD(regionCodeOrder & 0xF);
+		if (!str.isEmpty())
 		{
-			QListWidgetItem *item = new QListWidgetItem(tr(str));
+			QListWidgetItem *item = new QListWidgetItem(str);
 			item->setData(Qt::UserRole, (regionCodeOrder & 0xF));
 			lstRegionDetect->insertItem(0, item);
 		}

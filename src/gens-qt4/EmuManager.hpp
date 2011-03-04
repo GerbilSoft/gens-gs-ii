@@ -92,6 +92,28 @@ class EmuManager : public QObject
 				return LibGens::Rom::MDP_SYSTEM_UNKNOWN;
 			return m_rom->sysId();
 		}
+		
+		/**
+		 * LgRegionCodeStr(): Get a string identifying a given LibGens region code.
+		 * @param region Region code.
+		 * @return Region code string, or empty string on error.
+		 */
+		static QString LgRegionCodeStr(LibGens::SysVersion::RegionCode_t region);
+		
+		/**
+		 * LgRegionCodeStr(): Get a string identifying a given GensConfig region code.
+		 * TODO: Combine ConfRegionCode_t with RegionCode_t.
+		 * @param region Region code.
+		 * @return Region code string, or empty string on error.
+		 */
+		static QString GcRegionCodeStr(GensConfig::ConfRegionCode_t region);
+		
+		/**
+		 * LgRegionCodeStrMD(): Get a string identifying a given region code. (MD hex code)
+		 * @param region Region code.
+		 * @return Region code string, or empty string on error.
+		 */
+		static QString LgRegionCodeStrMD(int region);
 	
 	signals:
 		void updateFps(double fps);

@@ -300,12 +300,11 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	if (gqt4_config->regionCode() == GensConfig::CONFREGION_AUTODETECT)
 	{
 		// Print the auto-detected region.
-		const char *region_cstr = LibGens::Rom::RegionCodeStr(lg_region);
-		if (region_cstr)
+		const QString detect_str = LgRegionCodeStr(lg_region);
+		if (!detect_str.isEmpty())
 		{
-			const QString auto_QStr = tr("ROM region detected as %1.");
-			const QString region_QStr = tr(region_cstr);
-			emit osdPrintMsg(1500, auto_QStr.arg(region_QStr));
+			const QString auto_str = tr("ROM region detected as %1.");
+			emit osdPrintMsg(1500, auto_str.arg(detect_str));
 		}
 	}
 	
@@ -608,6 +607,71 @@ QString EmuManager::sysName(void)
 		default:
 			return tr("Unknown");
 	}
+}
+
+
+/**
+ * LgRegionCodeStr(): Get a string identifying a given LibGens region code.
+ * @param region Region code. (1, 2, 4, 8)
+ * @return Region code string, or NULL on error.
+ */
+QString EmuManager::LgRegionCodeStr(LibGens::SysVersion::RegionCode_t region)
+{
+	switch (region)
+	{
+		case LibGens::SysVersion::REGION_JP_NTSC:	return tr("Japan (NTSC)");
+		case LibGens::SysVersion::REGION_ASIA_PAL:	return tr("Asia (PAL)");
+		case LibGens::SysVersion::REGION_US_NTSC:	return tr("USA (NTSC)");
+		case LibGens::SysVersion::REGION_EU_PAL:	return tr("Europe (PAL)");
+		default:	return QString();
+	}
+	
+	// Should not get here...
+	return QString();
+}
+
+
+/**
+ * LgRegionCodeStr(): Get a string identifying a given GensConfig region code.
+ * TODO: Combine ConfRegionCode_t with RegionCode_t.
+ * @param region Region code.
+ * @return Region code string, or empty string on error.
+ */
+QString EmuManager::GcRegionCodeStr(GensConfig::ConfRegionCode_t region)
+{
+	switch (region)
+	{
+		case GensConfig::CONFREGION_AUTODETECT:	return tr("Auto-Detect");
+		case GensConfig::CONFREGION_JP_NTSC:	return tr("Japan (NTSC)");
+		case GensConfig::CONFREGION_ASIA_PAL:	return tr("Asia (PAL)");
+		case GensConfig::CONFREGION_US_NTSC:	return tr("USA (NTSC)");
+		case GensConfig::CONFREGION_EU_PAL:	return tr("Europe (PAL)");
+		default:	return QString();
+	}
+	
+	// Should not get here...
+	return QString();
+}
+
+
+/**
+ * LgRegionCodeStrMD(): Get a string identifying a given region code. (MD hex code)
+ * @param region Region. (1, 2, 4, 8)
+ * @return Region code string, or NULL on error.
+ */
+QString EmuManager::LgRegionCodeStrMD(int region)
+{
+	switch (region & 0xF)
+	{
+		case 0x1:	return tr("Japan (NTSC)");
+		case 0x2:	return tr("Asia (PAL)");
+		case 0x4:	return tr("USA (NTSC)");
+		case 0x8:	return tr("Europe (PAL)");
+		default:	return QString();
+	}
+	
+	// Should not get here...
+	return QString();
 }
 
 

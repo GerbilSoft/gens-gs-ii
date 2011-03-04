@@ -1062,27 +1062,7 @@ void EmuManager::doRegionCode(GensConfig::ConfRegionCode_t region)
 	// If it isn't, don't do anything.
 	
 	// Print a message to the OSD.
-	QString region_str;
-	switch (region)
-	{
-		case GensConfig::CONFREGION_AUTODETECT:
-		default:
-			region_str = tr("Auto-Detect");
-			break;
-		case GensConfig::CONFREGION_JP_NTSC:
-			region_str = tr("Japan (NTSC)");
-			break;
-		case GensConfig::CONFREGION_ASIA_PAL:
-			region_str = tr("Asia (PAL)");
-			break;
-		case GensConfig::CONFREGION_US_NTSC:
-			region_str = tr("USA (NTSC)");
-			break;
-		case GensConfig::CONFREGION_EU_PAL:
-			region_str = tr("Europe (PAL)");
-			break;
-	}
-	
+	const QString region_str = GcRegionCodeStr(region);
 	const QString str = tr("System region set to %1.");
 	emit osdPrintMsg(1500, str.arg(region_str));
 	
@@ -1097,12 +1077,11 @@ void EmuManager::doRegionCode(GensConfig::ConfRegionCode_t region)
 		if (region == GensConfig::CONFREGION_AUTODETECT)
 		{
 			// Print the auto-detected region.
-			const char *region_cstr = LibGens::Rom::RegionCodeStr(lg_region);
-			if (region_cstr)
+			const QString detect_str = LgRegionCodeStr(lg_region);
+			if (!detect_str.isEmpty())
 			{
-				const QString auto_QStr = tr("ROM region detected as %1.");
-				const QString region_QStr = tr(region_cstr);
-				emit osdPrintMsg(1500, auto_QStr.arg(region_QStr));
+				const QString auto_str = tr("ROM region detected as %1.");
+				emit osdPrintMsg(1500, auto_str.arg(detect_str));
 			}
 		}
 	}

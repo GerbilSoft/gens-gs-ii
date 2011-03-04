@@ -678,48 +678,4 @@ int Rom::detectRegionCodeMD(const char countryCodes[16])
 	return code;
 }
 
-
-/**
- * RegionCodeStr(): Get a string identifying a given region code.
- * NOTE: This function returns an ASCII string, suitable for translation.
- * @param region Region code. (1, 2, 4, 8)
- * @return Region code string, or NULL on error.
- */
-const char *Rom::RegionCodeStr(SysVersion::RegionCode_t region)
-{
-	switch (region)
-	{
-		case SysVersion::REGION_JP_NTSC:	return "Japan (NTSC)";
-		case SysVersion::REGION_ASIA_PAL:	return "Asia (PAL)";
-		case SysVersion::REGION_US_NTSC:	return "USA (NTSC)";
-		case SysVersion::REGION_EU_PAL:		return "Europe (PAL)";
-		default:	return NULL;
-	}
-	
-	// Should not get here...
-	return NULL;
-}
-
-
-/**
- * RegionCodeStrMD(): Get a string identifying a given region code. (MD hex code)
- * NOTE: This function returns an ASCII string, suitable for translation.
- * @param region Region. (1, 2, 4, 8)
- * @return Region code string, or NULL on error.
- */
-const char *Rom::RegionCodeStrMD(int region)
-{
-	switch (region & 0xF)
-	{
-		case 0x1:	return "Japan (NTSC)";
-		case 0x2:	return "Asia (PAL)";
-		case 0x4:	return "USA (NTSC)";
-		case 0x8:	return "Europe (PAL)";
-		default:	return NULL;
-	}
-	
-	// Should not get here...
-	return NULL;
-}
-
 }
