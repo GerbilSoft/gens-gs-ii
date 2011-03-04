@@ -113,7 +113,9 @@ int Init(void)
 		"\n");
 	
 	// GNU GPLv2 notice.
-	// Reference: http://www.gnu.org/licenses/gpl-howto.html
+	// References:
+	// * http://www.gnu.org/licenses/gpl-howto.html
+	// * http://web.archive.org/web/20070121002445/http://www.gnu.org/licenses/gpl-howto.html
 	fprintf(stderr,
 		"This program is free software; you can redistribute it and/or modify\n"
 		"it under the terms of the GNU General Public License as published by\n"
