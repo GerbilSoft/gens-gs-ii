@@ -94,6 +94,11 @@ const GensGS_credits_t GensGS_credits[] =
 	{"WahCade Integration",		"Zombie Ryushu"},
 	{"-", NULL},
 	
+	{"Translations",		NULL},
+	{"*en_GB",			"Overlord"},
+	{"*ja_JP",			"Scarred Sun"},
+	{"-", NULL},
+	
 	{"Software Testing",		"AamirM"},
 	{NULL,				"Baffo32"},
 	{NULL,				"Biafra Republic"},
