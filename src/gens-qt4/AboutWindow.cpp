@@ -217,6 +217,7 @@ void AboutWindow::initAboutWindowText(void)
 	// TODO: Use QString instead of stringstream?
 	stringstream ss_credits;
 	const GensGS_credits_t *p_credits = &GensGS_credits[0];
+	static const char *s_indent = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 	for (; p_credits->credit_title || p_credits->credit_name; p_credits++)
 	{
 		if (p_credits->credit_title)
@@ -228,6 +229,13 @@ void AboutWindow::initAboutWindowText(void)
 				ss_credits << "<br/>\n";
 				continue;
 			}
+			else if (p_credits->credit_title[0] == '*')
+			{
+				// Subtitle. (TODO: UTF-8 bullet character.)
+				// TODO: Translate language translation subtitles?
+				ss_credits << s_indent << "* " <<
+					&p_credits->credit_title[1] << ": ";
+			}
 			else
 			{
 				// Title is not "-". Print it.
@@ -238,8 +246,16 @@ void AboutWindow::initAboutWindowText(void)
 		if (p_credits->credit_name)
 		{
 			// Name specified.
-			ss_credits << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-				   << p_credits->credit_name << "<br/>\n";
+			if (!p_credits->credit_title ||
+			    p_credits->credit_title[0] != '*')
+			{
+				// No subtitle specified.
+				// Indent the name.
+				ss_credits << s_indent;
+			}
+			
+			// Append the name to the credits.
+			ss_credits << p_credits->credit_name << "<br/>\n";
 		}
 	}
 	
