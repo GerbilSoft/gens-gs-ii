@@ -29,6 +29,8 @@
 // Z80 flag and state definitions.
 #include "mdZ80_flags.h"
 
+// Default instruction fetch area. (Consists of HALT opcodes.)
+static uint8_t mdZ80_insn_fetch[256];
 
 /**
  * mdZ80_init(): Initialize a Z80 context.
@@ -39,9 +41,13 @@ void mdZ80_init(Z80_CONTEXT *z80)
 	// Clear the entire Z80 struct.
 	memset(z80, 0x00, sizeof(Z80_CONTEXT));
 	
-	// Clear Fetch[].
-	// NOTE: Fetch[] must be initialized by the main emulator before use!
-	memset(z80->Fetch, 0x00, sizeof(z80->Fetch));
+	// Initialize the default instruction fetch area.
+	for (size_t i = 0; i < sizeof(mdZ80_insn_fetch); i++)
+		mdZ80_insn_fetch[i] = 0x76;	// HLT
+	
+	// Initialize Fetch[].
+	for (size_t i = 0; i < sizeof(z80->Fetch); i++)
+		z80->Fetch[i] = (mdZ80_insn_fetch - (i * 256));
 	
 	// Set up the default memory and I/O handlers.
 	z80->ReadB = mdZ80_def_ReadB;
