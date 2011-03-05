@@ -268,21 +268,17 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 		return -2;
 	}
 	
-	// Save the ROM as m_rom.
-	m_rom = rom;
-	
 	// Make sure the ROM is supported.
 	const QChar chrBullet(0x2022);  // U+2022: BULLET
 	const QChar chrNewline(L'\n');
 	const QChar chrSpace(L' ');
 	
 	// Check the system ID.
-	if (m_rom->sysId() != LibGens::Rom::MDP_SYSTEM_MD)
+	if (rom->sysId() != LibGens::Rom::MDP_SYSTEM_MD)
 	{
 		// Only MD ROM images are supported.
-		const LibGens::Rom::MDP_SYSTEM_ID errSysId = m_rom->sysId();
-		delete m_rom;
-		m_rom = NULL;
+		const LibGens::Rom::MDP_SYSTEM_ID errSysId = rom->sysId();
+		delete rom;
 		
 		// TODO: Specify GensWindow as parent window.
 		// TODO: Move this out of EmuManager and simply use return codes?
@@ -306,12 +302,11 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	}
 	
 	// Check the ROM format.
-	if (m_rom->romFormat() != LibGens::Rom::RFMT_BINARY)
+	if (rom->romFormat() != LibGens::Rom::RFMT_BINARY)
 	{
-		// Only binary ROM images are supported.
-		LibGens::Rom::RomFormat errRomFormat = m_rom->romFormat();
-		delete m_rom;
-		m_rom = NULL;
+		// Only binary ROM images are supported.r
+		LibGens::Rom::RomFormat errRomFormat = rom->romFormat();
+		delete rom;
 		
 		// TODO: Split this into another function?
 		QString romFormat;
@@ -385,8 +380,8 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	
 	// Create a new MD emulation context.
 	delete gqt4_emuContext;
-	gqt4_emuContext = new LibGens::EmuMD(m_rom, lg_region);
-	m_rom->close();	// TODO: Let EmuMD handle this...
+	gqt4_emuContext = new LibGens::EmuMD(rom, lg_region);
+	rom->close();	// TODO: Let EmuMD handle this...
 	
 	if (!gqt4_emuContext->isRomOpened())
 	{
@@ -396,10 +391,12 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 		fprintf(stderr, "Error: Initialization of gqt4_emuContext failed. (TODO: Error code.)\n");
 		delete gqt4_emuContext;
 		gqt4_emuContext = NULL;
-		delete m_rom;
-		m_rom = NULL;
+		delete rom;
 		return 5;
 	}
+	
+	// Save the Rom class pointer as m_rom.
+	m_rom = rom;
 	
 	// m_rom isn't deleted, since keeping it around
 	// indicates that a game is running.
