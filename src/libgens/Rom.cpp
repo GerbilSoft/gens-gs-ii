@@ -301,7 +301,7 @@ Rom::MDP_SYSTEM_ID Rom::DetectSystem(const uint8_t *header, size_t header_size, 
 		// SMD format check.
 		if (header[0x0300] == 0xF9)
 		{
-			if ((header[0x0280] == '3' && header[0x0281] == 'X') ||
+			if ((header[0x0282] == '3' && header[0x0283] == 'X') ||
 			    (header[0x0407] == 'A' && header[0x0408] == 'S'))
 			{
 				// 32X ROM.
