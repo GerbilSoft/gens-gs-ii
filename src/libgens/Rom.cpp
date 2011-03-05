@@ -271,7 +271,17 @@ Rom::RomFormat Rom::DetectFormat(const uint8_t *header, size_t header_size)
 	}
 	
 	/** MGD-format (.MD) ROM check. */
-	// TODO
+	if (header_size >= 0x100)
+	{
+		// MGD format is interleaved without blocks.
+		// The odd bytes in the MD header are located at 0x80.
+		if (header[0x80] == 'E' && header[0x81] == 'A')
+		{
+			// Odd bytes of "SEGA" found in the ROM header.
+			// This is probably an MGD ROM.
+			return RFMT_MGD;
+		}
+	}
 	
 	// Assuming plain binary ROM.
 	return RFMT_BINARY;
@@ -303,6 +313,24 @@ Rom::MDP_SYSTEM_ID Rom::DetectSystem(const uint8_t *header, size_t header_size, 
 		{
 			if ((header[0x0282] == '3' && header[0x0283] == 'X') ||
 			    (header[0x0407] == 'A' && header[0x0408] == 'S'))
+			{
+				// 32X ROM.
+				return MDP_SYSTEM_32X;
+			}
+		}
+		else
+		{
+			// Assume MD.
+			return MDP_SYSTEM_MD;
+		}
+	}
+	else if (fmt == RFMT_MGD && header_size >= 0x200)
+	{
+		// MGD format check.
+		if (header[0x100] == 0xF9)
+		{
+			if ((header[0x0082] == '3' && header[0x0083] == 'X') ||
+			    (header[0x0207] == 'A' && header[0x0208] == 'S'))
 			{
 				// 32X ROM.
 				return MDP_SYSTEM_32X;
