@@ -74,8 +74,11 @@ class EmuManager : public QObject
 			{ return m_saveSlot; }
 		
 		// ROM information.
-		QString romName(void);
-		QString sysName(void);
+		QString romName(void);	// Active ROM name.
+		QString sysName(void);	// System name for the active ROM, based on ROM region.
+		static QString SysName(LibGens::Rom::MDP_SYSTEM_ID sysId,
+					LibGens::SysVersion::RegionCode_t region);
+		static QString SysName_l(LibGens::Rom::MDP_SYSTEM_ID sysId);
 		
 		/** Rom class passthrough functions. **/
 		

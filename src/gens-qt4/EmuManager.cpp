@@ -526,22 +526,31 @@ QString EmuManager::romName(void)
 
 
 /**
- * sysName(): Get the system name.
- * @return System name, or empty string if no ROM is loaded.
+ * sysName(): Get the system name for the active ROM, based on ROM region.
+ * @return System name, or empty string if unknown or no ROM is loaded.
  */
 QString EmuManager::sysName(void)
 {
 	if (!m_rom)
 		return QString();
 	
-	// Check the system ID.
-	const LibGens::SysVersion &region = LibGens::M68K_Mem::ms_SysVersion;
-	
-	switch (m_rom->sysId())
+	return SysName(m_rom->sysId(), LibGens::M68K_Mem::ms_SysVersion.region());
+}
+
+
+/**
+ * SysName(): Get the system name for the specified system ID and region.
+ * @param sysID System ID.
+ * @param region Region.
+ * @return System name, or empty string if unknown.
+ */
+QString EmuManager::SysName(LibGens::Rom::MDP_SYSTEM_ID sysId, LibGens::SysVersion::RegionCode_t region)
+{
+	switch (sysId)
 	{
 		case LibGens::Rom::MDP_SYSTEM_MD:
 			// Genesis / Mega Drive.
-			if (region.region() == LibGens::SysVersion::REGION_US_NTSC)
+			if (region == LibGens::SysVersion::REGION_US_NTSC)
 			{
 				//: MD ROM region is US/NTSC. System name should be the equivalent of "Genesis".
 				return tr("Genesis", "rom-region");
@@ -553,7 +562,7 @@ QString EmuManager::sysName(void)
 			}
 		
 		case LibGens::Rom::MDP_SYSTEM_MCD:
-			if (region.region() == LibGens::SysVersion::REGION_US_NTSC)
+			if (region == LibGens::SysVersion::REGION_US_NTSC)
 			{
 				//: MCD disc region is US/NTSC. System name should be the equivalent of "Sega CD".
 				return tr("Sega CD", "rom-region");
@@ -565,7 +574,7 @@ QString EmuManager::sysName(void)
 			}
 		
 		case LibGens::Rom::MDP_SYSTEM_32X:
-			switch (region.region())
+			switch (region)
 			{
 				default:
 				case LibGens::SysVersion::REGION_US_NTSC:
@@ -581,7 +590,7 @@ QString EmuManager::sysName(void)
 			}
 		
 		case LibGens::Rom::MDP_SYSTEM_MCD32X:
-			if (region.region() == LibGens::SysVersion::REGION_US_NTSC)
+			if (region == LibGens::SysVersion::REGION_US_NTSC)
 			{
 				//: Sega CD 32X disc region is US/NTSC. System name should be the equivalent of "Sega CD 32X".
 				return tr("Sega CD 32X", "rom-region");
@@ -593,20 +602,77 @@ QString EmuManager::sysName(void)
 			}
 		
 		case LibGens::Rom::MDP_SYSTEM_SMS:
-			return tr("Master System");
+			//: Master System. (No localized names yet...)
+			return tr("Master System", "rom-region");
 		
 		case LibGens::Rom::MDP_SYSTEM_GG:
-			return tr("Game Gear");
+			//: Game Gear. (No localized names yet...)
+			return tr("Game Gear", "rom-region");
 		
 		case LibGens::Rom::MDP_SYSTEM_SG1000:
-			return tr("SG-1000");
+			//: SG-1000. (No localized names yet...)
+			return tr("SG-1000", "rom-region");
 		
 		case LibGens::Rom::MDP_SYSTEM_PICO:
-			return tr("Pico");
+			//: Pico. (No localized names yet...)
+			return tr("Pico", "rom-region");
 		
 		default:
-			return tr("Unknown");
+			return QString();
 	}
+	
+	// Should not get here...
+	return QString();
+}
+
+
+/**
+ * SysName_l(): Get the localized system name for the specified system ID.
+ * @param sysID System ID.
+ * @return Localized system name, or empty string if unknown.
+ */
+QString EmuManager::SysName_l(LibGens::Rom::MDP_SYSTEM_ID sysId)
+{
+	switch (sysId)
+	{
+		case LibGens::Rom::MDP_SYSTEM_MD:
+			//: Localized name of Sega Genesis.
+			return tr("Genesis", "local-region");
+		
+		case LibGens::Rom::MDP_SYSTEM_MCD:
+			//: Localized name of Sega CD.
+			return tr("Sega CD", "local-region");
+		
+		case LibGens::Rom::MDP_SYSTEM_32X:
+			//: Localized name of Sega 32X.
+			return tr("Sega 32X", "local-region");
+		
+		case LibGens::Rom::MDP_SYSTEM_MCD32X:
+			//: Localized name of Sega CD 32X.
+			return tr("Sega CD 32X", "local-region");
+		
+		case LibGens::Rom::MDP_SYSTEM_SMS:
+			//: Localized name of Master System.
+			return tr("Master System", "local-region");
+		
+		case LibGens::Rom::MDP_SYSTEM_GG:
+			//: Localized name of Game Gear.
+			return tr("Game Gear", "local-region");
+		
+		case LibGens::Rom::MDP_SYSTEM_SG1000:
+			//: Localized name of SG-1000.
+			return tr("SG-1000", "local-region");
+		
+		case LibGens::Rom::MDP_SYSTEM_PICO:
+			//: Localized name of Pico.
+			return tr("Pico", "local-region");
+		
+		default:
+			return QString();
+	}
+	
+	// Should not get here...
+	return QString();
 }
 
 
