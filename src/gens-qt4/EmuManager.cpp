@@ -327,7 +327,7 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 				romFormat = tr("Super Magic Drive (split)", "rom-format");
 				break;
 			case LibGens::Rom::RFMT_MGD:
-				romFormat = tr("Multi-Game-Doctor", "rom-format");
+				romFormat = tr("Multi Game Doctor", "rom-format");
 				break;
 			case LibGens::Rom::RFMT_CD_CUE:
 				romFormat = tr("CD-ROM cue sheet", "rom-format");
