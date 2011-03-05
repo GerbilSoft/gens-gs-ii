@@ -302,7 +302,7 @@ const QString CtrlConfigWindow::GetPortName(int port)
 	}
 	else if (port >= CTRL_CFG_PORT_4WPA && port < (CTRL_CFG_PORT_4WPA+4))
 	{
-		return tr("EA 4-Way Play, Port %1")
+		return tr("4-Way Play, Port %1")
 			.arg(QChar(L'A' + (port - CTRL_CFG_PORT_4WPA)));
 	}
 	
