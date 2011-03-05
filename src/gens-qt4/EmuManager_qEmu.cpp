@@ -1085,6 +1085,9 @@ void EmuManager::doRegionCode(GensConfig::ConfRegionCode_t region)
 			}
 		}
 	}
+	
+	// Update the system name in the GensWindow title bar.
+	emit stateChanged();
 }
 
 }
