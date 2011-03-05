@@ -383,21 +383,30 @@ QString AboutWindow::GetDebugInfo(void)
 	//: CPU flags are extra features found in a CPU, such as SSE.
 	sDebugInfo += tr("CPU flags") + QLatin1String(": ");
 #if defined(__i386__) || defined(__amd64__)
-	const char *CpuFlagNames[11] =
+	static const char *CpuFlagNames[11] =
 	{
 		"MMX", "MMXEXT", "3DNow!", "3DNow! EXT",
 		"SSE", "SSE2", "SSE3", "SSSE3",
 		"SSE4.1", "SSE4.2", "SSE4a"
 	};
-	unsigned int cnt = 0;
-	for (unsigned int i = 0; i < (sizeof(CpuFlagNames)/sizeof(CpuFlagNames[0])); i++)
+	
+	if (CPU_Flags == 0)
 	{
-		if (CPU_Flags & (1 << i))
+		//: Used to indicate no special CPU features were found.
+		sDebugInfo += tr("(none)");
+	}
+	else
+	{
+		unsigned int cnt = 0;
+		for (unsigned int i = 0; i < (sizeof(CpuFlagNames)/sizeof(CpuFlagNames[0])); i++)
 		{
-			if (cnt != 0)
-				sDebugInfo += QLatin1String(", ");
-			sDebugInfo += QLatin1String(CpuFlagNames[i]);
-			cnt++;
+			if (CPU_Flags & (1 << i))
+			{
+				if (cnt != 0)
+					sDebugInfo += QLatin1String(", ");
+				sDebugInfo += QLatin1String(CpuFlagNames[i]);
+				cnt++;
+			}
 		}
 	}
 #else
