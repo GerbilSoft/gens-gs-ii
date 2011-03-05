@@ -354,7 +354,7 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 				//: A ROM image was selected in a format that Gens/GS II does not currently support. (error title)
 				tr("Unsupported ROM Format"),
 				//: A ROM image was selected in a format that Gens/GS II does not currently support. (error description)
-				tr("The selected ROM format is not currently supported by Gens/GS II.") +
+				tr("The selected ROM image is in a format that is not currently supported by Gens/GS II.") +
 				chrNewline + chrNewline +
 				//: Indicate what format the ROM image is in.
 				tr("Selected ROM image format: %1").arg(romFormat) +
