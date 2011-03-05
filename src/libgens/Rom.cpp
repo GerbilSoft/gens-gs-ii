@@ -578,7 +578,13 @@ int Rom::loadRom(void *buf, size_t siz)
 	if (siz == 0 || siz < m_romSize)
 	{
 		// ROM buffer isn't large enough for the ROM image.
-		return -2;
+		return -4;
+	}
+	
+	if (m_romFormat != RFMT_BINARY)
+	{
+		// Unsupported ROM format.
+		return -5;
 	}
 	
 	// Load the ROM image.
