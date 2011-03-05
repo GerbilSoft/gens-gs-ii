@@ -56,6 +56,7 @@
 #include <QtCore/QTimer>
 #include <QtGui/QApplication>
 #include <QtGui/QFileDialog>
+#include <QtGui/QMessageBox>
 
 // Qt key handler.
 #include "Input/KeyHandlerQt.hpp"
@@ -270,25 +271,99 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	// Save the ROM as m_rom.
 	m_rom = rom;
 	
-	// Print ROM information.
-	// TODO: OSD, or remove this entirely.
-	printf("ROM information: format == %d, system == %d\n", m_rom->romFormat(), m_rom->sysId());
+	// Make sure the ROM is supported.
+	const QChar chrBullet(0x2022);  // U+2022: BULLET
+	const QChar chrNewline(L'\n');
+	const QChar chrSpace(L' ');
 	
+	// Check the system ID.
 	if (m_rom->sysId() != LibGens::Rom::MDP_SYSTEM_MD)
 	{
 		// Only MD ROM images are supported.
-		fprintf(stderr, "ERROR: Only Sega Genesis / Mega Drive ROM images are supported right now.\n");
+		const LibGens::Rom::MDP_SYSTEM_ID errSysId = m_rom->sysId();
 		delete m_rom;
 		m_rom = NULL;
+		
+		// TODO: Specify GensWindow as parent window.
+		// TODO: Move this out of EmuManager and simply use return codes?
+		// (how would we indicate what system the ROM is for...)
+		QMessageBox::critical(NULL,
+				//: A ROM image was selected for a system that Gens/GS II does not currently support. (error title)
+				tr("Unsupported System"),
+				//: A ROM image was selected for a system that Gens/GS II does not currently support. (error description)
+				tr("The selected ROM image is designed for a system that"
+				   " is not currently supported by Gens/GS II.") +
+				chrNewline + chrNewline +
+				//: Indicate what system the ROM image is for.
+				tr("Selected ROM's system: %1").arg(SysName_l(errSysId)) +
+				chrNewline + chrNewline +
+				//: List of systems that Gens/GS II currently supports.
+				tr("Supported systems:") + chrNewline +
+				chrBullet + chrSpace + SysName_l(LibGens::Rom::MDP_SYSTEM_MD)
+				);
+		
 		return 3;
 	}
 	
+	// Check the ROM format.
 	if (m_rom->romFormat() != LibGens::Rom::RFMT_BINARY)
 	{
 		// Only binary ROM images are supported.
-		fprintf(stderr, "ERROR: Only binary ROM images are supported right now.\n");
+		LibGens::Rom::RomFormat errRomFormat = m_rom->romFormat();
 		delete m_rom;
 		m_rom = NULL;
+		
+		// TODO: Split this into another function?
+		QString romFormat;
+		switch (errRomFormat)
+		{
+			case LibGens::Rom::RFMT_BINARY:
+				romFormat = tr("Binary", "rom-format");
+				break;
+			case LibGens::Rom::RFMT_SMD:
+				romFormat = tr("Super Magic Drive", "rom-format");
+				break;
+			case LibGens::Rom::RFMT_SMD_SPLIT:
+				romFormat = tr("Super Magic Drive (split)", "rom-format");
+				break;
+			case LibGens::Rom::RFMT_MGD:
+				romFormat = tr("Multi-Game-Doctor", "rom-format");
+				break;
+			case LibGens::Rom::RFMT_CD_CUE:
+				romFormat = tr("CD-ROM cue sheet", "rom-format");
+				break;
+			case LibGens::Rom::RFMT_CD_ISO_2048:
+			case LibGens::Rom::RFMT_CD_ISO_2352:
+				romFormat = tr("ISO-9660 CD-ROM image (%1-byte sectors)", "rom-format")
+						.arg(m_rom->romFormat() == LibGens::Rom::RFMT_CD_ISO_2048 ? 2048 : 2352);
+				break;
+			case LibGens::Rom::RFMT_CD_BIN_2048:
+			case LibGens::Rom::RFMT_CD_BIN_2352:
+				romFormat = tr("Raw CD-ROM image (%1-byte sectors)", "rom-format")
+						.arg(m_rom->romFormat() == LibGens::Rom::RFMT_CD_BIN_2048 ? 2048 : 2352);
+				break;
+			default:
+				romFormat = tr("Unknown", "rom-format");
+				break;
+		}
+		
+		// TODO: Specify GensWindow as parent window.
+		// TODO: Move this out of EmuManager and simply use return codes?
+		// (how would we indicate what format the ROM was in...)
+		QMessageBox::critical(NULL,
+				//: A ROM image was selected in a format that Gens/GS II does not currently support. (error title)
+				tr("Unsupported ROM Format"),
+				//: A ROM image was selected in a format that Gens/GS II does not currently support. (error description)
+				tr("The selected ROM format is not currently supported by Gens/GS II.") +
+				chrNewline + chrNewline +
+				//: Indicate what format the ROM image is in.
+				tr("Selected ROM image format: %1").arg(romFormat) +
+				chrNewline + chrNewline +
+				//: List of ROM formats that Gens/GS II currently supports.
+				tr("Supported ROM formats:") + chrNewline +
+				chrBullet + chrSpace + tr("Binary", "rom-format")
+				);
+		
 		return 4;
 	}
 	
