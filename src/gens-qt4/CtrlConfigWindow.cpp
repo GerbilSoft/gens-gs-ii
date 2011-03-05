@@ -231,7 +231,6 @@ void CtrlConfigWindow::keyPressEvent(QKeyEvent *event)
 
 /**
  * GetShortDeviceName(): Get the short name of an I/O device.
- * TODO: Use IoBase::devName()?
  * @param devType Device type.
  * @return Short device name.
  */
@@ -258,7 +257,6 @@ const QString CtrlConfigWindow::GetShortDeviceName(LibGens::IoBase::IoType devTy
 
 /**
  * GetLongDeviceName(): Get the long name of an I/O device.
- * TODO: Use IoBase::devName()?
  * @param devType Device type.
  * @return Long device name.
  */
