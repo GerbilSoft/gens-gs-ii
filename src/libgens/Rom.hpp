@@ -80,7 +80,7 @@ class Rom
 			RFMT_BINARY,		// Plain binary ROM image.
 			RFMT_SMD,		// Interleaved ROM image from Super Magic Drive.
 			RFMT_SMD_SPLIT,		// Multi-part SMD image. (Probably won't be supported.)
-			RFMT_MGD,		// Interleaved ROM image from Multi-Game-Doctor.
+			RFMT_MGD,		// Interleaved ROM image from Multi Game Doctor.
 			
 			// TODO: CD-ROM image handling.
 			RFMT_CD_CUE,		// CD-ROM image, CUE sheet.
