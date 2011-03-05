@@ -335,12 +335,12 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 			case LibGens::Rom::RFMT_CD_ISO_2048:
 			case LibGens::Rom::RFMT_CD_ISO_2352:
 				romFormat = tr("ISO-9660 CD-ROM image (%1-byte sectors)", "rom-format")
-						.arg(m_rom->romFormat() == LibGens::Rom::RFMT_CD_ISO_2048 ? 2048 : 2352);
+						.arg(errRomFormat == LibGens::Rom::RFMT_CD_ISO_2048 ? 2048 : 2352);
 				break;
 			case LibGens::Rom::RFMT_CD_BIN_2048:
 			case LibGens::Rom::RFMT_CD_BIN_2352:
 				romFormat = tr("Raw CD-ROM image (%1-byte sectors)", "rom-format")
-						.arg(m_rom->romFormat() == LibGens::Rom::RFMT_CD_BIN_2048 ? 2048 : 2352);
+						.arg(errRomFormat == LibGens::Rom::RFMT_CD_BIN_2048 ? 2048 : 2352);
 				break;
 			default:
 				romFormat = tr("Unknown", "rom-format");
