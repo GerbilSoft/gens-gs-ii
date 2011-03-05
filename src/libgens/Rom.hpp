@@ -85,8 +85,8 @@ class Rom
 			// TODO: CD-ROM image handling.
 			RFMT_CD_CUE,		// CD-ROM image, CUE sheet.
 			RFMT_CD_ISO_2048,	// CD-ROM image, ISO-9660 format. (2048-byte sectors)
-			RFMT_CD_ISO_2352,	// CD-ROM image, ISO-9660 format. (2048-byte sectors)
-			RFMT_CD_BIN_2048,	// CD-ROM image, BIN format. (2352-byte sectors)
+			RFMT_CD_ISO_2352,	// CD-ROM image, ISO-9660 format. (2352-byte sectors)
+			RFMT_CD_BIN_2048,	// CD-ROM image, BIN format. (2048-byte sectors)
 			RFMT_CD_BIN_2352,	// CD-ROM image, BIN format. (2352-byte sectors)
 		};
 		
