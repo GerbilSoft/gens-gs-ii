@@ -1,25 +1,25 @@
-/***************************************************************************
- * gens-qt4: Gens Qt4 UI.                                                  *
- * GeneralConfigWindow.cpp: General Configuration Window.                  *
- *                                                                         *
- * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
- * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
- *                                                                         *
- * This program is free software; you can redistribute it and/or modify it *
- * under the terms of the GNU General Public License as published by the   *
- * Free Software Foundation; either version 2 of the License, or (at your  *
- * option) any later version.                                              *
- *                                                                         *
- * This program is distributed in the hope that it will be useful, but     *
- * WITHOUT ANY WARRANTY; without even the implied warranty of              *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
- * GNU General Public License for more details.                            *
- *                                                                         *
- * You should have received a copy of the GNU General Public License along *
- * with this program; if not, write to the Free Software Foundation, Inc., *
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
- ***************************************************************************/
+/******************************************************************************
+ * gens-qt4: Gens Qt4 UI.                                                     *
+ * GeneralConfigWindow.cpp: General Configuration Window.                     *
+ *                                                                            *
+ * Copyright (c) 1999-2002 by Stéphane Dallongeville.                         *
+ * Copyright (c) 2003-2004 by Stéphane Akhoun.                                *
+ * Copyright (c) 2008-2011 by David Korth.                                    *
+ *                                                                            *
+ * This program is free software; you can redistribute it and/or modify       *
+ * it under the terms of the GNU General Public License as published by       *
+ * the Free Software Foundation; either version 2 of the License, or          *
+ * (at your option) any later version.                                        *
+ *                                                                            *
+ * This program is distributed in the hope that it will be useful,            *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+ * GNU General Public License for more details.                               *
+ *                                                                            *
+ * You should have received a copy of the GNU General Public License          *
+ * along with this program; if not, write to the Free Software                *
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA *
+ ******************************************************************************/
 
 #include <config.h>
 
@@ -594,7 +594,7 @@ void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *
 	QString filename = QFileDialog::getOpenFileName(this, title,
 			txtRomFile->text(),	// Default filename.
 			tr("Sega CD Boot ROM images") +
-			QString::fromLatin1(
+			QLatin1String(
 				" (*.bin *.gen *.md *.smd"
 #ifdef HAVE_ZLIB
 				ZLIB_EXT
@@ -604,7 +604,7 @@ void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *
 #endif /* HAVE_LZMA */
 				RAR_EXT
 				");;") +
-			tr("All Files") + QString::fromLatin1(" (*.*)"));
+			tr("All Files") + QLatin1String(" (*.*)"));
 	
 	if (filename.isEmpty())
 		return;
@@ -648,7 +648,7 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 	MCD_RomStatus_t boot_rom_status;
 	
 	// Line break string.
-	const QString sLineBreak = QString::fromLatin1("<br/>\n");
+	const QString sLineBreak = QLatin1String("<br/>\n");
 	
 	// Check if the file exists.
 	const QString& filename = txtRomFile->text();
@@ -811,7 +811,7 @@ void GeneralConfigWindow::mcdDisplayRomFileStatus(const QString& rom_id, const Q
 	// Set the ROM description.
 	QString sel_rom = tr("Selected ROM: %1");
 	lblMcdSelectedRom->setText(sel_rom.arg(rom_id) +
-				QString::fromLatin1("<br/>\n") + rom_desc);
+				QLatin1String("<br/>\n") + rom_desc);
 	lblMcdSelectedRom->setTextFormat(Qt::RichText);
 }
 
@@ -912,11 +912,11 @@ void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
 	QString filename = QFileDialog::getOpenFileName(this, title,
 			txtExtPrgUnRAR->text(),		// Default filename.
 #ifdef Q_OS_WIN32
-			tr("DLL files") + QString::fromLatin1(" (*.dll);;") +
+			tr("DLL files") + QLatin1String(" (*.dll);;") +
 #else
-			tr("rar or unrar") + QString::fromLatin1(" (rar unrar);;") +
+			tr("rar or unrar") + QLatin1String(" (rar unrar);;") +
 #endif
-			tr("All Files") + QString::fromLatin1(" (*.*)"));
+			tr("All Files") + QLatin1String(" (*.*)"));
 	
 	if (filename.isEmpty())
 		return;
@@ -944,7 +944,7 @@ void GeneralConfigWindow::extprgDisplayFileStatus(const QString& file_id, const 
 	// Set the file description.
 	QString sel_prg = tr("Selected Program: %1");
 	lblExtPrgSel->setText(sel_prg.arg(file_id) +
-				QString::fromLatin1("<br/>\n") + file_desc);
+				QLatin1String("<br/>\n") + file_desc);
 	lblExtPrgSel->setTextFormat(Qt::RichText);
 }
 
@@ -1067,7 +1067,7 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 	sExtPrgStatus_UnRAR = tr("Identified as: %1").arg(prg_id);
 	
 	// Line break string.
-	const QString sLineBreak = QString::fromLatin1("<br/>\n");
+	const QString sLineBreak = QLatin1String("<br/>\n");
 	
 	// Print DLL version information, if available.
 	if (prg_info.dll_major != 0 || prg_info.dll_minor != 0 ||

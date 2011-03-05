@@ -1,25 +1,25 @@
-/***************************************************************************
- * gens-qt4: Gens Qt4 UI.                                                  *
- * GensWindow.cpp: Gens Window.                                            *
- *                                                                         *
- * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
- * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
- *                                                                         *
- * This program is free software; you can redistribute it and/or modify it *
- * under the terms of the GNU General Public License as published by the   *
- * Free Software Foundation; either version 2 of the License, or (at your  *
- * option) any later version.                                              *
- *                                                                         *
- * This program is distributed in the hope that it will be useful, but     *
- * WITHOUT ANY WARRANTY; without even the implied warranty of              *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
- * GNU General Public License for more details.                            *
- *                                                                         *
- * You should have received a copy of the GNU General Public License along *
- * with this program; if not, write to the Free Software Foundation, Inc., *
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
- ***************************************************************************/
+/******************************************************************************
+ * gens-qt4: Gens Qt4 UI.                                                     *
+ * GensWindow.cpp: Gens Window.                                               *
+ *                                                                            *
+ * Copyright (c) 1999-2002 by Stéphane Dallongeville.                         *
+ * Copyright (c) 2003-2004 by Stéphane Akhoun.                                *
+ * Copyright (c) 2008-2011 by David Korth.                                    *
+ *                                                                            *
+ * This program is free software; you can redistribute it and/or modify       *
+ * it under the terms of the GNU General Public License as published by       *
+ * the Free Software Foundation; either version 2 of the License, or          *
+ * (at your option) any later version.                                        *
+ *                                                                            *
+ * This program is distributed in the hope that it will be useful,            *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+ * GNU General Public License for more details.                               *
+ *                                                                            *
+ * You should have received a copy of the GNU General Public License          *
+ * along with this program; if not, write to the Free Software                *
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA *
+ ******************************************************************************/
 
 #include <config.h>
 
@@ -122,7 +122,7 @@ GensWindow::~GensWindow()
 void GensWindow::setupUi(void)
 {
 	if (this->objectName().isEmpty())
-		this->setObjectName(QString::fromUtf8("GensWindow"));
+		this->setObjectName(QLatin1String("GensWindow"));
 	
 #ifdef Q_WS_MAC
 	// Remove the window icon. (Mac "proxy icon")
@@ -131,7 +131,7 @@ void GensWindow::setupUi(void)
 	
 	// Create the central widget.
 	centralwidget = new QWidget(this);
-	centralwidget->setObjectName(QString::fromLatin1("centralwidget"));
+	centralwidget->setObjectName(QLatin1String("centralwidget"));
 	this->setCentralWidget(centralwidget);
 	
 	// Connect slots by name.
@@ -147,7 +147,7 @@ void GensWindow::setupUi(void)
 	
 	// Create the layout.
 	layout = new QVBoxLayout(this->centralwidget);
-	layout->setObjectName(QString::fromLatin1("layout"));
+	layout->setObjectName(QLatin1String("layout"));
 	layout->setMargin(0);
 	layout->setSpacing(0);
 	centralwidget->setLayout(layout);
@@ -262,7 +262,7 @@ void GensWindow::dragEnterEvent(QDragEnterEvent *event)
 	
 	// Make sure the URL is file://.
 	// TODO: Add support for other protocols later.
-	if (url.scheme() != QString::fromLatin1("file"))
+	if (url.scheme() != QLatin1String("file"))
 		return;
 	
 	// Override the propsed action with Copy, and accept it.
@@ -294,7 +294,7 @@ void GensWindow::dropEvent(QDropEvent *event)
 	
 	// Make sure the URL is file://.
 	// TODO: Add support for other protocols later.
-	if (url.scheme() != QString::fromLatin1("file"))
+	if (url.scheme() != QLatin1String("file"))
 		return;
 	
 	// Get the local filename.
