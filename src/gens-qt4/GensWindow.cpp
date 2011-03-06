@@ -480,7 +480,8 @@ void GensWindow::setBpp(LibGens::VdpPalette::ColorDepth newBpp)
 	m_vBackend->setVbDirty();
 	//m_vBackend->vbUpdate();	// TODO: Don't update immediately?
 	
-	const QString msg = tr("Color depth set to %1-bit.").arg(bppVal);
+	//: OSD message indicating color depth change.
+	const QString msg = tr("Color depth set to %1-bit.", "osd").arg(bppVal);
 	m_vBackend->osd_printqs(1500, msg);
 }
 

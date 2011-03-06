@@ -163,28 +163,37 @@ void VBackend::setStretchMode(GensConfig::StretchMode_t newStretchMode)
 	m_stretchMode = newStretchMode;
 	
 	// Print a message to the OSD.
-	// TODO: Use Qt translations.
-	const char *msg;
+	//: OSD message indicating the Stretch Mode has been changed.
+	QString msg = tr("Stretch Mode set to %1.", "osd-stretch");
 	switch (m_stretchMode)
 	{
 		case GensConfig::STRETCH_NONE:
-			msg = "Stretch Mode set to None.";
+			//: OSD message indicating the Stretch Mode has been set to None.
+			msg = msg.arg(tr("None", "osd-stretch"));
 			break;
+		
 		case GensConfig::STRETCH_H:
-			msg = "Stretch Mode set to Horizontal.";
+			//: OSD message indicating the Stretch Mode has been set to Horizontal.
+			msg = msg.arg(tr("Horizontal", "osd-stretch"));
 			break;
+		
 		case GensConfig::STRETCH_V:
-			msg = "Stretch Mode set to Vertical.";
+			//: OSD message indicating the Stretch Mode has been set to Vertical.
+			msg = msg.arg(tr("Vertical", "osd-stretch"));
 			break;
+		
 		case GensConfig::STRETCH_FULL:
-			msg = "Stretch Mode set to Full.";
+			//: OSD message indicating the Stretch Mode has been set to Full.
+			msg = msg.arg(tr("Full", "osd-stretch"));
 			break;
+		
 		default:
-			msg = "";
+			msg.clear();
 			break;
 	}
 	
-	osd_printf(1500, "%s", msg);
+	if (!msg.isEmpty())
+		osd_printqs(1500, msg);
 	
 	// TODO: Only if paused, or regardless of pause?
 	if (!isRunning() || isPaused())
@@ -209,9 +218,15 @@ void VBackend::setFastBlur(bool newFastBlur)
 	
 	// Print a message to the OSD.
 	if (m_fastBlur)
-		osd_printf(1500, "Fast Blur enabled.");
+	{
+		//: OSD message indicating Fast Blur has been enabled.
+		osd_printqs(1500, tr("Fast Blur enabled.", "osd"));
+	}
 	else
-		osd_printf(1500, "Fast Blur disabled.");
+	{
+		//: OSD message indicating Fast Blur has been disabled.
+		osd_printqs(1500, tr("Fast Blur disabled.", "osd"));
+	}
 	
 	// If paused, update the VBackend.
 	if (isRunning() && isPaused())

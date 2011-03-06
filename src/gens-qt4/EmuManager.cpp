@@ -347,7 +347,8 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 		const QString detect_str = LgRegionCodeStr(lg_region);
 		if (!detect_str.isEmpty())
 		{
-			const QString auto_str = tr("ROM region detected as %1.");
+			//: OSD message indicating the auto-detected ROM region.
+			const QString auto_str = tr("ROM region detected as %1.", "osd");
 			emit osdPrintMsg(1500, auto_str.arg(detect_str));
 		}
 	}

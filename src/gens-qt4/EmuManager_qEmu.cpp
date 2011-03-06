@@ -591,8 +591,8 @@ void EmuManager::doCtrlChange(int port, LibGens::IoBase::IoType type)
 	delete *prevDevPtr;
 	*prevDevPtr = dev;
 	
-	// Print a message on the OSD.
-	QString osdMsg = tr("Port %1 set to %2.");
+	//: OSD message indicating controller change.
+	QString osdMsg = tr("Port %1 set to %2.", "osd");
 	osdMsg = osdMsg.arg(port + 1);	// TODO: Use "E" for Port 3.
 	osdMsg = osdMsg.arg(devName);
 	
@@ -698,7 +698,7 @@ void EmuManager::doScreenShot(void)
 	QImageWriter imgWriter(scrFilename, "png");
 	imgWriter.write(img);
 	
-	// Print a message on the OSD.
+	//: OSD message indicating screenshot saved.
 	QString osdMsg = tr("Screenshot %1 saved.");
 	osdMsg = osdMsg.arg(scrNumber);
 	emit osdPrintMsg(1500, osdMsg);
@@ -715,8 +715,8 @@ void EmuManager::doAudioRate(int newRate)
 		return;
 	m_audio->setRate(newRate);
 	
-	// Print a message on the OSD.
-	QString osdMsg = tr("Audio sampling rate set to %L1 Hz.");
+	//: OSD message indicating sampling rate change.
+	QString osdMsg = tr("Audio sampling rate set to %L1 Hz.", "osd");
 	osdMsg = osdMsg.arg(newRate);
 	
 	// Emit the signal.
@@ -734,9 +734,13 @@ void EmuManager::doAudioStereo(bool newStereo)
 		return;
 	m_audio->setStereo(newStereo);
 	
-	// Print a message on the OSD.
-	QString osdMsg = tr("Audio set to %1.");
-	osdMsg = osdMsg.arg(newStereo ? tr("Stereo") : tr("Mono"));
+	//: OSD message indicating audio stereo/mono change.
+	QString osdMsg = tr("Audio set to %1.", "osd");
+	osdMsg = osdMsg.arg(newStereo
+		//: OSD message indicating audio has been set to Stereo.
+		? tr("Stereo", "osd")
+		//: OSD message indicating audio has been set to Mono.
+		: tr("Mono", "osd"));
 	emit osdPrintMsg(1500, osdMsg);
 }
 
@@ -768,14 +772,21 @@ void EmuManager::doSaveState(const char *filename, int saveSlot)
 	{
 		// Savestate saved.
 		if (saveSlot >= 0)
-			osdMsg = tr("State %1 saved.").arg(saveSlot);
+		{
+			//: OSD message indicating a savestate has been saved.
+			osdMsg = tr("State %1 saved.", "osd").arg(saveSlot);
+		}
 		else
-			osdMsg = tr("State saved in %1").arg(sFilename);
+		{
+			//: OSD message indicating a savestate has been saved using a specified filename
+			osdMsg = tr("State saved in %1", "osd").arg(sFilename);
+		}
 	}
 	else
 	{
-		// Error loading savestate.
-		osdMsg = tr("Error saving state: %1").arg(ret);
+		// Error saving savestate.
+		//: OSD message indicating an error occurred while saving the savestate.
+		osdMsg = tr("Error saving state: %1", "osd").arg(ret);
 	}
 	
 	// Print a message on the OSD.
@@ -800,14 +811,21 @@ void EmuManager::doLoadState(const char *filename, int saveSlot)
 	{
 		// Savestate loaded.
 		if (saveSlot >= 0)
-			osdMsg = tr("State %1 loaded.").arg(saveSlot);
+		{
+			//: OSD message indicating a savestate has been loaded.
+			osdMsg = tr("State %1 loaded.", "osd").arg(saveSlot);
+		}
 		else
-			osdMsg = tr("State loaded from %1").arg(sFilename);
+		{
+			//: OSD message indicating a savestate has been loaded using a specified filename
+			osdMsg = tr("State loaded from %1", "osd").arg(sFilename);
+		}
 	}
 	else
 	{
 		// Error loading savestate.
-		osdMsg = tr("Error loading state: %1").arg(ret);
+		//: OSD message indicating an error occurred while loading the savestate.
+		osdMsg = tr("Error loading state: %1", "osd").arg(ret);
 	}
 	
 	// Print a message on the OSD.
@@ -834,21 +852,24 @@ void EmuManager::doSaveSlot(int newSaveSlot)
 	if (!m_rom)
 	{
 		// No ROM is loaded.
-		QString osdMsg = tr("Save Slot %1 selected.").arg(m_saveSlot);
+		//: OSD message indicating a save slot is selected while no ROM is loaded.
+		QString osdMsg = tr("Save Slot %1 selected.", "osd").arg(m_saveSlot);
 		emit osdPrintMsg(OsdDuration, osdMsg);
 		emit osdShowPreview(0, imgPreview);
 		return;
 	}
 	
 	// ROM is loaded.
-	QString osdMsg = tr("Save Slot %1 [%2]").arg(m_saveSlot);
+	//: OSD message indicating a save slot is selected while a ROM is loaded.
+	QString osdMsg = tr("Save Slot %1 [%2]", "osd").arg(m_saveSlot);
 	
 	// Check if the file exists.
 	QString filename = getSaveStateFilename();
 	if (QFile::exists(filename))
 	{
 		// Savestate exists.
-		osdMsg = osdMsg.arg(tr("OCCUPIED"));
+		//: OSD message indicating a savestate exists in the selected slot.
+		osdMsg = osdMsg.arg(tr("OCCUPIED", "osd"));
 		
 		// Check if the savestate has a preview image.
 		LibZomg::Zomg zomg(filename.toUtf8().constData(), LibZomg::Zomg::ZOMG_LOAD);
@@ -877,7 +898,8 @@ void EmuManager::doSaveSlot(int newSaveSlot)
 	else
 	{
 		// Savestate doesn't exist.
-		osdMsg = osdMsg.arg(tr("EMPTY"));
+		//: OSD message indicating there is no savestate in the selected slot.
+		osdMsg = osdMsg.arg(tr("EMPTY", "osd"));
 	}
 	
 	// Print the OSD.
@@ -934,13 +956,17 @@ void EmuManager::doResetEmulator(bool hardReset)
 	{
 		// Do a hard reset.
 		gqt4_emuContext->hardReset();
-		emit osdPrintMsg(2500, tr("Hard Reset."));
+		
+		//: OSD message indicating a Hard Reset was performed.
+		emit osdPrintMsg(2500, tr("Hard Reset.", "osd"));
 	}
 	else
 	{
 		// Do a soft reset.
 		gqt4_emuContext->softReset();
-		emit osdPrintMsg(2500, tr("Soft Reset."));
+		
+		//: OSD message indicating a Soft Reset was performed.
+		emit osdPrintMsg(2500, tr("Soft Reset.", "osd"));
 	}
 }
 
@@ -987,32 +1013,37 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 					((LibGens::VdpRend_m5::IntRend_Mode_t)val);
 			
 			// Gens/GS r7+ prints a message to the OSD, so we'll do that too.
-			const char *msg;
+			//: OSD message indicating the interlaced rendering mode was changed.
+			QString msg = tr("Interlaced: %1", "osd");
 			switch (LibGens::VdpRend_m5::IntRend_Mode)
 			{
 				case LibGens::VdpRend_m5::INTREND_EVEN:
-					msg = "Interlaced: Even lines only.";
+					//: OSD message indicating the interlaced rendering mode was set to even lines only.
+					msg = msg.arg(tr("Even lines only", "osd"));
 					break;
 				
 				case LibGens::VdpRend_m5::INTREND_ODD:
-					msg = "Interlaced: Odd lines only.";
+					//: OSD message indicating the interlaced rendering mode was set to odd lines only.
+					msg = msg.arg(tr("Odd lines only", "osd"));
 					break;
 				
 				case LibGens::VdpRend_m5::INTREND_FLICKER:
-					msg = "Interlaced: Alternating lines.";
+					//: OSD message indicating the interlaced rendering mode was set to alternating lines.
+					msg = msg.arg(tr("Alternating lines", "osd"));
 					break;
 				
 				case LibGens::VdpRend_m5::INTREND_2X:
-					msg = "Interlaced: 2x resolution.";
+					//: OSD message indicating the interlaced rendering mode was set to 2x resolution.
+					msg = msg.arg(tr("2x resolution", "osd"));
 					break;
 				
 				default:
-					msg = NULL;
+					msg.clear();
 					break;
 			}
 			
-			if (msg)
-				emit osdPrintMsg(1500, QLatin1String(msg));
+			if (!msg.isEmpty())
+				emit osdPrintMsg(1500, msg);
 			break;
 		}
 		
@@ -1030,25 +1061,28 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 void EmuManager::doResetCpu(EmuManager::ResetCpuIndex cpu_idx)
 {
 	// TODO: Reset CPUs through the emulation context using MDP CPU indexes.
-	const char *msg = NULL;
+	QString msg;
 	switch (cpu_idx)
 	{
 		case RQT_CPU_M68K:
 			LibGens::M68K::Reset();
-			msg = "68000 reset.";
+			//: OSD message indicating the 68000 CPU was reset.
+			msg = tr("68000 reset.", "osd");
 			break;
 		
 		case RQT_CPU_Z80:
 			LibGens::Z80::Reset();
-			msg = "Z80 reset.";
+			//: OSD message indicating the Z80 CPU was reset.
+			msg = tr("Z80 reset.", "osd");
 			break;
 		
 		default:
+			msg.clear();
 			break;
 	}
 	
-	if (msg)
-		emit osdPrintMsg(1500, QLatin1String(msg));
+	if (!msg.isEmpty())
+		emit osdPrintMsg(1500, msg);
 }
 
 
@@ -1063,7 +1097,8 @@ void EmuManager::doRegionCode(GensConfig::ConfRegionCode_t region)
 	
 	// Print a message to the OSD.
 	const QString region_str = GcRegionCodeStr(region);
-	const QString str = tr("System region set to %1.");
+	//: OSD message indicating the system region code was changed.
+	const QString str = tr("System region set to %1.", "osd");
 	emit osdPrintMsg(1500, str.arg(region_str));
 	
 	if (m_rom)
@@ -1080,7 +1115,8 @@ void EmuManager::doRegionCode(GensConfig::ConfRegionCode_t region)
 			const QString detect_str = LgRegionCodeStr(lg_region);
 			if (!detect_str.isEmpty())
 			{
-				const QString auto_str = tr("ROM region detected as %1.");
+				//: OSD message indicating the auto-detected ROM region.
+				const QString auto_str = tr("ROM region detected as %1.", "osd");
 				emit osdPrintMsg(1500, auto_str.arg(detect_str));
 			}
 		}
