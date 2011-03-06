@@ -459,12 +459,6 @@ Used to indicate no special CPU features were found.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="350"/>
-        <location filename="../EmuManager_qEmu.cpp" line="1083"/>
-        <source>ROM region detected as %1.</source>
-        <translation></translation>
-    </message>
-    <message>
         <location filename="../EmuManager_str.cpp" line="109"/>
         <source>Genesis</source>
         <comment>rom-region</comment>
@@ -663,91 +657,192 @@ Used to indicate no special CPU features were found.</extracomment>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="595"/>
         <source>Port %1 set to %2.</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating controller change.</extracomment>
         <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="702"/>
         <source>Screenshot %1 saved.</source>
+        <extracomment>OSD message indicating screenshot saved.</extracomment>
         <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="719"/>
         <source>Audio sampling rate set to %L1 Hz.</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating sampling rate change.</extracomment>
         <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="738"/>
         <source>Audio set to %1.</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating audio stereo/mono change.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="739"/>
+        <location filename="../EmuManager_qEmu.cpp" line="741"/>
         <source>Stereo</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating audio has been set to Stereo.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="739"/>
+        <location filename="../EmuManager_qEmu.cpp" line="743"/>
         <source>Mono</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating audio has been set to Mono.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="771"/>
+        <location filename="../EmuManager_qEmu.cpp" line="777"/>
         <source>State %1 saved.</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating a savestate has been saved.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="773"/>
+        <location filename="../EmuManager_qEmu.cpp" line="782"/>
         <source>State saved in %1</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating a savestate has been saved using a specified filename</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="778"/>
+        <location filename="../EmuManager_qEmu.cpp" line="789"/>
         <source>Error saving state: %1</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating an error occurred while saving the savestate.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="803"/>
+        <location filename="../EmuManager_qEmu.cpp" line="816"/>
         <source>State %1 loaded.</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating a savestate has been loaded.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="805"/>
+        <location filename="../EmuManager_qEmu.cpp" line="821"/>
         <source>State loaded from %1</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating a savestate has been loaded using a specified filename</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="810"/>
+        <location filename="../EmuManager_qEmu.cpp" line="828"/>
         <source>Error loading state: %1</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating an error occurred while loading the savestate.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="837"/>
+        <location filename="../EmuManager_qEmu.cpp" line="856"/>
         <source>Save Slot %1 selected.</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating a save slot is selected while no ROM is loaded.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="844"/>
+        <location filename="../EmuManager_qEmu.cpp" line="864"/>
         <source>Save Slot %1 [%2]</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating a save slot is selected while a ROM is loaded.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="851"/>
+        <location filename="../EmuManager_qEmu.cpp" line="872"/>
         <source>OCCUPIED</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating a savestate exists in the selected slot.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="880"/>
+        <location filename="../EmuManager_qEmu.cpp" line="902"/>
         <source>EMPTY</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating there is no savestate in the selected slot.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="937"/>
+        <location filename="../EmuManager_qEmu.cpp" line="961"/>
         <source>Hard Reset.</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating a Hard Reset was performed.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="943"/>
+        <location filename="../EmuManager_qEmu.cpp" line="969"/>
         <source>Soft Reset.</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating a Soft Reset was performed.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../EmuManager_qEmu.cpp" line="1017"/>
+        <source>Interlaced: %1</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating the interlaced rendering mode was changed.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../EmuManager_qEmu.cpp" line="1022"/>
+        <source>Even lines only</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating the interlaced rendering mode was set to even lines only.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../EmuManager_qEmu.cpp" line="1027"/>
+        <source>Odd lines only</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating the interlaced rendering mode was set to odd lines only.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../EmuManager_qEmu.cpp" line="1032"/>
+        <source>Alternating lines</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating the interlaced rendering mode was set to alternating lines.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../EmuManager_qEmu.cpp" line="1037"/>
+        <source>2x resolution</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating the interlaced rendering mode was set to 2x resolution.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../EmuManager_qEmu.cpp" line="1070"/>
+        <source>68000 reset.</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating the 68000 CPU was reset.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../EmuManager_qEmu.cpp" line="1076"/>
+        <source>Z80 reset.</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating the Z80 CPU was reset.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../EmuManager_qEmu.cpp" line="1101"/>
+        <source>System region set to %1.</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating the system region code was changed.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../EmuManager.cpp" line="351"/>
+        <location filename="../EmuManager_qEmu.cpp" line="1119"/>
+        <source>ROM region detected as %1.</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating the auto-detected ROM region.
+----------
+OSD message indicating the auto-detected ROM region.</extracomment>
         <translation></translation>
     </message>
     <message>
@@ -781,11 +876,6 @@ Used to indicate no special CPU features were found.</extracomment>
         <location filename="../EmuManager_str.cpp" line="64"/>
         <location filename="../EmuManager_str.cpp" line="85"/>
         <source>Europe (PAL)</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../EmuManager_qEmu.cpp" line="1066"/>
-        <source>System region set to %1.</source>
         <translation></translation>
     </message>
 </context>
@@ -1338,16 +1428,22 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="559"/>
         <source>Raw</source>
+        <comment>color-scale-method</comment>
+        <extracomment>Raw color scaling. (MD $EEE -&gt; #E0E0E0)</extracomment>
         <translation></translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="564"/>
         <source>Full</source>
+        <comment>color-scale-method</comment>
+        <extracomment>Full color scaling. (MD $EEE -&gt; #FFFFFF)</extracomment>
         <translation></translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="569"/>
         <source>Full with S/H</source>
+        <comment>color-scale-method</comment>
+        <extracomment>Full+S/H color scaling. (MD $EEE -&gt; #EEEEEE)</extracomment>
         <translation></translation>
     </message>
     <message>
@@ -2018,8 +2114,10 @@ window to a larger size than its original resolution.</source>
         </translation>
     </message>
     <message>
-        <location filename="../GensWindow.cpp" line="483"/>
+        <location filename="../GensWindow.cpp" line="484"/>
         <source>Color depth set to %1-bit.</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating color depth change.</extracomment>
         <translation>Colour depth set to %1-bit.</translation>
     </message>
 </context>
@@ -2078,6 +2176,58 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../ui/McdControlWindow.ui" line="20"/>
         <source>CD-ROM Drives</source>
+        <translation></translation>
+    </message>
+</context>
+<context>
+    <name>GensQt4::VBackend</name>
+    <message>
+        <location filename="../VBackend/VBackend.cpp" line="167"/>
+        <source>Stretch Mode set to %1.</source>
+        <comment>osd-stretch</comment>
+        <extracomment>OSD message indicating the Stretch Mode has been changed.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../VBackend/VBackend.cpp" line="172"/>
+        <source>None</source>
+        <comment>osd-stretch</comment>
+        <extracomment>OSD message indicating the Stretch Mode has been set to None.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../VBackend/VBackend.cpp" line="177"/>
+        <source>Horizontal</source>
+        <comment>osd-stretch</comment>
+        <extracomment>OSD message indicating the Stretch Mode has been set to Horizontal.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../VBackend/VBackend.cpp" line="182"/>
+        <source>Vertical</source>
+        <comment>osd-stretch</comment>
+        <extracomment>OSD message indicating the Stretch Mode has been set to Vertical.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../VBackend/VBackend.cpp" line="187"/>
+        <source>Full</source>
+        <comment>osd-stretch</comment>
+        <extracomment>OSD message indicating the Stretch Mode has been set to Full.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../VBackend/VBackend.cpp" line="223"/>
+        <source>Fast Blur enabled.</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating Fast Blur has been enabled.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../VBackend/VBackend.cpp" line="228"/>
+        <source>Fast Blur disabled.</source>
+        <comment>osd</comment>
+        <extracomment>OSD message indicating Fast Blur has been disabled.</extracomment>
         <translation></translation>
     </message>
 </context>
