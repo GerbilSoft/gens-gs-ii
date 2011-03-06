@@ -308,38 +308,12 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 		LibGens::Rom::RomFormat errRomFormat = rom->romFormat();
 		delete rom;
 		
-		// TODO: Split this into another function?
-		QString romFormat;
-		switch (errRomFormat)
+		// Get the ROM format.
+		QString sRomFormat = RomFormat(errRomFormat);
+		if (sRomFormat.isEmpty())
 		{
-			case LibGens::Rom::RFMT_BINARY:
-				romFormat = tr("Binary", "rom-format");
-				break;
-			case LibGens::Rom::RFMT_SMD:
-				romFormat = tr("Super Magic Drive", "rom-format");
-				break;
-			case LibGens::Rom::RFMT_SMD_SPLIT:
-				romFormat = tr("Super Magic Drive (split)", "rom-format");
-				break;
-			case LibGens::Rom::RFMT_MGD:
-				romFormat = tr("Multi Game Doctor", "rom-format");
-				break;
-			case LibGens::Rom::RFMT_CD_CUE:
-				romFormat = tr("CD-ROM cue sheet", "rom-format");
-				break;
-			case LibGens::Rom::RFMT_CD_ISO_2048:
-			case LibGens::Rom::RFMT_CD_ISO_2352:
-				romFormat = tr("ISO-9660 CD-ROM image (%1-byte sectors)", "rom-format")
-						.arg(errRomFormat == LibGens::Rom::RFMT_CD_ISO_2048 ? 2048 : 2352);
-				break;
-			case LibGens::Rom::RFMT_CD_BIN_2048:
-			case LibGens::Rom::RFMT_CD_BIN_2352:
-				romFormat = tr("Raw CD-ROM image (%1-byte sectors)", "rom-format")
-						.arg(errRomFormat == LibGens::Rom::RFMT_CD_BIN_2048 ? 2048 : 2352);
-				break;
-			default:
-				romFormat = tr("Unknown", "rom-format");
-				break;
+			//: Unknown ROM format. (EmuManager::RomFormat() returned an empty string.)
+			sRomFormat = tr("(unknown)", "rom-format");
 		}
 		
 		// TODO: Specify GensWindow as parent window.
@@ -352,11 +326,11 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 				tr("The selected ROM image is in a format that is not currently supported by Gens/GS II.") +
 				chrNewline + chrNewline +
 				//: Indicate what format the ROM image is in.
-				tr("Selected ROM image format: %1").arg(romFormat) +
+				tr("Selected ROM image format: %1").arg(sRomFormat) +
 				chrNewline + chrNewline +
 				//: List of ROM formats that Gens/GS II currently supports.
 				tr("Supported ROM formats:") + chrNewline +
-				chrBullet + chrSpace + tr("Binary", "rom-format")
+				chrBullet + chrSpace + RomFormat(LibGens::Rom::RFMT_BINARY)
 				);
 		
 		return 4;
