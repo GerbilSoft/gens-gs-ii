@@ -2,479 +2,6 @@
 <!DOCTYPE TS>
 <TS version="2.0" language="en_GB">
 <context>
-    <name>AboutWindow</name>
-    <message>
-        <location filename="../ui/AboutWindow.ui" line="14"/>
-        <source>About Gens/GS II</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/AboutWindow.ui" line="57"/>
-        <source>&amp;Copyrights</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/AboutWindow.ui" line="95"/>
-        <source>Included &amp;Libraries</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/AboutWindow.ui" line="130"/>
-        <source>&amp;Debug Info</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/AboutWindow.ui" line="168"/>
-        <source>C&amp;redits</source>
-        <translation></translation>
-    </message>
-</context>
-<context>
-    <name>CtrlConfigWindow</name>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="17"/>
-        <source>Controller Configuration</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="43"/>
-        <source>Port Settings</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="57"/>
-        <source>&amp;Device:</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="107"/>
-        <source>Button Configuration</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="204"/>
-        <source>Port &amp;1</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="207"/>
-        <source>Configure the device connected to the emulated Port 1.</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="219"/>
-        <source>Port &amp;2</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="222"/>
-        <source>Configure the device connected to the emulated Port 2.</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="234"/>
-        <source>TP-1A</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="246"/>
-        <source>TP-1B</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="258"/>
-        <source>TP-1C</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="270"/>
-        <source>TP-1D</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="282"/>
-        <source>TP-2A</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="294"/>
-        <source>TP-2B</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="306"/>
-        <source>TP-2C</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="318"/>
-        <source>TP-2D</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="330"/>
-        <source>4WP-A</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="342"/>
-        <source>4WP-B</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="354"/>
-        <source>4WP-C</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="366"/>
-        <source>4WP-D</source>
-        <translation></translation>
-    </message>
-</context>
-<context>
-    <name>GeneralConfigWindow</name>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="32"/>
-        <source>General Configuration</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="52"/>
-        <source>&amp;General</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="58"/>
-        <source>Onscreen &amp;Display</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="66"/>
-        <source>Show &amp;FPS counter in this color:</source>
-        <translation>Show &amp;FPS counter in this colour:</translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="103"/>
-        <source>Show onscreen &amp;messages in this color:</source>
-        <translation>Show onscreen &amp;messages in this colour:</translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="141"/>
-        <source>&amp;Emulation Options</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="147"/>
-        <source>This fixes red screens on some games,
-but may break games that use
-non-standard checksums.</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="152"/>
-        <source>Fix incorrect ROM c&amp;hecksums.</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="159"/>
-        <source>Automatically pause the emulator when
-the emulation window loses focus.</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="163"/>
-        <source>&amp;Pause emulation when the window loses focus.</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="170"/>
-        <source>Use the background color in the border area
-instead of drawing a black border.</source>
-        <translation>Use the background colour in the border area
-instead of drawing a black border.</translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="174"/>
-        <source>&amp;Border color emulation</source>
-        <translation>&amp;Border colour emulation</translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="181"/>
-        <source>Tints the emulator window purple when
-emulation is paused.</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="185"/>
-        <source>&amp;Tint the window purple when paused.</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="192"/>
-        <source>Simulates the &quot;rolling&quot; effect observed on the
-Mega Drive hardware if 320x240 mode is set
-on NTSC models.</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="197"/>
-        <source>&amp;NTSC V30 Rolling</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="213"/>
-        <source>&amp;Intro Effect</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="219"/>
-        <source>&amp;Style:</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="242"/>
-        <source>None</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="247"/>
-        <source>Gens Logo</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="252"/>
-        <source>&quot;Crazy&quot; Effect</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="260"/>
-        <source>&amp;Color:</source>
-        <translation>&amp;Colour:</translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="309"/>
-        <source>G&amp;raphics</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="315"/>
-        <source>Rendering Options</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="321"/>
-        <source>Constrains the viewable image to a 4:3 aspect ratio.
-
-This prevents image artifacting on widescreen
-displays by showing black bars on the sides of
-the screen if the emulation window is maximized.</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="328"/>
-        <source>Constrain &amp;aspect ratio to 4:3</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="335"/>
-        <source>Enables the &quot;Fast Blur&quot; effect, which simulates
-dithering artifacting as seen on the original system.</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="339"/>
-        <source>Fast &amp;Blur</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="346"/>
-        <source>Smoothes the image when scaling the emulation
-window to a larger size than its original resolution.</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="350"/>
-        <source>Enable bi&amp;linear filtering</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="359"/>
-        <source>&amp;Interlaced Rendering:</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="376"/>
-        <source>Even Lines Only</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="381"/>
-        <source>Odd Lines Only</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="386"/>
-        <source>Alternating Lines</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="412"/>
-        <source>Color Adjustment</source>
-        <translation>Colour Adjustment</translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="418"/>
-        <source>Co&amp;ntrast:</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="466"/>
-        <source>&amp;Brightness:</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="514"/>
-        <source>Gra&amp;yscale</source>
-        <translation>Gre&amp;yscale</translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="521"/>
-        <source>&amp;Inverted</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="528"/>
-        <source>Color &amp;Scale Method:</source>
-        <translation>Colour &amp;Scale Method:</translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="559"/>
-        <source>Raw</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="564"/>
-        <source>Full</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="569"/>
-        <source>Full with S/H</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="596"/>
-        <source>&amp;System</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="602"/>
-        <source>&amp;Region Code</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="610"/>
-        <source>Current region &amp;setting:</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="630"/>
-        <source>Auto-detect from ROM</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="635"/>
-        <source>Japan (NTSC)</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="640"/>
-        <source>Asia (PAL)</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="645"/>
-        <source>USA (NTSC)</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="650"/>
-        <source>Europe (PAL)</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="666"/>
-        <source>Automatic Region Detection &amp;Order</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="784"/>
-        <source>Sega &amp;CD</source>
-        <translatorcomment>Sega CD is known as Mega CD in Europe.</translatorcomment>
-        <translation>Mega &amp;CD</translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="790"/>
-        <source>Boot &amp;ROMs</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="799"/>
-        <source>&amp;USA:</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="815"/>
-        <location filename="../ui/GeneralConfigWindow.ui" line="838"/>
-        <location filename="../ui/GeneralConfigWindow.ui" line="861"/>
-        <location filename="../ui/GeneralConfigWindow.ui" line="937"/>
-        <location filename="../ui/GeneralConfigWindow.ui" line="982"/>
-        <source>Browse...</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="822"/>
-        <source>&amp;Europe:</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="845"/>
-        <source>&amp;Japan:</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="893"/>
-        <source>Selected ROM: (none)</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="921"/>
-        <source>&amp;Asia:</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="951"/>
-        <source>E&amp;xternal Programs</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="957"/>
-        <source>Data &amp;Compression</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="966"/>
-        <source>Un&amp;RAR:</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="1011"/>
-        <source>Selected Program: (none)</source>
-        <translation></translation>
-    </message>
-</context>
-<context>
     <name>GensQt4::AboutWindow</name>
     <message>
         <location filename="../AboutWindow.cpp" line="178"/>
@@ -641,6 +168,31 @@ Used to indicate no special CPU features were found.</extracomment>
         <extracomment>No OpenGL extensions are being used.</extracomment>
         <translation></translation>
     </message>
+    <message>
+        <location filename="../ui/AboutWindow.ui" line="14"/>
+        <source>About Gens/GS II</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/AboutWindow.ui" line="57"/>
+        <source>&amp;Copyrights</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/AboutWindow.ui" line="95"/>
+        <source>Included &amp;Libraries</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/AboutWindow.ui" line="130"/>
+        <source>&amp;Debug Info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/AboutWindow.ui" line="168"/>
+        <source>C&amp;redits</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>GensQt4::CtrlConfigWindow</name>
@@ -726,6 +278,106 @@ Used to indicate no special CPU features were found.</extracomment>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="326"/>
         <source>4-Way Play, Port %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="17"/>
+        <source>Controller Configuration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="43"/>
+        <source>Port Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="57"/>
+        <source>&amp;Device:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="107"/>
+        <source>Button Configuration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="204"/>
+        <source>Port &amp;1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="207"/>
+        <source>Configure the device connected to the emulated Port 1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="219"/>
+        <source>Port &amp;2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="222"/>
+        <source>Configure the device connected to the emulated Port 2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="234"/>
+        <source>TP-1A</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="246"/>
+        <source>TP-1B</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="258"/>
+        <source>TP-1C</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="270"/>
+        <source>TP-1D</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="282"/>
+        <source>TP-2A</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="294"/>
+        <source>TP-2B</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="306"/>
+        <source>TP-2C</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="318"/>
+        <source>TP-2D</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="330"/>
+        <source>4WP-A</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="342"/>
+        <source>4WP-B</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="354"/>
+        <source>4WP-C</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="366"/>
+        <source>4WP-D</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1468,29 +1120,348 @@ Used to indicate no special CPU features were found.</extracomment>
         <translation></translation>
     </message>
     <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="32"/>
+        <source>General Configuration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="52"/>
         <location filename="../GeneralConfigWindow_mac.mm" line="80"/>
         <source>&amp;General</source>
         <translation></translation>
     </message>
     <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="58"/>
+        <source>Onscreen &amp;Display</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="66"/>
+        <source>Show &amp;FPS counter in this color:</source>
+        <translation>Show &amp;FPS counter in this colour:</translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="103"/>
+        <source>Show onscreen &amp;messages in this color:</source>
+        <translation>Show onscreen &amp;messages in this colour:</translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="141"/>
+        <source>&amp;Emulation Options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="147"/>
+        <source>This fixes red screens on some games,
+but may break games that use
+non-standard checksums.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="152"/>
+        <source>Fix incorrect ROM c&amp;hecksums.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="159"/>
+        <source>Automatically pause the emulator when
+the emulation window loses focus.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="163"/>
+        <source>&amp;Pause emulation when the window loses focus.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="170"/>
+        <source>Use the background color in the border area
+instead of drawing a black border.</source>
+        <translation>Use the background colour in the border area
+instead of drawing a black border.</translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="174"/>
+        <source>&amp;Border color emulation</source>
+        <translation>&amp;Border colour emulation</translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="181"/>
+        <source>Tints the emulator window purple when
+emulation is paused.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="185"/>
+        <source>&amp;Tint the window purple when paused.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="192"/>
+        <source>Simulates the &quot;rolling&quot; effect observed on the
+Mega Drive hardware if 320x240 mode is set
+on NTSC models.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="197"/>
+        <source>&amp;NTSC V30 Rolling</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="213"/>
+        <source>&amp;Intro Effect</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="219"/>
+        <source>&amp;Style:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="242"/>
+        <source>None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="247"/>
+        <source>Gens Logo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="252"/>
+        <source>&quot;Crazy&quot; Effect</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="260"/>
+        <source>&amp;Color:</source>
+        <translation>&amp;Colour:</translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="309"/>
         <location filename="../GeneralConfigWindow_mac.mm" line="81"/>
         <source>G&amp;raphics</source>
         <translation></translation>
     </message>
     <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="315"/>
+        <source>Rendering Options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="321"/>
+        <source>Constrains the viewable image to a 4:3 aspect ratio.
+
+This prevents image artifacting on widescreen
+displays by showing black bars on the sides of
+the screen if the emulation window is maximized.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="328"/>
+        <source>Constrain &amp;aspect ratio to 4:3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="335"/>
+        <source>Enables the &quot;Fast Blur&quot; effect, which simulates
+dithering artifacting as seen on the original system.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="339"/>
+        <source>Fast &amp;Blur</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="346"/>
+        <source>Smoothes the image when scaling the emulation
+window to a larger size than its original resolution.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="350"/>
+        <source>Enable bi&amp;linear filtering</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="359"/>
+        <source>&amp;Interlaced Rendering:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="376"/>
+        <source>Even Lines Only</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="381"/>
+        <source>Odd Lines Only</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="386"/>
+        <source>Alternating Lines</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="412"/>
+        <source>Color Adjustment</source>
+        <translation>Colour Adjustment</translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="418"/>
+        <source>Co&amp;ntrast:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="466"/>
+        <source>&amp;Brightness:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="514"/>
+        <source>Gra&amp;yscale</source>
+        <translation>Gre&amp;yscale</translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="521"/>
+        <source>&amp;Inverted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="528"/>
+        <source>Color &amp;Scale Method:</source>
+        <translation>Colour &amp;Scale Method:</translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="559"/>
+        <source>Raw</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="564"/>
+        <source>Full</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="569"/>
+        <source>Full with S/H</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="596"/>
         <location filename="../GeneralConfigWindow_mac.mm" line="82"/>
         <source>&amp;System</source>
         <translation></translation>
     </message>
     <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="602"/>
+        <source>&amp;Region Code</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="610"/>
+        <source>Current region &amp;setting:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="630"/>
+        <source>Auto-detect from ROM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="635"/>
+        <source>Japan (NTSC)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="640"/>
+        <source>Asia (PAL)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="645"/>
+        <source>USA (NTSC)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="650"/>
+        <source>Europe (PAL)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="666"/>
+        <source>Automatic Region Detection &amp;Order</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="784"/>
         <location filename="../GeneralConfigWindow_mac.mm" line="83"/>
         <source>Sega &amp;CD</source>
+        <translatorcomment>Sega CD is known as Mega CD in Europe.</translatorcomment>
         <translation>Mega &amp;CD</translation>
     </message>
     <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="790"/>
+        <source>Boot &amp;ROMs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="799"/>
+        <source>&amp;USA:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="815"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="838"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="861"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="937"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="982"/>
+        <source>Browse...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="822"/>
+        <source>&amp;Europe:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="845"/>
+        <source>&amp;Japan:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="893"/>
+        <source>Selected ROM: (none)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="921"/>
+        <source>&amp;Asia:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="951"/>
         <location filename="../GeneralConfigWindow_mac.mm" line="84"/>
         <source>E&amp;xternal Programs</source>
         <translation></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="957"/>
+        <source>Data &amp;Compression</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="966"/>
+        <source>Un&amp;RAR:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/GeneralConfigWindow.ui" line="1011"/>
+        <source>Selected Program: (none)</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2098,9 +2069,6 @@ Used to indicate no special CPU features were found.</extracomment>
         <source>No CD-ROM drives found.</source>
         <translation></translation>
     </message>
-</context>
-<context>
-    <name>McdControlWindow</name>
     <message>
         <location filename="../ui/McdControlWindow.ui" line="14"/>
         <source>Sega CD Control Panel</source>
@@ -2110,21 +2078,21 @@ Used to indicate no special CPU features were found.</extracomment>
     <message>
         <location filename="../ui/McdControlWindow.ui" line="20"/>
         <source>CD-ROM Drives</source>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>ZipSelectDialog</name>
+    <name>GensQt4::ZipSelectDialog</name>
     <message>
         <location filename="../ui/ZipSelectDialog.ui" line="14"/>
         <source>Multiple Files in Archive</source>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/ZipSelectDialog.ui" line="23"/>
         <source>This archive contains multiple files.
 Select which file you want to load.</source>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>
