@@ -54,10 +54,6 @@
         <translation>押しボタン構成</translation>
     </message>
     <message>
-        <source>toolBar</source>
-        <translation type="obsolete">ツールバー</translation>
-    </message>
-    <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="204"/>
         <source>Port &amp;1</source>
         <translation>ポート &amp;1</translation>
@@ -486,22 +482,14 @@ window to a larger size than its original resolution.</source>
 <context>
     <name>GensQt4::AboutWindow</name>
     <message>
-        <source>Visit the Gens homepage:</source>
-        <translatorcomment>Lit. &quot;Please come to the Gens homepage&quot;</translatorcomment>
-        <translation type="obsolete">主頁のGensが来遊するください:</translation>
-    </message>
-    <message>
-        <source>Gens/GS II</source>
-        <translation type="obsolete">Gens/GS II</translation>
-    </message>
-    <message>
         <source>Development Build</source>
         <translation type="obsolete">開発ビルド</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="178"/>
         <source>Visit the Gens homepage</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Lit. &quot;Please come to the Gens homepage&quot;</translatorcomment>
+        <translation>主頁のGensが来遊するください</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="184"/>
@@ -584,31 +572,32 @@ Used to indicate no special CPU features were found.</extracomment>
         <location filename="../AboutWindow.cpp" line="461"/>
         <source>OpenGL vendor string</source>
         <extracomment>String identifying the manufacturer of the OpenGL implementation. (e.g. &quot;X.Org R300 Project&quot;)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>OpenGLベンダ列</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="463"/>
         <source>OpenGL renderer string</source>
         <extracomment>String identifying the specific OpenGL renderer. (e.g. &quot;Gallium 0.4 on ATI RV530&quot;)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>OpenGLレンダラ列</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="465"/>
         <source>OpenGL version string</source>
         <extracomment>String identifying the OpenGL renderer version. (e.g. &quot;2.1 Mesa 7.11-devel&quot;)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>OpenGL版列</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="482"/>
         <source>GLSL version string</source>
         <extracomment>String identifying the OpenGL Shading Language version. (e.g. &quot;1.20&quot;)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>GLSL版列</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="516"/>
         <source>Using GL extensions</source>
         <extracomment>List what OpenGL extensions are in use.</extracomment>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Similar &quot;using&quot; issue to that of &quot;Using Qt&quot;</translatorcomment>
+        <translation>GL拡張部分は使用をしている</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="562"/>
@@ -641,27 +630,11 @@ Used to indicate no special CPU features were found.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>OpenGL vendor string:</source>
-        <translation type="obsolete">OpenGLベンダ列:</translation>
-    </message>
-    <message>
         <location filename="../AboutWindow.cpp" line="467"/>
         <location filename="../AboutWindow.cpp" line="502"/>
         <source>(unknown)</source>
         <extracomment>Placeholder used if an OpenGL version string could not be retrieved.</extracomment>
         <translation>(不詳)</translation>
-    </message>
-    <message>
-        <source>OpenGL renderer string:</source>
-        <translation type="obsolete">OpenGLレンダラ列:</translation>
-    </message>
-    <message>
-        <source>OpenGL version string:</source>
-        <translation type="obsolete">OpenGL版列:</translation>
-    </message>
-    <message>
-        <source>GLSL version string:</source>
-        <translation type="obsolete">GLSL版列:</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="493"/>
@@ -683,8 +656,6 @@ Used to indicate no special CPU features were found.</extracomment>
     </message>
     <message>
         <source>Using GL extensions:</source>
-        <translatorcomment>Similar &quot;using&quot; issue to that of &quot;Using Qt&quot;</translatorcomment>
-        <translation type="obsolete">GL拡張部分は使用をしている:</translation>
     </message>
 </context>
 <context>
@@ -770,11 +741,7 @@ Used to indicate no special CPU features were found.</extracomment>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="326"/>
         <source>4-Way Play, Port %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>EA 4-Way Play, Port %1</source>
-        <translation type="obsolete">EA 4ウェイプレーポート %1</translation>
+        <translation>4ウェイプレーポート %1</translation>
     </message>
 </context>
 <context>
@@ -1055,26 +1022,6 @@ Used to indicate no special CPU features were found.</extracomment>
         <comment>rom-format</comment>
         <extracomment>BIN portion of BIN/CUE CD-ROM disc image.</extracomment>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Master System</source>
-        <translation type="obsolete">マスターシステム</translation>
-    </message>
-    <message>
-        <source>Game Gear</source>
-        <translation type="obsolete">ゲームギア</translation>
-    </message>
-    <message>
-        <source>SG-1000</source>
-        <translation type="obsolete">SG-1000</translation>
-    </message>
-    <message>
-        <source>Pico</source>
-        <translation type="obsolete">キッズコンピュータ・ピコ</translation>
-    </message>
-    <message>
-        <source>Unknown</source>
-        <translation type="obsolete">不詳</translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="595"/>
