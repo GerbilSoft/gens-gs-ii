@@ -6,27 +6,28 @@
     <message>
         <location filename="../ui/AboutWindow.ui" line="14"/>
         <source>About Gens/GS II</source>
-        <translation type="unfinished"></translation>
+        <translation>Gens/GS IIについて</translation>
     </message>
     <message>
         <location filename="../ui/AboutWindow.ui" line="57"/>
         <source>&amp;Copyrights</source>
-        <translation type="unfinished"></translation>
+        <translation>著作権 (&amp;C)</translation>
     </message>
     <message>
         <location filename="../ui/AboutWindow.ui" line="95"/>
         <source>Included &amp;Libraries</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Was a bit iffy whether を or が was more appropriate given context; went with を.</translatorcomment>
+        <translation>ライブラリを含した (&amp;L)</translation>
     </message>
     <message>
         <location filename="../ui/AboutWindow.ui" line="130"/>
         <source>&amp;Debug Info</source>
-        <translation type="unfinished"></translation>
+        <translation>デバッグ情報 (&amp;D)</translation>
     </message>
     <message>
         <location filename="../ui/AboutWindow.ui" line="168"/>
         <source>C&amp;redits</source>
-        <translation type="unfinished"></translation>
+        <translation>クレジット (&amp;C)</translation>
     </message>
 </context>
 <context>
@@ -34,32 +35,33 @@
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="17"/>
         <source>Controller Configuration</source>
-        <translation type="unfinished"></translation>
+        <translation>汎用構成</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="43"/>
         <source>Port Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>ポート設定</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="57"/>
         <source>&amp;Device:</source>
-        <translation type="unfinished"></translation>
+        <translation>デバイス: (&amp;D)</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="107"/>
         <source>Button Configuration</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Literal translation: &quot;Push button configuration&quot;</translatorcomment>
+        <translation>押しボタン構成</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="154"/>
         <source>toolBar</source>
-        <translation type="unfinished"></translation>
+        <translation>ツールバー</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="207"/>
         <source>Port &amp;1</source>
-        <translation type="unfinished"></translation>
+        <translation>ポート &amp;1</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="210"/>
@@ -69,7 +71,7 @@
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="222"/>
         <source>Port &amp;2</source>
-        <translation type="unfinished"></translation>
+        <translation>ポート &amp;2</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="225"/>
@@ -79,62 +81,62 @@
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="237"/>
         <source>TP-1A</source>
-        <translation type="unfinished"></translation>
+        <translation>ST-1A</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="249"/>
         <source>TP-1B</source>
-        <translation type="unfinished"></translation>
+        <translation>ST-1B</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="261"/>
         <source>TP-1C</source>
-        <translation type="unfinished"></translation>
+        <translation>ST-1C</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="273"/>
         <source>TP-1D</source>
-        <translation type="unfinished"></translation>
+        <translation>ST-1D</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="285"/>
         <source>TP-2A</source>
-        <translation type="unfinished"></translation>
+        <translation>ST-2A</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="297"/>
         <source>TP-2B</source>
-        <translation type="unfinished"></translation>
+        <translation>ST-2B</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="309"/>
         <source>TP-2C</source>
-        <translation type="unfinished"></translation>
+        <translation>ST-2C</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="321"/>
         <source>TP-2D</source>
-        <translation type="unfinished"></translation>
+        <translation>ST-2D</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="333"/>
         <source>4WP-A</source>
-        <translation type="unfinished"></translation>
+        <translation>4WP-A</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="345"/>
         <source>4WP-B</source>
-        <translation type="unfinished"></translation>
+        <translation>4WP-B</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="357"/>
         <source>4WP-C</source>
-        <translation type="unfinished"></translation>
+        <translation>4WP-C</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="369"/>
         <source>4WP-D</source>
-        <translation type="unfinished"></translation>
+        <translation>4WP-D</translation>
     </message>
 </context>
 <context>
@@ -142,17 +144,17 @@
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="32"/>
         <source>General Configuration</source>
-        <translation type="unfinished"></translation>
+        <translation>汎用構成</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="52"/>
         <source>&amp;General</source>
-        <translation type="unfinished"></translation>
+        <translation>汎用 (&amp;G)</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="58"/>
         <source>Onscreen &amp;Display</source>
-        <translation type="unfinished"></translation>
+        <translation>画面上ディスプレイ(&amp;D)</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="66"/>
@@ -167,7 +169,7 @@
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="141"/>
         <source>&amp;Emulation Options</source>
-        <translation type="unfinished"></translation>
+        <translation>エミュレーションオプション(&amp;E)</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="147"/>
@@ -179,7 +181,8 @@ non-standard checksums.</source>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="152"/>
         <source>Fix incorrect ROM c&amp;hecksums.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Lit. &quot;This fixes incorrect ROM checksums.&quot;</translatorcomment>
+        <translation>このは不正解ROMサムチェックが修正。</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="159"/>
@@ -224,47 +227,49 @@ on NTSC models.</source>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="197"/>
         <source>&amp;NTSC V30 Rolling</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>I love how much ridiculous kanji there is in that</translatorcomment>
+        <translation>&amp;NTSC V30縦視野移動</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="213"/>
         <source>&amp;Intro Effect</source>
-        <translation type="unfinished"></translation>
+        <translation>イントロ効果(&amp;I)</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="219"/>
         <source>&amp;Style:</source>
-        <translation type="unfinished"></translation>
+        <translation>スタイル: (&amp;S)</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="242"/>
         <source>None</source>
-        <translation type="unfinished"></translation>
+        <translation>皆無</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="247"/>
         <source>Gens Logo</source>
-        <translation type="unfinished"></translation>
+        <translation>Gensロゴ</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="252"/>
         <source>&quot;Crazy&quot; Effect</source>
-        <translation type="unfinished"></translation>
+        <translation>「クレージー」効果</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="260"/>
         <source>&amp;Color:</source>
-        <translation type="unfinished"></translation>
+        <translation>色: (&amp;C)</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="309"/>
         <source>G&amp;raphics</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Lit either  &quot;computer graphics&quot; or &quot;graphics processing&quot;</translatorcomment>
+        <translation>図形処理 (&amp;G)</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="315"/>
         <source>Rendering Options</source>
-        <translation type="unfinished"></translation>
+        <translation>レンダリングオプション</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="321"/>
@@ -330,17 +335,17 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="418"/>
         <source>Co&amp;ntrast:</source>
-        <translation type="unfinished"></translation>
+        <translation>コントラスト:</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="466"/>
         <source>&amp;Brightness:</source>
-        <translation type="unfinished"></translation>
+        <translation>輝度: (&amp;B)</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="514"/>
         <source>Gra&amp;yscale</source>
-        <translation type="unfinished"></translation>
+        <translation>グレースケール</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="521"/>
@@ -350,17 +355,17 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="528"/>
         <source>Color &amp;Scale Method:</source>
-        <translation type="unfinished"></translation>
+        <translation>カラースケールメソッド:</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="559"/>
         <source>Raw</source>
-        <translation type="unfinished"></translation>
+        <translation>原</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="564"/>
         <source>Full</source>
-        <translation type="unfinished"></translation>
+        <translation>満</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="569"/>
@@ -370,12 +375,12 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="596"/>
         <source>&amp;System</source>
-        <translation type="unfinished"></translation>
+        <translation>システム</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="602"/>
         <source>&amp;Region Code</source>
-        <translation type="unfinished"></translation>
+        <translation>リージョンコード</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="610"/>
@@ -385,27 +390,28 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="630"/>
         <source>Auto-detect from ROM</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Lit. &quot;Find automatically in ROM&quot;</translatorcomment>
+        <translation>ROMで独りでに捜し当てる</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="635"/>
         <source>Japan (NTSC)</source>
-        <translation type="unfinished"></translation>
+        <translation>日本(NTSC)</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="640"/>
         <source>Asia (PAL)</source>
-        <translation type="unfinished"></translation>
+        <translation>アジア(PAL)</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="645"/>
         <source>USA (NTSC)</source>
-        <translation type="unfinished"></translation>
+        <translation>アメリカ(NTSC)</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="650"/>
         <source>Europe (PAL)</source>
-        <translation type="unfinished"></translation>
+        <translation>ヨーロッパ(PAL)</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="666"/>
@@ -415,17 +421,17 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="784"/>
         <source>Sega &amp;CD</source>
-        <translation type="unfinished"></translation>
+        <translation>メガCD</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="790"/>
         <source>Boot &amp;ROMs</source>
-        <translation type="unfinished"></translation>
+        <translation>ブート&amp;ROMｓ</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="799"/>
         <source>&amp;USA:</source>
-        <translation type="unfinished"></translation>
+        <translation>アメリカ:</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="815"/>
@@ -434,17 +440,17 @@ window to a larger size than its original resolution.</source>
         <location filename="../ui/GeneralConfigWindow.ui" line="937"/>
         <location filename="../ui/GeneralConfigWindow.ui" line="982"/>
         <source>Browse...</source>
-        <translation type="unfinished"></translation>
+        <translation>バロース...</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="822"/>
         <source>&amp;Europe:</source>
-        <translation type="unfinished"></translation>
+        <translation>ヨーロッパ:</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="845"/>
         <source>&amp;Japan:</source>
-        <translation type="unfinished"></translation>
+        <translation>日本:</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="893"/>
@@ -454,7 +460,7 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="921"/>
         <source>&amp;Asia:</source>
-        <translation type="unfinished"></translation>
+        <translation>アジア:</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="951"/>
@@ -464,12 +470,13 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="957"/>
         <source>Data &amp;Compression</source>
-        <translation type="unfinished"></translation>
+        <translation>データ圧縮</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="966"/>
         <source>Un&amp;RAR:</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Lit. &quot;Decompress RAR&quot;</translatorcomment>
+        <translation>解凍するRAR:</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="1011"/>
@@ -482,7 +489,8 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../AboutWindow.cpp" line="161"/>
         <source>Visit the Gens homepage:</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Lit. &quot;Please come to the Gens homepage&quot;</translatorcomment>
+        <translation>主頁のGensが来遊するください:</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="167"/>
@@ -492,73 +500,75 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../AboutWindow.cpp" line="178"/>
         <source>Gens/GS II</source>
-        <translation type="unfinished"></translation>
+        <translation>Gens/GS II</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="179"/>
         <source>Development Build</source>
-        <translation type="unfinished"></translation>
+        <translation>開発ビルド</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="183"/>
         <source>NO-EMULATION BUILD</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Lit. &quot;Non-emulation build&quot;</translatorcomment>
+        <translation>非エミュレーションビルド</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="194"/>
         <source>Sega Genesis / Mega Drive,</source>
-        <translation type="unfinished"></translation>
+        <translation>セガジェネシス/メガドライブ、</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="195"/>
         <source>Sega CD / Mega CD,</source>
-        <translation type="unfinished"></translation>
+        <translation>セガCD/メガCD、</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="196"/>
         <source>Sega 32X emulator</source>
-        <translation type="unfinished"></translation>
+        <translation>スーパ　３２X　エミュレータ</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="288"/>
         <source>Internal copy of %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>%1の内部コピー.</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="354"/>
         <source>Compiled using Qt %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>コンパイルしたがQt%1を使用して.</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="355"/>
         <source>Using Qt %1.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>This is more accurately &quot;has been using Qt %1,&quot; but the grammar is a bit ambiguous either way. It&apos;s saying it as a continuing action.</translatorcomment>
+        <translation>Qt%1は使用をしている.</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="359"/>
         <source>CPU flags</source>
-        <translation type="unfinished"></translation>
+        <translation>CPUフラグ</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="384"/>
         <source>Timing method</source>
-        <translation type="unfinished"></translation>
+        <translation>タイミング法</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="390"/>
         <source>Save directory</source>
-        <translation type="unfinished"></translation>
+        <translation>ディレクトリでセイヴ状態</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="399"/>
         <source>OpenGL disabled.
 </source>
-        <translation type="unfinished"></translation>
+        <translation>OpenGL使用禁止。</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="404"/>
         <source>OpenGL vendor string:</source>
-        <translation type="unfinished"></translation>
+        <translation>OpenGLベンダ列:</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="405"/>
@@ -567,22 +577,22 @@ window to a larger size than its original resolution.</source>
         <location filename="../AboutWindow.cpp" line="418"/>
         <location filename="../AboutWindow.cpp" line="430"/>
         <source>(unknown)</source>
-        <translation type="unfinished"></translation>
+        <translation>(不詳)</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="406"/>
         <source>OpenGL renderer string:</source>
-        <translation type="unfinished"></translation>
+        <translation>OpenGLレンダラ列:</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="408"/>
         <source>OpenGL version string:</source>
-        <translation type="unfinished"></translation>
+        <translation>OpenGL版列:</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="415"/>
         <source>GLSL version string:</source>
-        <translation type="unfinished"></translation>
+        <translation>GLSL版列:</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="424"/>
@@ -597,7 +607,8 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../AboutWindow.cpp" line="444"/>
         <source>Using GL extensions:</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Similar &quot;using&quot; issue to that of &quot;Using Qt&quot;</translatorcomment>
+        <translation>GL拡張部分は使用をしている:</translation>
     </message>
 </context>
 <context>
@@ -605,84 +616,85 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="246"/>
         <source>None</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Lit. &quot;nil/nothing&quot;</translatorcomment>
+        <translation>皆無</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="248"/>
         <source>3-button</source>
-        <translation type="unfinished"></translation>
+        <translation>3ボタン</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="249"/>
         <source>6-button</source>
-        <translation type="unfinished"></translation>
+        <translation>6ボタン</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="250"/>
         <source>2-button</source>
-        <translation type="unfinished"></translation>
+        <translation>2ボタン</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="251"/>
         <location filename="../CtrlConfigWindow.cpp" line="278"/>
         <source>Mega Mouse</source>
-        <translation type="unfinished"></translation>
+        <translation>セガマウス</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="252"/>
         <source>Team Player</source>
-        <translation type="unfinished"></translation>
+        <translation>セガタップ</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="254"/>
         <source>4-Way Play</source>
-        <translation type="unfinished"></translation>
+        <translation>4ウェイプレー</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="273"/>
         <source>No device connected.</source>
-        <translation type="unfinished"></translation>
+        <translation>デバイスが接続しなかった.</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="275"/>
         <source>3-button gamepad</source>
-        <translation type="unfinished"></translation>
+        <translation>3ボタンゲームパッド</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="276"/>
         <source>6-button gamepad</source>
-        <translation type="unfinished"></translation>
+        <translation>6ボタンゲームパッド</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="277"/>
         <source>2-button gamepad (SMS)</source>
-        <translation type="unfinished"></translation>
+        <translation>2ボタンゲームパッド(SMS)</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="279"/>
         <source>Sega Team Player</source>
-        <translation type="unfinished"></translation>
+        <translation>セガタップ</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="281"/>
         <source>EA 4-Way Play</source>
-        <translation type="unfinished"></translation>
+        <translation>EA 4ウェイプレー</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="294"/>
         <source>Port %1</source>
-        <translation type="unfinished"></translation>
+        <translation>ポート %1</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="297"/>
         <location filename="../CtrlConfigWindow.cpp" line="302"/>
         <source>Team Player %1, Port %2</source>
-        <translation type="unfinished"></translation>
+        <translation>セガタップ %1, ポート %2</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="307"/>
         <source>EA 4-Way Play, Port %1</source>
-        <translation type="unfinished"></translation>
+        <translation>EA 4ウェイプレーポート %1</translation>
     </message>
 </context>
 <context>
@@ -690,17 +702,17 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../EmuManager.cpp" line="145"/>
         <source>Open ROM</source>
-        <translation type="unfinished"></translation>
+        <translation>ROMを開く</translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="147"/>
         <source>Sega Genesis ROM images</source>
-        <translation type="unfinished"></translation>
+        <translation>セガメガドライブROMイメージ</translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="160"/>
         <source>Sega Genesis / 32X ROMs; Sega CD disc images</source>
-        <translation type="unfinished"></translation>
+        <translation>セガメガドライブとスーパ３２X ROMｓ; メガCDディスクイメージ</translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="163"/>
@@ -718,98 +730,98 @@ window to a larger size than its original resolution.</source>
         <source>Genesis</source>
         <comment>rom-region</comment>
         <extracomment>MD ROM region is US/NTSC. System name should be the equivalent of &quot;Genesis&quot;.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>ジェネシス</translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="553"/>
         <source>Mega Drive</source>
         <comment>rom-region</comment>
         <extracomment>MD ROM region is not US/NTSC. System name should be the equivalent of &quot;Mega Drive&quot;.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>メガドライブ</translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="560"/>
         <source>Sega CD</source>
         <comment>rom-region</comment>
         <extracomment>MCD disc region is US/NTSC. System name should be the equivalent of &quot;Sega CD&quot;.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>セガCD</translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="565"/>
         <source>Mega CD</source>
         <comment>rom-region</comment>
         <extracomment>MCD disc region is not US/NTSC. System name should be the equivalent of &quot;Mega CD&quot;.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>メガCD</translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="574"/>
         <source>Sega 32X</source>
         <comment>rom-region</comment>
         <extracomment>32X ROM is US/NTSC. System name should be the equivalent of &quot;Sega 32X&quot;.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>セガ３２X</translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="577"/>
         <source>Mega Drive 32X</source>
         <comment>rom-region</comment>
         <extracomment>32X ROM is EU/PAL. System name should be the equivalent of &quot;Mega Drive 32X&quot;.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>メガ３２ｘ</translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="581"/>
         <source>Super 32X</source>
         <comment>rom-region</comment>
         <extracomment>32X ROM is JP or ASIA. System name should be the equivalent of &quot;Super 32X&quot;.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>スーパ３２ｘ</translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="588"/>
         <source>Sega CD 32X</source>
         <comment>rom-region</comment>
         <extracomment>Sega CD 32X disc region is US/NTSC. System name should be the equivalent of &quot;Sega CD 32X&quot;.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>セガCD32X</translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="593"/>
         <source>Mega CD 32X</source>
         <comment>rom-region</comment>
         <extracomment>Sega CD 32X disc region is US/NTSC. System name should be the equivalent of &quot;Mega CD 32X&quot;.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>メガCD32X</translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="597"/>
         <source>Master System</source>
-        <translation type="unfinished"></translation>
+        <translation>マスターシステム</translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="600"/>
         <source>Game Gear</source>
-        <translation type="unfinished"></translation>
+        <translation>ゲームギア</translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="603"/>
         <source>SG-1000</source>
-        <translation type="unfinished"></translation>
+        <translation>SG-1000</translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="606"/>
         <source>Pico</source>
-        <translation type="unfinished"></translation>
+        <translation>キッズコンピュータ・ピコ</translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="609"/>
         <source>Unknown</source>
-        <translation type="unfinished"></translation>
+        <translation>不詳</translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="588"/>
         <source>Port %1 set to %2.</source>
-        <translation type="unfinished"></translation>
+        <translation>ポート%1は%2を据える.</translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="695"/>
         <source>Screenshot %1 saved.</source>
-        <translation type="unfinished"></translation>
+        <translation>スクリーンショット%1を保存した.</translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="712"/>
@@ -824,26 +836,28 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="732"/>
         <source>Stereo</source>
-        <translation type="unfinished"></translation>
+        <translation>ステレオ</translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="732"/>
         <source>Mono</source>
-        <translation type="unfinished"></translation>
+        <translation>モノ</translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="764"/>
         <source>State %1 saved.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Lit. &quot;Save State %1 saved.&quot;</translatorcomment>
+        <translation>セイヴ状態%1保存した.</translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="766"/>
         <source>State saved in %1</source>
-        <translation type="unfinished"></translation>
+        <translation>セイヴ状態の中に%1保存した.</translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="771"/>
         <source>Error saving state: %1</source>
+        <translatorcomment>Lit. &quot;Save state in %1 saved.&quot;</translatorcomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -874,47 +888,47 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="844"/>
         <source>OCCUPIED</source>
-        <translation type="unfinished"></translation>
+        <translation>満</translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="873"/>
         <source>EMPTY</source>
-        <translation type="unfinished"></translation>
+        <translation>空</translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="930"/>
         <source>Hard Reset.</source>
-        <translation type="unfinished"></translation>
+        <translation>ハードリセット。</translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="936"/>
         <source>Soft Reset.</source>
-        <translation type="unfinished"></translation>
+        <translation>ソフトリセット。</translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="1063"/>
         <source>Auto-Detect</source>
-        <translation type="unfinished"></translation>
+        <translation>独りでに捜し当てる</translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="1066"/>
         <source>Japan (NTSC)</source>
-        <translation type="unfinished"></translation>
+        <translation>日本(NTSC)</translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="1069"/>
         <source>Asia (PAL)</source>
-        <translation type="unfinished"></translation>
+        <translation>アジア(PAL)</translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="1072"/>
         <source>USA (NTSC)</source>
-        <translation type="unfinished"></translation>
+        <translation>アメリカ(NTSC)</translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="1075"/>
         <source>Europe (PAL)</source>
-        <translation type="unfinished"></translation>
+        <translation>ヨーロッパ(PAL)</translation>
     </message>
     <message>
         <location filename="../EmuManager_qEmu.cpp" line="1079"/>
@@ -927,7 +941,7 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../cdrom/FindCdromUDisks.cpp" line="315"/>
         <source>Blank %1</source>
-        <translation type="unfinished"></translation>
+        <translation>空%1</translation>
     </message>
 </context>
 <context>
@@ -935,12 +949,12 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../cdrom/FindCdromUnix.cpp" line="160"/>
         <source>Blank %1</source>
-        <translation type="unfinished"></translation>
+        <translation>空%1</translation>
     </message>
     <message>
         <location filename="../cdrom/FindCdromUnix.cpp" line="279"/>
         <source>Unknown disc type.</source>
-        <translation type="unfinished"></translation>
+        <translation>不詳種類のデイスク。</translation>
     </message>
 </context>
 <context>
@@ -948,7 +962,7 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../cdrom/FindCdromWin32.cpp" line="143"/>
         <source>Blank %1</source>
-        <translation type="unfinished"></translation>
+        <translation>空%1</translation>
     </message>
 </context>
 <context>
@@ -956,7 +970,7 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="66"/>
         <source>Warning:</source>
-        <translation type="unfinished"></translation>
+        <translation>警醒:</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="144"/>
@@ -969,7 +983,7 @@ window to a larger size than its original resolution.</source>
         <location filename="../GeneralConfigWindow.cpp" line="820"/>
         <location filename="../GeneralConfigWindow.cpp" line="834"/>
         <source>Sega CD (U)</source>
-        <translation type="unfinished"></translation>
+        <translation>セガCD (U)</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="146"/>
@@ -977,7 +991,7 @@ window to a larger size than its original resolution.</source>
         <location filename="../GeneralConfigWindow.cpp" line="822"/>
         <location filename="../GeneralConfigWindow.cpp" line="851"/>
         <source>Mega CD (E)</source>
-        <translation type="unfinished"></translation>
+        <translation>メガCD (E)</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="147"/>
@@ -985,7 +999,7 @@ window to a larger size than its original resolution.</source>
         <location filename="../GeneralConfigWindow.cpp" line="824"/>
         <location filename="../GeneralConfigWindow.cpp" line="868"/>
         <source>Mega CD (J)</source>
-        <translation type="unfinished"></translation>
+        <translation>メガCD (J)</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="148"/>
@@ -993,7 +1007,7 @@ window to a larger size than its original resolution.</source>
         <location filename="../GeneralConfigWindow.cpp" line="826"/>
         <location filename="../GeneralConfigWindow.cpp" line="886"/>
         <source>Mega CD (Asia)</source>
-        <translation type="unfinished"></translation>
+        <translation>メガCD (アジア)</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="154"/>
@@ -1055,7 +1069,7 @@ window to a larger size than its original resolution.</source>
         <location filename="../GeneralConfigWindow.cpp" line="672"/>
         <location filename="../GeneralConfigWindow.cpp" line="965"/>
         <source>Unknown</source>
-        <translation type="unfinished"></translation>
+        <translation>不詳</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="682"/>
@@ -1065,7 +1079,7 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="690"/>
         <source>This archive has multiple files.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">このアーカイブは多重ファイルが含有です。</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="691"/>
@@ -1100,12 +1114,12 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="754"/>
         <source>(expected %1; found %2)</source>
-        <translation type="unfinished"></translation>
+        <translation>(%1を所期する；%2を見当たる)</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="773"/>
         <source>This Boot ROM is not supported by Gens/GS II.</source>
-        <translation type="unfinished"></translation>
+        <translation>このブートROMはGens/GS IIが対応しない。</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="779"/>
@@ -1220,17 +1234,17 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="1056"/>
         <source>UnRAR</source>
-        <translation type="unfinished"></translation>
+        <translation>解凍するRAR</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="1060"/>
         <source>RAR</source>
-        <translation type="unfinished"></translation>
+        <translation>RAR</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="1064"/>
         <source>UnRAR.dll</source>
-        <translation type="unfinished"></translation>
+        <translation>UnRAR.dll</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="1068"/>
@@ -1240,37 +1254,37 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="1079"/>
         <source>%1 version %2.%3.%4.%5</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 版 %2.%3.%4.%5</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="1086"/>
         <source>%1 version %2.%3</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 版 %2.%3</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="1094"/>
         <source>API version %1</source>
-        <translation type="unfinished"></translation>
+        <translation>API版 %1</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow_mac.mm" line="80"/>
         <source>&amp;General</source>
-        <translation type="unfinished"></translation>
+        <translation>汎用 (&amp;G)</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow_mac.mm" line="81"/>
         <source>G&amp;raphics</source>
-        <translation type="unfinished"></translation>
+        <translation>図形処理 (&amp;G)</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow_mac.mm" line="82"/>
         <source>&amp;System</source>
-        <translation type="unfinished"></translation>
+        <translation>システム</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow_mac.mm" line="83"/>
         <source>Sega &amp;CD</source>
-        <translation type="unfinished"></translation>
+        <translation>メガCD</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow_mac.mm" line="84"/>
@@ -1283,92 +1297,92 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../widgets/GensColorComboBox.cpp" line="68"/>
         <source>White</source>
-        <translation type="unfinished"></translation>
+        <translation>白い</translation>
     </message>
     <message>
         <location filename="../widgets/GensColorComboBox.cpp" line="69"/>
         <source>Black</source>
-        <translation type="unfinished"></translation>
+        <translation>黒い</translation>
     </message>
     <message>
         <location filename="../widgets/GensColorComboBox.cpp" line="70"/>
         <source>Red</source>
-        <translation type="unfinished"></translation>
+        <translation>赤い</translation>
     </message>
     <message>
         <location filename="../widgets/GensColorComboBox.cpp" line="71"/>
         <source>Dark Red</source>
-        <translation type="unfinished"></translation>
+        <translation>暗赤</translation>
     </message>
     <message>
         <location filename="../widgets/GensColorComboBox.cpp" line="72"/>
         <source>Green</source>
-        <translation type="unfinished"></translation>
+        <translation>緑い</translation>
     </message>
     <message>
         <location filename="../widgets/GensColorComboBox.cpp" line="73"/>
         <source>Dark Green</source>
-        <translation type="unfinished"></translation>
+        <translation>暗緑</translation>
     </message>
     <message>
         <location filename="../widgets/GensColorComboBox.cpp" line="74"/>
         <source>Blue</source>
-        <translation type="unfinished"></translation>
+        <translation>青い</translation>
     </message>
     <message>
         <location filename="../widgets/GensColorComboBox.cpp" line="75"/>
         <source>Dark Blue</source>
-        <translation type="unfinished"></translation>
+        <translation>暗青</translation>
     </message>
     <message>
         <location filename="../widgets/GensColorComboBox.cpp" line="76"/>
         <source>Cyan</source>
-        <translation type="unfinished"></translation>
+        <translation>シアン</translation>
     </message>
     <message>
         <location filename="../widgets/GensColorComboBox.cpp" line="77"/>
         <source>Dark Cyan</source>
-        <translation type="unfinished"></translation>
+        <translation>暗シアン</translation>
     </message>
     <message>
         <location filename="../widgets/GensColorComboBox.cpp" line="78"/>
         <source>Magenta</source>
-        <translation type="unfinished"></translation>
+        <translation>マゼンタ</translation>
     </message>
     <message>
         <location filename="../widgets/GensColorComboBox.cpp" line="79"/>
         <source>Dark Magenta</source>
-        <translation type="unfinished"></translation>
+        <translation>暗マゼンタ</translation>
     </message>
     <message>
         <location filename="../widgets/GensColorComboBox.cpp" line="80"/>
         <source>Yellow</source>
-        <translation type="unfinished"></translation>
+        <translation>黄色い</translation>
     </message>
     <message>
         <location filename="../widgets/GensColorComboBox.cpp" line="81"/>
         <source>Dark Yellow</source>
-        <translation type="unfinished"></translation>
+        <translation>暗黄色い</translation>
     </message>
     <message>
         <location filename="../widgets/GensColorComboBox.cpp" line="82"/>
         <source>Gray</source>
-        <translation type="unfinished"></translation>
+        <translation>灰色</translation>
     </message>
     <message>
         <location filename="../widgets/GensColorComboBox.cpp" line="83"/>
         <source>Dark Gray</source>
-        <translation type="unfinished"></translation>
+        <translation>暗灰色</translation>
     </message>
     <message>
         <location filename="../widgets/GensColorComboBox.cpp" line="84"/>
         <source>Light Gray</source>
-        <translation type="unfinished"></translation>
+        <translation>淡灰色</translation>
     </message>
     <message>
         <location filename="../widgets/GensColorComboBox.cpp" line="85"/>
         <source>Transparent</source>
-        <translation type="unfinished"></translation>
+        <translation>透過的</translation>
     </message>
 </context>
 <context>
@@ -1377,39 +1391,39 @@ window to a larger size than its original resolution.</source>
         <location filename="../widgets/GensKeySequenceWidget.cpp" line="268"/>
         <location filename="../widgets/GensKeySequenceWidget.cpp" line="273"/>
         <source>Ctrl</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl</translation>
     </message>
     <message>
         <location filename="../widgets/GensKeySequenceWidget.cpp" line="269"/>
         <location filename="../widgets/GensKeySequenceWidget.cpp" line="274"/>
         <source>Alt</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt</translation>
     </message>
     <message>
         <location filename="../widgets/GensKeySequenceWidget.cpp" line="270"/>
         <source>Win</source>
-        <translation type="unfinished"></translation>
+        <translation>Win</translation>
     </message>
     <message>
         <location filename="../widgets/GensKeySequenceWidget.cpp" line="271"/>
         <location filename="../widgets/GensKeySequenceWidget.cpp" line="276"/>
         <source>Shift</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift</translation>
     </message>
     <message>
         <location filename="../widgets/GensKeySequenceWidget.cpp" line="275"/>
         <source>Meta</source>
-        <translation type="unfinished"></translation>
+        <translation>Meta</translation>
     </message>
     <message>
         <location filename="../widgets/GensKeySequenceWidget.cpp" line="305"/>
         <source>Input</source>
-        <translation type="unfinished"></translation>
+        <translation>Input</translation>
     </message>
     <message>
         <location filename="../widgets/GensKeySequenceWidget.cpp" line="313"/>
         <source>None</source>
-        <translation type="unfinished"></translation>
+        <translation>None</translation>
     </message>
 </context>
 <context>
@@ -1417,17 +1431,18 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="36"/>
         <source>&amp;Open ROM...</source>
-        <translation type="unfinished"></translation>
+        <translation>ROMを開く... （&amp;O)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="37"/>
         <source>&amp;Close ROM</source>
-        <translation type="unfinished"></translation>
+        <translation>ROMを閉め</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="39"/>
         <source>&amp;Save State</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Lit. &quot;Save Savestate&quot;</translatorcomment>
+        <translation>セイヴ状態を保存 (&amp;S)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="40"/>
@@ -1437,97 +1452,99 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="44"/>
         <source>&amp;Preferences...</source>
-        <translation type="unfinished"></translation>
+        <translation>設定...(&amp;P)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="46"/>
         <source>&amp;General Configuration</source>
-        <translation type="unfinished"></translation>
+        <translation>汎用構成 (&amp;G)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="48"/>
         <source>Sega C&amp;D Control Panel</source>
-        <translation type="unfinished"></translation>
+        <translation>メガCD操作パネル (&amp;D)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="54"/>
         <source>&amp;Quit</source>
-        <translation type="unfinished"></translation>
+        <translation>終了(&amp;X)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="63"/>
         <source>Show &amp;Menu Bar</source>
-        <translation type="unfinished"></translation>
+        <translation>&gt;メニュバーを見せる (&amp;M)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="66"/>
         <source>&amp;Resolution</source>
-        <translation type="unfinished"></translation>
+        <translation>解像度 (&amp;R)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="67"/>
         <source>&amp;Color Depth</source>
-        <translation type="unfinished"></translation>
+        <translation>色深度(&amp;C)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="68"/>
         <source>S&amp;tretch Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>ストレッチモード (&amp;T)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="71"/>
         <source>&amp;Screenshot</source>
-        <translation type="unfinished"></translation>
+        <translation>スクリーンショット (&amp;S)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="79"/>
         <source>320x240 (&amp;1x)</source>
-        <translation type="unfinished"></translation>
+        <translation>320x240 (&amp;1x)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="80"/>
         <source>640x480 (&amp;2x)</source>
-        <translation type="unfinished"></translation>
+        <translation>640x480 (&amp;2x)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="81"/>
         <source>960x720 (&amp;3x)</source>
-        <translation type="unfinished"></translation>
+        <translation>960x720 (&amp;3x)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="82"/>
         <source>1280x960 (&amp;4x)</source>
-        <translation type="unfinished"></translation>
+        <translation>1280x960 (&amp;4x)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="90"/>
         <source>15-bit (555)</source>
-        <translation type="unfinished"></translation>
+        <translation>15ビット (555)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="91"/>
         <source>16-bit (565)</source>
-        <translation type="unfinished"></translation>
+        <translation>16ビット (565)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="92"/>
         <source>32-bit (888)</source>
-        <translation type="unfinished"></translation>
+        <translation>32ビット (888)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="100"/>
         <source>None</source>
-        <translation type="unfinished"></translation>
+        <translation>皆無</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="101"/>
         <source>Horizontal Only</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Lit. &quot;Horizontal axis only&quot;</translatorcomment>
+        <translation>水平軸だけ</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="102"/>
         <source>Vertical Only</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Lit. &quot;Vertical axis only&quot;</translatorcomment>
+        <translation>縦軸だけ</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="103"/>
@@ -1537,92 +1554,92 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="111"/>
         <source>&amp;Region</source>
-        <translation type="unfinished"></translation>
+        <translation>リージョン (&amp;R)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="113"/>
         <source>&amp;Hard Reset</source>
-        <translation type="unfinished"></translation>
+        <translation>ハードレセット (&amp;H)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="114"/>
         <source>&amp;Soft Reset</source>
-        <translation type="unfinished"></translation>
+        <translation>ソフトレセット (&amp;S)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="115"/>
         <source>&amp;Pause</source>
-        <translation type="unfinished"></translation>
+        <translation>ポーズ (&amp;P)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="117"/>
         <source>Reset &amp;68000</source>
-        <translation type="unfinished"></translation>
+        <translation>リセット&amp;68000</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="118"/>
         <source>Reset &amp;Z80</source>
-        <translation type="unfinished"></translation>
+        <translation>リセット&amp;Z80</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="126"/>
         <source>&amp;Auto Detect</source>
-        <translation type="unfinished"></translation>
+        <translation>独りでに捜し当てる (&amp;A)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="127"/>
         <source>&amp;Japan (NTSC)</source>
-        <translation type="unfinished"></translation>
+        <translation>日本(NTSC)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="128"/>
         <source>A&amp;sia (PAL)</source>
-        <translation type="unfinished"></translation>
+        <translation>アジア(PAL)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="129"/>
         <source>&amp;USA (NTSC)</source>
-        <translation type="unfinished"></translation>
+        <translation>アメリカ(NTSC)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="130"/>
         <source>&amp;Europe (PAL)</source>
-        <translation type="unfinished"></translation>
+        <translation>ヨーロッパ(PAL)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="161"/>
         <source>Mono</source>
-        <translation type="unfinished"></translation>
+        <translation>モノ</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="162"/>
         <source>Stereo</source>
-        <translation type="unfinished"></translation>
+        <translation>ステレオ</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="170"/>
         <source>&amp;About Gens/GS II</source>
-        <translation type="unfinished"></translation>
+        <translation>Gens/GS IIについて</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="178"/>
         <source>&amp;File</source>
-        <translation type="unfinished"></translation>
+        <translation>ファイル (&amp;F)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="179"/>
         <source>&amp;Graphics</source>
-        <translation type="unfinished"></translation>
+        <translation>図形処理 (&amp;G)</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="180"/>
         <source>&amp;System</source>
-        <translation type="unfinished"></translation>
+        <translation>システム</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="183"/>
         <source>&amp;Help</source>
-        <translation type="unfinished"></translation>
+        <translation>ヘルプ (&amp;H)</translation>
     </message>
 </context>
 <context>
@@ -1630,22 +1647,24 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../GensWindow.cpp" line="367"/>
         <source>Gens/GS II</source>
-        <translation type="unfinished"></translation>
+        <translation>Gens/GS II</translation>
     </message>
     <message>
         <location filename="../GensWindow.cpp" line="368"/>
         <source>dev</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Lit. &quot;development&quot; in computing context</translatorcomment>
+        <translation>開発</translation>
     </message>
     <message>
         <location filename="../GensWindow.cpp" line="370"/>
         <source>NO-EMU</source>
-        <translation type="unfinished"></translation>
+        <translation>非エミュレーション</translation>
     </message>
     <message>
         <location filename="../GensWindow.cpp" line="377"/>
         <source>Idle</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Lit. &quot;idling&quot; as to contrast with &quot;アイドル”（&quot;aidoru&quot;) which is often interpreted as &quot;idol.&quot; There is a more accurate kanji translation but it does not appear to be commonly used in a computing context.</translatorcomment>
+        <translation>アイドリング</translation>
     </message>
     <message numerus="yes">
         <location filename="../GensWindow.cpp" line="401"/>
@@ -1659,16 +1678,17 @@ window to a larger size than its original resolution.</source>
         <location filename="../GensWindow.cpp" line="404"/>
         <source>SRAM saved. (%n byte(s))</source>
         <comment>Onscreen Display</comment>
-        <translation type="unfinished">
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>SRAM保存した. (%n バイト)</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <location filename="../GensWindow.cpp" line="407"/>
         <source>SRAM autosaved. (%n byte(s))</source>
         <comment>Onscreen Display</comment>
+        <translatorcomment>Lit. &quot;SRAM saved by itself. (%n bytes)</translatorcomment>
         <translation type="unfinished">
-            <numerusform></numerusform>
+            <numerusform>SRAM独りでに保存した. (%nバイト)</numerusform>
         </translation>
     </message>
     <message numerus="yes">
@@ -1683,16 +1703,16 @@ window to a larger size than its original resolution.</source>
         <location filename="../GensWindow.cpp" line="413"/>
         <source>EEPROM saved. (%n byte(s))</source>
         <comment>Onscreen Display</comment>
-        <translation type="unfinished">
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>EEPROM保存した. (%n バイト)</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <location filename="../GensWindow.cpp" line="416"/>
         <source>EEPROM autosaved. (%n byte(s))</source>
         <comment>Onscreen Display</comment>
-        <translation type="unfinished">
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>EEPROM独りでに保存した. (%nバイト)</numerusform>
         </translation>
     </message>
     <message>
@@ -1706,17 +1726,17 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../widgets/GensZipDirModel.cpp" line="116"/>
         <source>Filename</source>
-        <translation type="unfinished"></translation>
+        <translation>ファイル名</translation>
     </message>
     <message>
         <location filename="../widgets/GensZipDirModel.cpp" line="117"/>
         <source>Full Filename</source>
-        <translation type="unfinished"></translation>
+        <translation>完全なファイル名</translation>
     </message>
     <message>
         <location filename="../widgets/GensZipDirModel.cpp" line="118"/>
         <source>Filesize</source>
-        <translation type="unfinished"></translation>
+        <translation>ファイルサイズ</translation>
     </message>
 </context>
 <context>
@@ -1734,18 +1754,20 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../McdControlWindow.cpp" line="177"/>
         <source>Searching for CD-ROM drives...</source>
-        <translation type="unfinished"></translation>
+        <translation>CD-ROMドライブが検索をしている...</translation>
     </message>
     <message>
         <location filename="../McdControlWindow.cpp" line="201"/>
         <source>No medium found.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Lit. &quot;Recording media was not found&quot;</translatorcomment>
+        <translation>記録媒体は拾わなかった。</translation>
     </message>
     <message>
         <location filename="../McdControlWindow.cpp" line="278"/>
         <location filename="../McdControlWindow.cpp" line="324"/>
         <source>No CD-ROM drives found.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Lit. &quot;CD-ROM drive was not found.&quot;</translatorcomment>
+        <translation>CD-ROMドライブは拾わなかった.</translation>
     </message>
 </context>
 <context>
@@ -1753,12 +1775,12 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../ui/McdControlWindow.ui" line="14"/>
         <source>Sega CD Control Panel</source>
-        <translation type="unfinished"></translation>
+        <translation>メガCD操作パネ</translation>
     </message>
     <message>
         <location filename="../ui/McdControlWindow.ui" line="20"/>
         <source>CD-ROM Drives</source>
-        <translation type="unfinished"></translation>
+        <translation>CD-ROMドライブ</translation>
     </message>
 </context>
 <context>
@@ -1766,13 +1788,13 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../ui/ZipSelectDialog.ui" line="14"/>
         <source>Multiple Files in Archive</source>
-        <translation type="unfinished"></translation>
+        <translation>多重ファイルの中にアーカイブ</translation>
     </message>
     <message>
         <location filename="../ui/ZipSelectDialog.ui" line="23"/>
         <source>This archive contains multiple files.
 Select which file you want to load.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">このアーカイブは多重ファイルが含有です.</translation>
     </message>
 </context>
 </TS>
