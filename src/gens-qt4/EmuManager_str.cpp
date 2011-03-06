@@ -228,4 +228,54 @@ QString EmuManager::SysName_l(LibGens::Rom::MDP_SYSTEM_ID sysId)
 	return QString();
 }
 
+
+/**
+ * RomFormat(): Get the ROM format name for the specified ROM format ID.
+ * @param romFormat ROM format ID.
+ * @return ROM format name, or empty string on error.
+ */
+QString EmuManager::RomFormat(LibGens::Rom::RomFormat romFormat)
+{
+	switch (romFormat)
+	{
+		case LibGens::Rom::RFMT_BINARY:
+			//: Plain binary ROM dump.
+			return tr("Binary", "rom-format");
+		
+		case LibGens::Rom::RFMT_SMD:
+			//: Interleaved ROM dump from a Super Magic Drive.
+			return tr("Super Magic Drive", "rom-format");
+		
+		case LibGens::Rom::RFMT_SMD_SPLIT:
+			//: Split interleaved ROM dump from a Super Magic Drive.
+			return tr("Super Magic Drive (split)", "rom-format");
+		
+		case LibGens::Rom::RFMT_MGD:
+			//: Interleaved ROM dump from a Multi Game Doctor.
+			return tr("Multi Game Doctor", "rom-format");
+		
+		case LibGens::Rom::RFMT_CD_CUE:
+			//: CD-ROM cue sheet. (Used for BIN/CUE.)
+			return tr("CD-ROM cue sheet", "rom-format");
+		
+		case LibGens::Rom::RFMT_CD_ISO_2048:
+		case LibGens::Rom::RFMT_CD_ISO_2352:
+			//: Standard ISO-9660 CD-ROM disc image.
+			return tr("ISO-9660 CD-ROM image (%1-byte sectors)", "rom-format")
+				.arg(romFormat == LibGens::Rom::RFMT_CD_ISO_2048 ? 2048 : 2352);
+		
+		case LibGens::Rom::RFMT_CD_BIN_2048:
+		case LibGens::Rom::RFMT_CD_BIN_2352:
+			//: BIN portion of BIN/CUE CD-ROM disc image.
+			return tr("Raw CD-ROM image (%1-byte sectors)", "rom-format")
+				.arg(romFormat == LibGens::Rom::RFMT_CD_BIN_2048 ? 2048 : 2352);
+		
+		default:
+			return QString();
+	}
+	
+	// Should not get here...
+	return QString();
+}
+
 }

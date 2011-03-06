@@ -207,6 +207,13 @@ class EmuManager : public QObject
 		 */
 		static QString SysName_l(LibGens::Rom::MDP_SYSTEM_ID sysId);
 	
+		/**
+		 * RomFormat(): Get the ROM format name for the specified ROM format ID.
+		 * @param romFormat ROM format ID.
+		 * @return ROM format name, or empty string on error.
+		 */
+		QString RomFormat(LibGens::Rom::RomFormat romFormat);
+	
 	/** Emulation Request Struct. **/
 	
 	public:
