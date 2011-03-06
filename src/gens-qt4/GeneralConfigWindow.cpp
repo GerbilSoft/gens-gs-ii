@@ -246,6 +246,41 @@ void GeneralConfigWindow::keyPressEvent(QKeyEvent *event)
 
 
 /**
+ * changeEvent(): Widget state has changed.
+ * @param event State change event.
+ */
+void GeneralConfigWindow::changeEvent(QEvent *event)
+{
+	if (event->type() != QEvent::LanguageChange)
+		return;
+	
+	// Retranslate the UI.
+	retranslateUi(this);
+	
+	// Update Sega CD Boot ROM file status.
+	// TODO: Update the display for the last selected ROM.
+	QString sNewRomStatus;
+	sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomUSA, MCD_REGION_USA);
+	if (!sNewRomStatus.isEmpty())
+		sMcdRomStatus_USA = sNewRomStatus;
+	sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomEUR, MCD_REGION_EUROPE);
+	if (!sNewRomStatus.isEmpty())
+		sMcdRomStatus_EUR = sNewRomStatus;
+	sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomJPN, MCD_REGION_JAPAN);
+	if (!sNewRomStatus.isEmpty())
+		sMcdRomStatus_JPN = sNewRomStatus;
+	sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomAsia, MCD_REGION_ASIA);
+	if (!sNewRomStatus.isEmpty())
+		sMcdRomStatus_Asia = sNewRomStatus;
+	
+	// Update external program status.
+	// TODO: Split the RAR check code out of the on_txtExtPrgUnRAR_textChanged() function.
+	// NOTE: Calling on_txtExtPrgUnRAR_textChanged() will enable the Apply button!
+	on_txtExtPrgUnRAR_textChanged();
+}
+
+
+/**
  * accept(): Accept the configuration changes.
  * Triggered if "OK" is clicked.
  */

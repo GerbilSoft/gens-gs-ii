@@ -145,6 +145,23 @@ void AboutWindow::ShowSingle(QWidget *parent)
 
 
 /**
+ * changeEvent(): Widget state has changed.
+ * @param event State change event.
+ */
+void AboutWindow::changeEvent(QEvent *event)
+{
+	if (event->type() != QEvent::LanguageChange)
+		return;
+	
+	// Retranslate the UI.
+	retranslateUi(this);
+	
+	// Reinitialize the About Window text.
+	initAboutWindowText();
+}
+
+
+/**
  * initAboutWindowText(): Initialize the About Window text.
  */
 void AboutWindow::initAboutWindowText(void)

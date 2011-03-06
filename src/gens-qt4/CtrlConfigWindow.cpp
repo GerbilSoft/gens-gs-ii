@@ -230,6 +230,27 @@ void CtrlConfigWindow::keyPressEvent(QKeyEvent *event)
 
 
 /**
+ * changeEvent(): Widget state has changed.
+ * @param event State change event.
+ */
+void CtrlConfigWindow::changeEvent(QEvent *event)
+{
+	if (event->type() != QEvent::LanguageChange)
+		return;
+	
+	// Retranslate the UI.
+	retranslateUi(this);
+	
+	// Update the port buttons.
+	for (int i = 0; i < CTRL_CFG_MAX_PORTS; i++)
+		updatePortButton(i);
+	
+	// Update the selected port information.
+	updatePortSettings(m_selPort);
+}
+
+
+/**
  * GetShortDeviceName(): Get the short name of an I/O device.
  * @param devType Device type.
  * @return Short device name.

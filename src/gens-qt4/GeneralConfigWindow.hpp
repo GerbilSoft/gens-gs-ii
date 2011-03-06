@@ -72,6 +72,9 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		
 		void keyPressEvent(QKeyEvent *event);
 		
+		// State change event. (Used for switching the UI language at runtime.)
+		void changeEvent(QEvent *event);
+		
 		// Button CSS colors.
 		static const QString ms_sCssBtnColors;
 		

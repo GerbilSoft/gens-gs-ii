@@ -69,14 +69,17 @@ int gens_main(int argc, char *argv[])
 	// Initialize the Qt translation system.
 	// TODO: Allow switching languages on the fly?
 	// TODO: Translations subdirectory.
-	QTranslator qt_translator;
-	qt_translator.load(QLatin1String("qt_") + QLocale::system().name(),
+	GensQt4::gqt4_qtTranslator = new QTranslator(GensQt4::gqt4_app);
+	GensQt4::gqt4_qtTranslator->load(
+		QLatin1String("qt_") + QLocale::system().name(),
 		QLibraryInfo::location(QLibraryInfo::TranslationsPath));
-	GensQt4::gqt4_app->installTranslator(&qt_translator);
+	GensQt4::gqt4_app->installTranslator(GensQt4::gqt4_qtTranslator);
 	
-	QTranslator gqt4_translator;
-	gqt4_translator.load(QLatin1String("gens-qt4_") + QLocale::system().name());
-	GensQt4::gqt4_app->installTranslator(&gqt4_translator);
+	// Initialize the Gens translator.
+	GensQt4::gqt4_gensTranslator = new QTranslator(GensQt4::gqt4_app);
+	GensQt4::gqt4_gensTranslator->load(
+		QLatin1String("gens-qt4_") + QLocale::system().name());
+	GensQt4::gqt4_app->installTranslator(GensQt4::gqt4_gensTranslator);
 	
 	// Initialize LibGens.
 	LibGens::Init();
@@ -105,6 +108,8 @@ int gens_main(int argc, char *argv[])
 	 * Example: On Windows, if the user logs off while the program's running,
 	 * app.exec() won't return.
 	 */
+	
+	// TODO: Delete the translators?
 	
 	// Unregister the LibGens OSD handler.
 	// TODO: Do this earlier?
@@ -168,6 +173,10 @@ GensConfig *gqt4_config = NULL;
 // Emulation objects.
 EmuThread *gqt4_emuThread = NULL;		// Thread.
 LibGens::EmuContext *gqt4_emuContext = NULL;	// Context.
+
+// Qt translators.
+QTranslator *gqt4_qtTranslator = NULL;
+QTranslator *gqt4_gensTranslator = NULL;
 
 /**
  * QuitGens(): Quit Gens.

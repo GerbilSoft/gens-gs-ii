@@ -41,6 +41,9 @@ class AboutWindow : public QDialog, public Ui::AboutWindow
 		AboutWindow(QWidget *parent = NULL);
 		virtual ~AboutWindow();
 		
+		// State change event. (Used for switching the UI language at runtime.)
+		void changeEvent(QEvent *event);
+		
 		// Initialize the About Window text.
 		void initAboutWindowText(void);
 		bool m_scrlAreaInit;

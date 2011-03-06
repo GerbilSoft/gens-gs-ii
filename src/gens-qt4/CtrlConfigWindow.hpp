@@ -68,6 +68,9 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		
 		void keyPressEvent(QKeyEvent *event);
 		
+		// State change event. (Used for switching the UI language at runtime.)
+		void changeEvent(QEvent *event);
+		
 		// Constant data.
 		static const char *ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX];
 		static const QString GetShortDeviceName(LibGens::IoBase::IoType devType);

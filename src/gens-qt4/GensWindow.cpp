@@ -317,6 +317,25 @@ void GensWindow::dropEvent(QDropEvent *event)
 
 
 /**
+ * changeEvent(): Widget state has changed.
+ * @param event State change event.
+ */
+void GensWindow::changeEvent(QEvent *event)
+{
+	if (event->type() != QEvent::LanguageChange)
+		return;
+	
+	// Retranslate the menu bar.
+	m_gensMenuBar->retranslate();
+	
+	// If the menu bar is visible, remove it and
+	// add a new menu bar with the new language.
+	if (this->menuWidget() != NULL)
+		this->setMenuBar(m_gensMenuBar->createMenuBar());
+}
+
+
+/**
  * rescale(): Rescale the window.
  * @param scale New scale value.
  */
