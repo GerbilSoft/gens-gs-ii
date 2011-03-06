@@ -52,6 +52,8 @@ class GensCtrlCfgWidgetPrivate
 		
 		inline LibGens::IoBase::IoType ioType(void);
 		void setIoType(LibGens::IoBase::IoType newIoType);
+		
+		static QString ButtonName_l(LibGens::IoBase::ButtonName_t buttonName);
 	
 	private:
 		GensCtrlCfgWidget *const q;
@@ -155,15 +157,11 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoBase::IoType newIoType)
 	
 	// Show the buttons, in logical button order.
 	QString sBtnLabel;
-	const char *cBtnLabel;
 	for (int i = 0, button = 0;
 	     i < numButtons && button >= 0; i++)
 	{
-		cBtnLabel = ctrl->buttonName(button);
-		if (!cBtnLabel)
-			sBtnLabel.clear();
-		else
-			sBtnLabel = QLatin1String(cBtnLabel) + QChar(L':');
+		LibGens::IoBase::ButtonName_t buttonName = ctrl->buttonName(button);
+		sBtnLabel = ButtonName_l(buttonName);
 		
 		m_lblCfg[i]->setText(sBtnLabel);
 		m_lblCfg[i]->setVisible(true);
@@ -182,6 +180,99 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoBase::IoType newIoType)
 	
 	// Delete the IoBase object
 	delete ctrl;
+}
+
+
+/**
+ * ButtonName_l(): Get a localized LibGens button name.
+ * @param buttonName LibGens button name.
+ * @return Localized button name, or empty string on error.
+ */
+QString GensCtrlCfgWidgetPrivate::ButtonName_l(LibGens::IoBase::ButtonName_t buttonName)
+{
+	switch (buttonName)
+	{
+		// Standard controller buttons.
+		case LibGens::IoBase::BTNNAME_UP:
+			//: Standard controller: D-Pad UP.
+			return GensCtrlCfgWidget::tr("Up", "controller-standard");
+		
+		case LibGens::IoBase::BTNNAME_DOWN:
+			//: Standard controller: D-Pad DOWN.
+			return GensCtrlCfgWidget::tr("Down", "controller-standard");
+		
+		case LibGens::IoBase::BTNNAME_LEFT:
+			//: Standard controller: D-Pad LEFT.
+			return GensCtrlCfgWidget::tr("Left", "controller-standard");
+		
+		case LibGens::IoBase::BTNNAME_RIGHT:
+			//: Standard controller: D-Pad RIGHT.
+			return GensCtrlCfgWidget::tr("Right", "controller-standard");
+			
+		case LibGens::IoBase::BTNNAME_B:
+			//: Standard controller: B button.
+			return GensCtrlCfgWidget::tr("B", "controller-standard");
+		
+		case LibGens::IoBase::BTNNAME_C:
+			//: Standard controller: C button.
+			return GensCtrlCfgWidget::tr("C", "controller-standard");
+			
+		case LibGens::IoBase::BTNNAME_A:
+			//: Standard controller: A button.
+			return GensCtrlCfgWidget::tr("A", "controller-standard");
+		
+		case LibGens::IoBase::BTNNAME_START:
+			//: Standard controller: START button.
+			return GensCtrlCfgWidget::tr("Start", "controller-standard");
+		
+		case LibGens::IoBase::BTNNAME_Z:
+			//: Standard controller: Z button.
+			return GensCtrlCfgWidget::tr("Z", "controller-standard");
+		
+		case LibGens::IoBase::BTNNAME_Y:
+			//: Standard controller: Y button.
+			return GensCtrlCfgWidget::tr("Y", "controller-standard");
+		
+		case LibGens::IoBase::BTNNAME_X:
+			//: Standard controller: X button.
+			return GensCtrlCfgWidget::tr("X", "controller-standard");
+		
+		case LibGens::IoBase::BTNNAME_MODE:
+			//: Standard controller: MODE button.
+			return GensCtrlCfgWidget::tr("Mode", "controller-standard");
+		
+		// SMS/GG buttons.
+		case LibGens::IoBase::BTNNAME_1:
+			//: SMS/Game Gear: 1 button.
+			return GensCtrlCfgWidget::tr("1", "controller-sms-gg");
+		
+		case LibGens::IoBase::BTNNAME_2:
+			//: SMS/Game Gear: 2 button.
+			return GensCtrlCfgWidget::tr("2", "controller-sms-gg");
+		
+		// Sega Mega Mouse buttons.
+		case LibGens::IoBase::BTNNAME_MOUSE_LEFT:
+			//: Sega Mega Mouse: LEFT mouse button.
+			return GensCtrlCfgWidget::tr("Left", "controller-mouse");
+		
+		case LibGens::IoBase::BTNNAME_MOUSE_RIGHT:
+			//: Sega Mega Mouse: RIGHT mouse button.
+			return GensCtrlCfgWidget::tr("Right", "controller-mouse");
+		
+		case LibGens::IoBase::BTNNAME_MOUSE_MIDDLE:
+			//: Sega Mega Mouse: MIDDLE mouse button.
+			return GensCtrlCfgWidget::tr("Middle", "controller-mouse");
+		
+		case LibGens::IoBase::BTNNAME_MOUSE_START:
+			//: Sega Mega Mouse: START button.
+			return GensCtrlCfgWidget::tr("Start", "controller-mouse");
+		
+		default:
+			return QString();
+	}
+	
+	// Should not get here...
+	return QString();
 }
 
 
