@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CtrlConfigWindow</class>
- <widget class="QMainWindow" name="CtrlConfigWindow">
+ <class>GensQt4::CtrlConfigWindow</class>
+ <widget class="QMainWindow" name="GensQt4::CtrlConfigWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -108,7 +108,7 @@
           </property>
           <layout class="QVBoxLayout" name="vboxBtnCfg">
            <item>
-            <widget class="GensQt4::GensCtrlCfgWidget" name="ctrlCfgWidget" native="true">
+            <widget class="GensCtrlCfgWidget" name="ctrlCfgWidget" native="true">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                <horstretch>0</horstretch>
@@ -369,7 +369,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>GensQt4::GensCtrlCfgWidget</class>
+   <class>GensCtrlCfgWidget</class>
    <extends>QWidget</extends>
    <header>widgets/GensCtrlCfgWidget.hpp</header>
    <container>1</container>
@@ -385,7 +385,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>CtrlConfigWindow</receiver>
+   <receiver>GensQt4::CtrlConfigWindow</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -401,7 +401,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>CtrlConfigWindow</receiver>
+   <receiver>GensQt4::CtrlConfigWindow</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

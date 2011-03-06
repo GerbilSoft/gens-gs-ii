@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>GeneralConfigWindow</class>
- <widget class="QMainWindow" name="GeneralConfigWindow">
+ <class>GensQt4::GeneralConfigWindow</class>
+ <widget class="QMainWindow" name="GensQt4::GeneralConfigWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -271,7 +271,7 @@ on NTSC models.</string>
             </widget>
            </item>
            <item row="1" column="2">
-            <widget class="GensQt4::GensColorComboBox" name="cboIntroColor">
+            <widget class="GensColorComboBox" name="cboIntroColor">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -904,16 +904,16 @@ window to a larger size than its original resolution.</string>
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="GensQt4::GensLineEdit" name="txtMcdRomUSA"/>
+            <widget class="GensLineEdit" name="txtMcdRomUSA"/>
            </item>
            <item row="1" column="1">
-            <widget class="GensQt4::GensLineEdit" name="txtMcdRomEUR"/>
+            <widget class="GensLineEdit" name="txtMcdRomEUR"/>
            </item>
            <item row="2" column="1">
-            <widget class="GensQt4::GensLineEdit" name="txtMcdRomJPN"/>
+            <widget class="GensLineEdit" name="txtMcdRomJPN"/>
            </item>
            <item row="3" column="1">
-            <widget class="GensQt4::GensLineEdit" name="txtMcdRomAsia"/>
+            <widget class="GensLineEdit" name="txtMcdRomAsia"/>
            </item>
            <item row="3" column="0">
             <widget class="QLabel" name="lblMcdRomAsia">
@@ -1022,7 +1022,7 @@ window to a larger size than its original resolution.</string>
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="GensQt4::GensLineEdit" name="txtExtPrgUnRAR"/>
+            <widget class="GensLineEdit" name="txtExtPrgUnRAR"/>
            </item>
           </layout>
          </widget>
@@ -1050,12 +1050,12 @@ window to a larger size than its original resolution.</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>GensQt4::GensLineEdit</class>
+   <class>GensLineEdit</class>
    <extends>QLineEdit</extends>
    <header>widgets/GensLineEdit.hpp</header>
   </customwidget>
   <customwidget>
-   <class>GensQt4::GensColorComboBox</class>
+   <class>GensColorComboBox</class>
    <extends>QComboBox</extends>
    <header>widgets/GensColorComboBox.hpp</header>
   </customwidget>
@@ -1103,7 +1103,7 @@ window to a larger size than its original resolution.</string>
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>GeneralConfigWindow</receiver>
+   <receiver>GensQt4::GeneralConfigWindow</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -1119,7 +1119,7 @@ window to a larger size than its original resolution.</string>
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>GeneralConfigWindow</receiver>
+   <receiver>GensQt4::GeneralConfigWindow</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
