@@ -56,7 +56,7 @@ class IoMegaMouse : public IoBase
 		int numButtons(void) const
 			{ return 4; }
 		int nextLogicalButton(int button) const;
-		const char *buttonName(int button) const;
+		ButtonName_t buttonName(int button) const;
 	
 	protected:
 		/**

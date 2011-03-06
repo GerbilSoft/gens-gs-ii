@@ -54,9 +54,7 @@ class Io4WPSlave : public IoBase
 		IoType devType(void) const
 			{ return IOT_4WP_SLAVE; }
 		int numButtons(void) const
-			{ return 12; }	// TODO
-		int nextLogicalButton(int button) const;	// TODO
-		const char *buttonName(int button) const;	// TODO
+			{ return 0; }	// TODO
 		
 		// 4WP-specific: Set slave controller.
 		void setSlaveController(int id);

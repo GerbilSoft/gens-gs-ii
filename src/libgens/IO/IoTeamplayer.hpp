@@ -54,9 +54,7 @@ class IoTeamplayer : public IoBase
 		IoType devType(void) const
 			{ return IOT_TEAMPLAYER; }
 		int numButtons(void) const
-			{ return 12; }
-		int nextLogicalButton(int button) const;
-		const char *buttonName(int button) const;
+			{ return 0; }
 	
 	protected:
 		/**

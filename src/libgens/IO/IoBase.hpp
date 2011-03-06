@@ -128,10 +128,49 @@ class IoBase
 			((void)button);
 			return -1;
 		}
-		virtual const char *buttonName(int button) const
+		
+		// Logical button names.
+		// These are used for button name trnaslation in the UI.
+		enum ButtonName_t
+		{
+			BTNNAME_UNKNOWN	= -1,
+			
+			// Standard controller buttons.
+			BTNNAME_UP	= 0,
+			BTNNAME_DOWN	= 1,
+			BTNNAME_LEFT	= 2,
+			BTNNAME_RIGHT	= 3,
+			BTNNAME_B	= 4,
+			BTNNAME_C	= 5,
+			BTNNAME_A	= 6,
+			BTNNAME_START	= 7,
+			BTNNAME_Z	= 8,
+			BTNNAME_Y	= 9,
+			BTNNAME_X	= 10,
+			BTNNAME_MODE	= 11,
+			
+			// SMS/GG buttons.
+			BTNNAME_1	= 12,
+			BTNNAME_2	= 13,
+			
+			// Sega Mega Mouse buttons.
+			BTNNAME_MOUSE_LEFT	= 14,
+			BTNNAME_MOUSE_RIGHT	= 15,
+			BTNNAME_MOUSE_MIDDLE	= 16,
+			BTNNAME_MOUSE_START	= 17,
+			
+			BTNNAME_MAX
+		};
+		
+		/**
+		 * buttonName(): Get the name for a given button index.
+		 * @param button Button index.
+		 * @return Button name, or BTNNAME_UNKNOWN if the button index is invalid.
+		 */
+		virtual ButtonName_t buttonName(int button) const
 		{
 			((void)button);
-			return NULL;
+			return BTNNAME_UNKNOWN;
 		}
 		
 		/** ZOMG savestate functions. **/
@@ -224,6 +263,9 @@ class IoBase
 		// Button index values.
 		enum ButtonIndex
 		{
+			BTNI_UNKNOWN	= -1,
+			
+			// Standard controller buttons.
 			BTNI_UP		= 0,
 			BTNI_DOWN	= 1,
 			BTNI_LEFT	= 2,

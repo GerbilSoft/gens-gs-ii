@@ -44,7 +44,7 @@ class Io2Button : public IoBase
 		int numButtons(void) const
 			{ return 6; }
 		int nextLogicalButton(int button) const;
-		const char *buttonName(int button) const;
+		ButtonName_t buttonName(int button) const;
 };
 
 }

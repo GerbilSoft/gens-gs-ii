@@ -53,8 +53,6 @@ class Io4WPMaster : public IoBase
 			{ return IOT_4WP_MASTER; }
 		int numButtons(void) const
 			{ return 0; }
-		int nextLogicalButton(int button) const;
-		const char *buttonName(int button) const;
 		
 		// 4WP-specific: Set slave device.
 		void setSlaveDevice(Io4WPSlave *slave);

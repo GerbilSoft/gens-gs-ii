@@ -56,7 +56,7 @@ class Io6Button : public IoBase
 		int numButtons(void) const
 			{ return 12; }
 		int nextLogicalButton(int button) const;
-		const char *buttonName(int button) const;
+		ButtonName_t buttonName(int button) const;
 	
 	protected:
 		/**
