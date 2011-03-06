@@ -110,7 +110,7 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 	}
 	
 	// Query CD-ROM drives.
-	//query();
+	query();
 }
 
 
