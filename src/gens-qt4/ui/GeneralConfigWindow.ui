@@ -552,21 +552,21 @@ window to a larger size than its original resolution.</string>
                 </sizepolicy>
                </property>
                <property name="currentIndex">
-                <number>2</number>
+                <number>1</number>
                </property>
                <item>
                 <property name="text">
-                 <string>Raw</string>
+                 <string comment="color-scale-method" extracomment="Raw color scaling. (MD $EEE -&gt; #E0E0E0)">Raw</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>Full</string>
+                 <string comment="color-scale-method" extracomment="Full color scaling. (MD $EEE -&gt; #FFFFFF)">Full</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>Full with S/H</string>
+                 <string comment="color-scale-method" extracomment="Full+S/H color scaling. (MD $EEE -&gt; #EEEEEE)">Full with S/H</string>
                 </property>
                </item>
               </widget>
