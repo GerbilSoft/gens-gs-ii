@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -39,14 +39,12 @@ class Io3Button : public IoBase
 		uint8_t readData(void);
 		
 		// Controller configuration.
-		const char *devName(void) const
-			{ return "3-button gamepad"; }
 		IoType devType(void) const
 			{ return IOT_3BTN; }
 		int numButtons(void) const
 			{ return 8; }
 		int nextLogicalButton(int button) const;
-		const char *buttonName(int button) const;
+		ButtonName_t buttonName(int button) const;
 };
 
 }

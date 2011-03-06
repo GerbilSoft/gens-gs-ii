@@ -311,7 +311,7 @@ void GLBackend::reallocTexOsd(void)
 	
 	// Load the OSD texture.
 	// TODO: Handle the case where the image isn't found.
-	QImage imgOsd = QImage(QString::fromLatin1(":/gens/vga-charset.png"));
+	QImage imgOsd = QImage(QLatin1String(":/gens/vga-charset.png"));
 	QVector<QRgb> colorTable = imgOsd.colorTable();
 	
 	if (!colorTable.isEmpty())

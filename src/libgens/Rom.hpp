@@ -80,13 +80,13 @@ class Rom
 			RFMT_BINARY,		// Plain binary ROM image.
 			RFMT_SMD,		// Interleaved ROM image from Super Magic Drive.
 			RFMT_SMD_SPLIT,		// Multi-part SMD image. (Probably won't be supported.)
-			RFMT_MGD,		// Interleaved ROM image from Multi-Game-Doctor.
+			RFMT_MGD,		// Interleaved ROM image from Multi Game Doctor.
 			
 			// TODO: CD-ROM image handling.
 			RFMT_CD_CUE,		// CD-ROM image, CUE sheet.
 			RFMT_CD_ISO_2048,	// CD-ROM image, ISO-9660 format. (2048-byte sectors)
-			RFMT_CD_ISO_2352,	// CD-ROM image, ISO-9660 format. (2048-byte sectors)
-			RFMT_CD_BIN_2048,	// CD-ROM image, BIN format. (2352-byte sectors)
+			RFMT_CD_ISO_2352,	// CD-ROM image, ISO-9660 format. (2352-byte sectors)
+			RFMT_CD_BIN_2048,	// CD-ROM image, BIN format. (2048-byte sectors)
 			RFMT_CD_BIN_2352,	// CD-ROM image, BIN format. (2352-byte sectors)
 		};
 		
@@ -136,22 +136,6 @@ class Rom
 		// TODO: Change to uint8_t?
 		int regionCode(void) const
 			{ return m_regionCode; }
-		
-		/**
-		 * RegionCodeStr(): Get a string identifying a given region code.
-		 * NOTE: This function returns an ASCII string, suitable for translation.
-		 * @param region Region code.
-		 * @return Region code string, or NULL on error.
-		 */
-		static const char *RegionCodeStr(SysVersion::RegionCode_t region);
-		
-		/**
-		 * RegionCodeStrMD(): Get a string identifying a given region code. (MD hex code)
-		 * NOTE: This function returns an ASCII string, suitable for translation.
-		 * @param region Region code.
-		 * @return Region code string, or NULL on error.
-		 */
-		static const char *RegionCodeStrMD(int region);
 		
 		/** Multi-file ROM archive support. **/
 		

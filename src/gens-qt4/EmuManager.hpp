@@ -74,8 +74,8 @@ class EmuManager : public QObject
 			{ return m_saveSlot; }
 		
 		// ROM information.
-		QString romName(void);
-		QString sysName(void);
+		QString romName(void);	// Active ROM name.
+		QString sysName(void);	// System name for the active ROM, based on ROM region.
 		
 		/** Rom class passthrough functions. **/
 		
@@ -165,6 +165,54 @@ class EmuManager : public QObject
 			loadRom_int(m_loadRom_int_tmr_rom);
 			m_loadRom_int_tmr_rom = NULL;
 		}
+	
+	/** Translatable string functions. **/
+	
+	public:
+		/**
+		 * LgRegionCodeStr(): Get a string identifying a given LibGens region code.
+		 * @param region Region code.
+		 * @return Region code string, or empty string on error.
+		 */
+		static QString LgRegionCodeStr(LibGens::SysVersion::RegionCode_t region);
+		
+		/**
+		 * LgRegionCodeStr(): Get a string identifying a given GensConfig region code.
+		 * TODO: Combine ConfRegionCode_t with RegionCode_t.
+		 * @param region Region code.
+		 * @return Region code string, or empty string on error.
+		 */
+		static QString GcRegionCodeStr(GensConfig::ConfRegionCode_t region);
+		
+		/**
+		 * LgRegionCodeStrMD(): Get a string identifying a given region code. (MD hex code)
+		 * @param region Region code.
+		 * @return Region code string, or empty string on error.
+		 */
+		static QString LgRegionCodeStrMD(int region);
+		
+		/**
+		 * SysName(): Get the system name for the specified system ID and region.
+		 * @param sysID System ID.
+		 * @param region Region.
+		 * @return System name, or empty string on error.
+		 */
+		static QString SysName(LibGens::Rom::MDP_SYSTEM_ID sysId,
+					LibGens::SysVersion::RegionCode_t region);
+		
+		/**
+		 * SysName_l(): Get the localized system name for the specified system ID.
+		 * @param sysID System ID.
+		 * @return Localized system name, or empty string on error.
+		 */
+		static QString SysName_l(LibGens::Rom::MDP_SYSTEM_ID sysId);
+	
+		/**
+		 * RomFormat(): Get the ROM format name for the specified ROM format ID.
+		 * @param romFormat ROM format ID.
+		 * @return ROM format name, or empty string on error.
+		 */
+		QString RomFormat(LibGens::Rom::RomFormat romFormat);
 	
 	/** Emulation Request Struct. **/
 	

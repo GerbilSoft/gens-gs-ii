@@ -29,6 +29,9 @@
 
 // Qt includes.
 #include <QtGui/QMessageBox>
+#include <QtCore/QTranslator>
+#include <QtCore/QLocale>
+#include <QtCore/QLibraryInfo>
 
 #include "GensQApplication.hpp"
 #include "GensWindow.hpp"
@@ -63,6 +66,21 @@ int gens_main(int argc, char *argv[])
 	// TODO: Parse command line arguments.
 	// They're available in app.arguments() [QStringList].
 	
+	// Initialize the Qt translation system.
+	// TODO: Allow switching languages on the fly?
+	// TODO: Translations subdirectory.
+	GensQt4::gqt4_qtTranslator = new QTranslator(GensQt4::gqt4_app);
+	GensQt4::gqt4_qtTranslator->load(
+		QLatin1String("qt_") + QLocale::system().name(),
+		QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+	GensQt4::gqt4_app->installTranslator(GensQt4::gqt4_qtTranslator);
+	
+	// Initialize the Gens translator.
+	GensQt4::gqt4_gensTranslator = new QTranslator(GensQt4::gqt4_app);
+	GensQt4::gqt4_gensTranslator->load(
+		QLatin1String("gens-qt4_") + QLocale::system().name());
+	GensQt4::gqt4_app->installTranslator(GensQt4::gqt4_gensTranslator);
+	
 	// Initialize LibGens.
 	LibGens::Init();
 	
@@ -91,6 +109,8 @@ int gens_main(int argc, char *argv[])
 	 * app.exec() won't return.
 	 */
 	
+	// TODO: Delete the translators?
+	
 	// Unregister the LibGens OSD handler.
 	// TODO: Do this earlier?
 	lg_set_osd_fn(NULL);
@@ -117,7 +137,8 @@ int gens_main(int argc, char *argv[])
  */
 void gqt4_log_msg_critical(const char *channel, const utf8_str *msg)
 {
-	QString title = TR("Gens Critical Error: %1").arg(QString::fromLatin1(channel));
+	QString title = QLatin1String("Gens Critical Error:") + QChar(L' ') +
+			QLatin1String(channel);
 	
 	QMessageBox dialog(QMessageBox::Critical, title, QString::fromUtf8(msg));
 	dialog.setTextFormat(Qt::PlainText);
@@ -152,6 +173,10 @@ GensConfig *gqt4_config = NULL;
 // Emulation objects.
 EmuThread *gqt4_emuThread = NULL;		// Thread.
 LibGens::EmuContext *gqt4_emuContext = NULL;	// Context.
+
+// Qt translators.
+QTranslator *gqt4_qtTranslator = NULL;
+QTranslator *gqt4_gensTranslator = NULL;
 
 /**
  * QuitGens(): Quit Gens.

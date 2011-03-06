@@ -160,32 +160,4 @@ void Io4WPSlave::setSlaveController(int id)
 	}
 }
 
-
-/** Controller Configuration. **/
-
-
-/**
- * nextLogicalButton(): Get the next logical button.
- * @return Next logical button, or -1 if we're at the end.
- */
-int Io4WPSlave::nextLogicalButton(int button) const
-{
-	// 4WP Slave device has no buttons.
-	((void)button);
-	return -1;
-}
-
-
-/**
- * buttonName(): Get the name for a given button index.
- * @param button Button index.
- * @return Button name, or NULL if the button index is invalid.
- */
-const char *Io4WPSlave::buttonName(int button) const
-{
-	// 4WP Slave device has no buttons.
-	((void)button);
-	return NULL;
-}
-
 }

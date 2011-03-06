@@ -271,7 +271,17 @@ Rom::RomFormat Rom::DetectFormat(const uint8_t *header, size_t header_size)
 	}
 	
 	/** MGD-format (.MD) ROM check. */
-	// TODO
+	if (header_size >= 0x100)
+	{
+		// MGD format is interleaved without blocks.
+		// The odd bytes in the MD header are located at 0x80.
+		if (header[0x80] == 'E' && header[0x81] == 'A')
+		{
+			// Odd bytes of "SEGA" found in the ROM header.
+			// This is probably an MGD ROM.
+			return RFMT_MGD;
+		}
+	}
 	
 	// Assuming plain binary ROM.
 	return RFMT_BINARY;
@@ -301,8 +311,26 @@ Rom::MDP_SYSTEM_ID Rom::DetectSystem(const uint8_t *header, size_t header_size, 
 		// SMD format check.
 		if (header[0x0300] == 0xF9)
 		{
-			if ((header[0x0280] == '3' && header[0x0281] == 'X') ||
+			if ((header[0x0282] == '3' && header[0x0283] == 'X') ||
 			    (header[0x0407] == 'A' && header[0x0408] == 'S'))
+			{
+				// 32X ROM.
+				return MDP_SYSTEM_32X;
+			}
+		}
+		else
+		{
+			// Assume MD.
+			return MDP_SYSTEM_MD;
+		}
+	}
+	else if (fmt == RFMT_MGD && header_size >= 0x200)
+	{
+		// MGD format check.
+		if (header[0x100] == 0xF9)
+		{
+			if ((header[0x0082] == '3' && header[0x0083] == 'X') ||
+			    (header[0x0207] == 'A' && header[0x0208] == 'S'))
 			{
 				// 32X ROM.
 				return MDP_SYSTEM_32X;
@@ -621,7 +649,13 @@ int Rom::loadRom(void *buf, size_t siz)
 	if (siz == 0 || siz < m_romSize)
 	{
 		// ROM buffer isn't large enough for the ROM image.
-		return -2;
+		return -4;
+	}
+	
+	if (m_romFormat != RFMT_BINARY)
+	{
+		// Unsupported ROM format.
+		return -5;
 	}
 	
 	// Load the ROM image.
@@ -719,50 +753,6 @@ int Rom::detectRegionCodeMD(const char countryCodes[16])
 	
 	// Country code detection complete.
 	return code;
-}
-
-
-/**
- * RegionCodeStr(): Get a string identifying a given region code.
- * NOTE: This function returns an ASCII string, suitable for translation.
- * @param region Region code. (1, 2, 4, 8)
- * @return Region code string, or NULL on error.
- */
-const char *Rom::RegionCodeStr(SysVersion::RegionCode_t region)
-{
-	switch (region)
-	{
-		case SysVersion::REGION_JP_NTSC:	return "Japan (NTSC)";
-		case SysVersion::REGION_ASIA_PAL:	return "Asia (PAL)";
-		case SysVersion::REGION_US_NTSC:	return "USA (NTSC)";
-		case SysVersion::REGION_EU_PAL:		return "Europe (PAL)";
-		default:	return NULL;
-	}
-	
-	// Should not get here...
-	return NULL;
-}
-
-
-/**
- * RegionCodeStrMD(): Get a string identifying a given region code. (MD hex code)
- * NOTE: This function returns an ASCII string, suitable for translation.
- * @param region Region. (1, 2, 4, 8)
- * @return Region code string, or NULL on error.
- */
-const char *Rom::RegionCodeStrMD(int region)
-{
-	switch (region & 0xF)
-	{
-		case 0x1:	return "Japan (NTSC)";
-		case 0x2:	return "Asia (PAL)";
-		case 0x4:	return "USA (NTSC)";
-		case 0x8:	return "Europe (PAL)";
-		default:	return NULL;
-	}
-	
-	// Should not get here...
-	return NULL;
 }
 
 }

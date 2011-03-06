@@ -77,11 +77,11 @@ void GeneralConfigWindow::setupUi_mac(void)
 	{
 		// TODO: Use a Sega CD icon instead of a generic CD-ROM icon.
 		// TODO: Use Mac generic program icon instead of Oxygen.
-		{"&General",		"configure"},
-		{"G&raphics",		"applications-graphics"},
-		{"&System",		"applications-system"},
-		{"Sega &CD",		"media-optical"},
-		{"E&xternal Programs",	"utilities-terminal"},
+		{QT_TR_NOOP("&General"),		"configure"},
+		{QT_TR_NOOP("G&raphics"),		"applications-graphics"},
+		{QT_TR_NOOP("&System"),			"applications-system"},
+		{QT_TR_NOOP("Sega &CD"),		"media-optical"},
+		{QT_TR_NOOP("E&xternal Programs"),	"utilities-terminal"},
 		
 		// End of list.
 		{NULL, NULL}

@@ -1,25 +1,25 @@
-/***************************************************************************
- * gens-qt4: Gens Qt4 UI.                                                  *
- * EmuManager.cpp: Emulation manager.                                      *
- *                                                                         *
- * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
- * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
- *                                                                         *
- * This program is free software; you can redistribute it and/or modify it *
- * under the terms of the GNU General Public License as published by the   *
- * Free Software Foundation; either version 2 of the License, or (at your  *
- * option) any later version.                                              *
- *                                                                         *
- * This program is distributed in the hope that it will be useful, but     *
- * WITHOUT ANY WARRANTY; without even the implied warranty of              *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
- * GNU General Public License for more details.                            *
- *                                                                         *
- * You should have received a copy of the GNU General Public License along *
- * with this program; if not, write to the Free Software Foundation, Inc., *
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
- ***************************************************************************/
+/******************************************************************************
+ * gens-qt4: Gens Qt4 UI.                                                     *
+ * EmuManager.cpp: Emulation manager.                                         *
+ *                                                                            *
+ * Copyright (c) 1999-2002 by Stéphane Dallongeville.                         *
+ * Copyright (c) 2003-2004 by Stéphane Akhoun.                                *
+ * Copyright (c) 2008-2011 by David Korth.                                    *
+ *                                                                            *
+ * This program is free software; you can redistribute it and/or modify       *
+ * it under the terms of the GNU General Public License as published by       *
+ * the Free Software Foundation; either version 2 of the License, or          *
+ * (at your option) any later version.                                        *
+ *                                                                            *
+ * This program is distributed in the hope that it will be useful,            *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+ * GNU General Public License for more details.                               *
+ *                                                                            *
+ * You should have received a copy of the GNU General Public License          *
+ * along with this program; if not, write to the Free Software                *
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA *
+ ******************************************************************************/
 
 #include <config.h>
 
@@ -56,6 +56,7 @@
 #include <QtCore/QTimer>
 #include <QtGui/QApplication>
 #include <QtGui/QFileDialog>
+#include <QtGui/QMessageBox>
 
 // Qt key handler.
 #include "Input/KeyHandlerQt.hpp"
@@ -145,7 +146,7 @@ int EmuManager::openRom(QWidget *parent)
 			tr("Open ROM"),		// Dialog title
 			QString(),		// Default filename.
 			tr("Sega Genesis ROM images") +
-			QString::fromLatin1(
+			QLatin1String(
 				" (*.bin *.gen *.md *.smd"
 #ifdef HAVE_ZLIB
 				ZLIB_EXT
@@ -160,7 +161,7 @@ int EmuManager::openRom(QWidget *parent)
 			tr("Sega Genesis / 32X ROMs; Sega CD disc images") +
 			"(*.bin *.smd *.gen *.32x *.cue *.iso *.raw" ZLIB_EXT LZMA_EXT RAR_EXT ");;" +
 #endif
-			tr("All Files") + QString::fromLatin1(" (*.*)"));
+			tr("All Files") + QLatin1String(" (*.*)"));
 	
 	if (filename.isEmpty())
 		return -1;
@@ -267,28 +268,71 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 		return -2;
 	}
 	
-	// Save the ROM as m_rom.
-	m_rom = rom;
+	// Make sure the ROM is supported.
+	const QChar chrBullet(0x2022);  // U+2022: BULLET
+	const QChar chrNewline(L'\n');
+	const QChar chrSpace(L' ');
 	
-	// Print ROM information.
-	// TODO: OSD, or remove this entirely.
-	printf("ROM information: format == %d, system == %d\n", m_rom->romFormat(), m_rom->sysId());
-	
-	if (m_rom->sysId() != LibGens::Rom::MDP_SYSTEM_MD)
+	// Check the system ID.
+	if (rom->sysId() != LibGens::Rom::MDP_SYSTEM_MD)
 	{
 		// Only MD ROM images are supported.
-		fprintf(stderr, "ERROR: Only Sega Genesis / Mega Drive ROM images are supported right now.\n");
-		delete m_rom;
-		m_rom = NULL;
+		const LibGens::Rom::MDP_SYSTEM_ID errSysId = rom->sysId();
+		delete rom;
+		
+		// TODO: Specify GensWindow as parent window.
+		// TODO: Move this out of EmuManager and simply use return codes?
+		// (how would we indicate what system the ROM is for...)
+		QMessageBox::critical(NULL,
+				//: A ROM image was selected for a system that Gens/GS II does not currently support. (error title)
+				tr("Unsupported System"),
+				//: A ROM image was selected for a system that Gens/GS II does not currently support. (error description)
+				tr("The selected ROM image is designed for a system that"
+				   " is not currently supported by Gens/GS II.") +
+				chrNewline + chrNewline +
+				//: Indicate what system the ROM image is for.
+				tr("Selected ROM's system: %1").arg(SysName_l(errSysId)) +
+				chrNewline + chrNewline +
+				//: List of systems that Gens/GS II currently supports.
+				tr("Supported systems:") + chrNewline +
+				chrBullet + chrSpace + SysName_l(LibGens::Rom::MDP_SYSTEM_MD)
+				);
+		
 		return 3;
 	}
 	
-	if (m_rom->romFormat() != LibGens::Rom::RFMT_BINARY)
+	// Check the ROM format.
+	if (rom->romFormat() != LibGens::Rom::RFMT_BINARY)
 	{
-		// Only binary ROM images are supported.
-		fprintf(stderr, "ERROR: Only binary ROM images are supported right now.\n");
-		delete m_rom;
-		m_rom = NULL;
+		// Only binary ROM images are supported.r
+		LibGens::Rom::RomFormat errRomFormat = rom->romFormat();
+		delete rom;
+		
+		// Get the ROM format.
+		QString sRomFormat = RomFormat(errRomFormat);
+		if (sRomFormat.isEmpty())
+		{
+			//: Unknown ROM format. (EmuManager::RomFormat() returned an empty string.)
+			sRomFormat = tr("(unknown)", "rom-format");
+		}
+		
+		// TODO: Specify GensWindow as parent window.
+		// TODO: Move this out of EmuManager and simply use return codes?
+		// (how would we indicate what format the ROM was in...)
+		QMessageBox::critical(NULL,
+				//: A ROM image was selected in a format that Gens/GS II does not currently support. (error title)
+				tr("Unsupported ROM Format"),
+				//: A ROM image was selected in a format that Gens/GS II does not currently support. (error description)
+				tr("The selected ROM image is in a format that is not currently supported by Gens/GS II.") +
+				chrNewline + chrNewline +
+				//: Indicate what format the ROM image is in.
+				tr("Selected ROM image format: %1").arg(sRomFormat) +
+				chrNewline + chrNewline +
+				//: List of ROM formats that Gens/GS II currently supports.
+				tr("Supported ROM formats:") + chrNewline +
+				chrBullet + chrSpace + RomFormat(LibGens::Rom::RFMT_BINARY)
+				);
+		
 		return 4;
 	}
 	
@@ -300,19 +344,18 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	if (gqt4_config->regionCode() == GensConfig::CONFREGION_AUTODETECT)
 	{
 		// Print the auto-detected region.
-		const char *region_cstr = LibGens::Rom::RegionCodeStr(lg_region);
-		if (region_cstr)
+		const QString detect_str = LgRegionCodeStr(lg_region);
+		if (!detect_str.isEmpty())
 		{
-			const QString auto_QStr = tr("ROM region detected as %1.");
-			const QString region_QStr = tr(region_cstr);
-			emit osdPrintMsg(1500, auto_QStr.arg(region_QStr));
+			const QString auto_str = tr("ROM region detected as %1.");
+			emit osdPrintMsg(1500, auto_str.arg(detect_str));
 		}
 	}
 	
 	// Create a new MD emulation context.
 	delete gqt4_emuContext;
-	gqt4_emuContext = new LibGens::EmuMD(m_rom, lg_region);
-	m_rom->close();	// TODO: Let EmuMD handle this...
+	gqt4_emuContext = new LibGens::EmuMD(rom, lg_region);
+	rom->close();	// TODO: Let EmuMD handle this...
 	
 	if (!gqt4_emuContext->isRomOpened())
 	{
@@ -322,10 +365,12 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 		fprintf(stderr, "Error: Initialization of gqt4_emuContext failed. (TODO: Error code.)\n");
 		delete gqt4_emuContext;
 		gqt4_emuContext = NULL;
-		delete m_rom;
-		m_rom = NULL;
+		delete rom;
 		return 5;
 	}
+	
+	// Save the Rom class pointer as m_rom.
+	m_rom = rom;
 	
 	// m_rom isn't deleted, since keeping it around
 	// indicates that a game is running.
@@ -527,59 +572,15 @@ QString EmuManager::romName(void)
 
 
 /**
- * sysName(): Get the system name.
- * @return System name, or empty string if no ROM is loaded.
+ * sysName(): Get the system name for the active ROM, based on ROM region.
+ * @return System name, or empty string if unknown or no ROM is loaded.
  */
 QString EmuManager::sysName(void)
 {
 	if (!m_rom)
 		return QString();
 	
-	// Check the system ID.
-	const LibGens::SysVersion &region = LibGens::M68K_Mem::ms_SysVersion;
-	
-	switch (m_rom->sysId())
-	{
-		case LibGens::Rom::MDP_SYSTEM_MD:
-			// Genesis / Mega Drive.
-			if (region.region() == LibGens::SysVersion::REGION_US_NTSC)
-				return tr("Genesis");
-			else
-				return tr("Mega Drive");
-		
-		case LibGens::Rom::MDP_SYSTEM_MCD:
-			if (region.region() == LibGens::SysVersion::REGION_US_NTSC)
-				return tr("Sega CD");
-			else
-				return tr("Mega CD");
-		
-		case LibGens::Rom::MDP_SYSTEM_32X:
-			if (region.isPal())
-				return tr("32X (PAL)");
-			else
-				return tr("32X (NTSC)");
-		
-		case LibGens::Rom::MDP_SYSTEM_MCD32X:
-			if (region.region() == LibGens::SysVersion::REGION_US_NTSC)
-				return tr("Sega CD 32X");
-			else
-				return tr("Mega CD 32X");
-		
-		case LibGens::Rom::MDP_SYSTEM_SMS:
-			return tr("Master System");
-		
-		case LibGens::Rom::MDP_SYSTEM_GG:
-			return tr("Game Gear");
-		
-		case LibGens::Rom::MDP_SYSTEM_SG1000:
-			return tr("SG-1000");
-		
-		case LibGens::Rom::MDP_SYSTEM_PICO:
-			return tr("Pico");
-		
-		default:
-			return tr("Unknown");
-	}
+	return SysName(m_rom->sysId(), LibGens::M68K_Mem::ms_SysVersion.region());
 }
 
 

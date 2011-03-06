@@ -53,6 +53,8 @@ class GensMenuBar : public QObject
 		QMenuBar *createMenuBar(void);
 		QMenu *popupMenu(void);
 		
+		void retranslate(void);
+		
 		bool menuItemCheckState(int id);
 		int setMenuItemCheckState(int id, bool newCheck);
 		
@@ -75,6 +77,7 @@ class GensMenuBar : public QObject
 			int id;				// Menu identifier. (-1 == separator)
 			MenuItemType type;		// Menu item type.
 			const utf8_str *text;		// Menu item text.
+			QAction::MenuRole menuRole;	// (Mac OS X) Menu item role.
 			
 			int submenu_id;			// Submenu ID.
 			const MenuItem *submenu;	// First element of submenu.
@@ -116,10 +119,9 @@ class GensMenuBar : public QObject
 		
 		QSignalMapper *m_signalMapper;
 		
-		// Hash tables of QActions and QMenus.
+		// Hash tables of QActions.
 		// List of menu separators.
 		QHash<int, QAction*> m_hashActions;
-		QHash<int, QMenu*> m_hashMenus;
 		QList<QAction*> m_lstSeparators;
 		
 		void clearHashTables(void);

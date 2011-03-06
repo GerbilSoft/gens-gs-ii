@@ -27,11 +27,13 @@
 // C includes.
 #include <stdarg.h>
 
+// Qt includes.
 #include <QtCore/QString>
 #include <QtCore/QList>
 #include <QtGui/QWidget>
 #include <QtGui/QColor>
 
+// LibGens includes.
 #include "libgens/MD/VdpRend.hpp"
 
 // paused_t
@@ -87,10 +89,11 @@ class VBackend : public QWidget
 		
 		// NOTE: Format string argument is 3 instead of 2.
 		// This is due to the implicit "this" parameter.
-		void osd_vprintf(const int duration, const char *msg, va_list ap)
+		void osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
 			__attribute__ ((format (printf, 3, 0)));
-		void osd_printf(const int duration, const char *msg, ...)
+		void osd_printf(const int duration, const utf8_str *msg, ...)
 			__attribute__ ((format (printf, 3, 4)));
+		void osd_printqs(const int duration, const QString& msg);
 		
 		/**
 		 * osd_lock() / osd_unlock(): Temporarily lock the OSD.
@@ -142,7 +145,7 @@ class VBackend : public QWidget
 		// OSD message struct.
 		struct OsdMessage
 		{
-			OsdMessage(const char *msg, double endTime);
+			OsdMessage(const QString &msg, double endTime);
 			QString msg;
 			double endTime;
 		};
@@ -253,7 +256,7 @@ inline QColor VBackend::osdMsgColor(void) const
  * @param msg Message to write. (printf-formatted)
  * @param ... Format arguments.
  */
-inline void VBackend::osd_printf(const int duration, const char *msg, ...)
+inline void VBackend::osd_printf(const int duration, const utf8_str *msg, ...)
 {
 	va_list ap;
 	va_start(ap, msg);
@@ -262,11 +265,10 @@ inline void VBackend::osd_printf(const int duration, const char *msg, ...)
 }
 
 /** OSD message struct constructor. **/
-inline VBackend::OsdMessage::OsdMessage(const char *msg, double endTime)
-{
-	this->msg = QString::fromUtf8(msg);
-	this->endTime = endTime;
-}
+inline VBackend::OsdMessage::OsdMessage(const QString& msg, double endTime)
+	: msg(msg)
+	, endTime(endTime)
+{ }
 
 /** OSD list dirty flag functions. **/
 inline bool VBackend::isOsdListDirty(void)

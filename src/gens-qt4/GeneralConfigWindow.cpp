@@ -1,25 +1,25 @@
-/***************************************************************************
- * gens-qt4: Gens Qt4 UI.                                                  *
- * GeneralConfigWindow.cpp: General Configuration Window.                  *
- *                                                                         *
- * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
- * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
- *                                                                         *
- * This program is free software; you can redistribute it and/or modify it *
- * under the terms of the GNU General Public License as published by the   *
- * Free Software Foundation; either version 2 of the License, or (at your  *
- * option) any later version.                                              *
- *                                                                         *
- * This program is distributed in the hope that it will be useful, but     *
- * WITHOUT ANY WARRANTY; without even the implied warranty of              *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
- * GNU General Public License for more details.                            *
- *                                                                         *
- * You should have received a copy of the GNU General Public License along *
- * with this program; if not, write to the Free Software Foundation, Inc., *
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
- ***************************************************************************/
+/******************************************************************************
+ * gens-qt4: Gens Qt4 UI.                                                     *
+ * GeneralConfigWindow.cpp: General Configuration Window.                     *
+ *                                                                            *
+ * Copyright (c) 1999-2002 by Stéphane Dallongeville.                         *
+ * Copyright (c) 2003-2004 by Stéphane Akhoun.                                *
+ * Copyright (c) 2008-2011 by David Korth.                                    *
+ *                                                                            *
+ * This program is free software; you can redistribute it and/or modify       *
+ * it under the terms of the GNU General Public License as published by       *
+ * the Free Software Foundation; either version 2 of the License, or          *
+ * (at your option) any later version.                                        *
+ *                                                                            *
+ * This program is distributed in the hope that it will be useful,            *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+ * GNU General Public License for more details.                               *
+ *                                                                            *
+ * You should have received a copy of the GNU General Public License          *
+ * along with this program; if not, write to the Free Software                *
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA *
+ ******************************************************************************/
 
 #include <config.h>
 
@@ -47,8 +47,8 @@ using std::auto_ptr;
 // libgens: RAR decompressor
 #include "libgens/Decompressor/DcRar.hpp"
 
-// libgens: ROM class.
-#include "libgens/Rom.hpp"
+// EmuManager is needed for region code strings.
+#include "EmuManager.hpp"
 
 namespace GensQt4
 {
@@ -63,7 +63,8 @@ const QString GeneralConfigWindow::ms_sCssBtnColors =
 // Warning string.
 const QString GeneralConfigWindow::ms_sWarning =
 	QLatin1String("<span style='color: red'><b>") +
-	tr("Warning:") + QLatin1String("</b></span> ");
+	GeneralConfigWindow::tr("Warning:") +
+	QLatin1String("</b></span> ");
 
 
 /**
@@ -245,6 +246,41 @@ void GeneralConfigWindow::keyPressEvent(QKeyEvent *event)
 
 
 /**
+ * changeEvent(): Widget state has changed.
+ * @param event State change event.
+ */
+void GeneralConfigWindow::changeEvent(QEvent *event)
+{
+	if (event->type() != QEvent::LanguageChange)
+		return;
+	
+	// Retranslate the UI.
+	retranslateUi(this);
+	
+	// Update Sega CD Boot ROM file status.
+	// TODO: Update the display for the last selected ROM.
+	QString sNewRomStatus;
+	sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomUSA, MCD_REGION_USA);
+	if (!sNewRomStatus.isEmpty())
+		sMcdRomStatus_USA = sNewRomStatus;
+	sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomEUR, MCD_REGION_EUROPE);
+	if (!sNewRomStatus.isEmpty())
+		sMcdRomStatus_EUR = sNewRomStatus;
+	sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomJPN, MCD_REGION_JAPAN);
+	if (!sNewRomStatus.isEmpty())
+		sMcdRomStatus_JPN = sNewRomStatus;
+	sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomAsia, MCD_REGION_ASIA);
+	if (!sNewRomStatus.isEmpty())
+		sMcdRomStatus_Asia = sNewRomStatus;
+	
+	// Update external program status.
+	// TODO: Split the RAR check code out of the on_txtExtPrgUnRAR_textChanged() function.
+	// NOTE: Calling on_txtExtPrgUnRAR_textChanged() will enable the Apply button!
+	on_txtExtPrgUnRAR_textChanged();
+}
+
+
+/**
  * accept(): Accept the configuration changes.
  * Triggered if "OK" is clicked.
  */
@@ -295,12 +331,14 @@ void GeneralConfigWindow::reload(void)
 	m_osdFpsColor = gqt4_config->osdFpsColor();
 	colorText = TextColor_For_BGColor(m_osdFpsColor);
 	btnOsdFpsColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdFpsColor.name()).arg(colorText.name()));
+	btnOsdFpsColor->setText(m_osdFpsColor.name().toUpper());
 	
 	/** Onscreen display: Messages. **/
 	chkOsdMsgEnable->setChecked(gqt4_config->osdMsgEnabled());
 	m_osdMsgColor = gqt4_config->osdMsgColor();
 	colorText = TextColor_For_BGColor(m_osdMsgColor);
 	btnOsdMsgColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdMsgColor.name()).arg(colorText.name()));
+	btnOsdMsgColor->setText(m_osdMsgColor.name().toUpper());
 	
 	/** Intro effect. **/
 	cboIntroStyle->setCurrentIndex(gqt4_config->introStyle());
@@ -342,10 +380,10 @@ void GeneralConfigWindow::reload(void)
 	uint16_t regionCodeOrder = gqt4_config->regionCodeOrder();
 	for (int i = 0; i < 4; i++, regionCodeOrder >>= 4)
 	{
-		const char *str = LibGens::Rom::RegionCodeStrMD(regionCodeOrder & 0xF);
-		if (str)
+		const QString str = EmuManager::LgRegionCodeStrMD(regionCodeOrder & 0xF);
+		if (!str.isEmpty())
 		{
-			QListWidgetItem *item = new QListWidgetItem(tr(str));
+			QListWidgetItem *item = new QListWidgetItem(str);
 			item->setData(Qt::UserRole, (regionCodeOrder & 0xF));
 			lstRegionDetect->insertItem(0, item);
 		}
@@ -468,6 +506,7 @@ void GeneralConfigWindow::on_btnOsdFpsColor_clicked(void)
 	m_osdFpsColor = color;
 	QColor colorText = TextColor_For_BGColor(m_osdFpsColor);
 	btnOsdFpsColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdFpsColor.name()).arg(colorText.name()));
+	btnOsdFpsColor->setText(m_osdFpsColor.name().toUpper());
 	
 	// Settings have been changed.
 #ifndef GCW_APPLY_IMMED
@@ -479,7 +518,7 @@ void GeneralConfigWindow::on_btnOsdFpsColor_clicked(void)
 
 void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
 {
-	QColor color = osdSelectColor(tr("Messages"), m_osdMsgColor);
+	QColor color = osdSelectColor(tr("messages"), m_osdMsgColor);
 	if (!color.isValid() || m_osdMsgColor == color)
 		return;
 	
@@ -590,7 +629,7 @@ void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *
 	QString filename = QFileDialog::getOpenFileName(this, title,
 			txtRomFile->text(),	// Default filename.
 			tr("Sega CD Boot ROM images") +
-			QString::fromLatin1(
+			QLatin1String(
 				" (*.bin *.gen *.md *.smd"
 #ifdef HAVE_ZLIB
 				ZLIB_EXT
@@ -600,7 +639,7 @@ void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *
 #endif /* HAVE_LZMA */
 				RAR_EXT
 				");;") +
-			tr("All Files") + QString::fromLatin1(" (*.*)"));
+			tr("All Files") + QLatin1String(" (*.*)"));
 	
 	if (filename.isEmpty())
 		return;
@@ -644,7 +683,7 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 	MCD_RomStatus_t boot_rom_status;
 	
 	// Line break string.
-	const QString sLineBreak = QString::fromLatin1("<br/>\n");
+	const QString sLineBreak = QLatin1String("<br/>\n");
 	
 	// Check if the file exists.
 	const QString& filename = txtRomFile->text();
@@ -807,7 +846,7 @@ void GeneralConfigWindow::mcdDisplayRomFileStatus(const QString& rom_id, const Q
 	// Set the ROM description.
 	QString sel_rom = tr("Selected ROM: %1");
 	lblMcdSelectedRom->setText(sel_rom.arg(rom_id) +
-				QString::fromLatin1("<br/>\n") + rom_desc);
+				QLatin1String("<br/>\n") + rom_desc);
 	lblMcdSelectedRom->setTextFormat(Qt::RichText);
 }
 
@@ -908,11 +947,11 @@ void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
 	QString filename = QFileDialog::getOpenFileName(this, title,
 			txtExtPrgUnRAR->text(),		// Default filename.
 #ifdef Q_OS_WIN32
-			tr("DLL files") + QString::fromLatin1(" (*.dll);;") +
+			tr("DLL files") + QLatin1String(" (*.dll);;") +
 #else
-			tr("rar or unrar") + QString::fromLatin1(" (rar unrar);;") +
+			tr("rar or unrar") + QLatin1String(" (rar unrar);;") +
 #endif
-			tr("All Files") + QString::fromLatin1(" (*.*)"));
+			tr("All Files") + QLatin1String(" (*.*)"));
 	
 	if (filename.isEmpty())
 		return;
@@ -940,7 +979,7 @@ void GeneralConfigWindow::extprgDisplayFileStatus(const QString& file_id, const 
 	// Set the file description.
 	QString sel_prg = tr("Selected Program: %1");
 	lblExtPrgSel->setText(sel_prg.arg(file_id) +
-				QString::fromLatin1("<br/>\n") + file_desc);
+				QLatin1String("<br/>\n") + file_desc);
 	lblExtPrgSel->setTextFormat(Qt::RichText);
 }
 
@@ -1063,7 +1102,7 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 	sExtPrgStatus_UnRAR = tr("Identified as: %1").arg(prg_id);
 	
 	// Line break string.
-	const QString sLineBreak = QString::fromLatin1("<br/>\n");
+	const QString sLineBreak = QLatin1String("<br/>\n");
 	
 	// Print DLL version information, if available.
 	if (prg_info.dll_major != 0 || prg_info.dll_minor != 0 ||

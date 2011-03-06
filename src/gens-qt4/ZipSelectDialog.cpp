@@ -56,6 +56,20 @@ ZipSelectDialog::ZipSelectDialog(QWidget *parent)
 
 
 /**
+ * changeEvent(): Widget state has changed.
+ * @param event State change event.
+ */
+void ZipSelectDialog::changeEvent(QEvent *event)
+{
+	if (event->type() != QEvent::LanguageChange)
+		return;
+	
+	// Retranslate the UI.
+	retranslateUi(this);
+}
+
+
+/**
  * setFileList(): Set the file list.
  * @param z_entry File list.
  */

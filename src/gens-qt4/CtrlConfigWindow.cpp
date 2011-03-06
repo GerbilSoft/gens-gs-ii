@@ -230,8 +230,28 @@ void CtrlConfigWindow::keyPressEvent(QKeyEvent *event)
 
 
 /**
+ * changeEvent(): Widget state has changed.
+ * @param event State change event.
+ */
+void CtrlConfigWindow::changeEvent(QEvent *event)
+{
+	if (event->type() != QEvent::LanguageChange)
+		return;
+	
+	// Retranslate the UI.
+	retranslateUi(this);
+	
+	// Update the port buttons.
+	for (int i = 0; i < CTRL_CFG_MAX_PORTS; i++)
+		updatePortButton(i);
+	
+	// Update the selected port information.
+	updatePortSettings(m_selPort);
+}
+
+
+/**
  * GetShortDeviceName(): Get the short name of an I/O device.
- * TODO: Use IoBase::devName()?
  * @param devType Device type.
  * @return Short device name.
  */
@@ -258,7 +278,6 @@ const QString CtrlConfigWindow::GetShortDeviceName(LibGens::IoBase::IoType devTy
 
 /**
  * GetLongDeviceName(): Get the long name of an I/O device.
- * TODO: Use IoBase::devName()?
  * @param devType Device type.
  * @return Long device name.
  */
@@ -304,7 +323,7 @@ const QString CtrlConfigWindow::GetPortName(int port)
 	}
 	else if (port >= CTRL_CFG_PORT_4WPA && port < (CTRL_CFG_PORT_4WPA+4))
 	{
-		return tr("EA 4-Way Play, Port %1")
+		return tr("4-Way Play, Port %1")
 			.arg(QChar(L'A' + (port - CTRL_CFG_PORT_4WPA)));
 	}
 	

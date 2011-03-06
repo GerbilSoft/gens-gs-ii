@@ -55,11 +55,7 @@ GensMenuBar::GensMenuBar(QObject *parent, EmuManager *emuManager)
 	
 	// Create the popup menu.
 	m_popupMenu = new QMenu();
-	parseMainMenu(&ms_gmmiMain[0]);	// Populate the popup menu.
-	
-	// Synchronization.
-	syncAll();	// Synchronize the menus.
-	syncConnect();	// Connect synchronization slots.
+	retranslate();
 }
 
 GensMenuBar::~GensMenuBar()
@@ -76,10 +72,23 @@ GensMenuBar::~GensMenuBar()
 
 
 /**
+ * retranslate(): Retranslate the menus.
+ */
+void GensMenuBar::retranslate(void)
+{
+	// (Re-)Populate the popup menu.
+	parseMainMenu(&ms_gmmiMain[0]);
+	
+	// Synchronization.
+	syncAll();	// Synchronize the menus.
+	syncConnect();	// Connect synchronization slots.
+}
+
+
+/**
  * clearHashTables(): Clear the menu hash tables and lists.
  * - m_hashActions: Hash table of menu actions.
  * - m_lstSeparators: List of menu separators.
- * - m_hashMenus: Hash table of top-level menus.
  */
 void GensMenuBar::clearHashTables(void)
 {
@@ -93,11 +102,7 @@ void GensMenuBar::clearHashTables(void)
 	// Separators list.
 	while (!m_lstSeparators.isEmpty())
 		delete m_lstSeparators.takeFirst();
-	
-	// Menus map.
-	foreach (QMenu *menu, m_hashMenus)
-		delete menu;
-	m_hashMenus.clear();
+	m_lstSeparators.clear();
 }
 
 
@@ -125,8 +130,9 @@ void GensMenuBar::parseMainMenu(const GensMenuBar::MainMenuItem *mainMenu)
 {
 	QMenu *mnuSubMenu;
 	
-	// Clear the menu hash tables and lists.
-	clearHashTables();
+	// Clear everything.
+	clearHashTables();	// Clear the menu hash tables and lists.
+	m_popupMenu->clear();	// Clear the popup menu.
 	
 	for (; mainMenu->id != 0; mainMenu++)
 	{
@@ -139,9 +145,6 @@ void GensMenuBar::parseMainMenu(const GensMenuBar::MainMenuItem *mainMenu)
 		
 		// Add the menu to the popup menu.
 		m_popupMenu->addMenu(mnuSubMenu);
-		
-		// Add the QMenu to the menus map.
-		m_hashMenus.insert(mainMenu->id, mnuSubMenu);
 	}
 }
 
@@ -184,7 +187,6 @@ void GensMenuBar::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 				mnuSubMenu->setTitle(tr(menu->text));
 				parseMenu(menu->submenu, mnuSubMenu);
 				mnuItem->setMenu(mnuSubMenu);
-				m_hashMenus.insert(menu->submenu_id, mnuSubMenu);
 				break;
 			
 			case GMI_RADIO:

@@ -95,19 +95,23 @@ int Io2Button::nextLogicalButton(int button) const
 /**
  * buttonName(): Get the name for a given button index.
  * @param button Button index.
- * @return Button name, or NULL if the button index is invalid.
+ * @return Button name, or BTNNAME_UNKNOWN if the button index is invalid.
  */
-const char *Io2Button::buttonName(int button) const
+IoBase::ButtonName_t Io2Button::buttonName(int button) const
 {
-	static const char *btnNames[] =
+	switch (button)
 	{
-		"Up", "Down", "Left", "Right",
-		"1", "2"
-	};
+		case BTNI_UP:		return BTNNAME_UP;
+		case BTNI_DOWN:		return BTNNAME_DOWN;
+		case BTNI_LEFT:		return BTNNAME_LEFT;
+		case BTNI_RIGHT:	return BTNNAME_RIGHT;
+		case BTNI_1:		return BTNNAME_1;
+		case BTNI_2:		return BTNNAME_2;
+		default:		return BTNNAME_UNKNOWN;
+	}
 	
-	if (button >= BTNI_UP && button <= BTNI_2)
-		return btnNames[button];
-	return NULL;
+	// Should not get here...
+	return BTNNAME_UNKNOWN;
 }
 
 }

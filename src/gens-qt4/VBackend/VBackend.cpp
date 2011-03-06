@@ -358,7 +358,7 @@ void VBackend::updateFastBlur(bool fromMdScreen)
  * @param msg Message to write. (printf-formatted)
  * @param ap Format arguments.
  */
-void VBackend::osd_vprintf(const int duration, const char *msg, va_list ap)
+void VBackend::osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
 {
 	assert(m_osdLockCnt >= 0);
 	if (duration <= 0 ||		// Invalid duration.
@@ -374,11 +374,32 @@ void VBackend::osd_vprintf(const int duration, const char *msg, va_list ap)
 	vsnprintf(msg_buf, sizeof(msg_buf), msg, ap);
 	msg_buf[sizeof(msg_buf)-1] = 0x00;
 	
+	// Convert the message to a QString and print it to the screen.
+	osd_printqs(duration, QString::fromUtf8(msg_buf));
+}
+
+
+/**
+ * osd_vprintf(): Print text to the screen.
+ * @param duration Duration for the message to appear, in milliseconds.
+ * @param msg Message to write.
+ */
+void VBackend::osd_printqs(const int duration, const QString& msg)
+{
+	assert(m_osdLockCnt >= 0);
+	if (duration <= 0 ||		// Invalid duration.
+	    !osdMsgEnabled() ||		// Messages disabled.
+	    m_osdLockCnt > 0)		// OSD locked.
+	{
+		// Don't write anything to the message buffer.
+		return;
+	}
+	
 	// Calculate the end time.
-	double endTime = LibGens::Timing::GetTimeD() + ((double)duration / 1000.0);
+	const double endTime = LibGens::Timing::GetTimeD() + ((double)duration / 1000.0);
 	
 	// Create the OSD message and add it to the list.
-	OsdMessage osdMsg(msg_buf, endTime);
+	OsdMessage osdMsg(msg, endTime);
 	m_osdList.append(osdMsg);
 	setOsdListDirty();
 	

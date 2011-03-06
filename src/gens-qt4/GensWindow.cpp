@@ -1,25 +1,25 @@
-/***************************************************************************
- * gens-qt4: Gens Qt4 UI.                                                  *
- * GensWindow.cpp: Gens Window.                                            *
- *                                                                         *
- * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
- * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
- *                                                                         *
- * This program is free software; you can redistribute it and/or modify it *
- * under the terms of the GNU General Public License as published by the   *
- * Free Software Foundation; either version 2 of the License, or (at your  *
- * option) any later version.                                              *
- *                                                                         *
- * This program is distributed in the hope that it will be useful, but     *
- * WITHOUT ANY WARRANTY; without even the implied warranty of              *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
- * GNU General Public License for more details.                            *
- *                                                                         *
- * You should have received a copy of the GNU General Public License along *
- * with this program; if not, write to the Free Software Foundation, Inc., *
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
- ***************************************************************************/
+/******************************************************************************
+ * gens-qt4: Gens Qt4 UI.                                                     *
+ * GensWindow.cpp: Gens Window.                                               *
+ *                                                                            *
+ * Copyright (c) 1999-2002 by Stéphane Dallongeville.                         *
+ * Copyright (c) 2003-2004 by Stéphane Akhoun.                                *
+ * Copyright (c) 2008-2011 by David Korth.                                    *
+ *                                                                            *
+ * This program is free software; you can redistribute it and/or modify       *
+ * it under the terms of the GNU General Public License as published by       *
+ * the Free Software Foundation; either version 2 of the License, or          *
+ * (at your option) any later version.                                        *
+ *                                                                            *
+ * This program is distributed in the hope that it will be useful,            *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+ * GNU General Public License for more details.                               *
+ *                                                                            *
+ * You should have received a copy of the GNU General Public License          *
+ * along with this program; if not, write to the Free Software                *
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA *
+ ******************************************************************************/
 
 #include <config.h>
 
@@ -122,7 +122,7 @@ GensWindow::~GensWindow()
 void GensWindow::setupUi(void)
 {
 	if (this->objectName().isEmpty())
-		this->setObjectName(QString::fromUtf8("GensWindow"));
+		this->setObjectName(QLatin1String("GensWindow"));
 	
 #ifdef Q_WS_MAC
 	// Remove the window icon. (Mac "proxy icon")
@@ -131,7 +131,7 @@ void GensWindow::setupUi(void)
 	
 	// Create the central widget.
 	centralwidget = new QWidget(this);
-	centralwidget->setObjectName(QString::fromLatin1("centralwidget"));
+	centralwidget->setObjectName(QLatin1String("centralwidget"));
 	this->setCentralWidget(centralwidget);
 	
 	// Connect slots by name.
@@ -147,7 +147,7 @@ void GensWindow::setupUi(void)
 	
 	// Create the layout.
 	layout = new QVBoxLayout(this->centralwidget);
-	layout->setObjectName(QString::fromLatin1("layout"));
+	layout->setObjectName(QLatin1String("layout"));
 	layout->setMargin(0);
 	layout->setSpacing(0);
 	centralwidget->setLayout(layout);
@@ -262,7 +262,7 @@ void GensWindow::dragEnterEvent(QDragEnterEvent *event)
 	
 	// Make sure the URL is file://.
 	// TODO: Add support for other protocols later.
-	if (url.scheme() != QString::fromLatin1("file"))
+	if (url.scheme() != QLatin1String("file"))
 		return;
 	
 	// Override the propsed action with Copy, and accept it.
@@ -294,7 +294,7 @@ void GensWindow::dropEvent(QDropEvent *event)
 	
 	// Make sure the URL is file://.
 	// TODO: Add support for other protocols later.
-	if (url.scheme() != QString::fromLatin1("file"))
+	if (url.scheme() != QLatin1String("file"))
 		return;
 	
 	// Get the local filename.
@@ -313,6 +313,25 @@ void GensWindow::dropEvent(QDropEvent *event)
 	
 	// Open the ROM.
 	m_emuManager->openRom(filename);
+}
+
+
+/**
+ * changeEvent(): Widget state has changed.
+ * @param event State change event.
+ */
+void GensWindow::changeEvent(QEvent *event)
+{
+	if (event->type() != QEvent::LanguageChange)
+		return;
+	
+	// Retranslate the menu bar.
+	m_gensMenuBar->retranslate();
+	
+	// If the menu bar is visible, remove it and
+	// add a new menu bar with the new language.
+	if (this->menuWidget() != NULL)
+		this->setMenuBar(m_gensMenuBar->createMenuBar());
 }
 
 
@@ -394,36 +413,37 @@ void GensWindow::setGensTitle(void)
  */
 void GensWindow::osd(OsdType osd_type, int param)
 {
+	QString msg;
 	switch (osd_type)
 	{
 		case OSD_SRAM_LOAD:
-			m_vBackend->osd_printf(1500, "SRAM loaded. (%d bytes)", param);
+			msg = tr("SRAM loaded. (%n byte(s))", "Onscreen Display", param);
 			break;
-		
 		case OSD_SRAM_SAVE:
-			m_vBackend->osd_printf(1500, "SRAM saved. (%d bytes)", param);
+			msg = tr("SRAM saved. (%n byte(s))", "Onscreen Display", param);
 			break;
-		
 		case OSD_SRAM_AUTOSAVE:
-			m_vBackend->osd_printf(1500, "SRAM autosaved. (%d bytes)", param);
+			msg = tr("SRAM autosaved. (%n byte(s))", "Onscreen Display", param);
 			break;
-		
 		case OSD_EEPROM_LOAD:
-			m_vBackend->osd_printf(1500, "EEPROM loaded. (%d bytes)", param);
+			msg = tr("EEPROM loaded. (%n byte(s))", "Onscreen Display", param);
 			break;
-		
 		case OSD_EEPROM_SAVE:
-			m_vBackend->osd_printf(1500, "EEPROM saved. (%d bytes)", param);
+			msg = tr("EEPROM saved. (%n byte(s))", "Onscreen Display", param);
 			break;
-		
 		case OSD_EEPROM_AUTOSAVE:
-			m_vBackend->osd_printf(1500, "EEPROM autosaved. (%d bytes)", param);
+			msg = tr("EEPROM autosaved. (%n byte(s))", "Onscreen Display", param);
 			break;
-		
 		default:
 			// Unknown OSD type.
 			break;
 	}
+	
+	if (msg.isEmpty())
+		return;
+	
+	// Print the message to the screen.
+	m_vBackend->osd_printqs(1500, msg);
 }
 
 
@@ -460,8 +480,8 @@ void GensWindow::setBpp(LibGens::VdpPalette::ColorDepth newBpp)
 	m_vBackend->setVbDirty();
 	//m_vBackend->vbUpdate();	// TODO: Don't update immediately?
 	
-	QString msg = tr("Color depth set to %1-bit.").arg(bppVal);
-	m_vBackend->osd_printf(1500, "%s", msg.toUtf8().constData());
+	const QString msg = tr("Color depth set to %1-bit.").arg(bppVal);
+	m_vBackend->osd_printqs(1500, msg);
 }
 
 

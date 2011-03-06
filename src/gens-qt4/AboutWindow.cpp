@@ -145,6 +145,23 @@ void AboutWindow::ShowSingle(QWidget *parent)
 
 
 /**
+ * changeEvent(): Widget state has changed.
+ * @param event State change event.
+ */
+void AboutWindow::changeEvent(QEvent *event)
+{
+	if (event->type() != QEvent::LanguageChange)
+		return;
+	
+	// Retranslate the UI.
+	retranslateUi(this);
+	
+	// Reinitialize the About Window text.
+	initAboutWindowText();
+}
+
+
+/**
  * initAboutWindowText(): Initialize the About Window text.
  */
 void AboutWindow::initAboutWindowText(void)
@@ -158,13 +175,13 @@ void AboutWindow::initAboutWindowText(void)
 			"(c) 2003-2004 by Stéphane Akhoun.<br />\n<br />\n"
 			"Gens/GS (c) 2008-2011 by David Korth.<br />\n<br />\n");
 	
-	sCopyrights += tr("Visit the Gens homepage:") + sLineBreak +
+	sCopyrights += tr("Visit the Gens homepage") + QChar(L':') + sLineBreak +
 			QLatin1String(
 				"<a href=\"http://www.gens.me/\">"
 				"http://www.gens.me/</a>") +
 			sLineBreak + sLineBreak;
 	
-	sCopyrights += tr("For news on Gens/GS, visit Sonic Retro:") + sLineBreak +
+	sCopyrights += tr("For news on Gens/GS, visit Sonic Retro") + QChar(L':') + sLineBreak +
 			QLatin1String(
 				"<a href=\"http://www.sonicretro.org/\">"
 				"http://www.sonicretro.org/</a>");
@@ -175,10 +192,17 @@ void AboutWindow::initAboutWindowText(void)
 	
 	// Build the program title text.
 	QString sPrgTitle =
-		QLatin1String("<b>") + tr("Gens/GS II") + QLatin1String("</b>") + sLineBreak +
-		tr("Development Build") + sLineBreak;
+		QLatin1String("<b>Gens/GS II</b>") + sLineBreak;
+	
+	if (LibGens::version_desc != NULL)
+	{
+		// Append the version description.
+		// TODO: Translate it?
+		sPrgTitle += QLatin1String(LibGens::version_desc) + sLineBreak;
+	}
 	
 #if !defined(GENS_ENABLE_EMULATION)
+	//: "NO-EMULATION BUILD" means CPU cores aren't compiled in. Used for testing Gens/GS II on new platforms.
 	sPrgTitle += QLatin1String("<b>") +
 			tr("NO-EMULATION BUILD") +
 			QLatin1String("</b>") + sLineBreak;
@@ -190,6 +214,7 @@ void AboutWindow::initAboutWindowText(void)
 		sPrgTitle += QLatin1String(LibGens::version_vcs) + sLineBreak;
 	}
 	
+	// TODO: Should this be translatable?
 	sPrgTitle += sLineBreak +
 		tr("Sega Genesis / Mega Drive,") + sLineBreak +
 		tr("Sega CD / Mega CD,") + sLineBreak +
@@ -209,6 +234,7 @@ void AboutWindow::initAboutWindowText(void)
 	// TODO: Use QString instead of stringstream?
 	stringstream ss_credits;
 	const GensGS_credits_t *p_credits = &GensGS_credits[0];
+	static const char *s_indent = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 	for (; p_credits->credit_title || p_credits->credit_name; p_credits++)
 	{
 		if (p_credits->credit_title)
@@ -220,6 +246,13 @@ void AboutWindow::initAboutWindowText(void)
 				ss_credits << "<br/>\n";
 				continue;
 			}
+			else if (p_credits->credit_title[0] == '*')
+			{
+				// Subtitle. (TODO: UTF-8 bullet character.)
+				// TODO: Translate language translation subtitles?
+				ss_credits << s_indent << "* " <<
+					&p_credits->credit_title[1] << ": ";
+			}
 			else
 			{
 				// Title is not "-". Print it.
@@ -230,8 +263,16 @@ void AboutWindow::initAboutWindowText(void)
 		if (p_credits->credit_name)
 		{
 			// Name specified.
-			ss_credits << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-				   << p_credits->credit_name << "<br/>\n";
+			if (!p_credits->credit_title ||
+			    p_credits->credit_title[0] != '*')
+			{
+				// No subtitle specified.
+				// Indent the name.
+				ss_credits << s_indent;
+			}
+			
+			// Append the name to the credits.
+			ss_credits << p_credits->credit_name << "<br/>\n";
 		}
 	}
 	
@@ -356,37 +397,48 @@ QString AboutWindow::GetDebugInfo(void)
 	
 	// CPU flags.
 	// TODO: Move the array of CPU flag names to LibGens.
+	//: CPU flags are extra features found in a CPU, such as SSE.
 	sDebugInfo += tr("CPU flags") + QLatin1String(": ");
 #if defined(__i386__) || defined(__amd64__)
-	const char *CpuFlagNames[11] =
+	static const char *CpuFlagNames[11] =
 	{
 		"MMX", "MMXEXT", "3DNow!", "3DNow! EXT",
 		"SSE", "SSE2", "SSE3", "SSSE3",
 		"SSE4.1", "SSE4.2", "SSE4a"
 	};
-	unsigned int cnt = 0;
-	for (unsigned int i = 0; i < (sizeof(CpuFlagNames)/sizeof(CpuFlagNames[0])); i++)
+	
+	if (CPU_Flags == 0)
 	{
-		if (CPU_Flags & (1 << i))
+		//: Used to indicate no special CPU features were found.
+		sDebugInfo += tr("(none)");
+	}
+	else
+	{
+		unsigned int cnt = 0;
+		for (unsigned int i = 0; i < (sizeof(CpuFlagNames)/sizeof(CpuFlagNames[0])); i++)
 		{
-			if (cnt != 0)
-				sDebugInfo += QLatin1String(", ");
-			sDebugInfo += QLatin1String(CpuFlagNames[i]);
-			cnt++;
+			if (CPU_Flags & (1 << i))
+			{
+				if (cnt != 0)
+					sDebugInfo += QLatin1String(", ");
+				sDebugInfo += QLatin1String(CpuFlagNames[i]);
+				cnt++;
+			}
 		}
 	}
-	sDebugInfo += QChar(L'\n');
 #else
-	sDebugInfo += QLatin1String("(none)\n");
+	//: Used to indicate no special CPU features were found.
+	sDebugInfo += tr("(none)");
 #endif /* defined(__i386__) || defined(__amd64__) */
+	sDebugInfo += QChar(L'\n');
 	
-	// Timing method.
+	//: Timing method: Function used to handle emulation timing.
 	sDebugInfo += tr("Timing method") + QLatin1String(": ") +
 		QLatin1String(LibGens::Timing::GetTimingMethodName(LibGens::Timing::GetTimingMethod())) +
 		QLatin1String("()\n\n");
 	
-	// Save directory.
-	// TODO: Make it a link.
+	// TODO: Make this a link.
+	//: Save directory: Directory where configuration and savestate files are saved.
 	sDebugInfo += tr("Save directory") + QLatin1String(":\n") +
 		QDir::toNativeSeparators(gqt4_config->cfgPath()) + QLatin1String("\n\n");
 	
@@ -396,35 +448,55 @@ QString AboutWindow::GetDebugInfo(void)
 #endif /* Q_OS_WIN32 */
 	
 #ifndef HAVE_OPENGL
+	//: Displayed if Gens/GS II is compiled without OpenGL support.
 	sDebugInfo += tr("OpenGL disabled.\n");
 #else
 	const char *glVendor = (const char*)glGetString(GL_VENDOR);
 	const char *glRenderer = (const char*)glGetString(GL_RENDERER);
 	const char *glVersion = (const char*)glGetString(GL_VERSION);
-	sDebugInfo += tr("OpenGL vendor string:") + QChar(L' ') +
-			QString(glVendor ? QLatin1String(glVendor) : tr("(unknown)")) + QChar(L'\n') +
-			tr("OpenGL renderer string:") + QChar(L' ') +
-			QString(glRenderer ? QLatin1String(glRenderer) : tr("(unknown)")) + QChar(L'\n') +
-			tr("OpenGL version string:") + QChar(L' ') +
-			QString(glVersion ? QLatin1String(glVersion) : tr("(unknown)")) + QChar(L'\n');
+	
+	// Translatable strings.
+	
+	//: String identifying the manufacturer of the OpenGL implementation. (e.g. "X.Org R300 Project")
+	const QString qsid_glVendor = tr("OpenGL vendor string");
+	//: String identifying the specific OpenGL renderer. (e.g. "Gallium 0.4 on ATI RV530")
+	const QString qsid_glRenderer = tr("OpenGL renderer string");
+	//: String identifying the OpenGL renderer version. (e.g. "2.1 Mesa 7.11-devel")
+	const QString qsid_glVersion = tr("OpenGL version string");
+	//: Placeholder used if an OpenGL version string could not be retrieved.
+	const QString qsid_unknown = tr("(unknown)");
+	
+	sDebugInfo += qsid_glVendor + QLatin1String(": ") +
+			QString(glVendor ? QLatin1String(glVendor) : qsid_unknown) + QChar(L'\n') +
+			qsid_glRenderer + QLatin1String(": ") +
+			QString(glRenderer ? QLatin1String(glRenderer) : qsid_unknown) + QChar(L'\n') +
+			qsid_glVersion + QLatin1String(": ") +
+			QString(glVersion ? QLatin1String(glVersion) : qsid_unknown) + QChar(L'\n');
 	
 #ifdef GL_SHADING_LANGUAGE_VERSION
 	if (glVersion && glVersion[0] >= '2' && glVersion[1] == '.')
 	{
 		const char *glslVersion = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
-		sDebugInfo += tr("GLSL version string:") + QChar(L' ') +
+		
+		//: String identifying the OpenGL Shading Language version. (e.g. "1.20")
+		const QString qsid_glslVersion = tr("GLSL version string");
+		sDebugInfo += qsid_glslVersion + QLatin1String(": ") +
 				QString(glslVersion
 					? QLatin1String(glslVersion)
-					: tr("(unknown)")) + QChar(L'\n');
+					: qsid_unknown) + QChar(L'\n');
 	}
 	
 	// OpenGL extensions.
 	sDebugInfo += QChar(L'\n');
 #ifndef HAVE_GLEW
+	//: GL Extension Wrangler support was not compiled in.
 	sDebugInfo += tr("GLEW disabled; no GL extensions supported.") + QChar(L'\n');
 #else
 	const char *glewVersion = (const char*)glewGetString(GLEW_VERSION);
-	sDebugInfo += QLatin1String("GLEW version ") +
+	
+	//: String identifying the GLEW version.
+	const QString qsid_glewVersion = tr("GLEW version");
+	sDebugInfo += qsid_glewVersion + QChar(L' ') +
 			QString(glewVersion
 				? QLatin1String(glewVersion)
 				: tr("(unknown)")) + QChar(L'\n');
@@ -435,13 +507,13 @@ QString AboutWindow::GetDebugInfo(void)
 	
 	if (extsInUse.isEmpty())
 	{
-		// No OpenGL extensions are being used.
+		//: No OpenGL extensions are being used.
 		sDebugInfo += tr("No GL extensions in use.");
 	}
 	else
 	{
-		// Print a list of OpenGL extensions.
-		sDebugInfo += tr("Using GL extensions:");
+		//: List what OpenGL extensions are in use.
+		sDebugInfo += tr("Using GL extensions") + QChar(L':');
 		foreach (const QString& ext, extsInUse)
 		{
 			sDebugInfo += QChar(L'\n');
@@ -486,22 +558,25 @@ QString AboutWindow::GetCodePageInfo(void)
 	
 	cpInfo m_cpInfo[2] =
 	{
-		{CP_ACP,	"System ANSI code page"},
-		{CP_OEMCP,	"System OEM code page"}
+		//: Win32: ANSI code page. (e.g. 1252 for US/English, 932 for Japanese)
+		{CP_ACP,	QT_TR_NOOP("System ANSI code page")},
+		//: Win32: OEM code page. (e.g. 437 for US/English)
+		{CP_OEMCP,	QT_TR_NOOP("System OEM code page")}
 	};
 	
 	// TODO: GetCPInfoExU() support?
 	for (int i = 0; i < 2; i++)
 	{
-		sCodePageInfo += m_cpInfo[i].cpStr;
-		sCodePageInfo += ": ";
+		sCodePageInfo += tr(m_cpInfo[i].cpStr);
+		sCodePageInfo += QLatin1String(": ");
 		
 		// Get the code page information.
 		CPINFOEX cpix;
 		BOOL bRet = GetCPInfoExA(m_cpInfo[i].cp, 0, &cpix);
 		if (!bRet)
 		{
-			sCodePageInfo += "Unknown [GetCPInfoExA() failed]\n";
+			//: GetCPInfoExA() call failed.
+			sCodePageInfo += tr("Unknown [GetCPInfoExA() failed]") + QChar('\n');
 			continue;
 		}
 		
@@ -510,12 +585,12 @@ QString AboutWindow::GetCodePageInfo(void)
 		// if the code page name is blank, don't add extra parentheses.
 		if (cpix.CodePageName[0] == 0x00)
 		{
-			sCodePageInfo += "\n";
+			sCodePageInfo += QChar('\n');
 			continue;
 		}
 		
 		// Add the code page name.
-		sCodePageInfo += " (";
+		sCodePageInfo += QLatin1String(" (");
 		
 		// Windows XP has the code page number in cpix.CodePageName,
 		// followed by two spaces, and then the code page name in parentheses.
@@ -538,14 +613,21 @@ QString AboutWindow::GetCodePageInfo(void)
 			sCodePageInfo += QString::fromLocal8Bit(parenStart + 1);
 		}
 		
-		sCodePageInfo += ")\n";
+		sCodePageInfo += QLatin1String(")\n");
 	}
 	
 	// Is Gens/GS II using Unicode?
 	if (GetModuleHandleW(NULL) != NULL)
-		sCodePageInfo += "Using Unicode strings for Win32 API.\n";
+	{
+		//: Win32: Unicode strings are being used. (WinNT)
+		sCodePageInfo += tr("Using Unicode strings for Win32 API.");
+	}
 	else
-		sCodePageInfo += "Using ANSI strings for Win32 API.\n";
+	{
+		//: Win32: ANSI strings are being used. (Win9x)
+		sCodePageInfo += tr("Using ANSI strings for Win32 API.");
+	}
+	sCodePageInfo += QChar('\n');
 	
 	return sCodePageInfo;
 }

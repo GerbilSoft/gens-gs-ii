@@ -66,6 +66,8 @@ void gqt4_osd(OsdType osd_type, int param);
 #include "EmuThread.hpp"
 #include "../libgens/EmuContext.hpp"
 
+class QTranslator;
+
 namespace GensQt4
 {
 	// Class forward declarations.
@@ -81,6 +83,10 @@ namespace GensQt4
 	// TODO: Move the EmuContext to the EmuThread later.
 	extern EmuThread *gqt4_emuThread;		// Thread.
 	extern LibGens::EmuContext *gqt4_emuContext;	// Context.
+	
+	// Qt translators.
+	extern QTranslator *gqt4_qtTranslator;		// Qt base translator.
+	extern QTranslator *gqt4_gensTranslator;	// Gens translator.
 	
 	void QuitGens(void);
 }

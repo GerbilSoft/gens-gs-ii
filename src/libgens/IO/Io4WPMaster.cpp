@@ -30,16 +30,17 @@ namespace LibGens
 {
 
 Io4WPMaster::Io4WPMaster()
-{
-	m_slave = NULL;
-	m_current = 0;
-}
+	: m_slave(NULL)
+	, m_current(0)
+{ }
 
 Io4WPMaster::Io4WPMaster(const IoBase *other)
 	: IoBase(other)
+	, m_slave(NULL)
+	, m_current(0)
 {
 	// TODO: Copy m_slave from another 4WP Master device.
-	m_current = 0;	// TODO: Update based on m_lastData.
+	// TODO: Update m_current based on m_lastData.
 }
 
 /**
@@ -112,34 +113,6 @@ void Io4WPMaster::setSlaveDevice(Io4WPSlave *slave)
 	m_slave = slave;
 	if (m_slave)
 		m_slave->setSlaveController(m_current);
-}
-
-
-/** Controller Configuration. **/
-
-
-/**
- * nextLogicalButton(): Get the next logical button.
- * @return Next logical button, or -1 if we're at the end.
- */
-int Io4WPMaster::nextLogicalButton(int button) const
-{
-	// 4WP Master device has no buttons.
-	((void)button);
-	return -1;
-}
-
-
-/**
- * buttonName(): Get the name for a given button index.
- * @param button Button index.
- * @return Button name, or NULL if the button index is invalid.
- */
-const char *Io4WPMaster::buttonName(int button) const
-{
-	// 4WP Master device has no buttons.
-	((void)button);
-	return NULL;
 }
 
 }

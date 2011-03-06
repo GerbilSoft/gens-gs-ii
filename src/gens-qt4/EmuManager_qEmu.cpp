@@ -1,25 +1,25 @@
-/***************************************************************************
- * gens-qt4: Gens Qt4 UI.                                                  *
- * EmuManager_qEmu.cpp: Emulation manager. (Emulation Queue functions.)    *
- *                                                                         *
- * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
- * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
- *                                                                         *
- * This program is free software; you can redistribute it and/or modify it *
- * under the terms of the GNU General Public License as published by the   *
- * Free Software Foundation; either version 2 of the License, or (at your  *
- * option) any later version.                                              *
- *                                                                         *
- * This program is distributed in the hope that it will be useful, but     *
- * WITHOUT ANY WARRANTY; without even the implied warranty of              *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
- * GNU General Public License for more details.                            *
- *                                                                         *
- * You should have received a copy of the GNU General Public License along *
- * with this program; if not, write to the Free Software Foundation, Inc., *
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
- ***************************************************************************/
+/******************************************************************************
+ * gens-qt4: Gens Qt4 UI.                                                     *
+ * EmuManager_qEmu.cpp: Emulation manager. (Emulation Queue functions.)       *
+ *                                                                            *
+ * Copyright (c) 1999-2002 by Stéphane Dallongeville.                         *
+ * Copyright (c) 2003-2004 by Stéphane Akhoun.                                *
+ * Copyright (c) 2008-2011 by David Korth.                                    *
+ *                                                                            *
+ * This program is free software; you can redistribute it and/or modify       *
+ * it under the terms of the GNU General Public License as published by       *
+ * the Free Software Foundation; either version 2 of the License, or          *
+ * (at your option) any later version.                                        *
+ *                                                                            *
+ * This program is distributed in the hope that it will be useful,            *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+ * GNU General Public License for more details.                               *
+ *                                                                            *
+ * You should have received a copy of the GNU General Public License          *
+ * along with this program; if not, write to the Free Software                *
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA *
+ ******************************************************************************/
 
 #include "EmuManager.hpp"
 #include "gqt4_main.hpp"
@@ -516,41 +516,48 @@ void EmuManager::doCtrlChange(int port, LibGens::IoBase::IoType type)
 	}
 	
 	LibGens::IoBase *dev = NULL;
+	QString devName;
 	switch (type)
 	{
 		case LibGens::IoBase::IOT_NONE:
 			// No controller.
 			dev = new LibGens::IoBase(*prevDevPtr);
+			devName = QLatin1String("None");
 			// TODO: Copy settings from existing Port 1 controller.
 			break;
 		
 		case LibGens::IoBase::IOT_3BTN:
 			// 3-button controller.
 			dev = new LibGens::Io3Button(*prevDevPtr);
+			devName = QLatin1String("3-button");
 			// TODO: Copy settings from existing Port 1 controller.
 			break;
 		
 		case LibGens::IoBase::IOT_6BTN:
 			// 6-button controller.
 			dev = new LibGens::Io6Button(*prevDevPtr);
+			devName = QLatin1String("6-button");
 			// TODO: Copy settings from existing Port 1 controller.
 			break;
 		
 		case LibGens::IoBase::IOT_2BTN:
 			// 2-button controller.
 			dev = new LibGens::Io2Button(*prevDevPtr);
+			devName = QLatin1String("2-button (SMS)");
 			// TODO: Copy settings from existing Port 1 controller.
 			break;
 		
 		case LibGens::IoBase::IOT_MEGA_MOUSE:
 			// Sega Mega Mouse.
 			dev = new LibGens::IoMegaMouse(*prevDevPtr);
+			devName = QLatin1String("Mega Mouse");
 			// TODO: Copy settings from existing Port 1 controller.
 			break;
 		
 		case LibGens::IoBase::IOT_TEAMPLAYER:
 			// Sega Teamplayer.
 			dev = new LibGens::IoTeamplayer(*prevDevPtr);
+			devName = QLatin1String("Team Player");
 			// TODO: Copy settings from existing Port 1 controller.
 			break;
 		
@@ -587,7 +594,7 @@ void EmuManager::doCtrlChange(int port, LibGens::IoBase::IoType type)
 	// Print a message on the OSD.
 	QString osdMsg = tr("Port %1 set to %2.");
 	osdMsg = osdMsg.arg(port + 1);	// TODO: Use "E" for Port 3.
-	osdMsg = osdMsg.arg(QString::fromLatin1(dev->devName()));
+	osdMsg = osdMsg.arg(devName);
 	
 	emit osdPrintMsg(1500, osdMsg);
 	
@@ -607,14 +614,14 @@ void EmuManager::doCtrlChange(int port, LibGens::IoBase::IoType type)
 			port1 = new LibGens::IoBase(LibGens::EmuMD::m_port1);
 			delete LibGens::EmuMD::m_port1;
 			LibGens::EmuMD::m_port1 = port1;
-			m_vBackend->osd_printf(1500, "Port 1 set to NONE.");
+			m_vBackend->osd_printf(1500, "Port 1 set to None.");
 		}
 		else
 		{
 			port2 = new LibGens::IoBase(LibGens::EmuMD::m_port2);
 			delete LibGens::EmuMD::m_port2;
 			LibGens::EmuMD::m_port2 = port2;
-			m_vBackend->osd_printf(1500, "Port 2 set to NONE.");
+			m_vBackend->osd_printf(1500, "Port 2 set to None.");
 		}
 	}
 #endif
@@ -674,7 +681,7 @@ void EmuManager::doScreenShot(void)
 	// TODO: Enumerate QImageWriter for supported image formats.
 	const QString scrFilenamePrefix =
 		gqt4_config->userPath(GensConfig::GCPATH_SCREENSHOTS) + QChar(L'/') + romFilename;
-	const QString scrFilenameSuffix = QString::fromLatin1(".png");
+	const QString scrFilenameSuffix = QLatin1String(".png");
 	QString scrFilename;
 	int scrNumber = -1;
 	do
@@ -1055,27 +1062,7 @@ void EmuManager::doRegionCode(GensConfig::ConfRegionCode_t region)
 	// If it isn't, don't do anything.
 	
 	// Print a message to the OSD.
-	QString region_str;
-	switch (region)
-	{
-		case GensConfig::CONFREGION_AUTODETECT:
-		default:
-			region_str = tr("Auto-Detect");
-			break;
-		case GensConfig::CONFREGION_JP_NTSC:
-			region_str = tr("Japan (NTSC)");
-			break;
-		case GensConfig::CONFREGION_ASIA_PAL:
-			region_str = tr("Asia (PAL)");
-			break;
-		case GensConfig::CONFREGION_US_NTSC:
-			region_str = tr("USA (NTSC)");
-			break;
-		case GensConfig::CONFREGION_EU_PAL:
-			region_str = tr("Europe (PAL)");
-			break;
-	}
-	
+	const QString region_str = GcRegionCodeStr(region);
 	const QString str = tr("System region set to %1.");
 	emit osdPrintMsg(1500, str.arg(region_str));
 	
@@ -1090,15 +1077,17 @@ void EmuManager::doRegionCode(GensConfig::ConfRegionCode_t region)
 		if (region == GensConfig::CONFREGION_AUTODETECT)
 		{
 			// Print the auto-detected region.
-			const char *region_cstr = LibGens::Rom::RegionCodeStr(lg_region);
-			if (region_cstr)
+			const QString detect_str = LgRegionCodeStr(lg_region);
+			if (!detect_str.isEmpty())
 			{
-				const QString auto_QStr = tr("ROM region detected as %1.");
-				const QString region_QStr = tr(region_cstr);
-				emit osdPrintMsg(1500, auto_QStr.arg(region_QStr));
+				const QString auto_str = tr("ROM region detected as %1.");
+				emit osdPrintMsg(1500, auto_str.arg(detect_str));
 			}
 		}
 	}
+	
+	// Update the system name in the GensWindow title bar.
+	emit stateChanged();
 }
 
 }

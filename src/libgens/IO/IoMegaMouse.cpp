@@ -391,18 +391,21 @@ int IoMegaMouse::nextLogicalButton(int button) const
 /**
  * buttonName(): Get the name for a given button index.
  * @param button Button index.
- * @return Button name, or NULL if the button index is invalid.
+ * @return Button name, or BTNNAME_UNKNOWN if the button index is invalid.
  */
-const char *IoMegaMouse::buttonName(int button) const
+IoBase::ButtonName_t IoMegaMouse::buttonName(int button) const
 {
-	static const char *btnNames[] =
+	switch (button)
 	{
-		"Left", "Right", "Middle", "Start"
-	};
+		case BTNI_MOUSE_LEFT:	return BTNNAME_MOUSE_LEFT;
+		case BTNI_MOUSE_RIGHT:	return BTNNAME_MOUSE_RIGHT;
+		case BTNI_MOUSE_MIDDLE:	return BTNNAME_MOUSE_MIDDLE;
+		case BTNI_MOUSE_START:	return BTNNAME_MOUSE_START;
+		default:		return BTNNAME_UNKNOWN;
+	}
 	
-	if (button >= BTNI_MOUSE_LEFT && button <= BTNI_MOUSE_START)
-		return btnNames[button];
-	return NULL;
+	// Should not get here...
+	return BTNNAME_UNKNOWN;
 }
 
 }

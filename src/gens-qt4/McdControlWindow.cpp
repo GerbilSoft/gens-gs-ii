@@ -110,7 +110,7 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 	}
 	
 	// Query CD-ROM drives.
-	query();
+	//query();
 }
 
 
@@ -146,6 +146,20 @@ void McdControlWindow::ShowSingle(QWidget *parent)
 		m_McdControlWindow = new McdControlWindow(parent);
 		m_McdControlWindow->show();
 	}
+}
+
+
+/**
+ * changeEvent(): Widget state has changed.
+ * @param event State change event.
+ */
+void McdControlWindow::changeEvent(QEvent *event)
+{
+	if (event->type() != QEvent::LanguageChange)
+		return;
+	
+	// Retranslate the UI.
+	retranslateUi(this);
 }
 
 

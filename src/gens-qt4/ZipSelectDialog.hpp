@@ -59,6 +59,10 @@ class ZipSelectDialog : public QDialog, public Ui::ZipSelectDialog
 		const mdp_z_entry_t *selectedFile(void) const
 			{ return m_z_entry_sel; }
 	
+	protected:
+		// State change event. (Used for switching the UI language at runtime.)
+		void changeEvent(QEvent *event);
+	
 	private slots:
 		void accept(void);
 		

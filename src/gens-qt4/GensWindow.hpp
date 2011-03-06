@@ -110,6 +110,9 @@ class GensWindow : public QMainWindow
 		void dragEnterEvent(QDragEnterEvent *event);
 		void dropEvent(QDropEvent *event);
 		
+		// State change event. (Used for switching the UI language at runtime.)
+		void changeEvent(QEvent *event);
+		
 		// Widgets.
 		VBackend *m_vBackend;		// GensQGLWidget.
 		GensMenuBar *m_gensMenuBar;	// Gens menu bar.
@@ -162,7 +165,7 @@ class GensWindow : public QMainWindow
 		 * @param msg Message to print.
 		 */
 		void osdPrintMsg(int duration, const QString& msg)
-			{ m_vBackend->osd_printf(duration, "%s", msg.toUtf8().constData()); }
+			{ m_vBackend->osd_printqs(duration, msg); }
 		
 		/**
 		 * osdShowPreview(): Show a preview image on the OSD.

@@ -43,6 +43,62 @@ const GensGS_credits_t GensGS_credits[] =
 	{"Gens/GS Contributors",	NULL},
 	{"-", NULL},
 	
+	{"32X PWM Improvements",	"Chilly Willy"},
+	{NULL,				"Joseph Fenton"},
+	{"-", NULL},
+	
+	{"Controller Icons",		"theocas"},
+	{"-", NULL},
+	
+	{"Credits ROM",			"Sik"},
+	{"-", NULL},
+	
+	{"Game Gear PSG Stereo Info",	"nineko"},
+	{"-", NULL},
+	
+	{"Game Genie Icon",		"Maximal|Firestorm"},
+	{"-", NULL},
+	
+	{"Gens/GS Application Icon",	"Marc Gordon (Cinossu)"},
+	{"-", NULL},
+	
+	{"GLSL Assistance",		"Damizean"},
+	{"-", NULL},
+	
+	{"Haiku Port (in progress)",	"Phil Costin"},
+	{"-", NULL},
+	
+	{"Mac OS X Testing",		"Pietro Gagliardi (andlabs)"},
+	{NULL,				"Puto"},
+	{NULL,				"sonicblur"},
+	{"-", NULL},
+	
+	{"MD Emulation Assistance",	"AamirM"},
+	{NULL,				"Jorge"},
+	{NULL,				"TmEE"},
+	{"-", NULL},
+	
+	{"SGens Icon",			"Sik"},
+	{"-", NULL},
+	
+	{"Test ROMs",			"Jorge"},
+	{NULL,				"Sik"},
+	{"-", NULL},
+	
+	{"VDP Layer Options Icon",	"SkyLights"},
+	{"-", NULL},
+	
+	{"VGM Logging Code",		"ValleyBell"},
+	{"-", NULL},
+	
+	{"WahCade Integration",		"Zombie Ryushu"},
+	{"-", NULL},
+	
+	{"Translations",		NULL},
+	{"*en_GB",			"Overlord"},
+	{"*ja_JP",			"Scarred Sun"},
+	{"-", NULL},
+	
 	{"Software Testing",		"AamirM"},
 	{NULL,				"Baffo32"},
 	{NULL,				"Biafra Republic"},
@@ -62,56 +118,6 @@ const GensGS_credits_t GensGS_credits[] =
 	{NULL,				"Tets"},
 	{NULL,				"TiZ"},
 	{NULL,				"Zombie Ryushu"},
-	{"-", NULL},
 	
-	{"Mac OS X Testing",		"Pietro Gagliardi (andlabs)"},
-	{NULL,				"Puto"},
-	{NULL,				"sonicblur"},
-	{"-", NULL},
-	
-	{"MD Emulation Assistance",	"AamirM"},
-	{NULL,				"Jorge"},
-	{NULL,				"TmEE"},
-	{"-", NULL},
-	
-	{"Test ROMs",			"Jorge"},
-	{NULL,				"Sik"},
-	{"-", NULL},
-	
-	{"32X PWM Improvements",	"Chilly Willy"},
-	{NULL,				"Joseph Fenton"},
-	{"-", NULL},
-	
-	{"GLSL Assistance",		"Damizean"},
-	{"-", NULL},
-	
-	{"Gens/GS Application Icon",	"Marc Gordon (Cinossu)"},
-	{"-", NULL},
-	
-	{"Game Genie Icon",		"Maximal|Firestorm"},
-	{"-", NULL},
-	
-	{"SGens Icon",			"Sik"},
-	{"-", NULL},
-	
-	{"VDP Layer Options Icon",	"SkyLights"},
-	{"-", NULL},
-	
-	{"Game Gear PSG Stereo Info",	"nineko"},
-	{"-", NULL},
-	
-	{"Haiku Port (in progress)",	"Phil Costin"},
-	{"-", NULL},
-	
-	{"Controller Icons",		"theocas"},
-	{"-", NULL},
-	
-	{"WahCade Integration",		"Zombie Ryushu"},
-	{"-", NULL},
-	
-	{"VGM Logging Code",		"ValleyBell"},
-	{"-", NULL},
-	
-	{"Credits ROM",			"Sik"},
 	{NULL, NULL}
 };
