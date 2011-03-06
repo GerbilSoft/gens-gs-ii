@@ -136,6 +136,7 @@ SET(gens-qt4_COMMON_SRCS
 	widgets/GensColorComboBox.cpp
 	widgets/GensKeySequenceWidget.cpp
 	widgets/GensCtrlCfgWidget.cpp
+	EmuManager_str.cpp
 	)
 
 # Headers with Qt4 objects.
