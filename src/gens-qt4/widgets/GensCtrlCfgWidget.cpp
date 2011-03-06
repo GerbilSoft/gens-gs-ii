@@ -62,6 +62,7 @@ class GensCtrlCfgWidgetPrivate
 		QGridLayout *m_layout;
 		QLabel *m_lblCfg[MAX_CFG_BTNS];
 		GensKeySequenceWidget *m_btnCfg[MAX_CFG_BTNS];
+		QSpacerItem *m_vspcCfg;
 };
 
 
@@ -100,7 +101,7 @@ GensCtrlCfgWidgetPrivate::~GensCtrlCfgWidgetPrivate()
 void GensCtrlCfgWidgetPrivate::init(void)
 {
 	// Add MAX_CFG_BTNS items to the grid layout.
-	for (size_t i = 0; i < (sizeof(m_lblCfg)/sizeof(m_lblCfg[0])); i++)
+	for (size_t i = 0; i < MAX_CFG_BTNS; i++)
 	{
 		m_lblCfg[i] = new QLabel();
 		m_lblCfg[i]->setVisible(false);
@@ -109,6 +110,10 @@ void GensCtrlCfgWidgetPrivate::init(void)
 		m_layout->addWidget(m_lblCfg[i], i, 0, Qt::AlignLeft);
 		m_layout->addWidget(m_btnCfg[i], i, 1, Qt::AlignRight);
 	}
+	
+	// Add a vertical spacer at the bottom of the layout.
+	m_vspcCfg = new QSpacerItem(0, 0, QSizePolicy::Fixed, QSizePolicy::Expanding);
+	m_layout->addItem(m_vspcCfg, MAX_CFG_BTNS, 0, 1, 2, Qt::AlignCenter);
 }
 
 
