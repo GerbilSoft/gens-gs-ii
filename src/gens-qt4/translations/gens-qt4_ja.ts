@@ -301,7 +301,7 @@ Used to indicate no special CPU features were found.</extracomment>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="57"/>
         <source>&amp;Device:</source>
-        <translation>デバイス: (&amp;D)</translation>
+        <translation>デバイス (&amp;D):</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="107"/>
@@ -478,147 +478,147 @@ Used to indicate no special CPU features were found.</extracomment>
         <source>Genesis</source>
         <comment>rom-region</comment>
         <extracomment>MD ROM region is US/NTSC. System name should be the equivalent of &quot;Genesis&quot;.</extracomment>
-        <translation>ジェネシス</translation>
+        <translation type="unfinished">ジェネシス</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="114"/>
         <source>Mega Drive</source>
         <comment>rom-region</comment>
         <extracomment>MD ROM region is not US/NTSC. System name should be the equivalent of &quot;Mega Drive&quot;.</extracomment>
-        <translation>メガドライブ</translation>
+        <translation type="unfinished">メガドライブ</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="121"/>
         <source>Sega CD</source>
         <comment>rom-region</comment>
         <extracomment>MCD disc region is US/NTSC. System name should be the equivalent of &quot;Sega CD&quot;.</extracomment>
-        <translation>セガCD</translation>
+        <translation type="unfinished">セガCD</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="126"/>
         <source>Mega CD</source>
         <comment>rom-region</comment>
         <extracomment>MCD disc region is not US/NTSC. System name should be the equivalent of &quot;Mega CD&quot;.</extracomment>
-        <translation>メガCD</translation>
+        <translation type="unfinished">メガCD</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="135"/>
         <source>Sega 32X</source>
         <comment>rom-region</comment>
         <extracomment>32X ROM is US/NTSC. System name should be the equivalent of &quot;Sega 32X&quot;.</extracomment>
-        <translation>セガ３２X</translation>
+        <translation type="unfinished">セガ３２X</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="138"/>
         <source>Mega Drive 32X</source>
         <comment>rom-region</comment>
         <extracomment>32X ROM is EU/PAL. System name should be the equivalent of &quot;Mega Drive 32X&quot;.</extracomment>
-        <translation>メガ３２ｘ</translation>
+        <translation type="unfinished">メガ３２ｘ</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="142"/>
         <source>Super 32X</source>
         <comment>rom-region</comment>
         <extracomment>32X ROM is JP or ASIA. System name should be the equivalent of &quot;Super 32X&quot;.</extracomment>
-        <translation>スーパ３２ｘ</translation>
+        <translation type="unfinished">スーパ３２ｘ</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="149"/>
         <source>Sega CD 32X</source>
         <comment>rom-region</comment>
         <extracomment>Sega CD 32X disc region is US/NTSC. System name should be the equivalent of &quot;Sega CD 32X&quot;.</extracomment>
-        <translation>セガCD32X</translation>
+        <translation type="unfinished">セガCD32X</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="154"/>
         <source>Mega CD 32X</source>
         <comment>rom-region</comment>
         <extracomment>Sega CD 32X disc region is US/NTSC. System name should be the equivalent of &quot;Mega CD 32X&quot;.</extracomment>
-        <translation>メガCD32X</translation>
+        <translation type="unfinished">メガCD32X</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="159"/>
         <source>Master System</source>
         <comment>rom-region</comment>
         <extracomment>Master System. (No localized names yet...)</extracomment>
-        <translation type="unfinished">マスターシステム</translation>
+        <translation>マスターシステム</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="163"/>
         <source>Game Gear</source>
         <comment>rom-region</comment>
         <extracomment>Game Gear. (No localized names yet...)</extracomment>
-        <translation type="unfinished">ゲームギア</translation>
+        <translation>ゲームギア</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="167"/>
         <source>SG-1000</source>
         <comment>rom-region</comment>
         <extracomment>SG-1000. (No localized names yet...)</extracomment>
-        <translation type="unfinished">SG-1000</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="171"/>
         <source>Pico</source>
         <comment>rom-region</comment>
         <extracomment>Pico. (No localized names yet...)</extracomment>
-        <translation type="unfinished">キッズコンピュータ・ピコ</translation>
+        <translation>キッズコンピュータ・ピコ</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="193"/>
         <source>Genesis</source>
         <comment>local-region</comment>
         <extracomment>Localized name of Sega Genesis.</extracomment>
-        <translation type="unfinished">ジェネシス</translation>
+        <translation type="unfinished">メガドライブ</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="197"/>
         <source>Sega CD</source>
         <comment>local-region</comment>
         <extracomment>Localized name of Sega CD.</extracomment>
-        <translation type="unfinished">セガCD</translation>
+        <translation type="unfinished">メガCD</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="201"/>
         <source>Sega 32X</source>
         <comment>local-region</comment>
         <extracomment>Localized name of Sega 32X.</extracomment>
-        <translation type="unfinished">セガ３２X</translation>
+        <translation type="unfinished">スーパ３２ｘ</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="205"/>
         <source>Sega CD 32X</source>
         <comment>local-region</comment>
         <extracomment>Localized name of Sega CD 32X.</extracomment>
-        <translation type="unfinished">セガCD32X</translation>
+        <translation type="unfinished">メガCD32X</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="209"/>
         <source>Master System</source>
         <comment>local-region</comment>
         <extracomment>Localized name of Master System.</extracomment>
-        <translation type="unfinished">マスターシステム</translation>
+        <translation>マスターシステム</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="213"/>
         <source>Game Gear</source>
         <comment>local-region</comment>
         <extracomment>Localized name of Game Gear.</extracomment>
-        <translation type="unfinished">ゲームギア</translation>
+        <translation>ゲームギア</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="217"/>
         <source>SG-1000</source>
         <comment>local-region</comment>
         <extracomment>Localized name of SG-1000.</extracomment>
-        <translation type="unfinished">SG-1000</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="221"/>
         <source>Pico</source>
         <comment>local-region</comment>
         <extracomment>Localized name of Pico.</extracomment>
-        <translation type="unfinished">キッズコンピュータ・ピコ</translation>
+        <translation>キッズコンピュータ・ピコ</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="243"/>
@@ -1228,7 +1228,7 @@ on NTSC models.</source>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="219"/>
         <source>&amp;Style:</source>
-        <translation>スタイル: (&amp;S)</translation>
+        <translation>スタイル (&amp;S):</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="242"/>
@@ -1248,7 +1248,7 @@ on NTSC models.</source>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="260"/>
         <source>&amp;Color:</source>
-        <translation>色: (&amp;C)</translation>
+        <translation>色 (&amp;C):</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="309"/>
@@ -1331,7 +1331,7 @@ window to a larger size than its original resolution.</source>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="466"/>
         <source>&amp;Brightness:</source>
-        <translation>輝度: (&amp;B)</translation>
+        <translation type="unfinished">輝度 (&amp;B):</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="514"/>
