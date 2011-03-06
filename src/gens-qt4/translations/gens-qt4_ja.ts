@@ -654,9 +654,6 @@ Used to indicate no special CPU features were found.</extracomment>
         <extracomment>No OpenGL extensions are being used.</extracomment>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Using GL extensions:</source>
-    </message>
 </context>
 <context>
     <name>GensQt4::CtrlConfigWindow</name>
