@@ -51,6 +51,7 @@ class GensKeySequenceWidgetPrivate
 		GensKeySequenceWidgetPrivate(GensKeySequenceWidget *q);
 		
 		void init(void);
+		static QIcon GetClearButtonIcon(void);
 		
 		static QKeySequence appendToSequence(const QKeySequence& seq, int keyQt);
 		
@@ -152,6 +153,29 @@ GensKeySequenceWidgetPrivate::GensKeySequenceWidgetPrivate(GensKeySequenceWidget
 
 
 /**
+ * GensKeySequenceWidgetPrivate::GetClearButtonIcon(): Get the clear button icon.
+ * @return Clear button icon.
+ */
+inline QIcon GensKeySequenceWidgetPrivate::GetClearButtonIcon(void)
+{
+	// Determine which icon to use for the clear button.
+	if (QApplication::isLeftToRight())
+	{
+		return GensQApplication::IconFromTheme(
+				QLatin1String("edit-clear-locationbar-rtl"));
+	}
+	else
+	{
+		return GensQApplication::IconFromTheme(
+				QLatin1String("edit-clear-locationbar-ltr"));
+	}
+	
+	// Should not get here...
+	return QIcon();
+}
+
+
+/**
  * GensKeySequenceWidgetPrivate::init(): Initialize the private data members.
  */
 void GensKeySequenceWidgetPrivate::init(void)
@@ -169,19 +193,8 @@ void GensKeySequenceWidgetPrivate::init(void)
 	clearButton = new QToolButton(q);
 	layout->addWidget(clearButton);
 	
-	// Determine which icon to use for the clear button.
-	if (QApplication::isLeftToRight())
-	{
-		clearButton->setIcon(GensQApplication::IconFromTheme(
-					QLatin1String("edit-clear-locationbar-rtl")
-					));
-	}
-	else
-	{
-		clearButton->setIcon(GensQApplication::IconFromTheme(
-					QLatin1String("edit-clear-locationbar-ltr")
-					));
-	}
+	// Set the clear button icon.
+	clearButton->setIcon(GetClearButtonIcon());
 }
 
 
@@ -347,6 +360,23 @@ GensKeySequenceWidget::GensKeySequenceWidget(QWidget *parent)
 GensKeySequenceWidget::~GensKeySequenceWidget()
 {
 	delete d;
+}
+
+
+/**
+ * GensKeySequenceWidget::changeEvent(): Widget state has changed.
+ * @param event State change event.
+ */
+void GensKeySequenceWidget::changeEvent(QEvent *event)
+{
+	if (event->type() == QEvent::LayoutDirectionChange)
+	{
+		// Update the clear button icon.
+		d->clearButton->setIcon(GensKeySequenceWidgetPrivate::GetClearButtonIcon());
+	}
+	
+	// Pass the event to the base class.
+	this->QWidget::changeEvent(event);
 }
 
 

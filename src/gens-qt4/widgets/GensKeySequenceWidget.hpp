@@ -42,6 +42,9 @@ class GensKeySequenceWidget : public QWidget
 		explicit GensKeySequenceWidget(QWidget *parent = 0);
 		~GensKeySequenceWidget();
 		
+		// State change event. (Used for switching the UI language at runtime.)
+		void changeEvent(QEvent *event);
+		
 		/**
 		 * Return the currently selected key sequence.
 		 */
