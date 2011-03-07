@@ -97,9 +97,9 @@ class GensCtrlKeyWidgetPrivate
 };
 
 
-/*******************************************
+/***************************************
  * GensCtrlKeyWidgetPrivate functions. *
- *******************************************/
+ ***************************************/
 
 GensCtrlKeyWidgetPrivate::GensCtrlKeyWidgetPrivate(GensCtrlKeyWidget *q, QLabel *lblDisplay)
 	: q(q)
@@ -255,9 +255,9 @@ void GensCtrlKeyWidgetPrivate::updateShortcutDisplay(void)
 }
 
 
-/************************************
+/********************************
  * GensCtrlKeyWidget functions. *
- ************************************/
+ ********************************/
 
 
 GensCtrlKeyWidget::GensCtrlKeyWidget(QWidget *parent, QLabel *label)
