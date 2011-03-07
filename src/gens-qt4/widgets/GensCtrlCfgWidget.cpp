@@ -111,8 +111,7 @@ void GensCtrlCfgWidgetPrivate::init(void)
 		m_lblKeyDisplay[i] = new QLabel();
 		m_lblKeyDisplay[i]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 		m_lblKeyDisplay[i]->setVisible(false);
-		m_btnCfg[i] = new GensCtrlKeyWidget();
-		m_btnCfg[i]->setLabel(m_lblKeyDisplay[i]); // TODO: Put this in the GensCtrlCfgWidget constructor?
+		m_btnCfg[i] = new GensCtrlKeyWidget(NULL, m_lblKeyDisplay[i]);
 		m_btnCfg[i]->setVisible(false);
 		
 		m_layout->addWidget(m_lblButtonName[i], i, 0, Qt::AlignLeft);
