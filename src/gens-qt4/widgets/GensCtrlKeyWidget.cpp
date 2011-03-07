@@ -110,7 +110,7 @@ GensCtrlKeyWidgetPrivate::GensCtrlKeyWidgetPrivate(GensCtrlKeyWidget *q, QLabel 
 	, gensKey(0)
 	, oldGensKey(0)
 	, isRecording(false)
-{}
+{ }
 
 
 /**
@@ -267,6 +267,13 @@ GensCtrlKeyWidget::GensCtrlKeyWidget(QWidget *parent, QLabel *label)
 	modFont.setStyleHint(QFont::TypeWriter);
 	d->clearButton->setFont(modFont);*/
 	d->updateShortcutDisplay();
+	
+	if (d->lblDisplay)
+	{
+		// Make sure the label is unreferenced if it's destroyed.
+		connect(d->lblDisplay, SIGNAL(destroyed(QObject*)),
+			this, SLOT(labelDestroyed()));
+	}
 }
 
 
@@ -281,7 +288,22 @@ GensCtrlKeyWidget::~GensCtrlKeyWidget()
  */
 void GensCtrlKeyWidget::setLabel(QLabel *label)
 {
+	if (d->lblDisplay)
+	{
+		// Disconnected the destroyed() signal from the current label.
+		disconnect(d->lblDisplay, SIGNAL(destroyed(QObject*)),
+			   this, SLOT(labelDestroyed()));
+	}
+	
 	d->lblDisplay = label;
+	if (d->lblDisplay)
+	{
+		// Connect the destroyed() signal from the new label.
+		connect(d->lblDisplay, SIGNAL(destroyed(QObject*)),
+			this, SLOT(labelDestroyed()));
+	}
+	
+	// Update the shortcut display.
 	d->updateShortcutDisplay();
 }
 
@@ -311,6 +333,15 @@ void GensCtrlKeyWidget::doneRecording(void)
 void GensCtrlKeyWidget::blinkLabel(void)
 {
 	d->blinkLabel();
+}
+
+
+/**
+ * GensCtrlKeyWidget::labelDestroyed(): Label was destroyed.
+ */
+void GensCtrlKeyWidget::labelDestroyed(void)
+{
+	d->lblDisplay = NULL;
 }
 
 

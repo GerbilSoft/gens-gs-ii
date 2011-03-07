@@ -83,6 +83,9 @@ class GensCtrlKeyWidget : public QWidget
 		
 		// Blink the label.
 		void blinkLabel(void);
+		
+		// lblDisplay destroyed slot.
+		void labelDestroyed(void);
 	
 	private:
 		friend class GensCtrlKeyWidgetPrivate;
