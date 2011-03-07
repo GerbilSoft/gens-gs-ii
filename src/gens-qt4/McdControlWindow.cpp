@@ -155,7 +155,7 @@ void McdControlWindow::ShowSingle(QWidget *parent)
  */
 void McdControlWindow::changeEvent(QEvent *event)
 {
-	if (event->type() != QEvent::LanguageChange)
+	if (event->type() == QEvent::LanguageChange)
 	{
 		// Retranslate the UI.
 		retranslateUi(this);

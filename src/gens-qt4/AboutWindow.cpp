@@ -150,7 +150,7 @@ void AboutWindow::ShowSingle(QWidget *parent)
  */
 void AboutWindow::changeEvent(QEvent *event)
 {
-	if (event->type() != QEvent::LanguageChange)
+	if (event->type() == QEvent::LanguageChange)
 	{
 		// Retranslate the UI.
 		retranslateUi(this);

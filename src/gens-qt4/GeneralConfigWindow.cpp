@@ -251,7 +251,7 @@ void GeneralConfigWindow::keyPressEvent(QKeyEvent *event)
  */
 void GeneralConfigWindow::changeEvent(QEvent *event)
 {
-	if (event->type() != QEvent::LanguageChange)
+	if (event->type() == QEvent::LanguageChange)
 	{
 		// Retranslate the UI.
 		retranslateUi(this);

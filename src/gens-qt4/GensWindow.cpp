@@ -322,7 +322,7 @@ void GensWindow::dropEvent(QDropEvent *event)
  */
 void GensWindow::changeEvent(QEvent *event)
 {
-	if (event->type() != QEvent::LanguageChange)
+	if (event->type() == QEvent::LanguageChange)
 	{
 		// Retranslate the menu bar.
 		m_gensMenuBar->retranslate();
