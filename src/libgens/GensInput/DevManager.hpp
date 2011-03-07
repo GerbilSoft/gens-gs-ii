@@ -24,6 +24,9 @@
 #ifndef __LIBGENS_GENSINPUT_DEVMANAGER_HPP__
 #define __LIBGENS_GENSINPUT_DEVMANAGER_HPP__
 
+// C includes. (Needed for NULL definition.)
+#include <string.h>
+
 #include "GensKey_t.h"
 
 namespace LibGens
@@ -71,6 +74,14 @@ class DevManager
 		 * @return True if the key is pressed; false if it isn't.
 		 */
 		static bool IsKeyPressed(GensKey_t key);
+		
+		/**
+		 * KeyName(): Get a key name.
+		 * TODO: Move to the UI for key name translation.
+		 * @param key Gens keycode.
+		 * @return Key name, or NULL on error.
+		 */
+		static const char *KeyName(GensKey_t key);
 	
 	private:
 		DevManager() { }
@@ -115,6 +126,24 @@ bool DevManager::IsKeyPressed(GensKey_t key)
 	if (gkey.type >= MAX_DEVICE_TYPES || !ms_DevFn[gkey.type])
 		return false;
 	return ms_DevFn[gkey.type](key);
+}
+
+
+/**
+ * KeyName(): Get a key name.
+ * TODO: Move to the UI for key name translation.
+ * @param key Gens keycode.
+ * @return Key name, or NULL on error.
+ */
+const char *DevManager::KeyName(GensKey_t key)
+{
+	GensKey_u gkey;
+	gkey.keycode = key;
+	if (gkey.dev_id != GKT_KEYBOARD)
+		return NULL;
+	if (gkey.key16 >= KEYV_LAST)
+		return NULL;
+	return ms_KeyNames[gkey.key16];
 }
 
 }

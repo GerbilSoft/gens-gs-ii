@@ -24,9 +24,6 @@
 
 #include "DevManager.hpp"
 
-// C includes.
-#include <string.h>
-
 namespace LibGens
 {
 
