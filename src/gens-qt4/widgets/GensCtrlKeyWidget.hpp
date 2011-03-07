@@ -42,7 +42,7 @@ class GensCtrlKeyWidget : public QWidget
 	Q_OBJECT
 	
 	public:
-		explicit GensCtrlKeyWidget(QWidget *parent = 0);
+		explicit GensCtrlKeyWidget(QWidget *parent = 0, QLabel *label = 0);
 		~GensCtrlKeyWidget();
 		
 		/**

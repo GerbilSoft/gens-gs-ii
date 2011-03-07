@@ -248,9 +248,9 @@ void GensCtrlKeyWidgetPrivate::updateShortcutDisplay(void)
  ************************************/
 
 
-GensCtrlKeyWidget::GensCtrlKeyWidget(QWidget *parent)
+GensCtrlKeyWidget::GensCtrlKeyWidget(QWidget *parent, QLabel *label)
 	: QWidget(parent)
-	, d(new GensCtrlKeyWidgetPrivate(this))
+	, d(new GensCtrlKeyWidgetPrivate(this, label))
 {
 	// Initialize the private members.
 	d->init();
