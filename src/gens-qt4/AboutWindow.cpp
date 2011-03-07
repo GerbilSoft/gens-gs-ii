@@ -158,6 +158,9 @@ void AboutWindow::changeEvent(QEvent *event)
 	
 	// Reinitialize the About Window text.
 	initAboutWindowText();
+	
+	// Pass the event to the base class.
+	this->QDialog::changeEvent(event);
 }
 
 

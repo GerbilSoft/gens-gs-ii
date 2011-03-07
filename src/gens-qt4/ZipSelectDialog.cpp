@@ -66,6 +66,9 @@ void ZipSelectDialog::changeEvent(QEvent *event)
 	
 	// Retranslate the UI.
 	retranslateUi(this);
+	
+	// Pass the event to the base class.
+	this->QDialog::changeEvent(event);
 }
 
 

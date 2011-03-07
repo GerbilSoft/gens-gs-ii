@@ -248,6 +248,9 @@ void CtrlConfigWindow::changeEvent(QEvent *event)
 	
 	// Update the selected port information.
 	updatePortSettings(m_selPort);
+	
+	// Pass the event to the base class.
+	this->QMainWindow::changeEvent(event);
 }
 
 

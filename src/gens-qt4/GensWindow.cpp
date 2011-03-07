@@ -332,6 +332,9 @@ void GensWindow::changeEvent(QEvent *event)
 	// add a new menu bar with the new language.
 	if (this->menuWidget() != NULL)
 		this->setMenuBar(m_gensMenuBar->createMenuBar());
+	
+	// Pass the event to the base class.
+	this->QMainWindow::changeEvent(event);
 }
 
 

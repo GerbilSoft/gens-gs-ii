@@ -277,6 +277,9 @@ void GeneralConfigWindow::changeEvent(QEvent *event)
 	// TODO: Split the RAR check code out of the on_txtExtPrgUnRAR_textChanged() function.
 	// NOTE: Calling on_txtExtPrgUnRAR_textChanged() will enable the Apply button!
 	on_txtExtPrgUnRAR_textChanged();
+	
+	// Pass the event to the base class.
+	this->QMainWindow::changeEvent(event);
 }
 
 
