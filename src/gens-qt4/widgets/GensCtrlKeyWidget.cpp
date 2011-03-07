@@ -235,9 +235,21 @@ void GensCtrlKeyWidgetPrivate::updateShortcutDisplay(void)
 	else
 	{
 		// Display the key.
-		// TODO: Translate key value.
+		// TODO: Move LibGens::DevManager::KeyName to the UI.
+		const char *keyName = LibGens::DevManager::KeyName(gensKey);
+		QString sKeyName;
+		if (!keyName)
+		{
+			//: No key is assigned.
+			sKeyName = GensCtrlKeyWidget::tr("None", "key-name");
+		}
+		else
+		{
+			sKeyName = QLatin1String(keyName);
+		}
+		
 		lblDisplay->setText(QLatin1String("<tt>") +
-				QString::number(gensKey, 16) +
+				sKeyName +
 				QLatin1String("</tt>"));
 	}
 }
