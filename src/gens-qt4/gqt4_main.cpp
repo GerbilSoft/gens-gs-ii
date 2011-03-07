@@ -32,6 +32,7 @@
 #include <QtCore/QTranslator>
 #include <QtCore/QLocale>
 #include <QtCore/QLibraryInfo>
+#include <QtCore/QDir>
 
 #include "GensQApplication.hpp"
 #include "GensWindow.hpp"
@@ -68,7 +69,11 @@ int gens_main(int argc, char *argv[])
 	
 	// Initialize the Qt translation system.
 	// TODO: Allow switching languages on the fly?
-	// TODO: Translations subdirectory.
+	// TODO: Check in the following directories:
+	// * Qt library directory
+	// * Application/translations/
+	// * Application/
+	// * config/
 	GensQt4::gqt4_qtTranslator = new QTranslator(GensQt4::gqt4_app);
 	GensQt4::gqt4_qtTranslator->load(
 		QLatin1String("qt_") + QLocale::system().name(),
@@ -76,9 +81,15 @@ int gens_main(int argc, char *argv[])
 	GensQt4::gqt4_app->installTranslator(GensQt4::gqt4_qtTranslator);
 	
 	// Initialize the Gens translator.
+	// TODO: Check in the following directories:
+	// * Application/translations/
+	// * Application/
+	// * config/
+	QDir appDir(QApplication::applicationDirPath());
 	GensQt4::gqt4_gensTranslator = new QTranslator(GensQt4::gqt4_app);
 	GensQt4::gqt4_gensTranslator->load(
-		QLatin1String("gens-qt4_") + QLocale::system().name());
+		QLatin1String("gens-qt4_") + QLocale::system().name(),
+		appDir.absoluteFilePath(QLatin1String("translations/")));
 	GensQt4::gqt4_app->installTranslator(GensQt4::gqt4_gensTranslator);
 	
 	// Initialize LibGens.

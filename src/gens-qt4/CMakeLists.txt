@@ -307,35 +307,9 @@ ENDIF(APPLE)
 # Translations. #
 #################
 
-# Translate all files.
-FILE(GLOB ALL_HEADER_FILES
-	*.h *.hpp
-	*/*.h */*.hpp
-	ui/resources/win32/*.h
-	)
-FILE(GLOB ALL_SRC_FILES
-	*.c *.cpp *.m *.mm
-	*/*.c */*.cpp */*.m */*.mm)
-FILE(GLOB ALL_UI_FILES ui/*.ui)
-SET(FILES_TO_TRANSLATE
-	${ALL_HEADER_FILES}
-	${ALL_SRC_FILES}
-	${ALL_UI_FILES}
-	)
-
-# Reference: http://www.vtk.org/Wiki/CMake:How_To_Build_Qt4_Software
-FILE(GLOB TRANSLATIONS_FILES translations/*.ts)
-OPTION(UPDATE_TRANSLATIONS "Update source translation translations/*.ts
-files (WARNING: make clean will delete the source .ts files! Danger!)")
-IF(UPDATE_TRANSLATIONS)
-	QT4_CREATE_TRANSLATION(QM_FILES ${FILES_TO_TRANSLATE} ${TRANSLATIONS_FILES})
-ELSE(UPDATE_TRANSLATIONS)
-	QT4_ADD_TRANSLATION(QM_FILES ${TRANSLATIONS_FILES})
-ENDIF(UPDATE_TRANSLATIONS)
-
-ADD_CUSTOM_TARGET(translations_target DEPENDS ${QM_FILES})
-INSTALL(FILES ${QM_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/translations)
+ADD_SUBDIRECTORY(translations)
 # TODO: Mac OS X bundle location.
+# TODO: "make install" location.
 
 #########################
 # Build the executable. #
@@ -349,8 +323,9 @@ ADD_EXECUTABLE(gens-qt4 MACOSX_BUNDLE
 	${gens-qt4_MOC_SOURCES}
 	${gens-qt4_UIS_H}
 	${gens-qt4_RCC_O}
-	${QM_FILES})
+	)
 TARGET_LINK_LIBRARIES(gens-qt4 gens)
+ADD_DEPENDENCIES(gens-qt4 translations_target)
 
 # Fast QString concatenation.
 # Introduced with Qt 4.6.
