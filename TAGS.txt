@@ -1,5 +1,9 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-CtrlConfigWindow-v2: CtrlConfigWindow now uses a new class,
+GensCtrlKeyWidget, which accepts a single key without modifiers and
+blinks the text while waiting for a key.
+
 gens-qt4-region-code-v1: Region auto-detection is mostly implemented.
 GeneralConfigWindow doesn't yet enable the Apply button or save changes
 if regions are dragged and dropped in lstRegionDetect, but it does work
