@@ -271,9 +271,9 @@ GensCtrlKeyWidget::GensCtrlKeyWidget(QWidget *parent, QLabel *label)
 	// Connect signals to the buttons.
 	connect(d->keyButton, SIGNAL(clicked()), this, SLOT(captureKey()));
 	connect(d->clearButton, SIGNAL(clicked()), this, SLOT(clearKey()));
-	connect(&d->keyChangeTimeout, SIGNAL(timeout()), this, SLOT(doneRecording()));
+	connect(&d->keyChangeTimeout, SIGNAL(timeout()), this, SLOT(captureKeyTimeout()));
 	connect(&d->blinkTimer, SIGNAL(timeout()), this, SLOT(blinkLabel()));
-
+	
 	//TODO: how to adopt style changes at runtime?
 	/*QFont modFont = d->clearButton->font();
 	modFont.setStyleHint(QFont::TypeWriter);
@@ -321,7 +321,7 @@ void GensCtrlKeyWidget::setLabel(QLabel *label)
 
 
 /**
- * GensCtrlKeyWidget::doneRecording(): Done recording a sequence.
+ * GensCtrlKeyWidget::captureKeyTimeout(): captureKey() has timed out.
  * Forwards to GensCtrlKeyWidgetPrivate::doneRecording().
  * We can't use Q_PRIVATE_SLOT() because the private class isn't available,
  * and we're not using KDE's automoc4 to generate mocs without linking
@@ -329,8 +329,9 @@ void GensCtrlKeyWidget::setLabel(QLabel *label)
  * 
  * (automoc4 links mocs using #include.)
  */
-void GensCtrlKeyWidget::doneRecording(void)
+void GensCtrlKeyWidget::captureKeyTimeout(void)
 {
+	d->gensKey = d->oldGensKey;
 	d->doneRecording();
 }
 

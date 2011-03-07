@@ -78,8 +78,8 @@ class GensCtrlKeyWidget : public QWidget
 	
 	private slots:
 		// NOTE: We can't use Q_PRIVATE_SLOT() properly without KDE's automoc4.
-		//Q_PRIVATE_SLOT(d, void doneRecording(void))
-		void doneRecording(void);
+		//Q_PRIVATE_SLOT(d, void captureKeyTimeout(void))
+		void captureKeyTimeout(void);
 		
 		// Blink the label.
 		void blinkLabel(void);
