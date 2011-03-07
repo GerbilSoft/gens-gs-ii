@@ -203,9 +203,6 @@
    <property name="text">
     <string>Port &amp;1</string>
    </property>
-   <property name="toolTip">
-    <string>Configure the device connected to the emulated Port 1.</string>
-   </property>
   </action>
   <action name="actionPort2">
    <property name="checkable">
@@ -213,9 +210,6 @@
    </property>
    <property name="text">
     <string>Port &amp;2</string>
-   </property>
-   <property name="toolTip">
-    <string>Configure the device connected to the emulated Port 2.</string>
    </property>
   </action>
   <action name="actionPortTP1A">
