@@ -323,15 +323,15 @@ void GensWindow::dropEvent(QDropEvent *event)
 void GensWindow::changeEvent(QEvent *event)
 {
 	if (event->type() != QEvent::LanguageChange)
-		return;
-	
-	// Retranslate the menu bar.
-	m_gensMenuBar->retranslate();
-	
-	// If the menu bar is visible, remove it and
-	// add a new menu bar with the new language.
-	if (this->menuWidget() != NULL)
-		this->setMenuBar(m_gensMenuBar->createMenuBar());
+	{
+		// Retranslate the menu bar.
+		m_gensMenuBar->retranslate();
+		
+		// If the menu bar is visible, remove it and
+		// add a new menu bar with the new language.
+		if (this->menuWidget() != NULL)
+			this->setMenuBar(m_gensMenuBar->createMenuBar());
+	}
 	
 	// Pass the event to the base class.
 	this->QMainWindow::changeEvent(event);

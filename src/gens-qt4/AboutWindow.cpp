@@ -151,13 +151,13 @@ void AboutWindow::ShowSingle(QWidget *parent)
 void AboutWindow::changeEvent(QEvent *event)
 {
 	if (event->type() != QEvent::LanguageChange)
-		return;
-	
-	// Retranslate the UI.
-	retranslateUi(this);
-	
-	// Reinitialize the About Window text.
-	initAboutWindowText();
+	{
+		// Retranslate the UI.
+		retranslateUi(this);
+		
+		// Reinitialize the About Window text.
+		initAboutWindowText();
+	}
 	
 	// Pass the event to the base class.
 	this->QDialog::changeEvent(event);

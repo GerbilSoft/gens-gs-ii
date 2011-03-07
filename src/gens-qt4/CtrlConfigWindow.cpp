@@ -237,17 +237,17 @@ void CtrlConfigWindow::keyPressEvent(QKeyEvent *event)
 void CtrlConfigWindow::changeEvent(QEvent *event)
 {
 	if (event->type() != QEvent::LanguageChange)
-		return;
-	
-	// Retranslate the UI.
-	retranslateUi(this);
-	
-	// Update the port buttons.
-	for (int i = 0; i < CTRL_CFG_MAX_PORTS; i++)
-		updatePortButton(i);
-	
-	// Update the selected port information.
-	updatePortSettings(m_selPort);
+	{
+		// Retranslate the UI.
+		retranslateUi(this);
+		
+		// Update the port buttons.
+		for (int i = 0; i < CTRL_CFG_MAX_PORTS; i++)
+			updatePortButton(i);
+		
+		// Update the selected port information.
+		updatePortSettings(m_selPort);
+	}
 	
 	// Pass the event to the base class.
 	this->QMainWindow::changeEvent(event);
