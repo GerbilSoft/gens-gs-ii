@@ -308,7 +308,10 @@ GensCtrlKeyWidget::~GensCtrlKeyWidget()
 }
 
 
-// State change event. (Used for switching the UI language at runtime.)
+/**
+ * GensCtrlKeyWidget::changeEvent(): Widget state has changed.
+ * @param event State change event.
+ */
 void GensCtrlKeyWidget::changeEvent(QEvent *event)
 {
 	if (event->type() == QEvent::LayoutDirectionChange)
