@@ -205,12 +205,6 @@ void CtrlConfigWindow::keyPressEvent(QKeyEvent *event)
 	{
 		switch (event->key())
 		{
-			case Qt::Key_A:
-				QApplication::setLayoutDirection(Qt::RightToLeft);
-				break;
-			case Qt::Key_B:
-				QApplication::setLayoutDirection(Qt::LeftToRight);
-				break;
 			case Qt::Key_Enter:
 			case Qt::Key_Return:
 				// Accept the dialog changes.
