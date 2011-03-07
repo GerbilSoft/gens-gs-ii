@@ -102,7 +102,7 @@ class DevManager
 /**
  * Update(): Update the device handlers.
  */
-void DevManager::Update(void)
+inline void DevManager::Update(void)
 {
 	// Call the device handlers with keycode ~0.
 	for (int devType = 0; devType < MAX_DEVICE_TYPES; devType++)
@@ -119,7 +119,7 @@ void DevManager::Update(void)
  * @param key Gens keycode.
  * @return True if the key is pressed; false if it isn't.
  */
-bool DevManager::IsKeyPressed(GensKey_t key)
+inline bool DevManager::IsKeyPressed(GensKey_t key)
 {
 	GensKey_u gkey;
 	gkey.keycode = key;
@@ -135,7 +135,7 @@ bool DevManager::IsKeyPressed(GensKey_t key)
  * @param key Gens keycode.
  * @return Key name, or NULL on error.
  */
-const char *DevManager::KeyName(GensKey_t key)
+inline const char *DevManager::KeyName(GensKey_t key)
 {
 	GensKey_u gkey;
 	gkey.keycode = key;
