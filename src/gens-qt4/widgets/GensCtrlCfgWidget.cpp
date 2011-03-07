@@ -91,9 +91,9 @@ GensCtrlCfgWidgetPrivate::~GensCtrlCfgWidgetPrivate()
 	// TODO: Is this necessary?
 	for (size_t i = 0; i < MAX_CFG_BTNS; i++)
 	{
-		delete m_btnCfg[i];
 		delete m_lblButtonName[i];
-		delete m_lblKeyDisplay[i]; // TODO: Connect destroyed signal in GensCtrlKeyWidget.
+		delete m_lblKeyDisplay[i];
+		delete m_btnCfg[i];
 	}
 }
 
