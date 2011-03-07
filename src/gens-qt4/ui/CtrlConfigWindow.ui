@@ -196,6 +196,10 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="resources/gens-qt4.qrc">
+     <normaloff>:/gens/48x48/controllers/controller-none.png</normaloff>:/gens/48x48/controllers/controller-none.png</iconset>
+   </property>
    <property name="text">
     <string>Port &amp;1</string>
    </property>
