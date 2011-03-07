@@ -415,7 +415,9 @@ void CtrlConfigWindow::updatePortButton(int port)
 	
 	// Update the port icon and tooltip.
 	actionPort->setIcon(GetCtrlIcon(m_devType[port]));
-	actionPort->setToolTip(GetLongDeviceName(m_devType[port]));
+	actionPort->setToolTip(GetPortName(port) +
+				QLatin1String(": ") +
+				GetLongDeviceName(m_devType[port]));
 	
 	if (port == 0)
 	{
