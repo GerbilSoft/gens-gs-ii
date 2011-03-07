@@ -33,6 +33,7 @@
 // Qt includes.
 #include <QtGui/QActionGroup>
 #include <QtGui/QKeyEvent>
+#include <QtCore/QFile>
 
 namespace GensQt4
 {
@@ -43,14 +44,14 @@ CtrlConfigWindow *CtrlConfigWindow::m_CtrlConfigWindow = NULL;
 // Controller icon filenames.
 const char *CtrlConfigWindow::ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX] =
 {
-	":/gens/controller-none.png",		// IOT_NONE
-	":/gens/controller-3btn.png",		// IOT_3BTN
-	":/gens/controller-6btn.png",		// IOT_6BTN
-	":/gens/controller-2btn.png",		// IOT_2BTN
-	":/gens/controller-mega-mouse.png",	// IOT_MEGA_MOUSE (TODO)
-	":/gens/controller-teamplayer.png",	// IOT_TEAMPLAYER (TODO)
-	":/gens/controller-4wp.png",		// IOT_4WP_MASTER (TODO)
-	":/gens/controller-4wp.png",		// IOT_4WP_SLAVE (TODO)
+	"controller-none.png",		// IOT_NONE
+	"controller-3btn.png",		// IOT_3BTN
+	"controller-6btn.png",		// IOT_6BTN
+	"controller-2btn.png",		// IOT_2BTN
+	"controller-mega-mouse.png",	// IOT_MEGA_MOUSE (TODO)
+	"controller-teamplayer.png",	// IOT_TEAMPLAYER (TODO)
+	"controller-4wp.png",		// IOT_4WP_MASTER (TODO)
+	"controller-4wp.png",		// IOT_4WP_SLAVE (TODO)
 };
 
 
@@ -124,7 +125,7 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	cboDevice_lock();
 	for (int i = LibGens::IoBase::IOT_NONE; i <= LibGens::IoBase::IOT_TEAMPLAYER; i++)
 	{
-		cboDevice->addItem(QIcon(QLatin1String(ms_CtrlIconFilenames[i])),
+		cboDevice->addItem(GetCtrlIcon((LibGens::IoBase::IoType)i),
 				GetShortDeviceName((LibGens::IoBase::IoType)i));
 	}
 	cboDevice_unlock();
@@ -255,7 +256,7 @@ void CtrlConfigWindow::changeEvent(QEvent *event)
  * @param devType Device type.
  * @return Short device name.
  */
-const QString CtrlConfigWindow::GetShortDeviceName(LibGens::IoBase::IoType devType)
+QString CtrlConfigWindow::GetShortDeviceName(LibGens::IoBase::IoType devType)
 {
 	using LibGens::IoBase;
 	
@@ -281,7 +282,7 @@ const QString CtrlConfigWindow::GetShortDeviceName(LibGens::IoBase::IoType devTy
  * @param devType Device type.
  * @return Long device name.
  */
-const QString CtrlConfigWindow::GetLongDeviceName(LibGens::IoBase::IoType devType)
+QString CtrlConfigWindow::GetLongDeviceName(LibGens::IoBase::IoType devType)
 {
 	using LibGens::IoBase;
 	
@@ -307,7 +308,7 @@ const QString CtrlConfigWindow::GetLongDeviceName(LibGens::IoBase::IoType devTyp
  * @param port Port number.
  * @return Port name, or empty string on error.
  */
-const QString CtrlConfigWindow::GetPortName(int port)
+QString CtrlConfigWindow::GetPortName(int port)
 {
 	if (port == 0 || port == 1)
 		return tr("Port %1").arg(port+1);
@@ -329,6 +330,43 @@ const QString CtrlConfigWindow::GetPortName(int port)
 	
 	// Unknown port number.
 	return QString();
+}
+
+
+/**
+ * GetCtrlIcon(): Get an icon for the specified controller type.
+ * @param ioType Controller type.
+ * @return Icon for the specified controller type.
+ */
+QIcon CtrlConfigWindow::GetCtrlIcon(LibGens::IoBase::IoType ioType)
+{
+	if (ioType < LibGens::IoBase::IOT_NONE ||
+	    ioType >= LibGens::IoBase::IOT_MAX)
+	{
+		// Invalid I/O type.
+		return QIcon();
+	}
+	
+	// Create the icon.
+	QIcon ctrlIcon;
+	static const int iconSizes[5] = {64, 48, 32, 22, 16};
+	for (size_t i = 0; i < sizeof(iconSizes)/sizeof(iconSizes[0]); i++)
+	{
+		QString iconFilename = QLatin1String(":/gens/") +
+			QString::number(iconSizes[i]) + QChar(L'x') +
+			QString::number(iconSizes[i]) +
+			QLatin1String("/controllers/") +
+			QLatin1String(ms_CtrlIconFilenames[ioType]);
+		
+		if (QFile::exists(iconFilename))
+		{
+			// File exists.
+			ctrlIcon.addFile(iconFilename, QSize(iconSizes[i], iconSizes[i]));
+		}
+	}
+	
+	// Return the controller icon.
+	return ctrlIcon;
 }
 
 
@@ -376,7 +414,7 @@ void CtrlConfigWindow::updatePortButton(int port)
 	}
 	
 	// Update the port icon and tooltip.
-	actionPort->setIcon(QIcon(QLatin1String(ms_CtrlIconFilenames[m_devType[port]])));
+	actionPort->setIcon(GetCtrlIcon(m_devType[port]));
 	actionPort->setToolTip(GetLongDeviceName(m_devType[port]));
 	
 	if (port == 0)
@@ -523,7 +561,7 @@ void CtrlConfigWindow::cboDevice_setTP(bool isTP)
 		for (int i = LibGens::IoBase::IOT_2BTN;
 		     i <= LibGens::IoBase::IOT_TEAMPLAYER; i++)
 		{
-			cboDevice->addItem(QIcon(QLatin1String(ms_CtrlIconFilenames[i])),
+			cboDevice->addItem(GetCtrlIcon((LibGens::IoBase::IoType)i),
 					GetShortDeviceName((LibGens::IoBase::IoType)i));
 		}
 	}

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>591</width>
-    <height>457</height>
+    <width>600</width>
+    <height>440</height>
    </rect>
   </property>
   <property name="contextMenuPolicy">
@@ -158,8 +158,8 @@
    </property>
    <property name="iconSize">
     <size>
-     <width>64</width>
-     <height>64</height>
+     <width>48</width>
+     <height>48</height>
     </size>
    </property>
    <property name="toolButtonStyle">
@@ -196,10 +196,6 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="icon">
-    <iconset resource="resources/gens-qt4.qrc">
-     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
-   </property>
    <property name="text">
     <string>Port &amp;1</string>
    </property>
@@ -210,10 +206,6 @@
   <action name="actionPort2">
    <property name="checkable">
     <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources/gens-qt4.qrc">
-     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
    </property>
    <property name="text">
     <string>Port &amp;2</string>
@@ -226,10 +218,6 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="icon">
-    <iconset resource="resources/gens-qt4.qrc">
-     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
-   </property>
    <property name="text">
     <string>TP-1A</string>
    </property>
@@ -237,10 +225,6 @@
   <action name="actionPortTP1B">
    <property name="checkable">
     <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources/gens-qt4.qrc">
-     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
    </property>
    <property name="text">
     <string>TP-1B</string>
@@ -250,10 +234,6 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="icon">
-    <iconset resource="resources/gens-qt4.qrc">
-     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
-   </property>
    <property name="text">
     <string>TP-1C</string>
    </property>
@@ -261,10 +241,6 @@
   <action name="actionPortTP1D">
    <property name="checkable">
     <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources/gens-qt4.qrc">
-     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
    </property>
    <property name="text">
     <string>TP-1D</string>
@@ -274,10 +250,6 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="icon">
-    <iconset resource="resources/gens-qt4.qrc">
-     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
-   </property>
    <property name="text">
     <string>TP-2A</string>
    </property>
@@ -285,10 +257,6 @@
   <action name="actionPortTP2B">
    <property name="checkable">
     <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources/gens-qt4.qrc">
-     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
    </property>
    <property name="text">
     <string>TP-2B</string>
@@ -298,10 +266,6 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="icon">
-    <iconset resource="resources/gens-qt4.qrc">
-     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
-   </property>
    <property name="text">
     <string>TP-2C</string>
    </property>
@@ -309,10 +273,6 @@
   <action name="actionPortTP2D">
    <property name="checkable">
     <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources/gens-qt4.qrc">
-     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
    </property>
    <property name="text">
     <string>TP-2D</string>
@@ -322,10 +282,6 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="icon">
-    <iconset resource="resources/gens-qt4.qrc">
-     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
-   </property>
    <property name="text">
     <string>4WP-A</string>
    </property>
@@ -333,10 +289,6 @@
   <action name="actionPort4WPB">
    <property name="checkable">
     <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources/gens-qt4.qrc">
-     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
    </property>
    <property name="text">
     <string>4WP-B</string>
@@ -346,10 +298,6 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="icon">
-    <iconset resource="resources/gens-qt4.qrc">
-     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
-   </property>
    <property name="text">
     <string>4WP-C</string>
    </property>
@@ -357,10 +305,6 @@
   <action name="actionPort4WPD">
    <property name="checkable">
     <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources/gens-qt4.qrc">
-     <normaloff>:/gens/controller-none.png</normaloff>:/gens/controller-none.png</iconset>
    </property>
    <property name="text">
     <string>4WP-D</string>
@@ -376,6 +320,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>cboDevice</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources>

@@ -27,7 +27,8 @@
 #include <QtGui/QMainWindow>
 #include "ui_CtrlConfigWindow.h"
 
-// Qt classes.
+// Qt includes and classes.
+#include <QtGui/QIcon>
 class QActionGroup;
 
 // LibGens includes.
@@ -71,12 +72,6 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		// State change event. (Used for switching the UI language at runtime.)
 		void changeEvent(QEvent *event);
 		
-		// Constant data.
-		static const char *ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX];
-		static const QString GetShortDeviceName(LibGens::IoBase::IoType devType);
-		static const QString GetLongDeviceName(LibGens::IoBase::IoType devType);
-		static const QString GetPortName(int port);
-		
 		// Internal controller settings.
 		LibGens::IoBase::IoType m_devType[CTRL_CFG_MAX_PORTS];
 		
@@ -118,6 +113,13 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 	
 	private:
 		static CtrlConfigWindow *m_CtrlConfigWindow;
+		
+		// Controller data.
+		static const char *ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX];
+		static QString GetShortDeviceName(LibGens::IoBase::IoType devType);
+		static QString GetLongDeviceName(LibGens::IoBase::IoType devType);
+		static QString GetPortName(int port);
+		static QIcon GetCtrlIcon(LibGens::IoBase::IoType ioType);
 		
 		// Selected port.
 		int m_selPort;
