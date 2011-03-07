@@ -213,7 +213,11 @@ int GensConfigPrivate::reload(const QString& filename)
 	// TODO: Don't use setExtPrgUnRAR.
 	// Instead, set the filename directly.
 #ifdef Q_OS_WIN32
+#ifdef __amd64__
+	const QLatin1String sExtPrgUnRAR_default("UnRAR64.dll");
+#else
 	const QLatin1String sExtPrgUnRAR_default("UnRAR.dll");
+#endif
 #else /* !Q_OS_WIN32 */
 	// TODO: Check for the existence of unrar and rar.
 	// We should:
