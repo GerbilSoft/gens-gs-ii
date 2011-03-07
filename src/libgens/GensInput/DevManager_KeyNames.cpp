@@ -51,10 +51,13 @@ namespace LibGens
 #define ALT_KEYNAME "Alt"
 #endif
 
+// TODO: Qt refers to Windows keys as "Meta",
+// but X11 refers to Windows keys as "Super".
+
 const char *DevManager::ms_KeyNames[KEYV_LAST] =
 {
 	// 0x00
-	"Unknown", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	"None", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	"Backspace", "Tab", NULL, NULL, "Clear", RETURN_KEYNAME, NULL, NULL,
 	NULL, NULL, NULL, "Pause", NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, "Escape", NULL, NULL, NULL, NULL,
