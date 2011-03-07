@@ -45,6 +45,9 @@ class GensCtrlKeyWidget : public QWidget
 		explicit GensCtrlKeyWidget(QWidget *parent = 0, QLabel *label = 0);
 		~GensCtrlKeyWidget();
 		
+		// State change event. (Used for switching the UI language at runtime.)
+		void changeEvent(QEvent *event);
+		
 		/**
 		 * Set the display label.
 		 */
