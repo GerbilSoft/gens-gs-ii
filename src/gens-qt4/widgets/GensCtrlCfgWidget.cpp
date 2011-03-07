@@ -30,6 +30,7 @@
 // GensKeySequenceWidget.
 // TODO: Add property for "single key" and add gamepad support.
 #include "GensKeySequenceWidget.hpp"
+#include "GensCtrlKeyWidget.hpp"
 
 // I/O devices.
 #include "libgens/IO/IoBase.hpp"
@@ -60,8 +61,9 @@ class GensCtrlCfgWidgetPrivate
 		LibGens::IoBase::IoType m_ioType;
 		
 		QGridLayout *m_layout;
-		QLabel *m_lblCfg[MAX_CFG_BTNS];
-		GensKeySequenceWidget *m_btnCfg[MAX_CFG_BTNS];
+		QLabel *m_lblButtonName[MAX_CFG_BTNS];
+		QLabel *m_lblKeyDisplay[MAX_CFG_BTNS];
+		GensCtrlKeyWidget *m_btnCfg[MAX_CFG_BTNS];
 		QSpacerItem *m_vspcCfg;
 };
 
@@ -87,10 +89,11 @@ GensCtrlCfgWidgetPrivate::~GensCtrlCfgWidgetPrivate()
 {
 	// Delete all the labels and buttons.
 	// TODO: Is this necessary?
-	for (size_t i = 0; i < (sizeof(m_lblCfg)/sizeof(m_lblCfg[0])); i++)
+	for (size_t i = 0; i < MAX_CFG_BTNS; i++)
 	{
-		delete m_lblCfg[i];
 		delete m_btnCfg[i];
+		delete m_lblButtonName[i];
+		delete m_lblKeyDisplay[i]; // TODO: Connect destroyed signal in GensCtrlKeyWidget.
 	}
 }
 
@@ -103,17 +106,23 @@ void GensCtrlCfgWidgetPrivate::init(void)
 	// Add MAX_CFG_BTNS items to the grid layout.
 	for (size_t i = 0; i < MAX_CFG_BTNS; i++)
 	{
-		m_lblCfg[i] = new QLabel();
-		m_lblCfg[i]->setVisible(false);
-		m_btnCfg[i] = new GensKeySequenceWidget();
+		m_lblButtonName[i] = new QLabel();
+		m_lblButtonName[i]->setVisible(false);
+		m_lblKeyDisplay[i] = new QLabel();
+		m_lblKeyDisplay[i]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+		m_lblKeyDisplay[i]->setVisible(false);
+		m_btnCfg[i] = new GensCtrlKeyWidget();
+		m_btnCfg[i]->setLabel(m_lblKeyDisplay[i]); // TODO: Put this in the GensCtrlCfgWidget constructor?
 		m_btnCfg[i]->setVisible(false);
-		m_layout->addWidget(m_lblCfg[i], i, 0, Qt::AlignLeft);
-		m_layout->addWidget(m_btnCfg[i], i, 1, Qt::AlignRight);
+		
+		m_layout->addWidget(m_lblButtonName[i], i, 0, Qt::AlignLeft);
+		m_layout->addWidget(m_lblKeyDisplay[i], i, 1, Qt::AlignLeft);
+		m_layout->addWidget(m_btnCfg[i], i, 2, Qt::AlignRight);
 	}
 	
 	// Add a vertical spacer at the bottom of the layout.
-	m_vspcCfg = new QSpacerItem(0, 0, QSizePolicy::Fixed, QSizePolicy::Expanding);
-	m_layout->addItem(m_vspcCfg, MAX_CFG_BTNS, 0, 1, 2, Qt::AlignCenter);
+	m_vspcCfg = new QSpacerItem(128, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
+	m_layout->addItem(m_vspcCfg, MAX_CFG_BTNS, 1, 1, 1, Qt::AlignCenter);
 }
 
 
@@ -168,8 +177,9 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoBase::IoType newIoType)
 		LibGens::IoBase::ButtonName_t buttonName = ctrl->buttonName(button);
 		sBtnLabel = ButtonName_l(buttonName);
 		
-		m_lblCfg[i]->setText(sBtnLabel);
-		m_lblCfg[i]->setVisible(true);
+		m_lblButtonName[i]->setText(sBtnLabel);
+		m_lblButtonName[i]->setVisible(true);
+		m_lblKeyDisplay[i]->setVisible(true);
 		m_btnCfg[i]->setVisible(true);
 		
 		// Get the next logical button.
@@ -179,7 +189,8 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoBase::IoType newIoType)
 	// Hide other buttons.
 	for (int i = numButtons; i < MAX_CFG_BTNS; i++)
 	{
-		m_lblCfg[i]->setVisible(false);
+		m_lblButtonName[i]->setVisible(false);
+		m_lblKeyDisplay[i]->setVisible(false);
 		m_btnCfg[i]->setVisible(false);
 	}
 	

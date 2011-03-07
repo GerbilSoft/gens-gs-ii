@@ -137,6 +137,7 @@ SET(gens-qt4_COMMON_SRCS
 	widgets/GensKeySequenceWidget.cpp
 	widgets/GensCtrlCfgWidget.cpp
 	EmuManager_str.cpp
+	widgets/GensCtrlKeyWidget.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -167,6 +168,8 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	widgets/GensKeySequenceWidget.hpp
 	widgets/GensKeySequenceWidget_p.hpp
 	widgets/GensCtrlCfgWidget.hpp
+	widgets/GensCtrlKeyWidget.hpp
+	widgets/GensCtrlKeyWidget_p.hpp
 	)
 
 SET(gens-qt4_SRCS ${gens-qt4_COMMON_SRCS})
