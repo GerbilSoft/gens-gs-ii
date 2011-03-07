@@ -62,15 +62,7 @@ class DevManager
 		/**
 		 * Update(): Update the device handlers.
 		 */
-		static void Update(void)
-		{
-			// Call the device handlers with keycode ~0.
-			for (int devType = 0; devType < MAX_DEVICE_TYPES; devType++)
-			{
-				if (ms_DevFn[devType])
-					ms_DevFn[devType]((GensKey_t)~0);
-			}
-		}
+		static void Update(void);
 		
 		/**
 		 * IsKeyPressed(): Check if a key is pressed.
@@ -78,16 +70,12 @@ class DevManager
 		 * @param key Gens keycode.
 		 * @return True if the key is pressed; false if it isn't.
 		 */
-		static bool IsKeyPressed(GensKey_t key)
-		{
-			GensKey_u gkey;
-			gkey.keycode = key;
-			if (gkey.type >= MAX_DEVICE_TYPES || !ms_DevFn[gkey.type])
-				return false;
-			return ms_DevFn[gkey.type](key);
-		}
+		static bool IsKeyPressed(GensKey_t key);
 	
-	protected:
+	private:
+		DevManager() { }
+		~DevManager() { }
+		
 		/**
 		 * ms_DevFn[]: Device handler functions.
 		 * Currently supports up to 4 device types.
@@ -97,11 +85,37 @@ class DevManager
 		
 		// Key names.
 		static const char *ms_KeyNames[KEYV_LAST];
-	
-	private:
-		DevManager() { }
-		~DevManager() { }
 };
+
+
+/**
+ * Update(): Update the device handlers.
+ */
+void DevManager::Update(void)
+{
+	// Call the device handlers with keycode ~0.
+	for (int devType = 0; devType < MAX_DEVICE_TYPES; devType++)
+	{
+		if (ms_DevFn[devType])
+			ms_DevFn[devType]((GensKey_t)~0);
+	}
+}
+
+
+/**
+ * IsKeyPressed(): Check if a key is pressed.
+ * This should ONLY be called from IoBase functions from within LibGens!
+ * @param key Gens keycode.
+ * @return True if the key is pressed; false if it isn't.
+ */
+bool DevManager::IsKeyPressed(GensKey_t key)
+{
+	GensKey_u gkey;
+	gkey.keycode = key;
+	if (gkey.type >= MAX_DEVICE_TYPES || !ms_DevFn[gkey.type])
+		return false;
+	return ms_DevFn[gkey.type](key);
+}
 
 }
 
