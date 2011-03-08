@@ -179,7 +179,7 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoBase::IoType newIoType)
 	     i < numButtons && button >= 0; i++)
 	{
 		LibGens::IoBase::ButtonName_t buttonName = ctrl->buttonName(button);
-		sBtnLabel = ButtonName_l(buttonName);
+		sBtnLabel = ButtonName_l(buttonName) + QChar(L':');
 		
 		m_lblButtonName[i]->setText(sBtnLabel);
 		m_lblButtonName[i]->setVisible(true);
