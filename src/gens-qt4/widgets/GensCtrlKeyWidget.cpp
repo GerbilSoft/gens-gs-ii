@@ -241,9 +241,8 @@ void GensCtrlKeyWidgetPrivate::updateShortcutDisplay(void)
 	{
 		// Shortcut display should blink "Press a key..."
 		//: Key input is currently being recorded.
-		lblDisplay->setText(QLatin1String("<tt>") +
-				GensCtrlKeyWidget::tr("Press a key...") +
-				QLatin1String("</tt>"));
+		lblDisplay->setText(GensCtrlKeyWidget::tr("Press a key..."));
+		lblDisplay->setTextFormat(Qt::PlainText);
 	}
 	else
 	{
@@ -261,9 +260,8 @@ void GensCtrlKeyWidgetPrivate::updateShortcutDisplay(void)
 			sKeyName = QLatin1String(keyName);
 		}
 		
-		lblDisplay->setText(QLatin1String("<tt>") +
-				sKeyName +
-				QLatin1String("</tt>"));
+		lblDisplay->setText(sKeyName);
+		lblDisplay->setTextFormat(Qt::PlainText);
 	}
 }
 

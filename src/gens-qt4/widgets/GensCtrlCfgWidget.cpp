@@ -103,6 +103,10 @@ GensCtrlCfgWidgetPrivate::~GensCtrlCfgWidgetPrivate()
  */
 void GensCtrlCfgWidgetPrivate::init(void)
 {
+	// Monospaced font.
+	QFont fntMonospace(QLatin1String("Monospace"));
+	fntMonospace.setStyleHint(QFont::TypeWriter);
+	
 	// Add MAX_CFG_BTNS items to the grid layout.
 	for (size_t i = 0; i < MAX_CFG_BTNS; i++)
 	{
@@ -111,6 +115,7 @@ void GensCtrlCfgWidgetPrivate::init(void)
 		m_lblKeyDisplay[i] = new QLabel();
 		m_lblKeyDisplay[i]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 		m_lblKeyDisplay[i]->setVisible(false);
+		m_lblKeyDisplay[i]->setFont(fntMonospace);
 		m_btnCfg[i] = new GensCtrlKeyWidget(NULL, m_lblKeyDisplay[i]);
 		m_btnCfg[i]->setVisible(false);
 		
