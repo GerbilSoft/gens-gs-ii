@@ -35,29 +35,22 @@
 namespace GensQt4
 {
 
+class GensQApplicationPrivate;
+
 class GensQApplication : public QApplication
 {
 	Q_OBJECT
 	
 	public:
-		GensQApplication(int &argc, char **argv)
-			: QApplication(argc, argv)
-		{ gqaInit(); }
-		
-		GensQApplication(int &argc, char **argv, bool GUIenabled)
-			: QApplication(argc, argv, GUIenabled)
-		{ gqaInit(); }
-		
-		GensQApplication(int &argc, char **argv, Type type)
-			: QApplication(argc, argv, type)
-		{ gqaInit(); }
+		GensQApplication(int &argc, char **argv);
+		GensQApplication(int &argc, char **argv, bool GUIenabled);
+		GensQApplication(int &argc, char **argv, Type type);
 		
 		/**
 		 * isGuiThread(): Check if the current thread is the GUI thread.
 		 * @return True if it is; false if it isn't.
 		 */
-		inline bool isGuiThread(void)
-			{ return (QThread::currentThread() == m_guiThread); }
+		bool isGuiThread(void);
 		
 		/**
 		 * IconFromTheme(): Get an icon from the system theme.
@@ -85,7 +78,10 @@ class GensQApplication : public QApplication
 #endif /* HAVE_SIGACTION */
 	
 	private:
-		void gqaInit(void);
+		friend class GensQApplicationPrivate;
+		GensQApplicationPrivate *const d;
+		
+		Q_DISABLE_COPY(GensQApplication)
 		
 		// GUI thread.
 		QThread *m_guiThread;
@@ -94,7 +90,7 @@ class GensQApplication : public QApplication
 		/**
 		 * SetFont_Win32(): Set the Qt font to match the system font.
 		 */
-		void SetFont_Win32(void);
+		static void SetFont_Win32(void);
 #endif /* Q_OS_WIN32 */
 		
 		friend class SigHandler; // Allow SigHandler to call doCrash().
@@ -115,6 +111,14 @@ class GensQApplication : public QApplication
 			{ SigHandler::SignalHandler(signum); }
 #endif /* HAVE_SIGACTION */
 };
+
+
+/**
+ * isGuiThread(): Check if the current thread is the GUI thread.
+ * @return True if it is; false if it isn't.
+ */
+inline bool GensQApplication::isGuiThread(void)
+	{ return (QThread::currentThread() == m_guiThread); }
 
 }
 

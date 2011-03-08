@@ -67,31 +67,6 @@ int gens_main(int argc, char *argv[])
 	// TODO: Parse command line arguments.
 	// They're available in app.arguments() [QStringList].
 	
-	// Initialize the Qt translation system.
-	// TODO: Allow switching languages on the fly?
-	// TODO: Check in the following directories:
-	// * Qt library directory
-	// * Application/translations/
-	// * Application/
-	// * config/
-	GensQt4::gqt4_qtTranslator = new QTranslator(GensQt4::gqt4_app);
-	GensQt4::gqt4_qtTranslator->load(
-		QLatin1String("qt_") + QLocale::system().name(),
-		QLibraryInfo::location(QLibraryInfo::TranslationsPath));
-	GensQt4::gqt4_app->installTranslator(GensQt4::gqt4_qtTranslator);
-	
-	// Initialize the Gens translator.
-	// TODO: Check in the following directories:
-	// * Application/translations/
-	// * Application/
-	// * config/
-	QDir appDir(QApplication::applicationDirPath());
-	GensQt4::gqt4_gensTranslator = new QTranslator(GensQt4::gqt4_app);
-	GensQt4::gqt4_gensTranslator->load(
-		QLatin1String("gens-qt4_") + QLocale::system().name(),
-		appDir.absoluteFilePath(QLatin1String("translations/")));
-	GensQt4::gqt4_app->installTranslator(GensQt4::gqt4_gensTranslator);
-	
 	// Initialize LibGens.
 	LibGens::Init();
 	
@@ -184,10 +159,6 @@ GensConfig *gqt4_config = NULL;
 // Emulation objects.
 EmuThread *gqt4_emuThread = NULL;		// Thread.
 LibGens::EmuContext *gqt4_emuContext = NULL;	// Context.
-
-// Qt translators.
-QTranslator *gqt4_qtTranslator = NULL;
-QTranslator *gqt4_gensTranslator = NULL;
 
 /**
  * QuitGens(): Quit Gens.
