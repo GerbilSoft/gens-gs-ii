@@ -74,6 +74,7 @@ class GensCtrlKeyWidgetPrivate
 		
 	private:
 		GensCtrlKeyWidget *const q;
+		Q_DISABLE_COPY(GensCtrlKeyWidgetPrivate)
 	
 	public:
 		// private slot

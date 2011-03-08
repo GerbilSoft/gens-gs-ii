@@ -118,9 +118,13 @@ class GensKeySequenceWidgetPrivate
 		
 		// private slot
 		void doneRecording(void);
-		
-		// members
+	
+	private:
 		GensKeySequenceWidget *const q;
+		Q_DISABLE_COPY(GensKeySequenceWidgetPrivate)
+	
+	public:
+		// members
 		QHBoxLayout *layout;
 		GensKeySequenceButton *keyButton;
 		QToolButton *clearButton;

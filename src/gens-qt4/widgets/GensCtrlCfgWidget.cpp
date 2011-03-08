@@ -58,6 +58,8 @@ class GensCtrlCfgWidgetPrivate
 	
 	private:
 		GensCtrlCfgWidget *const q;
+		Q_DISABLE_COPY(GensCtrlCfgWidgetPrivate)
+		
 		LibGens::IoBase::IoType m_ioType;
 		
 		QGridLayout *m_layout;
