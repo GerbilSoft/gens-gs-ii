@@ -57,6 +57,8 @@ class GensCtrlCfgWidgetPrivate
 		void setIoType(LibGens::IoBase::IoType newIoType);
 		
 		static QString ButtonName_l(LibGens::IoBase::ButtonName_t buttonName);
+		
+		void clearAllButtons(void);
 	
 	private:
 		GensCtrlCfgWidget *const q;
@@ -148,6 +150,8 @@ void GensCtrlCfgWidgetPrivate::init(void)
 	hboxOptions->addWidget(btnChangeAll);
 	
 	btnClearAll = new QPushButton(GensCtrlCfgWidget::tr("C&lear All Buttons"), q);
+	QObject::connect(btnClearAll, SIGNAL(clicked(bool)),
+			 q, SLOT(clearAllButtons()));
 	hboxOptions->addWidget(btnClearAll);
 }
 
@@ -318,6 +322,17 @@ QString GensCtrlCfgWidgetPrivate::ButtonName_l(LibGens::IoBase::ButtonName_t but
 }
 
 
+/**
+ * GensCtrlCfgWidgetPrivate::clearAllButtons(): Clear all mapped buttons.
+ * WRAPPER SLOT for GensCtrlCfgWidetPrivate.
+ */
+void GensCtrlCfgWidgetPrivate::clearAllButtons(void)
+{
+	for (int i = 0; i < MAX_CFG_BTNS; i++)
+		m_btnCfg[i]->clearKey();
+}
+
+
 /********************************
  * GensCtrlCfgWidget functions. *
  ********************************/
@@ -349,5 +364,15 @@ LibGens::IoBase::IoType GensCtrlCfgWidget::ioType(void)
  */
 void GensCtrlCfgWidget::setIoType(LibGens::IoBase::IoType newIoType)
 	{ d->setIoType(newIoType); }
+
+
+/**
+ * GensCtrlCfgWidget::clearAllButtons(): Clear all mapped buttons.
+ * WRAPPER SLOT for GensCtrlCfgWidetPrivate.
+ */
+void GensCtrlCfgWidget::clearAllButtons(void)
+{
+	d->clearAllButtons();
+}
 
 }

@@ -49,6 +49,9 @@ class GensCtrlCfgWidget : public QWidget
 		GensCtrlCfgWidgetPrivate *const d;
 		
 		Q_DISABLE_COPY(GensCtrlCfgWidget)
+	
+	private slots:
+		void clearAllButtons(void);
 };
 
 }
