@@ -38,14 +38,43 @@ class Io3Button : public IoBase
 		
 		uint8_t readData(void);
 		
-		// Controller configuration.
-		IoType devType(void) const
-			{ return IOT_3BTN; }
-		int numButtons(void) const
-			{ return 8; }
-		int nextLogicalButton(int button) const;
-		ButtonName_t buttonName(int button) const;
+		// Controller configuration. (STATIC functions)
+		static IoType DevType(void);
+		static int NumButtons(void);
+		static int NextLogicalButton(int button);
+		
+		// Controller configuration. (virtual functions)
+		virtual IoType devType(void) const;
+		virtual int numButtons(void) const;
+		virtual int nextLogicalButton(int button) const;
+		
+		// Get button names.
+		static ButtonName_t ButtonName(int button);
+		virtual ButtonName_t buttonName(int button) const;
 };
+
+
+// Controller configuration. (STATIC functions)
+inline IoBase::IoType Io3Button::DevType(void)
+	{ return IOT_3BTN; }
+inline int Io3Button::NumButtons(void)
+	{ return 8; }
+
+// Controller configuration. (virtual functions)
+inline IoBase::IoType Io3Button::devType(void) const
+	{ return DevType(); }
+inline int Io3Button::numButtons(void) const
+	{ return NumButtons(); }
+inline int Io3Button::nextLogicalButton(int button) const
+	{ return NextLogicalButton(button); }
+
+/**
+ * buttonName(): Get the name for a given button index. (virtual function)
+ * @param button Button index.
+ * @return Button name, or BTNNAME_UNKNOWN if the button index is invalid.
+ */
+inline IoBase::ButtonName_t Io3Button::buttonName(int button) const
+	{ return ButtonName(button); }
 
 }
 

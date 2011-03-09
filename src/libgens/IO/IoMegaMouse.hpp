@@ -50,13 +50,19 @@ class IoMegaMouse : public IoBase
 		// I/O device update function.
 		void update(void);
 		
-		// Controller configuration.
-		IoType devType(void) const
-			{ return IOT_MEGA_MOUSE; }
-		int numButtons(void) const
-			{ return 4; }
-		int nextLogicalButton(int button) const;
-		ButtonName_t buttonName(int button) const;
+		// Controller configuration. (STATIC functions)
+		static IoType DevType(void);
+		static int NumButtons(void);
+		static int NextLogicalButton(int button);
+		
+		// Controller configuration. (virtual functions)
+		virtual IoType devType(void) const;
+		virtual int numButtons(void) const;
+		virtual int nextLogicalButton(int button) const;
+		
+		// Get button names.
+		static ButtonName_t ButtonName(int button);
+		virtual ButtonName_t buttonName(int button) const;
 	
 	protected:
 		/**
@@ -73,6 +79,28 @@ class IoMegaMouse : public IoBase
 		uint8_t m_latchSignOver;
 		uint8_t m_latchRelX, m_latchRelY;
 };
+
+// Controller configuration. (STATIC functions)
+inline IoBase::IoType IoMegaMouse::DevType(void)
+	{ return IOT_MEGA_MOUSE; }
+inline int IoMegaMouse::NumButtons(void)
+	{ return 4; }
+
+// Controller configuration. (virtual functions)
+inline IoBase::IoType IoMegaMouse::devType(void) const
+	{ return DevType(); }
+inline int IoMegaMouse::numButtons(void) const
+	{ return NumButtons(); }
+inline int IoMegaMouse::nextLogicalButton(int button) const
+	{ return NextLogicalButton(button); }
+
+/**
+ * buttonName(): Get the name for a given button index. (virtual function)
+ * @param button Button index.
+ * @return Button name, or BTNNAME_UNKNOWN if the button index is invalid.
+ */
+inline IoBase::ButtonName_t IoMegaMouse::buttonName(int button) const
+	{ return ButtonName(button); }
 
 }
 

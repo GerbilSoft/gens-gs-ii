@@ -50,11 +50,13 @@ class IoTeamplayer : public IoBase
 		// I/O device update function.
 		void update(void);
 		
-		// Controller configuration.
-		IoType devType(void) const
-			{ return IOT_TEAMPLAYER; }
-		int numButtons(void) const
-			{ return 0; }
+		// Controller configuration. (STATIC functions)
+		static IoType DevType(void);
+		static int NumButtons(void);
+		
+		// Controller configuration. (virtual functions)
+		virtual IoType devType(void) const;
+		virtual int numButtons(void) const;
 	
 	protected:
 		/**
@@ -133,6 +135,18 @@ class IoTeamplayer : public IoBase
 		DataType m_ctrlIndex[DT_MAX - DT_PADA_RLDU];
 		void rebuildCtrlIndexTable(void);
 };
+
+// Controller configuration. (STATIC functions)
+inline IoBase::IoType IoTeamplayer::DevType(void)
+	{ return IOT_TEAMPLAYER; }
+inline int IoTeamplayer::NumButtons(void)
+	{ return 0; }
+
+// Controller configuration. (virtual functions)
+inline IoBase::IoType IoTeamplayer::devType(void) const
+	{ return DevType(); }
+inline int IoTeamplayer::numButtons(void) const
+	{ return NumButtons(); }
 
 }
 

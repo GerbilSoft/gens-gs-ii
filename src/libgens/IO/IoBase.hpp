@@ -120,14 +120,15 @@ class IoBase
 			IOT_MAX
 		};
 		
-		// Controller configuration.
-		virtual IoType devType(void) const { return IOT_NONE; }
-		virtual int numButtons(void) const { return 0; }
-		virtual int nextLogicalButton(int button) const
-		{
-			((void)button);
-			return -1;
-		}
+		// Controller configuration. (STATIC functions)
+		static IoType DevType(void);
+		static int NumButtons(void);
+		static int NextLogicalButton(int button);
+		
+		// Controller configuration. (virtual functions)
+		virtual IoType devType(void) const;
+		virtual int numButtons(void) const;
+		virtual int nextLogicalButton(int button) const;
 		
 		// Logical button names.
 		// These are used for button name trnaslation in the UI.
@@ -162,16 +163,9 @@ class IoBase
 			BTNNAME_MAX
 		};
 		
-		/**
-		 * buttonName(): Get the name for a given button index.
-		 * @param button Button index.
-		 * @return Button name, or BTNNAME_UNKNOWN if the button index is invalid.
-		 */
-		virtual ButtonName_t buttonName(int button) const
-		{
-			((void)button);
-			return BTNNAME_UNKNOWN;
-		}
+		// Get button names.
+		static ButtonName_t ButtonName(int button);
+		virtual ButtonName_t buttonName(int button) const;
 		
 		/** ZOMG savestate functions. **/
 		struct Zomg_MD_IoSave_int_t
@@ -332,6 +326,42 @@ class IoBase
 		// Select line state.
 		bool m_select;
 };
+
+
+// Controller configuration. (STATIC functions)
+inline IoBase::IoType IoBase::DevType(void)
+	{ return IOT_NONE; }
+inline int IoBase::NumButtons(void)
+	{ return 0; }
+inline int IoBase::NextLogicalButton(int button)
+	{ ((void)button); return -1; }
+
+// Controller configuration. (virtual functions)
+inline IoBase::IoType IoBase::devType(void) const
+	{ return DevType(); }
+inline int IoBase::numButtons(void) const
+	{ return NumButtons(); }
+inline int IoBase::nextLogicalButton(int button) const
+	{ return NextLogicalButton(button); }
+
+/**
+ * ButtonName(): Get the name for a given button index. (STATIC function)
+ * @param button Button index.
+ * @return Button name, or BTNNAME_UNKNOWN if the button index is invalid.
+ */
+inline IoBase::ButtonName_t IoBase::ButtonName(int button)
+{
+	((void)button);
+	return BTNNAME_UNKNOWN;
+}
+
+/**
+ * buttonName(): Get the name for a given button index. (virtual function)
+ * @param button Button index.
+ * @return Button name, or BTNNAME_UNKNOWN if the button index is invalid.
+ */
+inline IoBase::ButtonName_t IoBase::buttonName(int button) const
+	{ return ButtonName(button); }
 
 }
 

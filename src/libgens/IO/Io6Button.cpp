@@ -218,10 +218,10 @@ void Io6Button::doScanline(void)
 
 
 /**
- * nextLogicalButton(): Get the next logical button.
+ * NextLogicalButton(): Get the next logical button. (STATIC function)
  * @return Next logical button, or -1 if we're at the end.
  */
-int Io6Button::nextLogicalButton(int button) const
+int Io6Button::NextLogicalButton(int button)
 {
 	switch (button)
 	{
@@ -244,11 +244,11 @@ int Io6Button::nextLogicalButton(int button) const
 
 
 /**
- * buttonName(): Get the name for a given button index.
+ * ButtonName(): Get the name for a given button index. (STATIC function)
  * @param button Button index.
  * @return Button name, or BTNNAME_UNKNOWN if the button index is invalid.
  */
-IoBase::ButtonName_t Io6Button::buttonName(int button) const
+IoBase::ButtonName_t Io6Button::ButtonName(int button)
 {
 	switch (button)
 	{

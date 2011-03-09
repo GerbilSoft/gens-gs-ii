@@ -50,11 +50,13 @@ class Io4WPSlave : public IoBase
 		// I/O device update function.
 		void update(void);
 		
-		// Controller configuration.
-		IoType devType(void) const
-			{ return IOT_4WP_SLAVE; }
-		int numButtons(void) const
-			{ return 0; }	// TODO
+		// Controller configuration. (STATIC functions)
+		static IoType DevType(void);
+		static int NumButtons(void);
+		
+		// Controller configuration. (virtual functions)
+		virtual IoType devType(void) const;
+		virtual int numButtons(void) const;
 		
 		// 4WP-specific: Set slave controller.
 		void setSlaveController(int id);
@@ -63,6 +65,18 @@ class Io4WPSlave : public IoBase
 		IoBase *m_devs[4];	// I/O devices.
 		int m_current;		// Current slave controller.
 };
+
+// Controller configuration. (STATIC functions)
+inline IoBase::IoType Io4WPSlave::DevType(void)
+	{ return IOT_4WP_SLAVE; }
+inline int Io4WPSlave::NumButtons(void)
+	{ return 0; }
+
+// Controller configuration. (virtual functions)
+inline IoBase::IoType Io4WPSlave::devType(void) const
+	{ return DevType(); }
+inline int Io4WPSlave::numButtons(void) const
+	{ return NumButtons(); }
 
 }
 

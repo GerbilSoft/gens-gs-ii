@@ -81,10 +81,10 @@ uint8_t Io2Button::readData(void)
 
 
 /**
- * nextLogicalButton(): Get the next logical button.
+ * NextLogicalButton(): Get the next logical button. (STATIC function)
  * @return Next logical button, or -1 if we're at the end.
  */
-int Io2Button::nextLogicalButton(int button) const
+int Io2Button::NextLogicalButton(int button)
 {
 	if (button >= BTNI_UP && button < BTNI_2)
 		return (button + 1);
@@ -93,11 +93,11 @@ int Io2Button::nextLogicalButton(int button) const
 
 
 /**
- * buttonName(): Get the name for a given button index.
+ * ButtonName(): Get the name for a given button index. (STATIC function)
  * @param button Button index.
  * @return Button name, or BTNNAME_UNKNOWN if the button index is invalid.
  */
-IoBase::ButtonName_t Io2Button::buttonName(int button) const
+IoBase::ButtonName_t Io2Button::ButtonName(int button)
 {
 	switch (button)
 	{

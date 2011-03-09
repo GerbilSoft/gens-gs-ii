@@ -371,10 +371,10 @@ void IoMegaMouse::latchMouseMovement(void)
 
 
 /**
- * nextLogicalButton(): Get the next logical button.
+ * NextLogicalButton(): Get the next logical button. (STATIC function)
  * @return Next logical button, or -1 if we're at the end.
  */
-int IoMegaMouse::nextLogicalButton(int button) const
+int IoMegaMouse::NextLogicalButton(int button)
 {
 	switch (button)
 	{
@@ -389,11 +389,11 @@ int IoMegaMouse::nextLogicalButton(int button) const
 
 
 /**
- * buttonName(): Get the name for a given button index.
+ * ButtonName(): Get the name for a given button index. (STATIC function)
  * @param button Button index.
  * @return Button name, or BTNNAME_UNKNOWN if the button index is invalid.
  */
-IoBase::ButtonName_t IoMegaMouse::buttonName(int button) const
+IoBase::ButtonName_t IoMegaMouse::ButtonName(int button)
 {
 	switch (button)
 	{
