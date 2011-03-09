@@ -26,6 +26,8 @@
 #include <QtGui/QGridLayout>
 #include <QtGui/QLabel>
 #include <QtGui/QSpacerItem>
+#include <QtGui/QPushButton>
+#include <QtGui/QHBoxLayout>
 
 // GensKeySequenceWidget.
 // TODO: Add property for "single key" and add gamepad support.
@@ -67,6 +69,11 @@ class GensCtrlCfgWidgetPrivate
 		QLabel *m_lblKeyDisplay[MAX_CFG_BTNS];
 		GensCtrlKeyWidget *m_btnCfg[MAX_CFG_BTNS];
 		QSpacerItem *m_vspcCfg;
+		
+		// "Change All", "Reset All".
+		QPushButton *btnChangeAll;
+		QPushButton *btnResetAll;
+		QHBoxLayout *hboxOptions;
 };
 
 
@@ -127,8 +134,20 @@ void GensCtrlCfgWidgetPrivate::init(void)
 	}
 	
 	// Add a vertical spacer at the bottom of the layout.
-	m_vspcCfg = new QSpacerItem(128, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
+	m_vspcCfg = new QSpacerItem(128, 128, QSizePolicy::Expanding, QSizePolicy::Expanding);
 	m_layout->addItem(m_vspcCfg, MAX_CFG_BTNS, 1, 1, 1, Qt::AlignCenter);
+	
+	// Create the HBox.
+	hboxOptions = new QHBoxLayout();
+	hboxOptions->setContentsMargins(0, 8, 0, 0); // TODO: Use style default for Top margin.
+	m_layout->addLayout(hboxOptions, MAX_CFG_BTNS+1, 0, 1, 3, Qt::AlignCenter);
+	
+	// Add the "Change All" and "Reset All" buttons.
+	// TODO: Icons.
+	btnChangeAll = new QPushButton(GensCtrlCfgWidget::tr("&Change All Buttons"), q);
+	btnResetAll = new QPushButton(GensCtrlCfgWidget::tr("&Reset All Buttons"), q);
+	hboxOptions->addWidget(btnChangeAll);
+	hboxOptions->addWidget(btnResetAll);
 }
 
 
