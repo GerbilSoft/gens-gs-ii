@@ -176,15 +176,42 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoBase::IoType newIoType)
 	m_ioType = newIoType;
 	
 	// Update the grid layout based on the specified controller type.
-	LibGens::IoBase *ctrl;
+	int numButtons;
+	int (*pNextLogicalButton)(int button);
+	LibGens::IoBase::ButtonName_t (*pButtonName)(int button);
+	
 	switch (newIoType)
 	{
 		default:
-		case LibGens::IoBase::IOT_NONE: ctrl = new LibGens::IoBase(); break;
-		case LibGens::IoBase::IOT_3BTN: ctrl = new LibGens::Io3Button(); break;
-		case LibGens::IoBase::IOT_6BTN: ctrl = new LibGens::Io6Button(); break;
-		case LibGens::IoBase::IOT_2BTN: ctrl = new LibGens::Io2Button(); break;
-		case LibGens::IoBase::IOT_MEGA_MOUSE: ctrl = new LibGens::IoMegaMouse(); break;
+		case LibGens::IoBase::IOT_NONE:
+			numButtons		= LibGens::IoBase::NumButtons();
+			pNextLogicalButton	= &LibGens::IoBase::NextLogicalButton;
+			pButtonName		= &LibGens::IoBase::ButtonName;
+			break;
+		
+		case LibGens::IoBase::IOT_3BTN:
+			numButtons		= LibGens::Io3Button::NumButtons();
+			pNextLogicalButton	= &LibGens::Io3Button::NextLogicalButton;
+			pButtonName		= &LibGens::Io3Button::ButtonName;
+			break;
+		
+		case LibGens::IoBase::IOT_6BTN:
+			numButtons		= LibGens::Io6Button::NumButtons();
+			pNextLogicalButton	= &LibGens::Io6Button::NextLogicalButton;
+			pButtonName		= &LibGens::Io6Button::ButtonName;
+			break;
+		
+		case LibGens::IoBase::IOT_2BTN:
+			numButtons		= LibGens::Io2Button::NumButtons();
+			pNextLogicalButton	= &LibGens::Io2Button::NextLogicalButton;
+			pButtonName		= &LibGens::Io2Button::ButtonName;
+			break;
+		
+		case LibGens::IoBase::IOT_MEGA_MOUSE:
+			numButtons		= LibGens::IoMegaMouse::NumButtons();
+			pNextLogicalButton	= &LibGens::IoMegaMouse::NextLogicalButton;
+			pButtonName		= &LibGens::IoMegaMouse::ButtonName;
+			break;
 		
 		// TODO: Other devices.
 #if 0
@@ -194,8 +221,7 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoBase::IoType newIoType)
 #endif
 	}
 	
-	// Get the number of buttons.
-	int numButtons = ctrl->numButtons();
+	// Make sure we don't exceed the maximum number of buttons.
 	if (numButtons > MAX_CFG_BTNS)
 		numButtons = MAX_CFG_BTNS;
 	
@@ -204,7 +230,7 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoBase::IoType newIoType)
 	for (int i = 0, button = 0;
 	     i < numButtons && button >= 0; i++)
 	{
-		LibGens::IoBase::ButtonName_t buttonName = ctrl->buttonName(button);
+		LibGens::IoBase::ButtonName_t buttonName = pButtonName(button);
 		sBtnLabel = ButtonName_l(buttonName) + QChar(L':');
 		
 		m_lblButtonName[i]->setText(sBtnLabel);
@@ -213,7 +239,7 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoBase::IoType newIoType)
 		m_btnCfg[i]->setVisible(true);
 		
 		// Get the next logical button.
-		button = ctrl->nextLogicalButton(button);
+		button = pNextLogicalButton(button);
 	}
 	
 	// Hide other buttons.
@@ -223,9 +249,6 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoBase::IoType newIoType)
 		m_lblKeyDisplay[i]->setVisible(false);
 		m_btnCfg[i]->setVisible(false);
 	}
-	
-	// Delete the IoBase object
-	delete ctrl;
 }
 
 
