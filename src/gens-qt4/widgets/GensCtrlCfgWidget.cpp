@@ -70,9 +70,9 @@ class GensCtrlCfgWidgetPrivate
 		GensCtrlKeyWidget *m_btnCfg[MAX_CFG_BTNS];
 		QSpacerItem *m_vspcCfg;
 		
-		// "Change All", "Reset All".
+		// "Change All", "Clear All".
 		QPushButton *btnChangeAll;
-		QPushButton *btnResetAll;
+		QPushButton *btnClearAll;
 		QHBoxLayout *hboxOptions;
 };
 
@@ -142,12 +142,13 @@ void GensCtrlCfgWidgetPrivate::init(void)
 	hboxOptions->setContentsMargins(0, 8, 0, 0); // TODO: Use style default for Top margin.
 	m_layout->addLayout(hboxOptions, MAX_CFG_BTNS+1, 0, 1, 3, Qt::AlignCenter);
 	
-	// Add the "Change All" and "Reset All" buttons.
+	// Add the "Change All" and "Clear All" buttons.
 	// TODO: Icons.
 	btnChangeAll = new QPushButton(GensCtrlCfgWidget::tr("&Change All Buttons"), q);
-	btnResetAll = new QPushButton(GensCtrlCfgWidget::tr("&Reset All Buttons"), q);
 	hboxOptions->addWidget(btnChangeAll);
-	hboxOptions->addWidget(btnResetAll);
+	
+	btnClearAll = new QPushButton(GensCtrlCfgWidget::tr("C&lear All Buttons"), q);
+	hboxOptions->addWidget(btnClearAll);
 }
 
 
