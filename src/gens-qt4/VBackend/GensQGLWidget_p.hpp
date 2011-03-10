@@ -44,17 +44,17 @@ class GensQGLWidgetPrivate : public QGLWidget
 	protected:
 		// Keyboard handler functions.
 		void keyPressEvent(QKeyEvent *event)
-			{ KeyHandlerQt::KeyPressEvent(event); }
+			{ q->m_keyHandler->keyPressEvent(event); }
 		void keyReleaseEvent(QKeyEvent *event)
-			{ KeyHandlerQt::KeyReleaseEvent(event); }
+			{ q->m_keyHandler->keyReleaseEvent(event); }
 		
 		// Mouse handler functions.
 		void mouseMoveEvent(QMouseEvent *event)
-			{ KeyHandlerQt::MouseMoveEvent(event); }
+			{ q->m_keyHandler->mouseMoveEvent(event); }
 		void mousePressEvent(QMouseEvent *event)
-			{ KeyHandlerQt::MousePressEvent(event); }
+			{ q->m_keyHandler->mousePressEvent(event); }
 		void mouseReleaseEvent(QMouseEvent *event)
-			{ KeyHandlerQt::MouseReleaseEvent(event); }
+			{ q->m_keyHandler->mouseReleaseEvent(event); }
 		
 		// QGLWidget protected functions.
 		void initializeGL(void);

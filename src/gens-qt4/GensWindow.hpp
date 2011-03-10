@@ -42,6 +42,7 @@ class QCloseEvent;
 #include "EmuManager.hpp"
 #include "actions/GensActions.hpp"
 #include "actions/GensMenuBar.hpp"
+#include "Input/KeyHandlerQt.hpp"
 
 // Idle thread.
 #include "IdleThread.hpp"
@@ -112,6 +113,9 @@ class GensWindow : public QMainWindow
 		
 		// State change event. (Used for switching the UI language at runtime.)
 		void changeEvent(QEvent *event);
+		
+		// Key handler.
+		KeyHandlerQt *m_keyHandler;
 		
 		// Widgets.
 		VBackend *m_vBackend;		// GensQGLWidget.

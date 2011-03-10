@@ -50,13 +50,14 @@ namespace GensQt4
 // Forward declaration for MsgTimer.
 // Can't #include "MsgTimer.hpp" due to circular dependencies.
 class MsgTimer;
+class KeyHandlerQt;
 
 class VBackend : public QWidget
 {
 	Q_OBJECT
 	
 	public:
-		VBackend(QWidget *parent = 0);
+		VBackend(QWidget *parent = 0, KeyHandlerQt *keyHandler = 0);
 		virtual ~VBackend();
 		
 		void setVbDirty(void)
@@ -64,6 +65,8 @@ class VBackend : public QWidget
 		void setMdScreenDirty(void)
 			{ m_mdScreenDirty = true; }
 		virtual void vbUpdate(void) = 0;
+		
+		void setKeyHandler(KeyHandlerQt *newKeyHandler);
 		
 		/** Properties. **/
 		
@@ -123,6 +126,9 @@ class VBackend : public QWidget
 		int recStop(const QString& component);
 	
 	protected:
+		// Key handler.
+		KeyHandlerQt *m_keyHandler;
+		
 		// Dirty flags.
 		bool m_vbDirty;		// VBackend dirty: screen must be redrawn.
 		bool m_mdScreenDirty;	// MD Screen dirty: texture must be reuploaded.
@@ -180,6 +186,7 @@ class VBackend : public QWidget
 		GensConfig::StretchMode_t stretchMode(void) const;
 	
 	protected slots:
+		/** Properties. **/
 		void setOsdFpsEnabled(bool enable);
 		void setOsdFpsColor(const QColor& color);
 		void setOsdMsgEnabled(bool enable);
@@ -237,6 +244,10 @@ class VBackend : public QWidget
 		bool m_aspectRatioConstraint_changed;
 		bool m_bilinearFilter;
 		GensConfig::StretchMode_t m_stretchMode;
+	
+	private slots:
+		// Key handler destroyed slot.
+		void keyHandlerDestroyed(void);
 };
 
 /** Onscreen display. **/

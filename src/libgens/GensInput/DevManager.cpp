@@ -29,10 +29,10 @@ namespace LibGens
 /** Static class variables. **/
 
 /**
- * ms_DevFn[]: Device handler functions.
- * Currently supports up to 4 device types.
+ * ms_DevFn[], ms_DevParam: Device handler functions and parameters.
  */
-DevManager::DeviceHandler_fn DevManager::ms_DevFn[4];
+DevManager::DeviceHandler_fn DevManager::ms_DevFn[MAX_DEVICE_TYPES];
+void *DevManager::ms_DevParam[MAX_DEVICE_TYPES];
 
 
 /**
@@ -40,8 +40,9 @@ DevManager::DeviceHandler_fn DevManager::ms_DevFn[4];
  */
 void DevManager::Init(void)
 {
-	// Clear ms_DevFn[].
+	// Clear ms_DevFn[] and ms_DevParam[].
 	memset(ms_DevFn, 0x00, sizeof(ms_DevFn));
+	memset(ms_DevParam, 0x00, sizeof(ms_DevParam));
 }
 
 /**
@@ -49,8 +50,9 @@ void DevManager::Init(void)
  */
 void DevManager::End(void)
 {
-	// Clear ms_DevFn[].
+	// Clear ms_DevFn[] and ms_DevParam[].
 	memset(ms_DevFn, 0x00, sizeof(ms_DevFn));
+	memset(ms_DevParam, 0x00, sizeof(ms_DevParam));
 }
 
 
@@ -58,9 +60,10 @@ void DevManager::End(void)
  * RegisterDeviceHandler(): Register a device handler function.
  * @param devType Device type ID.
  * @param fn Device handler function.
+ * @param param Parameter to pass to the device handler function.
  * @return 0 on success; non-zero on error.
  */
-int DevManager::RegisterDeviceHandler(int devType, DeviceHandler_fn fn)
+int DevManager::RegisterDeviceHandler(int devType, DeviceHandler_fn fn, void *param)
 {
 	// Make sure the device type ID is in range.
 	if (devType < 0 || devType > MAX_DEVICE_TYPES)
@@ -72,6 +75,7 @@ int DevManager::RegisterDeviceHandler(int devType, DeviceHandler_fn fn)
 	
 	// Register the function.
 	ms_DevFn[devType] = fn;
+	ms_DevParam[devType] = param;
 	return 0;
 }
 
@@ -79,20 +83,22 @@ int DevManager::RegisterDeviceHandler(int devType, DeviceHandler_fn fn)
  * UnregisterDeviceHandler(): Unregister a device handler function.
  * @param devType Device type ID.
  * @param fn Device handler function.
+ * @param param Parameter specified when registering the device handler function.
  * @return 0 on success; non-zero on error.
  */
-int DevManager::UnregisterDeviceHandler(int devType, DeviceHandler_fn fn)
+int DevManager::UnregisterDeviceHandler(int devType, DeviceHandler_fn fn, void *param)
 {
 	// Make sure the device type ID is in range.
 	if (devType < 0 || devType > MAX_DEVICE_TYPES)
 		return 1;
 	
 	// Make sure the function is registered.
-	if (ms_DevFn[devType] != fn)
+	if (ms_DevFn[devType] != fn || ms_DevParam[devType] != param)
 		return 2;
 	
 	// Unregister the function.
 	ms_DevFn[devType] = NULL;
+	ms_DevParam[devType] = NULL;
 	return 0;
 }
 

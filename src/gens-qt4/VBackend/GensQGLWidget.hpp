@@ -51,7 +51,7 @@ class GensQGLWidget : public GLBackend
 	Q_OBJECT
 	
 	public:
-		GensQGLWidget(QWidget *parent = 0);
+		GensQGLWidget(QWidget *parent = 0, KeyHandlerQt *keyHandler = 0);
 		~GensQGLWidget() { }
 		
 		void vbUpdate(void);

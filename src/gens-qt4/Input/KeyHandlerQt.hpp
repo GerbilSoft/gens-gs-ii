@@ -29,32 +29,23 @@
 // Gens Action Manager.
 #include "../actions/GensActions.hpp"
 
-// Qt forward declarations.
+// Qt includes and classes.
+#include <QtCore/QObject>
 class QKeyEvent;
 class QMouseEvent;
 
 namespace GensQt4
 {
 
-class KeyHandlerQt
+class KeyHandlerQt : public QObject
 {
+	Q_OBJECT
+	
 	public:
-		static void Init(GensActions *gensActions);
-		static void End(void);
+		KeyHandlerQt(QObject *parent = 0, GensActions *gensActions = 0);
+		~KeyHandlerQt();
 		
-		static void KeyPressEvent(QKeyEvent *event);
-		static void KeyReleaseEvent(QKeyEvent *event);
-		
-		static void MouseMoveEvent(QMouseEvent *event);
-		static void MousePressEvent(QMouseEvent *event);
-		static void MouseReleaseEvent(QMouseEvent *event);
-		
-		/**
-		 * DevHandler(): LibGens Device Handler function.
-		 * @param key Gens keycode. (~0 for Update; return value is true on success.)
-		 * @return True if the key is pressed; false if it isn't.
-		 */
-		static bool DevHandler(GensKey_t key);
+		void setGensActions(GensActions *newGensActions);
 		
 		// QKeyEvent to LibGens Key Value.
 		static GensKey_t QKeyEventToKeyVal(QKeyEvent *event);
@@ -67,12 +58,36 @@ class KeyHandlerQt
 		 */
 		static int KeyValMToQtKey(GensKey_t keyM);
 		
-	protected:
+		// QKeyEvent wrappers.
+		void keyPressEvent(QKeyEvent *event);
+		void keyReleaseEvent(QKeyEvent *event);
+		
+		// QMouseEvent wrappers.
+		void mouseMoveEvent(QMouseEvent *event);
+		void mousePressEvent(QMouseEvent *event);
+		void mouseReleaseEvent(QMouseEvent *event);
+	
+	private:
+		/**
+		 * DevHandler(): LibGens Device Handler function. (STATIC function)
+		 * @param param Parameter specified when registering the device handler function.
+		 * @param key Gens keycode. (~0 for Update; return value is true on success.)
+		 * @return True if the key is pressed; false if it isn't.
+		 */
+		static bool DevHandler(void *param, GensKey_t key);
+		
+		/**
+		 * DevHandler(): LibGens Device Handler function. (member function)
+		 * @param key Gens keycode. (~0 for Update; return value is true on success.)
+		 * @return True if the key is pressed; false if it isn't.
+		 */
+		bool devHandler(GensKey_t key);
+		
 		// Gens Actions Manager.
-		static GensActions *ms_GensActions;
+		GensActions *m_gensActions;
 		
 		// Keypress array.
-		static bool ms_KeyPress[KEYV_LAST];
+		bool m_keyPress[KEYV_LAST];
 		
 #if 0
 		// TODO
@@ -81,9 +96,9 @@ class KeyHandlerQt
 		static QPoint m_lastMousePos;
 #endif
 	
-	private:
-		KeyHandlerQt() { }
-		~KeyHandlerQt() { }
+	private slots:
+		// GensActions destroyed slot.
+		void gensActionsDestroyed(void);
 };
 
 }

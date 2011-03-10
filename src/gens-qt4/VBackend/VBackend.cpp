@@ -38,12 +38,23 @@
 // gqt4_main.hpp has GensConfig.
 #include "gqt4_main.hpp"
 
+// Qt Key Handler.
+#include "Input/KeyHandlerQt.hpp"
+
 namespace GensQt4
 {
 
-VBackend::VBackend(QWidget *parent)
+VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	: QWidget(parent)
+	, m_keyHandler(keyHandler)
 {
+	if (m_keyHandler)
+	{
+		// Connect the key handler's "destroyed" signal.
+		connect(m_keyHandler, SIGNAL(destroyed()),
+			this, SLOT(keyHandlerDestroyed()));
+	}
+	
 	// Mark the video backend as dirty on startup.
 	m_vbDirty = true;
 	m_mdScreenDirty = true;
@@ -109,6 +120,38 @@ VBackend::~VBackend()
 	// Delete internal objects.
 	delete m_msgTimer;	// Message timer.
 	delete m_intScreen;	// Internal screen buffer.
+}
+
+
+/**
+ * setKeyHandler(): Set the key handler.
+ * @param newKeyHandler New key handler.
+ */
+void VBackend::setKeyHandler(KeyHandlerQt *newKeyHandler)
+{
+	if (m_keyHandler)
+	{
+		// Disconnect the existing key handler's "destroyed" signal.
+		disconnect(m_keyHandler, SIGNAL(destroyed()),
+			   this, SLOT(keyHandlerDestroyed()));
+	}
+	
+	m_keyHandler = newKeyHandler;
+	if (m_keyHandler)
+	{
+		// Connect the new key handler's "destroyed" signal.
+		connect(m_keyHandler, SIGNAL(destroyed()),
+			this, SLOT(keyHandlerDestroyed()));
+	}
+}
+
+
+/**
+ * keyHandlerDestroyed(): Key handler was destroyed.
+ */
+void VBackend::keyHandlerDestroyed(void)
+{
+	m_keyHandler = NULL;
 }
 
 

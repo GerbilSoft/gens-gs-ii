@@ -38,8 +38,8 @@
 namespace GensQt4
 {
 
-GensQGLWidget::GensQGLWidget(QWidget *parent)
-	: GLBackend(parent)
+GensQGLWidget::GensQGLWidget(QWidget *parent, KeyHandlerQt *keyHandler)
+	: GLBackend(parent, keyHandler)
 	, d(new GensQGLWidgetPrivate(this))
 {
 	// NOTE: QVBoxLayout is required for proper resizing.

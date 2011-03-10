@@ -45,59 +45,81 @@
 #include <windows.h>
 #endif
 
+#include <stdio.h>
 namespace GensQt4
 {
 
-/** Static class variables. **/
-
 /**
- * ms_KeyPress[]: Keypress array.
- */
-bool KeyHandlerQt::ms_KeyPress[KEYV_LAST];
-
-// Gens Actions Manager.
-GensActions *KeyHandlerQt::ms_GensActions = NULL;
-
-
-/**
- * Init(): Initialize KeyHandlerQt.
+ * KeyHanderQt(): Initialize KeyHandlerQt.
  * @param gensActions Gens Actions Manager.
  * NOTE: This class does NOT delete the GensActions object on shutdown!
  */
-void KeyHandlerQt::Init(GensActions *gensActions)
+KeyHandlerQt::KeyHandlerQt(QObject *parent, GensActions *gensActions)
+	: QObject(parent)
+	, m_gensActions(gensActions)
 {
-	// Clear the keypress array.
-	memset(ms_KeyPress, 0x00, sizeof(ms_KeyPress));
+	if (m_gensActions)
+	{
+		// Connect the Gens Actions object's "destroyed" signal.
+		connect(m_gensActions, SIGNAL(destroyed()),
+			this, SLOT(gensActionsDestroyed()));
+	}
 	
-	// Save the Gens Actions Manager.
-	ms_GensActions = gensActions;
+	// Clear the keypress array.
+	memset(m_keyPress, 0x00, sizeof(m_keyPress));
 	
 	// Register as LibGens device type GKT_KEYBOARD.
-	LibGens::DevManager::RegisterDeviceHandler(GKT_KEYBOARD, KeyHandlerQt::DevHandler);
+	LibGens::DevManager::RegisterDeviceHandler(GKT_KEYBOARD, KeyHandlerQt::DevHandler, this);
 }
 
 /**
- * End(): Shut down KeyHandlerQt.
+ * ~KeyHandlerQt(): Shut down KeyHandlerQt.
  */
-void KeyHandlerQt::End(void)
+KeyHandlerQt::~KeyHandlerQt(void)
 {
-	// Clear the keypress array.
-	memset(ms_KeyPress, 0x00, sizeof(ms_KeyPress));
-	
-	// Clear the Gens Actions Manager.
-	ms_GensActions = NULL;
-	
 	// Unregister as LibGens device type 0.
 	// TODO: Symbolic constants for device types.
-	LibGens::DevManager::UnregisterDeviceHandler(GKT_KEYBOARD, KeyHandlerQt::DevHandler);
+	LibGens::DevManager::UnregisterDeviceHandler(GKT_KEYBOARD, KeyHandlerQt::DevHandler, this);
 }
 
 
 /**
- * KeyPressEvent(): Key press handler.
+ * setGensActions(): Set the Gens Actions object.
+ * @param newKeyHandler New Gens Actions object.
+ */
+void KeyHandlerQt::setGensActions(GensActions *newGensActions)
+{
+	if (newGensActions)
+	{
+		// Disconnect the existing key handler's "destroyed" signal.
+		disconnect(m_gensActions, SIGNAL(destroyed()),
+			   this, SLOT(gensActionsDestroyed()));
+	}
+	
+	m_gensActions = newGensActions;
+	if (m_gensActions)
+	{
+		// Connect the new key handler's "destroyed" signal.
+		connect(m_gensActions, SIGNAL(destroyed()),
+			this, SLOT(gensActionsDestroyed()));
+	}
+}
+
+
+/**
+ * gensActionsDestroyed(): Gens Actions object was destroyed.
+ */
+void KeyHandlerQt::gensActionsDestroyed(void)
+{
+	m_gensActions = NULL;
+}
+
+
+/**
+ * keyPressEvent(): Key press handler.
  * @param event Key event.
  */
-void KeyHandlerQt::KeyPressEvent(QKeyEvent *event)
+void KeyHandlerQt::keyPressEvent(QKeyEvent *event)
 {
 	// TODO: Move effects keypresses from GensQGLWidget to KeyHandlerQt.
 	// TODO: Multiple keyboard support?
@@ -110,7 +132,7 @@ void KeyHandlerQt::KeyPressEvent(QKeyEvent *event)
 	// Qt's modifiers conveniently map to GensKeyMod_t.
 	// TODO: Use GensKeyM_t to indicate modifiers?
 	GensKey_t gensKeyMod = (gensKey | ((event->modifiers() >> 16) & 0x1E00));
-	if (ms_GensActions->checkEventKey(gensKeyMod))
+	if (m_gensActions && m_gensActions->checkEventKey(gensKeyMod))
 	{
 		// Key was handled as an event key.
 		return;
@@ -120,33 +142,33 @@ void KeyHandlerQt::KeyPressEvent(QKeyEvent *event)
 	if (gensKey > KEYV_UNKNOWN && gensKey < KEYV_LAST)
 	{
 		// Mark the key as pressed.
-		ms_KeyPress[gensKey] = true;
+		m_keyPress[gensKey] = true;
 	}
 }
 
 
 /**
- * KeyPressEvent(): Key release handler.
+ * keyPressEvent(): Key release handler.
  * @param event Key event.
  */
-void KeyHandlerQt::KeyReleaseEvent(QKeyEvent *event)
+void KeyHandlerQt::keyReleaseEvent(QKeyEvent *event)
 {
 	// TODO: Multiple keyboard support?
 	int gensKey = QKeyEventToKeyVal(event);
 	if (gensKey > KEYV_UNKNOWN)
 	{
 		// Mark the key as released.
-		ms_KeyPress[gensKey] = false;
+		m_keyPress[gensKey] = false;
 	}
 }
 
 
 /**
- * MouseMoveEvent(): Mouse movement handler.
+ * mouseMoveEvent(): Mouse movement handler.
  * TODO: This function is broken!
  * @param event Mouse event.
  */
-void KeyHandlerQt::MouseMoveEvent(QMouseEvent *event)
+void KeyHandlerQt::mouseMoveEvent(QMouseEvent *event)
 {
 	// TODO
 #if 0
@@ -177,10 +199,10 @@ void KeyHandlerQt::MouseMoveEvent(QMouseEvent *event)
 
 
 /**
- * MousePressEvent(): Mouse button press handler.
+ * mousePressEvent(): Mouse button press handler.
  * @param event Mouse event.
  */
-void KeyHandlerQt::MousePressEvent(QMouseEvent *event)
+void KeyHandlerQt::mousePressEvent(QMouseEvent *event)
 {
 	int gensButton;
 	switch (event->button())
@@ -195,15 +217,15 @@ void KeyHandlerQt::MousePressEvent(QMouseEvent *event)
 	}
 	
 	// Mark the key as pressed.
-	ms_KeyPress[KEYV_MOUSE_UNKNOWN + gensButton] = true;
+	m_keyPress[KEYV_MOUSE_UNKNOWN + gensButton] = true;
 }
 
 
 /**
- * MouseReleaseEvent(): Mouse button release handler.
+ * mouseReleaseEvent(): Mouse button release handler.
  * @param event Mouse event.
  */
-void KeyHandlerQt::MouseReleaseEvent(QMouseEvent *event)
+void KeyHandlerQt::mouseReleaseEvent(QMouseEvent *event)
 {
 	int gensButton;
 	switch (event->button())
@@ -218,16 +240,27 @@ void KeyHandlerQt::MouseReleaseEvent(QMouseEvent *event)
 	}
 	
 	// Mark the key as released.
-	ms_KeyPress[KEYV_MOUSE_UNKNOWN + gensButton] = false;
+	m_keyPress[KEYV_MOUSE_UNKNOWN + gensButton] = false;
 }
 
 
 /**
- * DevHandler(): LibGens Device Handler function.
+ * DevHandler(): LibGens Device Handler function. (STATIC function)
+ * @param param Parameter specified when registering the device handler function.
  * @param key Gens keycode.
  * @return True if the key is pressed; false if it isn't.
  */
-bool KeyHandlerQt::DevHandler(GensKey_t key)
+bool KeyHandlerQt::DevHandler(void *param, GensKey_t key)
+{
+	return ((KeyHandlerQt*)param)->devHandler(key);
+}
+
+/**
+ * devHandler(): LibGens Device Handler function. (member function)
+ * @param key Gens keycode.
+ * @return True if the key is pressed; false if it isn't.
+ */
+bool KeyHandlerQt::devHandler(GensKey_t key)
 {
 	if (key == (GensKey_t)~0)
 	{
@@ -261,7 +294,7 @@ bool KeyHandlerQt::DevHandler(GensKey_t key)
 	if (gkey.key16 >= KEYV_LAST)
 		return false;
 	
-	return ms_KeyPress[gkey.key16];
+	return m_keyPress[gkey.key16];
 }
 
 

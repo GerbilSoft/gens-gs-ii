@@ -54,8 +54,8 @@ namespace GensQt4
 /**
  * GLBackend(): Initialize the common OpenGL backend.
  */
-GLBackend::GLBackend(QWidget *parent = 0)
-	: VBackend(parent)
+GLBackend::GLBackend(QWidget *parent, KeyHandlerQt *keyHandler)
+	: VBackend(parent, keyHandler)
 {
 	// Initialize the OpenGL variables.
 	m_tex = 0;		// Main texture.

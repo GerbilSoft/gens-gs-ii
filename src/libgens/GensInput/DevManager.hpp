@@ -41,26 +41,29 @@ class DevManager
 		/**
 		 * DeviceHandler_fn: Device Handler function prototype.
 		 * TODO: Add MDP_FNCALL or something similar?
+		 * @param param Parameter specified when registering the device handler function.
 		 * @param key Gens keycode. (~0 for Update; return value is true on success.)
 		 * @return True if the key is pressed; false if it isn't.
 		 */
-		typedef bool (*DeviceHandler_fn)(GensKey_t key);
+		typedef bool (*DeviceHandler_fn)(void *param, GensKey_t key);
 		
 		/**
 		 * RegisterDeviceHandler(): Register a device handler function.
 		 * @param devType Device type ID.
 		 * @param fn Device handler function.
+		 * @param param Parameter to pass to the device handler function.
 		 * @return 0 on success; non-zero on error.
 		 */
-		static int RegisterDeviceHandler(int devType, DeviceHandler_fn fn);
+		static int RegisterDeviceHandler(int devType, DeviceHandler_fn fn, void *param);
 		
 		/**
 		 * UnregisterDeviceHandler(): Unregister a device handler function.
 		 * @param devType Device type ID.
 		 * @param fn Device handler function.
+		 * @param param Parameter specified when registering the device handler function.
 		 * @return 0 on success; non-zero on error.
 		 */
-		static int UnregisterDeviceHandler(int devType, DeviceHandler_fn fn);
+		static int UnregisterDeviceHandler(int devType, DeviceHandler_fn fn, void *param);
 		
 		/**
 		 * Update(): Update the device handlers.
@@ -88,11 +91,11 @@ class DevManager
 		~DevManager() { }
 		
 		/**
-		 * ms_DevFn[]: Device handler functions.
-		 * Currently supports up to 4 device types.
+		 * ms_DevFn[], ms_DevParam: Device handler functions and parameters.
 		 */
 		static const int MAX_DEVICE_TYPES = 4;
 		static DeviceHandler_fn ms_DevFn[MAX_DEVICE_TYPES];
+		static void *ms_DevParam[MAX_DEVICE_TYPES];
 		
 		// Key names.
 		static const char *ms_KeyNames[KEYV_LAST];
@@ -108,7 +111,7 @@ inline void DevManager::Update(void)
 	for (int devType = 0; devType < MAX_DEVICE_TYPES; devType++)
 	{
 		if (ms_DevFn[devType])
-			ms_DevFn[devType]((GensKey_t)~0);
+			ms_DevFn[devType](ms_DevParam[devType], (GensKey_t)~0);
 	}
 }
 
@@ -125,7 +128,7 @@ inline bool DevManager::IsKeyPressed(GensKey_t key)
 	gkey.keycode = key;
 	if (gkey.type >= MAX_DEVICE_TYPES || !ms_DevFn[gkey.type])
 		return false;
-	return ms_DevFn[gkey.type](key);
+	return ms_DevFn[gkey.type](ms_DevParam[gkey.type], key);
 }
 
 

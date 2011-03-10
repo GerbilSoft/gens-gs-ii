@@ -170,6 +170,7 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	widgets/GensCtrlCfgWidget.hpp
 	widgets/GensCtrlKeyWidget.hpp
 	widgets/GensCtrlKeyWidget_p.hpp
+	Input/KeyHandlerQt.hpp
 	)
 
 SET(gens-qt4_SRCS ${gens-qt4_COMMON_SRCS})

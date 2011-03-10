@@ -60,7 +60,7 @@ class GLBackend : public VBackend
 	Q_OBJECT
 	
 	public:
-		GLBackend(QWidget *parent);
+		GLBackend(QWidget *parent, KeyHandlerQt *keyHandler = 0);
 		virtual ~GLBackend();
 		
 #ifdef HAVE_GLEW

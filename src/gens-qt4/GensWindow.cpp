@@ -69,8 +69,7 @@ GensWindow::GensWindow()
 	m_gensActions = new GensActions(this);
 	
 	// Initialize KeyHandlerQt.
-	// TODO: Make KeyHandlerQt a standard object?
-	KeyHandlerQt::Init(m_gensActions);
+	m_keyHandler = new KeyHandlerQt(this, m_gensActions);
 	
 	// Set up the User Interface.
 	setupUi();
@@ -100,8 +99,7 @@ GensWindow::GensWindow()
 GensWindow::~GensWindow()
 {
 	// Shut down KeyHandlerQt.
-	// TODO: Make KeyHandlerQt a standard object?
-	KeyHandlerQt::End();
+	delete m_keyHandler;
 	
 	// Delete the Gens Actions Manager.
 	delete m_gensActions;
@@ -143,7 +141,7 @@ void GensWindow::setupUi(void)
 	
 	// Create the Video Backend.
 	// TODO: Allow selection of all available VBackend classes.
-	m_vBackend = new GensQGLWidget(this->centralwidget);
+	m_vBackend = new GensQGLWidget(this->centralwidget, m_keyHandler);
 	
 	// Create the layout.
 	layout = new QVBoxLayout(this->centralwidget);
