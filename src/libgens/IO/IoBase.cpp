@@ -36,7 +36,6 @@ IoBase::IoBase()
 	// - 0x00: all zeroes (current option)
 	// - 0xFF: all ones
 	
-	// CTRL is initialized to 0x40 for SMS compatibility.
 	m_ctrl = 0x00;		// input
 	m_lastData = 0xFF;	// all ones
 	m_buttons = ~0;		// no buttons pressed
@@ -56,13 +55,29 @@ IoBase::IoBase()
 
 IoBase::IoBase(const IoBase *other)
 {
-	// Copy tristate control and data buffer from another controller.
-	m_ctrl = other->m_ctrl;
-	m_lastData = other->m_lastData;
-	m_buttons = ~0;		// buttons are NOT copied!
+	if (other)
+	{
+		// Copy tristate control and data buffer from another controller.
+		m_ctrl = other->m_ctrl;
+		m_lastData = other->m_lastData;
+		
+		// Serial settings.
+		m_serCtrl = other->m_serCtrl;
+		m_serLastTx = other->m_serLastTx;
+	}
+	else
+	{
+		// NULL device specified.
+		m_ctrl = 0x00;		// input
+		m_lastData = 0xFF;	// all ones
+		
+		// Serial settings.
+		m_serCtrl = 0x00;	// parallel mode
+		m_serLastTx = 0xFF;
+	}
 	
-	// Serial settings.
-	m_serCtrl = other->m_serCtrl;
+	// Buttons are NOT copied!
+	m_buttons = ~0;
 	
 	updateSelectLine();
 	
