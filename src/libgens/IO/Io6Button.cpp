@@ -29,7 +29,6 @@ namespace LibGens
 Io6Button::Io6Button()
 {
 	// Reset 6-button variables.
-	m_buttons = ~0;
 	m_counter = 0;
 	m_scanlines = 0;
 	
@@ -52,7 +51,6 @@ Io6Button::Io6Button(const IoBase *other)
 	: IoBase(other)
 {
 	// Reset 6-button variables.
-	m_buttons = ~0;
 	m_counter = 0;
 	m_scanlines = 0;
 	
