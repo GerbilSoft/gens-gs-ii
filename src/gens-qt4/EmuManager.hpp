@@ -39,7 +39,7 @@
 
 // InterlacedMode
 // TODO: Move somewhere else?
-#include "GensConfig.hpp"
+#include "Config/GensConfig.hpp"
 
 namespace GensQt4
 {

@@ -62,7 +62,7 @@ void gqt4_osd(OsdType osd_type, int param);
 }
 #endif
 
-#include "GensConfig.hpp"
+#include "Config/GensConfig.hpp"
 #include "EmuThread.hpp"
 #include "../libgens/EmuContext.hpp"
 

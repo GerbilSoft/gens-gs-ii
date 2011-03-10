@@ -34,7 +34,7 @@
 #include <QtGui/QKeySequence>
 
 // GensConfig is needed for synchronization.
-#include "GensConfig.hpp"
+#include "Config/GensConfig.hpp"
 
 // EmuManager is needed for some settings.
 #include "../EmuManager.hpp"

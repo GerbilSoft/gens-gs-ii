@@ -123,7 +123,7 @@ SET(gens-qt4_COMMON_SRCS
 	GeneralConfigWindow.cpp
 	GeneralConfigWindow_slots.cpp
 	widgets/GensLineEdit.cpp
-	GensConfig.cpp
+	Config/GensConfig.cpp
 	cdrom/FindCdrom.cpp
 	McdControlWindow.cpp
 	widgets/GensZipDirModel.cpp
@@ -157,7 +157,7 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	ZipSelectDialog.hpp
 	GeneralConfigWindow.hpp
 	widgets/GensLineEdit.hpp
-	GensConfig.hpp
+	Config/GensConfig.hpp
 	cdrom/FindCdrom.hpp
 	McdControlWindow.hpp
 	widgets/GensZipDirModel.hpp

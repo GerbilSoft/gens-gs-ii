@@ -41,7 +41,7 @@
 
 // StretchMode is in GensConfig.
 // TODO: Move somewhere else, or use int?
-#include "GensConfig.hpp"
+#include "Config/GensConfig.hpp"
 
 
 namespace GensQt4
