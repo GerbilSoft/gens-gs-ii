@@ -48,7 +48,7 @@ IoMegaMouse::IoMegaMouse(const IoBase *other)
  * reset(): Reset function.
  * Called when the system is reset.
  */
-void IoMegaMouse::reset()
+void IoMegaMouse::reset(void)
 {
 	IoBase::reset();
 	

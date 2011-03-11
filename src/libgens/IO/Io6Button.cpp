@@ -58,7 +58,7 @@ Io6Button::Io6Button(const IoBase *other)
  * reset(): Reset function.
  * Called when the system is reset.
  */
-void Io6Button::reset()
+void Io6Button::reset(void)
 {
 	IoBase::reset();
 	

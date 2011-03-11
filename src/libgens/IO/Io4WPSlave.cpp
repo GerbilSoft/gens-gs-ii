@@ -61,7 +61,7 @@ Io4WPSlave::~Io4WPSlave()
  * reset(): Reset function.
  * Called when the system is reset.
  */
-void Io4WPSlave::reset()
+void Io4WPSlave::reset(void)
 {
 	IoBase::reset();
 	m_current = 0;	// TODO: Update based on m_lastData.

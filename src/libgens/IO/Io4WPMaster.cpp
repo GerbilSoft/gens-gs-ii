@@ -42,7 +42,7 @@ Io4WPMaster::Io4WPMaster(const IoBase *other)
  * reset(): Reset function.
  * Called when the system is reset.
  */
-void Io4WPMaster::reset()
+void Io4WPMaster::reset(void)
 {
 	IoBase::reset();
 	m_current = 0;	// TODO: Update based on m_lastData.
