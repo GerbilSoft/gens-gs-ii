@@ -32,19 +32,6 @@
 namespace LibGens
 {
 
-Io4WPSlave::Io4WPSlave()
-{
-	m_current = 0;
-	
-	// Create I/O devices.
-	// TODO: Make these configurable!
-	// TODO: Delete these devices when finished.
-	m_devs[0] = new Io3Button();
-	m_devs[1] = new Io3Button();
-	m_devs[2] = new Io3Button();
-	m_devs[3] = new Io3Button();
-}
-
 Io4WPSlave::Io4WPSlave(const IoBase *other)
 	: IoBase(other)
 {

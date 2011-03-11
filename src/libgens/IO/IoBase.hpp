@@ -41,8 +41,7 @@ namespace LibGens
 class IoBase
 {
 	public:
-		IoBase();
-		IoBase(const IoBase *other);
+		IoBase(const IoBase *other = NULL);
 		virtual ~IoBase() { }
 		
 		/**

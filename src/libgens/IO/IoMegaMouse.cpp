@@ -31,17 +31,6 @@
 namespace LibGens
 {
 
-IoMegaMouse::IoMegaMouse()
-{
-	m_buttons = 0;	// Mega Mouse uses Active High logic.
-	m_counter = 0;
-	m_relX = 0;
-	m_relY = 0;
-	m_latchSignOver = 0;
-	m_latchRelX = 0;
-	m_latchRelY = 0;
-}
-
 IoMegaMouse::IoMegaMouse(const IoBase *other)
 	: IoBase(other)
 {

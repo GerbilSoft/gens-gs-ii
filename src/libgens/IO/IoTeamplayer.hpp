@@ -32,9 +32,7 @@ namespace LibGens
 class IoTeamplayer : public IoBase
 {
 	public:
-		IoTeamplayer();
-		IoTeamplayer(const IoBase *other);
-		virtual ~IoTeamplayer() { }
+		IoTeamplayer(const IoBase *other = NULL);
 		
 		/**
 		 * reset(): Reset function.
@@ -55,8 +53,8 @@ class IoTeamplayer : public IoBase
 		static int NumButtons(void);
 		
 		// Controller configuration. (virtual functions)
-		virtual IoType devType(void) const;
-		virtual int numButtons(void) const;
+		IoType devType(void) const;
+		int numButtons(void) const;
 	
 	protected:
 		/**

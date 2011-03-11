@@ -32,9 +32,7 @@ namespace LibGens
 class IoMegaMouse : public IoBase
 {
 	public:
-		IoMegaMouse();
-		IoMegaMouse(const IoBase *other);
-		virtual ~IoMegaMouse() { }
+		IoMegaMouse(const IoBase *other = NULL);
 		
 		/**
 		 * reset(): Reset function.
@@ -56,13 +54,13 @@ class IoMegaMouse : public IoBase
 		static int NextLogicalButton(int button);
 		
 		// Controller configuration. (virtual functions)
-		virtual IoType devType(void) const;
-		virtual int numButtons(void) const;
-		virtual int nextLogicalButton(int button) const;
+		IoType devType(void) const;
+		int numButtons(void) const;
+		int nextLogicalButton(int button) const;
 		
 		// Get button names.
 		static ButtonName_t ButtonName(int button);
-		virtual ButtonName_t buttonName(int button) const;
+		ButtonName_t buttonName(int button) const;
 	
 	protected:
 		/**

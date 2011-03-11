@@ -26,21 +26,6 @@
 namespace LibGens
 {
 
-Io2Button::Io2Button()
-{
-	// Resize the keymap.
-	m_keyMap.resize(numButtons());
-	
-	// Create the default keymap.
-	// TODO: Initialize elsewhere.
-	m_keyMap[BTNI_UP]	= KEYV_UP;
-	m_keyMap[BTNI_DOWN]	= KEYV_DOWN;
-	m_keyMap[BTNI_LEFT]	= KEYV_LEFT;
-	m_keyMap[BTNI_RIGHT]	= KEYV_RIGHT;
-	m_keyMap[BTNI_1]	= KEYV_s;
-	m_keyMap[BTNI_2]	= KEYV_d;
-}
-
 Io2Button::Io2Button(const IoBase *other)
 	: IoBase(other)
 {

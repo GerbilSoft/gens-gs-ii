@@ -32,9 +32,8 @@ namespace LibGens
 class Io4WPSlave : public IoBase
 {
 	public:
-		Io4WPSlave();
 		Io4WPSlave(const IoBase *other);
-		virtual ~Io4WPSlave();
+		~Io4WPSlave();
 		
 		/**
 		 * reset(): Reset function.
@@ -55,8 +54,8 @@ class Io4WPSlave : public IoBase
 		static int NumButtons(void);
 		
 		// Controller configuration. (virtual functions)
-		virtual IoType devType(void) const;
-		virtual int numButtons(void) const;
+		IoType devType(void) const;
+		int numButtons(void) const;
 		
 		// 4WP-specific: Set slave controller.
 		void setSlaveController(int id);

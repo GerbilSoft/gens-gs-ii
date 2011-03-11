@@ -32,9 +32,7 @@ namespace LibGens
 class Io2Button : public IoBase
 {
 	public:
-		Io2Button();
-		Io2Button(const IoBase *other);
-		virtual ~Io2Button() { }
+		Io2Button(const IoBase *other = NULL);
 		
 		uint8_t readData(void);
 		
@@ -44,13 +42,13 @@ class Io2Button : public IoBase
 		static int NextLogicalButton(int button);
 		
 		// Controller configuration. (virtual functions)
-		virtual IoType devType(void) const;
-		virtual int numButtons(void) const;
-		virtual int nextLogicalButton(int button) const;
+		IoType devType(void) const;
+		int numButtons(void) const;
+		int nextLogicalButton(int button) const;
 		
 		// Get button names.
 		static ButtonName_t ButtonName(int button);
-		virtual ButtonName_t buttonName(int button) const;
+		ButtonName_t buttonName(int button) const;
 };
 
 

@@ -27,35 +27,27 @@
 namespace LibGens
 {
 
-IoBase::IoBase()
-{
-	// Initialize tristate control and data buffer.
-	// TODO: What should 0x40 be initialized to?
-	// - 0x40: SMS compatibility (breaks Multitap Test ROM when controllers are swapped)
-	//   - Nemesis' Sprite Masking & Test ROM seems to expect this...
-	// - 0x00: all zeroes (current option)
-	// - 0xFF: all ones
-	
-	m_ctrl = 0x00;		// input
-	m_lastData = 0xFF;	// all ones
-	m_buttons = ~0;		// no buttons pressed
-	
-	// Serial settings.
-	m_serCtrl = 0x00;	// parallel mode
-	m_serLastTx = 0xFF;
-	
-	updateSelectLine();
-	
-	// Clear the keymap.
-	// NOTE: Derived classes must resize the keymap themselves!
-	// (We can't call virtual functions from the constructor.)
-	m_keyMap.clear();
-}
-
-
 IoBase::IoBase(const IoBase *other)
 {
-	if (other)
+	if (!other)
+	{
+		// No initial device specified.
+		
+		// Initialize tristate control and data buffer.
+		// TODO: What should 0x40 be initialized to?
+		// - 0x40: SMS compatibility (breaks Multitap Test ROM when controllers are swapped)
+		//   - Nemesis' Sprite Masking & Test ROM seems to expect this...
+		// - 0x00: all zeroes (current option)
+		// - 0xFF: all ones
+		
+		m_ctrl = 0x00;		// input
+		m_lastData = 0xFF;	// all ones
+		
+		// Serial settings.
+		m_serCtrl = 0x00;	// parallel mode
+		m_serLastTx = 0xFF;
+	}
+	else
 	{
 		// Copy tristate control and data buffer from another controller.
 		m_ctrl = other->m_ctrl;
@@ -64,16 +56,6 @@ IoBase::IoBase(const IoBase *other)
 		// Serial settings.
 		m_serCtrl = other->m_serCtrl;
 		m_serLastTx = other->m_serLastTx;
-	}
-	else
-	{
-		// NULL device specified.
-		m_ctrl = 0x00;		// input
-		m_lastData = 0xFF;	// all ones
-		
-		// Serial settings.
-		m_serCtrl = 0x00;	// parallel mode
-		m_serLastTx = 0xFF;
 	}
 	
 	// Buttons are NOT copied!

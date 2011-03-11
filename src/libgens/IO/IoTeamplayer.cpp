@@ -29,25 +29,6 @@
 namespace LibGens
 {
 
-IoTeamplayer::IoTeamplayer()
-{
-	// Reset the counter.
-	m_counter = DT_INIT;
-	
-	// Clear controller data.
-	memset(&m_ctrlData, 0xFF, sizeof(m_ctrlData));
-	
-	// Initialize controller types.
-	// TODO: User settings.
-	m_ctrlType[0] = PT_6BTN;
-	m_ctrlType[1] = PT_NONE;
-	m_ctrlType[2] = PT_NONE;
-	m_ctrlType[3] = PT_NONE;
-	
-	// Rebuild the controller dat index table.
-	rebuildCtrlIndexTable();
-}
-
 IoTeamplayer::IoTeamplayer(const IoBase *other)
 	: IoBase(other)
 {

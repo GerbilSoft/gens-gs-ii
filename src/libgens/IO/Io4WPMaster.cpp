@@ -29,11 +29,6 @@
 namespace LibGens
 {
 
-Io4WPMaster::Io4WPMaster()
-	: m_slave(NULL)
-	, m_current(0)
-{ }
-
 Io4WPMaster::Io4WPMaster(const IoBase *other)
 	: IoBase(other)
 	, m_slave(NULL)
