@@ -50,46 +50,22 @@ class IoBase
 		 */
 		virtual void reset(void);
 		
-		// MD-side controller functions.
+		/** MD-side controller functions. **/
 		// TODO: Trigger IRQ 2 if TH interrupt is enabled.
-		virtual void writeCtrl(uint8_t ctrl)
-		{
-			m_ctrl = ctrl;
-			updateSelectLine();
-		}
-		virtual uint8_t readCtrl(void)
-			{ return m_ctrl; }
-		
-		virtual void writeData(uint8_t data)
-		{
-			m_lastData = data;
-			updateSelectLine();
-		}
-		virtual uint8_t readData(void)
-		{
-			// Mask the data according to the tristate control.
-			// Tristate is 0 for input and 1 for output.
-			// Note that tristate bit 7 is used for TH interrupt.
-			// All input bits should read 1.
-			// All output bits should read the last value written.
-			uint8_t tris = (~m_ctrl & 0x7F);
-			return (m_lastData | tris);
-		}
+		virtual void writeCtrl(uint8_t ctrl);
+		virtual uint8_t readCtrl(void);
+		virtual void writeData(uint8_t data);
+		virtual uint8_t readData(void);
 		
 		// Serial I/O virtual functions.
 		// TODO: Baud rate delay handling, TL/TR handling.
 		// TODO: Trigger IRQ 2 on data receive if interrupt is enabled.
 		// NOTE: Serial mode used is 8n1: 1 start, 8 data, 1 stop = 10 baud per byte.
-		virtual void writeSerCtrl(uint8_t serCtrl)
-			{ m_serCtrl = serCtrl; }
-		virtual uint8_t readSerCtrl(void)
-			{ return m_serCtrl & 0xF8; }
-		virtual void writeSerTx(uint8_t data)
-			{ m_serLastTx = data; }
-		virtual uint8_t readSerTx(void)
-			{ return m_serLastTx; }
-		virtual uint8_t readSerRx(void)
-			{ return 0xFF; }
+		virtual void writeSerCtrl(uint8_t serCtrl);
+		virtual uint8_t readSerCtrl(void);
+		virtual void writeSerTx(uint8_t data);
+		virtual uint8_t readSerTx(void);
+		virtual uint8_t readSerRx(void);
 		
 		/**
 		 * update(): I/O device update function.
@@ -326,6 +302,45 @@ class IoBase
 		bool m_select;
 };
 
+
+/** MD-side controller functions. **/
+
+// TODO: Trigger IRQ 2 if TH interrupt is enabled.
+inline void IoBase::writeCtrl(uint8_t ctrl)
+	{ m_ctrl = ctrl; updateSelectLine(); }
+inline uint8_t IoBase::readCtrl(void)
+	{ return m_ctrl; }
+
+inline void IoBase::writeData(uint8_t data)
+	{ m_lastData = data; updateSelectLine(); }
+inline uint8_t IoBase::readData(void)
+{
+	// Mask the data according to the tristate control.
+	// Tristate is 0 for input and 1 for output.
+	// Note that tristate bit 7 is used for TH interrupt.
+	// All input bits should read 1.
+	// All output bits should read the last value written.
+	uint8_t tris = (~m_ctrl & 0x7F);
+	return (m_lastData | tris);
+}
+
+// Serial I/O virtual functions.
+// TODO: Baud rate delay handling, TL/TR handling.
+// TODO: Trigger IRQ 2 on data receive if interrupt is enabled.
+// NOTE: Serial mode used is 8n1: 1 start, 8 data, 1 stop = 10 baud per byte.
+inline void IoBase::writeSerCtrl(uint8_t serCtrl)
+	{ m_serCtrl = serCtrl; }
+inline uint8_t IoBase::readSerCtrl(void)
+	{ return m_serCtrl & 0xF8; }
+inline void IoBase::writeSerTx(uint8_t data)
+	{ m_serLastTx = data; }
+inline uint8_t IoBase::readSerTx(void)
+	{ return m_serLastTx; }
+inline uint8_t IoBase::readSerRx(void)
+	{ return 0xFF; }
+
+
+/** Controller configuration. **/
 
 // Controller configuration. (STATIC functions)
 inline IoBase::IoType IoBase::DevType(void)
