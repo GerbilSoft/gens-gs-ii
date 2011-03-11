@@ -129,6 +129,7 @@ void IoMegaMouse::writeData(uint8_t data)
 		{
 			// TH falling edge.
 			m_counter++;
+			latchMouseMovement();
 		}
 	}
 	else
@@ -148,7 +149,7 @@ void IoMegaMouse::writeData(uint8_t data)
  * readData(): Read data from the controller.
  * @return Data from the controller.
  */
-uint8_t IoMegaMouse::readData(void)
+uint8_t IoMegaMouse::readData(void) const
 {
 	// TL bit (0x10) is Busy Flag (BF).
 	
@@ -164,7 +165,6 @@ uint8_t IoMegaMouse::readData(void)
 		case 1:
 			// ID #1: $B (+BF)
 			ret = 0x1B;
-			latchMouseMovement();
 			break;
 		
 		case 2:

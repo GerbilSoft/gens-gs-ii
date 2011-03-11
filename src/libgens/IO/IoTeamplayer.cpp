@@ -142,7 +142,7 @@ void IoTeamplayer::writeData(uint8_t data)
  * readData(): Read data from the controller.
  * @return Data from the controller.
  */
-uint8_t IoTeamplayer::readData(void)
+uint8_t IoTeamplayer::readData(void) const
 {
 	uint8_t ret;
 	

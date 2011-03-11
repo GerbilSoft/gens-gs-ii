@@ -50,7 +50,7 @@ Io3Button::Io3Button(const IoBase *other)
  * readData(): Read data from the controller.
  * @return Data from the controller.
  */
-uint8_t Io3Button::readData(void)
+uint8_t Io3Button::readData(void) const
 {
 	/**
 	 * Data formats: (D == last written MSB)

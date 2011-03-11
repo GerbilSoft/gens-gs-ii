@@ -110,7 +110,7 @@ void Io4WPSlave::writeData(uint8_t data)
  * readData(): Read data from the controller.
  * @return Data from the controller.
  */
-uint8_t Io4WPSlave::readData(void)
+uint8_t Io4WPSlave::readData(void) const
 {
 	if (m_current >= 4)
 		return 0x70;	// Multitap detection: TH2 = 1

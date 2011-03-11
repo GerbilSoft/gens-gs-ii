@@ -109,7 +109,7 @@ void IoBase::update(void)
  * zomgSaveMD(): Save the controller port state. (MD version)
  * @param state Zomg_MD_IoSave_int_t struct to save to.
  */
-void IoBase::zomgSaveMD(Zomg_MD_IoSave_int_t *state)
+void IoBase::zomgSaveMD(Zomg_MD_IoSave_int_t *state) const
 {
 	state->data = m_lastData;
 	state->ctrl = m_ctrl;

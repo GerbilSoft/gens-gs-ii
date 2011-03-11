@@ -53,19 +53,19 @@ class IoBase
 		/** MD-side controller functions. **/
 		// TODO: Trigger IRQ 2 if TH interrupt is enabled.
 		virtual void writeCtrl(uint8_t ctrl);
-		virtual uint8_t readCtrl(void);
+		virtual uint8_t readCtrl(void) const;
 		virtual void writeData(uint8_t data);
-		virtual uint8_t readData(void);
+		virtual uint8_t readData(void) const;
 		
 		// Serial I/O virtual functions.
 		// TODO: Baud rate delay handling, TL/TR handling.
 		// TODO: Trigger IRQ 2 on data receive if interrupt is enabled.
 		// NOTE: Serial mode used is 8n1: 1 start, 8 data, 1 stop = 10 baud per byte.
 		virtual void writeSerCtrl(uint8_t serCtrl);
-		virtual uint8_t readSerCtrl(void);
+		virtual uint8_t readSerCtrl(void) const;
 		virtual void writeSerTx(uint8_t data);
-		virtual uint8_t readSerTx(void);
-		virtual uint8_t readSerRx(void);
+		virtual uint8_t readSerTx(void) const;
+		virtual uint8_t readSerRx(void) const;
 		
 		/**
 		 * update(): I/O device update function.
@@ -151,7 +151,7 @@ class IoBase
 			uint8_t ser_rx;
 			uint8_t ser_ctrl;
 		};
-		void zomgSaveMD(Zomg_MD_IoSave_int_t *state);
+		void zomgSaveMD(Zomg_MD_IoSave_int_t *state) const;
 		void zomgRestoreMD(const Zomg_MD_IoSave_int_t *state);
 	
 	protected:
@@ -308,12 +308,12 @@ class IoBase
 // TODO: Trigger IRQ 2 if TH interrupt is enabled.
 inline void IoBase::writeCtrl(uint8_t ctrl)
 	{ m_ctrl = ctrl; updateSelectLine(); }
-inline uint8_t IoBase::readCtrl(void)
+inline uint8_t IoBase::readCtrl(void) const
 	{ return m_ctrl; }
 
 inline void IoBase::writeData(uint8_t data)
 	{ m_lastData = data; updateSelectLine(); }
-inline uint8_t IoBase::readData(void)
+inline uint8_t IoBase::readData(void) const
 {
 	// Mask the data according to the tristate control.
 	// Tristate is 0 for input and 1 for output.
@@ -330,13 +330,13 @@ inline uint8_t IoBase::readData(void)
 // NOTE: Serial mode used is 8n1: 1 start, 8 data, 1 stop = 10 baud per byte.
 inline void IoBase::writeSerCtrl(uint8_t serCtrl)
 	{ m_serCtrl = serCtrl; }
-inline uint8_t IoBase::readSerCtrl(void)
+inline uint8_t IoBase::readSerCtrl(void) const
 	{ return m_serCtrl & 0xF8; }
 inline void IoBase::writeSerTx(uint8_t data)
 	{ m_serLastTx = data; }
-inline uint8_t IoBase::readSerTx(void)
+inline uint8_t IoBase::readSerTx(void) const
 	{ return m_serLastTx; }
-inline uint8_t IoBase::readSerRx(void)
+inline uint8_t IoBase::readSerRx(void) const
 	{ return 0xFF; }
 
 

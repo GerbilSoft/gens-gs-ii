@@ -44,7 +44,7 @@ class Io4WPSlave : public IoBase
 		void writeCtrl(uint8_t ctrl);
 		
 		void writeData(uint8_t data);
-		uint8_t readData(void);
+		uint8_t readData(void) const;
 		
 		// I/O device update function.
 		void update(void);

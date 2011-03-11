@@ -34,7 +34,7 @@ class Io3Button : public IoBase
 	public:
 		Io3Button(const IoBase *other = NULL);
 		
-		uint8_t readData(void);
+		uint8_t readData(void) const;
 		
 		// Controller configuration. (STATIC functions)
 		static IoType DevType(void);

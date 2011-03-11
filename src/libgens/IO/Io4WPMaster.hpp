@@ -44,7 +44,7 @@ class Io4WPMaster : public IoBase
 		void writeCtrl(uint8_t ctrl);
 		
 		void writeData(uint8_t data);
-		uint8_t readData(void);
+		uint8_t readData(void) const;
 		
 		// Controller configuration. (STATIC functions)
 		static IoType DevType(void);

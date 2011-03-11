@@ -48,7 +48,7 @@ Io2Button::Io2Button(const IoBase *other)
  * readData(): Read data from the controller.
  * @return Data from the controller.
  */
-uint8_t Io2Button::readData(void)
+uint8_t Io2Button::readData(void) const
 {
 	/**
 	 * Data format: (x == tristate value)

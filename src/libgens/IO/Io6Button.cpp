@@ -120,7 +120,7 @@ void Io6Button::writeData(uint8_t data)
  * readData(): Read data from the controller.
  * @return Data from the controller.
  */
-uint8_t Io6Button::readData(void)
+uint8_t Io6Button::readData(void) const
 {
 	uint8_t ret;
 	

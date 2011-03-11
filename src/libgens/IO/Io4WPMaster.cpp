@@ -92,7 +92,7 @@ void Io4WPMaster::writeData(uint8_t data)
  * readData(): Read data from the controller.
  * @return Data from the controller.
  */
-uint8_t Io4WPMaster::readData(void)
+uint8_t Io4WPMaster::readData(void) const
 {
 	// Master port always returns 0x7F.
 	return applyTristate(0x7F);
