@@ -41,6 +41,10 @@ IoMegaMouse::IoMegaMouse(const IoBase *other)
 	m_latchSignOver = 0;
 	m_latchRelX = 0;
 	m_latchRelY = 0;
+	
+	// Initialize the keymap.
+	// TODO: Copy from other controller?
+	m_keyMap.resize(numButtons(), 0);
 }
 
 
@@ -224,19 +228,17 @@ uint8_t IoMegaMouse::readData(void) const
  */
 void IoMegaMouse::update(void)
 {
-	// TODO: Allow customizable keymaps.
-	// TODO: Add mouse handling to KeyManager.
-	// NOTE: Mega Mouse buttons are Active High.
+	// TODO: Add relative axis support.
 	
+	// NOTE: Mega Mouse buttons are Active High.
 	// Bitfield: [START MIDDLE RIGHT LEFT]
 	m_buttons = 0;
-	m_buttons |= DevManager::IsKeyPressed(KEYV_SPACE);		// Start
-	m_buttons <<= 1;
-	m_buttons |= DevManager::IsKeyPressed(KEYV_MOUSE_MIDDLE);	// Middle (TODO)
-	m_buttons <<= 1;
-	m_buttons |= DevManager::IsKeyPressed(KEYV_MOUSE_RIGHT);	// Right (TODO)
-	m_buttons <<= 1;
-	m_buttons |= DevManager::IsKeyPressed(KEYV_MOUSE_LEFT);		// Left (TODO)
+	
+	for (int i = (m_keyMap.size() - 1); i >= 0; i--)
+	{
+		m_buttons <<= 1;
+		m_buttons |= DevManager::IsKeyPressed(m_keyMap[i]);
+	}
 }
 
 
