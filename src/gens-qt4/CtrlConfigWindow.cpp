@@ -121,9 +121,10 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	}
 	
 	// Initialize the "Device" dropdown.
-	// TODO: Handle Master/Slave devices.
+	// 4WP Master is added here.
+	// on_cboDevice_currentIndexChanged() handles translation for Port 1.
 	cboDevice_lock();
-	for (int i = LibGens::IoBase::IOT_NONE; i <= LibGens::IoBase::IOT_TEAMPLAYER; i++)
+	for (int i = LibGens::IoBase::IOT_NONE; i <= LibGens::IoBase::IOT_4WP_MASTER; i++)
 	{
 		cboDevice->addItem(GetCtrlIcon((LibGens::IoBase::IoType)i),
 				GetShortDeviceName((LibGens::IoBase::IoType)i));
@@ -545,7 +546,7 @@ void CtrlConfigWindow::selectPort(int port)
  */
 void CtrlConfigWindow::cboDevice_setTP(bool isTP)
 {
-	const int devCount = (isTP ? LibGens::IoBase::IOT_6BTN : LibGens::IoBase::IOT_TEAMPLAYER) + 1;
+	const int devCount = (isTP ? LibGens::IoBase::IOT_6BTN : LibGens::IoBase::IOT_4WP_MASTER) + 1;
 	if (cboDevice->count() == devCount)
 		return;
 	
@@ -554,7 +555,7 @@ void CtrlConfigWindow::cboDevice_setTP(bool isTP)
 	if (cboDevice->count() > devCount)
 	{
 		// Remove the extra items.
-		for (int i = LibGens::IoBase::IOT_TEAMPLAYER;
+		for (int i = LibGens::IoBase::IOT_4WP_MASTER;
 		     i > LibGens::IoBase::IOT_6BTN; i--)
 		{
 			cboDevice->removeItem(i);
@@ -564,7 +565,7 @@ void CtrlConfigWindow::cboDevice_setTP(bool isTP)
 	{
 		// Add the extra items.
 		for (int i = LibGens::IoBase::IOT_2BTN;
-		     i <= LibGens::IoBase::IOT_TEAMPLAYER; i++)
+		     i <= LibGens::IoBase::IOT_4WP_MASTER; i++)
 		{
 			cboDevice->addItem(GetCtrlIcon((LibGens::IoBase::IoType)i),
 					GetShortDeviceName((LibGens::IoBase::IoType)i));
@@ -664,8 +665,76 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 		return;
 	}
 	
-	// Device type has been changed.
-	m_devType[m_selPort] = (LibGens::IoBase::IoType)index;
+	// Check for 4WP.
+	if (m_selPort == 0)
+	{
+		// Port 1.
+		if (index == LibGens::IoBase::IOT_4WP_MASTER)
+		{
+			// 4WP SLAVE set for Port 1.
+			// (4WP_MASTER index used for dropdown.)
+			// TODO: Maybe use the combo box item's data parameter?
+			m_devType[m_selPort] = LibGens::IoBase::IOT_4WP_SLAVE;
+			
+			// Make sure Port 2 is set to 4WP MASTER.
+			if (m_devType[1] != LibGens::IoBase::IOT_4WP_MASTER)
+			{
+				m_devType[1] = LibGens::IoBase::IOT_4WP_MASTER;
+				updatePortButton(1);
+			}
+		}
+		else
+		{
+			// 4WP SLAVE not set for Port 1.
+			m_devType[m_selPort] = (LibGens::IoBase::IoType)index;
+			
+			// Check if Port 2 is set to 4WP MASTER. (or 4WP SLAVE for sanity check)
+			if (m_devType[1] == LibGens::IoBase::IOT_4WP_MASTER ||
+			    m_devType[1] == LibGens::IoBase::IOT_4WP_SLAVE)
+			{
+				// Port 2 is set to 4WP MASTER. Unset it.
+				m_devType[1] = LibGens::IoBase::IOT_NONE;
+				updatePortButton(1);
+			}
+		}
+	}
+	else if (m_selPort == 1)
+	{
+		// Port 2.
+		if (index == LibGens::IoBase::IOT_4WP_MASTER)
+		{
+			// 4WP MASTER set for Port 2.
+			m_devType[m_selPort] = LibGens::IoBase::IOT_4WP_MASTER;
+			
+			// Make sure Port 1 is set to 4WP SLAVE.
+			if (m_devType[0] != LibGens::IoBase::IOT_4WP_SLAVE)
+			{
+				m_devType[0] = LibGens::IoBase::IOT_4WP_SLAVE;
+				updatePortButton(0);
+			}
+		}
+		else
+		{
+			// 4WP MASTER not set for Port 2.
+			m_devType[m_selPort] = (LibGens::IoBase::IoType)index;
+			
+			// Check if Port 1 is set to 4WP SLAVE. (or 4WP MASTER for sanity check)
+			if (m_devType[0] == LibGens::IoBase::IOT_4WP_SLAVE ||
+			    m_devType[0] == LibGens::IoBase::IOT_4WP_MASTER)
+			{
+				// Port 1 is set to 4WP SLAVE. Unset it.
+				m_devType[0] = LibGens::IoBase::IOT_NONE;
+				updatePortButton(0);
+			}
+		}
+	}
+	else
+	{
+		// Other port.
+		m_devType[m_selPort] = (LibGens::IoBase::IoType)index;
+	}
+	
+	// Update the port information.
 	updatePortButton(m_selPort);
 	updatePortSettings(m_selPort);
 }
