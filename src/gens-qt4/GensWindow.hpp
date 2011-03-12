@@ -96,7 +96,6 @@ class GensWindow : public QMainWindow
 		void saveState(void);
 		void loadState(void);
 		void screenShot(void);
-		void setController(int port, LibGens::IoBase::IoType type);
 		void setAudioRate(int newRate);
 		void setStereo(bool newStereo);
 	

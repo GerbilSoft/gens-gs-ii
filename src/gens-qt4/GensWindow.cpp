@@ -619,8 +619,6 @@ void GensWindow::loadState(void)
 	{ m_emuManager->loadState(); }
 void GensWindow::screenShot(void)
 	{ m_emuManager->screenShot(); }
-void GensWindow::setController(int port, LibGens::IoBase::IoType type)
-	{ m_emuManager->setController(port, type); }
 void GensWindow::setAudioRate(int newRate)
 	{ m_emuManager->setAudioRate(newRate); }
 void GensWindow::setStereo(bool newStereo)

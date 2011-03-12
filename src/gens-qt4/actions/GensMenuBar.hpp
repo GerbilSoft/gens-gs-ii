@@ -105,7 +105,7 @@ class GensMenuBar : public QObject
 			static const MenuItem ms_gmiGraphicsStretch[];
 		static const MenuItem ms_gmiSystem[];
 			static const MenuItem ms_gmiSystemRegion[];
-		static const MenuItem ms_gmiCtrlTest[];
+		static const MenuItem ms_gmiOptions[];
 		static const MenuItem ms_gmiSoundTest[];
 		static const MenuItem ms_gmiHelp[];
 		

@@ -293,41 +293,11 @@ bool GensActions::doAction(int action, bool state)
 					(MNUID_ITEM(action) - MNUID_ITEM(IDM_SYSTEM_REGION_AUTODETECT) - 1));
 			break;
 		
-		case IDM_CTRLTEST_MENU:
-			// Controller Testing
+		case IDM_OPTIONS_MENU:
+			// Options menu.
 			switch (MNUID_ITEM(action))
 			{
-				case MNUID_ITEM(IDM_CTRLTEST_NONE):
-					m_parent->setController(0, LibGens::IoBase::IOT_NONE);
-					return true;
-				
-				case MNUID_ITEM(IDM_CTRLTEST_3BT):
-					m_parent->setController(0, LibGens::IoBase::IOT_3BTN);
-					return true;
-				
-				case MNUID_ITEM(IDM_CTRLTEST_6BT):
-					m_parent->setController(0, LibGens::IoBase::IOT_6BTN);
-					return true;
-				
-				case MNUID_ITEM(IDM_CTRLTEST_2BT):
-					m_parent->setController(0, LibGens::IoBase::IOT_2BTN);
-					return true;
-				
-				case MNUID_ITEM(IDM_CTRLTEST_MEGAMOUSE):
-					m_parent->setController(0, LibGens::IoBase::IOT_MEGA_MOUSE);
-					return true;
-				
-				case MNUID_ITEM(IDM_CTRLTEST_TEAMPLAYER):
-					m_parent->setController(0, LibGens::IoBase::IOT_TEAMPLAYER);
-					return true;
-				
-				case MNUID_ITEM(IDM_CTRLTEST_4WP):
-					// TODO
-					m_parent->setController(0, LibGens::IoBase::IOT_4WP_SLAVE);
-					m_parent->setController(1, LibGens::IoBase::IOT_4WP_MASTER);
-					return true;
-				
-				case MNUID_ITEM(IDM_CTRLTEST_CONFIG):
+				case MNUID_ITEM(IDM_OPTIONS_CONTROLLERS):
 					// Controller Configuration.
 					CtrlConfigWindow::ShowSingle(m_parent);
 					return true;

@@ -135,18 +135,10 @@ const GensMenuBar::MenuItem GensMenuBar::ms_gmiSystemRegion[] =
 	{0, GMI_NORMAL, NULL, QAction::NoRole, 0, NULL, NULL}
 };
 
-/** CtrlTest menu. **/
-const GensMenuBar::MenuItem GensMenuBar::ms_gmiCtrlTest[] =
+/** Options menu. **/
+const GensMenuBar::MenuItem GensMenuBar::ms_gmiOptions[] =
 {
-	{IDM_CTRLTEST_NONE, GMI_NORMAL, "&None", QAction::NoRole, 0, NULL, NULL},
-	{IDM_CTRLTEST_3BT, GMI_NORMAL, "&3-button", QAction::NoRole, 0, NULL, NULL},
-	{IDM_CTRLTEST_6BT, GMI_NORMAL, "&6-button", QAction::NoRole, 0, NULL, NULL},
-	{IDM_CTRLTEST_2BT, GMI_NORMAL, "&2-button", QAction::NoRole, 0, NULL, NULL},
-	{IDM_CTRLTEST_MEGAMOUSE, GMI_NORMAL, "&Mega Mouse", QAction::NoRole, 0, NULL, NULL},
-	{IDM_CTRLTEST_TEAMPLAYER, GMI_NORMAL, "&Teamplayer", QAction::NoRole, 0, NULL, NULL},
-	{IDM_CTRLTEST_4WP, GMI_NORMAL, "EA &4-Way Play", QAction::NoRole, 0, NULL, NULL},
-	{IDM_SEPARATOR, GMI_SEPARATOR, NULL, QAction::NoRole, 0, NULL, NULL},
-	{IDM_CTRLTEST_CONFIG, GMI_NORMAL, "&CtrlConfig...", QAction::NoRole, 0, NULL, "input-gaming"},
+	{IDM_OPTIONS_CONTROLLERS, GMI_NORMAL, "&Controllers...", QAction::NoRole, 0, NULL, "input-gaming"},
 	
 	{0, GMI_NORMAL, NULL, QAction::NoRole, 0, NULL, NULL}
 };
@@ -181,7 +173,7 @@ const GensMenuBar::MainMenuItem GensMenuBar::ms_gmmiMain[] =
 	{IDM_FILE_MENU, QT_TR_NOOP("&File"), &ms_gmiFile[0]},
 	{IDM_GRAPHICS_MENU, QT_TR_NOOP("&Graphics"), &ms_gmiGraphics[0]},
 	{IDM_SYSTEM_MENU, QT_TR_NOOP("&System"), &ms_gmiSystem[0]},
-	{IDM_CTRLTEST_MENU, "&CtrlTest", &ms_gmiCtrlTest[0]},
+	{IDM_OPTIONS_MENU, "&Options", &ms_gmiOptions[0]},
 	{IDM_SOUNDTEST_MENU, "&SoundTest", &ms_gmiSoundTest[0]},
 	{IDM_HELP_MENU, QT_TR_NOOP("&Help"), &ms_gmiHelp[0]},
 	

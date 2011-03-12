@@ -237,7 +237,7 @@ class EmuManager : public QObject
 			enum RequestType
 			{
 				RQT_UNKNOWN		= 0,
-				RQT_CTRLCHANGE		= 1,
+				//RQT_CTRLCHANGE	= 1, // OBSOLETE
 				RQT_SCREENSHOT		= 2,
 				RQT_AUDIO_RATE		= 3,
 				RQT_AUDIO_STEREO	= 4,
@@ -316,7 +316,6 @@ class EmuManager : public QObject
 	
 	public slots:
 		/** Emulation settings. **/
-		void setController(int port, LibGens::IoBase::IoType type);
 		void screenShot(void);
 		void setAudioRate(int newRate);
 		void setStereo(bool newStereo);
@@ -392,7 +391,6 @@ class EmuManager : public QObject
 	
 	private:
 		void processQEmuRequest(void);
-		void doCtrlChange(int port, LibGens::IoBase::IoType type);
 		
 		QImage getMDScreen(void) const;
 		void doScreenShot(void);

@@ -69,26 +69,6 @@ namespace GensQt4
 /** Emulation Request Queue: Submission functions. **/
 
 /**
- * setController(): Set a controller type.
- * @param port Controller port. (0, 1, 2)
- * TODO: Teamplayer/4WP support.
- * TODO: Replace this with full controller config update.
- * @param type Controller type.
- */
-void EmuManager::setController(int port, LibGens::IoBase::IoType type)
-{
-	EmuRequest_t rq;
-	rq.rqType = EmuRequest_t::RQT_CTRLCHANGE;
-	rq.ctrlChange.port = port;
-	rq.ctrlChange.ctrlType = type;
-	m_qEmuRequest.enqueue(rq);
-	
-	if (!m_rom || m_paused.data)
-		processQEmuRequest();
-}
-
-
-/**
  * screenShot(): Request a screenshot.
  */
 void EmuManager::screenShot(void)
@@ -405,11 +385,6 @@ void EmuManager::processQEmuRequest(void)
 		
 		switch (rq.rqType)
 		{
-			case EmuRequest_t::RQT_CTRLCHANGE:
-				// Controller Change.
-				doCtrlChange(rq.ctrlChange.port, rq.ctrlChange.ctrlType);
-				break;
-			
 			case EmuRequest_t::RQT_SCREENSHOT:
 				// Screenshot.
 				doScreenShot();
@@ -479,155 +454,6 @@ void EmuManager::processQEmuRequest(void)
 				break;
 		}
 	}
-}
-
-
-/**
- * doCtrlChange(): Do a controller change.
- * Called from processQEmuRequest().
- * @param port Controller port. (0, 1, 2) [TODO: Teamplayer/4WP]
- * @param type New controller type.
- */
-void EmuManager::doCtrlChange(int port, LibGens::IoBase::IoType type)
-{
-	// Disabled for now.
-	return;
-	
-	// TODO: Teamplayer/4WP support.
-	// NOTE: Only works if a ROM is loaded.
-	// TODO: Replace this with standard Controller Configuration.
-	if (!gqt4_emuContext)
-		return;
-	
-	LibGens::IoBase **prevDevPtr = NULL;
-	switch (port)
-	{
-		case 0:		prevDevPtr = &gqt4_emuContext->m_port1; break;
-		case 1:		prevDevPtr = &gqt4_emuContext->m_port2; break;
-		case 2:		prevDevPtr = &gqt4_emuContext->m_portE; break;
-		default:	break;
-	}
-	
-	if (!(*prevDevPtr))
-		return;
-	
-	if ((*prevDevPtr)->devType() == type)
-	{
-		// There's no point in changing a controller
-		// to the same type that it already is...
-		return;
-	}
-	
-	LibGens::IoBase *dev = NULL;
-	QString devName;
-	switch (type)
-	{
-		case LibGens::IoBase::IOT_NONE:
-			// No controller.
-			dev = new LibGens::IoBase(*prevDevPtr);
-			devName = QLatin1String("None");
-			// TODO: Copy settings from existing Port 1 controller.
-			break;
-		
-		case LibGens::IoBase::IOT_3BTN:
-			// 3-button controller.
-			dev = new LibGens::Io3Button(*prevDevPtr);
-			devName = QLatin1String("3-button");
-			// TODO: Copy settings from existing Port 1 controller.
-			break;
-		
-		case LibGens::IoBase::IOT_6BTN:
-			// 6-button controller.
-			dev = new LibGens::Io6Button(*prevDevPtr);
-			devName = QLatin1String("6-button");
-			// TODO: Copy settings from existing Port 1 controller.
-			break;
-		
-		case LibGens::IoBase::IOT_2BTN:
-			// 2-button controller.
-			dev = new LibGens::Io2Button(*prevDevPtr);
-			devName = QLatin1String("2-button (SMS)");
-			// TODO: Copy settings from existing Port 1 controller.
-			break;
-		
-		case LibGens::IoBase::IOT_MEGA_MOUSE:
-			// Sega Mega Mouse.
-			dev = new LibGens::IoMegaMouse(*prevDevPtr);
-			devName = QLatin1String("Mega Mouse");
-			// TODO: Copy settings from existing Port 1 controller.
-			break;
-		
-		case LibGens::IoBase::IOT_TEAMPLAYER:
-			// Sega Teamplayer.
-			dev = new LibGens::IoTeamplayer(*prevDevPtr);
-			devName = QLatin1String("Team Player");
-			// TODO: Copy settings from existing Port 1 controller.
-			break;
-		
-		case LibGens::IoBase::IOT_4WP_MASTER:
-		case LibGens::IoBase::IOT_4WP_SLAVE:
-		{
-			// EA 4-Way Play. (TODO)
-#if 0
-			LibGens::Io4WPMaster *master = new LibGens::Io4WPMaster(LibGens::EmuMD::m_port2);
-			LibGens::Io4WPSlave *slave = new LibGens::Io4WPSlave(LibGens::EmuMD::m_port1);
-			master->setSlaveDevice(slave);
-			port2 = master;
-			port1 = slave;
-			m_vBackend->osd_printf(1500, "Port 1 set to EA 4-WAY PLAY (Slave).");
-			m_vBackend->osd_printf(1500, "Port 2 set to EA 4-WAY PLAY (Master).");
-#endif
-			break;
-		}
-		
-		default:
-			break;
-	}
-	
-	if (!dev)
-	{
-		// Unknown device. TODO
-		return;
-	}
-			
-	// Set the device.
-	delete *prevDevPtr;
-	*prevDevPtr = dev;
-	
-	//: OSD message indicating controller change.
-	QString osdMsg = tr("Port %1 set to %2.", "osd");
-	osdMsg = osdMsg.arg(port + 1);	// TODO: Use "E" for Port 3.
-	osdMsg = osdMsg.arg(devName);
-	
-	emit osdPrintMsg(1500, osdMsg);
-	
-	// Make sure there's no dangling 4WP master/slave device.
-	// TODO: Do this after the emulation request queue is cleared.
-#if 0
-	LibGens::IoBase::IoType p1_type = LibGens::EmuMD::m_port1->devType();
-	LibGens::IoBase::IoType p2_type = LibGens::EmuMD::m_port2->devType();
-	bool p1_is4WP = (p1_type == LibGens::IoBase::IOT_4WP_MASTER || p1_type == LibGens::IoBase::IOT_4WP_SLAVE);
-	bool p2_is4WP = (p2_type == LibGens::IoBase::IOT_4WP_MASTER || p2_type == LibGens::IoBase::IOT_4WP_SLAVE);
-	
-	if (p1_is4WP ^ p2_is4WP)
-	{
-		// Dangling 4WP device.
-		if (p1_is4WP)
-		{
-			port1 = new LibGens::IoBase(LibGens::EmuMD::m_port1);
-			delete LibGens::EmuMD::m_port1;
-			LibGens::EmuMD::m_port1 = port1;
-			m_vBackend->osd_printf(1500, "Port 1 set to None.");
-		}
-		else
-		{
-			port2 = new LibGens::IoBase(LibGens::EmuMD::m_port2);
-			delete LibGens::EmuMD::m_port2;
-			LibGens::EmuMD::m_port2 = port2;
-			m_vBackend->osd_printf(1500, "Port 2 set to None.");
-		}
-	}
-#endif
 }
 
 
