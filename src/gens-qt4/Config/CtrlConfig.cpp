@@ -130,7 +130,7 @@ const GensKey_t CtrlConfigPrivate::Def_CtrlKeys[CtrlConfig::PORT_MAX][CtrlConfig
 	
 	// Port 2 (TODO: This needs to be improved!)
 	{KEYV_i, KEYV_k, KEYV_j, KEYV_l,
-	KEYV_r, KEYV_t, KEYV_y, KEYV_u,
+	KEYV_t, KEYV_y, KEYV_r, KEYV_u,
 	0, 0, 0, 0},
 	
 	// Other ports are left undefined.
