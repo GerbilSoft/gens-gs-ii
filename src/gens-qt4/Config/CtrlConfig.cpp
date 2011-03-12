@@ -277,6 +277,7 @@ int CtrlConfigPrivate::load(const QSettings& settings)
 		else
 		{
 			// Controller information specified.
+			ctrlTypes[i] = (LibGens::IoBase::IoType)ctrlType_tmp;
 			
 			// Clear the controller keys.
 			memset(ctrlKeys[i], 0x00, sizeof(ctrlKeys[i]));
