@@ -24,6 +24,9 @@
 
 #include "IoBase.hpp"
 
+// C++ includes.
+#include <algorithm>
+
 namespace LibGens
 {
 
@@ -99,6 +102,36 @@ void IoBase::update(void)
 	
 	// Buttons typically use active-low logic.
 	m_buttons = ~m_buttons;
+}
+
+
+/**
+ * setKeymap(): Set the device keymap.
+ * @param keymap Array of GensKey_t values.
+ * @param count Number of GensKey_t values in the keymap array.
+ * @return Number of keys set, or negative on error.
+ */
+int IoBase::setKeymap(const GensKey_t *keymap, int count)
+{
+	const int btns = std::min(count, (int)m_keyMap.size());
+	for (int i = 0; i < btns; i++)
+		m_keyMap[i] = *keymap++;
+	return btns;
+}
+
+
+/**
+ * keymap(): Get the device keymap.
+ * @param keymap Array to store the GensKey_t values in.
+ * @param siz Size of keymap array.
+ * @return Number of keys returned, or negative on error.
+ */
+int IoBase::keymap(GensKey_t *keymap, int siz) const
+{
+	const int btns = std::min(siz, (int)m_keyMap.size());
+	for (int i = 0; i < btns; i++)
+		*keymap++ = m_keyMap[i];
+	return btns;
 }
 
 

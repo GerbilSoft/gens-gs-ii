@@ -142,6 +142,10 @@ class IoBase
 		static ButtonName_t ButtonName(int button);
 		virtual ButtonName_t buttonName(int button) const;
 		
+		// Set/get keymap.
+		int setKeymap(const GensKey_t *keymap, int count);
+		int keymap(GensKey_t *keymap, int siz) const;
+		
 		/** ZOMG savestate functions. **/
 		struct Zomg_MD_IoSave_int_t
 		{
