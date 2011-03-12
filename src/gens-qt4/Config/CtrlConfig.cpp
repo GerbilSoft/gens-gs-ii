@@ -125,8 +125,9 @@ const GensKey_t CtrlConfigPrivate::Def_CtrlKeys[CtrlConfig::PORT_MAX][CtrlConfig
 #ifdef Q_WS_MAC
 	KEYV_LSHIFT
 #else
-	KEYV_RSHIFT},
+	KEYV_RSHIFT
 #endif
+	},
 	
 	// Port 2 (TODO: This needs to be improved!)
 	{KEYV_i, KEYV_k, KEYV_j, KEYV_l,
