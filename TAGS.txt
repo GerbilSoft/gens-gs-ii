@@ -1,5 +1,15 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-CtrlConfig-v0: Initial Controller Configuration class.
+This class stores the key mapping for all controllers, and provides
+functions to update the LibGens::IoBase objects with new configuration.
+It also provides load() and save() functions to load and save the
+configuration using a QSettings object. Team Player and 4-Way Play
+devices are currently not supported. GensConfig now has an instance
+of CtrlConfig, called m_ctrlConfig, which is currently public. It may
+be marked private later on, provided that I add wrapper functions for
+access and modification.
+
 gens-qt4-CtrlConfigWindow-v2: CtrlConfigWindow now uses a new class,
 GensCtrlKeyWidget, which accepts a single key without modifiers and
 blinks the text while waiting for a key.
