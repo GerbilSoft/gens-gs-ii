@@ -35,6 +35,9 @@
 // Key configuration.
 #include "actions/GensKeyConfig.hpp"
 
+// Controller configuration.
+#include "CtrlConfig.hpp"
+
 // Property function macro.
 // NOTE: We can't include Q_PROPERTY() or signals here due to moc limitations.
 #define GC_PROPERTY(propType, propName, setPropType, setPropName) \
@@ -51,7 +54,7 @@ class GensConfig : public QObject
 	Q_OBJECT
 	
 	public:
-		GensConfig();
+		GensConfig(QObject *parent = 0);
 		~GensConfig();
 		
 		/**
@@ -271,6 +274,11 @@ class GensConfig : public QObject
 		friend class GensConfigPrivate;
 		GensConfigPrivate *d;
 		Q_DISABLE_COPY(GensConfig)
+	
+	public:
+		// Controller configuration class.
+		// TODO: Make it private?
+		CtrlConfig *m_ctrlConfig;
 };
 
 }

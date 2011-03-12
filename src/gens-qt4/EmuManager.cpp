@@ -385,6 +385,10 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	m_lastTime_fps = m_lastTime;
 	m_frames = 0;
 	
+	// Initialize controllers.
+	const CtrlConfig *cfg = gqt4_config->m_ctrlConfig;
+	gqt4_emuContext->m_port1 = cfg->updatePort1(gqt4_emuContext->m_port1);
+	
 	// Start the emulation thread.
 	m_paused.data = 0;
 	gqt4_emuThread = new EmuThread();
@@ -653,6 +657,14 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	// Check for requests in the emulation queue.
 	if (!m_qEmuRequest.isEmpty())
 		processQEmuRequest();
+	
+	// Check for controller configuration updates.
+	const CtrlConfig *cfg = gqt4_config->m_ctrlConfig;
+	if (gqt4_config->m_ctrlConfig->isDirty())
+	{
+		// Update the port.
+		gqt4_emuContext->m_port1 = cfg->updatePort1(gqt4_emuContext->m_port1);
+	}
 	
 	// Update the GensQGLWidget.
 	if (!wasFastFrame)

@@ -152,7 +152,7 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	}
 	
 	// Initialize all the port buttons.
-	for (int i = 0; i < CTRL_CFG_MAX_PORTS; i++)
+	for (int i = 0; i < CtrlConfig::PORT_MAX; i++)
 		updatePortButton(i);
 	
 	// Set Port 1 as active.
@@ -243,7 +243,7 @@ void CtrlConfigWindow::changeEvent(QEvent *event)
 		retranslateUi(this);
 		
 		// Update the port buttons.
-		for (int i = 0; i < CTRL_CFG_MAX_PORTS; i++)
+		for (int i = 0; i < CtrlConfig::PORT_MAX; i++)
 			updatePortButton(i);
 		
 		// Update the selected port information.
@@ -314,25 +314,43 @@ QString CtrlConfigWindow::GetLongDeviceName(LibGens::IoBase::IoType devType)
  */
 QString CtrlConfigWindow::GetPortName(int port)
 {
-	if (port == 0 || port == 1)
-		return tr("Port %1").arg(port+1);
-	else if (port >= CTRL_CFG_PORT_TP1A && port < (CTRL_CFG_PORT_TP1A+4))
+	switch (port)
 	{
-		return tr("Team Player %1, Port %2").arg(1)
-			.arg(QChar(L'A' + (port - CTRL_CFG_PORT_TP1A)));
-	}
-	else if (port >= CTRL_CFG_PORT_TP2A && port < (CTRL_CFG_PORT_TP2A+4))
-	{
-		return tr("Team Player %1, Port %2").arg(2)
-			.arg(QChar(L'A' + (port - CTRL_CFG_PORT_TP2A)));
-	}
-	else if (port >= CTRL_CFG_PORT_4WPA && port < (CTRL_CFG_PORT_4WPA+4))
-	{
-		return tr("4-Way Play, Port %1")
-			.arg(QChar(L'A' + (port - CTRL_CFG_PORT_4WPA)));
+		// System controller ports.
+		case CtrlConfig::PORT_1:
+		case CtrlConfig::PORT_2:
+			return tr("Port %1").arg((port - CtrlConfig::PORT_1) + 1);
+		
+		// Team Player, Port 1.
+		case CtrlConfig::PORT_TP1A:
+		case CtrlConfig::PORT_TP1B:
+		case CtrlConfig::PORT_TP1C:
+		case CtrlConfig::PORT_TP1D:
+			return tr("Team Player %1, Port %2").arg(1)
+				.arg(QChar(L'A' + (port - CtrlConfig::PORT_TP1A)));
+		
+		// Team Player, Port 2.
+		case CtrlConfig::PORT_TP2A:
+		case CtrlConfig::PORT_TP2B:
+		case CtrlConfig::PORT_TP2C:
+		case CtrlConfig::PORT_TP2D:
+			return tr("Team Player %1, Port %2").arg(1)
+				.arg(QChar(L'A' + (port - CtrlConfig::PORT_TP2A)));
+		
+		// 4-Way Play.
+		case CtrlConfig::PORT_4WPA:
+		case CtrlConfig::PORT_4WPB:
+		case CtrlConfig::PORT_4WPC:
+		case CtrlConfig::PORT_4WPD:
+			return tr("4-Way Play, Port %1")
+				.arg(QChar(L'A' + (port - CtrlConfig::PORT_4WPA)));
+		
+		default:
+			// Unknown port number.
+			return QString();
 	}
 	
-	// Unknown port number.
+	// Should not get here...
 	return QString();
 }
 
@@ -383,29 +401,30 @@ void CtrlConfigWindow::updatePortButton(int port)
 	QAction *actionPort;
 	switch (port)
 	{
-		// Base ports.
-		case 0:		actionPort = actionPort1; break;
-		case 1:		actionPort = actionPort2; break;
+		// System controller ports.
+		case CtrlConfig::PORT_1:	actionPort = actionPort1; break;
+		case CtrlConfig::PORT_2:	actionPort = actionPort2; break;
 		
-		// TeamPlayer 1.
-		case CTRL_CFG_PORT_TP1A:	actionPort = actionPortTP1A; break;
-		case CTRL_CFG_PORT_TP1A+1:	actionPort = actionPortTP1B; break;
-		case CTRL_CFG_PORT_TP1A+2:	actionPort = actionPortTP1C; break;
-		case CTRL_CFG_PORT_TP1A+3:	actionPort = actionPortTP1D; break;
+		// Team Player, Port 1.
+		case CtrlConfig::PORT_TP1A:	actionPort = actionPortTP1A; break;
+		case CtrlConfig::PORT_TP1B:	actionPort = actionPortTP1B; break;
+		case CtrlConfig::PORT_TP1C:	actionPort = actionPortTP1C; break;
+		case CtrlConfig::PORT_TP1D:	actionPort = actionPortTP1D; break;
 
-		// TeamPlayer 2.
-		case CTRL_CFG_PORT_TP2A:	actionPort = actionPortTP2A; break;
-		case CTRL_CFG_PORT_TP2A+1:	actionPort = actionPortTP2B; break;
-		case CTRL_CFG_PORT_TP2A+2:	actionPort = actionPortTP2C; break;
-		case CTRL_CFG_PORT_TP2A+3:	actionPort = actionPortTP2D; break;
+		// Team Player, Port 2.
+		case CtrlConfig::PORT_TP2A:	actionPort = actionPortTP2A; break;
+		case CtrlConfig::PORT_TP2B:	actionPort = actionPortTP2B; break;
+		case CtrlConfig::PORT_TP2C:	actionPort = actionPortTP2C; break;
+		case CtrlConfig::PORT_TP2D:	actionPort = actionPortTP2D; break;
 		
-		// EA 4-Way Play.
-		case CTRL_CFG_PORT_4WPA:	actionPort = actionPort4WPA; break;
-		case CTRL_CFG_PORT_4WPA+1:	actionPort = actionPort4WPB; break;
-		case CTRL_CFG_PORT_4WPA+2:	actionPort = actionPort4WPC; break;
-		case CTRL_CFG_PORT_4WPA+3:	actionPort = actionPort4WPD; break;
+		// 4-Way Play.
+		case CtrlConfig::PORT_4WPA:	actionPort = actionPort4WPA; break;
+		case CtrlConfig::PORT_4WPB:	actionPort = actionPort4WPB; break;
+		case CtrlConfig::PORT_4WPC:	actionPort = actionPort4WPC; break;
+		case CtrlConfig::PORT_4WPD:	actionPort = actionPort4WPD; break;
 		
 		default:
+			// Unknown port.
 			return;
 	}
 	
@@ -423,7 +442,7 @@ void CtrlConfigWindow::updatePortButton(int port)
 				QLatin1String(": ") +
 				GetLongDeviceName(m_devType[port]));
 	
-	if (port == 0)
+	if (port == CtrlConfig::PORT_1)
 	{
 		// Port 1. Update TeamPlayer 1 button state.
 		const bool isTP = (m_devType[port] == LibGens::IoBase::IOT_TEAMPLAYER);
@@ -433,7 +452,7 @@ void CtrlConfigWindow::updatePortButton(int port)
 		actionPortTP1C->setVisible(isTP);
 		actionPortTP1D->setVisible(isTP);
 	}
-	else if (port == 1)
+	else if (port == CtrlConfig::PORT_2)
 	{
 		// Port 2. Update TeamPlayer 2 button state.
 		const bool isTP = (m_devType[port] == LibGens::IoBase::IOT_TEAMPLAYER);
@@ -444,7 +463,7 @@ void CtrlConfigWindow::updatePortButton(int port)
 		actionPortTP2D->setVisible(isTP);
 	}
 	
-	if (port == 0 || port == 1)
+	if (port == CtrlConfig::PORT_1 || port == CtrlConfig::PORT_2)
 	{
 		// Port 1 or 2. Update EA 4-Way Play button state.
 		const bool is4WP = (m_devType[0] == LibGens::IoBase::IOT_4WP_SLAVE &&
@@ -465,7 +484,7 @@ void CtrlConfigWindow::updatePortButton(int port)
  */
 void CtrlConfigWindow::updatePortSettings(int port)
 {
-	if (port < 0 || port >= CTRL_CFG_MAX_PORTS)
+	if (port < CtrlConfig::PORT_1 || port >= CtrlConfig::PORT_MAX)
 		return;
 	
 	// Update the port settings.
@@ -497,33 +516,48 @@ void CtrlConfigWindow::updatePortSettings(int port)
 
 void CtrlConfigWindow::selectPort(int port)
 {
-	if (port < 0 || port >= CTRL_CFG_MAX_PORTS)
+	if (port < CtrlConfig::PORT_1 || port >= CtrlConfig::PORT_MAX)
 		return;
 	
-	// Check if this is a TeamPlayer port.
+	// Check if this is a Team Player port.
 	bool isTP = false;
-	if (port >= CTRL_CFG_PORT_TP1A && port < (CTRL_CFG_PORT_TP1A+4))
+	switch (port)
 	{
-		// TeamPlayer on Port 1.
-		if (m_devType[0] == LibGens::IoBase::IOT_TEAMPLAYER)
-			isTP = true;
+		// Team Player, Port 1.
+		case CtrlConfig::PORT_TP1A:
+		case CtrlConfig::PORT_TP1B:
+		case CtrlConfig::PORT_TP1C:
+		case CtrlConfig::PORT_TP1D:
+			if (m_devType[0] == LibGens::IoBase::IOT_TEAMPLAYER)
+				isTP = true;
+			break;
+		
+		// Team Player, Port 2.
+		case CtrlConfig::PORT_TP2A:
+		case CtrlConfig::PORT_TP2B:
+		case CtrlConfig::PORT_TP2C:
+		case CtrlConfig::PORT_TP2D:
+			if (m_devType[1] == LibGens::IoBase::IOT_TEAMPLAYER)
+				isTP = true;
+			break;
+		
+		// 4-Way Play.
+		case CtrlConfig::PORT_4WPA:
+		case CtrlConfig::PORT_4WPB:
+		case CtrlConfig::PORT_4WPC:
+		case CtrlConfig::PORT_4WPD:
+			if (m_devType[0] == LibGens::IoBase::IOT_4WP_SLAVE &&
+			    m_devType[1] == LibGens::IoBase::IOT_4WP_MASTER)
+			{
+				isTP = true;
+			}
+			break;
+		
+		default:
+			// Other port.
+			break;
 	}
-	else if (port >= CTRL_CFG_PORT_TP2A && port < (CTRL_CFG_PORT_TP2A+4))
-	{
-		// TeamPlayer on Port 2.
-		if (m_devType[1] == LibGens::IoBase::IOT_TEAMPLAYER)
-			isTP = true;
-	}
-	else if (port >= CTRL_CFG_PORT_4WPA && port < (CTRL_CFG_PORT_4WPA+4))
-	{
-		// EA 4-Way Play.
-		if (m_devType[0] == LibGens::IoBase::IOT_4WP_SLAVE &&
-		    m_devType[1] == LibGens::IoBase::IOT_4WP_MASTER)
-		{
-			isTP = true;
-		}
-	}
-	
+
 	// Device setting is valid.
 	
 	// Make sure the dropdown index is set properly to reduce flicker.
@@ -614,31 +648,31 @@ void CtrlConfigWindow::on_actionPort2_toggled(bool checked)
 	{ if (checked) selectPort(1); }
 
 void CtrlConfigWindow::on_actionPortTP1A_toggled(bool checked)
-	{ if (checked) selectPort(CTRL_CFG_PORT_TP1A); }
+	{ if (checked) selectPort(CtrlConfig::PORT_TP1A); }
 void CtrlConfigWindow::on_actionPortTP1B_toggled(bool checked)
-	{ if (checked) selectPort(CTRL_CFG_PORT_TP1A+1); }
+	{ if (checked) selectPort(CtrlConfig::PORT_TP1B); }
 void CtrlConfigWindow::on_actionPortTP1C_toggled(bool checked)
-	{ if (checked) selectPort(CTRL_CFG_PORT_TP1A+2); }
+	{ if (checked) selectPort(CtrlConfig::PORT_TP1C); }
 void CtrlConfigWindow::on_actionPortTP1D_toggled(bool checked)
-	{ if (checked) selectPort(CTRL_CFG_PORT_TP1A+3); }
+	{ if (checked) selectPort(CtrlConfig::PORT_TP1D); }
 
 void CtrlConfigWindow::on_actionPortTP2A_toggled(bool checked)
-	{ if (checked) selectPort(CTRL_CFG_PORT_TP2A); }
+	{ if (checked) selectPort(CtrlConfig::PORT_TP2A); }
 void CtrlConfigWindow::on_actionPortTP2B_toggled(bool checked)
-	{ if (checked) selectPort(CTRL_CFG_PORT_TP2A+1); }
+	{ if (checked) selectPort(CtrlConfig::PORT_TP2B); }
 void CtrlConfigWindow::on_actionPortTP2C_toggled(bool checked)
-	{ if (checked) selectPort(CTRL_CFG_PORT_TP2A+2); }
+	{ if (checked) selectPort(CtrlConfig::PORT_TP2C); }
 void CtrlConfigWindow::on_actionPortTP2D_toggled(bool checked)
-	{ if (checked) selectPort(CTRL_CFG_PORT_TP2A+3); }
+	{ if (checked) selectPort(CtrlConfig::PORT_TP2D); }
 
 void CtrlConfigWindow::on_actionPort4WPA_toggled(bool checked)
-	{ if (checked) selectPort(CTRL_CFG_PORT_4WPA); }
+	{ if (checked) selectPort(CtrlConfig::PORT_4WPA); }
 void CtrlConfigWindow::on_actionPort4WPB_toggled(bool checked)
-	{ if (checked) selectPort(CTRL_CFG_PORT_4WPA+1); }
+	{ if (checked) selectPort(CtrlConfig::PORT_4WPB); }
 void CtrlConfigWindow::on_actionPort4WPC_toggled(bool checked)
-	{ if (checked) selectPort(CTRL_CFG_PORT_4WPA+2); }
+	{ if (checked) selectPort(CtrlConfig::PORT_4WPC); }
 void CtrlConfigWindow::on_actionPort4WPD_toggled(bool checked)
-	{ if (checked) selectPort(CTRL_CFG_PORT_4WPA+3); }
+	{ if (checked) selectPort(CtrlConfig::PORT_4WPD); }
 
 
 /**
@@ -650,7 +684,7 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 	if (isCboDeviceLocked())
 		return;
 	
-	if (m_selPort < 0 || m_selPort >= CTRL_CFG_MAX_PORTS)
+	if (m_selPort < CtrlConfig::PORT_1 || m_selPort >= CtrlConfig::PORT_MAX)
 		return;
 	
 	// Check if the device type has been changed.
@@ -666,7 +700,7 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 	}
 	
 	// Check for 4WP.
-	if (m_selPort == 0)
+	if (m_selPort == CtrlConfig::PORT_1)
 	{
 		// Port 1.
 		if (index == LibGens::IoBase::IOT_4WP_MASTER)
@@ -677,10 +711,10 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 			m_devType[m_selPort] = LibGens::IoBase::IOT_4WP_SLAVE;
 			
 			// Make sure Port 2 is set to 4WP MASTER.
-			if (m_devType[1] != LibGens::IoBase::IOT_4WP_MASTER)
+			if (m_devType[CtrlConfig::PORT_2] != LibGens::IoBase::IOT_4WP_MASTER)
 			{
-				m_devType[1] = LibGens::IoBase::IOT_4WP_MASTER;
-				updatePortButton(1);
+				m_devType[CtrlConfig::PORT_2] = LibGens::IoBase::IOT_4WP_MASTER;
+				updatePortButton(CtrlConfig::PORT_2);
 			}
 		}
 		else
@@ -689,16 +723,16 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 			m_devType[m_selPort] = (LibGens::IoBase::IoType)index;
 			
 			// Check if Port 2 is set to 4WP MASTER. (or 4WP SLAVE for sanity check)
-			if (m_devType[1] == LibGens::IoBase::IOT_4WP_MASTER ||
-			    m_devType[1] == LibGens::IoBase::IOT_4WP_SLAVE)
+			if (m_devType[CtrlConfig::PORT_2] == LibGens::IoBase::IOT_4WP_MASTER ||
+			    m_devType[CtrlConfig::PORT_2] == LibGens::IoBase::IOT_4WP_SLAVE)
 			{
 				// Port 2 is set to 4WP MASTER. Unset it.
-				m_devType[1] = LibGens::IoBase::IOT_NONE;
-				updatePortButton(1);
+				m_devType[CtrlConfig::PORT_2] = LibGens::IoBase::IOT_NONE;
+				updatePortButton(CtrlConfig::PORT_2);
 			}
 		}
 	}
-	else if (m_selPort == 1)
+	else if (m_selPort == CtrlConfig::PORT_2)
 	{
 		// Port 2.
 		if (index == LibGens::IoBase::IOT_4WP_MASTER)
@@ -707,10 +741,10 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 			m_devType[m_selPort] = LibGens::IoBase::IOT_4WP_MASTER;
 			
 			// Make sure Port 1 is set to 4WP SLAVE.
-			if (m_devType[0] != LibGens::IoBase::IOT_4WP_SLAVE)
+			if (m_devType[CtrlConfig::PORT_1] != LibGens::IoBase::IOT_4WP_SLAVE)
 			{
-				m_devType[0] = LibGens::IoBase::IOT_4WP_SLAVE;
-				updatePortButton(0);
+				m_devType[CtrlConfig::PORT_1] = LibGens::IoBase::IOT_4WP_SLAVE;
+				updatePortButton(CtrlConfig::PORT_1);
 			}
 		}
 		else
@@ -719,12 +753,12 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 			m_devType[m_selPort] = (LibGens::IoBase::IoType)index;
 			
 			// Check if Port 1 is set to 4WP SLAVE. (or 4WP MASTER for sanity check)
-			if (m_devType[0] == LibGens::IoBase::IOT_4WP_SLAVE ||
-			    m_devType[0] == LibGens::IoBase::IOT_4WP_MASTER)
+			if (m_devType[CtrlConfig::PORT_1] == LibGens::IoBase::IOT_4WP_SLAVE ||
+			    m_devType[CtrlConfig::PORT_1] == LibGens::IoBase::IOT_4WP_MASTER)
 			{
 				// Port 1 is set to 4WP SLAVE. Unset it.
-				m_devType[0] = LibGens::IoBase::IOT_NONE;
-				updatePortButton(0);
+				m_devType[CtrlConfig::PORT_1] = LibGens::IoBase::IOT_NONE;
+				updatePortButton(CtrlConfig::PORT_1);
 			}
 		}
 	}

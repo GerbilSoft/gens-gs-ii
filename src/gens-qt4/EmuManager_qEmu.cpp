@@ -490,6 +490,9 @@ void EmuManager::processQEmuRequest(void)
  */
 void EmuManager::doCtrlChange(int port, LibGens::IoBase::IoType type)
 {
+	// Disabled for now.
+	return;
+	
 	// TODO: Teamplayer/4WP support.
 	// NOTE: Only works if a ROM is loaded.
 	// TODO: Replace this with standard Controller Configuration.

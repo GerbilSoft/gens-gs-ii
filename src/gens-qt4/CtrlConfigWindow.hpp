@@ -27,25 +27,15 @@
 #include <QtGui/QMainWindow>
 #include "ui_CtrlConfigWindow.h"
 
+// Controller Configuration class.
+#include "Config/CtrlConfig.hpp"
+
 // Qt includes and classes.
 #include <QtGui/QIcon>
 class QActionGroup;
 
 // LibGens includes.
 #include "libgens/IO/IoBase.hpp"
-
-/**
- * Controller Configuration ports.
- * 0: Port 1
- * 1: Port 2
- * 2-5: Ports TP1A-TP1D
- * 6-9: Ports TP2A-TP2D
- * 10-13: Ports 4WPA-4WPD
- */
-#define CTRL_CFG_MAX_PORTS 14
-#define CTRL_CFG_PORT_TP1A 2
-#define CTRL_CFG_PORT_TP2A 6
-#define CTRL_CFG_PORT_4WPA 10
 
 // Toolbar separators.
 #define CTRL_CFG_TBSEP_TP1 0
@@ -73,7 +63,7 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		void changeEvent(QEvent *event);
 		
 		// Internal controller settings.
-		LibGens::IoBase::IoType m_devType[CTRL_CFG_MAX_PORTS];
+		LibGens::IoBase::IoType m_devType[CtrlConfig::PORT_MAX];
 		
 		QActionGroup *m_actgrpSelPort;
 		

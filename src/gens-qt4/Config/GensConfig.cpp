@@ -273,6 +273,11 @@ int GensConfigPrivate::reload(const QString& filename)
 	keyConfig.load(settings);
 	settings.endGroup();
 	
+	/** Controller configuration. **/
+	settings.beginGroup(QLatin1String("Controllers"));
+	q->m_ctrlConfig->load(settings);
+	settings.endGroup();
+	
 	// Finished loading settings.
 	// NOTE: Caller must call emitAll() for settings to take effect.
 	return 0;
@@ -404,6 +409,11 @@ int GensConfigPrivate::save(const QString& filename)
 	keyConfig.save(settings);
 	settings.endGroup();
 	
+	/** Controller configuration. **/
+	settings.beginGroup(QLatin1String("Controllers"));
+	q->m_ctrlConfig->save(settings);
+	settings.endGroup();
+	
 	// Finished saving settings.
 	return 0;
 }
@@ -413,8 +423,10 @@ int GensConfigPrivate::save(const QString& filename)
  * GensConfig functions. *
  *************************/
 
-GensConfig::GensConfig()
-	: d(new GensConfigPrivate(this))
+GensConfig::GensConfig(QObject *parent)
+	: QObject(parent)
+	, d(new GensConfigPrivate(this))
+	, m_ctrlConfig(new CtrlConfig(this))
 {
 	// Determine the configuration path.
 	// TODO: Portable mode.

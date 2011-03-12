@@ -41,7 +41,8 @@
 #include "libgens/IO/Io2Button.hpp"
 #include "libgens/IO/IoMegaMouse.hpp"
 
-#define MAX_CFG_BTNS 12
+// Controller configuration.
+#include "Config/CtrlConfig.hpp"
 
 namespace GensQt4
 {
@@ -67,9 +68,9 @@ class GensCtrlCfgWidgetPrivate
 		LibGens::IoBase::IoType m_ioType;
 		
 		QGridLayout *m_layout;
-		QLabel *m_lblButtonName[MAX_CFG_BTNS];
-		QLabel *m_lblKeyDisplay[MAX_CFG_BTNS];
-		GensCtrlKeyWidget *m_btnCfg[MAX_CFG_BTNS];
+		QLabel *m_lblButtonName[CtrlConfig::MAX_BTNS];
+		QLabel *m_lblKeyDisplay[CtrlConfig::MAX_BTNS];
+		GensCtrlKeyWidget *m_btnCfg[CtrlConfig::MAX_BTNS];
 		QSpacerItem *m_vspcCfg;
 		
 		// "Change All", "Clear All".
@@ -100,7 +101,7 @@ GensCtrlCfgWidgetPrivate::~GensCtrlCfgWidgetPrivate()
 {
 	// Delete all the labels and buttons.
 	// TODO: Is this necessary?
-	for (size_t i = 0; i < MAX_CFG_BTNS; i++)
+	for (int i = 0; i < CtrlConfig::MAX_BTNS; i++)
 	{
 		delete m_lblButtonName[i];
 		delete m_lblKeyDisplay[i];
@@ -118,8 +119,8 @@ void GensCtrlCfgWidgetPrivate::init(void)
 	QFont fntMonospace(QLatin1String("Monospace"));
 	fntMonospace.setStyleHint(QFont::TypeWriter);
 	
-	// Add MAX_CFG_BTNS items to the grid layout.
-	for (size_t i = 0; i < MAX_CFG_BTNS; i++)
+	// Add CtrlConfig::MAX_BTNS items to the grid layout.
+	for (int i = 0; i < CtrlConfig::MAX_BTNS; i++)
 	{
 		m_lblButtonName[i] = new QLabel();
 		m_lblButtonName[i]->setVisible(false);
@@ -137,12 +138,12 @@ void GensCtrlCfgWidgetPrivate::init(void)
 	
 	// Add a vertical spacer at the bottom of the layout.
 	m_vspcCfg = new QSpacerItem(128, 128, QSizePolicy::Expanding, QSizePolicy::Expanding);
-	m_layout->addItem(m_vspcCfg, MAX_CFG_BTNS, 1, 1, 1, Qt::AlignCenter);
+	m_layout->addItem(m_vspcCfg, CtrlConfig::MAX_BTNS, 1, 1, 1, Qt::AlignCenter);
 	
 	// Create the HBox.
 	hboxOptions = new QHBoxLayout();
 	hboxOptions->setContentsMargins(0, 8, 0, 0); // TODO: Use style default for Top margin.
-	m_layout->addLayout(hboxOptions, MAX_CFG_BTNS+1, 0, 1, 3, Qt::AlignCenter);
+	m_layout->addLayout(hboxOptions, CtrlConfig::MAX_BTNS+1, 0, 1, 3, Qt::AlignCenter);
 	
 	// Add the "Change All" and "Clear All" buttons.
 	// TODO: Icons.
@@ -222,8 +223,8 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoBase::IoType newIoType)
 	}
 	
 	// Make sure we don't exceed the maximum number of buttons.
-	if (numButtons > MAX_CFG_BTNS)
-		numButtons = MAX_CFG_BTNS;
+	if (numButtons > CtrlConfig::MAX_BTNS)
+		numButtons = CtrlConfig::MAX_BTNS;
 	
 	// Show the buttons, in logical button order.
 	QString sBtnLabel;
@@ -243,7 +244,7 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoBase::IoType newIoType)
 	}
 	
 	// Hide other buttons.
-	for (int i = numButtons; i < MAX_CFG_BTNS; i++)
+	for (int i = numButtons; i < CtrlConfig::MAX_BTNS; i++)
 	{
 		m_lblButtonName[i]->setVisible(false);
 		m_lblKeyDisplay[i]->setVisible(false);
@@ -351,7 +352,7 @@ QString GensCtrlCfgWidgetPrivate::ButtonName_l(LibGens::IoBase::ButtonName_t but
  */
 void GensCtrlCfgWidgetPrivate::clearAllButtons(void)
 {
-	for (int i = 0; i < MAX_CFG_BTNS; i++)
+	for (int i = 0; i < CtrlConfig::MAX_BTNS; i++)
 		m_btnCfg[i]->clearKey();
 }
 
