@@ -367,8 +367,8 @@ void CtrlConfig::updatePort1(LibGens::IoBase **ppOldPort) const
 		newPort = oldPort;
 	}
 	
-	// Assign the new keymap.
-	// TODO
+	// Set the new keymap.
+	newPort->setKeymap(&d->ctrlKeys[PORT_1][0], newPort->numButtons());
 	
 	// Update the port variable.
 	*ppOldPort = newPort;
