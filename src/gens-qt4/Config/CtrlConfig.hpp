@@ -95,7 +95,7 @@ class CtrlConfig : public QObject
 		 */
 		int save(QSettings& settings);
 		
-		LibGens::IoBase *updatePort1(LibGens::IoBase *oldPort) const;
+		void updatePort1(LibGens::IoBase **ppOldPort) const;
 	
 	private:
 		friend class CtrlConfigPrivate;

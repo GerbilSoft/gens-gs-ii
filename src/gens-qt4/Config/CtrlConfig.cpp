@@ -333,12 +333,12 @@ int CtrlConfig::save(QSettings& settings)
 
 /**
  * updatePort1(): Update controller port 1.
- * @param oldPort Old port, or NULL if this is a new port.
- * If oldPort is specified, oldPort may be deleted by this function.
- * @return New port, or updated old port.
+ * @param ppOldPort Pointer to IoBase variable, possibly containing an IoBase object.
+ * ppOldPort may be updated with the address to the new IoBase object.
  */
-LibGens::IoBase *CtrlConfig::updatePort1(LibGens::IoBase *oldPort) const
+void CtrlConfig::updatePort1(LibGens::IoBase **ppOldPort) const
 {
+	LibGens::IoBase *oldPort = *ppOldPort;
 	LibGens::IoBase *newPort;
 	// TODO: Team Player / 4WP support.
 	
@@ -377,7 +377,8 @@ LibGens::IoBase *CtrlConfig::updatePort1(LibGens::IoBase *oldPort) const
 	// Assign the new keymap.
 	// TODO
 	
-	return newPort;
+	// Update the port variable.
+	*ppOldPort = newPort;
 }
 
 }
