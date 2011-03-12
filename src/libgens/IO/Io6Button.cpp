@@ -33,24 +33,9 @@ Io6Button::Io6Button(const IoBase *other)
 	m_counter = 0;
 	m_scanlines = 0;
 	
-	// Resize the keymap.
-	m_keyMap.resize(numButtons());
-	
-	// Create the default keymap.
-	// TODO: Initialize elsewhere.
+	// Initialize the keymap.
 	// TODO: Copy from other controller?
-	m_keyMap[BTNI_UP]	= KEYV_UP;
-	m_keyMap[BTNI_DOWN]	= KEYV_DOWN;
-	m_keyMap[BTNI_LEFT]	= KEYV_LEFT;
-	m_keyMap[BTNI_RIGHT]	= KEYV_RIGHT;
-	m_keyMap[BTNI_B]	= KEYV_s;
-	m_keyMap[BTNI_C]	= KEYV_d;
-	m_keyMap[BTNI_A]	= KEYV_a;
-	m_keyMap[BTNI_START]	= KEYV_RETURN;
-	m_keyMap[BTNI_X]	= KEYV_q;
-	m_keyMap[BTNI_Y]	= KEYV_w;
-	m_keyMap[BTNI_Z]	= KEYV_e;
-	m_keyMap[BTNI_MODE]	= KEYV_RSHIFT;
+	m_keyMap.resize(numButtons(), 0);
 }
 
 

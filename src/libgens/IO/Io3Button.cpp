@@ -29,20 +29,9 @@ namespace LibGens
 Io3Button::Io3Button(const IoBase *other)
 	: IoBase(other)
 {
-	// Resize the keymap.
-	m_keyMap.resize(numButtons());
-	
-	// Create the default keymap.
-	// TODO: Initialize elsewhere.
+	// Initialize the keymap.
 	// TODO: Copy from other controller?
-	m_keyMap[BTNI_UP]	= KEYV_UP;
-	m_keyMap[BTNI_DOWN]	= KEYV_DOWN;
-	m_keyMap[BTNI_LEFT]	= KEYV_LEFT;
-	m_keyMap[BTNI_RIGHT]	= KEYV_RIGHT;
-	m_keyMap[BTNI_B]	= KEYV_s;
-	m_keyMap[BTNI_C]	= KEYV_d;
-	m_keyMap[BTNI_A]	= KEYV_a;
-	m_keyMap[BTNI_START]	= KEYV_RETURN;
+	m_keyMap.resize(numButtons(), 0);
 }
 
 

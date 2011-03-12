@@ -29,18 +29,9 @@ namespace LibGens
 Io2Button::Io2Button(const IoBase *other)
 	: IoBase(other)
 {
-	// Resize the keymap.
-	m_keyMap.resize(numButtons());
-	
-	// Create the default keymap.
-	// TODO: Initialize elsewhere.
+	// Initialize the keymap.
 	// TODO: Copy from other controller?
-	m_keyMap[BTNI_UP]	= KEYV_UP;
-	m_keyMap[BTNI_DOWN]	= KEYV_DOWN;
-	m_keyMap[BTNI_LEFT]	= KEYV_LEFT;
-	m_keyMap[BTNI_RIGHT]	= KEYV_RIGHT;
-	m_keyMap[BTNI_1]	= KEYV_s;
-	m_keyMap[BTNI_2]	= KEYV_d;
+	m_keyMap.resize(numButtons(), 0);
 }
 
 
