@@ -385,18 +385,37 @@ GensKey_t KeyHandlerQt::QKeyEventToKeyVal(QKeyEvent *event)
 		// TODO: Optimize this to use lookup tables instead of switch/case.
 		switch (event->key())
 		{
+#ifdef Q_WS_MAC
+			case Qt::Key_0: case Qt::Key_Insert:	return KEYV_KP0;
+			case Qt::Key_1: case Qt::Key_End:	return KEYV_KP1;
+			case Qt::Key_2:				return KEYV_KP2;
+			case Qt::Key_3: case Qt::Key_PageDown:	return KEYV_KP3;
+			case Qt::Key_4: 			return KEYV_KP4;
+			// TODO: I don't think Qt::Key_Clear is needed here...
+			case Qt::Key_5: case Qt::Key_Clear:	return KEYV_KP5;
+			case Qt::Key_6: 			return KEYV_KP6;
+			case Qt::Key_7: case Qt::Key_Home:	return KEYV_KP7;
+			case Qt::Key_8:				return KEYV_KP8;
+			case Qt::Key_9: case Qt::Key_PageUp:	return KEYV_KP9;
+			
+			// Mac OS X: Arrow keys map to the numeric keypad.
+			case Qt::Key_Down:			return KEYV_DOWN;
+			case Qt::Key_Left:			return KEYV_LEFT;
+			case Qt::Key_Right:			return KEYV_RIGHT;
+			case Qt::Key_Up:			return KEYV_UP;
+#else /* !Q_WS_MAC */
+			// Win32, Linux: Arrows map normally.
 			case Qt::Key_0: case Qt::Key_Insert:	return KEYV_KP0;
 			case Qt::Key_1: case Qt::Key_End:	return KEYV_KP1;
 			case Qt::Key_2: case Qt::Key_Down:	return KEYV_KP2;
 			case Qt::Key_3: case Qt::Key_PageDown:	return KEYV_KP3;
 			case Qt::Key_4: case Qt::Key_Left:	return KEYV_KP4;
-			// TODO: Qt::Key_Clear maps to '5' with numlock off on Linux.
-			// Verify how this functions on Mac OS X.
 			case Qt::Key_5: case Qt::Key_Clear:	return KEYV_KP5;
 			case Qt::Key_6: case Qt::Key_Right:	return KEYV_KP6;
 			case Qt::Key_7: case Qt::Key_Home:	return KEYV_KP7;
 			case Qt::Key_8: case Qt::Key_Up:	return KEYV_KP8;
 			case Qt::Key_9: case Qt::Key_PageUp:	return KEYV_KP9;
+#endif /* Q_WS_MAC */
 			case Qt::Key_Period: case Qt::Key_Delete: return KEYV_KP_PERIOD;
 			case Qt::Key_Slash:			return KEYV_KP_DIVIDE;
 			case Qt::Key_Asterisk:			return KEYV_KP_MULTIPLY;
