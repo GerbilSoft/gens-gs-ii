@@ -241,28 +241,21 @@ int CtrlConfigPrivate::save(QSettings& settings)
 		QString keyData;
 		QString keyHex;
 		const int numButtons = NumButtons(ctrlTypes[i]);
-		if (numButtons <= 0)
+		
+		// Write the buttons to the configuration file.
+		for (int j = 0; j < qMin(numButtons, CtrlConfig::MAX_BTNS); j++)
 		{
-			// No buttons available for this device.
-			settings.remove(portName + QLatin1String("/keys"));
+			if (j > 0)
+				keyData += QChar(chrKeyValSep);
+			keyHex = QString::number(ctrlKeys[i][j], 16);
+			keyData += QLatin1String("0x");
+			if (ctrlKeys[i][j] <= 0xFFFF)
+				keyData += keyHex.rightJustified(4, QChar(L'0'));
+			else
+				keyData += keyHex.rightJustified(8, QChar(L'0'));
 		}
-		else
-		{
-			// Write the buttons to the configuration file.
-			for (int j = 0; j < qMin(numButtons, CtrlConfig::MAX_BTNS); j++)
-			{
-				if (j > 0)
-					keyData += QChar(chrKeyValSep);
-				keyHex = QString::number(ctrlKeys[i][j], 16);
-				keyData += QLatin1String("0x");
-				if (ctrlKeys[i][j] <= 0xFFFF)
-					keyData += keyHex.rightJustified(4, QChar(L'0'));
-				else
-					keyData += keyHex.rightJustified(8, QChar(L'0'));
-			}
-			
-			settings.setValue(portName + QLatin1String("/keys"), keyData);
-		}
+		
+		settings.setValue(portName + QLatin1String("/keys"), keyData);
 	}
 	
 	// Controller configuration saved.
