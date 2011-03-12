@@ -76,6 +76,10 @@ class CtrlConfigPrivate
 		
 		// Key value separator in the config file.
 		static const QChar chrKeyValSep;
+		
+		// Default controller configuration.
+		static const LibGens::IoBase::IoType Def_CtrlTypes[CtrlConfig::PORT_MAX];
+		static const GensKey_t Def_CtrlKeys[CtrlConfig::PORT_MAX][CtrlConfig::MAX_BTNS];
 };
 
 /********************************
@@ -84,6 +88,72 @@ class CtrlConfigPrivate
 
 // Key value separator in the config file.
 const QChar CtrlConfigPrivate::chrKeyValSep = QChar(L':');
+
+// Default controller configuration.
+const LibGens::IoBase::IoType CtrlConfigPrivate::Def_CtrlTypes[CtrlConfig::PORT_MAX] =
+{
+	// System controller ports.
+	LibGens::IoBase::IOT_6BTN,	// Port 1
+	LibGens::IoBase::IOT_3BTN,	// Port 2
+	
+	// Team Player, Port 1.
+	LibGens::IoBase::IOT_NONE,	// Port TP1A
+	LibGens::IoBase::IOT_NONE,	// Port TP1B
+	LibGens::IoBase::IOT_NONE,	// Port TP1C
+	LibGens::IoBase::IOT_NONE,	// Port TP1D
+	
+	// Team Player, Port 2.
+	LibGens::IoBase::IOT_NONE,	// Port TP2A
+	LibGens::IoBase::IOT_NONE,	// Port TP2B
+	LibGens::IoBase::IOT_NONE,	// Port TP2C
+	LibGens::IoBase::IOT_NONE,	// Port TP2D
+	
+	// 4-Way Play.
+	LibGens::IoBase::IOT_NONE,	// Port 4WPA
+	LibGens::IoBase::IOT_NONE,	// Port 4WPB
+	LibGens::IoBase::IOT_NONE,	// Port 4WPC
+	LibGens::IoBase::IOT_NONE,	// Port 4WPD
+};
+
+const GensKey_t CtrlConfigPrivate::Def_CtrlKeys[CtrlConfig::PORT_MAX][CtrlConfig::MAX_BTNS] =
+{
+	// Port 1
+	// NOTE: Both shift keys are mapped to LSHIFT on Mac OS X.
+	{KEYV_UP, KEYV_DOWN, KEYV_LEFT, KEYV_RIGHT,
+	KEYV_s, KEYV_d, KEYV_a, KEYV_RETURN,
+	KEYV_q, KEYV_w, KEYV_e,
+#ifdef Q_WS_MAC
+	KEYV_LSHIFT
+#else
+	KEYV_RSHIFT},
+#endif
+	
+	// Port 2 (TODO: This needs to be improved!)
+	{KEYV_i, KEYV_k, KEYV_j, KEYV_l,
+	KEYV_r, KEYV_t, KEYV_y, KEYV_u,
+	0, 0, 0, 0},
+	
+	// Other ports are left undefined.
+	
+	// Team Player, Port 1.
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP1A
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP1B
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP1C
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP1D
+	
+	// Team Player, Port 2.
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP2A
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP2B
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP2C
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP2D
+	
+	// 4-Way Play.
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port 4WPA
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port 4WPB
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port 4WPC
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port 4WPD
+};
+
 
 CtrlConfigPrivate::CtrlConfigPrivate(CtrlConfig* q)
 	: q(q)
@@ -194,25 +264,32 @@ int CtrlConfigPrivate::load(const QSettings& settings)
 		// Get the controller type.
 		// TODO: Allow ASCII controller types?
 		const QString portName = PortName((CtrlConfig::CtrlPort_t)i);
-		ctrlTypes[i] = (LibGens::IoBase::IoType)
-				(settings.value(portName + QLatin1String("/type"), LibGens::IoBase::IOT_NONE).toInt());
-		if (ctrlTypes[i] < LibGens::IoBase::IOT_NONE ||
-		    ctrlTypes[i] >= LibGens::IoBase::IOT_MAX)
+		int ctrlType_tmp = (LibGens::IoBase::IoType)
+				(settings.value(portName + QLatin1String("/type"), -1).toInt());
+		if (ctrlType_tmp < LibGens::IoBase::IOT_NONE ||
+		    ctrlType_tmp >= LibGens::IoBase::IOT_MAX)
 		{
-			ctrlTypes[i] = LibGens::IoBase::IOT_NONE;
+			// No controller information.
+			// Use the default.
+			ctrlTypes[i] = Def_CtrlTypes[i];
+			memcpy(ctrlKeys[i], Def_CtrlKeys[i], sizeof(ctrlKeys[i]));
 		}
-		
-		// Clear the controller keys.
-		memset(ctrlKeys[i], 0x00, sizeof(ctrlKeys[i]));
-		
-		// Read the controller keys from the configuration file.
-		const QStringList keyData =
-			settings.value(portName + QLatin1String("/keys"), QString()).toString().split(chrKeyValSep);
-		
-		// Copy the controller keys into ctrlKeys[].
-		for (int j = qMin(keyData.size(), NumButtons(ctrlTypes[i])) - 1; j >= 0; j--)
+		else
 		{
-			ctrlKeys[i][j] = keyData.at(j).toUInt(NULL, 0);
+			// Controller information specified.
+			
+			// Clear the controller keys.
+			memset(ctrlKeys[i], 0x00, sizeof(ctrlKeys[i]));
+			
+			// Read the controller keys from the configuration file.
+			const QStringList keyData =
+				settings.value(portName + QLatin1String("/keys"), QString()).toString().split(chrKeyValSep);
+			
+			// Copy the controller keys into ctrlKeys[].
+			for (int j = qMin(keyData.size(), NumButtons(ctrlTypes[i])) - 1; j >= 0; j--)
+			{
+				ctrlKeys[i][j] = keyData.at(j).toUInt(NULL, 0);
+			}
 		}
 	}
 	
