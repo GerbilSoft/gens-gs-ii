@@ -95,7 +95,13 @@ class CtrlConfig : public QObject
 		 */
 		int save(QSettings& settings);
 		
-		void updatePort1(LibGens::IoBase **ppOldPort) const;
+		/**
+		 * updateSysPort(): Update a system controller port.
+		 * @param ppOldPort Pointer to IoBase variable, possibly containing an IoBase object.
+		 * ppOldPort may be updated with the address to the new IoBase object.
+		 * @param port Port number.
+		 */
+		void updateSysPort(LibGens::IoBase **ppOldPort, int port) const;
 	
 	private:
 		friend class CtrlConfigPrivate;

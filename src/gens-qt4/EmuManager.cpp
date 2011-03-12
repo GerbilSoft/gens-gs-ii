@@ -386,7 +386,8 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	m_frames = 0;
 	
 	// Initialize controllers.
-	gqt4_config->m_ctrlConfig->updatePort1(&gqt4_emuContext->m_port1);
+	gqt4_config->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port1, CtrlConfig::PORT_1);
+	gqt4_config->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port2, CtrlConfig::PORT_2);
 	
 	// Start the emulation thread.
 	m_paused.data = 0;
@@ -660,8 +661,9 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	// Check for controller configuration updates.
 	if (gqt4_config->m_ctrlConfig->isDirty())
 	{
-		// Update the port.
-		gqt4_config->m_ctrlConfig->updatePort1(&gqt4_emuContext->m_port1);
+		// Update the controller ports.
+		gqt4_config->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port1, CtrlConfig::PORT_1);
+		gqt4_config->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port2, CtrlConfig::PORT_2);
 	}
 	
 	// Update the GensQGLWidget.

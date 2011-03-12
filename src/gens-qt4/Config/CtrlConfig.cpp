@@ -403,20 +403,25 @@ int CtrlConfig::save(QSettings& settings)
 
 
 /**
- * updatePort1(): Update controller port 1.
+ * CtrlConfig::updateSysPort(): Update a system controller port.
  * @param ppOldPort Pointer to IoBase variable, possibly containing an IoBase object.
  * ppOldPort may be updated with the address to the new IoBase object.
+ * @param port Port number.
  */
-void CtrlConfig::updatePort1(LibGens::IoBase **ppOldPort) const
+void CtrlConfig::updateSysPort(LibGens::IoBase **ppOldPort, int port) const
 {
+	// Only system controller ports are supported here.
+	if (port < PORT_1 || port > PORT_2)
+		return;
+	
 	LibGens::IoBase *oldPort = *ppOldPort;
 	LibGens::IoBase *newPort;
 	// TODO: Team Player / 4WP support.
 	
-	if (!oldPort || oldPort->devType() != d->ctrlTypes[PORT_1])
+	if (!oldPort || oldPort->devType() != d->ctrlTypes[port])
 	{
 		// New port needs to be created.
-		switch (d->ctrlTypes[PORT_1])
+		switch (d->ctrlTypes[port])
 		{
 			default:
 			case LibGens::IoBase::IOT_NONE:
@@ -446,7 +451,7 @@ void CtrlConfig::updatePort1(LibGens::IoBase **ppOldPort) const
 	}
 	
 	// Set the new keymap.
-	newPort->setKeymap(&d->ctrlKeys[PORT_1][0], newPort->numButtons());
+	newPort->setKeymap(&d->ctrlKeys[port][0], newPort->numButtons());
 	
 	// Update the port variable.
 	*ppOldPort = newPort;
