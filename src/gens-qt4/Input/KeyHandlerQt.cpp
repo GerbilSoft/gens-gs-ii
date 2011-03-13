@@ -274,12 +274,12 @@ bool KeyHandlerQt::devHandler(GensKey_t key)
 		// - Beginning of frame.
 		// - Before VBlank.
 		// - End of frame.
-		ms_KeyPress[KEYV_LSHIFT] =	(!!(GetAsyncKeyState(VK_LSHIFT) & 0x8000));
-		ms_KeyPress[KEYV_RSHIFT] =	(!!(GetAsyncKeyState(VK_RSHIFT) & 0x8000));
-		ms_KeyPress[KEYV_LCTRL] =	(!!(GetAsyncKeyState(VK_LCONTROL) & 0x8000));
-		ms_KeyPress[KEYV_RCTRL] =	(!!(GetAsyncKeyState(VK_RCONTROL) & 0x8000));
-		ms_KeyPress[KEYV_LALT] =	(!!(GetAsyncKeyState(VK_LMENU) & 0x8000));
-		ms_KeyPress[KEYV_RALT] =	(!!(GetAsyncKeyState(VK_RMENU) & 0x8000));
+		m_keyPress[KEYV_LSHIFT] = (!!(GetAsyncKeyState(VK_LSHIFT) & 0x8000));
+		m_keyPress[KEYV_RSHIFT] = (!!(GetAsyncKeyState(VK_RSHIFT) & 0x8000));
+		m_keyPress[KEYV_LCTRL]	= (!!(GetAsyncKeyState(VK_LCONTROL) & 0x8000));
+		m_keyPress[KEYV_RCTRL]	= (!!(GetAsyncKeyState(VK_RCONTROL) & 0x8000));
+		m_keyPress[KEYV_LALT]	= (!!(GetAsyncKeyState(VK_LMENU) & 0x8000));
+		m_keyPress[KEYV_RALT]	= (!!(GetAsyncKeyState(VK_RMENU) & 0x8000));
 #endif
 		// Update event returns true on success.
 		return true;
