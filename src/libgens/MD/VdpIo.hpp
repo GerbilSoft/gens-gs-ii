@@ -164,26 +164,6 @@ class VdpIo
 		static int HInt_Counter;
 		
 		/**
-		 * VDP_Ctrl: VDP control struct.
-		 */
-		struct VDP_Ctrl_t
-		{
-			unsigned int Flag;	// Data latch.
-			union Data_t
-			{
-				uint16_t w[2];	// Control words.
-				uint32_t d;	// Control DWORD. (TODO: Endianness conversion.)
-			};
-			Data_t Data;
-			unsigned int Write;
-			unsigned int Access;	// Uses VDEST_t values to determine VDP destination.
-			unsigned int Address;
-			unsigned int DMA_Mode;	// (DMA ADDRESS HIGH & 0xC0) [reg 23]
-			unsigned int DMA;
-		};
-		static VDP_Ctrl_t VDP_Ctrl;
-		
-		/**
 		* VDP_Mode: Current VDP mode.
 		*/
 		#define VDP_MODE_M1	(1 << 0)
@@ -393,7 +373,37 @@ class VdpIo
 		#define DMA_TYPE(src, dest) (((int)src << 2) | ((int)dest))
 		
 		template<DMA_Src_t src_component, DMA_Dest_t dest_component>
-		static inline void T_DMA_Loop(unsigned int src_address, unsigned int dest_address, int length);
+		static inline void T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int length);
+		
+		/**
+		 * VDP_Ctrl: VDP control struct.
+		 */
+		struct VDP_Ctrl_t
+		{
+			// Control word buffer.
+			union Data_t
+			{
+				uint16_t w[2];	// Control words.
+				uint32_t d;	// Control DWORD. (TODO: Endianness conversion.)
+			};
+			Data_t Data;
+			
+			// VDP memory access mode.
+			uint16_t Access;	// Uses VDEST_t values to determine VDP destination.
+			uint16_t Address;	// Address counter.
+			
+			// DMA values.
+			uint8_t DMA_Mode;	// (DMA ADDRESS HIGH & 0xC0) [reg 23]
+			uint8_t DMA;		// HIGH byte from CD_Table[].
+			
+			/**
+			 * ctrl_latch: Control word latch.
+			 * False: Next control word is FIRST word.
+			 * True: Next control word is SECOND word, which triggers an action.
+			 */
+			bool ctrl_latch;	// Control word latch.
+		};
+		static VDP_Ctrl_t VDP_Ctrl;
 		
 		/**
 		 * VDEST_t: VDP memory destination constants.

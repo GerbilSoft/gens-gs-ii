@@ -116,7 +116,7 @@ void VdpIo::Reset(void)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 	
-	for (unsigned int i = 0; i < sizeof(vdp_reg_init)/sizeof(vdp_reg_init[0]); i++)
+	for (size_t i = 0; i < sizeof(vdp_reg_init)/sizeof(vdp_reg_init[0]); i++)
 	{
 		Set_Reg(i, vdp_reg_init[i]);
 	}
@@ -133,13 +133,12 @@ void VdpIo::Reset(void)
 	VDP_Int = 0;
 	
 	// VDP control struct.
-	VDP_Ctrl.Flag = 0;
 	VDP_Ctrl.Data.d = 0;
-	VDP_Ctrl.Write = 0;
 	VDP_Ctrl.Access = 0;
 	VDP_Ctrl.Address = 0;
 	VDP_Ctrl.DMA_Mode = 0;
 	VDP_Ctrl.DMA = 0;
+	VDP_Ctrl.ctrl_latch = false;
 	
 	// Set the CRam and VRam flags.
 	VDP_Flags.CRam = 1;
@@ -726,9 +725,9 @@ uint16_t VdpIo::Read_Data(void)
 	LOG_MSG(vdp_io, LOG_MSG_LEVEL_DEBUG2,
 		"VDP_Ctrl.Access == %d", VDP_Ctrl.Access);
 	
-	// Clear the VDP control flag.
+	// Clear the VDP control word latch.
 	// (It's set when the address is set.)
-	VDP_Ctrl.Flag = 0;
+	VDP_Ctrl.ctrl_latch = false;
 	
 	// NOTE: volatile is needed due to an optimization issue caused by
 	// -ftree-pre on gcc-4.4.2. (It also breaks on gcc-3.4.5, but that
@@ -955,8 +954,8 @@ void VdpIo::DMA_Fill(uint16_t data)
  */
 void VdpIo::Write_Data_Word(uint16_t data)
 {
-	// Clear the VDP data latch.
-	VDP_Ctrl.Flag = 0;
+	// Clear the VDP control word latch.
+	VDP_Ctrl.ctrl_latch = false;
 	
 	if (VDP_Ctrl.DMA & 0x04)
 	{
@@ -966,7 +965,7 @@ void VdpIo::Write_Data_Word(uint16_t data)
 	}
 	
 	// Check the access mode.
-	uint32_t address = VDP_Ctrl.Address;
+	uint16_t address = VDP_Ctrl.Address;
 	switch (VDP_Ctrl.Access)
 	{
 		case (VDEST_LOC_VRAM | VDEST_ACC_WRITE):
@@ -1033,10 +1032,11 @@ void VdpIo::Write_Data_Word(uint16_t data)
  * @param src_component Source component.
  * @param dest_component Destination component.
  * @param src_address Source address.
+ * @param dest_address Destination address.
  * @param length Length.
  */
 template<VdpIo::DMA_Src_t src_component, VdpIo::DMA_Dest_t dest_component>
-inline void VdpIo::T_DMA_Loop(unsigned int src_address, unsigned int dest_address, int length)
+inline void VdpIo::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int length)
 {
 	LOG_MSG(vdp_io, LOG_MSG_LEVEL_DEBUG2,
 		"<%d, %d> src_address == 0x%06X, dest_address == 0x%04X, length == %d",
@@ -1246,7 +1246,7 @@ void VdpIo::Write_Ctrl(uint16_t data)
 	// TODO: Check endianness with regards to the control words. (Wordswapping!)
 	
 	// Check if this is the first or second control word.
-	if (!VDP_Ctrl.Flag)
+	if (!VDP_Ctrl.ctrl_latch)
 	{
 		// First control word.
 		// Check if this is an actual control word or a register write.
@@ -1254,7 +1254,7 @@ void VdpIo::Write_Ctrl(uint16_t data)
 		{
 			// Register write.
 			VDP_Ctrl.Access = (VDEST_LOC_VRAM | VDEST_ACC_READ);	// Implicitly set VDP access mode to VRAM READ.
-			VDP_Ctrl.Address = 0;	// Reset the address counter.
+			VDP_Ctrl.Address = 0x0000;	// Reset the address counter.
 			
 			const int reg = (data >> 8) & 0x1F;
 			Set_Reg(reg, (data & 0xFF));
@@ -1263,7 +1263,7 @@ void VdpIo::Write_Ctrl(uint16_t data)
 		
 		// Control word.
 		VDP_Ctrl.Data.w[0] = data;
-		VDP_Ctrl.Flag = 1;		// Latch the first control word.
+		VDP_Ctrl.ctrl_latch = true;	// Latch the first control word.
 		
 		// Determine the VDP address.
 		VDP_Ctrl.Address = (data & 0x3FFF);
@@ -1278,7 +1278,7 @@ void VdpIo::Write_Ctrl(uint16_t data)
 	
 	// Second control word.
 	VDP_Ctrl.Data.w[1] = data;
-	VDP_Ctrl.Flag = 0;		// Clear the latch.
+	VDP_Ctrl.ctrl_latch = false;	// Clear the control word latch.
 	
 	// Determine the VDP address.
 	VDP_Ctrl.Address = (VDP_Ctrl.Data.w[0] & 0x3FFF);
@@ -1323,7 +1323,7 @@ void VdpIo::Write_Ctrl(uint16_t data)
 	
 	// Get the DMA addresses.
 	unsigned int src_address = DMA_Address;				// Src Address / 2
-	unsigned int dest_address = (VDP_Ctrl.Address & 0xFFFF);	// Dest Address
+	uint16_t dest_address = (VDP_Ctrl.Address & 0xFFFF);	// Dest Address
 	
 	// Check for CRam or VSRam destination overflow.
 	if (dest_component == DMA_DEST_CRAM ||
