@@ -176,9 +176,9 @@ class VdpIo
 			};
 			Data_t Data;
 			unsigned int Write;
-			unsigned int Access;
+			unsigned int Access;	// Uses VDEST_t values to determine VDP destination.
 			unsigned int Address;
-			unsigned int DMA_Mode;
+			unsigned int DMA_Mode;	// (DMA ADDRESS HIGH & 0xC0) [reg 23]
 			unsigned int DMA;
 		};
 		static VDP_Ctrl_t VDP_Ctrl;
@@ -296,7 +296,6 @@ class VdpIo
 		
 		/** VDP tables. **/
 		static uint8_t H_Counter_Table[512][2];
-		static const uint32_t CD_Table[64];
 		static const uint8_t DMA_Timing_Table[4][4];
 		
 		/** VDP functions. **/
@@ -395,6 +394,46 @@ class VdpIo
 		
 		template<DMA_Src_t src_component, DMA_Dest_t dest_component>
 		static inline void T_DMA_Loop(unsigned int src_address, unsigned int dest_address, int length);
+		
+		/**
+		 * VDEST_t: VDP memory destination constants.
+		 */
+		enum VDEST_t
+		{
+			// 0x0000: INVALID.
+			VDEST_INVALID		= 0x0000,
+			
+			// Bits 0-2: Location. 
+			VDEST_LOC_INVALID	= 0x0000,
+			VDEST_LOC_VRAM		= 0x0001,
+			VDEST_LOC_CRAM		= 0x0002,
+			VDEST_LOC_VSRAM		= 0x0003,
+			
+			// Bits 3-4: Access. (R/W)
+			VDEST_ACC_INVALID	= 0x0000,
+			VDEST_ACC_READ		= 0x0004,
+			VDEST_ACC_WRITE		= 0x0008,
+			
+			// Bits 8-11: DMA MEM to VRAM: destination
+			VDEST_DMA_MEM_TO_INVALID	= 0x0000,
+			VDEST_DMA_MEM_TO_VRAM		= 0x0100,
+			VDEST_DMA_MEM_TO_CRAM		= 0x0200,
+			VDEST_DMA_MEM_TO_VSRAM		= 0x0300,
+			
+			// Bit 12: DMA VRAM FILL.
+			VDEST_DMA_NO_FILL	= 0x0000,
+			VDEST_DMA_FILL		= 0x0400,
+			
+			// Bit 13: DMA VRAM COPY.
+			VDEST_DMA_NO_COPY	= 0x0000,
+			VDEST_DMA_COPY		= 0x0800,
+		};
+		
+		/**
+		 * CD_Table[]: VDP memory destination table.
+		 * Maps VDP control word destinations to Gens destinations.
+		 */
+		static const uint16_t CD_Table[64];
 	
 	private:
 		VdpIo() { }

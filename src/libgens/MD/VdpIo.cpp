@@ -741,17 +741,17 @@ uint16_t VdpIo::Read_Data(void)
 	// Check the access mode.
 	switch (VDP_Ctrl.Access)
 	{
-		case 5:
+		case (VDEST_LOC_VRAM | VDEST_ACC_READ):
 			// VRam Read.
 			data = VRam.u16[(VDP_Ctrl.Address & 0xFFFF) >> 1];
 			break;
 		
-		case 6:
+		case (VDEST_LOC_CRAM | VDEST_ACC_READ):
 			// CRam Read.
 			data = CRam.u16[(VDP_Ctrl.Address & 0x7E) >> 1];
 			break;
 		
-		case 7:
+		case (VDEST_LOC_VSRAM | VDEST_ACC_READ):
 			// VSRam Read.
 			data = VSRam.u16[(VDP_Ctrl.Address & 0x7E) >> 1];
 			break;
@@ -969,7 +969,7 @@ void VdpIo::Write_Data_Word(uint16_t data)
 	uint32_t address = VDP_Ctrl.Address;
 	switch (VDP_Ctrl.Access)
 	{
-		case 9:
+		case (VDEST_LOC_VRAM | VDEST_ACC_WRITE):
 			// VRam Write.
 			VDP_Flags.VRam = 1;
 			address &= 0xFFFF;	// VRam is 64 KB. (32 Kwords)
@@ -990,7 +990,7 @@ void VdpIo::Write_Data_Word(uint16_t data)
 			VDP_Ctrl.Address += VDP_Reg.m5.Auto_Inc;
 			break;
 		
-		case 10:
+		case (VDEST_LOC_CRAM | VDEST_ACC_WRITE):
 			// CRam Write.
 			// TODO: According to the Genesis Software Manual, writing at
 			// odd addresses results in "interesting side effects".
@@ -1006,7 +1006,7 @@ void VdpIo::Write_Data_Word(uint16_t data)
 			VDP_Ctrl.Address += VDP_Reg.m5.Auto_Inc;
 			break;
 		
-		case 11:
+		case (VDEST_LOC_VSRAM | VDEST_ACC_WRITE):
 			// VSRam Write.
 			// TODO: The Genesis Software Manual doesn't mention what happens
 			// with regards to odd address writes for VSRam.
@@ -1253,7 +1253,7 @@ void VdpIo::Write_Ctrl(uint16_t data)
 		if ((data & 0xC000) == 0x8000)
 		{
 			// Register write.
-			VDP_Ctrl.Access = 5;	// TODO: What does this mean?
+			VDP_Ctrl.Access = (VDEST_LOC_VRAM | VDEST_ACC_READ);	// Implicitly set VDP access mode to VRAM READ.
 			VDP_Ctrl.Address = 0;	// Reset the address counter.
 			
 			const int reg = (data >> 8) & 0x1F;
@@ -1269,7 +1269,7 @@ void VdpIo::Write_Ctrl(uint16_t data)
 		VDP_Ctrl.Address = (data & 0x3FFF);
 		VDP_Ctrl.Address |= ((VDP_Ctrl.Data.w[1] & 0x3) << 14);
 		
-		// Determine the DMA destination.
+		// Determine the VDP destination.
 		unsigned int CD_Offset = ((data >> 14) & 0x3);
 		CD_Offset |= ((VDP_Ctrl.Data.w[1] & 0xF0) >> 2);
 		VDP_Ctrl.Access = (CD_Table[CD_Offset] & 0xFF);
@@ -1287,9 +1287,10 @@ void VdpIo::Write_Ctrl(uint16_t data)
 	// Determine the destination.
 	unsigned int CD_Offset = ((VDP_Ctrl.Data.w[0] >> 14) & 0x3);
 	CD_Offset |= ((data & 0xF0) >> 2);
-	unsigned int CD = CD_Table[CD_Offset];
+	uint16_t CD = CD_Table[CD_Offset];
 	VDP_Ctrl.Access = (CD & 0xFF);
 	
+	// High byte of CD is the DMA access mode.
 	if (!(CD & 0xFF00))
 	{
 		// No DMA is needed.
@@ -1306,16 +1307,16 @@ void VdpIo::Write_Ctrl(uint16_t data)
 		return;
 	}
 	
-	// DMA access mode is the high byte in the CD_Table[] word.
-	CD >>= 8;
-	
 	// Check for DMA FILL.
-	if ((CD & 0x04) && (VDP_Ctrl.DMA_Mode == 0x80))
+	if ((CD & VDEST_DMA_FILL) && (VDP_Ctrl.DMA_Mode == 0x80))
 	{
 		// DMA FILL.
-		VDP_Ctrl.DMA = (CD & 0xFF);
+		VDP_Ctrl.DMA = ((CD >> 8) & 0xFF);
 		return;
 	}
+	
+	// DMA access mode is the high byte in the CD_Table[] word.
+	CD >>= 8;
 	
 	// Determine the DMA destination.
 	DMA_Dest_t dest_component = (DMA_Dest_t)(CD & 0x03);	// 0 == invalid; 1 == VRam; 2 == CRam; 3 == VSRam
