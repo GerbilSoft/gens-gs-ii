@@ -286,17 +286,6 @@ class VdpIo
 		static void Set_Visible_Lines(void);
 		static void Check_NTSC_V30_VBlank(void);
 		
-		/**
-		 * Scroll_Size_t: Convenience enum for dealing with scroll plane sizes.
-		 */
-		enum Scroll_Size_t
-		{
-			V32_H32 = 0, V32_H64,  V32_HXX,  V32_H128,
-			V64_H32,     V64_H64,  V64_HXX,  V64_H128,
-			VXX_H32,     VXX_H64,  VXX_HXX,  VXX_H128,
-			V128_H32,    V128_H64, V128_HXX, V128_H128
-		};
-		
 		static void Set_Reg(int reg_num, uint8_t val);
 		
 		static uint8_t Read_H_Counter(void);
@@ -444,6 +433,17 @@ class VdpIo
 		 * Maps VDP control word destinations to Gens destinations.
 		 */
 		static const uint16_t CD_Table[64];
+		
+		/**
+		 * Scroll_Size_t: Convenience enum for dealing with scroll plane sizes.
+		 */
+		enum Scroll_Size_t
+		{
+			V32_H32 = 0, V32_H64,  V32_HXX,  V32_H128,
+			V64_H32,     V64_H64,  V64_HXX,  V64_H128,
+			VXX_H32,     VXX_H64,  VXX_HXX,  VXX_H128,
+			V128_H32,    V128_H64, V128_HXX, V128_H128
+		};
 	
 	private:
 		VdpIo() { }

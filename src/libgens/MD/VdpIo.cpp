@@ -485,63 +485,41 @@ void VdpIo::Set_Reg(int reg_num, uint8_t val)
 			tmp = (val & 0x3);
 			tmp |= (val & 0x30) >> 2;
 			
-			switch ((Scroll_Size_t)tmp)
+			/**
+			 * Scroll size table.
+			 * Format:
+			 * - idx 0: H_Scroll_CMul
+			 * - idx 1: H_Scroll_CMask
+			 * - idx 2: V_Scroll_CMask
+			 * - idx 3: reserved (padding)
+			 */
+			static const uint8_t Scroll_Size_Tbl[][4] =
 			{
-				case V32_H32:
-				case VXX_H32:
-					H_Scroll_CMul = 5;
-					H_Scroll_CMask = 31;
-					V_Scroll_CMask = 31;
-					break;
+				// V32_H32 (VXX_H32)      // V32_H64 (VXX_H64)
+				{0x05, 0x1F, 0x1F, 0x00}, {0x06, 0x3F, 0x1F, 0x00},
+				// V32_HXX (V??_HXX)      // V32_H128 (V??_H128)
+				{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
 				
-				case V64_H32:
-					H_Scroll_CMul = 5;
-					H_Scroll_CMask = 31;
-					V_Scroll_CMask = 63;
-					break;
+				// V64_H32                // V64_H64 (V128_H64)
+				{0x05, 0x1F, 0x3F, 0x00}, {0x06, 0x3F, 0x3F, 0x00},
+				// V64_HXX (V??_HXX)      // V64_H128 (V??_H128)
+				{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
 				
-				case V128_H32:
-					H_Scroll_CMul = 5;
-					H_Scroll_CMask = 31;
-					V_Scroll_CMask = 127;
-					break;
+				// VXX_H32 (V32_H32)      // VXX_H64 (V32_H64)
+				{0x05, 0x1F, 0x1F, 0x00}, {0x06, 0x3F, 0x1F, 0x00},
+				// VXX_HXX (V??_HXX)      // VXX_H128 (V??_H128)
+				{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
 				
-				case V32_H64:
-				case VXX_H64:
-					H_Scroll_CMul = 6;
-					H_Scroll_CMask = 63;
-					V_Scroll_CMask = 31;
-					break;
-				
-				case V64_H64:
-				case V128_H64:
-					H_Scroll_CMul = 6;
-					H_Scroll_CMask = 63;
-					V_Scroll_CMask = 63;
-					break;
-				
-				case V32_HXX:
-				case V64_HXX:
-				case VXX_HXX:
-				case V128_HXX:
-					H_Scroll_CMul = 6;
-					H_Scroll_CMask = 63;
-					V_Scroll_CMask = 0;
-					break;
-				
-				case V32_H128:
-				case V64_H128:
-				case VXX_H128:
-				case V128_H128:
-					H_Scroll_CMul = 7;
-					H_Scroll_CMask = 127;
-					V_Scroll_CMask = 31;
-					break;
-				
-				default:	// to make gcc shut up
-					break;
-			}
+				// V128_H32               // V128_H64 (V64_H64)
+				{0x05, 0x1F, 0x7F, 0x00}, {0x06, 0x3F, 0x3F, 0x00},
+				// V128_HXX (V??_HXX)     // V128_H128 (V??_H128)
+				{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00}
+			};
 			
+			// Get the values from the scroll size table.
+			H_Scroll_CMul  = Scroll_Size_Tbl[tmp][0];
+			H_Scroll_CMask = Scroll_Size_Tbl[tmp][1];
+			V_Scroll_CMask = Scroll_Size_Tbl[tmp][2];
 			break;
 		}
 		
