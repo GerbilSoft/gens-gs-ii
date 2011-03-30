@@ -38,6 +38,9 @@
 // Controller configuration.
 #include "CtrlConfig.hpp"
 
+// Recent ROMs.
+#include "RecentRoms.hpp"
+
 // Property function macro.
 // NOTE: We can't include Q_PROPERTY() or signals here due to moc limitations.
 #define GC_PROPERTY(propType, propName, setPropType, setPropName) \
@@ -279,6 +282,10 @@ class GensConfig : public QObject
 		// Controller configuration class.
 		// TODO: Make it private?
 		CtrlConfig *m_ctrlConfig;
+		
+		// Recent ROMs class.
+		// TODO: Make it private?
+		RecentRoms *m_recentRoms;
 };
 
 }

@@ -194,6 +194,7 @@ int EmuManager::openRom(const QString& filename)
 	}
 	
 	// Check if this is a multi-file ROM archive.
+	QString z_filename;
 	if (rom->isMultiFile())
 	{
 		// Multi-file ROM archive.
@@ -210,9 +211,15 @@ int EmuManager::openRom(const QString& filename)
 		}
 		
 		// Get the selected file.
-		rom->select_z_entry(zipsel->selectedFile());
+		const mdp_z_entry_t *z_entry = zipsel->selectedFile();
+		z_filename = QString::fromUtf8(z_entry->filename);
+		rom->select_z_entry(z_entry);
 		delete zipsel;
 	}
+	
+	// Add the ROM file to the Recent ROMs list.
+	// TODO: Don't do this if the ROM couldn't be loaded.
+	gqt4_config->m_recentRoms->update(filename, z_filename, rom->sysId());
 	
 	// Load the selected ROM file.
 	return loadRom(rom);

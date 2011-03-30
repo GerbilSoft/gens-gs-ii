@@ -139,6 +139,7 @@ SET(gens-qt4_COMMON_SRCS
 	widgets/GensCtrlCfgWidget.cpp
 	EmuManager_str.cpp
 	widgets/GensCtrlKeyWidget.cpp
+	Config/RecentRoms.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -173,6 +174,7 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	widgets/GensCtrlKeyWidget.hpp
 	widgets/GensCtrlKeyWidget_p.hpp
 	Input/KeyHandlerQt.hpp
+	Config/RecentRoms.hpp
 	)
 
 SET(gens-qt4_SRCS ${gens-qt4_COMMON_SRCS})
