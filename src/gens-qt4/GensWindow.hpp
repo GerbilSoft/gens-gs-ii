@@ -92,6 +92,7 @@ class GensWindow : public QMainWindow
 		// it's off by two bytes when reading the address from
 		// the GensWindow instance.
 		void openRom(void);
+		void openRom(const QString& filename, QString z_filename = QString());
 		void closeRom(void);
 		void saveState(void);
 		void loadState(void);

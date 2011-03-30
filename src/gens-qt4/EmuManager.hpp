@@ -57,7 +57,7 @@ class EmuManager : public QObject
 		
 		// TODO: Move the parent argument to EmuManager()?
 		int openRom(QWidget *parent = 0);
-		int openRom(const QString& filename);
+		int openRom(const QString& filename, QString z_filename = QString());
 		int loadRom(LibGens::Rom *rom);
 		
 		/**

@@ -120,6 +120,22 @@ bool GensActions::doAction(int action, bool state)
 			}
 			break;
 		
+		case IDM_FILE_RECENT_MENU:
+		{
+			// File, Recent ROMs.
+			int romID = MNUID_ITEM(action);
+			const RecentRom_t rom = gqt4_config->m_recentRoms->getRom(romID);
+			if (rom.filename.isEmpty())
+			{
+				// Invalid ROM ID.
+				break;
+			}
+			
+			// Load the ROM.
+			m_parent->openRom(rom.filename, rom.z_filename);
+			break;
+		}
+		
 		case IDM_HELP_MENU:
 			// Help menu.
 			switch (MNUID_ITEM(action))

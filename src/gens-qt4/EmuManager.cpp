@@ -61,6 +61,15 @@
 // Qt key handler.
 #include "Input/KeyHandlerQt.hpp"
 
+// Filename case-sensitivity.
+// TODO: Determine this from QAbstractFileEngine instead of hard-coding it!
+// TODO: Share this with the RecentRoms class.
+#if defined(Q_OS_WIN32) || defined(Q_OS_MAC)
+#define FILENAME_CASE_SENSITIVE Qt::CaseInsensitive
+#else
+#define FILENAME_CASE_SENSITIVE Qt::CaseSensitive
+#endif
+
 
 namespace GensQt4
 {
@@ -177,10 +186,10 @@ int EmuManager::openRom(QWidget *parent)
 /**
  * openRom(): Open a ROM file.
  * @param filename ROM filename. (Must have native separators!)
- * TODO: Add a z_entry parameter?
+ * @param z_filename Internal archive filename. (If not specified, user will be prompted.)
  * @return 0 on success; non-zero on error.
  */
-int EmuManager::openRom(const QString& filename)
+int EmuManager::openRom(const QString& filename, QString z_filename)
 {
 	// Open the file using the LibGens::Rom class.
 	// TODO: This won't work for KIO...
@@ -194,27 +203,53 @@ int EmuManager::openRom(const QString& filename)
 	}
 	
 	// Check if this is a multi-file ROM archive.
-	QString z_filename;
 	if (rom->isMultiFile())
 	{
 		// Multi-file ROM archive.
-		// Prompt the user to select a file.
-		ZipSelectDialog *zipsel = new ZipSelectDialog();
-		zipsel->setFileList(rom->get_z_entry_list());
-		int ret = zipsel->exec();
-		if (ret != QDialog::Accepted || zipsel->selectedFile() == NULL)
+		const mdp_z_entry_t *z_entry;
+		
+		if (z_filename.isEmpty())
 		{
-			// Dialog was rejected.
-			delete rom;
+			// Prompt the user to select a file.
+			ZipSelectDialog *zipsel = new ZipSelectDialog();
+			zipsel->setFileList(rom->get_z_entry_list());
+			int ret = zipsel->exec();
+			if (ret != QDialog::Accepted || zipsel->selectedFile() == NULL)
+			{
+				// Dialog was rejected.
+				delete rom;
+				delete zipsel;
+				return -3;
+			}
+			
+			// Get the selected file.
+			z_entry = zipsel->selectedFile();
 			delete zipsel;
-			return -3;
+		}
+		else
+		{
+			// Search for the specified filename in the z_entry list.
+			z_entry = rom->get_z_entry_list();
+			for (; z_entry; z_entry = z_entry->next)
+			{
+				const QString z_entry_filename = QString::fromUtf8(z_entry->filename);
+				if (!z_filename.compare(z_entry_filename, FILENAME_CASE_SENSITIVE))
+					break;
+			}
+			
+			if (!z_entry)
+			{
+				// z_filename not found.
+				// TODO: Show an error message.
+				fprintf(stderr, "Error opening ROM file: z_filename not found.\n");
+				delete rom;
+				return -4;
+			}
 		}
 		
 		// Get the selected file.
-		const mdp_z_entry_t *z_entry = zipsel->selectedFile();
 		z_filename = QString::fromUtf8(z_entry->filename);
 		rom->select_z_entry(z_entry);
-		delete zipsel;
 	}
 	
 	// Add the ROM file to the Recent ROMs list.

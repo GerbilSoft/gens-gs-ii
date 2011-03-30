@@ -611,6 +611,8 @@ void GensWindow::showMenuBar_changed_slot(bool newShowMenuBar)
 
 void GensWindow::openRom(void)
 	{ m_emuManager->openRom(this); }
+void GensWindow::openRom(const QString& filename, QString z_filename)
+	{ m_emuManager->openRom(filename, z_filename); }
 void GensWindow::closeRom(void)
 	{ m_emuManager->closeRom(); }
 void GensWindow::saveState(void)
