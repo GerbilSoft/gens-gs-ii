@@ -185,7 +185,7 @@ void RecentRomsMenuPrivate::update(void)
 		filename.replace(QChar(L'&'), QLatin1String("&&"));
 		
 		// Append the processed filename.
-		//title += QLatin1String("\t ") + filename;
+		title += QLatin1String("\t ") + filename;
 		
 		if (!rom.z_filename.isEmpty())
 		{
