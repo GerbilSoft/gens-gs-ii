@@ -78,6 +78,18 @@ const GensKeyConfigPrivate::DefKeySetting_t GensKeyConfigPrivate::DefKeySettings
 {
 	// File menu.
 	{IDM_FILE_OPEN, KEYM_CTRL | KEYV_o,			"file/open"},
+	{IDM_FILE_RECENT, 0,					"file/recent"},
+	// File, Recent ROMs menu.
+	{IDM_FILE_RECENT_1, KEYM_CTRL | KEYV_1,			"file/recent/1"},
+	{IDM_FILE_RECENT_2, KEYM_CTRL | KEYV_2,			"file/recent/2"},
+	{IDM_FILE_RECENT_3, KEYM_CTRL | KEYV_3,			"file/recent/3"},
+	{IDM_FILE_RECENT_4, KEYM_CTRL | KEYV_4,			"file/recent/4"},
+	{IDM_FILE_RECENT_5, KEYM_CTRL | KEYV_5,			"file/recent/5"},
+	{IDM_FILE_RECENT_6, KEYM_CTRL | KEYV_6,			"file/recent/6"},
+	{IDM_FILE_RECENT_7, KEYM_CTRL | KEYV_7,			"file/recent/7"},
+	{IDM_FILE_RECENT_8, KEYM_CTRL | KEYV_8,			"file/recent/8"},
+	{IDM_FILE_RECENT_9, KEYM_CTRL | KEYV_9,			"file/recent/9"},
+	// File menu.
 	{IDM_FILE_CLOSE, KEYM_CTRL | KEYV_w,			"file/close"},
 	{IDM_FILE_SAVESTATE, KEYV_F5,				"file/saveState"},
 	{IDM_FILE_LOADSTATE, KEYV_F8,				"file/loadState"},

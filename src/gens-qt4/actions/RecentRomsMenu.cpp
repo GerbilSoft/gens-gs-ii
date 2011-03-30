@@ -23,9 +23,19 @@
 
 #include "RecentRomsMenu.hpp"
 
+// gqt4_config
+#include "gqt4_main.hpp"
+
+// Menu item IDs.
+#include "GensMenuBar_menus.hpp"
+
+// Key Handler.
+#include "../Input/KeyHandlerQt.hpp"
+
 // Qt includes.
 #include <QtCore/QList>
 #include <QtCore/QDir>
+#include <QtCore/QSignalMapper>
 #include <QtGui/QAction>
 
 namespace GensQt4
@@ -44,6 +54,8 @@ class RecentRomsMenuPrivate
 	private:
 		RecentRomsMenu *const q;
 		Q_DISABLE_COPY(RecentRomsMenuPrivate)
+		
+		QSignalMapper *m_signalMapper;
 	
 	public:
 		// Recent ROMs class.
@@ -56,6 +68,7 @@ class RecentRomsMenuPrivate
 
 RecentRomsMenuPrivate::RecentRomsMenuPrivate(RecentRomsMenu *q, RecentRoms *initRecentRoms)
 	: q(q)
+	, m_signalMapper(new QSignalMapper(q))
 	, recentRoms(initRecentRoms)
 { }
 
@@ -65,6 +78,10 @@ RecentRomsMenuPrivate::RecentRomsMenuPrivate(RecentRomsMenu *q, RecentRoms *init
  */
 void RecentRomsMenuPrivate::init(void)
 {
+	// Connect the QSignalMapper's mapped() signal.
+	QObject::connect(m_signalMapper, SIGNAL(mapped(int)),
+			 q, SIGNAL(triggered(int)));
+	
 	// Update the QActions list.
 	update();
 	
@@ -132,8 +149,7 @@ void RecentRomsMenuPrivate::update(void)
 	}
 	
 	// Create new QActions from the Recent ROMs list.
-	// TODO: Connect the triggered() signal from the QActions.
-	// TODO: Move ROM format prefixes somewhere else.
+	// TODO: Move the ROM format prefixes somewhere else.
 	static const char *RomFormatPrefix[] =
 	{
 		"---", "MD", "MCD", "32X",
@@ -169,7 +185,7 @@ void RecentRomsMenuPrivate::update(void)
 		filename.replace(QChar(L'&'), QLatin1String("&&"));
 		
 		// Append the processed filename.
-		title += QLatin1String("\t ") + filename;
+		//title += QLatin1String("\t ") + filename;
 		
 		if (!rom.z_filename.isEmpty())
 		{
@@ -182,6 +198,19 @@ void RecentRomsMenuPrivate::update(void)
 		
 		// Create the QAction.
 		QAction *action = new QAction(title, q);
+		
+		// Set the shortcut key.
+		// NOTE: The shortcut key won't show up due to the "\t" after the system ID.
+		const int mnuItemId = ((IDM_FILE_RECENT_1 - 1) + i);
+		GensKey_t gensKey = gqt4_config->actionToKey(mnuItemId);
+		action->setShortcut(KeyHandlerQt::KeyValMToQtKey(gensKey));
+		
+		// Connect the signal to the signal mapper.
+		QObject::connect(action, SIGNAL(triggered()),
+				 m_signalMapper, SLOT(map()));
+		m_signalMapper->setMapping(action, mnuItemId);
+		
+		// Add the action to the RecentRomsMenu.
 		q->addAction(action);
 		
 		// Next ROM.
@@ -243,7 +272,7 @@ void RecentRomsMenu::setRecentRoms(RecentRoms *newRecentRoms)
 
 
 /**
- * recentRomsDestroyed(): d->recentRoms was destroyed.
+ * RecentRomsMenu::recentRomsDestroyed(): d->recentRoms was destroyed.
  */
 void RecentRomsMenu::recentRomsDestroyed(void)
 {
@@ -252,7 +281,7 @@ void RecentRomsMenu::recentRomsDestroyed(void)
 
 
 /**
- * recentRomsUpdated(): The Recent ROMs class has been updated.
+ * RecentRomsMenu::recentRomsUpdated(): The Recent ROMs class has been updated.
  * Call d->update() to update the menu.
  */
 void RecentRomsMenu::recentRomsUpdated(void)

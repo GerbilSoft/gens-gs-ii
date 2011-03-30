@@ -48,7 +48,16 @@ class RecentRomsMenu : public QMenu
 		void setRecentRoms(RecentRoms *newRecentRoms);
 	
 	signals:
+		/**
+		 * updated(): The Recent ROMs list was updated.
+		 */
 		void updated(void);
+		
+		/**
+		 * triggered(): A Recent ROM was selected.
+		 * @param id Menu item ID.
+		 */
+		void triggered(int id);
 	
 	private:
 		friend class RecentRomsMenuPrivate;
