@@ -28,8 +28,6 @@
 #include "libgens/macros/common.h"
 
 // Qt includes.
-#include <QtCore/QSignalMapper>
-#include <QtCore/QHash>
 #include <QtGui/QMenuBar>
 #include <QtGui/QKeySequence>
 
@@ -41,6 +39,8 @@
 
 namespace GensQt4
 {
+
+class GensMenuBarPrivate;
 
 class GensMenuBar : public QObject
 {
@@ -113,36 +113,11 @@ class GensMenuBar : public QObject
 		static const MainMenuItem ms_gmmiMain[];
 		
 		/** END: Menu definitions. **/
-		
-		void parseMainMenu(const MainMenuItem *mainMenu);
-		void parseMenu(const MenuItem *menu, QMenu *parent);
-		
-		QSignalMapper *m_signalMapper;
-		
-		// Hash tables of QActions.
-		// List of menu separators.
-		QHash<int, QAction*> m_hashActions;
-		QList<QAction*> m_lstSeparators;
-		
-		void clearHashTables(void);
-		
-		// Popup menu.
-		QMenu *m_popupMenu;
 	
 	signals:
 		void triggered(int id, bool state);
 	
 	protected:
-		/**
-		 * syncAll(): Synchronize all menus.
-		 */
-		void syncAll(void);
-		
-		/**
-		 * syncConnect(): Connect menu synchronization slots.
-		 */
-		void syncConnect(void);
-		
 		/**
 		 * lock(), unlock(): Temporarily lock menu actions.
 		 * Calls are cumulative; 2 locks requires 2 unlocks.
@@ -153,19 +128,15 @@ class GensMenuBar : public QObject
 		int unlock(void);
 	
 	private:
+		friend class GensMenuBarPrivate;
+		GensMenuBarPrivate *const d;
+		
 		Q_DISABLE_COPY(GensMenuBar);
 		
 	/** Menu synchronization. **/
 	
 	public:
 		void setEmuManager(EmuManager *newEmuManager);
-	
-	private:
-		// Lock counter.
-		int m_lockCnt;
-		
-		// Emulation Manager.
-		EmuManager *m_emuManager;
 	
 	public slots:
 		/** Emulation state has changed. **/
@@ -179,12 +150,6 @@ class GensMenuBar : public QObject
 		void stretchMode_changed_slot(GensConfig::StretchMode_t newStretchMode);
 		void regionCode_changed_slot(GensConfig::ConfRegionCode_t newRegionCode);
 };
-
-inline QMenu *GensMenuBar::popupMenu(void)
-	{ return m_popupMenu; }
-
-inline bool GensMenuBar::isLocked(void)
-	{ return (m_lockCnt > 0); }
 
 }
 

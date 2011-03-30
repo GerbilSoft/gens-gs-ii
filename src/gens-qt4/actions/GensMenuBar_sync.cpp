@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include "GensMenuBar.hpp"
+#include "GensMenuBar_p.hpp"
 #include "GensMenuBar_menus.hpp"
 
 // gqt4_config
@@ -33,46 +34,21 @@
 namespace GensQt4
 {
 
-/**
- * setEmuManager(): Set the emulation manager.
- * @param newEmuManager New emulation manager.
- */
-void GensMenuBar::setEmuManager(EmuManager *newEmuManager)
-{
-	if (m_emuManager == newEmuManager)
-		return;
-	
-	if (m_emuManager)
-	{
-		// Disconnect emulation manager signals.
-		disconnect(m_emuManager, SIGNAL(stateChanged(void)),
-			this, SLOT(stateChanged(void)));
-	}
-	
-	m_emuManager = newEmuManager;
-	if (m_emuManager)
-	{
-		// Connect emulation manager signals.
-		connect(m_emuManager, SIGNAL(stateChanged(void)),
-			this, SLOT(stateChanged(void)));
-	}
-	
-	// Emulation state has changed.
-	stateChanged();
-}
-
+/*********************************
+ * GensMenuBarPrivate functions. *
+ *********************************/
 
 /**
  * syncAll(): Synchronize all menus.
  */
-void GensMenuBar::syncAll(void)
+void GensMenuBarPrivate::syncAll(void)
 {
 	this->lock();
 	
 	// Do synchronization.
-	stretchMode_changed_slot(gqt4_config->stretchMode());
-	regionCode_changed_slot(gqt4_config->regionCode());
-	stateChanged();
+	q->stretchMode_changed_slot(gqt4_config->stretchMode());
+	q->regionCode_changed_slot(gqt4_config->regionCode());
+	q->stateChanged();
 	
 	this->unlock();
 }
@@ -81,21 +57,18 @@ void GensMenuBar::syncAll(void)
 /**
  * syncConnect(): Connect menu synchronization slots.
  */
-void GensMenuBar::syncConnect(void)
+void GensMenuBarPrivate::syncConnect(void)
 {
-	connect(gqt4_config, SIGNAL(stretchMode_changed(GensConfig::StretchMode_t)),
-		this, SLOT(stretchMode_changed_slot(GensConfig::StretchMode_t)));
-	connect(gqt4_config, SIGNAL(regionCode_changed(GensConfig::ConfRegionCode_t)),
-		this, SLOT(regionCode_changed_slot(GensConfig::ConfRegionCode_t)));
-	
-	if (m_emuManager)
-	{
-		// Connect emulation manager signals.
-		connect(m_emuManager, SIGNAL(stateChanged(void)),
-			this, SLOT(stateChanged(void)));
-	}
+	QObject::connect(gqt4_config, SIGNAL(stretchMode_changed(GensConfig::StretchMode_t)),
+			 q, SLOT(stretchMode_changed_slot(GensConfig::StretchMode_t)));
+	QObject::connect(gqt4_config, SIGNAL(regionCode_changed(GensConfig::ConfRegionCode_t)),
+			 q, SLOT(regionCode_changed_slot(GensConfig::ConfRegionCode_t)));
 }
 
+
+/**************************
+ * GensMenuBar functions. *
+ **************************/
 
 /** Synchronization slots. **/
 
@@ -118,7 +91,7 @@ void GensMenuBar::stretchMode_changed_slot(GensConfig::StretchMode_t newStretchM
 	}
 	
 	// Find the action.
-	QAction *action = m_hashActions.value(id, NULL);
+	QAction *action = d->hashActions.value(id, NULL);
 	if (!action)
 		return;
 	
@@ -148,7 +121,7 @@ void GensMenuBar::regionCode_changed_slot(GensConfig::ConfRegionCode_t newRegion
 	}
 	
 	// Find the action.
-	QAction *action = m_hashActions.value(id, NULL);
+	QAction *action = d->hashActions.value(id, NULL);
 	if (!action)
 		return;
 	
@@ -165,13 +138,13 @@ void GensMenuBar::regionCode_changed_slot(GensConfig::ConfRegionCode_t newRegion
 void GensMenuBar::stateChanged(void)
 {
 	// Update various menu items.
-	QAction *actionPause = m_hashActions.value(IDM_SYSTEM_PAUSE);
+	QAction *actionPause = d->hashActions.value(IDM_SYSTEM_PAUSE);
 	
 	// Lock menu actions to prevent errant signals from being emitted.
 	this->lock();
 	
-	const bool isRomOpen = (m_emuManager && m_emuManager->isRomOpen());
-	const bool isPaused = (isRomOpen ? m_emuManager->paused().paused_manual : false);
+	const bool isRomOpen = (d->emuManager && d->emuManager->isRomOpen());
+	const bool isPaused = (isRomOpen ? d->emuManager->paused().paused_manual : false);
 	
 	// TODO: Do we really need to check for NULL actions?
 	
@@ -192,22 +165,22 @@ void GensMenuBar::stateChanged(void)
 	
 	for (int i = ((sizeof(EnableIfOpen)/sizeof(EnableIfOpen[0]))-2); i >= 0; i--)
 	{
-		QAction *actionEnableIfOpen = m_hashActions.value(EnableIfOpen[i]);
+		QAction *actionEnableIfOpen = d->hashActions.value(EnableIfOpen[i]);
 		if (actionEnableIfOpen)
 			actionEnableIfOpen->setEnabled(isRomOpen);
 	}
 	
 #ifndef Q_WS_MAC
 	// Show Menu Bar.
-	QAction *actionShowMenuBar = m_hashActions.value(IDM_GRAPHICS_MENUBAR);
+	QAction *actionShowMenuBar = d->hashActions.value(IDM_GRAPHICS_MENUBAR);
 	if (actionShowMenuBar)
 		actionShowMenuBar->setChecked(gqt4_config->showMenuBar());
 #endif /* Q_WS_MAC */
 	
 	// System-specifc Reset CPU actions.
 	// TODO: Determine the active system.
-	QAction *actionCpuResetM68K = m_hashActions.value(IDM_SYSTEM_CPURESET_M68K);
-	QAction *actionCpuResetZ80 = m_hashActions.value(IDM_SYSTEM_CPURESET_Z80);
+	QAction *actionCpuResetM68K = d->hashActions.value(IDM_SYSTEM_CPURESET_M68K);
+	QAction *actionCpuResetZ80 = d->hashActions.value(IDM_SYSTEM_CPURESET_Z80);
 	if (actionCpuResetM68K)
 	{
 		actionCpuResetM68K->setEnabled(isRomOpen);
