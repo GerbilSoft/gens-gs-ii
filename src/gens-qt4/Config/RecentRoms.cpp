@@ -176,4 +176,28 @@ int RecentRoms::save(QSettings& settings)
 	return m_lstRoms.size();
 }
 
+
+/**
+ * getRom(): Get a recent ROM entry.
+ * @param id Recent ROM ID. (starting at 1)
+ * @return RecentRom_t describing the ROM entry.
+ */
+RecentRom_t RecentRoms::getRom(int id)
+{
+	// Recent ROM IDs start at 1.
+	// Rebase it to start at 0 for the QList.
+	id--;
+	
+	// Make sure the Recent ROM ID is in range.
+	if (id < 0 || id >= m_lstRoms.size())
+	{
+		// Recent ROM ID is out of range.
+		// Return an empty RecentRom_t.
+		return RecentRom_t();
+	}
+	
+	// Return the specified RecentRom_t.
+	return m_lstRoms.at(id);
+}
+
 }

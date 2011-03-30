@@ -78,6 +78,13 @@ class RecentRoms : public QObject
 		int save(QSettings& settings);
 		
 		/**
+		 * getRom(): Get a recent ROM entry.
+		 * @param id Recent ROM ID. (starting at 1)
+		 * @return RecentRom_t describing the ROM entry.
+		 */
+		RecentRom_t getRom(int id);
+		
+		/**
 		 * romList(): Get a const reference to the ROM list.
 		 * @return Const reference to the ROM list.
 		 */
