@@ -1,5 +1,13 @@
 Description of git tags for Gens/GS II:
 
+gens-qt4-RecentRoms-v0: Initial implementation of Recent ROMs
+functionality. Two classes are used: RecentRoms, which stores
+and manages the Recent ROMs list, and RecentRomsMenu, which
+displays the Recent ROMs list as a QMenu. The RecentRoms instance
+is located in GensConfig, and provides QSettings load()/save()
+functions, which are called by GensConfig's reload() and save()
+functions, respectively.
+
 gens-qt4-CtrlConfig-v0: Initial Controller Configuration class.
 This class stores the key mapping for all controllers, and provides
 functions to update the LibGens::IoBase objects with new configuration.
