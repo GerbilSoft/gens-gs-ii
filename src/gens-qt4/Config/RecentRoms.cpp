@@ -113,7 +113,7 @@ int RecentRoms::load(const QSettings& settings)
 	for (int i = 0; i < MAX_ROMS; i++)
 	{
 		RecentRom_t rom;
-		const QString romID = QLatin1String("rom") + QString::number(i);
+		const QString romID = QLatin1String("rom") + QString::number(i+1);
 		
 		// Get the ROM filename.
 		// If it's empty, skip this ROM.
@@ -154,7 +154,7 @@ int RecentRoms::save(QSettings& settings)
 	foreach(const RecentRom_t& rom, m_lstRoms)
 	{
 		// Save the ROM information.
-		const QString romID = QLatin1String("rom") + QString::number(i);
+		const QString romID = QLatin1String("rom") + QString::number(i+1);
 		settings.setValue(romID, rom.filename);
 		settings.setValue(romID + QLatin1String("_zf"), rom.z_filename);
 		settings.setValue(romID + QLatin1String("_sys"), (int)rom.sysId);
@@ -166,7 +166,7 @@ int RecentRoms::save(QSettings& settings)
 	// Delete extra entries.
 	for (; i < MAX_ROMS; i++)
 	{
-		const QString romID = QLatin1String("rom") + QString::number(i);
+		const QString romID = QLatin1String("rom") + QString::number(i+1);
 		settings.remove(romID);
 		settings.remove(romID + QLatin1String("_zf"));
 		settings.remove(romID + QLatin1String("_sys"));
