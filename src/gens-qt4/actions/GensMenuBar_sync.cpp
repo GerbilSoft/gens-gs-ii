@@ -31,28 +31,15 @@
 // Qt includes.
 #include <QtCore/qglobal.h>
 
+// Recent ROMs menu.
+#include "RecentRomsMenu.hpp"
+
 namespace GensQt4
 {
 
 /*********************************
  * GensMenuBarPrivate functions. *
  *********************************/
-
-/**
- * syncAll(): Synchronize all menus.
- */
-void GensMenuBarPrivate::syncAll(void)
-{
-	this->lock();
-	
-	// Do synchronization.
-	q->stretchMode_changed_slot(gqt4_config->stretchMode());
-	q->regionCode_changed_slot(gqt4_config->regionCode());
-	q->stateChanged();
-	
-	this->unlock();
-}
-
 
 /**
  * syncConnect(): Connect menu synchronization slots.
@@ -66,11 +53,61 @@ void GensMenuBarPrivate::syncConnect(void)
 }
 
 
+/**
+ * syncAll(): Synchronize all menus.
+ */
+void GensMenuBarPrivate::syncAll(void)
+{
+	this->lock();
+	
+	// Do synchronization.
+	syncRecent();
+	q->stretchMode_changed_slot(gqt4_config->stretchMode());
+	q->regionCode_changed_slot(gqt4_config->regionCode());
+	q->stateChanged();
+	
+	this->unlock();
+}
+
+
+/**
+ * syncRecent(): Synchronize the "Recent ROMs" menu.
+ */
+void GensMenuBarPrivate::syncRecent(void)
+{
+	this->lock();
+	
+	// Find the "Recent ROMs" action.
+	QAction *actionRecentRoms = hashActions.value(IDM_FILE_RECENT);
+	if (!actionRecentRoms)
+		goto out;
+	
+	// Set the submenu.
+	actionRecentRoms->setMenu(recentRomsMenu);
+	
+	// If there aren't any ROMs in the list, disable the action.
+	actionRecentRoms->setEnabled(!recentRomsMenu->actions().isEmpty());
+	
+out:
+	this->unlock();
+}
+
+
 /**************************
  * GensMenuBar functions. *
  **************************/
 
 /** Synchronization slots. **/
+
+
+/**
+ * recentRoms_updated(): Recent ROMs menu has been updated.
+ */
+void GensMenuBar::recentRoms_updated(void)
+{
+	// Synchronize the "Recent ROMs" menu action.
+	d->syncRecent();
+}
 
 
 /**

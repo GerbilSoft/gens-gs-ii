@@ -76,6 +76,12 @@ class RecentRoms : public QObject
 		 * @return Size of Recent ROMs list on success; negative on error.
 		 */
 		int save(QSettings& settings);
+		
+		/**
+		 * romList(): Get a const reference to the ROM list.
+		 * @return Const reference to the ROM list.
+		 */
+		const QList<RecentRom_t>& romList(void);
 	
 	signals:
 		// Recent ROMs list has been updated.
@@ -87,6 +93,14 @@ class RecentRoms : public QObject
 	private:
 		Q_DISABLE_COPY(RecentRoms)
 };
+
+/**
+ * romList(): Get a const reference to the ROM list.
+ * @return Const reference to the ROM list.
+ */
+inline const QList<RecentRom_t>& RecentRoms::romList(void)
+	{ return m_lstRoms; }
+
 
 }
 

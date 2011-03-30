@@ -34,6 +34,7 @@ namespace GensQt4
 const GensMenuBar::MenuItem GensMenuBar::ms_gmiFile[] =
 {
 	{IDM_FILE_OPEN, GMI_NORMAL, QT_TR_NOOP("&Open ROM..."), QAction::NoRole, 0, NULL, "document-open"},
+	{IDM_FILE_RECENT, GMI_NORMAL, QT_TR_NOOP("&Recent ROMs"), QAction::NoRole, 0, NULL, "document-open-recent"},
 	{IDM_FILE_CLOSE, GMI_NORMAL, QT_TR_NOOP("&Close ROM"), QAction::NoRole, 0, NULL, "document-close"},
 	{IDM_SEPARATOR, GMI_SEPARATOR, NULL, QAction::NoRole, 0, NULL, NULL},
 	{IDM_FILE_SAVESTATE, GMI_NORMAL, QT_TR_NOOP("&Save State"), QAction::NoRole, 0, NULL, NULL},

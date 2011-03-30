@@ -8,6 +8,7 @@
     <file>16x16/arrow-up.png</file>
     <file>16x16/configure.png</file>
     <file>16x16/document-close.png</file>
+    <file>16x16/document-open-recent.png</file>
     <file>16x16/document-open.png</file>
     <file>16x16/drive-optical.png</file>
     <file>16x16/edit-clear-locationbar-ltr.png</file>
@@ -28,6 +29,7 @@
     <file>22x22/arrow-up.png</file>
     <file>22x22/configure.png</file>
     <file>22x22/document-close.png</file>
+    <file>22x22/document-open-recent.png</file>
     <file>22x22/document-open.png</file>
     <file>22x22/drive-optical.png</file>
     <file>22x22/edit-clear-locationbar-ltr.png</file>
@@ -48,6 +50,7 @@
     <file>32x32/arrow-up.png</file>
     <file>32x32/configure.png</file>
     <file>32x32/document-close.png</file>
+    <file>32x32/document-open-recent.png</file>
     <file>32x32/document-open.png</file>
     <file>32x32/drive-optical.png</file>
     <file>32x32/edit-clear-locationbar-ltr.png</file>
@@ -68,6 +71,7 @@
     <file>48x48/arrow-up.png</file>
     <file>48x48/configure.png</file>
     <file>48x48/document-close.png</file>
+    <file>48x48/document-open-recent.png</file>
     <file>48x48/document-open.png</file>
     <file>48x48/drive-optical.png</file>
     <file>48x48/edit-clear-locationbar-ltr.png</file>

@@ -1,7 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * GensMenuBar_p.hpp: Gens Menu Bar class.                                 *
- * (PRIVATE HEADER)                                                        *
+ * RecentRomsMenu.hpp: Recent ROMs Menu.                                   *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -22,71 +21,47 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_ACTIONS_GENSMENUBAR_P_HPP__
-#define __GENS_QT4_ACTIONS_GENSMENUBAR_P_HPP__
+#ifndef __GENS_QT4_ACTIONS_RECENTROMSMENU_HPP__
+#define __GENS_QT4_ACTIONS_RECENTROMSMENU_HPP__
 
-// Qt includes and classes.
-#include <QtCore/QSignalMapper>
-#include <QtCore/QHash>
-class QAction;
+// Qt includes.
+#include <QtGui/QMenu>
+
+// Recent ROMs class.
+#include "../Config/RecentRoms.hpp"
 
 namespace GensQt4
 {
 
-class GensMenuBar;
-class RecentRomsMenu;
+class RecentRomsMenuPrivate;
 
-class GensMenuBarPrivate
+class RecentRomsMenu : public QMenu
 {
-	public:
-		GensMenuBarPrivate(GensMenuBar *q);
-		~GensMenuBarPrivate();
-		
-		void init(EmuManager *initEmuManager = 0);
-		
-		void setEmuManager(EmuManager *newEmuManager);
-		
-		void retranslate(void);
-		
-		int lock(void);
-		int unlock(void);
-		bool isLocked(void);
-	
-	private:
-		GensMenuBar *const q;
-		Q_DISABLE_COPY(GensMenuBarPrivate)
-		
-		int m_lockCnt;		// Lock counter.
+	Q_OBJECT
 	
 	public:
-		// Menu parsing functions.
-		void parseMainMenu(const GensMenuBar::MainMenuItem *mainMenu);
-		void parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent);
+		RecentRomsMenu(QWidget *parent = 0, RecentRoms *recentRoms = 0);
+		RecentRomsMenu(const QString& title, QWidget *parent = 0, RecentRoms *recentRoms = 0);
+		~RecentRomsMenu();
 		
-		// Hash table of QActions.
-		QHash<int, QAction*> hashActions;
-		
-		QMenu *popupMenu;	// Popup menu.
-		EmuManager *emuManager;	// Emulation Manager.
-		
-		// Recent ROMs menu.
-		RecentRomsMenu *recentRomsMenu;
-		
-		void syncConnect(void);	// Connect menu synchronization slots.
-		
-		void syncAll(void);	// Synchronize all menus.
-		void syncRecent(void);	// Synchronize the "Recent ROMs" menu.
+		RecentRoms *recentRoms(void);
+		void setRecentRoms(RecentRoms *newRecentRoms);
+	
+	signals:
+		void updated(void);
 	
 	private:
-		QSignalMapper *m_signalMapper;
+		friend class RecentRomsMenuPrivate;
+		RecentRomsMenuPrivate *const d;
 		
-		// Clear the hash tables.
-		void clearHashTables(void);
-		
-		// List of menu separators.
-		QList<QAction*> m_lstSeparators;
+		Q_DISABLE_COPY(RecentRomsMenu)
+	
+	private slots:
+		// d->recentRoms signals.
+		void recentRomsDestroyed(void);
+		void recentRomsUpdated(void);
 };
 
 }
 
-#endif /* __GENS_QT4_ACTIONS_GENSMENUBAR_P_HPP__ */
+#endif /* __GENS_QT4_ACTIONS_RECENTROMSMENU_HPP__ */

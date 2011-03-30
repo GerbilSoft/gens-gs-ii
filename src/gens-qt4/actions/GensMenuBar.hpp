@@ -147,6 +147,7 @@ class GensMenuBar : public QObject
 		void menuItemSelected(int id);
 		
 		/** Menu synchronization slots. **/
+		void recentRoms_updated(void);
 		void stretchMode_changed_slot(GensConfig::StretchMode_t newStretchMode);
 		void regionCode_changed_slot(GensConfig::ConfRegionCode_t newRegionCode);
 };

@@ -41,6 +41,9 @@
 // GensMenuBarPrivate
 #include "GensMenuBar_p.hpp"
 
+// Recent ROMs menu.
+#include "RecentRomsMenu.hpp"
+
 namespace GensQt4
 {
 
@@ -52,6 +55,7 @@ GensMenuBarPrivate::GensMenuBarPrivate(GensMenuBar *q)
 	: q(q)
 	, m_lockCnt(0)
 	, emuManager(NULL)
+	, recentRomsMenu(NULL)
 	, m_signalMapper(new QSignalMapper(q))
 {
 }
@@ -67,6 +71,9 @@ GensMenuBarPrivate::~GensMenuBarPrivate()
 	
 	// Delete the popup menu.
 	delete popupMenu;
+	
+	// Delete the "Recent ROMs" menu.
+	delete recentRomsMenu;
 }
 
 
@@ -82,6 +89,11 @@ void GensMenuBarPrivate::init(EmuManager *initEmuManager)
 	// Connect the QSignalMapper's mapped() signal.
 	QObject::connect(m_signalMapper, SIGNAL(mapped(int)),
 			 q, SLOT(menuItemSelected(int)));
+	
+	// Create the "Recent ROMs" menu.
+	recentRomsMenu = new RecentRomsMenu(NULL, gqt4_config->m_recentRoms);
+	QObject::connect(recentRomsMenu, SIGNAL(updated()),
+			 q, SLOT(recentRoms_updated()));
 	
 	// Create the popup menu.
 	popupMenu = new QMenu();
