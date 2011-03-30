@@ -610,7 +610,7 @@ void GensWindow::showMenuBar_changed_slot(bool newShowMenuBar)
 /** TODO: Have GensActions emit signals, and link them to EmuManager slots. **/
 
 void GensWindow::openRom(void)
-	{ m_emuManager->openRom(this); }
+	{ m_emuManager->openRom(); }
 void GensWindow::openRom(const QString& filename, QString z_filename)
 	{ m_emuManager->openRom(filename, z_filename); }
 void GensWindow::closeRom(void)

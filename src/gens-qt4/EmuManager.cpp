@@ -74,7 +74,8 @@
 namespace GensQt4
 {
 
-EmuManager::EmuManager()
+EmuManager::EmuManager(QObject *parent)
+	: QObject(parent)
 {
 	// Initialize timing information.
 	m_lastTime = 0.0;
@@ -140,10 +141,9 @@ EmuManager::~EmuManager()
 /**
  * openRom(): Open a ROM file.
  * Prompts the user to select a ROM file, then opens it.
- * @param parent Parent window for the modal dialog box.
  * @return 0 on success; non-zero on error.
  */
-int EmuManager::openRom(QWidget *parent)
+int EmuManager::openRom(void)
 {
 	// TODO: Proper compressed file support.
 	#define ZLIB_EXT " *.zip *.zsg *.gz"
@@ -151,7 +151,7 @@ int EmuManager::openRom(QWidget *parent)
 	#define RAR_EXT " *.rar"
 	
 	// TODO: Set the default filename.
-	QString filename = QFileDialog::getOpenFileName(parent,
+	QString filename = QFileDialog::getOpenFileName(NULL,
 			tr("Open ROM"),		// Dialog title
 			QString(),		// Default filename.
 			tr("Sega Genesis ROM images") +
