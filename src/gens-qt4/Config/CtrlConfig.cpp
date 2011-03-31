@@ -326,7 +326,7 @@ int CtrlConfigPrivate::save(QSettings& settings)
 		{
 			if (j > 0)
 				keyData += QChar(chrKeyValSep);
-			keyHex = QString::number(ctrlKeys[i][j], 16);
+			keyHex = QString::number(ctrlKeys[i][j], 16).toUpper();
 			keyData += QLatin1String("0x");
 			if (ctrlKeys[i][j] <= 0xFFFF)
 				keyData += keyHex.rightJustified(4, QChar(L'0'));
