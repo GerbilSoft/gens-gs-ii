@@ -41,8 +41,10 @@ const EEPRom::GameEEPRomInfo EEPRom::ms_Database[29] =
 	{"T-81033"    , 0,      {8,  0xFF,   0xFF,   0x200001, 0x200001, 0x200001, 0, 1, 1}},   /* NBA Jam (J) */
 	
 	/* 24C02 */
-	{"T-81406"    , 0,      {8,  0xFF,   0xFF,   0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* NBA Jam TE */
 	{"T-081276"   , 0,      {8,  0xFF,   0xFF,   0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* NFL Quarterback Club */
+	
+	/* 24C04 */
+	{"T-81406"    , 0,      {8,  0x1FF,  0x1FF,  0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* NBA Jam TE */
 	
 	/* 24C16 */
 	{"T-081586"   , 0,      {8,  0x7FF,  0x7FF,  0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* NFL Quarterback Club '96 */
@@ -72,10 +74,8 @@ const EEPRom::GameEEPRomInfo EEPRom::ms_Database[29] =
 	
 	/** CODEMASTERS mapper **/
 	
-	/* 24C01 */
-	{"T-120106",    0,      {7,  0x7F,   0x7F,   0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Brian Lara Cricket */
-	
 	/* 24C08 */
+	{"T-120106",    0,      {7,  0x3FF,  0x3FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Brian Lara Cricket */
 	{"T-120096"   , 0,      {8,  0x3FF,  0x3FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Micro Machines 2 - Turbo Tournament (E) */
 	{"00000000-00", 0x168B, {8,  0x3FF,  0x3FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Micro Machines Military */
 	{"00000000-00", 0xCEE0, {8,  0x3FF,  0x3FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Micro Machines Military (Bad)*/
