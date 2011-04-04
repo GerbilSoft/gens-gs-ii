@@ -1,5 +1,9 @@
 Description of git tags for Gens/GS II:
 
+gens-rom-compat-list-v0: Initial implementation of the
+ROM Compatibility List generator scripts. The source file doesn't
+have any actual ROMs in it yet, but they'll be added soon.
+
 gens-qt4-RecentRoms-v0: Initial implementation of Recent ROMs
 functionality. Two classes are used: RecentRoms, which stores
 and manages the Recent ROMs list, and RecentRomsMenu, which
