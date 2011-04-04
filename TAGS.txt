@@ -225,3 +225,7 @@ libgens-initial-vdp: Initial port of Gens/GS r7+'s VDP code into Gens/GS II.
 gens-qt4-menubar-refactoring: Refactoring of the gens-qt4 menu bar system.
 
 gens-qt4-initial-ui: Initial Qt4 UI for Gens/GS II.
+
+initial-commit: Initial commit of Gens/GS II.
+Tagged 2011/04/04 01:31 PM EDT, but set to the same date as
+the initial commit so it shows up correctly in gitweb.
