@@ -1,3 +1,25 @@
+/***************************************************************************
+ * Gens/GS II Documentation.                                               *
+ * rom-compat.css: ROM compatibility lists: Stylesheet for generated HTML. *
+ *                                                                         *
+ * Copyright (c) 2011 by Pietro Gagliardi.                                 *
+ * Copyright (c) 2011 by David Korth.                                      *
+ *                                                                         *
+ * This program is free software; you can redistribute it and/or modify it *
+ * under the terms of the GNU General Public License as published by the   *
+ * Free Software Foundation; either version 2 of the License, or (at your  *
+ * option) any later version.                                              *
+ *                                                                         *
+ * This program is distributed in the hope that it will be useful, but     *
+ * WITHOUT ANY WARRANTY; without even the implied warranty of              *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
+ * GNU General Public License for more details.                            *
+ *                                                                         *
+ * You should have received a copy of the GNU General Public License along *
+ * with this program; if not, write to the Free Software Foundation, Inc., *
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
+ ***************************************************************************/
+
 table { border-color: #000000; border-width: 0 1px 1px 0; border-style: solid; border-spacing: 0px; }
 th { border-color: #000000; border-width: 1px 0 0 1px; border-style: solid; margin: 0px; }
 td { border-color: #000000; border-width: 1px 0 0 1px; border-style: solid; margin: 0px; }
