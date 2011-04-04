@@ -222,3 +222,4 @@ UNSET(GENS_LDFLAGS_PLATFORM)
 
 # Project subdirectories.
 ADD_SUBDIRECTORY(src)
+ADD_SUBDIRECTORY(doc)	# TODO: Make documentation optional.
