@@ -53,6 +53,8 @@ BEGIN {
 	print "\t</tr>"
 }
 
+/^#/ { next }
+
 {
 	# ROM name.
 	name = $1
