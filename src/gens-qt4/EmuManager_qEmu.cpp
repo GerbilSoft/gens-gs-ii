@@ -28,6 +28,7 @@
 #include "libgens/Save/GensZomg.hpp"
 
 // LibGens includes.
+#include "libgens/Util/Timing.hpp"
 #include "libgens/MD/EmuMD.hpp"
 
 // LibGens video includes.
@@ -61,6 +62,7 @@
 #include <QtGui/QImage>
 #include <QtGui/QImageReader>
 #include <QtGui/QImageWriter>
+#include <QtGui/QMessageBox>
 
 
 namespace GensQt4
@@ -447,6 +449,26 @@ void EmuManager::processQEmuRequest(void)
 				// Set the region code.
 				doRegionCode(rq.region);
 				break;
+			
+			case EmuRequest_t::RQT_LOAD_ROM:
+			{
+				// Load a ROM.
+				int ret = doLoadRom(rq.loadRom.rom);
+				if (ret == 0)
+				{
+					// ROM loaded successfully.
+					// Add it to the Recent ROMs list.
+					gqt4_config->m_recentRoms->update(
+						*rq.loadRom.filename,
+						*rq.loadRom.z_filename,
+						rq.loadRom.rom->sysId());
+				}
+				
+				// Delete the QStrings.
+				delete rq.loadRom.filename;
+				delete rq.loadRom.z_filename;
+				break;
+			}
 			
 			case EmuRequest_t::RQT_UNKNOWN:
 			default:
@@ -953,6 +975,183 @@ void EmuManager::doRegionCode(GensConfig::ConfRegionCode_t region)
 	
 	// Update the system name in the GensWindow title bar.
 	emit stateChanged();
+}
+
+
+/**
+ * doLoadRom(): Load a ROM file.
+ * @param rom Previously-opened ROM class.
+ * @return 0 on success; non-zero on error.
+ */
+int EmuManager::doLoadRom(LibGens::Rom *rom)
+{
+	// Check if this is a multi-file ROM archive.
+	if (rom->isMultiFile() && !rom->isRomSelected())
+	{
+		// Multi-file ROM archive, but a ROM hasn't been selected.
+		return -2;
+	}
+	
+	// Make sure the ROM is supported.
+	const QChar chrBullet(0x2022);  // U+2022: BULLET
+	const QChar chrNewline(L'\n');
+	const QChar chrSpace(L' ');
+	
+	// Check the system ID.
+	if (rom->sysId() != LibGens::Rom::MDP_SYSTEM_MD)
+	{
+		// Only MD ROM images are supported.
+		const LibGens::Rom::MDP_SYSTEM_ID errSysId = rom->sysId();
+		delete rom;
+		
+		// TODO: Specify GensWindow as parent window.
+		// TODO: Move this out of EmuManager and simply use return codes?
+		// (how would we indicate what system the ROM is for...)
+		QMessageBox::critical(NULL,
+				//: A ROM image was selected for a system that Gens/GS II does not currently support. (error title)
+				tr("Unsupported System"),
+				//: A ROM image was selected for a system that Gens/GS II does not currently support. (error description)
+				tr("The selected ROM image is designed for a system that"
+				   " is not currently supported by Gens/GS II.") +
+				chrNewline + chrNewline +
+				//: Indicate what system the ROM image is for.
+				tr("Selected ROM's system: %1").arg(SysName_l(errSysId)) +
+				chrNewline + chrNewline +
+				//: List of systems that Gens/GS II currently supports.
+				tr("Supported systems:") + chrNewline +
+				chrBullet + chrSpace + SysName_l(LibGens::Rom::MDP_SYSTEM_MD)
+				);
+		
+		return 3;
+	}
+	
+	// Check the ROM format.
+	if (rom->romFormat() != LibGens::Rom::RFMT_BINARY)
+	{
+		// Only binary ROM images are supported.r
+		LibGens::Rom::RomFormat errRomFormat = rom->romFormat();
+		delete rom;
+		
+		// Get the ROM format.
+		QString sRomFormat = RomFormat(errRomFormat);
+		if (sRomFormat.isEmpty())
+		{
+			//: Unknown ROM format. (EmuManager::RomFormat() returned an empty string.)
+			sRomFormat = tr("(unknown)", "rom-format");
+		}
+		
+		// TODO: Specify GensWindow as parent window.
+		// TODO: Move this out of EmuManager and simply use return codes?
+		// (how would we indicate what format the ROM was in...)
+		QMessageBox::critical(NULL,
+				//: A ROM image was selected in a format that Gens/GS II does not currently support. (error title)
+				tr("Unsupported ROM Format"),
+				//: A ROM image was selected in a format that Gens/GS II does not currently support. (error description)
+				tr("The selected ROM image is in a format that is not currently supported by Gens/GS II.") +
+				chrNewline + chrNewline +
+				//: Indicate what format the ROM image is in.
+				tr("Selected ROM image format: %1").arg(sRomFormat) +
+				chrNewline + chrNewline +
+				//: List of ROM formats that Gens/GS II currently supports.
+				tr("Supported ROM formats:") + chrNewline +
+				chrBullet + chrSpace + RomFormat(LibGens::Rom::RFMT_BINARY)
+				);
+		
+		return 4;
+	}
+	
+	// If emulation is already running, simply reset it.
+	// TODO: Lock m_rom here and in emuFrameDone().
+	bool createEmuThread = true;
+	if (m_rom)
+	{
+		// Save the state of the current ROM first.
+		// Don't do a full closeRom(), since that causes
+		// issues with threading.
+		createEmuThread = false;
+		delete m_rom;
+		m_rom = NULL;
+		
+		// TODO: Use a parameter in closeRom() to specify this?
+		
+		// Make sure SRam/EEPRom data is saved.
+		// (SaveData() will call the LibGens OSD handler if necessary.)
+		// NOTE: Do this before auto-detecting the region code
+		// so SRAM save messages appear before new ROM messages.
+		gqt4_emuContext->saveData();
+		
+		// Close audio.
+		// TODO: Do we really need to do this?
+		m_audio->close();
+	}
+	
+	// Determine the system region code.
+	LibGens::SysVersion::RegionCode_t lg_region = GetLgRegionCode(
+				gqt4_config->regionCode(), rom->regionCode(),
+				gqt4_config->regionCodeOrder());
+	
+	if (gqt4_config->regionCode() == GensConfig::CONFREGION_AUTODETECT)
+	{
+		// Print the auto-detected region.
+		const QString detect_str = LgRegionCodeStr(lg_region);
+		if (!detect_str.isEmpty())
+		{
+			//: OSD message indicating the auto-detected ROM region.
+			const QString auto_str = tr("ROM region detected as %1.", "osd");
+			emit osdPrintMsg(1500, auto_str.arg(detect_str));
+		}
+	}
+	
+	// Create a new MD emulation context.
+	delete gqt4_emuContext;
+	gqt4_emuContext = new LibGens::EmuMD(rom, lg_region);
+	rom->close();	// TODO: Let EmuMD handle this...
+	
+	if (!gqt4_emuContext->isRomOpened())
+	{
+		// Error loading the ROM image in EmuMD.
+		// TODO: EmuMD error code constants.
+		// TODO: Show an error message.
+		fprintf(stderr, "Error: Initialization of gqt4_emuContext failed. (TODO: Error code.)\n");
+		delete gqt4_emuContext;
+		gqt4_emuContext = NULL;
+		delete rom;
+		return 5;
+	}
+	
+	// Save the Rom class pointer as m_rom.
+	m_rom = rom;
+	
+	// m_rom isn't deleted, since keeping it around
+	// indicates that a game is running.
+	// TODO: Use gqt4_emuContext instead?
+	
+	// Open audio.
+	m_audio->open();
+	
+	// Initialize timing information.
+	m_lastTime = LibGens::Timing::GetTimeD();
+	m_lastTime_fps = m_lastTime;
+	m_frames = 0;
+	
+	// Initialize controllers.
+	gqt4_config->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port1, CtrlConfig::PORT_1);
+	gqt4_config->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port2, CtrlConfig::PORT_2);
+	gqt4_config->m_ctrlConfig->clearDirty();
+	
+	// Start the emulation thread.
+	m_paused.data = 0;
+	if (createEmuThread)
+	{
+		gqt4_emuThread = new EmuThread();
+		QObject::connect(gqt4_emuThread, SIGNAL(frameDone(bool)),
+				 this, SLOT(emuFrameDone(bool)));
+		gqt4_emuThread->start();
+	}
+	
+	// Update the Gens title.
+	emit stateChanged();
+	return 0;
 }
 
 }

@@ -71,7 +71,7 @@ MACRO(PROCESS_ROM_COMPAT out_html_files)
 ENDMACRO(PROCESS_ROM_COMPAT)
 
 # Process the ROM compatibility lists.
-PROCESS_ROM_COMPAT(HTML_FILES test.txt)
+PROCESS_ROM_COMPAT(HTML_FILES ${ROM_LISTS})
 
 # Copy the CSS file to the build directory.
 ADD_CUSTOM_COMMAND(
