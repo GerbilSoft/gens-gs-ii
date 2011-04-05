@@ -84,7 +84,7 @@ BEGIN {
 	printf "\t<tr class=\"pcnt_%s\">\n", $3
 	printf "\t\t<td class='name'>%s</td>\n", name
 	printf "\t\t<td class='crc32'>%s</td>\n", crc32
-	printf "\t\t<td class='pcnt_working'>%d%%</td>\n", $3
+	printf "\t\t<td class='pcnt_working'>%s%%</td>\n", $3
 	printf "\t\t<td class='version'>%s</td>\n", version
 	printf "\t\t<td class='notes'>%s</td>\n", notes
 	print "\t</tr>"
