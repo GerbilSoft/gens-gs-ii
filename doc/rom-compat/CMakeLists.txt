@@ -23,8 +23,8 @@
 PROJECT(rom-compat)
 cmake_minimum_required(VERSION 2.6)
 
-# Check if we have gawk installed.
-FIND_PROGRAM(HAVE_GAWK gawk)
+# Check if we have an awk interpreter installed.
+FIND_PROGRAM(HAVE_GAWK awk)
 IF(NOT HAVE_GAWK)
 	MESSAGE(WARNING "gawk not found.\nROM compatibility lists will not be processed.")
 ELSE(NOT HAVE_GAWK)
