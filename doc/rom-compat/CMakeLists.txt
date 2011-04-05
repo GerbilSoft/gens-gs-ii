@@ -53,7 +53,6 @@ MACRO(PROCESS_ROM_COMPAT out_html_files)
 		# Prepend directory names.
 		SET(PRC_TMP_TXT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${PRC_TMP_TXT_FILE}")
 		SET(PRC_TMP_HTML_FILE "${CMAKE_CURRENT_BINARY_DIR}/${PRC_TMP_HTML_FILE}")
-		MESSAGE(STATUS html: ${PRC_TMP_HTML_FILE})
 		
 		# Create the custom command.
 		ADD_CUSTOM_COMMAND(
@@ -73,7 +72,6 @@ ENDMACRO(PROCESS_ROM_COMPAT)
 
 # Process the ROM compatibility lists.
 PROCESS_ROM_COMPAT(HTML_FILES test.txt)
-MESSAGE(STATUS HTML_FILES: ${HTML_FILES})
 
 # Copy the CSS file to the build directory.
 ADD_CUSTOM_COMMAND(
@@ -83,7 +81,6 @@ ADD_CUSTOM_COMMAND(
 	)
 
 IF(HAVE_GAWK)
-	MESSAGE(STATUS "adding target")
 	ADD_CUSTOM_TARGET(rom-compat_target ALL
 		DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${ROM_COMPAT_CSS}" ${HTML_FILES}
 		)
