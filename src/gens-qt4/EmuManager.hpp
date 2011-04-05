@@ -112,6 +112,12 @@ class EmuManager : public QObject
 		void osdShowPreview(int duration, const QImage& img);
 	
 	protected:
+		// Load ROM.
+		// HACK: Works around the threading issue when opening a new ROM without closing the old one.
+		// TODO: Fix the threading issue!
+		int loadRom_int(LibGens::Rom *rom);
+		LibGens::Rom *m_loadRom_int_tmr_rom;
+		
 		/**
 		 * GetLgRegionCode(): Determine the LibGens region code to use.
 		 * @param confRegionCode Current GensConfig region code.
@@ -150,6 +156,14 @@ class EmuManager : public QObject
 	protected slots:
 		// Frame done signal from EmuThread.
 		void emuFrameDone(bool wasFastFrame);
+		
+		// Calls openRom_int() with the stored filename.
+		// HACK: Works around the threading issue when opening a new ROM without closing the old one.
+		void sl_loadRom_int(void)
+		{
+			loadRom_int(m_loadRom_int_tmr_rom);
+			m_loadRom_int_tmr_rom = NULL;
+		}
 	
 	/** Translatable string functions. **/
 	
@@ -235,7 +249,6 @@ class EmuManager : public QObject
 				RQT_SAVE_SLOT		= 11,
 				RQT_RESET_CPU		= 12,
 				RQT_REGION_CODE		= 13,
-				RQT_LOAD_ROM		= 14,
 			};
 			
 			// RQT_PALETTE_SETTING types.
@@ -290,14 +303,6 @@ class EmuManager : public QObject
 				
 				// Region code.
 				GensConfig::ConfRegionCode_t region;
-				
-				// Load ROM.
-				struct
-				{
-					LibGens::Rom *rom;
-					QString *filename;
-					QString *z_filename;
-				} loadRom;
 			};
 		};
 		
@@ -404,8 +409,6 @@ class EmuManager : public QObject
 		void doResetCpu(ResetCpuIndex cpu_idx);
 		
 		void doRegionCode(GensConfig::ConfRegionCode_t region);
-		
-		int doLoadRom(LibGens::Rom *rom);
 };
 
 
