@@ -36,6 +36,9 @@
 // CPU flags.
 #include "libgens/Util/cpuflags.h"
 
+// Qt includes.
+#include <QtCore/QMutexLocker>
+
 namespace GensQt4
 {
 
@@ -66,6 +69,7 @@ void GensPortAudio::open(void)
 	
 	// Initialize the buffer before initializing PortAudio.
 	// This prevents a race condition.
+	QMutexLocker locker(&m_mtxBuffer);
 	memset(m_buffer, 0x00, sizeof(m_buffer));
 	m_bufferPos = 0;
 	m_sampleSize = (sizeof(int16_t) * (m_stereo ? 2 : 1));
@@ -143,6 +147,8 @@ void GensPortAudio::open(void)
  */
 void GensPortAudio::close(void)
 {
+	QMutexLocker locker(&m_mtxBuffer);
+	
 	if (!m_open)
 		return;
 	
@@ -250,6 +256,8 @@ int GensPortAudio::gensPaCallback(const void *inputBuffer, void *outputBuffer,
 				  const PaStreamCallbackTimeInfo *timeInfo,
 				  PaStreamCallbackFlags statusFlags)
 {
+	QMutexLocker locker(&m_mtxBuffer);
+	
 	// NOTE: Sample size is 16-bit, but we're using 8-bit here
 	// for convenience, since everything's measured in bytes.
 	uint8_t *out = (uint8_t*)outputBuffer;
@@ -291,6 +299,8 @@ int GensPortAudio::gensPaCallback(const void *inputBuffer, void *outputBuffer,
  */
 int GensPortAudio::write(void)
 {
+	QMutexLocker locker(&m_mtxBuffer);
+	
 	if (!m_open)
 		return 1;
 	

@@ -94,6 +94,7 @@ class GensPortAudio : public ABackend
 		// Audio buffer.
 		int16_t m_buffer[1024*SEGMENTS_TO_BUFFER*2];
 		unsigned long m_bufferPos; // Byte position in m_buffer.
+		QMutex m_mtxBuffer;
 		
 		// Sample size. (Calculated on open().)
 		int m_sampleSize;
