@@ -309,7 +309,7 @@ int GensPortAudio::write(void)
 	int segLength = (LibGens::SoundMgr::GetSegLength() * m_sampleSize);
 	if ((m_bufferPos + segLength) > sizeof(m_buffer))
 	{
-		printf("internal buffer overflow\n");
+		fprintf(stderr, "GensPortAudio::%s(): Internal buffer overflow.\n", __func__);
 		return 1;
 	}
 	
