@@ -69,10 +69,11 @@ void GensPortAudio::open(void)
 	
 	// Initialize the buffer before initializing PortAudio.
 	// This prevents a race condition.
-	QMutexLocker locker(&m_mtxBuffer);
+	m_mtxBuffer.lock();
 	memset(m_buffer, 0x00, sizeof(m_buffer));
 	m_bufferPos = 0;
 	m_sampleSize = (sizeof(int16_t) * (m_stereo ? 2 : 1));
+	m_mtxBuffer.unlock();
 	
 	// Initialize PortAudio.
 	int err = Pa_Initialize();
@@ -147,8 +148,6 @@ void GensPortAudio::open(void)
  */
 void GensPortAudio::close(void)
 {
-	QMutexLocker locker(&m_mtxBuffer);
-	
 	if (!m_open)
 		return;
 	
