@@ -182,6 +182,13 @@ int EmuMD::hardReset(void)
 	SoundMgr::ms_Psg.reset();
 	SoundMgr::ms_Ym2612.reset();
 	
+	// Make sure the VDP's video mode bit is set properly.
+	// TODO: Make a VdpIo inline function for this?
+	if (M68K_Mem::ms_SysVersion.isPal())
+		VdpIo::VDP_Status |= 0x0001;	// PAL: Set the PAL bit.
+	else
+		VdpIo::VDP_Status &= ~0x0001;	// NTSC: Clear the PAL bit.
+	
 	// Reset successful.
 	return 0;
 }
@@ -224,13 +231,13 @@ int EmuMD::setRegion_int(SysVersion::RegionCode_t region, bool preserveState)
 	{
 		M68K_Mem::CPL_M68K = (int)floor((((double)CLOCK_PAL / 7.0) / 50.0) / 312.0);
 		M68K_Mem::CPL_Z80 = (int)floor((((double)CLOCK_PAL / 15.0) / 50.0) / 312.0);
-		VdpIo::VDP_Status |= 0x0001;	// Set the PAL bit.
+		VdpIo::VDP_Status |= 0x0001;	// PAL: Set the PAL bit.
 	}
 	else
 	{
 		M68K_Mem::CPL_M68K = (int)floor((((double)CLOCK_NTSC / 7.0) / 60.0) / 262.0);
 		M68K_Mem::CPL_Z80 = (int)floor((((double)CLOCK_NTSC / 15.0) / 60.0) / 262.0);
-		VdpIo::VDP_Status &= ~0x0001;	// Clear the PAL bit.
+		VdpIo::VDP_Status &= ~0x0001;	// NTSC: Clear the PAL bit.
 	}
 	
 	// Initialize audio.
