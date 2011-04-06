@@ -87,14 +87,14 @@ class ABackend
 		 * @param dest Destination buffer.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int writeStereo(int16_t *dest);
+		static int WriteStereo(int16_t *dest);
 		
 		/**
 		 * writeMono(): Write the current segment to the audio buffer. (Monaural output)
 		 * @param dest Destination buffer.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int writeMono(int16_t *dest);
+		static int WriteMono(int16_t *dest);
 		
 #ifdef HAVE_MMX
 		/**
@@ -102,14 +102,14 @@ class ABackend
 		 * @param dest Destination buffer.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int writeStereoMMX(int16_t *dest);
+		static int WriteStereoMMX(int16_t *dest);
 		
 		/**
 		 * writeMonoMMX(): Write the current segment to the audio buffer. (Monaural output; MMX-optimized)
 		 * @param dest Destination buffer.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int writeMonoMMX(int16_t *dest);
+		static int WriteMonoMMX(int16_t *dest);
 #endif
 };
 

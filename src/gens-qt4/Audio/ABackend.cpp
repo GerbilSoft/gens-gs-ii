@@ -54,11 +54,11 @@ ABackend::~ABackend()
 
 
 /**
- * writeStereo(): Write the current segment to the audio buffer. (Stereo output)
+ * WriteStereo(): Write the current segment to the audio buffer. (Stereo output)
  * @param dest Destination buffer.
  * @return 0 on success; non-zero on error.
  */
-int ABackend::writeStereo(int16_t *dest)
+int ABackend::WriteStereo(int16_t *dest)
 {
 	// Segment length.
 	const int SegLength = LibGens::SoundMgr::GetSegLength();
@@ -92,11 +92,11 @@ int ABackend::writeStereo(int16_t *dest)
 
 
 /**
- * writeMono(): Write the current segment to the audio buffer. (Monaural output)
+ * WriteMono(): Write the current segment to the audio buffer. (Monaural output)
  * @param dest Destination buffer.
  * @return 0 on success; non-zero on error.
  */
-int ABackend::writeMono(int16_t *dest)
+int ABackend::WriteMono(int16_t *dest)
 {
 	// Segment length.
 	const int SegLength = LibGens::SoundMgr::GetSegLength();
@@ -126,11 +126,11 @@ int ABackend::writeMono(int16_t *dest)
 
 #ifdef HAVE_MMX
 /**
- * writeStereoMMX(): Write the current segment to the audio buffer. (Stereo output; MMX-optimized)
+ * WriteStereoMMX(): Write the current segment to the audio buffer. (Stereo output; MMX-optimized)
  * @param dest Destination buffer.
  * @return 0 on success; non-zero on error.
  */
-int ABackend::writeStereoMMX(int16_t *dest)
+int ABackend::WriteStereoMMX(int16_t *dest)
 {
 	// Segment length.
 	const int SegLength = LibGens::SoundMgr::GetSegLength();
@@ -202,11 +202,11 @@ int ABackend::writeStereoMMX(int16_t *dest)
 
 
 /**
- * writeMonoMMX(): Write the current segment to the audio buffer. (Monaural output; MMX-optimized)
+ * WriteMonoMMX(): Write the current segment to the audio buffer. (Monaural output; MMX-optimized)
  * @param dest Destination buffer.
  * @return 0 on success; non-zero on error.
  */
-int ABackend::writeMonoMMX(int16_t *dest)
+int ABackend::WriteMonoMMX(int16_t *dest)
 {
 	// Segment length.
 	const int SegLength = LibGens::SoundMgr::GetSegLength();

@@ -322,16 +322,16 @@ int GensPortAudio::write(void)
 	{
 		// MMX is supported.
 		if (m_stereo)
-			ret = writeStereoMMX(buf);
+			ret = WriteStereoMMX(buf);
 		else
-			ret = writeMonoMMX(buf);
+			ret = WriteMonoMMX(buf);
 	}
 	else
 #endif /* HAVE_MMX */
 	if (m_stereo)
-		ret = writeStereo(buf);
+		ret = WriteStereo(buf);
 	else
-		ret = writeMono(buf);
+		ret = WriteMono(buf);
 	
 	// Increment the buffer position.
 	m_bufferPos += segLength;
