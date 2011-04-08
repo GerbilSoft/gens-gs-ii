@@ -130,6 +130,10 @@ class EmuContext
 		inline const SRam *getSRam(void) const { return &m_SRam; }
 		inline const EEPRom *getEEPRom(void) const { return &m_EEPRom; }
 		
+		// Save data enable bit.
+		bool saveDataEnable(void);
+		void setSaveDataEnable(bool newSaveDataEnable);
+		
 		// Static functions. Temporarily needed for SRam/EEPRom.
 		static inline bool GetSaveDataEnable(void) { return instance->m_saveDataEnable; }
 		static inline SRam *GetSRam(void) { return instance->getSRam(); }
@@ -172,6 +176,11 @@ class EmuContext
 	private:
 		static int ms_RefCount;
 };
+
+inline bool EmuContext::saveDataEnable(void)
+	{ return m_saveDataEnable; }
+inline void EmuContext::setSaveDataEnable(bool newSaveDataEnable)
+	{ m_saveDataEnable = newSaveDataEnable; }
 
 }
 
