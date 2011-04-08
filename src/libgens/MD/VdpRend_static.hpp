@@ -35,8 +35,8 @@ namespace LibGens
 // Palette manager.
 VdpPalette VdpRend::m_palette;
 
-// Screen buffer.
-VdpRend::Screen_t VdpRend::MD_Screen;
+// MD framebuffer.
+MdFb VdpRend::MD_Screen;
 
 // Sprite structs.
 VdpRend::Sprite_Struct_t VdpRend::Sprite_Struct[128];

@@ -57,7 +57,6 @@ SET(libgens_SRCS
 	MD/VdpIo.cpp
 	MD/VdpRend.cpp
 	MD/VdpRend_m5.cpp
-	MD/TAB336.c
 	MD/EmuMD.cpp
 	MD/VdpPalette.cpp
 	Save/GensZomg.cpp
@@ -101,6 +100,7 @@ SET(libgens_SRCS
 	Data/32X/fw_32x.c
 	MD/VdpRend_Err.cpp
 	MD/VGA_charset.c
+	Util/MdFb.cpp
 	)
 
 IF(HAVE_LZMA)

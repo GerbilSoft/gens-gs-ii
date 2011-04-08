@@ -382,7 +382,7 @@ void VBackend::updatePausedEffect(bool fromMdScreen)
 {
 	// Allocate the internal framebuffer, if necessary.
 	if (!m_intScreen)
-		m_intScreen = new LibGens::VdpRend::Screen_t;
+		m_intScreen = new LibGens::MdFb();
 	
 	// Use LibGens' software paused effect function.
 	LibGens::PausedEffect::DoPausedEffect(m_intScreen, fromMdScreen);
@@ -400,7 +400,7 @@ void VBackend::updateFastBlur(bool fromMdScreen)
 {
 	// Allocate the internal framebuffer, if necessary.
 	if (!m_intScreen)
-		m_intScreen = new LibGens::VdpRend::Screen_t;
+		m_intScreen = new LibGens::MdFb();
 	
 	// Use LibGens' software paused effect function.
 	LibGens::FastBlur::DoFastBlur(m_intScreen, fromMdScreen);

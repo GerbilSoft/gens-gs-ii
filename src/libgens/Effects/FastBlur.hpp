@@ -34,10 +34,12 @@
 namespace LibGens
 {
 
+class MdFb;
+
 class FastBlur
 {
 	public:
-		static void DoFastBlur(void *outScreen, bool fromMdScreen = true);
+		static void DoFastBlur(MdFb *outScreen, bool fromMdScreen = true);
 	
 	protected:
 		template<typename pixel, pixel mask>

@@ -37,10 +37,12 @@
 namespace LibGens
 {
 
+class MdFb;
+
 class PausedEffect
 {
 	public:
-		static void DoPausedEffect(void *outScreen, bool fromMdScreen = true);
+		static void DoPausedEffect(MdFb *outScreen, bool fromMdScreen = true);
 	
 	protected:
 		template<typename pixel, pixel RMask, pixel GMask, pixel BMask,

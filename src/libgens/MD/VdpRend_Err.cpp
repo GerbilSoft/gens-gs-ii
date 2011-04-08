@@ -26,7 +26,6 @@
 #include <string.h>
 
 // VDP includes.
-#include "TAB336.h"
 #include "VdpIo.hpp"
 #include "VdpRend.hpp"
 #include "VGA_charset.h"
@@ -99,7 +98,8 @@ template<typename pixel>
 inline void VdpRend_Err::T_DrawColorBars(pixel *screen, const pixel palette[22])
 {
 	// Go to the correct position in the screen.
-	screen += TAB336[VdpIo::VDP_Lines.Visible.Border_Size] + 8;
+	// TODO: Update to use MdFb.
+	screen += (VdpIo::VDP_Lines.Visible.Border_Size * 336);
 	const int HPix = VdpIo::GetHPix();	// Get horizontal pixel count.
 	const int pitch_diff = (336 - HPix);	// Calculate pitch difference.
 	
@@ -189,7 +189,8 @@ template<typename pixel>
 inline void VdpRend_Err::T_DrawColorBars_Border(pixel *screen, const pixel bg_color)
 {
 	// Draw the top border.
-	for (unsigned int i = (TAB336[VdpIo::VDP_Lines.Visible.Border_Size]); i != 0; i -= 4, screen += 4)
+	// TODO: Update to use MdFb.
+	for (unsigned int i = (VdpIo::VDP_Lines.Visible.Border_Size * 336); i != 0; i -= 4, screen += 4)
 	{
 		*screen = bg_color;
 		*(screen + 1) = bg_color;
@@ -239,11 +240,13 @@ inline void VdpRend_Err::T_DrawColorBars_Border(pixel *screen, const pixel bg_co
 	else
 	{
 		// Go to the bottom border.
-		screen += (TAB336[VdpIo::VDP_Lines.Visible.Total]);
+		// TODO: Update to use MdFb.
+		screen += (VdpIo::VDP_Lines.Visible.Total * 336);
 	}
 	
 	// Draw the bottom border.
-	for (unsigned int i = (TAB336[VdpIo::VDP_Lines.Visible.Border_Size]); i != 0; i -= 4, screen += 4)
+	// TODO: Update to use MdFb.
+	for (unsigned int i = (VdpIo::VDP_Lines.Visible.Border_Size * 336); i != 0; i -= 4, screen += 4)
 	{
 		*screen = bg_color;
 		*(screen + 1) = bg_color;
@@ -326,7 +329,8 @@ inline void VdpRend_Err::T_DrawChr(pixel *screen, int chr)
 template<typename pixel, pixel text_color>
 inline void VdpRend_Err::T_DrawText(pixel *screen, int x, int y, const char *str)
 {
-	pixel *scr_ptr = &screen[TAB336[y] + x + 8];
+	// TODO: Update to use MdFb.
+	pixel *scr_ptr = &screen[(y * 336) + x];
 	
 	for (; *str != 0x00; scr_ptr += 8, str++)
 	{
@@ -461,19 +465,19 @@ void VdpRend_Err::Render_Line(void)
 		switch (VdpRend::m_palette.bpp())
 		{
 			case VdpPalette::BPP_15:
-				T_DrawColorBars<uint16_t>(VdpRend::MD_Screen.u16, cb15);
-				T_DrawVDPErrorMessage<uint16_t, 0x7FFF>(VdpRend::MD_Screen.u16);
+				T_DrawColorBars<uint16_t>(VdpRend::MD_Screen.fb16(), cb15);
+				T_DrawVDPErrorMessage<uint16_t, 0x7FFF>(VdpRend::MD_Screen.fb16());
 				break;
 			
 			case VdpPalette::BPP_16:
-				T_DrawColorBars<uint16_t>(VdpRend::MD_Screen.u16, cb16);
-				T_DrawVDPErrorMessage<uint16_t, 0xFFFF>(VdpRend::MD_Screen.u16);
+				T_DrawColorBars<uint16_t>(VdpRend::MD_Screen.fb16(), cb16);
+				T_DrawVDPErrorMessage<uint16_t, 0xFFFF>(VdpRend::MD_Screen.fb16());
 				break;
 			
 			case VdpPalette::BPP_32:
 			default:
-				T_DrawColorBars<uint32_t>(VdpRend::MD_Screen.u32, cb32);
-				T_DrawVDPErrorMessage<uint32_t, 0xFFFFFF>(VdpRend::MD_Screen.u32);
+				T_DrawColorBars<uint32_t>(VdpRend::MD_Screen.fb32(), cb32);
+				T_DrawVDPErrorMessage<uint32_t, 0xFFFFFF>(VdpRend::MD_Screen.fb32());
 				break;
 		}
 		
@@ -495,12 +499,12 @@ void VdpRend_Err::Render_Line(void)
 			// Update the color bar borders.
 			if (VdpRend::m_palette.bpp() != VdpPalette::BPP_32)
 			{
-				T_DrawColorBars_Border<uint16_t>(VdpRend::MD_Screen.u16,
+				T_DrawColorBars_Border<uint16_t>(VdpRend::MD_Screen.fb16(),
 								VdpRend::m_palette.m_palActiveMD.u16[0]);
 			}
 			else
 			{
-				T_DrawColorBars_Border<uint32_t>(VdpRend::MD_Screen.u32,
+				T_DrawColorBars_Border<uint32_t>(VdpRend::MD_Screen.fb32(),
 								VdpRend::m_palette.m_palActiveMD.u32[0]);
 			}
 		}

@@ -28,7 +28,6 @@
 
 #include "VdpRend.hpp"
 #include "VdpIo.hpp"
-#include "TAB336.h"
 
 // M68K_Mem::ms_Region is needed for region detection.
 #include "cpu/M68K_Mem.hpp"
@@ -1456,7 +1455,7 @@ void VdpRend_m5::Render_Line(void)
 		if (LineStart < 0)
 			LineStart += 240;
 	}
-	LineStart = TAB336[LineStart + VdpIo::VDP_Lines.Visible.Border_Size] + 8;
+	LineStart += VdpIo::VDP_Lines.Visible.Border_Size;
 	
 	// TODO: LibGens: Reimplement the borderColorEmulation option.
 #if 0
@@ -1552,9 +1551,15 @@ void VdpRend_m5::Render_Line(void)
 	
 	// Render the image.
 	if (VdpRend::m_palette.bpp() != VdpPalette::BPP_32)
-		T_Render_LineBuf<uint16_t>(&VdpRend::MD_Screen.u16[LineStart], VdpRend::m_palette.m_palActiveMD.u16);
+	{
+		uint16_t *lineBuf16 = VdpRend::MD_Screen.lineBuf16(LineStart);
+		T_Render_LineBuf<uint16_t>(lineBuf16, VdpRend::m_palette.m_palActiveMD.u16);
+	}
 	else
-		T_Render_LineBuf<uint32_t>(&VdpRend::MD_Screen.u32[LineStart], VdpRend::m_palette.m_palActiveMD.u32);
+	{
+		uint32_t *lineBuf32 = VdpRend::MD_Screen.lineBuf32(LineStart);
+		T_Render_LineBuf<uint32_t>(lineBuf32, VdpRend::m_palette.m_palActiveMD.u32);
+	}
 }
 
 

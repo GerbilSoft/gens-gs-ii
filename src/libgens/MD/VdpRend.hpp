@@ -33,6 +33,9 @@
 // VDP palette manager.
 #include "VdpPalette.hpp"
 
+// MD framebuffer.
+#include "../Util/MdFb.hpp"
+
 namespace LibGens
 {
 
@@ -47,13 +50,8 @@ class VdpRend
 		// Palette manager.
 		static VdpPalette m_palette;
 		
-		// Screen buffer.
-		union Screen_t
-		{
-			uint16_t u16[336 * 240];
-			uint32_t u32[336 * 240];
-		};
-		static Screen_t MD_Screen;
+		// MD framebuffer.
+		static MdFb MD_Screen;
 
 		// Sprite structs.
 		struct Sprite_Struct_t

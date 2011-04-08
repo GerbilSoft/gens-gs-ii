@@ -33,7 +33,6 @@
 // LibGens video includes.
 #include "libgens/MD/VdpRend.hpp"
 #include "libgens/MD/VdpIo.hpp"
-#include "libgens/MD/TAB336.h"
 #include "libgens/MD/VdpRend_m5.hpp"
 
 // Controller devices.
@@ -488,21 +487,20 @@ QImage EmuManager::getMDScreen(void) const
 	// Create the QImage.
 	const uint8_t *start;
 	const int startY = ((240 - LibGens::VdpIo::GetVPix()) / 2);
-	const int startX = (8 + LibGens::VdpIo::GetHPixBegin());
-	const int startPx = (TAB336[startY] + startX);
+	const int startX = (LibGens::VdpIo::GetHPixBegin());
 	int bytesPerLine;
 	QImage::Format imgFormat;
 	
 	if (LibGens::VdpRend::m_palette.bpp() == LibGens::VdpPalette::BPP_32)
 	{
-		start = (const uint8_t*)(&LibGens::VdpRend::MD_Screen.u32[startPx]);
-		bytesPerLine = (336 * sizeof(uint32_t));
+		start = (const uint8_t*)(LibGens::VdpRend::MD_Screen.lineBuf32(startY) + startX);
+		bytesPerLine = (LibGens::VdpRend::MD_Screen.pxPerLine() * sizeof(uint32_t));
 		imgFormat = QImage::Format_RGB32;
 	}
 	else
 	{
-		start = (const uint8_t*)(&LibGens::VdpRend::MD_Screen.u16[startPx]);
-		bytesPerLine = (336 * sizeof(uint16_t));
+		start = (const uint8_t*)(LibGens::VdpRend::MD_Screen.lineBuf16(startY) + startX);
+		bytesPerLine = (LibGens::VdpRend::MD_Screen.pxPerLine() * sizeof(uint16_t));
 		if (LibGens::VdpRend::m_palette.bpp() == LibGens::VdpPalette::BPP_16)
 			imgFormat = QImage::Format_RGB16;
 		else

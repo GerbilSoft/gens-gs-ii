@@ -528,9 +528,15 @@ void GLBackend::glb_paintGL(void)
 		}
 		
 		// Determine which screen buffer should be used for video output.
-		GLvoid *screen = (bFromMD
-				? (GLvoid*)LibGens::VdpRend::MD_Screen.u16
-				: (GLvoid*)m_intScreen);
+		// TODO: Optimize this!
+		GLvoid *screen;
+		LibGens::MdFb *src_fb = (bFromMD
+				? &LibGens::VdpRend::MD_Screen
+				: m_intScreen);
+		if (LibGens::VdpRend::m_palette.bpp() != LibGens::VdpPalette::BPP_32)
+			screen = src_fb->fb16();
+		else
+			screen = src_fb->fb32();
 		
 		/** END: Apply effects. **/
 		
@@ -543,7 +549,6 @@ void GLBackend::glb_paintGL(void)
 		
 		// (Re-)Upload the texture.
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 336);
-		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 8);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 8);
 		
 		glTexSubImage2D(GL_TEXTURE_2D, 0,

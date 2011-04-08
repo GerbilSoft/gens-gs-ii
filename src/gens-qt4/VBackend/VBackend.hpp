@@ -35,6 +35,7 @@
 
 // LibGens includes.
 #include "libgens/MD/VdpRend.hpp"
+#include "libgens/Util/MdFb.hpp"
 
 // paused_t
 #include "gqt4_datatypes.h"
@@ -142,7 +143,7 @@ class VBackend : public QWidget
 		
 		// Internal rendering buffer used for software effects.
 		// NOTE: This takes up (336*240*4) == 322,560 bytes!
-		LibGens::VdpRend::Screen_t *m_intScreen;
+		LibGens::MdFb *m_intScreen;
 		
 		// Get the current average FPS.
 		inline double fpsAvg(void)

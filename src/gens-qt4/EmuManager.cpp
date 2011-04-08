@@ -41,7 +41,6 @@
 #include "libgens/MD/VdpPalette.hpp"
 #include "libgens/MD/VdpRend.hpp"
 #include "libgens/MD/VdpIo.hpp"
-#include "libgens/MD/TAB336.h"
 
 // M68K_Mem.hpp has SysRegion.
 #include "libgens/cpu/M68K_Mem.hpp"
