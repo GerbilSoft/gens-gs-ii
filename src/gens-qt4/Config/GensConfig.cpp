@@ -105,6 +105,9 @@ class GensConfigPrivate
 		
 		/** Key configuration. **/
 		GensKeyConfig keyConfig;
+		
+		/** Emulation options. (Options menu) **/
+		bool enableSRam;
 	
 	private:
 		GensConfig *const q;
@@ -283,6 +286,11 @@ int GensConfigPrivate::reload(const QString& filename)
 	q->m_recentRoms->load(settings);
 	settings.endGroup();
 	
+	/** Emulation options. (Options menu) **/
+	settings.beginGroup(QLatin1String("Options"));
+	enableSRam = settings.value(QLatin1String("enableSRam"), true).toBool();
+	settings.endGroup();
+	
 	// Finished loading settings.
 	// NOTE: Caller must call emitAll() for settings to take effect.
 	return 0;
@@ -422,6 +430,11 @@ int GensConfigPrivate::save(const QString& filename)
 	/** Recent ROMs. **/
 	settings.beginGroup(QLatin1String("Recent_ROMs"));
 	q->m_recentRoms->save(settings);
+	settings.endGroup();
+	
+	/** Emulation options. (Options menu) **/
+	settings.beginGroup(QLatin1String("Options"));
+	settings.setValue(QLatin1String("enableSRam"), enableSRam);
 	settings.endGroup();
 	
 	// Finished saving settings.
@@ -567,6 +580,9 @@ void GensConfig::emitAll(void)
 #ifndef Q_WS_MAC
 	emit showMenuBar_changed(d->showMenuBar);
 #endif /* !Q_WS_MAC */
+	
+	/** Emulation options. (Options menu) **/
+	emit enableSRam_changed(d->enableSRam);
 }
 
 
@@ -800,6 +816,9 @@ int GensConfig::keyToAction(GensKey_t key)
 
 GensKey_t GensConfig::actionToKey(int action)
 	{ return d->keyConfig.actionToKey(action); }
+
+/** Emulation options. (Options menu) **/
+GC_PROPERTY_WRITE(bool, enableSRam, bool, EnableSRam)
 
 }
 

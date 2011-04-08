@@ -121,6 +121,10 @@ EmuManager::EmuManager(QObject *parent)
 		this, SLOT(regionCode_changed_slot(GensConfig::ConfRegionCode_t)));
 	connect(gqt4_config, SIGNAL(regionCodeOrder_changed(uint16_t)),
 		this, SLOT(regionCodeOrder_changed_slot(uint16_t)));
+	
+	// Emulation options. (Options menu)
+	connect(gqt4_config, SIGNAL(enableSRam_changed(bool)),
+		this, SLOT(enableSRam_changed_slot(bool)));
 }
 
 EmuManager::~EmuManager()
@@ -431,6 +435,10 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	gqt4_config->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port1, CtrlConfig::PORT_1);
 	gqt4_config->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port2, CtrlConfig::PORT_2);
 	gqt4_config->m_ctrlConfig->clearDirty();
+	
+	// Set the EmuContext settings.
+	// TODO: Load these in EmuContext directly?
+	gqt4_emuContext->setSaveDataEnable(gqt4_config->enableSRam());
 	
 	// Start the emulation thread.
 	m_paused.data = 0;

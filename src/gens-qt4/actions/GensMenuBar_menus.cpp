@@ -139,6 +139,8 @@ const GensMenuBar::MenuItem GensMenuBar::ms_gmiSystemRegion[] =
 /** Options menu. **/
 const GensMenuBar::MenuItem GensMenuBar::ms_gmiOptions[] =
 {
+	{IDM_OPTIONS_ENABLESRAM, GMI_CHECK, "Enable &SRAM/EEPROM", QAction::NoRole, 0, NULL, NULL},
+	{IDM_SEPARATOR, GMI_SEPARATOR, NULL, QAction::NoRole, 0, NULL, NULL},
 	{IDM_OPTIONS_CONTROLLERS, GMI_NORMAL, "&Controllers...", QAction::NoRole, 0, NULL, "input-gaming"},
 	
 	{0, GMI_NORMAL, NULL, QAction::NoRole, 0, NULL, NULL}

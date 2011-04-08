@@ -223,6 +223,10 @@ class GensConfig : public QObject
 		/** Key configuration. **/
 		int keyToAction(GensKey_t key);
 		GensKey_t actionToKey(int action);
+		
+		/** Emulation options. (Options menu) **/
+		Q_PROPERTY(bool enableSRam READ enableSRam WRITE setEnableSRam NOTIFY enableSRam_changed)
+		GC_PROPERTY(bool, enableSRam, bool, EnableSRam)
 	
 	signals:
 		/** Onscreen display. **/
@@ -272,6 +276,9 @@ class GensConfig : public QObject
 		
 		/** GensWindow configuration. **/
 		void showMenuBar_changed(bool newShowMenuBar);
+		
+		/** Emulation options. (Options menu) **/
+		void enableSRam_changed(bool newEnableSRam);
 	
 	private:
 		friend class GensConfigPrivate;

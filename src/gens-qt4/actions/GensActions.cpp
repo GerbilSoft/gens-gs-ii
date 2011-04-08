@@ -313,6 +313,11 @@ bool GensActions::doAction(int action, bool state)
 			// Options menu.
 			switch (MNUID_ITEM(action))
 			{
+				case MNUID_ITEM(IDM_OPTIONS_ENABLESRAM):
+					// Enable SRam/EEPRom.
+					gqt4_config->setEnableSRam(state);
+					break;
+				
 				case MNUID_ITEM(IDM_OPTIONS_CONTROLLERS):
 					// Controller Configuration.
 					CtrlConfigWindow::ShowSingle(m_parent);

@@ -150,6 +150,7 @@ class GensMenuBar : public QObject
 		void recentRoms_updated(void);
 		void stretchMode_changed_slot(GensConfig::StretchMode_t newStretchMode);
 		void regionCode_changed_slot(GensConfig::ConfRegionCode_t newRegionCode);
+		void enableSRam_changed_slot(bool newEnableSRam);
 };
 
 }

@@ -249,6 +249,7 @@ class EmuManager : public QObject
 				RQT_SAVE_SLOT		= 11,
 				RQT_RESET_CPU		= 12,
 				RQT_REGION_CODE		= 13,
+				RQT_ENABLE_SRAM		= 14,
 			};
 			
 			// RQT_PALETTE_SETTING types.
@@ -303,6 +304,9 @@ class EmuManager : public QObject
 				
 				// Region code.
 				GensConfig::ConfRegionCode_t region;
+				
+				// Enable/disable SRam.
+				bool enableSRam;
 			};
 		};
 		
@@ -355,6 +359,12 @@ class EmuManager : public QObject
 		 * @param newRegionCodeOrder New region code auto-detection order setting.
 		 */
 		void regionCodeOrder_changed_slot(uint16_t newRegionCodeOrder);
+		
+		/**
+		 * enableSRam_changed_slot(): Enable SRam/EEPRom setting has changed.
+		 * @param newEnableSRam New Enable SRam/EEPRom setting.
+		 */
+		void enableSRam_changed_slot(bool newEnableSRam);
 	
 	public slots:
 		/**
@@ -409,6 +419,8 @@ class EmuManager : public QObject
 		void doResetCpu(ResetCpuIndex cpu_idx);
 		
 		void doRegionCode(GensConfig::ConfRegionCode_t region);
+		
+		void doEnableSRam(bool enableSRam);
 };
 
 

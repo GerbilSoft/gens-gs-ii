@@ -50,6 +50,8 @@ void GensMenuBarPrivate::syncConnect(void)
 			 q, SLOT(stretchMode_changed_slot(GensConfig::StretchMode_t)));
 	QObject::connect(gqt4_config, SIGNAL(regionCode_changed(GensConfig::ConfRegionCode_t)),
 			 q, SLOT(regionCode_changed_slot(GensConfig::ConfRegionCode_t)));
+	QObject::connect(gqt4_config, SIGNAL(enableSRam_changed(bool)),
+			 q, SLOT(enableSRam_changed_slot(bool)));
 }
 
 
@@ -64,6 +66,7 @@ void GensMenuBarPrivate::syncAll(void)
 	syncRecent();
 	q->stretchMode_changed_slot(gqt4_config->stretchMode());
 	q->regionCode_changed_slot(gqt4_config->regionCode());
+	q->enableSRam_changed_slot(gqt4_config->enableSRam());
 	q->stateChanged();
 	
 	this->unlock();
@@ -165,6 +168,24 @@ void GensMenuBar::regionCode_changed_slot(GensConfig::ConfRegionCode_t newRegion
 	// Set the region code.
 	this->lock();
 	action->setChecked(true);
+	this->unlock();
+}
+
+
+/**
+ * enableSRam_changed_slot(): Enable SRam/EEPRom setting has changed.
+ * @param newEnableSRam New Enable SRam/EEPRom setting.
+ */
+void GensMenuBar::enableSRam_changed_slot(bool newEnableSRam)
+{
+	// Find the action.
+	QAction *action = d->hashActions.value(IDM_OPTIONS_ENABLESRAM, NULL);
+	if (!action)
+		return;
+	
+	// Set the check state.
+	this->lock();
+	action->setChecked(newEnableSRam);
 	this->unlock();
 }
 

@@ -272,6 +272,23 @@ void EmuManager::saveSlot_changed_slot(int newSaveSlot)
 
 
 /**
+ * enableSRam_changed_slot(): Enable SRam/EEPRom setting has changed.
+ * @param newEnableSRam New Enable SRam/EEPRom setting.
+ */
+void EmuManager::enableSRam_changed_slot(bool newEnableSRam)
+{
+	// Queue the Enable SRam/EEPRom request.
+	EmuRequest_t rq;
+	rq.rqType = EmuRequest_t::RQT_ENABLE_SRAM;
+	rq.enableSRam = newEnableSRam;
+	m_qEmuRequest.enqueue(rq);
+	
+	if (!m_rom || m_paused.data)
+		processQEmuRequest();
+}
+
+
+/**
  * autoFixChecksum_changed_slot(): Change the Auto Fix Checksum setting.
  * @param newAutoFixChecksum New Auto Fix Checksum setting.
  */
@@ -446,6 +463,11 @@ void EmuManager::processQEmuRequest(void)
 			case EmuRequest_t::RQT_REGION_CODE:
 				// Set the region code.
 				doRegionCode(rq.region);
+				break;
+			
+			case EmuRequest_t::RQT_ENABLE_SRAM:
+				// Enable/disable SRam/EEPRom.
+				doEnableSRam(rq.enableSRam);
 				break;
 			
 			case EmuRequest_t::RQT_UNKNOWN:
@@ -953,6 +975,33 @@ void EmuManager::doRegionCode(GensConfig::ConfRegionCode_t region)
 	
 	// Update the system name in the GensWindow title bar.
 	emit stateChanged();
+}
+
+
+/**
+ * doEnableSRam(): Enable/disable SRam/EEPRom.
+ * @param enableSRam New enable/disable SRam/EEPRom value.
+ */
+void EmuManager::doEnableSRam(bool enableSRam)
+{
+	if (gqt4_emuContext)
+	{
+		if (gqt4_emuContext->saveDataEnable() == enableSRam)
+		{
+			// SRAM enabled value is the same.
+			// Don't show a message.
+			return;
+		}
+		
+		// Set the SRAM enabled value.
+		gqt4_emuContext->setSaveDataEnable(enableSRam);
+	}
+	
+	// Print a message to the screen.
+	const QString msg = (enableSRam
+				? tr("SRAM/EEPROM enabled.", "osd")
+				: tr("SRAM/EEPROM disabled.", "osd"));
+	emit osdPrintMsg(1500, msg);
 }
 
 }
