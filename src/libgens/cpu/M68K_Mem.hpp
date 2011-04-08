@@ -169,6 +169,11 @@ class M68K_Mem
 		 */
 		static uint8_t ms_M68KBank_Type[32];
 		
+		/**
+		 * msc_M68KBank_Def_MD[]: Default M68K bank type IDs for MD.
+		 */
+		static const uint8_t msc_M68KBank_Def_MD[32];
+		
 		/** Read Byte functions. **/
 		
 		template<uint8_t bank>

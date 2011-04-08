@@ -46,8 +46,9 @@ Ram_68k_t Ram_68k;
 // EmuContext
 #include "../EmuContext.hpp"
 
-// Byteswapping macros.
+// Miscellaneous.
 #include "../Util/byteswap.h"
+#include "../macros/log_msg.h"
 
 // C wrapper functions for Starscream.
 #ifdef __cplusplus
@@ -106,8 +107,45 @@ int M68K_Mem::Cycles_Z80;
 // TODO: Move ms_Region somewhere else?
 SysVersion M68K_Mem::ms_SysVersion;
 
+/**
+ * ms_SSF2_BankState[]: SSF2 bankswitching state.
+ * TODO: Make a helper class for this?
+ */
 uint8_t M68K_Mem::ms_SSF2_BankState[8];
+
+/**
+ * ms_M68KBank_Type[]: M68K bank type identifiers.
+ * These type identifiers indicate what's mapped to each virtual bank.
+ * Banks are 512 KB each, for a total of 32 banks.
+ */
 uint8_t M68K_Mem::ms_M68KBank_Type[32];
+		
+/**
+ * msc_M68KBank_Def_MD[]: Default M68K bank type IDs for MD.
+ */
+const uint8_t M68K_Mem::msc_M68KBank_Def_MD[32] =
+{
+	// $000000 - $3FFFFF: ROM banks.
+	M68K_BANK_ROM_0, M68K_BANK_ROM_1, M68K_BANK_ROM_2, M68K_BANK_ROM_3,
+	M68K_BANK_ROM_4, M68K_BANK_ROM_5, M68K_BANK_ROM_6, M68K_BANK_ROM_7,
+	
+	// $400000 - $7FFFFF: Unused. (Sega CD)
+	M68K_BANK_UNUSED, M68K_BANK_UNUSED, M68K_BANK_UNUSED, M68K_BANK_UNUSED,
+	M68K_BANK_UNUSED, M68K_BANK_UNUSED, M68K_BANK_UNUSED, M68K_BANK_UNUSED,
+	
+	// $800000 - $9FFFFF: Unused. (Sega 32X)
+	M68K_BANK_UNUSED, M68K_BANK_UNUSED, M68K_BANK_UNUSED, M68K_BANK_UNUSED,
+	
+	// $A00000 - $A7FFFF: I/O area.
+	// $A80000 - $BFFFFF: Unused.
+	M68K_BANK_IO, M68K_BANK_UNUSED, M68K_BANK_UNUSED, M68K_BANK_UNUSED,
+	
+	// $C00000 - $DFFFFF: VDP. (specialized mirroring)
+	M68K_BANK_VDP, M68K_BANK_VDP, M68K_BANK_VDP, M68K_BANK_VDP,
+	
+	// $E00000 - $FFFFFF: RAM. (64K mirroring)
+	M68K_BANK_RAM, M68K_BANK_RAM, M68K_BANK_RAM, M68K_BANK_RAM
+};
 
 
 void M68K_Mem::Init(void)
@@ -1229,53 +1267,19 @@ void M68K_Mem::InitSys(M68K::SysID system)
 	memset(ms_SSF2_BankState, 0xFF, sizeof(ms_SSF2_BankState));
 	
 	// Initialize the M68K bank type identifiers.
-	// TODO: Const array of default values?
-	// TODO: System-specific values.
-	
-	// $000000 - $3FFFFF: ROM banks.
-	ms_M68KBank_Type[0x00] = M68K_BANK_ROM_0;
-	ms_M68KBank_Type[0x01] = M68K_BANK_ROM_1;
-	ms_M68KBank_Type[0x02] = M68K_BANK_ROM_2;
-	ms_M68KBank_Type[0x03] = M68K_BANK_ROM_3;
-	ms_M68KBank_Type[0x04] = M68K_BANK_ROM_4;
-	ms_M68KBank_Type[0x05] = M68K_BANK_ROM_5;
-	ms_M68KBank_Type[0x06] = M68K_BANK_ROM_6;
-	ms_M68KBank_Type[0x07] = M68K_BANK_ROM_7;
-	
-	// $400000 - $7FFFFF: Unused. (Sega CD)
-	ms_M68KBank_Type[0x08] = M68K_BANK_UNUSED;
-	ms_M68KBank_Type[0x09] = M68K_BANK_UNUSED;
-	ms_M68KBank_Type[0x0A] = M68K_BANK_UNUSED;
-	ms_M68KBank_Type[0x0B] = M68K_BANK_UNUSED;
-	ms_M68KBank_Type[0x0C] = M68K_BANK_UNUSED;
-	ms_M68KBank_Type[0x0D] = M68K_BANK_UNUSED;
-	ms_M68KBank_Type[0x0E] = M68K_BANK_UNUSED;
-	ms_M68KBank_Type[0x0F] = M68K_BANK_UNUSED;
-	
-	// $800000 - $9FFFFF: Unused. (Sega 32X)
-	ms_M68KBank_Type[0x10] = M68K_BANK_UNUSED;
-	ms_M68KBank_Type[0x11] = M68K_BANK_UNUSED;
-	ms_M68KBank_Type[0x12] = M68K_BANK_UNUSED;
-	ms_M68KBank_Type[0x13] = M68K_BANK_UNUSED;
-	
-	// $A00000 - $A7FFFF: I/O area.
-	// $A80000 - $BFFFFF: Unused.
-	ms_M68KBank_Type[0x14] = M68K_BANK_IO;
-	ms_M68KBank_Type[0x15] = M68K_BANK_UNUSED;
-	ms_M68KBank_Type[0x16] = M68K_BANK_UNUSED;
-	ms_M68KBank_Type[0x17] = M68K_BANK_UNUSED;
-	
-	// $C00000 - $DFFFFF: VDP. (specialized mirroring)
-	ms_M68KBank_Type[0x18] = M68K_BANK_VDP;
-	ms_M68KBank_Type[0x19] = M68K_BANK_VDP;
-	ms_M68KBank_Type[0x1A] = M68K_BANK_VDP;
-	ms_M68KBank_Type[0x1B] = M68K_BANK_VDP;
-	
-	// $E00000 - $FFFFFF: RAM. (64K mirroring)
-	ms_M68KBank_Type[0x1C] = M68K_BANK_RAM;
-	ms_M68KBank_Type[0x1D] = M68K_BANK_RAM;
-	ms_M68KBank_Type[0x1E] = M68K_BANK_RAM;
-	ms_M68KBank_Type[0x1F] = M68K_BANK_RAM;
+	switch (system)
+	{
+		case M68K::SYSID_MD:
+			memcpy(ms_M68KBank_Type, msc_M68KBank_Def_MD, sizeof(ms_M68KBank_Type));
+			break;
+		
+		default:
+			// Unknown system ID.
+			LOG_MSG(68k, LOG_MSG_LEVEL_ERROR,
+				"Unknwon system ID: %d", system);
+			memset(ms_M68KBank_Type, 0x00, sizeof(ms_M68KBank_Type));
+			break;
+	}
 }
 
 
