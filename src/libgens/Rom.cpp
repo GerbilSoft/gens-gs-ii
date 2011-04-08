@@ -540,13 +540,15 @@ int Rom::initSRam(SRam *sram) const
 	start &= ~1;
 	end |= 1;
 	
-	// If the ROM is smaller than the SRam starting address, always enable SRam.
-	// TODO: Instead of hardcoding 2 MB, use SRAM_Start.
-	if (m_romSize <= 0x200000)
-	{
-		sram->setOn(true);
-		sram->setWrite(true);
-	}
+	/**
+	 * If the ROM is smaller than the SRam starting address, always enable SRam.
+	 * Notes:
+	 * - HardBall '95: SRAM is at $300000; ROM is 3 MB; cartridge does NOT have $A130F1 register.
+	 *                 Need to enable SRAM initially; otherwise, an error appears on startup.
+	 */
+	const bool enableSRam = (m_romSize <= start);
+	sram->setOn(enableSRam);
+	sram->setWrite(enableSRam);
 	
 	// Apply hacks for certain ROMs.
 	if (!strncmp("T-113016", &m_mdHeader.serialNumber[3], 8))
