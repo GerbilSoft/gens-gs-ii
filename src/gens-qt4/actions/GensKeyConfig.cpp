@@ -142,6 +142,10 @@ const GensKeyConfigPrivate::DefKeySetting_t GensKeyConfigPrivate::DefKeySettings
 	{IDM_SYSTEM_CPURESET_M68K, 0,				"system/resetM68K"},
 	{IDM_SYSTEM_CPURESET_Z80, 0,				"system/resetZ80"},
 	
+	// Options menu.
+	{IDM_OPTIONS_ENABLESRAM, 0,				"options/enableSRam"},
+	{IDM_OPTIONS_CONTROLLERS, 0,				"options/controllers"},
+	
 	// NOTE: Test menus aren't going to be added here.
 	
 	// Help menu.
