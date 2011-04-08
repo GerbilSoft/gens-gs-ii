@@ -46,6 +46,9 @@ Ram_68k_t Ram_68k;
 // EmuContext
 #include "../EmuContext.hpp"
 
+// Byteswapping macros.
+#include "../Util/byteswap.h"
+
 // C wrapper functions for Starscream.
 #ifdef __cplusplus
 extern "C" {
@@ -104,7 +107,7 @@ int M68K_Mem::Cycles_Z80;
 SysVersion M68K_Mem::ms_SysVersion;
 
 uint8_t M68K_Mem::ms_SSF2_BankState[8];
-uint8_t *M68K_Mem::ms_RomData_ptrs[8];
+uint8_t M68K_Mem::ms_M68KBank_Type[32];
 
 
 void M68K_Mem::Init(void)
@@ -115,10 +118,6 @@ void M68K_Mem::Init(void)
 	
 	// Initialize the SSF2 bankswitching state.
 	memset(ms_SSF2_BankState, 0xFF, sizeof(ms_SSF2_BankState));
-	
-	// Initialize the ROM data pointers.
-	for (int i = 0; i < 8; i++)
-		ms_RomData_ptrs[i] = &Rom_Data.u8[i * 0x80000];
 }
 
 
@@ -129,32 +128,44 @@ void M68K_Mem::End(void)
 
 /** Read Byte functions. **/
 
+/**
+ * BYTE_ADDR_INVERT: Inversion flag for byte-addressing.
+ * ROM and RAM is stored in host 16-bit endian.
+ * Hence, bytewide access needs to have the LSB inverted
+ * on little-endian machines.
+ */
+#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+#define BYTE_ADDR_INVERT 1
+#else /* GENS_BYTEORDER = GENS_BIG_ENDIAN */
+#define BYTE_ADDR_INVERT 0
+#endif
 
 /**
- * M68K_Read_Byte_Rom(): Read a byte from ROM.
- * TODO: XOR by 1 on little-endian systems only.
+ * T_M68K_Read_Byte_Rom(): Read a byte from ROM.
+ * @param bank Physical ROM bank.
  * @param address Address.
  * @return Byte from ROM.
  */
-inline uint8_t M68K_Mem::M68K_Read_Byte_Rom(uint32_t address)
+template<uint8_t bank>
+inline uint8_t M68K_Mem::T_M68K_Read_Byte_Rom(uint32_t address)
 {
-	const uint8_t bank = (address >> 19) & 0x07;
 	address &= 0x7FFFF;
-	address ^= 1;	// TODO: LE only!
-	return ms_RomData_ptrs[bank][address];
+	address ^= ((bank << 19) | BYTE_ADDR_INVERT);
+	return Rom_Data.u8[address];
 }
 // TODO: Add banks C, D, E, and F for 8 MB ROM support.
 // For now, they will return 0x00.
 
 
 /**
- * M68K_Read_Byte_Rom_SRam(): Read a byte from ROM or SRam/EEPRom.
+ * T_M68K_Read_Byte_Rom_SRam(): Read a byte from ROM or SRam/EEPRom.
  * TODO: Verify that this works for 0x300000/0x380000.
- * TODO: XOR by 1 on little-endian systems only.
+ * @param bank Physical ROM bank.
  * @param address Address.
  * @return Byte from ROM or SRam/EEPRom.
  */
-inline uint8_t M68K_Mem::M68K_Read_Byte_Rom_SRam(uint32_t address)
+template<uint8_t bank>
+inline uint8_t M68K_Mem::T_M68K_Read_Byte_Rom_SRam(uint32_t address)
 {
 	// Check if this is a save data request.
 	if (EmuContext::GetSaveDataEnable())
@@ -184,7 +195,7 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Rom_SRam(uint32_t address)
 	}
 	
 	// Not SRam/EEPRom. Return the ROM data.
-	return M68K_Read_Byte_Rom(address);
+	return T_M68K_Read_Byte_Rom<bank>(address);
 }
 
 
@@ -367,30 +378,31 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 
 
 /**
- * M68K_Read_Word_Rom(): Read a word from ROM.
+ * T_M68K_Read_Word_Rom(): Read a word from ROM.
+ * @param bank Physical ROM bank.
  * @param address Address.
  * @return Word from ROM.
  */
-inline uint16_t M68K_Mem::M68K_Read_Word_Rom(uint32_t address)
+template<uint8_t bank>
+inline uint16_t M68K_Mem::T_M68K_Read_Word_Rom(uint32_t address)
 {
-	const uint8_t bank = (address >> 19) & 0x07;
-	address &= 0x7FFFE;
-	address >>= 1;
-	
-	// TODO: ms_RomData_ptrs should provide u8 and u16.
-	return ((uint16_t*)ms_RomData_ptrs[bank])[address];
+	address &= 0x7FFFF;
+	address |= (bank << 19);
+	return Rom_Data.u16[address >> 1];
 }
 // TODO: Add banks C, D, E, and F for 8 MB ROM support.
 // For now, they will return 0x00.
 
 
 /**
- * M68K_Read_Word_Rom_SRam(): Read a word from ROM or SRam/EEPRom.
+ * T_M68K_Read_Word_Rom_SRam(): Read a word from ROM or SRam/EEPRom.
  * TODO: Verify that this works for 0x300000/0x380000.
+ * @param bank Physical ROM bank.
  * @param address Address.
  * @return Word from ROM or SRam/EEPRom.
  */
-inline uint16_t M68K_Mem::M68K_Read_Word_Rom_SRam(uint32_t address)
+template<uint8_t bank>
+inline uint16_t M68K_Mem::T_M68K_Read_Word_Rom_SRam(uint32_t address)
 {
 	// Check if this is a save data request.
 	if (EmuContext::GetSaveDataEnable())
@@ -420,7 +432,7 @@ inline uint16_t M68K_Mem::M68K_Read_Word_Rom_SRam(uint32_t address)
 	}
 	
 	// Not SRam/EEPRom. Return the ROM data.
-	return M68K_Read_Word_Rom(address);
+	return T_M68K_Read_Word_Rom<bank>(address);
 }
 
 
@@ -795,8 +807,8 @@ inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 			ms_SSF2_BankState[phys_bank] = virt_bank;
 		}
 		
-		// Update the ROM data pointers.
-		ms_RomData_ptrs[phys_bank] = &Rom_Data.u8[virt_bank * 0x80000];
+		// Update the M68K bank type identifiers.
+		ms_M68KBank_Type[phys_bank] = (M68K_BANK_ROM_0 + virt_bank);
 		return;
 	}
 	else if (address > 0xA1001F)
@@ -1102,8 +1114,8 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 			ms_SSF2_BankState[phys_bank] = virt_bank;
 		}
 		
-		// Update the ROM data pointers.
-		ms_RomData_ptrs[phys_bank] = &Rom_Data.u8[virt_bank * 0x80000];
+		// Update the M68K bank type identifiers.
+		ms_M68KBank_Type[phys_bank] = (M68K_BANK_ROM_0 + virt_bank);
 		return;
 	}
 	else if (address > 0xA1001F)
@@ -1215,6 +1227,55 @@ void M68K_Mem::InitSys(M68K::SysID system)
 {
 	// Initialize the SSF2 bankswitching state.
 	memset(ms_SSF2_BankState, 0xFF, sizeof(ms_SSF2_BankState));
+	
+	// Initialize the M68K bank type identifiers.
+	// TODO: Const array of default values?
+	// TODO: System-specific values.
+	
+	// $000000 - $3FFFFF: ROM banks.
+	ms_M68KBank_Type[0x00] = M68K_BANK_ROM_0;
+	ms_M68KBank_Type[0x01] = M68K_BANK_ROM_1;
+	ms_M68KBank_Type[0x02] = M68K_BANK_ROM_2;
+	ms_M68KBank_Type[0x03] = M68K_BANK_ROM_3;
+	ms_M68KBank_Type[0x04] = M68K_BANK_ROM_4;
+	ms_M68KBank_Type[0x05] = M68K_BANK_ROM_5;
+	ms_M68KBank_Type[0x06] = M68K_BANK_ROM_6;
+	ms_M68KBank_Type[0x07] = M68K_BANK_ROM_7;
+	
+	// $400000 - $7FFFFF: Unused. (Sega CD)
+	ms_M68KBank_Type[0x08] = M68K_BANK_UNUSED;
+	ms_M68KBank_Type[0x09] = M68K_BANK_UNUSED;
+	ms_M68KBank_Type[0x0A] = M68K_BANK_UNUSED;
+	ms_M68KBank_Type[0x0B] = M68K_BANK_UNUSED;
+	ms_M68KBank_Type[0x0C] = M68K_BANK_UNUSED;
+	ms_M68KBank_Type[0x0D] = M68K_BANK_UNUSED;
+	ms_M68KBank_Type[0x0E] = M68K_BANK_UNUSED;
+	ms_M68KBank_Type[0x0F] = M68K_BANK_UNUSED;
+	
+	// $800000 - $9FFFFF: Unused. (Sega 32X)
+	ms_M68KBank_Type[0x10] = M68K_BANK_UNUSED;
+	ms_M68KBank_Type[0x11] = M68K_BANK_UNUSED;
+	ms_M68KBank_Type[0x12] = M68K_BANK_UNUSED;
+	ms_M68KBank_Type[0x13] = M68K_BANK_UNUSED;
+	
+	// $A00000 - $A7FFFF: I/O area.
+	// $A80000 - $BFFFFF: Unused.
+	ms_M68KBank_Type[0x14] = M68K_BANK_IO;
+	ms_M68KBank_Type[0x15] = M68K_BANK_UNUSED;
+	ms_M68KBank_Type[0x16] = M68K_BANK_UNUSED;
+	ms_M68KBank_Type[0x17] = M68K_BANK_UNUSED;
+	
+	// $C00000 - $DFFFFF: VDP. (specialized mirroring)
+	ms_M68KBank_Type[0x18] = M68K_BANK_VDP;
+	ms_M68KBank_Type[0x19] = M68K_BANK_VDP;
+	ms_M68KBank_Type[0x1A] = M68K_BANK_VDP;
+	ms_M68KBank_Type[0x1B] = M68K_BANK_VDP;
+	
+	// $E00000 - $FFFFFF: RAM. (64K mirroring)
+	ms_M68KBank_Type[0x1C] = M68K_BANK_RAM;
+	ms_M68KBank_Type[0x1D] = M68K_BANK_RAM;
+	ms_M68KBank_Type[0x1E] = M68K_BANK_RAM;
+	ms_M68KBank_Type[0x1F] = M68K_BANK_RAM;
 }
 
 
@@ -1226,51 +1287,32 @@ void M68K_Mem::InitSys(M68K::SysID system)
 uint8_t M68K_Mem::M68K_RB(uint32_t address)
 {
 	// TODO: This is MD only. Add MCD/32X later.
-	// TODO: SSF2 bankswitching.
 	address &= 0xFFFFFF;
-	const uint8_t page = (address >> 19);
+	const uint8_t bank = ((address >> 19) & 0x1F);
 	
-	switch (page & 0x1F)
+	// TODO: Optimize the switch using a bitwise AND.
+	switch (ms_M68KBank_Type[bank])
 	{
-		case 0x00:	return M68K_Read_Byte_Rom(address);
-		case 0x01:	return M68K_Read_Byte_Rom(address);
-		case 0x02:	return M68K_Read_Byte_Rom(address);
-		case 0x03:	return M68K_Read_Byte_Rom(address);
+		default:
+		case M68K_BANK_UNUSED:	return 0xFF;
 		
-		case 0x04:	return M68K_Read_Byte_Rom_SRam(address);
-		case 0x05:	return M68K_Read_Byte_Rom(address);
-		case 0x06:	return M68K_Read_Byte_Rom_SRam(address);
-		case 0x07:	return M68K_Read_Byte_Rom_SRam(address);
+		// Physical ROM bank.
+		// TODO: SRam should be used for virtual banks 4, 6, and 7; not physical banks.
+		case M68K_BANK_ROM_0:	return T_M68K_Read_Byte_Rom<0x00>(address);
+		case M68K_BANK_ROM_1:	return T_M68K_Read_Byte_Rom<0x01>(address);
+		case M68K_BANK_ROM_2:	return T_M68K_Read_Byte_Rom<0x02>(address);
+		case M68K_BANK_ROM_3:	return T_M68K_Read_Byte_Rom<0x03>(address);
+		case M68K_BANK_ROM_4:	return T_M68K_Read_Byte_Rom_SRam<0x04>(address);
+		case M68K_BANK_ROM_5:	return T_M68K_Read_Byte_Rom<0x05>(address);
+		case M68K_BANK_ROM_6:	return T_M68K_Read_Byte_Rom_SRam<0x06>(address);
+		case M68K_BANK_ROM_7:	return T_M68K_Read_Byte_Rom_SRam<0x07>(address);
+		case M68K_BANK_ROM_8:	return T_M68K_Read_Byte_Rom<0x08>(address);
+		case M68K_BANK_ROM_9:	return T_M68K_Read_Byte_Rom<0x09>(address);
 		
-		case 0x08:	return 0xFF;
-		case 0x09:	return 0xFF;
-		case 0x0A:	return 0xFF;
-		case 0x0B:	return 0xFF;
-		
-		case 0x0C:	return 0xFF;
-		case 0x0D:	return 0xFF;
-		case 0x0E:	return 0xFF;
-		case 0x0F:	return 0xFF;
-		
-		case 0x10:	return 0xFF;
-		case 0x11:	return 0xFF;
-		case 0x12:	return 0xFF;
-		case 0x13:	return 0xFF;
-		
-		case 0x14:	return M68K_Read_Byte_Misc(address);
-		case 0x15:	return 0xFF;
-		case 0x16:	return 0xFF;
-		case 0x17:	return 0xFF;
-		
-		case 0x18:	return M68K_Read_Byte_VDP(address);
-		case 0x19:	return M68K_Read_Byte_VDP(address);
-		case 0x1A:	return M68K_Read_Byte_VDP(address);
-		case 0x1B:	return M68K_Read_Byte_VDP(address);
-		
-		case 0x1C:	return M68K_Read_Byte_Ram(address);
-		case 0x1D:	return M68K_Read_Byte_Ram(address);
-		case 0x1E:	return M68K_Read_Byte_Ram(address);
-		case 0x1F:	return M68K_Read_Byte_Ram(address);
+		// Other MD banks.
+		case M68K_BANK_IO:	return M68K_Read_Byte_Misc(address);
+		case M68K_BANK_VDP:	return M68K_Read_Byte_VDP(address);
+		case M68K_BANK_RAM:	return M68K_Read_Byte_Ram(address);
 	}
 	
 	// Should not get here...
@@ -1286,51 +1328,32 @@ uint8_t M68K_Mem::M68K_RB(uint32_t address)
 uint16_t M68K_Mem::M68K_RW(uint32_t address)
 {
 	// TODO: This is MD only. Add MCD/32X later.
-	// TODO: SSF2 bankswitching.
 	address &= 0xFFFFFF;
-	const uint8_t page = (address >> 19);
+	const uint8_t bank = ((address >> 19) & 0x1F);
 	
-	switch (page & 0x1F)
+	// TODO: Optimize the switch using a bitwise AND.
+	switch (ms_M68KBank_Type[bank])
 	{
-		case 0x00:	return M68K_Read_Word_Rom(address);
-		case 0x01:	return M68K_Read_Word_Rom(address);
-		case 0x02:	return M68K_Read_Word_Rom(address);
-		case 0x03:	return M68K_Read_Word_Rom(address);
+		default:
+		case M68K_BANK_UNUSED:	return 0xFFFF;
 		
-		case 0x04:	return M68K_Read_Word_Rom_SRam(address);
-		case 0x05:	return M68K_Read_Word_Rom(address);
-		case 0x06:	return M68K_Read_Word_Rom_SRam(address);
-		case 0x07:	return M68K_Read_Word_Rom_SRam(address);
+		// Physical ROM bank.
+		// TODO: SRam should be used for virtual banks 4, 6, and 7; not physical banks.
+		case M68K_BANK_ROM_0:	return T_M68K_Read_Word_Rom<0x00>(address);
+		case M68K_BANK_ROM_1:	return T_M68K_Read_Word_Rom<0x01>(address);
+		case M68K_BANK_ROM_2:	return T_M68K_Read_Word_Rom<0x02>(address);
+		case M68K_BANK_ROM_3:	return T_M68K_Read_Word_Rom<0x03>(address);
+		case M68K_BANK_ROM_4:	return T_M68K_Read_Word_Rom_SRam<0x04>(address);
+		case M68K_BANK_ROM_5:	return T_M68K_Read_Word_Rom<0x05>(address);
+		case M68K_BANK_ROM_6:	return T_M68K_Read_Word_Rom_SRam<0x06>(address);
+		case M68K_BANK_ROM_7:	return T_M68K_Read_Word_Rom_SRam<0x07>(address);
+		case M68K_BANK_ROM_8:	return T_M68K_Read_Word_Rom<0x08>(address);
+		case M68K_BANK_ROM_9:	return T_M68K_Read_Word_Rom<0x09>(address);
 		
-		case 0x08:	return 0xFFFF;
-		case 0x09:	return 0xFFFF;
-		case 0x0A:	return 0xFFFF;
-		case 0x0B:	return 0xFFFF;
-		
-		case 0x0C:	return 0xFFFF;
-		case 0x0D:	return 0xFFFF;
-		case 0x0E:	return 0xFFFF;
-		case 0x0F:	return 0xFFFF;
-		
-		case 0x10:	return 0xFFFF;
-		case 0x11:	return 0xFFFF;
-		case 0x12:	return 0xFFFF;
-		case 0x13:	return 0xFFFF;
-		
-		case 0x14:	return M68K_Read_Word_Misc(address);
-		case 0x15:	return 0xFFFF;
-		case 0x16:	return 0xFFFF;
-		case 0x17:	return 0xFFFF;
-		
-		case 0x18:	return M68K_Read_Word_VDP(address);
-		case 0x19:	return M68K_Read_Word_VDP(address);
-		case 0x1A:	return M68K_Read_Word_VDP(address);
-		case 0x1B:	return M68K_Read_Word_VDP(address);
-		
-		case 0x1C:	return M68K_Read_Word_Ram(address);
-		case 0x1D:	return M68K_Read_Word_Ram(address);
-		case 0x1E:	return M68K_Read_Word_Ram(address);
-		case 0x1F:	return M68K_Read_Word_Ram(address);
+		// Other MD banks.
+		case M68K_BANK_IO:	return M68K_Read_Word_Misc(address);
+		case M68K_BANK_VDP:	return M68K_Read_Word_VDP(address);
+		case M68K_BANK_RAM:	return M68K_Read_Word_Ram(address);
 	}
 	
 	// Should not get here...
@@ -1346,20 +1369,28 @@ uint16_t M68K_Mem::M68K_RW(uint32_t address)
 void M68K_Mem::M68K_WB(uint32_t address, uint8_t data)
 {
 	// TODO: This is MD only. Add MCD/32X later.
-	// TODO: SSF2 bankswitching.
 	address &= 0xFFFFFF;
-	const uint8_t page = (address >> 21);
+	const uint8_t bank = ((address >> 19) & 0x1F);
 	
-	switch (page & 0x07)
+	// TODO: Optimize the switch using a bitwise AND.
+	switch (ms_M68KBank_Type[bank])
 	{
-		case 0x00:	M68K_Write_Byte_SRam(address, data); break;
-		case 0x01:	M68K_Write_Byte_SRam(address, data); break;
-		case 0x02:	break;
-		case 0x03:	break;
-		case 0x04:	break;
-		case 0x05:	M68K_Write_Byte_Misc(address, data); break;
-		case 0x06:	M68K_Write_Byte_VDP(address, data); break;
-		case 0x07:	M68K_Write_Byte_Ram(address, data); break;
+		default:
+		case M68K_BANK_UNUSED:	break;
+		
+		// TODO: SRAM should use physical banks, not ROM banks.
+		case M68K_BANK_ROM_0: case M68K_BANK_ROM_1:
+		case M68K_BANK_ROM_2: case M68K_BANK_ROM_3:
+		case M68K_BANK_ROM_4: case M68K_BANK_ROM_5:
+		case M68K_BANK_ROM_6: case M68K_BANK_ROM_7:
+		case M68K_BANK_ROM_8: case M68K_BANK_ROM_9:
+			M68K_Write_Byte_SRam(address, data);
+			break;
+		
+		// Other MD banks.
+		case M68K_BANK_IO:	M68K_Write_Byte_Misc(address, data); break;
+		case M68K_BANK_VDP:	M68K_Write_Byte_VDP(address, data); break;
+		case M68K_BANK_RAM:	M68K_Write_Byte_Ram(address, data); break;
 	}
 }
 
@@ -1372,20 +1403,28 @@ void M68K_Mem::M68K_WB(uint32_t address, uint8_t data)
 void M68K_Mem::M68K_WW(uint32_t address, uint16_t data)
 {
 	// TODO: This is MD only. Add MCD/32X later.
-	// TODO: SSF2 bankswitching.
 	address &= 0xFFFFFF;
-	const uint8_t page = (address >> 21);
+	const uint8_t bank = ((address >> 19) & 0x1F);
 	
-	switch (page & 0x07)
+	// TODO: Optimize the switch using a bitwise AND.
+	switch (ms_M68KBank_Type[bank])
 	{
-		case 0x00:	M68K_Write_Word_SRam(address, data); break;
-		case 0x01:	M68K_Write_Word_SRam(address, data); break;
-		case 0x02:	break;
-		case 0x03:	break;
-		case 0x04:	break;
-		case 0x05:	M68K_Write_Word_Misc(address, data); break;
-		case 0x06:	M68K_Write_Word_VDP(address, data); break;
-		case 0x07:	M68K_Write_Word_Ram(address, data); break;
+		default:
+		case M68K_BANK_UNUSED:	break;
+		
+		// TODO: SRAM should use physical banks, not ROM banks.
+		case M68K_BANK_ROM_0: case M68K_BANK_ROM_1:
+		case M68K_BANK_ROM_2: case M68K_BANK_ROM_3:
+		case M68K_BANK_ROM_4: case M68K_BANK_ROM_5:
+		case M68K_BANK_ROM_6: case M68K_BANK_ROM_7:
+		case M68K_BANK_ROM_8: case M68K_BANK_ROM_9:
+			M68K_Write_Word_SRam(address, data);
+			break;
+		
+		// Other MD banks.
+		case M68K_BANK_IO:	M68K_Write_Word_Misc(address, data); break;
+		case M68K_BANK_VDP:	M68K_Write_Word_VDP(address, data); break;
+		case M68K_BANK_RAM:	M68K_Write_Word_Ram(address, data); break;
 	}
 }
 
@@ -1439,8 +1478,8 @@ void M68K_Mem::ZomgRestoreSSF2BankState(const Zomg_MD_TimeReg_t *state)
 			ms_SSF2_BankState[phys_bank] = 0xFF;	// default bank
 		}
 		
-		// Update the ROM data pointers.
-		ms_RomData_ptrs[phys_bank] = &Rom_Data.u8[virt_bank * 0x80000];
+		// Update the M68K bank type identifiers.
+		ms_M68KBank_Type[phys_bank] = (M68K_BANK_ROM_0 + virt_bank);
 	}
 }
 

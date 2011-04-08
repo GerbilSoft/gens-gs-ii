@@ -135,27 +135,60 @@ class M68K_Mem
 		 */
 		static uint8_t ms_SSF2_BankState[8];
 		
+		enum M68KBank_t
+		{
+			// Unused bank. (Return 0xFF)
+			M68K_BANK_UNUSED = 0,
+			
+			// ROM banks.
+			M68K_BANK_ROM_0,	// ROM: $000000 - $07FFFF
+			M68K_BANK_ROM_1,	// ROM: $080000 - $0FFFFF
+			M68K_BANK_ROM_2,	// ROM: $100000 - $17FFFF
+			M68K_BANK_ROM_3,	// ROM: $180000 - $1FFFFF
+			M68K_BANK_ROM_4,	// ROM: $200000 - $27FFFF
+			M68K_BANK_ROM_5,	// ROM: $280000 - $2FFFFF
+			M68K_BANK_ROM_6,	// ROM: $300000 - $37FFFF
+			M68K_BANK_ROM_7,	// ROM: $380000 - $3FFFFF
+			M68K_BANK_ROM_8,	// ROM: $400000 - $47FFFF
+			M68K_BANK_ROM_9,	// ROM: $480000 - $4FFFFF
+			
+			// I/O area.
+			M68K_BANK_IO,		// M68K: $A00000 - $A7FFFF (TODO: Verify mirroring.)
+			
+			// VDP area.
+			M68K_BANK_VDP,		// M68K: $C00000 - $DFFFFF (specialized mirroring)
+			
+			// RAM area.
+			M68K_BANK_RAM,		// M68K: $E00000 - $FFFFFF (64K mirroring)
+		};
+		
 		/**
-		 * ms_RomData_ptrs[]: ROM data pointers.
-		 * Used with SSF2 bankswitching.
-		 * Each pointer refers to a 512 KB page of ROM.
-		 * 
-		 * NOTE: These pointers map virtual to PHYSICAL pages.
-		 * e.g. ms_RomData_ptrs[4] maps to any page in ROM,
-		 * but is accessed by the M68K as if it's 0x200000.
+		 * ms_M68KBank_Type[]: M68K bank type identifiers.
+		 * These type identifiers indicate what's mapped to each virtual bank.
+		 * Banks are 512 KB each, for a total of 32 banks.
 		 */
-		static uint8_t *ms_RomData_ptrs[8];
+		static uint8_t ms_M68KBank_Type[32];
 		
 		/** Read Byte functions. **/
-		static uint8_t M68K_Read_Byte_Rom(uint32_t address);
-		static uint8_t M68K_Read_Byte_Rom_SRam(uint32_t address);
+		
+		template<uint8_t bank>
+		static uint8_t T_M68K_Read_Byte_Rom(uint32_t address);
+		
+		template<uint8_t bank>
+		static uint8_t T_M68K_Read_Byte_Rom_SRam(uint32_t address);
+		
 		static uint8_t M68K_Read_Byte_Ram(uint32_t address);
 		static uint8_t M68K_Read_Byte_Misc(uint32_t address);
 		static uint8_t M68K_Read_Byte_VDP(uint32_t address);
 		
 		/** Read Word functions. **/
-		static uint16_t M68K_Read_Word_Rom(uint32_t address);
-		static uint16_t M68K_Read_Word_Rom_SRam(uint32_t address);
+		
+		template<uint8_t bank>
+		static uint16_t T_M68K_Read_Word_Rom(uint32_t address);
+		
+		template<uint8_t bank>
+		static uint16_t T_M68K_Read_Word_Rom_SRam(uint32_t address);
+		
 		static uint16_t M68K_Read_Word_Ram(uint32_t address);
 		static uint16_t M68K_Read_Word_Misc(uint32_t address);
 		static uint16_t M68K_Read_Word_VDP(uint32_t address);
