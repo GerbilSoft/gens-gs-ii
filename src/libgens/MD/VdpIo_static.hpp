@@ -46,10 +46,12 @@ unsigned int VdpIo::DMAT_Type;
 
 // VDP address pointers.
 // These are relative to VRam[] and are based on register values.
+// uint16_t*: Absolute pointers.
+// uint16_t: Relative offset within VRam[].
 uint16_t *VdpIo::ScrA_Addr;
 uint16_t *VdpIo::ScrB_Addr;
 uint16_t *VdpIo::Win_Addr;
-uint16_t *VdpIo::Spr_Addr;
+uint16_t VdpIo::Spr_Addr;
 uint16_t *VdpIo::H_Scroll_Addr;
 
 // VDP convenience values: Horizontal.

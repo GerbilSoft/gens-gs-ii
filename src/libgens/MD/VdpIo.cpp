@@ -386,11 +386,9 @@ void VdpIo::Set_Reg(int reg_num, uint8_t val)
 		case 5:
 			// Sprite Attribute Table base address.
 			if (VDP_Reg.m5.Set4 & 0x01)	// Check for H40 mode. (TODO: Test 0x81 instead?)
-				tmp = (val & 0x7E) << 9;
+				Spr_Addr = (val & 0x7E) << 9;
 			else
-				tmp = (val & 0x7F) << 9;
-			
-			Spr_Addr = &VRam.u16[tmp>>1];
+				Spr_Addr = (val & 0x7F) << 9;
 			
 			// Update the Sprite Attribute Table.
 			// TODO: Only set this if the actual value has changed.
@@ -446,8 +444,7 @@ void VdpIo::Set_Reg(int reg_num, uint8_t val)
 				Win_Addr = &VRam.u16[tmp>>1];
 				
 				// Update the Sprite Attribute Table base address.
-				tmp = (VDP_Reg.m5.Spr_Att_Adr & 0x7E) << 9;
-				Spr_Addr = &VRam.u16[tmp>>1];
+				Spr_Addr = (VDP_Reg.m5.Spr_Att_Adr & 0x7E) << 9;
 			}
 			else
 			{
@@ -467,8 +464,7 @@ void VdpIo::Set_Reg(int reg_num, uint8_t val)
 				Win_Addr = &VRam.u16[tmp>>1];
 				
 				// Update the Sprite Attribute Table base address.
-				tmp = (VDP_Reg.m5.Spr_Att_Adr & 0x7F) << 9;
-				Spr_Addr = &VRam.u16[tmp>>1];
+				Spr_Addr = (VDP_Reg.m5.Spr_Att_Adr & 0x7F) << 9;
 			}
 			
 			break;

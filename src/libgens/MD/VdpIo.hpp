@@ -124,10 +124,12 @@ class VdpIo
 		
 		// VDP address pointers.
 		// These are relative to VRam[] and are based on register values.
+		// uint16_t*: Absolute pointers.
+		// uint16_t: Relative offset within VRam[].
 		static uint16_t *ScrA_Addr;
 		static uint16_t *ScrB_Addr;
 		static uint16_t *Win_Addr;
-		static uint16_t *Spr_Addr;
+		static uint16_t Spr_Addr;
 		static uint16_t *H_Scroll_Addr;
 		
 		// Window row shift.

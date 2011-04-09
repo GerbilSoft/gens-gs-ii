@@ -892,10 +892,8 @@ FORCE_INLINE void VdpRend_m5::T_Render_Line_ScrollA(void)
 template<bool interlaced, bool partial>
 FORCE_INLINE void VdpRend_m5::T_Make_Sprite_Struct(void)
 {
-	// TODO: Handle wraparound if Spr_Addr is >= 0xFC00. (reg5 >= 0xFE)
-	uint16_t *CurSpr = VdpIo::Spr_Addr;
 	unsigned int spr_num = 0;
-	unsigned int link;
+	unsigned int link = 0;
 	
 	// H40 allows 80 sprites; H32 allows 64 sprites.
 	// Essentially, it's (VdpIo::GetHCells() * 2).
@@ -908,6 +906,9 @@ FORCE_INLINE void VdpRend_m5::T_Make_Sprite_Struct(void)
 	
 	do
 	{
+		// Get the current sprite address in VRam.
+		const uint16_t *CurSpr = &VdpIo::VRam.u16[((VdpIo::Spr_Addr + (link * 8)) & 0xFFFF) >> 1];
+		
 		// Sprite position.
 		VdpRend::Sprite_Struct[spr_num].Pos_X = (CurSpr[3] & 0x1FF) - 128;
 		if (!partial)
@@ -967,9 +968,6 @@ FORCE_INLINE void VdpRend_m5::T_Make_Sprite_Struct(void)
 		spr_num++;
 		if (link == 0)
 			break;
-		
-		// Go to the next sprite.
-		CurSpr = VdpIo::Spr_Addr + (link * (8>>1));
 		
 		// Stop processing after:
 		// - Link number is 0. (checked above)
