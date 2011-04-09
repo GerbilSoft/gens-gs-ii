@@ -904,11 +904,11 @@ FORCE_INLINE void VdpRend_m5::T_Make_Sprite_Struct(void)
 					? (VdpIo::GetHCells() * 2)
 					: 80);
 	
+	// Get the first sprite address in VRam.
+	const uint16_t *CurSpr = &VdpIo::VRam.u16[VdpIo::Spr_Addr >> 1];
+	
 	do
 	{
-		// Get the current sprite address in VRam.
-		const uint16_t *CurSpr = &VdpIo::VRam.u16[((VdpIo::Spr_Addr + (link * 8)) & 0xFFFF) >> 1];
-		
 		// Sprite position.
 		VdpRend::Sprite_Struct[spr_num].Pos_X = (CurSpr[3] & 0x1FF) - 128;
 		if (!partial)
@@ -968,6 +968,9 @@ FORCE_INLINE void VdpRend_m5::T_Make_Sprite_Struct(void)
 		spr_num++;
 		if (link == 0)
 			break;
+		
+		// Get the next sprite address in VRam.
+		CurSpr = &VdpIo::VRam.u16[((VdpIo::Spr_Addr + (link * 8)) & 0xFFFF) >> 1];
 		
 		// Stop processing after:
 		// - Link number is 0. (checked above)
