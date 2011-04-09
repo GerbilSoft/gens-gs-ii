@@ -152,6 +152,9 @@ class M68K_Mem
 			M68K_BANK_ROM_8,	// ROM: $400000 - $47FFFF
 			M68K_BANK_ROM_9,	// ROM: $480000 - $4FFFFF
 			
+			// SRAM only.
+			M68K_BANK_SRAM,		// SRAM. (Used for some games that store SRAM in invalid areas.)
+			
 			// I/O area.
 			M68K_BANK_IO,		// M68K: $A00000 - $A7FFFF (TODO: Verify mirroring.)
 			
@@ -179,7 +182,7 @@ class M68K_Mem
 		template<uint8_t bank>
 		static uint8_t T_M68K_Read_Byte_Rom(uint32_t address);
 		
-		template<uint8_t bank>
+		template<int8_t bank>
 		static uint8_t T_M68K_Read_Byte_Rom_SRam(uint32_t address);
 		
 		static uint8_t M68K_Read_Byte_Ram(uint32_t address);
@@ -191,7 +194,7 @@ class M68K_Mem
 		template<uint8_t bank>
 		static uint16_t T_M68K_Read_Word_Rom(uint32_t address);
 		
-		template<uint8_t bank>
+		template<int8_t bank>
 		static uint16_t T_M68K_Read_Word_Rom_SRam(uint32_t address);
 		
 		static uint16_t M68K_Read_Word_Ram(uint32_t address);

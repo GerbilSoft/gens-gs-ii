@@ -44,6 +44,9 @@ using std::string;
 #include "macros/common.h"
 #include "lg_osd.h"
 
+// Needed for checking CRC32s for "Xin Qi Gai Wang Zi" (Beggar Prince).
+#include <zlib.h>
+
 namespace LibGens
 {
 
@@ -570,7 +573,7 @@ int Rom::initSRam(SRam *sram) const
 	else if (m_mdHeader.checksum == 0x8104)
 	{
 		/**
-		 * TODO: Check ROM CRC32s.
+		 * TODO: Check ROM CRC32.
 		 * ROM doesn't have original MD headers.
 		 * 
 		 * Genesis Plus calculates the ROM checksum,
@@ -583,9 +586,9 @@ int Rom::initSRam(SRam *sram) const
 		 * - Xin Qi Gai Wang Zi (Ch) [a1].gen:	DA5A4BFE
 		 */
 		
-		// Xin Qi Gai Wangzi, aka Beggar Prince.
+		// Xin Qi Gai Wang Zi (Beggar Prince).
 		// ROM uses 0x400000-0x40FFFF for SRAM.
-		// TODO: Update M68K_Mem to handle this.
+		// TODO: Verify that this actually works properly!
 		start = 0x400000;
 		end = 0x40FFFF;
 		sram->setOn(true);

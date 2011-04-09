@@ -130,7 +130,8 @@ const uint8_t M68K_Mem::msc_M68KBank_Def_MD[32] =
 	M68K_BANK_ROM_4, M68K_BANK_ROM_5, M68K_BANK_ROM_6, M68K_BANK_ROM_7,
 	
 	// $400000 - $7FFFFF: Unused. (Sega CD)
-	M68K_BANK_UNUSED, M68K_BANK_UNUSED, M68K_BANK_UNUSED, M68K_BANK_UNUSED,
+	// Xin Qi Gai Wangzi (Beggar Prince) has SRAM at $400000 - $40FFFF.
+	M68K_BANK_SRAM, M68K_BANK_UNUSED, M68K_BANK_UNUSED, M68K_BANK_UNUSED,
 	M68K_BANK_UNUSED, M68K_BANK_UNUSED, M68K_BANK_UNUSED, M68K_BANK_UNUSED,
 	
 	// $800000 - $9FFFFF: Unused. (Sega 32X)
@@ -198,11 +199,11 @@ inline uint8_t M68K_Mem::T_M68K_Read_Byte_Rom(uint32_t address)
 /**
  * T_M68K_Read_Byte_Rom_SRam(): Read a byte from ROM or SRam/EEPRom.
  * TODO: Verify that this works for 0x300000/0x380000.
- * @param bank Physical ROM bank.
+ * @param bank Physical ROM bank. (-1 for SRAM only)
  * @param address Address.
  * @return Byte from ROM or SRam/EEPRom.
  */
-template<uint8_t bank>
+template<int8_t bank>
 inline uint8_t M68K_Mem::T_M68K_Read_Byte_Rom_SRam(uint32_t address)
 {
 	// Check if this is a save data request.
@@ -233,7 +234,9 @@ inline uint8_t M68K_Mem::T_M68K_Read_Byte_Rom_SRam(uint32_t address)
 	}
 	
 	// Not SRam/EEPRom. Return the ROM data.
-	return T_M68K_Read_Byte_Rom<bank>(address);
+	if (bank >= 0)
+		return T_M68K_Read_Byte_Rom<bank>(address);
+	return 0xFF;
 }
 
 
@@ -435,11 +438,11 @@ inline uint16_t M68K_Mem::T_M68K_Read_Word_Rom(uint32_t address)
 /**
  * T_M68K_Read_Word_Rom_SRam(): Read a word from ROM or SRam/EEPRom.
  * TODO: Verify that this works for 0x300000/0x380000.
- * @param bank Physical ROM bank.
+ * @param bank Physical ROM bank. (-1 for SRAM only)
  * @param address Address.
  * @return Word from ROM or SRam/EEPRom.
  */
-template<uint8_t bank>
+template<int8_t bank>
 inline uint16_t M68K_Mem::T_M68K_Read_Word_Rom_SRam(uint32_t address)
 {
 	// Check if this is a save data request.
@@ -470,7 +473,9 @@ inline uint16_t M68K_Mem::T_M68K_Read_Word_Rom_SRam(uint32_t address)
 	}
 	
 	// Not SRam/EEPRom. Return the ROM data.
-	return T_M68K_Read_Word_Rom<bank>(address);
+	if (bank >= 0)
+		return T_M68K_Read_Word_Rom<bank>(address);
+	return 0xFFFF;
 }
 
 
@@ -1312,6 +1317,7 @@ uint8_t M68K_Mem::M68K_RB(uint32_t address)
 		case M68K_BANK_ROM_7:	return T_M68K_Read_Byte_Rom_SRam<0x07>(address);
 		case M68K_BANK_ROM_8:	return T_M68K_Read_Byte_Rom<0x08>(address);
 		case M68K_BANK_ROM_9:	return T_M68K_Read_Byte_Rom<0x09>(address);
+		case M68K_BANK_SRAM:	return T_M68K_Read_Byte_Rom_SRam<-1>(address);
 		
 		// Other MD banks.
 		case M68K_BANK_IO:	return M68K_Read_Byte_Misc(address);
@@ -1353,6 +1359,7 @@ uint16_t M68K_Mem::M68K_RW(uint32_t address)
 		case M68K_BANK_ROM_7:	return T_M68K_Read_Word_Rom_SRam<0x07>(address);
 		case M68K_BANK_ROM_8:	return T_M68K_Read_Word_Rom<0x08>(address);
 		case M68K_BANK_ROM_9:	return T_M68K_Read_Word_Rom<0x09>(address);
+		case M68K_BANK_SRAM:	return T_M68K_Read_Word_Rom_SRam<-1>(address);
 		
 		// Other MD banks.
 		case M68K_BANK_IO:	return M68K_Read_Word_Misc(address);
@@ -1388,6 +1395,7 @@ void M68K_Mem::M68K_WB(uint32_t address, uint8_t data)
 		case M68K_BANK_ROM_4: case M68K_BANK_ROM_5:
 		case M68K_BANK_ROM_6: case M68K_BANK_ROM_7:
 		case M68K_BANK_ROM_8: case M68K_BANK_ROM_9:
+		case M68K_BANK_SRAM:
 			M68K_Write_Byte_SRam(address, data);
 			break;
 		
@@ -1422,6 +1430,7 @@ void M68K_Mem::M68K_WW(uint32_t address, uint16_t data)
 		case M68K_BANK_ROM_4: case M68K_BANK_ROM_5:
 		case M68K_BANK_ROM_6: case M68K_BANK_ROM_7:
 		case M68K_BANK_ROM_8: case M68K_BANK_ROM_9:
+		case M68K_BANK_SRAM:
 			M68K_Write_Word_SRam(address, data);
 			break;
 		
