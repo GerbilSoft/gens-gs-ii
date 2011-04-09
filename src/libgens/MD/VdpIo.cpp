@@ -363,24 +363,20 @@ void VdpIo::Set_Reg(int reg_num, uint8_t val)
 		
 		case 2:
 			// Scroll A base address.
-			tmp = (val & 0x38) << 10;
-			ScrA_Addr = &VRam.u16[tmp>>1];
+			ScrA_Addr = (val & 0x38) << 10;
 			break;
 		
 		case 3:
 			// Window base address.
 			if (VDP_Reg.m5.Set4 & 0x01)	// Check for H40 mode. (TODO: Test 0x81 instead?)
-				tmp = (val & 0x3C) << 10;	// H40.
+				Win_Addr = (val & 0x3C) << 10;	// H40.
 			else
-				tmp = (val & 0x3E) << 10;	// H32.
-			
-			Win_Addr = &VRam.u16[tmp>>1];
+				Win_Addr = (val & 0x3E) << 10;	// H32.
 			break;
 		
 		case 4:
 			// Scroll B base address.
-			tmp = (val & 0x07) << 13;
-			ScrB_Addr = &VRam.u16[tmp>>1];
+			ScrB_Addr = (val & 0x07) << 13;
 			break;
 		
 		case 5:
@@ -439,11 +435,8 @@ void VdpIo::Set_Reg(int reg_num, uint8_t val)
 				if (Win_X_Pos > 40)
 					Win_X_Pos = 40;
 				
-				// Update the Window base address.
-				tmp = (VDP_Reg.m5.Pat_Win_Adr & 0x3C) << 10;
-				Win_Addr = &VRam.u16[tmp>>1];
-				
-				// Update the Sprite Attribute Table base address.
+				// Update the Window and Sprite Attribute Table base addresses.
+				Win_Addr = (VDP_Reg.m5.Pat_Win_Adr & 0x3C) << 10;
 				Spr_Addr = (VDP_Reg.m5.Spr_Att_Adr & 0x7E) << 9;
 			}
 			else
@@ -459,11 +452,8 @@ void VdpIo::Set_Reg(int reg_num, uint8_t val)
 				if (Win_X_Pos > 32)
 					Win_X_Pos = 32;
 				
-				// Update the Window base address.
-				tmp = (VDP_Reg.m5.Pat_Win_Adr & 0x3E) << 10;
-				Win_Addr = &VRam.u16[tmp>>1];
-				
-				// Update the Sprite Attribute Table base address.
+				// Update the Window and Sprite Attribute Table base addresses.
+				Win_Addr = (VDP_Reg.m5.Pat_Win_Adr & 0x3E) << 10;
 				Spr_Addr = (VDP_Reg.m5.Spr_Att_Adr & 0x7F) << 9;
 			}
 			
@@ -471,8 +461,7 @@ void VdpIo::Set_Reg(int reg_num, uint8_t val)
 		
 		case 13:
 			// H Scroll Table base address.
-			tmp = (val & 0x3F) << 10;
-			H_Scroll_Addr = &VRam.u16[tmp>>1];
+			H_Scroll_Addr = (val & 0x3F) << 10;
 			break;
 		
 		case 16:

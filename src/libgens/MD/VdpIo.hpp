@@ -122,15 +122,19 @@ class VdpIo
 		static int DMAT_Length;
 		static unsigned int DMAT_Type;
 		
-		// VDP address pointers.
-		// These are relative to VRam[] and are based on register values.
-		// uint16_t*: Absolute pointers.
-		// uint16_t: Relative offset within VRam[].
-		static uint16_t *ScrA_Addr;
-		static uint16_t *ScrB_Addr;
-		static uint16_t *Win_Addr;
-		static uint16_t Spr_Addr;
-		static uint16_t *H_Scroll_Addr;
+		/** VDP address functions: Get Pointers. **/
+		static uint16_t *ScrA_Addr_Ptr16(uint16_t offset);
+		static uint16_t *ScrB_Addr_Ptr16(uint16_t offset);
+		static uint16_t *Win_Addr_Ptr16(uint16_t offset);
+		static uint16_t *Spr_Addr_Ptr16(uint16_t offset);
+		static uint16_t *H_Scroll_Addr_Ptr16(uint16_t offset);
+		
+		/** VDP address functions: Get Values. **/
+		static uint16_t ScrA_Addr_u16(uint16_t offset);
+		static uint16_t ScrB_Addr_u16(uint16_t offset);
+		static uint16_t Win_Addr_u16(uint16_t offset);
+		static uint16_t Spr_Addr_u16(uint16_t offset);
+		static uint16_t H_Scroll_Addr_u16(uint16_t offset);
 		
 		// Window row shift.
 		// H40: 6. (64x32 window)
@@ -366,6 +370,14 @@ class VdpIo
 		template<DMA_Src_t src_component, DMA_Dest_t dest_component>
 		static inline void T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int length);
 		
+		// VDP address pointers.
+		// These are relative to VRam[] and are based on register values.
+		static uint16_t ScrA_Addr;
+		static uint16_t ScrB_Addr;
+		static uint16_t Win_Addr;
+		static uint16_t Spr_Addr;
+		static uint16_t H_Scroll_Addr;
+		
 		/**
 		 * VDP_Ctrl: VDP control struct.
 		 */
@@ -446,7 +458,7 @@ class VdpIo
 			VXX_H32,     VXX_H64,  VXX_HXX,  VXX_H128,
 			V128_H32,    V128_H64, V128_HXX, V128_H128
 		};
-	
+
 	private:
 		VdpIo() { }
 		~VdpIo() { }
@@ -463,6 +475,30 @@ inline int VdpIo::GetHCells(void)
 
 inline int VdpIo::GetVPix(void)
 	{ return VDP_Lines.Visible.Total; }
+
+/** VDP address functions: Get Pointers. **/
+inline uint16_t *VdpIo::ScrA_Addr_Ptr16(uint16_t offset)
+	{ return &VRam.u16[((ScrA_Addr + offset) & 0xFFFF) >> 1]; }
+inline uint16_t *VdpIo::ScrB_Addr_Ptr16(uint16_t offset)
+	{ return &VRam.u16[((ScrB_Addr + offset) & 0xFFFF) >> 1]; }
+inline uint16_t *VdpIo::Win_Addr_Ptr16(uint16_t offset)
+	{ return &VRam.u16[((Win_Addr + offset) & 0xFFFF) >> 1]; }
+inline uint16_t *VdpIo::Spr_Addr_Ptr16(uint16_t offset)
+	{ return &VRam.u16[((Spr_Addr + offset) & 0xFFFF) >> 1]; }
+inline uint16_t *VdpIo::H_Scroll_Addr_Ptr16(uint16_t offset)
+	{ return &VRam.u16[((H_Scroll_Addr + offset) & 0xFFFF) >> 1]; }
+
+/** VDP address functions: Get Values. **/
+inline uint16_t VdpIo::ScrA_Addr_u16(uint16_t offset)
+	{ return VRam.u16[((ScrA_Addr + offset) & 0xFFFF) >> 1]; }
+inline uint16_t VdpIo::ScrB_Addr_u16(uint16_t offset)
+	{ return VRam.u16[((ScrB_Addr + offset) & 0xFFFF) >> 1]; }
+inline uint16_t VdpIo::Win_Addr_u16(uint16_t offset)
+	{ return VRam.u16[((Win_Addr + offset) & 0xFFFF) >> 1]; }
+inline uint16_t VdpIo::Spr_Addr_u16(uint16_t offset)
+	{ return VRam.u16[((Spr_Addr + offset) & 0xFFFF) >> 1]; }
+inline uint16_t VdpIo::H_Scroll_Addr_u16(uint16_t offset)
+	{ return VRam.u16[((H_Scroll_Addr + offset) & 0xFFFF) >> 1]; }
 
 }
 

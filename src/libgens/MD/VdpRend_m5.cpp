@@ -499,17 +499,19 @@ FORCE_INLINE void VdpRend_m5::T_PutLine_Sprite(int disp_pixnum, uint32_t pattern
 template<bool plane>
 FORCE_INLINE uint16_t VdpRend_m5::T_Get_X_Offset(void)
 {
-	const unsigned int H_Scroll_Offset = (VdpIo::VDP_Lines.Visible.Current & VdpIo::H_Scroll_Mask) * 2;
+	// NOTE: Multiply by 4 for 16-bit access.
+	// * 2 == select A/B; * 2 == 16-bit
+	const unsigned int H_Scroll_Offset = (VdpIo::VDP_Lines.Visible.Current & VdpIo::H_Scroll_Mask) * 4;
 	
 	if (plane)
 	{
 		// Scroll A.
-		return VdpIo::H_Scroll_Addr[H_Scroll_Offset];
+		return VdpIo::H_Scroll_Addr_u16(H_Scroll_Offset);
 	}
 	else
 	{
 		// Scroll B.
-		return VdpIo::H_Scroll_Addr[H_Scroll_Offset + 1];
+		return VdpIo::H_Scroll_Addr_u16(H_Scroll_Offset + 2);
 	}
 }
 
@@ -583,10 +585,11 @@ FORCE_INLINE uint16_t VdpRend_m5::T_Get_Pattern_Info(unsigned int x, unsigned in
 {
 	// Get the offset.
 	// H_Scroll_CMul is the shift value required for the proper vertical offset.
-	unsigned int offset = (y << VdpIo::H_Scroll_CMul) + x;
+	// NOTE: Multiply by 2 for 16-bit access.
+	const unsigned int offset = ((y << VdpIo::H_Scroll_CMul) + x) * 2;
 	
 	// Return the pattern information.
-	return (plane ? VdpIo::ScrA_Addr[offset] : VdpIo::ScrB_Addr[offset]);
+	return (plane ? VdpIo::ScrA_Addr_u16(offset) : VdpIo::ScrB_Addr_u16(offset));
 }
 
 
@@ -828,7 +831,9 @@ FORCE_INLINE void VdpRend_m5::T_Render_Line_ScrollA(void)
 		
 		// Window row start address.
 		const unsigned int Y_offset_cell = (VdpIo::VDP_Lines.Visible.Current / 8);
-		const uint16_t *Win_Row_Addr = &VdpIo::Win_Addr[Y_offset_cell << VdpIo::H_Win_Shift] + Win_Start;
+		// TODO: See if we need to handle address wraparound.
+		// NOTE: Multiply by 2 for 16-bit access.
+		const uint16_t *Win_Row_Addr = VdpIo::Win_Addr_Ptr16((Y_offset_cell << VdpIo::H_Win_Shift) * 2) + Win_Start;
 		
 		// Loop through the cells.
 		for (int x = Win_Length; x > 0; x--, disp_pixnum += 8)
@@ -905,7 +910,7 @@ FORCE_INLINE void VdpRend_m5::T_Make_Sprite_Struct(void)
 					: 80);
 	
 	// Get the first sprite address in VRam.
-	const uint16_t *CurSpr = &VdpIo::VRam.u16[VdpIo::Spr_Addr >> 1];
+	const uint16_t *CurSpr = VdpIo::Spr_Addr_Ptr16(0);
 	
 	do
 	{
@@ -970,7 +975,9 @@ FORCE_INLINE void VdpRend_m5::T_Make_Sprite_Struct(void)
 			break;
 		
 		// Get the next sprite address in VRam.
-		CurSpr = &VdpIo::VRam.u16[((VdpIo::Spr_Addr + (link * 8)) & 0xFFFF) >> 1];
+		// NOTE: Original byte offset needs to be used here.
+		// (Spr_Addr_Ptr16() divides by 2 for 16-bit access.)
+		CurSpr = VdpIo::Spr_Addr_Ptr16(link * 8);
 		
 		// Stop processing after:
 		// - Link number is 0. (checked above)
