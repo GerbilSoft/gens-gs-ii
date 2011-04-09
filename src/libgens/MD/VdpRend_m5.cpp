@@ -926,10 +926,10 @@ FORCE_INLINE void VdpRend_m5::T_Make_Sprite_Struct(void)
 		}
 		
 		// Sprite size.
-		uint8_t sz = (CurSpr[1] >> 8);
+		const uint8_t sz = ((CurSpr[1] >> 8) & 0xFF);
 		VdpRend::Sprite_Struct[spr_num].Size_X = ((sz >> 2) & 3) + 1;	// 1 more than the original value.
 		if (!partial)
-			VdpRend::Sprite_Struct[spr_num].Size_Y = sz & 3;		// Exactly the original value.
+			VdpRend::Sprite_Struct[spr_num].Size_Y = sz & 3;	// Exactly the original value.
 		
 		// Determine the maximum positions.
 		VdpRend::Sprite_Struct[spr_num].Pos_X_Max =
