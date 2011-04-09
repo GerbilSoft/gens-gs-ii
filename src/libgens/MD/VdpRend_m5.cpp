@@ -892,6 +892,7 @@ FORCE_INLINE void VdpRend_m5::T_Render_Line_ScrollA(void)
 template<bool interlaced, bool partial>
 FORCE_INLINE void VdpRend_m5::T_Make_Sprite_Struct(void)
 {
+	// TODO: Handle wraparound if Spr_Addr is >= 0xFC00. (reg5 >= 0xFE)
 	uint16_t *CurSpr = VdpIo::Spr_Addr;
 	unsigned int spr_num = 0;
 	unsigned int link;
@@ -955,8 +956,12 @@ FORCE_INLINE void VdpRend_m5::T_Make_Sprite_Struct(void)
 			VdpRend::Sprite_Struct[spr_num].Num_Tile = CurSpr[2];
 		}
 		
-		// Link number.
-		link = (CurSpr[1] & 0xFF);
+		// Link field.
+		// NOTE: Link field is 7-bit. Usually this won't cause a problem,
+		// since most games won't set the high bit.
+		// Dino Land incorrectly sets the high bit on some sprites,
+		// so we have to mask it off.
+		link = (CurSpr[1] & 0x7F);
 		
 		// Increment the sprite number.
 		spr_num++;
