@@ -51,6 +51,7 @@ class SysVersion
 	public:
 		enum RegionCode_t
 		{
+			REGION_AUTO	= -1,	// Auto-Detect
 			REGION_JP_NTSC	= 0,	// Japan (NTSC)
 			REGION_ASIA_PAL	= 1,	// Asia (PAL)
 			REGION_US_NTSC	= 2,	// USA (NTSC)

@@ -126,7 +126,7 @@ class EmuManager : public QObject
 		 * @return LibGens region code to use.
 		 */
 		static LibGens::SysVersion::RegionCode_t GetLgRegionCode(
-			GensConfig::ConfRegionCode_t confRegionCode,
+			LibGens::SysVersion::RegionCode_t confRegionCode,
 			int mdHexRegionCode, uint16_t regionCodeOrder);
 		
 		/**
@@ -176,15 +176,7 @@ class EmuManager : public QObject
 		static QString LgRegionCodeStr(LibGens::SysVersion::RegionCode_t region);
 		
 		/**
-		 * LgRegionCodeStr(): Get a string identifying a given GensConfig region code.
-		 * TODO: Combine ConfRegionCode_t with RegionCode_t.
-		 * @param region Region code.
-		 * @return Region code string, or empty string on error.
-		 */
-		static QString GcRegionCodeStr(GensConfig::ConfRegionCode_t region);
-		
-		/**
-		 * LgRegionCodeStrMD(): Get a string identifying a given region code. (MD hex code)
+		 * StrMD(): Get a string identifying a given region code. (MD hex code)
 		 * @param region Region code.
 		 * @return Region code string, or empty string on error.
 		 */
@@ -303,7 +295,7 @@ class EmuManager : public QObject
 				ResetCpuIndex cpu_idx;
 				
 				// Region code.
-				GensConfig::ConfRegionCode_t region;
+				LibGens::SysVersion::RegionCode_t region;
 				
 				// Enable/disable SRam.
 				bool enableSRam;
@@ -352,7 +344,7 @@ class EmuManager : public QObject
 		 * regionCode_changed_slot(): Region code has changed.
 		 * @param newRegionCode New region code setting.
 		 */
-		void regionCode_changed_slot(GensConfig::ConfRegionCode_t newRegionCode);
+		void regionCode_changed_slot(int newRegionCode); // LibGens::SysVersion::RegionCode_t
 		
 		/**
 		 * regionCodeOrder_changed_slot(): Region code auto-detection order has changed.
@@ -418,7 +410,7 @@ class EmuManager : public QObject
 		void doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, int val);
 		void doResetCpu(ResetCpuIndex cpu_idx);
 		
-		void doRegionCode(GensConfig::ConfRegionCode_t region);
+		void doRegionCode(LibGens::SysVersion::RegionCode_t region);
 		
 		void doEnableSRam(bool enableSRam);
 };

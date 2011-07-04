@@ -63,7 +63,7 @@ class GensConfigPrivate
 		int introColor;
 		
 		/** System. **/
-		GensConfig::ConfRegionCode_t regionCode;
+		int regionCode; // LibGens::SysVersion::RegionCode_t
 		uint16_t regionCodeOrder;
 		static bool IsRegionCodeOrderValid(uint16_t order);
 		
@@ -192,10 +192,14 @@ int GensConfigPrivate::reload(const QString& filename)
 	
 	/** System. **/
 	settings.beginGroup(QLatin1String("System"));
-	int regionCode_tmp = settings.value(QLatin1String("regionCode"), (int)GensConfig::CONFREGION_AUTODETECT).toInt();
-	if ((regionCode_tmp < (int)GensConfig::CONFREGION_AUTODETECT) || (regionCode_tmp > (int)GensConfig::CONFREGION_EU_PAL))
-		regionCode_tmp = (int)GensConfig::CONFREGION_AUTODETECT;
-	regionCode = (GensConfig::ConfRegionCode_t)regionCode_tmp;
+	
+	// NOTE: Uses LibGens::SysVersion::RegionCode_t, but Q_ENUMS requires a QObject for storage.
+	regionCode = settings.value(QLatin1String("regionCode"), (int)LibGens::SysVersion::REGION_AUTO).toInt();
+	if ((regionCode < (int)LibGens::SysVersion::REGION_AUTO) ||
+	    (regionCode > (int)LibGens::SysVersion::REGION_EU_PAL))
+	{
+		regionCode = (int)LibGens::SysVersion::REGION_AUTO;
+	}
 	
 	uint16_t regionCodeOrder_tmp = settings.value(
 			QLatin1String("regionCodeOrder"), QLatin1String("0x4812")).toString().toUShort(NULL, 0);
@@ -697,10 +701,11 @@ GC_PROPERTY_WRITE_RANGE(int, introStyle, int, IntroStyle, 0, 2)
 GC_PROPERTY_WRITE_RANGE(int, introColor, int, IntroColor, 0, 7)
 
 /** System. **/
-GC_PROPERTY_WRITE_RANGE(GensConfig::ConfRegionCode_t, regionCode,
-			GensConfig::ConfRegionCode_t, RegionCode,
-			(int)CONFREGION_AUTODETECT,
-			(int)CONFREGION_EU_PAL)
+// NOTE: Uses LibGens::SysVersion::RegionCode_t, but Q_ENUMS requires a QObject for storage.
+GC_PROPERTY_WRITE_RANGE(int, regionCode,
+			int, RegionCode,
+			(int)LibGens::SysVersion::REGION_AUTO,
+			(int)LibGens::SysVersion::REGION_EU_PAL)
 
 // Region code auto-detection order.
 uint16_t GensConfig::regionCodeOrder(void) const

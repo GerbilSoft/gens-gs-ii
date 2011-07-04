@@ -41,6 +41,9 @@
 // Recent ROMs.
 #include "RecentRoms.hpp"
 
+// SysVersion.hpp (contains RegionCode_t)
+#include "libgens/MD/SysVersion.hpp"
+
 // Property function macro.
 // NOTE: We can't include Q_PROPERTY() or signals here due to moc limitations.
 #define GC_PROPERTY(propType, propName, setPropType, setPropName) \
@@ -125,18 +128,9 @@ class GensConfig : public QObject
 		GC_PROPERTY(int, introColor, int, IntroColor);
 		
 		/** System. **/
-		
-		enum ConfRegionCode_t
-		{
-			CONFREGION_AUTODETECT = -1,
-			CONFREGION_JP_NTSC    = 0,
-			CONFREGION_ASIA_PAL   = 1,
-			CONFREGION_US_NTSC   = 2,
-			CONFREGION_EU_PAL     = 3
-		};
-		Q_ENUMS(ConfRegionCode_t);
-		Q_PROPERTY(ConfRegionCode_t regionCode READ regionCode WRITE setRegionCode NOTIFY regionCode_changed);
-		GC_PROPERTY(ConfRegionCode_t, regionCode, ConfRegionCode_t, RegionCode);
+		// NOTE: Uses LibGens::SysVersion::RegionCode_t, but Q_ENUMS requires a QObject for storage.
+		Q_PROPERTY(int regionCode READ regionCode WRITE setRegionCode NOTIFY regionCode_changed);
+		GC_PROPERTY(int, regionCode, int, RegionCode);
 		
 		// Region code auto-detection order.
 		Q_PROPERTY(uint16_t regionCodeOrder READ regionCodeOrder WRITE setRegionCodeOrder NOTIFY regionCodeOrder_changed);
@@ -236,7 +230,7 @@ class GensConfig : public QObject
 		void osdMsgColor_changed(const QColor& color);
 		
 		/** System. **/
-		void regionCode_changed(GensConfig::ConfRegionCode_t newRegionCode);
+		void regionCode_changed(int newRegionCode); // LibGens::SysVersion::RegionCode_t
 		void regionCodeOrder_changed(uint16_t newRegionCodeOrder);
 		
 		/** Intro effect. **/

@@ -444,7 +444,7 @@ void GeneralConfigWindow::apply(void)
 	gqt4_config->setNtscV30Rolling(chkNtscV30Rolling->isChecked());
 	
 	/** System. **/
-	gqt4_config->setRegionCode((GensConfig::ConfRegionCode_t)(cboRegionCurrent->currentIndex() - 1));
+	gqt4_config->setRegionCode((LibGens::SysVersion::RegionCode_t)(cboRegionCurrent->currentIndex() - 1));
 	gqt4_config->setRegionCodeOrder(regionCodeOrder());
 	
 	// Disable the Apply button.

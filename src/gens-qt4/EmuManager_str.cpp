@@ -28,40 +28,18 @@ namespace GensQt4
 
 /**
  * LgRegionCodeStr(): Get a string identifying a given LibGens region code.
- * @param region Region code. (1, 2, 4, 8)
+ * @param region Region code.
  * @return Region code string, or empty string on error.
  */
 QString EmuManager::LgRegionCodeStr(LibGens::SysVersion::RegionCode_t region)
 {
 	switch (region)
 	{
+		case LibGens::SysVersion::REGION_AUTO:		return tr("Auto-Detect");
 		case LibGens::SysVersion::REGION_JP_NTSC:	return tr("Japan (NTSC)");
 		case LibGens::SysVersion::REGION_ASIA_PAL:	return tr("Asia (PAL)");
 		case LibGens::SysVersion::REGION_US_NTSC:	return tr("USA (NTSC)");
 		case LibGens::SysVersion::REGION_EU_PAL:	return tr("Europe (PAL)");
-		default:	return QString();
-	}
-	
-	// Should not get here...
-	return QString();
-}
-
-
-/**
- * LgRegionCodeStr(): Get a string identifying a given GensConfig region code.
- * TODO: Combine ConfRegionCode_t with RegionCode_t.
- * @param region Region code.
- * @return Region code string, or empty string on error.
- */
-QString EmuManager::GcRegionCodeStr(GensConfig::ConfRegionCode_t region)
-{
-	switch (region)
-	{
-		case GensConfig::CONFREGION_AUTODETECT:	return tr("Auto-Detect");
-		case GensConfig::CONFREGION_JP_NTSC:	return tr("Japan (NTSC)");
-		case GensConfig::CONFREGION_ASIA_PAL:	return tr("Asia (PAL)");
-		case GensConfig::CONFREGION_US_NTSC:	return tr("USA (NTSC)");
-		case GensConfig::CONFREGION_EU_PAL:	return tr("Europe (PAL)");
 		default:	return QString();
 	}
 	

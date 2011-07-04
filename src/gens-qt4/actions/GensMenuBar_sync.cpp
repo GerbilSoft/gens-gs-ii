@@ -48,8 +48,8 @@ void GensMenuBarPrivate::syncConnect(void)
 {
 	QObject::connect(gqt4_config, SIGNAL(stretchMode_changed(GensConfig::StretchMode_t)),
 			 q, SLOT(stretchMode_changed_slot(GensConfig::StretchMode_t)));
-	QObject::connect(gqt4_config, SIGNAL(regionCode_changed(GensConfig::ConfRegionCode_t)),
-			 q, SLOT(regionCode_changed_slot(GensConfig::ConfRegionCode_t)));
+	QObject::connect(gqt4_config, SIGNAL(regionCode_changed(int)),
+			 q, SLOT(regionCode_changed_slot(int)));	// LibGens::SysVersion::RegionCode_t
 	QObject::connect(gqt4_config, SIGNAL(enableSRam_changed(bool)),
 			 q, SLOT(enableSRam_changed_slot(bool)));
 }
@@ -146,16 +146,17 @@ void GensMenuBar::stretchMode_changed_slot(GensConfig::StretchMode_t newStretchM
  * regionCode_changed_slot(): Region code has changed.
  * @param newRegionCode New region code.
  */
-void GensMenuBar::regionCode_changed_slot(GensConfig::ConfRegionCode_t newRegionCode)
+// NOTE: Uses LibGens::SysVersion::RegionCode_t, but Q_ENUMS requires a QObject for storage.
+void GensMenuBar::regionCode_changed_slot(int newRegionCode)
 {
 	int id;
 	switch (newRegionCode)
 	{
-		case GensConfig::CONFREGION_AUTODETECT:	id = IDM_SYSTEM_REGION_AUTODETECT; break;
-		case GensConfig::CONFREGION_JP_NTSC:	id = IDM_SYSTEM_REGION_JAPAN;      break;
-		case GensConfig::CONFREGION_ASIA_PAL:	id = IDM_SYSTEM_REGION_ASIA;       break;
-		case GensConfig::CONFREGION_US_NTSC:	id = IDM_SYSTEM_REGION_USA;        break;
-		case GensConfig::CONFREGION_EU_PAL:	id = IDM_SYSTEM_REGION_EUROPE;     break;
+		case LibGens::SysVersion::REGION_AUTO:		id = IDM_SYSTEM_REGION_AUTODETECT; break;
+		case LibGens::SysVersion::REGION_JP_NTSC:	id = IDM_SYSTEM_REGION_JAPAN;      break;
+		case LibGens::SysVersion::REGION_ASIA_PAL:	id = IDM_SYSTEM_REGION_ASIA;       break;
+		case LibGens::SysVersion::REGION_US_NTSC:	id = IDM_SYSTEM_REGION_USA;        break;
+		case LibGens::SysVersion::REGION_EU_PAL:	id = IDM_SYSTEM_REGION_EUROPE;     break;
 		default:
 			return;
 	}

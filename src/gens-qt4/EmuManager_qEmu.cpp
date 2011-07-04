@@ -308,7 +308,8 @@ void EmuManager::autoFixChecksum_changed_slot(bool newAutoFixChecksum)
  * regionCode_changed_slot(): Region code has changed.
  * @param newRegionCode New region code setting.
  */
-void EmuManager::regionCode_changed_slot(GensConfig::ConfRegionCode_t newRegionCode)
+// NOTE: Uses LibGens::SysVersion::RegionCode_t, but Q_ENUMS requires a QObject for storage.
+void EmuManager::regionCode_changed_slot(int newRegionCode)
 {
 	// NOTE: Region code change is processed even if a ROM isn't loaded,
 	// since we're printing a message to the screen.
@@ -316,7 +317,7 @@ void EmuManager::regionCode_changed_slot(GensConfig::ConfRegionCode_t newRegionC
 	// Queue the region code change.
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_REGION_CODE;
-	rq.region = newRegionCode;
+	rq.region = (LibGens::SysVersion::RegionCode_t)newRegionCode;
 	m_qEmuRequest.enqueue(rq);
 	
 	if (!m_rom || m_paused.data)
@@ -332,7 +333,7 @@ void EmuManager::regionCodeOrder_changed_slot(uint16_t newRegionCodeOrder)
 {
 	if (!m_rom)
 		return;
-	if (gqt4_config->regionCode() != GensConfig::CONFREGION_AUTODETECT)
+	if (gqt4_config->regionCode() != LibGens::SysVersion::REGION_AUTO)
 		return;
 	
 	// Auto-detect order has changed, and we're currently using auto-detect.
@@ -340,7 +341,7 @@ void EmuManager::regionCodeOrder_changed_slot(uint16_t newRegionCodeOrder)
 	// Queue the region code change.
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_REGION_CODE;
-	rq.region = GensConfig::CONFREGION_AUTODETECT;
+	rq.region = LibGens::SysVersion::REGION_AUTO;
 	m_qEmuRequest.enqueue(rq);
 	
 	if (!m_rom || m_paused.data)
@@ -939,13 +940,13 @@ void EmuManager::doResetCpu(EmuManager::ResetCpuIndex cpu_idx)
  * doRegionCode(): Set the region code.
  * @param region New region code setting.
  */
-void EmuManager::doRegionCode(GensConfig::ConfRegionCode_t region)
+void EmuManager::doRegionCode(LibGens::SysVersion::RegionCode_t region)
 {
 	// TODO: Verify if this is an actual change.
 	// If it isn't, don't do anything.
 	
 	// Print a message to the OSD.
-	const QString region_str = GcRegionCodeStr(region);
+	const QString region_str = LgRegionCodeStr(region);
 	//: OSD message indicating the system region code was changed.
 	const QString str = tr("System region set to %1.", "osd");
 	emit osdPrintMsg(1500, str.arg(region_str));
@@ -953,12 +954,13 @@ void EmuManager::doRegionCode(GensConfig::ConfRegionCode_t region)
 	if (m_rom)
 	{
 		// Emulation is running. Change the region.
+		// GetLgRegionCode() is needed for region auto-detection.
 		LibGens::SysVersion::RegionCode_t lg_region = GetLgRegionCode(
 					region, m_rom->regionCode(),
 					gqt4_config->regionCodeOrder());
 		gqt4_emuContext->setRegion(lg_region);
 		
-		if (region == GensConfig::CONFREGION_AUTODETECT)
+		if (region == LibGens::SysVersion::REGION_AUTO)
 		{
 			// Print the auto-detected region.
 			const QString detect_str = LgRegionCodeStr(lg_region);
