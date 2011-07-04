@@ -118,7 +118,11 @@ const GensMenuBar::MenuItem GensMenuBar::ms_gmiSystem[] =
 	{IDM_SYSTEM_SOFTRESET, GMI_NORMAL, QT_TR_NOOP("&Soft Reset"), QAction::NoRole, 0, NULL, NULL},
 	{IDM_SYSTEM_PAUSE, GMI_CHECK, QT_TR_NOOP("&Pause"), QAction::NoRole, 0, NULL, NULL},
 	{IDM_SEPARATOR, GMI_SEPARATOR, NULL, QAction::NoRole, 0, NULL, NULL},
+	// TODO: "Main 68000" for Sega CD?
 	{IDM_SYSTEM_CPURESET_M68K, GMI_NORMAL, QT_TR_NOOP("Reset &68000"), QAction::NoRole, 0, NULL, NULL},
+	{IDM_SYSTEM_CPURESET_S68K, GMI_NORMAL, QT_TR_NOOP("Reset Sub 68000"), QAction::NoRole, 0, NULL, NULL},
+	{IDM_SYSTEM_CPURESET_MSH2, GMI_NORMAL, QT_TR_NOOP("Reset Master SH2"), QAction::NoRole, 0, NULL, NULL},
+	{IDM_SYSTEM_CPURESET_SSH2, GMI_NORMAL, QT_TR_NOOP("Reset Slave SH2"), QAction::NoRole, 0, NULL, NULL},
 	{IDM_SYSTEM_CPURESET_Z80, GMI_NORMAL, QT_TR_NOOP("Reset &Z80"), QAction::NoRole, 0, NULL, NULL},
 	
 	{0, GMI_NORMAL, NULL, QAction::NoRole, 0, NULL, NULL}

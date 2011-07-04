@@ -236,19 +236,45 @@ void GensMenuBar::stateChanged(void)
 		actionShowMenuBar->setChecked(gqt4_config->showMenuBar());
 #endif /* Q_WS_MAC */
 	
-	// System-specifc Reset CPU actions.
-	// TODO: Determine the active system.
-	QAction *actionCpuResetM68K = d->hashActions.value(IDM_SYSTEM_CPURESET_M68K);
-	QAction *actionCpuResetZ80 = d->hashActions.value(IDM_SYSTEM_CPURESET_Z80);
-	if (actionCpuResetM68K)
+	// Z80. (Common for all systems.)
+	QAction *actionCpuReset = d->hashActions.value(IDM_SYSTEM_CPURESET_Z80);
+	if (actionCpuReset)
 	{
-		actionCpuResetM68K->setEnabled(isRomOpen);
-		actionCpuResetM68K->setVisible(isRomOpen);
+		actionCpuReset->setEnabled(isRomOpen);
+		actionCpuReset->setVisible(isRomOpen);
 	}
-	if (actionCpuResetZ80)
+	
+	// Main 68000. (MD, MCD, 32X, MCD32X)
+	// TODO: Change title to "Main 68000" when Sega CD is enabled?
+	actionCpuReset = d->hashActions.value(IDM_SYSTEM_CPURESET_M68K);
+	if (actionCpuReset)
 	{
-		actionCpuResetZ80->setEnabled(isRomOpen);
-		actionCpuResetZ80->setVisible(isRomOpen);
+		actionCpuReset->setEnabled(isRomOpen);
+		actionCpuReset->setVisible(isRomOpen);
+	}
+	
+	// Sub 68000. (MCD, MCD32X)
+	// TODO: Identify active system.
+	actionCpuReset = d->hashActions.value(IDM_SYSTEM_CPURESET_S68K);
+	if (actionCpuReset)
+	{
+		actionCpuReset->setEnabled(false);
+		actionCpuReset->setVisible(false);
+	}
+	
+	// Master and Slave SH2. (32X, MCD32X)
+	// TODO: Identify active system.
+	actionCpuReset = d->hashActions.value(IDM_SYSTEM_CPURESET_MSH2);
+	if (actionCpuReset)
+	{
+		actionCpuReset->setEnabled(false);
+		actionCpuReset->setVisible(false);
+	}
+	actionCpuReset = d->hashActions.value(IDM_SYSTEM_CPURESET_SSH2);
+	if (actionCpuReset)
+	{
+		actionCpuReset->setEnabled(false);
+		actionCpuReset->setVisible(false);
 	}
 	
 	// Unlock menu actions.

@@ -140,6 +140,9 @@ const GensKeyConfigPrivate::DefKeySetting_t GensKeyConfigPrivate::DefKeySettings
 	{IDM_SYSTEM_SOFTRESET, KEYV_TAB,			"system/softReset"},
 	{IDM_SYSTEM_PAUSE, KEYV_ESCAPE,				"system/pause"},
 	{IDM_SYSTEM_CPURESET_M68K, 0,				"system/resetM68K"},
+	{IDM_SYSTEM_CPURESET_S68K, 0,				"system/resetS68K"},
+	{IDM_SYSTEM_CPURESET_MSH2, 0,				"system/resetMSH2"},
+	{IDM_SYSTEM_CPURESET_SSH2, 0,				"system/resetSSH2"},
 	{IDM_SYSTEM_CPURESET_Z80, 0,				"system/resetZ80"},
 	
 	// Options menu.
