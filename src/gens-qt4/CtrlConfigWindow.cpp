@@ -334,7 +334,7 @@ QString CtrlConfigWindow::GetPortName(int port)
 		case CtrlConfig::PORT_TP2B:
 		case CtrlConfig::PORT_TP2C:
 		case CtrlConfig::PORT_TP2D:
-			return tr("Team Player %1, Port %2").arg(1)
+			return tr("Team Player %1, Port %2").arg(2)
 				.arg(QChar(L'A' + (port - CtrlConfig::PORT_TP2A)));
 		
 		// 4-Way Play.
