@@ -232,6 +232,7 @@ void AboutWindow::initAboutWindowText(void)
 	
 	// Set the debug information text.
 	lblDebugInfo->setText(AboutWindow::GetDebugInfo());
+	lblDebugInfo->setTextFormat(Qt::RichText);
 	
 	// Build the credits text.
 	// TODO: Use QString instead of stringstream?
@@ -393,10 +394,13 @@ QString AboutWindow::GetIncLibraries(void)
  */
 QString AboutWindow::GetDebugInfo(void)
 {
+	// Line break string.
+	const QString sLineBreak = QLatin1String("<br/>\n");
+	
 	// Debug information.
 	QString sDebugInfo =
-		tr("Compiled using Qt %1.").arg(QLatin1String(QT_VERSION_STR)) + QChar(L'\n') +
-		tr("Using Qt %1.").arg(QLatin1String(qVersion())) + QChar(L'\n') + QChar(L'\n');
+		tr("Compiled using Qt %1.").arg(QLatin1String(QT_VERSION_STR)) + sLineBreak +
+		tr("Using Qt %1.").arg(QLatin1String(qVersion())) + sLineBreak + sLineBreak;
 	
 	// CPU flags.
 	// TODO: Move the array of CPU flag names to LibGens.
@@ -433,26 +437,28 @@ QString AboutWindow::GetDebugInfo(void)
 	//: Used to indicate no special CPU features were found.
 	sDebugInfo += tr("(none)");
 #endif /* defined(__i386__) || defined(__amd64__) */
-	sDebugInfo += QChar(L'\n');
+	sDebugInfo += sLineBreak;
 	
 	//: Timing method: Function used to handle emulation timing.
 	sDebugInfo += tr("Timing method") + QLatin1String(": ") +
 		QLatin1String(LibGens::Timing::GetTimingMethodName(LibGens::Timing::GetTimingMethod())) +
-		QLatin1String("()\n\n");
+		QLatin1String("()") + sLineBreak + sLineBreak;
 	
-	// TODO: Make this a link.
 	//: Save directory: Directory where configuration and savestate files are saved.
-	sDebugInfo += tr("Save directory") + QLatin1String(":\n") +
-		QDir::toNativeSeparators(gqt4_config->cfgPath()) + QLatin1String("\n\n");
+	// TODO: Verify that the link works on Windows and Mac OS X.
+	sDebugInfo += tr("Save directory") + QChar(L':') + sLineBreak +
+		QLatin1String("<a href=\"file://") + gqt4_config->cfgPath() + QLatin1String("\">") +
+		QDir::toNativeSeparators(gqt4_config->cfgPath()) + QLatin1String("</a>") +
+		sLineBreak + sLineBreak;
 	
 #ifdef Q_OS_WIN32
 	// Win32 code page information.
-	sDebugInfo += GetCodePageInfo() + QChar(L'\n');
+	sDebugInfo += GetCodePageInfo() + sLineBreak;
 #endif /* Q_OS_WIN32 */
 	
 #ifndef HAVE_OPENGL
 	//: Displayed if Gens/GS II is compiled without OpenGL support.
-	sDebugInfo += tr("OpenGL disabled.\n");
+	sDebugInfo += tr("OpenGL disabled.") + sLineBreak;
 #else
 	const char *glVendor = (const char*)glGetString(GL_VENDOR);
 	const char *glRenderer = (const char*)glGetString(GL_RENDERER);
@@ -470,11 +476,11 @@ QString AboutWindow::GetDebugInfo(void)
 	const QString qsid_unknown = tr("(unknown)");
 	
 	sDebugInfo += qsid_glVendor + QLatin1String(": ") +
-			QString(glVendor ? QLatin1String(glVendor) : qsid_unknown) + QChar(L'\n') +
+			QString(glVendor ? QLatin1String(glVendor) : qsid_unknown) + sLineBreak +
 			qsid_glRenderer + QLatin1String(": ") +
-			QString(glRenderer ? QLatin1String(glRenderer) : qsid_unknown) + QChar(L'\n') +
+			QString(glRenderer ? QLatin1String(glRenderer) : qsid_unknown) + sLineBreak +
 			qsid_glVersion + QLatin1String(": ") +
-			QString(glVersion ? QLatin1String(glVersion) : qsid_unknown) + QChar(L'\n');
+			QString(glVersion ? QLatin1String(glVersion) : qsid_unknown) + sLineBreak;
 	
 #ifdef GL_SHADING_LANGUAGE_VERSION
 	if (glVersion && glVersion[0] >= '2' && glVersion[1] == '.')
@@ -486,14 +492,14 @@ QString AboutWindow::GetDebugInfo(void)
 		sDebugInfo += qsid_glslVersion + QLatin1String(": ") +
 				QString(glslVersion
 					? QLatin1String(glslVersion)
-					: qsid_unknown) + QChar(L'\n');
+					: qsid_unknown) + sLineBreak;
 	}
 	
 	// OpenGL extensions.
-	sDebugInfo += QChar(L'\n');
+	sDebugInfo += sLineBreak;
 #ifndef HAVE_GLEW
 	//: GL Extension Wrangler support was not compiled in.
-	sDebugInfo += tr("GLEW disabled; no GL extensions supported.") + QChar(L'\n');
+	sDebugInfo += tr("GLEW disabled; no GL extensions supported.") + sLineBreak;
 #else
 	const char *glewVersion = (const char*)glewGetString(GLEW_VERSION);
 	
@@ -502,7 +508,7 @@ QString AboutWindow::GetDebugInfo(void)
 	sDebugInfo += qsid_glewVersion + QChar(L' ') +
 			QString(glewVersion
 				? QLatin1String(glewVersion)
-				: tr("(unknown)")) + QChar(L'\n');
+				: tr("(unknown)")) + sLineBreak;
 	
 	// Get a list of OpenGL extensions that are in use.
 	const QChar chrBullet(0x2022);	// U+2022: BULLET
@@ -519,7 +525,7 @@ QString AboutWindow::GetDebugInfo(void)
 		sDebugInfo += tr("Using GL extensions") + QChar(L':');
 		foreach (const QString& ext, extsInUse)
 		{
-			sDebugInfo += QChar(L'\n');
+			sDebugInfo += sLineBreak;
 			sDebugInfo += chrBullet;
 			sDebugInfo += QChar(L' ');
 			sDebugInfo += ext;
