@@ -31,7 +31,7 @@ namespace GensQt4
 class GensColorButton : public QPushButton
 {
 	Q_OBJECT
-	Q_PROPERTY(QColor bgColor READ bgColor WRITE setBgColor)
+	Q_PROPERTY(QColor bgColor READ bgColor WRITE setBgColor RESET unsetBgColor)
 	
 	public:
 		GensColorButton(QWidget *parent = 0)
@@ -43,6 +43,7 @@ class GensColorButton : public QPushButton
 		
 		QColor bgColor(void);
 		void setBgColor(const QColor& newBgColor);
+		void unsetBgColor(void);
 	
 	protected:
 		static QColor TextColor_For_BgColor(const QColor& color);
@@ -55,6 +56,9 @@ class GensColorButton : public QPushButton
 
 inline QColor GensColorButton::bgColor(void)
 	{ return m_bgColor; }
+
+inline void GensColorButton::unsetBgColor(void)
+	{ setBgColor(QColor()); }
 
 /**
 * TextColor_For_BgColor(): Get the text color for a given background color.
