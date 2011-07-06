@@ -56,10 +56,6 @@ namespace GensQt4
 // Static member initialization.
 GeneralConfigWindow *GeneralConfigWindow::m_GeneralConfigWindow = NULL;
 
-// Button CSS colors.
-const QString GeneralConfigWindow::ms_sCssBtnColors =
-	QLatin1String("QPushButton { background-color: %1; color: %2; }");
-
 // Warning string.
 const QString GeneralConfigWindow::ms_sWarning =
 	QLatin1String("<span style='color: red'><b>") +
@@ -332,15 +328,13 @@ void GeneralConfigWindow::reload(void)
 	/** Onscreen display: FPS counter. **/
 	chkOsdFpsEnable->setChecked(gqt4_config->osdFpsEnabled());
 	m_osdFpsColor = gqt4_config->osdFpsColor();
-	colorText = TextColor_For_BGColor(m_osdFpsColor);
-	btnOsdFpsColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdFpsColor.name()).arg(colorText.name()));
+	btnOsdFpsColor->setBgColor(m_osdFpsColor);
 	btnOsdFpsColor->setText(m_osdFpsColor.name().toUpper());
 	
 	/** Onscreen display: Messages. **/
 	chkOsdMsgEnable->setChecked(gqt4_config->osdMsgEnabled());
 	m_osdMsgColor = gqt4_config->osdMsgColor();
-	colorText = TextColor_For_BGColor(m_osdMsgColor);
-	btnOsdMsgColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdMsgColor.name()).arg(colorText.name()));
+	btnOsdMsgColor->setBgColor(m_osdMsgColor);
 	btnOsdMsgColor->setText(m_osdMsgColor.name().toUpper());
 	
 	/** Intro effect. **/
@@ -472,19 +466,6 @@ void GeneralConfigWindow::toolbarTriggered(QAction* action)
 
 
 /**
- * TextColor_For_BGColor(): Get the text color for a given background color.
- * If the luminance is < 128, this returns white.
- * Otherwise, this returns black.
- * @return Text color for the given background color.
- */
-
-QColor GeneralConfigWindow::TextColor_For_BGColor(const QColor& color)
-{
-	return (color.value() < 128 ? QColor(Qt::white) : QColor(Qt::black));
-}
-
-
-/**
  * osdSelectColor(): Select a color for the OSD.
  * @param color_id	[in] Color ID.
  * @param init_color	[in] Initial color.
@@ -507,8 +488,7 @@ void GeneralConfigWindow::on_btnOsdFpsColor_clicked(void)
 		return;
 	
 	m_osdFpsColor = color;
-	QColor colorText = TextColor_For_BGColor(m_osdFpsColor);
-	btnOsdFpsColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdFpsColor.name()).arg(colorText.name()));
+	btnOsdFpsColor->setBgColor(m_osdFpsColor);
 	btnOsdFpsColor->setText(m_osdFpsColor.name().toUpper());
 	
 	// Settings have been changed.
@@ -526,8 +506,8 @@ void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
 		return;
 	
 	m_osdMsgColor = color;
-	QColor colorText = TextColor_For_BGColor(m_osdMsgColor);
-	btnOsdMsgColor->setStyleSheet(ms_sCssBtnColors.arg(m_osdMsgColor.name()).arg(colorText.name()));
+	btnOsdMsgColor->setBgColor(color);
+	btnOsdMsgColor->setText(m_osdMsgColor.name().toUpper());
 	
 	// Settings have been changed.
 #ifndef GCW_APPLY_IMMED

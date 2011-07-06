@@ -75,9 +75,6 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		// State change event. (Used for switching the UI language at runtime.)
 		void changeEvent(QEvent *event);
 		
-		// Button CSS colors.
-		static const QString ms_sCssBtnColors;
-		
 		// Warning string.
 		static const QString ms_sWarning;
 		
@@ -113,15 +110,6 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		static GeneralConfigWindow *m_GeneralConfigWindow;
 		
 		/** Onscreen Display **/
-		
-		/**
-		 * TextColor_For_BGColor(): Get the text color for a given background color.
-		 * If the luminance is < 128, this returns white.
-		 * Otherwise, this returns black.
-		 * @return Text color for the given background color.
-		 */
-		static QColor TextColor_For_BGColor(const QColor& color);
-		
 		QColor osdSelectColor(const QString& color_id, const QColor& init_color);
 		
 		// Onscreen Display: Colors.

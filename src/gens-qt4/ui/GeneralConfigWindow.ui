@@ -68,7 +68,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btnOsdFpsColor">
+              <widget class="GensColorButton" name="btnOsdFpsColor">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -105,7 +105,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btnOsdMsgColor">
+              <widget class="GensColorButton" name="btnOsdMsgColor">
                <property name="text">
                 <string notr="true">#FFFFFF</string>
                </property>
@@ -1058,6 +1058,11 @@ window to a larger size than its original resolution.</string>
    <class>GensColorComboBox</class>
    <extends>QComboBox</extends>
    <header>widgets/GensColorComboBox.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>GensColorButton</class>
+   <extends>QPushButton</extends>
+   <header>widgets/GensColorButton.hpp</header>
   </customwidget>
  </customwidgets>
  <tabstops>
