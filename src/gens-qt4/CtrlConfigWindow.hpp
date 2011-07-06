@@ -32,6 +32,8 @@
 
 // Qt includes and classes.
 #include <QtGui/QIcon>
+#include <QtCore/QSignalMapper>
+#include <QtCore/QVector>
 class QActionGroup;
 
 // LibGens includes.
@@ -81,24 +83,7 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		void apply(void);
 		
 		/** Widget slots. **/
-		void on_actionPort1_toggled(bool checked);
-		void on_actionPort2_toggled(bool checked);
-		
-		void on_actionPortTP1A_toggled(bool checked);
-		void on_actionPortTP1B_toggled(bool checked);
-		void on_actionPortTP1C_toggled(bool checked);
-		void on_actionPortTP1D_toggled(bool checked);
-		
-		void on_actionPortTP2A_toggled(bool checked);
-		void on_actionPortTP2B_toggled(bool checked);
-		void on_actionPortTP2C_toggled(bool checked);
-		void on_actionPortTP2D_toggled(bool checked);
-		
-		void on_actionPort4WPA_toggled(bool checked);
-		void on_actionPort4WPB_toggled(bool checked);
-		void on_actionPort4WPC_toggled(bool checked);
-		void on_actionPort4WPD_toggled(bool checked);
-		
+		void toolbarPortSelected(int i);
 		void on_cboDevice_currentIndexChanged(int index);
 	
 	private:
@@ -113,9 +98,10 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		
 		// Selected port.
 		int m_selPort;
+		QSignalMapper *m_mapperSelPort;
 		
 		// Toolbar separators.
-		QAction *m_tbSep[CTRL_CFG_TBSEP_MAX];
+		QVector<QAction*> m_vecTbSep;
 		
 		// Update port information.
 		void updatePortButton(int port);

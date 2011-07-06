@@ -106,17 +106,31 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	m_actgrpSelPort->addAction(actionPort4WPC);
 	m_actgrpSelPort->addAction(actionPort4WPD);
 	
+	// Signal mapper for toolbar buttons.
+	m_mapperSelPort = new QSignalMapper(this);
+	QObject::connect(m_mapperSelPort, SIGNAL(mapped(int)),
+			 this, SLOT(toolbarPortSelected(int)));
+	
 	// Find the toolbar separators.
 	// Qt Designer doesn't save them for some reason.
+	// Also, add port buttons to the signal mapper.
 	size_t tbSepCnt = 0;
+	int portNum = 0;
+	m_vecTbSep.reserve(CTRL_CFG_TBSEP_MAX);
 	foreach(QAction *action, toolBar->actions())
 	{
 		if (action->isSeparator())
 		{
-			m_tbSep[tbSepCnt] = action;
-			tbSepCnt++;
-			if (tbSepCnt >= (sizeof(m_tbSep) / sizeof(m_tbSep[0])))
-				break;
+			// Append to the vector of separators.
+			m_vecTbSep.append(action);
+		}
+		else
+		{
+			// Port button. Add to signal mapper.
+			QObject::connect(action, SIGNAL(toggled(bool)),
+					 m_mapperSelPort, SLOT(map()));
+			m_mapperSelPort->setMapping(action, portNum);
+			portNum++;
 		}
 	}
 	
@@ -446,7 +460,7 @@ void CtrlConfigWindow::updatePortButton(int port)
 	{
 		// Port 1. Update TeamPlayer 1 button state.
 		const bool isTP = (m_devType[port] == LibGens::IoBase::IOT_TEAMPLAYER);
-		m_tbSep[CTRL_CFG_TBSEP_TP1]->setVisible(isTP);
+		m_vecTbSep[CTRL_CFG_TBSEP_TP1]->setVisible(isTP);
 		actionPortTP1A->setVisible(isTP);
 		actionPortTP1B->setVisible(isTP);
 		actionPortTP1C->setVisible(isTP);
@@ -456,7 +470,7 @@ void CtrlConfigWindow::updatePortButton(int port)
 	{
 		// Port 2. Update TeamPlayer 2 button state.
 		const bool isTP = (m_devType[port] == LibGens::IoBase::IOT_TEAMPLAYER);
-		m_tbSep[CTRL_CFG_TBSEP_TP2]->setVisible(isTP);
+		m_vecTbSep[CTRL_CFG_TBSEP_TP2]->setVisible(isTP);
 		actionPortTP2A->setVisible(isTP);
 		actionPortTP2B->setVisible(isTP);
 		actionPortTP2C->setVisible(isTP);
@@ -469,7 +483,7 @@ void CtrlConfigWindow::updatePortButton(int port)
 		const bool is4WP = (m_devType[0] == LibGens::IoBase::IOT_4WP_SLAVE &&
 				    m_devType[1] == LibGens::IoBase::IOT_4WP_MASTER);
 		
-		m_tbSep[CTRL_CFG_TBSEP_4WP]->setVisible(is4WP);
+		m_vecTbSep[CTRL_CFG_TBSEP_4WP]->setVisible(is4WP);
 		actionPort4WPA->setVisible(is4WP);
 		actionPort4WPB->setVisible(is4WP);
 		actionPort4WPC->setVisible(is4WP);
@@ -641,38 +655,17 @@ void CtrlConfigWindow::apply(void) { }
 
 /** Widget slots. **/
 
-// TODO: Use a signal mapper.
-void CtrlConfigWindow::on_actionPort1_toggled(bool checked)
-	{ if (checked) selectPort(0); }
-void CtrlConfigWindow::on_actionPort2_toggled(bool checked)
-	{ if (checked) selectPort(1); }
 
-void CtrlConfigWindow::on_actionPortTP1A_toggled(bool checked)
-	{ if (checked) selectPort(CtrlConfig::PORT_TP1A); }
-void CtrlConfigWindow::on_actionPortTP1B_toggled(bool checked)
-	{ if (checked) selectPort(CtrlConfig::PORT_TP1B); }
-void CtrlConfigWindow::on_actionPortTP1C_toggled(bool checked)
-	{ if (checked) selectPort(CtrlConfig::PORT_TP1C); }
-void CtrlConfigWindow::on_actionPortTP1D_toggled(bool checked)
-	{ if (checked) selectPort(CtrlConfig::PORT_TP1D); }
-
-void CtrlConfigWindow::on_actionPortTP2A_toggled(bool checked)
-	{ if (checked) selectPort(CtrlConfig::PORT_TP2A); }
-void CtrlConfigWindow::on_actionPortTP2B_toggled(bool checked)
-	{ if (checked) selectPort(CtrlConfig::PORT_TP2B); }
-void CtrlConfigWindow::on_actionPortTP2C_toggled(bool checked)
-	{ if (checked) selectPort(CtrlConfig::PORT_TP2C); }
-void CtrlConfigWindow::on_actionPortTP2D_toggled(bool checked)
-	{ if (checked) selectPort(CtrlConfig::PORT_TP2D); }
-
-void CtrlConfigWindow::on_actionPort4WPA_toggled(bool checked)
-	{ if (checked) selectPort(CtrlConfig::PORT_4WPA); }
-void CtrlConfigWindow::on_actionPort4WPB_toggled(bool checked)
-	{ if (checked) selectPort(CtrlConfig::PORT_4WPB); }
-void CtrlConfigWindow::on_actionPort4WPC_toggled(bool checked)
-	{ if (checked) selectPort(CtrlConfig::PORT_4WPC); }
-void CtrlConfigWindow::on_actionPort4WPD_toggled(bool checked)
-	{ if (checked) selectPort(CtrlConfig::PORT_4WPD); }
+/**
+ * toolbarPortSelected(): The selected port in the toolbar has been changed.
+ * @param i Port number.
+ */
+void CtrlConfigWindow::toolbarPortSelected(int i)
+{
+	QAction *action = qobject_cast<QAction*>(m_mapperSelPort->mapping(i));
+	if (action && action->isChecked())
+		selectPort(i);
+}
 
 
 /**
