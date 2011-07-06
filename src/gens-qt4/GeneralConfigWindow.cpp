@@ -716,7 +716,7 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 		rom_size_warning = ms_sWarning + tr("ROM size is incorrect.") + sLineBreak +
 				tr("(expected %L1 bytes; found %L2 bytes)").arg(MCD_ROM_FILESIZE).arg(rom->romSize());
 		
-		// TODO: LibGens::Rom::loadRom() fails if the ROM buffer isn't >= the ROM size.
+		// TODO: Continue ROM identification even if the ROM is too big?
 		//if (file.size() < MCD_ROM_FILESIZE)
 		{
 			// ROM is too small, so it's guaranteed to not match anything in the database.
@@ -892,7 +892,6 @@ void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 
 void GeneralConfigWindow::on_txtMcdRomAsia_textChanged(void)
 {
-	// TODO: Add a separate "Mega CD (Asia)" boot ROM?
 	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomAsia, MCD_REGION_ASIA);
 	if (!sNewRomStatus.isEmpty())
 	{
