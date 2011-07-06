@@ -41,11 +41,30 @@ class GensColorButton : public QPushButton
 		GensColorButton(const QIcon& icon, const QString& text, QWidget *parent = 0)
 			: QPushButton(icon, text, parent) { }
 		
+		/**
+		 * bgColor(): Get the current background color.
+		 * @return Background color.
+		 */
 		QColor bgColor(void);
+		
+		/**
+		 * setBgColor(): Set the background color.
+		 * @param newBgColor New background color. (If an invalid color is specified, unsets the background color.)
+		 */
 		void setBgColor(const QColor& newBgColor);
+		
+		/**
+		 * unsetBgColor(): Unset the background color.
+		 */
 		void unsetBgColor(void);
 	
 	protected:
+		/**
+		 * TextColor_For_BgColor(): Get the text color for a given background color.
+		 * If the luminance is < 128, this returns white.
+		 * Otherwise, this returns black.
+		 * @return Text color for the given background color.
+		 */
 		static QColor TextColor_For_BgColor(const QColor& color);
 		
 		// Stylesheet for QPushButton background color.
@@ -60,12 +79,6 @@ inline QColor GensColorButton::bgColor(void)
 inline void GensColorButton::unsetBgColor(void)
 	{ setBgColor(QColor()); }
 
-/**
-* TextColor_For_BgColor(): Get the text color for a given background color.
-* If the luminance is < 128, this returns white.
-* Otherwise, this returns black.
-* @return Text color for the given background color.
-*/
 inline QColor GensColorButton::TextColor_For_BgColor(const QColor& color)
 	{ return (color.value() < 128 ? QColor(Qt::white) : QColor(Qt::black)); }
 

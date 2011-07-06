@@ -28,6 +28,10 @@ namespace GensQt4
 const QString GensColorButton::ms_sCssBtnColors =
 	QLatin1String("QPushButton { background-color: %1; color: %2; }");
 
+/**
+ * setBgColor(): Set the background color.
+ * @param newBgColor New background color. (If an invalid color is specified, unsets the background color.)
+ */
 void GensColorButton::setBgColor(const QColor& newBgColor)
 {
 	if (m_bgColor == newBgColor || (!m_bgColor.isValid() && !newBgColor.isValid()))
