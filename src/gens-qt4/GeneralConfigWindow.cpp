@@ -322,9 +322,6 @@ void GeneralConfigWindow::reload(void)
 	// Onscreen Display.
 	QColor colorText;
 	
-	// TODO: Split button coloring into a separate function.
-	// Alternatively, subclass QPushButton and create GensColorButton.
-	
 	/** Onscreen display: FPS counter. **/
 	chkOsdFpsEnable->setChecked(gqt4_config->osdFpsEnabled());
 	m_osdFpsColor = gqt4_config->osdFpsColor();
