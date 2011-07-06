@@ -263,7 +263,6 @@ void SigHandler::SignalHandler(int signum)
 	if (!GensQt4::gqt4_app->isGuiThread())
 	{
 		// This isn't the GUI thread.
-		// TODO: Signal the GUI thread.
 		// This uses LOG_MSG_LEVEL_ERROR in order to suppress the message box.
 #ifdef HAVE_SIGACTION
 		if (siginfo)

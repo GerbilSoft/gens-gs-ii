@@ -262,7 +262,6 @@ void McdControlWindow::driveUpdated(const CdromDriveEntry& drive)
 	{
 		// Not querying drives.
 		// This is an actual drive update signal.
-		// TODO: If the drive's already in the list, update it.
 		int index = cboCdDrives->findData(drive.path, Qt::UserRole,
 #if defined(Q_OS_WIN)
 						(Qt::MatchFixedString | Qt::MatchCaseSensitive)
