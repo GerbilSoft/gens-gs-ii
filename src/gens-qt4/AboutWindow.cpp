@@ -44,10 +44,6 @@
 // C includes.
 #include <string.h>
 
-// C++ includes.
-#include <sstream>
-using std::stringstream;
-
 // Qt includes.
 #include <QtCore/QString>
 #include <QtCore/QStringList>
@@ -235,10 +231,11 @@ void AboutWindow::initAboutWindowText(void)
 	lblDebugInfo->setTextFormat(Qt::RichText);
 	
 	// Build the credits text.
-	// TODO: Use QString instead of stringstream?
-	stringstream ss_credits;
+	QString sCredits;
+	sCredits.reserve(4096); // Preallocate the string.
 	const GensGS_credits_t *p_credits = &GensGS_credits[0];
-	static const char *s_indent = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+	const QString sIndent = QLatin1String("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+	const QChar chrBullet(0x2022);	// U+2022: BULLET
 	for (; p_credits->credit_title || p_credits->credit_name; p_credits++)
 	{
 		if (p_credits->credit_title)
@@ -247,20 +244,24 @@ void AboutWindow::initAboutWindowText(void)
 			if (!strncmp(p_credits->credit_title, "-", 2))
 			{
 				// Title is "-". Next line.
-				ss_credits << "<br/>\n";
+				sCredits += sLineBreak;
 				continue;
 			}
 			else if (p_credits->credit_title[0] == '*')
 			{
-				// Subtitle. (TODO: UTF-8 bullet character.)
+				// Subtitle.
 				// TODO: Translate language translation subtitles?
-				ss_credits << s_indent << "* " <<
-					&p_credits->credit_title[1] << ": ";
+				sCredits += sIndent + chrBullet;
+				sCredits += QChar(L' ');
+				sCredits += QString::fromUtf8(&p_credits->credit_title[1]) +
+					QLatin1String(": ");
 			}
 			else
 			{
 				// Title is not "-". Print it.
-				ss_credits << "<b>" << p_credits->credit_title << "</b><br/>\n";
+				sCredits += QLatin1String("<b>") +
+					QString::fromUtf8(p_credits->credit_title) +
+					QLatin1String("</b>") + sLineBreak;
 			}
 		}
 		
@@ -272,16 +273,16 @@ void AboutWindow::initAboutWindowText(void)
 			{
 				// No subtitle specified.
 				// Indent the name.
-				ss_credits << s_indent;
+				sCredits += sIndent;
 			}
 			
 			// Append the name to the credits.
-			ss_credits << p_credits->credit_name << "<br/>\n";
+			sCredits += QString::fromUtf8(p_credits->credit_name) + sLineBreak;
 		}
 	}
 	
 	// Set the credits text.
-	lblCredits->setText(QString::fromUtf8(ss_credits.str().c_str()));
+	lblCredits->setText(sCredits);
 	lblCredits->setTextFormat(Qt::RichText);
 	
 	if (!m_scrlAreaInit)
