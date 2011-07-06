@@ -31,6 +31,7 @@ namespace GensQt4
 class GensColorButton : public QPushButton
 {
 	Q_OBJECT
+	Q_PROPERTY(QColor bgColor READ bgColor WRITE setBgColor)
 	
 	public:
 		GensColorButton(QWidget *parent = 0)
