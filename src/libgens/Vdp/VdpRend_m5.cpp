@@ -135,7 +135,7 @@ FORCE_INLINE int Vdp::T_GetLineNumber(void)
 }
 
 /**
- * Vdp::T_PutPixel_P0(): Put a pixel in background graphics layer 0.
+ * Vdp::T_PutPixel_P0(): Put a pixel in background graphics layer 0. (low-priority)
  * @param plane		[in] True for Scroll A; false for Scroll B.
  * @param h_s		[in] Highlight/Shadow enable.
  * @param pat_pixnum	[in] Pattern pixel number.
@@ -187,7 +187,7 @@ FORCE_INLINE void Vdp::T_PutPixel_P0(int disp_pixnum, uint32_t pattern, unsigned
 
 
 /**
- * Vdp::T_PutPixel_P1(): Put a pixel in background graphics layer 1.
+ * Vdp::T_PutPixel_P1(): Put a pixel in background graphics layer 1. (high-priority)
  * @param plane		[in] True for Scroll A; false for Scroll B.
  * @param h_s		[in] Highlight/Shadow enable.
  * @param pat_pixnum	[in] Pattern pixel number.
@@ -322,7 +322,7 @@ FORCE_INLINE uint8_t Vdp::T_PutPixel_Sprite(int disp_pixnum, uint32_t pattern, u
 
 
 /**
- * Vdp::T_PutLine_P0(): Put a line in background graphics layer 0.
+ * Vdp::T_PutLine_P0(): Put a line in background graphics layer 0. (low-priority)
  * @param plane		[in] True for Scroll A; false for Scroll B.
  * @param h_s		[in] Highlight/Shadow enable.
  * @param flip		[in] True to flip the line horizontally.
@@ -381,7 +381,7 @@ FORCE_INLINE void Vdp::T_PutLine_P0(int disp_pixnum, uint32_t pattern, int palet
 
 
 /**
- * Vdp::T_PutLine_P1(): Put a line in background graphics layer 1.
+ * Vdp::T_PutLine_P1(): Put a line in background graphics layer 1. (high-priority)
  * @param plane		[in] True for Scroll A; false for Scroll B.
  * @param h_s		[in] Highlight/Shadow enable.
  * @param flip		[in] True to flip the line horizontally.
