@@ -481,10 +481,12 @@ void VdpRend_Err::Render_Line(void)
 		}
 		
 		// Force a palette update.
-		Vdp::UpdateFlags.CRam = 1;
+		Vdp::MarkCRamDirty();
 	}
 	
 	// Check if the palette was modified.
+	// TODO: Merge this into the VDP class.
+#if 0
 	if (Vdp::UpdateFlags.CRam)
 	{
 		// Update the palette.
@@ -508,6 +510,7 @@ void VdpRend_Err::Render_Line(void)
 			}
 		}
 	}
+#endif
 }
 
 

@@ -45,10 +45,17 @@ class Vdp
 		static void Init(void);
 		static void End(void);
 		static void Reset(void);
-	
+		
 		// VDP emulation options.
 		static VdpTypes::VdpEmuOptions_t VdpEmuOptions;
 		
+		// Update flags.
+	public:
+		static void MarkCRamDirty(void);
+		static void MarkVRamDirty(void);
+	private:
+		static VdpTypes::UpdateFlags_t ms_UpdateFlags;
+	
 	/*!**************************************************************
 	 * VdpIo: I/O registers and variables.                          *
 	 ****************************************************************/
@@ -133,9 +140,6 @@ class Vdp
 		// NOTE: Gens/GS currently uses 312 lines for PAL. It should use 313!
 		static VdpTypes::VdpLines_t VDP_Lines;
 		
-		// Update flags.
-		static VdpTypes::UpdateFlags_t UpdateFlags;
-		
 		// System status.
 		// TODO: Move this to a more relevant file.
 		struct SysStatus_t
@@ -199,7 +203,10 @@ class Vdp
 		static int GetVPix(void);
 	
 	private:
-		static inline void Update_Mode(void);
+		/**
+		 * Vdp::Update_Mode(): Update VDP_Mode.
+		 */
+		static void Update_Mode(void);
 		
 		// VDP convenience values: Horizontal.
 		// NOTE: These must be signed for VDP arithmetic to work properly!
@@ -324,7 +331,7 @@ class Vdp
 			VXX_H32,     VXX_H64,  VXX_HXX,  VXX_H128,
 			V128_H32,    V128_H64, V128_HXX, V128_H128
 		};
-
+	
 	/*!**************************************************************
 	 * VdpRend: Rendering functions and variables.                  *
 	 ****************************************************************/
@@ -460,6 +467,18 @@ class Vdp
 		Vdp() { }
 		~Vdp() { }
 };
+
+/**
+ * MarkCRamDirty(): Mark CRam as dirty.
+ */
+inline void Vdp::MarkCRamDirty(void)
+	{ ms_UpdateFlags.CRam = 1; }
+
+/**
+ * MarkVRamDirty(): Mark VRam as dirty.
+ */
+inline void Vdp::MarkVRamDirty(void)
+	{ ms_UpdateFlags.VRam = 1; }
 
 inline int Vdp::GetHPix(void)
 	{ return H_Pix; }

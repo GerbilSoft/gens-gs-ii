@@ -97,11 +97,11 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 	
 	// Load VRam.
 	zomg.loadVRam(Vdp::VRam.u16, sizeof(Vdp::VRam.u16), true);
-	Vdp::UpdateFlags.VRam = 1;
+	Vdp::MarkVRamDirty();
 	
 	// Load CRam.
 	zomg.loadCRam(Vdp::CRam.u16, sizeof(Vdp::CRam.u16), true);
-	Vdp::UpdateFlags.CRam = 1;
+	Vdp::MarkCRamDirty();
 	
 	/** VDP: MD-specific **/
 	

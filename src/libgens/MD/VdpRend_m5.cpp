@@ -1512,23 +1512,23 @@ void Vdp::Render_Line_m5(void)
 		if (Interlaced.DoubleRes)
 		{
 			// Interlaced.
-			if (UpdateFlags.VRam)
+			if (ms_UpdateFlags.VRam)
 				T_Make_Sprite_Struct<true, false>();
-			else if (UpdateFlags.VRam_Spr)
+			else if (ms_UpdateFlags.VRam_Spr)
 				T_Make_Sprite_Struct<true, true>();
 		}
 		else
 		{
 			// Non-Interlaced.
-			if (UpdateFlags.VRam)
+			if (ms_UpdateFlags.VRam)
 				T_Make_Sprite_Struct<false, false>();
-			else if (UpdateFlags.VRam_Spr)
+			else if (ms_UpdateFlags.VRam_Spr)
 				T_Make_Sprite_Struct<false, true>();
 		}
 		
 		// Clear the VRam flags.
-		UpdateFlags.VRam = 0;
-		UpdateFlags.VRam_Spr = 0;
+		ms_UpdateFlags.VRam = 0;
+		ms_UpdateFlags.VRam_Spr = 0;
 		
 		// Determine how to render the image.
 		const int RenderMode = ((VDP_Reg.m5.Set4 & 0x8) >> 2) | Interlaced.DoubleRes;
@@ -1557,13 +1557,16 @@ void Vdp::Render_Line_m5(void)
 	}
 	
 	// Check if the palette was modified.
-	if (UpdateFlags.CRam)
+	if (ms_UpdateFlags.CRam)
 	{
 		// Update the palette.
 		if (VDP_Reg.m5.Set4 & 0x08)
 			m_palette.updateMD_HS(&CRam);
 		else
 			m_palette.updateMD(&CRam);
+		
+		// Clear the CRam flag.
+		ms_UpdateFlags.CRam = 0;
 	}
 	
 	// TODO: Clear the CRam update flag?

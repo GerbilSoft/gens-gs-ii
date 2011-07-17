@@ -390,7 +390,7 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 	
 	// If the full palette is dirty, force a CRam update.
 	if (Vdp::m_palette.isDirty())
-		Vdp::UpdateFlags.CRam = 1;
+		Vdp::MarkCRamDirty();
 	
 	// TODO: MDP. (LibGens)
 #if 0
@@ -399,7 +399,7 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 #endif
 	
 	// Set the VRam flag to force a VRam update.
-	Vdp::UpdateFlags.VRam = 1;
+	Vdp::MarkVRamDirty();
 	
 	// Interlaced frame status.
 	// Both Interlaced Modes 1 and 2 set this bit on odd frames.

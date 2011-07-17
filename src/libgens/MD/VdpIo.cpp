@@ -140,8 +140,8 @@ void Vdp::Reset(void)
 	VDP_Ctrl.ctrl_latch = false;
 	
 	// Set the VDP update flags.
-	UpdateFlags.CRam = 1;
-	UpdateFlags.VRam = 1;
+	MarkCRamDirty();
+	MarkVRamDirty();
 	
 	// Initialize the Horizontal Interrupt counter.
 	HInt_Counter = VDP_Reg.m5.H_Int;
@@ -315,7 +315,7 @@ inline void Vdp::Update_Mode(void)
 	
 	// If the VDP mode has changed, CRam needs to be updated.
 	if (prevVdpMode != VDP_Mode)
-		UpdateFlags.CRam = 1;
+		MarkCRamDirty();
 }
 
 
@@ -388,13 +388,13 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 			
 			// Update the Sprite Attribute Table.
 			// TODO: Only set this if the actual value has changed.
-			UpdateFlags.VRam_Spr = 1;
+			ms_UpdateFlags.VRam_Spr = 1;
 			break;
 		
 		case 7:
 			// Background Color.
 			// TODO: Only set this if the actual value has changed.
-			UpdateFlags.CRam = 1;
+			MarkCRamDirty();
 			break;
 		
 		case 11:
@@ -420,7 +420,7 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 			// This register has the Shadow/Highlight setting,
 			// so set the CRam Flag to force a CRam update.
 			// TODO: Only set this if the actual value has changed.
-			UpdateFlags.CRam = 1;
+			MarkCRamDirty();
 			
 			if (val & 0x81)		// TODO: Original asm tests 0x81. Should this be done for other H40 tests?
 			{
@@ -837,7 +837,7 @@ void Vdp::Write_Data_Byte(uint8_t data)
 void Vdp::DMA_Fill(uint16_t data)
 {
 	// Set the VRam flag.
-	UpdateFlags.VRam = 1;
+	MarkVRamDirty();
 	
 	// Get the values. (length is in bytes)
 	// NOTE: DMA Fill uses *bytes* for length, not words!
@@ -933,7 +933,7 @@ void Vdp::Write_Data_Word(uint16_t data)
 	{
 		case (VDEST_LOC_VRAM | VDEST_ACC_WRITE):
 			// VRam Write.
-			UpdateFlags.VRam = 1;
+			MarkVRamDirty();
 			address &= 0xFFFF;	// VRam is 64 KB. (32 Kwords)
 			if (address & 0x0001)
 			{
@@ -958,7 +958,7 @@ void Vdp::Write_Data_Word(uint16_t data)
 			// odd addresses results in "interesting side effects".
 			// Those side effects aren't listed, so we're just going to
 			// mask the LSB for now.
-			UpdateFlags.CRam = 1;
+			MarkCRamDirty();
 			address &= 0x7E;	// CRam is 128 bytes. (64 words)
 			
 			// Write the word to CRam.
@@ -973,7 +973,7 @@ void Vdp::Write_Data_Word(uint16_t data)
 			// TODO: The Genesis Software Manual doesn't mention what happens
 			// with regards to odd address writes for VSRam.
 			// TODO: VSRam is 80 bytes, but we're allowing a maximum of 128 bytes here...
-			UpdateFlags.CRam = 1;
+			MarkCRamDirty();
 			address &= 0x7E;	// VSRam is 80 bytes. (40 words)
 			
 			// Write the word to VSRam.
@@ -1047,12 +1047,12 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 	switch (dest_component)
 	{
 		case DMA_DEST_VRAM:
-			UpdateFlags.VRam = 1;
+			MarkVRamDirty();
 			DMAT_Type = 0;
 			break;
 		
 		case DMA_DEST_CRAM:
-			UpdateFlags.CRam = 1;
+			MarkCRamDirty();
 			DMAT_Type = 1;
 			break;
 		
@@ -1328,7 +1328,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 		DMA_Length = 0;
 		DMAT_Length = length;
 		DMAT_Type = 0x3;
-		UpdateFlags.VRam = 1;
+		MarkVRamDirty();
 		
 		// TODO: Is this correct with regards to endianness?
 		do

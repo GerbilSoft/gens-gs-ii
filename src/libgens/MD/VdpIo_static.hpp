@@ -121,7 +121,7 @@ int Vdp::VDP_Status;
 VdpTypes::VdpLines_t Vdp::VDP_Lines;
 
 // Update flags.
-VdpTypes::UpdateFlags_t Vdp::UpdateFlags;
+VdpTypes::UpdateFlags_t Vdp::ms_UpdateFlags;
 
 // System status.
 // TODO: Move this to a more relevant file.

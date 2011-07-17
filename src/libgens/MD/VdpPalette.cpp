@@ -383,7 +383,7 @@ void VdpPalette::recalcFull(void)
 	// Set the CRam flag to force a palette update.
 	// TODO: This is being done from a class instance...
 	// Figure out a better way to handle this.
-	Vdp::UpdateFlags.CRam = 1;
+	Vdp::MarkCRamDirty();
 	
 	// TODO: Do_VDP_Only() / Do_32X_VDP_Only() if paused.
 	
@@ -420,12 +420,12 @@ FORCE_INLINE void VdpPalette::T_updateMD(pixel *MD_palette,
 					const VdpTypes::CRam_t *cram)
 {
 	// TODO: Figure out a better way to handle this.
-	if (Vdp::VDP_Layers & Vdp::VDP_LAYER_PALETTE_LOCK)
+	if (Vdp::VDP_Layers & VdpTypes::VDP_LAYER_PALETTE_LOCK)
 		return;
 	
-	// Clear the CRam flag, since the palette is being updated.
-	// TODO: Don't do this from a class instance?
-	Vdp::UpdateFlags.CRam = 0;
+	// NOTE: We can't clear the CRam flag in the VDP class here.
+	// This function is called by the VDP class, so the VDP class
+	// can clear the flag itself.
 	
 	// Color mask. Depends on VDP register 0, bit 2 (Palette Select).
 	// If set, allows full MD palette.
