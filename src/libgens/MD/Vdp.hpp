@@ -1,10 +1,10 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * VdpIo.hpp: VDP I/O class.                                               *
+ * Vdp.hpp: VDP emulation class.                                           *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,96 +21,38 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_MD_VDPIO_HPP__
-#define __LIBGENS_MD_VDPIO_HPP__
+#ifndef __LIBGENS_MD_VDP_HPP__
+#define __LIBGENS_MD_VDP_HPP__
 
 #include <stdint.h>
+
+// VdpRend includes.
+#include "../Util/MdFb.hpp"
+
+// Needed for FORCE_INLINE.
+#include "../macros/common.h"
+
+// VDP types.
+#include "VdpTypes.hpp"
+#include "VdpPalette.hpp"
 
 namespace LibGens
 {
 
-class VdpIo
+class Vdp
 {
 	public:
 		static void Init(void);
 		static void End(void);
+		static void Reset(void);
 		
-		/** VDP I/O registers and variables. **/
-		
+	/*!**************************************************************
+	 * VdpIo: I/O registers and variables.                          *
+	 ****************************************************************/
+	
+	public:
 		// VDP registers.
-		union VDP_Reg_t
-		{
-			uint8_t reg[24];
-			struct m5_t
-			{
-				/**
-				* Mode 5 (MD) registers.
-				* DISP == Display Enable. (1 == on; 0 == off)
-				* IE0 == Enable V interrupt. (1 == on; 0 == off)
-				* IE1 == Enable H interrupt. (1 == on; 0 == off)
-				* IE2 == Enable external interrupt. (1 == on; 0 == off)
-				* M1 == DMA Enable. (1 == on; 0 == off)
-				* M2 == V cell mode. (1 == V30 [PAL only]; 0 == V28)
-				* M3 == HV counter latch. (1 == stop HV counter; 0 == enable read, H, V counter)
-				* M4/PSEL == Palette Select; if clear, masks high two bits of each CRam color component.
-				*            If M5 is off, acts like M4 instead of PSEL.
-				* M5 == Mode 4/5 toggle; set for Mode 5, clear for Mode 4.
-				* VSCR == V Scroll mode. (0 == full; 1 == 2-cell)
-				* HSCR/LSCR == H Scroll mode. (00 == full; 01 == invalid; 10 == 1-cell; 11 == 1-line)
-				* RS0/RS1 == H cell mode. (11 == H40; 00 == H32; others == invalid)
-				* LSM1/LSM0 == Interlace mode. (00 == normal; 01 == interlace mode 1; 10 == invalid; 11 == interlace mode 2)
-				* S/TE == Highlight/Shadow enable. (1 == on; 0 == off)
-				* VSZ1/VSZ2 == Vertical scroll size. (00 == 32 cells; 01 == 64 cells; 10 == invalid; 11 == 128 cells)
-				* HSZ1/HSZ2 == Vertical scroll size. (00 == 32 cells; 01 == 64 cells; 10 == invalid; 11 == 128 cells)
-				*/
-				uint8_t Set1;		// Mode Set 1.  [   0    0    0  IE1    0 PSEL   M3    0]
-				uint8_t Set2;		// Mode Set 2.  [   0 DISP  IE0   M1   M2   M5    0    0]
-				uint8_t Pat_ScrA_Adr;	// Pattern name table base address for Scroll A.
-				uint8_t Pat_Win_Adr;	// Pattern name table base address for Window.
-				uint8_t Pat_ScrB_Adr;	// Pattern name table base address for Scroll B.
-				uint8_t Spr_Att_Adr;	// Sprite Attribute Table base address.
-				uint8_t Reg6;		// unused
-				uint8_t BG_Color;	// Background color.
-				uint8_t Reg8;		// unused
-				uint8_t Reg9;		// unused
-				uint8_t H_Int;		// H Interrupt.
-				uint8_t Set3;		// Mode Set 3.  [   0    0    0    0  IE2 VSCR HSCR LSCR]
-				uint8_t Set4;		// Mode Set 4.  [ RS0    0    0    0 S/TE LSM1 LSM0  RS1]
-				uint8_t H_Scr_Adr;	// H Scroll Data Table base address.
-				uint8_t Reg14;		// unused
-				uint8_t Auto_Inc;	// Auto Increment.
-				uint8_t Scr_Size;	// Scroll Size. [   0    0 VSZ1 VSZ0    0    0 HSZ1 HSZ0]
-				uint8_t Win_H_Pos;	// Window H position.
-				uint8_t Win_V_Pos;	// Window V position.
-				uint8_t DMA_Length_L;	// DMA Length Counter Low.
-				uint8_t DMA_Length_H;	// DMA Length Counter High.
-				uint8_t DMA_Src_Adr_L;	// DMA Source Address Low.
-				uint8_t DMA_Src_Adr_M;	// DMA Source Address Mid.
-				uint8_t DMA_Src_Adr_H;	// DMA Source Address High.
-			};
-			m5_t m5;
-			struct m4_t
-			{
-				/**
-				* Mode 4 (SMS) registers.
-				* NOTE: Mode 4 is currently not implemented.
-				* This is here for future use.
-				*/
-				uint8_t Set1;		// Mode Set 1.
-				uint8_t Set2;		// Mode Set 2.
-				uint8_t NameTbl_Addr;	// Name table base address.
-				uint8_t ColorTbl_Addr;	// Color table base address.
-				uint8_t	Pat_BG_Addr;	// Background Pattern Generator base address.
-				uint8_t Spr_Att_Addr;	// Sprite Attribute Table base address.
-				uint8_t Spr_Pat_addr;	// Sprite Pattern Generator base address.
-				uint8_t BG_Color;	// Background color.
-				uint8_t H_Scroll;	// Horizontal scroll.
-				uint8_t V_Scroll;	// Vertical scroll.
-				uint8_t H_Int;		// H Interrupt.
-			};
-			m4_t m4;
-		};
-		static VDP_Reg_t VDP_Reg;
+		static VdpTypes::VdpReg_t VDP_Reg;
 		
 		// These two variables are internal to Gens.
 		// They don't map to any actual VDP registers.
@@ -136,9 +78,11 @@ class VdpIo
 		static uint16_t Spr_Addr_u16(uint16_t offset);
 		static uint16_t H_Scroll_Addr_u16(uint16_t offset);
 		
-		// Window row shift.
-		// H40: 6. (64x32 window)
-		// H32: 5. (32x32 window)
+		/**
+		 * Window row shift.
+		 * H40: 6. (64x32 window)
+		 * H32: 5. (32x32 window)
+		 */
 		static unsigned int H_Win_Shift;
 		
 		// VDP convenience values: Scroll.
@@ -154,12 +98,7 @@ class VdpIo
 		static int Win_Y_Pos;
 		
 		// Interlaced mode.
-		struct Interlaced_t
-		{
-			unsigned int HalfLine  :1;	// Half-line is enabled. [LSM0]
-			unsigned int DoubleRes :1;	// 2x resolution is enabled. [LSM1]
-		};
-		static Interlaced_t Interlaced;
+		static VdpTypes::Interlaced_t Interlaced;
 		
 		// Sprite dot overflow.
 		// If set, the previous line had a sprite dot overflow.
@@ -179,92 +118,20 @@ class VdpIo
 		#define VDP_MODE_M5	(1 << 4)
 		static unsigned int VDP_Mode;
 		
-		/**
-		 * VRam: Video RAM.
-		 * SMS/GG: 16 KB.
-		 * MD: 64 KB. (32 KW)
-		 */
-		union VDP_VRam_t
-		{
-			uint8_t  u8[64*1024];
-			uint16_t u16[(64*1024)>>1];
-			uint32_t u32[(64*1024)>>2];
-		};
-		static VDP_VRam_t VRam;
-		
-		/**
-		 * CRam: Color RAM.
-		 * SMS: 32 bytes.
-		 * MD: 128 bytes. (64 words)
-		 * GG: 64 bytes. (32 words)
-		 */
-		union VDP_CRam_t
-		{
-			uint8_t  u8[64<<1];
-			uint16_t u16[64];
-			uint32_t u32[64>>1];
-		};
-		static VDP_CRam_t CRam;
-		
-		/**
-		 * VSRam: Vertical Scroll RAM.
-		 * MD: 40 words.
-		 */
-		union VSRam_t
-		{
-			uint8_t  u8[40<<1];
-			uint16_t u16[40];
-			
-			uint8_t  reserved[128];		// TODO: Figure out how to remove this.
-		};
-		static VSRam_t VSRam;
+		// VRam, CRam, VSRam.
+		static VdpTypes::VRam_t VRam;
+		static VdpTypes::CRam_t CRam;
+		static VdpTypes::VSRam_t VSRam;
 		
 		static int VDP_Int;
 		static int VDP_Status;
 		
 		// VDP line counters.
 		// NOTE: Gens/GS currently uses 312 lines for PAL. It should use 313!
-		struct VDP_Lines_t
-		{
-			/** Total lines using NTSC/PAL line numbering. **/
-			struct Display_t
-			{
-				unsigned int Total;	// Total number of lines on the display. (262, 313)
-				unsigned int Current;	// Current display line.
-			};
-			Display_t Display;
-			
-			/** Visible lines using VDP line numbering. **/
-			struct Visible_t
-			{
-				int Total;		// Total number of visible lines. (192, 224, 240)
-				int Current;		// Current visible line. (May be negative for top border.)
-				int Border_Size;	// Size of the border. (192 lines == 24; 224 lines == 8)
-			};
-			Visible_t Visible;
-			
-			/** NTSC V30 handling. **/
-			struct NTSC_V30_t
-			{
-				int Offset;		// Current NTSC V30 roll offset.
-				int VBlank_Div;		// VBlank divider. (0 == VBlank is OK; 1 == no VBlank allowed)
-			};
-			NTSC_V30_t NTSC_V30;
-		};
-		static VDP_Lines_t VDP_Lines;
+		static VdpTypes::VdpLines_t VDP_Lines;
 		
-		// Flags.
-		union VDP_Flags_t
-		{
-			unsigned int flags;
-			struct
-			{
-				unsigned int VRam	:1;	// VRam was modified. (Implies VRam_Spr.)
-				unsigned int VRam_Spr	:1;	// Sprite Attribute Table was modified.
-				unsigned int CRam	:1;	// CRam was modified.
-			};
-		};
-		static VDP_Flags_t VDP_Flags;
+		// Update flags.
+		static VdpTypes::UpdateFlags_t UpdateFlags;
 		
 		// Set this to 1 to enable zero-length DMA requests.
 		// Default is 0. (hardware-accurate)
@@ -284,11 +151,11 @@ class VdpIo
 		static uint8_t H_Counter_Table[512][2];
 		static const uint8_t DMA_Timing_Table[4][4];
 		
-		/** VDP functions. **/
-		static void Reset(void);
+		/** Interrupt functions. **/
 		static uint8_t Int_Ack(void);
 		static void Update_IRQ_Line(void);
 		
+		// Lines.
 		static void Set_Visible_Lines(void);
 		static void Check_NTSC_V30_VBlank(void);
 		
@@ -459,45 +326,203 @@ class VdpIo
 			V128_H32,    V128_H64, V128_HXX, V128_H128
 		};
 
+	/*!**************************************************************
+	 * VdpRend: Rendering functions and variables.                  *
+	 ****************************************************************/
+	
+	protected:
+		/** NOTE: Init(), End(), and Reset() should ONLY be called from VdpIo()! **/
+		static void Rend_Init(void);
+		static void Rend_End(void);
+		static void Rend_Reset(void);
+	
+	public:
+		// Palette manager.
+		static VdpPalette m_palette;
+		
+		// MD framebuffer.
+		static MdFb MD_Screen;
+
+		// Sprite structs.
+		struct Sprite_Struct_t
+		{
+			int Pos_X;
+			int Pos_Y;
+			unsigned int Size_X;
+			unsigned int Size_Y;
+			int Pos_X_Max;
+			int Pos_Y_Max;
+			unsigned int Num_Tile;	// Includes palette, priority, and flip bits.
+			int Pos_X_Max_Vis;	// Number of visible horizontal pixels. (Used for Sprite Limit.)
+		};
+		static Sprite_Struct_t Sprite_Struct[128];
+		static unsigned int Sprite_Visible[128];
+		
+		// If set, enforces sprite limits.
+		static int Sprite_Limits;
+	
+		// VDP layer flags.
+		enum VDP_Layer_Flags
+		{
+			VDP_LAYER_SCROLLA_LOW		= (1 << 0),
+			VDP_LAYER_SCROLLA_HIGH		= (1 << 1),
+			VDP_LAYER_SCROLLA_SWAP		= (1 << 2),
+			VDP_LAYER_SCROLLB_LOW		= (1 << 3),
+			VDP_LAYER_SCROLLB_HIGH		= (1 << 4),
+			VDP_LAYER_SCROLLB_SWAP		= (1 << 5),
+			VDP_LAYER_SPRITE_LOW		= (1 << 6),
+			VDP_LAYER_SPRITE_HIGH		= (1 << 7),
+			VDP_LAYER_SPRITE_SWAP		= (1 << 8),
+			VDP_LAYER_SPRITE_ALWAYSONTOP	= (1 << 9),
+			VDP_LAYER_PALETTE_LOCK		= (1 << 10),
+		};
+		
+		static const unsigned int VDP_LAYERS_DEFAULT =
+			(VDP_LAYER_SCROLLA_LOW	|
+			 VDP_LAYER_SCROLLA_HIGH	|
+			 VDP_LAYER_SCROLLB_LOW	|
+			 VDP_LAYER_SCROLLB_HIGH	|
+			 VDP_LAYER_SPRITE_LOW	|
+			 VDP_LAYER_SPRITE_HIGH);
+		
+		// VDP layer control.
+		static unsigned int VDP_Layers;
+		
+		/** Line rendering functions. **/
+		static void Render_Line(void);
+	
+	protected:
+		// Line buffer for current line.
+		union LineBuf_t
+		{
+			struct LineBuf_px_t
+			{
+#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+				uint8_t pixel;
+				uint8_t layer;
+#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
+				uint8_t layer;
+				uint8_t pixel;
+#endif
+			};
+			LineBuf_px_t px[336];
+			uint8_t  u8[336<<1];
+			uint16_t u16[336];
+			uint32_t u32[336>>1];
+		};
+		static LineBuf_t LineBuf;
+		
+		template<bool hs, typename pixel>
+		static inline void T_Update_Palette(pixel *MD_palette, const pixel *palette);
+	
+	/*!**************************************************************
+	 * VdpRend_m5: Mode 5 rendering functions and variables.        *
+	 ****************************************************************/
+	
+	public:
+		static VdpTypes::IntRend_Mode_t IntRend_Mode;
+		
+		/** Line rendering functions. **/
+		static void Render_Line_m5(void);
+	
+	protected:
+		// Temporary VDP data.
+		static unsigned int Y_FineOffset;
+		static unsigned int TotalSprites;
+		
+		template<bool interlaced>
+		static FORCE_INLINE int T_GetLineNumber(void);
+		
+		template<bool plane, bool h_s, int pat_pixnum, uint32_t mask, int shift>
+		static FORCE_INLINE void T_PutPixel_P0(int disp_pixnum, uint32_t pattern, unsigned int palette);
+		
+		template<bool plane, bool h_s, int pat_pixnum, uint32_t mask, int shift>
+		static FORCE_INLINE void T_PutPixel_P1(int disp_pixnum, uint32_t pattern, unsigned int palette);
+		
+		template<bool priority, bool h_s, int pat_pixnum, uint32_t mask, int shift>
+		static FORCE_INLINE uint8_t T_PutPixel_Sprite(int disp_pixnum, uint32_t pattern, unsigned int palette);
+		
+		template<bool plane, bool h_s, bool flip>
+		static FORCE_INLINE void T_PutLine_P0(int disp_pixnum, uint32_t pattern, int palette);
+		
+		template<bool plane, bool h_s, bool flip>
+		static FORCE_INLINE void T_PutLine_P1(int disp_pixnum, uint32_t pattern, int palette);
+		
+		template<bool priority, bool h_s, bool flip>
+		static FORCE_INLINE void T_PutLine_Sprite(int disp_pixnum, uint32_t pattern, int palette);
+		
+		template<bool plane>
+		static FORCE_INLINE uint16_t T_Get_X_Offset(void);
+		
+		template<bool plane, bool interlaced>
+		static FORCE_INLINE unsigned int T_Update_Y_Offset(int cell_cur);
+		
+		template<bool plane>
+		static FORCE_INLINE uint16_t T_Get_Pattern_Info(unsigned int x, unsigned int y);
+		
+		template<bool interlaced>
+		static FORCE_INLINE unsigned int T_Get_Pattern_Data(uint16_t pattern);
+		
+		template<bool plane, bool interlaced, bool vscroll, bool h_s>
+		static FORCE_INLINE void T_Render_Line_Scroll(int cell_start, int cell_length);
+		
+		template<bool interlaced, bool vscroll, bool h_s>
+		static FORCE_INLINE void T_Render_Line_ScrollA(void);
+		
+		template<bool interlaced, bool partial>
+		static FORCE_INLINE void T_Make_Sprite_Struct(void);
+		
+		template<bool sprite_limit, bool interlaced>
+		static FORCE_INLINE unsigned int T_Update_Mask_Sprite(void);
+		
+		template<bool interlaced, bool h_s>
+		static FORCE_INLINE void T_Render_Line_Sprite(void);
+		
+		template<bool interlaced, bool h_s>
+		static FORCE_INLINE void T_Render_Line_m5(void);
+		
+		template<typename pixel>
+		static FORCE_INLINE void T_Render_LineBuf(pixel *dest, pixel *md_palette);
+	
 	private:
-		VdpIo() { }
-		~VdpIo() { }
+		Vdp() { }
+		~Vdp() { }
 };
 
-inline int VdpIo::GetHPix(void)
+inline int Vdp::GetHPix(void)
 	{ return H_Pix; }
 
-inline int VdpIo::GetHPixBegin(void)
+inline int Vdp::GetHPixBegin(void)
 	{ return H_Pix_Begin; }
 
-inline int VdpIo::GetHCells(void)
+inline int Vdp::GetHCells(void)
 	{ return H_Cell; }
 
-inline int VdpIo::GetVPix(void)
+inline int Vdp::GetVPix(void)
 	{ return VDP_Lines.Visible.Total; }
 
 /** VDP address functions: Get Pointers. **/
-inline uint16_t *VdpIo::ScrA_Addr_Ptr16(uint16_t offset)
+inline uint16_t *Vdp::ScrA_Addr_Ptr16(uint16_t offset)
 	{ return &VRam.u16[((ScrA_Addr + offset) & 0xFFFF) >> 1]; }
-inline uint16_t *VdpIo::ScrB_Addr_Ptr16(uint16_t offset)
+inline uint16_t *Vdp::ScrB_Addr_Ptr16(uint16_t offset)
 	{ return &VRam.u16[((ScrB_Addr + offset) & 0xFFFF) >> 1]; }
-inline uint16_t *VdpIo::Win_Addr_Ptr16(uint16_t offset)
+inline uint16_t *Vdp::Win_Addr_Ptr16(uint16_t offset)
 	{ return &VRam.u16[((Win_Addr + offset) & 0xFFFF) >> 1]; }
-inline uint16_t *VdpIo::Spr_Addr_Ptr16(uint16_t offset)
+inline uint16_t *Vdp::Spr_Addr_Ptr16(uint16_t offset)
 	{ return &VRam.u16[((Spr_Addr + offset) & 0xFFFF) >> 1]; }
-inline uint16_t *VdpIo::H_Scroll_Addr_Ptr16(uint16_t offset)
+inline uint16_t *Vdp::H_Scroll_Addr_Ptr16(uint16_t offset)
 	{ return &VRam.u16[((H_Scroll_Addr + offset) & 0xFFFF) >> 1]; }
 
 /** VDP address functions: Get Values. **/
-inline uint16_t VdpIo::ScrA_Addr_u16(uint16_t offset)
+inline uint16_t Vdp::ScrA_Addr_u16(uint16_t offset)
 	{ return VRam.u16[((ScrA_Addr + offset) & 0xFFFF) >> 1]; }
-inline uint16_t VdpIo::ScrB_Addr_u16(uint16_t offset)
+inline uint16_t Vdp::ScrB_Addr_u16(uint16_t offset)
 	{ return VRam.u16[((ScrB_Addr + offset) & 0xFFFF) >> 1]; }
-inline uint16_t VdpIo::Win_Addr_u16(uint16_t offset)
+inline uint16_t Vdp::Win_Addr_u16(uint16_t offset)
 	{ return VRam.u16[((Win_Addr + offset) & 0xFFFF) >> 1]; }
-inline uint16_t VdpIo::Spr_Addr_u16(uint16_t offset)
+inline uint16_t Vdp::Spr_Addr_u16(uint16_t offset)
 	{ return VRam.u16[((Spr_Addr + offset) & 0xFFFF) >> 1]; }
-inline uint16_t VdpIo::H_Scroll_Addr_u16(uint16_t offset)
+inline uint16_t Vdp::H_Scroll_Addr_u16(uint16_t offset)
 	{ return VRam.u16[((H_Scroll_Addr + offset) & 0xFFFF) >> 1]; }
 
 }

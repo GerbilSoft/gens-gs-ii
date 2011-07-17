@@ -31,9 +31,7 @@
 #include "libgens/MD/EmuMD.hpp"
 
 // LibGens video includes.
-#include "libgens/MD/VdpRend.hpp"
-#include "libgens/MD/VdpIo.hpp"
-#include "libgens/MD/VdpRend_m5.hpp"
+#include "libgens/MD/Vdp.hpp"
 
 // Controller devices.
 #include "libgens/IO/IoBase.hpp"
@@ -487,22 +485,22 @@ QImage EmuManager::getMDScreen(void) const
 {
 	// Create the QImage.
 	const uint8_t *start;
-	const int startY = ((240 - LibGens::VdpIo::GetVPix()) / 2);
-	const int startX = (LibGens::VdpIo::GetHPixBegin());
+	const int startY = ((240 - LibGens::Vdp::GetVPix()) / 2);
+	const int startX = (LibGens::Vdp::GetHPixBegin());
 	int bytesPerLine;
 	QImage::Format imgFormat;
 	
-	if (LibGens::VdpRend::m_palette.bpp() == LibGens::VdpPalette::BPP_32)
+	if (LibGens::Vdp::m_palette.bpp() == LibGens::VdpPalette::BPP_32)
 	{
-		start = (const uint8_t*)(LibGens::VdpRend::MD_Screen.lineBuf32(startY) + startX);
-		bytesPerLine = (LibGens::VdpRend::MD_Screen.pxPerLine() * sizeof(uint32_t));
+		start = (const uint8_t*)(LibGens::Vdp::MD_Screen.lineBuf32(startY) + startX);
+		bytesPerLine = (LibGens::Vdp::MD_Screen.pxPerLine() * sizeof(uint32_t));
 		imgFormat = QImage::Format_RGB32;
 	}
 	else
 	{
-		start = (const uint8_t*)(LibGens::VdpRend::MD_Screen.lineBuf16(startY) + startX);
-		bytesPerLine = (LibGens::VdpRend::MD_Screen.pxPerLine() * sizeof(uint16_t));
-		if (LibGens::VdpRend::m_palette.bpp() == LibGens::VdpPalette::BPP_16)
+		start = (const uint8_t*)(LibGens::Vdp::MD_Screen.lineBuf16(startY) + startX);
+		bytesPerLine = (LibGens::Vdp::MD_Screen.pxPerLine() * sizeof(uint16_t));
+		if (LibGens::Vdp::m_palette.bpp() == LibGens::VdpPalette::BPP_16)
 			imgFormat = QImage::Format_RGB16;
 		else
 			imgFormat = QImage::Format_RGB555;
@@ -510,8 +508,8 @@ QImage EmuManager::getMDScreen(void) const
 	
 	// TODO: Check for errors.
 	// TODO: Store timestamp, ROM filename, etc.
-	return QImage(start, LibGens::VdpIo::GetHPix(),
-			LibGens::VdpIo::GetVPix(),
+	return QImage(start, LibGens::Vdp::GetHPix(),
+			LibGens::Vdp::GetVPix(),
 			bytesPerLine, imgFormat);	
 }
 
@@ -834,23 +832,23 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 	switch (type)
 	{
 		case EmuRequest_t::RQT_PS_CONTRAST:
-			LibGens::VdpRend::m_palette.setContrast(val + 100);
+			LibGens::Vdp::m_palette.setContrast(val + 100);
 			break;
 		
 		case EmuRequest_t::RQT_PS_BRIGHTNESS:
-			LibGens::VdpRend::m_palette.setBrightness(val + 100);
+			LibGens::Vdp::m_palette.setBrightness(val + 100);
 			break;
 		
 		case EmuRequest_t::RQT_PS_GRAYSCALE:
-			LibGens::VdpRend::m_palette.setGrayscale((bool)(!!val));
+			LibGens::Vdp::m_palette.setGrayscale((bool)(!!val));
 			break;
 		
 		case EmuRequest_t::RQT_PS_INVERTED:
-			LibGens::VdpRend::m_palette.setInverted((bool)(!!val));
+			LibGens::Vdp::m_palette.setInverted((bool)(!!val));
 			break;
 		
 		case EmuRequest_t::RQT_PS_COLORSCALEMETHOD:
-			LibGens::VdpRend::m_palette.setColorScaleMethod(
+			LibGens::Vdp::m_palette.setColorScaleMethod(
 						(LibGens::VdpPalette::ColorScaleMethod_t)val);
 			break;
 		
@@ -859,30 +857,30 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 			// Interlaced Mode isn't exactly a "palette" setting.
 			// TODO: Rename to "VDP setting"?
 			// TODO: Consolidate the two interlaced rendering mode enums.
-			LibGens::VdpRend_m5::IntRend_Mode =
-					((LibGens::VdpRend_m5::IntRend_Mode_t)val);
+			LibGens::Vdp::IntRend_Mode =
+					((LibGens::VdpTypes::IntRend_Mode_t)val);
 			
 			// Gens/GS r7+ prints a message to the OSD, so we'll do that too.
 			//: OSD message indicating the interlaced rendering mode was changed.
 			QString msg = tr("Interlaced: %1", "osd");
-			switch (LibGens::VdpRend_m5::IntRend_Mode)
+			switch (LibGens::Vdp::IntRend_Mode)
 			{
-				case LibGens::VdpRend_m5::INTREND_EVEN:
+				case LibGens::VdpTypes::INTREND_EVEN:
 					//: OSD message indicating the interlaced rendering mode was set to even lines only.
 					msg = msg.arg(tr("Even lines only", "osd"));
 					break;
 				
-				case LibGens::VdpRend_m5::INTREND_ODD:
+				case LibGens::VdpTypes::INTREND_ODD:
 					//: OSD message indicating the interlaced rendering mode was set to odd lines only.
 					msg = msg.arg(tr("Odd lines only", "osd"));
 					break;
 				
-				case LibGens::VdpRend_m5::INTREND_FLICKER:
+				case LibGens::VdpTypes::INTREND_FLICKER:
 					//: OSD message indicating the interlaced rendering mode was set to alternating lines.
 					msg = msg.arg(tr("Alternating lines", "osd"));
 					break;
 				
-				case LibGens::VdpRend_m5::INTREND_2X:
+				case LibGens::VdpTypes::INTREND_2X:
 					//: OSD message indicating the interlaced rendering mode was set to 2x resolution.
 					msg = msg.arg(tr("2x resolution", "osd"));
 					break;

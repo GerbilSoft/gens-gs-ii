@@ -23,10 +23,9 @@
 
 #include "EmuMD.hpp"
 
-// VDP I/O and renderer.
-#include "VdpIo.hpp"
-#include "VdpRend.hpp"
-#include "VdpPalette.hpp"
+// VDP.
+#include "Vdp.hpp"
+//#include "VdpPalette.hpp"
 
 // CPU emulators.
 #include "cpu/M68K.cpp"
@@ -96,7 +95,7 @@ EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
 		fixChecksum();
 	
 	// Initialize the VDP.
-	VdpIo::Reset();
+	Vdp::Reset();
 	
 	// Initialize the M68K.
 	M68K::InitSys(M68K::SYSID_MD);
@@ -178,16 +177,16 @@ int EmuMD::hardReset(void)
 	// This includes clearing RAM.
 	M68K::InitSys(M68K::SYSID_MD);
 	Z80::ReInit();
-	VdpIo::Reset();
+	Vdp::Reset();
 	SoundMgr::ms_Psg.reset();
 	SoundMgr::ms_Ym2612.reset();
 	
 	// Make sure the VDP's video mode bit is set properly.
 	// TODO: Make a VdpIo inline function for this?
 	if (M68K_Mem::ms_SysVersion.isPal())
-		VdpIo::VDP_Status |= 0x0001;	// PAL: Set the PAL bit.
+		Vdp::VDP_Status |= 0x0001;	// PAL: Set the PAL bit.
 	else
-		VdpIo::VDP_Status &= ~0x0001;	// NTSC: Clear the PAL bit.
+		Vdp::VDP_Status &= ~0x0001;	// NTSC: Clear the PAL bit.
 	
 	// Reset successful.
 	return 0;
@@ -222,22 +221,22 @@ int EmuMD::setRegion_int(SysVersion::RegionCode_t region, bool preserveState)
 	// Set the region.
 	M68K_Mem::ms_SysVersion.setRegion(region);
 	
-	// TODO: VdpIo::VDP_Lines.Display.Total isn't being set properly...
-	VdpIo::VDP_Lines.Display.Total = (M68K_Mem::ms_SysVersion.isPal() ? 312 : 262);
-	VdpIo::Set_Visible_Lines();
+	// TODO: Vdp::VDP_Lines.Display.Total isn't being set properly...
+	Vdp::VDP_Lines.Display.Total = (M68K_Mem::ms_SysVersion.isPal() ? 312 : 262);
+	Vdp::Set_Visible_Lines();
 	
 	// Initialize CPL.
 	if (M68K_Mem::ms_SysVersion.isPal())
 	{
 		M68K_Mem::CPL_M68K = (int)floor((((double)CLOCK_PAL / 7.0) / 50.0) / 312.0);
 		M68K_Mem::CPL_Z80 = (int)floor((((double)CLOCK_PAL / 15.0) / 50.0) / 312.0);
-		VdpIo::VDP_Status |= 0x0001;	// PAL: Set the PAL bit.
+		Vdp::VDP_Status |= 0x0001;	// PAL: Set the PAL bit.
 	}
 	else
 	{
 		M68K_Mem::CPL_M68K = (int)floor((((double)CLOCK_NTSC / 7.0) / 60.0) / 262.0);
 		M68K_Mem::CPL_Z80 = (int)floor((((double)CLOCK_NTSC / 15.0) / 60.0) / 262.0);
-		VdpIo::VDP_Status &= ~0x0001;	// NTSC: Clear the PAL bit.
+		Vdp::VDP_Status &= ~0x0001;	// NTSC: Clear the PAL bit.
 	}
 	
 	// Initialize audio.
@@ -257,12 +256,12 @@ int EmuMD::setRegion_int(SysVersion::RegionCode_t region, bool preserveState)
 template<EmuMD::LineType_t LineType, bool VDP>
 FORCE_INLINE void EmuMD::T_execLine(void)
 {
-	int writePos = SoundMgr::GetWritePos(VdpIo::VDP_Lines.Display.Current);
+	int writePos = SoundMgr::GetWritePos(Vdp::VDP_Lines.Display.Current);
 	int32_t *bufL = &SoundMgr::ms_SegBufL[writePos];
 	int32_t *bufR = &SoundMgr::ms_SegBufR[writePos];
 	
 	// Update the sound chips.
-	int writeLen = SoundMgr::GetWriteLen(VdpIo::VDP_Lines.Display.Current);
+	int writeLen = SoundMgr::GetWriteLen(Vdp::VDP_Lines.Display.Current);
 	SoundMgr::ms_Ym2612.updateDacAndTimers(bufL, bufR, writeLen);
 	SoundMgr::ms_Ym2612.addWriteLen(writeLen);
 	SoundMgr::ms_Psg.addWriteLen(writeLen);
@@ -279,22 +278,22 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 	M68K_Mem::Cycles_M68K += M68K_Mem::CPL_M68K;
 	M68K_Mem::Cycles_Z80 += M68K_Mem::CPL_Z80;
 	
-	if (VdpIo::DMAT_Length)
-		M68K::AddCycles(VdpIo::Update_DMA());
+	if (Vdp::DMAT_Length)
+		M68K::AddCycles(Vdp::Update_DMA());
 	
 	switch (LineType)
 	{
 		case LINETYPE_ACTIVEDISPLAY:
 			// In visible area.
-			VdpIo::VDP_Status |=  0x0004;	// HBlank = 1
+			Vdp::VDP_Status |=  0x0004;	// HBlank = 1
 			M68K::Exec(M68K_Mem::Cycles_M68K - 404);
-			VdpIo::VDP_Status &= ~0x0004;	// HBlank = 0
+			Vdp::VDP_Status &= ~0x0004;	// HBlank = 0
 			
-			if (--VdpIo::HInt_Counter < 0)
+			if (--Vdp::HInt_Counter < 0)
 			{
-				VdpIo::VDP_Int |= 0x4;
-				VdpIo::Update_IRQ_Line();
-				VdpIo::HInt_Counter = VdpIo::VDP_Reg.m5.H_Int;
+				Vdp::VDP_Int |= 0x4;
+				Vdp::Update_IRQ_Line();
+				Vdp::HInt_Counter = Vdp::VDP_Reg.m5.H_Int;
 			}
 			
 			break;
@@ -302,19 +301,19 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 		case LINETYPE_VBLANKLINE:
 		{
 			// VBlank line!
-			if (--VdpIo::HInt_Counter < 0)
+			if (--Vdp::HInt_Counter < 0)
 			{
-				VdpIo::VDP_Int |= 0x4;
-				VdpIo::Update_IRQ_Line();
+				Vdp::VDP_Int |= 0x4;
+				Vdp::Update_IRQ_Line();
 			}
 			
 #if 0
 			// TODO: Congratulations! (LibGens)
 			CONGRATULATIONS_PRECHECK();
 #endif
-			VdpIo::VDP_Status |= 0x000C;	// VBlank = 1 et HBlank = 1 (retour de balayage vertical en cours)
-			if (VdpIo::VDP_Lines.NTSC_V30.VBlank_Div != 0)
-				VdpIo::VDP_Status &= ~0x0008;
+			Vdp::VDP_Status |= 0x000C;	// VBlank = 1 et HBlank = 1 (retour de balayage vertical en cours)
+			if (Vdp::VDP_Lines.NTSC_V30.VBlank_Div != 0)
+				Vdp::VDP_Status &= ~0x0008;
 			
 			M68K::Exec(M68K_Mem::Cycles_M68K - 360);
 			Z80::Exec(168);
@@ -323,13 +322,13 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 			CONGRATULATIONS_POSTCHECK();
 #endif
 			
-			VdpIo::VDP_Status &= ~0x0004;	// HBlank = 0
-			if (VdpIo::VDP_Lines.NTSC_V30.VBlank_Div == 0)
+			Vdp::VDP_Status &= ~0x0004;	// HBlank = 0
+			if (Vdp::VDP_Lines.NTSC_V30.VBlank_Div == 0)
 			{
-				VdpIo::VDP_Status |=  0x0080;		// V Int happened
+				Vdp::VDP_Status |=  0x0080;		// V Int happened
 				
-				VdpIo::VDP_Int |= 0x8;
-				VdpIo::Update_IRQ_Line();
+				Vdp::VDP_Int |= 0x8;
+				Vdp::Update_IRQ_Line();
 				
 				// Z80 interrupt.
 				// TODO: Does this trigger on all VBlanks,
@@ -348,7 +347,7 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 	if (VDP)
 	{
 		// VDP needs to be updated.
-		VdpRend::Render_Line();
+		Vdp::Render_Line();
 	}
 	
 	M68K::Exec(M68K_Mem::Cycles_M68K);
@@ -364,10 +363,10 @@ template<bool VDP>
 FORCE_INLINE void EmuMD::T_execFrame(void)
 {
 	// Initialize VDP_Lines.Display.
-	VdpIo::Set_Visible_Lines();
+	Vdp::Set_Visible_Lines();
 	
 	// Check if VBlank is allowed.
-	VdpIo::Check_NTSC_V30_VBlank();
+	Vdp::Check_NTSC_V30_VBlank();
 	
 	// Update I/O devices.
 	// TODO: Determine the best place for the I/O devices to be updated:
@@ -390,8 +389,8 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 	Z80::ClearOdometer();
 	
 	// If the full palette is dirty, force a CRam update.
-	if (VdpRend::m_palette.isDirty())
-		VdpIo::VDP_Flags.CRam = 1;
+	if (Vdp::m_palette.isDirty())
+		Vdp::UpdateFlags.CRam = 1;
 	
 	// TODO: MDP. (LibGens)
 #if 0
@@ -400,33 +399,33 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 #endif
 	
 	// Set the VRam flag to force a VRam update.
-	VdpIo::VDP_Flags.VRam = 1;
+	Vdp::UpdateFlags.VRam = 1;
 	
 	// Interlaced frame status.
 	// Both Interlaced Modes 1 and 2 set this bit on odd frames.
 	// This bit is cleared on even frames and if not running in interlaced mode.
-	if (VdpIo::VDP_Reg.m5.Set4 & 0x06)
-		VdpIo::VDP_Status ^= 0x0010;
+	if (Vdp::VDP_Reg.m5.Set4 & 0x06)
+		Vdp::VDP_Status ^= 0x0010;
 	else
-		VdpIo::VDP_Status &= ~0x0010;
+		Vdp::VDP_Status &= ~0x0010;
 	
 	/** Main execution loops. **/
 	
 	/** Loop 0: Top border. **/
-	/** NOTE: VdpIo::VDP_Lines.Visible.Current may initially be 0! (NTSC V30) **/
-	VdpIo::VDP_Lines.Display.Current = 0;
-	while (VdpIo::VDP_Lines.Visible.Current < 0)
+	/** NOTE: Vdp::VDP_Lines.Visible.Current may initially be 0! (NTSC V30) **/
+	Vdp::VDP_Lines.Display.Current = 0;
+	while (Vdp::VDP_Lines.Visible.Current < 0)
 	{
 		T_execLine<LINETYPE_BORDER, VDP>();
 		
 		// Next line.
-		VdpIo::VDP_Lines.Display.Current++;
-		VdpIo::VDP_Lines.Visible.Current++;
+		Vdp::VDP_Lines.Display.Current++;
+		Vdp::VDP_Lines.Visible.Current++;
 	}
 	
 	/** Visible line 0. **/
-	VdpIo::HInt_Counter = VdpIo::VDP_Reg.m5.H_Int;	// Initialize HInt_Counter.
-	VdpIo::VDP_Status &= ~0x0008;			// Clear VBlank status.
+	Vdp::HInt_Counter = Vdp::VDP_Reg.m5.H_Int;	// Initialize HInt_Counter.
+	Vdp::VDP_Status &= ~0x0008;			// Clear VBlank status.
 	
 	/** Loop 1: Active display. **/
 	do
@@ -434,14 +433,14 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 		T_execLine<LINETYPE_ACTIVEDISPLAY, VDP>();
 		
 		// Next line.
-		VdpIo::VDP_Lines.Display.Current++;
-		VdpIo::VDP_Lines.Visible.Current++;
-	} while (VdpIo::VDP_Lines.Visible.Current < VdpIo::VDP_Lines.Visible.Total);
+		Vdp::VDP_Lines.Display.Current++;
+		Vdp::VDP_Lines.Visible.Current++;
+	} while (Vdp::VDP_Lines.Visible.Current < Vdp::VDP_Lines.Visible.Total);
 	
 	/** Loop 2: VBlank line. **/
 	T_execLine<LINETYPE_VBLANKLINE, VDP>();
-	VdpIo::VDP_Lines.Display.Current++;
-	VdpIo::VDP_Lines.Visible.Current++;
+	Vdp::VDP_Lines.Display.Current++;
+	Vdp::VDP_Lines.Visible.Current++;
 	
 	/** Loop 3: Bottom border. **/
 	do
@@ -449,9 +448,9 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 		T_execLine<LINETYPE_BORDER, VDP>();
 		
 		// Next line.
-		VdpIo::VDP_Lines.Display.Current++;
-		VdpIo::VDP_Lines.Visible.Current++;
-	} while (VdpIo::VDP_Lines.Display.Current < VdpIo::VDP_Lines.Display.Total);
+		Vdp::VDP_Lines.Display.Current++;
+		Vdp::VDP_Lines.Visible.Current++;
+	} while (Vdp::VDP_Lines.Display.Current < Vdp::VDP_Lines.Display.Total);
 	
 	// Update the PSG and YM2612 output.
 	SoundMgr::SpecialUpdate();

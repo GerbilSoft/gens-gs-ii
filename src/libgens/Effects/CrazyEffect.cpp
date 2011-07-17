@@ -26,7 +26,7 @@
  */
 
 #include "CrazyEffect.hpp"
-#include "MD/VdpRend.hpp"
+#include "MD/Vdp.hpp"
 
 // C includes.
 #include <math.h>
@@ -162,23 +162,23 @@ inline void CrazyEffect::T_doCrazyEffect(pixel *screen)
  */
 void CrazyEffect::run(void)
 {
-	switch (VdpRend::m_palette.bpp())
+	switch (Vdp::m_palette.bpp())
 	{
 		case VdpPalette::BPP_15:
 			T_doCrazyEffect<uint16_t, 0x7C00, 0x03E0, 0x001F,
-					0x0400, 0x0020, 0x0001>(VdpRend::MD_Screen.fb16());
+					0x0400, 0x0020, 0x0001>(Vdp::MD_Screen.fb16());
 			break;
 		
 		case VdpPalette::BPP_16:
 			T_doCrazyEffect<uint16_t, 0xF800, 0x07C0, 0x001F,
-					0x0800, 0x0040, 0x0001>(VdpRend::MD_Screen.fb16());
+					0x0800, 0x0040, 0x0001>(Vdp::MD_Screen.fb16());
 			break;
 		
 		case VdpPalette::BPP_32:
 		default:
 			T_doCrazyEffect<uint32_t, CRAZY_MASK32_R, CRAZY_MASK32_G, CRAZY_MASK32_B,
 					CRAZY_ADD32_R, CRAZY_ADD32_G, CRAZY_ADD32_B>
-					(VdpRend::MD_Screen.fb32());
+					(Vdp::MD_Screen.fb32());
 			break;
 	}
 }

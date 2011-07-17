@@ -23,8 +23,9 @@
 
 #include "VdpPalette.hpp"
 
-#include "VdpRend.hpp"
-#include "VdpIo.hpp"
+// TODO: Remove Vdp::UpdateFlags dependency.
+#include "Vdp.hpp"
+#include "VdpTypes.hpp"
 
 #include "Util/byteswap.h"
 
@@ -382,7 +383,7 @@ void VdpPalette::recalcFull(void)
 	// Set the CRam flag to force a palette update.
 	// TODO: This is being done from a class instance...
 	// Figure out a better way to handle this.
-	VdpIo::VDP_Flags.CRam = 1;
+	Vdp::UpdateFlags.CRam = 1;
 	
 	// TODO: Do_VDP_Only() / Do_32X_VDP_Only() if paused.
 	
@@ -416,21 +417,21 @@ void VdpPalette::resetActive(void)
 template<bool hs, typename pixel>
 FORCE_INLINE void VdpPalette::T_updateMD(pixel *MD_palette,
 					const pixel *palette,
-					const VdpIo::VDP_CRam_t *cram)
+					const VdpTypes::CRam_t *cram)
 {
 	// TODO: Figure out a better way to handle this.
-	if (VdpRend::VDP_Layers & VdpRend::VDP_LAYER_PALETTE_LOCK)
+	if (Vdp::VDP_Layers & Vdp::VDP_LAYER_PALETTE_LOCK)
 		return;
 	
 	// Clear the CRam flag, since the palette is being updated.
 	// TODO: Don't do this from a class instance?
-	VdpIo::VDP_Flags.CRam = 0;
+	Vdp::UpdateFlags.CRam = 0;
 	
 	// Color mask. Depends on VDP register 0, bit 2 (Palette Select).
 	// If set, allows full MD palette.
 	// If clear, only allows the LSB of each color component.
 	// TODO: Figure out a better way to handle this. (class instance etc)
-	const uint16_t color_mask = (VdpIo::VDP_Reg.m5.Set1 & 0x04) ? 0x0EEE : 0x0222;
+	const uint16_t color_mask = (Vdp::VDP_Reg.m5.Set1 & 0x04) ? 0x0EEE : 0x0222;
 	
 	// Update all 64 colors.
 	for (int i = 62; i >= 0; i -= 2)
@@ -471,7 +472,7 @@ FORCE_INLINE void VdpPalette::T_updateMD(pixel *MD_palette,
 	}
 	
 	// Update the background color.
-	unsigned int BG_Color = (VdpIo::VDP_Reg.m5.BG_Color & 0x3F);
+	unsigned int BG_Color = (Vdp::VDP_Reg.m5.BG_Color & 0x3F);
 	MD_palette[0] = MD_palette[BG_Color];
 	
 	if (hs)
@@ -494,7 +495,7 @@ FORCE_INLINE void VdpPalette::T_updateMD(pixel *MD_palette,
  * updateMD(): Update the active MD palette.
  * @param cram MD CRam.
  */
-void VdpPalette::updateMD(const VdpIo::VDP_CRam_t *cram)
+void VdpPalette::updateMD(const VdpTypes::CRam_t *cram)
 {
 	if (m_dirty)
 		recalcFull();
@@ -510,7 +511,7 @@ void VdpPalette::updateMD(const VdpIo::VDP_CRam_t *cram)
  * updateMD(): Update the active MD palette, including shadow/highlight.
  * @param cram MD CRam.
  */
-void VdpPalette::updateMD_HS(const VdpIo::VDP_CRam_t *cram)
+void VdpPalette::updateMD_HS(const VdpTypes::CRam_t *cram)
 {
 	if (m_dirty)
 		recalcFull();

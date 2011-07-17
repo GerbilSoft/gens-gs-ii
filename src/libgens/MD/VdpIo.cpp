@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * VdpIo.cpp: VDP I/O class.                                               *
+ * Vdp.cpp: VDP class: I/O functions.                                    *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,8 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "VdpIo.hpp"
-#include "VdpRend.hpp"
+#include "Vdp.hpp"
 
 // C includes.
 #include <string.h>
@@ -44,7 +43,7 @@ extern "C" {
 
 uint8_t VDP_Int_Ack(void)
 {
-	return LibGens::VdpIo::Int_Ack();
+	return LibGens::Vdp::Int_Ack();
 }
 
 #ifdef __cplusplus
@@ -57,7 +56,7 @@ namespace LibGens
 /**
  * VdpRend::Init(): Initialize the VDP subsystem.
  */
-void VdpIo::Init(void)
+void Vdp::Init(void)
 {
 	// Initialize the Horizontal Counter table.
 	unsigned int hc_val;
@@ -73,27 +72,27 @@ void VdpIo::Init(void)
 	}
 	
 	// Initialize the VDP rendering subsystem.
-	VdpRend::Init();
+	Rend_Init();
 }
 
 
 /**
- * VdpIo::Init(): Shut down the VDP subsystem.
+ * Vdp::Init(): Shut down the VDP subsystem.
  */
-void VdpIo::End(void)
+void Vdp::End(void)
 {
 	// shut down the VDP rendering subsystem.
-	VdpRend::End();
+	Rend_End();
 }
 
 
 /**
- * VdpIo::Reset(): Reset the VDP.
+ * Vdp::Reset(): Reset the VDP.
  */
-void VdpIo::Reset(void)
+void Vdp::Reset(void)
 {
 	// Reset the VDP rendering arrays.
-	VdpRend::Reset();
+	Rend_Reset();
 	
 	// Clear VRam, CRam, and VSRam.
 	memset(&VRam, 0x00, sizeof(VRam));
@@ -140,9 +139,9 @@ void VdpIo::Reset(void)
 	VDP_Ctrl.DMA = 0;
 	VDP_Ctrl.ctrl_latch = false;
 	
-	// Set the CRam and VRam flags.
-	VDP_Flags.CRam = 1;
-	VDP_Flags.VRam = 1;
+	// Set the VDP update flags.
+	UpdateFlags.CRam = 1;
+	UpdateFlags.VRam = 1;
 	
 	// Initialize the Horizontal Interrupt counter.
 	HInt_Counter = VDP_Reg.m5.H_Int;
@@ -150,10 +149,10 @@ void VdpIo::Reset(void)
 
 
 /**
- * VdpIo::Int_Ack(): Acknowledge an interrupt.
+ * Vdp::Int_Ack(): Acknowledge an interrupt.
  * @return ???
  */
-uint8_t VdpIo::Int_Ack(void)
+uint8_t Vdp::Int_Ack(void)
 {
 	if ((VDP_Reg.m5.Set2 & 0x20) && (VDP_Int & 0x08))
 	{
@@ -174,9 +173,9 @@ uint8_t VdpIo::Int_Ack(void)
 
 
 /**
- * VdpIo::Update_IRQ_Line(): Update the IRQ line.
+ * Vdp::Update_IRQ_Line(): Update the IRQ line.
  */
-void VdpIo::Update_IRQ_Line(void)
+void Vdp::Update_IRQ_Line(void)
 {
 	// TODO: HBlank interrupt should take priority over VBlank interrupt.
 	if ((VDP_Reg.m5.Set2 & 0x20) && (VDP_Int & 0x08))
@@ -204,7 +203,7 @@ void VdpIo::Update_IRQ_Line(void)
  * Set_Visible_Lines(): Sets the number of visible lines, depending on CPU mode and VDP setting.
  * TODO: LibGens porting.
  */
-void VdpIo::Set_Visible_Lines(void)
+void Vdp::Set_Visible_Lines(void)
 {
 	// Arrays of values.
 	// Indexes: 0 == 192 lines; 1 == 224 lines; 2 == 240 lines.
@@ -263,9 +262,9 @@ void VdpIo::Set_Visible_Lines(void)
 
 
 /**
- * VdpIo::Check_NTSC_V30_VBlank(): Check if VBlank is allowed in NTSC V30 mode.
+ * Vdp::Check_NTSC_V30_VBlank(): Check if VBlank is allowed in NTSC V30 mode.
  */
-void VdpIo::Check_NTSC_V30_VBlank(void)
+void Vdp::Check_NTSC_V30_VBlank(void)
 {
 	// TODO: Only do this in Mode 5, and maybe Mode 4 if SMS2 is in use.
 	if (M68K_Mem::ms_SysVersion.isPal() || !(VDP_Reg.m5.Set2 & 0x08))
@@ -301,9 +300,9 @@ void VdpIo::Check_NTSC_V30_VBlank(void)
 
 
 /**
- * VdpIo::Update_Mode(): Update VDP_Mode.
+ * Vdp::Update_Mode(): Update VDP_Mode.
  */
-inline void VdpIo::Update_Mode(void)
+inline void Vdp::Update_Mode(void)
 {
 	const register uint8_t Set1 = VDP_Reg.m5.Set1;
 	const register uint8_t Set2 = VDP_Reg.m5.Set2;
@@ -315,16 +314,16 @@ inline void VdpIo::Update_Mode(void)
 	
 	// CRam needs to be updated.
 	// TODO: Only update if VDP_Mode is changed.
-	VDP_Flags.CRam = 1;
+	UpdateFlags.CRam = 1;
 }
 
 
 /**
- * VdpIo::Set_Reg(): Set the value of a register. (Mode 5 only!)
+ * Vdp::Set_Reg(): Set the value of a register. (Mode 5 only!)
  * @param reg_num Register number.
  * @param val New value for the register.
  */
-void VdpIo::Set_Reg(int reg_num, uint8_t val)
+void Vdp::Set_Reg(int reg_num, uint8_t val)
 {
 	if (reg_num < 0 || reg_num >= 24)
 		return;
@@ -388,13 +387,13 @@ void VdpIo::Set_Reg(int reg_num, uint8_t val)
 			
 			// Update the Sprite Attribute Table.
 			// TODO: Only set this if the actual value has changed.
-			VDP_Flags.VRam_Spr = 1;
+			UpdateFlags.VRam_Spr = 1;
 			break;
 		
 		case 7:
 			// Background Color.
 			// TODO: Only set this if the actual value has changed.
-			VDP_Flags.CRam = 1;
+			UpdateFlags.CRam = 1;
 			break;
 		
 		case 11:
@@ -420,7 +419,7 @@ void VdpIo::Set_Reg(int reg_num, uint8_t val)
 			// This register has the Shadow/Highlight setting,
 			// so set the CRam Flag to force a CRam update.
 			// TODO: Only set this if the actual value has changed.
-			VDP_Flags.CRam = 1;
+			UpdateFlags.CRam = 1;
 			
 			if (val & 0x81)		// TODO: Original asm tests 0x81. Should this be done for other H40 tests?
 			{
@@ -554,11 +553,11 @@ void VdpIo::Set_Reg(int reg_num, uint8_t val)
 
 
 /**
- * VdpIo::Read_H_Counter(): Read the H Counter.
+ * Vdp::Read_H_Counter(): Read the H Counter.
  * @return H Counter.
  * TODO: Port to LibGens.
  */
-uint8_t VdpIo::Read_H_Counter(void)
+uint8_t Vdp::Read_H_Counter(void)
 {
 	unsigned int odo_68K = M68K::ReadOdometer();
 	odo_68K -= (M68K_Mem::Cycles_M68K - M68K_Mem::CPL_M68K);
@@ -576,11 +575,11 @@ uint8_t VdpIo::Read_H_Counter(void)
 
 
 /**
- * VdpIo::Read_V_Counter(): Read the V Counter.
+ * Vdp::Read_V_Counter(): Read the V Counter.
  * @return V Counter.
  * TODO: Port to LibGens.
  */
-uint8_t VdpIo::Read_V_Counter(void)
+uint8_t Vdp::Read_V_Counter(void)
 {
 	unsigned int odo_68K = M68K::ReadOdometer();
 	odo_68K -= (M68K_Mem::Cycles_M68K - M68K_Mem::CPL_M68K);
@@ -650,10 +649,10 @@ uint8_t VdpIo::Read_V_Counter(void)
 
 
 /**
- * VdpIo::Read_Status(): Read the VDP status register.
+ * Vdp::Read_Status(): Read the VDP status register.
  * @return VDP status register.
  */
-uint16_t VdpIo::Read_Status(void)
+uint16_t Vdp::Read_Status(void)
 {
 	// Toggle the upper 8 bits of VDP_Status. (TODO: Is this correct?)
 	VDP_Status ^= 0xFF00;
@@ -678,10 +677,10 @@ uint16_t VdpIo::Read_Status(void)
 
 
 /**
- * VdpIo::Read_Data(): Read data from the VDP.
+ * Vdp::Read_Data(): Read data from the VDP.
  * @return Data.
  */
-uint16_t VdpIo::Read_Data(void)
+uint16_t Vdp::Read_Data(void)
 {
 	// TODO: Test this function.
 	// Soleil (crusader of Centry) reads from VRam.
@@ -729,11 +728,11 @@ uint16_t VdpIo::Read_Data(void)
 
 
 /**
- * VdpIo::Update_DMA(): Update the DMA state.
+ * Vdp::Update_DMA(): Update the DMA state.
  * @return Number of cycles used.
  * TODO: Port to LibGens.
  */
-unsigned int VdpIo::Update_DMA(void)
+unsigned int Vdp::Update_DMA(void)
 {
 	/**
 	 * DMA transfer rate depends on the following:
@@ -811,10 +810,10 @@ unsigned int VdpIo::Update_DMA(void)
 
 
 /**
- * VdpIo::Write_Data_Byte(): Write data to the VDP. (8-bit)
+ * Vdp::Write_Data_Byte(): Write data to the VDP. (8-bit)
  * @param data 8-bit data.
  */
-void VdpIo::Write_Data_Byte(uint8_t data)
+void Vdp::Write_Data_Byte(uint8_t data)
 {
 	/**
 	 * NOTE: In Mode 5, the VDP requires 16-bit data.
@@ -831,13 +830,13 @@ void VdpIo::Write_Data_Byte(uint8_t data)
 
 
 /**
- * VdpIo::DMA_Fill(): Perform a DMA Fill operation. (Called from VDP_Write_Data_Word().)
+ * Vdp::DMA_Fill(): Perform a DMA Fill operation. (Called from VDP_Write_Data_Word().)
  * @param data 16-bit data.
  */
-void VdpIo::DMA_Fill(uint16_t data)
+void Vdp::DMA_Fill(uint16_t data)
 {
 	// Set the VRam flag.
-	VDP_Flags.VRam = 1;
+	UpdateFlags.VRam = 1;
 	
 	// Get the values. (length is in bytes)
 	// NOTE: DMA Fill uses *bytes* for length, not words!
@@ -912,10 +911,10 @@ void VdpIo::DMA_Fill(uint16_t data)
 
 
 /**
- * VdpIo::Write_Data_Word(): Write data to the VDP. (16-bit)
+ * Vdp::Write_Data_Word(): Write data to the VDP. (16-bit)
  * @param data 16-bit data.
  */
-void VdpIo::Write_Data_Word(uint16_t data)
+void Vdp::Write_Data_Word(uint16_t data)
 {
 	// Clear the VDP control word latch.
 	VDP_Ctrl.ctrl_latch = false;
@@ -933,7 +932,7 @@ void VdpIo::Write_Data_Word(uint16_t data)
 	{
 		case (VDEST_LOC_VRAM | VDEST_ACC_WRITE):
 			// VRam Write.
-			VDP_Flags.VRam = 1;
+			UpdateFlags.VRam = 1;
 			address &= 0xFFFF;	// VRam is 64 KB. (32 Kwords)
 			if (address & 0x0001)
 			{
@@ -958,7 +957,7 @@ void VdpIo::Write_Data_Word(uint16_t data)
 			// odd addresses results in "interesting side effects".
 			// Those side effects aren't listed, so we're just going to
 			// mask the LSB for now.
-			VDP_Flags.CRam = 1;
+			UpdateFlags.CRam = 1;
 			address &= 0x7E;	// CRam is 128 bytes. (64 words)
 			
 			// Write the word to CRam.
@@ -973,7 +972,7 @@ void VdpIo::Write_Data_Word(uint16_t data)
 			// TODO: The Genesis Software Manual doesn't mention what happens
 			// with regards to odd address writes for VSRam.
 			// TODO: VSRam is 80 bytes, but we're allowing a maximum of 128 bytes here...
-			VDP_Flags.CRam = 1;
+			UpdateFlags.CRam = 1;
 			address &= 0x7E;	// VSRam is 80 bytes. (40 words)
 			
 			// Write the word to VSRam.
@@ -991,15 +990,15 @@ void VdpIo::Write_Data_Word(uint16_t data)
 
 
 /**
- * VdpIo::T_DMA_Loop(): Mem-to-DMA loop.
+ * Vdp::T_DMA_Loop(): Mem-to-DMA loop.
  * @param src_component Source component.
  * @param dest_component Destination component.
  * @param src_address Source address.
  * @param dest_address Destination address.
  * @param length Length.
  */
-template<VdpIo::DMA_Src_t src_component, VdpIo::DMA_Dest_t dest_component>
-inline void VdpIo::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int length)
+template<Vdp::DMA_Src_t src_component, Vdp::DMA_Dest_t dest_component>
+inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int length)
 {
 	LOG_MSG(vdp_io, LOG_MSG_LEVEL_DEBUG2,
 		"<%d, %d> src_address == 0x%06X, dest_address == 0x%04X, length == %d",
@@ -1047,12 +1046,12 @@ inline void VdpIo::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, i
 	switch (dest_component)
 	{
 		case DMA_DEST_VRAM:
-			VDP_Flags.VRam = 1;
+			UpdateFlags.VRam = 1;
 			DMAT_Type = 0;
 			break;
 		
 		case DMA_DEST_CRAM:
-			VDP_Flags.CRam = 1;
+			UpdateFlags.CRam = 1;
 			DMAT_Type = 1;
 			break;
 		
@@ -1201,10 +1200,10 @@ inline void VdpIo::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, i
 
 
 /**
- * VdpIo::Write_Ctrl(): Write a control word to the VDP.
+ * Vdp::Write_Ctrl(): Write a control word to the VDP.
  * @param data Control word.
  */
-void VdpIo::Write_Ctrl(uint16_t data)
+void Vdp::Write_Ctrl(uint16_t data)
 {
 	// TODO: Check endianness with regards to the control words. (Wordswapping!)
 	
@@ -1328,7 +1327,7 @@ void VdpIo::Write_Ctrl(uint16_t data)
 		DMA_Length = 0;
 		DMAT_Length = length;
 		DMAT_Type = 0x3;
-		VDP_Flags.VRam = 1;
+		UpdateFlags.VRam = 1;
 		
 		// TODO: Is this correct with regards to endianness?
 		do

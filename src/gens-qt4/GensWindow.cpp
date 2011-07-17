@@ -44,6 +44,7 @@
 
 // LibGens includes.
 #include "libgens/macros/log_msg.h"
+#include "libgens/MD/Vdp.hpp"
 
 // Video Backend classes.
 #include "VBackend/GensQGLWidget.hpp"
@@ -457,7 +458,7 @@ void GensWindow::setBpp(LibGens::VdpPalette::ColorDepth newBpp)
 {
 	// TODO: bpp changes should be pushed to the emulation queue.
 	// TODO: Maybe this should be a slot called by GensConfig.
-	if (LibGens::VdpRend::m_palette.bpp() == newBpp)
+	if (LibGens::Vdp::m_palette.bpp() == newBpp)
 		return;
 	
 	int bppVal;
@@ -477,7 +478,7 @@ void GensWindow::setBpp(LibGens::VdpPalette::ColorDepth newBpp)
 	}
 	
 	// Set the color depth.
-	LibGens::VdpRend::m_palette.setBpp(newBpp);
+	LibGens::Vdp::m_palette.setBpp(newBpp);
 	m_vBackend->setVbDirty();
 	//m_vBackend->vbUpdate();	// TODO: Don't update immediately?
 	
@@ -704,7 +705,7 @@ void GensWindow::introStyle_changed_slot(int newIntroStyle)
 	{
 		// Intro style was changed to "None", and emulation isn't running.
 		// Clear the screen.
-		LibGens::VdpIo::Reset();
+		LibGens::Vdp::Reset();
 		updateVideo();
 	}
 }

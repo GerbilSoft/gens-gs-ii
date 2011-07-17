@@ -22,7 +22,7 @@
  ***************************************************************************/
 
 #include "M68K_Mem.hpp"
-#include "MD/VdpIo.hpp"
+#include "MD/Vdp.hpp"
 
 // Z80 CPU emulator and memory space.
 #include "Z80.hpp"
@@ -386,24 +386,24 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 		case 0x04: case 0x06:
 		{
 			// VDP control port. (high byte)
-			uint16_t vdp_status = VdpIo::Read_Status();
+			uint16_t vdp_status = Vdp::Read_Status();
 			return ((vdp_status >> 8) & 0xFF);
 		}
 		
 		case 0x05: case 0x07:
 		{
 			// VDP control port. (low byte)
-			uint16_t vdp_status = VdpIo::Read_Status();
+			uint16_t vdp_status = Vdp::Read_Status();
 			return (vdp_status & 0xFF);
 		}
 		
 		case 0x08:
 			// V counter.
-			return VdpIo::Read_V_Counter();
+			return Vdp::Read_V_Counter();
 		
 		case 0x09:
 			// H counter.
-			return VdpIo::Read_H_Counter();
+			return Vdp::Read_H_Counter();
 		
 		default:
 			// Invalid or unsupported VDP port.
@@ -635,15 +635,15 @@ inline uint16_t M68K_Mem::M68K_Read_Word_VDP(uint32_t address)
 	{
 		case 0x00: case 0x02:
 			// VDP data port.
-			return VdpIo::Read_Data();
+			return Vdp::Read_Data();
 		
 		case 0x04: case 0x06:
 			// VDP control port.
-			return VdpIo::Read_Status();
+			return Vdp::Read_Status();
 		
 		case 0x08:
 			// HV counter.
-			return ((VdpIo::Read_V_Counter() << 8) | VdpIo::Read_H_Counter());
+			return ((Vdp::Read_V_Counter() << 8) | Vdp::Read_H_Counter());
 		
 		default:
 			// Invalid or unsupported VDP port.
@@ -932,7 +932,7 @@ inline void M68K_Mem::M68K_Write_Byte_VDP(uint32_t address, uint8_t data)
 	{
 		case 0x00: case 0x01: case 0x02: case 0x03:
 			// VDP data port.
-			VdpIo::Write_Data_Byte(data);
+			Vdp::Write_Data_Byte(data);
 			break;
 		
 		case 0x04: case 0x05: case 0x06: case 0x07:
@@ -1238,12 +1238,12 @@ inline void M68K_Mem::M68K_Write_Word_VDP(uint32_t address, uint16_t data)
 	{
 		case 0x00: case 0x02:
 			// VDP data port.
-			VdpIo::Write_Data_Word(data);
+			Vdp::Write_Data_Word(data);
 			break;
 		
 		case 0x04: case 0x06:
 			// VDP control port.
-			VdpIo::Write_Ctrl(data);
+			Vdp::Write_Ctrl(data);
 			break;
 		
 		case 0x10:

@@ -26,7 +26,7 @@
 
 #include <stdint.h>
 
-#include "VdpIo.hpp"
+#include "VdpTypes.hpp"
 
 // Needed for FORCE_INLINE.
 #include "../macros/common.h"
@@ -115,8 +115,8 @@ class VdpPalette
 		void resetActive(void);
 		
 		// Palette update functions.
-		void updateMD(const VdpIo::VDP_CRam_t *cram);
-		void updateMD_HS(const VdpIo::VDP_CRam_t *cram);
+		void updateMD(const VdpTypes::CRam_t *cram);
+		void updateMD_HS(const VdpTypes::CRam_t *cram);
 		
 		// TODO
 		//static void Adjust_CRam_32X(void);
@@ -146,7 +146,7 @@ class VdpPalette
 		template<bool hs, typename pixel>
 		static FORCE_INLINE void T_updateMD(pixel *MD_palette,
 						const pixel *palette,
-						const VdpIo::VDP_CRam_t *cram);
+						const VdpTypes::CRam_t *cram);
 };
 
 }

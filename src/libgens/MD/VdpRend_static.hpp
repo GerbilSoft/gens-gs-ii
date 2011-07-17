@@ -24,7 +24,7 @@
 #ifndef __LIBGENS_MD_VDPREND_STATIC_HPP__
 #define __LIBGENS_MD_VDPREND_STATIC_HPP__
 
-#include "VdpRend.hpp"
+#include "Vdp.hpp"
 #include "VdpPalette.hpp"
 
 namespace LibGens
@@ -33,23 +33,23 @@ namespace LibGens
 /** Static member initialization. **/
 
 // Palette manager.
-VdpPalette VdpRend::m_palette;
+VdpPalette Vdp::m_palette;
 
 // MD framebuffer.
-MdFb VdpRend::MD_Screen;
+MdFb Vdp::MD_Screen;
 
 // Sprite structs.
-VdpRend::Sprite_Struct_t VdpRend::Sprite_Struct[128];
-unsigned int VdpRend::Sprite_Visible[128];
+Vdp::Sprite_Struct_t Vdp::Sprite_Struct[128];
+unsigned int Vdp::Sprite_Visible[128];
 
 // If set, enforces sprite limits.
-int VdpRend::Sprite_Limits = 1;
+int Vdp::Sprite_Limits = 1;
 
 // VDP layer control.
-unsigned int VdpRend::VDP_Layers = VdpRend::VDP_LAYERS_DEFAULT;
+unsigned int Vdp::VDP_Layers = Vdp::VDP_LAYERS_DEFAULT;
 
 // Line buffer for current line.
-VdpRend::LineBuf_t VdpRend::LineBuf;
+Vdp::LineBuf_t Vdp::LineBuf;
 
 }
 

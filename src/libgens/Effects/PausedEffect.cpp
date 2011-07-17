@@ -26,7 +26,7 @@
  */
 
 #include "PausedEffect.hpp"
-#include "MD/VdpRend.hpp"
+#include "MD/Vdp.hpp"
 
 // MD framebuffer.
 #include "../Util/MdFb.hpp"
@@ -149,7 +149,7 @@ inline void PausedEffect::T_DoPausedEffect(pixel* RESTRICT outScreen)
 /**
  * DoPausedEffect(): Tint the screen a purple hue to indicate that emulation is paused.
  * @param outScreen Output screen.
- * @param fromMdScreen If true, uses VdpRend::MD_Screen[] as the source buffer.
+ * @param fromMdScreen If true, uses Vdp::MD_Screen[] as the source buffer.
  * Otherwise, outScreen is used as both source and destination.
  */
 void PausedEffect::DoPausedEffect(MdFb *outScreen, bool fromMdScreen)
@@ -157,28 +157,28 @@ void PausedEffect::DoPausedEffect(MdFb *outScreen, bool fromMdScreen)
 	if (fromMdScreen)
 	{
 		// Render from MD_Screen[] to outScreen.
-		switch (VdpRend::m_palette.bpp())
+		switch (Vdp::m_palette.bpp())
 		{
 			case VdpPalette::BPP_15:
 				T_DoPausedEffect<uint16_t, 0x7C00, 0x03E0, 0x001F, 10, 5, 0>
-					(VdpRend::MD_Screen.fb16(), outScreen->fb16());
+					(Vdp::MD_Screen.fb16(), outScreen->fb16());
 				break;
 			case VdpPalette::BPP_16:
 				T_DoPausedEffect<uint16_t, 0xF800, 0x07C0, 0x001F, 11, 6, 0>
-					(VdpRend::MD_Screen.fb16(), outScreen->fb16());
+					(Vdp::MD_Screen.fb16(), outScreen->fb16());
 				break;
 			case VdpPalette::BPP_32:
 			default:
 				T_DoPausedEffect<uint32_t, PAUSED_MASK32_R, PAUSED_MASK32_G, PAUSED_MASK32_B,
 						PAUSED_SHIFT32_R, PAUSED_SHIFT32_G, PAUSED_SHIFT32_B>
-					(VdpRend::MD_Screen.fb32(), outScreen->fb32());
+					(Vdp::MD_Screen.fb32(), outScreen->fb32());
 				break;
 		}
 	}
 	else
 	{
 		// Update outScreen only.
-		switch (VdpRend::m_palette.bpp())
+		switch (Vdp::m_palette.bpp())
 		{
 			case VdpPalette::BPP_15:
 				T_DoPausedEffect<uint16_t, 0x7C00, 0x03E0, 0x001F, 10, 5, 0>

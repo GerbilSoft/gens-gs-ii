@@ -39,8 +39,7 @@
 
 // LibGens video includes.
 #include "libgens/MD/VdpPalette.hpp"
-#include "libgens/MD/VdpRend.hpp"
-#include "libgens/MD/VdpIo.hpp"
+#include "libgens/MD/Vdp.hpp"
 
 // M68K_Mem.hpp has SysRegion.
 #include "libgens/cpu/M68K_Mem.hpp"
@@ -554,7 +553,7 @@ int EmuManager::closeRom(bool emitStateChanged)
 		{
 			// Intro Effect is disabled.
 			// Clear the screen.
-			LibGens::VdpIo::Reset();
+			LibGens::Vdp::Reset();
 			emit updateVideo();
 		}
 		

@@ -35,7 +35,7 @@
 #include "cpu/Z80_MD_Mem.hpp"
 
 // System emulation code.
-#include "MD/VdpIo.hpp"
+#include "MD/Vdp.hpp"
 
 // Input Device Manager.
 #include "GensInput/DevManager.hpp"
@@ -149,7 +149,8 @@ int Init(void)
 	Z80::Init();
 	Z80_MD_Mem::Init();
 	
-	VdpIo::Init();
+	// MD VDP. (TODO: Make this non-static.)
+	Vdp::Init();
 	
 	DevManager::Init();
 	SoundMgr::Init();
@@ -180,7 +181,8 @@ int End(void)
 	Z80::End();
 	Z80_MD_Mem::End();
 	
-	VdpIo::End();
+	// MD VDP. (TODO: Make this non-static.)
+	Vdp::End();
 	
 	DevManager::End();
 	SoundMgr::End();

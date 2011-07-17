@@ -37,10 +37,6 @@ class QVBoxLayout;
 // Key Handler.
 #include "Input/KeyHandlerQt.hpp"
 
-// LibGens includes.
-#include "libgens/MD/VdpRend.hpp"
-
-
 namespace GensQt4
 {
 

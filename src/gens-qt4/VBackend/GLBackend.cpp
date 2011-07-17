@@ -30,7 +30,7 @@
 #include "libgens/macros/log_msg.h"
 
 // LibGens includes.
-#include "libgens/MD/VdpRend.hpp"
+#include "libgens/MD/Vdp.hpp"
 #include "libgens/Util/Timing.hpp"
 #include "libgens/MD/EmuMD.hpp"
 
@@ -166,7 +166,7 @@ void GLBackend::reallocTexture(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMethod);
 	
 	// Determine the texture format and type.
-	m_lastBpp = LibGens::VdpRend::m_palette.bpp();
+	m_lastBpp = LibGens::Vdp::m_palette.bpp();
 	switch (m_lastBpp)
 	{
 		case LibGens::VdpPalette::BPP_15:
@@ -494,7 +494,7 @@ void GLBackend::glb_paintGL(void)
 		// MD_Screen is dirty.
 		
 		// Check if the Bpp has changed.
-		if (LibGens::VdpRend::m_palette.bpp() != m_lastBpp)
+		if (LibGens::Vdp::m_palette.bpp() != m_lastBpp)
 		{
 			// Bpp has changed. Reallocate the texture.
 			// VDP palettes will be recalculated on the next frame.
@@ -531,9 +531,9 @@ void GLBackend::glb_paintGL(void)
 		// TODO: Optimize this!
 		GLvoid *screen;
 		LibGens::MdFb *src_fb = (bFromMD
-				? &LibGens::VdpRend::MD_Screen
+				? &LibGens::Vdp::MD_Screen
 				: m_intScreen);
-		if (LibGens::VdpRend::m_palette.bpp() != LibGens::VdpPalette::BPP_32)
+		if (LibGens::Vdp::m_palette.bpp() != LibGens::VdpPalette::BPP_32)
 			screen = src_fb->fb16();
 		else
 			screen = src_fb->fb32();
@@ -589,8 +589,8 @@ void GLBackend::glb_paintGL(void)
 	
 	// Check if the MD resolution has changed.
 	// If it has, recalculate the stretch mode rectangle.
-	const QSize mdResCur(LibGens::VdpIo::GetHPix(),
-			     LibGens::VdpIo::GetVPix());
+	const QSize mdResCur(LibGens::Vdp::GetHPix(),
+			     LibGens::Vdp::GetVPix());
 	if (mdResCur != m_stretchLastRes)
 		recalcStretchRectF();
 	
@@ -644,8 +644,8 @@ void GLBackend::glb_paintGL(void)
 void GLBackend::recalcStretchRectF(GensConfig::StretchMode_t mode)
 {
 	// Store the current MD screen resolution.
-	m_stretchLastRes.setWidth(LibGens::VdpIo::GetHPix());
-	m_stretchLastRes.setHeight(LibGens::VdpIo::GetVPix());
+	m_stretchLastRes.setWidth(LibGens::Vdp::GetHPix());
+	m_stretchLastRes.setHeight(LibGens::Vdp::GetVPix());
 	
 	// Default to no stretch.
 	m_stretchRectF = QRectF(
@@ -665,7 +665,7 @@ void GLBackend::recalcStretchRectF(GensConfig::StretchMode_t mode)
 	    mode == GensConfig::STRETCH_FULL)
 	{
 		// Horizontal stretch.
-		const int h_pix_begin = LibGens::VdpIo::GetHPixBegin();
+		const int h_pix_begin = LibGens::Vdp::GetHPixBegin();
 		if (h_pix_begin > 0)
 		{
 			// Less than 320 pixels wide.
@@ -681,7 +681,7 @@ void GLBackend::recalcStretchRectF(GensConfig::StretchMode_t mode)
 	    mode == GensConfig::STRETCH_FULL)
 	{
 		// Vertical stretch.
-		int v_pix = (240 - LibGens::VdpIo::GetVPix());
+		int v_pix = (240 - LibGens::Vdp::GetVPix());
 		if (v_pix > 0)
 		{
 			// Less than 240 pixels tall.

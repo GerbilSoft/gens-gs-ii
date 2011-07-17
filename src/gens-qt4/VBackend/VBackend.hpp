@@ -34,8 +34,8 @@
 #include <QtGui/QColor>
 
 // LibGens includes.
-#include "libgens/MD/VdpRend.hpp"
 #include "libgens/Util/MdFb.hpp"
+#include "libgens/MD/VdpPalette.hpp"
 
 // paused_t
 #include "gqt4_datatypes.h"

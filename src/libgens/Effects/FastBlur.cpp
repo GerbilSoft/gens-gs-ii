@@ -26,7 +26,7 @@
  */
 
 #include "FastBlur.hpp"
-#include "MD/VdpRend.hpp"
+#include "MD/Vdp.hpp"
 #include "Util/cpuflags.h"
 
 // C includes.
@@ -177,7 +177,7 @@ void FastBlur::DoFastBlur_32_MMX(uint32_t *mdScreen)
 /**
  * DoFastBlur(): Apply a fast blur effect to the screen buffer.
  * @param outScreen Output screen.
- * @param fromMdScreen If true, uses VdpRend::MD_Screen[] as the source buffer.
+ * @param fromMdScreen If true, uses Vdp::MD_Screen[] as the source buffer.
  * Otherwise, outScreen is used as both source and destination.
  */
 void FastBlur::DoFastBlur(MdFb *outScreen, bool fromMdScreen)
@@ -185,23 +185,23 @@ void FastBlur::DoFastBlur(MdFb *outScreen, bool fromMdScreen)
 	if (fromMdScreen)
 	{
 		// Copy MD_Screen[] to outScreen.
-		switch(VdpRend::m_palette.bpp())
+		switch(Vdp::m_palette.bpp())
 		{
 			case VdpPalette::BPP_15:
 			case VdpPalette::BPP_16:
-				memcpy(outScreen->fb16(), VdpRend::MD_Screen.fb16(),
-				       (VdpRend::MD_Screen.pxPerLine() * VdpRend::MD_Screen.numLines() * sizeof(uint16_t)));
+				memcpy(outScreen->fb16(), Vdp::MD_Screen.fb16(),
+				       (Vdp::MD_Screen.pxPerLine() * Vdp::MD_Screen.numLines() * sizeof(uint16_t)));
 				break;
 			
 			case VdpPalette::BPP_32:
 			default:
-				memcpy(outScreen->fb32(), VdpRend::MD_Screen.fb32(),
-				       (VdpRend::MD_Screen.pxPerLine() * VdpRend::MD_Screen.numLines() * sizeof(uint32_t)));
+				memcpy(outScreen->fb32(), Vdp::MD_Screen.fb32(),
+				       (Vdp::MD_Screen.pxPerLine() * Vdp::MD_Screen.numLines() * sizeof(uint32_t)));
 				break;
 		}
 	}
 	
-	switch (VdpRend::m_palette.bpp())
+	switch (Vdp::m_palette.bpp())
 	{
 		case VdpPalette::BPP_15:
 #ifdef HAVE_MMX
@@ -232,3 +232,4 @@ void FastBlur::DoFastBlur(MdFb *outScreen, bool fromMdScreen)
 }
 
 }
+

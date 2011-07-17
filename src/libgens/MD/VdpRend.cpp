@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * VdpRend.cpp: VDP rendering class.                                       *
+ * VdpRend.cpp: VDP rendering code. (Part of the Vdp class.)               *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,14 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "VdpRend.hpp"
-#include "VdpIo.hpp"
+#include "Vdp.hpp"
 
 /** Static member initialization. **/
 #include "VdpRend_static.hpp"
 
-// Mode-specific renderers.
-#include "VdpRend_m5.hpp"
+// VDP error message.
 #include "VdpRend_Err.hpp"
 
 // C includes.
@@ -38,30 +36,30 @@ namespace LibGens
 {
 
 /**
- * VdpRend::Init(): Initialize the VDP rendering subsystem.
- * This function should only be called from VdpIo::Init()!
+ * Vdp::Rend_Init(): Initialize the VDP rendering subsystem.
+ * This function should only be called from Init()!
  */
-void VdpRend::Init(void)
+void Vdp::Rend_Init(void)
 {
 	// TODO
 }
 
 
 /**
- * VdpRend::Init(): Shut down the VDP rendering subsystem.
- * This function should only be called from VdpIo::Init()!
+ * Vdp::Rend_End(): Shut down the VDP rendering subsystem.
+ * This function should only be called from Vdp::Init()!
  */
-void VdpRend::End(void)
+void Vdp::Rend_End(void)
 {
 	// TODO
 }
 
 
 /**
- * VdpRend::Reset(): Reset the VDP rendering arrays.
- * This function should only be called from VdpIo::Reset()!
+ * Vdp::Rend_Reset(): Reset the VDP rendering arrays.
+ * This function should only be called from Vdp::Reset()!
  */
-void VdpRend::Reset(void)
+void Vdp::Rend_Reset(void)
 {
 	// Clear MD_Screen.
 	memset(&MD_Screen, 0x00, sizeof(MD_Screen));
@@ -77,21 +75,21 @@ void VdpRend::Reset(void)
 
 
 /**
- * VdpRend::Render_Line(): Render a line.
+ * Vdp::Render_Line(): Render a line.
  */
-void VdpRend::Render_Line(void)
+void Vdp::Render_Line(void)
 {
 	// TODO: 32X-specific function.
-	if (VdpIo::VDP_Mode & VDP_MODE_M5)
+	if (VDP_Mode & VDP_MODE_M5)
 	{
 		// Mode 5.
 		// TODO: Port to LibGens.
-		if (VdpIo::SysStatus._32X) { }
+		if (SysStatus._32X) { }
 #if 0
 			VDP_Render_Line_m5_32X();
 #endif
 		else
-			VdpRend_m5::Render_Line();
+			Render_Line_m5();
 	}
 	else
 	{

@@ -29,7 +29,7 @@
 
 // LibGens includes.
 #include "M68K_Mem.hpp"
-#include "MD/VdpIo.hpp"
+#include "MD/Vdp.hpp"
 
 // Sound Manager.
 #include "sound/SoundMgr.hpp"
@@ -116,24 +116,24 @@ inline uint8_t Z80_MD_Mem::Z80_ReadB_VDP(uint32_t address)
 		case 0x04: case 0x06:
 		{
 			// VDP control port. (high byte)
-			uint16_t vdp_status = VdpIo::Read_Status();
+			uint16_t vdp_status = Vdp::Read_Status();
 			return ((vdp_status >> 8) & 0xFF);
 		}
 		
 		case 0x05: case 0x07:
 		{
 			// VDP control port. (low byte)
-			uint16_t vdp_status = VdpIo::Read_Status();
+			uint16_t vdp_status = Vdp::Read_Status();
 			return (vdp_status & 0xFF);
 		}
 		
 		case 0x08:
 			// V counter.
-			return VdpIo::Read_V_Counter();
+			return Vdp::Read_V_Counter();
 		
 		case 0x09:
 			// H counter.
-			return VdpIo::Read_H_Counter();
+			return Vdp::Read_H_Counter();
 		
 		default:
 			// Invalid or unsupported VDP port.
@@ -218,7 +218,7 @@ inline void Z80_MD_Mem::Z80_WriteB_VDP(uint32_t address, uint8_t data)
 	{
 		case 0x00: case 0x01: case 0x02: case 0x03:
 			// VDP data port.
-			VdpIo::Write_Data_Byte(data);
+			Vdp::Write_Data_Byte(data);
 			break;
 		
 		case 0x11:

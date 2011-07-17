@@ -41,7 +41,7 @@
 
 // Sound Manager.
 #include "SoundMgr.hpp"
-#include "MD/VdpIo.hpp"
+#include "MD/Vdp.hpp"
 
 namespace LibGens
 {
@@ -441,7 +441,7 @@ void Psg::specialUpdate(void)
 	m_writeLen = 0;
 	
 	// Determine the new starting position.
-	int writePos = SoundMgr::GetWritePos(VdpIo::VDP_Lines.Display.Current + 1);
+	int writePos = SoundMgr::GetWritePos(Vdp::VDP_Lines.Display.Current + 1);
 	
 	// Update the PSG buffer pointers.
 	m_bufPtrL = &SoundMgr::ms_SegBufL[writePos];
@@ -549,3 +549,4 @@ void PSG_Restore_State_GSX_v7(struct _gsx_v7_psg *save)
 /** end **/
 
 }
+

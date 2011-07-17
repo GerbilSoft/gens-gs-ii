@@ -47,7 +47,7 @@
 
 // Sound Manager.
 #include "SoundMgr.hpp"
-#include "MD/VdpIo.hpp"
+#include "MD/Vdp.hpp"
 
 #if 0
 // GSX v7 savestate functionality.
@@ -2435,7 +2435,7 @@ void Ym2612::specialUpdate(void)
 	m_writeLen = 0;
 	
 	// Determine the new starting position.
-	int writePos = SoundMgr::GetWritePos(VdpIo::VDP_Lines.Display.Current + 1);
+	int writePos = SoundMgr::GetWritePos(Vdp::VDP_Lines.Display.Current + 1);
 	
 	// Update the PSG buffer pointers.
 	m_bufPtrL = &SoundMgr::ms_SegBufL[writePos];

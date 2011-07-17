@@ -24,7 +24,8 @@
 #ifndef __LIBGENS_MD_VDPIO_STATIC_HPP__
 #define __LIBGENS_MD_VDPIO_STATIC_HPP__
 
-#include "VdpIo.hpp"
+#include "Vdp.hpp"
+#include "VdpTypes.hpp"
 
 namespace LibGens
 {
@@ -32,93 +33,93 @@ namespace LibGens
 /** Static member initialization. **/
 
 // VDP registers.
-VdpIo::VDP_Reg_t VdpIo::VDP_Reg;
+VdpTypes::VdpReg_t Vdp::VDP_Reg;
 
 // These two variables are internal to Gens.
 // They don't map to any actual VDP registers.
-int VdpIo::DMA_Length;
-unsigned int VdpIo::DMA_Address;
+int Vdp::DMA_Length;
+unsigned int Vdp::DMA_Address;
 
 // DMAT variables.
-unsigned int VdpIo::DMAT_Tmp;
-int VdpIo::DMAT_Length;
-unsigned int VdpIo::DMAT_Type;
+unsigned int Vdp::DMAT_Tmp;
+int Vdp::DMAT_Length;
+unsigned int Vdp::DMAT_Type;
 
 // VDP address pointers.
 // These are relative to VRam[] and are based on register values.
-uint16_t VdpIo::ScrA_Addr;
-uint16_t VdpIo::ScrB_Addr;
-uint16_t VdpIo::Win_Addr;
-uint16_t VdpIo::Spr_Addr;
-uint16_t VdpIo::H_Scroll_Addr;
+uint16_t Vdp::ScrA_Addr;
+uint16_t Vdp::ScrB_Addr;
+uint16_t Vdp::Win_Addr;
+uint16_t Vdp::Spr_Addr;
+uint16_t Vdp::H_Scroll_Addr;
 
 // VDP convenience values: Horizontal.
 // NOTE: These must be signed for VDP arithmetic to work properly!
-int VdpIo::H_Cell;
-int VdpIo::H_Pix;
-int VdpIo::H_Pix_Begin;
+int Vdp::H_Cell;
+int Vdp::H_Pix;
+int Vdp::H_Pix_Begin;
 
 // Window row shift.
 // H40: 6. (64x32 window)
 // H32: 5. (32x32 window)
-unsigned int VdpIo::H_Win_Shift;
+unsigned int Vdp::H_Win_Shift;
 
 // VDP convenience values: Scroll.
-unsigned int VdpIo::V_Scroll_MMask;
-unsigned int VdpIo::H_Scroll_Mask;
+unsigned int Vdp::V_Scroll_MMask;
+unsigned int Vdp::H_Scroll_Mask;
 
-unsigned int VdpIo::H_Scroll_CMul;
-unsigned int VdpIo::H_Scroll_CMask;
-unsigned int VdpIo::V_Scroll_CMask;
+unsigned int Vdp::H_Scroll_CMul;
+unsigned int Vdp::H_Scroll_CMask;
+unsigned int Vdp::V_Scroll_CMask;
 
 // TODO: Eliminate these.
-int VdpIo::Win_X_Pos;
-int VdpIo::Win_Y_Pos;
+int Vdp::Win_X_Pos;
+int Vdp::Win_Y_Pos;
 
 // Interlaced mode.
-VdpIo::Interlaced_t VdpIo::Interlaced;
+VdpTypes::Interlaced_t Vdp::Interlaced;
 
 // Sprite dot overflow.
 // If set, the previous line had a sprite dot overflow.
 // This is needed to properly implement Sprite Masking in S1.
-int VdpIo::SpriteDotOverflow;
+int Vdp::SpriteDotOverflow;
 
 // Horizontal Interrupt Counter.
-int VdpIo::HInt_Counter;
+int Vdp::HInt_Counter;
 
 /**
  * VDP_Ctrl: VDP control struct.
  */
-VdpIo::VDP_Ctrl_t VdpIo::VDP_Ctrl;
+Vdp::VDP_Ctrl_t Vdp::VDP_Ctrl;
 
 /**
 * VDP_Mode: Current VDP mode.
 */
-unsigned int VdpIo::VDP_Mode;
+unsigned int Vdp::VDP_Mode;
 
-VdpIo::VDP_VRam_t VdpIo::VRam;
-VdpIo::VDP_CRam_t VdpIo::CRam;
-VdpIo::VSRam_t VdpIo::VSRam;
+VdpTypes::VRam_t Vdp::VRam;
+VdpTypes::CRam_t Vdp::CRam;
+VdpTypes::VSRam_t Vdp::VSRam;
 
-uint8_t VdpIo::H_Counter_Table[512][2];
+uint8_t Vdp::H_Counter_Table[512][2];
 
-int VdpIo::VDP_Int;
-int VdpIo::VDP_Status;
+int Vdp::VDP_Int;
+int Vdp::VDP_Status;
 
 // VDP line counters.
 // NOTE: Gens/GS currently uses 312 lines for PAL. It should use 313!
-VdpIo::VDP_Lines_t VdpIo::VDP_Lines;
+VdpTypes::VdpLines_t Vdp::VDP_Lines;
 
-// Flags.
-VdpIo::VDP_Flags_t VdpIo::VDP_Flags;
+// Update flags.
+VdpTypes::UpdateFlags_t Vdp::UpdateFlags;
 
 // Set this to 1 to enable zero-length DMA requests.
 // Default is 0. (hardware-accurate)
-int VdpIo::Zero_Length_DMA;
+int Vdp::Zero_Length_DMA;
 
 // System status.
 // TODO: Move this to a more relevant file.
-VdpIo::SysStatus_t VdpIo::SysStatus;
+Vdp::SysStatus_t Vdp::SysStatus;
 
 
 /** VDP tables. **/
@@ -127,7 +128,7 @@ VdpIo::SysStatus_t VdpIo::SysStatus;
  * CD_Table[]: VDP memory destination table.
  * Maps VDP control word destinations to VDEST_t values.
  */
-const uint16_t VdpIo::CD_Table[64] =
+const uint16_t Vdp::CD_Table[64] =
 {
 	// 0x00 - 0x0F
 	VDEST_LOC_VRAM | VDEST_ACC_READ,	VDEST_LOC_VRAM | VDEST_ACC_WRITE,
@@ -174,7 +175,7 @@ const uint16_t VdpIo::CD_Table[64] =
 /**
  * DMA_Timing_Table[][]: Maximum number of DMA transfers per line.
  */
-const uint8_t VdpIo::DMA_Timing_Table[4][4] =
+const uint8_t Vdp::DMA_Timing_Table[4][4] =
 {
 	/* Format: H32 active, H32 blanking, H40 active, H40 blanking */
 	{8,    83,   9, 102},	/* 68K to VRam (1 word == 2 bytes) */

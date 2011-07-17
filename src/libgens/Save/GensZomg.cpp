@@ -28,7 +28,7 @@
 
 #include "GensZomg.hpp"
 
-#include "MD/VdpIo.hpp"
+#include "MD/Vdp.hpp"
 #include "sound/SoundMgr.hpp"
 #include "cpu/M68K_Mem.hpp"
 #include "cpu/M68K.hpp"
@@ -92,21 +92,21 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 	// Writing to register 23 changes the DMA status.
 	for (int i = 23; i >= 0; i--)
 	{
-		VdpIo::Set_Reg(i, vdp_reg[i]);
+		Vdp::Set_Reg(i, vdp_reg[i]);
 	}
 	
 	// Load VRam.
-	zomg.loadVRam(VdpIo::VRam.u16, sizeof(VdpIo::VRam.u16), true);
-	VdpIo::VDP_Flags.VRam = 1;
+	zomg.loadVRam(Vdp::VRam.u16, sizeof(Vdp::VRam.u16), true);
+	Vdp::UpdateFlags.VRam = 1;
 	
 	// Load CRam.
-	zomg.loadCRam(VdpIo::CRam.u16, sizeof(VdpIo::CRam.u16), true);
-	VdpIo::VDP_Flags.CRam = 1;
+	zomg.loadCRam(Vdp::CRam.u16, sizeof(Vdp::CRam.u16), true);
+	Vdp::UpdateFlags.CRam = 1;
 	
 	/** VDP: MD-specific **/
 	
 	// Load VSRam.
-	zomg.loadMD_VSRam(VdpIo::VSRam.u16, sizeof(VdpIo::VSRam.u16), true);
+	zomg.loadMD_VSRam(Vdp::VSRam.u16, sizeof(Vdp::VSRam.u16), true);
 	
 	/** Audio **/
 	
@@ -256,18 +256,18 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	/** VDP **/
 	
 	// Save the VDP registers.
-	zomg.saveVdpReg(VdpIo::VDP_Reg.reg, 24);
+	zomg.saveVdpReg(Vdp::VDP_Reg.reg, 24);
 	
 	// Save VRam.
-	zomg.saveVRam(VdpIo::VRam.u16, sizeof(VdpIo::VRam.u16), true);
+	zomg.saveVRam(Vdp::VRam.u16, sizeof(Vdp::VRam.u16), true);
 	
 	// Save CRam.
-	zomg.saveCRam(VdpIo::CRam.u16, sizeof(VdpIo::CRam.u16), true);
+	zomg.saveCRam(Vdp::CRam.u16, sizeof(Vdp::CRam.u16), true);
 	
 	/** VDP: MD-specific **/
 	
 	// Save VSRam.
-	zomg.saveMD_VSRam(VdpIo::VSRam.u16, sizeof(VdpIo::VSRam.u16), true);
+	zomg.saveMD_VSRam(Vdp::VSRam.u16, sizeof(Vdp::VSRam.u16), true);
 	
 	/** Audio **/
 	
