@@ -344,6 +344,9 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 			
 			// Update the VDP mode.
 			Update_Mode();
+			
+			// Mode 5: Write the palette select bit.
+			m_palette.setMdColorMask(!(VDP_Reg.m5.Set1 & 0x04));
 			break;
 		
 		case 1:
