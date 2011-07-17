@@ -357,30 +357,6 @@ class Vdp
 		static Sprite_Struct_t Sprite_Struct[128];
 		static unsigned int Sprite_Visible[128];
 		
-		// VDP layer flags.
-		enum VDP_Layer_Flags
-		{
-			VDP_LAYER_SCROLLA_LOW		= (1 << 0),
-			VDP_LAYER_SCROLLA_HIGH		= (1 << 1),
-			VDP_LAYER_SCROLLA_SWAP		= (1 << 2),
-			VDP_LAYER_SCROLLB_LOW		= (1 << 3),
-			VDP_LAYER_SCROLLB_HIGH		= (1 << 4),
-			VDP_LAYER_SCROLLB_SWAP		= (1 << 5),
-			VDP_LAYER_SPRITE_LOW		= (1 << 6),
-			VDP_LAYER_SPRITE_HIGH		= (1 << 7),
-			VDP_LAYER_SPRITE_SWAP		= (1 << 8),
-			VDP_LAYER_SPRITE_ALWAYSONTOP	= (1 << 9),
-			VDP_LAYER_PALETTE_LOCK		= (1 << 10),
-		};
-		
-		static const unsigned int VDP_LAYERS_DEFAULT =
-			(VDP_LAYER_SCROLLA_LOW	|
-			 VDP_LAYER_SCROLLA_HIGH	|
-			 VDP_LAYER_SCROLLB_LOW	|
-			 VDP_LAYER_SCROLLB_HIGH	|
-			 VDP_LAYER_SPRITE_LOW	|
-			 VDP_LAYER_SPRITE_HIGH);
-		
 		// VDP layer control.
 		static unsigned int VDP_Layers;
 		

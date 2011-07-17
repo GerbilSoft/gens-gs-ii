@@ -65,7 +65,7 @@ void Vdp::Rend_Reset(void)
 	memset(&MD_Screen, 0x00, sizeof(MD_Screen));
 	
 	// Reset the active palettes.
-	if (!(VDP_Layers & VDP_LAYER_PALETTE_LOCK))
+	if (!(VDP_Layers & VdpTypes::VDP_LAYER_PALETTE_LOCK))
 		m_palette.resetActive();
 	
 	// Sprite arrays.

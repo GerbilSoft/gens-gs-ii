@@ -328,14 +328,14 @@ FORCE_INLINE void Vdp::T_PutLine_P0(int disp_pixnum, uint32_t pattern, int palet
 	{
 		// Scroll B.
 		// If ScrollB_Low is disabled, don't do anything.
-		if (!(VDP_Layers & VDP_LAYER_SCROLLB_LOW))
+		if (!(VDP_Layers & VdpTypes::VDP_LAYER_SCROLLB_LOW))
 			return;
 	}
 	else
 	{
 		// Scroll A.
 		// If ScrollA Low is disabled. don't do anything.
-		if (!(VDP_Layers & VDP_LAYER_SCROLLA_LOW))
+		if (!(VDP_Layers & VdpTypes::VDP_LAYER_SCROLLA_LOW))
 			return;
 	}
 	
@@ -390,14 +390,14 @@ FORCE_INLINE void Vdp::T_PutLine_P1(int disp_pixnum, uint32_t pattern, int palet
 		memset(&LineBuf.u16[disp_pixnum], 0x00, 8*2);
 		
 		// If ScrollB_Low is disabled, don't do anything.
-		if (!(VDP_Layers & VDP_LAYER_SCROLLB_LOW))
+		if (!(VDP_Layers & VdpTypes::VDP_LAYER_SCROLLB_LOW))
 			return;
 	}
 	else
 	{
 		// Scroll A.
 		// If ScrollA Low is disabled. don't do anything.
-		if (!(VDP_Layers & VDP_LAYER_SCROLLA_LOW))
+		if (!(VDP_Layers & VdpTypes::VDP_LAYER_SCROLLA_LOW))
 			return;
 		
 		// AND the linebuffer with ~LINEBUF_SHAD_W.
@@ -457,7 +457,7 @@ template<bool priority, bool h_s, bool flip>
 FORCE_INLINE void Vdp::T_PutLine_Sprite(int disp_pixnum, uint32_t pattern, int palette)
 {
 	// Check if the sprite layer is disabled.
-	if (!(VDP_Layers & (priority ? VDP_LAYER_SPRITE_HIGH : VDP_LAYER_SPRITE_LOW)))
+	if (!(VDP_Layers & (priority ? VdpTypes::VDP_LAYER_SPRITE_HIGH : VdpTypes::VDP_LAYER_SPRITE_LOW)))
 	{
 		// Sprite layer is disabled.
 		return;
@@ -728,7 +728,7 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 		unsigned int palette = (pattern_info >> 9) & 0x30;
 		
 		// Check for swapped Scroll B priority.
-		if (VDP_Layers & VDP_LAYER_SCROLLB_SWAP)
+		if (VDP_Layers & VdpTypes::VDP_LAYER_SCROLLB_SWAP)
 			pattern_info ^= 0x8000;
 		
 		// Check for horizontal flip.
@@ -851,7 +851,7 @@ FORCE_INLINE void Vdp::T_Render_Line_ScrollA(void)
 			unsigned int palette = (pattern_info >> 9) & 0x30;
 			
 			// Check for swapped Scroll A priority.
-			if (VDP_Layers & VDP_LAYER_SCROLLA_SWAP)
+			if (VDP_Layers & VdpTypes::VDP_LAYER_SCROLLA_SWAP)
 				pattern_info ^= 0x8000;
 			
 			// Check for horizontal flip.
@@ -1190,7 +1190,7 @@ FORCE_INLINE void Vdp::T_Render_Line_Sprite(void)
 		// Get the sprite information.
 		// Also, check for swapped sprite layer priority.
 		unsigned int spr_info = Sprite_Struct[spr_num].Num_Tile;
-		if (VDP_Layers & VDP_LAYER_SPRITE_SWAP)
+		if (VDP_Layers & VdpTypes::VDP_LAYER_SPRITE_SWAP)
 			spr_info ^= 0x8000;
 		
 		// Get the palette number, multiplied by 16.
@@ -1271,7 +1271,7 @@ FORCE_INLINE void Vdp::T_Render_Line_Sprite(void)
 			}
 			
 			// Draw the sprite.
-			if ((VDP_Layers & VDP_LAYER_SPRITE_ALWAYSONTOP) || (spr_info & 0x8000))
+			if ((VDP_Layers & VdpTypes::VDP_LAYER_SPRITE_ALWAYSONTOP) || (spr_info & 0x8000))
 			{
 				// High priority.
 				for (; H_Pos_Max >= H_Pos_Min; H_Pos_Max -= 8)
@@ -1308,7 +1308,7 @@ FORCE_INLINE void Vdp::T_Render_Line_Sprite(void)
 			}
 			
 			// Draw the sprite.
-			if ((VDP_Layers & VDP_LAYER_SPRITE_ALWAYSONTOP) || (spr_info & 0x8000))
+			if ((VDP_Layers & VdpTypes::VDP_LAYER_SPRITE_ALWAYSONTOP) || (spr_info & 0x8000))
 			{
 				// High priority.
 				for (; H_Pos_Min < H_Pos_Max; H_Pos_Min += 8)

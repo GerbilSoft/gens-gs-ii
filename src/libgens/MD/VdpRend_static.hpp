@@ -43,7 +43,7 @@ Vdp::Sprite_Struct_t Vdp::Sprite_Struct[128];
 unsigned int Vdp::Sprite_Visible[128];
 
 // VDP layer control.
-unsigned int Vdp::VDP_Layers = Vdp::VDP_LAYERS_DEFAULT;
+unsigned int Vdp::VDP_Layers = VdpTypes::VDP_LAYERS_DEFAULT;
 
 // Line buffer for current line.
 Vdp::LineBuf_t Vdp::LineBuf;
