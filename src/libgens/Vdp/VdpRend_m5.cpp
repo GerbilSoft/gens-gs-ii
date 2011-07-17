@@ -85,6 +85,59 @@
 namespace LibGens
 {
 
+/**
+ * VdpRend_m5_Private(): Private functions.
+ */
+class VdpRend_m5_Private
+{
+	public:
+		/** VDP address functions: Get Pointers. **/
+		static uint16_t *ScrA_Addr_Ptr16(uint16_t offset);
+		static uint16_t *ScrB_Addr_Ptr16(uint16_t offset);
+		static uint16_t *Win_Addr_Ptr16(uint16_t offset);
+		static uint16_t *Spr_Addr_Ptr16(uint16_t offset);
+		static uint16_t *H_Scroll_Addr_Ptr16(uint16_t offset);
+		
+		/** VDP address functions: Get Values. **/
+		static uint16_t ScrA_Addr_u16(uint16_t offset);
+		static uint16_t ScrB_Addr_u16(uint16_t offset);
+		static uint16_t Win_Addr_u16(uint16_t offset);
+		static uint16_t Spr_Addr_u16(uint16_t offset);
+		static uint16_t H_Scroll_Addr_u16(uint16_t offset);
+	
+	private:
+		VdpRend_m5_Private() { }
+		~VdpRend_m5_Private() { }
+		
+		// Disable the copy constructor.
+		VdpRend_m5_Private(const VdpRend_m5_Private &);
+		VdpRend_m5_Private &operator=(const VdpRend_m5_Private &);
+};
+
+/** VDP address functions: Get Pointers. **/
+inline uint16_t *VdpRend_m5_Private::ScrA_Addr_Ptr16(uint16_t offset)
+	{ return &Vdp::VRam.u16[((Vdp::ScrA_Addr + offset) & 0xFFFF) >> 1]; }
+inline uint16_t *VdpRend_m5_Private::ScrB_Addr_Ptr16(uint16_t offset)
+	{ return &Vdp::VRam.u16[((Vdp::ScrB_Addr + offset) & 0xFFFF) >> 1]; }
+inline uint16_t *VdpRend_m5_Private::Win_Addr_Ptr16(uint16_t offset)
+	{ return &Vdp::VRam.u16[((Vdp::Win_Addr + offset) & 0xFFFF) >> 1]; }
+inline uint16_t *VdpRend_m5_Private::Spr_Addr_Ptr16(uint16_t offset)
+	{ return &Vdp::VRam.u16[((Vdp::Spr_Addr + offset) & 0xFFFF) >> 1]; }
+inline uint16_t *VdpRend_m5_Private::H_Scroll_Addr_Ptr16(uint16_t offset)
+	{ return &Vdp::VRam.u16[((Vdp::H_Scroll_Addr + offset) & 0xFFFF) >> 1]; }
+
+/** VDP address functions: Get Values. **/
+inline uint16_t VdpRend_m5_Private::ScrA_Addr_u16(uint16_t offset)
+	{ return Vdp::VRam.u16[((Vdp::ScrA_Addr + offset) & 0xFFFF) >> 1]; }
+inline uint16_t VdpRend_m5_Private::ScrB_Addr_u16(uint16_t offset)
+	{ return Vdp::VRam.u16[((Vdp::ScrB_Addr + offset) & 0xFFFF) >> 1]; }
+inline uint16_t VdpRend_m5_Private::Win_Addr_u16(uint16_t offset)
+	{ return Vdp::VRam.u16[((Vdp::Win_Addr + offset) & 0xFFFF) >> 1]; }
+inline uint16_t VdpRend_m5_Private::Spr_Addr_u16(uint16_t offset)
+	{ return Vdp::VRam.u16[((Vdp::Spr_Addr + offset) & 0xFFFF) >> 1]; }
+inline uint16_t VdpRend_m5_Private::H_Scroll_Addr_u16(uint16_t offset)
+	{ return Vdp::VRam.u16[((Vdp::H_Scroll_Addr + offset) & 0xFFFF) >> 1]; }
+
 /** Static member initialization. **/
 
 // Interlaced rendering mode.
@@ -519,12 +572,12 @@ FORCE_INLINE uint16_t Vdp::T_Get_X_Offset(void)
 	if (plane)
 	{
 		// Scroll A.
-		return H_Scroll_Addr_u16(H_Scroll_Offset);
+		return VdpRend_m5_Private::H_Scroll_Addr_u16(H_Scroll_Offset);
 	}
 	else
 	{
 		// Scroll B.
-		return H_Scroll_Addr_u16(H_Scroll_Offset + 2);
+		return VdpRend_m5_Private::H_Scroll_Addr_u16(H_Scroll_Offset + 2);
 	}
 }
 
@@ -602,7 +655,9 @@ FORCE_INLINE uint16_t Vdp::T_Get_Pattern_Info(unsigned int x, unsigned int y)
 	const unsigned int offset = ((y << H_Scroll_CMul) + x) * 2;
 	
 	// Return the pattern information.
-	return (plane ? ScrA_Addr_u16(offset) : ScrB_Addr_u16(offset));
+	return (plane
+		? VdpRend_m5_Private::ScrA_Addr_u16(offset)
+		: VdpRend_m5_Private::ScrB_Addr_u16(offset));
 }
 
 
@@ -846,7 +901,7 @@ FORCE_INLINE void Vdp::T_Render_Line_ScrollA(void)
 		const unsigned int Y_offset_cell = (VDP_Lines.Visible.Current / 8);
 		// TODO: See if we need to handle address wraparound.
 		// NOTE: Multiply by 2 for 16-bit access.
-		const uint16_t *Win_Row_Addr = Win_Addr_Ptr16((Y_offset_cell << H_Win_Shift) * 2) + Win_Start;
+		const uint16_t *Win_Row_Addr = VdpRend_m5_Private::Win_Addr_Ptr16((Y_offset_cell << H_Win_Shift) * 2) + Win_Start;
 		
 		// Loop through the cells.
 		for (int x = Win_Length; x > 0; x--, disp_pixnum += 8)
@@ -923,7 +978,7 @@ FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
 					: 80);
 	
 	// Get the first sprite address in VRam.
-	const uint16_t *CurSpr = Spr_Addr_Ptr16(0);
+	const uint16_t *CurSpr = VdpRend_m5_Private::Spr_Addr_Ptr16(0);
 	
 	do
 	{
@@ -990,7 +1045,7 @@ FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
 		// Get the next sprite address in VRam.
 		// NOTE: Original byte offset needs to be used here.
 		// (Spr_Addr_Ptr16() divides by 2 for 16-bit access.)
-		CurSpr = Spr_Addr_Ptr16(link * 8);
+		CurSpr = VdpRend_m5_Private::Spr_Addr_Ptr16(link * 8);
 		
 		// Stop processing after:
 		// - Link number is 0. (checked above)
