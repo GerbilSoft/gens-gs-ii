@@ -334,6 +334,10 @@ void EmuManager::regionCodeOrder_changed_slot(uint16_t newRegionCodeOrder)
 	if (gqt4_config->regionCode() != LibGens::SysVersion::REGION_AUTO)
 		return;
 	
+	// NOTE: The region code order passed as newRegionCodeOrder
+	// isn't actually used by the emulation request queue.
+	Q_UNUSED(newRegionCodeOrder)
+	
 	// Auto-detect order has changed, and we're currently using auto-detect.
 	// Handle it as a regular region code change.
 	// Queue the region code change.
