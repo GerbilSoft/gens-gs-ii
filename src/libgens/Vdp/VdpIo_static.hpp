@@ -35,9 +35,9 @@ namespace LibGens
 VdpTypes::VdpEmuOptions_t Vdp::VdpEmuOptions =
 {
 	VdpTypes::INTREND_FLICKER,	// intRendMode
-	0,				// zeroLengthDMA
-	1,				// spriteLimits
-	1,				// vscrollBug
+	false,				// zeroLengthDMA
+	true,				// spriteLimits
+	true,				// vscrollBug
 };
 
 /** Static member initialization. **/
