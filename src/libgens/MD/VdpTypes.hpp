@@ -199,6 +199,30 @@ namespace VdpTypes
 			unsigned int CRam	:1;	// CRam was modified.
 		};
 	};
+	
+	// VDP emulation options.
+	struct VdpEmuOptions_t
+	{
+		// Interlaced rendering mode.
+		IntRend_Mode_t intRendMode;
+		
+		// Enables zero-length DMA.
+		// Default is 0 (hardware-accurate).
+		// May need to be enabled for buggy hacks.
+		unsigned int zeroLengthDMA	: 1;
+		
+		// Enables sprite limits.
+		// Default is 1 (hardware-accurate).
+		// May need to be disabled for buggy hacks.
+		unsigned int spriteLimits	: 1;
+		
+		// Enables left-column VScroll bug emulation.
+		// Options:
+		// - 0: disabled. (Majesco Genesis 3)
+		// - 1: enabled. (MD1, MD2) [default]
+		// TODO: Not implemented at the moment!
+		unsigned int vscrollBug		: 1;
+	};
 }
 
 }

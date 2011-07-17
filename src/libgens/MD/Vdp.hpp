@@ -45,6 +45,9 @@ class Vdp
 		static void Init(void);
 		static void End(void);
 		static void Reset(void);
+	
+		// VDP emulation options.
+		static VdpTypes::VdpEmuOptions_t VdpEmuOptions;
 		
 	/*!**************************************************************
 	 * VdpIo: I/O registers and variables.                          *
@@ -132,10 +135,6 @@ class Vdp
 		
 		// Update flags.
 		static VdpTypes::UpdateFlags_t UpdateFlags;
-		
-		// Set this to 1 to enable zero-length DMA requests.
-		// Default is 0. (hardware-accurate)
-		static int Zero_Length_DMA;
 		
 		// System status.
 		// TODO: Move this to a more relevant file.
@@ -358,9 +357,6 @@ class Vdp
 		static Sprite_Struct_t Sprite_Struct[128];
 		static unsigned int Sprite_Visible[128];
 		
-		// If set, enforces sprite limits.
-		static int Sprite_Limits;
-	
 		// VDP layer flags.
 		enum VDP_Layer_Flags
 		{

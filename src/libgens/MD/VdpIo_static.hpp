@@ -30,6 +30,16 @@
 namespace LibGens
 {
 
+/** Static member initialization. (VDP global items) **/
+// TODO: Move to Vdp.cpp?
+VdpTypes::VdpEmuOptions_t Vdp::VdpEmuOptions =
+{
+	VdpTypes::INTREND_FLICKER,	// intRendMode
+	0,				// zeroLengthDMA
+	1,				// spriteLimits
+	1,				// vscrollBug
+};
+
 /** Static member initialization. **/
 
 // VDP registers.
@@ -112,10 +122,6 @@ VdpTypes::VdpLines_t Vdp::VDP_Lines;
 
 // Update flags.
 VdpTypes::UpdateFlags_t Vdp::UpdateFlags;
-
-// Set this to 1 to enable zero-length DMA requests.
-// Default is 0. (hardware-accurate)
-int Vdp::Zero_Length_DMA;
 
 // System status.
 // TODO: Move this to a more relevant file.

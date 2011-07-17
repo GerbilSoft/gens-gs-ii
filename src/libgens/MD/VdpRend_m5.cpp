@@ -909,7 +909,7 @@ FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
 	// [Nemesis' Sprite Masking and Overflow Test ROM: Test #9]
 	// TODO: 80 sprites with Sprite Limit disabled, or 128?
 	// (Old Gens limited to 80 sprites regardless of video mode.)
-	const unsigned int max_spr = (Sprite_Limits
+	const unsigned int max_spr = (VdpEmuOptions.spriteLimits
 					? (GetHCells() * 2)
 					: 80);
 	
@@ -1157,7 +1157,7 @@ FORCE_INLINE void Vdp::T_Render_Line_Sprite(void)
 {
 	// Update the sprite masks.
 	unsigned int num_spr;
-	if (Sprite_Limits)
+	if (VdpEmuOptions.spriteLimits)
 		num_spr = T_Update_Mask_Sprite<true, interlaced>();
 	else
 		num_spr = T_Update_Mask_Sprite<false, interlaced>();

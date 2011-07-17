@@ -1303,7 +1303,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 	if (length == 0)
 	{
 		// DMA length is zero.
-		if (Zero_Length_DMA)
+		if (VdpEmuOptions.zeroLengthDMA)
 		{
 			// Zero-Length DMA transfers are enabled.
 			// Ignore this request.

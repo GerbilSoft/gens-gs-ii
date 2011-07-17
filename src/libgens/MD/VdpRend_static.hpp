@@ -42,9 +42,6 @@ MdFb Vdp::MD_Screen;
 Vdp::Sprite_Struct_t Vdp::Sprite_Struct[128];
 unsigned int Vdp::Sprite_Visible[128];
 
-// If set, enforces sprite limits.
-int Vdp::Sprite_Limits = 1;
-
 // VDP layer control.
 unsigned int Vdp::VDP_Layers = Vdp::VDP_LAYERS_DEFAULT;
 
