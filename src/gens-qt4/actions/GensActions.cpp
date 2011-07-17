@@ -40,7 +40,7 @@
 #include "../McdControlWindow.hpp"
 
 // LibGens includes.
-#include "libgens/MD/VdpPalette.hpp"
+#include "libgens/Vdp/VdpPalette.hpp"
 
 namespace GensQt4
 {

@@ -35,7 +35,7 @@
 
 // LibGens includes.
 #include "libgens/Util/MdFb.hpp"
-#include "libgens/MD/VdpPalette.hpp"
+#include "libgens/Vdp/VdpPalette.hpp"
 
 // paused_t
 #include "gqt4_datatypes.h"

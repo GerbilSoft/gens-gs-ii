@@ -26,7 +26,7 @@
  */
 
 #include "PausedEffect.hpp"
-#include "MD/Vdp.hpp"
+#include "Vdp/Vdp.hpp"
 
 // MD framebuffer.
 #include "../Util/MdFb.hpp"

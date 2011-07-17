@@ -26,7 +26,7 @@
  */
 
 #include "CrazyEffect.hpp"
-#include "MD/Vdp.hpp"
+#include "Vdp/Vdp.hpp"
 
 // C includes.
 #include <math.h>

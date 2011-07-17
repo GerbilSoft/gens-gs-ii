@@ -47,7 +47,7 @@
 
 // Sound Manager.
 #include "SoundMgr.hpp"
-#include "MD/Vdp.hpp"
+#include "Vdp/Vdp.hpp"
 
 #if 0
 // GSX v7 savestate functionality.

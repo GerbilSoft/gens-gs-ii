@@ -27,7 +27,7 @@
 #include "libgens/Decompressor/DcRar.hpp"
 
 // Color Scale Method.
-#include "libgens/MD/VdpPalette.hpp"
+#include "libgens/Vdp/VdpPalette.hpp"
 
 // Version information.
 #include "libgens/lg_main.hpp"

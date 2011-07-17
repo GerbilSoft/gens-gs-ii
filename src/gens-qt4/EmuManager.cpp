@@ -38,8 +38,8 @@
 #include "Audio/GensPortAudio.hpp"
 
 // LibGens video includes.
-#include "libgens/MD/VdpPalette.hpp"
-#include "libgens/MD/Vdp.hpp"
+#include "libgens/Vdp/Vdp.hpp"
+#include "libgens/Vdp/VdpPalette.hpp"
 
 // M68K_Mem.hpp has SysRegion.
 #include "libgens/cpu/M68K_Mem.hpp"

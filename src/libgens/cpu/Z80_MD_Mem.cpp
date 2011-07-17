@@ -29,7 +29,7 @@
 
 // LibGens includes.
 #include "M68K_Mem.hpp"
-#include "MD/Vdp.hpp"
+#include "Vdp/Vdp.hpp"
 
 // Sound Manager.
 #include "sound/SoundMgr.hpp"

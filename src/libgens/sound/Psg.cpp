@@ -41,7 +41,7 @@
 
 // Sound Manager.
 #include "SoundMgr.hpp"
-#include "MD/Vdp.hpp"
+#include "Vdp/Vdp.hpp"
 
 namespace LibGens
 {

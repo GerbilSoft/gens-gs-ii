@@ -30,7 +30,7 @@
 #include "libgens/macros/log_msg.h"
 
 // LibGens includes.
-#include "libgens/MD/Vdp.hpp"
+#include "libgens/Vdp/Vdp.hpp"
 #include "libgens/Util/Timing.hpp"
 #include "libgens/MD/EmuMD.hpp"
 

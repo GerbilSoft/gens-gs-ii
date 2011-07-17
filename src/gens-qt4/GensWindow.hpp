@@ -34,7 +34,7 @@ class QCloseEvent;
 
 // LibGens includes.
 #include "libgens/lg_osd.h"
-#include "libgens/MD/VdpPalette.hpp"
+#include "libgens/Vdp/VdpPalette.hpp"
 
 // gens-qt4 classes.
 #include "gqt4_main.hpp"

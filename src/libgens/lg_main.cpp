@@ -35,7 +35,7 @@
 #include "cpu/Z80_MD_Mem.hpp"
 
 // System emulation code.
-#include "MD/Vdp.hpp"
+#include "Vdp/Vdp.hpp"
 
 // Input Device Manager.
 #include "GensInput/DevManager.hpp"

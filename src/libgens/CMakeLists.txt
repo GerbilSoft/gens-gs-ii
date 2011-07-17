@@ -54,11 +54,11 @@ CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY
 # Sources.
 SET(libgens_SRCS
 	lg_main.cpp
-	MD/VdpIo.cpp
-	MD/VdpRend.cpp
-	MD/VdpRend_m5.cpp
+	Vdp/VdpIo.cpp
+	Vdp/VdpRend.cpp
+	Vdp/VdpRend_m5.cpp
 	MD/EmuMD.cpp
-	MD/VdpPalette.cpp
+	Vdp/VdpPalette.cpp
 	Save/GensZomg.cpp
 	cpu/M68K.cpp
 	cpu/M68K_Mem.cpp
@@ -98,8 +98,8 @@ SET(libgens_SRCS
 	Save/EEPRom_DB.cpp
 	Data/mcd_rom_db.c
 	Data/32X/fw_32x.c
-	MD/VdpRend_Err.cpp
-	MD/VGA_charset.c
+	Vdp/VdpRend_Err.cpp
+	Vdp/VGA_charset.c
 	Util/MdFb.cpp
 	)
 

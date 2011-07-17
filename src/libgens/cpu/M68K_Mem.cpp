@@ -22,7 +22,7 @@
  ***************************************************************************/
 
 #include "M68K_Mem.hpp"
-#include "MD/Vdp.hpp"
+#include "Vdp/Vdp.hpp"
 
 // Z80 CPU emulator and memory space.
 #include "Z80.hpp"

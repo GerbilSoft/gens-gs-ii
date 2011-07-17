@@ -44,7 +44,7 @@
 
 // LibGens includes.
 #include "libgens/macros/log_msg.h"
-#include "libgens/MD/Vdp.hpp"
+#include "libgens/Vdp/Vdp.hpp"
 
 // Video Backend classes.
 #include "VBackend/GensQGLWidget.hpp"

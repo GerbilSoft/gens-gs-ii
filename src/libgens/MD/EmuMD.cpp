@@ -24,8 +24,7 @@
 #include "EmuMD.hpp"
 
 // VDP.
-#include "Vdp.hpp"
-//#include "VdpPalette.hpp"
+#include "Vdp/Vdp.hpp"
 
 // CPU emulators.
 #include "cpu/M68K.cpp"

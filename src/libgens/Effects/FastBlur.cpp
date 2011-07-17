@@ -26,7 +26,7 @@
  */
 
 #include "FastBlur.hpp"
-#include "MD/Vdp.hpp"
+#include "Vdp/Vdp.hpp"
 #include "Util/cpuflags.h"
 
 // C includes.

@@ -31,7 +31,7 @@
 #include "libgens/MD/EmuMD.hpp"
 
 // LibGens video includes.
-#include "libgens/MD/Vdp.hpp"
+#include "libgens/Vdp/Vdp.hpp"
 
 // Controller devices.
 #include "libgens/IO/IoBase.hpp"
