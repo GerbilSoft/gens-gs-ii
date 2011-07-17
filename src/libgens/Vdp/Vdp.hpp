@@ -64,16 +64,24 @@ class Vdp
 		// VDP registers.
 		static VdpTypes::VdpReg_t VDP_Reg;
 		
+		/** DMA variables. **/
+	private:
 		// These two variables are internal to Gens.
 		// They don't map to any actual VDP registers.
+		// TODO: Do we need separate DMA_Length variables,
+		// or are the DMA length and address registers used by the VDP?
 		static int DMA_Length;
 		static unsigned int DMA_Address;
 		
 		// DMAT variables.
-		static unsigned int DMAT_Tmp;
+		// TODO: Mark DMAT_Length private.
+	public:	
 		static int DMAT_Length;
+	private:
+		static unsigned int DMAT_Tmp;
 		static unsigned int DMAT_Type;
-		
+	
+	private:
 		/** VDP address functions: Get Pointers. **/
 		static uint16_t *ScrA_Addr_Ptr16(uint16_t offset);
 		static uint16_t *ScrB_Addr_Ptr16(uint16_t offset);
@@ -114,12 +122,11 @@ class Vdp
 		// If set, the previous line had a sprite dot overflow.
 		// This is needed to properly implement Sprite Masking in S1.
 		static int SpriteDotOverflow;
-		
-		// Horizontal Interrupt Counter.
-		static int HInt_Counter;
-		
+	
+	public:
 		/**
 		* VDP_Mode: Current VDP mode.
+		* TODO: Mark as private after integrating VdpRend_Err within the Vdp class.
 		*/
 		#define VDP_MODE_M1	(1 << 0)
 		#define VDP_MODE_M2	(1 << 1)
@@ -127,6 +134,9 @@ class Vdp
 		#define VDP_MODE_M4	(1 << 3)
 		#define VDP_MODE_M5	(1 << 4)
 		static unsigned int VDP_Mode;
+	
+		// Horizontal Interrupt Counter.
+		static int HInt_Counter;
 		
 		// VRam, CRam, VSRam.
 		static VdpTypes::VRam_t VRam;
@@ -149,11 +159,13 @@ class Vdp
 			unsigned int _32X	:1;
 		};
 		static SysStatus_t SysStatus;
-		
+	
+	private:
 		/** VDP tables. **/
 		static uint8_t H_Counter_Table[512][2];
 		static const uint8_t DMA_Timing_Table[4][4];
-		
+	
+	public:
 		/** Interrupt functions. **/
 		static uint8_t Int_Ack(void);
 		static void Update_IRQ_Line(void);
@@ -336,7 +348,7 @@ class Vdp
 	 * VdpRend: Rendering functions and variables.                  *
 	 ****************************************************************/
 	
-	protected:
+	private:
 		/** NOTE: Init(), End(), and Reset() should ONLY be called from VdpIo()! **/
 		static void Rend_Init(void);
 		static void Rend_End(void);
@@ -370,7 +382,7 @@ class Vdp
 		/** Line rendering functions. **/
 		static void Render_Line(void);
 	
-	protected:
+	private:
 		// Line buffer for current line.
 		union LineBuf_t
 		{
@@ -404,7 +416,7 @@ class Vdp
 		/** Line rendering functions. **/
 		static void Render_Line_m5(void);
 	
-	protected:
+	private:
 		// Temporary VDP data.
 		static unsigned int Y_FineOffset;
 		static unsigned int TotalSprites;
