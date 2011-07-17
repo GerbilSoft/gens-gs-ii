@@ -155,6 +155,8 @@ FORCE_INLINE void Vdp::T_PutPixel_P0(int disp_pixnum, uint32_t pattern, unsigned
 	// Check the layer bits of the current pixel.
 	const unsigned int LineBuf_pixnum = (disp_pixnum + pat_pixnum);
 	uint8_t layer_bits = LineBuf.px[LineBuf_pixnum].layer;
+	
+	// Check if this pixel is masked.
 	if (plane && (layer_bits & (LINEBUF_PRIO_B | LINEBUF_WIN_B)))
 	{
 		// Scroll A: Either the pixel has priority set,
@@ -168,9 +170,16 @@ FORCE_INLINE void Vdp::T_PutPixel_P0(int disp_pixnum, uint32_t pattern, unsigned
 	// Apply palette data.
 	pat8 |= palette;
 	
-	// If Highlight/Shadow is enabled, mark this pixel as shadow.
+	// If Highlight/Shadow is enabled, adjust the shadow flags.
 	if (h_s)
-		pat8 |= LINEBUF_SHAD_B;
+	{
+		// Scroll A: Mark as shadow if the layer is marked as shadow.
+		// Scroll B: Always mark as shadow.
+		if (plane)
+			pat8 |= (layer_bits & LINEBUF_SHAD_B);
+		else
+			pat8 |= LINEBUF_SHAD_B;
+	}
 	
 	// Write the new pixel to the line buffer.
 	LineBuf.px[LineBuf_pixnum].pixel = pat8;
