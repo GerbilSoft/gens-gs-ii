@@ -106,6 +106,14 @@ class VdpPalette
 			{ return m_bpp; }
 		void setBpp(ColorDepth newBpp);
 		
+		/**
+		 * mdColorMask: Set if color masking is enabled. (Mode 5 only)
+		 * False: Full color range is used.
+		 * True: Only LSBs are used.
+		 */
+		bool mdColorMask(void) const;
+		void setMdColorMask(bool newMdColorMask);
+		
 		/** Palette manipulation functions. **/
 		
 		// Palette recalculation functions.
@@ -129,6 +137,11 @@ class VdpPalette
 		ColorScaleMethod_t m_colorScaleMethod;
 		ColorDepth m_bpp;
 		
+		// MD color mask. (Mode 5 only)
+		uint16_t m_mdColorMask;
+		static const uint16_t MD_COLOR_MASK_FULL;
+		static const uint16_t MD_COLOR_MASK_LSB;
+		
 		// Dirty flag.
 		bool m_dirty;
 		
@@ -144,10 +157,17 @@ class VdpPalette
 		FORCE_INLINE void T_recalcFullMD(pixel *palMD);
 		
 		template<bool hs, typename pixel>
-		static FORCE_INLINE void T_updateMD(pixel *MD_palette,
-						const pixel *palette,
-						const VdpTypes::CRam_t *cram);
+		FORCE_INLINE void T_updateMD(pixel *MD_palette,
+					const pixel *palette,
+					const VdpTypes::CRam_t *cram);
 };
+
+/**
+ * mdColorMask(): Check if the MD colors are masked.
+ * @return True if all but LSBs are masked; false if full color range is available.
+ */
+inline bool VdpPalette::mdColorMask(void) const
+	{ return (m_mdColorMask == MD_COLOR_MASK_LSB); }
 
 }
 

@@ -37,19 +37,27 @@
 namespace LibGens
 {
 
+/** Static member initialization. **/
+const uint16_t VdpPalette::MD_COLOR_MASK_FULL = 0xEEE;
+const uint16_t VdpPalette::MD_COLOR_MASK_LSB = 0x222;
+
+/**
+ * VdpPalette(): Initialize a new VdpPalette object.
+ * 
+ * NOTE: bpp is initialized to 32 for now because
+ * radeong_dri.so is really slow with 16-bit color.
+ * TODO: Check with recent Gallium3D updates!
+ */
 VdpPalette::VdpPalette()
+	: m_contrast(100)
+	, m_brightness(100)
+	, m_grayscale(false)
+	, m_inverted(false)
+	, m_colorScaleMethod(COLSCALE_FULL)
+	, m_bpp(BPP_32)
+	, m_mdColorMask(MD_COLOR_MASK_FULL)
+	, m_dirty(true)
 {
-	// Set defaults.
-	// NOTE: bpp is initialized to 32 for now because
-	// radeong_dri.so is really slow with 16-bit color.
-	m_contrast = 100;
-	m_brightness = 100;
-	m_grayscale = false;
-	m_inverted = false;
-	m_colorScaleMethod = COLSCALE_FULL;
-	m_bpp = BPP_32;
-	m_dirty = true;
-	
 	// Reset the active palettes.
 	resetActive();
 }
@@ -81,6 +89,23 @@ PAL_PROPERTY_WRITE(grayscale, bool, Grayscale)
 PAL_PROPERTY_WRITE(inverted, bool, Inverted)
 PAL_PROPERTY_WRITE(colorScaleMethod, ColorScaleMethod_t, ColorScaleMethod)
 PAL_PROPERTY_WRITE(bpp, ColorDepth, Bpp)
+
+
+/**
+ * setMdColorMask(): Set the MD color mask. (Mode 5 only)
+ * @param newMdColorMask If true, masks all but LSBs.
+ */
+void VdpPalette::setMdColorMask(bool newMdColorMask)
+{
+	const uint16_t newMask = (newMdColorMask
+				? MD_COLOR_MASK_LSB
+				: MD_COLOR_MASK_FULL);
+	
+	if (m_mdColorMask == newMask)
+		return;
+	m_mdColorMask = newMask;
+	m_dirty = true;
+}
 
 
 /**
@@ -427,17 +452,11 @@ FORCE_INLINE void VdpPalette::T_updateMD(pixel *MD_palette,
 	// This function is called by the VDP class, so the VDP class
 	// can clear the flag itself.
 	
-	// Color mask. Depends on VDP register 0, bit 2 (Palette Select).
-	// If set, allows full MD palette.
-	// If clear, only allows the LSB of each color component.
-	// TODO: Figure out a better way to handle this. (class instance etc)
-	const uint16_t color_mask = (Vdp::VDP_Reg.m5.Set1 & 0x04) ? 0x0EEE : 0x0222;
-	
 	// Update all 64 colors.
 	for (int i = 62; i >= 0; i -= 2)
 	{
-		uint16_t color1_raw = cram->u16[i] & color_mask;
-		uint16_t color2_raw = cram->u16[i + 1] & color_mask;
+		uint16_t color1_raw = cram->u16[i] & m_mdColorMask;
+		uint16_t color2_raw = cram->u16[i + 1] & m_mdColorMask;
 		
 		// Get the palette color.
 		pixel color1 = palette[color1_raw];
