@@ -125,7 +125,7 @@ FORCE_INLINE int Vdp::T_GetLineNumber(void)
 			
 			case VdpTypes::INTREND_FLICKER:
 				// Flickering Interlaced mode.
-				if (Vdp::IsOddLine())
+				if (Reg_Status.isOddFrame())
 					vdp_line++;
 				break;
 		}
@@ -500,7 +500,8 @@ FORCE_INLINE void Vdp::T_PutLine_Sprite(int disp_pixnum, uint32_t pattern, int p
 	}
 	
 	// Check for sprite collision.
-	Reg_Status |= (status & 0x20);
+	if (status & LINEBUF_SPR_B)
+		Reg_Status.setCollision(true);
 }
 
 
@@ -1145,7 +1146,7 @@ FORCE_INLINE unsigned int Vdp::T_Update_Mask_Sprite(void)
 			{
 				// Sprite overflow!
 				// Set the SOVR flag.
-				Reg_Status |= 0x40;
+				Reg_Status.setSOvr(true);
 				break;
 			}
 		}

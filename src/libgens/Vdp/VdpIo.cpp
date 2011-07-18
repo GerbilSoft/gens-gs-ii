@@ -620,7 +620,7 @@ uint8_t Vdp::Read_V_Counter(void)
 	// Rewrite HV handling to match Genesis Plus.
 	
 	// V_Counter_Overflow depends on PAL/NTSC status.
-	if (Vdp::IsPal())
+	if (Vdp::Reg_Status.isPal())
 	{
 		// PAL.
 		if (V_Counter >= 0x103)
@@ -659,25 +659,13 @@ uint8_t Vdp::Read_V_Counter(void)
  */
 uint16_t Vdp::Read_Status(void)
 {
-	// Toggle the upper 8 bits of VDP_Status. (TODO: Is this correct?)
-	Reg_Status ^= 0xFF00;
+	uint16_t status = Reg_Status.read();
 	
-	// Mask the SOVR ("Sprite Overflow") and C ("Collision between non-zero pixels in two sprites") bits.
-	// TODO: Should these be masked? This might be why some games are broken...
-	Reg_Status &= ~(0x0040 | 0x0020);
-	
-	// Check if we're currently in VBlank.
-	if (!(Reg_Status & 0x0008))
-	{
-		// Not in VBlank. Mask the F bit. ("Vertical Interrupt Happened")
-		Reg_Status &= ~0x0080;
-	}
-	
-	// If the Display is disabled, OR the result with 0x0008.
+	// If the Display is disabled, set the VBlank flag.
 	if (VDP_Reg.m5.Set2 & 0x40)
-		return Reg_Status;
+		return status;
 	else
-		return (Reg_Status | 0x0008);
+		return (status | VdpStatus::VDP_STATUS_VBLANK);
 }
 
 
@@ -799,7 +787,7 @@ unsigned int Vdp::Update_DMA(void)
 	cycles >>= 16;
 	
 	// Clear the DMA Busy flag.
-	Reg_Status &= ~0x0002;
+	Reg_Status.setDMABusy(false);
 	
 	if (DMAT_Type & 2)
 	{
@@ -858,7 +846,7 @@ void Vdp::DMA_Fill(uint16_t data)
 	}
 	
 	// Set the DMA Busy flag.
-	Reg_Status |= 0x0002;
+	Reg_Status.setDMABusy(true);
 	
 	// TODO: Although we decrement DMAT_Length correctly based on
 	// DMA cycles per line, we fill everything immediately instead
@@ -1183,7 +1171,7 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 	if (DMAT_Length <= 0)
 	{
 		// No DMA left!
-		Reg_Status &= ~0x0002;
+		Reg_Status.setDMABusy(false);
 		return;
 	}
 	
@@ -1328,7 +1316,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 	{
 		// DMA COPY.
 		src_address &= 0xFFFF;
-		Reg_Status |= 0x0002;	// Set the DMA BUSY bit.
+		Reg_Status.setDMABusy(true);	// Set the DMA BUSY bit.
 		DMA_Length = 0;
 		DMAT_Length = length;
 		DMAT_Type = 0x3;
@@ -1409,7 +1397,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 DMA_Src_OK:
 	
 	// Set the DMA BUSY bit.
-	Reg_Status |= 0x0002;
+	Reg_Status.setDMABusy(true);
 	
 	switch (DMA_TYPE(src_component, dest_component))
 	{

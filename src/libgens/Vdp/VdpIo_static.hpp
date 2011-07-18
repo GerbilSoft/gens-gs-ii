@@ -116,7 +116,7 @@ uint8_t Vdp::H_Counter_Table[512][2];
 int Vdp::VDP_Int;
 
 // VDP status register.
-uint16_t Vdp::Reg_Status;
+VdpStatus Vdp::Reg_Status;
 
 // VDP line counters.
 // NOTE: Gens/GS currently uses 312 lines for PAL. It should use 313!

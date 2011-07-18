@@ -101,6 +101,7 @@ SET(libgens_SRCS
 	Vdp/VdpRend_Err.cpp
 	Vdp/VGA_charset.c
 	Util/MdFb.cpp
+	Vdp/VdpStatus.cpp
 	)
 
 IF(HAVE_LZMA)
