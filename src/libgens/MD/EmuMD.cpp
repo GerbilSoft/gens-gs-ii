@@ -183,9 +183,9 @@ int EmuMD::hardReset(void)
 	// Make sure the VDP's video mode bit is set properly.
 	// TODO: Make a VdpIo inline function for this?
 	if (M68K_Mem::ms_SysVersion.isPal())
-		Vdp::VDP_Status |= 0x0001;	// PAL: Set the PAL bit.
+		Vdp::SetRegion(true);	// PAL: Set the PAL bit.
 	else
-		Vdp::VDP_Status &= ~0x0001;	// NTSC: Clear the PAL bit.
+		Vdp::SetRegion(false);	// NTSC: Clear the PAL bit.
 	
 	// Reset successful.
 	return 0;
@@ -229,13 +229,13 @@ int EmuMD::setRegion_int(SysVersion::RegionCode_t region, bool preserveState)
 	{
 		M68K_Mem::CPL_M68K = (int)floor((((double)CLOCK_PAL / 7.0) / 50.0) / 312.0);
 		M68K_Mem::CPL_Z80 = (int)floor((((double)CLOCK_PAL / 15.0) / 50.0) / 312.0);
-		Vdp::VDP_Status |= 0x0001;	// PAL: Set the PAL bit.
+		Vdp::SetRegion(true);	// PAL: Set the PAL bit.
 	}
 	else
 	{
 		M68K_Mem::CPL_M68K = (int)floor((((double)CLOCK_NTSC / 7.0) / 60.0) / 262.0);
 		M68K_Mem::CPL_Z80 = (int)floor((((double)CLOCK_NTSC / 15.0) / 60.0) / 262.0);
-		Vdp::VDP_Status &= ~0x0001;	// NTSC: Clear the PAL bit.
+		Vdp::SetRegion(false);	// NTSC: Clear the PAL bit.
 	}
 	
 	// Initialize audio.
@@ -284,9 +284,9 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 	{
 		case LINETYPE_ACTIVEDISPLAY:
 			// In visible area.
-			Vdp::VDP_Status |=  0x0004;	// HBlank = 1
+			Vdp::SetHBlank(true);	// HBlank = 1
 			M68K::Exec(M68K_Mem::Cycles_M68K - 404);
-			Vdp::VDP_Status &= ~0x0004;	// HBlank = 0
+			Vdp::SetHBlank(false);	// HBlank = 0
 			
 			if (--Vdp::HInt_Counter < 0)
 			{
@@ -310,9 +310,14 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 			// TODO: Congratulations! (LibGens)
 			CONGRATULATIONS_PRECHECK();
 #endif
-			Vdp::VDP_Status |= 0x000C;	// VBlank = 1 et HBlank = 1 (retour de balayage vertical en cours)
+			// VBlank = 1 et HBlank = 1 (retour de balayage vertical en cours)
+			Vdp::SetHBlank(true);
+			Vdp::SetVBlank(true);
+			
+			// If we're using NTSC V30 and this is an "even" frame,
+			// don't set the VBlank flag.
 			if (Vdp::VDP_Lines.NTSC_V30.VBlank_Div != 0)
-				Vdp::VDP_Status &= ~0x0008;
+				Vdp::SetVBlank(false);
 			
 			M68K::Exec(M68K_Mem::Cycles_M68K - 360);
 			Z80::Exec(168);
@@ -321,10 +326,10 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 			CONGRATULATIONS_POSTCHECK();
 #endif
 			
-			Vdp::VDP_Status &= ~0x0004;	// HBlank = 0
+			Vdp::SetHBlank(false);	// HBlank = 0
 			if (Vdp::VDP_Lines.NTSC_V30.VBlank_Div == 0)
 			{
-				Vdp::VDP_Status |=  0x0080;		// V Int happened
+				Vdp::SetVIntHappened(true);	// V Int happened
 				
 				Vdp::VDP_Int |= 0x8;
 				Vdp::Update_IRQ_Line();
@@ -404,9 +409,9 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 	// Both Interlaced Modes 1 and 2 set this bit on odd frames.
 	// This bit is cleared on even frames and if not running in interlaced mode.
 	if (Vdp::VDP_Reg.m5.Set4 & 0x06)
-		Vdp::VDP_Status ^= 0x0010;
+		Vdp::ToggleOddLine();
 	else
-		Vdp::VDP_Status &= ~0x0010;
+		Vdp::ClearOddLine();
 	
 	/** Main execution loops. **/
 	
@@ -424,7 +429,7 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 	
 	/** Visible line 0. **/
 	Vdp::HInt_Counter = Vdp::VDP_Reg.m5.H_Int;	// Initialize HInt_Counter.
-	Vdp::VDP_Status &= ~0x0008;			// Clear VBlank status.
+	Vdp::SetVBlank(false);				// Clear VBlank status.
 	
 	/** Loop 1: Active display. **/
 	do

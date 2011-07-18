@@ -127,8 +127,10 @@ void Vdp::Reset(void)
 	DMAT_Length = 0;
 	DMAT_Type = 0;
 	
+	// VDP status register.
+	Reg_Status = 0x0200;
+	
 	// Other variables.
-	VDP_Status = 0x0200;
 	VDP_Int = 0;
 	
 	// VDP control struct.
@@ -618,8 +620,7 @@ uint8_t Vdp::Read_V_Counter(void)
 	// Rewrite HV handling to match Genesis Plus.
 	
 	// V_Counter_Overflow depends on PAL/NTSC status.
-	// (VDP_Status & 1) == 1 for PAL, 0 for NTSC.
-	if (VDP_Status & 1)
+	if (Vdp::IsPal())
 	{
 		// PAL.
 		if (V_Counter >= 0x103)
@@ -659,24 +660,24 @@ uint8_t Vdp::Read_V_Counter(void)
 uint16_t Vdp::Read_Status(void)
 {
 	// Toggle the upper 8 bits of VDP_Status. (TODO: Is this correct?)
-	VDP_Status ^= 0xFF00;
+	Reg_Status ^= 0xFF00;
 	
 	// Mask the SOVR ("Sprite Overflow") and C ("Collision between non-zero pixels in two sprites") bits.
 	// TODO: Should these be masked? This might be why some games are broken...
-	VDP_Status &= ~(0x0040 | 0x0020);
+	Reg_Status &= ~(0x0040 | 0x0020);
 	
 	// Check if we're currently in VBlank.
-	if (!(VDP_Status & 0x0008))
+	if (!(Reg_Status & 0x0008))
 	{
 		// Not in VBlank. Mask the F bit. ("Vertical Interrupt Happened")
-		VDP_Status &= ~0x0080;
+		Reg_Status &= ~0x0080;
 	}
 	
 	// If the Display is disabled, OR the result with 0x0008.
 	if (VDP_Reg.m5.Set2 & 0x40)
-		return VDP_Status;
+		return Reg_Status;
 	else
-		return (VDP_Status | 0x0008);
+		return (Reg_Status | 0x0008);
 }
 
 
@@ -798,7 +799,7 @@ unsigned int Vdp::Update_DMA(void)
 	cycles >>= 16;
 	
 	// Clear the DMA Busy flag.
-	VDP_Status &= ~0x0002;
+	Reg_Status &= ~0x0002;
 	
 	if (DMAT_Type & 2)
 	{
@@ -857,7 +858,7 @@ void Vdp::DMA_Fill(uint16_t data)
 	}
 	
 	// Set the DMA Busy flag.
-	VDP_Status |= 0x0002;
+	Reg_Status |= 0x0002;
 	
 	// TODO: Although we decrement DMAT_Length correctly based on
 	// DMA cycles per line, we fill everything immediately instead
@@ -1182,7 +1183,7 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 	if (DMAT_Length <= 0)
 	{
 		// No DMA left!
-		VDP_Status &= ~0x0002;
+		Reg_Status &= ~0x0002;
 		return;
 	}
 	
@@ -1327,7 +1328,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 	{
 		// DMA COPY.
 		src_address &= 0xFFFF;
-		VDP_Status |= 0x0002;	// Set the DMA BUSY bit.
+		Reg_Status |= 0x0002;	// Set the DMA BUSY bit.
 		DMA_Length = 0;
 		DMAT_Length = length;
 		DMAT_Type = 0x3;
@@ -1408,7 +1409,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 DMA_Src_OK:
 	
 	// Set the DMA BUSY bit.
-	VDP_Status |= 0x0002;
+	Reg_Status |= 0x0002;
 	
 	switch (DMA_TYPE(src_component, dest_component))
 	{

@@ -154,8 +154,23 @@ class Vdp
 		static VdpTypes::VSRam_t VSRam;
 		
 		static int VDP_Int;
-		static int VDP_Status;
 		
+		// VDP status register.
+		// TODO: Make a VdpStatus register class?
+	private:
+		static uint16_t Reg_Status;
+	public:
+		static bool IsPal(void);
+		static bool IsNtsc(void);
+		static bool IsOddLine(void);
+		static void ToggleOddLine(void);
+		static void ClearOddLine(void);
+		static void SetRegion(bool isPal);
+		static void SetHBlank(bool HBlank);
+		static void SetVBlank(bool VBlank);
+		static void SetVIntHappened(bool VIntHappened);
+	
+	public:
 		// VDP line counters.
 		// NOTE: Gens/GS currently uses 312 lines for PAL. It should use 313!
 		static VdpTypes::VdpLines_t VDP_Lines;
@@ -529,6 +544,57 @@ inline uint16_t Vdp::Spr_Addr_u16(uint16_t offset)
 	{ return VRam.u16[((Spr_Addr + offset) & 0xFFFF) >> 1]; }
 inline uint16_t Vdp::H_Scroll_Addr_u16(uint16_t offset)
 	{ return VRam.u16[((H_Scroll_Addr + offset) & 0xFFFF) >> 1]; }
+
+/** VDP status register functions. **/
+
+// PAL/NTSC: Bit 0. 0 == NTSC; 1 == PAL.
+inline bool Vdp::IsPal(void)
+	{ return (Reg_Status & 1); }
+inline bool Vdp::IsNtsc(void)
+	{ return (!(Reg_Status & 1)); }
+
+inline bool Vdp::IsOddLine(void)
+	{ return (!!(Reg_Status & 0x0010)); }
+inline void Vdp::ToggleOddLine(void)
+	{ Reg_Status ^= 0x0010; }
+inline void Vdp::ClearOddLine(void)
+	{ Reg_Status &= ~0x0010; }
+
+inline void Vdp::SetRegion(bool isPal)
+{
+	// Bit 0: 0 == NTSC; 1 == PAL
+	if (isPal)
+		Reg_Status |= 0x0001;
+	else
+		Reg_Status &= ~0x0001;
+}
+
+inline void Vdp::SetHBlank(bool HBlank)
+{
+	// Bit 3: 0 == not in HBlank; 1 == in HBlank
+	if (HBlank)
+		Reg_Status |= 0x0004;
+	else
+		Reg_Status &= ~0x0004;
+}
+
+inline void Vdp::SetVBlank(bool VBlank)
+{
+	// Bit 4: 0 == not in HBlank; 1 == in HBlank
+	if (VBlank)
+		Reg_Status |= 0x0008;
+	else
+		Reg_Status &= ~0x0008;
+}
+
+inline void Vdp::SetVIntHappened(bool VIntHappened)
+{
+	// Bit 7: 0 == VInt processed; 1 == new VInt happened
+	if (VIntHappened)
+		Reg_Status |= 0x0080;
+	else
+		Reg_Status &= ~0x0080;
+}
 
 }
 
