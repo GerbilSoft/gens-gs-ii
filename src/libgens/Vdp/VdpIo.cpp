@@ -128,7 +128,7 @@ void Vdp::Reset(void)
 	DMAT_Type = 0;
 	
 	// VDP status register.
-	Reg_Status = 0x0200;
+	Reg_Status.reset();
 	
 	// Other variables.
 	VDP_Int = 0;
