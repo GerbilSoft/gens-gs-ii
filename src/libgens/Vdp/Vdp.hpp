@@ -97,6 +97,16 @@ class Vdp
 		static uint16_t H_Scroll_Addr_u16(uint16_t offset);
 		
 		/**
+		 * VDP address pointers.
+		 * These are relative to VRam[] and are based on register values.
+		 */
+		static uint16_t ScrA_Addr;
+		static uint16_t ScrB_Addr;
+		static uint16_t Win_Addr;
+		static uint16_t Spr_Addr;
+		static uint16_t H_Scroll_Addr;
+		
+		/**
 		 * Window row shift.
 		 * H40: 6. (64x32 window)
 		 * H32: 5. (32x32 window)
@@ -254,14 +264,6 @@ class Vdp
 		
 		template<DMA_Src_t src_component, DMA_Dest_t dest_component>
 		static inline void T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int length);
-		
-		// VDP address pointers.
-		// These are relative to VRam[] and are based on register values.
-		static uint16_t ScrA_Addr;
-		static uint16_t ScrB_Addr;
-		static uint16_t Win_Addr;
-		static uint16_t Spr_Addr;
-		static uint16_t H_Scroll_Addr;
 		
 		/**
 		 * VDP_Ctrl: VDP control struct.
