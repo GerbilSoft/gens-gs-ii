@@ -77,21 +77,12 @@ class VdpStatus
 		void write_raw(uint16_t status);
 		
 		/** Convenience functions. **/
-		
 		bool isPal(void) const;
 		bool isNtsc(void) const;
-		
 		bool isOddFrame(void) const;
-		void toggleOddFrame(void);
-		void clearOddFrame(void);
 		
-		void setRegion(bool isPal);
-		void setHBlank(bool HBlank);
-		void setVBlank(bool VBlank);
-		void setVIntHappened(bool VIntHappened);
-		void setDMABusy(bool DMABusy);
-		void setCollision(bool collision);
-		void setSOvr(bool sovr);
+		void setBit(StatusBits bit, bool value);
+		void toggleBit(StatusBits bit);
 	
 	private:
 		uint16_t m_status;
@@ -105,81 +96,23 @@ inline void VdpStatus::write_raw(uint16_t status)
 
 /** VDP status register functions. **/
 
-// PAL/NTSC: Bit 0. 0 == NTSC; 1 == PAL.
 inline bool VdpStatus::isPal(void) const
 	{ return (m_status & VDP_STATUS_PAL); }
 inline bool VdpStatus::isNtsc(void) const
 	{ return (!(m_status & VDP_STATUS_PAL)); }
-
 inline bool VdpStatus::isOddFrame(void) const
 	{ return (!!(m_status & VDP_STATUS_ODD)); }
-inline void VdpStatus::toggleOddFrame(void)
-	{ m_status ^= VDP_STATUS_ODD; }
-inline void VdpStatus::clearOddFrame(void)
-	{ m_status &= ~VDP_STATUS_ODD; }
 
-inline void VdpStatus::setRegion(bool isPal)
+inline void VdpStatus::setBit(StatusBits bit, bool value)
 {
-	// Bit 0: 0 == NTSC; 1 == PAL
-	if (isPal)
-		m_status |= VDP_STATUS_PAL;
+	if (value)
+		m_status |= bit;
 	else
-		m_status &= ~VDP_STATUS_PAL;
+		m_status &= ~bit;
 }
 
-inline void VdpStatus::setHBlank(bool HBlank)
-{
-	// Bit 3: 0 == not in HBlank; 1 == in HBlank
-	if (HBlank)
-		m_status |= VDP_STATUS_HBLANK;
-	else
-		m_status &= ~VDP_STATUS_HBLANK;
-}
-
-inline void VdpStatus::setVBlank(bool VBlank)
-{
-	// Bit 4: 0 == not in HBlank; 1 == in HBlank
-	if (VBlank)
-		m_status |= VDP_STATUS_VBLANK;
-	else
-		m_status &= ~VDP_STATUS_VBLANK;
-}
-
-inline void VdpStatus::setVIntHappened(bool VIntHappened)
-{
-	// Bit 7: 0 == VInt processed; 1 == new VInt happened
-	if (VIntHappened)
-		m_status |= VDP_STATUS_F;
-	else
-		m_status &= ~VDP_STATUS_F;
-}
-
-inline void VdpStatus::setDMABusy(bool DMABusy)
-{
-	// Bit 1: 0 == not processing DMA; 1 == DMA busy
-	if (DMABusy)
-		m_status |= VDP_STATUS_DMA;
-	else
-		m_status &= ~VDP_STATUS_DMA;
-}
-
-inline void VdpStatus::setCollision(bool collision)
-{
-	// Bit 5: 0 == no sprite collision; 1 == sprite collision
-	if (collision)
-		m_status |= VDP_STATUS_COLLISION;
-	else
-		m_status &= ~VDP_STATUS_COLLISION;
-}
-
-inline void VdpStatus::setSOvr(bool sovr)
-{
-	// Bit 6: 0 == no sprite overflow; 1 == sprite overflow
-	if (sovr)
-		m_status |= VDP_STATUS_SOVR;
-	else
-		m_status &= ~VDP_STATUS_SOVR;
-}
+inline void VdpStatus::toggleBit(StatusBits bit)
+	{ m_status &= bit; }
 
 }
 

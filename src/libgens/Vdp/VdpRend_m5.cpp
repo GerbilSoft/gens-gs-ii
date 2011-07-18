@@ -501,7 +501,7 @@ FORCE_INLINE void Vdp::T_PutLine_Sprite(int disp_pixnum, uint32_t pattern, int p
 	
 	// Check for sprite collision.
 	if (status & LINEBUF_SPR_B)
-		Reg_Status.setCollision(true);
+		Reg_Status.setBit(VdpStatus::VDP_STATUS_COLLISION, true);
 }
 
 
@@ -1146,7 +1146,7 @@ FORCE_INLINE unsigned int Vdp::T_Update_Mask_Sprite(void)
 			{
 				// Sprite overflow!
 				// Set the SOVR flag.
-				Reg_Status.setSOvr(true);
+				Reg_Status.setBit(VdpStatus::VDP_STATUS_SOVR, true);
 				break;
 			}
 		}

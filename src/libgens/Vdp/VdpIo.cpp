@@ -787,7 +787,7 @@ unsigned int Vdp::Update_DMA(void)
 	cycles >>= 16;
 	
 	// Clear the DMA Busy flag.
-	Reg_Status.setDMABusy(false);
+	Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, false);
 	
 	if (DMAT_Type & 2)
 	{
@@ -846,7 +846,7 @@ void Vdp::DMA_Fill(uint16_t data)
 	}
 	
 	// Set the DMA Busy flag.
-	Reg_Status.setDMABusy(true);
+	Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, true);
 	
 	// TODO: Although we decrement DMAT_Length correctly based on
 	// DMA cycles per line, we fill everything immediately instead
@@ -1171,7 +1171,7 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 	if (DMAT_Length <= 0)
 	{
 		// No DMA left!
-		Reg_Status.setDMABusy(false);
+		Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, false);
 		return;
 	}
 	
@@ -1316,7 +1316,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 	{
 		// DMA COPY.
 		src_address &= 0xFFFF;
-		Reg_Status.setDMABusy(true);	// Set the DMA BUSY bit.
+		Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, true);	// Set the DMA BUSY bit.
 		DMA_Length = 0;
 		DMAT_Length = length;
 		DMAT_Type = 0x3;
@@ -1397,7 +1397,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 DMA_Src_OK:
 	
 	// Set the DMA BUSY bit.
-	Reg_Status.setDMABusy(true);
+	Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, true);
 	
 	switch (DMA_TYPE(src_component, dest_component))
 	{
