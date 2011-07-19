@@ -366,7 +366,8 @@ class Vdp
 		
 		// MD framebuffer.
 		static MdFb MD_Screen;
-
+	
+	private:
 		// Sprite structs.
 		struct Sprite_Struct_t
 		{
@@ -381,7 +382,8 @@ class Vdp
 		};
 		static Sprite_Struct_t Sprite_Struct[128];
 		static unsigned int Sprite_Visible[128];
-		
+	
+	public:
 		// VDP layer control.
 		static unsigned int VDP_Layers;
 		
