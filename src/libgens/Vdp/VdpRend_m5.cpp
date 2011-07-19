@@ -925,27 +925,14 @@ FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
 	
 	do
 	{
-		// Sprite position.
+		// Sprite X position and size is updated for all types of updates.
+		
+		// Sprite X position.
 		Sprite_Struct[spr_num].Pos_X = (CurSpr[3] & 0x1FF) - 128;
-		if (!partial)
-		{
-			if (interlaced)
-			{
-				// Interlaced mode. Y position is 11-bit.
-				Sprite_Struct[spr_num].Pos_Y = (CurSpr[0] & 0x3FF) - 256;
-			}
-			else
-			{
-				// Non-Interlaced mode. Y position is 10-bit.
-				Sprite_Struct[spr_num].Pos_Y = (CurSpr[0] & 0x1FF) - 128;
-			}
-		}
 		
 		// Sprite size.
 		const uint8_t sz = ((CurSpr[1] >> 8) & 0xFF);
 		Sprite_Struct[spr_num].Size_X = ((sz >> 2) & 3) + 1;	// 1 more than the original value.
-		if (!partial)
-			Sprite_Struct[spr_num].Size_Y = sz & 3;	// Exactly the original value.
 		
 		// Determine the maximum positions.
 		Sprite_Struct[spr_num].Pos_X_Max =
@@ -954,16 +941,25 @@ FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
 		
 		if (!partial)
 		{
+			// Full sprite update: Update Y position, size, and tile number.
+			Sprite_Struct[spr_num].Size_Y = sz & 3;	// Exactly the original value.
+			
 			if (interlaced)
 			{
-				// Interlaced mode. Cells are 8x16.
+				// Interlaced mode:
+				// * Y position is 11-bit.
+				// * Cells are 8x16.
+				Sprite_Struct[spr_num].Pos_Y = (CurSpr[0] & 0x3FF) - 256;
 				Sprite_Struct[spr_num].Pos_Y_Max =
 						Sprite_Struct[spr_num].Pos_Y +
 						((Sprite_Struct[spr_num].Size_Y * 16) + 15);
 			}
 			else
 			{
-				// Non-Interlaced mode. Cells are 8x8.
+				// Non-Interlaced mode:
+				// * Y position is 10-bit.
+				// * Cells are 8x8.
+				Sprite_Struct[spr_num].Pos_Y = (CurSpr[0] & 0x1FF) - 128;
 				Sprite_Struct[spr_num].Pos_Y_Max =
 						Sprite_Struct[spr_num].Pos_Y +
 						((Sprite_Struct[spr_num].Size_Y * 8) + 7);
@@ -978,6 +974,7 @@ FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
 		// since most games won't set the high bit.
 		// Dino Land incorrectly sets the high bit on some sprites,
 		// so we have to mask it off.
+		// TODO: Do we update the link field on partial updates?
 		link = (CurSpr[1] & 0x7F);
 		
 		// Increment the sprite number.
