@@ -861,13 +861,13 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 			// Interlaced Mode isn't exactly a "palette" setting.
 			// TODO: Rename to "VDP setting"?
 			// TODO: Consolidate the two interlaced rendering mode enums.
-			LibGens::Vdp::IntRend_Mode =
+			LibGens::Vdp::VdpEmuOptions.intRendMode =
 					((LibGens::VdpTypes::IntRend_Mode_t)val);
 			
 			// Gens/GS r7+ prints a message to the OSD, so we'll do that too.
 			//: OSD message indicating the interlaced rendering mode was changed.
 			QString msg = tr("Interlaced: %1", "osd");
-			switch (LibGens::Vdp::IntRend_Mode)
+			switch (LibGens::Vdp::VdpEmuOptions.intRendMode)
 			{
 				case LibGens::VdpTypes::INTREND_EVEN:
 					//: OSD message indicating the interlaced rendering mode was set to even lines only.

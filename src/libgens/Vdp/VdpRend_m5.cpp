@@ -87,9 +87,6 @@ namespace LibGens
 
 /** Static member initialization. **/
 
-// Interlaced rendering mode.
-VdpTypes::IntRend_Mode_t Vdp::IntRend_Mode = VdpTypes::INTREND_FLICKER;
-
 // Temporary VDP data.
 unsigned int Vdp::Y_FineOffset;
 unsigned int Vdp::TotalSprites;
@@ -110,7 +107,7 @@ FORCE_INLINE int Vdp::T_GetLineNumber(void)
 		// Adjust the VDP line number for Flickering Interlaced display.
 		vdp_line *= 2;
 		
-		switch (IntRend_Mode)
+		switch (VdpEmuOptions.intRendMode)
 		{
 			case VdpTypes::INTREND_EVEN:
 			default:

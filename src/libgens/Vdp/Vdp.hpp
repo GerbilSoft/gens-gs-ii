@@ -419,8 +419,6 @@ class Vdp
 	 ****************************************************************/
 	
 	public:
-		static VdpTypes::IntRend_Mode_t IntRend_Mode;
-		
 		/** Line rendering functions. **/
 		static void Render_Line_m5(void);
 	
