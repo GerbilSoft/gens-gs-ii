@@ -72,6 +72,8 @@ class Zomg : public ZomgBase
 		
 		// VDP
 		int loadVdpReg(uint8_t *reg, size_t siz);
+		int loadVdpCtrl_8(Zomg_VdpCtrl_8_t *ctrl);
+		int loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl);
 		int loadVRam(void *vram, size_t siz, bool byteswap);
 		int loadCRam(void *cram, size_t siz, bool byteswap);
 		int loadMD_VSRam(uint16_t *vsram, size_t siz, bool byteswap);	/// MD-specific
@@ -116,6 +118,8 @@ class Zomg : public ZomgBase
 		
 		// VDP
 		int saveVdpReg(const uint8_t *reg, size_t siz);
+		int saveVdpCtrl_8(const Zomg_VdpCtrl_8_t *ctrl);
+		int saveVdpCtrl_16(const Zomg_VdpCtrl_16_t *ctrl);
 		int saveVRam(const void *vram, size_t siz, bool byteswap);
 		int saveCRam(const void *cram, size_t siz, bool byteswap);
 		int saveMD_VSRam(const uint16_t *vsram, size_t siz, bool byteswap);	/// MD-specific

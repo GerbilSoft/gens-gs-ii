@@ -133,6 +133,86 @@ int Zomg::saveVdpReg(const uint8_t *reg, size_t siz)
 
 
 /**
+ * saveVdpCtrl_8(): Load VDP control registers. (8-bit)
+ * File: common/vdp_ctrl.bin
+ * @param ctrl Source buffer for VDP control registers.
+ * @return 0 on success; non-zero on error.
+ */
+int Zomg::saveVdpCtrl_8(const Zomg_VdpCtrl_8_t *ctrl)
+{
+	// Verify the header.
+	if (ctrl->header != ZOMG_VDPCTRL_8_HEADER)
+		return -1;
+	
+#if ZOMG_BYTEORDER == ZOMG_LIL_ENDIAN
+	Zomg_VdpCtrl_8_t bswap_ctrl;
+	memcpy(&bswap_ctrl, ctrl, sizeof(bswap_ctrl));
+	
+	// Byteswap the header.
+	bswap_ctrl.header = cpu_to_be32(bswap_ctrl.header);
+	
+	// Byteswap the fields.
+	bswap_ctrl.address	= cpu_to_be16(bswap_ctrl.address);
+	
+	// Clear the reserved fields.
+	bswap_ctrl.reserved1 = 0;
+	bswap_ctrl.reserved2 = 0;
+	
+	// Save the file.
+	return saveToZomg("common/vdp_ctrl.bin", &bswap_ctrl, sizeof(bswap_ctrl));
+#else
+	// Save the file as-is.
+	return saveToZomg("common/vdp_ctrl.bin", &ctrl, sizeof(*ctrl));
+#endif
+}
+
+
+/**
+ * saveVdpCtrl_16(): Save VDP control registers. (16-bit)
+ * File: common/vdp_ctrl.bin
+ * @param ctrl Source buffer for VDP control registers.
+ * @return 0 on success; non-zero on error.
+ */
+int Zomg::saveVdpCtrl_16(const Zomg_VdpCtrl_16_t *ctrl)
+{
+	// Verify the header.
+	if (ctrl->header != ZOMG_VDPCTRL_16_HEADER)
+		return -1;
+	
+#if ZOMG_BYTEORDER == ZOMG_LIL_ENDIAN
+	Zomg_VdpCtrl_16_t bswap_ctrl;
+	memcpy(&bswap_ctrl, ctrl, sizeof(bswap_ctrl));
+	
+	// Byteswap the header.
+	bswap_ctrl.header = cpu_to_be32(bswap_ctrl.header);
+	
+	// Byteswap the fields.
+	bswap_ctrl.ctrl_word[0]	= cpu_to_be16(bswap_ctrl.ctrl_word[0]);
+	bswap_ctrl.ctrl_word[1]	= cpu_to_be16(bswap_ctrl.ctrl_word[1]);
+	bswap_ctrl.address	= cpu_to_be16(bswap_ctrl.address);
+	bswap_ctrl.status	= cpu_to_be16(bswap_ctrl.status);
+	
+	// FIFO
+	for (int i = 0; i < 4; i++)
+		bswap_ctrl.data_fifo[i] = cpu_to_be16(bswap_ctrl.data_fifo[i]);
+	
+	// DMA
+	bswap_ctrl.dma_src_address = cpu_to_be32(bswap_ctrl.dma_src_address);
+	bswap_ctrl.dma_length = cpu_to_be16(bswap_ctrl.dma_length);
+	
+	// Clear the reserved fields.
+	bswap_ctrl.reserved2 = 0;
+	
+	// Save the file.
+	return saveToZomg("common/vdp_ctrl.bin", &bswap_ctrl, sizeof(bswap_ctrl));
+#else
+	// Save the file as-is.
+	return saveToZomg("common/vdp_ctrl.bin", &ctrl, sizeof(*ctrl));
+#endif
+}
+
+
+/**
  * saveVRam(): Save VRam.
  * File: common/VRam.bin
  * @param vram Destination buffer for VRam.

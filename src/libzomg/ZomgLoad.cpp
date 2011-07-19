@@ -133,6 +133,78 @@ int Zomg::loadVdpReg(uint8_t *reg, size_t siz)
 
 
 /**
+ * loadVdpCtrl_8(): Load VDP control registers. (8-bit)
+ * File: common/vdp_ctrl.bin
+ * @param ctrl Destination buffer for VDP control registers.
+ * @return Number of bytes read on success; negative on error.
+ */
+int Zomg::loadVdpCtrl_8(Zomg_VdpCtrl_8_t *ctrl)
+{
+	int ret = loadFromZomg("common/vdp_ctrl.bin", ctrl, sizeof(*ctrl));
+	
+	// Verify that the control registers are valid.
+	if (ret != (int)(sizeof(*ctrl)))
+		return -1;
+	
+	// Verify the header.
+	ctrl->header = be32_to_cpu(ctrl->header);
+	if (ctrl->header != ZOMG_VDPCTRL_8_HEADER)
+		return -2;
+	
+	// Byteswap the fields.
+	ctrl->address = be16_to_cpu(ctrl->address);
+	
+	// Clear the reserved fields.
+	ctrl->reserved1 = 0;
+	ctrl->reserved2 = 0;
+	
+	// Return the number of bytes read.
+	return ret;
+}
+
+
+/**
+ * loadVdpCtrl_16(): Load VDP control registers. (16-bit)
+ * File: common/vdp_ctrl.bin
+ * @param ctrl Destination buffer for VDP control registers.
+ * @return Number of bytes read on success; negative on error.
+ */
+int Zomg::loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl)
+{
+	int ret = loadFromZomg("common/vdp_ctrl.bin", ctrl, sizeof(*ctrl));
+	
+	// Verify that the control registers are valid.
+	if (ret != (int)(sizeof(*ctrl)))
+		return -1;
+	
+	// Verify the header.
+	ctrl->header = be32_to_cpu(ctrl->header);
+	if (ctrl->header != ZOMG_VDPCTRL_16_HEADER)
+		return -2;
+	
+	// Byteswap the fields.
+	ctrl->ctrl_word[0]	= be16_to_cpu(ctrl->ctrl_word[0]);
+	ctrl->ctrl_word[1]	= be16_to_cpu(ctrl->ctrl_word[1]);
+	ctrl->address		= be16_to_cpu(ctrl->address);
+	ctrl->status		= be16_to_cpu(ctrl->status);
+	
+	// FIFO
+	for (int i = 0; i < 4; i++)
+		ctrl->data_fifo[i] = be16_to_cpu(ctrl->data_fifo[i]);
+	
+	// DMA
+	ctrl->dma_src_address = be32_to_cpu(ctrl->dma_src_address);
+	ctrl->dma_length = be16_to_cpu(ctrl->dma_length);
+	
+	// Clear the reserved fields.
+	ctrl->reserved2 = 0;
+	
+	// Return the number of bytes read.
+	return ret;
+}
+
+
+/**
  * loadVRam(): Load VRam.
  * File: common/VRam.bin
  * @param vram Destination buffer for VRam.
