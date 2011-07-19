@@ -115,7 +115,7 @@ void Vdp::Reset(void)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 	
-	for (size_t i = 0; i < sizeof(vdp_reg_init)/sizeof(vdp_reg_init[0]); i++)
+	for (int i = 0; i < (int)(sizeof(vdp_reg_init)/sizeof(vdp_reg_init[0])); i++)
 	{
 		Set_Reg(i, vdp_reg_init[i]);
 	}
