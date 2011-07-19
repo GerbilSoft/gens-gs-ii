@@ -1284,6 +1284,11 @@ void Vdp::Write_Ctrl(uint16_t data)
 	if (dest_component == DMA_DEST_CRAM ||
 	    dest_component == DMA_DEST_VSRAM)
 	{
+		// FIXME: Frogger (U) does DMA writes to CRAM $8000.
+		// Obviously this won't work if we're aborting on dest_address >= 0x80.
+		// We'll mask it with 0xFF for now.
+		// TODO: Figure out what the actual mask should be later.
+		dest_address &= 0xFF;
 		if (dest_address >= 0x80)
 		{
 			// CRam/VSRam overflow! Don't do anything.
