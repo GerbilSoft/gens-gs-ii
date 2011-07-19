@@ -247,7 +247,7 @@ FORCE_INLINE uint8_t Vdp::T_PutPixel_Sprite(int disp_pixnum, uint32_t pattern, u
 	const unsigned int LineBuf_pixnum = (disp_pixnum + pat_pixnum + 8);
 	uint8_t layer_bits = LineBuf.px[LineBuf_pixnum].layer;
 	
-	if (layer_bits & (LINEBUF_PRIO_B + LINEBUF_SPR_B - priority))
+	if (layer_bits & ((LINEBUF_PRIO_B | LINEBUF_SPR_B) - priority))
 	{
 		// Priority bit is set. (TODO: Is that what this means?)
 		if (!priority)
