@@ -141,6 +141,7 @@ components that are common throughout the Sega 8-bit and 16-bit hardware line.
 | Filename       |  Size (bytes)  | Endianness |
 +----------------+----------------+------------+
 | vdp_reg.bin    |      8; 11; 24 |    8-bit   |
+| vdp_ctrl.bin   |            TBD |     TBD    |
 | VRam.bin       | 16,384; 65,536 |   Varies   |
 | CRam.bin       |    32; 64; 128 |   Varies   |
 | psg.bin        |             23 |    8-bit   |
@@ -174,7 +175,62 @@ uint8_t vdp_reg_md[24];		// Sega Mega Drive.
 
 ----------------------------------------------------------------
 
-4.2. VRam.bin: Video RAM
+4.2. vdp_ctrl.bin: Sega VDP control registers
+
+The VDP control registers are internal counters that maintain the VDP's
+state. The control registers have different formats depending on whether
+the system is in 8-bit mode (SMS/GG) or 16-bit mode (MD). The structure
+has a header indicating whether it's 16-bit or 8-bit; if the header doesn't
+match the expected value, the program should cancel loading the savestate.
+
+TODO: Some emulators do not support the FIFO. Figure out how to implement
+the FIFO in these emulators.
+
+TODO: Internal DMA registers: DMA destination, etc.
+
+C equivalent for vdp_ctrl.bin:
+
+// 8-bit VDP (Master System)
+typedef struct _ZOMG_VDP_ctrl_8_t
+{
+	uint32_t header;		// 32-bit BE: Should be "SMS " (0x534D5320)
+	
+	uint8_t ctrl_byte[2];		// 8-bit: VDP control bytes.
+	uint16_t reserved1;
+	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
+	uint8_t dest;			// 8-bit: Read/Write location. (TODO)
+	
+	uint16_t address;		// 16-bit BE: VDP address counter.
+	uint8_t status;			// 8-bit: VDP status register.
+	uint8_t reserved2;
+	
+	uint8_t data_read_buffer;	// 8-bit: Data read buffer.
+} ZOMG_VDP_ctrl_8_t;
+
+// 16-bit VDP (Mega Drive)
+typedef struct _ZOMG_VDP_ctrl_16_t
+{
+	uint32_t header;		// 32-bit BE: Should be "MD  " (0x4D442020)
+	
+	uint16_t ctrl_word[2];		// 16-bit BE: VDP control words.
+	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
+	uint8_t dest;			// 8-bit: Read/Write location. (TODO)
+	
+	uint16_t address;		// 16-bit BE: VDP address counter.
+	uint16_t status;		// 16-bit BE: VDP status register.
+	
+	uint16_t data_fifo[4];		// 16-bit BE: Data FIFO. (4 words)
+	uint8_t data_fifo_count;	// 8-bit: Number of words currently in the FIFO.
+	uint8_t reserved2;
+	
+	// TODO: Finalize DMA registers.
+	uint32_t dma_src_address;	// 32-bit BE: DMA source address.
+	uint16_t dma_length;		// 16-bit BE: DMA length.
+} ZOMG_VDP_ctrl_16_t;
+
+----------------------------------------------------------------
+
+4.3. VRam.bin: Video RAM
 
 Video RAM is directly connected to the Video Display Processor on
 the Sega 8-bit and 16-bit machines. Depending on the system, it may
@@ -189,7 +245,7 @@ uint16_t vram_md[32768];	// Sega Mega Drive. (16-bit BE)
 
 ----------------------------------------------------------------
 
-4.3. CRam.bin: Color RAM
+4.4. CRam.bin: Color RAM
 
 Starting with the Sega Mark III, Sega's 8-bit and 16-bit VDPs
 have included Color RAM, which allows the onscreen palette to
@@ -206,7 +262,7 @@ uint16_t cram_gg[32];		// Sega Game Gear. (16-bit LE)
 
 ----------------------------------------------------------------
 
-4.4. psg.bin: TI SN76489(A) Programmable Sound Generator
+4.5. psg.bin: TI SN76489(A) Programmable Sound Generator
 
 This file contains the register values from the TI SN76489(A) Programmable
 Sound Generator. This chip is used for generating square waves and noise.
@@ -261,7 +317,7 @@ typedef struct _ZOMG_psg_t
 
 ----------------------------------------------------------------
 
-4.5. Z80_mem.bin: Zilog Z80 memory.
+4.6. Z80_mem.bin: Zilog Z80 memory.
 
 This file contains the system memory that is directly accessible by the
 Z80 CPU. The Z80 memory size depends on the console. Z80 memory is 8-bit,
@@ -281,7 +337,7 @@ uint8_t Z80_mem_mk3[8192];	// Sega Mark III (SMS), Sega Mega Drive
 
 ----------------------------------------------------------------
 
-4.6. Z80_reg.bin: Zilog Z80 registers.
+4.7. Z80_reg.bin: Zilog Z80 registers.
 
 This file contains the registers found in the Z80 CPU.
 
@@ -314,7 +370,7 @@ typedef struct _ZOMG_Z80_reg_t
 
 ----------------------------------------------------------------
 
-4.7. SRAM.bin: Save RAM. [OPTIONAL]
+4.8. SRAM.bin: Save RAM. [OPTIONAL]
 
 This file contains the contents of Save RAM, which is present
 in some cartridges.
