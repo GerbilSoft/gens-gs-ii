@@ -112,7 +112,7 @@ inline void VdpStatus::setBit(StatusBits bit, bool value)
 }
 
 inline void VdpStatus::toggleBit(StatusBits bit)
-	{ m_status &= bit; }
+	{ m_status ^= bit; }
 
 }
 
