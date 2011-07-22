@@ -51,11 +51,17 @@ void VdpStatus::reset(bool isPal)
  */
 uint16_t VdpStatus::read(void)
 {
-	// Toggle the upper 8 bits of VDP_Status. (TODO: Is this correct?)
+	// Save the original status register.
+	// The original status register will be returned to the CPU.
+	const uint16_t status_orig = m_status;
+	
+	// Toggle the upper 8 bits of VDP_Status.
+	// This sort-of simulates the unimplemented bits,
+	// and toggles the EMPTY/FULL FIFO flags.
+	// TODO: Implement the FIFO.
 	m_status ^= 0xFF00;
 	
 	// Mask the SOVR ("Sprite Overflow") and C ("Collision between non-zero pixels in two sprites") bits.
-	// TODO: Should these be masked? This might be why some games are broken...
 	m_status &= ~(VDP_STATUS_SOVR | VDP_STATUS_COLLISION);
 	
 	// Check if we're currently in VBlank.
@@ -65,8 +71,8 @@ uint16_t VdpStatus::read(void)
 		m_status &= ~VDP_STATUS_F;
 	}
 	
-	// Return the VDP status.
-	return m_status;
+	// Return the original VDP status.
+	return status_orig;
 }
 
 }
