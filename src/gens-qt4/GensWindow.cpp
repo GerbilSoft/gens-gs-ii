@@ -56,11 +56,15 @@ namespace GensQt4
  * GensWindow(): Initialize the Gens window.
  */
 GensWindow::GensWindow()
+	: m_scale(1)			// Set the scale to 1x by default.
+	, m_hasInitResize(false)	// Initial resize hasn't occurred yet.
+	, m_idleThread(NULL)		// Clear the idle thread.
+	, m_idleThreadAllowed(false)	// Not allowed yet.
 {
-	m_scale = 1;			// Set the scale to 1x by default.
-	m_hasInitResize = false;	// Initial resize hasn't occurred yet.
-	m_idleThread = NULL;		// Clear the idle thread.
-	m_idleThreadAllowed = false;	// Not allowed yet.
+	/** Configuration items. **/
+	m_cfg_autoPause = new ConfigItem(QLatin1String("autoPause"), false, this);
+	m_cfg_introStyle = new ConfigItem(QLatin1String("Intro_Effect/introStyle"), 0, this);
+	m_cfg_showMenuBar = new ConfigItem(QLatin1String("GensWindow/showMenuBar"), true, this);
 	
 	// Initialize the Emulation Manager.
 	m_emuManager = new EmuManager();
@@ -78,7 +82,7 @@ GensWindow::GensWindow()
 	// Make sure all user configuration settings are applied.
 	// (Lock the OSD first to prevent random messages from appearing.)
 	m_vBackend->osd_lock();
-	gqt4_config->emitAll();
+	ConfigItem::EmitAll();
 	m_vBackend->osd_unlock();
 	
 	// Initialize the emulation state.
@@ -111,7 +115,7 @@ GensWindow::~GensWindow()
 	// Save configuration.
 	// TODO: Figure out a better place to put this.
 	// TODO: Config autosave.
-	gqt4_config->save();
+	ConfigItem::Save();
 }
 
 
@@ -184,16 +188,16 @@ void GensWindow::setupUi(void)
 	// Auto Pause: Application Focus Changed signal, and setting change signal.
 	connect(gqt4_app, SIGNAL(focusChanged(QWidget*, QWidget*)),
 		this, SLOT(qAppFocusChanged(QWidget*, QWidget*)));
-	connect(gqt4_config, SIGNAL(autoPause_changed(bool)),
-		this, SLOT(autoPause_changed_slot(bool)));
+	connect(m_cfg_autoPause, SIGNAL(valueChanged(const QVariant&)),
+		this, SLOT(autoPause_changed_slot(const QVariant&)));
 	
 	// Intro Style Changed signal.
-	connect(gqt4_config, SIGNAL(introStyle_changed(int)),
-		this, SLOT(introStyle_changed_slot(int)));
+	connect(m_cfg_introStyle, SIGNAL(valueChanged(const QVariant&)),
+		this, SLOT(introStyle_changed_slot(const QVariant&)));
 	
 	// Show Menu Bar Changed signal.
-	connect(gqt4_config, SIGNAL(showMenuBar_changed(bool)),
-		this, SLOT(showMenuBar_changed_slot(bool)));
+	connect(m_cfg_showMenuBar, SIGNAL(valueChanged(const QVariant&)),
+		this, SLOT(showMenuBar_changed_slot(const QVariant&)));
 }
 
 
@@ -536,7 +540,7 @@ void GensWindow::stateChanged(void)
  */
 void GensWindow::qAppFocusChanged(QWidget *old, QWidget *now)
 {
-	if (!gqt4_config->autoPause() ||
+	if (!m_cfg_autoPause->value().toBool() ||
 	    !m_emuManager->isRomOpen())
 	{
 		// Auto Pause is disabled,
@@ -572,11 +576,11 @@ void GensWindow::qAppFocusChanged(QWidget *old, QWidget *now)
 
 /**
  * autoPause_changed_slot(): Auto Pause setting has changed.
- * @param newAutoPause New Auto Pause setting.
+ * @param newAutoPause (bool) New Auto Pause setting.
  */
-void GensWindow::autoPause_changed_slot(bool newAutoPause)
+void GensWindow::autoPause_changed_slot(const QVariant& newAutoPause)
 {
-	if (newAutoPause)
+	if (newAutoPause.toBool())
 	{
 		// Auto Pause is enabled.
 		qAppFocusChanged(NULL, gqt4_app->focusWidget());
@@ -598,11 +602,11 @@ void GensWindow::autoPause_changed_slot(bool newAutoPause)
 
 /**
  * showMenuBar_changed_slot(): Show Menu Bar setting has changed.
- * @param newShowMenuBar New Show Menu Bar setting.
+ * @param newShowMenuBar (bool) New Show Menu Bar setting.
  */
-void GensWindow::showMenuBar_changed_slot(bool newShowMenuBar)
+void GensWindow::showMenuBar_changed_slot(const QVariant& newShowMenuBar)
 {
-	if (!newShowMenuBar)
+	if (!newShowMenuBar.toBool())
 	{
 		// Hide the menu bar.
 		this->setMenuBar(NULL);
@@ -699,9 +703,9 @@ void GensWindow::idleThread_frameDone(void)
 
 /**
  * introStyle_changed_slot(): Intro Style setting has changed.
- * @param newIntroStyle New Intro Style setting.
+ * @param newIntroStyle (int) New Intro Style setting.
  */
-void GensWindow::introStyle_changed_slot(int newIntroStyle)
+void GensWindow::introStyle_changed_slot(const QVariant& newIntroStyle)
 {
 	checkIdleThread();
 	
@@ -709,7 +713,7 @@ void GensWindow::introStyle_changed_slot(int newIntroStyle)
 	if (!m_emuManager)
 		return;
 	
-	if (!m_emuManager->isRomOpen() && newIntroStyle == 0)
+	if (!m_emuManager->isRomOpen() && newIntroStyle.toInt() == 0)
 	{
 		// Intro style was changed to "None", and emulation isn't running.
 		// Clear the screen.

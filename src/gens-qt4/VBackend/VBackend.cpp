@@ -47,6 +47,18 @@ namespace GensQt4
 VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	: QWidget(parent)
 	, m_keyHandler(keyHandler)
+	
+	// Mark the video backend as dirty on startup.
+	, m_vbDirty(true)
+	, m_mdScreenDirty(true)
+	
+	// Set the internal framebuffer to NULL by default.
+	, m_intScreen(NULL)
+	
+	// We're not running anything initially.
+	// TODO: Remove m_running and just use m_emuContext?
+	, m_emuContext(NULL)
+	, m_running(false)
 {
 	if (m_keyHandler)
 	{
@@ -54,16 +66,6 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 		connect(m_keyHandler, SIGNAL(destroyed()),
 			this, SLOT(keyHandlerDestroyed()));
 	}
-	
-	// Mark the video backend as dirty on startup.
-	m_vbDirty = true;
-	m_mdScreenDirty = true;
-	
-	// Set the internal framebuffer to NULL by default.
-	m_intScreen = NULL;
-	
-	// We're not running anything initially.
-	m_running = false;
 	
 	// Set default video settings.
 	m_paused.data = 0;

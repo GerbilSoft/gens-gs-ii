@@ -62,6 +62,7 @@ int gens_main(int argc, char *argv[])
 	
 	// Load the configuration.
 	// TODO: Do this before or after command line arguments?
+	// TODO: Remove in favor of ConfigItem.
 	GensQt4::gqt4_config = new GensQt4::GensConfig();
 	
 	// TODO: Parse command line arguments.
@@ -78,8 +79,9 @@ int gens_main(int argc, char *argv[])
 	
 	// Set the EmuContext paths.
 	// TODO: Do this here or in GensWindow initialization?
-	LibGens::EmuContext::SetPathSRam(
-		GensQt4::gqt4_config->userPath(GensQt4::GensConfig::GCPATH_SRAM).toUtf8().constData());
+	QString sramPath = GensQt4::ConfigItem::GetConfigPath() + 
+				GensQt4::SRamPath.value().toString();
+	LibGens::EmuContext::SetPathSRam(sramPath.toUtf8().constData());
 	
 	gens_window = new GensQt4::GensWindow();
 	gens_window->show();
@@ -106,10 +108,6 @@ int gens_main(int argc, char *argv[])
 	
 	// Unregister the signal handler.
 	GensQt4::SigHandler::End();
-	
-	// Delete the configuration object.
-	delete GensQt4::gqt4_config;
-	GensQt4::gqt4_config = NULL;
 	
 	// Finished.
 	return ret;
@@ -153,12 +151,16 @@ namespace GensQt4
 // GensQApplication.
 GensQApplication *gqt4_app = NULL;
 
-// Configuration. (TODO: Use a smart pointer?)
+// Configuration. (TODO: Remove this in favor of ConfigItem.)
 GensConfig *gqt4_config = NULL;
 
 // Emulation objects.
 EmuThread *gqt4_emuThread = NULL;		// Thread.
 LibGens::EmuContext *gqt4_emuContext = NULL;	// Context.
+
+// SRam path. (TODO: Move somewhere else?)
+// TODO: Make config item subclass for paths. (don't hardcode it!)
+ConfigItem SRamPath(QLatin1String("Directories/SRAM"), QLatin1String("./SRAM/"));
 
 /**
  * QuitGens(): Quit Gens.
@@ -184,8 +186,7 @@ void QuitGens(void)
 	LibGens::End();
 	
 	// Save the configuration.
-	if (gqt4_config)
-		gqt4_config->save();
+	ConfigItem::Save();
 }
 
 }

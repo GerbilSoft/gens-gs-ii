@@ -24,6 +24,8 @@
 #ifndef __GENS_QT4_GENSCONFIG_HPP__
 #define __GENS_QT4_GENSCONFIG_HPP__
 
+#warning Do not use GensConfig.hpp
+
 // C includes.
 #include <stdint.h>
 

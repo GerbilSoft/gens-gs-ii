@@ -28,6 +28,8 @@
 #include "libgens/macros/common.h"
 #include "libgens/lg_osd.h"
 
+// Configuration items.
+#include "Config/ConfigItem.hpp"
 #ifndef _WIN32
 #define gens_main main
 #endif
@@ -62,9 +64,13 @@ void gqt4_osd(OsdType osd_type, int param);
 }
 #endif
 
+// TODO: Remove GensConfig in favor of ConfigItem.
 #include "Config/GensConfig.hpp"
 #include "EmuThread.hpp"
 #include "../libgens/EmuContext.hpp"
+
+// Configuration items.
+#include "Config/ConfigItem.hpp"
 
 class QTranslator;
 
@@ -77,7 +83,12 @@ namespace GensQt4
 	extern GensQApplication *gqt4_app;
 	
 	// Configuration. (TODO: Use a smart pointer?)
+	// TODO: Remove GensConfig in favor of ConfigItem.
 	extern GensConfig *gqt4_config;
+	
+	// SRam path. (TODO: Move somewhere else?)
+	// TODO: Make config item subclass for paths. (don't hardcode it!)
+	extern ConfigItem SRamPath;
 	
 	// Emulation objects.
 	// TODO: Move the EmuContext to the EmuThread later.

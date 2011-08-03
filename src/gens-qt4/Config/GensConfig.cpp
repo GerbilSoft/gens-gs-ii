@@ -308,6 +308,9 @@ int GensConfigPrivate::reload(const QString& filename)
  */
 int GensConfigPrivate::save(const QString& filename)
 {
+	// TODO: Migrate to ConfigItem.
+	return 0;
+	
 	QSettings settings(filename, QSettings::IniFormat, q);
 	settings.setIniCodec(QTextCodec::codecForName("UTF-8"));
 	
