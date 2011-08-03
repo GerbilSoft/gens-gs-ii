@@ -49,10 +49,10 @@ const char *ConfigItem::ms_CfgFilename = "gens-gs-ii.conf";
 // Reference count.
 int ConfigItem::ms_RefCnt = 0;
 
-// List of all ConfigItems.
+// Hashtable of all ConfigItems.
 // NOTE: This cannot be statically-allocated, because it might
 // not get initialized before statically-allocated ConfigItem objects.
-QList<ConfigItem*>* ConfigItem::ms_pLstItems = NULL;
+QHash<QString, ConfigItem*>* ConfigItem::ms_pHashItems = NULL;
 
 
 /** Static functions. **/
@@ -92,8 +92,8 @@ QString ConfigItem::GetConfigPath(void)
  */
 void ConfigItem::Load(void)
 {
-	for (int i = 0; i < ms_pLstItems->count(); i++)
-		ms_pLstItems->at(i)->load_item();
+	foreach(ConfigItem *item, *ms_pHashItems)
+		item->load_item();
 	
 	// NOTE: EmitAll() is NOT called here.
 	// The calling function must call EmitAll() after loading settings.
@@ -140,8 +140,8 @@ void ConfigItem::Save(void)
 	}
 	
 	// Save the ConfigItems.
-	for (int i = 0; i < ms_pLstItems->count(); i++)
-		ms_pLstItems->at(i)->save_item();
+	foreach(ConfigItem *item, *ms_pHashItems)
+		item->save_item();
 }
 
 
@@ -150,8 +150,8 @@ void ConfigItem::Save(void)
  */
 void ConfigItem::EmitAll(void)
 {
-	for (int i = 0; i < ms_pLstItems->count(); i++)
-		ms_pLstItems->at(i)->emit_item();
+	foreach(ConfigItem *item, *ms_pHashItems)
+		item->emit_item();
 }
 
 
@@ -171,7 +171,7 @@ void ConfigItem::init(void)
 		const QString filename = GetConfigPath() + QChar(L'/') + QLatin1String(ms_CfgFilename);
 		
 		// Initialize the configuration file.
-		ms_pLstItems = new QList<ConfigItem*>();
+		ms_pHashItems = new QHash<QString, ConfigItem*>();
 		ms_Settings = new QSettings(filename, QSettings::IniFormat);
 		ms_Settings->setIniCodec(QTextCodec::codecForName("UTF-8"));
 	}
@@ -183,7 +183,7 @@ void ConfigItem::init(void)
 	load_item();
 	
 	// Register this ConfigItem in ms_LstItems.
-	ms_pLstItems->append(this);
+	ms_pHashItems->insert(m_section_key, this);
 }
 
 
@@ -231,8 +231,8 @@ ConfigItem::~ConfigItem()
 	if (m_dirty)
 		save_item();
 	
-	// Remove this ConfigItem from ms_pLstItems.
-	ms_pLstItems->removeOne(this);
+	// Remove this ConfigItem from ms_pHashItems.
+	ms_pHashItems->remove(m_section_key);
 	
 	// Decrement the reference count.
 	ms_RefCnt--;
@@ -240,8 +240,8 @@ ConfigItem::~ConfigItem()
 	{
 		// All configuration items have been deleted.
 		ms_RefCnt = 0;
-		delete ms_pLstItems;
-		ms_pLstItems = NULL;
+		delete ms_pHashItems;
+		ms_pHashItems = NULL;
 		
 		// Close the settings file.
 		delete ms_Settings;

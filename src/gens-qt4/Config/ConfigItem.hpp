@@ -28,7 +28,7 @@
 #include <QtCore/QString>
 #include <QtCore/QVariant>
 #include <QtCore/QSettings>
-#include <QtCore/QList>
+#include <QtCore/QHash>
 
 namespace GensQt4
 {
@@ -138,7 +138,7 @@ class ConfigItem : public QObject
 		static int ms_RefCnt;
 		
 		// List of all ConfigItems.
-		static QList<ConfigItem*>* ms_pLstItems;
+		static QHash<QString, ConfigItem*>* ms_pHashItems;
 };
 
 /**
