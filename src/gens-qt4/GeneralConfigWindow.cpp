@@ -379,9 +379,11 @@ void GeneralConfigWindow::reload(void)
 	chkNtscV30Rolling->setChecked(ValByPath_bool("ntscV30Rolling"));
 	
 	/** System. **/
+	// TODO: Port to ConfigItem.
 	cboRegionCurrent->setCurrentIndex((int)gqt4_config->regionCode() + 1);
 	
 	// Region auto-detection settings.
+	// TODO: Port to ConfigItem.
 	lstRegionDetect->clear();
 	uint16_t regionCodeOrder = gqt4_config->regionCodeOrder();
 	for (int i = 0; i < 4; i++, regionCodeOrder >>= 4)
@@ -456,6 +458,7 @@ void GeneralConfigWindow::apply(void)
 	SetValByPath_bool("ntscV30Rolling", chkNtscV30Rolling->isChecked());
 	
 	/** System. **/
+	// TODO: Port to ConfigItem.
 	gqt4_config->setRegionCode((LibGens::SysVersion::RegionCode_t)(cboRegionCurrent->currentIndex() - 1));
 	gqt4_config->setRegionCodeOrder(regionCodeOrder());
 	
@@ -513,7 +516,7 @@ void GeneralConfigWindow::on_btnOsdFpsColor_clicked(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	gqt4_config->setOsdFpsColor(m_osdFpsColor);
+	SetValByPath_QColor("OSD/fpsColor", m_osdMsgColor);
 #endif
 }
 
@@ -531,7 +534,7 @@ void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	gqt4_config->setOsdMsgColor(m_osdMsgColor);
+	SetValByPath_QColor("OSD/msgColor", m_osdMsgColor);
 #endif
 }
 
@@ -560,7 +563,8 @@ void GeneralConfigWindow::on_btnRegionDetectUp_clicked(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	gqt4_config->setRegionCodeOrder(regionCodeOrder());
+	// TODO: Port to ConfigItem.
+	//gqt4_config->setRegionCodeOrder(regionCodeOrder());
 #endif
 }
 
@@ -873,7 +877,7 @@ void GeneralConfigWindow::on_txtMcdRomUSA_textChanged(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	gqt4_config->setMcdRomUSA(txtMcdRomUSA->text());
+	SetValByPath_QString("Sega_CD/bootRomUSA", txtMcdRomUSA->text());
 #endif
 }
 
@@ -890,7 +894,7 @@ void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	gqt4_config->setMcdRomEUR(txtMcdRomEUR->text());
+	SetValByPath_QString("Sega_CD/bootRomEUR", txtMcdRomEUR->text());
 #endif
 }
 
@@ -907,7 +911,7 @@ void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	gqt4_config->setMcdRomJPN(txtMcdRomJPN->text());
+	SetValByPath_QString("Sega_CD/bootRomJPN", txtMcdRomJPN->text());
 #endif
 }
 
@@ -924,7 +928,7 @@ void GeneralConfigWindow::on_txtMcdRomAsia_textChanged(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	gqt4_config->setMcdRomAsia(txtMcdRomAsia->text());
+	SetValByPath_QString("Sega_CD/bootRomAsia", txtMcdRomAsia->text());
 #endif
 }
 
@@ -1143,7 +1147,7 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	gqt4_config->setExtPrgUnRAR(txtExtPrgUnRAR->text());
+	SetValByPath_QString("External_Programs/UnRAR", txtExtPrgUnRAR->text());
 #endif
 }
 

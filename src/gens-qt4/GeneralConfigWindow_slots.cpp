@@ -24,8 +24,8 @@
 
 #include "GeneralConfigWindow.hpp"
 
-// gqt4_main has gqt4_config.
-#include "gqt4_main.hpp"
+// ConfigItem
+#include "Config/ConfigItem.hpp"
 
 namespace GensQt4
 {
@@ -37,64 +37,65 @@ namespace GensQt4
 // the window is being initialized.
 
 #ifndef GCW_APPLY_IMMED
-#define GENERIC_OPTION(fn, var) \
+#define GENERIC_OPTION(path, var) \
 do { \
 	((void)var); \
 	setApplyButtonEnabled(true); \
 } while (0)
 #else
-#define GENERIC_OPTION(fn, var) \
+#define GENERIC_OPTION(path, var) \
 do { \
 	if (this->isVisible()) \
-		gqt4_config->fn(var); \
+		ConfigItem::SetValueByPath(QLatin1String(path), var); \
 } while (0)
 #endif
 
 /** Onscreen display. **/
 void GeneralConfigWindow::on_chkOsdFpsEnable_toggled(bool checked)
-	{ GENERIC_OPTION(setOsdFpsEnabled, checked); }
+	{ GENERIC_OPTION("OSD/fpsEnabled", checked); }
 void GeneralConfigWindow::on_chkOsdMsgEnable_toggled(bool checked)
-	{ GENERIC_OPTION(setOsdMsgEnabled, checked); }
+	{ GENERIC_OPTION("OSD/msgEnabled", checked); }
 void GeneralConfigWindow::on_chkAutoFixChecksum_toggled(bool checked)
-	{ GENERIC_OPTION(setAutoFixChecksum, checked); }
+	{ GENERIC_OPTION("autoFixChecksum", checked); }
 void GeneralConfigWindow::on_chkAutoPause_toggled(bool checked)
-	{ GENERIC_OPTION(setAutoPause, checked); }
+	{ GENERIC_OPTION("autoPause", checked); }
 void GeneralConfigWindow::on_chkBorderColor_toggled(bool checked)
-	{ GENERIC_OPTION(setBorderColor, checked); }
+	{ GENERIC_OPTION("borderColorEmulation", checked); }
 void GeneralConfigWindow::on_chkPauseTint_toggled(bool checked)
-	{ GENERIC_OPTION(setPauseTint, checked); }
+	{ GENERIC_OPTION("pauseTint", checked); }
 void GeneralConfigWindow::on_chkNtscV30Rolling_toggled(bool checked)
-	{ GENERIC_OPTION(setNtscV30Rolling, checked); }
+	{ GENERIC_OPTION("ntscV30Rolling", checked); }
 
 /** Intro effect. **/
 void GeneralConfigWindow::on_cboIntroStyle_currentIndexChanged(int index)
-	{ GENERIC_OPTION(setIntroStyle, index); }
+	{ GENERIC_OPTION("Intro_Effect/introStyle", index); }
 void GeneralConfigWindow::on_cboIntroColor_currentIndexChanged(int index)
-	{ GENERIC_OPTION(setIntroColor, index); }
+	{ GENERIC_OPTION("Intro_Effect/introColor", index); }
 
 /** System. **/
+// TODO: Port to ConfigItem.
 void GeneralConfigWindow::on_cboRegionCurrent_currentIndexChanged(int index)
-	{ GENERIC_OPTION(setRegionCode, (LibGens::SysVersion::RegionCode_t)(index - 1)); }
+	{ /*GENERIC_OPTION(setRegionCode, (LibGens::SysVersion::RegionCode_t)(index - 1));*/ }
 
 /** Graphics settings. **/
 void GeneralConfigWindow::on_chkAspectRatioConstraint_toggled(bool checked)
-	{ GENERIC_OPTION(setAspectRatioConstraint, checked); }
+	{ GENERIC_OPTION("Graphics/aspectRatioConstraint", checked); }
 void GeneralConfigWindow::on_chkFastBlur_toggled(bool checked)
-	{ GENERIC_OPTION(setFastBlur, checked); }
+	{ GENERIC_OPTION("Graphics/fastBlur", checked); }
 void GeneralConfigWindow::on_chkBilinearFilter_toggled(bool checked)
-	{ GENERIC_OPTION(setBilinearFilter, checked); }
+	{ GENERIC_OPTION("Graphics/bilinearFilter", checked); }
 void GeneralConfigWindow::on_cboInterlacedMode_currentIndexChanged(int index)
-	{ GENERIC_OPTION(setInterlacedMode, (GensConfig::InterlacedMode_t)index); }
+	{ GENERIC_OPTION("Graphics/interlacedMode", index); }
 
 void GeneralConfigWindow::on_hsldContrast_valueChanged(int value)
-	{ GENERIC_OPTION(setContrast, value); }
+	{ GENERIC_OPTION("Graphics/contrast", value); }
 void GeneralConfigWindow::on_hsldBrightness_valueChanged(int value)
-	{ GENERIC_OPTION(setBrightness, value); }
+	{ GENERIC_OPTION("Graphics/brightness", value); }
 void GeneralConfigWindow::on_chkGrayscale_toggled(bool checked)
-	{ GENERIC_OPTION(setGrayscale, checked); }
+	{ GENERIC_OPTION("Graphics/grayscale", checked); }
 void GeneralConfigWindow::on_chkInverted_toggled(bool checked)
-	{ GENERIC_OPTION(setInverted, checked); }
+	{ GENERIC_OPTION("Graphics/inverted", checked); }
 void GeneralConfigWindow::on_cboColorScaleMethod_currentIndexChanged(int index)
-	{ GENERIC_OPTION(setColorScaleMethod, index); }
+	{ GENERIC_OPTION("Graphics/colorScaleMethod", index); }
 
 }
