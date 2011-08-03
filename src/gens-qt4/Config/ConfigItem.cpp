@@ -25,6 +25,7 @@
 
 // Qt includes.
 #include <QtCore/QDir>
+#include <QtCore/QTextCodec>
 
 namespace GensQt4
 {
@@ -134,6 +135,7 @@ void ConfigItem::init(void)
 		// Initialize the configuration file.
 		ms_pLstItems = new QList<ConfigItem*>();
 		ms_Settings = new QSettings(filename, QSettings::IniFormat);
+		ms_Settings->setIniCodec(QTextCodec::codecForName("UTF-8"));
 	}
 	
 	// Increment the reference count.
