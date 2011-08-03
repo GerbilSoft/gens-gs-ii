@@ -85,7 +85,7 @@ class ConfigItem : public QObject
 		 * setValue(): Set the configuration item's value.
 		 * @param newValue New value for the configuration item.
 		 */
-		void setValue(const QVariant& newValue);
+		virtual void setValue(const QVariant& newValue);
 	
 	signals:
 		void valueChanged(const QVariant& value);

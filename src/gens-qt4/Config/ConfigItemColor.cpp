@@ -93,6 +93,17 @@ void ConfigItemColor::save_item(void)
  * setValue(): Set the configuration item's value.
  * @param newValue New value for the configuration item.
  */
+void ConfigItemColor::setValue(const QVariant& newValue)
+{
+	// Parse the value as a QColor.
+	setValue(newValue.value<QColor>());
+}
+
+
+/**
+ * setValue(): Set the configuration item's value.
+ * @param newValue New value for the configuration item.
+ */
 void ConfigItemColor::setValue(const QColor& newValue)
 {
 	if (m_value == newValue)

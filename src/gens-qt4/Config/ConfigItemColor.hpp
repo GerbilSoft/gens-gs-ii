@@ -56,6 +56,12 @@ class ConfigItemColor : public ConfigItem
 		 * setValue(): Set the configuration item's value.
 		 * @param newValue New value for the configuration item.
 		 */
+		void setValue(const QVariant& newValue);
+		
+		/**
+		 * setValue(): Set the configuration item's value.
+		 * @param newValue New value for the configuration item.
+		 */
 		void setValue(const QColor& newValue);
 	
 	signals:
