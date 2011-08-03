@@ -156,40 +156,6 @@ class ConfigItem : public QObject
 		static QHash<QString, ConfigItem*>* ms_pHashItems;
 };
 
-/** Static functions. **/
-
-/**
- * ValueByPath(): Get a value by path.
- * @param path Path of the configuration item.
- * @return Value, or empty QVariant() on error.
- */
-inline QVariant ConfigItem::ValueByPath(const QString& path)
-{
-	ConfigItem *item = ms_pHashItems->value(path, NULL);
-	if (item)
-		return item->value();
-	return QVariant();
-}
-
-/**
- * SetValueByPath(): Set a value by path.
- * @param path Path of the configuration item.
- * @param value New value to set.
- * @return 0 on success; non-zero on error.
- */
-inline int ConfigItem::SetValueByPath(const QString& path, const QVariant& value)
-{
-	ConfigItem *item = ms_pHashItems->value(path, NULL);
-	if (item)
-	{
-		item->setValue(value);
-		return 0;
-	}
-	
-	// Configuration item does not exist.
-	return -1;
-}
-
 /** Instance functions. **/
 
 /**
