@@ -71,6 +71,7 @@ void ConfigItemColor::load_item(void)
 	m_value = ms_Settings->value(m_section_key, QColor()).value<QColor>();
 	if (!m_value.isValid())
 		m_value = m_def;
+	this->ConfigItem::m_value = m_value.name();
 	m_dirty = false;		// No longer dirty.
 	
 	// NOTE: emit_item() is NOT called here.
@@ -109,6 +110,7 @@ void ConfigItemColor::setValue(const QColor& newValue)
 	if (m_value == newValue)
 		return;
 	m_value = newValue;
+	this->ConfigItem::m_value = m_value.name();
 	
 	// Value has changed.
 	emit valueChanged(m_value);
