@@ -37,16 +37,14 @@
 #include "libgens/Util/MdFb.hpp"
 #include "libgens/Vdp/VdpPalette.hpp"
 
-// paused_t
+// paused_t, StretchMode_t
 #include "gqt4_datatypes.h"
-
-// StretchMode is in GensConfig.
-// TODO: Move somewhere else, or use int?
-#include "Config/GensConfig.hpp"
 
 // Emulation Context.
 #include "libgens/EmuContext.hpp"
 
+// Configuration items.
+#include "Config/ConfigItem.hpp"
 
 namespace GensQt4
 {
@@ -191,10 +189,13 @@ class VBackend : public QWidget
 		void resetAspectRatioConstraintChanged(void);
 		bool bilinearFilter(void) const;
 		bool pauseTint(void) const;
-		GensConfig::StretchMode_t stretchMode(void) const;
+		StretchMode_t stretchMode(void) const;
 		
 		/** Emulation Context. **/
 		LibGens::EmuContext *m_emuContext;
+		
+		// Reset Stretch Mode. (Used if the stretch mode is invalid.)
+		void stretchMode_reset(void);
 	
 	protected slots:
 		/** Properties. **/
@@ -203,17 +204,17 @@ class VBackend : public QWidget
 		void setOsdMsgEnabled(bool enable);
 		void setOsdMsgColor(const QColor& color);
 		
-		virtual void setFastBlur(bool newFastBlur);
-		virtual void setAspectRatioConstraint(bool newAspectRatioConstraint);
-		virtual void setBilinearFilter(bool newBilinearFilter);
-		virtual void setPauseTint(bool newPauseTint);
-		virtual void setStretchMode(GensConfig::StretchMode_t newStretchMode);
+		virtual void fastBlur_changed_slot(const QVariant& newFastBlur);				// bool
+		virtual void aspectRatioConstraint_changed_slot(const QVariant& newAspectRatioConstraint);	// bool
+		virtual void bilinearFilter_changed_slot(const QVariant& newBilinearFilter);			// bool
+		virtual void pauseTint_changed_slot(const QVariant& newPauseTint);				// bool
+		virtual void stretchMode_changed_slot(const QVariant& newStretchMode);				// int
 	
 	private:
 		// Effects.
 		paused_t m_paused;
-		bool m_fastBlur;
-		bool m_pauseTint;
+		ConfigItem *m_cfg_fastBlur;	// bool
+		ConfigItem *m_cfg_pauseTint;	// bool
 		
 		// Is the emulator running?
 		bool m_running;
@@ -251,10 +252,10 @@ class VBackend : public QWidget
 		friend class MsgTimer;
 		
 		/** Video settings. **/
-		bool m_aspectRatioConstraint;
+		ConfigItem *m_cfg_aspectRatioConstraint;	// bool
 		bool m_aspectRatioConstraint_changed;
-		bool m_bilinearFilter;
-		GensConfig::StretchMode_t m_stretchMode;
+		ConfigItem *m_cfg_bilinearFilter;		// bool
+		ConfigItem *m_cfg_stretchMode;			// StretchMode_t
 	
 	private slots:
 		// Key handler destroyed slot.
@@ -309,22 +310,25 @@ inline int VBackend::recStop(const QString& component)
 /** Property read functions. **/
 // TODO: Should we keep these properties here, or just get them from gqt4_config?
 inline bool VBackend::fastBlur(void) const
-	{ return m_fastBlur; }
+	{ return m_cfg_fastBlur->value().toBool(); }
 inline bool VBackend::aspectRatioConstraint(void) const
-	{ return m_aspectRatioConstraint; }
+	{ return m_cfg_aspectRatioConstraint->value().toBool(); }
 inline bool VBackend::hasAspectRatioConstraintChanged(void) const
 	{ return m_aspectRatioConstraint_changed; }
 inline void VBackend::resetAspectRatioConstraintChanged(void)
 	{ m_aspectRatioConstraint_changed = false; }
 inline bool VBackend::bilinearFilter(void) const
-	{ return m_bilinearFilter; }
+	{ return m_cfg_bilinearFilter->value().toBool(); }
 inline bool VBackend::pauseTint(void) const
-	{ return m_pauseTint; }
-inline GensConfig::StretchMode_t VBackend::stretchMode(void) const
-	{ return m_stretchMode; }
+	{ return m_cfg_pauseTint->value().toBool(); }
+inline StretchMode_t VBackend::stretchMode(void) const
+	{ return (StretchMode_t)m_cfg_stretchMode->value().toInt(); }
 
 inline LibGens::EmuContext *VBackend::emuContext(void) const
 	{ return m_emuContext; }
+
+inline void VBackend::stretchMode_reset(void)
+	{ m_cfg_stretchMode->setValue(m_cfg_stretchMode->def()); }
 
 }
 

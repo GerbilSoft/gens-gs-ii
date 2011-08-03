@@ -59,6 +59,9 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	// TODO: Remove m_running and just use m_emuContext?
 	, m_emuContext(NULL)
 	, m_running(false)
+	
+	// Make sure the aspect ratio constraint is initialized correctly.
+	, m_aspectRatioConstraint_changed(true)
 {
 	if (m_keyHandler)
 	{
@@ -67,14 +70,15 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 			this, SLOT(keyHandlerDestroyed()));
 	}
 	
-	// Set default video settings.
+	/** Configuration items. **/
+	m_cfg_fastBlur = new ConfigItem(QLatin1String("Graphics/fastBlur"), false, this);
+	m_cfg_pauseTint = new ConfigItem(QLatin1String("pauseTint"), false, this);
+	m_cfg_aspectRatioConstraint = new ConfigItem(QLatin1String("Graphics/aspectRatioConstraint"), true, this);
+	m_cfg_bilinearFilter = new ConfigItem(QLatin1String("Graphics/bilinearFilter"), true, this);;
+	m_cfg_stretchMode = new ConfigItem(QLatin1String("Graphics/stretchMode"), 1, this);;
+	
+	// Initialize the paused setting.
 	m_paused.data = 0;
-	m_stretchMode = gqt4_config->stretchMode();
-	m_fastBlur = gqt4_config->fastBlur();
-	m_aspectRatioConstraint = gqt4_config->aspectRatioConstraint();
-	m_aspectRatioConstraint_changed = true;
-	m_bilinearFilter = gqt4_config->bilinearFilter();
-	m_pauseTint = gqt4_config->pauseTint();
 	
 	// Initialize the FPS manager.
 	resetFps();
@@ -105,16 +109,16 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 		this, SLOT(setOsdMsgColor(const QColor&)));
 	
 	// Video effect settings.
-	connect(gqt4_config, SIGNAL(fastBlur_changed(bool)),
-		this, SLOT(setFastBlur(bool)));
-	connect(gqt4_config, SIGNAL(aspectRatioConstraint_changed(bool)),
-		this, SLOT(setAspectRatioConstraint(bool)));
-	connect(gqt4_config, SIGNAL(bilinearFilter_changed(bool)),
-		this, SLOT(setBilinearFilter(bool)));
-	connect(gqt4_config, SIGNAL(pauseTint_changed(bool)),
-		this, SLOT(setPauseTint(bool)));
-	connect(gqt4_config, SIGNAL(stretchMode_changed(GensConfig::StretchMode_t)),
-		this, SLOT(setStretchMode(GensConfig::StretchMode_t)));
+	connect(m_cfg_fastBlur, SIGNAL(valueChanged(const QVariant&)),
+		this, SLOT(fastBlur_changed_slot(const QVariant&)));
+	connect(m_cfg_aspectRatioConstraint, SIGNAL(valueChanged(const QVariant&)),
+		this, SLOT(aspectRatioConstraint_changed_slot(const QVariant&)));
+	connect(m_cfg_bilinearFilter, SIGNAL(valueChanged(const QVariant&)),
+		this, SLOT(bilinearFilter_changed_slot(const QVariant&)));
+	connect(m_cfg_pauseTint, SIGNAL(valueChanged(const QVariant&)),
+		this, SLOT(pauseTint_changed_slot(const QVariant&)));
+	connect(m_cfg_stretchMode, SIGNAL(valueChanged(const QVariant&)),
+		this, SLOT(stretchMode_changed_slot(const QVariant&)));
 }
 
 VBackend::~VBackend()
@@ -192,42 +196,44 @@ void VBackend::setPaused(paused_t newPaused)
 
 
 /**
- * setStretchMode(): Set the stretch mode setting.
- * @param newStretchMode New stretch mode setting.
+ * stretchMode_changed_slot(): Stretch mode setting has changed.
+ * @param newStretchMode (int) New stretch mode setting.
  */
-void VBackend::setStretchMode(GensConfig::StretchMode_t newStretchMode)
+void VBackend::stretchMode_changed_slot(const QVariant& newStretchMode)
 {
-	if ((m_stretchMode == newStretchMode) ||
-	    (newStretchMode < GensConfig::STRETCH_NONE) ||
-	    (newStretchMode > GensConfig::STRETCH_FULL))
+	StretchMode_t stretch = (StretchMode_t)newStretchMode.toInt();
+	
+	// Verify that the new stretch mode is valid.
+	// TODO: New ConfigItem subclass for StretchMode_t.
+	if ((stretch < STRETCH_NONE) || (stretch > STRETCH_FULL))
 	{
+		// Invalid stretch mode.
+		// Reset to default.
+		m_cfg_stretchMode->setValue(m_cfg_stretchMode->def());
 		return;
 	}
-	
-	// Update the stretch mode setting.
-	m_stretchMode = newStretchMode;
 	
 	// Print a message to the OSD.
 	//: OSD message indicating the Stretch Mode has been changed.
 	QString msg = tr("Stretch Mode set to %1.", "osd-stretch");
-	switch (m_stretchMode)
+	switch (stretch)
 	{
-		case GensConfig::STRETCH_NONE:
+		case STRETCH_NONE:
 			//: OSD message indicating the Stretch Mode has been set to None.
 			msg = msg.arg(tr("None", "osd-stretch"));
 			break;
 		
-		case GensConfig::STRETCH_H:
+		case STRETCH_H:
 			//: OSD message indicating the Stretch Mode has been set to Horizontal.
 			msg = msg.arg(tr("Horizontal", "osd-stretch"));
 			break;
 		
-		case GensConfig::STRETCH_V:
+		case STRETCH_V:
 			//: OSD message indicating the Stretch Mode has been set to Vertical.
 			msg = msg.arg(tr("Vertical", "osd-stretch"));
 			break;
 		
-		case GensConfig::STRETCH_FULL:
+		case STRETCH_FULL:
 			//: OSD message indicating the Stretch Mode has been set to Full.
 			msg = msg.arg(tr("Full", "osd-stretch"));
 			break;
@@ -250,19 +256,13 @@ void VBackend::setStretchMode(GensConfig::StretchMode_t newStretchMode)
 
 
 /**
- * setFastBlur(): Set the Fast Blur effect setting.
- * @param newFastBlur True to enable Fast Blur; false to disable it.
+ * fastBlur_changed_slot(): Fast Blur effect has changed.
+ * @param newFastBlur (bool) New Fast Blur effect setting.
  */
-void VBackend::setFastBlur(bool newFastBlur)
+void VBackend::fastBlur_changed_slot(const QVariant& newFastBlur)
 {
-	if (m_fastBlur == newFastBlur)
-		return;
-	
-	// Update the Fast Blur setting.
-	m_fastBlur = newFastBlur;
-	
 	// Print a message to the OSD.
-	if (m_fastBlur)
+	if (newFastBlur.toBool())
 	{
 		//: OSD message indicating Fast Blur has been enabled.
 		osd_printqs(1500, tr("Fast Blur enabled.", "osd"));
@@ -283,16 +283,12 @@ void VBackend::setFastBlur(bool newFastBlur)
 
 
 /**
- * setAspectRatioConstraint(): Set the aspect ratio constraint setting.
- * @param newAspectRatioConstraint True to enable Aspect Ratio Constraint; false to disable it.
+ * aspectRatioConstraint_changed_slot(): Aspect ratio constraint setting has changed.
+ * @param newAspectRatioConstraint (bool) New aspect ratio constraint setting.
  */
-void VBackend::setAspectRatioConstraint(bool newAspectRatioConstraint)
+void VBackend::aspectRatioConstraint_changed_slot(const QVariant& newAspectRatioConstraint)
 {
-	if (m_aspectRatioConstraint == newAspectRatioConstraint)
-		return;
-	
-	// Update the Aspect Ratio Constraint setting.
-	m_aspectRatioConstraint = newAspectRatioConstraint;
+	// Aspect Ratio Constraint setting has changed.
 	m_aspectRatioConstraint_changed = true;
 	
 	// Update the Video Backend even when not running.
@@ -305,17 +301,11 @@ void VBackend::setAspectRatioConstraint(bool newAspectRatioConstraint)
 
 
 /**
- * setBilinearFilter(): Set the bilinear filter setting.
- * @param newBilinearFilter True to enable bilinear filtering; false to disable it.
+ * bilinearFilter_changed_slot(): Bilinear filter setting has changed.
+ * @param newBilinearFilter (bool) New bilinear filter setting.
  */
-void VBackend::setBilinearFilter(bool newBilinearFilter)
+void VBackend::bilinearFilter_changed_slot(const QVariant& newBilinearFilter)
 {
-	if (m_bilinearFilter == newBilinearFilter)
-		return;
-	
-	// Update the Aspect Ratio Constraint setting.
-	m_bilinearFilter = newBilinearFilter;
-	
 	// TODO: Only if paused, or regardless of pause?
 	if (!isRunning() || isPaused())
 	{
@@ -326,17 +316,11 @@ void VBackend::setBilinearFilter(bool newBilinearFilter)
 
 
 /**
- * setPauseTint(): Set the Pause Tint effect setting.
- * @param newFastBlur True to enable Pause Tint; false to disable it.
+ * pauseTint_changed_slot(): Pause Tint effect setting has changed.
+ * @param newPauseTint (bool) New pause tint effect setting.
  */
-void VBackend::setPauseTint(bool newPauseTint)
+void VBackend::pauseTint_changed_slot(const QVariant& newPauseTint)
 {
-	if (m_pauseTint == newPauseTint)
-		return;
-	
-	// Update the Pause Tint setting.
-	m_pauseTint = newPauseTint;
-	
 	// Update the video backend if emulation is running,
 	// and if we're currently paused manually.
 	if (isRunning() && isManualPaused())

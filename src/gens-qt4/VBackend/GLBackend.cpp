@@ -657,7 +657,7 @@ void GLBackend::glb_paintGL(void)
  * recalcStretchRectF(): Recalculate the stretch mode rectangle.
  * @param mode Stretch mode.
  */
-void GLBackend::recalcStretchRectF(GensConfig::StretchMode_t mode)
+void GLBackend::recalcStretchRectF(StretchMode_t mode)
 {
 	if (m_emuContext)
 	{
@@ -685,12 +685,11 @@ void GLBackend::recalcStretchRectF(GensConfig::StretchMode_t mode)
 	// - stretching is disabled
 	// - emulation isn't running
 	// - no emulation context is present (TODO: Combine isRunning() with m_emuContext?)
-	if (mode == GensConfig::STRETCH_NONE || !isRunning() || !m_emuContext)
+	if (mode == STRETCH_NONE || !isRunning() || !m_emuContext)
 		return;
 	
 	// Horizontal stretch.
-	if (mode == GensConfig::STRETCH_H ||
-	    mode == GensConfig::STRETCH_FULL)
+	if (mode == STRETCH_H || mode == STRETCH_FULL)
 	{
 		// Horizontal stretch.
 		const int h_pix_begin = m_emuContext->m_vdp->GetHPixBegin();
@@ -705,8 +704,7 @@ void GLBackend::recalcStretchRectF(GensConfig::StretchMode_t mode)
 	}
 	
 	// Vertical stretch.
-	if (mode == GensConfig::STRETCH_V ||
-	    mode == GensConfig::STRETCH_FULL)
+	if (mode == STRETCH_V || mode == STRETCH_FULL)
 	{
 		// Vertical stretch.
 		int v_pix = (240 - m_emuContext->m_vdp->GetVPix());
@@ -1064,8 +1062,7 @@ void GLBackend::showOsdPreview(void)
 	// Calculate (x2, y2) based on stretch mode.
 	
 	// Horizontal stretch.
-	if (stretchMode() == GensConfig::STRETCH_H ||
-	    stretchMode() == GensConfig::STRETCH_FULL)
+	if (stretchMode() == STRETCH_H || stretchMode() == STRETCH_FULL)
 	{
 		x2 = x1 + 0.5;
 	}
@@ -1075,8 +1072,7 @@ void GLBackend::showOsdPreview(void)
 	}
 	
 	// Vertical stretch.
-	if (stretchMode() == GensConfig::STRETCH_V ||
-	    stretchMode() == GensConfig::STRETCH_FULL)
+	if (stretchMode() == STRETCH_V || stretchMode() == STRETCH_FULL)
 	{
 		y2 = y1 - 0.5;
 	}
@@ -1104,15 +1100,12 @@ void GLBackend::showOsdPreview(void)
 
 
 /**
- * setBilinearFilter(): Set the bilinear filter setting.
+ * bilinearFilter_changed_slot(): Bilinear filter setting has changed.
  * NOTE: This function MUST be called from within an active OpenGL context!
- * @param newBilinearFilter True to enable bilinear filtering; false to disable it.
+ * @param newBilinearFilter (bool) New bilinear filter setting.
  */
-void GLBackend::setBilinearFilter(bool newBilinearFilter)
+void GLBackend::bilinearFilter_changed_slot(const QVariant& newBilinearFilter)
 {
-	if (bilinearFilter() == newBilinearFilter)
-		return;
-	
 	if (m_tex > 0)
 	{
 		// Bind the texture.
@@ -1120,7 +1113,7 @@ void GLBackend::setBilinearFilter(bool newBilinearFilter)
 		glBindTexture(GL_TEXTURE_2D, m_tex);
 		
 		// Set the texture filter setting.
-		const GLint filterMethod = (newBilinearFilter ? GL_LINEAR : GL_NEAREST);
+		const GLint filterMethod = (newBilinearFilter.toBool() ? GL_LINEAR : GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMethod);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMethod);
 		
@@ -1128,20 +1121,17 @@ void GLBackend::setBilinearFilter(bool newBilinearFilter)
 		glDisable(GL_TEXTURE_2D);
 	}
 	
-	// Update VBackend's bilinear filter setting.
-	VBackend::setBilinearFilter(newBilinearFilter);
+	// Call VBackend's bilinearFilter_changed_slot().
+	VBackend::bilinearFilter_changed_slot(newBilinearFilter);
 }
 
 
 /**
- * setPauseTint(): Set the Pause Tint effect setting.
- * @param newFastBlur True to enable Pause Tint; false to disable it.
+ * pauseTint_changed_slot(): Pause Tint effect setting has changed.
+ * @param newPauseTint (bool) New pause tint effect setting.
  */
-void GLBackend::setPauseTint(bool newPauseTint)
+void GLBackend::pauseTint_changed_slot(const QVariant& newPauseTint)
 {
-	if (pauseTint() == newPauseTint)
-		return;
-	
 	if (!m_shaderMgr.hasPaused() &&
 	    (isRunning() && isPaused()))
 	{
@@ -1151,26 +1141,34 @@ void GLBackend::setPauseTint(bool newPauseTint)
 		m_mdScreenDirty = true;
 	}
 	
-	// Update VBackend's pause tint effect setting.
-	VBackend::setPauseTint(newPauseTint);
+	// Call VBackend's pauseTint_changed_slot().
+	VBackend::pauseTint_changed_slot(newPauseTint);
 }
 
 
-void GLBackend::setStretchMode(GensConfig::StretchMode_t newStretchMode)
+/**
+ * stretchMode_changed_slot(): Stretch mode setting has changed.
+ * @param newStretchMode (int) New stretch mode setting.
+ */
+void GLBackend::stretchMode_changed_slot(const QVariant& newStretchMode)
 {
-	if ((stretchMode() == newStretchMode) ||
-	    (newStretchMode < GensConfig::STRETCH_NONE) ||
-	    (newStretchMode > GensConfig::STRETCH_FULL))
+	StretchMode_t stretch = (StretchMode_t)newStretchMode.toInt();
+	
+	// Verify that the new stretch mode is valid.
+	// TODO: New ConfigItem subclass for StretchMode_t.
+	if ((stretch < STRETCH_NONE) || (stretch > STRETCH_FULL))
 	{
+		// Invalid stretch mode.
+		// Reset to default.
+		stretchMode_reset();
 		return;
 	}
 	
 	// Recalculate the stretch mode rectangle.
-	recalcStretchRectF(newStretchMode);
+	recalcStretchRectF(stretch);
 	
-	// Set the stretch mode setting.
-	VBackend::setStretchMode(newStretchMode);
+	// Call VBackend's stretchMode_changed_slot().
+	VBackend::stretchMode_changed_slot(newStretchMode);
 }
-
 
 }

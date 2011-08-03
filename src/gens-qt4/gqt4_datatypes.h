@@ -41,6 +41,14 @@ typedef struct _paused_t
 	};
 } paused_t;
 
+typedef enum
+{
+	STRETCH_NONE	= 0,
+	STRETCH_H	= 1,
+	STRETCH_V	= 2,
+	STRETCH_FULL	= 3
+} StretchMode_t;
+
 #ifdef __cplusplus
 }
 #endif
