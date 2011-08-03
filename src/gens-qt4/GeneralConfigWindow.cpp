@@ -50,6 +50,9 @@ using std::auto_ptr;
 // EmuManager is needed for region code strings.
 #include "EmuManager.hpp"
 
+// Configuration items.
+#include "Config/ConfigItem.hpp"
+
 namespace GensQt4
 {
 
@@ -314,6 +317,15 @@ void GeneralConfigWindow::setApplyButtonEnabled(bool enabled)
 #endif
 
 
+static inline bool ValByPath_bool(const char *path)
+	{ return ConfigItem::ValueByPath(QLatin1String(path)).toBool(); }
+static inline QColor ValByPath_QColor(const char *path)
+	{ return ConfigItem::ValueByPath(QLatin1String(path)).value<QColor>(); }
+static inline int ValByPath_int(const char *path)
+	{ return ConfigItem::ValueByPath(QLatin1String(path)).toInt(); }
+static inline QString ValByPath_QString(const char *path)
+	{ return ConfigItem::ValueByPath(QLatin1String(path)).toString(); }
+
 /**
  * reload(): Reload configuration.
  */
@@ -323,48 +335,48 @@ void GeneralConfigWindow::reload(void)
 	QColor colorText;
 	
 	/** Onscreen display: FPS counter. **/
-	chkOsdFpsEnable->setChecked(gqt4_config->osdFpsEnabled());
-	m_osdFpsColor = gqt4_config->osdFpsColor();
+	chkOsdFpsEnable->setChecked(ValByPath_bool("OSD/fpsEnabled"));
+	m_osdFpsColor = ValByPath_QColor("OSD/fpsColor");
 	btnOsdFpsColor->setBgColor(m_osdFpsColor);
 	btnOsdFpsColor->setText(m_osdFpsColor.name().toUpper());
 	
 	/** Onscreen display: Messages. **/
-	chkOsdMsgEnable->setChecked(gqt4_config->osdMsgEnabled());
-	m_osdMsgColor = gqt4_config->osdMsgColor();
+	chkOsdMsgEnable->setChecked(ValByPath_bool("OSD/msgEnabled"));
+	m_osdMsgColor = ConfigItem::ValueByPath(QLatin1String("OSD/msgColor")).value<QColor>();
 	btnOsdMsgColor->setBgColor(m_osdMsgColor);
 	btnOsdMsgColor->setText(m_osdMsgColor.name().toUpper());
 	
 	/** Intro effect. **/
-	cboIntroStyle->setCurrentIndex(gqt4_config->introStyle());
-	cboIntroColor->setCurrentIndex(gqt4_config->introColor());
+	cboIntroStyle->setCurrentIndex(ValByPath_int("Intro_Effect/introStyle"));
+	cboIntroColor->setCurrentIndex(ValByPath_int("Intro_Effect/introColor"));
 	
 	/** Sega CD Boot ROMs. **/
-	txtMcdRomUSA->setText(gqt4_config->mcdRomUSA());
-	txtMcdRomEUR->setText(gqt4_config->mcdRomEUR());
-	txtMcdRomJPN->setText(gqt4_config->mcdRomJPN());
-	txtMcdRomAsia->setText(gqt4_config->mcdRomAsia());
+	txtMcdRomUSA->setText(ValByPath_QString("Sega_CD/bootRomUSA"));
+	txtMcdRomEUR->setText(ValByPath_QString("Sega_CD/bootRomEUR"));
+	txtMcdRomJPN->setText(ValByPath_QString("Sega_CD/bootRomJPN"));
+	txtMcdRomAsia->setText(ValByPath_QString("Sega_CD/bootRomAsia"));
 	on_txtMcdRomUSA_focusIn();
 	
 	/** External programs. **/
-	txtExtPrgUnRAR->setText(gqt4_config->extprgUnRAR());
+	txtExtPrgUnRAR->setText(ValByPath_QString("External_Programs/UnRAR"));
 	
 	/** Graphics settings. **/
-	chkAspectRatioConstraint->setChecked(gqt4_config->aspectRatioConstraint());
-	chkFastBlur->setChecked(gqt4_config->fastBlur());
-	chkBilinearFilter->setChecked(gqt4_config->bilinearFilter());
-	cboInterlacedMode->setCurrentIndex((int)gqt4_config->interlacedMode());
-	hsldContrast->setValue(gqt4_config->contrast());
-	hsldBrightness->setValue(gqt4_config->brightness());
-	chkGrayscale->setChecked(gqt4_config->grayscale());
-	chkInverted->setChecked(gqt4_config->inverted());
-	cboColorScaleMethod->setCurrentIndex(gqt4_config->colorScaleMethod());
+	chkAspectRatioConstraint->setChecked(ValByPath_bool("Graphics/aspectRatioConstraint"));
+	chkFastBlur->setChecked(ValByPath_bool("Graphics/fastBlur"));
+	chkBilinearFilter->setChecked(ValByPath_bool("Graphics/bilinearFilter"));
+	cboInterlacedMode->setCurrentIndex(ValByPath_int("Graphics/interlacedMode"));
+	hsldContrast->setValue(ValByPath_int("Graphics/contrast"));
+	hsldBrightness->setValue(ValByPath_int("Graphics/brightness"));
+	chkGrayscale->setChecked(ValByPath_bool("Graphics/grayscale"));
+	chkInverted->setChecked(ValByPath_bool("Graphics/inverted"));
+	cboColorScaleMethod->setCurrentIndex(ValByPath_int("Graphics/colorScaleMethod"));
 	
 	/** General settings. **/
-	chkAutoFixChecksum->setChecked(gqt4_config->autoFixChecksum());
-	chkAutoPause->setChecked(gqt4_config->autoPause());
-	chkBorderColor->setChecked(gqt4_config->borderColor());
-	chkPauseTint->setChecked(gqt4_config->pauseTint());
-	chkNtscV30Rolling->setChecked(gqt4_config->ntscV30Rolling());
+	chkAutoFixChecksum->setChecked(ValByPath_bool("autoFixChecksum"));
+	chkAutoPause->setChecked(ValByPath_bool("autoPause"));
+	chkBorderColor->setChecked(ValByPath_bool("borderColorEmulation"));
+	chkPauseTint->setChecked(ValByPath_bool("pauseTint"));
+	chkNtscV30Rolling->setChecked(ValByPath_bool("ntscV30Rolling"));
 	
 	/** System. **/
 	cboRegionCurrent->setCurrentIndex((int)gqt4_config->regionCode() + 1);
@@ -390,6 +402,15 @@ void GeneralConfigWindow::reload(void)
 }
 
 
+static inline void SetValByPath_bool(const char *path, bool value)
+	{ ConfigItem::SetValueByPath(QLatin1String(path), value); }
+static inline void SetValByPath_QColor(const char *path, const QColor& value)
+	{ ConfigItem::SetValueByPath(QLatin1String(path), value.name()); }
+static inline void SetValByPath_int(const char *path, int value)
+	{ ConfigItem::SetValueByPath(QLatin1String(path), value); }
+static inline void SetValByPath_QString(const char *path, const QString& value)
+	{ ConfigItem::SetValueByPath(QLatin1String(path), value); }
+
 /**
  * apply(): Apply the configuration changes.
  * Triggered if "Apply" is clicked.
@@ -398,41 +419,41 @@ void GeneralConfigWindow::apply(void)
 {
 #ifndef GCW_APPLY_IMMED
 	/** Onscreen display. **/
-	gqt4_config->setOsdFpsEnabled(chkOsdFpsEnable->isChecked());
-	gqt4_config->setOsdFpsColor(m_osdFpsColor);
-	gqt4_config->setOsdMsgEnabled(chkOsdMsgEnable->isChecked());
-	gqt4_config->setOsdMsgColor(m_osdMsgColor);
+	SetValByPath_bool("OSD/fpsEnabled", chkOsdFpsEnable->isChecked());
+	SetValByPath_QColor("OSD/fpsColor", m_osdFpsColor);
+	SetValByPath_bool("OSD/msgEnable", chkOsdMsgEnable->isChecked());
+	SetValByPath_QColor("OSD/msgColor", m_osdMsgColor);
 	
 	/** Intro effect. **/
-	gqt4_config->setIntroStyle(cboIntroStyle->currentIndex());
-	gqt4_config->setIntroColor(cboIntroColor->currentIndex());
+	SetValByPath_int("Intro_Effect/introStyle", cboIntroStyle->currentIndex());
+	SetValByPath_int("Intro_effect/introColor", cboIntroColor->currentIndex());
 	
 	/** Sega CD Boot ROMs. **/
-	gqt4_config->setMcdRomUSA(txtMcdRomUSA->text());
-	gqt4_config->setMcdRomEUR(txtMcdRomEUR->text());
-	gqt4_config->setMcdRomJPN(txtMcdRomJPN->text());
-	gqt4_config->setMcdRomAsia(txtMcdRomAsia->text());
+	SetValByPath_QString("Sega_CD/bootRomUSA", txtMcdRomUSA->text());
+	SetValByPath_QString("Sega_CD/bootRomEUR", txtMcdRomEUR->text());
+	SetValByPath_QString("Sega_CD/bootRomJPN", txtMcdRomJPN->text());
+	SetValByPath_QString("Sega_CD/bootRomAsia", txtMcdRomAsia->text());
 	
 	/** External programs. **/
-	gqt4_config->setExtPrgUnRAR(txtExtPrgUnRAR->text());
+	SetValByPath_QString("External_Programs/UnRAR", txtExtPrgUnRAR->text());
 	
 	/** Graphics settings. **/
-	gqt4_config->setAspectRatioConstraint(chkAspectRatioConstraint->isChecked());
-	gqt4_config->setFastBlur(chkFastBlur->isChecked());
-	gqt4_config->setBilinearFilter(chkBilinearFilter->isChecked());
-	gqt4_config->setInterlacedMode((GensConfig::InterlacedMode_t)cboInterlacedMode->currentIndex());
-	gqt4_config->setContrast(hsldContrast->value());
-	gqt4_config->setBrightness(hsldBrightness->value());
-	gqt4_config->setGrayscale(chkGrayscale->isChecked());
-	gqt4_config->setInverted(chkInverted->isChecked());
-	gqt4_config->setColorScaleMethod(cboColorScaleMethod->currentIndex());
+	SetValByPath_bool("Graphics/aspectRatioConstraint", chkAspectRatioConstraint->isChecked());
+	SetValByPath_bool("Graphics/fastBlur", chkFastBlur->isChecked());
+	SetValByPath_bool("Graphics/bilinearFilter", chkBilinearFilter->isChecked());
+	SetValByPath_int("Graphics/interlacedMode", cboInterlacedMode->currentIndex());
+	SetValByPath_int("Graphics/contrast", hsldContrast->value());
+	SetValByPath_int("Graphics/brightness", hsldBrightness->value());
+	SetValByPath_bool("Graphics/grayscale", chkGrayscale->isChecked());
+	SetValByPath_bool("Graphics/inverted", chkInverted->isChecked());
+	SetValByPath_int("Graphics/colorScaleMethod", cboColorScaleMethod->currentIndex());
 	
 	/** General settings. **/
-	gqt4_config->setAutoFixChecksum(chkAutoFixChecksum->isChecked());
-	gqt4_config->setAutoPause(chkAutoPause->isChecked());
-	gqt4_config->setBorderColor(chkBorderColor->isChecked());
-	gqt4_config->setPauseTint(chkPauseTint->isChecked());
-	gqt4_config->setNtscV30Rolling(chkNtscV30Rolling->isChecked());
+	SetValByPath_bool("autoFixChecksum", chkAutoFixChecksum->isChecked());
+	SetValByPath_bool("autoPause", chkAutoPause->isChecked());
+	SetValByPath_bool("borderColorEmulation", chkBorderColor->isChecked());
+	SetValByPath_bool("pauseTint", chkPauseTint->isChecked());
+	SetValByPath_bool("ntscV30Rolling", chkNtscV30Rolling->isChecked());
 	
 	/** System. **/
 	gqt4_config->setRegionCode((LibGens::SysVersion::RegionCode_t)(cboRegionCurrent->currentIndex() - 1));
