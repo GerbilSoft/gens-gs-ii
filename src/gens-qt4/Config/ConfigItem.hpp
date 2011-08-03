@@ -76,6 +76,12 @@ class ConfigItem : public QObject
 		QVariant value(void);
 		
 		/**
+		 * def(): Get the configuration item's default value.
+		 * @return Configuration item's default value.
+		 */
+		QVariant def(void);
+		
+		/**
 		 * setValue(): Set the configuration item's value.
 		 * @param newValue New value for the configuration item.
 		 */
@@ -141,6 +147,13 @@ class ConfigItem : public QObject
  */
 inline QVariant ConfigItem::value(void)
 	{ return m_value; }
+
+/**
+ * def(): Get the configuration item's default value.
+ * @return Configuration item's default value.
+ */
+inline QVariant ConfigItem::def(void)
+	{ return m_def; }
 
 /**
  * emit_item(): Emit valueChanged() signal for this item.
