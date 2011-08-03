@@ -162,6 +162,8 @@ inline void CrazyEffect::T_doCrazyEffect(pixel *screen)
  */
 void CrazyEffect::run(void)
 {
+	// TODO: Update to not use the Vdp class.
+#if 0
 	switch (Vdp::m_palette.bpp())
 	{
 		case VdpPalette::BPP_15:
@@ -181,6 +183,7 @@ void CrazyEffect::run(void)
 					(Vdp::MD_Screen.fb32());
 			break;
 	}
+#endif
 }
 
 }

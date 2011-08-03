@@ -152,6 +152,14 @@ void GLBackend::reallocTexture(void)
 	if (m_tex > 0)
 		glDeleteTextures(1, &m_tex);
 	
+	// If we don't have an emulation context, don't allocate a texture for now.
+	// TODO: Intro effects.
+	if (!m_emuContext)
+	{
+		m_tex = 0;
+		return;
+	}
+	
 	// Create and initialize a GL texture.
 	// TODO: Add support for NPOT textures and/or GL_TEXTURE_RECTANGLE_ARB.
 	glEnable(GL_TEXTURE_2D);
@@ -166,7 +174,7 @@ void GLBackend::reallocTexture(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMethod);
 	
 	// Determine the texture format and type.
-	m_lastBpp = LibGens::Vdp::m_palette.bpp();
+	m_lastBpp = m_emuContext->m_vdp->m_palette.bpp();
 	switch (m_lastBpp)
 	{
 		case LibGens::VdpPalette::BPP_15:
@@ -482,6 +490,13 @@ void GLBackend::glb_paintGL(void)
 	glClearColor(1.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
+	if (!m_emuContext)
+	{
+		// No emulation context.
+		// TODO: Intro effects.
+		return;
+	}
+	
 	if (hasAspectRatioConstraintChanged())
 	{
 		// Aspect ratio constraint has changed.
@@ -494,7 +509,8 @@ void GLBackend::glb_paintGL(void)
 		// MD_Screen is dirty.
 		
 		// Check if the Bpp has changed.
-		if (LibGens::Vdp::m_palette.bpp() != m_lastBpp)
+		const LibGens::VdpPalette::ColorDepth bpp = m_emuContext->m_vdp->m_palette.bpp();
+		if (bpp != m_lastBpp)
 		{
 			// Bpp has changed. Reallocate the texture.
 			// VDP palettes will be recalculated on the next frame.
@@ -531,9 +547,9 @@ void GLBackend::glb_paintGL(void)
 		// TODO: Optimize this!
 		GLvoid *screen;
 		LibGens::MdFb *src_fb = (bFromMD
-				? &LibGens::Vdp::MD_Screen
+				? &m_emuContext->m_vdp->MD_Screen
 				: m_intScreen);
-		if (LibGens::Vdp::m_palette.bpp() != LibGens::VdpPalette::BPP_32)
+		if (bpp != LibGens::VdpPalette::BPP_32)
 			screen = src_fb->fb16();
 		else
 			screen = src_fb->fb32();
@@ -589,8 +605,8 @@ void GLBackend::glb_paintGL(void)
 	
 	// Check if the MD resolution has changed.
 	// If it has, recalculate the stretch mode rectangle.
-	const QSize mdResCur(LibGens::Vdp::GetHPix(),
-			     LibGens::Vdp::GetVPix());
+	const QSize mdResCur(m_emuContext->m_vdp->GetHPix(),
+			     m_emuContext->m_vdp->GetVPix());
 	if (mdResCur != m_stretchLastRes)
 		recalcStretchRectF();
 	
@@ -643,9 +659,19 @@ void GLBackend::glb_paintGL(void)
  */
 void GLBackend::recalcStretchRectF(GensConfig::StretchMode_t mode)
 {
-	// Store the current MD screen resolution.
-	m_stretchLastRes.setWidth(LibGens::Vdp::GetHPix());
-	m_stretchLastRes.setHeight(LibGens::Vdp::GetVPix());
+	if (m_emuContext)
+	{
+		// Store the current MD screen resolution.
+		m_stretchLastRes.setWidth(m_emuContext->m_vdp->GetHPix());
+		m_stretchLastRes.setHeight(m_emuContext->m_vdp->GetVPix());
+	}
+	else
+	{
+		// No emulation context.
+		// Assume 320x240 image for now.
+		m_stretchLastRes.setWidth(320);
+		m_stretchLastRes.setWidth(240);
+	}
 	
 	// Default to no stretch.
 	m_stretchRectF = QRectF(
@@ -655,9 +681,11 @@ void GLBackend::recalcStretchRectF(GensConfig::StretchMode_t mode)
 		((double)m_texVisSize.height() / (double)m_texSize.height())	// Height.
 		);
 	
-	// If stretch is disabled, we're done here.
-	// Also, stretch shouldn't be applied if emulation isn't running.
-	if (mode == GensConfig::STRETCH_NONE || !isRunning())
+	// Don't apply any stretch parameters if:
+	// - stretching is disabled
+	// - emulation isn't running
+	// - no emulation context is present (TODO: Combine isRunning() with m_emuContext?)
+	if (mode == GensConfig::STRETCH_NONE || !isRunning() || !m_emuContext)
 		return;
 	
 	// Horizontal stretch.
@@ -665,7 +693,7 @@ void GLBackend::recalcStretchRectF(GensConfig::StretchMode_t mode)
 	    mode == GensConfig::STRETCH_FULL)
 	{
 		// Horizontal stretch.
-		const int h_pix_begin = LibGens::Vdp::GetHPixBegin();
+		const int h_pix_begin = m_emuContext->m_vdp->GetHPixBegin();
 		if (h_pix_begin > 0)
 		{
 			// Less than 320 pixels wide.
@@ -681,7 +709,7 @@ void GLBackend::recalcStretchRectF(GensConfig::StretchMode_t mode)
 	    mode == GensConfig::STRETCH_FULL)
 	{
 		// Vertical stretch.
-		int v_pix = (240 - LibGens::Vdp::GetVPix());
+		int v_pix = (240 - m_emuContext->m_vdp->GetVPix());
 		if (v_pix > 0)
 		{
 			// Less than 240 pixels tall.

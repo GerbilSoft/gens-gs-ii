@@ -29,6 +29,9 @@
 
 #include "Util/byteswap.h"
 
+// TODO: Eliminate use of EmuContext.
+#include "../EmuContext.hpp"
+
 // C includes.
 #include <math.h>
 #include <stdint.h>
@@ -408,7 +411,9 @@ void VdpPalette::recalcFull(void)
 	// Set the CRam flag to force a palette update.
 	// TODO: This is being done from a class instance...
 	// Figure out a better way to handle this.
-	Vdp::MarkCRamDirty();
+	EmuContext *instance = EmuContext::Instance();
+	if (instance != NULL)
+		instance->m_vdp->MarkCRamDirty();
 	
 	// TODO: Do_VDP_Only() / Do_32X_VDP_Only() if paused.
 	
@@ -445,7 +450,11 @@ FORCE_INLINE void VdpPalette::T_updateMD(pixel *MD_palette,
 					const VdpTypes::CRam_t *cram)
 {
 	// TODO: Figure out a better way to handle this.
-	if (Vdp::VDP_Layers & VdpTypes::VDP_LAYER_PALETTE_LOCK)
+	unsigned int vdp_layers = 0;
+	EmuContext *instance = EmuContext::Instance();
+	if (instance != NULL)
+		vdp_layers = instance->m_vdp->VDP_Layers;
+	if (vdp_layers & VdpTypes::VDP_LAYER_PALETTE_LOCK)
 		return;
 	
 	// NOTE: We can't clear the CRam flag in the VDP class here.
@@ -491,7 +500,10 @@ FORCE_INLINE void VdpPalette::T_updateMD(pixel *MD_palette,
 	}
 	
 	// Update the background color.
-	unsigned int BG_Color = (Vdp::VDP_Reg.m5.BG_Color & 0x3F);
+	// TODO: Eliminate dependency on Vdp::VDP_Reg.
+	unsigned int BG_Color = 0;
+	if (instance != NULL)
+		BG_Color = (instance->m_vdp->VDP_Reg.m5.BG_Color & 0x3F);
 	MD_palette[0] = MD_palette[BG_Color];
 	
 	if (hs)

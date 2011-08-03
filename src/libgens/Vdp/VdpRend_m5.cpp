@@ -85,19 +85,13 @@
 namespace LibGens
 {
 
-/** Static member initialization. **/
-
-// Temporary VDP data.
-unsigned int Vdp::Y_FineOffset;
-unsigned int Vdp::TotalSprites;
-
 /**
  * Vdp::T_GetLineNumber(): Get the current line number, adjusted for interlaced display.
  * @param interlaced True for interlaced; false for non-interlaced.
  * @return Line number.
  */
 template<bool interlaced>
-FORCE_INLINE int Vdp::T_GetLineNumber(void)
+FORCE_INLINE int Vdp::T_GetLineNumber(void) const
 {
 	// Get the current line number.
 	int vdp_line = VDP_Lines.Visible.Current;

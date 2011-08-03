@@ -36,6 +36,9 @@
 /** Static member initialization. **/
 #include "VdpIo_static.hpp"
 
+// Emulation Context.
+#include "../EmuContext.hpp"
+
 // C wrapper functions for Starscream.
 #ifdef __cplusplus
 extern "C" {
@@ -43,7 +46,10 @@ extern "C" {
 
 uint8_t VDP_Int_Ack(void)
 {
-	return LibGens::Vdp::Int_Ack();
+	// TODO: This won't work with multiple contexts...
+	LibGens::EmuContext *instance = LibGens::EmuContext::Instance();
+	if (instance != NULL)
+		return instance->m_vdp->Int_Ack();
 }
 
 #ifdef __cplusplus
@@ -53,10 +59,20 @@ uint8_t VDP_Int_Ack(void)
 namespace LibGens
 {
 
+/** Static member initialization. (VDP global items) **/
+// TODO: Move to Vdp.cpp?
+VdpTypes::VdpEmuOptions_t Vdp::VdpEmuOptions =
+{
+	VdpTypes::INTREND_FLICKER,	// intRendMode
+	false,				// zeroLengthDMA
+	true,				// spriteLimits
+	true,				// vscrollBug
+};
+
 /**
- * VdpRend::Init(): Initialize the VDP subsystem.
+ * Vdp::Vdp(): Initialize the VDP subsystem.
  */
-void Vdp::Init(void)
+Vdp::Vdp(void)
 {
 	// Initialize the Horizontal Counter table.
 	unsigned int hc_val;
@@ -72,27 +88,30 @@ void Vdp::Init(void)
 	}
 	
 	// Initialize the VDP rendering subsystem.
-	Rend_Init();
+	rend_init();
+	
+	// Reset the VDP.
+	reset();
 }
 
 
 /**
- * Vdp::Init(): Shut down the VDP subsystem.
+ * Vdp::~Vdp(): Shut down the VDP subsystem.
  */
-void Vdp::End(void)
+Vdp::~Vdp(void)
 {
-	// shut down the VDP rendering subsystem.
-	Rend_End();
+	// Shut down the VDP rendering subsystem.
+	rend_end();
 }
 
 
 /**
- * Vdp::Reset(): Reset the VDP.
+ * Vdp::reset(): Reset the VDP.
  */
-void Vdp::Reset(void)
+void Vdp::reset(void)
 {
 	// Reset the VDP rendering arrays.
-	Rend_Reset();
+	rend_reset();
 	
 	// Clear VRam, CRam, and VSRam.
 	memset(&VRam, 0x00, sizeof(VRam));

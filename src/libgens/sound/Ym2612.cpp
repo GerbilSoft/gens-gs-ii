@@ -49,6 +49,9 @@
 #include "SoundMgr.hpp"
 #include "Vdp/Vdp.hpp"
 
+// TODO: Get rid of EmuContext.
+#include "../EmuContext.hpp"
+
 #if 0
 // GSX v7 savestate functionality.
 #include "util/file/gsx_v7.h"
@@ -2434,8 +2437,14 @@ void Ym2612::specialUpdate(void)
 	update(m_bufPtrL, m_bufPtrR, m_writeLen);
 	m_writeLen = 0;
 	
+	// TODO: Don't use EmuContext here...
+	int line_num = 1;
+	EmuContext *context = EmuContext::Instance();
+	if (context != NULL)
+		line_num = (context->m_vdp->VDP_Lines.Display.Current + 1);
+	
 	// Determine the new starting position.
-	int writePos = SoundMgr::GetWritePos(Vdp::VDP_Lines.Display.Current + 1);
+	int writePos = SoundMgr::GetWritePos(line_num);
 	
 	// Update the PSG buffer pointers.
 	m_bufPtrL = &SoundMgr::ms_SegBufL[writePos];

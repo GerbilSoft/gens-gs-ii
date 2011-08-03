@@ -487,24 +487,30 @@ void EmuManager::processQEmuRequest(void)
  */
 QImage EmuManager::getMDScreen(void) const
 {
+	if (!gqt4_emuContext)
+		return QImage();
+	
+	// Get the color depth.
+	const LibGens::VdpPalette::ColorDepth bpp = gqt4_emuContext->m_vdp->m_palette.bpp();
+	
 	// Create the QImage.
 	const uint8_t *start;
-	const int startY = ((240 - LibGens::Vdp::GetVPix()) / 2);
-	const int startX = (LibGens::Vdp::GetHPixBegin());
+	const int startY = ((240 - gqt4_emuContext->m_vdp->GetVPix()) / 2);
+	const int startX = (gqt4_emuContext->m_vdp->GetHPixBegin());
 	int bytesPerLine;
 	QImage::Format imgFormat;
 	
-	if (LibGens::Vdp::m_palette.bpp() == LibGens::VdpPalette::BPP_32)
+	if (bpp == LibGens::VdpPalette::BPP_32)
 	{
-		start = (const uint8_t*)(LibGens::Vdp::MD_Screen.lineBuf32(startY) + startX);
-		bytesPerLine = (LibGens::Vdp::MD_Screen.pxPerLine() * sizeof(uint32_t));
+		start = (const uint8_t*)(gqt4_emuContext->m_vdp->MD_Screen.lineBuf32(startY) + startX);
+		bytesPerLine = (gqt4_emuContext->m_vdp->MD_Screen.pxPerLine() * sizeof(uint32_t));
 		imgFormat = QImage::Format_RGB32;
 	}
 	else
 	{
-		start = (const uint8_t*)(LibGens::Vdp::MD_Screen.lineBuf16(startY) + startX);
-		bytesPerLine = (LibGens::Vdp::MD_Screen.pxPerLine() * sizeof(uint16_t));
-		if (LibGens::Vdp::m_palette.bpp() == LibGens::VdpPalette::BPP_16)
+		start = (const uint8_t*)(gqt4_emuContext->m_vdp->MD_Screen.lineBuf16(startY) + startX);
+		bytesPerLine = (gqt4_emuContext->m_vdp->MD_Screen.pxPerLine() * sizeof(uint16_t));
+		if (bpp == LibGens::VdpPalette::BPP_16)
 			imgFormat = QImage::Format_RGB16;
 		else
 			imgFormat = QImage::Format_RGB555;
@@ -512,8 +518,8 @@ QImage EmuManager::getMDScreen(void) const
 	
 	// TODO: Check for errors.
 	// TODO: Store timestamp, ROM filename, etc.
-	return QImage(start, LibGens::Vdp::GetHPix(),
-			LibGens::Vdp::GetVPix(),
+	return QImage(start, gqt4_emuContext->m_vdp->GetHPix(),
+			gqt4_emuContext->m_vdp->GetVPix(),
 			bytesPerLine, imgFormat);	
 }
 
@@ -833,27 +839,32 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 	// NOTE: gens-qt4 uses values [-100,100] for contrast and brightness.
 	// libgens uses [0,200] for contrast and brightness.
 	
+	// TODO: Initialize palette settings on ROM startup.
+	if (!gqt4_emuContext)
+		return;
+	LibGens::VdpPalette *palette = &gqt4_emuContext->m_vdp->m_palette;
+	
 	switch (type)
 	{
 		case EmuRequest_t::RQT_PS_CONTRAST:
-			LibGens::Vdp::m_palette.setContrast(val + 100);
+			palette->setContrast(val + 100);
 			break;
 		
 		case EmuRequest_t::RQT_PS_BRIGHTNESS:
-			LibGens::Vdp::m_palette.setBrightness(val + 100);
+			palette->setBrightness(val + 100);
 			break;
 		
 		case EmuRequest_t::RQT_PS_GRAYSCALE:
-			LibGens::Vdp::m_palette.setGrayscale((bool)(!!val));
+			palette->setGrayscale((bool)(!!val));
 			break;
 		
 		case EmuRequest_t::RQT_PS_INVERTED:
-			LibGens::Vdp::m_palette.setInverted((bool)(!!val));
+			palette->setInverted((bool)(!!val));
 			break;
 		
 		case EmuRequest_t::RQT_PS_COLORSCALEMETHOD:
-			LibGens::Vdp::m_palette.setColorScaleMethod(
-						(LibGens::VdpPalette::ColorScaleMethod_t)val);
+			palette->setColorScaleMethod(
+					(LibGens::VdpPalette::ColorScaleMethod_t)val);
 			break;
 		
 		case EmuRequest_t::RQT_PS_INTERLACEDMODE:

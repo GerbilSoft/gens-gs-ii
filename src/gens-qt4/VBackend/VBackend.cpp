@@ -829,5 +829,23 @@ int VBackend::recSetDuration(const QString& component, int duration)
 	return 0;
 }
 
+
+/**
+ * setEmuContext(): Set the emulation context for this video backend.
+ * @param newEmuContext New emulation context.
+ */
+void VBackend::setEmuContext(LibGens::EmuContext *newEmuContext)
+{
+	if (m_emuContext == newEmuContext)
+		return;
+	
+	m_emuContext = newEmuContext;
+	setVbDirty();
+	setMdScreenDirty();
+	
+	// TODO: Should we update the video buffer here?
+	if (!isRunning() || isPaused())
+		vbUpdate();
 }
 
+}

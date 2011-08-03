@@ -374,6 +374,11 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 		return 0x00;
 	}
 	
+	// TODO: Don't use EmuContext here...
+	EmuContext *context = EmuContext::Instance();
+	if (!context)
+		return 0;
+	
 	// Check the VDP address.
 	switch (address & 0x1F)
 	{
@@ -386,24 +391,24 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 		case 0x04: case 0x06:
 		{
 			// VDP control port. (high byte)
-			uint16_t vdp_status = Vdp::Read_Status();
+			uint16_t vdp_status = context->m_vdp->Read_Status();
 			return ((vdp_status >> 8) & 0xFF);
 		}
 		
 		case 0x05: case 0x07:
 		{
 			// VDP control port. (low byte)
-			uint16_t vdp_status = Vdp::Read_Status();
+			uint16_t vdp_status = context->m_vdp->Read_Status();
 			return (vdp_status & 0xFF);
 		}
 		
 		case 0x08:
 			// V counter.
-			return Vdp::Read_V_Counter();
+			return context->m_vdp->Read_V_Counter();
 		
 		case 0x09:
 			// H counter.
-			return Vdp::Read_H_Counter();
+			return context->m_vdp->Read_H_Counter();
 		
 		default:
 			// Invalid or unsupported VDP port.
@@ -630,20 +635,25 @@ inline uint16_t M68K_Mem::M68K_Read_Word_VDP(uint32_t address)
 		return 0x0000;
 	}
 	
+	// TODO: Don't use EmuContext here...
+	EmuContext *context = EmuContext::Instance();
+	if (!context)
+		return 0;
+	
 	// Check the VDP address.
 	switch (address & 0x1E)
 	{
 		case 0x00: case 0x02:
 			// VDP data port.
-			return Vdp::Read_Data();
+			return context->m_vdp->Read_Data();
 		
 		case 0x04: case 0x06:
 			// VDP control port.
-			return Vdp::Read_Status();
+			return context->m_vdp->Read_Status();
 		
 		case 0x08:
 			// HV counter.
-			return ((Vdp::Read_V_Counter() << 8) | Vdp::Read_H_Counter());
+			return ((context->m_vdp->Read_V_Counter() << 8) | context->m_vdp->Read_H_Counter());
 		
 		default:
 			// Invalid or unsupported VDP port.
@@ -927,12 +937,17 @@ inline void M68K_Mem::M68K_Write_Byte_VDP(uint32_t address, uint8_t data)
 		return;
 	}
 	
+	// TODO: Don't use EmuContext here...
+	EmuContext *context = EmuContext::Instance();
+	if (!context)
+		return;
+	
 	// Check the VDP address.
 	switch (address & 0x1F)
 	{
 		case 0x00: case 0x01: case 0x02: case 0x03:
 			// VDP data port.
-			Vdp::Write_Data_Byte(data);
+			context->m_vdp->Write_Data_Byte(data);
 			break;
 		
 		case 0x04: case 0x05: case 0x06: case 0x07:
@@ -1233,17 +1248,22 @@ inline void M68K_Mem::M68K_Write_Word_VDP(uint32_t address, uint16_t data)
 		return;
 	}
 	
+	// TODO: Don't use EmuContext here...
+	EmuContext *context = EmuContext::Instance();
+	if (!context)
+		return;
+	
 	// Check the VDP address.
 	switch (address & 0x1E)
 	{
 		case 0x00: case 0x02:
 			// VDP data port.
-			Vdp::Write_Data_Word(data);
+			context->m_vdp->Write_Data_Word(data);
 			break;
 		
 		case 0x04: case 0x06:
 			// VDP control port.
-			Vdp::Write_Ctrl(data);
+			context->m_vdp->Write_Ctrl(data);
 			break;
 		
 		case 0x10:

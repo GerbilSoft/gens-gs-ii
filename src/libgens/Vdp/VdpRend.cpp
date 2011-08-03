@@ -23,9 +23,6 @@
 
 #include "Vdp.hpp"
 
-/** Static member initialization. **/
-#include "VdpRend_static.hpp"
-
 // VDP error message.
 #include "VdpRend_Err.hpp"
 
@@ -36,30 +33,31 @@ namespace LibGens
 {
 
 /**
- * Vdp::Rend_Init(): Initialize the VDP rendering subsystem.
+ * Vdp::rend_init(): Initialize the VDP rendering subsystem.
  * This function should only be called from Init()!
  */
-void Vdp::Rend_Init(void)
+void Vdp::rend_init(void)
 {
-	// TODO
+	// Initialize the VDP rendering variables.
+	VDP_Layers = VdpTypes::VDP_LAYERS_DEFAULT;
 }
 
 
 /**
- * Vdp::Rend_End(): Shut down the VDP rendering subsystem.
+ * Vdp::rend_end(): Shut down the VDP rendering subsystem.
  * This function should only be called from Vdp::Init()!
  */
-void Vdp::Rend_End(void)
+void Vdp::rend_end(void)
 {
 	// TODO
 }
 
 
 /**
- * Vdp::Rend_Reset(): Reset the VDP rendering arrays.
- * This function should only be called from Vdp::Reset()!
+ * Vdp::rend_reset(): Reset the VDP rendering arrays.
+ * This function should only be called from Vdp::reset()!
  */
-void Vdp::Rend_Reset(void)
+void Vdp::rend_reset(void)
 {
 	// Clear MD_Screen.
 	memset(&MD_Screen, 0x00, sizeof(MD_Screen));
@@ -94,11 +92,13 @@ void Vdp::Render_Line(void)
 	else
 	{
 		// Unsupported mode.
-		VdpRend_Err::Render_Line();
+		// TODO: Update for non-static VDP.
+		//VdpRend_Err::Render_Line();
 	}
 	
 	// Update the VDP render error cache.
-	VdpRend_Err::Update();
+	// TODO: Update for non-static VDP.
+	//VdpRend_Err::Update();
 }
 
 }

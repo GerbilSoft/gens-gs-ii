@@ -55,7 +55,7 @@ IoBase *EmuContext::m_port2;		// Player 2.
 IoBase *EmuContext::m_portE;		// EXT port.
 
 // Static pointer. Temporarily needed for SRam/EEPRom.
-EmuContext *EmuContext::instance = NULL;
+EmuContext *EmuContext::m_instance = NULL;
 
 /**
  * Global settings.
@@ -77,7 +77,7 @@ EmuContext::EmuContext(Rom *rom, SysVersion::RegionCode_t region)
 	
 	ms_RefCount++;
 	assert(ms_RefCount == 1);
-	instance = this;
+	m_instance = this;
 	
 	// Initialize variables.
 	m_rom = rom;
@@ -114,13 +114,16 @@ EmuContext::EmuContext(Rom *rom, SysVersion::RegionCode_t region)
 		if (sramSize > 0)
 			lg_osd(OSD_SRAM_LOAD, sramSize);
 	}
+	
+	// Initialize the VDP.
+	m_vdp = new Vdp();
 }
 
 EmuContext::~EmuContext()
 {
 	ms_RefCount--;
 	assert(ms_RefCount == 0);
-	instance = NULL;
+	m_instance = NULL;
 	
 	// Delete the I/O devices.
 	// TODO: Don't do this right now.
@@ -132,6 +135,10 @@ EmuContext::~EmuContext()
 	delete m_portE;
 	m_portE = NULL;
 #endif
+	
+	// Delete the VDP.
+	delete m_vdp;
+	m_vdp = NULL;
 }
 
 

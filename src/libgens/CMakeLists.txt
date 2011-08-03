@@ -98,7 +98,7 @@ SET(libgens_SRCS
 	Save/EEPRom_DB.cpp
 	Data/mcd_rom_db.c
 	Data/32X/fw_32x.c
-	Vdp/VdpRend_Err.cpp
+	#Vdp/VdpRend_Err.cpp
 	Vdp/VGA_charset.c
 	Util/MdFb.cpp
 	Vdp/VdpStatus.cpp

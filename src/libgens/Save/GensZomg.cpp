@@ -92,21 +92,21 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 	// Writing to register 23 changes the DMA status.
 	for (int i = 23; i >= 0; i--)
 	{
-		Vdp::Set_Reg(i, vdp_reg[i]);
+		context->m_vdp->Set_Reg(i, vdp_reg[i]);
 	}
 	
 	// Load VRam.
-	zomg.loadVRam(Vdp::VRam.u16, sizeof(Vdp::VRam.u16), true);
-	Vdp::MarkVRamDirty();
+	zomg.loadVRam(context->m_vdp->VRam.u16, sizeof(context->m_vdp->VRam.u16), true);
+	context->m_vdp->MarkVRamDirty();
 	
 	// Load CRam.
-	zomg.loadCRam(Vdp::CRam.u16, sizeof(Vdp::CRam.u16), true);
-	Vdp::MarkCRamDirty();
+	zomg.loadCRam(context->m_vdp->CRam.u16, sizeof(context->m_vdp->CRam.u16), true);
+	context->m_vdp->MarkCRamDirty();
 	
 	/** VDP: MD-specific **/
 	
 	// Load VSRam.
-	zomg.loadMD_VSRam(Vdp::VSRam.u16, sizeof(Vdp::VSRam.u16), true);
+	zomg.loadMD_VSRam(context->m_vdp->VSRam.u16, sizeof(context->m_vdp->VSRam.u16), true);
 	
 	/** Audio **/
 	
@@ -256,18 +256,18 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	/** VDP **/
 	
 	// Save the VDP registers.
-	zomg.saveVdpReg(Vdp::VDP_Reg.reg, 24);
+	zomg.saveVdpReg(context->m_vdp->VDP_Reg.reg, 24);
 	
 	// Save VRam.
-	zomg.saveVRam(Vdp::VRam.u16, sizeof(Vdp::VRam.u16), true);
+	zomg.saveVRam(context->m_vdp->VRam.u16, sizeof(context->m_vdp->VRam.u16), true);
 	
 	// Save CRam.
-	zomg.saveCRam(Vdp::CRam.u16, sizeof(Vdp::CRam.u16), true);
+	zomg.saveCRam(context->m_vdp->CRam.u16, sizeof(context->m_vdp->CRam.u16), true);
 	
 	/** VDP: MD-specific **/
 	
 	// Save VSRam.
-	zomg.saveMD_VSRam(Vdp::VSRam.u16, sizeof(Vdp::VSRam.u16), true);
+	zomg.saveMD_VSRam(context->m_vdp->VSRam.u16, sizeof(context->m_vdp->VSRam.u16), true);
 	
 	/** Audio **/
 	

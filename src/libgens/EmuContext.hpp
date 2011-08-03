@@ -39,6 +39,9 @@
 // TODO: Make the region code non-console-specific.
 #include "MD/SysVersion.hpp"
 
+// VDP.
+#include "Vdp/Vdp.hpp"
+
 // C++ includes.
 #include <string>
 
@@ -50,6 +53,9 @@ class EmuContext
 	public:
 		EmuContext(Rom *rom, SysVersion::RegionCode_t region = SysVersion::REGION_US_NTSC);
 		virtual ~EmuContext();
+		
+		// Get the current EmuContext instance.
+		static EmuContext *Instance(void);
 		
 		/**
 		 * fixChecksum(): Fix the ROM checksum.
@@ -135,9 +141,9 @@ class EmuContext
 		void setSaveDataEnable(bool newSaveDataEnable);
 		
 		// Static functions. Temporarily needed for SRam/EEPRom.
-		static inline bool GetSaveDataEnable(void) { return instance->m_saveDataEnable; }
-		static inline SRam *GetSRam(void) { return instance->getSRam(); }
-		static inline EEPRom *GetEEPRom(void) { return instance->getEEPRom(); }
+		static inline bool GetSaveDataEnable(void) { return m_instance->m_saveDataEnable; }
+		static inline SRam *GetSRam(void) { return m_instance->getSRam(); }
+		static inline EEPRom *GetEEPRom(void) { return m_instance->getEEPRom(); }
 		
 		/**
 		 * Global settings.
@@ -154,6 +160,9 @@ class EmuContext
 		static inline const char *PathSRam(void)
 			{ return ms_PathSRam.c_str(); }
 		static void SetPathSRam(const char *newPathSRam);
+		
+		/** VDP (TODO) **/
+		Vdp *m_vdp;
 	
 	protected:
 		Rom *m_rom;
@@ -165,7 +174,7 @@ class EmuContext
 		EEPRom m_EEPRom;
 		
 		// Static pointer. Temporarily needed for SRam/EEPRom.
-		static EmuContext *instance;
+		static EmuContext *m_instance;
 		
 		/**
 		 * Global settings.
@@ -176,6 +185,10 @@ class EmuContext
 	private:
 		static int ms_RefCount;
 };
+
+// Get the current EmuContext instance.
+inline EmuContext *EmuContext::Instance(void)
+	{ return m_instance; }
 
 inline bool EmuContext::saveDataEnable(void)
 	{ return m_saveDataEnable; }

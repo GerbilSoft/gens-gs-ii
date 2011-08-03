@@ -44,6 +44,9 @@
 // TODO: Move somewhere else, or use int?
 #include "Config/GensConfig.hpp"
 
+// Emulation Context.
+#include "libgens/EmuContext.hpp"
+
 
 namespace GensQt4
 {
@@ -88,6 +91,10 @@ class VBackend : public QWidget
 		QColor osdFpsColor(void) const;
 		bool osdMsgEnabled(void) const;
 		QColor osdMsgColor(void) const;
+		
+		/** Emulation Context. **/
+		LibGens::EmuContext *emuContext(void) const;
+		void setEmuContext(LibGens::EmuContext *newEmuContext);
 		
 		/** Format strings. **/
 		
@@ -185,6 +192,9 @@ class VBackend : public QWidget
 		bool bilinearFilter(void) const;
 		bool pauseTint(void) const;
 		GensConfig::StretchMode_t stretchMode(void) const;
+		
+		/** Emulation Context. **/
+		LibGens::EmuContext *m_emuContext;
 	
 	protected slots:
 		/** Properties. **/
@@ -312,6 +322,9 @@ inline bool VBackend::pauseTint(void) const
 	{ return m_pauseTint; }
 inline GensConfig::StretchMode_t VBackend::stretchMode(void) const
 	{ return m_stretchMode; }
+
+inline LibGens::EmuContext *VBackend::emuContext(void) const
+	{ return m_emuContext; }
 
 }
 

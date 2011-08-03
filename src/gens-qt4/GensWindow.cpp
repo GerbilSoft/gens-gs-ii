@@ -456,6 +456,8 @@ void GensWindow::osd(OsdType osd_type, int param)
  */
 void GensWindow::setBpp(LibGens::VdpPalette::ColorDepth newBpp)
 {
+	// TODO: Move to GensConfig/qEmu.
+#if 0
 	// TODO: bpp changes should be pushed to the emulation queue.
 	// TODO: Maybe this should be a slot called by GensConfig.
 	if (LibGens::Vdp::m_palette.bpp() == newBpp)
@@ -485,6 +487,7 @@ void GensWindow::setBpp(LibGens::VdpPalette::ColorDepth newBpp)
 	//: OSD message indicating color depth change.
 	const QString msg = tr("Color depth set to %1-bit.", "osd").arg(bppVal);
 	m_vBackend->osd_printqs(1500, msg);
+#endif
 }
 
 
@@ -495,6 +498,11 @@ void GensWindow::setBpp(LibGens::VdpPalette::ColorDepth newBpp)
  */
 void GensWindow::stateChanged(void)
 {
+	// TODO: Make sure that m_vBackend gets the new gqt4_emuContext in time.
+	// FIXME: This is probably a race condition.
+	// m_vBackend->setEmuContext() should be called when gqt4_emuContext changes.
+	m_vBackend->setEmuContext(gqt4_emuContext);
+	
 	if (m_emuManager->isRomOpen())
 	{
 		// ROM is open.
@@ -705,7 +713,6 @@ void GensWindow::introStyle_changed_slot(int newIntroStyle)
 	{
 		// Intro style was changed to "None", and emulation isn't running.
 		// Clear the screen.
-		LibGens::Vdp::Reset();
 		updateVideo();
 	}
 }

@@ -553,7 +553,6 @@ int EmuManager::closeRom(bool emitStateChanged)
 		{
 			// Intro Effect is disabled.
 			// Clear the screen.
-			LibGens::Vdp::Reset();
 			emit updateVideo();
 		}
 		
