@@ -25,6 +25,7 @@
 
 // LibGens includes.
 #include "libgens/lg_main.hpp"
+#include "libgens/macros/log_msg.h"
 
 // Qt includes.
 #include <QtCore/QDir>
@@ -160,11 +161,15 @@ void ConfigItem::EmitAll(void)
  * @param path Path of the configuration item.
  * @return Value, or empty QVariant() on error.
  */
-inline QVariant ConfigItem::ValueByPath(const QString& path)
+QVariant ConfigItem::ValueByPath(const QString& path)
 {
 	ConfigItem *item = ms_pHashItems->value(path, NULL);
 	if (item)
 		return item->value();
+	
+	// Path not found.
+	LOG_MSG(gens, LOG_MSG_LEVEL_WARNING,
+		"Path \"%s\" not found.", path.toUtf8().constData());
 	return QVariant();
 }
 
@@ -175,7 +180,7 @@ inline QVariant ConfigItem::ValueByPath(const QString& path)
  * @param value New value to set.
  * @return 0 on success; non-zero on error.
  */
-inline int ConfigItem::SetValueByPath(const QString& path, const QVariant& value)
+int ConfigItem::SetValueByPath(const QString& path, const QVariant& value)
 {
 	ConfigItem *item = ms_pHashItems->value(path, NULL);
 	if (item)
@@ -184,7 +189,9 @@ inline int ConfigItem::SetValueByPath(const QString& path, const QVariant& value
 		return 0;
 	}
 	
-	// Configuration item does not exist.
+	// Path not found.
+	LOG_MSG(gens, LOG_MSG_LEVEL_WARNING,
+		"Path \"%s\" not found.", path.toUtf8().constData());
 	return -1;
 }
 
