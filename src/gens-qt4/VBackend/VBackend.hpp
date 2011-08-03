@@ -45,6 +45,7 @@
 
 // Configuration items.
 #include "Config/ConfigItem.hpp"
+#include "Config/ConfigItemColor.hpp"
 
 namespace GensQt4
 {
@@ -199,10 +200,10 @@ class VBackend : public QWidget
 	
 	protected slots:
 		/** Properties. **/
-		void setOsdFpsEnabled(bool enable);
-		void setOsdFpsColor(const QColor& color);
-		void setOsdMsgEnabled(bool enable);
-		void setOsdMsgColor(const QColor& color);
+		void osdFpsEnabled_changed_slot(const QVariant& enable);	// bool
+		void osdFpsColor_changed_slot(const QColor& color);
+		void osdMsgEnabled_changed_slot(const QVariant& enable);	// bool
+		void osdMsgColor_changed_slot(const QColor& color);
 		
 		virtual void fastBlur_changed_slot(const QVariant& newFastBlur);				// bool
 		virtual void aspectRatioConstraint_changed_slot(const QVariant& newAspectRatioConstraint);	// bool
@@ -233,12 +234,12 @@ class VBackend : public QWidget
 		bool m_osdListDirty;
 		
 		// OSD enable bits.
-		bool m_osdFpsEnabled;
-		bool m_osdMsgEnabled;
+		ConfigItem *m_cfg_osdFpsEnabled;
+		ConfigItem *m_cfg_osdMsgEnabled;
 		
 		// OSD colors.
-		QColor m_osdFpsColor;
-		QColor m_osdMsgColor;
+		ConfigItemColor *m_cfg_osdFpsColor;
+		ConfigItemColor *m_cfg_osdMsgColor;
 		
 		// OSD lock counter.
 		int m_osdLockCnt;
@@ -265,13 +266,13 @@ class VBackend : public QWidget
 /** Onscreen display. **/
 
 inline bool VBackend::osdFpsEnabled(void) const
-	{ return m_osdFpsEnabled; }
+	{ return m_cfg_osdFpsEnabled->value().toBool(); }
 inline QColor VBackend::osdFpsColor(void) const
-	{ return m_osdFpsColor; }
+	{ return m_cfg_osdFpsColor->value(); }
 inline bool VBackend::osdMsgEnabled(void) const
-	{ return m_osdMsgEnabled; }
+	{ return m_cfg_osdMsgEnabled->value().toBool(); }
 inline QColor VBackend::osdMsgColor(void) const
-	{ return m_osdMsgColor; }
+	{ return m_cfg_osdMsgColor->value(); }
 
 /**
  * osd_vprintf(): Print formatted text to the screen.

@@ -84,10 +84,10 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	resetFps();
 	
 	// Initialize the OSD settings.
-	m_osdFpsEnabled = gqt4_config->osdFpsEnabled();
-	m_osdFpsColor   = gqt4_config->osdFpsColor();
-	m_osdMsgEnabled = gqt4_config->osdMsgEnabled();
-	m_osdMsgColor   = gqt4_config->osdMsgColor();
+	m_cfg_osdFpsEnabled = new ConfigItem(QLatin1String("OSD/fpsEnabled"), true, this);
+	m_cfg_osdFpsColor   = new ConfigItemColor(QLatin1String("OSD/fpsColor"), QColor(Qt::white), this);
+	m_cfg_osdMsgEnabled = new ConfigItem(QLatin1String("OSD/msgEnabled"), true, this);
+	m_cfg_osdMsgColor   = new ConfigItemColor(QLatin1String("OSD/msgColor"), QColor(Qt::white), this);
 	m_osdLockCnt = 0;	// OSD lock counter.
 	setOsdListDirty();	// TODO: Set this on startup?
 	
@@ -99,14 +99,14 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	
 	// Connect signals from GensConfig.
 	// TODO: Reconnect signals if GensConfig is deleted/recreated.
-	connect(gqt4_config, SIGNAL(osdFpsEnabled_changed(bool)),
-		this, SLOT(setOsdFpsEnabled(bool)));
-	connect(gqt4_config, SIGNAL(osdFpsColor_changed(const QColor&)),
-		this, SLOT(setOsdFpsColor(const QColor&)));
-	connect(gqt4_config, SIGNAL(osdMsgEnabled_changed(bool)),
-		this, SLOT(setOsdMsgEnabled(bool)));
-	connect(gqt4_config, SIGNAL(osdMsgColor_changed(const QColor&)),
-		this, SLOT(setOsdMsgColor(const QColor&)));
+	connect(m_cfg_osdFpsEnabled, SIGNAL(valueChanged(const QVariant&)),
+		this, SLOT(osdFpsEnabled_changed_slot(const QVariant&)));
+	connect(m_cfg_osdFpsColor, SIGNAL(valueChanged(const QColor&)),
+		this, SLOT(osdFpsColor_changed_slot(const QColor&)));
+	connect(m_cfg_osdMsgEnabled, SIGNAL(valueChanged(const QVariant&)),
+		this, SLOT(osdMsgEnabled_changed_slot(const QVariant&)));
+	connect(m_cfg_osdMsgColor, SIGNAL(valueChanged(const QColor&)),
+		this, SLOT(osdMsgColor_changed_slot(const QColor&)));
 	
 	// Video effect settings.
 	connect(m_cfg_fastBlur, SIGNAL(valueChanged(const QVariant&)),
@@ -607,17 +607,13 @@ void VBackend::pushFps(double fps)
 
 
 /**
- * setOsdFpsEnabled(): Set the OSD FPS counter visibility setting.
- * @param enable True to show FPS; false to hide FPS.
+ * osdFpsEnabled_changed_slot(): OSD FPS counter visibility setting has changed.
+ * @param enable New OSD FPS counter visibility setting.
  */
-void VBackend::setOsdFpsEnabled(bool enable)
+void VBackend::osdFpsEnabled_changed_slot(const QVariant& enable)
 {
-	if (m_osdFpsEnabled == enable)
-		return;
-	
-	// Update the Show FPS setting.
-	m_osdFpsEnabled = enable;
-	setVbDirty();		// TODO: Texture doesn't really need to be reuploaded...
+	// TODO: Texture doesn't really need to be reuploaded...
+	setVbDirty();
 	
 	// Mark the OSD list as dirty if the emulator is running.
 	if (isRunning())
@@ -626,16 +622,17 @@ void VBackend::setOsdFpsEnabled(bool enable)
 
 
 /**
- * setOsdFpsColor(): Set the OSD FPS counter color.
+ * osdFpsColor_changed_slot(): OSD FPS counter color has changed.
  * @param color New OSD FPS counter color.
  */
-void VBackend::setOsdFpsColor(const QColor& color)
+void VBackend::osdFpsColor_changed_slot(const QColor& color)
 {
-	if (!color.isValid() || m_osdFpsColor == color)
+	if (!color.isValid())
+	{
+		// Invalid color. Reset to default.
+		m_cfg_osdFpsColor->setValue(m_cfg_osdFpsColor->def());
 		return;
-	
-	// Update the FPS counter color.
-	m_osdFpsColor = color;
+	}
 	
 	if (osdFpsEnabled() && isRunning())
 	{
@@ -648,17 +645,13 @@ void VBackend::setOsdFpsColor(const QColor& color)
 
 
 /**
- * setOsdMsgEnabled(): Set the OSD Message visibility setting.
- * @param enable True to show messages; false to hide messages.
+ * osdMsgEnabled_changed_slot(): OSD Message visibility setting has changed.
+ * @param enable New OSD Message visibility setting.
  */
-void VBackend::setOsdMsgEnabled(bool enable)
+void VBackend::osdMsgEnabled_changed_slot(const QVariant& enable)
 {
-	if (m_osdMsgEnabled == enable)
-		return;
-	
-	// Update the Show FPS setting.
-	m_osdMsgEnabled = enable;
-	setVbDirty();		// TODO: Texture doesn't really need to be reuploaded...
+	// TODO: Texture doesn't really need to be reuploaded...
+	setVbDirty();
 	
 	// Mark the OSD list as dirty if the emulator is running.
 	if (isRunning())
@@ -667,16 +660,17 @@ void VBackend::setOsdMsgEnabled(bool enable)
 
 
 /**
- * setOsdMsgColor(): Set the OSD Message color.
+ * osdMsgColor_changed_slot(): OSD Message color has changed.
  * @param color New OSD Message color.
  */
-void VBackend::setOsdMsgColor(const QColor& color)
+void VBackend::osdMsgColor_changed_slot(const QColor& color)
 {
-	if (!color.isValid() || m_osdMsgColor == color)
+	if (!color.isValid())
+	{
+		// Invalid color. Reset to default.
+		m_cfg_osdMsgColor->setValue(m_cfg_osdMsgColor->def());
 		return;
-	
-	// Update the message color.
-	m_osdMsgColor = color;
+	}
 	
 	if (osdMsgEnabled() && !m_osdList.isEmpty())
 	{
