@@ -179,8 +179,8 @@ void QuitGens(void)
 	}
 	
 	// Delete the emulation context.
-	delete gqt4_emuContext;
-	gqt4_emuContext = NULL;
+	// FIXME: Delete gqt4_emuContext after VBackend is finished using it. (MEMORY LEAK)
+	//delete gqt4_emuContext;
 	
 	// Shut down LibGens.
 	LibGens::End();

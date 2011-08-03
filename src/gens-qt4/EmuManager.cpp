@@ -399,7 +399,8 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	}
 	
 	// Create a new MD emulation context.
-	delete gqt4_emuContext;
+	// FIXME: Delete gqt4_emuContext after VBackend is finished using it. (MEMORY LEAK)
+	//delete gqt4_emuContext;
 	gqt4_emuContext = new LibGens::EmuMD(rom, lg_region);
 	rom->close();	// TODO: Let EmuMD handle this...
 	
