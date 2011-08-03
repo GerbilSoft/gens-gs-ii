@@ -29,6 +29,7 @@
 #include <QtCore/QVariant>
 #include <QtCore/QSettings>
 #include <QtCore/QHash>
+#include <stdio.h>
 
 namespace GensQt4
 {
@@ -65,6 +66,20 @@ class ConfigItem : public QObject
 		 * EmitAll(): Emit signals for all configuration items.
 		 */
 		static void EmitAll(void);
+		
+		/**
+		 * ValueByPath(): Get a value by path.
+		 * @param path Path of the configuration item.
+		 * @return Value, or empty QVariant() on error.
+		 */
+		static QVariant ValueByPath(const QString& path);
+		
+		/**
+		 * SetValueByPath(): Set a value by path.
+		 * @param path Path of the configuration item.
+		 * @param value New value to set.
+		 */
+		static int SetValueByPath(const QString& path, const QVariant& value);
 		
 		
 		/** Instance functions. **/
@@ -140,6 +155,42 @@ class ConfigItem : public QObject
 		// List of all ConfigItems.
 		static QHash<QString, ConfigItem*>* ms_pHashItems;
 };
+
+/** Static functions. **/
+
+/**
+ * ValueByPath(): Get a value by path.
+ * @param path Path of the configuration item.
+ * @return Value, or empty QVariant() on error.
+ */
+inline QVariant ConfigItem::ValueByPath(const QString& path)
+{
+	ConfigItem *item = ms_pHashItems->value(path, NULL);
+	if (item)
+		return item->value();
+	return QVariant();
+}
+
+/**
+ * SetValueByPath(): Set a value by path.
+ * @param path Path of the configuration item.
+ * @param value New value to set.
+ * @return 0 on success; non-zero on error.
+ */
+inline int ConfigItem::SetValueByPath(const QString& path, const QVariant& value)
+{
+	ConfigItem *item = ms_pHashItems->value(path, NULL);
+	if (item)
+	{
+		item->setValue(value);
+		return 0;
+	}
+	
+	// Configuration item does not exist.
+	return -1;
+}
+
+/** Instance functions. **/
 
 /**
  * value(): Get the configuration item's value.
