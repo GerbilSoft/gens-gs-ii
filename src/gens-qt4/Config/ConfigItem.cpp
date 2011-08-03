@@ -23,6 +23,9 @@
 
 #include "ConfigItem.hpp"
 
+// LibGens includes.
+#include "libgens/lg_main.hpp"
+
 // Qt includes.
 #include <QtCore/QDir>
 #include <QtCore/QTextCodec>
@@ -102,6 +105,41 @@ void ConfigItem::Load(void)
  */
 void ConfigItem::Save(void)
 {
+	/** Application information. **/
+	// Stored in the "General" section.
+	// TODO: Move "General" settings to another section?
+	// ("General" is always moved to the top of the file.)
+	// TODO: Get the application information from somewhere else.
+	// TODO: Use MDP version macros.
+	const QString sVersion = QString::fromLatin1("%1.%2.%3")
+					.arg((LibGens::version >> 24) & 0xFF)
+					.arg((LibGens::version >> 16) & 0xFF)
+					.arg(LibGens::version & 0xFFFF);
+	
+	ms_Settings->setValue(QLatin1String("_Application"), QLatin1String("Gens/GS II"));
+	ms_Settings->setValue(QLatin1String("_Version"), sVersion);
+	
+	if (LibGens::version_desc)
+	{
+		ms_Settings->setValue(QLatin1String("_VersionExt"),
+					QString::fromUtf8(LibGens::version_desc));
+	}
+	else
+	{
+		ms_Settings->remove(QLatin1String("_VersionExt"));
+	}
+	
+	if (LibGens::version_vcs)
+	{
+		ms_Settings->setValue(QLatin1String("_VersionVcs"),
+					QString::fromUtf8(LibGens::version_vcs));
+	}
+	else
+	{
+		ms_Settings->remove(QLatin1String("_VersionVcs"));
+	}
+	
+	// Save the ConfigItems.
 	for (int i = 0; i < ms_pLstItems->count(); i++)
 		ms_pLstItems->at(i)->save_item();
 }
