@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * ConfigItem.hpp: Gens configuration item.                                *
+ * ConfigItemColor.hpp: Gens configuration item. (QColor)                  *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,146 +21,90 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_CONFIG_CONFIGITEM_HPP__
-#define __GENS_QT4_CONFIG_CONFIGITEM_HPP__
+#ifndef __GENS_QT4_CONFIG_CONFIGITEMCOLOR_HPP__
+#define __GENS_QT4_CONFIG_CONFIGITEMCOLOR_HPP__
 
-#include <QtCore/QObject>
-#include <QtCore/QString>
-#include <QtCore/QVariant>
-#include <QtCore/QSettings>
-#include <QtCore/QList>
+#include "ConfigItem.hpp"
+
+// Qt includes.
+#include <QtGui/QColor>
 
 namespace GensQt4
 {
 
-class ConfigItem : public QObject
+class ConfigItemColor : public ConfigItem
 {
 	Q_OBJECT
 	
 	public:
-		ConfigItem(const QString& section, const QString& key, const QVariant& def, QObject *parent = 0);
-		ConfigItem(const QString& section_key, const QVariant& def, QObject *parent = 0);
-		virtual ~ConfigItem();
-		
-		
-		/** Static functions. **/
-		
-		/**
-		 * GetConfigPath(): Determine the configuration path.
-		 * @return Configuration filename.
-		 */
-		static QString GetConfigPath(void);
-		
-		/**
-		 * Load(): Load (or reload) all configuration items.
-		 */
-		static void Load(void);
-		
-		/**
-		 * Save(): Save all configuration items.
-		 */
-		static void Save(void);
-		
-		/**
-		 * EmitAll(): Emit signals for all configuration items.
-		 */
-		static void EmitAll(void);
-		
-		
-		/** Instance functions. **/
+		ConfigItemColor(const QString& section, const QString& key, const QColor& def, QObject *parent = 0);
+		ConfigItemColor(const QString& section_key, const QColor& def, QObject *parent = 0);
 		
 		/**
 		 * value(): Get the configuration item's value.
 		 * @return Configuration item's value.
 		 */
-		QVariant value(void);
+		QColor value(void);
 		
 		/**
 		 * def(): Get the configuration item's default value.
 		 * @return Configuration item's default value.
 		 */
-		QVariant def(void);
+		QColor def(void);
 		
 		/**
 		 * setValue(): Set the configuration item's value.
 		 * @param newValue New value for the configuration item.
 		 */
-		void setValue(const QVariant& newValue);
+		void setValue(const QColor& newValue);
 	
 	signals:
-		void valueChanged(const QVariant& value);
+		void valueChanged(const QColor& value);
 	
 	protected:
-		/** Static variables. **/
-		
-		/**
-		 * ms_Settings: Settings file.
-		 * Opened on first ConfigItem instantiation; closed on last ConfigItem destruction.
-		 */
-		static QSettings *ms_Settings;
-		
-		/** Instance variables. **/
-		const QString m_section_key;	// Section+Key. (format: "section/key")
-		const QVariant m_def;		// Default value.
-		QVariant m_value;		// Configuration entry.
+		const QColor m_def;		// Default value.
+		QColor m_value;		// Configuration entry.
 		bool m_dirty;			// Is this item dirty?
-		
-		/**
-		 * init(): Initialize this ConfigItem.
-		 * Called from ConfigItem::ConfigItem().
-		 */
-		void init(void);
 		
 		/**
 		 * load_item(): Load the configuration item from the settings file.
 		 */
-		virtual void load_item(void);
+		void load_item(void);
 		
 		/**
 		 * save_item(): Save the configuration item to the settings file.
 		 */
-		virtual void save_item(void);
+		void save_item(void);
 		
 		/**
 		 * emit_item(): Emit valueChanged() signal for this item.
 		 */
-		virtual void emit_item(void);
+		void emit_item(void);
 	
 	private:
-		Q_DISABLE_COPY(ConfigItem)
-		
-		// Organization and program names.
-		static const char *ms_OrgName;
-		static const char *ms_PrgName;
-		static const char *ms_CfgFilename;
-		
-		// Reference count.
-		static int ms_RefCnt;
-		
-		// List of all ConfigItems.
-		static QList<ConfigItem*>* ms_pLstItems;
+		Q_DISABLE_COPY(ConfigItemColor)
 };
 
 /**
  * value(): Get the configuration item's value.
  * @return Configuration item's value.
  */
-inline QVariant ConfigItem::value(void)
+inline QColor ConfigItemColor::value(void)
 	{ return m_value; }
 
 /**
  * def(): Get the configuration item's default value.
  * @return Configuration item's default value.
  */
-inline QVariant ConfigItem::def(void)
+inline QColor ConfigItemColor::def(void)
 	{ return m_def; }
 
 /**
  * emit_item(): Emit valueChanged() signal for this item.
  */
-inline void ConfigItem::emit_item(void)
+inline void ConfigItemColor::emit_item(void)
 	{ emit valueChanged(m_value); }
 
 }
 
-#endif /* __GENS_QT4_CONFIG_CONFIGITEM_HPP__ */
+#endif /* __GENS_QT4_CONFIG_CONFIGITEMCOLOR_HPP__ */
