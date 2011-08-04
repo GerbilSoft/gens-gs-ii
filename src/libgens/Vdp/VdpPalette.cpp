@@ -59,6 +59,7 @@ VdpPalette::VdpPalette()
 	, m_colorScaleMethod(COLSCALE_FULL)
 	, m_bpp(BPP_32)
 	, m_mdColorMask(MD_COLOR_MASK_FULL)
+	, m_bgColorIdx(0x00)
 	, m_dirty(true)
 {
 	// Reset the active palettes.
@@ -108,6 +109,25 @@ void VdpPalette::setMdColorMask(bool newMdColorMask)
 		return;
 	m_mdColorMask = newMask;
 	m_dirty = true;
+}
+
+
+/**
+ * setBgColorIdx(): Set the background color index.
+ * @param newBgColorIdx New background color index.
+ */
+void VdpPalette::setBgColorIdx(uint8_t newBgColorIdx)
+{
+	if (m_bgColorIdx == newBgColorIdx)
+		return;
+	m_bgColorIdx = newBgColorIdx;
+	
+	// Set the CRam flag to force a palette update.
+	// TODO: This is being done from a class instance...
+	// Figure out a better way to handle this.
+	EmuContext *instance = EmuContext::Instance();
+	if (instance != NULL)
+		instance->m_vdp->MarkCRamDirty();
 }
 
 
@@ -501,23 +521,14 @@ FORCE_INLINE void VdpPalette::T_updateMD(pixel *MD_palette,
 	
 	// Update the background color.
 	// TODO: Eliminate dependency on Vdp::VDP_Reg.
-	unsigned int BG_Color = 0;
-	if (instance != NULL)
-		BG_Color = (instance->m_vdp->VDP_Reg.m5.BG_Color & 0x3F);
-	MD_palette[0] = MD_palette[BG_Color];
+	MD_palette[0] = MD_palette[m_bgColorIdx];
 	
 	if (hs)
 	{
 		// Update the background color for highlight and shadow.
-		
-		// Normal color.
-		MD_palette[192] = MD_palette[BG_Color];
-		
-		// Shadow color.
-		MD_palette[64] = MD_palette[BG_Color + 64];
-		
-		// Highlight color.
-		MD_palette[128] = MD_palette[BG_Color + 128];
+		MD_palette[192] = MD_palette[m_bgColorIdx];		// Normal color.
+		MD_palette[64]  = MD_palette[m_bgColorIdx + 64];	// Shadow color.
+		MD_palette[128] = MD_palette[m_bgColorIdx + 128];	// Highlight color.
 	}
 }
 

@@ -114,6 +114,12 @@ class VdpPalette
 		bool mdColorMask(void) const;
 		void setMdColorMask(bool newMdColorMask);
 		
+		/**
+		 * bgColorIdx: Background color index.
+		 */
+		int bgColorIdx(void) const;
+		void setBgColorIdx(uint8_t newBgColorIdx);
+		
 		/** Palette manipulation functions. **/
 		
 		// Palette recalculation functions.
@@ -142,6 +148,9 @@ class VdpPalette
 		static const uint16_t MD_COLOR_MASK_FULL;
 		static const uint16_t MD_COLOR_MASK_LSB;
 		
+		// Background color index.
+		uint8_t m_bgColorIdx;
+		
 		// Dirty flag.
 		bool m_dirty;
 		
@@ -168,6 +177,13 @@ class VdpPalette
  */
 inline bool VdpPalette::mdColorMask(void) const
 	{ return (m_mdColorMask == MD_COLOR_MASK_LSB); }
+
+/**
+ * bgColorIdx: Get the background color index.
+ * @return Background color index.
+ */
+inline int VdpPalette::bgColorIdx(void) const
+	{ return m_bgColorIdx; }
 
 }
 
