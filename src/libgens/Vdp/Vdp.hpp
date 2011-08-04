@@ -174,11 +174,15 @@ class Vdp
 		
 		// System status.
 		// TODO: Move this to a more relevant file.
-		struct SysStatus_t
+		union SysStatus_t
 		{
-			unsigned int Genesis	:1;
-			unsigned int SegaCD	:1;
-			unsigned int _32X	:1;
+			struct
+			{
+				unsigned int Genesis	:1;
+				unsigned int SegaCD	:1;
+				unsigned int _32X	:1;
+			};
+			unsigned int data;
 		};
 		SysStatus_t SysStatus;
 	

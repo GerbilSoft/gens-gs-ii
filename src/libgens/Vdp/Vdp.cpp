@@ -58,6 +58,10 @@ Vdp::Vdp(void)
 		H_Counter_Table[hc][1] = (uint8_t)hc_val;
 	}
 	
+	// Initialize system status.
+	// TODO: Move SysStatus somewhere else?
+	SysStatus.data = 0;
+	
 	// Initialize the VDP rendering subsystem.
 	rend_init();
 	
