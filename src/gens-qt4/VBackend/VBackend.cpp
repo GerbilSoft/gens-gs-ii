@@ -51,6 +51,7 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	// Mark the video backend as dirty on startup.
 	, m_vbDirty(true)
 	, m_mdScreenDirty(true)
+	, m_lastBpp(LibGens::VdpPalette::BPP_MAX)
 	
 	// Set the internal framebuffer to NULL by default.
 	, m_intScreen(NULL)

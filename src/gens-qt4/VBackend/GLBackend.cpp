@@ -156,7 +156,9 @@ void GLBackend::reallocTexture(void)
 	// TODO: Intro effects.
 	if (!m_emuContext)
 	{
+		// Clear texture; set last bpp as invalid to force update.
 		m_tex = 0;
+		m_lastBpp = LibGens::VdpPalette::BPP_MAX;
 		return;
 	}
 	
