@@ -58,6 +58,10 @@ Vdp::Vdp(void)
 		H_Counter_Table[hc][1] = (uint8_t)hc_val;
 	}
 	
+	// Clear VDP_Reg before initializing the VDP.
+	// Valgrind complains if we don't do this.
+	memset(&VDP_Reg.reg[0], 0x00, sizeof(VDP_Reg.reg));
+	
 	// Initialize system status.
 	// TODO: Move SysStatus somewhere else?
 	SysStatus.data = 0;
