@@ -304,8 +304,9 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 		
 		case 7:
 			// Background Color.
-			// TODO: Only set this if the actual value has changed.
-			MarkCRamDirty();
+			// TODO: This is only valid for MD. SMS and GG function differently.
+			// NOTE: This will automatically mark CRam as dirty if the index has changed.
+			m_palette.setBgColorIdx(val & 0x3F);
 			break;
 		
 		case 11:
