@@ -99,6 +99,12 @@ class GensWindow : public QMainWindow
 		void screenShot(void);
 		void setAudioRate(int newRate);
 		void setStereo(bool newStereo);
+		
+		/** VBackend properties. **/
+		// TODO: Allow GensActions to access m_vBackend directly?
+		void toggleFastBlur(void);
+		StretchMode_t stretchMode(void);
+		void setStretchMode(StretchMode_t newStretchMode);
 	
 	protected:
 		void setupUi(void);

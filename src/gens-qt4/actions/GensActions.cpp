@@ -164,9 +164,9 @@ bool GensActions::doAction(int action, bool state)
 				case MNUID_ITEM(IDM_GRAPHICS_STRETCH):
 				{
 					// Next stretch mode.
-					int stretch_tmp = (int)gqt4_config->stretchMode();
+					int stretch_tmp = (int)m_parent->stretchMode();
 					stretch_tmp = (stretch_tmp + 1) % 4;
-					gqt4_config->setStretchMode((GensConfig::StretchMode_t)stretch_tmp);
+					m_parent->setStretchMode((StretchMode_t)stretch_tmp);
 					return true;
 				}
 				
@@ -230,19 +230,19 @@ bool GensActions::doAction(int action, bool state)
 			switch (MNUID_ITEM(action))
 			{
 				case MNUID_ITEM(IDM_GRAPHICS_STRETCH_NONE):
-					gqt4_config->setStretchMode(GensConfig::STRETCH_NONE);
+					m_parent->setStretchMode(STRETCH_NONE);
 					return true;
 				
 				case MNUID_ITEM(IDM_GRAPHICS_STRETCH_H):
-					gqt4_config->setStretchMode(GensConfig::STRETCH_H);
+					m_parent->setStretchMode(STRETCH_H);
 					return true;
 				
 				case MNUID_ITEM(IDM_GRAPHICS_STRETCH_V):
-					gqt4_config->setStretchMode(GensConfig::STRETCH_V);
+					m_parent->setStretchMode(STRETCH_V);
 					return true;
 				
 				case MNUID_ITEM(IDM_GRAPHICS_STRETCH_FULL):
-					gqt4_config->setStretchMode(GensConfig::STRETCH_FULL);
+					m_parent->setStretchMode(STRETCH_FULL);
 					return true;
 				
 				default:
@@ -367,7 +367,7 @@ bool GensActions::doAction(int action, bool state)
 			{
 				case MNUID_ITEM(IDM_NOMENU_FASTBLUR):
 					// Toggle Fast Blur.
-					gqt4_config->setFastBlur(!gqt4_config->fastBlur());
+					m_parent->toggleFastBlur();
 					return true;
 				
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_0):

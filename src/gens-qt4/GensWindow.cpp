@@ -639,6 +639,13 @@ void GensWindow::setAudioRate(int newRate)
 void GensWindow::setStereo(bool newStereo)
 	{ m_emuManager->setStereo(newStereo); }
 
+/** VBackend properties. **/
+void GensWindow::toggleFastBlur(void)
+	{ m_vBackend->setFastBlur(!m_vBackend->fastBlur()); }
+StretchMode_t GensWindow::stretchMode(void)
+	{ return m_vBackend->stretchMode(); }
+void GensWindow::setStretchMode(StretchMode_t newStretchMode)
+	{ m_vBackend->setStretchMode(newStretchMode); }
 
 void GensWindow::setIdleThreadAllowed(bool newIdleThreadAllowed)
 {

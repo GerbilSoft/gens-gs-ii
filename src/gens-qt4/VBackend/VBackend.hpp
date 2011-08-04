@@ -91,6 +91,18 @@ class VBackend : public QWidget
 		bool osdMsgEnabled(void) const;
 		QColor osdMsgColor(void) const;
 		
+		/** Properties. **/
+		bool fastBlur(void) const;
+		void setFastBlur(bool newFastBlur);
+		
+		bool aspectRatioConstraint(void) const;
+		bool hasAspectRatioConstraintChanged(void) const;
+		void resetAspectRatioConstraintChanged(void);
+		bool bilinearFilter(void) const;
+		bool pauseTint(void) const;
+		StretchMode_t stretchMode(void) const;
+		void setStretchMode(StretchMode_t newStretchMode);
+		
 		/** Emulation Context. **/
 		LibGens::EmuContext *emuContext(void) const;
 		void setEmuContext(LibGens::EmuContext *newEmuContext);
@@ -181,16 +193,6 @@ class VBackend : public QWidget
 			bool isRecording;	// True if recording; false if stopped.
 		};
 		QList<RecOsd> m_osdRecList;
-		
-		/** Properties. **/
-		// TODO: Should we keep these properties here, or just get them from gqt4_config?
-		bool fastBlur(void) const;
-		bool aspectRatioConstraint(void) const;
-		bool hasAspectRatioConstraintChanged(void) const;
-		void resetAspectRatioConstraintChanged(void);
-		bool bilinearFilter(void) const;
-		bool pauseTint(void) const;
-		StretchMode_t stretchMode(void) const;
 		
 		/** Emulation Context. **/
 		LibGens::EmuContext *m_emuContext;
@@ -312,6 +314,8 @@ inline int VBackend::recStop(const QString& component)
 // TODO: Should we keep these properties here, or just get them from gqt4_config?
 inline bool VBackend::fastBlur(void) const
 	{ return m_cfg_fastBlur->value().toBool(); }
+inline void VBackend::setFastBlur(bool newFastBlur)
+	{ m_cfg_fastBlur->setValue(newFastBlur); }
 inline bool VBackend::aspectRatioConstraint(void) const
 	{ return m_cfg_aspectRatioConstraint->value().toBool(); }
 inline bool VBackend::hasAspectRatioConstraintChanged(void) const
@@ -324,6 +328,8 @@ inline bool VBackend::pauseTint(void) const
 	{ return m_cfg_pauseTint->value().toBool(); }
 inline StretchMode_t VBackend::stretchMode(void) const
 	{ return (StretchMode_t)m_cfg_stretchMode->value().toInt(); }
+inline void VBackend::setStretchMode(StretchMode_t newStretchMode)
+	{ m_cfg_stretchMode->setValue((int)newStretchMode); }
 
 inline LibGens::EmuContext *VBackend::emuContext(void) const
 	{ return m_emuContext; }
