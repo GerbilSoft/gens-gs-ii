@@ -496,6 +496,9 @@ void GLBackend::glb_paintGL(void)
 	{
 		// No emulation context.
 		// TODO: Intro effects.
+		showOsdPreview();	// Display the OSD preview image.
+		printOsdText();		// Print the OSD text to the screen.
+		m_vbDirty = false;	// Video backend is no longer dirty.
 		return;
 	}
 	
@@ -641,17 +644,11 @@ void GLBackend::glb_paintGL(void)
 		}
 	}
 	
-	// Disable 2D textures.
-	glDisable(GL_TEXTURE_2D);
-	
-	// Display the OSD preview image.
-	showOsdPreview();
-	
-	// Print the OSD text to the screen.
-	printOsdText();
-	
-	// Video backend is no longer dirty.
-	m_vbDirty = false;
+	// Finish up drawing.
+	glDisable(GL_TEXTURE_2D);	// Disable 2D textures.
+	showOsdPreview();		// Display the OSD preview image.
+	printOsdText();			// Print the OSD text to the screen.
+	m_vbDirty = false;		// Video backend is no longer dirty.
 }
 
 
