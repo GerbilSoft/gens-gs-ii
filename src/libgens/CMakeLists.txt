@@ -54,6 +54,7 @@ CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY
 # Sources.
 SET(libgens_SRCS
 	lg_main.cpp
+	Vdp/Vdp.cpp
 	Vdp/VdpIo.cpp
 	Vdp/VdpRend.cpp
 	Vdp/VdpRend_m5.cpp
