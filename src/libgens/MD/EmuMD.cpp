@@ -101,6 +101,11 @@ EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
 	M68K_Mem::Z80_State = (Z80_STATE_ENABLED | Z80_STATE_RESET);	// TODO: "Sound, Z80" setting.
 	Z80::ReInit();
 	
+	// Initialize the system status.
+	// TODO: Move Vdp::SysStatus to EmuContext.
+	m_vdp->SysStatus.data = 0;
+	m_vdp->SysStatus.Genesis = 1;
+	
 	// Reset the controller ports.
 	m_port1->reset();
 	m_port2->reset();
