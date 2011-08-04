@@ -531,7 +531,8 @@ int EmuManager::closeRom(bool emitStateChanged)
 		gqt4_emuContext->saveData();
 		
 		// Delete the emulation context.
-		delete gqt4_emuContext;
+		// FIXME: Delete gqt4_emuContext after VBackend is finished using it. (MEMORY LEAK)
+		//delete gqt4_emuContext;
 		gqt4_emuContext = NULL;
 		
 		// Delete the Rom instance.
