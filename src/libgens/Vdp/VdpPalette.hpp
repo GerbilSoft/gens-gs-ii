@@ -48,25 +48,24 @@ class VdpPalette
 		};
 		ActivePalette_t m_palActive;
 		
-		inline bool isDirty(void) const
-			{ return m_dirty; }
+		/**
+		 * isDirty(): Check if the palette is dirty.
+		 * @return True if the palette is dirty.
+		 */
+		bool isDirty(void) const;
 		
 		/** Properties. **/
 		
-		inline int contrast(void) const
-			{ return m_contrast; }
+		int contrast(void) const;
 		void setContrast(int newContrast);
 		
-		inline int brightness(void) const
-			{ return m_brightness; }
+		int brightness(void) const;
 		void setBrightness(int newBrightness);
 		
-		inline bool grayscale(void) const
-			{ return m_grayscale; }
+		bool grayscale(void) const;
 		void setGrayscale(bool newGrayscale);
 		
-		inline bool inverted(void) const
-			{ return m_inverted; }
+		bool inverted(void) const;
 		void setInverted(bool newInverted);
 		
 		/**
@@ -81,8 +80,7 @@ class VdpPalette
 			COLSCALE_FULL = 1,	// Full colors: 0xEEE -> 0xFFFFFF
 			COLSCALE_FULL_HS = 2,	// Full colors with Highlight/Shadow: 0xEEE -> 0xEEEEEE for highlight
 		};
-		inline ColorScaleMethod_t colorScaleMethod(void) const
-			{ return m_colorScaleMethod; }
+		ColorScaleMethod_t colorScaleMethod(void) const;
 		void setColorScaleMethod(ColorScaleMethod_t newColorScaleMethod);
 		
 		// Color depth.
@@ -95,8 +93,7 @@ class VdpPalette
 			
 			BPP_MAX
 		};
-		inline ColorDepth bpp(void) const
-			{ return m_bpp; }
+		ColorDepth bpp(void) const;
 		void setBpp(ColorDepth newBpp);
 		
 		/**
@@ -154,6 +151,9 @@ class VdpPalette
 		uint8_t m_bgColorIdx;
 		
 		// Dirty flag.
+		// TODO: Split into two flags:
+		// - active dirty: active palette needs to be updated
+		// - full dirty: full (and active) palette needs to be updated
 		bool m_dirty;
 		
 		template<int mask>
@@ -174,16 +174,30 @@ class VdpPalette
 };
 
 /**
- * mdColorMask(): Check if the MD colors are masked.
- * @return True if all but LSBs are masked; false if full color range is available.
+ * isDirty(): Check if the palette is dirty.
+ * @return True if the palette is dirty.
  */
+inline bool VdpPalette::isDirty(void) const
+	{ return m_dirty; }
+
+/** Properties. **/
+inline int VdpPalette::contrast(void) const
+	{ return m_contrast; }
+inline int VdpPalette::brightness(void) const
+	{ return m_brightness; }
+inline bool VdpPalette::grayscale(void) const
+	{ return m_grayscale; }
+inline bool VdpPalette::inverted(void) const
+	{ return m_inverted; }
+
+inline VdpPalette::ColorScaleMethod_t VdpPalette::colorScaleMethod(void) const
+	{ return m_colorScaleMethod; }
+
+inline VdpPalette::ColorDepth VdpPalette::bpp(void) const
+	{ return m_bpp; }
+
 inline bool VdpPalette::mdColorMask(void) const
 	{ return (m_mdColorMask == MD_COLOR_MASK_LSB); }
-
-/**
- * bgColorIdx: Get the background color index.
- * @return Background color index.
- */
 inline int VdpPalette::bgColorIdx(void) const
 	{ return m_bgColorIdx; }
 
