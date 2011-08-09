@@ -453,7 +453,7 @@ void VdpPalette::recalcFull(void)
  */
 void VdpPalette::resetActive(void)
 {
-	memset(&m_palActiveMD, 0x00, sizeof(m_palActiveMD));
+	memset(&m_palActive, 0x00, sizeof(m_palActive));
 }
 
 
@@ -543,9 +543,9 @@ void VdpPalette::updateMD(const VdpTypes::CRam_t *cram)
 		recalcFull();
 	
 	if (m_bpp != BPP_32)
-		T_updateMD<false, uint16_t>(m_palActiveMD.u16, m_palette.u16, cram);
+		T_updateMD<false, uint16_t>(m_palActive.u16, m_palette.u16, cram);
 	else
-		T_updateMD<false, uint32_t>(m_palActiveMD.u32, m_palette.u32, cram);
+		T_updateMD<false, uint32_t>(m_palActive.u32, m_palette.u32, cram);
 }
 
 
@@ -559,9 +559,9 @@ void VdpPalette::updateMD_HS(const VdpTypes::CRam_t *cram)
 		recalcFull();
 	
 	if (m_bpp != BPP_32)
-		T_updateMD<true, uint16_t>(m_palActiveMD.u16, m_palette.u16, cram);
+		T_updateMD<true, uint16_t>(m_palActive.u16, m_palette.u16, cram);
 	else
-		T_updateMD<true, uint32_t>(m_palActiveMD.u32, m_palette.u32, cram);
+		T_updateMD<true, uint32_t>(m_palActive.u32, m_palette.u32, cram);
 }
 
 

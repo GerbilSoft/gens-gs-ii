@@ -41,12 +41,12 @@ class VdpPalette
 		~VdpPalette();
 		
 		// Active MD palette.
-		union MD_Palette_t
+		union ActivePalette_t
 		{
 			uint16_t u16[0x100];
 			uint32_t u32[0x100];
 		};
-		MD_Palette_t m_palActiveMD;
+		ActivePalette_t m_palActive;
 		
 		inline bool isDirty(void) const
 			{ return m_dirty; }

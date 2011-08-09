@@ -1573,12 +1573,12 @@ void Vdp::Render_Line_m5(void)
 	if (m_palette.bpp() != VdpPalette::BPP_32)
 	{
 		uint16_t *lineBuf16 = MD_Screen.lineBuf16(LineStart);
-		T_Render_LineBuf<uint16_t>(lineBuf16, m_palette.m_palActiveMD.u16);
+		T_Render_LineBuf<uint16_t>(lineBuf16, m_palette.m_palActive.u16);
 	}
 	else
 	{
 		uint32_t *lineBuf32 = MD_Screen.lineBuf32(LineStart);
-		T_Render_LineBuf<uint32_t>(lineBuf32, m_palette.m_palActiveMD.u32);
+		T_Render_LineBuf<uint32_t>(lineBuf32, m_palette.m_palActive.u32);
 	}
 }
 
