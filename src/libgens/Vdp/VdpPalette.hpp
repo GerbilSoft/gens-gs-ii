@@ -40,14 +40,6 @@ class VdpPalette
 		VdpPalette();
 		~VdpPalette();
 		
-		// Full MD palette.
-		union Palette_t
-		{
-			uint16_t u16[0x1000];
-			uint32_t u32[0x1000];
-		};
-		Palette_t m_palette;
-		
 		// Active MD palette.
 		union MD_Palette_t
 		{
@@ -55,27 +47,6 @@ class VdpPalette
 			uint32_t u32[0x100];
 		};
 		MD_Palette_t m_palActiveMD;
-		
-		// Color scale method.
-		// TODO: Possibly remove COLSCALE_FULL_HS, since it's incorrect.
-		// Normal MD(0xEEE) and highlighted MD(0xEEE) have the same brightness.
-		// This was tested by TmEE on hardware. (Genesis 2)
-		enum ColorScaleMethod_t
-		{
-			COLSCALE_RAW = 0,	// Raw colors: 0xEEE -> 0xE0E0E0
-			COLSCALE_FULL = 1,	// Full colors: 0xEEE -> 0xFFFFFF
-			COLSCALE_FULL_HS = 2,	// Full colors with Highlight/Shadow: 0xEEE -> 0xEEEEEE for highlight
-		};
-		
-		// Color depth.
-		enum ColorDepth
-		{
-			BPP_15,
-			BPP_16,
-			BPP_32,
-			
-			BPP_MAX
-		};
 		
 		inline bool isDirty(void) const
 			{ return m_dirty; }
@@ -98,10 +69,32 @@ class VdpPalette
 			{ return m_inverted; }
 		void setInverted(bool newInverted);
 		
+		/**
+		 * Color scale method.
+		 * TODO: Possibly remove COLSCALE_FULL_HS, since it's incorrect.
+		 * Normal MD(0xEEE) and highlighted MD(0xEEE) have the same brightness.
+		 * This was tested by TmEE on hardware. (Genesis 2)
+		 */
+		enum ColorScaleMethod_t
+		{
+			COLSCALE_RAW = 0,	// Raw colors: 0xEEE -> 0xE0E0E0
+			COLSCALE_FULL = 1,	// Full colors: 0xEEE -> 0xFFFFFF
+			COLSCALE_FULL_HS = 2,	// Full colors with Highlight/Shadow: 0xEEE -> 0xEEEEEE for highlight
+		};
 		inline ColorScaleMethod_t colorScaleMethod(void) const
 			{ return m_colorScaleMethod; }
 		void setColorScaleMethod(ColorScaleMethod_t newColorScaleMethod);
 		
+		// Color depth.
+		enum ColorDepth
+		{
+			// RGB color modes.
+			BPP_15,
+			BPP_16,
+			BPP_32,
+			
+			BPP_MAX
+		};
 		inline ColorDepth bpp(void) const
 			{ return m_bpp; }
 		void setBpp(ColorDepth newBpp);
@@ -136,6 +129,15 @@ class VdpPalette
 		//static void Adjust_CRam_32X(void);
 	
 	private:
+		// Full MD palette.
+		union Palette_t
+		{
+			uint16_t u16[0x1000];
+			uint32_t u32[0x1000];
+		};
+		Palette_t m_palette;
+		
+		/** Proerties. **/
 		int m_contrast;
 		int m_brightness;
 		bool m_grayscale;
