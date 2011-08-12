@@ -1557,11 +1557,8 @@ void Vdp::Render_Line_m5(void)
 	// Check if the palette was modified.
 	if (ms_UpdateFlags.CRam)
 	{
-		// Update the palette.
-		if (VDP_Reg.m5.Set4 & 0x08)
-			m_palette.updateMD_HS(&CRam);
-		else
-			m_palette.updateMD(&CRam);
+		// Update the active palette.
+		m_palette.updateMD(&CRam);
 		
 		// Clear the CRam flag.
 		ms_UpdateFlags.CRam = 0;

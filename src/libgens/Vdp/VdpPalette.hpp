@@ -97,6 +97,14 @@ class VdpPalette
 		void setBpp(ColorDepth newBpp);
 		
 		/**
+		 * bgColorIdx: Background color index.
+		 */
+		int bgColorIdx(void) const;
+		void setBgColorIdx(uint8_t newBgColorIdx);
+		
+		/** MD-specific properties. **/
+		
+		/**
 		 * mdColorMask: Set if color masking is enabled. (Mode 5 only)
 		 * False: Full color range is used.
 		 * True: Only LSBs are used.
@@ -105,10 +113,12 @@ class VdpPalette
 		void setMdColorMask(bool newMdColorMask);
 		
 		/**
-		 * bgColorIdx: Background color index.
+		 * mdShadowHighlight(): Set if the Shadow/Highlight functionality is enabled. (Mode 5 only)
+		 * False: Shadow/Highlight is disabled.
+		 * True: Shadow/Highlight is enabled.
 		 */
-		int bgColorIdx(void) const;
-		void setBgColorIdx(uint8_t newBgColorIdx);
+		bool mdShadowHighlight(void) const;
+		void setMdShadowHighlight(bool newMdShadowHighlight);
 		
 		/** Palette manipulation functions. **/
 		
@@ -120,7 +130,6 @@ class VdpPalette
 		
 		// Palette update functions.
 		void updateMD(const VdpTypes::CRam_t *cram);
-		void updateMD_HS(const VdpTypes::CRam_t *cram);
 		
 		// TODO
 		//static void Adjust_CRam_32X(void);
@@ -142,18 +151,28 @@ class VdpPalette
 		ColorScaleMethod_t m_colorScaleMethod;
 		ColorDepth m_bpp;
 		
-		// MD color mask. (Mode 5 only)
+		// Background color index.
+		uint8_t m_bgColorIdx;
+		
+		/**
+		 * MD color mask. (Mode 5 only)
+		 * Used with the Palette Select bit.
+		 */
 		uint16_t m_mdColorMask;
 		static const uint16_t MD_COLOR_MASK_FULL;
 		static const uint16_t MD_COLOR_MASK_LSB;
 		
-		// Background color index.
-		uint8_t m_bgColorIdx;
+		/**
+		 * Shadow/Highlight enable bit. (Mode 5 only)
+		 */
+		bool m_mdShadowHighlight;
 		
-		// Dirty flag.
-		// TODO: Split into two flags:
-		// - active dirty: active palette needs to be updated
-		// - full dirty: full (and active) palette needs to be updated
+		/**
+		 * Dirty flag.
+		 * TODO: Split into two flags:
+		 * - active dirty: active palette needs to be updated
+		 * - full dirty: full (and active) palette needs to be updated
+		 */
 		bool m_dirty;
 		
 		template<int mask>
@@ -167,7 +186,7 @@ class VdpPalette
 			int RMask, int GMask, int BMask>
 		FORCE_INLINE void T_recalcFullMD(pixel *palMD);
 		
-		template<bool hs, typename pixel>
+		template<typename pixel>
 		FORCE_INLINE void T_updateMD(pixel *MD_palette,
 					const pixel *palette,
 					const VdpTypes::CRam_t *cram);

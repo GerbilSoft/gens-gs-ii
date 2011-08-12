@@ -329,9 +329,9 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 		case 12:
 			// Mode Set 4.
 			
-			// This register has the Shadow/Highlight setting,
-			// so set the CRam Flag to force a CRam update.
-			// TODO: Only set this if the actual value has changed.
+			// Update the Shadow/Highlight setting.
+			m_palette.setMdShadowHighlight(!!(VDP_Reg.m5.Set4 & 0x08));
+			// TODO: Move the CRam dirty flag to VdpPalette.
 			MarkCRamDirty();
 			
 			if (val & 0x81)		// TODO: Original asm tests 0x81. Should this be done for other H40 tests?
