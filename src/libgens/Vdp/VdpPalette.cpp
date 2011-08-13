@@ -261,7 +261,7 @@ void VdpPalette::T_recalcFull_MD(pixel *palFull)
 	// Normal contrast:   (  Contrast == 100)
 	const int brightness = (m_brightness - 100);
 	
-	// Calculate the MD palette. (32-bit color)
+	// Calculate the MD palette.
 	for (int i = 0x0000; i < 0x1000; i++)
 	{
 		int r = md_components[i & 0x000F];
