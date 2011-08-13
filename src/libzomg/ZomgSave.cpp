@@ -230,7 +230,10 @@ int Zomg::saveVRam(const void *vram, size_t siz, bool byteswap)
 		uint16_t *bswap_buf = (uint16_t*)malloc(siz);
 		memcpy(bswap_buf, vram, siz);
 		cpu_to_be16_array(bswap_buf, siz);
-		return saveToZomg("common/VRam.bin", bswap_buf, siz);
+		
+		int ret = saveToZomg("common/VRam.bin", bswap_buf, siz);
+		free(bswap_buf);
+		return ret;
 	}
 	else
 #endif
@@ -282,7 +285,10 @@ int Zomg::saveMD_VSRam(const uint16_t *vsram, size_t siz, bool byteswap)
 		uint16_t *bswap_buf = (uint16_t*)malloc(siz);
 		memcpy(bswap_buf, vsram, siz);
 		cpu_to_be16_array(bswap_buf, siz);
-		return saveToZomg("MD/VSRam.bin", bswap_buf, siz);
+		
+		int ret = saveToZomg("MD/VSRam.bin", bswap_buf, siz);
+		free(bswap_buf);
+		return ret;
 	}
 	else
 #endif
@@ -410,7 +416,10 @@ int Zomg::saveM68KMem(const uint16_t *mem, size_t siz, bool byteswap)
 		uint16_t *bswap_buf = (uint16_t*)malloc(siz);
 		memcpy(bswap_buf, mem, siz);
 		cpu_to_be16_array(bswap_buf, siz);
-		return saveToZomg("MD/M68K_mem.bin", bswap_buf, siz);
+		
+		int ret = saveToZomg("MD/M68K_mem.bin", bswap_buf, siz);
+		free(bswap_buf);
+		return ret;
 	}
 	else
 #endif
