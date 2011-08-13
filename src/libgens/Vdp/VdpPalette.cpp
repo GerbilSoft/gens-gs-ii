@@ -326,84 +326,47 @@ void VdpPalette::T_recalcFull_MD(pixel *palFull)
 }
 
 
-// TODO: Port to LibGens.
-#if 0
 /**
- * T_Adjust_CRam_32X(): Adjust the 32X CRam.
- */
-template<typename pixel>
-static FORCE_INLINE void T_Adjust_CRam_32X(pixel *pal32X, pixel *cramAdjusted32X)
-{
-	for (int i = 0; i < 0x100; i += 4)
-	{
-		cramAdjusted32X[i] = pal32X[_32X_VDP_CRam[i]];
-		cramAdjusted32X[i+1] = pal32X[_32X_VDP_CRam[i+1]];
-		cramAdjusted32X[i+2] = pal32X[_32X_VDP_CRam[i+2]];
-		cramAdjusted32X[i+3] = pal32X[_32X_VDP_CRam[i+3]];
-	}
-}
-#endif
-
-
-// TODO: Port to LibGens.
-#if 0
-/**
- * T_Recalculate_Palette_32X(): Recalculates the 32X palette for brightness, contrast, and various effects.
+ * T_recalcFull_32X(): Recalculate the full palette. (Sega 32X)
+ * This applies brightness, contrast, grayscale, and inverted palette settings.
+ * TODO: UNTESTED!
+ * @param palFull Full palette. (Must have enough space for at least 0x10000 entries!)
  */
 template<typename pixel,
 	int RBits, int GBits, int BBits,
 	int RMask, int GMask, int BMask>
-static inline void T_Recalculate_Palette_32X(pixel *pal32X, pixel *cramAdjusted32X)
+FORCE_INLINE void VdpPalette::T_recalcFull_32X(pixel *palFull32X)
 {
-	int r, g, b;
-	
 	// Brightness / Contrast
 	// These values are scaled to positive numbers.
 	// Normal brightness: (Brightness == 100)
 	// Normal contrast:   (  Contrast == 100)
-
-	const int brightness = (Brightness - 100);
-	const int contrast = Contrast;
+	const int brightness = (m_brightness - 100);
 	
-	// Calculate the 32X palette.
-	for (unsigned int i = 0; i < 0x10000; i++)
+	// Calculate the SMS palette.
+	for (int i = 0x00; i < 0x1000; i++)
 	{
-		// Process using 8-bit color components.
-		r = (i & 0x1F) << 3;
-		g = (i >> 2) & 0xF8;
-		b = (i >> 7) & 0xF8;
-		
-		// Scale the colors to full RGB.
-		if (ColorScaleMethod != COLSCALE_RAW)
-		{
-			r = (r * 0xFF) / 0xF8;
-			g = (g * 0xFF) / 0xF8;
-			b = (b * 0xFF) / 0xF8;
-		}
+		// Sega 32X uses 15-bit color.
+		// Scale each component by using the following algorithm:
+		// - 32X component: abcde
+		// - RGB component: abcdeabc
+		// Example: 32X 0x15 (10101) -> RGB 0xAD (10101101)
+		int r = ((i & 0x001F) << 3);	r |= (r >> 5);
+		int g = ((i >> 2) & 0x00F8);	g |= (g >> 5);
+		int b = ((i >> 7) & 0x00F8);	b |= (b >> 5);
 		
 		// Adjust brightness.
-		if (brightness != 0)
-		{
-			r += brightness;
-			g += brightness;
-			b += brightness;
-		}
+		r += brightness;
+		g += brightness;
+		b += brightness;
 		
 		// Adjust contrast.
-		AdjustContrast(r, g, b, contrast);
+		AdjustContrast(r, g, b, m_contrast);
 		
-		if (Grayscale)
+		if (m_grayscale)
 		{
 			// Convert the color to grayscale.
 			r = g = b = CalcGrayscale(r, g, b);
-		}
-		
-		if (InvertColor)
-		{
-			// Invert the color components.
-			r ^= 0xFF;
-			g ^= 0xFF;
-			b ^= 0xFF;
 		}
 		
 		// Reduce color components to original color depth.
@@ -416,23 +379,37 @@ static inline void T_Recalculate_Palette_32X(pixel *pal32X, pixel *cramAdjusted3
 		T_ConstrainColorComponent<GMask>(g);
 		T_ConstrainColorComponent<BMask>(b);
 		
+		if (m_inverted)
+		{
+			// Invert the color components.
+			r ^= RMask;
+			g ^= GMask;
+			b ^= BMask;
+		}
+		
+		// TODO: Make this configurable?
+#if 0	
 		if (GMask == 0x3F)
 		{
 			// 16-bit color. (RGB565)
 			// Mask off the LSB of the green component.
 			g &= ~1;
 		}
+#endif
 		
-		// Create the color.
-		pal32X[i] = (r << (GBits + BBits)) |
-			    (g << (BBits)) |
-			    (b);
+		// Combine the color components.
+		palFull32X[i] = (r << (BBits + GBits)) |
+				(g << (BBits)) |
+				(b);
 	}
 	
+	// TODO: Port to LibGens.
+	// TODO: Move this to T_update_32X()?
+#if 0
 	// Adjust the 32X VDP CRam.
 	T_Adjust_CRam_32X<pixel>(pal32X, cramAdjusted32X);
-}
 #endif
+}
 
 
 /**
@@ -708,6 +685,25 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 		MD_palette[128] = MD_palette[m_bgColorIdx + 128];	// Highlight color.
 	}
 }
+
+
+// TODO: Port to LibGens.
+#if 0
+/**
+ * T_Adjust_CRam_32X(): Adjust the 32X CRam.
+ */
+template<typename pixel>
+static FORCE_INLINE void T_Adjust_CRam_32X(pixel *pal32X, pixel *cramAdjusted32X)
+{
+	for (int i = 0; i < 0x100; i += 4)
+	{
+		cramAdjusted32X[i] = pal32X[_32X_VDP_CRam[i]];
+		cramAdjusted32X[i+1] = pal32X[_32X_VDP_CRam[i+1]];
+		cramAdjusted32X[i+2] = pal32X[_32X_VDP_CRam[i+2]];
+		cramAdjusted32X[i+3] = pal32X[_32X_VDP_CRam[i+3]];
+	}
+}
+#endif
 
 
 /**

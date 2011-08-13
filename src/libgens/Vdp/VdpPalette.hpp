@@ -178,7 +178,7 @@ class VdpPalette
 		void zomgRestoreCRam(const Zomg_CRam_t *cram);
 	
 	private:
-		// Full MD palette.
+		// Full MD/SMS/GG palette.
 		union PalFull_t
 		{
 			uint16_t u16[0x1000];
@@ -188,6 +188,15 @@ class VdpPalette
 		
 		// Color RAM.
 		VdpTypes::CRam_t m_cram;
+		
+		// Full 32X palette.
+		// TODO: Only allocate this if 32X mode is enabled?
+		union PalFull_32X_t
+		{
+			uint16_t u16[0x10000];
+			uint32_t u32[0x10000];
+		};
+		PalFull_32X_t m_palFull32X;
 		
 		/** Proerties. **/
 		int m_contrast;
@@ -239,6 +248,11 @@ class VdpPalette
 			int RBits, int GBits, int BBits,
 			int RMask, int GMask, int BMask>
 		FORCE_INLINE void T_recalcFull_MD(pixel *palFull);
+		
+		template<typename pixel,
+			int RBits, int GBits, int BBits,
+			int RMask, int GMask, int BMask>
+		FORCE_INLINE void T_recalcFull_32X(pixel *palFull32X);
 		
 		template<typename pixel,
 			int RBits, int GBits, int BBits,
