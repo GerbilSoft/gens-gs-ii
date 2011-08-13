@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include <Util/Timing.hpp>
 #include "VdpPalette.hpp"
 
 // TODO: Remove Vdp::UpdateFlags dependency.
@@ -684,8 +683,8 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 	// Update all 64 colors.
 	for (int i = 62; i >= 0; i -= 2)
 	{
-		uint16_t color1_raw = m_cram.u16[i] & m_mdColorMask;
-		uint16_t color2_raw = m_cram.u16[i + 1] & m_mdColorMask;
+		const uint16_t color1_raw = (m_cram.u16[i] & m_mdColorMask);
+		const uint16_t color2_raw = (m_cram.u16[i + 1] & m_mdColorMask);
 		
 		// Get the palette color.
 		pixel color1 = palette[color1_raw];
@@ -694,16 +693,23 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 		// Set the new color.
 		MD_palette[i]     = color1;
 		MD_palette[i + 1] = color2;
+	}
+	
+	// Update the background color.
+	MD_palette[0] = MD_palette[m_bgColorIdx];
+	
+	if (m_mdShadowHighlight)
+	{
+		// Update the shadow and highlight colors.
+		// References:
+		// - http://www.tehskeen.com/forums/showpost.php?p=71308&postcount=1077
+		// - http://forums.sonicretro.org/index.php?showtopic=17905
 		
-		if (m_mdShadowHighlight)
+		// Shadow (64-127) and highlight (128-191) palettes.
+		for (int i = 62; i >= 0; i -= 2)
 		{
-			// Update the highlight and shadow colors.
-			// References:
-			// - http://www.tehskeen.com/forums/showpost.php?p=71308&postcount=1077
-			// - http://forums.sonicretro.org/index.php?showtopic=17905
-			
-			color1_raw >>= 1;
-			color2_raw >>= 1;
+			uint16_t color1_raw = ((m_cram.u16[i] & m_mdColorMask) >> 1);
+			uint16_t color2_raw = ((m_cram.u16[i + 1] & m_mdColorMask) >> 1);
 			
 			// Shadow color. (0xxx)
 			MD_palette[i + 64]	= palette[color1_raw];
@@ -713,18 +719,12 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 			MD_palette[i + 128]	= palette[(0x888 | color1_raw) - 0x111];
 			MD_palette[i + 1 + 128]	= palette[(0x888 | color2_raw) - 0x111];
 		}
-	}
-	
-	// Update the background color.
-	MD_palette[0] = MD_palette[m_bgColorIdx];
-	
-	if (m_mdShadowHighlight)
-	{
+		
 		// Copy the normal colors (0-63) to shadow+highlight (192-255).
 		// Pixels with both shadow and highlight show up as normal.
 		memcpy(&MD_palette[192], &MD_palette[0], (sizeof(MD_palette[0]) * 64));
 		
-		// Update the background color for highlight and shadow.
+		// Update the background color for the shadow and highlight palettes.
 		MD_palette[64]  = MD_palette[m_bgColorIdx + 64];	// Shadow color.
 		MD_palette[128] = MD_palette[m_bgColorIdx + 128];	// Highlight color.
 	}
