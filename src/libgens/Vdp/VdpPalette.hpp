@@ -271,6 +271,29 @@ class VdpPalette
 		template<typename pixel>
 		FORCE_INLINE void T_update_MD(pixel *MD_palette,
 					const pixel *palette);
+		
+		/**
+		 * TMS9918 palettes.
+		 * References:
+		 * - http://www.smspower.org/forums/viewtopic.php?t=8224
+		 * - http://www.smspower.org/maxim/forumstuff/colours.html
+		 */
+		
+		/**
+		 * PalTMS9918_SMS[]: TMS9918 palette as used on the SMS. (6-bit RGB)
+		 * Used in SMS backwards-compatibility mode.
+		 * VdpPalette should be set to SMS mode to use this palette.
+		 * Source: http://www.smspower.org/maxim/forumstuff/colours.html
+		 */
+		static const uint8_t PalTMS9918_SMS[16];
+		
+		/**
+		 * PalTMS9918_Analog[] TMS9918 analog palette, in 32-bit RGB.
+		 * Source: http://www.smspower.org/maxim/forumstuff/colours.html
+		 */
+		// TODO: Byteswapping on big-endian?
+		struct PalRGB_t{ uint8_t a; uint8_t r; uint8_t g; uint8_t b; };
+		static const PalRGB_t PalTMS9918_Analog[16];
 };
 
 /**
