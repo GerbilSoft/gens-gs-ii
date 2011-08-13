@@ -386,8 +386,8 @@ FORCE_INLINE void VdpPalette::T_recalcFull_32X(pixel *palFull32X)
 	// Normal contrast:   (  Contrast == 100)
 	const int brightness = (m_brightness - 100);
 	
-	// Calculate the 32X palette.
-	for (int i = 0x0000; i < 0x10000; i++)
+	// Calculate the 32X palette. (first half)
+	for (int i = 0x0000; i < 0x8000; i++)
 	{
 		// Sega 32X uses 15-bit color.
 		// Scale each component by using the following algorithm:
@@ -445,6 +445,10 @@ FORCE_INLINE void VdpPalette::T_recalcFull_32X(pixel *palFull32X)
 				(g << (BBits)) |
 				(b);
 	}
+	
+	// Copy the palette from the first half of palFull32X to the second half.
+	// TODO: Is it better to do this, or should we just mask palette entries by 0x7FFF?
+	memcpy(&palFull32X[0x8000], palFull32X, 0x8000);
 	
 	// TODO: Port to LibGens.
 	// TODO: Move this to T_update_32X()?
