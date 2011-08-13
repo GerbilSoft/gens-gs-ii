@@ -482,12 +482,12 @@ void VdpPalette::recalcFull(void)
 
 
 /**
- * T_updateMD(): MD VDP palette update function.
+ * T_update_MD(): Recalculate the active palette. (Mega Drive, Mode 5)
  * @param MD_palette MD color palette.
  * @param palette Full color palette.
  */
 template<typename pixel>
-FORCE_INLINE void VdpPalette::T_updateMD(pixel *MD_palette,
+FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 					const pixel *palette)
 {
 	// TODO: Figure out a better way to handle this.
@@ -553,19 +553,20 @@ FORCE_INLINE void VdpPalette::T_updateMD(pixel *MD_palette,
 
 
 /**
- * updateMD(): Update the active MD palette.
+ * update(): Update the active palette.
  */
-void VdpPalette::updateMD(void)
+void VdpPalette::update(void)
 {
 	if (m_dirty.full)
 		recalcFull();
 	
+	// TODO: Add support for SMS, Game Gear, and TMS9918.
 	if (m_dirty.active)
 	{
 		if (m_bpp != BPP_32)
-			T_updateMD<uint16_t>(m_palActive.u16, m_palFull.u16);
+			T_update_MD<uint16_t>(m_palActive.u16, m_palFull.u16);
 		else
-			T_updateMD<uint32_t>(m_palActive.u32, m_palFull.u32);
+			T_update_MD<uint32_t>(m_palActive.u32, m_palFull.u32);
 		
 		// Clear the active palette dirty bit.
 		m_dirty.active = false;

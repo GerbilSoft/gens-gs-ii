@@ -1555,7 +1555,7 @@ void Vdp::Render_Line_m5(void)
 	}
 	
 	// Update the active palette.
-	m_palette.updateMD();
+	m_palette.update();
 	
 	// Render the image.
 	if (m_palette.bpp() != VdpPalette::BPP_32)

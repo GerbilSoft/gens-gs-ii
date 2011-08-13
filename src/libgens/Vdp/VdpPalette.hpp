@@ -168,9 +168,7 @@ class VdpPalette
 		void setMdShadowHighlight(bool newMdShadowHighlight);
 		
 		/** Palette recalculation functions. **/
-		
-		// Palette update functions.
-		void updateMD(void);
+		void update(void);
 		
 		// TODO
 		//static void Adjust_CRam_32X(void);
@@ -247,7 +245,7 @@ class VdpPalette
 		/** Active palette recalculation functions. **/
 		
 		template<typename pixel>
-		FORCE_INLINE void T_updateMD(pixel *MD_palette,
+		FORCE_INLINE void T_update_MD(pixel *MD_palette,
 					const pixel *palette);
 };
 
