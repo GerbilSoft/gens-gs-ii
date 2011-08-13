@@ -336,35 +336,6 @@ void VBackend::pauseTint_changed_slot(const QVariant& newPauseTint)
 
 
 /**
- * setRunning(): Set the emulation running state.
- * @param newIsRunning True if emulation is running; false if it isn't.
- */
-void VBackend::setRunning(bool newIsRunning)
-{
-	if (m_running == newIsRunning)
-		return;
-	
-	m_running = newIsRunning;
-	
-	// Mark the OSD list as dirty if the FPS counter is visible.
-	if (osdFpsEnabled())
-	{
-		setOsdListDirty();
-		if (!isRunning())
-		{
-			// Emulation isn't running.
-			// Update the display immediately.
-			vbUpdate();
-		}
-	}
-	
-	// If emulation isn't running or emulation is paused, start the message timer.
-	if (!isRunning() || isPaused())
-		m_msgTimer->start();
-}
-
-
-/**
  * updatePausedEffect(): Update the Paused effect.
  * @param fromMdScreen If true, copies MD_Screen[] to m_intScreen.
  */
@@ -820,21 +791,30 @@ int VBackend::recSetDuration(const QString& component, int duration)
  */
 void VBackend::setEmuContext(LibGens::EmuContext *newEmuContext)
 {
-	// Emulation Context must be locked before use.
+	// Lock m_emuContext while updating.
 	QMutexLocker lockEmuContext(&m_mtxEmuContext);
-	
 	if (m_emuContext == newEmuContext)
 		return;
-	
 	m_emuContext = newEmuContext;
 	lockEmuContext.unlock();
+	
+	// setEmuContext() replaces setRunning().
+	// Mark the OSD list as dirty if the FPS counter is visible.
+	if (osdFpsEnabled())
+		setOsdListDirty();
 	
 	setVbDirty();
 	setMdScreenDirty();
 	
 	// TODO: Should we update the video buffer here?
-	if (!isRunning() || isPaused())
+	// Updated if there's no emulation contextor if emulation is paused.
+	if (!newEmuContext || isPaused())
 		vbUpdate();
+	
+	// If there's no emulation context or emulation is paused,
+	// start the message timer.
+	if (!newEmuContext || isPaused())
+		m_msgTimer->start();
 }
 
 }

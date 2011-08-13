@@ -510,7 +510,6 @@ void GensWindow::stateChanged(void)
 	if (m_emuManager->isRomOpen())
 	{
 		// ROM is open.
-		m_vBackend->setRunning(m_emuManager->isRomOpen());
 		m_vBackend->setPaused(m_emuManager->paused());
 	}
 	else
@@ -520,7 +519,6 @@ void GensWindow::stateChanged(void)
 		unPause.data = 0;
 		
 		m_vBackend->osd_show_preview(0, QImage());
-		m_vBackend->setRunning(false);
 		m_vBackend->setPaused(unPause);
 		m_vBackend->resetFps();
 	}

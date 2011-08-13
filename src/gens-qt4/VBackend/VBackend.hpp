@@ -83,9 +83,6 @@ class VBackend : public QWidget
 			{ return !!(m_paused.paused_manual); }
 		void setPaused(paused_t newPaused);
 		
-		inline bool isRunning(void) const { return m_running; }
-		void setRunning(bool newIsRunning);
-		
 		/** Onscreen display. **/
 		bool osdFpsEnabled(void) const;
 		QColor osdFpsColor(void) const;
@@ -107,6 +104,7 @@ class VBackend : public QWidget
 		/** Emulation Context. **/
 		LibGens::EmuContext *emuContext(void) const;
 		void setEmuContext(LibGens::EmuContext *newEmuContext);
+		bool isRunning(void) const;
 		
 		/** Format strings. **/
 		
@@ -335,6 +333,11 @@ inline void VBackend::setStretchMode(StretchMode_t newStretchMode)
 
 inline LibGens::EmuContext *VBackend::emuContext(void) const
 	{ return m_emuContext; }
+inline bool VBackend::isRunning(void) const
+{
+	// TODO: Lock m_mtxEmuContext?
+	return (!!m_emuContext);
+}
 
 inline void VBackend::stretchMode_reset(void)
 	{ m_cfg_stretchMode->setValue(m_cfg_stretchMode->def()); }
