@@ -527,7 +527,7 @@ void GLBackend::glb_paintGL(void)
 		}
 		
 		// Screen buffer used for output.
-		LibGens::MdFb *src_fb = NULL;
+		LibGens::MdFb *src_fb = m_intScreen;
 		
 		/** START: Apply effects. **/
 		if (isRunning())
@@ -562,17 +562,6 @@ void GLBackend::glb_paintGL(void)
 		}
 		
 		/** END: Apply effects. **/
-		
-		// If the MD screen buffer wasn't used, use the internal screen buffer.
-		if (!src_fb)
-		{
-			// Make sure the internal screen buffer is allocated.
-			if (!m_intScreen)
-				m_intScreen = new LibGens::MdFb();
-			
-			// Use the internal screen buffer.
-			src_fb = m_intScreen;
-		}
 		
 		// Get the screen buffer from the LibGens::MdFb.
 		const GLvoid *screen;
