@@ -158,7 +158,13 @@ void VdpPalette::setMdShadowHighlight(bool newMdShadowHighlight)
 		return;
 	
 	m_mdShadowHighlight = newMdShadowHighlight;
-	// TODO: Mark CRAM as dirty if S/H was enabled.
+	if (m_mdShadowHighlight)
+	{
+		// Shadow/Highlight was just enabled.
+		// Active palette needs to be recalculated
+		// in order to populate the S/H entries.
+		m_dirty.active = true;
+	}
 }
 
 
