@@ -386,8 +386,8 @@ FORCE_INLINE void VdpPalette::T_recalcFull_32X(pixel *palFull32X)
 	// Normal contrast:   (  Contrast == 100)
 	const int brightness = (m_brightness - 100);
 	
-	// Calculate the SMS palette.
-	for (int i = 0x00; i < 0x1000; i++)
+	// Calculate the 32X palette.
+	for (int i = 0x0000; i < 0x10000; i++)
 	{
 		// Sega 32X uses 15-bit color.
 		// Scale each component by using the following algorithm:
