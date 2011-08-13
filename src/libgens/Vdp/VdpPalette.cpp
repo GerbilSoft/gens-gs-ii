@@ -448,7 +448,7 @@ FORCE_INLINE void VdpPalette::T_recalcFull_32X(pixel *palFull32X)
 	
 	// Copy the palette from the first half of palFull32X to the second half.
 	// TODO: Is it better to do this, or should we just mask palette entries by 0x7FFF?
-	memcpy(&palFull32X[0x8000], &palFull32X[0], 0x8000);
+	memcpy(&palFull32X[0x8000], &palFull32X[0], (0x8000 * sizeof(palFull32X[0])));
 	
 	// TODO: Port to LibGens.
 	// TODO: Move this to T_update_32X()?
