@@ -93,10 +93,12 @@ void Vdp::reset(void)
 	// Reset the VDP rendering arrays.
 	rend_reset();
 	
-	// Clear VRam, CRam, and VSRam.
+	// Clear VRam and VSRam.
 	memset(&VRam, 0x00, sizeof(VRam));
-	memset(&CRam, 0x00, sizeof(CRam));
 	memset(&VSRam, 0x00, sizeof(VSRam));
+	
+	// Reset the palette. (Includes CRam.)
+	m_palette.reset();
 	
 	/**
 	 * VDP registers.
@@ -141,7 +143,6 @@ void Vdp::reset(void)
 	VDP_Ctrl.ctrl_latch = false;
 	
 	// Set the VDP update flags.
-	MarkCRamDirty();
 	MarkVRamDirty();
 	
 	// Initialize the Horizontal Interrupt counter.

@@ -60,7 +60,6 @@ class Vdp
 		
 		// Update flags.
 	public:
-		void MarkCRamDirty(void);
 		void MarkVRamDirty(void);
 	private:
 		VdpTypes::UpdateFlags_t ms_UpdateFlags;
@@ -157,9 +156,8 @@ class Vdp
 		// Horizontal Interrupt Counter.
 		int HInt_Counter;
 		
-		// VRam, CRam, VSRam.
+		// VRam, VSRam.
 		VdpTypes::VRam_t VRam;
-		VdpTypes::CRam_t CRam;
 		VdpTypes::VSRam_t VSRam;
 		
 		int VDP_Int;
@@ -496,12 +494,6 @@ class Vdp
 		template<typename pixel>
 		FORCE_INLINE void T_Render_LineBuf(pixel *dest, pixel *md_palette);
 };
-
-/**
- * MarkCRamDirty(): Mark CRam as dirty.
- */
-inline void Vdp::MarkCRamDirty(void)
-	{ ms_UpdateFlags.CRam = 1; }
 
 /**
  * MarkVRamDirty(): Mark VRam as dirty.

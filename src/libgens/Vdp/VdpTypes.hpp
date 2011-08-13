@@ -191,12 +191,11 @@ namespace VdpTypes
 	// Update flags.
 	union UpdateFlags_t
 	{
-		unsigned int flags;
+		uint8_t flags;
 		struct
 		{
-			unsigned int VRam	:1;	// VRam was modified. (Implies VRam_Spr.)
-			unsigned int VRam_Spr	:1;	// Sprite Attribute Table was modified.
-			unsigned int CRam	:1;	// CRam was modified.
+			bool VRam	:1;	// VRam was modified. (Implies VRam_Spr.)
+			bool VRam_Spr	:1;	// Sprite Attribute Table was modified.
 		};
 	};
 	

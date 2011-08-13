@@ -62,16 +62,32 @@ VdpPalette::VdpPalette()
 	, m_bgColorIdx(0x00)
 	, m_mdColorMask(MD_COLOR_MASK_FULL)
 	, m_mdShadowHighlight(false)
-	, m_dirty(true)
 {
-	// Reset the active palettes.
-	resetActive();
+	// Set the dirty flags.
+	m_dirty.active = true;
+	m_dirty.full = true;
+	
+	// Reset CRam and other palette variables.
+	reset();
 }
 
 
 VdpPalette::~VdpPalette()
 {
 	// TODO
+}
+
+
+/**
+ * reset(): Reset the palette, including CRam.
+ */
+void VdpPalette::reset(void)
+{
+	// Clear CRam.
+	memset(&m_cram, 0x00, sizeof(m_cram));
+	
+	// Mark the active palette as dirty.
+	m_dirty.active = true;
 }
 
 
@@ -84,7 +100,7 @@ void VdpPalette::set##setPropName(setPropType new##setPropName) \
 	if (m_##propName == (new##setPropName)) \
 		return; \
 	m_##propName = (new##setPropName); \
-	m_dirty = true; \
+	m_dirty.full = true; \
 }
 
 
@@ -107,12 +123,8 @@ void VdpPalette::setBgColorIdx(uint8_t newBgColorIdx)
 		return;
 	m_bgColorIdx = newBgColorIdx;
 	
-	// Set the CRam flag to force a palette update.
-	// TODO: This is being done from a class instance...
-	// Figure out a better way to handle this.
-	EmuContext *instance = EmuContext::Instance();
-	if (instance != NULL)
-		instance->m_vdp->MarkCRamDirty();
+	// Mark the active palette as dirty.
+	m_dirty.active = true;
 }
 
 
@@ -129,7 +141,10 @@ void VdpPalette::setMdColorMask(bool newMdColorMask)
 	if (m_mdColorMask == newMask)
 		return;
 	m_mdColorMask = newMask;
-	m_dirty = true;
+	
+	// Mark both full and active palettes as dirty.
+	m_dirty.full = true;
+	m_dirty.active = true;
 }
 
 
@@ -448,13 +463,6 @@ void VdpPalette::recalcFull(void)
 			break;
 	}
 	
-	// Set the CRam flag to force a palette update.
-	// TODO: This is being done from a class instance...
-	// Figure out a better way to handle this.
-	EmuContext *instance = EmuContext::Instance();
-	if (instance != NULL)
-		instance->m_vdp->MarkCRamDirty();
-	
 	// TODO: Do_VDP_Only() / Do_32X_VDP_Only() if paused.
 	
 	// Force a wakeup.
@@ -463,31 +471,24 @@ void VdpPalette::recalcFull(void)
 	GensUI::wakeup();
 #endif
 	
-	// Clear the dirty bit.
-	m_dirty = false;
+	// Full palette is recalculated.
+	// Active palette needs to be recalculated.
+	m_dirty.full = false;
+	m_dirty.active = true;
 }
 
 
-/**
- * resetActive(): Reset the active palettes.
- */
-void VdpPalette::resetActive(void)
-{
-	memset(&m_palActive, 0x00, sizeof(m_palActive));
-}
+/** Active palette recalculation functions. **/
 
 
 /**
  * T_updateMD(): MD VDP palette update function.
  * @param MD_palette MD color palette.
  * @param palette Full color palette.
- * @param cram CRam.
  */
-#include <stdio.h>
 template<typename pixel>
 FORCE_INLINE void VdpPalette::T_updateMD(pixel *MD_palette,
-					const pixel *palette,
-					const VdpTypes::CRam_t *cram)
+					const pixel *palette)
 {
 	// TODO: Figure out a better way to handle this.
 	unsigned int vdp_layers = 0;
@@ -504,8 +505,8 @@ FORCE_INLINE void VdpPalette::T_updateMD(pixel *MD_palette,
 	// Update all 64 colors.
 	for (int i = 62; i >= 0; i -= 2)
 	{
-		uint16_t color1_raw = cram->u16[i] & m_mdColorMask;
-		uint16_t color2_raw = cram->u16[i + 1] & m_mdColorMask;
+		uint16_t color1_raw = m_cram.u16[i] & m_mdColorMask;
+		uint16_t color2_raw = m_cram.u16[i + 1] & m_mdColorMask;
 		
 		// Get the palette color.
 		pixel color1 = palette[color1_raw];
@@ -553,17 +554,22 @@ FORCE_INLINE void VdpPalette::T_updateMD(pixel *MD_palette,
 
 /**
  * updateMD(): Update the active MD palette.
- * @param cram MD CRam.
  */
-void VdpPalette::updateMD(const VdpTypes::CRam_t *cram)
+void VdpPalette::updateMD(void)
 {
-	if (m_dirty)
+	if (m_dirty.full)
 		recalcFull();
 	
-	if (m_bpp != BPP_32)
-		T_updateMD<uint16_t>(m_palActive.u16, m_palette.u16, cram);
-	else
-		T_updateMD<uint32_t>(m_palActive.u32, m_palette.u32, cram);
+	if (m_dirty.active)
+	{
+		if (m_bpp != BPP_32)
+			T_updateMD<uint16_t>(m_palActive.u16, m_palette.u16);
+		else
+			T_updateMD<uint32_t>(m_palActive.u32, m_palette.u32);
+		
+		// Clear the active palette dirty bit.
+		m_dirty.active = false;
+	}
 }
 
 

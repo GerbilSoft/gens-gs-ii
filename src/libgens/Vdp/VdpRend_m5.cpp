@@ -1554,17 +1554,8 @@ void Vdp::Render_Line_m5(void)
 		}
 	}
 	
-	// Check if the palette was modified.
-	if (ms_UpdateFlags.CRam)
-	{
-		// Update the active palette.
-		m_palette.updateMD(&CRam);
-		
-		// Clear the CRam flag.
-		ms_UpdateFlags.CRam = 0;
-	}
-	
-	// TODO: Clear the CRam update flag?
+	// Update the active palette.
+	m_palette.updateMD();
 	
 	// Render the image.
 	if (m_palette.bpp() != VdpPalette::BPP_32)

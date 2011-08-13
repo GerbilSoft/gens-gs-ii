@@ -40,7 +40,13 @@ class VdpPalette
 		VdpPalette();
 		~VdpPalette();
 		
+		/**
+		 * reset(): Reset the palette, including CRam.
+		 */
+		void reset();
+		
 		// Active MD palette.
+		// TODO: Make this private and add accessors.
 		union ActivePalette_t
 		{
 			uint16_t u16[0x100];
@@ -53,6 +59,44 @@ class VdpPalette
 		 * @return True if the palette is dirty.
 		 */
 		bool isDirty(void) const;
+		
+		/**
+		 * setMode(): Set the palette mode.
+		 * TODO: Implement mode settings. For now, this just forces a palette recalculation.
+		 */
+		void setMode(void);
+		
+		/** CRam functions. **/
+		
+		/**
+		 * readCRam_8(): Read 8-bit data from CRam.
+		 * @param address CRam address.
+		 * @return CRam data. (8-bit)
+		 */
+		uint8_t readCRam_8(uint8_t address) const;
+		
+		/**
+		 * readCRam_16(): Read 16-bit data from CRam.
+		 * @param address CRam address. (Must be 16-bit aligned!)
+		 * @return CRam data. (16-bit)
+		 * TODO: Endianness? Assuming host-endian for now.
+		 */
+		uint16_t readCRam_16(uint8_t address) const;
+		
+		/**
+		 * writeCRam_8(): Write 8-bit data to CRam.
+		 * @param address CRam address.
+		 * @param data CRam data. (8-bit)
+		 */
+		void writeCRam_8(uint8_t address, uint8_t data);
+		
+		/**
+		 * writeCRam_16(): Write 16-bit data to CRam.
+		 * @param address CRam address. (Must be 16-bit aligned!)
+		 * @param data CRam data. (16-bit)
+		 * TODO: Endianness? Assuming host-endian for now.
+		 */
+		void writeCRam_16(uint8_t address, uint16_t data);
 		
 		/** Properties. **/
 		
@@ -120,16 +164,10 @@ class VdpPalette
 		bool mdShadowHighlight(void) const;
 		void setMdShadowHighlight(bool newMdShadowHighlight);
 		
-		/** Palette manipulation functions. **/
-		
-		// Palette recalculation functions.
-		void recalcFull(void);
-		
-		// Reset the active palettes.
-		void resetActive(void);
+		/** Palette recalculation functions. **/
 		
 		// Palette update functions.
-		void updateMD(const VdpTypes::CRam_t *cram);
+		void updateMD(void);
 		
 		// TODO
 		//static void Adjust_CRam_32X(void);
@@ -142,6 +180,9 @@ class VdpPalette
 			uint32_t u32[0x1000];
 		};
 		Palette_t m_palette;
+		
+		// Color RAM.
+		VdpTypes::CRam_t m_cram;
 		
 		/** Proerties. **/
 		int m_contrast;
@@ -168,12 +209,18 @@ class VdpPalette
 		bool m_mdShadowHighlight;
 		
 		/**
-		 * Dirty flag.
-		 * TODO: Split into two flags:
-		 * - active dirty: active palette needs to be updated
-		 * - full dirty: full (and active) palette needs to be updated
+		 * Dirty flags.
 		 */
-		bool m_dirty;
+		union PalDirty_t
+		{
+			uint8_t data;
+			struct
+			{
+				bool active	:1;
+				bool full	:1;
+			};
+		};
+		PalDirty_t m_dirty;
 		
 		template<int mask>
 		static FORCE_INLINE void T_ConstrainColorComponent(int& c);
@@ -188,10 +235,13 @@ class VdpPalette
 			int RMask, int GMask, int BMask>
 		FORCE_INLINE void T_recalcFull_MD(pixel *palMD);
 		
+		void recalcFull(void);
+		
+		/** Active palette recalculation functions. **/
+		
 		template<typename pixel>
 		FORCE_INLINE void T_updateMD(pixel *MD_palette,
-					const pixel *palette,
-					const VdpTypes::CRam_t *cram);
+					const pixel *palette);
 };
 
 /**
@@ -199,7 +249,66 @@ class VdpPalette
  * @return True if the palette is dirty.
  */
 inline bool VdpPalette::isDirty(void) const
-	{ return m_dirty; }
+	{ return !!(m_dirty.data); }
+
+/**
+ * setMode(): Set the palette mode.
+ * TODO: Implement mode settings. For now, this just forces a palette recalculation.
+ */
+inline void VdpPalette::setMode(void)
+	{ m_dirty.full = true; }
+
+
+/** CRam functions. **/
+
+/**
+ * readCRam_8(): Read 8-bit data from CRam.
+ * @param address CRam address.
+ * @return CRam data. (8-bit)
+ */
+inline uint8_t VdpPalette::readCRam_8(uint8_t address) const
+{
+	// TODO: Apply address masking based on system ID.
+	return m_cram.u8[address & 0x7F];
+}
+
+/**
+ * readCRam_16(): Read 16-bit data from CRam.
+ * @param address CRam address. (Must be 16-bit aligned!)
+ * @return CRam data. (16-bit)
+ * TODO: Endianness? Assuming host-endian for now.
+ */
+inline uint16_t VdpPalette::readCRam_16(uint8_t address) const
+{
+	// TODO: Apply address masking based on system ID.
+	return m_cram.u16[(address & 0x7F) >> 1];
+}
+
+/**
+ * writeCRam_8(): Write 8-bit data to CRam.
+ * @param address CRam address.
+ * @param data CRam data. (8-bit)
+ */
+inline void VdpPalette::writeCRam_8(uint8_t address, uint8_t data)
+{
+	// TODO: Apply address masking based on system ID.
+	m_cram.u8[address & 0x7F] = data;
+	m_dirty.active = true;
+}
+
+/**
+ * writeCRam_16(): Write 16-bit data to CRam.
+ * @param address CRam address. (Must be 16-bit aligned!)
+ * @param data CRam data. (16-bit)
+ * TODO: Endianness? Assuming host-endian for now.
+ */
+inline void VdpPalette::writeCRam_16(uint8_t address, uint16_t data)
+{
+	// TODO: Apply address masking based on system ID.
+	m_cram.u16[(address & 0x7F) >> 1] = data;
+	m_dirty.active = true;
+}
+
 
 /** Properties. **/
 inline int VdpPalette::contrast(void) const

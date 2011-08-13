@@ -100,8 +100,11 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 	context->m_vdp->MarkVRamDirty();
 	
 	// Load CRam.
+	// TODO: Update for VdpPalette CRam.
+#if 0
 	zomg.loadCRam(context->m_vdp->CRam.u16, sizeof(context->m_vdp->CRam.u16), true);
 	context->m_vdp->MarkCRamDirty();
+#endif
 	
 	/** VDP: MD-specific **/
 	
@@ -262,7 +265,10 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	zomg.saveVRam(context->m_vdp->VRam.u16, sizeof(context->m_vdp->VRam.u16), true);
 	
 	// Save CRam.
+	// TODO: Update for VdpPalette CRam.
+#if 0
 	zomg.saveCRam(context->m_vdp->CRam.u16, sizeof(context->m_vdp->CRam.u16), true);
+#endif
 	
 	/** VDP: MD-specific **/
 	

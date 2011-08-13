@@ -47,6 +47,9 @@ uint8_t VDP_Int_Ack(void)
 	LibGens::EmuContext *instance = LibGens::EmuContext::Instance();
 	if (instance != NULL)
 		return instance->m_vdp->Int_Ack();
+	
+	// TODO: What should we return here?
+	return 0;
 }
 
 #ifdef __cplusplus
@@ -223,7 +226,7 @@ inline void Vdp::Update_Mode(void)
 	
 	// If the VDP mode has changed, CRam needs to be updated.
 	if (prevVdpMode != VDP_Mode)
-		MarkCRamDirty();
+		m_palette.setMode();
 }
 
 
@@ -331,8 +334,6 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 			
 			// Update the Shadow/Highlight setting.
 			m_palette.setMdShadowHighlight(!!(VDP_Reg.m5.Set4 & 0x08));
-			// TODO: Move the CRam dirty flag to VdpPalette.
-			MarkCRamDirty();
 			
 			if (val & 0x81)		// TODO: Original asm tests 0x81. Should this be done for other H40 tests?
 			{
@@ -609,7 +610,7 @@ uint16_t Vdp::Read_Data(void)
 		
 		case (VDEST_LOC_CRAM | VDEST_ACC_READ):
 			// CRam Read.
-			data = CRam.u16[(VDP_Ctrl.Address & 0x7E) >> 1];
+			data = m_palette.readCRam_16(VDP_Ctrl.Address & 0x7E);
 			break;
 		
 		case (VDEST_LOC_VSRAM | VDEST_ACC_READ):
@@ -857,11 +858,10 @@ void Vdp::Write_Data_Word(uint16_t data)
 			// odd addresses results in "interesting side effects".
 			// Those side effects aren't listed, so we're just going to
 			// mask the LSB for now.
-			MarkCRamDirty();
-			address &= 0x7E;	// CRam is 128 bytes. (64 words)
 			
 			// Write the word to CRam.
-			CRam.u16[address>>1] = data;
+			// CRam is 128 bytes. (64 words)
+			m_palette.writeCRam_16((address & 0x7E), data);
 			
 			// Increment the address register.
 			VDP_Ctrl.Address += VDP_Reg.m5.Auto_Inc;
@@ -871,12 +871,13 @@ void Vdp::Write_Data_Word(uint16_t data)
 			// VSRam Write.
 			// TODO: The Genesis Software Manual doesn't mention what happens
 			// with regards to odd address writes for VSRam.
-			// TODO: VSRam is 80 bytes, but we're allowing a maximum of 128 bytes here...
-			MarkCRamDirty();
-			address &= 0x7E;	// VSRam is 80 bytes. (40 words)
+			// TODO: Should this be VRam flag instead of CRam flag?
+			//MarkCRamDirty();
 			
 			// Write the word to VSRam.
-			VSRam.u16[address>>1] = data;
+			// VSRam is 80 bytes. (40 words)
+			// TODO: VSRam is 80 bytes, but we're allowing a maximum of 128 bytes here...
+			VSRam.u16[(address & 0x7E) >> 1] = data;
 			
 			// Increment the address register.
 			VDP_Ctrl.Address += VDP_Reg.m5.Auto_Inc;
@@ -951,7 +952,6 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 			break;
 		
 		case DMA_DEST_CRAM:
-			MarkCRamDirty();
 			DMAT_Type = 1;
 			break;
 		
@@ -1044,7 +1044,7 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 				break;
 			
 			case DMA_DEST_CRAM:
-				CRam.u16[dest_address >> 1] = w;
+				m_palette.writeCRam_16(dest_address, w);
 				break;
 			
 			case DMA_DEST_VSRAM:
