@@ -254,13 +254,10 @@ int Zomg::saveCRam(const Zomg_CRam_t *cram)
 {
 #if ZOMG_BYTEORDER == ZOMG_LIL_ENDIAN
 	// TODO: Byteswapping memcpy().
-	uint16_t *bswap_buf = (uint16_t*)malloc(sizeof(cram->md));
-	memcpy(bswap_buf, cram->md, sizeof(cram->md));
-	cpu_to_be16_array(bswap_buf, sizeof(cram->md));
-	
-	int ret = saveToZomg("common/CRam.bin", bswap_buf, sizeof(cram->md));
-	free(bswap_buf);
-	return ret;
+	Zomg_CRam_t bswap_buf;
+	memcpy(bswap_buf.md, cram->md, sizeof(bswap_buf.md));
+	cpu_to_be16_array(bswap_buf.md, sizeof(bswap_buf.md));
+	return saveToZomg("common/CRam.bin", bswap_buf.md, sizeof(bswap_buf.md));
 #else
 	return saveToZomg("common/CRam.bin", cram->md, sizeof(cram->md));
 #endif
