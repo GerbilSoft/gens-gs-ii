@@ -238,7 +238,17 @@ class VdpPalette
 		template<typename pixel,
 			int RBits, int GBits, int BBits,
 			int RMask, int GMask, int BMask>
-		FORCE_INLINE void T_recalcFull_MD(pixel *palMD);
+		FORCE_INLINE void T_recalcFull_MD(pixel *palFull);
+		
+		template<typename pixel,
+			int RBits, int GBits, int BBits,
+			int RMask, int GMask, int BMask>
+		FORCE_INLINE void T_recalcFull_SMS(pixel *palFull);
+		
+		template<typename pixel,
+			int RBits, int GBits, int BBits,
+			int RMask, int GMask, int BMask>
+		FORCE_INLINE void T_recalcFull_GG(pixel *palFull);
 		
 		void recalcFull(void);
 		

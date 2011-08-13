@@ -220,9 +220,10 @@ FORCE_INLINE void VdpPalette::AdjustContrast(int& r, int& g, int& b, int contras
 
 
 /**
- * T_recalcFull_MD(): Recalculate the full MD palette.
+ * T_recalcFull_MD(): Recalculate the full palette. (Mega Drive)
  * This applies brightness, contrast, grayscale, and inverted palette settings.
  * Additionally, the MD color scale method is used to determine how colors are calculated.
+ * @param palFull Full palette. (Must have enough space for at least 0x1000 entries!)
  */
 template<typename pixel,
 	int RBits, int GBits, int BBits,
@@ -264,6 +265,7 @@ void VdpPalette::T_recalcFull_MD(pixel *palFull)
 	// Calculate the MD palette.
 	for (int i = 0x0000; i < 0x1000; i++)
 	{
+		// Scale the color components using the lookup table.
 		int r = md_components[i & 0x000F];
 		int g = md_components[(i >> 4) & 0x000F];
 		int b = md_components[(i >> 8) & 0x000F];
@@ -425,6 +427,160 @@ static inline void T_Recalculate_Palette_32X(pixel *pal32X, pixel *cramAdjusted3
 	T_Adjust_CRam_32X<pixel>(pal32X, cramAdjusted32X);
 }
 #endif
+
+
+/**
+ * T_recalcFull_SMS(): Recalculate the full palette. (Sega Master System)
+ * This applies brightness, contrast, grayscale, and inverted palette settings.
+ * TODO: UNTESTED!
+ * @param palFull Full palette. (Must have enough space for at least 0x40 entries!)
+ */
+template<typename pixel,
+	int RBits, int GBits, int BBits,
+	int RMask, int GMask, int BMask>
+FORCE_INLINE void VdpPalette::T_recalcFull_SMS(pixel *palFull)
+{
+	// SMS color components. (EGA palette)
+	static const uint8_t PalComponent_SMS[4] = {0x00, 0x55, 0xAA, 0xFF};
+	
+	// Brightness / Contrast
+	// These values are scaled to positive numbers.
+	// Normal brightness: (Brightness == 100)
+	// Normal contrast:   (  Contrast == 100)
+	const int brightness = (m_brightness - 100);
+	
+	// Calculate the SMS palette.
+	for (int i = 0x00; i < 0x3F; i++)
+	{
+		// Scale the color components using the lookup table.
+		int r = PalComponent_SMS[i & 0x03];
+		int g = PalComponent_SMS[(i >> 4) & 0x0C];
+		int b = PalComponent_SMS[(i >> 8) & 0x30];
+		
+		// Adjust brightness.
+		r += brightness;
+		g += brightness;
+		b += brightness;
+		
+		// Adjust contrast.
+		AdjustContrast(r, g, b, m_contrast);
+		
+		if (m_grayscale)
+		{
+			// Convert the color to grayscale.
+			r = g = b = CalcGrayscale(r, g, b);
+		}
+		
+		// Reduce color components to original color depth.
+		r >>= (8 - RBits);
+		g >>= (8 - GBits);
+		b >>= (8 - BBits);
+		
+		// Constrain the color components.
+		T_ConstrainColorComponent<RMask>(r);
+		T_ConstrainColorComponent<GMask>(g);
+		T_ConstrainColorComponent<BMask>(b);
+		
+		if (m_inverted)
+		{
+			// Invert the color components.
+			r ^= RMask;
+			g ^= GMask;
+			b ^= BMask;
+		}
+		
+		// TODO: Make this configurable?
+#if 0	
+		if (GMask == 0x3F)
+		{
+			// 16-bit color. (RGB565)
+			// Mask off the LSB of the green component.
+			g &= ~1;
+		}
+#endif
+		
+		// Combine the color components.
+		palFull[i] = (r << (BBits + GBits)) |
+			     (g << (BBits)) |
+			     (b);
+	}
+}
+
+
+/**
+ * T_recalcFull_GG(): Recalculate the full palette. (Game Gear)
+ * This applies brightness, contrast, grayscale, and inverted palette settings.
+ * TODO: UNTESTED!
+ * @param palFull Full palette. (Must have enough space for at least 0x1000 entries!)
+ */
+template<typename pixel,
+	int RBits, int GBits, int BBits,
+	int RMask, int GMask, int BMask>
+FORCE_INLINE void VdpPalette::T_recalcFull_GG(pixel *palFull)
+{
+	// Brightness / Contrast
+	// These values are scaled to positive numbers.
+	// Normal brightness: (Brightness == 100)
+	// Normal contrast:   (  Contrast == 100)
+	const int brightness = (m_brightness - 100);
+	
+	// Calculate the SMS palette.
+	for (int i = 0x00; i < 0x1000; i++)
+	{
+		// Game Gear uses 12-bit color.
+		// Scale each component by using the same 4 bits for each nybble.
+		int r = (i & 0x000F);		r |= (r << 4);
+		int g = ((i >> 4) & 0x000F);	g |= (g << 4);
+		int b = ((i >> 8) & 0x000F);	b |= (b << 4);
+		
+		// Adjust brightness.
+		r += brightness;
+		g += brightness;
+		b += brightness;
+		
+		// Adjust contrast.
+		AdjustContrast(r, g, b, m_contrast);
+		
+		if (m_grayscale)
+		{
+			// Convert the color to grayscale.
+			r = g = b = CalcGrayscale(r, g, b);
+		}
+		
+		// Reduce color components to original color depth.
+		r >>= (8 - RBits);
+		g >>= (8 - GBits);
+		b >>= (8 - BBits);
+		
+		// Constrain the color components.
+		T_ConstrainColorComponent<RMask>(r);
+		T_ConstrainColorComponent<GMask>(g);
+		T_ConstrainColorComponent<BMask>(b);
+		
+		if (m_inverted)
+		{
+			// Invert the color components.
+			r ^= RMask;
+			g ^= GMask;
+			b ^= BMask;
+		}
+		
+		// TODO: Make this configurable?
+#if 0	
+		if (GMask == 0x3F)
+		{
+			// 16-bit color. (RGB565)
+			// Mask off the LSB of the green component.
+			g &= ~1;
+		}
+#endif
+		
+		// Combine the color components.
+		palFull[i] = (r << (BBits + GBits)) |
+			     (g << (BBits)) |
+			     (b);
+	}
+}
 
 
 /**
