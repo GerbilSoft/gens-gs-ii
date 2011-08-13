@@ -827,6 +827,8 @@ void VBackend::setEmuContext(LibGens::EmuContext *newEmuContext)
 		return;
 	
 	m_emuContext = newEmuContext;
+	lockEmuContext.unlock();
+	
 	setVbDirty();
 	setMdScreenDirty();
 	

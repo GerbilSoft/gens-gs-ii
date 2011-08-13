@@ -165,6 +165,12 @@ void GLBackend::reallocTexture(void)
 		return;
 	}
 	
+	// Get the emulation context's color depth.
+	m_lastBpp = m_emuContext->m_vdp->m_palette.bpp();
+	
+	// Unlock the emulation context.
+	lockEmuContext.unlock();
+	
 	// Create and initialize a GL texture.
 	// TODO: Add support for NPOT textures and/or GL_TEXTURE_RECTANGLE_ARB.
 	glEnable(GL_TEXTURE_2D);
@@ -179,7 +185,6 @@ void GLBackend::reallocTexture(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMethod);
 	
 	// Determine the texture format and type.
-	m_lastBpp = m_emuContext->m_vdp->m_palette.bpp();
 	switch (m_lastBpp)
 	{
 		case LibGens::VdpPalette::BPP_15:
@@ -508,6 +513,9 @@ void GLBackend::glb_paintGL(void)
 		return;
 	}
 	
+	// Unlock the emulation context.
+	lockEmuContext.unlock();
+	
 	if (hasAspectRatioConstraintChanged())
 	{
 		// Aspect ratio constraint has changed.
@@ -529,7 +537,7 @@ void GLBackend::glb_paintGL(void)
 		}
 		
 		/** START: Apply effects. **/
-		
+		lockEmuContext.relock();	// Emulation Context is used here.
 		if (isRunning())
 		{
 			// Emulation is running. Check if any effects should be applied.
@@ -586,6 +594,9 @@ void GLBackend::glb_paintGL(void)
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 0);
+		
+		// Unlock the Emulation Context.
+		lockEmuContext.unlock();
 		
 		// Texture is no longer dirty.
 		m_mdScreenDirty = false;
