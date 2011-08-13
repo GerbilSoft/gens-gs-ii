@@ -181,10 +181,12 @@ class VdpPalette
 		static FORCE_INLINE int CalcGrayscale(int r, int g, int b);
 		static FORCE_INLINE void AdjustContrast(int& r, int& g, int& b, int contrast);
 		
+		/** Full palette recalculation functions. **/
+		
 		template<typename pixel,
 			int RBits, int GBits, int BBits,
 			int RMask, int GMask, int BMask>
-		FORCE_INLINE void T_recalcFullMD(pixel *palMD);
+		FORCE_INLINE void T_recalcFull_MD(pixel *palMD);
 		
 		template<typename pixel>
 		FORCE_INLINE void T_updateMD(pixel *MD_palette,

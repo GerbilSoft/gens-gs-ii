@@ -201,61 +201,62 @@ FORCE_INLINE void VdpPalette::AdjustContrast(int& r, int& g, int& b, int contras
 }
 
 
+/** Full palette recalculation functions. **/
+
+
 /**
- * T_recalcFullMD(): Recalculates the full MD palette for brightness, contrast, and various effects.
+ * T_recalcFull_MD(): Recalculate the full MD palette.
+ * This applies brightness, contrast, grayscale, and inverted palette settings.
+ * Additionally, the MD color scale method is used to determine how colors are calculated.
  */
 template<typename pixel,
 	int RBits, int GBits, int BBits,
 	int RMask, int GMask, int BMask>
-FORCE_INLINE void VdpPalette::T_recalcFullMD(pixel *palFull)
+void VdpPalette::T_recalcFull_MD(pixel *palFull)
 {
-	int r, g, b;
+	// MD color components.
+	static const uint8_t PalComponent_MD_Raw[16] =
+		{0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70,
+		 0xE0, 0x90, 0xA0, 0xB0, 0xC0, 0xD0, 0xE0, 0xF0};
+	static const uint8_t PalComponent_MD_Full[16] =
+		{  0,  18,  36,  54,  72,  91, 109, 127,
+		 145, 163, 182, 200, 218, 236, 255, 255};
+	static const uint8_t PalComponent_MD_Full_SH[16] =
+		{0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+		 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF};
+	
+	const uint8_t *md_components;
+	switch (m_colorScaleMethod)
+	{
+		case COLSCALE_RAW:
+			md_components = &PalComponent_MD_Raw[0];
+			break;
+		case COLSCALE_FULL:
+		default: // Matches Genesis 2; tested by TmEE.
+			md_components = &PalComponent_MD_Full[0];
+			break;
+		case COLSCALE_FULL_HS:
+			md_components = &PalComponent_MD_Full_SH[0];
+			break;
+	}
 	
 	// Brightness / Contrast
 	// These values are scaled to positive numbers.
 	// Normal brightness: (Brightness == 100)
 	// Normal contrast:   (  Contrast == 100)
-
 	const int brightness = (m_brightness - 100);
 	
-	int mdComponentScale;
-	switch (m_colorScaleMethod)
+	// Calculate the MD palette. (32-bit color)
+	for (int i = 0x0000; i < 0x1000; i++)
 	{
-		case COLSCALE_RAW:
-			mdComponentScale = 0;
-			break;
-		case COLSCALE_FULL:
-			mdComponentScale = 0xE0;
-			break;
-		case COLSCALE_FULL_HS:
-		default:
-			mdComponentScale = 0xF0;
-			break;
-	}
-	
-	// Calculate the MD palette.
-	for (unsigned int i = 0x0000; i < 0x1000; i++)
-	{
-		// Process using 8-bit color components.
-		r = (i & 0x000F) << 4;
-		g = (i & 0x00F0);
-		b = (i >> 4) & 0xF0;
-		
-		// Scale the colors to full RGB.
-		if (m_colorScaleMethod != COLSCALE_RAW)
-		{
-			r = (r * 0xFF) / mdComponentScale;
-			g = (g * 0xFF) / mdComponentScale;
-			b = (b * 0xFF) / mdComponentScale;
-		}
+		int r = md_components[i & 0x000F];
+		int g = md_components[(i >> 4) & 0x000F];
+		int b = md_components[(i >> 8) & 0x000F];
 		
 		// Adjust brightness.
-		if (brightness != 0)
-		{
-			r += brightness;
-			g += brightness;
-			b += brightness;
-		}
+		r += brightness;
+		g += brightness;
+		b += brightness;
 		
 		// Adjust contrast.
 		AdjustContrast(r, g, b, m_contrast);
@@ -294,7 +295,7 @@ FORCE_INLINE void VdpPalette::T_recalcFullMD(pixel *palFull)
 		}
 #endif
 		
-		// Create the color.
+		// Combine the color components.
 		palFull[i] = (r << (BBits + GBits)) |
 			     (g << (BBits)) |
 			     (b);
@@ -419,7 +420,7 @@ void VdpPalette::recalcFull(void)
 	switch (m_bpp)
 	{
 		case BPP_15:
-			T_recalcFullMD<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(m_palette.u16);
+			T_recalcFull_MD<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(m_palette.u16);
 #if 0
 			// TODO: Port to LibGens.
 			T_Recalculate_Palette_32X<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>
@@ -428,7 +429,7 @@ void VdpPalette::recalcFull(void)
 			break;
 		
 		case BPP_16:
-			T_recalcFullMD<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(m_palette.u16);
+			T_recalcFull_MD<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(m_palette.u16);
 #if 0
 			// TODO: Port to LibGens.
 			T_Recalculate_Palette_32X<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>
@@ -438,7 +439,7 @@ void VdpPalette::recalcFull(void)
 		
 		case BPP_32:
 		default:
-			T_recalcFullMD<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(m_palette.u32);
+			T_recalcFull_MD<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(m_palette.u32);
 #if 0
 			// TODO: Port to LibGens.
 			T_Recalculate_Palette_32X<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>
