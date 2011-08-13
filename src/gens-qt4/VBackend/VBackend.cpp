@@ -27,6 +27,9 @@
 #include <stdio.h>
 #include <assert.h>
 
+// Qt includes.
+#include <QtCore/QMutexLocker>
+
 // LibGens includes.
 #include "libgens/Effects/PausedEffect.hpp"
 #include "libgens/Effects/FastBlur.hpp"
@@ -817,6 +820,9 @@ int VBackend::recSetDuration(const QString& component, int duration)
  */
 void VBackend::setEmuContext(LibGens::EmuContext *newEmuContext)
 {
+	// Emulation Context must be locked before use.
+	QMutexLocker lockEmuContext(&m_mtxEmuContext);
+	
 	if (m_emuContext == newEmuContext)
 		return;
 	

@@ -152,6 +152,9 @@ void GLBackend::reallocTexture(void)
 	if (m_tex > 0)
 		glDeleteTextures(1, &m_tex);
 	
+	// Emulation Context must be locked before use.
+	QMutexLocker lockEmuContext(&m_mtxEmuContext);
+	
 	// If we don't have an emulation context, don't allocate a texture for now.
 	// TODO: Intro effects.
 	if (!m_emuContext)
@@ -492,6 +495,9 @@ void GLBackend::glb_paintGL(void)
 	glClearColor(1.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
+	// Emulation Context must be locked before use.
+	QMutexLocker lockEmuContext(&m_mtxEmuContext);
+	
 	if (!m_emuContext)
 	{
 		// No emulation context.
@@ -658,19 +664,35 @@ void GLBackend::glb_paintGL(void)
  */
 void GLBackend::recalcStretchRectF(StretchMode_t mode)
 {
-	if (m_emuContext)
+	// Emulation Context must be locked before use.
+	QMutexLocker lockEmuContext(&m_mtxEmuContext);
+	
+	// Get the video resolution from the emulation context.
+	int ctxHPix, ctxHPixBegin, ctxVPix;
+	const bool isEmuContext = (!!m_emuContext);
+	
+	if (isEmuContext)
 	{
-		// Store the current MD screen resolution.
-		m_stretchLastRes.setWidth(m_emuContext->m_vdp->GetHPix());
-		m_stretchLastRes.setHeight(m_emuContext->m_vdp->GetVPix());
+		// Emulation context is active. Get the video resolution.
+		ctxHPix = m_emuContext->m_vdp->GetHPix();
+		ctxHPixBegin = m_emuContext->m_vdp->GetHPixBegin();
+		ctxVPix = m_emuContext->m_vdp->GetVPix();
 	}
 	else
 	{
 		// No emulation context.
 		// Assume 320x240 image for now.
-		m_stretchLastRes.setWidth(320);
-		m_stretchLastRes.setWidth(240);
+		ctxHPix = 320;
+		ctxHPixBegin = 0;
+		ctxVPix = 240;
 	}
+	
+	// Unlock the emulation context.
+	lockEmuContext.unlock();
+	
+	// Store the current MD screen resolution.
+	m_stretchLastRes.setWidth(ctxHPix);
+	m_stretchLastRes.setHeight(ctxVPix);
 	
 	// Default to no stretch.
 	m_stretchRectF = QRectF(
@@ -684,20 +706,19 @@ void GLBackend::recalcStretchRectF(StretchMode_t mode)
 	// - stretching is disabled
 	// - emulation isn't running
 	// - no emulation context is present (TODO: Combine isRunning() with m_emuContext?)
-	if (mode == STRETCH_NONE || !isRunning() || !m_emuContext)
+	if (mode == STRETCH_NONE || !isRunning() || !isEmuContext)
 		return;
 	
 	// Horizontal stretch.
 	if (mode == STRETCH_H || mode == STRETCH_FULL)
 	{
 		// Horizontal stretch.
-		const int h_pix_begin = m_emuContext->m_vdp->GetHPixBegin();
-		if (h_pix_begin > 0)
+		if (ctxHPixBegin > 0)
 		{
 			// Less than 320 pixels wide.
 			// Adjust horizontal stretch.
 			// NOTE: Width is adjusted automatically by QRectF when setting X.
-			m_stretchRectF.setX((double)h_pix_begin / (double)m_texSize.width());
+			m_stretchRectF.setX((double)ctxHPixBegin / (double)m_texSize.width());
 			//m_stretchRectF.setWidth(img_dest.width() - img_dest.x());
 		}
 	}
@@ -706,7 +727,7 @@ void GLBackend::recalcStretchRectF(StretchMode_t mode)
 	if (mode == STRETCH_V || mode == STRETCH_FULL)
 	{
 		// Vertical stretch.
-		int v_pix = (240 - m_emuContext->m_vdp->GetVPix());
+		int v_pix = (240 - ctxVPix);
 		if (v_pix > 0)
 		{
 			// Less than 240 pixels tall.

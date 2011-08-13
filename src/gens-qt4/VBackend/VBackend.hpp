@@ -30,6 +30,7 @@
 // Qt includes.
 #include <QtCore/QString>
 #include <QtCore/QList>
+#include <QtCore/QMutex>
 #include <QtGui/QWidget>
 #include <QtGui/QColor>
 
@@ -196,6 +197,7 @@ class VBackend : public QWidget
 		
 		/** Emulation Context. **/
 		LibGens::EmuContext *m_emuContext;
+		QMutex m_mtxEmuContext;
 		
 		// Reset Stretch Mode. (Used if the stretch mode is invalid.)
 		void stretchMode_reset(void);
