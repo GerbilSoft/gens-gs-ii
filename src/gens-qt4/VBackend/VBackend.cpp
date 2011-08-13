@@ -56,8 +56,8 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	, m_mdScreenDirty(true)
 	, m_lastBpp(LibGens::VdpPalette::BPP_MAX)
 	
-	// Set the internal framebuffer to NULL by default.
-	, m_intScreen(NULL)
+	// Allocate the internal screen buffer.
+	, m_intScreen(new LibGens::MdFb())
 	
 	// We're not running anything initially.
 	// TODO: Remove m_running and just use m_emuContext?
@@ -341,10 +341,6 @@ void VBackend::pauseTint_changed_slot(const QVariant& newPauseTint)
  */
 void VBackend::updatePausedEffect(bool fromMdScreen)
 {
-	// Allocate the internal framebuffer, if necessary.
-	if (!m_intScreen)
-		m_intScreen = new LibGens::MdFb();
-	
 	// Use LibGens' software paused effect function.
 	LibGens::PausedEffect::DoPausedEffect(m_intScreen, fromMdScreen);
 	
@@ -359,10 +355,6 @@ void VBackend::updatePausedEffect(bool fromMdScreen)
  */
 void VBackend::updateFastBlur(bool fromMdScreen)
 {
-	// Allocate the internal framebuffer, if necessary.
-	if (!m_intScreen)
-		m_intScreen = new LibGens::MdFb();
-	
 	// Use LibGens' software paused effect function.
 	LibGens::FastBlur::DoFastBlur(m_intScreen, fromMdScreen);
 	
