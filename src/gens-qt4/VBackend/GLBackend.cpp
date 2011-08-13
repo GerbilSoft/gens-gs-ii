@@ -152,12 +152,9 @@ void GLBackend::reallocTexture(void)
 	if (m_tex > 0)
 		glDeleteTextures(1, &m_tex);
 	
-	// Emulation Context must be locked before use.
-	QMutexLocker lockEmuContext(&m_mtxEmuContext);
-	
 	// If we don't have an emulation context, don't allocate a texture for now.
 	// TODO: Intro effects.
-	if (!m_emuContext)
+	if (!isRunning())
 	{
 		// Clear texture; set last bpp as invalid to force update.
 		m_tex = 0;
@@ -166,10 +163,9 @@ void GLBackend::reallocTexture(void)
 	}
 	
 	// Get the emulation context's color depth.
+	m_mtxEmuContext.lock();
 	m_lastBpp = m_emuContext->m_vdp->m_palette.bpp();
-	
-	// Unlock the emulation context.
-	lockEmuContext.unlock();
+	m_mtxEmuContext.unlock();
 	
 	// Create and initialize a GL texture.
 	// TODO: Add support for NPOT textures and/or GL_TEXTURE_RECTANGLE_ARB.
@@ -500,10 +496,7 @@ void GLBackend::glb_paintGL(void)
 	glClearColor(1.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
-	// Emulation Context must be locked before use.
-	QMutexLocker lockEmuContext(&m_mtxEmuContext);
-	
-	if (!m_emuContext)
+	if (!isRunning())
 	{
 		// No emulation context.
 		// TODO: Intro effects.
@@ -512,9 +505,6 @@ void GLBackend::glb_paintGL(void)
 		m_vbDirty = false;	// Video backend is no longer dirty.
 		return;
 	}
-	
-	// Unlock the emulation context.
-	lockEmuContext.unlock();
 	
 	if (hasAspectRatioConstraintChanged())
 	{
@@ -536,12 +526,16 @@ void GLBackend::glb_paintGL(void)
 			reallocTexture();
 		}
 		
+		// Screen buffer used for output.
+		LibGens::MdFb *src_fb = NULL;
+		
 		/** START: Apply effects. **/
-		lockEmuContext.relock();	// Emulation Context is used here.
 		if (isRunning())
 		{
 			// Emulation is running. Check if any effects should be applied.
 			
+			// Emulation Context must be locked before use.
+			QMutexLocker lockEmuContext(&m_mtxEmuContext);
 			/** Software rendering path. **/
 			
 			// If Fast Blur is enabled, update the Fast Blur effect.
@@ -560,20 +554,32 @@ void GLBackend::glb_paintGL(void)
 				updatePausedEffect(bFromMD);
 				bFromMD = false;
 			}
+			
+			// If we're using the MD screen directly,
+			// get the LibGens::MdFb from m_emuContext.
+			if (bFromMD)
+				src_fb = &m_emuContext->m_vdp->MD_Screen;
 		}
 		
-		// Determine which screen buffer should be used for video output.
-		// TODO: Optimize this!
-		GLvoid *screen;
-		LibGens::MdFb *src_fb = (bFromMD
-				? &m_emuContext->m_vdp->MD_Screen
-				: m_intScreen);
+		/** END: Apply effects. **/
+		
+		// If the MD screen buffer wasn't used, use the internal screen buffer.
+		if (!src_fb)
+		{
+			// Make sure the internal screen buffer is allocated.
+			if (!m_intScreen)
+				m_intScreen = new LibGens::MdFb();
+			
+			// Use the internal screen buffer.
+			src_fb = m_intScreen;
+		}
+		
+		// Get the screen buffer from the LibGens::MdFb.
+		const GLvoid *screen;
 		if (bpp != LibGens::VdpPalette::BPP_32)
 			screen = src_fb->fb16();
 		else
 			screen = src_fb->fb32();
-		
-		/** END: Apply effects. **/
 		
 		// Bind the texture.
 		glEnable(GL_TEXTURE_2D);
@@ -594,9 +600,6 @@ void GLBackend::glb_paintGL(void)
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 0);
-		
-		// Unlock the Emulation Context.
-		lockEmuContext.unlock();
 		
 		// Texture is no longer dirty.
 		m_mdScreenDirty = false;
