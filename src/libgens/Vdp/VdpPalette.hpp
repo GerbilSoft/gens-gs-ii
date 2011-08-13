@@ -28,6 +28,9 @@
 
 #include "VdpTypes.hpp"
 
+// ZOMG CRam struct.
+#include "libzomg/zomg_vdp.h"
+
 // Needed for FORCE_INLINE.
 #include "../macros/common.h"
 
@@ -171,6 +174,10 @@ class VdpPalette
 		
 		// TODO
 		//static void Adjust_CRam_32X(void);
+		
+		/** ZOMG savestate functions. **/
+		void zomgSaveCRam(Zomg_CRam_t *cram);
+		void zomgRestoreCRam(const Zomg_CRam_t *cram);
 	
 	private:
 		// Full MD palette.

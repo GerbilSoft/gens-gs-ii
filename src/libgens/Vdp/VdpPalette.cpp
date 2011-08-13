@@ -587,5 +587,28 @@ void Adjust_CRam_32X(void)
 }
 #endif
 
+
+/** ZOMG savestate functions. **/
+
+
+/**
+ * zomgSaveCRam(): Save the CRam.
+ * @param state Zomg_PsgSave_t struct to save to.
+ */
+void VdpPalette::zomgSaveCRam(Zomg_CRam_t *cram)
+{
+	// TODO: Support systems other than MD.
+	memcpy(cram->md, m_cram.u16, sizeof(cram->md));
 }
 
+
+void VdpPalette::zomgRestoreCRam(const Zomg_CRam_t *cram)
+{
+	// TODO: Support systems other than MD.
+	memcpy(m_cram.u16, cram->md, sizeof(cram->md));
+	
+	// Mark the active palette as dirty.
+	m_dirty.active = true;
+}
+
+}
