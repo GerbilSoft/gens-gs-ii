@@ -660,10 +660,6 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 	if (vdp_layers & VdpTypes::VDP_LAYER_PALETTE_LOCK)
 		return;
 	
-	// NOTE: We can't clear the CRam flag in the VDP class here.
-	// This function is called by the VDP class, so the VDP class
-	// can clear the flag itself.
-	
 	// Update all 64 colors.
 	for (int i = 62; i >= 0; i -= 2)
 	{
