@@ -228,20 +228,16 @@ int Zomg::loadVRam(void *vram, size_t siz, bool byteswap)
 /**
  * loadCRam(): Load CRam.
  * File: common/CRam.bin
- * @param vram Destination buffer for CRam.
- * @param siz Number of bytes to read.
- * @param byteswap If true, byteswap to host-endian 16-bit.
+ * @param cram Destination buffer for CRam.
  * @return Number of bytes read on success; negative on error.
  * TODO: Apply byteswapping only for MD.
  */
-int Zomg::loadCRam(void *cram, size_t siz, bool byteswap)
+int Zomg::loadCRam(Zomg_CRam_t *cram)
 {
-	int ret = loadFromZomg("common/CRam.bin", cram, siz);
-	if (byteswap)
-	{
-		// TODO: Only byteswap for MD.
-		be16_to_cpu_array(cram, siz);
-	}
+	int ret = loadFromZomg("common/CRam.bin", cram->md, sizeof(cram->md));
+	
+	// TODO: Only byteswap for MD.
+	be16_to_cpu_array(cram->md, sizeof(cram->md));
 	return ret;
 }
 
