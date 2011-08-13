@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <Util/Timing.hpp>
 #include "VdpPalette.hpp"
 
 // TODO: Remove Vdp::UpdateFlags dependency.
@@ -481,6 +482,7 @@ void VdpPalette::resetActive(void)
  * @param palette Full color palette.
  * @param cram CRam.
  */
+#include <stdio.h>
 template<typename pixel>
 FORCE_INLINE void VdpPalette::T_updateMD(pixel *MD_palette,
 					const pixel *palette,
@@ -519,10 +521,6 @@ FORCE_INLINE void VdpPalette::T_updateMD(pixel *MD_palette,
 			// - http://www.tehskeen.com/forums/showpost.php?p=71308&postcount=1077
 			// - http://forums.sonicretro.org/index.php?showtopic=17905
 			
-			// Normal color. (xxx0)
-			MD_palette[i + 192]	= color1;
-			MD_palette[i + 1 + 192]	= color2;
-			
 			color1_raw >>= 1;
 			color2_raw >>= 1;
 			
@@ -541,8 +539,11 @@ FORCE_INLINE void VdpPalette::T_updateMD(pixel *MD_palette,
 	
 	if (m_mdShadowHighlight)
 	{
+		// Copy the normal colors (0-63) to shadow+highlight (192-255).
+		// Pixels with both shadow and highlight show up as normal.
+		memcpy(&MD_palette[192], &MD_palette[0], (sizeof(MD_palette[0]) * 64));
+		
 		// Update the background color for highlight and shadow.
-		MD_palette[192] = MD_palette[m_bgColorIdx];		// Normal color.
 		MD_palette[64]  = MD_palette[m_bgColorIdx + 64];	// Shadow color.
 		MD_palette[128] = MD_palette[m_bgColorIdx + 128];	// Highlight color.
 	}
