@@ -435,7 +435,7 @@ void VdpPalette::recalcFull(void)
 	switch (m_bpp)
 	{
 		case BPP_15:
-			T_recalcFull_MD<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(m_palette.u16);
+			T_recalcFull_MD<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(m_palFull.u16);
 #if 0
 			// TODO: Port to LibGens.
 			T_Recalculate_Palette_32X<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>
@@ -444,7 +444,7 @@ void VdpPalette::recalcFull(void)
 			break;
 		
 		case BPP_16:
-			T_recalcFull_MD<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(m_palette.u16);
+			T_recalcFull_MD<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(m_palFull.u16);
 #if 0
 			// TODO: Port to LibGens.
 			T_Recalculate_Palette_32X<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>
@@ -454,7 +454,7 @@ void VdpPalette::recalcFull(void)
 		
 		case BPP_32:
 		default:
-			T_recalcFull_MD<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(m_palette.u32);
+			T_recalcFull_MD<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(m_palFull.u32);
 #if 0
 			// TODO: Port to LibGens.
 			T_Recalculate_Palette_32X<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>
@@ -563,9 +563,9 @@ void VdpPalette::updateMD(void)
 	if (m_dirty.active)
 	{
 		if (m_bpp != BPP_32)
-			T_updateMD<uint16_t>(m_palActive.u16, m_palette.u16);
+			T_updateMD<uint16_t>(m_palActive.u16, m_palFull.u16);
 		else
-			T_updateMD<uint32_t>(m_palActive.u32, m_palette.u32);
+			T_updateMD<uint32_t>(m_palActive.u32, m_palFull.u32);
 		
 		// Clear the active palette dirty bit.
 		m_dirty.active = false;

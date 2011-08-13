@@ -181,12 +181,12 @@ class VdpPalette
 	
 	private:
 		// Full MD palette.
-		union Palette_t
+		union PalFull_t
 		{
 			uint16_t u16[0x1000];
 			uint32_t u32[0x1000];
 		};
-		Palette_t m_palette;
+		PalFull_t m_palFull;
 		
 		// Color RAM.
 		VdpTypes::CRam_t m_cram;
