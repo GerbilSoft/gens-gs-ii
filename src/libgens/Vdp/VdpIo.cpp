@@ -202,10 +202,10 @@ void Vdp::Update_IRQ_Line(void)
 
 
 /**
- * Set_Visible_Lines(): Sets the number of visible lines, depending on CPU mode and VDP setting.
- * TODO: LibGens porting.
+ * updateVdpLines(): Update VDP_Lines based on CPU and VDP mode settings.
+ * @param resetCurrent If true, reset VDP_Lines.Display.Current and VDP_Lines.Visible.Current.
  */
-void Vdp::Set_Visible_Lines(void)
+void Vdp::updateVdpLines(bool resetCurrent)
 {
 	// Arrays of values.
 	// Indexes: 0 == 192 lines; 1 == 224 lines; 2 == 240 lines.
@@ -213,6 +213,11 @@ void Vdp::Set_Visible_Lines(void)
 	static const int VisLines_Border_Size[3] = {24, 8, 0};
 	static const int VisLines_Current_NTSC[3] = {-40, -24, 0};
 	static const int VisLines_Current_PAL[3] = {-67+1, -51+1, -43+1};
+	
+	// Initialize VDP_Lines.Display.
+	VDP_Lines.Display.Total = (M68K_Mem::ms_SysVersion.isPal() ? 312 : 262);
+	if (resetCurrent)
+		VDP_Lines.Display.Current = 0;
 	
 	// Line offset.
 	int LineOffset;
@@ -253,9 +258,13 @@ void Vdp::Set_Visible_Lines(void)
 	
 	VDP_Lines.Visible.Total = VisLines_Total[LineOffset];
 	VDP_Lines.Visible.Border_Size = VisLines_Border_Size[LineOffset];
-	VDP_Lines.Visible.Current = (M68K_Mem::ms_SysVersion.isPal()
-					? VisLines_Current_PAL[LineOffset]
-					: VisLines_Current_NTSC[LineOffset]);
+	if (resetCurrent)
+	{
+		// Reset VDP_Lines.Visible.Current.
+		VDP_Lines.Visible.Current = (M68K_Mem::ms_SysVersion.isPal()
+						? VisLines_Current_PAL[LineOffset]
+						: VisLines_Current_NTSC[LineOffset]);
+	}
 	
 	// Check interlaced mode.
 	Interlaced.HalfLine  = ((VDP_Reg.m5.Set4 & 0x02) >> 1);		// LSM0
@@ -318,6 +327,11 @@ inline void Vdp::Update_Mode(void)
 	// If the VDP mode has changed, CRam needs to be updated.
 	if (prevVdpMode != VDP_Mode)
 		MarkCRamDirty();
+	
+	// Initialize Vdp::VDP_Lines.
+	// Don't reset the VDP current line variables here,
+	// since this might not be the beginning of the frame.
+	Vdp::updateVdpLines(false);
 }
 
 

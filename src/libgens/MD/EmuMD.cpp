@@ -220,9 +220,10 @@ int EmuMD::setRegion_int(SysVersion::RegionCode_t region, bool preserveState)
 	// Set the region.
 	M68K_Mem::ms_SysVersion.setRegion(region);
 	
-	// TODO: Vdp::VDP_Lines.Display.Total isn't being set properly...
-	Vdp::VDP_Lines.Display.Total = (M68K_Mem::ms_SysVersion.isPal() ? 312 : 262);
-	Vdp::Set_Visible_Lines();
+	// Initialize Vdp::VDP_Lines.
+	// Don't reset the VDP current line variables here,
+	// since this might not be the beginning of the frame.
+	Vdp::updateVdpLines(false);
 	
 	// Initialize CPL.
 	if (M68K_Mem::ms_SysVersion.isPal())
@@ -366,8 +367,9 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 template<bool VDP>
 FORCE_INLINE void EmuMD::T_execFrame(void)
 {
-	// Initialize VDP_Lines.Display.
-	Vdp::Set_Visible_Lines();
+	// Initialize Vdp::VDP_Lines.
+	// Reset the current VDP line variables for the new frame.
+	Vdp::updateVdpLines(true);
 	
 	// Check if VBlank is allowed.
 	Vdp::Check_NTSC_V30_VBlank();

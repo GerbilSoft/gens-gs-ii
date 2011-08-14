@@ -185,7 +185,7 @@ class Vdp
 		static void Update_IRQ_Line(void);
 		
 		// Lines.
-		static void Set_Visible_Lines(void);
+		static void updateVdpLines(bool resetCurrent);
 		static void Check_NTSC_V30_VBlank(void);
 		
 		static void Set_Reg(int reg_num, uint8_t val);
