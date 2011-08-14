@@ -181,7 +181,7 @@ inline void Z80_MD_Mem::Z80_WriteB_Bank(uint32_t address, uint8_t data)
 	
 	uint32_t bank_address = (Bank_Z80 & 0xFF0000) >> 1;
 	uint32_t bank_num = (data & 1) << 23;
-	bank_address += bank_num;
+	bank_address |= bank_num;
 	
 	Bank_Z80 = bank_address;
 }
