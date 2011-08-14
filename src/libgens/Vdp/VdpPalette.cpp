@@ -646,6 +646,87 @@ FORCE_INLINE void VdpPalette::T_recalcFull_GG(pixel *palFull)
 
 
 /**
+ * T_recalcFull_TMS9918(): Recalculate the full palette. (TMS9918)
+ * This applies brightness, contrast, grayscale, and inverted palette settings.
+ * TODO: UNTESTED!
+ * @param palFull Full palette. (Must have enough space for at least 0x20 entries!)
+ * NOTE: The palette is 16 colors, but we're saving it twice for compatibility purposes.
+ */
+template<typename pixel,
+	int RBits, int GBits, int BBits,
+	int RMask, int GMask, int BMask>
+FORCE_INLINE void VdpPalette::T_recalcFull_TMS9918(pixel *palFull)
+{
+	// Brightness / Contrast
+	// These values are scaled to positive numbers.
+	// Normal brightness: (Brightness == 100)
+	// Normal contrast:   (  Contrast == 100)
+	const int brightness = (m_brightness - 100);
+	
+	// Calculate the TMS9918 palette.
+	for (int i = 0x00; i < 0x10; i++)
+	{
+		// TMS9918 uses analog color circuitry.
+		// We're using close approximations of the colors as 32-bit RGB.
+		// Source: http://www.smspower.org/maxim/forumstuff/colours.html
+		int r = PalTMS9918_Analog[i].r;
+		int g = PalTMS9918_Analog[i].g;
+		int b = PalTMS9918_Analog[i].b;
+		
+		// Adjust brightness.
+		r += brightness;
+		g += brightness;
+		b += brightness;
+		
+		// Adjust contrast.
+		AdjustContrast(r, g, b, m_contrast);
+		
+		if (m_grayscale)
+		{
+			// Convert the color to grayscale.
+			r = g = b = CalcGrayscale(r, g, b);
+		}
+		
+		// Reduce color components to original color depth.
+		r >>= (8 - RBits);
+		g >>= (8 - GBits);
+		b >>= (8 - BBits);
+		
+		// Constrain the color components.
+		T_ConstrainColorComponent<RMask>(r);
+		T_ConstrainColorComponent<GMask>(g);
+		T_ConstrainColorComponent<BMask>(b);
+		
+		if (m_inverted)
+		{
+			// Invert the color components.
+			r ^= RMask;
+			g ^= GMask;
+			b ^= BMask;
+		}
+		
+		// TODO: Make this configurable?
+#if 0	
+		if (GMask == 0x3F)
+		{
+			// 16-bit color. (RGB565)
+			// Mask off the LSB of the green component.
+			g &= ~1;
+		}
+#endif
+		
+		// Combine the color components.
+		palFull[i] = (r << (BBits + GBits)) |
+			     (g << (BBits)) |
+			     (b);
+	}
+	
+	// Copy the TMS9918 palette to the second 16 colors.
+	memcpy(&palFull[16], &palFull[0], (sizeof(palFull[0]) * 16));
+}
+
+
+/**
  * recalcFull(): Recalculate the full VDP palette.
  */
 void VdpPalette::recalcFull(void)
@@ -841,6 +922,40 @@ FORCE_INLINE void VdpPalette::T_update_GG(pixel *GG_palette,
 	
 	// Update the background color.
 	GG_palette[0] = GG_palette[m_bgColorIdx];
+}
+
+
+/**
+ * T_update_TMS9918(): Recalculate the active palette. (TMS9918)
+ * TODO: UNTESTED!
+ * @param GG_palette Game Gear color palette.
+ * @param palette Full color palette.
+ */
+template<typename pixel>
+FORCE_INLINE void VdpPalette::T_update_TMS9918(pixel *TMS_palette,
+					const pixel *palette)
+{
+	/**
+	 * NOTE: This function doesn't actually recalculate palettes.
+	 * It simply copies the full 16-color palette to the active palette twice.
+	 * The palette is copied twice for compatibility purposes.
+	 */
+	
+	// TODO: Figure out a better way to handle this.
+	unsigned int vdp_layers = 0;
+	EmuContext *instance = EmuContext::Instance();
+	if (instance != NULL)
+		vdp_layers = instance->m_vdp->VDP_Layers;
+	if (vdp_layers & VdpTypes::VDP_LAYER_PALETTE_LOCK)
+		return;
+	
+	// Copy the colors.
+	memcpy(&TMS_palette[0], &palette[0], (sizeof(TMS_palette[0]) * 32));
+	memcpy(&TMS_palette[16], &palette[0], (sizeof(TMS_palette[0]) * 16));
+	
+	// Update the background color.
+	// TODO: How is the background color handled in TMS9918 modes?
+	//TMS_palette[0] = TMS_palette[m_bgColorIdx];
 }
 
 
