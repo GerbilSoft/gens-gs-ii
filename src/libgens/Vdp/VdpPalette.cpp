@@ -164,7 +164,15 @@ void VdpPalette::setBgColorIdx(uint8_t newBgColorIdx)
 {
 	if (m_bgColorIdx == newBgColorIdx)
 		return;
-	m_bgColorIdx = newBgColorIdx;
+	
+	// Mega Drive:
+	m_bgColorIdx = (newBgColorIdx & 0x3F);
+	
+	// TODO: On SMS and Game Gear:
+#if 0
+	m_bgColorIdx &= 0x0F;
+	m_bgColorIdx |= 0x10;
+#endif
 	
 	// Mark the active palette as dirty.
 	m_dirty.active = true;
@@ -208,6 +216,30 @@ void VdpPalette::setMdShadowHighlight(bool newMdShadowHighlight)
 		// in order to populate the S/H entries.
 		m_dirty.active = true;
 	}
+}
+
+
+/** SMS-specific functions. **/
+
+
+/**
+ * initSegaTMSPalette(): Initialize CRam with the SMS TMS9918 palette.
+ * Only used on Sega Master System!
+ * Palette mode must be set to PALMODE_SMS.
+ * TODO: UNTESTED!
+ */
+void VdpPalette::initSegaTMSPalette(void)
+{
+	// TODO: Verify that palette mode is set to PALMODE_SMS.
+	// TODO: Implement multiple palette modes.
+	// TODO: Use alternating bytes in SMS CRam for MD compatibility?
+	
+	// Copy PalTMS9918_SMS to both SMS palettes in CRam.
+	memcpy(&m_cram.u8[0], PalTMS9918_SMS, sizeof(PalTMS9918_SMS));
+	memcpy(&m_cram.u8[16], PalTMS9918_SMS, sizeof(PalTMS9918_SMS));
+	
+	// Palette is dirty.
+	m_dirty.active = true;
 }
 
 
@@ -732,6 +764,45 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 		MD_palette[64]  = MD_palette[m_bgColorIdx + 64];	// Shadow color.
 		MD_palette[128] = MD_palette[m_bgColorIdx + 128];	// Highlight color.
 	}
+}
+
+
+/**
+ * T_update_SMS(): Recalculate the active palette. (Sega Master System, Mode 4)
+ * TODO: UNTESTED!
+ * @param SMS_palette SMS color palette.
+ * @param palette Full color palette.
+ */
+template<typename pixel>
+FORCE_INLINE void VdpPalette::T_update_SMS(pixel *SMS_palette,
+					const pixel *palette)
+{
+	// TODO: Figure out a better way to handle this.
+	unsigned int vdp_layers = 0;
+	EmuContext *instance = EmuContext::Instance();
+	if (instance != NULL)
+		vdp_layers = instance->m_vdp->VDP_Layers;
+	if (vdp_layers & VdpTypes::VDP_LAYER_PALETTE_LOCK)
+		return;
+	
+	// Update all 32 colors.
+	for (int i = 30; i >= 0; i -= 2)
+	{
+		// TODO: Use alternating bytes in SMS CRam for MD compatibility?
+		const uint8_t color1_raw = (m_cram.u8[i] & 0x3F);
+		const uint8_t color2_raw = (m_cram.u8[i + 1] & 0x3F);
+		
+		// Get the palette color.
+		pixel color1 = palette[color1_raw];
+		pixel color2 = palette[color2_raw];
+		
+		// Set the new color.
+		SMS_palette[i]     = color1;
+		SMS_palette[i + 1] = color2;
+	}
+	
+	// Update the background color.
+	SMS_palette[0] = SMS_palette[m_bgColorIdx];
 }
 
 
