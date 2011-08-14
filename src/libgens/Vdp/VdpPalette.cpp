@@ -806,6 +806,44 @@ FORCE_INLINE void VdpPalette::T_update_SMS(pixel *SMS_palette,
 }
 
 
+/**
+ * T_update_GG(): Recalculate the active palette. (Sega Game Gear, Mode 4 [12-bit RGB])
+ * TODO: UNTESTED!
+ * @param GG_palette Game Gear color palette.
+ * @param palette Full color palette.
+ */
+template<typename pixel>
+FORCE_INLINE void VdpPalette::T_update_GG(pixel *GG_palette,
+					const pixel *palette)
+{
+	// TODO: Figure out a better way to handle this.
+	unsigned int vdp_layers = 0;
+	EmuContext *instance = EmuContext::Instance();
+	if (instance != NULL)
+		vdp_layers = instance->m_vdp->VDP_Layers;
+	if (vdp_layers & VdpTypes::VDP_LAYER_PALETTE_LOCK)
+		return;
+	
+	// Update all 32 colors.
+	for (int i = 30; i >= 0; i -= 2)
+	{
+		const uint16_t color1_raw = (m_cram.u16[i] & 0xFFF);
+		const uint16_t color2_raw = (m_cram.u16[i + 1] & 0xFFF);
+		
+		// Get the palette color.
+		pixel color1 = palette[color1_raw];
+		pixel color2 = palette[color2_raw];
+		
+		// Set the new color.
+		GG_palette[i]     = color1;
+		GG_palette[i + 1] = color2;
+	}
+	
+	// Update the background color.
+	GG_palette[0] = GG_palette[m_bgColorIdx];
+}
+
+
 // TODO: Port to LibGens.
 #if 0
 /**

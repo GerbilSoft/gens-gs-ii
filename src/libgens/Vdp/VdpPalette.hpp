@@ -285,6 +285,10 @@ class VdpPalette
 		FORCE_INLINE void T_update_SMS(pixel *SMS_palette,
 					const pixel *palette);
 		
+		template<typename pixel>
+		FORCE_INLINE void T_update_GG(pixel *GG_palette,
+					const pixel *palette);
+		
 		/**
 		 * TMS9918 palettes.
 		 * References:
