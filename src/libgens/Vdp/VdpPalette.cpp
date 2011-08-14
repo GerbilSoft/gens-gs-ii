@@ -44,50 +44,6 @@ namespace LibGens
 const uint16_t VdpPalette::MD_COLOR_MASK_FULL = 0xEEE;
 const uint16_t VdpPalette::MD_COLOR_MASK_LSB = 0x222;
 
-
-/**
- * TMS9918 palettes.
- * References:
- * - http://www.smspower.org/forums/viewtopic.php?t=8224
- * - http://www.smspower.org/maxim/forumstuff/colours.html
- */
-
-/**
- * PalTMS9918_SMS[]: TMS9918 palette as used on the SMS. (6-bit RGB)
- * Used in SMS backwards-compatibility mode.
- * VdpPalette should be set to SMS mode to use this palette.
- * Source: http://www.smspower.org/maxim/forumstuff/colours.html
- */
-const uint8_t VdpPalette::PalTMS9918_SMS[16] =
-	{0x00, 0x00, 0x08, 0x0C, 0x10, 0x30, 0x01, 0x3C,
-	 0x02, 0x03, 0x04, 0x0F, 0x04, 0x33, 0x15, 0x3F};
-
-/**
- * PalTMS9918_Analog[] TMS9918 analog palette, in 32-bit RGB.
- * Source: http://www.smspower.org/maxim/forumstuff/colours.html
- */
-// TODO: Byteswapping on big-endian?
-const VdpPalette::PalRGB_t VdpPalette::PalTMS9918_Analog[16] =
-{
-	{0x00, 0x00, 0x00, 0x00},	// 0: Transparent
-	{0x00, 0x00, 0x00, 0x00},	// 1: Black
-	{0x00, 0x47, 0xB7, 0x3B},	// 2: Medium Green
-	{0x00, 0x7C, 0xCF, 0x6F},	// 3: Light Green
-	{0x00, 0x5D, 0x4E, 0xFF},	// 4: Dark Blue
-	{0x00, 0x80, 0x72, 0xFF},	// 5: Light Blue
-	{0x00, 0xB6, 0x62, 0x47},	// 6: Dark Red
-	{0x00, 0x5D, 0xC8, 0xED},	// 7: Cyan
-	{0x00, 0xD7, 0x68, 0x48},	// 8: Medium Red
-	{0x00, 0xFB, 0x8F, 0x6C},	// 9: Light Red
-	{0x00, 0xC3, 0xCD, 0x41},	// A: Dark Yellow
-	{0x00, 0xD3, 0xDA, 0x76},	// B: Light Yellow
-	{0x00, 0x3E, 0x9F, 0x2F},	// C: Dark Green
-	{0x00, 0xB6, 0x64, 0xC7},	// D: Magenta
-	{0x00, 0xCC, 0xCC, 0xCC},	// E: Gray
-	{0x00, 0xFF, 0xFF, 0xFF},	// F: White
-};
-
-
 /**
  * VdpPalette(): Initialize a new VdpPalette object.
  * 
@@ -230,6 +186,17 @@ void VdpPalette::setMdShadowHighlight(bool newMdShadowHighlight)
  */
 void VdpPalette::initSegaTMSPalette(void)
 {
+	/**
+	 * PalTMS9918_SMS[]: TMS9918 palette as used on the SMS. (6-bit RGB)
+	 * Used in SMS backwards-compatibility mode.
+	 * VdpPalette should be set to SMS mode to use this palette.
+	 * Source: http://www.smspower.org/maxim/forumstuff/colours.html
+	 * Reference: http://www.smspower.org/forums/viewtopic.php?t=8224
+	 */
+	static const uint8_t PalTMS9918_SMS[16] =
+		{0x00, 0x00, 0x08, 0x0C, 0x10, 0x30, 0x01, 0x3C,
+		 0x02, 0x03, 0x04, 0x0F, 0x04, 0x33, 0x15, 0x3F};
+	 
 	// TODO: Verify that palette mode is set to PALMODE_SMS.
 	// TODO: Implement multiple palette modes.
 	// TODO: Use alternating bytes in SMS CRam for MD compatibility?
@@ -657,6 +624,33 @@ template<typename pixel,
 	int RMask, int GMask, int BMask>
 FORCE_INLINE void VdpPalette::T_recalcFull_TMS9918(pixel *palFull)
 {
+	/**
+	 * PalTMS9918_Analog[] TMS9918 analog palette, in 32-bit RGB.
+	 * Source: http://www.smspower.org/maxim/forumstuff/colours.html
+	 * Reference: http://www.smspower.org/forums/viewtopic.php?t=8224
+	 */
+	// TODO: Byteswapping on big-endian?
+	struct PalRGB_t { uint8_t a; uint8_t r; uint8_t g; uint8_t b; };
+	static const PalRGB_t PalTMS9918_Analog[16] =
+	{
+		{0x00, 0x00, 0x00, 0x00},	// 0: Transparent
+		{0x00, 0x00, 0x00, 0x00},	// 1: Black
+		{0x00, 0x47, 0xB7, 0x3B},	// 2: Medium Green
+		{0x00, 0x7C, 0xCF, 0x6F},	// 3: Light Green
+		{0x00, 0x5D, 0x4E, 0xFF},	// 4: Dark Blue
+		{0x00, 0x80, 0x72, 0xFF},	// 5: Light Blue
+		{0x00, 0xB6, 0x62, 0x47},	// 6: Dark Red
+		{0x00, 0x5D, 0xC8, 0xED},	// 7: Cyan
+		{0x00, 0xD7, 0x68, 0x48},	// 8: Medium Red
+		{0x00, 0xFB, 0x8F, 0x6C},	// 9: Light Red
+		{0x00, 0xC3, 0xCD, 0x41},	// A: Dark Yellow
+		{0x00, 0xD3, 0xDA, 0x76},	// B: Light Yellow
+		{0x00, 0x3E, 0x9F, 0x2F},	// C: Dark Green
+		{0x00, 0xB6, 0x64, 0xC7},	// D: Magenta
+		{0x00, 0xCC, 0xCC, 0xCC},	// E: Gray
+		{0x00, 0xFF, 0xFF, 0xFF},	// F: White
+	};
+	
 	// Brightness / Contrast
 	// These values are scaled to positive numbers.
 	// Normal brightness: (Brightness == 100)
