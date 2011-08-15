@@ -19,12 +19,15 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
 #include <errno.h>
 #include <stdint.h>
 #include <limits.h>
+
+// strdup() requires __USE_BSD when compiling without GNU extensions.
+#define __USE_BSD 1
+#include <string.h>
 
 #define MCD_PCM_VERSION 0x00010000U
 
