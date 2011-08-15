@@ -67,7 +67,7 @@ SET(libgens_SRCS
 	macros/log_msg.c
 	Util/byteswap.c
 	Rom.cpp
-	Util/siginfo.c
+	Util/gens_siginfo.c
 	Util/cpuflags.c
 	Effects/CrazyEffect.cpp
 	Effects/PausedEffect.cpp

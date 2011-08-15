@@ -32,7 +32,7 @@
 #endif
 
 // LibGens includes
-#include "libgens/Util/siginfo.h"
+#include "libgens/Util/gens_siginfo.h"
 
 namespace GensQt4
 {

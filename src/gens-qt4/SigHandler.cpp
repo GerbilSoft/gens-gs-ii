@@ -31,7 +31,6 @@
 // LibGens includes.
 #include "libgens/lg_main.hpp"
 #include "libgens/macros/log_msg.h"
-#include "libgens/Util/siginfo.h"
 
 // Qt includes.
 #include <QtCore/QString>
@@ -140,22 +139,22 @@ const gens_signal_t *SigHandler::GetSigInfo(int signum, int si_code)
 	{
 #ifdef SIGILL
 		case SIGILL:
-			siginfo = &siginfo_SIGILL[0];
+			siginfo = &gens_siginfo_SIGILL[0];
 			break;
 #endif
 #ifdef SIGFPE
 		case SIGFPE:
-			siginfo = &siginfo_SIGFPE[0];
+			siginfo = &gens_siginfo_SIGFPE[0];
 			break;
 #endif
 #ifdef SIGSEGV
 		case SIGSEGV:
-			siginfo = &siginfo_SIGSEGV[0];
+			siginfo = &gens_siginfo_SIGSEGV[0];
 			break;
 #endif
 #ifdef SIGBUS
 		case SIGBUS:
-			siginfo = &siginfo_SIGBUS[0];
+			siginfo = &gens_siginfo_SIGBUS[0];
 			break;
 #endif
 		default:

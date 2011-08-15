@@ -21,11 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "siginfo.h"
+#include "gens_siginfo.h"
 
 // C includes.
 #include <stdlib.h>
-#include <signal.h>
 
 /**
  * gens_signals[]: Signal information.
@@ -90,53 +89,95 @@ const gens_signal_t gens_signals[] =
 
 #ifdef SIGILL
 // SIGILL information.
-const gens_signal_t siginfo_SIGILL[] =
+const gens_signal_t gens_siginfo_SIGILL[] =
 {
+#ifdef ILL_ILLOPC
 	{ILL_ILLOPC,	"ILL_ILLOPC",	"Illegal opcode"},
+#endif
+#ifdef ILL_ILLOPN
 	{ILL_ILLOPN,	"ILL_ILLOPN",	"Illegal operand"},
+#endif
+#ifdef ILL_ILLADR
 	{ILL_ILLADR,	"ILL_ILLADR",	"Illegal addressing mode"},
+#endif
+#ifdef ILL_ILLTRP
 	{ILL_ILLTRP,	"ILL_ILLTRP",	"Illegal trap"},
+#endif
+#ifdef ILL_PRVOPC
 	{ILL_PRVOPC,	"ILL_PRVOPC",	"Privileged opcode"},
+#endif
+#ifdef ILL_PRVREG
 	{ILL_PRVREG,	"ILL_PRVREG",	"Privileged register"},
+#endif
+#ifdef ILL_COPROC
 	{ILL_COPROC,	"ILL_COPROC",	"Coprocessor error"},
+#endif
+#ifdef ILL_BADSTK
 	{ILL_BADSTK,	"ILL_BADSTK",	"Internal stack error"},
+#endif
 	{0, NULL, NULL}
 };
 #endif
 	
 #ifdef SIGFPE
 // SIGFPE information.
-const gens_signal_t siginfo_SIGFPE[] =
+const gens_signal_t gens_siginfo_SIGFPE[] =
 {
+#ifdef FPE_INTDIV
 	{FPE_INTDIV,	"FPE_INTDIV",	"Integer divide by zero"},
+#endif
+#ifdef FPE_INTOVF
 	{FPE_INTOVF,	"FPE_INTOVF",	"Integer overflow"},
+#endif
+#ifdef FPE_FLTDIV
 	{FPE_FLTDIV,	"FPE_FLTDIV",	"Floating-point divide by zero"},
+#endif
+#ifdef FPE_FLTOVF
 	{FPE_FLTOVF,	"FPE_FLTOVF",	"Floating-point overflow"},
+#endif
+#ifdef FPE_FLTUND
 	{FPE_FLTUND,	"FPE_FLTUND",	"Floating-point underflow"},
+#endif
+#ifdef FPE_FLTRES
 	{FPE_FLTRES,	"FPE_FLTRES",	"Floating-point inexact result"},
+#endif
+#ifdef FPE_FLTINV
 	{FPE_FLTINV,	"FPE_FLTINV",	"Floating-point invalid operation"},
+#endif
+#ifdef FPE_FLTSUB
 	{FPE_FLTSUB,	"FPE_FLTSUB",	"Subscript out of range"},
+#endif
 	{0, NULL, NULL}
 };
 #endif
 	
 #ifdef SIGSEGV
 // SIGSEGV information.
-const gens_signal_t siginfo_SIGSEGV[] =
+const gens_signal_t gens_siginfo_SIGSEGV[] =
 {
+#ifdef SEGV_MAPERR
 	{SEGV_MAPERR,	"SEGV_MAPERR",	"Address not mapped to object"},
+#endif
+#ifdef SEGV_ACCERR
 	{SEGV_ACCERR,	"SEGV_ACCERR",	"Invalid permissions for mapped object"},
+#endif
 	{0, NULL, NULL}
 };
 #endif
 	
 #ifdef SIGBUS
 // SIGBUS information.
-const gens_signal_t siginfo_SIGBUS[] =
+const gens_signal_t gens_siginfo_SIGBUS[] =
 {
+#ifdef BUS_ADRALN
 	{BUS_ADRALN,	"BUS_ADRALN",	"Invalid address alignment"},
+#endif
+#ifdef BUS_ADRERR
 	{BUS_ADRERR,	"BUS_ADRERR",	"Nonexistent physical address"},
+#endif
+#ifdef BUS_OBJERR
 	{BUS_OBJERR,	"BUS_OBJERR",	"Object-specific hardware error"},
+#endif
 	{0, NULL, NULL}
 };
 #endif

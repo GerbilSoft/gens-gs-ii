@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * siginfo.h: signal(2) information.                                       *
+ * gens_siginfo.h: signal(2) information.                                  *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -23,8 +23,11 @@
 
 #include <config.h>
 
-#ifndef __LIBGENS_SIGINFO_H__
-#define __LIBGENS_SIGINFO_H__
+#ifndef __LIBGENS_GENS_SIGINFO_H__
+#define __LIBGENS_GENS_SIGINFO_H__
+
+// C includes.
+#include <signal.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,20 +45,20 @@ extern const gens_signal_t gens_signals[];
 #ifdef HAVE_SIGACTION
 
 #ifdef SIGILL
-extern const gens_signal_t siginfo_SIGILL[];
+extern const gens_signal_t gens_siginfo_SIGILL[];
 #endif
 	
 #ifdef SIGFPE
 // SIGFPE information.
-extern const gens_signal_t siginfo_SIGFPE[];
+extern const gens_signal_t gens_siginfo_SIGFPE[];
 #endif
 	
 #ifdef SIGSEGV
-extern const gens_signal_t siginfo_SIGSEGV[];
+extern const gens_signal_t gens_siginfo_SIGSEGV[];
 #endif
 	
 #ifdef SIGBUS
-extern const gens_signal_t siginfo_SIGBUS[];
+extern const gens_signal_t gens_siginfo_SIGBUS[];
 #endif
 
 #endif /* HAVE_SIGACTION */
@@ -64,4 +67,4 @@ extern const gens_signal_t siginfo_SIGBUS[];
 }
 #endif
 
-#endif /* __LIBGENS_SIGINFO_H__ */
+#endif /* __LIBGENS_GENS_SIGINFO_H__ */
