@@ -109,9 +109,10 @@ IF(WIN32)
 	SET(GENS_CFLAGS_PLATFORM "-gstabs -fshort-wchar")
 	SET(GENS_CXXFLAGS_PLATFORM "-gstabs -fshort-wchar")
 	
-	# Test for static libgcc/libstdc++.
+	# Test for static libgcc.
+	# TODO: Test for static libstdc++?
 	SET(GENS_LDFLAGS_PLATFORM "")
-	FOREACH(FLAG_TEST "-static-libgcc" "-static-libstdc++")
+	FOREACH(FLAG_TEST "-static-libgcc")
 		CHECK_C_COMPILER_FLAG("${FLAG_TEST}" LDFLAG_${FLAG_TEST})
 		IF(LDFLAG_${FLAG_TEST})
 			SET(GENS_LDFLAGS_PLATFORM "${GENS_LDFLAGS_PLATFORM} ${FLAG_TEST}")
