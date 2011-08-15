@@ -2,6 +2,7 @@ PROJECT(gens-gs-ii)
 
 # Version dependencies:
 # - BREAK(): CMake 2.6.0
+# - NASM: CMake 2.8.4
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.0)
 
 # UNSET() was added in cmake-2.6.3.
