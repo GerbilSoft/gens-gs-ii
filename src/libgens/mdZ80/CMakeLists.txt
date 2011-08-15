@@ -1,5 +1,7 @@
 PROJECT(mdZ80)
-cmake_minimum_required(VERSION 2.6)
+
+# NASM requires CMake 2.8.4.
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.4)
 
 # Sources.
 SET(SRCS
