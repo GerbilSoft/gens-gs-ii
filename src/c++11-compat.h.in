@@ -1,0 +1,43 @@
+/***************************************************************************
+ * c++11-compat.h.in: C++ 2011 compatibility header.                       *
+ *                                                                         *
+ * Copyright (c) 2011 by David Korth.                                      *
+ *                                                                         *
+ * This program is free software; you can redistribute it and/or modify it *
+ * under the terms of the GNU General Public License as published by the   *
+ * Free Software Foundation; either version 2 of the License, or (at your  *
+ * option) any later version.                                              *
+ *                                                                         *
+ * This program is distributed in the hope that it will be useful, but     *
+ * WITHOUT ANY WARRANTY; without even the implied warranty of              *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
+ * GNU General Public License for more details.                            *
+ *                                                                         *
+ * You should have received a copy of the GNU General Public License along *
+ * with this program; if not, write to the Free Software Foundation, Inc., *
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
+ ***************************************************************************/
+
+#ifndef __CXX11_COMPAT_H__
+#define __CXX11_COMPAT_H__
+
+/* Define to 1 if C++ 2011 is supported. */
+#cmakedefine HAVE_CXX_2011 1
+
+#if !defined(HAVE_CXX_2011) || !defined(__cplusplus)
+/**
+ * Either C++ 2011 is not supported, or we're compiling C code.
+ * Provide replacements for C++ 2011 functionality.
+ */
+
+/* nullptr: Represents a NULL pointer. NULL == 0 */
+#define nullptr 0
+
+/* static_assert(): Compile-time assertions. */
+/* Since it's not available, we'll use standard assert(). */
+#include <assert.h>
+#define static_assert(expr, msg) assert(expr)
+
+#endif
+
+#endif /* __CXX11_COMPAT_H__ */

@@ -7,6 +7,12 @@ cmake_minimum_required(VERSION 2.6.0)
 SET(HAVE_LZMA 1)
 #SET(LZMA_FOUND 1)
 
+# Check for C++ 2011 support.
+# If C++ 2011 isn't available, compatibility definitions will be enabled.
+INCLUDE(CheckCXXSourceCompiles)
+CHECK_CXX_SOURCE_COMPILES("int main() { void *ptr = nullptr; }" HAVE_CXX_2011)
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/c++11-compat.h.in" "${CMAKE_CURRENT_BINARY_DIR}/c++11-compat.h")
+
 # External libraries.
 ADD_SUBDIRECTORY(extlib)
 
