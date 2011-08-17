@@ -129,14 +129,14 @@ FindCdromUDisks::FindCdromUDisks()
 	// * DeviceRemoved(): A device has been removed.
 	// * NOTE: DeviceAdded() is not needed, since UDisks emits
 	//   DeviceChanged() immediately after the device is added.
-	connect(m_ifUDisks, SIGNAL(DeviceChanged(const QDBusObjectPath&)),
-		this, SLOT(deviceChanged(const QDBusObjectPath&)));
+	connect(m_ifUDisks, SIGNAL(DeviceChanged(QDBusObjectPath)),
+		this, SLOT(deviceChanged(QDBusObjectPath)));
 #if 0
-	connect(m_ifUDisks, SIGNAL(DeviceAdded(const QDBusObjectPath&)),
-		this, SLOT(deviceChanged(const QDBusObjectPath&)));
+	connect(m_ifUDisks, SIGNAL(DeviceAdded(QDBusObjectPath)),
+		this, SLOT(deviceChanged(QDBusObjectPath)));
 #endif
-	connect(m_ifUDisks, SIGNAL(DeviceRemoved(const QDBusObjectPath&)),
-		this, SLOT(deviceRemoved(const QDBusObjectPath&)));
+	connect(m_ifUDisks, SIGNAL(DeviceRemoved(QDBusObjectPath)),
+		this, SLOT(deviceRemoved(QDBusObjectPath)));
 }
 
 

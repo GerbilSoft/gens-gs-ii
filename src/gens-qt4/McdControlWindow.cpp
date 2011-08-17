@@ -101,12 +101,12 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 	if (m_drives)
 	{
 		// Set up the FindCdromBase signals
-		connect(m_drives, SIGNAL(driveUpdated(const CdromDriveEntry&)),
-			this, SLOT(driveUpdated(const CdromDriveEntry&)));
+		connect(m_drives, SIGNAL(driveUpdated(CdromDriveEntry)),
+			this, SLOT(driveUpdated(CdromDriveEntry)));
 		connect(m_drives, SIGNAL(driveQueryFinished(void)),
 			this, SLOT(driveQueryFinished(void)));
-		connect(m_drives, SIGNAL(driveRemoved(const QString&)),
-			this, SLOT(driveRemoved(const QString&)));
+		connect(m_drives, SIGNAL(driveRemoved(QString)),
+			this, SLOT(driveRemoved(QString)));
 	}
 	
 	// Query CD-ROM drives.

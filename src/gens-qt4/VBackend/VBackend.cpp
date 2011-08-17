@@ -103,14 +103,14 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	
 	// Connect signals from GensConfig.
 	// TODO: Reconnect signals if GensConfig is deleted/recreated.
-	connect(m_cfg_osdFpsEnabled, SIGNAL(valueChanged(const QVariant&)),
-		this, SLOT(osdFpsEnabled_changed_slot(const QVariant&)));
-	connect(m_cfg_osdFpsColor, SIGNAL(valueChanged(const QColor&)),
-		this, SLOT(osdFpsColor_changed_slot(const QColor&)));
-	connect(m_cfg_osdMsgEnabled, SIGNAL(valueChanged(const QVariant&)),
-		this, SLOT(osdMsgEnabled_changed_slot(const QVariant&)));
-	connect(m_cfg_osdMsgColor, SIGNAL(valueChanged(const QColor&)),
-		this, SLOT(osdMsgColor_changed_slot(const QColor&)));
+	connect(m_cfg_osdFpsEnabled, SIGNAL(valueChanged(QVariant)),
+		this, SLOT(osdFpsEnabled_changed_slot(QVariant)));
+	connect(m_cfg_osdFpsColor, SIGNAL(valueChanged(QColor)),
+		this, SLOT(osdFpsColor_changed_slot(QColor)));
+	connect(m_cfg_osdMsgEnabled, SIGNAL(valueChanged(QVariant)),
+		this, SLOT(osdMsgEnabled_changed_slot(QVariant)));
+	connect(m_cfg_osdMsgColor, SIGNAL(valueChanged(QColor)),
+		this, SLOT(osdMsgColor_changed_slot(QColor)));
 	
 	// Video effect settings.
 	connect(m_cfg_fastBlur, SIGNAL(valueChanged(const QVariant&)),
