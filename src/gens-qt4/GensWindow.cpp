@@ -188,16 +188,16 @@ void GensWindow::setupUi(void)
 	// Auto Pause: Application Focus Changed signal, and setting change signal.
 	connect(gqt4_app, SIGNAL(focusChanged(QWidget*, QWidget*)),
 		this, SLOT(qAppFocusChanged(QWidget*, QWidget*)));
-	connect(m_cfg_autoPause, SIGNAL(valueChanged(const QVariant&)),
-		this, SLOT(autoPause_changed_slot(const QVariant&)));
+	connect(m_cfg_autoPause, SIGNAL(valueChanged(QVariant)),
+		this, SLOT(autoPause_changed_slot(QVariant)));
 	
 	// Intro Style Changed signal.
-	connect(m_cfg_introStyle, SIGNAL(valueChanged(const QVariant&)),
-		this, SLOT(introStyle_changed_slot(const QVariant&)));
+	connect(m_cfg_introStyle, SIGNAL(valueChanged(QVariant)),
+		this, SLOT(introStyle_changed_slot(QVariant)));
 	
 	// Show Menu Bar Changed signal.
-	connect(m_cfg_showMenuBar, SIGNAL(valueChanged(const QVariant&)),
-		this, SLOT(showMenuBar_changed_slot(const QVariant&)));
+	connect(m_cfg_showMenuBar, SIGNAL(valueChanged(QVariant)),
+		this, SLOT(showMenuBar_changed_slot(QVariant)));
 }
 
 

@@ -113,16 +113,16 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 		this, SLOT(osdMsgColor_changed_slot(QColor)));
 	
 	// Video effect settings.
-	connect(m_cfg_fastBlur, SIGNAL(valueChanged(const QVariant&)),
-		this, SLOT(fastBlur_changed_slot(const QVariant&)));
-	connect(m_cfg_aspectRatioConstraint, SIGNAL(valueChanged(const QVariant&)),
-		this, SLOT(aspectRatioConstraint_changed_slot(const QVariant&)));
-	connect(m_cfg_bilinearFilter, SIGNAL(valueChanged(const QVariant&)),
-		this, SLOT(bilinearFilter_changed_slot(const QVariant&)));
-	connect(m_cfg_pauseTint, SIGNAL(valueChanged(const QVariant&)),
-		this, SLOT(pauseTint_changed_slot(const QVariant&)));
-	connect(m_cfg_stretchMode, SIGNAL(valueChanged(const QVariant&)),
-		this, SLOT(stretchMode_changed_slot(const QVariant&)));
+	connect(m_cfg_fastBlur, SIGNAL(valueChanged(QVariant)),
+		this, SLOT(fastBlur_changed_slot(QVariant)));
+	connect(m_cfg_aspectRatioConstraint, SIGNAL(valueChanged(QVariant)),
+		this, SLOT(aspectRatioConstraint_changed_slot(QVariant)));
+	connect(m_cfg_bilinearFilter, SIGNAL(valueChanged(QVariant)),
+		this, SLOT(bilinearFilter_changed_slot(QVariant)));
+	connect(m_cfg_pauseTint, SIGNAL(valueChanged(QVariant)),
+		this, SLOT(pauseTint_changed_slot(QVariant)));
+	connect(m_cfg_stretchMode, SIGNAL(valueChanged(QVariant)),
+		this, SLOT(stretchMode_changed_slot(QVariant)));
 }
 
 VBackend::~VBackend()
