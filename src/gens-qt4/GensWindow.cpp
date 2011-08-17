@@ -87,8 +87,8 @@ GensWindow::GensWindow()
 	
 #ifndef Q_WS_MAC
 	// Enable the context menu.
-	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
-		this, SLOT(showContextMenu(const QPoint&)));
+	connect(this, SIGNAL(customContextMenuRequested(QPoint)),
+		this, SLOT(showContextMenu(QPoint)));
 	setContextMenuPolicy(Qt::CustomContextMenu);
 #endif
 }
@@ -168,10 +168,10 @@ void GensWindow::setupUi(void)
 		this, SLOT(stateChanged(void)));
 	connect(m_emuManager, SIGNAL(updateVideo(void)),
 		this, SLOT(updateVideo(void)));
-	connect(m_emuManager, SIGNAL(osdPrintMsg(int, const QString&)),
-		this, SLOT(osdPrintMsg(int, const QString&)));
-	connect(m_emuManager, SIGNAL(osdShowPreview(int, const QImage&)),
-		this, SLOT(osdShowPreview(int, const QImage&)));
+	connect(m_emuManager, SIGNAL(osdPrintMsg(int, QString)),
+		this, SLOT(osdPrintMsg(int, QString)));
+	connect(m_emuManager, SIGNAL(osdShowPreview(int, QImage)),
+		this, SLOT(osdShowPreview(int, QImage)));
 	
 	// Gens Action Manager signals.
 	connect(m_gensActions, SIGNAL(actionSetPaused(bool)),

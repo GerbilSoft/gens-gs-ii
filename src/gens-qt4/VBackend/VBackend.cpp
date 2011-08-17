@@ -95,12 +95,12 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	// TODO: Reconnect signals if GensConfig is deleted/recreated.
 	connect(gqt4_config, SIGNAL(osdFpsEnabled_changed(bool)),
 		this, SLOT(setOsdFpsEnabled(bool)));
-	connect(gqt4_config, SIGNAL(osdFpsColor_changed(const QColor&)),
-		this, SLOT(setOsdFpsColor(const QColor&)));
+	connect(gqt4_config, SIGNAL(osdFpsColor_changed(QColor)),
+		this, SLOT(setOsdFpsColor(QColor)));
 	connect(gqt4_config, SIGNAL(osdMsgEnabled_changed(bool)),
 		this, SLOT(setOsdMsgEnabled(bool)));
-	connect(gqt4_config, SIGNAL(osdMsgColor_changed(const QColor&)),
-		this, SLOT(setOsdMsgColor(const QColor&)));
+	connect(gqt4_config, SIGNAL(osdMsgColor_changed(QColor)),
+		this, SLOT(setOsdMsgColor(QColor)));
 	
 	// Video effect settings.
 	connect(gqt4_config, SIGNAL(fastBlur_changed(bool)),
