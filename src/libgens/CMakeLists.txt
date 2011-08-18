@@ -159,3 +159,7 @@ ENDIF(GENS_ENABLE_EMULATION)
 IF(HAVE_LZMA)
 	ADD_DEPENDENCIES(lzmabase 7z)
 ENDIF(HAVE_LZMA)
+
+# Test suite.
+# TODO: Add an option to disable tests.
+ADD_SUBDIRECTORY(tests)
