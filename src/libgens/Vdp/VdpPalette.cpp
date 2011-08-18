@@ -54,6 +54,7 @@ VdpPalette::VdpPalette()
 	, m_inverted(false)
 	, m_colorScaleMethod(COLSCALE_FULL)
 	, m_bpp(BPP_32)
+	, m_palMode(PALMODE_MD)
 	, m_bgColorIdx(0x00)
 	, m_mdColorMask(MD_COLOR_MASK_FULL)
 	, m_mdShadowHighlight(false)
@@ -106,6 +107,22 @@ PAL_PROPERTY_WRITE(grayscale, bool, Grayscale)
 PAL_PROPERTY_WRITE(inverted, bool, Inverted)
 PAL_PROPERTY_WRITE(colorScaleMethod, ColorScaleMethod_t, ColorScaleMethod)
 PAL_PROPERTY_WRITE(bpp, ColorDepth, Bpp)
+
+
+/**
+ * setPalMode(): Set the palette mode.
+ * @param newPalMode New palette mode.
+ */
+void VdpPalette::setPalMode(PalMode newPalMode)
+{
+	if (m_palMode == newPalMode)
+		return;
+	m_palMode = newPalMode;
+	
+	// Both the full and active palettes must be recalculated.
+	m_dirty.full = true;
+	m_dirty.active = true;
+}
 
 
 /**
@@ -724,31 +741,73 @@ void VdpPalette::recalcFull(void)
 	switch (m_bpp)
 	{
 		case BPP_15:
-			T_recalcFull_MD<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(m_palFull.u16);
-#if 0
-			// TODO: Port to LibGens.
-			T_Recalculate_Palette_32X<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>
-					(_32X_Palette.u16, _32X_VDP_CRam_Adjusted.u16);
-#endif
+			switch (m_palMode)
+			{
+				case PALMODE_32X:
+					T_recalcFull_32X<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(m_palFull32X.u16);
+					// NOTE: 32X falls through to MD, since both 32X and MD palettes must be updated.
+					// TODO: Add a separate dirty flag for the 32X palette?
+				case PALMODE_MD:
+				default:
+					T_recalcFull_MD<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(m_palFull.u16);
+					break;
+				case PALMODE_SMS:
+					T_recalcFull_SMS<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(m_palFull.u16);
+					break;
+				case PALMODE_GG:
+					T_recalcFull_GG<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(m_palFull.u16);
+					break;
+				case PALMODE_TMS9918:
+					T_recalcFull_TMS9918<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(m_palFull.u16);
+					break;
+			}
 			break;
 		
 		case BPP_16:
-			T_recalcFull_MD<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(m_palFull.u16);
-#if 0
-			// TODO: Port to LibGens.
-			T_Recalculate_Palette_32X<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>
-					(_32X_Palette.u16, _32X_VDP_CRam_Adjusted.u16);
-#endif
+			switch (m_palMode)
+			{
+				case PALMODE_32X:
+					T_recalcFull_32X<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(m_palFull32X.u16);
+					// NOTE: 32X falls through to MD, since both 32X and MD palettes must be updated.
+					// TODO: Add a separate dirty flag for the 32X palette?
+				case PALMODE_MD:
+				default:
+					T_recalcFull_MD<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(m_palFull.u16);
+					break;
+				case PALMODE_SMS:
+					T_recalcFull_SMS<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(m_palFull.u16);
+					break;
+				case PALMODE_GG:
+					T_recalcFull_GG<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(m_palFull.u16);
+					break;
+				case PALMODE_TMS9918:
+					T_recalcFull_TMS9918<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(m_palFull.u16);
+					break;
+			}
 			break;
 		
 		case BPP_32:
 		default:
-			T_recalcFull_MD<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(m_palFull.u32);
-#if 0
-			// TODO: Port to LibGens.
-			T_Recalculate_Palette_32X<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>
-					(_32X_Palette.u32, _32X_VDP_CRam_Adjusted.u32);
-#endif
+			switch (m_palMode)
+			{
+				case PALMODE_32X:
+					T_recalcFull_32X<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(m_palFull32X.u32);
+					// NOTE: 32X falls through to MD, since both 32X and MD palettes must be updated.
+					// TODO: Add a separate dirty flag for the 32X palette?
+				case PALMODE_MD:
+				default:
+					T_recalcFull_MD<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(m_palFull.u32);
+					break;
+				case PALMODE_SMS:
+					T_recalcFull_SMS<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(m_palFull.u32);
+					break;
+				case PALMODE_GG:
+					T_recalcFull_GG<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(m_palFull.u32);
+					break;
+				case PALMODE_TMS9918:
+					T_recalcFull_TMS9918<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(m_palFull.u32);
+					break;
+			}
 			break;
 	}
 	
@@ -943,22 +1002,76 @@ void VdpPalette::update(void)
 {
 	if (m_dirty.full)
 		recalcFull();
+	if (!m_dirty.active)
+		return;
 	
-	// TODO: Add support for SMS, Game Gear, and TMS9918.
-	if (m_dirty.active)
+	if (m_bpp != BPP_32)
 	{
-		if (m_bpp != BPP_32)
-			T_update_MD<uint16_t>(m_palActive.u16, m_palFull.u16);
-		else
-			T_update_MD<uint32_t>(m_palActive.u32, m_palFull.u32);
-		
-		// Clear the active palette dirty bit.
-		m_dirty.active = false;
+		switch (m_palMode)
+		{
+			case PALMODE_32X:
+				// TODO: Implement T_update_32X().
+#if 0
+				T_update_32X<uint16_t>(m_palActive32X.u16, m_palFull32X.u16);
+#endif
+				// NOTE: 32X falls through to MD, since both 32X and MD palettes must be updated.
+				// TODO: Add a separate dirty flag for the 32X palette?
+			
+			case PALMODE_MD:
+			default:
+				T_update_MD<uint16_t>(m_palActive.u16, m_palFull.u16);
+				break;
+			
+			case PALMODE_SMS:
+				T_update_SMS<uint16_t>(m_palActive.u16, m_palFull.u16);
+				break;
+			
+			case PALMODE_GG:
+				T_update_GG<uint16_t>(m_palActive.u16, m_palFull.u16);
+				break;
+			
+			case PALMODE_TMS9918:
+				T_update_TMS9918<uint16_t>(m_palActive.u16, m_palFull.u16);
+				break;
+		}
 	}
+	else
+	{
+		switch (m_palMode)
+		{
+			case PALMODE_32X:
+				// TODO: Implement T_update_32X().
+#if 0
+				T_update_32X<uint32_t>(m_palActive32X.u32, m_palFull32X.u32);
+#endif
+				// NOTE: 32X falls through to MD, since both 32X and MD palettes must be updated.
+				// TODO: Add a separate dirty flag for the 32X palette?
+			
+			case PALMODE_MD:
+			default:
+				T_update_MD<uint32_t>(m_palActive.u32, m_palFull.u32);
+				break;
+			
+			case PALMODE_SMS:
+				T_update_SMS<uint32_t>(m_palActive.u32, m_palFull.u32);
+				break;
+			
+			case PALMODE_GG:
+				T_update_GG<uint32_t>(m_palActive.u32, m_palFull.u32);
+				break;
+			
+			case PALMODE_TMS9918:
+				T_update_TMS9918<uint32_t>(m_palActive.u32, m_palFull.u32);
+				break;
+		}
+	}
+	
+	// Clear the active palette dirty bit.
+	m_dirty.active = false;
 }
 
 
-// TODO: Port to LibGens.
+// TODO: Port to LibGens: T_update_32X()
 #if 0
 /**
  * Adjust_CRam_32X(): Adjust the 32X CRam.

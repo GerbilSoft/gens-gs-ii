@@ -67,7 +67,7 @@ class VdpPalette
 		 * setMode(): Set the palette mode.
 		 * TODO: Implement mode settings. For now, this just forces a palette recalculation.
 		 */
-		void setMode(void);
+		void setMode(void) __attribute__ ((deprecated));
 		
 		/** CRam functions. **/
 		
@@ -143,6 +143,20 @@ class VdpPalette
 		ColorDepth bpp(void) const;
 		void setBpp(ColorDepth newBpp);
 		
+		// Palette mode.
+		enum PalMode
+		{
+			PALMODE_MD,
+			PALMODE_32X,
+			PALMODE_SMS,
+			PALMODE_GG,
+			PALMODE_TMS9918,
+			
+			PALMODE_MAX
+		};
+		PalMode palMode(void) const;
+		void setPalMode(PalMode newPalMode);
+		
 		/**
 		 * bgColorIdx: Background color index.
 		 */
@@ -214,6 +228,9 @@ class VdpPalette
 		bool m_inverted;
 		ColorScaleMethod_t m_colorScaleMethod;
 		ColorDepth m_bpp;
+		
+		// Palette mode.
+		PalMode m_palMode;
 		
 		// Background color index.
 		uint8_t m_bgColorIdx;
@@ -381,10 +398,12 @@ inline VdpPalette::ColorScaleMethod_t VdpPalette::colorScaleMethod(void) const
 inline VdpPalette::ColorDepth VdpPalette::bpp(void) const
 	{ return m_bpp; }
 
-inline bool VdpPalette::mdColorMask(void) const
-	{ return (m_mdColorMask == MD_COLOR_MASK_LSB); }
+inline VdpPalette::PalMode VdpPalette::palMode(void) const
+	{ return m_palMode; }
 inline int VdpPalette::bgColorIdx(void) const
 	{ return m_bgColorIdx; }
+inline bool VdpPalette::mdColorMask(void) const
+	{ return (m_mdColorMask == MD_COLOR_MASK_LSB); }
 
 }
 
