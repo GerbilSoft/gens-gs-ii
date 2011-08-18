@@ -23,6 +23,10 @@
 
 #include "VdpPalette.hpp"
 
+// FOR TESTING ONLY: Uncomment this #define to enable support for 4 palette lines in all modes.
+// This should not be enabled in release builds!
+//#define DO_FOUR_PALETTE_LINES_IN_ALL_MODES_FOR_LULZ
+
 // TODO: Remove Vdp::UpdateFlags dependency.
 #include "Vdp.hpp"
 #include "VdpTypes.hpp"
@@ -214,11 +218,13 @@ void VdpPalette::initSegaTMSPalette(void)
 	// TODO: Implement multiple palette modes.
 	// TODO: Use alternating bytes in SMS CRam for MD compatibility?
 	
-	// Copy PalTMS9918_SMS to all four MD palettes in CRam.
+	// Copy PalTMS9918_SMS to both SMS palettes in CRam.
 	memcpy(&m_cram.u8[0x00], PalTMS9918_SMS, sizeof(PalTMS9918_SMS));
 	memcpy(&m_cram.u8[0x10], PalTMS9918_SMS, sizeof(PalTMS9918_SMS));
+#if defined(DO_FOUR_PALETTE_LINES_IN_ALL_MODES_FOR_LULZ)
 	memcpy(&m_cram.u8[0x20], PalTMS9918_SMS, sizeof(PalTMS9918_SMS));
 	memcpy(&m_cram.u8[0x30], PalTMS9918_SMS, sizeof(PalTMS9918_SMS));
+#endif
 	
 	// Palette is dirty.
 	m_dirty.active = true;
@@ -730,10 +736,8 @@ FORCE_INLINE void VdpPalette::T_recalcFull_TMS9918(pixel *palFull)
 			     (b);
 	}
 	
-	// Copy the TMS9918 palette to the remaining three MD palettes.
+	// Copy the TMS9918 palette to the second SMS palettes.
 	memcpy(&palFull[0x10], &palFull[0x00], (sizeof(palFull[0]) * 16));
-	memcpy(&palFull[0x20], &palFull[0x00], (sizeof(palFull[0]) * 16));
-	memcpy(&palFull[0x30], &palFull[0x00], (sizeof(palFull[0]) * 16));
 }
 
 
@@ -903,8 +907,15 @@ template<typename pixel>
 FORCE_INLINE void VdpPalette::T_update_SMS(pixel *SMS_palette,
 					const pixel *palette)
 {
+#if !defined(DO_FOUR_PALETTE_LINES_IN_ALL_MODES_FOR_LULZ)
 	// Update all 32 colors.
-	for (int i = 30; i >= 0; i -= 2)
+	static const int color_start = (32 - 2);
+#else
+	// Process all 64 colors for lulz.
+	static const int color_start = (64 - 2);
+#endif
+	
+	for (int i = color_start; i >= 0; i -= 2)
 	{
 		// TODO: Use alternating bytes in SMS CRam for MD compatibility?
 		const uint8_t color1_raw = (m_cram.u8[i] & 0x3F);
@@ -934,8 +945,15 @@ template<typename pixel>
 FORCE_INLINE void VdpPalette::T_update_GG(pixel *GG_palette,
 					const pixel *palette)
 {
+#if !defined(DO_FOUR_PALETTE_LINES_IN_ALL_MODES_FOR_LULZ)
 	// Update all 32 colors.
-	for (int i = 30; i >= 0; i -= 2)
+	static const int color_start = (32 - 2);
+#else
+	// Process all 64 colors for lulz.
+	static const int color_start = (64 - 2);
+#endif
+	
+	for (int i = color_start; i >= 0; i -= 2)
 	{
 		const uint16_t color1_raw = (m_cram.u16[i] & 0xFFF);
 		const uint16_t color2_raw = (m_cram.u16[i + 1] & 0xFFF);
@@ -967,14 +985,16 @@ FORCE_INLINE void VdpPalette::T_update_TMS9918(pixel *TMS_palette,
 	/**
 	 * NOTE: This function doesn't actually recalculate palettes.
 	 * It simply copies the full 16-color palette to the active palette twice.
-	 * The palette is copied four times for compatibility purposes.
+	 * The palette is copied twice for compatibility purposes.
 	 */
 	
 	// Copy the colors.
 	memcpy(&TMS_palette[0x00], &palette[0x00], (sizeof(TMS_palette[0]) * 16));
 	memcpy(&TMS_palette[0x10], &palette[0x00], (sizeof(TMS_palette[0]) * 16));
+#if defined(DO_FOUR_PALETTE_LINES_IN_ALL_MODES_FOR_LULZ)
 	memcpy(&TMS_palette[0x20], &palette[0x00], (sizeof(TMS_palette[0]) * 16));
 	memcpy(&TMS_palette[0x30], &palette[0x00], (sizeof(TMS_palette[0]) * 16));
+#endif
 	
 	// Update the background color.
 	// TODO: How is the background color handled in TMS9918 modes?
