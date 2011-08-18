@@ -21,6 +21,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+/**
+ * TODO:
+ * - Add command line options to specify things, e.g.:
+ *   - output filename
+ *   - palette mode
+ *   - shadow/highlight
+ * - Add 32X and TMS9918 functions.
+ */
+
 #include "test_VdpPalette.h"
 
 // C includes.
