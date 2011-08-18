@@ -504,8 +504,8 @@ FORCE_INLINE void VdpPalette::T_recalcFull_SMS(pixel *palFull)
 	{
 		// Scale the color components using the lookup table.
 		int r = PalComponent_SMS[i & 0x03];
-		int g = PalComponent_SMS[(i >> 4) & 0x0C];
-		int b = PalComponent_SMS[(i >> 8) & 0x30];
+		int g = PalComponent_SMS[(i >> 2) & 0x03];
+		int b = PalComponent_SMS[(i >> 4) & 0x03];
 		
 		// Adjust brightness.
 		r += brightness;
