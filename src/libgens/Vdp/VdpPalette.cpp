@@ -29,9 +29,6 @@
 
 #include "Util/byteswap.h"
 
-// TODO: Eliminate use of EmuContext.
-#include "../EmuContext.hpp"
-
 // C includes.
 #include <math.h>
 #include <stdint.h>
@@ -783,14 +780,6 @@ template<typename pixel>
 FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 					const pixel *palette)
 {
-	// TODO: Figure out a better way to handle this.
-	unsigned int vdp_layers = 0;
-	EmuContext *instance = EmuContext::Instance();
-	if (instance != NULL)
-		vdp_layers = instance->m_vdp->VDP_Layers;
-	if (vdp_layers & VdpTypes::VDP_LAYER_PALETTE_LOCK)
-		return;
-	
 	// Update all 64 colors.
 	for (int i = 62; i >= 0; i -= 2)
 	{
@@ -852,14 +841,6 @@ template<typename pixel>
 FORCE_INLINE void VdpPalette::T_update_SMS(pixel *SMS_palette,
 					const pixel *palette)
 {
-	// TODO: Figure out a better way to handle this.
-	unsigned int vdp_layers = 0;
-	EmuContext *instance = EmuContext::Instance();
-	if (instance != NULL)
-		vdp_layers = instance->m_vdp->VDP_Layers;
-	if (vdp_layers & VdpTypes::VDP_LAYER_PALETTE_LOCK)
-		return;
-	
 	// Update all 32 colors.
 	for (int i = 30; i >= 0; i -= 2)
 	{
@@ -891,14 +872,6 @@ template<typename pixel>
 FORCE_INLINE void VdpPalette::T_update_GG(pixel *GG_palette,
 					const pixel *palette)
 {
-	// TODO: Figure out a better way to handle this.
-	unsigned int vdp_layers = 0;
-	EmuContext *instance = EmuContext::Instance();
-	if (instance != NULL)
-		vdp_layers = instance->m_vdp->VDP_Layers;
-	if (vdp_layers & VdpTypes::VDP_LAYER_PALETTE_LOCK)
-		return;
-	
 	// Update all 32 colors.
 	for (int i = 30; i >= 0; i -= 2)
 	{
@@ -934,14 +907,6 @@ FORCE_INLINE void VdpPalette::T_update_TMS9918(pixel *TMS_palette,
 	 * It simply copies the full 16-color palette to the active palette twice.
 	 * The palette is copied twice for compatibility purposes.
 	 */
-	
-	// TODO: Figure out a better way to handle this.
-	unsigned int vdp_layers = 0;
-	EmuContext *instance = EmuContext::Instance();
-	if (instance != NULL)
-		vdp_layers = instance->m_vdp->VDP_Layers;
-	if (vdp_layers & VdpTypes::VDP_LAYER_PALETTE_LOCK)
-		return;
 	
 	// Copy the colors.
 	memcpy(&TMS_palette[0], &palette[0], (sizeof(TMS_palette[0]) * 32));
