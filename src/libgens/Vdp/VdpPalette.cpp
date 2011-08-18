@@ -214,9 +214,11 @@ void VdpPalette::initSegaTMSPalette(void)
 	// TODO: Implement multiple palette modes.
 	// TODO: Use alternating bytes in SMS CRam for MD compatibility?
 	
-	// Copy PalTMS9918_SMS to both SMS palettes in CRam.
-	memcpy(&m_cram.u8[0], PalTMS9918_SMS, sizeof(PalTMS9918_SMS));
-	memcpy(&m_cram.u8[16], PalTMS9918_SMS, sizeof(PalTMS9918_SMS));
+	// Copy PalTMS9918_SMS to all four MD palettes in CRam.
+	memcpy(&m_cram.u8[0x00], PalTMS9918_SMS, sizeof(PalTMS9918_SMS));
+	memcpy(&m_cram.u8[0x10], PalTMS9918_SMS, sizeof(PalTMS9918_SMS));
+	memcpy(&m_cram.u8[0x20], PalTMS9918_SMS, sizeof(PalTMS9918_SMS));
+	memcpy(&m_cram.u8[0x30], PalTMS9918_SMS, sizeof(PalTMS9918_SMS));
 	
 	// Palette is dirty.
 	m_dirty.active = true;
@@ -671,7 +673,7 @@ FORCE_INLINE void VdpPalette::T_recalcFull_TMS9918(pixel *palFull)
 	const int brightness = (m_brightness - 100);
 	
 	// Calculate the TMS9918 palette.
-	for (int i = 0x00; i < 0x10; i++)
+	for (int i = 0; i < 16; i++)
 	{
 		// TMS9918 uses analog color circuitry.
 		// We're using close approximations of the colors as 32-bit RGB.
@@ -728,8 +730,10 @@ FORCE_INLINE void VdpPalette::T_recalcFull_TMS9918(pixel *palFull)
 			     (b);
 	}
 	
-	// Copy the TMS9918 palette to the second 16 colors.
-	memcpy(&palFull[16], &palFull[0], (sizeof(palFull[0]) * 16));
+	// Copy the TMS9918 palette to the remaining three MD palettes.
+	memcpy(&palFull[0x10], &palFull[0x00], (sizeof(palFull[0]) * 16));
+	memcpy(&palFull[0x20], &palFull[0x00], (sizeof(palFull[0]) * 16));
+	memcpy(&palFull[0x30], &palFull[0x00], (sizeof(palFull[0]) * 16));
 }
 
 
@@ -963,12 +967,14 @@ FORCE_INLINE void VdpPalette::T_update_TMS9918(pixel *TMS_palette,
 	/**
 	 * NOTE: This function doesn't actually recalculate palettes.
 	 * It simply copies the full 16-color palette to the active palette twice.
-	 * The palette is copied twice for compatibility purposes.
+	 * The palette is copied four times for compatibility purposes.
 	 */
 	
 	// Copy the colors.
-	memcpy(&TMS_palette[0], &palette[0], (sizeof(TMS_palette[0]) * 32));
-	memcpy(&TMS_palette[16], &palette[0], (sizeof(TMS_palette[0]) * 16));
+	memcpy(&TMS_palette[0x00], &palette[0x00], (sizeof(TMS_palette[0]) * 16));
+	memcpy(&TMS_palette[0x10], &palette[0x00], (sizeof(TMS_palette[0]) * 16));
+	memcpy(&TMS_palette[0x20], &palette[0x00], (sizeof(TMS_palette[0]) * 16));
+	memcpy(&TMS_palette[0x30], &palette[0x00], (sizeof(TMS_palette[0]) * 16));
 	
 	// Update the background color.
 	// TODO: How is the background color handled in TMS9918 modes?
