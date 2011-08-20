@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
- * test_VdpPalette_generate.h: VdpPalette tests. (Data file generator)     *
+ * test_VdpPalette_generate.c: VdpPalette tests. (Data file generator)     *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -35,20 +35,45 @@
 // C includes.
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
 #include <stdlib.h>
 
-// TODO: Use ColorScaleMethod enum from LibGens.
+// getopt_long()
+#include <unistd.h>
+#include <getopt.h>
+
+// NOTE: We're not using LibGens defines here.
+// test_VdpPalette_generate.c won't link to LibGens.
+
+// Palette mode. [VdpPalette::PalMode_t]
 typedef enum
 {
-	CSM_RAW = 0,
-	CSM_FULL = 1,
-	CSM_FULL_SH = 2,
-} ColorScaleMethod;
+	PALMODE_MD,
+	PALMODE_32X,
+	PALMODE_SMS,
+	PALMODE_GG,
+	PALMODE_TMS9918,
+	
+	PALMODE_MAX
+} PalMode_t;
+
+/**
+ * Color scale method. [LibGens::VdpPalette::ColorScaleMethod_t]
+ * TODO: Possibly remove COLSCALE_FULL_SH, since it's incorrect.
+ * Normal MD(0xEEE) and highlighted MD(0xEEE) have the same brightness.
+ * This was tested by TmEE on hardware. (Genesis 2)
+ */
+typedef enum
+{
+	COLSCALE_RAW = 0,	// Raw colors: 0xEEE -> 0xE0E0E0
+	COLSCALE_FULL = 1,	// Full colors: 0xEEE -> 0xFFFFFF
+	COLSCALE_FULL_SH = 2,	// Full colors with Shadow/Highlight: 0xEEE -> 0xEEEEEE for highlight
+} ColorScaleMethod_t;
 
 // TODO: Combine these functios together.
 
-static int write_paltype_md(const char *filename, ColorScaleMethod csm)
+static int write_paltype_md(const char *filename, ColorScaleMethod_t csm)
 {
 	static const uint8_t PalComponent_MD_Raw[16] =
 		{0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70,
@@ -76,16 +101,16 @@ static int write_paltype_md(const char *filename, ColorScaleMethod csm)
 	const char *palTest_ColorScale;
 	switch (csm)
 	{
-		case CSM_RAW:
+		case COLSCALE_RAW:
 			palcomponent_md = PalComponent_MD_Raw;
 			palTest_ColorScale = PALTEST_COLORSCALE_RAW;
 			break;
-		case CSM_FULL:
+		case COLSCALE_FULL:
 		default:
 			palcomponent_md = PalComponent_MD_Full;
 			palTest_ColorScale = PALTEST_COLORSCALE_FULL;
 			break;
-		case CSM_FULL_SH:
+		case COLSCALE_FULL_SH:
 			palcomponent_md = PalComponent_MD_Full_SH;
 			palTest_ColorScale = PALTEST_COLORSCALE_FULL_SH;
 			break;
@@ -274,12 +299,123 @@ static int write_paltype_gg(const char *filename)
 	return 0;
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
-	write_paltype_md("PalTest_MD_Raw.txt", CSM_RAW);
-	write_paltype_md("PalTest_MD_Full.txt", CSM_FULL);
-	write_paltype_md("PalTest_MD_Full_SH.txt", CSM_FULL_SH);
+	static const struct option PalTest_Options[] =
+	{
+		{"palmode",	1, NULL, 'p'},
+		{"csm",		1, NULL, 'c'},
+		{"help",	0, NULL, 'h'},
+		
+		{NULL, 0, NULL, 0}
+	};
+	
+	// Command line syntax:
+	// ./test_VdpPalette_generate --palmode[=PAL] [--csm[=CSM]] output.filename.txt
+	
+	// Configurable options.
+	PalMode_t palMode = PALMODE_MD;
+	ColorScaleMethod_t csm = COLSCALE_FULL;
+	
+	// Get options.
+	int c;
+	int option_index;
+	while (1)
+	{
+		option_index = -1;
+		c = getopt_long(argc, argv, "p:s:h", PalTest_Options, &option_index);
+		if (c == -1)
+			break;
+		
+		switch (c)
+		{
+			case 'p':
+				// Palette mode.
+				if (!strcasecmp("MD", optarg))
+					palMode = PALMODE_MD;
+				else if (!strcasecmp("32X", optarg))
+					palMode = PALMODE_32X;
+				else if (!strcasecmp("SMS", optarg))
+					palMode = PALMODE_SMS;
+				else if (!strcasecmp("GG", optarg))
+					palMode = PALMODE_GG;
+				else if (!strcasecmp("TMS9918", optarg))
+					palMode = PALMODE_TMS9918;
+				else
+				{
+					// Invalid palette mode.
+					if (option_index < 0)
+						fprintf(stderr, "%s: invalid argument `%s' for `-%c'\n",
+							argv[0], optarg, c);
+					else
+						fprintf(stderr, "%s: invalid argument `%s' for `--%s'\n",
+							argv[0], optarg, PalTest_Options[option_index].name);
+					
+					fprintf(stderr, "Valid arguments are:\n"
+							"  - `md', `32x', `sms', `gg', `tms9918'\n");
+					fprintf(stderr, "Try `%s --help' for more information.\n", argv[0]);
+					return EXIT_FAILURE;
+				}
+				break;
+			
+			case 'c':
+				// Color Scale Method.
+				if (!strcasecmp("raw", optarg))
+					csm = COLSCALE_RAW;
+				else if (!strcasecmp("full", optarg))
+					csm = COLSCALE_FULL;
+				else if (!strcasecmp("full+sh", optarg))
+					csm = COLSCALE_FULL_SH;
+				else
+				{
+					// Invalid color scale method.
+					if (option_index < 0)
+						fprintf(stderr, "%s: invalid argument `%s' for `-%c'\n",
+							argv[0], optarg, c);
+					else
+						fprintf(stderr, "%s: invalid argument `%s' for `--%s'\n",
+							argv[0], optarg, PalTest_Options[option_index].name);
+					
+					fprintf(stderr, "Valid arguments are:\n"
+							"  - `raw', `full', `full+sh'\n");
+					fprintf(stderr, "Try `%s --help' for more information.\n", argv[0]);
+					return EXIT_FAILURE;
+				}
+				break;
+			
+			case 'h':
+				// Help.
+				fprintf(stderr, "LibGens: VdpPalette tests: Data file generator.\n");
+				fprintf(stderr, "Usage: %s [OPTION]... [FILE]\n", argv[0]);
+				fprintf(stderr, "Generates a LibGens VdpPalette test data file for use with test_VdpPalette.\n"
+						"By default, generates a Mega Drive palette file using Full color scaling.\n"
+						"\n"
+						"Options:\n"
+						"  -p, --palmode[=PAL]        set the palette mode for the data file.\n"
+						"                               `md', `32x', `sms', `gg', `tms9918'\n"
+						"  -c, --csm[=CSM]            set the color scaling method for MD palettes.\n"
+						"                               `raw', `full', `full+sh'\n"
+						"  -h, --help                 display this help and exit\n"
+						"\n"
+						"Exit status:\n"
+						" 0  if OK.\n"
+						" 1  if an error occurred.\n"
+						);
+				return EXIT_SUCCESS;
+			
+			case '?':
+			default:
+				// Invalid option.
+				fprintf(stderr, "Try `%s --help' for more information.\n", argv[0]);
+				return EXIT_FAILURE;
+		}
+	}
+	
+	write_paltype_md("PalTest_MD_Raw.txt", COLSCALE_RAW);
+	write_paltype_md("PalTest_MD_Full.txt", COLSCALE_FULL);
+	write_paltype_md("PalTest_MD_Full_SH.txt", COLSCALE_FULL_SH);
 	write_paltype_sms("PalTest_SMS.txt");
 	write_paltype_gg("PalTest_GG.txt");
 	return EXIT_SUCCESS;
 }
+
