@@ -117,7 +117,7 @@ class VdpPalette
 		
 		/**
 		 * Color scale method.
-		 * TODO: Possibly remove COLSCALE_FULL_HS, since it's incorrect.
+		 * TODO: Possibly remove COLSCALE_FULL_SH, since it's incorrect.
 		 * Normal MD(0xEEE) and highlighted MD(0xEEE) have the same brightness.
 		 * This was tested by TmEE on hardware. (Genesis 2)
 		 */
@@ -125,7 +125,7 @@ class VdpPalette
 		{
 			COLSCALE_RAW = 0,	// Raw colors: 0xEEE -> 0xE0E0E0
 			COLSCALE_FULL = 1,	// Full colors: 0xEEE -> 0xFFFFFF
-			COLSCALE_FULL_HS = 2,	// Full colors with Highlight/Shadow: 0xEEE -> 0xEEEEEE for highlight
+			COLSCALE_FULL_SH = 2,	// Full colors with Shadow/Highlight: 0xEEE -> 0xEEEEEE for highlight
 		};
 		ColorScaleMethod_t colorScaleMethod(void) const;
 		void setColorScaleMethod(ColorScaleMethod_t newColorScaleMethod);

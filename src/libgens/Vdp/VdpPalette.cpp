@@ -320,7 +320,7 @@ void VdpPalette::T_recalcFull_MD(pixel *palFull)
 		default: // Matches Genesis 2; tested by TmEE.
 			md_components = &PalComponent_MD_Full[0];
 			break;
-		case COLSCALE_FULL_HS:
+		case COLSCALE_FULL_SH:
 			md_components = &PalComponent_MD_Full_SH[0];
 			break;
 	}

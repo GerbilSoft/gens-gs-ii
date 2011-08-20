@@ -254,7 +254,7 @@ int GensConfigPrivate::reload(const QString& filename)
 	// using int to prevent Qt issues
 	colorScaleMethod = settings.value(QLatin1String("colorScaleMethod"),
 				(int)LibGens::VdpPalette::COLSCALE_FULL).toInt();
-	if ((colorScaleMethod < 0) || (colorScaleMethod > (int)LibGens::VdpPalette::COLSCALE_FULL_HS))
+	if ((colorScaleMethod < 0) || (colorScaleMethod > (int)LibGens::VdpPalette::COLSCALE_FULL_SH))
 		colorScaleMethod = (int)LibGens::VdpPalette::COLSCALE_FULL;
 	int stretch_tmp = settings.value(QLatin1String("stretchMode"), (int)GensConfig::STRETCH_H).toInt();
 	if ((stretch_tmp < (int)GensConfig::STRETCH_NONE) || (stretch_tmp > (int)GensConfig::STRETCH_FULL))
@@ -769,7 +769,7 @@ GC_PROPERTY_WRITE(bool, inverted, bool, Inverted)
 GC_PROPERTY_WRITE_RANGE(int, colorScaleMethod,
 			int, ColorScaleMethod,
 			(int)LibGens::VdpPalette::COLSCALE_RAW,
-			(int)LibGens::VdpPalette::COLSCALE_FULL_HS)
+			(int)LibGens::VdpPalette::COLSCALE_FULL_SH)
 GC_PROPERTY_WRITE_RANGE(GensConfig::StretchMode_t, stretchMode,
 			GensConfig::StretchMode_t, StretchMode,
 			(int)STRETCH_NONE, (int)STRETCH_FULL)
