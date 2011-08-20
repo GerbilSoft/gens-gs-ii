@@ -117,7 +117,7 @@ PAL_PROPERTY_WRITE(bpp, ColorDepth, Bpp)
  * setPalMode(): Set the palette mode.
  * @param newPalMode New palette mode.
  */
-void VdpPalette::setPalMode(PalMode newPalMode)
+void VdpPalette::setPalMode(PalMode_t newPalMode)
 {
 	if (m_palMode == newPalMode)
 		return;

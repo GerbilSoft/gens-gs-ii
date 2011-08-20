@@ -144,7 +144,7 @@ class VdpPalette
 		void setBpp(ColorDepth newBpp);
 		
 		// Palette mode.
-		enum PalMode
+		enum PalMode_t
 		{
 			PALMODE_MD,
 			PALMODE_32X,
@@ -154,8 +154,8 @@ class VdpPalette
 			
 			PALMODE_MAX
 		};
-		PalMode palMode(void) const;
-		void setPalMode(PalMode newPalMode);
+		PalMode_t palMode(void) const;
+		void setPalMode(PalMode_t newPalMode);
 		
 		/**
 		 * bgColorIdx: Background color index.
@@ -230,7 +230,7 @@ class VdpPalette
 		ColorDepth m_bpp;
 		
 		// Palette mode.
-		PalMode m_palMode;
+		PalMode_t m_palMode;
 		
 		// Background color index.
 		uint8_t m_bgColorIdx;
@@ -398,7 +398,7 @@ inline VdpPalette::ColorScaleMethod_t VdpPalette::colorScaleMethod(void) const
 inline VdpPalette::ColorDepth VdpPalette::bpp(void) const
 	{ return m_bpp; }
 
-inline VdpPalette::PalMode VdpPalette::palMode(void) const
+inline VdpPalette::PalMode_t VdpPalette::palMode(void) const
 	{ return m_palMode; }
 inline int VdpPalette::bgColorIdx(void) const
 	{ return m_bgColorIdx; }
