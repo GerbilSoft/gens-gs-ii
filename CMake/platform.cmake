@@ -1,5 +1,15 @@
 # Platform-specific functionality.
 
+# Hack to remove -rdynamic from CFLAGS and CXXFLAGS
+# See http://public.kitware.com/pipermail/cmake/2006-July/010404.html
+IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
+	SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
+ENDIF()
+
+# Don't embed rpaths in the executables.
+SET(CMAKE_SKIP_RPATH ON)
+
 # If we're not using x86, disable emulation functionality.
 # TODO: Port everything from asm to C/C++!
 # TODO: Add configuration option.
