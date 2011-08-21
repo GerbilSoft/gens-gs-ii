@@ -11,7 +11,7 @@ MACRO(UNSET var)
 	SET(${var})
 ENDMACRO(UNSET)
 
-list (APPEND CMAKE_MODULE_PATH "${gens-gs-ii_SOURCE_DIR}/CMake")
+list (APPEND CMAKE_MODULE_PATH "${gens-gs-ii_SOURCE_DIR}/CMake/macros")
 
 # Mac OS X: CMake doesn't include this by default.
 INCLUDE(CheckLibraryExists)
