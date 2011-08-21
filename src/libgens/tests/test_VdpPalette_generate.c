@@ -411,11 +411,50 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	write_paltype_md("PalTest_MD_Raw.txt", COLSCALE_RAW);
-	write_paltype_md("PalTest_MD_Full.txt", COLSCALE_FULL);
-	write_paltype_md("PalTest_MD_Full_SH.txt", COLSCALE_FULL_SH);
-	write_paltype_sms("PalTest_SMS.txt");
-	write_paltype_gg("PalTest_GG.txt");
-	return EXIT_SUCCESS;
+	// Check for an output file.
+	if (optind > (argc - 1))
+	{
+		// No output file specified.
+		fprintf(stderr, "%s: missing file operand\n", argv[0]);
+		fprintf(stderr, "Try `%s --help' for more information.\n", argv[0]);
+		return EXIT_FAILURE;
+	}
+	else if (optind < (argc - 1))
+	{
+		// Too many filenames specified.
+		fprintf(stderr, "%s: too many filenames specified\n", argv[0]);
+		fprintf(stderr, "Try `%s --help' for more information.\n", argv[0]);
+		return EXIT_FAILURE;
+	}
+	
+	const char *filename = argv[optind];
+	int ret;
+	switch (palMode)
+	{
+		case PALMODE_MD:
+			ret = write_paltype_md(filename, csm);
+			break;
+		case PALMODE_SMS:
+			ret = write_paltype_sms(filename);
+			break;
+		case PALMODE_GG:
+			ret = write_paltype_gg(filename);
+			break;
+		case PALMODE_32X:
+		case PALMODE_TMS9918:
+		default:
+			// Unsupported right now.
+			fprintf(stderr, "%s: error: %s palette mode isn't supported yet.\n",
+				argv[0], (palMode == PALMODE_32X ? "32X" : "TMS9918"));
+			return EXIT_FAILURE;
+	}
+	
+	// TODO: Print a success/fail message.
+	if (ret != 0)
+	{
+		// TODO: Print the error message.
+		fprintf(stderr, "%s: error %d\n", argv[0], ret);
+	}
+	return ret;
 }
 
