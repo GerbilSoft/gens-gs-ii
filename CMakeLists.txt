@@ -15,6 +15,10 @@ list (APPEND CMAKE_MODULE_PATH "${gens-gs-ii_SOURCE_DIR}/CMake")
 # Mac OS X: CMake doesn't include this by default.
 INCLUDE(CheckLibraryExists)
 
+# Enable testing.
+ENABLE_TESTING()
+INCLUDE(CTest)
+
 # Git version information.
 ADD_CUSTOM_TARGET(git_version ALL
 	${gens-gs-ii_SOURCE_DIR}/git_version.sh -s "${gens-gs-ii_SOURCE_DIR}" -o "${gens-gs-ii_BINARY_DIR}/git_version.h"
