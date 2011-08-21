@@ -23,10 +23,6 @@
 
 /**
  * TODO:
- * - Add command line options to specify things, e.g.:
- *   - output filename
- *   - palette mode
- *   - shadow/highlight
  * - Add 32X and TMS9918 functions.
  */
 
