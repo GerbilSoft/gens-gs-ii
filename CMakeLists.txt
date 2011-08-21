@@ -20,6 +20,9 @@ INCLUDE(CheckLibraryExists)
 ENABLE_TESTING()
 INCLUDE(CTest)
 
+# Set default build options.
+INCLUDE(CMake/options.cmake)
+
 # Git version information.
 ADD_CUSTOM_TARGET(git_version ALL
 	${gens-gs-ii_SOURCE_DIR}/git_version.sh -s "${gens-gs-ii_SOURCE_DIR}" -o "${gens-gs-ii_BINARY_DIR}/git_version.h"
@@ -42,9 +45,14 @@ INCLUDE(CMake/platform.cmake)
 
 # Check for required libraries.
 INCLUDE(CMake/libs/CheckZLIB.cmake)
+INCLUDE(CMake/libs/CheckLZMA.cmake)
 INCLUDE(CMake/libs/CheckOpenGL.cmake)
 
 # Project subdirectories.
 ADD_SUBDIRECTORY(extlib)
 ADD_SUBDIRECTORY(src)
-ADD_SUBDIRECTORY(doc)	# TODO: Make documentation optional.
+
+# Documentation.
+IF(BUILD_DOC)
+	ADD_SUBDIRECTORY(doc)
+ENDIF(BUILD_DOC)

@@ -337,7 +337,7 @@ QString AboutWindow::GetIncLibraries(void)
 	// Included libraries string.
 	QString sIncLibraries;
 	
-#if defined(HAVE_ZLIB) && !defined(ZLIB_FOUND)
+#if defined(HAVE_ZLIB) && defined(USE_INTERNAL_ZLIB)
 	// ZLIB is included.
 	sIncLibraries += sIntCopyOf.arg(QLatin1String("zlib-" ZLIB_VERSION)) + sLineBreak +
 		QLatin1String("Copyright (c) 1995-2010 Jean-loup Gailly and Mark Adler.") + sLineBreak +
@@ -357,7 +357,7 @@ QString AboutWindow::GetIncLibraries(void)
 		QLatin1String("Zip64/Zip Copyright (c) 2009-2001 by Mathias Svensson.");
 #endif
 	
-#if defined(HAVE_LZMA) && !defined(LZMA_FOUND)
+#if defined(HAVE_LZMA) && defined(USE_INTERNAL_LZMA)
 	// LZMA is included.
 	if (!sIncLibraries.isEmpty())
 		sIncLibraries += sLineBreak + sLineBreak;
@@ -367,7 +367,7 @@ QString AboutWindow::GetIncLibraries(void)
 					"http://www.7-zip.org/sdk.html</a>");
 #endif
 	
-#if defined(HAVE_GLEW) && !defined(GLEW_FOUND)
+#if defined(HAVE_GLEW) && defined(USE_INTERNAL_GLEW)
 	// GLEW is included.
 	if (!sIncLibraries.isEmpty())
 		sIncLibraries += sLineBreak + sLineBreak;

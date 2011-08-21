@@ -142,7 +142,7 @@ IF(HAVE_LZMA)
 	# Link ordering matters:
 	# * 7z depends on lzmabase.
 	# * lzmabase does NOT depend on 7z.
-	TARGET_LINK_LIBRARIES(gens 7z lzmabase)
+	TARGET_LINK_LIBRARIES(gens ${7z_LIBRARY} ${LZMA_LIBRARY})
 ENDIF(HAVE_LZMA)
 IF(WIN32)
 	# version.dll is required for DcRar_Win32.cpp, which calls these functions:
@@ -157,9 +157,10 @@ IF(GENS_ENABLE_EMULATION)
 	ADD_DEPENDENCIES(starscream mdZ80)
 ENDIF(GENS_ENABLE_EMULATION)
 IF(HAVE_LZMA)
-	ADD_DEPENDENCIES(lzmabase 7z)
+	ADD_DEPENDENCIES(${7z_LIBRARY} ${LZMA_LIBRARY})
 ENDIF(HAVE_LZMA)
 
 # Test suite.
-# TODO: Add an option to disable tests.
-ADD_SUBDIRECTORY(tests)
+IF(BUILD_TESTS)
+	ADD_SUBDIRECTORY(tests)
+ENDIF(BUILD_TESTS)

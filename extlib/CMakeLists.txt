@@ -36,8 +36,9 @@ ENDIF(USE_INTERNAL_ZLIB)
 ADD_SUBDIRECTORY(minizip)
 
 # LZMA
-# TODO: Add an option to enable LZMA support.
-ADD_SUBDIRECTORY(lzma)
+IF(USE_INTERNAL_LZMA)
+	ADD_SUBDIRECTORY(lzma)
+ENDIF(USE_INTERNAL_LZMA)
 
 IF(USE_INTERNAL_GLEW)
 	# Use the internal copy of glew.

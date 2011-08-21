@@ -33,8 +33,8 @@
 /* Define to 1 if you have the `GLEW' library (-lGLEW / -lglew32). */
 #cmakedefine HAVE_GLEW 1
 
-/* Define to 1 if an external GLEW is being used. */
-#cmakedefine GLEW_FOUND 1
+/* Define to 1 if the internal GLEW library is being used. */
+#cmakedefine USE_INTERNAL_GLEW 1
 
 /* Define to 1 if you have the `AL` library (-lopenal / -lOpenAL32). */
 #cmakedefine HAVE_OPENAL 1
@@ -42,14 +42,14 @@
 /* Define to 1 if you have the `zlib` library (-lz). */
 #cmakedefine HAVE_ZLIB 1
 
-/* Define to 1 if an external zlib is being used. */
-#cmakedefine ZLIB_FOUND 1
+/* Define to 1 if the internal ZLIB library is being used. */
+#cmakedefine USE_INTERNAL_ZLIB 1
 
 /* Define to 1 if LibGens is built with LZMA support using the included LZMA SDK. */
 #cmakedefine HAVE_LZMA 1
 
-/* Define to 1 if an ezternal LZMA is being used. */
-#cmakedefine LZMA_FOUND 1
+/* Define to 1 if the internal LZMA library is being used. */
+#cmakedefine USE_INTERNAL_LZMA 1
 
 /* Define to 1 if CPU emulation code should be enabled. */
 #cmakedefine GENS_ENABLE_EMULATION 1
