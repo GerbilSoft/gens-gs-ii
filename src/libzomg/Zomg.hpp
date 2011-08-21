@@ -30,8 +30,8 @@
 #include "ZomgBase.hpp"
 
 // MiniZip
-#include "../extlib/minizip/zip.h"
-#include "../extlib/minizip/unzip.h"
+#include "minizip/zip.h"
+#include "minizip/unzip.h"
 
 namespace LibZomg
 {
