@@ -319,7 +319,7 @@ int main(int argc, char *argv[])
 	while (1)
 	{
 		option_index = -1;
-		c = getopt_long(argc, argv, "p:s:h", PalTest_Options, &option_index);
+		c = getopt_long(argc, argv, "p:c:h", PalTest_Options, &option_index);
 		if (c == -1)
 			break;
 		
