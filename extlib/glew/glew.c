@@ -1888,6 +1888,7 @@ GLboolean __GLXEW_VERSION_1_1 = GL_FALSE;
 GLboolean __GLXEW_VERSION_1_2 = GL_FALSE;
 GLboolean __GLXEW_VERSION_1_3 = GL_FALSE;
 GLboolean __GLXEW_VERSION_1_4 = GL_FALSE;
+GLboolean __GLXEW_ARB_get_proc_address = GL_FALSE;
 GLboolean __GLXEW_EXT_swap_control = GL_FALSE;
 GLboolean __GLXEW_SGI_swap_control = GL_FALSE;
 
@@ -1938,6 +1939,10 @@ static GLboolean _glewInit_GLX_VERSION_1_3 (GLXEW_CONTEXT_ARG_DEF_INIT)
 #ifdef GLX_VERSION_1_4
 
 #endif /* GLX_VERSION_1_4 */
+
+#ifdef GLX_ARB_get_proc_address
+
+#endif /* GLX_ARB_get_proc_address */
 
 #ifdef GLX_EXT_swap_control
 
@@ -2020,6 +2025,9 @@ GLenum glxewContextInit (GLXEW_CONTEXT_ARG_DEF_LIST)
 #ifdef GLX_VERSION_1_3
   if (glewExperimental || GLXEW_VERSION_1_3) CONST_CAST(GLXEW_VERSION_1_3) = !_glewInit_GLX_VERSION_1_3(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GLX_VERSION_1_3 */
+#ifdef GLX_ARB_get_proc_address
+  CONST_CAST(GLXEW_ARB_get_proc_address) = glxewGetExtension("GLX_ARB_get_proc_address");
+#endif /* GLX_ARB_get_proc_address */
 #ifdef GLX_EXT_swap_control
   CONST_CAST(GLXEW_EXT_swap_control) = glxewGetExtension("GLX_EXT_swap_control");
   if (glewExperimental || GLXEW_EXT_swap_control) CONST_CAST(GLXEW_EXT_swap_control) = !_glewInit_GLX_EXT_swap_control(GLEW_CONTEXT_ARG_VAR_INIT);
@@ -2444,6 +2452,16 @@ GLboolean glxewIsSupported (const char* name)
         if (_glewStrSame3(&pos, &len, (const GLubyte*)"1_4", 3))
         {
           ret = GLXEW_VERSION_1_4;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"ARB_", 4))
+      {
+#ifdef GLX_ARB_get_proc_address
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"get_proc_address", 16))
+        {
+          ret = GLXEW_ARB_get_proc_address;
           continue;
         }
 #endif

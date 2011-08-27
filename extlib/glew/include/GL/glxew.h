@@ -334,6 +334,17 @@ extern void ( * glXGetProcAddress (const GLubyte *procName)) (void);
 
 #endif /* GLX_VERSION_1_4 */
 
+/* ------------------------ GLX_ARB_get_proc_address ----------------------- */
+
+#ifndef GLX_ARB_get_proc_address
+#define GLX_ARB_get_proc_address 1
+
+extern void ( * glXGetProcAddressARB (const GLubyte *procName)) (void);
+
+#define GLXEW_ARB_get_proc_address GLXEW_GET_VAR(__GLXEW_ARB_get_proc_address)
+
+#endif /* GLX_ARB_get_proc_address */
+
 /* -------------------------- GLX_EXT_swap_control ------------------------- */
 
 #ifndef GLX_EXT_swap_control
@@ -405,6 +416,7 @@ GLXEW_EXPORT GLboolean __GLXEW_VERSION_1_1;
 GLXEW_EXPORT GLboolean __GLXEW_VERSION_1_2;
 GLXEW_EXPORT GLboolean __GLXEW_VERSION_1_3;
 GLXEW_EXPORT GLboolean __GLXEW_VERSION_1_4;
+GLXEW_EXPORT GLboolean __GLXEW_ARB_get_proc_address;
 GLXEW_EXPORT GLboolean __GLXEW_EXT_swap_control;
 GLXEW_EXPORT GLboolean __GLXEW_SGI_swap_control;
 
