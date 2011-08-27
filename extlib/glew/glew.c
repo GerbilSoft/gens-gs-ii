@@ -249,6 +249,26 @@ static GLboolean _glewStrSame3 (GLubyte** a, GLuint* na, const GLubyte* b, GLuin
   return GL_FALSE;
 }
 
+/*
+ * Search for name in the extensions string. Use of strstr()
+ * is not sufficient because extension names can be prefixes of
+ * other extension names. Could use strtok() but the constant
+ * string returned by glGetString might be in read-only memory.
+ */
+static GLboolean _glewSearchExtension (const char* name, const GLubyte *start, const GLubyte *end)
+{
+  const GLubyte* p;
+  GLuint len = _glewStrLen((const GLubyte*)name);
+  p = start;
+  while (p < end)
+  {
+    GLuint n = _glewStrCLen(p, ' ');
+    if (len == n && _glewStrSame((const GLubyte*)name, p, n)) return GL_TRUE;
+    p += n+1;
+  }
+  return GL_FALSE;
+}
+
 #if !defined(_WIN32) || !defined(GLEW_MX)
 
 PFNGLCOPYTEXSUBIMAGE3DPROC __glewCopyTexSubImage3D = NULL;
@@ -763,6 +783,7 @@ GLboolean __GLEW_VERSION_3_2 = GL_FALSE;
 GLboolean __GLEW_VERSION_3_3 = GL_FALSE;
 GLboolean __GLEW_VERSION_4_0 = GL_FALSE;
 GLboolean __GLEW_VERSION_4_1 = GL_FALSE;
+GLboolean __GLEW_VERSION_4_2 = GL_FALSE;
 GLboolean __GLEW_ARB_fragment_program = GL_FALSE;
 GLboolean __GLEW_ARB_fragment_shader = GL_FALSE;
 GLboolean __GLEW_ARB_multitexture = GL_FALSE;
@@ -1204,6 +1225,10 @@ static GLboolean _glewInit_GL_VERSION_4_0 (GLEW_CONTEXT_ARG_DEF_INIT)
 
 #endif /* GL_VERSION_4_1 */
 
+#ifdef GL_VERSION_4_2
+
+#endif /* GL_VERSION_4_2 */
+
 #ifdef GL_ARB_fragment_program
 
 #endif /* GL_ARB_fragment_program */
@@ -1508,27 +1533,15 @@ static GLboolean _glewInit_GL_EXT_vertex_shader (GLEW_CONTEXT_ARG_DEF_INIT)
 
 /* ------------------------------------------------------------------------- */
 
-/* 
- * Search for name in the extensions string. Use of strstr()
- * is not sufficient because extension names can be prefixes of
- * other extension names. Could use strtok() but the constant
- * string returned by glGetString might be in read-only memory.
- */
 GLboolean glewGetExtension (const char* name)
 {    
-  GLubyte* p;
-  GLubyte* end;
-  GLuint len = _glewStrLen((const GLubyte*)name);
-  p = (GLubyte*)glGetString(GL_EXTENSIONS);
-  if (0 == p) return GL_FALSE;
-  end = p + _glewStrLen(p);
-  while (p < end)
-  {
-    GLuint n = _glewStrCLen(p, ' ');
-    if (len == n && _glewStrSame((const GLubyte*)name, p, n)) return GL_TRUE;
-    p += n+1;
-  }
-  return GL_FALSE;
+  const GLubyte* start;
+  const GLubyte* end;
+  start = (const GLubyte*)glGetString(GL_EXTENSIONS);
+  if (start == 0)
+    return GL_FALSE;
+  end = start + _glewStrLen(start);
+  return _glewSearchExtension(name, start, end);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -1541,6 +1554,8 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
   const GLubyte* s;
   GLuint dot;
   GLint major, minor;
+  const GLubyte* extStart;
+  const GLubyte* extEnd;
   /* query opengl version */
   s = glGetString(GL_VERSION);
   dot = _glewStrCLen(s, '.');
@@ -1562,7 +1577,8 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
   }
   else
   {
-    CONST_CAST(GLEW_VERSION_4_1)   = ( major > 4 )                 || ( major == 4 && minor >= 1 ) ? GL_TRUE : GL_FALSE;
+    CONST_CAST(GLEW_VERSION_4_2)   = ( major > 4 )                 || ( major == 4 && minor >= 2 ) ? GL_TRUE : GL_FALSE;
+    CONST_CAST(GLEW_VERSION_4_1)   = GLEW_VERSION_4_2   == GL_TRUE || ( major == 4 && minor >= 1 ) ? GL_TRUE : GL_FALSE;
     CONST_CAST(GLEW_VERSION_4_0)   = GLEW_VERSION_4_1   == GL_TRUE || ( major == 4               ) ? GL_TRUE : GL_FALSE;
     CONST_CAST(GLEW_VERSION_3_3)   = GLEW_VERSION_4_0   == GL_TRUE || ( major == 3 && minor >= 3 ) ? GL_TRUE : GL_FALSE;
     CONST_CAST(GLEW_VERSION_3_2)   = GLEW_VERSION_3_3   == GL_TRUE || ( major == 3 && minor >= 2 ) ? GL_TRUE : GL_FALSE;
@@ -1577,6 +1593,13 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
     CONST_CAST(GLEW_VERSION_1_2)   = GLEW_VERSION_1_2_1 == GL_TRUE || ( major == 1 && minor >= 2 ) ? GL_TRUE : GL_FALSE;
     CONST_CAST(GLEW_VERSION_1_1)   = GLEW_VERSION_1_2   == GL_TRUE || ( major == 1 && minor >= 1 ) ? GL_TRUE : GL_FALSE;
   }
+
+  /* query opengl extensions string */
+  extStart = glGetString(GL_EXTENSIONS);
+  if (extStart == 0)
+    extStart = (const GLubyte*)"";
+  extEnd = extStart + _glewStrLen(extStart);
+
   /* initialize extensions */
 #ifdef GL_VERSION_1_2
   if (glewExperimental || GLEW_VERSION_1_2) CONST_CAST(GLEW_VERSION_1_2) = !_glewInit_GL_VERSION_1_2(GLEW_CONTEXT_ARG_VAR_INIT);
@@ -1615,56 +1638,58 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
 #endif /* GL_VERSION_4_0 */
 #ifdef GL_VERSION_4_1
 #endif /* GL_VERSION_4_1 */
+#ifdef GL_VERSION_4_2
+#endif /* GL_VERSION_4_2 */
 #ifdef GL_ARB_fragment_program
-  CONST_CAST(GLEW_ARB_fragment_program) = glewGetExtension("GL_ARB_fragment_program");
+  CONST_CAST(GLEW_ARB_fragment_program) = _glewSearchExtension("GL_ARB_fragment_program", extStart, extEnd);
 #endif /* GL_ARB_fragment_program */
 #ifdef GL_ARB_fragment_shader
-  CONST_CAST(GLEW_ARB_fragment_shader) = glewGetExtension("GL_ARB_fragment_shader");
+  CONST_CAST(GLEW_ARB_fragment_shader) = _glewSearchExtension("GL_ARB_fragment_shader", extStart, extEnd);
 #endif /* GL_ARB_fragment_shader */
 #ifdef GL_ARB_multitexture
-  CONST_CAST(GLEW_ARB_multitexture) = glewGetExtension("GL_ARB_multitexture");
+  CONST_CAST(GLEW_ARB_multitexture) = _glewSearchExtension("GL_ARB_multitexture", extStart, extEnd);
   if (glewExperimental || GLEW_ARB_multitexture) CONST_CAST(GLEW_ARB_multitexture) = !_glewInit_GL_ARB_multitexture(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GL_ARB_multitexture */
 #ifdef GL_ARB_shader_objects
-  CONST_CAST(GLEW_ARB_shader_objects) = glewGetExtension("GL_ARB_shader_objects");
+  CONST_CAST(GLEW_ARB_shader_objects) = _glewSearchExtension("GL_ARB_shader_objects", extStart, extEnd);
   if (glewExperimental || GLEW_ARB_shader_objects) CONST_CAST(GLEW_ARB_shader_objects) = !_glewInit_GL_ARB_shader_objects(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GL_ARB_shader_objects */
 #ifdef GL_ARB_shading_language_100
-  CONST_CAST(GLEW_ARB_shading_language_100) = glewGetExtension("GL_ARB_shading_language_100");
+  CONST_CAST(GLEW_ARB_shading_language_100) = _glewSearchExtension("GL_ARB_shading_language_100", extStart, extEnd);
 #endif /* GL_ARB_shading_language_100 */
 #ifdef GL_ARB_texture_rectangle
-  CONST_CAST(GLEW_ARB_texture_rectangle) = glewGetExtension("GL_ARB_texture_rectangle");
+  CONST_CAST(GLEW_ARB_texture_rectangle) = _glewSearchExtension("GL_ARB_texture_rectangle", extStart, extEnd);
 #endif /* GL_ARB_texture_rectangle */
 #ifdef GL_ARB_vertex_program
-  CONST_CAST(GLEW_ARB_vertex_program) = glewGetExtension("GL_ARB_vertex_program");
+  CONST_CAST(GLEW_ARB_vertex_program) = _glewSearchExtension("GL_ARB_vertex_program", extStart, extEnd);
   if (glewExperimental || GLEW_ARB_vertex_program) CONST_CAST(GLEW_ARB_vertex_program) = !_glewInit_GL_ARB_vertex_program(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GL_ARB_vertex_program */
 #ifdef GL_ARB_vertex_shader
-  CONST_CAST(GLEW_ARB_vertex_shader) = glewGetExtension("GL_ARB_vertex_shader");
+  CONST_CAST(GLEW_ARB_vertex_shader) = _glewSearchExtension("GL_ARB_vertex_shader", extStart, extEnd);
   if (glewExperimental || GLEW_ARB_vertex_shader) CONST_CAST(GLEW_ARB_vertex_shader) = !_glewInit_GL_ARB_vertex_shader(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GL_ARB_vertex_shader */
 #ifdef GL_ATI_fragment_shader
-  CONST_CAST(GLEW_ATI_fragment_shader) = glewGetExtension("GL_ATI_fragment_shader");
+  CONST_CAST(GLEW_ATI_fragment_shader) = _glewSearchExtension("GL_ATI_fragment_shader", extStart, extEnd);
   if (glewExperimental || GLEW_ATI_fragment_shader) CONST_CAST(GLEW_ATI_fragment_shader) = !_glewInit_GL_ATI_fragment_shader(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GL_ATI_fragment_shader */
 #ifdef GL_ATI_text_fragment_shader
-  CONST_CAST(GLEW_ATI_text_fragment_shader) = glewGetExtension("GL_ATI_text_fragment_shader");
+  CONST_CAST(GLEW_ATI_text_fragment_shader) = _glewSearchExtension("GL_ATI_text_fragment_shader", extStart, extEnd);
 #endif /* GL_ATI_text_fragment_shader */
 #ifdef GL_EXT_bgra
-  CONST_CAST(GLEW_EXT_bgra) = glewGetExtension("GL_EXT_bgra");
+  CONST_CAST(GLEW_EXT_bgra) = _glewSearchExtension("GL_EXT_bgra", extStart, extEnd);
 #endif /* GL_EXT_bgra */
 #ifdef GL_EXT_packed_pixels
-  CONST_CAST(GLEW_EXT_packed_pixels) = glewGetExtension("GL_EXT_packed_pixels");
+  CONST_CAST(GLEW_EXT_packed_pixels) = _glewSearchExtension("GL_EXT_packed_pixels", extStart, extEnd);
 #endif /* GL_EXT_packed_pixels */
 #ifdef GL_EXT_texture_rectangle
-  CONST_CAST(GLEW_EXT_texture_rectangle) = glewGetExtension("GL_EXT_texture_rectangle");
+  CONST_CAST(GLEW_EXT_texture_rectangle) = _glewSearchExtension("GL_EXT_texture_rectangle", extStart, extEnd);
 #endif /* GL_EXT_texture_rectangle */
 #ifdef GL_EXT_vertex_shader
-  CONST_CAST(GLEW_EXT_vertex_shader) = glewGetExtension("GL_EXT_vertex_shader");
+  CONST_CAST(GLEW_EXT_vertex_shader) = _glewSearchExtension("GL_EXT_vertex_shader", extStart, extEnd);
   if (glewExperimental || GLEW_EXT_vertex_shader) CONST_CAST(GLEW_EXT_vertex_shader) = !_glewInit_GL_EXT_vertex_shader(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GL_EXT_vertex_shader */
 #ifdef GL_NV_texture_rectangle
-  CONST_CAST(GLEW_NV_texture_rectangle) = glewGetExtension("GL_NV_texture_rectangle");
+  CONST_CAST(GLEW_NV_texture_rectangle) = _glewSearchExtension("GL_NV_texture_rectangle", extStart, extEnd);
 #endif /* GL_NV_texture_rectangle */
 
   return GLEW_OK;
@@ -1793,63 +1818,68 @@ static PFNWGLGETEXTENSIONSSTRINGEXTPROC _wglewGetExtensionsStringEXT = NULL;
 
 GLboolean wglewGetExtension (const char* name)
 {    
-  GLubyte* p;
-  GLubyte* end;
-  GLuint len = _glewStrLen((const GLubyte*)name);
+  const GLubyte* start;
+  const GLubyte* end;
   if (_wglewGetExtensionsStringARB == NULL)
     if (_wglewGetExtensionsStringEXT == NULL)
       return GL_FALSE;
     else
-      p = (GLubyte*)_wglewGetExtensionsStringEXT();
+      start = (const GLubyte*)_wglewGetExtensionsStringEXT();
   else
-    p = (GLubyte*)_wglewGetExtensionsStringARB(wglGetCurrentDC());
-  if (0 == p) return GL_FALSE;
-  end = p + _glewStrLen(p);
-  while (p < end)
-  {
-    GLuint n = _glewStrCLen(p, ' ');
-    if (len == n && _glewStrSame((const GLubyte*)name, p, n)) return GL_TRUE;
-    p += n+1;
-  }
-  return GL_FALSE;
+    start = (const GLubyte*)_wglewGetExtensionsStringARB(wglGetCurrentDC());
+  if (start == 0)
+    return GL_FALSE;
+  end = start + _glewStrLen(start);
+  return _glewSearchExtension(name, start, end);
 }
 
 GLenum wglewContextInit (WGLEW_CONTEXT_ARG_DEF_LIST)
 {
   GLboolean crippled;
+  const GLubyte* extStart;
+  const GLubyte* extEnd;
   /* find wgl extension string query functions */
   _wglewGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)glewGetProcAddress((const GLubyte*)"wglGetExtensionsStringARB");
   _wglewGetExtensionsStringEXT = (PFNWGLGETEXTENSIONSSTRINGEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetExtensionsStringEXT");
+  /* query wgl extension string */
+  if (_wglewGetExtensionsStringARB == NULL)
+    if (_wglewGetExtensionsStringEXT == NULL)
+      extStart = (const GLubyte*)"";
+    else
+      extStart = (const GLubyte*)_wglewGetExtensionsStringEXT();
+  else
+    extStart = (const GLubyte*)_wglewGetExtensionsStringARB(wglGetCurrentDC());
+  extEnd = extStart + _glewStrLen(extStart);
   /* initialize extensions */
   crippled = _wglewGetExtensionsStringARB == NULL && _wglewGetExtensionsStringEXT == NULL;
 #ifdef WGL_ARB_extensions_string
-  CONST_CAST(WGLEW_ARB_extensions_string) = wglewGetExtension("WGL_ARB_extensions_string");
+  CONST_CAST(WGLEW_ARB_extensions_string) = _glewSearchExtension("WGL_ARB_extensions_string", extStart, extEnd);
   if (glewExperimental || WGLEW_ARB_extensions_string|| crippled) CONST_CAST(WGLEW_ARB_extensions_string)= !_glewInit_WGL_ARB_extensions_string(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* WGL_ARB_extensions_string */
 #ifdef WGL_ARB_multisample
-  CONST_CAST(WGLEW_ARB_multisample) = wglewGetExtension("WGL_ARB_multisample");
+  CONST_CAST(WGLEW_ARB_multisample) = _glewSearchExtension("WGL_ARB_multisample", extStart, extEnd);
 #endif /* WGL_ARB_multisample */
 #ifdef WGL_ARB_pbuffer
-  CONST_CAST(WGLEW_ARB_pbuffer) = wglewGetExtension("WGL_ARB_pbuffer");
+  CONST_CAST(WGLEW_ARB_pbuffer) = _glewSearchExtension("WGL_ARB_pbuffer", extStart, extEnd);
   if (glewExperimental || WGLEW_ARB_pbuffer|| crippled) CONST_CAST(WGLEW_ARB_pbuffer)= !_glewInit_WGL_ARB_pbuffer(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* WGL_ARB_pbuffer */
 #ifdef WGL_ARB_pixel_format
-  CONST_CAST(WGLEW_ARB_pixel_format) = wglewGetExtension("WGL_ARB_pixel_format");
+  CONST_CAST(WGLEW_ARB_pixel_format) = _glewSearchExtension("WGL_ARB_pixel_format", extStart, extEnd);
   if (glewExperimental || WGLEW_ARB_pixel_format|| crippled) CONST_CAST(WGLEW_ARB_pixel_format)= !_glewInit_WGL_ARB_pixel_format(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* WGL_ARB_pixel_format */
 #ifdef WGL_ATI_pixel_format_float
-  CONST_CAST(WGLEW_ATI_pixel_format_float) = wglewGetExtension("WGL_ATI_pixel_format_float");
+  CONST_CAST(WGLEW_ATI_pixel_format_float) = _glewSearchExtension("WGL_ATI_pixel_format_float", extStart, extEnd);
 #endif /* WGL_ATI_pixel_format_float */
 #ifdef WGL_EXT_extensions_string
-  CONST_CAST(WGLEW_EXT_extensions_string) = wglewGetExtension("WGL_EXT_extensions_string");
+  CONST_CAST(WGLEW_EXT_extensions_string) = _glewSearchExtension("WGL_EXT_extensions_string", extStart, extEnd);
   if (glewExperimental || WGLEW_EXT_extensions_string|| crippled) CONST_CAST(WGLEW_EXT_extensions_string)= !_glewInit_WGL_EXT_extensions_string(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* WGL_EXT_extensions_string */
 #ifdef WGL_EXT_swap_control
-  CONST_CAST(WGLEW_EXT_swap_control) = wglewGetExtension("WGL_EXT_swap_control");
+  CONST_CAST(WGLEW_EXT_swap_control) = _glewSearchExtension("WGL_EXT_swap_control", extStart, extEnd);
   if (glewExperimental || WGLEW_EXT_swap_control|| crippled) CONST_CAST(WGLEW_EXT_swap_control)= !_glewInit_WGL_EXT_swap_control(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* WGL_EXT_swap_control */
 #ifdef WGL_NV_float_buffer
-  CONST_CAST(WGLEW_NV_float_buffer) = wglewGetExtension("WGL_NV_float_buffer");
+  CONST_CAST(WGLEW_NV_float_buffer) = _glewSearchExtension("WGL_NV_float_buffer", extStart, extEnd);
 #endif /* WGL_NV_float_buffer */
 
   return GLEW_OK;
@@ -1974,27 +2004,21 @@ static GLboolean _glewInit_GLX_SGI_swap_control (GLXEW_CONTEXT_ARG_DEF_INIT)
 
 GLboolean glxewGetExtension (const char* name)
 {    
-  GLubyte* p;
-  GLubyte* end;
-  GLuint len;
+  const GLubyte* start;
+  const GLubyte* end;
 
   if (glXGetCurrentDisplay == NULL) return GL_FALSE;
-  len = _glewStrLen((const GLubyte*)name);
-  p = (GLubyte*)glXGetClientString(glXGetCurrentDisplay(), GLX_EXTENSIONS);
-  if (0 == p) return GL_FALSE;
-  end = p + _glewStrLen(p);
-  while (p < end)
-  {
-    GLuint n = _glewStrCLen(p, ' ');
-    if (len == n && _glewStrSame((const GLubyte*)name, p, n)) return GL_TRUE;
-    p += n+1;
-  }
-  return GL_FALSE;
+  start = (const GLubyte*)glXGetClientString(glXGetCurrentDisplay(), GLX_EXTENSIONS);
+  if (0 == start) return GL_FALSE;
+  end = start + _glewStrLen(start);
+  return _glewSearchExtension(name, start, end);
 }
 
 GLenum glxewContextInit (GLXEW_CONTEXT_ARG_DEF_LIST)
 {
   int major, minor;
+  const GLubyte* extStart;
+  const GLubyte* extEnd;
   /* initialize core GLX 1.2 */
   if (_glewInit_GLX_VERSION_1_2(GLEW_CONTEXT_ARG_VAR_INIT)) return GLEW_ERROR_GLX_VERSION_11_ONLY;
   /* initialize flags */
@@ -2021,19 +2045,26 @@ GLenum glxewContextInit (GLXEW_CONTEXT_ARG_DEF_LIST)
       break;
     }
   }
+  /* query GLX extension string */
+  extStart = 0;
+  if (glXGetCurrentDisplay != NULL)
+    extStart = (const GLubyte*)glXGetClientString(glXGetCurrentDisplay(), GLX_EXTENSIONS);
+  if (extStart == 0)
+    extStart = (const GLubyte *)"";
+  extEnd = extStart + _glewStrLen(extStart);
   /* initialize extensions */
 #ifdef GLX_VERSION_1_3
   if (glewExperimental || GLXEW_VERSION_1_3) CONST_CAST(GLXEW_VERSION_1_3) = !_glewInit_GLX_VERSION_1_3(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GLX_VERSION_1_3 */
 #ifdef GLX_ARB_get_proc_address
-  CONST_CAST(GLXEW_ARB_get_proc_address) = glxewGetExtension("GLX_ARB_get_proc_address");
+  CONST_CAST(GLXEW_ARB_get_proc_address) = _glewSearchExtension("GLX_ARB_get_proc_address", extStart, extEnd);
 #endif /* GLX_ARB_get_proc_address */
 #ifdef GLX_EXT_swap_control
-  CONST_CAST(GLXEW_EXT_swap_control) = glxewGetExtension("GLX_EXT_swap_control");
+  CONST_CAST(GLXEW_EXT_swap_control) = _glewSearchExtension("GLX_EXT_swap_control", extStart, extEnd);
   if (glewExperimental || GLXEW_EXT_swap_control) CONST_CAST(GLXEW_EXT_swap_control) = !_glewInit_GLX_EXT_swap_control(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GLX_EXT_swap_control */
 #ifdef GLX_SGI_swap_control
-  CONST_CAST(GLXEW_SGI_swap_control) = glxewGetExtension("GLX_SGI_swap_control");
+  CONST_CAST(GLXEW_SGI_swap_control) = _glewSearchExtension("GLX_SGI_swap_control", extStart, extEnd);
   if (glewExperimental || GLXEW_SGI_swap_control) CONST_CAST(GLXEW_SGI_swap_control) = !_glewInit_GLX_SGI_swap_control(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GLX_SGI_swap_control */
 
@@ -2063,10 +2094,10 @@ const GLubyte* glewGetString (GLenum name)
   static const GLubyte* _glewString[] =
   {
     (const GLubyte*)NULL,
-    (const GLubyte*)"1.5.8",
+    (const GLubyte*)"1.7.0",
     (const GLubyte*)"1",
-    (const GLubyte*)"5",
-    (const GLubyte*)"8"
+    (const GLubyte*)"7",
+    (const GLubyte*)"0"
   };
   const int max_string = sizeof(_glewString)/sizeof(*_glewString) - 1;
   return _glewString[(int)name > max_string ? 0 : (int)name];
@@ -2201,6 +2232,13 @@ GLboolean glewIsSupported (const char* name)
         if (_glewStrSame3(&pos, &len, (const GLubyte*)"4_1", 3))
         {
           ret = GLEW_VERSION_4_1;
+          continue;
+        }
+#endif
+#ifdef GL_VERSION_4_2
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"4_2", 3))
+        {
+          ret = GLEW_VERSION_4_2;
           continue;
         }
 #endif

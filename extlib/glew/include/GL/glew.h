@@ -199,9 +199,10 @@ typedef _W64 int ptrdiff_t;
 
 #include <stddef.h>
 
-/* SGI MIPSPro doesn't like stdint.h in C++ mode */
+/* SGI MIPSPro doesn't like stdint.h in C++ mode          */
+/* ID: 3376260 Solaris 9 has inttypes.h, but not stdint.h */
 
-#if defined(__sgi) && !defined(__GNUC__)
+#if (defined(__sgi) || defined(__sun)) && !defined(__GNUC__)
 #include <inttypes.h>
 #else
 #include <stdint.h>
@@ -1158,11 +1159,13 @@ GLAPI void GLAPIENTRY glViewport (GLint x, GLint y, GLsizei width, GLsizei heigh
 
 /* ---------------------------------- GLU ---------------------------------- */
 
+#ifndef GLEW_NO_GLU
 /* this is where we can safely include GLU */
-#if defined(__APPLE__) && defined(__MACH__)
-#include <OpenGL/glu.h>
-#else
-#include <GL/glu.h>
+#  if defined(__APPLE__) && defined(__MACH__)
+#    include <OpenGL/glu.h>
+#  else
+#    include <GL/glu.h>
+#  endif
 #endif
 
 /* ----------------------------- GL_VERSION_1_2 ---------------------------- */
@@ -1488,8 +1491,8 @@ typedef void (GLAPIENTRY * PFNGLFOGCOORDDPROC) (GLdouble coord);
 typedef void (GLAPIENTRY * PFNGLFOGCOORDDVPROC) (const GLdouble *coord);
 typedef void (GLAPIENTRY * PFNGLFOGCOORDFPROC) (GLfloat coord);
 typedef void (GLAPIENTRY * PFNGLFOGCOORDFVPROC) (const GLfloat *coord);
-typedef void (GLAPIENTRY * PFNGLMULTIDRAWARRAYSPROC) (GLenum mode, GLint *first, GLsizei *count, GLsizei primcount);
-typedef void (GLAPIENTRY * PFNGLMULTIDRAWELEMENTSPROC) (GLenum mode, GLsizei *count, GLenum type, const GLvoid **indices, GLsizei primcount);
+typedef void (GLAPIENTRY * PFNGLMULTIDRAWARRAYSPROC) (GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount);
+typedef void (GLAPIENTRY * PFNGLMULTIDRAWELEMENTSPROC) (GLenum mode, const GLsizei *count, GLenum type, const GLvoid **indices, GLsizei primcount);
 typedef void (GLAPIENTRY * PFNGLPOINTPARAMETERFPROC) (GLenum pname, GLfloat param);
 typedef void (GLAPIENTRY * PFNGLPOINTPARAMETERFVPROC) (GLenum pname, const GLfloat *params);
 typedef void (GLAPIENTRY * PFNGLPOINTPARAMETERIPROC) (GLenum pname, GLint param);
@@ -2405,6 +2408,15 @@ typedef void (GLAPIENTRY * PFNGLMINSAMPLESHADINGPROC) (GLclampf value);
 #define GLEW_VERSION_4_1 GLEW_GET_VAR(__GLEW_VERSION_4_1)
 
 #endif /* GL_VERSION_4_1 */
+
+/* ----------------------------- GL_VERSION_4_2 ---------------------------- */
+
+#ifndef GL_VERSION_4_2
+#define GL_VERSION_4_2 1
+
+#define GLEW_VERSION_4_2 GLEW_GET_VAR(__GLEW_VERSION_4_2)
+
+#endif /* GL_VERSION_4_2 */
 
 /* ------------------------ GL_ARB_fragment_program ------------------------ */
 
@@ -3851,6 +3863,7 @@ GLEW_VAR_EXPORT GLboolean __GLEW_VERSION_3_2;
 GLEW_VAR_EXPORT GLboolean __GLEW_VERSION_3_3;
 GLEW_VAR_EXPORT GLboolean __GLEW_VERSION_4_0;
 GLEW_VAR_EXPORT GLboolean __GLEW_VERSION_4_1;
+GLEW_VAR_EXPORT GLboolean __GLEW_VERSION_4_2;
 GLEW_VAR_EXPORT GLboolean __GLEW_ARB_fragment_program;
 GLEW_VAR_EXPORT GLboolean __GLEW_ARB_fragment_shader;
 GLEW_VAR_EXPORT GLboolean __GLEW_ARB_multitexture;
