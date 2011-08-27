@@ -361,6 +361,21 @@ typedef void ( * PFNGLXSWAPINTERVALEXTPROC) (Display* dpy, GLXDrawable drawable,
 
 #endif /* GLX_EXT_swap_control */
 
+/* ------------------------- GLX_MESA_swap_control ------------------------- */
+
+#ifndef GLX_MESA_swap_control
+#define GLX_MESA_swap_control 1
+
+typedef int ( * PFNGLXGETSWAPINTERVALMESAPROC) (void);
+typedef int ( * PFNGLXSWAPINTERVALMESAPROC) (unsigned int interval);
+
+#define glXGetSwapIntervalMESA GLXEW_GET_FUN(__glewXGetSwapIntervalMESA)
+#define glXSwapIntervalMESA GLXEW_GET_FUN(__glewXSwapIntervalMESA)
+
+#define GLXEW_MESA_swap_control GLXEW_GET_VAR(__GLXEW_MESA_swap_control)
+
+#endif /* GLX_MESA_swap_control */
+
 /* -------------------------- GLX_SGI_swap_control ------------------------- */
 
 #ifndef GLX_SGI_swap_control
@@ -373,6 +388,21 @@ typedef int ( * PFNGLXSWAPINTERVALSGIPROC) (int interval);
 #define GLXEW_SGI_swap_control GLXEW_GET_VAR(__GLXEW_SGI_swap_control)
 
 #endif /* GLX_SGI_swap_control */
+
+/* --------------------------- GLX_SGI_video_sync -------------------------- */
+
+#ifndef GLX_SGI_video_sync
+#define GLX_SGI_video_sync 1
+
+typedef int ( * PFNGLXGETVIDEOSYNCSGIPROC) (unsigned int* count);
+typedef int ( * PFNGLXWAITVIDEOSYNCSGIPROC) (int divisor, int remainder, unsigned int* count);
+
+#define glXGetVideoSyncSGI GLXEW_GET_FUN(__glewXGetVideoSyncSGI)
+#define glXWaitVideoSyncSGI GLXEW_GET_FUN(__glewXWaitVideoSyncSGI)
+
+#define GLXEW_SGI_video_sync GLXEW_GET_VAR(__GLXEW_SGI_video_sync)
+
+#endif /* GLX_SGI_video_sync */
 
 /* ------------------------------------------------------------------------- */
 
@@ -404,7 +434,13 @@ extern PFNGLXSELECTEVENTPROC __glewXSelectEvent;
 
 extern PFNGLXSWAPINTERVALEXTPROC __glewXSwapIntervalEXT;
 
+extern PFNGLXGETSWAPINTERVALMESAPROC __glewXGetSwapIntervalMESA;
+extern PFNGLXSWAPINTERVALMESAPROC __glewXSwapIntervalMESA;
+
 extern PFNGLXSWAPINTERVALSGIPROC __glewXSwapIntervalSGI;
+
+extern PFNGLXGETVIDEOSYNCSGIPROC __glewXGetVideoSyncSGI;
+extern PFNGLXWAITVIDEOSYNCSGIPROC __glewXWaitVideoSyncSGI;
 
 #if defined(GLEW_MX)
 struct GLXEWContextStruct
@@ -418,7 +454,9 @@ GLXEW_EXPORT GLboolean __GLXEW_VERSION_1_3;
 GLXEW_EXPORT GLboolean __GLXEW_VERSION_1_4;
 GLXEW_EXPORT GLboolean __GLXEW_ARB_get_proc_address;
 GLXEW_EXPORT GLboolean __GLXEW_EXT_swap_control;
+GLXEW_EXPORT GLboolean __GLXEW_MESA_swap_control;
 GLXEW_EXPORT GLboolean __GLXEW_SGI_swap_control;
+GLXEW_EXPORT GLboolean __GLXEW_SGI_video_sync;
 
 #ifdef GLEW_MX
 }; /* GLXEWContextStruct */

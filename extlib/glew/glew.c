@@ -1909,7 +1909,13 @@ PFNGLXSELECTEVENTPROC __glewXSelectEvent = NULL;
 
 PFNGLXSWAPINTERVALEXTPROC __glewXSwapIntervalEXT = NULL;
 
+PFNGLXGETSWAPINTERVALMESAPROC __glewXGetSwapIntervalMESA = NULL;
+PFNGLXSWAPINTERVALMESAPROC __glewXSwapIntervalMESA = NULL;
+
 PFNGLXSWAPINTERVALSGIPROC __glewXSwapIntervalSGI = NULL;
+
+PFNGLXGETVIDEOSYNCSGIPROC __glewXGetVideoSyncSGI = NULL;
+PFNGLXWAITVIDEOSYNCSGIPROC __glewXWaitVideoSyncSGI = NULL;
 
 #if !defined(GLEW_MX)
 
@@ -1920,7 +1926,9 @@ GLboolean __GLXEW_VERSION_1_3 = GL_FALSE;
 GLboolean __GLXEW_VERSION_1_4 = GL_FALSE;
 GLboolean __GLXEW_ARB_get_proc_address = GL_FALSE;
 GLboolean __GLXEW_EXT_swap_control = GL_FALSE;
+GLboolean __GLXEW_MESA_swap_control = GL_FALSE;
 GLboolean __GLXEW_SGI_swap_control = GL_FALSE;
+GLboolean __GLXEW_SGI_video_sync = GL_FALSE;
 
 #endif /* !GLEW_MX */
 
@@ -1987,6 +1995,20 @@ static GLboolean _glewInit_GLX_EXT_swap_control (GLXEW_CONTEXT_ARG_DEF_INIT)
 
 #endif /* GLX_EXT_swap_control */
 
+#ifdef GLX_MESA_swap_control
+
+static GLboolean _glewInit_GLX_MESA_swap_control (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXGetSwapIntervalMESA = (PFNGLXGETSWAPINTERVALMESAPROC)glewGetProcAddress((const GLubyte*)"glXGetSwapIntervalMESA")) == NULL) || r;
+  r = ((glXSwapIntervalMESA = (PFNGLXSWAPINTERVALMESAPROC)glewGetProcAddress((const GLubyte*)"glXSwapIntervalMESA")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_MESA_swap_control */
+
 #ifdef GLX_SGI_swap_control
 
 static GLboolean _glewInit_GLX_SGI_swap_control (GLXEW_CONTEXT_ARG_DEF_INIT)
@@ -1999,6 +2021,20 @@ static GLboolean _glewInit_GLX_SGI_swap_control (GLXEW_CONTEXT_ARG_DEF_INIT)
 }
 
 #endif /* GLX_SGI_swap_control */
+
+#ifdef GLX_SGI_video_sync
+
+static GLboolean _glewInit_GLX_SGI_video_sync (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXGetVideoSyncSGI = (PFNGLXGETVIDEOSYNCSGIPROC)glewGetProcAddress((const GLubyte*)"glXGetVideoSyncSGI")) == NULL) || r;
+  r = ((glXWaitVideoSyncSGI = (PFNGLXWAITVIDEOSYNCSGIPROC)glewGetProcAddress((const GLubyte*)"glXWaitVideoSyncSGI")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_SGI_video_sync */
 
 /* ------------------------------------------------------------------------ */
 
@@ -2063,10 +2099,18 @@ GLenum glxewContextInit (GLXEW_CONTEXT_ARG_DEF_LIST)
   CONST_CAST(GLXEW_EXT_swap_control) = _glewSearchExtension("GLX_EXT_swap_control", extStart, extEnd);
   if (glewExperimental || GLXEW_EXT_swap_control) CONST_CAST(GLXEW_EXT_swap_control) = !_glewInit_GLX_EXT_swap_control(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GLX_EXT_swap_control */
+#ifdef GLX_MESA_swap_control
+  CONST_CAST(GLXEW_MESA_swap_control) = _glewSearchExtension("GLX_MESA_swap_control", extStart, extEnd);
+  if (glewExperimental || GLXEW_MESA_swap_control) CONST_CAST(GLXEW_MESA_swap_control) = !_glewInit_GLX_MESA_swap_control(GLEW_CONTEXT_ARG_VAR_INIT);
+#endif /* GLX_MESA_swap_control */
 #ifdef GLX_SGI_swap_control
   CONST_CAST(GLXEW_SGI_swap_control) = _glewSearchExtension("GLX_SGI_swap_control", extStart, extEnd);
   if (glewExperimental || GLXEW_SGI_swap_control) CONST_CAST(GLXEW_SGI_swap_control) = !_glewInit_GLX_SGI_swap_control(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GLX_SGI_swap_control */
+#ifdef GLX_SGI_video_sync
+  CONST_CAST(GLXEW_SGI_video_sync) = _glewSearchExtension("GLX_SGI_video_sync", extStart, extEnd);
+  if (glewExperimental || GLXEW_SGI_video_sync) CONST_CAST(GLXEW_SGI_video_sync) = !_glewInit_GLX_SGI_video_sync(GLEW_CONTEXT_ARG_VAR_INIT);
+#endif /* GLX_SGI_video_sync */
 
   return GLEW_OK;
 }
@@ -2514,12 +2558,29 @@ GLboolean glxewIsSupported (const char* name)
         }
 #endif
       }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"MESA_", 5))
+      {
+#ifdef GLX_MESA_swap_control
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"swap_control", 12))
+        {
+          ret = GLXEW_MESA_swap_control;
+          continue;
+        }
+#endif
+      }
       if (_glewStrSame2(&pos, &len, (const GLubyte*)"SGI_", 4))
       {
 #ifdef GLX_SGI_swap_control
         if (_glewStrSame3(&pos, &len, (const GLubyte*)"swap_control", 12))
         {
           ret = GLXEW_SGI_swap_control;
+          continue;
+        }
+#endif
+#ifdef GLX_SGI_video_sync
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"video_sync", 10))
+        {
+          ret = GLXEW_SGI_video_sync;
           continue;
         }
 #endif

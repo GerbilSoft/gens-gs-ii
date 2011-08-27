@@ -27,6 +27,8 @@ GL_EXT_packed_pixels
 WGL_EXT_swap_control
 GLX_EXT_swap_control
 GLX_SGI_swap_control
+GLX_MESA_swap_control
+GLX_SGI_video_sync
 
 # Rectangle texture.
 GL_ARB_texture_rectangle
