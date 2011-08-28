@@ -90,7 +90,7 @@ static int write_paltype_md(const char *filename, ColorScaleMethod_t csm)
 	
 	// Write the file header.
 	fprintf(f, "%s:%04X\n", PALTEST_MAGIC, PALTEST_VERSION);
-	fprintf(f, "PalMode:%s\n", PALTEST_PALMODE_MD);
+	fprintf(f, "%s:%s\n", PALTEST_CMD_PALMODE, PALTEST_PALMODE_MD);
 	
 	// Color Scale Method.
 	const uint8_t *palcomponent_md;
@@ -111,11 +111,11 @@ static int write_paltype_md(const char *filename, ColorScaleMethod_t csm)
 			palTest_ColorScale = PALTEST_COLORSCALE_FULL_SH;
 			break;
 	}
-	fprintf(f, "ColorScale:%s\n", palTest_ColorScale);
+	fprintf(f, "%s:%s\n", PALTEST_CMD_COLORSCALE, palTest_ColorScale);
 	
 	// Write the normal palette.
 	fprintf(f, "\n");
-	fprintf(f, "SHMode:%s\n", PALTEST_SHMODE_NORMAL);
+	fprintf(f, "%s:%s\n", PALTEST_CMD_SHMODE, PALTEST_SHMODE_NORMAL);
 	for (unsigned i = 0; i < 512; i++)
 	{
 		// Get the MD color components.

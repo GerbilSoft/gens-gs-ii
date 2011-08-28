@@ -43,16 +43,19 @@ extern "C" {
 #define PALTEST_VERSION 0x0001
 
 // Color scaling methods.
+#define PALTEST_CMD_COLORSCALE     "ColorScale"
 #define PALTEST_COLORSCALE_RAW     "Raw"
 #define PALTEST_COLORSCALE_FULL    "Full"
 #define PALTEST_COLORSCALE_FULL_SH "Full+SH"
 
 // Shadow/Highlight mode.
+#define PALTEST_CMD_SHMODE       "SHMode"
 #define PALTEST_SHMODE_NORMAL    "Normal"
 #define PALTEST_SHMODE_SHADOW    "Shadow"
 #define PALTEST_SHMODE_HIGHLIGHT "Highlight"
 
 // Palette modes.
+#define PALTEST_CMD_PALMODE "PalMode"
 #define PALTEST_PALMODE_MD "MD"
 #define PALTEST_PALMODE_SMS "SMS"
 #define PALTEST_PALMODE_GG "GG"
