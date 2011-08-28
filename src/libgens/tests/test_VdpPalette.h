@@ -60,6 +60,9 @@ extern "C" {
 #define PALTEST_PALMODE_SMS "SMS"
 #define PALTEST_PALMODE_GG "GG"
 
+// Color entry.
+#define PALTEST_CMD_COLORENTRY "C"
+
 #ifdef __cplusplus
 }
 #endif

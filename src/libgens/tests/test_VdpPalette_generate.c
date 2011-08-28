@@ -140,8 +140,8 @@ static int write_paltype_md(const char *filename, ColorScaleMethod_t csm)
 		// - RGB555: 15-bit RGB value.
 		// - RGB565: 16-bit RGB value.
 		// - RGB888: 32-bit RGB value.
-		fprintf(f, "C:%04X:%04X:%04X:%06X\n",
-			color_md, rgb555, rgb565, rgb888);
+		fprintf(f, "%s:%04X:%04X:%04X:%06X\n",
+			PALTEST_CMD_COLORENTRY, color_md, rgb555, rgb565, rgb888);
 	}
 	
 	// Write the shadow palette.
