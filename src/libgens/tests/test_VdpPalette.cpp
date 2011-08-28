@@ -182,6 +182,7 @@ static int test_file(const char *filename)
 	}
 	
 	// TODO: Check if all tests passed.
+	fclose(f);
 	return EXIT_SUCCESS;
 	
 fail:
