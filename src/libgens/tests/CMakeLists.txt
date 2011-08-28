@@ -11,9 +11,10 @@ INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../")
 # I can't seem to find any way to make the test programs a dependency of CTest.
 
 # VdpPalette test programs
-ADD_EXECUTABLE(test_VdpPalette_generate
-	test_VdpPalette_generate.c
-	)
+ADD_EXECUTABLE(test_VdpPalette_generate test_VdpPalette_generate.c)
+
+ADD_EXECUTABLE(test_VdpPalette test_VdpPalette.cpp)
+TARGET_LINK_LIBRARIES(test_VdpPalette gens)
 
 # Generate the test files.
 ADD_TEST(NAME test_VdpPalette_generate_MD_Raw
