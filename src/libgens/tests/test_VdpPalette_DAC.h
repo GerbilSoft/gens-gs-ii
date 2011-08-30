@@ -1,10 +1,10 @@
 /***************************************************************************
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
- * test_VdpPalette.h: VdpPalette tests.                                    *
+ * test_VdpPalette_DAC.h: VdpPalette DAC tests.                            *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,13 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_TEST_VDPPALETTE_H__
-#define __LIBGENS_TEST_VDPPALETTE_H__
+#ifndef __LIBGENS_TEST_VDPPALETTE_DAC_H__
+#define __LIBGENS_TEST_VDPPALETTE_DAC_H__
 
 #include <stdint.h>
 
 // Packed struct attribute.
- #if !defined(PACKED)
+#if !defined(PACKED)
 #if defined(__GNUC__)
 #define PACKED __attribute__ ((packed))
 #else

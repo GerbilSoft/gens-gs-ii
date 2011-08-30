@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
- * test_VdpPalette.cpp: VdpPalette tests.                                  *
+ * test_VdpPalette_DAC.cpp: VdpPalette DAC tests.                          *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "test_VdpPalette.h"
+#include "test_VdpPalette_DAC.h"
 #include "Vdp/VdpPalette.hpp"
 
 // C includes.

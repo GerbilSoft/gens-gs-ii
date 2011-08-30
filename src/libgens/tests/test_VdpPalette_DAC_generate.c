@@ -1,6 +1,7 @@
 /***************************************************************************
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
- * test_VdpPalette_generate.c: VdpPalette tests. (Data file generator)     *
+ * test_VdpPalette_DAC_generate.c: VdpPalette DAC tests.                   *
+ * Data file generator.                                                    *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -26,7 +27,7 @@
  * - Add 32X and TMS9918 functions.
  */
 
-#include "test_VdpPalette.h"
+#include "test_VdpPalette_DAC.h"
 
 // C includes.
 #include <stdio.h>
@@ -40,7 +41,7 @@
 #include <getopt.h>
 
 // NOTE: We're not using LibGens defines here.
-// test_VdpPalette_generate.c won't link to LibGens.
+// test_VdpPalette_generate_DAC.c won't link to LibGens.
 
 // Palette mode. [VdpPalette::PalMode_t]
 typedef enum
