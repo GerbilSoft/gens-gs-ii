@@ -117,13 +117,12 @@ static int write_paltype_md(const char *filename, ColorScaleMethod_t csm)
 	// Write the normal palette.
 	fprintf(f, "\n");
 	fprintf(f, "%s:%s\n", PALTEST_CMD_SHMODE, PALTEST_SHMODE_NORMAL);
-	for (unsigned i = 0; i < 512; i++)
+	for (unsigned int i = 0x0000; i <= 0xFFFF; i++)
 	{
 		// Get the MD color components.
-		const uint8_t r = ((i << 1) & 0x00E);
-		const uint8_t g = ((i >> 2) & 0x00E);
-		const uint8_t b = ((i >> 5) & 0x00E);
-		const uint16_t color_md = ((b << 8) | (g << 4) | r);
+		const uint8_t r = (i & 0x00E);
+		const uint8_t g = ((i >> 4) & 0x00E);
+		const uint8_t b = ((i >> 8) & 0x00E);
 		
 		// Extract color components for the normal color.
 		const uint8_t r_md = palcomponent_md[r];
@@ -142,19 +141,18 @@ static int write_paltype_md(const char *filename, ColorScaleMethod_t csm)
 		// - RGB565: 16-bit RGB value.
 		// - RGB888: 32-bit RGB value.
 		fprintf(f, "%s:%04X:%04X:%04X:%06X\n",
-			PALTEST_CMD_COLORENTRY, color_md, rgb555, rgb565, rgb888);
+			PALTEST_CMD_COLORENTRY, i, rgb555, rgb565, rgb888);
 	}
 	
 	// Write the shadow palette.
 	fprintf(f, "\n");
 	fprintf(f, "SHMode:%s\n", PALTEST_SHMODE_SHADOW);
-	for (unsigned i = 0; i < 512; i++)
+	for (unsigned int i = 0x0000; i <= 0xFFFF; i++)
 	{
 		// Get the MD color components.
-		const uint8_t r = ((i << 1) & 0x00E);
-		const uint8_t g = ((i >> 2) & 0x00E);
-		const uint8_t b = ((i >> 5) & 0x00E);
-		const uint16_t color_md = ((b << 8) | (g << 4) | r);
+		const uint8_t r = (i & 0x00E);
+		const uint8_t g = ((i >> 4) & 0x00E);
+		const uint8_t b = ((i >> 8) & 0x00E);
 		
 		// Extract color components for the shadow color.
 		const uint8_t r_md = palcomponent_md[r >> 1];
@@ -172,20 +170,19 @@ static int write_paltype_md(const char *filename, ColorScaleMethod_t csm)
 		// - RGB555: 15-bit RGB value.
 		// - RGB565: 16-bit RGB value.
 		// - RGB888: 32-bit RGB value.
-		fprintf(f, "C:%04X:%04X:%04X:%06X\n",
-			color_md, rgb555, rgb565, rgb888);
+		fprintf(f, "%s:%04X:%04X:%04X:%06X\n",
+			PALTEST_CMD_COLORENTRY, i, rgb555, rgb565, rgb888);
 	}
 	
 	// Write the highlight palette.
 	fprintf(f, "\n");
 	fprintf(f, "SHMode:%s\n", PALTEST_SHMODE_HIGHLIGHT);
-	for (unsigned i = 0; i < 512; i++)
+	for (unsigned int i = 0x0000; i <= 0xFFFF; i++)
 	{
 		// Get the MD color components.
-		const uint8_t r = ((i << 1) & 0x00E);
-		const uint8_t g = ((i >> 2) & 0x00E);
-		const uint8_t b = ((i >> 5) & 0x00E);
-		const uint16_t color_md = ((b << 8) | (g << 4) | r);
+		const uint8_t r = (i & 0x00E);
+		const uint8_t g = ((i >> 4) & 0x00E);
+		const uint8_t b = ((i >> 8) & 0x00E);
 		
 		// Extract color components for the highlight color.
 		const uint8_t r_md = palcomponent_md[(r >> 1) + 8 - 1];
@@ -203,8 +200,8 @@ static int write_paltype_md(const char *filename, ColorScaleMethod_t csm)
 		// - RGB555: 15-bit RGB value.
 		// - RGB565: 16-bit RGB value.
 		// - RGB888: 32-bit RGB value.
-		fprintf(f, "C:%04X:%04X:%04X:%06X\n",
-			color_md, rgb555, rgb565, rgb888);
+		fprintf(f, "%s:%04X:%04X:%04X:%06X\n",
+			PALTEST_CMD_COLORENTRY, i, rgb555, rgb565, rgb888);
 	}
 	
 	// MD palettes written successfully.
@@ -229,7 +226,7 @@ static int write_paltype_sms(const char *filename)
 	
 	// Write the SMS palette.
 	fprintf(f, "\n");
-	for (unsigned i = 0; i < 64; i++)
+	for (unsigned int i = 0x00; i <= 0xFF; i++)
 	{
 		// Get the SMS color components.
 		const uint8_t r = PalComponent_SMS[i & 0x03];
@@ -270,7 +267,7 @@ static int write_paltype_gg(const char *filename)
 	
 	// Write the palette.
 	fprintf(f, "\n");
-	for (unsigned i = 0; i <= 0xFFF; i++)
+	for (unsigned int i = 0x0000; i <= 0xFFFF; i++)
 	{
 		// Get the Game Gear color components.
 		uint8_t r = (i & 0x00F);	r |= (r << 4);
