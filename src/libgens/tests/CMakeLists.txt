@@ -17,9 +17,9 @@ TARGET_LINK_LIBRARIES(test_VdpPalette_DAC gens)
 ADD_TEST(NAME test_VdpPalette_DAC_generate_MD_Raw
 	COMMAND test_VdpPalette_DAC_generate --palmode MD --csm raw PalTest_MD_Raw.txt)
 ADD_TEST(NAME test_VdpPalette_DAC_generate_MD_Full
-	COMMAND test_VdpPalette_DAC_generate --palmode MD --csm raw PalTest_MD_Full.txt)
+	COMMAND test_VdpPalette_DAC_generate --palmode MD --csm full PalTest_MD_Full.txt)
 ADD_TEST(NAME test_VdpPalette_DAC_generate_MD_Full+SH
-	COMMAND test_VdpPalette_DAC_generate --palmode MD --csm raw PalTest_MD_Full+SH.txt)
+	COMMAND test_VdpPalette_DAC_generate --palmode MD --csm full+sh PalTest_MD_Full+SH.txt)
 ADD_TEST(NAME test_VdpPalette_DAC_generate_SMS
 	COMMAND test_VdpPalette_DAC_generate --palmode SMS PalTest_SMS.txt)
 ADD_TEST(NAME test_VdpPalette_DAC_generate_GG
