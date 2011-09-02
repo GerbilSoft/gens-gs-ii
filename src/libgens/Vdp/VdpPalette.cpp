@@ -32,6 +32,7 @@
 #include "VdpTypes.hpp"
 
 #include "Util/byteswap.h"
+#include "macros/common.h"
 
 // C includes.
 #include <math.h>
@@ -39,6 +40,69 @@
 
 namespace LibGens
 {
+
+/**
+ * VdpPalette private class.
+ */
+class VdpPalettePrivate
+{
+	public:
+		template<int mask>
+		static void FUNC_PURE T_ConstrainColorComponent(int& c);
+
+		static int FUNC_PURE CalcGrayscale(int r, int g, int b);
+		static void FUNC_PURE AdjustContrast(int& r, int& g, int& b, int contrast);
+};
+
+/**
+ * Constrain a color component to [0, mask].
+ * @param mask Color component mask. (max value)
+ * @param c Color component to constrain.
+ */
+template<int mask>
+void FUNC_PURE VdpPalettePrivate::T_ConstrainColorComponent(int& c)
+{
+	if (c < 0)
+		c = 0;
+	else if (c > mask)
+		c = mask;
+}
+
+/**
+ * Calculate grayscale color values.
+ * @param r Red component.
+ * @param g Green component.
+ * @param b Blue component.
+ * @return Grayscale value.
+ */
+int FUNC_PURE VdpPalettePrivate::CalcGrayscale(int r, int g, int b)
+{
+	// Convert the color components to grayscale.
+	// Grayscale vector: [0.299 0.587 0.114] (ITU-R BT.601)
+	// Source: http://en.wikipedia.org/wiki/YCbCr
+	r = lrint((double)r * 0.299);
+	g = lrint((double)g * 0.587);
+	b = lrint((double)b * 0.114);
+	return (r + g + b);
+}
+
+/**
+ * AdjustContrast(): Adjust the contrast of the specified color.
+ * @param r Red component.
+ * @param g Green component.
+ * @param b Blue component.
+ */
+void FUNC_PURE VdpPalettePrivate::AdjustContrast(int& r, int& g, int& b, int contrast)
+{
+	if (contrast == 100)
+		return;
+	
+	r = (r * contrast) / 100;
+	g = (g * contrast) / 100;
+	b = (b * contrast) / 100;
+}
+
+/** VdpPalette class. **/
 
 /** Static member initialization. **/
 const uint16_t VdpPalette::MD_COLOR_MASK_FULL = 0xEEE;
@@ -234,57 +298,6 @@ void VdpPalette::initSegaTMSPalette(void)
 /** Palette update functions. **/
 
 
-/**
- * T_ConstrainColorComponent(): Constrains a color component.
- * @param mask Color component mask. (max value)
- * @param c Color component to constrain.
- */
-template<int mask>
-FORCE_INLINE void VdpPalette::T_ConstrainColorComponent(int& c)
-{
-	if (c < 0)
-		c = 0;
-	else if (c > mask)
-		c = mask;
-}
-
-
-/**
- * CalcGrayscale(): Calculate grayscale color values.
- * @param r Red component.
- * @param g Green component.
- * @param b Blue component.
- * @return Grayscale value.
- */
-FORCE_INLINE int VdpPalette::CalcGrayscale(int r, int g, int b)
-{
-	// Convert the color components to grayscale.
-	// Grayscale vector: [0.299 0.587 0.114] (ITU-R BT.601)
-	// Source: http://en.wikipedia.org/wiki/YCbCr
-	r = lrint((double)r * 0.299);
-	g = lrint((double)g * 0.587);
-	b = lrint((double)b * 0.114);
-	return (r + g + b);
-}
-
-
-/**
- * AdjustContrast(): Adjust the contrast of the specified color.
- * @param r Red component.
- * @param g Green component.
- * @param b Blue component.
- */
-FORCE_INLINE void VdpPalette::AdjustContrast(int& r, int& g, int& b, int contrast)
-{
-	if (contrast == 100)
-		return;
-	
-	r = (r * contrast) / 100;
-	g = (g * contrast) / 100;
-	b = (b * contrast) / 100;
-}
-
-
 /** Full palette recalculation functions. **/
 
 
@@ -345,12 +358,12 @@ void VdpPalette::T_recalcFull_MD(pixel *palFull)
 		b += brightness;
 		
 		// Adjust contrast.
-		AdjustContrast(r, g, b, m_contrast);
+		VdpPalettePrivate::AdjustContrast(r, g, b, m_contrast);
 		
 		if (m_grayscale)
 		{
 			// Convert the color to grayscale.
-			r = g = b = CalcGrayscale(r, g, b);
+			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
 		}
 		
 		// Reduce color components to original color depth.
@@ -359,9 +372,9 @@ void VdpPalette::T_recalcFull_MD(pixel *palFull)
 		b >>= (8 - BBits);
 		
 		// Constrain the color components.
-		T_ConstrainColorComponent<RMask>(r);
-		T_ConstrainColorComponent<GMask>(g);
-		T_ConstrainColorComponent<BMask>(b);
+		VdpPalettePrivate::T_ConstrainColorComponent<RMask>(r);
+		VdpPalettePrivate::T_ConstrainColorComponent<GMask>(g);
+		VdpPalettePrivate::T_ConstrainColorComponent<BMask>(b);
 		
 		if (m_inverted)
 		{
@@ -424,12 +437,12 @@ FORCE_INLINE void VdpPalette::T_recalcFull_32X(pixel *palFull32X)
 		b += brightness;
 		
 		// Adjust contrast.
-		AdjustContrast(r, g, b, m_contrast);
+		VdpPalettePrivate::AdjustContrast(r, g, b, m_contrast);
 		
 		if (m_grayscale)
 		{
 			// Convert the color to grayscale.
-			r = g = b = CalcGrayscale(r, g, b);
+			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
 		}
 		
 		// Reduce color components to original color depth.
@@ -438,9 +451,9 @@ FORCE_INLINE void VdpPalette::T_recalcFull_32X(pixel *palFull32X)
 		b >>= (8 - BBits);
 		
 		// Constrain the color components.
-		T_ConstrainColorComponent<RMask>(r);
-		T_ConstrainColorComponent<GMask>(g);
-		T_ConstrainColorComponent<BMask>(b);
+		VdpPalettePrivate::T_ConstrainColorComponent<RMask>(r);
+		VdpPalettePrivate::T_ConstrainColorComponent<GMask>(g);
+		VdpPalettePrivate::T_ConstrainColorComponent<BMask>(b);
 		
 		if (m_inverted)
 		{
@@ -513,12 +526,12 @@ FORCE_INLINE void VdpPalette::T_recalcFull_SMS(pixel *palFull)
 		b += brightness;
 		
 		// Adjust contrast.
-		AdjustContrast(r, g, b, m_contrast);
+		VdpPalettePrivate::AdjustContrast(r, g, b, m_contrast);
 		
 		if (m_grayscale)
 		{
 			// Convert the color to grayscale.
-			r = g = b = CalcGrayscale(r, g, b);
+			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
 		}
 		
 		// Reduce color components to original color depth.
@@ -527,9 +540,9 @@ FORCE_INLINE void VdpPalette::T_recalcFull_SMS(pixel *palFull)
 		b >>= (8 - BBits);
 		
 		// Constrain the color components.
-		T_ConstrainColorComponent<RMask>(r);
-		T_ConstrainColorComponent<GMask>(g);
-		T_ConstrainColorComponent<BMask>(b);
+		VdpPalettePrivate::T_ConstrainColorComponent<RMask>(r);
+		VdpPalettePrivate::T_ConstrainColorComponent<GMask>(g);
+		VdpPalettePrivate::T_ConstrainColorComponent<BMask>(b);
 		
 		if (m_inverted)
 		{
@@ -589,12 +602,12 @@ FORCE_INLINE void VdpPalette::T_recalcFull_GG(pixel *palFull)
 		b += brightness;
 		
 		// Adjust contrast.
-		AdjustContrast(r, g, b, m_contrast);
+		VdpPalettePrivate::AdjustContrast(r, g, b, m_contrast);
 		
 		if (m_grayscale)
 		{
 			// Convert the color to grayscale.
-			r = g = b = CalcGrayscale(r, g, b);
+			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
 		}
 		
 		// Reduce color components to original color depth.
@@ -603,9 +616,9 @@ FORCE_INLINE void VdpPalette::T_recalcFull_GG(pixel *palFull)
 		b >>= (8 - BBits);
 		
 		// Constrain the color components.
-		T_ConstrainColorComponent<RMask>(r);
-		T_ConstrainColorComponent<GMask>(g);
-		T_ConstrainColorComponent<BMask>(b);
+		VdpPalettePrivate::T_ConstrainColorComponent<RMask>(r);
+		VdpPalettePrivate::T_ConstrainColorComponent<GMask>(g);
+		VdpPalettePrivate::T_ConstrainColorComponent<BMask>(b);
 		
 		if (m_inverted)
 		{
@@ -694,12 +707,12 @@ FORCE_INLINE void VdpPalette::T_recalcFull_TMS9918(pixel *palFull)
 		b += brightness;
 		
 		// Adjust contrast.
-		AdjustContrast(r, g, b, m_contrast);
+		VdpPalettePrivate::AdjustContrast(r, g, b, m_contrast);
 		
 		if (m_grayscale)
 		{
 			// Convert the color to grayscale.
-			r = g = b = CalcGrayscale(r, g, b);
+			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
 		}
 		
 		// Reduce color components to original color depth.
@@ -708,9 +721,9 @@ FORCE_INLINE void VdpPalette::T_recalcFull_TMS9918(pixel *palFull)
 		b >>= (8 - BBits);
 		
 		// Constrain the color components.
-		T_ConstrainColorComponent<RMask>(r);
-		T_ConstrainColorComponent<GMask>(g);
-		T_ConstrainColorComponent<BMask>(b);
+		VdpPalettePrivate::T_ConstrainColorComponent<RMask>(r);
+		VdpPalettePrivate::T_ConstrainColorComponent<GMask>(g);
+		VdpPalettePrivate::T_ConstrainColorComponent<BMask>(b);
 		
 		if (m_inverted)
 		{
