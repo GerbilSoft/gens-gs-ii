@@ -222,7 +222,7 @@ void Vdp::Check_NTSC_V30_VBlank(void)
 /**
  * Vdp::Update_Mode(): Update VDP_Mode.
  */
-inline void Vdp::Update_Mode(void)
+void Vdp::Update_Mode(void)
 {
 	const unsigned int prevVdpMode = VDP_Mode;
 	const register uint8_t Set1 = VDP_Reg.m5.Set1;
