@@ -65,12 +65,6 @@ class VdpPalette
 		 */
 		bool isDirty(void) const;
 		
-		/**
-		 * setMode(): Set the palette mode.
-		 * TODO: Implement mode settings. For now, this just forces a palette recalculation.
-		 */
-		void setMode(void) __attribute__ ((deprecated));
-		
 		/** CRam functions. **/
 		
 		/**
@@ -256,13 +250,6 @@ class VdpPalette
  */
 inline bool VdpPalette::isDirty(void) const
 	{ return !!(m_dirty.data); }
-
-/**
- * setMode(): Set the palette mode.
- * TODO: Implement mode settings. For now, this just forces a palette recalculation.
- */
-inline void VdpPalette::setMode(void)
-	{ m_dirty.full = true; }
 
 
 /** CRam functions. **/
