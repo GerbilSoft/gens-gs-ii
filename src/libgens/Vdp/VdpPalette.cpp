@@ -65,6 +65,35 @@ class VdpPalettePrivate
 			uint32_t u32[0x10000];
 		};
 		PalFull_32X_t palFull32X;
+		
+		/** Full palette recalculation functions. **/
+		
+		template<typename pixel,
+			int RBits, int GBits, int BBits,
+			int RMask, int GMask, int BMask>
+		FORCE_INLINE void T_recalcFull_MD(pixel *palFull);
+		
+		template<typename pixel,
+			int RBits, int GBits, int BBits,
+			int RMask, int GMask, int BMask>
+		FORCE_INLINE void T_recalcFull_32X(pixel *palFull32X);
+		
+		template<typename pixel,
+			int RBits, int GBits, int BBits,
+			int RMask, int GMask, int BMask>
+		FORCE_INLINE void T_recalcFull_SMS(pixel *palFull);
+		
+		template<typename pixel,
+			int RBits, int GBits, int BBits,
+			int RMask, int GMask, int BMask>
+		FORCE_INLINE void T_recalcFull_GG(pixel *palFull);
+		
+		template<typename pixel,
+			int RBits, int GBits, int BBits,
+			int RMask, int GMask, int BMask>
+		FORCE_INLINE void T_recalcFull_TMS9918(pixel *palFull);
+		
+		void recalcFull(void);
 	
 	private:
 		VdpPalette *const q;
@@ -87,6 +116,555 @@ class VdpPalettePrivate
 VdpPalettePrivate::VdpPalettePrivate(VdpPalette *q)
 	: q(q)
 { }
+
+/** VdpPalettePrivate: Full palette recalculation functions. **/
+
+/**
+ * Recalculate the full palette. (Mega Drive)
+ * This applies brightness, contrast, grayscale, and inverted palette settings.
+ * Additionally, the MD color scale method is used to determine how colors are calculated.
+ * @param palFull Full palette. (Must have enough space for at least 0x1000 entries!)
+ */
+template<typename pixel,
+	int RBits, int GBits, int BBits,
+	int RMask, int GMask, int BMask>
+void VdpPalettePrivate::T_recalcFull_MD(pixel *palFull)
+{
+	// MD color components.
+	static const uint8_t PalComponent_MD_Raw[16] =
+		{0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70,
+		 0xE0, 0x90, 0xA0, 0xB0, 0xC0, 0xD0, 0xE0, 0xF0};
+	static const uint8_t PalComponent_MD_Full[16] =
+		{  0,  18,  36,  54,  72,  91, 109, 127,
+		 145, 163, 182, 200, 218, 236, 255, 255};
+	static const uint8_t PalComponent_MD_Full_SH[16] =
+		{0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+		 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF};
+	
+	const uint8_t *md_components;
+	switch (q->m_colorScaleMethod)
+	{
+		case VdpPalette::COLSCALE_RAW:
+			md_components = &PalComponent_MD_Raw[0];
+			break;
+		case VdpPalette::COLSCALE_FULL:
+		default: // Matches Genesis 2; tested by TmEE.
+			md_components = &PalComponent_MD_Full[0];
+			break;
+		case VdpPalette::COLSCALE_FULL_SH:
+			md_components = &PalComponent_MD_Full_SH[0];
+			break;
+	}
+	
+	// Brightness / Contrast
+	// These values are scaled to positive numbers.
+	// Normal brightness: (Brightness == 100)
+	// Normal contrast:   (  Contrast == 100)
+	const int brightness = (q->m_brightness - 100);
+	
+	// Calculate the MD palette.
+	for (int i = 0x0000; i < 0x1000; i++)
+	{
+		// Scale the color components using the lookup table.
+		int r = md_components[i & 0x000F];
+		int g = md_components[(i >> 4) & 0x000F];
+		int b = md_components[(i >> 8) & 0x000F];
+		
+		// Adjust brightness.
+		r += brightness;
+		g += brightness;
+		b += brightness;
+		
+		// Adjust contrast.
+		VdpPalettePrivate::AdjustContrast(r, g, b, q->m_contrast);
+		
+		if (q->m_grayscale)
+		{
+			// Convert the color to grayscale.
+			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
+		}
+		
+		// Reduce color components to original color depth.
+		r >>= (8 - RBits);
+		g >>= (8 - GBits);
+		b >>= (8 - BBits);
+		
+		// Clamp the color components.
+		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
+		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
+		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
+		
+		if (q->m_inverted)
+		{
+			// Invert the color components.
+			r ^= RMask;
+			g ^= GMask;
+			b ^= BMask;
+		}
+		
+		// TODO: Make this configurable?
+#if 0	
+		if (GMask == 0x3F)
+		{
+			// 16-bit color. (RGB565)
+			// Mask off the LSB of the green component.
+			g &= ~1;
+		}
+#endif
+		
+		// Combine the color components.
+		palFull[i] = (r << (BBits + GBits)) |
+			     (g << (BBits)) |
+			     (b);
+	}
+}
+
+
+/**
+ * Recalculate the full palette. (Sega 32X)
+ * This applies brightness, contrast, grayscale, and inverted palette settings.
+ * TODO: UNTESTED!
+ * @param palFull Full palette. (Must have enough space for at least 0x10000 entries!)
+ */
+template<typename pixel,
+	int RBits, int GBits, int BBits,
+	int RMask, int GMask, int BMask>
+FORCE_INLINE void VdpPalettePrivate::T_recalcFull_32X(pixel *palFull32X)
+{
+	// Brightness / Contrast
+	// These values are scaled to positive numbers.
+	// Normal brightness: (Brightness == 100)
+	// Normal contrast:   (  Contrast == 100)
+	const int brightness = (q->m_brightness - 100);
+	
+	// Calculate the 32X palette. (first half)
+	for (int i = 0x0000; i < 0x8000; i++)
+	{
+		// Sega 32X uses 15-bit color.
+		// Scale each component by using the following algorithm:
+		// - 32X component: abcde
+		// - RGB component: abcdeabc
+		// Example: 32X 0x15 (10101) -> RGB 0xAD (10101101)
+		int r = ((i & 0x001F) << 3);	r |= (r >> 5);
+		int g = ((i >> 2) & 0x00F8);	g |= (g >> 5);
+		int b = ((i >> 7) & 0x00F8);	b |= (b >> 5);
+		
+		// Adjust brightness.
+		r += brightness;
+		g += brightness;
+		b += brightness;
+		
+		// Adjust contrast.
+		VdpPalettePrivate::AdjustContrast(r, g, b, q->m_contrast);
+		
+		if (q->m_grayscale)
+		{
+			// Convert the color to grayscale.
+			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
+		}
+		
+		// Reduce color components to original color depth.
+		r >>= (8 - RBits);
+		g >>= (8 - GBits);
+		b >>= (8 - BBits);
+		
+		// Clamp the color components.
+		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
+		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
+		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
+		
+		if (q->m_inverted)
+		{
+			// Invert the color components.
+			r ^= RMask;
+			g ^= GMask;
+			b ^= BMask;
+		}
+		
+		// TODO: Make this configurable?
+#if 0	
+		if (GMask == 0x3F)
+		{
+			// 16-bit color. (RGB565)
+			// Mask off the LSB of the green component.
+			g &= ~1;
+		}
+#endif
+		
+		// Combine the color components.
+		palFull32X[i] = (r << (BBits + GBits)) |
+				(g << (BBits)) |
+				(b);
+	}
+	
+	// Copy the palette from the first half of palFull32X to the second half.
+	// TODO: Is it better to do this, or should we just mask palette entries by 0x7FFF?
+	memcpy(&palFull32X[0x8000], &palFull32X[0], (0x8000 * sizeof(palFull32X[0])));
+	
+	// TODO: Port to LibGens.
+	// TODO: Move this to T_update_32X()?
+#if 0
+	// Adjust the 32X VDP CRam.
+	T_Adjust_CRam_32X<pixel>(pal32X, cramAdjusted32X);
+#endif
+}
+
+
+/**
+ * Recalculate the full palette. (Sega Master System)
+ * This applies brightness, contrast, grayscale, and inverted palette settings.
+ * TODO: UNTESTED!
+ * @param palFull Full palette. (Must have enough space for at least 0x40 entries!)
+ */
+template<typename pixel,
+	int RBits, int GBits, int BBits,
+	int RMask, int GMask, int BMask>
+FORCE_INLINE void VdpPalettePrivate::T_recalcFull_SMS(pixel *palFull)
+{
+	// SMS color components. (EGA palette)
+	static const uint8_t PalComponent_SMS[4] = {0x00, 0x55, 0xAA, 0xFF};
+	
+	// Brightness / Contrast
+	// These values are scaled to positive numbers.
+	// Normal brightness: (Brightness == 100)
+	// Normal contrast:   (  Contrast == 100)
+	const int brightness = (q->m_brightness - 100);
+	
+	// Calculate the SMS palette.
+	for (int i = 0x00; i < 0x3F; i++)
+	{
+		// Scale the color components using the lookup table.
+		int r = PalComponent_SMS[i & 0x03];
+		int g = PalComponent_SMS[(i >> 2) & 0x03];
+		int b = PalComponent_SMS[(i >> 4) & 0x03];
+		
+		// Adjust brightness.
+		r += brightness;
+		g += brightness;
+		b += brightness;
+		
+		// Adjust contrast.
+		VdpPalettePrivate::AdjustContrast(r, g, b, q->m_contrast);
+		
+		if (q->m_grayscale)
+		{
+			// Convert the color to grayscale.
+			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
+		}
+		
+		// Reduce color components to original color depth.
+		r >>= (8 - RBits);
+		g >>= (8 - GBits);
+		b >>= (8 - BBits);
+		
+		// Clamp the color components.
+		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
+		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
+		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
+		
+		if (q->m_inverted)
+		{
+			// Invert the color components.
+			r ^= RMask;
+			g ^= GMask;
+			b ^= BMask;
+		}
+		
+		// TODO: Make this configurable?
+#if 0	
+		if (GMask == 0x3F)
+		{
+			// 16-bit color. (RGB565)
+			// Mask off the LSB of the green component.
+			g &= ~1;
+		}
+#endif
+		
+		// Combine the color components.
+		palFull[i] = (r << (BBits + GBits)) |
+			     (g << (BBits)) |
+			     (b);
+	}
+}
+
+
+/**
+ * Recalculate the full palette. (Game Gear)
+ * This applies brightness, contrast, grayscale, and inverted palette settings.
+ * TODO: UNTESTED!
+ * @param palFull Full palette. (Must have enough space for at least 0x1000 entries!)
+ */
+template<typename pixel,
+	int RBits, int GBits, int BBits,
+	int RMask, int GMask, int BMask>
+FORCE_INLINE void VdpPalettePrivate::T_recalcFull_GG(pixel *palFull)
+{
+	// Brightness / Contrast
+	// These values are scaled to positive numbers.
+	// Normal brightness: (Brightness == 100)
+	// Normal contrast:   (  Contrast == 100)
+	const int brightness = (q->m_brightness - 100);
+	
+	// Calculate the SMS palette.
+	for (int i = 0x00; i < 0x1000; i++)
+	{
+		// Game Gear uses 12-bit color.
+		// Scale each component by using the same 4 bits for each nybble.
+		int r = (i & 0x000F);		r |= (r << 4);
+		int g = ((i >> 4) & 0x000F);	g |= (g << 4);
+		int b = ((i >> 8) & 0x000F);	b |= (b << 4);
+		
+		// Adjust brightness.
+		r += brightness;
+		g += brightness;
+		b += brightness;
+		
+		// Adjust contrast.
+		VdpPalettePrivate::AdjustContrast(r, g, b, q->m_contrast);
+		
+		if (q->m_grayscale)
+		{
+			// Convert the color to grayscale.
+			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
+		}
+		
+		// Reduce color components to original color depth.
+		r >>= (8 - RBits);
+		g >>= (8 - GBits);
+		b >>= (8 - BBits);
+		
+		// Clamp the color components.
+		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
+		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
+		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
+		
+		if (q->m_inverted)
+		{
+			// Invert the color components.
+			r ^= RMask;
+			g ^= GMask;
+			b ^= BMask;
+		}
+		
+		// TODO: Make this configurable?
+#if 0	
+		if (GMask == 0x3F)
+		{
+			// 16-bit color. (RGB565)
+			// Mask off the LSB of the green component.
+			g &= ~1;
+		}
+#endif
+		
+		// Combine the color components.
+		palFull[i] = (r << (BBits + GBits)) |
+			     (g << (BBits)) |
+			     (b);
+	}
+}
+
+
+/**
+ * Recalculate the full palette. (TMS9918)
+ * This applies brightness, contrast, grayscale, and inverted palette settings.
+ * TODO: UNTESTED!
+ * @param palFull Full palette. (Must have enough space for at least 0x20 entries!)
+ * NOTE: The palette is 16 colors, but we're saving it twice for compatibility purposes.
+ */
+template<typename pixel,
+	int RBits, int GBits, int BBits,
+	int RMask, int GMask, int BMask>
+FORCE_INLINE void VdpPalettePrivate::T_recalcFull_TMS9918(pixel *palFull)
+{
+	/**
+	 * PalTMS9918_Analog[] TMS9918 analog palette, in 32-bit RGB.
+	 * Source: http://www.smspower.org/maxim/forumstuff/colours.html
+	 * Reference: http://www.smspower.org/forums/viewtopic.php?t=8224
+	 */
+	// TODO: Byteswapping on big-endian?
+	struct PalRGB_t { uint8_t a; uint8_t r; uint8_t g; uint8_t b; };
+	static const PalRGB_t PalTMS9918_Analog[16] =
+	{
+		{0x00, 0x00, 0x00, 0x00},	// 0: Transparent
+		{0x00, 0x00, 0x00, 0x00},	// 1: Black
+		{0x00, 0x47, 0xB7, 0x3B},	// 2: Medium Green
+		{0x00, 0x7C, 0xCF, 0x6F},	// 3: Light Green
+		{0x00, 0x5D, 0x4E, 0xFF},	// 4: Dark Blue
+		{0x00, 0x80, 0x72, 0xFF},	// 5: Light Blue
+		{0x00, 0xB6, 0x62, 0x47},	// 6: Dark Red
+		{0x00, 0x5D, 0xC8, 0xED},	// 7: Cyan
+		{0x00, 0xD7, 0x68, 0x48},	// 8: Medium Red
+		{0x00, 0xFB, 0x8F, 0x6C},	// 9: Light Red
+		{0x00, 0xC3, 0xCD, 0x41},	// A: Dark Yellow
+		{0x00, 0xD3, 0xDA, 0x76},	// B: Light Yellow
+		{0x00, 0x3E, 0x9F, 0x2F},	// C: Dark Green
+		{0x00, 0xB6, 0x64, 0xC7},	// D: Magenta
+		{0x00, 0xCC, 0xCC, 0xCC},	// E: Gray
+		{0x00, 0xFF, 0xFF, 0xFF},	// F: White
+	};
+	
+	// Brightness / Contrast
+	// These values are scaled to positive numbers.
+	// Normal brightness: (Brightness == 100)
+	// Normal contrast:   (  Contrast == 100)
+	const int brightness = (q->m_brightness - 100);
+	
+	// Calculate the TMS9918 palette.
+	for (int i = 0; i < 16; i++)
+	{
+		// TMS9918 uses analog color circuitry.
+		// We're using close approximations of the colors as 32-bit RGB.
+		// Source: http://www.smspower.org/maxim/forumstuff/colours.html
+		int r = PalTMS9918_Analog[i].r;
+		int g = PalTMS9918_Analog[i].g;
+		int b = PalTMS9918_Analog[i].b;
+		
+		// Adjust brightness.
+		r += brightness;
+		g += brightness;
+		b += brightness;
+		
+		// Adjust contrast.
+		VdpPalettePrivate::AdjustContrast(r, g, b, q->m_contrast);
+		
+		if (q->m_grayscale)
+		{
+			// Convert the color to grayscale.
+			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
+		}
+		
+		// Reduce color components to original color depth.
+		r >>= (8 - RBits);
+		g >>= (8 - GBits);
+		b >>= (8 - BBits);
+		
+		// Clamp the color components.
+		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
+		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
+		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
+		
+		if (q->m_inverted)
+		{
+			// Invert the color components.
+			r ^= RMask;
+			g ^= GMask;
+			b ^= BMask;
+		}
+		
+		// TODO: Make this configurable?
+#if 0	
+		if (GMask == 0x3F)
+		{
+			// 16-bit color. (RGB565)
+			// Mask off the LSB of the green component.
+			g &= ~1;
+		}
+#endif
+		
+		// Combine the color components.
+		palFull[i] = (r << (BBits + GBits)) |
+			     (g << (BBits)) |
+			     (b);
+	}
+	
+	// Copy the TMS9918 palette to the second SMS palettes.
+	memcpy(&palFull[0x10], &palFull[0x00], (sizeof(palFull[0]) * 16));
+}
+
+
+/**
+ * Recalculate the full VDP palette.
+ */
+void VdpPalettePrivate::recalcFull(void)
+{
+	switch (q->m_bpp)
+	{
+		case VdpPalette::BPP_15:
+			switch (q->m_palMode)
+			{
+				case VdpPalette::PALMODE_32X:
+					T_recalcFull_32X<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(palFull32X.u16);
+					// NOTE: 32X falls through to MD, since both 32X and MD palettes must be updated.
+					// TODO: Add a separate dirty flag for the 32X palette?
+				case VdpPalette::PALMODE_MD:
+				default:
+					T_recalcFull_MD<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(palFull.u16);
+					break;
+				case VdpPalette::PALMODE_SMS:
+					T_recalcFull_SMS<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(palFull.u16);
+					break;
+				case VdpPalette::PALMODE_GG:
+					T_recalcFull_GG<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(palFull.u16);
+					break;
+				case VdpPalette::PALMODE_TMS9918:
+					T_recalcFull_TMS9918<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(palFull.u16);
+					break;
+			}
+			break;
+		
+		case VdpPalette::BPP_16:
+			switch (q->m_palMode)
+			{
+				case VdpPalette::PALMODE_32X:
+					T_recalcFull_32X<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(palFull32X.u16);
+					// NOTE: 32X falls through to MD, since both 32X and MD palettes must be updated.
+					// TODO: Add a separate dirty flag for the 32X palette?
+				case VdpPalette::PALMODE_MD:
+				default:
+					T_recalcFull_MD<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(palFull.u16);
+					break;
+				case VdpPalette::PALMODE_SMS:
+					T_recalcFull_SMS<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(palFull.u16);
+					break;
+				case VdpPalette::PALMODE_GG:
+					T_recalcFull_GG<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(palFull.u16);
+					break;
+				case VdpPalette::PALMODE_TMS9918:
+					T_recalcFull_TMS9918<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(palFull.u16);
+					break;
+			}
+			break;
+		
+		case VdpPalette::BPP_32:
+		default:
+			switch (q->m_palMode)
+			{
+				case VdpPalette::PALMODE_32X:
+					T_recalcFull_32X<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(palFull32X.u32);
+					// NOTE: 32X falls through to MD, since both 32X and MD palettes must be updated.
+					// TODO: Add a separate dirty flag for the 32X palette?
+				case VdpPalette::PALMODE_MD:
+				default:
+					T_recalcFull_MD<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(palFull.u32);
+					break;
+				case VdpPalette::PALMODE_SMS:
+					T_recalcFull_SMS<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(palFull.u32);
+					break;
+				case VdpPalette::PALMODE_GG:
+					T_recalcFull_GG<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(palFull.u32);
+					break;
+				case VdpPalette::PALMODE_TMS9918:
+					T_recalcFull_TMS9918<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(palFull.u32);
+					break;
+			}
+			break;
+	}
+	
+	// TODO: Do_VDP_Only() / Do_32X_VDP_Only() if paused.
+	
+	// Force a wakeup.
+	// TODO: Port to LibGens.
+#if 0
+	GensUI::wakeup();
+#endif
+	
+	// Full palette is recalculated.
+	// Active palette needs to be recalculated.
+	q->m_dirty.full = false;
+	q->m_dirty.active = true;
+}
+
+/** VdpPalettePrivate: Static functions. **/
 
 /**
  * Clamp a color component to [0, mask].
@@ -336,555 +914,6 @@ void VdpPalette::initSegaTMSPalette(void)
 /** Palette update functions. **/
 
 
-/** Full palette recalculation functions. **/
-
-
-/**
- * T_recalcFull_MD(): Recalculate the full palette. (Mega Drive)
- * This applies brightness, contrast, grayscale, and inverted palette settings.
- * Additionally, the MD color scale method is used to determine how colors are calculated.
- * @param palFull Full palette. (Must have enough space for at least 0x1000 entries!)
- */
-template<typename pixel,
-	int RBits, int GBits, int BBits,
-	int RMask, int GMask, int BMask>
-void VdpPalette::T_recalcFull_MD(pixel *palFull)
-{
-	// MD color components.
-	static const uint8_t PalComponent_MD_Raw[16] =
-		{0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70,
-		 0xE0, 0x90, 0xA0, 0xB0, 0xC0, 0xD0, 0xE0, 0xF0};
-	static const uint8_t PalComponent_MD_Full[16] =
-		{  0,  18,  36,  54,  72,  91, 109, 127,
-		 145, 163, 182, 200, 218, 236, 255, 255};
-	static const uint8_t PalComponent_MD_Full_SH[16] =
-		{0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
-		 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF};
-	
-	const uint8_t *md_components;
-	switch (m_colorScaleMethod)
-	{
-		case COLSCALE_RAW:
-			md_components = &PalComponent_MD_Raw[0];
-			break;
-		case COLSCALE_FULL:
-		default: // Matches Genesis 2; tested by TmEE.
-			md_components = &PalComponent_MD_Full[0];
-			break;
-		case COLSCALE_FULL_SH:
-			md_components = &PalComponent_MD_Full_SH[0];
-			break;
-	}
-	
-	// Brightness / Contrast
-	// These values are scaled to positive numbers.
-	// Normal brightness: (Brightness == 100)
-	// Normal contrast:   (  Contrast == 100)
-	const int brightness = (m_brightness - 100);
-	
-	// Calculate the MD palette.
-	for (int i = 0x0000; i < 0x1000; i++)
-	{
-		// Scale the color components using the lookup table.
-		int r = md_components[i & 0x000F];
-		int g = md_components[(i >> 4) & 0x000F];
-		int b = md_components[(i >> 8) & 0x000F];
-		
-		// Adjust brightness.
-		r += brightness;
-		g += brightness;
-		b += brightness;
-		
-		// Adjust contrast.
-		VdpPalettePrivate::AdjustContrast(r, g, b, m_contrast);
-		
-		if (m_grayscale)
-		{
-			// Convert the color to grayscale.
-			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
-		}
-		
-		// Reduce color components to original color depth.
-		r >>= (8 - RBits);
-		g >>= (8 - GBits);
-		b >>= (8 - BBits);
-		
-		// Clamp the color components.
-		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
-		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
-		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
-		
-		if (m_inverted)
-		{
-			// Invert the color components.
-			r ^= RMask;
-			g ^= GMask;
-			b ^= BMask;
-		}
-		
-		// TODO: Make this configurable?
-#if 0	
-		if (GMask == 0x3F)
-		{
-			// 16-bit color. (RGB565)
-			// Mask off the LSB of the green component.
-			g &= ~1;
-		}
-#endif
-		
-		// Combine the color components.
-		palFull[i] = (r << (BBits + GBits)) |
-			     (g << (BBits)) |
-			     (b);
-	}
-}
-
-
-/**
- * T_recalcFull_32X(): Recalculate the full palette. (Sega 32X)
- * This applies brightness, contrast, grayscale, and inverted palette settings.
- * TODO: UNTESTED!
- * @param palFull Full palette. (Must have enough space for at least 0x10000 entries!)
- */
-template<typename pixel,
-	int RBits, int GBits, int BBits,
-	int RMask, int GMask, int BMask>
-FORCE_INLINE void VdpPalette::T_recalcFull_32X(pixel *palFull32X)
-{
-	// Brightness / Contrast
-	// These values are scaled to positive numbers.
-	// Normal brightness: (Brightness == 100)
-	// Normal contrast:   (  Contrast == 100)
-	const int brightness = (m_brightness - 100);
-	
-	// Calculate the 32X palette. (first half)
-	for (int i = 0x0000; i < 0x8000; i++)
-	{
-		// Sega 32X uses 15-bit color.
-		// Scale each component by using the following algorithm:
-		// - 32X component: abcde
-		// - RGB component: abcdeabc
-		// Example: 32X 0x15 (10101) -> RGB 0xAD (10101101)
-		int r = ((i & 0x001F) << 3);	r |= (r >> 5);
-		int g = ((i >> 2) & 0x00F8);	g |= (g >> 5);
-		int b = ((i >> 7) & 0x00F8);	b |= (b >> 5);
-		
-		// Adjust brightness.
-		r += brightness;
-		g += brightness;
-		b += brightness;
-		
-		// Adjust contrast.
-		VdpPalettePrivate::AdjustContrast(r, g, b, m_contrast);
-		
-		if (m_grayscale)
-		{
-			// Convert the color to grayscale.
-			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
-		}
-		
-		// Reduce color components to original color depth.
-		r >>= (8 - RBits);
-		g >>= (8 - GBits);
-		b >>= (8 - BBits);
-		
-		// Clamp the color components.
-		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
-		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
-		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
-		
-		if (m_inverted)
-		{
-			// Invert the color components.
-			r ^= RMask;
-			g ^= GMask;
-			b ^= BMask;
-		}
-		
-		// TODO: Make this configurable?
-#if 0	
-		if (GMask == 0x3F)
-		{
-			// 16-bit color. (RGB565)
-			// Mask off the LSB of the green component.
-			g &= ~1;
-		}
-#endif
-		
-		// Combine the color components.
-		palFull32X[i] = (r << (BBits + GBits)) |
-				(g << (BBits)) |
-				(b);
-	}
-	
-	// Copy the palette from the first half of palFull32X to the second half.
-	// TODO: Is it better to do this, or should we just mask palette entries by 0x7FFF?
-	memcpy(&palFull32X[0x8000], &palFull32X[0], (0x8000 * sizeof(palFull32X[0])));
-	
-	// TODO: Port to LibGens.
-	// TODO: Move this to T_update_32X()?
-#if 0
-	// Adjust the 32X VDP CRam.
-	T_Adjust_CRam_32X<pixel>(pal32X, cramAdjusted32X);
-#endif
-}
-
-
-/**
- * T_recalcFull_SMS(): Recalculate the full palette. (Sega Master System)
- * This applies brightness, contrast, grayscale, and inverted palette settings.
- * TODO: UNTESTED!
- * @param palFull Full palette. (Must have enough space for at least 0x40 entries!)
- */
-template<typename pixel,
-	int RBits, int GBits, int BBits,
-	int RMask, int GMask, int BMask>
-FORCE_INLINE void VdpPalette::T_recalcFull_SMS(pixel *palFull)
-{
-	// SMS color components. (EGA palette)
-	static const uint8_t PalComponent_SMS[4] = {0x00, 0x55, 0xAA, 0xFF};
-	
-	// Brightness / Contrast
-	// These values are scaled to positive numbers.
-	// Normal brightness: (Brightness == 100)
-	// Normal contrast:   (  Contrast == 100)
-	const int brightness = (m_brightness - 100);
-	
-	// Calculate the SMS palette.
-	for (int i = 0x00; i < 0x3F; i++)
-	{
-		// Scale the color components using the lookup table.
-		int r = PalComponent_SMS[i & 0x03];
-		int g = PalComponent_SMS[(i >> 2) & 0x03];
-		int b = PalComponent_SMS[(i >> 4) & 0x03];
-		
-		// Adjust brightness.
-		r += brightness;
-		g += brightness;
-		b += brightness;
-		
-		// Adjust contrast.
-		VdpPalettePrivate::AdjustContrast(r, g, b, m_contrast);
-		
-		if (m_grayscale)
-		{
-			// Convert the color to grayscale.
-			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
-		}
-		
-		// Reduce color components to original color depth.
-		r >>= (8 - RBits);
-		g >>= (8 - GBits);
-		b >>= (8 - BBits);
-		
-		// Clamp the color components.
-		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
-		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
-		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
-		
-		if (m_inverted)
-		{
-			// Invert the color components.
-			r ^= RMask;
-			g ^= GMask;
-			b ^= BMask;
-		}
-		
-		// TODO: Make this configurable?
-#if 0	
-		if (GMask == 0x3F)
-		{
-			// 16-bit color. (RGB565)
-			// Mask off the LSB of the green component.
-			g &= ~1;
-		}
-#endif
-		
-		// Combine the color components.
-		palFull[i] = (r << (BBits + GBits)) |
-			     (g << (BBits)) |
-			     (b);
-	}
-}
-
-
-/**
- * T_recalcFull_GG(): Recalculate the full palette. (Game Gear)
- * This applies brightness, contrast, grayscale, and inverted palette settings.
- * TODO: UNTESTED!
- * @param palFull Full palette. (Must have enough space for at least 0x1000 entries!)
- */
-template<typename pixel,
-	int RBits, int GBits, int BBits,
-	int RMask, int GMask, int BMask>
-FORCE_INLINE void VdpPalette::T_recalcFull_GG(pixel *palFull)
-{
-	// Brightness / Contrast
-	// These values are scaled to positive numbers.
-	// Normal brightness: (Brightness == 100)
-	// Normal contrast:   (  Contrast == 100)
-	const int brightness = (m_brightness - 100);
-	
-	// Calculate the SMS palette.
-	for (int i = 0x00; i < 0x1000; i++)
-	{
-		// Game Gear uses 12-bit color.
-		// Scale each component by using the same 4 bits for each nybble.
-		int r = (i & 0x000F);		r |= (r << 4);
-		int g = ((i >> 4) & 0x000F);	g |= (g << 4);
-		int b = ((i >> 8) & 0x000F);	b |= (b << 4);
-		
-		// Adjust brightness.
-		r += brightness;
-		g += brightness;
-		b += brightness;
-		
-		// Adjust contrast.
-		VdpPalettePrivate::AdjustContrast(r, g, b, m_contrast);
-		
-		if (m_grayscale)
-		{
-			// Convert the color to grayscale.
-			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
-		}
-		
-		// Reduce color components to original color depth.
-		r >>= (8 - RBits);
-		g >>= (8 - GBits);
-		b >>= (8 - BBits);
-		
-		// Clamp the color components.
-		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
-		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
-		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
-		
-		if (m_inverted)
-		{
-			// Invert the color components.
-			r ^= RMask;
-			g ^= GMask;
-			b ^= BMask;
-		}
-		
-		// TODO: Make this configurable?
-#if 0	
-		if (GMask == 0x3F)
-		{
-			// 16-bit color. (RGB565)
-			// Mask off the LSB of the green component.
-			g &= ~1;
-		}
-#endif
-		
-		// Combine the color components.
-		palFull[i] = (r << (BBits + GBits)) |
-			     (g << (BBits)) |
-			     (b);
-	}
-}
-
-
-/**
- * T_recalcFull_TMS9918(): Recalculate the full palette. (TMS9918)
- * This applies brightness, contrast, grayscale, and inverted palette settings.
- * TODO: UNTESTED!
- * @param palFull Full palette. (Must have enough space for at least 0x20 entries!)
- * NOTE: The palette is 16 colors, but we're saving it twice for compatibility purposes.
- */
-template<typename pixel,
-	int RBits, int GBits, int BBits,
-	int RMask, int GMask, int BMask>
-FORCE_INLINE void VdpPalette::T_recalcFull_TMS9918(pixel *palFull)
-{
-	/**
-	 * PalTMS9918_Analog[] TMS9918 analog palette, in 32-bit RGB.
-	 * Source: http://www.smspower.org/maxim/forumstuff/colours.html
-	 * Reference: http://www.smspower.org/forums/viewtopic.php?t=8224
-	 */
-	// TODO: Byteswapping on big-endian?
-	struct PalRGB_t { uint8_t a; uint8_t r; uint8_t g; uint8_t b; };
-	static const PalRGB_t PalTMS9918_Analog[16] =
-	{
-		{0x00, 0x00, 0x00, 0x00},	// 0: Transparent
-		{0x00, 0x00, 0x00, 0x00},	// 1: Black
-		{0x00, 0x47, 0xB7, 0x3B},	// 2: Medium Green
-		{0x00, 0x7C, 0xCF, 0x6F},	// 3: Light Green
-		{0x00, 0x5D, 0x4E, 0xFF},	// 4: Dark Blue
-		{0x00, 0x80, 0x72, 0xFF},	// 5: Light Blue
-		{0x00, 0xB6, 0x62, 0x47},	// 6: Dark Red
-		{0x00, 0x5D, 0xC8, 0xED},	// 7: Cyan
-		{0x00, 0xD7, 0x68, 0x48},	// 8: Medium Red
-		{0x00, 0xFB, 0x8F, 0x6C},	// 9: Light Red
-		{0x00, 0xC3, 0xCD, 0x41},	// A: Dark Yellow
-		{0x00, 0xD3, 0xDA, 0x76},	// B: Light Yellow
-		{0x00, 0x3E, 0x9F, 0x2F},	// C: Dark Green
-		{0x00, 0xB6, 0x64, 0xC7},	// D: Magenta
-		{0x00, 0xCC, 0xCC, 0xCC},	// E: Gray
-		{0x00, 0xFF, 0xFF, 0xFF},	// F: White
-	};
-	
-	// Brightness / Contrast
-	// These values are scaled to positive numbers.
-	// Normal brightness: (Brightness == 100)
-	// Normal contrast:   (  Contrast == 100)
-	const int brightness = (m_brightness - 100);
-	
-	// Calculate the TMS9918 palette.
-	for (int i = 0; i < 16; i++)
-	{
-		// TMS9918 uses analog color circuitry.
-		// We're using close approximations of the colors as 32-bit RGB.
-		// Source: http://www.smspower.org/maxim/forumstuff/colours.html
-		int r = PalTMS9918_Analog[i].r;
-		int g = PalTMS9918_Analog[i].g;
-		int b = PalTMS9918_Analog[i].b;
-		
-		// Adjust brightness.
-		r += brightness;
-		g += brightness;
-		b += brightness;
-		
-		// Adjust contrast.
-		VdpPalettePrivate::AdjustContrast(r, g, b, m_contrast);
-		
-		if (m_grayscale)
-		{
-			// Convert the color to grayscale.
-			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
-		}
-		
-		// Reduce color components to original color depth.
-		r >>= (8 - RBits);
-		g >>= (8 - GBits);
-		b >>= (8 - BBits);
-		
-		// Clamp the color components.
-		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
-		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
-		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
-		
-		if (m_inverted)
-		{
-			// Invert the color components.
-			r ^= RMask;
-			g ^= GMask;
-			b ^= BMask;
-		}
-		
-		// TODO: Make this configurable?
-#if 0	
-		if (GMask == 0x3F)
-		{
-			// 16-bit color. (RGB565)
-			// Mask off the LSB of the green component.
-			g &= ~1;
-		}
-#endif
-		
-		// Combine the color components.
-		palFull[i] = (r << (BBits + GBits)) |
-			     (g << (BBits)) |
-			     (b);
-	}
-	
-	// Copy the TMS9918 palette to the second SMS palettes.
-	memcpy(&palFull[0x10], &palFull[0x00], (sizeof(palFull[0]) * 16));
-}
-
-
-/**
- * recalcFull(): Recalculate the full VDP palette.
- */
-void VdpPalette::recalcFull(void)
-{
-	switch (m_bpp)
-	{
-		case BPP_15:
-			switch (m_palMode)
-			{
-				case PALMODE_32X:
-					T_recalcFull_32X<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(d->palFull32X.u16);
-					// NOTE: 32X falls through to MD, since both 32X and MD palettes must be updated.
-					// TODO: Add a separate dirty flag for the 32X palette?
-				case PALMODE_MD:
-				default:
-					T_recalcFull_MD<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(d->palFull.u16);
-					break;
-				case PALMODE_SMS:
-					T_recalcFull_SMS<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(d->palFull.u16);
-					break;
-				case PALMODE_GG:
-					T_recalcFull_GG<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(d->palFull.u16);
-					break;
-				case PALMODE_TMS9918:
-					T_recalcFull_TMS9918<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(d->palFull.u16);
-					break;
-			}
-			break;
-		
-		case BPP_16:
-			switch (m_palMode)
-			{
-				case PALMODE_32X:
-					T_recalcFull_32X<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(d->palFull32X.u16);
-					// NOTE: 32X falls through to MD, since both 32X and MD palettes must be updated.
-					// TODO: Add a separate dirty flag for the 32X palette?
-				case PALMODE_MD:
-				default:
-					T_recalcFull_MD<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(d->palFull.u16);
-					break;
-				case PALMODE_SMS:
-					T_recalcFull_SMS<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(d->palFull.u16);
-					break;
-				case PALMODE_GG:
-					T_recalcFull_GG<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(d->palFull.u16);
-					break;
-				case PALMODE_TMS9918:
-					T_recalcFull_TMS9918<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(d->palFull.u16);
-					break;
-			}
-			break;
-		
-		case BPP_32:
-		default:
-			switch (m_palMode)
-			{
-				case PALMODE_32X:
-					T_recalcFull_32X<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(d->palFull32X.u32);
-					// NOTE: 32X falls through to MD, since both 32X and MD palettes must be updated.
-					// TODO: Add a separate dirty flag for the 32X palette?
-				case PALMODE_MD:
-				default:
-					T_recalcFull_MD<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(d->palFull.u32);
-					break;
-				case PALMODE_SMS:
-					T_recalcFull_SMS<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(d->palFull.u32);
-					break;
-				case PALMODE_GG:
-					T_recalcFull_GG<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(d->palFull.u32);
-					break;
-				case PALMODE_TMS9918:
-					T_recalcFull_TMS9918<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(d->palFull.u32);
-					break;
-			}
-			break;
-	}
-	
-	// TODO: Do_VDP_Only() / Do_32X_VDP_Only() if paused.
-	
-	// Force a wakeup.
-	// TODO: Port to LibGens.
-#if 0
-	GensUI::wakeup();
-#endif
-	
-	// Full palette is recalculated.
-	// Active palette needs to be recalculated.
-	m_dirty.full = false;
-	m_dirty.active = true;
-}
-
-
 /** Active palette recalculation functions. **/
 
 
@@ -1078,7 +1107,7 @@ static FORCE_INLINE void T_Adjust_CRam_32X(pixel *pal32X, pixel *cramAdjusted32X
 void VdpPalette::update(void)
 {
 	if (m_dirty.full)
-		recalcFull();
+		d->recalcFull();
 	if (!m_dirty.active)
 		return;
 	

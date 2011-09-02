@@ -255,35 +255,6 @@ class VdpPalette
 		};
 		PalDirty_t m_dirty;
 		
-		/** Full palette recalculation functions. **/
-		
-		template<typename pixel,
-			int RBits, int GBits, int BBits,
-			int RMask, int GMask, int BMask>
-		FORCE_INLINE void T_recalcFull_MD(pixel *palFull);
-		
-		template<typename pixel,
-			int RBits, int GBits, int BBits,
-			int RMask, int GMask, int BMask>
-		FORCE_INLINE void T_recalcFull_32X(pixel *palFull32X);
-		
-		template<typename pixel,
-			int RBits, int GBits, int BBits,
-			int RMask, int GMask, int BMask>
-		FORCE_INLINE void T_recalcFull_SMS(pixel *palFull);
-		
-		template<typename pixel,
-			int RBits, int GBits, int BBits,
-			int RMask, int GMask, int BMask>
-		FORCE_INLINE void T_recalcFull_GG(pixel *palFull);
-		
-		template<typename pixel,
-			int RBits, int GBits, int BBits,
-			int RMask, int GMask, int BMask>
-		FORCE_INLINE void T_recalcFull_TMS9918(pixel *palFull);
-		
-		void recalcFull(void);
-		
 		/** Active palette recalculation functions. **/
 		
 		template<typename pixel>
