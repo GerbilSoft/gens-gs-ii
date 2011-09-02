@@ -47,18 +47,18 @@ namespace LibGens
 class VdpPalettePrivate
 {
 	public:
-		static int FUNC_PURE ConstrainColorComponent(int mask, int c);
+		static int FUNC_PURE ClampColorComponent(int mask, int c);
 		static int FUNC_PURE CalcGrayscale(int r, int g, int b);
 		static void FUNC_PURE AdjustContrast(int& r, int& g, int& b, int contrast);
 };
 
 /**
- * Constrain a color component to [0, mask].
+ * Clamp a color component to [0, mask].
  * @param mask Color component mask. (max value)
- * @param c Color component to constrain.
- * @return Constrained color component.
+ * @param c Color component to clamp.
+ * @return Clamped color component.
  */
-int FUNC_PURE VdpPalettePrivate::ConstrainColorComponent(int mask, int c)
+int FUNC_PURE VdpPalettePrivate::ClampColorComponent(int mask, int c)
 {
 	if (c < 0)
 		return 0;
@@ -370,10 +370,10 @@ void VdpPalette::T_recalcFull_MD(pixel *palFull)
 		g >>= (8 - GBits);
 		b >>= (8 - BBits);
 		
-		// Constrain the color components.
-		r = VdpPalettePrivate::ConstrainColorComponent(RMask, r);
-		g = VdpPalettePrivate::ConstrainColorComponent(GMask, g);
-		b = VdpPalettePrivate::ConstrainColorComponent(BMask, b);
+		// Clamp the color components.
+		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
+		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
+		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
 		
 		if (m_inverted)
 		{
@@ -449,10 +449,10 @@ FORCE_INLINE void VdpPalette::T_recalcFull_32X(pixel *palFull32X)
 		g >>= (8 - GBits);
 		b >>= (8 - BBits);
 		
-		// Constrain the color components.
-		r = VdpPalettePrivate::ConstrainColorComponent(RMask, r);
-		g = VdpPalettePrivate::ConstrainColorComponent(GMask, g);
-		b = VdpPalettePrivate::ConstrainColorComponent(BMask, b);
+		// Clamp the color components.
+		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
+		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
+		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
 		
 		if (m_inverted)
 		{
@@ -538,10 +538,10 @@ FORCE_INLINE void VdpPalette::T_recalcFull_SMS(pixel *palFull)
 		g >>= (8 - GBits);
 		b >>= (8 - BBits);
 		
-		// Constrain the color components.
-		r = VdpPalettePrivate::ConstrainColorComponent(RMask, r);
-		g = VdpPalettePrivate::ConstrainColorComponent(GMask, g);
-		b = VdpPalettePrivate::ConstrainColorComponent(BMask, b);
+		// Clamp the color components.
+		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
+		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
+		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
 		
 		if (m_inverted)
 		{
@@ -614,10 +614,10 @@ FORCE_INLINE void VdpPalette::T_recalcFull_GG(pixel *palFull)
 		g >>= (8 - GBits);
 		b >>= (8 - BBits);
 		
-		// Constrain the color components.
-		r = VdpPalettePrivate::ConstrainColorComponent(RMask, r);
-		g = VdpPalettePrivate::ConstrainColorComponent(GMask, g);
-		b = VdpPalettePrivate::ConstrainColorComponent(BMask, b);
+		// Clamp the color components.
+		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
+		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
+		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
 		
 		if (m_inverted)
 		{
@@ -719,10 +719,10 @@ FORCE_INLINE void VdpPalette::T_recalcFull_TMS9918(pixel *palFull)
 		g >>= (8 - GBits);
 		b >>= (8 - BBits);
 		
-		// Constrain the color components.
-		r = VdpPalettePrivate::ConstrainColorComponent(RMask, r);
-		g = VdpPalettePrivate::ConstrainColorComponent(GMask, g);
-		b = VdpPalettePrivate::ConstrainColorComponent(BMask, b);
+		// Clamp the color components.
+		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
+		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
+		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
 		
 		if (m_inverted)
 		{
