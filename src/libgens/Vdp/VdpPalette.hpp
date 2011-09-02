@@ -37,6 +37,8 @@
 namespace LibGens
 {
 
+class VdpPalettePrivate;
+
 class VdpPalette
 {
 	public:
@@ -201,27 +203,18 @@ class VdpPalette
 		void zomgRestoreCRam(const Zomg_CRam_t *cram);
 	
 	private:
-		// Full MD/SMS/GG palette.
-		union PalFull_t
-		{
-			uint16_t u16[0x1000];
-			uint32_t u32[0x1000];
-		};
-		PalFull_t m_palFull;
+		friend class VdpPalettePrivate;
+		VdpPalettePrivate *const d;
+		
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		VdpPalette(const VdpPalette &);
+		VdpPalette &operator=(const VdpPalette &);
 		
 		// Color RAM.
 		VdpTypes::CRam_t m_cram;
 		
-		// Full 32X palette.
-		// TODO: Only allocate this if 32X mode is enabled?
-		union PalFull_32X_t
-		{
-			uint16_t u16[0x10000];
-			uint32_t u32[0x10000];
-		};
-		PalFull_32X_t m_palFull32X;
-		
-		/** Proerties. **/
+		/** Properties. **/
 		int m_contrast;
 		int m_brightness;
 		bool m_grayscale;

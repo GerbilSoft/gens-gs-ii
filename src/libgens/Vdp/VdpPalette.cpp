@@ -47,10 +47,46 @@ namespace LibGens
 class VdpPalettePrivate
 {
 	public:
+		VdpPalettePrivate(VdpPalette *q);
+		
+		// Full MD/SMS/GG palette.
+		union PalFull_t
+		{
+			uint16_t u16[0x1000];
+			uint32_t u32[0x1000];
+		};
+		PalFull_t palFull;
+		
+		// Full 32X palette.
+		// TODO: Only allocate this if 32X mode is enabled?
+		union PalFull_32X_t
+		{
+			uint16_t u16[0x10000];
+			uint32_t u32[0x10000];
+		};
+		PalFull_32X_t palFull32X;
+	
+	private:
+		VdpPalette *const q;
+		
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		VdpPalettePrivate(const VdpPalettePrivate &);
+		VdpPalettePrivate &operator=(const VdpPalettePrivate &);
+	
+	public:
+		/** Static functions. **/
 		static int FUNC_PURE ClampColorComponent(int mask, int c);
 		static int FUNC_PURE CalcGrayscale(int r, int g, int b);
 		static void FUNC_PURE AdjustContrast(int& r, int& g, int& b, int contrast);
 };
+
+/**
+ * VdpPalette private class.
+ */
+VdpPalettePrivate::VdpPalettePrivate(VdpPalette *q)
+	: q(q)
+{ }
 
 /**
  * Clamp a color component to [0, mask].
@@ -115,7 +151,8 @@ const uint16_t VdpPalette::MD_COLOR_MASK_LSB = 0x222;
  * TODO: Check with recent Gallium3D updates!
  */
 VdpPalette::VdpPalette()
-	: m_contrast(100)
+	: d(new VdpPalettePrivate(this))
+	, m_contrast(100)
 	, m_brightness(100)
 	, m_grayscale(false)
 	, m_inverted(false)
@@ -137,7 +174,9 @@ VdpPalette::VdpPalette()
 
 VdpPalette::~VdpPalette()
 {
-	// TODO
+	delete d;
+	
+	// TODO: Other cleanup.
 }
 
 
@@ -764,21 +803,21 @@ void VdpPalette::recalcFull(void)
 			switch (m_palMode)
 			{
 				case PALMODE_32X:
-					T_recalcFull_32X<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(m_palFull32X.u16);
+					T_recalcFull_32X<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(d->palFull32X.u16);
 					// NOTE: 32X falls through to MD, since both 32X and MD palettes must be updated.
 					// TODO: Add a separate dirty flag for the 32X palette?
 				case PALMODE_MD:
 				default:
-					T_recalcFull_MD<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(m_palFull.u16);
+					T_recalcFull_MD<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(d->palFull.u16);
 					break;
 				case PALMODE_SMS:
-					T_recalcFull_SMS<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(m_palFull.u16);
+					T_recalcFull_SMS<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(d->palFull.u16);
 					break;
 				case PALMODE_GG:
-					T_recalcFull_GG<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(m_palFull.u16);
+					T_recalcFull_GG<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(d->palFull.u16);
 					break;
 				case PALMODE_TMS9918:
-					T_recalcFull_TMS9918<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(m_palFull.u16);
+					T_recalcFull_TMS9918<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(d->palFull.u16);
 					break;
 			}
 			break;
@@ -787,21 +826,21 @@ void VdpPalette::recalcFull(void)
 			switch (m_palMode)
 			{
 				case PALMODE_32X:
-					T_recalcFull_32X<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(m_palFull32X.u16);
+					T_recalcFull_32X<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(d->palFull32X.u16);
 					// NOTE: 32X falls through to MD, since both 32X and MD palettes must be updated.
 					// TODO: Add a separate dirty flag for the 32X palette?
 				case PALMODE_MD:
 				default:
-					T_recalcFull_MD<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(m_palFull.u16);
+					T_recalcFull_MD<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(d->palFull.u16);
 					break;
 				case PALMODE_SMS:
-					T_recalcFull_SMS<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(m_palFull.u16);
+					T_recalcFull_SMS<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(d->palFull.u16);
 					break;
 				case PALMODE_GG:
-					T_recalcFull_GG<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(m_palFull.u16);
+					T_recalcFull_GG<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(d->palFull.u16);
 					break;
 				case PALMODE_TMS9918:
-					T_recalcFull_TMS9918<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(m_palFull.u16);
+					T_recalcFull_TMS9918<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(d->palFull.u16);
 					break;
 			}
 			break;
@@ -811,21 +850,21 @@ void VdpPalette::recalcFull(void)
 			switch (m_palMode)
 			{
 				case PALMODE_32X:
-					T_recalcFull_32X<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(m_palFull32X.u32);
+					T_recalcFull_32X<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(d->palFull32X.u32);
 					// NOTE: 32X falls through to MD, since both 32X and MD palettes must be updated.
 					// TODO: Add a separate dirty flag for the 32X palette?
 				case PALMODE_MD:
 				default:
-					T_recalcFull_MD<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(m_palFull.u32);
+					T_recalcFull_MD<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(d->palFull.u32);
 					break;
 				case PALMODE_SMS:
-					T_recalcFull_SMS<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(m_palFull.u32);
+					T_recalcFull_SMS<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(d->palFull.u32);
 					break;
 				case PALMODE_GG:
-					T_recalcFull_GG<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(m_palFull.u32);
+					T_recalcFull_GG<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(d->palFull.u32);
 					break;
 				case PALMODE_TMS9918:
-					T_recalcFull_TMS9918<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(m_palFull.u32);
+					T_recalcFull_TMS9918<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(d->palFull.u32);
 					break;
 			}
 			break;
@@ -1057,19 +1096,19 @@ void VdpPalette::update(void)
 			
 			case PALMODE_MD:
 			default:
-				T_update_MD<uint16_t>(m_palActive.u16, m_palFull.u16);
+				T_update_MD<uint16_t>(m_palActive.u16, d->palFull.u16);
 				break;
 			
 			case PALMODE_SMS:
-				T_update_SMS<uint16_t>(m_palActive.u16, m_palFull.u16);
+				T_update_SMS<uint16_t>(m_palActive.u16, d->palFull.u16);
 				break;
 			
 			case PALMODE_GG:
-				T_update_GG<uint16_t>(m_palActive.u16, m_palFull.u16);
+				T_update_GG<uint16_t>(m_palActive.u16, d->palFull.u16);
 				break;
 			
 			case PALMODE_TMS9918:
-				T_update_TMS9918<uint16_t>(m_palActive.u16, m_palFull.u16);
+				T_update_TMS9918<uint16_t>(m_palActive.u16, d->palFull.u16);
 				break;
 		}
 	}
@@ -1087,19 +1126,19 @@ void VdpPalette::update(void)
 			
 			case PALMODE_MD:
 			default:
-				T_update_MD<uint32_t>(m_palActive.u32, m_palFull.u32);
+				T_update_MD<uint32_t>(m_palActive.u32, d->palFull.u32);
 				break;
 			
 			case PALMODE_SMS:
-				T_update_SMS<uint32_t>(m_palActive.u32, m_palFull.u32);
+				T_update_SMS<uint32_t>(m_palActive.u32, d->palFull.u32);
 				break;
 			
 			case PALMODE_GG:
-				T_update_GG<uint32_t>(m_palActive.u32, m_palFull.u32);
+				T_update_GG<uint32_t>(m_palActive.u32, d->palFull.u32);
 				break;
 			
 			case PALMODE_TMS9918:
-				T_update_TMS9918<uint32_t>(m_palActive.u32, m_palFull.u32);
+				T_update_TMS9918<uint32_t>(m_palActive.u32, d->palFull.u32);
 				break;
 		}
 	}
