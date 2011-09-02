@@ -218,11 +218,6 @@ class VdpPalette
 		ColorDepth m_bpp;
 		
 		/**
-		 * Shadow/Highlight enable bit. (Mode 5 only)
-		 */
-		bool m_mdShadowHighlight;
-		
-		/**
 		 * Dirty flags.
 		 */
 		union PalDirty_t

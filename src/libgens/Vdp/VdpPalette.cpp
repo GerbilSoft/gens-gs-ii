@@ -75,6 +75,11 @@ class VdpPalettePrivate
 		static const uint16_t MD_COLOR_MASK_FULL;
 		static const uint16_t MD_COLOR_MASK_LSB;
 		
+		/**
+		 * Shadow/Highlight enable bit. (Mode 5 only)
+		 */
+		bool mdShadowHighlight;
+		
 		// Full MD/SMS/GG palette.
 		union PalFull_t
 		{
@@ -145,6 +150,7 @@ VdpPalettePrivate::VdpPalettePrivate(VdpPalette *q)
 	, palMode(VdpPalette::PALMODE_MD)
 	, bgColorIdx(0x00)
 	, mdColorMask(MD_COLOR_MASK_FULL)
+	, mdShadowHighlight(false)
 { }
 
 /** VdpPalettePrivate: Full palette recalculation functions. **/
@@ -757,7 +763,6 @@ void FUNC_PURE VdpPalettePrivate::AdjustContrast(int& r, int& g, int& b, int con
 VdpPalette::VdpPalette()
 	: d(new VdpPalettePrivate(this))
 	, m_bpp(BPP_32)
-	, m_mdShadowHighlight(false)
 {
 	// Set the dirty flags.
 	m_dirty.active = true;
@@ -898,7 +903,7 @@ bool VdpPalette::mdColorMask(void) const
 	{ return (d->mdColorMask == VdpPalettePrivate::MD_COLOR_MASK_LSB); }
 
 /**
- * setMdColorMask(): Set the MD color mask. (Mode 5 only)
+ * Set the MD color mask. (Mode 5 only)
  * @param newMdColorMask If true, masks all but LSBs.
  */
 void VdpPalette::setMdColorMask(bool newMdColorMask)
@@ -918,16 +923,22 @@ void VdpPalette::setMdColorMask(bool newMdColorMask)
 
 
 /**
- * setMdShadowHighlight(): Set the MD Shadow/Highlight bit. (Mode 5 only)
+ * Get the MD Shadow/Highlight bit. (Mode 5 only)
+ * @return True if shadow/highlight is enabled; false otherwise.
+ */
+PAL_PROPERTY_READ(bool, mdShadowHighlight)
+
+/**
+ * Set the MD Shadow/Highlight bit. (Mode 5 only)
  * @param newMdShadowHighlight If true, enables shadow/highlight.
  */
 void VdpPalette::setMdShadowHighlight(bool newMdShadowHighlight)
 {
-	if (m_mdShadowHighlight == newMdShadowHighlight)
+	if (d->mdShadowHighlight == newMdShadowHighlight)
 		return;
 	
-	m_mdShadowHighlight = newMdShadowHighlight;
-	if (m_mdShadowHighlight)
+	d->mdShadowHighlight = newMdShadowHighlight;
+	if (d->mdShadowHighlight)
 	{
 		// Shadow/Highlight was just enabled.
 		// Active palette needs to be recalculated
@@ -1009,7 +1020,7 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 	// Update the background color.
 	MD_palette[0] = MD_palette[d->bgColorIdx];
 	
-	if (m_mdShadowHighlight)
+	if (d->mdShadowHighlight)
 	{
 		// Update the shadow and highlight colors.
 		// References:
