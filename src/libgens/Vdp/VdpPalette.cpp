@@ -64,6 +64,16 @@ class VdpPalettePrivate
 		bool grayscale;
 		bool inverted;
 		VdpPalette::ColorScaleMethod_t colorScaleMethod;
+		VdpPalette::PalMode_t palMode;	// Palette mode.
+		uint8_t bgColorIdx;		// Background color index.
+		
+		/**
+		 * MD color mask. (Mode 5 only)
+		 * Used with the Palette Select bit.
+		 */
+		uint16_t mdColorMask;
+		static const uint16_t MD_COLOR_MASK_FULL;
+		static const uint16_t MD_COLOR_MASK_LSB;
 		
 		// Full MD/SMS/GG palette.
 		union PalFull_t
@@ -118,6 +128,10 @@ class VdpPalettePrivate
 		static void FUNC_PURE AdjustContrast(int& r, int& g, int& b, int contrast);
 };
 
+// TODO: Maybe just make these #define's instead of class variables?
+const uint16_t VdpPalettePrivate::MD_COLOR_MASK_FULL = 0xEEE;
+const uint16_t VdpPalettePrivate::MD_COLOR_MASK_LSB = 0x222;
+
 /**
  * VdpPalette private class.
  */
@@ -128,6 +142,9 @@ VdpPalettePrivate::VdpPalettePrivate(VdpPalette *q)
 	, grayscale(false)
 	, inverted(false)
 	, colorScaleMethod(VdpPalette::COLSCALE_FULL)
+	, palMode(VdpPalette::PALMODE_MD)
+	, bgColorIdx(0x00)
+	, mdColorMask(MD_COLOR_MASK_FULL)
 { }
 
 /** VdpPalettePrivate: Full palette recalculation functions. **/
@@ -593,7 +610,7 @@ void VdpPalettePrivate::recalcFull(void)
 	switch (q->m_bpp)
 	{
 		case VdpPalette::BPP_15:
-			switch (q->m_palMode)
+			switch (this->palMode)
 			{
 				case VdpPalette::PALMODE_32X:
 					T_recalcFull_32X<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(palFull32X.u16);
@@ -616,7 +633,7 @@ void VdpPalettePrivate::recalcFull(void)
 			break;
 		
 		case VdpPalette::BPP_16:
-			switch (q->m_palMode)
+			switch (this->palMode)
 			{
 				case VdpPalette::PALMODE_32X:
 					T_recalcFull_32X<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(palFull32X.u16);
@@ -640,7 +657,7 @@ void VdpPalettePrivate::recalcFull(void)
 		
 		case VdpPalette::BPP_32:
 		default:
-			switch (q->m_palMode)
+			switch (this->palMode)
 			{
 				case VdpPalette::PALMODE_32X:
 					T_recalcFull_32X<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(palFull32X.u32);
@@ -730,10 +747,6 @@ void FUNC_PURE VdpPalettePrivate::AdjustContrast(int& r, int& g, int& b, int con
 
 /** VdpPalette class. **/
 
-/** Static member initialization. **/
-const uint16_t VdpPalette::MD_COLOR_MASK_FULL = 0xEEE;
-const uint16_t VdpPalette::MD_COLOR_MASK_LSB = 0x222;
-
 /**
  * VdpPalette(): Initialize a new VdpPalette object.
  * 
@@ -744,9 +757,6 @@ const uint16_t VdpPalette::MD_COLOR_MASK_LSB = 0x222;
 VdpPalette::VdpPalette()
 	: d(new VdpPalettePrivate(this))
 	, m_bpp(BPP_32)
-	, m_palMode(PALMODE_MD)
-	, m_bgColorIdx(0x00)
-	, m_mdColorMask(MD_COLOR_MASK_FULL)
 	, m_mdShadowHighlight(false)
 {
 	// Set the dirty flags.
@@ -826,16 +836,21 @@ PAL_PROPERTY_WRITE(inverted, bool, Inverted)
 PAL_PROPERTY_WRITE(colorScaleMethod, ColorScaleMethod_t, ColorScaleMethod)
 PAL_PROPERTY_WRITE_NOPRIV(bpp, ColorDepth, Bpp)
 
+/**
+ * Get the palette mode.
+ * @return Palette mode.
+ */
+PAL_PROPERTY_READ(VdpPalette::PalMode_t, palMode);
 
 /**
- * setPalMode(): Set the palette mode.
+ * Set the palette mode.
  * @param newPalMode New palette mode.
  */
 void VdpPalette::setPalMode(PalMode_t newPalMode)
 {
-	if (m_palMode == newPalMode)
+	if (d->palMode == newPalMode)
 		return;
-	m_palMode = newPalMode;
+	d->palMode = newPalMode;
 	
 	// Both the full and active palettes must be recalculated.
 	m_dirty.full = true;
@@ -844,27 +859,43 @@ void VdpPalette::setPalMode(PalMode_t newPalMode)
 
 
 /**
- * setBgColorIdx(): Set the background color index.
+ * Get the background color index.
+ * @return Background color index.
+ */
+PAL_PROPERTY_READ(uint8_t, bgColorIdx)
+
+/**
+ * Set the background color index.
  * @param newBgColorIdx New background color index.
  */
 void VdpPalette::setBgColorIdx(uint8_t newBgColorIdx)
 {
-	if (m_bgColorIdx == newBgColorIdx)
+	if (d->bgColorIdx == newBgColorIdx)
 		return;
 	
 	// Mega Drive:
-	m_bgColorIdx = (newBgColorIdx & 0x3F);
+	d->bgColorIdx = (newBgColorIdx & 0x3F);
 	
-	// TODO: On SMS and Game Gear:
 #if 0
-	m_bgColorIdx &= 0x0F;
-	m_bgColorIdx |= 0x10;
+	// TODO: On SMS and Game Gear:
+	d->bgColorIdx &= 0x0F;
+	d->bgColorIdx |= 0x10;
 #endif
+	
+	// TODO: Store the original BG color index as well as the masked version?
+	// (and re-mask the original index on mode change)
 	
 	// Mark the active palette as dirty.
 	m_dirty.active = true;
 }
 
+
+/**
+ * Get the MD color mask. (Mode 5 only)
+ * @return True if all but LSBs are masked; false for normal operation.
+ */
+bool VdpPalette::mdColorMask(void) const
+	{ return (d->mdColorMask == VdpPalettePrivate::MD_COLOR_MASK_LSB); }
 
 /**
  * setMdColorMask(): Set the MD color mask. (Mode 5 only)
@@ -873,12 +904,12 @@ void VdpPalette::setBgColorIdx(uint8_t newBgColorIdx)
 void VdpPalette::setMdColorMask(bool newMdColorMask)
 {
 	const uint16_t newMask = (newMdColorMask
-				? MD_COLOR_MASK_LSB
-				: MD_COLOR_MASK_FULL);
+				? VdpPalettePrivate::MD_COLOR_MASK_LSB
+				: VdpPalettePrivate::MD_COLOR_MASK_FULL);
 	
-	if (m_mdColorMask == newMask)
+	if (d->mdColorMask == newMask)
 		return;
-	m_mdColorMask = newMask;
+	d->mdColorMask = newMask;
 	
 	// Mark both full and active palettes as dirty.
 	m_dirty.full = true;
@@ -963,8 +994,8 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 	// Update all 64 colors.
 	for (int i = 62; i >= 0; i -= 2)
 	{
-		const uint16_t color1_raw = (m_cram.u16[i] & m_mdColorMask);
-		const uint16_t color2_raw = (m_cram.u16[i + 1] & m_mdColorMask);
+		const uint16_t color1_raw = (m_cram.u16[i] & d->mdColorMask);
+		const uint16_t color2_raw = (m_cram.u16[i + 1] & d->mdColorMask);
 		
 		// Get the palette color.
 		pixel color1 = palette[color1_raw];
@@ -976,7 +1007,7 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 	}
 	
 	// Update the background color.
-	MD_palette[0] = MD_palette[m_bgColorIdx];
+	MD_palette[0] = MD_palette[d->bgColorIdx];
 	
 	if (m_mdShadowHighlight)
 	{
@@ -988,8 +1019,8 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 		// Shadow (64-127) and highlight (128-191) palettes.
 		for (int i = 62; i >= 0; i -= 2)
 		{
-			uint16_t color1_raw = ((m_cram.u16[i] & m_mdColorMask) >> 1);
-			uint16_t color2_raw = ((m_cram.u16[i + 1] & m_mdColorMask) >> 1);
+			uint16_t color1_raw = ((m_cram.u16[i] & d->mdColorMask) >> 1);
+			uint16_t color2_raw = ((m_cram.u16[i + 1] & d->mdColorMask) >> 1);
 			
 			// Shadow color. (0xxx)
 			MD_palette[i + 64]	= palette[color1_raw];
@@ -1005,8 +1036,8 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 		memcpy(&MD_palette[192], &MD_palette[0], (sizeof(MD_palette[0]) * 64));
 		
 		// Update the background color for the shadow and highlight palettes.
-		MD_palette[64]  = MD_palette[m_bgColorIdx + 64];	// Shadow color.
-		MD_palette[128] = MD_palette[m_bgColorIdx + 128];	// Highlight color.
+		MD_palette[64]  = MD_palette[d->bgColorIdx + 64];	// Shadow color.
+		MD_palette[128] = MD_palette[d->bgColorIdx + 128];	// Highlight color.
 	}
 }
 
@@ -1045,7 +1076,7 @@ FORCE_INLINE void VdpPalette::T_update_SMS(pixel *SMS_palette,
 	}
 	
 	// Update the background color.
-	SMS_palette[0] = SMS_palette[m_bgColorIdx];
+	SMS_palette[0] = SMS_palette[d->bgColorIdx];
 }
 
 
@@ -1082,7 +1113,7 @@ FORCE_INLINE void VdpPalette::T_update_GG(pixel *GG_palette,
 	}
 	
 	// Update the background color.
-	GG_palette[0] = GG_palette[m_bgColorIdx];
+	GG_palette[0] = GG_palette[d->bgColorIdx];
 }
 
 
@@ -1112,7 +1143,7 @@ FORCE_INLINE void VdpPalette::T_update_TMS9918(pixel *TMS_palette,
 	
 	// Update the background color.
 	// TODO: How is the background color handled in TMS9918 modes?
-	//TMS_palette[0] = TMS_palette[m_bgColorIdx];
+	//TMS_palette[0] = TMS_palette[d->bgColorIdx];
 }
 
 
@@ -1147,7 +1178,7 @@ void VdpPalette::update(void)
 	
 	if (m_bpp != BPP_32)
 	{
-		switch (m_palMode)
+		switch (d->palMode)
 		{
 			case PALMODE_32X:
 				// TODO: Implement T_update_32X().
@@ -1177,7 +1208,7 @@ void VdpPalette::update(void)
 	}
 	else
 	{
-		switch (m_palMode)
+		switch (d->palMode)
 		{
 			case PALMODE_32X:
 				// TODO: Implement T_update_32X().

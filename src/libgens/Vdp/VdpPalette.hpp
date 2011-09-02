@@ -162,7 +162,7 @@ class VdpPalette
 		/**
 		 * bgColorIdx: Background color index.
 		 */
-		int bgColorIdx(void) const;
+		uint8_t bgColorIdx(void) const;
 		void setBgColorIdx(uint8_t newBgColorIdx);
 		
 		/** MD-specific properties. **/
@@ -216,20 +216,6 @@ class VdpPalette
 		
 		// Color depth.
 		ColorDepth m_bpp;
-		
-		// Palette mode.
-		PalMode_t m_palMode;
-		
-		// Background color index.
-		uint8_t m_bgColorIdx;
-		
-		/**
-		 * MD color mask. (Mode 5 only)
-		 * Used with the Palette Select bit.
-		 */
-		uint16_t m_mdColorMask;
-		static const uint16_t MD_COLOR_MASK_FULL;
-		static const uint16_t MD_COLOR_MASK_LSB;
 		
 		/**
 		 * Shadow/Highlight enable bit. (Mode 5 only)
@@ -338,13 +324,6 @@ inline void VdpPalette::writeCRam_16(uint8_t address, uint16_t data)
 /** Properties. **/
 inline VdpPalette::ColorDepth VdpPalette::bpp(void) const
 	{ return m_bpp; }
-
-inline VdpPalette::PalMode_t VdpPalette::palMode(void) const
-	{ return m_palMode; }
-inline int VdpPalette::bgColorIdx(void) const
-	{ return m_bgColorIdx; }
-inline bool VdpPalette::mdColorMask(void) const
-	{ return (m_mdColorMask == MD_COLOR_MASK_LSB); }
 
 }
 
