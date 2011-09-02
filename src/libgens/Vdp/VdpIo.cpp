@@ -235,7 +235,19 @@ inline void Vdp::Update_Mode(void)
 	
 	// If the VDP mode has changed, CRam needs to be updated.
 	if (prevVdpMode != VDP_Mode)
-		m_palette.setMode();
+	{
+		// Update the VDP mode variables.
+		if (VDP_Mode & 0x10)
+		{
+			// Mode 5.
+			m_palette.setPalMode(VdpPalette::PALMODE_MD);
+			m_palette.setMdColorMask(!(VDP_Mode & 0x08));	// M4/PSEL
+		}
+		else
+		{
+			// TODO: Support other palette modes.
+		}
+	}
 	
 	// Initialize Vdp::VDP_Lines.
 	// Don't reset the VDP current line variables here,
@@ -269,9 +281,6 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 			
 			// Update the VDP mode.
 			Update_Mode();
-			
-			// Mode 5: Write the palette select bit.
-			m_palette.setMdColorMask(!(VDP_Reg.m5.Set1 & 0x04));
 			break;
 		
 		case 1:
