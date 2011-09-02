@@ -48,6 +48,22 @@ class VdpPalettePrivate
 {
 	public:
 		VdpPalettePrivate(VdpPalette *q);
+	
+	private:
+		VdpPalette *const q;
+		
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		VdpPalettePrivate(const VdpPalettePrivate &);
+		VdpPalettePrivate &operator=(const VdpPalettePrivate &);
+	
+	public:
+		/** Properties. **/
+		int contrast;
+		int brightness;
+		bool grayscale;
+		bool inverted;
+		VdpPalette::ColorScaleMethod_t colorScaleMethod;
 		
 		// Full MD/SMS/GG palette.
 		union PalFull_t
@@ -95,14 +111,6 @@ class VdpPalettePrivate
 		
 		void recalcFull(void);
 	
-	private:
-		VdpPalette *const q;
-		
-		// Q_DISABLE_COPY() equivalent.
-		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
-		VdpPalettePrivate(const VdpPalettePrivate &);
-		VdpPalettePrivate &operator=(const VdpPalettePrivate &);
-	
 	public:
 		/** Static functions. **/
 		static int FUNC_PURE ClampColorComponent(int mask, int c);
@@ -115,6 +123,11 @@ class VdpPalettePrivate
  */
 VdpPalettePrivate::VdpPalettePrivate(VdpPalette *q)
 	: q(q)
+	, contrast(100)
+	, brightness(100)
+	, grayscale(false)
+	, inverted(false)
+	, colorScaleMethod(VdpPalette::COLSCALE_FULL)
 { }
 
 /** VdpPalettePrivate: Full palette recalculation functions. **/
@@ -142,7 +155,7 @@ void VdpPalettePrivate::T_recalcFull_MD(pixel *palFull)
 		 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF};
 	
 	const uint8_t *md_components;
-	switch (q->m_colorScaleMethod)
+	switch (this->colorScaleMethod)
 	{
 		case VdpPalette::COLSCALE_RAW:
 			md_components = &PalComponent_MD_Raw[0];
@@ -160,7 +173,7 @@ void VdpPalettePrivate::T_recalcFull_MD(pixel *palFull)
 	// These values are scaled to positive numbers.
 	// Normal brightness: (Brightness == 100)
 	// Normal contrast:   (  Contrast == 100)
-	const int brightness = (q->m_brightness - 100);
+	const int brightAdj = (this->brightness - 100);
 	
 	// Calculate the MD palette.
 	for (int i = 0x0000; i < 0x1000; i++)
@@ -171,14 +184,14 @@ void VdpPalettePrivate::T_recalcFull_MD(pixel *palFull)
 		int b = md_components[(i >> 8) & 0x000F];
 		
 		// Adjust brightness.
-		r += brightness;
-		g += brightness;
-		b += brightness;
+		r += brightAdj;
+		g += brightAdj;
+		b += brightAdj;
 		
 		// Adjust contrast.
-		VdpPalettePrivate::AdjustContrast(r, g, b, q->m_contrast);
+		VdpPalettePrivate::AdjustContrast(r, g, b, this->contrast);
 		
-		if (q->m_grayscale)
+		if (this->grayscale)
 		{
 			// Convert the color to grayscale.
 			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
@@ -194,7 +207,7 @@ void VdpPalettePrivate::T_recalcFull_MD(pixel *palFull)
 		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
 		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
 		
-		if (q->m_inverted)
+		if (this->inverted)
 		{
 			// Invert the color components.
 			r ^= RMask;
@@ -235,7 +248,7 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_32X(pixel *palFull32X)
 	// These values are scaled to positive numbers.
 	// Normal brightness: (Brightness == 100)
 	// Normal contrast:   (  Contrast == 100)
-	const int brightness = (q->m_brightness - 100);
+	const int brightAdj = (this->brightness - 100);
 	
 	// Calculate the 32X palette. (first half)
 	for (int i = 0x0000; i < 0x8000; i++)
@@ -250,14 +263,14 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_32X(pixel *palFull32X)
 		int b = ((i >> 7) & 0x00F8);	b |= (b >> 5);
 		
 		// Adjust brightness.
-		r += brightness;
-		g += brightness;
-		b += brightness;
+		r += brightAdj;
+		g += brightAdj;
+		b += brightAdj;
 		
 		// Adjust contrast.
-		VdpPalettePrivate::AdjustContrast(r, g, b, q->m_contrast);
+		VdpPalettePrivate::AdjustContrast(r, g, b, this->contrast);
 		
-		if (q->m_grayscale)
+		if (this->grayscale)
 		{
 			// Convert the color to grayscale.
 			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
@@ -273,7 +286,7 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_32X(pixel *palFull32X)
 		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
 		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
 		
-		if (q->m_inverted)
+		if (this->inverted)
 		{
 			// Invert the color components.
 			r ^= RMask;
@@ -328,7 +341,7 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_SMS(pixel *palFull)
 	// These values are scaled to positive numbers.
 	// Normal brightness: (Brightness == 100)
 	// Normal contrast:   (  Contrast == 100)
-	const int brightness = (q->m_brightness - 100);
+	const int brightAdj = (this->brightness - 100);
 	
 	// Calculate the SMS palette.
 	for (int i = 0x00; i < 0x3F; i++)
@@ -339,14 +352,14 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_SMS(pixel *palFull)
 		int b = PalComponent_SMS[(i >> 4) & 0x03];
 		
 		// Adjust brightness.
-		r += brightness;
-		g += brightness;
-		b += brightness;
+		r += brightAdj;
+		g += brightAdj;
+		b += brightAdj;
 		
 		// Adjust contrast.
-		VdpPalettePrivate::AdjustContrast(r, g, b, q->m_contrast);
+		VdpPalettePrivate::AdjustContrast(r, g, b, this->contrast);
 		
-		if (q->m_grayscale)
+		if (this->grayscale)
 		{
 			// Convert the color to grayscale.
 			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
@@ -362,7 +375,7 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_SMS(pixel *palFull)
 		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
 		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
 		
-		if (q->m_inverted)
+		if (this->inverted)
 		{
 			// Invert the color components.
 			r ^= RMask;
@@ -403,7 +416,7 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_GG(pixel *palFull)
 	// These values are scaled to positive numbers.
 	// Normal brightness: (Brightness == 100)
 	// Normal contrast:   (  Contrast == 100)
-	const int brightness = (q->m_brightness - 100);
+	const int brightAdj = (this->brightness - 100);
 	
 	// Calculate the SMS palette.
 	for (int i = 0x00; i < 0x1000; i++)
@@ -415,14 +428,14 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_GG(pixel *palFull)
 		int b = ((i >> 8) & 0x000F);	b |= (b << 4);
 		
 		// Adjust brightness.
-		r += brightness;
-		g += brightness;
-		b += brightness;
+		r += brightAdj;
+		g += brightAdj;
+		b += brightAdj;
 		
 		// Adjust contrast.
-		VdpPalettePrivate::AdjustContrast(r, g, b, q->m_contrast);
+		VdpPalettePrivate::AdjustContrast(r, g, b, this->contrast);
 		
-		if (q->m_grayscale)
+		if (this->grayscale)
 		{
 			// Convert the color to grayscale.
 			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
@@ -438,7 +451,7 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_GG(pixel *palFull)
 		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
 		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
 		
-		if (q->m_inverted)
+		if (this->inverted)
 		{
 			// Invert the color components.
 			r ^= RMask;
@@ -507,7 +520,7 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_TMS9918(pixel *palFull)
 	// These values are scaled to positive numbers.
 	// Normal brightness: (Brightness == 100)
 	// Normal contrast:   (  Contrast == 100)
-	const int brightness = (q->m_brightness - 100);
+	const int brightAdj = (this->brightness - 100);
 	
 	// Calculate the TMS9918 palette.
 	for (int i = 0; i < 16; i++)
@@ -520,14 +533,14 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_TMS9918(pixel *palFull)
 		int b = PalTMS9918_Analog[i].b;
 		
 		// Adjust brightness.
-		r += brightness;
-		g += brightness;
-		b += brightness;
+		r += brightAdj;
+		g += brightAdj;
+		b += brightAdj;
 		
 		// Adjust contrast.
-		VdpPalettePrivate::AdjustContrast(r, g, b, q->m_contrast);
+		VdpPalettePrivate::AdjustContrast(r, g, b, this->contrast);
 		
-		if (q->m_grayscale)
+		if (this->grayscale)
 		{
 			// Convert the color to grayscale.
 			r = g = b = VdpPalettePrivate::CalcGrayscale(r, g, b);
@@ -543,7 +556,7 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_TMS9918(pixel *palFull)
 		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
 		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
 		
-		if (q->m_inverted)
+		if (this->inverted)
 		{
 			// Invert the color components.
 			r ^= RMask;
@@ -730,11 +743,6 @@ const uint16_t VdpPalette::MD_COLOR_MASK_LSB = 0x222;
  */
 VdpPalette::VdpPalette()
 	: d(new VdpPalettePrivate(this))
-	, m_contrast(100)
-	, m_brightness(100)
-	, m_grayscale(false)
-	, m_inverted(false)
-	, m_colorScaleMethod(COLSCALE_FULL)
 	, m_bpp(BPP_32)
 	, m_palMode(PALMODE_MD)
 	, m_bgColorIdx(0x00)
@@ -772,9 +780,29 @@ void VdpPalette::reset(void)
 
 
 /**
- * PAL_PROPERTY_WRITE(): Property write function macro..
+ * PAL_PROPERTY_READ(): Property read function macro.
+ */
+#define PAL_PROPERTY_READ(propType, propName) \
+propType VdpPalette::propName(void) const \
+	{ return d->propName; }
+
+/**
+ * PAL_PROPERTY_WRITE(): Property write function macro.
  */
 #define PAL_PROPERTY_WRITE(propName, setPropType, setPropName) \
+void VdpPalette::set##setPropName(setPropType new##setPropName) \
+{ \
+	if (d->propName == (new##setPropName)) \
+		return; \
+	d->propName = (new##setPropName); \
+	m_dirty.full = true; \
+}
+
+/**
+ * PAL_PROPERTY_WRITE_NOPRIV(): Property write function macro.
+ * Used for properties that haven't been moved to VdpPalettePrivate yet.
+ */
+#define PAL_PROPERTY_WRITE_NOPRIV(propName, setPropType, setPropName) \
 void VdpPalette::set##setPropName(setPropType new##setPropName) \
 { \
 	if (m_##propName == (new##setPropName)) \
@@ -783,6 +811,12 @@ void VdpPalette::set##setPropName(setPropType new##setPropName) \
 	m_dirty.full = true; \
 }
 
+/** Property read functions. **/
+PAL_PROPERTY_READ(int, contrast)
+PAL_PROPERTY_READ(int, brightness)
+PAL_PROPERTY_READ(bool, grayscale)
+PAL_PROPERTY_READ(bool, inverted)
+PAL_PROPERTY_READ(VdpPalette::ColorScaleMethod_t, colorScaleMethod)
 
 /** Property write functions. **/
 PAL_PROPERTY_WRITE(contrast, int, Contrast)
@@ -790,7 +824,7 @@ PAL_PROPERTY_WRITE(brightness, int, Brightness)
 PAL_PROPERTY_WRITE(grayscale, bool, Grayscale)
 PAL_PROPERTY_WRITE(inverted, bool, Inverted)
 PAL_PROPERTY_WRITE(colorScaleMethod, ColorScaleMethod_t, ColorScaleMethod)
-PAL_PROPERTY_WRITE(bpp, ColorDepth, Bpp)
+PAL_PROPERTY_WRITE_NOPRIV(bpp, ColorDepth, Bpp)
 
 
 /**

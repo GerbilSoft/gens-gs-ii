@@ -214,12 +214,7 @@ class VdpPalette
 		// Color RAM.
 		VdpTypes::CRam_t m_cram;
 		
-		/** Properties. **/
-		int m_contrast;
-		int m_brightness;
-		bool m_grayscale;
-		bool m_inverted;
-		ColorScaleMethod_t m_colorScaleMethod;
+		// Color depth.
 		ColorDepth m_bpp;
 		
 		// Palette mode.
@@ -341,18 +336,6 @@ inline void VdpPalette::writeCRam_16(uint8_t address, uint16_t data)
 
 
 /** Properties. **/
-inline int VdpPalette::contrast(void) const
-	{ return m_contrast; }
-inline int VdpPalette::brightness(void) const
-	{ return m_brightness; }
-inline bool VdpPalette::grayscale(void) const
-	{ return m_grayscale; }
-inline bool VdpPalette::inverted(void) const
-	{ return m_inverted; }
-
-inline VdpPalette::ColorScaleMethod_t VdpPalette::colorScaleMethod(void) const
-	{ return m_colorScaleMethod; }
-
 inline VdpPalette::ColorDepth VdpPalette::bpp(void) const
 	{ return m_bpp; }
 
