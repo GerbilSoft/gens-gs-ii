@@ -407,7 +407,15 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 			 * - idx 2: V_Scroll_CMask
 			 * - idx 3: reserved (padding)
 			 */
-			static const uint8_t Scroll_Size_Tbl[][4] =
+			struct Scroll_Size_Tbl_t
+			{
+				uint8_t H_Scroll_CMul;
+				uint8_t H_Scroll_CMask;
+				uint8_t V_Scroll_CMask;
+				uint8_t reserved;
+			};
+			
+			static const Scroll_Size_Tbl_t Scroll_Size_Tbl[] =
 			{
 				// V32_H32 (VXX_H32)      // V32_H64 (VXX_H64)
 				{0x05, 0x1F, 0x1F, 0x00}, {0x06, 0x3F, 0x1F, 0x00},
@@ -431,9 +439,9 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 			};
 			
 			// Get the values from the scroll size table.
-			H_Scroll_CMul  = Scroll_Size_Tbl[tmp][0];
-			H_Scroll_CMask = Scroll_Size_Tbl[tmp][1];
-			V_Scroll_CMask = Scroll_Size_Tbl[tmp][2];
+			H_Scroll_CMul  = Scroll_Size_Tbl[tmp].H_Scroll_CMul;
+			H_Scroll_CMask = Scroll_Size_Tbl[tmp].H_Scroll_CMask;
+			V_Scroll_CMask = Scroll_Size_Tbl[tmp].V_Scroll_CMask;
 			break;
 		}
 		
