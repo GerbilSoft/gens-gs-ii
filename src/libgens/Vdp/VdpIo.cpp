@@ -233,6 +233,13 @@ inline void Vdp::Update_Mode(void)
 		   ((Set1 & 0x04) << 1) |	// M4/PSEL
 		   ((Set2 & 0x04) << 2);	// M5
 	
+	if (!(Set2 & 0x08))
+	{
+		// V28 mode. Reset the NTSC V30 roll values.
+		VDP_Lines.NTSC_V30.Offset = 0;
+		VDP_Lines.NTSC_V30.VBlank_Div = 0;
+	}
+	
 	// If the VDP mode has changed, CRam needs to be updated.
 	if (prevVdpMode != VDP_Mode)
 	{
@@ -276,23 +283,9 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 	switch (reg_num)
 	{
 		case 0:
-			// Mode Set 1.
-			Update_IRQ_Line();
-			
-			// Update the VDP mode.
-			Update_Mode();
-			break;
-		
 		case 1:
-			// Mode Set 2.
+			// Mode Set 1, Mode Set 2.
 			Update_IRQ_Line();
-			
-			if (!(VDP_Reg.m5.Set2 & 0x08))
-			{
-				// V28 mode. Reset the NTSC V30 roll values.
-				VDP_Lines.NTSC_V30.Offset = 0;
-				VDP_Lines.NTSC_V30.VBlank_Div = 0;
-			}
 			
 			// Update the VDP mode.
 			Update_Mode();
