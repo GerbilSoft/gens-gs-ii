@@ -62,20 +62,11 @@ BITS 32
 	%define SYM(x) _ %+ x
 %endif
 
-; Fastcall symbol declaration.
-%ifdef __OBJ_WIN32
-	%define SYMF(sym, args) @ %+ sym %+ @ %+ args
-%else
-	%define SYMF(sym, args) SYM(sym)
-%endif
-
 ; Global symbol declaration.
 %ifdef __OBJ_ELF
 	%define GLOBAL_SYM(sym, type)		global SYM(sym):type (sym %+ _end - sym)
-	%define GLOBAL_SYMF(sym, args, type)	global SYMF(sym, args):type (sym %+ _end - sym)
 %else
 	%define GLOBAL_SYM(sym, type)		global SYM(sym)
-	%define GLOBAL_SYMF(sym, args, type)	global SYMF(sym, args)
 %endif
 
 ;*******************
@@ -4843,16 +4834,20 @@ PREFIXE_FDCB:
 
 align 16
 
-; UINT32 FASTCALL z80_Exec(Z80_CONTEXT *z80, UINT32 odo)
-; ecx = context pointer
-; edx = odometer to raise
+; UINT32 z80_Exec(Z80_CONTEXT *z80, UINT32 odo)
+; [esp + 4] == %ecx == context pointer
+; [esp + 8] == %edx == dometer to raise
 ;
 ; RETURN:
 ; 0  -> ok
 ; !0 -> error (status returned) or no cycle to do (-1)
 
-GLOBAL_SYMF(z80_Exec, 8, function)
-SYMF(z80_Exec, 8):
+GLOBAL_SYM(z80_Exec, function)
+SYM(z80_Exec):
+	; Get the parameters from the stack.
+	mov	ecx, [esp + 4]	; Z80_CONTEXT *z80
+	mov	edx, [esp + 8]	; UINT32 odo
+
 	sub	edx, [ecx + Z80.CycleCnt]
 	jbe	near z80_Cycles_Already_done
 	
