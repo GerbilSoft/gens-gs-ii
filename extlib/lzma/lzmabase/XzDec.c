@@ -815,7 +815,12 @@ SRes XzUnpacker_Code(CXzUnpacker *p, Byte *dest, SizeT *destLen,
         {
           p->state = XZ_STATE_STREAM_FOOTER;
           p->pos = 0;
-          if (CRC_GET_DIGEST(p->crc) != GetUi32(p->buf))
+          
+          // Gens/GS II: Strict aliasing fix. [2011/09/02]
+          union { Byte b[4]; UInt32 d; } b2d;
+	  memcpy(b2d.b, p->buf, 4);
+	  //if (CRC_GET_DIGEST(p->crc) != GetUi32(p->buf))
+          if (CRC_GET_DIGEST(p->crc) != b2d.d)
             return SZ_ERROR_CRC;
         }
         break;
