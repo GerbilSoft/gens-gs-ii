@@ -136,20 +136,10 @@ section .bss align=64
 		.FXYW2:	resb 1
 		.FXYB2:	resb 1
 		
-		.BC2:
-		.C2:	resb 1
-		.B2:	resb 1
-			resw 1
-		
-		.DE2:
-		.E2:	resb 1
-		.D2:	resb 1
-			resw 1
-		
-		.HL2:
-		.L2:	resb 1
-		.H2:	resb 1
-			resw 1
+		.BC2:	resw 1
+		.DE2:	resw 1
+		.HL2:	resw 1
+		resw 1		; Reserved for struct alignment.
 		
 		.IFF:		resb 1	; Interrupt flip-flops.
 		.R:		resb 1	; Refresh register.
@@ -248,26 +238,9 @@ section .text align=64
 
 %define zFXY2	byte [ebp + Z80.FXYB2]
 
-%define zB2	byte [ebp + Z80.B2]
-%define zhBC2	byte [ebp + Z80.B2]
-%define zC2	byte [ebp + Z80.C2]
-%define zlBC2	byte [ebp + Z80.C2]
 %define zBC2	word [ebp + Z80.BC2]
-%define zxBC2	dword [ebp + Z80.BC2]
-
-%define zD2	byte [ebp + Z80.D2]
-%define zhDE2	byte [ebp + Z80.D2]
-%define zE2	byte [ebp + Z80.E2]
-%define zlDE2	byte [ebp + Z80.E2]
 %define zDE2	word [ebp + Z80.DE2]
-%define zxDE2	dword [ebp + Z80.DE2]
-
-%define zH2	byte [ebp + Z80.H2]
-%define zhHL2	byte [ebp + Z80.H2]
-%define zL2	byte [ebp + Z80.L2]
-%define zlHL2	byte [ebp + Z80.L2]
 %define zHL2	word [ebp + Z80.HL2]
-%define zxHL2	dword [ebp + Z80.HL2]
 
 %define zlIX	byte [ebp + Z80.IXL]
 %define zhIX	byte [ebp + Z80.IXH]
@@ -1655,19 +1628,19 @@ Z80I_EX_AF_AF2:
 align 16
 
 Z80I_EXX:
-	mov	ecx, zxBC2
+	movzx	ecx, zBC2
 	mov	edx, zxBC
 	mov	zxBC, ecx
-	mov	zxBC2, edx
+	mov	zBC2, dx
 	inc	zxPC
-	mov	ecx, zxDE2
+	movzx	ecx, zDE2
 	mov	edx, zxDE
 	mov	zxDE, ecx
-	mov	zxDE2, edx
-	mov	ecx, zxHL2
+	mov	zDE2, dx
+	movzx	ecx, zHL2
 	mov	edx, zxHL
 	mov	zxHL, ecx
-	mov	zxHL2, edx
+	mov	zHL2, dx
 	NEXT 4
 
 

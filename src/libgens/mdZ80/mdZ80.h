@@ -150,51 +150,10 @@ struct _Z80_context
 		} w;
 		uint32_t d;
 	} AF2;
-	union
-	{
-		struct
-		{
-			uint8_t C2;
-			uint8_t B2;
-			uint16_t x;
-		} b;
-		struct
-		{
-			uint16_t BC2;
-			uint16_t x;
-		} w;
-		uint32_t d;
-	} BC2;
-	union
-	{
-		struct
-		{
-			uint8_t E2;
-			uint8_t D2;
-			uint16_t x;
-		} b;
-		struct
-		{
-			uint16_t DE2;
-			uint16_t x;
-		} w;
-		uint32_t d;
-	} DE2;
-	union
-	{
-		struct
-		{
-			uint8_t L2;
-			uint8_t H2;
-			uint16_t x;
-		} b;
-		struct
-		{
-			uint16_t HL2;
-			uint16_t x;
-		} w;
-		uint32_t d;
-	} HL2;
+	uint16_t BC2;
+	uint16_t DE2;
+	uint16_t HL2;
+	uint16_t reserved_reg2;	// Reserved for struct alignment.
 	
 	uint8_t IFF;		// Interrupt flip-flops.
 	uint8_t R;		// Refresh register.
