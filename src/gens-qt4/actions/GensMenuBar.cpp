@@ -285,13 +285,13 @@ void GensMenuBarPrivate::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *par
  * Calling unlock() when not locked will return an error.
  * @return 0 on success; non-zero on error.
  */
-inline int GensMenuBarPrivate::lock(void)
+int GensMenuBarPrivate::lock(void)
 {
 	m_lockCnt++;
 	return 0;
 }
 
-inline int GensMenuBarPrivate::unlock(void)
+int GensMenuBarPrivate::unlock(void)
 {
 	assert(m_lockCnt >= 0);
 	if (m_lockCnt <= 0)
@@ -305,7 +305,7 @@ inline int GensMenuBarPrivate::unlock(void)
  * GensMenuBarPrivate::isLocked(): Check if the menu actions are locked.
  * @return True if the menu actions are locked; false otherwise.
  */
-inline bool GensMenuBarPrivate::isLocked(void)
+bool GensMenuBarPrivate::isLocked(void)
 	{ return (m_lockCnt > 0); }
 
 
