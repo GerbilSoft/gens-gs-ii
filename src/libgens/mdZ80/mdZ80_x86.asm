@@ -154,13 +154,9 @@ section .bss align=64
 		.H2:	resb 1
 			resw 1
 		
-		.IFF:
-		.IFF1:	resb 1
-		.IFF2:	resb 1
-			resw 1
-		
-		.R:		resb 1
-		.reserved:	resb 3
+		.IFF:		resb 1	; Interrupt flip-flops.
+		.R:		resb 1	; Refresh register.
+		.reserved:	resb 2
 		
 		.I:		resb 1
 		.IM:		resb 1
@@ -298,10 +294,8 @@ section .text align=64
 %define zIM	byte [ebp + Z80.IM]
 %define zR	byte [ebp + Z80.R]
 
-%define zIFF	word [ebp + Z80.IFF]
-%define zIFF1	byte [ebp + Z80.IFF2]
-%define zIFF2	byte [ebp + Z80.IFF2]
-%define zxIFF	dword [ebp + Z80.IFF]
+; Interrupt flip-flop. [0 0 0 0 0 0 IFF2 IFF1]
+%define znewIFF	byte [ebp + Z80.IFF]
 
 
 %define FLAG_C	0x01
@@ -740,12 +734,12 @@ align 16
 %macro CHECK_INT 0
 	
 	mov	dl, [ebp + Z80.IntLine]
-	mov	dh, zIFF1
-	test	dl, dl
-	jz	short %%No_Int
-	js	short %%NMI
+	mov	dh, znewIFF
+	test	dl, dl		; Check if the interrupt line is set.
+	jz	short %%No_Int	; IntLine is 0; no interrupt.
+	js	short %%NMI	; IntLine is 0x80; NMI occurred.
 	
-	test	dl, dh
+	test	dl, dh		; Check for a matching IFF flag.
 	jz	short %%No_Int
 	
 	call	_do_INT
@@ -787,7 +781,7 @@ _do_NMI:
 	WRITE_WORD
 	mov	dl, [ebp + Z80.IntLine]
 	mov	dh, [ebp + Z80.Status]
-	mov	zIFF1, 0
+	and	znewIFF, ~1	; NMI clears IFF1; IFF2 remains as-is.
 	and	dl, ~0x80
 	and	dh, ~Z80_HALTED
 	mov	zxPC, 0x66
@@ -809,10 +803,9 @@ _do_INT:
 	WRITE_WORD
 	mov	dl, [ebp + Z80.Status]
 	mov	dh, [ebp + Z80.IntLine]
-	xor	ecx, ecx
 	and	dl, ~Z80_HALTED
 	and	dh, 0x80
-	mov	zxIFF, ecx
+	mov	znewIFF, 0	; INT clears both IFF1 and IFF2.
 	mov	[ebp + Z80.Status], dl
 	mov	[ebp + Z80.IntLine], dh
 	mov	dl, [ebp + Z80.IM]
@@ -1328,9 +1321,11 @@ Z80I_LD_A_%1:
 	mov	dl, zF
 %endif
 	lahf
-	mov	dh, zIFF2
+	mov	dh, znewIFF	; IFF2 is copied into P/V flag (bit 2) for LD A,I / LD A,R.
 	mov	zFXY, zA
-	or	dl, dh
+	and	dh, 2		; IFF2 is copied into P/V flag (bit 2) for LD A,I / LD A,R.
+	add	dh, dh		; Shift IFF2 (bit 1) into P/V flag (bit 2).
+	or	dl, dh		; Copy IFF2 into the flags.
 	and	zF, FLAG_S | FLAG_Z
 	add	zxPC, byte 2
 	or	zF, dl
@@ -2621,9 +2616,8 @@ Z80I_DI:
 	;NEXT 4
 	
 	movzx	edx, byte [zxPC + 1]
-	xor	ecx, ecx
 	inc	zxPC
-	mov	zxIFF, ecx
+	mov	znewIFF, 0		; DI clears both IFF1 and IFF2.
 	sub	edi, byte 4
 	
 %if (GENS_LOG == 1)
@@ -2647,9 +2641,8 @@ Z80I_EI:
 	movzx	edx, byte [zxPC + 1]
 	mov	[ebp + Z80.CycleSup], edi	; we will check for interrupt after the next instruction
 	inc	zxPC
-	mov	ecx, FLAG_P | (FLAG_P << 8)
 	xor	edi, edi
-	mov	zxIFF, ecx
+	mov	znewIFF, 3		; EI sets both IFF1 and IFF2.
 	sub	edi, byte 4
 	
 %if (GENS_LOG == 1)
@@ -4419,10 +4412,12 @@ Z80I_RETN:
 	mov	ecx, zxSP
 	movzx	zxPC, dx
 	add	ecx, byte 2
-	mov	dl, zIFF2
+	movzx	edx, znewIFF	; RETN copies IFF2 to IFF1.
 	and	ecx, 0xFFFF
-	mov	zIFF1, dl
+	shr	dl, 1		; RETN copies IFF2 to IFF1.
+	and	dl, 1		; RETN copies IFF2 to IFF1.
 	mov	zxSP, ecx
+	or	znewIFF, dl	; RETN copies IFF2 to IFF1.
 	REBASE_PC
 	NEXT 14
 

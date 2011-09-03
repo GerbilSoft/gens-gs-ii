@@ -25,6 +25,7 @@
 
 // C includes.
 #include <string.h>
+#include <stddef.h>
 
 // Z80 flag and state definitions.
 #include "mdZ80_flags.h"
@@ -67,7 +68,8 @@ void mdZ80_reset(Z80_CONTEXT *z80)
 	unsigned int cycleCnt = z80->CycleCnt;
 	
 	// Clear the Z80 struct up to CycleSup.
-	memset(z80, 0x00, 23*4);
+	// NOTE: offsetof() is used to prevent issues if the struct is resized.
+	memset(z80, 0x00, offsetof(Z80_CONTEXT, Fetch));
 	
 	// Restore the Z80 Cycle Count.
 	z80->CycleCnt = cycleCnt;
@@ -253,7 +255,7 @@ void mdZ80_add_cycles(Z80_CONTEXT *z80, unsigned int cycles)
 void mdZ80_nmi(Z80_CONTEXT *z80)
 {
 	z80->IntVect = 0x66;
-	z80->IntLine = 0x80;
+	z80->IntLine = 0x80;	// NMI flag.
 	
 	// If the Z80 is currently running, don't do anything else.
 	if (z80->Status & Z80_STATE_RUNNING)
@@ -275,7 +277,7 @@ void mdZ80_interrupt(Z80_CONTEXT *z80, unsigned char vector)
 {
 	// Set the interrupt data.
 	z80->IntVect = vector;
-	z80->IntLine = Z80_FLAG_P;	// because of IFF mask
+	z80->IntLine = 0x01;	// IFF1 flag.
 	
 	// If the Z80 is currently running, don't do anything else.
 	if (z80->Status & Z80_STATE_RUNNING)

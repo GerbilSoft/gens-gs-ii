@@ -211,25 +211,10 @@ struct _Z80_context
 		} w;
 		uint32_t d;
 	} HL2;
-	union
-	{
-		struct
-		{
-			uint8_t IFF1;
-			uint8_t IFF2;
-			uint16_t x;
-		} b;
-		struct
-		{
-			uint16_t IFF;
-			uint16_t x;
-		} w;
-		uint32_t d;
-	} IFF;
 	
-	// Refresh register.
-	uint8_t R;
-	uint8_t reserved[3];
+	uint8_t IFF;		// Interrupt flip-flops.
+	uint8_t R;		// Refresh register.
+	uint8_t reserved[2];
 	
 	// Interrupt registers.
 	uint8_t I;
