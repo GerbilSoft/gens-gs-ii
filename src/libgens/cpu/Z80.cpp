@@ -112,7 +112,7 @@ void Z80::ZomgSaveReg(Zomg_Z80RegSave_t *state)
 	state->IX = ms_Z80.IX.w.IX;
 	state->IY = ms_Z80.IY.w.IY;
 	state->PC = mdZ80_get_PC(&ms_Z80);
-	state->SP = ms_Z80.SP.w.SP;
+	state->SP = ms_Z80.SP.w;
 	
 	// Shadow register set.
 	state->AF2 = mdZ80_get_AF2(&ms_Z80);
@@ -148,7 +148,7 @@ void Z80::ZomgRestoreReg(const Zomg_Z80RegSave_t *state)
 	ms_Z80.IX.w.IX = state->IX;
 	ms_Z80.IY.w.IY = state->IY;
 	mdZ80_set_PC(&ms_Z80, state->PC);
-	ms_Z80.SP.w.SP = state->SP;
+	ms_Z80.SP.w = state->SP;
 	
 	// Shadow register set.
 	mdZ80_set_AF2(&ms_Z80, state->AF2);
