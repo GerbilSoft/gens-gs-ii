@@ -1286,7 +1286,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 	src_address *= 2;
 	
 	// Determine the source component.
-	DMA_Src_t src_component;
+	DMA_Src_t src_component = DMA_SRC_ROM;	// TODO: Determine a better default.
 	int WRam_Mode;
 	if (src_address < M68K_Mem::Rom_Size)
 	{
