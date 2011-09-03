@@ -294,7 +294,7 @@ section .text align=64
 %define zIM	byte [ebp + Z80.IM]
 %define zR	byte [ebp + Z80.R]
 
-; Interrupt flip-flop. [0 0 0 0 0 0 IFF2 IFF1]
+; Interrupt flip-flops. [0 0 0 0 0 0 IFF2 IFF1]
 %define znewIFF	byte [ebp + Z80.IFF]
 
 
