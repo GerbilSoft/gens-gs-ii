@@ -121,9 +121,7 @@ void Z80::ZomgSaveReg(Zomg_Z80RegSave_t *state)
 	state->HL2 = ms_Z80.HL2.w.HL2;
 	
 	// Other registers.
-	// TODO: IFFs aren't being saved correctly.
-	// (mdZ80 seems to set IFF1 to 4...)
-	state->IFF = ((ms_Z80.IFF.b.IFF1 & 1) | ((ms_Z80.IFF.b.IFF2 & 1) << 1));
+	state->IFF = (ms_Z80.IFF & 0x03);
 	state->R = ms_Z80.R;
 	state->I = ms_Z80.I;
 	state->IM = ms_Z80.IM;
@@ -159,10 +157,7 @@ void Z80::ZomgRestoreReg(const Zomg_Z80RegSave_t *state)
 	ms_Z80.HL2.w.HL2 = state->HL2;
 	
 	// Other registers.
-	// TODO: IFFs aren't being restored correctly.
-	// (mdZ80 seems to set IFF1 to 4...)
-	ms_Z80.IFF.b.IFF1 = (state->IFF & 1);
-	ms_Z80.IFF.b.IFF2 = ((state->IFF & 2) >> 1);
+	ms_Z80.IFF = (state->IFF & 0x03);
 	ms_Z80.R = state->R;
 	ms_Z80.I = state->I;
 	ms_Z80.IM = state->IM;
