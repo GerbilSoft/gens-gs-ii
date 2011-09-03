@@ -95,7 +95,7 @@ unsigned int mdZ80_get_PC(Z80_CONTEXT *z80)
 		return -1;
 	
 	// Subtract the BasePC from PC to get the actual Z80 program counter.
-	return (z80->PC.d - z80->BasePC);
+	return (z80->PC - z80->BasePC);
 }
 
 
@@ -113,7 +113,7 @@ void mdZ80_set_PC(Z80_CONTEXT *z80, unsigned int PC)
 	PC &= 0xFFFF;
 	unsigned int newPC = (unsigned int)(z80->Fetch[PC >> 8]);
 	z80->BasePC = newPC;
-	z80->PC.d = newPC + PC;
+	z80->PC = newPC + PC;
 }
 
 

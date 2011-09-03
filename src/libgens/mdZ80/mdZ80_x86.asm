@@ -123,15 +123,12 @@ section .bss align=64
 		.IYH:	resb 1
 			resw 1
 		
-		.PC:			; PC == BasePC + Z80 PC
-		.PCL:	resb 1
-		.PCH:	resb 1
-			resw 1
+		.PC:	resd 1	; PC == BasePC + Z80 PC [x86 pointer!]
 		
 		.SP:
 		.SPL:	resb 1
 		.SPH:	resb 1
-			resw 1
+		resw 1		; Reserved for struct alignment.
 		
 		.AF2:
 		.A2:	resb 1
@@ -288,7 +285,7 @@ section .text align=64
 %define zlSP	byte [ebp + Z80.SPL]
 %define zhSP	byte [ebp + Z80.SPH]
 %define zSP	word [ebp + Z80.SP]
-%define zxSP	dword [ebp + Z80.SP]
+;%define zxSP	dword [ebp + Z80.SP]
 
 %define zI	byte [ebp + Z80.I]
 %define zIM	byte [ebp + Z80.IM]
@@ -772,12 +769,12 @@ align 16
 align 16
 
 _do_NMI:
-	mov	ecx, zxSP
+	movzx	ecx, zSP
 	mov	edx, zxPC
 	sub	ecx, byte 2
 	sub	edx, [ebp + Z80.BasePC]
-	and	ecx, 0xFFFF
-	mov	zxSP, ecx
+	and	ecx, 0xFFFF	; Still needed for WRITE_WORD.
+	mov	zSP, cx
 	WRITE_WORD
 	mov	dl, [ebp + Z80.IntLine]
 	mov	dh, [ebp + Z80.Status]
@@ -794,12 +791,12 @@ _do_NMI:
 align 16
 
 _do_INT:
-	mov	ecx, zxSP
+	movzx	ecx, zSP
 	mov	edx, zxPC
 	sub	ecx, byte 2
 	sub	edx, [ebp + Z80.BasePC]
-	and	ecx, 0xFFFF
-	mov	zxSP, ecx
+	and	ecx, 0xFFFF	; Still needed for WRITE_WORD.
+	mov	zSP, cx
 	WRITE_WORD
 	mov	dl, [ebp + Z80.Status]
 	mov	dh, [ebp + Z80.IntLine]
@@ -1556,7 +1553,7 @@ align 16
 
 Z80I_PUSH_%1:
 %ifidn %1, AF
-	mov	ecx, zxSP
+	movzx	ecx, zSP
 	inc	zxPC
 	mov	dl, zF
 	mov	dh, zFXY
@@ -1565,15 +1562,15 @@ Z80I_PUSH_%1:
 	sub	ecx, byte 2
 	or	dl, dh
 	mov	dh, zA
-	and	ecx, 0xFFFF
-	mov	zxSP, ecx
+	and	ecx, 0xFFFF	; Still needed for WRITE_WORD.
+	mov	zSP, cx
 	WRITE_WORD
 %else
-	mov	ecx, zxSP
+	movzx	ecx, zSP
 	sub	ecx, byte 2
 	inc	zxPC
-	and	ecx, 0xFFFF
-	mov	zxSP, ecx
+	and	ecx, 0xFFFF	; Still needed for WRITE_WORD.
+	mov	zSP, cx
 	WRITE_WORD %1
 %endif
 	NEXT 11
@@ -1596,23 +1593,23 @@ PUSH_RR IY
 align 16
 
 Z80I_POP_%1:
-	mov	ecx, zxSP
+	movzx	ecx, zSP
 	inc	zxPC
 %ifidn %1, AF
 	READ_WORD
 	mov	zF, dl
-	mov	ecx, zxSP
+	movzx	ecx, zSP
 	mov	zFXY, dl
 	add	ecx, byte 2
 	mov	zA, dh
-	and	ecx, 0xFFFF
-	mov	zxSP, ecx
+	and	ecx, 0xFFFF	; Still needed for READ_WORD.
+	mov	zSP, cx
 %else
 	READ_WORD %1
-	mov	ecx, zxSP
+	movzx	ecx, zSP
 	add	ecx, byte 2
 	and	ecx, 0xFFFF
-	mov	zxSP, ecx
+	mov	zSP, cx
 %endif
 	NEXT 10
 
@@ -1681,13 +1678,13 @@ Z80I_EXX:
 align 16
 
 Z80I_EX_mSP_%1:
-	mov	ecx, zxSP
+	movzx	ecx, zSP
 	inc	zxPC
 	READ_WORD
 	mov	cx, z%1
 	mov	z%1, dx
 	mov	dx, cx
-	mov	ecx, zxSP
+	mov	cx, zSP
 	WRITE_WORD
 	NEXT 19
 
@@ -4313,16 +4310,16 @@ Z80I_CALL%2%1_NN:
 %if %0 > 0
 	test	zF, FLAG_%1
 %endif
-	mov	ecx, zxSP
+	movzx	ecx, zSP
 %if %0 > 0
 	j%2z	near %%dont_take_it
 %endif
 
 	sub	ecx, byte 2
 	lea	edx, [zxPC + 3]
-	and	ecx, 0xFFFF
+	and	ecx, 0xFFFF	; Still needed for WRITE_WORD.
 	sub	edx, [ebp + Z80.BasePC]
-	mov	zxSP, ecx
+	mov	zSP, cx
 	WRITE_WORD
 	movzx	edx, byte [zxPC + 2]
 	movzx	zxPC, byte [zxPC + 1]
@@ -4363,17 +4360,17 @@ Z80I_RET%2%1:
 %if %0 > 0
 	test	zF, FLAG_%1
 %endif
-	mov	ecx, zxSP
+	movzx	ecx, zSP
 %if %0 > 0
 	j%2z near %%dont_take_it
 %endif
 
 	READ_WORD
-	mov	ecx, zxSP
+	movzx	ecx, zSP
 	movzx	zxPC, dx
 	add	ecx, byte 2
-	and	ecx, 0xFFFF
-	mov	zxSP, ecx
+	and	ecx, 0xFFFF	; Still needed for WRITE_WORD.
+	mov	zSP, cx
 	REBASE_PC
 %if %0 > 0
 	NEXT 17
@@ -4407,16 +4404,16 @@ align 16
 
 Z80I_RETI:
 Z80I_RETN:
-	mov	ecx, zxSP
+	movzx	ecx, zSP
 	READ_WORD
-	mov	ecx, zxSP
+	movzx	ecx, zSP
 	movzx	zxPC, dx
 	add	ecx, byte 2
 	movzx	edx, znewIFF	; RETN copies IFF2 to IFF1.
-	and	ecx, 0xFFFF
+	;and	ecx, 0xFFFF	; Not needed since zSP is 16-bit.
 	shr	dl, 1		; RETN copies IFF2 to IFF1.
 	and	dl, 1		; RETN copies IFF2 to IFF1.
-	mov	zxSP, ecx
+	mov	zSP, cx
 	or	znewIFF, dl	; RETN copies IFF2 to IFF1.
 	REBASE_PC
 	NEXT 14
@@ -4425,14 +4422,14 @@ Z80I_RETN:
 align 16
 
 Z80I_RST:
-	mov	ecx, zxSP
+	movzx	ecx, zSP
 	lea	edx, [zxPC + 1]
 	sub	ecx, byte 2
 	movzx	zxPC, byte [zxPC]
-	and	ecx, 0xFFFF
+	and	ecx, 0xFFFF	; Still needed for WRITE_WORD.
 	sub	edx, [ebp + Z80.BasePC]
 	and	zxPC, 0x38
-	mov	zxSP, ecx
+	mov	zSP, cx
 	WRITE_WORD
 	REBASE_PC
 	NEXT 11

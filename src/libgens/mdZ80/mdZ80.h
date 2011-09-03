@@ -120,36 +120,20 @@ struct _Z80_context
 		} w;
 		uint32_t d;
 	} IY;
-	union
-	{
-		struct
-		{
-			uint8_t PCL;
-			uint8_t PCH;
-			uint16_t x;
-		} b;
-		struct
-		{
-			uint16_t PC;
-			uint16_t x;
-		} w;
-		uint32_t d;
-	} PC;	// PC == BasePC + Z80 PC
+	
+	uint32_t PC;	// PC == BasePC + Z80 PC [x86 pointer!]
+	
 	union
 	{
 		struct
 		{
 			uint8_t SPL;
 			uint8_t SPH;
-			uint16_t x;
 		} b;
-		struct
-		{
-			uint16_t SP;
-			uint16_t x;
-		} w;
-		uint32_t d;
+		uint16_t w;
 	} SP;
+	uint16_t reserved_sp;	// Reserved for struct alignment.
+	
 	union
 	{
 		struct
