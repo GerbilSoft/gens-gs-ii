@@ -159,10 +159,8 @@ section .bss align=64
 		.IFF2:	resb 1
 			resw 1
 		
-		.R:
-		.R1:	resb 1
-		.R2:	resb 1
-			resw 1
+		.R:		resb 1
+		.reserved:	resb 3
 		
 		.I:		resb 1
 		.IM:		resb 1

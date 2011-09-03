@@ -226,22 +226,12 @@ struct _Z80_context
 		} w;
 		uint32_t d;
 	} IFF;
-	union
-	{
-		struct
-		{
-			uint8_t R1;
-			uint8_t R2;
-			uint16_t x;
-		} b;
-		struct
-		{
-			uint16_t R;
-			uint16_t x;
-		} w;
-		uint32_t d;
-	} R;
-
+	
+	// Refresh register.
+	uint8_t R;
+	uint8_t reserved[3];
+	
+	// Interrupt registers.
 	uint8_t I;
 	uint8_t IM;
 	uint8_t IntVect;
