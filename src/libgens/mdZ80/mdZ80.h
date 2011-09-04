@@ -131,17 +131,17 @@ struct _Z80_context
 	uint8_t R;		// Refresh register.
 	
 	// Interrupt registers.
-	uint8_t I;
-	uint8_t IM;
-	uint8_t IntVect;
-	uint8_t IntLine;
+	uint8_t I;		// Interrupt vector page. (IM 2)
+	uint8_t IM;		// Interrupt mode.
+	uint8_t IntVect;	// Interrupt vector. (IM 0, IM 2)
+	uint8_t IntLine;	// Interrupt line. (0x01 == INT; 0x80 == NMI)
 	
 	// Z80 status flags.
 	uint8_t Status;
 	uint8_t reserved_stat;	// Reserved for struct alignment.
 	
 	uint32_t BasePC;	// Pointer to x86 memory location where Z80 RAM starts.
-
+	
 	uint32_t CycleCnt;
 	uint32_t CycleTD;
 	uint32_t CycleIO;

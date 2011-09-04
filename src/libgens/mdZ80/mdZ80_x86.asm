@@ -143,10 +143,10 @@ section .bss align=64
 		.R:		resb 1	; Refresh register.
 		
 		; Interrupt registers.
-		.I:		resb 1
-		.IM:		resb 1
-		.IntVect:	resb 1
-		.IntLine:	resb 1
+		.I:		resb 1	; Interrupt vector page. (IM 2)
+		.IM:		resb 1	; Interrupt mode.
+		.IntVect:	resb 1	; Interrupt vector. (IM 0, IM 2)
+		.IntLine:	resb 1	; Interrupt line. (0x01 == INT; 0x80 == NMI)
 		
 		; Z80 status flags.
 		.Status:	resb 1
