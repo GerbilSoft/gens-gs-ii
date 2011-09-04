@@ -106,11 +106,11 @@ void Z80::ZomgSaveReg(Zomg_Z80RegSave_t *state)
 #ifdef GENS_ENABLE_EMULATION
 	// Main register set.
 	state->AF = mdZ80_get_AF(&ms_Z80);
-	state->BC = ms_Z80.BC.w.BC;
-	state->DE = ms_Z80.DE.w.DE;
-	state->HL = ms_Z80.HL.w.HL;
-	state->IX = ms_Z80.IX.w.IX;
-	state->IY = ms_Z80.IY.w.IY;
+	state->BC = ms_Z80.BC.w;
+	state->DE = ms_Z80.DE.w;
+	state->HL = ms_Z80.HL.w;
+	state->IX = ms_Z80.IX.w;
+	state->IY = ms_Z80.IY.w;
 	state->PC = mdZ80_get_PC(&ms_Z80);
 	state->SP = ms_Z80.SP.w;
 	
@@ -142,11 +142,11 @@ void Z80::ZomgRestoreReg(const Zomg_Z80RegSave_t *state)
 #ifdef GENS_ENABLE_EMULATION
 	// Main register set.
 	mdZ80_set_AF(&ms_Z80, state->AF);
-	ms_Z80.BC.w.BC = state->BC;
-	ms_Z80.DE.w.DE = state->DE;
-	ms_Z80.HL.w.HL = state->HL;
-	ms_Z80.IX.w.IX = state->IX;
-	ms_Z80.IY.w.IY = state->IY;
+	ms_Z80.BC.w = state->BC;
+	ms_Z80.DE.w = state->DE;
+	ms_Z80.HL.w = state->HL;
+	ms_Z80.IX.w = state->IX;
+	ms_Z80.IY.w = state->IY;
 	mdZ80_set_PC(&ms_Z80, state->PC);
 	ms_Z80.SP.w = state->SP;
 	
