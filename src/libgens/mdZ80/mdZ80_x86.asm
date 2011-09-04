@@ -149,8 +149,6 @@ section .bss align=64
 		
 		.Status:	resd 1
 		.BasePC:	resd 1	; Pointer to x86 memory location where Z80 RAM starts.
-		.TmpSav:	resd 1
-				resd 1
 		
 		.CycleCnt:	resd 1
 		.CycleTD:	resd 1
@@ -270,6 +268,7 @@ section .text align=64
 %define FLAG_S	0x80
 
 
+; Status flags.
 %define Z80_RUNNING	0x01
 %define Z80_HALTED	0x02
 %define Z80_FAULTED	0x10

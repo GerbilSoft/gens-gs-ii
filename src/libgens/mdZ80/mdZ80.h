@@ -138,8 +138,6 @@ struct _Z80_context
 
 	uint32_t Status;
 	uint32_t BasePC;	// Pointer to x86 memory location where Z80 RAM starts.
-	uint32_t TmpSav0;
-	uint32_t TmpSav1;
 
 	uint32_t CycleCnt;
 	uint32_t CycleTD;
