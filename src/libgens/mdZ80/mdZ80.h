@@ -126,17 +126,20 @@ struct _Z80_context
 	uint16_t HL2;
 	uint16_t reserved_reg2;	// Reserved for struct alignment.
 	
+	// Internal registers.
 	uint8_t IFF;		// Interrupt flip-flops.
 	uint8_t R;		// Refresh register.
-	uint8_t reserved[2];
 	
 	// Interrupt registers.
 	uint8_t I;
 	uint8_t IM;
 	uint8_t IntVect;
 	uint8_t IntLine;
-
-	uint32_t Status;
+	
+	// Z80 status flags.
+	uint8_t Status;
+	uint8_t reserved_stat;	// Reserved for struct alignment.
+	
 	uint32_t BasePC;	// Pointer to x86 memory location where Z80 RAM starts.
 
 	uint32_t CycleCnt;
@@ -153,6 +156,11 @@ struct _Z80_context
 };
 
 typedef struct _Z80_context Z80_CONTEXT;
+
+// Z80 status flags.
+#define Z80_RUNNING	0x01
+#define Z80_HALTED	0x02
+#define Z80_FAULTED	0x10
 
 
 /**

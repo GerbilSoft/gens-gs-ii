@@ -138,16 +138,20 @@ section .bss align=64
 		.HL2:	resw 1
 		resw 1		; Reserved for struct alignment.
 		
+		; Internal registers.
 		.IFF:		resb 1	; Interrupt flip-flops.
 		.R:		resb 1	; Refresh register.
-		.reserved:	resb 2
 		
+		; Interrupt registers.
 		.I:		resb 1
 		.IM:		resb 1
 		.IntVect:	resb 1
 		.IntLine:	resb 1
 		
-		.Status:	resd 1
+		; Z80 status flags.
+		.Status:	resb 1
+		resb 1		; Reserved for struct alignment.
+		
 		.BasePC:	resd 1	; Pointer to x86 memory location where Z80 RAM starts.
 		
 		.CycleCnt:	resd 1
@@ -2557,11 +2561,11 @@ Z80I_SCF:
 align 16
 
 Z80I_HALT:
-	mov	edx, [ebp + Z80.Status]
+	movzx	edx, byte [ebp + Z80.Status]
 	or	edi, byte -1
-	or	edx, Z80_HALTED
+	or	dl, Z80_HALTED
 	inc	zxPC
-	mov	[ebp + Z80.Status], edx
+	mov	[ebp + Z80.Status], dl
 	jmp	z80_Exec_Really_Quit
 
 
@@ -4823,14 +4827,14 @@ SYM(z80_Exec):
 	
 	CHECK_INT
 	
-	mov	edx, [ebp + Z80.Status]
+	movzx	edx, byte [ebp + Z80.Status]
 	xor	ecx, ecx
-	test	edx, Z80_HALTED | Z80_FAULTED | Z80_RUNNING
+	test	dl, (Z80_HALTED | Z80_FAULTED | Z80_RUNNING)
 	jnz	near z80_Cannot_Run
 	
-	or	edx, Z80_RUNNING
+	or	dl, Z80_RUNNING
 	mov	[ebp + Z80.CycleSup], ecx
-	mov	[ebp + Z80.Status], edx
+	mov	[ebp + Z80.Status], dl
 	mov	[ebp + Z80.CycleTD], edi
 	; WARNING: This can potentially crash the emulator
 	; if the program attempts to run past 0xFFFF!
@@ -4866,9 +4870,8 @@ z80_Exec_Really_Quit:
 	mov	[ebp + Z80.AF], zAF
 	mov	[ebp + Z80.HL], zHL
 	mov	eax, [ebp + Z80.CycleTD]
-	xor	ecx, ecx
 	mov	ebx, [ebp + Z80.CycleCnt]
-	mov	cl, [ebp + Z80.Status]
+	movzx	ecx, byte [ebp + Z80.Status]
 	sub	eax, edi
 %if (Z80_SAFE = 1)
 	mov	edx, [ebp + Z80.BasePC]
