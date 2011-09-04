@@ -78,8 +78,8 @@ void mdZ80_reset(Z80_CONTEXT *z80)
 	mdZ80_set_PC(z80, 0);
 	
 	// Initialize the index and flag registers.
-	z80->IX.d = 0xFFFF;
-	z80->IY.d = 0xFFFF;
+	z80->IX.w = 0xFFFF;
+	z80->IY.w = 0xFFFF;
 	z80->AF.d = 0x4000;
 }
 

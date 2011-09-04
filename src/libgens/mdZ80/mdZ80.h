@@ -51,14 +51,8 @@ struct _Z80_context
 		{
 			uint8_t C;
 			uint8_t B;
-			uint16_t x;
 		} b;
-		struct
-		{
-			uint16_t BC;
-			uint16_t x;
-		} w;
-		uint32_t d;
+		uint16_t w;
 	} BC;
 	union
 	{
@@ -66,14 +60,8 @@ struct _Z80_context
 		{
 			uint8_t E;
 			uint8_t D;
-			uint16_t x;
 		} b;
-		struct
-		{
-			uint16_t DE;
-			uint16_t x;
-		} w;
-		uint32_t d;
+		uint16_t w;
 	} DE;
 	union
 	{
@@ -81,14 +69,8 @@ struct _Z80_context
 		{
 			uint8_t L;
 			uint8_t H;
-			uint16_t x;
 		} b;
-		struct
-		{
-			uint16_t HL;
-			uint16_t x;
-		} w;
-		uint32_t d;
+		uint16_t w;
 	} HL;
 	union
 	{
@@ -96,14 +78,8 @@ struct _Z80_context
 		{
 			uint8_t IXL;
 			uint8_t IXH;
-			uint16_t x;
 		} b;
-		struct
-		{
-			uint16_t IX;
-			uint16_t x;
-		} w;
-		uint32_t d;
+		uint16_t w;
 	} IX;
 	union
 	{
@@ -111,15 +87,10 @@ struct _Z80_context
 		{
 			uint8_t IYL;
 			uint8_t IYH;
-			uint16_t x;
 		} b;
-		struct
-		{
-			uint16_t IY;
-			uint16_t x;
-		} w;
-		uint32_t d;
+		uint16_t w;
 	} IY;
+	uint16_t reserved_reg;	// Reserved for struct alignment.
 	
 	uint32_t PC;	// PC == BasePC + Z80 PC [x86 pointer!]
 	

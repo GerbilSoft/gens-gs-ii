@@ -101,27 +101,24 @@ section .bss align=64
 		.BC:
 		.C:	resb 1
 		.B:	resb 1
-			resw 1
 		
 		.DE:
 		.E:	resb 1
 		.D:	resb 1
-			resw 1
 		
 		.HL:
 		.L:	resb 1
 		.H:	resb 1
-			resw 1
 		
 		.IX:
 		.IXL:	resb 1
 		.IXH:	resb 1
-			resw 1
 		
 		.IY:
 		.IYL:	resb 1
 		.IYH:	resb 1
-			resw 1
+		
+		resw 1		; Reserved for struct alignment.
 		
 		.PC:	resd 1	; PC == BasePC + Z80 PC [x86 pointer!]
 		
@@ -214,14 +211,12 @@ section .text align=64
 %define zC	byte [ebp + Z80.C]
 %define zlBC	byte [ebp + Z80.C]
 %define zBC	word [ebp + Z80.BC]
-%define zxBC	dword [ebp + Z80.BC]
 
 %define zD	byte [ebp + Z80.D]
 %define zhDE	byte [ebp + Z80.D]
 %define zE	byte [ebp + Z80.E]
 %define zlDE	byte [ebp + Z80.E]
 %define zDE	word [ebp + Z80.DE]
-%define zxDE	dword [ebp + Z80.DE]
 
 %define zH	bh
 %define zhHL	bh
@@ -245,12 +240,10 @@ section .text align=64
 %define zlIX	byte [ebp + Z80.IXL]
 %define zhIX	byte [ebp + Z80.IXH]
 %define zIX	word [ebp + Z80.IX]
-%define zxIX	dword [ebp + Z80.IX]
 
 %define zlIY	byte [ebp + Z80.IYL]
 %define zhIY	byte [ebp + Z80.IYH]
 %define zIY	word [ebp + Z80.IY]
-%define zxIY	dword [ebp + Z80.IY]
 
 %define zPC	si
 %define zxPC	esi
@@ -258,7 +251,6 @@ section .text align=64
 %define zlSP	byte [ebp + Z80.SPL]
 %define zhSP	byte [ebp + Z80.SPH]
 %define zSP	word [ebp + Z80.SP]
-;%define zxSP	dword [ebp + Z80.SP]
 
 %define zI	byte [ebp + Z80.I]
 %define zIM	byte [ebp + Z80.IM]
@@ -1052,8 +1044,8 @@ align 16
 
 Z80I_LD_%1_mHL:
 
-	mov ecx, zxHL
-	inc zxPC
+	mov	ecx, zxHL
+	inc	zxPC
 	READ_BYTE %1
 	NEXT 7
 
@@ -1077,17 +1069,11 @@ align 16
 
 Z80I_LD_%1_m%2d:
 
-%ifidn %2, IX
-	%define rind zxIX
-%elifidn %2, IY
-	%define rind zxIY
-%endif
-
-	mov	ecx, rind
+	movzx	ecx, z%2
 	movsx	edx, byte [zxPC + 1]
 	add	ecx, edx
 	add	zxPC, byte 2
-	and	ecx, 0xFFFF
+	and	ecx, 0xFFFF	; Still required for READ_BYTE.
 	READ_BYTE %1
 	NEXT 15
 
@@ -1118,8 +1104,8 @@ LD_R_mXYd L, IY
 align 16
 
 Z80I_LD_mHL_%1:
-	mov ecx, zxHL
-	inc zxPC
+	mov	ecx, zxHL
+	inc	zxPC
 	WRITE_BYTE %1
 	NEXT 7
 
@@ -1142,11 +1128,11 @@ LD_mHL_R L
 align 16
 
 Z80I_LD_m%2d_%1:
-	mov	edx, zx%2
+	movzx	edx, z%2
 	movsx	ecx, byte [zxPC + 1]
 	add	ecx, edx
 	add	zxPC, byte 2
-	and	ecx, 0xFFFF
+	and	ecx, 0xFFFF	; Still required for WRITE_BYTE.
 	WRITE_BYTE %1
 	NEXT 15
 
@@ -1172,9 +1158,9 @@ LD_mXYd_R L, IY
 align 16
 
 Z80I_LD_mHL_N:
-	mov dl, [zxPC + 1]
-	mov ecx, zxHL
-	add zxPC, byte 2
+	mov	dl, [zxPC + 1]
+	mov	ecx, zxHL
+	add	zxPC, byte 2
 	WRITE_BYTE
 	NEXT 10
 
@@ -1186,11 +1172,11 @@ Z80I_LD_mHL_N:
 align 16
 
 Z80I_LD_m%1d_N:
-	mov	edx, zx%1
+	movzx	edx, z%1
 	movsx	ecx, byte [zxPC + 1]
 	add	ecx, edx
 	add	zxPC, byte 3
-	and	ecx, 0xFFFF
+	and	ecx, 0xFFFF	; Still required for WRITE_BYTE.
 	mov	dl, [zxPC - 1]
 	WRITE_BYTE
 	NEXT 15
@@ -1205,8 +1191,8 @@ LD_mXYd_N IY
 align 16
 
 Z80I_LD_A_mBC:
-	mov ecx, zxBC
-	inc zxPC
+	movzx	ecx, zBC
+	inc	zxPC
 	READ_BYTE A
 	NEXT 7
 
@@ -1214,8 +1200,8 @@ Z80I_LD_A_mBC:
 align 16
 
 Z80I_LD_A_mDE:
-	mov ecx, zxDE
-	inc zxPC
+	movzx	ecx, zDE
+	inc	zxPC
 	READ_BYTE A
 	NEXT 7
 
@@ -1235,8 +1221,8 @@ Z80I_LD_A_mNN:
 align 16
 
 Z80I_LD_mBC_A:
-	mov ecx, zxBC
-	inc zxPC
+	movzx	ecx, zBC
+	inc	zxPC
 	WRITE_BYTE A
 	NEXT 7
 
@@ -1244,9 +1230,9 @@ Z80I_LD_mBC_A:
 align 16
 
 Z80I_LD_mDE_A:
-	mov ecx, zxDE
-	mov dl, zA
-	inc zxPC
+	movzx	ecx, zDE
+	mov	dl, zA
+	inc	zxPC
 	WRITE_BYTE
 	NEXT 7
 
@@ -1606,8 +1592,8 @@ align 16
 Z80I_EX_DE_HL:
 	mov	edx, zxHL
 	inc	zxPC
-	mov	zxHL, zxDE
-	mov	zxDE, edx
+	movzx	zxHL, zDE
+	mov	zDE, dx
 	NEXT 4
 
 
@@ -1629,13 +1615,13 @@ align 16
 
 Z80I_EXX:
 	movzx	ecx, zBC2
-	mov	edx, zxBC
-	mov	zxBC, ecx
+	movzx	edx, zBC
+	mov	zBC, cx
 	mov	zBC2, dx
 	inc	zxPC
 	movzx	ecx, zDE2
-	mov	edx, zxDE
-	mov	zxDE, ecx
+	movzx	edx, zDE
+	mov	zDE, cx
 	mov	zDE2, dx
 	movzx	ecx, zHL2
 	mov	edx, zxHL
@@ -1681,11 +1667,11 @@ Z80I_LD%1:
 	mov	ecx, zxHL
 	add	zxPC, byte 2
 	READ_BYTE
-	mov	ecx, zxDE
+	movzx	ecx, zDE
 	WRITE_BYTE
 	and	zF, FLAG_S | FLAG_Z | FLAG_C
-	mov	edx, zxBC
-	mov	ecx, zxDE
+	movzx	edx, zBC
+	movzx	ecx, zDE
 %ifidn %1, I
 	inc	zxHL
 	dec	edx
@@ -1696,15 +1682,15 @@ Z80I_LD%1:
 	dec	ecx
 %endif
 	and	zxHL, 0xFFFF
-	and	ecx, 0xFFFF
-	and	edx, 0xFFFF
+	;and	ecx, 0xFFFF	; Not needed since zDE is 16-bit.
+	;and	edx, 0xFFFF	; Not needed since zBC is 16-bit.
 	jz	short %%BC_zero
 	
 	or	zF, FLAG_P
 
 %%BC_zero:
-	mov	zxDE, ecx
-	mov	zxBC, edx
+	mov	zDE, cx
+	mov	zBC, dx
 	NEXT 16
 
 %endmacro
@@ -1726,10 +1712,10 @@ Z80I_LD%1R:
 %%Loop:
 	mov	ecx, zxHL
 	READ_BYTE
-	mov	ecx, zxDE
+	movzx	ecx, zDE
 	WRITE_BYTE
-	mov	edx, zxBC
-	mov	ecx, zxDE
+	movzx	edx, zBC
+	movzx	ecx, zDE
 %ifidn %1, I
 	inc	zxHL
 	dec	edx
@@ -1740,10 +1726,11 @@ Z80I_LD%1R:
 	dec	ecx
 %endif
 	and	zxHL, 0xFFFF
-	and	ecx, 0xFFFF
-	and	edx, 0xFFFF
-	mov	zxDE, ecx
-	mov	zxBC, edx
+	;and	ecx, 0xFFFF	; Not needed since zDE is 16-bit.
+	;and	edx, 0xFFFF	; Not needed since zBC is 16-bit.
+	test	dx, dx		; Check if dx is 0. (Needed due to removal of the above mask.)
+	mov	zDE, cx
+	mov	zBC, dx
 	jz	short %%End
 	
 	sub	edi, byte 21
@@ -1787,18 +1774,19 @@ Z80I_CP%1:
 	mov	dh, zF
 	cmp	zA, dl
 	lahf
-	mov	ecx, zxBC
+	movzx	ecx, zBC
 	and	zF, FLAG_S | FLAG_Z | FLAG_H | FLAG_N
 	and	zxHL, 0xFFFF
 	dec	ecx
 	or	zF, dh
-	and	ecx, 0xFFFF
+	;and	ecx, 0xFFFF	; Not needed since zBC is 16-bit.
+	test	cx, cx		; Check if cx is 0. (Needed due to removal of the above mask.)
 	jz	short %%BC_zero
 	
 	or	zF, FLAG_P
 
 %%BC_zero:
-	mov	zxBC, ecx
+	mov	zBC, cx
 	NEXT 16
 
 %endmacro
@@ -1821,7 +1809,7 @@ Z80I_CP%1R:
 %%Loop:
 	mov	ecx, zxHL
 	READ_BYTE
-	mov	ecx, zxBC
+	movzx	ecx, zBC
 %ifidn %1, I
 	inc	zxHL
 %else
@@ -1829,10 +1817,11 @@ Z80I_CP%1R:
 %endif
 	dec	ecx
 	and	zxHL, 0xFFFF
-	and	ecx, 0xFFFF
+	;and	ecx, 0xFFFF	; Not needed since zBC is 16-bit.
+	test	cx, cx		; Check if cx is 0. (Needed due to removal of the above mask.)
 	jz	short %%End_BC_zero
 	
-	mov	zxBC, ecx
+	mov	zBC, cx
 	cmp	zA, dl
 	je	short %%End_A_equal_mHL
 	
@@ -1862,13 +1851,13 @@ align 16
 align 16
 
 %%End_BC_zero:
-	mov dh, zF
-	cmp zA, dl
+	mov	dh, zF
+	cmp	zA, dl
 	lahf
-	mov zxBC, ecx
-	and zF, FLAG_S | FLAG_Z | FLAG_H | FLAG_N
-	add zxPC, byte 2
-	or zF, dh
+	mov	zBC, cx
+	and	zF, FLAG_S | FLAG_Z | FLAG_H | FLAG_N
+	add	zxPC, byte 2
+	or	zF, dh
 	NEXT 18
 
 %endmacro
@@ -2089,31 +2078,31 @@ align 16
 %endif
 
 Z80I_%1_mHL:
-	mov ecx, zxHL
-	inc zxPC
+	mov	ecx, zxHL
+	inc	zxPC
 	READ_BYTE
 %ifidn %1, ADC
-	shr zF, 1
+	shr	zF, 1
 %elifidn %1, SBC
-	shr zF, 1
+	shr	zF, 1
 %endif
-	OPX zA, dl
+	OPX	zA, dl
 	lahf
 %ifidn %1, CP
-	mov zFXY, dl
+	mov	zFXY, dl
 %else
-	mov zFXY, zA
+	mov	zFXY, zA
 %endif
-	jo short %%over
+	jo	short %%over
 
-	and zF, OPFLAG
+	and	zF, OPFLAG
 	NEXT 7
 
 align 16
 
 %%over:
-	and zF, OPFLAG
-	or zF, FLAG_P
+	and	zF, OPFLAG
+	or	zF, FLAG_P
 	NEXT 7
 
 %endmacro
@@ -2146,34 +2135,34 @@ align 16
 %endif
 
 Z80I_%1_m%2d:
-	mov edx, zx%2
-	movsx ecx, byte [zxPC + 1]
-	add ecx, edx
-	add zxPC, byte 2
-	and ecx, 0xFFFF
+	movzx	edx, z%2
+	movsx	ecx, byte [zxPC + 1]
+	add	ecx, edx
+	add	zxPC, byte 2
+	and	ecx, 0xFFFF	; Still required for READ_BYTE.
 	READ_BYTE
 %ifidn %1, ADC
-	shr zF, 1
+	shr	zF, 1
 %elifidn %1, SBC
-	shr zF, 1
+	shr	zF, 1
 %endif
-	OPX zA, dl
+	OPX	zA, dl
 	lahf
 %ifidn %1, CP
-	mov zFXY, dl
+	mov	zFXY, dl
 %else
-	mov zFXY, zA
+	mov	zFXY, zA
 %endif
-	jo short %%over
+	jo	short %%over
 
-	and zF, OPFLAG
+	and	zF, OPFLAG
 	NEXT 15
 
 align 16
 
 %%over:
-	and zF, OPFLAG
-	or zF, FLAG_P
+	and	zF, OPFLAG
+	or	zF, FLAG_P
 	NEXT 15
 
 %endmacro
@@ -2334,11 +2323,11 @@ LOGIC_A_mHL XOR
 align 16
 
 Z80I_%1_m%2d:
-	mov	edx, zx%2
+	movzx	edx, z%2
 	movsx	ecx, byte [zxPC + 1]
 	add	ecx, edx
 	add	zxPC, byte 2
-	and	ecx, 0xFFFF
+	and	ecx, 0xFFFF	; Still required for READ_BYTE.
 	READ_BYTE
 	%1 zA, dl
 	lahf
@@ -2462,11 +2451,11 @@ INCDEC_mHL DEC
 align 16
 
 Z80I_%1_m%2d:
-	mov	edx, zx%2
+	movzx	edx, z%2
 	movsx	ecx, byte [zxPC + 1]
 	add	ecx, edx
 	add	zxPC, byte 2
-	and	ecx, 0xFFFF
+	and	ecx, 0xFFFF	; Still required for READ_BYTE.
 	push	ecx
 %ifdef __FORCE_STACK_ALIGNMENT
 	; Enforce 16-byte stack alignment.
@@ -3116,12 +3105,12 @@ Z80I_%1_m%2d_%3:
 %else
 Z80I_%1_m%2d:
 %endif
-	mov edx, zx%2
-	movsx ecx, byte [zxPC + 1]
-	add ecx, edx
-	add zxPC, byte 3
-	and ecx, 0xFFFF
-	push ecx
+	movzx	edx, z%2
+	movsx	ecx, byte [zxPC + 1]
+	add	ecx, edx
+	add	zxPC, byte 3
+	and	ecx, 0xFFFF	; Still required for READ_BYTE.
+	push	ecx
 %ifdef __FORCE_STACK_ALIGNMENT
 	; Enforce 16-byte stack alignment.
 	sub	esp, byte 12
@@ -3132,54 +3121,54 @@ Z80I_%1_m%2d:
 	add	esp, byte 12
 %endif
 %ifidn %1, RLC
-	rol dl, 1
-	pop ecx
+	rol	dl, 1
+	pop	ecx
 	%define sft 0
 %elifidn %1, RL
-	shr zF, 1
-	pop ecx
-	rcl dl, 1
+	shr	zF, 1
+	pop	ecx
+	rcl	dl, 1
 	%define sft 0
 %elifidn %1, RRC
-	ror dl, 1
-	pop ecx
+	ror	dl, 1
+	pop	ecx
 	%define sft 0
 %elifidn %1, RR
-	shr zF, 1
-	pop ecx
-	rcr dl, 1
+	shr	zF, 1
+	pop	ecx
+	rcr	dl, 1
 	%define sft 0
 %elifidn %1, SLA
-	add dl, dl
-	pop ecx
+	add	dl, dl
+	pop	ecx
 	%define sft 1
 %elifidn %1, SLL
-	add dl, dl
-	pop ecx
+	add	dl, dl
+	pop	ecx
 	%define sft 1
 %elifidn %1, SRA
-	sar dl, 1
-	pop ecx
+	sar	dl, 1
+	pop	ecx
 	%define sft 1
 %elifidn %1, SRL
-	shr dl, 1
-	pop ecx
+	shr	dl, 1
+	pop	ecx
 	%define sft 1
 %endif
 %if (sft == 0)
-	setc dh
-	test dl, dl
+	setc	dh
+	test	dl, dl
 	%if %0 > 2
 		mov z%3, dl
 	%endif
 	lahf
-	and zF, FLAG_Z | FLAG_S | FLAG_P
-	mov zFXY, dl
-	or zF, dh
+	and	zF, FLAG_Z | FLAG_S | FLAG_P
+	mov	zFXY, dl
+	or	zF, dh
 %else
 	lahf
-	mov zFXY, dl
-	and zF, FLAG_S | FLAG_Z | FLAG_P | FLAG_C
+	mov	zFXY, dl
+	and	zF, FLAG_S | FLAG_Z | FLAG_P | FLAG_C
 	%ifidn %1, SLL
 		inc dl
 		or zF, FLAG_P
@@ -3566,36 +3555,36 @@ BITb_mHL 7
 align 16
 
 Z80I_BIT%1_m%2d:
-	mov edx, zx%2
-	movsx ecx, byte [zxPC + 1]
-	add ecx, edx
-	and zF, FLAG_C
-	and ecx, 0xFFFF
+	movzx	edx, z%2
+	movsx	ecx, byte [zxPC + 1]
+	add	ecx, edx
+	and	zF, FLAG_C
+	and	ecx, 0xFFFF	; Still required for READ_BYTE.
 	READ_BYTE
-	test dl, (1 << %1)
-	lea zxPC, [zxPC + 3]
-	jz short %%zero
+	test	dl, (1 << %1)
+	lea	zxPC, [zxPC + 3]
+	jz	short %%zero
 
 %if (%1 == 7)
-	mov zFXY, 0
-	or zF, FLAG_S | FLAG_H
+	mov	zFXY, 0
+	or	zF, FLAG_S | FLAG_H
 %elif (%1 == 5)
-	mov zFXY, ch
-	or zF, FLAG_Y | FLAG_H
+	mov	zFXY, ch
+	or	zF, FLAG_Y | FLAG_H
 %elif (%1 == 3)
-	mov zFXY, ch
-	or zF, FLAG_X | FLAG_H
+	mov	zFXY, ch
+	or	zF, FLAG_X | FLAG_H
 %else
-	mov zFXY, 0
-	or zF, FLAG_H
+	mov	zFXY, 0
+	or	zF, FLAG_H
 %endif
 	NEXT 16
 
 align 16
 
 %%zero:
-	mov zFXY, 0
-	or zF, FLAG_Z | FLAG_H | FLAG_P
+	mov	zFXY, 0
+	or	zF, FLAG_Z | FLAG_H | FLAG_P
 	NEXT 16
 
 %endmacro
@@ -3817,12 +3806,12 @@ Z80I_%1%2_m%3d_%4:
 %else
 Z80I_%1%2_m%3d:
 %endif
-	mov edx, zx%3
-	movsx ecx, byte [zxPC + 1]
-	add ecx, edx
-	add zxPC, byte 3
-	and ecx, 0xFFFF
-	push ecx
+	movzx	edx, z%3
+	movsx	ecx, byte [zxPC + 1]
+	add	ecx, edx
+	add	zxPC, byte 3
+	and	ecx, 0xFFFF	; Still required for READ_BYTE.
+	push	ecx
 %ifdef __FORCE_STACK_ALIGNMENT
 	; Enforce 16-byte stack alignment.
 	sub	esp, byte 12
@@ -3833,16 +3822,16 @@ Z80I_%1%2_m%3d:
 	add	esp, byte 12
 %endif
 %if %0 < 4
-	pop ecx
+	pop	ecx
 %endif
 %ifidn %1, SET
-	or dl, (1 << %2)
+	or	dl, (1 << %2)
 %else
-	and dl, ~(1 << %2)
+	and	dl, ~(1 << %2)
 %endif
 %if %0 > 3
-	pop ecx
-	mov z%4, dl
+	pop	ecx
+	mov	z%4, dl
 %endif
 	WRITE_BYTE
 	NEXT 19
@@ -4236,7 +4225,7 @@ JRcc_N C, N
 align 16
 
 Z80I_JP_%1:
-	mov zxPC, zx%1
+	movzx	zxPC, z%1
 	REBASE_PC
 	NEXT 4
 
@@ -4435,7 +4424,7 @@ Z80I_IN_%1_mBC:
 %else
 Z80I_IN_F_mBC:
 %endif
-	mov	ecx, zxBC
+	movzx	ecx, zBC
 	add	zxPC, byte 2
 	DO_IN
 	and	zF, FLAG_C
@@ -4604,12 +4593,12 @@ Z80I_OUT_mBC_%1:
 %else
 Z80I_OUT_mBC_0:
 %endif
-	mov ecx, zxBC
-	add zxPC, byte 2
+	movzx	ecx, zBC
+	add	zxPC, byte 2
 %if %0 > 0
-	mov dl, z%1
+	mov	dl, z%1
 %else
-	xor dl, dl
+	xor	dl, dl
 %endif
 	DO_OUT
 	NEXT 12
@@ -4849,7 +4838,7 @@ SYM(z80_Exec):
 	; No boundary checks are performed!
 	; FIXME: Fix this in the C rewrite!
 	movzx	edx, byte [zxPC]
-	mov	zxHL, [ebp + Z80.HL]
+	movzx	zxHL, word [ebp + Z80.HL]
 	
 %if (GENS_LOG == 1)
 	push	eax
@@ -4876,7 +4865,7 @@ z80_Exec_Quit:
 
 z80_Exec_Really_Quit:
 	mov	[ebp + Z80.AF], zAF
-	mov	[ebp + Z80.HL], zxHL
+	mov	[ebp + Z80.HL], zHL
 	mov	eax, [ebp + Z80.CycleTD]
 	xor	ecx, ecx
 	mov	ebx, [ebp + Z80.CycleCnt]
