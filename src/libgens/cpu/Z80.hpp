@@ -69,7 +69,7 @@ class Z80
 		static inline void Reset(void)
 		{
 #ifdef GENS_ENABLE_EMULATION
-			mdZ80_reset(&ms_Z80);
+			mdZ80_reset(ms_Z80);
 #endif /* GENS_ENABLE_EMULATION */
 		}
 		
@@ -84,9 +84,9 @@ class Z80
 			
 			// Only run the Z80 if it's enabled and it has the bus.
 			if (M68K_Mem::Z80_State == (Z80_STATE_ENABLED | Z80_STATE_BUSREQ))
-				z80_Exec(&ms_Z80, cyclesToRun);
+				z80_Exec(ms_Z80, cyclesToRun);
 			else
-				mdZ80_set_odo(&ms_Z80, cyclesToRun);
+				mdZ80_set_odo(ms_Z80, cyclesToRun);
 #else
 			((void)cyclesSubtract);
 #endif /* GENS_ENABLE_EMULATION */
@@ -99,7 +99,7 @@ class Z80
 		static inline void Interrupt(uint8_t irq)
 		{
 #ifdef GENS_ENABLE_EMULATION
-			mdZ80_interrupt(&ms_Z80, irq);
+			mdZ80_interrupt(ms_Z80, irq);
 #else
 			((void)irq);
 #endif /* GENS_ENABLE_EMULATION */
@@ -111,7 +111,7 @@ class Z80
 		static inline void ClearOdometer(void)
 		{
 #ifdef GENS_ENABLE_EMULATION
-			mdZ80_clear_odo(&ms_Z80);
+			mdZ80_clear_odo(ms_Z80);
 #endif /* GENS_ENABLE_EMULATION */
 		}
 		
@@ -122,7 +122,7 @@ class Z80
 		static inline void SetOdometer(unsigned int odo)
 		{
 #ifdef GENS_ENABLE_EMULATION
-			mdZ80_set_odo(&ms_Z80, odo);
+			mdZ80_set_odo(ms_Z80, odo);
 #else
 			((void)odo);
 #endif /* GENS_ENABLE_EMULATION */
@@ -131,7 +131,7 @@ class Z80
 		/** END: mdZ80 wrapper functions. **/
 	
 	protected:
-		static Z80_CONTEXT ms_Z80;
+		static mdZ80_context *ms_Z80;
 	
 	private:
 		Z80() { }
