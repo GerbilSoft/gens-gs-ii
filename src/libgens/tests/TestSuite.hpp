@@ -35,8 +35,8 @@
 	if (expr) assertPass(0); \
 	else      assertFail(#expr);
 
-namespace LibGens
-{
+namespace LibGens {
+namespace Tests {
 
 class TestSuite
 {
@@ -121,6 +121,6 @@ inline int TestSuite::testsFailed(void) const
 inline int TestSuite::testsTotal(void) const
 	{ return m_tests_total; }
 
-}
+} }
 
 #endif /* __LIBGENS_TESTS_TESTSUITE_HPP__ */

@@ -38,8 +38,7 @@ using namespace std;
 // C++ includes.
 #include <string>
 
-namespace LibGens
-{
+namespace LibGens { namespace Tests {
 
 /**
  * Parse a number from a string. (strtol() wrapper)
@@ -520,7 +519,7 @@ fail:
 	return -1;
 }
 
-}
+} }
 
 int main(int argc, char *argv[])
 {
@@ -531,7 +530,7 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 	
-	LibGens::Test_VdpPalette_DAC vdpTest(argv[1]);
+	LibGens::Tests::Test_VdpPalette_DAC vdpTest(argv[1]);
 	int ret = vdpTest.exec();
 	return ((ret == 0) ? ret : vdpTest.testsFailed());
 }

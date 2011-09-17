@@ -25,8 +25,8 @@
 #include <cstdio>
 using namespace std;
 
-namespace LibGens
-{
+namespace LibGens {
+namespace Tests {
 
 TestSuite::TestSuite()
 	: m_tests_total(0)
@@ -123,4 +123,4 @@ void TestSuite::assertFail(const char *expr)
 	}
 }
 
-}
+} }
