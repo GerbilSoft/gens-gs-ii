@@ -10,7 +10,7 @@ INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../")
 # VdpPalette test programs
 ADD_EXECUTABLE(test_VdpPalette_DAC_generate test_VdpPalette_DAC_generate.c)
 
-ADD_EXECUTABLE(test_VdpPalette_DAC test_VdpPalette_DAC.cpp)
+ADD_EXECUTABLE(test_VdpPalette_DAC test_VdpPalette_DAC.cpp TestSuite.cpp)
 TARGET_LINK_LIBRARIES(test_VdpPalette_DAC gens)
 
 # Generate the test files.
