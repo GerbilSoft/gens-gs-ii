@@ -367,7 +367,7 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_SMS(pixel *palFull)
 	const int brightAdj = (this->brightness - 100);
 	
 	// Calculate the SMS palette.
-	for (int i = 0x00; i < 0x3F; i++)
+	for (int i = 0x00; i < 0x40; i++)
 	{
 		// Scale the color components using the lookup table.
 		int r = PalComponent_SMS[i & 0x03];
