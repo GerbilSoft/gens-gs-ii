@@ -504,7 +504,7 @@ int Test_VdpPalette_DAC::exec(void )
 	// Tests are complete.
 	// TODO: Print class name.
 	testsCompleted();
-	return 0;
+	return testsFailed();
 
 no_magic:
 	PrintFail(stderr);	// TODO: [FATAL] instead of [FAIL].
