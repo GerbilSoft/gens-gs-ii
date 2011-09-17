@@ -24,3 +24,15 @@ ADD_TEST(NAME test_VdpPalette_DAC_generate_SMS
 	COMMAND test_VdpPalette_DAC_generate --palmode SMS PalTest_SMS.txt)
 ADD_TEST(NAME test_VdpPalette_DAC_generate_GG
 	COMMAND test_VdpPalette_DAC_generate --palmode GG PalTest_GG.txt)
+
+# Test the VDP DAC.
+ADD_TEST(NAME test_VdpPalette_DAC_MD_Raw
+	COMMAND test_VdpPalette_DAC PalTest_MD_Raw.txt)
+ADD_TEST(NAME test_VdpPalette_DAC_MD_Full
+	COMMAND test_VdpPalette_DAC PalTest_MD_Full.txt)
+ADD_TEST(NAME test_VdpPalette_DAC_MD_Full+SH
+	COMMAND test_VdpPalette_DAC PalTest_MD_Full+SH.txt)
+ADD_TEST(NAME test_VdpPalette_DAC_GG
+	COMMAND test_VdpPalette_DAC PalTest_GG.txt)
+ADD_TEST(NAME test_VdpPalette_DAC_SMS
+	COMMAND test_VdpPalette_DAC PalTest_SMS.txt)
