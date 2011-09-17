@@ -149,11 +149,11 @@ int Test_VdpPalette_DAC::exec(void )
 	}
 	
 	// Current Palette Mode.
-	LibGens::VdpPalette::PalMode_t palMode = LibGens::VdpPalette::PALMODE_MD;
+	VdpPalette::PalMode_t palMode = VdpPalette::PALMODE_MD;
 	const char *palMode_str = PALTEST_PALMODE_MD;
 	
 	// Current Color Scale Method.
-	LibGens::VdpPalette::ColorScaleMethod_t csm = LibGens::VdpPalette::COLSCALE_FULL;
+	VdpPalette::ColorScaleMethod_t csm = VdpPalette::COLSCALE_FULL;
 	const char *csm_str = PALTEST_COLORSCALE_FULL;
 	
 	// Current SHMode. (0x00 == normal, 0x40 == shadow, 0x80 == highlight)
@@ -161,14 +161,14 @@ int Test_VdpPalette_DAC::exec(void )
 	const char *shMode_str = PALTEST_SHMODE_NORMAL;
 	
 	// Initialize three VdpPalette objects.
-	LibGens::VdpPalette *vdp15 = new LibGens::VdpPalette();
-	vdp15->setBpp(LibGens::VdpPalette::BPP_15);
+	VdpPalette *vdp15 = new VdpPalette();
+	vdp15->setBpp(VdpPalette::BPP_15);
 	
-	LibGens::VdpPalette *vdp16 = new LibGens::VdpPalette();
-	vdp16->setBpp(LibGens::VdpPalette::BPP_16);
+	VdpPalette *vdp16 = new VdpPalette();
+	vdp16->setBpp(VdpPalette::BPP_16);
 	
-	LibGens::VdpPalette *vdp32 = new LibGens::VdpPalette();
-	vdp32->setBpp(LibGens::VdpPalette::BPP_32);
+	VdpPalette *vdp32 = new VdpPalette();
+	vdp32->setBpp(VdpPalette::BPP_32);
 	
 	/**
 	 * Default settings:
@@ -176,13 +176,13 @@ int Test_VdpPalette_DAC::exec(void )
 	 * - ColorScale: Full
 	 * - SHMode: Normal
 	 */
-	vdp15->setPalMode(LibGens::VdpPalette::PALMODE_MD);
-	vdp16->setPalMode(LibGens::VdpPalette::PALMODE_MD);
-	vdp32->setPalMode(LibGens::VdpPalette::PALMODE_MD);
+	vdp15->setPalMode(VdpPalette::PALMODE_MD);
+	vdp16->setPalMode(VdpPalette::PALMODE_MD);
+	vdp32->setPalMode(VdpPalette::PALMODE_MD);
 	
-	vdp15->setColorScaleMethod(LibGens::VdpPalette::COLSCALE_FULL);
-	vdp16->setColorScaleMethod(LibGens::VdpPalette::COLSCALE_FULL);
-	vdp32->setColorScaleMethod(LibGens::VdpPalette::COLSCALE_FULL);
+	vdp15->setColorScaleMethod(VdpPalette::COLSCALE_FULL);
+	vdp16->setColorScaleMethod(VdpPalette::COLSCALE_FULL);
+	vdp32->setColorScaleMethod(VdpPalette::COLSCALE_FULL);
 	
 	vdp15->setMdShadowHighlight(false);
 	vdp16->setMdShadowHighlight(false);
@@ -254,18 +254,18 @@ int Test_VdpPalette_DAC::exec(void )
 			// Format: PalMode:(string)mode
 			token = strtok(NULL, ":");
 			if (!strcasecmp(token, PALTEST_PALMODE_MD))
-				palMode = LibGens::VdpPalette::PALMODE_MD;
+				palMode = VdpPalette::PALMODE_MD;
 			/* TODO
 			else if (!strcasecmp(token, PALTEST_PALMODE_32X))
-				palMode = LibGens::VdpPalette::PALMODE_32X;
+				palMode = VdpPalette::PALMODE_32X;
 			*/
 			else if (!strcasecmp(token, PALTEST_PALMODE_SMS))
-				palMode = LibGens::VdpPalette::PALMODE_SMS;
+				palMode = VdpPalette::PALMODE_SMS;
 			else if (!strcasecmp(token, PALTEST_PALMODE_GG))
-				palMode = LibGens::VdpPalette::PALMODE_GG;
+				palMode = VdpPalette::PALMODE_GG;
 			/* TODO
 			else if (!strcasecmp(token, PALTEST_PALMODE_TMS9918))
-				palMode = LibGens::VdpPalette::PALMODE_TMS9918;
+				palMode = VdpPalette::PALMODE_TMS9918;
 			*/
 			else
 			{
@@ -277,23 +277,23 @@ int Test_VdpPalette_DAC::exec(void )
 			// Convert the selected PalMode to uppercase.
 			switch (palMode)
 			{
-				case LibGens::VdpPalette::PALMODE_MD:
+				case VdpPalette::PALMODE_MD:
 				default:
 					palMode_str = PALTEST_PALMODE_MD;
 					break;
 				/* TODO
-				case LibGens::VdpPalette::PALMODE_32X:
+				case VdpPalette::PALMODE_32X:
 					palMode_str = PALTEST_PALMODE_32X;
 					break;
 				*/
-				case LibGens::VdpPalette::PALMODE_SMS:
+				case VdpPalette::PALMODE_SMS:
 					palMode_str = PALTEST_PALMODE_SMS;
 					break;
-				case LibGens::VdpPalette::PALMODE_GG:
+				case VdpPalette::PALMODE_GG:
 					palMode_str = PALTEST_PALMODE_GG;
 					break;
 				/* TODO
-				case LibGens::VdpPalette::PALMODE_TMS9918:
+				case VdpPalette::PALMODE_TMS9918:
 					palMode_str = PALTEST_PALMODE_TMS9918;
 					break;
 				*/
@@ -317,11 +317,11 @@ int Test_VdpPalette_DAC::exec(void )
 			// Format: ColorScale:(string)csm
 			token = strtok(NULL, ":");
 			if (!strcasecmp(token, PALTEST_COLORSCALE_RAW))
-				csm = LibGens::VdpPalette::COLSCALE_RAW;
+				csm = VdpPalette::COLSCALE_RAW;
 			else if (!strcasecmp(token, PALTEST_COLORSCALE_FULL))
-				csm = LibGens::VdpPalette::COLSCALE_FULL;
+				csm = VdpPalette::COLSCALE_FULL;
 			else if (!strcasecmp(token, PALTEST_COLORSCALE_FULL_SH))
-				csm = LibGens::VdpPalette::COLSCALE_FULL_SH;
+				csm = VdpPalette::COLSCALE_FULL_SH;
 			else
 			{
 				PrintFail(stderr);
@@ -332,21 +332,21 @@ int Test_VdpPalette_DAC::exec(void )
 			// Convert the selected ColorScale to uppercase.
 			switch (csm)
 			{
-				case LibGens::VdpPalette::COLSCALE_RAW:
+				case VdpPalette::COLSCALE_RAW:
 				default:
 					csm_str = PALTEST_COLORSCALE_RAW;
 					break;
-				case LibGens::VdpPalette::COLSCALE_FULL:
+				case VdpPalette::COLSCALE_FULL:
 					csm_str = PALTEST_COLORSCALE_FULL;
 					break;
-				case LibGens::VdpPalette::COLSCALE_FULL_SH:
+				case VdpPalette::COLSCALE_FULL_SH:
 					csm_str = PALTEST_COLORSCALE_FULL_SH;
 					break;
 			}
 			
 			// Print the selected color scale method.
 			fprintf(stderr, "Selected ColorScale: '%s'\n", csm_str);
-			if (palMode != LibGens::VdpPalette::PALMODE_MD)
+			if (palMode != VdpPalette::PALMODE_MD)
 			{
 				// ColorScale is only supported with MD palettes.
 				PrintWarn(stderr);
@@ -397,7 +397,7 @@ int Test_VdpPalette_DAC::exec(void )
 			
 			// Print the selected Shadow/Highlight mode.
 			fprintf(stderr, "Selected SHMode: '%s'\n", shMode_str);
-			if (palMode != LibGens::VdpPalette::PALMODE_MD)
+			if (palMode != VdpPalette::PALMODE_MD)
 			{
 				// ColorScale is only supported with MD palettes.
 				PrintWarn(stderr);
@@ -463,12 +463,12 @@ int Test_VdpPalette_DAC::exec(void )
 			
 			// Test the palette entry.
 			const uint8_t pal_entry =
-				(palMode == LibGens::VdpPalette::PALMODE_MD
+				(palMode == VdpPalette::PALMODE_MD
 					? (shMode + 1)
 					: 0x01
 					);
 			
-			if (palMode == LibGens::VdpPalette::PALMODE_SMS)
+			if (palMode == VdpPalette::PALMODE_SMS)
 			{
 				// SMS. Write 8-bit data to CRam.
 				vdp15->writeCRam_8(0x01, (uint8_t)cram);
