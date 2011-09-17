@@ -24,12 +24,18 @@
 #include "test_VdpPalette_DAC.h"
 #include "Vdp/VdpPalette.hpp"
 
-// C includes.
-#include <stdio.h>
-#include <stdlib.h>
+// C includes. (C++ namespace)
+#include <cstdio>
+#include <cstdlib>
+#include <cerrno>
+#include <cstring>
+using namespace std;
+
 #include <unistd.h>
-#include <errno.h>
-#include <string.h>
+
+// Test variables.
+static int tests_failed = 0;	// Number of tests failed.
+static int tests_total = 0;	// Total number of tests run.
 
 /**
  * Parse a number from a string. (strtol() wrapper)
@@ -57,7 +63,7 @@ static inline int parse_number(const char *str, int base, int* pRet)
 /**
  * Test a palette data file.
  * @param filename Filename.
- * @return 0 on success; non-zero on error.
+ * @return 0 if tests were run; non-zero if a fatal error occurred.
  */
 static int test_file(const char *filename)
 {
@@ -66,8 +72,20 @@ static int test_file(const char *filename)
 	if (!f)
 	{
 		fprintf(stderr, "Error opening '%s': %s\n", filename, strerror(errno));
-		return EXIT_FAILURE;
+		return -1;
 	}
+	
+	// Current Palette Mode.
+	LibGens::VdpPalette::PalMode_t palMode = LibGens::VdpPalette::PALMODE_MD;
+	const char *palMode_str = PALTEST_PALMODE_MD;
+	
+	// Current Color Scale Method.
+	LibGens::VdpPalette::ColorScaleMethod_t csm = LibGens::VdpPalette::COLSCALE_FULL;
+	const char *csm_str = PALTEST_COLORSCALE_FULL;
+	
+	// Current SHMode. (0x00 == normal, 0x40 == shadow, 0x80 == highlight)
+	uint8_t shMode = 0x00;
+	const char *shMode_str = PALTEST_SHMODE_NORMAL;
 	
 	// Initialize three VdpPalette objects.
 	LibGens::VdpPalette *vdp15 = new LibGens::VdpPalette();
@@ -99,6 +117,14 @@ static int test_file(const char *filename)
 	
 	// Set to true when PALTEST_MAGIC is read.
 	bool isInit = false;
+	
+	// Set to true once a color is read to indicate the start of a new section.
+	// (Initialized to true on startup.)
+	bool isNewSection = true;
+	
+	// Current section failed/total counter.
+	int section_failed = 0;
+	int section_total = 0;
 	
 	// Read lines.
 	char buf[1024];
@@ -137,7 +163,7 @@ static int test_file(const char *filename)
 			
 			if (header_version != PALTEST_VERSION)
 			{
-				fprintf(stderr, "'%s': Incorrect PalTest version. (expected %04X; found %04X)\n",
+				fprintf(stderr, "'%s': Incorrect PalTest version. (expected %04X; found %04X) [FATAL]\n",
 					filename, header_version, PALTEST_VERSION);
 				goto fail;
 			}
@@ -145,12 +171,22 @@ static int test_file(const char *filename)
 			// Header is valid.
 			fprintf(stderr, "Processing file: '%s'\n", filename);
 			isInit = true;
+			isNewSection = true;
 		}
 		else if (!strcasecmp(token, PALTEST_CMD_PALMODE))
 		{
-			// Palette mode.
-			LibGens::VdpPalette::PalMode_t palMode = LibGens::VdpPalette::PALMODE_MD;
+			if (!isInit)
+				goto no_magic;
 			
+			if (isNewSection)
+			{
+				fputc('\n', stderr);
+				isNewSection = false;
+				section_failed = 0;
+				section_total = 0;
+			}
+			
+			// Palette mode.
 			token = strtok(NULL, ":");
 			if (!strcasecmp(token, PALTEST_PALMODE_MD))
 				palMode = LibGens::VdpPalette::PALMODE_MD;
@@ -172,8 +208,149 @@ static int test_file(const char *filename)
 				goto fail;
 			}
 			
-			// TODO: Convert PalMode to uppercase?
-			fprintf(stderr, "Selected PalMode: '%s'\n", token);
+			// Convert the selected PalMode to uppercase.
+			switch (palMode)
+			{
+				case LibGens::VdpPalette::PALMODE_MD:
+				default:
+					palMode_str = PALTEST_PALMODE_MD;
+					break;
+				/* TODO
+				case LibGens::VdpPalette::PALMODE_32X:
+					palMode_str = PALTEST_PALMODE_32X;
+					break;
+				*/
+				case LibGens::VdpPalette::PALMODE_SMS:
+					palMode_str = PALTEST_PALMODE_SMS;
+					break;
+				case LibGens::VdpPalette::PALMODE_GG:
+					palMode_str = PALTEST_PALMODE_GG;
+					break;
+				/* TODO
+				case LibGens::VdpPalette::PALMODE_TMS9918:
+					palMode_str = PALTEST_PALMODE_TMS9918;
+					break;
+				*/
+			}
+			
+			// Print the selected palette mode.
+			fprintf(stderr, "Selected PalMode: '%s'\n", palMode_str);
+			
+			// Set the palette mode.
+			vdp15->setPalMode(palMode);
+			vdp16->setPalMode(palMode);
+			vdp32->setPalMode(palMode);
+		}
+		else if (!strcasecmp(token, PALTEST_CMD_COLORSCALE))
+		{
+			if (!isInit)
+				goto no_magic;
+			
+			if (isNewSection)
+			{
+				fputc('\n', stderr);
+				isNewSection = false;
+				section_failed = 0;
+				section_total = 0;
+			}
+			
+			// Color Scale Method.
+			token = strtok(NULL, ":");
+			if (!strcasecmp(token, PALTEST_COLORSCALE_RAW))
+				csm = LibGens::VdpPalette::COLSCALE_RAW;
+			else if (!strcasecmp(token, PALTEST_COLORSCALE_FULL))
+				csm = LibGens::VdpPalette::COLSCALE_FULL;
+			else if (!strcasecmp(token, PALTEST_COLORSCALE_FULL_SH))
+				csm = LibGens::VdpPalette::COLSCALE_FULL_SH;
+			else
+			{
+				fprintf(stderr, "Unsupported ColorScale: '%s'\n", token);
+				goto fail;
+			}
+			
+			// Convert the selected ColorScale to uppercase.
+			switch (csm)
+			{
+				case LibGens::VdpPalette::COLSCALE_RAW:
+				default:
+					csm_str = PALTEST_COLORSCALE_RAW;
+					break;
+				case LibGens::VdpPalette::COLSCALE_FULL:
+					csm_str = PALTEST_COLORSCALE_FULL;
+					break;
+				case LibGens::VdpPalette::COLSCALE_FULL_SH:
+					csm_str = PALTEST_COLORSCALE_FULL_SH;
+					break;
+			}
+			
+			// Print the selected color scale method.
+			fprintf(stderr, "Selected ColorScale: '%s'\n", csm_str);
+			if (palMode != LibGens::VdpPalette::PALMODE_MD)
+			{
+				// ColorScale is only supported with MD palettes.
+				fprintf(stderr, "* WARNING: ColorScale has no effect with PalMode '%s'.", palMode_str);
+			}
+			
+			// Set the color scale method.
+			vdp15->setColorScaleMethod(csm);
+			vdp16->setColorScaleMethod(csm);
+			vdp32->setColorScaleMethod(csm);
+		}
+		else if (!strcasecmp(token, PALTEST_CMD_SHMODE))
+		{
+			if (!isInit)
+				goto no_magic;
+			
+			if (isNewSection)
+			{
+				fputc('\n', stderr);
+				isNewSection = false;
+				section_failed = 0;
+				section_total = 0;
+			}
+			
+			// Shadow/Highlight Mode.
+			token = strtok(NULL, ":");
+			if (!strcasecmp(token, PALTEST_SHMODE_NORMAL))
+				shMode = 0x00;
+			else if (!strcasecmp(token, PALTEST_SHMODE_SHADOW))
+				shMode = 0x40;
+			else if (!strcasecmp(token, PALTEST_SHMODE_HIGHLIGHT))
+				shMode = 0x80;
+			else
+			{
+				fprintf(stderr, "Unsupported SHMode: '%s'\n", token);
+				goto fail;
+			}
+			
+			// Convert the selected SHMode to uppercase.
+			switch (shMode)
+			{
+				case 0x00:
+				default:
+					shMode_str = PALTEST_SHMODE_NORMAL;
+					break;
+				case 0x40:
+					shMode_str = PALTEST_SHMODE_SHADOW;
+					break;
+				case 0x80:
+					shMode_str = PALTEST_SHMODE_HIGHLIGHT;
+					break;
+			}
+			
+			// Print the selected Shadow/Highlight mode.
+			fprintf(stderr, "Selected SHMode: '%s'\n", shMode_str);
+			if (palMode != LibGens::VdpPalette::PALMODE_MD)
+			{
+				// ColorScale is only supported with MD palettes.
+				fprintf(stderr, "* WARNING: SHMode has no effect with PalMode '%s'.", palMode_str);
+			}
+			
+			// Set the Shadow/Highlight mode.
+			const bool doSH = (shMode != 0x00);
+			vdp15->setMdColorMask(doSH);
+			vdp16->setMdColorMask(doSH);
+			vdp32->setMdColorMask(doSH);
 		}
 		else
 		{
@@ -181,13 +358,14 @@ static int test_file(const char *filename)
 		}
 	}
 	
-	// TODO: Check if all tests passed.
 	fclose(f);
-	return EXIT_SUCCESS;
-	
+	return 0;
+
+no_magic:
+	fprintf(stderr, "'%s': PalTest version line is missing. [FATAL]\n", filename);
 fail:
 	fclose(f);
-	return EXIT_FAILURE;
+	return -1;
 }
 
 int main(int argc, char *argv[])
@@ -199,5 +377,6 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 	
-	return test_file(argv[1]);
+	int ret = test_file(argv[1]);
+	return ((ret == 0) ? ret : tests_failed);
 }
