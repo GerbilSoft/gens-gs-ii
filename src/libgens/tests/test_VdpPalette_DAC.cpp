@@ -23,6 +23,7 @@
 
 #include "test_VdpPalette_DAC.h"
 #include "Vdp/VdpPalette.hpp"
+#include "TestSuite.hpp"
 
 // C includes. (C++ namespace)
 #include <cstdio>
@@ -31,31 +32,14 @@
 #include <cstring>
 using namespace std;
 
+// C includes.
 #include <unistd.h>
 
-// Test variables.
-static int tests_failed = 0;	// Number of tests failed.
-static int tests_total = 0;	// Total number of tests run.
+// C++ includes.
+#include <string>
 
-// Test variables. (Current section.)
-static int section_failed = 0;	// Number of tests failed.
-static int section_total = 0;	// Total number of tests run.
-
-/**
- * New test section.
- * Prints previous section data and clears the test variables.
- */
-static void new_section(void)
+namespace LibGens
 {
-	if (section_total > 0)
-	{
-		fprintf(stderr, "Section complete. %d/%d tests passed.\n\n",
-			(section_total - section_failed), section_total);
-	}
-	
-	section_failed = 0;
-	section_total = 0;
-}
 
 /**
  * Parse a number from a string. (strtol() wrapper)
@@ -81,57 +65,86 @@ static inline int parse_number(const char *str, int base, T *pRet)
 	return 0;
 }
 
+class Test_VdpPalette_DAC : public TestSuite
+{
+	public:
+		Test_VdpPalette_DAC()
+			: m_filename()
+			{ }
+		
+		Test_VdpPalette_DAC(string filename)
+			: m_filename(filename)
+			{ }
+		
+		void setDataFilename(string filename)
+			{ m_filename = filename; }
+		
+		int exec(void);
+	
+	protected:
+		/**
+		 * Test a CRam value against the expected and actual RGB values.
+		 * @param lineNum Line number from the data file.
+		 * @param bpp Color depth. (15/16/32; used for field width adjustment.)
+		 * @param cram CRam value. (TODO: Only print 2 digits for SMS!)
+		 * @param expected Expected RGB value.
+		 * @param actual Actual RGB value.
+		 */
+		void assertCRam(int lineNum, int bpp, uint16_t cram, uint32_t expected, uint32_t actual);
+	
+	private:
+		/**
+		 * Palette data filename.
+		 */
+		string m_filename;
+};
+
 // TODO: Templated version!
 
 /**
- * CRam assert for VdpPalette.
- * Increments total test counters.
- * If test fails, error is printed and failed test counters are incremented.
- * @param test_name Test name.
+ * Test a CRam value against the expected and actual RGB values.
+ * @param lineNum Line number from the data file.
+ * @param bpp Color depth. (15/16/32; used for field width adjustment.)
  * @param cram CRam value. (TODO: Only print 2 digits for SMS!)
- * @param expected Expected value.
- * @param actual Actual value.
- * @return Expression value.
+ * @param expected Expected RGB value.
+ * @param actual Actual RGB value.
  */
-template<typename T>
-static bool CRam_Assert(const char *test_name, uint16_t cram, T expected, T actual)
+void Test_VdpPalette_DAC::assertCRam(int lineNum, int bpp, uint16_t cram, uint32_t expected, uint32_t actual)
 {
-	// Increment the total test counters.
-	tests_total++;
-	section_total++;
-	
 	if (expected == actual)
-		return true;
+	{
+		// Test passed.
+		assertPass(NULL);
+		return;
+	}
 	
 	// Assertion failed.
-	if (sizeof(T) == 2)
+	assertFail(NULL);
+	PrintFail(stderr);
+	if (bpp <= 16)
 	{
-		fprintf(stderr, "[FAIL] %s: [%04X] expected %04X, got %04X\n",
-			test_name, cram, expected, actual);
+		fprintf(stderr, "Line %d, rgb%d: [%04X] expected %04X, got %04X\n",
+			lineNum, bpp, cram, expected, actual);
 	}
 	else
 	{
-		fprintf(stderr, "[FAIL] %s: [%04X] expected %06X, got %06X\n",
-			test_name, cram, expected, actual);
+		fprintf(stderr, "Line %d, rgb%d: [%04X] expected %06X, got %06X\n",
+			lineNum, bpp, cram, expected, actual);
 	}
-	
-	tests_failed++;
-	section_failed++;
-	return false;
 }
 
 /**
  * Test a palette data file.
- * @param filename Filename.
- * @return 0 if tests were run; non-zero if a fatal error occurred.
+ * @return 0 on success; negative on fatal error; positive if tests failed.
  */
-static int test_file(const char *filename)
+int Test_VdpPalette_DAC::exec(void )
 {
 	// Open the file.
-	FILE *f = fopen(filename, "r");
+	FILE *f = fopen(m_filename.c_str(), "r");
 	if (!f)
 	{
-		fprintf(stderr, "Error opening '%s': %s\n", filename, strerror(errno));
+		fprintf(stderr, "Error opening '%s': %s\n",
+			m_filename.c_str(), strerror(errno));
 		return -1;
 	}
 	
@@ -181,11 +194,13 @@ static int test_file(const char *filename)
 	// Read lines.
 	char buf[1024];
 	const char *token;
+	int lineNum = 0;
 	while (!feof(f))
 	{
 		if (!fgets(buf, sizeof(buf), f))
 			break;
 		buf[sizeof(buf)-1] = 0x00;
+		lineNum++;
 		
 		// Remove trailing newlines.
 		int endpos = (int)strlen(buf) - 1;
@@ -211,26 +226,29 @@ static int test_file(const char *filename)
 			int header_version;
 			if (parse_number(token, 16, &header_version) != 0)
 			{
-				fprintf(stderr, "'%s': Invalid file header.\n", filename);
+				PrintFail(stderr);
+				fprintf(stderr, "Invalid file header.\n");
 				goto fail;
 			}
 			
 			if (header_version != PALTEST_VERSION)
 			{
-				fprintf(stderr, "'%s': Incorrect PalTest version. (expected %04X; found %04X) [FATAL]\n",
-					filename, header_version, PALTEST_VERSION);
+				PrintFail(stderr);
+				fprintf(stderr, "Incorrect PalTest version. (expected %04X; found %04X) [FATAL]\n",
+					header_version, PALTEST_VERSION);
 				goto fail;
 			}
 			
 			// Header is valid.
-			fprintf(stderr, "Processing file: '%s'\n\n", filename);
+			fprintf(stderr, "Processing file: '%s'\n\n",
+				m_filename.c_str());
 			isInit = true;
 		}
 		else if (!strcasecmp(token, PALTEST_CMD_PALMODE))
 		{
 			if (!isInit)
 				goto no_magic;
-			new_section();
+			newSection();
 			
 			// Palette mode.
 			// Format: PalMode:(string)mode
@@ -251,6 +269,7 @@ static int test_file(const char *filename)
 			*/
 			else
 			{
+				PrintFail(stderr);
 				fprintf(stderr, "Unsupported PalMode: '%s'\n", token);
 				goto fail;
 			}
@@ -292,7 +311,7 @@ static int test_file(const char *filename)
 		{
 			if (!isInit)
 				goto no_magic;
-			new_section();
+			newSection();
 			
 			// Color Scale Method.
 			// Format: ColorScale:(string)csm
@@ -305,6 +324,7 @@ static int test_file(const char *filename)
 				csm = LibGens::VdpPalette::COLSCALE_FULL_SH;
 			else
 			{
+				PrintFail(stderr);
 				fprintf(stderr, "Unsupported ColorScale: '%s'\n", token);
 				goto fail;
 			}
@@ -329,7 +349,8 @@ static int test_file(const char *filename)
 			if (palMode != LibGens::VdpPalette::PALMODE_MD)
 			{
 				// ColorScale is only supported with MD palettes.
-				fprintf(stderr, "* WARNING: ColorScale has no effect with PalMode '%s'.\n", palMode_str);
+				PrintWarn(stderr);
+				fprintf(stderr, "ColorScale has no effect with PalMode '%s'.\n", palMode_str);
 			}
 			
 			// Set the color scale method.
@@ -341,7 +362,7 @@ static int test_file(const char *filename)
 		{
 			if (!isInit)
 				goto no_magic;
-			new_section();			
+			newSection();			
 			
 			// Shadow/Highlight Mode.
 			// Format: SHMode:(string)shmode
@@ -354,6 +375,7 @@ static int test_file(const char *filename)
 				shMode = 0x80;
 			else
 			{
+				PrintFail(stderr);
 				fprintf(stderr, "Unsupported SHMode: '%s'\n", token);
 				goto fail;
 			}
@@ -378,7 +400,8 @@ static int test_file(const char *filename)
 			if (palMode != LibGens::VdpPalette::PALMODE_MD)
 			{
 				// ColorScale is only supported with MD palettes.
-				fprintf(stderr, "* WARNING: SHMode has no effect with PalMode '%s'.\n", palMode_str);
+				PrintWarn(stderr);
+				fprintf(stderr, "SHMode has no effect with PalMode '%s'.\n", palMode_str);
 			}
 			
 			// Set the Shadow/Highlight mode.
@@ -404,45 +427,37 @@ static int test_file(const char *filename)
 			token = strtok(NULL, ":");
 			if (!token || parse_number(token, 16, &cram) != 0)
 			{
-				fprintf(stderr, "ColorEntry: Invalid CRAM field: '%s'. [FAIL]\n",
-					(token ? token : "(null)"));
-				tests_failed++;
-				tests_total++;
-				section_failed++;
-				section_total++;
+				assertFail(NULL);
+				PrintFail(stderr);
+				fprintf(stderr, "Line %d, ColorEntry: Invalid CRAM field: '%s'.\n",
+					lineNum, (token ? token : "(null)"));
 				continue;
 			}
 			token = strtok(NULL, ":");
 			if (!token || parse_number(token, 16, &rgb15) != 0)
 			{
-				fprintf(stderr, "ColorEntry: Invalid RGB15 field: '%s'. [FAIL]\n",
-					(token ? token : "(null)"));
-				tests_failed++;
-				tests_total++;
-				section_failed++;
-				section_total++;
+				assertFail(NULL);
+				PrintFail(stderr);
+				fprintf(stderr, "Line %d, ColorEntry: Invalid RGB15 field: '%s'.\n",
+					lineNum, (token ? token : "(null)"));
 				continue;
 			}
 			token = strtok(NULL, ":");
 			if (!token || parse_number(token, 16, &rgb16) != 0)
 			{
-				fprintf(stderr, "ColorEntry: Invalid RGB16 field: '%s'. [FAIL]\n",
-					(token ? token : "(null)"));
-				tests_failed++;
-				tests_total++;
-				section_failed++;
-				section_total++;
+				assertFail(NULL);
+				PrintFail(stderr);
+				fprintf(stderr, "Line %d, ColorEntry: Invalid RGB16 field: '%s'.\n",
+					lineNum, (token ? token : "(null)"));
 				continue;
 			}
 			token = strtok(NULL, ":");
 			if (!token || parse_number(token, 16, &rgb32) != 0)
 			{
-				fprintf(stderr, "ColorEntry: Invalid RGB32 field: '%s'. [FAIL]\n",
-					(token ? token : "(null)"));
-				tests_failed++;
-				tests_total++;
-				section_failed++;
-				section_total++;
+				assertFail(NULL);
+				PrintFail(stderr);
+				fprintf(stderr, "Line %d, ColorEntry: Invalid RGB32 field: '%s'.\n",
+					lineNum, (token ? token : "(null)"));
 				continue;
 			}
 			
@@ -475,9 +490,9 @@ static int test_file(const char *filename)
 			vdp32->update();
 			
 			// Verify the RGB values.
-			CRam_Assert("rgb15", cram, rgb15, vdp15->m_palActive.u16[pal_entry]);
-			CRam_Assert("rgb16", cram, rgb16, vdp16->m_palActive.u16[pal_entry]);
-			CRam_Assert("rgb32", cram, rgb32, vdp32->m_palActive.u32[pal_entry]);
+			assertCRam(lineNum, 15, cram, rgb15, vdp15->m_palActive.u16[pal_entry]);
+			assertCRam(lineNum, 16, cram, rgb16, vdp16->m_palActive.u16[pal_entry]);
+			assertCRam(lineNum, 32, cram, rgb32, vdp32->m_palActive.u32[pal_entry]);
 		}
 		else
 		{
@@ -485,17 +500,26 @@ static int test_file(const char *filename)
 		}
 	}
 	
-	// Complete the last section.
-	new_section();
-	
 	fclose(f);
+	
+	// Tests are complete.
+	// TODO: Print class name.
+	testsCompleted();
 	return 0;
 
 no_magic:
-	fprintf(stderr, "'%s': PalTest version line is missing. [FATAL]\n", filename);
+	PrintFail(stderr);	// TODO: [FATAL] instead of [FAIL].
+	fprintf(stderr, "'%s': PalTest version line is missing.\n", m_filename.c_str());
 fail:
 	fclose(f);
+	
+	// Tests are complete.
+	// TODO: Indicate fatal errors.
+	// TODO: Print class name.
+	testsCompleted();
 	return -1;
+}
+
 }
 
 int main(int argc, char *argv[])
@@ -507,15 +531,7 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 	
-	int ret = test_file(argv[1]);
-	if (ret != 0)
-	{
-		fprintf(stderr, "Test file aborted due to fatal error.\n");
-	}
-	else
-	{
-		fprintf(stderr, "Test file complete. %d/%d tests passed.\n",
-			(tests_total - tests_failed), tests_total);
-	}
-	return ((ret == 0) ? ret : tests_failed);
+	LibGens::Test_VdpPalette_DAC vdpTest(argv[1]);
+	int ret = vdpTest.exec();
+	return ((ret == 0) ? ret : vdpTest.testsFailed());
 }
