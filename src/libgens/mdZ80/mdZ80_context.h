@@ -26,7 +26,7 @@
 #ifndef __MDZ80_CONTEXT_H__
 #define __MDZ80_CONTEXT_H__
 
-struct _mdZ80_context
+typedef struct _mdZ80_context
 {
 	union
 	{
@@ -152,8 +152,6 @@ struct _mdZ80_context
 	
 	Z80_RB *IN_C;
 	Z80_WB *OUT_C;
-};
-
-typedef struct _mdZ80_context mdZ80_context;
+} mdZ80_context;
 
 #endif /* __MDZ80_CONTEXT_H__ */
