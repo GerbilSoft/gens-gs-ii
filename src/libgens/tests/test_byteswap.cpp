@@ -140,7 +140,7 @@ fail:
 
 } }
 
-int main(int argc, char *argv[])
+int main(void)
 {
 	LibGens::Tests::Test_Byteswap byteswapTest;
 	int ret = byteswapTest.exec();
