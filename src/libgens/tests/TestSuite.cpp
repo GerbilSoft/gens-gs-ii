@@ -92,7 +92,7 @@ void TestSuite::PrintWarn(FILE *f)
 	{ fprintf(f, "[WARN] "); }
 void TestSuite::PrintPass(FILE *f)
 	{ fprintf(f, "[PASS] "); }
-void TestSuite::PrintPass(FILE *f)
+void TestSuite::PrintInfo(FILE *f)
 	{ fprintf(f, "[INFO] "); }
 #endif /* _WIN32 */
 
