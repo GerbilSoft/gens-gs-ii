@@ -75,6 +75,8 @@ void TestSuite::PrintWarn(FILE *f)
 	{ fprintf(f, "[" ANSI_ESC_COLOR(3) "WARN" ANSI_ESC_END "] "); }
 void TestSuite::PrintPass(FILE *f)
 	{ fprintf(f, "[" ANSI_ESC_COLOR(2) "PASS" ANSI_ESC_END "] "); }
+void TestSuite::PrintInfo(FILE *f)
+	{ fprintf(f, "[" ANSI_ESC_COLOR(5) "INFO" ANSI_ESC_END "] "); }
 #undef ANSI_ESC_COLOR
 #undef ANSI_ESC_END
 #else /* _WIN32 */
@@ -85,6 +87,8 @@ void TestSuite::PrintWarn(FILE *f)
 	{ fprintf(f, "[WARN] "); }
 void TestSuite::PrintPass(FILE *f)
 	{ fprintf(f, "[PASS] "); }
+void TestSuite::PrintPass(FILE *f)
+	{ fprintf(f, "[INFO] "); }
 #endif /* _WIN32 */
 
 
