@@ -103,6 +103,15 @@ class TestSuite
 		 */
 		template<typename T>
 		void assertEquals_hex(const char *test, T expected, T actual);
+		
+		/**
+		 * Check two values for equality.
+		 * @param test Test name.
+		 * @param expected Expected value.
+		 * @param actual Actual value.
+		 */
+		template<typename T>
+		void assertEquals(const char *test, T expected, T actual);
 	
 	private:
 		/** All tests. **/
