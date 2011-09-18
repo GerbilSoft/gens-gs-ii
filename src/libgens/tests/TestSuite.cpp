@@ -138,9 +138,10 @@ void TestSuite::assertFail(const char *expr)
  * @param test Test name.
  * @param expected Expected value.
  * @param actual Actual value.
+ * @return True if the values match.
  */
 template<typename T>
-void TestSuite::assertEquals_hex(const char *test, T expected, T actual)
+bool TestSuite::assertEquals_hex(const char *test, T expected, T actual)
 {
 	m_tests_total++;
 	m_section_total++;
@@ -167,18 +168,19 @@ void TestSuite::assertEquals_hex(const char *test, T expected, T actual)
 	string act_str = ss.str();
 	
 	fprintf(stderr, "%s: expected %s, got %s\n", test, exp_str.c_str(), act_str.c_str());
+	return (expected == actual);
 }
 
 // Ensure variants of assertEquals_hex() exist for most types.
-template void TestSuite::assertEquals_hex<uint8_t>(const char *test, uint8_t expected, uint8_t actual);
-template void TestSuite::assertEquals_hex<uint16_t>(const char *test, uint16_t expected, uint16_t actual);
-template void TestSuite::assertEquals_hex<uint32_t>(const char *test, uint32_t expected, uint32_t actual);
-template void TestSuite::assertEquals_hex<uint64_t>(const char *test, uint64_t expected, uint64_t actual);
+template bool TestSuite::assertEquals_hex<uint8_t>(const char *test, uint8_t expected, uint8_t actual);
+template bool TestSuite::assertEquals_hex<uint16_t>(const char *test, uint16_t expected, uint16_t actual);
+template bool TestSuite::assertEquals_hex<uint32_t>(const char *test, uint32_t expected, uint32_t actual);
+template bool TestSuite::assertEquals_hex<uint64_t>(const char *test, uint64_t expected, uint64_t actual);
 
-template void TestSuite::assertEquals_hex<int8_t>(const char *test, int8_t expected, int8_t actual);
-template void TestSuite::assertEquals_hex<int16_t>(const char *test, int16_t expected, int16_t actual);
-template void TestSuite::assertEquals_hex<int32_t>(const char *test, int32_t expected, int32_t actual);
-template void TestSuite::assertEquals_hex<int64_t>(const char *test, int64_t expected, int64_t actual);
+template bool TestSuite::assertEquals_hex<int8_t>(const char *test, int8_t expected, int8_t actual);
+template bool TestSuite::assertEquals_hex<int16_t>(const char *test, int16_t expected, int16_t actual);
+template bool TestSuite::assertEquals_hex<int32_t>(const char *test, int32_t expected, int32_t actual);
+template bool TestSuite::assertEquals_hex<int64_t>(const char *test, int64_t expected, int64_t actual);
 
 
 /**
@@ -186,9 +188,10 @@ template void TestSuite::assertEquals_hex<int64_t>(const char *test, int64_t exp
  * @param test Test name.
  * @param expected Expected value.
  * @param actual Actual value.
+ * @return True if the values match.
  */
 template<typename T>
-void TestSuite::assertEquals(const char *test, T expected, T actual)
+bool TestSuite::assertEquals(const char *test, T expected, T actual)
 {
 	m_tests_total++;
 	m_section_total++;
@@ -213,17 +216,18 @@ void TestSuite::assertEquals(const char *test, T expected, T actual)
 	string act_str = ss.str();
 	
 	fprintf(stderr, "%s: expected %s, got %s\n", test, exp_str.c_str(), act_str.c_str());
+	return (expected == actual);
 }
 
 // Ensure variants of assertEquals_hex() exist for most types.
-template void TestSuite::assertEquals<uint8_t>(const char *test, uint8_t expected, uint8_t actual);
-template void TestSuite::assertEquals<uint16_t>(const char *test, uint16_t expected, uint16_t actual);
-template void TestSuite::assertEquals<uint32_t>(const char *test, uint32_t expected, uint32_t actual);
-template void TestSuite::assertEquals<uint64_t>(const char *test, uint64_t expected, uint64_t actual);
+template bool TestSuite::assertEquals<uint8_t>(const char *test, uint8_t expected, uint8_t actual);
+template bool TestSuite::assertEquals<uint16_t>(const char *test, uint16_t expected, uint16_t actual);
+template bool TestSuite::assertEquals<uint32_t>(const char *test, uint32_t expected, uint32_t actual);
+template bool TestSuite::assertEquals<uint64_t>(const char *test, uint64_t expected, uint64_t actual);
 
-template void TestSuite::assertEquals<int8_t>(const char *test, int8_t expected, int8_t actual);
-template void TestSuite::assertEquals<int16_t>(const char *test, int16_t expected, int16_t actual);
-template void TestSuite::assertEquals<int32_t>(const char *test, int32_t expected, int32_t actual);
-template void TestSuite::assertEquals<int64_t>(const char *test, int64_t expected, int64_t actual);
+template bool TestSuite::assertEquals<int8_t>(const char *test, int8_t expected, int8_t actual);
+template bool TestSuite::assertEquals<int16_t>(const char *test, int16_t expected, int16_t actual);
+template bool TestSuite::assertEquals<int32_t>(const char *test, int32_t expected, int32_t actual);
+template bool TestSuite::assertEquals<int64_t>(const char *test, int64_t expected, int64_t actual);
 
 } }

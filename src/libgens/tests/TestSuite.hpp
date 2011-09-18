@@ -102,7 +102,7 @@ class TestSuite
 		 * @param actual Actual value.
 		 */
 		template<typename T>
-		void assertEquals_hex(const char *test, T expected, T actual);
+		bool assertEquals_hex(const char *test, T expected, T actual);
 		
 		/**
 		 * Check two values for equality.
@@ -111,7 +111,7 @@ class TestSuite
 		 * @param actual Actual value.
 		 */
 		template<typename T>
-		void assertEquals(const char *test, T expected, T actual);
+		bool assertEquals(const char *test, T expected, T actual);
 	
 	private:
 		/** All tests. **/
