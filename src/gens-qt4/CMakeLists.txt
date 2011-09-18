@@ -62,6 +62,7 @@ INCLUDE_DIRECTORIES("${gens-gs-ii_BINARY_DIR}")
 
 # Include the previous directory.
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../")
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/../")
 
 # GensQt4 source and binary directories.
 # Binary directory is needed for config.h.
@@ -93,7 +94,7 @@ IF(HAVE_PORTAUDIO)
 ENDIF()
 
 # Write the config.h file.
-CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.gens-qt4.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.gens-qt4.h")
 
 # Sources.
 SET(gens-qt4_COMMON_SRCS

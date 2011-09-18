@@ -24,7 +24,7 @@
 #ifndef __LIBGENS_UTIL_TIMING_HPP__
 #define __LIBGENS_UTIL_TIMING_HPP__
 
-#include <config.h>
+#include <libgens/config.libgens.h>
 
 #if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN

@@ -1,6 +1,10 @@
 PROJECT(libzomg)
 cmake_minimum_required(VERSION 2.6.0)
 
+# Include the previous directory.
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../")
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/../")
+
 # LibGens source and binary directories.
 # Binary directory is needed for config.h.
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
@@ -14,7 +18,7 @@ INCLUDE(CheckLibraryExists)
 CHECK_LIBRARY_EXISTS(c localtime_r "" HAVE_LOCALTIME_R)	# libc: localtime_r()
 
 # Write the config.h file.
-CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libzomg.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libzomg.h")
 
 # Sources.
 SET(libzomg_SRCS

@@ -1,10 +1,8 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
- * config.h.in: Source file for config.h.                                  *
+ * libzomg: Zipped Original Memory from Genesis.                           *
+ * config.libzomg.h.in: LibZomg configuration. (source file)               *
  *                                                                         *
- * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
- * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,25 +19,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_CONFIG_H__
-#define __LIBGENS_CONFIG_H__
-
-/* Define to 1 if you have the `sigaction' function. */
-#cmakedefine HAVE_SIGACTION 1
-
-/* Define to 1 if you have the `rt' library (-lrt). */
-#cmakedefine HAVE_LIBRT 1
+#ifndef __LIBZOMG_CONFIG_H__
+#define __LIBZOMG_CONFIG_H__
 
 /* Define to 1 if you have the `zlib` library (-lz). */
 #cmakedefine HAVE_ZLIB 1
 
-/* Define to 1 if LibGens is built with LZMA support using the included LZMA SDK. */
-#cmakedefine HAVE_LZMA 1
+/* Define to 1 if you have the `localtime_r` function. */
+#cmakedefine HAVE_LOCALTIME_R 1
 
-/* Define to 1 if you have iconv() in either libc or libiconv. */
-#cmakedefine HAVE_ICONV 1
-
-/* Define to 1 if CPU emulation code should be enabled. */
-#cmakedefine GENS_ENABLE_EMULATION 1
-
-#endif /* __LIBGENS_CONFIG_H__ */
+#endif /* __LIBZOMG_CONFIG_H__ */

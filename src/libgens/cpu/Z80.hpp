@@ -24,9 +24,7 @@
 #ifndef __LIBGENS_CPU_Z80_HPP__
 #define __LIBGENS_CPU_Z80_HPP__
 
-// NOTE: This will include config.h for the current project, not necessarily libgens!
-// TODO: Make a global config.h instead?
-#include <config.h>
+#include <libgens/config.libgens.h>
 
 // mdZ80: Z80 CPU emulator.
 #include "../mdZ80/mdZ80.h"

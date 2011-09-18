@@ -12,6 +12,7 @@ INCLUDE_DIRECTORIES(${gens-gs-ii_BINARY_DIR})
 
 # Include the previous directory.
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../")
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/../")
 
 # LibGens source and binary directories.
 # Binary directory is needed for config.h.
@@ -53,7 +54,7 @@ ELSE(WIN32)
 ENDIF(WIN32)
 
 # Write the config.h file.
-CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libgens.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libgens.h")
 
 # Test system byteorder.
 # TODO: Universal Binary support; detect PDP endian.

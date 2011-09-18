@@ -22,7 +22,7 @@
 #ifndef __GENS_QT4_VBACKEND_GLSHADER_HPP__
 #define __GENS_QT4_VBACKEND_GLSHADER_HPP__
 
-#include <config.h>
+#include <gens-qt4/config.gens-qt4.h>
 
 #ifdef HAVE_GLEW
 // GL Extension Wrangler.

@@ -24,9 +24,7 @@
 #ifndef __LIBGENS_CPU_M68K_HPP__
 #define __LIBGENS_CPU_M68K_HPP__
 
-// NOTE: This will include config.h for the current project, not necessarily libgens!
-// TODO: Make a global config.h instead?
-#include <config.h>
+#include <libgens/config.libgens.h>
 
 #include "star_68k.h"
 
@@ -39,8 +37,6 @@
 
 namespace LibGens
 {
-
-class Zomg;
 
 class M68K
 {

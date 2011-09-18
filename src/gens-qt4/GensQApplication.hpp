@@ -24,7 +24,7 @@
 #ifndef __GENS_QT4_GENSQAPPLICATION_HPP__
 #define __GENS_QT4_GENSQAPPLICATION_HPP__
 
-#include <config.h>
+#include <gens-qt4/config.gens-qt4.h>
 
 #include "SigHandler.hpp"
 

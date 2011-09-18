@@ -1,10 +1,10 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * config.h.in: Source file for config.h.                                  *
+ * config.gens-qt4.h.in: GensQt4 configuration. (source file)              *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_CONFIG_H__
-#define __GENS_QT4_CONFIG_H__
+#ifndef __GENS_QT4_CONFIG_GENS_QT4_H__
+#define __GENS_QT4_CONFIG_GENS_QT4_H__
 
 /* Define to 1 if you have the `sigaction' function. */
 #cmakedefine HAVE_SIGACTION 1
@@ -35,9 +35,6 @@
 
 /* Define to 1 if the internal GLEW library is being used. */
 #cmakedefine USE_INTERNAL_GLEW 1
-
-/* Define to 1 if you have the `AL` library (-lopenal / -lOpenAL32). */
-#cmakedefine HAVE_OPENAL 1
 
 /* Define to 1 if you have the `zlib` library (-lz). */
 #cmakedefine HAVE_ZLIB 1

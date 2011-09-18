@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include <config.h>
+#include <libgens/config.libgens.h>
 
 #ifndef __LIBGENS_SIGINFO_H__
 #define __LIBGENS_SIGINFO_H__
