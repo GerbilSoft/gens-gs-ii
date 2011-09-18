@@ -28,6 +28,7 @@
 // TODO: Figure out how to do this in CMake.
 #define GENS_LIL_ENDIAN 1234
 #define GENS_BIG_ENDIAN 4321
+#define GENS_PDP_ENDIAN 3412
 #ifndef GENS_BYTEORDER
 #if defined(__hppa__) || \
     defined(__m68k__) || defined(mc68000) || defined(_M_M68K) || \
