@@ -7,10 +7,15 @@ INCLUDE_DIRECTORIES(${gens-gs-ii_BINARY_DIR})
 # Include the previous directory.
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../")
 
+# TestSuite base sources.
+SET(TESTSUITE_BASE_SRC
+	TestSuite.cpp
+	)
+
 # VdpPalette test programs
 ADD_EXECUTABLE(test_VdpPalette_DAC_generate test_VdpPalette_DAC_generate.c)
 
-ADD_EXECUTABLE(test_VdpPalette_DAC test_VdpPalette_DAC.cpp TestSuite.cpp)
+ADD_EXECUTABLE(test_VdpPalette_DAC test_VdpPalette_DAC.cpp ${TESTSUITE_BASE_SRC})
 TARGET_LINK_LIBRARIES(test_VdpPalette_DAC gens)
 
 # Generate the test files.
@@ -36,3 +41,9 @@ ADD_TEST(NAME test_VdpPalette_DAC_GG
 	COMMAND test_VdpPalette_DAC PalTest_GG.txt)
 ADD_TEST(NAME test_VdpPalette_DAC_SMS
 	COMMAND test_VdpPalette_DAC PalTest_SMS.txt)
+
+# Byteswap test.
+ADD_EXECUTABLE(test_byteswap test_byteswap.cpp ${TESTSUITE_BASE_SRC})
+TARGET_LINK_LIBRARIES(test_byteswap gens)
+ADD_TEST(NAME test_byteswap
+	COMMAND test_byteswap)
