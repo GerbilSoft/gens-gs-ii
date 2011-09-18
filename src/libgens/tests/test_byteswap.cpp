@@ -118,7 +118,12 @@ int Test_Byteswap::exec(void)
 	fprintf(stderr, "Run-time byte ordering: %s\n", byteorder_runtime_str);
 	
 	// Make sure the byteorders are equivalent.
-	assertEquals("Byteorder", (uint16_t)byteorder_compiled, (uint16_t)byteorder_runtime);
+	if (!assertEquals("Byteorder", (uint16_t)byteorder_compiled, (uint16_t)byteorder_runtime))
+	{
+		// Byteorders do not match. Print a warning.
+		PrintWarn(stderr);
+		fprintf(stderr, "Remaining tests will probably fail due to byteorder mismatch.\n");
+	}
 	
 	// Tests are complete.
 	// TODO: Print class name.
