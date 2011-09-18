@@ -51,6 +51,18 @@ ENDIF(WIN32)
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 
+# Test system byteorder.
+# TODO: Universal Binary support; detect PDP endian.
+INCLUDE(TestBigEndian)
+TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
+IF(IS_BIG_ENDIAN)
+	SET(GENS_BYTEORDER "GENS_BIG_ENDIAN")
+ELSE(IS_BIG_ENDIAN)
+	SET(GENS_BYTEORDER "GENS_LIL_ENDIAN")
+ENDIF(IS_BIG_ENDIAN)
+UNSET(IS_BIG_ENDIAN)
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/Util/byteorder.h.in" "${CMAKE_CURRENT_BINARY_DIR}/Util/byteorder.h")
+
 # Sources.
 SET(libgens_SRCS
 	lg_main.cpp
