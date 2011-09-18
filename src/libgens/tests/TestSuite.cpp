@@ -123,4 +123,29 @@ void TestSuite::assertFail(const char *expr)
 	}
 }
 
+
+/**
+ * Check two uint32_t values for equality. (hexadecimal output)
+ * @param test Test name.
+ * @param expected Expected value.
+ * @param actual Actual value.
+ */
+void TestSuite::assertEquals_u32x(const char *test, uint32_t expected, uint32_t actual)
+{
+	m_tests_total++;
+	m_section_total++;
+	
+	if (expected == actual)
+		PrintPass(stderr);
+	else
+	{
+		m_tests_failed++;
+		m_section_failed++;
+		PrintFail(stderr);
+	}
+	
+	fprintf(stderr, "%s: expected %08X, got %08X\n",
+		test, expected, actual);
+}
+
 } }

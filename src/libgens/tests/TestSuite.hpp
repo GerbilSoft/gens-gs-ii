@@ -25,6 +25,9 @@
 // C includes. (C++ namespace)
 #include <cstdio>
 
+// C includes.
+#include <stdint.h>
+
 /**
  * Run a test on a given expression.
  * If the expression is true, the test passes. (No text is printed.)
@@ -90,6 +93,14 @@ class TestSuite
 		 * @param expr Stringified expression, or NULL if nothing should be printed.
 		 */
 		void assertFail(const char *expr);
+		
+		/**
+		 * Check two uint32_t values for equality. (hexadecimal output)
+		 * @param test Test name.
+		 * @param expected Expected value.
+		 * @param actual Actual value.
+		 */
+		void assertEquals_u32x(const char *test, uint32_t expected, uint32_t actual);
 	
 	private:
 		/** All tests. **/
