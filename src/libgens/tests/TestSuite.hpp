@@ -81,6 +81,7 @@ class TestSuite
 		static void PrintFail(FILE *f);
 		static void PrintWarn(FILE *f);
 		static void PrintPass(FILE *f);
+		static void PrintInfo(FILE *f);
 		
 		/**
 		 * Internal function to indicate a test passed.
