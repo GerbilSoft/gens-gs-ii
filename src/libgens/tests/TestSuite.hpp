@@ -96,20 +96,13 @@ class TestSuite
 		void assertFail(const char *expr);
 		
 		/**
-		 * Check two uint32_t values for equality. (hexadecimal output)
+		 * Check two hex values for equality.
 		 * @param test Test name.
 		 * @param expected Expected value.
 		 * @param actual Actual value.
 		 */
-		void assertEquals_u32x(const char *test, uint32_t expected, uint32_t actual);
-		
-		/**
-		 * Check two uint16_t values for equality. (hexadecimal output)
-		 * @param test Test name.
-		 * @param expected Expected value.
-		 * @param actual Actual value.
-		 */
-		void assertEquals_u16x(const char *test, uint16_t expected, uint16_t actual);
+		template<typename T>
+		void assertEquals_hex(const char *test, T expected, T actual);
 	
 	private:
 		/** All tests. **/
