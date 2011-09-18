@@ -65,7 +65,9 @@ void Z80::Init(void)
 void Z80::End(void)
 {
 	// Free the Z80 context.
+#ifdef GENS_ENABLE_EMULATION
 	mdZ80_free(ms_Z80);
+#endif
 	ms_Z80 = NULL;
 	
 	// TODO: Other shutdown stuff.
