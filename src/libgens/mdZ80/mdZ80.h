@@ -9,25 +9,15 @@
 #ifndef __MDZ80_H__
 #define __MDZ80_H__
 
-
 #include "../macros/fastcall.h"
 #include <stdint.h>
+
+// Z80 context.
+#include "mdZ80_context.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-
-/****************************/
-/* Structures & definitions */
-/****************************/
-
-typedef uint8_t FASTCALL Z80_RB(uint32_t adr);
-typedef void FASTCALL Z80_WB(uint32_t adr, uint8_t data);
-
-struct _mdZ80_context;
-typedef struct _mdZ80_context mdZ80_context;
-
 
 /*! Z80 context allocation. **/
 
