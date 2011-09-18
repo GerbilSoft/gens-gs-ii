@@ -148,4 +148,29 @@ void TestSuite::assertEquals_u32x(const char *test, uint32_t expected, uint32_t 
 		test, expected, actual);
 }
 
+/**
+ * Check two uint16_t values for equality. (hexadecimal output)
+ * @param test Test name.
+ * @param expected Expected value.
+ * @param actual Actual value.
+ */
+void TestSuite::assertEquals_u16x(const char *test, uint16_t expected, uint16_t actual)
+{
+	// TODO: Combine with assertEquals_u32x() using templates?
+	m_tests_total++;
+	m_section_total++;
+	
+	if (expected == actual)
+		PrintPass(stderr);
+	else
+	{
+		m_tests_failed++;
+		m_section_failed++;
+		PrintFail(stderr);
+	}
+	
+	fprintf(stderr, "%s: expected %04X, got %04X\n",
+		test, expected, actual);
+}
+
 } }

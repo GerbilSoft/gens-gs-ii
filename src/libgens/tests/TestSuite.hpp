@@ -101,6 +101,14 @@ class TestSuite
 		 * @param actual Actual value.
 		 */
 		void assertEquals_u32x(const char *test, uint32_t expected, uint32_t actual);
+		
+		/**
+		 * Check two uint16_t values for equality. (hexadecimal output)
+		 * @param test Test name.
+		 * @param expected Expected value.
+		 * @param actual Actual value.
+		 */
+		void assertEquals_u16x(const char *test, uint16_t expected, uint16_t actual);
 	
 	private:
 		/** All tests. **/
