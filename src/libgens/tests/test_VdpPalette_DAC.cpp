@@ -138,6 +138,8 @@ void Test_VdpPalette_DAC::assertCRam(int lineNum, int bpp, uint16_t cram, uint32
  */
 int Test_VdpPalette_DAC::exec(void)
 {
+	fprintf(stderr, "LibGens: VdpPalette DAC test suite.\n\n");
+	
 	// Open the file.
 	FILE *f = fopen(m_filename.c_str(), "r");
 	if (!f)
