@@ -110,12 +110,12 @@ int Test_Byteswap::exec(void)
 	// Print the compile-time byte ordering.
 	const int byteorder_compiled = GENS_BYTEORDER;
 	const char *byteorder_compiled_str = byteorderString(byteorder_compiled);
-	fprintf(stderr, "Compile-time byte ordering: %s\n", byteorder_compiled_str);
+	fprintf(stderr, "Compile-time byteorder: %s\n", byteorder_compiled_str);
 	
 	// Determine the run-time byte ordering.
 	const int byteorder_runtime = checkRuntimeByteorder();
 	const char *byteorder_runtime_str = byteorderString(byteorder_runtime);
-	fprintf(stderr, "Run-time byte ordering: %s\n", byteorder_runtime_str);
+	fprintf(stderr, "Run-time byteorder: %s\n", byteorder_runtime_str);
 	
 	// Make sure the byteorders are equivalent.
 	if (!assertEquals("Byteorder", (uint16_t)byteorder_compiled, (uint16_t)byteorder_runtime))
