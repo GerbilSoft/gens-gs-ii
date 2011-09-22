@@ -135,6 +135,12 @@ class M68K_Mem
 		 */
 		static uint8_t ms_SSF2_BankState[8];
 		
+		/**
+		 * Number of banks currently supported by SSF2 mapper implementation.
+		 * Rom_Data is currently 6 MB, which is 12 banks of 512 KB. (0x0 - 0xB)
+		 */
+		static const uint8_t SSF2_NUM_BANKS = 12;
+		
 		enum M68KBank_t
 		{
 			// Unused bank. (Return 0xFF)
@@ -151,6 +157,8 @@ class M68K_Mem
 			M68K_BANK_ROM_7,	// ROM: $380000 - $3FFFFF
 			M68K_BANK_ROM_8,	// ROM: $400000 - $47FFFF
 			M68K_BANK_ROM_9,	// ROM: $480000 - $4FFFFF
+			M68K_BANK_ROM_A,	// ROM: $500000 - $57FFFF
+			M68K_BANK_ROM_B,	// ROM: $580000 - $5FFFFF
 			
 			// SRAM only.
 			M68K_BANK_SRAM,		// SRAM. (Used for some games that store SRAM in invalid areas.)

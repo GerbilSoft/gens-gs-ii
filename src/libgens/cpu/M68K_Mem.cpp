@@ -834,13 +834,13 @@ inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 		// Super Street Fighter II (SSF2) bankswitching system.
 		// TODO: Starscream doesn't use this for instruction fetch!
 		// TODO: Use a helper class?
-		// TODO: Only banks 0-9 are supported right now...
 		const uint8_t phys_bank = (address & 0xF) >> 1;
 		uint8_t virt_bank = (data & 0x1F);
 		
-		if (virt_bank > 9)
+		// SSF2_NUM_BANKS == number of SSF2 banks supported by Gens/GS II's implementation.
+		if (virt_bank >= SSF2_NUM_BANKS)
 		{
-			// TODO: We're ignoring banks over bank 9.
+			// Bank isn't supported.
 			virt_bank = phys_bank;
 			ms_SSF2_BankState[phys_bank] = 0xFF;	// default bank
 		}
@@ -1141,13 +1141,13 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 		// Super Street Fighter II (SSF2) bankswitching system.
 		// TODO: Starscream doesn't use this for instruction fetch!
 		// TODO: Use a helper class?
-		// TODO: Only banks 0-9 are supported right now...
 		const uint8_t phys_bank = (address & 0xF) >> 1;
 		uint8_t virt_bank = (data & 0x1F);
 		
-		if (virt_bank > 9)
+		// SSF2_NUM_BANKS == number of SSF2 banks supported by Gens/GS II's implementation.
+		if (virt_bank >= SSF2_NUM_BANKS)
 		{
-			// TODO: We're ignoring banks over bank 9.
+			// Bank isn't supported.
 			virt_bank = phys_bank;
 			ms_SSF2_BankState[phys_bank] = 0xFF;	// default bank
 		}
@@ -1317,6 +1317,8 @@ uint8_t M68K_Mem::M68K_RB(uint32_t address)
 		case M68K_BANK_ROM_7:	return T_M68K_Read_Byte_Rom_SRam<0x07>(address);
 		case M68K_BANK_ROM_8:	return T_M68K_Read_Byte_Rom<0x08>(address);
 		case M68K_BANK_ROM_9:	return T_M68K_Read_Byte_Rom<0x09>(address);
+		case M68K_BANK_ROM_A:	return T_M68K_Read_Byte_Rom<0x0A>(address);
+		case M68K_BANK_ROM_B:	return T_M68K_Read_Byte_Rom<0x0B>(address);
 		case M68K_BANK_SRAM:	return T_M68K_Read_Byte_Rom_SRam<-1>(address);
 		
 		// Other MD banks.
@@ -1359,6 +1361,8 @@ uint16_t M68K_Mem::M68K_RW(uint32_t address)
 		case M68K_BANK_ROM_7:	return T_M68K_Read_Word_Rom_SRam<0x07>(address);
 		case M68K_BANK_ROM_8:	return T_M68K_Read_Word_Rom<0x08>(address);
 		case M68K_BANK_ROM_9:	return T_M68K_Read_Word_Rom<0x09>(address);
+		case M68K_BANK_ROM_A:	return T_M68K_Read_Word_Rom<0x0A>(address);
+		case M68K_BANK_ROM_B:	return T_M68K_Read_Word_Rom<0x0B>(address);
 		case M68K_BANK_SRAM:	return T_M68K_Read_Word_Rom_SRam<-1>(address);
 		
 		// Other MD banks.
@@ -1395,6 +1399,7 @@ void M68K_Mem::M68K_WB(uint32_t address, uint8_t data)
 		case M68K_BANK_ROM_4: case M68K_BANK_ROM_5:
 		case M68K_BANK_ROM_6: case M68K_BANK_ROM_7:
 		case M68K_BANK_ROM_8: case M68K_BANK_ROM_9:
+		case M68K_BANK_ROM_A: case M68K_BANK_ROM_B:
 		case M68K_BANK_SRAM:
 			M68K_Write_Byte_SRam(address, data);
 			break;
@@ -1430,6 +1435,7 @@ void M68K_Mem::M68K_WW(uint32_t address, uint16_t data)
 		case M68K_BANK_ROM_4: case M68K_BANK_ROM_5:
 		case M68K_BANK_ROM_6: case M68K_BANK_ROM_7:
 		case M68K_BANK_ROM_8: case M68K_BANK_ROM_9:
+		case M68K_BANK_ROM_A: case M68K_BANK_ROM_B:
 		case M68K_BANK_SRAM:
 			M68K_Write_Word_SRam(address, data);
 			break;
@@ -1479,13 +1485,14 @@ void M68K_Mem::ZomgRestoreSSF2BankState(const Zomg_MD_TimeReg_t *state)
 	ms_SSF2_BankState[7] = state->SSF2_bank7;
 	
 	// Verify the bank states.
-	// NOTE: Only banks 0-9 are supported right now.
 	for (int phys_bank = 0; phys_bank < 8; phys_bank++)
 	{
 		uint8_t virt_bank = ms_SSF2_BankState[phys_bank];
-		if (virt_bank > 9)
+		
+		// SSF2_NUM_BANKS == number of SSF2 banks supported by Gens/GS II's implementation.
+		if (virt_bank >= SSF2_NUM_BANKS)
 		{
-			// TODO: We're ignoring banks over bank 9.
+			// Bank isn't supported.
 			// This also catches 0xFF, which indicates "default bank".
 			virt_bank = phys_bank;
 			ms_SSF2_BankState[phys_bank] = 0xFF;	// default bank
