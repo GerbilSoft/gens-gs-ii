@@ -47,3 +47,14 @@ ADD_EXECUTABLE(test_byteswap test_byteswap.cpp ${TESTSUITE_BASE_SRC})
 TARGET_LINK_LIBRARIES(test_byteswap gens)
 ADD_TEST(NAME test_byteswap
 	COMMAND test_byteswap)
+
+# Sprite Masking & Overflow Test ROM.
+INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+ADD_EXECUTABLE(test_Vdp_SpriteMaskingTestRom
+	test_Vdp_SpriteMaskingTestRom.cpp
+	test_Vdp_SpriteMaskingTestRom_data.c
+	${TESTSUITE_BASE_SRC}
+	)
+TARGET_LINK_LIBRARIES(test_Vdp_SpriteMaskingTestRom gens ${ZLIB_LIBRARY})
+ADD_TEST(NAME test_Vdp_SpriteMaskingTestRom
+	COMMAND test_Vdp_SpriteMaskingTestRom)
