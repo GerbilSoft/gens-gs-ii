@@ -172,7 +172,7 @@ int Test_SpriteMaskTestRom::loadVRam(ScreenMode screenMode)
 	// Data was read successfully.
 	
 	// Byteswap VRam to host-endian.
-	be32_to_cpu_array(out, 65536);
+	be16_to_cpu_array(out, 65536);
 	
 	// Copy VRam to the VDP.
 	memcpy(m_vdp->VRam.u8, out, 65536);
