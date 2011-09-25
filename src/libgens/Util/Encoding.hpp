@@ -47,7 +47,7 @@ class Encoding
 		 * Convert UTF-16 (host-endian) to UTF-8.
 		 * @param src UTF-16 string. (host-endian)
 		 * @param len Length of UTF-16 string, in characters.
-		 * @return UTF-8 string, or empty string on error.
+		 * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
 		 */
 		static std::string Utf16_to_Utf8(const uint16_t *src, size_t len);
 		
@@ -57,6 +57,13 @@ class Encoding
 		 * @return Allocated null-terminated UTF-16 string, or NULL on error.
 		 */
 		static uint16_t *Utf8_to_Utf16(const std::string& src);
+		
+		/**
+		 * Convert Shift-JIS to UTF-8.
+		 * @param src Shift-JIS string.
+		 * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
+		 */
+		static std::string SJIS_to_Utf8(const std::string& src);
 		
 		/**
 		 * Compare two UTF-16 strings.

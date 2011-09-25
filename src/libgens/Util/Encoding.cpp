@@ -149,14 +149,20 @@ namespace LibGens
  */
 string Encoding::Utf16_to_Utf8(const uint16_t *src, size_t len)
 {
+	char *mbs;
 #if defined(_WIN32)
 	// Win32 version. Use W32U_mini.
 	// TODO: Use the "len" parameter.
-	char *mbs = W32U_UTF16_to_mbs((wchar_t*)src, CP_UTF8);
+	mbs = W32U_UTF16_to_mbs((wchar_t*)src, CP_UTF8);
 #elif defined(HAVE_ICONV)
 	// iconv version.
-	char *mbs = gens_iconv((char*)src, len * 2, UTF16_ENCODING, "UTF-8");
+	mbs = gens_iconv((char*)src, len * 2, UTF16_ENCODING, "UTF-8");
+#else
+	// No translation supported.
+	// TODO: #error?
+	return string();
 #endif
+	
 	if (!mbs)
 		return string();
 	
@@ -181,7 +187,41 @@ uint16_t *Encoding::Utf8_to_Utf16(const string& src)
 #elif defined(HAVE_ICONV)
 	// iconv version.
 	return (uint16_t*)gens_iconv(src.c_str(), src.size(), "UTF-8", UTF16_ENCODING);
+#else
+	// No translation supported.
+	// TODO: #error?
+	return NULL;
 #endif
+}
+
+
+/**
+ * Convert Shift-JIS to UTF-8.
+ * @param src Shift-JIS string.
+ * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
+ */
+std::string Encoding::SJIS_to_Utf8(const std::string& src)
+{
+	utf8_str *mbs = NULL;
+#if defined(_WIN32)
+	wchar_t *wcs = W32U_mbs_to_UTF16(src.c_str(), 932); // cp932 == Shift-JIS
+	if (wcs)
+	{
+		mbs = W32U_UTF16_to_mbs(wcs, CP_UTF8);
+		free(wcs);
+	}
+#elif defined(HAVE_ICONV)
+	mbs = gens_iconv(src.c_str(), src.length(), "SHIFT-JIS", "UTF-8");
+#else
+	// No translation supported.
+	// TODO: #error?
+#endif
+	
+	if (!mbs)
+		return string();
+	string ret(mbs);
+	free(mbs);
+	return ret;
 }
 
 
