@@ -52,9 +52,8 @@ using std::string;
 #include "lzma/lzmabase/7zCrc.h"
 
 // Character set translation.
-#if defined(HAVE_ICONV)
-#include "Util/gens_iconv.h"
-#elif defined(_WIN32)
+#include "Util/Encoding.hpp"
+#if defined(_WIN32)
 #include "Win32/W32U_mini.h"
 #endif
 
@@ -109,6 +108,7 @@ Dc7z::Dc7z(FILE *f, const utf8_str *filename)
 	
 #ifdef _WIN32
 	// Convert the filename from UTF-8 to UTF-16.
+	// TODO: Use Encoding::Utf8_to_Utf16?
 	wchar_t *filenameW = W32U_mbs_to_UTF16(filename, CP_UTF8);
 	if (!filenameW)
 	{
@@ -124,6 +124,7 @@ Dc7z::Dc7z(FILE *f, const utf8_str *filename)
 	{
 		// System doesn't support Unicode.
 		// Convert the filename from UTF-16 to ANSI.
+		// TODO: Use Encoding::Utf16_to_[something]?
 		char *filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
 		if (!filenameA)
 		{
@@ -272,26 +273,13 @@ int Dc7z::getFileInfo(mdp_z_entry_t **z_entry_out)
 		SzArEx_GetFileNameUtf16(&m_db, i, filenameW);
 		
 		// Convert the filename to UTF-8.
-		utf8_str *z_entry_filename = NULL;
-#if defined(HAVE_ICONV)
-		// Use iconv().
-#if GENS_BYTEORDER == GENS_BIG_ENDIAN
-		z_entry_filename = gens_iconv((char*)filenameW, filenameW_len * 2,
-					      "UTF-16BE", "UTF-8");
-#else /* GENS_BYTEORDER == GENS_LIL_ENDIAN */
-		z_entry_filename = gens_iconv((char*)filenameW, filenameW_len * 2,
-					      "UTF-16LE", "UTF-8");
-#endif /* GENS_BYTEORDER */
-#elif defined(_WIN32)
-		// Win32: Use W32U_UTF16_to_mbs().
-		z_entry_filename = W32U_UTF16_to_mbs((wchar_t*)filenameW, CP_UTF8);
-#endif
-		if (!z_entry_filename)
+		string z_entry_filename = Encoding::Utf16_to_Utf8(filenameW, filenameW_len);
+		if (z_entry_filename.empty())
 		{
 			// Error converting the filename to UTF-8.
 			// We'll just mask each UTF-16 character by 0x7F for ASCII-compatible filenames.
 			// TODO: Include our own UTF-16 to UTF-8 conversion function?
-			z_entry_filename = (utf8_str*)malloc(filenameW_len);
+			z_entry_filename.resize(filenameW_len);
 			for (unsigned int chr = 0; chr < len; chr++)
 			{
 				z_entry_filename[chr] = (filenameW[chr] & 0x7F);
@@ -304,7 +292,7 @@ int Dc7z::getFileInfo(mdp_z_entry_t **z_entry_out)
 		
 		// Store the ROM file information.
 		// TODO: f->Size is 64-bit...
-		z_entry_cur->filename = z_entry_filename;
+		z_entry_cur->filename = strdup(z_entry_filename.c_str());
 		z_entry_cur->filesize = (size_t)f->Size;
 		z_entry_cur->next = NULL;
 		
@@ -360,29 +348,12 @@ int Dc7z::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *r
 	}
 	
 	// Convert the z_entry filename to UTF-16.
-	// TODO: Determine which byteorder 7-Zip uses on PowerPC.
-	uint16_t *z_entry_filenameW = NULL;
-#if defined(HAVE_ICONV)
-	// Use iconv().
-#if GENS_BYTEORDER == GENS_BIG_ENDIAN
-	z_entry_filenameW = (uint16_t*)gens_iconv(z_entry->filename, strlen(z_entry->filename),
-						  "UTF-8", "UTF-16BE");
-#else /* GENS_BYTEORDER == GENS_LIL_ENDIAN */
-	z_entry_filenameW = (uint16_t*)gens_iconv(z_entry->filename, strlen(z_entry->filename),
-						  "UTF-8", "UTF-16LE");
-#endif /* GENS_BYTEORDER */
-#elif defined(_WIN32)
-	// Win32: Use W32U_UTF16_to_mbs().
-	z_entry_filenameW = (uint16_t*)W32U_mbs_to_UTF16(z_entry->filename, CP_UTF8);
+	uint16_t *z_entry_filenameW = Encoding::Utf8_to_Utf16(string(z_entry->filename));
 	if (!z_entry_filenameW)
 	{
 		// Error converting the filename to Unicode.
 		return -4; // TODO: Return an appropriate MDP error code.
 	}
-#else
-	// TODO: Manual conversion from UTF-8 to UTF-16.
-#error No UTF-8 to UTF-16 conversion function found.
-#endif
 	
 	// Filename buffer. (UTF-16)
 	uint16_t *filenameW = NULL;
@@ -409,19 +380,9 @@ int Dc7z::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *r
 		SzArEx_GetFileNameUtf16(&m_db, i, filenameW);
 		
 		// Compare the filename against the z_entry filename.
-		int cmp;
-#ifdef _WIN32
-		// Win32's wchar_t is 16-bit, so we can use _wcsicmp().
-		cmp = _wcsicmp((wchar_t*)z_entry_filenameW, (wchar_t*)filenameW);
-#else
-		// Unix's wchar_t is 32-bit, so we an't use wcscmp().
-		// Compare the filename manually.
-		cmp = gens_utf16_ncmp(z_entry_filenameW, filenameW, filenameW_len);
-#endif
-		
-		if (cmp != 0)
+		if (Encoding::Utf16_ncmp(z_entry_filenameW, filenameW, filenameW_len) != 0)
 		{
-		// Not the correct file.
+			// Not the correct file.
 			continue;
 		}
 		
