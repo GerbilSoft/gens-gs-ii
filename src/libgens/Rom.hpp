@@ -190,10 +190,7 @@ class Rom
 		void readHeaderMD(const uint8_t *header, size_t header_size);
 		
 		// Space elimination algorithm.
-		static inline FUNC_PURE bool IsGraphChar(char chr)
-		{
-			return (isgraph(chr) || (chr & 0x80));
-		}
+		static FUNC_PURE bool IsGraphChar(uint16_t chr);
 		static std::string SpaceElim(const char *src, size_t len);
 		
 		/** Variables. **/
@@ -249,6 +246,29 @@ class Rom
 		int m_regionCode;
 		int detectRegionCodeMD(const char countryCodes[16]);
 };
+
+
+/**
+ * IsGraphChar(): Determine if a character is a graphics character.
+ * @param chr Character to check.
+ * @return True if this is a graphics character; false otherwise.
+ */
+inline FUNC_PURE bool Rom::IsGraphChar(uint16_t chr)
+{
+	// TODO: Figure out why iswgraph() and iswspace() are useless.
+	
+	if (chr < 0x7F)
+		return isgraph(chr);
+	else if (chr == 0x3000)
+	{
+		// U+3000: IDEOGRAPHIC SPACE
+		// Used in "Columns"' ROM headers.
+		return false;
+	}
+	
+	// Assume graphical character by default.
+	return true;
+}
 
 }
 

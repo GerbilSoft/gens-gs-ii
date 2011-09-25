@@ -439,25 +439,40 @@ void Rom::readHeaderMD(const uint8_t *header, size_t header_size)
 /**
  * SpaceElim(): Eliminate excess spaces from a ROM name.
  * TODO: Returning an std::string is a bit wasteful...
- * @param src ROM name.
+ * TODO: Move to a separate string handling class.
+ * @param src ROM name. (UTF-8)
  * @param len Length of ROM name.
- * @return ROM name with excess spaces eliminated.
+ * @return ROM name with excess spaces eliminated. (UTF-8)
  */
-std::string Rom::SpaceElim(const char *src, size_t len)
+std::string Rom::SpaceElim(const utf8_str *src, size_t len)
 {
-	// Allocate enough space for the string initially.
-	std::string s_elim;
-	s_elim.resize(len);
-	size_t i_dest = 0;
+	// Convert the string to UTF-16 first.
+	// TODO: Check for invalid UTF-8 sequences and handle them as cp1252?
+	string str_src = string(src, len);
+	uint16_t *wcs_src = Encoding::Utf8_to_Utf16(src);
+	if (!wcs_src)
+	{
+		// Error converting the string. Assume the string is ASCII.
+		wcs_src = (uint16_t*)malloc(len * sizeof(uint16_t));
+		for (size_t i = 0; i < len; i++)
+		{
+			wcs_src[i] = (src[i] & 0x7F);
+		}
+	}
+	
+	// Allocate the destination string. (UTF-16)
+	uint16_t *wcs_dest = (uint16_t*)malloc((len + 1) * sizeof(uint16_t));
+	wcs_dest[len] = 0x00;
+	int i_dest = 0;
 	
 	// Was the last character a graphics character?
 	bool lastCharIsGraph = false;
 	
-	for (size_t n = len; n != 0; n--)
+	// wcs_src is null-terminated.
+	// Process the string.
+	for (uint16_t *wchr = wcs_src; *wchr != 0x00; wchr++)
 	{
-		char chr = *src++;
-		
-		if (!lastCharIsGraph && !IsGraphChar(chr))
+		if (!lastCharIsGraph && !IsGraphChar(*wchr))
 		{
 			// This is a space character, and the previous
 			// character was not a space character.
@@ -466,21 +481,32 @@ std::string Rom::SpaceElim(const char *src, size_t len)
 		
 		// This is not a space character,
 		// or it is a space character and the previous character wasn't.
-		s_elim[i_dest++] = chr;
-		lastCharIsGraph = IsGraphChar(chr);
+		wcs_dest[i_dest++] = *wchr;
+		lastCharIsGraph = IsGraphChar(*wchr);
 	}
 	
-	// Resize the string to the last written character.
-	// (Make sure there's no space at the end, too.)
+	// Free the source string.
+	free(wcs_src);
+	
 	if (i_dest == 0)
-		s_elim.clear();
-	else if (!IsGraphChar(s_elim[i_dest - 1]))
-		s_elim.resize(i_dest - 1);
+	{
+		// Empty string.
+		free(wcs_dest);
+		return string();
+	}
+	
+	// Make sure there's no space at the end of the string.
+	if (!IsGraphChar(wcs_dest[i_dest - 1]))
+		wcs_dest[i_dest - 1] = 0x00;
 	else
-		s_elim.resize(i_dest);
+		wcs_dest[i_dest] = 0x00;
+	
+	// Convert the string back to UTF-8.
+	string str_dest = Encoding::Utf16_to_Utf8(wcs_dest, i_dest);
+	free(wcs_dest);
 	
 	// Return the string.
-	return s_elim;
+	return str_dest;
 }
 
 
