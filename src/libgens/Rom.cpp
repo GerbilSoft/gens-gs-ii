@@ -399,27 +399,40 @@ void Rom::readHeaderMD(const uint8_t *header, size_t header_size)
 	// Detect the ROM's region code.
 	m_regionCode = detectRegionCodeMD(m_mdHeader.countryCodes);
 	
-	// Attempt to convert the Japanese ROM header name from Shift-JIS to UTF-8.
-	string jp_sjis = string(m_mdHeader.romNameJP, sizeof(m_mdHeader.romNameJP));
-	string jp_utf8 = Encoding::SJIS_to_Utf8(jp_sjis);
+	// Attempt to convert the Domestic ROM header name from Shift-JIS to UTF-8.
+	string header_sjis = string(m_mdHeader.romNameJP, sizeof(m_mdHeader.romNameJP));
+	string header_utf8 = Encoding::SJIS_to_Utf8(header_sjis);
 	
-	if (!jp_utf8.empty())
+	if (!header_utf8.empty())
 	{
-		// Japanese ROM header name has been converted from Shift-JIS to UTF-8.
-		m_romNameJP = SpaceElim(jp_utf8.c_str(), jp_utf8.size());
+		// Domestic ROM header name has been converted from Shift-JIS to UTF-8.
+		m_romNameJP = SpaceElim(header_utf8.c_str(), header_utf8.size());
 	}
 	else
 	{
-		// Japanese ROM header name was not converted.
+		// Domestic ROM header name was not converted.
 		// Use it as-is.
 		// TODO: Remove characters with high bit set?
 		m_romNameJP = SpaceElim(m_mdHeader.romNameJP, sizeof(m_mdHeader.romNameJP));
 	}
 	
-	// US ROM header name.
-	// TODO: Remove characters with high bit set?
-	// TODO: Convert from cp1252 to UTF-8?
-	m_romNameUS = SpaceElim(m_mdHeader.romNameUS, sizeof(m_mdHeader.romNameUS));
+	// Attempt to convert the Overseas ROM header name from Shift-JIS to UTF-8.
+	// (Columns uses Shift-JIS for both fields.)
+	header_sjis = string(m_mdHeader.romNameUS, sizeof(m_mdHeader.romNameUS));
+	header_utf8 = Encoding::SJIS_to_Utf8(header_sjis);
+	
+	if (!header_utf8.empty())
+	{
+		// Overseas ROM header name has been converted from Shift-JIS to UTF-8.
+		m_romNameUS = SpaceElim(header_utf8.c_str(), header_utf8.size());
+	}
+	else
+	{
+		// Overseas ROM header name was not converted.
+		// Use it as-is.
+		// TODO: Remove characters with high bit set?
+		m_romNameUS = SpaceElim(m_mdHeader.romNameUS, sizeof(m_mdHeader.romNameUS));
+	}
 }
 
 
