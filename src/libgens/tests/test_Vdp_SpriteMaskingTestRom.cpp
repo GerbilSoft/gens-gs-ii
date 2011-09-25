@@ -79,11 +79,49 @@ class Test_SpriteMaskTestRom : public TestSuite
 		
 		enum TestMinMax
 		{
-			TEST_MIN = 0,	// Test minimum bounds.
-			TEST_MAX = 1,	// Test maximum bounds.
+			TEST_UNBOUNDED = 0,	// Test is unbounded. (equivalent to TEST_MIN)
+			TEST_MIN = 1,		// Test minimum bounds.
+			TEST_MAX = 2,		// Test maximum bounds.
 		};
 		
+		/**
+		 * Channel value must be < than this number
+		 * to be considered "off".
+		 */
+		static const uint8_t PX_MIN_THRESH = 0x20;
+		
+		/**
+		 * Channel value must be >= than this number
+		 * to be considered "on".
+		 */
+		static const uint8_t PX_MAX_THRESH = 0xE0;
+		
 		SpriteTestResult checkSpriteTest(int test, TestMinMax testMinMax);
+		
+		struct TestNames
+		{
+			const char *name;
+			bool isMinMax;
+		};
+		
+		static const TestNames SpriteTestNames[9];
+		
+		void assertSpriteTest(int test, TestMinMax testMinMax, SpriteTestResult expected, SpriteTestResult actual);
+		static void PrintSpriteTestResult(FILE *f, SpriteTestResult result);
+};
+
+
+const Test_SpriteMaskTestRom::TestNames Test_SpriteMaskTestRom::SpriteTestNames[9] =
+{
+	{"Max Sprites per Line", true},
+	{"Max Sprite Dots - Basic", true},
+	{"Max Sprite Dots - Complex", true},
+	{"Sprite Mask", false},
+	{"Sprite Mask in S1", false},
+	{"Mask S1 on Dot Overflow", false},
+	{"Mask S1, X=1;  S2, X=0", false},
+	{"Mask S1, X=40; S2, X=0", false},
+	{"Max Sprites per Frame", true},
 };
 
 
@@ -210,16 +248,99 @@ Test_SpriteMaskTestRom::SpriteTestResult Test_SpriteMaskTestRom::checkSpriteTest
 	
 	// X position: min == 216, max == 232
 	// Add HPixBegin() for H32 mode.
-	const int x = ((testMinMax == TEST_MIN ? 216 : 232) + m_vdp->GetHPixBegin());
+	const int x = ((testMinMax <= TEST_MIN ? 216 : 232) + m_vdp->GetHPixBegin());
 	
 	// Y position: 48+8+((test-1)*8)
 	const int y = (48 + 8 + ((test-1) * 8));
 	
 	// Check the pixel color in the framebuffer.
-	// TODO: Return SpriteTestResult based on the pixel color.
-	uint32_t px = m_vdp->MD_Screen.lineBuf32(y)[x];
-	fprintf(stderr, "test #%d, %s: px == %06X\n", test, (testMinMax == TEST_MIN ? "min" : "max"), px);
+	const uint32_t px = m_vdp->MD_Screen.lineBuf32(y)[x];
+	const uint8_t b = (px & 0xFF);
+	const uint8_t g = ((px >> 8) & 0xFF);
+	const uint8_t r = ((px >> 16) & 0xFF);
+	
+	// Check for TEST_PASSED.
+	if (r < PX_MIN_THRESH && g >= PX_MAX_THRESH && b < PX_MIN_THRESH)
+		return TEST_PASSED;
+	
+	// Check for TEST_FAILED.
+	if (r >= PX_MAX_THRESH && g < PX_MIN_THRESH && b < PX_MIN_THRESH)
+		return TEST_FAILED;
+	
+	// Unknown pixel value.
 	return TEST_UNKNOWN;
+}
+
+
+/**
+ * Print a SpriteTestResult.
+ * @param f File to print to.
+ * @param result SpriteTestResult.
+ */
+void Test_SpriteMaskTestRom::PrintSpriteTestResult(FILE *f, SpriteTestResult result)
+{
+	switch (result)
+	{
+		case TEST_PASSED:
+			PrintPass(f);
+			break;
+		case TEST_FAILED:
+			PrintFail(f);
+			break;
+		case TEST_UNKNOWN:
+		default:
+			PrintUnknown(f);
+			break;
+	}
+}
+
+
+/**
+ * Assert a sprite test.
+ * @param test Test number.
+ * @param testMinMax MIN/MAX/UNBOUNDED.
+ * @param expected Expected result.
+ * @param actual Actual result.
+ */
+void Test_SpriteMaskTestRom::assertSpriteTest(int test, TestMinMax testMinMax, SpriteTestResult expected, SpriteTestResult actual)
+{
+	// NOTE: test is currently unused.
+	((void)test);
+	
+	fprintf(stderr, "   - ");
+	if (expected == actual)
+	{
+		assertPass(NULL);
+		PrintPass(stderr);
+	}
+	else
+	{
+		assertFail(NULL);
+		PrintFail(stderr);
+	}
+	
+	// Bounds string.
+	const char *bounds;
+	switch (testMinMax)
+	{
+		case TEST_MIN:
+			bounds = "Minimum";
+			break;
+		case TEST_MAX:
+			bounds = "Maximum";
+			break;
+		case TEST_UNBOUNDED:
+		default:
+			bounds = "Test";
+			break;
+	}
+	
+	// Print the assertion message.
+	fprintf(stderr, "%s: expected ", bounds);
+	PrintSpriteTestResult(stderr, expected);
+	fprintf(stderr, ", got ");
+	PrintSpriteTestResult(stderr, actual);
+	fprintf(stderr, "\n");
 }
 
 
@@ -268,17 +389,60 @@ int Test_SpriteMaskTestRom::runTestSection(ScreenMode screenMode, SpriteLimits s
 	}
 	
 	// Verify the results.
-	// Tests 1, 2, 3, and 9 have min/max bounds.
-	// Tests 4-8 do not.
-	checkSpriteTest(1, TEST_MIN);	checkSpriteTest(1, TEST_MAX);
-	checkSpriteTest(2, TEST_MIN);	checkSpriteTest(2, TEST_MAX);
-	checkSpriteTest(3, TEST_MIN);	checkSpriteTest(3, TEST_MAX);
-	checkSpriteTest(4, TEST_MIN);
-	checkSpriteTest(5, TEST_MIN);
-	checkSpriteTest(6, TEST_MIN);
-	checkSpriteTest(7, TEST_MIN);
-	checkSpriteTest(8, TEST_MIN);
-	checkSpriteTest(9, TEST_MIN);	checkSpriteTest(9, TEST_MAX);
+	for (int i = 1; i <= 9; i++)
+	{
+		fprintf(stderr, "%d. %s\n", i, SpriteTestNames[i-1].name);
+		
+		SpriteTestResult expected, actual;
+		
+		if (!SpriteTestNames[i-1].isMinMax)
+		{
+			// Test doesn't have min/max.
+			
+			// If sprite limits are on, all tests should pass.
+			// If sprite limits are off, test 6 should fail; others should pass.
+			if (spriteLimits == SPRITE_LIMITS_DISABLED)
+				expected = (i == 6 ? TEST_FAILED : TEST_PASSED);
+			else
+				expected = TEST_PASSED;
+			
+			actual = checkSpriteTest(i, TEST_UNBOUNDED);
+			assertSpriteTest(i, TEST_UNBOUNDED, expected, actual);
+		}
+		else
+		{
+			// Test has min/max.
+			
+			// Run the min test.
+			expected = TEST_PASSED;
+			actual = checkSpriteTest(i, TEST_MIN);
+			assertSpriteTest(i, TEST_MIN, expected, actual);
+			
+			// Run the max test.
+			
+			// If sprite limits are on, all tests should passed.
+			// If sprite limits are off, tests 1, 2, 3, should fail;
+			// test 9 should fail only for H32; others should pass.
+			//
+			// NOTE: Test 9 doesn't fail in H40 because Gens currently
+			// limits sprites to a maximum of 80 regardless of sprite limits.
+			// This matches H40's limit. It might change in the future.
+			if (spriteLimits == SPRITE_LIMITS_DISABLED)
+			{
+				if (i == 9 && screenMode == SCREEN_MODE_H32)
+					expected = TEST_FAILED;
+				else if (i <= 3)
+					expected = TEST_FAILED;
+				else
+					expected = TEST_PASSED;
+			}
+			else
+				expected = TEST_PASSED;
+			
+			actual = checkSpriteTest(i, TEST_MAX);
+			assertSpriteTest(i, TEST_MAX, expected, actual);
+		}
+	}
 	
 	// TODO: Assert the test results.
 	
