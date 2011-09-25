@@ -65,17 +65,16 @@ int W32U_End(void);
 extern int W32U_IsUnicode;
 
 /**
- * Convert a multibyte string to UTF-16.
- * TODO: Move to another file.
- * @param mbs UTF-8 string.
+ * Convert a null-terminated multibyte string to UTF-16.
+ * @param mbs Multibyte string. (null-terminated)
  * @param codepage mbs codepage.
  * @return UTF-16 string, or NULL on error.
  */
 wchar_t *W32U_mbs_to_UTF16(const utf8_str *mbs, unsigned int codepage);
 
 /**
- * Convert a UTF-16 string to multibyte.
- * @param wcs UTF-16 string.
+ * Convert a null-terminated UTF-16 string to multibyte.
+ * @param wcs UTF-16 string. (null-terminated)
  * @param codepage mbs codepage.
  * @return Multibyte string, or NULL on error.
  */
