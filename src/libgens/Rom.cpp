@@ -406,14 +406,14 @@ void Rom::readHeaderMD(const uint8_t *header, size_t header_size)
 	if (!header_utf8.empty())
 	{
 		// Domestic ROM header name has been converted from Shift-JIS to UTF-8.
-		m_romNameJP = SpaceElim(header_utf8.c_str(), header_utf8.size());
+		m_romNameJP = SpaceElim(header_utf8);
 	}
 	else
 	{
 		// Domestic ROM header name was not converted.
 		// Use it as-is.
 		// TODO: Remove characters with high bit set?
-		m_romNameJP = SpaceElim(m_mdHeader.romNameJP, sizeof(m_mdHeader.romNameJP));
+		m_romNameJP = SpaceElim(string(m_mdHeader.romNameJP, sizeof(m_mdHeader.romNameJP)));
 	}
 	
 	// Attempt to convert the Overseas ROM header name from Shift-JIS to UTF-8.
@@ -424,14 +424,14 @@ void Rom::readHeaderMD(const uint8_t *header, size_t header_size)
 	if (!header_utf8.empty())
 	{
 		// Overseas ROM header name has been converted from Shift-JIS to UTF-8.
-		m_romNameUS = SpaceElim(header_utf8.c_str(), header_utf8.size());
+		m_romNameUS = SpaceElim(header_utf8);
 	}
 	else
 	{
 		// Overseas ROM header name was not converted.
 		// Use it as-is.
 		// TODO: Remove characters with high bit set?
-		m_romNameUS = SpaceElim(m_mdHeader.romNameUS, sizeof(m_mdHeader.romNameUS));
+		m_romNameUS = SpaceElim(string(m_mdHeader.romNameUS, sizeof(m_mdHeader.romNameUS)));
 	}
 }
 
@@ -441,28 +441,26 @@ void Rom::readHeaderMD(const uint8_t *header, size_t header_size)
  * TODO: Returning an std::string is a bit wasteful...
  * TODO: Move to a separate string handling class.
  * @param src ROM name. (UTF-8)
- * @param len Length of ROM name.
  * @return ROM name with excess spaces eliminated. (UTF-8)
  */
-std::string Rom::SpaceElim(const utf8_str *src, size_t len)
+std::string Rom::SpaceElim(const string& src)
 {
 	// Convert the string to UTF-16 first.
 	// TODO: Check for invalid UTF-8 sequences and handle them as cp1252?
-	string str_src = string(src, len);
 	uint16_t *wcs_src = Encoding::Utf8_to_Utf16(src);
 	if (!wcs_src)
 	{
 		// Error converting the string. Assume the string is ASCII.
-		wcs_src = (uint16_t*)malloc(len * sizeof(uint16_t));
-		for (size_t i = 0; i < len; i++)
+		wcs_src = (uint16_t*)malloc(src.size() * sizeof(uint16_t));
+		for (size_t i = 0; i < src.size(); i++)
 		{
 			wcs_src[i] = (src[i] & 0x7F);
 		}
 	}
 	
 	// Allocate the destination string. (UTF-16)
-	uint16_t *wcs_dest = (uint16_t*)malloc((len + 1) * sizeof(uint16_t));
-	wcs_dest[len] = 0x00;
+	uint16_t *wcs_dest = (uint16_t*)malloc((src.size() + 1) * sizeof(uint16_t));
+	wcs_dest[src.size()] = 0x00;
 	int i_dest = 0;
 	
 	// Was the last character a graphics character?

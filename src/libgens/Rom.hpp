@@ -191,7 +191,7 @@ class Rom
 		
 		// Space elimination algorithm.
 		static FUNC_PURE bool IsGraphChar(uint16_t chr);
-		static std::string SpaceElim(const char *src, size_t len);
+		static std::string SpaceElim(const std::string& src);
 		
 		/** Variables. **/
 		
