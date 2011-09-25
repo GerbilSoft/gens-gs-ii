@@ -216,6 +216,7 @@ int Test_SpriteMaskTestRom::runTestSection(ScreenMode screenMode, SpriteLimits s
 		m_vdp->Set_Reg(0x0C, 0x81);
 	
 	// Run the VDP for one frame.
+	m_vdp->updateVdpLines(true);
 	for (; m_vdp->VDP_Lines.Display.Current < m_vdp->VDP_Lines.Display.Total;
 	     m_vdp->VDP_Lines.Display.Current++, m_vdp->VDP_Lines.Visible.Current++)
 	{
@@ -239,7 +240,6 @@ int Test_SpriteMaskTestRom::exec(void)
 	
 	// Initialize the VDP.
 	m_vdp = new Vdp();
-	m_vdp->updateVdpLines(true);
 	
 	// Set initial registers.
 	m_vdp->Set_Reg(0x00, 0x04);	// Enable the palette. (?)
