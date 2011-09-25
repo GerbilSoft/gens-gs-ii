@@ -20,6 +20,18 @@ CHECK_LIBRARY_EXISTS(c localtime_r "" HAVE_LOCALTIME_R)	# libc: localtime_r()
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libzomg.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libzomg.h")
 
+# Test system byteorder.
+# TODO: Universal Binary support; detect PDP endian.
+INCLUDE(TestBigEndian)
+TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
+IF(IS_BIG_ENDIAN)
+	SET(ZOMG_BYTEORDER "ZOMG_BIG_ENDIAN")
+ELSE(IS_BIG_ENDIAN)
+	SET(ZOMG_BYTEORDER "ZOMG_LIL_ENDIAN")
+ENDIF(IS_BIG_ENDIAN)
+UNSET(IS_BIG_ENDIAN)
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/zomg_byteorder.h.in" "${CMAKE_CURRENT_BINARY_DIR}/zomg_byteorder.h")
+
 # Sources.
 SET(libzomg_SRCS
 	Zomg.cpp
