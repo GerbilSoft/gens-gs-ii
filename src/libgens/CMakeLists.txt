@@ -102,6 +102,7 @@ SET(libgens_SRCS
 	Vdp/VGA_charset.c
 	Util/MdFb.cpp
 	Vdp/VdpStatus.cpp
+	Util/Encoding.cpp
 	)
 
 IF(HAVE_LZMA)
@@ -110,6 +111,7 @@ ELSE()
 	SET(libgens_OPTIONAL_SRCS "")
 ENDIF()
 
+# TODO: Remove this once Encoding.cpp is fully usable.
 IF(HAVE_ICONV)
 	SET(libgens_OPTIONAL_SRCS ${libgens_OPTIONAL_SRCS} Util/gens_iconv.c)
 ENDIF()
