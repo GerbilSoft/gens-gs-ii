@@ -47,25 +47,25 @@ extern "C" {
 #endif
 
 /**
- * W32U_Init(): Initialize the Win32 Unicode Translation Layer.
+ * Initialize the Win32 Unicode Translation Layer.
  * @return 0 on success; non-zero on error.
  */
 int W32U_Init(void);
 
 /**
- * W32U_End(): Shut down the Win32 Unicode Translation Layer.
+ * Shut down the Win32 Unicode Translation Layer.
  * @return 0 on success; non-zero on error.
  */
 int W32U_End(void);
 
 /**
- * W32U_IsUnicode: Indicates if the system is Unicode.
+ * Indicates if the system is Unicode.
  * NOTE: Do NOT edit this variable outside of W32U!
  */
 extern int W32U_IsUnicode;
 
 /**
- * W32U_mbs_to_UTF16(): Convert a multibyte string to UTF-16.
+ * Convert a multibyte string to UTF-16.
  * TODO: Move to another file.
  * @param mbs UTF-8 string.
  * @param codepage mbs codepage.
@@ -74,7 +74,7 @@ extern int W32U_IsUnicode;
 wchar_t *W32U_mbs_to_UTF16(const utf8_str *mbs, unsigned int codepage);
 
 /**
- * W32U_UTF16_to_mbs(): Convert a UTF-16 string to multibyte.
+ * Convert a UTF-16 string to multibyte.
  * @param wcs UTF-16 string.
  * @param codepage mbs codepage.
  * @return Multibyte string, or NULL on error.
@@ -85,7 +85,7 @@ char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage);
 #define fopen(filename, mode) W32U_fopen(filename, mode)
 
 /**
- * W32U_fopen(): Open a file.
+ * Open a file.
  * @param filename Filename.
  * @param mode File mode.
  * @return File pointer, or NULL on error.
