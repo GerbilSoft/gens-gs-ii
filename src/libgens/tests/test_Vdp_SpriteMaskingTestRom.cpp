@@ -69,6 +69,21 @@ class Test_SpriteMaskTestRom : public TestSuite
 		
 		int loadVRam(ScreenMode screenMode);
 		int runTestSection(ScreenMode screenMode, SpriteLimits spriteLimits);
+		
+		enum SpriteTestResult
+		{
+			TEST_PASSED = 0,
+			TEST_FAILED = 1,
+			TEST_UNKNOWN = 2,
+		};
+		
+		enum TestMinMax
+		{
+			TEST_MIN = 0,	// Test minimum bounds.
+			TEST_MAX = 1,	// Test maximum bounds.
+		};
+		
+		SpriteTestResult checkSpriteTest(int test, TestMinMax testMinMax);
 };
 
 
@@ -183,6 +198,32 @@ int Test_SpriteMaskTestRom::loadVRam(ScreenMode screenMode)
 
 
 /**
+ * Check a sprite test using screen scraping.
+ * @param test Test number. (1-9)
+ * @param testMinMax Select whether to test minimum or maximum bounds.
+ * @return Sprite test result.
+ */
+Test_SpriteMaskTestRom::SpriteTestResult Test_SpriteMaskTestRom::checkSpriteTest(int test, TestMinMax testMinMax)
+{
+	if (test <= 0 || test > 9)
+		return TEST_UNKNOWN;
+	
+	// X position: min == 216, max == 232
+	// Add HPixBegin() for H32 mode.
+	const int x = ((testMinMax == TEST_MIN ? 216 : 232) + m_vdp->GetHPixBegin());
+	
+	// Y position: 48+8+((test-1)*8)
+	const int y = (48 + 8 + ((test-1) * 8));
+	
+	// Check the pixel color in the framebuffer.
+	// TODO: Return SpriteTestResult based on the pixel color.
+	uint32_t px = m_vdp->MD_Screen.lineBuf32(y)[x];
+	fprintf(stderr, "test #%d, %s: px == %06X\n", test, (testMinMax == TEST_MIN ? "min" : "max"), px);
+	return TEST_UNKNOWN;
+}
+
+
+/**
  * Run a section of tests.
  * @param screenMode Screen mode. (H32 or H40)
  * @param spriteLimits Indicate if sprite limits are enabled or disabled.
@@ -215,6 +256,9 @@ int Test_SpriteMaskTestRom::runTestSection(ScreenMode screenMode, SpriteLimits s
 	else
 		m_vdp->Set_Reg(0x0C, 0x81);
 	
+	// Set the VRam dirty flag.
+	m_vdp->MarkVRamDirty();
+	
 	// Run the VDP for one frame.
 	m_vdp->updateVdpLines(true);
 	for (; m_vdp->VDP_Lines.Display.Current < m_vdp->VDP_Lines.Display.Total;
@@ -223,7 +267,20 @@ int Test_SpriteMaskTestRom::runTestSection(ScreenMode screenMode, SpriteLimits s
 		m_vdp->Render_Line();
 	}
 	
-	// TODO: Verify the results.
+	// Verify the results.
+	// Tests 1, 2, 3, and 9 have min/max bounds.
+	// Tests 4-8 do not.
+	checkSpriteTest(1, TEST_MIN);	checkSpriteTest(1, TEST_MAX);
+	checkSpriteTest(2, TEST_MIN);	checkSpriteTest(2, TEST_MAX);
+	checkSpriteTest(3, TEST_MIN);	checkSpriteTest(3, TEST_MAX);
+	checkSpriteTest(4, TEST_MIN);
+	checkSpriteTest(5, TEST_MIN);
+	checkSpriteTest(6, TEST_MIN);
+	checkSpriteTest(7, TEST_MIN);
+	checkSpriteTest(8, TEST_MIN);
+	checkSpriteTest(9, TEST_MIN);	checkSpriteTest(9, TEST_MAX);
+	
+	// TODO: Assert the test results.
 	
 	// Tests run successfully.
 	return 0;
