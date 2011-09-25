@@ -82,7 +82,7 @@ void TestSuite::PrintPass(FILE *f)
 	{ fprintf(f, "[" ANSI_ESC_COLOR(2) "PASS" ANSI_ESC_END "] "); }
 void TestSuite::PrintInfo(FILE *f)
 	{ fprintf(f, "[" ANSI_ESC_COLOR(5) "INFO" ANSI_ESC_END "] "); }
-void TestSuite::PrintInfo(FILE *f)
+void TestSuite::PrintUnknown(FILE *f)
 	{ fprintf(f, "[" ANSI_ESC_COLOR(3) "UNKNOWN" ANSI_ESC_END "] "); }
 #undef ANSI_ESC_COLOR
 #undef ANSI_ESC_END
