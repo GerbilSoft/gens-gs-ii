@@ -254,7 +254,7 @@ int Test_SpriteMaskTestRom::exec(void)
 	// Initialize CRam.
 	LibGens::VdpPalette *palette = &m_vdp->m_palette;
 	palette->setBpp(LibGens::VdpPalette::BPP_32);
-	for (size_t i = 0; i < sizeof(test_spritemask_cram); i++)
+	for (size_t i = 0; i < (sizeof(test_spritemask_cram)/sizeof(test_spritemask_cram[0])); i++)
 	{
 		palette->writeCRam_16((i<<1), test_spritemask_cram[i]);
 	}
