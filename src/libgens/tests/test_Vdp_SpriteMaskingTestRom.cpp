@@ -457,7 +457,8 @@ int Test_SpriteMaskTestRom::runTestSection(ScreenMode screenMode, SpriteLimits s
  */
 int Test_SpriteMaskTestRom::exec(void)
 {
-	fprintf(stderr, "LibGens: VDP Sprite Masking & Overflow Test ROM.\n\n");
+	fprintf(stderr, "LibGens: VDP Sprite Masking & Overflow Test ROM.\n"
+			"Original ROM (c) 2009 by Nemesis.\n\n");
 	
 	// Initialize the VDP.
 	m_vdp = new Vdp();
