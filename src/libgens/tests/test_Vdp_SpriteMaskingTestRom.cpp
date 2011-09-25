@@ -211,9 +211,9 @@ int Test_SpriteMaskTestRom::runTestSection(ScreenMode screenMode, SpriteLimits s
 	
 	// Set the screen mode.
 	if (screenMode == SCREEN_MODE_H32)
-		m_vdp->Set_Reg(0x0C, 0x81);
-	else
 		m_vdp->Set_Reg(0x0C, 0x00);
+	else
+		m_vdp->Set_Reg(0x0C, 0x81);
 	
 	// Run the VDP for one frame.
 	for (; m_vdp->VDP_Lines.Display.Current < m_vdp->VDP_Lines.Display.Total;
