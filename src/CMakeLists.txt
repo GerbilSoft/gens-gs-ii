@@ -10,7 +10,14 @@ SET(HAVE_LZMA 1)
 # Check for C++ 2011 support.
 # If C++ 2011 isn't available, compatibility definitions will be enabled.
 INCLUDE(CheckCXXSourceCompiles)
-CHECK_CXX_SOURCE_COMPILES("int main() { void *ptr = nullptr; }" HAVE_CXX_2011)
+INCLUDE(CheckCXX11CompilerFlag)
+
+SET(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
+SET(CMAKE_REQUIRED_DEFINITIONS "${GENS_CXX11_CXXFLAG}")
+CHECK_CXX_SOURCE_COMPILES("int main(void) { void *ptr = nullptr; return 0; }" HAVE_CXX_2011)
+SET(CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
+UNSET(SAFE_CMAKE_REQUIRED_DEFINITIONS)
+
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/c++11-compat.h.in" "${CMAKE_CURRENT_BINARY_DIR}/c++11-compat.h")
 
 # External libraries.
