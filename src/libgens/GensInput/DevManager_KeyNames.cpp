@@ -51,7 +51,7 @@ namespace LibGens
 // TODO: Qt refers to Windows keys as "Meta",
 // but X11 refers to Windows keys as "Super".
 
-const char *DevManager::ms_KeyNames[KEYV_LAST] =
+const char *const DevManager::ms_KeyNames[KEYV_LAST] =
 {
 	// 0x00
 	"None", NULL, NULL, NULL, NULL, NULL, NULL, NULL,

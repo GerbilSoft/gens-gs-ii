@@ -98,7 +98,7 @@ class DevManager
 		static void *ms_DevParam[MAX_DEVICE_TYPES];
 		
 		// Key names.
-		static const char *ms_KeyNames[KEYV_LAST];
+		static const char *const ms_KeyNames[KEYV_LAST];
 };
 
 
