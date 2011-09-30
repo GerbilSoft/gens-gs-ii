@@ -369,7 +369,7 @@ inline void VdpRend_Err::T_DrawVDPErrorMessage(pixel *screen)
 	T_DrawText<pixel, text_color>(screen, x, y, buf);
 	
 	// TMS9918 modes.
-	static const char *tms9918_modes[8] =
+	static const char *const tms9918_modes[8] =
 	{
 		"0 (Graphic I)",
 		"1 (Text)",
@@ -380,8 +380,8 @@ inline void VdpRend_Err::T_DrawVDPErrorMessage(pixel *screen)
 		"2+3",
 		"1+2+3"
 	};
-	const char *cur_mode;
 	
+	const char *cur_mode;
 	if (Vdp::VDP_Mode & VDP_MODE_M4)
 	{
 		// Mode 4.
