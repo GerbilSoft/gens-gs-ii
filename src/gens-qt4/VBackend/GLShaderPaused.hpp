@@ -41,9 +41,9 @@ class GLShaderPaused : public GLShader
 	private:
 		/** Shaders. **/
 #ifdef HAVE_GLEW
-		static const char *ms_GL_ARB_fragment_program;
+		static const char *const ms_GL_ARB_fragment_program;
 #ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
-		static const char *ms_GL_ATI_text_fragment_shader;
+		static const char *const ms_GL_ATI_text_fragment_shader;
 #endif /* ENABLE_ATI_TEXT_FRAGMENT_SHADER */
 #endif /* HAVE_GLEW */
 };

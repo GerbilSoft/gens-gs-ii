@@ -46,7 +46,7 @@ class GLShaderFastBlur : public GLShader
 	private:
 		/** Shaders. **/
 #ifdef HAVE_GLEW
-		static const char *ms_GL_ARB_fragment_program;
+		static const char *const ms_GL_ARB_fragment_program;
 #endif /* HAVE_GLEW */
 };
 

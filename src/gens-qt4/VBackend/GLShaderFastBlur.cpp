@@ -37,7 +37,7 @@ namespace GensQt4
  * ms_GL_ARB_fragment_program: GL_ARB_fragment_program.
  * Based on GLSL code by Damizean.
  */
-const char *GLShaderFastBlur::ms_GL_ARB_fragment_program =
+const char *const GLShaderFastBlur::ms_GL_ARB_fragment_program =
 	"!!ARBfp1.0\n"
 	"OPTION ARB_precision_hint_fastest;\n"
 	"PARAM div2 = {0.5, 0.5, 0.5, 0.0};\n"			// Divide by 2 vector.

@@ -40,7 +40,7 @@ namespace GensQt4
  * Grayscale vector: [0.299 0.587 0.114] (ITU-R BT.601)
  * Source: http://en.wikipedia.org/wiki/YCbCr
  */
-const char *GLShaderPaused::ms_GL_ARB_fragment_program =
+const char *const GLShaderPaused::ms_GL_ARB_fragment_program =
 	"!!ARBfp1.0\n"
 	"OPTION ARB_precision_hint_fastest;\n"
 	"PARAM grayscale = {0.299, 0.587, 0.114, 0.0};\n"	// Standard RGB to Grayscale vector.
@@ -59,7 +59,7 @@ const char *GLShaderPaused::ms_GL_ARB_fragment_program =
  * Grayscale vector: [0.299 0.587 0.114] (ITU-R BT.601)
  * Source: http://en.wikipedia.org/wiki/YCbCr
  */
-const char *GLShaderPaused::ms_GL_ATI_text_fragment_shader =
+const char *const GLShaderPaused::ms_GL_ATI_text_fragment_shader =
 	"!!ATIfs1.0\n"
 	"StartConstants;\n"
 	"  CONSTANT c0 = {0.299, 0.587, 0.114};\n"	// Standard RGB to Grayscale vector.
