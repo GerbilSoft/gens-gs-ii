@@ -38,6 +38,17 @@
 #include <assert.h>
 #define static_assert(expr, msg) assert(expr)
 
+/* Unicode characters and strings. */
+#include <string>
+typedef uint16_t char16_t;
+typedef uint32_t char32_t;
+
+namespace std
+{
+	typedef basic_string<char16_t> u16string;
+	typedef basic_string<char32_t> u32string;
+}
+
 #endif
 
 #endif /* __CXX11_COMPAT_H__ */
