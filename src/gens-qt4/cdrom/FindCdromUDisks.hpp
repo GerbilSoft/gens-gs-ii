@@ -60,7 +60,7 @@ class FindCdromUDisks : public FindCdrom
 		int query_int(void);
 	
 	private:
-		static const char *ms_UDisks_DriveID[20];
+		static const char *const ms_UDisks_DriveID[20];
 		
 		static QString GetStringProperty(QDBusInterface *dbus_if, const char *prop);
 		static bool GetBoolProperty(QDBusInterface *dbus_if, const char *prop);

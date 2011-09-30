@@ -48,7 +48,7 @@ class FindCdromUnix : public FindCdrom
 		int query_int(void);
 	
 	private:
-		static const char *ms_Unix_DevNames[];
+		static const char *const ms_Unix_DevNames[];
 		
 		/** OS-specific functions. **/
 		static int os_GetDevIdentity(int fd, CdromDriveEntry &entry);

@@ -48,7 +48,7 @@ namespace GensQt4
 typedef QList<QDBusObjectPath> QtDBus_ao_t;
 
 // UDisks drive IDs.
-const char *FindCdromUDisks::ms_UDisks_DriveID[20] =
+const char *const FindCdromUDisks::ms_UDisks_DriveID[20] =
 {
 	"optical_cd", "optical_cd_r", "optical_cd_rw", "optical_dvd",
 	"optical_dvd_r", "optical_dvd_rw", "optical_dvd_ram",

@@ -57,7 +57,7 @@
 namespace GensQt4
 {
 
-const char *FindCdromUnix::ms_Unix_DevNames[] =
+const char *const FindCdromUnix::ms_Unix_DevNames[] =
 {
 #ifdef Q_OS_LINUX
 	"cdrom*", "cdrw*", "dvd*", "dvdrw*", "sr*", "scd*", "hd*",
@@ -82,7 +82,7 @@ int FindCdromUnix::query_int(void)
 	
 	// Create the filters for the templates.
 	QStringList nameFilters;
-	for (const char **devName = &ms_Unix_DevNames[0];
+	for (const char *const *devName = &ms_Unix_DevNames[0];
 	     *devName != NULL; devName++)
 	{
 		nameFilters.append(QLatin1String(*devName));
