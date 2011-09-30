@@ -22,6 +22,8 @@
 #ifndef __LIBGENS_UTIL_ENCODING_HPP__
 #define __LIBGENS_UTIL_ENCODING_HPP__
 
+// TODO: Figure out a better way to #include this.
+#include "../c++11-compat.h"
 
 // C++ includes.
 #include <string>
@@ -49,14 +51,14 @@ class Encoding
 		 * @param len Length of UTF-16 string, in characters.
 		 * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
 		 */
-		static std::string Utf16_to_Utf8(const uint16_t *src, size_t len);
+		static std::string Utf16_to_Utf8(const char16_t *src, size_t len);
 		
 		/**
 		 * Convert UTF-8 to UTF-16 (host-endian).
 		 * @param src UTF-8 string.
 		 * @return Allocated null-terminated UTF-16 string, or NULL on error.
 		 */
-		static uint16_t *Utf8_to_Utf16(const std::string& src);
+		static char16_t *Utf8_to_Utf16(const std::string& src);
 		
 		/**
 		 * Convert Shift-JIS to UTF-8.
@@ -73,7 +75,7 @@ class Encoding
 		 * @param n Maximum number of characters to check.
 		 * @return Negative value if s1 < s2; 0 if s1 == s2; positive value if s1 > s2.
 		 */
-		static int Utf16_ncmp(const uint16_t *s1, const uint16_t *s2, size_t n);
+		static int Utf16_ncmp(const char16_t *s1, const char16_t *s2, size_t n);
 	
 	private:
 		Encoding() { }
@@ -82,7 +84,7 @@ class Encoding
 
 #ifdef _WIN32
 // Win32: wchar_t is 16-bit, so use _wcsicmp() directly.
-inline int Encoding::Utf16_ncmp(const uint16_t *s1, const uint16_t *s2, size_t n)
+inline int Encoding::Utf16_ncmp(const char16_t *s1, const char16_t *s2, size_t n)
 	{ return _wcsnicmp((const wchar_t*)s1, (const wchar_t*)s2, n); }
 #endif
 

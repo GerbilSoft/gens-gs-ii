@@ -25,6 +25,9 @@
 
 #include "Rom.hpp"
 
+// TODO: Figure out a better way to #include this.
+#include "../c++11-compat.h"
+
 // C includes.
 #include <string.h>
 
@@ -447,11 +450,11 @@ std::string Rom::SpaceElim(const string& src)
 {
 	// Convert the string to UTF-16 first.
 	// TODO: Check for invalid UTF-8 sequences and handle them as cp1252?
-	uint16_t *wcs_src = Encoding::Utf8_to_Utf16(src);
+	char16_t *wcs_src = Encoding::Utf8_to_Utf16(src);
 	if (!wcs_src)
 	{
 		// Error converting the string. Assume the string is ASCII.
-		wcs_src = (uint16_t*)malloc(src.size() * sizeof(uint16_t));
+		wcs_src = (char16_t*)malloc(src.size() * sizeof(*wcs_src));
 		for (size_t i = 0; i < src.size(); i++)
 		{
 			wcs_src[i] = (src[i] & 0x7F);
@@ -459,7 +462,7 @@ std::string Rom::SpaceElim(const string& src)
 	}
 	
 	// Allocate the destination string. (UTF-16)
-	uint16_t *wcs_dest = (uint16_t*)malloc((src.size() + 1) * sizeof(uint16_t));
+	char16_t *wcs_dest = (char16_t*)malloc((src.size() + 1) * sizeof(*wcs_dest));
 	wcs_dest[src.size()] = 0x00;
 	int i_dest = 0;
 	
@@ -468,7 +471,7 @@ std::string Rom::SpaceElim(const string& src)
 	
 	// wcs_src is null-terminated.
 	// Process the string.
-	for (uint16_t *wchr = wcs_src; *wchr != 0x00; wchr++)
+	for (char16_t *wchr = wcs_src; *wchr != 0x00; wchr++)
 	{
 		if (!lastCharIsGraph && !IsGraphChar(*wchr))
 		{

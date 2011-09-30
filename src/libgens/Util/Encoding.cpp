@@ -147,7 +147,7 @@ namespace LibGens
  * @param len Length of UTF-16 string, in characters.
  * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
  */
-string Encoding::Utf16_to_Utf8(const uint16_t *src, size_t len)
+string Encoding::Utf16_to_Utf8(const char16_t *src, size_t len)
 {
 	char *mbs;
 #if defined(_WIN32)
@@ -178,15 +178,15 @@ string Encoding::Utf16_to_Utf8(const uint16_t *src, size_t len)
  * @param src UTF-8 string. (null-terminated)
  * @return Allocated null-terminated UTF-16 string, or NULL on error.
  */
-uint16_t *Encoding::Utf8_to_Utf16(const string& src)
+char16_t *Encoding::Utf8_to_Utf16(const string& src)
 {
 #if defined(_WIN32)
 	// Win32 version. Use W32U_mini.
 	// TODO: Use the source string's length.
-	return (uint16_t*)W32U_mbs_to_UTF16(src.c_str(), CP_UTF8);
+	return (char16_t*)W32U_mbs_to_UTF16(src.c_str(), CP_UTF8);
 #elif defined(HAVE_ICONV)
 	// iconv version.
-	return (uint16_t*)gens_iconv(src.c_str(), src.size(), "UTF-8", UTF16_ENCODING);
+	return (char16_t*)gens_iconv(src.c_str(), src.size(), "UTF-8", UTF16_ENCODING);
 #else
 	// No translation supported.
 	// TODO: #error?
@@ -234,7 +234,7 @@ std::string Encoding::SJIS_to_Utf8(const std::string& src)
  * @param n Maximum number of characters to check.
  * @return Negative value if s1 < s2; 0 if s1 == s2; positive value if s1 > s2.
  */
-int Encoding::Utf16_ncmp(const uint16_t *s1, const uint16_t *s2, size_t n)
+int Encoding::Utf16_ncmp(const char16_t *s1, const char16_t *s2, size_t n)
 {
 	// TODO: This expects platform-endian strings.
 	// Add a parameter for LE vs. BE?

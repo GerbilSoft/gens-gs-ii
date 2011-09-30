@@ -30,6 +30,9 @@
 
 #include "Dc7z.hpp"
 
+// TODO: Figure out a better way to #include this.
+#include "../c++11-compat.h"
+
 // C includes.
 #include <stdlib.h>
 #include <string.h>
@@ -250,7 +253,7 @@ int Dc7z::getFileInfo(mdp_z_entry_t **z_entry_out)
 	mdp_z_entry_t *z_entry_tail = NULL;
 	
 	// Filename buffer. (UTF-16)
-	uint16_t *filenameW = NULL;
+	char16_t *filenameW = NULL;
 	size_t filenameW_len = 0;
 	
 	// Read the filenames.
@@ -268,9 +271,9 @@ int Dc7z::getFileInfo(mdp_z_entry_t **z_entry_out)
 			// TODO: Check for malloc() errors?
 			free(filenameW);
 			filenameW_len = len;
-			filenameW = (uint16_t*)malloc(filenameW_len * sizeof(uint16_t));
+			filenameW = (char16_t*)malloc(filenameW_len * sizeof(*filenameW));
 		}
-		SzArEx_GetFileNameUtf16(&m_db, i, filenameW);
+		SzArEx_GetFileNameUtf16(&m_db, i, (uint16_t*)filenameW);
 		
 		// Convert the filename to UTF-8.
 		string z_entry_filename = Encoding::Utf16_to_Utf8(filenameW, filenameW_len);
@@ -348,7 +351,7 @@ int Dc7z::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *r
 	}
 	
 	// Convert the z_entry filename to UTF-16.
-	uint16_t *z_entry_filenameW = Encoding::Utf8_to_Utf16(string(z_entry->filename));
+	char16_t *z_entry_filenameW = Encoding::Utf8_to_Utf16(string(z_entry->filename));
 	if (!z_entry_filenameW)
 	{
 		// Error converting the filename to Unicode.
@@ -356,7 +359,7 @@ int Dc7z::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *r
 	}
 	
 	// Filename buffer. (UTF-16)
-	uint16_t *filenameW = NULL;
+	char16_t *filenameW = NULL;
 	size_t filenameW_len = 0;
 	
 	// Locate the file in the 7-Zip archive.
@@ -375,9 +378,9 @@ int Dc7z::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *r
 			// TODO: Check for malloc() errors?
 			free(filenameW);
 			filenameW_len = len;
-			filenameW = (uint16_t*)malloc(filenameW_len * sizeof(uint16_t));
+			filenameW = (char16_t*)malloc(filenameW_len * sizeof(*filenameW));
 		}
-		SzArEx_GetFileNameUtf16(&m_db, i, filenameW);
+		SzArEx_GetFileNameUtf16(&m_db, i, (uint16_t*)filenameW);
 		
 		// Compare the filename against the z_entry filename.
 		if (Encoding::Utf16_ncmp(z_entry_filenameW, filenameW, filenameW_len) != 0)
