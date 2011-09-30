@@ -40,6 +40,7 @@
 // C++ includes.
 #include <string>
 using std::string;
+using std::u16string;
 
 // C includes. (C++ namespace)
 #include <cstdlib>
@@ -176,22 +177,31 @@ string Encoding::Utf16_to_Utf8(const char16_t *src, size_t len)
 /**
  * Convert UTF-8 to UTF-16 (host-endian).
  * @param src UTF-8 string. (null-terminated)
- * @return Allocated null-terminated UTF-16 string, or NULL on error.
+ * @return UTF-16 string, or empty string on error.
  */
-char16_t *Encoding::Utf8_to_Utf16(const string& src)
+u16string Encoding::Utf8_to_Utf16(const string& src)
 {
+	char16_t *wcs;
 #if defined(_WIN32)
 	// Win32 version. Use W32U_mini.
 	// TODO: Use the source string's length.
-	return (char16_t*)W32U_mbs_to_UTF16(src.c_str(), CP_UTF8);
+	wcs = (char16_t*)W32U_mbs_to_UTF16(src.c_str(), CP_UTF8);
 #elif defined(HAVE_ICONV)
 	// iconv version.
-	return (char16_t*)gens_iconv(src.data(), src.size(), "UTF-8", UTF16_ENCODING);
+	wcs = (char16_t*)gens_iconv(src.data(), src.size(), "UTF-8", UTF16_ENCODING);
 #else
 	// No translation supported.
 	// TODO: #error?
-	return NULL;
+	return u16string();
 #endif
+
+	if (!wcs)
+		return u16string();
+	
+	// Convert the allocated data to an std::u16string.
+	u16string ret(wcs);
+	free(wcs);
+	return ret;
 }
 
 
@@ -200,7 +210,7 @@ char16_t *Encoding::Utf8_to_Utf16(const string& src)
  * @param src Shift-JIS string.
  * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
  */
-std::string Encoding::SJIS_to_Utf8(const std::string& src)
+string Encoding::SJIS_to_Utf8(const string& src)
 {
 	utf8_str *mbs = NULL;
 #if defined(_WIN32)

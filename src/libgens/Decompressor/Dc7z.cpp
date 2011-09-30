@@ -48,6 +48,7 @@
 // C++ includes.
 #include <string>
 using std::string;
+using std::u16string;
 
 // 7-Zip includes.
 #include "lzma/7z/7zAlloc.h"
@@ -351,8 +352,8 @@ int Dc7z::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *r
 	}
 	
 	// Convert the z_entry filename to UTF-16.
-	char16_t *z_entry_filenameW = Encoding::Utf8_to_Utf16(string(z_entry->filename));
-	if (!z_entry_filenameW)
+	u16string z_entry_filenameW = Encoding::Utf8_to_Utf16(string(z_entry->filename));
+	if (z_entry_filenameW.empty())
 	{
 		// Error converting the filename to Unicode.
 		return -4; // TODO: Return an appropriate MDP error code.
@@ -383,7 +384,7 @@ int Dc7z::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *r
 		SzArEx_GetFileNameUtf16(&m_db, i, (uint16_t*)filenameW);
 		
 		// Compare the filename against the z_entry filename.
-		if (Encoding::Utf16_ncmp(z_entry_filenameW, filenameW, filenameW_len) != 0)
+		if (Encoding::Utf16_ncmp(z_entry_filenameW.c_str(), filenameW, filenameW_len) != 0)
 		{
 			// Not the correct file.
 			continue;
@@ -416,8 +417,8 @@ int Dc7z::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *r
 		break;
 	}
 	
-	// Free the UTF-16 z_entry filename.
-	free(z_entry_filenameW);
+	// Free the temporary UTF-16 filename buffer.
+	free(filenameW);
 	
 	if (i >= m_db.db.NumFiles)
 	{

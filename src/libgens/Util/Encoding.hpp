@@ -48,6 +48,13 @@ class Encoding
 		/**
 		 * Convert UTF-16 (host-endian) to UTF-8.
 		 * @param src UTF-16 string. (host-endian)
+		 * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
+		 */
+		static std::string Utf16_to_Utf8(const std::u16string& src);
+		
+		/**
+		 * Convert UTF-16 (host-endian) to UTF-8.
+		 * @param src UTF-16 string. (host-endian)
 		 * @param len Length of UTF-16 string, in characters.
 		 * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
 		 */
@@ -56,9 +63,9 @@ class Encoding
 		/**
 		 * Convert UTF-8 to UTF-16 (host-endian).
 		 * @param src UTF-8 string.
-		 * @return Allocated null-terminated UTF-16 string, or NULL on error.
+		 * @return UTF-16 string, or empty string on error.
 		 */
-		static char16_t *Utf8_to_Utf16(const std::string& src);
+		static std::u16string Utf8_to_Utf16(const std::string& src);
 		
 		/**
 		 * Convert Shift-JIS to UTF-8.
@@ -81,6 +88,19 @@ class Encoding
 		Encoding() { }
 		~Encoding() { }
 };
+
+/**
+ * Convert UTF-16 (host-endian) to UTF-8.
+ * @param src UTF-16 string. (host-endian)
+ * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
+ */
+inline std::string Encoding::Utf16_to_Utf8(const std::u16string& src)
+{
+	// The raw char16_t* version is used in Dc7z.cpp,
+	// so we'll make the std::u16string version a wrapper
+	// instead of converting the char16_t* to an std::u16string.
+	return Utf16_to_Utf8(src.data(), src.size());
+}
 
 #ifdef _WIN32
 // Win32: wchar_t is 16-bit, so use _wcsicmp() directly.
