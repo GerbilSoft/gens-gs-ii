@@ -150,11 +150,11 @@ void RecentRomsMenuPrivate::update(void)
 	
 	// Create new QActions from the Recent ROMs list.
 	// TODO: Move the ROM format prefixes somewhere else.
-	static const char *RomFormatPrefix[] =
+	static const char RomFormatPrefix[][8] =
 	{
 		"---", "MD", "MCD", "32X",
 		"MCD32X", "SMS", "GG", "SG",
-		"Pico", NULL
+		"Pico"
 	};
 	
 	int i = 1;
