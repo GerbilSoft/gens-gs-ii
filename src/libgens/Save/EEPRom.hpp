@@ -163,7 +163,7 @@ class EEPRom
 		 * - ppc32: powerpc-apple-darwin9-gcc-4.0.1 (GCC) 4.0.1 (Apple Inc. build 5493) [OS X 10.5.7]
 		 * - i386:  i686-apple-darwin9-gcc-4.2.1 (GCC) 4.2.1 (Apple Inc. build 5566) [andlabs] [OS X 10.5.8]
 		 */
-		static const char *ms_FileExt;
+		static const char *const ms_FileExt;
 		std::string m_filename;		// EEPRom base filename.
 		std::string m_pathname;		// EEPRom pathname.
 		std::string m_fullPathname;	// Full pathname. (m_pathname + m_filename)

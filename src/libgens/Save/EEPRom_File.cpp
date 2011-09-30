@@ -35,7 +35,7 @@ namespace LibGens
 {
 
 // Static variable initialization.
-const char *EEPRom::ms_FileExt = "epr";	// TODO: .epr, .sep, or just .srm?
+const char *const EEPRom::ms_FileExt = "epr";	// TODO: .epr, .sep, or just .srm?
 
 // TODO: EEPRom directory path.
 // For now, just save in the ROM directory.

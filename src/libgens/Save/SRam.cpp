@@ -36,7 +36,7 @@ namespace LibGens
 {
 
 // Static variable initialization.
-const char *SRam::ms_FileExt = "srm";
+const char *const SRam::ms_FileExt = "srm";
 
 // TODO: SRam directory path.
 // For now, just save in the ROM directory.

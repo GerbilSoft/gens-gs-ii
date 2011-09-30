@@ -138,7 +138,7 @@ class SRam
 	
 	private:
 		// Filename.
-		static const char *ms_FileExt;
+		static const char *const ms_FileExt;
 		std::string m_filename;		// SRam base filename.
 		std::string m_pathname;		// SRam pathname.
 		std::string m_fullPathname;	// Full pathname. (m_pathname + m_filename)
