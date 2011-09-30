@@ -186,7 +186,7 @@ char16_t *Encoding::Utf8_to_Utf16(const string& src)
 	return (char16_t*)W32U_mbs_to_UTF16(src.c_str(), CP_UTF8);
 #elif defined(HAVE_ICONV)
 	// iconv version.
-	return (char16_t*)gens_iconv(src.c_str(), src.size(), "UTF-8", UTF16_ENCODING);
+	return (char16_t*)gens_iconv(src.data(), src.size(), "UTF-8", UTF16_ENCODING);
 #else
 	// No translation supported.
 	// TODO: #error?
@@ -211,7 +211,7 @@ std::string Encoding::SJIS_to_Utf8(const std::string& src)
 		free(wcs);
 	}
 #elif defined(HAVE_ICONV)
-	mbs = gens_iconv(src.c_str(), src.length(), "SHIFT-JIS", "UTF-8");
+	mbs = gens_iconv(src.data(), src.length(), "SHIFT-JIS", "UTF-8");
 #else
 	// No translation supported.
 	// TODO: #error?
