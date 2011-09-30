@@ -90,7 +90,7 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		static CtrlConfigWindow *m_CtrlConfigWindow;
 		
 		// Controller data.
-		static const char *ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX];
+		static const char *const ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX];
 		static QString GetShortDeviceName(LibGens::IoBase::IoType devType);
 		static QString GetLongDeviceName(LibGens::IoBase::IoType devType);
 		static QString GetPortName(int port);

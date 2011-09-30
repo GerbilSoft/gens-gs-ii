@@ -42,7 +42,7 @@ namespace GensQt4
 CtrlConfigWindow *CtrlConfigWindow::m_CtrlConfigWindow = NULL;
 
 // Controller icon filenames.
-const char *CtrlConfigWindow::ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX] =
+const char *const CtrlConfigWindow::ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX] =
 {
 	"controller-none.png",		// IOT_NONE
 	"controller-3btn.png",		// IOT_3BTN
