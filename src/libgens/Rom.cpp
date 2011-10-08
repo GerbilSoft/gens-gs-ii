@@ -31,6 +31,7 @@
 // C includes. (C++ namespace)
 #include <cstring>
 #include <cctype>
+#include <cstdio>
 
 // C++ includes.
 #include <algorithm>

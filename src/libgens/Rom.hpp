@@ -25,7 +25,6 @@
 #define __LIBGENS_ROM_HPP__
 
 // C includes. (C++ namespace)
-#include <cstdio>
 #include <cstdint>
 
 // C++ includes.
