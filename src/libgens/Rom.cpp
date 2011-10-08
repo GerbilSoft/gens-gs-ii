@@ -59,7 +59,9 @@ namespace LibGens
 class RomPrivate
 {
 	public:
-		RomPrivate(Rom *q);
+		RomPrivate(Rom *q, const utf8_str *filename,
+				Rom::MDP_SYSTEM_ID sysOverride = Rom::MDP_SYSTEM_UNKNOWN,
+				Rom::RomFormat fmtOverride = Rom::RFMT_UNKNOWN);
 		~RomPrivate();
 	
 	private:
@@ -84,6 +86,13 @@ class RomPrivate
 		Decompressor *decomp;
 		mdp_z_entry_t *z_entry_list;
 		const mdp_z_entry_t *z_entry_sel;
+		
+		/**
+		 * Determine if the loaded ROM archive has multiple files.
+		 * @return True if the ROM archive has multiple files; false if it doesn't.
+		 */
+		inline bool isMultiFile(void) const
+			{ return (z_entry_list && z_entry_list->next); }
 		
 		// System ID and ROM format.
 		Rom::MDP_SYSTEM_ID sysId;
@@ -156,10 +165,15 @@ class RomPrivate
 
 
 /**
- * Initialize the RomPrivate object.
+ * Initialize a new RomPrivate object.
  * @param q Rom object that owns this RomPrivate object.
+ * @param filename ROM filename.
+ * @param sysOverride System override.
+ * @param fmtOverride ROM format override.
  */
-RomPrivate::RomPrivate(Rom *q)
+RomPrivate::RomPrivate(Rom *q, const utf8_str *filename,
+			Rom::MDP_SYSTEM_ID sysOverride,
+			Rom::RomFormat fmtOverride)
 	: q(q)
 	, file(NULL)
 	, decomp(NULL)
@@ -167,12 +181,83 @@ RomPrivate::RomPrivate(Rom *q)
 	, z_entry_sel(NULL)
 	, sysId(Rom::MDP_SYSTEM_UNKNOWN)
 	, romFormat(Rom::RFMT_UNKNOWN)
-	, sysId_override(Rom::MDP_SYSTEM_UNKNOWN)
-	, romFormat_override(Rom::RFMT_UNKNOWN)
+	, sysId_override(sysOverride)
+	, romFormat_override(fmtOverride)
 	, romSize(0)
 	, eprType(-1)
 	, regionCode(0)
-{ }
+{
+	// If filename is NULL, don't do anything else.
+	if (!filename)
+		return;
+	
+	// Save the filename for later.
+	this->filename = string(filename);
+	
+	// Remove the directories and extension from the ROM filename.
+	// TODO: Remove all extensions (e.g. ".gen.gz")?
+	string tmpFilename = this->filename;
+	
+	// Get the filename portion.
+	size_t dirSep = tmpFilename.rfind(LG_PATH_SEP_CHR);
+	if (dirSep != string::npos)
+		tmpFilename.erase(0, dirSep+1);
+	
+	// Remove the file extension.
+	size_t extSep = tmpFilename.rfind('.');
+	if (extSep != string::npos)
+		tmpFilename.erase(extSep, (tmpFilename.size() - extSep));
+	
+	// Save the truncated filename.
+	filenameBaseNoExt = tmpFilename;
+	
+	// Open the ROM file.
+	file = fopen(filename, "rb");
+	if (!file)
+		return;
+	
+	// Determine which decompressor to use.
+	decomp = Decompressor::GetDecompressor(file, filename);
+	if (!decomp)
+	{
+		// Couldn't find a suitable decompressor.
+		// TODO: Indicate that a suitable decompressor couldn't be found.
+		fclose(file);
+		file = NULL;
+		return;
+	}
+	
+	// Get the list of files in the archive.
+	int ret = decomp->getFileInfo(&z_entry_list);
+	if (ret != 0) // TODO: MDP_ERR_OK
+	{
+		// Error getting the list of files.
+		z_entry_list = NULL;
+		
+		// Delete the decompressor.
+		delete decomp;
+		decomp = NULL;
+		
+		// Close the file.
+		fclose(file);
+		file = NULL;
+		return;
+	}
+	
+	if (!isMultiFile())
+	{
+		// Archive is not multi-file.
+		// Load the ROM header.
+		z_entry_sel = z_entry_list;
+		loadRomHeader(sysOverride, fmtOverride);
+	}
+	else
+	{
+		// Archive is multi-file.
+		// We can't continue until the user selects a file to load.
+		z_entry_sel = NULL;
+	}
+}
 
 
 /**
@@ -625,88 +710,15 @@ void RomPrivate::readHeaderMD(const uint8_t *header, size_t header_size)
 /** Rom class. **/
 
 
+/**
+ * Initialize a new RomPrivate object.
+ * @param filename ROM filename.
+ * @param sysOverride System override.
+ * @param fmtOverride ROM format override.
+ */
 Rom::Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
-	: d(new RomPrivate(this))
-{
-	// TODO: Move the file open code to RomPrivate?
-	
-	// Save the filename for later.
-	d->filename = string(filename);
-	
-	// Remove the directories and extension from the ROM filename.
-	// TODO: Remove all extensions (e.g. ".gen.gz")?
-	string tmpFilename = d->filename;
-	
-	// Get the filename portion.
-	size_t dirSep = tmpFilename.rfind(LG_PATH_SEP_CHR);
-	if (dirSep != string::npos)
-		tmpFilename.erase(0, dirSep+1);
-	
-	// Remove the file extension.
-	size_t extSep = tmpFilename.rfind('.');
-	if (extSep != string::npos)
-		tmpFilename.erase(extSep, (tmpFilename.size() - extSep));
-	
-	// Save the truncated filename.
-	d->filenameBaseNoExt = tmpFilename;
-	
-	// Save the system and ROM format overrides.
-	d->sysId_override = sysOverride;
-	d->romFormat_override = fmtOverride;
-	
-	// Open the ROM file.
-	d->file = fopen(filename, "rb");
-	if (!d->file)
-		return;
-	
-	// Determine which decompressor to use.
-	d->decomp = Decompressor::GetDecompressor(d->file, filename);
-	if (!d->decomp)
-	{
-		// Couldn't find a suitable decompressor.
-		// TODO: Indicate that a suitable decompressor couldn't be found.
-		fclose(d->file);
-		d->file = NULL;
-		return;
-	}
-	
-	// Get the list of files in the archive.
-	int ret = d->decomp->getFileInfo(&d->z_entry_list);
-	if (ret != 0) // TODO: MDP_ERR_OK
-	{
-		// Error getting the list of files.
-		d->z_entry_list = NULL;
-		
-		// Delete the decompressor.
-		delete d->decomp;
-		d->decomp = NULL;
-		
-		// Close the file.
-		fclose(d->file);
-		d->file = NULL;
-		return;
-	}
-	
-	if (!isMultiFile())
-	{
-		// Archive is not multi-file.
-		// Load the ROM header.
-		d->z_entry_sel = d->z_entry_list;
-		d->loadRomHeader(sysOverride, fmtOverride);
-	}
-	else
-	{
-		// Archive is multi-file.
-		// We can't continue until the user selects a file to load.
-		d->z_entry_sel = NULL;
-		
-		// Initialize system and format to unknown for now.
-		// NOTE: System and format are initialized to UNKNOWN by RomPrivate.
-		// We probably don't need to do this here...
-		d->sysId = MDP_SYSTEM_UNKNOWN;
-		d->romFormat = RFMT_UNKNOWN;
-	}
-}
+	: d(new RomPrivate(this, filename, sysOverride, fmtOverride))
+{ }
 
 
 /**
@@ -985,7 +997,7 @@ int Rom::regionCode(void) const
  * @return True if the ROM archive has multiple files; false if it doesn't.
  */
 bool Rom::isMultiFile(void) const
-	{ return (d->z_entry_list && d->z_entry_list->next); }
+	{ return d->isMultiFile(); }
 
 /**
  * Get the list of files in the ROM archive.
