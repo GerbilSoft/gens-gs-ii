@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -24,10 +24,9 @@
 #ifndef __LIBGENS_ROM_HPP__
 #define __LIBGENS_ROM_HPP__
 
-// C includes.
-#include <stdio.h>
-#include <stdint.h>
-#include <ctype.h>
+// C includes. (C++ namespace)
+#include <cstdio>
+#include <cstdint>
 
 // C++ includes.
 #include <string>
@@ -51,6 +50,8 @@
 
 namespace LibGens
 {
+
+class RomPrivate;
 
 class Rom
 {
@@ -91,15 +92,45 @@ class Rom
 		};
 		
 		Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride = MDP_SYSTEM_UNKNOWN, RomFormat fmtOverride = RFMT_UNKNOWN);
-		~Rom();
+	
+	private:
+		friend class RomPrivate;
+		RomPrivate *const d;
 		
-		bool isOpen(void) const { return (m_file != NULL); }
-		void close(void) { fclose(m_file); m_file = NULL; }
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		Rom(const Rom &);
+		Rom &operator=(const Rom &);
+	
+	public:
+		/**
+		 * Check if the ROM file is open.
+		 * @return True if the ROM file is open; false if not.
+		 */
+		bool isOpen(void) const;
 		
-		inline MDP_SYSTEM_ID sysId(void) const { return m_sysId; }
-		inline RomFormat romFormat(void) const { return m_romFormat; }
+		/**
+		 * Close the opened ROM file.
+		 */
+		void close(void);
 		
-		inline int romSize(void) const { return m_romSize; }
+		/**
+		 * Get the ROM system ID.
+		 * @return ROM system ID.
+		 */
+		MDP_SYSTEM_ID sysId(void) const;
+		
+		/**
+		 * Get the ROM format.
+		 * @return ROM format.
+		 */
+		RomFormat romFormat(void) const;
+		
+		/**
+		 * Get the ROM size.
+		 * @return ROM size, or 0 on error.
+		 */
+		int romSize(void) const;
 		
 		int initSRam(SRam *sram) const;
 		int initEEPRom(EEPRom *eeprom) const;
@@ -112,163 +143,76 @@ class Rom
 		 */
 		int loadRom(void *buf, size_t siz);
 		
-		// ROM filename.
-		const utf8_str *filename(void) const
-			{ return m_filename.c_str(); }
-		const utf8_str *filenameBaseNoExt(void) const
-			{ return m_filenameBaseNoExt.c_str(); }
+		/**
+		 * Get the ROM filename.
+		 * @return ROM filename (UTF-8), or NULL on error.
+		 */
+		const utf8_str *filename(void) const;
+		
+		/**
+		 * Get the ROM filename. (basename, no extension)
+		 * @return ROM filename (UTF-8), or NULL on error.
+		 */
+		const utf8_str *filenameBaseNoExt(void) const;
 		
 		/********************
 		 * ROM header data. *
 		 ********************/
 		
-		/// ROM names. (Obtained from the ROM headers.)
-		const utf8_str *romNameJP(void) const
-			{ return m_romNameJP.c_str(); }
-		const utf8_str *romNameUS(void) const
-			{ return m_romNameUS.c_str(); }
+		/**
+		 * Get the Japanese (domestic) ROM name.
+		 * @return Japanese (domestic) ROM name (UTF-8), or NULL on error.
+		 */
+		const utf8_str *romNameJP(void) const;
 		
-		/// ROM checksum.
-		uint16_t checksum(void) const
-			{ return m_mdHeader.checksum; }
+		/**
+		 * Get the American (overseas) ROM name.
+		 * @return American (overseas) ROM name (UTF-8), or NULL on error.
+		 */
+		const utf8_str *romNameUS(void) const;
 		
-		/// Region code. (MD hex format)
-		// TODO: Change to uint8_t?
-		int regionCode(void) const
-			{ return m_regionCode; }
+		/**
+		 * Get the ROM checksum.
+		 * TODO: This is MD only for now...
+		 * @return ROM checksum.
+		 */
+		uint16_t checksum(void) const;
+		
+		/**
+		 * Get the region code. (MD hex format)
+		 * TODO: Change to uint8_t?
+		 * @return ROM region code. (MD hex format)
+		 */
+		int regionCode(void) const;
 		
 		/** Multi-file ROM archive support. **/
 		
 		/**
-		 * isMultiFile(): Determine if the loaded ROM archive has multiple files.
+		 * Determine if the loaded ROM archive has multiple files.
 		 * @return True if the ROM archive has multiple files; false if it doesn't.
 		 */
-		bool isMultiFile(void) const
-			{ return (m_z_entry_list && m_z_entry_list->next); }
-		
-		const mdp_z_entry_t *get_z_entry_list(void) const
-			{ return m_z_entry_list; }
+		bool isMultiFile(void) const;
 		
 		/**
-		 * select_z_entry(): Select a file from a multi-file ROM archive to load.
+		 * Get the list of files in the ROM archive.
+		 * @return List of files in the ROM archive, or NULL on error.
+		 */
+		const mdp_z_entry_t *get_z_entry_list(void) const;
+		
+		/**
+		 * Select a file from a multi-file ROM archive to load.
 		 * @param sel File to load.
 		 * @return 0 on success; non-zero on error.
 		 */
 		int select_z_entry(const mdp_z_entry_t *sel);
 		
 		/**
-		 * isRomSelected(): Determine if a ROM has been selected.
+		 * Determine if a ROM has been selected.
 		 * NOTE: This is only correct if the ROM file hasn't been closed.
 		 * @return True if a ROM has been selected.
 		 */
-		bool isRomSelected(void) const { return (m_z_entry_sel != NULL); }
-	
-	private:
-		MDP_SYSTEM_ID m_sysId;
-		RomFormat m_romFormat;
-		
-		FILE *m_file;
-		Decompressor *m_decomp;
-		mdp_z_entry_t *m_z_entry_list;
-		const mdp_z_entry_t *m_z_entry_sel;
-		
-		// System overrides specified in the constructor.
-		MDP_SYSTEM_ID m_sysId_override;
-		RomFormat m_romFormat_override;
-		
-		/**
-		 * loadRomHeader(): Load the ROM header from the selected ROM file.
-		 * @param sysOverride System override.
-		 * @param fmtOverride Format override.
-		 * @return 0 on success; non-zero on error.
-		*/
-		int loadRomHeader(MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride);
-		
-		static RomFormat DetectFormat(const uint8_t *header, size_t header_size);
-		static MDP_SYSTEM_ID DetectSystem(const uint8_t *header, size_t header_size, RomFormat fmt);
-		
-		void readHeaderMD(const uint8_t *header, size_t header_size);
-		
-		// Space elimination algorithm.
-		static FUNC_PURE bool IsGraphChar(uint16_t chr);
-		static std::string SpaceElim(const std::string& src);
-		
-		/** Variables. **/
-		
-		std::string m_filename;			// ROM filename.
-		std::string m_filenameBaseNoExt;	// ROM filename. (basename; no extension)
-		unsigned int m_romSize;			// ROM size.
-		int m_eprType;				// EEPRom type.
-		
-		/**
-		 * MD_RomHeader: ROM header. (MD-style)
-		 * This matches the MD ROM header format exactly.
-		 * 
-		 * NOTE: Strings are NOT null-terminated!
-		 */
-		struct MD_RomHeader
-		{
-			char consoleName[16];
-			char copyright[16];
-			char romNameJP[48];	// Japanese ROM name.
-			char romNameUS[48];	// US/Europe ROM name.
-			char serialNumber[14];
-			uint16_t checksum;
-			char ioSupport[16];
-			
-			// ROM/RAM address information.
-			uint32_t romStartAddr;
-			uint32_t romEndAddr;
-			uint32_t ramStartAddr;
-			uint32_t ramEndAddr;
-			
-			// Save RAM information.
-			// Info format: 'R', 'A', %1x1yz000, 0x20
-			// x == 1 for backup (SRAM), 0 for not backup
-			// yz == 10 for even addresses, 11 for odd addresses
-			uint32_t sramInfo;
-			uint32_t sramStartAddr;
-			uint32_t sramEndAddr;
-			
-			// Miscellaneous.
-			char modemInfo[12];
-			char notes[40];
-			char countryCodes[16];
-		};
-		
-		MD_RomHeader m_mdHeader;
-		
-		// ROM names.
-		std::string m_romNameJP;
-		std::string m_romNameUS;
-		
-		// Region code. Same format as the newer hex format used in MD ROMs.
-		int m_regionCode;
-		int detectRegionCodeMD(const char countryCodes[16]);
+		bool isRomSelected(void) const;
 };
-
-
-/**
- * IsGraphChar(): Determine if a character is a graphics character.
- * @param chr Character to check.
- * @return True if this is a graphics character; false otherwise.
- */
-inline FUNC_PURE bool Rom::IsGraphChar(uint16_t chr)
-{
-	// TODO: Figure out why iswgraph() and iswspace() are useless.
-	
-	if (chr < 0x7F)
-		return isgraph(chr);
-	else if (chr == 0x3000)
-	{
-		// U+3000: IDEOGRAPHIC SPACE
-		// Used in "Columns"' ROM headers.
-		return false;
-	}
-	
-	// Assume graphical character by default.
-	return true;
-}
 
 }
 
