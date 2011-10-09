@@ -340,7 +340,7 @@ QString AboutWindow::GetIncLibraries(void)
 #if defined(HAVE_ZLIB) && defined(USE_INTERNAL_ZLIB)
 	// ZLIB is included.
 	sIncLibraries += sIntCopyOf.arg(QLatin1String("zlib-" ZLIB_VERSION)) + sLineBreak +
-		QLatin1String("Copyright (c) 1995-2010 Jean-loup Gailly and Mark Adler.") + sLineBreak +
+		QLatin1String("Copyright (c) 1995-2011 Jean-loup Gailly and Mark Adler.") + sLineBreak +
 		QLatin1String("<a href=\"http://www.zlib.net/\">http://www.zlib.net/</a>");
 #endif
 	
