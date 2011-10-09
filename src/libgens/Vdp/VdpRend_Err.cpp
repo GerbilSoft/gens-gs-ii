@@ -472,12 +472,12 @@ void Vdp::Render_Line_Err(void)
 			if (m_palette.bpp() != VdpPalette::BPP_32)
 			{
 				T_DrawColorBars_Border<uint16_t>(MD_Screen.fb16(),
-								m_palette.m_palActiveMD.u16[0]);
+								m_palette.m_palActive.u16[0]);
 			}
 			else
 			{
 				T_DrawColorBars_Border<uint32_t>(MD_Screen.fb32(),
-								m_palette.m_palActiveMD.u32[0]);
+								m_palette.m_palActive.u32[0]);
 			}
 		}
 	}
