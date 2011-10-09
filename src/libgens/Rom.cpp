@@ -189,7 +189,7 @@ class RomPrivate
 			} sram;
 		};
 		
-		static const MD_RomFixup MD_RomFixups[3];
+		static const MD_RomFixup MD_RomFixups[5];
 		
 		uint32_t rom_crc32;	// ROM CRC32.
 		int romFixup;		// ROM fixup index. (-1 == no fixups)
@@ -202,7 +202,7 @@ class RomPrivate
 /**
  * ROM fixup table. (Mega Drive)
  */
-const RomPrivate::MD_RomFixup RomPrivate::MD_RomFixups[3] =
+const RomPrivate::MD_RomFixup RomPrivate::MD_RomFixups[5] =
 {
 	// Puggsy: Shows an anti-piracy message after the third level if SRAM is detected.
 	{{"GM T-113016", 0, 0}, Rom::MAPPER_STANDARD, {0, 0, true}},
@@ -219,9 +219,8 @@ const RomPrivate::MD_RomFixup RomPrivate::MD_RomFixups[3] =
 	 * - Xin Qi Gai Wang Zi (Ch).gen:	DD2F38B5
 	 * - Xin Qi Gai Wang Zi (Ch) [a1].gen:	DA5A4BFE
 	 */
-	// TODO: Calculate the CRC32 before running CheckRomFixupsMD().
-	//{{NULL, 0, 0xDD2F38B5}, Rom::MAPPER_STANDARD, {0x400000, 0x40FFFF, false}},
-	//{{NULL, 0, 0xDA5A4BFE}, Rom::MAPPER_STANDARD, {0x400000, 0x40FFFF, false}},
+	{{NULL, 0, 0xDD2F38B5}, Rom::MAPPER_STANDARD, {0x400000, 0x40FFFF, false}},
+	{{NULL, 0, 0xDA5A4BFE}, Rom::MAPPER_STANDARD, {0x400000, 0x40FFFF, false}},
 };
 
 
@@ -788,6 +787,7 @@ int RomPrivate::CheckRomFixupsMD(const RomPrivate::MD_RomHeader *mdRomHeader, ui
 	for (int i = 0; i < (int)(sizeof(MD_RomFixups)/sizeof(MD_RomFixups[0])); i++)
 	{
 		const MD_RomFixup *fixup = &MD_RomFixups[i];
+		bool match = false;
 		
 		if (fixup->id.serial != NULL)
 		{
@@ -797,6 +797,7 @@ int RomPrivate::CheckRomFixupsMD(const RomPrivate::MD_RomHeader *mdRomHeader, ui
 			{
 				continue;
 			}
+			match = true;
 		}
 		
 		if (fixup->id.crc32 != 0 && crc32 != 0)
@@ -804,6 +805,7 @@ int RomPrivate::CheckRomFixupsMD(const RomPrivate::MD_RomHeader *mdRomHeader, ui
 			// Compare the ROM CRC32.
 			if (crc32 != fixup->id.crc32)
 				continue;
+			match = true;
 		}
 		
 		if (fixup->id.checksum != 0)
@@ -811,10 +813,12 @@ int RomPrivate::CheckRomFixupsMD(const RomPrivate::MD_RomHeader *mdRomHeader, ui
 			// Compare the ROM checksum.
 			if (mdRomHeader->checksum != fixup->id.checksum)
 				continue;
+			match = true;
 		}
 		
 		// Found a fixup for this ROM.
-		return i;
+		if (match)
+			return i;
 	}
 	
 	// No fixup found for this ROM.
