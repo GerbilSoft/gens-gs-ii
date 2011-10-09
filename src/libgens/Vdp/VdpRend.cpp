@@ -40,6 +40,14 @@ void Vdp::rend_init(void)
 {
 	// Initialize the VDP rendering variables.
 	VDP_Layers = VdpTypes::VDP_LAYERS_DEFAULT;
+	
+	// Initialize the m5 Y fine offset.
+	// Sonic 3D sometimes triggers a crash if this isn't initialized,
+	// since it starts with 2-cell VSRam scrolling. The starting VSRam
+	// cell in 2-cell scrolling is -1, and Y_FineOffset isn't currently
+	// updated properly for negative VSRam cells.
+	// TODO: Fix Y_FineOffset for VSRam_Cell == -1 and remove this hack.
+	Y_FineOffset = 0;
 }
 
 

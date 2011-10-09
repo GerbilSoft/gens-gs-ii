@@ -531,9 +531,13 @@ FORCE_INLINE uint16_t Vdp::T_Get_X_Offset(void)
 template<bool plane, bool interlaced>
 FORCE_INLINE unsigned int Vdp::T_Update_Y_Offset(int cell_cur)
 {
+	// TODO: Y_FineOffset should be refactored such that it's reentrant.
 	if ((cell_cur & 0xFF80) || (cell_cur < 0))
 	{
 		// Cell number is invalid.
+		// TODO: Properly handle cell -1.
+		// - MD1, MD2: Vertical scrolling "bug".
+		// - Genesis 3: Vertical scrolling "works".
 		return 0;
 	}
 	
@@ -683,7 +687,7 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 	{
 		// Full vertical scrolling.
 		// Initialize the Y offset here.
-		Y_offset_cell = T_Update_Y_Offset<plane, interlaced>(VSRam_Cell + 2);
+		Y_offset_cell = T_Update_Y_Offset<plane, interlaced>(0);
 	}
 	
 	// Loop through the cells.
