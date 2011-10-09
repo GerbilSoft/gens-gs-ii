@@ -29,6 +29,9 @@
 namespace LibGens
 {
 	
+// VdpRend_Err private class.
+#include "VdpRend_Err_p.hpp"
+
 /** Static member initialization. (VDP global items) **/
 // TODO: Make these non-static?
 VdpTypes::VdpEmuOptions_t Vdp::VdpEmuOptions =
@@ -43,7 +46,8 @@ VdpTypes::VdpEmuOptions_t Vdp::VdpEmuOptions =
 /**
  * Vdp::Vdp(): Initialize the VDP subsystem.
  */
-Vdp::Vdp(void)
+Vdp::Vdp()
+	: d_err(new VdpRend_Err_Private(this))
 {
 	// Initialize the Horizontal Counter table.
 	unsigned int hc_val;

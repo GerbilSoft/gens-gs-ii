@@ -40,12 +40,21 @@
 namespace LibGens
 {
 
+class VdpRend_Err_Private;
+
 class Vdp
 {
 	public:
 		Vdp();
 		~Vdp();
-		
+	
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		Vdp(const Vdp &);
+		Vdp &operator=(const Vdp &);
+	
+	public:
 		/**
 		 * reset(): Reset the VDP.
 		 */
@@ -498,29 +507,11 @@ class Vdp
 	 *****************************************************************/
 	
 	private:
-		// VDP mode data.
-		unsigned int err_LastVdpMode;
-		int err_LastHPix;
-		int err_LastVPix;
-		VdpPalette::ColorDepth err_LastBpp;
+		friend class VdpRend_Err_Private;
+		VdpRend_Err_Private *const d_err;
 		
 		void Render_Line_Err(void);
 		void Update_Err(void);
-		
-		template<typename pixel>
-		void T_DrawColorBars(pixel *screen, const pixel palette[22]);
-		
-		template<typename pixel>
-		void T_DrawColorBars_Border(pixel *screen, const pixel bg_color);
-		
-		template<typename pixel, pixel text_color>
-		void T_DrawChr(pixel *screen, int chr);
-		
-		template<typename pixel, pixel text_color>
-		void T_DrawText(pixel *screen, int x, int y, const char *str);
-		
-		template<typename pixel, pixel text_color>
-		void T_DrawVDPErrorMessage(pixel *screen);
 };
 
 /**
