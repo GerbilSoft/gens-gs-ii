@@ -92,12 +92,12 @@
 #endif
 
 /* function prototypes */
-local void fixedtables OF((struct inflate_state FAR *state));
-local int updatewindow OF((z_streamp strm, unsigned out));
+local void fixedtables _Z_OF((struct inflate_state FAR *state));
+local int updatewindow _Z_OF((z_streamp strm, unsigned out));
 #ifdef BUILDFIXED
-   void makefixed OF((void));
+   void makefixed _Z_OF((void));
 #endif
-local unsigned syncsearch OF((unsigned FAR *have, unsigned char FAR *buf,
+local unsigned syncsearch _Z_OF((unsigned FAR *have, unsigned char FAR *buf,
                               unsigned len));
 
 int ZEXPORT inflateReset(strm)

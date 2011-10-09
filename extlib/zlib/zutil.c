@@ -292,9 +292,9 @@ void ZLIB_INTERNAL zcfree (voidpf opaque, voidpf ptr)
 #ifndef MY_ZCALLOC /* Any system without a special alloc function */
 
 #ifndef STDC
-extern voidp  malloc OF((uInt size));
-extern voidp  calloc OF((uInt items, uInt size));
-extern void   free   OF((voidpf ptr));
+extern voidp  malloc _Z_OF((uInt size));
+extern voidp  calloc _Z_OF((uInt items, uInt size));
+extern void   free   _Z_OF((voidpf ptr));
 #endif
 
 voidpf ZLIB_INTERNAL zcalloc (opaque, items, size)

@@ -12,13 +12,13 @@
 #include "gzguts.h"
 
 /* Local functions */
-local int gz_load OF((gz_statep, unsigned char *, unsigned, unsigned *));
-local int gz_avail OF((gz_statep));
-local int gz_next4 OF((gz_statep, unsigned long *));
-local int gz_head OF((gz_statep));
-local int gz_decomp OF((gz_statep));
-local int gz_make OF((gz_statep));
-local int gz_skip OF((gz_statep, z_off64_t));
+local int gz_load _Z_OF((gz_statep, unsigned char *, unsigned, unsigned *));
+local int gz_avail _Z_OF((gz_statep));
+local int gz_next4 _Z_OF((gz_statep, unsigned long *));
+local int gz_head _Z_OF((gz_statep));
+local int gz_decomp _Z_OF((gz_statep));
+local int gz_make _Z_OF((gz_statep));
+local int gz_skip _Z_OF((gz_statep, z_off64_t));
 
 /* Use read() to load a buffer -- return -1 on error, otherwise 0.  Read from
    state->fd, and update state->eof, state->err, and state->msg as appropriate.

@@ -12,9 +12,9 @@
 #include "gzguts.h"
 
 /* Local functions */
-local int gz_init OF((gz_statep));
-local int gz_comp OF((gz_statep, int));
-local int gz_zero OF((gz_statep, z_off64_t));
+local int gz_init _Z_OF((gz_statep));
+local int gz_comp _Z_OF((gz_statep, int));
+local int gz_zero _Z_OF((gz_statep, z_off64_t));
 
 /* Initialize state for writing a gzip file.  Mark initialization by setting
    state->size to non-zero.  Return -1 on failure or 0 on success. */

@@ -25,13 +25,13 @@
 #define INVALID_SET_FILE_POINTER ((DWORD)-1)
 #endif
 
-voidpf  ZCALLBACK win32_open_file_func  OF((voidpf opaque, const char* filename, int mode));
-uLong   ZCALLBACK win32_read_file_func  OF((voidpf opaque, voidpf stream, void* buf, uLong size));
-uLong   ZCALLBACK win32_write_file_func OF((voidpf opaque, voidpf stream, const void* buf, uLong size));
-ZPOS64_T ZCALLBACK win32_tell64_file_func  OF((voidpf opaque, voidpf stream));
-long    ZCALLBACK win32_seek64_file_func  OF((voidpf opaque, voidpf stream, ZPOS64_T offset, int origin));
-int     ZCALLBACK win32_close_file_func OF((voidpf opaque, voidpf stream));
-int     ZCALLBACK win32_error_file_func OF((voidpf opaque, voidpf stream));
+voidpf  ZCALLBACK win32_open_file_func  _MZ_OF((voidpf opaque, const char* filename, int mode));
+uLong   ZCALLBACK win32_read_file_func  _MZ_OF((voidpf opaque, voidpf stream, void* buf, uLong size));
+uLong   ZCALLBACK win32_write_file_func _MZ_OF((voidpf opaque, voidpf stream, const void* buf, uLong size));
+ZPOS64_T ZCALLBACK win32_tell64_file_func  _MZ_OF((voidpf opaque, voidpf stream));
+long    ZCALLBACK win32_seek64_file_func  _MZ_OF((voidpf opaque, voidpf stream, ZPOS64_T offset, int origin));
+int     ZCALLBACK win32_close_file_func _MZ_OF((voidpf opaque, voidpf stream));
+int     ZCALLBACK win32_error_file_func _MZ_OF((voidpf opaque, voidpf stream));
 
 typedef struct
 {

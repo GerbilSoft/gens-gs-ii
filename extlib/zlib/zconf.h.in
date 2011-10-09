@@ -235,11 +235,11 @@
 
                         /* Type declarations */
 
-#ifndef OF /* function prototypes */
+#ifndef _Z_OF /* function prototypes */
 #  ifdef STDC
-#    define OF(args)  args
+#    define _Z_OF(args)  args
 #  else
-#    define OF(args)  ()
+#    define _Z_OF(args)  ()
 #  endif
 #endif
 

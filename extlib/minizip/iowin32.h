@@ -11,6 +11,9 @@
 
 */
 
+/* _MZ_OF() */
+#include "mz_of.h"
+
 #include <windows.h>
 
 
@@ -18,10 +21,10 @@
 extern "C" {
 #endif
 
-void fill_win32_filefunc OF((zlib_filefunc_def* pzlib_filefunc_def));
-void fill_win32_filefunc64 OF((zlib_filefunc64_def* pzlib_filefunc_def));
-void fill_win32_filefunc64A OF((zlib_filefunc64_def* pzlib_filefunc_def));
-void fill_win32_filefunc64W OF((zlib_filefunc64_def* pzlib_filefunc_def));
+void fill_win32_filefunc _MZ_OF((zlib_filefunc_def* pzlib_filefunc_def));
+void fill_win32_filefunc64 _MZ_OF((zlib_filefunc64_def* pzlib_filefunc_def));
+void fill_win32_filefunc64A _MZ_OF((zlib_filefunc64_def* pzlib_filefunc_def));
+void fill_win32_filefunc64W _MZ_OF((zlib_filefunc64_def* pzlib_filefunc_def));
 
 #ifdef __cplusplus
 }
