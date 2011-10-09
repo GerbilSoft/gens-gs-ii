@@ -161,6 +161,67 @@ class RomPrivate
 		};
 		
 		MD_RomHeader m_mdHeader;
+		
+		/**
+		 * ROM fixups table entry. (Mega Drive)
+		 */
+		struct MD_RomFixup
+		{
+			// ROM identification.
+			// If any value is 0 or NULL, that field is ignored.
+			struct
+			{
+				const char *serial;	// ROM serial number.
+				uint16_t checksum;	// MD checksum.
+				uint32_t crc32;		// CRC32.
+			} id;
+			
+			// Fixups.
+			Rom::Mapper mapper;		// ROM mapper.
+			
+			// SRAM fixups.
+			// (If any address is 0, it is ignored.)
+			struct
+			{
+				uint32_t start_addr;	// SRAM start address.
+				uint32_t end_addr;	// SRAM end address.
+				bool force_off;		// Force SRAM off. (Puggsy)
+			} sram;
+		};
+		
+		static const MD_RomFixup RomFixups[3];
+		
+		uint32_t rom_crc32;	// ROM CRC32.
+		int romFixup;		// ROM fixup index. (-1 == no fixups)
+		Rom::Mapper mapper;	// ROM mapper.
+		
+		static int CheckRomFixupsMD(const MD_RomHeader *mdRomHeader, uint32_t crc32);
+};
+
+
+/**
+ * ROM fixup table.
+ */
+const RomPrivate::MD_RomFixup RomPrivate::RomFixups[3] =
+{
+	// Puggsy: Shows an anti-piracy message after the third level if SRAM is detected.
+	{{"GM T-113016", 0, 0}, Rom::MAPPER_STANDARD, {1, 0, true}},
+	{{"GM T-550055", 0, 0}, Rom::MAPPER_STANDARD, {1, 0, true}},	// Puggsy (Beta)
+	
+	// Psy-O-Blade: Incorrect SRAM header.
+	{{"GM T-26013 ", 0, 0}, Rom::MAPPER_STANDARD, {0x200000, 0x203FFF, false}},
+	
+	/**
+	 * Xin Qi Gai Wang Zi (original version of Beggar Prince):
+	 * SRAM is located at 0x400000-0x40FFFF; ROM header is invalid.
+	 * 
+	 * CRC32s:
+	 * - Xin Qi Gai Wang Zi (Ch).gen:	DD2F38B5
+	 * - Xin Qi Gai Wang Zi (Ch) [a1].gen:	DA5A4BFE
+	 */
+	// TODO: Calculate the CRC32 before running CheckRomFixupsMD().
+	//{{NULL, 0, 0xDD2F38B5}, Rom::MAPPER_STANDARD, {0x400000, 0x40FFFF, false}},
+	//{{NULL, 0, 0xDA5A4BFE}, Rom::MAPPER_STANDARD, {0x400000, 0x40FFFF, false}},
 };
 
 
@@ -186,6 +247,9 @@ RomPrivate::RomPrivate(Rom *q, const utf8_str *filename,
 	, romSize(0)
 	, eprType(-1)
 	, regionCode(0)
+	, rom_crc32(0)
+	, romFixup(-1)
+	, mapper(Rom::MAPPER_STANDARD)
 {
 	// If filename is NULL, don't do anything else.
 	if (!filename)
@@ -627,6 +691,12 @@ int RomPrivate::loadRomHeader(Rom::MDP_SYSTEM_ID sysOverride, Rom::RomFormat fmt
 	// Load the ROM header information.
 	readHeaderMD(header, header_size);
 	
+	// Check for ROM fixups.
+	// TODO: CRC32 needs to be calculated here...
+	// TODO: Move ROM fixup check to another function?
+	romFixup = CheckRomFixupsMD(&m_mdHeader, rom_crc32);
+	printf("ROM FIXUP: %d\n", romFixup);
+	
 	// Detect the EEPRom type from the ROM serial number and checksum.
 	eprType = EEPRom::DetectEEPRomType(
 			&m_mdHeader.serialNumber[3],
@@ -704,6 +774,49 @@ void RomPrivate::readHeaderMD(const uint8_t *header, size_t header_size)
 		// TODO: Remove characters with the high bit set?
 		romNameUS = SpaceElim(string(m_mdHeader.romNameUS, sizeof(m_mdHeader.romNameUS)));
 	}
+}
+
+
+/**
+ * Check for ROM fixups. (Mega Drive)
+ * @param mdRomHeader ROM header.
+ * @param crc32 ROM CRC32.
+ * @return Index in RomFixups[], or -1 if no fixup is required.
+ */
+int RomPrivate::CheckRomFixupsMD(const RomPrivate::MD_RomHeader *mdRomHeader, uint32_t crc32)
+{
+	for (int i = 0; i < (int)(sizeof(RomFixups)/sizeof(RomFixups[0])); i++)
+	{
+		if (RomFixups[i].id.serial != NULL)
+		{
+			// Compare the ROM serial number.
+			if (strncmp(mdRomHeader->serialNumber, RomFixups[i].id.serial,
+				sizeof(mdRomHeader->serialNumber)-3) != 0)
+			{
+				continue;
+			}
+		}
+		
+		if (RomFixups[i].id.crc32 != 0 && crc32 != 0)
+		{
+			// Compare the ROM CRC32.
+			if (crc32 != RomFixups[i].id.crc32)
+				continue;
+		}
+		
+		if (RomFixups[i].id.checksum != 0)
+		{
+			// Compare the ROM checksum.
+			if (mdRomHeader->checksum != RomFixups[i].id.checksum)
+				continue;
+		}
+		
+		// Found a fixup for this ROM.
+		return i;
+	}
+	
+	// No fixup found for this ROM.
+	return -1;
 }
 
 

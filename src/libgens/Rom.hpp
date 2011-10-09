@@ -211,6 +211,34 @@ class Rom
 		 * @return True if a ROM has been selected.
 		 */
 		bool isRomSelected(void) const;
+		
+		/**
+		 * Mappers.
+		 */
+		enum Mapper
+		{
+			/**
+			 * Standard MD mapper.
+			 * Can represent either of the following:
+			 * - No mapper. (<= 4 MB)
+			 * - Super Street Fighet 2 mapper. (> 4 MB)
+			 * - Flat addressing. (> 4 MB, <= 10 MB)
+			 */
+			MAPPER_STANDARD = 0,
+			
+			/**
+			 * Gamtec read-only copy protection mapper.
+			 * Has read-only registers above $400000.
+			 * Used in 777 Casino.
+			 */
+			MAPPER_GAMTEC_REG_RO = 1,
+			
+			/**
+			 * Gamtec read-write copy protection mapper.
+			 * Has writable registers above $400000.
+			 */
+			MAPPER_GAMTEC_REG_RW = 2,
+		};
 };
 
 }
