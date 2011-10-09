@@ -86,8 +86,7 @@ void Vdp::rend_reset(void)
 void Vdp::Render_Line(void)
 {
 	// TODO: 32X-specific function.
-	// TODO: Re-enable M5 after porting the error message code to the non-static VDP.
-	if (0)//(VDP_Mode & VDP_MODE_M5)
+	if (VDP_Mode & VDP_MODE_M5)
 	{
 		// Mode 5.
 		// TODO: Port to LibGens.
