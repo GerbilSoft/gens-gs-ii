@@ -180,7 +180,7 @@ class RomPrivate
 			Rom::Mapper mapper;		// ROM mapper.
 			
 			// SRAM fixups.
-			// (If any address is 0, it is ignored.)
+			// If any value is 0, that field is ignored.
 			struct
 			{
 				uint32_t start_addr;	// SRAM start address.
@@ -189,7 +189,7 @@ class RomPrivate
 			} sram;
 		};
 		
-		static const MD_RomFixup RomFixups[3];
+		static const MD_RomFixup MD_RomFixups[3];
 		
 		uint32_t rom_crc32;	// ROM CRC32.
 		int romFixup;		// ROM fixup index. (-1 == no fixups)
@@ -200,13 +200,13 @@ class RomPrivate
 
 
 /**
- * ROM fixup table.
+ * ROM fixup table. (Mega Drive)
  */
-const RomPrivate::MD_RomFixup RomPrivate::RomFixups[3] =
+const RomPrivate::MD_RomFixup RomPrivate::MD_RomFixups[3] =
 {
 	// Puggsy: Shows an anti-piracy message after the third level if SRAM is detected.
-	{{"GM T-113016", 0, 0}, Rom::MAPPER_STANDARD, {1, 0, true}},
-	{{"GM T-550055", 0, 0}, Rom::MAPPER_STANDARD, {1, 0, true}},	// Puggsy (Beta)
+	{{"GM T-113016", 0, 0}, Rom::MAPPER_STANDARD, {0, 0, true}},
+	{{"GM T-550055", 0, 0}, Rom::MAPPER_STANDARD, {0, 0, true}},	// Puggsy (Beta)
 	
 	// Psy-O-Blade: Incorrect SRAM header.
 	{{"GM T-26013 ", 0, 0}, Rom::MAPPER_STANDARD, {0x200000, 0x203FFF, false}},
@@ -781,33 +781,35 @@ void RomPrivate::readHeaderMD(const uint8_t *header, size_t header_size)
  * Check for ROM fixups. (Mega Drive)
  * @param mdRomHeader ROM header.
  * @param crc32 ROM CRC32.
- * @return Index in RomFixups[], or -1 if no fixup is required.
+ * @return Index in MD_RomFixups[], or -1 if no fixup is required.
  */
 int RomPrivate::CheckRomFixupsMD(const RomPrivate::MD_RomHeader *mdRomHeader, uint32_t crc32)
 {
-	for (int i = 0; i < (int)(sizeof(RomFixups)/sizeof(RomFixups[0])); i++)
+	for (int i = 0; i < (int)(sizeof(MD_RomFixups)/sizeof(MD_RomFixups[0])); i++)
 	{
-		if (RomFixups[i].id.serial != NULL)
+		const MD_RomFixup *fixup = &MD_RomFixups[i];
+		
+		if (fixup->id.serial != NULL)
 		{
 			// Compare the ROM serial number.
-			if (strncmp(mdRomHeader->serialNumber, RomFixups[i].id.serial,
+			if (strncmp(mdRomHeader->serialNumber, fixup->id.serial,
 				sizeof(mdRomHeader->serialNumber)-3) != 0)
 			{
 				continue;
 			}
 		}
 		
-		if (RomFixups[i].id.crc32 != 0 && crc32 != 0)
+		if (fixup->id.crc32 != 0 && crc32 != 0)
 		{
 			// Compare the ROM CRC32.
-			if (crc32 != RomFixups[i].id.crc32)
+			if (crc32 != fixup->id.crc32)
 				continue;
 		}
 		
-		if (RomFixups[i].id.checksum != 0)
+		if (fixup->id.checksum != 0)
 		{
 			// Compare the ROM checksum.
-			if (mdRomHeader->checksum != RomFixups[i].id.checksum)
+			if (mdRomHeader->checksum != fixup->id.checksum)
 				continue;
 		}
 		
