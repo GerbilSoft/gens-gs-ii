@@ -896,49 +896,28 @@ int Rom::initSRam(SRam *sram) const
 	sram->setOn(enableSRam);
 	sram->setWrite(enableSRam);
 	
-	// Apply hacks for certain ROMs.
-	// TODO: Move to generic fixup table, which will also have ROM mappers.
-	if (!strncmp("T-113016", &d->m_mdHeader.serialNumber[3], 8))
+	// Check if a ROM fixup needs to be applied.
+	if (d->romFixup >= 0)
 	{
-		// Puggsy: Shows an anti-piracy message after the third level if SRAM is detected.
-		sram->setOn(false);
-		sram->setWrite(false);
-		sram->setStart(1);
-		sram->setEnd(0);
-		return 0;
-	}
-	else if (!strncmp("T-26013", &d->m_mdHeader.serialNumber[3], 7))
-	{
-		// Psy-O-Blade: Incorrect header.
-		start = 0x200000;
-		end = 0x203FFF;
-	}
-#if 0
-	else if (m_mdHeader.checksum == 0x8104)
-	{
-		/**
-		 * TODO: Check ROM CRC32.
-		 * ROM doesn't have original MD headers.
-		 * 
-		 * Genesis Plus calculates the ROM checksum,
-		 * but this isn't reliable. Also, it'd require
-		 * moving checksum functionality out of EmuContext,
-		 * which I don't want to do.
-		 * 
-		 * CRC32s:
-		 * - Xin Qi Gai Wang Zi (Ch).gen:	DD2F38B5
-		 * - Xin Qi Gai Wang Zi (Ch) [a1].gen:	DA5A4BFE
-		 */
+		// Apply a ROM fixup.
+		const RomPrivate::MD_RomFixup *fixup = &RomPrivate::MD_RomFixups[d->romFixup];
 		
-		// Xin Qi Gai Wang Zi (Beggar Prince).
-		// ROM uses 0x400000-0x40FFFF for SRAM.
-		// TODO: Verify that this actually works properly!
-		start = 0x400000;
-		end = 0x40FFFF;
-		sram->setOn(true);
-		sram->setWrite(true);
+		if (fixup->sram.force_off)
+		{
+			// Force SRAM off.
+			sram->setOn(false);
+			sram->setWrite(false);
+			sram->setStart(1);
+			sram->setEnd(0);
+			return 0;
+		}
+		
+		// Fix SRAM start/end addresses.
+		if (fixup->sram.start_addr != 0)
+			start = fixup->sram.start_addr;
+		if (fixup->sram.end_addr != 0)
+			end = fixup->sram.end_addr;
 	}
-#endif
 	
 	// Set the addresses.
 	sram->setStart(start);
