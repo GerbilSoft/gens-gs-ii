@@ -24,7 +24,7 @@
 /* _MZ_OF() */
 #include "mz_of.h"
 
-#if (!defined(_WIN32)) && (!defined(WIN32))
+#if (!defined(_WIN32)) && (!defined(WIN32)) && (!defined(__APPLE__))
 
   // Linux needs this to support file operation on files larger then 4+GB
   // But might need better if/def to select just the platforms that needs them.
@@ -42,16 +42,6 @@
                 #define _FILE_OFFSET_BIT 64
         #endif
 #endif
-
-#ifdef __APPLE__
-/**
- * Mac OS X supports 64-bit file pointers using the regular
- * fopen(), ftello(), and fseeko() functions.
- * Consequently, it doesn't have fopen64(), ftello64(), or fseeko64().
- * TODO: Make this a CMake check!
- */
-#define USE_FILE32API
-#endif /* __APPLE__ */
 
 #include <stdio.h>
 #include <stdlib.h>
