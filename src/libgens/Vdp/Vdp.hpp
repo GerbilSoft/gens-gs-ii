@@ -380,22 +380,6 @@ class Vdp
 		// MD framebuffer.
 		MdFb MD_Screen;
 	
-	private:
-		// Sprite structs.
-		struct Sprite_Struct_t
-		{
-			int Pos_X;
-			int Pos_Y;
-			unsigned int Size_X;
-			unsigned int Size_Y;
-			int Pos_X_Max;
-			int Pos_Y_Max;
-			unsigned int Num_Tile;	// Includes palette, priority, and flip bits.
-			int Pos_X_Max_Vis;	// Number of visible horizontal pixels. (Used for Sprite Limit.)
-		};
-		Sprite_Struct_t Sprite_Struct[128];
-		unsigned int Sprite_Visible[128];
-	
 	public:
 		// VDP layer control.
 		unsigned int VDP_Layers;
@@ -438,7 +422,22 @@ class Vdp
 	private:
 		// Temporary VDP data.
 		unsigned int Y_FineOffset;
-		unsigned int TotalSprites;
+		
+		// Sprite structs.
+		struct Sprite_Struct_t
+		{
+			int Pos_X;
+			int Pos_Y;
+			unsigned int Size_X;
+			unsigned int Size_Y;
+			int Pos_X_Max;
+			int Pos_Y_Max;
+			unsigned int Num_Tile;	// Includes palette, priority, and flip bits.
+			int Pos_X_Max_Vis;	// Number of visible horizontal pixels. (Used for Sprite Limit.)
+		};
+		Sprite_Struct_t Sprite_Struct[80];
+		uint8_t Sprite_Visible[80];	// List of visible sprites. (element == sprite idx in Sprite_Struct[])
+		uint8_t TotalSprites;		// Total number of visible sprites.
 		
 		template<bool interlaced>
 		FORCE_INLINE int T_GetLineNumber(void) const;

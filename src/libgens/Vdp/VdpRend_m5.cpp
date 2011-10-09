@@ -27,8 +27,8 @@
 // M68K_Mem::ms_Region is needed for region detection.
 #include "cpu/M68K_Mem.hpp"
 
-// C includes.
-#include <string.h>
+// C includes. (C++ namespace)
+#include <cstring>
 
 // TODO: Maybe move these to class enum constants?
 #define LINEBUF_HIGH_B	0x80
@@ -899,15 +899,15 @@ FORCE_INLINE void Vdp::T_Render_Line_ScrollA(void)
 
 
 /**
- * Vdp::T_Make_Sprite_Struct(): Fill Sprite_Struct[] with information from the Sprite Attribute Table.
+ * Fill Sprite_Struct[] with information from the Sprite Attribute Table.
  * @param interlaced If true, using Interlaced Mode 2. (2x res)
  * @param partial If true, only do a partial update. (X pos, X size)
  */
 template<bool interlaced, bool partial>
 FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
 {
-	unsigned int spr_num = 0;
-	unsigned int link = 0;
+	uint8_t spr_num = 0;
+	uint8_t link = 0;
 	
 	// H40 allows 80 sprites; H32 allows 64 sprites.
 	// Essentially, it's (GetHCells() * 2).
@@ -916,7 +916,7 @@ FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
 	// (Old Gens limited to 80 sprites regardless of video mode.)
 	const unsigned int max_spr = (VdpEmuOptions.spriteLimits
 					? (GetHCells() * 2)
-					: 80);
+					: (unsigned int)(sizeof(Sprite_Struct)/sizeof(Sprite_Struct[0])));
 	
 	// Get the first sprite address in VRam.
 	const uint16_t *CurSpr = Spr_Addr_Ptr16(0);
@@ -998,7 +998,7 @@ FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
 
 
 /**
- * Vdp::T_Update_Mask_Sprite(): Update Sprite_Visible[] using sprite masking.
+ * Update Sprite_Visible[] using sprite masking.
  * @param sprite_limit If true, emulates sprite limits.
  * @param interlaced If true, uses interlaced mode.
  * @return Number of visible sprites.
@@ -1027,8 +1027,8 @@ FORCE_INLINE unsigned int Vdp::T_Update_Mask_Sprite(void)
 	// Those sprites still count towards total sprite and sprite dot counts.
 	bool sprite_mask_active = false;
 
-	unsigned int spr_num = 0;	// Current sprite number in Sprite_Struct[].
-	unsigned int spr_vis = 0;	// Current visible sprite in Sprite_Visible[].
+	uint8_t spr_num = 0;	// Current sprite number in Sprite_Struct[].
+	uint8_t spr_vis = 0;	// Current visible sprite in Sprite_Visible[].
 	
 	// Get the current line number.
 	const int vdp_line = T_GetLineNumber<interlaced>();
@@ -1167,7 +1167,7 @@ FORCE_INLINE void Vdp::T_Render_Line_Sprite(void)
 	for (unsigned int spr_vis = 0; spr_vis < num_spr; spr_vis++)
 	{
 		// Get the sprite number.
-		const unsigned int spr_num = Sprite_Visible[spr_vis];
+		const uint8_t spr_num = Sprite_Visible[spr_vis];
 		
 		// Determine the cell and line offsets.
 		unsigned int cell_offset = (T_GetLineNumber<interlaced>() - Sprite_Struct[spr_num].Pos_Y);
