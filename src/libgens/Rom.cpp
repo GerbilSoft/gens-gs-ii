@@ -694,7 +694,6 @@ int RomPrivate::loadRomHeader(Rom::MDP_SYSTEM_ID sysOverride, Rom::RomFormat fmt
 	// TODO: CRC32 needs to be calculated here...
 	// TODO: Move ROM fixup check to another function?
 	romFixup = CheckRomFixupsMD(&m_mdHeader, rom_crc32);
-	printf("ROM FIXUP: %d\n", romFixup);
 	
 	// Detect the EEPRom type from the ROM serial number and checksum.
 	eprType = EEPRom::DetectEEPRomType(
