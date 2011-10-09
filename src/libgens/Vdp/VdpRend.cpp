@@ -23,9 +23,6 @@
 
 #include "Vdp.hpp"
 
-// VDP error message.
-#include "VdpRend_Err.hpp"
-
 // C includes.
 #include <string.h>
 
@@ -84,12 +81,13 @@ void Vdp::rend_reset(void)
 
 
 /**
- * Vdp::Render_Line(): Render a line.
+ * Render a line.
  */
 void Vdp::Render_Line(void)
 {
 	// TODO: 32X-specific function.
-	if (VDP_Mode & VDP_MODE_M5)
+	// TODO: Re-enable M5 after porting the error message code to the non-static VDP.
+	if (0)//(VDP_Mode & VDP_MODE_M5)
 	{
 		// Mode 5.
 		// TODO: Port to LibGens.
@@ -103,13 +101,11 @@ void Vdp::Render_Line(void)
 	else
 	{
 		// Unsupported mode.
-		// TODO: Update for non-static VDP.
-		//VdpRend_Err::Render_Line();
+		Render_Line_Err();
 	}
 	
 	// Update the VDP render error cache.
-	// TODO: Update for non-static VDP.
-	//VdpRend_Err::Update();
+	Update_Err();
 }
 
 }
