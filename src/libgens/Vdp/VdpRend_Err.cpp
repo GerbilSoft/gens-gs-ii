@@ -42,6 +42,11 @@ namespace LibGens
  */
 VdpRend_Err_Private::VdpRend_Err_Private(Vdp *q)
 	: q(q)
+	, lastVdpMode(~0)
+	, lastHPix(~0)
+	, lastVPix(~0)
+	, lastBpp(VdpPalette::BPP_32)
+	, lastBorderColor(~0)
 { }
 
 /**
@@ -456,32 +461,32 @@ void Vdp::Render_Line_Err(void)
 		updateBorders = true;
 	}
 	
+	// Update the palette.
+	m_palette.update();
+	
+	// Get the current border color.
+	uint32_t newBorderColor;
+	if (m_palette.bpp() != VdpPalette::BPP_32)
+		newBorderColor = (uint32_t)m_palette.m_palActive.u16[0];
+	else
+		newBorderColor = m_palette.m_palActive.u32[0];
+	
 	// Check if we need to update the borders.
-	if (updateBorders)
+	if (updateBorders ||
+	    newBorderColor != d_err->lastBorderColor)
 	{
-		// TODO: Is this needed?
-#if 0
-		// Update the palette.
-		if (VDP_Reg.m5.Set4 & 0x08)
-			m_palette.updateMD_HS(&CRam);
-		else
-			m_palette.updateMD(&CRam);
-#endif
-		
+		// TODO: Check for horizontal borders too.
 		if (VDP_Lines.Visible.Border_Size != 0)
 		{
 			// Update the color bar borders.
 			if (m_palette.bpp() != VdpPalette::BPP_32)
-			{
-				d_err->T_DrawColorBars_Border<uint16_t>(&MD_Screen,
-									m_palette.m_palActive.u16[0]);
-			}
+				d_err->T_DrawColorBars_Border<uint16_t>(&MD_Screen, (uint16_t)newBorderColor);
 			else
-			{
-				d_err->T_DrawColorBars_Border<uint32_t>(&MD_Screen,
-									m_palette.m_palActive.u32[0]);
-			}
+				d_err->T_DrawColorBars_Border<uint32_t>(&MD_Screen, newBorderColor);
 		}
+		
+		// Save the new border color.
+		d_err->lastBorderColor = newBorderColor;
 	}
 }
 
@@ -497,9 +502,11 @@ void Vdp::Update_Err(void)
 	d_err->lastVPix = GetVPix();
 	d_err->lastBpp = m_palette.bpp();
 	
-	// TODO: If the border color has changed, force a border update.
+	// Check border color.
+	if (m_palette.bpp() != VdpPalette::BPP_32)
+		d_err->lastBorderColor = (uint32_t)m_palette.m_palActive.u16[0];
+	else
+		d_err->lastBorderColor = m_palette.m_palActive.u32[0];
 }
 
 }
-
-

@@ -56,6 +56,7 @@ class VdpRend_Err_Private
 		int lastHPix;
 		int lastVPix;
 		VdpPalette::ColorDepth lastBpp;
+		uint32_t lastBorderColor;
 	
 	public:
 		// Drawing functions.
