@@ -279,6 +279,7 @@ inline void VdpRend_Err_Private::T_DrawColorBars_Border(MdFb *fb, const pixel bg
 template<typename pixel, pixel text_color>
 inline void VdpRend_Err_Private::T_DrawChr(pixel *screen, int chr)
 {
+	// TODO: Use MdFb to get pixels per line instead of hard-coding 336.
 	if (chr < 0x20)
 		return;
 	chr = (chr & 0x7F) - 0x20;
