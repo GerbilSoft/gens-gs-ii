@@ -376,11 +376,6 @@ IF(HAVE_GLEW)
 	ENDIF(NOT GLEW_FOUND)
 ENDIF(HAVE_GLEW)
 
-ADD_DEPENDENCIES(gens-qt4 gens)
-IF(NOT GLEW_FOUND)
-	ADD_DEPENDENCIES(gens-qt4 glew)
-ENDIF(NOT GLEW_FOUND)
-
 # Mac OS X bundle information.
 # TODO: Add "NO-EMU" if necessary.
 SET(MACOSX_BUNDLE_GUI_IDENTIFIER "gsft.gerbilsoft.GensGSII")
