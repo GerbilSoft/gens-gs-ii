@@ -687,6 +687,10 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 	{
 		// Full vertical scrolling.
 		// Initialize the Y offset here.
+		// NOTE: We're using 0 instead of (VSRam_Cell + 2),
+		// since VSRam_Cell will be either -2 or -1 here.
+		// T_Update_Y_Offset() ANDs the result with ~1, so
+		// the resulting value will always be 0.
 		Y_offset_cell = T_Update_Y_Offset<plane, interlaced>(0);
 	}
 	
