@@ -488,7 +488,7 @@ class Vdp
 		FORCE_INLINE void T_Render_Line_Scroll(int cell_start, int cell_length);
 		
 		template<bool interlaced, bool vscroll, bool h_s>
-		FORCE_INLINE void T_Render_Line_ScrollA(void);
+		FORCE_INLINE void T_Render_Line_ScrollA_Window(void);
 		
 		template<bool interlaced, bool partial>
 		FORCE_INLINE void T_Make_Sprite_Struct(void);

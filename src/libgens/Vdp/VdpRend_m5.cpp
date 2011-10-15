@@ -791,13 +791,13 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 
 
 /**
- * Vdp::T_Render_Line_ScrollA(): Render a line for Scroll A / Window.
+ * Render a line for Scroll A / Window.
  * @param interlaced	[in] True for interlaced; false for non-interlaced.
  * @param vscroll	[in] True for 2-cell mode; false for full scroll.
  * @param h_s		[in] Highlight/Shadow enable.
  */
 template<bool interlaced, bool vscroll, bool h_s>
-FORCE_INLINE void Vdp::T_Render_Line_ScrollA(void)
+FORCE_INLINE void Vdp::T_Render_Line_ScrollA_Window(void)
 {
 	// Cell counts for Scroll A.
 	int ScrA_Start, ScrA_Length;
@@ -1377,13 +1377,13 @@ FORCE_INLINE void Vdp::T_Render_Line_m5(void)
 	{
 		// 2-cell VScroll.
 		T_Render_Line_Scroll<false, interlaced, true, h_s>(0, 0);	// Scroll B
-		T_Render_Line_ScrollA<interlaced, true, h_s>();			// Scroll A
+		T_Render_Line_ScrollA_Window<interlaced, true, h_s>();			// Scroll A
 	}
 	else
 	{
 		// Full VScroll.
 		T_Render_Line_Scroll<false, interlaced, false, h_s>(0, 0);	// Scroll B
-		T_Render_Line_ScrollA<interlaced, false, h_s>();		// Scroll A
+		T_Render_Line_ScrollA_Window<interlaced, false, h_s>();		// Scroll A
 	}
 	
 	T_Render_Line_Sprite<interlaced, h_s>();
