@@ -851,16 +851,19 @@ FORCE_INLINE void Vdp::T_Render_Line_ScrollA(void)
 		// (Window is not scrollable.)
 		unsigned int disp_pixnum = (Win_Start * 8) + 8;
 		
-		// Calculate the fine offsets.
-		const int vdp_line = T_GetLineNumber<interlaced>();
-		unsigned int y_fine_offset;
-		if (interlaced)
-			y_fine_offset = (vdp_line & 15);
-		else
-			y_fine_offset = (vdp_line & 7);
+		// Calculate the Y offsets.
+		const int y_offset = T_GetLineNumber<interlaced>();
+		unsigned int y_cell_offset, y_fine_offset;
 		
-		// Window row start address.
-		const unsigned int y_cell_offset = (VDP_Lines.Visible.Current / 8);
+		// Non-Interlaced: 8x8 cells
+		// Interlaced: 8x16 cells
+		// TODO: Add a parameter to T_Get_Y_Cell_Offset() to disable V_Scroll_CMask.
+		if (!interlaced)
+			y_cell_offset = (y_offset >> 3);
+		else
+			y_cell_offset = (y_offset >> 4);
+		y_fine_offset = T_Get_Y_Fine_Offset<interlaced>(y_offset);
+		
 		// TODO: See if we need to handle address wraparound.
 		// NOTE: Multiply by 2 for 16-bit access.
 		const uint16_t *Win_Row_Addr = Win_Addr_Ptr16((y_cell_offset << H_Win_Shift) * 2) + Win_Start;
