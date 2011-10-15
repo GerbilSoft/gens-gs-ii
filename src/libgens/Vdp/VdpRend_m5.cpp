@@ -511,12 +511,12 @@ FORCE_INLINE uint16_t Vdp::T_Get_X_Offset(void)
 	if (plane)
 	{
 		// Scroll A.
-		return H_Scroll_Addr_u16(H_Scroll_Offset);
+		return H_Scroll_Addr_u16(H_Scroll_Offset) & 0x3FF;
 	}
 	else
 	{
 		// Scroll B.
-		return H_Scroll_Addr_u16(H_Scroll_Offset + 2);
+		return H_Scroll_Addr_u16(H_Scroll_Offset + 2) & 0x3FF;
 	}
 }
 
@@ -660,7 +660,7 @@ template<bool plane, bool interlaced, bool vscroll, bool h_s>
 FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 {
 	// Get the horizontal scroll offset. (cell and fine offset)
-	unsigned int x_cell_offset = T_Get_X_Offset<plane>() & 0x3FF;
+	unsigned int x_cell_offset = T_Get_X_Offset<plane>();
 	
 	// Drawing will start at the fine cell offset.
 	// LineBuf.u16[X_offset_cell & 7]
