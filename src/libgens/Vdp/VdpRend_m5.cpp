@@ -564,17 +564,24 @@ FORCE_INLINE unsigned int Vdp::T_Get_Y_Offset(int cell_cur)
  * Get the cell offset from a Y offset.
  * This function applies the VScroll cell mask.
  * @param y_offset Y offset.
+ * @param vscroll_mask If true, mask with the VScroll cell mask.
  * @return Cell offset.
  */
-template<bool interlaced>
+template<bool interlaced, bool vscroll_mask>
 FORCE_INLINE unsigned int Vdp::T_Get_Y_Cell_Offset(unsigned int y_offset)
 {
 	// Non-Interlaced: 8x8 cells
 	// Interlaced: 8x16 cells
+	unsigned int cell_offset;
 	if (!interlaced)
-		return ((y_offset >> 3) & V_Scroll_CMask);
+		cell_offset = (y_offset >> 3);
 	else
-		return ((y_offset >> 4) & V_Scroll_CMask);
+		cell_offset = (y_offset >> 4);
+	
+	if (vscroll_mask)
+		cell_offset &= V_Scroll_CMask;
+	
+	return cell_offset;
 }
 
 
@@ -704,7 +711,7 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 		// T_Update_Y_Offset() ANDs the result with ~1, so
 		// the resulting value will always be 0.
 		y_offset = T_Get_Y_Offset<plane, interlaced>(0);
-		y_cell_offset = T_Get_Y_Cell_Offset<interlaced>(y_offset);
+		y_cell_offset = T_Get_Y_Cell_Offset<interlaced, true>(y_offset);
 		y_fine_offset = T_Get_Y_Fine_Offset<interlaced>(y_offset);
 	}
 	
@@ -717,7 +724,7 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 			// 2-cell vertical scrolling.
 			// Update the Y offset.
 			y_offset = T_Get_Y_Offset<plane, interlaced>(VSRam_Cell);
-			y_cell_offset = T_Get_Y_Cell_Offset<interlaced>(y_offset);
+			y_cell_offset = T_Get_Y_Cell_Offset<interlaced, true>(y_offset);
 			y_fine_offset = T_Get_Y_Fine_Offset<interlaced>(y_offset);
 		}
 		
@@ -857,11 +864,7 @@ FORCE_INLINE void Vdp::T_Render_Line_ScrollA(void)
 		
 		// Non-Interlaced: 8x8 cells
 		// Interlaced: 8x16 cells
-		// TODO: Add a parameter to T_Get_Y_Cell_Offset() to disable V_Scroll_CMask.
-		if (!interlaced)
-			y_cell_offset = (y_offset >> 3);
-		else
-			y_cell_offset = (y_offset >> 4);
+		y_cell_offset = T_Get_Y_Cell_Offset<interlaced, false>(y_offset);
 		y_fine_offset = T_Get_Y_Fine_Offset<interlaced>(y_offset);
 		
 		// TODO: See if we need to handle address wraparound.

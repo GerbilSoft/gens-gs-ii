@@ -472,7 +472,7 @@ class Vdp
 		template<bool plane, bool interlaced>
 		FORCE_INLINE unsigned int T_Get_Y_Offset(int cell_cur);
 		
-		template<bool interlaced>
+		template<bool interlaced, bool vscroll_mask>
 		FORCE_INLINE unsigned int T_Get_Y_Cell_Offset(unsigned int y_offset);
 		
 		template<bool interlaced>
