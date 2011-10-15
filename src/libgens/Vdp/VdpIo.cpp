@@ -331,8 +331,7 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 		case 11:
 		{
 			// Mode Set 3.
-			static const unsigned int Size_V_Scroll[4] = {255, 511, 255, 1023};
-			static const unsigned int H_Scroll_Mask_Table[4] = {0x0000, 0x0007, 0x01F8, 0x1FFF};
+			static const uint8_t H_Scroll_Mask_Table[4] = {0x00, 0x07, 0xF8, 0xFF};
 			
 			// Check the Vertical Scroll mode. (Bit 3)
 			// 0: Full scrolling. (Mask == 0)
