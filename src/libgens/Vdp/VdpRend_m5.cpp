@@ -522,14 +522,14 @@ FORCE_INLINE uint16_t Vdp::T_Get_X_Offset(void)
 
 
 /**
- * Vdp::T_Update_Y_Offset(): Update the Y offset.
+ * Get the Y offset.
  * @param plane True for Scroll A; false for Scroll B.
  * @param interlaced True for interlaced; false for non-interlaced.
  * @param cell_cur Current X cell number.
- * @return Y offset.
+ * @return Y offset, in pixels. (Includes cell offset and fine offset.)
  */
 template<bool plane, bool interlaced>
-FORCE_INLINE unsigned int Vdp::T_Update_Y_Offset(int cell_cur)
+FORCE_INLINE unsigned int Vdp::T_Get_Y_Offset(int cell_cur)
 {
 	// TODO: Y_FineOffset should be refactored such that it's reentrant.
 	if ((cell_cur & 0xFF80) || (cell_cur < 0))
@@ -544,45 +544,59 @@ FORCE_INLINE unsigned int Vdp::T_Update_Y_Offset(int cell_cur)
 	// Mask off odd columns.
 	cell_cur &= ~1;
 	
-	// Get the vertical scroll offset.
-	unsigned int VScroll_Offset;
-	if (plane)
-	{
-		// Scroll A.
-		VScroll_Offset = VSRam.u16[cell_cur];
-	}
-	else
-	{
-		// Scroll B.
-		VScroll_Offset = VSRam.u16[cell_cur + 1];
-	}
+	// Plane A VScroll is stored on even addresses.
+	// Plane B VScroll is stored on odd addresses.
+	if (!plane)
+		cell_cur++;
 	
-	// Add the current line number to the VScroll offset.
-	VScroll_Offset += T_GetLineNumber<interlaced>();
+	// Get the Y offset.
+	unsigned int y_offset = VSRam.u16[cell_cur];
 	
-	if (interlaced)
-	{
-		// Interlaced mode.
-		Y_FineOffset = (VScroll_Offset & 15);
-		
-		// Get the V Cell offset and prevent it from overflowing.
-		VScroll_Offset = (VScroll_Offset >> 4) & V_Scroll_CMask;
-	}
-	else
-	{
-		// Non-Interlaced mode.
-		Y_FineOffset = (VScroll_Offset & 7);
-		
-		// Get the V Cell offset and prevent it from overflowing.
-		VScroll_Offset = (VScroll_Offset >> 3) & V_Scroll_CMask;
-	}
+	// Add the current line number to the Y offset.
+	y_offset += T_GetLineNumber<interlaced>();
 	
-	return VScroll_Offset;
+	// Y offset retrieved.
+	return y_offset;
 }
 
 
 /**
- * Vdp::T_Get_Pattern_Info(): Get pattern info from a scroll plane.
+ * Get the cell offset from a Y offset.
+ * This function applies the VScroll cell mask.
+ * @param y_offset Y offset.
+ * @return Cell offset.
+ */
+template<bool interlaced>
+FORCE_INLINE unsigned int Vdp::T_Get_Y_Cell_Offset(unsigned int y_offset)
+{
+	// Non-Interlaced: 8x8 cells
+	// Interlaced: 8x16 cells
+	if (!interlaced)
+		return ((y_offset >> 3) & V_Scroll_CMask);
+	else
+		return ((y_offset >> 4) & V_Scroll_CMask);
+}
+
+
+/**
+ * Get the fine offset from a Y offset.
+ * @param y_offset Y offset.
+ * @return Fine offset.
+ */
+template<bool interlaced>
+FORCE_INLINE unsigned int Vdp::T_Get_Y_Fine_Offset(unsigned int y_offset)
+{
+	// Non-Interlaced: 8x8 cells
+	// Interlaced: 8x16 cells
+	if (!interlaced)
+		return (y_offset & 7);
+	else
+		return (y_offset & 15);
+}
+
+
+/**
+ * Get pattern info from a scroll plane.
  * H_Scroll_CMul must be initialized correctly.
  * @param plane True for Scroll A; false for Scroll B.
  * @param x X tile number.
@@ -603,17 +617,15 @@ FORCE_INLINE uint16_t Vdp::T_Get_Pattern_Info(unsigned int x, unsigned int y)
 
 
 /**
- * Vdp::T_Get_Pattern_Data(): Get pattern data for a given tile for the current line.
+ * Get pattern data for a given tile for the current line.
  * @param interlaced True for interlaced; false for non-interlaced.
  * @param pattern Pattern info.
+ * @param y_fine_offset Y fine offset.
  * @return Pattern data.
  */
 template<bool interlaced>
-FORCE_INLINE unsigned int Vdp::T_Get_Pattern_Data(uint16_t pattern)
+FORCE_INLINE uint32_t Vdp::T_Get_Pattern_Data(uint16_t pattern, unsigned int y_fine_offset)
 {
-	// Vertical offset.
-	unsigned int V_Offset = Y_FineOffset;
-	
 	// Get the tile address.
 	unsigned int TileAddr;
 	if (interlaced)
@@ -625,13 +637,13 @@ FORCE_INLINE unsigned int Vdp::T_Get_Pattern_Data(uint16_t pattern)
 	{
 		// V Flip enabled. Flip the tile vertically.
 		if (interlaced)
-			V_Offset ^= 15;
+			y_fine_offset ^= 15;
 		else
-			V_Offset ^= 7;
+			y_fine_offset ^= 7;
 	}
 	
 	// Return the pattern data.
-	return VRam.u32[(TileAddr + (V_Offset * 4)) >> 2];
+	return VRam.u32[(TileAddr + (y_fine_offset * 4)) >> 2];
 }
 
 
@@ -648,11 +660,11 @@ template<bool plane, bool interlaced, bool vscroll, bool h_s>
 FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 {
 	// Get the horizontal scroll offset. (cell and fine offset)
-	unsigned int X_offset_cell = T_Get_X_Offset<plane>() & 0x3FF;
+	unsigned int x_cell_offset = T_Get_X_Offset<plane>() & 0x3FF;
 	
 	// Drawing will start at the fine cell offset.
 	// LineBuf.u16[X_offset_cell & 7]
-	unsigned int disp_pixnum = (X_offset_cell & 7);
+	unsigned int disp_pixnum = (x_cell_offset & 7);
 	
 	// Determine if we should apply the Left Window bug.
 	int LeftWindowBugCnt = 0;	// Left Window bug counter.
@@ -661,14 +673,14 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 		// Determine the value for the Left Window bug counter.
 		// First tile: Counter should be 2.
 		// Second tile: Counter should be 1.
-		LeftWindowBugCnt = ((X_offset_cell & 8) ? 2 : 1);
+		LeftWindowBugCnt = ((x_cell_offset & 8) ? 2 : 1);
 	}
 	
 	if (plane)
 	{
 		// Adjust for the cell starting position.
 		const int cell_start_px = (cell_start << 3);
-		X_offset_cell -= cell_start_px;
+		x_cell_offset -= cell_start_px;
 		disp_pixnum += cell_start_px;
 	}
 	
@@ -676,13 +688,13 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 	// - Invert the cell position.
 	// - Right-shift by 3 for the cell number.
 	// - AND with the horizontal scrolling cell mask to prevent overflow.
-	X_offset_cell = (((X_offset_cell ^ 0x3FF) >> 3) & H_Scroll_CMask);
+	x_cell_offset = (((x_cell_offset ^ 0x3FF) >> 3) & H_Scroll_CMask);
 	
 	// VSRam cell number.
-	int VSRam_Cell = ((X_offset_cell & 1) - 2);
+	int VSRam_Cell = ((x_cell_offset & 1) - 2);
 	
 	// Initialize the Y offset.
-	unsigned int Y_offset_cell;				// Y offset. (in cells)
+	unsigned int y_offset, y_cell_offset, y_fine_offset;
 	if (!vscroll)
 	{
 		// Full vertical scrolling.
@@ -691,7 +703,9 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 		// since VSRam_Cell will be either -2 or -1 here.
 		// T_Update_Y_Offset() ANDs the result with ~1, so
 		// the resulting value will always be 0.
-		Y_offset_cell = T_Update_Y_Offset<plane, interlaced>(0);
+		y_offset = T_Get_Y_Offset<plane, interlaced>(0);
+		y_cell_offset = T_Get_Y_Cell_Offset<interlaced>(y_offset);
+		y_fine_offset = T_Get_Y_Fine_Offset<interlaced>(y_offset);
 	}
 	
 	// Loop through the cells.
@@ -702,7 +716,9 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 		{
 			// 2-cell vertical scrolling.
 			// Update the Y offset.
-			Y_offset_cell = T_Update_Y_Offset<plane, interlaced>(VSRam_Cell);
+			y_offset = T_Get_Y_Offset<plane, interlaced>(VSRam_Cell);
+			y_cell_offset = T_Get_Y_Cell_Offset<interlaced>(y_offset);
+			y_fine_offset = T_Get_Y_Fine_Offset<interlaced>(y_offset);
 		}
 		
 		// Get the pattern info for the current tile.
@@ -710,7 +726,7 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 		if (!plane)
 		{
 			// Scroll B.
-			pattern_info = T_Get_Pattern_Info<plane>(X_offset_cell, Y_offset_cell);
+			pattern_info = T_Get_Pattern_Info<plane>(x_cell_offset, y_cell_offset);
 		}
 		else
 		{
@@ -718,19 +734,19 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 			if (LeftWindowBugCnt <= 0)
 			{
 				// Left Window bug doesn't apply or has already been emulated.
-				pattern_info = T_Get_Pattern_Info<plane>(X_offset_cell, Y_offset_cell);
+				pattern_info = T_Get_Pattern_Info<plane>(x_cell_offset, y_cell_offset);
 			}
 			else
 			{
 				// Left Window bug applies.
 				LeftWindowBugCnt--;
-				const unsigned int TmpXCell = ((X_offset_cell + 2) & H_Scroll_CMask);
-				pattern_info = T_Get_Pattern_Info<plane>(TmpXCell, Y_offset_cell);
+				const unsigned int TmpXCell = ((x_cell_offset + 2) & H_Scroll_CMask);
+				pattern_info = T_Get_Pattern_Info<plane>(TmpXCell, y_cell_offset);
 			}
 		}
 		
 		// Get the pattern data for the current tile.
-		uint32_t pattern_data = T_Get_Pattern_Data<interlaced>(pattern_info);
+		uint32_t pattern_data = T_Get_Pattern_Data<interlaced>(pattern_info, y_fine_offset);
 		
 		// Extract the palette number.
 		// Resulting number is palette * 16.
@@ -759,7 +775,7 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 		}
 		
 		// Go to the next H cell.
-		X_offset_cell = (X_offset_cell + 1) & H_Scroll_CMask;
+		x_cell_offset = (x_cell_offset + 1) & H_Scroll_CMask;
 		
 		// Go to the next pattern.
 		disp_pixnum += 8;
@@ -837,23 +853,24 @@ FORCE_INLINE void Vdp::T_Render_Line_ScrollA(void)
 		
 		// Calculate the fine offsets.
 		const int vdp_line = T_GetLineNumber<interlaced>();
+		unsigned int y_fine_offset;
 		if (interlaced)
-			Y_FineOffset = (vdp_line & 15);
+			y_fine_offset = (vdp_line & 15);
 		else
-			Y_FineOffset = (vdp_line & 7);
+			y_fine_offset = (vdp_line & 7);
 		
 		// Window row start address.
-		const unsigned int Y_offset_cell = (VDP_Lines.Visible.Current / 8);
+		const unsigned int y_cell_offset = (VDP_Lines.Visible.Current / 8);
 		// TODO: See if we need to handle address wraparound.
 		// NOTE: Multiply by 2 for 16-bit access.
-		const uint16_t *Win_Row_Addr = Win_Addr_Ptr16((Y_offset_cell << H_Win_Shift) * 2) + Win_Start;
+		const uint16_t *Win_Row_Addr = Win_Addr_Ptr16((y_cell_offset << H_Win_Shift) * 2) + Win_Start;
 		
 		// Loop through the cells.
 		for (int x = Win_Length; x > 0; x--, disp_pixnum += 8)
 		{
 			// Get the pattern info and data for the current tile.
 			register uint16_t pattern_info = *Win_Row_Addr++;
-			uint32_t pattern_data = T_Get_Pattern_Data<interlaced>(pattern_info);
+			uint32_t pattern_data = T_Get_Pattern_Data<interlaced>(pattern_info, y_fine_offset);
 			
 			// Extract the palette number.
 			// Resulting number is palette * 16.

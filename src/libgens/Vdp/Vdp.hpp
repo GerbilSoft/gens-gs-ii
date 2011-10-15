@@ -429,9 +429,6 @@ class Vdp
 		void Render_Line_m5(void);
 	
 	private:
-		// Temporary VDP data.
-		unsigned int Y_FineOffset;
-		
 		// Sprite structs.
 		struct Sprite_Struct_t
 		{
@@ -473,13 +470,19 @@ class Vdp
 		FORCE_INLINE uint16_t T_Get_X_Offset(void);
 		
 		template<bool plane, bool interlaced>
-		FORCE_INLINE unsigned int T_Update_Y_Offset(int cell_cur);
+		FORCE_INLINE unsigned int T_Get_Y_Offset(int cell_cur);
+		
+		template<bool interlaced>
+		FORCE_INLINE unsigned int T_Get_Y_Cell_Offset(unsigned int y_offset);
+		
+		template<bool interlaced>
+		FORCE_INLINE unsigned int T_Get_Y_Fine_Offset(unsigned int y_offset);
 		
 		template<bool plane>
 		FORCE_INLINE uint16_t T_Get_Pattern_Info(unsigned int x, unsigned int y);
 		
 		template<bool interlaced>
-		FORCE_INLINE unsigned int T_Get_Pattern_Data(uint16_t pattern);
+		FORCE_INLINE uint32_t T_Get_Pattern_Data(uint16_t pattern, unsigned int y_fine_offset);
 		
 		template<bool plane, bool interlaced, bool vscroll, bool h_s>
 		FORCE_INLINE void T_Render_Line_Scroll(int cell_start, int cell_length);
