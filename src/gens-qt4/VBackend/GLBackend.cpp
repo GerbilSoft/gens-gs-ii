@@ -578,8 +578,9 @@ void GLBackend::glb_paintGL(void)
 		// For other renderers, use non-MD screen buffer.
 		
 		// (Re-)Upload the texture.
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, 336);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 8);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, src_fb->pxPerLine());
+		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 8); // TODO: 16 on amd64?
 		
 		glTexSubImage2D(GL_TEXTURE_2D, 0,
 				0, 0,						// x/y offset
@@ -587,7 +588,6 @@ void GLBackend::glb_paintGL(void)
 				m_texFormat, m_texType, screen);
 		
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 0);
 		
 		// Texture is no longer dirty.
