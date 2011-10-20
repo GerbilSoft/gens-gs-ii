@@ -152,10 +152,15 @@ inline uint8_t Z80_MD_Mem::Z80_ReadB_VDP(uint32_t address)
  */
 inline uint8_t Z80_MD_Mem::Z80_ReadB_68K_Rom(uint32_t address)
 {
-	// TODO: Only allow ROM reads.
-	// RAM reads should return 0xFF.
-	// Other reads should crash.
-	return M68K_Mem::M68K_RB(Bank_Z80 + (address & 0x7FFF));
+	// Z80 cannot read from M68K RAM.
+	// If this is attempted, 0xFF will be returned.
+	// Reference: http://gendev.spritesmind.net/forum/viewtopic.php?t=985
+	if (Bank_Z80 >= 0xE00000)
+		return 0xFF;
+	
+	address &= 0x7FFF;
+	address |= Bank_Z80
+	return M68K_Mem::M68K_RB(address);
 }
 
 
@@ -238,9 +243,11 @@ inline void Z80_MD_Mem::Z80_WriteB_VDP(uint32_t address, uint8_t data)
  */
 inline void Z80_MD_Mem::Z80_WriteB_68K_Rom(uint32_t address, uint8_t data)
 {
-	address &= 0x7FFF;
-	address += Bank_Z80;
+	// NOTE: Z80 writes to M68K RAM are allowed.
+	// Reference: http://gendev.spritesmind.net/forum/viewtopic.php?t=985
 	
+	address &= 0x7FFF;
+	address |= Bank_Z80;
 	M68K_Mem::M68K_WB(address, data);
 }
 
