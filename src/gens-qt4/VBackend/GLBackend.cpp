@@ -145,7 +145,7 @@ QStringList GLBackend::GLExtsInUse(void)
 
 
 /**
- * reallocTexture(): (Re-)Allocate the OpenGL texture.
+ * (Re-)Allocate the OpenGL texture.
  */
 void GLBackend::reallocTexture(void)
 {
@@ -239,6 +239,7 @@ void GLBackend::reallocTexture(void)
 #endif /* HAVE_GLEW */
 	
 	// TODO: Determine size based on renderer.
+	// TODO: Use the MdFb pxPerLine() and numLines() properties to calculate the visible size.
 	m_texVisSize = QSize(320, 240);
 	m_texSize.setWidth(next_pow2s(m_texVisSize.width()));
 	m_texSize.setHeight(next_pow2s(m_texVisSize.height()));
