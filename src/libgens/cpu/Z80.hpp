@@ -61,13 +61,24 @@ class Z80
 		/** BEGIN: mdZ80 wrapper functions. **/
 		
 		/**
-		 * Reset(): Reset the Z80.
-		 * This function should be called when the Z80 RESET line is asserted.
+		 * HardReset(): Reset the Z80. (Hard Reset)
+		 * This function should be called when resetting emulation.
 		 */
-		static inline void Reset(void)
+		static inline void HardReset(void)
 		{
 #ifdef GENS_ENABLE_EMULATION
-			mdZ80_reset(ms_Z80);
+			mdZ80_hard_reset(ms_Z80);
+#endif /* GENS_ENABLE_EMULATION */
+		}
+		
+		/**
+		 * SoftReset(): Reset the Z80. (Soft Reset)
+		 * This function should be called when the Z80 !RESET line is asserted.
+		 */
+		static inline void SoftReset(void)
+		{
+#ifdef GENS_ENABLE_EMULATION
+			mdZ80_soft_reset(ms_Z80);
 #endif /* GENS_ENABLE_EMULATION */
 		}
 		

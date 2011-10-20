@@ -34,10 +34,18 @@ mdZ80_context *mdZ80_new(void);
 void mdZ80_free(mdZ80_context *z80);
 
 /**
- * Reset the Z80 CPU.
+ * Reset the Z80 CPU. (Hard Reset)
+ * This resets *all* registers to their initial states.
  * @param z80 Pointer to Z80 context.
  */
-void mdZ80_reset(mdZ80_context *z80);
+void mdZ80_hard_reset(mdZ80_context *z80);
+
+/**
+ * Reset the Z80 CPU.
+ * This is equivalent to asserting the !RESET line.
+ * @param z80 Pointer to Z80 context.
+ */
+void mdZ80_soft_reset(mdZ80_context *z80);
 
 
 /*! Set memory and I/O read/write functions. **/

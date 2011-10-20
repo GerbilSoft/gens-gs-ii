@@ -79,10 +79,11 @@ void mdZ80_free(mdZ80_context *z80)
 }
 
 /**
- * Reset the Z80 CPU.
+ * Reset the Z80 CPU. (Hard Reset)
+ * Resets *all* parameters, including cycle count.
  * @param z80 Pointer to Z80 context.
  */
-void mdZ80_reset(mdZ80_context *z80)
+void mdZ80_hard_reset(mdZ80_context *z80)
 {
 	// Save the Z80 Cycle Count.
 	unsigned int cycleCnt = z80->CycleCnt;
@@ -94,13 +95,46 @@ void mdZ80_reset(mdZ80_context *z80)
 	// Restore the Z80 Cycle Count.
 	z80->CycleCnt = cycleCnt;
 	
-	// Initialize the program counter.
-	mdZ80_set_PC(z80, 0);
+	// TODO: Initialize registers to 0xFFFF?
+	// Gens and genplus-gx initialize them to 0,
+	// except for specific registers in Soft Reset.
 	
-	// Initialize the index and flag registers.
-	z80->IX.w = 0xFFFF;
-	z80->IY.w = 0xFFFF;
-	z80->AF.d = 0x4000;
+	// Initialize the registers using Soft Reset.
+	mdZ80_soft_reset(z80);
+}
+
+/**
+ * Reset the Z80 CPU.
+ * This is equivalent to asserting the !RESET line.
+ * @param z80 Pointer to Z80 context.
+ */
+void mdZ80_soft_reset(mdZ80_context *z80)
+{
+	/**
+	 * References:
+	 * [1] "The Undocumented Z80 Docuemnted" by Sean Young, v0.91 (2005/09/18)
+	 * [2] http://gs_server.gerbilsoft.ddns.info/bugs/show_bug.cgi?id=47
+	 */
+	
+	// NOTE: Both [1] and [2] say that other registers are *not* touched
+	// when !RESET is asserted, so they're left as-is.
+	
+	// TODO: Write a test program for MD, then test it on actual hardware.
+	
+	// Z80 program starts at 0x0000.
+	mdZ80_set_PC(z80, 0);	// old Gens; [1]
+	
+	// TODO: Are IX and IY actually reset on !RESET?
+	z80->IX.w = 0xFFFF;	// old Gens; also genplus-gx
+	z80->IY.w = 0xFFFF;	// old Gens; also genplus-gx
+	
+	// TODO: Initialize AF2 to 0xFFFF?
+	mdZ80_set_AF(z80, 0xFFFF);	// [1]; Gens originally used 0x4000 (ZF only).
+	z80->SP.w = 0xFFFF;		// [1]
+	z80->IFF = 0;			// [1]
+	z80->R = 0;			// [2]
+	z80->I = 0;			// [2]
+	z80->IM = 0;			// [1]
 }
 
 

@@ -821,7 +821,7 @@ inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 		else
 		{
 			// RESET is low. Stop the Z80.
-			Z80::Reset();
+			Z80::SoftReset();
 			Z80_State |= Z80_STATE_RESET;
 			
 			// YM2612's RESET line is tied to the Z80's RESET line.
@@ -1131,7 +1131,7 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 		else
 		{
 			// RESET is low. Stop the Z80.
-			Z80::Reset();
+			Z80::SoftReset();
 			Z80_State |= Z80_STATE_RESET;
 			
 			// YM2612's RESET line is tied to the Z80's RESET line.

@@ -95,8 +95,8 @@ void Z80::ReInit(void)
 	M68K_Mem::Last_BUS_REQ_Cnt = 0;
 	M68K_Mem::Last_BUS_REQ_St = 0;
 	
-	// Reset the Z80.
-	Reset();
+	// Hard-reset the Z80.
+	HardReset();
 }
 
 

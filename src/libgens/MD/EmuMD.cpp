@@ -142,7 +142,7 @@ int EmuMD::softReset(void)
 	
 	// Reset the M68K, Z80, and YM2612.
 	M68K::Reset();
-	Z80::Reset();
+	Z80::SoftReset();
 	SoundMgr::ms_Ym2612.reset();
 	
 	// Z80 state should be reset to the default value.
