@@ -38,17 +38,44 @@ class MdFb
 		uint32_t *lineBuf32(int line);
 		template<typename pixel> pixel *lineBuf(int line);
 		
-		// Framebuffer access.
+		/** Framebuffer access. **/
+		
+		/**
+		 * Get the framebuffer. (16-bit color)
+		 * @return First pixel of the framebuffer.
+		 */
 		uint16_t *fb16(void);
+		
+		/**
+		 * Get the framebuffer. (32-bit color)
+		 * @return First pixel of the framebuffer.
+		 */
 		uint32_t *fb32(void);
+		
+		/**
+		 * Get the number of visible pixels per line.
+		 * @return Number of visible pixels per line.
+		 */
 		int pxPerLine(void) const;
+		
+		/**
+		 * Get the total number of pixels per line, including offscreen area.
+		 * @return Total number of pixels per line.
+		 */
+		int pxPitch(void) const;
+		
+		/**
+		 * Get the number of lines.
+		 * @return Number of lines.
+		 */
 		int numLines(void) const;
 	
 	private:
 		// NOTE: These are subject to change in the future.
 		// Specifically, they may become dynamic.
 		// TODO: Eliminate the 8px left/right borders.
-		static const int ms_PxPerLine = 336;
+		static const int ms_PxPerLine = 320;
+		static const int ms_PxPitch = 336;
 		static const int ms_NumLines = 240;
 		
 		// 336px and 320px tables.
@@ -58,8 +85,8 @@ class MdFb
 		// Framebuffer.
 		union FB_t
 		{
-			uint16_t u16[ms_PxPerLine * ms_NumLines + 8];
-			uint32_t u32[ms_PxPerLine * ms_NumLines + 8];
+			uint16_t u16[ms_PxPitch * ms_NumLines + 8];
+			uint32_t u32[ms_PxPitch * ms_NumLines + 8];
 		};
 		FB_t m_fb;
 };
@@ -115,6 +142,9 @@ inline uint32_t *MdFb::fb32(void)
 
 inline int MdFb::pxPerLine(void) const
 	{ return ms_PxPerLine; }
+
+inline int MdFb::pxPitch(void) const
+	{ return ms_PxPitch; }
 
 inline int MdFb::numLines(void) const
 	{ return ms_NumLines; }

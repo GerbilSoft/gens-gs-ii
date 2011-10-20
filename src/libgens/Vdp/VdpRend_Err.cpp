@@ -119,8 +119,8 @@ inline void VdpRend_Err_Private::T_DrawColorBars(MdFb *fb, const pixel palette[2
 	// Go to the correct position in the screen.
 	// TODO: Update to use MdFb.
 	pixel *screen = fb->lineBuf<pixel>(q->VDP_Lines.Visible.Border_Size);
-	const int HPix = q->GetHPix();				// Get horizontal pixel count.
-	const int pitch_diff = (fb->pxPerLine() - HPix);	// Calculate pitch difference.
+	const int HPix = q->GetHPix();			// Get horizontal pixel count.
+	const int pitch_diff = (fb->pxPitch() - HPix);	// Calculate pitch difference.
 	
 	// X bar positions.
 	int barX_1[7];
@@ -209,7 +209,7 @@ inline void VdpRend_Err_Private::T_DrawColorBars_Border(MdFb *fb, const pixel bg
 {
 	// Draw the top border.
 	pixel *screen = fb->lineBuf<pixel>(0);
-	for (unsigned int i = (q->VDP_Lines.Visible.Border_Size * fb->pxPerLine());
+	for (unsigned int i = (q->VDP_Lines.Visible.Border_Size * fb->pxPitch());
 	     i != 0; i -= 4, screen += 4)
 	{
 		*screen = bg_color;
@@ -258,12 +258,12 @@ inline void VdpRend_Err_Private::T_DrawColorBars_Border(MdFb *fb, const pixel bg
 	{
 		// Go to the bottom border.
 		// TODO: Update to use MdFb.
-		screen += (q->VDP_Lines.Visible.Total * fb->pxPerLine());
+		screen += (q->VDP_Lines.Visible.Total * fb->pxPitch());
 	}
 	
 	// Draw the bottom border.
 	// TODO: Update to use MdFb.
-	for (unsigned int i = (q->VDP_Lines.Visible.Border_Size * fb->pxPerLine());
+	for (unsigned int i = (q->VDP_Lines.Visible.Border_Size * fb->pxPitch());
 	     i != 0; i -= 4, screen += 4)
 	{
 		*screen = bg_color;

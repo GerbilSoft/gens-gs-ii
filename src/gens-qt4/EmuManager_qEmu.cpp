@@ -503,13 +503,13 @@ QImage EmuManager::getMDScreen(void) const
 	if (bpp == LibGens::VdpPalette::BPP_32)
 	{
 		start = (const uint8_t*)(gqt4_emuContext->m_vdp->MD_Screen.lineBuf32(startY) + startX);
-		bytesPerLine = (gqt4_emuContext->m_vdp->MD_Screen.pxPerLine() * sizeof(uint32_t));
+		bytesPerLine = (gqt4_emuContext->m_vdp->MD_Screen.pxPitch() * sizeof(uint32_t));
 		imgFormat = QImage::Format_RGB32;
 	}
 	else
 	{
 		start = (const uint8_t*)(gqt4_emuContext->m_vdp->MD_Screen.lineBuf16(startY) + startX);
-		bytesPerLine = (gqt4_emuContext->m_vdp->MD_Screen.pxPerLine() * sizeof(uint16_t));
+		bytesPerLine = (gqt4_emuContext->m_vdp->MD_Screen.pxPitch() * sizeof(uint16_t));
 		if (bpp == LibGens::VdpPalette::BPP_16)
 			imgFormat = QImage::Format_RGB16;
 		else

@@ -192,13 +192,13 @@ void FastBlur::DoFastBlur(MdFb *outScreen, bool fromMdScreen)
 			case VdpPalette::BPP_15:
 			case VdpPalette::BPP_16:
 				memcpy(outScreen->fb16(), Vdp::MD_Screen.fb16(),
-				       (Vdp::MD_Screen.pxPerLine() * Vdp::MD_Screen.numLines() * sizeof(uint16_t)));
+				       (Vdp::MD_Screen.pxPitch() * Vdp::MD_Screen.numLines() * sizeof(uint16_t)));
 				break;
 			
 			case VdpPalette::BPP_32:
 			default:
 				memcpy(outScreen->fb32(), Vdp::MD_Screen.fb32(),
-				       (Vdp::MD_Screen.pxPerLine() * Vdp::MD_Screen.numLines() * sizeof(uint32_t)));
+				       (Vdp::MD_Screen.pxPitch() * Vdp::MD_Screen.numLines() * sizeof(uint32_t)));
 				break;
 		}
 	}
