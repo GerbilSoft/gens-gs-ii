@@ -30,9 +30,6 @@
 /* Structures & definitions */
 /****************************/
 
-typedef uint8_t FASTCALL Z80_RB(uint32_t adr);
-typedef void FASTCALL Z80_WB(uint32_t adr, uint8_t data);
-
 typedef struct _mdZ80_context
 {
 	union
