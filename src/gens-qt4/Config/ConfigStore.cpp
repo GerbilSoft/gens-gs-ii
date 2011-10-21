@@ -1,0 +1,278 @@
+/***************************************************************************
+ * gens-qt4: Gens Qt4 UI.                                                  *
+ * ConfigStore.cpp: Configuration store.                                   *
+ *                                                                         *
+ * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
+ * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
+ *                                                                         *
+ * This program is free software; you can redistribute it and/or modify it *
+ * under the terms of the GNU General Public License as published by the   *
+ * Free Software Foundation; either version 2 of the License, or (at your  *
+ * option) any later version.                                              *
+ *                                                                         *
+ * This program is distributed in the hope that it will be useful, but     *
+ * WITHOUT ANY WARRANTY; without even the implied warranty of              *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
+ * GNU General Public License for more details.                            *
+ *                                                                         *
+ * You should have received a copy of the GNU General Public License along *
+ * with this program; if not, write to the Free Software Foundation, Inc., *
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
+ ***************************************************************************/
+
+#include "ConfigStore.hpp"
+
+// Qt includes.
+#include <QtCore/QSettings>
+#include <QtCore/QHash>
+#include <QtCore/QDir>
+#include <QtCore/QString>
+#include <QtCore/QVariant>
+#include <QtCore/QPointer>
+#include <QtCore/QVector>
+
+namespace GensQt4
+{
+
+class ConfigStorePrivate
+{
+	public:
+		ConfigStorePrivate(ConfigStore *q);
+		~ConfigStorePrivate();
+		
+		/**
+		 * Reset all settings to defaults.
+		 */
+		void reset(void);
+		
+		/**
+		 * Set a property.
+		 * @param key Property name.
+		 * @param value Property value.
+		 */
+		void set(const QString& key, const QVariant& value);
+		
+		/**
+		 * Get a property.
+		 * @param key Property name.
+		 * @return Property value.
+		 */
+		QVariant get(const QString& key);
+	
+	private:
+		ConfigStore *const q;
+		Q_DISABLE_COPY(ConfigStorePrivate)
+	
+	public:
+		// Current settings.
+		QHash<QString, QVariant> settings;
+		
+		// Default settings.
+		struct DefaultSetting
+		{
+			const char *key;
+			const char *value;
+		};
+		static const DefaultSetting DefaultSettings[];
+		
+		// Configuration path.
+		QString configPath;
+		
+		/**
+		 * Signal mappings.
+		 * Format:
+		 * - Key: Property to watch.
+		 * - Value: List of SignalMaps.
+		 *   - SignalMap.obj: Object to send signal to.
+		 *   - SignalMap.slot: Slot name.
+		 */
+		struct SignalMap
+		{
+			QPointer<QObject> obj;
+			const char *slot;
+		};
+		QHash<QString, QVector<SignalMap>* > signalMaps;
+};
+
+
+/**
+ * Default settings.
+ */
+const ConfigStorePrivate::DefaultSetting ConfigStorePrivate::DefaultSettings[] =
+{
+	/** General settings. **/
+	{"autoFixChecksum",		"true"},
+	{"autoPause",			"false"},
+	{"borderColorEmulation",	"true"},
+	{"pauseTint",			"true"},
+	{"ntscV30Rolling",		"true"},
+	
+	/** Onscreen display. **/
+	{"OSD/fpsEnabled",		"true"},
+	{"OSD/fpsColor",		"#ffffff"},
+	{"OSD/msgEnabled",		"true"},
+	{"OSD/msgColor",		"#ffffff"},
+	
+	/** Intro effect. **/
+	{"Intro_Effect/introStyle",	"0"},	// none
+	{"Intro_Effect/introColor",	"7"},	// white
+	
+	/** System. **/
+	{"System/regionCode",		"-1"},		// LibGens::SysVersion::REGION_AUTO
+	{"System/regionCodeOrder",	"0x4812"},	// US, Europe, Japan, Asia
+	
+	/** Sega CD Boot ROMs. **/
+	{"Sega_CD/bootRomUSA", NULL},
+	{"Sega_CD/bootRomEUR", NULL},
+	{"Sega_CD/bootRomJPN", NULL},
+	{"Sega_CD/bootRomAsia", NULL},
+	
+	/** External programs. **/
+#ifdef Q_OS_WIN32
+#ifdef __amd64__
+	{"External_Programs/UnRAR", "UnRAR64.dll"},
+#else
+	{"External_Programs/UnRAR", "UnRAR.dll"},
+#endif
+#else /* !Q_OS_WIN32 */
+	// TODO: Check for the existence of unrar and rar.
+	// We should:
+	// - Default to unrar if it's found.
+	// - Fall back to rar if it's found but unrar isn't.
+	// - Assume unrar if neither are found.
+	{"External_Programs/UnRAR", "/usr/bin/unrar"},
+#endif /* Q_OS_WIN32 */
+	
+	/** Graphics settings. **/
+	{"Graphics/aspectRatioConstraint",	"true"},
+	{"Graphics/fastBlur",			"false"},
+	{"Graphics/bilinearFilter",		"false"},
+	{"Graphics/interlacedMode",		"2"},	// GensConfig::INTERLACED_FLICKER
+	{"Graphics/contrast",			"0"},
+	{"Graphics/brightness",			"0"},
+	{"Graphics/grayscale",			"false"},
+	{"Graphics/inverted",			"false"},
+	{"Graphics/colorScaleMethod",		"1"},	// LibGens::VdpPalette::COLSCALE_FULL
+	{"Graphics/stretchMode",		"1"},	// GensConfig::STRETCH_H
+	
+	/** Savestates. **/
+	{"Savestates/saveSlot", "0"},
+	
+	/** GensWindow configuration. **/
+	{"GensWindow/showMenuBar", "true"},
+	
+	// TODO: Shortcut keys, controllers, recent ROMs.
+	
+	/** Emulation options. (Options menu) **/
+	{"Options/enableSRam", "true"},
+	
+	/** End of array. **/
+	{NULL, NULL}
+};
+
+/** ConfigStorePrivate **/
+
+
+ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
+	: q(q)
+{
+	// Initialize settings.
+	reset();
+	
+	// Determine the configuration path.
+	// TODO: Portable mode.
+	// TODO: Fallback if the user directory isn't writable.
+	QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+				QLatin1String("gens-gs-ii"),
+				QLatin1String("gens-gs-ii"));
+	
+	// TODO: Figure out if QDir has a function to remove the filename portion of the pathname.
+	configPath = settings.fileName();
+	int sepChr = configPath.lastIndexOf(QChar(L'/'));
+	if (sepChr >= 0)
+		configPath.remove(sepChr + 1, configPath.size());
+	
+	// Make sure the directory exists.
+	// If it doesn't exist, create it.
+	QDir dir(configPath);
+	if (!dir.exists())
+		dir.mkpath(configPath);
+}
+
+
+ConfigStorePrivate::~ConfigStorePrivate()
+{
+	// TODO: Save the settings.
+}
+
+
+/**
+ * Reset all settings to defaults.
+ */
+void ConfigStorePrivate::reset(void)
+{
+	// Initialize settings with DefaultSettings.
+	settings.clear();
+	for (const DefaultSetting *def = &DefaultSettings[0]; def->key != NULL; def++)
+	{
+		settings.insert(QLatin1String(def->key),
+				(def->value ? QLatin1String(def->value) : QString()));
+	}
+}
+
+
+/**
+ * Set a property.
+ * @param key Property name.
+ * @param value Property value.
+ */
+void ConfigStorePrivate::set(const QString& key, const QVariant& value)
+{
+	settings.insert(key, value);
+	
+	// Invoke slots for registered objects.
+	QVector<SignalMap> *signalMapVector = signalMaps.value(key, NULL);
+	if (!signalMapVector)
+		return;
+	
+	// Process the signal map list in reverse-order.
+	// Reverse order makes it easier to remove deleted objects.
+	// TODO: Use QLinkedList instead?
+	for (int i = (signalMapVector->size() - 1); i >= 0; i--)
+	{
+		const SignalMap *smap = &signalMapVector->at(i);
+		if (smap->obj.isNull())
+		{
+			// NULL pointer. Remove this Signalmap.
+			signalMapVector->remove(i);
+		}
+		else
+		{
+			// Invoke this slot.
+			QMetaObject::invokeMethod(smap->obj, smap->slot, Q_ARG(QVariant, value));
+		}
+	}
+}
+
+
+/**
+ * Get a property.
+ * @param key Property name.
+ * @return Property value.
+ */
+QVariant ConfigStorePrivate::get(const QString& key)
+{
+	return settings.value(key);
+}
+
+
+/** ConfigStore **/
+
+
+ConfigStore::ConfigStore(QObject *parent)
+	: QObject(parent)
+	, d(new ConfigStorePrivate(this))
+{ }
+
+}
