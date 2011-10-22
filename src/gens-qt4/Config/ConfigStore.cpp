@@ -285,6 +285,9 @@ ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
 	QDir dir(configPath);
 	if (!dir.exists())
 		dir.mkpath(configPath);
+	
+	// Load the user's settings.
+	load();
 }
 
 
@@ -443,7 +446,7 @@ QVariant ConfigStorePrivate::get(const QString& key)
 			key.toUtf8().constData());
 	}
 #endif
-	
+
 	return settings.value(key);
 }
 
