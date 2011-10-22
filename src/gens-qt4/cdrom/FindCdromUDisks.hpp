@@ -27,13 +27,10 @@
 // QtDBus includes.
 #include <QtDBus/QDBusObjectPath>
 
-// UDisks interface.
-#include "udisksinterface.h"
-
-// TODO: Make a private class.
-
 namespace GensQt4
 {
+
+class FindCdromUDisksPrivate;
 
 class FindCdromUDisks : public FindCdrom
 {
@@ -41,13 +38,21 @@ class FindCdromUDisks : public FindCdrom
 	
 	public:
 		FindCdromUDisks();
-		~FindCdromUDisks();
-		
-		inline bool isUsable(void) const
-			{ return (m_ifUDisks != NULL); }
+	
+	private:
+		friend class FindCdromUDisksPrivate;
+		FindCdromUDisksPrivate *const d;
+		Q_DISABLE_COPY(FindCdromUDisks)
+	
+	public:
+		/**
+		 * Check if this FindCdrom object is usable.
+		 * @return True if this object is usable; false if not.
+		 */
+		bool isUsable(void) const;
 		
 		/**
-		 * query(): Asynchronously query for CD-ROM drives.
+		 * Asynchronously query for CD-ROM drives.
 		 * The driveUpdated() signal will be emitted once for each detected drive.
 		 * @return 0 on success; non-zero on error.
 		 */
@@ -55,21 +60,11 @@ class FindCdromUDisks : public FindCdrom
 	
 	protected:
 		/**
-		 * query_int(): Asynchronously query for CD-ROM drives. (INTERNAL FUNCTION)
+		 * Asynchronously query for CD-ROM drives. (INTERNAL FUNCTION)
 		 * The driveUpdated() signal will be emitted once for each detected drive.
 		 * @return 0 on success; non-zero on error.
 		 */
 		int query_int(void);
-	
-	private:
-		static const char *const ms_UDisks_DriveID[20];
-		
-		static QString GetStringProperty(QDBusInterface *dbus_if, const char *prop);
-		static bool GetBoolProperty(QDBusInterface *dbus_if, const char *prop);
-		
-		// D-BUS interface to UDisks.
-		OrgFreedesktopUDisksInterface *m_ifUDisks;
-		int queryUDisksDevice(const QDBusObjectPath& objectPath);
 	
 	private slots:
 		void deviceChanged(const QDBusObjectPath& objectPath);
