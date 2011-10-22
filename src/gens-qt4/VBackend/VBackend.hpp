@@ -44,10 +44,11 @@
 // Emulation Context.
 #include "libgens/EmuContext.hpp"
 
-// Configuration items.
+// gqt4_cfg
+#include "gqt4_main.hpp"
+
 #include "Config/ConfigItem.hpp"
 #include "Config/ConfigItemColor.hpp"
-
 namespace GensQt4
 {
 
@@ -216,8 +217,8 @@ class VBackend : public QWidget
 	private:
 		// Effects.
 		paused_t m_paused;
-		ConfigItem *m_cfg_fastBlur;	// bool
-		ConfigItem *m_cfg_pauseTint;	// bool
+		bool m_cfg_fastBlur;	// bool
+		bool m_cfg_pauseTint;	// bool
 		
 		// Is the emulator running?
 		bool m_running;
@@ -313,9 +314,9 @@ inline int VBackend::recStop(const QString& component)
 /** Property read functions. **/
 // TODO: Should we keep these properties here, or just get them from gqt4_config?
 inline bool VBackend::fastBlur(void) const
-	{ return m_cfg_fastBlur->value().toBool(); }
+	{ return m_cfg_fastBlur; }
 inline void VBackend::setFastBlur(bool newFastBlur)
-	{ m_cfg_fastBlur->setValue(newFastBlur); }
+	{ gqt4_cfg->set(QLatin1String("Graphics/fastBlur"), newFastBlur); }
 inline bool VBackend::aspectRatioConstraint(void) const
 	{ return m_cfg_aspectRatioConstraint->value().toBool(); }
 inline bool VBackend::hasAspectRatioConstraintChanged(void) const
@@ -325,7 +326,7 @@ inline void VBackend::resetAspectRatioConstraintChanged(void)
 inline bool VBackend::bilinearFilter(void) const
 	{ return m_cfg_bilinearFilter->value().toBool(); }
 inline bool VBackend::pauseTint(void) const
-	{ return m_cfg_pauseTint->value().toBool(); }
+	{ return m_cfg_pauseTint; }
 inline StretchMode_t VBackend::stretchMode(void) const
 	{ return (StretchMode_t)m_cfg_stretchMode->value().toInt(); }
 inline void VBackend::setStretchMode(StretchMode_t newStretchMode)

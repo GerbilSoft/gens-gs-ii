@@ -75,11 +75,17 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	}
 	
 	/** Configuration items. **/
-	m_cfg_fastBlur = new ConfigItem(QLatin1String("Graphics/fastBlur"), false, this);
-	m_cfg_pauseTint = new ConfigItem(QLatin1String("pauseTint"), false, this);
+	m_cfg_fastBlur = gqt4_cfg->get(QLatin1String("Graphics/fastBlur")).toBool();
+	m_cfg_pauseTint = gqt4_cfg->get(QLatin1String("pauseTint")).toBool();
 	m_cfg_aspectRatioConstraint = new ConfigItem(QLatin1String("Graphics/aspectRatioConstraint"), true, this);
 	m_cfg_bilinearFilter = new ConfigItem(QLatin1String("Graphics/bilinearFilter"), true, this);;
 	m_cfg_stretchMode = new ConfigItem(QLatin1String("Graphics/stretchMode"), 1, this);;
+	
+	/** Configuration items: Signals. **/
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/fastBlur"),
+					this, SLOT(fastBlur_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/pauseTint"),
+					this, SLOT(pauseTint_changed_slot(QVariant)));
 	
 	// Initialize the paused setting.
 	m_paused.data = 0;
@@ -113,14 +119,10 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 		this, SLOT(osdMsgColor_changed_slot(QColor)));
 	
 	// Video effect settings.
-	connect(m_cfg_fastBlur, SIGNAL(valueChanged(QVariant)),
-		this, SLOT(fastBlur_changed_slot(QVariant)));
 	connect(m_cfg_aspectRatioConstraint, SIGNAL(valueChanged(QVariant)),
 		this, SLOT(aspectRatioConstraint_changed_slot(QVariant)));
 	connect(m_cfg_bilinearFilter, SIGNAL(valueChanged(QVariant)),
 		this, SLOT(bilinearFilter_changed_slot(QVariant)));
-	connect(m_cfg_pauseTint, SIGNAL(valueChanged(QVariant)),
-		this, SLOT(pauseTint_changed_slot(QVariant)));
 	connect(m_cfg_stretchMode, SIGNAL(valueChanged(QVariant)),
 		this, SLOT(stretchMode_changed_slot(QVariant)));
 }
@@ -265,8 +267,11 @@ void VBackend::stretchMode_changed_slot(const QVariant& newStretchMode)
  */
 void VBackend::fastBlur_changed_slot(const QVariant& newFastBlur)
 {
+	// Save the new Fast Blur setting.
+	m_cfg_fastBlur = newFastBlur.toBool();
+	
 	// Print a message to the OSD.
-	if (newFastBlur.toBool())
+	if (m_cfg_fastBlur)
 	{
 		//: OSD message indicating Fast Blur has been enabled.
 		osd_printqs(1500, tr("Fast Blur enabled.", "osd"));
