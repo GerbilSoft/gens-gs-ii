@@ -161,6 +161,7 @@ class ConfigStorePrivate
 		{
 			const char *key;
 			const char *value;
+			int hex_digits;		// If non-zero, saves as hexadecimal with this many digits.
 		};
 		static const DefaultSetting DefaultSettings[];
 		
@@ -196,38 +197,38 @@ const char ConfigStorePrivate::DefaultConfigFilename[] = "gens-gs-ii.NEWCONF.con
 const ConfigStorePrivate::DefaultSetting ConfigStorePrivate::DefaultSettings[] =
 {
 	/** General settings. **/
-	{"autoFixChecksum",		"true"},
-	{"autoPause",			"false"},
-	{"borderColorEmulation",	"true"},
-	{"pauseTint",			"true"},
-	{"ntscV30Rolling",		"true"},
+	{"autoFixChecksum",		"true", 0},
+	{"autoPause",			"false", 0},
+	{"borderColorEmulation",	"true", 0},
+	{"pauseTint",			"true", 0},
+	{"ntscV30Rolling",		"true", 0},
 	
 	/** Onscreen display. **/
-	{"OSD/fpsEnabled",		"true"},
-	{"OSD/fpsColor",		"#ffffff"},
-	{"OSD/msgEnabled",		"true"},
-	{"OSD/msgColor",		"#ffffff"},
+	{"OSD/fpsEnabled",		"true", 0},
+	{"OSD/fpsColor",		"#ffffff", 0},
+	{"OSD/msgEnabled",		"true", 0},
+	{"OSD/msgColor",		"#ffffff", 0},
 	
 	/** Intro effect. **/
-	{"Intro_Effect/introStyle",	"0"},	// none
-	{"Intro_Effect/introColor",	"7"},	// white
+	{"Intro_Effect/introStyle",	"0", 0},	// none
+	{"Intro_Effect/introColor",	"7", 0},	// white
 	
 	/** System. **/
-	{"System/regionCode",		"-1"},		// LibGens::SysVersion::REGION_AUTO
-	{"System/regionCodeOrder",	"0x4812"},	// US, Europe, Japan, Asia
+	{"System/regionCode",		"-1", 0},	// LibGens::SysVersion::REGION_AUTO
+	{"System/regionCodeOrder",	"0x4812", 4},	// US, Europe, Japan, Asia
 	
 	/** Sega CD Boot ROMs. **/
-	{"Sega_CD/bootRomUSA", NULL},
-	{"Sega_CD/bootRomEUR", NULL},
-	{"Sega_CD/bootRomJPN", NULL},
-	{"Sega_CD/bootRomAsia", NULL},
+	{"Sega_CD/bootRomUSA", NULL, 0},
+	{"Sega_CD/bootRomEUR", NULL, 0},
+	{"Sega_CD/bootRomJPN", NULL, 0},
+	{"Sega_CD/bootRomAsia", NULL, 0},
 	
 	/** External programs. **/
 #ifdef Q_OS_WIN32
 #ifdef __amd64__
-	{"External_Programs/UnRAR", "UnRAR64.dll"},
+	{"External_Programs/UnRAR", "UnRAR64.dll", 0},
 #else
-	{"External_Programs/UnRAR", "UnRAR.dll"},
+	{"External_Programs/UnRAR", "UnRAR.dll", 0},
 #endif
 #else /* !Q_OS_WIN32 */
 	// TODO: Check for the existence of unrar and rar.
@@ -235,43 +236,43 @@ const ConfigStorePrivate::DefaultSetting ConfigStorePrivate::DefaultSettings[] =
 	// - Default to unrar if it's found.
 	// - Fall back to rar if it's found but unrar isn't.
 	// - Assume unrar if neither are found.
-	{"External_Programs/UnRAR", "/usr/bin/unrar"},
+	{"External_Programs/UnRAR", "/usr/bin/unrar", 0},
 #endif /* Q_OS_WIN32 */
 	
 	/** Graphics settings. **/
-	{"Graphics/aspectRatioConstraint",	"true"},
-	{"Graphics/fastBlur",			"false"},
-	{"Graphics/bilinearFilter",		"false"},
-	{"Graphics/interlacedMode",		"2"},	// GensConfig::INTERLACED_FLICKER
-	{"Graphics/contrast",			"0"},
-	{"Graphics/brightness",			"0"},
-	{"Graphics/grayscale",			"false"},
-	{"Graphics/inverted",			"false"},
-	{"Graphics/colorScaleMethod",		"1"},	// LibGens::VdpPalette::COLSCALE_FULL
-	{"Graphics/stretchMode",		"1"},	// GensConfig::STRETCH_H
+	{"Graphics/aspectRatioConstraint",	"true", 0},
+	{"Graphics/fastBlur",			"false", 0},
+	{"Graphics/bilinearFilter",		"false", 0},
+	{"Graphics/interlacedMode",		"2", 0},	// GensConfig::INTERLACED_FLICKER
+	{"Graphics/contrast",			"0", 0},
+	{"Graphics/brightness",			"0", 0},
+	{"Graphics/grayscale",			"false", 0},
+	{"Graphics/inverted",			"false", 0},
+	{"Graphics/colorScaleMethod",		"1", 0},	// LibGens::VdpPalette::COLSCALE_FULL
+	{"Graphics/stretchMode",		"1", 0},	// GensConfig::STRETCH_H
 	
 	/** Savestates. **/
-	{"Savestates/saveSlot", "0"},
+	{"Savestates/saveSlot", "0", 0},
 	
 	/** GensWindow configuration. **/
-	{"GensWindow/showMenuBar", "true"},
+	{"GensWindow/showMenuBar", "true", 0},
 	
 	/** Emulation options. (Options menu) **/
-	{"Options/enableSRam", "true"},
+	{"Options/enableSRam", "true", 0},
 	
 	/** Directories. **/
 	// TODO: Add a class to handle path resolution.
-	{"Directories/Savestates",	"./Savestates/"},
-	{"Directories/SRAM",		"./SRAM/"},
-	{"Directories/BRAM",		"./BRAM/"},
-	{"Directories/WAV",		"./WAV/"},
-	{"Directories/VGM",		"./VGM/"},
-	{"Directories/Screenshots",	"./Screenshots/"},
+	{"Directories/Savestates",	"./Savestates/", 0},
+	{"Directories/SRAM",		"./SRAM/", 0},
+	{"Directories/BRAM",		"./BRAM/", 0},
+	{"Directories/WAV",		"./WAV/", 0},
+	{"Directories/VGM",		"./VGM/", 0},
+	{"Directories/Screenshots",	"./Screenshots/", 0},
 	
 	// TODO: Shortcut keys, controllers, recent ROMs.
 	
 	/** End of array. **/
-	{NULL, NULL}
+	{NULL, NULL, 0}
 };
 
 /** ConfigStorePrivate **/
@@ -585,8 +586,18 @@ int ConfigStorePrivate::save(const QString& filename)
 	for (const DefaultSetting *def = &DefaultSettings[0]; def->key != NULL; def++)
 	{
 		const QString key = QLatin1String(def->key);
-		qSettings.setValue(key, settingsTmp.value(key,
-					(def->value ? QLatin1String(def->value) : QString())));
+		
+		QVariant value = settingsTmp.value(key,
+					(def->value ? QLatin1String(def->value) : QString()));
+		if (def->hex_digits > 0)
+		{
+			// Convert to hexadecimal.
+			unsigned int uint_val = value.toString().toUInt(NULL, 0);
+			value = QLatin1String("0x") + 
+					QString::number(uint_val, 16).toUpper().rightJustified(4, QChar(L'0'));
+		}
+		
+		qSettings.setValue(key, value);
 		settingsTmp.remove(key);
 	}
 	
