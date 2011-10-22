@@ -79,6 +79,14 @@ class ConfigStorePrivate
 		unsigned int getUInt(const QString& key);
 		
 		/**
+		 * Get a property.
+		 * Converts hexadecimal string values to signed int.
+		 * @param key Property name.
+		 * @return Property value.
+		 */
+		int getInt(const QString& key);
+		
+		/**
 		 * Load the configuration file.
 		 * @param filename Configuration filename.
 		 * @return 0 on success; non-zero on error.
@@ -471,9 +479,16 @@ QVariant ConfigStorePrivate::get(const QString& key)
  * @return Property value.
  */
 unsigned int ConfigStorePrivate::getUInt(const QString& key)
-{
-	return get(key).toString().toUInt(NULL, 0);
-}
+	{ return get(key).toString().toUInt(NULL, 0); }
+
+/**
+ * Get a property.
+ * Converts hexadecimal string values to signed int.
+ * @param key Property name.
+ * @return Property value.
+ */
+int ConfigStorePrivate::getInt(const QString& key)
+	{ return get(key).toString().toInt(NULL, 0); }
 
 
 /**
@@ -709,6 +724,15 @@ QVariant ConfigStore::get(const QString& key)
  */
 unsigned int ConfigStore::getUInt(const QString& key)
 	{ return d->getUInt(key); }
+
+/**
+ * Get a property.
+ * Converts hexadecimal string values to signed int.
+ * @param key Property name.
+ * @return Property value.
+ */
+int ConfigStore::getInt(const QString& key)
+	{ return d->getInt(key); }
 
 
 /**
