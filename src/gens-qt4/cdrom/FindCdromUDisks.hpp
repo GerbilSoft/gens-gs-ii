@@ -38,6 +38,7 @@ class FindCdromUDisks : public FindCdrom
 	
 	public:
 		FindCdromUDisks();
+		~FindCdromUDisks();
 	
 	private:
 		friend class FindCdromUDisksPrivate;

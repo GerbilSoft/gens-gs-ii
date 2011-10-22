@@ -244,6 +244,8 @@ FindCdromUDisks::FindCdromUDisks()
 		this, SLOT(deviceRemoved(QDBusObjectPath)));
 }
 
+FindCdromUDisks::~FindCdromUDisks()
+	{ delete d; }
 
 bool FindCdromUDisks::isUsable(void) const
 	{ return (d->ifUDisks != NULL); }
