@@ -192,6 +192,8 @@ int FindCdromUDisks::query_int(void)
 	{
 		fprintf(stderr, "EnumerateDevices failed: %s\n",
 			m_ifUDisks->lastError().message().toLocal8Bit().constData());
+		// TODO: Emit an error signal instead?
+		emit driveQueryFinished();
 		return -2;
 	}
 	
