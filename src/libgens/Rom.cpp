@@ -838,6 +838,8 @@ Rom::Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverr
 	: d(new RomPrivate(this, filename, sysOverride, fmtOverride))
 { }
 
+Rom::~Rom()
+	{ delete d; }
 
 /**
  * initSRam(): Initialize an SRam class using the ROM's header information.

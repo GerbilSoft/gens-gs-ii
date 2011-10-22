@@ -91,6 +91,7 @@ class Rom
 		};
 		
 		Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride = MDP_SYSTEM_UNKNOWN, RomFormat fmtOverride = RFMT_UNKNOWN);
+		~Rom();
 	
 	private:
 		friend class RomPrivate;
