@@ -34,6 +34,8 @@
 #include <QtCore/QVariant>
 #include <QtCore/QPointer>
 #include <QtCore/QVector>
+#include <QtCore/QMutex>
+#include <QtCore/QMutexLocker>
 
 namespace GensQt4
 {
@@ -136,6 +138,7 @@ class ConfigStorePrivate
 			const char *slot;
 		};
 		QHash<QString, QVector<SignalMap>* > signalMaps;
+		QMutex mtxSignalMaps;
 };
 
 
@@ -257,6 +260,8 @@ ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
  */
 void ConfigStorePrivate::registerChangeNotification(const QString& property, QObject *object, const char *slot)
 {
+	QMutexLocker mtxLocker(&mtxSignalMaps);
+	
 	// Get the vector of signal maps for this property.
 	QVector<SignalMap>* signalMapVector = signalMaps.value(property, NULL);
 	if (!signalMapVector)
@@ -318,6 +323,7 @@ void ConfigStorePrivate::set(const QString& key, const QVariant& value)
 	settings.insert(key, value);
 	
 	// Invoke slots for registered objects.
+	QMutexLocker mtxLocker(&mtxSignalMaps);
 	QVector<SignalMap> *signalMapVector = signalMaps.value(key, NULL);
 	if (!signalMapVector)
 		return;
