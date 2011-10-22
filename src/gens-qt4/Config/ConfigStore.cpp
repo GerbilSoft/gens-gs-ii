@@ -333,6 +333,10 @@ ConfigStorePrivate::~ConfigStorePrivate()
 	// Save the configuration.
 	// TODO: Handle non-default filenames.
 	save();
+	
+	// Delete all the signal map vectors.
+	qDeleteAll(signalMaps);
+	signalMaps.clear();
 }
 
 
