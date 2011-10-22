@@ -824,6 +824,8 @@ void GLBackend::printOsdText(void)
 	{
 		// NOTE: QList internally uses an array of pointers.
 		// We can use array indexing instead of iterators.
+		const QColor clText = osdMsgColor();
+		
 		for (int i = (m_osdList.size() - 1); i >= 0; i--)
 		{
 			if (curTime >= m_osdList[i].endTime)
@@ -842,7 +844,7 @@ void GLBackend::printOsdText(void)
 			// TODO: Make the drop shadow optional or something.
 			glb_setColor(clShadow);
 			printOsdLine(ms_Osd_chrW+1, y+1, msg);
-			glb_setColor(osdMsgColor());	// TODO: Per-message colors?
+			glb_setColor(clText);	// TODO: Per-message colors?
 			printOsdLine(ms_Osd_chrW, y, msg);
 		}
 	}
