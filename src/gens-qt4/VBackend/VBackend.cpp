@@ -74,18 +74,24 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 			this, SLOT(keyHandlerDestroyed()));
 	}
 	
-	/** Configuration items. **/
+	/** Video effect settings. **/
 	m_cfg_fastBlur = gqt4_cfg->get(QLatin1String("Graphics/fastBlur")).toBool();
 	m_cfg_pauseTint = gqt4_cfg->get(QLatin1String("pauseTint")).toBool();
-	m_cfg_aspectRatioConstraint = new ConfigItem(QLatin1String("Graphics/aspectRatioConstraint"), true, this);
-	m_cfg_bilinearFilter = new ConfigItem(QLatin1String("Graphics/bilinearFilter"), true, this);;
-	m_cfg_stretchMode = new ConfigItem(QLatin1String("Graphics/stretchMode"), 1, this);;
+	m_cfg_aspectRatioConstraint = gqt4_cfg->get(QLatin1String("Graphics/aspectRatioConstraint")).toBool();
+	m_cfg_bilinearFilter = gqt4_cfg->get(QLatin1String("Graphics/bilinearFilter")).toBool();
+	m_cfg_stretchMode = (StretchMode_t)gqt4_cfg->getInt(QLatin1String("Graphics/stretchMode"));
 	
-	/** Configuration items: Signals. **/
+	/** Video effect settings: Signals. **/
 	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/fastBlur"),
 					this, SLOT(fastBlur_changed_slot(QVariant)));
-	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/pauseTint"),
+	gqt4_cfg->registerChangeNotification(QLatin1String("pauseTint"),
 					this, SLOT(pauseTint_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/aspectRatioConstraint"),
+					this, SLOT(aspectRatioConstraint_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/bilinearFilter"),
+					this, SLOT(bilinearFilter_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/stretchMode"),
+					this, SLOT(stretchMode_changed_slot(QVariant)));
 	
 	// Initialize the paused setting.
 	m_paused.data = 0;
@@ -94,37 +100,34 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	resetFps();
 	
 	// Initialize the OSD settings.
-	m_cfg_osdFpsEnabled = new ConfigItem(QLatin1String("OSD/fpsEnabled"), true, this);
-	m_cfg_osdFpsColor   = new ConfigItemColor(QLatin1String("OSD/fpsColor"), QColor(Qt::white), this);
-	m_cfg_osdMsgEnabled = new ConfigItem(QLatin1String("OSD/msgEnabled"), true, this);
-	m_cfg_osdMsgColor   = new ConfigItemColor(QLatin1String("OSD/msgColor"), QColor(Qt::white), this);
+	m_cfg_osdFpsEnabled = gqt4_cfg->get(QLatin1String("OSD/fpsEnabled")).toBool();
+	m_cfg_osdFpsColor   = gqt4_cfg->get(QLatin1String("OSD/fpsColor")).value<QColor>();
+	if (!m_cfg_osdFpsColor.isValid())
+		m_cfg_osdFpsColor = QColor(Qt::white);
+	m_cfg_osdMsgEnabled = gqt4_cfg->get(QLatin1String("OSD/msgEnabled")).toBool();
+	m_cfg_osdMsgColor   = gqt4_cfg->get(QLatin1String("OSD/msgColor")).value<QColor>();
+	if (!m_cfg_osdMsgColor.isValid())
+		m_cfg_osdMsgColor = QColor(Qt::white);
+	
 	m_osdLockCnt = 0;	// OSD lock counter.
 	setOsdListDirty();	// TODO: Set this on startup?
+	
+	/** OSD settings: Signals. **/
+	// TODO: Reconnect signals if ConfigStore is deleted/recreated?
+	gqt4_cfg->registerChangeNotification(QLatin1String("OSD/fpsEnabled"),
+					this, SLOT(osdFpsEnabled_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("OSD/fpsColor"),
+					this, SLOT(osdFpsColor_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("OSD/msgEnabled"),
+					this, SLOT(osdMsgEnabled_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("OSD/msgColor"),
+					this, SLOT(osdMsgColor_changed_slot(QVariant)));
 	
 	// Clear the preview image.
 	m_preview_show = false;
 	
 	// Create the message timer.
 	m_msgTimer = new MsgTimer(this);
-	
-	// Connect signals from GensConfig.
-	// TODO: Reconnect signals if GensConfig is deleted/recreated.
-	connect(m_cfg_osdFpsEnabled, SIGNAL(valueChanged(QVariant)),
-		this, SLOT(osdFpsEnabled_changed_slot(QVariant)));
-	connect(m_cfg_osdFpsColor, SIGNAL(valueChanged(QColor)),
-		this, SLOT(osdFpsColor_changed_slot(QColor)));
-	connect(m_cfg_osdMsgEnabled, SIGNAL(valueChanged(QVariant)),
-		this, SLOT(osdMsgEnabled_changed_slot(QVariant)));
-	connect(m_cfg_osdMsgColor, SIGNAL(valueChanged(QColor)),
-		this, SLOT(osdMsgColor_changed_slot(QColor)));
-	
-	// Video effect settings.
-	connect(m_cfg_aspectRatioConstraint, SIGNAL(valueChanged(QVariant)),
-		this, SLOT(aspectRatioConstraint_changed_slot(QVariant)));
-	connect(m_cfg_bilinearFilter, SIGNAL(valueChanged(QVariant)),
-		this, SLOT(bilinearFilter_changed_slot(QVariant)));
-	connect(m_cfg_stretchMode, SIGNAL(valueChanged(QVariant)),
-		this, SLOT(stretchMode_changed_slot(QVariant)));
 }
 
 VBackend::~VBackend()
@@ -207,22 +210,23 @@ void VBackend::setPaused(paused_t newPaused)
  */
 void VBackend::stretchMode_changed_slot(const QVariant& newStretchMode)
 {
-	StretchMode_t stretch = (StretchMode_t)newStretchMode.toInt();
+	m_cfg_stretchMode = (StretchMode_t)newStretchMode.toInt();
 	
 	// Verify that the new stretch mode is valid.
 	// TODO: New ConfigItem subclass for StretchMode_t.
-	if ((stretch < STRETCH_NONE) || (stretch > STRETCH_FULL))
+	if ((m_cfg_stretchMode < STRETCH_NONE) || (m_cfg_stretchMode > STRETCH_FULL))
 	{
 		// Invalid stretch mode.
 		// Reset to default.
-		m_cfg_stretchMode->setValue(m_cfg_stretchMode->def());
+		m_cfg_stretchMode = STRETCH_H;
+		gqt4_cfg->set(QLatin1String("Graphics/stretchMode"), m_cfg_stretchMode);
 		return;
 	}
 	
 	// Print a message to the OSD.
 	//: OSD message indicating the Stretch Mode has been changed.
 	QString msg = tr("Stretch Mode set to %1.", "osd-stretch");
-	switch (stretch)
+	switch (m_cfg_stretchMode)
 	{
 		case STRETCH_NONE:
 			//: OSD message indicating the Stretch Mode has been set to None.
@@ -584,6 +588,8 @@ void VBackend::pushFps(double fps)
  */
 void VBackend::osdFpsEnabled_changed_slot(const QVariant& enable)
 {
+	m_cfg_osdFpsEnabled = enable.toBool();
+	
 	// TODO: Texture doesn't really need to be reuploaded...
 	setVbDirty();
 	
@@ -595,14 +601,16 @@ void VBackend::osdFpsEnabled_changed_slot(const QVariant& enable)
 
 /**
  * osdFpsColor_changed_slot(): OSD FPS counter color has changed.
- * @param color New OSD FPS counter color.
+ * @param var_color New OSD FPS counter color.
  */
-void VBackend::osdFpsColor_changed_slot(const QColor& color)
+void VBackend::osdFpsColor_changed_slot(const QVariant& var_color)
 {
-	if (!color.isValid())
+	m_cfg_osdFpsColor = var_color.value<QColor>();
+	if (!m_cfg_osdFpsColor.isValid())
 	{
 		// Invalid color. Reset to default.
-		m_cfg_osdFpsColor->setValue(m_cfg_osdFpsColor->def());
+		m_cfg_osdFpsColor = QColor(Qt::white);
+		gqt4_cfg->set(QLatin1String("OSD/fpsColor"), m_cfg_osdFpsColor.name());
 		return;
 	}
 	
@@ -622,6 +630,8 @@ void VBackend::osdFpsColor_changed_slot(const QColor& color)
  */
 void VBackend::osdMsgEnabled_changed_slot(const QVariant& enable)
 {
+	m_cfg_osdMsgEnabled = enable.toBool();
+	
 	// TODO: Texture doesn't really need to be reuploaded...
 	setVbDirty();
 	
@@ -633,14 +643,16 @@ void VBackend::osdMsgEnabled_changed_slot(const QVariant& enable)
 
 /**
  * osdMsgColor_changed_slot(): OSD Message color has changed.
- * @param color New OSD Message color.
+ * @param var_color New OSD Message color.
  */
-void VBackend::osdMsgColor_changed_slot(const QColor& color)
+void VBackend::osdMsgColor_changed_slot(const QVariant& var_color)
 {
-	if (!color.isValid())
+	m_cfg_osdMsgColor = var_color.value<QColor>();
+	if (!m_cfg_osdMsgColor.isValid())
 	{
 		// Invalid color. Reset to default.
-		m_cfg_osdMsgColor->setValue(m_cfg_osdMsgColor->def());
+		m_cfg_osdMsgColor = QColor(Qt::white);
+		gqt4_cfg->set(QLatin1String("OSD/msgColor"), m_cfg_osdMsgColor.name());
 		return;
 	}
 	

@@ -47,6 +47,10 @@ class QCloseEvent;
 // Idle thread.
 #include "IdleThread.hpp"
 
+// ConfigItem.
+// TODO: Port to ConfigStore.
+#include "Config/ConfigItem.hpp"
+
 namespace GensQt4
 {
 

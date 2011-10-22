@@ -30,6 +30,7 @@
 // Qt includes.
 #include <QtCore/QString>
 #include <QtCore/QList>
+#include <QtCore/QVariant>
 #include <QtCore/QMutex>
 #include <QtGui/QWidget>
 #include <QtGui/QColor>
@@ -47,8 +48,6 @@
 // gqt4_cfg
 #include "gqt4_main.hpp"
 
-#include "Config/ConfigItem.hpp"
-#include "Config/ConfigItemColor.hpp"
 namespace GensQt4
 {
 
@@ -198,15 +197,17 @@ class VBackend : public QWidget
 		LibGens::EmuContext *m_emuContext;
 		QMutex m_mtxEmuContext;
 		
-		// Reset Stretch Mode. (Used if the stretch mode is invalid.)
+		/**
+		 * Reset Stretch Mode. (Called if the stretch mode is invalid.)
+		 */
 		void stretchMode_reset(void);
 	
 	protected slots:
 		/** Properties. **/
 		void osdFpsEnabled_changed_slot(const QVariant& enable);	// bool
-		void osdFpsColor_changed_slot(const QColor& color);
+		void osdFpsColor_changed_slot(const QVariant& var_color);	// QColor
 		void osdMsgEnabled_changed_slot(const QVariant& enable);	// bool
-		void osdMsgColor_changed_slot(const QColor& color);
+		void osdMsgColor_changed_slot(const QVariant& var_color);	// QColor
 		
 		virtual void fastBlur_changed_slot(const QVariant& newFastBlur);				// bool
 		virtual void aspectRatioConstraint_changed_slot(const QVariant& newAspectRatioConstraint);	// bool
@@ -217,8 +218,8 @@ class VBackend : public QWidget
 	private:
 		// Effects.
 		paused_t m_paused;
-		bool m_cfg_fastBlur;	// bool
-		bool m_cfg_pauseTint;	// bool
+		bool m_cfg_fastBlur;
+		bool m_cfg_pauseTint;
 		
 		// Is the emulator running?
 		bool m_running;
@@ -237,12 +238,12 @@ class VBackend : public QWidget
 		bool m_osdListDirty;
 		
 		// OSD enable bits.
-		ConfigItem *m_cfg_osdFpsEnabled;
-		ConfigItem *m_cfg_osdMsgEnabled;
+		bool m_cfg_osdFpsEnabled;
+		bool m_cfg_osdMsgEnabled;
 		
 		// OSD colors.
-		ConfigItemColor *m_cfg_osdFpsColor;
-		ConfigItemColor *m_cfg_osdMsgColor;
+		QColor m_cfg_osdFpsColor;
+		QColor m_cfg_osdMsgColor;
 		
 		// OSD lock counter.
 		int m_osdLockCnt;
@@ -256,10 +257,10 @@ class VBackend : public QWidget
 		friend class MsgTimer;
 		
 		/** Video settings. **/
-		ConfigItem *m_cfg_aspectRatioConstraint;	// bool
+		bool m_cfg_aspectRatioConstraint;
 		bool m_aspectRatioConstraint_changed;
-		ConfigItem *m_cfg_bilinearFilter;		// bool
-		ConfigItem *m_cfg_stretchMode;			// StretchMode_t
+		bool m_cfg_bilinearFilter;
+		StretchMode_t m_cfg_stretchMode;
 	
 	private slots:
 		// Key handler destroyed slot.
@@ -269,13 +270,13 @@ class VBackend : public QWidget
 /** Onscreen display. **/
 
 inline bool VBackend::osdFpsEnabled(void) const
-	{ return m_cfg_osdFpsEnabled->value().toBool(); }
+	{ return m_cfg_osdFpsEnabled; }
 inline QColor VBackend::osdFpsColor(void) const
-	{ return m_cfg_osdFpsColor->value(); }
+	{ return m_cfg_osdFpsColor; }
 inline bool VBackend::osdMsgEnabled(void) const
-	{ return m_cfg_osdMsgEnabled->value().toBool(); }
+	{ return m_cfg_osdMsgEnabled; }
 inline QColor VBackend::osdMsgColor(void) const
-	{ return m_cfg_osdMsgColor->value(); }
+	{ return m_cfg_osdMsgColor; }
 
 /**
  * osd_vprintf(): Print formatted text to the screen.
@@ -318,19 +319,19 @@ inline bool VBackend::fastBlur(void) const
 inline void VBackend::setFastBlur(bool newFastBlur)
 	{ gqt4_cfg->set(QLatin1String("Graphics/fastBlur"), newFastBlur); }
 inline bool VBackend::aspectRatioConstraint(void) const
-	{ return m_cfg_aspectRatioConstraint->value().toBool(); }
+	{ return m_cfg_aspectRatioConstraint; }
 inline bool VBackend::hasAspectRatioConstraintChanged(void) const
 	{ return m_aspectRatioConstraint_changed; }
 inline void VBackend::resetAspectRatioConstraintChanged(void)
 	{ m_aspectRatioConstraint_changed = false; }
 inline bool VBackend::bilinearFilter(void) const
-	{ return m_cfg_bilinearFilter->value().toBool(); }
+	{ return m_cfg_bilinearFilter; }
 inline bool VBackend::pauseTint(void) const
 	{ return m_cfg_pauseTint; }
 inline StretchMode_t VBackend::stretchMode(void) const
-	{ return (StretchMode_t)m_cfg_stretchMode->value().toInt(); }
+	{ return m_cfg_stretchMode; }
 inline void VBackend::setStretchMode(StretchMode_t newStretchMode)
-	{ m_cfg_stretchMode->setValue((int)newStretchMode); }
+	{ m_cfg_stretchMode = newStretchMode; }
 
 inline LibGens::EmuContext *VBackend::emuContext(void) const
 	{ return m_emuContext; }
@@ -340,8 +341,11 @@ inline bool VBackend::isRunning(void) const
 	return (!!m_emuContext);
 }
 
+/**
+ * Reset Stretch Mode. (Called if the stretch mode is invalid.)
+ */
 inline void VBackend::stretchMode_reset(void)
-	{ m_cfg_stretchMode->setValue(m_cfg_stretchMode->def()); }
+	{ m_cfg_stretchMode = STRETCH_H; }
 
 }
 
