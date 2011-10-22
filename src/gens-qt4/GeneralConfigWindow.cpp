@@ -418,12 +418,12 @@ void GeneralConfigWindow::apply(void)
 	/** Onscreen display. **/
 	SetValByPath_bool("OSD/fpsEnabled", chkOsdFpsEnable->isChecked());
 	SetValByPath_QColor("OSD/fpsColor", m_osdFpsColor);
-	SetValByPath_bool("OSD/msgEnable", chkOsdMsgEnable->isChecked());
+	SetValByPath_bool("OSD/msgEnabled", chkOsdMsgEnable->isChecked());
 	SetValByPath_QColor("OSD/msgColor", m_osdMsgColor);
 	
 	/** Intro effect. **/
 	SetValByPath_int("Intro_Effect/introStyle", cboIntroStyle->currentIndex());
-	SetValByPath_int("Intro_effect/introColor", cboIntroColor->currentIndex());
+	SetValByPath_int("Intro_Effect/introColor", cboIntroColor->currentIndex());
 	
 	/** Sega CD Boot ROMs. **/
 	SetValByPath_QString("Sega_CD/bootRomUSA", txtMcdRomUSA->text());
