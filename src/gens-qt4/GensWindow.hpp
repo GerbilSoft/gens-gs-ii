@@ -47,10 +47,6 @@ class QCloseEvent;
 // Idle thread.
 #include "IdleThread.hpp"
 
-// ConfigItem.
-// TODO: Port to ConfigStore.
-#include "Config/ConfigItem.hpp"
-
 namespace GensQt4
 {
 
@@ -150,9 +146,9 @@ class GensWindow : public QMainWindow
 		void setGensTitle(void);
 		
 		/** Configuration items. **/
-		ConfigItem *m_cfg_autoPause;
-		ConfigItem *m_cfg_introStyle;
-		ConfigItem *m_cfg_showMenuBar;
+		bool m_cfg_autoPause;
+		int m_cfg_introStyle;
+		bool m_cfg_showMenuBar;
 	
 	protected slots:
 		/**

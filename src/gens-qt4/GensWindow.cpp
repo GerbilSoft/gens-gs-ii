@@ -62,9 +62,9 @@ GensWindow::GensWindow()
 	, m_idleThreadAllowed(false)	// Not allowed yet.
 {
 	/** Configuration items. **/
-	m_cfg_autoPause = new ConfigItem(QLatin1String("autoPause"), false, this);
-	m_cfg_introStyle = new ConfigItem(QLatin1String("Intro_Effect/introStyle"), 0, this);
-	m_cfg_showMenuBar = new ConfigItem(QLatin1String("GensWindow/showMenuBar"), true, this);
+	m_cfg_autoPause = gqt4_cfg->get(QLatin1String("autoPause")).toBool();
+	m_cfg_introStyle = gqt4_cfg->getInt(QLatin1String("Intro_Effect/introStyle"));
+	m_cfg_showMenuBar = gqt4_cfg->get(QLatin1String("GensWindow/showMenuBar")).toBool();
 	
 	// Initialize the Emulation Manager.
 	m_emuManager = new EmuManager();
@@ -82,7 +82,6 @@ GensWindow::GensWindow()
 	// Make sure all user configuration settings are applied.
 	// (Lock the OSD first to prevent random messages from appearing.)
 	m_vBackend->osd_lock();
-	ConfigItem::EmitAll();
 	m_vBackend->osd_unlock();
 	
 	// Initialize the emulation state.
@@ -183,16 +182,14 @@ void GensWindow::setupUi(void)
 	// Auto Pause: Application Focus Changed signal, and setting change signal.
 	connect(gqt4_app, SIGNAL(focusChanged(QWidget*, QWidget*)),
 		this, SLOT(qAppFocusChanged(QWidget*, QWidget*)));
-	connect(m_cfg_autoPause, SIGNAL(valueChanged(QVariant)),
-		this, SLOT(autoPause_changed_slot(QVariant)));
 	
-	// Intro Style Changed signal.
-	connect(m_cfg_introStyle, SIGNAL(valueChanged(QVariant)),
-		this, SLOT(introStyle_changed_slot(QVariant)));
-	
-	// Show Menu Bar Changed signal.
-	connect(m_cfg_showMenuBar, SIGNAL(valueChanged(QVariant)),
-		this, SLOT(showMenuBar_changed_slot(QVariant)));
+	/** Configuration items: Signals. **/
+	gqt4_cfg->registerChangeNotification(QLatin1String("autoPause"),
+					this, SLOT(autoPause_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Intro_Effect/introStyle"),
+					this, SLOT(introStyle_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("GensWindow/showMenuBar"),
+					this, SLOT(showMenuBar_changed_slot(QVariant)));
 }
 
 
@@ -533,8 +530,7 @@ void GensWindow::stateChanged(void)
  */
 void GensWindow::qAppFocusChanged(QWidget *old, QWidget *now)
 {
-	if (!m_cfg_autoPause->value().toBool() ||
-	    !m_emuManager->isRomOpen())
+	if (!m_cfg_autoPause || !m_emuManager->isRomOpen())
 	{
 		// Auto Pause is disabled,
 		// or no ROM is running.
@@ -573,7 +569,9 @@ void GensWindow::qAppFocusChanged(QWidget *old, QWidget *now)
  */
 void GensWindow::autoPause_changed_slot(const QVariant& newAutoPause)
 {
-	if (newAutoPause.toBool())
+	m_cfg_autoPause = newAutoPause.toBool();
+	
+	if (m_cfg_autoPause)
 	{
 		// Auto Pause is enabled.
 		qAppFocusChanged(NULL, gqt4_app->focusWidget());
@@ -599,7 +597,9 @@ void GensWindow::autoPause_changed_slot(const QVariant& newAutoPause)
  */
 void GensWindow::showMenuBar_changed_slot(const QVariant& newShowMenuBar)
 {
-	if (!newShowMenuBar.toBool())
+	m_cfg_showMenuBar = newShowMenuBar.toBool();
+	
+	if (m_cfg_showMenuBar)
 	{
 		// Hide the menu bar.
 		this->setMenuBar(NULL);
@@ -707,13 +707,14 @@ void GensWindow::idleThread_frameDone(void)
  */
 void GensWindow::introStyle_changed_slot(const QVariant& newIntroStyle)
 {
+	m_cfg_introStyle = newIntroStyle.toInt();
 	checkIdleThread();
 	
 	// Prevent race conditions.
 	if (!m_emuManager)
 		return;
 	
-	if (!m_emuManager->isRomOpen() && newIntroStyle.toInt() == 0)
+	if (!m_emuManager->isRomOpen() && m_cfg_introStyle == 0)
 	{
 		// Intro style was changed to "None", and emulation isn't running.
 		// Clear the screen.
