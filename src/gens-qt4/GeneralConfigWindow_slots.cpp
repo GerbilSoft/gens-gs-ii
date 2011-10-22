@@ -72,9 +72,8 @@ void GeneralConfigWindow::on_cboIntroColor_currentIndexChanged(int index)
 	{ GENERIC_OPTION("Intro_Effect/introColor", index); }
 
 /** System. **/
-// TODO: Port to ConfigStore.
 void GeneralConfigWindow::on_cboRegionCurrent_currentIndexChanged(int index)
-	{ /*GENERIC_OPTION(setRegionCode, (LibGens::SysVersion::RegionCode_t)(index - 1));*/ }
+	{ GENERIC_OPTION("System/regionCode", (LibGens::SysVersion::RegionCode_t)(index - 1)); }
 
 /** Graphics settings. **/
 void GeneralConfigWindow::on_chkAspectRatioConstraint_toggled(bool checked)
