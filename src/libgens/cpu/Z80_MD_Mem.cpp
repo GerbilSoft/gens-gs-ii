@@ -159,7 +159,7 @@ inline uint8_t Z80_MD_Mem::Z80_ReadB_68K_Rom(uint32_t address)
 		return 0xFF;
 	
 	address &= 0x7FFF;
-	address |= Bank_Z80
+	address |= Bank_Z80;
 	return M68K_Mem::M68K_RB(address);
 }
 
