@@ -38,6 +38,10 @@
 #include <QtCore/QMutex>
 #include <QtCore/QMutexLocker>
 
+#include <QtCore/QObject>
+#include <QtCore/QMetaObject>
+#include <QtCore/QMetaMethod>
+
 namespace GensQt4
 {
 
@@ -115,6 +119,14 @@ class ConfigStorePrivate
 		 * Useful when starting the emulator.
 		 */
 		void notifyAll(void);
+		
+		/**
+		 * Invoke a Qt method by SIGNAL() or SLOT() name, with one QVariant parameter.
+		 * @param object Qt object.
+		 * @param method Method name.
+		 * @param param QVariant parameter.
+		 */
+		static void InvokeQtMethod(QObject *object, const char *method, QVariant param);
 	
 	private:
 		ConfigStore *const q;
@@ -144,13 +156,13 @@ class ConfigStorePrivate
 		 * Format:
 		 * - Key: Property to watch.
 		 * - Value: List of SignalMaps.
-		 *   - SignalMap.obj: Object to send signal to.
-		 *   - SignalMap.slot: Slot name.
+		 *   - SignalMap.object: Object to send signal to.
+		 *   - SignalMap.method: Method name.
 		 */
 		struct SignalMap
 		{
-			QPointer<QObject> obj;
-			const char *slot;
+			QPointer<QObject> object;
+			const char *method;
 		};
 		QHash<QString, QVector<SignalMap>* > signalMaps;
 		QMutex mtxSignalMaps;
@@ -280,9 +292,9 @@ ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
  * Register an object for property change notification.
  * @param property Property to watch.
  * @param object QObject to register.
- * @param slot Slot name.
+ * @param method Method name.
  */
-void ConfigStorePrivate::registerChangeNotification(const QString& property, QObject *object, const char *slot)
+void ConfigStorePrivate::registerChangeNotification(const QString& property, QObject *object, const char *method)
 {
 	if (!object)
 		return;
@@ -300,8 +312,8 @@ void ConfigStorePrivate::registerChangeNotification(const QString& property, QOb
 	// Add this object and slot to the signal maps vector.
 	// TODO: Validate and normalize the slot name?
 	SignalMap smap;
-	smap.obj = object;
-	smap.slot = slot;
+	smap.object = object;
+	smap.method = method;
 	signalMapVector->append(smap);
 }
 
@@ -310,9 +322,9 @@ void ConfigStorePrivate::registerChangeNotification(const QString& property, QOb
  * Unregister an object for property change notification.
  * @param property Property to watch.
  * @param object QObject to register.
- * @param slot Slot name. (If NULL, unregisters all slots for this object.)
+ * @param method Method name. (If NULL, unregisters all slots for this object.)
  */
-void ConfigStorePrivate::unregisterChangeNotification(const QString& property, QObject *object, const char *slot)
+void ConfigStorePrivate::unregisterChangeNotification(const QString& property, QObject *object, const char *method)
 {
 	if (!object)
 		return;
@@ -329,12 +341,12 @@ void ConfigStorePrivate::unregisterChangeNotification(const QString& property, Q
 	for (int i = (signalMapVector->size() - 1); i >= 0; i--)
 	{
 		const SignalMap *smap = &signalMapVector->at(i);
-		if (smap->obj.isNull())
+		if (smap->object.isNull())
 			signalMapVector->remove(i);
-		else if (smap->obj == object)
+		else if (smap->object == object)
 		{
 			// Found the object.
-			if (slot == NULL || slot == smap->slot)
+			if (method == NULL || method == smap->method)
 			{
 				// Found a matching signal map.
 				signalMapVector->remove(i);
@@ -391,7 +403,7 @@ void ConfigStorePrivate::set(const QString& key, const QVariant& value)
 	
 	settings.insert(key, value);
 	
-	// Invoke slots for registered objects.
+	// Invoke methods for registered objects.
 	QMutexLocker mtxLocker(&mtxSignalMaps);
 	QVector<SignalMap> *signalMapVector = signalMaps.value(key, NULL);
 	if (!signalMapVector)
@@ -403,12 +415,12 @@ void ConfigStorePrivate::set(const QString& key, const QVariant& value)
 	for (int i = (signalMapVector->size() - 1); i >= 0; i--)
 	{
 		const SignalMap *smap = &signalMapVector->at(i);
-		if (smap->obj.isNull())
+		if (smap->object.isNull())
 			signalMapVector->remove(i);
 		else
 		{
-			// Invoke this slot.
-			QMetaObject::invokeMethod(smap->obj, smap->slot, Q_ARG(QVariant, value));
+			// Invoke this method.
+			InvokeQtMethod(smap->object, smap->method, value);
 		}
 	}
 }
@@ -562,7 +574,7 @@ int ConfigStorePrivate::save(void)
  */
 void ConfigStorePrivate::notifyAll(void)
 {
-	// Invoke slots for registered objects.
+	// Invoke methods for registered objects.
 	QMutexLocker mtxLocker(&mtxSignalMaps);
 	
 	foreach (const QString& property, signalMaps.keys())
@@ -580,15 +592,51 @@ void ConfigStorePrivate::notifyAll(void)
 		for (int i = (signalMapVector->size() - 1); i >= 0; i--)
 		{
 			const SignalMap *smap = &signalMapVector->at(i);
-			if (smap->obj.isNull())
+			if (smap->object.isNull())
 				signalMapVector->remove(i);
 			else
 			{
-				// Invoke this slot.
-				QMetaObject::invokeMethod(smap->obj, smap->slot, Q_ARG(QVariant, value));
+				// Invoke this method.
+				InvokeQtMethod(smap->object, smap->method, value);
 			}
 		}
 	}
+}
+
+
+/**
+ * Invoke a Qt method by SIGNAL() or SLOT() name, with one QVariant parameter.
+ * @param object Qt object.
+ * @param method Method name.
+ * @param param QVariant parameter.
+ */
+void ConfigStorePrivate::InvokeQtMethod(QObject *object, const char *method, QVariant param)
+{
+	// Based on QMetaObject::invokeMethod().
+	
+	// NOTE: The first character of method indicates whether it's a signal or slot.
+	// We don't need this information, so we use method+1.
+	method++;
+	
+	int idx = object->metaObject()->indexOfMethod(method);
+	if (idx < 0)
+	{
+		QByteArray norm = QMetaObject::normalizedSignature(method);
+		idx = object->metaObject()->indexOfMethod(norm.constData());
+	}
+	
+	if (idx < 0 || idx >= object->metaObject()->methodCount())
+	{
+		// TODO: Do verification in registerChangeNotification()?
+		LOG_MSG(gens, LOG_MSG_LEVEL_WARNING,
+			"No such method %s::%s",
+			object->metaObject()->className(), method);
+		return;
+	}
+	
+	QMetaMethod metaMethod = object->metaObject()->method(idx);
+	metaMethod.invoke(object, Qt::AutoConnection,
+		      QGenericReturnArgument(), Q_ARG(QVariant, param));
 }
 
 
@@ -664,19 +712,19 @@ int ConfigStore::save(void)
  * Register an object for property change notification.
  * @param property Property to watch.
  * @param object QObject to register.
- * @param slot Slot name.
+ * @param method Method name.
  */
-void ConfigStore::registerChangeNotification(const QString& property, QObject *object, const char *slot)
-	{ d->registerChangeNotification(property, object, slot); }
+void ConfigStore::registerChangeNotification(const QString& property, QObject *object, const char *method)
+	{ d->registerChangeNotification(property, object, method); }
 
 /**
  * Unregister an object for property change notification.
  * @param property Property to watch.
  * @param object QObject to register.
- * @param slot Slot name.
+ * @param method Method name.
  */
-void ConfigStore::unregisterChangeNotification(const QString& property, QObject *object, const char *slot)
-	{ d->unregisterChangeNotification(property, object, slot); }
+void ConfigStore::unregisterChangeNotification(const QString& property, QObject *object, const char *method)
+	{ d->unregisterChangeNotification(property, object, method); }
 
 /**
  * Notify all registered objects that configuration settings have changed.

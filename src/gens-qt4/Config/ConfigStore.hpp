@@ -90,17 +90,17 @@ class ConfigStore : public QObject
 		 * Register an object for property change notification.
 		 * @param property Property to watch.
 		 * @param object QObject to register.
-		 * @param slot Slot name.
+		 * @param method Method name.
 		 */
-		void registerChangeNotification(const QString& property, QObject *object, const char *slot);
+		void registerChangeNotification(const QString& property, QObject *object, const char *method);
 		
 		/**
 		 * Unregister an object for property change notification.
 		 * @param property Property to watch.
 		 * @param object QObject to register.
-		 * @param slot Slot name.
+		 * @param method Method name.
 		 */
-		void unregisterChangeNotification(const QString& property, QObject *object, const char *slot);
+		void unregisterChangeNotification(const QString& property, QObject *object, const char *method);
 		
 		/**
 		 * Notify all registered objects that configuration settings have changed.
