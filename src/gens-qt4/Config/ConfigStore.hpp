@@ -101,6 +101,12 @@ class ConfigStore : public QObject
 		 * @param slot Slot name.
 		 */
 		void unregisterChangeNotification(const QString& property, QObject *object, const char *slot);
+		
+		/**
+		 * notifyAll(): Notify all registered objects that configuration settings have changed.
+		 * Useful when starting the emulator.
+		 */
+		void notifyAll(void);
 	
 	private:
 		friend class ConfigStorePrivate;

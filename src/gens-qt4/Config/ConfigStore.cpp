@@ -108,6 +108,12 @@ class ConfigStorePrivate
 		 * @param slot Slot name.
 		 */
 		void unregisterChangeNotification(const QString& property, QObject *object, const char *slot);
+		
+		/**
+		 * notifyAll(): Notify all registered objects that configuration settings have changed.
+		 * Useful when starting the emulator.
+		 */
+		void notifyAll(void);
 	
 	private:
 		ConfigStore *const q;
@@ -307,7 +313,7 @@ void ConfigStorePrivate::unregisterChangeNotification(const QString& property, Q
 	if (!signalMapVector)
 		return;
 	
-	// Process the signal map list in reverse-order.
+	// Process the signal map vector in reverse-order.
 	// Reverse order makes it easier to remove deleted objects.
 	// TODO: Use QLinkedList instead?
 	for (int i = (signalMapVector->size() - 1); i >= 0; i--)
@@ -381,17 +387,14 @@ void ConfigStorePrivate::set(const QString& key, const QVariant& value)
 	if (!signalMapVector)
 		return;
 	
-	// Process the signal map list in reverse-order.
+	// Process the signal map vector in reverse-order.
 	// Reverse order makes it easier to remove deleted objects.
 	// TODO: Use QLinkedList instead?
 	for (int i = (signalMapVector->size() - 1); i >= 0; i--)
 	{
 		const SignalMap *smap = &signalMapVector->at(i);
 		if (smap->obj.isNull())
-		{
-			// NULL pointer. Remove this Signalmap.
 			signalMapVector->remove(i);
-		}
 		else
 		{
 			// Invoke this slot.
@@ -491,6 +494,42 @@ int ConfigStorePrivate::save(void)
 }
 
 
+/**
+ * notifyAll(): Notify all registered objects that configuration settings have changed.
+ * Useful when starting the emulator.
+ */
+void ConfigStorePrivate::notifyAll(void)
+{
+	// Invoke slots for registered objects.
+	QMutexLocker mtxLocker(&mtxSignalMaps);
+	
+	foreach (const QString& property, signalMaps.keys())
+	{
+		QVector<SignalMap> *signalMapVector = signalMaps.value(property);
+		if (signalMapVector->isEmpty())
+			continue;
+		
+		// Get the property value.
+		const QVariant value = settings.value(property);
+		
+		// Process the signal map vector in reverse-order.
+		// Reverse order makes it easier to remove deleted objects.
+		// TODO: Use QLinkedList instead?
+		for (int i = (signalMapVector->size() - 1); i >= 0; i--)
+		{
+			const SignalMap *smap = &signalMapVector->at(i);
+			if (smap->obj.isNull())
+				signalMapVector->remove(i);
+			else
+			{
+				// Invoke this slot.
+				QMetaObject::invokeMethod(smap->obj, smap->slot, Q_ARG(QVariant, value));
+			}
+		}
+	}
+}
+
+
 /** ConfigStore **/
 
 
@@ -576,5 +615,12 @@ void ConfigStore::registerChangeNotification(const QString& property, QObject *o
  */
 void ConfigStore::unregisterChangeNotification(const QString& property, QObject *object, const char *slot)
 	{ d->unregisterChangeNotification(property, object, slot); }
+
+/**
+ * notifyAll(): Notify all registered objects that configuration settings have changed.
+ * Useful when starting the emulator.
+ */
+void ConfigStore::notifyAll(void)
+	{ d->notifyAll(); }
 
 }
