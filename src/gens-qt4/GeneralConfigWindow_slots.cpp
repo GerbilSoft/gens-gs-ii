@@ -24,8 +24,7 @@
 
 #include "GeneralConfigWindow.hpp"
 
-// ConfigItem
-#include "Config/ConfigItem.hpp"
+#include "gqt4_main.hpp"
 
 namespace GensQt4
 {
@@ -46,7 +45,7 @@ do { \
 #define GENERIC_OPTION(path, var) \
 do { \
 	if (this->isVisible()) \
-		ConfigItem::SetValueByPath(QLatin1String(path), var); \
+		gqt4_cfg->set(QLatin1String(path), var); \
 } while (0)
 #endif
 
@@ -73,7 +72,7 @@ void GeneralConfigWindow::on_cboIntroColor_currentIndexChanged(int index)
 	{ GENERIC_OPTION("Intro_Effect/introColor", index); }
 
 /** System. **/
-// TODO: Port to ConfigItem.
+// TODO: Port to ConfigStore.
 void GeneralConfigWindow::on_cboRegionCurrent_currentIndexChanged(int index)
 	{ /*GENERIC_OPTION(setRegionCode, (LibGens::SysVersion::RegionCode_t)(index - 1));*/ }
 

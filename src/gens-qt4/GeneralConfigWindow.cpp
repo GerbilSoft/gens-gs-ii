@@ -48,9 +48,6 @@ using std::auto_ptr;
 // EmuManager is needed for region code strings.
 #include "EmuManager.hpp"
 
-// Configuration items.
-#include "Config/ConfigItem.hpp"
-
 namespace GensQt4
 {
 
@@ -316,13 +313,13 @@ void GeneralConfigWindow::setApplyButtonEnabled(bool enabled)
 
 
 static inline bool ValByPath_bool(const char *path)
-	{ return ConfigItem::ValueByPath(QLatin1String(path)).toBool(); }
+	{ return gqt4_cfg->get(QLatin1String(path)).toBool(); }
 static inline QColor ValByPath_QColor(const char *path)
-	{ return ConfigItem::ValueByPath(QLatin1String(path)).value<QColor>(); }
+	{ return gqt4_cfg->get(QLatin1String(path)).value<QColor>(); }
 static inline int ValByPath_int(const char *path)
-	{ return ConfigItem::ValueByPath(QLatin1String(path)).toInt(); }
+	{ return gqt4_cfg->get(QLatin1String(path)).toInt(); }
 static inline QString ValByPath_QString(const char *path)
-	{ return ConfigItem::ValueByPath(QLatin1String(path)).toString(); }
+	{ return gqt4_cfg->get(QLatin1String(path)).toString(); }
 
 /**
  * reload(): Reload configuration.
@@ -340,7 +337,7 @@ void GeneralConfigWindow::reload(void)
 	
 	/** Onscreen display: Messages. **/
 	chkOsdMsgEnable->setChecked(ValByPath_bool("OSD/msgEnabled"));
-	m_osdMsgColor = ConfigItem::ValueByPath(QLatin1String("OSD/msgColor")).value<QColor>();
+	m_osdMsgColor = ValByPath_QColor("OSD/msgColor");
 	btnOsdMsgColor->setBgColor(m_osdMsgColor);
 	btnOsdMsgColor->setText(m_osdMsgColor.name().toUpper());
 	
@@ -403,13 +400,13 @@ void GeneralConfigWindow::reload(void)
 
 
 static inline void SetValByPath_bool(const char *path, bool value)
-	{ ConfigItem::SetValueByPath(QLatin1String(path), value); }
+	{ gqt4_cfg->set(QLatin1String(path), value); }
 static inline void SetValByPath_QColor(const char *path, const QColor& value)
-	{ ConfigItem::SetValueByPath(QLatin1String(path), value.name()); }
+	{ gqt4_cfg->set(QLatin1String(path), value.name()); }
 static inline void SetValByPath_int(const char *path, int value)
-	{ ConfigItem::SetValueByPath(QLatin1String(path), value); }
+	{ gqt4_cfg->set(QLatin1String(path), value); }
 static inline void SetValByPath_QString(const char *path, const QString& value)
-	{ ConfigItem::SetValueByPath(QLatin1String(path), value); }
+	{ gqt4_cfg->set(QLatin1String(path), value); }
 
 /**
  * apply(): Apply the configuration changes.
