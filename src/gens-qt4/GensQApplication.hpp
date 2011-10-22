@@ -45,6 +45,7 @@ class GensQApplication : public QApplication
 		GensQApplication(int &argc, char **argv);
 		GensQApplication(int &argc, char **argv, bool GUIenabled);
 		GensQApplication(int &argc, char **argv, Type type);
+		virtual ~GensQApplication();
 		
 		/**
 		 * isGuiThread(): Check if the current thread is the GUI thread.

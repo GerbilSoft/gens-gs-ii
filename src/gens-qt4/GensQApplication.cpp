@@ -173,6 +173,8 @@ GensQApplication::GensQApplication(int &argc, char **argv, Type type)
 	d->gqaInit();
 }
 
+GensQApplication::~GensQApplication()
+	{ delete d; }
 
 /**
  * IconFromTheme(): Get an icon from the system theme.
