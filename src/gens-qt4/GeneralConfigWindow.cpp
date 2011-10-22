@@ -317,9 +317,9 @@ static inline bool ValByPath_bool(const char *path)
 static inline QColor ValByPath_QColor(const char *path)
 	{ return gqt4_cfg->get(QLatin1String(path)).value<QColor>(); }
 static inline int ValByPath_int(const char *path)
-	{ return gqt4_cfg->get(QLatin1String(path)).toInt(); }
+	{ return gqt4_cfg->getInt(QLatin1String(path)); }
 static inline int ValByPath_uint(const char *path)
-	{ return gqt4_cfg->get(QLatin1String(path)).toUInt(); }
+	{ return gqt4_cfg->getUInt(QLatin1String(path)); }
 static inline QString ValByPath_QString(const char *path)
 	{ return gqt4_cfg->get(QLatin1String(path)).toString(); }
 
