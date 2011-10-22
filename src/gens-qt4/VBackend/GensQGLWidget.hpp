@@ -48,7 +48,7 @@ class GensQGLWidget : public GLBackend
 	
 	public:
 		GensQGLWidget(QWidget *parent = 0, KeyHandlerQt *keyHandler = 0);
-		~GensQGLWidget() { }
+		virtual ~GensQGLWidget();
 		
 		void vbUpdate(void);
 		

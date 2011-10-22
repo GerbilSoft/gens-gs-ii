@@ -58,6 +58,10 @@ GensQGLWidget::GensQGLWidget(QWidget *parent, KeyHandlerQt *keyHandler)
 #endif
 }
 
+GensQGLWidget::~GensQGLWidget()
+	{ delete d; }
+
+
 
 /**
  * vbUpdate(): Video Backend update function.
