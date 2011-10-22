@@ -111,7 +111,7 @@ class ConfigStorePrivate
 		void unregisterChangeNotification(const QString& property, QObject *object, const char *slot);
 		
 		/**
-		 * notifyAll(): Notify all registered objects that configuration settings have changed.
+		 * Notify all registered objects that configuration settings have changed.
 		 * Useful when starting the emulator.
 		 */
 		void notifyAll(void);
@@ -537,7 +537,7 @@ int ConfigStorePrivate::save(void)
 
 
 /**
- * notifyAll(): Notify all registered objects that configuration settings have changed.
+ * Notify all registered objects that configuration settings have changed.
  * Useful when starting the emulator.
  */
 void ConfigStorePrivate::notifyAll(void)
@@ -659,10 +659,17 @@ void ConfigStore::unregisterChangeNotification(const QString& property, QObject 
 	{ d->unregisterChangeNotification(property, object, slot); }
 
 /**
- * notifyAll(): Notify all registered objects that configuration settings have changed.
+ * Notify all registered objects that configuration settings have changed.
  * Useful when starting the emulator.
  */
 void ConfigStore::notifyAll(void)
 	{ d->notifyAll(); }
+
+/**
+ * Get the configuration path.
+ * @return Configuration path.
+ */
+QString ConfigStore::configPath(void)
+	{ return d->configPath; }
 
 }
