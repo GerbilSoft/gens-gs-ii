@@ -134,9 +134,10 @@ void GensWindow::setupUi(void)
 	// Connect slots by name.
 	QMetaObject::connectSlotsByName(this);
 	
-	// Create the menubar.
+	// Create the menu bar.
 	m_gensMenuBar = new GensMenuBar(this, m_emuManager);
-	this->setMenuBar(m_gensMenuBar->createMenuBar());
+	if (m_cfg_showMenuBar)
+		this->setMenuBar(m_gensMenuBar->createMenuBar());
 	
 	// Create the Video Backend.
 	// TODO: Allow selection of all available VBackend classes.
