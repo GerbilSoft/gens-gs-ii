@@ -59,6 +59,14 @@ class ConfigStore : public QObject
 		QVariant get(const QString& key);
 		
 		/**
+		 * Get a property.
+		 * Converts hexadecimal string values to unsigned int.
+		 * @param key Property name.
+		 * @return Property value.
+		 */
+		unsigned int getUInt(const QString& key);
+		
+		/**
 		 * Load the configuration file.
 		 * @param filename Configuration filename.
 		 * @return 0 on success; non-zero on error.
