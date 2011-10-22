@@ -412,6 +412,17 @@ void ConfigStorePrivate::set(const QString& key, const QVariant& value)
  */
 QVariant ConfigStorePrivate::get(const QString& key)
 {
+#ifndef NDEBUG
+	// Make sure this property exists.
+	if (!settings.contains(key))
+	{
+		// Property does not exist. Print a warning.
+		LOG_MSG(gens, LOG_MSG_LEVEL_WARNING,
+			"ConfigStorePrivate: Property '%s' has no default value. FIX THIS!",
+			key.toUtf8().constData());
+	}
+#endif
+	
 	return settings.value(key);
 }
 
