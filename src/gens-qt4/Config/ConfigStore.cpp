@@ -23,7 +23,8 @@
 
 #include "ConfigStore.hpp"
 
-// Message logging subsystem.
+// LibGens includes.
+#include "libgens/lg_main.hpp"
 #include "libgens/macros/log_msg.h"
 
 // Qt includes.
@@ -433,6 +434,12 @@ int ConfigStorePrivate::load(const QString& filename)
 		settings.insert(key, qSettings.value(key));
 	}
 	
+	// Remove application information from the settings QHash.
+	settings.remove(QLatin1String("_Application"));
+	settings.remove(QLatin1String("_Version"));
+	settings.remove(QLatin1String("_VersionExt"));
+	settings.remove(QLatin1String("_VersionVcs"));
+	
 	// Finished loading settings.
 	// NOTE: Caller must call emitAll() for settings to take effect.
 	return 0;
@@ -458,6 +465,41 @@ int ConfigStorePrivate::load(void)
 int ConfigStorePrivate::save(const QString& filename)
 {
 	QSettings qSettings(filename, QSettings::IniFormat);
+	
+	/** Application information. **/
+	
+	// Stored in the "General" section.
+	// TODO: Move "General" settings to another section?
+	// ("General" is always moved to the top of the file.)
+	// TODO: Get the application information from somewhere else.
+	// TODO: Use MDP version macros.
+	const QString sVersion = QString::fromLatin1("%1.%2.%3")
+					.arg((LibGens::version >> 24) & 0xFF)
+					.arg((LibGens::version >> 16) & 0xFF)
+					.arg(LibGens::version & 0xFFFF);
+	
+	qSettings.setValue(QLatin1String("_Application"), QLatin1String("Gens/GS II"));
+	qSettings.setValue(QLatin1String("_Version"), sVersion);
+	
+	if (LibGens::version_desc)
+	{
+		qSettings.setValue(QLatin1String("_VersionExt"),
+					QString::fromUtf8(LibGens::version_desc));
+	}
+	else
+	{
+		qSettings.remove(QLatin1String("_VersionExt"));
+	}
+	
+	if (LibGens::version_vcs)
+	{
+		qSettings.setValue(QLatin1String("_VersionVcs"),
+					QString::fromUtf8(LibGens::version_vcs));
+	}
+	else
+	{
+		qSettings.remove(QLatin1String("_VersionVcs"));
+	}
 	
 	// Make a copy of the settings map.
 	// Entries will be removed as DefaultSettings[] is traversed.
