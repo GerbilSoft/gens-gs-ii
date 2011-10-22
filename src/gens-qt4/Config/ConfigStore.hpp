@@ -38,6 +38,7 @@ class ConfigStore : public QObject
 	
 	public:
 		ConfigStore(QObject *parent = 0);
+		~ConfigStore();
 		
 		/**
 		 * Reset all settings to defaults.

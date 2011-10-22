@@ -702,6 +702,9 @@ ConfigStore::ConfigStore(QObject *parent)
 	, d(new ConfigStorePrivate(this))
 { }
 
+ConfigStore::~ConfigStore()
+	{ delete d; }
+
 
 /**
  * Reset all settings to defaults.
