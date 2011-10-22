@@ -100,6 +100,14 @@ class ConfigStorePrivate
 		 * @param slot Slot name.
 		 */
 		void registerChangeNotification(const QString& property, QObject *object, const char *slot);
+		
+		/**
+		 * Unregister an object for property change notification.
+		 * @param property Property to watch.
+		 * @param object QObject to register.
+		 * @param slot Slot name.
+		 */
+		void unregisterChangeNotification(const QString& property, QObject *object, const char *slot);
 	
 	private:
 		ConfigStore *const q;
@@ -260,9 +268,11 @@ ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
  */
 void ConfigStorePrivate::registerChangeNotification(const QString& property, QObject *object, const char *slot)
 {
-	QMutexLocker mtxLocker(&mtxSignalMaps);
+	if (!object)
+		return;
 	
 	// Get the vector of signal maps for this property.
+	QMutexLocker mtxLocker(&mtxSignalMaps);
 	QVector<SignalMap>* signalMapVector = signalMaps.value(property, NULL);
 	if (!signalMapVector)
 	{
@@ -272,10 +282,49 @@ void ConfigStorePrivate::registerChangeNotification(const QString& property, QOb
 	}
 	
 	// Add this object and slot to the signal maps vector.
+	// TODO: Validate and normalize the slot name?
 	SignalMap smap;
 	smap.obj = object;
 	smap.slot = slot;
 	signalMapVector->append(smap);
+}
+
+
+/**
+ * Unregister an object for property change notification.
+ * @param property Property to watch.
+ * @param object QObject to register.
+ * @param slot Slot name. (If NULL, unregisters all slots for this object.)
+ */
+void ConfigStorePrivate::unregisterChangeNotification(const QString& property, QObject *object, const char *slot)
+{
+	if (!object)
+		return;
+	
+	// Get the vector of signal maps for this property.
+	QMutexLocker mtxLocker(&mtxSignalMaps);
+	QVector<SignalMap>* signalMapVector = signalMaps.value(property, NULL);
+	if (!signalMapVector)
+		return;
+	
+	// Process the signal map list in reverse-order.
+	// Reverse order makes it easier to remove deleted objects.
+	// TODO: Use QLinkedList instead?
+	for (int i = (signalMapVector->size() - 1); i >= 0; i--)
+	{
+		const SignalMap *smap = &signalMapVector->at(i);
+		if (smap->obj.isNull())
+			signalMapVector->remove(i);
+		else if (smap->obj == object)
+		{
+			// Found the object.
+			if (slot == NULL || slot == smap->slot)
+			{
+				// Found a matching signal map.
+				signalMapVector->remove(i);
+			}
+		}
+	}
 }
 
 
@@ -514,5 +563,14 @@ int ConfigStore::save(void)
  */
 void ConfigStore::registerChangeNotification(const QString& property, QObject *object, const char *slot)
 	{ d->registerChangeNotification(property, object, slot); }
+
+/**
+ * Unregister an object for property change notification.
+ * @param property Property to watch.
+ * @param object QObject to register.
+ * @param slot Slot name.
+ */
+void ConfigStore::unregisterChangeNotification(const QString& property, QObject *object, const char *slot)
+	{ d->unregisterChangeNotification(property, object, slot); }
 
 }

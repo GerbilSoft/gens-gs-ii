@@ -93,6 +93,14 @@ class ConfigStore : public QObject
 		 * @param slot Slot name.
 		 */
 		void registerChangeNotification(const QString& property, QObject *object, const char *slot);
+		
+		/**
+		 * Unregister an object for property change notification.
+		 * @param property Property to watch.
+		 * @param object QObject to register.
+		 * @param slot Slot name.
+		 */
+		void unregisterChangeNotification(const QString& property, QObject *object, const char *slot);
 	
 	private:
 		friend class ConfigStorePrivate;
