@@ -90,6 +90,14 @@ class ConfigStorePrivate
 		 * @return 0 on success; non-zero on error.
 		 */
 		int save(void);
+		
+		/**
+		 * Register an object for property change notification.
+		 * @param property Property to watch.
+		 * @param object QObject to register.
+		 * @param slot Slot name.
+		 */
+		void registerChangeNotification(const QString& property, QObject *object, const char *slot);
 	
 	private:
 		ConfigStore *const q;
@@ -97,6 +105,7 @@ class ConfigStorePrivate
 	
 	public:
 		// Current settings.
+		// TODO: Use const char* for the key instead of QString?
 		QHash<QString, QVariant> settings;
 		
 		// Default configuration filename.
@@ -237,6 +246,31 @@ ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
 	QDir dir(configPath);
 	if (!dir.exists())
 		dir.mkpath(configPath);
+}
+
+
+/**
+ * Register an object for property change notification.
+ * @param property Property to watch.
+ * @param object QObject to register.
+ * @param slot Slot name.
+ */
+void ConfigStorePrivate::registerChangeNotification(const QString& property, QObject *object, const char *slot)
+{
+	// Get the vector of signal maps for this property.
+	QVector<SignalMap>* signalMapVector = signalMaps.value(property, NULL);
+	if (!signalMapVector)
+	{
+		// No vector found. Create one.
+		signalMapVector = new QVector<SignalMap>();
+		signalMaps.insert(property, signalMapVector);
+	}
+	
+	// Add this object and slot to the signal maps vector.
+	SignalMap smap;
+	smap.obj = object;
+	smap.slot = slot;
+	signalMapVector->append(smap);
 }
 
 
@@ -464,5 +498,15 @@ int ConfigStore::save(const QString& filename)
  */
 int ConfigStore::save(void)
 	{ return d->save(); }
+
+
+/**
+ * Register an object for property change notification.
+ * @param property Property to watch.
+ * @param object QObject to register.
+ * @param slot Slot name.
+ */
+void ConfigStore::registerChangeNotification(const QString& property, QObject *object, const char *slot)
+	{ d->registerChangeNotification(property, object, slot); }
 
 }

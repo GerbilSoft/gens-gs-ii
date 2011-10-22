@@ -85,6 +85,14 @@ class ConfigStore : public QObject
 		 * @return 0 on success; non-zero on error.
 		 */
 		int save(void);
+		
+		/**
+		 * Register an object for property change notification.
+		 * @param property Property to watch.
+		 * @param object QObject to register.
+		 * @param slot Slot name.
+		 */
+		void registerChangeNotification(const QString& property, QObject *object, const char *slot);
 	
 	private:
 		friend class ConfigStorePrivate;
