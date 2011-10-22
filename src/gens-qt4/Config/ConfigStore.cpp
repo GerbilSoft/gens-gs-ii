@@ -404,6 +404,12 @@ void ConfigStorePrivate::set(const QString& key, const QVariant& value)
 	}
 #endif
 	
+	// Check if the new value is the same as the old value.
+	QVariant oldValue = settings.value(key);
+	if (value == oldValue)
+		return;
+	
+	// New value is different.
 	settings.insert(key, value);
 	
 	// Invoke methods for registered objects.
