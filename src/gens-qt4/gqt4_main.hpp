@@ -64,13 +64,13 @@ void gqt4_osd(OsdType osd_type, int param);
 }
 #endif
 
-// TODO: Remove GensConfig in favor of ConfigItem.
+// TODO: Remove GensConfig and ConfigItem in favor of ConfigStore.
 #include "Config/GensConfig.hpp"
+#include "Config/ConfigItem.hpp"
+#include "Config/ConfigStore.hpp"
+
 #include "EmuThread.hpp"
 #include "libgens/EmuContext.hpp"
-
-// Configuration items.
-#include "Config/ConfigItem.hpp"
 
 class QTranslator;
 
@@ -89,6 +89,9 @@ namespace GensQt4
 	// SRam path. (TODO: Move somewhere else?)
 	// TODO: Make config item subclass for paths. (don't hardcode it!)
 	extern ConfigItem SRamPath;
+	
+	// Configuration store.
+	extern ConfigStore *gqt4_cfg;
 	
 	// Emulation objects.
 	// TODO: Move the EmuContext to the EmuThread later.

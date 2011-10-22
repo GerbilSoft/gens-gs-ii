@@ -62,8 +62,9 @@ int gens_main(int argc, char *argv[])
 	
 	// Load the configuration.
 	// TODO: Do this before or after command line arguments?
-	// TODO: Remove in favor of ConfigItem.
+	// TODO: Remove in favor of ConfigStore.
 	GensQt4::gqt4_config = new GensQt4::GensConfig();
+	GensQt4::gqt4_cfg = new GensQt4::ConfigStore();
 	
 	// TODO: Parse command line arguments.
 	// They're available in app.arguments() [QStringList].
@@ -154,13 +155,16 @@ GensQApplication *gqt4_app = NULL;
 // Configuration. (TODO: Remove this in favor of ConfigItem.)
 GensConfig *gqt4_config = NULL;
 
-// Emulation objects.
-EmuThread *gqt4_emuThread = NULL;		// Thread.
-LibGens::EmuContext *gqt4_emuContext = NULL;	// Context.
-
 // SRam path. (TODO: Move somewhere else?)
 // TODO: Make config item subclass for paths. (don't hardcode it!)
 ConfigItem SRamPath(QLatin1String("Directories/SRAM"), QLatin1String("./SRAM/"));
+
+// Configuration store.
+ConfigStore *gqt4_cfg = NULL;
+
+// Emulation objects.
+EmuThread *gqt4_emuThread = NULL;		// Thread.
+LibGens::EmuContext *gqt4_emuContext = NULL;	// Context.
 
 /**
  * QuitGens(): Quit Gens.
@@ -186,7 +190,9 @@ void QuitGens(void)
 	LibGens::End();
 	
 	// Save the configuration.
+	// TODO: Switch to ConfigStore.
 	ConfigItem::Save();
+	gqt4_cfg->save();
 }
 
 }

@@ -111,11 +111,6 @@ GensWindow::~GensWindow()
 	
 	// Delete the Emulation Manager.
 	delete m_emuManager;
-	
-	// Save configuration.
-	// TODO: Figure out a better place to put this.
-	// TODO: Config autosave.
-	ConfigItem::Save();
 }
 
 
