@@ -62,7 +62,7 @@ void gqt4_osd(OsdType osd_type, int param);
 }
 #endif
 
-// TODO: Remove GensConfig and ConfigItem in favor of ConfigStore.
+// TODO: Remove GensConfig in favor of ConfigStore.
 #include "Config/GensConfig.hpp"
 #include "Config/ConfigStore.hpp"
 

@@ -153,12 +153,8 @@ namespace GensQt4
 // GensQApplication.
 GensQApplication *gqt4_app = NULL;
 
-// Configuration. (TODO: Remove this in favor of ConfigItem.)
+// Configuration. (TODO: Remove this in favor of ConfigStore.)
 GensConfig *gqt4_config = NULL;
-
-// SRam path. (TODO: Move somewhere else?)
-// TODO: Make config item subclass for paths. (don't hardcode it!)
-ConfigItem SRamPath(QLatin1String("Directories/SRAM"), QLatin1String("./SRAM/"));
 
 // Configuration store.
 ConfigStore *gqt4_cfg = NULL;
@@ -191,8 +187,6 @@ void QuitGens(void)
 	LibGens::End();
 	
 	// Save the configuration.
-	// TODO: Switch to ConfigStore.
-	ConfigItem::Save();
 	gqt4_cfg->save();
 }
 
