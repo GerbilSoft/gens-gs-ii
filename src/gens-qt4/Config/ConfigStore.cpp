@@ -231,6 +231,15 @@ const ConfigStorePrivate::DefaultSetting ConfigStorePrivate::DefaultSettings[] =
 	/** Emulation options. (Options menu) **/
 	{"Options/enableSRam", "true"},
 	
+	/** Directories. **/
+	// TODO: Add a class to handle path resolution.
+	{"Directories/Savestates",	"./Savestates/"},
+	{"Directories/SRAM",		"./SRAM/"},
+	{"Directories/BRAM",		"./BRAM/"},
+	{"Directories/WAV",		"./WAV/"},
+	{"Directories/VGM",		"./VGM/"},
+	{"Directories/Screenshots",	"./Screenshots/"},
+	
 	// TODO: Shortcut keys, controllers, recent ROMs.
 	
 	/** End of array. **/
