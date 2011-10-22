@@ -22,7 +22,6 @@
 #include "FindCdromUDisks.hpp"
 
 // C includes.
-#include <stdio.h>
 #include <paths.h>
 
 // C++ includes.
@@ -38,8 +37,8 @@ using std::auto_ptr;
 #include <QtDBus/QDBusMessage>
 #include <QtDBus/QDBusReply>
 
-// TODO: Use LOG_MSG().
-
+// LOG_MSG() subsystem.
+#include "libgens/macros/log_msg.h"
 
 namespace GensQt4
 {
@@ -190,8 +189,10 @@ int FindCdromUDisks::query_int(void)
 	QDBusReply<QtDBus_ao_t> reply_EnumerateDevices = m_ifUDisks->call(QLatin1String("EnumerateDevices"));
 	if (!reply_EnumerateDevices.isValid())
 	{
-		fprintf(stderr, "EnumerateDevices failed: %s\n",
+		LOG_MSG(cd, LOG_MSG_LEVEL_ERROR,
+			"FindCdromUdisks: EnumerateDevices failed: %s",
 			m_ifUDisks->lastError().message().toLocal8Bit().constData());
+		
 		// TODO: Emit an error signal instead?
 		emit driveQueryFinished();
 		return -2;
@@ -228,7 +229,8 @@ int FindCdromUDisks::queryUDisksDevice(const QDBusObjectPath& objectPath)
 	if (!drive_if->isValid())
 	{
 		// Drive interface is invalid.
-		fprintf(stderr, "Error attaching interface %s: %s\n",
+		LOG_MSG(cd, LOG_MSG_LEVEL_ERROR,
+			"FindCdromUDisks: Error attaching interface %s: %s",
 			objectPath.path().toLocal8Bit().constData(),
 			drive_if->lastError().message().toLocal8Bit().constData());
 		return -1;
@@ -249,7 +251,8 @@ int FindCdromUDisks::queryUDisksDevice(const QDBusObjectPath& objectPath)
 	QVariant reply_DriveMediaCompatibility = drive_if->property("DriveMediaCompatibility");
 	if (!reply_DriveMediaCompatibility.isValid())
 	{
-		fprintf(stderr, "DriveMediaCompatibility failed for %s: %s\n",
+		LOG_MSG(cd, LOG_MSG_LEVEL_WARNING,
+			"DriveMediaCompatibility failed for %s: %s",
 			objectPath.path().toLocal8Bit().constData(),
 			drive_if->lastError().message().toLocal8Bit().constData());
 		return -2;
