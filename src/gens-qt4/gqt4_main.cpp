@@ -80,8 +80,9 @@ int gens_main(int argc, char *argv[])
 	
 	// Set the EmuContext paths.
 	// TODO: Do this here or in GensWindow initialization?
-	QString sramPath = GensQt4::ConfigItem::GetConfigPath() + 
-				GensQt4::SRamPath.value().toString();
+	// TODO: Add Path handler class to normalize paths, etc.
+	QString sramPath = GensQt4::gqt4_cfg->configPath() +
+				GensQt4::gqt4_cfg->get(QLatin1String("Directories/SRAM")).toString();
 	LibGens::EmuContext::SetPathSRam(sramPath.toUtf8().constData());
 	
 	gens_window = new GensQt4::GensWindow();

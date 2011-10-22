@@ -28,8 +28,6 @@
 #include "libgens/macros/common.h"
 #include "libgens/lg_osd.h"
 
-// Configuration items.
-#include "Config/ConfigItem.hpp"
 #ifndef _WIN32
 #define gens_main main
 #endif
@@ -66,7 +64,6 @@ void gqt4_osd(OsdType osd_type, int param);
 
 // TODO: Remove GensConfig and ConfigItem in favor of ConfigStore.
 #include "Config/GensConfig.hpp"
-#include "Config/ConfigItem.hpp"
 #include "Config/ConfigStore.hpp"
 
 #include "EmuThread.hpp"
@@ -83,12 +80,8 @@ namespace GensQt4
 	extern GensQApplication *gqt4_app;
 	
 	// Configuration. (TODO: Use a smart pointer?)
-	// TODO: Remove GensConfig in favor of ConfigItem.
+	// TODO: Remove GensConfig in favor of ConfigStore.
 	extern GensConfig *gqt4_config;
-	
-	// SRam path. (TODO: Move somewhere else?)
-	// TODO: Make config item subclass for paths. (don't hardcode it!)
-	extern ConfigItem SRamPath;
 	
 	// Configuration store.
 	extern ConfigStore *gqt4_cfg;
