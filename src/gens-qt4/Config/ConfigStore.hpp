@@ -38,6 +38,53 @@ class ConfigStore : public QObject
 	
 	public:
 		ConfigStore(QObject *parent = 0);
+		
+		/**
+		 * Reset all settings to defaults.
+		 */
+		void reset(void);
+		
+		/**
+		 * Set a property.
+		 * @param key Property name.
+		 * @param value Property value.
+		 */
+		void set(const QString& key, const QVariant& value);
+		
+		/**
+		 * Get a property.
+		 * @param key Property name.
+		 * @return Property value.
+		 */
+		QVariant get(const QString& key);
+		
+		/**
+		 * Load the configuration file.
+		 * @param filename Configuration filename.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int load(const QString& filename);
+		
+		/**
+		 * Load the configuration file.
+		 * No filename specified; use the default filename.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int load(void);
+		
+		/**
+		 * Save the configuration file.
+		 * @param filename Filename.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int save(const QString& filename);
+		
+		/**
+		 * Save the configuration file.
+		 * No filename specified; use the default filename.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int save(void);
 	
 	private:
 		friend class ConfigStorePrivate;

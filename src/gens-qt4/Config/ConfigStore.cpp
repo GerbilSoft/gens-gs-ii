@@ -23,6 +23,9 @@
 
 #include "ConfigStore.hpp"
 
+// Message logging subsystem.
+#include "libgens/macros/log_msg.h"
+
 // Qt includes.
 #include <QtCore/QSettings>
 #include <QtCore/QHash>
@@ -59,6 +62,34 @@ class ConfigStorePrivate
 		 * @return Property value.
 		 */
 		QVariant get(const QString& key);
+		
+		/**
+		 * Load the configuration file.
+		 * @param filename Configuration filename.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int load(const QString& filename);
+		
+		/**
+		 * Load the configuration file.
+		 * No filename specified; use the default filename.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int load(void);
+		
+		/**
+		 * Save the configuration file.
+		 * @param filename Configuration filename.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int save(const QString& filename);
+		
+		/**
+		 * Save the configuration file.
+		 * No filename specified; use the default filename.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int save(void);
 	
 	private:
 		ConfigStore *const q;
@@ -67,6 +98,9 @@ class ConfigStorePrivate
 	public:
 		// Current settings.
 		QHash<QString, QVariant> settings;
+		
+		// Default configuration filename.
+		static const char DefaultConfigFilename[];
 		
 		// Default settings.
 		struct DefaultSetting
@@ -95,6 +129,11 @@ class ConfigStorePrivate
 		QHash<QString, QVector<SignalMap>* > signalMaps;
 };
 
+
+/**
+ * Default configuration filename.
+ */
+const char ConfigStorePrivate::DefaultConfigFilename[] = "gens-gs-ii.NEWCONF.conf";
 
 /**
  * Default settings.
@@ -162,10 +201,10 @@ const ConfigStorePrivate::DefaultSetting ConfigStorePrivate::DefaultSettings[] =
 	/** GensWindow configuration. **/
 	{"GensWindow/showMenuBar", "true"},
 	
-	// TODO: Shortcut keys, controllers, recent ROMs.
-	
 	/** Emulation options. (Options menu) **/
 	{"Options/enableSRam", "true"},
+	
+	// TODO: Shortcut keys, controllers, recent ROMs.
 	
 	/** End of array. **/
 	{NULL, NULL}
@@ -203,7 +242,9 @@ ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
 
 ConfigStorePrivate::~ConfigStorePrivate()
 {
-	// TODO: Save the settings.
+	// Save the configuration.
+	// TODO: Handle non-default filenames.
+	save();
 }
 
 
@@ -229,6 +270,17 @@ void ConfigStorePrivate::reset(void)
  */
 void ConfigStorePrivate::set(const QString& key, const QVariant& value)
 {
+#ifndef NDEBUG
+	// Make sure this property exists.
+	if (!settings.contains(key))
+	{
+		// Property does not exist. Print a warning.
+		LOG_MSG(gens, LOG_MSG_LEVEL_WARNING,
+			"ConfigStorePrivate: Property '%s' has no default value. FIX THIS!",
+			key.toUtf8().constData());
+	}
+#endif
+	
 	settings.insert(key, value);
 	
 	// Invoke slots for registered objects.
@@ -267,6 +319,85 @@ QVariant ConfigStorePrivate::get(const QString& key)
 }
 
 
+/**
+ * Load the configuration file.
+ * @param filename Configuration filename.
+ * @return 0 on success; non-zero on error.
+ */
+int ConfigStorePrivate::load(const QString& filename)
+{
+	QSettings qSettings(filename, QSettings::IniFormat);
+	
+	// Reset the internal settings map to defaults.
+	reset();
+	
+	// Load the settings from the file.
+	foreach (const QString& key, qSettings.allKeys())
+	{
+		settings.insert(key, qSettings.value(key));
+	}
+	
+	// Finished loading settings.
+	// NOTE: Caller must call emitAll() for settings to take effect.
+	return 0;
+}
+
+/**
+ * Load the configuration file.
+ * No filename specified; use the default filename.
+ * @return 0 on success; non-zero on error.
+ */
+int ConfigStorePrivate::load(void)
+{
+	const QString cfgFilename = configPath + QLatin1String(DefaultConfigFilename);
+	return load(cfgFilename);
+}
+
+
+/**
+ * Save the configuration file.
+ * @param filename Configuration filename.
+ * @return 0 on success; non-zero on error.
+ */
+int ConfigStorePrivate::save(const QString& filename)
+{
+	QSettings qSettings(filename, QSettings::IniFormat);
+	
+	// Make a copy of the settings map.
+	// Entries will be removed as DefaultSettings[] is traversed.
+	// This is done to maintain ordering for known settings.
+	QHash<QString, QVariant> settingsTmp(settings);
+	
+	// Save the default settings.
+	for (const DefaultSetting *def = &DefaultSettings[0]; def->key != NULL; def++)
+	{
+		const QString key = QLatin1String(def->key);
+		qSettings.setValue(key, settingsTmp.value(key,
+					(def->value ? QLatin1String(def->value) : QString())));
+		settingsTmp.remove(key);
+	}
+	
+	// Save the remaining settings.
+	foreach (const QString& key, settingsTmp.keys())
+	{
+		qSettings.setValue(key, settingsTmp.value(key));
+	}
+	
+	return 0;
+}
+
+/**
+ * Save the configuration file.
+ * No filename specified; use the default filename.
+ * @return 0 on success; non-zero on error.
+ */
+int ConfigStorePrivate::save(void)
+{
+	const QString cfgFilename = configPath + QLatin1String(DefaultConfigFilename);
+	return save(cfgFilename);
+}
+
+
 /** ConfigStore **/
 
 
@@ -274,5 +405,64 @@ ConfigStore::ConfigStore(QObject *parent)
 	: QObject(parent)
 	, d(new ConfigStorePrivate(this))
 { }
+
+
+/**
+ * Reset all settings to defaults.
+ */
+void ConfigStore::reset(void)
+	{ d->reset(); }
+
+
+/**
+ * Set a property.
+ * @param key Property name.
+ * @param value Property value.
+ */
+void ConfigStore::set(const QString& key, const QVariant& value)
+	{ d->set(key, value); }
+
+
+/**
+ * Get a property.
+ * @param key Property name.
+ * @return Property value.
+ */
+QVariant ConfigStore::get(const QString& key)
+	{ return d->get(key); }
+
+
+/**
+ * Load the configuration file.
+ * @param filename Configuration filename.
+ * @return 0 on success; non-zero on error.
+ */
+int ConfigStore::load(const QString& filename)
+	{ return d->load(filename); }
+
+/**
+ * Load the configuration file.
+ * No filename specified; use the default filename.
+ * @return 0 on success; non-zero on error.
+ */
+int ConfigStore::load(void)
+	{ return d->load(); }
+
+
+/**
+ * Save the configuration file.
+ * @param filename Filename.
+ * @return 0 on success; non-zero on error.
+ */
+int ConfigStore::save(const QString& filename)
+	{ return d->save(filename); }
+
+/**
+ * Save the configuration file.
+ * No filename specified; use the default filename.
+ * @return 0 on success; non-zero on error.
+ */
+int ConfigStore::save(void)
+	{ return d->save(); }
 
 }
