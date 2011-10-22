@@ -113,22 +113,6 @@ class GensConfig : public QObject
 			};
 			QString userPath(ConfigPath pathID);
 		
-		/** Onscreen display. **/
-		Q_PROPERTY(bool osdFpsEnabled READ osdFpsEnabled WRITE setOsdFpsEnabled NOTIFY osdFpsEnabled_changed)
-		GC_PROPERTY(bool, osdFpsEnabled, bool, OsdFpsEnabled);
-		Q_PROPERTY(QColor osdFpsColor READ osdFpsColor WRITE setOsdFpsColor NOTIFY osdFpsColor_changed)
-		GC_PROPERTY(QColor, osdFpsColor, const QColor&, OsdFpsColor);
-		Q_PROPERTY(bool osdMsgEnabled READ osdMsgEnabled WRITE setOsdMsgEnabled NOTIFY osdMsgEnabled_changed)
-		GC_PROPERTY(bool, osdMsgEnabled, bool, OsdMsgEnabled);
-		Q_PROPERTY(QColor osdMsgColor READ osdMsgColor WRITE setOsdMsgColor NOTIFY osdMsgColor_changed)
-		GC_PROPERTY(QColor, osdMsgColor, const QColor&, OsdMsgColor);
-		
-		/** Intro effect. **/
-		Q_PROPERTY(int introStyle READ introStyle WRITE setIntroStyle NOTIFY introStyle_changed)
-		GC_PROPERTY(int, introStyle, int, IntroStyle);
-		Q_PROPERTY(int introColor READ introColor WRITE setIntroColor NOTIFY introColor_changed)
-		GC_PROPERTY(int, introColor, int, IntroColor);
-		
 		/** System. **/
 		// NOTE: Uses LibGens::SysVersion::RegionCode_t, but Q_ENUMS requires a QObject for storage.
 		Q_PROPERTY(int regionCode READ regionCode WRITE setRegionCode NOTIFY regionCode_changed);
@@ -153,12 +137,6 @@ class GensConfig : public QObject
 		GC_PROPERTY(QString, extprgUnRAR, const QString&, ExtPrgUnRAR);
 		
 		/** Graphics settings. **/
-		Q_PROPERTY(bool aspectRatioConstraint READ aspectRatioConstraint WRITE setAspectRatioConstraint NOTIFY aspectRatioConstraint_changed)
-		GC_PROPERTY(bool, aspectRatioConstraint, bool, AspectRatioConstraint);
-		Q_PROPERTY(bool fastBlur READ fastBlur WRITE setFastBlur NOTIFY fastBlur_changed)
-		GC_PROPERTY(bool, fastBlur, bool, FastBlur);
-		Q_PROPERTY(bool bilinearFilter READ bilinearFilter WRITE setBilinearFilter NOTIFY bilinearFilter_changed)
-		GC_PROPERTY(bool, bilinearFilter, bool, BilinearFilter);
 		
 		enum InterlacedMode_t
 		{
@@ -182,18 +160,6 @@ class GensConfig : public QObject
 		Q_PROPERTY(int colorScaleMethod READ colorScaleMethod WRITE setColorScaleMethod NOTIFY colorScaleMethod_changed)
 		GC_PROPERTY(int, colorScaleMethod, int, ColorScaleMethod);
 		
-		public:
-			enum StretchMode_t
-			{
-				STRETCH_NONE	= 0,
-				STRETCH_H	= 1,
-				STRETCH_V	= 2,
-				STRETCH_FULL	= 3
-			};
-		Q_ENUMS(StretchMode_t);
-		Q_PROPERTY(StretchMode_t stretchMode READ stretchMode WRITE setStretchMode NOTIFY stretchMode_changed)
-		GC_PROPERTY(StretchMode_t, stretchMode, StretchMode_t, StretchMode);
-		
 		/** General settings. **/
 		Q_PROPERTY(bool autoFixChecksum READ autoFixChecksum WRITE setAutoFixChecksum NOTIFY autoFixChecksum_changed)
 		GC_PROPERTY(bool, autoFixChecksum, bool, AutoFixChecksum);
@@ -201,8 +167,6 @@ class GensConfig : public QObject
 		GC_PROPERTY(bool, autoPause, bool, AutoPause);
 		Q_PROPERTY(bool borderColor READ borderColor WRITE setBorderColor NOTIFY borderColor_changed)
 		GC_PROPERTY(bool, borderColor, bool, BorderColor);
-		Q_PROPERTY(bool pauseTint READ pauseTint WRITE setPauseTint NOTIFY pauseTint_changed)
-		GC_PROPERTY(bool, pauseTint, bool, PauseTint);
 		Q_PROPERTY(bool ntscV30Rolling READ ntscV30Rolling WRITE setNtscV30Rolling NOTIFY ntscV30Rolling_changed)
 		GC_PROPERTY(bool, ntscV30Rolling, bool, NtscV30Rolling);
 		
@@ -225,19 +189,9 @@ class GensConfig : public QObject
 		GC_PROPERTY(bool, enableSRam, bool, EnableSRam)
 	
 	signals:
-		/** Onscreen display. **/
-		void osdFpsEnabled_changed(bool enable);
-		void osdFpsColor_changed(const QColor& color);
-		void osdMsgEnabled_changed(bool enable);
-		void osdMsgColor_changed(const QColor& color);
-		
 		/** System. **/
 		void regionCode_changed(int newRegionCode); // LibGens::SysVersion::RegionCode_t
 		void regionCodeOrder_changed(uint16_t newRegionCodeOrder);
-		
-		/** Intro effect. **/
-		void introStyle_changed(int style);
-		void introColor_changed(int color);
 		
 		/** Sega CD Boot ROMs. **/
 		void mcdRomUSA_changed(const QString& filename);
@@ -249,22 +203,17 @@ class GensConfig : public QObject
 		void extprgUnRAR_changed(const QString& filename);
 		
 		/** Graphics settings. **/
-		void aspectRatioConstraint_changed(bool newAspectRatioConstraint);
-		void fastBlur_changed(bool newFastBlur);
-		void bilinearFilter_changed(bool newBilinearFilter);
 		void interlacedMode_changed(GensConfig::InterlacedMode_t newInterlacedMode);
 		void contrast_changed(int newContrast);
 		void brightness_changed(int newBrightness);
 		void grayscale_changed(bool newGrayscale);
 		void inverted_changed(bool newInverted);
 		void colorScaleMethod_changed(int newColorScaleMethod);
-		void stretchMode_changed(GensConfig::StretchMode_t newStretchMode);
 		
 		/** General settings. **/
 		void autoFixChecksum_changed(bool newAutoFixChecksum);
 		void autoPause_changed(bool newAutoPause);
 		void borderColor_changed(bool newBorderColor);
-		void pauseTint_changed(bool newPauseTint);
 		void ntscV30Rolling_changed(bool newNtscV30Rolling);
 		
 		/** Savestates. **/

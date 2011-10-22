@@ -652,7 +652,7 @@ void GensWindow::checkIdleThread(void)
 {
 	if (m_emuManager->isRomOpen() ||
 		!m_idleThreadAllowed ||
-		gqt4_config->introStyle() == 0)
+		m_cfg_introStyle == 0)
 	{
 		// Make sure the idle thread isn't running.
 		// TODO: Check for race conditions.

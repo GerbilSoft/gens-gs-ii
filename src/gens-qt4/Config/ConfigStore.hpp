@@ -39,7 +39,13 @@ class ConfigStore : public QObject
 	public:
 		ConfigStore(QObject *parent = 0);
 		~ConfigStore();
-		
+	
+	private:
+		friend class ConfigStorePrivate;
+		ConfigStorePrivate *d;
+		Q_DISABLE_COPY(ConfigStore)
+	
+	public:
 		/**
 		 * Reset all settings to defaults.
 		 */
@@ -131,10 +137,15 @@ class ConfigStore : public QObject
 		 */
 		QString configPath(void);
 	
-	private:
-		friend class ConfigStorePrivate;
-		ConfigStorePrivate *d;
-		Q_DISABLE_COPY(ConfigStore)
+		// TODO: This shouldn't be in ConfigStore.
+		enum StretchMode_t
+		{
+			STRETCH_NONE	= 0,
+			STRETCH_H	= 1,
+			STRETCH_V	= 2,
+			STRETCH_FULL	= 3
+		};
+		Q_ENUMS(StretchMode_t);
 };
 
 }

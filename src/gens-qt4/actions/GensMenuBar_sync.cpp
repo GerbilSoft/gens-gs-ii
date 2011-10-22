@@ -46,8 +46,11 @@ namespace GensQt4
  */
 void GensMenuBarPrivate::syncConnect(void)
 {
+	// TODO: Port to ConfigStore.
+	/*
 	QObject::connect(gqt4_config, SIGNAL(stretchMode_changed(GensConfig::StretchMode_t)),
 			 q, SLOT(stretchMode_changed_slot(GensConfig::StretchMode_t)));
+	*/
 	QObject::connect(gqt4_config, SIGNAL(regionCode_changed(int)),
 			 q, SLOT(regionCode_changed_slot(int)));	// LibGens::SysVersion::RegionCode_t
 	QObject::connect(gqt4_config, SIGNAL(enableSRam_changed(bool)),
@@ -64,7 +67,7 @@ void GensMenuBarPrivate::syncAll(void)
 	
 	// Do synchronization.
 	syncRecent();
-	q->stretchMode_changed_slot(gqt4_config->stretchMode());
+	//q->stretchMode_changed_slot(gqt4_config->stretchMode());	// TODO: Port to ConfigStore.
 	q->regionCode_changed_slot(gqt4_config->regionCode());
 	q->enableSRam_changed_slot(gqt4_config->enableSRam());
 	q->stateChanged();
@@ -117,6 +120,7 @@ void GensMenuBar::recentRoms_updated(void)
  * stretchMode_changed_slot(): Stretch mode has changed.
  * @param newStretchMode New stretch mode.
  */
+/* TODO: Port to ConfigStore.
 void GensMenuBar::stretchMode_changed_slot(GensConfig::StretchMode_t newStretchMode)
 {
 	int id;
@@ -140,6 +144,7 @@ void GensMenuBar::stretchMode_changed_slot(GensConfig::StretchMode_t newStretchM
 	action->setChecked(true);
 	this->unlock();
 }
+*/
 
 
 /**

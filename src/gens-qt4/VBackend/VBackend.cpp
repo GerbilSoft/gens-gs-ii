@@ -186,7 +186,7 @@ void VBackend::setPaused(paused_t newPaused)
 	// Update VBackend on one of the following conditions:
 	// - Manual pause changed and pause tint is enabled.
 	// - FPS is enabled.
-	if ((pause_manual_changed && gqt4_config->pauseTint()) || osdFpsEnabled())
+	if ((pause_manual_changed && m_cfg_pauseTint) || osdFpsEnabled())
 	{
 		// Update the video backend.
 		if (isRunning())

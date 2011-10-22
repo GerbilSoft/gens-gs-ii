@@ -70,14 +70,15 @@ void IdleThread::stop(void)
 void IdleThread::run(void)
 {
 	// TODO: Use an enum for the Intro Effect Style.
-	int prevIntroStyle = gqt4_config->introStyle();
+	int prevIntroStyle = gqt4_cfg->getInt(QLatin1String("Intro_Effect/introStyle"));
 	
 	// Run the idle thread.
 	m_mutex.lock();
 	while (!m_stop)
 	{
 		// Check if the intro effect has changed.
-		if (prevIntroStyle != gqt4_config->introStyle())
+		const int newIntroStyle = gqt4_cfg->getInt(QLatin1String("Intro_Effect/introStyle"));
+		if (prevIntroStyle != newIntroStyle)
 		{
 			// Intro effect has changed. Delete existing effects.
 			delete m_crazyEffect;
@@ -85,7 +86,7 @@ void IdleThread::run(void)
 		}
 		
 		// Run the intro effect.
-		prevIntroStyle = gqt4_config->introStyle();
+		prevIntroStyle = newIntroStyle;
 		switch (prevIntroStyle)
 		{
 			case 0:
@@ -107,7 +108,8 @@ void IdleThread::run(void)
 					m_crazyEffect = new LibGens::CrazyEffect();
 				
 				m_crazyEffect->run(
-					(LibGens::CrazyEffect::ColorMask)gqt4_config->introColor());
+					(LibGens::CrazyEffect::ColorMask)gqt4_cfg->getInt(
+						QLatin1String("Intro_Effect/introColor")));
 				emit frameDone();
 				usleep(20000);
 				break;

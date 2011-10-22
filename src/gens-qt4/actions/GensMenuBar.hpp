@@ -31,10 +31,6 @@
 #include <QtGui/QMenuBar>
 #include <QtGui/QKeySequence>
 
-// GensConfig is needed for synchronization.
-// GensConfig also registers LibGens::SysVersion::RegionCode_t.
-#include "Config/GensConfig.hpp"
-
 // EmuManager is needed for some settings.
 #include "../EmuManager.hpp"
 
@@ -149,7 +145,8 @@ class GensMenuBar : public QObject
 		
 		/** Menu synchronization slots. **/
 		void recentRoms_updated(void);
-		void stretchMode_changed_slot(GensConfig::StretchMode_t newStretchMode);
+		// TODO: Port to ConfigStore.
+		//void stretchMode_changed_slot(GensConfig::StretchMode_t newStretchMode);
 		void regionCode_changed_slot(int newRegionCode); // LibGens::SysVersion::RegionCode_t
 		void enableSRam_changed_slot(bool newEnableSRam);
 };

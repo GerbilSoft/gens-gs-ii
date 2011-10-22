@@ -551,7 +551,8 @@ int EmuManager::closeRom(bool emitStateChanged)
 	// clearing the screen is a waste of time.
 	if (emitStateChanged)
 	{
-		if (gqt4_config->introStyle() == 0)
+		const int introStyle = gqt4_cfg->getInt(QLatin1String("Intro_Effect/introStyle"));
+		if (introStyle == 0)
 		{
 			// Intro Effect is disabled.
 			// Clear the screen.

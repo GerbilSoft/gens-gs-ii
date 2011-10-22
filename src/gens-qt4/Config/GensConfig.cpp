@@ -52,16 +52,6 @@ class GensConfigPrivate
 		/** Configuration path. **/
 		QString cfgPath;
 		
-		/** Onscreen display. **/
-		bool osdFpsEnabled;
-		bool osdMsgEnabled;
-		QColor osdFpsColor;
-		QColor osdMsgColor;
-		
-		/** Intro effect. **/
-		int introStyle;
-		int introColor;
-		
 		/** System. **/
 		int regionCode; // LibGens::SysVersion::RegionCode_t
 		uint16_t regionCodeOrder;
@@ -77,22 +67,17 @@ class GensConfigPrivate
 		QString extprgUnRAR;
 		
 		/** Graphics settings. **/
-		bool aspectRatioConstraint;
-		bool fastBlur;
-		bool bilinearFilter;
 		GensConfig::InterlacedMode_t interlacedMode;
 		int contrast;
 		int brightness;
 		bool grayscale;
 		bool inverted;
 		int colorScaleMethod;
-		GensConfig::StretchMode_t stretchMode;
 		
 		/** General settings. **/
 		bool autoFixChecksum;
 		bool autoPause;
 		bool borderColor;
-		bool pauseTint;
 		bool ntscV30Rolling;
 		
 		/** Savestates. **/
@@ -167,28 +152,8 @@ int GensConfigPrivate::reload(const QString& filename)
 	autoFixChecksum = settings.value(QLatin1String("autoFixChecksum"), true).toBool();
 	autoPause = settings.value(QLatin1String("autoPause"), false).toBool();
 	borderColor = settings.value(QLatin1String("borderColorEmulation"), true).toBool();
-	pauseTint = settings.value(QLatin1String("pauseTint"), true).toBool();
 	ntscV30Rolling = settings.value(QLatin1String("ntscV30Rolling"), true).toBool();
 	//settings.endGroup();
-	
-	/** Onscreen display. **/
-	settings.beginGroup(QLatin1String("OSD"));
-	osdFpsEnabled = settings.value(QLatin1String("fpsEnabled"), true).toBool();
-	osdFpsColor   = settings.value(QLatin1String("fpsColor"), QColor()).value<QColor>();
-	if (!osdFpsColor.isValid())
-		osdFpsColor = QColor(Qt::white);
-	osdMsgEnabled = settings.value(QLatin1String("msgEnabled"), true).toBool();
-	osdMsgColor   = settings.value(QLatin1String("msgColor"), QColor()).value<QColor>();
-	if (!osdMsgColor.isValid())
-		osdMsgColor = QColor(Qt::white);
-	settings.endGroup();
-	
-	/** Intro effect. **/
-	// TODO: Enums.
-	settings.beginGroup(QLatin1String("Intro_Effect"));
-	introStyle = settings.value(QLatin1String("introStyle"), 0).toInt();	// none
-	introColor = settings.value(QLatin1String("introColor"), 7).toInt();	// white
-	settings.endGroup();
 	
 	/** System. **/
 	settings.beginGroup(QLatin1String("System"));
@@ -239,9 +204,6 @@ int GensConfigPrivate::reload(const QString& filename)
 	
 	/** Graphics settings. **/
 	settings.beginGroup(QLatin1String("Graphics"));
-	aspectRatioConstraint = settings.value(QLatin1String("aspectRatioConstraint"), true).toBool();
-	fastBlur = settings.value(QLatin1String("fastBlur"), false).toBool();
-	bilinearFilter = settings.value(QLatin1String("bilinearFilter"), false).toBool();
 	// TODO: Add support for INTERLACED_2X.
 	int interlaced_tmp = settings.value(QLatin1String("interlacedMode"), (int)GensConfig::INTERLACED_FLICKER).toInt();
 	if ((interlaced_tmp < (int)GensConfig::INTERLACED_EVEN) || (interlaced_tmp > (int)GensConfig::INTERLACED_FLICKER))
@@ -256,10 +218,6 @@ int GensConfigPrivate::reload(const QString& filename)
 				(int)LibGens::VdpPalette::COLSCALE_FULL).toInt();
 	if ((colorScaleMethod < 0) || (colorScaleMethod > (int)LibGens::VdpPalette::COLSCALE_FULL_SH))
 		colorScaleMethod = (int)LibGens::VdpPalette::COLSCALE_FULL;
-	int stretch_tmp = settings.value(QLatin1String("stretchMode"), (int)GensConfig::STRETCH_H).toInt();
-	if ((stretch_tmp < (int)GensConfig::STRETCH_NONE) || (stretch_tmp > (int)GensConfig::STRETCH_FULL))
-		stretch_tmp = (int)GensConfig::STRETCH_H;
-	stretchMode = (GensConfig::StretchMode_t)stretch_tmp;
 	
 	settings.endGroup();
 	
@@ -357,24 +315,8 @@ int GensConfigPrivate::save(const QString& filename)
 	settings.setValue(QLatin1String("autoFixChecksum"), autoFixChecksum);
 	settings.setValue(QLatin1String("autoPause"), autoPause);
 	settings.setValue(QLatin1String("borderColorEmulation"), borderColor);
-	settings.setValue(QLatin1String("pauseTint"), pauseTint);
 	settings.setValue(QLatin1String("ntscV30Rolling"), ntscV30Rolling);
 	//settings.endGroup();
-	
-	/** Onscreen display. **/
-	settings.beginGroup(QLatin1String("OSD"));
-	settings.setValue(QLatin1String("fpsEnabled"), osdFpsEnabled);
-	settings.setValue(QLatin1String("fpsColor"),   osdFpsColor.name());
-	settings.setValue(QLatin1String("msgEnabled"), osdMsgEnabled);
-	settings.setValue(QLatin1String("msgColor"),   osdMsgColor.name());
-	settings.endGroup();
-	
-	/** Intro effect. **/
-	// TODO: Enums.
-	settings.beginGroup(QLatin1String("Intro_Effect"));
-	settings.setValue(QLatin1String("introStyle"), introStyle);
-	settings.setValue(QLatin1String("introColor"), introColor);
-	settings.endGroup();
 	
 	/** System. **/
 	settings.beginGroup(QLatin1String("System"));
@@ -399,9 +341,6 @@ int GensConfigPrivate::save(const QString& filename)
 	
 	/** Graphics settings. **/
 	settings.beginGroup(QLatin1String("Graphics"));
-	settings.setValue(QLatin1String("aspectRatioConstraint"), aspectRatioConstraint);
-	settings.setValue(QLatin1String("fastBlur"), fastBlur);
-	settings.setValue(QLatin1String("bilinearFilter"), bilinearFilter);
 	settings.setValue(QLatin1String("interlacedMode"), (int)interlacedMode);
 	settings.setValue(QLatin1String("contrast"), contrast);
 	settings.setValue(QLatin1String("brightness"), brightness);
@@ -409,7 +348,6 @@ int GensConfigPrivate::save(const QString& filename)
 	settings.setValue(QLatin1String("inverted"), inverted);
 	// using int to prevent Qt issues
 	settings.setValue(QLatin1String("colorScaleMethod"), colorScaleMethod);
-	settings.setValue(QLatin1String("stretchMode"), (int)stretchMode);
 	settings.endGroup();
 	
 	/** Savestates. **/
@@ -537,16 +475,6 @@ int GensConfig::save(const QString& filename)
  */
 void GensConfig::emitAll(void)
 {
-	/** Onscreen display. **/
-	emit osdFpsEnabled_changed(d->osdFpsEnabled);
-	emit osdFpsColor_changed(d->osdFpsColor);
-	emit osdMsgEnabled_changed(d->osdMsgEnabled);
-	emit osdMsgColor_changed(d->osdMsgColor);
-	
-	/** Intro effect. **/
-	emit introStyle_changed(d->introStyle);
-	emit introColor_changed(d->introColor);
-	
 	/** System. **/
 	emit regionCode_changed(d->regionCode);
 	emit regionCodeOrder_changed(d->regionCodeOrder);
@@ -562,22 +490,17 @@ void GensConfig::emitAll(void)
 	
 	/** Graphics settings. **/
 	// TODO: Optimize palette calculation so it's only done once.
-	emit aspectRatioConstraint_changed(d->aspectRatioConstraint);
-	emit fastBlur_changed(d->fastBlur);
-	emit bilinearFilter_changed(d->bilinearFilter);
 	emit interlacedMode_changed(d->interlacedMode);
 	emit contrast_changed(d->contrast);
 	emit brightness_changed(d->brightness);
 	emit grayscale_changed(d->grayscale);
 	emit inverted_changed(d->inverted);
 	emit colorScaleMethod_changed(d->colorScaleMethod);
-	emit stretchMode_changed(d->stretchMode);
 	
 	/** General settings. **/
 	emit autoFixChecksum_changed(d->autoFixChecksum);
 	emit autoPause_changed(d->autoPause);
 	emit borderColor_changed(d->borderColor);
-	emit pauseTint_changed(d->pauseTint);
 	emit ntscV30Rolling_changed(d->ntscV30Rolling);
 	
 	/** Savestates. **/
@@ -693,16 +616,6 @@ void GensConfig::set##setPropName(setPropType new##setPropName) \
 	emit propName##_changed(new##setPropName); \
 }
 
-/** Onscreen display. **/
-GC_PROPERTY_WRITE(bool, osdFpsEnabled, bool, OsdFpsEnabled)
-GC_PROPERTY_WRITE(QColor, osdFpsColor, const QColor&, OsdFpsColor)
-GC_PROPERTY_WRITE(bool, osdMsgEnabled, bool, OsdMsgEnabled)
-GC_PROPERTY_WRITE(QColor, osdMsgColor, const QColor&, OsdMsgColor)
-
-/** Intro effect. **/
-GC_PROPERTY_WRITE_RANGE(int, introStyle, int, IntroStyle, 0, 2)
-GC_PROPERTY_WRITE_RANGE(int, introColor, int, IntroColor, 0, 7)
-
 /** System. **/
 // NOTE: Uses LibGens::SysVersion::RegionCode_t, but Q_ENUMS requires a QObject for storage.
 GC_PROPERTY_WRITE_RANGE(int, regionCode,
@@ -755,9 +668,6 @@ void GensConfig::setExtPrgUnRAR(const QString& filename)
 
 
 /** Graphics settings. **/
-GC_PROPERTY_WRITE(bool, aspectRatioConstraint, bool, AspectRatioConstraint)
-GC_PROPERTY_WRITE(bool, fastBlur, bool, FastBlur)
-GC_PROPERTY_WRITE(bool, bilinearFilter, bool, BilinearFilter)
 // TODO: Add support for INTERLACED_2X.
 GC_PROPERTY_WRITE_RANGE(GensConfig::InterlacedMode_t, interlacedMode,
 			GensConfig::InterlacedMode_t, InterlacedMode,
@@ -770,16 +680,12 @@ GC_PROPERTY_WRITE_RANGE(int, colorScaleMethod,
 			int, ColorScaleMethod,
 			(int)LibGens::VdpPalette::COLSCALE_RAW,
 			(int)LibGens::VdpPalette::COLSCALE_FULL_SH)
-GC_PROPERTY_WRITE_RANGE(GensConfig::StretchMode_t, stretchMode,
-			GensConfig::StretchMode_t, StretchMode,
-			(int)STRETCH_NONE, (int)STRETCH_FULL)
 
 
 /** General settings. **/
 GC_PROPERTY_WRITE(bool, autoFixChecksum, bool, AutoFixChecksum)
 GC_PROPERTY_WRITE(bool, autoPause, bool, AutoPause)
 GC_PROPERTY_WRITE(bool, borderColor, bool, BorderColor)
-GC_PROPERTY_WRITE(bool, pauseTint, bool, PauseTint)
 GC_PROPERTY_WRITE(bool, ntscV30Rolling, bool, NtscV30Rolling)
 
 
