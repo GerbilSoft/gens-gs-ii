@@ -125,8 +125,6 @@ SET(gens-qt4_COMMON_SRCS
 	GeneralConfigWindow_slots.cpp
 	widgets/GensLineEdit.cpp
 	Config/GensConfig.cpp
-	Config/ConfigItem.cpp
-	Config/ConfigItemColor.cpp
 	Config/ConfigStore.cpp
 	Config/CtrlConfig.cpp
 	cdrom/FindCdrom.cpp
@@ -166,8 +164,6 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	GeneralConfigWindow.hpp
 	widgets/GensLineEdit.hpp
 	Config/GensConfig.hpp
-	Config/ConfigItem.hpp
-	Config/ConfigItemColor.hpp
 	Config/ConfigStore.hpp
 	Config/CtrlConfig.hpp
 	cdrom/FindCdrom.hpp
