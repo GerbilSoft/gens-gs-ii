@@ -318,6 +318,8 @@ static inline QColor ValByPath_QColor(const char *path)
 	{ return gqt4_cfg->get(QLatin1String(path)).value<QColor>(); }
 static inline int ValByPath_int(const char *path)
 	{ return gqt4_cfg->get(QLatin1String(path)).toInt(); }
+static inline int ValByPath_uint(const char *path)
+	{ return gqt4_cfg->get(QLatin1String(path)).toUInt(); }
 static inline QString ValByPath_QString(const char *path)
 	{ return gqt4_cfg->get(QLatin1String(path)).toString(); }
 
@@ -375,12 +377,12 @@ void GeneralConfigWindow::reload(void)
 	
 	/** System. **/
 	// TODO: Port to ConfigItem.
-	cboRegionCurrent->setCurrentIndex((int)gqt4_config->regionCode() + 1);
+	cboRegionCurrent->setCurrentIndex(ValByPath_int("System/regionCode") + 1);
 	
 	// Region auto-detection settings.
 	// TODO: Port to ConfigItem.
 	lstRegionDetect->clear();
-	uint16_t regionCodeOrder = gqt4_config->regionCodeOrder();
+	uint16_t regionCodeOrder = (uint16_t)ValByPath_uint("System/regionCodeOrder");
 	for (int i = 0; i < 4; i++, regionCodeOrder >>= 4)
 	{
 		const QString str = EmuManager::LgRegionCodeStrMD(regionCodeOrder & 0xF);
@@ -404,6 +406,8 @@ static inline void SetValByPath_bool(const char *path, bool value)
 static inline void SetValByPath_QColor(const char *path, const QColor& value)
 	{ gqt4_cfg->set(QLatin1String(path), value.name()); }
 static inline void SetValByPath_int(const char *path, int value)
+	{ gqt4_cfg->set(QLatin1String(path), value); }
+static inline void SetValByPath_uint(const char *path, unsigned int value)
 	{ gqt4_cfg->set(QLatin1String(path), value); }
 static inline void SetValByPath_QString(const char *path, const QString& value)
 	{ gqt4_cfg->set(QLatin1String(path), value); }
@@ -453,9 +457,8 @@ void GeneralConfigWindow::apply(void)
 	SetValByPath_bool("ntscV30Rolling", chkNtscV30Rolling->isChecked());
 	
 	/** System. **/
-	// TODO: Port to ConfigItem.
-	gqt4_config->setRegionCode((LibGens::SysVersion::RegionCode_t)(cboRegionCurrent->currentIndex() - 1));
-	gqt4_config->setRegionCodeOrder(regionCodeOrder());
+	SetValByPath_int("System/regionCode", (cboRegionCurrent->currentIndex() - 1));
+	SetValByPath_uint("System/regionCodeOrder", regionCodeOrder());
 	
 	// Disable the Apply button.
 	// TODO: If Apply was clicked, set focus back to the main window elements.
@@ -558,8 +561,7 @@ void GeneralConfigWindow::on_btnRegionDetectUp_clicked(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	// TODO: Port to ConfigItem.
-	//gqt4_config->setRegionCodeOrder(regionCodeOrder());
+	SetValByPath_uint("System/regionCodeOrder", regionCodeOrder());
 #endif
 }
 
@@ -584,7 +586,7 @@ void GeneralConfigWindow::on_btnRegionDetectDown_clicked(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	gqt4_config->setRegionCodeOrder(regionCodeOrder());
+	SetValByPath_uint("System/regionCodeOrder", regionCodeOrder());
 #endif
 }
 
