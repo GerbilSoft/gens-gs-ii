@@ -217,9 +217,19 @@ SET(gens-qt4_CDROM_WIN32_MOC_HEADERS
 IF(QT_QTDBUS_FOUND)
 	# QtDBus found.
 	# Enable UDisks support.
+	# NOTE: The D-BUS interfaces are generated in ${CMAKE_CURRENT_BINARY_DIR},
+	# *not* ${CMAKE_CURRENT_BINARY_DIR}/cdrom/dbus/.
+	INCLUDE(QtDBusInterfaceNoNS)
+	QT4_ADD_DBUS_INTERFACES_NONS(
+		gens-qt4-DBUS_SRCS
+		cdrom/dbus/org.freedesktop.UDisks.xml
+		cdrom/dbus/org.freedesktop.UDisks.Device.xml
+		)
+	
 	SET(gens-qt4_SRCS
 		${gens-qt4_SRCS}
 		${gens-qt4_CDROM_UDISKS_SRCS}
+		${gens-qt4-DBUS_SRCS}
 		)
 	SET(gens-qt4_MOC_HEADERS
 		${gens-qt4_MOC_HEADERS}

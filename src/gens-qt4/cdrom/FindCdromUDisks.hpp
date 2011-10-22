@@ -27,8 +27,10 @@
 // QtDBus includes.
 #include <QtDBus/QDBusObjectPath>
 
-// QtDBus forward declarations.
-class QDBusInterface;
+// UDisks interface.
+#include "udisksinterface.h"
+
+// TODO: Make a private class.
 
 namespace GensQt4
 {
@@ -66,7 +68,7 @@ class FindCdromUDisks : public FindCdrom
 		static bool GetBoolProperty(QDBusInterface *dbus_if, const char *prop);
 		
 		// D-BUS interface to UDisks.
-		QDBusInterface *m_ifUDisks;
+		OrgFreedesktopUDisksInterface *m_ifUDisks;
 		int queryUDisksDevice(const QDBusObjectPath& objectPath);
 	
 	private slots:
