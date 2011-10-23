@@ -256,7 +256,7 @@ int EmuManager::openRom(const QString& filename, QString z_filename)
 	
 	// Add the ROM file to the Recent ROMs list.
 	// TODO: Don't do this if the ROM couldn't be loaded.
-	gqt4_config->m_recentRoms->update(filename, z_filename, rom->sysId());
+	gqt4_cfg->recentRomsUpdate(filename, z_filename, rom->sysId());
 	
 	// Load the selected ROM file.
 	return loadRom(rom);

@@ -193,11 +193,6 @@ int GensConfigPrivate::reload(const QString& filename)
 	q->m_ctrlConfig->load(settings);
 	settings.endGroup();
 	
-	/** Recent ROMs. **/
-	settings.beginGroup(QLatin1String("Recent_ROMs"));
-	q->m_recentRoms->load(settings);
-	settings.endGroup();
-	
 	/** Emulation options. (Options menu) **/
 	settings.beginGroup(QLatin1String("Options"));
 	enableSRam = settings.value(QLatin1String("enableSRam"), true).toBool();
@@ -302,11 +297,6 @@ int GensConfigPrivate::save(const QString& filename)
 	q->m_ctrlConfig->save(settings);
 	settings.endGroup();
 	
-	/** Recent ROMs. **/
-	settings.beginGroup(QLatin1String("Recent_ROMs"));
-	q->m_recentRoms->save(settings);
-	settings.endGroup();
-	
 	/** Emulation options. (Options menu) **/
 	settings.beginGroup(QLatin1String("Options"));
 	settings.setValue(QLatin1String("enableSRam"), enableSRam);
@@ -325,7 +315,6 @@ GensConfig::GensConfig(QObject *parent)
 	: QObject(parent)
 	, d(new GensConfigPrivate(this))
 	, m_ctrlConfig(new CtrlConfig(this))
-	, m_recentRoms(new RecentRoms(this))
 {
 	// Determine the configuration path.
 	// TODO: Portable mode.

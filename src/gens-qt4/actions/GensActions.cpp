@@ -124,7 +124,7 @@ bool GensActions::doAction(int action, bool state)
 		{
 			// File, Recent ROMs.
 			int romID = MNUID_ITEM(action);
-			const RecentRom_t rom = gqt4_config->m_recentRoms->getRom(romID);
+			const RecentRom_t rom = gqt4_cfg->recentRomsEntry(romID);
 			if (rom.filename.isEmpty())
 			{
 				// Invalid ROM ID.

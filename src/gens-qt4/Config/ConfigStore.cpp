@@ -50,7 +50,12 @@ class ConfigStorePrivate
 	public:
 		ConfigStorePrivate(ConfigStore *q);
 		~ConfigStorePrivate();
-		
+	
+	private:
+		ConfigStore *const q;
+		Q_DISABLE_COPY(ConfigStorePrivate)
+	
+	public:
 		/**
 		 * Reset all settings to defaults.
 		 */
@@ -144,11 +149,8 @@ class ConfigStorePrivate
 		 */
 		static void InvokeQtMethod(QObject *object, const char *method, QVariant param);
 	
-	private:
-		ConfigStore *const q;
-		Q_DISABLE_COPY(ConfigStorePrivate)
-	
-	public:
+		/** Internal variables. **/
+		
 		// Current settings.
 		// TODO: Use const char* for the key instead of QString?
 		QHash<QString, QVariant> settings;
@@ -183,6 +185,9 @@ class ConfigStorePrivate
 		};
 		QHash<QString, QVector<SignalMap>* > signalMaps;
 		QMutex mtxSignalMaps;
+		
+		// Recent ROMs.
+		RecentRoms *const recentRoms;
 };
 
 
@@ -280,6 +285,7 @@ const ConfigStorePrivate::DefaultSetting ConfigStorePrivate::DefaultSettings[] =
 
 ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
 	: q(q)
+	, recentRoms(new RecentRoms())
 {
 	// Initialize settings.
 	reset();
@@ -516,6 +522,12 @@ int ConfigStorePrivate::load(const QString& filename)
 	settings.remove(QLatin1String("_VersionExt"));
 	settings.remove(QLatin1String("_VersionVcs"));
 	
+	// Load the Recent ROMs settings.
+	// TODO: Remove Recent ROMs entries from qSettings?
+	qSettings.beginGroup(QLatin1String("Recent_ROMs"));
+	recentRoms->load(&qSettings);
+	qSettings.endGroup();
+	
 	// Finished loading settings.
 	// NOTE: Caller must call emitAll() for settings to take effect.
 	return 0;
@@ -606,6 +618,12 @@ int ConfigStorePrivate::save(const QString& filename)
 	{
 		qSettings.setValue(key, settingsTmp.value(key));
 	}
+	
+	// Save the Recent ROMs settings.
+	// TODO: Remove Recent ROMs entries from qSettings?
+	qSettings.beginGroup(QLatin1String("Recent_ROMs"));
+	recentRoms->save(&qSettings);
+	qSettings.endGroup();
 	
 	return 0;
 }
@@ -814,5 +832,34 @@ void ConfigStore::notifyAll(void)
  */
 QString ConfigStore::configPath(void)
 	{ return d->configPath; }
+
+
+/** Recent ROMs. **/
+
+/**
+ * Update the Recent ROMs list.
+ * @param filename ROM filename.
+ * @param z_filename Filename of ROM within archive.
+ * @param sysId System ID.
+ */
+void ConfigStore::recentRomsUpdate(QString filename, QString z_filename,
+					LibGens::Rom::MDP_SYSTEM_ID sysId)
+{
+	d->recentRoms->update(filename, z_filename, sysId);
+}
+
+/**
+ * Get a const pointer to the Recent ROMs object.
+ * @return Const pointer to the Recent ROMs object.
+ */
+const RecentRoms *ConfigStore::recentRomsObject(void)
+	{ return d->recentRoms; }
+
+/**
+ * Get a Recent ROMs entry.
+ * @param id Recent ROM ID.
+ */
+RecentRom_t ConfigStore::recentRomsEntry(int id)
+	{ return d->recentRoms->getRom(id); }
 
 }

@@ -40,9 +40,6 @@
 // Controller configuration.
 #include "CtrlConfig.hpp"
 
-// Recent ROMs.
-#include "RecentRoms.hpp"
-
 // SysVersion.hpp (contains RegionCode_t)
 #include "libgens/MD/SysVersion.hpp"
 
@@ -204,10 +201,6 @@ class GensConfig : public QObject
 		// Controller configuration class.
 		// TODO: Make it private?
 		CtrlConfig *m_ctrlConfig;
-		
-		// Recent ROMs class.
-		// TODO: Make it private?
-		RecentRoms *m_recentRoms;
 };
 
 }

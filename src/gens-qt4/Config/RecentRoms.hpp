@@ -49,6 +49,10 @@ class RecentRoms : public QObject
 	public:
 		RecentRoms(QObject *parent = 0);
 		
+	private:
+		Q_DISABLE_COPY(RecentRoms)
+	
+	public:
 		// Maximum number of ROMs allowed in Recent ROMs.
 		static const int MAX_ROMS;
 		
@@ -67,7 +71,7 @@ class RecentRoms : public QObject
 		 * @param settings Settings file.
 		 * @return Size of Recent ROMs list on success; negative on error.
 		 */
-		int load(const QSettings& settings);
+		int load(const QSettings *settings);
 		
 		/**
 		 * save(): Save the recent ROMs list to a settings file.
@@ -75,7 +79,7 @@ class RecentRoms : public QObject
 		 * @param settings Settings file.
 		 * @return Size of Recent ROMs list on success; negative on error.
 		 */
-		int save(QSettings& settings);
+		int save(QSettings *settings);
 		
 		/**
 		 * getRom(): Get a recent ROM entry.
@@ -88,7 +92,7 @@ class RecentRoms : public QObject
 		 * romList(): Get a const reference to the ROM list.
 		 * @return Const reference to the ROM list.
 		 */
-		const QList<RecentRom_t>& romList(void);
+		const QList<RecentRom_t>& romList(void) const;
 	
 	signals:
 		// Recent ROMs list has been updated.
@@ -96,18 +100,7 @@ class RecentRoms : public QObject
 	
 	protected:
 		QList<RecentRom_t> m_lstRoms;
-	
-	private:
-		Q_DISABLE_COPY(RecentRoms)
 };
-
-/**
- * romList(): Get a const reference to the ROM list.
- * @return Const reference to the ROM list.
- */
-inline const QList<RecentRom_t>& RecentRoms::romList(void)
-	{ return m_lstRoms; }
-
 
 }
 

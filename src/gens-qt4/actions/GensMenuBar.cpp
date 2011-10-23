@@ -87,7 +87,7 @@ void GensMenuBarPrivate::init(EmuManager *initEmuManager)
 			 q, SLOT(menuItemSelected(int)));
 	
 	// Create the "Recent ROMs" menu.
-	recentRomsMenu = new RecentRomsMenu(NULL, gqt4_config->m_recentRoms);
+	recentRomsMenu = new RecentRomsMenu(NULL, gqt4_cfg->recentRomsObject());
 	QObject::connect(recentRomsMenu, SIGNAL(updated()),
 			 q, SLOT(recentRoms_updated()));
 	QObject::connect(recentRomsMenu, SIGNAL(triggered(int)),

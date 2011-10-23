@@ -24,8 +24,14 @@
 #ifndef __GENS_QT4_CONFIG_CONFIGSTORE_HPP__
 #define __GENS_QT4_CONFIG_CONFIGSTORE_HPP__
 
+// LibGens includes.
+#include "libgens/Rom.hpp"
+
 // Qt includes.
 #include <QtCore/QObject>
+
+// Recent ROMs class.
+#include "RecentRoms.hpp"
 
 namespace GensQt4
 {
@@ -136,6 +142,29 @@ class ConfigStore : public QObject
 		 * @return Configuration path.
 		 */
 		QString configPath(void);
+		
+		/** Recent ROMs. **/
+		
+		/**
+		 * Update the Recent ROMs list.
+		 * @param filename ROM filename.
+		 * @param z_filename Filename of ROM within archive.
+		 * @param sysId System ID.
+		 */
+		void recentRomsUpdate(QString filename, QString z_filename,
+					LibGens::Rom::MDP_SYSTEM_ID sysId);
+		
+		/**
+		 * Get a const pointer to the Recent ROMs object.
+		 * @return Const pointer to the Recent ROMs object.
+		 */
+		const RecentRoms *recentRomsObject(void);
+		
+		/**
+		 * Get a Recent ROMs entry.
+		 * @param id Recent ROM ID.
+		 */
+		RecentRom_t recentRomsEntry(int id);
 };
 
 }
