@@ -52,11 +52,6 @@ class GensConfigPrivate
 		/** Configuration path. **/
 		QString cfgPath;
 		
-		/** System. **/
-		int regionCode; // LibGens::SysVersion::RegionCode_t
-		uint16_t regionCodeOrder;
-		static bool IsRegionCodeOrderValid(uint16_t order);
-		
 		/** Savestates. **/
 		int saveSlot;
 		
@@ -79,31 +74,6 @@ GensConfigPrivate::GensConfigPrivate(GensConfig* q)
 	: q(q)
 {}
 
-/**
- * IsRegionCodeOrderValid(): Check if a region code order is valid.
- * @param order Region code order.
- * @return True if the region code order is valid; false if it isn't.
- */
-bool GensConfigPrivate::IsRegionCodeOrderValid(uint16_t order)
-{
-	static const uint16_t ms_RegionCodeOrder_tbl[24] =
-	{
-		0x4812, 0x4821, 0x4182, 0x4128, 0x4281, 0x4218, 
-		0x8412, 0x8421, 0x8124, 0x8142, 0x8241, 0x8214,
-		0x1482, 0x1428, 0x1824, 0x1842, 0x1248, 0x1284,
-		0x2481, 0x2418,	0x2814, 0x2841, 0x2148, 0x2184
-	};
-	
-	for (size_t i = 0; i < (sizeof(ms_RegionCodeOrder_tbl)/sizeof(ms_RegionCodeOrder_tbl[0])); i++)
-	{
-		if (ms_RegionCodeOrder_tbl[i] == order)
-			return true;
-	}
-	
-	// Region code order is not valid.
-	return false;
-}
-
 
 /**
  * reload(): Load the user's configuration file.
@@ -116,24 +86,6 @@ int GensConfigPrivate::reload(const QString& filename)
 	
 	// TODO: Check if the file was opened successfully.
 	// TODO: QVariant type checking.
-	
-	/** System. **/
-	settings.beginGroup(QLatin1String("System"));
-	
-	// NOTE: Uses LibGens::SysVersion::RegionCode_t, but Q_ENUMS requires a QObject for storage.
-	regionCode = settings.value(QLatin1String("regionCode"), (int)LibGens::SysVersion::REGION_AUTO).toInt();
-	if ((regionCode < (int)LibGens::SysVersion::REGION_AUTO) ||
-	    (regionCode > (int)LibGens::SysVersion::REGION_EU_PAL))
-	{
-		regionCode = (int)LibGens::SysVersion::REGION_AUTO;
-	}
-	
-	uint16_t regionCodeOrder_tmp = settings.value(
-			QLatin1String("regionCodeOrder"), QLatin1String("0x4812")).toString().toUShort(NULL, 0);
-	if (!IsRegionCodeOrderValid(regionCodeOrder_tmp))
-		regionCodeOrder_tmp = 0x4812;
-	regionCodeOrder = regionCodeOrder_tmp;
-	settings.endGroup();
 	
 	/** Savestates. **/
 	settings.beginGroup(QLatin1String("Savestates"));
@@ -209,14 +161,6 @@ int GensConfigPrivate::save(const QString& filename)
 	{
 		settings.remove(QLatin1String("_VersionVcs"));
 	}
-	
-	/** System. **/
-	settings.beginGroup(QLatin1String("System"));
-	settings.setValue(QLatin1String("regionCode"), (int)regionCode);
-	QString sRegionCodeOrder = QLatin1String("0x") +
-			QString::number(regionCodeOrder, 16).toUpper().rightJustified(4, QChar(L'0'));
-	settings.setValue(QLatin1String("regionCodeOrder"), sRegionCodeOrder);
-	settings.endGroup();
 	
 	/** Savestates. **/
 	settings.beginGroup(QLatin1String("Savestates"));
@@ -330,10 +274,6 @@ int GensConfig::save(const QString& filename)
  */
 void GensConfig::emitAll(void)
 {
-	/** System. **/
-	emit regionCode_changed(d->regionCode);
-	emit regionCodeOrder_changed(d->regionCodeOrder);
-	
 	/** Savestates. **/
 	emit saveSlot_changed(d->saveSlot);
 	
@@ -440,27 +380,6 @@ void GensConfig::set##setPropName(setPropType new##setPropName) \
 	\
 	d->propName = (new##setPropName); \
 	emit propName##_changed(new##setPropName); \
-}
-
-/** System. **/
-// NOTE: Uses LibGens::SysVersion::RegionCode_t, but Q_ENUMS requires a QObject for storage.
-GC_PROPERTY_WRITE_RANGE(int, regionCode,
-			int, RegionCode,
-			(int)LibGens::SysVersion::REGION_AUTO,
-			(int)LibGens::SysVersion::REGION_EU_PAL)
-
-// Region code auto-detection order.
-uint16_t GensConfig::regionCodeOrder(void) const
-	{ return d->regionCodeOrder; }
-void GensConfig::setRegionCodeOrder(uint16_t newRegionCodeOrder)
-{
-	if (d->regionCodeOrder == newRegionCodeOrder)
-		return;
-	if (!GensConfigPrivate::IsRegionCodeOrderValid(newRegionCodeOrder))
-		return;
-	
-	d->regionCodeOrder = newRegionCodeOrder;
-	emit regionCodeOrder_changed(newRegionCodeOrder);
 }
 
 

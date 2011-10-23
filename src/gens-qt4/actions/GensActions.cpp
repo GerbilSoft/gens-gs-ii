@@ -257,10 +257,10 @@ bool GensActions::doAction(int action, bool state)
 				case MNUID_ITEM(IDM_SYSTEM_REGION):
 				{
 					// Switch to the next region setting.
-					int region = (int)gqt4_config->regionCode() + 1;
+					int region = gqt4_cfg->getInt(QLatin1String("System/regionCode")) + 1;
 					if (region > (int)LibGens::SysVersion::REGION_EU_PAL)
 						region = (int)LibGens::SysVersion::REGION_AUTO;
-					gqt4_config->setRegionCode((LibGens::SysVersion::RegionCode_t)region);
+					gqt4_cfg->set(QLatin1String("System/regionCode"), region);
 					break;
 				}
 					
@@ -304,8 +304,7 @@ bool GensActions::doAction(int action, bool state)
 			}
 			
 			// Set the region code.
-			gqt4_config->setRegionCode(
-				(LibGens::SysVersion::RegionCode_t)
+			gqt4_cfg->set(QLatin1String("System/regionCode"),
 					(MNUID_ITEM(action) - MNUID_ITEM(IDM_SYSTEM_REGION_AUTODETECT) - 1));
 			break;
 		

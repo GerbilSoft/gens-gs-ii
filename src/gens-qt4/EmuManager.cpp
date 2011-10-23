@@ -127,10 +127,10 @@ EmuManager::EmuManager(QObject *parent)
 					this, SLOT(vscrollBug_changed_slot(QVariant)));
 	
 	// Region code settings.
-	connect(gqt4_config, SIGNAL(regionCode_changed(int)),
-		this, SLOT(regionCode_changed_slot(int)));	// LibGens::SysVersion::RegionCode_t
-	connect(gqt4_config, SIGNAL(regionCodeOrder_changed(uint16_t)),
-		this, SLOT(regionCodeOrder_changed_slot(uint16_t)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("System/regionCode"),
+					this, SLOT(regionCode_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("System/regionCodeOrder"),
+					this, SLOT(regionCodeOrder_changed_slot(QVariant)));
 	
 	// Emulation options. (Options menu)
 	connect(gqt4_config, SIGNAL(enableSRam_changed(bool)),
@@ -392,13 +392,23 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 		return 4;
 	}
 	
-	// Determine the system region code.
-	LibGens::SysVersion::RegionCode_t lg_region = GetLgRegionCode(
-				(LibGens::SysVersion::RegionCode_t)gqt4_config->regionCode(),
-				rom->regionCode(),
-				gqt4_config->regionCodeOrder());
+	// Validate the region code order.
+	uint16_t rc_order = (uint16_t)gqt4_cfg->getUInt(QLatin1String("System/regionCodeOrder"));
+	if (!IsRegionCodeOrderValid(rc_order))
+	{
+		// Region code order is not valid.
+		// Reset to default value. (0x4812)
+		gqt4_cfg->set(QLatin1String("System/regionCodeOrder"), 0x4812);
+		rc_order = 0x4812;
+	}
 	
-	if (gqt4_config->regionCode() == LibGens::SysVersion::REGION_AUTO)
+	// Determine the system region code.
+	const LibGens::SysVersion::RegionCode_t cfg_region =
+				(LibGens::SysVersion::RegionCode_t)gqt4_cfg->getInt(QLatin1String("System/regionCode"));
+	const LibGens::SysVersion::RegionCode_t lg_region = GetLgRegionCode(
+				cfg_region, rom->regionCode(), rc_order);
+	
+	if (cfg_region == LibGens::SysVersion::REGION_AUTO)
 	{
 		// Print the auto-detected region.
 		const QString detect_str = LgRegionCodeStr(lg_region);
@@ -661,6 +671,32 @@ QString EmuManager::sysName(void)
 		return QString();
 	
 	return SysName(m_rom->sysId(), LibGens::M68K_Mem::ms_SysVersion.region());
+}
+
+
+/**
+ * Check if a region code order is valid.
+ * @param regionCodeOrder Region code order to check.
+ * @return True if valid; false if invalid.
+ */
+bool EmuManager::IsRegionCodeOrderValid(uint16_t regionCodeOrder)
+{
+	static const uint16_t RegionCodeOrder_tbl[24] =
+	{
+		0x4812, 0x4821, 0x4182, 0x4128, 0x4281, 0x4218, 
+		0x8412, 0x8421, 0x8124, 0x8142, 0x8241, 0x8214,
+		0x1482, 0x1428, 0x1824, 0x1842, 0x1248, 0x1284,
+		0x2481, 0x2418,	0x2814, 0x2841, 0x2148, 0x2184
+	};
+	
+	for (size_t i = 0; i < (sizeof(RegionCodeOrder_tbl)/sizeof(RegionCodeOrder_tbl[0])); i++)
+	{
+		if (regionCodeOrder == RegionCodeOrder_tbl[i])
+			return true;
+	}
+	
+	// Region code order is not valid.
+	return false;
 }
 
 

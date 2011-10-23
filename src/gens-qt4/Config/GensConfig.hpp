@@ -40,9 +40,6 @@
 // Controller configuration.
 #include "CtrlConfig.hpp"
 
-// SysVersion.hpp (contains RegionCode_t)
-#include "libgens/MD/SysVersion.hpp"
-
 // Property function macro.
 // NOTE: We can't include Q_PROPERTY() or signals here due to moc limitations.
 #define GC_PROPERTY(propType, propName, setPropType, setPropName) \
@@ -110,15 +107,6 @@ class GensConfig : public QObject
 			};
 			QString userPath(ConfigPath pathID);
 		
-		/** System. **/
-		// NOTE: Uses LibGens::SysVersion::RegionCode_t, but Q_ENUMS requires a QObject for storage.
-		Q_PROPERTY(int regionCode READ regionCode WRITE setRegionCode NOTIFY regionCode_changed);
-		GC_PROPERTY(int, regionCode, int, RegionCode);
-		
-		// Region code auto-detection order.
-		Q_PROPERTY(uint16_t regionCodeOrder READ regionCodeOrder WRITE setRegionCodeOrder NOTIFY regionCodeOrder_changed);
-		GC_PROPERTY(uint16_t, regionCodeOrder, uint16_t, RegionCodeOrder);
-		
 		/** Savestates. **/
 		Q_PROPERTY(int saveSlot READ saveSlot WRITE setSaveSlot NOTIFY saveSlot_changed)
 		GC_PROPERTY(int, saveSlot, int, SaveSlot);
@@ -134,10 +122,6 @@ class GensConfig : public QObject
 		GC_PROPERTY(bool, enableSRam, bool, EnableSRam)
 	
 	signals:
-		/** System. **/
-		void regionCode_changed(int newRegionCode); // LibGens::SysVersion::RegionCode_t
-		void regionCodeOrder_changed(uint16_t newRegionCodeOrder);
-		
 		/** General settings. **/
 		void autoFixChecksum_changed(bool newAutoFixChecksum);
 		void autoPause_changed(bool newAutoPause);

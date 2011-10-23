@@ -87,6 +87,13 @@ class EmuManager : public QObject
 				return LibGens::Rom::MDP_SYSTEM_UNKNOWN;
 			return m_rom->sysId();
 		}
+		
+		/**
+		 * Check if a region code order is valid.
+		 * @param regionCodeOrder Region code order to check.
+		 * @return True if valid; false if invalid.
+		 */
+		static bool IsRegionCodeOrderValid(uint16_t regionCodeOrder);
 	
 	signals:
 		void updateFps(double fps);
@@ -345,15 +352,15 @@ class EmuManager : public QObject
 	
 		/**
 		 * regionCode_changed_slot(): Region code has changed.
-		 * @param newRegionCode New region code setting.
+		 * @param regionCode (int) New region code setting.
 		 */
-		void regionCode_changed_slot(int newRegionCode); // LibGens::SysVersion::RegionCode_t
+		void regionCode_changed_slot(const QVariant& regionCode); // LibGens::SysVersion::RegionCode_t
 		
 		/**
 		 * regionCodeOrder_changed_slot(): Region code auto-detection order has changed.
-		 * @param newRegionCodeOrder New region code auto-detection order setting.
+		 * @param regionCodeOrder (uint16_t) New region code auto-detection order setting.
 		 */
-		void regionCodeOrder_changed_slot(uint16_t newRegionCodeOrder);
+		void regionCodeOrder_changed_slot(const QVariant& regionCodeOrder);
 		
 		/**
 		 * enableSRam_changed_slot(): Enable SRam/EEPRom setting has changed.

@@ -134,10 +134,14 @@ class GensMenuBar : public QObject
 	
 	public:
 		void setEmuManager(EmuManager *newEmuManager);
-	
+		
 	public slots:
 		/** Emulation state has changed. **/
 		void stateChanged(void);
+	
+	private:
+		// Internal function for regionCode_changed_slot().
+		void regionCode_changed_slot_int(int regionCode); // LibGens::SysVersion::RegionCode_t
 	
 	private slots:
 		/** Menu item selection slot. **/
@@ -146,8 +150,8 @@ class GensMenuBar : public QObject
 		/** Menu synchronization slots. **/
 		void recentRoms_updated(void);
 		void stretchMode_changed_slot(const QVariant& newStretchMode);
+		void regionCode_changed_slot(const QVariant& regionCode); // LibGens::SysVersion::RegionCode_t
 		// TODO: Port to ConfigStore.
-		void regionCode_changed_slot(int newRegionCode); // LibGens::SysVersion::RegionCode_t
 		void enableSRam_changed_slot(bool newEnableSRam);
 		void showMenuBar_changed_slot(const QVariant& newShowMenuBar);
 };

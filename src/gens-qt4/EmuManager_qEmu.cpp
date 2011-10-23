@@ -305,18 +305,28 @@ void EmuManager::autoFixChecksum_changed_slot(const QVariant& autoFixChecksum)
 
 /**
  * regionCode_changed_slot(): Region code has changed.
- * @param newRegionCode New region code setting.
+ * @param regionCode (int) New region code setting.
  */
-// NOTE: Uses LibGens::SysVersion::RegionCode_t, but Q_ENUMS requires a QObject for storage.
-void EmuManager::regionCode_changed_slot(int newRegionCode)
+void EmuManager::regionCode_changed_slot(const QVariant& regionCode)
 {
 	// NOTE: Region code change is processed even if a ROM isn't loaded,
 	// since we're printing a message to the screen.
 	
+	LibGens::SysVersion::RegionCode_t lg_region =
+			(LibGens::SysVersion::RegionCode_t)regionCode.toInt();
+	if (lg_region < LibGens::SysVersion::REGION_AUTO ||
+	    lg_region > LibGens::SysVersion::REGION_EU_PAL)
+	{
+		// Invalid region. Reset to US/NTSC.
+		gqt4_cfg->set(QLatin1String("System/regionCode"),
+				(int)LibGens::SysVersion::REGION_US_NTSC);
+		return;
+	}
+	
 	// Queue the region code change.
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_REGION_CODE;
-	rq.region = (LibGens::SysVersion::RegionCode_t)newRegionCode;
+	rq.region = lg_region;
 	m_qEmuRequest.enqueue(rq);
 	
 	if (!m_rom || m_paused.data)
@@ -326,18 +336,28 @@ void EmuManager::regionCode_changed_slot(int newRegionCode)
 
 /**
  * regionCodeOrder_changed_slot(): Region code auto-detection order has changed.
- * @param newRegionCodeOrder New region code auto-detection order setting.
+ * @param regionCodeOrder New region code auto-detection order setting.
  */
-void EmuManager::regionCodeOrder_changed_slot(uint16_t newRegionCodeOrder)
+void EmuManager::regionCodeOrder_changed_slot(const QVariant& regionCodeOrder)
 {
 	if (!m_rom)
 		return;
-	if (gqt4_config->regionCode() != LibGens::SysVersion::REGION_AUTO)
-		return;
 	
-	// NOTE: The region code order passed as newRegionCodeOrder
-	// isn't actually used by the emulation request queue.
-	Q_UNUSED(newRegionCodeOrder)
+	const uint16_t rc_order = (uint16_t)regionCodeOrder.toUInt();
+	if (!IsRegionCodeOrderValid(rc_order))
+	{
+		// Region code order is not valid.
+		// Reset to default value. (0x4812)
+		gqt4_cfg->set(QLatin1String("System/regionCodeOrder"), 0x4812);
+		return;
+	}
+	
+	// If we're not using region code auto-detection, don't do anything else.
+	if (gqt4_cfg->getInt(QLatin1String("System/regionCode")) !=
+	    (int)LibGens::SysVersion::REGION_AUTO)
+	{
+		return;
+	}
 	
 	// Auto-detect order has changed, and we're currently using auto-detect.
 	// Handle it as a regular region code change.
@@ -1040,13 +1060,15 @@ void EmuManager::doRegionCode(LibGens::SysVersion::RegionCode_t region)
 	const QString str = tr("System region set to %1.", "osd");
 	emit osdPrintMsg(1500, str.arg(region_str));
 	
+	// NOTE: Region code order validation isn't needed here,
+	// since it's done elsewhere.
 	if (m_rom)
 	{
 		// Emulation is running. Change the region.
 		// GetLgRegionCode() is needed for region auto-detection.
 		LibGens::SysVersion::RegionCode_t lg_region = GetLgRegionCode(
 					region, m_rom->regionCode(),
-					gqt4_config->regionCodeOrder());
+					(uint16_t)gqt4_cfg->getUInt(QLatin1String("System/regionCodeOrder")));
 		gqt4_emuContext->setRegion(lg_region);
 		
 		if (region == LibGens::SysVersion::REGION_AUTO)

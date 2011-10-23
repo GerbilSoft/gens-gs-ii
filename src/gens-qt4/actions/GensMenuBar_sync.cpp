@@ -48,9 +48,9 @@ void GensMenuBarPrivate::syncConnect(void)
 {
 	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/stretchMode"),
 					q, SLOT(stretchMode_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("System/regionCode"),
+					q, SLOT(regionCode_changed_slot(QVariant)));
 	// TODO: Port to ConfigStore.
-	QObject::connect(gqt4_config, SIGNAL(regionCode_changed(int)),
-			 q, SLOT(regionCode_changed_slot(int)));	// LibGens::SysVersion::RegionCode_t
 	QObject::connect(gqt4_config, SIGNAL(enableSRam_changed(bool)),
 			 q, SLOT(enableSRam_changed_slot(bool)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("GensWindow/showMenuBar"),
@@ -69,7 +69,7 @@ void GensMenuBarPrivate::syncAll(void)
 	syncRecent();
 	syncShowMenuBar();
 	//q->stretchMode_changed_slot(gqt4_config->stretchMode());	// TODO: Port to ConfigStore.
-	q->regionCode_changed_slot(gqt4_config->regionCode());
+	q->regionCode_changed_slot_int(gqt4_cfg->getInt(QLatin1String("System/regionCode")));
 	q->enableSRam_changed_slot(gqt4_config->enableSRam());
 	q->stateChanged();
 	
@@ -160,13 +160,12 @@ void GensMenuBar::stretchMode_changed_slot(const QVariant& newStretchMode)
 
 /**
  * Region code has changed.
- * @param newRegionCode New region code.
+ * @param regionCode New region code.
  */
-// NOTE: Uses LibGens::SysVersion::RegionCode_t, but Q_ENUMS requires a QObject for storage.
-void GensMenuBar::regionCode_changed_slot(int newRegionCode)
+void GensMenuBar::regionCode_changed_slot_int(int regionCode)
 {
 	int id;
-	switch (newRegionCode)
+	switch (regionCode)
 	{
 		case LibGens::SysVersion::REGION_AUTO:		id = IDM_SYSTEM_REGION_AUTODETECT; break;
 		case LibGens::SysVersion::REGION_JP_NTSC:	id = IDM_SYSTEM_REGION_JAPAN;      break;
@@ -186,6 +185,17 @@ void GensMenuBar::regionCode_changed_slot(int newRegionCode)
 	this->lock();
 	action->setChecked(true);
 	this->unlock();
+}
+
+/**
+ * Region code has changed.
+ * (WRAPPER FUNCTION for regionCode_changed_slot_int().)
+ * @param regionCode New region code.
+ */
+void GensMenuBar::regionCode_changed_slot(const QVariant& regionCode)
+{
+	// Wrapper for regionCode_changed_slot_int().
+	regionCode_changed_slot_int(regionCode.toInt());
 }
 
 
