@@ -26,6 +26,7 @@
 
 // LibGens includes.
 #include "libgens/Rom.hpp"
+#include "libgens/GensInput/GensKey_t.h"
 
 // Qt includes.
 #include <QtCore/QObject>
@@ -165,6 +166,22 @@ class ConfigStore : public QObject
 		 * @param id Recent ROM ID.
 		 */
 		RecentRom_t recentRomsEntry(int id);
+		
+		/** Key configuration. **/
+		
+		/**
+		 * Get the action associated with a GensKey_t.
+		 * @param key GensKey_t.
+		 * @return Action ID.
+		 */
+		int keyToAction(GensKey_t key);
+		
+		/**
+		 * Get the GensKey_t associated with an action.
+		 * @param actoin Action ID.
+		 * @return GensKey_t.
+		 */
+		GensKey_t actionToKey(int action);
 };
 
 }

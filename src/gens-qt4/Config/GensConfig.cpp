@@ -51,9 +51,6 @@ class GensConfigPrivate
 		
 		/** Configuration path. **/
 		QString cfgPath;
-		
-		/** Key configuration. **/
-		GensKeyConfig keyConfig;
 	
 	private:
 		GensConfig *const q;
@@ -80,11 +77,6 @@ int GensConfigPrivate::reload(const QString& filename)
 	
 	// TODO: Check if the file was opened successfully.
 	// TODO: QVariant type checking.
-	
-	/** Key configuration. **/
-	settings.beginGroup(QLatin1String("Shortcut_Keys"));
-	keyConfig.load(settings);
-	settings.endGroup();
 	
 	/** Controller configuration. **/
 	settings.beginGroup(QLatin1String("Controllers"));
@@ -145,11 +137,6 @@ int GensConfigPrivate::save(const QString& filename)
 	{
 		settings.remove(QLatin1String("_VersionVcs"));
 	}
-	
-	/** Key configuration. **/
-	settings.beginGroup(QLatin1String("Shortcut_Keys"));
-	keyConfig.save(settings);
-	settings.endGroup();
 	
 	/** Controller configuration. **/
 	settings.beginGroup(QLatin1String("Controllers"));
@@ -349,14 +336,6 @@ void GensConfig::set##setPropName(setPropType new##setPropName) \
 	d->propName = (new##setPropName); \
 	emit propName##_changed(new##setPropName); \
 }
-
-
-/** Key configuration. **/
-int GensConfig::keyToAction(GensKey_t key)
-	{ return d->keyConfig.keyToAction(key); }
-
-GensKey_t GensConfig::actionToKey(int action)
-	{ return d->keyConfig.actionToKey(action); }
 
 }
 

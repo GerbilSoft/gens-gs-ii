@@ -106,10 +106,6 @@ class GensConfig : public QObject
 				GCPATH_MAX
 			};
 			QString userPath(ConfigPath pathID);
-		
-		/** Key configuration. **/
-		int keyToAction(GensKey_t key);
-		GensKey_t actionToKey(int action);
 	
 	private:
 		friend class GensConfigPrivate;

@@ -67,7 +67,7 @@ class GensKeyConfig : public QObject
 		 * @param settings Settings file.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int load(const QSettings& settings);
+		int load(const QSettings *settings);
 		
 		/**
 		 * save(): Save key configuration to a settings file.
@@ -75,7 +75,7 @@ class GensKeyConfig : public QObject
 		 * @param settings Settings file.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int save(QSettings& settings);
+		int save(QSettings *settings);
 	
 	private:
 		GensKeyConfigPrivate *d;

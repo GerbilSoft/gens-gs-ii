@@ -225,7 +225,7 @@ int GensKeyConfig::actionToKey(int action)
  * @param settings Settings file.
  * @return 0 on success; non-zero on error.
  */
-int GensKeyConfig::load(const QSettings& settings)
+int GensKeyConfig::load(const QSettings *settings)
 {
 	// Clear the hash tables before loading.
 	d->hashActionToKey.clear();
@@ -235,7 +235,8 @@ int GensKeyConfig::load(const QSettings& settings)
 	for (const GensKeyConfigPrivate::DefKeySetting_t *key = &d->DefKeySettings[0];
 	    key->action != 0; key++)
 	{
-		const GensKey_t gensKey = settings.value(QLatin1String(key->setting), key->gensKey).toString().toUInt(NULL, 0);
+		const GensKey_t gensKey = settings->value(
+			QLatin1String(key->setting), key->gensKey).toString().toUInt(NULL, 0);
 		d->hashActionToKey.insert(key->action, gensKey);
 		if (key->gensKey != KEYV_UNKNOWN)
 			d->hashKeyToAction.insert(gensKey, key->action);
@@ -252,7 +253,7 @@ int GensKeyConfig::load(const QSettings& settings)
  * @param settings Settings file.
  * @return 0 on success; non-zero on error.
  */
-int GensKeyConfig::save(QSettings& settings)
+int GensKeyConfig::save(QSettings *settings)
 {
 	// Save the key configuration.
 	for (const GensKeyConfigPrivate::DefKeySetting_t *key = &d->DefKeySettings[0];
@@ -262,7 +263,7 @@ int GensKeyConfig::save(QSettings& settings)
 		QString gensKey_str = QLatin1String("0x") +
 				QString::number(gensKey, 16).toUpper().rightJustified(4, QChar(L'0'));
 		
-		settings.setValue(QLatin1String(key->setting), gensKey_str);
+		settings->setValue(QLatin1String(key->setting), gensKey_str);
 	}
 	
 	// Key configuration saved.

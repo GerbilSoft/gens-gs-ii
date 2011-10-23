@@ -42,6 +42,9 @@
 #include <QtCore/QMetaObject>
 #include <QtCore/QMetaMethod>
 
+// Key configuration.
+#include "actions/GensKeyConfig.hpp"
+
 namespace GensQt4
 {
 
@@ -186,8 +189,11 @@ class ConfigStorePrivate
 		QHash<QString, QVector<SignalMap>* > signalMaps;
 		QMutex mtxSignalMaps;
 		
-		// Recent ROMs.
+		/** Recent ROMs. **/
 		RecentRoms *const recentRoms;
+		
+		/** Key configuration. **/
+		GensKeyConfig keyConfig;
 };
 
 
@@ -533,6 +539,12 @@ int ConfigStorePrivate::load(const QString& filename)
 	recentRoms->load(&qSettings);
 	qSettings.endGroup();
 	
+	// Load the key configuration.
+	// TODO: Remove key configuration entries from qSettings?
+	qSettings.beginGroup(QLatin1String("Shortcut_Keys"));
+	keyConfig.load(&qSettings);
+	qSettings.endGroup();
+	
 	// Finished loading settings.
 	// NOTE: Caller must call emitAll() for settings to take effect.
 	return 0;
@@ -628,6 +640,12 @@ int ConfigStorePrivate::save(const QString& filename)
 	// TODO: Remove Recent ROMs entries from qSettings?
 	qSettings.beginGroup(QLatin1String("Recent_ROMs"));
 	recentRoms->save(&qSettings);
+	qSettings.endGroup();
+	
+	// Save the key configuration.
+	// TODO: Remove key configuration entries from qSettings?
+	qSettings.beginGroup(QLatin1String("Shortcut_Keys"));
+	keyConfig.save(&qSettings);
 	qSettings.endGroup();
 	
 	return 0;
@@ -866,5 +884,24 @@ const RecentRoms *ConfigStore::recentRomsObject(void)
  */
 RecentRom_t ConfigStore::recentRomsEntry(int id)
 	{ return d->recentRoms->getRom(id); }
+
+
+/** Key configuration. **/
+
+/**
+ * Get the action associated with a GensKey_t.
+ * @param key GensKey_t.
+ * @return Action ID.
+ */
+int ConfigStore::keyToAction(GensKey_t key)
+	{ return d->keyConfig.keyToAction(key); }
+
+/**
+ * Get the GensKey_t associated with an action.
+ * @param actoin Action ID.
+ * @return GensKey_t.
+ */
+GensKey_t ConfigStore::actionToKey(int action)
+	{ return d->keyConfig.actionToKey(action); }
 
 }

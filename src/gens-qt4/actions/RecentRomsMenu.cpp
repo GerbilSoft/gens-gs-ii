@@ -202,7 +202,7 @@ void RecentRomsMenuPrivate::update(void)
 		// Set the shortcut key.
 		// NOTE: The shortcut key won't show up due to the "\t" after the system ID.
 		const int mnuItemId = ((IDM_FILE_RECENT_1 - 1) + i);
-		GensKey_t gensKey = gqt4_config->actionToKey(mnuItemId);
+		GensKey_t gensKey = gqt4_cfg->actionToKey(mnuItemId);
 		action->setShortcut(KeyHandlerQt::KeyValMToQtKey(gensKey));
 		
 		// Connect the signal to the signal mapper.

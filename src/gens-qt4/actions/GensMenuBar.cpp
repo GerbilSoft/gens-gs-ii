@@ -262,7 +262,7 @@ void GensMenuBarPrivate::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *par
 #endif /* __APPLE__ */
 		
 		// Set the shortcut key.
-		GensKey_t gensKey = gqt4_config->actionToKey(menu->id);
+		GensKey_t gensKey = gqt4_cfg->actionToKey(menu->id);
 		mnuItem->setShortcut(KeyHandlerQt::KeyValMToQtKey(gensKey));
 		
 		// Connect the signal to the signal mapper.

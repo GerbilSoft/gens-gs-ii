@@ -60,7 +60,7 @@ GensActions::GensActions(GensWindow *parent)
 bool GensActions::checkEventKey(GensKey_t key)
 {
 	// Look up the action from GensConfig.
-	int action = gqt4_config->keyToAction(key);
+	int action = gqt4_cfg->keyToAction(key);
 	if (action == 0)
 		return false;
 	
