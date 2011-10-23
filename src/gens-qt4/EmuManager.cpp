@@ -440,6 +440,18 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	// TODO: Load these in EmuContext directly?
 	gqt4_emuContext->setSaveDataEnable(gqt4_config->enableSRam());
 	
+	// Initialize the graphics settings.
+	LibGens::VdpPalette *palette = &gqt4_emuContext->m_vdp->m_palette;
+	palette->setContrast(gqt4_cfg->getInt(QLatin1String("Graphics/contrast")) + 100);
+	palette->setBrightness(gqt4_cfg->getInt(QLatin1String("Graphics/brightness")) + 100);
+	palette->setGrayscale(gqt4_cfg->get(QLatin1String("Graphics/grayscale")).toBool());
+	palette->setInverted(gqt4_cfg->get(QLatin1String("Graphics/inverted")).toBool());
+	palette->setColorScaleMethod(
+			(LibGens::VdpPalette::ColorScaleMethod_t)gqt4_cfg->getInt(QLatin1String("Graphics/colorScaleMethod")));
+	LibGens::Vdp::VdpEmuOptions.intRendMode =
+			(LibGens::VdpTypes::IntRend_Mode_t)gqt4_cfg->getInt(QLatin1String("Graphics/colorScaleMethod"));
+	// TODO: Sprite limits, VScroll bug, zero length DMA.
+	
 	// Start the emulation thread.
 	m_paused.data = 0;
 	gqt4_emuThread = new EmuThread();
