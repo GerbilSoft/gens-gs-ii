@@ -42,7 +42,7 @@ namespace GensQt4
  *********************************/
 
 /**
- * syncConnect(): Connect menu synchronization slots.
+ * Connect menu synchronization slots.
  */
 void GensMenuBarPrivate::syncConnect(void)
 {
@@ -53,11 +53,13 @@ void GensMenuBarPrivate::syncConnect(void)
 			 q, SLOT(regionCode_changed_slot(int)));	// LibGens::SysVersion::RegionCode_t
 	QObject::connect(gqt4_config, SIGNAL(enableSRam_changed(bool)),
 			 q, SLOT(enableSRam_changed_slot(bool)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("GensWindow/showMenuBar"),
+					q, SLOT(showMenuBar_changed_slot(QVariant)));
 }
 
 
 /**
- * syncAll(): Synchronize all menus.
+ * Synchronize all menus.
  */
 void GensMenuBarPrivate::syncAll(void)
 {
@@ -65,6 +67,7 @@ void GensMenuBarPrivate::syncAll(void)
 	
 	// Do synchronization.
 	syncRecent();
+	syncShowMenuBar();
 	//q->stretchMode_changed_slot(gqt4_config->stretchMode());	// TODO: Port to ConfigStore.
 	q->regionCode_changed_slot(gqt4_config->regionCode());
 	q->enableSRam_changed_slot(gqt4_config->enableSRam());
@@ -75,7 +78,7 @@ void GensMenuBarPrivate::syncAll(void)
 
 
 /**
- * syncRecent(): Synchronize the "Recent ROMs" menu.
+ * Synchronize the "Recent ROMs" menu.
  */
 void GensMenuBarPrivate::syncRecent(void)
 {
@@ -97,6 +100,22 @@ out:
 }
 
 
+/**
+ * Synchronize the "Show Menu Bar" item.
+ */
+void GensMenuBarPrivate::syncShowMenuBar(void)
+{
+#ifndef Q_WS_MAC
+	// Show Menu Bar.
+	this->lock();
+	QAction *actionShowMenuBar = hashActions.value(IDM_GRAPHICS_MENUBAR);
+	if (actionShowMenuBar)
+		actionShowMenuBar->setChecked(gqt4_cfg->get(QLatin1String("GensWindow/showMenuBar")).toBool());
+	this->unlock();
+#endif /* Q_WS_MAC */
+}
+
+
 /**************************
  * GensMenuBar functions. *
  **************************/
@@ -105,7 +124,7 @@ out:
 
 
 /**
- * recentRoms_updated(): Recent ROMs menu has been updated.
+ * Recent ROMs menu has been updated.
  */
 void GensMenuBar::recentRoms_updated(void)
 {
@@ -115,7 +134,7 @@ void GensMenuBar::recentRoms_updated(void)
 
 
 /**
- * stretchMode_changed_slot(): Stretch mode has changed.
+ * Stretch mode has changed.
  * @param newStretchMode New stretch mode.
  */
 void GensMenuBar::stretchMode_changed_slot(const QVariant& newStretchMode)
@@ -140,7 +159,7 @@ void GensMenuBar::stretchMode_changed_slot(const QVariant& newStretchMode)
 
 
 /**
- * regionCode_changed_slot(): Region code has changed.
+ * Region code has changed.
  * @param newRegionCode New region code.
  */
 // NOTE: Uses LibGens::SysVersion::RegionCode_t, but Q_ENUMS requires a QObject for storage.
@@ -171,7 +190,7 @@ void GensMenuBar::regionCode_changed_slot(int newRegionCode)
 
 
 /**
- * enableSRam_changed_slot(): Enable SRam/EEPRom setting has changed.
+ * Enable SRam/EEPRom setting has changed.
  * @param newEnableSRam New Enable SRam/EEPRom setting.
  */
 void GensMenuBar::enableSRam_changed_slot(bool newEnableSRam)
@@ -189,7 +208,18 @@ void GensMenuBar::enableSRam_changed_slot(bool newEnableSRam)
 
 
 /**
- * stateChanged(): Emulation state has changed.
+ * "Show Menu Bar" setting has changed.
+ * @param newShowMenuBar New "Show Menu Bar" setting.
+ */
+void GensMenuBar::showMenuBar_changed_slot(const QVariant& newShowMenuBar)
+{
+	((void)newShowMenuBar);
+	d->syncShowMenuBar();
+}
+
+
+/**
+ * Emulation state has changed.
  */
 void GensMenuBar::stateChanged(void)
 {
@@ -225,13 +255,6 @@ void GensMenuBar::stateChanged(void)
 		if (actionEnableIfOpen)
 			actionEnableIfOpen->setEnabled(isRomOpen);
 	}
-	
-#ifndef Q_WS_MAC
-	// Show Menu Bar.
-	QAction *actionShowMenuBar = d->hashActions.value(IDM_GRAPHICS_MENUBAR);
-	if (actionShowMenuBar)
-		actionShowMenuBar->setChecked(gqt4_config->showMenuBar());
-#endif /* Q_WS_MAC */
 	
 	// Z80. (Common for all systems.)
 	QAction *actionCpuReset = d->hashActions.value(IDM_SYSTEM_CPURESET_Z80);

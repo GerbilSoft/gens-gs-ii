@@ -74,8 +74,9 @@ class GensMenuBarPrivate
 		
 		void syncConnect(void);	// Connect menu synchronization slots.
 		
-		void syncAll(void);	// Synchronize all menus.
-		void syncRecent(void);	// Synchronize the "Recent ROMs" menu.
+		void syncAll(void);		// Synchronize all menus.
+		void syncRecent(void);		// Synchronize the "Recent ROMs" menu.
+		void syncShowMenuBar(void);	// Synchronize the "Show Menu Bar" item.
 	
 	private:
 		QSignalMapper *m_signalMapper;

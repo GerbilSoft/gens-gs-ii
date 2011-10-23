@@ -157,7 +157,7 @@ bool GensActions::doAction(int action, bool state)
 #ifndef Q_WS_MAC
 				case MNUID_ITEM(IDM_GRAPHICS_MENUBAR):
 					// Show Menu Bar.
-					gqt4_config->setShowMenuBar(state);
+					gqt4_cfg->set(QLatin1String("GensWindow/showMenuBar"), state);
 					break;
 #endif /* !Q_WS_MAC */
 				

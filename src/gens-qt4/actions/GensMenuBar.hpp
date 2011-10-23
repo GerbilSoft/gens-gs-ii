@@ -149,6 +149,7 @@ class GensMenuBar : public QObject
 		// TODO: Port to ConfigStore.
 		void regionCode_changed_slot(int newRegionCode); // LibGens::SysVersion::RegionCode_t
 		void enableSRam_changed_slot(bool newEnableSRam);
+		void showMenuBar_changed_slot(const QVariant& newShowMenuBar);
 };
 
 }

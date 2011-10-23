@@ -600,7 +600,9 @@ void GensWindow::showMenuBar_changed_slot(const QVariant& newShowMenuBar)
 {
 	m_cfg_showMenuBar = newShowMenuBar.toBool();
 	
-	if (m_cfg_showMenuBar)
+	// TODO: If the value changed and we're windowed,
+	// resize the window to compensate.
+	if (!m_cfg_showMenuBar)
 	{
 		// Hide the menu bar.
 		this->setMenuBar(NULL);
