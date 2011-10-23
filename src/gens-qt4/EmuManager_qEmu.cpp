@@ -435,6 +435,10 @@ void EmuManager::interlacedMode_changed_slot(const QVariant& interlacedMode)
 }
 void EmuManager::spriteLimits_changed_slot(const QVariant& spriteLimits)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_SPRITELIMITS, (int)spriteLimits.toBool()); }
+void EmuManager::zeroLengthDMA_changed_slot(const QVariant& zeroLengthDMA)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_ZEROLENGTHDMA, (int)zeroLengthDMA.toBool()); }
+void EmuManager::vscrollBug_changed_slot(const QVariant& vscrollBug)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_VSCROLLBUG, (int)vscrollBug.toBool()); }
 
 
 /** Emulation Request Queue: Processing functions. **/
@@ -959,6 +963,14 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 		
 		case EmuRequest_t::RQT_PS_SPRITELIMITS:
 			LibGens::Vdp::VdpEmuOptions.spriteLimits = (bool)(!!val);
+			break;
+		
+		case EmuRequest_t::RQT_PS_ZEROLENGTHDMA:
+			LibGens::Vdp::VdpEmuOptions.zeroLengthDMA = (bool)(!!val);
+			break;
+		
+		case EmuRequest_t::RQT_PS_VSCROLLBUG:
+			LibGens::Vdp::VdpEmuOptions.vscrollBug = (bool)(!!val);
 			break;
 		
 		default:

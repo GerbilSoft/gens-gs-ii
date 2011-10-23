@@ -115,6 +115,10 @@ EmuManager::EmuManager(QObject *parent)
 					this, SLOT(interlacedMode_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/spriteLimits"),
 					this, SLOT(spriteLimits_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("zeroLengthDMA"),
+					this, SLOT(zeroLengthDMA_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/vscrollBug"),
+					this, SLOT(vscrollBug_changed_slot(QVariant)));
 	
 	// Region code settings.
 	connect(gqt4_config, SIGNAL(regionCode_changed(int)),
@@ -454,7 +458,10 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 			(LibGens::VdpTypes::IntRend_Mode_t)gqt4_cfg->getInt(QLatin1String("Graphics/colorScaleMethod"));
 	LibGens::Vdp::VdpEmuOptions.spriteLimits =
 			gqt4_cfg->get(QLatin1String("Graphics/spriteLimits")).toBool();
-	// TODO: VScroll bug, zero length DMA.
+	LibGens::Vdp::VdpEmuOptions.zeroLengthDMA =
+			gqt4_cfg->get(QLatin1String("zeroLengthDMA")).toBool();
+	LibGens::Vdp::VdpEmuOptions.vscrollBug =
+			gqt4_cfg->get(QLatin1String("Graphics/vscrollBug")).toBool();
 	
 	// Start the emulation thread.
 	m_paused.data = 0;

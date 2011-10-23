@@ -249,8 +249,12 @@ class EmuManager : public QObject
 				RQT_PS_GRAYSCALE	= 3,
 				RQT_PS_INVERTED		= 4,
 				RQT_PS_COLORSCALEMETHOD	= 5,
+				
+				// These aren't really "palette" settings...
 				RQT_PS_INTERLACEDMODE	= 6,
 				RQT_PS_SPRITELIMITS	= 7,
+				RQT_PS_ZEROLENGTHDMA	= 8,
+				RQT_PS_VSCROLLBUG	= 9,
 			};
 			
 			RequestType rqType;
@@ -378,6 +382,8 @@ class EmuManager : public QObject
 		void colorScaleMethod_changed_slot(const QVariant& colorScaleMethod);
 		void interlacedMode_changed_slot(const QVariant& interlacedMode);
 		void spriteLimits_changed_slot(const QVariant& spriteLimits);
+		void zeroLengthDMA_changed_slot(const QVariant& zeroLengthDMA);
+		void vscrollBug_changed_slot(const QVariant& vscrollBug);
 	
 	/** Emulation Request Queue: Processing functions. **/
 	
