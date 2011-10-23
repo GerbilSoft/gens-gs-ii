@@ -28,9 +28,6 @@
 // Gens Keys.
 #include "libgens/GensInput/GensKey_t.h"
 
-// GensConfig::ConfRegionCode_t
-#include "Config/GensConfig.hpp"
-
 // Qt includes.
 #include <QtCore/QObject>
 
