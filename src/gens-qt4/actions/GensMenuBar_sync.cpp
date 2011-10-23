@@ -67,9 +67,12 @@ void GensMenuBarPrivate::syncAll(void)
 	// Do synchronization.
 	syncRecent();
 	syncShowMenuBar();
-	//q->stretchMode_changed_slot(gqt4_config->stretchMode());	// TODO: Port to ConfigStore.
-	q->regionCode_changed_slot_int(gqt4_cfg->getInt(QLatin1String("System/regionCode")));
-	q->enableSRam_changed_slot_int(gqt4_cfg->get(QLatin1String("Options/enableSRam")).toBool());
+	q->stretchMode_changed_slot_int(
+			(StretchMode_t)gqt4_cfg->getInt(QLatin1String("Graphics/stretchMode")));
+	q->regionCode_changed_slot_int(
+			(LibGens::SysVersion::RegionCode_t)gqt4_cfg->getInt(QLatin1String("System/regionCode")));
+	q->enableSRam_changed_slot_int(
+			gqt4_cfg->get(QLatin1String("Options/enableSRam")).toBool());
 	q->stateChanged();
 	
 	this->unlock();
@@ -134,19 +137,18 @@ void GensMenuBar::recentRoms_updated(void)
 
 /**
  * Stretch mode has changed.
- * @param newStretchMode New stretch mode.
+ * @param stretchMode New stretch mode.
  */
-void GensMenuBar::stretchMode_changed_slot(const QVariant& newStretchMode)
+void GensMenuBar::stretchMode_changed_slot_int(StretchMode_t stretchMode)
 {
-	int value = newStretchMode.toInt();
-	if (value < STRETCH_NONE || value > STRETCH_FULL)
+	if (stretchMode < STRETCH_NONE || stretchMode > STRETCH_FULL)
 		return;
 	
 	// Convert the stretch mode to a menu item ID.
-	value += IDM_GRAPHICS_STRETCH_NONE;
+	const int id = (int)stretchMode + IDM_GRAPHICS_STRETCH_NONE;
 	
 	// Find the action.
-	QAction *action = d->hashActions.value(value, NULL);
+	QAction *action = d->hashActions.value(id, NULL);
 	if (!action)
 		return;
 	
@@ -156,12 +158,23 @@ void GensMenuBar::stretchMode_changed_slot(const QVariant& newStretchMode)
 	this->unlock();
 }
 
+/**
+ * Stretch mode has changed.
+ * (WRAPPER FUNCTION for stretchMode_changed_slot_int().)
+ * @param stretchMode (StretchMode_t) New stretch mode.
+ */
+void GensMenuBar::stretchMode_changed_slot(const QVariant& stretchMode)
+{
+	// Wrapper for stretchMode_changed_slot_int().
+	stretchMode_changed_slot_int((StretchMode_t)stretchMode.toInt());
+}
+
 
 /**
  * Region code has changed.
  * @param regionCode New region code.
  */
-void GensMenuBar::regionCode_changed_slot_int(int regionCode)
+void GensMenuBar::regionCode_changed_slot_int(LibGens::SysVersion::RegionCode_t regionCode)
 {
 	int id;
 	switch (regionCode)
@@ -193,12 +206,13 @@ void GensMenuBar::regionCode_changed_slot_int(int regionCode)
 /**
  * Region code has changed.
  * (WRAPPER FUNCTION for regionCode_changed_slot_int().)
- * @param regionCode New region code.
+ * @param regionCode (RegionCode_t) New region code.
  */
 void GensMenuBar::regionCode_changed_slot(const QVariant& regionCode)
 {
 	// Wrapper for regionCode_changed_slot_int().
-	regionCode_changed_slot_int(regionCode.toInt());
+	regionCode_changed_slot_int(
+		(LibGens::SysVersion::RegionCode_t)regionCode.toInt());
 }
 
 
@@ -222,7 +236,7 @@ void GensMenuBar::enableSRam_changed_slot_int(bool enableSRam)
 /**
  * Enable SRam/EEPRom setting has changed.
  * (WRAPPER FUNCTION for enableSRam_changed_slot_int().)
- * @param enableSRam New Enable SRam/EEPRom setting.
+ * @param enableSRam (bool) New Enable SRam/EEPRom setting.
  */
 void GensMenuBar::enableSRam_changed_slot(const QVariant& enableSRam)
 {
