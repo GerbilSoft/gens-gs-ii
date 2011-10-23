@@ -716,8 +716,7 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 	}
 	
 	// Loop through the cells.
-	for (int x = (plane ? cell_length : GetHCells());
-	     x >= 0; x--, VSRam_Cell++)
+	for (int x = cell_length; x >= 0; x--, VSRam_Cell++)
 	{
 		if (vscroll)
 		{
@@ -1376,14 +1375,14 @@ FORCE_INLINE void Vdp::T_Render_Line_m5(void)
 	if (VDP_Reg.m5.Set3 & 0x04)
 	{
 		// 2-cell VScroll.
-		T_Render_Line_Scroll<false, interlaced, true, h_s>(0, 0);	// Scroll B
+		T_Render_Line_Scroll<false, interlaced, true, h_s>(0, GetHCells());	// Scroll B
 		T_Render_Line_ScrollA_Window<interlaced, true, h_s>();			// Scroll A
 	}
 	else
 	{
 		// Full VScroll.
-		T_Render_Line_Scroll<false, interlaced, false, h_s>(0, 0);	// Scroll B
-		T_Render_Line_ScrollA_Window<interlaced, false, h_s>();		// Scroll A
+		T_Render_Line_Scroll<false, interlaced, false, h_s>(0, GetHCells());	// Scroll B
+		T_Render_Line_ScrollA_Window<interlaced, false, h_s>();			// Scroll A
 	}
 	
 	T_Render_Line_Sprite<interlaced, h_s>();
