@@ -124,10 +124,6 @@ class GensConfig : public QObject
 		GC_PROPERTY(bool, autoFixChecksum, bool, AutoFixChecksum);
 		Q_PROPERTY(bool autoPause READ autoPause WRITE setAutoPause NOTIFY autoPause_changed)
 		GC_PROPERTY(bool, autoPause, bool, AutoPause);
-		Q_PROPERTY(bool borderColor READ borderColor WRITE setBorderColor NOTIFY borderColor_changed)
-		GC_PROPERTY(bool, borderColor, bool, BorderColor);
-		Q_PROPERTY(bool ntscV30Rolling READ ntscV30Rolling WRITE setNtscV30Rolling NOTIFY ntscV30Rolling_changed)
-		GC_PROPERTY(bool, ntscV30Rolling, bool, NtscV30Rolling);
 		
 		/** Savestates. **/
 		Q_PROPERTY(int saveSlot READ saveSlot WRITE setSaveSlot NOTIFY saveSlot_changed)
@@ -151,8 +147,6 @@ class GensConfig : public QObject
 		/** General settings. **/
 		void autoFixChecksum_changed(bool newAutoFixChecksum);
 		void autoPause_changed(bool newAutoPause);
-		void borderColor_changed(bool newBorderColor);
-		void ntscV30Rolling_changed(bool newNtscV30Rolling);
 		
 		/** Savestates. **/
 		void saveSlot_changed(int newSaveSlot);

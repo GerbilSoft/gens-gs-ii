@@ -60,8 +60,6 @@ class GensConfigPrivate
 		/** General settings. **/
 		bool autoFixChecksum;
 		bool autoPause;
-		bool borderColor;
-		bool ntscV30Rolling;
 		
 		/** Savestates. **/
 		int saveSlot;
@@ -129,8 +127,6 @@ int GensConfigPrivate::reload(const QString& filename)
 	//settings.beginGroup(QLatin1String("General"));
 	autoFixChecksum = settings.value(QLatin1String("autoFixChecksum"), true).toBool();
 	autoPause = settings.value(QLatin1String("autoPause"), false).toBool();
-	borderColor = settings.value(QLatin1String("borderColorEmulation"), true).toBool();
-	ntscV30Rolling = settings.value(QLatin1String("ntscV30Rolling"), true).toBool();
 	//settings.endGroup();
 	
 	/** System. **/
@@ -232,8 +228,6 @@ int GensConfigPrivate::save(const QString& filename)
 	//settings.beginGroup(QLatin1String("General"));
 	settings.setValue(QLatin1String("autoFixChecksum"), autoFixChecksum);
 	settings.setValue(QLatin1String("autoPause"), autoPause);
-	settings.setValue(QLatin1String("borderColorEmulation"), borderColor);
-	settings.setValue(QLatin1String("ntscV30Rolling"), ntscV30Rolling);
 	//settings.endGroup();
 	
 	/** System. **/
@@ -363,8 +357,6 @@ void GensConfig::emitAll(void)
 	/** General settings. **/
 	emit autoFixChecksum_changed(d->autoFixChecksum);
 	emit autoPause_changed(d->autoPause);
-	emit borderColor_changed(d->borderColor);
-	emit ntscV30Rolling_changed(d->ntscV30Rolling);
 	
 	/** Savestates. **/
 	emit saveSlot_changed(d->saveSlot);
@@ -499,8 +491,6 @@ void GensConfig::setRegionCodeOrder(uint16_t newRegionCodeOrder)
 /** General settings. **/
 GC_PROPERTY_WRITE(bool, autoFixChecksum, bool, AutoFixChecksum)
 GC_PROPERTY_WRITE(bool, autoPause, bool, AutoPause)
-GC_PROPERTY_WRITE(bool, borderColor, bool, BorderColor)
-GC_PROPERTY_WRITE(bool, ntscV30Rolling, bool, NtscV30Rolling)
 
 
 /** Savestates. **/
