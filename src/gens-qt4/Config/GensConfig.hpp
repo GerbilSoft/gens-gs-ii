@@ -176,10 +176,6 @@ class GensConfig : public QObject
 		void setSaveSlot_Prev(void);
 		void setSaveSlot_Next(void);
 		
-		/** GensWindow configuration. **/
-		Q_PROPERTY(bool showMenuBar READ showMenuBar WRITE setShowMenuBar NOTIFY showMenuBar_changed)
-		GC_PROPERTY(bool, showMenuBar, bool, ShowMenuBar);
-		
 		/** Key configuration. **/
 		int keyToAction(GensKey_t key);
 		GensKey_t actionToKey(int action);
@@ -218,9 +214,6 @@ class GensConfig : public QObject
 		
 		/** Savestates. **/
 		void saveSlot_changed(int newSaveSlot);
-		
-		/** GensWindow configuration. **/
-		void showMenuBar_changed(bool newShowMenuBar);
 		
 		/** Emulation options. (Options menu) **/
 		void enableSRam_changed(bool newEnableSRam);
