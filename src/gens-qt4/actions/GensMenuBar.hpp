@@ -145,8 +145,8 @@ class GensMenuBar : public QObject
 		
 		/** Menu synchronization slots. **/
 		void recentRoms_updated(void);
+		void stretchMode_changed_slot(const QVariant& newStretchMode);
 		// TODO: Port to ConfigStore.
-		//void stretchMode_changed_slot(GensConfig::StretchMode_t newStretchMode);
 		void regionCode_changed_slot(int newRegionCode); // LibGens::SysVersion::RegionCode_t
 		void enableSRam_changed_slot(bool newEnableSRam);
 };

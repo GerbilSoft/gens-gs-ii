@@ -46,11 +46,9 @@ namespace GensQt4
  */
 void GensMenuBarPrivate::syncConnect(void)
 {
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/stretchMode"),
+					q, SLOT(stretchMode_changed_slot(QVariant)));
 	// TODO: Port to ConfigStore.
-	/*
-	QObject::connect(gqt4_config, SIGNAL(stretchMode_changed(GensConfig::StretchMode_t)),
-			 q, SLOT(stretchMode_changed_slot(GensConfig::StretchMode_t)));
-	*/
 	QObject::connect(gqt4_config, SIGNAL(regionCode_changed(int)),
 			 q, SLOT(regionCode_changed_slot(int)));	// LibGens::SysVersion::RegionCode_t
 	QObject::connect(gqt4_config, SIGNAL(enableSRam_changed(bool)),
@@ -120,22 +118,17 @@ void GensMenuBar::recentRoms_updated(void)
  * stretchMode_changed_slot(): Stretch mode has changed.
  * @param newStretchMode New stretch mode.
  */
-/* TODO: Port to ConfigStore.
-void GensMenuBar::stretchMode_changed_slot(GensConfig::StretchMode_t newStretchMode)
+void GensMenuBar::stretchMode_changed_slot(const QVariant& newStretchMode)
 {
-	int id;
-	switch (newStretchMode)
-	{
-		case GensConfig::STRETCH_NONE:	id = IDM_GRAPHICS_STRETCH_NONE; break;
-		case GensConfig::STRETCH_H:	id = IDM_GRAPHICS_STRETCH_H;    break;
-		case GensConfig::STRETCH_V:	id = IDM_GRAPHICS_STRETCH_V;    break;
-		case GensConfig::STRETCH_FULL:	id = IDM_GRAPHICS_STRETCH_FULL; break;
-		default:
-			return;
-	}
+	int value = newStretchMode.toInt();
+	if (value < STRETCH_NONE || value > STRETCH_FULL)
+		return;
+	
+	// Convert the stretch mode to a menu item ID.
+	value += IDM_GRAPHICS_STRETCH_NONE;
 	
 	// Find the action.
-	QAction *action = d->hashActions.value(id, NULL);
+	QAction *action = d->hashActions.value(value, NULL);
 	if (!action)
 		return;
 	
@@ -144,7 +137,6 @@ void GensMenuBar::stretchMode_changed_slot(GensConfig::StretchMode_t newStretchM
 	action->setChecked(true);
 	this->unlock();
 }
-*/
 
 
 /**

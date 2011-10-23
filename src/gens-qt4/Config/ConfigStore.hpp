@@ -136,16 +136,6 @@ class ConfigStore : public QObject
 		 * @return Configuration path.
 		 */
 		QString configPath(void);
-	
-		// TODO: This shouldn't be in ConfigStore.
-		enum StretchMode_t
-		{
-			STRETCH_NONE	= 0,
-			STRETCH_H	= 1,
-			STRETCH_V	= 2,
-			STRETCH_FULL	= 3
-		};
-		Q_ENUMS(StretchMode_t);
 };
 
 }

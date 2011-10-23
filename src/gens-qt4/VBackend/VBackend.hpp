@@ -314,6 +314,7 @@ inline int VBackend::recStop(const QString& component)
 
 /** Property read functions. **/
 // TODO: Should we keep these properties here, or just get them from gqt4_config?
+// TODO: Un-inline these...
 inline bool VBackend::fastBlur(void) const
 	{ return m_cfg_fastBlur; }
 inline void VBackend::setFastBlur(bool newFastBlur)
@@ -331,7 +332,7 @@ inline bool VBackend::pauseTint(void) const
 inline StretchMode_t VBackend::stretchMode(void) const
 	{ return m_cfg_stretchMode; }
 inline void VBackend::setStretchMode(StretchMode_t newStretchMode)
-	{ m_cfg_stretchMode = newStretchMode; }
+	{ gqt4_cfg->set(QLatin1String("Graphics/stretchMode"), (int)newStretchMode); }
 
 inline LibGens::EmuContext *VBackend::emuContext(void) const
 	{ return m_emuContext; }
