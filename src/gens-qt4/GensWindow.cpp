@@ -602,15 +602,35 @@ void GensWindow::showMenuBar_changed_slot(const QVariant& newShowMenuBar)
 	
 	// TODO: If the value changed and we're windowed,
 	// resize the window to compensate.
+	int height_adjust = 0;
 	if (!m_cfg_showMenuBar)
 	{
 		// Hide the menu bar.
+		if (!this->isMaximized() && !this->isMinimized())
+		{
+			QWidget *menuBar = this->menuWidget();
+			if (menuBar != NULL)
+				height_adjust = -menuBar->height();
+		}
 		this->setMenuBar(NULL);
 	}
 	else if (!this->menuWidget())
 	{
 		// Show the menu bar.
-		this->setMenuBar(m_gensMenuBar->createMenuBar());
+		QMenuBar *menuBar = m_gensMenuBar->createMenuBar();
+		this->setMenuBar(menuBar);
+		
+		if (!this->isMaximized() && !this->isMinimized())
+		{
+			menuBar->adjustSize();	// ensure the menu bar gets the correct size
+			height_adjust = menuBar->height();
+		}
+	}
+	
+	if (height_adjust != 0)
+	{
+		// Adjust the window height to compensate for the menu bar change.
+		this->resize(this->width(), this->height() + height_adjust);
 	}
 }
 
