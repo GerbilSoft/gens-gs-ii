@@ -532,7 +532,7 @@ template<bool plane, bool interlaced>
 FORCE_INLINE unsigned int Vdp::T_Get_Y_Offset(int cell_cur)
 {
 	// TODO: Y_FineOffset should be refactored such that it's reentrant.
-	if ((cell_cur & 0xFF80) || (cell_cur < 0))
+	if (cell_cur < 0 || cell_cur >= 40)
 	{
 		// Cell number is invalid.
 		// TODO: Properly handle cell -1.
@@ -698,6 +698,8 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 	x_cell_offset = (((x_cell_offset ^ 0x3FF) >> 3) & H_Scroll_CMask);
 	
 	// VSRam cell number.
+	// TODO: Adjust for left-window?
+	// TODO: This starts at cell -2 if 2-cell VScroll is enabled...
 	int VSRam_Cell = ((x_cell_offset & 1) - 2);
 	
 	// Initialize the Y offset.
