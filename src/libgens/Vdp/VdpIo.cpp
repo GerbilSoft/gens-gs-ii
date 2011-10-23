@@ -191,6 +191,7 @@ void Vdp::Check_NTSC_V30_VBlank(void)
 	{
 		// Either we're in PAL mode, where V30 is allowed, or V30 isn't set.
 		// VBlank is always OK.
+		// TODO: Clear the NTSC V30 offset?
 		VDP_Lines.NTSC_V30.VBlank_Div = 0;
 		return;
 	}
@@ -202,11 +203,7 @@ void Vdp::Check_NTSC_V30_VBlank(void)
 	// See http://gendev.spritesmind.net/forum/viewtopic.php?p=8128#8128 for more information.
 	VDP_Lines.NTSC_V30.VBlank_Div = !VDP_Lines.NTSC_V30.VBlank_Div;
 	
-	// TODO: LibGens: Add a user-configurable option for NTSC V30 rolling.
-#if 0
-	if (Video.ntscV30rolling)
-#endif
-	if (1)
+	if (VdpEmuOptions.ntscV30Rolling)
 	{
 		VDP_Lines.NTSC_V30.Offset += 11;	// TODO: Figure out a good offset increment.
 		VDP_Lines.NTSC_V30.Offset %= 240;	// Prevent overflow.
