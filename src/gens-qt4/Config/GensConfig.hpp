@@ -110,18 +110,11 @@ class GensConfig : public QObject
 		/** Key configuration. **/
 		int keyToAction(GensKey_t key);
 		GensKey_t actionToKey(int action);
-		
-		/** Emulation options. (Options menu) **/
-		Q_PROPERTY(bool enableSRam READ enableSRam WRITE setEnableSRam NOTIFY enableSRam_changed)
-		GC_PROPERTY(bool, enableSRam, bool, EnableSRam)
 	
 	signals:
 		/** General settings. **/
 		void autoFixChecksum_changed(bool newAutoFixChecksum);
 		void autoPause_changed(bool newAutoPause);
-		
-		/** Emulation options. (Options menu) **/
-		void enableSRam_changed(bool newEnableSRam);
 	
 	private:
 		friend class GensConfigPrivate;

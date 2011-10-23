@@ -364,9 +364,9 @@ class EmuManager : public QObject
 		
 		/**
 		 * enableSRam_changed_slot(): Enable SRam/EEPRom setting has changed.
-		 * @param newEnableSRam New Enable SRam/EEPRom setting.
+		 * @param enableSRam (bool) New Enable SRam/EEPRom setting.
 		 */
-		void enableSRam_changed_slot(bool newEnableSRam);
+		void enableSRam_changed_slot(const QVariant& enableSRam);
 	
 	public slots:
 		/**

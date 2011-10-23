@@ -314,7 +314,7 @@ bool GensActions::doAction(int action, bool state)
 			{
 				case MNUID_ITEM(IDM_OPTIONS_ENABLESRAM):
 					// Enable SRam/EEPRom.
-					gqt4_config->setEnableSRam(state);
+					gqt4_cfg->set(QLatin1String("Options/enableSRam"), state);
 					break;
 				
 				case MNUID_ITEM(IDM_OPTIONS_CONTROLLERS):

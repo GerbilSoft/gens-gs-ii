@@ -276,14 +276,14 @@ void EmuManager::saveSlot_changed_slot(const QVariant& saveSlot)
 
 /**
  * enableSRam_changed_slot(): Enable SRam/EEPRom setting has changed.
- * @param newEnableSRam New Enable SRam/EEPRom setting.
+ * @param enableSRam (bool) New Enable SRam/EEPRom setting.
  */
-void EmuManager::enableSRam_changed_slot(bool newEnableSRam)
+void EmuManager::enableSRam_changed_slot(const QVariant& enableSRam)
 {
 	// Queue the Enable SRam/EEPRom request.
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_ENABLE_SRAM;
-	rq.enableSRam = newEnableSRam;
+	rq.enableSRam = enableSRam.toBool();
 	m_qEmuRequest.enqueue(rq);
 	
 	if (!m_rom || m_paused.data)

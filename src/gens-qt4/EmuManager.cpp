@@ -134,8 +134,8 @@ EmuManager::EmuManager(QObject *parent)
 					this, SLOT(regionCodeOrder_changed_slot(QVariant)));
 	
 	// Emulation options. (Options menu)
-	connect(gqt4_config, SIGNAL(enableSRam_changed(bool)),
-		this, SLOT(enableSRam_changed_slot(bool)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Options/enableSRam"),
+					this, SLOT(enableSRam_changed_slot(QVariant)));
 }
 
 EmuManager::~EmuManager()
@@ -476,7 +476,7 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	
 	// Set the EmuContext settings.
 	// TODO: Load these in EmuContext directly?
-	gqt4_emuContext->setSaveDataEnable(gqt4_config->enableSRam());
+	gqt4_emuContext->setSaveDataEnable(gqt4_cfg->get(QLatin1String("Options/enableSRam")).toBool());
 	
 	// Initialize the graphics settings.
 	LibGens::VdpPalette *palette = &gqt4_emuContext->m_vdp->m_palette;

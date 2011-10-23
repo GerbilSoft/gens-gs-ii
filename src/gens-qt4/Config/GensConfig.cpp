@@ -54,9 +54,6 @@ class GensConfigPrivate
 		
 		/** Key configuration. **/
 		GensKeyConfig keyConfig;
-		
-		/** Emulation options. (Options menu) **/
-		bool enableSRam;
 	
 	private:
 		GensConfig *const q;
@@ -92,11 +89,6 @@ int GensConfigPrivate::reload(const QString& filename)
 	/** Controller configuration. **/
 	settings.beginGroup(QLatin1String("Controllers"));
 	q->m_ctrlConfig->load(settings);
-	settings.endGroup();
-	
-	/** Emulation options. (Options menu) **/
-	settings.beginGroup(QLatin1String("Options"));
-	enableSRam = settings.value(QLatin1String("enableSRam"), true).toBool();
 	settings.endGroup();
 	
 	// Finished loading settings.
@@ -162,11 +154,6 @@ int GensConfigPrivate::save(const QString& filename)
 	/** Controller configuration. **/
 	settings.beginGroup(QLatin1String("Controllers"));
 	q->m_ctrlConfig->save(settings);
-	settings.endGroup();
-	
-	/** Emulation options. (Options menu) **/
-	settings.beginGroup(QLatin1String("Options"));
-	settings.setValue(QLatin1String("enableSRam"), enableSRam);
 	settings.endGroup();
 	
 	// Finished saving settings.
@@ -260,10 +247,7 @@ int GensConfig::save(const QString& filename)
  * Useful when starting the emulator.
  */
 void GensConfig::emitAll(void)
-{
-	/** Emulation options. (Options menu) **/
-	emit enableSRam_changed(d->enableSRam);
-}
+{ }
 
 
 /**
@@ -373,9 +357,6 @@ int GensConfig::keyToAction(GensKey_t key)
 
 GensKey_t GensConfig::actionToKey(int action)
 	{ return d->keyConfig.actionToKey(action); }
-
-/** Emulation options. (Options menu) **/
-GC_PROPERTY_WRITE(bool, enableSRam, bool, EnableSRam)
 
 }
 

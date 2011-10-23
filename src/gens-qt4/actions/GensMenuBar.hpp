@@ -140,8 +140,9 @@ class GensMenuBar : public QObject
 		void stateChanged(void);
 	
 	private:
-		// Internal function for regionCode_changed_slot().
+		// Internal function for synchronization slots.
 		void regionCode_changed_slot_int(int regionCode); // LibGens::SysVersion::RegionCode_t
+		void enableSRam_changed_slot_int(bool enableSRam);
 	
 	private slots:
 		/** Menu item selection slot. **/
@@ -151,8 +152,7 @@ class GensMenuBar : public QObject
 		void recentRoms_updated(void);
 		void stretchMode_changed_slot(const QVariant& newStretchMode);
 		void regionCode_changed_slot(const QVariant& regionCode); // LibGens::SysVersion::RegionCode_t
-		// TODO: Port to ConfigStore.
-		void enableSRam_changed_slot(bool newEnableSRam);
+		void enableSRam_changed_slot(const QVariant& enableSRam);
 		void showMenuBar_changed_slot(const QVariant& newShowMenuBar);
 };
 

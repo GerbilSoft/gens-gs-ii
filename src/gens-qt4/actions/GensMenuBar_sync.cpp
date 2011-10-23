@@ -50,9 +50,8 @@ void GensMenuBarPrivate::syncConnect(void)
 					q, SLOT(stretchMode_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("System/regionCode"),
 					q, SLOT(regionCode_changed_slot(QVariant)));
-	// TODO: Port to ConfigStore.
-	QObject::connect(gqt4_config, SIGNAL(enableSRam_changed(bool)),
-			 q, SLOT(enableSRam_changed_slot(bool)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Options/enableSRam"),
+					q, SLOT(enableSRam_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("GensWindow/showMenuBar"),
 					q, SLOT(showMenuBar_changed_slot(QVariant)));
 }
@@ -70,7 +69,7 @@ void GensMenuBarPrivate::syncAll(void)
 	syncShowMenuBar();
 	//q->stretchMode_changed_slot(gqt4_config->stretchMode());	// TODO: Port to ConfigStore.
 	q->regionCode_changed_slot_int(gqt4_cfg->getInt(QLatin1String("System/regionCode")));
-	q->enableSRam_changed_slot(gqt4_config->enableSRam());
+	q->enableSRam_changed_slot_int(gqt4_cfg->get(QLatin1String("Options/enableSRam")).toBool());
 	q->stateChanged();
 	
 	this->unlock();
@@ -205,9 +204,9 @@ void GensMenuBar::regionCode_changed_slot(const QVariant& regionCode)
 
 /**
  * Enable SRam/EEPRom setting has changed.
- * @param newEnableSRam New Enable SRam/EEPRom setting.
+ * @param enableSRam New Enable SRam/EEPRom setting.
  */
-void GensMenuBar::enableSRam_changed_slot(bool newEnableSRam)
+void GensMenuBar::enableSRam_changed_slot_int(bool enableSRam)
 {
 	// Find the action.
 	QAction *action = d->hashActions.value(IDM_OPTIONS_ENABLESRAM, NULL);
@@ -216,8 +215,19 @@ void GensMenuBar::enableSRam_changed_slot(bool newEnableSRam)
 	
 	// Set the check state.
 	this->lock();
-	action->setChecked(newEnableSRam);
+	action->setChecked(enableSRam);
 	this->unlock();
+}
+
+/**
+ * Enable SRam/EEPRom setting has changed.
+ * (WRAPPER FUNCTION for enableSRam_changed_slot_int().)
+ * @param enableSRam New Enable SRam/EEPRom setting.
+ */
+void GensMenuBar::enableSRam_changed_slot(const QVariant& enableSRam)
+{
+	// Wrapper for enableSRam_changed_slot_int().
+	enableSRam_changed_slot_int(enableSRam.toBool());
 }
 
 
