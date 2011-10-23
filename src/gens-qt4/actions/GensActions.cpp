@@ -391,7 +391,7 @@ bool GensActions::doAction(int action, bool state)
 					gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), saveSlot);
 					return true;
 				}
-					
+				
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_NEXT):
 				{
 					// Next Save Slot.
