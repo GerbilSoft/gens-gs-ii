@@ -249,6 +249,7 @@ const ConfigStorePrivate::DefaultSetting ConfigStorePrivate::DefaultSettings[] =
 	{"Graphics/fastBlur",			"false", 0},
 	{"Graphics/bilinearFilter",		"false", 0},
 	{"Graphics/interlacedMode",		"2", 0},	// GensConfig::INTERLACED_FLICKER
+	{"Graphics/spriteLimits",		"true", 0},
 	{"Graphics/contrast",			"0", 0},
 	{"Graphics/brightness",			"0", 0},
 	{"Graphics/grayscale",			"false", 0},

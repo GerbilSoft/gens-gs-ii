@@ -198,6 +198,7 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		void on_chkFastBlur_toggled(bool checked);
 		void on_chkBilinearFilter_toggled(bool checked);
 		void on_cboInterlacedMode_currentIndexChanged(int index);
+		void on_chkSpriteLimits_toggled(bool checked);
 		
 		/** System. **/
 		void on_cboRegionCurrent_currentIndexChanged(int index);

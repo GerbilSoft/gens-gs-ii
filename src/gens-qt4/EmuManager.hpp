@@ -37,10 +37,6 @@
 // paused_t
 #include "gqt4_datatypes.h"
 
-// InterlacedMode
-// TODO: Move somewhere else?
-#include "Config/GensConfig.hpp"
-
 namespace GensQt4
 {
 
@@ -254,6 +250,7 @@ class EmuManager : public QObject
 				RQT_PS_INVERTED		= 4,
 				RQT_PS_COLORSCALEMETHOD	= 5,
 				RQT_PS_INTERLACEDMODE	= 6,
+				RQT_PS_SPRITELIMITS	= 7,
 			};
 			
 			RequestType rqType;
@@ -380,6 +377,7 @@ class EmuManager : public QObject
 		void inverted_changed_slot(const QVariant& inverted);
 		void colorScaleMethod_changed_slot(const QVariant& colorScaleMethod);
 		void interlacedMode_changed_slot(const QVariant& interlacedMode);
+		void spriteLimits_changed_slot(const QVariant& spriteLimits);
 	
 	/** Emulation Request Queue: Processing functions. **/
 	

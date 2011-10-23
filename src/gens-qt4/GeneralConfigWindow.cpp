@@ -362,6 +362,7 @@ void GeneralConfigWindow::reload(void)
 	chkFastBlur->setChecked(ValByPath_bool("Graphics/fastBlur"));
 	chkBilinearFilter->setChecked(ValByPath_bool("Graphics/bilinearFilter"));
 	cboInterlacedMode->setCurrentIndex(ValByPath_int("Graphics/interlacedMode"));
+	chkSpriteLimits->setChecked(ValByPath_bool("Graphics/spriteLimits"));
 	hsldContrast->setValue(ValByPath_int("Graphics/contrast"));
 	hsldBrightness->setValue(ValByPath_int("Graphics/brightness"));
 	chkGrayscale->setChecked(ValByPath_bool("Graphics/grayscale"));
@@ -443,6 +444,7 @@ void GeneralConfigWindow::apply(void)
 	SetValByPath_bool("Graphics/fastBlur", chkFastBlur->isChecked());
 	SetValByPath_bool("Graphics/bilinearFilter", chkBilinearFilter->isChecked());
 	SetValByPath_int("Graphics/interlacedMode", cboInterlacedMode->currentIndex());
+	SetValByPath_bool("Graphics/spriteLimits", chkSpriteLimits->isChecked());
 	SetValByPath_int("Graphics/contrast", hsldContrast->value());
 	SetValByPath_int("Graphics/brightness", hsldBrightness->value());
 	SetValByPath_bool("Graphics/grayscale", chkGrayscale->isChecked());

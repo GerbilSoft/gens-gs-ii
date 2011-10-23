@@ -352,6 +352,13 @@ window to a larger size than its original resolution.</string>
             </widget>
            </item>
            <item>
+            <widget class="QCheckBox" name="chkSpriteLimits">
+             <property name="text">
+              <string>Enforce &amp;sprite limits</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <layout class="QHBoxLayout" name="hboxInterlacedMode">
              <item>
               <widget class="QLabel" name="lblInterlacedMode">
@@ -1081,6 +1088,7 @@ window to a larger size than its original resolution.</string>
   <tabstop>chkAspectRatioConstraint</tabstop>
   <tabstop>chkFastBlur</tabstop>
   <tabstop>chkBilinearFilter</tabstop>
+  <tabstop>chkSpriteLimits</tabstop>
   <tabstop>cboInterlacedMode</tabstop>
   <tabstop>hsldContrast</tabstop>
   <tabstop>hsldBrightness</tabstop>

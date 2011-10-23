@@ -84,6 +84,8 @@ void GeneralConfigWindow::on_chkBilinearFilter_toggled(bool checked)
 	{ GENERIC_OPTION("Graphics/bilinearFilter", checked); }
 void GeneralConfigWindow::on_cboInterlacedMode_currentIndexChanged(int index)
 	{ GENERIC_OPTION("Graphics/interlacedMode", index); }
+void GeneralConfigWindow::on_chkSpriteLimits_toggled(bool checked)
+	{ GENERIC_OPTION("Graphics/spriteLimits", checked); }
 
 void GeneralConfigWindow::on_hsldContrast_valueChanged(int value)
 	{ GENERIC_OPTION("Graphics/contrast", value); }
