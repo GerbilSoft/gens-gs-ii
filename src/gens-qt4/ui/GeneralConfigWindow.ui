@@ -35,7 +35,10 @@
       <property name="contextMenuPolicy">
        <enum>Qt::NoContextMenu</enum>
       </property>
-      <widget class="QWidget" name="tabGeneral" native="true">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tabGeneral">
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QGroupBox" name="grpOsd">
@@ -289,7 +292,7 @@ on NTSC models.</string>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tabGraphics" native="true">
+      <widget class="QWidget" name="tabGraphics">
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <widget class="QGroupBox" name="grpGraphics">
@@ -580,7 +583,7 @@ window to a larger size than its original resolution.</string>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tabSystem" native="true">
+      <widget class="QWidget" name="tabSystem">
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
          <widget class="QGroupBox" name="grpRegionCode">
@@ -671,21 +674,25 @@ window to a larger size than its original resolution.</string>
                   </property>
                   <property name="minimumSize">
                    <size>
-                    <width>40</width>
-                    <height>40</height>
+                    <width>44</width>
+                    <height>44</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>40</width>
-                    <height>40</height>
+                    <width>44</width>
+                    <height>44</height>
                    </size>
                   </property>
                   <property name="baseSize">
                    <size>
-                    <width>40</width>
-                    <height>40</height>
+                    <width>44</width>
+                    <height>44</height>
                    </size>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="resources/oxygen/oxygen.qrc">
+                    <normaloff>:/icons/oxygen/32x32/arrow-up.png</normaloff>:/icons/oxygen/32x32/arrow-up.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
@@ -718,21 +725,25 @@ window to a larger size than its original resolution.</string>
                   </property>
                   <property name="minimumSize">
                    <size>
-                    <width>40</width>
-                    <height>40</height>
+                    <width>44</width>
+                    <height>44</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>40</width>
-                    <height>40</height>
+                    <width>44</width>
+                    <height>44</height>
                    </size>
                   </property>
                   <property name="baseSize">
                    <size>
-                    <width>40</width>
-                    <height>40</height>
+                    <width>48</width>
+                    <height>48</height>
                    </size>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="resources/oxygen/oxygen.qrc">
+                    <normaloff>:/icons/oxygen/32x32/arrow-down.png</normaloff>:/icons/oxygen/32x32/arrow-down.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
@@ -765,7 +776,7 @@ window to a larger size than its original resolution.</string>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tabSegaCD" native="true">
+      <widget class="QWidget" name="tabSegaCD">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <widget class="QGroupBox" name="grpMcdRoms">
@@ -929,7 +940,7 @@ window to a larger size than its original resolution.</string>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tabExtPrg" native="true">
+      <widget class="QWidget" name="tabExtPrg">
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
          <widget class="QGroupBox" name="grpExtPrg">
