@@ -205,21 +205,41 @@ namespace VdpTypes
 		// Interlaced rendering mode.
 		IntRend_Mode_t intRendMode;
 		
-		// Enables zero-length DMA.
-		// Default is false (hardware-accurate).
-		// May need to be enabled for buggy hacks.
+		/**
+		 * Enables border color emulation.
+		 * If true, draws the background color in the screen borders.
+		 * Otherwise, the screen borders default to black.
+		 */
+		bool borderColorEmulation;
+		
+		/**
+		 * Enables "rolling" graphics in V30 on NTSC.
+		 * This simulates the effect seen on an NTSC Genesis
+		 * if 240-line mode is enabled.
+		 */
+		bool ntscV30Rolling;
+		
+		/**
+		 * Enables zero-length DMA.
+		 * Default is false (hardware-accurate).
+		 * May need to be enabled for buggy hacks.
+		 */
 		bool zeroLengthDMA;
 		
-		// Enables sprite limits.
-		// Default is true (hardware-accurate).
-		// May need to be disabled for buggy hacks.
+		/**
+		 * Enables sprite limits.
+		 * Default is true (hardware-accurate).
+		 * May need to be disabled for buggy hacks.
+		 */
 		bool spriteLimits;
 		
-		// Enables left-column VScroll bug emulation.
-		// Options:
-		// - false: disabled. (Majesco Genesis 3)
-		// - true:  enabled.  (MD1, MD2) [default]
-		// FIXME: Not implemented at the moment!
+		/**
+		 * Enables left-column VScroll bug emulation.
+		 * Options:
+		 * - false: disabled. (Majesco Genesis 3)
+		 * - true:  enabled.  (MD1, MD2) [default]
+		 * FIXME: Not implemented at the moment!
+		 */
 		bool vscrollBug;
 	};
 	

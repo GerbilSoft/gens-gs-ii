@@ -1424,12 +1424,8 @@ FORCE_INLINE void Vdp::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 	// NOTE: S/H is ignored if we're in the border region.
 	
 	// Get the border color.
-	// TODO: LibGens: Add the "borderColorEmulation" variable somewhere.
-#if 0
-	register const pixel border_color = (Video.borderColorEmulation ? md_palette[0] : 0);
-#else
-	register const pixel border_color = md_palette[0];
-#endif
+	register const pixel border_color =
+		(VdpEmuOptions.borderColorEmulation ? md_palette[0] : 0);
 	
 	// Left border.
 	const int HPix = GetHPix();
@@ -1492,7 +1488,9 @@ void Vdp::Render_Line_m5(void)
 	// Determine the starting line in MD_Screen.
 	// TODO: LibGens: Add a user-configurable option for NTSC V30 rolling.
 	int LineStart = VDP_Lines.Visible.Current;
-	if (M68K_Mem::ms_SysVersion.isNtsc() && (VDP_Reg.m5.Set2 & 0x08))// && Video.ntscV30rolling)
+	if (M68K_Mem::ms_SysVersion.isNtsc() &&
+	    (VDP_Reg.m5.Set2 & 0x08) &&
+	    VdpEmuOptions.ntscV30Rolling)
 	{
 		// NTSC V30 mode. Simulate screen rolling.
 		LineStart -= VDP_Lines.NTSC_V30.Offset;
@@ -1504,21 +1502,25 @@ void Vdp::Render_Line_m5(void)
 	LineStart += VDP_Lines.Visible.Border_Size;
 	
 	// TODO: LibGens: Reimplement the borderColorEmulation option.
-#if 0
-	if (in_border && !Video.borderColorEmulation)
+	if (in_border && !VdpEmuOptions.borderColorEmulation)
 	{
 		// We're in the border area, but border color emulation is disabled.
 		// Clear the border area.
 		// TODO: Only clear this if the option changes or V/H mode changes.
-		if (bppMD == 32)
-			memset(&MD_Screen.u32[LineStart], 0x00, 320*sizeof(uint32_t));
+		if (m_palette.bpp() != VdpPalette::BPP_32)
+		{
+			memset(MD_Screen.lineBuf16(LineStart), 0x00,
+				(MD_Screen.pxPerLine() * sizeof(uint16_t)));
+		}
 		else
-			memset(&MD_Screen.u16[LineStart], 0x00, 320*sizeof(uint16_t));
+		{
+			memset(MD_Screen.lineBuf32(LineStart), 0x00,
+				(MD_Screen.pxPerLine() * sizeof(uint32_t)));
+		}
 		
 		// ...and we're done here.
 		return;
 	}
-#endif
 	
 	// Check if the VDP is enabled.
 	if (!(VDP_Reg.m5.Set2 & 0x40) || in_border)

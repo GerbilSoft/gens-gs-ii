@@ -252,9 +252,11 @@ class EmuManager : public QObject
 				
 				// These aren't really "palette" settings...
 				RQT_PS_INTERLACEDMODE	= 6,
-				RQT_PS_SPRITELIMITS	= 7,
-				RQT_PS_ZEROLENGTHDMA	= 8,
-				RQT_PS_VSCROLLBUG	= 9,
+				RQT_PS_BORDERCOLOREMULATION = 7,
+				RQT_PS_NTSCV30ROLLING	= 8,
+				RQT_PS_SPRITELIMITS	= 9,
+				RQT_PS_ZEROLENGTHDMA	= 10,
+				RQT_PS_VSCROLLBUG	= 11,
 			};
 			
 			RequestType rqType;
@@ -381,6 +383,10 @@ class EmuManager : public QObject
 		void inverted_changed_slot(const QVariant& inverted);
 		void colorScaleMethod_changed_slot(const QVariant& colorScaleMethod);
 		void interlacedMode_changed_slot(const QVariant& interlacedMode);
+		
+		/** VDP settings. **/
+		void borderColorEmulation_changed_slot(const QVariant& borderColorEmulation);
+		void ntscV30Rolling_changed_slot(const QVariant& ntscV30Rolling);
 		void spriteLimits_changed_slot(const QVariant& spriteLimits);
 		void zeroLengthDMA_changed_slot(const QVariant& zeroLengthDMA);
 		void vscrollBug_changed_slot(const QVariant& vscrollBug);

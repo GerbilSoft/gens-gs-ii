@@ -37,6 +37,8 @@ namespace LibGens
 VdpTypes::VdpEmuOptions_t Vdp::VdpEmuOptions =
 {
 	VdpTypes::INTREND_FLICKER,	// intRendMode
+	true,				// borderColorEmulation
+	true,				// ntscV30Rolling
 	false,				// zeroLengthDMA
 	true,				// spriteLimits
 	true,				// vscrollBug

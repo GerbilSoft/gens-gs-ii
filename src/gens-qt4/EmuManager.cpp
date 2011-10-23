@@ -113,6 +113,12 @@ EmuManager::EmuManager(QObject *parent)
 					this, SLOT(colorScaleMethod_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/interlacedMode"),
 					this, SLOT(interlacedMode_changed_slot(QVariant)));
+	
+	// VDP settings.
+	gqt4_cfg->registerChangeNotification(QLatin1String("VDP/borderColorEmulation"),
+					this, SLOT(borderColorEmulation_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("VDP/ntscV30Rolling"),
+					this, SLOT(ntscV30Rolling_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("VDP/spriteLimits"),
 					this, SLOT(spriteLimits_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("VDP/zeroLengthDMA"),
@@ -456,6 +462,12 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 			(LibGens::VdpPalette::ColorScaleMethod_t)gqt4_cfg->getInt(QLatin1String("Graphics/colorScaleMethod")));
 	LibGens::Vdp::VdpEmuOptions.intRendMode =
 			(LibGens::VdpTypes::IntRend_Mode_t)gqt4_cfg->getInt(QLatin1String("Graphics/colorScaleMethod"));
+	
+	// Initialize the VDP settings.
+	LibGens::Vdp::VdpEmuOptions.borderColorEmulation =
+			gqt4_cfg->get(QLatin1String("VDP/borderColorEmulation")).toBool();
+	LibGens::Vdp::VdpEmuOptions.ntscV30Rolling =
+			gqt4_cfg->get(QLatin1String("VDP/ntscV30Rolling")).toBool();
 	LibGens::Vdp::VdpEmuOptions.spriteLimits =
 			gqt4_cfg->get(QLatin1String("VDP/spriteLimits")).toBool();
 	LibGens::Vdp::VdpEmuOptions.zeroLengthDMA =

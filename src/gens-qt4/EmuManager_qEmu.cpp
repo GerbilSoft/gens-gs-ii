@@ -391,10 +391,7 @@ void EmuManager::changePaletteSetting(EmuRequest_t::PaletteSettingType type, int
 }
 
 
-/**
- * Graphics settings.
- */
-
+/** Graphics settings. **/
 
 void EmuManager::contrast_changed_slot(const QVariant& contrast)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_CONTRAST, contrast.toBool()); }
@@ -433,6 +430,13 @@ void EmuManager::interlacedMode_changed_slot(const QVariant& interlacedMode)
 	
 	changePaletteSetting(EmuRequest_t::RQT_PS_INTERLACEDMODE, im);
 }
+
+/** VDP settings. **/
+
+void EmuManager::borderColorEmulation_changed_slot(const QVariant& borderColorEmulation)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_BORDERCOLOREMULATION, (int)borderColorEmulation.toBool()); }
+void EmuManager::ntscV30Rolling_changed_slot(const QVariant& ntscV30Rolling)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_NTSCV30ROLLING, (int)ntscV30Rolling.toBool()); }
 void EmuManager::spriteLimits_changed_slot(const QVariant& spriteLimits)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_SPRITELIMITS, (int)spriteLimits.toBool()); }
 void EmuManager::zeroLengthDMA_changed_slot(const QVariant& zeroLengthDMA)
@@ -960,6 +964,14 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 				emit osdPrintMsg(1500, msg);
 			break;
 		}
+		
+		case EmuRequest_t::RQT_PS_BORDERCOLOREMULATION:
+			LibGens::Vdp::VdpEmuOptions.borderColorEmulation = (bool)(!!val);
+			break;
+		
+		case EmuRequest_t::RQT_PS_NTSCV30ROLLING:
+			LibGens::Vdp::VdpEmuOptions.ntscV30Rolling = (bool)(!!val);
+			break;
 		
 		case EmuRequest_t::RQT_PS_SPRITELIMITS:
 			LibGens::Vdp::VdpEmuOptions.spriteLimits = (bool)(!!val);
