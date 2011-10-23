@@ -409,13 +409,28 @@ void GeneralConfigWindow::reload(void)
 	chkNtscV30Rolling->setChecked(ValByPath_bool("VDP/ntscV30Rolling"));
 	
 	/** System. **/
-	// TODO: Port to ConfigItem.
-	cboRegionCurrent->setCurrentIndex(ValByPath_int("System/regionCode") + 1);
+	int regionCode = ValByPath_int("System/regionCode");
+	if (regionCode < LibGens::SysVersion::REGION_AUTO ||
+	    regionCode > LibGens::SysVersion::REGION_EU_PAL)
+	{
+		// Invalid region. Reset to Auto-Detect.
+		gqt4_cfg->set(QLatin1String("System/regionCode"),
+				(int)LibGens::SysVersion::REGION_AUTO);
+		regionCode = LibGens::SysVersion::REGION_AUTO;
+	}
+	cboRegionCurrent->setCurrentIndex(regionCode + 1);
 	
 	// Region auto-detection settings.
-	// TODO: Port to ConfigItem.
 	lstRegionDetect->clear();
 	uint16_t regionCodeOrder = (uint16_t)ValByPath_uint("System/regionCodeOrder");
+	if (!EmuManager::IsRegionCodeOrderValid(regionCodeOrder))
+	{
+		// Region code order is not valid.
+		// Reset to default value. (0x4812)
+		gqt4_cfg->set(QLatin1String("System/regionCodeOrder"), 0x4812);
+		regionCodeOrder = 0x4812;
+	}
+	
 	for (int i = 0; i < 4; i++, regionCodeOrder >>= 4)
 	{
 		const QString str = EmuManager::LgRegionCodeStrMD(regionCodeOrder & 0xF);
