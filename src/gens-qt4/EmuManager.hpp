@@ -339,9 +339,9 @@ class EmuManager : public QObject
 		
 		/**
 		 * autoFixChecksum_changed_slot(): Change the Auto Fix Checksum setting.
-		 * @param newAutoFixChecksum New Auto Fix Checksum setting.
+		 * @param autoFixChecksum (bool) New Auto Fix Checksum setting.
 		 */
-		void autoFixChecksum_changed_slot(bool newAutoFixChecksum);
+		void autoFixChecksum_changed_slot(const QVariant& autoFixChecksum);
 	
 		/**
 		 * regionCode_changed_slot(): Region code has changed.

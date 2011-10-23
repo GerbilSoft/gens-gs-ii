@@ -94,11 +94,11 @@ EmuManager::EmuManager(QObject *parent)
 	// NOTE: Audio backends are NOT QWidgets!
 	m_audio = new GensPortAudio();
 	
-	// Connect the configuration slots.
+	// Configuration settings.
 	connect(gqt4_config, SIGNAL(saveSlot_changed(int)),
 		this, SLOT(saveSlot_changed_slot(int)));
-	connect(gqt4_config, SIGNAL(autoFixChecksum_changed(bool)),
-		this, SLOT(autoFixChecksum_changed_slot(bool)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("autoFixChecksum"),
+					this, SLOT(autoFixChecksum_changed_slot(QVariant)));
 	
 	// Graphics settings.
 	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/contrast"),
@@ -409,6 +409,12 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 			emit osdPrintMsg(1500, auto_str.arg(detect_str));
 		}
 	}
+	
+	// Autofix Checksum.
+	// NOTE: This must be set *before* creating the emulation context!
+	// Otherwise, it won't work until Hard Reset.
+	LibGens::EmuContext::SetAutoFixChecksum(
+			gqt4_cfg->get(QLatin1String("autoFixChecksum")).toBool());
 	
 	// Create a new MD emulation context.
 	// FIXME: Delete gqt4_emuContext after VBackend is finished using it. (MEMORY LEAK)

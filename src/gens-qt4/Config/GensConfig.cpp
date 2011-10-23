@@ -57,10 +57,6 @@ class GensConfigPrivate
 		uint16_t regionCodeOrder;
 		static bool IsRegionCodeOrderValid(uint16_t order);
 		
-		/** General settings. **/
-		bool autoFixChecksum;
-		bool autoPause;
-		
 		/** Savestates. **/
 		int saveSlot;
 		
@@ -120,14 +116,6 @@ int GensConfigPrivate::reload(const QString& filename)
 	
 	// TODO: Check if the file was opened successfully.
 	// TODO: QVariant type checking.
-	
-	/** General settings. **/
-	// NOTE: The "General" section is reserved for keys with no section.
-	// In order to use it, we shouldn't set a group name.
-	//settings.beginGroup(QLatin1String("General"));
-	autoFixChecksum = settings.value(QLatin1String("autoFixChecksum"), true).toBool();
-	autoPause = settings.value(QLatin1String("autoPause"), false).toBool();
-	//settings.endGroup();
 	
 	/** System. **/
 	settings.beginGroup(QLatin1String("System"));
@@ -221,14 +209,6 @@ int GensConfigPrivate::save(const QString& filename)
 	{
 		settings.remove(QLatin1String("_VersionVcs"));
 	}
-	
-	/** General settings. **/
-	// NOTE: The "General" section is reserved for keys with no section.
-	// In order to use it, we shouldn't set a group name.
-	//settings.beginGroup(QLatin1String("General"));
-	settings.setValue(QLatin1String("autoFixChecksum"), autoFixChecksum);
-	settings.setValue(QLatin1String("autoPause"), autoPause);
-	//settings.endGroup();
 	
 	/** System. **/
 	settings.beginGroup(QLatin1String("System"));
@@ -353,10 +333,6 @@ void GensConfig::emitAll(void)
 	/** System. **/
 	emit regionCode_changed(d->regionCode);
 	emit regionCodeOrder_changed(d->regionCodeOrder);
-	
-	/** General settings. **/
-	emit autoFixChecksum_changed(d->autoFixChecksum);
-	emit autoPause_changed(d->autoPause);
 	
 	/** Savestates. **/
 	emit saveSlot_changed(d->saveSlot);
@@ -486,11 +462,6 @@ void GensConfig::setRegionCodeOrder(uint16_t newRegionCodeOrder)
 	d->regionCodeOrder = newRegionCodeOrder;
 	emit regionCodeOrder_changed(newRegionCodeOrder);
 }
-
-
-/** General settings. **/
-GC_PROPERTY_WRITE(bool, autoFixChecksum, bool, AutoFixChecksum)
-GC_PROPERTY_WRITE(bool, autoPause, bool, AutoPause)
 
 
 /** Savestates. **/

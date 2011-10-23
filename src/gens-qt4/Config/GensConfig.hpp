@@ -119,12 +119,6 @@ class GensConfig : public QObject
 		Q_PROPERTY(uint16_t regionCodeOrder READ regionCodeOrder WRITE setRegionCodeOrder NOTIFY regionCodeOrder_changed);
 		GC_PROPERTY(uint16_t, regionCodeOrder, uint16_t, RegionCodeOrder);
 		
-		/** General settings. **/
-		Q_PROPERTY(bool autoFixChecksum READ autoFixChecksum WRITE setAutoFixChecksum NOTIFY autoFixChecksum_changed)
-		GC_PROPERTY(bool, autoFixChecksum, bool, AutoFixChecksum);
-		Q_PROPERTY(bool autoPause READ autoPause WRITE setAutoPause NOTIFY autoPause_changed)
-		GC_PROPERTY(bool, autoPause, bool, AutoPause);
-		
 		/** Savestates. **/
 		Q_PROPERTY(int saveSlot READ saveSlot WRITE setSaveSlot NOTIFY saveSlot_changed)
 		GC_PROPERTY(int, saveSlot, int, SaveSlot);

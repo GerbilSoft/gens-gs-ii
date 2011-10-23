@@ -288,14 +288,14 @@ void EmuManager::enableSRam_changed_slot(bool newEnableSRam)
 
 /**
  * autoFixChecksum_changed_slot(): Change the Auto Fix Checksum setting.
- * @param newAutoFixChecksum New Auto Fix Checksum setting.
+ * @param autoFixChecksum (bool) New Auto Fix Checksum setting.
  */
-void EmuManager::autoFixChecksum_changed_slot(bool newAutoFixChecksum)
+void EmuManager::autoFixChecksum_changed_slot(const QVariant& autoFixChecksum)
 {
 	// Queue the autofix checksum change request.
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_AUTOFIX_CHANGE;
-	rq.autoFixChecksum = newAutoFixChecksum;
+	rq.autoFixChecksum = autoFixChecksum.toBool();
 	m_qEmuRequest.enqueue(rq);
 	
 	if (!m_rom || m_paused.data)
@@ -860,7 +860,7 @@ void EmuManager::doResetEmulator(bool hardReset)
 	// TODO: Move this call to EmuMD::hardReset() / EmuMD::softReset()?
 	// (That'll require setting a static option in EmuContext.)
 	// TODO: Automatically fix/unfix checksum when the option is changed?
-	if (gqt4_config->autoFixChecksum())
+	if (gqt4_cfg->get(QLatin1String("autoFixChecksum")).toBool())
 		gqt4_emuContext->fixChecksum();
 	else
 		gqt4_emuContext->restoreChecksum();
