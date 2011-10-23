@@ -391,7 +391,7 @@ void GeneralConfigWindow::reload(void)
 	chkFastBlur->setChecked(ValByPath_bool("Graphics/fastBlur"));
 	chkBilinearFilter->setChecked(ValByPath_bool("Graphics/bilinearFilter"));
 	cboInterlacedMode->setCurrentIndex(ValByPath_int("Graphics/interlacedMode"));
-	chkSpriteLimits->setChecked(ValByPath_bool("Graphics/spriteLimits"));
+	chkSpriteLimits->setChecked(ValByPath_bool("VDP/spriteLimits"));
 	hsldContrast->setValue(ValByPath_int("Graphics/contrast"));
 	hsldBrightness->setValue(ValByPath_int("Graphics/brightness"));
 	chkGrayscale->setChecked(ValByPath_bool("Graphics/grayscale"));
@@ -401,9 +401,9 @@ void GeneralConfigWindow::reload(void)
 	/** General settings. **/
 	chkAutoFixChecksum->setChecked(ValByPath_bool("autoFixChecksum"));
 	chkAutoPause->setChecked(ValByPath_bool("autoPause"));
-	chkBorderColor->setChecked(ValByPath_bool("borderColorEmulation"));
+	chkBorderColor->setChecked(ValByPath_bool("VDP/borderColorEmulation"));
 	chkPauseTint->setChecked(ValByPath_bool("pauseTint"));
-	chkNtscV30Rolling->setChecked(ValByPath_bool("ntscV30Rolling"));
+	chkNtscV30Rolling->setChecked(ValByPath_bool("VDP/ntscV30Rolling"));
 	
 	/** System. **/
 	// TODO: Port to ConfigItem.
@@ -473,7 +473,7 @@ void GeneralConfigWindow::apply(void)
 	SetValByPath_bool("Graphics/fastBlur", chkFastBlur->isChecked());
 	SetValByPath_bool("Graphics/bilinearFilter", chkBilinearFilter->isChecked());
 	SetValByPath_int("Graphics/interlacedMode", cboInterlacedMode->currentIndex());
-	SetValByPath_bool("Graphics/spriteLimits", chkSpriteLimits->isChecked());
+	SetValByPath_bool("VDP/spriteLimits", chkSpriteLimits->isChecked());
 	SetValByPath_int("Graphics/contrast", hsldContrast->value());
 	SetValByPath_int("Graphics/brightness", hsldBrightness->value());
 	SetValByPath_bool("Graphics/grayscale", chkGrayscale->isChecked());
@@ -483,9 +483,9 @@ void GeneralConfigWindow::apply(void)
 	/** General settings. **/
 	SetValByPath_bool("autoFixChecksum", chkAutoFixChecksum->isChecked());
 	SetValByPath_bool("autoPause", chkAutoPause->isChecked());
-	SetValByPath_bool("borderColorEmulation", chkBorderColor->isChecked());
+	SetValByPath_bool("VDP/borderColorEmulation", chkBorderColor->isChecked());
 	SetValByPath_bool("pauseTint", chkPauseTint->isChecked());
-	SetValByPath_bool("ntscV30Rolling", chkNtscV30Rolling->isChecked());
+	SetValByPath_bool("VDP/ntscV30Rolling", chkNtscV30Rolling->isChecked());
 	
 	/** System. **/
 	SetValByPath_int("System/regionCode", (cboRegionCurrent->currentIndex() - 1));

@@ -204,10 +204,7 @@ const ConfigStorePrivate::DefaultSetting ConfigStorePrivate::DefaultSettings[] =
 	/** General settings. **/
 	{"autoFixChecksum",		"true", 0},
 	{"autoPause",			"false", 0},
-	{"borderColorEmulation",	"true", 0},
 	{"pauseTint",			"true", 0},
-	{"ntscV30Rolling",		"true", 0},
-	{"zeroLengthDMA",		"false", 0},
 	
 	/** Onscreen display. **/
 	{"OSD/fpsEnabled",		"true", 0},
@@ -250,14 +247,19 @@ const ConfigStorePrivate::DefaultSetting ConfigStorePrivate::DefaultSettings[] =
 	{"Graphics/fastBlur",			"false", 0},
 	{"Graphics/bilinearFilter",		"false", 0},
 	{"Graphics/interlacedMode",		"2", 0},	// GensConfig::INTERLACED_FLICKER
-	{"Graphics/spriteLimits",		"true", 0},
-	{"Graphics/vscrollBug",			"true", 0},
 	{"Graphics/contrast",			"0", 0},
 	{"Graphics/brightness",			"0", 0},
 	{"Graphics/grayscale",			"false", 0},
 	{"Graphics/inverted",			"false", 0},
 	{"Graphics/colorScaleMethod",		"1", 0},	// LibGens::VdpPalette::COLSCALE_FULL
 	{"Graphics/stretchMode",		"1", 0},	// GensConfig::STRETCH_H
+	
+	/** VDP settings. **/
+	{"VDP/borderColorEmulation",	"true", 0},
+	{"VDP/ntscV30Rolling",		"true", 0},
+	{"VDP/zeroLengthDMA",		"false", 0},
+	{"VDP/spriteLimits",		"true", 0},
+	{"VDP/vscrollBug",		"true", 0},
 	
 	/** Savestates. **/
 	{"Savestates/saveSlot", "0", 0},

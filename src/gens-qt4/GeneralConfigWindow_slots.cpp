@@ -59,11 +59,11 @@ void GeneralConfigWindow::on_chkAutoFixChecksum_toggled(bool checked)
 void GeneralConfigWindow::on_chkAutoPause_toggled(bool checked)
 	{ GENERIC_OPTION("autoPause", checked); }
 void GeneralConfigWindow::on_chkBorderColor_toggled(bool checked)
-	{ GENERIC_OPTION("borderColorEmulation", checked); }
+	{ GENERIC_OPTION("VDP/borderColorEmulation", checked); }
 void GeneralConfigWindow::on_chkPauseTint_toggled(bool checked)
 	{ GENERIC_OPTION("pauseTint", checked); }
 void GeneralConfigWindow::on_chkNtscV30Rolling_toggled(bool checked)
-	{ GENERIC_OPTION("ntscV30Rolling", checked); }
+	{ GENERIC_OPTION("VDP/ntscV30Rolling", checked); }
 
 /** Intro effect. **/
 void GeneralConfigWindow::on_cboIntroStyle_currentIndexChanged(int index)
@@ -85,7 +85,7 @@ void GeneralConfigWindow::on_chkBilinearFilter_toggled(bool checked)
 void GeneralConfigWindow::on_cboInterlacedMode_currentIndexChanged(int index)
 	{ GENERIC_OPTION("Graphics/interlacedMode", index); }
 void GeneralConfigWindow::on_chkSpriteLimits_toggled(bool checked)
-	{ GENERIC_OPTION("Graphics/spriteLimits", checked); }
+	{ GENERIC_OPTION("VDP/spriteLimits", checked); }
 
 void GeneralConfigWindow::on_hsldContrast_valueChanged(int value)
 	{ GENERIC_OPTION("Graphics/contrast", value); }
