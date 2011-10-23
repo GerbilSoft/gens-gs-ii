@@ -600,6 +600,7 @@ void GensWindow::showMenuBar_changed_slot(const QVariant& newShowMenuBar)
 {
 	m_cfg_showMenuBar = newShowMenuBar.toBool();
 	
+#ifndef Q_WS_MAC
 	// TODO: If the value changed and we're windowed,
 	// resize the window to compensate.
 	int height_adjust = 0;
@@ -632,6 +633,7 @@ void GensWindow::showMenuBar_changed_slot(const QVariant& newShowMenuBar)
 		// Adjust the window height to compensate for the menu bar change.
 		this->resize(this->width(), this->height() + height_adjust);
 	}
+#endif /* Q_WS_MAC */
 }
 
 
