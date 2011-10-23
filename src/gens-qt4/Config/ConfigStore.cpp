@@ -432,6 +432,7 @@ void ConfigStorePrivate::set(const QString& key, const QVariant& value)
 	if (!settings.contains(key))
 	{
 		// Property does not exist. Print a warning.
+		// TODO: Make this an error, since it won't be saved?
 		LOG_MSG(gens, LOG_MSG_LEVEL_WARNING,
 			"ConfigStorePrivate: Property '%s' has no default value. FIX THIS!",
 			key.toUtf8().constData());
@@ -481,6 +482,7 @@ QVariant ConfigStorePrivate::get(const QString& key)
 	if (!settings.contains(key))
 	{
 		// Property does not exist. Print a warning.
+		// TODO: Make this an error, since it won't be saved?
 		LOG_MSG(gens, LOG_MSG_LEVEL_WARNING,
 			"ConfigStorePrivate: Property '%s' has no default value. FIX THIS!",
 			key.toUtf8().constData());
@@ -518,20 +520,17 @@ int ConfigStorePrivate::load(const QString& filename)
 {
 	QSettings qSettings(filename, QSettings::IniFormat);
 	
-	// Reset the internal settings map to defaults.
-	reset();
+	// NOTE: Only known settings will be loaded.
+	settings.clear();
+	settings.reserve(sizeof(DefaultSettings)/sizeof(DefaultSettings[0]));
 	
-	// Load the settings from the file.
-	foreach (const QString& key, qSettings.allKeys())
+	// Load known settings from the configuration file.
+	for (const DefaultSetting *def = &DefaultSettings[0]; def->key != NULL; def++)
 	{
-		settings.insert(key, qSettings.value(key));
+		const QString key = QLatin1String(def->key);
+		const QVariant value = qSettings.value(key, QLatin1String(def->value));
+		settings.insert(key, value);
 	}
-	
-	// Remove application information from the settings QHash.
-	settings.remove(QLatin1String("_Application"));
-	settings.remove(QLatin1String("_Version"));
-	settings.remove(QLatin1String("_VersionExt"));
-	settings.remove(QLatin1String("_VersionVcs"));
 	
 	// Load the Recent ROMs settings.
 	// TODO: Remove Recent ROMs entries from qSettings?
@@ -606,18 +605,13 @@ int ConfigStorePrivate::save(const QString& filename)
 		qSettings.remove(QLatin1String("_VersionVcs"));
 	}
 	
-	// Make a copy of the settings map.
-	// Entries will be removed as DefaultSettings[] is traversed.
-	// This is done to maintain ordering for known settings.
-	QHash<QString, QVariant> settingsTmp(settings);
+	// NOTE: Only known settings will be saved.
 	
-	// Save the default settings.
+	// Save known settings to the configuration file.
 	for (const DefaultSetting *def = &DefaultSettings[0]; def->key != NULL; def++)
 	{
 		const QString key = QLatin1String(def->key);
-		
-		QVariant value = settingsTmp.value(key,
-					(def->value ? QLatin1String(def->value) : QString()));
+		QVariant value = settings.value(key, QLatin1String(def->value));
 		if (def->hex_digits > 0)
 		{
 			// Convert to hexadecimal.
@@ -627,13 +621,6 @@ int ConfigStorePrivate::save(const QString& filename)
 		}
 		
 		qSettings.setValue(key, value);
-		settingsTmp.remove(key);
-	}
-	
-	// Save the remaining settings.
-	foreach (const QString& key, settingsTmp.keys())
-	{
-		qSettings.setValue(key, settingsTmp.value(key));
 	}
 	
 	// Save the Recent ROMs settings.
