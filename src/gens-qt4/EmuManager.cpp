@@ -101,18 +101,18 @@ EmuManager::EmuManager(QObject *parent)
 		this, SLOT(autoFixChecksum_changed_slot(bool)));
 	
 	// Graphics settings.
-	connect(gqt4_config, SIGNAL(contrast_changed(int)),
-		this, SLOT(contrast_changed_slot(int)));
-	connect(gqt4_config, SIGNAL(brightness_changed(int)),
-		this, SLOT(brightness_changed_slot(int)));
-	connect(gqt4_config, SIGNAL(grayscale_changed(bool)),
-		this, SLOT(grayscale_changed_slot(bool)));
-	connect(gqt4_config, SIGNAL(inverted_changed(bool)),
-		this, SLOT(inverted_changed_slot(bool)));
-	connect(gqt4_config, SIGNAL(colorScaleMethod_changed(int)),
-		this, SLOT(colorScaleMethod_changed_slot(int)));
-	connect(gqt4_config, SIGNAL(interlacedMode_changed(GensConfig::InterlacedMode_t)),
-		this, SLOT(interlacedMode_changed_slot(GensConfig::InterlacedMode_t)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/contrast"),
+					this, SLOT(contrast_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/brightness"),
+					this, SLOT(brightness_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/grayscale"),
+					this, SLOT(grayscale_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/inverted"),
+					this, SLOT(inverted_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/colorScaleMethod"),
+					this, SLOT(colorScaleMethod_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/interlacedMode"),
+					this, SLOT(interlacedMode_changed_slot(QVariant)));
 	
 	// Region code settings.
 	connect(gqt4_config, SIGNAL(regionCode_changed(int)),

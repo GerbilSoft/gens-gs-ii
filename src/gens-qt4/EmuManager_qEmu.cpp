@@ -54,6 +54,7 @@
 #include <QtCore/QBuffer>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
+#include <QtCore/QVariant>
 #include <QtGui/QApplication>
 #include <QtGui/QImage>
 #include <QtGui/QImageReader>
@@ -387,6 +388,50 @@ void EmuManager::changePaletteSetting(EmuRequest_t::PaletteSettingType type, int
 	
 	if (!m_rom || m_paused.data)
 		processQEmuRequest();
+}
+
+
+/**
+ * Graphics settings.
+ */
+
+
+void EmuManager::contrast_changed_slot(const QVariant& contrast)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_CONTRAST, contrast.toBool()); }
+void EmuManager::brightness_changed_slot(const QVariant& brightness)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_BRIGHTNESS, brightness.toInt()); }
+void EmuManager::grayscale_changed_slot(const QVariant& grayscale)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_GRAYSCALE, (int)grayscale.toBool()); }
+void EmuManager::inverted_changed_slot(const QVariant& inverted)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_INVERTED, (int)inverted.toBool()); }
+void EmuManager::colorScaleMethod_changed_slot(const QVariant& colorScaleMethod)
+{
+	int csm = colorScaleMethod.toInt();
+	if (csm < LibGens::VdpPalette::COLSCALE_RAW ||
+	    csm > LibGens::VdpPalette::COLSCALE_FULL_SH)
+	{
+		// Invalid color scale method.
+		gqt4_cfg->set(QLatin1String("Graphics/colorScaleMethod"),
+				(int)LibGens::VdpPalette::COLSCALE_FULL);
+		return;
+	}
+	
+	changePaletteSetting(EmuRequest_t::RQT_PS_COLORSCALEMETHOD, csm);
+}
+void EmuManager::interlacedMode_changed_slot(const QVariant& interlacedMode)
+{
+	int im = interlacedMode.toInt();
+	if (im < LibGens::VdpTypes::INTREND_EVEN ||
+	    im > LibGens::VdpTypes::INTREND_FLICKER)
+	{
+		// Invalid interlaced rendering mode.
+		// TODO: Add support for INTREND_2X.
+		gqt4_cfg->set(QLatin1String("Graphics/interlacedMode"),
+				(int)LibGens::VdpTypes::INTREND_FLICKER);
+		return;
+	}
+	
+	changePaletteSetting(EmuRequest_t::RQT_PS_INTERLACEDMODE, im);
 }
 
 

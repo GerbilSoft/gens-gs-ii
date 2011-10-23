@@ -119,30 +119,6 @@ class GensConfig : public QObject
 		Q_PROPERTY(uint16_t regionCodeOrder READ regionCodeOrder WRITE setRegionCodeOrder NOTIFY regionCodeOrder_changed);
 		GC_PROPERTY(uint16_t, regionCodeOrder, uint16_t, RegionCodeOrder);
 		
-		/** Graphics settings. **/
-		
-		enum InterlacedMode_t
-		{
-			INTERLACED_EVEN		= 0,
-			INTERLACED_ODD		= 1,
-			INTERLACED_FLICKER	= 2,
-			INTERLACED_2X		= 3,
-		};
-		Q_ENUMS(InterlacedMode_t);
-		GC_PROPERTY(InterlacedMode_t, interlacedMode, InterlacedMode_t, InterlacedMode);
-		Q_PROPERTY(InterlacedMode_t interlacedMode READ interlacedMode WRITE setInterlacedMode NOTIFY interlacedMode_changed)
-		
-		Q_PROPERTY(int contrast READ contrast WRITE setContrast NOTIFY contrast_changed)
-		GC_PROPERTY(int, contrast, int, Contrast);
-		Q_PROPERTY(int brightness READ brightness WRITE setBrightness NOTIFY brightness_changed)
-		GC_PROPERTY(int, brightness, int, Brightness);
-		Q_PROPERTY(bool grayscale READ grayscale WRITE setGrayscale NOTIFY grayscale_changed)
-		GC_PROPERTY(bool, grayscale, bool, Grayscale);
-		Q_PROPERTY(bool inverted READ inverted WRITE setInverted NOTIFY inverted_changed)
-		GC_PROPERTY(bool, inverted, bool, Inverted);
-		Q_PROPERTY(int colorScaleMethod READ colorScaleMethod WRITE setColorScaleMethod NOTIFY colorScaleMethod_changed)
-		GC_PROPERTY(int, colorScaleMethod, int, ColorScaleMethod);
-		
 		/** General settings. **/
 		Q_PROPERTY(bool autoFixChecksum READ autoFixChecksum WRITE setAutoFixChecksum NOTIFY autoFixChecksum_changed)
 		GC_PROPERTY(bool, autoFixChecksum, bool, AutoFixChecksum);
@@ -171,14 +147,6 @@ class GensConfig : public QObject
 		/** System. **/
 		void regionCode_changed(int newRegionCode); // LibGens::SysVersion::RegionCode_t
 		void regionCodeOrder_changed(uint16_t newRegionCodeOrder);
-		
-		/** Graphics settings. **/
-		void interlacedMode_changed(GensConfig::InterlacedMode_t newInterlacedMode);
-		void contrast_changed(int newContrast);
-		void brightness_changed(int newBrightness);
-		void grayscale_changed(bool newGrayscale);
-		void inverted_changed(bool newInverted);
-		void colorScaleMethod_changed(int newColorScaleMethod);
 		
 		/** General settings. **/
 		void autoFixChecksum_changed(bool newAutoFixChecksum);

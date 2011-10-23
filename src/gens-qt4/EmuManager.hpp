@@ -374,19 +374,12 @@ class EmuManager : public QObject
 	
 	protected slots:
 		/** Graphics settings. **/
-		// TODO: Verify that this doesn't break on Mac OS X.
-		void contrast_changed_slot(int newContrast)
-			{ changePaletteSetting(EmuRequest_t::RQT_PS_CONTRAST, newContrast); }
-		void brightness_changed_slot(int newBrightness)
-			{ changePaletteSetting(EmuRequest_t::RQT_PS_BRIGHTNESS, newBrightness); }
-		void grayscale_changed_slot(bool newGrayscale)
-			{ changePaletteSetting(EmuRequest_t::RQT_PS_GRAYSCALE, (int)newGrayscale); }
-		void inverted_changed_slot(bool newInverted)
-			{ changePaletteSetting(EmuRequest_t::RQT_PS_INVERTED, (int)newInverted); }
-		void colorScaleMethod_changed_slot(int newColorScaleMethod)
-			{ changePaletteSetting(EmuRequest_t::RQT_PS_COLORSCALEMETHOD, newColorScaleMethod); }
-		void interlacedMode_changed_slot(GensConfig::InterlacedMode_t newInterlacedMode)
-			{ changePaletteSetting(EmuRequest_t::RQT_PS_INTERLACEDMODE, (int)newInterlacedMode); }
+		void contrast_changed_slot(const QVariant& contrast);
+		void brightness_changed_slot(const QVariant& brightness);
+		void grayscale_changed_slot(const QVariant& grayscale);
+		void inverted_changed_slot(const QVariant& inverted);
+		void colorScaleMethod_changed_slot(const QVariant& colorScaleMethod);
+		void interlacedMode_changed_slot(const QVariant& interlacedMode);
 	
 	/** Emulation Request Queue: Processing functions. **/
 	

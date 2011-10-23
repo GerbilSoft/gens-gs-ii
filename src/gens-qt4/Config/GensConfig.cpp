@@ -57,14 +57,6 @@ class GensConfigPrivate
 		uint16_t regionCodeOrder;
 		static bool IsRegionCodeOrderValid(uint16_t order);
 		
-		/** Graphics settings. **/
-		GensConfig::InterlacedMode_t interlacedMode;
-		int contrast;
-		int brightness;
-		bool grayscale;
-		bool inverted;
-		int colorScaleMethod;
-		
 		/** General settings. **/
 		bool autoFixChecksum;
 		bool autoPause;
@@ -159,25 +151,6 @@ int GensConfigPrivate::reload(const QString& filename)
 	regionCodeOrder = regionCodeOrder_tmp;
 	settings.endGroup();
 	
-	/** Graphics settings. **/
-	settings.beginGroup(QLatin1String("Graphics"));
-	// TODO: Add support for INTERLACED_2X.
-	int interlaced_tmp = settings.value(QLatin1String("interlacedMode"), (int)GensConfig::INTERLACED_FLICKER).toInt();
-	if ((interlaced_tmp < (int)GensConfig::INTERLACED_EVEN) || (interlaced_tmp > (int)GensConfig::INTERLACED_FLICKER))
-		interlaced_tmp = (int)GensConfig::INTERLACED_FLICKER;
-	interlacedMode = (GensConfig::InterlacedMode_t)interlaced_tmp;
-	contrast = settings.value(QLatin1String("contrast"), 0).toInt();
-	brightness = settings.value(QLatin1String("brightness"), 0).toInt();
-	grayscale = settings.value(QLatin1String("grayscale"), false).toBool();
-	inverted = settings.value(QLatin1String("inverted"), false).toBool();
-	// using int to prevent Qt issues
-	colorScaleMethod = settings.value(QLatin1String("colorScaleMethod"),
-				(int)LibGens::VdpPalette::COLSCALE_FULL).toInt();
-	if ((colorScaleMethod < 0) || (colorScaleMethod > (int)LibGens::VdpPalette::COLSCALE_FULL_SH))
-		colorScaleMethod = (int)LibGens::VdpPalette::COLSCALE_FULL;
-	
-	settings.endGroup();
-	
 	/** Savestates. **/
 	settings.beginGroup(QLatin1String("Savestates"));
 	saveSlot = settings.value(QLatin1String("saveSlot"), 0).toInt();
@@ -269,17 +242,6 @@ int GensConfigPrivate::save(const QString& filename)
 	QString sRegionCodeOrder = QLatin1String("0x") +
 			QString::number(regionCodeOrder, 16).toUpper().rightJustified(4, QChar(L'0'));
 	settings.setValue(QLatin1String("regionCodeOrder"), sRegionCodeOrder);
-	settings.endGroup();
-	
-	/** Graphics settings. **/
-	settings.beginGroup(QLatin1String("Graphics"));
-	settings.setValue(QLatin1String("interlacedMode"), (int)interlacedMode);
-	settings.setValue(QLatin1String("contrast"), contrast);
-	settings.setValue(QLatin1String("brightness"), brightness);
-	settings.setValue(QLatin1String("grayscale"), grayscale);
-	settings.setValue(QLatin1String("inverted"), inverted);
-	// using int to prevent Qt issues
-	settings.setValue(QLatin1String("colorScaleMethod"), colorScaleMethod);
 	settings.endGroup();
 	
 	/** Savestates. **/
@@ -397,15 +359,6 @@ void GensConfig::emitAll(void)
 	/** System. **/
 	emit regionCode_changed(d->regionCode);
 	emit regionCodeOrder_changed(d->regionCodeOrder);
-	
-	/** Graphics settings. **/
-	// TODO: Optimize palette calculation so it's only done once.
-	emit interlacedMode_changed(d->interlacedMode);
-	emit contrast_changed(d->contrast);
-	emit brightness_changed(d->brightness);
-	emit grayscale_changed(d->grayscale);
-	emit inverted_changed(d->inverted);
-	emit colorScaleMethod_changed(d->colorScaleMethod);
 	
 	/** General settings. **/
 	emit autoFixChecksum_changed(d->autoFixChecksum);
@@ -541,21 +494,6 @@ void GensConfig::setRegionCodeOrder(uint16_t newRegionCodeOrder)
 	d->regionCodeOrder = newRegionCodeOrder;
 	emit regionCodeOrder_changed(newRegionCodeOrder);
 }
-
-
-/** Graphics settings. **/
-// TODO: Add support for INTERLACED_2X.
-GC_PROPERTY_WRITE_RANGE(GensConfig::InterlacedMode_t, interlacedMode,
-			GensConfig::InterlacedMode_t, InterlacedMode,
-			(int)INTERLACED_EVEN, (int)INTERLACED_FLICKER);
-GC_PROPERTY_WRITE(int, contrast, int, Contrast)
-GC_PROPERTY_WRITE(int, brightness, int, Brightness)
-GC_PROPERTY_WRITE(bool, grayscale, bool, Grayscale)
-GC_PROPERTY_WRITE(bool, inverted, bool, Inverted)
-GC_PROPERTY_WRITE_RANGE(int, colorScaleMethod,
-			int, ColorScaleMethod,
-			(int)LibGens::VdpPalette::COLSCALE_RAW,
-			(int)LibGens::VdpPalette::COLSCALE_FULL_SH)
 
 
 /** General settings. **/
