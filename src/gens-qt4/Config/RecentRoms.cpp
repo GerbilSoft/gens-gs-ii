@@ -101,10 +101,10 @@ void RecentRoms::update(QString filename, QString z_filename,
 /**
  * load(): Load the recent ROMs list from a settings file.
  * NOTE: The group must be selected in the QSettings before calling this function!
- * @param settings Settings file.
+ * @param qSettings Settings file.
  * @return Size of Recent ROMs list on success; negative on error.
  */
-int RecentRoms::load(const QSettings *settings)
+int RecentRoms::load(const QSettings *qSettings)
 {
 	// Clear the Recent ROMs list.
 	m_lstRoms.clear();
@@ -117,17 +117,17 @@ int RecentRoms::load(const QSettings *settings)
 		
 		// Get the ROM filename.
 		// If it's empty, skip this ROM.
-		rom.filename = settings->value(romID).toString();
+		rom.filename = qSettings->value(romID).toString();
 		if (rom.filename.isEmpty())
 			continue;
 		
 		// Get the ROM z_filename.
 		// May be empty for uncompressed ROMs or single-file archives.
-		rom.z_filename = settings->value(romID + QLatin1String("_zf")).toString();
+		rom.z_filename = qSettings->value(romID + QLatin1String("_zf")).toString();
 		
 		// Get the ROM system ID.
 		rom.sysId = (LibGens::Rom::MDP_SYSTEM_ID)
-				(settings->value(romID + QLatin1String("_sys"), LibGens::Rom::MDP_SYSTEM_UNKNOWN).toInt());
+				(qSettings->value(romID + QLatin1String("_sys"), LibGens::Rom::MDP_SYSTEM_UNKNOWN).toInt());
 		
 		// Append the ROM to the list.
 		m_lstRoms.append(rom);
@@ -144,10 +144,10 @@ int RecentRoms::load(const QSettings *settings)
 /**
  * save(): Save the recent ROMs list to a settings file.
  * NOTE: The group must be selected in the QSettings before calling this function!
- * @param settings Settings file.
+ * @param qSettings Settings file.
  * @return 0 on success; non-zero on error.
  */
-int RecentRoms::save(QSettings *settings)
+int RecentRoms::save(QSettings *qSettings)
 {
 	// Save the recent ROMs to the settings file.
 	int i = 0;
@@ -155,9 +155,9 @@ int RecentRoms::save(QSettings *settings)
 	{
 		// Save the ROM information.
 		const QString romID = QLatin1String("rom") + QString::number(i+1);
-		settings->setValue(romID, rom.filename);
-		settings->setValue(romID + QLatin1String("_zf"), rom.z_filename);
-		settings->setValue(romID + QLatin1String("_sys"), (int)rom.sysId);
+		qSettings->setValue(romID, rom.filename);
+		qSettings->setValue(romID + QLatin1String("_zf"), rom.z_filename);
+		qSettings->setValue(romID + QLatin1String("_sys"), (int)rom.sysId);
 		
 		// Increment the ROM counter.
 		i++;
@@ -167,9 +167,9 @@ int RecentRoms::save(QSettings *settings)
 	for (; i < MAX_ROMS; i++)
 	{
 		const QString romID = QLatin1String("rom") + QString::number(i+1);
-		settings->remove(romID);
-		settings->remove(romID + QLatin1String("_zf"));
-		settings->remove(romID + QLatin1String("_sys"));
+		qSettings->remove(romID);
+		qSettings->remove(romID + QLatin1String("_zf"));
+		qSettings->remove(romID + QLatin1String("_sys"));
 	}
 	
 	// Return the size of the Recent ROMs list.

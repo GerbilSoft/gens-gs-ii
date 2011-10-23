@@ -68,18 +68,18 @@ class RecentRoms : public QObject
 		/**
 		 * load(): Load the recent ROMs list from a settings file.
 		 * NOTE: The group must be selected in the QSettings before calling this function!
-		 * @param settings Settings file.
+		 * @param qSettings Settings file.
 		 * @return Size of Recent ROMs list on success; negative on error.
 		 */
-		int load(const QSettings *settings);
+		int load(const QSettings *qSettings);
 		
 		/**
 		 * save(): Save the recent ROMs list to a settings file.
 		 * NOTE: The group must be selected in the QSettings before calling this function!
-		 * @param settings Settings file.
+		 * @param qSettings Settings file.
 		 * @return Size of Recent ROMs list on success; negative on error.
 		 */
-		int save(QSettings *settings);
+		int save(QSettings *qSettings);
 		
 		/**
 		 * getRom(): Get a recent ROM entry.

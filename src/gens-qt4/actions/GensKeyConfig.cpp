@@ -222,10 +222,10 @@ int GensKeyConfig::actionToKey(int action)
 /**
  * load(): Load key configuration from a settings file.
  * NOTE: The group must be selected in the QSettings before calling this function!
- * @param settings Settings file.
+ * @param qSettings Settings file.
  * @return 0 on success; non-zero on error.
  */
-int GensKeyConfig::load(const QSettings *settings)
+int GensKeyConfig::load(const QSettings *qSettings)
 {
 	// Clear the hash tables before loading.
 	d->hashActionToKey.clear();
@@ -235,7 +235,7 @@ int GensKeyConfig::load(const QSettings *settings)
 	for (const GensKeyConfigPrivate::DefKeySetting_t *key = &d->DefKeySettings[0];
 	    key->action != 0; key++)
 	{
-		const GensKey_t gensKey = settings->value(
+		const GensKey_t gensKey = qSettings->value(
 			QLatin1String(key->setting), key->gensKey).toString().toUInt(NULL, 0);
 		d->hashActionToKey.insert(key->action, gensKey);
 		if (key->gensKey != KEYV_UNKNOWN)
@@ -250,10 +250,10 @@ int GensKeyConfig::load(const QSettings *settings)
 /**
  * save(): Save key configuration to a settings file.
  * NOTE: The group must be selected in the QSettings before calling this function!
- * @param settings Settings file.
+ * @param qSettings Settings file.
  * @return 0 on success; non-zero on error.
  */
-int GensKeyConfig::save(QSettings *settings)
+int GensKeyConfig::save(QSettings *qSettings)
 {
 	// Save the key configuration.
 	for (const GensKeyConfigPrivate::DefKeySetting_t *key = &d->DefKeySettings[0];
@@ -263,7 +263,7 @@ int GensKeyConfig::save(QSettings *settings)
 		QString gensKey_str = QLatin1String("0x") +
 				QString::number(gensKey, 16).toUpper().rightJustified(4, QChar(L'0'));
 		
-		settings->setValue(QLatin1String(key->setting), gensKey_str);
+		qSettings->setValue(QLatin1String(key->setting), gensKey_str);
 	}
 	
 	// Key configuration saved.
