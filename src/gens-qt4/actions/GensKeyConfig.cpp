@@ -177,10 +177,10 @@ const GensKeyConfigPrivate::DefKeySetting_t GensKeyConfigPrivate::DefKeySettings
 };
 
 
-GensKeyConfig::GensKeyConfig()
+GensKeyConfig::GensKeyConfig(QObject *parent)
+	: QObject(parent)
+	, d(new GensKeyConfigPrivate())
 {
-	d = new GensKeyConfigPrivate();
-	
 	// Load the default key configuration.
 	for (const GensKeyConfigPrivate::DefKeySetting_t *key = &d->DefKeySettings[0];
 	    key->action != 0; key++)

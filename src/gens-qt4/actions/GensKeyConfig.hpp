@@ -44,7 +44,7 @@ class GensKeyConfig : public QObject
 	Q_OBJECT
 	
 	public:
-		GensKeyConfig();
+		GensKeyConfig(QObject *parent = 0);
 		~GensKeyConfig();
 		
 		/**
