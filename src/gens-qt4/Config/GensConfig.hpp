@@ -111,11 +111,6 @@ class GensConfig : public QObject
 		int keyToAction(GensKey_t key);
 		GensKey_t actionToKey(int action);
 	
-	signals:
-		/** General settings. **/
-		void autoFixChecksum_changed(bool newAutoFixChecksum);
-		void autoPause_changed(bool newAutoPause);
-	
 	private:
 		friend class GensConfigPrivate;
 		GensConfigPrivate *d;
