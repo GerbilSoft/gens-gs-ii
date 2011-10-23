@@ -62,7 +62,7 @@ const QString GeneralConfigWindow::ms_sWarning =
 
 
 /**
- * GeneralConfigWindow(): Initialize the General Configuration window.
+ * Initialize the General Configuration window.
  */
 GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	: QMainWindow(parent,
@@ -77,6 +77,35 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
+	
+	// Create the action group for the toolbar buttons.
+	m_agBtnGroup = new QActionGroup(this);
+	m_agBtnGroup->setExclusive(true);
+	connect(m_agBtnGroup, SIGNAL(triggered(QAction*)),
+		this, SLOT(toolbarTriggered(QAction*)));
+
+	// FreeDesktop.org icon names for the toolbar buttons.
+	static const char *const icon_fdo[] =
+	{
+		"applications-graphics",	// Graphics
+		"configure",			// General
+		"applications-system",		// System
+		"media-optical",		// Sega CD
+		"utilities-terminal",		// External Programs
+		NULL
+	};
+	
+	// Initialize the toolbar buttons.
+	int i = 0;
+	foreach (QAction *action, toolBar->actions())
+	{
+		action->setIcon(GensQApplication::IconFromTheme(QLatin1String(icon_fdo[i])));
+		action->setData(i);
+		m_agBtnGroup->addAction(action);
+		
+		// Next action.
+		i++;
+	}
 	
 #ifndef GCW_APPLY_IMMED
 	// Set up a signal for the Apply button.
@@ -161,7 +190,7 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 
 
 /**
- * ~GeneralConfigWindow(): Shut down the Controller Configuration window.
+ * Shut down the Controller Configuration window.
  */
 GeneralConfigWindow::~GeneralConfigWindow()
 {
@@ -171,7 +200,7 @@ GeneralConfigWindow::~GeneralConfigWindow()
 
 
 /**
- * ShowSingle(): Show a single instance of the General Configuration window.
+ * Show a single instance of the General Configuration window.
  * @param parent Parent window.
  */
 void GeneralConfigWindow::ShowSingle(QWidget *parent)
@@ -192,7 +221,7 @@ void GeneralConfigWindow::ShowSingle(QWidget *parent)
 
 
 /**
- * keyPressEvent(): Key press handler.
+ * Key press handler.
  * @param event Key event.
  */
 void GeneralConfigWindow::keyPressEvent(QKeyEvent *event)
@@ -240,7 +269,7 @@ void GeneralConfigWindow::keyPressEvent(QKeyEvent *event)
 
 
 /**
- * changeEvent(): Widget state has changed.
+ * Widget state has changed.
  * @param event State change event.
  */
 void GeneralConfigWindow::changeEvent(QEvent *event)
@@ -278,7 +307,7 @@ void GeneralConfigWindow::changeEvent(QEvent *event)
 
 
 /**
- * accept(): Accept the configuration changes.
+ * Accept the configuration changes.
  * Triggered if "OK" is clicked.
  */
 void GeneralConfigWindow::accept(void)
@@ -289,7 +318,7 @@ void GeneralConfigWindow::accept(void)
 
 
 /**
- * reject(): Reject the configuration changes.
+ * Reject the configuration changes.
  * Triggered if "Cancel" is clicked.
  */
 void GeneralConfigWindow::reject(void)
@@ -300,7 +329,7 @@ void GeneralConfigWindow::reject(void)
 
 #ifndef GCW_APPLY_IMMED
 /**
- * setApplyButtonEnabled(): Enable or disable the Apply button.
+ * Enable or disable the Apply button.
  * @param enabled True to enable; false to disable.
  */
 void GeneralConfigWindow::setApplyButtonEnabled(bool enabled)
@@ -324,7 +353,7 @@ static inline QString ValByPath_QString(const char *path)
 	{ return gqt4_cfg->get(QLatin1String(path)).toString(); }
 
 /**
- * reload(): Reload configuration.
+ * Reload configuration.
  */
 void GeneralConfigWindow::reload(void)
 {
@@ -414,7 +443,7 @@ static inline void SetValByPath_QString(const char *path, const QString& value)
 	{ gqt4_cfg->set(QLatin1String(path), value); }
 
 /**
- * apply(): Apply the configuration changes.
+ * Apply the configuration changes.
  * Triggered if "Apply" is clicked.
  */
 void GeneralConfigWindow::apply(void)
@@ -471,23 +500,28 @@ void GeneralConfigWindow::apply(void)
 
 
 /**
- * toolbarTriggered(): A toolbar button was clicked.
+ * A toolbar button was clicked.
  * @param action Toolbar button.
- * NOTE: Only used on Mac OS X.
- * The Mac OS X version is in GeneralConfigWindow_mac.cpp.
- * We need to implement this slot here anyway due to moc limitations.
  */
-#ifndef Q_WS_MAC
-void GeneralConfigWindow::toolbarTriggered(QAction* action)
-	{ ((void)action); }
-#endif
+void GeneralConfigWindow::toolbarTriggered(QAction *action)
+{
+	QVariant data = action->data();
+	if (!data.isValid() || !data.canConvert(QVariant::Int))
+		return;
+	
+	int tab = data.toInt();
+	if (tab < 0 || tab >= stackedWidget->count())
+		return;
+	
+	stackedWidget->setCurrentIndex(tab);
+}
 
 
 /** Onscreen display **/
 
 
 /**
- * osdSelectColor(): Select a color for the OSD.
+ * Select a color for the OSD.
  * @param color_id	[in] Color ID.
  * @param init_color	[in] Initial color.
  * @return Selected color, or invalid QColor if cancelled.
@@ -544,7 +578,7 @@ void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
 
 
 /**
- * on_btnRegionDetectUp_clicked(): Up button was clicked.
+ * Up button was clicked.
  */
 void GeneralConfigWindow::on_btnRegionDetectUp_clicked(void)
 {
@@ -569,7 +603,7 @@ void GeneralConfigWindow::on_btnRegionDetectUp_clicked(void)
 
 
 /**
- * on_btnRegionDetectDown_clicked(): Down button was clicked.
+ * Down button was clicked.
  */
 void GeneralConfigWindow::on_btnRegionDetectDown_clicked(void)
 {
@@ -594,7 +628,7 @@ void GeneralConfigWindow::on_btnRegionDetectDown_clicked(void)
 
 
 /**
- * regionCodeOrder(): Get the region code order from lstRegionDetect.
+ * Get the region code order from lstRegionDetect.
  * @return Region code order.
  */
 uint16_t GeneralConfigWindow::regionCodeOrder(void) const
@@ -614,7 +648,7 @@ uint16_t GeneralConfigWindow::regionCodeOrder(void) const
 
 
 /**
- * mcdSelectRomFile(): Select a Sega CD Boot ROM file.
+ * Select a Sega CD Boot ROM file.
  * @param rom_id	[in] Sega CD Boot ROM ID.
  * @param txtRomFile	[in] ROM file textbox.
  */
@@ -671,7 +705,7 @@ void GeneralConfigWindow::on_btnMcdRomAsia_clicked(void)
 
 
 /**
- * mcdUpdateRomFileStatus(): Sega CD: Update Boot ROM file status.
+ * Sega CD: Update Boot ROM file status.
  * @param txtRomFile ROM file textbox.
  * @param region_code Expected ROM region code. (bitmask)
  * @return Updated ROM status.
@@ -841,7 +875,7 @@ rom_identified:
 
 
 /**
- * mcdDisplayRomFileStatus(): Sega CD: Display Boot ROM file status.
+ * Sega CD: Display Boot ROM file status.
  * @param rom_id Sega CD Boot ROM ID.
  * @param rom_desc ROM file description. (detected by examining the ROM)
  */
@@ -936,7 +970,7 @@ void GeneralConfigWindow::on_txtMcdRomAsia_textChanged(void)
 
 
 /**
- * on_btnExtPrgUnRAR_clicked(): Select a RAR/UnRAR binary.
+ * Select a RAR/UnRAR binary.
  */
 void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
 {
@@ -973,7 +1007,7 @@ void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
 
 
 /**
- * extprgDisplayFileStatus(): Display external program file status.
+ * Display external program file status.
  * @param file_id File ID.
  * @param file_desc File description. (detected by examining the file)
  */
