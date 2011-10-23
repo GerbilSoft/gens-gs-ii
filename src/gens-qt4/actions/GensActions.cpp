@@ -380,18 +380,25 @@ bool GensActions::doAction(int action, bool state)
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_8):
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_9):
 					// Save slot selection.
-					gqt4_config->setSaveSlot(action - IDM_NOMENU_SAVESLOT_0);
+					gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), (action - IDM_NOMENU_SAVESLOT_0));
 					return true;
 				
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_PREV):
+				{
 					// Previous Save Slot.
-					gqt4_config->setSaveSlot_Prev();
+					int saveSlot = gqt4_cfg->getInt(QLatin1String("Savestates/saveSlot"));
+					saveSlot = ((saveSlot + 9) % 10);
+					gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), saveSlot);
 					return true;
+				}
 					
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_NEXT):
+				{
 					// Next Save Slot.
-					gqt4_config->setSaveSlot_Next();
-					return true;
+					int saveSlot = gqt4_cfg->getInt(QLatin1String("Savestates/saveSlot"));
+					saveSlot = ((saveSlot + 1) % 10);
+					gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), saveSlot);
+				}
 				
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_LOADFROM):
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_SAVEAS):

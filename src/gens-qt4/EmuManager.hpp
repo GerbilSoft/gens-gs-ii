@@ -340,9 +340,9 @@ class EmuManager : public QObject
 	protected slots:
 		/**
 		 * saveSlot_changed_slot(): Set the save slot number.
-		 * @param newSaveSlot Save slot number, (0-9)
+		 * @param saveSlot (int) Save slot number, (0-9)
 		 */
-		void saveSlot_changed_slot(int newSaveSlot);
+		void saveSlot_changed_slot(const QVariant& saveSlot);
 		
 		/**
 		 * autoFixChecksum_changed_slot(): Change the Auto Fix Checksum setting.

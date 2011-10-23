@@ -107,12 +107,6 @@ class GensConfig : public QObject
 			};
 			QString userPath(ConfigPath pathID);
 		
-		/** Savestates. **/
-		Q_PROPERTY(int saveSlot READ saveSlot WRITE setSaveSlot NOTIFY saveSlot_changed)
-		GC_PROPERTY(int, saveSlot, int, SaveSlot);
-		void setSaveSlot_Prev(void);
-		void setSaveSlot_Next(void);
-		
 		/** Key configuration. **/
 		int keyToAction(GensKey_t key);
 		GensKey_t actionToKey(int action);
@@ -125,9 +119,6 @@ class GensConfig : public QObject
 		/** General settings. **/
 		void autoFixChecksum_changed(bool newAutoFixChecksum);
 		void autoPause_changed(bool newAutoPause);
-		
-		/** Savestates. **/
-		void saveSlot_changed(int newSaveSlot);
 		
 		/** Emulation options. (Options menu) **/
 		void enableSRam_changed(bool newEnableSRam);

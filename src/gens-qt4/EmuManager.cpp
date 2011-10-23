@@ -85,7 +85,8 @@ EmuManager::EmuManager(QObject *parent)
 	m_paused.data = 0;
 	
 	// Save slot.
-	m_saveSlot = gqt4_config->saveSlot();
+	// TODO: Move saveSlot validation intn ConfigStore
+	m_saveSlot = gqt4_cfg->getInt(QLatin1String("Savestates/saveSlot")) % 10;
 	
 	// TODO: Load initial VdpPalette settings.
 	
@@ -95,8 +96,8 @@ EmuManager::EmuManager(QObject *parent)
 	m_audio = new GensPortAudio();
 	
 	// Configuration settings.
-	connect(gqt4_config, SIGNAL(saveSlot_changed(int)),
-		this, SLOT(saveSlot_changed_slot(int)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Savestates/saveSlot"),
+					this, SLOT(saveSlot_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("autoFixChecksum"),
 					this, SLOT(autoFixChecksum_changed_slot(QVariant)));
 	

@@ -249,19 +249,24 @@ void EmuManager::pauseRequest(paused_t newPaused)
 
 /**
  * saveSlot_changed_slot(): Save slot changed.
- * @param newSaveSlot Save slot number, (0-9)
+ * @param saveSlot (int) Save slot number, (0-9)
  */
-void EmuManager::saveSlot_changed_slot(int newSaveSlot)
+void EmuManager::saveSlot_changed_slot(const QVariant& saveSlot)
 {
 	// NOTE: Don't check if the save slot is the same.
 	// This allows users to recheck a savestate's preview image.
-	if (newSaveSlot < 0 || newSaveSlot > 9)
+	const int saveSlotNum = saveSlot.toInt();
+	if (saveSlotNum < 0 || saveSlotNum > 9)
+	{
+		// Invalid save slot. Mod by 10 to get a valid slot.
+		gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), (saveSlotNum % 10));
 		return;
+	}
 	
 	// Queue the save slot request.
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_SAVE_SLOT;
-	rq.saveState.saveSlot = newSaveSlot;
+	rq.saveState.saveSlot = saveSlotNum;
 	m_qEmuRequest.enqueue(rq);
 	
 	if (!m_rom || m_paused.data)

@@ -52,9 +52,6 @@ class GensConfigPrivate
 		/** Configuration path. **/
 		QString cfgPath;
 		
-		/** Savestates. **/
-		int saveSlot;
-		
 		/** Key configuration. **/
 		GensKeyConfig keyConfig;
 		
@@ -86,11 +83,6 @@ int GensConfigPrivate::reload(const QString& filename)
 	
 	// TODO: Check if the file was opened successfully.
 	// TODO: QVariant type checking.
-	
-	/** Savestates. **/
-	settings.beginGroup(QLatin1String("Savestates"));
-	saveSlot = settings.value(QLatin1String("saveSlot"), 0).toInt();
-	settings.endGroup();
 	
 	/** Key configuration. **/
 	settings.beginGroup(QLatin1String("Shortcut_Keys"));
@@ -161,11 +153,6 @@ int GensConfigPrivate::save(const QString& filename)
 	{
 		settings.remove(QLatin1String("_VersionVcs"));
 	}
-	
-	/** Savestates. **/
-	settings.beginGroup(QLatin1String("Savestates"));
-	settings.setValue(QLatin1String("saveSlot"), saveSlot);
-	settings.endGroup();
 	
 	/** Key configuration. **/
 	settings.beginGroup(QLatin1String("Shortcut_Keys"));
@@ -274,9 +261,6 @@ int GensConfig::save(const QString& filename)
  */
 void GensConfig::emitAll(void)
 {
-	/** Savestates. **/
-	emit saveSlot_changed(d->saveSlot);
-	
 	/** Emulation options. (Options menu) **/
 	emit enableSRam_changed(d->enableSRam);
 }
@@ -381,31 +365,6 @@ void GensConfig::set##setPropName(setPropType new##setPropName) \
 	d->propName = (new##setPropName); \
 	emit propName##_changed(new##setPropName); \
 }
-
-
-/** Savestates. **/
-
-
-int GensConfig::saveSlot(void) const
-	{ return d->saveSlot; }
-void GensConfig::setSaveSlot(int newSaveSlot)
-{
-	// Allow setting the same save slot for preview functionality.
-	if (/*d->saveSlot == newSaveSlot ||*/
-	    newSaveSlot < 0 ||
-	    newSaveSlot > 9)
-	{
-		return;
-	}
-	
-	d->saveSlot = newSaveSlot;
-	emit saveSlot_changed(newSaveSlot);
-}
-
-void GensConfig::setSaveSlot_Prev(void)
-	{ setSaveSlot((d->saveSlot + 9) % 10); }
-void GensConfig::setSaveSlot_Next(void)
-	{ setSaveSlot((d->saveSlot + 1) % 10); }
 
 
 /** Key configuration. **/
