@@ -122,16 +122,6 @@ class GensConfig : public QObject
 		Q_PROPERTY(uint16_t regionCodeOrder READ regionCodeOrder WRITE setRegionCodeOrder NOTIFY regionCodeOrder_changed);
 		GC_PROPERTY(uint16_t, regionCodeOrder, uint16_t, RegionCodeOrder);
 		
-		/** Sega CD Boot ROMs. **/
-		Q_PROPERTY(QString mcdRomUSA READ mcdRomUSA WRITE setMcdRomUSA NOTIFY mcdRomUSA_changed)
-		GC_PROPERTY(QString, mcdRomUSA, const QString&, McdRomUSA);
-		Q_PROPERTY(QString mcdRomEUR READ mcdRomEUR WRITE setMcdRomEUR NOTIFY mcdRomEUR_changed)
-		GC_PROPERTY(QString, mcdRomEUR, const QString&, McdRomEUR);
-		Q_PROPERTY(QString mcdRomJPN READ mcdRomJPN WRITE setMcdRomJPN NOTIFY mcdRomJPN_changed)
-		GC_PROPERTY(QString, mcdRomJPN, const QString&, McdRomJPN);
-		Q_PROPERTY(QString mcdRomAsia READ mcdRomJPN WRITE setMcdRomAsia NOTIFY mcdRomAsia_changed)
-		GC_PROPERTY(QString, mcdRomAsia, const QString&, McdRomAsia);
-		
 		/** External programs. **/
 		Q_PROPERTY(QString extprgUnRAR READ extprgUnRAR WRITE setExtPrgUnRAR NOTIFY extprgUnRAR_changed)
 		GC_PROPERTY(QString, extprgUnRAR, const QString&, ExtPrgUnRAR);
@@ -188,12 +178,6 @@ class GensConfig : public QObject
 		/** System. **/
 		void regionCode_changed(int newRegionCode); // LibGens::SysVersion::RegionCode_t
 		void regionCodeOrder_changed(uint16_t newRegionCodeOrder);
-		
-		/** Sega CD Boot ROMs. **/
-		void mcdRomUSA_changed(const QString& filename);
-		void mcdRomEUR_changed(const QString& filename);
-		void mcdRomJPN_changed(const QString& filename);
-		void mcdRomAsia_changed(const QString& filename);
 		
 		/** External programs. **/
 		void extprgUnRAR_changed(const QString& filename);

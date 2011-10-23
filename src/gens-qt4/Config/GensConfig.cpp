@@ -57,12 +57,6 @@ class GensConfigPrivate
 		uint16_t regionCodeOrder;
 		static bool IsRegionCodeOrderValid(uint16_t order);
 		
-		/** Sega CD Boot ROMs. **/
-		QString mcdRomUSA;
-		QString mcdRomEUR;
-		QString mcdRomJPN;
-		QString mcdRomAsia;
-		
 		/** External programs. **/
 		QString extprgUnRAR;
 		
@@ -166,14 +160,6 @@ int GensConfigPrivate::reload(const QString& filename)
 	if (!IsRegionCodeOrderValid(regionCodeOrder_tmp))
 		regionCodeOrder_tmp = 0x4812;
 	regionCodeOrder = regionCodeOrder_tmp;
-	settings.endGroup();
-	
-	/** Sega CD Boot ROMs. **/
-	settings.beginGroup(QLatin1String("Sega_CD"));
-	mcdRomUSA = settings.value(QLatin1String("bootRomUSA"), QString()).toString();
-	mcdRomEUR = settings.value(QLatin1String("bootRomEUR"), QString()).toString();
-	mcdRomJPN = settings.value(QLatin1String("bootRomJPN"), QString()).toString();
-	mcdRomAsia = settings.value(QLatin1String("bootRomAsia"), QString()).toString();
 	settings.endGroup();
 	
 	/** External programs. **/
@@ -314,14 +300,6 @@ int GensConfigPrivate::save(const QString& filename)
 	settings.setValue(QLatin1String("regionCodeOrder"), sRegionCodeOrder);
 	settings.endGroup();
 	
-	/** Sega CD Boot ROMs. **/
-	settings.beginGroup(QLatin1String("Sega_CD"));
-	settings.setValue(QLatin1String("bootRomUSA"), mcdRomUSA);
-	settings.setValue(QLatin1String("bootRomEUR"), mcdRomEUR);
-	settings.setValue(QLatin1String("bootRomJPN"), mcdRomJPN);
-	settings.setValue(QLatin1String("bootRomAsia"), mcdRomAsia);
-	settings.endGroup();
-	
 	/** External programs. **/
 	settings.beginGroup(QLatin1String("External_Programs"));
 	settings.setValue(QLatin1String("UnRAR"), extprgUnRAR);
@@ -459,12 +437,6 @@ void GensConfig::emitAll(void)
 	/** System. **/
 	emit regionCode_changed(d->regionCode);
 	emit regionCodeOrder_changed(d->regionCodeOrder);
-	
-	/** Sega CD Boot ROMs. **/
-	emit mcdRomUSA_changed(d->mcdRomUSA);
-	emit mcdRomEUR_changed(d->mcdRomEUR);
-	emit mcdRomJPN_changed(d->mcdRomJPN);
-	emit mcdRomAsia_changed(d->mcdRomAsia);
 	
 	/** External programs. **/
 	emit extprgUnRAR_changed(d->extprgUnRAR);
@@ -612,13 +584,6 @@ void GensConfig::setRegionCodeOrder(uint16_t newRegionCodeOrder)
 	d->regionCodeOrder = newRegionCodeOrder;
 	emit regionCodeOrder_changed(newRegionCodeOrder);
 }
-
-
-/** Sega CD Boot ROMs. **/
-GC_PROPERTY_WRITE(QString, mcdRomUSA, const QString&, McdRomUSA)
-GC_PROPERTY_WRITE(QString, mcdRomEUR, const QString&, McdRomEUR)
-GC_PROPERTY_WRITE(QString, mcdRomJPN, const QString&, McdRomJPN)
-GC_PROPERTY_WRITE(QString, mcdRomAsia, const QString&, McdRomAsia)
 
 
 /** External programs. **/
