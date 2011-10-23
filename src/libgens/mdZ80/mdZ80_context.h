@@ -30,7 +30,7 @@
 /* Structures & definitions */
 /****************************/
 
-typedef struct _mdZ80_context
+struct _mdZ80_context
 {
 	union
 	{
@@ -156,6 +156,6 @@ typedef struct _mdZ80_context
 	
 	Z80_RB *IN_C;
 	Z80_WB *OUT_C;
-} mdZ80_context;
+};
 
 #endif /* __MDZ80_CONTEXT_H__ */
