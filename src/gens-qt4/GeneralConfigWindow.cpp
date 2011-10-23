@@ -107,6 +107,9 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 		i++;
 	}
 	
+	// Select the "General" tab.
+	actionGeneral->setChecked(true);
+	
 #ifndef GCW_APPLY_IMMED
 	// Set up a signal for the Apply button.
 	QPushButton *btnApply = buttonBox->button(QDialogButtonBox::Apply);
