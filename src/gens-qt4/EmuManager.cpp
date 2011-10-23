@@ -403,8 +403,17 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	}
 	
 	// Determine the system region code.
-	const LibGens::SysVersion::RegionCode_t cfg_region =
+	LibGens::SysVersion::RegionCode_t cfg_region =
 				(LibGens::SysVersion::RegionCode_t)gqt4_cfg->getInt(QLatin1String("System/regionCode"));
+	if (cfg_region < LibGens::SysVersion::REGION_AUTO ||
+	    cfg_region > LibGens::SysVersion::REGION_EU_PAL)
+	{
+		// Invalid region. Reset to Auto-Detect.
+		gqt4_cfg->set(QLatin1String("System/regionCode"),
+				(int)LibGens::SysVersion::REGION_AUTO);
+		cfg_region = LibGens::SysVersion::REGION_AUTO;
+	}
+	
 	const LibGens::SysVersion::RegionCode_t lg_region = GetLgRegionCode(
 				cfg_region, rom->regionCode(), rc_order);
 	

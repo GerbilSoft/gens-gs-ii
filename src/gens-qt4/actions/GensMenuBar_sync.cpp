@@ -173,7 +173,11 @@ void GensMenuBar::regionCode_changed_slot_int(int regionCode)
 		case LibGens::SysVersion::REGION_US_NTSC:	id = IDM_SYSTEM_REGION_USA;        break;
 		case LibGens::SysVersion::REGION_EU_PAL:	id = IDM_SYSTEM_REGION_EUROPE;     break;
 		default:
-			return;
+			// Invalid region. Reset to Auto-Detect.
+			gqt4_cfg->set(QLatin1String("System/regionCode"),
+					(int)LibGens::SysVersion::REGION_AUTO);
+			id = IDM_SYSTEM_REGION_AUTODETECT;
+			break;
 	}
 	
 	// Find the action.

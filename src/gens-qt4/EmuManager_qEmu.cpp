@@ -317,9 +317,9 @@ void EmuManager::regionCode_changed_slot(const QVariant& regionCode)
 	if (lg_region < LibGens::SysVersion::REGION_AUTO ||
 	    lg_region > LibGens::SysVersion::REGION_EU_PAL)
 	{
-		// Invalid region. Reset to US/NTSC.
+		// Invalid region. Reset to Auto-Detect.
 		gqt4_cfg->set(QLatin1String("System/regionCode"),
-				(int)LibGens::SysVersion::REGION_US_NTSC);
+				(int)LibGens::SysVersion::REGION_AUTO);
 		return;
 	}
 	
