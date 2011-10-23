@@ -38,6 +38,9 @@
 #include "GensWindow.hpp"
 #include "SigHandler.hpp"
 
+// External program configuration handler.
+#include "ExtPrgHandler.hpp"
+
 // Text translation macro.
 #define TR(text) \
 	QCoreApplication::translate("gqt4_main", (text), NULL, QCoreApplication::UnicodeUTF8)
@@ -65,6 +68,9 @@ int gens_main(int argc, char *argv[])
 	// TODO: Remove in favor of ConfigStore.
 	GensQt4::gqt4_config = new GensQt4::GensConfig();
 	GensQt4::gqt4_cfg = new GensQt4::ConfigStore();
+	
+	// External program configuration handler.
+	GensQt4::ExtPrgHandler *extPrgHandler = new GensQt4::ExtPrgHandler();
 	
 	// TODO: Parse command line arguments.
 	// They're available in app.arguments() [QStringList].
@@ -110,6 +116,12 @@ int gens_main(int argc, char *argv[])
 	
 	// Unregister the signal handler.
 	GensQt4::SigHandler::End();
+	
+	// Delete the various objects.
+	delete extPrgHandler;
+	delete GensQt4::gqt4_cfg;
+	delete GensQt4::gqt4_config;
+	delete GensQt4::gqt4_app;
 	
 	// Finished.
 	return ret;

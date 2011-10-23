@@ -122,10 +122,6 @@ class GensConfig : public QObject
 		Q_PROPERTY(uint16_t regionCodeOrder READ regionCodeOrder WRITE setRegionCodeOrder NOTIFY regionCodeOrder_changed);
 		GC_PROPERTY(uint16_t, regionCodeOrder, uint16_t, RegionCodeOrder);
 		
-		/** External programs. **/
-		Q_PROPERTY(QString extprgUnRAR READ extprgUnRAR WRITE setExtPrgUnRAR NOTIFY extprgUnRAR_changed)
-		GC_PROPERTY(QString, extprgUnRAR, const QString&, ExtPrgUnRAR);
-		
 		/** Graphics settings. **/
 		
 		enum InterlacedMode_t
@@ -178,9 +174,6 @@ class GensConfig : public QObject
 		/** System. **/
 		void regionCode_changed(int newRegionCode); // LibGens::SysVersion::RegionCode_t
 		void regionCodeOrder_changed(uint16_t newRegionCodeOrder);
-		
-		/** External programs. **/
-		void extprgUnRAR_changed(const QString& filename);
 		
 		/** Graphics settings. **/
 		void interlacedMode_changed(GensConfig::InterlacedMode_t newInterlacedMode);

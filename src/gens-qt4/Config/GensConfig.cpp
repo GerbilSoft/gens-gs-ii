@@ -57,9 +57,6 @@ class GensConfigPrivate
 		uint16_t regionCodeOrder;
 		static bool IsRegionCodeOrderValid(uint16_t order);
 		
-		/** External programs. **/
-		QString extprgUnRAR;
-		
 		/** Graphics settings. **/
 		GensConfig::InterlacedMode_t interlacedMode;
 		int contrast;
@@ -160,27 +157,6 @@ int GensConfigPrivate::reload(const QString& filename)
 	if (!IsRegionCodeOrderValid(regionCodeOrder_tmp))
 		regionCodeOrder_tmp = 0x4812;
 	regionCodeOrder = regionCodeOrder_tmp;
-	settings.endGroup();
-	
-	/** External programs. **/
-	// TODO: Don't use setExtPrgUnRAR.
-	// Instead, set the filename directly.
-#ifdef Q_OS_WIN32
-#ifdef __amd64__
-	const QLatin1String sExtPrgUnRAR_default("UnRAR64.dll");
-#else
-	const QLatin1String sExtPrgUnRAR_default("UnRAR.dll");
-#endif
-#else /* !Q_OS_WIN32 */
-	// TODO: Check for the existence of unrar and rar.
-	// We should:
-	// - Default to unrar if it's found.
-	// - Fall back to rar if it's found but unrar isn't.
-	// - Assume unrar if neither are found.
-	const QLatin1String sExtPrgUnRAR_default("/usr/bin/unrar");
-#endif /* Q_OS_WIN32 */
-	settings.beginGroup(QLatin1String("External_Programs"));
-	q->setExtPrgUnRAR(settings.value(QLatin1String("UnRAR"), sExtPrgUnRAR_default).toString());
 	settings.endGroup();
 	
 	/** Graphics settings. **/
@@ -298,11 +274,6 @@ int GensConfigPrivate::save(const QString& filename)
 	QString sRegionCodeOrder = QLatin1String("0x") +
 			QString::number(regionCodeOrder, 16).toUpper().rightJustified(4, QChar(L'0'));
 	settings.setValue(QLatin1String("regionCodeOrder"), sRegionCodeOrder);
-	settings.endGroup();
-	
-	/** External programs. **/
-	settings.beginGroup(QLatin1String("External_Programs"));
-	settings.setValue(QLatin1String("UnRAR"), extprgUnRAR);
 	settings.endGroup();
 	
 	/** Graphics settings. **/
@@ -437,9 +408,6 @@ void GensConfig::emitAll(void)
 	/** System. **/
 	emit regionCode_changed(d->regionCode);
 	emit regionCodeOrder_changed(d->regionCodeOrder);
-	
-	/** External programs. **/
-	emit extprgUnRAR_changed(d->extprgUnRAR);
 	
 	/** Graphics settings. **/
 	// TODO: Optimize palette calculation so it's only done once.
@@ -583,28 +551,6 @@ void GensConfig::setRegionCodeOrder(uint16_t newRegionCodeOrder)
 	
 	d->regionCodeOrder = newRegionCodeOrder;
 	emit regionCodeOrder_changed(newRegionCodeOrder);
-}
-
-
-/** External programs. **/
-
-
-QString GensConfig::extprgUnRAR(void) const
-	{ return d->extprgUnRAR; }
-void GensConfig::setExtPrgUnRAR(const QString& filename)
-{
-	if (d->extprgUnRAR == filename)
-		return;
-	
-	d->extprgUnRAR = filename;
-	emit extprgUnRAR_changed(d->extprgUnRAR);
-	
-	// TODO: Don't set the DcRar filename here.
-	// Set it in a signal handler in gqt4_main.cpp or something.
-	// Maybe create GensConfigHandler.cpp?
-	// (Reasoning is we might have multiple GensConfig instances,
-	//  but only one may be active at any given time.)
-	LibGens::DcRar::SetExtPrg(d->extprgUnRAR.toUtf8().constData());
 }
 
 
