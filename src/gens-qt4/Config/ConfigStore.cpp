@@ -23,6 +23,9 @@
 
 #include "ConfigStore.hpp"
 
+// C includes.
+#include <stdint.h>
+
 // LibGens includes.
 #include "libgens/lg_main.hpp"
 #include "libgens/macros/log_msg.h"
@@ -41,6 +44,9 @@
 #include <QtCore/QObject>
 #include <QtCore/QMetaObject>
 #include <QtCore/QMetaMethod>
+
+// QtGui includes.
+#include <QtGui/QColor>
 
 // Key configuration.
 #include "actions/GensKeyConfig.hpp"
@@ -68,6 +74,21 @@ class ConfigStorePrivate
 		 * Reset all settings to defaults.
 		 */
 		void reset(void);
+		
+		/**
+		 * Check if a region code order is valid.
+		 * @param regionCodeOrder Region code order to check.
+		 * @return True if valid; false if invalid.
+		 */
+		static bool IsRegionCodeOrderValid(uint16_t regionCodeOrder);
+		
+		/**
+		 * Validate a property.
+		 * @param key Property name.
+		 * @param value Property value. (May be edited for validation.)
+		 * @return Property value (possibly adjusted) if validated; invalid QVariant on failure.
+		 */
+		static QVariant Validate(const QString& name, const QVariant& value);
 		
 		/**
 		 * Set a property.
@@ -172,6 +193,21 @@ class ConfigStorePrivate
 			const char *key;
 			const char *value;
 			int hex_digits;		// If non-zero, saves as hexadecimal with this many digits.
+			
+			// Parameter validation.
+			enum ValidationType
+			{
+				VT_NONE,		// No validation.
+				VT_BOOL,		// Boolean; normalize to true/false.
+				VT_COLOR,		// QColor.
+				VT_RANGE,		// Integer range.
+				VT_REGIONCODEORDER,	// RegionCodeOrder.
+				
+				VT_MAX
+			};
+			ValidationType validation;
+			int range_min;
+			int range_max;
 		};
 		static const DefaultSetting DefaultSettings[];
 		static QHash<QString, const DefaultSetting*> DefaultSettingsHash;
@@ -215,36 +251,38 @@ const char ConfigStorePrivate::DefaultConfigFilename[] = "gens-gs-ii.NEWCONF.con
 const ConfigStorePrivate::DefaultSetting ConfigStorePrivate::DefaultSettings[] =
 {
 	/** General settings. **/
-	{"autoFixChecksum",		"true", 0},
-	{"autoPause",			"false", 0},
-	{"pauseTint",			"true", 0},
+	{"autoFixChecksum",		"true", 0,	DefaultSetting::VT_BOOL, 0, 0},
+	{"autoPause",			"false", 0,	DefaultSetting::VT_BOOL, 0, 0},
+	{"pauseTint",			"true", 0,	DefaultSetting::VT_BOOL, 0, 0},
 	
 	/** Onscreen display. **/
-	{"OSD/fpsEnabled",		"true", 0},
-	{"OSD/fpsColor",		"#ffffff", 0},
-	{"OSD/msgEnabled",		"true", 0},
-	{"OSD/msgColor",		"#ffffff", 0},
+	{"OSD/fpsEnabled",		"true", 0,	DefaultSetting::VT_BOOL, 0, 0},
+	{"OSD/fpsColor",		"#ffffff", 0,	DefaultSetting::VT_COLOR, 0, 0},
+	{"OSD/msgEnabled",		"true", 0,	DefaultSetting::VT_BOOL, 0, 0},
+	{"OSD/msgColor",		"#ffffff", 0,	DefaultSetting::VT_COLOR, 0, 0},
 	
 	/** Intro effect. **/
-	{"Intro_Effect/introStyle",	"0", 0},	// none
-	{"Intro_Effect/introColor",	"7", 0},	// white
+	// TODO: Use enum constants for range.
+	{"Intro_Effect/introStyle",	"0", 0,		DefaultSetting::VT_RANGE, 0, 2},	// none
+	{"Intro_Effect/introColor",	"7", 0,		DefaultSetting::VT_RANGE, 0, 7},	// white
 	
 	/** System. **/
-	{"System/regionCode",		"-1", 0},	// LibGens::SysVersion::REGION_AUTO
-	{"System/regionCodeOrder",	"0x4812", 4},	// US, Europe, Japan, Asia
+	// TODO: Use enum constants for range.
+	{"System/regionCode",		"-1", 0,	DefaultSetting::VT_RANGE, -1, 4},	// LibGens::SysVersion::REGION_AUTO
+	{"System/regionCodeOrder",	"0x4812", 4,	DefaultSetting::VT_REGIONCODEORDER, 0, 0},	// US, Europe, Japan, Asia
 	
 	/** Sega CD Boot ROMs. **/
-	{"Sega_CD/bootRomUSA", NULL, 0},
-	{"Sega_CD/bootRomEUR", NULL, 0},
-	{"Sega_CD/bootRomJPN", NULL, 0},
-	{"Sega_CD/bootRomAsia", NULL, 0},
+	{"Sega_CD/bootRomUSA", NULL, 0,		DefaultSetting::VT_NONE, 0, 0},
+	{"Sega_CD/bootRomEUR", NULL, 0,		DefaultSetting::VT_NONE, 0, 0},
+	{"Sega_CD/bootRomJPN", NULL, 0,		DefaultSetting::VT_NONE, 0, 0},
+	{"Sega_CD/bootRomAsia", NULL, 0,	DefaultSetting::VT_NONE, 0, 0},
 	
 	/** External programs. **/
 #ifdef Q_OS_WIN32
 #ifdef __amd64__
-	{"External_Programs/UnRAR", "UnRAR64.dll", 0},
+	{"External_Programs/UnRAR", "UnRAR64.dll", 0,	DefaultSetting::VT_NONE, 0, 0},
 #else
-	{"External_Programs/UnRAR", "UnRAR.dll", 0},
+	{"External_Programs/UnRAR", "UnRAR.dll", 0,	DefaultSetting::VT_NONE, 0, 0},
 #endif
 #else /* !Q_OS_WIN32 */
 	// TODO: Check for the existence of unrar and rar.
@@ -252,50 +290,52 @@ const ConfigStorePrivate::DefaultSetting ConfigStorePrivate::DefaultSettings[] =
 	// - Default to unrar if it's found.
 	// - Fall back to rar if it's found but unrar isn't.
 	// - Assume unrar if neither are found.
-	{"External_Programs/UnRAR", "/usr/bin/unrar", 0},
+	{"External_Programs/UnRAR", "/usr/bin/unrar", 0, DefaultSetting::VT_NONE, 0, 0},
 #endif /* Q_OS_WIN32 */
 	
 	/** Graphics settings. **/
-	{"Graphics/aspectRatioConstraint",	"true", 0},
-	{"Graphics/fastBlur",			"false", 0},
-	{"Graphics/bilinearFilter",		"false", 0},
-	{"Graphics/interlacedMode",		"2", 0},	// GensConfig::INTERLACED_FLICKER
-	{"Graphics/contrast",			"0", 0},
-	{"Graphics/brightness",			"0", 0},
-	{"Graphics/grayscale",			"false", 0},
-	{"Graphics/inverted",			"false", 0},
-	{"Graphics/colorScaleMethod",		"1", 0},	// LibGens::VdpPalette::COLSCALE_FULL
-	{"Graphics/stretchMode",		"1", 0},	// GensConfig::STRETCH_H
+	// TODO: Use enum constants for range.
+	{"Graphics/aspectRatioConstraint",	"true", 0,	DefaultSetting::VT_BOOL, 0, 0},
+	{"Graphics/fastBlur",			"false", 0,	DefaultSetting::VT_BOOL, 0, 0},
+	{"Graphics/bilinearFilter",		"false", 0,	DefaultSetting::VT_BOOL, 0, 0},
+	{"Graphics/interlacedMode",		"2", 0,		DefaultSetting::VT_RANGE, 0, 2},	// GensConfig::INTERLACED_FLICKER
+	{"Graphics/contrast",			"0", 0,		DefaultSetting::VT_RANGE, -100, 100},
+	{"Graphics/brightness",			"0", 0,		DefaultSetting::VT_RANGE, -100, 100},
+	{"Graphics/grayscale",			"false", 0,	DefaultSetting::VT_BOOL, 0, 0},
+	{"Graphics/inverted",			"false", 0,	DefaultSetting::VT_BOOL, 0, 0},
+	{"Graphics/colorScaleMethod",		"1", 0,		DefaultSetting::VT_RANGE, 0, 2},	// LibGens::VdpPalette::COLSCALE_FULL
+	{"Graphics/stretchMode",		"1", 0,		DefaultSetting::VT_RANGE, 0, 3},	// GensConfig::STRETCH_H
 	
 	/** VDP settings. **/
-	{"VDP/borderColorEmulation",	"true", 0},
-	{"VDP/ntscV30Rolling",		"true", 0},
-	{"VDP/zeroLengthDMA",		"false", 0},
-	{"VDP/spriteLimits",		"true", 0},
-	{"VDP/vscrollBug",		"true", 0},
+	{"VDP/borderColorEmulation",	"true", 0,	DefaultSetting::VT_BOOL, 0, 0},
+	{"VDP/ntscV30Rolling",		"true", 0,	DefaultSetting::VT_BOOL, 0, 0},
+	{"VDP/zeroLengthDMA",		"false", 0,	DefaultSetting::VT_BOOL, 0, 0},
+	{"VDP/spriteLimits",		"true", 0,	DefaultSetting::VT_BOOL, 0, 0},
+	{"VDP/vscrollBug",		"true", 0,	DefaultSetting::VT_BOOL, 0, 0},
 	
 	/** Savestates. **/
-	{"Savestates/saveSlot", "0", 0},
+	{"Savestates/saveSlot", "0", 0, DefaultSetting::VT_RANGE, 0, 9},
 	
 	/** GensWindow configuration. **/
-	{"GensWindow/showMenuBar", "true", 0},
+	{"GensWindow/showMenuBar", "true", 0, DefaultSetting::VT_BOOL, 0, 0},
 	
 	/** Emulation options. (Options menu) **/
-	{"Options/enableSRam", "true", 0},
+	{"Options/enableSRam", "true", 0, DefaultSetting::VT_BOOL, 0, 0},
 	
 	/** Directories. **/
 	// TODO: Add a class to handle path resolution.
-	{"Directories/Savestates",	"./Savestates/", 0},
-	{"Directories/SRAM",		"./SRAM/", 0},
-	{"Directories/BRAM",		"./BRAM/", 0},
-	{"Directories/WAV",		"./WAV/", 0},
-	{"Directories/VGM",		"./VGM/", 0},
-	{"Directories/Screenshots",	"./Screenshots/", 0},
+	// TODO: Validation type? (Or will that be handled using the class...)
+	{"Directories/Savestates",	"./Savestates/", 0,	DefaultSetting::VT_NONE, 0, 0},
+	{"Directories/SRAM",		"./SRAM/", 0,		DefaultSetting::VT_NONE, 0, 0},
+	{"Directories/BRAM",		"./BRAM/", 0,		DefaultSetting::VT_NONE, 0, 0},
+	{"Directories/WAV",		"./WAV/", 0,		DefaultSetting::VT_NONE, 0, 0},
+	{"Directories/VGM",		"./VGM/", 0,		DefaultSetting::VT_NONE, 0, 0},
+	{"Directories/Screenshots",	"./Screenshots/", 0,	DefaultSetting::VT_NONE, 0, 0},
 	
 	// TODO: Shortcut keys, controllers, recent ROMs.
 	
 	/** End of array. **/
-	{NULL, NULL, 0}
+	{NULL, NULL, 0, DefaultSetting::VT_NONE, 0, 0}
 };
 
 QHash<QString, const ConfigStorePrivate::DefaultSetting*> ConfigStorePrivate::DefaultSettingsHash;
@@ -454,6 +494,92 @@ void ConfigStorePrivate::reset(void)
 
 
 /**
+ * Check if a region code order is valid.
+ * @param regionCodeOrder Region code order to check.
+ * @return True if valid; false if invalid.
+ */
+bool ConfigStorePrivate::IsRegionCodeOrderValid(uint16_t regionCodeOrder)
+{
+	static const uint16_t RegionCodeOrder_tbl[24] =
+	{
+		0x4812, 0x4821, 0x4182, 0x4128, 0x4281, 0x4218, 
+		0x8412, 0x8421, 0x8124, 0x8142, 0x8241, 0x8214,
+		0x1482, 0x1428, 0x1824, 0x1842, 0x1248, 0x1284,
+		0x2481, 0x2418,	0x2814, 0x2841, 0x2148, 0x2184
+	};
+	
+	for (size_t i = 0; i < (sizeof(RegionCodeOrder_tbl)/sizeof(RegionCodeOrder_tbl[0])); i++)
+	{
+		if (regionCodeOrder == RegionCodeOrder_tbl[i])
+			return true;
+	}
+	
+	// Region code order is not valid.
+	return false;
+}
+
+
+/**
+ * Validate a property.
+ * @param key Property name.
+ * @param value Property value. (May be edited for validation.)
+ * @return Property value (possibly adjusted) if validated; invalid QVariant on failure.
+ */
+QVariant ConfigStorePrivate::Validate(const QString& name, const QVariant& value)
+{
+	// Get the DefaultSetting entry for this property.
+	// TODO: Lock the hash?
+	const DefaultSetting *def = DefaultSettingsHash.value(name, NULL);
+	if (!def)
+		return -1;
+	
+	switch (def->validation)
+	{
+		case DefaultSetting::VT_NONE:
+		default:
+			// No validation required.
+			return value;
+		
+		case DefaultSetting::VT_BOOL:
+			if (!value.canConvert(QVariant::Bool))
+				return QVariant();
+			return QVariant(value.toBool());
+		
+		case DefaultSetting::VT_COLOR:
+		{
+			QColor color = value.value<QColor>();
+			if (!color.isValid())
+				return QVariant();
+			return QVariant(color.name());
+		}
+		
+		case DefaultSetting::VT_RANGE:
+		{
+			if (!value.canConvert(QVariant::Int))
+				return QVariant();
+			int val = value.toInt();
+			if (val < def->range_min || val > def->range_min)
+				return QVariant();
+			return QVariant(val);
+		}
+		
+		case DefaultSetting::VT_REGIONCODEORDER:
+		{
+			if (!value.canConvert(QVariant::UInt))
+				return QVariant();
+			uint16_t rc_order = (uint16_t)value.toUInt();
+			if (!IsRegionCodeOrderValid(rc_order))
+				return QVariant();
+			return QVariant(rc_order);
+		}
+	}
+	
+	// Should not get here...
+	return QVariant();
+}
+
+
+/**
  * Set a property.
  * @param key Property name.
  * @param value Property value.
@@ -477,8 +603,13 @@ void ConfigStorePrivate::set(const QString& key, const QVariant& value)
 	if (value == oldValue)
 		return;
 	
-	// New value is different.
-	settings.insert(key, value);
+	// Verify that this value passes validation.
+	QVariant newValue = Validate(key, value);
+	if (!newValue.isValid())
+		return;
+	
+	// Set the new value.
+	settings.insert(key, newValue);
 	
 	// Invoke methods for registered objects.
 	QMutexLocker mtxLocker(&mtxSignalMaps);
@@ -497,7 +628,7 @@ void ConfigStorePrivate::set(const QString& key, const QVariant& value)
 		else
 		{
 			// Invoke this method.
-			InvokeQtMethod(smap->object, smap->method, value);
+			InvokeQtMethod(smap->object, smap->method, newValue);
 		}
 	}
 }
@@ -561,7 +692,16 @@ int ConfigStorePrivate::load(const QString& filename)
 	for (const DefaultSetting *def = &DefaultSettings[0]; def->key != NULL; def++)
 	{
 		const QString key = QLatin1String(def->key);
-		const QVariant value = qSettings.value(key, QLatin1String(def->value));
+		QVariant value = qSettings.value(key, QLatin1String(def->value));
+		
+		// Validate this value.
+		value = Validate(key, value);
+		if (!value.isValid())
+		{
+			// Validation failed. Use the default value.
+			value = QVariant(QLatin1String(def->value));
+		}
+		
 		settings.insert(key, value);
 	}
 	
