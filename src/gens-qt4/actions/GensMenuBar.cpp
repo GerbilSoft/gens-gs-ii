@@ -49,11 +49,11 @@ namespace GensQt4
 
 GensMenuBarPrivate::GensMenuBarPrivate(GensMenuBar *q)
 	: q(q)
-	, m_lockCnt(0)
+	, lockCnt(0)
 	, popupMenu(NULL)
 	, emuManager(NULL)
 	, recentRomsMenu(NULL)
-	, m_signalMapper(new QSignalMapper(q))
+	, signalMapper(new QSignalMapper(q))
 { }
 
 
@@ -80,7 +80,7 @@ void GensMenuBarPrivate::init(EmuManager *initEmuManager)
 	setEmuManager(initEmuManager);
 	
 	// Connect the QSignalMapper's mapped() signal.
-	QObject::connect(m_signalMapper, SIGNAL(mapped(int)),
+	QObject::connect(signalMapper, SIGNAL(mapped(int)),
 			 q, SLOT(menuItemSelected(int)));
 	
 	// Create the "Recent ROMs" menu.
@@ -128,7 +128,7 @@ void GensMenuBarPrivate::setEmuManager(EmuManager *newEmuManager)
 /**
  * Clear the menu hash tables and lists.
  * - hashActions: Hash table of menu actions.
- * - m_lstSeparators: List of menu separators.
+ * - lstSeparators: List of menu separators.
  */
 void GensMenuBarPrivate::clearHashTables(void)
 {
@@ -139,8 +139,8 @@ void GensMenuBarPrivate::clearHashTables(void)
 	hashActions.clear();
 	
 	// Separators list.
-	qDeleteAll(m_lstSeparators);
-	m_lstSeparators.clear();
+	qDeleteAll(lstSeparators);
+	lstSeparators.clear();
 }
 
 
@@ -160,7 +160,7 @@ inline void GensMenuBarPrivate::retranslate(void)
 
 /**
  * Parse an array of GensMainMenuItem items.
- * The menus are added to m_popupMenu.
+ * The menus are added to popupMenu.
  * @param mainMenu Pointer to the first item in the GensMainMenuItem array.
  */
 void GensMenuBarPrivate::parseMainMenu(const GensMenuBar::MainMenuItem *mainMenu)
@@ -205,7 +205,7 @@ void GensMenuBarPrivate::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *par
 		if (menu->type == GensMenuBar::GMI_SEPARATOR)
 		{
 			// Menu separator.
-			m_lstSeparators.append(parent->addSeparator());
+			lstSeparators.append(parent->addSeparator());
 			continue;
 		}
 		
@@ -262,8 +262,8 @@ void GensMenuBarPrivate::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *par
 		
 		// Connect the signal to the signal mapper.
 		QObject::connect(mnuItem, SIGNAL(triggered()),
-				 this->m_signalMapper, SLOT(map()));
-		m_signalMapper->setMapping(mnuItem, menu->id);
+				 this->signalMapper, SLOT(map()));
+		signalMapper->setMapping(mnuItem, menu->id);
 		
 		// Add the menu item to the menu.
 		parent->addAction(mnuItem);
@@ -282,17 +282,17 @@ void GensMenuBarPrivate::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *par
  */
 int GensMenuBarPrivate::lock(void)
 {
-	m_lockCnt++;
+	lockCnt++;
 	return 0;
 }
 
 int GensMenuBarPrivate::unlock(void)
 {
-	assert(m_lockCnt >= 0);
-	if (m_lockCnt <= 0)
+	assert(lockCnt >= 0);
+	if (lockCnt <= 0)
 		return -1;
 	
-	m_lockCnt--;
+	lockCnt--;
 	return 0;
 }
 
@@ -301,7 +301,7 @@ int GensMenuBarPrivate::unlock(void)
  * @return True if the menu actions are locked; false otherwise.
  */
 bool GensMenuBarPrivate::isLocked(void)
-	{ return (m_lockCnt > 0); }
+	{ return (lockCnt > 0); }
 
 
 /**************************
