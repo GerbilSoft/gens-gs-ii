@@ -23,7 +23,7 @@
 
 #include "RecentRomsMenu.hpp"
 
-// gqt4_config
+// gqt4_cfg
 #include "gqt4_main.hpp"
 
 // Menu item IDs.

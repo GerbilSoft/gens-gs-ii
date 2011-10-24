@@ -22,24 +22,20 @@
  ***************************************************************************/
 
 #include "GensMenuBar.hpp"
-
-// C includes.
-#include <assert.h>
-
-// Menu definitions.
+#include "GensMenuBar_p.hpp"
 #include "GensMenuBar_menus.hpp"
 
-// GensQApplication::IconFromTheme()
-#include "../GensQApplication.hpp"
+// C includes. (C++ namespace)
+#include <cassert>
 
-// gqt4_config
-#include "../gqt4_main.hpp"
+// GensQApplication::IconFromTheme()
+#include "GensQApplication.hpp"
+
+// gqt4_cfg
+#include "gqt4_main.hpp"
 
 // Needed for KeyValMToQtKey().
-#include "../Input/KeyHandlerQt.hpp"
-
-// GensMenuBarPrivate
-#include "GensMenuBar_p.hpp"
+#include "Input/KeyHandlerQt.hpp"
 
 // Recent ROMs menu.
 #include "RecentRomsMenu.hpp"

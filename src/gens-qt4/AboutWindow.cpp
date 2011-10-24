@@ -448,8 +448,8 @@ QString AboutWindow::GetDebugInfo(void)
 	//: Save directory: Directory where configuration and savestate files are saved.
 	// TODO: Verify that the link works on Windows and Mac OS X.
 	sDebugInfo += tr("Save directory") + QChar(L':') + sLineBreak +
-		QLatin1String("<a href=\"file://") + gqt4_config->cfgPath() + QLatin1String("\">") +
-		QDir::toNativeSeparators(gqt4_config->cfgPath()) + QLatin1String("</a>") +
+		QLatin1String("<a href=\"file://") + gqt4_cfg->configPath() + QLatin1String("\">") +
+		QDir::toNativeSeparators(gqt4_cfg->configPath()) + QLatin1String("</a>") +
 		sLineBreak + sLineBreak;
 	
 #ifdef Q_OS_WIN32

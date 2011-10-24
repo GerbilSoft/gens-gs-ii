@@ -24,20 +24,18 @@
 
 #include "GensActions.hpp"
 
-// gqt4_main has gqt4_config.
-#include "../gqt4_main.hpp"
+// gqt4_cfg
+#include "gqt4_main.hpp"
 
 // Menu actions.
 #include "GensMenuBar_menus.hpp"
 
-// Gens Window.
-#include "../GensWindow.hpp"
-
-// Other windows.
-#include "../AboutWindow.hpp"
-#include "../CtrlConfigWindow.hpp"
-#include "../GeneralConfigWindow.hpp"
-#include "../McdControlWindow.hpp"
+// Windows.
+#include "GensWindow.hpp"
+#include "AboutWindow.hpp"
+#include "CtrlConfigWindow.hpp"
+#include "GeneralConfigWindow.hpp"
+#include "McdControlWindow.hpp"
 
 // LibGens includes.
 #include "libgens/Vdp/VdpPalette.hpp"

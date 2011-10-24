@@ -25,7 +25,7 @@
 #include "GensMenuBar_p.hpp"
 #include "GensMenuBar_menus.hpp"
 
-// gqt4_config
+// gqt4_cfg
 #include "gqt4_main.hpp"
 
 // Qt includes.
