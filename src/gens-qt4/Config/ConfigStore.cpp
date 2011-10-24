@@ -558,7 +558,7 @@ QVariant ConfigStorePrivate::Validate(const QString& name, const QVariant& value
 			if (!value.canConvert(QVariant::Int))
 				return QVariant();
 			int val = value.toInt();
-			if (val < def->range_min || val > def->range_min)
+			if (val < def->range_min || val > def->range_max)
 				return QVariant();
 			return QVariant(val);
 		}
