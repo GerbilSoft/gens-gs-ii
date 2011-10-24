@@ -38,15 +38,8 @@ class Test_Byteswap : public TestSuite
 		int exec(void);
 	
 	protected:
-		const char *byteorderString(int byteorder);
-		
-		union DtoB
-		{
-			uint32_t d;
-			uint8_t b[4];
-		};
-		
-		int checkRuntimeByteorder(void);
+		static const char *ByteorderString(int byteorder);
+		static int CheckRuntimeByteorder(void);
 };
 
 // TODO: Templated version!
@@ -56,7 +49,7 @@ class Test_Byteswap : public TestSuite
  * @param byteorder Gens byteorder.
  * @return String representation.
  */
-const char *Test_Byteswap::byteorderString(int byteorder)
+const char *Test_Byteswap::ByteorderString(int byteorder)
 {
 	switch (byteorder)
 	{
@@ -76,7 +69,7 @@ const char *Test_Byteswap::byteorderString(int byteorder)
  * Check the runtime byteorder.
  * @return Runtime byteorder, or 0 on error.
  */
-int Test_Byteswap::checkRuntimeByteorder(void)
+int Test_Byteswap::CheckRuntimeByteorder(void)
 {
 	// Determine the run-time byte ordering.
 	static const uint32_t boCheck_32 = 0x12345678;
@@ -84,6 +77,11 @@ int Test_Byteswap::checkRuntimeByteorder(void)
 	static const uint8_t boCheck_BE[4] = {0x12, 0x34, 0x56, 0x78};
 	static const uint8_t boCheck_PDP[4] = {0x34, 0x12, 0x78, 0x56};
 	
+	union DtoB
+	{
+		uint32_t d;
+		uint8_t b[4];
+	};
 	DtoB byteorder_check;
 	byteorder_check.d = boCheck_32;
 	
@@ -109,12 +107,12 @@ int Test_Byteswap::exec(void)
 	
 	// Print the compile-time byte ordering.
 	const int byteorder_compiled = GENS_BYTEORDER;
-	const char *byteorder_compiled_str = byteorderString(byteorder_compiled);
+	const char *byteorder_compiled_str = ByteorderString(byteorder_compiled);
 	fprintf(stderr, "Compile-time byteorder: %s\n", byteorder_compiled_str);
 	
 	// Determine the run-time byte ordering.
-	const int byteorder_runtime = checkRuntimeByteorder();
-	const char *byteorder_runtime_str = byteorderString(byteorder_runtime);
+	const int byteorder_runtime = CheckRuntimeByteorder();
+	const char *byteorder_runtime_str = ByteorderString(byteorder_runtime);
 	fprintf(stderr, "Run-time byteorder: %s\n", byteorder_runtime_str);
 	
 	// Make sure the byteorders are equivalent.
