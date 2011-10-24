@@ -50,6 +50,83 @@ static GensQt4::GensWindow *gens_window = NULL;
 
 
 /**
+ * gqt4_log_msg_critical(): LOG_MSG() critical error handler.
+ * @param channel Debug channel. (ASCII)
+ * @param msg Message. (Preformatted UTF-8)
+ */
+void gqt4_log_msg_critical(const char *channel, const utf8_str *msg)
+{
+	QString title = QLatin1String("Gens Critical Error:") + QChar(L' ') +
+			QLatin1String(channel);
+	
+	QMessageBox dialog(QMessageBox::Critical, title, QString::fromUtf8(msg));
+	dialog.setTextFormat(Qt::PlainText);
+	dialog.exec();
+}
+
+
+/**
+ * gqt4_osd(): LibGens OSD handler.
+ * @param osd_type: OSD type.
+ * @param param: Integer parameter.
+ */
+void gqt4_osd(OsdType osd_type, int param)
+{
+	// TODO: Make sure this function doesn't run if Gens is shutting down.
+	if (!gens_window)
+		return;
+	
+	gens_window->osd(osd_type, param);
+}
+
+
+namespace GensQt4
+{
+
+// GensQApplication.
+GensQApplication *gqt4_app = NULL;
+
+// Configuration. (TODO: Remove this in favor of ConfigStore.)
+GensConfig *gqt4_config = NULL;
+
+// Configuration store.
+ConfigStore *gqt4_cfg = NULL;
+
+// Emulation objects.
+EmuThread *gqt4_emuThread = NULL;		// Thread.
+LibGens::EmuContext *gqt4_emuContext = NULL;	// Context.
+
+/**
+ * QuitGens(): Quit Gens.
+ */
+void QuitGens(void)
+{
+	// TODO: Stop LibGens' emulation core.
+	
+	// Stop and delete the emulation thread.
+	if (gqt4_emuThread)
+	{
+		gqt4_emuThread->stop();
+		gqt4_emuThread->wait();
+		delete gqt4_emuThread;
+		gqt4_emuThread = NULL;
+	}
+	
+	// Delete the emulation context.
+	// FIXME: Delete gqt4_emuContext after VBackend is finished using it. (MEMORY LEAK)
+	//delete gqt4_emuContext;
+	
+	// Shut down LibGens.
+	LibGens::End();
+	
+	// Save the configuration.
+	gqt4_cfg->save();
+}
+
+}
+
+
+/**
  * gens_main(): Main entry point.
  * @param argc Number of arguments.
  * @param argv Array of arguments.
@@ -125,81 +202,4 @@ int gens_main(int argc, char *argv[])
 	
 	// Finished.
 	return ret;
-}
-
-
-/**
- * gqt4_log_msg_critical(): LOG_MSG() critical error handler.
- * @param channel Debug channel. (ASCII)
- * @param msg Message. (Preformatted UTF-8)
- */
-void gqt4_log_msg_critical(const char *channel, const utf8_str *msg)
-{
-	QString title = QLatin1String("Gens Critical Error:") + QChar(L' ') +
-			QLatin1String(channel);
-	
-	QMessageBox dialog(QMessageBox::Critical, title, QString::fromUtf8(msg));
-	dialog.setTextFormat(Qt::PlainText);
-	dialog.exec();
-}
-
-
-/**
- * gqt4_osd(): LibGens OSD handler.
- * @param osd_type: OSD type.
- * @param param: Integer parameter.
- */
-void gqt4_osd(OsdType osd_type, int param)
-{
-	// TODO: Make sure this function doesn't run if Gens is shutting down.
-	if (!gens_window)
-		return;
-	
-	gens_window->osd(osd_type, param);
-}
-
-
-namespace GensQt4
-{
-
-// GensQApplication.
-GensQApplication *gqt4_app = NULL;
-
-// Configuration. (TODO: Remove this in favor of ConfigStore.)
-GensConfig *gqt4_config = NULL;
-
-// Configuration store.
-ConfigStore *gqt4_cfg = NULL;
-
-// Emulation objects.
-EmuThread *gqt4_emuThread = NULL;		// Thread.
-LibGens::EmuContext *gqt4_emuContext = NULL;	// Context.
-
-/**
- * QuitGens(): Quit Gens.
- */
-void QuitGens(void)
-{
-	// TODO: Stop LibGens' emulation core.
-	
-	// Stop and delete the emulation thread.
-	if (gqt4_emuThread)
-	{
-		gqt4_emuThread->stop();
-		gqt4_emuThread->wait();
-		delete gqt4_emuThread;
-		gqt4_emuThread = NULL;
-	}
-	
-	// Delete the emulation context.
-	// FIXME: Delete gqt4_emuContext after VBackend is finished using it. (MEMORY LEAK)
-	//delete gqt4_emuContext;
-	
-	// Shut down LibGens.
-	LibGens::End();
-	
-	// Save the configuration.
-	gqt4_cfg->save();
-}
-
 }
