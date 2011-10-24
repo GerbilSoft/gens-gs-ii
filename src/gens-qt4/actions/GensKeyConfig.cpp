@@ -128,7 +128,7 @@ const GensKeyConfigPrivate::DefKeySetting_t GensKeyConfigPrivate::DefKeySettings
 	{IDM_GRAPHICS_SCRSHOT, KEYM_SHIFT | KEYV_BACKSPACE,	"graphics/screenShot"},
 	
 	// System menu.
-	{IDM_SYSTEM_REGION, 0,					"system/region"},
+	{IDM_SYSTEM_REGION, KEYM_SHIFT | KEYV_F3,		"system/region"},
 	// System, Region submenu.
 	{IDM_SYSTEM_REGION_AUTODETECT, 0,			"system/region/autoDetect"},
 	{IDM_SYSTEM_REGION_JAPAN, 0,				"system/region/japan"},
