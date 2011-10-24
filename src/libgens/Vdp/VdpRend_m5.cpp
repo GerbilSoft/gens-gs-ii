@@ -551,8 +551,10 @@ FORCE_INLINE unsigned int Vdp::T_Get_Y_Offset(int cell_cur)
 			 * H40: Result is VSRam.u16[38] & VSRam.u16[39].
 			 * That is, column 19 from both planes A and B, ANDed together.
 			 * This is used for both scroll planes.
-			 * - Test ROM: Oerg's MDEM 2011 demo. (TODO: Still broken...)
-			 * 
+			 * - Test ROM: Oerg's MDEM 2011 demo. (without masking sprites)
+			 *   - Video demonstrating the VScroll bug:
+			 *     http://www.youtube.com/watch?v=UsW8i7zsY8w
+			 *
 			 * References:
 			 * - Sik on #GensGS.
 			 * - http://gendev.spritesmind.net/forum/viewtopic.php?p=11728#11728
