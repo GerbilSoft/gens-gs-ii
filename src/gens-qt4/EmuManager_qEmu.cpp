@@ -255,18 +255,11 @@ void EmuManager::saveSlot_changed_slot(const QVariant& saveSlot)
 {
 	// NOTE: Don't check if the save slot is the same.
 	// This allows users to recheck a savestate's preview image.
-	const int saveSlotNum = saveSlot.toInt();
-	if (saveSlotNum < 0 || saveSlotNum > 9)
-	{
-		// Invalid save slot. Mod by 10 to get a valid slot.
-		gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), (saveSlotNum % 10));
-		return;
-	}
 	
 	// Queue the save slot request.
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_SAVE_SLOT;
-	rq.saveState.saveSlot = saveSlotNum;
+	rq.saveState.saveSlot = saveSlot.toInt();
 	m_qEmuRequest.enqueue(rq);
 	
 	if (!m_rom || m_paused.data)
@@ -317,21 +310,10 @@ void EmuManager::regionCode_changed_slot(const QVariant& regionCode)
 	// NOTE: Region code change is processed even if a ROM isn't loaded,
 	// since we're printing a message to the screen.
 	
-	LibGens::SysVersion::RegionCode_t lg_region =
-			(LibGens::SysVersion::RegionCode_t)regionCode.toInt();
-	if (lg_region < LibGens::SysVersion::REGION_AUTO ||
-	    lg_region > LibGens::SysVersion::REGION_EU_PAL)
-	{
-		// Invalid region. Reset to Auto-Detect.
-		gqt4_cfg->set(QLatin1String("System/regionCode"),
-				(int)LibGens::SysVersion::REGION_AUTO);
-		return;
-	}
-	
 	// Queue the region code change.
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_REGION_CODE;
-	rq.region = lg_region;
+	rq.region = (LibGens::SysVersion::RegionCode_t)regionCode.toInt();
 	m_qEmuRequest.enqueue(rq);
 	
 	if (!m_rom || m_paused.data)
@@ -348,14 +330,8 @@ void EmuManager::regionCodeOrder_changed_slot(const QVariant& regionCodeOrder)
 	if (!m_rom)
 		return;
 	
-	const uint16_t rc_order = (uint16_t)regionCodeOrder.toUInt();
-	if (!IsRegionCodeOrderValid(rc_order))
-	{
-		// Region code order is not valid.
-		// Reset to default value. (0x4812)
-		gqt4_cfg->set(QLatin1String("System/regionCodeOrder"), 0x4812);
-		return;
-	}
+	// regionCodeOrder isn't actually used here...
+	Q_UNUSED(regionCodeOrder);
 	
 	// If we're not using region code auto-detection, don't do anything else.
 	if (gqt4_cfg->getInt(QLatin1String("System/regionCode")) !=
@@ -427,34 +403,9 @@ void EmuManager::grayscale_changed_slot(const QVariant& grayscale)
 void EmuManager::inverted_changed_slot(const QVariant& inverted)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_INVERTED, (int)inverted.toBool()); }
 void EmuManager::colorScaleMethod_changed_slot(const QVariant& colorScaleMethod)
-{
-	int csm = colorScaleMethod.toInt();
-	if (csm < LibGens::VdpPalette::COLSCALE_RAW ||
-	    csm > LibGens::VdpPalette::COLSCALE_FULL_SH)
-	{
-		// Invalid color scale method.
-		gqt4_cfg->set(QLatin1String("Graphics/colorScaleMethod"),
-				(int)LibGens::VdpPalette::COLSCALE_FULL);
-		return;
-	}
-	
-	changePaletteSetting(EmuRequest_t::RQT_PS_COLORSCALEMETHOD, csm);
-}
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_COLORSCALEMETHOD, colorScaleMethod.toInt()); }
 void EmuManager::interlacedMode_changed_slot(const QVariant& interlacedMode)
-{
-	int im = interlacedMode.toInt();
-	if (im < LibGens::VdpTypes::INTREND_EVEN ||
-	    im > LibGens::VdpTypes::INTREND_FLICKER)
-	{
-		// Invalid interlaced rendering mode.
-		// TODO: Add support for INTREND_2X.
-		gqt4_cfg->set(QLatin1String("Graphics/interlacedMode"),
-				(int)LibGens::VdpTypes::INTREND_FLICKER);
-		return;
-	}
-	
-	changePaletteSetting(EmuRequest_t::RQT_PS_INTERLACEDMODE, im);
-}
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_INTERLACEDMODE, interlacedMode.toInt()); }
 
 /** VDP settings. **/
 

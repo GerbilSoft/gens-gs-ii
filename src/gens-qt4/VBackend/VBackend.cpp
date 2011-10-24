@@ -212,17 +212,6 @@ void VBackend::stretchMode_changed_slot(const QVariant& newStretchMode)
 {
 	m_cfg_stretchMode = (StretchMode_t)newStretchMode.toInt();
 	
-	// Verify that the new stretch mode is valid.
-	// TODO: New ConfigItem subclass for StretchMode_t.
-	if ((m_cfg_stretchMode < STRETCH_NONE) || (m_cfg_stretchMode > STRETCH_FULL))
-	{
-		// Invalid stretch mode.
-		// Reset to default.
-		m_cfg_stretchMode = STRETCH_H;
-		gqt4_cfg->set(QLatin1String("Graphics/stretchMode"), m_cfg_stretchMode);
-		return;
-	}
-	
 	// Print a message to the OSD.
 	//: OSD message indicating the Stretch Mode has been changed.
 	QString msg = tr("Stretch Mode set to %1.", "osd-stretch");
@@ -606,13 +595,6 @@ void VBackend::osdFpsEnabled_changed_slot(const QVariant& enable)
 void VBackend::osdFpsColor_changed_slot(const QVariant& var_color)
 {
 	m_cfg_osdFpsColor = var_color.value<QColor>();
-	if (!m_cfg_osdFpsColor.isValid())
-	{
-		// Invalid color. Reset to default.
-		m_cfg_osdFpsColor = QColor(Qt::white);
-		gqt4_cfg->set(QLatin1String("OSD/fpsColor"), m_cfg_osdFpsColor.name());
-		return;
-	}
 	
 	if (osdFpsEnabled() && isRunning())
 	{
@@ -648,13 +630,6 @@ void VBackend::osdMsgEnabled_changed_slot(const QVariant& enable)
 void VBackend::osdMsgColor_changed_slot(const QVariant& var_color)
 {
 	m_cfg_osdMsgColor = var_color.value<QColor>();
-	if (!m_cfg_osdMsgColor.isValid())
-	{
-		// Invalid color. Reset to default.
-		m_cfg_osdMsgColor = QColor(Qt::white);
-		gqt4_cfg->set(QLatin1String("OSD/msgColor"), m_cfg_osdMsgColor.name());
-		return;
-	}
 	
 	if (osdMsgEnabled() && !m_osdList.isEmpty())
 	{

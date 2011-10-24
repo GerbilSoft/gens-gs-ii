@@ -87,13 +87,6 @@ class EmuManager : public QObject
 				return LibGens::Rom::MDP_SYSTEM_UNKNOWN;
 			return m_rom->sysId();
 		}
-		
-		/**
-		 * Check if a region code order is valid.
-		 * @param regionCodeOrder Region code order to check.
-		 * @return True if valid; false if invalid.
-		 */
-		static bool IsRegionCodeOrderValid(uint16_t regionCodeOrder);
 	
 	signals:
 		void updateFps(double fps);
