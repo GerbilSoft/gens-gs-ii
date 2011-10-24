@@ -531,14 +531,51 @@ FORCE_INLINE uint16_t Vdp::T_Get_X_Offset(void)
 template<bool plane, bool interlaced>
 FORCE_INLINE unsigned int Vdp::T_Get_Y_Offset(int cell_cur)
 {
-	// TODO: Y_FineOffset should be refactored such that it's reentrant.
+	// NOTE: Cell offset masking is handled in T_Get_Y_Cell_Offset().
+	// We don't need to do it here.
+	unsigned int y_offset;
+	
 	if (cell_cur < 0 || cell_cur >= 40)
 	{
 		// Cell number is invalid.
-		// TODO: Properly handle cell -1.
-		// - MD1, MD2: Vertical scrolling "bug".
-		// - Genesis 3: Vertical scrolling "works".
-		return 0;
+		// This usually happens if 2-cell VScroll is used
+		// at the same time as HScroll.
+		if (VdpEmuOptions.vscrollBug)
+		{
+			/**
+			 * VScroll bug is enabled. (MD1, MD2)
+			 * 
+			 * H32: VScroll is fixed to 0.
+			 * - Test ROM: Kawasaki Superbike Challenge
+			 * 
+			 * H40: Result is VSRam.u16[38] & VSRam.u16[39].
+			 * That is, column 19 from both planes A and B, ANDed together.
+			 * This is used for both scroll planes.
+			 * - Test ROM: Oerg's MDEM 2011 demo. (TODO: Still broken...)
+			 * 
+			 * References:
+			 * - Sik on #GensGS.
+			 * - http://gendev.spritesmind.net/forum/viewtopic.php?p=11728#11728
+			 */
+			
+			// Check for H40 mode. (TODO: Test 0x81 instead?)
+			if (VDP_Reg.m5.Set4 & 0x01)
+				y_offset = (VSRam.u16[38] & VSRam.u16[39]);
+			else	// H32 mode
+				y_offset = 0;
+			
+			// Add the current line number to the Y offset.
+			y_offset += T_GetLineNumber<interlaced>();
+			return y_offset;
+		}
+		else
+		{
+			/**
+			 * VScroll bug is disabled. (MD3)
+			 * Handle this column the same as column 0.
+			 */
+			cell_cur = 0;
+		}
 	}
 	
 	// Mask off odd columns.
@@ -550,12 +587,10 @@ FORCE_INLINE unsigned int Vdp::T_Get_Y_Offset(int cell_cur)
 		cell_cur++;
 	
 	// Get the Y offset.
-	unsigned int y_offset = VSRam.u16[cell_cur];
+	y_offset = VSRam.u16[cell_cur];
 	
 	// Add the current line number to the Y offset.
 	y_offset += T_GetLineNumber<interlaced>();
-	
-	// Y offset retrieved.
 	return y_offset;
 }
 
@@ -653,7 +688,7 @@ FORCE_INLINE uint32_t Vdp::T_Get_Pattern_Data(uint16_t pattern, unsigned int y_f
 	return VRam.u32[(TileAddr + (y_fine_offset * 4)) >> 2];
 }
 
-
+#include <stdio.h>
 /**
  * Vdp::T_Render_Line_Scroll(): Render a scroll line.
  * @param plane		[in] True for Scroll A / Window; false for Scroll B.
@@ -699,7 +734,8 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 	
 	// VSRam cell number.
 	// TODO: Adjust for left-window?
-	// TODO: This starts at cell -2 if 2-cell VScroll is enabled...
+	// NOTE: This starts at -1 or -2, since we're rendering within the 336px buffer.
+	// (Rendering starts from 0 to 7 px off the left side of the screen.)
 	int VSRam_Cell = ((x_cell_offset & 1) - 2);
 	
 	// Initialize the Y offset.

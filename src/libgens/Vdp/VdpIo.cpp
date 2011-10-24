@@ -635,6 +635,8 @@ uint16_t Vdp::Read_Data(void)
 		
 		case (VDEST_LOC_VSRAM | VDEST_ACC_READ):
 			// VSRam Read.
+			// TODO: Mask off high bits? (Only 10/11 bits are present.)
+			// TODO: If we do that, the remaining bits should be what's in the FIFO.
 			data = VSRam.u16[(VDP_Ctrl.Address & 0x7E) >> 1];
 			break;
 		
@@ -897,6 +899,7 @@ void Vdp::Write_Data_Word(uint16_t data)
 			// Write the word to VSRam.
 			// VSRam is 80 bytes. (40 words)
 			// TODO: VSRam is 80 bytes, but we're allowing a maximum of 128 bytes here...
+			// TODO: Mask off high bits? (Only 10/11 bits are present.)
 			VSRam.u16[(address & 0x7E) >> 1] = data;
 			
 			// Increment the address register.
@@ -1068,6 +1071,7 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 				break;
 			
 			case DMA_DEST_VSRAM:
+				// TODO: Mask off high bits? (Only 10/11 bits are present.)
 				VSRam.u16[dest_address >> 1] = w;
 				break;
 			
