@@ -135,13 +135,11 @@ void GensMenuBarPrivate::clearHashTables(void)
 	// TODO: Consider using QScopedPointer or QSharedPointer instead?
 	
 	// Actions map.
-	foreach (QAction *action, hashActions)
-		delete action;
+	qDeleteAll(hashActions);
 	hashActions.clear();
 	
 	// Separators list.
-	while (!m_lstSeparators.isEmpty())
-		delete m_lstSeparators.takeFirst();
+	qDeleteAll(m_lstSeparators);
 	m_lstSeparators.clear();
 }
 
