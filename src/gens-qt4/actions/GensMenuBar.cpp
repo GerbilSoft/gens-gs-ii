@@ -59,7 +59,7 @@ GensMenuBarPrivate::GensMenuBarPrivate(GensMenuBar *q)
 
 GensMenuBarPrivate::~GensMenuBarPrivate()
 {
-	// Clear the menu maps.
+	// Clear the menu hash tables.
 	clearHashTables();
 	
 	// Delete the popup menu.

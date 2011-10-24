@@ -85,7 +85,7 @@ class GensMenuBarPrivate
 		void clearHashTables(void);
 		
 		// List of menu separators.
-		QList<QAction*> lstSeparators;
+		QVector<QAction*> lstSeparators;
 };
 
 }
