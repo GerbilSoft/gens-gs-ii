@@ -60,6 +60,11 @@ class ConfigStorePrivate
 	
 	public:
 		/**
+		 * Initialize the Default Settings QHash.
+		 */
+		static void InitDefaultSettingsHash(void);
+		
+		/**
 		 * Reset all settings to defaults.
 		 */
 		void reset(void);
@@ -169,6 +174,8 @@ class ConfigStorePrivate
 			int hex_digits;		// If non-zero, saves as hexadecimal with this many digits.
 		};
 		static const DefaultSetting DefaultSettings[];
+		static QHash<QString, const DefaultSetting*> DefaultSettingsHash;
+		static QMutex MtxDefaultSettingsHash;
 		
 		// Configuration path.
 		QString configPath;
@@ -291,6 +298,10 @@ const ConfigStorePrivate::DefaultSetting ConfigStorePrivate::DefaultSettings[] =
 	{NULL, NULL, 0}
 };
 
+QHash<QString, const ConfigStorePrivate::DefaultSetting*> ConfigStorePrivate::DefaultSettingsHash;
+QMutex ConfigStorePrivate::MtxDefaultSettingsHash;
+
+
 /** ConfigStorePrivate **/
 
 
@@ -298,6 +309,9 @@ ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
 	: q(q)
 	, recentRoms(new RecentRoms())
 {
+	// Initialize the Default Settings QHash.
+	InitDefaultSettingsHash();
+	
 	// Initialize settings.
 	reset();
 	
@@ -322,6 +336,25 @@ ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
 	
 	// Load the user's settings.
 	load();
+}
+
+
+/**
+ * Initialize the Default Settings QHash.
+ */
+void ConfigStorePrivate::InitDefaultSettingsHash(void)
+{
+	QMutexLocker mtxLocker(&MtxDefaultSettingsHash);
+	
+	if (!DefaultSettingsHash.isEmpty())
+		return;
+	
+	// Populate the default settings hash.
+	for (const DefaultSetting *def = &DefaultSettings[0]; def->key != NULL; def++)
+	{
+		const QString key = QLatin1String(def->key);
+		DefaultSettingsHash.insert(key, def);
+	}
 }
 
 
