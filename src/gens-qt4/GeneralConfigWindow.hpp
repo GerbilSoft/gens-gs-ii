@@ -182,9 +182,7 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		void on_chkOsdMsgEnable_toggled(bool checked);
 		void on_chkAutoFixChecksum_toggled(bool checked);
 		void on_chkAutoPause_toggled(bool checked);
-		void on_chkBorderColor_toggled(bool checked);
 		void on_chkPauseTint_toggled(bool checked);
-		void on_chkNtscV30Rolling_toggled(bool checked);
 		void on_cboIntroStyle_currentIndexChanged(int index);
 		void on_cboIntroColor_currentIndexChanged(int index);
 		
@@ -193,7 +191,13 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		void on_chkFastBlur_toggled(bool checked);
 		void on_chkBilinearFilter_toggled(bool checked);
 		void on_cboInterlacedMode_currentIndexChanged(int index);
+		
+		/** Advanced VDP settings. **/
 		void on_chkSpriteLimits_toggled(bool checked);
+		void on_chkBorderColor_toggled(bool checked);
+		void on_chkNtscV30Rolling_toggled(bool checked);
+		void on_chkVScrollBug_toggled(bool checked);
+		void on_chkZeroLengthDMA_toggled(bool checked);
 		
 		/** System. **/
 		void on_cboRegionCurrent_currentIndexChanged(int index);

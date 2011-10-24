@@ -375,6 +375,11 @@ void GeneralConfigWindow::reload(void)
 	btnOsdMsgColor->setBgColor(m_osdMsgColor);
 	btnOsdMsgColor->setText(m_osdMsgColor.name().toUpper());
 	
+	/** General settings. **/
+	chkAutoFixChecksum->setChecked(ValByPath_bool("autoFixChecksum"));
+	chkAutoPause->setChecked(ValByPath_bool("autoPause"));
+	chkPauseTint->setChecked(ValByPath_bool("pauseTint"));
+	
 	/** Intro effect. **/
 	cboIntroStyle->setCurrentIndex(ValByPath_int("Intro_Effect/introStyle"));
 	cboIntroColor->setCurrentIndex(ValByPath_int("Intro_Effect/introColor"));
@@ -394,19 +399,18 @@ void GeneralConfigWindow::reload(void)
 	chkFastBlur->setChecked(ValByPath_bool("Graphics/fastBlur"));
 	chkBilinearFilter->setChecked(ValByPath_bool("Graphics/bilinearFilter"));
 	cboInterlacedMode->setCurrentIndex(ValByPath_int("Graphics/interlacedMode"));
-	chkSpriteLimits->setChecked(ValByPath_bool("VDP/spriteLimits"));
 	hsldContrast->setValue(ValByPath_int("Graphics/contrast"));
 	hsldBrightness->setValue(ValByPath_int("Graphics/brightness"));
 	chkGrayscale->setChecked(ValByPath_bool("Graphics/grayscale"));
 	chkInverted->setChecked(ValByPath_bool("Graphics/inverted"));
 	cboColorScaleMethod->setCurrentIndex(ValByPath_int("Graphics/colorScaleMethod"));
 	
-	/** General settings. **/
-	chkAutoFixChecksum->setChecked(ValByPath_bool("autoFixChecksum"));
-	chkAutoPause->setChecked(ValByPath_bool("autoPause"));
+	/** Advanced VDP settings. **/
+	chkSpriteLimits->setChecked(ValByPath_bool("VDP/spriteLimits"));
 	chkBorderColor->setChecked(ValByPath_bool("VDP/borderColorEmulation"));
-	chkPauseTint->setChecked(ValByPath_bool("pauseTint"));
 	chkNtscV30Rolling->setChecked(ValByPath_bool("VDP/ntscV30Rolling"));
+	chkVScrollBug->setChecked(ValByPath_bool("VDP/vscrollBug"));
+	chkZeroLengthDMA->setChecked(ValByPath_bool("VDP/zeroLengthDMA"));
 	
 	/** System. **/
 	cboRegionCurrent->setCurrentIndex(ValByPath_int("System/regionCode") + 1);
@@ -460,6 +464,11 @@ void GeneralConfigWindow::apply(void)
 	SetValByPath_int("Intro_Effect/introStyle", cboIntroStyle->currentIndex());
 	SetValByPath_int("Intro_Effect/introColor", cboIntroColor->currentIndex());
 	
+	/** General settings. **/
+	SetValByPath_bool("autoFixChecksum", chkAutoFixChecksum->isChecked());
+	SetValByPath_bool("autoPause", chkAutoPause->isChecked());
+	SetValByPath_bool("pauseTint", chkPauseTint->isChecked());
+	
 	/** Sega CD Boot ROMs. **/
 	SetValByPath_QString("Sega_CD/bootRomUSA", txtMcdRomUSA->text());
 	SetValByPath_QString("Sega_CD/bootRomEUR", txtMcdRomEUR->text());
@@ -474,19 +483,18 @@ void GeneralConfigWindow::apply(void)
 	SetValByPath_bool("Graphics/fastBlur", chkFastBlur->isChecked());
 	SetValByPath_bool("Graphics/bilinearFilter", chkBilinearFilter->isChecked());
 	SetValByPath_int("Graphics/interlacedMode", cboInterlacedMode->currentIndex());
-	SetValByPath_bool("VDP/spriteLimits", chkSpriteLimits->isChecked());
 	SetValByPath_int("Graphics/contrast", hsldContrast->value());
 	SetValByPath_int("Graphics/brightness", hsldBrightness->value());
 	SetValByPath_bool("Graphics/grayscale", chkGrayscale->isChecked());
 	SetValByPath_bool("Graphics/inverted", chkInverted->isChecked());
 	SetValByPath_int("Graphics/colorScaleMethod", cboColorScaleMethod->currentIndex());
 	
-	/** General settings. **/
-	SetValByPath_bool("autoFixChecksum", chkAutoFixChecksum->isChecked());
-	SetValByPath_bool("autoPause", chkAutoPause->isChecked());
+	/** Advanced VDP settings. **/
+	SetValByPath_bool("VDP/spriteLimits", chkSpriteLimits->isChecked());
 	SetValByPath_bool("VDP/borderColorEmulation", chkBorderColor->isChecked());
-	SetValByPath_bool("pauseTint", chkPauseTint->isChecked());
 	SetValByPath_bool("VDP/ntscV30Rolling", chkNtscV30Rolling->isChecked());
+	SetValByPath_bool("VDP/vscrollBug", chkVScrollBug->isChecked());
+	SetValByPath_bool("VDP/zeroLengthDMA", chkZeroLengthDMA->isChecked());
 	
 	/** System. **/
 	SetValByPath_int("System/regionCode", (cboRegionCurrent->currentIndex() - 1));

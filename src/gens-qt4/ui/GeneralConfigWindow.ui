@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>480</width>
-    <height>471</height>
+    <height>567</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -153,17 +153,6 @@ the emulation window loses focus.</string>
             </widget>
            </item>
            <item>
-            <widget class="QCheckBox" name="chkBorderColor">
-             <property name="toolTip">
-              <string>Use the background color in the border area
-instead of drawing a black border.</string>
-             </property>
-             <property name="text">
-              <string>&amp;Border color emulation</string>
-             </property>
-            </widget>
-           </item>
-           <item>
             <widget class="QCheckBox" name="chkPauseTint">
              <property name="toolTip">
               <string>Tints the emulator window purple when
@@ -171,18 +160,6 @@ emulation is paused.</string>
              </property>
              <property name="text">
               <string>&amp;Tint the window purple when paused.</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="chkNtscV30Rolling">
-             <property name="toolTip">
-              <string>Simulates the &quot;rolling&quot; effect observed on the
-Mega Drive hardware if 320x240 mode is set
-on NTSC models.</string>
-             </property>
-             <property name="text">
-              <string>&amp;NTSC V30 Rolling</string>
              </property>
             </widget>
            </item>
@@ -201,7 +178,7 @@ on NTSC models.</string>
            <string>&amp;Intro Effect</string>
           </property>
           <layout class="QGridLayout" name="gridIntroEffect">
-           <item row="0" column="0">
+           <item row="2" column="0">
             <widget class="QLabel" name="lblintroStyle">
              <property name="text">
               <string>&amp;Style:</string>
@@ -217,7 +194,7 @@ on NTSC models.</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="2">
+           <item row="2" column="2">
             <widget class="QComboBox" name="cboIntroStyle">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -242,7 +219,7 @@ on NTSC models.</string>
              </item>
             </widget>
            </item>
-           <item row="1" column="0">
+           <item row="3" column="0">
             <widget class="QLabel" name="lblIntroColor">
              <property name="text">
               <string>&amp;Color:</string>
@@ -258,7 +235,7 @@ on NTSC models.</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="2">
+           <item row="3" column="2">
             <widget class="GensColorComboBox" name="cboIntroColor">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -333,13 +310,6 @@ window to a larger size than its original resolution.</string>
              </property>
              <property name="text">
               <string>Enable bi&amp;linear filtering</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="chkSpriteLimits">
-             <property name="text">
-              <string>Enforce &amp;sprite limits</string>
              </property>
             </widget>
            </item>
@@ -517,7 +487,7 @@ window to a larger size than its original resolution.</string>
            <item row="2" column="1">
             <widget class="QLabel" name="lblColorScaleMethod">
              <property name="text">
-              <string>Color &amp;Scale Method:</string>
+              <string>Color Scale &amp;Method:</string>
              </property>
              <property name="textFormat">
               <enum>Qt::PlainText</enum>
@@ -564,6 +534,83 @@ window to a larger size than its original resolution.</string>
               </widget>
              </item>
             </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="grpAdvancedVDP">
+          <property name="title">
+           <string>Advanced VDP Settings</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_7">
+           <item>
+            <widget class="QCheckBox" name="chkSpriteLimits">
+             <property name="toolTip">
+              <string>Enforces the per-line and per-frame sprite limits
+as observed in the actual VDP.</string>
+             </property>
+             <property name="text">
+              <string>Enforce &amp;sprite limits</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="chkBorderColor">
+             <property name="toolTip">
+              <string>Use the background color in the border area
+instead of drawing a black border.</string>
+             </property>
+             <property name="text">
+              <string>&amp;Border color emulation</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="chkNtscV30Rolling">
+             <property name="toolTip">
+              <string>Simulates the &quot;rolling&quot; effect observed on the
+Mega Drive hardware if 320x240 mode is set
+on NTSC models.</string>
+             </property>
+             <property name="text">
+              <string>&amp;NTSC V30 Rolling</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="chkVScrollBug">
+             <property name="toolTip">
+              <string>If enabled, 2-cell vertical scrolling will exhibit glitches in the
+left-most column if horizontal scrolling is used at the same
+time. This matches the behavior seen on Genesis 1 (MK-1601)
+and Genesis 2 (MK-1631) consoles.
+
+The Genesis 3 (MK-1641) does not show this bug, so disabling
+this option will more accurately simulate the Genesis 3.</string>
+             </property>
+             <property name="text">
+              <string>Emulate the 2-cell &amp;Vertical Scrolling bug</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="chkZeroLengthDMA">
+             <property name="toolTip">
+              <string>The Genesis VDP has a bug where a DMA transfer with a length
+of 0 results in a transfer of 128 KB. Older versions of Gens did
+not handle this properly, and simply ignored zero-length
+transfers. This was incorrectly used by some hacks, so those
+hacks will break in emulators that handle this correctly.
+
+If you want to play one of these hacks, enable this option.
+Be warned that it may break commercial games and other
+programs that depend on the correct VDP behavior.</string>
+             </property>
+             <property name="text">
+              <string>Allow zero-length DMA transfers</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -1152,15 +1199,12 @@ window to a larger size than its original resolution.</string>
   <tabstop>btnOsdMsgColor</tabstop>
   <tabstop>chkAutoFixChecksum</tabstop>
   <tabstop>chkAutoPause</tabstop>
-  <tabstop>chkBorderColor</tabstop>
   <tabstop>chkPauseTint</tabstop>
-  <tabstop>chkNtscV30Rolling</tabstop>
   <tabstop>cboIntroStyle</tabstop>
   <tabstop>cboIntroColor</tabstop>
   <tabstop>chkAspectRatioConstraint</tabstop>
   <tabstop>chkFastBlur</tabstop>
   <tabstop>chkBilinearFilter</tabstop>
-  <tabstop>chkSpriteLimits</tabstop>
   <tabstop>cboInterlacedMode</tabstop>
   <tabstop>hsldContrast</tabstop>
   <tabstop>hsldBrightness</tabstop>
