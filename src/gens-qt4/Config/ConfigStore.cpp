@@ -557,7 +557,7 @@ QVariant ConfigStorePrivate::Validate(const QString& name, const QVariant& value
 		{
 			if (!value.canConvert(QVariant::Int))
 				return QVariant();
-			int val = value.toInt();
+			int val = value.toString().toInt(NULL, 0);
 			if (val < def->range_min || val > def->range_max)
 				return QVariant();
 			return QVariant(val);
@@ -567,7 +567,7 @@ QVariant ConfigStorePrivate::Validate(const QString& name, const QVariant& value
 		{
 			if (!value.canConvert(QVariant::UInt))
 				return QVariant();
-			uint16_t rc_order = (uint16_t)value.toUInt();
+			uint16_t rc_order = (uint16_t)value.toString().toUInt(NULL, 0);
 			if (!IsRegionCodeOrderValid(rc_order))
 				return QVariant();
 			return QVariant(rc_order);
