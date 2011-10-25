@@ -158,7 +158,7 @@ void RecentRomsMenuPrivate::update(void)
 	};
 	
 	int i = 1;
-	foreach(const RecentRom_t& rom, recentRoms->romList())
+	foreach (const RecentRom_t& rom, recentRoms->romList())
 	{
 		QString title = QChar(L'&') + QString::number(i) + QChar(L' ');
 		
@@ -185,7 +185,7 @@ void RecentRomsMenuPrivate::update(void)
 		filename.replace(QChar(L'&'), QLatin1String("&&"));
 		
 		// Append the processed filename.
-		title += QLatin1String("\t ") + filename;
+		title += QChar(L' ') + filename;
 		
 		if (!rom.z_filename.isEmpty())
 		{
