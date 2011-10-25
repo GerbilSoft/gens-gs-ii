@@ -162,6 +162,8 @@ void RecentRomsMenuPrivate::update(void)
 	{
 		QString title;
 		title.reserve(rom.filename.size() + rom.z_filename.size() + 16);
+		
+		// Recent ROM number.
 		title += QChar(L'&') + QString::number(i) + QChar(L' ');
 		
 		// System ID.
