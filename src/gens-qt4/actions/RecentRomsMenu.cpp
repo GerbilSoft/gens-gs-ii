@@ -160,7 +160,9 @@ void RecentRomsMenuPrivate::update(void)
 	int i = 1;
 	foreach (const RecentRom_t& rom, recentRoms->romList())
 	{
-		QString title = QChar(L'&') + QString::number(i) + QChar(L' ');
+		QString title;
+		title.reserve(rom.filename.size() + rom.z_filename.size() + 16);
+		title += QChar(L'&') + QString::number(i) + QChar(L' ');
 		
 		// System ID.
 		title += QChar(L'[');
