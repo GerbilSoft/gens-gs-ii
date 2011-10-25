@@ -87,8 +87,9 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	// FreeDesktop.org icon names for the toolbar buttons.
 	static const char *const icon_fdo[] =
 	{
-		"applications-graphics",	// Graphics
 		"configure",			// General
+		"applications-graphics",	// Graphics
+		"cpu",				// VDP
 		"applications-system",		// System
 		"media-optical",		// Sega CD
 		"utilities-terminal",		// External Programs

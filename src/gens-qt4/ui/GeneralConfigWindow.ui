@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>480</width>
-    <height>567</height>
+    <width>520</width>
+    <height>421</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>480</width>
+    <width>520</width>
     <height>0</height>
    </size>
   </property>
@@ -539,6 +539,23 @@ window to a larger size than its original resolution.</string>
          </widget>
         </item>
         <item>
+         <spacer name="vspcGraphics">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabVdp">
+       <layout class="QVBoxLayout" name="verticalLayout_8">
+        <item>
          <widget class="QGroupBox" name="grpAdvancedVDP">
           <property name="title">
            <string>Advanced VDP Settings</string>
@@ -579,6 +596,32 @@ on NTSC models.</string>
             </widget>
            </item>
            <item>
+            <spacer name="vspcVdpAdvanced">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>32</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="lblVdpAdvanced">
+             <property name="text">
+              <string>&lt;span style=&quot;font-weight: bold; color: red&quot;&gt;Warning:&lt;/span&gt; The following settings are low-level emulation settings. Changing these settings may break certain games. You should not change these settings unless you know what you're doing.</string>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QCheckBox" name="chkVScrollBug">
              <property name="toolTip">
               <string>If enabled, 2-cell vertical scrolling will exhibit glitches in the
@@ -612,21 +655,21 @@ programs that depend on the correct VDP behavior.</string>
              </property>
             </widget>
            </item>
+           <item>
+            <spacer name="vspcVdp">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
           </layout>
          </widget>
-        </item>
-        <item>
-         <spacer name="vspcGraphics">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </widget>
@@ -1109,6 +1152,7 @@ programs that depend on the correct VDP behavior.</string>
    </attribute>
    <addaction name="actionGeneral"/>
    <addaction name="actionGraphics"/>
+   <addaction name="actionVdp"/>
    <addaction name="actionSystem"/>
    <addaction name="actionSegaCD"/>
    <addaction name="actionExternalPrograms"/>
@@ -1135,6 +1179,15 @@ programs that depend on the correct VDP behavior.</string>
    </property>
    <property name="text">
     <string>G&amp;raphics</string>
+   </property>
+  </action>
+  <action name="actionVdp">
+   <property name="icon">
+    <iconset resource="resources/oxygen/oxygen.qrc">
+     <normaloff>:/icons/oxygen/32x32/cpu.png</normaloff>:/icons/oxygen/32x32/cpu.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;VDP</string>
    </property>
   </action>
   <action name="actionSystem">
@@ -1192,7 +1245,6 @@ programs that depend on the correct VDP behavior.</string>
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>stackedWidget</tabstop>
   <tabstop>chkOsdFpsEnable</tabstop>
   <tabstop>btnOsdFpsColor</tabstop>
   <tabstop>chkOsdMsgEnable</tabstop>
@@ -1211,6 +1263,11 @@ programs that depend on the correct VDP behavior.</string>
   <tabstop>chkGrayscale</tabstop>
   <tabstop>chkInverted</tabstop>
   <tabstop>cboColorScaleMethod</tabstop>
+  <tabstop>chkSpriteLimits</tabstop>
+  <tabstop>chkBorderColor</tabstop>
+  <tabstop>chkNtscV30Rolling</tabstop>
+  <tabstop>chkVScrollBug</tabstop>
+  <tabstop>chkZeroLengthDMA</tabstop>
   <tabstop>cboRegionCurrent</tabstop>
   <tabstop>lstRegionDetect</tabstop>
   <tabstop>btnRegionDetectUp</tabstop>
