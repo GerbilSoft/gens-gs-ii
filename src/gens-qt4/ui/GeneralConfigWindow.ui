@@ -1182,6 +1182,9 @@ programs that depend on the correct VDP behavior.</string>
    </property>
   </action>
   <action name="actionVdp">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="resources/oxygen/oxygen.qrc">
      <normaloff>:/icons/oxygen/32x32/cpu.png</normaloff>:/icons/oxygen/32x32/cpu.png</iconset>
