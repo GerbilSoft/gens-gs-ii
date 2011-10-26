@@ -470,7 +470,7 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	palette->setColorScaleMethod(
 			(LibGens::VdpPalette::ColorScaleMethod_t)gqt4_cfg->getInt(QLatin1String("Graphics/colorScaleMethod")));
 	LibGens::Vdp::VdpEmuOptions.intRendMode =
-			(LibGens::VdpTypes::IntRend_Mode_t)gqt4_cfg->getInt(QLatin1String("Graphics/colorScaleMethod"));
+			(LibGens::VdpTypes::IntRend_Mode_t)gqt4_cfg->getInt(QLatin1String("Graphics/interlacedMode"));
 	
 	// Initialize the VDP settings.
 	LibGens::Vdp::VdpEmuOptions.borderColorEmulation =
