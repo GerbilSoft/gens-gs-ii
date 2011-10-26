@@ -1428,7 +1428,7 @@ FORCE_INLINE void Vdp::T_Render_Line_m5(void)
 
 
 /**
- * Vdp::T_Render_LineBuf(): Render the line buffer to the destination surface.
+ * Render the line buffer to the destination surface.
  * @param pixel Type of pixel.
  * @param dest Destination surface.
  * @param md_palette MD palette buffer.
@@ -1441,8 +1441,7 @@ FORCE_INLINE void Vdp::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 	// Render the line buffer to the destination surface.
 	const int HPixBegin = GetHPixBegin();
 	dest += HPixBegin;
-	for (int i = ((160 - HPixBegin) / 4);
-	     i != 0; i--, dest += 8, src += 8)
+	for (int i = H_Cell; i != 0; i--, dest += 8, src += 8)
 	{
 		*dest     = md_palette[src->pixel];
 		*(dest+1) = md_palette[(src+1)->pixel];
@@ -1497,7 +1496,29 @@ FORCE_INLINE void Vdp::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 
 
 /**
- * Vdp::Render_Line_m5(): Render a line. (Mode 5)
+ * Apply SMS left-column masking to the destination surface.
+ * @param pixel Type of pixel.
+ * @param dest Destination surface.
+ * @param border_color Border color.
+ */
+template<typename pixel>
+FORCE_INLINE void Vdp::T_Apply_SMS_LMSK(pixel *dest, pixel border_color)
+{
+	dest += GetHPixBegin();
+	
+	*dest     = border_color;
+	*(dest+1) = border_color;
+	*(dest+2) = border_color;
+	*(dest+3) = border_color;
+	*(dest+4) = border_color;
+	*(dest+5) = border_color;
+	*(dest+6) = border_color;
+	*(dest+7) = border_color;
+}
+
+
+/**
+ * Render a line. (Mode 5)
  */
 void Vdp::Render_Line_m5(void)
 {
@@ -1630,15 +1651,30 @@ void Vdp::Render_Line_m5(void)
 		m_palette.update();
 	
 	// Render the image.
+	// TODO: Optimize SMS LMSK handling. (maybe use Linux's unlikely() macro?)
 	if (m_palette.bpp() != VdpPalette::BPP_32)
 	{
 		uint16_t *lineBuf16 = MD_Screen.lineBuf16(LineStart);
 		T_Render_LineBuf<uint16_t>(lineBuf16, m_palette.m_palActive.u16);
+		
+		if (VDP_Reg.m5.Set1 & 0x20)
+		{
+			// SMS left-column masking bit is set.
+			T_Apply_SMS_LMSK<uint16_t>(lineBuf16, 
+				(VdpEmuOptions.borderColorEmulation ? m_palette.m_palActive.u16[0] : 0));
+		}
 	}
 	else
 	{
 		uint32_t *lineBuf32 = MD_Screen.lineBuf32(LineStart);
 		T_Render_LineBuf<uint32_t>(lineBuf32, m_palette.m_palActive.u32);
+		
+		if (VDP_Reg.m5.Set1 & 0x20)
+		{
+			// SMS left-column masking bit is set.
+			T_Apply_SMS_LMSK<uint32_t>(lineBuf32, 
+				(VdpEmuOptions.borderColorEmulation ? m_palette.m_palActive.u32[0] : 0));
+		}
 	}
 }
 
