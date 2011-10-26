@@ -86,8 +86,8 @@ namespace VdpTypes
 			 * M4/PSEL == Palette Select; if clear, masks high two bits of each CRam color component.
 			 *            If M5 is off, acts like M4 instead of PSEL.
 			 * M5 == Mode 4/5 toggle; set for Mode 5, clear for Mode 4.
-			 * LMSK == Left column mask. SMS VDP holdover; if set, masks the first 8 pixels
-			 *         with the background color.
+			 * LCB == Left Column Blank. SMS VDP holdover; if set, masks the first 8 pixels
+			 *        with the background color.
 			 * VSCR == V Scroll mode. (0 == full; 1 == 2-cell)
 			 * HSCR/LSCR == H Scroll mode. (00 == full; 01 == invalid; 10 == 1-cell; 11 == 1-line)
 			 * RS0/RS1 == H cell mode. (11 == H40; 00 == H32; others == invalid)
@@ -96,7 +96,7 @@ namespace VdpTypes
 			 * VSZ1/VSZ2 == Vertical scroll size. (00 == 32 cells; 01 == 64 cells; 10 == invalid; 11 == 128 cells)
 			 * HSZ1/HSZ2 == Vertical scroll size. (00 == 32 cells; 01 == 64 cells; 10 == invalid; 11 == 128 cells)
 			 */
-			uint8_t Set1;		// Mode Set 1.  [   0    0  LMSK  IE1    0 PSEL   M3    0]
+			uint8_t Set1;		// Mode Set 1.  [   0    0   LCB  IE1    0 PSEL   M3    0]
 			uint8_t Set2;		// Mode Set 2.  [   0 DISP   IE0   M1   M2   M5    0    0]
 			uint8_t Pat_ScrA_Adr;	// Pattern name table base address for Scroll A.
 			uint8_t Pat_Win_Adr;	// Pattern name table base address for Window.

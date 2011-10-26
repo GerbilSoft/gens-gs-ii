@@ -1496,13 +1496,13 @@ FORCE_INLINE void Vdp::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 
 
 /**
- * Apply SMS left-column masking to the destination surface.
+ * Apply SMS left-column blanking to the destination surface.
  * @param pixel Type of pixel.
  * @param dest Destination surface.
  * @param border_color Border color.
  */
 template<typename pixel>
-FORCE_INLINE void Vdp::T_Apply_SMS_LMSK(pixel *dest, pixel border_color)
+FORCE_INLINE void Vdp::T_Apply_SMS_LCB(pixel *dest, pixel border_color)
 {
 	dest += GetHPixBegin();
 	
@@ -1651,7 +1651,7 @@ void Vdp::Render_Line_m5(void)
 		m_palette.update();
 	
 	// Render the image.
-	// TODO: Optimize SMS LMSK handling. (maybe use Linux's unlikely() macro?)
+	// TODO: Optimize SMS LCB handling. (maybe use Linux's unlikely() macro?)
 	if (m_palette.bpp() != VdpPalette::BPP_32)
 	{
 		uint16_t *lineBuf16 = MD_Screen.lineBuf16(LineStart);
@@ -1659,8 +1659,8 @@ void Vdp::Render_Line_m5(void)
 		
 		if (VDP_Reg.m5.Set1 & 0x20)
 		{
-			// SMS left-column masking bit is set.
-			T_Apply_SMS_LMSK<uint16_t>(lineBuf16, 
+			// SMS left-column blanking bit is set.
+			T_Apply_SMS_LCB<uint16_t>(lineBuf16, 
 				(VdpEmuOptions.borderColorEmulation ? m_palette.m_palActive.u16[0] : 0));
 		}
 	}
@@ -1671,8 +1671,8 @@ void Vdp::Render_Line_m5(void)
 		
 		if (VDP_Reg.m5.Set1 & 0x20)
 		{
-			// SMS left-column masking bit is set.
-			T_Apply_SMS_LMSK<uint32_t>(lineBuf32, 
+			// SMS left-column blanking bit is set.
+			T_Apply_SMS_LCB<uint32_t>(lineBuf32, 
 				(VdpEmuOptions.borderColorEmulation ? m_palette.m_palActive.u32[0] : 0));
 		}
 	}

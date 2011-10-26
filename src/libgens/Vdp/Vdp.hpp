@@ -512,7 +512,7 @@ class Vdp
 		FORCE_INLINE void T_Render_LineBuf(pixel *dest, pixel *md_palette);
 		
 		template<typename pixel>
-		FORCE_INLINE void T_Apply_SMS_LMSK(pixel *dest, pixel border_color);
+		FORCE_INLINE void T_Apply_SMS_LCB(pixel *dest, pixel border_color);
 	
 	/*!***************************************************************
 	 * VdpRend_Err: Error message rendering functions and variables. *
