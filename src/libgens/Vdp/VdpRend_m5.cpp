@@ -1578,9 +1578,9 @@ void Vdp::Render_Line_m5(void)
 		// VDP is enabled.
 		
 		// Check if sprite structures need to be updated.
-		if (Interlaced.DoubleRes)
+		if (Interlaced == VdpTypes::INTERLACED_MODE_2)
 		{
-			// Interlaced.
+			// Interlaced Mode 2. (2x resolution)
 			if (ms_UpdateFlags.VRam)
 				T_Make_Sprite_Struct<true, false>();
 			else if (ms_UpdateFlags.VRam_Spr)
@@ -1600,23 +1600,24 @@ void Vdp::Render_Line_m5(void)
 		ms_UpdateFlags.VRam_Spr = 0;
 		
 		// Determine how to render the image.
-		const int RenderMode = ((VDP_Reg.m5.Set4 & 0x08) >> 2) | Interlaced.DoubleRes;
+		int RenderMode = ((VDP_Reg.m5.Set4 & 0x08) >> 2);		// Shadow/Highlight
+		RenderMode |= (Interlaced == VdpTypes::INTERLACED_MODE_2);	// Interlaced.
 		switch (RenderMode & 3)
 		{
 			case 0:
-				// H/S disabled; interlaced disabled.
+				// H/S disabled; normal display.
 				T_Render_Line_m5<false, false>();
 				break;
 			case 1:
-				// H/S disabled: interlaced enabled.
+				// H/S disabled: Interlaced Mode 2.
 				T_Render_Line_m5<true, false>();
 				break;
 			case 2:
-				// H/S enabled; interlaced disabled.
+				// H/S enabled; normal display.
 				T_Render_Line_m5<false, true>();
 				break;
 			case 3:
-				// H/S enabled: interlaced enabled.
+				// H/S enabled: Interlaced Mode 2.
 				T_Render_Line_m5<true, true>();
 				break;
 			default:

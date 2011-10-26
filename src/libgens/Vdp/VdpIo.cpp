@@ -176,8 +176,9 @@ void Vdp::updateVdpLines(bool resetCurrent)
 	}
 	
 	// Check interlaced mode.
-	Interlaced.HalfLine  = ((VDP_Reg.m5.Set4 & 0x02) >> 1);		// LSM0
-	Interlaced.DoubleRes = ((VDP_Reg.m5.Set4 & 0x04) >> 2);		// LSM1
+	Interlaced = (VdpTypes::Interlaced_t)
+			(((VDP_Reg.m5.Set4 & 0x02) >> 1) |	// LSM0
+			 ((VDP_Reg.m5.Set4 & 0x04) >> 1));	// LSM1
 }
 
 
@@ -570,8 +571,8 @@ uint8_t Vdp::Read_V_Counter(void)
 		}
 	}
 	
-	// Check for 2x interlaced mode.
-	if (Interlaced.DoubleRes)
+	// Check for Interlaced Mode 2. (2x resolution)
+	if (Interlaced == VdpTypes::INTERLACED_MODE_2)
 	{
 		// Interlaced mode is enabled.
 		uint8_t vc_tmp = (V_Counter & 0xFF);
