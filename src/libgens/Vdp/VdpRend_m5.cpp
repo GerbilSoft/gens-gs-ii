@@ -560,10 +560,9 @@ FORCE_INLINE unsigned int Vdp::T_Get_Y_Offset(int cell_cur)
 			 * - http://gendev.spritesmind.net/forum/viewtopic.php?p=11728#11728
 			 */
 			
-			// Check for H40 mode. (TODO: Test 0x81 instead?)
-			if (VDP_Reg.m5.Set4 & 0x01)
+			if (isH40())
 				y_offset = (VSRam.u16[38] & VSRam.u16[39]);
-			else	// H32 mode
+			else // H32
 				y_offset = 0;
 			
 			// Add the current line number to the Y offset.
@@ -1601,7 +1600,7 @@ void Vdp::Render_Line_m5(void)
 		ms_UpdateFlags.VRam_Spr = 0;
 		
 		// Determine how to render the image.
-		const int RenderMode = ((VDP_Reg.m5.Set4 & 0x8) >> 2) | Interlaced.DoubleRes;
+		const int RenderMode = ((VDP_Reg.m5.Set4 & 0x08) >> 2) | Interlaced.DoubleRes;
 		switch (RenderMode & 3)
 		{
 			case 0:
@@ -1934,7 +1933,7 @@ void VDP_Render_Line_m5_32X(void)
 		VDP_Flags.VRam_Spr = 0;
 		
 		// Determine how to render the image.
-		const int RenderMode = ((VDP_Reg.m5.Set4 & 0x8) >> 2) | VDP_Reg.Interlaced.DoubleRes;
+		const int RenderMode = ((VDP_Reg.m5.Set4 & 0x08) >> 2) | VDP_Reg.Interlaced.DoubleRes;
 		switch (RenderMode & 3)
 		{
 			case 0:

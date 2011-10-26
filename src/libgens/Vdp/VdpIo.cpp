@@ -295,7 +295,7 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 		
 		case 3:
 			// Window base address.
-			if (VDP_Reg.m5.Set4 & 0x01)	// Check for H40 mode. (TODO: Test 0x81 instead?)
+			if (isH40())
 				Win_Addr = (val & 0x3C) << 10;	// H40.
 			else
 				Win_Addr = (val & 0x3E) << 10;	// H32.
@@ -308,7 +308,7 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 		
 		case 5:
 			// Sprite Attribute Table base address.
-			if (VDP_Reg.m5.Set4 & 0x01)	// Check for H40 mode. (TODO: Test 0x81 instead?)
+			if (isH40())
 				Spr_Addr = (val & 0x7E) << 9;
 			else
 				Spr_Addr = (val & 0x7F) << 9;
@@ -347,7 +347,11 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 			// Update the Shadow/Highlight setting.
 			m_palette.setMdShadowHighlight(!!(VDP_Reg.m5.Set4 & 0x08));
 			
-			if (val & 0x81)		// TODO: Original asm tests 0x81. Should this be done for other H40 tests?
+			// H40 mode is activated by setting VDP_Reg.m5.Set4, bit 0 (0x01, RS1).
+			// Bit 7 (0x80, RS0) is also needed, but RS1 is what tells the VDP
+			// to increase the pixel counters to 320px per line.
+			// Source: http://wiki.megadrive.org/index.php?title=VDPRegs_Addendum (Jorge)
+			if (val & 0x01)
 			{
 				// H40 mode.
 				H_Cell = 40;
@@ -500,8 +504,7 @@ uint8_t Vdp::Read_H_Counter(void)
 	// H_Counter_Table[][0] == H32.
 	// H_Counter_Table[][1] == H40.
 	
-	// TODO: We're checking both RS0 and RS1 here. Others only check one.
-	if (VDP_Reg.m5.Set4 & 0x81)
+	if (isH40())
 		return H_Counter_Table[odo_68K][1];
 	else
 		return H_Counter_Table[odo_68K][0];
@@ -522,7 +525,7 @@ uint8_t Vdp::Read_V_Counter(void)
 	unsigned int H_Counter;
 	uint8_t bl, bh;		// TODO: Figure out what this actually means.
 	
-	if (VDP_Reg.m5.Set4 & 0x81)
+	if (isH40())
 	{
 		// H40
 		H_Counter = H_Counter_Table[odo_68K][0];
@@ -651,9 +654,8 @@ uint16_t Vdp::Read_Data(void)
 
 
 /**
- * Vdp::Update_DMA(): Update the DMA state.
+ * Update the DMA state.
  * @return Number of cycles used.
- * TODO: Port to LibGens.
  */
 unsigned int Vdp::Update_DMA(void)
 {
@@ -671,8 +673,8 @@ unsigned int Vdp::Update_DMA(void)
 	 */
 	
 	// Horizontal resolution.
-	// TODO: Use both RS0/RS1, not just RS1.
-	unsigned int offset = ((VDP_Reg.m5.Set4 & 1) * 2);
+	// TODO: Optimize this conditional? (Not sure if the compiler optimizes it...)
+	unsigned int offset = (isH40() ? 2 : 0);
 	
 	// Check if we're in VBlank or if the VDP is disabled.
 	if (VDP_Lines.Visible.Current < 0 ||

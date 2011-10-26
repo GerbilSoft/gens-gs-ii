@@ -258,6 +258,12 @@ class Vdp
 		int H_Cell;
 		int H_Pix;
 		int H_Pix_Begin;
+
+		/**
+		 * Determine if the display mode is H40. (320px wide)
+		 * @return True if H40; false otherwise.
+		 */
+		bool isH40(void) const;
 		
 		/** DMA **/
 		
@@ -534,6 +540,19 @@ inline int Vdp::GetHCells(void)
 
 inline int Vdp::GetVPix(void)
 	{ return VDP_Lines.Visible.Total; }
+
+/**
+ * Determine if the display mode is H40. (320px wide)
+ * @return True if H40; false otherwise.
+ */
+inline bool Vdp::isH40(void) const
+{
+	// H40 mode is activated by setting VDP_Reg.m5.Set4, bit 0 (0x01, RS1).
+	// Bit 7 (0x80, RS0) is also needed, but RS1 is what tells the VDP
+	// to increase the pixel counters to 320px per line.
+	// Source: http://wiki.megadrive.org/index.php?title=VDPRegs_Addendum (Jorge)
+	return (VDP_Reg.m5.Set4 & 0x01);
+}
 
 /** VDP address functions: Get Pointers. **/
 inline uint16_t *Vdp::ScrA_Addr_Ptr16(uint16_t offset)
