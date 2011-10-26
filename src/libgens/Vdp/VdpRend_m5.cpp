@@ -689,7 +689,6 @@ FORCE_INLINE uint32_t Vdp::T_Get_Pattern_Data(uint16_t pattern, unsigned int y_f
 	return VRam.u32[(TileAddr + (y_fine_offset * 4)) >> 2];
 }
 
-#include <stdio.h>
 /**
  * Vdp::T_Render_Line_Scroll(): Render a scroll line.
  * @param plane		[in] True for Scroll A / Window; false for Scroll B.
