@@ -34,6 +34,7 @@
 
 // VDP types.
 #include "VdpTypes.hpp"
+#include "VdpReg.hpp"
 #include "VdpPalette.hpp"
 #include "VdpStatus.hpp"
 
