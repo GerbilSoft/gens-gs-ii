@@ -317,6 +317,9 @@ QString PathConfig::configPath(void)
 QString PathConfig::configPath(ConfigPath path)
 {
 	assert(path >= GCPATH_CONFIG && path < GCPATH_MAX);
+	if (path < GCPATH_CONFIG || path >= GCPATH_MAX)
+		path = GCPATH_CONFIG;
+	
 	return d->configPaths.at(path);
 }
 
