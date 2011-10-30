@@ -83,7 +83,7 @@ class PathConfig : public QObject
 			
 			GCPATH_MAX
 		};
-		Q_ENUMS(ConfigPath)
+		Q_ENUMS(GensQt4::PathConfig::ConfigPath)
 		
 		/**
 		 * Get the main configuration path. (GCPATH_CONFIG)
@@ -99,13 +99,15 @@ class PathConfig : public QObject
 		QString configPath(ConfigPath path);
 	
 	signals:
+		// NOTE: Signals must use the full namespace specification
+		// of enums in order to get moc to handle them properly.
 		/**
 		 * A configuration path has been changed.
 		 * This signal *is* emitted on load().
 		 * @param path Configuration path.
 		 * @param dir New directory.
 		 */
-		void pathChanged(ConfigPath path, const QString& dir);
+		void pathChanged(GensQt4::PathConfig::ConfigPath path, const QString& dir);
 };
 
 }
