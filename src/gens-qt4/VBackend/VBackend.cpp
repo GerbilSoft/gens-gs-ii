@@ -23,9 +23,9 @@
 
 #include "VBackend.hpp"
 
-// C includes.
-#include <stdio.h>
-#include <assert.h>
+// C includes. (C++ namespace)
+#include <cstdio>
+#include <cassert>
 
 // Qt includes.
 #include <QtCore/QMutexLocker>
@@ -285,11 +285,14 @@ void VBackend::fastBlur_changed_slot(const QVariant& newFastBlur)
 
 
 /**
- * aspectRatioConstraint_changed_slot(): Aspect ratio constraint setting has changed.
+ * Aspect ratio constraint setting has changed.
  * @param newAspectRatioConstraint (bool) New aspect ratio constraint setting.
  */
 void VBackend::aspectRatioConstraint_changed_slot(const QVariant& newAspectRatioConstraint)
 {
+	// Save the new Aspect Ratio Constraint setting.
+	m_cfg_aspectRatioConstraint = newAspectRatioConstraint.toBool();
+	
 	// Aspect Ratio Constraint setting has changed.
 	m_aspectRatioConstraint_changed = true;
 	
@@ -303,11 +306,14 @@ void VBackend::aspectRatioConstraint_changed_slot(const QVariant& newAspectRatio
 
 
 /**
- * bilinearFilter_changed_slot(): Bilinear filter setting has changed.
+ * Bilinear Filter setting has changed.
  * @param newBilinearFilter (bool) New bilinear filter setting.
  */
 void VBackend::bilinearFilter_changed_slot(const QVariant& newBilinearFilter)
 {
+	// Save the new Bilinear Filter setting.
+	m_cfg_bilinearFilter = newBilinearFilter.toBool();
+	
 	// TODO: Only if paused, or regardless of pause?
 	if (!isRunning() || isPaused())
 	{
@@ -318,11 +324,14 @@ void VBackend::bilinearFilter_changed_slot(const QVariant& newBilinearFilter)
 
 
 /**
- * pauseTint_changed_slot(): Pause Tint effect setting has changed.
+ * Pause Tint effect setting has changed.
  * @param newPauseTint (bool) New pause tint effect setting.
  */
 void VBackend::pauseTint_changed_slot(const QVariant& newPauseTint)
 {
+	// Save the new Pause Tint effect setting.
+	m_cfg_pauseTint = newPauseTint.toBool();
+	
 	// Update the video backend if emulation is running,
 	// and if we're currently paused manually.
 	if (isRunning() && isManualPaused())
@@ -334,7 +343,7 @@ void VBackend::pauseTint_changed_slot(const QVariant& newPauseTint)
 
 
 /**
- * updatePausedEffect(): Update the Paused effect.
+ * Update the Paused effect.
  * @param fromMdScreen If true, copies MD_Screen[] to m_intScreen.
  */
 void VBackend::updatePausedEffect(bool fromMdScreen)
@@ -348,7 +357,7 @@ void VBackend::updatePausedEffect(bool fromMdScreen)
 
 
 /**
- * updateFastBlur(): Update the Fast Blur effect.
+ * Update the Fast Blur effect.
  * @param fromMdScreen If true, copies MD_Screen[] to m_intScreen.
  */
 void VBackend::updateFastBlur(bool fromMdScreen)
@@ -362,7 +371,7 @@ void VBackend::updateFastBlur(bool fromMdScreen)
 
 
 /**
- * osd_vprintf(): Print formatted text to the screen.
+ * Print formatted text to the screen.
  * @param duration Duration for the message to appear, in milliseconds.
  * @param msg Message to write. (printf-formatted)
  * @param ap Format arguments.
@@ -389,7 +398,7 @@ void VBackend::osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
 
 
 /**
- * osd_vprintf(): Print text to the screen.
+ * Print text to the screen.
  * @param duration Duration for the message to appear, in milliseconds.
  * @param msg Message to write.
  */
