@@ -120,6 +120,7 @@ SET(gens-qt4_COMMON_SRCS
 	Audio/ARingBuffer.cpp
 	ZipSelectDialog.cpp
 	EmuManager_qEmu.cpp
+	Screenshot.cpp
 	VBackend/GLTex2D.cpp
 	GeneralConfigWindow.cpp
 	GeneralConfigWindow_slots.cpp
@@ -162,6 +163,7 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	EmuManager.hpp
 	VBackend/MsgTimer.hpp
 	ZipSelectDialog.hpp
+	Screenshot.hpp
 	GeneralConfigWindow.hpp
 	widgets/GensLineEdit.hpp
 	Config/ConfigStore.hpp

@@ -55,10 +55,13 @@
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QVariant>
+#include <QtCore/QIODevice>
 #include <QtGui/QApplication>
 #include <QtGui/QImage>
 #include <QtGui/QImageReader>
-#include <QtGui/QImageWriter>
+
+// Screenshot handler.
+#include "Screenshot.hpp"
 
 
 namespace GensQt4
@@ -513,50 +516,7 @@ void EmuManager::processQEmuRequest(void)
 
 
 /**
- * getMDScreen(): Get the MD screen as a QImage.
- * @return QImage of the MD screen.
- */
-QImage EmuManager::getMDScreen(void) const
-{
-	if (!gqt4_emuContext)
-		return QImage();
-	
-	// Get the color depth.
-	const LibGens::VdpPalette::ColorDepth bpp = gqt4_emuContext->m_vdp->m_palette.bpp();
-	
-	// Create the QImage.
-	const uint8_t *start;
-	const int startY = ((240 - gqt4_emuContext->m_vdp->GetVPix()) / 2);
-	const int startX = (gqt4_emuContext->m_vdp->GetHPixBegin());
-	int bytesPerLine;
-	QImage::Format imgFormat;
-	
-	if (bpp == LibGens::VdpPalette::BPP_32)
-	{
-		start = (const uint8_t*)(gqt4_emuContext->m_vdp->MD_Screen->lineBuf32(startY) + startX);
-		bytesPerLine = (gqt4_emuContext->m_vdp->MD_Screen->pxPitch() * sizeof(uint32_t));
-		imgFormat = QImage::Format_RGB32;
-	}
-	else
-	{
-		start = (const uint8_t*)(gqt4_emuContext->m_vdp->MD_Screen->lineBuf16(startY) + startX);
-		bytesPerLine = (gqt4_emuContext->m_vdp->MD_Screen->pxPitch() * sizeof(uint16_t));
-		if (bpp == LibGens::VdpPalette::BPP_16)
-			imgFormat = QImage::Format_RGB16;
-		else
-			imgFormat = QImage::Format_RGB555;
-	}
-	
-	// TODO: Check for errors.
-	// TODO: Store timestamp, ROM filename, etc.
-	return QImage(start, gqt4_emuContext->m_vdp->GetHPix(),
-			gqt4_emuContext->m_vdp->GetVPix(),
-			bytesPerLine, imgFormat);	
-}
-
-
-/**
- * doScreenShot(): Do a screenshot.
+ * Do a screenshot.
  * Called from processQEmuRequest().
  */
 void EmuManager::doScreenShot(void)
@@ -582,14 +542,24 @@ void EmuManager::doScreenShot(void)
 				scrFilenameSuffix;
 	} while (QFile::exists(scrFilename));
 	
-	// Create the QImage.
-	QImage img = getMDScreen();
-	QImageWriter imgWriter(scrFilename, "png");
-	imgWriter.write(img);
+	// Create the screenshot.
+	Screenshot ss(m_rom, gqt4_emuContext, this);
+	int ret = ss.save(scrFilename);
 	
-	//: OSD message indicating screenshot saved.
-	QString osdMsg = tr("Screenshot %1 saved.");
-	osdMsg = osdMsg.arg(scrNumber);
+	QString osdMsg;
+	if (ret == 0)
+	{
+		//: OSD message indicating a screenshot has been saved.
+		osdMsg = tr("Screenshot %1 saved.");
+		osdMsg = osdMsg.arg(scrNumber);
+	}
+	else
+	{
+		// TODO: Print the actual error.
+		//: OSD message indicating an error occurred while saving a screenshot.
+		osdMsg = tr("Error saving screenshot.");
+	}
+	
 	emit osdPrintMsg(1500, osdMsg);
 }
 
@@ -642,10 +612,9 @@ void EmuManager::doAudioStereo(bool newStereo)
 void EmuManager::doSaveState(const QString& filename, int saveSlot)
 {
 	// Create the preview image.
-	QImage img = getMDScreen();
+	Screenshot ss(m_rom, gqt4_emuContext, this);
 	QBuffer imgBuf;
-	QImageWriter imgWriter(&imgBuf, "png");
-	imgWriter.write(img);
+	ss.save(&imgBuf);
 	
 	// Save the ZOMG file.
 	const QString nativeFilename = QDir::toNativeSeparators(filename);
