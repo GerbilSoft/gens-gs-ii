@@ -556,9 +556,9 @@ window to a larger size than its original resolution.</string>
       <widget class="QWidget" name="tabVdp">
        <layout class="QVBoxLayout" name="verticalLayout_8">
         <item>
-         <widget class="QGroupBox" name="grpAdvancedVDP">
+         <widget class="QGroupBox" name="grpVDP">
           <property name="title">
-           <string>Advanced VDP Settings</string>
+           <string>VDP Settings</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
            <item>
@@ -612,35 +612,41 @@ on NTSC models.</string>
             </spacer>
            </item>
            <item>
-            <widget class="QLabel" name="lblVdpAdvanced">
-             <property name="text">
-              <string>&lt;span style=&quot;font-weight: bold; color: red&quot;&gt;Warning:&lt;/span&gt; The following settings are low-level emulation settings. Changing these settings may break certain games. You should not change these settings unless you know what you're doing.</string>
-             </property>
-             <property name="wordWrap">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="chkVScrollBug">
-             <property name="toolTip">
-              <string>If enabled, 2-cell vertical scrolling will exhibit glitches in the
+            <widget class="QWidget" name="grpAdvancedVDP" native="true">
+             <layout class="QVBoxLayout" name="verticalLayout_9">
+              <property name="margin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="lblVdpAdvanced">
+                <property name="text">
+                 <string>&lt;span style=&quot;font-weight: bold; color: red&quot;&gt;Warning:&lt;/span&gt; The following settings are low-level emulation settings. Changing these settings may break certain games. You should not change these settings unless you know what you're doing.</string>
+                </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="chkVScrollBug">
+                <property name="toolTip">
+                 <string>If enabled, 2-cell vertical scrolling will exhibit glitches in the
 left-most column if horizontal scrolling is used at the same
 time. This matches the behavior seen on Genesis 1 (MK-1601)
 and Genesis 2 (MK-1631) consoles.
 
 The Genesis 3 (MK-1641) does not show this bug, so disabling
 this option will more accurately simulate the Genesis 3.</string>
-             </property>
-             <property name="text">
-              <string>Emulate the 2-cell &amp;Vertical Scrolling bug</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="chkZeroLengthDMA">
-             <property name="toolTip">
-              <string>The Genesis VDP has a bug where a DMA transfer with a length
+                </property>
+                <property name="text">
+                 <string>Emulate the 2-cell &amp;Vertical Scrolling bug.</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="chkZeroLengthDMA">
+                <property name="toolTip">
+                 <string>The Genesis VDP has a bug where a DMA transfer with a length
 of 0 results in a transfer of 128 KB. Older versions of Gens did
 not handle this properly, and simply ignored zero-length
 transfers. This was incorrectly used by some hacks, so those
@@ -649,10 +655,13 @@ hacks will break in emulators that handle this correctly.
 If you want to play one of these hacks, enable this option.
 Be warned that it may break commercial games and other
 programs that depend on the correct VDP behavior.</string>
-             </property>
-             <property name="text">
-              <string>Allow zero-length DMA transfers</string>
-             </property>
+                </property>
+                <property name="text">
+                 <string>Allow zero-length DMA transfers.</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </widget>
            </item>
            <item>
@@ -1269,8 +1278,6 @@ programs that depend on the correct VDP behavior.</string>
   <tabstop>chkSpriteLimits</tabstop>
   <tabstop>chkBorderColor</tabstop>
   <tabstop>chkNtscV30Rolling</tabstop>
-  <tabstop>chkVScrollBug</tabstop>
-  <tabstop>chkZeroLengthDMA</tabstop>
   <tabstop>cboRegionCurrent</tabstop>
   <tabstop>lstRegionDetect</tabstop>
   <tabstop>btnRegionDetectUp</tabstop>

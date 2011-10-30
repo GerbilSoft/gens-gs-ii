@@ -94,7 +94,7 @@ void GeneralConfigWindow::on_chkInverted_toggled(bool checked)
 void GeneralConfigWindow::on_cboColorScaleMethod_currentIndexChanged(int index)
 	{ GENERIC_OPTION("Graphics/colorScaleMethod", index); }
 
-/** Advanced VDP settings. **/
+/** VDP settings. **/
 void GeneralConfigWindow::on_chkSpriteLimits_toggled(bool checked)
 	{ GENERIC_OPTION("VDP/spriteLimits", checked); }
 void GeneralConfigWindow::on_chkBorderColor_toggled(bool checked)

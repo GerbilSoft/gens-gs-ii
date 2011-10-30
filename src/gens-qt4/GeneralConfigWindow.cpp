@@ -60,6 +60,16 @@ const QString GeneralConfigWindow::ms_sWarning =
 	GeneralConfigWindow::tr("Warning:") +
 	QLatin1String("</b></span> ");
 
+/**
+ * Check if the warranty is void.
+ * If it is, we'll show some super secret settings.
+ * @return True if the warranty is void.
+ */
+static inline bool isWarrantyVoid(void)
+{
+	return (gqt4_cfg->get(QLatin1String("iKnowWhatImDoingAndWillVoidTheWarranty")).toBool());
+}
+
 
 /**
  * Initialize the General Configuration window.
@@ -77,6 +87,13 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
+	
+	if (!isWarrantyVoid())
+	{
+		// Hide the super secret settings.
+		delete grpAdvancedVDP;
+		grpAdvancedVDP = NULL;
+	}
 	
 	// Create the action group for the toolbar buttons.
 	m_agBtnGroup = new QActionGroup(this);
@@ -406,12 +423,15 @@ void GeneralConfigWindow::reload(void)
 	chkInverted->setChecked(ValByPath_bool("Graphics/inverted"));
 	cboColorScaleMethod->setCurrentIndex(ValByPath_int("Graphics/colorScaleMethod"));
 	
-	/** Advanced VDP settings. **/
+	/** VDP settings. **/
 	chkSpriteLimits->setChecked(ValByPath_bool("VDP/spriteLimits"));
 	chkBorderColor->setChecked(ValByPath_bool("VDP/borderColorEmulation"));
 	chkNtscV30Rolling->setChecked(ValByPath_bool("VDP/ntscV30Rolling"));
-	chkVScrollBug->setChecked(ValByPath_bool("VDP/vscrollBug"));
-	chkZeroLengthDMA->setChecked(ValByPath_bool("VDP/zeroLengthDMA"));
+	if (isWarrantyVoid())
+	{
+		chkVScrollBug->setChecked(ValByPath_bool("VDP/vscrollBug"));
+		chkZeroLengthDMA->setChecked(ValByPath_bool("VDP/zeroLengthDMA"));
+	}
 	
 	/** System. **/
 	cboRegionCurrent->setCurrentIndex(ValByPath_int("System/regionCode") + 1);
@@ -490,12 +510,15 @@ void GeneralConfigWindow::apply(void)
 	SetValByPath_bool("Graphics/inverted", chkInverted->isChecked());
 	SetValByPath_int("Graphics/colorScaleMethod", cboColorScaleMethod->currentIndex());
 	
-	/** Advanced VDP settings. **/
+	/** VDP settings. **/
 	SetValByPath_bool("VDP/spriteLimits", chkSpriteLimits->isChecked());
 	SetValByPath_bool("VDP/borderColorEmulation", chkBorderColor->isChecked());
 	SetValByPath_bool("VDP/ntscV30Rolling", chkNtscV30Rolling->isChecked());
-	SetValByPath_bool("VDP/vscrollBug", chkVScrollBug->isChecked());
-	SetValByPath_bool("VDP/zeroLengthDMA", chkZeroLengthDMA->isChecked());
+	if (isWarrantyVoid())
+	{
+		SetValByPath_bool("VDP/vscrollBug", chkVScrollBug->isChecked());
+		SetValByPath_bool("VDP/zeroLengthDMA", chkZeroLengthDMA->isChecked());
+	}
 	
 	/** System. **/
 	SetValByPath_int("System/regionCode", (cboRegionCurrent->currentIndex() - 1));
