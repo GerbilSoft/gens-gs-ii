@@ -200,7 +200,7 @@ class ConfigStorePrivate
 		{
 			const char *key;
 			const char *value;
-			int hex_digits;		// If non-zero, saves as hexadecimal with this many digits.
+			uint8_t hex_digits;	// If non-zero, saves as hexadecimal with this many digits.
 			
 			/**
 			 * If true, allow a setting to be reset to the current value,
@@ -212,6 +212,15 @@ class ConfigStorePrivate
 			 * save slot in order to see the preview image for that savestate.
 			 */
 			bool allow_same_value;
+			
+			/**
+			 * If true, don't save this setting in the configuration file.
+			 * This will be used for some "hidden" settings that cannot
+			 * be changed in the GUI, e.g. the option to show the
+			 * VScroll Bug and Zero-Length DMA bug checkboxes in
+			 * GeneralConfigWindow.
+			 */
+			bool no_save;
 			
 			// Parameter validation.
 			enum ValidationType
@@ -269,39 +278,42 @@ const char ConfigStorePrivate::DefaultConfigFilename[] = "gens-gs-ii.conf";
  */
 const ConfigStorePrivate::DefaultSetting ConfigStorePrivate::DefaultSettings[] =
 {
+	/** Super hidden settings! **/
+	{"iKnowWhatImDoingAndWillVoidTheWarranty", "false", 0, false, true, DefaultSetting::VT_BOOL, 0, 0},
+	
 	/** General settings. **/
-	{"autoFixChecksum",		"true", 0, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"autoPause",			"false", 0, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"pauseTint",			"true", 0, false,	DefaultSetting::VT_BOOL, 0, 0},
+	{"autoFixChecksum",		"true", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
+	{"autoPause",			"false", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
+	{"pauseTint",			"true", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
 	
 	/** Onscreen display. **/
-	{"OSD/fpsEnabled",		"true", 0, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"OSD/fpsColor",		"#ffffff", 0, false,	DefaultSetting::VT_COLOR, 0, 0},
-	{"OSD/msgEnabled",		"true", 0, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"OSD/msgColor",		"#ffffff", 0, false,	DefaultSetting::VT_COLOR, 0, 0},
+	{"OSD/fpsEnabled",		"true", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
+	{"OSD/fpsColor",		"#ffffff", 0, false, false,	DefaultSetting::VT_COLOR, 0, 0},
+	{"OSD/msgEnabled",		"true", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
+	{"OSD/msgColor",		"#ffffff", 0, false, false,	DefaultSetting::VT_COLOR, 0, 0},
 	
 	/** Intro effect. **/
 	// TODO: Use enum constants for range.
-	{"Intro_Effect/introStyle",	"0", 0, false,	DefaultSetting::VT_RANGE, 0, 2},	// none
-	{"Intro_Effect/introColor",	"7", 0, false,	DefaultSetting::VT_RANGE, 0, 7},	// white
+	{"Intro_Effect/introStyle",	"0", 0, false, false,		DefaultSetting::VT_RANGE, 0, 2},	// none
+	{"Intro_Effect/introColor",	"7", 0, false, false,		DefaultSetting::VT_RANGE, 0, 7},	// white
 	
 	/** System. **/
 	// TODO: Use enum constants for range.
-	{"System/regionCode",		"-1", 0, false,		DefaultSetting::VT_RANGE, -1, 4},	// LibGens::SysVersion::REGION_AUTO
-	{"System/regionCodeOrder",	"0x4812", 4, false,	DefaultSetting::VT_REGIONCODEORDER, 0, 0},	// US, Europe, Japan, Asia
+	{"System/regionCode",		"-1", 0, false, false,		DefaultSetting::VT_RANGE, -1, 4},	// LibGens::SysVersion::REGION_AUTO
+	{"System/regionCodeOrder",	"0x4812", 4, false, false,	DefaultSetting::VT_REGIONCODEORDER, 0, 0},	// US, Europe, Japan, Asia
 	
 	/** Sega CD Boot ROMs. **/
-	{"Sega_CD/bootRomUSA", 		"", 0, false,		DefaultSetting::VT_NONE, 0, 0},
-	{"Sega_CD/bootRomEUR",		"", 0, false,		DefaultSetting::VT_NONE, 0, 0},
-	{"Sega_CD/bootRomJPN",		"", 0, false,		DefaultSetting::VT_NONE, 0, 0},
-	{"Sega_CD/bootRomAsia",		"", 0, false,		DefaultSetting::VT_NONE, 0, 0},
+	{"Sega_CD/bootRomUSA", 		"", 0, false, false,		DefaultSetting::VT_NONE, 0, 0},
+	{"Sega_CD/bootRomEUR",		"", 0, false, false,		DefaultSetting::VT_NONE, 0, 0},
+	{"Sega_CD/bootRomJPN",		"", 0, false, false,		DefaultSetting::VT_NONE, 0, 0},
+	{"Sega_CD/bootRomAsia",		"", 0, false, false,		DefaultSetting::VT_NONE, 0, 0},
 	
 	/** External programs. **/
 #ifdef Q_OS_WIN32
 #ifdef __amd64__
-	{"External_Programs/UnRAR", "UnRAR64.dll", 0, false,	DefaultSetting::VT_NONE, 0, 0},
+	{"External_Programs/UnRAR", "UnRAR64.dll", 0, false, false,	DefaultSetting::VT_NONE, 0, 0},
 #else
-	{"External_Programs/UnRAR", "UnRAR.dll", 0, false,	DefaultSetting::VT_NONE, 0, 0},
+	{"External_Programs/UnRAR", "UnRAR.dll", 0, false, false,	DefaultSetting::VT_NONE, 0, 0},
 #endif
 #else /* !Q_OS_WIN32 */
 	// TODO: Check for the existence of unrar and rar.
@@ -309,40 +321,40 @@ const ConfigStorePrivate::DefaultSetting ConfigStorePrivate::DefaultSettings[] =
 	// - Default to unrar if it's found.
 	// - Fall back to rar if it's found but unrar isn't.
 	// - Assume unrar if neither are found.
-	{"External_Programs/UnRAR", "/usr/bin/unrar", 0, false, DefaultSetting::VT_NONE, 0, 0},
+	{"External_Programs/UnRAR", "/usr/bin/unrar", 0, false, false, DefaultSetting::VT_NONE, 0, 0},
 #endif /* Q_OS_WIN32 */
 	
 	/** Graphics settings. **/
 	// TODO: Use enum constants for range.
-	{"Graphics/aspectRatioConstraint",	"true", 0, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"Graphics/fastBlur",			"false", 0, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"Graphics/bilinearFilter",		"false", 0, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"Graphics/interlacedMode",		"2", 0, false,		DefaultSetting::VT_RANGE, 0, 2},	// GensConfig::INTERLACED_FLICKER
-	{"Graphics/contrast",			"0", 0, false,		DefaultSetting::VT_RANGE, -100, 100},
-	{"Graphics/brightness",			"0", 0, false,		DefaultSetting::VT_RANGE, -100, 100},
-	{"Graphics/grayscale",			"false", 0, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"Graphics/inverted",			"false", 0, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"Graphics/colorScaleMethod",		"1", 0, false,		DefaultSetting::VT_RANGE, 0, 2},	// LibGens::VdpPalette::COLSCALE_FULL
-	{"Graphics/stretchMode",		"1", 0, false,		DefaultSetting::VT_RANGE, 0, 3},	// GensConfig::STRETCH_H
+	{"Graphics/aspectRatioConstraint",	"true", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
+	{"Graphics/fastBlur",			"false", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
+	{"Graphics/bilinearFilter",		"false", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
+	{"Graphics/interlacedMode",		"2", 0, false, false,		DefaultSetting::VT_RANGE, 0, 2}, // INTERLACED_FLICKER
+	{"Graphics/contrast",			"0", 0, false, false,		DefaultSetting::VT_RANGE, -100, 100},
+	{"Graphics/brightness",			"0", 0, false, false,		DefaultSetting::VT_RANGE, -100, 100},
+	{"Graphics/grayscale",			"false", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
+	{"Graphics/inverted",			"false", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
+	{"Graphics/colorScaleMethod",		"1", 0, false, false,		DefaultSetting::VT_RANGE, 0, 2}, // COLSCALE_FULL
+	{"Graphics/stretchMode",		"1", 0, false, false,		DefaultSetting::VT_RANGE, 0, 3}, // STRETCH_H
 	
 	/** VDP settings. **/
-	{"VDP/borderColorEmulation",	"true", 0, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"VDP/ntscV30Rolling",		"true", 0, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"VDP/zeroLengthDMA",		"false", 0, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"VDP/spriteLimits",		"true", 0, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"VDP/vscrollBug",		"true", 0, false,	DefaultSetting::VT_BOOL, 0, 0},
+	{"VDP/borderColorEmulation",	"true", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
+	{"VDP/ntscV30Rolling",		"true", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
+	{"VDP/zeroLengthDMA",		"false", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
+	{"VDP/spriteLimits",		"true", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
+	{"VDP/vscrollBug",		"true", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
 	
 	/** Savestates. **/
-	{"Savestates/saveSlot", "0", 0, true, DefaultSetting::VT_RANGE, 0, 9},
+	{"Savestates/saveSlot", "0", 0, true, false, DefaultSetting::VT_RANGE, 0, 9},
 	
 	/** GensWindow configuration. **/
-	{"GensWindow/showMenuBar", "true", 0, false, DefaultSetting::VT_BOOL, 0, 0},
+	{"GensWindow/showMenuBar", "true", 0, false, false, DefaultSetting::VT_BOOL, 0, 0},
 	
 	/** Emulation options. (Options menu) **/
-	{"Options/enableSRam", "true", 0, false, DefaultSetting::VT_BOOL, 0, 0},
+	{"Options/enableSRam", "true", 0, false, false, DefaultSetting::VT_BOOL, 0, 0},
 	
 	/** End of array. **/
-	{NULL, NULL, 0, false, DefaultSetting::VT_NONE, 0, 0}
+	{NULL, NULL, 0, false, false, DefaultSetting::VT_NONE, 0, 0}
 };
 
 QHash<QString, const ConfigStorePrivate::DefaultSetting*> ConfigStorePrivate::DefaultSettingsHash;
@@ -805,6 +817,9 @@ int ConfigStorePrivate::save(const QString& filename) const
 	// Save known settings to the configuration file.
 	for (const DefaultSetting *def = &DefaultSettings[0]; def->key != NULL; def++)
 	{
+		if (def->no_save)
+			continue;
+		
 		const QString key = QLatin1String(def->key);
 		QVariant value = settings.value(key, QLatin1String(def->value));
 		if (def->hex_digits > 0)
