@@ -49,7 +49,7 @@ class ConfigStore : public QObject
 	
 	private:
 		friend class ConfigStorePrivate;
-		ConfigStorePrivate *d;
+		ConfigStorePrivate *const d;
 		Q_DISABLE_COPY(ConfigStore)
 	
 	public:
