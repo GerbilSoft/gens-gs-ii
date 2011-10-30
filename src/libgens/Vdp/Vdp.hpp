@@ -234,27 +234,27 @@ class Vdp
 		 * NOTE: Do NOT use this if a ROM isn't loaded!
 		 * @return Horizontal resolution, in pixels.
 		 */
-		int GetHPix(void);
+		int GetHPix(void) const;
 		
 		/**
 		 * GetHPixBegin(): Get the first horizontal pixel number.
 		 * NOTE: Do NOT use this if a ROM isn't loaded!
 		 * @return First horizontal pixel number.
 		 */
-		int GetHPixBegin(void);
+		int GetHPixBegin(void) const;
 		
 		/**
 		 * GetHCells(): Get the current horizontal resolution, in cells.
 		 * @return Horizontal resolution, in cells.
 		 */
-		int GetHCells(void);
+		int GetHCells(void) const;
 		
 		/**
 		 * GetVPix(): Get the current vertical resolution.
 		 * NOTE: Do NOT use this if a ROM isn't loaded!
 		 * @return Vertical resolution, in pixels.
 		 */
-		int GetVPix(void);
+		int GetVPix(void) const;
 	
 	private:
 		/**
@@ -553,16 +553,16 @@ inline void Vdp::setVideoMode(bool videoMode)
 inline void Vdp::MarkVRamDirty(void)
 	{ ms_UpdateFlags.VRam = 1; }
 
-inline int Vdp::GetHPix(void)
+inline int Vdp::GetHPix(void) const
 	{ return H_Pix; }
 
-inline int Vdp::GetHPixBegin(void)
+inline int Vdp::GetHPixBegin(void) const
 	{ return H_Pix_Begin; }
 
-inline int Vdp::GetHCells(void)
+inline int Vdp::GetHCells(void) const
 	{ return H_Cell; }
 
-inline int Vdp::GetVPix(void)
+inline int Vdp::GetVPix(void) const
 	{ return VDP_Lines.Visible.Total; }
 
 /**
