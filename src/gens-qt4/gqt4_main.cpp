@@ -166,6 +166,11 @@ int gens_main(int argc, char *argv[])
 	QString sramPath = GensQt4::gqt4_cfg->configPath(GensQt4::PathConfig::GCPATH_SRAM);
 	LibGens::EmuContext::SetPathSRam(sramPath.toUtf8().constData());
 	
+	// Add a signal handler for path changes.
+	QObject::connect(
+		GensQt4::gqt4_cfg->pathConfigObject(), SIGNAL(pathChanged(GensQt4::PathConfig::ConfigPath, QString)),
+		configHandler, SLOT(pathChanged(GensQt4::PathConfig::ConfigPath, QString)));
+	
 	gens_window = new GensQt4::GensWindow();
 	gens_window->show();
 	

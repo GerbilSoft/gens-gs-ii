@@ -52,4 +52,23 @@ void ConfigHandler::extprgUnRAR_changed_slot(const QVariant& extprgUnRAR)
 	LibGens::DcRar::SetExtPrg(extprgUnRAR.toString().toUtf8().constData());
 }
 
+/**
+ * A configuration path has been changed.
+ * @param path Configuration path.
+ * @param dir New directory.
+ */
+void ConfigHandler::pathChanged(PathConfig::ConfigPath path, const QString& dir)
+{
+	switch (path)
+	{
+		case PathConfig::GCPATH_SRAM:
+			// Update the SRam path in LibGens.
+			LibGens::EmuContext::SetPathSRam(dir.toUtf8().constData());
+			break;
+		
+		default:
+			break;
+	}
+}
+
 }

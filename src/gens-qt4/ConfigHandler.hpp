@@ -25,19 +25,31 @@
 // Qt includes.
 #include <QtCore/QObject>
 
+// PathConfig.
+#include "Config/PathConfig.hpp"
+
 namespace GensQt4
 {
-	// General configuration signal handler.
-	class ConfigHandler : public QObject
-	{
-		Q_OBJECT
+
+// General configuration signal handler.
+class ConfigHandler : public QObject
+{
+	Q_OBJECT
+	
+	public:
+		ConfigHandler(QObject *parent = 0);
+	
+	public slots:
+		void extprgUnRAR_changed_slot(const QVariant& extprgUnRAR);
 		
-		public:
-			ConfigHandler(QObject *parent = 0);
-		
-		public slots:
-			void extprgUnRAR_changed_slot(const QVariant& extprgUnRAR);
-	};
+		/**
+		 * A configuration path has been changed.
+		 * @param path Configuration path.
+		 * @param dir New directory.
+		 */
+		void pathChanged(GensQt4::PathConfig::ConfigPath path, const QString& dir);
+};
+
 }
 
 #endif /* __GENS_QT4_CONFIGHANDLER_HPP__ */
