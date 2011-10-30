@@ -694,7 +694,6 @@ int ConfigStorePrivate::getInt(const QString& key) const
  */
 int ConfigStorePrivate::load(const QString& filename)
 {
-	printf("FILENAME: %s\n", filename.toUtf8().constData());
 	QSettings qSettings(filename, QSettings::IniFormat);
 	
 	// NOTE: Only known settings will be loaded.
