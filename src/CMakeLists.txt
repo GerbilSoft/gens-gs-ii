@@ -10,6 +10,8 @@ INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../extlib/")
 
 # Check for C++ 2011 support.
 # If C++ 2011 isn't available, compatibility definitions will be enabled.
+# NOTE: CHECK_CXX11_COMPILER_FLAG() needs to be called here again.
+# It worked without this previously due to old config.h files in the build directory.
 INCLUDE(CheckCXXSourceCompiles)
 INCLUDE(CheckCXX11CompilerFlag)
 CHECK_CXX11_COMPILER_FLAG(GENS_CXX11_CXXFLAG)
