@@ -354,9 +354,12 @@ QMutex ConfigStorePrivate::MtxDefaultSettingsHash;
 
 ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
 	: q(q)
-	, pathConfig(new PathConfig())
-	, recentRoms(new RecentRoms())
+	, pathConfig(new PathConfig(q))
+	, recentRoms(new RecentRoms(q))
 {
+	// TODO: Rework this with the upcoming all-in-one IoManager.
+	q->m_ctrlConfig = new CtrlConfig(q);
+	
 	// Initialize the Default Settings QHash.
 	InitDefaultSettingsHash();
 	
@@ -942,7 +945,6 @@ void ConfigStorePrivate::InvokeQtMethod(QObject *object, int method_idx, QVarian
 ConfigStore::ConfigStore(QObject *parent)
 	: QObject(parent)
 	, d(new ConfigStorePrivate(this))
-	, m_ctrlConfig(new CtrlConfig(this))
 { }
 
 ConfigStore::~ConfigStore()
