@@ -262,7 +262,7 @@ class ConfigStorePrivate
 /**
  * Default configuration filename.
  */
-const char ConfigStorePrivate::DefaultConfigFilename[] = "gens-gs-ii.NEWCONF.conf";
+const char ConfigStorePrivate::DefaultConfigFilename[] = "gens-gs-ii.conf";
 
 /**
  * Default settings.
