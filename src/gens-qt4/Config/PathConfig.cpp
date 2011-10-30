@@ -76,7 +76,7 @@ class PathConfigPrivate
 		/**
 		 * Convert a relative path to absolute (within GCPATH_CONFIG).
 		 * @param path Path to convert.
-		 * @return Absolute path. (No trailing slash!)
+		 * @return Absolute path, with trailing slash.
 		 */
 		QString toAbsolutePath(QString path) const;
 		
@@ -84,8 +84,7 @@ class PathConfigPrivate
 		
 		/**
 		 * Vector of configuration paths.
-		 * This vector has absolute pathnames.
-		 * NOTE: These pathnames do not have trailing slashes.
+		 * This vector has absolute pathnames, with trailing slashes.
 		 */
 		QVector<QString> configPaths;
 		
@@ -140,7 +139,10 @@ PathConfigPrivate::PathConfigPrivate(PathConfig *q)
 		configDir.mkpath(configDir.absolutePath());
 	
 	// Save the main configuration path.
-	configPaths.replace(PathConfig::GCPATH_CONFIG, configDir.absolutePath());
+	configPath = configDir.absolutePath();
+	if (!configPath.endsWith(QChar(L'/')))
+		configPath.append(QChar(L'/'));
+	configPaths.replace(PathConfig::GCPATH_CONFIG, configPath);
 	
 	// Initialize the other configuration paths.
 	// TODO: Add support for plugin configuration paths.
@@ -151,7 +153,11 @@ PathConfigPrivate::PathConfigPrivate(PathConfig *q)
 		QDir otherConfigDir(otherConfigPath);
 		if (!otherConfigDir.exists())
 			otherConfigDir.mkpath(otherConfigDir.absolutePath());
-		configPaths.replace(i, otherConfigDir.absolutePath());
+		
+		otherConfigPath = otherConfigDir.absolutePath();
+		if (!otherConfigPath.endsWith(QChar(L'/')))
+			otherConfigPath.append(QChar(L'/'));
+		configPaths.replace(i, otherConfigPath);
 	}
 }
 
@@ -248,7 +254,7 @@ QString PathConfigPrivate::toRelativePath(QString path) const
 /**
  * Convert a relative path to absolute (within GCPATH_CONFIG).
  * @param path Path to convert.
- * @return Absolute path. (No trailing slash!)
+ * @return Absolute path, with trailing slash.
  */
 QString PathConfigPrivate::toAbsolutePath(QString path) const
 {
@@ -266,7 +272,10 @@ QString PathConfigPrivate::toAbsolutePath(QString path) const
 	QString newPath = configDir.absoluteFilePath(path);
 	QDir newDir(newPath);
 	
-	return newDir.absolutePath();
+	newPath = newDir.absolutePath();
+	if (!newPath.endsWith(QChar(L'/')))
+		newPath.append(QChar(L'/'));
+	return newPath;
 }
 
 
