@@ -140,10 +140,17 @@ class ConfigStore : public QObject
 		void notifyAll(void);
 		
 		/**
-		 * Get the configuration path.
-		 * @return Configuration path.
+		 * Get the main configuration path. (GCPATH_CONFIG)
+		 * @return Main configuration path.
 		 */
 		QString configPath(void);
+		
+		/**
+		 * Get the specified configuration path.
+		 * @param path Configuration path to get. (Invalid paths act like GCPATH_CONFIG.)
+		 * @return Configuration path.
+		 */
+		QString configPath(PathConfig::ConfigPath path);
 		
 		/** Recent ROMs. **/
 		

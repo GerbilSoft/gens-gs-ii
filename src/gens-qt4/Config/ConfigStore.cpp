@@ -232,9 +232,6 @@ class ConfigStorePrivate
 		static QHash<QString, const DefaultSetting*> DefaultSettingsHash;
 		static QMutex MtxDefaultSettingsHash;
 		
-		// Configuration path.
-		QString configPath;
-		
 		/**
 		 * Signal mappings.
 		 * Format:
@@ -365,29 +362,8 @@ ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
 	// Initialize the Default Settings QHash.
 	InitDefaultSettingsHash();
 	
-	// Initialize settings.
+	// Initialize settings to defaults.
 	reset();
-	
-	// TODO: Use PathConfig.
-	
-	// Determine the configuration path.
-	// TODO: Portable mode.
-	// TODO: Fallback if the user directory isn't writable.
-	QSettings settings(QSettings::IniFormat, QSettings::UserScope,
-				QLatin1String("gens-gs-ii"),
-				QLatin1String("gens-gs-ii"));
-	
-	// TODO: Figure out if QDir has a function to remove the filename portion of the pathname.
-	configPath = settings.fileName();
-	int sepChr = configPath.lastIndexOf(QChar(L'/'));
-	if (sepChr >= 0)
-		configPath.remove(sepChr + 1, configPath.size());
-	
-	// Make sure the directory exists.
-	// If it doesn't exist, create it.
-	QDir dir(configPath);
-	if (!dir.exists())
-		dir.mkpath(configPath);
 	
 	// Load the user's settings.
 	load();
@@ -718,6 +694,7 @@ int ConfigStorePrivate::getInt(const QString& key)
  */
 int ConfigStorePrivate::load(const QString& filename)
 {
+	printf("FILENAME: %s\n", filename.toUtf8().constData());
 	QSettings qSettings(filename, QSettings::IniFormat);
 	
 	// NOTE: Only known settings will be loaded.
@@ -768,7 +745,7 @@ int ConfigStorePrivate::load(const QString& filename)
  */
 int ConfigStorePrivate::load(void)
 {
-	const QString cfgFilename = configPath + QLatin1String(DefaultConfigFilename);
+	const QString cfgFilename = (pathConfig->configPath() + QLatin1String(DefaultConfigFilename));
 	return load(cfgFilename);
 }
 
@@ -860,7 +837,7 @@ int ConfigStorePrivate::save(const QString& filename)
  */
 int ConfigStorePrivate::save(void)
 {
-	const QString cfgFilename = configPath + QLatin1String(DefaultConfigFilename);
+	const QString cfgFilename = (pathConfig->configPath() + QLatin1String(DefaultConfigFilename));
 	return save(cfgFilename);
 }
 
@@ -1065,11 +1042,19 @@ void ConfigStore::notifyAll(void)
 	{ d->notifyAll(); }
 
 /**
- * Get the configuration path.
- * @return Configuration path.
+ * Get the main configuration path. (GCPATH_CONFIG)
+ * @return Main configuration path.
  */
 QString ConfigStore::configPath(void)
-	{ return d->configPath; }
+	{ return d->pathConfig->configPath(); }
+
+/**
+ * Get the specified configuration path.
+ * @param path Configuration path to get. (Invalid paths act like GCPATH_CONFIG.)
+ * @return Configuration path.
+ */
+QString ConfigStore::configPath(PathConfig::ConfigPath path)
+	{ return d->pathConfig->configPath(path); }
 
 
 /** Recent ROMs. **/
