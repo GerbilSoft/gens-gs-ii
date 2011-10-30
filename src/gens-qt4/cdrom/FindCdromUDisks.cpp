@@ -188,7 +188,7 @@ int FindCdromUDisksPrivate::queryUDisksDevice(const QDBusObjectPath& objectPath)
 	// If the disc is blank, set the disc label to "Blank [disc_type]".
 	// TODO: Make this a common FindCdromBase function?
 	if (drive.disc_type != DISC_TYPE_NONE && drive.disc_blank)
-		drive.disc_label = q->tr("Blank %1").arg(q->GetDiscTypeName(drive.disc_type));
+		drive.disc_label = FindCdromUDisks::tr("Blank %1").arg(q->GetDiscTypeName(drive.disc_type));
 	
 	// Emit the driveUpdated() signal for this drive.
 	emit q->driveUpdated(drive);
