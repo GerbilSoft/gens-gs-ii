@@ -300,6 +300,7 @@ class EmuManager : public QObject
 				// Savestates.
 				struct
 				{
+					// NOTE: filename must be deleted after use!
 					QString *filename;
 					int saveSlot;
 				} saveState;

@@ -34,6 +34,7 @@
 // Configuration classes.
 #include "RecentRoms.hpp"
 #include "PathConfig.hpp"
+#include "CtrlConfig.hpp"	// TODO: Rework this with the upcoming all-in-one IoManager.
 
 namespace GensQt4
 {
@@ -198,6 +199,11 @@ class ConfigStore : public QObject
 		 * @return GensKey_t.
 		 */
 		GensKey_t actionToKey(int action) const;
+	
+	public:
+		// Controller configuration class.
+		// TODO: Rework this with the upcoming all-in-one IoManager.
+		CtrlConfig *m_ctrlConfig;
 };
 
 }

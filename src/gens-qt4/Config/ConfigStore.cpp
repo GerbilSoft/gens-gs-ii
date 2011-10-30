@@ -341,8 +341,6 @@ const ConfigStorePrivate::DefaultSetting ConfigStorePrivate::DefaultSettings[] =
 	/** Emulation options. (Options menu) **/
 	{"Options/enableSRam", "true", 0, false, DefaultSetting::VT_BOOL, 0, 0},
 	
-	// TODO: Shortcut keys, controllers, recent ROMs.
-	
 	/** End of array. **/
 	{NULL, NULL, 0, false, DefaultSetting::VT_NONE, 0, 0}
 };
@@ -732,6 +730,12 @@ int ConfigStorePrivate::load(const QString& filename)
 	keyConfig.load(&qSettings);
 	qSettings.endGroup();
 	
+	// Load the controller configuration.
+	// TODO: Rework this with the upcoming all-in-one IoManager.
+	qSettings.beginGroup(QLatin1String("Controllers"));
+	q->m_ctrlConfig->load(&qSettings);
+	qSettings.endGroup();
+	
 	// Finished loading settings.
 	// NOTE: Caller must call emitAll() for settings to take effect.
 	return 0;
@@ -824,6 +828,12 @@ int ConfigStorePrivate::save(const QString& filename) const
 	// Save the key configuration.
 	qSettings.beginGroup(QLatin1String("Shortcut_Keys"));
 	keyConfig.save(&qSettings);
+	qSettings.endGroup();
+	
+	// Save the controller configuration.
+	// TODO: Rework this with the upcoming all-in-one IoManager.
+	qSettings.beginGroup(QLatin1String("Controllers"));
+	q->m_ctrlConfig->save(&qSettings);
 	qSettings.endGroup();
 	
 	return 0;
@@ -932,6 +942,7 @@ void ConfigStorePrivate::InvokeQtMethod(QObject *object, int method_idx, QVarian
 ConfigStore::ConfigStore(QObject *parent)
 	: QObject(parent)
 	, d(new ConfigStorePrivate(this))
+	, m_ctrlConfig(new CtrlConfig(this))
 { }
 
 ConfigStore::~ConfigStore()

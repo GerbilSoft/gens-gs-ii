@@ -80,20 +80,20 @@ class CtrlConfig : public QObject
 		};
 		
 		/**
-		 * load(): Load controller configuration from a settings file.
+		 * Load controller configuration from a settings file.
 		 * NOTE: The group must be selected in the QSettings before calling this function!
-		 * @param settings Settings file.
+		 * @param qSettings Settings file.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int load(const QSettings& settings);
+		int load(const QSettings *qSettings);
 		
 		/**
-		 * save(): Save controller configuration to a settings file.
+		 * Save controller configuration to a settings file.
 		 * NOTE: The group must be selected in the QSettings before calling this function!
-		 * @param settings Settings file.
+		 * @param qSettings Settings file.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int save(QSettings& settings);
+		int save(QSettings *qSettings);
 		
 		/**
 		 * updateSysPort(): Update a system controller port.
