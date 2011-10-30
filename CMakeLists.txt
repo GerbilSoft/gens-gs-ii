@@ -43,11 +43,6 @@ ENDIF()
 # Check for platform-specific functionality.
 INCLUDE(CMake/platform.cmake)
 
-# Check what flag is needed for C++ 2011 support.
-# TODO: Move to CMake/platform.cmake
-INCLUDE(CheckCXX11CompilerFlag)
-CHECK_CXX11_COMPILER_FLAG(GENS_CXX11_CXXFLAG)
-
 # Check for required libraries.
 INCLUDE(CMake/libs/CheckZLIB.cmake)
 INCLUDE(CMake/libs/CheckLZMA.cmake)
