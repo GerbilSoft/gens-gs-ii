@@ -31,8 +31,9 @@
 // Qt includes.
 #include <QtCore/QObject>
 
-// Recent ROMs class.
+// Configuration classes.
 #include "RecentRoms.hpp"
+#include "PathConfig.hpp"
 
 namespace GensQt4
 {

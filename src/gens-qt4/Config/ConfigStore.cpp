@@ -251,6 +251,9 @@ class ConfigStorePrivate
 		QHash<QString, QVector<SignalMap>* > signalMaps;
 		QMutex mtxSignalMaps;
 		
+		/** PathConfig **/
+		PathConfig *const pathConfig;
+		
 		/** Recent ROMs. **/
 		RecentRoms *const recentRoms;
 		
@@ -341,16 +344,6 @@ const ConfigStorePrivate::DefaultSetting ConfigStorePrivate::DefaultSettings[] =
 	/** Emulation options. (Options menu) **/
 	{"Options/enableSRam", "true", 0, false, DefaultSetting::VT_BOOL, 0, 0},
 	
-	/** Directories. **/
-	// TODO: Add a class to handle path resolution.
-	// TODO: Validation type? (Or will that be handled using the class...)
-	{"Directories/Savestates",	"./Savestates/", 0, false,	DefaultSetting::VT_NONE, 0, 0},
-	{"Directories/SRAM",		"./SRAM/", 0, false,		DefaultSetting::VT_NONE, 0, 0},
-	{"Directories/BRAM",		"./BRAM/", 0, false,		DefaultSetting::VT_NONE, 0, 0},
-	{"Directories/WAV",		"./WAV/", 0, false,		DefaultSetting::VT_NONE, 0, 0},
-	{"Directories/VGM",		"./VGM/", 0, false,		DefaultSetting::VT_NONE, 0, 0},
-	{"Directories/Screenshots",	"./Screenshots/", 0, false,	DefaultSetting::VT_NONE, 0, 0},
-	
 	// TODO: Shortcut keys, controllers, recent ROMs.
 	
 	/** End of array. **/
@@ -366,6 +359,7 @@ QMutex ConfigStorePrivate::MtxDefaultSettingsHash;
 
 ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
 	: q(q)
+	, pathConfig(new PathConfig())
 	, recentRoms(new RecentRoms())
 {
 	// Initialize the Default Settings QHash.
@@ -373,6 +367,8 @@ ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
 	
 	// Initialize settings.
 	reset();
+	
+	// TODO: Use PathConfig.
 	
 	// Determine the configuration path.
 	// TODO: Portable mode.
@@ -745,14 +741,17 @@ int ConfigStorePrivate::load(const QString& filename)
 		settings.insert(key, value);
 	}
 	
+	// Load the PathConfig settings.
+	qSettings.beginGroup(QLatin1String("Directories"));
+	pathConfig->load(&qSettings);
+	qSettings.endGroup();
+	
 	// Load the Recent ROMs settings.
-	// TODO: Remove Recent ROMs entries from qSettings?
 	qSettings.beginGroup(QLatin1String("Recent_ROMs"));
 	recentRoms->load(&qSettings);
 	qSettings.endGroup();
 	
 	// Load the key configuration.
-	// TODO: Remove key configuration entries from qSettings?
 	qSettings.beginGroup(QLatin1String("Shortcut_Keys"));
 	keyConfig.load(&qSettings);
 	qSettings.endGroup();
@@ -836,14 +835,17 @@ int ConfigStorePrivate::save(const QString& filename)
 		qSettings.setValue(key, value);
 	}
 	
+	// Save the PathConfig settings.
+	qSettings.beginGroup(QLatin1String("Directories"));
+	pathConfig->save(&qSettings);
+	qSettings.endGroup();
+	
 	// Save the Recent ROMs settings.
-	// TODO: Remove Recent ROMs entries from qSettings?
 	qSettings.beginGroup(QLatin1String("Recent_ROMs"));
 	recentRoms->save(&qSettings);
 	qSettings.endGroup();
 	
 	// Save the key configuration.
-	// TODO: Remove key configuration entries from qSettings?
 	qSettings.beginGroup(QLatin1String("Shortcut_Keys"));
 	keyConfig.save(&qSettings);
 	qSettings.endGroup();

@@ -126,6 +126,7 @@ SET(gens-qt4_COMMON_SRCS
 	widgets/GensLineEdit.cpp
 	Config/GensConfig.cpp
 	Config/ConfigStore.cpp
+	Config/PathConfig.cpp
 	Config/CtrlConfig.cpp
 	cdrom/FindCdrom.cpp
 	McdControlWindow.cpp
@@ -166,6 +167,7 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	widgets/GensLineEdit.hpp
 	Config/GensConfig.hpp
 	Config/ConfigStore.hpp
+	Config/PathConfig.hpp
 	Config/CtrlConfig.hpp
 	cdrom/FindCdrom.hpp
 	McdControlWindow.hpp
