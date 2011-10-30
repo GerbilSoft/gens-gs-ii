@@ -165,16 +165,6 @@ class GensWindow : public QMainWindow
 		void stateChanged(void);
 		
 		/**
-		 * updateVideo(): Update video.
-		 */
-		void updateVideo(void)
-		{
-			m_vBackend->setMdScreenDirty();
-			m_vBackend->setVbDirty();
-			m_vBackend->vbUpdate();
-		}
-		
-		/**
 		 * osdPrintMsg(): Print a message on the OSD.
 		 * @param duration Duration for the message to appear, in milliseconds.
 		 * @param msg Message to print.

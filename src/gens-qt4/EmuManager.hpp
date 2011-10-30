@@ -37,6 +37,9 @@
 // paused_t
 #include "gqt4_datatypes.h"
 
+// Video Backend.
+#include "VBackend/VBackend.hpp"
+
 namespace GensQt4
 {
 
@@ -48,7 +51,7 @@ class EmuManager : public QObject
 	Q_OBJECT
 	
 	public:
-		EmuManager(QObject *parent = 0);
+		EmuManager(QObject *parent = 0, VBackend *vBackend = 0);
 		~EmuManager();
 		
 		int openRom(void);
@@ -87,11 +90,15 @@ class EmuManager : public QObject
 				return LibGens::Rom::MDP_SYSTEM_UNKNOWN;
 			return m_rom->sysId();
 		}
+		
+		/**
+		 * Update video on the current VBackend.
+		 */
+		void updateVideo(void);
 	
 	signals:
 		void updateFps(double fps);
 		void stateChanged(void);		// Emulation state changed. Update the Gens title.
-		void updateVideo(void);			// Update the video widget in GensWindow.
 		
 		/**
 		 * osdPrintMsg(): Print a message on the OSD.
@@ -160,6 +167,18 @@ class EmuManager : public QObject
 			loadRom_int(m_loadRom_int_tmr_rom);
 			m_loadRom_int_tmr_rom = NULL;
 		}
+	
+	/** Video Backend. **/
+	public:
+		void setVBackend(VBackend *vBackend);
+		VBackend *vBackend(void)
+			{ return m_vBackend; }
+		void updateVBackend(void);
+	private:
+		// Video Backend.
+		VBackend *m_vBackend;
+	private slots:
+		void vBackend_destroyed(QObject *obj);
 	
 	/** Translatable string functions. **/
 	

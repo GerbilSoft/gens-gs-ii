@@ -82,6 +82,7 @@ GensWindow::GensWindow()
 	// Make sure all user configuration settings are applied.
 	// (Lock the OSD first to prevent random messages from appearing.)
 	m_vBackend->osd_lock();
+	// TODO: Emit configuration settings from ConfigStore?
 	m_vBackend->osd_unlock();
 	
 	// Initialize the emulation state.
@@ -142,6 +143,7 @@ void GensWindow::setupUi(void)
 	// Create the Video Backend.
 	// TODO: Allow selection of all available VBackend classes.
 	m_vBackend = new GensQGLWidget(this->centralwidget, m_keyHandler);
+	m_emuManager->setVBackend(m_vBackend);
 	
 	// Create the layout.
 	layout = new QVBoxLayout(this->centralwidget);
@@ -165,8 +167,6 @@ void GensWindow::setupUi(void)
 		this, SLOT(updateFps(double)));
 	connect(m_emuManager, SIGNAL(stateChanged(void)),
 		this, SLOT(stateChanged(void)));
-	connect(m_emuManager, SIGNAL(updateVideo(void)),
-		this, SLOT(updateVideo(void)));
 	connect(m_emuManager, SIGNAL(osdPrintMsg(int, QString)),
 		this, SLOT(osdPrintMsg(int, QString)));
 	connect(m_emuManager, SIGNAL(osdShowPreview(int, QImage)),
@@ -719,7 +719,7 @@ void GensWindow::idleThread_frameDone(void)
 		return;
 	
 	// Update video.
-	emit updateVideo();
+	m_emuManager->updateVBackend();
 	
 	// Resume the idle thread.
 	m_idleThread->resume();
@@ -743,7 +743,7 @@ void GensWindow::introStyle_changed_slot(const QVariant& newIntroStyle)
 	{
 		// Intro style was changed to "None", and emulation isn't running.
 		// Clear the screen.
-		updateVideo();
+		m_emuManager->updateVBackend();
 	}
 }
 

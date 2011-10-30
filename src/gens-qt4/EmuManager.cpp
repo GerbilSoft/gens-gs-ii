@@ -72,8 +72,9 @@
 namespace GensQt4
 {
 
-EmuManager::EmuManager(QObject *parent)
+EmuManager::EmuManager(QObject *parent, VBackend *vBackend)
 	: QObject(parent)
+	, m_vBackend(vBackend)
 {
 	// Initialize timing information.
 	m_lastTime = 0.0;
@@ -83,6 +84,13 @@ EmuManager::EmuManager(QObject *parent)
 	// No ROM is loaded at startup.
 	m_rom = NULL;
 	m_paused.data = 0;
+	
+	// If a video backend is specified, connect its destroyed() signal.
+	if (m_vBackend)
+	{
+		connect(m_vBackend, SIGNAL(destroyed(QObject*)),
+			this, SLOT(vBackend_destroyed(QObject*)));
+	}
 	
 	// Save slot.
 	// TODO: Move saveSlot validation intn ConfigStore
@@ -600,7 +608,7 @@ int EmuManager::closeRom(bool emitStateChanged)
 		{
 			// Intro Effect is disabled.
 			// Clear the screen.
-			emit updateVideo();
+			updateVBackend();
 		}
 		
 		// Update the Gens title.
@@ -745,9 +753,9 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 		gqt4_config->m_ctrlConfig->clearDirty();
 	}
 	
-	// Update the GensQGLWidget.
+	// Update the Video Backend.
 	if (!wasFastFrame)
-		emit updateVideo();
+		updateVBackend();
 	
 	// If emulation is paused, don't resume the emulation thread.
 	if (m_paused.data)
@@ -797,6 +805,55 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	// Tell the emulation thread that we're ready for another frame.
 	if (gqt4_emuThread)
 		gqt4_emuThread->resume(doFastFrame);
+}
+
+/** Video Backend. **/
+
+/**
+ * Set the Video Backend.
+ * @param vBackend Video Backend.
+ */
+void EmuManager::setVBackend(VBackend *vBackend)
+{
+	if (m_vBackend)
+	{
+		// Disconnect the destroyed() signal from the current VBackend.
+		disconnect(m_vBackend, SIGNAL(destroyed(QObject*)),
+			   this, SLOT(vBackend_destroyed(QObject*)));
+	}
+	
+	// Save the new Video Backend.
+	m_vBackend = vBackend;
+	
+	if (m_vBackend)
+	{
+		// Connect the destroyed() signal to the new VBackend.
+		connect(m_vBackend, SIGNAL(destroyed(QObject*)),
+			this, SLOT(vBackend_destroyed(QObject*)));
+	}
+}
+
+/**
+ * Video Backend was destroyed.
+ * @param obj VBackend object.
+ */
+void EmuManager::vBackend_destroyed(QObject *obj)
+{
+	if (m_vBackend == obj)
+		m_vBackend = NULL;
+}
+
+/**
+ * Update the Video Backend.
+ */
+void EmuManager::updateVBackend(void)
+{
+	if (!m_vBackend)
+		return;
+	
+	m_vBackend->setMdScreenDirty();
+	m_vBackend->setVbDirty();
+	m_vBackend->vbUpdate();
 }
 
 }
