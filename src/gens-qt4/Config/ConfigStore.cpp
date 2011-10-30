@@ -171,12 +171,20 @@ class ConfigStorePrivate
 		void notifyAll(void);
 		
 		/**
-		 * Invoke a Qt method by SIGNAL() or SLOT() name, with one QVariant parameter.
+		 * Look up the method index of a SIGNAL() or SLOT() in a QObject.
 		 * @param object Qt object.
 		 * @param method Method name.
+		 * @return Method index, or negative on error.
+		 */
+		static int LookupQtMethod(const QObject *object, const char *method);
+		
+		/**
+		 * Invoke a Qt method by method index, with one QVariant parameter.
+		 * @param object Qt object.
+		 * @param method_idx Method index.
 		 * @param param QVariant parameter.
 		 */
-		static void InvokeQtMethod(QObject *object, const char *method, QVariant param);
+		static void InvokeQtMethod(QObject *object, int method_idx, QVariant param);
 	
 		/** Internal variables. **/
 		
@@ -238,7 +246,7 @@ class ConfigStorePrivate
 		struct SignalMap
 		{
 			QPointer<QObject> object;
-			const char *method;
+			int method_idx;
 		};
 		QHash<QString, QVector<SignalMap>* > signalMaps;
 		QMutex mtxSignalMaps;
@@ -430,11 +438,15 @@ void ConfigStorePrivate::registerChangeNotification(const QString& property, QOb
 		signalMaps.insert(property, signalMapVector);
 	}
 	
+	// Look up the method index.
+	int method_idx = LookupQtMethod(object, method);
+	if (method_idx < 0)
+		return;
+	
 	// Add this object and slot to the signal maps vector.
-	// TODO: Validate and normalize the slot name?
 	SignalMap smap;
 	smap.object = object;
-	smap.method = method;
+	smap.method_idx = method_idx;
 	signalMapVector->append(smap);
 }
 
@@ -456,6 +468,15 @@ void ConfigStorePrivate::unregisterChangeNotification(const QString& property, Q
 	if (!signalMapVector)
 		return;
 	
+	// Get the method index.
+	int method_idx = -1;
+	if (method != NULL)
+	{
+		method_idx = LookupQtMethod(object, method);
+		if (method_idx < 0)
+			return;
+	}
+	
 	// Process the signal map vector in reverse-order.
 	// Reverse order makes it easier to remove deleted objects.
 	// TODO: Use QLinkedList instead?
@@ -467,7 +488,7 @@ void ConfigStorePrivate::unregisterChangeNotification(const QString& property, Q
 		else if (smap->object == object)
 		{
 			// Found the object.
-			if (method == NULL || method == smap->method)
+			if (method == NULL || method_idx == smap->method_idx)
 			{
 				// Found a matching signal map.
 				signalMapVector->remove(i);
@@ -647,7 +668,7 @@ void ConfigStorePrivate::set(const QString& key, const QVariant& value)
 		else
 		{
 			// Invoke this method.
-			InvokeQtMethod(smap->object, smap->method, newValue);
+			InvokeQtMethod(smap->object, smap->method_idx, newValue);
 		}
 	}
 }
@@ -871,7 +892,7 @@ void ConfigStorePrivate::notifyAll(void)
 			else
 			{
 				// Invoke this method.
-				InvokeQtMethod(smap->object, smap->method, value);
+				InvokeQtMethod(smap->object, smap->method_idx, value);
 			}
 		}
 	}
@@ -879,12 +900,12 @@ void ConfigStorePrivate::notifyAll(void)
 
 
 /**
- * Invoke a Qt method by SIGNAL() or SLOT() name, with one QVariant parameter.
+ * Look up the method index of a SIGNAL() or SLOT() in a QObject.
  * @param object Qt object.
  * @param method Method name.
- * @param param QVariant parameter.
+ * @return Method index, or negative on error.
  */
-void ConfigStorePrivate::InvokeQtMethod(QObject *object, const char *method, QVariant param)
+int ConfigStorePrivate::LookupQtMethod(const QObject *object, const char *method)
 {
 	// Based on QMetaObject::invokeMethod().
 	
@@ -905,10 +926,23 @@ void ConfigStorePrivate::InvokeQtMethod(QObject *object, const char *method, QVa
 		LOG_MSG(gens, LOG_MSG_LEVEL_WARNING,
 			"No such method %s::%s",
 			object->metaObject()->className(), method);
-		return;
+		return -1;
 	}
 	
-	QMetaMethod metaMethod = object->metaObject()->method(idx);
+	// Method index found.
+	return idx;
+}
+
+/**
+ * Invoke a Qt method by method index, with one QVariant parameter.
+ * @param object Qt object.
+ * @param method_idx Method index.
+ * @param param QVariant parameter.
+ */
+void ConfigStorePrivate::InvokeQtMethod(QObject *object, int method_idx, QVariant param)
+{
+	// Based on QMetaObject::invokeMethod().
+	QMetaMethod metaMethod = object->metaObject()->method(method_idx);
 	metaMethod.invoke(object, Qt::AutoConnection,
 		      QGenericReturnArgument(), Q_ARG(QVariant, param));
 }
