@@ -33,6 +33,7 @@
 #include <QtCore/QString>
 #include <QtGui/QImage>
 class QIODevice;
+class QImageWriter;
 
 namespace GensQt4
 {
@@ -55,6 +56,7 @@ class Screenshot : public QObject
 		QImage m_img;
 		
 		void update(void);
+		int save_int(QImageWriter& writer);
 };
 
 /**

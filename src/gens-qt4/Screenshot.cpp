@@ -28,6 +28,7 @@
 #include "libgens/Vdp/VdpPalette.hpp"
 
 // Qt includes.
+#include <QtCore/QDateTime>
 #include <QtGui/QImageWriter>
 
 namespace GensQt4
@@ -107,9 +108,8 @@ int Screenshot::save(QString filename)
 	if (m_img.isNull())
 		return -1;
 	
-	QImageWriter imgWriter(filename, "png");
-	imgWriter.write(m_img);
-	return 0;
+	QImageWriter writer(filename, "png");
+	return save_int(writer);
 }
 
 
@@ -123,8 +123,21 @@ int Screenshot::save(QIODevice *device)
 	if (m_img.isNull())
 		return -1;
 	
-	QImageWriter imgWriter(device, "png");
-	imgWriter.write(m_img);
+	QImageWriter writer(device, "png");
+	return save_int(writer);
+}
+
+
+/**
+ * Save the image using a QImageWriter.
+ * @param writer QImageWriter.
+ * @return 0 on success; non-zero on error.
+ */
+int Screenshot::save_int(QImageWriter& writer)
+{
+	// TODO: Figure out what should be saved in the Description field.
+	// TODO: Save extra data.
+	writer.write(m_img);
 	return 0;
 }
 
