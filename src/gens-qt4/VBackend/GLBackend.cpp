@@ -71,10 +71,8 @@ GLBackend::GLBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 
 GLBackend::~GLBackend()
 {
-	/* TODO
 	if (m_fb)
 		m_fb->unref();
-	*/
 	if (m_tex > 0)
 		glDeleteTextures(1, &m_tex);
 	if (m_texOsd)

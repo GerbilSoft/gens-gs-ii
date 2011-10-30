@@ -68,11 +68,11 @@ void GensQGLWidget::vbUpdate(void)
 		if (m_fb != m_emuContext->m_vdp->MD_Screen)
 		{
 			// Framebuffer has changed.
-			//if (m_fb)
-			//	m_fb->unref();	// TODO
+			if (m_fb)
+				m_fb->unref();	// TODO
 			m_fb = m_emuContext->m_vdp->MD_Screen;
-			//if (m_fb)
-			//	m_fb->ref();	// TODO
+			if (m_fb)
+				m_fb->ref();	// TODO
 			m_mdScreenDirty = true;
 		}
 		
@@ -82,8 +82,8 @@ void GensQGLWidget::vbUpdate(void)
 	else
 	{
 		// No emulation context. Clear the framebuffer.
-		//if (m_fb)
-		//	m_fb->unref();	// TODO
+		if (m_fb)
+			m_fb->unref();	// TODO
 		m_fb = NULL;
 	}
 	
