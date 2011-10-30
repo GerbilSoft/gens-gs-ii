@@ -1056,6 +1056,13 @@ QString ConfigStore::configPath(void) const
 QString ConfigStore::configPath(PathConfig::ConfigPath path) const
 	{ return d->pathConfig->configPath(path); }
 
+/**
+ * Get a const pointer to the PathConfig object.
+ * @return Const pointer to the PathConfig object.
+ */
+const PathConfig *ConfigStore::pathConfigObject(void) const
+	{ return d->pathConfig; }
+
 
 /** Recent ROMs. **/
 

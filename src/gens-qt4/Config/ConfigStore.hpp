@@ -154,6 +154,12 @@ class ConfigStore : public QObject
 		 */
 		QString configPath(PathConfig::ConfigPath path) const;
 		
+		/**
+		 * Get a const pointer to the PathConfig object.
+		 * @return Const pointer to the PathConfig object.
+		 */
+		const PathConfig *pathConfigObject(void) const;
+		
 		/** Recent ROMs. **/
 		
 		/**
