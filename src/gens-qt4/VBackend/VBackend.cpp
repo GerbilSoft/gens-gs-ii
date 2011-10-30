@@ -134,7 +134,7 @@ VBackend::~VBackend()
 {
 	// Delete internal objects.
 	delete m_msgTimer;	// Message timer.
-	delete m_intScreen;	// Internal screen buffer.
+	m_intScreen->unref();	// Internal screen buffer.
 }
 
 

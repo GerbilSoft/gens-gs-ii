@@ -1567,13 +1567,13 @@ void Vdp::Render_Line_m5(void)
 		// TODO: Only clear this if the option changes or V/H mode changes.
 		if (m_palette.bpp() != VdpPalette::BPP_32)
 		{
-			memset(MD_Screen.lineBuf16(LineStart), 0x00,
-				(MD_Screen.pxPerLine() * sizeof(uint16_t)));
+			memset(MD_Screen->lineBuf16(LineStart), 0x00,
+				(MD_Screen->pxPerLine() * sizeof(uint16_t)));
 		}
 		else
 		{
-			memset(MD_Screen.lineBuf32(LineStart), 0x00,
-				(MD_Screen.pxPerLine() * sizeof(uint32_t)));
+			memset(MD_Screen->lineBuf32(LineStart), 0x00,
+				(MD_Screen->pxPerLine() * sizeof(uint32_t)));
 		}
 		
 		// ...and we're done here.
@@ -1654,7 +1654,7 @@ void Vdp::Render_Line_m5(void)
 	// TODO: Optimize SMS LCB handling. (maybe use Linux's unlikely() macro?)
 	if (m_palette.bpp() != VdpPalette::BPP_32)
 	{
-		uint16_t *lineBuf16 = MD_Screen.lineBuf16(LineStart);
+		uint16_t *lineBuf16 = MD_Screen->lineBuf16(LineStart);
 		T_Render_LineBuf<uint16_t>(lineBuf16, m_palette.m_palActive.u16);
 		
 		if (VDP_Reg.m5.Set1 & 0x20)
@@ -1666,7 +1666,7 @@ void Vdp::Render_Line_m5(void)
 	}
 	else
 	{
-		uint32_t *lineBuf32 = MD_Screen.lineBuf32(LineStart);
+		uint32_t *lineBuf32 = MD_Screen->lineBuf32(LineStart);
 		T_Render_LineBuf<uint32_t>(lineBuf32, m_palette.m_palActive.u32);
 		
 		if (VDP_Reg.m5.Set1 & 0x20)

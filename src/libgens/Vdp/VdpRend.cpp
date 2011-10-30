@@ -57,7 +57,7 @@ void Vdp::rend_end(void)
 void Vdp::rend_reset(void)
 {
 	// Clear MD_Screen.
-	memset(&MD_Screen, 0x00, sizeof(MD_Screen));
+	MD_Screen->clear();
 	
 	// Reset the active palettes.
 	// TODO: Handle VDP_LAYER_PALETTE_LOCK in VdpPalette.

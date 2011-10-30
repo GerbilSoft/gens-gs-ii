@@ -441,19 +441,19 @@ void Vdp::Render_Line_Err(void)
 		switch (m_palette.bpp())
 		{
 			case VdpPalette::BPP_15:
-				d_err->T_DrawColorBars<uint16_t>(&MD_Screen, VdpRend_Err_Private::ColorBarsPalette_15);
-				d_err->T_DrawVDPErrorMessage<uint16_t, 0x7FFF>(&MD_Screen);
+				d_err->T_DrawColorBars<uint16_t>(MD_Screen, VdpRend_Err_Private::ColorBarsPalette_15);
+				d_err->T_DrawVDPErrorMessage<uint16_t, 0x7FFF>(MD_Screen);
 				break;
 			
 			case VdpPalette::BPP_16:
-				d_err->T_DrawColorBars<uint16_t>(&MD_Screen, VdpRend_Err_Private::ColorBarsPalette_16);
-				d_err->T_DrawVDPErrorMessage<uint16_t, 0xFFFF>(&MD_Screen);
+				d_err->T_DrawColorBars<uint16_t>(MD_Screen, VdpRend_Err_Private::ColorBarsPalette_16);
+				d_err->T_DrawVDPErrorMessage<uint16_t, 0xFFFF>(MD_Screen);
 				break;
 			
 			case VdpPalette::BPP_32:
 			default:
-				d_err->T_DrawColorBars<uint32_t>(&MD_Screen, VdpRend_Err_Private::ColorBarsPalette_32);
-				d_err->T_DrawVDPErrorMessage<uint32_t, 0xFFFFFF>(&MD_Screen);
+				d_err->T_DrawColorBars<uint32_t>(MD_Screen, VdpRend_Err_Private::ColorBarsPalette_32);
+				d_err->T_DrawVDPErrorMessage<uint32_t, 0xFFFFFF>(MD_Screen);
 				break;
 		}
 		
@@ -480,9 +480,9 @@ void Vdp::Render_Line_Err(void)
 		{
 			// Update the color bar borders.
 			if (m_palette.bpp() != VdpPalette::BPP_32)
-				d_err->T_DrawColorBars_Border<uint16_t>(&MD_Screen, (uint16_t)newBorderColor);
+				d_err->T_DrawColorBars_Border<uint16_t>(MD_Screen, (uint16_t)newBorderColor);
 			else
-				d_err->T_DrawColorBars_Border<uint32_t>(&MD_Screen, newBorderColor);
+				d_err->T_DrawColorBars_Border<uint32_t>(MD_Screen, newBorderColor);
 		}
 		
 		// Save the new border color.

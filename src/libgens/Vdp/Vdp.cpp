@@ -49,7 +49,8 @@ VdpTypes::VdpEmuOptions_t Vdp::VdpEmuOptions =
  * Vdp::Vdp(): Initialize the VDP subsystem.
  */
 Vdp::Vdp()
-	: d_err(new VdpRend_Err_Private(this))
+	: MD_Screen(new MdFb())
+	, d_err(new VdpRend_Err_Private(this))
 {
 	// Initialize the Horizontal Counter table.
 	unsigned int hc_val;
@@ -88,6 +89,9 @@ Vdp::~Vdp(void)
 {
 	// Shut down the VDP rendering subsystem.
 	rend_end();
+	
+	// Unreference the framebuffer.
+	MD_Screen->unref();
 }
 
 

@@ -65,12 +65,12 @@ void GensQGLWidget::vbUpdate(void)
 	if (m_emuContext)
 	{
 		// Save the framebuffer.
-		if (m_fb != &m_emuContext->m_vdp->MD_Screen)
+		if (m_fb != m_emuContext->m_vdp->MD_Screen)
 		{
 			// Framebuffer has changed.
 			//if (m_fb)
 			//	m_fb->unref();	// TODO
-			m_fb = &m_emuContext->m_vdp->MD_Screen;
+			m_fb = m_emuContext->m_vdp->MD_Screen;
 			//if (m_fb)
 			//	m_fb->ref();	// TODO
 			m_mdScreenDirty = true;

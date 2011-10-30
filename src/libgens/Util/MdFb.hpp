@@ -24,8 +24,12 @@
 #ifndef __LIBGENS_UTIL_MDFB_HPP__
 #define __LIBGENS_UTIL_MDFB_HPP__
 
+// C includes. (C++ namespace)
+#include <cassert>
+#include <cstring>
+
+// C includes.
 #include <stdint.h>
-#include <assert.h>
 
 namespace LibGens
 {
@@ -33,6 +37,18 @@ namespace LibGens
 class MdFb
 {
 	public:
+		MdFb() : m_refcnt(1) { }
+		void ref(void);
+		void unref(void);
+	
+	private:
+		~MdFb() { }
+		int m_refcnt;
+	
+	public:
+		// Clear the screen.
+		void clear(void);
+		
 		// Line access.
 		uint16_t *lineBuf16(int line);
 		const uint16_t *lineBuf16(int line) const;
@@ -108,6 +124,31 @@ class MdFb
 		FB_t m_fb;
 };
 
+
+/** Reference counter. **/
+
+inline void MdFb::ref(void)
+{
+	// TODO: Use atomic access?
+	m_refcnt++;
+}
+
+inline void MdFb::unref(void)
+{
+	// TODO: Use atomic access?
+	assert(m_refcnt > 0);
+	m_refcnt--;
+	if (m_refcnt <= 0)
+		delete this;
+}
+
+/**
+ * Clear the screen.
+ */
+inline void MdFb::clear(void)
+{
+	memset(&m_fb, 0x00, sizeof(m_fb));
+}
 
 /** Line access. **/
 

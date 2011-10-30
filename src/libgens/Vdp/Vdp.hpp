@@ -394,7 +394,7 @@ class Vdp
 		VdpPalette m_palette;
 		
 		// MD framebuffer.
-		MdFb MD_Screen;
+		MdFb *MD_Screen;
 	
 	public:
 		// VDP layer control.

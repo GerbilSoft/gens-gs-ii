@@ -254,7 +254,7 @@ Test_SpriteMaskTestRom::SpriteTestResult Test_SpriteMaskTestRom::checkSpriteTest
 	const int y = (48 + 8 + ((test-1) * 8));
 	
 	// Check the pixel color in the framebuffer.
-	const uint32_t px = m_vdp->MD_Screen.lineBuf32(y)[x];
+	const uint32_t px = m_vdp->MD_Screen->lineBuf32(y)[x];
 	const uint8_t b = (px & 0xFF);
 	const uint8_t g = ((px >> 8) & 0xFF);
 	const uint8_t r = ((px >> 16) & 0xFF);
