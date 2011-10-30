@@ -429,8 +429,10 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	
 	// Create a new MD emulation context.
 	// FIXME: Delete gqt4_emuContext after VBackend is finished using it. (MEMORY LEAK)
-	//delete gqt4_emuContext;
+	m_vBackend->setEmuContext(NULL);
+	delete gqt4_emuContext;
 	gqt4_emuContext = new LibGens::EmuMD(rom, lg_region);
+	m_vBackend->setEmuContext(gqt4_emuContext);
 	rom->close();	// TODO: Let EmuMD handle this...
 	
 	if (!gqt4_emuContext->isRomOpened())
@@ -439,6 +441,7 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 		// TODO: EmuMD error code constants.
 		// TODO: Show an error message.
 		fprintf(stderr, "Error: Initialization of gqt4_emuContext failed. (TODO: Error code.)\n");
+		m_vBackend->setEmuContext(NULL);
 		delete gqt4_emuContext;
 		gqt4_emuContext = NULL;
 		delete rom;
@@ -584,7 +587,8 @@ int EmuManager::closeRom(bool emitStateChanged)
 		
 		// Delete the emulation context.
 		// FIXME: Delete gqt4_emuContext after VBackend is finished using it. (MEMORY LEAK)
-		//delete gqt4_emuContext;
+		m_vBackend->setEmuContext(NULL);
+		delete gqt4_emuContext;
 		gqt4_emuContext = NULL;
 		
 		// Delete the Rom instance.
