@@ -71,7 +71,7 @@ class ConfigStore : public QObject
 		 * @param key Property name.
 		 * @return Property value.
 		 */
-		QVariant get(const QString& key);
+		QVariant get(const QString& key) const;
 		
 		/**
 		 * Get a property.
@@ -79,7 +79,7 @@ class ConfigStore : public QObject
 		 * @param key Property name.
 		 * @return Property value.
 		 */
-		unsigned int getUInt(const QString& key);
+		unsigned int getUInt(const QString& key) const;
 		
 		/**
 		 * Get a property.
@@ -87,7 +87,7 @@ class ConfigStore : public QObject
 		 * @param key Property name.
 		 * @return Property value.
 		 */
-		int getInt(const QString& key);
+		int getInt(const QString& key) const;
 		
 		/**
 		 * Load the configuration file.
@@ -108,14 +108,14 @@ class ConfigStore : public QObject
 		 * @param filename Filename.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int save(const QString& filename);
+		int save(const QString& filename) const;
 		
 		/**
 		 * Save the configuration file.
 		 * No filename specified; use the default filename.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int save(void);
+		int save(void) const;
 		
 		/**
 		 * Register an object for property change notification.
@@ -139,18 +139,20 @@ class ConfigStore : public QObject
 		 */
 		void notifyAll(void);
 		
+		/** Configuration Paths. **/
+		
 		/**
 		 * Get the main configuration path. (GCPATH_CONFIG)
 		 * @return Main configuration path.
 		 */
-		QString configPath(void);
+		QString configPath(void) const;
 		
 		/**
 		 * Get the specified configuration path.
 		 * @param path Configuration path to get. (Invalid paths act like GCPATH_CONFIG.)
 		 * @return Configuration path.
 		 */
-		QString configPath(PathConfig::ConfigPath path);
+		QString configPath(PathConfig::ConfigPath path) const;
 		
 		/** Recent ROMs. **/
 		
@@ -167,13 +169,13 @@ class ConfigStore : public QObject
 		 * Get a const pointer to the Recent ROMs object.
 		 * @return Const pointer to the Recent ROMs object.
 		 */
-		const RecentRoms *recentRomsObject(void);
+		const RecentRoms *recentRomsObject(void) const;
 		
 		/**
 		 * Get a Recent ROMs entry.
 		 * @param id Recent ROM ID.
 		 */
-		RecentRom_t recentRomsEntry(int id);
+		RecentRom_t recentRomsEntry(int id) const;
 		
 		/** Key configuration. **/
 		
@@ -182,14 +184,14 @@ class ConfigStore : public QObject
 		 * @param key GensKey_t.
 		 * @return Action ID.
 		 */
-		int keyToAction(GensKey_t key);
+		int keyToAction(GensKey_t key) const;
 		
 		/**
 		 * Get the GensKey_t associated with an action.
 		 * @param actoin Action ID.
 		 * @return GensKey_t.
 		 */
-		GensKey_t actionToKey(int action);
+		GensKey_t actionToKey(int action) const;
 };
 
 }

@@ -202,7 +202,7 @@ GensKeyConfig::~GensKeyConfig()
  * @param key GensKey_t value. (WITH MODIFIERS)
  * @return Action, or 0 if no action was found.
  */
-int GensKeyConfig::keyToAction(GensKey_t key)
+int GensKeyConfig::keyToAction(GensKey_t key) const
 {
 	return d->hashKeyToAction.value(key, 0);
 }
@@ -213,7 +213,7 @@ int GensKeyConfig::keyToAction(GensKey_t key)
  * @param action Action value.
  * @return GensKey_t (WITH MODIFIERS), or 0 if no key was found.
  */
-int GensKeyConfig::actionToKey(int action)
+int GensKeyConfig::actionToKey(int action) const
 {
 	return d->hashActionToKey.value(action, 0);
 }
@@ -253,7 +253,7 @@ int GensKeyConfig::load(const QSettings *qSettings)
  * @param qSettings Settings file.
  * @return 0 on success; non-zero on error.
  */
-int GensKeyConfig::save(QSettings *qSettings)
+int GensKeyConfig::save(QSettings *qSettings) const
 {
 	// Save the key configuration.
 	for (const GensKeyConfigPrivate::DefKeySetting_t *key = &d->DefKeySettings[0];

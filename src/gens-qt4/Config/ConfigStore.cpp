@@ -102,7 +102,7 @@ class ConfigStorePrivate
 		 * @param key Property name.
 		 * @return Property value.
 		 */
-		QVariant get(const QString& key);
+		QVariant get(const QString& key) const;
 		
 		/**
 		 * Get a property.
@@ -110,7 +110,7 @@ class ConfigStorePrivate
 		 * @param key Property name.
 		 * @return Property value.
 		 */
-		unsigned int getUInt(const QString& key);
+		unsigned int getUInt(const QString& key) const;
 		
 		/**
 		 * Get a property.
@@ -118,7 +118,7 @@ class ConfigStorePrivate
 		 * @param key Property name.
 		 * @return Property value.
 		 */
-		int getInt(const QString& key);
+		int getInt(const QString& key) const;
 		
 		/**
 		 * Load the configuration file.
@@ -139,14 +139,14 @@ class ConfigStorePrivate
 		 * @param filename Configuration filename.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int save(const QString& filename);
+		int save(const QString& filename) const;
 		
 		/**
 		 * Save the configuration file.
 		 * No filename specified; use the default filename.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int save(void);
+		int save(void) const;
 		
 		/**
 		 * Register an object for property change notification.
@@ -651,7 +651,7 @@ void ConfigStorePrivate::set(const QString& key, const QVariant& value)
  * @param key Property name.
  * @return Property value.
  */
-QVariant ConfigStorePrivate::get(const QString& key)
+QVariant ConfigStorePrivate::get(const QString& key) const
 {
 #ifndef NDEBUG
 	// Make sure this property exists.
@@ -674,7 +674,7 @@ QVariant ConfigStorePrivate::get(const QString& key)
  * @param key Property name.
  * @return Property value.
  */
-unsigned int ConfigStorePrivate::getUInt(const QString& key)
+unsigned int ConfigStorePrivate::getUInt(const QString& key) const
 	{ return get(key).toString().toUInt(NULL, 0); }
 
 /**
@@ -683,7 +683,7 @@ unsigned int ConfigStorePrivate::getUInt(const QString& key)
  * @param key Property name.
  * @return Property value.
  */
-int ConfigStorePrivate::getInt(const QString& key)
+int ConfigStorePrivate::getInt(const QString& key) const
 	{ return get(key).toString().toInt(NULL, 0); }
 
 
@@ -755,7 +755,7 @@ int ConfigStorePrivate::load(void)
  * @param filename Configuration filename.
  * @return 0 on success; non-zero on error.
  */
-int ConfigStorePrivate::save(const QString& filename)
+int ConfigStorePrivate::save(const QString& filename) const
 {
 	QSettings qSettings(filename, QSettings::IniFormat);
 	
@@ -835,7 +835,7 @@ int ConfigStorePrivate::save(const QString& filename)
  * No filename specified; use the default filename.
  * @return 0 on success; non-zero on error.
  */
-int ConfigStorePrivate::save(void)
+int ConfigStorePrivate::save(void) const
 {
 	const QString cfgFilename = (pathConfig->configPath() + QLatin1String(DefaultConfigFilename));
 	return save(cfgFilename);
@@ -960,7 +960,7 @@ void ConfigStore::set(const QString& key, const QVariant& value)
  * @param key Property name.
  * @return Property value.
  */
-QVariant ConfigStore::get(const QString& key)
+QVariant ConfigStore::get(const QString& key) const
 	{ return d->get(key); }
 
 /**
@@ -969,7 +969,7 @@ QVariant ConfigStore::get(const QString& key)
  * @param key Property name.
  * @return Property value.
  */
-unsigned int ConfigStore::getUInt(const QString& key)
+unsigned int ConfigStore::getUInt(const QString& key) const
 	{ return d->getUInt(key); }
 
 /**
@@ -978,7 +978,7 @@ unsigned int ConfigStore::getUInt(const QString& key)
  * @param key Property name.
  * @return Property value.
  */
-int ConfigStore::getInt(const QString& key)
+int ConfigStore::getInt(const QString& key) const
 	{ return d->getInt(key); }
 
 
@@ -1004,7 +1004,7 @@ int ConfigStore::load(void)
  * @param filename Filename.
  * @return 0 on success; non-zero on error.
  */
-int ConfigStore::save(const QString& filename)
+int ConfigStore::save(const QString& filename) const
 	{ return d->save(filename); }
 
 /**
@@ -1012,7 +1012,7 @@ int ConfigStore::save(const QString& filename)
  * No filename specified; use the default filename.
  * @return 0 on success; non-zero on error.
  */
-int ConfigStore::save(void)
+int ConfigStore::save(void) const
 	{ return d->save(); }
 
 
@@ -1045,7 +1045,7 @@ void ConfigStore::notifyAll(void)
  * Get the main configuration path. (GCPATH_CONFIG)
  * @return Main configuration path.
  */
-QString ConfigStore::configPath(void)
+QString ConfigStore::configPath(void) const
 	{ return d->pathConfig->configPath(); }
 
 /**
@@ -1053,7 +1053,7 @@ QString ConfigStore::configPath(void)
  * @param path Configuration path to get. (Invalid paths act like GCPATH_CONFIG.)
  * @return Configuration path.
  */
-QString ConfigStore::configPath(PathConfig::ConfigPath path)
+QString ConfigStore::configPath(PathConfig::ConfigPath path) const
 	{ return d->pathConfig->configPath(path); }
 
 
@@ -1075,14 +1075,14 @@ void ConfigStore::recentRomsUpdate(QString filename, QString z_filename,
  * Get a const pointer to the Recent ROMs object.
  * @return Const pointer to the Recent ROMs object.
  */
-const RecentRoms *ConfigStore::recentRomsObject(void)
+const RecentRoms *ConfigStore::recentRomsObject(void) const
 	{ return d->recentRoms; }
 
 /**
  * Get a Recent ROMs entry.
  * @param id Recent ROM ID.
  */
-RecentRom_t ConfigStore::recentRomsEntry(int id)
+RecentRom_t ConfigStore::recentRomsEntry(int id) const
 	{ return d->recentRoms->getRom(id); }
 
 
@@ -1093,7 +1093,7 @@ RecentRom_t ConfigStore::recentRomsEntry(int id)
  * @param key GensKey_t.
  * @return Action ID.
  */
-int ConfigStore::keyToAction(GensKey_t key)
+int ConfigStore::keyToAction(GensKey_t key) const
 	{ return d->keyConfig.keyToAction(key); }
 
 /**
@@ -1101,7 +1101,7 @@ int ConfigStore::keyToAction(GensKey_t key)
  * @param actoin Action ID.
  * @return GensKey_t.
  */
-GensKey_t ConfigStore::actionToKey(int action)
+GensKey_t ConfigStore::actionToKey(int action) const
 	{ return d->keyConfig.actionToKey(action); }
 
 }
