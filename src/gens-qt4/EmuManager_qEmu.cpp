@@ -151,7 +151,7 @@ void EmuManager::saveState(void)
 	
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_SAVE_STATE;
-	rq.saveState.filename = strdup(filename.toUtf8().constData());
+	rq.saveState.filename = new QString(filename);
 	rq.saveState.saveSlot = m_saveSlot;
 	m_qEmuRequest.enqueue(rq);
 	
@@ -172,7 +172,7 @@ void EmuManager::loadState(void)
 	
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_LOAD_STATE;
-	rq.saveState.filename = strdup(filename.toUtf8().constData());
+	rq.saveState.filename = new QString(filename);
 	rq.saveState.saveSlot = m_saveSlot;
 	m_qEmuRequest.enqueue(rq);
 	
@@ -452,14 +452,14 @@ void EmuManager::processQEmuRequest(void)
 			
 			case EmuRequest_t::RQT_SAVE_STATE:
 				// Save a savestate.
-				doSaveState(rq.saveState.filename, rq.saveState.saveSlot);
-				free(rq.saveState.filename);
+				doSaveState(*rq.saveState.filename, rq.saveState.saveSlot);
+				delete rq.saveState.filename;
 				break;
 			
 			case EmuRequest_t::RQT_LOAD_STATE:
 				// Load a savestate.
-				doLoadState(rq.saveState.filename, rq.saveState.saveSlot);
-				free(rq.saveState.filename);
+				doLoadState(*rq.saveState.filename, rq.saveState.saveSlot);
+				delete rq.saveState.filename;
 				break;
 			
 			case EmuRequest_t::RQT_SAVE_SLOT:
@@ -569,7 +569,7 @@ void EmuManager::doScreenShot(void)
 	// Add the current directory, number, and .png extension.
 	// TODO: Enumerate QImageWriter for supported image formats.
 	const QString scrFilenamePrefix =
-		gqt4_config->userPath(GensConfig::GCPATH_SCREENSHOTS) + QChar(L'/') + romFilename;
+		gqt4_cfg->configPath(PathConfig::GCPATH_SCREENSHOTS) + romFilename;
 	const QString scrFilenameSuffix = QLatin1String(".png");
 	QString scrFilename;
 	int scrNumber = -1;
@@ -639,7 +639,7 @@ void EmuManager::doAudioStereo(bool newStereo)
  * @param filename Filename.
  * @param saveSlot Save slot number. (0-9)
  */
-void EmuManager::doSaveState(const char *filename, int saveSlot)
+void EmuManager::doSaveState(const QString& filename, int saveSlot)
 {
 	// Create the preview image.
 	QImage img = getMDScreen();
@@ -648,13 +648,14 @@ void EmuManager::doSaveState(const char *filename, int saveSlot)
 	imgWriter.write(img);
 	
 	// Save the ZOMG file.
-	int ret = LibGens::ZomgSave(filename,			// ZOMG filename.
+	const QString nativeFilename = QDir::toNativeSeparators(filename);
+	int ret = LibGens::ZomgSave(
+				nativeFilename.toUtf8().constData(),	// ZOMG filename.
 				gqt4_emuContext,		// Emulation context.
 				imgBuf.buffer().constData(),	// Preview image.
 				imgBuf.buffer().size()		// Size of preview image.
 				);
 	
-	QString sFilename = QString::fromUtf8(filename);
 	QString osdMsg;
 	
 	if (ret == 0)
@@ -668,7 +669,7 @@ void EmuManager::doSaveState(const char *filename, int saveSlot)
 		else
 		{
 			//: OSD message indicating a savestate has been saved using a specified filename
-			osdMsg = tr("State saved in %1", "osd").arg(sFilename);
+			osdMsg = tr("State saved in %1", "osd").arg(nativeFilename);
 		}
 	}
 	else
@@ -688,12 +689,14 @@ void EmuManager::doSaveState(const char *filename, int saveSlot)
  * @param filename Filename.
  * @param saveSlot Save slot number. (0-9)
  */
-void EmuManager::doLoadState(const char *filename, int saveSlot)
+void EmuManager::doLoadState(const QString& filename, int saveSlot)
 {
 	// TODO: Redraw the screen if emulation is paused.
-	int ret = LibGens::ZomgLoad(filename, gqt4_emuContext);
 	
-	QString sFilename = QString::fromUtf8(filename);
+	// Load the ZOMG file.
+	const QString nativeFilename = QDir::toNativeSeparators(filename);
+	int ret = LibGens::ZomgLoad(nativeFilename.toUtf8().constData(), gqt4_emuContext);
+	
 	QString osdMsg;
 	
 	if (ret == 0)
@@ -707,7 +710,7 @@ void EmuManager::doLoadState(const char *filename, int saveSlot)
 		else
 		{
 			//: OSD message indicating a savestate has been loaded using a specified filename
-			osdMsg = tr("State loaded from %1", "osd").arg(sFilename);
+			osdMsg = tr("State loaded from %1", "osd").arg(nativeFilename);
 		}
 	}
 	else
@@ -761,7 +764,8 @@ void EmuManager::doSaveSlot(int newSaveSlot)
 		osdMsg = osdMsg.arg(tr("OCCUPIED", "osd"));
 		
 		// Check if the savestate has a preview image.
-		LibZomg::Zomg zomg(filename.toUtf8().constData(), LibZomg::Zomg::ZOMG_LOAD);
+		QString nativeFilename = QDir::toNativeSeparators(filename);
+		LibZomg::Zomg zomg(nativeFilename.toUtf8().constData(), LibZomg::Zomg::ZOMG_LOAD);
 		if (zomg.getPreviewSize() > 0)
 		{
 			// Preview image found.

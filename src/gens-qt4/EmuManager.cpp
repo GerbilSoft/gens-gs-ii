@@ -680,8 +680,9 @@ QString EmuManager::sysName(void)
 
 
 /**
- * getSaveStateFilename(): Get the savestate filename.
+ * Get the savestate filename.
  * TODO: Move savestate code to another file?
+ * NOTE: Returned filename uses Qt directory separators. ('/')
  * @return Savestate filename, or empty string if no ROM is loaded.
  */
 QString EmuManager::getSaveStateFilename(void)
@@ -690,7 +691,7 @@ QString EmuManager::getSaveStateFilename(void)
 		return QString();
 	
 	const QString filename =
-		gqt4_config->userPath(GensConfig::GCPATH_SAVESTATES) +
+		gqt4_cfg->configPath(PathConfig::GCPATH_SAVESTATES) +
 		QString::fromUtf8(m_rom->filenameBaseNoExt()) +
 		QChar(L'.') + QString::number(m_saveSlot) +
 		QLatin1String(".zomg");

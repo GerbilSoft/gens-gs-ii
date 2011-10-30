@@ -152,8 +152,15 @@ class EmuManager : public QObject
 		// Paused state.
 		paused_t m_paused;
 		
-		// Savestates.
+		/** Savestates. **/
 		int m_saveSlot;
+		
+		/**
+		 * Get the savestate filename.
+		 * TODO: Move savestate code to another file?
+		 * NOTE: Returned filename uses Qt directory separators. ('/')
+		 * @return Savestate filename, or empty string if no ROM is loaded.
+		 */
 		QString getSaveStateFilename(void);
 	
 	protected slots:
@@ -293,7 +300,7 @@ class EmuManager : public QObject
 				// Savestates.
 				struct
 				{
-					char *filename;
+					QString *filename;
 					int saveSlot;
 				} saveState;
 				
@@ -422,8 +429,8 @@ class EmuManager : public QObject
 		void doAudioStereo(bool newStereo);
 		
 		/** Savestates. **/
-		void doSaveState(const char *filename, int saveSlot);
-		void doLoadState(const char *filename, int saveSlot);
+		void doSaveState(const QString& filename, int saveSlot);
+		void doLoadState(const QString& filename, int saveSlot);
 		void doSaveSlot(int newSaveSlot);
 		
 		void doPauseRequest(paused_t newPaused);
