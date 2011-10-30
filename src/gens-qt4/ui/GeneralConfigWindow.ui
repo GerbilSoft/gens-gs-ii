@@ -565,7 +565,7 @@ window to a larger size than its original resolution.</string>
             <widget class="QCheckBox" name="chkSpriteLimits">
              <property name="toolTip">
               <string>Enforces the per-line and per-frame sprite limits
-as observed in the actual VDP.</string>
+as observed on the actual VDP.</string>
              </property>
              <property name="text">
               <string>Enforce &amp;sprite limits</string>
