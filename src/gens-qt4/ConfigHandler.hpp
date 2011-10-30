@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * ExtPrgHandler.hpp: External program configuration handler.              *
+ * ConfigHandler.hpp: General configuration signal handler.                *
  *                                                                         *
  * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
@@ -19,26 +19,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_EXTPRGHANDLER_HPP__
-#define __GENS_QT4_EXTPRGHANDLER_HPP__
+#ifndef __GENS_QT4_CONFIGHANDLER_HPP__
+#define __GENS_QT4_CONFIGHANDLER_HPP__
 
 // Qt includes.
 #include <QtCore/QObject>
 
 namespace GensQt4
 {
-	// External program signal handler.
-	// TODO: Move somewhere else?
-	class ExtPrgHandler : public QObject
+	// General configuration signal handler.
+	class ConfigHandler : public QObject
 	{
 		Q_OBJECT
 		
 		public:
-			ExtPrgHandler(QObject *parent = 0);
+			ConfigHandler(QObject *parent = 0);
 		
 		public slots:
 			void extprgUnRAR_changed_slot(const QVariant& extprgUnRAR);
 	};
 }
 
-#endif /* __GENS_QT4_EXTPRGHANDLER_HPP__ */
+#endif /* __GENS_QT4_CONFIGHANDLER_HPP__ */

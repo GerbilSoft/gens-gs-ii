@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * ExtPrgHandler.cpp: External program configuration handler.              *
+ * ConfigHandler.hpp: General configuration signal handler.                *
  *                                                                         *
  * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "ExtPrgHandler.hpp"
+#include "ConfigHandler.hpp"
 #include "gqt4_main.hpp"
 
 // LibGens includes.
@@ -32,7 +32,7 @@
 namespace GensQt4
 {
 
-ExtPrgHandler::ExtPrgHandler(QObject *parent)
+ConfigHandler::ConfigHandler(QObject *parent)
 	: QObject(parent)
 {
 	// Initialize the external programs.
@@ -47,7 +47,7 @@ ExtPrgHandler::ExtPrgHandler(QObject *parent)
  * UnRAR program filename has changed.
  * @param extprgUnRAR New UnRAR program.
  */
-void ExtPrgHandler::extprgUnRAR_changed_slot(const QVariant& extprgUnRAR)
+void ConfigHandler::extprgUnRAR_changed_slot(const QVariant& extprgUnRAR)
 {
 	LibGens::DcRar::SetExtPrg(extprgUnRAR.toString().toUtf8().constData());
 }

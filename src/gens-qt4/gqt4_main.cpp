@@ -38,8 +38,8 @@
 #include "GensWindow.hpp"
 #include "SigHandler.hpp"
 
-// External program configuration handler.
-#include "ExtPrgHandler.hpp"
+// General configuration signal handler.
+#include "ConfigHandler.hpp"
 
 // Text translation macro.
 #define TR(text) \
@@ -147,7 +147,7 @@ int gens_main(int argc, char *argv[])
 	GensQt4::gqt4_cfg = new GensQt4::ConfigStore();
 	
 	// External program configuration handler.
-	GensQt4::ExtPrgHandler *extPrgHandler = new GensQt4::ExtPrgHandler();
+	GensQt4::ConfigHandler *configHandler = new GensQt4::ConfigHandler();
 	
 	// TODO: Parse command line arguments.
 	// They're available in app.arguments() [QStringList].
@@ -163,7 +163,6 @@ int gens_main(int argc, char *argv[])
 	
 	// Set the EmuContext paths.
 	// TODO: Do this here or in GensWindow initialization?
-	// TODO: Add Path handler class to normalize paths, etc.
 	QString sramPath = GensQt4::gqt4_cfg->configPath() +
 				GensQt4::gqt4_cfg->get(QLatin1String("Directories/SRAM")).toString();
 	LibGens::EmuContext::SetPathSRam(sramPath.toUtf8().constData());
@@ -195,7 +194,7 @@ int gens_main(int argc, char *argv[])
 	GensQt4::SigHandler::End();
 	
 	// Delete the various objects.
-	delete extPrgHandler;
+	delete configHandler;
 	delete GensQt4::gqt4_cfg;
 	delete GensQt4::gqt4_config;
 	delete GensQt4::gqt4_app;

@@ -145,7 +145,7 @@ SET(gens-qt4_COMMON_SRCS
 	Config/RecentRoms.cpp
 	actions/RecentRomsMenu.cpp
 	widgets/GensColorButton.cpp
-	ExtPrgHandler.cpp
+	ConfigHandler.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -185,7 +185,7 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	Config/RecentRoms.hpp
 	actions/RecentRomsMenu.hpp
 	widgets/GensColorButton.hpp
-	ExtPrgHandler.hpp
+	ConfigHandler.hpp
 	)
 
 SET(gens-qt4_SRCS ${gens-qt4_COMMON_SRCS})
