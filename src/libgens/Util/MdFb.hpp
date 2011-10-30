@@ -38,12 +38,12 @@ class MdFb
 {
 	public:
 		MdFb() : m_refcnt(1) { }
-		void ref(void);
-		void unref(void);
+		void ref(void) const;
+		void unref(void) const;
 	
 	private:
 		~MdFb() { }
-		int m_refcnt;
+		mutable int m_refcnt;	// Allow ref()/unref() even for const MdFb.
 	
 	public:
 		// Clear the screen.
@@ -127,13 +127,13 @@ class MdFb
 
 /** Reference counter. **/
 
-inline void MdFb::ref(void)
+inline void MdFb::ref(void) const
 {
 	// TODO: Use atomic access?
 	m_refcnt++;
 }
 
-inline void MdFb::unref(void)
+inline void MdFb::unref(void) const
 {
 	// TODO: Use atomic access?
 	assert(m_refcnt > 0);
