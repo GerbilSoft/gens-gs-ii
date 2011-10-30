@@ -630,14 +630,15 @@ int EmuManager::closeRom(bool emitStateChanged)
  */
 QString EmuManager::romName(void)
 {
-	if (!m_rom)
+	if (!m_rom || !gqt4_emuContext)
 		return QString();
 	
 	// TODO: This is MD/MCD/32X only!
+	// TODO: Multi-context spport.
 	
 	// Check the active system region.
 	const char *s_romName;
-	if (LibGens::M68K_Mem::ms_SysVersion.isEast())
+	if (gqt4_emuContext->versionRegisterObject()->isEast())
 	{
 		// East (JP). Return the domestic ROM name.
 		s_romName = m_rom->romNameJP();
@@ -673,10 +674,11 @@ QString EmuManager::romName(void)
  */
 QString EmuManager::sysName(void)
 {
-	if (!m_rom)
+	if (!m_rom || !gqt4_emuContext)
 		return QString();
 	
-	return SysName(m_rom->sysId(), LibGens::M68K_Mem::ms_SysVersion.region());
+	return SysName(m_rom->sysId(),
+			gqt4_emuContext->versionRegisterObject()->region());
 }
 
 
@@ -783,7 +785,8 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	
 	// Check if we're higher or lower than the required framerate.
 	bool doFastFrame = false;
-	const double frameRate = (1.0 / (LibGens::M68K_Mem::ms_SysVersion.isPal() ? 50.0 : 60.0));
+	const double frameRate = (1.0 /
+			(gqt4_emuContext->versionRegisterObject()->isPal() ? 50.0 : 60.0));
 	const double threshold = 0.001;
 	if (timeDiff > (frameRate + threshold))
 	{

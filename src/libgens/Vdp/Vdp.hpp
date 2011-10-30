@@ -68,6 +68,14 @@ class Vdp
 		 */
 		static VdpTypes::VdpEmuOptions_t VdpEmuOptions;
 		
+		// PAL/NTSC.
+	public:
+		bool isPal(void);
+		bool isNtsc(void);
+		void setPal(void);
+		void setNtsc(void);
+		void setVideoMode(bool videoMode);
+		
 		// Update flags.
 	public:
 		void MarkVRamDirty(void);
@@ -526,6 +534,18 @@ class Vdp
 		void Render_Line_Err(void);
 		void Update_Err(void);
 };
+
+// PAL/NTSC.
+inline bool Vdp::isPal(void)
+	{ return Reg_Status.isPal(); }
+inline bool Vdp::isNtsc(void)
+	{ return Reg_Status.isNtsc(); }
+inline void Vdp::setPal(void)
+	{ Reg_Status.setBit(VdpStatus::VDP_STATUS_PAL, true); }
+inline void Vdp::setNtsc(void)
+	{ Reg_Status.setBit(VdpStatus::VDP_STATUS_PAL, false); }
+inline void Vdp::setVideoMode(bool videoMode)
+	{ Reg_Status.setBit(VdpStatus::VDP_STATUS_PAL, videoMode); }
 
 /**
  * MarkVRamDirty(): Mark VRam as dirty.

@@ -1546,7 +1546,7 @@ void Vdp::Render_Line_m5(void)
 	// Determine the starting line in MD_Screen.
 	// TODO: LibGens: Add a user-configurable option for NTSC V30 rolling.
 	int LineStart = VDP_Lines.Visible.Current;
-	if (M68K_Mem::ms_SysVersion.isNtsc() &&
+	if (Reg_Status.isNtsc() &&
 	    (VDP_Reg.m5.Set2 & 0x08) &&
 	    VdpEmuOptions.ntscV30Rolling)
 	{

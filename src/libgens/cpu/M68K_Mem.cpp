@@ -104,9 +104,6 @@ int M68K_Mem::CPL_Z80;
 int M68K_Mem::Cycles_M68K;
 int M68K_Mem::Cycles_Z80;
 
-// TODO: Move ms_Region somewhere else?
-SysVersion M68K_Mem::ms_SysVersion;
-
 /**
  * ms_SSF2_BankState[]: SSF2 bankswitching state.
  * TODO: Make a helper class for this?
@@ -326,8 +323,13 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 	switch (address & 0x1E)
 	{
 		case 0x00:
+		{
 			// 0xA10001: Genesis version register.
-			return ms_SysVersion.readData();
+			EmuContext *context = EmuContext::Instance();
+			if (!context)
+				return 0;
+			return context->readVersionRegister_MD();
+		}
 		
 		// Parallel I/O
 		case 0x02:	return EmuMD::m_port1->readData();
@@ -587,8 +589,13 @@ inline uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 	switch (address & 0x1E)
 	{
 		case 0x00:
+		{
 			// 0xA10001: Genesis version register.
-			return ms_SysVersion.readData();
+			EmuContext *context = EmuContext::Instance();
+			if (!context)
+				return 0;
+			return context->readVersionRegister_MD();
+		}
 		
 		// Parallel I/O
 		case 0x02:	return EmuMD::m_port1->readData();

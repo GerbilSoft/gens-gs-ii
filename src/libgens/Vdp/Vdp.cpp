@@ -112,23 +112,23 @@ void Vdp::reset(void)
 	
 	/**
 	 * VDP registers.
-	 * Default register values:
+	 * Default register values: (Mode 5)
 	 * - 0x01 (Mode1):   0x04 (H_Int off, Mode 5 [MD])
 	 * - 0x0A (H_Int):   0xFF (disabled).
 	 * - 0x0C (Mode4):   0x81 (H40, S/H off, no interlace)
 	 * - 0x0F (AutoInc): 0x02 (auto-increment by 2 on memory access)
 	 * All other registers are set to 0x00 by default.
 	 */
-	static const uint8_t vdp_reg_init[24] =
+	static const uint8_t vdp_reg_init_m5[24] =
 	{
 		0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0xFF, 0x00, 0x81, 0x00, 0x00, 0x02,
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 	
-	for (int i = 0; i < (int)(sizeof(vdp_reg_init)/sizeof(vdp_reg_init[0])); i++)
+	for (int i = 0; i < (int)(sizeof(vdp_reg_init_m5)/sizeof(vdp_reg_init_m5[0])); i++)
 	{
-		Set_Reg(i, vdp_reg_init[i]);
+		Set_Reg(i, vdp_reg_init_m5[i]);
 	}
 	
 	// Reset the DMA variables.
@@ -139,7 +139,9 @@ void Vdp::reset(void)
 	DMAT_Type = 0;
 	
 	// VDP status register.
-	Reg_Status.reset();
+	// (Maintain the status of the PAL/NTSC bit.)
+	const bool isPal = Reg_Status.isPal();
+	Reg_Status.reset(isPal);
 	
 	// Other variables.
 	VDP_Int = 0;

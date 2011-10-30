@@ -124,7 +124,7 @@ void Vdp::updateVdpLines(bool resetCurrent)
 	static const int VisLines_Current_PAL[3] = {-67+1, -51+1, -43+1};
 	
 	// Initialize VDP_Lines.Display.
-	VDP_Lines.Display.Total = (M68K_Mem::ms_SysVersion.isPal() ? 312 : 262);
+	VDP_Lines.Display.Total = (Reg_Status.isPal() ? 312 : 262);
 	if (resetCurrent)
 		VDP_Lines.Display.Current = 0;
 	
@@ -170,7 +170,7 @@ void Vdp::updateVdpLines(bool resetCurrent)
 	if (resetCurrent)
 	{
 		// Reset VDP_Lines.Visible.Current.
-		VDP_Lines.Visible.Current = (M68K_Mem::ms_SysVersion.isPal()
+		VDP_Lines.Visible.Current = (Reg_Status.isPal()
 						? VisLines_Current_PAL[LineOffset]
 						: VisLines_Current_NTSC[LineOffset]);
 	}
@@ -188,7 +188,7 @@ void Vdp::updateVdpLines(bool resetCurrent)
 void Vdp::Check_NTSC_V30_VBlank(void)
 {
 	// TODO: Only do this in Mode 5, and maybe Mode 4 if SMS2 is in use.
-	if (M68K_Mem::ms_SysVersion.isPal() || !(VDP_Reg.m5.Set2 & 0x08))
+	if (Reg_Status.isPal() || !(VDP_Reg.m5.Set2 & 0x08))
 	{
 		// Either we're in PAL mode, where V30 is allowed, or V30 isn't set.
 		// VBlank is always OK.
@@ -552,7 +552,7 @@ uint8_t Vdp::Read_V_Counter(void)
 	// Rewrite HV handling to match Genesis Plus.
 	
 	// V_Counter_Overflow depends on PAL/NTSC status.
-	if (Vdp::Reg_Status.isPal())
+	if (Reg_Status.isPal())
 	{
 		// PAL.
 		if (V_Counter >= 0x103)

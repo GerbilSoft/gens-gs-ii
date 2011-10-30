@@ -136,6 +136,20 @@ class EmuContext
 		inline const SRam *getSRam(void) const { return &m_SRam; }
 		inline const EEPRom *getEEPRom(void) const { return &m_EEPRom; }
 		
+		/**
+		 * Read the system version register. (MD)
+		 * @return MD version register.
+		 */
+		uint8_t readVersionRegister_MD(void) const;
+		
+		/**
+		 * Get a const pointer to the version register.
+		 * @return Const pointer to the version register.
+		 */
+		const SysVersion *versionRegisterObject(void) const;
+		
+		// TODO: Add isPal(), isNtsc(), regionCode(), etc. wrapper functions/
+		
 		// Save data enable bit.
 		bool saveDataEnable(void);
 		void setSaveDataEnable(bool newSaveDataEnable);
@@ -173,6 +187,11 @@ class EmuContext
 		SRam m_SRam;
 		EEPRom m_EEPRom;
 		
+		/**
+		 * System version register.
+		 */
+		SysVersion m_sysVersion;
+		
 		// Static pointer. Temporarily needed for SRam/EEPRom.
 		static EmuContext *m_instance;
 		
@@ -189,6 +208,20 @@ class EmuContext
 // Get the current EmuContext instance.
 inline EmuContext *EmuContext::Instance(void)
 	{ return m_instance; }
+
+/**
+ * Read the system version register. (MD)
+ * @return MD version register.
+ */
+inline uint8_t EmuContext::readVersionRegister_MD(void) const
+	{ return m_sysVersion.readData(); }
+
+/**
+ * Get a const pointer to the version register.
+ * @return Const pointer to the version register.
+ */
+inline const SysVersion *EmuContext::versionRegisterObject(void) const
+	{ return &m_sysVersion; }
 
 inline bool EmuContext::saveDataEnable(void)
 	{ return m_saveDataEnable; }

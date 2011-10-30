@@ -462,6 +462,7 @@ int Test_SpriteMaskTestRom::exec(void)
 	
 	// Initialize the VDP.
 	m_vdp = new Vdp();
+	m_vdp->setNtsc();
 	
 	// Set initial registers.
 	m_vdp->Set_Reg(0x00, 0x04);	// Enable the palette. (?)
@@ -511,9 +512,6 @@ fail:
 
 int main(void)
 {
-	// TODO: Remove M68K_Mem::ms_SysVersion dependency from LibGens::Vdp.
-	LibGens::M68K_Mem::ms_SysVersion.setRegion(LibGens::SysVersion::REGION_US_NTSC);
-	
 	LibGens::Tests::Test_SpriteMaskTestRom spriteMaskTest;
 	int ret = spriteMaskTest.exec();
 	return ((ret == 0) ? ret : spriteMaskTest.testsFailed());

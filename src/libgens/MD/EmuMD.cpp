@@ -112,8 +112,8 @@ EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
 	m_portE->reset();
 	
 	// Set the system version settings.
-	M68K_Mem::ms_SysVersion.setDisk(false);		// No MCD connected.
-	setRegion_int(region, false);			// Initialize region code.
+	m_sysVersion.setDisk(false);	// No MCD connected.
+	setRegion_int(region, false);	// Initialize region code.
 	
 	// Finished initializing.
 	return;
@@ -183,11 +183,7 @@ int EmuMD::hardReset(void)
 	SoundMgr::ms_Ym2612.reset();
 	
 	// Make sure the VDP's video mode bit is set properly.
-	// TODO: Make a VdpIo inline function for this?
-	if (M68K_Mem::ms_SysVersion.isPal())
-		m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_PAL, true);	// PAL: Set the PAL bit.
-	else
-		m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_PAL, false);	// NTSC: Clear the PAL bit.
+	m_vdp->setVideoMode(m_sysVersion.isPal());
 	
 	// Reset successful.
 	return 0;
@@ -211,39 +207,38 @@ int EmuMD::setRegion(SysVersion::RegionCode_t region)
 int EmuMD::setRegion_int(SysVersion::RegionCode_t region, bool preserveState)
 {
 	SysVersion newRegion(region);
-	if (preserveState && (M68K_Mem::ms_SysVersion.isPal() == newRegion.isPal()))
+	if (preserveState && (m_sysVersion.isPal() == newRegion.isPal()))
 	{
 		// preserveState was specified, and the current NTSC/PAL setting
 		// matches the new NTSC/PAL setting. Don't reset anything.
-		M68K_Mem::ms_SysVersion.setRegion(region);
+		m_sysVersion.setRegion(region);
 		return 0;
 	}
 	
 	// Set the region.
-	M68K_Mem::ms_SysVersion.setRegion(region);
+	m_sysVersion.setRegion(region);
 	
 	// Initialize Vdp::VDP_Lines.
 	// Don't reset the VDP current line variables here,
 	// since this might not be the beginning of the frame.
 	m_vdp->updateVdpLines(false);
+	m_vdp->setVideoMode(m_sysVersion.isPal());
 	
 	// Initialize CPL.
-	if (M68K_Mem::ms_SysVersion.isPal())
+	if (m_sysVersion.isPal())
 	{
 		M68K_Mem::CPL_M68K = (int)floor((((double)CLOCK_PAL / 7.0) / 50.0) / 312.0);
 		M68K_Mem::CPL_Z80 = (int)floor((((double)CLOCK_PAL / 15.0) / 50.0) / 312.0);
-		m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_PAL, true);	// PAL: Set the PAL bit.
 	}
 	else
 	{
 		M68K_Mem::CPL_M68K = (int)floor((((double)CLOCK_NTSC / 7.0) / 60.0) / 262.0);
 		M68K_Mem::CPL_Z80 = (int)floor((((double)CLOCK_NTSC / 15.0) / 60.0) / 262.0);
-		m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_PAL, false);	// NTSC: Clear the PAL bit.
 	}
 	
 	// Initialize audio.
 	// NOTE: Only set the region. Sound rate is set by the UI.
-	SoundMgr::SetRegion(M68K_Mem::ms_SysVersion.isPal(), preserveState);
+	SoundMgr::SetRegion(m_sysVersion.isPal(), preserveState);
 	
 	// Region set successfully.
 	return 0;
