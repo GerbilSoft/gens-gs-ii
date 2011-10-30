@@ -86,9 +86,6 @@ namespace GensQt4
 // GensQApplication.
 GensQApplication *gqt4_app = NULL;
 
-// Configuration. (TODO: Remove this in favor of ConfigStore.)
-GensConfig *gqt4_config = NULL;
-
 // Configuration store.
 ConfigStore *gqt4_cfg = NULL;
 
@@ -142,8 +139,6 @@ int gens_main(int argc, char *argv[])
 	
 	// Load the configuration.
 	// TODO: Do this before or after command line arguments?
-	// TODO: Remove in favor of ConfigStore.
-	GensQt4::gqt4_config = new GensQt4::GensConfig();
 	GensQt4::gqt4_cfg = new GensQt4::ConfigStore();
 	
 	// External program configuration handler.
@@ -200,7 +195,6 @@ int gens_main(int argc, char *argv[])
 	// Delete the various objects.
 	delete configHandler;
 	delete GensQt4::gqt4_cfg;
-	delete GensQt4::gqt4_config;
 	delete GensQt4::gqt4_app;
 	
 	// Finished.

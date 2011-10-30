@@ -124,7 +124,6 @@ SET(gens-qt4_COMMON_SRCS
 	GeneralConfigWindow.cpp
 	GeneralConfigWindow_slots.cpp
 	widgets/GensLineEdit.cpp
-	Config/GensConfig.cpp
 	Config/ConfigStore.cpp
 	Config/PathConfig.cpp
 	Config/CtrlConfig.cpp
@@ -165,7 +164,6 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	ZipSelectDialog.hpp
 	GeneralConfigWindow.hpp
 	widgets/GensLineEdit.hpp
-	Config/GensConfig.hpp
 	Config/ConfigStore.hpp
 	Config/PathConfig.hpp
 	Config/CtrlConfig.hpp

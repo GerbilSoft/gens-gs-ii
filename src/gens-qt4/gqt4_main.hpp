@@ -62,8 +62,6 @@ void gqt4_osd(OsdType osd_type, int param);
 }
 #endif
 
-// TODO: Remove GensConfig in favor of ConfigStore.
-#include "Config/GensConfig.hpp"
 #include "Config/ConfigStore.hpp"
 
 #include "EmuThread.hpp"
@@ -78,10 +76,6 @@ namespace GensQt4
 	
 	// GensQApplication.
 	extern GensQApplication *gqt4_app;
-	
-	// Configuration. (TODO: Use a smart pointer?)
-	// TODO: Remove GensConfig in favor of ConfigStore.
-	extern GensConfig *gqt4_config;
 	
 	// Configuration store.
 	extern ConfigStore *gqt4_cfg;
