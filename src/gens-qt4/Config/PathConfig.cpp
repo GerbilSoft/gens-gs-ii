@@ -143,6 +143,7 @@ PathConfigPrivate::PathConfigPrivate(PathConfig *q)
 	if (!configPath.endsWith(QChar(L'/')))
 		configPath.append(QChar(L'/'));
 	configPaths.replace(PathConfig::GCPATH_CONFIG, configPath);
+	emit q->pathChanged(PathConfig::GCPATH_CONFIG, configPath);
 	
 	// Initialize the other configuration paths.
 	// TODO: Add support for plugin configuration paths.
@@ -184,7 +185,11 @@ int PathConfigPrivate::load(const QSettings *qSettings)
 		
 		QString absPath = toAbsolutePath(relPath);
 		configPaths.replace(i, absPath);
+		emit q->pathChanged((PathConfig::ConfigPath)i, absPath);
 	}
+	
+	// Paths loaded.
+	return (PathConfig::GCPATH_MAX - 2);
 }
 
 
@@ -207,6 +212,9 @@ int PathConfigPrivate::save(QSettings *qSettings) const
 		QString relPath = toRelativePath(configPaths.at(i));
 		qSettings->setValue(QLatin1String(DefConfigPaths[i].cfg_name), relPath);
 	}
+	
+	// Paths saved.
+	return (PathConfig::GCPATH_MAX - 2);
 }
 
 

@@ -83,6 +83,7 @@ class PathConfig : public QObject
 			
 			GCPATH_MAX
 		};
+		Q_ENUMS(ConfigPath)
 		
 		/**
 		 * Get the main configuration path. (GCPATH_CONFIG)
@@ -96,6 +97,15 @@ class PathConfig : public QObject
 		 * @return Configuration path.
 		 */
 		QString configPath(ConfigPath path);
+	
+	signals:
+		/**
+		 * A configuration path has been changed.
+		 * This signal *is* emitted on load().
+		 * @param path Configuration path.
+		 * @param dir New directory.
+		 */
+		void pathChanged(ConfigPath path, const QString& dir);
 };
 
 }
