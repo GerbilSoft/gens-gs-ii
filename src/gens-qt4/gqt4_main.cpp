@@ -41,6 +41,11 @@
 // General configuration signal handler.
 #include "ConfigHandler.hpp"
 
+#ifdef Q_WS_X11
+// X11 includes.
+#include <X11/Xlib.h>
+#endif /* Q_WS_X11 */
+
 // Text translation macro.
 #define TR(text) \
 	QCoreApplication::translate("gqt4_main", (text), NULL, QCoreApplication::UnicodeUTF8)
@@ -133,6 +138,11 @@ int gens_main(int argc, char *argv[])
 {
 	// Register the signal handler.
 	GensQt4::SigHandler::Init();
+	
+#ifdef Q_WS_X11
+	// Initialize X11 threading.
+	XInitThreads();
+#endif /* Q_WS_X11 */
 	
 	// Initialize the GensQApplication.
 	GensQt4::gqt4_app = new GensQt4::GensQApplication(argc, argv);
