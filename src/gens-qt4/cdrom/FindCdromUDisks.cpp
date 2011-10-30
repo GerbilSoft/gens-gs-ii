@@ -237,7 +237,7 @@ FindCdromUDisks::FindCdromUDisks()
 	connect(d->ifUDisks, SIGNAL(DeviceChanged(QDBusObjectPath)),
 		this, SLOT(deviceChanged(QDBusObjectPath)));
 #if 0
-	connect(m_ifUDisks, SIGNAL(DeviceAdded(QDBusObjectPath)),
+	connect(d->ifUDisks, SIGNAL(DeviceAdded(QDBusObjectPath)),
 		this, SLOT(deviceChanged(QDBusObjectPath)));
 #endif
 	connect(d->ifUDisks, SIGNAL(DeviceRemoved(QDBusObjectPath)),
