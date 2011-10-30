@@ -22,7 +22,6 @@
  ***************************************************************************/
 
 #include "Timing.hpp"
-#include <config.h>
 
 // Message logging.
 #include "macros/log_msg.h"

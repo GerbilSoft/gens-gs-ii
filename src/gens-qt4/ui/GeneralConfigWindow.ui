@@ -6,30 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>494</width>
-    <height>457</height>
+    <width>520</width>
+    <height>421</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>494</width>
-    <height>457</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>494</width>
-    <height>457</height>
-   </size>
-  </property>
-  <property name="baseSize">
-   <size>
-    <width>494</width>
-    <height>457</height>
+    <width>520</width>
+    <height>0</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>General Configuration</string>
+  </property>
+  <property name="toolButtonStyle">
+   <enum>Qt::ToolButtonTextUnderIcon</enum>
   </property>
   <property name="unifiedTitleAndToolBarOnMac">
    <bool>true</bool>
@@ -40,7 +31,7 @@
      <number>8</number>
     </property>
     <item>
-     <widget class="QTabWidget" name="tabWidget">
+     <widget class="QStackedWidget" name="stackedWidget">
       <property name="contextMenuPolicy">
        <enum>Qt::NoContextMenu</enum>
       </property>
@@ -48,9 +39,6 @@
        <number>0</number>
       </property>
       <widget class="QWidget" name="tabGeneral">
-       <attribute name="title">
-        <string>&amp;General</string>
-       </attribute>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QGroupBox" name="grpOsd">
@@ -165,17 +153,6 @@ the emulation window loses focus.</string>
             </widget>
            </item>
            <item>
-            <widget class="QCheckBox" name="chkBorderColor">
-             <property name="toolTip">
-              <string>Use the background color in the border area
-instead of drawing a black border.</string>
-             </property>
-             <property name="text">
-              <string>&amp;Border color emulation</string>
-             </property>
-            </widget>
-           </item>
-           <item>
             <widget class="QCheckBox" name="chkPauseTint">
              <property name="toolTip">
               <string>Tints the emulator window purple when
@@ -183,18 +160,6 @@ emulation is paused.</string>
              </property>
              <property name="text">
               <string>&amp;Tint the window purple when paused.</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="chkNtscV30Rolling">
-             <property name="toolTip">
-              <string>Simulates the &quot;rolling&quot; effect observed on the
-Mega Drive hardware if 320x240 mode is set
-on NTSC models.</string>
-             </property>
-             <property name="text">
-              <string>&amp;NTSC V30 Rolling</string>
              </property>
             </widget>
            </item>
@@ -213,7 +178,7 @@ on NTSC models.</string>
            <string>&amp;Intro Effect</string>
           </property>
           <layout class="QGridLayout" name="gridIntroEffect">
-           <item row="0" column="0">
+           <item row="2" column="0">
             <widget class="QLabel" name="lblintroStyle">
              <property name="text">
               <string>&amp;Style:</string>
@@ -229,7 +194,7 @@ on NTSC models.</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="2">
+           <item row="2" column="2">
             <widget class="QComboBox" name="cboIntroStyle">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -254,7 +219,7 @@ on NTSC models.</string>
              </item>
             </widget>
            </item>
-           <item row="1" column="0">
+           <item row="3" column="0">
             <widget class="QLabel" name="lblIntroColor">
              <property name="text">
               <string>&amp;Color:</string>
@@ -270,7 +235,7 @@ on NTSC models.</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="2">
+           <item row="3" column="2">
             <widget class="GensColorComboBox" name="cboIntroColor">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -305,9 +270,6 @@ on NTSC models.</string>
        </layout>
       </widget>
       <widget class="QWidget" name="tabGraphics">
-       <attribute name="title">
-        <string>G&amp;raphics</string>
-       </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <widget class="QGroupBox" name="grpGraphics">
@@ -525,7 +487,7 @@ window to a larger size than its original resolution.</string>
            <item row="2" column="1">
             <widget class="QLabel" name="lblColorScaleMethod">
              <property name="text">
-              <string>Color &amp;Scale Method:</string>
+              <string>Color Scale &amp;Method:</string>
              </property>
              <property name="textFormat">
               <enum>Qt::PlainText</enum>
@@ -591,10 +553,136 @@ window to a larger size than its original resolution.</string>
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tabVdp">
+       <layout class="QVBoxLayout" name="verticalLayout_8">
+        <item>
+         <widget class="QGroupBox" name="grpVDP">
+          <property name="title">
+           <string>VDP Settings</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_7">
+           <item>
+            <widget class="QCheckBox" name="chkSpriteLimits">
+             <property name="toolTip">
+              <string>Enforces the per-line and per-frame sprite limits
+as observed in the actual VDP.</string>
+             </property>
+             <property name="text">
+              <string>Enforce &amp;sprite limits</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="chkBorderColor">
+             <property name="toolTip">
+              <string>Use the background color in the border area
+instead of drawing a black border.</string>
+             </property>
+             <property name="text">
+              <string>&amp;Border color emulation</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="chkNtscV30Rolling">
+             <property name="toolTip">
+              <string>Simulates the &quot;rolling&quot; effect observed on the
+Mega Drive hardware if 320x240 mode is set
+on NTSC models.</string>
+             </property>
+             <property name="text">
+              <string>&amp;NTSC V30 Rolling</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="vspcVdpAdvanced">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>32</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QWidget" name="grpAdvancedVDP" native="true">
+             <layout class="QVBoxLayout" name="verticalLayout_9">
+              <property name="margin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="lblVdpAdvanced">
+                <property name="text">
+                 <string>&lt;span style=&quot;font-weight: bold; color: red&quot;&gt;Warning:&lt;/span&gt; The following settings are low-level emulation settings. Changing these settings may break certain games. You should not change these settings unless you know what you're doing.</string>
+                </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="chkVScrollBug">
+                <property name="toolTip">
+                 <string>If enabled, 2-cell vertical scrolling will exhibit glitches in the
+left-most column if horizontal scrolling is used at the same
+time. This matches the behavior seen on Genesis 1 (MK-1601)
+and Genesis 2 (MK-1631) consoles.
+
+The Genesis 3 (MK-1641) does not show this bug, so disabling
+this option will more accurately simulate the Genesis 3.</string>
+                </property>
+                <property name="text">
+                 <string>Emulate the 2-cell &amp;Vertical Scrolling bug.</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="chkZeroLengthDMA">
+                <property name="toolTip">
+                 <string>The Genesis VDP has a bug where a DMA transfer with a length
+of 0 results in a transfer of 128 KB. Older versions of Gens did
+not handle this properly, and simply ignored zero-length
+transfers. This was incorrectly used by some hacks, so those
+hacks will break in emulators that handle this correctly.
+
+If you want to play one of these hacks, enable this option.
+Be warned that it may break commercial games and other
+programs that depend on the correct VDP behavior.</string>
+                </property>
+                <property name="text">
+                 <string>Allow zero-length DMA transfers.</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <spacer name="vspcVdp">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tabSystem">
-       <attribute name="title">
-        <string>&amp;System</string>
-       </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
          <widget class="QGroupBox" name="grpRegionCode">
@@ -685,21 +773,25 @@ window to a larger size than its original resolution.</string>
                   </property>
                   <property name="minimumSize">
                    <size>
-                    <width>40</width>
-                    <height>40</height>
+                    <width>44</width>
+                    <height>44</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>40</width>
-                    <height>40</height>
+                    <width>44</width>
+                    <height>44</height>
                    </size>
                   </property>
                   <property name="baseSize">
                    <size>
-                    <width>40</width>
-                    <height>40</height>
+                    <width>44</width>
+                    <height>44</height>
                    </size>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="resources/oxygen/oxygen.qrc">
+                    <normaloff>:/icons/oxygen/32x32/arrow-up.png</normaloff>:/icons/oxygen/32x32/arrow-up.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
@@ -732,21 +824,25 @@ window to a larger size than its original resolution.</string>
                   </property>
                   <property name="minimumSize">
                    <size>
-                    <width>40</width>
-                    <height>40</height>
+                    <width>44</width>
+                    <height>44</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>40</width>
-                    <height>40</height>
+                    <width>44</width>
+                    <height>44</height>
                    </size>
                   </property>
                   <property name="baseSize">
                    <size>
-                    <width>40</width>
-                    <height>40</height>
+                    <width>48</width>
+                    <height>48</height>
                    </size>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="resources/oxygen/oxygen.qrc">
+                    <normaloff>:/icons/oxygen/32x32/arrow-down.png</normaloff>:/icons/oxygen/32x32/arrow-down.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
@@ -780,9 +876,6 @@ window to a larger size than its original resolution.</string>
        </layout>
       </widget>
       <widget class="QWidget" name="tabSegaCD">
-       <attribute name="title">
-        <string>Sega &amp;CD</string>
-       </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <widget class="QGroupBox" name="grpMcdRoms">
@@ -927,7 +1020,7 @@ window to a larger size than its original resolution.</string>
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
              <property name="buddy">
-              <cstring>txtMcdRomJPN</cstring>
+              <cstring>txtMcdRomAsia</cstring>
              </property>
             </widget>
            </item>
@@ -947,9 +1040,6 @@ window to a larger size than its original resolution.</string>
        </layout>
       </widget>
       <widget class="QWidget" name="tabExtPrg">
-       <attribute name="title">
-        <string>E&amp;xternal Programs</string>
-       </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
          <widget class="QGroupBox" name="grpExtPrg">
@@ -1047,6 +1137,107 @@ window to a larger size than its original resolution.</string>
     </item>
    </layout>
   </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>32</width>
+     <height>32</height>
+    </size>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionGeneral"/>
+   <addaction name="actionGraphics"/>
+   <addaction name="actionVdp"/>
+   <addaction name="actionSystem"/>
+   <addaction name="actionSegaCD"/>
+   <addaction name="actionExternalPrograms"/>
+  </widget>
+  <action name="actionGeneral">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/oxygen/oxygen.qrc">
+     <normaloff>:/icons/oxygen/32x32/configure.png</normaloff>:/icons/oxygen/32x32/configure.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;General</string>
+   </property>
+  </action>
+  <action name="actionGraphics">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/oxygen/oxygen.qrc">
+     <normaloff>:/icons/oxygen/32x32/applications-graphics.png</normaloff>:/icons/oxygen/32x32/applications-graphics.png</iconset>
+   </property>
+   <property name="text">
+    <string>G&amp;raphics</string>
+   </property>
+  </action>
+  <action name="actionVdp">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/oxygen/oxygen.qrc">
+     <normaloff>:/icons/oxygen/32x32/cpu.png</normaloff>:/icons/oxygen/32x32/cpu.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;VDP</string>
+   </property>
+  </action>
+  <action name="actionSystem">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/oxygen/oxygen.qrc">
+     <normaloff>:/icons/oxygen/32x32/applications-system.png</normaloff>:/icons/oxygen/32x32/applications-system.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;System</string>
+   </property>
+  </action>
+  <action name="actionSegaCD">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/oxygen/oxygen.qrc">
+     <normaloff>:/icons/oxygen/32x32/media-optical.png</normaloff>:/icons/oxygen/32x32/media-optical.png</iconset>
+   </property>
+   <property name="text">
+    <string>Sega &amp;CD</string>
+   </property>
+  </action>
+  <action name="actionExternalPrograms">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/oxygen/oxygen.qrc">
+     <normaloff>:/icons/oxygen/32x32/utilities-terminal.png</normaloff>:/icons/oxygen/32x32/utilities-terminal.png</iconset>
+   </property>
+   <property name="text">
+    <string>E&amp;xternal Programs</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1066,16 +1257,13 @@ window to a larger size than its original resolution.</string>
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>tabWidget</tabstop>
   <tabstop>chkOsdFpsEnable</tabstop>
   <tabstop>btnOsdFpsColor</tabstop>
   <tabstop>chkOsdMsgEnable</tabstop>
   <tabstop>btnOsdMsgColor</tabstop>
   <tabstop>chkAutoFixChecksum</tabstop>
   <tabstop>chkAutoPause</tabstop>
-  <tabstop>chkBorderColor</tabstop>
   <tabstop>chkPauseTint</tabstop>
-  <tabstop>chkNtscV30Rolling</tabstop>
   <tabstop>cboIntroStyle</tabstop>
   <tabstop>cboIntroColor</tabstop>
   <tabstop>chkAspectRatioConstraint</tabstop>
@@ -1087,6 +1275,9 @@ window to a larger size than its original resolution.</string>
   <tabstop>chkGrayscale</tabstop>
   <tabstop>chkInverted</tabstop>
   <tabstop>cboColorScaleMethod</tabstop>
+  <tabstop>chkSpriteLimits</tabstop>
+  <tabstop>chkBorderColor</tabstop>
+  <tabstop>chkNtscV30Rolling</tabstop>
   <tabstop>cboRegionCurrent</tabstop>
   <tabstop>lstRegionDetect</tabstop>
   <tabstop>btnRegionDetectUp</tabstop>
@@ -1103,7 +1294,9 @@ window to a larger size than its original resolution.</string>
   <tabstop>btnExtPrgUnRAR</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="resources/oxygen/oxygen.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>
@@ -1134,70 +1327,6 @@ window to a larger size than its original resolution.</string>
     <hint type="destinationlabel">
      <x>139</x>
      <y>415</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>hsldContrast</sender>
-   <signal>sliderMoved(int)</signal>
-   <receiver>lblContrastValue</receiver>
-   <slot>setNum(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>430</x>
-     <y>239</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>470</x>
-     <y>239</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>hsldContrast</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>lblContrastValue</receiver>
-   <slot>setNum(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>430</x>
-     <y>239</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>470</x>
-     <y>239</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>hsldBrightness</sender>
-   <signal>sliderMoved(int)</signal>
-   <receiver>lblBrightnessValue</receiver>
-   <slot>setNum(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>430</x>
-     <y>266</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>470</x>
-     <y>266</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>hsldBrightness</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>lblBrightnessValue</receiver>
-   <slot>setNum(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>430</x>
-     <y>266</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>470</x>
-     <y>266</y>
     </hint>
    </hints>
   </connection>

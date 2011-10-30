@@ -21,8 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include <config.h>
-
 #include "GensQGLWidget.hpp"
 #include "GensQGLWidget_p.hpp"
 
@@ -64,10 +62,35 @@ GensQGLWidget::~GensQGLWidget()
 
 
 /**
- * vbUpdate(): Video Backend update function.
+ * Video Backend update function.
  */
 void GensQGLWidget::vbUpdate(void)
 {
+	if (m_emuContext)
+	{
+		// Save the framebuffer.
+		if (m_fb != m_emuContext->m_vdp->MD_Screen)
+		{
+			// Framebuffer has changed.
+			if (m_fb)
+				m_fb->unref();	// TODO
+			m_fb = m_emuContext->m_vdp->MD_Screen;
+			if (m_fb)
+				m_fb->ref();	// TODO
+			m_mdScreenDirty = true;
+		}
+		
+		// Save the color depth.
+		m_bpp = m_emuContext->m_vdp->m_palette.bpp();
+	}
+	else
+	{
+		// No emulation context. Clear the framebuffer.
+		if (m_fb)
+			m_fb->unref();	// TODO
+		m_fb = NULL;
+	}
+	
 	// TODO: Expand this function?
 	d->makeCurrent();
 	d->updateGL();
@@ -75,14 +98,11 @@ void GensQGLWidget::vbUpdate(void)
 
 
 /**
- * setFastBlur(): Fast Blur setting has changed.
- * @param newFastBlur New fast blur setting.
+ * fastBlur_changed_slot(): Fast Blur effect has changed.
+ * @param newFastBlur (bool) New Fast Blur effect setting.
  */
-void GensQGLWidget::setFastBlur(bool newFastBlur)
+void GensQGLWidget::fastBlur_changed_slot(const QVariant& newFastBlur)
 {
-	if (fastBlur() == newFastBlur)
-		return;
-	
 	if (isRunning() && isPaused())
 	{
 		// Emulation is running, but is currently paused.
@@ -92,37 +112,32 @@ void GensQGLWidget::setFastBlur(bool newFastBlur)
 		m_mdScreenDirty = true;
 	}
 	
-	VBackend::setFastBlur(newFastBlur);
+	// Call VBackend's fastBlur_changed_slot().
+	VBackend::fastBlur_changed_slot(newFastBlur);
 }
 
 
 /**
- * setBilinearFilter(): Bilinear filter setting has changed.
- * @param newBilinearFilter New bilinear filter setting.
+ * bilinearFilter_changed_slot(): Bilinear filter setting has changed.
+ * @param newBilinearFilter (bool) New bilinear filter setting.
  */
-void GensQGLWidget::setBilinearFilter(bool newBilinearFilter)
+void GensQGLWidget::bilinearFilter_changed_slot(const QVariant& newBilinearFilter)
 {
-	if (bilinearFilter() == newBilinearFilter)
-		return;
-	
 	// Update GLBackend's bilinear filter setting.
 	d->makeCurrent();
-	GLBackend::setBilinearFilter(newBilinearFilter);
+	GLBackend::bilinearFilter_changed_slot(newBilinearFilter);
 }
 
 
 /**
- * setPauseTint(): Pause Tint setting has changed.
- * @param newPauseTint New pause tint setting.
+ * pauseTint_changed_slot(): Pause Tint effect setting has changed.
+ * @param newPauseTint (bool) New pause tint effect setting.
  */
-void GensQGLWidget::setPauseTint(bool newPauseTint)
+void GensQGLWidget::pauseTint_changed_slot(const QVariant& newPauseTint)
 {
-	if (pauseTint() == newPauseTint)
-		return;
-	
 	// Update GLBackend's pause tint setting.
 	d->makeCurrent();
-	GLBackend::setPauseTint(newPauseTint);
+	GLBackend::pauseTint_changed_slot(newPauseTint);
 }
 
 }

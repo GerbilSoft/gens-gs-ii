@@ -68,88 +68,44 @@ namespace VdpTypes
 		uint8_t  reserved[128];		// TODO: Figure out how to remove this.
 	};
 	
-	// VDP registers.
-	union VdpReg_t
+	/**
+	 * Interlaced display mode. (See VdpReg_t.m5.Set4)
+	 * Source: http://wiki.megadrive.org/index.php?title=VDPRegs_Addendum (Jorge)
+	 */
+	enum Interlaced_t
 	{
-		uint8_t reg[24];
-		struct m5_t
-		{
-			/**
-			 * Mode 5 (MD) registers.
-			 * DISP == Display Enable. (1 == on; 0 == off)
-			 * IE0 == Enable V interrupt. (1 == on; 0 == off)
-			 * IE1 == Enable H interrupt. (1 == on; 0 == off)
-			 * IE2 == Enable external interrupt. (1 == on; 0 == off)
-			 * M1 == DMA Enable. (1 == on; 0 == off)
-			 * M2 == V cell mode. (1 == V30 [PAL only]; 0 == V28)
-			 * M3 == HV counter latch. (1 == stop HV counter; 0 == enable read, H, V counter)
-			 * M4/PSEL == Palette Select; if clear, masks high two bits of each CRam color component.
-			 *            If M5 is off, acts like M4 instead of PSEL.
-			 * M5 == Mode 4/5 toggle; set for Mode 5, clear for Mode 4.
-			 * VSCR == V Scroll mode. (0 == full; 1 == 2-cell)
-			 * HSCR/LSCR == H Scroll mode. (00 == full; 01 == invalid; 10 == 1-cell; 11 == 1-line)
-			 * RS0/RS1 == H cell mode. (11 == H40; 00 == H32; others == invalid)
-			 * LSM1/LSM0 == Interlace mode. (00 == normal; 01 == interlace mode 1; 10 == invalid; 11 == interlace mode 2)
-			 * S/TE == Highlight/Shadow enable. (1 == on; 0 == off)
-			 * VSZ1/VSZ2 == Vertical scroll size. (00 == 32 cells; 01 == 64 cells; 10 == invalid; 11 == 128 cells)
-			 * HSZ1/HSZ2 == Vertical scroll size. (00 == 32 cells; 01 == 64 cells; 10 == invalid; 11 == 128 cells)
-			 */
-			uint8_t Set1;		// Mode Set 1.  [   0    0    0  IE1    0 PSEL   M3    0]
-			uint8_t Set2;		// Mode Set 2.  [   0 DISP  IE0   M1   M2   M5    0    0]
-			uint8_t Pat_ScrA_Adr;	// Pattern name table base address for Scroll A.
-			uint8_t Pat_Win_Adr;	// Pattern name table base address for Window.
-			uint8_t Pat_ScrB_Adr;	// Pattern name table base address for Scroll B.
-			uint8_t Spr_Att_Adr;	// Sprite Attribute Table base address.
-			uint8_t Reg6;		// unused
-			uint8_t BG_Color;	// Background color.
-			uint8_t Reg8;		// unused
-			uint8_t Reg9;		// unused
-			uint8_t H_Int;		// H Interrupt.
-			uint8_t Set3;		// Mode Set 3.  [   0    0    0    0  IE2 VSCR HSCR LSCR]
-			uint8_t Set4;		// Mode Set 4.  [ RS0    0    0    0 S/TE LSM1 LSM0  RS1]
-			uint8_t H_Scr_Adr;	// H Scroll Data Table base address.
-			uint8_t Reg14;		// unused
-			uint8_t Auto_Inc;	// Auto Increment.
-			uint8_t Scr_Size;	// Scroll Size. [   0    0 VSZ1 VSZ0    0    0 HSZ1 HSZ0]
-			uint8_t Win_H_Pos;	// Window H position.
-			uint8_t Win_V_Pos;	// Window V position.
-			uint8_t DMA_Length_L;	// DMA Length Counter Low.
-			uint8_t DMA_Length_H;	// DMA Length Counter High.
-			uint8_t DMA_Src_Adr_L;	// DMA Source Address Low.
-			uint8_t DMA_Src_Adr_M;	// DMA Source Address Mid.
-			uint8_t DMA_Src_Adr_H;	// DMA Source Address High.
-		};
-		m5_t m5;
-		struct m4_t
-		{
-			/**
-			* Mode 4 (SMS) registers.
-			* NOTE: Mode 4 is currently not implemented.
-			* This is here for future use.
-			*/
-			uint8_t Set1;		// Mode Set 1.
-			uint8_t Set2;		// Mode Set 2.
-			uint8_t NameTbl_Addr;	// Name table base address.
-			uint8_t ColorTbl_Addr;	// Color table base address.
-			uint8_t	Pat_BG_Addr;	// Background Pattern Generator base address.
-			uint8_t Spr_Att_Addr;	// Sprite Attribute Table base address.
-			uint8_t Spr_Pat_addr;	// Sprite Pattern Generator base address.
-			uint8_t BG_Color;	// Background color.
-			uint8_t H_Scroll;	// Horizontal scroll.
-			uint8_t V_Scroll;	// Vertical scroll.
-			uint8_t H_Int;		// H Interrupt.
-		};
-		m4_t m4;
+		/**
+		 * Interlaced mode is off. [LSM1 LSM0] == [0 0]
+		 */
+		INTERLACED_OFF		= 0,
+		
+		/**
+		 * Interlaced Mode 1. [LSM1 LSM0] == [0 1]
+		 * The display is interlaced, but the image
+		 * is exactly the same as INTERLACED_OFF.
+		 */
+		INTERLACED_MODE_1	= 1,	// [LSM1 LSM0] == [0 1]
+		
+		/**
+		 * Interlaced mode is off. [LSM1 LSM0] = [1 0]
+		 * Although LSM1 is set, the screen is still non-interlaced,
+		 * and the image is regular resolution.
+		 */
+		INTERLACED_OFF2		= 2,
+		
+		/**
+		 * Interlaced Mode 2. [LSM1 LSM0] = [1 1]
+		 * The display is interlaced, and the vertical resolution
+		 * is doubled. (x448, x480)
+		 */
+		INTERLACED_MODE_2	= 3,
 	};
 	
-	// Interlaced mode.
-	struct Interlaced_t
-	{
-		unsigned int HalfLine  :1;	// Half-line is enabled. [LSM0]
-		unsigned int DoubleRes :1;	// 2x resolution is enabled. [LSM1]
-	};
-	
-	// Interlaced rendering mode.
+	/**
+	 * Interlaced rendering mode.
+	 * This controls the way INTERLACED_MODE_2 is rendered onscreen.
+	 * TODO: Make Interlaced_t and IntRend_Mode_t less confusing.
+	 */
 	enum IntRend_Mode_t
 	{
 		INTREND_EVEN	= 0,	// Even lines only. (Old Gens)
@@ -191,12 +147,11 @@ namespace VdpTypes
 	// Update flags.
 	union UpdateFlags_t
 	{
-		unsigned int flags;
+		uint8_t flags;
 		struct
 		{
-			unsigned int VRam	:1;	// VRam was modified. (Implies VRam_Spr.)
-			unsigned int VRam_Spr	:1;	// Sprite Attribute Table was modified.
-			unsigned int CRam	:1;	// CRam was modified.
+			bool VRam	:1;	// VRam was modified. (Implies VRam_Spr.)
+			bool VRam_Spr	:1;	// Sprite Attribute Table was modified.
 		};
 	};
 	
@@ -206,21 +161,41 @@ namespace VdpTypes
 		// Interlaced rendering mode.
 		IntRend_Mode_t intRendMode;
 		
-		// Enables zero-length DMA.
-		// Default is false (hardware-accurate).
-		// May need to be enabled for buggy hacks.
+		/**
+		 * Enables border color emulation.
+		 * If true, draws the background color in the screen borders.
+		 * Otherwise, the screen borders default to black.
+		 */
+		bool borderColorEmulation;
+		
+		/**
+		 * Enables "rolling" graphics in V30 on NTSC.
+		 * This simulates the effect seen on an NTSC Genesis
+		 * if 240-line mode is enabled.
+		 */
+		bool ntscV30Rolling;
+		
+		/**
+		 * Enables zero-length DMA.
+		 * Default is false (hardware-accurate).
+		 * May need to be enabled for buggy hacks.
+		 */
 		bool zeroLengthDMA;
 		
-		// Enables sprite limits.
-		// Default is true (hardware-accurate).
-		// May need to be disabled for buggy hacks.
+		/**
+		 * Enables sprite limits.
+		 * Default is true (hardware-accurate).
+		 * May need to be disabled for buggy hacks.
+		 */
 		bool spriteLimits;
 		
-		// Enables left-column VScroll bug emulation.
-		// Options:
-		// - false: disabled. (Majesco Genesis 3)
-		// - true:  enabled.  (MD1, MD2) [default]
-		// FIXME: Not implemented at the moment!
+		/**
+		 * Enables left-column VScroll bug emulation.
+		 * Options:
+		 * - false: disabled. (Majesco Genesis 3)
+		 * - true:  enabled.  (MD1, MD2) [default]
+		 * FIXME: Not implemented at the moment!
+		 */
 		bool vscrollBug;
 	};
 	

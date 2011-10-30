@@ -23,9 +23,12 @@
 
 #include "VBackend.hpp"
 
-// C includes.
-#include <stdio.h>
-#include <assert.h>
+// C includes. (C++ namespace)
+#include <cstdio>
+#include <cassert>
+
+// Qt includes.
+#include <QtCore/QMutexLocker>
 
 // LibGens includes.
 #include "libgens/Effects/PausedEffect.hpp"
@@ -47,6 +50,22 @@ namespace GensQt4
 VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	: QWidget(parent)
 	, m_keyHandler(keyHandler)
+	
+	// Mark the video backend as dirty on startup.
+	, m_vbDirty(true)
+	, m_mdScreenDirty(true)
+	, m_lastBpp(LibGens::VdpPalette::BPP_MAX)
+	
+	// Allocate the internal screen buffer.
+	, m_intScreen(new LibGens::MdFb())
+	
+	// We're not running anything initially.
+	// TODO: Remove m_running and just use m_emuContext?
+	, m_emuContext(NULL)
+	, m_running(false)
+	
+	// Make sure the aspect ratio constraint is initialized correctly.
+	, m_aspectRatioConstraint_changed(true)
 {
 	if (m_keyHandler)
 	{
@@ -55,71 +74,67 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 			this, SLOT(keyHandlerDestroyed()));
 	}
 	
-	// Mark the video backend as dirty on startup.
-	m_vbDirty = true;
-	m_mdScreenDirty = true;
+	/** Video effect settings. **/
+	m_cfg_fastBlur = gqt4_cfg->get(QLatin1String("Graphics/fastBlur")).toBool();
+	m_cfg_pauseTint = gqt4_cfg->get(QLatin1String("pauseTint")).toBool();
+	m_cfg_aspectRatioConstraint = gqt4_cfg->get(QLatin1String("Graphics/aspectRatioConstraint")).toBool();
+	m_cfg_bilinearFilter = gqt4_cfg->get(QLatin1String("Graphics/bilinearFilter")).toBool();
+	m_cfg_stretchMode = (StretchMode_t)gqt4_cfg->getInt(QLatin1String("Graphics/stretchMode"));
 	
-	// Set the internal framebuffer to NULL by default.
-	m_intScreen = NULL;
+	/** Video effect settings: Signals. **/
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/fastBlur"),
+					this, SLOT(fastBlur_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("pauseTint"),
+					this, SLOT(pauseTint_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/aspectRatioConstraint"),
+					this, SLOT(aspectRatioConstraint_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/bilinearFilter"),
+					this, SLOT(bilinearFilter_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/stretchMode"),
+					this, SLOT(stretchMode_changed_slot(QVariant)));
 	
-	// We're not running anything initially.
-	m_running = false;
-	
-	// Set default video settings.
+	// Initialize the paused setting.
 	m_paused.data = 0;
-	m_stretchMode = gqt4_config->stretchMode();
-	m_fastBlur = gqt4_config->fastBlur();
-	m_aspectRatioConstraint = gqt4_config->aspectRatioConstraint();
-	m_aspectRatioConstraint_changed = true;
-	m_bilinearFilter = gqt4_config->bilinearFilter();
-	m_pauseTint = gqt4_config->pauseTint();
 	
 	// Initialize the FPS manager.
 	resetFps();
 	
 	// Initialize the OSD settings.
-	m_osdFpsEnabled = gqt4_config->osdFpsEnabled();
-	m_osdFpsColor   = gqt4_config->osdFpsColor();
-	m_osdMsgEnabled = gqt4_config->osdMsgEnabled();
-	m_osdMsgColor   = gqt4_config->osdMsgColor();
+	m_cfg_osdFpsEnabled = gqt4_cfg->get(QLatin1String("OSD/fpsEnabled")).toBool();
+	m_cfg_osdFpsColor   = gqt4_cfg->get(QLatin1String("OSD/fpsColor")).value<QColor>();
+	if (!m_cfg_osdFpsColor.isValid())
+		m_cfg_osdFpsColor = QColor(Qt::white);
+	m_cfg_osdMsgEnabled = gqt4_cfg->get(QLatin1String("OSD/msgEnabled")).toBool();
+	m_cfg_osdMsgColor   = gqt4_cfg->get(QLatin1String("OSD/msgColor")).value<QColor>();
+	if (!m_cfg_osdMsgColor.isValid())
+		m_cfg_osdMsgColor = QColor(Qt::white);
+	
 	m_osdLockCnt = 0;	// OSD lock counter.
 	setOsdListDirty();	// TODO: Set this on startup?
+	
+	/** OSD settings: Signals. **/
+	// TODO: Reconnect signals if ConfigStore is deleted/recreated?
+	gqt4_cfg->registerChangeNotification(QLatin1String("OSD/fpsEnabled"),
+					this, SLOT(osdFpsEnabled_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("OSD/fpsColor"),
+					this, SLOT(osdFpsColor_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("OSD/msgEnabled"),
+					this, SLOT(osdMsgEnabled_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("OSD/msgColor"),
+					this, SLOT(osdMsgColor_changed_slot(QVariant)));
 	
 	// Clear the preview image.
 	m_preview_show = false;
 	
 	// Create the message timer.
 	m_msgTimer = new MsgTimer(this);
-	
-	// Connect signals from GensConfig.
-	// TODO: Reconnect signals if GensConfig is deleted/recreated.
-	connect(gqt4_config, SIGNAL(osdFpsEnabled_changed(bool)),
-		this, SLOT(setOsdFpsEnabled(bool)));
-	connect(gqt4_config, SIGNAL(osdFpsColor_changed(QColor)),
-		this, SLOT(setOsdFpsColor(QColor)));
-	connect(gqt4_config, SIGNAL(osdMsgEnabled_changed(bool)),
-		this, SLOT(setOsdMsgEnabled(bool)));
-	connect(gqt4_config, SIGNAL(osdMsgColor_changed(QColor)),
-		this, SLOT(setOsdMsgColor(QColor)));
-	
-	// Video effect settings.
-	connect(gqt4_config, SIGNAL(fastBlur_changed(bool)),
-		this, SLOT(setFastBlur(bool)));
-	connect(gqt4_config, SIGNAL(aspectRatioConstraint_changed(bool)),
-		this, SLOT(setAspectRatioConstraint(bool)));
-	connect(gqt4_config, SIGNAL(bilinearFilter_changed(bool)),
-		this, SLOT(setBilinearFilter(bool)));
-	connect(gqt4_config, SIGNAL(pauseTint_changed(bool)),
-		this, SLOT(setPauseTint(bool)));
-	connect(gqt4_config, SIGNAL(stretchMode_changed(GensConfig::StretchMode_t)),
-		this, SLOT(setStretchMode(GensConfig::StretchMode_t)));
 }
 
 VBackend::~VBackend()
 {
 	// Delete internal objects.
 	delete m_msgTimer;	// Message timer.
-	delete m_intScreen;	// Internal screen buffer.
+	m_intScreen->unref();	// Internal screen buffer.
 }
 
 
@@ -171,7 +186,7 @@ void VBackend::setPaused(paused_t newPaused)
 	// Update VBackend on one of the following conditions:
 	// - Manual pause changed and pause tint is enabled.
 	// - FPS is enabled.
-	if ((pause_manual_changed && gqt4_config->pauseTint()) || osdFpsEnabled())
+	if ((pause_manual_changed && m_cfg_pauseTint) || osdFpsEnabled())
 	{
 		// Update the video backend.
 		if (isRunning())
@@ -190,42 +205,34 @@ void VBackend::setPaused(paused_t newPaused)
 
 
 /**
- * setStretchMode(): Set the stretch mode setting.
- * @param newStretchMode New stretch mode setting.
+ * stretchMode_changed_slot(): Stretch mode setting has changed.
+ * @param newStretchMode (int) New stretch mode setting.
  */
-void VBackend::setStretchMode(GensConfig::StretchMode_t newStretchMode)
+void VBackend::stretchMode_changed_slot(const QVariant& newStretchMode)
 {
-	if ((m_stretchMode == newStretchMode) ||
-	    (newStretchMode < GensConfig::STRETCH_NONE) ||
-	    (newStretchMode > GensConfig::STRETCH_FULL))
-	{
-		return;
-	}
-	
-	// Update the stretch mode setting.
-	m_stretchMode = newStretchMode;
+	m_cfg_stretchMode = (StretchMode_t)newStretchMode.toInt();
 	
 	// Print a message to the OSD.
 	//: OSD message indicating the Stretch Mode has been changed.
 	QString msg = tr("Stretch Mode set to %1.", "osd-stretch");
-	switch (m_stretchMode)
+	switch (m_cfg_stretchMode)
 	{
-		case GensConfig::STRETCH_NONE:
+		case STRETCH_NONE:
 			//: OSD message indicating the Stretch Mode has been set to None.
 			msg = msg.arg(tr("None", "osd-stretch"));
 			break;
 		
-		case GensConfig::STRETCH_H:
+		case STRETCH_H:
 			//: OSD message indicating the Stretch Mode has been set to Horizontal.
 			msg = msg.arg(tr("Horizontal", "osd-stretch"));
 			break;
 		
-		case GensConfig::STRETCH_V:
+		case STRETCH_V:
 			//: OSD message indicating the Stretch Mode has been set to Vertical.
 			msg = msg.arg(tr("Vertical", "osd-stretch"));
 			break;
 		
-		case GensConfig::STRETCH_FULL:
+		case STRETCH_FULL:
 			//: OSD message indicating the Stretch Mode has been set to Full.
 			msg = msg.arg(tr("Full", "osd-stretch"));
 			break;
@@ -248,19 +255,16 @@ void VBackend::setStretchMode(GensConfig::StretchMode_t newStretchMode)
 
 
 /**
- * setFastBlur(): Set the Fast Blur effect setting.
- * @param newFastBlur True to enable Fast Blur; false to disable it.
+ * fastBlur_changed_slot(): Fast Blur effect has changed.
+ * @param newFastBlur (bool) New Fast Blur effect setting.
  */
-void VBackend::setFastBlur(bool newFastBlur)
+void VBackend::fastBlur_changed_slot(const QVariant& newFastBlur)
 {
-	if (m_fastBlur == newFastBlur)
-		return;
-	
-	// Update the Fast Blur setting.
-	m_fastBlur = newFastBlur;
+	// Save the new Fast Blur setting.
+	m_cfg_fastBlur = newFastBlur.toBool();
 	
 	// Print a message to the OSD.
-	if (m_fastBlur)
+	if (m_cfg_fastBlur)
 	{
 		//: OSD message indicating Fast Blur has been enabled.
 		osd_printqs(1500, tr("Fast Blur enabled.", "osd"));
@@ -281,16 +285,15 @@ void VBackend::setFastBlur(bool newFastBlur)
 
 
 /**
- * setAspectRatioConstraint(): Set the aspect ratio constraint setting.
- * @param newAspectRatioConstraint True to enable Aspect Ratio Constraint; false to disable it.
+ * Aspect ratio constraint setting has changed.
+ * @param newAspectRatioConstraint (bool) New aspect ratio constraint setting.
  */
-void VBackend::setAspectRatioConstraint(bool newAspectRatioConstraint)
+void VBackend::aspectRatioConstraint_changed_slot(const QVariant& newAspectRatioConstraint)
 {
-	if (m_aspectRatioConstraint == newAspectRatioConstraint)
-		return;
+	// Save the new Aspect Ratio Constraint setting.
+	m_cfg_aspectRatioConstraint = newAspectRatioConstraint.toBool();
 	
-	// Update the Aspect Ratio Constraint setting.
-	m_aspectRatioConstraint = newAspectRatioConstraint;
+	// Aspect Ratio Constraint setting has changed.
 	m_aspectRatioConstraint_changed = true;
 	
 	// Update the Video Backend even when not running.
@@ -303,16 +306,13 @@ void VBackend::setAspectRatioConstraint(bool newAspectRatioConstraint)
 
 
 /**
- * setBilinearFilter(): Set the bilinear filter setting.
- * @param newBilinearFilter True to enable bilinear filtering; false to disable it.
+ * Bilinear Filter setting has changed.
+ * @param newBilinearFilter (bool) New bilinear filter setting.
  */
-void VBackend::setBilinearFilter(bool newBilinearFilter)
+void VBackend::bilinearFilter_changed_slot(const QVariant& newBilinearFilter)
 {
-	if (m_bilinearFilter == newBilinearFilter)
-		return;
-	
-	// Update the Aspect Ratio Constraint setting.
-	m_bilinearFilter = newBilinearFilter;
+	// Save the new Bilinear Filter setting.
+	m_cfg_bilinearFilter = newBilinearFilter.toBool();
 	
 	// TODO: Only if paused, or regardless of pause?
 	if (!isRunning() || isPaused())
@@ -324,16 +324,13 @@ void VBackend::setBilinearFilter(bool newBilinearFilter)
 
 
 /**
- * setPauseTint(): Set the Pause Tint effect setting.
- * @param newFastBlur True to enable Pause Tint; false to disable it.
+ * Pause Tint effect setting has changed.
+ * @param newPauseTint (bool) New pause tint effect setting.
  */
-void VBackend::setPauseTint(bool newPauseTint)
+void VBackend::pauseTint_changed_slot(const QVariant& newPauseTint)
 {
-	if (m_pauseTint == newPauseTint)
-		return;
-	
-	// Update the Pause Tint setting.
-	m_pauseTint = newPauseTint;
+	// Save the new Pause Tint effect setting.
+	m_cfg_pauseTint = newPauseTint.toBool();
 	
 	// Update the video backend if emulation is running,
 	// and if we're currently paused manually.
@@ -346,44 +343,11 @@ void VBackend::setPauseTint(bool newPauseTint)
 
 
 /**
- * setRunning(): Set the emulation running state.
- * @param newIsRunning True if emulation is running; false if it isn't.
- */
-void VBackend::setRunning(bool newIsRunning)
-{
-	if (m_running == newIsRunning)
-		return;
-	
-	m_running = newIsRunning;
-	
-	// Mark the OSD list as dirty if the FPS counter is visible.
-	if (osdFpsEnabled())
-	{
-		setOsdListDirty();
-		if (!isRunning())
-		{
-			// Emulation isn't running.
-			// Update the display immediately.
-			vbUpdate();
-		}
-	}
-	
-	// If emulation isn't running or emulation is paused, start the message timer.
-	if (!isRunning() || isPaused())
-		m_msgTimer->start();
-}
-
-
-/**
- * updatePausedEffect(): Update the Paused effect.
+ * Update the Paused effect.
  * @param fromMdScreen If true, copies MD_Screen[] to m_intScreen.
  */
 void VBackend::updatePausedEffect(bool fromMdScreen)
 {
-	// Allocate the internal framebuffer, if necessary.
-	if (!m_intScreen)
-		m_intScreen = new LibGens::MdFb();
-	
 	// Use LibGens' software paused effect function.
 	LibGens::PausedEffect::DoPausedEffect(m_intScreen, fromMdScreen);
 	
@@ -393,15 +357,11 @@ void VBackend::updatePausedEffect(bool fromMdScreen)
 
 
 /**
- * updateFastBlur(): Update the Fast Blur effect.
+ * Update the Fast Blur effect.
  * @param fromMdScreen If true, copies MD_Screen[] to m_intScreen.
  */
 void VBackend::updateFastBlur(bool fromMdScreen)
 {
-	// Allocate the internal framebuffer, if necessary.
-	if (!m_intScreen)
-		m_intScreen = new LibGens::MdFb();
-	
 	// Use LibGens' software paused effect function.
 	LibGens::FastBlur::DoFastBlur(m_intScreen, fromMdScreen);
 	
@@ -411,7 +371,7 @@ void VBackend::updateFastBlur(bool fromMdScreen)
 
 
 /**
- * osd_vprintf(): Print formatted text to the screen.
+ * Print formatted text to the screen.
  * @param duration Duration for the message to appear, in milliseconds.
  * @param msg Message to write. (printf-formatted)
  * @param ap Format arguments.
@@ -438,7 +398,7 @@ void VBackend::osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
 
 
 /**
- * osd_vprintf(): Print text to the screen.
+ * Print text to the screen.
  * @param duration Duration for the message to appear, in milliseconds.
  * @param msg Message to write.
  */
@@ -621,17 +581,15 @@ void VBackend::pushFps(double fps)
 
 
 /**
- * setOsdFpsEnabled(): Set the OSD FPS counter visibility setting.
- * @param enable True to show FPS; false to hide FPS.
+ * osdFpsEnabled_changed_slot(): OSD FPS counter visibility setting has changed.
+ * @param enable New OSD FPS counter visibility setting.
  */
-void VBackend::setOsdFpsEnabled(bool enable)
+void VBackend::osdFpsEnabled_changed_slot(const QVariant& enable)
 {
-	if (m_osdFpsEnabled == enable)
-		return;
+	m_cfg_osdFpsEnabled = enable.toBool();
 	
-	// Update the Show FPS setting.
-	m_osdFpsEnabled = enable;
-	setVbDirty();		// TODO: Texture doesn't really need to be reuploaded...
+	// TODO: Texture doesn't really need to be reuploaded...
+	setVbDirty();
 	
 	// Mark the OSD list as dirty if the emulator is running.
 	if (isRunning())
@@ -640,16 +598,12 @@ void VBackend::setOsdFpsEnabled(bool enable)
 
 
 /**
- * setOsdFpsColor(): Set the OSD FPS counter color.
- * @param color New OSD FPS counter color.
+ * osdFpsColor_changed_slot(): OSD FPS counter color has changed.
+ * @param var_color New OSD FPS counter color.
  */
-void VBackend::setOsdFpsColor(const QColor& color)
+void VBackend::osdFpsColor_changed_slot(const QVariant& var_color)
 {
-	if (!color.isValid() || m_osdFpsColor == color)
-		return;
-	
-	// Update the FPS counter color.
-	m_osdFpsColor = color;
+	m_cfg_osdFpsColor = var_color.value<QColor>();
 	
 	if (osdFpsEnabled() && isRunning())
 	{
@@ -662,17 +616,15 @@ void VBackend::setOsdFpsColor(const QColor& color)
 
 
 /**
- * setOsdMsgEnabled(): Set the OSD Message visibility setting.
- * @param enable True to show messages; false to hide messages.
+ * osdMsgEnabled_changed_slot(): OSD Message visibility setting has changed.
+ * @param enable New OSD Message visibility setting.
  */
-void VBackend::setOsdMsgEnabled(bool enable)
+void VBackend::osdMsgEnabled_changed_slot(const QVariant& enable)
 {
-	if (m_osdMsgEnabled == enable)
-		return;
+	m_cfg_osdMsgEnabled = enable.toBool();
 	
-	// Update the Show FPS setting.
-	m_osdMsgEnabled = enable;
-	setVbDirty();		// TODO: Texture doesn't really need to be reuploaded...
+	// TODO: Texture doesn't really need to be reuploaded...
+	setVbDirty();
 	
 	// Mark the OSD list as dirty if the emulator is running.
 	if (isRunning())
@@ -681,16 +633,12 @@ void VBackend::setOsdMsgEnabled(bool enable)
 
 
 /**
- * setOsdMsgColor(): Set the OSD Message color.
- * @param color New OSD Message color.
+ * osdMsgColor_changed_slot(): OSD Message color has changed.
+ * @param var_color New OSD Message color.
  */
-void VBackend::setOsdMsgColor(const QColor& color)
+void VBackend::osdMsgColor_changed_slot(const QVariant& var_color)
 {
-	if (!color.isValid() || m_osdMsgColor == color)
-		return;
-	
-	// Update the message color.
-	m_osdMsgColor = color;
+	m_cfg_osdMsgColor = var_color.value<QColor>();
 	
 	if (osdMsgEnabled() && !m_osdList.isEmpty())
 	{
@@ -829,5 +777,37 @@ int VBackend::recSetDuration(const QString& component, int duration)
 	return 0;
 }
 
+
+/**
+ * setEmuContext(): Set the emulation context for this video backend.
+ * @param newEmuContext New emulation context.
+ */
+void VBackend::setEmuContext(LibGens::EmuContext *newEmuContext)
+{
+	// Lock m_emuContext while updating.
+	QMutexLocker lockEmuContext(&m_mtxEmuContext);
+	if (m_emuContext == newEmuContext)
+		return;
+	m_emuContext = newEmuContext;
+	lockEmuContext.unlock();
+	
+	// setEmuContext() replaces setRunning().
+	// Mark the OSD list as dirty if the FPS counter is visible.
+	if (osdFpsEnabled())
+		setOsdListDirty();
+	
+	setVbDirty();
+	setMdScreenDirty();
+	
+	// TODO: Should we update the video buffer here?
+	// Updated if there's no emulation contextor if emulation is paused.
+	if (!newEmuContext || isPaused())
+		vbUpdate();
+	
+	// If there's no emulation context or emulation is paused,
+	// start the message timer.
+	if (!newEmuContext || isPaused())
+		m_msgTimer->start();
 }
 
+}

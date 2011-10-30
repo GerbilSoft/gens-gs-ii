@@ -22,27 +22,9 @@
 #ifndef __LIBZOMG_ZOMG_BYTESWAP_H__
 #define __LIBZOMG_ZOMG_BYTESWAP_H__
 
-#include <stdint.h>
-
-// Endianness defines ported from libsdl.
-// TODO: Figure out how to do this in CMake.
-#define ZOMG_LIL_ENDIAN 1234
-#define ZOMG_BIG_ENDIAN 4321
-#ifndef ZOMG_BYTEORDER
-#if defined(__hppa__) || \
-    defined(__m68k__) || defined(mc68000) || defined(_M_M68K) || \
-    (defined(__MIPS__) && defined(__MIPSEB__)) || \
-    defined(__ppc__) || defined(__ppc64__) || \
-    defined(__powerpc__) || defined(__powerpc64__) || \
-    defined(__POWERPC__) || defined(__POWERPC64__) || \
-    defined(_M_PPC) || \
-    defined(__armeb__) || defined(__ARMEB__) || \
-    defined(__SPARC__)
-#define ZOMG_BYTEORDER ZOMG_BIG_ENDIAN
-#else
-#define ZOMG_BYTEORDER ZOMG_LIL_ENDIAN
-#endif
-#endif
+// NOTE: This file is generated at compile-time.
+// It's located in the binary directory.
+#include "libzomg/zomg_byteorder.h"
 
 #define __swab16(x) (((x) << 8) | ((x) >> 8))
 

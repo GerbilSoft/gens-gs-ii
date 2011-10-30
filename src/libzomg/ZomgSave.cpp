@@ -230,7 +230,10 @@ int Zomg::saveVRam(const void *vram, size_t siz, bool byteswap)
 		uint16_t *bswap_buf = (uint16_t*)malloc(siz);
 		memcpy(bswap_buf, vram, siz);
 		cpu_to_be16_array(bswap_buf, siz);
-		return saveToZomg("common/VRam.bin", bswap_buf, siz);
+		
+		int ret = saveToZomg("common/VRam.bin", bswap_buf, siz);
+		free(bswap_buf);
+		return ret;
 	}
 	else
 #endif
@@ -243,28 +246,21 @@ int Zomg::saveVRam(const void *vram, size_t siz, bool byteswap)
 /**
  * saveCRam(): Save CRam.
  * File: common/CRam.bin
- * @param vram Destination buffer for CRam.
- * @param siz Number of bytes to read.
- * @param byteswap If true, byteswap from host-endian 16-bit.
+ * @param cram Destination buffer for CRam.
  * @return 0 on success; non-zero on error.
  * TODO: Apply byteswapping only for MD.
  */
-int Zomg::saveCRam(const void *cram, size_t siz, bool byteswap)
+int Zomg::saveCRam(const Zomg_CRam_t *cram)
 {
 #if ZOMG_BYTEORDER == ZOMG_LIL_ENDIAN
-	if (byteswap)
-	{
-		// TODO: Byteswapping memcpy().
-		uint16_t *bswap_buf = (uint16_t*)malloc(siz);
-		memcpy(bswap_buf, cram, siz);
-		cpu_to_be16_array(bswap_buf, siz);
-		return saveToZomg("common/CRam.bin", bswap_buf, siz);
-	}
-	else
+	// TODO: Byteswapping memcpy().
+	Zomg_CRam_t bswap_buf;
+	memcpy(bswap_buf.md, cram->md, sizeof(bswap_buf.md));
+	cpu_to_be16_array(bswap_buf.md, sizeof(bswap_buf.md));
+	return saveToZomg("common/CRam.bin", bswap_buf.md, sizeof(bswap_buf.md));
+#else
+	return saveToZomg("common/CRam.bin", cram->md, sizeof(cram->md));
 #endif
-	{
-		return saveToZomg("common/CRam.bin", cram, siz);
-	}
 }
 
 
@@ -286,7 +282,10 @@ int Zomg::saveMD_VSRam(const uint16_t *vsram, size_t siz, bool byteswap)
 		uint16_t *bswap_buf = (uint16_t*)malloc(siz);
 		memcpy(bswap_buf, vsram, siz);
 		cpu_to_be16_array(bswap_buf, siz);
-		return saveToZomg("MD/VSRam.bin", bswap_buf, siz);
+		
+		int ret = saveToZomg("MD/VSRam.bin", bswap_buf, siz);
+		free(bswap_buf);
+		return ret;
 	}
 	else
 #endif
@@ -414,7 +413,10 @@ int Zomg::saveM68KMem(const uint16_t *mem, size_t siz, bool byteswap)
 		uint16_t *bswap_buf = (uint16_t*)malloc(siz);
 		memcpy(bswap_buf, mem, siz);
 		cpu_to_be16_array(bswap_buf, siz);
-		return saveToZomg("MD/M68K_mem.bin", bswap_buf, siz);
+		
+		int ret = saveToZomg("MD/M68K_mem.bin", bswap_buf, siz);
+		free(bswap_buf);
+		return ret;
 	}
 	else
 #endif

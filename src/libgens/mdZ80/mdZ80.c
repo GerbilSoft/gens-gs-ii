@@ -25,6 +25,11 @@
 
 // C includes.
 #include <string.h>
+#include <stddef.h>
+#include <stdlib.h>
+
+// Z80 context definition.
+#include "mdZ80_context.h"
 
 // Z80 flag and state definitions.
 #include "mdZ80_flags.h"
@@ -32,21 +37,26 @@
 // Default instruction fetch area. (Consists of HALT opcodes.)
 static uint8_t mdZ80_insn_fetch[256];
 
+/*! Z80 context allocation. **/
+
 /**
- * mdZ80_init(): Initialize a Z80 context.
- * @param z80 Pointer to Z80 context.
+ * Create a new Z80 context.
+ * @return New Z80 context, or NULL on error.
  */
-void mdZ80_init(Z80_CONTEXT *z80)
+mdZ80_context *mdZ80_new(void)
 {
-	// Clear the entire Z80 struct.
-	memset(z80, 0x00, sizeof(Z80_CONTEXT));
+	// Create a new Z80 context.
+	mdZ80_context *z80 = (mdZ80_context*)calloc(1, sizeof(mdZ80_context));
+	if (!z80)
+		return NULL;
 	
 	// Initialize the default instruction fetch area.
-	for (size_t i = 0; i < sizeof(mdZ80_insn_fetch); i++)
+	// TODO: Only initialize this once!
+	for (size_t i = 0; i < (sizeof(mdZ80_insn_fetch)/sizeof(mdZ80_insn_fetch[0])); i++)
 		mdZ80_insn_fetch[i] = 0x76;	// HLT
 	
 	// Initialize Fetch[].
-	for (size_t i = 0; i < sizeof(z80->Fetch); i++)
+	for (size_t i = 0; i < (sizeof(z80->Fetch)/sizeof(z80->Fetch[0])); i++)
 		z80->Fetch[i] = (mdZ80_insn_fetch - (i * 256));
 	
 	// Set up the default memory and I/O handlers.
@@ -54,159 +64,88 @@ void mdZ80_init(Z80_CONTEXT *z80)
 	z80->WriteB = mdZ80_def_WriteB;
 	z80->IN_C = mdZ80_def_In;
 	z80->OUT_C = mdZ80_def_Out;
+	
+	// Return the new Z80 context.
+	return z80;
 }
 
-
 /**
- * mdZ80_reset(): Reset the Z80 CPU.
+ * Free a Z80 context.
  * @param z80 Pointer to Z80 context.
  */
-void mdZ80_reset(Z80_CONTEXT *z80)
+void mdZ80_free(mdZ80_context *z80)
+{
+	free(z80);
+}
+
+/**
+ * Reset the Z80 CPU. (Hard Reset)
+ * Resets *all* parameters, including cycle count.
+ * @param z80 Pointer to Z80 context.
+ */
+void mdZ80_hard_reset(mdZ80_context *z80)
 {
 	// Save the Z80 Cycle Count.
 	unsigned int cycleCnt = z80->CycleCnt;
 	
 	// Clear the Z80 struct up to CycleSup.
-	memset(z80, 0x00, 23*4);
+	// NOTE: offsetof() is used to prevent issues if the struct is resized.
+	memset(z80, 0x00, offsetof(mdZ80_context, Fetch));
 	
 	// Restore the Z80 Cycle Count.
 	z80->CycleCnt = cycleCnt;
 	
-	// Initialize the program counter.
-	mdZ80_set_PC(z80, 0);
+	// TODO: Initialize registers to 0xFFFF?
+	// Gens and genplus-gx initialize them to 0,
+	// except for specific registers in Soft Reset.
 	
-	// Initialize the index and flag registers.
-	z80->IX.d = 0xFFFF;
-	z80->IY.d = 0xFFFF;
-	z80->AF.d = 0x4000;
+	// Initialize the registers using Soft Reset.
+	mdZ80_soft_reset(z80);
 }
-
 
 /**
- * mdZ80_get_PC(): Get the Z80 program counter.
+ * Reset the Z80 CPU.
+ * This is equivalent to asserting the !RESET line.
  * @param z80 Pointer to Z80 context.
- * @return Z80 program counter, or -1 (0xFFFFFFFF) if the Z80 is running.
  */
-unsigned int mdZ80_get_PC(Z80_CONTEXT *z80)
+void mdZ80_soft_reset(mdZ80_context *z80)
 {
-	if (z80->Status & Z80_STATE_RUNNING)
-		return -1;
+	/**
+	 * References:
+	 * [1] "The Undocumented Z80 Docuemnted" by Sean Young, v0.91 (2005/09/18)
+	 * [2] http://gs_server.gerbilsoft.ddns.info/bugs/show_bug.cgi?id=47
+	 */
 	
-	// Subtract the BasePC from PC to get the actual Z80 program counter.
-	return (z80->PC.d - z80->BasePC);
+	// NOTE: Both [1] and [2] say that other registers are *not* touched
+	// when !RESET is asserted, so they're left as-is.
+	
+	// TODO: Write a test program for MD, then test it on actual hardware.
+	
+	// Z80 program starts at 0x0000.
+	mdZ80_set_PC(z80, 0);	// old Gens; [1]
+	
+	// TODO: Are IX and IY actually reset on !RESET?
+	z80->IX.w = 0xFFFF;	// old Gens; also genplus-gx
+	z80->IY.w = 0xFFFF;	// old Gens; also genplus-gx
+	
+	// TODO: Initialize AF2 to 0xFFFF?
+	mdZ80_set_AF(z80, 0xFFFF);	// [1]; Gens originally used 0x4000 (ZF only).
+	z80->SP.w = 0xFFFF;		// [1]
+	z80->IFF = 0;			// [1]
+	z80->R = 0;			// [2]
+	z80->I = 0;			// [2]
+	z80->IM = 0;			// [1]
 }
 
 
-/**
- * mdZ80_set_PC(): Set the Z80 program counter.
- * @param z80 Pointer to Z80 context.
- * @param PC New program counter.
- */
-void mdZ80_set_PC(Z80_CONTEXT *z80, unsigned int PC)
-{
-	if (z80->Status & Z80_STATE_RUNNING)
-		return;
-	
-	// TODO: 32-bit specific code will break on 64-bit!
-	PC &= 0xFFFF;
-	unsigned int newPC = (unsigned int)(z80->Fetch[PC >> 8]);
-	z80->BasePC = newPC;
-	z80->PC.d = newPC + PC;
-}
-
-
-/**
- * mdZ0_get_AF(): Get the AF register.
- * @param z80 Pointer to Z80 context.
- * @return AF register, or -1 during z80_Exec().
- */
-unsigned int mdZ80_get_AF(Z80_CONTEXT *z80)
-{
-	if (z80->Status & Z80_STATE_RUNNING)
-		return -1;
-	
-	// F register.
-	// The X and Y flags are stored separately from the
-	// rest of the flags for some reason.
-	unsigned char F = (z80->AF.b.F & ~(Z80_FLAG_X | Z80_FLAG_Y)) |
-			  (z80->AF.b.FXY & (Z80_FLAG_X | Z80_FLAG_Y));
-	
-	// Return AF.
-	return ((z80->AF.b.A << 8) | F);
-}
-
-
-/**
- * mdZ80_set_AF(): Set the AF register.
- * @param z80 Pointer to Z80 context.
- * @param newAF New AF register value.
- */
-void mdZ80_set_AF(Z80_CONTEXT *z80, unsigned int newAF)
-{
-	if (z80->Status & Z80_STATE_RUNNING)
-		return;
-	
-	// Set the A register.
-	z80->AF.b.A = (newAF >> 8) & 0xFF;
-	
-	// Set the F register.
-	newAF &= 0xFF;
-	z80->AF.b.F = newAF & ~(Z80_FLAG_X | Z80_FLAG_Y);
-	
-	// Set the FXY register.
-	z80->AF.b.FXY = newAF & (Z80_FLAG_X | Z80_FLAG_Y);
-}
-
-
-/**
- * mdZ80_get_AF2(): Get the AF' register.
- * @param z80 Pointer to Z80 context.
- * @return AF' register, or -1 during z80_Exec().
- */
-unsigned int mdZ80_get_AF2(Z80_CONTEXT *z80)
-{
-	if (z80->Status & Z80_STATE_RUNNING)
-		return -1;
-	
-	// F' register.
-	// The X and Y flags are stored separately from the
-	// rest of the flags for some reason.
-	unsigned char F2 = (z80->AF2.b.F2 & ~(Z80_FLAG_X | Z80_FLAG_Y)) |
-			  (z80->AF2.b.FXY2 & (Z80_FLAG_X | Z80_FLAG_Y));
-	
-	// Return AF'.
-	return ((z80->AF2.b.A2 << 8) | F2);
-}
-
-
-/**
- * mdZ0_set_AF2(): Set the AF' register.
- * @param z80 Pointer to Z80 context.
- * @param newAF New AF' register value.
- */
-void mdZ80_set_AF2(Z80_CONTEXT *z80, unsigned int newAF2)
-{
-	if (z80->Status & Z80_STATE_RUNNING)
-		return;
-	
-	// Set the A' register.
-	z80->AF2.b.A2 = (newAF2 >> 8) & 0xFF;
-	
-	// Set the F' register.
-	newAF2 &= 0xFF;
-	z80->AF2.b.F2 = newAF2 & ~(Z80_FLAG_X | Z80_FLAG_Y);
-	
-	// Set the FXY2 register.
-	z80->AF2.b.FXY2 = newAF2 & (Z80_FLAG_X | Z80_FLAG_Y);
-}
-
+/*! Odometer (clock cycle) functions. **/
 
 /**
  * mdZ80_read_odo(): Read the Z80 odometer.
  * @param z80 Pointer to Z80 context.
  * @return Z80 odometer, or -1 during z80_Exec().
  */
-unsigned int mdZ80_read_odo(Z80_CONTEXT *z80)
+unsigned int mdZ80_read_odo(mdZ80_context *z80)
 {
 	if (z80->Status & Z80_STATE_RUNNING)
 		return -1;
@@ -220,9 +159,19 @@ unsigned int mdZ80_read_odo(Z80_CONTEXT *z80)
  * @param z80 Pointer to Z80 context.
  * @param odo New value for the Z80 odometer.
  */
-void mdZ80_set_odo(Z80_CONTEXT *z80, unsigned int odo)
+void mdZ80_set_odo(mdZ80_context *z80, unsigned int odo)
 {
 	z80->CycleCnt = odo;
+}
+
+
+/**
+ * Clear the Z80 odometer.
+ * @param z80 Pointer to Z80 context.
+ */
+void mdZ80_clear_odo(mdZ80_context *z80)
+{
+	z80->CycleCnt = 0;
 }
 
 
@@ -231,7 +180,7 @@ void mdZ80_set_odo(Z80_CONTEXT *z80, unsigned int odo)
  * @param z80 Pointer to Z80 context.
  * @param cycles Number of cycles to add.
  */
-void mdZ80_add_cycles(Z80_CONTEXT *z80, unsigned int cycles)
+void mdZ80_add_cycles(mdZ80_context *z80, unsigned int cycles)
 {
 	if (z80->Status & Z80_STATE_RUNNING)
 	{
@@ -250,10 +199,10 @@ void mdZ80_add_cycles(Z80_CONTEXT *z80, unsigned int cycles)
  * mdZ80_nmi(): Raise a non-maskable interrupt.
  * @param z80 Pointer to Z80 context.
  */
-void mdZ80_nmi(Z80_CONTEXT *z80)
+void mdZ80_nmi(mdZ80_context *z80)
 {
 	z80->IntVect = 0x66;
-	z80->IntLine = 0x80;
+	z80->IntLine = 0x80;	// NMI flag.
 	
 	// If the Z80 is currently running, don't do anything else.
 	if (z80->Status & Z80_STATE_RUNNING)
@@ -271,11 +220,11 @@ void mdZ80_nmi(Z80_CONTEXT *z80)
  * @param z80 Pointer to Z80 context.
  * @param vector Interrupt vector.
  */
-void mdZ80_interrupt(Z80_CONTEXT *z80, unsigned char vector)
+void mdZ80_interrupt(mdZ80_context *z80, unsigned char vector)
 {
 	// Set the interrupt data.
 	z80->IntVect = vector;
-	z80->IntLine = Z80_FLAG_P;	// because of IFF mask
+	z80->IntLine = 0x01;	// IFF1 flag.
 	
 	// If the Z80 is currently running, don't do anything else.
 	if (z80->Status & Z80_STATE_RUNNING)
@@ -331,7 +280,7 @@ void FASTCALL mdZ80_def_Out(uint32_t address, uint8_t data)
  * @param z80 Z80 context.
  * @param func ReadB handler.
  */
-void mdZ80_Set_ReadB(Z80_CONTEXT *z80, Z80_RB *func)
+void mdZ80_Set_ReadB(mdZ80_context *z80, Z80_RB *func)
 {
 	z80->ReadB = (func ? func : mdZ80_def_ReadB);
 }
@@ -341,7 +290,7 @@ void mdZ80_Set_ReadB(Z80_CONTEXT *z80, Z80_RB *func)
  * @param z80 Z80 context.
  * @param func WriteB handler.
  */
-void mdZ80_Set_WriteB(Z80_CONTEXT *z80, Z80_WB *func)
+void mdZ80_Set_WriteB(mdZ80_context *z80, Z80_WB *func)
 {
 	z80->WriteB = (func ? func : mdZ80_def_WriteB);
 }
@@ -351,7 +300,7 @@ void mdZ80_Set_WriteB(Z80_CONTEXT *z80, Z80_WB *func)
  * @param z80 Z80 context.
  * @param func I/O IN handler.
  */
-void mdZ80_Set_In(Z80_CONTEXT *z80, Z80_RB *func)
+void mdZ80_Set_In(mdZ80_context *z80, Z80_RB *func)
 {
 	z80->IN_C = (func ? func : mdZ80_def_In);
 }
@@ -361,7 +310,7 @@ void mdZ80_Set_In(Z80_CONTEXT *z80, Z80_RB *func)
  * @param z80 Z80 context.
  * @param func I/O OUT handler.
  */
-void mdZ80_Set_Out(Z80_CONTEXT *z80, Z80_WB *func)
+void mdZ80_Set_Out(mdZ80_context *z80, Z80_WB *func)
 {
 	z80->OUT_C = (func ? func : mdZ80_def_Out);
 }
@@ -374,7 +323,7 @@ void mdZ80_Set_Out(Z80_CONTEXT *z80, Z80_WB *func)
  * @param high_adr High page.
  * @param region Memory region.
  */
-void mdZ80_Add_Fetch(Z80_CONTEXT *z80, uint8_t low_adr, uint8_t high_adr, uint8_t *region)
+void mdZ80_Add_Fetch(mdZ80_context *z80, uint8_t low_adr, uint8_t high_adr, uint8_t *region)
 {
 	region -= (low_adr << 8);
 	for (int i = low_adr; i <= high_adr; i++)

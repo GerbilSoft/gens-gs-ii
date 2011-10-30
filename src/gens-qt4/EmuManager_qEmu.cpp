@@ -54,6 +54,7 @@
 #include <QtCore/QBuffer>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
+#include <QtCore/QVariant>
 #include <QtGui/QApplication>
 #include <QtGui/QImage>
 #include <QtGui/QImageReader>
@@ -150,7 +151,7 @@ void EmuManager::saveState(void)
 	
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_SAVE_STATE;
-	rq.saveState.filename = strdup(filename.toUtf8().constData());
+	rq.saveState.filename = new QString(filename);
 	rq.saveState.saveSlot = m_saveSlot;
 	m_qEmuRequest.enqueue(rq);
 	
@@ -171,7 +172,7 @@ void EmuManager::loadState(void)
 	
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_LOAD_STATE;
-	rq.saveState.filename = strdup(filename.toUtf8().constData());
+	rq.saveState.filename = new QString(filename);
 	rq.saveState.saveSlot = m_saveSlot;
 	m_qEmuRequest.enqueue(rq);
 	
@@ -248,19 +249,17 @@ void EmuManager::pauseRequest(paused_t newPaused)
 
 /**
  * saveSlot_changed_slot(): Save slot changed.
- * @param newSaveSlot Save slot number, (0-9)
+ * @param saveSlot (int) Save slot number, (0-9)
  */
-void EmuManager::saveSlot_changed_slot(int newSaveSlot)
+void EmuManager::saveSlot_changed_slot(const QVariant& saveSlot)
 {
 	// NOTE: Don't check if the save slot is the same.
 	// This allows users to recheck a savestate's preview image.
-	if (newSaveSlot < 0 || newSaveSlot > 9)
-		return;
 	
 	// Queue the save slot request.
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_SAVE_SLOT;
-	rq.saveState.saveSlot = newSaveSlot;
+	rq.saveState.saveSlot = saveSlot.toInt();
 	m_qEmuRequest.enqueue(rq);
 	
 	if (!m_rom || m_paused.data)
@@ -270,14 +269,14 @@ void EmuManager::saveSlot_changed_slot(int newSaveSlot)
 
 /**
  * enableSRam_changed_slot(): Enable SRam/EEPRom setting has changed.
- * @param newEnableSRam New Enable SRam/EEPRom setting.
+ * @param enableSRam (bool) New Enable SRam/EEPRom setting.
  */
-void EmuManager::enableSRam_changed_slot(bool newEnableSRam)
+void EmuManager::enableSRam_changed_slot(const QVariant& enableSRam)
 {
 	// Queue the Enable SRam/EEPRom request.
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_ENABLE_SRAM;
-	rq.enableSRam = newEnableSRam;
+	rq.enableSRam = enableSRam.toBool();
 	m_qEmuRequest.enqueue(rq);
 	
 	if (!m_rom || m_paused.data)
@@ -287,14 +286,14 @@ void EmuManager::enableSRam_changed_slot(bool newEnableSRam)
 
 /**
  * autoFixChecksum_changed_slot(): Change the Auto Fix Checksum setting.
- * @param newAutoFixChecksum New Auto Fix Checksum setting.
+ * @param autoFixChecksum (bool) New Auto Fix Checksum setting.
  */
-void EmuManager::autoFixChecksum_changed_slot(bool newAutoFixChecksum)
+void EmuManager::autoFixChecksum_changed_slot(const QVariant& autoFixChecksum)
 {
 	// Queue the autofix checksum change request.
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_AUTOFIX_CHANGE;
-	rq.autoFixChecksum = newAutoFixChecksum;
+	rq.autoFixChecksum = autoFixChecksum.toBool();
 	m_qEmuRequest.enqueue(rq);
 	
 	if (!m_rom || m_paused.data)
@@ -304,10 +303,9 @@ void EmuManager::autoFixChecksum_changed_slot(bool newAutoFixChecksum)
 
 /**
  * regionCode_changed_slot(): Region code has changed.
- * @param newRegionCode New region code setting.
+ * @param regionCode (int) New region code setting.
  */
-// NOTE: Uses LibGens::SysVersion::RegionCode_t, but Q_ENUMS requires a QObject for storage.
-void EmuManager::regionCode_changed_slot(int newRegionCode)
+void EmuManager::regionCode_changed_slot(const QVariant& regionCode)
 {
 	// NOTE: Region code change is processed even if a ROM isn't loaded,
 	// since we're printing a message to the screen.
@@ -315,7 +313,7 @@ void EmuManager::regionCode_changed_slot(int newRegionCode)
 	// Queue the region code change.
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_REGION_CODE;
-	rq.region = (LibGens::SysVersion::RegionCode_t)newRegionCode;
+	rq.region = (LibGens::SysVersion::RegionCode_t)regionCode.toInt();
 	m_qEmuRequest.enqueue(rq);
 	
 	if (!m_rom || m_paused.data)
@@ -325,18 +323,22 @@ void EmuManager::regionCode_changed_slot(int newRegionCode)
 
 /**
  * regionCodeOrder_changed_slot(): Region code auto-detection order has changed.
- * @param newRegionCodeOrder New region code auto-detection order setting.
+ * @param regionCodeOrder New region code auto-detection order setting.
  */
-void EmuManager::regionCodeOrder_changed_slot(uint16_t newRegionCodeOrder)
+void EmuManager::regionCodeOrder_changed_slot(const QVariant& regionCodeOrder)
 {
 	if (!m_rom)
 		return;
-	if (gqt4_config->regionCode() != LibGens::SysVersion::REGION_AUTO)
-		return;
 	
-	// NOTE: The region code order passed as newRegionCodeOrder
-	// isn't actually used by the emulation request queue.
-	Q_UNUSED(newRegionCodeOrder)
+	// regionCodeOrder isn't actually used here...
+	Q_UNUSED(regionCodeOrder);
+	
+	// If we're not using region code auto-detection, don't do anything else.
+	if (gqt4_cfg->getInt(QLatin1String("System/regionCode")) !=
+	    (int)LibGens::SysVersion::REGION_AUTO)
+	{
+		return;
+	}
 	
 	// Auto-detect order has changed, and we're currently using auto-detect.
 	// Handle it as a regular region code change.
@@ -390,6 +392,35 @@ void EmuManager::changePaletteSetting(EmuRequest_t::PaletteSettingType type, int
 }
 
 
+/** Graphics settings. **/
+
+void EmuManager::contrast_changed_slot(const QVariant& contrast)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_CONTRAST, contrast.toBool()); }
+void EmuManager::brightness_changed_slot(const QVariant& brightness)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_BRIGHTNESS, brightness.toInt()); }
+void EmuManager::grayscale_changed_slot(const QVariant& grayscale)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_GRAYSCALE, (int)grayscale.toBool()); }
+void EmuManager::inverted_changed_slot(const QVariant& inverted)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_INVERTED, (int)inverted.toBool()); }
+void EmuManager::colorScaleMethod_changed_slot(const QVariant& colorScaleMethod)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_COLORSCALEMETHOD, colorScaleMethod.toInt()); }
+void EmuManager::interlacedMode_changed_slot(const QVariant& interlacedMode)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_INTERLACEDMODE, interlacedMode.toInt()); }
+
+/** VDP settings. **/
+
+void EmuManager::borderColorEmulation_changed_slot(const QVariant& borderColorEmulation)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_BORDERCOLOREMULATION, (int)borderColorEmulation.toBool()); }
+void EmuManager::ntscV30Rolling_changed_slot(const QVariant& ntscV30Rolling)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_NTSCV30ROLLING, (int)ntscV30Rolling.toBool()); }
+void EmuManager::spriteLimits_changed_slot(const QVariant& spriteLimits)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_SPRITELIMITS, (int)spriteLimits.toBool()); }
+void EmuManager::zeroLengthDMA_changed_slot(const QVariant& zeroLengthDMA)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_ZEROLENGTHDMA, (int)zeroLengthDMA.toBool()); }
+void EmuManager::vscrollBug_changed_slot(const QVariant& vscrollBug)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_VSCROLLBUG, (int)vscrollBug.toBool()); }
+
+
 /** Emulation Request Queue: Processing functions. **/
 
 
@@ -421,14 +452,14 @@ void EmuManager::processQEmuRequest(void)
 			
 			case EmuRequest_t::RQT_SAVE_STATE:
 				// Save a savestate.
-				doSaveState(rq.saveState.filename, rq.saveState.saveSlot);
-				free(rq.saveState.filename);
+				doSaveState(*rq.saveState.filename, rq.saveState.saveSlot);
+				delete rq.saveState.filename;
 				break;
 			
 			case EmuRequest_t::RQT_LOAD_STATE:
 				// Load a savestate.
-				doLoadState(rq.saveState.filename, rq.saveState.saveSlot);
-				free(rq.saveState.filename);
+				doLoadState(*rq.saveState.filename, rq.saveState.saveSlot);
+				delete rq.saveState.filename;
 				break;
 			
 			case EmuRequest_t::RQT_SAVE_SLOT:
@@ -487,24 +518,30 @@ void EmuManager::processQEmuRequest(void)
  */
 QImage EmuManager::getMDScreen(void) const
 {
+	if (!gqt4_emuContext)
+		return QImage();
+	
+	// Get the color depth.
+	const LibGens::VdpPalette::ColorDepth bpp = gqt4_emuContext->m_vdp->m_palette.bpp();
+	
 	// Create the QImage.
 	const uint8_t *start;
-	const int startY = ((240 - LibGens::Vdp::GetVPix()) / 2);
-	const int startX = (LibGens::Vdp::GetHPixBegin());
+	const int startY = ((240 - gqt4_emuContext->m_vdp->GetVPix()) / 2);
+	const int startX = (gqt4_emuContext->m_vdp->GetHPixBegin());
 	int bytesPerLine;
 	QImage::Format imgFormat;
 	
-	if (LibGens::Vdp::m_palette.bpp() == LibGens::VdpPalette::BPP_32)
+	if (bpp == LibGens::VdpPalette::BPP_32)
 	{
-		start = (const uint8_t*)(LibGens::Vdp::MD_Screen.lineBuf32(startY) + startX);
-		bytesPerLine = (LibGens::Vdp::MD_Screen.pxPerLine() * sizeof(uint32_t));
+		start = (const uint8_t*)(gqt4_emuContext->m_vdp->MD_Screen->lineBuf32(startY) + startX);
+		bytesPerLine = (gqt4_emuContext->m_vdp->MD_Screen->pxPitch() * sizeof(uint32_t));
 		imgFormat = QImage::Format_RGB32;
 	}
 	else
 	{
-		start = (const uint8_t*)(LibGens::Vdp::MD_Screen.lineBuf16(startY) + startX);
-		bytesPerLine = (LibGens::Vdp::MD_Screen.pxPerLine() * sizeof(uint16_t));
-		if (LibGens::Vdp::m_palette.bpp() == LibGens::VdpPalette::BPP_16)
+		start = (const uint8_t*)(gqt4_emuContext->m_vdp->MD_Screen->lineBuf16(startY) + startX);
+		bytesPerLine = (gqt4_emuContext->m_vdp->MD_Screen->pxPitch() * sizeof(uint16_t));
+		if (bpp == LibGens::VdpPalette::BPP_16)
 			imgFormat = QImage::Format_RGB16;
 		else
 			imgFormat = QImage::Format_RGB555;
@@ -512,8 +549,8 @@ QImage EmuManager::getMDScreen(void) const
 	
 	// TODO: Check for errors.
 	// TODO: Store timestamp, ROM filename, etc.
-	return QImage(start, LibGens::Vdp::GetHPix(),
-			LibGens::Vdp::GetVPix(),
+	return QImage(start, gqt4_emuContext->m_vdp->GetHPix(),
+			gqt4_emuContext->m_vdp->GetVPix(),
 			bytesPerLine, imgFormat);	
 }
 
@@ -532,7 +569,7 @@ void EmuManager::doScreenShot(void)
 	// Add the current directory, number, and .png extension.
 	// TODO: Enumerate QImageWriter for supported image formats.
 	const QString scrFilenamePrefix =
-		gqt4_config->userPath(GensConfig::GCPATH_SCREENSHOTS) + QChar(L'/') + romFilename;
+		gqt4_cfg->configPath(PathConfig::GCPATH_SCREENSHOTS) + romFilename;
 	const QString scrFilenameSuffix = QLatin1String(".png");
 	QString scrFilename;
 	int scrNumber = -1;
@@ -602,7 +639,7 @@ void EmuManager::doAudioStereo(bool newStereo)
  * @param filename Filename.
  * @param saveSlot Save slot number. (0-9)
  */
-void EmuManager::doSaveState(const char *filename, int saveSlot)
+void EmuManager::doSaveState(const QString& filename, int saveSlot)
 {
 	// Create the preview image.
 	QImage img = getMDScreen();
@@ -611,13 +648,14 @@ void EmuManager::doSaveState(const char *filename, int saveSlot)
 	imgWriter.write(img);
 	
 	// Save the ZOMG file.
-	int ret = LibGens::ZomgSave(filename,			// ZOMG filename.
+	const QString nativeFilename = QDir::toNativeSeparators(filename);
+	int ret = LibGens::ZomgSave(
+				nativeFilename.toUtf8().constData(),	// ZOMG filename.
 				gqt4_emuContext,		// Emulation context.
 				imgBuf.buffer().constData(),	// Preview image.
 				imgBuf.buffer().size()		// Size of preview image.
 				);
 	
-	QString sFilename = QString::fromUtf8(filename);
 	QString osdMsg;
 	
 	if (ret == 0)
@@ -631,7 +669,7 @@ void EmuManager::doSaveState(const char *filename, int saveSlot)
 		else
 		{
 			//: OSD message indicating a savestate has been saved using a specified filename
-			osdMsg = tr("State saved in %1", "osd").arg(sFilename);
+			osdMsg = tr("State saved in %1", "osd").arg(nativeFilename);
 		}
 	}
 	else
@@ -651,12 +689,14 @@ void EmuManager::doSaveState(const char *filename, int saveSlot)
  * @param filename Filename.
  * @param saveSlot Save slot number. (0-9)
  */
-void EmuManager::doLoadState(const char *filename, int saveSlot)
+void EmuManager::doLoadState(const QString& filename, int saveSlot)
 {
 	// TODO: Redraw the screen if emulation is paused.
-	int ret = LibGens::ZomgLoad(filename, gqt4_emuContext);
 	
-	QString sFilename = QString::fromUtf8(filename);
+	// Load the ZOMG file.
+	const QString nativeFilename = QDir::toNativeSeparators(filename);
+	int ret = LibGens::ZomgLoad(nativeFilename.toUtf8().constData(), gqt4_emuContext);
+	
 	QString osdMsg;
 	
 	if (ret == 0)
@@ -670,7 +710,7 @@ void EmuManager::doLoadState(const char *filename, int saveSlot)
 		else
 		{
 			//: OSD message indicating a savestate has been loaded using a specified filename
-			osdMsg = tr("State loaded from %1", "osd").arg(sFilename);
+			osdMsg = tr("State loaded from %1", "osd").arg(nativeFilename);
 		}
 	}
 	else
@@ -724,7 +764,8 @@ void EmuManager::doSaveSlot(int newSaveSlot)
 		osdMsg = osdMsg.arg(tr("OCCUPIED", "osd"));
 		
 		// Check if the savestate has a preview image.
-		LibZomg::Zomg zomg(filename.toUtf8().constData(), LibZomg::Zomg::ZOMG_LOAD);
+		QString nativeFilename = QDir::toNativeSeparators(filename);
+		LibZomg::Zomg zomg(nativeFilename.toUtf8().constData(), LibZomg::Zomg::ZOMG_LOAD);
 		if (zomg.getPreviewSize() > 0)
 		{
 			// Preview image found.
@@ -799,7 +840,7 @@ void EmuManager::doResetEmulator(bool hardReset)
 	// TODO: Move this call to EmuMD::hardReset() / EmuMD::softReset()?
 	// (That'll require setting a static option in EmuContext.)
 	// TODO: Automatically fix/unfix checksum when the option is changed?
-	if (gqt4_config->autoFixChecksum())
+	if (gqt4_cfg->get(QLatin1String("autoFixChecksum")).toBool())
 		gqt4_emuContext->fixChecksum();
 	else
 		gqt4_emuContext->restoreChecksum();
@@ -833,27 +874,32 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 	// NOTE: gens-qt4 uses values [-100,100] for contrast and brightness.
 	// libgens uses [0,200] for contrast and brightness.
 	
+	// TODO: Initialize palette settings on ROM startup.
+	if (!gqt4_emuContext)
+		return;
+	LibGens::VdpPalette *palette = &gqt4_emuContext->m_vdp->m_palette;
+	
 	switch (type)
 	{
 		case EmuRequest_t::RQT_PS_CONTRAST:
-			LibGens::Vdp::m_palette.setContrast(val + 100);
+			palette->setContrast(val + 100);
 			break;
 		
 		case EmuRequest_t::RQT_PS_BRIGHTNESS:
-			LibGens::Vdp::m_palette.setBrightness(val + 100);
+			palette->setBrightness(val + 100);
 			break;
 		
 		case EmuRequest_t::RQT_PS_GRAYSCALE:
-			LibGens::Vdp::m_palette.setGrayscale((bool)(!!val));
+			palette->setGrayscale((bool)(!!val));
 			break;
 		
 		case EmuRequest_t::RQT_PS_INVERTED:
-			LibGens::Vdp::m_palette.setInverted((bool)(!!val));
+			palette->setInverted((bool)(!!val));
 			break;
 		
 		case EmuRequest_t::RQT_PS_COLORSCALEMETHOD:
-			LibGens::Vdp::m_palette.setColorScaleMethod(
-						(LibGens::VdpPalette::ColorScaleMethod_t)val);
+			palette->setColorScaleMethod(
+					(LibGens::VdpPalette::ColorScaleMethod_t)val);
 			break;
 		
 		case EmuRequest_t::RQT_PS_INTERLACEDMODE:
@@ -899,6 +945,26 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 			break;
 		}
 		
+		case EmuRequest_t::RQT_PS_BORDERCOLOREMULATION:
+			LibGens::Vdp::VdpEmuOptions.borderColorEmulation = (bool)(!!val);
+			break;
+		
+		case EmuRequest_t::RQT_PS_NTSCV30ROLLING:
+			LibGens::Vdp::VdpEmuOptions.ntscV30Rolling = (bool)(!!val);
+			break;
+		
+		case EmuRequest_t::RQT_PS_SPRITELIMITS:
+			LibGens::Vdp::VdpEmuOptions.spriteLimits = (bool)(!!val);
+			break;
+		
+		case EmuRequest_t::RQT_PS_ZEROLENGTHDMA:
+			LibGens::Vdp::VdpEmuOptions.zeroLengthDMA = (bool)(!!val);
+			break;
+		
+		case EmuRequest_t::RQT_PS_VSCROLLBUG:
+			LibGens::Vdp::VdpEmuOptions.vscrollBug = (bool)(!!val);
+			break;
+		
 		default:
 			break;
 	}
@@ -923,7 +989,8 @@ void EmuManager::doResetCpu(EmuManager::ResetCpuIndex cpu_idx)
 			break;
 		
 		case RQT_CPU_Z80:
-			LibGens::Z80::Reset();
+			LibGens::Z80::SoftReset();
+			// TODO: Add Z80 hard reset option?
 			//: OSD message indicating the Z80 CPU was reset.
 			msg = tr("Z80 reset.", "osd");
 			break;
@@ -953,13 +1020,15 @@ void EmuManager::doRegionCode(LibGens::SysVersion::RegionCode_t region)
 	const QString str = tr("System region set to %1.", "osd");
 	emit osdPrintMsg(1500, str.arg(region_str));
 	
+	// NOTE: Region code order validation isn't needed here,
+	// since it's done elsewhere.
 	if (m_rom)
 	{
 		// Emulation is running. Change the region.
 		// GetLgRegionCode() is needed for region auto-detection.
 		LibGens::SysVersion::RegionCode_t lg_region = GetLgRegionCode(
 					region, m_rom->regionCode(),
-					gqt4_config->regionCodeOrder());
+					(uint16_t)gqt4_cfg->getUInt(QLatin1String("System/regionCodeOrder")));
 		gqt4_emuContext->setRegion(lg_region);
 		
 		if (region == LibGens::SysVersion::REGION_AUTO)

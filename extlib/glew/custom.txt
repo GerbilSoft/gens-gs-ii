@@ -1,0 +1,53 @@
+# GLEW required extensions.
+WGL_ARB_extensions_string
+WGL_EXT_extensions_string
+WGL_ARB_pixel_format
+WGL_ARB_pbuffer
+WGL_NV_float_buffer
+WGL_ATI_pixel_format_float
+WGL_ARB_multisample
+
+# GLEW required extensions on X11.
+GLX_ARB_get_proc_address
+
+# Gens/GS II extensions.
+
+# OpenGL versions.
+GL_VERSION_1_0
+GL_VERSION_1_1
+GL_VERSION_1_2
+
+# Pixel formats.
+# BGRA is required.
+# Packed pixels is required for 15-bit/16-bit color.
+GL_EXT_bgra
+GL_EXT_packed_pixels
+
+# Vertical sync.
+WGL_EXT_swap_control
+GLX_EXT_swap_control
+GLX_SGI_swap_control
+GLX_MESA_swap_control
+GLX_SGI_video_sync
+
+# Rectangle texture.
+GL_ARB_texture_rectangle
+GL_EXT_texture_rectangle
+GL_NV_texture_rectangle
+
+# GL_ARB_multitexture.
+# (required by shaders)
+GL_ARB_multitexture
+
+# ATI fragment shaders.
+GL_ATI_fragment_shader
+GL_ATI_text_fragment_shader
+
+# GL Shading Language.
+GL_ARB_fragment_program
+GL_ARB_vertex_program
+GL_ARB_vertex_shader
+GL_EXT_vertex_shader
+GL_ARB_fragment_shader
+GL_ARB_shader_objects
+GL_ARB_shading_language_100

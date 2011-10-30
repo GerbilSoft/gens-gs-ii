@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA *
  ******************************************************************************/
 
-#include <config.h>
+#include <gens-qt4/config.gens-qt4.h>
 
 #include "EmuManager.hpp"
 #include "gqt4_main.hpp"
@@ -72,8 +72,9 @@
 namespace GensQt4
 {
 
-EmuManager::EmuManager(QObject *parent)
+EmuManager::EmuManager(QObject *parent, VBackend *vBackend)
 	: QObject(parent)
+	, m_vBackend(vBackend)
 {
 	// Initialize timing information.
 	m_lastTime = 0.0;
@@ -84,8 +85,16 @@ EmuManager::EmuManager(QObject *parent)
 	m_rom = NULL;
 	m_paused.data = 0;
 	
+	// If a video backend is specified, connect its destroyed() signal.
+	if (m_vBackend)
+	{
+		connect(m_vBackend, SIGNAL(destroyed(QObject*)),
+			this, SLOT(vBackend_destroyed(QObject*)));
+	}
+	
 	// Save slot.
-	m_saveSlot = gqt4_config->saveSlot();
+	// TODO: Move saveSlot validation intn ConfigStore
+	m_saveSlot = gqt4_cfg->getInt(QLatin1String("Savestates/saveSlot")) % 10;
 	
 	// TODO: Load initial VdpPalette settings.
 	
@@ -94,35 +103,47 @@ EmuManager::EmuManager(QObject *parent)
 	// NOTE: Audio backends are NOT QWidgets!
 	m_audio = new GensPortAudio();
 	
-	// Connect the configuration slots.
-	connect(gqt4_config, SIGNAL(saveSlot_changed(int)),
-		this, SLOT(saveSlot_changed_slot(int)));
-	connect(gqt4_config, SIGNAL(autoFixChecksum_changed(bool)),
-		this, SLOT(autoFixChecksum_changed_slot(bool)));
+	// Configuration settings.
+	gqt4_cfg->registerChangeNotification(QLatin1String("Savestates/saveSlot"),
+					this, SLOT(saveSlot_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("autoFixChecksum"),
+					this, SLOT(autoFixChecksum_changed_slot(QVariant)));
 	
 	// Graphics settings.
-	connect(gqt4_config, SIGNAL(contrast_changed(int)),
-		this, SLOT(contrast_changed_slot(int)));
-	connect(gqt4_config, SIGNAL(brightness_changed(int)),
-		this, SLOT(brightness_changed_slot(int)));
-	connect(gqt4_config, SIGNAL(grayscale_changed(bool)),
-		this, SLOT(grayscale_changed_slot(bool)));
-	connect(gqt4_config, SIGNAL(inverted_changed(bool)),
-		this, SLOT(inverted_changed_slot(bool)));
-	connect(gqt4_config, SIGNAL(colorScaleMethod_changed(int)),
-		this, SLOT(colorScaleMethod_changed_slot(int)));
-	connect(gqt4_config, SIGNAL(interlacedMode_changed(GensConfig::InterlacedMode_t)),
-		this, SLOT(interlacedMode_changed_slot(GensConfig::InterlacedMode_t)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/contrast"),
+					this, SLOT(contrast_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/brightness"),
+					this, SLOT(brightness_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/grayscale"),
+					this, SLOT(grayscale_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/inverted"),
+					this, SLOT(inverted_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/colorScaleMethod"),
+					this, SLOT(colorScaleMethod_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/interlacedMode"),
+					this, SLOT(interlacedMode_changed_slot(QVariant)));
+	
+	// VDP settings.
+	gqt4_cfg->registerChangeNotification(QLatin1String("VDP/borderColorEmulation"),
+					this, SLOT(borderColorEmulation_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("VDP/ntscV30Rolling"),
+					this, SLOT(ntscV30Rolling_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("VDP/spriteLimits"),
+					this, SLOT(spriteLimits_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("VDP/zeroLengthDMA"),
+					this, SLOT(zeroLengthDMA_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("VDP/vscrollBug"),
+					this, SLOT(vscrollBug_changed_slot(QVariant)));
 	
 	// Region code settings.
-	connect(gqt4_config, SIGNAL(regionCode_changed(int)),
-		this, SLOT(regionCode_changed_slot(int)));	// LibGens::SysVersion::RegionCode_t
-	connect(gqt4_config, SIGNAL(regionCodeOrder_changed(uint16_t)),
-		this, SLOT(regionCodeOrder_changed_slot(uint16_t)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("System/regionCode"),
+					this, SLOT(regionCode_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("System/regionCodeOrder"),
+					this, SLOT(regionCodeOrder_changed_slot(QVariant)));
 	
 	// Emulation options. (Options menu)
-	connect(gqt4_config, SIGNAL(enableSRam_changed(bool)),
-		this, SLOT(enableSRam_changed_slot(bool)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Options/enableSRam"),
+					this, SLOT(enableSRam_changed_slot(QVariant)));
 }
 
 EmuManager::~EmuManager()
@@ -256,7 +277,7 @@ int EmuManager::openRom(const QString& filename, QString z_filename)
 	
 	// Add the ROM file to the Recent ROMs list.
 	// TODO: Don't do this if the ROM couldn't be loaded.
-	gqt4_config->m_recentRoms->update(filename, z_filename, rom->sysId());
+	gqt4_cfg->recentRomsUpdate(filename, z_filename, rom->sysId());
 	
 	// Load the selected ROM file.
 	return loadRom(rom);
@@ -381,12 +402,14 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	}
 	
 	// Determine the system region code.
-	LibGens::SysVersion::RegionCode_t lg_region = GetLgRegionCode(
-				(LibGens::SysVersion::RegionCode_t)gqt4_config->regionCode(),
-				rom->regionCode(),
-				gqt4_config->regionCodeOrder());
+	const LibGens::SysVersion::RegionCode_t cfg_region =
+				(LibGens::SysVersion::RegionCode_t)gqt4_cfg->getInt(QLatin1String("System/regionCode"));
 	
-	if (gqt4_config->regionCode() == LibGens::SysVersion::REGION_AUTO)
+	const LibGens::SysVersion::RegionCode_t lg_region = GetLgRegionCode(
+				cfg_region, rom->regionCode(),
+				(uint16_t)gqt4_cfg->getUInt(QLatin1String("System/regionCodeOrder")));
+	
+	if (cfg_region == LibGens::SysVersion::REGION_AUTO)
 	{
 		// Print the auto-detected region.
 		const QString detect_str = LgRegionCodeStr(lg_region);
@@ -398,9 +421,18 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 		}
 	}
 	
+	// Autofix Checksum.
+	// NOTE: This must be set *before* creating the emulation context!
+	// Otherwise, it won't work until Hard Reset.
+	LibGens::EmuContext::SetAutoFixChecksum(
+			gqt4_cfg->get(QLatin1String("autoFixChecksum")).toBool());
+	
 	// Create a new MD emulation context.
+	// FIXME: Delete gqt4_emuContext after VBackend is finished using it. (MEMORY LEAK)
+	m_vBackend->setEmuContext(NULL);
 	delete gqt4_emuContext;
 	gqt4_emuContext = new LibGens::EmuMD(rom, lg_region);
+	m_vBackend->setEmuContext(gqt4_emuContext);
 	rom->close();	// TODO: Let EmuMD handle this...
 	
 	if (!gqt4_emuContext->isRomOpened())
@@ -409,6 +441,7 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 		// TODO: EmuMD error code constants.
 		// TODO: Show an error message.
 		fprintf(stderr, "Error: Initialization of gqt4_emuContext failed. (TODO: Error code.)\n");
+		m_vBackend->setEmuContext(NULL);
 		delete gqt4_emuContext;
 		gqt4_emuContext = NULL;
 		delete rom;
@@ -431,13 +464,37 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	m_frames = 0;
 	
 	// Initialize controllers.
-	gqt4_config->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port1, CtrlConfig::PORT_1);
-	gqt4_config->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port2, CtrlConfig::PORT_2);
-	gqt4_config->m_ctrlConfig->clearDirty();
+	// TODO: Rework this with the upcoming all-in-one IoManager.
+	gqt4_cfg->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port1, CtrlConfig::PORT_1);
+	gqt4_cfg->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port2, CtrlConfig::PORT_2);
+	gqt4_cfg->m_ctrlConfig->clearDirty();
 	
 	// Set the EmuContext settings.
 	// TODO: Load these in EmuContext directly?
-	gqt4_emuContext->setSaveDataEnable(gqt4_config->enableSRam());
+	gqt4_emuContext->setSaveDataEnable(gqt4_cfg->get(QLatin1String("Options/enableSRam")).toBool());
+	
+	// Initialize the graphics settings.
+	LibGens::VdpPalette *palette = &gqt4_emuContext->m_vdp->m_palette;
+	palette->setContrast(gqt4_cfg->getInt(QLatin1String("Graphics/contrast")) + 100);
+	palette->setBrightness(gqt4_cfg->getInt(QLatin1String("Graphics/brightness")) + 100);
+	palette->setGrayscale(gqt4_cfg->get(QLatin1String("Graphics/grayscale")).toBool());
+	palette->setInverted(gqt4_cfg->get(QLatin1String("Graphics/inverted")).toBool());
+	palette->setColorScaleMethod(
+			(LibGens::VdpPalette::ColorScaleMethod_t)gqt4_cfg->getInt(QLatin1String("Graphics/colorScaleMethod")));
+	LibGens::Vdp::VdpEmuOptions.intRendMode =
+			(LibGens::VdpTypes::IntRend_Mode_t)gqt4_cfg->getInt(QLatin1String("Graphics/interlacedMode"));
+	
+	// Initialize the VDP settings.
+	LibGens::Vdp::VdpEmuOptions.borderColorEmulation =
+			gqt4_cfg->get(QLatin1String("VDP/borderColorEmulation")).toBool();
+	LibGens::Vdp::VdpEmuOptions.ntscV30Rolling =
+			gqt4_cfg->get(QLatin1String("VDP/ntscV30Rolling")).toBool();
+	LibGens::Vdp::VdpEmuOptions.spriteLimits =
+			gqt4_cfg->get(QLatin1String("VDP/spriteLimits")).toBool();
+	LibGens::Vdp::VdpEmuOptions.zeroLengthDMA =
+			gqt4_cfg->get(QLatin1String("VDP/zeroLengthDMA")).toBool();
+	LibGens::Vdp::VdpEmuOptions.vscrollBug =
+			gqt4_cfg->get(QLatin1String("VDP/vscrollBug")).toBool();
 	
 	// Start the emulation thread.
 	m_paused.data = 0;
@@ -530,6 +587,8 @@ int EmuManager::closeRom(bool emitStateChanged)
 		gqt4_emuContext->saveData();
 		
 		// Delete the emulation context.
+		// FIXME: Delete gqt4_emuContext after VBackend is finished using it. (MEMORY LEAK)
+		m_vBackend->setEmuContext(NULL);
 		delete gqt4_emuContext;
 		gqt4_emuContext = NULL;
 		
@@ -549,12 +608,12 @@ int EmuManager::closeRom(bool emitStateChanged)
 	// clearing the screen is a waste of time.
 	if (emitStateChanged)
 	{
-		if (gqt4_config->introStyle() == 0)
+		const int introStyle = gqt4_cfg->getInt(QLatin1String("Intro_Effect/introStyle"));
+		if (introStyle == 0)
 		{
 			// Intro Effect is disabled.
 			// Clear the screen.
-			LibGens::Vdp::Reset();
-			emit updateVideo();
+			updateVBackend();
 		}
 		
 		// Update the Gens title.
@@ -571,14 +630,15 @@ int EmuManager::closeRom(bool emitStateChanged)
  */
 QString EmuManager::romName(void)
 {
-	if (!m_rom)
+	if (!m_rom || !gqt4_emuContext)
 		return QString();
 	
 	// TODO: This is MD/MCD/32X only!
+	// TODO: Multi-context spport.
 	
 	// Check the active system region.
 	const char *s_romName;
-	if (LibGens::M68K_Mem::ms_SysVersion.isEast())
+	if (gqt4_emuContext->versionRegisterObject()->isEast())
 	{
 		// East (JP). Return the domestic ROM name.
 		s_romName = m_rom->romNameJP();
@@ -614,16 +674,18 @@ QString EmuManager::romName(void)
  */
 QString EmuManager::sysName(void)
 {
-	if (!m_rom)
+	if (!m_rom || !gqt4_emuContext)
 		return QString();
 	
-	return SysName(m_rom->sysId(), LibGens::M68K_Mem::ms_SysVersion.region());
+	return SysName(m_rom->sysId(),
+			gqt4_emuContext->versionRegisterObject()->region());
 }
 
 
 /**
- * getSaveStateFilename(): Get the savestate filename.
+ * Get the savestate filename.
  * TODO: Move savestate code to another file?
+ * NOTE: Returned filename uses Qt directory separators. ('/')
  * @return Savestate filename, or empty string if no ROM is loaded.
  */
 QString EmuManager::getSaveStateFilename(void)
@@ -632,7 +694,7 @@ QString EmuManager::getSaveStateFilename(void)
 		return QString();
 	
 	const QString filename =
-		gqt4_config->userPath(GensConfig::GCPATH_SAVESTATES) +
+		gqt4_cfg->configPath(PathConfig::GCPATH_SAVESTATES) +
 		QString::fromUtf8(m_rom->filenameBaseNoExt()) +
 		QChar(L'.') + QString::number(m_saveSlot) +
 		QLatin1String(".zomg");
@@ -691,17 +753,18 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 		processQEmuRequest();
 	
 	// Check for controller configuration updates.
-	if (gqt4_config->m_ctrlConfig->isDirty())
+	// TODO: Rework this with the upcoming all-in-one IoManager.
+	if (gqt4_cfg->m_ctrlConfig->isDirty())
 	{
 		// Update the controller ports.
-		gqt4_config->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port1, CtrlConfig::PORT_1);
-		gqt4_config->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port2, CtrlConfig::PORT_2);
-		gqt4_config->m_ctrlConfig->clearDirty();
+		gqt4_cfg->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port1, CtrlConfig::PORT_1);
+		gqt4_cfg->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port2, CtrlConfig::PORT_2);
+		gqt4_cfg->m_ctrlConfig->clearDirty();
 	}
 	
-	// Update the GensQGLWidget.
+	// Update the Video Backend.
 	if (!wasFastFrame)
-		emit updateVideo();
+		updateVBackend();
 	
 	// If emulation is paused, don't resume the emulation thread.
 	if (m_paused.data)
@@ -722,7 +785,8 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	
 	// Check if we're higher or lower than the required framerate.
 	bool doFastFrame = false;
-	const double frameRate = (1.0 / (LibGens::M68K_Mem::ms_SysVersion.isPal() ? 50.0 : 60.0));
+	const double frameRate = (1.0 /
+			(gqt4_emuContext->versionRegisterObject()->isPal() ? 50.0 : 60.0));
 	const double threshold = 0.001;
 	if (timeDiff > (frameRate + threshold))
 	{
@@ -751,6 +815,55 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	// Tell the emulation thread that we're ready for another frame.
 	if (gqt4_emuThread)
 		gqt4_emuThread->resume(doFastFrame);
+}
+
+/** Video Backend. **/
+
+/**
+ * Set the Video Backend.
+ * @param vBackend Video Backend.
+ */
+void EmuManager::setVBackend(VBackend *vBackend)
+{
+	if (m_vBackend)
+	{
+		// Disconnect the destroyed() signal from the current VBackend.
+		disconnect(m_vBackend, SIGNAL(destroyed(QObject*)),
+			   this, SLOT(vBackend_destroyed(QObject*)));
+	}
+	
+	// Save the new Video Backend.
+	m_vBackend = vBackend;
+	
+	if (m_vBackend)
+	{
+		// Connect the destroyed() signal to the new VBackend.
+		connect(m_vBackend, SIGNAL(destroyed(QObject*)),
+			this, SLOT(vBackend_destroyed(QObject*)));
+	}
+}
+
+/**
+ * Video Backend was destroyed.
+ * @param obj VBackend object.
+ */
+void EmuManager::vBackend_destroyed(QObject *obj)
+{
+	if (m_vBackend == obj)
+		m_vBackend = NULL;
+}
+
+/**
+ * Update the Video Backend.
+ */
+void EmuManager::updateVBackend(void)
+{
+	if (!m_vBackend)
+		return;
+	
+	m_vBackend->setMdScreenDirty();
+	m_vBackend->setVbDirty();
+	m_vBackend->vbUpdate();
 }
 
 }

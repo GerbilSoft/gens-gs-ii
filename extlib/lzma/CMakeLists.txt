@@ -1,0 +1,10 @@
+# LZMA SDK 9.20, ANSI-C version.
+# http://www.7-zip.org/sdk.html
+
+# Subdirectories
+IF(USE_INTERNAL_LZMA)
+	ADD_SUBDIRECTORY(lzmabase)
+	IF(USE_INTERNAL_7z)
+		ADD_SUBDIRECTORY(7z)
+	ENDIF(USE_INTERNAL_7z)
+ENDIF(USE_INTERNAL_LZMA)

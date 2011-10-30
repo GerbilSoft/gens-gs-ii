@@ -23,7 +23,7 @@
 
 #include "RecentRomsMenu.hpp"
 
-// gqt4_config
+// gqt4_cfg
 #include "gqt4_main.hpp"
 
 // Menu item IDs.
@@ -44,11 +44,11 @@ namespace GensQt4
 class RecentRomsMenuPrivate
 {
 	public:
-		RecentRomsMenuPrivate(RecentRomsMenu *q, RecentRoms *initRecentRoms);
+		RecentRomsMenuPrivate(RecentRomsMenu *q, const RecentRoms *initRecentRoms);
 		
 		void init(void);
 		
-		void setRecentRoms(RecentRoms *newRecentRoms);
+		void setRecentRoms(const RecentRoms *newRecentRoms);
 		void update(void);
 		
 	private:
@@ -59,14 +59,14 @@ class RecentRomsMenuPrivate
 	
 	public:
 		// Recent ROMs class.
-		RecentRoms *recentRoms;
+		const RecentRoms *recentRoms;
 };
 
 /************************************
  * RecentRomsMenuPrivate functions. *
  ************************************/
 
-RecentRomsMenuPrivate::RecentRomsMenuPrivate(RecentRomsMenu *q, RecentRoms *initRecentRoms)
+RecentRomsMenuPrivate::RecentRomsMenuPrivate(RecentRomsMenu *q, const RecentRoms *initRecentRoms)
 	: q(q)
 	, m_signalMapper(new QSignalMapper(q))
 	, recentRoms(initRecentRoms)
@@ -74,7 +74,7 @@ RecentRomsMenuPrivate::RecentRomsMenuPrivate(RecentRomsMenu *q, RecentRoms *init
 
 
 /**
- * RecentRomsMenuPrivate::init(): Initialize RecentRomsMenuPrivate.
+ * Initialize RecentRomsMenuPrivate.
  */
 void RecentRomsMenuPrivate::init(void)
 {
@@ -98,10 +98,10 @@ void RecentRomsMenuPrivate::init(void)
 
 
 /**
- * RecentRomsMenuPrivate::setRecentRoms(): Set the Recent ROMs class this menu should represent.
+ * Set the Recent ROMs class this menu should represent.
  * @param newRecentRoms New Recent ROMs class, or NULL to unset.
  */
-inline void RecentRomsMenuPrivate::setRecentRoms(RecentRoms *newRecentRoms)
+inline void RecentRomsMenuPrivate::setRecentRoms(const RecentRoms *newRecentRoms)
 {
 	if (this->recentRoms == newRecentRoms)
 		return;
@@ -133,7 +133,7 @@ inline void RecentRomsMenuPrivate::setRecentRoms(RecentRoms *newRecentRoms)
 
 
 /**
- * update(): Update the Recent ROMs menu.
+ * Update the Recent ROMs menu.
  */
 void RecentRomsMenuPrivate::update(void)
 {
@@ -158,9 +158,13 @@ void RecentRomsMenuPrivate::update(void)
 	};
 	
 	int i = 1;
-	foreach(const RecentRom_t& rom, recentRoms->romList())
+	foreach (const RecentRom_t& rom, recentRoms->romList())
 	{
-		QString title = QChar(L'&') + QString::number(i) + QChar(L' ');
+		QString title;
+		title.reserve(rom.filename.size() + rom.z_filename.size() + 16);
+		
+		// Recent ROM number.
+		title += QChar(L'&') + QString::number(i) + QChar(L' ');
 		
 		// System ID.
 		title += QChar(L'[');
@@ -185,7 +189,7 @@ void RecentRomsMenuPrivate::update(void)
 		filename.replace(QChar(L'&'), QLatin1String("&&"));
 		
 		// Append the processed filename.
-		title += QLatin1String("\t ") + filename;
+		title += QChar(L' ') + filename;
 		
 		if (!rom.z_filename.isEmpty())
 		{
@@ -202,7 +206,7 @@ void RecentRomsMenuPrivate::update(void)
 		// Set the shortcut key.
 		// NOTE: The shortcut key won't show up due to the "\t" after the system ID.
 		const int mnuItemId = ((IDM_FILE_RECENT_1 - 1) + i);
-		GensKey_t gensKey = gqt4_config->actionToKey(mnuItemId);
+		GensKey_t gensKey = gqt4_cfg->actionToKey(mnuItemId);
 		action->setShortcut(KeyHandlerQt::KeyValMToQtKey(gensKey));
 		
 		// Connect the signal to the signal mapper.
@@ -226,7 +230,7 @@ void RecentRomsMenuPrivate::update(void)
  * RecentRomsMenu functions. *
  *****************************/
 
-RecentRomsMenu::RecentRomsMenu(QWidget* parent, RecentRoms* recentRoms)
+RecentRomsMenu::RecentRomsMenu(QWidget* parent, const RecentRoms* recentRoms)
 	: QMenu(parent)
 	, d(new RecentRomsMenuPrivate(this, recentRoms))
 {
@@ -234,7 +238,7 @@ RecentRomsMenu::RecentRomsMenu(QWidget* parent, RecentRoms* recentRoms)
 	d->init();
 }
 
-RecentRomsMenu::RecentRomsMenu(const QString& title, QWidget *parent, RecentRoms *recentRoms)
+RecentRomsMenu::RecentRomsMenu(const QString& title, QWidget *parent, const RecentRoms *recentRoms)
 	: QMenu(title, parent)
 	, d(new RecentRomsMenuPrivate(this, recentRoms))
 {
@@ -253,40 +257,34 @@ RecentRomsMenu::~RecentRomsMenu()
 
 
 /**
- * recentRoms(): Get the Recent ROMs class this menu is representing.
+ * Get the Recent ROMs class this menu is representing.
  * @return Recent ROMs class, or NULL if no class is assigned.
  */
-RecentRoms *RecentRomsMenu::recentRoms(void)
-{
-	return d->recentRoms;
-}
+const RecentRoms *RecentRomsMenu::recentRoms(void)
+	{ return d->recentRoms; }
 
 
 /**
- * RecentRomsMenu::setRecentRoms(): Set the Recent ROMs class this menu should represent.
+ * Set the Recent ROMs class this menu should represent.
  * WRAPPER FUNCTION for RecentRomsMenuPrivate::isDirty().
  * @param newRecentRoms New Recent ROMs class, or NULL to unset.
  */
-void RecentRomsMenu::setRecentRoms(RecentRoms *newRecentRoms)
+void RecentRomsMenu::setRecentRoms(const RecentRoms *newRecentRoms)
 	{ d->setRecentRoms(newRecentRoms); }
 
 
 /**
- * RecentRomsMenu::recentRomsDestroyed(): d->recentRoms was destroyed.
+ * d->recentRoms was destroyed.
  */
 void RecentRomsMenu::recentRomsDestroyed(void)
-{
-	d->recentRoms = NULL;
-}
+	{ d->recentRoms = NULL; }
 
 
 /**
- * RecentRomsMenu::recentRomsUpdated(): The Recent ROMs class has been updated.
+ * The Recent ROMs class has been updated.
  * Call d->update() to update the menu.
  */
 void RecentRomsMenu::recentRomsUpdated(void)
-{
-	d->update();
-}
+	{ d->update(); }
 
 }

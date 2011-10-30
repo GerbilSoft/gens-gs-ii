@@ -21,8 +21,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA *
  ******************************************************************************/
 
-#include <config.h>
-
 #include "GeneralConfigWindow.hpp"
 #include "gqt4_main.hpp"
 #include "GensQApplication.hpp"
@@ -62,9 +60,19 @@ const QString GeneralConfigWindow::ms_sWarning =
 	GeneralConfigWindow::tr("Warning:") +
 	QLatin1String("</b></span> ");
 
+/**
+ * Check if the warranty is void.
+ * If it is, we'll show some super secret settings.
+ * @return True if the warranty is void.
+ */
+static inline bool isWarrantyVoid(void)
+{
+	return (gqt4_cfg->get(QLatin1String("iKnowWhatImDoingAndWillVoidTheWarranty")).toBool());
+}
+
 
 /**
- * GeneralConfigWindow(): Initialize the General Configuration window.
+ * Initialize the General Configuration window.
  */
 GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	: QMainWindow(parent,
@@ -79,6 +87,46 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
+	
+	if (!isWarrantyVoid())
+	{
+		// Hide the super secret settings.
+		delete grpAdvancedVDP;
+		grpAdvancedVDP = NULL;
+	}
+	
+	// Create the action group for the toolbar buttons.
+	m_agBtnGroup = new QActionGroup(this);
+	m_agBtnGroup->setExclusive(true);
+	connect(m_agBtnGroup, SIGNAL(triggered(QAction*)),
+		this, SLOT(toolbarTriggered(QAction*)));
+
+	// FreeDesktop.org icon names for the toolbar buttons.
+	static const char *const icon_fdo[] =
+	{
+		"configure",			// General
+		"applications-graphics",	// Graphics
+		"cpu",				// VDP
+		"applications-system",		// System
+		"media-optical",		// Sega CD
+		"utilities-terminal",		// External Programs
+		NULL
+	};
+	
+	// Initialize the toolbar buttons.
+	int i = 0;
+	foreach (QAction *action, toolBar->actions())
+	{
+		action->setIcon(GensQApplication::IconFromTheme(QLatin1String(icon_fdo[i])));
+		action->setData(i);
+		m_agBtnGroup->addAction(action);
+		
+		// Next action.
+		i++;
+	}
+	
+	// Select the "General" tab.
+	actionGeneral->setChecked(true);
 	
 #ifndef GCW_APPLY_IMMED
 	// Set up a signal for the Apply button.
@@ -163,7 +211,7 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 
 
 /**
- * ~GeneralConfigWindow(): Shut down the Controller Configuration window.
+ * Shut down the Controller Configuration window.
  */
 GeneralConfigWindow::~GeneralConfigWindow()
 {
@@ -173,7 +221,7 @@ GeneralConfigWindow::~GeneralConfigWindow()
 
 
 /**
- * ShowSingle(): Show a single instance of the General Configuration window.
+ * Show a single instance of the General Configuration window.
  * @param parent Parent window.
  */
 void GeneralConfigWindow::ShowSingle(QWidget *parent)
@@ -194,7 +242,7 @@ void GeneralConfigWindow::ShowSingle(QWidget *parent)
 
 
 /**
- * keyPressEvent(): Key press handler.
+ * Key press handler.
  * @param event Key event.
  */
 void GeneralConfigWindow::keyPressEvent(QKeyEvent *event)
@@ -242,7 +290,7 @@ void GeneralConfigWindow::keyPressEvent(QKeyEvent *event)
 
 
 /**
- * changeEvent(): Widget state has changed.
+ * Widget state has changed.
  * @param event State change event.
  */
 void GeneralConfigWindow::changeEvent(QEvent *event)
@@ -280,7 +328,7 @@ void GeneralConfigWindow::changeEvent(QEvent *event)
 
 
 /**
- * accept(): Accept the configuration changes.
+ * Accept the configuration changes.
  * Triggered if "OK" is clicked.
  */
 void GeneralConfigWindow::accept(void)
@@ -291,7 +339,7 @@ void GeneralConfigWindow::accept(void)
 
 
 /**
- * reject(): Reject the configuration changes.
+ * Reject the configuration changes.
  * Triggered if "Cancel" is clicked.
  */
 void GeneralConfigWindow::reject(void)
@@ -302,7 +350,7 @@ void GeneralConfigWindow::reject(void)
 
 #ifndef GCW_APPLY_IMMED
 /**
- * setApplyButtonEnabled(): Enable or disable the Apply button.
+ * Enable or disable the Apply button.
  * @param enabled True to enable; false to disable.
  */
 void GeneralConfigWindow::setApplyButtonEnabled(bool enabled)
@@ -314,8 +362,19 @@ void GeneralConfigWindow::setApplyButtonEnabled(bool enabled)
 #endif
 
 
+static inline bool ValByPath_bool(const char *path)
+	{ return gqt4_cfg->get(QLatin1String(path)).toBool(); }
+static inline QColor ValByPath_QColor(const char *path)
+	{ return gqt4_cfg->get(QLatin1String(path)).value<QColor>(); }
+static inline int ValByPath_int(const char *path)
+	{ return gqt4_cfg->getInt(QLatin1String(path)); }
+static inline int ValByPath_uint(const char *path)
+	{ return gqt4_cfg->getUInt(QLatin1String(path)); }
+static inline QString ValByPath_QString(const char *path)
+	{ return gqt4_cfg->get(QLatin1String(path)).toString(); }
+
 /**
- * reload(): Reload configuration.
+ * Reload configuration.
  */
 void GeneralConfigWindow::reload(void)
 {
@@ -323,55 +382,63 @@ void GeneralConfigWindow::reload(void)
 	QColor colorText;
 	
 	/** Onscreen display: FPS counter. **/
-	chkOsdFpsEnable->setChecked(gqt4_config->osdFpsEnabled());
-	m_osdFpsColor = gqt4_config->osdFpsColor();
+	chkOsdFpsEnable->setChecked(ValByPath_bool("OSD/fpsEnabled"));
+	m_osdFpsColor = ValByPath_QColor("OSD/fpsColor");
 	btnOsdFpsColor->setBgColor(m_osdFpsColor);
 	btnOsdFpsColor->setText(m_osdFpsColor.name().toUpper());
 	
 	/** Onscreen display: Messages. **/
-	chkOsdMsgEnable->setChecked(gqt4_config->osdMsgEnabled());
-	m_osdMsgColor = gqt4_config->osdMsgColor();
+	chkOsdMsgEnable->setChecked(ValByPath_bool("OSD/msgEnabled"));
+	m_osdMsgColor = ValByPath_QColor("OSD/msgColor");
 	btnOsdMsgColor->setBgColor(m_osdMsgColor);
 	btnOsdMsgColor->setText(m_osdMsgColor.name().toUpper());
 	
+	/** General settings. **/
+	chkAutoFixChecksum->setChecked(ValByPath_bool("autoFixChecksum"));
+	chkAutoPause->setChecked(ValByPath_bool("autoPause"));
+	chkPauseTint->setChecked(ValByPath_bool("pauseTint"));
+	
 	/** Intro effect. **/
-	cboIntroStyle->setCurrentIndex(gqt4_config->introStyle());
-	cboIntroColor->setCurrentIndex(gqt4_config->introColor());
+	cboIntroStyle->setCurrentIndex(ValByPath_int("Intro_Effect/introStyle"));
+	cboIntroColor->setCurrentIndex(ValByPath_int("Intro_Effect/introColor"));
 	
 	/** Sega CD Boot ROMs. **/
-	txtMcdRomUSA->setText(gqt4_config->mcdRomUSA());
-	txtMcdRomEUR->setText(gqt4_config->mcdRomEUR());
-	txtMcdRomJPN->setText(gqt4_config->mcdRomJPN());
-	txtMcdRomAsia->setText(gqt4_config->mcdRomAsia());
+	txtMcdRomUSA->setText(ValByPath_QString("Sega_CD/bootRomUSA"));
+	txtMcdRomEUR->setText(ValByPath_QString("Sega_CD/bootRomEUR"));
+	txtMcdRomJPN->setText(ValByPath_QString("Sega_CD/bootRomJPN"));
+	txtMcdRomAsia->setText(ValByPath_QString("Sega_CD/bootRomAsia"));
 	on_txtMcdRomUSA_focusIn();
 	
 	/** External programs. **/
-	txtExtPrgUnRAR->setText(gqt4_config->extprgUnRAR());
+	txtExtPrgUnRAR->setText(ValByPath_QString("External_Programs/UnRAR"));
 	
 	/** Graphics settings. **/
-	chkAspectRatioConstraint->setChecked(gqt4_config->aspectRatioConstraint());
-	chkFastBlur->setChecked(gqt4_config->fastBlur());
-	chkBilinearFilter->setChecked(gqt4_config->bilinearFilter());
-	cboInterlacedMode->setCurrentIndex((int)gqt4_config->interlacedMode());
-	hsldContrast->setValue(gqt4_config->contrast());
-	hsldBrightness->setValue(gqt4_config->brightness());
-	chkGrayscale->setChecked(gqt4_config->grayscale());
-	chkInverted->setChecked(gqt4_config->inverted());
-	cboColorScaleMethod->setCurrentIndex(gqt4_config->colorScaleMethod());
+	chkAspectRatioConstraint->setChecked(ValByPath_bool("Graphics/aspectRatioConstraint"));
+	chkFastBlur->setChecked(ValByPath_bool("Graphics/fastBlur"));
+	chkBilinearFilter->setChecked(ValByPath_bool("Graphics/bilinearFilter"));
+	cboInterlacedMode->setCurrentIndex(ValByPath_int("Graphics/interlacedMode"));
+	hsldContrast->setValue(ValByPath_int("Graphics/contrast"));
+	hsldBrightness->setValue(ValByPath_int("Graphics/brightness"));
+	chkGrayscale->setChecked(ValByPath_bool("Graphics/grayscale"));
+	chkInverted->setChecked(ValByPath_bool("Graphics/inverted"));
+	cboColorScaleMethod->setCurrentIndex(ValByPath_int("Graphics/colorScaleMethod"));
 	
-	/** General settings. **/
-	chkAutoFixChecksum->setChecked(gqt4_config->autoFixChecksum());
-	chkAutoPause->setChecked(gqt4_config->autoPause());
-	chkBorderColor->setChecked(gqt4_config->borderColor());
-	chkPauseTint->setChecked(gqt4_config->pauseTint());
-	chkNtscV30Rolling->setChecked(gqt4_config->ntscV30Rolling());
+	/** VDP settings. **/
+	chkSpriteLimits->setChecked(ValByPath_bool("VDP/spriteLimits"));
+	chkBorderColor->setChecked(ValByPath_bool("VDP/borderColorEmulation"));
+	chkNtscV30Rolling->setChecked(ValByPath_bool("VDP/ntscV30Rolling"));
+	if (isWarrantyVoid())
+	{
+		chkVScrollBug->setChecked(ValByPath_bool("VDP/vscrollBug"));
+		chkZeroLengthDMA->setChecked(ValByPath_bool("VDP/zeroLengthDMA"));
+	}
 	
 	/** System. **/
-	cboRegionCurrent->setCurrentIndex((int)gqt4_config->regionCode() + 1);
+	cboRegionCurrent->setCurrentIndex(ValByPath_int("System/regionCode") + 1);
 	
 	// Region auto-detection settings.
 	lstRegionDetect->clear();
-	uint16_t regionCodeOrder = gqt4_config->regionCodeOrder();
+	uint16_t regionCodeOrder = (uint16_t)ValByPath_uint("System/regionCodeOrder");
 	for (int i = 0; i < 4; i++, regionCodeOrder >>= 4)
 	{
 		const QString str = EmuManager::LgRegionCodeStrMD(regionCodeOrder & 0xF);
@@ -390,53 +457,72 @@ void GeneralConfigWindow::reload(void)
 }
 
 
+static inline void SetValByPath_bool(const char *path, bool value)
+	{ gqt4_cfg->set(QLatin1String(path), value); }
+static inline void SetValByPath_QColor(const char *path, const QColor& value)
+	{ gqt4_cfg->set(QLatin1String(path), value.name()); }
+static inline void SetValByPath_int(const char *path, int value)
+	{ gqt4_cfg->set(QLatin1String(path), value); }
+static inline void SetValByPath_uint(const char *path, unsigned int value)
+	{ gqt4_cfg->set(QLatin1String(path), value); }
+static inline void SetValByPath_QString(const char *path, const QString& value)
+	{ gqt4_cfg->set(QLatin1String(path), value); }
+
 /**
- * apply(): Apply the configuration changes.
+ * Apply the configuration changes.
  * Triggered if "Apply" is clicked.
  */
 void GeneralConfigWindow::apply(void)
 {
 #ifndef GCW_APPLY_IMMED
 	/** Onscreen display. **/
-	gqt4_config->setOsdFpsEnabled(chkOsdFpsEnable->isChecked());
-	gqt4_config->setOsdFpsColor(m_osdFpsColor);
-	gqt4_config->setOsdMsgEnabled(chkOsdMsgEnable->isChecked());
-	gqt4_config->setOsdMsgColor(m_osdMsgColor);
+	SetValByPath_bool("OSD/fpsEnabled", chkOsdFpsEnable->isChecked());
+	SetValByPath_QColor("OSD/fpsColor", m_osdFpsColor);
+	SetValByPath_bool("OSD/msgEnabled", chkOsdMsgEnable->isChecked());
+	SetValByPath_QColor("OSD/msgColor", m_osdMsgColor);
 	
 	/** Intro effect. **/
-	gqt4_config->setIntroStyle(cboIntroStyle->currentIndex());
-	gqt4_config->setIntroColor(cboIntroColor->currentIndex());
-	
-	/** Sega CD Boot ROMs. **/
-	gqt4_config->setMcdRomUSA(txtMcdRomUSA->text());
-	gqt4_config->setMcdRomEUR(txtMcdRomEUR->text());
-	gqt4_config->setMcdRomJPN(txtMcdRomJPN->text());
-	gqt4_config->setMcdRomAsia(txtMcdRomAsia->text());
-	
-	/** External programs. **/
-	gqt4_config->setExtPrgUnRAR(txtExtPrgUnRAR->text());
-	
-	/** Graphics settings. **/
-	gqt4_config->setAspectRatioConstraint(chkAspectRatioConstraint->isChecked());
-	gqt4_config->setFastBlur(chkFastBlur->isChecked());
-	gqt4_config->setBilinearFilter(chkBilinearFilter->isChecked());
-	gqt4_config->setInterlacedMode((GensConfig::InterlacedMode_t)cboInterlacedMode->currentIndex());
-	gqt4_config->setContrast(hsldContrast->value());
-	gqt4_config->setBrightness(hsldBrightness->value());
-	gqt4_config->setGrayscale(chkGrayscale->isChecked());
-	gqt4_config->setInverted(chkInverted->isChecked());
-	gqt4_config->setColorScaleMethod(cboColorScaleMethod->currentIndex());
+	SetValByPath_int("Intro_Effect/introStyle", cboIntroStyle->currentIndex());
+	SetValByPath_int("Intro_Effect/introColor", cboIntroColor->currentIndex());
 	
 	/** General settings. **/
-	gqt4_config->setAutoFixChecksum(chkAutoFixChecksum->isChecked());
-	gqt4_config->setAutoPause(chkAutoPause->isChecked());
-	gqt4_config->setBorderColor(chkBorderColor->isChecked());
-	gqt4_config->setPauseTint(chkPauseTint->isChecked());
-	gqt4_config->setNtscV30Rolling(chkNtscV30Rolling->isChecked());
+	SetValByPath_bool("autoFixChecksum", chkAutoFixChecksum->isChecked());
+	SetValByPath_bool("autoPause", chkAutoPause->isChecked());
+	SetValByPath_bool("pauseTint", chkPauseTint->isChecked());
+	
+	/** Sega CD Boot ROMs. **/
+	SetValByPath_QString("Sega_CD/bootRomUSA", txtMcdRomUSA->text());
+	SetValByPath_QString("Sega_CD/bootRomEUR", txtMcdRomEUR->text());
+	SetValByPath_QString("Sega_CD/bootRomJPN", txtMcdRomJPN->text());
+	SetValByPath_QString("Sega_CD/bootRomAsia", txtMcdRomAsia->text());
+	
+	/** External programs. **/
+	SetValByPath_QString("External_Programs/UnRAR", txtExtPrgUnRAR->text());
+	
+	/** Graphics settings. **/
+	SetValByPath_bool("Graphics/aspectRatioConstraint", chkAspectRatioConstraint->isChecked());
+	SetValByPath_bool("Graphics/fastBlur", chkFastBlur->isChecked());
+	SetValByPath_bool("Graphics/bilinearFilter", chkBilinearFilter->isChecked());
+	SetValByPath_int("Graphics/interlacedMode", cboInterlacedMode->currentIndex());
+	SetValByPath_int("Graphics/contrast", hsldContrast->value());
+	SetValByPath_int("Graphics/brightness", hsldBrightness->value());
+	SetValByPath_bool("Graphics/grayscale", chkGrayscale->isChecked());
+	SetValByPath_bool("Graphics/inverted", chkInverted->isChecked());
+	SetValByPath_int("Graphics/colorScaleMethod", cboColorScaleMethod->currentIndex());
+	
+	/** VDP settings. **/
+	SetValByPath_bool("VDP/spriteLimits", chkSpriteLimits->isChecked());
+	SetValByPath_bool("VDP/borderColorEmulation", chkBorderColor->isChecked());
+	SetValByPath_bool("VDP/ntscV30Rolling", chkNtscV30Rolling->isChecked());
+	if (isWarrantyVoid())
+	{
+		SetValByPath_bool("VDP/vscrollBug", chkVScrollBug->isChecked());
+		SetValByPath_bool("VDP/zeroLengthDMA", chkZeroLengthDMA->isChecked());
+	}
 	
 	/** System. **/
-	gqt4_config->setRegionCode((LibGens::SysVersion::RegionCode_t)(cboRegionCurrent->currentIndex() - 1));
-	gqt4_config->setRegionCodeOrder(regionCodeOrder());
+	SetValByPath_int("System/regionCode", (cboRegionCurrent->currentIndex() - 1));
+	SetValByPath_uint("System/regionCodeOrder", regionCodeOrder());
 	
 	// Disable the Apply button.
 	// TODO: If Apply was clicked, set focus back to the main window elements.
@@ -447,23 +533,28 @@ void GeneralConfigWindow::apply(void)
 
 
 /**
- * toolbarTriggered(): A toolbar button was clicked.
+ * A toolbar button was clicked.
  * @param action Toolbar button.
- * NOTE: Only used on Mac OS X.
- * The Mac OS X version is in GeneralConfigWindow_mac.cpp.
- * We need to implement this slot here anyway due to moc limitations.
  */
-#ifndef Q_WS_MAC
-void GeneralConfigWindow::toolbarTriggered(QAction* action)
-	{ ((void)action); }
-#endif
+void GeneralConfigWindow::toolbarTriggered(QAction *action)
+{
+	QVariant data = action->data();
+	if (!data.isValid() || !data.canConvert(QVariant::Int))
+		return;
+	
+	int tab = data.toInt();
+	if (tab < 0 || tab >= stackedWidget->count())
+		return;
+	
+	stackedWidget->setCurrentIndex(tab);
+}
 
 
 /** Onscreen display **/
 
 
 /**
- * osdSelectColor(): Select a color for the OSD.
+ * Select a color for the OSD.
  * @param color_id	[in] Color ID.
  * @param init_color	[in] Initial color.
  * @return Selected color, or invalid QColor if cancelled.
@@ -492,7 +583,7 @@ void GeneralConfigWindow::on_btnOsdFpsColor_clicked(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	gqt4_config->setOsdFpsColor(m_osdFpsColor);
+	SetValByPath_QColor("OSD/fpsColor", m_osdMsgColor);
 #endif
 }
 
@@ -510,7 +601,7 @@ void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	gqt4_config->setOsdMsgColor(m_osdMsgColor);
+	SetValByPath_QColor("OSD/msgColor", m_osdMsgColor);
 #endif
 }
 
@@ -520,7 +611,7 @@ void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
 
 
 /**
- * on_btnRegionDetectUp_clicked(): Up button was clicked.
+ * Up button was clicked.
  */
 void GeneralConfigWindow::on_btnRegionDetectUp_clicked(void)
 {
@@ -539,13 +630,13 @@ void GeneralConfigWindow::on_btnRegionDetectUp_clicked(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	gqt4_config->setRegionCodeOrder(regionCodeOrder());
+	SetValByPath_uint("System/regionCodeOrder", regionCodeOrder());
 #endif
 }
 
 
 /**
- * on_btnRegionDetectDown_clicked(): Down button was clicked.
+ * Down button was clicked.
  */
 void GeneralConfigWindow::on_btnRegionDetectDown_clicked(void)
 {
@@ -564,13 +655,13 @@ void GeneralConfigWindow::on_btnRegionDetectDown_clicked(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	gqt4_config->setRegionCodeOrder(regionCodeOrder());
+	SetValByPath_uint("System/regionCodeOrder", regionCodeOrder());
 #endif
 }
 
 
 /**
- * regionCodeOrder(): Get the region code order from lstRegionDetect.
+ * Get the region code order from lstRegionDetect.
  * @return Region code order.
  */
 uint16_t GeneralConfigWindow::regionCodeOrder(void) const
@@ -590,7 +681,7 @@ uint16_t GeneralConfigWindow::regionCodeOrder(void) const
 
 
 /**
- * mcdSelectRomFile(): Select a Sega CD Boot ROM file.
+ * Select a Sega CD Boot ROM file.
  * @param rom_id	[in] Sega CD Boot ROM ID.
  * @param txtRomFile	[in] ROM file textbox.
  */
@@ -647,7 +738,7 @@ void GeneralConfigWindow::on_btnMcdRomAsia_clicked(void)
 
 
 /**
- * mcdUpdateRomFileStatus(): Sega CD: Update Boot ROM file status.
+ * Sega CD: Update Boot ROM file status.
  * @param txtRomFile ROM file textbox.
  * @param region_code Expected ROM region code. (bitmask)
  * @return Updated ROM status.
@@ -817,7 +908,7 @@ rom_identified:
 
 
 /**
- * mcdDisplayRomFileStatus(): Sega CD: Display Boot ROM file status.
+ * Sega CD: Display Boot ROM file status.
  * @param rom_id Sega CD Boot ROM ID.
  * @param rom_desc ROM file description. (detected by examining the ROM)
  */
@@ -852,7 +943,7 @@ void GeneralConfigWindow::on_txtMcdRomUSA_textChanged(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	gqt4_config->setMcdRomUSA(txtMcdRomUSA->text());
+	SetValByPath_QString("Sega_CD/bootRomUSA", txtMcdRomUSA->text());
 #endif
 }
 
@@ -869,7 +960,7 @@ void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	gqt4_config->setMcdRomEUR(txtMcdRomEUR->text());
+	SetValByPath_QString("Sega_CD/bootRomEUR", txtMcdRomEUR->text());
 #endif
 }
 
@@ -886,7 +977,7 @@ void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	gqt4_config->setMcdRomJPN(txtMcdRomJPN->text());
+	SetValByPath_QString("Sega_CD/bootRomJPN", txtMcdRomJPN->text());
 #endif
 }
 
@@ -903,7 +994,7 @@ void GeneralConfigWindow::on_txtMcdRomAsia_textChanged(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	gqt4_config->setMcdRomAsia(txtMcdRomAsia->text());
+	SetValByPath_QString("Sega_CD/bootRomAsia", txtMcdRomAsia->text());
 #endif
 }
 
@@ -912,7 +1003,7 @@ void GeneralConfigWindow::on_txtMcdRomAsia_textChanged(void)
 
 
 /**
- * on_btnExtPrgUnRAR_clicked(): Select a RAR/UnRAR binary.
+ * Select a RAR/UnRAR binary.
  */
 void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
 {
@@ -949,7 +1040,7 @@ void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
 
 
 /**
- * extprgDisplayFileStatus(): Display external program file status.
+ * Display external program file status.
  * @param file_id File ID.
  * @param file_desc File description. (detected by examining the file)
  */
@@ -1122,7 +1213,7 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
 #else
-	gqt4_config->setExtPrgUnRAR(txtExtPrgUnRAR->text());
+	SetValByPath_QString("External_Programs/UnRAR", txtExtPrgUnRAR->text());
 #endif
 }
 

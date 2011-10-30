@@ -21,8 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include <config.h>
-
 #ifndef __GENS_QT4_ZIPSELECTDIALOG_HPP__
 #define __GENS_QT4_ZIPSELECTDIALOG_HPP__
 

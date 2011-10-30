@@ -99,6 +99,12 @@ class GensWindow : public QMainWindow
 		void screenShot(void);
 		void setAudioRate(int newRate);
 		void setStereo(bool newStereo);
+		
+		/** VBackend properties. **/
+		// TODO: Allow GensActions to access m_vBackend directly?
+		void toggleFastBlur(void);
+		StretchMode_t stretchMode(void);
+		void setStretchMode(StretchMode_t newStretchMode);
 	
 	protected:
 		void setupUi(void);
@@ -138,6 +144,11 @@ class GensWindow : public QMainWindow
 		
 		// Set the Gens window title.
 		void setGensTitle(void);
+		
+		/** Configuration items. **/
+		bool m_cfg_autoPause;
+		int m_cfg_introStyle;
+		bool m_cfg_showMenuBar;
 	
 	protected slots:
 		/**
@@ -152,16 +163,6 @@ class GensWindow : public QMainWindow
 		 * - Update the Gens title.
 		 */
 		void stateChanged(void);
-		
-		/**
-		 * updateVideo(): Update video.
-		 */
-		void updateVideo(void)
-		{
-			m_vBackend->setMdScreenDirty();
-			m_vBackend->setVbDirty();
-			m_vBackend->vbUpdate();
-		}
 		
 		/**
 		 * osdPrintMsg(): Print a message on the OSD.
@@ -188,15 +189,15 @@ class GensWindow : public QMainWindow
 		
 		/**
 		 * autoPause_changed_slot(): Auto Pause setting has changed.
-		 * @param newAutoPause New Auto Pause setting.
+		 * @param newAutoPause (bool) New Auto Pause setting.
 		 */
-		void autoPause_changed_slot(bool newAutoPause);
+		void autoPause_changed_slot(const QVariant& newAutoPause);
 	
 		/**
 		 * showMenuBar_changed_slot(): Show Menu Bar setting has changed.
-		 * @param newShowMenuBar New Show Menu Bar setting.
+		 * @param newShowMenuBar (bool) New Show Menu Bar setting.
 		 */
-		void showMenuBar_changed_slot(bool newShowMenuBar);
+		void showMenuBar_changed_slot(const QVariant& newShowMenuBar);
 		
 	private:
 		/** Idle thread. **/
@@ -209,9 +210,9 @@ class GensWindow : public QMainWindow
 		
 		/**
 		 * introStyle_changed_slot(): Intro Style setting has changed.
-		 * @param newIntroStyle New Intro Style setting.
+		 * @param newIntroStyle (int) New Intro Style setting.
 		 */
-		void introStyle_changed_slot(int newIntroStyle);
+		void introStyle_changed_slot(const QVariant& newIntroStyle);
 		
 		/**
 		 * showContextMenu(): Show the context menu.

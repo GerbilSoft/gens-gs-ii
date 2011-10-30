@@ -64,8 +64,8 @@ class CtrlConfigPrivate
 		static QString PortName(CtrlConfig::CtrlPort_t port);
 		
 		// Load/Save functions.
-		int load(const QSettings& settings);
-		int save(QSettings& settings);
+		int load(const QSettings *qSettings);
+		int save(QSettings *qSettings);
 	
 	private:
 		CtrlConfig *const q;
@@ -253,12 +253,12 @@ QString CtrlConfigPrivate::PortName(CtrlConfig::CtrlPort_t port)
 
 
 /**
- * CtrlConfigPrivate::load(): Load controller configuration from a settings file.
+ * Load controller configuration from a settings file.
  * NOTE: The group must be selected in the QSettings before calling this function!
- * @param settings Settings file.
+ * @param qSettings Settings file.
  * @return 0 on success; non-zero on error.
  */
-int CtrlConfigPrivate::load(const QSettings& settings)
+int CtrlConfigPrivate::load(const QSettings *qSettings)
 {
 	for (int i = CtrlConfig::PORT_1; i < CtrlConfig::PORT_MAX; i++)
 	{
@@ -266,7 +266,7 @@ int CtrlConfigPrivate::load(const QSettings& settings)
 		// TODO: Allow ASCII controller types?
 		const QString portName = PortName((CtrlConfig::CtrlPort_t)i);
 		int ctrlType_tmp = (LibGens::IoBase::IoType)
-				(settings.value(portName + QLatin1String("/type"), -1).toInt());
+				(qSettings->value(portName + QLatin1String("/type"), -1).toInt());
 		if (ctrlType_tmp < LibGens::IoBase::IOT_NONE ||
 		    ctrlType_tmp >= LibGens::IoBase::IOT_MAX)
 		{
@@ -285,7 +285,7 @@ int CtrlConfigPrivate::load(const QSettings& settings)
 			
 			// Read the controller keys from the configuration file.
 			const QStringList keyData =
-				settings.value(portName + QLatin1String("/keys"), QString()).toString().split(chrKeyValSep);
+				qSettings->value(portName + QLatin1String("/keys"), QString()).toString().split(chrKeyValSep);
 			
 			// Copy the controller keys into ctrlKeys[].
 			for (int j = qMin(keyData.size(), NumButtons(ctrlTypes[i])) - 1; j >= 0; j--)
@@ -304,17 +304,17 @@ int CtrlConfigPrivate::load(const QSettings& settings)
 /**
  * CtrlConfigPrivate::save(): Save controller configuration to a settings file.
  * NOTE: The group must be selected in the QSettings before calling this function!
- * @param settings Settings file.
+ * @param qSettings Settings file.
  * @return 0 on success; non-zero on error.
  */
-int CtrlConfigPrivate::save(QSettings& settings)
+int CtrlConfigPrivate::save(QSettings *qSettings)
 {
 	for (int i = CtrlConfig::PORT_1; i < CtrlConfig::PORT_MAX; i++)
 	{
 		// Save the controller type.
 		// TODO: Allow ASCII controller types?
 		const QString portName = PortName((CtrlConfig::CtrlPort_t)i);
-		settings.setValue(portName + QLatin1String("/type"), (int)ctrlTypes[i]);
+		qSettings->setValue(portName + QLatin1String("/type"), (int)ctrlTypes[i]);
 		
 		// Save the controller keys.
 		QString keyData;
@@ -334,7 +334,7 @@ int CtrlConfigPrivate::save(QSettings& settings)
 				keyData += keyHex.rightJustified(8, QChar(L'0'));
 		}
 		
-		settings.setValue(portName + QLatin1String("/keys"), keyData);
+		qSettings->setValue(portName + QLatin1String("/keys"), keyData);
 	}
 	
 	// Controller configuration saved.
@@ -375,28 +375,28 @@ void CtrlConfig::clearDirty(void)
 
 
 /**
- * CtrlConfig::load(): Load controller configuration from a settings file.
+ * Load controller configuration from a settings file.
  * WRAPPER FUNCTION for CtrlConfigPrivate::load().
  * NOTE: The group must be selected in the QSettings before calling this function!
  * @param settings Settings file.
  * @return 0 on success; non-zero on error.
  */
-int CtrlConfig::load(const QSettings& settings)
+int CtrlConfig::load(const QSettings *qSettings)
 {
-	return d->load(settings);
+	return d->load(qSettings);
 }
 
 
 /**
- * save(): Save controller configuration to a settings file.
+ * Save controller configuration to a settings file.
  * WRAPPER FUNCTION for CtrlConfigPrivate::load().
  * NOTE: The group must be selected in the QSettings before calling this function!
  * @param settings Settings file.
  * @return 0 on success; non-zero on error.
  */
-int CtrlConfig::save(QSettings& settings)
+int CtrlConfig::save(QSettings *qSettings)
 {
-	return d->save(settings);
+	return d->save(qSettings);
 }
 
 

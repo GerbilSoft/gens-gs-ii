@@ -30,105 +30,7 @@
 namespace LibGens
 {
 
-/** Static member initialization. (VDP global items) **/
-// TODO: Move to Vdp.cpp?
-VdpTypes::VdpEmuOptions_t Vdp::VdpEmuOptions =
-{
-	VdpTypes::INTREND_FLICKER,	// intRendMode
-	false,				// zeroLengthDMA
-	true,				// spriteLimits
-	true,				// vscrollBug
-};
-
 /** Static member initialization. **/
-
-// VDP registers.
-VdpTypes::VdpReg_t Vdp::VDP_Reg;
-
-// These two variables are internal to Gens.
-// They don't map to any actual VDP registers.
-int Vdp::DMA_Length;
-unsigned int Vdp::DMA_Address;
-
-// DMAT variables.
-unsigned int Vdp::DMAT_Tmp;
-int Vdp::DMAT_Length;
-unsigned int Vdp::DMAT_Type;
-
-// VDP address pointers.
-// These are relative to VRam[] and are based on register values.
-uint16_t Vdp::ScrA_Addr;
-uint16_t Vdp::ScrB_Addr;
-uint16_t Vdp::Win_Addr;
-uint16_t Vdp::Spr_Addr;
-uint16_t Vdp::H_Scroll_Addr;
-
-// VDP convenience values: Horizontal.
-// NOTE: These must be signed for VDP arithmetic to work properly!
-int Vdp::H_Cell;
-int Vdp::H_Pix;
-int Vdp::H_Pix_Begin;
-
-// Window row shift.
-// H40: 6. (64x32 window)
-// H32: 5. (32x32 window)
-unsigned int Vdp::H_Win_Shift;
-
-// VDP convenience values: Scroll.
-unsigned int Vdp::V_Scroll_MMask;
-unsigned int Vdp::H_Scroll_Mask;
-
-unsigned int Vdp::H_Scroll_CMul;
-unsigned int Vdp::H_Scroll_CMask;
-unsigned int Vdp::V_Scroll_CMask;
-
-// TODO: Eliminate these.
-int Vdp::Win_X_Pos;
-int Vdp::Win_Y_Pos;
-
-// Interlaced mode.
-VdpTypes::Interlaced_t Vdp::Interlaced;
-
-// Sprite dot overflow.
-// If set, the previous line had a sprite dot overflow.
-// This is needed to properly implement Sprite Masking in S1.
-int Vdp::SpriteDotOverflow;
-
-// Horizontal Interrupt Counter.
-int Vdp::HInt_Counter;
-
-/**
- * VDP_Ctrl: VDP control struct.
- */
-Vdp::VDP_Ctrl_t Vdp::VDP_Ctrl;
-
-/**
-* VDP_Mode: Current VDP mode.
-*/
-unsigned int Vdp::VDP_Mode;
-
-VdpTypes::VRam_t Vdp::VRam;
-VdpTypes::CRam_t Vdp::CRam;
-VdpTypes::VSRam_t Vdp::VSRam;
-
-uint8_t Vdp::H_Counter_Table[512][2];
-
-int Vdp::VDP_Int;
-
-// VDP status register.
-VdpStatus Vdp::Reg_Status;
-
-// VDP line counters.
-// NOTE: Gens/GS currently uses 312 lines for PAL. It should use 313!
-VdpTypes::VdpLines_t Vdp::VDP_Lines;
-
-// Update flags.
-VdpTypes::UpdateFlags_t Vdp::ms_UpdateFlags;
-
-// System status.
-// TODO: Move this to a more relevant file.
-Vdp::SysStatus_t Vdp::SysStatus;
-
 
 /** VDP tables. **/
 
@@ -178,7 +80,6 @@ const uint16_t Vdp::CD_Table[64] =
 	VDEST_INVALID,				VDEST_INVALID,
 	VDEST_INVALID,				VDEST_INVALID
 };
-
 
 /**
  * DMA_Timing_Table[][]: Maximum number of DMA transfers per line.

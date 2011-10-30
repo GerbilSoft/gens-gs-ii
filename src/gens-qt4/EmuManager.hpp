@@ -37,9 +37,8 @@
 // paused_t
 #include "gqt4_datatypes.h"
 
-// InterlacedMode
-// TODO: Move somewhere else?
-#include "Config/GensConfig.hpp"
+// Video Backend.
+#include "VBackend/VBackend.hpp"
 
 namespace GensQt4
 {
@@ -52,7 +51,7 @@ class EmuManager : public QObject
 	Q_OBJECT
 	
 	public:
-		EmuManager(QObject *parent = 0);
+		EmuManager(QObject *parent = 0, VBackend *vBackend = 0);
 		~EmuManager();
 		
 		int openRom(void);
@@ -91,11 +90,15 @@ class EmuManager : public QObject
 				return LibGens::Rom::MDP_SYSTEM_UNKNOWN;
 			return m_rom->sysId();
 		}
+		
+		/**
+		 * Update video on the current VBackend.
+		 */
+		void updateVideo(void);
 	
 	signals:
 		void updateFps(double fps);
 		void stateChanged(void);		// Emulation state changed. Update the Gens title.
-		void updateVideo(void);			// Update the video widget in GensWindow.
 		
 		/**
 		 * osdPrintMsg(): Print a message on the OSD.
@@ -149,8 +152,15 @@ class EmuManager : public QObject
 		// Paused state.
 		paused_t m_paused;
 		
-		// Savestates.
+		/** Savestates. **/
 		int m_saveSlot;
+		
+		/**
+		 * Get the savestate filename.
+		 * TODO: Move savestate code to another file?
+		 * NOTE: Returned filename uses Qt directory separators. ('/')
+		 * @return Savestate filename, or empty string if no ROM is loaded.
+		 */
 		QString getSaveStateFilename(void);
 	
 	protected slots:
@@ -164,6 +174,18 @@ class EmuManager : public QObject
 			loadRom_int(m_loadRom_int_tmr_rom);
 			m_loadRom_int_tmr_rom = NULL;
 		}
+	
+	/** Video Backend. **/
+	public:
+		void setVBackend(VBackend *vBackend);
+		VBackend *vBackend(void)
+			{ return m_vBackend; }
+		void updateVBackend(void);
+	private:
+		// Video Backend.
+		VBackend *m_vBackend;
+	private slots:
+		void vBackend_destroyed(QObject *obj);
 	
 	/** Translatable string functions. **/
 	
@@ -253,7 +275,14 @@ class EmuManager : public QObject
 				RQT_PS_GRAYSCALE	= 3,
 				RQT_PS_INVERTED		= 4,
 				RQT_PS_COLORSCALEMETHOD	= 5,
+				
+				// These aren't really "palette" settings...
 				RQT_PS_INTERLACEDMODE	= 6,
+				RQT_PS_BORDERCOLOREMULATION = 7,
+				RQT_PS_NTSCV30ROLLING	= 8,
+				RQT_PS_SPRITELIMITS	= 9,
+				RQT_PS_ZEROLENGTHDMA	= 10,
+				RQT_PS_VSCROLLBUG	= 11,
 			};
 			
 			RequestType rqType;
@@ -271,7 +300,8 @@ class EmuManager : public QObject
 				// Savestates.
 				struct
 				{
-					char *filename;
+					// NOTE: filename must be deleted after use!
+					QString *filename;
 					int saveSlot;
 				} saveState;
 				
@@ -330,33 +360,33 @@ class EmuManager : public QObject
 	protected slots:
 		/**
 		 * saveSlot_changed_slot(): Set the save slot number.
-		 * @param newSaveSlot Save slot number, (0-9)
+		 * @param saveSlot (int) Save slot number, (0-9)
 		 */
-		void saveSlot_changed_slot(int newSaveSlot);
+		void saveSlot_changed_slot(const QVariant& saveSlot);
 		
 		/**
 		 * autoFixChecksum_changed_slot(): Change the Auto Fix Checksum setting.
-		 * @param newAutoFixChecksum New Auto Fix Checksum setting.
+		 * @param autoFixChecksum (bool) New Auto Fix Checksum setting.
 		 */
-		void autoFixChecksum_changed_slot(bool newAutoFixChecksum);
+		void autoFixChecksum_changed_slot(const QVariant& autoFixChecksum);
 	
 		/**
 		 * regionCode_changed_slot(): Region code has changed.
-		 * @param newRegionCode New region code setting.
+		 * @param regionCode (int) New region code setting.
 		 */
-		void regionCode_changed_slot(int newRegionCode); // LibGens::SysVersion::RegionCode_t
+		void regionCode_changed_slot(const QVariant& regionCode); // LibGens::SysVersion::RegionCode_t
 		
 		/**
 		 * regionCodeOrder_changed_slot(): Region code auto-detection order has changed.
-		 * @param newRegionCodeOrder New region code auto-detection order setting.
+		 * @param regionCodeOrder (uint16_t) New region code auto-detection order setting.
 		 */
-		void regionCodeOrder_changed_slot(uint16_t newRegionCodeOrder);
+		void regionCodeOrder_changed_slot(const QVariant& regionCodeOrder);
 		
 		/**
 		 * enableSRam_changed_slot(): Enable SRam/EEPRom setting has changed.
-		 * @param newEnableSRam New Enable SRam/EEPRom setting.
+		 * @param enableSRam (bool) New Enable SRam/EEPRom setting.
 		 */
-		void enableSRam_changed_slot(bool newEnableSRam);
+		void enableSRam_changed_slot(const QVariant& enableSRam);
 	
 	public slots:
 		/**
@@ -374,19 +404,19 @@ class EmuManager : public QObject
 	
 	protected slots:
 		/** Graphics settings. **/
-		// TODO: Verify that this doesn't break on Mac OS X.
-		void contrast_changed_slot(int newContrast)
-			{ changePaletteSetting(EmuRequest_t::RQT_PS_CONTRAST, newContrast); }
-		void brightness_changed_slot(int newBrightness)
-			{ changePaletteSetting(EmuRequest_t::RQT_PS_BRIGHTNESS, newBrightness); }
-		void grayscale_changed_slot(bool newGrayscale)
-			{ changePaletteSetting(EmuRequest_t::RQT_PS_GRAYSCALE, (int)newGrayscale); }
-		void inverted_changed_slot(bool newInverted)
-			{ changePaletteSetting(EmuRequest_t::RQT_PS_INVERTED, (int)newInverted); }
-		void colorScaleMethod_changed_slot(int newColorScaleMethod)
-			{ changePaletteSetting(EmuRequest_t::RQT_PS_COLORSCALEMETHOD, newColorScaleMethod); }
-		void interlacedMode_changed_slot(GensConfig::InterlacedMode_t newInterlacedMode)
-			{ changePaletteSetting(EmuRequest_t::RQT_PS_INTERLACEDMODE, (int)newInterlacedMode); }
+		void contrast_changed_slot(const QVariant& contrast);
+		void brightness_changed_slot(const QVariant& brightness);
+		void grayscale_changed_slot(const QVariant& grayscale);
+		void inverted_changed_slot(const QVariant& inverted);
+		void colorScaleMethod_changed_slot(const QVariant& colorScaleMethod);
+		void interlacedMode_changed_slot(const QVariant& interlacedMode);
+		
+		/** VDP settings. **/
+		void borderColorEmulation_changed_slot(const QVariant& borderColorEmulation);
+		void ntscV30Rolling_changed_slot(const QVariant& ntscV30Rolling);
+		void spriteLimits_changed_slot(const QVariant& spriteLimits);
+		void zeroLengthDMA_changed_slot(const QVariant& zeroLengthDMA);
+		void vscrollBug_changed_slot(const QVariant& vscrollBug);
 	
 	/** Emulation Request Queue: Processing functions. **/
 	
@@ -400,8 +430,8 @@ class EmuManager : public QObject
 		void doAudioStereo(bool newStereo);
 		
 		/** Savestates. **/
-		void doSaveState(const char *filename, int saveSlot);
-		void doLoadState(const char *filename, int saveSlot);
+		void doSaveState(const QString& filename, int saveSlot);
+		void doLoadState(const QString& filename, int saveSlot);
 		void doSaveSlot(int newSaveSlot);
 		
 		void doPauseRequest(paused_t newPaused);

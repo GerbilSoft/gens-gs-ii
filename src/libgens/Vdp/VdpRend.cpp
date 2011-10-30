@@ -23,12 +23,6 @@
 
 #include "Vdp.hpp"
 
-/** Static member initialization. **/
-#include "VdpRend_static.hpp"
-
-// VDP error message.
-#include "VdpRend_Err.hpp"
-
 // C includes.
 #include <string.h>
 
@@ -36,37 +30,41 @@ namespace LibGens
 {
 
 /**
- * Vdp::Rend_Init(): Initialize the VDP rendering subsystem.
+ * Vdp::rend_init(): Initialize the VDP rendering subsystem.
  * This function should only be called from Init()!
  */
-void Vdp::Rend_Init(void)
+void Vdp::rend_init(void)
 {
-	// TODO
+	// Initialize the VDP rendering variables.
+	VDP_Layers = VdpTypes::VDP_LAYERS_DEFAULT;
 }
 
 
 /**
- * Vdp::Rend_End(): Shut down the VDP rendering subsystem.
+ * Vdp::rend_end(): Shut down the VDP rendering subsystem.
  * This function should only be called from Vdp::Init()!
  */
-void Vdp::Rend_End(void)
+void Vdp::rend_end(void)
 {
 	// TODO
 }
 
 
 /**
- * Vdp::Rend_Reset(): Reset the VDP rendering arrays.
- * This function should only be called from Vdp::Reset()!
+ * Vdp::rend_reset(): Reset the VDP rendering arrays.
+ * This function should only be called from Vdp::reset()!
  */
-void Vdp::Rend_Reset(void)
+void Vdp::rend_reset(void)
 {
 	// Clear MD_Screen.
-	memset(&MD_Screen, 0x00, sizeof(MD_Screen));
+	MD_Screen->clear();
 	
 	// Reset the active palettes.
+	// TODO: Handle VDP_LAYER_PALETTE_LOCK in VdpPalette.
+#if 0
 	if (!(VDP_Layers & VdpTypes::VDP_LAYER_PALETTE_LOCK))
 		m_palette.resetActive();
+#endif
 	
 	// Sprite arrays.
 	memset(&Sprite_Struct, 0x00, sizeof(Sprite_Struct));
@@ -75,7 +73,7 @@ void Vdp::Rend_Reset(void)
 
 
 /**
- * Vdp::Render_Line(): Render a line.
+ * Render a line.
  */
 void Vdp::Render_Line(void)
 {
@@ -94,11 +92,11 @@ void Vdp::Render_Line(void)
 	else
 	{
 		// Unsupported mode.
-		VdpRend_Err::Render_Line();
+		Render_Line_Err();
 	}
 	
 	// Update the VDP render error cache.
-	VdpRend_Err::Update();
+	Update_Err();
 }
 
 }

@@ -7,6 +7,7 @@
     <file>16x16/arrow-down.png</file>
     <file>16x16/arrow-up.png</file>
     <file>16x16/configure.png</file>
+    <file>16x16/cpu.png</file>
     <file>16x16/document-close.png</file>
     <file>16x16/document-open-recent.png</file>
     <file>16x16/document-open.png</file>
@@ -28,6 +29,7 @@
     <file>22x22/arrow-down.png</file>
     <file>22x22/arrow-up.png</file>
     <file>22x22/configure.png</file>
+    <file>22x22/cpu.png</file>
     <file>22x22/document-close.png</file>
     <file>22x22/document-open-recent.png</file>
     <file>22x22/document-open.png</file>
@@ -49,6 +51,7 @@
     <file>32x32/arrow-down.png</file>
     <file>32x32/arrow-up.png</file>
     <file>32x32/configure.png</file>
+    <file>32x32/cpu.png</file>
     <file>32x32/document-close.png</file>
     <file>32x32/document-open-recent.png</file>
     <file>32x32/document-open.png</file>
@@ -70,6 +73,7 @@
     <file>48x48/arrow-down.png</file>
     <file>48x48/arrow-up.png</file>
     <file>48x48/configure.png</file>
+    <file>48x48/cpu.png</file>
     <file>48x48/document-close.png</file>
     <file>48x48/document-open-recent.png</file>
     <file>48x48/document-open.png</file>
@@ -89,6 +93,7 @@
     <file>64x64/applications-graphics.png</file>
     <file>64x64/applications-system.png</file>
     <file>64x64/configure.png</file>
+    <file>64x64/cpu.png</file>
     <file>64x64/drive-optical.png</file>
     <file>64x64/input-gaming.png</file>
     <file>64x64/media-optical-blu-ray.png</file>

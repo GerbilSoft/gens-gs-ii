@@ -40,12 +40,12 @@ class RecentRomsMenu : public QMenu
 	Q_OBJECT
 	
 	public:
-		RecentRomsMenu(QWidget *parent = 0, RecentRoms *recentRoms = 0);
-		RecentRomsMenu(const QString& title, QWidget *parent = 0, RecentRoms *recentRoms = 0);
+		RecentRomsMenu(QWidget *parent = 0, const RecentRoms *recentRoms = 0);
+		RecentRomsMenu(const QString& title, QWidget *parent = 0, const RecentRoms *recentRoms = 0);
 		~RecentRomsMenu();
 		
-		RecentRoms *recentRoms(void);
-		void setRecentRoms(RecentRoms *newRecentRoms);
+		const RecentRoms *recentRoms(void);
+		void setRecentRoms(const RecentRoms *newRecentRoms);
 	
 	signals:
 		/**

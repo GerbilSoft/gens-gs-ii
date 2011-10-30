@@ -24,20 +24,18 @@
 
 #include "GensActions.hpp"
 
-// gqt4_main has gqt4_config.
-#include "../gqt4_main.hpp"
+// gqt4_cfg
+#include "gqt4_main.hpp"
 
 // Menu actions.
 #include "GensMenuBar_menus.hpp"
 
-// Gens Window.
-#include "../GensWindow.hpp"
-
-// Other windows.
-#include "../AboutWindow.hpp"
-#include "../CtrlConfigWindow.hpp"
-#include "../GeneralConfigWindow.hpp"
-#include "../McdControlWindow.hpp"
+// Windows.
+#include "GensWindow.hpp"
+#include "AboutWindow.hpp"
+#include "CtrlConfigWindow.hpp"
+#include "GeneralConfigWindow.hpp"
+#include "McdControlWindow.hpp"
 
 // LibGens includes.
 #include "libgens/Vdp/VdpPalette.hpp"
@@ -60,7 +58,7 @@ GensActions::GensActions(GensWindow *parent)
 bool GensActions::checkEventKey(GensKey_t key)
 {
 	// Look up the action from GensConfig.
-	int action = gqt4_config->keyToAction(key);
+	int action = gqt4_cfg->keyToAction(key);
 	if (action == 0)
 		return false;
 	
@@ -124,7 +122,7 @@ bool GensActions::doAction(int action, bool state)
 		{
 			// File, Recent ROMs.
 			int romID = MNUID_ITEM(action);
-			const RecentRom_t rom = gqt4_config->m_recentRoms->getRom(romID);
+			const RecentRom_t rom = gqt4_cfg->recentRomsEntry(romID);
 			if (rom.filename.isEmpty())
 			{
 				// Invalid ROM ID.
@@ -157,16 +155,16 @@ bool GensActions::doAction(int action, bool state)
 #ifndef Q_WS_MAC
 				case MNUID_ITEM(IDM_GRAPHICS_MENUBAR):
 					// Show Menu Bar.
-					gqt4_config->setShowMenuBar(state);
+					gqt4_cfg->set(QLatin1String("GensWindow/showMenuBar"), state);
 					break;
 #endif /* !Q_WS_MAC */
 				
 				case MNUID_ITEM(IDM_GRAPHICS_STRETCH):
 				{
 					// Next stretch mode.
-					int stretch_tmp = (int)gqt4_config->stretchMode();
+					int stretch_tmp = (int)m_parent->stretchMode();
 					stretch_tmp = (stretch_tmp + 1) % 4;
-					gqt4_config->setStretchMode((GensConfig::StretchMode_t)stretch_tmp);
+					m_parent->setStretchMode((StretchMode_t)stretch_tmp);
 					return true;
 				}
 				
@@ -230,19 +228,19 @@ bool GensActions::doAction(int action, bool state)
 			switch (MNUID_ITEM(action))
 			{
 				case MNUID_ITEM(IDM_GRAPHICS_STRETCH_NONE):
-					gqt4_config->setStretchMode(GensConfig::STRETCH_NONE);
+					m_parent->setStretchMode(STRETCH_NONE);
 					return true;
 				
 				case MNUID_ITEM(IDM_GRAPHICS_STRETCH_H):
-					gqt4_config->setStretchMode(GensConfig::STRETCH_H);
+					m_parent->setStretchMode(STRETCH_H);
 					return true;
 				
 				case MNUID_ITEM(IDM_GRAPHICS_STRETCH_V):
-					gqt4_config->setStretchMode(GensConfig::STRETCH_V);
+					m_parent->setStretchMode(STRETCH_V);
 					return true;
 				
 				case MNUID_ITEM(IDM_GRAPHICS_STRETCH_FULL):
-					gqt4_config->setStretchMode(GensConfig::STRETCH_FULL);
+					m_parent->setStretchMode(STRETCH_FULL);
 					return true;
 				
 				default:
@@ -257,10 +255,10 @@ bool GensActions::doAction(int action, bool state)
 				case MNUID_ITEM(IDM_SYSTEM_REGION):
 				{
 					// Switch to the next region setting.
-					int region = (int)gqt4_config->regionCode() + 1;
+					int region = gqt4_cfg->getInt(QLatin1String("System/regionCode")) + 1;
 					if (region > (int)LibGens::SysVersion::REGION_EU_PAL)
 						region = (int)LibGens::SysVersion::REGION_AUTO;
-					gqt4_config->setRegionCode((LibGens::SysVersion::RegionCode_t)region);
+					gqt4_cfg->set(QLatin1String("System/regionCode"), region);
 					break;
 				}
 					
@@ -304,8 +302,7 @@ bool GensActions::doAction(int action, bool state)
 			}
 			
 			// Set the region code.
-			gqt4_config->setRegionCode(
-				(LibGens::SysVersion::RegionCode_t)
+			gqt4_cfg->set(QLatin1String("System/regionCode"),
 					(MNUID_ITEM(action) - MNUID_ITEM(IDM_SYSTEM_REGION_AUTODETECT) - 1));
 			break;
 		
@@ -315,7 +312,7 @@ bool GensActions::doAction(int action, bool state)
 			{
 				case MNUID_ITEM(IDM_OPTIONS_ENABLESRAM):
 					// Enable SRam/EEPRom.
-					gqt4_config->setEnableSRam(state);
+					gqt4_cfg->set(QLatin1String("Options/enableSRam"), state);
 					break;
 				
 				case MNUID_ITEM(IDM_OPTIONS_CONTROLLERS):
@@ -367,7 +364,7 @@ bool GensActions::doAction(int action, bool state)
 			{
 				case MNUID_ITEM(IDM_NOMENU_FASTBLUR):
 					// Toggle Fast Blur.
-					gqt4_config->setFastBlur(!gqt4_config->fastBlur());
+					m_parent->toggleFastBlur();
 					return true;
 				
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_0):
@@ -381,18 +378,25 @@ bool GensActions::doAction(int action, bool state)
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_8):
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_9):
 					// Save slot selection.
-					gqt4_config->setSaveSlot(action - IDM_NOMENU_SAVESLOT_0);
+					gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), (action - IDM_NOMENU_SAVESLOT_0));
 					return true;
 				
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_PREV):
+				{
 					// Previous Save Slot.
-					gqt4_config->setSaveSlot_Prev();
+					int saveSlot = gqt4_cfg->getInt(QLatin1String("Savestates/saveSlot"));
+					saveSlot = ((saveSlot + 9) % 10);
+					gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), saveSlot);
 					return true;
-					
+				}
+				
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_NEXT):
+				{
 					// Next Save Slot.
-					gqt4_config->setSaveSlot_Next();
-					return true;
+					int saveSlot = gqt4_cfg->getInt(QLatin1String("Savestates/saveSlot"));
+					saveSlot = ((saveSlot + 1) % 10);
+					gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), saveSlot);
+				}
 				
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_LOADFROM):
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_SAVEAS):

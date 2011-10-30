@@ -154,6 +154,8 @@ inline void PausedEffect::T_DoPausedEffect(pixel* RESTRICT outScreen)
  */
 void PausedEffect::DoPausedEffect(MdFb *outScreen, bool fromMdScreen)
 {
+	// TODO: Update to not use the VDP class.
+#if 0
 	if (fromMdScreen)
 	{
 		// Render from MD_Screen[] to outScreen.
@@ -196,6 +198,7 @@ void PausedEffect::DoPausedEffect(MdFb *outScreen, bool fromMdScreen)
 				break;
 		}
 	}
+#endif
 }
 
 }

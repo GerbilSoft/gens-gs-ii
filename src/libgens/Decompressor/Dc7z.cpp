@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include <config.h>
+#include <libgens/config.libgens.h>
 
 /**
  * Based on 7zMain.c from the LZMA SDK 9.12.

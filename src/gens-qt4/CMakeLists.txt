@@ -62,8 +62,9 @@ INCLUDE_DIRECTORIES("${gens-gs-ii_BINARY_DIR}")
 
 # Include the previous directory.
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../")
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/../")
 
-# LibGens source and binary directories.
+# GensQt4 source and binary directories.
 # Binary directory is needed for config.h.
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
@@ -93,7 +94,7 @@ IF(HAVE_PORTAUDIO)
 ENDIF()
 
 # Write the config.h file.
-CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.gens-qt4.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.gens-qt4.h")
 
 # Sources.
 SET(gens-qt4_COMMON_SRCS
@@ -123,7 +124,8 @@ SET(gens-qt4_COMMON_SRCS
 	GeneralConfigWindow.cpp
 	GeneralConfigWindow_slots.cpp
 	widgets/GensLineEdit.cpp
-	Config/GensConfig.cpp
+	Config/ConfigStore.cpp
+	Config/PathConfig.cpp
 	Config/CtrlConfig.cpp
 	cdrom/FindCdrom.cpp
 	McdControlWindow.cpp
@@ -142,6 +144,7 @@ SET(gens-qt4_COMMON_SRCS
 	Config/RecentRoms.cpp
 	actions/RecentRomsMenu.cpp
 	widgets/GensColorButton.cpp
+	ConfigHandler.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -161,7 +164,8 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	ZipSelectDialog.hpp
 	GeneralConfigWindow.hpp
 	widgets/GensLineEdit.hpp
-	Config/GensConfig.hpp
+	Config/ConfigStore.hpp
+	Config/PathConfig.hpp
 	Config/CtrlConfig.hpp
 	cdrom/FindCdrom.hpp
 	McdControlWindow.hpp
@@ -179,6 +183,7 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	Config/RecentRoms.hpp
 	actions/RecentRomsMenu.hpp
 	widgets/GensColorButton.hpp
+	ConfigHandler.hpp
 	)
 
 SET(gens-qt4_SRCS ${gens-qt4_COMMON_SRCS})
@@ -380,11 +385,6 @@ IF(HAVE_GLEW)
 			PROPERTIES COMPILE_DEFINITIONS GLEW_STATIC)
 	ENDIF(NOT GLEW_FOUND)
 ENDIF(HAVE_GLEW)
-
-ADD_DEPENDENCIES(gens-qt4 gens)
-IF(NOT GLEW_FOUND)
-	ADD_DEPENDENCIES(gens-qt4 glew)
-ENDIF(NOT GLEW_FOUND)
 
 # Mac OS X bundle information.
 # TODO: Add "NO-EMU" if necessary.

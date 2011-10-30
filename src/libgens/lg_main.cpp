@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA *
  ******************************************************************************/
 
-#include <config.h>
+#include <libgens/config.libgens.h>
 
 #include "lg_main.hpp"
 #include "macros/git.h"
@@ -149,9 +149,6 @@ int Init(void)
 	Z80::Init();
 	Z80_MD_Mem::Init();
 	
-	// MD VDP. (TODO: Make this non-static.)
-	Vdp::Init();
-	
 	DevManager::Init();
 	SoundMgr::Init();
 	
@@ -180,9 +177,6 @@ int End(void)
 	M68K_Mem::End();
 	Z80::End();
 	Z80_MD_Mem::End();
-	
-	// MD VDP. (TODO: Make this non-static.)
-	Vdp::End();
 	
 	DevManager::End();
 	SoundMgr::End();

@@ -21,6 +21,9 @@
 
 #include "zomg_byteswap.h"
 
+// C includes.
+#include <assert.h>
+
 /**
  * __zomg_byte_swap_16_array(): 16-bit byteswap function.
  * @param Pointer to array to swap.
@@ -32,6 +35,7 @@ void __zomg_byte_swap_16_array(void *ptr, unsigned int n)
 	unsigned char x;
 	
 	// Don't allow uneven lengths.
+	assert((n & 1) == 0);
 	n &= ~1;
 	
 	// TODO: Add an x86-optimized version, possibly using SSE.
@@ -54,6 +58,7 @@ void __zomg_byte_swap_32_array(void *ptr, unsigned int n)
 	unsigned char x, y;
 	
 	// Don't allow lengths that aren't divisible by 4.
+	assert((n & 3) == 0);
 	n &= ~3;
 	
 	// TODO: Add an x86-optimized version using bswap and/or SSE.

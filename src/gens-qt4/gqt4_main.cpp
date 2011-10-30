@@ -38,82 +38,20 @@
 #include "GensWindow.hpp"
 #include "SigHandler.hpp"
 
+// General configuration signal handler.
+#include "ConfigHandler.hpp"
+
+#ifdef Q_WS_X11
+// X11 includes.
+#include <X11/Xlib.h>
+#endif /* Q_WS_X11 */
+
 // Text translation macro.
 #define TR(text) \
 	QCoreApplication::translate("gqt4_main", (text), NULL, QCoreApplication::UnicodeUTF8)
 
 // Gens window.
 static GensQt4::GensWindow *gens_window = NULL;
-
-
-/**
- * gens_main(): Main entry point.
- * @param argc Number of arguments.
- * @param argv Array of arguments.
- * @return Return value.
- */
-int gens_main(int argc, char *argv[])
-{
-	// Register the signal handler.
-	GensQt4::SigHandler::Init();
-	
-	// Initialize the GensQApplication.
-	GensQt4::gqt4_app = new GensQt4::GensQApplication(argc, argv);
-	
-	// Load the configuration.
-	// TODO: Do this before or after command line arguments?
-	GensQt4::gqt4_config = new GensQt4::GensConfig();
-	
-	// TODO: Parse command line arguments.
-	// They're available in app.arguments() [QStringList].
-	
-	// Initialize LibGens.
-	LibGens::Init();
-	
-	// Register the LOG_MSG() critical error handler.
-	log_msg_register_critical_fn(gqt4_log_msg_critical);
-	
-	// Register the LibGens OSD handler.
-	lg_set_osd_fn(gqt4_osd);
-	
-	// Set the EmuContext paths.
-	// TODO: Do this here or in GensWindow initialization?
-	LibGens::EmuContext::SetPathSRam(
-		GensQt4::gqt4_config->userPath(GensQt4::GensConfig::GCPATH_SRAM).toUtf8().constData());
-	
-	gens_window = new GensQt4::GensWindow();
-	gens_window->show();
-	
-	// Run the Qt4 UI.
-	int ret = GensQt4::gqt4_app->exec();
-	
-	/**
-	 * TODO: Put cleanup code in GensQApplication's aboutToQuit() signal.
-	 * app.exec() may not return on some platforms!
-	 *
-	 * Example: On Windows, if the user logs off while the program's running,
-	 * app.exec() won't return.
-	 */
-	
-	// TODO: Delete the translators?
-	
-	// Unregister the LibGens OSD handler.
-	// TODO: Do this earlier?
-	lg_set_osd_fn(NULL);
-	
-	// Shut down LibGens.
-	LibGens::End();
-	
-	// Unregister the signal handler.
-	GensQt4::SigHandler::End();
-	
-	// Delete the configuration object.
-	delete GensQt4::gqt4_config;
-	GensQt4::gqt4_config = NULL;
-	
-	// Finished.
-	return ret;
-}
 
 
 /**
@@ -153,8 +91,8 @@ namespace GensQt4
 // GensQApplication.
 GensQApplication *gqt4_app = NULL;
 
-// Configuration. (TODO: Use a smart pointer?)
-GensConfig *gqt4_config = NULL;
+// Configuration store.
+ConfigStore *gqt4_cfg = NULL;
 
 // Emulation objects.
 EmuThread *gqt4_emuThread = NULL;		// Thread.
@@ -177,15 +115,98 @@ void QuitGens(void)
 	}
 	
 	// Delete the emulation context.
-	delete gqt4_emuContext;
-	gqt4_emuContext = NULL;
+	// FIXME: Delete gqt4_emuContext after VBackend is finished using it. (MEMORY LEAK)
+	//delete gqt4_emuContext;
 	
 	// Shut down LibGens.
 	LibGens::End();
 	
 	// Save the configuration.
-	if (gqt4_config)
-		gqt4_config->save();
+	gqt4_cfg->save();
 }
 
+}
+
+
+/**
+ * gens_main(): Main entry point.
+ * @param argc Number of arguments.
+ * @param argv Array of arguments.
+ * @return Return value.
+ */
+int gens_main(int argc, char *argv[])
+{
+	// Register the signal handler.
+	GensQt4::SigHandler::Init();
+	
+#ifdef Q_WS_X11
+	// Initialize X11 threading.
+	XInitThreads();
+#endif /* Q_WS_X11 */
+	
+	// Initialize the GensQApplication.
+	GensQt4::gqt4_app = new GensQt4::GensQApplication(argc, argv);
+	
+	// Load the configuration.
+	// TODO: Do this before or after command line arguments?
+	GensQt4::gqt4_cfg = new GensQt4::ConfigStore();
+	
+	// External program configuration handler.
+	GensQt4::ConfigHandler *configHandler = new GensQt4::ConfigHandler();
+	
+	// TODO: Parse command line arguments.
+	// They're available in app.arguments() [QStringList].
+	
+	// Initialize LibGens.
+	LibGens::Init();
+	
+	// Register the LOG_MSG() critical error handler.
+	log_msg_register_critical_fn(gqt4_log_msg_critical);
+	
+	// Register the LibGens OSD handler.
+	lg_set_osd_fn(gqt4_osd);
+	
+	// Set the EmuContext paths.
+	// TODO: Do this here or in GensWindow initialization?
+	QString sramPath = GensQt4::gqt4_cfg->configPath(GensQt4::PathConfig::GCPATH_SRAM);
+	LibGens::EmuContext::SetPathSRam(sramPath.toUtf8().constData());
+	
+	// Add a signal handler for path changes.
+	QObject::connect(
+		GensQt4::gqt4_cfg->pathConfigObject(), SIGNAL(pathChanged(GensQt4::PathConfig::ConfigPath, QString)),
+		configHandler, SLOT(pathChanged(GensQt4::PathConfig::ConfigPath, QString)));
+	
+	gens_window = new GensQt4::GensWindow();
+	gens_window->show();
+	
+	// Run the Qt4 UI.
+	int ret = GensQt4::gqt4_app->exec();
+	
+	/**
+	 * TODO: Put cleanup code in GensQApplication's aboutToQuit() signal.
+	 * app.exec() may not return on some platforms!
+	 *
+	 * Example: On Windows, if the user logs off while the program's running,
+	 * app.exec() won't return.
+	 */
+	
+	// TODO: Delete the translators?
+	
+	// Unregister the LibGens OSD handler.
+	// TODO: Do this earlier?
+	lg_set_osd_fn(NULL);
+	
+	// Shut down LibGens.
+	LibGens::End();
+	
+	// Unregister the signal handler.
+	GensQt4::SigHandler::End();
+	
+	// Delete the various objects.
+	delete configHandler;
+	delete GensQt4::gqt4_cfg;
+	delete GensQt4::gqt4_app;
+	
+	// Finished.
+	return ret;
 }

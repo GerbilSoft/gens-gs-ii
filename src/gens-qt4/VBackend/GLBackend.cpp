@@ -56,6 +56,8 @@ namespace GensQt4
  */
 GLBackend::GLBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	: VBackend(parent, keyHandler)
+	, m_fb(NULL)
+	, m_bpp(LibGens::VdpPalette::BPP_32)
 {
 	// Initialize the OpenGL variables.
 	m_tex = 0;		// Main texture.
@@ -69,6 +71,8 @@ GLBackend::GLBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 
 GLBackend::~GLBackend()
 {
+	if (m_fb)
+		m_fb->unref();
 	if (m_tex > 0)
 		glDeleteTextures(1, &m_tex);
 	if (m_texOsd)
@@ -145,12 +149,25 @@ QStringList GLBackend::GLExtsInUse(void)
 
 
 /**
- * reallocTexture(): (Re-)Allocate the OpenGL texture.
+ * (Re-)Allocate the OpenGL texture.
  */
 void GLBackend::reallocTexture(void)
 {
 	if (m_tex > 0)
 		glDeleteTextures(1, &m_tex);
+	
+	// If we don't have an emulation context, don't allocate a texture for now.
+	// TODO: Intro effects.
+	if (!isRunning())
+	{
+		// Clear texture; set last bpp as invalid to force update.
+		m_tex = 0;
+		m_lastBpp = LibGens::VdpPalette::BPP_MAX;
+		return;
+	}
+	
+	// Get the current color depth.
+	m_lastBpp = m_bpp;
 	
 	// Create and initialize a GL texture.
 	// TODO: Add support for NPOT textures and/or GL_TEXTURE_RECTANGLE_ARB.
@@ -166,7 +183,6 @@ void GLBackend::reallocTexture(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMethod);
 	
 	// Determine the texture format and type.
-	m_lastBpp = LibGens::Vdp::m_palette.bpp();
 	switch (m_lastBpp)
 	{
 		case LibGens::VdpPalette::BPP_15:
@@ -225,6 +241,7 @@ void GLBackend::reallocTexture(void)
 #endif /* HAVE_GLEW */
 	
 	// TODO: Determine size based on renderer.
+	// TODO: Use the MdFb pxPerLine() and numLines() properties to calculate the visible size.
 	m_texVisSize = QSize(320, 240);
 	m_texSize.setWidth(next_pow2s(m_texVisSize.width()));
 	m_texSize.setHeight(next_pow2s(m_texVisSize.height()));
@@ -482,6 +499,16 @@ void GLBackend::glb_paintGL(void)
 	glClearColor(1.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
+	if (!isRunning())
+	{
+		// No emulation context.
+		// TODO: Intro effects.
+		showOsdPreview();	// Display the OSD preview image.
+		printOsdText();		// Print the OSD text to the screen.
+		m_vbDirty = false;	// Video backend is no longer dirty.
+		return;
+	}
+	
 	if (hasAspectRatioConstraintChanged())
 	{
 		// Aspect ratio constraint has changed.
@@ -494,20 +521,23 @@ void GLBackend::glb_paintGL(void)
 		// MD_Screen is dirty.
 		
 		// Check if the Bpp has changed.
-		if (LibGens::Vdp::m_palette.bpp() != m_lastBpp)
+		if (m_bpp != m_lastBpp)
 		{
 			// Bpp has changed. Reallocate the texture.
 			// VDP palettes will be recalculated on the next frame.
 			reallocTexture();
 		}
 		
-		/** START: Apply effects. **/
+		// Screen buffer used for output.
+		const LibGens::MdFb *src_fb = m_intScreen;
 		
-		if (isRunning())
+		/** START: Apply effects. **/
+		if (isRunning() && m_fb)
 		{
 			// Emulation is running. Check if any effects should be applied.
 			
 			/** Software rendering path. **/
+			// TODO: These need to specify the source framebuffer...
 			
 			// If Fast Blur is enabled, update the Fast Blur effect.
 			// NOTE: Shader version is only used if we're not paused manually.
@@ -525,20 +555,21 @@ void GLBackend::glb_paintGL(void)
 				updatePausedEffect(bFromMD);
 				bFromMD = false;
 			}
+			
+			// If we're using the MD screen directly,
+			// get the MdFb specified in the update function.
+			if (bFromMD)
+				src_fb = m_fb;
 		}
 		
-		// Determine which screen buffer should be used for video output.
-		// TODO: Optimize this!
-		GLvoid *screen;
-		LibGens::MdFb *src_fb = (bFromMD
-				? &LibGens::Vdp::MD_Screen
-				: m_intScreen);
-		if (LibGens::Vdp::m_palette.bpp() != LibGens::VdpPalette::BPP_32)
+		/** END: Apply effects. **/
+		
+		// Get the screen buffer from the LibGens::MdFb.
+		const GLvoid *screen;
+		if (m_bpp != LibGens::VdpPalette::BPP_32)
 			screen = src_fb->fb16();
 		else
 			screen = src_fb->fb32();
-		
-		/** END: Apply effects. **/
 		
 		// Bind the texture.
 		glEnable(GL_TEXTURE_2D);
@@ -548,8 +579,9 @@ void GLBackend::glb_paintGL(void)
 		// For other renderers, use non-MD screen buffer.
 		
 		// (Re-)Upload the texture.
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, 336);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 8);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, src_fb->pxPitch());
+		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 8); // TODO: 16 on amd64?
 		
 		glTexSubImage2D(GL_TEXTURE_2D, 0,
 				0, 0,						// x/y offset
@@ -557,7 +589,6 @@ void GLBackend::glb_paintGL(void)
 				m_texFormat, m_texType, screen);
 		
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 0);
 		
 		// Texture is no longer dirty.
@@ -589,8 +620,9 @@ void GLBackend::glb_paintGL(void)
 	
 	// Check if the MD resolution has changed.
 	// If it has, recalculate the stretch mode rectangle.
-	const QSize mdResCur(LibGens::Vdp::GetHPix(),
-			     LibGens::Vdp::GetVPix());
+	// TODO: Remove use of m_emuContext?
+	const QSize mdResCur(m_emuContext->m_vdp->GetHPix(),
+			     m_emuContext->m_vdp->GetVPix());
 	if (mdResCur != m_stretchLastRes)
 		recalcStretchRectF();
 	
@@ -623,17 +655,11 @@ void GLBackend::glb_paintGL(void)
 		}
 	}
 	
-	// Disable 2D textures.
-	glDisable(GL_TEXTURE_2D);
-	
-	// Display the OSD preview image.
-	showOsdPreview();
-	
-	// Print the OSD text to the screen.
-	printOsdText();
-	
-	// Video backend is no longer dirty.
-	m_vbDirty = false;
+	// Finish up drawing.
+	glDisable(GL_TEXTURE_2D);	// Disable 2D textures.
+	showOsdPreview();		// Display the OSD preview image.
+	printOsdText();			// Print the OSD text to the screen.
+	m_vbDirty = false;		// Video backend is no longer dirty.
 }
 
 
@@ -641,11 +667,37 @@ void GLBackend::glb_paintGL(void)
  * recalcStretchRectF(): Recalculate the stretch mode rectangle.
  * @param mode Stretch mode.
  */
-void GLBackend::recalcStretchRectF(GensConfig::StretchMode_t mode)
+void GLBackend::recalcStretchRectF(StretchMode_t mode)
 {
+	// Emulation Context must be locked before use.
+	QMutexLocker lockEmuContext(&m_mtxEmuContext);
+	
+	// Get the video resolution from the emulation context.
+	int ctxHPix, ctxHPixBegin, ctxVPix;
+	const bool isEmuContext = (!!m_emuContext);
+	
+	if (isEmuContext)
+	{
+		// Emulation context is active. Get the video resolution.
+		ctxHPix = m_emuContext->m_vdp->GetHPix();
+		ctxHPixBegin = m_emuContext->m_vdp->GetHPixBegin();
+		ctxVPix = m_emuContext->m_vdp->GetVPix();
+	}
+	else
+	{
+		// No emulation context.
+		// Assume 320x240 image for now.
+		ctxHPix = 320;
+		ctxHPixBegin = 0;
+		ctxVPix = 240;
+	}
+	
+	// Unlock the emulation context.
+	lockEmuContext.unlock();
+	
 	// Store the current MD screen resolution.
-	m_stretchLastRes.setWidth(LibGens::Vdp::GetHPix());
-	m_stretchLastRes.setHeight(LibGens::Vdp::GetVPix());
+	m_stretchLastRes.setWidth(ctxHPix);
+	m_stretchLastRes.setHeight(ctxVPix);
 	
 	// Default to no stretch.
 	m_stretchRectF = QRectF(
@@ -655,33 +707,32 @@ void GLBackend::recalcStretchRectF(GensConfig::StretchMode_t mode)
 		((double)m_texVisSize.height() / (double)m_texSize.height())	// Height.
 		);
 	
-	// If stretch is disabled, we're done here.
-	// Also, stretch shouldn't be applied if emulation isn't running.
-	if (mode == GensConfig::STRETCH_NONE || !isRunning())
+	// Don't apply any stretch parameters if:
+	// - stretching is disabled
+	// - emulation isn't running
+	// - no emulation context is present (TODO: Combine isRunning() with m_emuContext?)
+	if (mode == STRETCH_NONE || !isRunning() || !isEmuContext)
 		return;
 	
 	// Horizontal stretch.
-	if (mode == GensConfig::STRETCH_H ||
-	    mode == GensConfig::STRETCH_FULL)
+	if (mode == STRETCH_H || mode == STRETCH_FULL)
 	{
 		// Horizontal stretch.
-		const int h_pix_begin = LibGens::Vdp::GetHPixBegin();
-		if (h_pix_begin > 0)
+		if (ctxHPixBegin > 0)
 		{
 			// Less than 320 pixels wide.
 			// Adjust horizontal stretch.
 			// NOTE: Width is adjusted automatically by QRectF when setting X.
-			m_stretchRectF.setX((double)h_pix_begin / (double)m_texSize.width());
+			m_stretchRectF.setX((double)ctxHPixBegin / (double)m_texSize.width());
 			//m_stretchRectF.setWidth(img_dest.width() - img_dest.x());
 		}
 	}
 	
 	// Vertical stretch.
-	if (mode == GensConfig::STRETCH_V ||
-	    mode == GensConfig::STRETCH_FULL)
+	if (mode == STRETCH_V || mode == STRETCH_FULL)
 	{
 		// Vertical stretch.
-		int v_pix = (240 - LibGens::Vdp::GetVPix());
+		int v_pix = (240 - ctxVPix);
 		if (v_pix > 0)
 		{
 			// Less than 240 pixels tall.
@@ -774,6 +825,8 @@ void GLBackend::printOsdText(void)
 	{
 		// NOTE: QList internally uses an array of pointers.
 		// We can use array indexing instead of iterators.
+		const QColor clText = osdMsgColor();
+		
 		for (int i = (m_osdList.size() - 1); i >= 0; i--)
 		{
 			if (curTime >= m_osdList[i].endTime)
@@ -792,7 +845,7 @@ void GLBackend::printOsdText(void)
 			// TODO: Make the drop shadow optional or something.
 			glb_setColor(clShadow);
 			printOsdLine(ms_Osd_chrW+1, y+1, msg);
-			glb_setColor(osdMsgColor());	// TODO: Per-message colors?
+			glb_setColor(clText);	// TODO: Per-message colors?
 			printOsdLine(ms_Osd_chrW, y, msg);
 		}
 	}
@@ -1036,8 +1089,7 @@ void GLBackend::showOsdPreview(void)
 	// Calculate (x2, y2) based on stretch mode.
 	
 	// Horizontal stretch.
-	if (stretchMode() == GensConfig::STRETCH_H ||
-	    stretchMode() == GensConfig::STRETCH_FULL)
+	if (stretchMode() == STRETCH_H || stretchMode() == STRETCH_FULL)
 	{
 		x2 = x1 + 0.5;
 	}
@@ -1047,8 +1099,7 @@ void GLBackend::showOsdPreview(void)
 	}
 	
 	// Vertical stretch.
-	if (stretchMode() == GensConfig::STRETCH_V ||
-	    stretchMode() == GensConfig::STRETCH_FULL)
+	if (stretchMode() == STRETCH_V || stretchMode() == STRETCH_FULL)
 	{
 		y2 = y1 - 0.5;
 	}
@@ -1076,15 +1127,12 @@ void GLBackend::showOsdPreview(void)
 
 
 /**
- * setBilinearFilter(): Set the bilinear filter setting.
+ * bilinearFilter_changed_slot(): Bilinear filter setting has changed.
  * NOTE: This function MUST be called from within an active OpenGL context!
- * @param newBilinearFilter True to enable bilinear filtering; false to disable it.
+ * @param newBilinearFilter (bool) New bilinear filter setting.
  */
-void GLBackend::setBilinearFilter(bool newBilinearFilter)
+void GLBackend::bilinearFilter_changed_slot(const QVariant& newBilinearFilter)
 {
-	if (bilinearFilter() == newBilinearFilter)
-		return;
-	
 	if (m_tex > 0)
 	{
 		// Bind the texture.
@@ -1092,7 +1140,7 @@ void GLBackend::setBilinearFilter(bool newBilinearFilter)
 		glBindTexture(GL_TEXTURE_2D, m_tex);
 		
 		// Set the texture filter setting.
-		const GLint filterMethod = (newBilinearFilter ? GL_LINEAR : GL_NEAREST);
+		const GLint filterMethod = (newBilinearFilter.toBool() ? GL_LINEAR : GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMethod);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMethod);
 		
@@ -1100,20 +1148,17 @@ void GLBackend::setBilinearFilter(bool newBilinearFilter)
 		glDisable(GL_TEXTURE_2D);
 	}
 	
-	// Update VBackend's bilinear filter setting.
-	VBackend::setBilinearFilter(newBilinearFilter);
+	// Call VBackend's bilinearFilter_changed_slot().
+	VBackend::bilinearFilter_changed_slot(newBilinearFilter);
 }
 
 
 /**
- * setPauseTint(): Set the Pause Tint effect setting.
- * @param newFastBlur True to enable Pause Tint; false to disable it.
+ * pauseTint_changed_slot(): Pause Tint effect setting has changed.
+ * @param newPauseTint (bool) New pause tint effect setting.
  */
-void GLBackend::setPauseTint(bool newPauseTint)
+void GLBackend::pauseTint_changed_slot(const QVariant& newPauseTint)
 {
-	if (pauseTint() == newPauseTint)
-		return;
-	
 	if (!m_shaderMgr.hasPaused() &&
 	    (isRunning() && isPaused()))
 	{
@@ -1123,26 +1168,34 @@ void GLBackend::setPauseTint(bool newPauseTint)
 		m_mdScreenDirty = true;
 	}
 	
-	// Update VBackend's pause tint effect setting.
-	VBackend::setPauseTint(newPauseTint);
+	// Call VBackend's pauseTint_changed_slot().
+	VBackend::pauseTint_changed_slot(newPauseTint);
 }
 
 
-void GLBackend::setStretchMode(GensConfig::StretchMode_t newStretchMode)
+/**
+ * stretchMode_changed_slot(): Stretch mode setting has changed.
+ * @param newStretchMode (int) New stretch mode setting.
+ */
+void GLBackend::stretchMode_changed_slot(const QVariant& newStretchMode)
 {
-	if ((stretchMode() == newStretchMode) ||
-	    (newStretchMode < GensConfig::STRETCH_NONE) ||
-	    (newStretchMode > GensConfig::STRETCH_FULL))
+	StretchMode_t stretch = (StretchMode_t)newStretchMode.toInt();
+	
+	// Verify that the new stretch mode is valid.
+	// TODO: New ConfigItem subclass for StretchMode_t.
+	if ((stretch < STRETCH_NONE) || (stretch > STRETCH_FULL))
 	{
+		// Invalid stretch mode.
+		// Reset to default.
+		stretchMode_reset();
 		return;
 	}
 	
 	// Recalculate the stretch mode rectangle.
-	recalcStretchRectF(newStretchMode);
+	recalcStretchRectF(stretch);
 	
-	// Set the stretch mode setting.
-	VBackend::setStretchMode(newStretchMode);
+	// Call VBackend's stretchMode_changed_slot().
+	VBackend::stretchMode_changed_slot(newStretchMode);
 }
-
 
 }

@@ -29,7 +29,7 @@
 #ifndef __GENS_QT4_VBACKEND_GLCOMMON_HPP__
 #define __GENS_QT4_VBACKEND_GLCOMMON_HPP__
 
-#include <config.h>
+#include <gens-qt4/config.gens-qt4.h>
 
 // C includes.
 #include <limits.h>
@@ -80,23 +80,23 @@ class GLBackend : public VBackend
 	
 	protected slots:
 		/**
-		 * setBilinearFilter(): Set the bilinear filter setting.inline
+		 * bilinearFilter_changed_slot(): Bilinear filter setting has changed.
 		 * NOTE: This function MUST be called from within an active OpenGL context!
-		 * @param newBilinearFilter True to enable bilinear filtering; false to disable it.
+		 * @param newBilinearFilter (bool) New bilinear filter setting.
 		 */
-		virtual void setBilinearFilter(bool newBilinearFilter);
+		virtual void bilinearFilter_changed_slot(const QVariant& newBilinearFilter);
 		
 		/**
-		 * setPauseTint(): Set the Pause Tint effect setting.
-		 * @param newFastBlur True to enable Pause Tint; false to disable it.
+		 * pauseTint_changed_slot(): Pause Tint effect setting has changed.
+		 * @param newPauseTint (bool) New pause tint effect setting.
 		 */
-		virtual void setPauseTint(bool newPauseTint);
+		virtual void pauseTint_changed_slot(const QVariant& newPauseTint);
 		
 		/**
-		 * setStretchMode(): Set the stretch mode setting.
-		 * @param newStretchMode New stretch mode setting.
+		 * stretchMode_changed_slot(): Stretch mode setting has changed.
+		 * @param newStretchMode (int) New stretch mode setting.
 		 */
-		void setStretchMode(GensConfig::StretchMode_t newStretchMode);
+		void stretchMode_changed_slot(const QVariant& newStretchMode);
 	
 	protected:
 		/**
@@ -152,7 +152,7 @@ class GLBackend : public VBackend
 		QRectF m_stretchRectF;		// Current stretch coordinates.
 		QSize m_stretchLastRes;		// Last MD screen resolution.
 		void recalcStretchRectF(void);
-		void recalcStretchRectF(GensConfig::StretchMode_t mode);
+		void recalcStretchRectF(StretchMode_t mode);
 		
 		// OSD texture.
 		GLTex2D *m_texOsd;	// Texture containing U+0000 - U+00FF.
@@ -184,6 +184,11 @@ class GLBackend : public VBackend
 		 * @param color QColor.
 		 */
 		void glb_setColor(const QColor& color);
+	
+	protected:
+		// Current MdFb and color depth.
+		const LibGens::MdFb *m_fb;
+		LibGens::VdpPalette::ColorDepth m_bpp;
 };
 
 

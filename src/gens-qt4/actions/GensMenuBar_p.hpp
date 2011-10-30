@@ -56,7 +56,7 @@ class GensMenuBarPrivate
 		GensMenuBar *const q;
 		Q_DISABLE_COPY(GensMenuBarPrivate)
 		
-		int m_lockCnt;		// Lock counter.
+		int lockCnt;		// Lock counter.
 	
 	public:
 		// Menu parsing functions.
@@ -74,17 +74,18 @@ class GensMenuBarPrivate
 		
 		void syncConnect(void);	// Connect menu synchronization slots.
 		
-		void syncAll(void);	// Synchronize all menus.
-		void syncRecent(void);	// Synchronize the "Recent ROMs" menu.
+		void syncAll(void);		// Synchronize all menus.
+		void syncRecent(void);		// Synchronize the "Recent ROMs" menu.
+		void syncShowMenuBar(void);	// Synchronize the "Show Menu Bar" item.
 	
 	private:
-		QSignalMapper *m_signalMapper;
+		QSignalMapper *signalMapper;
 		
 		// Clear the hash tables.
 		void clearHashTables(void);
 		
 		// List of menu separators.
-		QList<QAction*> m_lstSeparators;
+		QVector<QAction*> lstSeparators;
 };
 
 }

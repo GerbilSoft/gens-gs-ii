@@ -1,10 +1,10 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * Vdp.cpp: VDP class: I/O functions.                                    *
+ * VdpIo.cpp: VDP class: I/O functions.                                    *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2011 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -23,9 +23,6 @@
 
 #include "Vdp.hpp"
 
-// C includes.
-#include <string.h>
-
 // LOG_MSG() subsystem.
 #include "macros/log_msg.h"
 
@@ -36,6 +33,9 @@
 /** Static member initialization. **/
 #include "VdpIo_static.hpp"
 
+// Emulation Context.
+#include "../EmuContext.hpp"
+
 // C wrapper functions for Starscream.
 #ifdef __cplusplus
 extern "C" {
@@ -43,7 +43,13 @@ extern "C" {
 
 uint8_t VDP_Int_Ack(void)
 {
-	return LibGens::Vdp::Int_Ack();
+	// TODO: This won't work with multiple contexts...
+	LibGens::EmuContext *instance = LibGens::EmuContext::Instance();
+	if (instance != NULL)
+		return instance->m_vdp->Int_Ack();
+	
+	// TODO: What should we return here?
+	return 0;
 }
 
 #ifdef __cplusplus
@@ -52,103 +58,6 @@ uint8_t VDP_Int_Ack(void)
 
 namespace LibGens
 {
-
-/**
- * VdpRend::Init(): Initialize the VDP subsystem.
- */
-void Vdp::Init(void)
-{
-	// Initialize the Horizontal Counter table.
-	unsigned int hc_val;
-	for (unsigned int hc = 0; hc < 512; hc++)
-	{
-		// H32
-		hc_val = ((hc * 170) / 488) - 0x18;
-		H_Counter_Table[hc][0] = (uint8_t)hc_val;
-		
-		// H40
-		hc_val = ((hc * 205) / 488) - 0x1C;
-		H_Counter_Table[hc][1] = (uint8_t)hc_val;
-	}
-	
-	// Initialize the VDP rendering subsystem.
-	Rend_Init();
-}
-
-
-/**
- * Vdp::Init(): Shut down the VDP subsystem.
- */
-void Vdp::End(void)
-{
-	// shut down the VDP rendering subsystem.
-	Rend_End();
-}
-
-
-/**
- * Vdp::Reset(): Reset the VDP.
- */
-void Vdp::Reset(void)
-{
-	// Reset the VDP rendering arrays.
-	Rend_Reset();
-	
-	// Clear VRam, CRam, and VSRam.
-	memset(&VRam, 0x00, sizeof(VRam));
-	memset(&CRam, 0x00, sizeof(CRam));
-	memset(&VSRam, 0x00, sizeof(VSRam));
-	
-	/**
-	 * VDP registers.
-	 * Default register values:
-	 * - 0x01 (Mode1):   0x04 (H_Int off, Mode 5 [MD])
-	 * - 0x0A (H_Int):   0xFF (disabled).
-	 * - 0x0C (Mode4):   0x81 (H40, S/H off, no interlace)
-	 * - 0x0F (AutoInc): 0x02 (auto-increment by 2 on memory access)
-	 * All other registers are set to 0x00 by default.
-	 */
-	static const uint8_t vdp_reg_init[24] =
-	{
-		0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0xFF, 0x00, 0x81, 0x00, 0x00, 0x02,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-	};
-	
-	for (int i = 0; i < (int)(sizeof(vdp_reg_init)/sizeof(vdp_reg_init[0])); i++)
-	{
-		Set_Reg(i, vdp_reg_init[i]);
-	}
-	
-	// Reset the DMA variables.
-	DMA_Length = 0;
-	DMA_Address = 0;
-	DMAT_Tmp = 0;
-	DMAT_Length = 0;
-	DMAT_Type = 0;
-	
-	// VDP status register.
-	Reg_Status.reset();
-	
-	// Other variables.
-	VDP_Int = 0;
-	
-	// VDP control struct.
-	VDP_Ctrl.Data.d = 0;
-	VDP_Ctrl.Access = 0;
-	VDP_Ctrl.Address = 0;
-	VDP_Ctrl.DMA_Mode = 0;
-	VDP_Ctrl.DMA = 0;
-	VDP_Ctrl.ctrl_latch = false;
-	
-	// Set the VDP update flags.
-	MarkCRamDirty();
-	MarkVRamDirty();
-	
-	// Initialize the Horizontal Interrupt counter.
-	HInt_Counter = VDP_Reg.m5.H_Int;
-}
-
 
 /**
  * Vdp::Int_Ack(): Acknowledge an interrupt.
@@ -215,7 +124,7 @@ void Vdp::updateVdpLines(bool resetCurrent)
 	static const int VisLines_Current_PAL[3] = {-67+1, -51+1, -43+1};
 	
 	// Initialize VDP_Lines.Display.
-	VDP_Lines.Display.Total = (M68K_Mem::ms_SysVersion.isPal() ? 312 : 262);
+	VDP_Lines.Display.Total = (Reg_Status.isPal() ? 312 : 262);
 	if (resetCurrent)
 		VDP_Lines.Display.Current = 0;
 	
@@ -261,14 +170,15 @@ void Vdp::updateVdpLines(bool resetCurrent)
 	if (resetCurrent)
 	{
 		// Reset VDP_Lines.Visible.Current.
-		VDP_Lines.Visible.Current = (M68K_Mem::ms_SysVersion.isPal()
+		VDP_Lines.Visible.Current = (Reg_Status.isPal()
 						? VisLines_Current_PAL[LineOffset]
 						: VisLines_Current_NTSC[LineOffset]);
 	}
 	
 	// Check interlaced mode.
-	Interlaced.HalfLine  = ((VDP_Reg.m5.Set4 & 0x02) >> 1);		// LSM0
-	Interlaced.DoubleRes = ((VDP_Reg.m5.Set4 & 0x04) >> 2);		// LSM1
+	Interlaced = (VdpTypes::Interlaced_t)
+			(((VDP_Reg.m5.Set4 & 0x02) >> 1) |	// LSM0
+			 ((VDP_Reg.m5.Set4 & 0x04) >> 1));	// LSM1
 }
 
 
@@ -278,10 +188,11 @@ void Vdp::updateVdpLines(bool resetCurrent)
 void Vdp::Check_NTSC_V30_VBlank(void)
 {
 	// TODO: Only do this in Mode 5, and maybe Mode 4 if SMS2 is in use.
-	if (M68K_Mem::ms_SysVersion.isPal() || !(VDP_Reg.m5.Set2 & 0x08))
+	if (Reg_Status.isPal() || !(VDP_Reg.m5.Set2 & 0x08))
 	{
 		// Either we're in PAL mode, where V30 is allowed, or V30 isn't set.
 		// VBlank is always OK.
+		// TODO: Clear the NTSC V30 offset?
 		VDP_Lines.NTSC_V30.VBlank_Div = 0;
 		return;
 	}
@@ -293,11 +204,7 @@ void Vdp::Check_NTSC_V30_VBlank(void)
 	// See http://gendev.spritesmind.net/forum/viewtopic.php?p=8128#8128 for more information.
 	VDP_Lines.NTSC_V30.VBlank_Div = !VDP_Lines.NTSC_V30.VBlank_Div;
 	
-	// TODO: LibGens: Add a user-configurable option for NTSC V30 rolling.
-#if 0
-	if (Video.ntscV30rolling)
-#endif
-	if (1)
+	if (VdpEmuOptions.ntscV30Rolling)
 	{
 		VDP_Lines.NTSC_V30.Offset += 11;	// TODO: Figure out a good offset increment.
 		VDP_Lines.NTSC_V30.Offset %= 240;	// Prevent overflow.
@@ -324,14 +231,33 @@ inline void Vdp::Update_Mode(void)
 		   ((Set1 & 0x04) << 1) |	// M4/PSEL
 		   ((Set2 & 0x04) << 2);	// M5
 	
+	if (!(Set2 & 0x08))
+	{
+		// V28 mode. Reset the NTSC V30 roll values.
+		VDP_Lines.NTSC_V30.Offset = 0;
+		VDP_Lines.NTSC_V30.VBlank_Div = 0;
+	}
+	
 	// If the VDP mode has changed, CRam needs to be updated.
 	if (prevVdpMode != VDP_Mode)
-		MarkCRamDirty();
+	{
+		// Update the VDP mode variables.
+		if (VDP_Mode & 0x10)
+		{
+			// Mode 5.
+			m_palette.setPalMode(VdpPalette::PALMODE_MD);
+			m_palette.setMdColorMask(!(VDP_Mode & 0x08));	// M4/PSEL
+		}
+		else
+		{
+			// TODO: Support other palette modes.
+		}
+	}
 	
 	// Initialize Vdp::VDP_Lines.
 	// Don't reset the VDP current line variables here,
 	// since this might not be the beginning of the frame.
-	Vdp::updateVdpLines(false);
+	updateVdpLines(false);
 }
 
 
@@ -355,26 +281,9 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 	switch (reg_num)
 	{
 		case 0:
-			// Mode Set 1.
-			Update_IRQ_Line();
-			
-			// Update the VDP mode.
-			Update_Mode();
-			
-			// Mode 5: Write the palette select bit.
-			m_palette.setMdColorMask(!(VDP_Reg.m5.Set1 & 0x04));
-			break;
-		
 		case 1:
-			// Mode Set 2.
+			// Mode Set 1, Mode Set 2.
 			Update_IRQ_Line();
-			
-			if (!(VDP_Reg.m5.Set2 & 0x08))
-			{
-				// V28 mode. Reset the NTSC V30 roll values.
-				VDP_Lines.NTSC_V30.Offset = 0;
-				VDP_Lines.NTSC_V30.VBlank_Div = 0;
-			}
 			
 			// Update the VDP mode.
 			Update_Mode();
@@ -387,7 +296,7 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 		
 		case 3:
 			// Window base address.
-			if (VDP_Reg.m5.Set4 & 0x01)	// Check for H40 mode. (TODO: Test 0x81 instead?)
+			if (isH40())
 				Win_Addr = (val & 0x3C) << 10;	// H40.
 			else
 				Win_Addr = (val & 0x3E) << 10;	// H32.
@@ -400,7 +309,7 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 		
 		case 5:
 			// Sprite Attribute Table base address.
-			if (VDP_Reg.m5.Set4 & 0x01)	// Check for H40 mode. (TODO: Test 0x81 instead?)
+			if (isH40())
 				Spr_Addr = (val & 0x7E) << 9;
 			else
 				Spr_Addr = (val & 0x7F) << 9;
@@ -412,15 +321,15 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 		
 		case 7:
 			// Background Color.
-			// TODO: Only set this if the actual value has changed.
-			MarkCRamDirty();
+			// TODO: This is only valid for MD. SMS and GG function differently.
+			// NOTE: This will automatically mark CRam as dirty if the index has changed.
+			m_palette.setBgColorIdx(val & 0x3F);
 			break;
 		
 		case 11:
 		{
 			// Mode Set 3.
-			static const unsigned int Size_V_Scroll[4] = {255, 511, 255, 1023};
-			static const unsigned int H_Scroll_Mask_Table[4] = {0x0000, 0x0007, 0x01F8, 0x1FFF};
+			static const uint8_t H_Scroll_Mask_Table[4] = {0x00, 0x07, 0xF8, 0xFF};
 			
 			// Check the Vertical Scroll mode. (Bit 3)
 			// 0: Full scrolling. (Mask == 0)
@@ -436,12 +345,14 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 		case 12:
 			// Mode Set 4.
 			
-			// This register has the Shadow/Highlight setting,
-			// so set the CRam Flag to force a CRam update.
-			// TODO: Only set this if the actual value has changed.
-			MarkCRamDirty();
+			// Update the Shadow/Highlight setting.
+			m_palette.setMdShadowHighlight(!!(VDP_Reg.m5.Set4 & 0x08));
 			
-			if (val & 0x81)		// TODO: Original asm tests 0x81. Should this be done for other H40 tests?
+			// H40 mode is activated by setting VDP_Reg.m5.Set4, bit 0 (0x01, RS1).
+			// Bit 7 (0x80, RS0) is also needed, but RS1 is what tells the VDP
+			// to increase the pixel counters to 320px per line.
+			// Source: http://wiki.megadrive.org/index.php?title=VDPRegs_Addendum (Jorge)
+			if (val & 0x01)
 			{
 				// H40 mode.
 				H_Cell = 40;
@@ -497,7 +408,15 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 			 * - idx 2: V_Scroll_CMask
 			 * - idx 3: reserved (padding)
 			 */
-			static const uint8_t Scroll_Size_Tbl[][4] =
+			struct Scroll_Size_Tbl_t
+			{
+				uint8_t H_Scroll_CMul;
+				uint8_t H_Scroll_CMask;
+				uint8_t V_Scroll_CMask;
+				uint8_t reserved;
+			};
+			
+			static const Scroll_Size_Tbl_t Scroll_Size_Tbl[] =
 			{
 				// V32_H32 (VXX_H32)      // V32_H64 (VXX_H64)
 				{0x05, 0x1F, 0x1F, 0x00}, {0x06, 0x3F, 0x1F, 0x00},
@@ -521,9 +440,9 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 			};
 			
 			// Get the values from the scroll size table.
-			H_Scroll_CMul  = Scroll_Size_Tbl[tmp][0];
-			H_Scroll_CMask = Scroll_Size_Tbl[tmp][1];
-			V_Scroll_CMask = Scroll_Size_Tbl[tmp][2];
+			H_Scroll_CMul  = Scroll_Size_Tbl[tmp].H_Scroll_CMul;
+			H_Scroll_CMask = Scroll_Size_Tbl[tmp].H_Scroll_CMask;
+			V_Scroll_CMask = Scroll_Size_Tbl[tmp].V_Scroll_CMask;
 			break;
 		}
 		
@@ -586,8 +505,7 @@ uint8_t Vdp::Read_H_Counter(void)
 	// H_Counter_Table[][0] == H32.
 	// H_Counter_Table[][1] == H40.
 	
-	// TODO: We're checking both RS0 and RS1 here. Others only check one.
-	if (VDP_Reg.m5.Set4 & 0x81)
+	if (isH40())
 		return H_Counter_Table[odo_68K][1];
 	else
 		return H_Counter_Table[odo_68K][0];
@@ -608,7 +526,7 @@ uint8_t Vdp::Read_V_Counter(void)
 	unsigned int H_Counter;
 	uint8_t bl, bh;		// TODO: Figure out what this actually means.
 	
-	if (VDP_Reg.m5.Set4 & 0x81)
+	if (isH40())
 	{
 		// H40
 		H_Counter = H_Counter_Table[odo_68K][0];
@@ -634,7 +552,7 @@ uint8_t Vdp::Read_V_Counter(void)
 	// Rewrite HV handling to match Genesis Plus.
 	
 	// V_Counter_Overflow depends on PAL/NTSC status.
-	if (Vdp::Reg_Status.isPal())
+	if (Reg_Status.isPal())
 	{
 		// PAL.
 		if (V_Counter >= 0x103)
@@ -653,8 +571,8 @@ uint8_t Vdp::Read_V_Counter(void)
 		}
 	}
 	
-	// Check for 2x interlaced mode.
-	if (Interlaced.DoubleRes)
+	// Check for Interlaced Mode 2. (2x resolution)
+	if (Interlaced == VdpTypes::INTERLACED_MODE_2)
 	{
 		// Interlaced mode is enabled.
 		uint8_t vc_tmp = (V_Counter & 0xFF);
@@ -716,11 +634,13 @@ uint16_t Vdp::Read_Data(void)
 		
 		case (VDEST_LOC_CRAM | VDEST_ACC_READ):
 			// CRam Read.
-			data = CRam.u16[(VDP_Ctrl.Address & 0x7E) >> 1];
+			data = m_palette.readCRam_16(VDP_Ctrl.Address & 0x7E);
 			break;
 		
 		case (VDEST_LOC_VSRAM | VDEST_ACC_READ):
 			// VSRam Read.
+			// TODO: Mask off high bits? (Only 10/11 bits are present.)
+			// TODO: If we do that, the remaining bits should be what's in the FIFO.
 			data = VSRam.u16[(VDP_Ctrl.Address & 0x7E) >> 1];
 			break;
 		
@@ -735,9 +655,8 @@ uint16_t Vdp::Read_Data(void)
 
 
 /**
- * Vdp::Update_DMA(): Update the DMA state.
+ * Update the DMA state.
  * @return Number of cycles used.
- * TODO: Port to LibGens.
  */
 unsigned int Vdp::Update_DMA(void)
 {
@@ -755,8 +674,8 @@ unsigned int Vdp::Update_DMA(void)
 	 */
 	
 	// Horizontal resolution.
-	// TODO: Use both RS0/RS1, not just RS1.
-	unsigned int offset = ((VDP_Reg.m5.Set4 & 1) * 2);
+	// TODO: Optimize this conditional? (Not sure if the compiler optimizes it...)
+	unsigned int offset = (isH40() ? 2 : 0);
 	
 	// Check if we're in VBlank or if the VDP is disabled.
 	if (VDP_Lines.Visible.Current < 0 ||
@@ -964,11 +883,10 @@ void Vdp::Write_Data_Word(uint16_t data)
 			// odd addresses results in "interesting side effects".
 			// Those side effects aren't listed, so we're just going to
 			// mask the LSB for now.
-			MarkCRamDirty();
-			address &= 0x7E;	// CRam is 128 bytes. (64 words)
 			
 			// Write the word to CRam.
-			CRam.u16[address>>1] = data;
+			// CRam is 128 bytes. (64 words)
+			m_palette.writeCRam_16((address & 0x7E), data);
 			
 			// Increment the address register.
 			VDP_Ctrl.Address += VDP_Reg.m5.Auto_Inc;
@@ -978,12 +896,14 @@ void Vdp::Write_Data_Word(uint16_t data)
 			// VSRam Write.
 			// TODO: The Genesis Software Manual doesn't mention what happens
 			// with regards to odd address writes for VSRam.
-			// TODO: VSRam is 80 bytes, but we're allowing a maximum of 128 bytes here...
-			MarkCRamDirty();
-			address &= 0x7E;	// VSRam is 80 bytes. (40 words)
+			// TODO: Should this be VRam flag instead of CRam flag?
+			//MarkCRamDirty();
 			
 			// Write the word to VSRam.
-			VSRam.u16[address>>1] = data;
+			// VSRam is 80 bytes. (40 words)
+			// TODO: VSRam is 80 bytes, but we're allowing a maximum of 128 bytes here...
+			// TODO: Mask off high bits? (Only 10/11 bits are present.)
+			VSRam.u16[(address & 0x7E) >> 1] = data;
 			
 			// Increment the address register.
 			VDP_Ctrl.Address += VDP_Reg.m5.Auto_Inc;
@@ -1058,7 +978,6 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 			break;
 		
 		case DMA_DEST_CRAM:
-			MarkCRamDirty();
 			DMAT_Type = 1;
 			break;
 		
@@ -1151,10 +1070,11 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 				break;
 			
 			case DMA_DEST_CRAM:
-				CRam.u16[dest_address >> 1] = w;
+				m_palette.writeCRam_16(dest_address, w);
 				break;
 			
 			case DMA_DEST_VSRAM:
+				// TODO: Mask off high bits? (Only 10/11 bits are present.)
 				VSRam.u16[dest_address >> 1] = w;
 				break;
 			
@@ -1369,7 +1289,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 	src_address *= 2;
 	
 	// Determine the source component.
-	DMA_Src_t src_component;
+	DMA_Src_t src_component = DMA_SRC_ROM;	// TODO: Determine a better default.
 	int WRam_Mode;
 	if (src_address < M68K_Mem::Rom_Size)
 	{

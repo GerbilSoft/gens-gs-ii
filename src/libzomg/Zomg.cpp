@@ -24,7 +24,7 @@
  * and is subject to change.
  */
 
-#include <config.h>
+#include <libzomg/config.libzomg.h>
 
 #include "Zomg.hpp"
 #include "zomg_byteswap.h"

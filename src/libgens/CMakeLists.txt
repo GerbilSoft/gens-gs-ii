@@ -12,19 +12,25 @@ INCLUDE_DIRECTORIES(${gens-gs-ii_BINARY_DIR})
 
 # Include the previous directory.
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../")
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/../")
 
 # LibGens source and binary directories.
 # Binary directory is needed for config.h.
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
-# ZLIB include directory.
+# ZLIB and MINIZIP include directories.
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${MINIZIP_INCLUDE_DIR})
 
 # Library checks.
 INCLUDE(CheckLibraryExists)
 CHECK_LIBRARY_EXISTS(c sigaction "" HAVE_SIGACTION)	# libc: sigaction()
+
 CHECK_LIBRARY_EXISTS(rt clock_gettime "" HAVE_LIBRT)	# librt: clock_gettime()
+IF(HAVE_LIBRT)
+	SET(RT_LIBRARY "-lrt")
+ENDIF(HAVE_LIBRT)
 
 # Check for iconv() on non-Win32 systems.
 IF(WIN32)
@@ -49,11 +55,24 @@ ELSE(WIN32)
 ENDIF(WIN32)
 
 # Write the config.h file.
-CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libgens.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libgens.h")
+
+# Test system byteorder.
+# TODO: Universal Binary support; detect PDP endian.
+INCLUDE(TestBigEndian)
+TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
+IF(IS_BIG_ENDIAN)
+	SET(GENS_BYTEORDER "GENS_BIG_ENDIAN")
+ELSE(IS_BIG_ENDIAN)
+	SET(GENS_BYTEORDER "GENS_LIL_ENDIAN")
+ENDIF(IS_BIG_ENDIAN)
+UNSET(IS_BIG_ENDIAN)
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/Util/byteorder.h.in" "${CMAKE_CURRENT_BINARY_DIR}/Util/byteorder.h")
 
 # Sources.
 SET(libgens_SRCS
 	lg_main.cpp
+	Vdp/Vdp.cpp
 	Vdp/VdpIo.cpp
 	Vdp/VdpRend.cpp
 	Vdp/VdpRend_m5.cpp
@@ -124,12 +143,12 @@ ENDIF()
 
 # Build the library.
 ADD_LIBRARY(gens STATIC ${libgens_SRCS} ${libgens_OPTIONAL_SRCS} ${libgens_COMPAT_SRCS})
-TARGET_LINK_LIBRARIES(gens minizip zomg)
+TARGET_LINK_LIBRARIES(gens ${MINIZIP_LIBRARY} zomg)
 IF(GENS_ENABLE_EMULATION)
 	TARGET_LINK_LIBRARIES(gens starscream mdZ80)
 ENDIF(GENS_ENABLE_EMULATION)
 IF(HAVE_LIBRT)
-	TARGET_LINK_LIBRARIES(gens -lrt)
+	TARGET_LINK_LIBRARIES(gens ${RT_LIBRARY})
 ENDIF(HAVE_LIBRT)
 IF(HAVE_ICONV)
 	TARGET_LINK_LIBRARIES(gens ${ICONV_LIBRARY})
@@ -138,7 +157,7 @@ IF(HAVE_LZMA)
 	# Link ordering matters:
 	# * 7z depends on lzmabase.
 	# * lzmabase does NOT depend on 7z.
-	TARGET_LINK_LIBRARIES(gens 7z lzmabase)
+	TARGET_LINK_LIBRARIES(gens ${7z_LIBRARY} ${LZMA_LIBRARY})
 ENDIF(HAVE_LZMA)
 IF(WIN32)
 	# version.dll is required for DcRar_Win32.cpp, which calls these functions:
@@ -148,10 +167,7 @@ IF(WIN32)
 	TARGET_LINK_LIBRARIES(gens -lversion)
 ENDIF(WIN32)
 
-ADD_DEPENDENCIES(gens git_version minizip zomg)
-IF(GENS_ENABLE_EMULATION)
-	ADD_DEPENDENCIES(starscream mdZ80)
-ENDIF(GENS_ENABLE_EMULATION)
-IF(HAVE_LZMA)
-	ADD_DEPENDENCIES(lzmabase 7z)
-ENDIF(HAVE_LZMA)
+# Test suite.
+IF(BUILD_TESTS)
+	ADD_SUBDIRECTORY(tests)
+ENDIF(BUILD_TESTS)

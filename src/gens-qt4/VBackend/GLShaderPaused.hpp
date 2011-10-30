@@ -22,7 +22,7 @@
 #ifndef __GENS_QT4_VBACKEND_GLSHADERPAUSED_HPP__
 #define __GENS_QT4_VBACKEND_GLSHADERPAUSED_HPP__
 
-#include <config.h>
+#include <gens-qt4/config.gens-qt4.h>
 
 #include "GLShader.hpp"
 

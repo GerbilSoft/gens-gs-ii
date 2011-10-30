@@ -22,24 +22,20 @@
  ***************************************************************************/
 
 #include "GensMenuBar.hpp"
-
-// C includes.
-#include <assert.h>
-
-// Menu definitions.
+#include "GensMenuBar_p.hpp"
 #include "GensMenuBar_menus.hpp"
 
-// GensQApplication::IconFromTheme()
-#include "../GensQApplication.hpp"
+// C includes. (C++ namespace)
+#include <cassert>
 
-// gqt4_config
-#include "../gqt4_main.hpp"
+// GensQApplication::IconFromTheme()
+#include "GensQApplication.hpp"
+
+// gqt4_cfg
+#include "gqt4_main.hpp"
 
 // Needed for KeyValMToQtKey().
-#include "../Input/KeyHandlerQt.hpp"
-
-// GensMenuBarPrivate
-#include "GensMenuBar_p.hpp"
+#include "Input/KeyHandlerQt.hpp"
 
 // Recent ROMs menu.
 #include "RecentRomsMenu.hpp"
@@ -53,16 +49,17 @@ namespace GensQt4
 
 GensMenuBarPrivate::GensMenuBarPrivate(GensMenuBar *q)
 	: q(q)
-	, m_lockCnt(0)
+	, lockCnt(0)
+	, popupMenu(NULL)
 	, emuManager(NULL)
 	, recentRomsMenu(NULL)
-	, m_signalMapper(new QSignalMapper(q))
+	, signalMapper(new QSignalMapper(q))
 { }
 
 
 GensMenuBarPrivate::~GensMenuBarPrivate()
 {
-	// Clear the menu maps.
+	// Clear the menu hash tables.
 	clearHashTables();
 	
 	// Delete the popup menu.
@@ -74,7 +71,7 @@ GensMenuBarPrivate::~GensMenuBarPrivate()
 
 
 /**
- * GensMenuBarPrivate::init(): Initialize GensMenuBarPrivate.
+ * Initialize GensMenuBarPrivate.
  * @param initEmuManager Initial EmuManager class.
  */
 void GensMenuBarPrivate::init(EmuManager *initEmuManager)
@@ -83,11 +80,11 @@ void GensMenuBarPrivate::init(EmuManager *initEmuManager)
 	setEmuManager(initEmuManager);
 	
 	// Connect the QSignalMapper's mapped() signal.
-	QObject::connect(m_signalMapper, SIGNAL(mapped(int)),
+	QObject::connect(signalMapper, SIGNAL(mapped(int)),
 			 q, SLOT(menuItemSelected(int)));
 	
 	// Create the "Recent ROMs" menu.
-	recentRomsMenu = new RecentRomsMenu(NULL, gqt4_config->m_recentRoms);
+	recentRomsMenu = new RecentRomsMenu(NULL, gqt4_cfg->recentRomsObject());
 	QObject::connect(recentRomsMenu, SIGNAL(updated()),
 			 q, SLOT(recentRoms_updated()));
 	QObject::connect(recentRomsMenu, SIGNAL(triggered(int)),
@@ -100,7 +97,7 @@ void GensMenuBarPrivate::init(EmuManager *initEmuManager)
 
 
 /**
- * GensMenuBarPrivate::setEmuManager(): Set the emulation manager.
+ * Set the emulation manager.
  * @param newEmuManager New emulation manager.
  */
 void GensMenuBarPrivate::setEmuManager(EmuManager *newEmuManager)
@@ -129,28 +126,26 @@ void GensMenuBarPrivate::setEmuManager(EmuManager *newEmuManager)
 
 
 /**
- * GensMenuBarPrivate::clearHashTables(): Clear the menu hash tables and lists.
+ * Clear the menu hash tables and lists.
  * - hashActions: Hash table of menu actions.
- * - m_lstSeparators: List of menu separators.
+ * - lstSeparators: List of menu separators.
  */
 void GensMenuBarPrivate::clearHashTables(void)
 {
 	// TODO: Consider using QScopedPointer or QSharedPointer instead?
 	
 	// Actions map.
-	foreach (QAction *action, hashActions)
-		delete action;
+	qDeleteAll(hashActions);
 	hashActions.clear();
 	
 	// Separators list.
-	while (!m_lstSeparators.isEmpty())
-		delete m_lstSeparators.takeFirst();
-	m_lstSeparators.clear();
+	qDeleteAll(lstSeparators);
+	lstSeparators.clear();
 }
 
 
 /**
- * GensMenuBarPrivate::retranslate(): Retranslate the menus.
+ * Retranslate the menus.
  */
 inline void GensMenuBarPrivate::retranslate(void)
 {
@@ -164,8 +159,8 @@ inline void GensMenuBarPrivate::retranslate(void)
 
 
 /**
- * GensMenuBarPrivate::parseMainMenu(): Parse an array of GensMainMenuItem items.
- * The menus are added to m_popupMenu.
+ * Parse an array of GensMainMenuItem items.
+ * The menus are added to popupMenu.
  * @param mainMenu Pointer to the first item in the GensMainMenuItem array.
  */
 void GensMenuBarPrivate::parseMainMenu(const GensMenuBar::MainMenuItem *mainMenu)
@@ -192,7 +187,7 @@ void GensMenuBarPrivate::parseMainMenu(const GensMenuBar::MainMenuItem *mainMenu
 
 
 /**
- * GensMenuBarPrivate::parseMenuBar(): Parse an array of GensMenuItem items.
+ * Parse an array of GensMenuItem items.
  * @param menu Pointer to the first item in the GensMenuItem array.
  * @param parent QMenu to add the menu items to.
  */
@@ -210,7 +205,7 @@ void GensMenuBarPrivate::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *par
 		if (menu->type == GensMenuBar::GMI_SEPARATOR)
 		{
 			// Menu separator.
-			m_lstSeparators.append(parent->addSeparator());
+			lstSeparators.append(parent->addSeparator());
 			continue;
 		}
 		
@@ -262,13 +257,13 @@ void GensMenuBarPrivate::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *par
 #endif /* __APPLE__ */
 		
 		// Set the shortcut key.
-		GensKey_t gensKey = gqt4_config->actionToKey(menu->id);
+		GensKey_t gensKey = gqt4_cfg->actionToKey(menu->id);
 		mnuItem->setShortcut(KeyHandlerQt::KeyValMToQtKey(gensKey));
 		
 		// Connect the signal to the signal mapper.
 		QObject::connect(mnuItem, SIGNAL(triggered()),
-				 this->m_signalMapper, SLOT(map()));
-		m_signalMapper->setMapping(mnuItem, menu->id);
+				 this->signalMapper, SLOT(map()));
+		signalMapper->setMapping(mnuItem, menu->id);
 		
 		// Add the menu item to the menu.
 		parent->addAction(mnuItem);
@@ -285,28 +280,28 @@ void GensMenuBarPrivate::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *par
  * Calling unlock() when not locked will return an error.
  * @return 0 on success; non-zero on error.
  */
-inline int GensMenuBarPrivate::lock(void)
+int GensMenuBarPrivate::lock(void)
 {
-	m_lockCnt++;
+	lockCnt++;
 	return 0;
 }
 
-inline int GensMenuBarPrivate::unlock(void)
+int GensMenuBarPrivate::unlock(void)
 {
-	assert(m_lockCnt >= 0);
-	if (m_lockCnt <= 0)
+	assert(lockCnt >= 0);
+	if (lockCnt <= 0)
 		return -1;
 	
-	m_lockCnt--;
+	lockCnt--;
 	return 0;
 }
 
 /**
- * GensMenuBarPrivate::isLocked(): Check if the menu actions are locked.
+ * Check if the menu actions are locked.
  * @return True if the menu actions are locked; false otherwise.
  */
-inline bool GensMenuBarPrivate::isLocked(void)
-	{ return (m_lockCnt > 0); }
+bool GensMenuBarPrivate::isLocked(void)
+	{ return (lockCnt > 0); }
 
 
 /**************************
@@ -329,7 +324,7 @@ GensMenuBar::~GensMenuBar()
 
 
 /**
- * GensMenuBar::popupMenu(): Get the popup menu.
+ * Get the popup menu.
  * @return Popup menu.
  */
 QMenu *GensMenuBar::popupMenu(void)
@@ -337,7 +332,7 @@ QMenu *GensMenuBar::popupMenu(void)
 
 
 /**
- * GensMenuBar::createMenuBar(): Create a menu bar.
+ * Create a menu bar.
  * @return QMenuBar containing the Gens menus.
  */
 QMenuBar *GensMenuBar::createMenuBar(void)
@@ -352,7 +347,7 @@ QMenuBar *GensMenuBar::createMenuBar(void)
 
 
 /**
- * GensMenuBarPrivate::retranslate(): Retranslate the menus.
+ * Retranslate the menus.
  * WRAPPER FUNCTION for GensMenuBarPrivate::retranslate().
  */
 void GensMenuBar::retranslate(void)
@@ -360,7 +355,7 @@ void GensMenuBar::retranslate(void)
 
 
 /**
- * GensMenuBar::menuItemCheckState(): Get a menu item's check state.
+ * Get a menu item's check state.
  * @param id Menu item ID.
  * @return True if checked; false if not checked or not checkable.
  */
@@ -378,7 +373,7 @@ bool GensMenuBar::menuItemCheckState(int id)
 
 
 /**
- * GensMenuBar::setMenuItemCheckState(): Set a menu item's check state.
+ * Set a menu item's check state.
  * @param id Menu item ID.
  * @param newCheck New check state.
  * @return 0 on success; non-zero on error.
@@ -411,7 +406,7 @@ int GensMenuBar::unlock(void)
 	{ return d->unlock(); }
 
 /**
- * GensMenuBar::isLocked(): Check if the menu actions are locked.
+ * Check if the menu actions are locked.
  * WRAPPER FUNCTION for GensMenuBarPrivate::isLocked().
  * @return True if the menu actions are locked; false otherwise.
  */
@@ -420,7 +415,7 @@ bool GensMenuBar::isLocked(void)
 
 
 /**
- * GensMenuBar::menuItemSelected(): A menu item has been selected.
+ * A menu item has been selected.
  * @param id Menu item ID.
  */
 void GensMenuBar::menuItemSelected(int id)

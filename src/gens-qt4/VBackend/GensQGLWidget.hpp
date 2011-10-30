@@ -60,9 +60,9 @@ class GensQGLWidget : public GLBackend
 		QSize sizeHint(void) const { return QSize(320, 240); }
 	
 	protected slots:
-		void setFastBlur(bool newFastBlur);
-		void setBilinearFilter(bool newBilinearFilter);
-		void setPauseTint(bool newPauseTint);
+		void fastBlur_changed_slot(const QVariant& newFastBlur);		// bool
+		void bilinearFilter_changed_slot(const QVariant& newBilinearFilter);	// bool
+		void pauseTint_changed_slot(const QVariant& newPauseTint);		// bool
 	
 	private:
 		friend class GensQGLWidgetPrivate;

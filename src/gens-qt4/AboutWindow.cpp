@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include <config.h>
+#include <gens-qt4/config.gens-qt4.h>
 
 #ifdef HAVE_GLEW
 // GL Extension Wrangler.
@@ -337,10 +337,10 @@ QString AboutWindow::GetIncLibraries(void)
 	// Included libraries string.
 	QString sIncLibraries;
 	
-#if defined(HAVE_ZLIB) && !defined(ZLIB_FOUND)
+#if defined(HAVE_ZLIB) && defined(USE_INTERNAL_ZLIB)
 	// ZLIB is included.
 	sIncLibraries += sIntCopyOf.arg(QLatin1String("zlib-" ZLIB_VERSION)) + sLineBreak +
-		QLatin1String("Copyright (c) 1995-2010 Jean-loup Gailly and Mark Adler.") + sLineBreak +
+		QLatin1String("Copyright (c) 1995-2011 Jean-loup Gailly and Mark Adler.") + sLineBreak +
 		QLatin1String("<a href=\"http://www.zlib.net/\">http://www.zlib.net/</a>");
 #endif
 	
@@ -357,7 +357,7 @@ QString AboutWindow::GetIncLibraries(void)
 		QLatin1String("Zip64/Zip Copyright (c) 2009-2001 by Mathias Svensson.");
 #endif
 	
-#if defined(HAVE_LZMA) && !defined(LZMA_FOUND)
+#if defined(HAVE_LZMA) && defined(USE_INTERNAL_LZMA)
 	// LZMA is included.
 	if (!sIncLibraries.isEmpty())
 		sIncLibraries += sLineBreak + sLineBreak;
@@ -367,7 +367,7 @@ QString AboutWindow::GetIncLibraries(void)
 					"http://www.7-zip.org/sdk.html</a>");
 #endif
 	
-#if defined(HAVE_GLEW) && !defined(GLEW_FOUND)
+#if defined(HAVE_GLEW) && defined(USE_INTERNAL_GLEW)
 	// GLEW is included.
 	if (!sIncLibraries.isEmpty())
 		sIncLibraries += sLineBreak + sLineBreak;
@@ -448,8 +448,8 @@ QString AboutWindow::GetDebugInfo(void)
 	//: Save directory: Directory where configuration and savestate files are saved.
 	// TODO: Verify that the link works on Windows and Mac OS X.
 	sDebugInfo += tr("Save directory") + QChar(L':') + sLineBreak +
-		QLatin1String("<a href=\"file://") + gqt4_config->cfgPath() + QLatin1String("\">") +
-		QDir::toNativeSeparators(gqt4_config->cfgPath()) + QLatin1String("</a>") +
+		QLatin1String("<a href=\"file://") + gqt4_cfg->configPath() + QLatin1String("\">") +
+		QDir::toNativeSeparators(gqt4_cfg->configPath()) + QLatin1String("</a>") +
 		sLineBreak + sLineBreak;
 	
 #ifdef Q_OS_WIN32

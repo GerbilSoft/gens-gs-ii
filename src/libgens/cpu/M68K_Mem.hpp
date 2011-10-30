@@ -43,7 +43,6 @@ extern Ram_68k_t Ram_68k;
 #endif
 
 #include "M68K.hpp"
-#include "../MD/SysVersion.hpp"
 
 // ZOMG TIME_reg structs.
 #include "libzomg/zomg_md_time_reg.h"
@@ -96,9 +95,6 @@ class M68K_Mem
 		static int CPL_Z80;
 		static int Cycles_M68K;
 		static int Cycles_Z80;
-		
-		// TODO: Move ms_SysVersion somewhere else?
-		static SysVersion ms_SysVersion;
 		
 		/** Public init and read/write functions. **/
 		static void InitSys(M68K::SysID system);

@@ -25,7 +25,7 @@
 #include "GensMenuBar_p.hpp"
 #include "GensMenuBar_menus.hpp"
 
-// gqt4_config
+// gqt4_cfg
 #include "gqt4_main.hpp"
 
 // Qt includes.
@@ -42,21 +42,23 @@ namespace GensQt4
  *********************************/
 
 /**
- * syncConnect(): Connect menu synchronization slots.
+ * Connect menu synchronization slots.
  */
 void GensMenuBarPrivate::syncConnect(void)
 {
-	QObject::connect(gqt4_config, SIGNAL(stretchMode_changed(GensConfig::StretchMode_t)),
-			 q, SLOT(stretchMode_changed_slot(GensConfig::StretchMode_t)));
-	QObject::connect(gqt4_config, SIGNAL(regionCode_changed(int)),
-			 q, SLOT(regionCode_changed_slot(int)));	// LibGens::SysVersion::RegionCode_t
-	QObject::connect(gqt4_config, SIGNAL(enableSRam_changed(bool)),
-			 q, SLOT(enableSRam_changed_slot(bool)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/stretchMode"),
+					q, SLOT(stretchMode_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("System/regionCode"),
+					q, SLOT(regionCode_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Options/enableSRam"),
+					q, SLOT(enableSRam_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("GensWindow/showMenuBar"),
+					q, SLOT(showMenuBar_changed_slot(QVariant)));
 }
 
 
 /**
- * syncAll(): Synchronize all menus.
+ * Synchronize all menus.
  */
 void GensMenuBarPrivate::syncAll(void)
 {
@@ -64,9 +66,13 @@ void GensMenuBarPrivate::syncAll(void)
 	
 	// Do synchronization.
 	syncRecent();
-	q->stretchMode_changed_slot(gqt4_config->stretchMode());
-	q->regionCode_changed_slot(gqt4_config->regionCode());
-	q->enableSRam_changed_slot(gqt4_config->enableSRam());
+	syncShowMenuBar();
+	q->stretchMode_changed_slot_int(
+			(StretchMode_t)gqt4_cfg->getInt(QLatin1String("Graphics/stretchMode")));
+	q->regionCode_changed_slot_int(
+			(LibGens::SysVersion::RegionCode_t)gqt4_cfg->getInt(QLatin1String("System/regionCode")));
+	q->enableSRam_changed_slot_int(
+			gqt4_cfg->get(QLatin1String("Options/enableSRam")).toBool());
 	q->stateChanged();
 	
 	this->unlock();
@@ -74,7 +80,7 @@ void GensMenuBarPrivate::syncAll(void)
 
 
 /**
- * syncRecent(): Synchronize the "Recent ROMs" menu.
+ * Synchronize the "Recent ROMs" menu.
  */
 void GensMenuBarPrivate::syncRecent(void)
 {
@@ -96,6 +102,22 @@ out:
 }
 
 
+/**
+ * Synchronize the "Show Menu Bar" item.
+ */
+void GensMenuBarPrivate::syncShowMenuBar(void)
+{
+#ifndef Q_WS_MAC
+	// Show Menu Bar.
+	this->lock();
+	QAction *actionShowMenuBar = hashActions.value(IDM_GRAPHICS_MENUBAR);
+	if (actionShowMenuBar)
+		actionShowMenuBar->setChecked(gqt4_cfg->get(QLatin1String("GensWindow/showMenuBar")).toBool());
+	this->unlock();
+#endif /* Q_WS_MAC */
+}
+
+
 /**************************
  * GensMenuBar functions. *
  **************************/
@@ -104,7 +126,7 @@ out:
 
 
 /**
- * recentRoms_updated(): Recent ROMs menu has been updated.
+ * Recent ROMs menu has been updated.
  */
 void GensMenuBar::recentRoms_updated(void)
 {
@@ -114,21 +136,16 @@ void GensMenuBar::recentRoms_updated(void)
 
 
 /**
- * stretchMode_changed_slot(): Stretch mode has changed.
- * @param newStretchMode New stretch mode.
+ * Stretch mode has changed.
+ * @param stretchMode New stretch mode.
  */
-void GensMenuBar::stretchMode_changed_slot(GensConfig::StretchMode_t newStretchMode)
+void GensMenuBar::stretchMode_changed_slot_int(StretchMode_t stretchMode)
 {
-	int id;
-	switch (newStretchMode)
-	{
-		case GensConfig::STRETCH_NONE:	id = IDM_GRAPHICS_STRETCH_NONE; break;
-		case GensConfig::STRETCH_H:	id = IDM_GRAPHICS_STRETCH_H;    break;
-		case GensConfig::STRETCH_V:	id = IDM_GRAPHICS_STRETCH_V;    break;
-		case GensConfig::STRETCH_FULL:	id = IDM_GRAPHICS_STRETCH_FULL; break;
-		default:
-			return;
-	}
+	if (stretchMode < STRETCH_NONE || stretchMode > STRETCH_FULL)
+		return;
+	
+	// Convert the stretch mode to a menu item ID.
+	const int id = (int)stretchMode + IDM_GRAPHICS_STRETCH_NONE;
 	
 	// Find the action.
 	QAction *action = d->hashActions.value(id, NULL);
@@ -141,16 +158,26 @@ void GensMenuBar::stretchMode_changed_slot(GensConfig::StretchMode_t newStretchM
 	this->unlock();
 }
 
+/**
+ * Stretch mode has changed.
+ * (WRAPPER FUNCTION for stretchMode_changed_slot_int().)
+ * @param stretchMode (StretchMode_t) New stretch mode.
+ */
+void GensMenuBar::stretchMode_changed_slot(const QVariant& stretchMode)
+{
+	// Wrapper for stretchMode_changed_slot_int().
+	stretchMode_changed_slot_int((StretchMode_t)stretchMode.toInt());
+}
+
 
 /**
- * regionCode_changed_slot(): Region code has changed.
- * @param newRegionCode New region code.
+ * Region code has changed.
+ * @param regionCode New region code.
  */
-// NOTE: Uses LibGens::SysVersion::RegionCode_t, but Q_ENUMS requires a QObject for storage.
-void GensMenuBar::regionCode_changed_slot(int newRegionCode)
+void GensMenuBar::regionCode_changed_slot_int(LibGens::SysVersion::RegionCode_t regionCode)
 {
 	int id;
-	switch (newRegionCode)
+	switch (regionCode)
 	{
 		case LibGens::SysVersion::REGION_AUTO:		id = IDM_SYSTEM_REGION_AUTODETECT; break;
 		case LibGens::SysVersion::REGION_JP_NTSC:	id = IDM_SYSTEM_REGION_JAPAN;      break;
@@ -158,7 +185,7 @@ void GensMenuBar::regionCode_changed_slot(int newRegionCode)
 		case LibGens::SysVersion::REGION_US_NTSC:	id = IDM_SYSTEM_REGION_USA;        break;
 		case LibGens::SysVersion::REGION_EU_PAL:	id = IDM_SYSTEM_REGION_EUROPE;     break;
 		default:
-			return;
+			break;
 	}
 	
 	// Find the action.
@@ -172,12 +199,24 @@ void GensMenuBar::regionCode_changed_slot(int newRegionCode)
 	this->unlock();
 }
 
+/**
+ * Region code has changed.
+ * (WRAPPER FUNCTION for regionCode_changed_slot_int().)
+ * @param regionCode (RegionCode_t) New region code.
+ */
+void GensMenuBar::regionCode_changed_slot(const QVariant& regionCode)
+{
+	// Wrapper for regionCode_changed_slot_int().
+	regionCode_changed_slot_int(
+		(LibGens::SysVersion::RegionCode_t)regionCode.toInt());
+}
+
 
 /**
- * enableSRam_changed_slot(): Enable SRam/EEPRom setting has changed.
- * @param newEnableSRam New Enable SRam/EEPRom setting.
+ * Enable SRam/EEPRom setting has changed.
+ * @param enableSRam New Enable SRam/EEPRom setting.
  */
-void GensMenuBar::enableSRam_changed_slot(bool newEnableSRam)
+void GensMenuBar::enableSRam_changed_slot_int(bool enableSRam)
 {
 	// Find the action.
 	QAction *action = d->hashActions.value(IDM_OPTIONS_ENABLESRAM, NULL);
@@ -186,13 +225,35 @@ void GensMenuBar::enableSRam_changed_slot(bool newEnableSRam)
 	
 	// Set the check state.
 	this->lock();
-	action->setChecked(newEnableSRam);
+	action->setChecked(enableSRam);
 	this->unlock();
+}
+
+/**
+ * Enable SRam/EEPRom setting has changed.
+ * (WRAPPER FUNCTION for enableSRam_changed_slot_int().)
+ * @param enableSRam (bool) New Enable SRam/EEPRom setting.
+ */
+void GensMenuBar::enableSRam_changed_slot(const QVariant& enableSRam)
+{
+	// Wrapper for enableSRam_changed_slot_int().
+	enableSRam_changed_slot_int(enableSRam.toBool());
 }
 
 
 /**
- * stateChanged(): Emulation state has changed.
+ * "Show Menu Bar" setting has changed.
+ * @param newShowMenuBar New "Show Menu Bar" setting.
+ */
+void GensMenuBar::showMenuBar_changed_slot(const QVariant& newShowMenuBar)
+{
+	((void)newShowMenuBar);
+	d->syncShowMenuBar();
+}
+
+
+/**
+ * Emulation state has changed.
  */
 void GensMenuBar::stateChanged(void)
 {
@@ -228,13 +289,6 @@ void GensMenuBar::stateChanged(void)
 		if (actionEnableIfOpen)
 			actionEnableIfOpen->setEnabled(isRomOpen);
 	}
-	
-#ifndef Q_WS_MAC
-	// Show Menu Bar.
-	QAction *actionShowMenuBar = d->hashActions.value(IDM_GRAPHICS_MENUBAR);
-	if (actionShowMenuBar)
-		actionShowMenuBar->setChecked(gqt4_config->showMenuBar());
-#endif /* Q_WS_MAC */
 	
 	// Z80. (Common for all systems.)
 	QAction *actionCpuReset = d->hashActions.value(IDM_SYSTEM_CPURESET_Z80);

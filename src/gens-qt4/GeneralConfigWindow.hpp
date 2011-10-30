@@ -30,17 +30,12 @@
 #include <QtGui/QMainWindow>
 #include <QtGui/QColor>
 
-#ifdef Q_WS_MAC
-// Mac OS X:
-// Use a unified toolbar instead of tabs.
-class QStackedWidget;
-class QToolBar;
 class QAction;
+class QActionGroup;
 
 // Apply changes immediately.
 #ifdef Q_WS_MAC
 #define GCW_APPLY_IMMED
-#endif
 #else /* !Q_WS_MAC */
 #ifdef GCW_APPLY_IMMED
 #undef GCW_APPLY_IMMED
@@ -87,10 +82,7 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 #endif
 		
 #ifdef Q_WS_MAC
-		// Mac OS X:
-		// Use a unified toolbar instead of tabs.
-		QStackedWidget *stackedWidget;
-		QToolBar *toolBar;
+		// Mac OS X UI customizations.
 		void setupUi_mac(void);
 #endif
 	
@@ -101,9 +93,12 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		void reload(void);
 		void apply(void);
 	
-		// Mac OS X: Toolbar action group.
-		// moc doesn't properly support OS-specific slots,
-		// so we need to define this slot on all systems.
+	private:
+		// Toolbar action group.
+		QActionGroup *m_agBtnGroup;
+	
+	private slots:
+		// Toolbar action group.
 		void toolbarTriggered(QAction *action);
 	
 	private:
@@ -187,9 +182,7 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		void on_chkOsdMsgEnable_toggled(bool checked);
 		void on_chkAutoFixChecksum_toggled(bool checked);
 		void on_chkAutoPause_toggled(bool checked);
-		void on_chkBorderColor_toggled(bool checked);
 		void on_chkPauseTint_toggled(bool checked);
-		void on_chkNtscV30Rolling_toggled(bool checked);
 		void on_cboIntroStyle_currentIndexChanged(int index);
 		void on_cboIntroColor_currentIndexChanged(int index);
 		
@@ -198,6 +191,13 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		void on_chkFastBlur_toggled(bool checked);
 		void on_chkBilinearFilter_toggled(bool checked);
 		void on_cboInterlacedMode_currentIndexChanged(int index);
+		
+		/** Advanced VDP settings. **/
+		void on_chkSpriteLimits_toggled(bool checked);
+		void on_chkBorderColor_toggled(bool checked);
+		void on_chkNtscV30Rolling_toggled(bool checked);
+		void on_chkVScrollBug_toggled(bool checked);
+		void on_chkZeroLengthDMA_toggled(bool checked);
 		
 		/** System. **/
 		void on_cboRegionCurrent_currentIndexChanged(int index);

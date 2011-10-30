@@ -44,7 +44,7 @@ class GensKeyConfig : public QObject
 	Q_OBJECT
 	
 	public:
-		GensKeyConfig();
+		GensKeyConfig(QObject *parent = 0);
 		~GensKeyConfig();
 		
 		/**
@@ -52,30 +52,30 @@ class GensKeyConfig : public QObject
 		 * @param key GensKey_t value. (WITH MODIFIERS)
 		 * @return Action, or 0 if no action was found.
 		 */
-		int keyToAction(GensKey_t key);
+		int keyToAction(GensKey_t key) const;
 		
 		/**
 		 * actionToKey(): Look up a GensKey_t based on an action value.
 		 * @param action Action value.
 		 * @return GensKey_t (WITH MODIFIERS), or 0 if no key was found.
 		 */
-		int actionToKey(int action);
+		int actionToKey(int action) const;
 		
 		/**
 		 * load(): Load key configuration from a settings file.
 		 * NOTE: The group must be selected in the QSettings before calling this function!
-		 * @param settings Settings file.
+		 * @param qSettings Settings file.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int load(const QSettings& settings);
+		int load(const QSettings *qSettings);
 		
 		/**
 		 * save(): Save key configuration to a settings file.
 		 * NOTE: The group must be selected in the QSettings before calling this function!
-		 * @param settings Settings file.
+		 * @param qSettings Settings file.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int save(QSettings& settings);
+		int save(QSettings *qSettings) const;
 	
 	private:
 		GensKeyConfigPrivate *d;

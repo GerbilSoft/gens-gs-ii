@@ -27,8 +27,8 @@
 // M68K_Mem::ms_Region is needed for region detection.
 #include "cpu/M68K_Mem.hpp"
 
-// C includes.
-#include <string.h>
+// C includes. (C++ namespace)
+#include <cstring>
 
 // TODO: Maybe move these to class enum constants?
 #define LINEBUF_HIGH_B	0x80
@@ -85,19 +85,13 @@
 namespace LibGens
 {
 
-/** Static member initialization. **/
-
-// Temporary VDP data.
-unsigned int Vdp::Y_FineOffset;
-unsigned int Vdp::TotalSprites;
-
 /**
  * Vdp::T_GetLineNumber(): Get the current line number, adjusted for interlaced display.
  * @param interlaced True for interlaced; false for non-interlaced.
  * @return Line number.
  */
 template<bool interlaced>
-FORCE_INLINE int Vdp::T_GetLineNumber(void)
+FORCE_INLINE int Vdp::T_GetLineNumber(void) const
 {
 	// Get the current line number.
 	int vdp_line = VDP_Lines.Visible.Current;
@@ -517,74 +511,135 @@ FORCE_INLINE uint16_t Vdp::T_Get_X_Offset(void)
 	if (plane)
 	{
 		// Scroll A.
-		return H_Scroll_Addr_u16(H_Scroll_Offset);
+		return H_Scroll_Addr_u16(H_Scroll_Offset) & 0x3FF;
 	}
 	else
 	{
 		// Scroll B.
-		return H_Scroll_Addr_u16(H_Scroll_Offset + 2);
+		return H_Scroll_Addr_u16(H_Scroll_Offset + 2) & 0x3FF;
 	}
 }
 
 
 /**
- * Vdp::T_Update_Y_Offset(): Update the Y offset.
+ * Get the Y offset.
  * @param plane True for Scroll A; false for Scroll B.
  * @param interlaced True for interlaced; false for non-interlaced.
  * @param cell_cur Current X cell number.
- * @return Y offset.
+ * @return Y offset, in pixels. (Includes cell offset and fine offset.)
  */
 template<bool plane, bool interlaced>
-FORCE_INLINE unsigned int Vdp::T_Update_Y_Offset(int cell_cur)
+FORCE_INLINE unsigned int Vdp::T_Get_Y_Offset(int cell_cur)
 {
-	if ((cell_cur & 0xFF80) || (cell_cur < 0))
+	// NOTE: Cell offset masking is handled in T_Get_Y_Cell_Offset().
+	// We don't need to do it here.
+	unsigned int y_offset;
+	
+	if (cell_cur < 0 || cell_cur >= 40)
 	{
 		// Cell number is invalid.
-		return 0;
+		// This usually happens if 2-cell VScroll is used
+		// at the same time as HScroll.
+		if (VdpEmuOptions.vscrollBug)
+		{
+			/**
+			 * VScroll bug is enabled. (MD1, MD2)
+			 * 
+			 * H32: VScroll is fixed to 0.
+			 * - Test ROM: Kawasaki Superbike Challenge
+			 * 
+			 * H40: Result is VSRam.u16[38] & VSRam.u16[39].
+			 * That is, column 19 from both planes A and B, ANDed together.
+			 * This is used for both scroll planes.
+			 * - Test ROM: Oerg's MDEM 2011 demo. (without masking sprites)
+			 *   - Video demonstrating the VScroll bug:
+			 *     http://www.youtube.com/watch?v=UsW8i7zsY8w
+			 *
+			 * References:
+			 * - Sik on #GensGS.
+			 * - http://gendev.spritesmind.net/forum/viewtopic.php?p=11728#11728
+			 */
+			
+			if (isH40())
+				y_offset = (VSRam.u16[38] & VSRam.u16[39]);
+			else // H32
+				y_offset = 0;
+			
+			// Add the current line number to the Y offset.
+			y_offset += T_GetLineNumber<interlaced>();
+			return y_offset;
+		}
+		else
+		{
+			/**
+			 * VScroll bug is disabled. (MD3)
+			 * Handle this column the same as column 0.
+			 */
+			cell_cur = 0;
+		}
 	}
 	
 	// Mask off odd columns.
 	cell_cur &= ~1;
 	
-	// Get the vertical scroll offset.
-	unsigned int VScroll_Offset;
-	if (plane)
-	{
-		// Scroll A.
-		VScroll_Offset = VSRam.u16[cell_cur];
-	}
-	else
-	{
-		// Scroll B.
-		VScroll_Offset = VSRam.u16[cell_cur + 1];
-	}
+	// Plane A VScroll is stored on even addresses.
+	// Plane B VScroll is stored on odd addresses.
+	if (!plane)
+		cell_cur++;
 	
-	// Add the current line number to the VScroll offset.
-	VScroll_Offset += T_GetLineNumber<interlaced>();
+	// Get the Y offset.
+	y_offset = VSRam.u16[cell_cur];
 	
-	if (interlaced)
-	{
-		// Interlaced mode.
-		Y_FineOffset = (VScroll_Offset & 15);
-		
-		// Get the V Cell offset and prevent it from overflowing.
-		VScroll_Offset = (VScroll_Offset >> 4) & V_Scroll_CMask;
-	}
-	else
-	{
-		// Non-Interlaced mode.
-		Y_FineOffset = (VScroll_Offset & 7);
-		
-		// Get the V Cell offset and prevent it from overflowing.
-		VScroll_Offset = (VScroll_Offset >> 3) & V_Scroll_CMask;
-	}
-	
-	return VScroll_Offset;
+	// Add the current line number to the Y offset.
+	y_offset += T_GetLineNumber<interlaced>();
+	return y_offset;
 }
 
 
 /**
- * Vdp::T_Get_Pattern_Info(): Get pattern info from a scroll plane.
+ * Get the cell offset from a Y offset.
+ * This function applies the VScroll cell mask.
+ * @param y_offset Y offset.
+ * @param vscroll_mask If true, mask with the VScroll cell mask.
+ * @return Cell offset.
+ */
+template<bool interlaced, bool vscroll_mask>
+FORCE_INLINE unsigned int Vdp::T_Get_Y_Cell_Offset(unsigned int y_offset)
+{
+	// Non-Interlaced: 8x8 cells
+	// Interlaced: 8x16 cells
+	unsigned int cell_offset;
+	if (!interlaced)
+		cell_offset = (y_offset >> 3);
+	else
+		cell_offset = (y_offset >> 4);
+	
+	if (vscroll_mask)
+		cell_offset &= V_Scroll_CMask;
+	
+	return cell_offset;
+}
+
+
+/**
+ * Get the fine offset from a Y offset.
+ * @param y_offset Y offset.
+ * @return Fine offset.
+ */
+template<bool interlaced>
+FORCE_INLINE unsigned int Vdp::T_Get_Y_Fine_Offset(unsigned int y_offset)
+{
+	// Non-Interlaced: 8x8 cells
+	// Interlaced: 8x16 cells
+	if (!interlaced)
+		return (y_offset & 7);
+	else
+		return (y_offset & 15);
+}
+
+
+/**
+ * Get pattern info from a scroll plane.
  * H_Scroll_CMul must be initialized correctly.
  * @param plane True for Scroll A; false for Scroll B.
  * @param x X tile number.
@@ -605,17 +660,15 @@ FORCE_INLINE uint16_t Vdp::T_Get_Pattern_Info(unsigned int x, unsigned int y)
 
 
 /**
- * Vdp::T_Get_Pattern_Data(): Get pattern data for a given tile for the current line.
+ * Get pattern data for a given tile for the current line.
  * @param interlaced True for interlaced; false for non-interlaced.
  * @param pattern Pattern info.
+ * @param y_fine_offset Y fine offset.
  * @return Pattern data.
  */
 template<bool interlaced>
-FORCE_INLINE unsigned int Vdp::T_Get_Pattern_Data(uint16_t pattern)
+FORCE_INLINE uint32_t Vdp::T_Get_Pattern_Data(uint16_t pattern, unsigned int y_fine_offset)
 {
-	// Vertical offset.
-	unsigned int V_Offset = Y_FineOffset;
-	
 	// Get the tile address.
 	unsigned int TileAddr;
 	if (interlaced)
@@ -627,15 +680,14 @@ FORCE_INLINE unsigned int Vdp::T_Get_Pattern_Data(uint16_t pattern)
 	{
 		// V Flip enabled. Flip the tile vertically.
 		if (interlaced)
-			V_Offset ^= 15;
+			y_fine_offset ^= 15;
 		else
-			V_Offset ^= 7;
+			y_fine_offset ^= 7;
 	}
 	
 	// Return the pattern data.
-	return VRam.u32[(TileAddr + (V_Offset * 4)) >> 2];
+	return VRam.u32[(TileAddr + (y_fine_offset * 4)) >> 2];
 }
-
 
 /**
  * Vdp::T_Render_Line_Scroll(): Render a scroll line.
@@ -650,11 +702,11 @@ template<bool plane, bool interlaced, bool vscroll, bool h_s>
 FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 {
 	// Get the horizontal scroll offset. (cell and fine offset)
-	unsigned int X_offset_cell = T_Get_X_Offset<plane>() & 0x3FF;
+	unsigned int x_cell_offset = T_Get_X_Offset<plane>();
 	
 	// Drawing will start at the fine cell offset.
 	// LineBuf.u16[X_offset_cell & 7]
-	unsigned int disp_pixnum = (X_offset_cell & 7);
+	unsigned int disp_pixnum = (x_cell_offset & 7);
 	
 	// Determine if we should apply the Left Window bug.
 	int LeftWindowBugCnt = 0;	// Left Window bug counter.
@@ -663,14 +715,14 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 		// Determine the value for the Left Window bug counter.
 		// First tile: Counter should be 2.
 		// Second tile: Counter should be 1.
-		LeftWindowBugCnt = ((X_offset_cell & 8) ? 2 : 1);
+		LeftWindowBugCnt = ((x_cell_offset & 8) ? 2 : 1);
 	}
 	
 	if (plane)
 	{
 		// Adjust for the cell starting position.
 		const int cell_start_px = (cell_start << 3);
-		X_offset_cell -= cell_start_px;
+		x_cell_offset -= cell_start_px;
 		disp_pixnum += cell_start_px;
 	}
 	
@@ -678,29 +730,39 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 	// - Invert the cell position.
 	// - Right-shift by 3 for the cell number.
 	// - AND with the horizontal scrolling cell mask to prevent overflow.
-	X_offset_cell = (((X_offset_cell ^ 0x3FF) >> 3) & H_Scroll_CMask);
+	x_cell_offset = (((x_cell_offset ^ 0x3FF) >> 3) & H_Scroll_CMask);
 	
 	// VSRam cell number.
-	int VSRam_Cell = ((X_offset_cell & 1) - 2);
+	// TODO: Adjust for left-window?
+	// NOTE: This starts at -1 or -2, since we're rendering within the 336px buffer.
+	// (Rendering starts from 0 to 7 px off the left side of the screen.)
+	int VSRam_Cell = ((x_cell_offset & 1) - 2);
 	
 	// Initialize the Y offset.
-	unsigned int Y_offset_cell;				// Y offset. (in cells)
+	unsigned int y_offset, y_cell_offset, y_fine_offset;
 	if (!vscroll)
 	{
 		// Full vertical scrolling.
 		// Initialize the Y offset here.
-		Y_offset_cell = T_Update_Y_Offset<plane, interlaced>(VSRam_Cell + 2);
+		// NOTE: We're using 0 instead of (VSRam_Cell + 2),
+		// since VSRam_Cell will be either -2 or -1 here.
+		// T_Update_Y_Offset() ANDs the result with ~1, so
+		// the resulting value will always be 0.
+		y_offset = T_Get_Y_Offset<plane, interlaced>(0);
+		y_cell_offset = T_Get_Y_Cell_Offset<interlaced, true>(y_offset);
+		y_fine_offset = T_Get_Y_Fine_Offset<interlaced>(y_offset);
 	}
 	
 	// Loop through the cells.
-	for (int x = (plane ? cell_length : GetHCells());
-	     x >= 0; x--, VSRam_Cell++)
+	for (int x = cell_length; x >= 0; x--, VSRam_Cell++)
 	{
 		if (vscroll)
 		{
 			// 2-cell vertical scrolling.
 			// Update the Y offset.
-			Y_offset_cell = T_Update_Y_Offset<plane, interlaced>(VSRam_Cell);
+			y_offset = T_Get_Y_Offset<plane, interlaced>(VSRam_Cell);
+			y_cell_offset = T_Get_Y_Cell_Offset<interlaced, true>(y_offset);
+			y_fine_offset = T_Get_Y_Fine_Offset<interlaced>(y_offset);
 		}
 		
 		// Get the pattern info for the current tile.
@@ -708,7 +770,7 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 		if (!plane)
 		{
 			// Scroll B.
-			pattern_info = T_Get_Pattern_Info<plane>(X_offset_cell, Y_offset_cell);
+			pattern_info = T_Get_Pattern_Info<plane>(x_cell_offset, y_cell_offset);
 		}
 		else
 		{
@@ -716,19 +778,19 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 			if (LeftWindowBugCnt <= 0)
 			{
 				// Left Window bug doesn't apply or has already been emulated.
-				pattern_info = T_Get_Pattern_Info<plane>(X_offset_cell, Y_offset_cell);
+				pattern_info = T_Get_Pattern_Info<plane>(x_cell_offset, y_cell_offset);
 			}
 			else
 			{
 				// Left Window bug applies.
 				LeftWindowBugCnt--;
-				const unsigned int TmpXCell = ((X_offset_cell + 2) & H_Scroll_CMask);
-				pattern_info = T_Get_Pattern_Info<plane>(TmpXCell, Y_offset_cell);
+				const unsigned int TmpXCell = ((x_cell_offset + 2) & H_Scroll_CMask);
+				pattern_info = T_Get_Pattern_Info<plane>(TmpXCell, y_cell_offset);
 			}
 		}
 		
 		// Get the pattern data for the current tile.
-		uint32_t pattern_data = T_Get_Pattern_Data<interlaced>(pattern_info);
+		uint32_t pattern_data = T_Get_Pattern_Data<interlaced>(pattern_info, y_fine_offset);
 		
 		// Extract the palette number.
 		// Resulting number is palette * 16.
@@ -757,7 +819,7 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 		}
 		
 		// Go to the next H cell.
-		X_offset_cell = (X_offset_cell + 1) & H_Scroll_CMask;
+		x_cell_offset = (x_cell_offset + 1) & H_Scroll_CMask;
 		
 		// Go to the next pattern.
 		disp_pixnum += 8;
@@ -766,13 +828,13 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 
 
 /**
- * Vdp::T_Render_Line_ScrollA(): Render a line for Scroll A / Window.
+ * Render a line for Scroll A / Window.
  * @param interlaced	[in] True for interlaced; false for non-interlaced.
  * @param vscroll	[in] True for 2-cell mode; false for full scroll.
  * @param h_s		[in] Highlight/Shadow enable.
  */
 template<bool interlaced, bool vscroll, bool h_s>
-FORCE_INLINE void Vdp::T_Render_Line_ScrollA(void)
+FORCE_INLINE void Vdp::T_Render_Line_ScrollA_Window(void)
 {
 	// Cell counts for Scroll A.
 	int ScrA_Start, ScrA_Length;
@@ -833,25 +895,25 @@ FORCE_INLINE void Vdp::T_Render_Line_ScrollA(void)
 		// (Window is not scrollable.)
 		unsigned int disp_pixnum = (Win_Start * 8) + 8;
 		
-		// Calculate the fine offsets.
-		const int vdp_line = T_GetLineNumber<interlaced>();
-		if (interlaced)
-			Y_FineOffset = (vdp_line & 15);
-		else
-			Y_FineOffset = (vdp_line & 7);
+		// Calculate the Y offsets.
+		const int y_offset = T_GetLineNumber<interlaced>();
+		unsigned int y_cell_offset, y_fine_offset;
 		
-		// Window row start address.
-		const unsigned int Y_offset_cell = (VDP_Lines.Visible.Current / 8);
+		// Non-Interlaced: 8x8 cells
+		// Interlaced: 8x16 cells
+		y_cell_offset = T_Get_Y_Cell_Offset<interlaced, false>(y_offset);
+		y_fine_offset = T_Get_Y_Fine_Offset<interlaced>(y_offset);
+		
 		// TODO: See if we need to handle address wraparound.
 		// NOTE: Multiply by 2 for 16-bit access.
-		const uint16_t *Win_Row_Addr = Win_Addr_Ptr16((Y_offset_cell << H_Win_Shift) * 2) + Win_Start;
+		const uint16_t *Win_Row_Addr = Win_Addr_Ptr16((y_cell_offset << H_Win_Shift) * 2) + Win_Start;
 		
 		// Loop through the cells.
 		for (int x = Win_Length; x > 0; x--, disp_pixnum += 8)
 		{
 			// Get the pattern info and data for the current tile.
 			register uint16_t pattern_info = *Win_Row_Addr++;
-			uint32_t pattern_data = T_Get_Pattern_Data<interlaced>(pattern_info);
+			uint32_t pattern_data = T_Get_Pattern_Data<interlaced>(pattern_info, y_fine_offset);
 			
 			// Extract the palette number.
 			// Resulting number is palette * 16.
@@ -901,15 +963,15 @@ FORCE_INLINE void Vdp::T_Render_Line_ScrollA(void)
 
 
 /**
- * Vdp::T_Make_Sprite_Struct(): Fill Sprite_Struct[] with information from the Sprite Attribute Table.
+ * Fill Sprite_Struct[] with information from the Sprite Attribute Table.
  * @param interlaced If true, using Interlaced Mode 2. (2x res)
  * @param partial If true, only do a partial update. (X pos, X size)
  */
 template<bool interlaced, bool partial>
 FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
 {
-	unsigned int spr_num = 0;
-	unsigned int link = 0;
+	uint8_t spr_num = 0;
+	uint8_t link = 0;
 	
 	// H40 allows 80 sprites; H32 allows 64 sprites.
 	// Essentially, it's (GetHCells() * 2).
@@ -918,7 +980,7 @@ FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
 	// (Old Gens limited to 80 sprites regardless of video mode.)
 	const unsigned int max_spr = (VdpEmuOptions.spriteLimits
 					? (GetHCells() * 2)
-					: 80);
+					: (unsigned int)(sizeof(Sprite_Struct)/sizeof(Sprite_Struct[0])));
 	
 	// Get the first sprite address in VRam.
 	const uint16_t *CurSpr = Spr_Addr_Ptr16(0);
@@ -1000,7 +1062,7 @@ FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
 
 
 /**
- * Vdp::T_Update_Mask_Sprite(): Update Sprite_Visible[] using sprite masking.
+ * Update Sprite_Visible[] using sprite masking.
  * @param sprite_limit If true, emulates sprite limits.
  * @param interlaced If true, uses interlaced mode.
  * @return Number of visible sprites.
@@ -1029,8 +1091,8 @@ FORCE_INLINE unsigned int Vdp::T_Update_Mask_Sprite(void)
 	// Those sprites still count towards total sprite and sprite dot counts.
 	bool sprite_mask_active = false;
 
-	unsigned int spr_num = 0;	// Current sprite number in Sprite_Struct[].
-	unsigned int spr_vis = 0;	// Current visible sprite in Sprite_Visible[].
+	uint8_t spr_num = 0;	// Current sprite number in Sprite_Struct[].
+	uint8_t spr_vis = 0;	// Current visible sprite in Sprite_Visible[].
 	
 	// Get the current line number.
 	const int vdp_line = T_GetLineNumber<interlaced>();
@@ -1169,7 +1231,7 @@ FORCE_INLINE void Vdp::T_Render_Line_Sprite(void)
 	for (unsigned int spr_vis = 0; spr_vis < num_spr; spr_vis++)
 	{
 		// Get the sprite number.
-		const unsigned int spr_num = Sprite_Visible[spr_vis];
+		const uint8_t spr_num = Sprite_Visible[spr_vis];
 		
 		// Determine the cell and line offsets.
 		unsigned int cell_offset = (T_GetLineNumber<interlaced>() - Sprite_Struct[spr_num].Pos_Y);
@@ -1351,14 +1413,14 @@ FORCE_INLINE void Vdp::T_Render_Line_m5(void)
 	if (VDP_Reg.m5.Set3 & 0x04)
 	{
 		// 2-cell VScroll.
-		T_Render_Line_Scroll<false, interlaced, true, h_s>(0, 0);	// Scroll B
-		T_Render_Line_ScrollA<interlaced, true, h_s>();			// Scroll A
+		T_Render_Line_Scroll<false, interlaced, true, h_s>(0, GetHCells());	// Scroll B
+		T_Render_Line_ScrollA_Window<interlaced, true, h_s>();			// Scroll A
 	}
 	else
 	{
 		// Full VScroll.
-		T_Render_Line_Scroll<false, interlaced, false, h_s>(0, 0);	// Scroll B
-		T_Render_Line_ScrollA<interlaced, false, h_s>();		// Scroll A
+		T_Render_Line_Scroll<false, interlaced, false, h_s>(0, GetHCells());	// Scroll B
+		T_Render_Line_ScrollA_Window<interlaced, false, h_s>();			// Scroll A
 	}
 	
 	T_Render_Line_Sprite<interlaced, h_s>();
@@ -1366,7 +1428,7 @@ FORCE_INLINE void Vdp::T_Render_Line_m5(void)
 
 
 /**
- * Vdp::T_Render_LineBuf(): Render the line buffer to the destination surface.
+ * Render the line buffer to the destination surface.
  * @param pixel Type of pixel.
  * @param dest Destination surface.
  * @param md_palette MD palette buffer.
@@ -1379,8 +1441,7 @@ FORCE_INLINE void Vdp::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 	// Render the line buffer to the destination surface.
 	const int HPixBegin = GetHPixBegin();
 	dest += HPixBegin;
-	for (int i = ((160 - HPixBegin) / 4);
-	     i != 0; i--, dest += 8, src += 8)
+	for (int i = H_Cell; i != 0; i--, dest += 8, src += 8)
 	{
 		*dest     = md_palette[src->pixel];
 		*(dest+1) = md_palette[(src+1)->pixel];
@@ -1399,12 +1460,8 @@ FORCE_INLINE void Vdp::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 	// NOTE: S/H is ignored if we're in the border region.
 	
 	// Get the border color.
-	// TODO: LibGens: Add the "borderColorEmulation" variable somewhere.
-#if 0
-	register const pixel border_color = (Video.borderColorEmulation ? md_palette[0] : 0);
-#else
-	register const pixel border_color = md_palette[0];
-#endif
+	register const pixel border_color =
+		(VdpEmuOptions.borderColorEmulation ? md_palette[0] : 0);
 	
 	// Left border.
 	const int HPix = GetHPix();
@@ -1439,7 +1496,29 @@ FORCE_INLINE void Vdp::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 
 
 /**
- * Vdp::Render_Line_m5(): Render a line. (Mode 5)
+ * Apply SMS left-column blanking to the destination surface.
+ * @param pixel Type of pixel.
+ * @param dest Destination surface.
+ * @param border_color Border color.
+ */
+template<typename pixel>
+FORCE_INLINE void Vdp::T_Apply_SMS_LCB(pixel *dest, pixel border_color)
+{
+	dest += GetHPixBegin();
+	
+	*dest     = border_color;
+	*(dest+1) = border_color;
+	*(dest+2) = border_color;
+	*(dest+3) = border_color;
+	*(dest+4) = border_color;
+	*(dest+5) = border_color;
+	*(dest+6) = border_color;
+	*(dest+7) = border_color;
+}
+
+
+/**
+ * Render a line. (Mode 5)
  */
 void Vdp::Render_Line_m5(void)
 {
@@ -1467,7 +1546,9 @@ void Vdp::Render_Line_m5(void)
 	// Determine the starting line in MD_Screen.
 	// TODO: LibGens: Add a user-configurable option for NTSC V30 rolling.
 	int LineStart = VDP_Lines.Visible.Current;
-	if (M68K_Mem::ms_SysVersion.isNtsc() && (VDP_Reg.m5.Set2 & 0x08))// && Video.ntscV30rolling)
+	if (Reg_Status.isNtsc() &&
+	    (VDP_Reg.m5.Set2 & 0x08) &&
+	    VdpEmuOptions.ntscV30Rolling)
 	{
 		// NTSC V30 mode. Simulate screen rolling.
 		LineStart -= VDP_Lines.NTSC_V30.Offset;
@@ -1479,21 +1560,25 @@ void Vdp::Render_Line_m5(void)
 	LineStart += VDP_Lines.Visible.Border_Size;
 	
 	// TODO: LibGens: Reimplement the borderColorEmulation option.
-#if 0
-	if (in_border && !Video.borderColorEmulation)
+	if (in_border && !VdpEmuOptions.borderColorEmulation)
 	{
 		// We're in the border area, but border color emulation is disabled.
 		// Clear the border area.
 		// TODO: Only clear this if the option changes or V/H mode changes.
-		if (bppMD == 32)
-			memset(&MD_Screen.u32[LineStart], 0x00, 320*sizeof(uint32_t));
+		if (m_palette.bpp() != VdpPalette::BPP_32)
+		{
+			memset(MD_Screen->lineBuf16(LineStart), 0x00,
+				(MD_Screen->pxPerLine() * sizeof(uint16_t)));
+		}
 		else
-			memset(&MD_Screen.u16[LineStart], 0x00, 320*sizeof(uint16_t));
+		{
+			memset(MD_Screen->lineBuf32(LineStart), 0x00,
+				(MD_Screen->pxPerLine() * sizeof(uint32_t)));
+		}
 		
 		// ...and we're done here.
 		return;
 	}
-#endif
 	
 	// Check if the VDP is enabled.
 	if (!(VDP_Reg.m5.Set2 & 0x40) || in_border)
@@ -1513,9 +1598,9 @@ void Vdp::Render_Line_m5(void)
 		// VDP is enabled.
 		
 		// Check if sprite structures need to be updated.
-		if (Interlaced.DoubleRes)
+		if (Interlaced == VdpTypes::INTERLACED_MODE_2)
 		{
-			// Interlaced.
+			// Interlaced Mode 2. (2x resolution)
 			if (ms_UpdateFlags.VRam)
 				T_Make_Sprite_Struct<true, false>();
 			else if (ms_UpdateFlags.VRam_Spr)
@@ -1535,23 +1620,24 @@ void Vdp::Render_Line_m5(void)
 		ms_UpdateFlags.VRam_Spr = 0;
 		
 		// Determine how to render the image.
-		const int RenderMode = ((VDP_Reg.m5.Set4 & 0x8) >> 2) | Interlaced.DoubleRes;
+		int RenderMode = ((VDP_Reg.m5.Set4 & 0x08) >> 2);		// Shadow/Highlight
+		RenderMode |= (Interlaced == VdpTypes::INTERLACED_MODE_2);	// Interlaced.
 		switch (RenderMode & 3)
 		{
 			case 0:
-				// H/S disabled; interlaced disabled.
+				// H/S disabled; normal display.
 				T_Render_Line_m5<false, false>();
 				break;
 			case 1:
-				// H/S disabled: interlaced enabled.
+				// H/S disabled: Interlaced Mode 2.
 				T_Render_Line_m5<true, false>();
 				break;
 			case 2:
-				// H/S enabled; interlaced disabled.
+				// H/S enabled; normal display.
 				T_Render_Line_m5<false, true>();
 				break;
 			case 3:
-				// H/S enabled: interlaced enabled.
+				// H/S enabled: Interlaced Mode 2.
 				T_Render_Line_m5<true, true>();
 				break;
 			default:
@@ -1560,31 +1646,35 @@ void Vdp::Render_Line_m5(void)
 		}
 	}
 	
-	// Check if the palette was modified.
-	if (ms_UpdateFlags.CRam)
-	{
-		// Update the palette.
-		if (VDP_Reg.m5.Set4 & 0x08)
-			m_palette.updateMD_HS(&CRam);
-		else
-			m_palette.updateMD(&CRam);
-		
-		// Clear the CRam flag.
-		ms_UpdateFlags.CRam = 0;
-	}
-	
-	// TODO: Clear the CRam update flag?
+	// Update the active palette.
+	if (!(VDP_Layers & VdpTypes::VDP_LAYER_PALETTE_LOCK))
+		m_palette.update();
 	
 	// Render the image.
+	// TODO: Optimize SMS LCB handling. (maybe use Linux's unlikely() macro?)
 	if (m_palette.bpp() != VdpPalette::BPP_32)
 	{
-		uint16_t *lineBuf16 = MD_Screen.lineBuf16(LineStart);
-		T_Render_LineBuf<uint16_t>(lineBuf16, m_palette.m_palActiveMD.u16);
+		uint16_t *lineBuf16 = MD_Screen->lineBuf16(LineStart);
+		T_Render_LineBuf<uint16_t>(lineBuf16, m_palette.m_palActive.u16);
+		
+		if (VDP_Reg.m5.Set1 & 0x20)
+		{
+			// SMS left-column blanking bit is set.
+			T_Apply_SMS_LCB<uint16_t>(lineBuf16, 
+				(VdpEmuOptions.borderColorEmulation ? m_palette.m_palActive.u16[0] : 0));
+		}
 	}
 	else
 	{
-		uint32_t *lineBuf32 = MD_Screen.lineBuf32(LineStart);
-		T_Render_LineBuf<uint32_t>(lineBuf32, m_palette.m_palActiveMD.u32);
+		uint32_t *lineBuf32 = MD_Screen->lineBuf32(LineStart);
+		T_Render_LineBuf<uint32_t>(lineBuf32, m_palette.m_palActive.u32);
+		
+		if (VDP_Reg.m5.Set1 & 0x20)
+		{
+			// SMS left-column blanking bit is set.
+			T_Apply_SMS_LCB<uint32_t>(lineBuf32, 
+				(VdpEmuOptions.borderColorEmulation ? m_palette.m_palActive.u32[0] : 0));
+		}
 	}
 }
 
@@ -1879,7 +1969,7 @@ void VDP_Render_Line_m5_32X(void)
 		VDP_Flags.VRam_Spr = 0;
 		
 		// Determine how to render the image.
-		const int RenderMode = ((VDP_Reg.m5.Set4 & 0x8) >> 2) | VDP_Reg.Interlaced.DoubleRes;
+		const int RenderMode = ((VDP_Reg.m5.Set4 & 0x08) >> 2) | VDP_Reg.Interlaced.DoubleRes;
 		switch (RenderMode & 3)
 		{
 			case 0:
