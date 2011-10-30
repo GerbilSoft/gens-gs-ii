@@ -56,6 +56,7 @@ namespace GensQt4
 class MsgTimer;
 class KeyHandlerQt;
 
+// TODO: Move a ton of stuff into a private class?
 class VBackend : public QWidget
 {
 	Q_OBJECT
@@ -68,6 +69,7 @@ class VBackend : public QWidget
 			{ m_vbDirty = true; }
 		void setMdScreenDirty(void)
 			{ m_mdScreenDirty = true; }
+		
 		virtual void vbUpdate(void) = 0;
 		
 		void setKeyHandler(KeyHandlerQt *newKeyHandler);

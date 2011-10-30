@@ -58,10 +58,35 @@ GensQGLWidget::GensQGLWidget(QWidget *parent, KeyHandlerQt *keyHandler)
 
 
 /**
- * vbUpdate(): Video Backend update function.
+ * Video Backend update function.
  */
 void GensQGLWidget::vbUpdate(void)
 {
+	if (m_emuContext)
+	{
+		// Save the framebuffer.
+		if (m_fb != &m_emuContext->m_vdp->MD_Screen)
+		{
+			// Framebuffer has changed.
+			//if (m_fb)
+			//	m_fb->unref();	// TODO
+			m_fb = &m_emuContext->m_vdp->MD_Screen;
+			//if (m_fb)
+			//	m_fb->ref();	// TODO
+			m_mdScreenDirty = true;
+		}
+		
+		// Save the color depth.
+		m_bpp = m_emuContext->m_vdp->m_palette.bpp();
+	}
+	else
+	{
+		// No emulation context. Clear the framebuffer.
+		//if (m_fb)
+		//	m_fb->unref();	// TODO
+		m_fb = NULL;
+	}
+	
 	// TODO: Expand this function?
 	d->makeCurrent();
 	d->updateGL();

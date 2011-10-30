@@ -56,6 +56,8 @@ namespace GensQt4
  */
 GLBackend::GLBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	: VBackend(parent, keyHandler)
+	, m_fb(NULL)
+	, m_bpp(LibGens::VdpPalette::BPP_32)
 {
 	// Initialize the OpenGL variables.
 	m_tex = 0;		// Main texture.
@@ -69,6 +71,10 @@ GLBackend::GLBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 
 GLBackend::~GLBackend()
 {
+	/* TODO
+	if (m_fb)
+		m_fb->unref();
+	*/
 	if (m_tex > 0)
 		glDeleteTextures(1, &m_tex);
 	if (m_texOsd)
@@ -162,10 +168,8 @@ void GLBackend::reallocTexture(void)
 		return;
 	}
 	
-	// Get the emulation context's color depth.
-	m_mtxEmuContext.lock();
-	m_lastBpp = m_emuContext->m_vdp->m_palette.bpp();
-	m_mtxEmuContext.unlock();
+	// Get the current color depth.
+	m_lastBpp = m_bpp;
 	
 	// Create and initialize a GL texture.
 	// TODO: Add support for NPOT textures and/or GL_TEXTURE_RECTANGLE_ARB.
@@ -519,8 +523,7 @@ void GLBackend::glb_paintGL(void)
 		// MD_Screen is dirty.
 		
 		// Check if the Bpp has changed.
-		const LibGens::VdpPalette::ColorDepth bpp = m_emuContext->m_vdp->m_palette.bpp();
-		if (bpp != m_lastBpp)
+		if (m_bpp != m_lastBpp)
 		{
 			// Bpp has changed. Reallocate the texture.
 			// VDP palettes will be recalculated on the next frame.
@@ -528,16 +531,15 @@ void GLBackend::glb_paintGL(void)
 		}
 		
 		// Screen buffer used for output.
-		LibGens::MdFb *src_fb = m_intScreen;
+		const LibGens::MdFb *src_fb = m_intScreen;
 		
 		/** START: Apply effects. **/
-		if (isRunning())
+		if (isRunning() && m_fb)
 		{
 			// Emulation is running. Check if any effects should be applied.
 			
-			// Emulation Context must be locked before use.
-			QMutexLocker lockEmuContext(&m_mtxEmuContext);
 			/** Software rendering path. **/
+			// TODO: These need to specify the source framebuffer...
 			
 			// If Fast Blur is enabled, update the Fast Blur effect.
 			// NOTE: Shader version is only used if we're not paused manually.
@@ -557,16 +559,16 @@ void GLBackend::glb_paintGL(void)
 			}
 			
 			// If we're using the MD screen directly,
-			// get the LibGens::MdFb from m_emuContext.
+			// get the MdFb specified in the update function.
 			if (bFromMD)
-				src_fb = &m_emuContext->m_vdp->MD_Screen;
+				src_fb = m_fb;
 		}
 		
 		/** END: Apply effects. **/
 		
 		// Get the screen buffer from the LibGens::MdFb.
 		const GLvoid *screen;
-		if (bpp != LibGens::VdpPalette::BPP_32)
+		if (m_bpp != LibGens::VdpPalette::BPP_32)
 			screen = src_fb->fb16();
 		else
 			screen = src_fb->fb32();
@@ -620,6 +622,7 @@ void GLBackend::glb_paintGL(void)
 	
 	// Check if the MD resolution has changed.
 	// If it has, recalculate the stretch mode rectangle.
+	// TODO: Remove use of m_emuContext?
 	const QSize mdResCur(m_emuContext->m_vdp->GetHPix(),
 			     m_emuContext->m_vdp->GetVPix());
 	if (mdResCur != m_stretchLastRes)
