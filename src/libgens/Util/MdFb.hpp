@@ -35,8 +35,13 @@ class MdFb
 	public:
 		// Line access.
 		uint16_t *lineBuf16(int line);
+		const uint16_t *lineBuf16(int line) const;
+		
 		uint32_t *lineBuf32(int line);
+		const uint32_t *lineBuf32(int line) const;
+		
 		template<typename pixel> pixel *lineBuf(int line);
+		template<typename pixel> const pixel *lineBuf(int line) const;
 		
 		/** Framebuffer access. **/
 		
@@ -47,10 +52,22 @@ class MdFb
 		uint16_t *fb16(void);
 		
 		/**
+		 * Get the framebuffer. (16-bit color) [const pointer]
+		 * @return First pixel of the framebuffer.
+		 */
+		const uint16_t *fb16(void) const;
+		
+		/**
 		 * Get the framebuffer. (32-bit color)
 		 * @return First pixel of the framebuffer.
 		 */
 		uint32_t *fb32(void);
+		
+		/**
+		 * Get the framebuffer. (32-bit color) [const pointer]
+		 * @return First pixel of the framebuffer.
+		 */
+		const uint32_t *fb32(void) const;
 		
 		/**
 		 * Get the number of visible pixels per line.
@@ -106,11 +123,33 @@ inline uint16_t *MdFb::lineBuf16(int line)
 }
 
 /**
+ * Get a pointer to the specified line buffer. (16-bit color) [const pointer]
+ * @param line Line number.
+ * @return Pointer to the specified line buffer. (16-bit color)
+ */
+inline const uint16_t *MdFb::lineBuf16(int line) const
+{
+	assert(line >= 0 && line < ms_NumLines);
+	return &m_fb.u16[TAB336[line] + 8];
+}
+
+/**
  * Get a pointer to the specified line buffer. (32-bit color)
  * @param line Line number.
  * @return Pointer to the specified line buffer. (32-bit color)
  */
 inline uint32_t *MdFb::lineBuf32(int line)
+{
+	assert(line >= 0 && line < ms_NumLines);
+	return &m_fb.u32[TAB336[line] + 8];
+}
+
+/**
+ * Get a pointer to the specified line buffer. (32-bit color) [const pointer]
+ * @param line Line number.
+ * @return Pointer to the specified line buffer. (32-bit color)
+ */
+inline const uint32_t *MdFb::lineBuf32(int line) const
 {
 	assert(line >= 0 && line < ms_NumLines);
 	return &m_fb.u32[TAB336[line] + 8];
@@ -132,12 +171,34 @@ inline pixel *MdFb::lineBuf(int line)
 		return (pixel*)lineBuf16(line);
 }
 
+/**
+ * Get a pointer to the specified line buffer. (templated version) [const pointer]
+ * @param pixel Pixel type. (uint16_t or uint32_t)
+ * @param line Line number.
+ * @return Pointer to the specified line buffer.
+ */
+template<typename pixel>
+inline const pixel *MdFb::lineBuf(int line) const
+{
+	assert(sizeof(pixel) == 2 || sizeof(pixel) == 4);
+	if (sizeof(pixel) == 4)
+		return (const pixel*)lineBuf32(line);
+	else
+		return (const pixel*)lineBuf16(line);
+}
+
 /** Framebuffer access. **/
 
 inline uint16_t *MdFb::fb16(void)
 	{ return &m_fb.u16[8]; }
 
+inline const uint16_t *MdFb::fb16(void) const
+	{ return &m_fb.u16[8]; }
+
 inline uint32_t *MdFb::fb32(void)
+	{ return &m_fb.u32[8]; }
+
+inline const uint32_t *MdFb::fb32(void) const
 	{ return &m_fb.u32[8]; }
 
 inline int MdFb::pxPerLine(void) const
