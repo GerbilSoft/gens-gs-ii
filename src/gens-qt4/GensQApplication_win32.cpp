@@ -51,7 +51,40 @@
 extern void qWinMain(HINSTANCE, HINSTANCE, LPSTR, int, int &, QVector<char *> &);
 
 /**
- * WinMain(): Main entry point on Win32.
+ * Enable heap metadata protection.
+ * Reference: http://msdn.microsoft.com/en-us/library/bb430720.aspx
+ * @return 0 on success; non-zero on error.
+ */
+static int SetHeapOptions(void)
+{
+	SetDllDirectoryA("");
+	HMODULE hLib = LoadLibraryA("kernel32.dll");
+	if (hLib == NULL)
+		return -1;
+	
+	typedef BOOL (WINAPI *HSI)
+		(HANDLE, HEAP_INFORMATION_CLASS ,PVOID, SIZE_T);
+	HSI pHsi = (HSI)GetProcAddress(hLib,"HeapSetInformation");
+	printf("pHsi == %08X\n", pHsi);
+	if (!pHsi)
+	{
+		FreeLibrary(hLib);
+		return -2;
+	}
+
+#ifndef HeapEnableTerminationOnCorruption
+#   define HeapEnableTerminationOnCorruption (HEAP_INFORMATION_CLASS)1
+#endif
+	
+	bool fRet = !!((pHsi)(NULL, HeapEnableTerminationOnCorruption, NULL, 0));
+	if (hLib)
+		FreeLibrary(hLib);
+	
+	return fRet;
+}
+
+/**
+ * Main entry point on Win32.
  * Code based on libqtmain 4.7.1.
  * Windows CE-specific parts have been removed.
  * @param hInst Instance.
@@ -63,8 +96,11 @@ extern void qWinMain(HINSTANCE, HINSTANCE, LPSTR, int, int &, QVector<char *> &)
 extern "C"
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCmdShow)
 {
-	QByteArray cmdParam;
+	// Enable heap metadata protection.
+	// Reference: http://msdn.microsoft.com/en-us/library/bb430720.aspx
+	SetHeapOptions();
 	
+	QByteArray cmdParam;
 	wchar_t *cmdW = GetCommandLineW();
 	if (cmdW)
 	{
@@ -100,6 +136,8 @@ namespace GensQt4
  */
 bool GensQApplication::winEventFilter(MSG *msg, long *result)
 {
+	Q_UNUSED(result)
+	
 	if (msg->message != WM_SETTINGCHANGE &&
 	    msg->wParam != SPI_SETNONCLIENTMETRICS)
 	{
@@ -114,7 +152,6 @@ bool GensQApplication::winEventFilter(MSG *msg, long *result)
 	// Allow QApplication to handle this message anyway.
 	return false;
 }
-
 
 /**
  * SetFont_Win32(): Set the Qt font to match the system font.
