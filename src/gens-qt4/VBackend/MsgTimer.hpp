@@ -43,7 +43,8 @@ class MsgTimer : public QObject
 	Q_OBJECT
 	
 	public:
-		MsgTimer(VBackend *vBackend);
+		MsgTimer(QObject *parent);
+		MsgTimer(VBackend *vBackend, QObject *parent);
 		~MsgTimer();
 	
 	private:

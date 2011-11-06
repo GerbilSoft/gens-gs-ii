@@ -38,23 +38,40 @@ namespace GensQt4
 class MsgTimerPrivate
 {
 	public:
+		MsgTimerPrivate(MsgTimer *q, VBackend *vBackend = NULL);
+	
+	private:
+		MsgTimer *const q;
+		Q_DISABLE_COPY(MsgTimerPrivate)
+	
+	public:
 		VBackend *vBackend;
 		QTimer *timer;
 };
 
-MsgTimer::MsgTimer(VBackend *vBackend)
-	: d(new MsgTimerPrivate())
+MsgTimerPrivate::MsgTimerPrivate(MsgTimer *q, VBackend *vBackend)
+	: q(q)
+	, vBackend(vBackend)
 {
-	d->vBackend = vBackend;
-	
 	// Initialize the QTimer.
-	d->timer = new QTimer(this);
-	connect(d->timer, SIGNAL(timeout()),
-		this, SLOT(checkMsg()));
+	timer = new QTimer(q);
+	QObject::connect(timer, SIGNAL(timeout()),
+			 q, SLOT(checkMsg()));
 }
+
+MsgTimer::MsgTimer(QObject *parent)
+	: QObject(parent)
+	, d(new MsgTimerPrivate(this, NULL))
+{ }
+
+MsgTimer::MsgTimer(VBackend *vBackend, QObject *parent)
+	: QObject(parent)
+	, d(new MsgTimerPrivate(this, vBackend))
+{ }
 
 MsgTimer::~MsgTimer()
 	{ delete d; }
+
 
 /**
  * Start the message timer.
@@ -68,6 +85,14 @@ void MsgTimer::start(void)
 void MsgTimer::checkMsg(void)
 {
 	// Message timer tick.
+	
+	if (!d->vBackend)
+	{
+		// VBackend is invalid.
+		d->timer->stop();
+		return;
+	}
+	
 	// Check the VBackend for messages.
 	int num = d->vBackend->osd_process();
 	

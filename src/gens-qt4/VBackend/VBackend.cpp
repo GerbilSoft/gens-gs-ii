@@ -134,7 +134,7 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	m_preview_show = false;
 	
 	// Create the message timer.
-	m_msgTimer = new MsgTimer(this);
+	m_msgTimer = new MsgTimer(this, this);
 }
 
 VBackend::~VBackend()
