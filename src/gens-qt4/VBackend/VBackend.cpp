@@ -461,7 +461,8 @@ void VBackend::osd_printqs(const int duration, const QString& msg, bool forceVbD
 	OsdMessage osdMsg;
 	osdMsg.msg = msg;
 	osdMsg.duration = duration;
-	osdMsg.endTime = 0.0;	// Calculate endTime on first display.
+	osdMsg.hasDisplayed = false;
+	osdMsg.endTime = LibGens::Timing::GetTimeD() + ((double)duration / 1000.0);
 	m_osdList.append(osdMsg);
 	setOsdListDirty();
 	
@@ -475,8 +476,8 @@ void VBackend::osd_printqs(const int duration, const QString& msg, bool forceVbD
 		// Force a vbUpdate_int() on the next MsgTimer tick.
 		m_updateOnNextProcess = true;
 		
-		// Start the message timer.
-		m_msgTimer->start();
+		// Start the message timer (with a quick initial interval).
+		m_msgTimer->startQuick();
 	}
 }
 
@@ -529,20 +530,22 @@ int VBackend::osd_process(void)
 		// Check the message list for expired messages.
 		for (int i = (m_osdList.size() - 1); i >= 0; i--)
 		{
-			if (m_osdList[i].endTime <= 0.05)
+			if (curTime >= m_osdList[i].endTime)
 			{
-				// Message has not been displayed yet.
-				// Calculate the end time.
-				const double endTime = LibGens::Timing::GetTimeD() +
-							((double)m_osdList[i].duration / 1000.0);
-				m_osdList[i].endTime = endTime;
-			}
-			else if (curTime >= m_osdList[i].endTime)
-			{
-				// Message duration has elapsed.
-				// Remove the message from the list.
-				m_osdList.removeAt(i);
-				isMsgRemoved = true;
+				if (m_osdList[i].hasDisplayed)
+				{
+					// Message duration has elapsed.
+					// Remove the message from the list.
+					m_osdList.removeAt(i);
+					isMsgRemoved = true;
+				}
+				else
+				{
+					// Message has *not* been displayed.
+					// Reset its end time.
+					m_osdList[i].endTime =
+						curTime + ((double)m_osdList[i].duration / 1000.0);
+				}
 			}
 		}
 		
@@ -599,7 +602,7 @@ int VBackend::osd_process(void)
 
 
 /**
- * resetFps(): Reset the FPS manager.
+ * Reset the FPS manager.
  */
 void VBackend::resetFps(void)
 {
@@ -614,7 +617,7 @@ void VBackend::resetFps(void)
 
 
 /**
- * pushFps(): Push an FPS value.
+ * Push an FPS value.
  * @param fps FPS value.
  */
 void VBackend::pushFps(double fps)
@@ -758,8 +761,8 @@ void VBackend::osd_show_preview(int duration, const QImage& img)
 			// Force a vbUpdate_int() on the next MsgTimer tick.
 			m_updateOnNextProcess = true;
 			
-			// Start the message timer.
-			m_msgTimer->start();
+			// Start the message timer (with a quick initial interval).
+			m_msgTimer->startQuick();
 		}
 	}
 }
@@ -808,8 +811,8 @@ int VBackend::recSetStatus(const QString& component, bool isRecording)
 		// Force a vbUpdate_int() on the next MsgTimer tick.
 		m_updateOnNextProcess = true;
 		
-		// Start the message timer.
-		m_msgTimer->start();
+		// Start the message timer (with a quick initial interval).
+		m_msgTimer->startQuick();
 	}
 	
 	return 0;
@@ -848,8 +851,8 @@ int VBackend::recSetDuration(const QString& component, int duration)
 		// Force a vbUpdate_int() on the next MsgTimer tick.
 		m_updateOnNextProcess = true;
 		
-		// Start the message timer.
-		m_msgTimer->start();
+		// Start the message timer (with a quick initial interval).
+		m_msgTimer->startQuick();
 	}
 	
 	return 0;

@@ -829,23 +829,26 @@ void GLBackend::printOsdText(void)
 		
 		for (int i = (m_osdList.size() - 1); i >= 0; i--)
 		{
-			if (m_osdList[i].endTime <= 0.05)
-			{
-				// Message has not been displayed yet.
-				// Calculate the end time.
-				const double endTime = LibGens::Timing::GetTimeD() +
-							((double)m_osdList[i].duration / 1000.0);
-				m_osdList[i].endTime = endTime;
-			}
 			if (curTime >= m_osdList[i].endTime)
 			{
-				// Message duration has elapsed.
-				// Remove the message from the list.
-				m_osdList.removeAt(i);
-				continue;
+				if (m_osdList[i].hasDisplayed)
+				{
+					// Message duration has elapsed.
+					// Remove the message from the list.
+					m_osdList.removeAt(i);
+					continue;
+				}
+				else
+				{
+					// Message has *not* been displayed.
+					// Reset its end time.
+					m_osdList[i].endTime =
+						curTime + ((double)m_osdList[i].duration / 1000.0);
+				}
 			}
 			
 			const QString &msg = m_osdList[i].msg;
+			m_osdList[i].hasDisplayed = true;
 			
 			// Next line.
 			y -= ms_Osd_chrH;

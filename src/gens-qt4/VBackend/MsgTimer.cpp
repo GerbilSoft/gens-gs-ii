@@ -80,6 +80,12 @@ void MsgTimer::start(void)
 	{ d->timer->start(MSGTIMER_INTERVAL); }
 
 /**
+ * Start the message timer with the quick interval initially.
+ */
+void MsgTimer::startQuick(void)
+	{ d->timer->start(MSGTIMER_INTERVAL_QUICK); }
+
+/**
  * Check the OSD messages.
  */
 void MsgTimer::checkMsg(void)
@@ -101,7 +107,11 @@ void MsgTimer::checkMsg(void)
 		// No more messages.
 		// Stop the timer.
 		d->timer->stop();
+		return;
 	}
+	
+	// Make sure we're using the normal interval.
+	d->timer->setInterval(MSGTIMER_INTERVAL);
 }
 
 }

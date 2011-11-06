@@ -54,11 +54,17 @@ class MsgTimer : public QObject
 	public:
 		// 100 ms is a decent interval when emulation isn't running.
 		static const int MSGTIMER_INTERVAL = 100;
+		static const int MSGTIMER_INTERVAL_QUICK = 20;
 		
 		/**
 		 * Start the message timer.
 		 */
 		void start(void);
+		
+		/**
+		 * Start the message timer with the quick interval initially.
+		 */
+		void startQuick(void);
 	
 	private slots:
 		/**

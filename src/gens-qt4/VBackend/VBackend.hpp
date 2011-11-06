@@ -192,6 +192,7 @@ class VBackend : public QWidget
 		{
 			QString msg;
 			int duration;
+			bool hasDisplayed;
 			double endTime;
 		};
 		QList<OsdMessage> m_osdList;
