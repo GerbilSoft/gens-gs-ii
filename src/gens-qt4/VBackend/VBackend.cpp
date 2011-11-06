@@ -117,7 +117,7 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	
 	m_osdLockCnt = 0;	// OSD lock counter.
 	setOsdListDirty();	// TODO: Set this on startup?
-	m_updateOnNextProcess = false;
+	m_updateOnNextOsdProcess = false;
 	
 	/** OSD settings: Signals. **/
 	// TODO: Reconnect signals if ConfigStore is deleted/recreated?
@@ -448,7 +448,7 @@ void VBackend::osd_printqs(const int duration, const QString& msg, bool forceVbD
 				setVbDirty();
 				
 				// Force a vbUpdate_int() on the next MsgTimer tick.
-				m_updateOnNextProcess = true;
+				m_updateOnNextOsdProcess = true;
 				
 				// Start the message timer.
 				m_msgTimer->start();
@@ -474,7 +474,7 @@ void VBackend::osd_printqs(const int duration, const QString& msg, bool forceVbD
 			setVbDirty();
 		
 		// Force a vbUpdate_int() on the next MsgTimer tick.
-		m_updateOnNextProcess = true;
+		m_updateOnNextOsdProcess = true;
 		
 		// Start the message timer (with a quick initial interval).
 		m_msgTimer->startQuick();
@@ -504,10 +504,12 @@ int VBackend::osd_unlock(void)
 
 /**
  * Process the OSD queue.
- * This should ONLY be called by MsgTimer!
+ * This should be called by MsgTimer with updateVBackend == true,
+ * or subclasses with updateVBackend == false.
+ * @param updateVBackend True to update VBackend (MsgTimer); false otherwise (from VBackend).
  * @return Number of messages remaining in the OSD queue.
  */
-int VBackend::osd_process(void)
+int VBackend::osd_process_int(bool updateVBackend)
 {
 	bool isMsgRemoved = false;
 	int msgRemaining = 0;
@@ -577,16 +579,17 @@ int VBackend::osd_process(void)
 		// At least one message was removed.
 		// Update the video backend.
 		setOsdListDirty();
-		vbUpdate_int();
+		if (updateVBackend)
+			vbUpdate_int();
 	}
-	else if (m_updateOnNextProcess)
+	else if (m_updateOnNextOsdProcess && updateVBackend)
 	{
 		// vbUpdate_int() is forced.
 		vbUpdate_int();
 	}
 	
 	// Make sure this gets cleared now.
-	m_updateOnNextProcess = false;
+	m_updateOnNextOsdProcess = false;
 	
 	if (isRunning() && !isPaused())
 	{
@@ -766,7 +769,7 @@ void VBackend::osd_show_preview(int duration, const QImage& img)
 			// Update the VBackend.
 			
 			// Force a vbUpdate_int() on the next MsgTimer tick.
-			m_updateOnNextProcess = true;
+			m_updateOnNextOsdProcess = true;
 			
 			// Start the message timer (with a quick initial interval).
 			m_msgTimer->startQuick();
@@ -816,7 +819,7 @@ int VBackend::recSetStatus(const QString& component, bool isRecording)
 	if (!isRunning() || isPaused())
 	{
 		// Force a vbUpdate_int() on the next MsgTimer tick.
-		m_updateOnNextProcess = true;
+		m_updateOnNextOsdProcess = true;
 		
 		// Start the message timer (with a quick initial interval).
 		m_msgTimer->startQuick();
@@ -856,7 +859,7 @@ int VBackend::recSetDuration(const QString& component, int duration)
 	if (!isRunning() || isPaused())
 	{
 		// Force a vbUpdate_int() on the next MsgTimer tick.
-		m_updateOnNextProcess = true;
+		m_updateOnNextOsdProcess = true;
 		
 		// Start the message timer (with a quick initial interval).
 		m_msgTimer->startQuick();

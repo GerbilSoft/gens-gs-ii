@@ -269,15 +269,32 @@ class VBackend : public QWidget
 		
 		// OSD lock counter.
 		int m_osdLockCnt;
-		
+	
+	private:
 		/**
-		 * osd_process(): Process the OSD queue.
-		 * This should ONLY be called by MsgTimer!
+		 * Process the OSD queue. (MsgTimer only)
 		 * @return Number of messages remaining in the OSD queue.
 		 */
-		int osd_process(void);
-		bool m_updateOnNextProcess;
+		int osd_process_MsgTimer(void)
+			{ return osd_process_int(false); }
 		friend class MsgTimer;
+	protected:
+		/**
+		 * Process the OSD queue. (Subclasses only)
+		 * @return Number of messages remaining in the OSD queue.
+		 */
+		int osd_process_subclass(void)
+			{ return osd_process_int(false); }
+	private:
+		/**
+		 * Process the OSD queue.
+		 * This should be called by MsgTimer with updateVBackend == true,
+		 * or subclasses with updateVBackend == false.
+		 * @param updateVBackend True to update VBackend (MsgTimer); false otherwise (from VBackend).
+		 * @return Number of messages remaining in the OSD queue.
+		 */
+		int osd_process_int(bool updateVBackend);
+		bool m_updateOnNextOsdProcess;
 		
 		/** Video settings. **/
 		bool m_cfg_aspectRatioConstraint;

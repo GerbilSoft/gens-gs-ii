@@ -747,7 +747,7 @@ void GLBackend::recalcStretchRectF(StretchMode_t mode)
 
 
 /**
- * printOsdText(): Print the OSD text to the screen.
+ * Print the OSD text to the screen.
  */
 void GLBackend::printOsdText(void)
 {
@@ -756,6 +756,9 @@ void GLBackend::printOsdText(void)
 	// * renderText() doesn't support wordwrapping.
 	// * renderText() doesn't properly handle newlines.
 	// * fm.boundingRect() doesn't seem to handle wordwrapping correctly, either.
+	
+	// Process the OSD list.
+	osd_process_subclass();
 	
 	if (!isOsdListDirty())
 	{

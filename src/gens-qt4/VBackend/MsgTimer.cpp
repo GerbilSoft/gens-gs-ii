@@ -100,7 +100,7 @@ void MsgTimer::checkMsg(void)
 	}
 	
 	// Check the VBackend for messages.
-	int num = d->vBackend->osd_process();
+	int num = d->vBackend->osd_process_MsgTimer();
 	
 	if (num <= 0)
 	{
