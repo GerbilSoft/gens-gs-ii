@@ -56,8 +56,6 @@ namespace GensQt4
  */
 GLBackend::GLBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	: VBackend(parent, keyHandler)
-	, m_fb(NULL)
-	, m_bpp(LibGens::VdpPalette::BPP_32)
 {
 	// Initialize the OpenGL variables.
 	m_tex = 0;		// Main texture.
@@ -71,8 +69,6 @@ GLBackend::GLBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 
 GLBackend::~GLBackend()
 {
-	if (m_fb)
-		m_fb->unref();
 	if (m_tex > 0)
 		glDeleteTextures(1, &m_tex);
 	if (m_texOsd)
@@ -167,7 +163,7 @@ void GLBackend::reallocTexture(void)
 	}
 	
 	// Get the current color depth.
-	m_lastBpp = m_bpp;
+	m_lastBpp = m_srcBpp;
 	
 	// Create and initialize a GL texture.
 	// TODO: Add support for NPOT textures and/or GL_TEXTURE_RECTANGLE_ARB.
@@ -484,13 +480,6 @@ void GLBackend::glb_paintGL(void)
 #endif
 	
 	/**
-	 * bFromMD: If this is true after all effects are applied,
-	 * use LibGens::VDP_Rend::MD_Screen[] directly.
-	 * Otherwise, use m_intScreen[].
-	 */
-	bool bFromMD = true;
-	
-	/**
 	 * bDoPausedEffect: Indicates if the paused effect should be applied.
 	 * This is true if we're manually paused and the pause tint is enabled.
 	 */
@@ -521,7 +510,7 @@ void GLBackend::glb_paintGL(void)
 		// MD_Screen is dirty.
 		
 		// Check if the Bpp has changed.
-		if (m_bpp != m_lastBpp)
+		if (m_srcBpp != m_lastBpp)
 		{
 			// Bpp has changed. Reallocate the texture.
 			// VDP palettes will be recalculated on the next frame.
@@ -532,41 +521,52 @@ void GLBackend::glb_paintGL(void)
 		const LibGens::MdFb *src_fb = m_intScreen;
 		
 		/** START: Apply effects. **/
-		if (isRunning() && m_fb)
+		if (m_srcFb)
 		{
-			// Emulation is running. Check if any effects should be applied.
+			/**
+			 * If this is true after all effects are applied,
+			 * use the source framebuffer directly. (m_srcFb)
+			 * Otherwise, use m_intScreen.
+			 */
+			bool bFromMD = true;
 			
-			/** Software rendering path. **/
-			// TODO: These need to specify the source framebuffer...
-			
-			// If Fast Blur is enabled, update the Fast Blur effect.
-			// NOTE: Shader version is only used if we're not paused manually.
-			if (fastBlur() && (bDoPausedEffect || !m_shaderMgr.hasFastBlur()))
+			// Source framebuffer is specified.
+			if (isRunning())
 			{
-				updateFastBlur(bFromMD);
-				bFromMD = false;
-			}
-			
-			// If emulation is manually paused, update the pause effect.
-			if (bDoPausedEffect && !m_shaderMgr.hasPaused())
-			{
-				// Paused, but no shader is available.
-				// Apply the effect in software.
-				updatePausedEffect(bFromMD);
-				bFromMD = false;
+				// Emulation is running. Check if any effects should be applied.
+				
+				/** Software rendering path. **/
+				// TODO: These need to specify the source framebuffer...
+				
+				// If Fast Blur is enabled, update the Fast Blur effect.
+				// NOTE: Shader version is only used if we're not paused manually.
+				if (fastBlur() && (bDoPausedEffect || !m_shaderMgr.hasFastBlur()))
+				{
+					updateFastBlur(bFromMD);
+					bFromMD = false;
+				}
+				
+				// If emulation is manually paused, update the pause effect.
+				if (bDoPausedEffect && !m_shaderMgr.hasPaused())
+				{
+					// Paused, but no shader is available.
+					// Apply the effect in software.
+					updatePausedEffect(bFromMD);
+					bFromMD = false;
+				}
 			}
 			
 			// If we're using the MD screen directly,
-			// get the MdFb specified in the update function.
+			// use the source framebuffer.
 			if (bFromMD)
-				src_fb = m_fb;
+				src_fb = m_srcFb;
 		}
 		
 		/** END: Apply effects. **/
 		
 		// Get the screen buffer from the LibGens::MdFb.
 		const GLvoid *screen;
-		if (m_bpp != LibGens::VdpPalette::BPP_32)
+		if (m_srcBpp != LibGens::VdpPalette::BPP_32)
 			screen = src_fb->fb16();
 		else
 			screen = src_fb->fb32();
@@ -603,7 +603,7 @@ void GLBackend::glb_paintGL(void)
 	}
 	
 	// Enable shaders, if necessary.
-	if (isRunning())
+	if (isRunning() && m_srcFb)
 	{
 		if (m_shaderMgr.hasFastBlur() && fastBlur() && !bDoPausedEffect)
 		{
@@ -640,7 +640,7 @@ void GLBackend::glb_paintGL(void)
 	glEnd();
 	
 	// Disable shaders, if necessary.
-	if (isRunning())
+	if (isRunning() && m_srcFb)
 	{
 		if (m_shaderMgr.hasFastBlur() && fastBlur() && !bDoPausedEffect)
 		{

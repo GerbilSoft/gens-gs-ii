@@ -70,8 +70,26 @@ class VBackend : public QWidget
 		void setMdScreenDirty(void)
 			{ m_mdScreenDirty = true; }
 		
-		virtual void vbUpdate(void) = 0;
+	// Video Backend update function.
+	public:
+		/**
+		 * Video Backend update function.
+		 * @param fb Source framebuffer.
+		 * @param bpp Framebuffer color depth.
+		 */
+		void vbUpdate(const LibGens::MdFb *fb, LibGens::VdpPalette::ColorDepth bpp);
+	
+	protected:
+		/**
+		 * Video Backend update function. (INTERNAL FUNCTION)
+		 */
+		virtual void vbUpdate_int(void) = 0;
 		
+		// Current MdFb and color depth.
+		const LibGens::MdFb *m_srcFb;
+		LibGens::VdpPalette::ColorDepth m_srcBpp;
+	
+	public:
 		void setKeyHandler(KeyHandlerQt *newKeyHandler);
 		
 		/** Properties. **/

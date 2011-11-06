@@ -49,6 +49,12 @@ namespace GensQt4
 
 VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	: QWidget(parent)
+	
+	// No source framebuffer initially.
+	, m_srcFb(NULL)
+	, m_srcBpp(LibGens::VdpPalette::BPP_32)
+	
+	// Key handler.
 	, m_keyHandler(keyHandler)
 	
 	// Mark the video backend as dirty on startup.
@@ -134,7 +140,41 @@ VBackend::~VBackend()
 {
 	// Delete internal objects.
 	delete m_msgTimer;	// Message timer.
-	m_intScreen->unref();	// Internal screen buffer.
+	
+	// Internal screen buffer.
+	if (m_intScreen)
+		m_intScreen->unref();
+	
+	// Source framebuffer.
+	if (m_srcFb)
+		m_srcFb->unref();
+}
+
+
+/**
+ * Video Backend update function.
+ * @param fb Framebuffer to use.
+ * @param bpp Color depth.
+ */
+void VBackend::vbUpdate(const LibGens::MdFb *fb, LibGens::VdpPalette::ColorDepth bpp)
+{
+	// Save the framebuffer.
+	if (m_srcFb != fb)
+	{
+		// Framebuffer has changed.
+		if (m_srcFb)
+			m_srcFb->unref();
+		m_srcFb = fb;
+		if (m_srcFb)
+			m_srcFb->ref();
+		m_mdScreenDirty = true;
+	}
+	
+	// Save the color depth.
+	m_srcBpp = bpp;
+	
+	// Update the video backend.
+	vbUpdate_int();
 }
 
 
@@ -194,7 +234,7 @@ void VBackend::setPaused(paused_t newPaused)
 			setVbDirty();
 			if (osdFpsEnabled())
 				setOsdListDirty();
-			vbUpdate(); // TODO: Do we really need to call this here?
+			vbUpdate_int(); // TODO: Do we really need to call this here?
 		}
 	}
 	
@@ -249,7 +289,7 @@ void VBackend::stretchMode_changed_slot(const QVariant& newStretchMode)
 	if (!isRunning() || isPaused())
 	{
 		setVbDirty();
-		vbUpdate();
+		vbUpdate_int();
 	}
 }
 
@@ -279,7 +319,7 @@ void VBackend::fastBlur_changed_slot(const QVariant& newFastBlur)
 	if (isRunning() && isPaused())
 	{
 		setVbDirty();
-		vbUpdate();
+		vbUpdate_int();
 	}
 }
 
@@ -301,7 +341,7 @@ void VBackend::aspectRatioConstraint_changed_slot(const QVariant& newAspectRatio
 	
 	// TODO: Only if paused, or regardless of pause?
 	if (!isRunning() || isPaused())
-		vbUpdate();
+		vbUpdate_int();
 }
 
 
@@ -318,7 +358,7 @@ void VBackend::bilinearFilter_changed_slot(const QVariant& newBilinearFilter)
 	if (!isRunning() || isPaused())
 	{
 		setVbDirty();
-		vbUpdate();
+		vbUpdate_int();
 	}
 }
 
@@ -337,7 +377,7 @@ void VBackend::pauseTint_changed_slot(const QVariant& newPauseTint)
 	if (isRunning() && isManualPaused())
 	{
 		setVbDirty();
-		vbUpdate();
+		vbUpdate_int();
 	}
 }
 
@@ -425,7 +465,7 @@ void VBackend::osd_printqs(const int duration, const QString& msg)
 	{
 		// Emulation is either not running or paused.
 		// Update the VBackend.
-		vbUpdate();
+		vbUpdate_int();
 		
 		// Start the message timer.
 		m_msgTimer->start();
@@ -518,7 +558,7 @@ int VBackend::osd_process(void)
 		// At least one message was removed.
 		// Update the video backend.
 		setOsdListDirty();
-		vbUpdate();
+		vbUpdate_int();
 	}
 	
 	if (isRunning() && !isPaused())
@@ -690,7 +730,7 @@ void VBackend::osd_show_preview(int duration, const QImage& img)
 		{
 			// Emulation is either not running or paused.
 			// Update the VBackend.
-			vbUpdate();
+			vbUpdate_int();
 			
 			// Start the message timer.
 			m_msgTimer->start();
@@ -739,7 +779,7 @@ int VBackend::recSetStatus(const QString& component, bool isRecording)
 	setOsdListDirty();
 	// TODO: Only if paused, or regardless of pause?
 	if (!isRunning() || isPaused())
-		vbUpdate();
+		vbUpdate_int();
 	return 0;
 }
 
@@ -773,7 +813,7 @@ int VBackend::recSetDuration(const QString& component, int duration)
 	setOsdListDirty();
 	// TODO: Only if paused, or regardless of pause?
 	if (!isRunning() || isPaused())
-		vbUpdate();
+		vbUpdate_int();
 	return 0;
 }
 
@@ -802,7 +842,7 @@ void VBackend::setEmuContext(LibGens::EmuContext *newEmuContext)
 	// TODO: Should we update the video buffer here?
 	// Updated if there's no emulation contextor if emulation is paused.
 	if (!newEmuContext || isPaused())
-		vbUpdate();
+		vbUpdate_int();
 	
 	// If there's no emulation context or emulation is paused,
 	// start the message timer.

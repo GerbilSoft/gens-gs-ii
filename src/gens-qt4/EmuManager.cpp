@@ -863,7 +863,17 @@ void EmuManager::updateVBackend(void)
 	
 	m_vBackend->setMdScreenDirty();
 	m_vBackend->setVbDirty();
-	m_vBackend->vbUpdate();
+	
+	if (gqt4_emuContext)
+	{
+		const LibGens::Vdp *vdp = gqt4_emuContext->m_vdp;
+		m_vBackend->vbUpdate(vdp->MD_Screen, vdp->m_palette.bpp());
+	}
+	else
+	{
+		// TODO: Get color depth from ConfigStore.
+		m_vBackend->vbUpdate(NULL, LibGens::VdpPalette::BPP_32);
+	}
 }
 
 }

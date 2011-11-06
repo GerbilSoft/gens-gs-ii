@@ -50,7 +50,7 @@ class GensQGLWidget : public GLBackend
 		GensQGLWidget(QWidget *parent = 0, KeyHandlerQt *keyHandler = 0);
 		virtual ~GensQGLWidget();
 		
-		void vbUpdate(void);
+		void vbUpdate_int(void);
 		
 		/**
 		 * sizeHint(): Qt size hint.

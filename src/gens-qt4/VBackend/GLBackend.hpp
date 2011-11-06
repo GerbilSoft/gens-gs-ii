@@ -184,11 +184,6 @@ class GLBackend : public VBackend
 		 * @param color QColor.
 		 */
 		void glb_setColor(const QColor& color);
-	
-	protected:
-		// Current MdFb and color depth.
-		const LibGens::MdFb *m_fb;
-		LibGens::VdpPalette::ColorDepth m_bpp;
 };
 
 
