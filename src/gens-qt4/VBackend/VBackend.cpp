@@ -715,7 +715,7 @@ void VBackend::osdMsgColor_changed_slot(const QVariant& var_color)
 
 
 /**
- * osd_show_preview(): Show a preview image on the OSD.
+ * Show a preview image on the OSD.
  * @param duration Duration for the preview image to appaer, in milliseconds.
  * @param img Image to show.
  */
@@ -754,7 +754,9 @@ void VBackend::osd_show_preview(int duration, const QImage& img)
 		{
 			// Emulation is either not running or paused.
 			// Update the VBackend.
-			vbUpdate_int();
+			
+			// Force a vbUpdate_int() on the next MsgTimer tick.
+			m_updateOnNextProcess = true;
 			
 			// Start the message timer.
 			m_msgTimer->start();
@@ -764,7 +766,7 @@ void VBackend::osd_show_preview(int duration, const QImage& img)
 
 
 /**
- * recSetStatus(): Set recording status for a given component.
+ * Set recording status for a given component.
  * @param component	[in] Component.
  * @param isRecording	[in] True if recording; false if stopped.
  * @return 0 on success; non-zero on error.
@@ -799,17 +801,23 @@ int VBackend::recSetStatus(const QString& component, bool isRecording)
 	}
 	
 	// Update the OSD.
-	setVbDirty();	// TODO: Texture doesn't really need to be reuploaded...
 	setOsdListDirty();
-	// TODO: Only if paused, or regardless of pause?
+	
 	if (!isRunning() || isPaused())
-		vbUpdate_int();
+	{
+		// Force a vbUpdate_int() on the next MsgTimer tick.
+		m_updateOnNextProcess = true;
+		
+		// Start the message timer.
+		m_msgTimer->start();
+	}
+	
 	return 0;
 }
 
 
 /**
- * recSetDuration(): Set the recording duration for a component.
+ * Set the recording duration for a component.
  * @param component Component.
  * @param duration Recording duration.
  * @return 0 on success; non-zero on error.
@@ -833,11 +841,17 @@ int VBackend::recSetDuration(const QString& component, int duration)
 	m_osdRecList[recIdx].lastUpdate = curTime;
 	
 	// Update the OSD.
-	setVbDirty();	// TODO: Texture doesn't really need to be reuploaded...
 	setOsdListDirty();
-	// TODO: Only if paused, or regardless of pause?
+	
 	if (!isRunning() || isPaused())
-		vbUpdate_int();
+	{
+		// Force a vbUpdate_int() on the next MsgTimer tick.
+		m_updateOnNextProcess = true;
+		
+		// Start the message timer.
+		m_msgTimer->start();
+	}
+	
 	return 0;
 }
 
