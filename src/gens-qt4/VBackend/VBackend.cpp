@@ -690,6 +690,13 @@ void VBackend::osdMsgEnabled_changed_slot(const QVariant& enable)
 {
 	m_cfg_osdMsgEnabled = enable.toBool();
 	
+	if (!m_cfg_osdMsgEnabled)
+	{
+		// Messages have been disabled.
+		// Clear the message list.
+		m_osdList.clear();
+	}
+	
 	// TODO: Texture doesn't really need to be reuploaded...
 	setVbDirty();
 	
