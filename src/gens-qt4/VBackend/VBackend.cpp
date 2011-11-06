@@ -457,11 +457,11 @@ void VBackend::osd_printqs(const int duration, const QString& msg, bool forceVbD
 		return;
 	}
 	
-	// Calculate the end time.
-	const double endTime = LibGens::Timing::GetTimeD() + ((double)duration / 1000.0);
-	
 	// Create the OSD message and add it to the list.
-	OsdMessage osdMsg(msg, endTime);
+	OsdMessage osdMsg;
+	osdMsg.msg = msg;
+	osdMsg.duration = duration;
+	osdMsg.endTime = 0.0;	// Calculate endTime on first display.
 	m_osdList.append(osdMsg);
 	setOsdListDirty();
 	
@@ -529,8 +529,15 @@ int VBackend::osd_process(void)
 		// Check the message list for expired messages.
 		for (int i = (m_osdList.size() - 1); i >= 0; i--)
 		{
-			// TODO: Make sure the message has been displayed first.
-			if (curTime >= m_osdList[i].endTime)
+			if (m_osdList[i].endTime <= 0.05)
+			{
+				// Message has not been displayed yet.
+				// Calculate the end time.
+				const double endTime = LibGens::Timing::GetTimeD() +
+							((double)m_osdList[i].duration / 1000.0);
+				m_osdList[i].endTime = endTime;
+			}
+			else if (curTime >= m_osdList[i].endTime)
 			{
 				// Message duration has elapsed.
 				// Remove the message from the list.

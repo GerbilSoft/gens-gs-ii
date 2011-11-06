@@ -190,8 +190,8 @@ class VBackend : public QWidget
 		// OSD message struct.
 		struct OsdMessage
 		{
-			OsdMessage(const QString &msg, double endTime);
 			QString msg;
+			int duration;
 			double endTime;
 		};
 		QList<OsdMessage> m_osdList;
@@ -322,12 +322,6 @@ inline void VBackend::osd_printf(const int duration, const utf8_str *msg, ...)
 inline void VBackend::osd_printqs(const int duration, const QString& msg)
 	{ osd_printqs(duration, msg, false); }
 
-
-/** OSD message struct constructor. **/
-inline VBackend::OsdMessage::OsdMessage(const QString& msg, double endTime)
-	: msg(msg)
-	, endTime(endTime)
-{ }
 
 /** OSD list dirty flag functions. **/
 inline bool VBackend::isOsdListDirty(void)

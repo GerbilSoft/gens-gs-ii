@@ -829,6 +829,14 @@ void GLBackend::printOsdText(void)
 		
 		for (int i = (m_osdList.size() - 1); i >= 0; i--)
 		{
+			if (m_osdList[i].endTime <= 0.05)
+			{
+				// Message has not been displayed yet.
+				// Calculate the end time.
+				const double endTime = LibGens::Timing::GetTimeD() +
+							((double)m_osdList[i].duration / 1000.0);
+				m_osdList[i].endTime = endTime;
+			}
 			if (curTime >= m_osdList[i].endTime)
 			{
 				// Message duration has elapsed.
