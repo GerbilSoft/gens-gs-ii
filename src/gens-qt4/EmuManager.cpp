@@ -75,6 +75,7 @@ namespace GensQt4
 EmuManager::EmuManager(QObject *parent, VBackend *vBackend)
 	: QObject(parent)
 	, m_vBackend(vBackend)
+	, m_romClosedFb(NULL)
 {
 	// Initialize timing information.
 	m_lastTime = 0.0;
@@ -158,6 +159,10 @@ EmuManager::~EmuManager()
 	
 	// TODO: Do we really need to clear this?
 	m_paused.data = 0;
+	
+	// Unreference the last-closed ROM framebuffer.
+	if (m_romClosedFb)
+		m_romClosedFb->unref();
 }
 
 
@@ -582,6 +587,25 @@ int EmuManager::closeRom(bool emitStateChanged)
 	
 	if (gqt4_emuContext)
 	{
+		if (emitStateChanged)
+		{
+			LibGens::MdFb *prevFb = m_romClosedFb;
+			
+			const int introStyle = gqt4_cfg->getInt(QLatin1String("Intro_Effect/introStyle"));
+			if (introStyle != 0)
+			{
+				// Intro Effect is enabled.
+				// Save the previous source framebuffer.
+				
+				m_romClosedFb = gqt4_emuContext->m_vdp->MD_Screen->ref();
+				m_romClosedBpp = gqt4_emuContext->m_vdp->m_palette.bpp();
+			}
+			
+			// Unreference the last previous source framebuffer.
+			if (prevFb)
+				prevFb->unref();
+		}
+		
 		// Make sure SRam/EEPRom data is saved.
 		// (SaveData() will call the LibGens OSD handler if necessary.)
 		gqt4_emuContext->saveData();
@@ -608,14 +632,6 @@ int EmuManager::closeRom(bool emitStateChanged)
 	// clearing the screen is a waste of time.
 	if (emitStateChanged)
 	{
-		const int introStyle = gqt4_cfg->getInt(QLatin1String("Intro_Effect/introStyle"));
-		if (introStyle == 0)
-		{
-			// Intro Effect is disabled.
-			// Clear the screen.
-			updateVBackend();
-		}
-		
 		// Update the Gens title.
 		emit stateChanged();
 	}

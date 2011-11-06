@@ -187,6 +187,28 @@ class EmuManager : public QObject
 	private slots:
 		void vBackend_destroyed(QObject *obj);
 	
+	/** Temporary source FB for ROM close handling. **/
+	public:
+		/**
+		 * Get the MdFb from the last closed ROM.
+		 * @return MdFb.
+		 */
+		LibGens::MdFb *romClosedFb(void);
+		
+		/**
+		 * Get the bpp for the MdFb from the last closed ROM.
+		 * @return Color depth.
+		 */
+		LibGens::VdpPalette::ColorDepth romClosedBpp(void);
+		
+		/**
+		 * Reset the last closed ROM MdFb.
+		 */
+		void clearRomClosedFb(void);
+	private:
+		LibGens::MdFb *m_romClosedFb;
+		LibGens::VdpPalette::ColorDepth m_romClosedBpp;
+	
 	/** Translatable string functions. **/
 	
 	public:
@@ -447,10 +469,38 @@ class EmuManager : public QObject
 
 
 /**
- * closeRom(): Close the open ROM file and stop emulation.
+ * Close the open ROM file and stop emulation.
  */
 inline int EmuManager::closeRom(void)
 	{ return closeRom(true); }
+
+/** Temporary source FB for ROM close handling. **/
+
+/**
+ * Get the MdFb from the last closed ROM.
+ * @return MdFb.
+ */
+inline LibGens::MdFb *EmuManager::romClosedFb(void)
+	{ return m_romClosedFb; }
+
+/**
+ * Get the bpp for the MdFb from the last closed ROM.
+ * @return Color depth.
+ */
+inline LibGens::VdpPalette::ColorDepth EmuManager::romClosedBpp(void)
+	{ return m_romClosedBpp; }
+
+/**
+ * Reset the last closed ROM MdFb.
+ */
+inline void EmuManager::clearRomClosedFb(void)
+{
+	if (m_romClosedFb)
+	{
+		m_romClosedFb->unref();
+		m_romClosedFb = NULL;
+	}
+}
 
 }
 
