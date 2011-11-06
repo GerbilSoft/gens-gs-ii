@@ -117,6 +117,7 @@ SET(gens-qt4_COMMON_SRCS
 	VBackend/GLShader.cpp
 	VBackend/GLShaderPaused.cpp
 	VBackend/GLShaderFastBlur.cpp
+	VBackend/MsgTimer.cpp
 	Audio/ARingBuffer.cpp
 	ZipSelectDialog.cpp
 	EmuManager_qEmu.cpp
