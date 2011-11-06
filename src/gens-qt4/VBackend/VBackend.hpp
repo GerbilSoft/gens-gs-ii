@@ -134,6 +134,7 @@ class VBackend : public QWidget
 			__attribute__ ((format (printf, 3, 0)));
 		void osd_printf(const int duration, const utf8_str *msg, ...)
 			__attribute__ ((format (printf, 3, 4)));
+		void osd_printqs(const int duration, const QString& msg, bool forceVbDirty);
 		void osd_printqs(const int duration, const QString& msg);
 		
 		/**
@@ -274,6 +275,7 @@ class VBackend : public QWidget
 		 * @return Number of messages remaining in the OSD queue.
 		 */
 		int osd_process(void);
+		bool m_updateOnNextProcess;
 		friend class MsgTimer;
 		
 		/** Video settings. **/
@@ -299,7 +301,7 @@ inline QColor VBackend::osdMsgColor(void) const
 	{ return m_cfg_osdMsgColor; }
 
 /**
- * osd_vprintf(): Print formatted text to the screen.
+ * Print formatted text to the screen.
  * @param duration Duration for the message to appear, in milliseconds.
  * @param msg Message to write. (printf-formatted)
  * @param ... Format arguments.
@@ -311,6 +313,15 @@ inline void VBackend::osd_printf(const int duration, const utf8_str *msg, ...)
 	osd_vprintf(duration, msg, ap);
 	va_end(ap);
 }
+
+/**
+ * Print a QString to the screen.
+ * @param duration Duration for the message to appear, in milliseconds.
+ * @param msg Message to write. (printf-formatted)
+ */
+inline void VBackend::osd_printqs(const int duration, const QString& msg)
+	{ osd_printqs(duration, msg, false); }
+
 
 /** OSD message struct constructor. **/
 inline VBackend::OsdMessage::OsdMessage(const QString& msg, double endTime)

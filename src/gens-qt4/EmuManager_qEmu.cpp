@@ -648,7 +648,7 @@ void EmuManager::doSaveState(const QString& filename, int saveSlot)
 		osdMsg = tr("Error saving state: %1", "osd").arg(ret);
 	}
 	
-	// Print a message on the OSD.
+	// Print the message to the OSD.
 	emit osdPrintMsg(1500, osdMsg);
 }
 
@@ -689,7 +689,7 @@ void EmuManager::doLoadState(const QString& filename, int saveSlot)
 		osdMsg = tr("Error loading state: %1", "osd").arg(ret);
 	}
 	
-	// Print a message on the OSD.
+	// Print the message to the OSD.
 	emit osdPrintMsg(1500, osdMsg);
 }
 
@@ -814,13 +814,14 @@ void EmuManager::doResetEmulator(bool hardReset)
 	else
 		gqt4_emuContext->restoreChecksum();
 	
+	QString msg;
 	if (hardReset)
 	{
 		// Do a hard reset.
 		gqt4_emuContext->hardReset();
 		
 		//: OSD message indicating a Hard Reset was performed.
-		emit osdPrintMsg(2500, tr("Hard Reset.", "osd"));
+		msg = tr("Hard Reset.", "osd");
 	}
 	else
 	{
@@ -828,8 +829,11 @@ void EmuManager::doResetEmulator(bool hardReset)
 		gqt4_emuContext->softReset();
 		
 		//: OSD message indicating a Soft Reset was performed.
-		emit osdPrintMsg(2500, tr("Soft Reset.", "osd"));
+		msg = tr("Soft Reset.", "osd");
 	}
+	
+	// Print the message to the OSD.
+	emit osdPrintMsg(2500, msg);
 }
 
 
@@ -909,8 +913,8 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 					break;
 			}
 			
-			if (!msg.isEmpty())
-				emit osdPrintMsg(1500, msg);
+			// Print the message to the OSD.
+			emit osdPrintMsg(1500, msg);
 			break;
 		}
 		
@@ -969,8 +973,8 @@ void EmuManager::doResetCpu(EmuManager::ResetCpuIndex cpu_idx)
 			break;
 	}
 	
-	if (!msg.isEmpty())
-		emit osdPrintMsg(1500, msg);
+	// Print the message to the OSD.
+	emit osdPrintMsg(1500, msg);
 }
 
 
@@ -1038,9 +1042,19 @@ void EmuManager::doEnableSRam(bool enableSRam)
 	}
 	
 	// Print a message to the screen.
-	const QString msg = (enableSRam
-				? tr("SRAM/EEPROM enabled.", "osd")
-				: tr("SRAM/EEPROM disabled.", "osd"));
+	QString msg;
+	if (enableSRam)
+	{
+		//: OSD message indicating SRAM/EEPROM has been enabled.
+		msg = tr("SRAM/EEPROM enabled.", "osd");
+	}
+	else
+	{
+		//: OSD message indicating SRAM/EEPROM has been disabled.
+		msg = tr("SRAM/EEPROM disabled.", "osd");
+	}
+	
+	// Print the message to the OSD.
 	emit osdPrintMsg(1500, msg);
 }
 

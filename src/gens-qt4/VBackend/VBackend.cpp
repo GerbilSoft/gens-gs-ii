@@ -117,6 +117,7 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	
 	m_osdLockCnt = 0;	// OSD lock counter.
 	setOsdListDirty();	// TODO: Set this on startup?
+	m_updateOnNextProcess = false;
 	
 	/** OSD settings: Signals. **/
 	// TODO: Reconnect signals if ConfigStore is deleted/recreated?
@@ -282,15 +283,7 @@ void VBackend::stretchMode_changed_slot(const QVariant& newStretchMode)
 			break;
 	}
 	
-	if (!msg.isEmpty())
-		osd_printqs(1500, msg);
-	
-	// TODO: Only if paused, or regardless of pause?
-	if (!isRunning() || isPaused())
-	{
-		setVbDirty();
-		vbUpdate_int();
-	}
+	osd_printqs(1500, msg, true);
 }
 
 
@@ -304,23 +297,19 @@ void VBackend::fastBlur_changed_slot(const QVariant& newFastBlur)
 	m_cfg_fastBlur = newFastBlur.toBool();
 	
 	// Print a message to the OSD.
+	QString msg;
 	if (m_cfg_fastBlur)
 	{
 		//: OSD message indicating Fast Blur has been enabled.
-		osd_printqs(1500, tr("Fast Blur enabled.", "osd"));
+		msg = tr("Fast Blur enabled.", "osd");
 	}
 	else
 	{
 		//: OSD message indicating Fast Blur has been disabled.
-		osd_printqs(1500, tr("Fast Blur disabled.", "osd"));
+		msg = tr("Fast Blur disabled.", "osd");
 	}
 	
-	// If paused, update the VBackend.
-	if (isRunning() && isPaused())
-	{
-		setVbDirty();
-		vbUpdate_int();
-	}
+	osd_printqs(1500, msg, true);
 }
 
 
@@ -441,15 +430,30 @@ void VBackend::osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
  * Print text to the screen.
  * @param duration Duration for the message to appear, in milliseconds.
  * @param msg Message to write.
+ * @param forceVbDirty If true, and not running or paused, force the src as dirty and always update the VBackend.
  */
-void VBackend::osd_printqs(const int duration, const QString& msg)
+void VBackend::osd_printqs(const int duration, const QString& msg, bool forceVbDirty)
 {
 	assert(m_osdLockCnt >= 0);
 	if (duration <= 0 ||		// Invalid duration.
 	    !osdMsgEnabled() ||		// Messages disabled.
-	    m_osdLockCnt > 0)		// OSD locked.
+	    m_osdLockCnt > 0 ||		// OSD locked.
+	    msg.isEmpty())		// Message is empty.
 	{
 		// Don't write anything to the message buffer.
+		if (forceVbDirty)
+		{
+			if (!isRunning() || isPaused())
+			{
+				setVbDirty();
+				
+				// Force a vbUpdate_int() on the next MsgTimer tick.
+				m_updateOnNextProcess = true;
+				
+				// Start the message timer.
+				m_msgTimer->start();
+			}
+		}
 		return;
 	}
 	
@@ -465,7 +469,11 @@ void VBackend::osd_printqs(const int duration, const QString& msg)
 	{
 		// Emulation is either not running or paused.
 		// Update the VBackend.
-		vbUpdate_int();
+		if (forceVbDirty)
+			setVbDirty();
+		
+		// Force a vbUpdate_int() on the next MsgTimer tick.
+		m_updateOnNextProcess = true;
 		
 		// Start the message timer.
 		m_msgTimer->start();
@@ -494,7 +502,7 @@ int VBackend::osd_unlock(void)
 
 
 /**
- * osd_process(): Process the OSD queue.
+ * Process the OSD queue.
  * This should ONLY be called by MsgTimer!
  * @return Number of messages remaining in the OSD queue.
  */
@@ -521,6 +529,7 @@ int VBackend::osd_process(void)
 		// Check the message list for expired messages.
 		for (int i = (m_osdList.size() - 1); i >= 0; i--)
 		{
+			// TODO: Make sure the message has been displayed first.
 			if (curTime >= m_osdList[i].endTime)
 			{
 				// Message duration has elapsed.
@@ -560,6 +569,14 @@ int VBackend::osd_process(void)
 		setOsdListDirty();
 		vbUpdate_int();
 	}
+	else if (m_updateOnNextProcess)
+	{
+		// vbUpdate_int() is forced.
+		vbUpdate_int();
+	}
+	
+	// Make sure this gets cleared now.
+	m_updateOnNextProcess = false;
 	
 	if (isRunning() && !isPaused())
 	{
