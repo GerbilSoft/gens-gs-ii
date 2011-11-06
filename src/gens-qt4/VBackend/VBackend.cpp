@@ -608,7 +608,7 @@ void VBackend::resetFps(void)
 	m_fpsAvg = 0.0;
 	m_fpsPtr = 0;
 	
-	if (isRunning() && !isPaused())
+	if (osdFpsEnabled() && isRunning() && !isPaused())
 		setOsdListDirty();
 }
 
@@ -639,7 +639,7 @@ void VBackend::pushFps(double fps)
 	else
 		m_fpsAvg = (sum / (double)count);
 	
-	if (isRunning() && !isPaused())
+	if (osdFpsEnabled() && isRunning() && !isPaused())
 		setOsdListDirty();
 }
 
