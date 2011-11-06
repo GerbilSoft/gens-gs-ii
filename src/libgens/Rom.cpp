@@ -417,9 +417,9 @@ std::string RomPrivate::SpaceElim(const string& src)
 	
 	// Make sure there's no space at the end of the string.
 	if (!IsGraphChar(wcs_dest[i_dest - 1]))
-		wcs_dest.resize(i_dest - 2);
+		wcs_dest.resize(i_dest - 2 + 1);
 	else
-		wcs_dest.resize(i_dest - 1);
+		wcs_dest.resize(i_dest - 1 + 1);
 	
 	// Convert the string back to UTF-8.
 	return Encoding::Utf16_to_Utf8(wcs_dest);
