@@ -65,11 +65,33 @@ string EmuContext::ms_PathSRam;
 
 
 /**
- * EmuContext(): Initialize an emulation context.
+ * Initialize an emulation context.
  * @param rom ROM.
  * @param region System region. (not used in the base class)
  */
 EmuContext::EmuContext(Rom *rom, SysVersion::RegionCode_t region)
+{
+	init(NULL, rom, region);
+}
+
+/**
+ * Initialize an emulation context.
+ * @param fb Existing MdFb to use. (If NULL, allocate a new MdFb.)
+ * @param rom ROM.
+ * @param region System region. (not used in the base class)
+ */
+EmuContext::EmuContext(MdFb *fb, Rom *rom, SysVersion::RegionCode_t region)
+{
+	init(fb, rom, region);
+}
+
+/**
+ * Initialize an emulation context.
+ * @param fb Existing MdFb to use. (If NULL, allocate a new MdFb.)
+ * @param rom ROM.
+ * @param region System region. (not used in the base class)
+ */
+void EmuContext::init(MdFb *fb, Rom *rom, SysVersion::RegionCode_t region)
 {
 	// NOTE: Region code isn't used in the base class.
 	// This may change later on.
@@ -116,7 +138,7 @@ EmuContext::EmuContext(Rom *rom, SysVersion::RegionCode_t region)
 	}
 	
 	// Initialize the VDP.
-	m_vdp = new Vdp();
+	m_vdp = new Vdp(fb);
 }
 
 EmuContext::~EmuContext()

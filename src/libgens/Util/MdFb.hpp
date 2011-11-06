@@ -38,7 +38,7 @@ class MdFb
 {
 	public:
 		MdFb() : m_refcnt(1) { }
-		void ref(void) const;
+		MdFb *ref(void) const;
 		void unref(void) const;
 	
 	private:
@@ -127,10 +127,11 @@ class MdFb
 
 /** Reference counter. **/
 
-inline void MdFb::ref(void) const
+inline MdFb* MdFb::ref(void) const
 {
 	// TODO: Use atomic access?
 	m_refcnt++;
+	return (MdFb*)this;
 }
 
 inline void MdFb::unref(void) const

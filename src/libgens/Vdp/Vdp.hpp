@@ -46,7 +46,7 @@ class VdpRend_Err_Private;
 class Vdp
 {
 	public:
-		Vdp();
+		Vdp(MdFb *fb = NULL);
 		~Vdp();
 	
 	private:

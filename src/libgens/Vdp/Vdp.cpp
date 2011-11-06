@@ -46,10 +46,11 @@ VdpTypes::VdpEmuOptions_t Vdp::VdpEmuOptions =
 
 
 /**
- * Vdp::Vdp(): Initialize the VDP subsystem.
+ * Initialize the VDP subsystem.
+ * @param fb Existing MdFb to use. (If NULL, allocate a new MdFb.)
  */
-Vdp::Vdp()
-	: MD_Screen(new MdFb())
+Vdp::Vdp(MdFb *fb)
+	: MD_Screen(fb ? fb->ref() : new MdFb())
 	, d_err(new VdpRend_Err_Private(this))
 {
 	// Initialize the Horizontal Counter table.

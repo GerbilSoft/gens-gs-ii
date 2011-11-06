@@ -52,8 +52,13 @@ class EmuContext
 {
 	public:
 		EmuContext(Rom *rom, SysVersion::RegionCode_t region = SysVersion::REGION_US_NTSC);
+		EmuContext(MdFb *fb, Rom *rom, SysVersion::RegionCode_t region = SysVersion::REGION_US_NTSC);
 		virtual ~EmuContext();
-		
+	
+	private:
+		void init(MdFb *fb, Rom *rom, SysVersion::RegionCode_t region);
+
+	public:	
 		// Get the current EmuContext instance.
 		static EmuContext *Instance(void);
 		
