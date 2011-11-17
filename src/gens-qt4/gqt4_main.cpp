@@ -141,7 +141,17 @@ int gens_main(int argc, char *argv[])
 	
 #ifdef Q_WS_X11
 	// Initialize X11 threading.
+#if QT_VERSION >= 0x040800
+	// Let Qt call XInitThreads() itself, so that Qt knows it's in use.
+	// Otherwise, QPixmap may warn about threads not being initialized.
+	QApplication::setAttribute(Qt::AA_X11InitThreads);
+#else
 	XInitThreads();
+	// Make sure we set Qt::AA_X11InitThreads if compiled with an older
+	// version of Qt. This ensures that if the user upgrades to a newer
+	// version of Qt, it will be set properly.
+	QApplication::setAttribute(static_cast<Qt::ApplicationAttribute>(10));
+#endif /* QT_VERSION >= 0x040800 */
 #endif /* Q_WS_X11 */
 	
 	// Initialize the GensQApplication.
