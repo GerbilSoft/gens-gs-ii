@@ -199,6 +199,20 @@ int EmuMD::setRegion(SysVersion::RegionCode_t region)
 	{ return setRegion_int(region, true); }
 
 /**
+ * Round_Double(): Gens rounding function.
+ * The implementation doesn't match rint(), so we're defining this here.
+ * @param val Value to round.
+ * @return Rounded value.
+ */
+static inline int Round_Double(double val)
+{
+	if ((val - (double)(int)val) > 0.5)
+		return (int)val + 1;
+	else
+		return (int)val;
+}
+
+/**
  * setRegion_int(): Set the region code. (INTERNAL VERSION)
  * @param region Region code.
  * @param preserveState If true, preserve the audio IC state.
@@ -225,15 +239,21 @@ int EmuMD::setRegion_int(SysVersion::RegionCode_t region, bool preserveState)
 	m_vdp->setVideoMode(m_sysVersion.isPal());
 	
 	// Initialize CPL.
+	/* NOTE: Game_Music_Emu uses floor() here, but it seems that using floor()
+	 * causes audio distortion on the title screen of "Beavis and Butt-head" (U).
+	 * Use the old "Round_Double" implementation like in old Gens.
+	 * [rint() uses banker's rounding, which rounds 0.5 to 0 and 1.5 to 2.]
+	 * [Round_Double() rounds 0.5 to 0 and 1.5 to 1.] */
+	// TODO: Jorge says CPL is always 3420 master clock cycles...
 	if (m_sysVersion.isPal())
 	{
-		M68K_Mem::CPL_M68K = (int)floor((((double)CLOCK_PAL / 7.0) / 50.0) / 312.0);
-		M68K_Mem::CPL_Z80 = (int)floor((((double)CLOCK_PAL / 15.0) / 50.0) / 312.0);
+		M68K_Mem::CPL_M68K = Round_Double((((double)CLOCK_PAL / 7.0) / 50.0) / 312.0);
+		M68K_Mem::CPL_Z80 = Round_Double((((double)CLOCK_PAL / 15.0) / 50.0) / 312.0);
 	}
 	else
 	{
-		M68K_Mem::CPL_M68K = (int)floor((((double)CLOCK_NTSC / 7.0) / 60.0) / 262.0);
-		M68K_Mem::CPL_Z80 = (int)floor((((double)CLOCK_NTSC / 15.0) / 60.0) / 262.0);
+		M68K_Mem::CPL_M68K = Round_Double((((double)CLOCK_NTSC / 7.0) / 60.0) / 262.0);
+		M68K_Mem::CPL_Z80 = Round_Double((((double)CLOCK_NTSC / 15.0) / 60.0) / 262.0);
 	}
 	
 	// Initialize audio.
