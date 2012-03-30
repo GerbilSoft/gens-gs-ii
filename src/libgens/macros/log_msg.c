@@ -57,7 +57,6 @@ void log_msg(const char *channel, int level, const char *fn, const utf8_str *msg
 	va_start(ap, msg);
 	vsnprintf(&out_msg[ret], (sizeof(out_msg)-ret), msg, ap);
 	va_end(ap);
-	out_msg[sizeof(out_msg)-1] = 0x00;
 	
 	// Print the message to stderr.
 	fprintf(stderr, "%s\n", out_msg);

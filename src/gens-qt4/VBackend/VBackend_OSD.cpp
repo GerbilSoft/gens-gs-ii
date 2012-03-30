@@ -52,7 +52,6 @@ void VBackend::osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
 	// Format the message.
 	char msg_buf[1024];
 	vsnprintf(msg_buf, sizeof(msg_buf), msg, ap);
-	msg_buf[sizeof(msg_buf)-1] = 0x00;
 	
 	// Convert the message to a QString and print it to the screen.
 	osd_printqs(duration, QString::fromUtf8(msg_buf));

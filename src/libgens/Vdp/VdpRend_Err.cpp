@@ -384,7 +384,6 @@ inline void VdpRend_Err_Private::T_DrawVDPErrorMessage(MdFb *fb)
 			(vdpMode & VDP_MODE_M3) >> 2,
 			(vdpMode & VDP_MODE_M2) >> 1,
 			(vdpMode & VDP_MODE_M1));
-	buf[sizeof(buf)-1] = 0x00;
 	x = ((q->GetHPix() - (16*8)) / 2) + q->GetHPixBegin();
 	T_DrawText<pixel, text_color>(fb, x, y, buf);
 	
