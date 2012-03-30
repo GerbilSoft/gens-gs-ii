@@ -47,7 +47,7 @@ const char *const GLShaderPaused::ms_GL_ARB_fragment_program =
 	"TEMP t0, color;\n"
 	"TEX t0, fragment.texcoord[0], texture[0], 2D;\n"	// Sample the texture.
 	"DP3 color, t0, grayscale;\n"				// Calculate grayscale value.
-	"ADD_SAT color.z, color.z, color.z;\n"			// Double the blue component.
+	"ADD_SAT color.b, color.b, color.b;\n"			// Double the blue component.
 	"MOV result.color, color;\n"
 	"END\n";
 
