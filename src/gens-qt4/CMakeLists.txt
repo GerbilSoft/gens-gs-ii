@@ -106,6 +106,7 @@ SET(gens-qt4_COMMON_SRCS
 	GensQApplication.cpp
 	SigHandler.cpp
 	VBackend/VBackend.cpp
+	VBackend/VBackend_OSD.cpp
 	VBackend/GensQGLWidget.cpp
 	VBackend/GLBackend.cpp
 	Input/KeyHandlerQt.cpp

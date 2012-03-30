@@ -1062,7 +1062,7 @@ void GLBackend::osd_show_preview(int duration, const QImage& img)
  */
 void GLBackend::showOsdPreview(void)
 {
-	if (!m_preview_show || m_preview_img.isNull())
+	if (!m_previewImg.visible || m_previewImg.img.isNull())
 	{
 		// Don't show the preview image.
 		delete m_texPreview;
@@ -1072,7 +1072,7 @@ void GLBackend::showOsdPreview(void)
 	
 	// Check if the duration has elapsed.
 	const double curTime = LibGens::Timing::GetTimeD();
-	if (curTime >= m_preview_endTime)
+	if (curTime >= m_previewImg.endTime)
 	{
 		// Preview duration has elapsed.
 		// TODO: Combine this code with the !m_preview_show code.
@@ -1088,7 +1088,7 @@ void GLBackend::showOsdPreview(void)
 	if (!m_texPreview)
 	{
 		// Create the texture for the preview image.
-		m_texPreview = new GLTex2D(m_preview_img);
+		m_texPreview = new GLTex2D(m_previewImg.img);
 	}
 	
 	// Bind the texture.
