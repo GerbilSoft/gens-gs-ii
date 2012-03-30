@@ -513,7 +513,7 @@ void GensWindow::stateChanged(void)
 		
 		m_vBackend->osd_show_preview(0, QImage());
 		m_vBackend->setPaused(unPause);
-		m_vBackend->resetFps();
+		m_vBackend->fpsReset();
 	}
 	
 	// Check the idle thread state.

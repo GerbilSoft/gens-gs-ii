@@ -106,9 +106,6 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	// Initialize the paused setting.
 	m_paused.data = 0;
 	
-	// Initialize the FPS manager.
-	resetFps();
-	
 	// Initialize the OSD settings.
 	m_cfg_osdFpsEnabled = gqt4_cfg->get(QLatin1String("OSD/fpsEnabled")).toBool();
 	m_cfg_osdFpsColor   = gqt4_cfg->get(QLatin1String("OSD/fpsColor")).value<QColor>();

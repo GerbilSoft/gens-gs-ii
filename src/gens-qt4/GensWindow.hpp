@@ -155,7 +155,7 @@ class GensWindow : public QMainWindow
 		 * updateFps(): Update the FPS counter.
 		 */
 		void updateFps(double fps)
-			{ m_vBackend->pushFps(fps); }
+			{ m_vBackend->fpsPush(fps); }
 		
 		/**
 		 * stateChanged(): Emulation state changed.

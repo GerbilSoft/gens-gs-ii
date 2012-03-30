@@ -811,7 +811,7 @@ void GLBackend::printOsdText(void)
 	// Check if the FPS should be drawn.
 	if (isRunning() && !isPaused() && osdFpsEnabled())
 	{
-		const QString sFps = QString::number(fpsAvg(), 'f', 1);
+		const QString sFps = QString::number(m_fpsManager.get(), 'f', 1);
 		
 		// Next line.
 		y -= ms_Osd_chrH;

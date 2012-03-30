@@ -46,6 +46,9 @@
 // Emulation Context.
 #include "libgens/EmuContext.hpp"
 
+// FPS manager.
+#include "FpsManager.hpp"
+
 // gqt4_cfg
 #include "gqt4_main.hpp"
 
@@ -213,8 +216,8 @@ class VBackend : public QWidget
 		virtual void osd_show_preview(int duration, const QImage& img);
 		
 		// FPS manager.
-		void resetFps(void);
-		void pushFps(double fps);
+		void fpsReset(void);
+		void fpsPush(double fps);
 		
 		// Recording OSD.
 		int recSetStatus(const QString& component, bool isRecording);
@@ -244,9 +247,8 @@ class VBackend : public QWidget
 		void setOsdListDirty(void);
 		void clearOsdListDirty(void);
 		
-		// Get the current average FPS.
-		inline double fpsAvg(void)
-			{ return m_fpsAvg; }
+		// FPS manager.
+		FpsManager m_fpsManager;
 		
 		// Preview image.
 		struct PreviewImage
@@ -348,6 +350,12 @@ inline void VBackend::setOsdListDirty(void)
 	{ m_osdListDirty = true; }
 inline void VBackend::clearOsdListDirty(void)
 	{ m_osdListDirty = false; }
+
+// FPS manager.
+inline void VBackend::fpsReset(void)
+	{ m_fpsManager.reset(); }
+inline void VBackend::fpsPush(double fps)
+	{ m_fpsManager.push(fps); }
 
 /** Recording OSD. **/
 inline int VBackend::recStart(const QString& component)
