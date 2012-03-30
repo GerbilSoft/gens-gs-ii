@@ -351,12 +351,6 @@ inline void VBackend::setOsdListDirty(void)
 inline void VBackend::clearOsdListDirty(void)
 	{ m_osdListDirty = false; }
 
-// FPS manager.
-inline void VBackend::fpsReset(void)
-	{ m_fpsManager.reset(); }
-inline void VBackend::fpsPush(double fps)
-	{ m_fpsManager.push(fps); }
-
 /** Recording OSD. **/
 inline int VBackend::recStart(const QString& component)
 	{ return recSetStatus(component, true); }

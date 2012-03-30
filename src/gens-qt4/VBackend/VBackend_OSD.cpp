@@ -197,6 +197,30 @@ void VBackend::osd_show_preview(int duration, const QImage& img)
 }
 
 
+/*! FPS manager. **/
+
+/**
+ * Reset the FPS manager.
+ */
+void VBackend::fpsReset(void)
+{
+	m_fpsManager.reset();
+	if (osdFpsEnabled() && isRunning() && !isPaused())
+		setOsdListDirty();
+}
+
+/**
+ * Push an FPS value.
+ * @param fps FPS value.
+ */
+void VBackend::fpsPush(double fps)
+{
+	m_fpsManager.push(fps);
+	if (osdFpsEnabled() && isRunning() && !isPaused())
+		setOsdListDirty();
+}
+
+
 /*! Recording status. **/
 
 
