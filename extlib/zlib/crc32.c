@@ -11,12 +11,6 @@
 
 /* @(#) $Id$ */
 
-/**
- * gzip function redefinitions.
- * Required for Gens/GS II because Qt4/Win32 has its own copy of gz*.c.
- */
-#include "gzip_redefinitions.h"
-
 /*
   Note on the use of DYNAMIC_CRC_TABLE: there is no mutex or semaphore
   protection on the static variables used to control the first-use generation

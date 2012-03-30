@@ -1,4 +1,4 @@
-This copy of zlib-1.2.5.1 is a modified version of the original.
+This copy of zlib-1.2.6 is a modified version of the original.
 
 The following changes have been made to the original:
 
@@ -14,6 +14,6 @@ The following changes have been made to the original:
   zlib that exposes the same functions.
 
 - The OF() and ON() macros have been renamed to _Z_OF() and _Z_ON().
-  Based on Gentoo's zlib-1.2.5.1-r1 patches.
+  Based on Gentoo's zlib-1.2.6-r1 patches.
 
-To obtain the original zlib-1.2.5.1, visit http://www.zlib.net
+To obtain the original zlib-1.2.6, visit http://www.zlib.net
