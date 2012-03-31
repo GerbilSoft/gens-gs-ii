@@ -145,6 +145,14 @@ void GensQApplicationPrivate::setGensTranslation(const QString& locale)
 	gensTranslator->load(
 		QLatin1String("gens-qt4_") + locale,
 		appDir.absoluteFilePath(QLatin1String("translations/")));
+	
+	/** Translation file information. **/
+	
+	//: Translation file author. Put your name here.
+	QString tsAuthor = GensQApplication::tr("David Korth", "ts-author");
+	((void)tsAuthor);
+	
+	// TODO: Allow the program to access the translation file information.
 }
 
 
