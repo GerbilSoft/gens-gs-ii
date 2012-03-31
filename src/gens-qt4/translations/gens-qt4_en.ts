@@ -371,76 +371,76 @@ Used to indicate no special CPU features were found.</extracomment>
 <context>
     <name>GensQt4::EmuManager</name>
     <message>
-        <location filename="../EmuManager.cpp" line="178"/>
+        <location filename="../EmuManager.cpp" line="183"/>
         <source>Open ROM</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="180"/>
+        <location filename="../EmuManager.cpp" line="185"/>
         <source>Sega Genesis ROM images</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="193"/>
+        <location filename="../EmuManager.cpp" line="198"/>
         <source>Sega Genesis / 32X ROMs; Sega CD disc images</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="196"/>
+        <location filename="../EmuManager.cpp" line="201"/>
         <source>All Files</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="353"/>
+        <location filename="../EmuManager.cpp" line="358"/>
         <source>Unsupported System</source>
         <extracomment>A ROM image was selected for a system that Gens/GS II does not currently support. (error title)</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="355"/>
+        <location filename="../EmuManager.cpp" line="360"/>
         <source>The selected ROM image is designed for a system that is not currently supported by Gens/GS II.</source>
         <extracomment>A ROM image was selected for a system that Gens/GS II does not currently support. (error description)</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="359"/>
+        <location filename="../EmuManager.cpp" line="364"/>
         <source>Selected ROM&apos;s system: %1</source>
         <extracomment>Indicate what system the ROM image is for.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="362"/>
+        <location filename="../EmuManager.cpp" line="367"/>
         <source>Supported systems:</source>
         <extracomment>List of systems that Gens/GS II currently supports.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="381"/>
+        <location filename="../EmuManager.cpp" line="386"/>
         <source>(unknown)</source>
         <comment>rom-format</comment>
         <extracomment>Unknown ROM format. (EmuManager::RomFormat() returned an empty string.)</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="389"/>
+        <location filename="../EmuManager.cpp" line="394"/>
         <source>Unsupported ROM Format</source>
         <extracomment>A ROM image was selected in a format that Gens/GS II does not currently support. (error title)</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="391"/>
+        <location filename="../EmuManager.cpp" line="396"/>
         <source>The selected ROM image is in a format that is not currently supported by Gens/GS II.</source>
         <extracomment>A ROM image was selected in a format that Gens/GS II does not currently support. (error description)</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="394"/>
+        <location filename="../EmuManager.cpp" line="399"/>
         <source>Selected ROM image format: %1</source>
         <extracomment>Indicate what format the ROM image is in.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="397"/>
+        <location filename="../EmuManager.cpp" line="402"/>
         <source>Supported ROM formats:</source>
         <extracomment>List of ROM formats that Gens/GS II currently supports.</extracomment>
         <translation></translation>
@@ -642,194 +642,202 @@ Used to indicate no special CPU features were found.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="591"/>
+        <location filename="../EmuManager_qEmu.cpp" line="553"/>
         <source>Screenshot %1 saved.</source>
-        <extracomment>OSD message indicating screenshot saved.</extracomment>
+        <extracomment>OSD message indicating a screenshot has been saved.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="608"/>
+        <location filename="../EmuManager_qEmu.cpp" line="560"/>
+        <source>Error saving screenshot.</source>
+        <extracomment>OSD message indicating an error occurred while saving a screenshot.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../EmuManager_qEmu.cpp" line="578"/>
         <source>Audio sampling rate set to %L1 Hz.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating sampling rate change.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="627"/>
+        <location filename="../EmuManager_qEmu.cpp" line="597"/>
         <source>Audio set to %1.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating audio stereo/mono change.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="630"/>
+        <location filename="../EmuManager_qEmu.cpp" line="600"/>
         <source>Stereo</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating audio has been set to Stereo.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="632"/>
+        <location filename="../EmuManager_qEmu.cpp" line="602"/>
         <source>Mono</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating audio has been set to Mono.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="667"/>
+        <location filename="../EmuManager_qEmu.cpp" line="636"/>
         <source>State %1 saved.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating a savestate has been saved.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="672"/>
+        <location filename="../EmuManager_qEmu.cpp" line="641"/>
         <source>State saved in %1</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating a savestate has been saved using a specified filename</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="679"/>
+        <location filename="../EmuManager_qEmu.cpp" line="648"/>
         <source>Error saving state: %1</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating an error occurred while saving the savestate.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="708"/>
+        <location filename="../EmuManager_qEmu.cpp" line="677"/>
         <source>State %1 loaded.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating a savestate has been loaded.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="713"/>
+        <location filename="../EmuManager_qEmu.cpp" line="682"/>
         <source>State loaded from %1</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating a savestate has been loaded using a specified filename</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="720"/>
+        <location filename="../EmuManager_qEmu.cpp" line="689"/>
         <source>Error loading state: %1</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating an error occurred while loading the savestate.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="748"/>
+        <location filename="../EmuManager_qEmu.cpp" line="717"/>
         <source>Save Slot %1 selected.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating a save slot is selected while no ROM is loaded.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="756"/>
+        <location filename="../EmuManager_qEmu.cpp" line="725"/>
         <source>Save Slot %1 [%2]</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating a save slot is selected while a ROM is loaded.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="764"/>
+        <location filename="../EmuManager_qEmu.cpp" line="733"/>
         <source>OCCUPIED</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating a savestate exists in the selected slot.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="795"/>
+        <location filename="../EmuManager_qEmu.cpp" line="764"/>
         <source>EMPTY</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating there is no savestate in the selected slot.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="854"/>
+        <location filename="../EmuManager_qEmu.cpp" line="824"/>
         <source>Hard Reset.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating a Hard Reset was performed.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="862"/>
+        <location filename="../EmuManager_qEmu.cpp" line="832"/>
         <source>Soft Reset.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating a Soft Reset was performed.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="915"/>
+        <location filename="../EmuManager_qEmu.cpp" line="888"/>
         <source>Interlaced: %1</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating the interlaced rendering mode was changed.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="920"/>
+        <location filename="../EmuManager_qEmu.cpp" line="893"/>
         <source>Even lines only</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating the interlaced rendering mode was set to even lines only.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="925"/>
+        <location filename="../EmuManager_qEmu.cpp" line="898"/>
         <source>Odd lines only</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating the interlaced rendering mode was set to odd lines only.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="930"/>
+        <location filename="../EmuManager_qEmu.cpp" line="903"/>
         <source>Alternating lines</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating the interlaced rendering mode was set to alternating lines.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="935"/>
+        <location filename="../EmuManager_qEmu.cpp" line="908"/>
         <source>2x resolution</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating the interlaced rendering mode was set to 2x resolution.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="988"/>
+        <location filename="../EmuManager_qEmu.cpp" line="961"/>
         <source>68000 reset.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating the 68000 CPU was reset.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="995"/>
+        <location filename="../EmuManager_qEmu.cpp" line="968"/>
         <source>Z80 reset.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating the Z80 CPU was reset.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="1020"/>
+        <location filename="../EmuManager_qEmu.cpp" line="993"/>
         <source>System region set to %1.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating the system region code was changed.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="1073"/>
+        <location filename="../EmuManager_qEmu.cpp" line="1049"/>
         <source>SRAM/EEPROM enabled.</source>
         <comment>osd</comment>
+        <extracomment>OSD message indicating SRAM/EEPROM has been enabled.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="1074"/>
+        <location filename="../EmuManager_qEmu.cpp" line="1054"/>
         <source>SRAM/EEPROM disabled.</source>
         <comment>osd</comment>
+        <extracomment>OSD message indicating SRAM/EEPROM has been disabled.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="419"/>
-        <location filename="../EmuManager_qEmu.cpp" line="1041"/>
+        <location filename="../EmuManager.cpp" line="424"/>
+        <location filename="../EmuManager_qEmu.cpp" line="1014"/>
         <source>ROM region detected as %1.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating the auto-detected ROM region.
@@ -2124,6 +2132,16 @@ programs that depend on the correct VDP behavior.</source>
     </message>
 </context>
 <context>
+    <name>GensQt4::GensQApplication</name>
+    <message>
+        <location filename="../GensQApplication.cpp" line="152"/>
+        <source>David Korth</source>
+        <comment>ts-author</comment>
+        <extracomment>Translation file author. Put your name here.</extracomment>
+        <translation></translation>
+    </message>
+</context>
+<context>
     <name>GensQt4::GensWindow</name>
     <message>
         <location filename="../GensWindow.cpp" line="385"/>
@@ -2267,49 +2285,49 @@ programs that depend on the correct VDP behavior.</source>
 <context>
     <name>GensQt4::VBackend</name>
     <message>
-        <location filename="../VBackend/VBackend.cpp" line="217"/>
+        <location filename="../VBackend/VBackend.cpp" line="252"/>
         <source>Stretch Mode set to %1.</source>
         <comment>osd-stretch</comment>
         <extracomment>OSD message indicating the Stretch Mode has been changed.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../VBackend/VBackend.cpp" line="222"/>
+        <location filename="../VBackend/VBackend.cpp" line="257"/>
         <source>None</source>
         <comment>osd-stretch</comment>
         <extracomment>OSD message indicating the Stretch Mode has been set to None.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../VBackend/VBackend.cpp" line="227"/>
+        <location filename="../VBackend/VBackend.cpp" line="262"/>
         <source>Horizontal</source>
         <comment>osd-stretch</comment>
         <extracomment>OSD message indicating the Stretch Mode has been set to Horizontal.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../VBackend/VBackend.cpp" line="232"/>
+        <location filename="../VBackend/VBackend.cpp" line="267"/>
         <source>Vertical</source>
         <comment>osd-stretch</comment>
         <extracomment>OSD message indicating the Stretch Mode has been set to Vertical.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../VBackend/VBackend.cpp" line="237"/>
+        <location filename="../VBackend/VBackend.cpp" line="272"/>
         <source>Full</source>
         <comment>osd-stretch</comment>
         <extracomment>OSD message indicating the Stretch Mode has been set to Full.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../VBackend/VBackend.cpp" line="270"/>
+        <location filename="../VBackend/VBackend.cpp" line="298"/>
         <source>Fast Blur enabled.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating Fast Blur has been enabled.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../VBackend/VBackend.cpp" line="275"/>
+        <location filename="../VBackend/VBackend.cpp" line="303"/>
         <source>Fast Blur disabled.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating Fast Blur has been disabled.</extracomment>
