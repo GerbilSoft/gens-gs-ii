@@ -321,7 +321,7 @@ class VBackend : public QWidget
 		 * @return Number of messages remaining in the OSD queue.
 		 */
 		int osd_process_MsgTimer(void)
-			{ return osd_process_int(false); }
+			{ return osd_process_int(true); }
 		friend class MsgTimer;
 	protected:
 		/**
