@@ -29,8 +29,9 @@
 namespace GensQt4
 {
 
-FpsManager::FpsManager()
-	: m_fpsAvg(0.0)
+FpsManager::FpsManager(QObject *parent)
+	: QObject(parent)
+	, m_fpsAvg(0.0)
 	, m_fpsPtr(0)
 {
 	// Reset the FPS array.
@@ -50,6 +51,9 @@ void FpsManager::reset(void)
 	// Reset the FPS array.
 	for (size_t i = 0; i < (sizeof(m_fps)/sizeof(m_fps[0])); i++)
 		m_fps[i] = -1.0;
+	
+	// Average FPS has been updated.
+	emit updated(m_fpsAvg);
 }
 
 /**
@@ -77,6 +81,9 @@ void FpsManager::push(double fps)
 		m_fpsAvg = 0.0;
 	else
 		m_fpsAvg = (sum / (double)count);
+	
+	// Average FPS has been updated.
+	emit updated(m_fpsAvg);
 }
 
 }

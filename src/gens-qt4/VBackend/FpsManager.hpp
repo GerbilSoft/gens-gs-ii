@@ -24,14 +24,22 @@
 #ifndef __GENS_QT4_VBACKEND_FPSMANAGER_HPP__
 #define __GENS_QT4_VBACKEND_FPSMANAGER_HPP__
 
+#include <QtCore/QObject>
+
 namespace GensQt4
 {
 
-class FpsManager
+class FpsManager : public QObject
 {
+	Q_OBJECT
+	
 	public:
-		FpsManager();
-		
+		FpsManager(QObject *parent = 0);
+	
+	private:
+		Q_DISABLE_COPY(FpsManager);
+	
+	public:
 		/**
 		 * Reset the FPS manager.
 		 */
@@ -44,10 +52,17 @@ class FpsManager
 		void push(double fps);
 		
 		/**
-		 * Get the current FPS.
-		 * @return Current FPS.
+		 * Get the current average FPS.
+		 * @return Current average FPS.
 		 */
 		double get(void);
+	
+	signals:
+		/**
+		 * The FPS manager has been updated.
+		 * @param fps New average FPS.
+		 */
+		void updated(double fps);
 	
 	private:
 		double m_fps[8];
@@ -56,8 +71,8 @@ class FpsManager
 };
 
 /**
- * Get the current FPS.
- * @return Current FPS.
+ * Get the current average FPS.
+ * @return Current average FPS.
  */
 inline double FpsManager::get(void)
 	{ return m_fpsAvg; }

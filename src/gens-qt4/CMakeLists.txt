@@ -159,6 +159,7 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	IdleThread.hpp
 	GensQApplication.hpp
 	VBackend/VBackend.hpp
+	VBackend/FpsManager.hpp
 	VBackend/GLBackend.hpp
 	VBackend/GensQGLWidget.hpp
 	VBackend/GensQGLWidget_p.hpp
