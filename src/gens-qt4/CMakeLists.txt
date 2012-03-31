@@ -119,7 +119,6 @@ SET(gens-qt4_COMMON_SRCS
 	VBackend/GLShader.cpp
 	VBackend/GLShaderPaused.cpp
 	VBackend/GLShaderFastBlur.cpp
-	VBackend/MsgTimer.cpp
 	Audio/ARingBuffer.cpp
 	ZipSelectDialog.cpp
 	EmuManager_qEmu.cpp
@@ -165,7 +164,6 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	VBackend/GensQGLWidget_p.hpp
 	CtrlConfigWindow.hpp
 	EmuManager.hpp
-	VBackend/MsgTimer.hpp
 	ZipSelectDialog.hpp
 	Screenshot.hpp
 	GeneralConfigWindow.hpp

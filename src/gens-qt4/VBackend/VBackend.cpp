@@ -35,9 +35,6 @@
 #include "libgens/Effects/FastBlur.hpp"
 #include "libgens/Util/Timing.hpp"
 
-// Message timer.
-#include "MsgTimer.hpp"
-
 // gqt4_main.hpp has GensConfig.
 #include "gqt4_main.hpp"
 
@@ -130,14 +127,14 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	gqt4_cfg->registerChangeNotification(QLatin1String("OSD/msgColor"),
 					this, SLOT(osdMsgColor_changed_slot(QVariant)));
 	
-	// Create the message timer.
-	m_msgTimer = new MsgTimer(this, this);
+	// Connect the message timer to the OSD message timer slot.
+	connect(&m_msgTimer, SIGNAL(timeout()),
+		this, SLOT(osd_process_MsgTimer_slot()));
 }
 
 VBackend::~VBackend()
 {
 	// Delete internal objects.
-	delete m_msgTimer;	// Message timer.
 	
 	// Internal screen buffer.
 	if (m_intScreen)
@@ -238,7 +235,7 @@ void VBackend::setPaused(paused_t newPaused)
 	
 	// If emulation isn't running or emulation is paused, start the message timer.
 	if (!isRunning() || isPaused())
-		m_msgTimer->start();
+		m_msgTimer.start(MSGTIMER_INTERVAL);
 }
 
 
@@ -425,7 +422,7 @@ void VBackend::setEmuContext(LibGens::EmuContext *newEmuContext)
 	// If there's no emulation context or emulation is paused,
 	// start the message timer.
 	if (!newEmuContext || isPaused())
-		m_msgTimer->start();
+		m_msgTimer.start(MSGTIMER_INTERVAL);
 }
 
 }

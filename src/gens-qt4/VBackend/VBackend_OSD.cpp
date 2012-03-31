@@ -26,9 +26,6 @@
 // C includes. (C++ namespace)
 #include <cstdio>
 
-// Message timer.
-#include "MsgTimer.hpp"
-
 namespace GensQt4
 {
 
@@ -96,7 +93,7 @@ void VBackend::osd_printqs(const int duration, const QString& msg, bool forceVbD
 				m_updateOnNextOsdProcess = true;
 				
 				// Start the message timer.
-				m_msgTimer->start();
+				m_msgTimer.start(MSGTIMER_INTERVAL);
 			}
 		}
 		return;
@@ -122,7 +119,7 @@ void VBackend::osd_printqs(const int duration, const QString& msg, bool forceVbD
 		m_updateOnNextOsdProcess = true;
 		
 		// Start the message timer (with a quick initial interval).
-		m_msgTimer->startQuick();
+		m_msgTimer.start(MSGTIMER_INTERVAL_QUICK);
 	}
 }
 
@@ -191,7 +188,7 @@ void VBackend::osd_show_preview(int duration, const QImage& img)
 			m_updateOnNextOsdProcess = true;
 			
 			// Start the message timer (with a quick initial interval).
-			m_msgTimer->startQuick();
+			m_msgTimer.start(MSGTIMER_INTERVAL_QUICK);
 		}
 	}
 }
@@ -268,7 +265,7 @@ int VBackend::recSetStatus(const QString& component, bool isRecording)
 		m_updateOnNextOsdProcess = true;
 		
 		// Start the message timer (with a quick initial interval).
-		m_msgTimer->startQuick();
+		m_msgTimer.start(MSGTIMER_INTERVAL_QUICK);
 	}
 	
 	return 0;
@@ -308,7 +305,7 @@ int VBackend::recSetDuration(const QString& component, int duration)
 		m_updateOnNextOsdProcess = true;
 		
 		// Start the message timer (with a quick initial interval).
-		m_msgTimer->startQuick();
+		m_msgTimer.start(MSGTIMER_INTERVAL_QUICK);
 	}
 	
 	return 0;
@@ -496,6 +493,25 @@ int VBackend::osd_process_int(bool updateVBackend)
 	// Emulation is still either paused or not running.
 	// Return the number of messages remaining.
 	return msgRemaining;
+}
+
+/**
+ * Process the OSD queue. (MsgTimer only)
+ */
+void VBackend::osd_process_MsgTimer_slot(void)
+{
+	int msgRemaining = osd_process_int(true);
+	
+	if (msgRemaining <= 0)
+	{
+		// No more messages.
+		// Stop the timer.
+		m_msgTimer.stop();
+		return;
+	}
+	
+	// Make sure the timer is using the normal interval now.
+	m_msgTimer.setInterval(MSGTIMER_INTERVAL);
 }
 
 }

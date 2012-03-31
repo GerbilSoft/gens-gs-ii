@@ -32,6 +32,7 @@
 #include <QtCore/QList>
 #include <QtCore/QVariant>
 #include <QtCore/QMutex>
+#include <QtCore/QTimer>
 #include <QtGui/QWidget>
 #include <QtGui/QColor>
 
@@ -55,9 +56,6 @@
 namespace GensQt4
 {
 
-// Forward declaration for MsgTimer.
-// Can't #include "MsgTimer.hpp" due to circular dependencies.
-class MsgTimer;
 class KeyHandlerQt;
 
 // TODO: Move a ton of stuff into a private class?
@@ -282,7 +280,10 @@ class VBackend : public QWidget
 	
 	private:
 		// Message timer.
-		MsgTimer *m_msgTimer;
+		QTimer m_msgTimer;
+		// 100 ms is a decent interval when emulation isn't running.
+		static const int MSGTIMER_INTERVAL = 100;
+		static const int MSGTIMER_INTERVAL_QUICK = 20;
 		
 		/** Onscreen Display. **/
 		
@@ -315,14 +316,12 @@ class VBackend : public QWidget
 		int osd_process_int(bool updateVBackend);
 		bool m_updateOnNextOsdProcess;
 	
-	private:
+	private slots:
 		/**
 		 * Process the OSD queue. (MsgTimer only)
-		 * @return Number of messages remaining in the OSD queue.
 		 */
-		int osd_process_MsgTimer(void)
-			{ return osd_process_int(true); }
-		friend class MsgTimer;
+		void osd_process_MsgTimer_slot(void);
+	
 	protected:
 		/**
 		 * Process the OSD queue. (Subclasses only)
