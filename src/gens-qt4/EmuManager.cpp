@@ -819,6 +819,11 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 		{
 			thisTime = LibGens::Timing::GetTimeD();
 			timeDiff = (thisTime - m_lastTime);
+			
+			// NOTE: Putting usleep(0) here reduces CPU usage,
+			// but increases stuttering.
+			// TODO: Fix framedropping entirely.
+			//usleep(0);
 		} while (timeDiff < frameRate);
 		
 		// TODO: This causes some issues...
