@@ -8,6 +8,7 @@ SET(TRANSLATION_FILES
 	gens-qt4_en.ts
 	gens-qt4_en_GB.ts
 	gens-qt4_ja.ts
+	gens-qt4_fr.ts
 	)
 QT4_ADD_TRANSLATION(QM_FILES ${TRANSLATION_FILES})
 
