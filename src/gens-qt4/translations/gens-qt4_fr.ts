@@ -40,24 +40,24 @@
         <translation>Copie interne de %1.</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="403"/>
+        <location filename="../AboutWindow.cpp" line="404"/>
         <source>Compiled using Qt %1.</source>
         <translation>Compilé avec Qt %1.</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="404"/>
+        <location filename="../AboutWindow.cpp" line="405"/>
         <source>Using Qt %1.</source>
         <translation>Utilise Qt %1.</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="409"/>
+        <location filename="../AboutWindow.cpp" line="410"/>
         <source>CPU flags</source>
         <extracomment>CPU flags are extra features found in a CPU, such as SSE.</extracomment>
         <translation>Drapeaux CPU</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="421"/>
-        <location filename="../AboutWindow.cpp" line="439"/>
+        <location filename="../AboutWindow.cpp" line="422"/>
+        <location filename="../AboutWindow.cpp" line="440"/>
         <source>(none)</source>
         <extracomment>Used to indicate no special CPU features were found.
 ----------
@@ -65,104 +65,104 @@ Used to indicate no special CPU features were found.</extracomment>
         <translation>(aucun)</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="444"/>
+        <location filename="../AboutWindow.cpp" line="445"/>
         <source>Timing method</source>
         <extracomment>Timing method: Function used to handle emulation timing.</extracomment>
         <translation>Méthode de synchronisation</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="450"/>
+        <location filename="../AboutWindow.cpp" line="451"/>
         <source>Save directory</source>
         <extracomment>Save directory: Directory where configuration and savestate files are saved.</extracomment>
         <translation>Répertoire des sauvegardes</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="471"/>
+        <location filename="../AboutWindow.cpp" line="472"/>
         <source>OpenGL vendor string</source>
         <extracomment>String identifying the manufacturer of the OpenGL implementation. (e.g. &quot;X.Org R300 Project&quot;)</extracomment>
         <translation>Fournisseur OpenGL</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="473"/>
+        <location filename="../AboutWindow.cpp" line="474"/>
         <source>OpenGL renderer string</source>
         <extracomment>String identifying the specific OpenGL renderer. (e.g. &quot;Gallium 0.4 on ATI RV530&quot;)</extracomment>
         <translation>Renderer OpenGL</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="475"/>
+        <location filename="../AboutWindow.cpp" line="476"/>
         <source>OpenGL version string</source>
         <extracomment>String identifying the OpenGL renderer version. (e.g. &quot;2.1 Mesa 7.11-devel&quot;)</extracomment>
         <translation>Version OpenGL</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="492"/>
+        <location filename="../AboutWindow.cpp" line="493"/>
         <source>GLSL version string</source>
         <extracomment>String identifying the OpenGL Shading Language version. (e.g. &quot;1.20&quot;)</extracomment>
         <translation>Version GLSL</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="526"/>
+        <location filename="../AboutWindow.cpp" line="527"/>
         <source>Using GL extensions</source>
         <extracomment>List what OpenGL extensions are in use.</extracomment>
         <translation>Utilise les extensions GL</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="572"/>
+        <location filename="../AboutWindow.cpp" line="573"/>
         <source>System ANSI code page</source>
         <extracomment>Win32: ANSI code page. (e.g. 1252 for US/English, 932 for Japanese)</extracomment>
         <translation>Code ANSI du système</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="574"/>
+        <location filename="../AboutWindow.cpp" line="575"/>
         <source>System OEM code page</source>
         <extracomment>Win32: OEM code page. (e.g. 437 for US/English)</extracomment>
         <translation>Code EOM du système</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="589"/>
+        <location filename="../AboutWindow.cpp" line="590"/>
         <source>Unknown [GetCPInfoExA() failed]</source>
         <extracomment>GetCPInfoExA() call failed.</extracomment>
         <translation>Inconnu [Échec de GetCPInfoExA]</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="633"/>
+        <location filename="../AboutWindow.cpp" line="634"/>
         <source>Using Unicode strings for Win32 API.</source>
         <extracomment>Win32: Unicode strings are being used. (WinNT)</extracomment>
         <translation>Utilise du texte Unicode pour les API Win32.</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="638"/>
+        <location filename="../AboutWindow.cpp" line="639"/>
         <source>Using ANSI strings for Win32 API.</source>
         <extracomment>Win32: ANSI strings are being used. (Win9x)</extracomment>
         <translation>Utilise ANSI pour les API Win32.</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="477"/>
-        <location filename="../AboutWindow.cpp" line="512"/>
+        <location filename="../AboutWindow.cpp" line="478"/>
+        <location filename="../AboutWindow.cpp" line="513"/>
         <source>(unknown)</source>
         <extracomment>Placeholder used if an OpenGL version string could not be retrieved.</extracomment>
         <translation>(inconnu)</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="462"/>
+        <location filename="../AboutWindow.cpp" line="463"/>
         <source>OpenGL disabled.</source>
         <extracomment>Displayed if Gens/GS II is compiled without OpenGL support.</extracomment>
         <translation>OpenGL désactivé.</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="503"/>
+        <location filename="../AboutWindow.cpp" line="504"/>
         <source>GLEW disabled; no GL extensions supported.</source>
         <extracomment>GL Extension Wrangler support was not compiled in.</extracomment>
         <translation>GLEW désactivé ; pas d&apos;extensions GL supportées.</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="508"/>
+        <location filename="../AboutWindow.cpp" line="509"/>
         <source>GLEW version</source>
         <extracomment>String identifying the GLEW version.</extracomment>
         <translation>Version GLEW</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="521"/>
+        <location filename="../AboutWindow.cpp" line="522"/>
         <source>No GL extensions in use.</source>
         <extracomment>No OpenGL extensions are being used.</extracomment>
         <translation>Aucune extension GL n&apos;est utilisée.</translation>
@@ -201,80 +201,93 @@ Used to indicate no special CPU features were found.</extracomment>
         <translation>Aucun</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="287"/>
+        <location filename="../CtrlConfigWindow.cpp" line="289"/>
         <source>3-button</source>
+        <extracomment>Standard 3-button control pad.</extracomment>
         <translation>3 boutons</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="288"/>
+        <location filename="../CtrlConfigWindow.cpp" line="292"/>
         <source>6-button</source>
+        <extracomment>Sega 6-button &quot;arcade&quot; control pad.</extracomment>
         <translation>6 boutons</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="289"/>
+        <location filename="../CtrlConfigWindow.cpp" line="295"/>
         <source>2-button</source>
+        <extracomment>Sega Master System 2-button control pad.</extracomment>
         <translation>2 boutons</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="290"/>
-        <location filename="../CtrlConfigWindow.cpp" line="316"/>
+        <location filename="../CtrlConfigWindow.cpp" line="298"/>
+        <location filename="../CtrlConfigWindow.cpp" line="336"/>
         <source>Mega Mouse</source>
+        <extracomment>Sega Mega Mouse.
+----------
+Sega Mega Mouse.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="291"/>
+        <location filename="../CtrlConfigWindow.cpp" line="301"/>
         <source>Team Player</source>
+        <extracomment>Sega Team Player. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
         <translatorcomment>Sega Team Player is known as &quot;Multiplayer&quot; in Europe.</translatorcomment>
         <translation>Multiplayer</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="293"/>
+        <location filename="../CtrlConfigWindow.cpp" line="305"/>
         <source>4-Way Play</source>
+        <extracomment>EA 4-Way Play. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="311"/>
+        <location filename="../CtrlConfigWindow.cpp" line="323"/>
         <source>No device connected.</source>
         <translation>Pas d&apos;appareil connecté.</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="313"/>
+        <location filename="../CtrlConfigWindow.cpp" line="327"/>
         <source>3-button gamepad</source>
+        <extracomment>Standard 3-button control pad.</extracomment>
         <translation>Manette 3 boutons</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="314"/>
+        <location filename="../CtrlConfigWindow.cpp" line="330"/>
         <source>6-button gamepad</source>
+        <extracomment>Sega 6-button &quot;arcade&quot; control pad.</extracomment>
         <translation>Manette 6 boutons</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="315"/>
+        <location filename="../CtrlConfigWindow.cpp" line="333"/>
         <source>2-button gamepad (SMS)</source>
+        <extracomment>Sega Master System 2-button control pad.</extracomment>
         <translation>Manette 2 boutons (SMS)</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="317"/>
+        <location filename="../CtrlConfigWindow.cpp" line="339"/>
         <source>Sega Team Player</source>
+        <extracomment>Sega Team Player. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
         <translation>Sega Team Player</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="319"/>
+        <location filename="../CtrlConfigWindow.cpp" line="343"/>
         <source>EA 4-Way Play</source>
+        <extracomment>EA 4-Way Play. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
         <translation>EA 4-Way Play</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="336"/>
+        <location filename="../CtrlConfigWindow.cpp" line="360"/>
         <source>Port %1</source>
         <translation>Port %1</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="343"/>
-        <location filename="../CtrlConfigWindow.cpp" line="351"/>
+        <location filename="../CtrlConfigWindow.cpp" line="367"/>
+        <location filename="../CtrlConfigWindow.cpp" line="375"/>
         <source>Team Player %1, Port %2</source>
         <translation>Team Player %1, Port %2</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="359"/>
+        <location filename="../CtrlConfigWindow.cpp" line="383"/>
         <source>4-Way Play, Port %1</source>
         <translation>Multitap 4 joueurs, Port %1</translation>
     </message>
@@ -1486,6 +1499,7 @@ and Genesis 2 (MK-1631) consoles.
 
 The Genesis 3 (MK-1641) does not show this bug, so disabling
 this option will more accurately simulate the Genesis 3.</source>
+        <extracomment>&quot;Genesis 3&quot; is a specific model released in the US only. Do not translate it as &quot;Mega Drive&quot;.</extracomment>
         <translation>Si activé, des déformations d&apos;affichages seront visibles dans le coin haut-gauche lorsque l&apos;écran scroll à la fois dans les sens horizontaux et verticaux. Ce phénomène est visible sur les consoles Megadrive 1 (MK-1601) et Megadrive 2 (MK-1631).
 
 La Genesis 3 n&apos;a pas ce bug, donc désactiver cette option permettra de s&apos;approcher du rendu vidéo d&apos;une Genesis 3.</translation>

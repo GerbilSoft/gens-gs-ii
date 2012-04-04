@@ -223,71 +223,80 @@ Used to indicate no special CPU features were found.</extracomment>
         <translation>6ボタン</translation>
     </message>
     <message>
+        <location filename="../CtrlConfigWindow.cpp" line="295"/>
         <source>2-button</source>
-        <translation type="obsolete">2ボタン</translation>
+        <extracomment>Sega Master System 2-button control pad.</extracomment>
+        <translation>2ボタン</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="298"/>
-        <location filename="../CtrlConfigWindow.cpp" line="335"/>
+        <location filename="../CtrlConfigWindow.cpp" line="336"/>
         <source>Mega Mouse</source>
-        <extracomment>Sega Master System 2-button control pad. Sega Mega Mouse.</extracomment>
+        <extracomment>Sega Mega Mouse.
+----------
+Sega Mega Mouse.</extracomment>
         <translation>セガマウス</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="305"/>
+        <location filename="../CtrlConfigWindow.cpp" line="301"/>
         <source>Team Player</source>
-        <extracomment>Sega Team Player. NOTE: This is a specific brand name. Only change it if the Sega Team Player was released using a different name in your region, e.g. &quot;Multiplayer&quot; in Europe.</extracomment>
+        <extracomment>Sega Team Player. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
         <translation>セガタップ</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="312"/>
+        <location filename="../CtrlConfigWindow.cpp" line="305"/>
         <source>4-Way Play</source>
-        <extracomment>EA 4-Way Play. NOTE: This is a specific brand name. Only change it if the EA 4-Way Play was released using a different name in your region.</extracomment>
+        <extracomment>EA 4-Way Play. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
         <translation>4ウェイプレー</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="330"/>
+        <location filename="../CtrlConfigWindow.cpp" line="323"/>
         <source>No device connected.</source>
         <translation>デバイスが接続しなかった.</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="332"/>
+        <location filename="../CtrlConfigWindow.cpp" line="327"/>
         <source>3-button gamepad</source>
+        <extracomment>Standard 3-button control pad.</extracomment>
         <translation>3ボタンゲームパッド</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="333"/>
+        <location filename="../CtrlConfigWindow.cpp" line="330"/>
         <source>6-button gamepad</source>
+        <extracomment>Sega 6-button &quot;arcade&quot; control pad.</extracomment>
         <translation>6ボタンゲームパッド</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="334"/>
+        <location filename="../CtrlConfigWindow.cpp" line="333"/>
         <source>2-button gamepad (SMS)</source>
+        <extracomment>Sega Master System 2-button control pad.</extracomment>
         <translation>2ボタンゲームパッド(SMS)</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="336"/>
+        <location filename="../CtrlConfigWindow.cpp" line="339"/>
         <source>Sega Team Player</source>
+        <extracomment>Sega Team Player. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
         <translation>セガタップ</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="338"/>
+        <location filename="../CtrlConfigWindow.cpp" line="343"/>
         <source>EA 4-Way Play</source>
+        <extracomment>EA 4-Way Play. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
         <translation>EA 4ウェイプレー</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="355"/>
+        <location filename="../CtrlConfigWindow.cpp" line="360"/>
         <source>Port %1</source>
         <translation>ポート %1</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="362"/>
-        <location filename="../CtrlConfigWindow.cpp" line="370"/>
+        <location filename="../CtrlConfigWindow.cpp" line="367"/>
+        <location filename="../CtrlConfigWindow.cpp" line="375"/>
         <source>Team Player %1, Port %2</source>
         <translation>セガタップ %1, ポート %2</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="378"/>
+        <location filename="../CtrlConfigWindow.cpp" line="383"/>
         <source>4-Way Play, Port %1</source>
         <translation>4ウェイプレーポート %1</translation>
     </message>
