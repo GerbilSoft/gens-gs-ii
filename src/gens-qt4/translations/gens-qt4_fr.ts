@@ -219,17 +219,18 @@ Used to indicate no special CPU features were found.</extracomment>
         <location filename="../CtrlConfigWindow.cpp" line="290"/>
         <location filename="../CtrlConfigWindow.cpp" line="316"/>
         <source>Mega Mouse</source>
-        <translation>Mega Mouse</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="291"/>
         <source>Team Player</source>
-        <translation>Team Player</translation>
+        <translatorcomment>Sega Team Player is known as &quot;Multiplayer&quot; in Europe.</translatorcomment>
+        <translation>Multiplayer</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="293"/>
         <source>4-Way Play</source>
-        <translation>Multitap 4 joueurs</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="311"/>
@@ -300,72 +301,72 @@ Used to indicate no special CPU features were found.</extracomment>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="191"/>
         <source>Port &amp;1</source>
-        <translation>Port &amp;1</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="199"/>
         <source>Port &amp;2</source>
-        <translation>Port &amp;2</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="207"/>
         <source>TP-1A</source>
-        <translation>TP-1A</translation>
+        <translation>MP-1A</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="215"/>
         <source>TP-1B</source>
-        <translation>TP-1B</translation>
+        <translation>MP-1B</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="223"/>
         <source>TP-1C</source>
-        <translation>TP-1C</translation>
+        <translation>MP-1C</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="231"/>
         <source>TP-1D</source>
-        <translation>TP-1D</translation>
+        <translation>MP-1D</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="239"/>
         <source>TP-2A</source>
-        <translation>TP-2A</translation>
+        <translation>MP-2A</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="247"/>
         <source>TP-2B</source>
-        <translation>TP-2B</translation>
+        <translation>MP-2B</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="255"/>
         <source>TP-2C</source>
-        <translation>TP-2C</translation>
+        <translation>MP-2C</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="263"/>
         <source>TP-2D</source>
-        <translation>TP-2D</translation>
+        <translation>MP-2D</translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="271"/>
         <source>4WP-A</source>
-        <translation>Multitap-A</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="279"/>
         <source>4WP-B</source>
-        <translation>Multitap-B</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="287"/>
         <source>4WP-C</source>
-        <translation>Multitap-C</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../ui/CtrlConfigWindow.ui" line="295"/>
         <source>4WP-D</source>
-        <translation>Multitap-D</translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -378,12 +379,12 @@ Used to indicate no special CPU features were found.</extracomment>
     <message>
         <location filename="../EmuManager.cpp" line="185"/>
         <source>Sega Genesis ROM images</source>
-        <translation>ROM Sega MegaDrive</translation>
+        <translation>ROM Sega Megadrive</translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="198"/>
         <source>Sega Genesis / 32X ROMs; Sega CD disc images</source>
-        <translation>ROMs Sega MegaDrive / 32X ; Images disque MegaCD</translation>
+        <translation>ROMs Sega Megadrive / 32X ; Images disque Mega-CD</translation>
     </message>
     <message>
         <location filename="../EmuManager.cpp" line="201"/>
@@ -450,91 +451,91 @@ Used to indicate no special CPU features were found.</extracomment>
         <source>Genesis</source>
         <comment>rom-region</comment>
         <extracomment>MD ROM region is US/NTSC. System name should be the equivalent of &quot;Genesis&quot;.</extracomment>
-        <translation>Megadrive</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="92"/>
         <source>Mega Drive</source>
         <comment>rom-region</comment>
         <extracomment>MD ROM region is not US/NTSC. System name should be the equivalent of &quot;Mega Drive&quot;.</extracomment>
-        <translation>MegaDrive</translation>
+        <translation>Megadrive</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="99"/>
         <source>Sega CD</source>
         <comment>rom-region</comment>
         <extracomment>MCD disc region is US/NTSC. System name should be the equivalent of &quot;Sega CD&quot;.</extracomment>
-        <translation>Sega CD</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="104"/>
         <source>Mega CD</source>
         <comment>rom-region</comment>
         <extracomment>MCD disc region is not US/NTSC. System name should be the equivalent of &quot;Mega CD&quot;.</extracomment>
-        <translation>MegaCD</translation>
+        <translation>Mega-CD</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="113"/>
         <source>Sega 32X</source>
         <comment>rom-region</comment>
         <extracomment>32X ROM is US/NTSC. System name should be the equivalent of &quot;Sega 32X&quot;.</extracomment>
-        <translation>Sega 32X</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="116"/>
         <source>Mega Drive 32X</source>
         <comment>rom-region</comment>
         <extracomment>32X ROM is EU/PAL. System name should be the equivalent of &quot;Mega Drive 32X&quot;.</extracomment>
-        <translation>MegaDrive 32X</translation>
+        <translation>Megadrive 32X</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="120"/>
         <source>Super 32X</source>
         <comment>rom-region</comment>
         <extracomment>32X ROM is JP or ASIA. System name should be the equivalent of &quot;Super 32X&quot;.</extracomment>
-        <translation>32X</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="127"/>
         <source>Sega CD 32X</source>
         <comment>rom-region</comment>
         <extracomment>Sega CD 32X disc region is US/NTSC. System name should be the equivalent of &quot;Sega CD 32X&quot;.</extracomment>
-        <translation>Sega CD 32X</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="132"/>
         <source>Mega CD 32X</source>
         <comment>rom-region</comment>
         <extracomment>Sega CD 32X disc region is US/NTSC. System name should be the equivalent of &quot;Mega CD 32X&quot;.</extracomment>
-        <translation>MegaCD 32X</translation>
+        <translation>Mega-CD 32X</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="137"/>
         <source>Master System</source>
         <comment>rom-region</comment>
         <extracomment>Master System. (No localized names yet...)</extracomment>
-        <translation>Master System</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="141"/>
         <source>Game Gear</source>
         <comment>rom-region</comment>
         <extracomment>Game Gear. (No localized names yet...)</extracomment>
-        <translation>Game Gear</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="145"/>
         <source>SG-1000</source>
         <comment>rom-region</comment>
         <extracomment>SG-1000. (No localized names yet...)</extracomment>
-        <translation>SG-1000</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="149"/>
         <source>Pico</source>
         <comment>rom-region</comment>
         <extracomment>Pico. (No localized names yet...)</extracomment>
-        <translation>Pico</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="171"/>
@@ -548,49 +549,49 @@ Used to indicate no special CPU features were found.</extracomment>
         <source>Sega CD</source>
         <comment>local-region</comment>
         <extracomment>Localized name of Sega CD.</extracomment>
-        <translation>Sega CD</translation>
+        <translation>Mega-CD</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="179"/>
         <source>Sega 32X</source>
         <comment>local-region</comment>
         <extracomment>Localized name of Sega 32X.</extracomment>
-        <translation>Sega 32X</translation>
+        <translation>Megadrive 32X</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="183"/>
         <source>Sega CD 32X</source>
         <comment>local-region</comment>
         <extracomment>Localized name of Sega CD 32X.</extracomment>
-        <translation>Sega CD 32X</translation>
+        <translation>Mega-CD 32X</translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="187"/>
         <source>Master System</source>
         <comment>local-region</comment>
         <extracomment>Localized name of Master System.</extracomment>
-        <translation>Master System</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="191"/>
         <source>Game Gear</source>
         <comment>local-region</comment>
         <extracomment>Localized name of Game Gear.</extracomment>
-        <translation>Game Gear</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="195"/>
         <source>SG-1000</source>
         <comment>local-region</comment>
         <extracomment>Localized name of SG-1000.</extracomment>
-        <translation>SG-1000</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="199"/>
         <source>Pico</source>
         <comment>local-region</comment>
         <extracomment>Localized name of Pico.</extracomment>
-        <translation>Pico</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="221"/>
@@ -604,21 +605,21 @@ Used to indicate no special CPU features were found.</extracomment>
         <source>Super Magic Drive</source>
         <comment>rom-format</comment>
         <extracomment>Interleaved ROM dump from a Super Magic Drive.</extracomment>
-        <translation>Super Magic Drive</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="229"/>
         <source>Super Magic Drive (split)</source>
         <comment>rom-format</comment>
         <extracomment>Split interleaved ROM dump from a Super Magic Drive.</extracomment>
-        <translation>Super Magic Drive (split)</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="233"/>
         <source>Multi Game Doctor</source>
         <comment>rom-format</comment>
         <extracomment>Interleaved ROM dump from a Multi Game Doctor.</extracomment>
-        <translation>Multi Game Doctor</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../EmuManager_str.cpp" line="237"/>
@@ -922,7 +923,7 @@ OSD message indicating the auto-detected ROM region.</extracomment>
         <location filename="../GeneralConfigWindow.cpp" line="925"/>
         <location filename="../GeneralConfigWindow.cpp" line="939"/>
         <source>Sega CD (U)</source>
-        <translation>SegaCD (U)</translation>
+        <translation>Sega CD (U)</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="190"/>
@@ -930,7 +931,7 @@ OSD message indicating the auto-detected ROM region.</extracomment>
         <location filename="../GeneralConfigWindow.cpp" line="927"/>
         <location filename="../GeneralConfigWindow.cpp" line="956"/>
         <source>Mega CD (E)</source>
-        <translation>MegaCD (E)</translation>
+        <translation>Mega-CD (E)</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="191"/>
@@ -938,7 +939,7 @@ OSD message indicating the auto-detected ROM region.</extracomment>
         <location filename="../GeneralConfigWindow.cpp" line="929"/>
         <location filename="../GeneralConfigWindow.cpp" line="973"/>
         <source>Mega CD (J)</source>
-        <translation>MegaCD (J)</translation>
+        <translation>Mega-CD (J)</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="192"/>
@@ -946,7 +947,7 @@ OSD message indicating the auto-detected ROM region.</extracomment>
         <location filename="../GeneralConfigWindow.cpp" line="931"/>
         <location filename="../GeneralConfigWindow.cpp" line="990"/>
         <source>Mega CD (Asia)</source>
-        <translation>MegaCD (Asie)</translation>
+        <translation>Mega-CD (Asie)</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="198"/>
@@ -986,7 +987,7 @@ OSD message indicating the auto-detected ROM region.</extracomment>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="702"/>
         <source>Sega CD Boot ROM images</source>
-        <translation>Image ROM de boot SegaCD</translation>
+        <translation>Image ROM de boot Mega-CD</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="713"/>
@@ -1023,7 +1024,7 @@ OSD message indicating the auto-detected ROM region.</extracomment>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="796"/>
         <source>Multi-file ROM archives are not currently supported for Sega CD Boot ROMs.</source>
-        <translation>Les archives contenant plusieurs fichiers ne sont actuellement pas supportées pour le MegaCD.</translation>
+        <translation>Les archives contenant plusieurs fichiers ne sont actuellement pas supportées pour le Mega-CD.</translation>
     </message>
     <message>
         <location filename="../GeneralConfigWindow.cpp" line="807"/>
@@ -1485,9 +1486,9 @@ and Genesis 2 (MK-1631) consoles.
 
 The Genesis 3 (MK-1641) does not show this bug, so disabling
 this option will more accurately simulate the Genesis 3.</source>
-        <translation>Si activé, des déformations d&apos;affichages seront visibles dans le coin haut-gauche lorsque l&apos;écran scroll à la fois dans les sens horizontaux et verticaux. Ce phénomène est visible sur les consoles Megadrive 1 (MK-1601) et MegaDrive 2 (MK-1631).
+        <translation>Si activé, des déformations d&apos;affichages seront visibles dans le coin haut-gauche lorsque l&apos;écran scroll à la fois dans les sens horizontaux et verticaux. Ce phénomène est visible sur les consoles Megadrive 1 (MK-1601) et Megadrive 2 (MK-1631).
 
-La MegaDrive 3 n&apos;a pas ce bug, donc désactiver cette option permettra de s&apos;approcher du rendu vidéo d&apos;une MegaDrive 3.</translation>
+La Genesis 3 n&apos;a pas ce bug, donc désactiver cette option permettra de s&apos;approcher du rendu vidéo d&apos;une Genesis 3.</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="642"/>
@@ -1505,8 +1506,8 @@ hacks will break in emulators that handle this correctly.
 If you want to play one of these hacks, enable this option.
 Be warned that it may break commercial games and other
 programs that depend on the correct VDP behavior.</source>
-        <translation>Le VDP de la MegaDrive contient un bug, pour lequel chaque tranfert DMA
-avec un longueur de 0 se traduit par un transfert de 138KB. Les anciennes
+        <translation>Le VDP de la Megadrive contient un bug, pour lequel chaque tranfert DMA
+avec un longueur de 0 se traduit par un transfert de 128 Ko. Les anciennes
 versions de Gens ne géraient pas ceci correctement, et ignoraient simplement
 ces transferts de taille nulle. Quelques hacks de jeux utilisent cette fonction
 incorrectement, ceux-ci ne fonctionnent donc plus dans les émulateurs gérant
@@ -1564,7 +1565,8 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="1223"/>
         <source>Sega &amp;CD</source>
-        <translation>Sega&amp;CD</translation>
+        <translatorcomment>Sega CD is known as Mega CD in Europe.</translatorcomment>
+        <translation>Mega-&amp;CD</translation>
     </message>
     <message>
         <location filename="../ui/GeneralConfigWindow.ui" line="883"/>
@@ -1764,21 +1766,21 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
         <source>B</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: B button.</extracomment>
-        <translation>B</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../widgets/GensCtrlCfgWidget.cpp" line="288"/>
         <source>C</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: C button.</extracomment>
-        <translation>C</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../widgets/GensCtrlCfgWidget.cpp" line="292"/>
         <source>A</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: A button.</extracomment>
-        <translation>A</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../widgets/GensCtrlCfgWidget.cpp" line="296"/>
@@ -1793,42 +1795,42 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
         <source>Z</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: Z button.</extracomment>
-        <translation>Z</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../widgets/GensCtrlCfgWidget.cpp" line="304"/>
         <source>Y</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: Y button.</extracomment>
-        <translation>Y</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../widgets/GensCtrlCfgWidget.cpp" line="308"/>
         <source>X</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: X button.</extracomment>
-        <translation>X</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../widgets/GensCtrlCfgWidget.cpp" line="312"/>
         <source>Mode</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: MODE button.</extracomment>
-        <translation>Mode</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../widgets/GensCtrlCfgWidget.cpp" line="317"/>
         <source>1</source>
         <comment>controller-sms-gg</comment>
         <extracomment>SMS/Game Gear: 1 button.</extracomment>
-        <translation>1</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../widgets/GensCtrlCfgWidget.cpp" line="321"/>
         <source>2</source>
         <comment>controller-sms-gg</comment>
         <extracomment>SMS/Game Gear: 2 button.</extracomment>
-        <translation>2</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../widgets/GensCtrlCfgWidget.cpp" line="326"/>
@@ -1856,7 +1858,7 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
         <source>Start</source>
         <comment>controller-mouse</comment>
         <extracomment>Sega Mega Mouse: START button.</extracomment>
-        <translation>Start</translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -1881,18 +1883,18 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
         <location filename="../widgets/GensKeySequenceWidget.cpp" line="285"/>
         <location filename="../widgets/GensKeySequenceWidget.cpp" line="290"/>
         <source>Ctrl</source>
-        <translation>Ctrl</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../widgets/GensKeySequenceWidget.cpp" line="286"/>
         <location filename="../widgets/GensKeySequenceWidget.cpp" line="291"/>
         <source>Alt</source>
-        <translation>Alt</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../widgets/GensKeySequenceWidget.cpp" line="287"/>
         <source>Win</source>
-        <translation>Win</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../widgets/GensKeySequenceWidget.cpp" line="288"/>
@@ -1908,7 +1910,7 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
     <message>
         <location filename="../widgets/GensKeySequenceWidget.cpp" line="322"/>
         <source>Input</source>
-        <translation>Input</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../widgets/GensKeySequenceWidget.cpp" line="330"/>
@@ -1956,7 +1958,8 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="49"/>
         <source>Sega C&amp;D Control Panel</source>
-        <translation>&amp;Panneau de Contrôle MegaCD</translation>
+        <translatorcomment>Sega CD is known as Mega CD in Europe.</translatorcomment>
+        <translation>&amp;Panneau de Contrôle Mega-CD</translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="55"/>
@@ -1991,37 +1994,37 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="82"/>
         <source>320x240 (&amp;1x)</source>
-        <translation>320x240 (&amp;1x)</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="83"/>
         <source>640x480 (&amp;2x)</source>
-        <translation>640x480 (&amp;2x)</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="84"/>
         <source>960x720 (&amp;3x)</source>
-        <translation>960x720 (&amp;3x)</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="85"/>
         <source>1280x960 (&amp;4x)</source>
-        <translation>1280x960 (&amp;4x)</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="93"/>
         <source>15-bit (555)</source>
-        <translation>15 bit (555)</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="94"/>
         <source>16-bit (565)</source>
-        <translation>16 bit (565)</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="95"/>
         <source>32-bit (888)</source>
-        <translation>32 bit (888)</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="103"/>
@@ -2061,7 +2064,7 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="119"/>
         <source>&amp;Pause</source>
-        <translation>&amp;Pause</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../actions/GensMenuBar_menus.cpp" line="122"/>
@@ -2164,17 +2167,17 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
     <message>
         <location filename="../GensWindow.cpp" line="385"/>
         <source>Gens/GS II</source>
-        <translation>Gens/GS II</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../GensWindow.cpp" line="386"/>
         <source>dev</source>
-        <translation>dev</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../GensWindow.cpp" line="388"/>
         <source>NO-EMU</source>
-        <translation>NO-EMU</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../GensWindow.cpp" line="395"/>
@@ -2292,7 +2295,8 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
     <message>
         <location filename="../ui/McdControlWindow.ui" line="14"/>
         <source>Sega CD Control Panel</source>
-        <translation>Panneau de configuration MegaCD</translation>
+        <translatorcomment>Sega CD is known as Mega CD in Europe.</translatorcomment>
+        <translation>Panneau de configuration Mega-CD</translation>
     </message>
     <message>
         <location filename="../ui/McdControlWindow.ui" line="20"/>
