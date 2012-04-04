@@ -333,7 +333,7 @@ QString CtrlConfigWindow::GetLongDeviceName(LibGens::IoBase::IoType devType)
 			return tr("2-button gamepad (SMS)");
 		case IoBase::IOT_MEGA_MOUSE:
 			//: Sega Mega Mouse.
-			return tr("Sega Mega Mouse");
+			return tr("Mega Mouse");
 		case IoBase::IOT_TEAMPLAYER:
 			//: Sega Team Player. (Specific brand name; only modify if it's different in your region!)
 			return tr("Sega Team Player");
