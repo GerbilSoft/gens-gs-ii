@@ -267,7 +267,7 @@ Sega Mega Mouse.</extracomment>
         <location filename="../CtrlConfigWindow.cpp" line="339"/>
         <source>Sega Team Player</source>
         <extracomment>Sega Team Player. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
-        <translation>Sega Team Player</translation>
+        <translation>Sega Multiplayer</translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="343"/>
