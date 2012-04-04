@@ -330,7 +330,7 @@ QString CtrlConfigWindow::GetLongDeviceName(LibGens::IoBase::IoType devType)
 			return tr("6-button gamepad");
 		case IoBase::IOT_2BTN:
 			//: Sega Master System 2-button control pad.
-			return tr("2-button gamepad");
+			return tr("2-button gamepad (SMS)");
 		case IoBase::IOT_MEGA_MOUSE:
 			//: Sega Mega Mouse.
 			return tr("Sega Mega Mouse");
