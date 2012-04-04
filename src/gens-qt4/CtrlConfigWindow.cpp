@@ -284,13 +284,32 @@ QString CtrlConfigWindow::GetShortDeviceName(LibGens::IoBase::IoType devType)
 		default:
 			return tr("None");
 		
-		case IoBase::IOT_3BTN:		return tr("3-button");
-		case IoBase::IOT_6BTN:		return tr("6-button");
-		case IoBase::IOT_2BTN:		return tr("2-button");
-		case IoBase::IOT_MEGA_MOUSE:	return tr("Mega Mouse");
-		case IoBase::IOT_TEAMPLAYER:	return tr("Team Player");
-		case IoBase::IOT_4WP_MASTER:	/* see below */
-		case IoBase::IOT_4WP_SLAVE:	return tr("4-Way Play");
+		case IoBase::IOT_3BTN:
+			//: Standard 3-button control pad.
+			return tr("3-button");
+		case IoBase::IOT_6BTN:
+			//: Sega 6-button "arcade" control pad.
+			return tr("6-button");
+		case IoBase::IOT_2BTN:
+			//: Sega Master System 2-button control pad.
+			// return tr("2-button");
+		case IoBase::IOT_MEGA_MOUSE:
+			//: Sega Mega Mouse.
+			return tr("Mega Mouse");
+		case IoBase::IOT_TEAMPLAYER:
+			//: Sega Team Player.
+			//: NOTE: This is a specific brand name.
+			//: Only change it if the Sega Team Player was released
+			//: using a different name in your region,
+			//: e.g. "Multiplayer" in Europe.
+			return tr("Team Player");
+		case IoBase::IOT_4WP_MASTER:	/* fallthrough */
+		case IoBase::IOT_4WP_SLAVE:
+			//: EA 4-Way Play.
+			//: NOTE: This is a specific brand name.
+			//: Only change it if the EA 4-Way Play was released
+			//: using a different name in your region.
+			return tr("4-Way Play");
 	}
 }
 

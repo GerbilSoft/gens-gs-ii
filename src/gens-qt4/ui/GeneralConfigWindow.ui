@@ -630,7 +630,7 @@ on NTSC models.</string>
               <item>
                <widget class="QCheckBox" name="chkVScrollBug">
                 <property name="toolTip">
-                 <string>If enabled, 2-cell vertical scrolling will exhibit glitches in the
+                 <string extracomment="&quot;Genesis 3&quot; is a specific model released in the US only. Do not translate it as &quot;Mega Drive&quot;.">If enabled, 2-cell vertical scrolling will exhibit glitches in the
 left-most column if horizontal scrolling is used at the same
 time. This matches the behavior seen on Genesis 1 (MK-1601)
 and Genesis 2 (MK-1631) consoles.
