@@ -98,6 +98,7 @@ const GensGS_credits_t GensGS_credits[] =
 	{"*en_GB",			"Overlord"},
 	{"*ja",				"Scarred Sun"},
 	{"*fr",				"Guillaume Bernard"},
+	{"*fr_CA",			"Guillaume Bernard"},
 	{"-", NULL},
 	
 	{"Software Testing",		"AamirM"},
