@@ -259,7 +259,7 @@
 
                         /* Type declarations */
 
-#ifndef OF /* function prototypes */
+#ifndef _Z_OF /* function prototypes */
 #  ifdef STDC
 #    define _Z_OF(args)  args
 #  else
