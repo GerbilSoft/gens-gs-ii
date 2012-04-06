@@ -128,6 +128,7 @@ SET(gens-qt4_COMMON_SRCS
 	GeneralConfigWindow_slots.cpp
 	widgets/GensLineEdit.cpp
 	Config/ConfigStore.cpp
+	Config/ConfigDefaults.cpp
 	Config/PathConfig.cpp
 	Config/CtrlConfig.cpp
 	cdrom/FindCdrom.cpp

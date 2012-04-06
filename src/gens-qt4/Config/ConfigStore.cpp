@@ -48,6 +48,9 @@
 // QtGui includes.
 #include <QtGui/QColor>
 
+// Default settings.
+#include "ConfigDefaults.hpp"
+
 // Key configuration.
 #include "actions/GensKeyConfig.hpp"
 
@@ -65,11 +68,6 @@ class ConfigStorePrivate
 		Q_DISABLE_COPY(ConfigStorePrivate)
 	
 	public:
-		/**
-		 * Initialize the Default Settings QHash.
-		 */
-		static void InitDefaultSettingsHash(void);
-		
 		/**
 		 * Reset all settings to defaults.
 		 */
@@ -192,55 +190,6 @@ class ConfigStorePrivate
 		// TODO: Use const char* for the key instead of QString?
 		QHash<QString, QVariant> settings;
 		
-		// Default configuration filename.
-		static const char DefaultConfigFilename[];
-		
-		// Default settings.
-		struct DefaultSetting
-		{
-			const char *key;
-			const char *value;
-			uint8_t hex_digits;	// If non-zero, saves as hexadecimal with this many digits.
-			
-			/**
-			 * If true, allow a setting to be reset to the current value,
-			 * which will result in property change signals being emitted
-			 * regardless of whether or not the setting has actually changed.
-			 *
-			 * This is useful for e.g. "Savestate/saveSlot", since the user
-			 * should be able to press the key corresponding to the current
-			 * save slot in order to see the preview image for that savestate.
-			 */
-			bool allow_same_value;
-			
-			/**
-			 * If true, don't save this setting in the configuration file.
-			 * This will be used for some "hidden" settings that cannot
-			 * be changed in the GUI, e.g. the option to show the
-			 * VScroll Bug and Zero-Length DMA bug checkboxes in
-			 * GeneralConfigWindow.
-			 */
-			bool no_save;
-			
-			// Parameter validation.
-			enum ValidationType
-			{
-				VT_NONE,		// No validation.
-				VT_BOOL,		// Boolean; normalize to true/false.
-				VT_COLOR,		// QColor.
-				VT_RANGE,		// Integer range.
-				VT_REGIONCODEORDER,	// RegionCodeOrder.
-				
-				VT_MAX
-			};
-			ValidationType validation;
-			int range_min;
-			int range_max;
-		};
-		static const DefaultSetting DefaultSettings[];
-		static QHash<QString, const DefaultSetting*> DefaultSettingsHash;
-		static QMutex MtxDefaultSettingsHash;
-		
 		/**
 		 * Signal mappings.
 		 * Format:
@@ -268,99 +217,6 @@ class ConfigStorePrivate
 };
 
 
-/**
- * Default configuration filename.
- */
-const char ConfigStorePrivate::DefaultConfigFilename[] = "gens-gs-ii.conf";
-
-/**
- * Default settings.
- */
-const ConfigStorePrivate::DefaultSetting ConfigStorePrivate::DefaultSettings[] =
-{
-	/** Super hidden settings! **/
-	{"iKnowWhatImDoingAndWillVoidTheWarranty", "false", 0, false, true, DefaultSetting::VT_BOOL, 0, 0},
-	
-	/** General settings. **/
-	{"autoFixChecksum",		"true", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"autoPause",			"false", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"pauseTint",			"true", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
-	
-	/** Onscreen display. **/
-	{"OSD/fpsEnabled",		"true", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"OSD/fpsColor",		"#ffffff", 0, false, false,	DefaultSetting::VT_COLOR, 0, 0},
-	{"OSD/msgEnabled",		"true", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"OSD/msgColor",		"#ffffff", 0, false, false,	DefaultSetting::VT_COLOR, 0, 0},
-	
-	/** Intro effect. **/
-	// TODO: Use enum constants for range.
-	{"Intro_Effect/introStyle",	"0", 0, false, false,		DefaultSetting::VT_RANGE, 0, 2},	// none
-	{"Intro_Effect/introColor",	"7", 0, false, false,		DefaultSetting::VT_RANGE, 0, 7},	// white
-	
-	/** System. **/
-	// TODO: Use enum constants for range.
-	{"System/regionCode",		"-1", 0, false, false,		DefaultSetting::VT_RANGE, -1, 4},	// LibGens::SysVersion::REGION_AUTO
-	{"System/regionCodeOrder",	"0x4812", 4, false, false,	DefaultSetting::VT_REGIONCODEORDER, 0, 0},	// US, Europe, Japan, Asia
-	
-	/** Sega CD Boot ROMs. **/
-	{"Sega_CD/bootRomUSA", 		"", 0, false, false,		DefaultSetting::VT_NONE, 0, 0},
-	{"Sega_CD/bootRomEUR",		"", 0, false, false,		DefaultSetting::VT_NONE, 0, 0},
-	{"Sega_CD/bootRomJPN",		"", 0, false, false,		DefaultSetting::VT_NONE, 0, 0},
-	{"Sega_CD/bootRomAsia",		"", 0, false, false,		DefaultSetting::VT_NONE, 0, 0},
-	
-	/** External programs. **/
-#ifdef Q_OS_WIN32
-#ifdef __amd64__
-	{"External_Programs/UnRAR", "UnRAR64.dll", 0, false, false,	DefaultSetting::VT_NONE, 0, 0},
-#else
-	{"External_Programs/UnRAR", "UnRAR.dll", 0, false, false,	DefaultSetting::VT_NONE, 0, 0},
-#endif
-#else /* !Q_OS_WIN32 */
-	// TODO: Check for the existence of unrar and rar.
-	// We should:
-	// - Default to unrar if it's found.
-	// - Fall back to rar if it's found but unrar isn't.
-	// - Assume unrar if neither are found.
-	{"External_Programs/UnRAR", "/usr/bin/unrar", 0, false, false, DefaultSetting::VT_NONE, 0, 0},
-#endif /* Q_OS_WIN32 */
-	
-	/** Graphics settings. **/
-	// TODO: Use enum constants for range.
-	{"Graphics/aspectRatioConstraint",	"true", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"Graphics/fastBlur",			"false", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"Graphics/bilinearFilter",		"false", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"Graphics/interlacedMode",		"2", 0, false, false,		DefaultSetting::VT_RANGE, 0, 2}, // INTERLACED_FLICKER
-	{"Graphics/contrast",			"0", 0, false, false,		DefaultSetting::VT_RANGE, -100, 100},
-	{"Graphics/brightness",			"0", 0, false, false,		DefaultSetting::VT_RANGE, -100, 100},
-	{"Graphics/grayscale",			"false", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"Graphics/inverted",			"false", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"Graphics/colorScaleMethod",		"1", 0, false, false,		DefaultSetting::VT_RANGE, 0, 2}, // COLSCALE_FULL
-	{"Graphics/stretchMode",		"1", 0, false, false,		DefaultSetting::VT_RANGE, 0, 3}, // STRETCH_H
-	
-	/** VDP settings. **/
-	{"VDP/borderColorEmulation",	"true", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"VDP/ntscV30Rolling",		"true", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"VDP/zeroLengthDMA",		"false", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"VDP/spriteLimits",		"true", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"VDP/vscrollBug",		"true", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
-	
-	/** Savestates. **/
-	{"Savestates/saveSlot", "0", 0, true, false, DefaultSetting::VT_RANGE, 0, 9},
-	
-	/** GensWindow configuration. **/
-	{"GensWindow/showMenuBar", "true", 0, false, false, DefaultSetting::VT_BOOL, 0, 0},
-	
-	/** Emulation options. (Options menu) **/
-	{"Options/enableSRam", "true", 0, false, false, DefaultSetting::VT_BOOL, 0, 0},
-	
-	/** End of array. **/
-	{NULL, NULL, 0, false, false, DefaultSetting::VT_NONE, 0, 0}
-};
-
-QHash<QString, const ConfigStorePrivate::DefaultSetting*> ConfigStorePrivate::DefaultSettingsHash;
-QMutex ConfigStorePrivate::MtxDefaultSettingsHash;
-
-
 /** ConfigStorePrivate **/
 
 
@@ -372,33 +228,11 @@ ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
 	// TODO: Rework this with the upcoming all-in-one IoManager.
 	q->m_ctrlConfig = new CtrlConfig(q);
 	
-	// Initialize the Default Settings QHash.
-	InitDefaultSettingsHash();
-	
 	// Initialize settings to defaults.
 	reset();
 	
 	// Load the user's settings.
 	load();
-}
-
-
-/**
- * Initialize the Default Settings QHash.
- */
-void ConfigStorePrivate::InitDefaultSettingsHash(void)
-{
-	QMutexLocker mtxLocker(&MtxDefaultSettingsHash);
-	
-	if (!DefaultSettingsHash.isEmpty())
-		return;
-	
-	// Populate the default settings hash.
-	for (const DefaultSetting *def = &DefaultSettings[0]; def->key != NULL; def++)
-	{
-		const QString key = QLatin1String(def->key);
-		DefaultSettingsHash.insert(key, def);
-	}
 }
 
 
@@ -502,7 +336,8 @@ void ConfigStorePrivate::reset(void)
 {
 	// Initialize settings with DefaultSettings.
 	settings.clear();
-	for (const DefaultSetting *def = &DefaultSettings[0]; def->key != NULL; def++)
+	for (const ConfigDefaults::DefaultSetting *def = &ConfigDefaults::DefaultSettings[0];
+	     def->key != NULL; def++)
 	{
 		settings.insert(QLatin1String(def->key),
 				(def->value ? QLatin1String(def->value) : QString()));
@@ -546,23 +381,23 @@ QVariant ConfigStorePrivate::Validate(const QString& name, const QVariant& value
 {
 	// Get the DefaultSetting entry for this property.
 	// TODO: Lock the hash?
-	const DefaultSetting *def = DefaultSettingsHash.value(name, NULL);
+	const ConfigDefaults::DefaultSetting *def = ConfigDefaults::Instance()->get(name);
 	if (!def)
 		return -1;
 	
 	switch (def->validation)
 	{
-		case DefaultSetting::VT_NONE:
+		case ConfigDefaults::DefaultSetting::VT_NONE:
 		default:
 			// No validation required.
 			return value;
 		
-		case DefaultSetting::VT_BOOL:
+		case ConfigDefaults::DefaultSetting::VT_BOOL:
 			if (!value.canConvert(QVariant::Bool))
 				return QVariant();
 			return QVariant(value.toBool());
 		
-		case DefaultSetting::VT_COLOR:
+		case ConfigDefaults::DefaultSetting::VT_COLOR:
 		{
 			QColor color = value.value<QColor>();
 			if (!color.isValid())
@@ -570,7 +405,7 @@ QVariant ConfigStorePrivate::Validate(const QString& name, const QVariant& value
 			return QVariant(color.name());
 		}
 		
-		case DefaultSetting::VT_RANGE:
+		case ConfigDefaults::DefaultSetting::VT_RANGE:
 		{
 			if (!value.canConvert(QVariant::Int))
 				return QVariant();
@@ -580,7 +415,7 @@ QVariant ConfigStorePrivate::Validate(const QString& name, const QVariant& value
 			return QVariant(val);
 		}
 		
-		case DefaultSetting::VT_REGIONCODEORDER:
+		case ConfigDefaults::DefaultSetting::VT_REGIONCODEORDER:
 		{
 			if (!value.canConvert(QVariant::UInt))
 				return QVariant();
@@ -616,7 +451,7 @@ void ConfigStorePrivate::set(const QString& key, const QVariant& value)
 #endif
 	
 	// Get the default value.
-	const DefaultSetting *def = DefaultSettingsHash.value(key, NULL);
+	const ConfigDefaults::DefaultSetting *def = ConfigDefaults::Instance()->get(key);
 	if (!def)
 		return;
 	
@@ -711,10 +546,12 @@ int ConfigStorePrivate::load(const QString& filename)
 	
 	// NOTE: Only known settings will be loaded.
 	settings.clear();
-	settings.reserve(sizeof(DefaultSettings)/sizeof(DefaultSettings[0]));
+	// TODO: Add function to get sizeof(DefaultSettings) from ConfigDefaults.
+	settings.reserve(32);
 	
 	// Load known settings from the configuration file.
-	for (const DefaultSetting *def = &DefaultSettings[0]; def->key != NULL; def++)
+	for (const ConfigDefaults::DefaultSetting *def = &ConfigDefaults::DefaultSettings[0];
+	     def->key != NULL; def++)
 	{
 		const QString key = QLatin1String(def->key);
 		QVariant value = qSettings.value(key, QLatin1String(def->value));
@@ -763,7 +600,8 @@ int ConfigStorePrivate::load(const QString& filename)
  */
 int ConfigStorePrivate::load(void)
 {
-	const QString cfgFilename = (pathConfig->configPath() + QLatin1String(DefaultConfigFilename));
+	const QString cfgFilename = (pathConfig->configPath() +
+					QLatin1String(ConfigDefaults::DefaultConfigFilename));
 	return load(cfgFilename);
 }
 
@@ -815,7 +653,8 @@ int ConfigStorePrivate::save(const QString& filename) const
 	// NOTE: Only known settings will be saved.
 	
 	// Save known settings to the configuration file.
-	for (const DefaultSetting *def = &DefaultSettings[0]; def->key != NULL; def++)
+	for (const ConfigDefaults::DefaultSetting *def = &ConfigDefaults::DefaultSettings[0];
+	     def->key != NULL; def++)
 	{
 		if (def->no_save)
 			continue;
@@ -864,7 +703,8 @@ int ConfigStorePrivate::save(const QString& filename) const
  */
 int ConfigStorePrivate::save(void) const
 {
-	const QString cfgFilename = (pathConfig->configPath() + QLatin1String(DefaultConfigFilename));
+	const QString cfgFilename = (pathConfig->configPath() +
+					QLatin1String(ConfigDefaults::DefaultConfigFilename));
 	return save(cfgFilename);
 }
 
