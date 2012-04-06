@@ -101,6 +101,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
 	SetHeapOptions();
 	
 	QByteArray cmdParam;
+	// TODO: QString::fromWCharArray() seems to break on FraGag's system...
+#if 0
 	wchar_t *cmdW = GetCommandLineW();
 	if (cmdW)
 	{
@@ -108,6 +110,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
 		cmdParam = QString::fromWCharArray(cmdW).toLocal8Bit();
 	}
 	else
+#endif
 	{
 		// ANSI system.
 		cmdParam = QByteArray(lpCmdLine);
