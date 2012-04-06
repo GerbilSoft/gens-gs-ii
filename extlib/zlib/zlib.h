@@ -1651,8 +1651,17 @@ struct gzFile_s {
     z_off64_t pos;
 };
 ZEXTERN int ZEXPORT gzgetc_ _Z_OF((gzFile file));
+/* Gens/GS II: Fix gzgetc macro redefinition if Z_PREFIX is defined. */
+#ifdef Z_PREFIX
+#ifdef z_gzgetc
+#undef z_gzgetc
+#endif
+#define z_gzgetc(g) \
+    ((g)->have ? ((g)->have--, (g)->pos++, *((g)->next)++) : z_gzgetc_(g))
+#else
 #define gzgetc(g) \
     ((g)->have ? ((g)->have--, (g)->pos++, *((g)->next)++) : gzgetc_(g))
+#endif
 
 /* provide 64-bit offset functions if _LARGEFILE64_SOURCE defined, and/or
  * change the regular functions to 64 bits if _FILE_OFFSET_BITS is 64 (if
