@@ -100,26 +100,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
 	// Reference: http://msdn.microsoft.com/en-us/library/bb430720.aspx
 	SetHeapOptions();
 	
-	QByteArray cmdParam;
-	// TODO: QString::fromWCharArray() seems to break on FraGag's system...
-#if 0
-	wchar_t *cmdW = GetCommandLineW();
-	if (cmdW)
-	{
-		// Unicode system.
-		cmdParam = QString::fromWCharArray(cmdW).toLocal8Bit();
-	}
-	else
-#endif
-	{
-		// ANSI system.
-		cmdParam = QByteArray(lpCmdLine);
-	}
-	
 	// Tokenize the command line parameters.
 	int argc = 0;
 	QVector<char*> argv(8);
-	qWinMain(hInst, hPrevInst, cmdParam.data(), nCmdShow, argc, argv);
+	qWinMain(hInst, hPrevInst, lpCmdLine, nCmdShow, argc, argv);
 	
 	// Call the real main function.
 	return gens_main(argc, argv.data());
