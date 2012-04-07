@@ -499,7 +499,7 @@ int Zomg::loadMD_Z80Ctrl(Zomg_MD_Z80CtrlSave_t *state)
  */
 int Zomg::loadMD_TimeReg(Zomg_MD_TimeReg_t *state)
 {
-	memset(state, 0xFF, sizeof(state));
+	memset(state, 0xFF, sizeof(*state));
 	int ret = loadFromZomg("MD/TIME_reg.bin", state, sizeof(*state));
 	
 	if (ret <= 0xF1)
