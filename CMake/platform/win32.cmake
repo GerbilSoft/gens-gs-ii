@@ -11,12 +11,16 @@ ENDIF(CMAKE_BUILD_TYPE MATCHES ^debug)
 # Test for static libgcc/libstdc++.
 # NOTE: libstdc++ check removed for now.
 SET(GENS_LDFLAGS_PLATFORM "")
-FOREACH(FLAG_TEST "-static-libgcc" "-Wl,--large-address-aware" "-Wl,--nxcompat" "-Wl,--dynamicbase") # "-static-libstdc++")
-	CHECK_C_COMPILER_FLAG("${FLAG_TEST}" LDFLAG_${FLAG_TEST})
-	IF(LDFLAG_${FLAG_TEST})
+FOREACH(FLAG_TEST "-static-libgcc" "-static-libstdc++" "-Wl,--large-address-aware" "-Wl,--nxcompat" "-Wl,--dynamicbase")
+	# CMake doesn't like "+" characters in variable names.
+	STRING(REPLACE "+" "_" FLAG_TEST_VARNAME "${FLAG_TEST}")
+
+	CHECK_C_COMPILER_FLAG("${FLAG_TEST}" LDFLAG_${FLAG_TEST_VARNAME})
+	IF(LDFLAG_${FLAG_TEST_VARNAME})
 		SET(GENS_LDFLAGS_PLATFORM "${GENS_LDFLAGS_PLATFORM} ${FLAG_TEST}")
-	ENDIF(LDFLAG_${FLAG_TEST})
-	UNSET(LDFLAG_${FLAG_TEST})
+	ENDIF(LDFLAG_${FLAG_TEST_VARNAME})
+	UNSET(LDFLAG_${FLAG_TEST_VARNAME})
+	UNSET(FLAG_TEST_VARNAME)
 ENDFOREACH()
 
 # Enable windres support on MinGW.
