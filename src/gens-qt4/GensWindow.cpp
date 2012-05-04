@@ -382,22 +382,19 @@ void GensWindow::gensResize(void)
 void GensWindow::setGensTitle(void)
 {
 	// Update the window title to reflect the emulation status.
-	QString title = tr("Gens/GS II");
-	title += QChar(L' ') + tr("dev");
+	QString title;
 #if !defined(GENS_ENABLE_EMULATION)
-	title += QChar(L' ') + tr("NO-EMU");
+	title += tr("[NO-EMU]") + QChar(L' ');
 #endif
-	title += QLatin1String(" - ");
 	
 	if (!m_emuManager->isRomOpen())
 	{
 		// No ROM is running.
-		title += tr("Idle");
+		title += gqt4_app->applicationName();
 	}
 	else
 	{
 		// ROM is running.
-		title += m_emuManager->sysName() + QLatin1String(": ");
 		title += m_emuManager->romName();
 	}
 	

@@ -27,7 +27,7 @@
 #include "libgens/GensInput/GensKey_t.h"
 
 // Qt includes
-#include <qglobal.h>
+#include <QtCore/qglobal.h>
 #include <QtGui/QKeyEvent>
 #include <QtGui/QMouseEvent>
 
