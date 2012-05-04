@@ -377,7 +377,7 @@ void GensWindow::gensResize(void)
 
 
 /**
- * setGensTitle(): Set the Gens window title.
+ * Set the Gens window title.
  */
 void GensWindow::setGensTitle(void)
 {
@@ -395,6 +395,11 @@ void GensWindow::setGensTitle(void)
 	else
 	{
 		// ROM is running.
+		if (m_emuManager->paused().paused_manual)
+		{
+			// Emulator is paused manually.
+			title += tr("[Paused]") + QChar(L' ');
+		}
 		title += m_emuManager->romName();
 	}
 	
