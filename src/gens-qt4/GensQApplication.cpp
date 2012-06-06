@@ -45,7 +45,7 @@ class GensQApplicationPrivate
 		void gqaInit(void);
 		
 		// Set the Gens translation.
-		void setGensTranslation(const QString& locale);
+		void setGensTranslation(QString locale);
 	
 	private:
 		GensQApplication *const q;
@@ -123,7 +123,7 @@ void GensQApplicationPrivate::gqaInit(void)
 }
 
 
-void GensQApplicationPrivate::setGensTranslation(const QString& locale)
+void GensQApplicationPrivate::setGensTranslation(QString locale)
 {
 	// Initialize the Qt translation system.
 	// TODO: Allow switching languages on the fly?

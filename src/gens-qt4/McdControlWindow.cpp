@@ -314,7 +314,7 @@ void McdControlWindow::driveQueryFinished(void)
  * driveRemoved(): A drive was removed.
  * @param path Device path.
  */
-void McdControlWindow::driveRemoved(const QString& path)
+void McdControlWindow::driveRemoved(QString path)
 {
 	if (m_isQuerying)
 		return;

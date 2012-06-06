@@ -151,11 +151,11 @@ class VBackend : public QWidget
 		void stretchMode_reset(void);
 	
 	protected slots:
-		virtual void fastBlur_changed_slot(const QVariant& newFastBlur);				// bool
-		virtual void aspectRatioConstraint_changed_slot(const QVariant& newAspectRatioConstraint);	// bool
-		virtual void bilinearFilter_changed_slot(const QVariant& newBilinearFilter);			// bool
-		virtual void pauseTint_changed_slot(const QVariant& newPauseTint);				// bool
-		virtual void stretchMode_changed_slot(const QVariant& newStretchMode);				// int
+		virtual void fastBlur_changed_slot(QVariant newFastBlur);				// bool
+		virtual void aspectRatioConstraint_changed_slot(QVariant newAspectRatioConstraint);	// bool
+		virtual void bilinearFilter_changed_slot(QVariant newBilinearFilter);		// bool
+		virtual void pauseTint_changed_slot(QVariant newPauseTint);				// bool
+		virtual void stretchMode_changed_slot(QVariant newStretchMode);			// int
 	
 	private:
 		// Effects.
@@ -193,8 +193,8 @@ class VBackend : public QWidget
 			__attribute__ ((format (printf, 3, 0)));
 		void osd_printf(const int duration, const utf8_str *msg, ...)
 			__attribute__ ((format (printf, 3, 4)));
-		void osd_printqs(const int duration, const QString& msg, bool forceVbDirty);
-		void osd_printqs(const int duration, const QString& msg);
+		void osd_printqs(const int duration, QString msg, bool forceVbDirty);
+		void osd_printqs(const int duration, QString msg);
 		
 		/**
 		 * osd_lock() / osd_unlock(): Temporarily lock the OSD.
@@ -218,17 +218,17 @@ class VBackend : public QWidget
 		void fpsPush(double fps);
 		
 		// Recording OSD.
-		int recSetStatus(const QString& component, bool isRecording);
-		int recSetDuration(const QString& component, int duration);
-		int recStart(const QString& component);
-		int recStop(const QString& component);
+		int recSetStatus(QString component, bool isRecording);
+		int recSetDuration(QString component, int duration);
+		int recStart(QString component);
+		int recStop(QString component);
 
 	protected slots:
 		/** Properties. **/
-		void osdFpsEnabled_changed_slot(const QVariant& enable);	// bool
-		void osdFpsColor_changed_slot(const QVariant& var_color);	// QColor
-		void osdMsgEnabled_changed_slot(const QVariant& enable);	// bool
-		void osdMsgColor_changed_slot(const QVariant& var_color);	// QColor
+		void osdFpsEnabled_changed_slot(QVariant enable);	// bool
+		void osdFpsColor_changed_slot(QVariant var_color);	// QColor
+		void osdMsgEnabled_changed_slot(QVariant enable);	// bool
+		void osdMsgColor_changed_slot(QVariant var_color);	// QColor
 	
 	protected:
 		// OSD message struct.
@@ -351,9 +351,9 @@ inline void VBackend::clearOsdListDirty(void)
 	{ m_osdListDirty = false; }
 
 /** Recording OSD. **/
-inline int VBackend::recStart(const QString& component)
+inline int VBackend::recStart(QString component)
 	{ return recSetStatus(component, true); }
-inline int VBackend::recStop(const QString& component)
+inline int VBackend::recStop(QString component)
 	{ return recSetStatus(component, false); }
 
 /** Property read functions. **/

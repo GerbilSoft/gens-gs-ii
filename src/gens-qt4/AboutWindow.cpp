@@ -525,7 +525,7 @@ QString AboutWindow::GetDebugInfo(void)
 	{
 		//: List what OpenGL extensions are in use.
 		sDebugInfo += tr("Using GL extensions") + QChar(L':');
-		foreach (const QString& ext, extsInUse)
+		foreach (QString ext, extsInUse)
 		{
 			sDebugInfo += sLineBreak;
 			sDebugInfo += chrBullet;

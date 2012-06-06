@@ -55,7 +55,7 @@ class EmuManager : public QObject
 		~EmuManager();
 		
 		int openRom(void);
-		int openRom(const QString& filename, QString z_filename = QString());
+		int openRom(QString filename, QString z_filename = QString());
 		int loadRom(LibGens::Rom *rom);
 		
 		/**
@@ -105,7 +105,7 @@ class EmuManager : public QObject
 		 * @param duration Duration for the message to appear, in milliseconds.
 		 * @param msg Message to print.
 		 */
-		void osdPrintMsg(int duration, const QString& msg);
+		void osdPrintMsg(int duration, QString msg);
 		
 		/**
 		 * osdShowPreview(): Show a preview image on the OSD.
@@ -384,31 +384,31 @@ class EmuManager : public QObject
 		 * saveSlot_changed_slot(): Set the save slot number.
 		 * @param saveSlot (int) Save slot number, (0-9)
 		 */
-		void saveSlot_changed_slot(const QVariant& saveSlot);
+		void saveSlot_changed_slot(QVariant saveSlot);
 		
 		/**
 		 * autoFixChecksum_changed_slot(): Change the Auto Fix Checksum setting.
 		 * @param autoFixChecksum (bool) New Auto Fix Checksum setting.
 		 */
-		void autoFixChecksum_changed_slot(const QVariant& autoFixChecksum);
+		void autoFixChecksum_changed_slot(QVariant autoFixChecksum);
 	
 		/**
 		 * regionCode_changed_slot(): Region code has changed.
 		 * @param regionCode (int) New region code setting.
 		 */
-		void regionCode_changed_slot(const QVariant& regionCode); // LibGens::SysVersion::RegionCode_t
+		void regionCode_changed_slot(QVariant regionCode); // LibGens::SysVersion::RegionCode_t
 		
 		/**
 		 * regionCodeOrder_changed_slot(): Region code auto-detection order has changed.
 		 * @param regionCodeOrder (uint16_t) New region code auto-detection order setting.
 		 */
-		void regionCodeOrder_changed_slot(const QVariant& regionCodeOrder);
+		void regionCodeOrder_changed_slot(QVariant regionCodeOrder);
 		
 		/**
 		 * enableSRam_changed_slot(): Enable SRam/EEPRom setting has changed.
 		 * @param enableSRam (bool) New Enable SRam/EEPRom setting.
 		 */
-		void enableSRam_changed_slot(const QVariant& enableSRam);
+		void enableSRam_changed_slot(QVariant enableSRam);
 	
 	public slots:
 		/**
@@ -426,19 +426,19 @@ class EmuManager : public QObject
 	
 	protected slots:
 		/** Graphics settings. **/
-		void contrast_changed_slot(const QVariant& contrast);
-		void brightness_changed_slot(const QVariant& brightness);
-		void grayscale_changed_slot(const QVariant& grayscale);
-		void inverted_changed_slot(const QVariant& inverted);
-		void colorScaleMethod_changed_slot(const QVariant& colorScaleMethod);
-		void interlacedMode_changed_slot(const QVariant& interlacedMode);
+		void contrast_changed_slot(QVariant contrast);
+		void brightness_changed_slot(QVariant brightness);
+		void grayscale_changed_slot(QVariant grayscale);
+		void inverted_changed_slot(QVariant inverted);
+		void colorScaleMethod_changed_slot(QVariant colorScaleMethod);
+		void interlacedMode_changed_slot(QVariant interlacedMode);
 		
 		/** VDP settings. **/
-		void borderColorEmulation_changed_slot(const QVariant& borderColorEmulation);
-		void ntscV30Rolling_changed_slot(const QVariant& ntscV30Rolling);
-		void spriteLimits_changed_slot(const QVariant& spriteLimits);
-		void zeroLengthDMA_changed_slot(const QVariant& zeroLengthDMA);
-		void vscrollBug_changed_slot(const QVariant& vscrollBug);
+		void borderColorEmulation_changed_slot(QVariant borderColorEmulation);
+		void ntscV30Rolling_changed_slot(QVariant ntscV30Rolling);
+		void spriteLimits_changed_slot(QVariant spriteLimits);
+		void zeroLengthDMA_changed_slot(QVariant zeroLengthDMA);
+		void vscrollBug_changed_slot(QVariant vscrollBug);
 	
 	/** Emulation Request Queue: Processing functions. **/
 	
@@ -452,8 +452,8 @@ class EmuManager : public QObject
 		void doAudioStereo(bool newStereo);
 		
 		/** Savestates. **/
-		void doSaveState(const QString& filename, int saveSlot);
-		void doLoadState(const QString& filename, int saveSlot);
+		void doSaveState(QString filename, int saveSlot);
+		void doLoadState(QString filename, int saveSlot);
 		void doSaveSlot(int newSaveSlot);
 		
 		void doPauseRequest(paused_t newPaused);

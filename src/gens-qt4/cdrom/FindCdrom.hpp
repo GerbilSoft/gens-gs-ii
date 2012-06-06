@@ -175,7 +175,7 @@ class FindCdrom : public QObject
 	signals:
 		void driveUpdated(const CdromDriveEntry& drive);
 		void driveQueryFinished(void);
-		void driveRemoved(const QString& path);
+		void driveRemoved(QString path);
 };
 
 }

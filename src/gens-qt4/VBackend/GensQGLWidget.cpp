@@ -76,7 +76,7 @@ void GensQGLWidget::vbUpdate_int(void)
  * fastBlur_changed_slot(): Fast Blur effect has changed.
  * @param newFastBlur (bool) New Fast Blur effect setting.
  */
-void GensQGLWidget::fastBlur_changed_slot(const QVariant& newFastBlur)
+void GensQGLWidget::fastBlur_changed_slot(QVariant newFastBlur)
 {
 	if (isRunning() && isPaused())
 	{
@@ -96,7 +96,7 @@ void GensQGLWidget::fastBlur_changed_slot(const QVariant& newFastBlur)
  * bilinearFilter_changed_slot(): Bilinear filter setting has changed.
  * @param newBilinearFilter (bool) New bilinear filter setting.
  */
-void GensQGLWidget::bilinearFilter_changed_slot(const QVariant& newBilinearFilter)
+void GensQGLWidget::bilinearFilter_changed_slot(QVariant newBilinearFilter)
 {
 	// Update GLBackend's bilinear filter setting.
 	d->makeCurrent();
@@ -108,7 +108,7 @@ void GensQGLWidget::bilinearFilter_changed_slot(const QVariant& newBilinearFilte
  * pauseTint_changed_slot(): Pause Tint effect setting has changed.
  * @param newPauseTint (bool) New pause tint effect setting.
  */
-void GensQGLWidget::pauseTint_changed_slot(const QVariant& newPauseTint)
+void GensQGLWidget::pauseTint_changed_slot(QVariant newPauseTint)
 {
 	// Update GLBackend's pause tint setting.
 	d->makeCurrent();

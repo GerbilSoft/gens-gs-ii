@@ -217,7 +217,7 @@ int EmuManager::openRom(void)
  * @param z_filename Internal archive filename. (If not specified, user will be prompted.)
  * @return 0 on success; non-zero on error.
  */
-int EmuManager::openRom(const QString& filename, QString z_filename)
+int EmuManager::openRom(QString filename, QString z_filename)
 {
 	// Open the file using the LibGens::Rom class.
 	// TODO: This won't work for KIO...

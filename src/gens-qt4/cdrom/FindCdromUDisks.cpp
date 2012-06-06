@@ -146,7 +146,7 @@ int FindCdromUDisksPrivate::queryUDisksDevice(const QDBusObjectPath& objectPath)
 	// Determine the drive media support.
 	// TODO: Convert ms_UDisks_DriveID[] to a QMap or QHash?
 	QStringList driveMediaCompatibility = drive_if->driveMediaCompatibility();
-	foreach (const QString& drive_media_id, driveMediaCompatibility)
+	foreach (QString drive_media_id, driveMediaCompatibility)
 	{
 		// Check the drive media table.
 		for (size_t i = 0; i < sizeof(UDisks_MediaTypeID)/sizeof(UDisks_MediaTypeID[0]); i++)

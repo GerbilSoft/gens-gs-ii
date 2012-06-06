@@ -1145,7 +1145,7 @@ void GLBackend::showOsdPreview(void)
  * NOTE: This function MUST be called from within an active OpenGL context!
  * @param newBilinearFilter (bool) New bilinear filter setting.
  */
-void GLBackend::bilinearFilter_changed_slot(const QVariant& newBilinearFilter)
+void GLBackend::bilinearFilter_changed_slot(QVariant newBilinearFilter)
 {
 	if (m_tex > 0)
 	{
@@ -1171,7 +1171,7 @@ void GLBackend::bilinearFilter_changed_slot(const QVariant& newBilinearFilter)
  * pauseTint_changed_slot(): Pause Tint effect setting has changed.
  * @param newPauseTint (bool) New pause tint effect setting.
  */
-void GLBackend::pauseTint_changed_slot(const QVariant& newPauseTint)
+void GLBackend::pauseTint_changed_slot(QVariant newPauseTint)
 {
 	if (!m_shaderMgr.hasPaused() &&
 	    (isRunning() && isPaused()))
@@ -1191,7 +1191,7 @@ void GLBackend::pauseTint_changed_slot(const QVariant& newPauseTint)
  * stretchMode_changed_slot(): Stretch mode setting has changed.
  * @param newStretchMode (int) New stretch mode setting.
  */
-void GLBackend::stretchMode_changed_slot(const QVariant& newStretchMode)
+void GLBackend::stretchMode_changed_slot(QVariant newStretchMode)
 {
 	StretchMode_t stretch = (StretchMode_t)newStretchMode.toInt();
 	

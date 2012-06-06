@@ -243,7 +243,7 @@ void VBackend::setPaused(paused_t newPaused)
  * stretchMode_changed_slot(): Stretch mode setting has changed.
  * @param newStretchMode (int) New stretch mode setting.
  */
-void VBackend::stretchMode_changed_slot(const QVariant& newStretchMode)
+void VBackend::stretchMode_changed_slot(QVariant newStretchMode)
 {
 	m_cfg_stretchMode = (StretchMode_t)newStretchMode.toInt();
 	
@@ -285,7 +285,7 @@ void VBackend::stretchMode_changed_slot(const QVariant& newStretchMode)
  * fastBlur_changed_slot(): Fast Blur effect has changed.
  * @param newFastBlur (bool) New Fast Blur effect setting.
  */
-void VBackend::fastBlur_changed_slot(const QVariant& newFastBlur)
+void VBackend::fastBlur_changed_slot(QVariant newFastBlur)
 {
 	// Save the new Fast Blur setting.
 	m_cfg_fastBlur = newFastBlur.toBool();
@@ -311,7 +311,7 @@ void VBackend::fastBlur_changed_slot(const QVariant& newFastBlur)
  * Aspect ratio constraint setting has changed.
  * @param newAspectRatioConstraint (bool) New aspect ratio constraint setting.
  */
-void VBackend::aspectRatioConstraint_changed_slot(const QVariant& newAspectRatioConstraint)
+void VBackend::aspectRatioConstraint_changed_slot(QVariant newAspectRatioConstraint)
 {
 	// Save the new Aspect Ratio Constraint setting.
 	m_cfg_aspectRatioConstraint = newAspectRatioConstraint.toBool();
@@ -332,7 +332,7 @@ void VBackend::aspectRatioConstraint_changed_slot(const QVariant& newAspectRatio
  * Bilinear Filter setting has changed.
  * @param newBilinearFilter (bool) New bilinear filter setting.
  */
-void VBackend::bilinearFilter_changed_slot(const QVariant& newBilinearFilter)
+void VBackend::bilinearFilter_changed_slot(QVariant newBilinearFilter)
 {
 	// Save the new Bilinear Filter setting.
 	m_cfg_bilinearFilter = newBilinearFilter.toBool();
@@ -350,7 +350,7 @@ void VBackend::bilinearFilter_changed_slot(const QVariant& newBilinearFilter)
  * Pause Tint effect setting has changed.
  * @param newPauseTint (bool) New pause tint effect setting.
  */
-void VBackend::pauseTint_changed_slot(const QVariant& newPauseTint)
+void VBackend::pauseTint_changed_slot(QVariant newPauseTint)
 {
 	// Save the new Pause Tint effect setting.
 	m_cfg_pauseTint = newPauseTint.toBool();

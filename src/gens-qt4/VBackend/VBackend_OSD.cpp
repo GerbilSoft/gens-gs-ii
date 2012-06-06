@@ -74,7 +74,7 @@ void VBackend::osd_printf(const int duration, const utf8_str *msg, ...)
  * @param msg Message to write.
  * @param forceVbDirty If true, and not running or paused, force the src as dirty and always update the VBackend.
  */
-void VBackend::osd_printqs(const int duration, const QString& msg, bool forceVbDirty)
+void VBackend::osd_printqs(const int duration, QString msg, bool forceVbDirty)
 {
 	assert(m_osdLockCnt >= 0);
 	if (duration <= 0 ||		// Invalid duration.
@@ -128,7 +128,7 @@ void VBackend::osd_printqs(const int duration, const QString& msg, bool forceVbD
  * @param duration Duration for the message to appear, in milliseconds.
  * @param msg Message to write. (printf-formatted)
  */
-void VBackend::osd_printqs(const int duration, const QString& msg)
+void VBackend::osd_printqs(const int duration, QString msg)
 	{ osd_printqs(duration, msg, false); }
 
 
@@ -227,7 +227,7 @@ void VBackend::fpsPush(double fps)
  * @param isRecording	[in] True if recording; false if stopped.
  * @return 0 on success; non-zero on error.
  */
-int VBackend::recSetStatus(const QString& component, bool isRecording)
+int VBackend::recSetStatus(QString component, bool isRecording)
 {
 	// Find the component in m_osdList.
 	int recIdx;
@@ -278,7 +278,7 @@ int VBackend::recSetStatus(const QString& component, bool isRecording)
  * @param duration Recording duration.
  * @return 0 on success; non-zero on error.
  */
-int VBackend::recSetDuration(const QString& component, int duration)
+int VBackend::recSetDuration(QString component, int duration)
 {
 	// Find the component in m_osdList.
 	int recIdx;
@@ -319,7 +319,7 @@ int VBackend::recSetDuration(const QString& component, int duration)
  * OSD FPS counter visibility setting has changed.
  * @param enable New OSD FPS counter visibility setting.
  */
-void VBackend::osdFpsEnabled_changed_slot(const QVariant& enable)
+void VBackend::osdFpsEnabled_changed_slot(QVariant enable)
 {
 	m_cfg_osdFpsEnabled = enable.toBool();
 	
@@ -336,7 +336,7 @@ void VBackend::osdFpsEnabled_changed_slot(const QVariant& enable)
  * OSD FPS counter color has changed.
  * @param var_color New OSD FPS counter color.
  */
-void VBackend::osdFpsColor_changed_slot(const QVariant& var_color)
+void VBackend::osdFpsColor_changed_slot(QVariant var_color)
 {
 	m_cfg_osdFpsColor = var_color.value<QColor>();
 	
@@ -354,7 +354,7 @@ void VBackend::osdFpsColor_changed_slot(const QVariant& var_color)
  * OSD Message visibility setting has changed.
  * @param enable New OSD Message visibility setting.
  */
-void VBackend::osdMsgEnabled_changed_slot(const QVariant& enable)
+void VBackend::osdMsgEnabled_changed_slot(QVariant enable)
 {
 	m_cfg_osdMsgEnabled = enable.toBool();
 	
@@ -378,7 +378,7 @@ void VBackend::osdMsgEnabled_changed_slot(const QVariant& enable)
  * OSD Message color has changed.
  * @param var_color New OSD Message color.
  */
-void VBackend::osdMsgColor_changed_slot(const QVariant& var_color)
+void VBackend::osdMsgColor_changed_slot(QVariant var_color)
 {
 	m_cfg_osdMsgColor = var_color.value<QColor>();
 	

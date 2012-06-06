@@ -115,7 +115,7 @@ int FindCdromUnix::query_int(void)
 	
 	// Get drive information.
 	// TODO: We're just getting the pathname right now.
-	foreach (const QString& devFilename, devicesUsable)
+	foreach (QString devFilename, devicesUsable)
 	{
 		// Construct the CdromDriveEntry.
 		CdromDriveEntry drive;

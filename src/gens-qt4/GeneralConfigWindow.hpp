@@ -105,7 +105,7 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		static GeneralConfigWindow *m_GeneralConfigWindow;
 		
 		/** Onscreen Display **/
-		QColor osdSelectColor(const QString& color_id, const QColor& init_color);
+		QColor osdSelectColor(QString color_id, const QColor& init_color);
 		
 		// Onscreen Display: Colors.
 		QColor m_osdFpsColor;
@@ -120,13 +120,13 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		static const int MCD_ROM_FILESIZE = 131072;
 		
 		// Sega CD: Select Boot ROM file.
-		void mcdSelectRomFile(const QString& rom_id, GensLineEdit *txtRomFile);
+		void mcdSelectRomFile(QString rom_id, GensLineEdit *txtRomFile);
 		
 		// Sega CD: Update Boot ROM file status.
 		QString mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, int region_code);
 		
 		// Sega CD: Display Boot ROM file status.
-		void mcdDisplayRomFileStatus(const QString& rom_id, const QString& rom_desc);
+		void mcdDisplayRomFileStatus(QString rom_id, QString rom_desc);
 		
 		// Sega CD: Boot ROM file information.
 		QString sMcdRomStatus_USA;
@@ -136,7 +136,7 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		
 		/** External Programs **/
 		QString sExtPrgStatus_UnRAR;
-		void extprgDisplayFileStatus(const QString& file_id, const QString& file_desc);
+		void extprgDisplayFileStatus(QString file_id, QString file_desc);
 	
 	private slots:
 		/** Onscreen Display **/

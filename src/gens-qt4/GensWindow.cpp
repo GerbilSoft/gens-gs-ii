@@ -570,7 +570,7 @@ void GensWindow::qAppFocusChanged(QWidget *old, QWidget *now)
  * autoPause_changed_slot(): Auto Pause setting has changed.
  * @param newAutoPause (bool) New Auto Pause setting.
  */
-void GensWindow::autoPause_changed_slot(const QVariant& newAutoPause)
+void GensWindow::autoPause_changed_slot(QVariant newAutoPause)
 {
 	m_cfg_autoPause = newAutoPause.toBool();
 	
@@ -598,7 +598,7 @@ void GensWindow::autoPause_changed_slot(const QVariant& newAutoPause)
  * showMenuBar_changed_slot(): Show Menu Bar setting has changed.
  * @param newShowMenuBar (bool) New Show Menu Bar setting.
  */
-void GensWindow::showMenuBar_changed_slot(const QVariant& newShowMenuBar)
+void GensWindow::showMenuBar_changed_slot(QVariant newShowMenuBar)
 {
 	m_cfg_showMenuBar = newShowMenuBar.toBool();
 	
@@ -644,7 +644,7 @@ void GensWindow::showMenuBar_changed_slot(const QVariant& newShowMenuBar)
 
 void GensWindow::openRom(void)
 	{ m_emuManager->openRom(); }
-void GensWindow::openRom(const QString& filename, QString z_filename)
+void GensWindow::openRom(QString filename, QString z_filename)
 	{ m_emuManager->openRom(filename, z_filename); }
 void GensWindow::closeRom(void)
 	{ m_emuManager->closeRom(); }
@@ -732,7 +732,7 @@ void GensWindow::idleThread_frameDone(void)
  * introStyle_changed_slot(): Intro Style setting has changed.
  * @param newIntroStyle (int) New Intro Style setting.
  */
-void GensWindow::introStyle_changed_slot(const QVariant& newIntroStyle)
+void GensWindow::introStyle_changed_slot(QVariant newIntroStyle)
 {
 	m_cfg_introStyle = newIntroStyle.toInt();
 	checkIdleThread();

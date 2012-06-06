@@ -40,14 +40,14 @@ class ConfigHandler : public QObject
 		ConfigHandler(QObject *parent = 0);
 	
 	public slots:
-		void extprgUnRAR_changed_slot(const QVariant& extprgUnRAR);
+		void extprgUnRAR_changed_slot(QVariant extprgUnRAR);
 		
 		/**
 		 * A configuration path has been changed.
 		 * @param path Configuration path.
 		 * @param dir New directory.
 		 */
-		void pathChanged(GensQt4::PathConfig::ConfigPath path, const QString& dir);
+		void pathChanged(GensQt4::PathConfig::ConfigPath path, QString dir);
 };
 
 }

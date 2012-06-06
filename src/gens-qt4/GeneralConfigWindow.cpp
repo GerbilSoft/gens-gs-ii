@@ -465,7 +465,7 @@ static inline void SetValByPath_int(const char *path, int value)
 	{ gqt4_cfg->set(QLatin1String(path), value); }
 static inline void SetValByPath_uint(const char *path, unsigned int value)
 	{ gqt4_cfg->set(QLatin1String(path), value); }
-static inline void SetValByPath_QString(const char *path, const QString& value)
+static inline void SetValByPath_QString(const char *path, QString value)
 	{ gqt4_cfg->set(QLatin1String(path), value); }
 
 /**
@@ -559,7 +559,7 @@ void GeneralConfigWindow::toolbarTriggered(QAction *action)
  * @param init_color	[in] Initial color.
  * @return Selected color, or invalid QColor if cancelled.
  */
-QColor GeneralConfigWindow::osdSelectColor(const QString& color_id, const QColor& init_color)
+QColor GeneralConfigWindow::osdSelectColor(QString color_id, const QColor& init_color)
 {
 	// Create the dialog title.
 	QString title = tr("Select OSD %1 Color").arg(color_id);
@@ -685,7 +685,7 @@ uint16_t GeneralConfigWindow::regionCodeOrder(void) const
  * @param rom_id	[in] Sega CD Boot ROM ID.
  * @param txtRomFile	[in] ROM file textbox.
  */
-void GeneralConfigWindow::mcdSelectRomFile(const QString& rom_id, GensLineEdit *txtRomFile)
+void GeneralConfigWindow::mcdSelectRomFile(QString rom_id, GensLineEdit *txtRomFile)
 {
 	// TODO: Proper compressed file support.
 	#define ZLIB_EXT " *.zip *.zsg *.gz"
@@ -757,7 +757,7 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 	const QString sLineBreak = QLatin1String("<br/>\n");
 	
 	// Check if the file exists.
-	const QString& filename = txtRomFile->text();
+	QString filename = txtRomFile->text();
 	if (!QFile::exists(filename))
 	{
 		// File doesn't exist.
@@ -912,7 +912,7 @@ rom_identified:
  * @param rom_id Sega CD Boot ROM ID.
  * @param rom_desc ROM file description. (detected by examining the ROM)
  */
-void GeneralConfigWindow::mcdDisplayRomFileStatus(const QString& rom_id, const QString& rom_desc)
+void GeneralConfigWindow::mcdDisplayRomFileStatus(QString rom_id, QString rom_desc)
 {
 	// Set the ROM description.
 	QString sel_rom = tr("Selected ROM: %1");
@@ -1044,7 +1044,7 @@ void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
  * @param file_id File ID.
  * @param file_desc File description. (detected by examining the file)
  */
-void GeneralConfigWindow::extprgDisplayFileStatus(const QString& file_id, const QString& file_desc)
+void GeneralConfigWindow::extprgDisplayFileStatus(QString file_id, QString file_desc)
 {
 	// Set the file description.
 	QString sel_prg = tr("Selected Program: %1");
@@ -1072,7 +1072,7 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 	LibGens::DcRar::ExtPrgInfo prg_info;
 	
 	// Check if the file exists.
-	const QString& filename = txtExtPrgUnRAR->text();
+	QString filename = txtExtPrgUnRAR->text();
 	if (filename.isEmpty())
 		prg_status = tr("No filename specified.");
 	else

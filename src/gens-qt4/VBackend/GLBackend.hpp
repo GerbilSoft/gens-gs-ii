@@ -84,19 +84,19 @@ class GLBackend : public VBackend
 		 * NOTE: This function MUST be called from within an active OpenGL context!
 		 * @param newBilinearFilter (bool) New bilinear filter setting.
 		 */
-		virtual void bilinearFilter_changed_slot(const QVariant& newBilinearFilter);
+		virtual void bilinearFilter_changed_slot(QVariant newBilinearFilter);
 		
 		/**
 		 * pauseTint_changed_slot(): Pause Tint effect setting has changed.
 		 * @param newPauseTint (bool) New pause tint effect setting.
 		 */
-		virtual void pauseTint_changed_slot(const QVariant& newPauseTint);
+		virtual void pauseTint_changed_slot(QVariant newPauseTint);
 		
 		/**
 		 * stretchMode_changed_slot(): Stretch mode setting has changed.
 		 * @param newStretchMode (int) New stretch mode setting.
 		 */
-		void stretchMode_changed_slot(const QVariant& newStretchMode);
+		void stretchMode_changed_slot(QVariant newStretchMode);
 	
 	protected:
 		/**

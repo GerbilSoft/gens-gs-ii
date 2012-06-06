@@ -238,7 +238,7 @@ RecentRomsMenu::RecentRomsMenu(QWidget* parent, const RecentRoms* recentRoms)
 	d->init();
 }
 
-RecentRomsMenu::RecentRomsMenu(const QString& title, QWidget *parent, const RecentRoms *recentRoms)
+RecentRomsMenu::RecentRomsMenu(QString title, QWidget *parent, const RecentRoms *recentRoms)
 	: QMenu(title, parent)
 	, d(new RecentRomsMenuPrivate(this, recentRoms))
 {

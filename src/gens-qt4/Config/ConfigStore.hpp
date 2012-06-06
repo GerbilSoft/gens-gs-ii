@@ -65,14 +65,14 @@ class ConfigStore : public QObject
 		 * @param key Property name.
 		 * @param value Property value.
 		 */
-		void set(const QString& key, const QVariant& value);
+		void set(QString key, QVariant value);
 		
 		/**
 		 * Get a property.
 		 * @param key Property name.
 		 * @return Property value.
 		 */
-		QVariant get(const QString& key) const;
+		QVariant get(QString key) const;
 		
 		/**
 		 * Get a property.
@@ -80,7 +80,7 @@ class ConfigStore : public QObject
 		 * @param key Property name.
 		 * @return Property value.
 		 */
-		unsigned int getUInt(const QString& key) const;
+		unsigned int getUInt(QString key) const;
 		
 		/**
 		 * Get a property.
@@ -88,14 +88,14 @@ class ConfigStore : public QObject
 		 * @param key Property name.
 		 * @return Property value.
 		 */
-		int getInt(const QString& key) const;
+		int getInt(QString key) const;
 		
 		/**
 		 * Load the configuration file.
 		 * @param filename Configuration filename.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int load(const QString& filename);
+		int load(QString filename);
 		
 		/**
 		 * Load the configuration file.
@@ -109,7 +109,7 @@ class ConfigStore : public QObject
 		 * @param filename Filename.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int save(const QString& filename) const;
+		int save(QString filename) const;
 		
 		/**
 		 * Save the configuration file.
@@ -124,7 +124,7 @@ class ConfigStore : public QObject
 		 * @param object QObject to register.
 		 * @param method Method name.
 		 */
-		void registerChangeNotification(const QString& property, QObject *object, const char *method);
+		void registerChangeNotification(QString property, QObject *object, const char *method);
 		
 		/**
 		 * Unregister an object for property change notification.
@@ -132,7 +132,7 @@ class ConfigStore : public QObject
 		 * @param object QObject to register.
 		 * @param method Method name.
 		 */
-		void unregisterChangeNotification(const QString& property, QObject *object, const char *method);
+		void unregisterChangeNotification(QString property, QObject *object, const char *method);
 		
 		/**
 		 * Notify all registered objects that configuration settings have changed.

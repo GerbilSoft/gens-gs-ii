@@ -254,7 +254,7 @@ void EmuManager::pauseRequest(paused_t newPaused)
  * saveSlot_changed_slot(): Save slot changed.
  * @param saveSlot (int) Save slot number, (0-9)
  */
-void EmuManager::saveSlot_changed_slot(const QVariant& saveSlot)
+void EmuManager::saveSlot_changed_slot(QVariant saveSlot)
 {
 	// NOTE: Don't check if the save slot is the same.
 	// This allows users to recheck a savestate's preview image.
@@ -274,7 +274,7 @@ void EmuManager::saveSlot_changed_slot(const QVariant& saveSlot)
  * enableSRam_changed_slot(): Enable SRam/EEPRom setting has changed.
  * @param enableSRam (bool) New Enable SRam/EEPRom setting.
  */
-void EmuManager::enableSRam_changed_slot(const QVariant& enableSRam)
+void EmuManager::enableSRam_changed_slot(QVariant enableSRam)
 {
 	// Queue the Enable SRam/EEPRom request.
 	EmuRequest_t rq;
@@ -291,7 +291,7 @@ void EmuManager::enableSRam_changed_slot(const QVariant& enableSRam)
  * autoFixChecksum_changed_slot(): Change the Auto Fix Checksum setting.
  * @param autoFixChecksum (bool) New Auto Fix Checksum setting.
  */
-void EmuManager::autoFixChecksum_changed_slot(const QVariant& autoFixChecksum)
+void EmuManager::autoFixChecksum_changed_slot(QVariant autoFixChecksum)
 {
 	// Queue the autofix checksum change request.
 	EmuRequest_t rq;
@@ -308,7 +308,7 @@ void EmuManager::autoFixChecksum_changed_slot(const QVariant& autoFixChecksum)
  * regionCode_changed_slot(): Region code has changed.
  * @param regionCode (int) New region code setting.
  */
-void EmuManager::regionCode_changed_slot(const QVariant& regionCode)
+void EmuManager::regionCode_changed_slot(QVariant regionCode)
 {
 	// NOTE: Region code change is processed even if a ROM isn't loaded,
 	// since we're printing a message to the screen.
@@ -328,7 +328,7 @@ void EmuManager::regionCode_changed_slot(const QVariant& regionCode)
  * regionCodeOrder_changed_slot(): Region code auto-detection order has changed.
  * @param regionCodeOrder New region code auto-detection order setting.
  */
-void EmuManager::regionCodeOrder_changed_slot(const QVariant& regionCodeOrder)
+void EmuManager::regionCodeOrder_changed_slot(QVariant regionCodeOrder)
 {
 	if (!m_rom)
 		return;
@@ -397,30 +397,30 @@ void EmuManager::changePaletteSetting(EmuRequest_t::PaletteSettingType type, int
 
 /** Graphics settings. **/
 
-void EmuManager::contrast_changed_slot(const QVariant& contrast)
+void EmuManager::contrast_changed_slot(QVariant contrast)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_CONTRAST, contrast.toBool()); }
-void EmuManager::brightness_changed_slot(const QVariant& brightness)
+void EmuManager::brightness_changed_slot(QVariant brightness)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_BRIGHTNESS, brightness.toInt()); }
-void EmuManager::grayscale_changed_slot(const QVariant& grayscale)
+void EmuManager::grayscale_changed_slot(QVariant grayscale)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_GRAYSCALE, (int)grayscale.toBool()); }
-void EmuManager::inverted_changed_slot(const QVariant& inverted)
+void EmuManager::inverted_changed_slot(QVariant inverted)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_INVERTED, (int)inverted.toBool()); }
-void EmuManager::colorScaleMethod_changed_slot(const QVariant& colorScaleMethod)
+void EmuManager::colorScaleMethod_changed_slot(QVariant colorScaleMethod)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_COLORSCALEMETHOD, colorScaleMethod.toInt()); }
-void EmuManager::interlacedMode_changed_slot(const QVariant& interlacedMode)
+void EmuManager::interlacedMode_changed_slot(QVariant interlacedMode)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_INTERLACEDMODE, interlacedMode.toInt()); }
 
 /** VDP settings. **/
 
-void EmuManager::borderColorEmulation_changed_slot(const QVariant& borderColorEmulation)
+void EmuManager::borderColorEmulation_changed_slot(QVariant borderColorEmulation)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_BORDERCOLOREMULATION, (int)borderColorEmulation.toBool()); }
-void EmuManager::ntscV30Rolling_changed_slot(const QVariant& ntscV30Rolling)
+void EmuManager::ntscV30Rolling_changed_slot(QVariant ntscV30Rolling)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_NTSCV30ROLLING, (int)ntscV30Rolling.toBool()); }
-void EmuManager::spriteLimits_changed_slot(const QVariant& spriteLimits)
+void EmuManager::spriteLimits_changed_slot(QVariant spriteLimits)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_SPRITELIMITS, (int)spriteLimits.toBool()); }
-void EmuManager::zeroLengthDMA_changed_slot(const QVariant& zeroLengthDMA)
+void EmuManager::zeroLengthDMA_changed_slot(QVariant zeroLengthDMA)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_ZEROLENGTHDMA, (int)zeroLengthDMA.toBool()); }
-void EmuManager::vscrollBug_changed_slot(const QVariant& vscrollBug)
+void EmuManager::vscrollBug_changed_slot(QVariant vscrollBug)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_VSCROLLBUG, (int)vscrollBug.toBool()); }
 
 
@@ -609,7 +609,7 @@ void EmuManager::doAudioStereo(bool newStereo)
  * @param filename Filename.
  * @param saveSlot Save slot number. (0-9)
  */
-void EmuManager::doSaveState(const QString& filename, int saveSlot)
+void EmuManager::doSaveState(QString filename, int saveSlot)
 {
 	// Create the preview image.
 	Screenshot ss(m_rom, gqt4_emuContext, this);
@@ -658,7 +658,7 @@ void EmuManager::doSaveState(const QString& filename, int saveSlot)
  * @param filename Filename.
  * @param saveSlot Save slot number. (0-9)
  */
-void EmuManager::doLoadState(const QString& filename, int saveSlot)
+void EmuManager::doLoadState(QString filename, int saveSlot)
 {
 	// TODO: Redraw the screen if emulation is paused.
 	
