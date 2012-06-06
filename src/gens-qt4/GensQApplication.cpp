@@ -114,8 +114,8 @@ void GensQApplicationPrivate::gqaInit(void)
 	
 	// Connect the crash handler.
 #ifdef HAVE_SIGACTION
-	QObject::connect(q, SIGNAL(signalCrash(int, siginfo_t*, void*)),
-			 q, SLOT(slotCrash(int, siginfo_t*, void*)));
+	QObject::connect(q, SIGNAL(signalCrash(int,siginfo_t*,void*)),
+			 q, SLOT(slotCrash(int,siginfo_t*,void*)));
 #else /* !HAVE_SIGACTION */
 	QObject::connect(q, SIGNAL(signalCrash(int)),
 			 q, SLOT(slotCrash(int)));

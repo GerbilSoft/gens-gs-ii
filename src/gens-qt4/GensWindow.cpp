@@ -159,18 +159,18 @@ void GensWindow::setupUi(void)
 	setAcceptDrops(true);
 	
 	// Connect the GensMenuBar's triggered() signal.
-	connect(m_gensMenuBar, SIGNAL(triggered(int, bool)),
-		m_gensActions, SLOT(doAction(int, bool)));
+	connect(m_gensMenuBar, SIGNAL(triggered(int,bool)),
+		m_gensActions, SLOT(doAction(int,bool)));
 	
 	// Connect Emulation Manager signals to GensWindow.
 	connect(m_emuManager, SIGNAL(updateFps(double)),
 		this, SLOT(updateFps(double)));
 	connect(m_emuManager, SIGNAL(stateChanged(void)),
 		this, SLOT(stateChanged(void)));
-	connect(m_emuManager, SIGNAL(osdPrintMsg(int, QString)),
-		this, SLOT(osdPrintMsg(int, QString)));
-	connect(m_emuManager, SIGNAL(osdShowPreview(int, QImage)),
-		this, SLOT(osdShowPreview(int, QImage)));
+	connect(m_emuManager, SIGNAL(osdPrintMsg(int,QString)),
+		this, SLOT(osdPrintMsg(int,QString)));
+	connect(m_emuManager, SIGNAL(osdShowPreview(int,QImage)),
+		this, SLOT(osdShowPreview(int,QImage)));
 	
 	// Gens Action Manager signals.
 	connect(m_gensActions, SIGNAL(actionSetPaused(bool)),
@@ -204,8 +204,8 @@ void GensWindow::closeEvent(QCloseEvent *event)
 	// prevent segmentation faults.
 	// (e.g. caused by a signal being received after the
 	//  GensWindow has been deleted)
-	disconnect(gqt4_app, SIGNAL(focusChanged(QWidget*, QWidget*)),
-		   this, SLOT(qAppFocusChanged(QWidget*, QWidget*)));
+	disconnect(gqt4_app, SIGNAL(focusChanged(QWidget*,QWidget*)),
+		   this, SLOT(qAppFocusChanged(QWidget*,QWidget*)));
 	
 	// Quit.
 	m_emuManager->closeRom();
