@@ -24,12 +24,11 @@
 #ifndef __LIBGENS_UTIL_MDFB_HPP__
 #define __LIBGENS_UTIL_MDFB_HPP__
 
-// C includes. (C++ namespace)
 #include <cassert>
 #include <cstring>
-
-// C includes.
 #include <stdint.h>
+
+#include <vector>
 
 namespace LibGens
 {
@@ -37,66 +36,73 @@ namespace LibGens
 class MdFb
 {
 	public:
-		MdFb() : m_refcnt(1) { }
+		MdFb();
+
 		MdFb *ref(void) const;
 		void unref(void) const;
-	
-	private:
-		~MdFb() { }
+
+	protected:
+		~MdFb();
 		mutable int m_refcnt;	// Allow ref()/unref() even for const MdFb.
-	
+
 	public:
 		// Clear the screen.
 		void clear(void);
-		
+
 		// Line access.
 		uint16_t *lineBuf16(int line);
 		const uint16_t *lineBuf16(int line) const;
-		
+
 		uint32_t *lineBuf32(int line);
 		const uint32_t *lineBuf32(int line) const;
-		
+
 		template<typename pixel> pixel *lineBuf(int line);
 		template<typename pixel> const pixel *lineBuf(int line) const;
-		
+
 		/** Framebuffer access. **/
-		
+
 		/**
 		 * Get the framebuffer. (16-bit color)
 		 * @return First pixel of the framebuffer.
 		 */
 		uint16_t *fb16(void);
-		
+
 		/**
 		 * Get the framebuffer. (16-bit color) [const pointer]
 		 * @return First pixel of the framebuffer.
 		 */
 		const uint16_t *fb16(void) const;
-		
+
 		/**
 		 * Get the framebuffer. (32-bit color)
 		 * @return First pixel of the framebuffer.
 		 */
 		uint32_t *fb32(void);
-		
+
 		/**
 		 * Get the framebuffer. (32-bit color) [const pointer]
 		 * @return First pixel of the framebuffer.
 		 */
 		const uint32_t *fb32(void) const;
-		
+
 		/**
 		 * Get the number of visible pixels per line.
 		 * @return Number of visible pixels per line.
 		 */
 		int pxPerLine(void) const;
-		
+
 		/**
 		 * Get the total number of pixels per line, including offscreen area.
 		 * @return Total number of pixels per line.
 		 */
 		int pxPitch(void) const;
-		
+
+		/**
+		 * Get the starting pixel offset.
+		 * @return Starting pixel offset.
+		 */
+		int pxStart(void) const;
+
 		/**
 		 * Get the number of lines.
 		 * @return Number of lines.
@@ -104,24 +110,49 @@ class MdFb
 		int numLines(void) const;
 	
 	private:
-		// NOTE: These are subject to change in the future.
-		// Specifically, they may become dynamic.
-		// TODO: Eliminate the 8px left/right borders.
-		static const int ms_PxPerLine = 320;
-		static const int ms_PxPitch = 336;
-		static const int ms_NumLines = 240;
-		
-		// 336px and 320px tables.
-		static const unsigned int TAB336[240];
-		static const unsigned int TAB320[240];
-		
-		// Framebuffer.
-		union FB_t
-		{
-			uint16_t u16[ms_PxPitch * ms_NumLines + 8];
-			uint32_t u32[ms_PxPitch * ms_NumLines + 8];
-		};
-		FB_t m_fb;
+		/**
+		 * Number of visible pixels per line.
+		 * Default is 320.
+		 */
+		int m_pxPerLine;
+
+		/**
+		 * Total number of pixels per line.
+		 * Default is 336.
+		 */
+		int m_pxPitch;
+
+		/**
+		 * Starting pixel offset.
+		 * Default is 8.
+		 */
+		int m_pxStart;
+
+		/**
+		 * Number of lines.
+		 * Default is 240.
+		 */
+		int m_numLines;	
+
+		/**
+		 * Framebuffer.
+		 */
+		void *m_fb;
+
+		/**
+		 * Size of framebuffer, in bytes.
+		 */
+		size_t m_fb_sz;
+
+		/**
+		 * Line number lookup table.
+		 */
+		std::vector<uint32_t> m_lineNumTable;
+
+		/**
+		 * Reinitialize the framebuffer.
+		 */
+		void reinitFb(void);
 };
 
 
@@ -148,7 +179,7 @@ inline void MdFb::unref(void) const
  */
 inline void MdFb::clear(void)
 {
-	memset(&m_fb, 0x00, sizeof(m_fb));
+	memset(m_fb, 0x00, m_fb_sz);
 }
 
 /** Line access. **/
@@ -160,8 +191,9 @@ inline void MdFb::clear(void)
  */
 inline uint16_t *MdFb::lineBuf16(int line)
 {
-	assert(line >= 0 && line < ms_NumLines);
-	return &m_fb.u16[TAB336[line] + 8];
+	assert(line >= 0 && line < m_numLines);
+	uint16_t *fb = static_cast<uint16_t*>(m_fb);
+	return &fb[m_lineNumTable[line] + m_pxStart];
 }
 
 /**
@@ -171,8 +203,9 @@ inline uint16_t *MdFb::lineBuf16(int line)
  */
 inline const uint16_t *MdFb::lineBuf16(int line) const
 {
-	assert(line >= 0 && line < ms_NumLines);
-	return &m_fb.u16[TAB336[line] + 8];
+	assert(line >= 0 && line < m_numLines);
+	const uint16_t *fb = static_cast<const uint16_t*>(m_fb);
+	return &fb[m_lineNumTable[line] + m_pxStart];
 }
 
 /**
@@ -182,8 +215,9 @@ inline const uint16_t *MdFb::lineBuf16(int line) const
  */
 inline uint32_t *MdFb::lineBuf32(int line)
 {
-	assert(line >= 0 && line < ms_NumLines);
-	return &m_fb.u32[TAB336[line] + 8];
+	assert(line >= 0 && line < m_numLines);
+	uint32_t *fb = static_cast<uint32_t*>(m_fb);
+	return &fb[m_lineNumTable[line] + m_pxStart];
 }
 
 /**
@@ -193,8 +227,9 @@ inline uint32_t *MdFb::lineBuf32(int line)
  */
 inline const uint32_t *MdFb::lineBuf32(int line) const
 {
-	assert(line >= 0 && line < ms_NumLines);
-	return &m_fb.u32[TAB336[line] + 8];
+	assert(line >= 0 && line < m_numLines);
+	const uint32_t *fb = static_cast<const uint32_t*>(m_fb);
+	return &fb[m_lineNumTable[line] + m_pxStart];
 }
 
 /**
@@ -224,33 +259,36 @@ inline const pixel *MdFb::lineBuf(int line) const
 {
 	assert(sizeof(pixel) == 2 || sizeof(pixel) == 4);
 	if (sizeof(pixel) == 4)
-		return (const pixel*)lineBuf32(line);
+		return (pixel*)lineBuf32(line);
 	else
-		return (const pixel*)lineBuf16(line);
+		return (pixel*)lineBuf16(line);
 }
 
 /** Framebuffer access. **/
 
 inline uint16_t *MdFb::fb16(void)
-	{ return &m_fb.u16[8]; }
+	{ return lineBuf16(0); }
 
 inline const uint16_t *MdFb::fb16(void) const
-	{ return &m_fb.u16[8]; }
+	{ return lineBuf16(0); }
 
 inline uint32_t *MdFb::fb32(void)
-	{ return &m_fb.u32[8]; }
+	{ return lineBuf32(0); }
 
 inline const uint32_t *MdFb::fb32(void) const
-	{ return &m_fb.u32[8]; }
+	{ return lineBuf32(0); }
 
 inline int MdFb::pxPerLine(void) const
-	{ return ms_PxPerLine; }
+	{ return m_pxPerLine; }
 
 inline int MdFb::pxPitch(void) const
-	{ return ms_PxPitch; }
+	{ return m_pxPitch; }
+
+inline int MdFb::pxStart(void) const
+	{ return m_pxStart; }
 
 inline int MdFb::numLines(void) const
-	{ return ms_NumLines; }
+	{ return m_numLines; }
 
 }
 
