@@ -469,11 +469,7 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	m_frames = 0;
 	
 	// Initialize controllers.
-	// TODO: Rework this with the upcoming all-in-one IoManager.
-#if 0
-	gqt4_cfg->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port1, CtrlConfig::PORT_1);
-	gqt4_cfg->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port2, CtrlConfig::PORT_2);
-#endif
+	gqt4_cfg->m_ctrlConfig->updateIoManager(gqt4_emuContext->m_ioManager);
 	gqt4_cfg->m_ctrlConfig->clearDirty();
 	
 	// Set the EmuContext settings.
@@ -773,11 +769,7 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	// Check for controller configuration updates.
 	if (gqt4_cfg->m_ctrlConfig->isDirty()) {
 		// Update the controller ports.
-		// TODO: Rework this with the upcoming all-in-one IoManager.
-#if 0
-		gqt4_cfg->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port1, CtrlConfig::PORT_1);
-		gqt4_cfg->m_ctrlConfig->updateSysPort(&gqt4_emuContext->m_port2, CtrlConfig::PORT_2);
-#endif
+		gqt4_cfg->m_ctrlConfig->updateIoManager(gqt4_emuContext->m_ioManager);
 		gqt4_cfg->m_ctrlConfig->clearDirty();
 	}
 

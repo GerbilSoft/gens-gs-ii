@@ -27,6 +27,9 @@
 #include <cassert>
 #include <cstring>
 
+// C++ includes.
+#include <algorithm>
+
 #define NUM_ELEMENTS(x) ((int)(sizeof(x) / sizeof(x[0])))
 
 namespace LibGens
@@ -74,6 +77,42 @@ void IoManager::doScanline(void)
 			dev->scanlines = 0;
 		}
 	}
+}
+
+
+/** Controller Configuration **/
+
+
+/**
+ * Set the device keymap.
+ * @param virtPort Virtual port number.
+ * @param keymap Array of GensKey_t values.
+ * @param siz Size of keymap array.
+ * @return Number of keys set, or negative on error.
+ */
+int IoManager::setKeymap(int virtPort, const GensKey_t *keymap, int siz)
+{
+	IoDevice *dev = &m_ioDevices[virtPort];
+	const int btns = std::min(siz, NUM_ELEMENTS(dev->keyMap));
+	for (int i = 0; i < btns; i++)
+		dev->keyMap[i] = *keymap++;
+	return btns;
+}
+
+/**
+ * Get the device keymap.
+ * @param virtPort Virtual port number.
+ * @param keymap Array to store the GensKey_t values in.
+ * @param siz Size of keymap array.
+ * @return Number of keys returned, or negative on error.
+ */
+int IoManager::keymap(int virtPort, GensKey_t *keymap, int siz) const
+{
+	const IoDevice *dev = &m_ioDevices[virtPort];
+	const int btns = std::min(siz, NUM_ELEMENTS(dev->keyMap));
+	for (int i = 0; i < btns; i++)
+		*keymap++ = dev->keyMap[i];
+	return btns;
 }
 
 

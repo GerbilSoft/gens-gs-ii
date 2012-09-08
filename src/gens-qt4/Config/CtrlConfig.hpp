@@ -28,8 +28,10 @@
 #include <QtCore/QObject>
 class QSettings;
 
-// LibGens includes.
-#include "libgens/IO/IoBase.hpp"
+// LibGens classes.
+namespace LibGens {
+	class IoManager;
+}
 
 namespace GensQt4
 {
@@ -96,12 +98,10 @@ class CtrlConfig : public QObject
 		int save(QSettings *qSettings);
 		
 		/**
-		 * updateSysPort(): Update a system controller port.
-		 * @param ppOldPort Pointer to IoBase variable, possibly containing an IoBase object.
-		 * ppOldPort may be updated with the address to the new IoBase object.
-		 * @param port Port number.
+		 * Update the controller I/O manager.
+		 * @param ioManager I/O manager class.
 		 */
-		void updateSysPort(LibGens::IoBase **ppOldPort, int port) const;
+		void updateIoManager(LibGens::IoManager *ioManager) const;
 	
 	private:
 		friend class CtrlConfigPrivate;

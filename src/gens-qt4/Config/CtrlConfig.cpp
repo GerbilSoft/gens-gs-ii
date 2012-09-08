@@ -23,18 +23,17 @@
 
 #include "CtrlConfig.hpp"
 
-// I/O devices.
+// Controller I/O manager.
+#include "libgens/IoManager.hpp"
 #include "libgens/IO/IoBase.hpp"
-#include "libgens/IO/Io3Button.hpp"
-#include "libgens/IO/Io6Button.hpp"
-#include "libgens/IO/Io2Button.hpp"
-#include "libgens/IO/IoMegaMouse.hpp"
 
 // Qt includes.
 #include <QtCore/QString>
 #include <QtCore/QLatin1String>
 #include <QtCore/QSettings>
 #include <QtCore/QStringList>
+
+#define NUM_ELEMENTS(x) ((int)(sizeof(x) / sizeof(x[0])))
 
 namespace GensQt4
 {
@@ -189,15 +188,17 @@ inline void CtrlConfigPrivate::clearDirty(void)
  */
 int CtrlConfigPrivate::NumButtons(LibGens::IoBase::IoType ioType)
 {
-	switch (ioType)
-	{
-		default:
+	switch (ioType) {
+		default: return 0;
+		// TODO: Update for IoManager.
+#if 0
 		case LibGens::IoBase::IOT_NONE:		return LibGens::IoBase::NumButtons();
 		case LibGens::IoBase::IOT_3BTN:		return LibGens::Io3Button::NumButtons();
 		case LibGens::IoBase::IOT_6BTN:		return LibGens::Io6Button::NumButtons();
 		case LibGens::IoBase::IOT_2BTN:		return LibGens::Io2Button::NumButtons();
 		case LibGens::IoBase::IOT_MEGA_MOUSE:	return LibGens::IoMegaMouse::NumButtons();
-		
+#endif
+
 		// TODO: Other devices.
 #if 0
 		IOT_TEAMPLAYER	= 5,
@@ -404,58 +405,18 @@ int CtrlConfig::save(QSettings *qSettings)
 
 
 /**
- * CtrlConfig::updateSysPort(): Update a system controller port.
- * @param ppOldPort Pointer to IoBase variable, possibly containing an IoBase object.
- * ppOldPort may be updated with the address to the new IoBase object.
- * @param port Port number.
+ * Update the controller I/O manager.
+ * @param ioManager I/O manager class.
+ * @param virtPort Virtual port number.
  */
-void CtrlConfig::updateSysPort(LibGens::IoBase **ppOldPort, int port) const
+void CtrlConfig::updateIoManager(LibGens::IoManager *ioManager) const
 {
-	// Only system controller ports are supported here.
-	if (port < PORT_1 || port > PORT_2)
-		return;
-	
-	LibGens::IoBase *oldPort = *ppOldPort;
-	LibGens::IoBase *newPort;
-	// TODO: Team Player / 4WP support.
-	
-	if (!oldPort || oldPort->devType() != d->ctrlTypes[port])
-	{
-		// New port needs to be created.
-		switch (d->ctrlTypes[port])
-		{
-			default:
-			case LibGens::IoBase::IOT_NONE:
-				newPort = new LibGens::IoBase(oldPort);
-				break;
-			case LibGens::IoBase::IOT_3BTN:
-				newPort = new LibGens::Io3Button(oldPort);
-				break;
-			case LibGens::IoBase::IOT_6BTN:
-				newPort = new LibGens::Io6Button(oldPort);
-				break;
-			case LibGens::IoBase::IOT_2BTN:
-				newPort = new LibGens::Io2Button(oldPort);
-				break;
-			case LibGens::IoBase::IOT_MEGA_MOUSE:
-				newPort = new LibGens::IoMegaMouse(oldPort);
-				break;
-		}
-		
-		// Delete the old port.
-		delete oldPort;
+	for (int virtPort = 0; virtPort < NUM_ELEMENTS(d->ctrlKeys); virtPort++) {
+		// TODO: Set the port type.
+
+		// Set the new keymaps.
+		ioManager->setKeymap(virtPort, &d->ctrlKeys[virtPort][0], NUM_ELEMENTS(d->ctrlKeys[virtPort]));
 	}
-	else
-	{
-		// Device type is the same.
-		newPort = oldPort;
-	}
-	
-	// Set the new keymap.
-	newPort->setKeymap(&d->ctrlKeys[port][0], newPort->numButtons());
-	
-	// Update the port variable.
-	*ppOldPort = newPort;
 }
 
 }
