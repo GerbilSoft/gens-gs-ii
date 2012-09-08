@@ -53,7 +53,7 @@ void MdFb::reinitFb(void) {
 	// Free and reallocate the framebuffer.
 	free(m_fb);
 	m_fb_sz = m_pxPitch * m_numLines * sizeof(uint32_t);
-	m_fb = malloc(m_fb_sz);
+	m_fb = calloc(m_fb_sz, 1);
 
 	// Initialize the line number lookup table.
 	m_lineNumTable.resize(m_numLines);
