@@ -47,12 +47,9 @@ namespace LibGens
 // We're only allowing one emulation context at the moment.
 int EmuContext::ms_RefCount = 0;
 
-// Controllers.
-// TODO: Figure out a better place to put these!
-// TODO: Make these non-static!
-IoBase *EmuContext::m_port1;		// Player 1.
-IoBase *EmuContext::m_port2;		// Player 2.
-IoBase *EmuContext::m_portE;		// EXT port.
+// Controller I/O manager.
+// TODO: Make this non-static!
+IoManager *EmuContext::m_ioManager;
 
 // Static pointer. Temporarily needed for SRam/EEPRom.
 EmuContext *EmuContext::m_instance = NULL;
@@ -96,47 +93,40 @@ void EmuContext::init(MdFb *fb, Rom *rom, SysVersion::RegionCode_t region)
 	// NOTE: Region code isn't used in the base class.
 	// This may change later on.
 	((void)region);
-	
+
 	ms_RefCount++;
 	assert(ms_RefCount == 1);
 	m_instance = this;
-	
+
 	// Initialize variables.
 	m_rom = rom;
 	m_saveDataEnable = true;	// Enabled by default. (TODO: Config setting.)
-	
-	// Create base I/O devices that do nothing.
+
+	// Create the Controller I/O manager.
 	// TODO: For now, we'll treat them as static.
-	if (!m_port1)
-		m_port1 = new IoBase();
-	if (!m_port2)
-		m_port2 = new IoBase();
-	if (!m_portE)
-		m_portE = new IoBase();
-	
+	if (!m_ioManager)
+		m_ioManager = new IoManager();
+
 	// Set the SRam and EEPRom pathnames.
 	// TODO: Update them if the pathname is changed.
 	m_SRam.setPathname(ms_PathSRam);
 	m_EEPRom.setPathname(ms_PathSRam);
-	
+
 	// Initialize EEPRom.
 	// EEPRom is only used if the ROM is in the EEPRom class's database.
 	// Otherwise, SRam is used.
 	int eepromSize = m_rom->initEEPRom(&m_EEPRom);
-	if (eepromSize > 0)
-	{
+	if (eepromSize > 0) {
 		// EEPRom was initialized.
 		lg_osd(OSD_EEPROM_LOAD, eepromSize);
-	}
-	else
-	{
+	} else {
 		// EEPRom was not initialized.
 		// Initialize SRam.
 		int sramSize = m_rom->initSRam(&m_SRam);
 		if (sramSize > 0)
 			lg_osd(OSD_SRAM_LOAD, sramSize);
 	}
-	
+
 	// Initialize the VDP.
 	m_vdp = new Vdp(fb);
 }

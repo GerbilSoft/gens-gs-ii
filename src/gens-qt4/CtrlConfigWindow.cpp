@@ -155,8 +155,11 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	if (gqt4_emuContext)
 	{
 		// Emulation is running.
+		// TODO: Update for IoManager.
+#if 0
 		m_devType[0] = gqt4_emuContext->m_port1->devType();
 		m_devType[1] = gqt4_emuContext->m_port2->devType();
+#endif
 	}
 	else
 	{
