@@ -393,7 +393,7 @@ class IoManager
 			GensKey_t keyMap[BTNI_MAX];
 		};
 
-		IoDevice m_ioDevices[VIRTPORT_MAX - 1];
+		IoDevice m_ioDevices[VIRTPORT_MAX];
 };
 
 

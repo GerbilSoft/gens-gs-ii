@@ -64,7 +64,7 @@ void IoManager::reset(void)
  */
 void IoManager::doScanline(void)
 {
-	for (int i = VIRTPORT_1; i < VIRTPORT_MAX; i++) {
+	for (int i = 0; i < NUM_ELEMENTS(m_ioDevices); i++) {
 		IoDevice *dev = &m_ioDevices[i];
 		if (dev->type != IOT_6BTN)
 			continue;
