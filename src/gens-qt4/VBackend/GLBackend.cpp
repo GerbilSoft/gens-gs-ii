@@ -56,16 +56,15 @@ namespace GensQt4
  */
 GLBackend::GLBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	: VBackend(parent, keyHandler)
-{
-	// Initialize the OpenGL variables.
-	m_tex = 0;		// Main texture.
-	m_texOsd = 0;		// OSD texture.
-	m_glListOsd = 0;	// OSD display list.
-	m_texPreview = NULL;	// Preview image texture. (GlTex2D)
-
+	
 	// TODO: Have GensQGLWidget set the window size.
-	m_winSize = QSize(320, 240);
-}
+	, m_winSize(320, 240)
+
+	, m_tex(0)
+	, m_texOsd(0)
+	, m_glListOsd(0)
+	, m_texPreview(NULL)
+{ }
 
 GLBackend::~GLBackend()
 {
@@ -233,8 +232,11 @@ void GLBackend::reallocTexture(void)
 #endif /* HAVE_GLEW */
 
 	// TODO: Determine size based on renderer.
-	// TODO: Use the MdFb pxPerLine() and numLines() properties to calculate the visible size.
-	m_texVisSize = QSize(320, 240);
+	// TODO: Separate source framebuffer size from renderer size.
+	if (m_srcFb)
+		m_texVisSize = QSize(m_srcFb->pxPerLine(), m_srcFb->numLines());
+	else
+		m_texVisSize = QSize(320, 240);
 	m_texSize.setWidth(next_pow2s(m_texVisSize.width()));
 	m_texSize.setHeight(next_pow2s(m_texVisSize.height()));
 
@@ -398,40 +400,40 @@ void GLBackend::glb_resizeGL(int width, int height)
 	if (!aspectRatioConstraint()) {
 		// No aspect ratio constraint.
 		glOrtho(-1, 1, -1, 1, -1, 1);
-		m_rectfOsd = QRectF(0, 0, 320, 240);
+		m_rectfOsd = QRectF(0, 0, m_texVisSize.width(), m_texVisSize.height());
 	} else {
 		// Aspect ratio constraint.
-		const int w3 = (width * 3);
-		const int h4 = (height * 4);
+		const double screenRatio = ((double)width / (double)height);
+		const double texRatio = ((double)m_texVisSize.width() / (double)m_texVisSize.height());
 
-		if (w3 > h4) {
-			// Image is wider than 4:3.
-			const double ratio = ((double)w3 / (double)h4);
+		if (screenRatio > texRatio) {
+			// Screen is wider than the texture.
+			const double ratio = (screenRatio / texRatio);
 			glOrtho(-ratio, ratio, -1, 1, -1, 1);
 
 			// Adjust the OSD rectangle.
 			m_rectfOsd.setTop(0);
-			m_rectfOsd.setHeight(240);
+			m_rectfOsd.setHeight(m_texVisSize.height());
 
-			const double osdWidth = (320.0 * ratio);
-			m_rectfOsd.setLeft(-((osdWidth - 320.0) / 2.0));
+			const double osdWidth = (m_texVisSize.width() * ratio);
+			m_rectfOsd.setLeft(-((osdWidth - m_texVisSize.width()) / 2.0));
 			m_rectfOsd.setWidth(osdWidth);
-		} else if (w3 < h4) {
-			// Image is taller than 4:3.
-			const double ratio = ((double)h4 / (double)w3);
+		} else if (screenRatio < texRatio) {
+			// Screen is taller than the texture.
+			const double ratio = (texRatio / screenRatio);
 			glOrtho(-1, 1, -ratio, ratio, -1, 1);
 			
 			// Adjust the OSD rectangle.
 			m_rectfOsd.setLeft(0);
-			m_rectfOsd.setWidth(320);
+			m_rectfOsd.setWidth(m_texVisSize.width());
 			
-			const double osdHeight = (240.0 * ratio);
-			m_rectfOsd.setTop(-((osdHeight - 240.0) / 2.0));
+			const double osdHeight = (m_texVisSize.height() * ratio);
+			m_rectfOsd.setTop(-((osdHeight - m_texVisSize.height()) / 2.0));
 			m_rectfOsd.setHeight(osdHeight);
 		} else {
 			// Image has the correct aspect ratio.
 			glOrtho(-1, 1, -1, 1, -1, 1);
-			m_rectfOsd = QRectF(0, 0, 320, 240);
+			m_rectfOsd = QRectF(0, 0, m_texVisSize.width(), m_texVisSize.height());
 		}
 	}
 
@@ -475,8 +477,33 @@ void GLBackend::glb_paintGL(void)
 		m_vbDirty = false;	// Video backend is no longer dirty.
 		return;
 	}
-	
-	if (hasAspectRatioConstraintChanged()) {
+
+	// Check if the visible texture size has changed.
+	bool texVisSizeChanged = false;
+	if (m_srcFb) {
+		if (m_texVisSize.width() != m_srcFb->pxPerLine() ||
+		    m_texVisSize.height() != m_srcFb->numLines())
+		{
+			texVisSizeChanged = true;
+			// m_texVisSize is usually set in reallocTexture().
+			// We have to set it here so glb_resizeGL()
+			// updates the OSD rect correctly.
+			m_texVisSize.setWidth(m_srcFb->pxPerLine());
+			m_texVisSize.setHeight(m_srcFb->numLines());
+		}
+	} else {
+		// TODO: Use constants for default texture size.
+		if (m_texVisSize.width() != 320 || m_texVisSize.height() != 240) {
+			texVisSizeChanged = true;
+			// m_texVisSize is usually set in reallocTexture().
+			// We have to set it here so glb_resizeGL()
+			// updates the OSD rect correctly.
+			m_texVisSize.setWidth(320);
+			m_texVisSize.setHeight(240);
+		}
+	}
+
+	if (hasAspectRatioConstraintChanged() || texVisSizeChanged) {
 		// Aspect ratio constraint has changed.
 		glb_resizeGL(m_winSize.width(), m_winSize.height());
 		resetAspectRatioConstraintChanged();
@@ -485,8 +512,8 @@ void GLBackend::glb_paintGL(void)
 	if (m_mdScreenDirty) {
 		// MD_Screen is dirty.
 
-		// Check if the Bpp has changed.
-		if (m_srcBpp != m_lastBpp) {
+		// Check if the Bpp or texture size has changed.
+		if (m_srcBpp != m_lastBpp || texVisSizeChanged) {
 			// Bpp has changed. Reallocate the texture.
 			// VDP palettes will be recalculated on the next frame.
 			reallocTexture();
@@ -639,6 +666,7 @@ void GLBackend::recalcStretchRectF(StretchMode_t mode)
 
 	if (isEmuContext) {
 		// Emulation context is active. Get the video resolution.
+		// TODO: Adjust for visible texture size.
 		ctxHPix = m_emuContext->m_vdp->GetHPix();
 		ctxHPixBegin = m_emuContext->m_vdp->GetHPixBegin();
 		ctxVPix = m_emuContext->m_vdp->GetVPix();
@@ -673,6 +701,7 @@ void GLBackend::recalcStretchRectF(StretchMode_t mode)
 		return;
 
 	// Horizontal stretch.
+	// TODO: Adjust for visible texture size.
 	if (mode == STRETCH_H || mode == STRETCH_FULL) {
 		// Horizontal stretch.
 		if (ctxHPixBegin > 0) {
@@ -685,6 +714,7 @@ void GLBackend::recalcStretchRectF(StretchMode_t mode)
 	}
 
 	// Vertical stretch.
+	// TODO: Adjust for visible texture size.
 	if (mode == STRETCH_V || mode == STRETCH_FULL) {
 		// Vertical stretch.
 		int v_pix = (240 - ctxVPix);
@@ -758,6 +788,7 @@ void GLBackend::printOsdText(void)
 	// TODO: Make this customizable?
 	static const QColor clShadow(Qt::black);
 
+	// TODO: Adjust for visible texture size.
 	int y = (240 - ms_Osd_chrH);
 	const double curTime = LibGens::Timing::GetTimeD();
 
@@ -845,6 +876,7 @@ void GLBackend::printOsdText(void)
 			msg += QString::fromLatin1("%1:%2").arg(mins).arg(QString::number(secs), 2, QChar(L'0'));
 
 			// Calculate the message width.
+			// TODO: Adjust for visible texture size.
 			const int msgW = ((msg.size() + 1) * ms_Osd_chrW);
 			const int x = (320 - msgW);
 
