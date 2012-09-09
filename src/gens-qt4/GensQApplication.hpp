@@ -40,37 +40,37 @@ class GensQApplicationPrivate;
 class GensQApplication : public QApplication
 {
 	Q_OBJECT
-	
+
 	public:
 		GensQApplication(int &argc, char **argv);
 		GensQApplication(int &argc, char **argv, bool GUIenabled);
 		GensQApplication(int &argc, char **argv, Type type);
 		virtual ~GensQApplication();
-		
+
 		/**
-		 * isGuiThread(): Check if the current thread is the GUI thread.
+		 * Check if the current thread is the GUI thread.
 		 * @return True if it is; false if it isn't.
 		 */
 		bool isGuiThread(void);
-		
+
 		/**
-		 * IconFromTheme(): Get an icon from the system theme.
+		 * Get an icon from the system theme.
 		 * @param name Icon name.
 		 * @return QIcon.
 		 */
 		static QIcon IconFromTheme(QString name);
-		
+
 #ifdef Q_OS_WIN32
 		// Win32 event filter.
 		bool winEventFilter(MSG *msg, long *result);
 #endif /* Q_OS_WIN32 */
-		
+
 		/**
 		 * HACK: The following mess is a hack to get the
 		 * custom signal handler dialog to work across
 		 * multiple threads. Don't mess around with it!
 		 */
-		
+
 	signals:
 #ifdef HAVE_SIGACTION
 		void signalCrash(int signum, siginfo_t *info, void *context);
@@ -81,19 +81,16 @@ class GensQApplication : public QApplication
 	private:
 		friend class GensQApplicationPrivate;
 		GensQApplicationPrivate *const d;
-		
+
 		Q_DISABLE_COPY(GensQApplication)
-		
-		// GUI thread.
-		QThread *m_guiThread;
-		
+
 #ifdef Q_OS_WIN32
 		/**
-		 * SetFont_Win32(): Set the Qt font to match the system font.
+		 * Set the Qt font to match the system font.
 		 */
 		static void SetFont_Win32(void);
 #endif /* Q_OS_WIN32 */
-		
+
 		friend class SigHandler; // Allow SigHandler to call doCrash().
 #ifdef HAVE_SIGACTION
 		inline void doCrash(int signum, siginfo_t *info, void *context)
@@ -102,7 +99,7 @@ class GensQApplication : public QApplication
 		inline void doCrash(int signum)
 			{ emit signalCrash(signum); }
 #endif /* HAVE_SIGACTION */
-	
+
 	private slots:
 #ifdef HAVE_SIGACTION
 		inline void slotCrash(int signum, siginfo_t *info, void *context)
@@ -112,14 +109,6 @@ class GensQApplication : public QApplication
 			{ SigHandler::SignalHandler(signum); }
 #endif /* HAVE_SIGACTION */
 };
-
-
-/**
- * isGuiThread(): Check if the current thread is the GUI thread.
- * @return True if it is; false if it isn't.
- */
-inline bool GensQApplication::isGuiThread(void)
-	{ return (QThread::currentThread() == m_guiThread); }
 
 }
 

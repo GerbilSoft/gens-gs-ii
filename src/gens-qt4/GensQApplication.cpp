@@ -40,17 +40,22 @@ class GensQApplicationPrivate
 	public:
 		GensQApplicationPrivate(GensQApplication *q);
 		void init(void);
-		
+
 		// Initialize GensQApplication.
 		void gqaInit(void);
-		
+
 		// Set the Gens translation.
 		void setGensTranslation(QString locale);
-	
+
 	private:
 		GensQApplication *const q;
 		Q_DISABLE_COPY(GensQApplicationPrivate)
-		
+
+	public:
+		// GUI thread.
+		QThread *guiThread;
+
+	private:
 		// Qt translators.
 		QTranslator *qtTranslator;
 		QTranslator *gensTranslator;
@@ -63,18 +68,19 @@ class GensQApplicationPrivate
 
 GensQApplicationPrivate::GensQApplicationPrivate(GensQApplication *q)
 	: q(q)
+	, guiThread(NULL)
 	, qtTranslator(NULL)
 	, gensTranslator(NULL)
 { }
 
 /**
- * GensQApplicationPrivate::gqaInit(): GensQApplication initialization function.
+ * GensQApplication initialization function.
  * The same code is used in all three GensQApplication() constructors.
  */
 void GensQApplicationPrivate::gqaInit(void)
 {
 	// Save the GUI thread pointer for later.
-	q->m_guiThread = QThread::currentThread();
+	guiThread = QThread::currentThread();
 	
 	// Set application information.
 	QCoreApplication::setOrganizationName(QLatin1String("GerbilSoft"));
@@ -185,7 +191,16 @@ GensQApplication::~GensQApplication()
 	{ delete d; }
 
 /**
- * IconFromTheme(): Get an icon from the system theme.
+ * Check if the current thread is the GUI thread.
+ * @return True if it is; false if it isn't.
+ */
+bool GensQApplication::isGuiThread(void)
+{
+	return (QThread::currentThread() == d->guiThread);
+}
+
+/**
+ * Get an icon from the system theme.
  * @param name Icon name.
  * @return QIcon.
  */
