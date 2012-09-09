@@ -64,8 +64,8 @@ static int SetHeapOptions(void)
 
 	typedef BOOL (WINAPI *HSI)
 		(HANDLE, HEAP_INFORMATION_CLASS, PVOID, SIZE_T);
-	HSI pHsi = (HSI)GetProcAddress(hLib, "HeapSetInformation");
-	if (!pHsi) {
+	HSI pfnHsi = (HSI)GetProcAddress(hLib, "HeapSetInformation");
+	if (!pfnHsi) {
 		FreeLibrary(hLib);
 		return -2;
 	}
@@ -74,7 +74,7 @@ static int SetHeapOptions(void)
 #   define HeapEnableTerminationOnCorruption (HEAP_INFORMATION_CLASS)1
 #endif
 
-	bool fRet = !!(pHsi(NULL, HeapEnableTerminationOnCorruption, NULL, 0));
+	bool fRet = !!(pfnHsi(NULL, HeapEnableTerminationOnCorruption, NULL, 0));
 	if (hLib)
 		FreeLibrary(hLib);
 
