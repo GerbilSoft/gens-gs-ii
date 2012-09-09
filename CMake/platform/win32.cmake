@@ -4,8 +4,8 @@ SET(GENS_CXXFLAGS_PLATFORM "-fshort-wchar")
 
 # Debug flags.
 IF(CMAKE_BUILD_TYPE MATCHES ^debug)
-	SET(GENS_CFLAGS_PLATFORM "-gstabs")
-	SET(GENS_CXXFLAGS_PLATFORM "-gstabs")
+	SET(GENS_CFLAGS_PLATFORM "-ggdb")
+	SET(GENS_CXXFLAGS_PLATFORM "-ggdb")
 ENDIF(CMAKE_BUILD_TYPE MATCHES ^debug)
 
 # Test for static libgcc/libstdc++.
