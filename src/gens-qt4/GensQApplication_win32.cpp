@@ -61,13 +61,12 @@ static int SetHeapOptions(void)
 	HMODULE hLib = LoadLibraryA("kernel32.dll");
 	if (hLib == NULL)
 		return -1;
-	
+
 	typedef BOOL (WINAPI *HSI)
 		(HANDLE, HEAP_INFORMATION_CLASS ,PVOID, SIZE_T);
-	HSI pHsi = (HSI)GetProcAddress(hLib,"HeapSetInformation");
+	HSI pHsi = (HSI)GetProcAddress(hLib, "HeapSetInformation");
 	printf("pHsi == %08X\n", pHsi);
-	if (!pHsi)
-	{
+	if (!pHsi) {
 		FreeLibrary(hLib);
 		return -2;
 	}
@@ -75,11 +74,11 @@ static int SetHeapOptions(void)
 #ifndef HeapEnableTerminationOnCorruption
 #   define HeapEnableTerminationOnCorruption (HEAP_INFORMATION_CLASS)1
 #endif
-	
+
 	bool fRet = !!((pHsi)(NULL, HeapEnableTerminationOnCorruption, NULL, 0));
 	if (hLib)
 		FreeLibrary(hLib);
-	
+
 	return fRet;
 }
 
@@ -99,12 +98,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
 	// Enable heap metadata protection.
 	// Reference: http://msdn.microsoft.com/en-us/library/bb430720.aspx
 	SetHeapOptions();
-	
+
 	// Tokenize the command line parameters.
 	int argc = 0;
 	QVector<char*> argv(8);
 	qWinMain(hInst, hPrevInst, lpCmdLine, nCmdShow, argc, argv);
-	
+
 	// Call the real main function.
 	return gens_main(argc, argv.data());
 }
@@ -124,18 +123,18 @@ namespace GensQt4
 bool GensQApplication::winEventFilter(MSG *msg, long *result)
 {
 	Q_UNUSED(result)
-	
+
 	if (msg->message != WM_SETTINGCHANGE &&
 	    msg->wParam != SPI_SETNONCLIENTMETRICS)
 	{
 		// GensQApplication doesn't handle this message.
 		return false;
 	}
-	
+
 	// WM_SETTINGCHANGE / SPI_SETNONCLIENTMETRICS.
 	// Update the Qt font.
 	SetFont_Win32();
-	
+
 	// Allow QApplication to handle this message anyway.
 	return false;
 }
@@ -149,36 +148,33 @@ void GensQApplication::SetFont_Win32(void)
 	NONCLIENTMETRICS ncm;
 	ncm.cbSize = sizeof(ncm);
 	::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0);
-	
+
 	int nFontSize = 0;
 	HDC hDC = ::GetDC(NULL);
-	
+
 	// Calculate the font size in points.
 	// http://www.codeguru.com/forum/showthread.php?t=476244
-	if (ncm.lfMessageFont.lfHeight < 0)
-	{
+	if (ncm.lfMessageFont.lfHeight < 0) {
 		nFontSize = -::MulDiv(ncm.lfMessageFont.lfHeight,
 				      72, ::GetDeviceCaps(hDC, LOGPIXELSY));
-	}
-	else
-	{
+	} else {
 		TEXTMETRIC tm;
 		memset(&tm, 0x00, sizeof(tm));
 		::GetTextMetrics(hDC, &tm);
-		
+
 		nFontSize = -::MulDiv(ncm.lfMessageFont.lfHeight - tm.tmInternalLeading,
 				      72, ::GetDeviceCaps(hDC, LOGPIXELSY));
 	}
-	
+
 	// TODO: Scale Windows font weights to Qt font weights.
-	
+
 	// TODO: Menus always use the message font, and they already
 	// respond to WM_SETTINGCHANGE. Make menus use the menu font.
-	
+
 	// Create the QFont.
 	QFont qAppFont(ncm.lfMessageFont.lfFaceName, nFontSize,
 		       -1, ncm.lfMessageFont.lfItalic);
-	
+
 	// Set the Qt application font.
 	QApplication::setFont(qAppFont);
 }
