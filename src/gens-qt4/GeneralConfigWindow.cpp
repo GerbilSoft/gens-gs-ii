@@ -54,12 +54,6 @@ namespace GensQt4
 // Static member initialization.
 GeneralConfigWindow *GeneralConfigWindow::m_GeneralConfigWindow = NULL;
 
-// Warning string.
-const QString GeneralConfigWindow::ms_sWarning =
-	QLatin1String("<span style='color: red'><b>") +
-	GeneralConfigWindow::tr("Warning:") +
-	QLatin1String("</b></span> ");
-
 /**
  * Check if the warranty is void.
  * If it is, we'll show some super secret settings.
@@ -84,17 +78,21 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 {
 	// Initialize the Qt4 UI.
 	setupUi(this);
-	
+
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
-	
-	if (!isWarrantyVoid())
-	{
+
+	// Initialize the "Warning" string.
+	m_sWarning = QLatin1String("<span style='color: red'><b>") +
+			GeneralConfigWindow::tr("Warning:") +
+			QLatin1String("</b></span> ");
+
+	if (!isWarrantyVoid()) {
 		// Hide the super secret settings.
 		delete grpAdvancedVDP;
 		grpAdvancedVDP = NULL;
 	}
-	
+
 	// Create the action group for the toolbar buttons.
 	m_agBtnGroup = new QActionGroup(this);
 	m_agBtnGroup->setExclusive(true);
@@ -102,8 +100,7 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 		this, SLOT(toolbarTriggered(QAction*)));
 
 	// FreeDesktop.org icon names for the toolbar buttons.
-	static const char *const icon_fdo[] =
-	{
+	static const char *const icon_fdo[] = {
 		"configure",			// General
 		"applications-graphics",	// Graphics
 		"cpu",				// VDP
@@ -112,22 +109,21 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 		"utilities-terminal",		// External Programs
 		NULL
 	};
-	
+
 	// Initialize the toolbar buttons.
 	int i = 0;
-	foreach (QAction *action, toolBar->actions())
-	{
+	foreach (QAction *action, toolBar->actions()) {
 		action->setIcon(GensQApplication::IconFromTheme(QLatin1String(icon_fdo[i])));
 		action->setData(i);
 		m_agBtnGroup->addAction(action);
-		
+
 		// Next action.
 		i++;
 	}
-	
+
 	// Select the "General" tab.
 	actionGeneral->setChecked(true);
-	
+
 #ifndef GCW_APPLY_IMMED
 	// Set up a signal for the Apply button.
 	QPushButton *btnApply = buttonBox->button(QDialogButtonBox::Apply);
@@ -140,7 +136,7 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 		QSize szBbox = buttonBox->size();
 		delete buttonBox;
 		buttonBox = NULL;
-		
+
 		// Reduce the size of the QMainWindow.
 		QSize szWindow = this->maximumSize();
 		int left, top, right, bottom;
@@ -151,14 +147,14 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 		this->setBaseSize(szWindow);
 	}
 #endif
-	
+
 #ifdef Q_WS_MAC
 	// Set up the Mac OS X-specific UI elements.
 	setupUi_mac();
 #endif
-	
+
 	/** Intro effect. **/
-	
+
 	// Intro Effect Color: Add the color entries.
 	cboIntroColor->addItem(Qt::black);
 	cboIntroColor->addItem(Qt::blue);
@@ -168,21 +164,21 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	cboIntroColor->addItem(Qt::magenta);
 	cboIntroColor->addItem(Qt::yellow);
 	cboIntroColor->addItem(Qt::white);
-	
+
 	/** System. **/
-	
+
 	// Set the icons for the up/down buttons.
 	btnRegionDetectUp->setIcon(GensQApplication::IconFromTheme(QLatin1String("arrow-up")));
 	btnRegionDetectDown->setIcon(GensQApplication::IconFromTheme(QLatin1String("arrow-down")));
-	
+
 	/** Sega CD. **/
-	
+
 	// Sega CD: Initialize the Boot ROM textbox icons.
 	txtMcdRomUSA->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 	txtMcdRomEUR->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 	txtMcdRomJPN->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 	txtMcdRomAsia->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
-	
+
 	// Sega CD: Set the placeholder text.
 #if QT_VERSION >= 0x040700
 	const QString sMcdBootRom_PlaceholderText = tr("Select a %1 Boot ROM...");
@@ -191,7 +187,7 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	txtMcdRomJPN->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Mega CD (J)")));
 	txtMcdRomAsia->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Mega CD (Asia)")));
 #endif /* QT_VERSION >= 0x040700 */
-	
+
 	// External Programs: Set the textbox icon and placeholder text.
 	txtExtPrgUnRAR->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 #ifdef Q_OS_WIN32
@@ -204,7 +200,7 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	txtExtPrgUnRAR->setPlaceholderText(tr("Select a RAR or UnRAR binary..."));
 #endif /* QT_VERSION >= 0x040700 */
 #endif /* Q_OS_WIN32 */
-	
+
 	// Load configuration.
 	reload();
 }
@@ -791,7 +787,7 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 	if (rom->isMultiFile())
 	{
 		txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxWarning));
-		return (sLineBreak + ms_sWarning +
+		return (sLineBreak + m_sWarning +
 				tr("This archive has multiple files.") + sLineBreak +
 				tr("Multi-file ROM archives are not currently supported for Sega CD Boot ROMs."));
 	}
@@ -804,7 +800,7 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 		// Wrong ROM size.
 		filename_icon = QStyle::SP_MessageBoxWarning;
 		
-		rom_size_warning = ms_sWarning + tr("ROM size is incorrect.") + sLineBreak +
+		rom_size_warning = m_sWarning + tr("ROM size is incorrect.") + sLineBreak +
 				tr("(expected %L1 bytes; found %L2 bytes)").arg(MCD_ROM_FILESIZE).arg(rom->romSize());
 		
 		// TODO: Continue ROM identification even if the ROM is too big?
@@ -855,7 +851,7 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 		QString expected_region = QString::fromUtf8(lg_mcd_rom_GetRegionCodeString(region_code));
 		QString boot_rom_region = QString::fromUtf8(lg_mcd_rom_GetRegionCodeString(boot_rom_region_primary));
 		
-		rom_notes += ms_sWarning + tr("Region code is incorrect.") + sLineBreak +
+		rom_notes += m_sWarning + tr("Region code is incorrect.") + sLineBreak +
 			     tr("(expected %1; found %2)").arg(expected_region).arg(boot_rom_region) + sLineBreak;
 		
 		// Set the icon to warning.
@@ -875,13 +871,13 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 		case RomStatus_Unsupported:
 		default:
 			// ROM is unsupported.
-			rom_notes += ms_sWarning + tr("This Boot ROM is not supported by Gens/GS II.") + sLineBreak;
+			rom_notes += m_sWarning + tr("This Boot ROM is not supported by Gens/GS II.") + sLineBreak;
 			filename_icon = QStyle::SP_MessageBoxWarning;
 			break;
 		
 		case RomStatus_Broken:
 			// ROM is known to be broken.
-			rom_notes += ms_sWarning + tr("This Boot ROM is known to be broken on all emulators.") + sLineBreak;
+			rom_notes += m_sWarning + tr("This Boot ROM is known to be broken on all emulators.") + sLineBreak;
 			filename_icon = QStyle::SP_MessageBoxCritical;
 			break;
 	}
@@ -1092,27 +1088,27 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 			
 			case -2:
 				// RAR not executable.
-				prg_status = ms_sWarning + tr("The specified file is not executable.");
+				prg_status = m_sWarning + tr("The specified file is not executable.");
 				filename_icon = QStyle::SP_MessageBoxWarning;
 				break;
 			
 			case -3:
 				// File isn't a regular file.
-				prg_status = ms_sWarning + tr("The specified file is not a regular file.");
+				prg_status = m_sWarning + tr("The specified file is not a regular file.");
 				filename_icon = QStyle::SP_MessageBoxCritical;
 				break;
 			
 			case -4:
 				// Error calling stat().
 				// TODO: Get the stat() error code?
-				prg_status = ms_sWarning + tr("Error calling stat().");
+				prg_status = m_sWarning + tr("Error calling stat().");
 				filename_icon = QStyle::SP_MessageBoxCritical;
 				break;
 			
 #ifdef Q_OS_WIN32
 			case -5:
 				// UnRAR.dll API version is too old. (Win32 only)
-				prg_status = ms_sWarning + tr("UnRAR.dll API version is too old.") + "<br/>\n" +
+				prg_status = m_sWarning + tr("UnRAR.dll API version is too old.") + "<br/>\n" +
 							   tr("Gens/GS II requires API version %1 or later.").arg(RAR_DLL_VERSION);
 				filename_icon = QStyle::SP_MessageBoxCritical;
 				break;
@@ -1121,9 +1117,9 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 			case -6:
 				// Version information not found.
 #ifdef Q_OS_WIN32
-				prg_status = ms_sWarning + tr("DLL version information not found.");
+				prg_status = m_sWarning + tr("DLL version information not found.");
 #else
-				prg_status = ms_sWarning + tr("Program version information not found.");
+				prg_status = m_sWarning + tr("Program version information not found.");
 #endif
 				filename_icon = QStyle::SP_MessageBoxCritical;
 				break;
@@ -1131,16 +1127,16 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 			case -7:
 				// Not RAR, UnRAR, or UnRAR.dll.
 #ifdef Q_OS_WIN32
-				prg_status = ms_sWarning + tr("Selected DLL is not UnRAR.dll.");
+				prg_status = m_sWarning + tr("Selected DLL is not UnRAR.dll.");
 #else
-				prg_status = ms_sWarning + tr("Selected program is neither RAR nor UnRAR.");
+				prg_status = m_sWarning + tr("Selected program is neither RAR nor UnRAR.");
 #endif
 				filename_icon = QStyle::SP_MessageBoxCritical;
 				break;
 			
 			default:
 				// Unknown error.
-				prg_status = ms_sWarning + tr("Unknown error code %1 received from RAR file handler.").arg(status);
+				prg_status = m_sWarning + tr("Unknown error code %1 received from RAR file handler.").arg(status);
 				filename_icon = QStyle::SP_MessageBoxWarning;
 				break;
 		}

@@ -54,25 +54,27 @@ namespace GensQt4
 class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 {
 	Q_OBJECT
-	
+
 	public:
 		static void ShowSingle(QWidget *parent = NULL);
-	
+
 	protected:
 		GeneralConfigWindow(QWidget *parent = NULL);
 		virtual ~GeneralConfigWindow();
-		
+
 		QSize sizeHint(void) const
 			{ return this->baseSize(); }
-		
+
 		void keyPressEvent(QKeyEvent *event);
-		
+
 		// State change event. (Used for switching the UI language at runtime.)
 		void changeEvent(QEvent *event);
-		
+
 		// Warning string.
-		static const QString ms_sWarning;
-		
+		// NOTE: This must be built at runtime;
+		// otherwise, QObject might not be initialized.
+		QString m_sWarning;
+
 #ifndef GCW_APPLY_IMMED
 		/**
 		 * setApplyButtonEnabled(): Enable or disable the Apply button.
@@ -80,12 +82,12 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		 */
 		void setApplyButtonEnabled(bool enabled);
 #endif
-		
+
 #ifdef Q_WS_MAC
 		// Mac OS X UI customizations.
 		void setupUi_mac(void);
 #endif
-	
+
 	protected slots:
 		void accept(void);
 		void reject(void);
