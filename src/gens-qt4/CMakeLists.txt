@@ -344,9 +344,8 @@ ADD_SUBDIRECTORY(translations)
 # Build the executable. #
 #########################
 
-# TODO: Set Win32 when compiling release build
-# to disable the command prompt window.
-ADD_EXECUTABLE(gens-qt4 MACOSX_BUNDLE
+ADD_EXECUTABLE(gens-qt4
+	WIN32 MACOSX_BUNDLE
 	${gens-qt4_SRCS}
 	${gens-qt4_COMPAT_SRCS}
 	${gens-qt4_MOC_SOURCES}
