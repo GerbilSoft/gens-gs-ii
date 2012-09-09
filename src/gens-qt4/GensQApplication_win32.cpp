@@ -51,8 +51,6 @@
 
 // QtCore includes.
 #include <QtCore/qt_windows.h>
-#include <QtCore/QByteArray>
-#include <QtCore/QString>
 #include <QtCore/QVector>
 
 // qWinMain declaration.
