@@ -68,7 +68,7 @@ class GensColorButton : public QPushButton
 		static QColor TextColor_For_BgColor(const QColor& color);
 		
 		// Stylesheet for QPushButton background color.
-		static const QString ms_sCssBtnColors;
+		static const char *ms_sCssBtnColors;
 		
 		QColor m_bgColor;
 };

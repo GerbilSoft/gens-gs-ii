@@ -25,8 +25,8 @@ namespace GensQt4
 {
 
 // Stylesheet for QPushButton background color.
-const QString GensColorButton::ms_sCssBtnColors =
-	QLatin1String("QPushButton { background-color: %1; color: %2; }");
+const char *GensColorButton::ms_sCssBtnColors =
+	"QPushButton { background-color: %1; color: %2; }";
 
 /**
  * setBgColor(): Set the background color.
@@ -46,7 +46,8 @@ void GensColorButton::setBgColor(const QColor& newBgColor)
 	
 	// Create a stylesheet with the new background color.
 	QColor colorText = TextColor_For_BgColor(m_bgColor);
-	this->setStyleSheet(ms_sCssBtnColors.arg(m_bgColor.name()).arg(colorText.name()));
+	this->setStyleSheet(QString::fromLatin1(ms_sCssBtnColors)
+				.arg(m_bgColor.name()).arg(colorText.name()));
 }
 
 }
