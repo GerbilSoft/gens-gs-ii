@@ -26,7 +26,10 @@
 
 // Win32 includes.
 // Common Controls 6 is required for SHGetImageList().
+#if !defined(_WIN32_IE) || _WIN32_IE < 0x0600
+#undef _WIN32_IE
 #define _WIN32_IE 0x0600
+#endif
 #include <shellapi.h>
 #include <commctrl.h>
 #include <commoncontrols.h>
