@@ -63,9 +63,8 @@ static int SetHeapOptions(void)
 		return -1;
 
 	typedef BOOL (WINAPI *HSI)
-		(HANDLE, HEAP_INFORMATION_CLASS ,PVOID, SIZE_T);
+		(HANDLE, HEAP_INFORMATION_CLASS, PVOID, SIZE_T);
 	HSI pHsi = (HSI)GetProcAddress(hLib, "HeapSetInformation");
-	printf("pHsi == %08X\n", pHsi);
 	if (!pHsi) {
 		FreeLibrary(hLib);
 		return -2;
@@ -75,7 +74,7 @@ static int SetHeapOptions(void)
 #   define HeapEnableTerminationOnCorruption (HEAP_INFORMATION_CLASS)1
 #endif
 
-	bool fRet = !!((pHsi)(NULL, HeapEnableTerminationOnCorruption, NULL, 0));
+	bool fRet = !!(pHsi(NULL, HeapEnableTerminationOnCorruption, NULL, 0));
 	if (hLib)
 		FreeLibrary(hLib);
 
@@ -84,7 +83,7 @@ static int SetHeapOptions(void)
 
 /**
  * Main entry point on Win32.
- * Code based on libqtmain 4.7.1.
+ * Code based on libqtmain-4.7.1.
  * Windows CE-specific parts have been removed.
  * @param hInst Instance.
  * @param hPrevInst Previous instance. (Unused on Win32)
