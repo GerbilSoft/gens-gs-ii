@@ -41,6 +41,14 @@
 #endif
 #include <windows.h>
 
+// DEP policy (requires _WIN32_WINNT >= 0x0600)
+#ifndef PROCESS_DEP_ENABLE
+#define PROCESS_DEP_ENABLE 0x1
+#endif
+#ifndef PROCESS_DEP_DISABLE_ATL_THUNK_EMULATION
+#define PROCESS_DEP_DISABLE_ATL_THUNK_EMULATION 0x2
+#endif
+
 // QtCore includes.
 #include <QtCore/qt_windows.h>
 #include <QtCore/QByteArray>
@@ -82,6 +90,25 @@ static int SetHeapOptions(void)
 }
 
 /**
+ * Enable DEP/NX. (WinXP SP3, Vista, and later.)
+ * Reference: http://msdn.microsoft.com/en-us/library/bb430720.aspx
+ * NOTE: DEP/NX should be specified in the PE header
+ * using ld's --nxcompat, but we'll set it manually here
+ * just in case the linker doesn't support it.
+ * @return TRUE on success; FALSE on error.
+ */
+static BOOL EnableNX(void)
+{
+	HMODULE hKernel32 = GetModuleHandleA("kernel32.dll");
+
+	typedef BOOL (WINAPI *FNSETDEP)(DWORD);
+	FNSETDEP pfnSetDep = (FNSETDEP)GetProcAddress(hKernel32, "SetProcessDEPPolicy");
+	if (pfnSetDep)
+		return pfnSetDep(PROCESS_DEP_ENABLE);
+	return FALSE;
+}
+
+/**
  * Main entry point on Win32.
  * Code based on libqtmain-4.7.1.
  * Windows CE-specific parts have been removed.
@@ -97,6 +124,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
 	// Enable heap metadata protection.
 	// Reference: http://msdn.microsoft.com/en-us/library/bb430720.aspx
 	SetHeapOptions();
+
+	// Enable DEP/NX.
+	EnableNX();
 
 	// Tokenize the command line parameters.
 	int argc = 0;
