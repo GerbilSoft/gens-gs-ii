@@ -587,7 +587,7 @@ QString AboutWindow::GetCodePageInfo(void)
 		if (!bRet)
 		{
 			//: GetCPInfoExA() call failed.
-			sCodePageInfo += tr("Unknown [GetCPInfoExA() failed]") + QChar('\n');
+			sCodePageInfo += tr("Unknown [GetCPInfoExA() failed]") + QChar(L'\n');
 			continue;
 		}
 		
@@ -596,7 +596,7 @@ QString AboutWindow::GetCodePageInfo(void)
 		// if the code page name is blank, don't add extra parentheses.
 		if (cpix.CodePageName[0] == 0x00)
 		{
-			sCodePageInfo += QChar('\n');
+			sCodePageInfo += QChar(L'\n');
 			continue;
 		}
 		
@@ -638,7 +638,7 @@ QString AboutWindow::GetCodePageInfo(void)
 		//: Win32: ANSI strings are being used. (Win9x)
 		sCodePageInfo += tr("Using ANSI strings for Win32 API.");
 	}
-	sCodePageInfo += QChar('\n');
+	sCodePageInfo += QChar(L'\n');
 	
 	return sCodePageInfo;
 }

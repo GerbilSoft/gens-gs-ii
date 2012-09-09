@@ -665,8 +665,9 @@ int ConfigStorePrivate::save(QString filename) const
 		{
 			// Convert to hexadecimal.
 			unsigned int uint_val = value.toString().toUInt(NULL, 0);
-			value = QLatin1String("0x") + 
+			QString str = QLatin1String("0x") +
 					QString::number(uint_val, 16).toUpper().rightJustified(4, QChar(L'0'));
+			value = str;
 		}
 		
 		qSettings.setValue(key, value);

@@ -172,7 +172,7 @@ bool GensQApplication::winEventFilter(MSG *msg, long *result)
 void GensQApplication::SetFont_Win32(void)
 {
 	// Get the Win32 message font.
-	NONCLIENTMETRICS ncm;
+	NONCLIENTMETRICSA ncm;
 	ncm.cbSize = sizeof(ncm);
 	::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0);
 
@@ -199,8 +199,8 @@ void GensQApplication::SetFont_Win32(void)
 	// respond to WM_SETTINGCHANGE. Make menus use the menu font.
 
 	// Create the QFont.
-	QFont qAppFont(ncm.lfMessageFont.lfFaceName, nFontSize,
-		       -1, ncm.lfMessageFont.lfItalic);
+	QFont qAppFont(QLatin1String(ncm.lfMessageFont.lfFaceName),
+			nFontSize, -1, ncm.lfMessageFont.lfItalic);
 
 	// Set the Qt application font.
 	QApplication::setFont(qAppFont);

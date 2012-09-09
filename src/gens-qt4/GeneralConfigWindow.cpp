@@ -1108,7 +1108,7 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 #ifdef Q_OS_WIN32
 			case -5:
 				// UnRAR.dll API version is too old. (Win32 only)
-				prg_status = m_sWarning + tr("UnRAR.dll API version is too old.") + "<br/>\n" +
+				prg_status = m_sWarning + tr("UnRAR.dll API version is too old.") + QLatin1String("<br/>\n") +
 							   tr("Gens/GS II requires API version %1 or later.").arg(RAR_DLL_VERSION);
 				filename_icon = QStyle::SP_MessageBoxCritical;
 				break;
