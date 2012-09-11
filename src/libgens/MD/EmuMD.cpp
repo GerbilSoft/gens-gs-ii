@@ -33,8 +33,8 @@
 // Byteswapping macros and functions.
 #include "Util/byteswap.h"
 
-// I/O devices.
-#include "IO/IoBase.hpp"
+// Device Manager.
+#include "GensInput/DevManager.hpp"
 
 // Sound Manager.
 #include "sound/SoundMgr.hpp"

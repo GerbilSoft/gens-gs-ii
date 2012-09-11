@@ -31,7 +31,7 @@
 
 // LibGens includes.
 #include "libgens/Rom.hpp"
-#include "libgens/IO/IoBase.hpp"
+#include "libgens/IoManager.hpp"
 #include "libgens/MD/SysVersion.hpp"
 
 // paused_t
@@ -313,7 +313,7 @@ class EmuManager : public QObject
 				struct
 				{
 					int port;
-					LibGens::IoBase::IoType ctrlType;
+					LibGens::IoManager::IoType ctrlType;
 				} ctrlChange;
 				
 				int audioRate;
