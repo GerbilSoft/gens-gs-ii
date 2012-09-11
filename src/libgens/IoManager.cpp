@@ -125,39 +125,6 @@ class IoManagerPrivate
 			BTN_MOUSE_START		= 0x08	// Start
 		};
 
-		// Button index values.
-		enum ButtonIndex {
-			BTNI_UNKNOWN	= -1,
-
-			// Standard controller buttons.
-			BTNI_UP		= 0,
-			BTNI_DOWN	= 1,
-			BTNI_LEFT	= 2,
-			BTNI_RIGHT	= 3,
-			BTNI_B		= 4,
-			BTNI_C		= 5,
-			BTNI_A		= 6,
-			BTNI_START	= 7,
-			BTNI_Z		= 8,
-			BTNI_Y		= 9,
-			BTNI_X		= 10,
-			BTNI_MODE	= 11,
-
-			// SMS/GG buttons.
-			BTNI_1		= 4,
-			BTNI_2		= 5,
-
-			// Sega Mega Mouse buttons.
-			// NOTE: Mega Mouse buttons are active high,
-			// and they use a different bitfield layout.
-			BTNI_MOUSE_LEFT		= 0,
-			BTNI_MOUSE_RIGHT	= 1,
-			BTNI_MOUSE_MIDDLE	= 2,
-			BTNI_MOUSE_START	= 3,	// Start
-
-			BTNI_MAX	= 12
-		};
-
 		/** Serial I/O definitions and variables. **/
 
 		/**
@@ -267,7 +234,7 @@ class IoManagerPrivate
 			uint8_t serLastTx;	// Last transmitted data byte.
 
 			// Button mapping.
-			GensKey_t keyMap[BTNI_MAX];
+			GensKey_t keyMap[IoManager::BTNI_MAX];
 		};
 
 		IoDevice ioDevices[IoManager::VIRTPORT_MAX];
@@ -275,17 +242,6 @@ class IoManagerPrivate
 		/**
 		 * Number of buttons in each device type.
 		 */
-		/*
-		enum IoType {
-			IOT_NONE	= 0,
-			IOT_3BTN	= 1,
-			IOT_6BTN	= 2,
-			IOT_2BTN	= 3,
-			IOT_MEGA_MOUSE	= 4,
-			IOT_TEAMPLAYER	= 5,
-			IOT_4WP_MASTER	= 6,
-			IOT_4WP_SLAVE	= 7,
-		*/
 		static const uint8_t devBtnCount[IoManager::IOT_MAX];
 };
 
@@ -303,7 +259,6 @@ const uint8_t IoManagerPrivate::devBtnCount[IoManager::IOT_MAX] =
 	0,	// IOT_4WP_MASTER
 	0,	// IOT_4WP_SLAVE
 };
-
 
 IoManagerPrivate::IoManagerPrivate(IoManager *q)
 	: q(q)
@@ -599,6 +554,161 @@ IoManager::IoType IoManager::devType(VirtPort virtPort) const
 {
 	assert(virtPort >= VIRTPORT_1 && virtPort < VIRTPORT_MAX);
 	return d->ioDevices[virtPort].type;
+}
+
+IoManager::ButtonName_t IoManager::ButtonName(IoType devType, int btnIdx)
+{
+	assert(devType >= IOT_3BTN && devType < IOT_MAX);
+	assert(btnIdx >= 0 && btnIdx < BTNI_MAX);
+
+	switch (devType) {
+		case IOT_3BTN:
+			switch (btnIdx) {
+				case BTNI_UP:		return BTNNAME_UP;
+				case BTNI_DOWN:		return BTNNAME_DOWN;
+				case BTNI_LEFT:		return BTNNAME_LEFT;
+				case BTNI_RIGHT:	return BTNNAME_RIGHT;
+				case BTNI_B:		return BTNNAME_B;
+				case BTNI_C:		return BTNNAME_C;
+				case BTNI_A:		return BTNNAME_A;
+				case BTNI_START:	return BTNNAME_START;
+				default:		return BTNNAME_UNKNOWN;
+			}
+			break;
+
+		case IOT_6BTN:
+			switch (btnIdx) {
+				case BTNI_UP:		return BTNNAME_UP;
+				case BTNI_DOWN:		return BTNNAME_DOWN;
+				case BTNI_LEFT:		return BTNNAME_LEFT;
+				case BTNI_RIGHT:	return BTNNAME_RIGHT;
+				case BTNI_B:		return BTNNAME_B;
+				case BTNI_C:		return BTNNAME_C;
+				case BTNI_A:		return BTNNAME_A;
+				case BTNI_START:	return BTNNAME_START;
+				case BTNI_Z:		return BTNNAME_Z;
+				case BTNI_Y:		return BTNNAME_Y;
+				case BTNI_X:		return BTNNAME_X;
+				case BTNI_MODE:		return BTNNAME_MODE;
+				default:		return BTNNAME_UNKNOWN;
+			}
+			break;
+
+		case IOT_2BTN:
+			switch (btnIdx) {
+				case BTNI_UP:		return BTNNAME_UP;
+				case BTNI_DOWN:		return BTNNAME_DOWN;
+				case BTNI_LEFT:		return BTNNAME_LEFT;
+				case BTNI_RIGHT:	return BTNNAME_RIGHT;
+				case BTNI_1:		return BTNNAME_1;
+				case BTNI_2:		return BTNNAME_2;
+				default:		return BTNNAME_UNKNOWN;
+			}
+			break;
+
+		case IOT_MEGA_MOUSE:
+			switch (btnIdx) {
+				case BTNI_MOUSE_LEFT:		return BTNNAME_MOUSE_LEFT;
+				case BTNI_MOUSE_RIGHT:		return BTNNAME_MOUSE_RIGHT;
+				case BTNI_MOUSE_MIDDLE:	return BTNNAME_MOUSE_MIDDLE;
+				case BTNI_MOUSE_START:		return BTNNAME_MOUSE_START;
+				default:			return BTNNAME_UNKNOWN;
+			}
+			break;
+
+		default:
+			break;
+	}
+
+	return BTNNAME_UNKNOWN;
+}
+
+int IoManager::NextLogicalButton(IoType devType, int btnIdx)
+{
+	assert(devType >= IOT_3BTN && devType < IOT_MAX);
+	assert(btnIdx >= 0 && btnIdx < BTNI_MAX);
+
+#if 0
+	// IOT_3BTN
+	{IoManager::BTNI_DOWN, IoManager::BTNI_LEFT, IoManager::BTNI_RIGHT,
+	 IoManager::BTNI_START, IoManager::BTNI_A,
+	 IoManager::BTNI_B, IoManager::BTNI_C},
+
+	// IOT_6BTN
+	{IoManager::BTNI_DOWN, IoManager::BTNI_LEFT, IoManager::BTNI_RIGHT,
+	 IoManager::BTNI_START, IoManager::BTNI_A,
+	 IoManager::BTNI_B, IoManager::BTNI_C,
+	 IoManager::BTNI_MODE, IoManager::BTNI_X,
+	 IoManager::BTNI_Y, IoManager::BTNI_Z},
+
+	// IOT_2BTN
+	{IoManager::BTNI_DOWN, IoManager::BTNI_LEFT, IoManager::BTNI_RIGHT,
+	 IoManager::BTNI_1, IoManager::BTNI_2},
+
+	// IOT_MEGA_MOUSE
+	{IoManager::BTNI_MOUSE_MIDDLE, IoManager::BTNI_MOUSE_RIGHT,
+	 IoManager::BTNI_MOUSE_START},
+#endif
+	switch (devType) {
+		case IOT_3BTN:
+			switch (btnIdx) {
+				case BTNI_UP:		return BTNI_DOWN;
+				case BTNI_DOWN:		return BTNI_LEFT;
+				case BTNI_LEFT:		return BTNI_RIGHT;
+				case BTNI_RIGHT:	return BTNI_START;
+				case BTNI_START:	return BTNI_A;
+				case BTNI_A:		return BTNI_B;
+				case BTNI_B:		return BTNI_C;
+				case BTNI_C:
+				default:		return BTNI_UNKNOWN;
+			}
+			break;
+
+		case IOT_6BTN:
+			switch (btnIdx) {
+				case BTNI_UP:		return BTNI_DOWN;
+				case BTNI_DOWN:		return BTNI_LEFT;
+				case BTNI_LEFT:		return BTNI_RIGHT;
+				case BTNI_RIGHT:	return BTNI_START;
+				case BTNI_START:	return BTNI_A;
+				case BTNI_A:		return BTNI_B;
+				case BTNI_B:		return BTNI_C;
+				case BTNI_C:		return BTNI_MODE;
+				case BTNI_MODE:		return BTNI_X;
+				case BTNI_X:		return BTNI_Y;
+				case BTNI_Y:		return BTNI_Z;
+				case BTNI_Z:
+				default:		return BTNI_UNKNOWN;
+			}
+			break;
+
+		case IOT_2BTN:
+			switch (btnIdx) {
+				case BTNI_UP:		return BTNI_DOWN;
+				case BTNI_DOWN:		return BTNI_LEFT;
+				case BTNI_LEFT:		return BTNI_RIGHT;
+				case BTNI_RIGHT:	return BTNI_1;
+				case BTNI_1:		return BTNI_2;
+				case BTNI_2:
+				default:		return BTNI_UNKNOWN;
+			}
+			break;
+
+		case IOT_MEGA_MOUSE:
+			switch (btnIdx) {
+				case BTNI_MOUSE_LEFT:		return BTNI_MOUSE_MIDDLE;
+				case BTNI_MOUSE_MIDDLE:	return BTNI_MOUSE_RIGHT;
+				case BTNI_MOUSE_RIGHT:		return BTNI_MOUSE_START;
+				case BTNI_MOUSE_START:
+				default:			return BTNI_UNKNOWN;
+			}
+			break;
+
+		default:
+			break;
+	}
+
+	return BTNI_UNKNOWN;
 }
 
 

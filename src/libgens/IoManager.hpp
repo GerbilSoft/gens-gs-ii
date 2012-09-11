@@ -165,13 +165,10 @@ class IoManager
 		void setDevType(IoPort port, IoType newDevType);
 		*/
 
-		/*
-		int numButtons(IoPort port) const;
-		int nextLogicalButton(IoPort port, int button) const;
-		*/
-
-		// Logical button names.
-		// These are used for button name trnaslation in the UI.
+		/**
+		 * Logical button names.
+		 * These are used for button name trnaslation in the UI.
+		 */
 		enum ButtonName_t
 		{
 			BTNNAME_UNKNOWN	= -1,
@@ -203,12 +200,43 @@ class IoManager
 			BTNNAME_MAX
 		};
 
-		/*
+		// Button index values.
+		enum ButtonIndex {
+			BTNI_UNKNOWN	= -1,
+
+			// Standard controller buttons.
+			BTNI_UP		= 0,
+			BTNI_DOWN	= 1,
+			BTNI_LEFT	= 2,
+			BTNI_RIGHT	= 3,
+			BTNI_B		= 4,
+			BTNI_C		= 5,
+			BTNI_A		= 6,
+			BTNI_START	= 7,
+			BTNI_Z		= 8,
+			BTNI_Y		= 9,
+			BTNI_X		= 10,
+			BTNI_MODE	= 11,
+
+			// SMS/GG buttons.
+			BTNI_1		= 4,
+			BTNI_2		= 5,
+
+			// Sega Mega Mouse buttons.
+			// NOTE: Mega Mouse buttons are active high,
+			// and they use a different bitfield layout.
+			BTNI_MOUSE_LEFT		= 0,
+			BTNI_MOUSE_RIGHT	= 1,
+			BTNI_MOUSE_MIDDLE	= 2,
+			BTNI_MOUSE_START	= 3,	// Start
+
+			BTNI_MAX	= 12
+		};
+
 		// Get button names.
-		static ButtonName_t ButtonName(int button);
-		virtual ButtonName_t buttonName(int button) const;
-		*/
-		
+		static ButtonName_t ButtonName(IoType devType, int btnIdx);
+		static int NextLogicalButton(IoType devType, int btnIdx);
+
 		/** ZOMG savestate functions. **/
 		// TODO: Move this struct to libzomg.
 		/*
@@ -224,49 +252,6 @@ class IoManager
 		void zomgRestoreMD(const Zomg_MD_IoSave_int_t *state);
 		*/
 };
-
-
-/** Controller configuration. **/
-/*
-// Controller configuration. (STATIC functions)
-inline IoBase::IoType IoBase::DevType(void)
-	{ return IOT_NONE; }
-inline int IoBase::NumButtons(void)
-	{ return 0; }
-inline int IoBase::NextLogicalButton(int button)
-	{ ((void)button); return -1; }
-
-// Controller configuration. (virtual functions)
-inline IoBase::IoType IoBase::devType(void) const
-	{ return DevType(); }
-inline int IoBase::numButtons(void) const
-	{ return NumButtons(); }
-inline int IoBase::nextLogicalButton(int button) const
-	{ return NextLogicalButton(button); }
-*/
-
-/**
- * ButtonName(): Get the name for a given button index. (STATIC function)
- * @param button Button index.
- * @return Button name, or BTNNAME_UNKNOWN if the button index is invalid.
- */
-/*
-inline IoBase::ButtonName_t IoBase::ButtonName(int button)
-{
-	((void)button);
-	return BTNNAME_UNKNOWN;
-}
-*/
-
-/**
- * buttonName(): Get the name for a given button index. (virtual function)
- * @param button Button index.
- * @return Button name, or BTNNAME_UNKNOWN if the button index is invalid.
- */
-/*
-inline IoBase::ButtonName_t IoBase::buttonName(int button) const
-	{ return ButtonName(button); }
-*/
 
 }
 
