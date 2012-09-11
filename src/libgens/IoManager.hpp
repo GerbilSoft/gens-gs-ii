@@ -31,14 +31,26 @@
 namespace LibGens
 {
 
+class IoManagerPrivate;
+
 class IoManager
 {
 	public:
 		IoManager();
 		~IoManager();
 
+	private:
+		friend class IoManagerPrivate;
+		IoManagerPrivate *const d;
+		
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		IoManager(const IoManager &);
+		IoManager &operator=(const IoManager &);
+
+	public:
 		/**
-		 * Reset all controllers.
+		 * Reset all devices.
 		 */
 		void reset(void);
 
@@ -84,7 +96,6 @@ class IoManager
 		 * around 25 scanlines of no TH rising edges.
 		 */
 		void doScanline(void);
-		static const int SCANLINE_COUNT_MAX_6BTN = 25;
 
 		/**
 		 * @name Virtual port numbers.
@@ -197,203 +208,6 @@ class IoManager
 		void zomgSaveMD(Zomg_MD_IoSave_int_t *state) const;
 		void zomgRestoreMD(const Zomg_MD_IoSave_int_t *state);
 		*/
-	
-	private:
-		/**
-		 * Update an I/O device's state based on ctrl/data lines.
-		 * @param physPort Physical port number.
-		 */
-		void updateDevice(int physPort);
-
-		void updateDevice_3BTN(int virtPort);
-		void updateDevice_6BTN(int virtPort, bool oldSelect);
-		void updateDevice_2BTN(int virtPort);
-		
-		// I/O pin definitions.
-		enum IoPinDefs {
-			IOPIN_UP	= 0x01,	// D0
-			IOPIN_DOWN	= 0x02,	// D1
-			IOPIN_LEFT	= 0x04,	// D2
-			IOPIN_RIGHT	= 0x08,	// D3
-			IOPIN_TL	= 0x10,	// D4
-			IOPIN_TR	= 0x20,	// D5
-			IOPIN_TH	= 0x40	// D6
-		};
-
-		// Button bitfield values.
-		enum ButtonBitfield {
-			BTN_UP		= 0x01,
-			BTN_DOWN	= 0x02,
-			BTN_LEFT	= 0x04,
-			BTN_RIGHT	= 0x08,
-			BTN_B		= 0x10,
-			BTN_C		= 0x20,
-			BTN_A		= 0x40,
-			BTN_START	= 0x80,
-			BTN_Z		= 0x100,
-			BTN_Y		= 0x200,
-			BTN_X		= 0x400,
-			BTN_MODE	= 0x800,
-
-			// SMS/GG buttons.
-			BTN_1		= 0x10,
-			BTN_2		= 0x20,
-
-			// Sega Mega Mouse buttons.
-			// NOTE: Mega Mouse buttons are active high,
-			// and they use a different bitfield layout.
-			BTN_MOUSE_LEFT		= 0x01,
-			BTN_MOUSE_RIGHT		= 0x02,
-			BTN_MOUSE_MIDDLE	= 0x04,
-			BTN_MOUSE_START		= 0x08	// Start
-		};
-
-		// Button index values.
-		enum ButtonIndex {
-			BTNI_UNKNOWN	= -1,
-
-			// Standard controller buttons.
-			BTNI_UP		= 0,
-			BTNI_DOWN	= 1,
-			BTNI_LEFT	= 2,
-			BTNI_RIGHT	= 3,
-			BTNI_B		= 4,
-			BTNI_C		= 5,
-			BTNI_A		= 6,
-			BTNI_START	= 7,
-			BTNI_Z		= 8,
-			BTNI_Y		= 9,
-			BTNI_X		= 10,
-			BTNI_MODE	= 11,
-
-			// SMS/GG buttons.
-			BTNI_1		= 4,
-			BTNI_2		= 5,
-
-			// Sega Mega Mouse buttons.
-			// NOTE: Mega Mouse buttons are active high,
-			// and they use a different bitfield layout.
-			BTNI_MOUSE_LEFT		= 0,
-			BTNI_MOUSE_RIGHT	= 1,
-			BTNI_MOUSE_MIDDLE	= 2,
-			BTNI_MOUSE_START	= 3,	// Start
-
-			BTNI_MAX	= 12
-		};
-
-		/** Serial I/O definitions and variables. **/
-
-		/**
-		 * @name Serial I/O control bitfield.
-		 */
-		enum SerCtrl {
-			 SERCTRL_TFUL	= 0x01,		// TxdFull (1 == full)
-			 SERCTRL_RRDY	= 0x02,		// RxdReady (1 == ready)
-			 SERCTRL_RERR	= 0x04,		// RxdError (1 == error)
-			 SERCTRL_RINT	= 0x08,		// Rxd Interrupt (1 == on)
-			 SERCTRL_SOUT	= 0x10,		// TL mode. (1 == serial out; 0 == parallel)
-			 SERCTRL_SIN	= 0x20,		// TR mode. (1 == serial in; 0 == parallel)
-			 SERCTRL_BPS0	= 0x40,
-			 SERCTRL_BPS1	= 0x80
-		};
-
-		/**
-		 * @name Serial I/O baud rate values.
-		 */
-		enum SerBaud {
-			SERBAUD_4800	= 0x00,
-			SERBAUD_2400	= 0x01,
-			SERBAUD_1200	= 0x02,
-			SERBAUD_300	= 0x03
-		};
-
-		struct IoDevice
-		{
-			IoDevice()
-				: type(IOT_3BTN)
-				, counter(0)
-				, scanlines(0)
-				, ctrl(0)
-				, mdData(0xFF)
-				, deviceData(0xFF)
-				, select(false)
-				, buttons(~0)
-				, serCtrl(0)
-				, serLastTx(0xFF)
-			{ }
-
-			void reset(void) {
-				counter = 0;
-				scanlines = 0;
-				ctrl = 0;
-				mdData = 0xFF;
-				deviceData = 0xFF;
-				select = false;
-				buttons = ~0;
-				serCtrl = 0;
-				serLastTx = 0xFF;
-			}
-
-			IoType type;		// Device type.
-			int counter;		// Internal counter.
-			int scanlines;		// Scanline counter.
-
-			uint8_t ctrl;		// Tristate control.
-			uint8_t mdData;		// Data written from the MD.
-			uint8_t deviceData;	// Device data.
-			bool select;		// Select line state.
-
-			/**
-			 * Controller bitfield.
-			 * Format:
-			 * - 2-button:          ??CBRLDU
-			 * - 3-button:          SACBRLDU
-			 * - 6-button: ????MXYZ SACBRLDU
-			 * NOTE: ACTIVE LOW! (1 == released; 0 == pressed)
-			 */
-			unsigned int buttons;
-
-			/**
-			 * Determine the SELECT line state.
-			 */
-			inline void updateSelectLine(void) {
-				// TODO: Apply the device data.
-				select = (!(ctrl & IOPIN_TH) ||
-					    (mdData & IOPIN_TH));
-			}
-
-			inline bool isSelect(void) const
-				{ return select; }
-
-			/**
-			 * Read the last data value, with tristates applied.
-			 * @return Data value with tristate settings applied.
-			 */
-			inline uint8_t readData(void) const {
-				return applyTristate(deviceData);
-			}
-
-			/**
-			 * Apply the Tristate settings to the data value.
-			 * @param data Data value.
-			 * @return Data value with tristate settings applied.
-			 */
-			inline uint8_t applyTristate(uint8_t data) const {
-				data &= (~ctrl & 0x7F);		// Mask output bits.
-				data |= (mdData & (ctrl | 0x80));	// Apply data buffer.
-				return data;
-			}
-
-			// Serial I/O variables.
-			// TODO: Serial data buffer.
-			uint8_t serCtrl;	// Serial control.
-			uint8_t serLastTx;	// Last transmitted data byte.
-
-			// Button mapping.
-			GensKey_t keyMap[BTNI_MAX];
-		};
-
-		IoDevice m_ioDevices[VIRTPORT_MAX];
 };
 
 
