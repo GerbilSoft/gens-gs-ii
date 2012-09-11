@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include "IoManager.hpp"
+#include "GensInput/DevManager.hpp"
 
 // C includes. (C++ namespace)
 #include <cassert>
@@ -69,6 +70,11 @@ class IoManagerPrivate
 		 */
 		void doScanline(void);
 		static const int SCANLINE_COUNT_MAX_6BTN = 25;
+
+		/**
+		 * I/O device update function.
+		 */
+		void update(void);
 
 		/**
 		 * Update an I/O device's state based on ctrl/data lines.
@@ -265,6 +271,37 @@ class IoManagerPrivate
 		};
 
 		IoDevice ioDevices[IoManager::VIRTPORT_MAX];
+
+		/**
+		 * Number of buttons in each device type.
+		 */
+		/*
+		enum IoType {
+			IOT_NONE	= 0,
+			IOT_3BTN	= 1,
+			IOT_6BTN	= 2,
+			IOT_2BTN	= 3,
+			IOT_MEGA_MOUSE	= 4,
+			IOT_TEAMPLAYER	= 5,
+			IOT_4WP_MASTER	= 6,
+			IOT_4WP_SLAVE	= 7,
+		*/
+		static const uint8_t devBtnCount[IoManager::IOT_MAX];
+};
+
+/**
+ * Number of buttons in each device type.
+ */
+const uint8_t IoManagerPrivate::devBtnCount[IoManager::IOT_MAX] =
+{
+	0,	// IOT_NONE
+	8,	// IOT_3BTN
+	12,	// IOT_6BTN
+	6,	// IOT_2BTN (TODO: Start/Pause?)
+	4,	// IOT_MEGA_MOUSE
+	0,	// IOT_TEAMPLAYER
+	0,	// IOT_4WP_MASTER
+	0,	// IOT_4WP_SLAVE
 };
 
 
@@ -341,6 +378,29 @@ void IoManagerPrivate::doScanline(void)
 			dev->scanlines = 0;
 		}
 	}
+}
+
+/**
+ * I/O device update function.
+ */
+void IoManagerPrivate::update(void)
+{
+	// Update keyboard input for all ports.
+	for (int i = 0; i < NUM_ELEMENTS(ioDevices); i++) {
+		int btnCount = devBtnCount[ioDevices[i].type];
+		uint32_t buttons = 0;
+		for (int j = btnCount; j >= 0; j--) {
+			buttons <<= 1;
+			buttons |= DevManager::IsKeyPressed(ioDevices[i].keyMap[j]);
+		}
+
+		// Buttons typically use active-low logic.
+		ioDevices[i].buttons = ~buttons;
+	}
+
+	// Update all physical ports.
+	for (int i = IoManager::PHYSPORT_1; i < IoManager::PHYSPORT_MAX; i++)
+		updateDevice(i);
 }
 
 /**
@@ -618,11 +678,7 @@ uint8_t IoManager::readSerRx(int physPort) const
  */
 void IoManager::update(void)
 {
-	// TODO: Update keyboard input for al ports.
-
-	// Update all physical ports.
-	for (int i = PHYSPORT_1; i < PHYSPORT_MAX; i++)
-		d->updateDevice(i);
+	d->update();
 }
 
 }
