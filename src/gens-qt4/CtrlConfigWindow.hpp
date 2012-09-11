@@ -37,7 +37,7 @@
 class QActionGroup;
 
 // LibGens includes.
-#include "libgens/IO/IoBase.hpp"
+#include "libgens/IoManager.hpp"
 
 // Toolbar separators.
 #define CTRL_CFG_TBSEP_TP1 0
@@ -65,7 +65,7 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		void changeEvent(QEvent *event);
 		
 		// Internal controller settings.
-		LibGens::IoBase::IoType m_devType[CtrlConfig::PORT_MAX];
+		LibGens::IoManager::IoType m_devType[CtrlConfig::PORT_MAX];
 		
 		QActionGroup *m_actgrpSelPort;
 		
@@ -90,11 +90,11 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		static CtrlConfigWindow *m_CtrlConfigWindow;
 		
 		// Controller data.
-		static const char *const ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX];
-		static QString GetShortDeviceName(LibGens::IoBase::IoType devType);
-		static QString GetLongDeviceName(LibGens::IoBase::IoType devType);
+		static const char *const ms_CtrlIconFilenames[LibGens::IoManager::IOT_MAX];
+		static QString GetShortDeviceName(LibGens::IoManager::IoType devType);
+		static QString GetLongDeviceName(LibGens::IoManager::IoType devType);
 		static QString GetPortName(int port);
-		static QIcon GetCtrlIcon(LibGens::IoBase::IoType ioType);
+		static QIcon GetCtrlIcon(LibGens::IoManager::IoType ioType);
 		
 		// Selected port.
 		int m_selPort;

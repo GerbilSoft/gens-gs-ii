@@ -42,7 +42,7 @@ namespace GensQt4
 CtrlConfigWindow *CtrlConfigWindow::m_CtrlConfigWindow = NULL;
 
 // Controller icon filenames.
-const char *const CtrlConfigWindow::ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX] =
+const char *const CtrlConfigWindow::ms_CtrlIconFilenames[LibGens::IoManager::IOT_MAX] =
 {
 	"controller-none.png",		// IOT_NONE
 	"controller-3btn.png",		// IOT_3BTN
@@ -138,10 +138,10 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	// 4WP Master is added here.
 	// on_cboDevice_currentIndexChanged() handles translation for Port 1.
 	cboDevice_lock();
-	for (int i = LibGens::IoBase::IOT_NONE; i <= LibGens::IoBase::IOT_4WP_MASTER; i++)
+	for (int i = LibGens::IoManager::IOT_NONE; i <= LibGens::IoManager::IOT_4WP_MASTER; i++)
 	{
-		cboDevice->addItem(GetCtrlIcon((LibGens::IoBase::IoType)i),
-				GetShortDeviceName((LibGens::IoBase::IoType)i));
+		cboDevice->addItem(GetCtrlIcon((LibGens::IoManager::IoType)i),
+				GetShortDeviceName((LibGens::IoManager::IoType)i));
 	}
 	cboDevice_unlock();
 	
@@ -152,20 +152,14 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	// TODO: Button mapping.
 	// TODO: Load from the configuration cache instead of the emulation context.
 	// TODO: TeamPlayer / EA 4-Way Play support.
-	if (gqt4_emuContext)
-	{
+	if (gqt4_emuContext) {
 		// Emulation is running.
-		// TODO: Update for IoManager.
-#if 0
-		m_devType[0] = gqt4_emuContext->m_port1->devType();
-		m_devType[1] = gqt4_emuContext->m_port2->devType();
-#endif
-	}
-	else
-	{
+		m_devType[0] = gqt4_emuContext->m_ioManager->devType(LibGens::IoManager::VIRTPORT_1);
+		m_devType[1] = gqt4_emuContext->m_ioManager->devType(LibGens::IoManager::VIRTPORT_2);
+	} else {
 		// Emulation is not running.
-		m_devType[0] = LibGens::IoBase::IOT_NONE;
-		m_devType[1] = LibGens::IoBase::IOT_NONE;
+		m_devType[0] = LibGens::IoManager::IOT_NONE;
+		m_devType[1] = LibGens::IoManager::IOT_NONE;
 	}
 	
 	// Initialize all the port buttons.
@@ -277,33 +271,33 @@ void CtrlConfigWindow::changeEvent(QEvent *event)
  * @param devType Device type.
  * @return Short device name.
  */
-QString CtrlConfigWindow::GetShortDeviceName(LibGens::IoBase::IoType devType)
+QString CtrlConfigWindow::GetShortDeviceName(LibGens::IoManager::IoType devType)
 {
-	using LibGens::IoBase;
+	using LibGens::IoManager;
 	
 	switch (devType)
 	{
-		case IoBase::IOT_NONE:
+		case IoManager::IOT_NONE:
 		default:
 			return tr("None");
 		
-		case IoBase::IOT_3BTN:
+		case IoManager::IOT_3BTN:
 			//: Standard 3-button control pad.
 			return tr("3-button");
-		case IoBase::IOT_6BTN:
+		case IoManager::IOT_6BTN:
 			//: Sega 6-button "arcade" control pad.
 			return tr("6-button");
-		case IoBase::IOT_2BTN:
+		case IoManager::IOT_2BTN:
 			//: Sega Master System 2-button control pad.
 			return tr("2-button");
-		case IoBase::IOT_MEGA_MOUSE:
+		case IoManager::IOT_MEGA_MOUSE:
 			//: Sega Mega Mouse.
 			return tr("Mega Mouse");
-		case IoBase::IOT_TEAMPLAYER:
+		case IoManager::IOT_TEAMPLAYER:
 			//: Sega Team Player. (Specific brand name; only modify if it's different in your region!)
 			return tr("Team Player");
-		case IoBase::IOT_4WP_MASTER:	/* fallthrough */
-		case IoBase::IOT_4WP_SLAVE:
+		case IoManager::IOT_4WP_MASTER:	/* fallthrough */
+		case IoManager::IOT_4WP_SLAVE:
 			//: EA 4-Way Play. (Specific brand name; only modify if it's different in your region!)
 			return tr("4-Way Play");
 	}
@@ -315,33 +309,32 @@ QString CtrlConfigWindow::GetShortDeviceName(LibGens::IoBase::IoType devType)
  * @param devType Device type.
  * @return Long device name.
  */
-QString CtrlConfigWindow::GetLongDeviceName(LibGens::IoBase::IoType devType)
+QString CtrlConfigWindow::GetLongDeviceName(LibGens::IoManager::IoType devType)
 {
-	using LibGens::IoBase;
+	using LibGens::IoManager;
 	
 	switch (devType)
 	{
-		case IoBase::IOT_NONE:
+		case IoManager::IOT_NONE:
 		default:
 			return tr("No device connected.");
-		
-		case IoBase::IOT_3BTN:
+		case IoManager::IOT_3BTN:
 			//: Standard 3-button control pad.
 			return tr("3-button gamepad");
-		case IoBase::IOT_6BTN:
+		case IoManager::IOT_6BTN:
 			//: Sega 6-button "arcade" control pad.
 			return tr("6-button gamepad");
-		case IoBase::IOT_2BTN:
+		case IoManager::IOT_2BTN:
 			//: Sega Master System 2-button control pad.
 			return tr("2-button gamepad (SMS)");
-		case IoBase::IOT_MEGA_MOUSE:
+		case IoManager::IOT_MEGA_MOUSE:
 			//: Sega Mega Mouse.
 			return tr("Mega Mouse");
-		case IoBase::IOT_TEAMPLAYER:
+		case IoManager::IOT_TEAMPLAYER:
 			//: Sega Team Player. (Specific brand name; only modify if it's different in your region!)
 			return tr("Sega Team Player");
-		case IoBase::IOT_4WP_MASTER:	/* fallthrough */
-		case IoBase::IOT_4WP_SLAVE:
+		case IoManager::IOT_4WP_MASTER:	/* fallthrough */
+		case IoManager::IOT_4WP_SLAVE:
 			//: EA 4-Way Play. (Specific brand name; only modify if it's different in your region!)
 			return tr("EA 4-Way Play");
 	}
@@ -401,10 +394,10 @@ QString CtrlConfigWindow::GetPortName(int port)
  * @param ioType Controller type.
  * @return Icon for the specified controller type.
  */
-QIcon CtrlConfigWindow::GetCtrlIcon(LibGens::IoBase::IoType ioType)
+QIcon CtrlConfigWindow::GetCtrlIcon(LibGens::IoManager::IoType ioType)
 {
-	if (ioType < LibGens::IoBase::IOT_NONE ||
-	    ioType >= LibGens::IoBase::IOT_MAX)
+	if (ioType < LibGens::IoManager::IOT_NONE ||
+	    ioType >= LibGens::IoManager::IOT_MAX)
 	{
 		// Invalid I/O type.
 		return QIcon();
@@ -470,8 +463,8 @@ void CtrlConfigWindow::updatePortButton(int port)
 	}
 	
 	// Make sure the device type is in bounds.
-	if (m_devType[port] < LibGens::IoBase::IOT_NONE ||
-	    m_devType[port] >= LibGens::IoBase::IOT_MAX)
+	if (m_devType[port] < LibGens::IoManager::IOT_NONE ||
+	    m_devType[port] >= LibGens::IoManager::IOT_MAX)
 	{
 		// Invalid device type.
 		return;
@@ -486,7 +479,7 @@ void CtrlConfigWindow::updatePortButton(int port)
 	if (port == CtrlConfig::PORT_1)
 	{
 		// Port 1. Update TeamPlayer 1 button state.
-		const bool isTP = (m_devType[port] == LibGens::IoBase::IOT_TEAMPLAYER);
+		const bool isTP = (m_devType[port] == LibGens::IoManager::IOT_TEAMPLAYER);
 		m_vecTbSep[CTRL_CFG_TBSEP_TP1]->setVisible(isTP);
 		actionPortTP1A->setVisible(isTP);
 		actionPortTP1B->setVisible(isTP);
@@ -496,7 +489,7 @@ void CtrlConfigWindow::updatePortButton(int port)
 	else if (port == CtrlConfig::PORT_2)
 	{
 		// Port 2. Update TeamPlayer 2 button state.
-		const bool isTP = (m_devType[port] == LibGens::IoBase::IOT_TEAMPLAYER);
+		const bool isTP = (m_devType[port] == LibGens::IoManager::IOT_TEAMPLAYER);
 		m_vecTbSep[CTRL_CFG_TBSEP_TP2]->setVisible(isTP);
 		actionPortTP2A->setVisible(isTP);
 		actionPortTP2B->setVisible(isTP);
@@ -507,8 +500,8 @@ void CtrlConfigWindow::updatePortButton(int port)
 	if (port == CtrlConfig::PORT_1 || port == CtrlConfig::PORT_2)
 	{
 		// Port 1 or 2. Update EA 4-Way Play button state.
-		const bool is4WP = (m_devType[0] == LibGens::IoBase::IOT_4WP_SLAVE &&
-				    m_devType[1] == LibGens::IoBase::IOT_4WP_MASTER);
+		const bool is4WP = (m_devType[0] == LibGens::IoManager::IOT_4WP_SLAVE &&
+				    m_devType[1] == LibGens::IoManager::IOT_4WP_MASTER);
 		
 		m_vecTbSep[CTRL_CFG_TBSEP_4WP]->setVisible(is4WP);
 		actionPort4WPA->setVisible(is4WP);
@@ -532,8 +525,8 @@ void CtrlConfigWindow::updatePortSettings(int port)
 	// TODO: Controller keymap.
 	
 	// Make sure the device type is in bounds.
-	if (m_devType[port] < LibGens::IoBase::IOT_NONE ||
-	    m_devType[port] >= LibGens::IoBase::IOT_MAX)
+	if (m_devType[port] < LibGens::IoManager::IOT_NONE ||
+	    m_devType[port] >= LibGens::IoManager::IOT_MAX)
 	{
 		// Invalid device type.
 		return;
@@ -545,13 +538,13 @@ void CtrlConfigWindow::updatePortSettings(int port)
 	
 	// Set the device type in the dropdown.
 	int devIndex = m_devType[port];
-	if (devIndex >= LibGens::IoBase::IOT_4WP_SLAVE)
+	if (devIndex >= LibGens::IoManager::IOT_4WP_SLAVE)
 		devIndex--;	// avoid having two 4WP devices in the dropdown
 	cboDevice->setCurrentIndex(devIndex);
 	
 	// Set the device type in the CtrlCfgWidget.
 	// TODO: Load the configuration, and save the previous configuration.
-	ctrlCfgWidget->setIoType((LibGens::IoBase::IoType)devIndex);
+	ctrlCfgWidget->setIoType((LibGens::IoManager::IoType)devIndex);
 }
 
 
@@ -569,7 +562,7 @@ void CtrlConfigWindow::selectPort(int port)
 		case CtrlConfig::PORT_TP1B:
 		case CtrlConfig::PORT_TP1C:
 		case CtrlConfig::PORT_TP1D:
-			if (m_devType[0] == LibGens::IoBase::IOT_TEAMPLAYER)
+			if (m_devType[0] == LibGens::IoManager::IOT_TEAMPLAYER)
 				isTP = true;
 			break;
 		
@@ -578,7 +571,7 @@ void CtrlConfigWindow::selectPort(int port)
 		case CtrlConfig::PORT_TP2B:
 		case CtrlConfig::PORT_TP2C:
 		case CtrlConfig::PORT_TP2D:
-			if (m_devType[1] == LibGens::IoBase::IOT_TEAMPLAYER)
+			if (m_devType[1] == LibGens::IoManager::IOT_TEAMPLAYER)
 				isTP = true;
 			break;
 		
@@ -587,8 +580,8 @@ void CtrlConfigWindow::selectPort(int port)
 		case CtrlConfig::PORT_4WPB:
 		case CtrlConfig::PORT_4WPC:
 		case CtrlConfig::PORT_4WPD:
-			if (m_devType[0] == LibGens::IoBase::IOT_4WP_SLAVE &&
-			    m_devType[1] == LibGens::IoBase::IOT_4WP_MASTER)
+			if (m_devType[0] == LibGens::IoManager::IOT_4WP_SLAVE &&
+			    m_devType[1] == LibGens::IoManager::IOT_4WP_MASTER)
 			{
 				isTP = true;
 			}
@@ -621,7 +614,7 @@ void CtrlConfigWindow::selectPort(int port)
  */
 void CtrlConfigWindow::cboDevice_setTP(bool isTP)
 {
-	const int devCount = (isTP ? LibGens::IoBase::IOT_6BTN : LibGens::IoBase::IOT_4WP_MASTER) + 1;
+	const int devCount = (isTP ? LibGens::IoManager::IOT_6BTN : LibGens::IoManager::IOT_4WP_MASTER) + 1;
 	if (cboDevice->count() == devCount)
 		return;
 	
@@ -630,8 +623,8 @@ void CtrlConfigWindow::cboDevice_setTP(bool isTP)
 	if (cboDevice->count() > devCount)
 	{
 		// Remove the extra items.
-		for (int i = LibGens::IoBase::IOT_4WP_MASTER;
-		     i > LibGens::IoBase::IOT_6BTN; i--)
+		for (int i = LibGens::IoManager::IOT_4WP_MASTER;
+		     i > LibGens::IoManager::IOT_6BTN; i--)
 		{
 			cboDevice->removeItem(i);
 		}
@@ -639,11 +632,11 @@ void CtrlConfigWindow::cboDevice_setTP(bool isTP)
 	else
 	{
 		// Add the extra items.
-		for (int i = LibGens::IoBase::IOT_2BTN;
-		     i <= LibGens::IoBase::IOT_4WP_MASTER; i++)
+		for (int i = LibGens::IoManager::IOT_2BTN;
+		     i <= LibGens::IoManager::IOT_4WP_MASTER; i++)
 		{
-			cboDevice->addItem(GetCtrlIcon((LibGens::IoBase::IoType)i),
-					GetShortDeviceName((LibGens::IoBase::IoType)i));
+			cboDevice->addItem(GetCtrlIcon((LibGens::IoManager::IoType)i),
+					GetShortDeviceName((LibGens::IoManager::IoType)i));
 		}
 	}
 	cboDevice_unlock();
@@ -712,8 +705,8 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 		return;
 	if (m_devType[m_selPort] == index)
 		return;
-	if (m_devType[m_selPort] < LibGens::IoBase::IOT_NONE ||
-	    m_devType[m_selPort] >= LibGens::IoBase::IOT_MAX)
+	if (m_devType[m_selPort] < LibGens::IoManager::IOT_NONE ||
+	    m_devType[m_selPort] >= LibGens::IoManager::IOT_MAX)
 	{
 		// Invalid device type.
 		return;
@@ -723,31 +716,31 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 	if (m_selPort == CtrlConfig::PORT_1)
 	{
 		// Port 1.
-		if (index == LibGens::IoBase::IOT_4WP_MASTER)
+		if (index == LibGens::IoManager::IOT_4WP_MASTER)
 		{
 			// 4WP SLAVE set for Port 1.
 			// (4WP_MASTER index used for dropdown.)
 			// TODO: Maybe use the combo box item's data parameter?
-			m_devType[m_selPort] = LibGens::IoBase::IOT_4WP_SLAVE;
+			m_devType[m_selPort] = LibGens::IoManager::IOT_4WP_SLAVE;
 			
 			// Make sure Port 2 is set to 4WP MASTER.
-			if (m_devType[CtrlConfig::PORT_2] != LibGens::IoBase::IOT_4WP_MASTER)
+			if (m_devType[CtrlConfig::PORT_2] != LibGens::IoManager::IOT_4WP_MASTER)
 			{
-				m_devType[CtrlConfig::PORT_2] = LibGens::IoBase::IOT_4WP_MASTER;
+				m_devType[CtrlConfig::PORT_2] = LibGens::IoManager::IOT_4WP_MASTER;
 				updatePortButton(CtrlConfig::PORT_2);
 			}
 		}
 		else
 		{
 			// 4WP SLAVE not set for Port 1.
-			m_devType[m_selPort] = (LibGens::IoBase::IoType)index;
+			m_devType[m_selPort] = (LibGens::IoManager::IoType)index;
 			
 			// Check if Port 2 is set to 4WP MASTER. (or 4WP SLAVE for sanity check)
-			if (m_devType[CtrlConfig::PORT_2] == LibGens::IoBase::IOT_4WP_MASTER ||
-			    m_devType[CtrlConfig::PORT_2] == LibGens::IoBase::IOT_4WP_SLAVE)
+			if (m_devType[CtrlConfig::PORT_2] == LibGens::IoManager::IOT_4WP_MASTER ||
+			    m_devType[CtrlConfig::PORT_2] == LibGens::IoManager::IOT_4WP_SLAVE)
 			{
 				// Port 2 is set to 4WP MASTER. Unset it.
-				m_devType[CtrlConfig::PORT_2] = LibGens::IoBase::IOT_NONE;
+				m_devType[CtrlConfig::PORT_2] = LibGens::IoManager::IOT_NONE;
 				updatePortButton(CtrlConfig::PORT_2);
 			}
 		}
@@ -755,29 +748,29 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 	else if (m_selPort == CtrlConfig::PORT_2)
 	{
 		// Port 2.
-		if (index == LibGens::IoBase::IOT_4WP_MASTER)
+		if (index == LibGens::IoManager::IOT_4WP_MASTER)
 		{
 			// 4WP MASTER set for Port 2.
-			m_devType[m_selPort] = LibGens::IoBase::IOT_4WP_MASTER;
+			m_devType[m_selPort] = LibGens::IoManager::IOT_4WP_MASTER;
 			
 			// Make sure Port 1 is set to 4WP SLAVE.
-			if (m_devType[CtrlConfig::PORT_1] != LibGens::IoBase::IOT_4WP_SLAVE)
+			if (m_devType[CtrlConfig::PORT_1] != LibGens::IoManager::IOT_4WP_SLAVE)
 			{
-				m_devType[CtrlConfig::PORT_1] = LibGens::IoBase::IOT_4WP_SLAVE;
+				m_devType[CtrlConfig::PORT_1] = LibGens::IoManager::IOT_4WP_SLAVE;
 				updatePortButton(CtrlConfig::PORT_1);
 			}
 		}
 		else
 		{
 			// 4WP MASTER not set for Port 2.
-			m_devType[m_selPort] = (LibGens::IoBase::IoType)index;
+			m_devType[m_selPort] = (LibGens::IoManager::IoType)index;
 			
 			// Check if Port 1 is set to 4WP SLAVE. (or 4WP MASTER for sanity check)
-			if (m_devType[CtrlConfig::PORT_1] == LibGens::IoBase::IOT_4WP_SLAVE ||
-			    m_devType[CtrlConfig::PORT_1] == LibGens::IoBase::IOT_4WP_MASTER)
+			if (m_devType[CtrlConfig::PORT_1] == LibGens::IoManager::IOT_4WP_SLAVE ||
+			    m_devType[CtrlConfig::PORT_1] == LibGens::IoManager::IOT_4WP_MASTER)
 			{
 				// Port 1 is set to 4WP SLAVE. Unset it.
-				m_devType[CtrlConfig::PORT_1] = LibGens::IoBase::IOT_NONE;
+				m_devType[CtrlConfig::PORT_1] = LibGens::IoManager::IOT_NONE;
 				updatePortButton(CtrlConfig::PORT_1);
 			}
 		}
@@ -785,7 +778,7 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 	else
 	{
 		// Other port.
-		m_devType[m_selPort] = (LibGens::IoBase::IoType)index;
+		m_devType[m_selPort] = (LibGens::IoManager::IoType)index;
 	}
 	
 	// Update the port information.

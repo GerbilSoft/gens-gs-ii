@@ -23,7 +23,7 @@
 #define __GENS_QT4_WIDGETS_GENSCTRLCFGWIDGET_HPP__
 
 // LibGens includes.
-#include "libgens/IO/IoBase.hpp"
+#include "libgens/IoManager.hpp"
 
 // Qt includes.
 #include <QtGui/QWidget>
@@ -36,20 +36,20 @@ class GensCtrlCfgWidgetPrivate;
 class GensCtrlCfgWidget : public QWidget
 {
 	Q_OBJECT
-	
+
 	public:
 		GensCtrlCfgWidget(QWidget* parent = 0);
 		~GensCtrlCfgWidget();
-		
-		LibGens::IoBase::IoType ioType(void);
-		void setIoType(LibGens::IoBase::IoType newIoType);
-	
+
+		LibGens::IoManager::IoType ioType(void);
+		void setIoType(LibGens::IoManager::IoType newIoType);
+
 	private:
 		friend class GensCtrlCfgWidgetPrivate;
 		GensCtrlCfgWidgetPrivate *const d;
-		
+
 		Q_DISABLE_COPY(GensCtrlCfgWidget)
-	
+
 	private slots:
 		void clearAllButtons(void);
 };
