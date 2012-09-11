@@ -92,22 +92,14 @@ SET(libgens_SRCS
 	Effects/PausedEffect.cpp
 	Effects/FastBlur.cpp
 	Util/Timing.cpp
-	IO/Io3Button.cpp
-	IO/Io6Button.cpp
-	IO/Io2Button.cpp
-	IO/IoMegaMouse.cpp
 	cpu/Z80.cpp
 	cpu/Z80_MD_Mem.cpp
 	Save/SRam.cpp
 	Save/EEPRom.cpp
-	IO/IoTeamplayer.cpp
-	IO/IoBase.cpp
 	credits.c
 	lg_osd.c
 	Save/EEPRom_File.cpp
 	sound/SoundMgr.cpp
-	IO/Io4WPMaster.cpp
-	IO/Io4WPSlave.cpp
 	GensInput/DevManager.cpp
 	GensInput/DevManager_KeyNames.cpp
 	Decompressor/Decompressor.cpp
