@@ -171,48 +171,6 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoManager::IoType newIoType)
 
 	// Update the grid layout based on the specified controller type.
 	int numButtons = LibGens::IoManager::NumDevButtons(newIoType);
-	int (*pNextLogicalButton)(int button);
-	LibGens::IoManager::ButtonName_t (*pButtonName)(int button);
-
-	// TODO: Update for IoManager.
-#if 0
-	switch (newIoType) {
-		default:
-		case LibGens::IoManager::IOT_NONE:
-			pNextLogicalButton	= &LibGens::IoManager::NextLogicalButton;
-			pButtonName		= &LibGens::IoManager::ButtonName;
-			break;
-		
-		case LibGens::IoManager::IOT_3BTN:
-			pNextLogicalButton	= &LibGens::Io3Button::NextLogicalButton;
-			pButtonName		= &LibGens::Io3Button::ButtonName;
-			break;
-		
-		case LibGens::IoManager::IOT_6BTN:
-			pNextLogicalButton	= &LibGens::Io6Button::NextLogicalButton;
-			pButtonName		= &LibGens::Io6Button::ButtonName;
-			break;
-		
-		case LibGens::IoManager::IOT_2BTN:
-			pNextLogicalButton	= &LibGens::Io2Button::NextLogicalButton;
-			pButtonName		= &LibGens::Io2Button::ButtonName;
-			break;
-		
-		case LibGens::IoManager::IOT_MEGA_MOUSE:
-			pNextLogicalButton	= &LibGens::IoMegaMouse::NextLogicalButton;
-			pButtonName		= &LibGens::IoMegaMouse::ButtonName;
-			break;
-		
-		// TODO: Other devices.
-#if 0
-		IOT_TEAMPLAYER	= 5,
-		IOT_4WP_MASTER	= 6,
-		IOT_4WP_SLAVE	= 7,
-#endif
-	}
-#endif
-	
-	// Make sure we don't exceed the maximum number of buttons.
 	if (numButtons > CtrlConfig::MAX_BTNS)
 		numButtons = CtrlConfig::MAX_BTNS;
 	
@@ -220,7 +178,8 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoManager::IoType newIoType)
 	QString sBtnLabel;
 	for (int i = 0, button = 0;
 	     i < numButtons && button >= 0; i++) {
-		LibGens::IoManager::ButtonName_t buttonName = LibGens::IoManager::BTNNAME_1;//pButtonName(button);
+		LibGens::IoManager::ButtonName_t buttonName =
+					LibGens::IoManager::ButtonName(newIoType, button);
 		sBtnLabel = ButtonName_l(buttonName) + QChar(L':');
 		
 		m_lblButtonName[i]->setText(sBtnLabel);
@@ -229,8 +188,7 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoManager::IoType newIoType)
 		m_btnCfg[i]->setVisible(true);
 		
 		// Get the next logical button. (TODO: Update for IoManager.)
-		//button = pNextLogicalButton(button);
-		button = 0;
+		button = LibGens::IoManager::NextLogicalButton(newIoType, button);
 	}
 
 	// Hide other buttons.
