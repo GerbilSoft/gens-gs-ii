@@ -409,7 +409,7 @@ void IoManagerPrivate::update(void)
  */
 void IoManagerPrivate::updateDevice(int physPort)
 {
-	assert(physPort >= 0 && physPort <= 2);
+	assert(physPort >= IoManager::PHYSPORT_1 && physPort < IoManager::PHYSPORT_MAX);
 
 	IoDevice *dev = &ioDevices[physPort];
 	const bool oldSelect = dev->isSelect();
@@ -589,6 +589,16 @@ int IoManager::NumDevButtons(IoType ioType)
 		return 0;
 
 	return IoManagerPrivate::devBtnCount[ioType];
+}
+
+/**
+ * Get the device type for a given virtual port.
+ * @param virtPort Virtual port.
+ */
+IoManager::IoType IoManager::devType(VirtPort virtPort) const
+{
+	assert(virtPort >= VIRTPORT_1 && virtPort < VIRTPORT_MAX);
+	return d->ioDevices[virtPort].type;
 }
 
 

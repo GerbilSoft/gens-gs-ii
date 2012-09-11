@@ -156,15 +156,20 @@ class IoManager
 		 */
 		static int NumDevButtons(IoType ioType);
 
+		/**
+		 * Get the device type for a given virtual port.
+		 * @param virtPort Virtual port.
+		 */
+		IoType devType(VirtPort virtPort) const;
 		/*
-		IoType devType(IoPort port) const;
 		void setDevType(IoPort port, IoType newDevType);
 		*/
 
 		/*
 		int numButtons(IoPort port) const;
 		int nextLogicalButton(IoPort port, int button) const;
-		
+		*/
+
 		// Logical button names.
 		// These are used for button name trnaslation in the UI.
 		enum ButtonName_t
@@ -197,7 +202,8 @@ class IoManager
 			
 			BTNNAME_MAX
 		};
-		
+
+		/*
 		// Get button names.
 		static ButtonName_t ButtonName(int button);
 		virtual ButtonName_t buttonName(int button) const;
