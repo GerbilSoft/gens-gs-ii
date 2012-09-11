@@ -578,6 +578,19 @@ int IoManager::keymap(int virtPort, GensKey_t *keymap, int siz) const
 	return d->keymap(virtPort, keymap, siz);
 }
 
+/**
+ * Get the number of buttons present on a specific type of device.
+ * @param ioType Device type.
+ * @return Number of buttons.
+ */
+int IoManager::NumDevButtons(IoType ioType)
+{
+	if (ioType < 0 || ioType >= IOT_MAX)
+		return 0;
+
+	return IoManagerPrivate::devBtnCount[ioType];
+}
+
 
 /** MD-side controller functions. **/
 

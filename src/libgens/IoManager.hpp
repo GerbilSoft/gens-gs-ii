@@ -149,10 +149,19 @@ class IoManager
 		int setKeymap(int virtPort, const GensKey_t *keymap, int siz);
 		int keymap(int virtPort, GensKey_t *keymap, int siz) const;
 
+		/**
+		 * Get the number of buttons present on a specific type of device.
+		 * @param ioType Device type.
+		 * @return Number of buttons.
+		 */
+		static int NumDevButtons(IoType ioType);
+
 		/*
 		IoType devType(IoPort port) const;
 		void setDevType(IoPort port, IoType newDevType);
-		
+		*/
+
+		/*
 		int numButtons(IoPort port) const;
 		int nextLogicalButton(IoPort port, int button) const;
 		
