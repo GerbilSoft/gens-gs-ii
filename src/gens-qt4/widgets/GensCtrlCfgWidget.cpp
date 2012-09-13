@@ -50,7 +50,7 @@ class GensCtrlCfgWidgetPrivate
 		inline LibGens::IoManager::IoType ioType(void);
 		void setIoType(LibGens::IoManager::IoType newIoType);
 
-		static QString ButtonName_l(LibGens::IoManager::ButtonName_t buttonName);
+		QString buttonName_l(LibGens::IoManager::ButtonName_t buttonName);
 
 		void clearAllButtons(void);
 	
@@ -138,10 +138,10 @@ void GensCtrlCfgWidgetPrivate::init(void)
 
 	// Add the "Change All" and "Clear All" buttons.
 	// TODO: Icons.
-	btnChangeAll = new QPushButton(GensCtrlCfgWidget::tr("&Change All Buttons"), q);
+	btnChangeAll = new QPushButton(q->tr("&Change All Buttons"), q);
 	hboxOptions->addWidget(btnChangeAll);
 
-	btnClearAll = new QPushButton(GensCtrlCfgWidget::tr("C&lear All Buttons"), q);
+	btnClearAll = new QPushButton(q->tr("C&lear All Buttons"), q);
 	QObject::connect(btnClearAll, SIGNAL(clicked(bool)),
 			 q, SLOT(clearAllButtons()));
 	hboxOptions->addWidget(btnClearAll);
@@ -178,7 +178,7 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoManager::IoType newIoType)
 	     i < numButtons && button >= 0; i++) {
 		LibGens::IoManager::ButtonName_t buttonName =
 					LibGens::IoManager::ButtonName(newIoType, button);
-		sBtnLabel = ButtonName_l(buttonName) + QChar(L':');
+		sBtnLabel = buttonName_l(buttonName) + QChar(L':');
 
 		m_lblButtonName[i]->setText(sBtnLabel);
 		m_lblButtonName[i]->setVisible(true);
@@ -203,85 +203,85 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoManager::IoType newIoType)
  * @param buttonName LibGens button name.
  * @return Localized button name, or empty string on error.
  */
-QString GensCtrlCfgWidgetPrivate::ButtonName_l(LibGens::IoManager::ButtonName_t buttonName)
+QString GensCtrlCfgWidgetPrivate::buttonName_l(LibGens::IoManager::ButtonName_t buttonName)
 {
 	switch (buttonName) {
 		// Standard controller buttons.
 		case LibGens::IoManager::BTNNAME_UP:
 			//: Standard controller: D-Pad UP.
-			return GensCtrlCfgWidget::tr("Up", "controller-standard");
+			return q->tr("Up", "controller-standard");
 
 		case LibGens::IoManager::BTNNAME_DOWN:
 			//: Standard controller: D-Pad DOWN.
-			return GensCtrlCfgWidget::tr("Down", "controller-standard");
+			return q->tr("Down", "controller-standard");
 
 		case LibGens::IoManager::BTNNAME_LEFT:
 			//: Standard controller: D-Pad LEFT.
-			return GensCtrlCfgWidget::tr("Left", "controller-standard");
+			return q->tr("Left", "controller-standard");
 
 		case LibGens::IoManager::BTNNAME_RIGHT:
 			//: Standard controller: D-Pad RIGHT.
-			return GensCtrlCfgWidget::tr("Right", "controller-standard");
+			return q->tr("Right", "controller-standard");
 
 		case LibGens::IoManager::BTNNAME_B:
 			//: Standard controller: B button.
-			return GensCtrlCfgWidget::tr("B", "controller-standard");
+			return q->tr("B", "controller-standard");
 
 		case LibGens::IoManager::BTNNAME_C:
 			//: Standard controller: C button.
-			return GensCtrlCfgWidget::tr("C", "controller-standard");
+			return q->tr("C", "controller-standard");
 
 		case LibGens::IoManager::BTNNAME_A:
 			//: Standard controller: A button.
-			return GensCtrlCfgWidget::tr("A", "controller-standard");
+			return q->tr("A", "controller-standard");
 
 		case LibGens::IoManager::BTNNAME_START:
 			//: Standard controller: START button.
-			return GensCtrlCfgWidget::tr("Start", "controller-standard");
+			return q->tr("Start", "controller-standard");
 
 		case LibGens::IoManager::BTNNAME_Z:
 			//: Standard controller: Z button.
-			return GensCtrlCfgWidget::tr("Z", "controller-standard");
+			return q->tr("Z", "controller-standard");
 
 		case LibGens::IoManager::BTNNAME_Y:
 			//: Standard controller: Y button.
-			return GensCtrlCfgWidget::tr("Y", "controller-standard");
+			return q->tr("Y", "controller-standard");
 
 		case LibGens::IoManager::BTNNAME_X:
 			//: Standard controller: X button.
-			return GensCtrlCfgWidget::tr("X", "controller-standard");
+			return q->tr("X", "controller-standard");
 
 		case LibGens::IoManager::BTNNAME_MODE:
 			//: Standard controller: MODE button.
-			return GensCtrlCfgWidget::tr("Mode", "controller-standard");
+			return q->tr("Mode", "controller-standard");
 
 		/** SMS/GG buttons. **/
 
 		case LibGens::IoManager::BTNNAME_1:
 			//: SMS/Game Gear: 1 button.
-			return GensCtrlCfgWidget::tr("1", "controller-sms-gg");
+			return q->tr("1", "controller-sms-gg");
 
 		case LibGens::IoManager::BTNNAME_2:
 			//: SMS/Game Gear: 2 button.
-			return GensCtrlCfgWidget::tr("2", "controller-sms-gg");
+			return q->tr("2", "controller-sms-gg");
 
 		/** Sega Mega Mouse buttons. **/
 
 		case LibGens::IoManager::BTNNAME_MOUSE_LEFT:
 			//: Sega Mega Mouse: LEFT mouse button.
-			return GensCtrlCfgWidget::tr("Left", "controller-mouse");
+			return q->tr("Left", "controller-mouse");
 
 		case LibGens::IoManager::BTNNAME_MOUSE_RIGHT:
 			//: Sega Mega Mouse: RIGHT mouse button.
-			return GensCtrlCfgWidget::tr("Right", "controller-mouse");
+			return q->tr("Right", "controller-mouse");
 
 		case LibGens::IoManager::BTNNAME_MOUSE_MIDDLE:
 			//: Sega Mega Mouse: MIDDLE mouse button.
-			return GensCtrlCfgWidget::tr("Middle", "controller-mouse");
+			return q->tr("Middle", "controller-mouse");
 
 		case LibGens::IoManager::BTNNAME_MOUSE_START:
 			//: Sega Mega Mouse: START button.
-			return GensCtrlCfgWidget::tr("Start", "controller-mouse");
+			return q->tr("Start", "controller-mouse");
 
 		default:
 			return QString();
