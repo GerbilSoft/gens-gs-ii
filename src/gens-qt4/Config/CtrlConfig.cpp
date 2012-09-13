@@ -47,14 +47,14 @@ class CtrlConfigPrivate
 		void clearDirty(void);
 
 		// Controller types.
-		LibGens::IoManager::IoType ctrlTypes[LibGens::IoManager::VIRTPORT_MAX];
+		LibGens::IoManager::IoType_t ctrlTypes[LibGens::IoManager::VIRTPORT_MAX];
 
 		// Key configuration.
 		// TODO: Use next-highest power-of-two?
 		GensKey_t ctrlKeys[LibGens::IoManager::VIRTPORT_MAX][LibGens::IoManager::BTNI_MAX];
 
 		// Get an internal port name. (non-localized)
-		static QString PortName(LibGens::IoManager::VirtPort virtPort);
+		static QString PortName(LibGens::IoManager::VirtPort_t virtPort);
 
 		// Load/Save functions.
 		int load(const QSettings *qSettings);
@@ -71,7 +71,7 @@ class CtrlConfigPrivate
 		static const char chrKeyValSep = ':';
 
 		// Default controller configuration.
-		static const LibGens::IoManager::IoType Def_CtrlTypes[LibGens::IoManager::VIRTPORT_MAX];
+		static const LibGens::IoManager::IoType_t Def_CtrlTypes[LibGens::IoManager::VIRTPORT_MAX];
 		static const GensKey_t Def_CtrlKeys[LibGens::IoManager::VIRTPORT_MAX][LibGens::IoManager::BTNI_MAX];
 };
 
@@ -80,7 +80,7 @@ class CtrlConfigPrivate
  ********************************/
 
 // Default controller configuration.
-const LibGens::IoManager::IoType CtrlConfigPrivate::Def_CtrlTypes[LibGens::IoManager::VIRTPORT_MAX] =
+const LibGens::IoManager::IoType_t CtrlConfigPrivate::Def_CtrlTypes[LibGens::IoManager::VIRTPORT_MAX] =
 {
 	// System controller ports.
 	LibGens::IoManager::IOT_6BTN,	// Port 1
@@ -176,7 +176,7 @@ inline void CtrlConfigPrivate::clearDirty(void)
  * @param port Port number.
  * @return Port name, or empty string on error.
  */
-QString CtrlConfigPrivate::PortName(LibGens::IoManager::VirtPort virtPort)
+QString CtrlConfigPrivate::PortName(LibGens::IoManager::VirtPort_t virtPort)
 {
 	switch (virtPort) {
 		// System controller ports.
@@ -223,8 +223,8 @@ int CtrlConfigPrivate::load(const QSettings *qSettings)
 	     virtPort < LibGens::IoManager::VIRTPORT_MAX; virtPort++) {
 		// Get the controller type.
 		// TODO: Allow ASCII controller types?
-		const QString portName = PortName((LibGens::IoManager::VirtPort)virtPort);
-		int ioType_tmp = (LibGens::IoManager::IoType)
+		const QString portName = PortName((LibGens::IoManager::VirtPort_t)virtPort);
+		int ioType_tmp = (LibGens::IoManager::IoType_t)
 				(qSettings->value(portName + QLatin1String("/type"), -1).toInt());
 		if (ioType_tmp < LibGens::IoManager::IOT_NONE ||
 		    ioType_tmp >= LibGens::IoManager::IOT_MAX) {
@@ -234,7 +234,7 @@ int CtrlConfigPrivate::load(const QSettings *qSettings)
 			memcpy(ctrlKeys[virtPort], Def_CtrlKeys[virtPort], sizeof(ctrlKeys[virtPort]));
 		} else {
 			// Controller information specified.
-			ctrlTypes[virtPort] = (LibGens::IoManager::IoType)ioType_tmp;
+			ctrlTypes[virtPort] = (LibGens::IoManager::IoType_t)ioType_tmp;
 
 			// Clear the controller keys.
 			memset(ctrlKeys[virtPort], 0x00, sizeof(ctrlKeys[virtPort]));
@@ -272,7 +272,7 @@ int CtrlConfigPrivate::save(QSettings *qSettings)
 	     virtPort < LibGens::IoManager::VIRTPORT_MAX; virtPort++) {
 		// Save the controller type.
 		// TODO: Allow ASCII controller types?
-		const QString portName = PortName((LibGens::IoManager::VirtPort)virtPort);
+		const QString portName = PortName((LibGens::IoManager::VirtPort_t)virtPort);
 		qSettings->setValue(portName + QLatin1String("/type"), (int)ctrlTypes[virtPort]);
 
 		// Save the controller keys.

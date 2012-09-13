@@ -47,8 +47,8 @@ class GensCtrlCfgWidgetPrivate
 		~GensCtrlCfgWidgetPrivate();
 		void init(void);
 
-		inline LibGens::IoManager::IoType ioType(void);
-		void setIoType(LibGens::IoManager::IoType newIoType);
+		inline LibGens::IoManager::IoType_t ioType(void);
+		void setIoType(LibGens::IoManager::IoType_t newIoType);
 
 		QString buttonName_l(LibGens::IoManager::ButtonName_t buttonName);
 
@@ -58,7 +58,7 @@ class GensCtrlCfgWidgetPrivate
 		GensCtrlCfgWidget *const q;
 		Q_DISABLE_COPY(GensCtrlCfgWidgetPrivate)
 
-		LibGens::IoManager::IoType m_ioType;
+		LibGens::IoManager::IoType_t m_ioType;
 
 		QGridLayout *m_layout;
 		QLabel *m_lblButtonName[LibGens::IoManager::BTNI_MAX];
@@ -152,14 +152,14 @@ void GensCtrlCfgWidgetPrivate::init(void)
  * Get the current I/O type.
  * @return Current I/O type.
  */
-inline LibGens::IoManager::IoType GensCtrlCfgWidgetPrivate::ioType(void)
+inline LibGens::IoManager::IoType_t GensCtrlCfgWidgetPrivate::ioType(void)
 	{ return m_ioType; }
 
 /**
  * Set the I/O type.
  * @param newIoType New I/O type.
  */
-void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoManager::IoType newIoType)
+void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoManager::IoType_t newIoType)
 {
 	if (m_ioType == newIoType)
 		return;
@@ -325,14 +325,14 @@ GensCtrlCfgWidget::~GensCtrlCfgWidget()
  * GensCtrlCfgWidget::ioType(): Get the current I/O type.
  * @return Current I/O type.
  */
-LibGens::IoManager::IoType GensCtrlCfgWidget::ioType(void)
+LibGens::IoManager::IoType_t GensCtrlCfgWidget::ioType(void)
 	{ return d->ioType(); }
 
 /**
  * GensCtrlCfgWidget::setIoType(): Set the current I/O type.
  * @param newIoType New I/O type.
  */
-void GensCtrlCfgWidget::setIoType(LibGens::IoManager::IoType newIoType)
+void GensCtrlCfgWidget::setIoType(LibGens::IoManager::IoType_t newIoType)
 	{ d->setIoType(newIoType); }
 
 

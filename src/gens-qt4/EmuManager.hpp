@@ -313,7 +313,7 @@ class EmuManager : public QObject
 				struct
 				{
 					int port;
-					LibGens::IoManager::IoType ctrlType;
+					LibGens::IoManager::IoType_t ctrlType;
 				} ctrlChange;
 				
 				int audioRate;

@@ -100,7 +100,7 @@ class IoManager
 		/**
 		 * @name Virtual port numbers.
 		 */
-		enum VirtPort {
+		enum VirtPort_t {
 			VIRTPORT_1	= 0,	// Player 1
 			VIRTPORT_2	= 1,	// Player 2
 			VIRTPORT_EXT	= 2,	// Extension port
@@ -130,7 +130,7 @@ class IoManager
 			VIRTPORT_MAX
 		};
 
-		enum IoType {
+		enum IoType_t {
 			IOT_NONE	= 0,
 			IOT_3BTN	= 1,
 			IOT_6BTN	= 2,
@@ -154,15 +154,15 @@ class IoManager
 		 * @param ioType Device type.
 		 * @return Number of buttons.
 		 */
-		static int NumDevButtons(IoType ioType);
+		static int NumDevButtons(IoType_t ioType);
 
 		/**
 		 * Get the device type for a given virtual port.
 		 * @param virtPort Virtual port.
 		 */
-		IoType devType(VirtPort virtPort) const;
+		IoType_t devType(VirtPort_t virtPort) const;
 		/*
-		void setDevType(IoPort port, IoType newDevType);
+		void setDevType(IoPort port, IoType_t newDevType);
 		*/
 
 		/**
@@ -201,7 +201,7 @@ class IoManager
 		};
 
 		// Button index values.
-		enum ButtonIndex {
+		enum ButtonIndex_t {
 			BTNI_UNKNOWN	= -1,
 
 			// Standard controller buttons.
@@ -234,8 +234,8 @@ class IoManager
 		};
 
 		// Get button names.
-		static ButtonName_t ButtonName(IoType devType, int btnIdx);
-		static int NextLogicalButton(IoType devType, int btnIdx);
+		static ButtonName_t ButtonName(IoType_t ioType, int btnIdx);
+		static int NextLogicalButton(IoType_t ioType, int btnIdx);
 
 		/** ZOMG savestate functions. **/
 		// TODO: Move this struct to libzomg.

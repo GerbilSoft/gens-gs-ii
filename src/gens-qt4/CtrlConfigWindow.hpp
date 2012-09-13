@@ -66,7 +66,7 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		
 		// Internal controller settings.
 		// TODO: Maybe an internal CtrlConfig?
-		LibGens::IoManager::IoType m_devType[LibGens::IoManager::VIRTPORT_MAX];
+		LibGens::IoManager::IoType_t m_devType[LibGens::IoManager::VIRTPORT_MAX];
 		
 		QActionGroup *m_actgrpSelPort;
 		
@@ -92,24 +92,24 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		
 		// Controller data.
 		static const char *const ms_CtrlIconFilenames[LibGens::IoManager::IOT_MAX];
-		static QString GetShortDeviceName(LibGens::IoManager::IoType devType);
-		static QString GetLongDeviceName(LibGens::IoManager::IoType devType);
-		static QString GetPortName(LibGens::IoManager::VirtPort port);
-		static QIcon GetCtrlIcon(LibGens::IoManager::IoType ioType);
+		static QString GetShortDeviceName(LibGens::IoManager::IoType_t ioType);
+		static QString GetLongDeviceName(LibGens::IoManager::IoType_t ioType);
+		static QString GetPortName(LibGens::IoManager::VirtPort_t virtPort);
+		static QIcon GetCtrlIcon(LibGens::IoManager::IoType_t ioType);
 		
 		// Selected port.
-		LibGens::IoManager::VirtPort m_selPort;
+		LibGens::IoManager::VirtPort_t m_selPort;
 		QSignalMapper *m_mapperSelPort;
 		
 		// Toolbar separators.
 		QVector<QAction*> m_vecTbSep;
 		
 		// Update port information.
-		void updatePortButton(LibGens::IoManager::VirtPort virtPort);
-		void updatePortSettings(LibGens::IoManager::VirtPort virtPort);
+		void updatePortButton(LibGens::IoManager::VirtPort_t virtPort);
+		void updatePortSettings(LibGens::IoManager::VirtPort_t virtPort);
 		
 		// Select a port.
-		void selectPort(LibGens::IoManager::VirtPort virtPort);
+		void selectPort(LibGens::IoManager::VirtPort_t virtPort);
 		void cboDevice_setTP(bool isTP);
 		
 		// Dropdown device lock.

@@ -178,7 +178,7 @@ class IoManagerPrivate
 				serLastTx = 0xFF;
 			}
 
-			IoManager::IoType type;	// Device type.
+			IoManager::IoType_t type;	// Device type.
 			int counter;			// Internal counter.
 			int scanlines;			// Scanline counter.
 
@@ -539,7 +539,7 @@ int IoManager::keymap(int virtPort, GensKey_t *keymap, int siz) const
  * @param ioType Device type.
  * @return Number of buttons.
  */
-int IoManager::NumDevButtons(IoType ioType)
+int IoManager::NumDevButtons(IoType_t ioType)
 {
 	if (ioType < 0 || ioType >= IOT_MAX)
 		return 0;
@@ -551,18 +551,18 @@ int IoManager::NumDevButtons(IoType ioType)
  * Get the device type for a given virtual port.
  * @param virtPort Virtual port.
  */
-IoManager::IoType IoManager::devType(VirtPort virtPort) const
+IoManager::IoType_t IoManager::devType(VirtPort_t virtPort) const
 {
 	assert(virtPort >= VIRTPORT_1 && virtPort < VIRTPORT_MAX);
 	return d->ioDevices[virtPort].type;
 }
 
-IoManager::ButtonName_t IoManager::ButtonName(IoType devType, int btnIdx)
+IoManager::ButtonName_t IoManager::ButtonName(IoType_t ioType, int btnIdx)
 {
-	assert(devType >= IOT_3BTN && devType < IOT_MAX);
+	assert(ioType >= IOT_3BTN && ioType < IOT_MAX);
 	assert(btnIdx >= 0 && btnIdx < BTNI_MAX);
 
-	switch (devType) {
+	switch (ioType) {
 		case IOT_3BTN:
 			switch (btnIdx) {
 				case BTNI_UP:		return BTNNAME_UP;
@@ -624,33 +624,12 @@ IoManager::ButtonName_t IoManager::ButtonName(IoType devType, int btnIdx)
 	return BTNNAME_UNKNOWN;
 }
 
-int IoManager::NextLogicalButton(IoType devType, int btnIdx)
+int IoManager::NextLogicalButton(IoType_t ioType, int btnIdx)
 {
-	assert(devType >= IOT_3BTN && devType < IOT_MAX);
+	assert(ioType >= IOT_3BTN && ioType < IOT_MAX);
 	assert(btnIdx >= 0 && btnIdx < BTNI_MAX);
 
-#if 0
-	// IOT_3BTN
-	{IoManager::BTNI_DOWN, IoManager::BTNI_LEFT, IoManager::BTNI_RIGHT,
-	 IoManager::BTNI_START, IoManager::BTNI_A,
-	 IoManager::BTNI_B, IoManager::BTNI_C},
-
-	// IOT_6BTN
-	{IoManager::BTNI_DOWN, IoManager::BTNI_LEFT, IoManager::BTNI_RIGHT,
-	 IoManager::BTNI_START, IoManager::BTNI_A,
-	 IoManager::BTNI_B, IoManager::BTNI_C,
-	 IoManager::BTNI_MODE, IoManager::BTNI_X,
-	 IoManager::BTNI_Y, IoManager::BTNI_Z},
-
-	// IOT_2BTN
-	{IoManager::BTNI_DOWN, IoManager::BTNI_LEFT, IoManager::BTNI_RIGHT,
-	 IoManager::BTNI_1, IoManager::BTNI_2},
-
-	// IOT_MEGA_MOUSE
-	{IoManager::BTNI_MOUSE_MIDDLE, IoManager::BTNI_MOUSE_RIGHT,
-	 IoManager::BTNI_MOUSE_START},
-#endif
-	switch (devType) {
+	switch (ioType) {
 		case IOT_3BTN:
 			switch (btnIdx) {
 				case BTNI_UP:		return BTNI_DOWN;
