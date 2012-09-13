@@ -46,26 +46,26 @@ class GensCtrlCfgWidgetPrivate
 		GensCtrlCfgWidgetPrivate(GensCtrlCfgWidget *q);
 		~GensCtrlCfgWidgetPrivate();
 		void init(void);
-		
+
 		inline LibGens::IoManager::IoType ioType(void);
 		void setIoType(LibGens::IoManager::IoType newIoType);
-		
+
 		static QString ButtonName_l(LibGens::IoManager::ButtonName_t buttonName);
-		
+
 		void clearAllButtons(void);
 	
 	private:
 		GensCtrlCfgWidget *const q;
 		Q_DISABLE_COPY(GensCtrlCfgWidgetPrivate)
-		
+
 		LibGens::IoManager::IoType m_ioType;
-		
+
 		QGridLayout *m_layout;
-		QLabel *m_lblButtonName[CtrlConfig::MAX_BTNS];
-		QLabel *m_lblKeyDisplay[CtrlConfig::MAX_BTNS];
-		GensCtrlKeyWidget *m_btnCfg[CtrlConfig::MAX_BTNS];
+		QLabel *m_lblButtonName[LibGens::IoManager::BTNI_MAX];
+		QLabel *m_lblKeyDisplay[LibGens::IoManager::BTNI_MAX];
+		GensCtrlKeyWidget *m_btnCfg[LibGens::IoManager::BTNI_MAX];
 		QSpacerItem *m_vspcCfg;
-		
+
 		// "Change All", "Clear All".
 		QPushButton *btnChangeAll;
 		QPushButton *btnClearAll;
@@ -94,8 +94,7 @@ GensCtrlCfgWidgetPrivate::~GensCtrlCfgWidgetPrivate()
 {
 	// Delete all the labels and buttons.
 	// TODO: Is this necessary?
-	for (int i = 0; i < CtrlConfig::MAX_BTNS; i++)
-	{
+	for (int i = 0; i < LibGens::IoManager::BTNI_MAX; i++) {
 		delete m_lblButtonName[i];
 		delete m_lblKeyDisplay[i];
 		delete m_btnCfg[i];
@@ -104,17 +103,16 @@ GensCtrlCfgWidgetPrivate::~GensCtrlCfgWidgetPrivate()
 
 
 /**
- * GensCtrlCfgWidgetPrivate::init(): Initialize the grid layout.
+ * Initialize the grid layout.
  */
 void GensCtrlCfgWidgetPrivate::init(void)
 {
 	// Monospaced font.
 	QFont fntMonospace(QLatin1String("Monospace"));
 	fntMonospace.setStyleHint(QFont::TypeWriter);
-	
+
 	// Add CtrlConfig::MAX_BTNS items to the grid layout.
-	for (int i = 0; i < CtrlConfig::MAX_BTNS; i++)
-	{
+	for (int i = 0; i < LibGens::IoManager::BTNI_MAX; i++) {
 		m_lblButtonName[i] = new QLabel();
 		m_lblButtonName[i]->setVisible(false);
 		m_lblKeyDisplay[i] = new QLabel();
@@ -123,26 +121,26 @@ void GensCtrlCfgWidgetPrivate::init(void)
 		m_lblKeyDisplay[i]->setFont(fntMonospace);
 		m_btnCfg[i] = new GensCtrlKeyWidget(NULL, m_lblKeyDisplay[i]);
 		m_btnCfg[i]->setVisible(false);
-		
+
 		m_layout->addWidget(m_lblButtonName[i], i, 0, Qt::AlignLeft);
 		m_layout->addWidget(m_lblKeyDisplay[i], i, 1, Qt::AlignLeft);
 		m_layout->addWidget(m_btnCfg[i], i, 2, Qt::AlignRight);
 	}
-	
+
 	// Add a vertical spacer at the bottom of the layout.
 	m_vspcCfg = new QSpacerItem(128, 128, QSizePolicy::Expanding, QSizePolicy::Expanding);
-	m_layout->addItem(m_vspcCfg, CtrlConfig::MAX_BTNS, 1, 1, 1, Qt::AlignCenter);
-	
+	m_layout->addItem(m_vspcCfg, LibGens::IoManager::BTNI_MAX, 1, 1, 1, Qt::AlignCenter);
+
 	// Create the HBox.
 	hboxOptions = new QHBoxLayout();
 	hboxOptions->setContentsMargins(0, 8, 0, 0); // TODO: Use style default for Top margin.
-	m_layout->addLayout(hboxOptions, CtrlConfig::MAX_BTNS+1, 0, 1, 3, Qt::AlignCenter);
-	
+	m_layout->addLayout(hboxOptions, LibGens::IoManager::BTNI_MAX+1, 0, 1, 3, Qt::AlignCenter);
+
 	// Add the "Change All" and "Clear All" buttons.
 	// TODO: Icons.
 	btnChangeAll = new QPushButton(GensCtrlCfgWidget::tr("&Change All Buttons"), q);
 	hboxOptions->addWidget(btnChangeAll);
-	
+
 	btnClearAll = new QPushButton(GensCtrlCfgWidget::tr("C&lear All Buttons"), q);
 	QObject::connect(btnClearAll, SIGNAL(clicked(bool)),
 			 q, SLOT(clearAllButtons()));
@@ -151,14 +149,14 @@ void GensCtrlCfgWidgetPrivate::init(void)
 
 
 /**
- * GensCtrlCfgWidget::ioType(): Get the current I/O type.
+ * Get the current I/O type.
  * @return Current I/O type.
  */
 inline LibGens::IoManager::IoType GensCtrlCfgWidgetPrivate::ioType(void)
 	{ return m_ioType; }
 
 /**
- * GensCtrlCfgWidgetPrivate::setIoType(): Set the I/O type.
+ * Set the I/O type.
  * @param newIoType New I/O type.
  */
 void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoManager::IoType newIoType)
@@ -171,9 +169,9 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoManager::IoType newIoType)
 
 	// Update the grid layout based on the specified controller type.
 	int numButtons = LibGens::IoManager::NumDevButtons(newIoType);
-	if (numButtons > CtrlConfig::MAX_BTNS)
-		numButtons = CtrlConfig::MAX_BTNS;
-	
+	if (numButtons > LibGens::IoManager::BTNI_MAX)
+		numButtons = LibGens::IoManager::BTNI_MAX;
+
 	// Show the buttons, in logical button order.
 	QString sBtnLabel;
 	for (int i = 0, button = 0;
@@ -181,18 +179,18 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoManager::IoType newIoType)
 		LibGens::IoManager::ButtonName_t buttonName =
 					LibGens::IoManager::ButtonName(newIoType, button);
 		sBtnLabel = ButtonName_l(buttonName) + QChar(L':');
-		
+
 		m_lblButtonName[i]->setText(sBtnLabel);
 		m_lblButtonName[i]->setVisible(true);
 		m_lblKeyDisplay[i]->setVisible(true);
 		m_btnCfg[i]->setVisible(true);
-		
+
 		// Get the next logical button. (TODO: Update for IoManager.)
 		button = LibGens::IoManager::NextLogicalButton(newIoType, button);
 	}
 
 	// Hide other buttons.
-	for (int i = numButtons; i < CtrlConfig::MAX_BTNS; i++) {
+	for (int i = numButtons; i < LibGens::IoManager::BTNI_MAX; i++) {
 		m_lblButtonName[i]->setVisible(false);
 		m_lblKeyDisplay[i]->setVisible(false);
 		m_btnCfg[i]->setVisible(false);
@@ -201,7 +199,7 @@ void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoManager::IoType newIoType)
 
 
 /**
- * ButtonName_l(): Get a localized LibGens button name.
+ * Get a localized LibGens button name.
  * @param buttonName LibGens button name.
  * @return Localized button name, or empty string on error.
  */
@@ -295,12 +293,12 @@ QString GensCtrlCfgWidgetPrivate::ButtonName_l(LibGens::IoManager::ButtonName_t 
 
 
 /**
- * GensCtrlCfgWidgetPrivate::clearAllButtons(): Clear all mapped buttons.
+ * Clear all mapped buttons.
  * WRAPPER SLOT for GensCtrlCfgWidetPrivate.
  */
 void GensCtrlCfgWidgetPrivate::clearAllButtons(void)
 {
-	for (int i = 0; i < CtrlConfig::MAX_BTNS; i++)
+	for (int i = 0; i < LibGens::IoManager::BTNI_MAX; i++)
 		m_btnCfg[i]->clearKey();
 }
 

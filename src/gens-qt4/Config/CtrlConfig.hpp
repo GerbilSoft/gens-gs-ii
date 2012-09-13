@@ -45,42 +45,11 @@ class CtrlConfig : public QObject
 	public:
 		CtrlConfig(QObject *parent = 0);
 		~CtrlConfig();
-		
+
 		// Dirty flag.
 		bool isDirty(void) const;
 		void clearDirty(void);
-		
-		// Maximum number of buttons.
-		static const int MAX_BTNS = 12;
-		
-		// Controller ports.
-		enum CtrlPort_t
-		{
-			// System controller ports.
-			PORT_1		= 0,
-			PORT_2		= 1,
-			
-			// Team Player, Port 1.
-			PORT_TP1A	= 2,
-			PORT_TP1B	= 3,
-			PORT_TP1C	= 4,
-			PORT_TP1D	= 5,
-			
-			// Team Player, Port 2.
-			PORT_TP2A	= 6,
-			PORT_TP2B	= 7,
-			PORT_TP2C	= 8,
-			PORT_TP2D	= 9,
-			
-			// 4-Way Play.
-			PORT_4WPA	= 10,
-			PORT_4WPB	= 11,
-			PORT_4WPC	= 12,
-			PORT_4WPD	= 13,
-			
-			PORT_MAX
-		};
-		
+
 		/**
 		 * Load controller configuration from a settings file.
 		 * NOTE: The group must be selected in the QSettings before calling this function!
@@ -88,7 +57,7 @@ class CtrlConfig : public QObject
 		 * @return 0 on success; non-zero on error.
 		 */
 		int load(const QSettings *qSettings);
-		
+
 		/**
 		 * Save controller configuration to a settings file.
 		 * NOTE: The group must be selected in the QSettings before calling this function!
@@ -96,13 +65,13 @@ class CtrlConfig : public QObject
 		 * @return 0 on success; non-zero on error.
 		 */
 		int save(QSettings *qSettings);
-		
+
 		/**
 		 * Update the controller I/O manager.
 		 * @param ioManager I/O manager class.
 		 */
 		void updateIoManager(LibGens::IoManager *ioManager) const;
-	
+
 	private:
 		friend class CtrlConfigPrivate;
 		CtrlConfigPrivate *d;

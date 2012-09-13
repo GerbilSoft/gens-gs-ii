@@ -65,7 +65,8 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		void changeEvent(QEvent *event);
 		
 		// Internal controller settings.
-		LibGens::IoManager::IoType m_devType[CtrlConfig::PORT_MAX];
+		// TODO: Maybe an internal CtrlConfig?
+		LibGens::IoManager::IoType m_devType[LibGens::IoManager::VIRTPORT_MAX];
 		
 		QActionGroup *m_actgrpSelPort;
 		
@@ -83,7 +84,7 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		void apply(void);
 		
 		/** Widget slots. **/
-		void toolbarPortSelected(int i);
+		void toolbarPortSelected(int virtPort);
 		void on_cboDevice_currentIndexChanged(int index);
 	
 	private:
@@ -93,22 +94,22 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		static const char *const ms_CtrlIconFilenames[LibGens::IoManager::IOT_MAX];
 		static QString GetShortDeviceName(LibGens::IoManager::IoType devType);
 		static QString GetLongDeviceName(LibGens::IoManager::IoType devType);
-		static QString GetPortName(int port);
+		static QString GetPortName(LibGens::IoManager::VirtPort port);
 		static QIcon GetCtrlIcon(LibGens::IoManager::IoType ioType);
 		
 		// Selected port.
-		int m_selPort;
+		LibGens::IoManager::VirtPort m_selPort;
 		QSignalMapper *m_mapperSelPort;
 		
 		// Toolbar separators.
 		QVector<QAction*> m_vecTbSep;
 		
 		// Update port information.
-		void updatePortButton(int port);
-		void updatePortSettings(int port);
+		void updatePortButton(LibGens::IoManager::VirtPort virtPort);
+		void updatePortSettings(LibGens::IoManager::VirtPort virtPort);
 		
 		// Select a port.
-		void selectPort(int port);
+		void selectPort(LibGens::IoManager::VirtPort virtPort);
 		void cboDevice_setTP(bool isTP);
 		
 		// Dropdown device lock.
