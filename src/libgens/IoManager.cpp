@@ -234,6 +234,7 @@ class IoManagerPrivate
 			uint8_t serLastTx;	// Last transmitted data byte.
 
 			// Button mapping.
+			// TODO: Use next-highest power-of-two?
 			GensKey_t keyMap[IoManager::BTNI_MAX];
 		};
 
