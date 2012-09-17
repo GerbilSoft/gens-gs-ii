@@ -371,7 +371,7 @@ void IoManagerPrivate::reset(void)
  */
 int IoManagerPrivate::setKeymap(int virtPort, const GensKey_t *keymap, int siz)
 {
-	IoDevice *dev = &ioDevices[virtPort];
+	IoDevice *const dev = &ioDevices[virtPort];
 	const int btns = std::min(siz, NUM_ELEMENTS(dev->keyMap));
 	for (int i = 0; i < btns; i++)
 		dev->keyMap[i] = *keymap++;
@@ -387,7 +387,7 @@ int IoManagerPrivate::setKeymap(int virtPort, const GensKey_t *keymap, int siz)
  */
 int IoManagerPrivate::keymap(int virtPort, GensKey_t *keymap, int siz) const
 {
-	const IoDevice *dev = &ioDevices[virtPort];
+	const IoDevice *const dev = &ioDevices[virtPort];
 	const int btns = std::min(siz, NUM_ELEMENTS(dev->keyMap));
 	for (int i = 0; i < btns; i++)
 		*keymap++ = dev->keyMap[i];
@@ -403,7 +403,7 @@ int IoManagerPrivate::keymap(int virtPort, GensKey_t *keymap, int siz) const
 void IoManagerPrivate::doScanline(void)
 {
 	for (int i = 0; i < NUM_ELEMENTS(ioDevices); i++) {
-		IoDevice *dev = &ioDevices[i];
+		IoDevice *const dev = &ioDevices[i];
 		if (dev->type != IoManager::IOT_6BTN)
 			continue;
 
@@ -448,7 +448,7 @@ void IoManagerPrivate::updateDevice(int physPort)
 {
 	assert(physPort >= IoManager::PHYSPORT_1 && physPort < IoManager::PHYSPORT_MAX);
 
-	IoDevice *dev = &ioDevices[physPort];
+	IoDevice *const dev = &ioDevices[physPort];
 	const bool oldSelect = dev->isSelect();
 	dev->updateSelectLine();
 
@@ -479,7 +479,7 @@ void IoManagerPrivate::updateDevice_3BTN(int virtPort)
 	 * TH=0: D0SA00DU
 	 */
 	
-	IoDevice *dev = &ioDevices[virtPort];
+	IoDevice *const dev = &ioDevices[virtPort];
 	uint8_t data;
 	if (dev->isSelect()) {
 		// TH=1.
@@ -495,7 +495,7 @@ void IoManagerPrivate::updateDevice_3BTN(int virtPort)
 
 void IoManagerPrivate::updateDevice_6BTN(int virtPort, bool oldSelect)
 {
-	IoDevice *dev = &ioDevices[virtPort];
+	IoDevice *const dev = &ioDevices[virtPort];
 	uint8_t data;
 
 	if (!oldSelect && dev->isSelect()) {
@@ -565,7 +565,7 @@ void IoManagerPrivate::updateDevice_2BTN(int virtPort)
 	 * B == button 1
 	 * C == button 2
 	 */
-	IoDevice *dev = &ioDevices[virtPort];
+	IoDevice *const dev = &ioDevices[virtPort];
 	dev->deviceData = (0xC0 | (ioDevices[virtPort].buttons & 0x3F));
 }
 
@@ -579,7 +579,7 @@ void IoManagerPrivate::updateDevice_TP(int physPort, bool oldSelect, bool oldTr)
 {
 	assert(physPort >= IoManager::PHYSPORT_1 && physPort <= IoManager::PHYSPORT_2);
 
-	IoDevice *dev = &ioDevices[physPort];
+	IoDevice *const dev = &ioDevices[physPort];
 
 	// Check if either TH or TR has changed.
 	if ((dev->isSelect() != oldSelect) ||
@@ -642,16 +642,23 @@ void IoManagerPrivate::updateDevice_TP(int physPort, bool oldSelect, bool oldTr)
 				break;
 			}
 
+			// Determine the virtual port base.
+			const int virtPortBase = (physPort == 0
+						? IoManager::VIRTPORT_TP1A
+						: IoManager::VIRTPORT_TP2A);
+
 			// Controller data.
-			// TODO
-			data = 0xFF;
-			//ret = (m_ctrlData[m_ctrlIndex[adj_counter] - DT_PADA_RLDU] & 0xF);
+			const int virtPort = virtPortBase + (adj_counter / 3);
+			const int shift = (adj_counter % 3) * 4;
+
+			data = (ioDevices[virtPort].buttons >> shift) & 0xF;
 			break;
 	}
 
 	// TL should match TR.
 	// (from Genesis Plus GX)
-	if (data & IOPIN_TR)
+	// NOTE: TR is always an MD output line.
+	if (dev->isTrLine())
 		data |= IOPIN_TL;
 	else
 		data &= ~IOPIN_TL;
@@ -671,7 +678,7 @@ void IoManagerPrivate::rebuildCtrlIndexTable(int physPort)
 	// Check controller types.
 	assert(physPort >= IoManager::PHYSPORT_1 && physPort <= IoManager::PHYSPORT_2);
 
-	IoDevice *dev = &ioDevices[physPort];
+	IoDevice *const dev = &ioDevices[physPort];
 	assert(dev->type == IoManager::IOT_TEAMPLAYER);
 
 	// Determine the virtual port base.
@@ -796,8 +803,21 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 	assert(virtPort >= VIRTPORT_1 && virtPort < VIRTPORT_MAX);
 	assert(ioType >= IOT_NONE && ioType < IOT_MAX);
 
-	d->ioDevices[virtPort].type = ioType;
-	d->ioDevices[virtPort].reset();
+	IoManagerPrivate::IoDevice *const dev = &d->ioDevices[virtPort];
+	dev->type = ioType;
+	dev->reset();
+
+	// Rebuild Teamplayer controller index tables for TP devices.
+	if (virtPort >= VIRTPORT_1 && virtPort <= VIRTPORT_2) {
+		if (dev->type == IoManager::IOT_TEAMPLAYER)
+			d->rebuildCtrlIndexTable(virtPort);
+	} else if (virtPort >= VIRTPORT_TP1A && virtPort <= VIRTPORT_TP1D) {
+		if (d->ioDevices[VIRTPORT_1].type == IoManager::IOT_TEAMPLAYER)
+			d->rebuildCtrlIndexTable(VIRTPORT_1);
+	} else if (virtPort >= VIRTPORT_TP2A && virtPort <= VIRTPORT_TP2D) {
+		if (d->ioDevices[VIRTPORT_2].type == IoManager::IOT_TEAMPLAYER)
+			d->rebuildCtrlIndexTable(VIRTPORT_2);
+	}
 }
 
 IoManager::ButtonName_t IoManager::ButtonName(IoType_t ioType, int btnIdx)
