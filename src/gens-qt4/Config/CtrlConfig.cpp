@@ -224,7 +224,8 @@ int CtrlConfigPrivate::load(const QSettings *qSettings)
 		// Get the controller type.
 		// TODO: Allow ASCII controller types?
 		const QString portName = PortName((LibGens::IoManager::VirtPort_t)virtPort);
-		int ioType_tmp = (LibGens::IoManager::IoType_t)
+		LibGens::IoManager::IoType_t ioType_tmp =
+				(LibGens::IoManager::IoType_t)
 				(qSettings->value(portName + QLatin1String("/type"), -1).toInt());
 		if (ioType_tmp < LibGens::IoManager::IOT_NONE ||
 		    ioType_tmp >= LibGens::IoManager::IOT_MAX) {
