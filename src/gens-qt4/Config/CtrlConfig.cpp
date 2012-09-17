@@ -180,8 +180,9 @@ QString CtrlConfigPrivate::PortName(LibGens::IoManager::VirtPort_t virtPort)
 {
 	switch (virtPort) {
 		// System controller ports.
-		case LibGens::IoManager::VIRTPORT_1:	return QLatin1String("port1");
-		case LibGens::IoManager::VIRTPORT_2:	return QLatin1String("port2");
+		case LibGens::IoManager::VIRTPORT_1:		return QLatin1String("port1");
+		case LibGens::IoManager::VIRTPORT_2:		return QLatin1String("port2");
+		case LibGens::IoManager::VIRTPORT_EXT:	return QLatin1String("portEXT");
 
 		// Team Player, Port 1.
 		case LibGens::IoManager::VIRTPORT_TP1A:	return QLatin1String("portTP1A");
@@ -200,6 +201,10 @@ QString CtrlConfigPrivate::PortName(LibGens::IoManager::VirtPort_t virtPort)
 		case LibGens::IoManager::VIRTPORT_4WPB:	return QLatin1String("port4WPB");
 		case LibGens::IoManager::VIRTPORT_4WPC:	return QLatin1String("port4WPC");
 		case LibGens::IoManager::VIRTPORT_4WPD:	return QLatin1String("port4WPD");
+
+		// J_Cart
+		case LibGens::IoManager::VIRTPORT_JCART1:	return QLatin1String("portJCart1");
+		case LibGens::IoManager::VIRTPORT_JCART2:	return QLatin1String("portJCart2");
 
 		default:
 			// Unknown port.
@@ -277,6 +282,8 @@ int CtrlConfigPrivate::save(QSettings *qSettings)
 		qSettings->setValue(portName + QLatin1String("/type"), (int)ctrlTypes[virtPort]);
 
 		// Save the controller keys.
+		// TODO: Save all keys, even those not being used by the current type.
+		// Trim all 0 buttons from the keys afterwards.
 		int numButtons = LibGens::IoManager::NumDevButtons(ctrlTypes[virtPort]);
 		if (numButtons > NUM_ELEMENTS(ctrlKeys[virtPort]))
 			numButtons = NUM_ELEMENTS(ctrlKeys[virtPort]);
