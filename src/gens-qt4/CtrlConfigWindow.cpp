@@ -76,41 +76,42 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	// Remove the window icon. (Mac "proxy icon")
 	this->setWindowIcon(QIcon());
 #endif
-	
+
 	// Initialize the cboDevice lock counter.
 	m_cboDeviceLockCnt = 0;
-	
+
 	// Initialize the toolbar.
 	m_actgrpSelPort = new QActionGroup(this);
 	m_actgrpSelPort->setExclusive(true);
-	
+
 	// Base ports.
 	m_actgrpSelPort->addAction(actionPort1);
 	m_actgrpSelPort->addAction(actionPort2);
-	
+	m_actgrpSelPort->addAction(actionPortEXT);
+
 	// TeamPlayer 1.
 	m_actgrpSelPort->addAction(actionPortTP1A);
 	m_actgrpSelPort->addAction(actionPortTP1B);
 	m_actgrpSelPort->addAction(actionPortTP1C);
 	m_actgrpSelPort->addAction(actionPortTP1D);
-	
+
 	// TeamPlayer 2.
 	m_actgrpSelPort->addAction(actionPortTP2A);
 	m_actgrpSelPort->addAction(actionPortTP2B);
 	m_actgrpSelPort->addAction(actionPortTP2C);
 	m_actgrpSelPort->addAction(actionPortTP2D);
-	
+
 	// EA 4-Way Play.
 	m_actgrpSelPort->addAction(actionPort4WPA);
 	m_actgrpSelPort->addAction(actionPort4WPB);
 	m_actgrpSelPort->addAction(actionPort4WPC);
 	m_actgrpSelPort->addAction(actionPort4WPD);
-	
+
 	// Signal mapper for toolbar buttons.
 	m_mapperSelPort = new QSignalMapper(this);
 	QObject::connect(m_mapperSelPort, SIGNAL(mapped(int)),
 			 this, SLOT(toolbarPortSelected(int)));
-	
+
 	// Find the toolbar separators.
 	// Qt Designer doesn't save them for some reason.
 	// Also, add port buttons to the signal mapper.
@@ -475,6 +476,9 @@ void CtrlConfigWindow::updatePortButton(LibGens::IoManager::VirtPort_t virtPort)
 	actionPort->setToolTip(GetPortName(virtPort) +
 				QLatin1String(": ") +
 				GetLongDeviceName(m_devType[virtPort]));
+
+	// Disable the EXT port for now.
+	actionPortEXT->setVisible(false);
 
 	if (virtPort == LibGens::IoManager::VIRTPORT_1) {
 		// Port 1. Update TeamPlayer 1 button state.

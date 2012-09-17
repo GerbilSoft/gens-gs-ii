@@ -163,6 +163,7 @@
    </attribute>
    <addaction name="actionPort1"/>
    <addaction name="actionPort2"/>
+   <addaction name="actionPortEXT"/>
    <addaction name="separator"/>
    <addaction name="actionPortTP1A"/>
    <addaction name="actionPortTP1B"/>
@@ -197,6 +198,14 @@
    </property>
    <property name="text">
     <string>Port &amp;2</string>
+   </property>
+  </action>
+  <action name="actionPortEXT">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;EXT</string>
    </property>
   </action>
   <action name="actionPortTP1A">
