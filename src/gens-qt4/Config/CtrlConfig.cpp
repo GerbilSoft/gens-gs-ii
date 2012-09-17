@@ -371,10 +371,15 @@ int CtrlConfig::save(QSettings *qSettings)
 void CtrlConfig::updateIoManager(LibGens::IoManager *ioManager) const
 {
 	for (int virtPort = 0; virtPort < NUM_ELEMENTS(d->ctrlKeys); virtPort++) {
-		// TODO: Set the port type.
+		// Set the device type.
+		ioManager->setDevType(
+				(LibGens::IoManager::VirtPort_t)virtPort, 
+				d->ctrlTypes[virtPort]);
 
 		// Set the new keymaps.
-		ioManager->setKeymap(virtPort, &d->ctrlKeys[virtPort][0], NUM_ELEMENTS(d->ctrlKeys[virtPort]));
+		ioManager->setKeymap(virtPort,
+				&d->ctrlKeys[virtPort][0],
+				NUM_ELEMENTS(d->ctrlKeys[virtPort]));
 	}
 }
 
