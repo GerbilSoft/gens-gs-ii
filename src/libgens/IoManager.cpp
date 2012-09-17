@@ -376,7 +376,7 @@ void IoManagerPrivate::updateDevice(int physPort)
 		case IoManager::IOT_3BTN: updateDevice_3BTN(physPort); break;
 		case IoManager::IOT_6BTN: updateDevice_6BTN(physPort, oldSelect); break;
 		case IoManager::IOT_2BTN: updateDevice_2BTN(physPort); break;
-		
+
 		// TODO: Implement Team Player, 4WP, and Mega Mouse.
 		default:
 			break;
@@ -478,7 +478,7 @@ void IoManagerPrivate::updateDevice_2BTN(int virtPort)
 	 * C == button 2
 	 */
 	IoDevice *dev = &ioDevices[virtPort];
-	dev->mdData = (0xC0 | (ioDevices[virtPort].buttons & 0x3F));
+	dev->deviceData = (0xC0 | (ioDevices[virtPort].buttons & 0x3F));
 }
 
 
