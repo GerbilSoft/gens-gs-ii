@@ -161,9 +161,13 @@ class IoManager
 		 * @param virtPort Virtual port.
 		 */
 		IoType_t devType(VirtPort_t virtPort) const;
-		/*
-		void setDevType(IoPort port, IoType_t newDevType);
-		*/
+
+		/**
+		 * Set the device type for a given virtual port.
+		 * @param virtPort Virtual port.
+		 * @param ioType New device type.
+		 */
+		void setDevType(VirtPort_t virtPort, IoType_t ioType);
 
 		/**
 		 * Logical button names.

@@ -557,6 +557,20 @@ IoManager::IoType_t IoManager::devType(VirtPort_t virtPort) const
 	return d->ioDevices[virtPort].type;
 }
 
+/**
+ * Set the device type for a given virtual port.
+ * @param virtPort Virtual port.
+ * @param ioType New device type.
+ */
+void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
+{
+	assert(virtPort >= VIRTPORT_1 && virtPort < VIRTPORT_MAX);
+	assert(ioType >= IOT_NONE && ioType < IOT_MAX);
+
+	d->ioDevices[virtPort].type = ioType;
+	d->ioDevices[virtPort].reset();
+}
+
 IoManager::ButtonName_t IoManager::ButtonName(IoType_t ioType, int btnIdx)
 {
 	assert(ioType >= IOT_3BTN && ioType < IOT_MAX);
@@ -722,7 +736,6 @@ void IoManager::writeDataMD(int physPort, uint8_t data)
 
 	d->ioDevices[physPort].mdData = data;
 	d->updateDevice(physPort);
-	// TODO: Update the device.
 	// TODO: 4WP needs to copy this to the active device.
 }
 
