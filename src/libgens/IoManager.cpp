@@ -85,6 +85,7 @@ class IoManagerPrivate
 		void updateDevice_3BTN(int virtPort);
 		void updateDevice_6BTN(int virtPort, bool oldSelect);
 		void updateDevice_2BTN(int virtPort);
+		void updateDevice_TP(int physPort, bool oldSelect, bool oldTr);
 		
 		// I/O pin definitions.
 		enum IoPinDefs {
@@ -151,20 +152,73 @@ class IoManagerPrivate
 			SERBAUD_300	= 0x03
 		};
 
+		/**
+		 * Teamplayer.
+		 */
+
+		/**
+		 * Rebuild the controller index table.
+		 * @param physPort Physical controller port. (0 or 1)
+		 */
+		void rebuildCtrlIndexTable(int physPort);
+
+		/**
+		 * @name TP_PadType
+		 * Indicates the type of controller connected to
+		 * a given port on the Sega Teamplayer adapter.
+		 */
+		enum TP_PadType {
+			TP_PT_NONE	= 0xF,
+			TP_PT_3BTN	= 0x0,
+			TP_PT_6BTN	= 0x1
+		};
+
+		/**
+		 * @name TP_DataType
+		 * Indicates the type of data that should be returned
+		 * in the current cycle.
+		 */
+		enum TP_DataType {
+			// Initialization
+			TP_DT_INIT		= 0,	// 0: Initial state.
+			TP_DT_START		= 1,	// 1: Start request.
+			TP_DT_ACK1		= 2,	// 2: Acknowledgement.
+			TP_DT_ACK2		= 3,	// 3: Acknowledgement.
+			TP_DT_PADTYPE_A		= 4,	// 4: Pad type for Controller A
+			TP_DT_PADTYPE_B		= 5,	// 5: Pad type for Controller A
+			TP_DT_PADTYPE_C		= 6,	// 6: Pad type for Controller A
+			TP_DT_PADTYPE_D		= 7,	// 7: Pad type for Controller A
+
+			// Controller A
+			TP_DT_PADA_RLDU		= 8,	// D-pad
+			TP_DT_PADA_SACB		= 9,	// Start, A, C, B
+			TP_DT_PADA_MXYZ		= 10,	// Mode, X, Y, Z (6-button only)
+
+			// Controller B
+			TP_DT_PADB_RLDU		= 11,	// D-pad
+			TP_DT_PADB_SACB		= 12,	// Start, A, C, B
+			TP_DT_PADB_MXYZ		= 13,	// Mode, X, Y, Z (6-button only)
+
+			// Controller C
+			TP_DT_PADC_RLDU		= 14,	// D-pad
+			TP_DT_PADC_SACB		= 15,	// Start, A, C, B
+			TP_DT_PADC_MXYZ		= 16,	// Mode, X, Y, Z (6-button only)
+
+			// Controller D
+			TP_DT_PADD_RLDU		= 17,	// D-pad
+			TP_DT_PADD_SACB		= 18,	// Start, A, C, B
+			TP_DT_PADD_MXYZ		= 19,	// Mode, X, Y, Z (6-button only)
+
+			TP_DT_MAX
+		};
+
 		struct IoDevice
 		{
 			IoDevice()
 				: type(IoManager::IOT_3BTN)
-				, counter(0)
-				, scanlines(0)
-				, ctrl(0)
-				, mdData(0xFF)
-				, deviceData(0xFF)
-				, select(false)
-				, buttons(~0)
-				, serCtrl(0)
-				, serLastTx(0xFF)
-			{ }
+			{
+				reset();
+			}
 
 			void reset(void) {
 				counter = 0;
@@ -172,7 +226,8 @@ class IoManagerPrivate
 				ctrl = 0;
 				mdData = 0xFF;
 				deviceData = 0xFF;
-				select = false;
+				th_line = false;	// SELECT
+				tr_line = false;	// TR
 				buttons = ~0;
 				serCtrl = 0;
 				serLastTx = 0xFF;
@@ -185,7 +240,8 @@ class IoManagerPrivate
 			uint8_t ctrl;			// Tristate control.
 			uint8_t mdData;			// Data written from the MD.
 			uint8_t deviceData;		// Device data.
-			bool select;			// Select line state.
+			bool th_line;			// TH line state. (SELECT)
+			bool tr_line;			// TR line state.
 
 			/**
 			 * Controller bitfield.
@@ -202,12 +258,24 @@ class IoManagerPrivate
 			 */
 			inline void updateSelectLine(void) {
 				// TODO: Apply the device data.
-				select = (!(ctrl & IOPIN_TH) ||
+				th_line = (!(ctrl & IOPIN_TH) ||
 					    (mdData & IOPIN_TH));
 			}
 
 			inline bool isSelect(void) const
-				{ return select; }
+				{ return th_line; }
+
+			/**
+			 * Determine the TR line state.
+			 */
+			inline void updateTrLine(void) {
+				// TODO: Apply the device data.
+				tr_line = (!(ctrl & IOPIN_TR) ||
+					    (mdData & IOPIN_TR));
+			}
+
+			inline bool isTrLine(void) const
+				{ return tr_line; }
 
 			/**
 			 * Read the last data value, with tristates applied.
@@ -236,6 +304,12 @@ class IoManagerPrivate
 			// Button mapping.
 			// TODO: Use next-highest power-of-two?
 			GensKey_t keyMap[IoManager::BTNI_MAX];
+
+			/**
+			 * Teamplayer data.
+			 */
+			uint8_t tp_padTypes[4];
+			uint8_t tp_ctrlIndexTbl[TP_DT_MAX - TP_DT_PADA_RLDU];
 		};
 
 		IoDevice ioDevices[IoManager::VIRTPORT_MAX];
@@ -267,7 +341,7 @@ IoManagerPrivate::IoManagerPrivate(IoManager *q)
 	// Set the default controller types for IOPORT_1 and IOPORT_2.
 	ioDevices[IoManager::VIRTPORT_1].type = IoManager::IOT_6BTN;
 	ioDevices[IoManager::VIRTPORT_2].type = IoManager::IOT_3BTN;
-	
+
 	// Reset all devices.
 	reset();
 }
@@ -279,6 +353,13 @@ void IoManagerPrivate::reset(void)
 {
 	for (int i = 0; i < NUM_ELEMENTS(ioDevices); i++)
 		ioDevices[i].reset();
+
+	// Rebuild Teamplayer controller index tables for TP devices.
+	for (int i = IoManager::VIRTPORT_1;
+	     i <= IoManager::VIRTPORT_2; i++) {
+		if (ioDevices[i].type == IoManager::IOT_TEAMPLAYER)
+			rebuildCtrlIndexTable(i);
+	}
 }
 
 /**
@@ -377,7 +458,14 @@ void IoManagerPrivate::updateDevice(int physPort)
 		case IoManager::IOT_6BTN: updateDevice_6BTN(physPort, oldSelect); break;
 		case IoManager::IOT_2BTN: updateDevice_2BTN(physPort); break;
 
-		// TODO: Implement Team Player, 4WP, and Mega Mouse.
+		case IoManager::IOT_TEAMPLAYER: {
+			const bool oldTr = dev->isTrLine();
+			dev->updateTrLine();
+			updateDevice_TP(physPort, oldSelect, oldTr);
+			break;
+		}
+
+		// TODO: Implement 4WP and Mega Mouse.
 		default:
 			break;
 	}
@@ -479,6 +567,147 @@ void IoManagerPrivate::updateDevice_2BTN(int virtPort)
 	 */
 	IoDevice *dev = &ioDevices[virtPort];
 	dev->deviceData = (0xC0 | (ioDevices[virtPort].buttons & 0x3F));
+}
+
+/**
+ * Update a Teamplayer device.
+ * @param physPort Physical controller port.
+ * @param oldSelect Previous TH (SELECT) line state.
+ * @param oldTr Previous TR line state.
+ */
+void IoManagerPrivate::updateDevice_TP(int physPort, bool oldSelect, bool oldTr)
+{
+	assert(physPort >= IoManager::PHYSPORT_1 && physPort <= IoManager::PHYSPORT_2);
+
+	IoDevice *dev = &ioDevices[physPort];
+
+	// Check if either TH or TR has changed.
+	if ((dev->isSelect() != oldSelect) ||
+	    (dev->isTrLine() != oldTr)) {
+		// Check if TH is high.
+		if (dev->isSelect()) {
+			// TH high. Reset the counter.
+			dev->counter = TP_DT_INIT;
+		} else {
+			// Increment the counter.
+			dev->counter++;
+		}
+	}
+
+	if (dev->counter >= TP_DT_MAX) {
+		// Counter has overflowed.
+		dev->counter = TP_DT_MAX;
+		dev->deviceData = 0xFF;
+		return;
+	}
+
+	// Check the controller data index table.
+	uint8_t data;
+	switch (dev->counter)
+	{
+		case TP_DT_INIT:
+			// Initial state.
+			data = 0x73;
+			break;
+
+		case TP_DT_START:
+			// Start request.
+			data = 0x3F;
+			break;
+
+		case TP_DT_ACK1:
+		case TP_DT_ACK2:
+			// Acknowledgement request.
+			// TH=0, TR=0/1 -> RLDU = 0000
+			data = 0x00;
+			break;
+		
+		case TP_DT_PADTYPE_A:
+		case TP_DT_PADTYPE_B:
+		case TP_DT_PADTYPE_C:
+		case TP_DT_PADTYPE_D:
+			// Controller type.
+			data = dev->tp_padTypes[dev->counter - TP_DT_PADTYPE_A];
+			break;
+
+		default:
+			// Check the controller data index table.
+			int adj_counter = (dev->counter - TP_DT_PADA_RLDU);
+			if ((adj_counter > (int)(NUM_ELEMENTS(dev->tp_ctrlIndexTbl))) ||
+			    (dev->tp_ctrlIndexTbl[adj_counter] >= TP_DT_MAX))
+			{
+				// Invalid counter state.
+				// TODO: What value should be returned?
+				data = 0xFF;
+				break;
+			}
+
+			// Controller data.
+			// TODO
+			data = 0xFF;
+			//ret = (m_ctrlData[m_ctrlIndex[adj_counter] - DT_PADA_RLDU] & 0xF);
+			break;
+	}
+
+	// TL should match TR.
+	// (from Genesis Plus GX)
+	if (data & IOPIN_TR)
+		data |= IOPIN_TL;
+	else
+		data &= ~IOPIN_TL;
+
+	dev->deviceData = data;
+}
+
+
+/** IoManagerPrivate::IoDevice **/
+
+
+/**
+ * Rebuild the controller index table.
+ */
+void IoManagerPrivate::rebuildCtrlIndexTable(int physPort)
+{
+	// Check controller types.
+	assert(physPort >= IoManager::PHYSPORT_1 && physPort <= IoManager::PHYSPORT_2);
+
+	IoDevice *dev = &ioDevices[physPort];
+	assert(dev->type == IoManager::IOT_TEAMPLAYER);
+
+	// Determine the virtual port base.
+	const int virtPortBase = (physPort == 0
+				? IoManager::VIRTPORT_TP1A
+				: IoManager::VIRTPORT_TP2A);
+
+	int i = 0;	// tp_ctrlIndexTbl index
+	for (int pad = 0; pad < 4; pad++) {
+		const int dtBase = (TP_DT_PADA_RLDU + (pad * 3));
+		const int virtPort = virtPortBase + pad;
+
+		switch (ioDevices[virtPort].type) {
+			case IoManager::IOT_NONE:
+			default:
+				dev->tp_padTypes[pad] = TP_PT_NONE;
+				break;
+
+			case IoManager::IOT_3BTN:
+				dev->tp_padTypes[pad] = TP_PT_3BTN;
+				dev->tp_ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 0);
+				dev->tp_ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 1);
+				break;
+
+			case IoManager::IOT_6BTN:
+				dev->tp_padTypes[pad] = TP_PT_6BTN;
+				dev->tp_ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 0);
+				dev->tp_ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 1);
+				dev->tp_ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 2);
+				break;
+		}
+	}
+
+	// Set the rest of the controller data indexes to DT_MAX.
+	for (int x = i; x < NUM_ELEMENTS(dev->tp_ctrlIndexTbl); x++)
+		dev->tp_ctrlIndexTbl[x] = TP_DT_MAX;
 }
 
 
