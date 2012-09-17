@@ -602,7 +602,7 @@ void IoManagerPrivate::updateDevice_TP(int physPort, bool oldSelect, bool oldTr)
 	}
 
 	// Check the controller data index table.
-	uint8_t data;
+	uint8_t data = 0;
 	switch (dev->counter)
 	{
 		case TP_DT_INIT:
@@ -633,12 +633,12 @@ void IoManagerPrivate::updateDevice_TP(int physPort, bool oldSelect, bool oldTr)
 		default:
 			// Check the controller data index table.
 			int adj_counter = (dev->counter - TP_DT_PADA_RLDU);
-			if ((adj_counter > (int)(NUM_ELEMENTS(dev->tp_ctrlIndexTbl))) ||
+			if ((adj_counter >= (int)(NUM_ELEMENTS(dev->tp_ctrlIndexTbl))) ||
 			    (dev->tp_ctrlIndexTbl[adj_counter] >= TP_DT_MAX))
 			{
 				// Invalid counter state.
 				// TODO: What value should be returned?
-				data = 0xFF;
+				data = 0x0F;
 				break;
 			}
 
