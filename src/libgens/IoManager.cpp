@@ -78,15 +78,17 @@ class IoManagerPrivate
 
 		/**
 		 * Update an I/O device's state based on ctrl/data lines.
-		 * @param physPort Physical port number.
+		 * @param virtPort Virtual port number.
 		 */
-		void updateDevice(int physPort);
+		void updateDevice(int virtPort);
 
 		void updateDevice_3BTN(int virtPort);
 		void updateDevice_6BTN(int virtPort, bool oldSelect);
 		void updateDevice_2BTN(int virtPort);
 		void updateDevice_TP(int physPort, bool oldSelect, bool oldTr);
-		
+		void updateDevice_4WP_Master(int physPort);
+		void updateDevice_4WP_Slave(int physPort);
+
 		// I/O pin definitions.
 		enum IoPinDefs {
 			IOPIN_UP	= 0x01,	// D0
@@ -318,6 +320,11 @@ class IoManagerPrivate
 		 * Number of buttons in each device type.
 		 */
 		static const uint8_t devBtnCount[IoManager::IOT_MAX];
+
+		/**
+		 * 4-Way Play: Current player.
+		 */
+		int ea4wp_curPlayer;
 };
 
 /**
@@ -360,6 +367,9 @@ void IoManagerPrivate::reset(void)
 		if (ioDevices[i].type == IoManager::IOT_TEAMPLAYER)
 			rebuildCtrlIndexTable(i);
 	}
+
+	// EA 4-Way Play.
+	ea4wp_curPlayer = 7;
 }
 
 /**
@@ -442,26 +452,28 @@ void IoManagerPrivate::update(void)
 
 /**
  * Update an I/O device's state based on ctrl/data lines.
- * @param physPort Physical port number.
+ * @param virtPort Virtual port number.
  */
-void IoManagerPrivate::updateDevice(int physPort)
+void IoManagerPrivate::updateDevice(int virtPort)
 {
-	assert(physPort >= IoManager::PHYSPORT_1 && physPort < IoManager::PHYSPORT_MAX);
+	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
 
-	IoDevice *const dev = &ioDevices[physPort];
+	IoDevice *const dev = &ioDevices[virtPort];
 	const bool oldSelect = dev->isSelect();
 	dev->updateSelectLine();
 
 	// Handle devices that require updating when certain lines change.
 	switch (dev->type) {
-		case IoManager::IOT_3BTN: updateDevice_3BTN(physPort); break;
-		case IoManager::IOT_6BTN: updateDevice_6BTN(physPort, oldSelect); break;
-		case IoManager::IOT_2BTN: updateDevice_2BTN(physPort); break;
+		case IoManager::IOT_3BTN: updateDevice_3BTN(virtPort); break;
+		case IoManager::IOT_6BTN: updateDevice_6BTN(virtPort, oldSelect); break;
+		case IoManager::IOT_2BTN: updateDevice_2BTN(virtPort); break;
+		case IoManager::IOT_4WP_MASTER: updateDevice_4WP_Master(virtPort); break;
+		case IoManager::IOT_4WP_SLAVE: updateDevice_4WP_Slave(virtPort); break;
 
 		case IoManager::IOT_TEAMPLAYER: {
 			const bool oldTr = dev->isTrLine();
 			dev->updateTrLine();
-			updateDevice_TP(physPort, oldSelect, oldTr);
+			updateDevice_TP(virtPort, oldSelect, oldTr);
 			break;
 		}
 
@@ -664,6 +676,52 @@ void IoManagerPrivate::updateDevice_TP(int physPort, bool oldSelect, bool oldTr)
 		data &= ~IOPIN_TL;
 
 	dev->deviceData = data;
+}
+
+/**
+ * Update the 4WP Master device.
+ * @param physPort Physical controller port. (MUST be PHYSPORT_2!)
+ */
+void IoManagerPrivate::updateDevice_4WP_Master(int physPort)
+{
+	assert(physPort == IoManager::PHYSPORT_2);
+	IoDevice *const dev = &ioDevices[physPort];
+
+	// Update the slave port number.
+	ea4wp_curPlayer = (dev->applyTristate(0xFF) >> 4) & 0x07;
+
+	// Update the slave device.
+	assert(ioDevices[IoManager::PHYSPORT_1].type == IoManager::IOT_4WP_SLAVE);
+	updateDevice_4WP_Slave(IoManager::PHYSPORT_1);
+
+	// Device data is always 0x7F.
+	dev->deviceData = 0x7F;
+}
+
+/**
+ * Update the 4WP Slave device.
+ * @param physPort Physical controller port. (MUST be PHYSPORT_1!)
+ */
+void IoManagerPrivate::updateDevice_4WP_Slave(int physPort)
+{
+	assert(physPort == IoManager::PHYSPORT_1);
+	IoDevice *const dev = &ioDevices[physPort];
+
+	if (ea4wp_curPlayer < 0 || ea4wp_curPlayer >= 4) {
+		// Multitap detection.
+		dev->deviceData = 0x70;
+		return;
+	}
+
+	// Update the current virtual gamepad.
+	const int virtPort = IoManager::VIRTPORT_4WPA + ea4wp_curPlayer;
+	IoDevice *const virtDev = &ioDevices[virtPort];
+	assert(virtDev->type >= IoManager::IOT_NONE && virtDev->type <= IoManager::IOT_6BTN);
+
+	virtDev->ctrl = dev->ctrl;
+	virtDev->mdData = dev->mdData;
+	updateDevice(virtPort);
+	dev->deviceData = virtDev->deviceData;
 }
 
 
