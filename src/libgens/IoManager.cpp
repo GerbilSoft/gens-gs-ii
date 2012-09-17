@@ -426,7 +426,7 @@ void IoManagerPrivate::update(void)
 	for (int i = 0; i < NUM_ELEMENTS(ioDevices); i++) {
 		int btnCount = devBtnCount[ioDevices[i].type];
 		uint32_t buttons = 0;
-		for (int j = btnCount; j >= 0; j--) {
+		for (int j = (btnCount - 1); j >= 0; j--) {
 			buttons <<= 1;
 			buttons |= DevManager::IsKeyPressed(ioDevices[i].keyMap[j]);
 		}
@@ -435,7 +435,7 @@ void IoManagerPrivate::update(void)
 		ioDevices[i].buttons = ~buttons;
 	}
 
-	// Update all physical ports.
+	// Update all ports.
 	for (int i = IoManager::PHYSPORT_1; i < IoManager::PHYSPORT_MAX; i++)
 		updateDevice(i);
 }
