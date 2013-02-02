@@ -710,39 +710,52 @@ void CtrlConfigWindow::reload(void)
 
 	// TODO: If a TP or 4WP port was selected,
 	// but is no longer available, switch to the base port.
-	if (d->selPort >= IoManager::VIRTPORT_TP1A &&
-	    d->selPort <= IoManager::VIRTPORT_TP1D)
-	{
-		// Make sure port 1 is still Teamplayer.
-		if (d->ctrlConfig->ioType(IoManager::VIRTPORT_1) != IoManager::IOT_TEAMPLAYER) {
-			// Port 1 is no longer Teamplayer.
-			// Switch to Port 1 instead of the TP1 port.
-			actionPort1->setChecked(true);
-			hasUpdatedPortSettings = true;
-		}
-	}
-	else if (d->selPort >= IoManager::VIRTPORT_TP2A &&
-		 d->selPort <= IoManager::VIRTPORT_TP2D)
-	{
-		// Make sure port 2 is still Teamplayer.
-		if (d->ctrlConfig->ioType(IoManager::VIRTPORT_2) != IoManager::IOT_TEAMPLAYER) {
-			// Port 2 is no longer Teamplayer.
-			// Switch to Port 2 instead of the TP2 port.
-			actionPort2->setChecked(true);
-			hasUpdatedPortSettings = true;
-		}
-	}
-	else if (d->selPort >= IoManager::VIRTPORT_4WPA &&
-		 d->selPort <= IoManager::VIRTPORT_4WPD)
-	{
-		// Make sure port 1 is still 4WP slave,
-		// and port 2 is still 4WP master.
-		if (d->ctrlConfig->ioType(IoManager::VIRTPORT_1) != IoManager::IOT_4WP_SLAVE ||
-		    d->ctrlConfig->ioType(IoManager::VIRTPORT_2) != IoManager::IOT_4WP_MASTER) {
-			// 4WP is no longer set. Switch to Port 1.
-			actionPort1->setChecked(true);
-			hasUpdatedPortSettings = true;
-		}
+	switch (d->selPort) {
+		// Team Player, Port 1.
+		case IoManager::VIRTPORT_TP1A:
+		case IoManager::VIRTPORT_TP1B:
+		case IoManager::VIRTPORT_TP1C:
+		case IoManager::VIRTPORT_TP1D:
+			// Make sure port 1 is still Teamplayer.
+			if (d->ctrlConfig->ioType(IoManager::VIRTPORT_1) != IoManager::IOT_TEAMPLAYER) {
+				// Port 1 is no longer Teamplayer.
+				// Switch to Port 1 instead of the TP1 port.
+				actionPort1->setChecked(true);
+				hasUpdatedPortSettings = true;
+			}
+			break;
+
+		// Team Player, Port 1.
+		case IoManager::VIRTPORT_TP2A:
+		case IoManager::VIRTPORT_TP2B:
+		case IoManager::VIRTPORT_TP2C:
+		case IoManager::VIRTPORT_TP2D:
+			// Make sure port 2 is still Teamplayer.
+			if (d->ctrlConfig->ioType(IoManager::VIRTPORT_2) != IoManager::IOT_TEAMPLAYER) {
+				// Port 2 is no longer Teamplayer.
+				// Switch to Port 2 instead of the TP2 port.
+				actionPort2->setChecked(true);
+				hasUpdatedPortSettings = true;
+			}
+			break;
+
+		// 4-Way Play.
+		case IoManager::VIRTPORT_4WPA:
+		case IoManager::VIRTPORT_4WPB:
+		case IoManager::VIRTPORT_4WPC:
+		case IoManager::VIRTPORT_4WPD:
+			// Make sure port 1 is still 4WP slave,
+			// and port 2 is still 4WP master.
+			if (d->ctrlConfig->ioType(IoManager::VIRTPORT_1) != IoManager::IOT_4WP_SLAVE ||
+			    d->ctrlConfig->ioType(IoManager::VIRTPORT_2) != IoManager::IOT_4WP_MASTER) {
+				// 4WP is no longer set. Switch to Port 1.
+				actionPort1->setChecked(true);
+				hasUpdatedPortSettings = true;
+			}
+			break;
+
+		default:
+			break;
 	}
 
 	// If we didn't update the port settings due to an invalid TP/4WP setting,
