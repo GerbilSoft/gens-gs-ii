@@ -230,29 +230,46 @@ class IoManagerPrivate
 				reset();
 			}
 
+			/**
+			 * Reset everything in the IoDevice.
+			 * WARNING: Do NOT use this while emulation is running!
+			 */
 			void reset(void) {
-				counter = 0;
-				scanlines = 0;
 				ctrl = 0;
 				mdData = 0xFF;
-				deviceData = 0xFF;
-				th_line = false;	// SELECT
-				tr_line = false;	// TR
-				buttons = ~0;
 				serCtrl = 0;
 				serLastTx = 0xFF;
+				resetDev();
+			}
+
+			/**
+			 * Reset IoDevice data that only affects the device
+			 * and not the emulation-side registers.
+			 */
+			void resetDev(void) {
+				counter = 0;
+				scanlines = 0;
+				buttons = ~0;
+				deviceData = 0xFF;
+				updateSelectLine();
+				updateTrLine();
 
 				// Clear device-specific data.
 				memset(&data, 0x00, sizeof(data));
 			}
 
 			IoManager::IoType_t type;	// Device type.
+
+			// Device-side variables.
 			int counter;			// Internal counter.
 			int scanlines;			// Scanline counter.
+			uint8_t deviceData;		// Data written from the device.
 
+			// System-side variables.
 			uint8_t ctrl;			// Tristate control.
 			uint8_t mdData;			// Data written from the MD.
-			uint8_t deviceData;		// Data written from the device.
+
+			// Cache variables.
 			bool th_line;			// TH line state. (SELECT)
 			bool tr_line;			// TR line state.
 
@@ -1041,7 +1058,8 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 
 	IoManagerPrivate::IoDevice *const dev = &d->ioDevices[virtPort];
 	dev->type = ioType;
-	dev->reset();
+	// Only reset device data so we don't screw up emulation.
+	dev->resetDev();
 
 	// Rebuild Team Player controller index tables for TP devices.
 	if (virtPort >= VIRTPORT_1 && virtPort <= VIRTPORT_2) {
