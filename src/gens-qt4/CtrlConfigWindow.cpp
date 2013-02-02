@@ -684,9 +684,18 @@ void CtrlConfigWindow::cboDevice_setTP(bool isTP)
 
 /** TODO **/
 
+/**
+ * Save the configuration.
+ */
 void CtrlConfigWindow::accept(void)
-	{ close(); }
+{
+	apply();
+	close();
+}
 
+/**
+ * Discard the configuration changes.
+ */
 void CtrlConfigWindow::reject(void)
 	{ close(); }
 
@@ -764,7 +773,19 @@ void CtrlConfigWindow::reload(void)
 		updatePortSettings(d->selPort);
 }
 
-void CtrlConfigWindow::apply(void) { }
+/**
+ * Apply the configuration changes.
+ */
+void CtrlConfigWindow::apply(void)
+{
+	// Copy the controller configuration settings to gqt4_cfg.
+	gqt4_cfg->m_ctrlConfig->copyFrom(d->ctrlConfig);
+
+	// Update the I/O manager if emulation is running.
+	// TODO: Send something to the emulation queue instead?
+	if (gqt4_emuContext)
+		gqt4_cfg->m_ctrlConfig->updateIoManager(gqt4_emuContext->m_ioManager);
+}
 
 
 /** Widget slots. **/
