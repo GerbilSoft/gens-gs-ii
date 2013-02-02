@@ -71,10 +71,6 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		// State change event. (Used for switching the UI language at runtime.)
 		void changeEvent(QEvent *event);
 
-		// Internal controller settings.
-		// TODO: Maybe an internal CtrlConfig?
-		LibGens::IoManager::IoType_t m_devType[LibGens::IoManager::VIRTPORT_MAX];
-
 		QActionGroup *m_actgrpSelPort;
 
 		// Dropdown device lock.

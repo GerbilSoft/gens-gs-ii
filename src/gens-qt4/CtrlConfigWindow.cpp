@@ -62,6 +62,9 @@ class CtrlConfigWindowPrivate
 		QString getLongDeviceName(LibGens::IoManager::IoType_t ioType);
 		QString getPortName(LibGens::IoManager::VirtPort_t virtPort);
 		QIcon getCtrlIcon(LibGens::IoManager::IoType_t ioType);
+
+		// Internal CtrlConfig instance.
+		CtrlConfig *ctrlConfig;
 };
 
 /**************************************
@@ -86,6 +89,7 @@ const char *const CtrlConfigWindowPrivate::CtrlIconFilenames[IoManager::IOT_MAX]
 
 CtrlConfigWindowPrivate::CtrlConfigWindowPrivate(CtrlConfigWindow *q)
 	: q(q)
+	, ctrlConfig(new CtrlConfig(q))
 {
 	// Set the single window instance pointer.
 	ms_Window = q;
@@ -339,17 +343,8 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	}
 	cboDevice_unlock();
 
-	// Clear controller settings.
-	memset(m_devType, 0x00, sizeof(m_devType));
-
 	// Copy the current controller settings.
-	// TODO: Button mapping.
-	for (int virtPort = IoManager::VIRTPORT_1;
-	     virtPort < IoManager::VIRTPORT_MAX; virtPort++)
-	{
-		m_devType[virtPort] = gqt4_cfg->m_ctrlConfig->ioType((IoManager::VirtPort_t)virtPort);
-		
-	}
+	d->ctrlConfig->copyFrom(gqt4_cfg->m_ctrlConfig);
 
 	// Initialize all of the port buttons.
 	for (int virtPort = IoManager::VIRTPORT_1;
@@ -490,25 +485,26 @@ void CtrlConfigWindow::updatePortButton(IoManager::VirtPort_t virtPort)
 	}
 
 	// Make sure the device type is in bounds.
-	if (m_devType[virtPort] < IoManager::IOT_NONE ||
-	    m_devType[virtPort] >= IoManager::IOT_MAX)
+	const IoManager::IoType_t ioType = d->ctrlConfig->ioType(virtPort);
+	if (ioType < IoManager::IOT_NONE ||
+	    ioType >= IoManager::IOT_MAX)
 	{
 		// Invalid device type.
 		return;
 	}
 
 	// Update the port icon and tooltip.
-	actionPort->setIcon(d->getCtrlIcon(m_devType[virtPort]));
+	actionPort->setIcon(d->getCtrlIcon(ioType));
 	actionPort->setToolTip(d->getPortName(virtPort) +
 				QLatin1String(": ") +
-				d->getLongDeviceName(m_devType[virtPort]));
+				d->getLongDeviceName(ioType));
 
 	// Disable the EXT port for now.
 	actionPortEXT->setVisible(false);
 
 	if (virtPort == IoManager::VIRTPORT_1) {
 		// Port 1. Update TeamPlayer 1 button state.
-		const bool isTP = (m_devType[virtPort] == IoManager::IOT_TEAMPLAYER);
+		const bool isTP = (ioType == IoManager::IOT_TEAMPLAYER);
 		m_vecTbSep[CTRL_CFG_TBSEP_TP1]->setVisible(isTP);
 		actionPortTP1A->setVisible(isTP);
 		actionPortTP1B->setVisible(isTP);
@@ -516,7 +512,7 @@ void CtrlConfigWindow::updatePortButton(IoManager::VirtPort_t virtPort)
 		actionPortTP1D->setVisible(isTP);
 	} else if (virtPort == IoManager::VIRTPORT_2) {
 		// Port 2. Update TeamPlayer 2 button state.
-		const bool isTP = (m_devType[virtPort] == IoManager::IOT_TEAMPLAYER);
+		const bool isTP = (ioType == IoManager::IOT_TEAMPLAYER);
 		m_vecTbSep[CTRL_CFG_TBSEP_TP2]->setVisible(isTP);
 		actionPortTP2A->setVisible(isTP);
 		actionPortTP2B->setVisible(isTP);
@@ -528,8 +524,8 @@ void CtrlConfigWindow::updatePortButton(IoManager::VirtPort_t virtPort)
 	    virtPort == IoManager::VIRTPORT_2) {
 		// Port 1 or 2. Update EA 4-Way Play button state.
 		const bool is4WP =
-			(m_devType[IoManager::VIRTPORT_1] == IoManager::IOT_4WP_SLAVE &&
-			 m_devType[IoManager::VIRTPORT_2] == IoManager::IOT_4WP_MASTER);
+			(d->ctrlConfig->ioType(IoManager::VIRTPORT_1) == IoManager::IOT_4WP_SLAVE &&
+			 d->ctrlConfig->ioType(IoManager::VIRTPORT_2) == IoManager::IOT_4WP_MASTER);
 
 		m_vecTbSep[CTRL_CFG_TBSEP_4WP]->setVisible(is4WP);
 		actionPort4WPA->setVisible(is4WP);
@@ -554,8 +550,9 @@ void CtrlConfigWindow::updatePortSettings(IoManager::VirtPort_t virtPort)
 	// TODO: Controller keymap.
 
 	// Make sure the device type is in bounds.
-	if (m_devType[virtPort] < IoManager::IOT_NONE ||
-	    m_devType[virtPort] >= IoManager::IOT_MAX)
+	const int ioType = d->ctrlConfig->ioType(virtPort);
+	if (ioType < IoManager::IOT_NONE ||
+	    ioType >= IoManager::IOT_MAX)
 	{
 		// Invalid device type.
 		return;
@@ -566,7 +563,7 @@ void CtrlConfigWindow::updatePortSettings(IoManager::VirtPort_t virtPort)
 	grpPortSettings->setTitle(d->getPortName(virtPort));
 
 	// Set the device type in the dropdown.
-	int devIndex = m_devType[virtPort];
+	int devIndex = ioType;
 	if (devIndex >= IoManager::IOT_4WP_SLAVE)
 		devIndex--;	// avoid having two 4WP devices in the dropdown
 	cboDevice->setCurrentIndex(devIndex);
@@ -595,7 +592,7 @@ void CtrlConfigWindow::selectPort(IoManager::VirtPort_t virtPort)
 		case IoManager::VIRTPORT_TP1B:
 		case IoManager::VIRTPORT_TP1C:
 		case IoManager::VIRTPORT_TP1D:
-			if (m_devType[IoManager::VIRTPORT_1] == IoManager::IOT_TEAMPLAYER)
+			if (d->ctrlConfig->ioType(IoManager::VIRTPORT_1) == IoManager::IOT_TEAMPLAYER)
 				isTP = true;
 			break;
 
@@ -604,7 +601,7 @@ void CtrlConfigWindow::selectPort(IoManager::VirtPort_t virtPort)
 		case IoManager::VIRTPORT_TP2B:
 		case IoManager::VIRTPORT_TP2C:
 		case IoManager::VIRTPORT_TP2D:
-			if (m_devType[IoManager::VIRTPORT_2] == IoManager::IOT_TEAMPLAYER)
+			if (d->ctrlConfig->ioType(IoManager::VIRTPORT_2) == IoManager::IOT_TEAMPLAYER)
 				isTP = true;
 			break;
 
@@ -613,8 +610,8 @@ void CtrlConfigWindow::selectPort(IoManager::VirtPort_t virtPort)
 		case IoManager::VIRTPORT_4WPB:
 		case IoManager::VIRTPORT_4WPC:
 		case IoManager::VIRTPORT_4WPD:
-			if (m_devType[IoManager::VIRTPORT_1] == IoManager::IOT_4WP_SLAVE &&
-			    m_devType[IoManager::VIRTPORT_2] == IoManager::IOT_4WP_MASTER)
+			if (d->ctrlConfig->ioType(IoManager::VIRTPORT_1) == IoManager::IOT_4WP_SLAVE &&
+			    d->ctrlConfig->ioType(IoManager::VIRTPORT_2) == IoManager::IOT_4WP_MASTER)
 				isTP = true;
 			break;
 
@@ -627,7 +624,7 @@ void CtrlConfigWindow::selectPort(IoManager::VirtPort_t virtPort)
 
 	// Make sure the dropdown index is set properly to reduce flicker.
 	cboDevice_lock();
-	const int idx = (int)m_devType[virtPort];
+	const int idx = (int)d->ctrlConfig->ioType(virtPort);
 	if (idx < cboDevice->count())
 		cboDevice->setCurrentIndex(idx);
 	cboDevice_unlock();
@@ -726,14 +723,16 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 	if (m_selPort < IoManager::VIRTPORT_1 ||
 	    m_selPort >= IoManager::VIRTPORT_MAX)
 		return;
+	const IoManager::VirtPort_t virtPort = m_selPort;
 
 	// Check if the device type has been changed.
 	if (index < 0)
 		return;
-	if (m_devType[m_selPort] == index)
+	const IoManager::IoType_t ioType = d->ctrlConfig->ioType(virtPort);
+	if (ioType == index)
 		return;
-	if (m_devType[m_selPort] < IoManager::IOT_NONE ||
-	    m_devType[m_selPort] >= IoManager::IOT_MAX)
+	if (ioType < IoManager::IOT_NONE ||
+	    ioType >= IoManager::IOT_MAX)
 	{
 		// Invalid device type.
 		return;
@@ -746,23 +745,23 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 			// 4WP SLAVE set for Port 1.
 			// (4WP_MASTER index used for dropdown.)
 			// TODO: Maybe use the combo box item's data parameter?
-			m_devType[m_selPort] = IoManager::IOT_4WP_SLAVE;
+			d->ctrlConfig->setIoType(m_selPort, IoManager::IOT_4WP_SLAVE);
 
 			// Make sure Port 2 is set to 4WP MASTER.
-			if (m_devType[IoManager::VIRTPORT_2] != IoManager::IOT_4WP_MASTER) {
-				m_devType[IoManager::VIRTPORT_2] = IoManager::IOT_4WP_MASTER;
+			if (d->ctrlConfig->ioType(IoManager::VIRTPORT_2) != IoManager::IOT_4WP_MASTER) {
+				d->ctrlConfig->setIoType(IoManager::VIRTPORT_2, IoManager::IOT_4WP_MASTER);
 				updatePortButton(IoManager::VIRTPORT_2);
 			}
 		} else {
 			// 4WP SLAVE not set for Port 1.
-			m_devType[m_selPort] = (IoManager::IoType_t)index;
+			d->ctrlConfig->setIoType(m_selPort, (IoManager::IoType_t)index);
 			
 			// Check if Port 2 is set to 4WP MASTER. (or 4WP SLAVE for sanity check)
-			if (m_devType[IoManager::VIRTPORT_2] == IoManager::IOT_4WP_MASTER ||
-			    m_devType[IoManager::VIRTPORT_2] == IoManager::IOT_4WP_SLAVE)
+			if (d->ctrlConfig->ioType(IoManager::VIRTPORT_2) == IoManager::IOT_4WP_MASTER ||
+			    d->ctrlConfig->ioType(IoManager::VIRTPORT_2) == IoManager::IOT_4WP_SLAVE)
 			{
 				// Port 2 is set to 4WP MASTER. Unset it.
-				m_devType[IoManager::VIRTPORT_2] = IoManager::IOT_NONE;
+				d->ctrlConfig->setIoType(IoManager::VIRTPORT_2, IoManager::IOT_NONE);
 				updatePortButton(IoManager::VIRTPORT_2);
 			}
 		}
@@ -770,29 +769,29 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 		// Port 2.
 		if (index == IoManager::IOT_4WP_MASTER) {
 			// 4WP MASTER set for Port 2.
-			m_devType[m_selPort] = IoManager::IOT_4WP_MASTER;
+			d->ctrlConfig->setIoType(m_selPort, IoManager::IOT_4WP_MASTER);
 			
 			// Make sure Port 1 is set to 4WP SLAVE.
-			if (m_devType[IoManager::VIRTPORT_1] != IoManager::IOT_4WP_SLAVE) {
-				m_devType[IoManager::VIRTPORT_1] = IoManager::IOT_4WP_SLAVE;
+			if (d->ctrlConfig->ioType(IoManager::VIRTPORT_1) != IoManager::IOT_4WP_SLAVE) {
+				d->ctrlConfig->setIoType(IoManager::VIRTPORT_1, IoManager::IOT_4WP_SLAVE);
 				updatePortButton(IoManager::VIRTPORT_1);
 			}
 		} else {
 			// 4WP MASTER not set for Port 2.
-			m_devType[m_selPort] = (IoManager::IoType_t)index;
+			d->ctrlConfig->setIoType(m_selPort, (IoManager::IoType_t)index);
 			
 			// Check if Port 1 is set to 4WP SLAVE. (or 4WP MASTER for sanity check)
-			if (m_devType[IoManager::VIRTPORT_1] == IoManager::IOT_4WP_SLAVE ||
-			    m_devType[IoManager::VIRTPORT_1] == IoManager::IOT_4WP_MASTER)
+			if (d->ctrlConfig->ioType(IoManager::VIRTPORT_1) == IoManager::IOT_4WP_SLAVE ||
+			    d->ctrlConfig->ioType(IoManager::VIRTPORT_1) == IoManager::IOT_4WP_MASTER)
 			{
 				// Port 1 is set to 4WP SLAVE. Unset it.
-				m_devType[IoManager::VIRTPORT_1] = IoManager::IOT_NONE;
+				d->ctrlConfig->setIoType(IoManager::VIRTPORT_1, IoManager::IOT_NONE);
 				updatePortButton(IoManager::VIRTPORT_1);
 			}
 		}
 	} else {
 		// Other port.
-		m_devType[m_selPort] = (IoManager::IoType_t)index;
+		d->ctrlConfig->setIoType(m_selPort, (IoManager::IoType_t)index);
 	}
 
 	// Update the port information.
