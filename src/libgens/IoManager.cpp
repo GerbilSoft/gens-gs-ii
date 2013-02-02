@@ -512,8 +512,11 @@ void IoManagerPrivate::updateDevice(int virtPort)
 			break;
 		}
 
-		// TODO: Implement 4WP and Mega Mouse.
+		case IoManager::IOT_NONE:
 		default:
+			// No device, or unknown device.
+			// Assume device data is 0xFF.
+			dev->deviceData = 0xFF;
 			break;
 	}
 }
