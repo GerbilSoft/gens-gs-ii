@@ -42,11 +42,37 @@ using LibGens::IoManager;
 namespace GensQt4
 {
 
-// Static member initialization.
-CtrlConfigWindow *CtrlConfigWindow::m_CtrlConfigWindow = NULL;
+class CtrlConfigWindowPrivate
+{
+	public:
+		CtrlConfigWindowPrivate(CtrlConfigWindow *q);
+		~CtrlConfigWindowPrivate();
+
+	private:
+		CtrlConfigWindow *const q;
+		Q_DISABLE_COPY(CtrlConfigWindowPrivate)
+
+	public:
+		// Single window instance.
+		static CtrlConfigWindow *ms_Window;
+
+		// Controller data.
+		static const char *const CtrlIconFilenames[LibGens::IoManager::IOT_MAX];
+		QString getShortDeviceName(LibGens::IoManager::IoType_t ioType);
+		QString getLongDeviceName(LibGens::IoManager::IoType_t ioType);
+		QString getPortName(LibGens::IoManager::VirtPort_t virtPort);
+		QIcon getCtrlIcon(LibGens::IoManager::IoType_t ioType);
+};
+
+/**************************************
+ * CtrlConfigWindowPrivate functions. *
+ **************************************/
+
+// Single window instance.
+CtrlConfigWindow *CtrlConfigWindowPrivate::ms_Window = NULL;
 
 // Controller icon filenames.
-const char *const CtrlConfigWindow::ms_CtrlIconFilenames[IoManager::IOT_MAX] =
+const char *const CtrlConfigWindowPrivate::CtrlIconFilenames[IoManager::IOT_MAX] =
 {
 	"controller-none.png",		// IOT_NONE
 	"controller-3btn.png",		// IOT_3BTN
@@ -58,6 +84,169 @@ const char *const CtrlConfigWindow::ms_CtrlIconFilenames[IoManager::IOT_MAX] =
 	"controller-4wp.png",		// IOT_4WP_SLAVE (TODO)
 };
 
+CtrlConfigWindowPrivate::CtrlConfigWindowPrivate(CtrlConfigWindow *q)
+	: q(q)
+{
+	// Set the single window instance pointer.
+	ms_Window = q;
+}
+
+CtrlConfigWindowPrivate::~CtrlConfigWindowPrivate()
+{
+	// Clear the single window instance pointer.
+	ms_Window = NULL;
+}
+
+/**
+ * Get the short name of an I/O device.
+ * @param ioType Device type.
+ * @return Short device name.
+ */
+QString CtrlConfigWindowPrivate::getShortDeviceName(IoManager::IoType_t ioType)
+{
+	switch (ioType) {
+		case IoManager::IOT_NONE:
+		default:
+			return q->tr("None");
+		case IoManager::IOT_3BTN:
+			//: Standard 3-button control pad.
+			return q->tr("3-button");
+		case IoManager::IOT_6BTN:
+			//: Sega 6-button "arcade" control pad.
+			return q->tr("6-button");
+		case IoManager::IOT_2BTN:
+			//: Sega Master System 2-button control pad.
+			return q->tr("2-button");
+		case IoManager::IOT_MEGA_MOUSE:
+			//: Sega Mega Mouse.
+			return q->tr("Mega Mouse");
+		case IoManager::IOT_TEAMPLAYER:
+			//: Sega Team Player. (Specific brand name; only modify if it's different in your region!)
+			return q->tr("Team Player");
+		case IoManager::IOT_4WP_MASTER:	/* fallthrough */
+		case IoManager::IOT_4WP_SLAVE:
+			//: EA 4-Way Play. (Specific brand name; only modify if it's different in your region!)
+			return q->tr("4-Way Play");
+	}
+}
+
+/**
+ * Get the long name of an I/O device.
+ * @param ioType Device type.
+ * @return Long device name.
+ */
+QString CtrlConfigWindowPrivate::getLongDeviceName(IoManager::IoType_t ioType)
+{
+	switch (ioType) {
+		case IoManager::IOT_NONE:
+		default:
+			return q->tr("No device connected.");
+		case IoManager::IOT_3BTN:
+			//: Standard 3-button control pad.
+			return q->tr("3-button gamepad");
+		case IoManager::IOT_6BTN:
+			//: Sega 6-button "arcade" control pad.
+			return q->tr("6-button gamepad");
+		case IoManager::IOT_2BTN:
+			//: Sega Master System 2-button control pad.
+			return q->tr("2-button gamepad (SMS)");
+		case IoManager::IOT_MEGA_MOUSE:
+			//: Sega Mega Mouse.
+			return q->tr("Mega Mouse");
+		case IoManager::IOT_TEAMPLAYER:
+			//: Sega Team Player. (Specific brand name; only modify if it's different in your region!)
+			return q->tr("Sega Team Player");
+		case IoManager::IOT_4WP_MASTER:	/* fallthrough */
+		case IoManager::IOT_4WP_SLAVE:
+			//: EA 4-Way Play. (Specific brand name; only modify if it's different in your region!)
+			return q->tr("EA 4-Way Play");
+	}
+}
+
+/**
+ * Get the name of a given port.
+ * @param virtPort Virtual port number.
+ * @return Port name, or empty string on error.
+ */
+QString CtrlConfigWindowPrivate::getPortName(IoManager::VirtPort_t virtPort)
+{
+	switch (virtPort) {
+		// System controller ports.
+		case IoManager::VIRTPORT_1:
+		case IoManager::VIRTPORT_2:
+			return q->tr("Port %1")
+				.arg(virtPort - IoManager::VIRTPORT_1 + 1);
+
+		// Team Player, Port 1.
+		case IoManager::VIRTPORT_TP1A:
+		case IoManager::VIRTPORT_TP1B:
+		case IoManager::VIRTPORT_TP1C:
+		case IoManager::VIRTPORT_TP1D:
+			return q->tr("Team Player %1, Port %2").arg(1)
+				.arg(QChar(L'A' + (virtPort - IoManager::VIRTPORT_TP1A)));
+
+		// Team Player, Port 2.
+		case IoManager::VIRTPORT_TP2A:
+		case IoManager::VIRTPORT_TP2B:
+		case IoManager::VIRTPORT_TP2C:
+		case IoManager::VIRTPORT_TP2D:
+			return q->tr("Team Player %1, Port %2").arg(2)
+				.arg(QChar(L'A' + (virtPort - IoManager::VIRTPORT_TP2A)));
+
+		// 4-Way Play.
+		case IoManager::VIRTPORT_4WPA:
+		case IoManager::VIRTPORT_4WPB:
+		case IoManager::VIRTPORT_4WPC:
+		case IoManager::VIRTPORT_4WPD:
+			return q->tr("4-Way Play, Port %1")
+				.arg(QChar(L'A' + (virtPort - IoManager::VIRTPORT_4WPA)));
+
+		default:
+			// Unknown port number.
+			return QString();
+	}
+
+	// Should not get here...
+	return QString();
+}
+
+/**
+ * Get an icon for the specified controller type.
+ * @param ioType Controller type.
+ * @return Icon for the specified controller type.
+ */
+QIcon CtrlConfigWindowPrivate::getCtrlIcon(IoManager::IoType_t ioType)
+{
+	if (ioType < IoManager::IOT_NONE ||
+	    ioType >= IoManager::IOT_MAX) {
+		// Invalid I/O type.
+		return QIcon();
+	}
+	
+	// Create the icon.
+	QIcon ctrlIcon;
+	static const int iconSizes[5] = {64, 48, 32, 22, 16};
+	for (size_t i = 0; i < NUM_ELEMENTS(iconSizes); i++) {
+		QString iconFilename = QLatin1String(":/gens/") +
+			QString::number(iconSizes[i]) + QChar(L'x') +
+			QString::number(iconSizes[i]) +
+			QLatin1String("/controllers/") +
+			QLatin1String(CtrlIconFilenames[ioType]);
+		
+		if (QFile::exists(iconFilename)) {
+			// File exists.
+			ctrlIcon.addFile(iconFilename, QSize(iconSizes[i], iconSizes[i]));
+		}
+	}
+	
+	// Return the controller icon.
+	return ctrlIcon;
+}
+
+
+/*******************************
+ * CtrlConfigWindow functions. *
+ *******************************/
 
 /**
  * Initialize the Controller Configuration window.
@@ -69,6 +258,7 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 		Qt::WindowSystemMenuHint |
 		Qt::WindowMinimizeButtonHint |
 		Qt::WindowCloseButtonHint)
+	, d(new CtrlConfigWindowPrivate(this))
 {
 	// Initialize the Qt4 UI.
 	setupUi(this);
@@ -144,8 +334,8 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	cboDevice_lock();
 	for (int ioType = IoManager::IOT_NONE;
 	     ioType <= IoManager::IOT_4WP_MASTER; ioType++) {
-		cboDevice->addItem(GetCtrlIcon((IoManager::IoType_t)ioType),
-				GetShortDeviceName((IoManager::IoType_t)ioType));
+		cboDevice->addItem(d->getCtrlIcon((IoManager::IoType_t)ioType),
+				d->getShortDeviceName((IoManager::IoType_t)ioType));
 	}
 	cboDevice_unlock();
 
@@ -158,6 +348,7 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	     virtPort < IoManager::VIRTPORT_MAX; virtPort++)
 	{
 		m_devType[virtPort] = gqt4_cfg->m_ctrlConfig->ioType((IoManager::VirtPort_t)virtPort);
+		
 	}
 
 	// Initialize all of the port buttons.
@@ -176,8 +367,7 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
  */
 CtrlConfigWindow::~CtrlConfigWindow()
 {
-	// Clear the m_CtrlConfigWindow pointer.
-	m_CtrlConfigWindow = NULL;
+	delete d;
 }
 
 
@@ -187,17 +377,14 @@ CtrlConfigWindow::~CtrlConfigWindow()
  */
 void CtrlConfigWindow::ShowSingle(QWidget *parent)
 {
-	if (m_CtrlConfigWindow != NULL)
-	{
+	if (CtrlConfigWindowPrivate::ms_Window != NULL) {
 		// Controller Configuration Window is already displayed.
 		// NOTE: This doesn't seem to work on KDE 4.4.2...
-		QApplication::setActiveWindow(m_CtrlConfigWindow);
-	}
-	else
-	{
+		QApplication::setActiveWindow(CtrlConfigWindowPrivate::ms_Window);
+	} else {
 		// Controller Configuration Window is not displayed.
-		m_CtrlConfigWindow = new CtrlConfigWindow(parent);
-		m_CtrlConfigWindow->show();
+		// NOTE: CtrlConfigWindowPrivate's constructor sets ms_Window.
+		(new CtrlConfigWindow(parent))->show();
 	}
 }
 
@@ -268,157 +455,6 @@ void CtrlConfigWindow::changeEvent(QEvent *event)
 
 
 /**
- * Get the short name of an I/O device.
- * @param ioType Device type.
- * @return Short device name.
- */
-QString CtrlConfigWindow::GetShortDeviceName(IoManager::IoType_t ioType)
-{
-	switch (ioType) {
-		case IoManager::IOT_NONE:
-		default:
-			return tr("None");
-
-		case IoManager::IOT_3BTN:
-			//: Standard 3-button control pad.
-			return tr("3-button");
-		case IoManager::IOT_6BTN:
-			//: Sega 6-button "arcade" control pad.
-			return tr("6-button");
-		case IoManager::IOT_2BTN:
-			//: Sega Master System 2-button control pad.
-			return tr("2-button");
-		case IoManager::IOT_MEGA_MOUSE:
-			//: Sega Mega Mouse.
-			return tr("Mega Mouse");
-		case IoManager::IOT_TEAMPLAYER:
-			//: Sega Team Player. (Specific brand name; only modify if it's different in your region!)
-			return tr("Team Player");
-		case IoManager::IOT_4WP_MASTER:	/* fallthrough */
-		case IoManager::IOT_4WP_SLAVE:
-			//: EA 4-Way Play. (Specific brand name; only modify if it's different in your region!)
-			return tr("4-Way Play");
-	}
-}
-
-
-/**
- * Get the long name of an I/O device.
- * @param ioType Device type.
- * @return Long device name.
- */
-QString CtrlConfigWindow::GetLongDeviceName(IoManager::IoType_t ioType)
-{
-	switch (ioType) {
-		case IoManager::IOT_NONE:
-		default:
-			return tr("No device connected.");
-		case IoManager::IOT_3BTN:
-			//: Standard 3-button control pad.
-			return tr("3-button gamepad");
-		case IoManager::IOT_6BTN:
-			//: Sega 6-button "arcade" control pad.
-			return tr("6-button gamepad");
-		case IoManager::IOT_2BTN:
-			//: Sega Master System 2-button control pad.
-			return tr("2-button gamepad (SMS)");
-		case IoManager::IOT_MEGA_MOUSE:
-			//: Sega Mega Mouse.
-			return tr("Mega Mouse");
-		case IoManager::IOT_TEAMPLAYER:
-			//: Sega Team Player. (Specific brand name; only modify if it's different in your region!)
-			return tr("Sega Team Player");
-		case IoManager::IOT_4WP_MASTER:	/* fallthrough */
-		case IoManager::IOT_4WP_SLAVE:
-			//: EA 4-Way Play. (Specific brand name; only modify if it's different in your region!)
-			return tr("EA 4-Way Play");
-	}
-}
-
-
-/**
- * Get the name of a given port.
- * @param virtPort Virtual port number.
- * @return Port name, or empty string on error.
- */
-QString CtrlConfigWindow::GetPortName(IoManager::VirtPort_t virtPort)
-{
-	switch (virtPort) {
-		// System controller ports.
-		case IoManager::VIRTPORT_1:
-		case IoManager::VIRTPORT_2:
-			return tr("Port %1")
-				.arg(virtPort - IoManager::VIRTPORT_1 + 1);
-
-		// Team Player, Port 1.
-		case IoManager::VIRTPORT_TP1A:
-		case IoManager::VIRTPORT_TP1B:
-		case IoManager::VIRTPORT_TP1C:
-		case IoManager::VIRTPORT_TP1D:
-			return tr("Team Player %1, Port %2").arg(1)
-				.arg(QChar(L'A' + (virtPort - IoManager::VIRTPORT_TP1A)));
-
-		// Team Player, Port 2.
-		case IoManager::VIRTPORT_TP2A:
-		case IoManager::VIRTPORT_TP2B:
-		case IoManager::VIRTPORT_TP2C:
-		case IoManager::VIRTPORT_TP2D:
-			return tr("Team Player %1, Port %2").arg(2)
-				.arg(QChar(L'A' + (virtPort - IoManager::VIRTPORT_TP2A)));
-
-		// 4-Way Play.
-		case IoManager::VIRTPORT_4WPA:
-		case IoManager::VIRTPORT_4WPB:
-		case IoManager::VIRTPORT_4WPC:
-		case IoManager::VIRTPORT_4WPD:
-			return tr("4-Way Play, Port %1")
-				.arg(QChar(L'A' + (virtPort - IoManager::VIRTPORT_4WPA)));
-
-		default:
-			// Unknown port number.
-			return QString();
-	}
-
-	// Should not get here...
-	return QString();
-}
-
-
-/**
- * Get an icon for the specified controller type.
- * @param ioType Controller type.
- * @return Icon for the specified controller type.
- */
-QIcon CtrlConfigWindow::GetCtrlIcon(IoManager::IoType_t ioType)
-{
-	if (ioType < IoManager::IOT_NONE ||
-	    ioType >= IoManager::IOT_MAX) {
-		// Invalid I/O type.
-		return QIcon();
-	}
-	
-	// Create the icon.
-	QIcon ctrlIcon;
-	static const int iconSizes[5] = {64, 48, 32, 22, 16};
-	for (size_t i = 0; i < sizeof(iconSizes)/sizeof(iconSizes[0]); i++) {
-		QString iconFilename = QLatin1String(":/gens/") +
-			QString::number(iconSizes[i]) + QChar(L'x') +
-			QString::number(iconSizes[i]) +
-			QLatin1String("/controllers/") +
-			QLatin1String(ms_CtrlIconFilenames[ioType]);
-		
-		if (QFile::exists(iconFilename)) {
-			// File exists.
-			ctrlIcon.addFile(iconFilename, QSize(iconSizes[i], iconSizes[i]));
-		}
-	}
-	
-	// Return the controller icon.
-	return ctrlIcon;
-}
-
-
-/**
  * updatePortButton(): Update a port button.
  * @param virtPort Virtual port number.
  */
@@ -462,10 +498,10 @@ void CtrlConfigWindow::updatePortButton(IoManager::VirtPort_t virtPort)
 	}
 
 	// Update the port icon and tooltip.
-	actionPort->setIcon(GetCtrlIcon(m_devType[virtPort]));
-	actionPort->setToolTip(GetPortName(virtPort) +
+	actionPort->setIcon(d->getCtrlIcon(m_devType[virtPort]));
+	actionPort->setToolTip(d->getPortName(virtPort) +
 				QLatin1String(": ") +
-				GetLongDeviceName(m_devType[virtPort]));
+				d->getLongDeviceName(m_devType[virtPort]));
 
 	// Disable the EXT port for now.
 	actionPortEXT->setVisible(false);
@@ -527,7 +563,7 @@ void CtrlConfigWindow::updatePortSettings(IoManager::VirtPort_t virtPort)
 
 	// Set the "Port Settings" text.
 	// TODO: Port names for when e.g. EXT, J-Cart, etc. are added.
-	grpPortSettings->setTitle(GetPortName(virtPort));
+	grpPortSettings->setTitle(d->getPortName(virtPort));
 
 	// Set the device type in the dropdown.
 	int devIndex = m_devType[virtPort];
@@ -625,8 +661,8 @@ void CtrlConfigWindow::cboDevice_setTP(bool isTP)
 		// Add the extra items.
 		for (int ioType = IoManager::IOT_2BTN;
 		     ioType <= IoManager::IOT_4WP_MASTER; ioType++) {
-			cboDevice->addItem(GetCtrlIcon((IoManager::IoType_t)ioType),
-					GetShortDeviceName((IoManager::IoType_t)ioType));
+			cboDevice->addItem(d->getCtrlIcon((IoManager::IoType_t)ioType),
+					d->getShortDeviceName((IoManager::IoType_t)ioType));
 		}
 	}
 	cboDevice_unlock();
