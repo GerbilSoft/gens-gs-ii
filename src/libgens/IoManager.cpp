@@ -31,7 +31,8 @@
 // C++ includes.
 #include <algorithm>
 
-#define NUM_ELEMENTS(x) ((int)(sizeof(x) / sizeof(x[0])))
+// NUM_ELEMENTS(x)
+#include "macros/common.h"
 
 namespace LibGens
 {

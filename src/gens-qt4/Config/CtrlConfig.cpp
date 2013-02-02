@@ -36,7 +36,8 @@ using LibGens::IoManager;
 #include <QtCore/QSettings>
 #include <QtCore/QStringList>
 
-#define NUM_ELEMENTS(x) ((int)(sizeof(x) / sizeof(x[0])))
+// NUM_ELEMENTS()
+#include "libgens/macros/common.h"
 
 namespace GensQt4
 {

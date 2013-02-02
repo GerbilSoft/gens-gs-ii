@@ -75,4 +75,7 @@ typedef char utf8_str;
 #define LG_PATH_SEP_STR "/"
 #endif
 
+/** Number of elements in an array. **/
+#define NUM_ELEMENTS(x) (int)(sizeof(x) / sizeof((x)[0]))
+
 #endif /* __LIBGENS_MACROS_COMMON_H__ */
