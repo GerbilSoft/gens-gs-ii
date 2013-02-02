@@ -56,10 +56,10 @@ class GensCtrlCfgWidgetPrivate
 		GensCtrlCfgWidgetPrivate(GensCtrlCfgWidget *q);
 		void init(void);
 
-		inline IoManager::IoType_t ioType(void);
+		inline IoManager::IoType_t ioType(void) const;
 		void setIoType(IoManager::IoType_t newIoType);
 
-		QString buttonName_l(IoManager::ButtonName_t buttonName);
+		QString buttonName_l(IoManager::ButtonName_t buttonName) const;
 
 		void clearAllButtons(void);
 	
@@ -149,7 +149,7 @@ void GensCtrlCfgWidgetPrivate::init(void)
  * Get the current I/O type.
  * @return Current I/O type.
  */
-inline IoManager::IoType_t GensCtrlCfgWidgetPrivate::ioType(void)
+inline IoManager::IoType_t GensCtrlCfgWidgetPrivate::ioType(void) const
 	{ return m_ioType; }
 
 /**
@@ -201,7 +201,7 @@ void GensCtrlCfgWidgetPrivate::setIoType(IoManager::IoType_t newIoType)
  * @param buttonName LibGens button name.
  * @return Localized button name, or empty string on error.
  */
-QString GensCtrlCfgWidgetPrivate::buttonName_l(IoManager::ButtonName_t buttonName)
+QString GensCtrlCfgWidgetPrivate::buttonName_l(IoManager::ButtonName_t buttonName) const
 {
 	assert(buttonName >= IoManager::BTNNAME_UP && buttonName <= IoManager::BTNNAME_MAX);
 	switch (buttonName) {
@@ -306,14 +306,14 @@ GensCtrlCfgWidget::~GensCtrlCfgWidget()
 
 
 /**
- * GensCtrlCfgWidget::ioType(): Get the current I/O type.
+ * Get the current I/O type.
  * @return Current I/O type.
  */
-IoManager::IoType_t GensCtrlCfgWidget::ioType(void)
+IoManager::IoType_t GensCtrlCfgWidget::ioType(void) const
 	{ return d->ioType(); }
 
 /**
- * GensCtrlCfgWidget::setIoType(): Set the current I/O type.
+ * Set the current I/O type.
  * @param newIoType New I/O type.
  */
 void GensCtrlCfgWidget::setIoType(IoManager::IoType_t newIoType)
@@ -321,7 +321,7 @@ void GensCtrlCfgWidget::setIoType(IoManager::IoType_t newIoType)
 
 
 /**
- * GensCtrlCfgWidget::clearAllButtons(): Clear all mapped buttons.
+ * Clear all mapped buttons.
  * WRAPPER SLOT for GensCtrlCfgWidetPrivate.
  */
 void GensCtrlCfgWidget::clearAllButtons(void)
