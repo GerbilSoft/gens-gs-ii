@@ -221,11 +221,7 @@ QString CtrlConfigWindowPrivate::getPortName(IoManager::VirtPort_t virtPort)
  */
 QIcon CtrlConfigWindowPrivate::getCtrlIcon(IoManager::IoType_t ioType)
 {
-	if (ioType < IoManager::IOT_NONE ||
-	    ioType >= IoManager::IOT_MAX) {
-		// Invalid I/O type.
-		return QIcon();
-	}
+	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
 	
 	// Create the icon.
 	QIcon ctrlIcon;
@@ -315,15 +311,11 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	// Also, add port buttons to the signal mapper.
 	int portNum = 0;
 	m_vecTbSep.reserve(CTRL_CFG_TBSEP_MAX);
-	foreach(QAction *action, toolBar->actions())
-	{
-		if (action->isSeparator())
-		{
+	foreach(QAction *action, toolBar->actions()) {
+		if (action->isSeparator()) {
 			// Append to the vector of separators.
 			m_vecTbSep.append(action);
-		}
-		else
-		{
+		} else {
 			// Port button. Add to signal mapper.
 			QObject::connect(action, SIGNAL(toggled(bool)),
 					 m_mapperSelPort, SLOT(map()));
@@ -337,7 +329,8 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	// on_cboDevice_currentIndexChanged() handles translation for Port 1.
 	cboDevice_lock();
 	for (int ioType = IoManager::IOT_NONE;
-	     ioType <= IoManager::IOT_4WP_MASTER; ioType++) {
+	     ioType <= IoManager::IOT_4WP_MASTER; ioType++)
+	{
 		cboDevice->addItem(d->getCtrlIcon((IoManager::IoType_t)ioType),
 				d->getShortDeviceName((IoManager::IoType_t)ioType));
 	}
@@ -348,7 +341,8 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 
 	// Initialize all of the port buttons.
 	for (int virtPort = IoManager::VIRTPORT_1;
-	     virtPort < IoManager::VIRTPORT_MAX; virtPort++) {
+	     virtPort < IoManager::VIRTPORT_MAX; virtPort++)
+	{
 		updatePortButton((IoManager::VirtPort_t)virtPort);
 	}
 
@@ -385,7 +379,7 @@ void CtrlConfigWindow::ShowSingle(QWidget *parent)
 
 
 /**
- * keyPressEvent(): Key press handler.
+ * Key press handler.
  * @param event Key event.
  */
 void CtrlConfigWindow::keyPressEvent(QKeyEvent *event)
@@ -395,7 +389,8 @@ void CtrlConfigWindow::keyPressEvent(QKeyEvent *event)
 	
 	// Check for special dialog keys.
 	// Adapted from QDialog::keyPressEvent().
-	if (!event->modifiers() || ((event->modifiers() & Qt::KeypadModifier) && event->key() == Qt::Key_Enter))
+	if (!event->modifiers() || ((event->modifiers() & Qt::KeypadModifier)
+	    && event->key() == Qt::Key_Enter))
 	{
 		switch (event->key())
 		{
@@ -415,9 +410,7 @@ void CtrlConfigWindow::keyPressEvent(QKeyEvent *event)
 				this->QMainWindow::keyPressEvent(event);
 				return;
 		}
-	}
-	else
-	{
+	} else {
 		// Pass the event to the base class.
 		this->QMainWindow::keyPressEvent(event);
 	}
@@ -450,7 +443,7 @@ void CtrlConfigWindow::changeEvent(QEvent *event)
 
 
 /**
- * updatePortButton(): Update a port button.
+ * Update a port button.
  * @param virtPort Virtual port number.
  */
 void CtrlConfigWindow::updatePortButton(IoManager::VirtPort_t virtPort)
@@ -486,12 +479,7 @@ void CtrlConfigWindow::updatePortButton(IoManager::VirtPort_t virtPort)
 
 	// Make sure the device type is in bounds.
 	const IoManager::IoType_t ioType = d->ctrlConfig->ioType(virtPort);
-	if (ioType < IoManager::IOT_NONE ||
-	    ioType >= IoManager::IOT_MAX)
-	{
-		// Invalid device type.
-		return;
-	}
+	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
 
 	// Update the port icon and tooltip.
 	actionPort->setIcon(d->getCtrlIcon(ioType));
@@ -542,21 +530,13 @@ void CtrlConfigWindow::updatePortButton(IoManager::VirtPort_t virtPort)
  */
 void CtrlConfigWindow::updatePortSettings(IoManager::VirtPort_t virtPort)
 {
-	if (virtPort < IoManager::VIRTPORT_1 ||
-	    virtPort >= IoManager::VIRTPORT_MAX)
-		return;
+	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
+
+	const int ioType = d->ctrlConfig->ioType(virtPort);
+	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
 
 	// Update the port settings.
 	// TODO: Controller keymap.
-
-	// Make sure the device type is in bounds.
-	const int ioType = d->ctrlConfig->ioType(virtPort);
-	if (ioType < IoManager::IOT_NONE ||
-	    ioType >= IoManager::IOT_MAX)
-	{
-		// Invalid device type.
-		return;
-	}
 
 	// Set the "Port Settings" text.
 	// TODO: Port names for when e.g. EXT, J-Cart, etc. are added.
@@ -580,9 +560,7 @@ void CtrlConfigWindow::updatePortSettings(IoManager::VirtPort_t virtPort)
  */
 void CtrlConfigWindow::selectPort(IoManager::VirtPort_t virtPort)
 {
-	if (virtPort < IoManager::VIRTPORT_1 ||
-	    virtPort >= IoManager::VIRTPORT_MAX)
-		return;
+	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
 
 	// Check if this is a Team Player port.
 	bool isTP = false;
@@ -624,9 +602,10 @@ void CtrlConfigWindow::selectPort(IoManager::VirtPort_t virtPort)
 
 	// Make sure the dropdown index is set properly to reduce flicker.
 	cboDevice_lock();
-	const int idx = (int)d->ctrlConfig->ioType(virtPort);
-	if (idx < cboDevice->count())
-		cboDevice->setCurrentIndex(idx);
+	const int ioType = (int)d->ctrlConfig->ioType(virtPort);
+	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
+	if (ioType < cboDevice->count())
+		cboDevice->setCurrentIndex(ioType);
 	cboDevice_unlock();
 
 	// Update the port settings.
@@ -720,23 +699,16 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 	if (isCboDeviceLocked())
 		return;
 
-	if (m_selPort < IoManager::VIRTPORT_1 ||
-	    m_selPort >= IoManager::VIRTPORT_MAX)
-		return;
 	const IoManager::VirtPort_t virtPort = m_selPort;
+	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
 
 	// Check if the device type has been changed.
 	if (index < 0)
 		return;
 	const IoManager::IoType_t ioType = d->ctrlConfig->ioType(virtPort);
+	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
 	if (ioType == index)
 		return;
-	if (ioType < IoManager::IOT_NONE ||
-	    ioType >= IoManager::IOT_MAX)
-	{
-		// Invalid device type.
-		return;
-	}
 
 	// Check for 4WP.
 	if (m_selPort == IoManager::VIRTPORT_1) {
