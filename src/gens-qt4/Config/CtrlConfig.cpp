@@ -419,7 +419,7 @@ IoManager::IoType_t CtrlConfig::ioType(IoManager::VirtPort_t virtPort)
 void CtrlConfig::setIoType(IoManager::VirtPort_t virtPort, IoManager::IoType_t ioType)
 {
 	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
-	assert(ioType >= IoManager::IOT_3BTN && ioType < IoManager::IOT_MAX);
+	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
 	d->ctrlTypes[virtPort] = ioType;
 }
 
