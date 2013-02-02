@@ -75,6 +75,7 @@ class GensCtrlCfgWidgetPrivate
 		QLabel *lblButtonName[IoManager::BTNI_MAX];
 		QLabel *lblKeyDisplay[IoManager::BTNI_MAX];
 		GensCtrlKeyWidget *btnCfg[IoManager::BTNI_MAX];
+		int btnIdx[IoManager::BTNI_MAX];
 		QSpacerItem *vspcCfg;
 
 		// "Change All", "Clear All".
@@ -186,6 +187,7 @@ void GensCtrlCfgWidgetPrivate::setIoType(IoManager::IoType_t newIoType)
 		lblButtonName[i]->setVisible(true);
 		lblKeyDisplay[i]->setVisible(true);
 		btnCfg[i]->setVisible(true);
+		btnIdx[i] = button;
 
 		// Get the next logical button. (TODO: Update for IoManager.)
 		button = IoManager::NextLogicalButton(newIoType, button);
@@ -196,6 +198,7 @@ void GensCtrlCfgWidgetPrivate::setIoType(IoManager::IoType_t newIoType)
 		lblButtonName[i]->setVisible(false);
 		lblKeyDisplay[i]->setVisible(false);
 		btnCfg[i]->setVisible(false);
+		btnIdx[i] = -1;
 	}
 }
 
@@ -333,7 +336,7 @@ QVector<GensKey_t> GensCtrlCfgWidget::keyMap(void)
 {
 	QVector<GensKey_t> keyMap(d->numButtons);
 	for (int i = 0; i < d->numButtons; i++) {
-		keyMap[i] = d->btnCfg[i]->key();
+		keyMap[i] = d->btnCfg[d->btnIdx[i]]->key();
 	}
 
 	return keyMap;
@@ -348,7 +351,7 @@ void GensCtrlCfgWidget::setKeyMap(QVector<GensKey_t> keyMap)
 	const int maxButtons = std::min(d->numButtons, keyMap.count());
 
 	for (int i = 0; i < maxButtons; i++) {
-		d->btnCfg[i]->setKey(keyMap[i]);
+		d->btnCfg[d->btnIdx[i]]->setKey(keyMap[i]);
 	}
 
 	if (maxButtons < d->numButtons) {
