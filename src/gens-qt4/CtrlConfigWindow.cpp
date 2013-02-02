@@ -37,6 +37,7 @@ using LibGens::IoManager;
 // Qt includes.
 #include <QtGui/QActionGroup>
 #include <QtGui/QKeyEvent>
+#include <QtGui/QPushButton>
 #include <QtCore/QFile>
 
 namespace GensQt4
@@ -303,6 +304,11 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	this->setWindowIcon(QIcon());
 #endif
 
+	// "OK" and "Cancel" are automatically connected by uic.
+	// Connect a signal for the "Apply" button.
+	QPushButton *btnApply = buttonBox->button(QDialogButtonBox::Apply);
+	connect(btnApply, SIGNAL(clicked(bool)), this, SLOT(apply()));
+
 	// Initialize the toolbar.
 	m_actgrpSelPort = new QActionGroup(this);
 	m_actgrpSelPort->setExclusive(true);
@@ -365,15 +371,8 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	}
 	d->cboDevice_unlock();
 
-	// Copy the current controller settings.
-	d->ctrlConfig->copyFrom(gqt4_cfg->m_ctrlConfig);
-
-	// Initialize all of the port buttons.
-	for (int virtPort = IoManager::VIRTPORT_1;
-	     virtPort < IoManager::VIRTPORT_MAX; virtPort++)
-	{
-		updatePortButton((IoManager::VirtPort_t)virtPort);
-	}
+	// Load the controller configuration settings.
+	reload();
 
 	// Set Port 1 as active.
 	actionPort1->setChecked(true);
@@ -678,10 +677,71 @@ void CtrlConfigWindow::cboDevice_setTP(bool isTP)
 
 void CtrlConfigWindow::accept(void)
 	{ close(); }
+
 void CtrlConfigWindow::reject(void)
 	{ close(); }
 
-void CtrlConfigWindow::reload(void) { }
+/**
+ * Reload the configuration, discarding all changes.
+ */
+void CtrlConfigWindow::reload(void)
+{
+	// Copy the current controller settings.
+	d->ctrlConfig->copyFrom(gqt4_cfg->m_ctrlConfig);
+
+	// Initialize all of the port buttons.
+	for (int virtPort = IoManager::VIRTPORT_1;
+	     virtPort < IoManager::VIRTPORT_MAX; virtPort++)
+	{
+		updatePortButton((IoManager::VirtPort_t)virtPort);
+	}
+
+	// Set to true if the port settings have been updated.
+	bool hasUpdatedPortSettings = false;
+
+	// TODO: If a TP or 4WP port was selected,
+	// but is no longer available, switch to the base port.
+	if (m_selPort >= IoManager::VIRTPORT_TP1A &&
+	    m_selPort <= IoManager::VIRTPORT_TP1D)
+	{
+		// Make sure port 1 is still Teamplayer.
+		if (d->ctrlConfig->ioType(IoManager::VIRTPORT_1) != IoManager::IOT_TEAMPLAYER) {
+			// Port 1 is no longer Teamplayer.
+			// Switch to Port 1 instead of the TP1 port.
+			actionPort1->setChecked(true);
+			hasUpdatedPortSettings = true;
+		}
+	}
+	else if (m_selPort >= IoManager::VIRTPORT_TP2A &&
+		 m_selPort <= IoManager::VIRTPORT_TP2D)
+	{
+		// Make sure port 2 is still Teamplayer.
+		if (d->ctrlConfig->ioType(IoManager::VIRTPORT_2) != IoManager::IOT_TEAMPLAYER) {
+			// Port 2 is no longer Teamplayer.
+			// Switch to Port 2 instead of the TP2 port.
+			actionPort2->setChecked(true);
+			hasUpdatedPortSettings = true;
+		}
+	}
+	else if (m_selPort >= IoManager::VIRTPORT_4WPA &&
+		 m_selPort <= IoManager::VIRTPORT_4WPD)
+	{
+		// Make sure port 1 is still 4WP slave,
+		// and port 2 is still 4WP master.
+		if (d->ctrlConfig->ioType(IoManager::VIRTPORT_1) != IoManager::IOT_4WP_SLAVE ||
+		    d->ctrlConfig->ioType(IoManager::VIRTPORT_2) != IoManager::IOT_4WP_MASTER) {
+			// 4WP is no longer set. Switch to Port 1.
+			actionPort1->setChecked(true);
+			hasUpdatedPortSettings = true;
+		}
+	}
+
+	// If we didn't update the port settings due to an invalid TP/4WP setting,
+	// update them now, since they may have changed due to the reload.
+	if (!hasUpdatedPortSettings)
+		updatePortSettings(m_selPort);
+}
+
 void CtrlConfigWindow::apply(void) { }
 
 
