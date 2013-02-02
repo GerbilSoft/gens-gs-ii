@@ -129,7 +129,8 @@ void GensCtrlCfgWidgetPrivate::init(void)
 	layout->addItem(vspcCfg, IoManager::BTNI_MAX, 1, 1, 1, Qt::AlignCenter);
 
 	// Create the HBox.
-	hboxOptions = new QHBoxLayout(q);
+	// TODO: Verify that this doesn't leak memory.
+	hboxOptions = new QHBoxLayout();
 	hboxOptions->setContentsMargins(0, 8, 0, 0); // TODO: Use style default for Top margin.
 	layout->addLayout(hboxOptions, IoManager::BTNI_MAX+1, 0, 1, 3, Qt::AlignCenter);
 
