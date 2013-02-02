@@ -46,8 +46,8 @@ class CtrlConfigPrivate
 {
 	public:
 		CtrlConfigPrivate(CtrlConfig *q);
-		CtrlConfigPrivate(CtrlConfig *q, CtrlConfigPrivate *src);
-		void copyFrom(CtrlConfigPrivate *src);
+		CtrlConfigPrivate(CtrlConfig *q, const CtrlConfigPrivate *src);
+		void copyFrom(const CtrlConfigPrivate *src);
 
 		// Dirty flag.
 		bool isDirty(void) const;
@@ -163,7 +163,7 @@ CtrlConfigPrivate::CtrlConfigPrivate(CtrlConfig *q)
 	memset(ctrlKeys, 0x00, sizeof(ctrlKeys));
 }
 
-CtrlConfigPrivate::CtrlConfigPrivate(CtrlConfig *q, CtrlConfigPrivate *src)
+CtrlConfigPrivate::CtrlConfigPrivate(CtrlConfig *q, const CtrlConfigPrivate *src)
 	: q(q)
 {
 	// Copy from another CtrlConfigPrivate.
@@ -175,7 +175,7 @@ CtrlConfigPrivate::CtrlConfigPrivate(CtrlConfig *q, CtrlConfigPrivate *src)
  * NOTE: Does not copy 'q'.
  * @param src Other CtrlConfigPrivate to copy from.
  */
-void CtrlConfigPrivate::copyFrom(CtrlConfigPrivate *src)
+void CtrlConfigPrivate::copyFrom(const CtrlConfigPrivate *src)
 {
 	m_dirty = src->m_dirty;
 	memcpy(ctrlTypes, src->ctrlTypes, sizeof(ctrlTypes));
@@ -345,7 +345,7 @@ CtrlConfig::CtrlConfig(QObject *parent)
 	, d(new CtrlConfigPrivate(this))
 { }
 
-CtrlConfig::CtrlConfig(CtrlConfig *src, QObject *parent)
+CtrlConfig::CtrlConfig(const CtrlConfig *src, QObject *parent)
 	: QObject(parent)
 	, d(new CtrlConfigPrivate(this))
 {
@@ -363,7 +363,7 @@ CtrlConfig::~CtrlConfig()
  * Copy settings from another CtrlConfig.
  * @param src Other CtrlConfig to copy from.
  */
-void CtrlConfig::copyFrom(CtrlConfig *src)
+void CtrlConfig::copyFrom(const CtrlConfig *src)
 {
 	d->copyFrom(src->d);
 }

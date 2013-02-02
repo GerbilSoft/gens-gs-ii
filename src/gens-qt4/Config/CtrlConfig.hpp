@@ -42,14 +42,14 @@ class CtrlConfig : public QObject
 	
 	public:
 		CtrlConfig(QObject *parent = 0);
-		CtrlConfig(CtrlConfig *src, QObject *parent = 0);
+		CtrlConfig(const CtrlConfig *src, QObject *parent = 0);
 		~CtrlConfig();
 
 		/**
 		 * Copy settings from another CtrlConfig.
 		 * @param src Other CtrlConfig to copy from.
 		 */
-		void copyFrom(CtrlConfig *src);
+		void copyFrom(const CtrlConfig *src);
 
 		// Dirty flag.
 		bool isDirty(void) const;
