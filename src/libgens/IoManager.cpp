@@ -163,7 +163,7 @@ class IoManagerPrivate
 		};
 
 		/**
-		 * Teamplayer.
+		 * Team Player.
 		 */
 
 		/**
@@ -175,7 +175,7 @@ class IoManagerPrivate
 		/**
 		 * @name TP_PadType
 		 * Indicates the type of controller connected to
-		 * a given port on the Sega Teamplayer adapter.
+		 * a given port on the Sega Team Player adapter.
 		 */
 		enum TP_PadType {
 			TP_PT_NONE	= 0xF,
@@ -323,7 +323,7 @@ class IoManagerPrivate
 			 */
 			union {
 				struct {
-					// Teamplayer data.
+					// Team Player data.
 					uint8_t padTypes[4];
 					uint8_t ctrlIndexTbl[TP_DT_MAX - TP_DT_PADA_RLDU];
 				} tp;
@@ -388,7 +388,7 @@ void IoManagerPrivate::reset(void)
 	for (int i = 0; i < NUM_ELEMENTS(ioDevices); i++)
 		ioDevices[i].reset();
 
-	// Rebuild Teamplayer controller index tables for TP devices.
+	// Rebuild Team Player controller index tables for TP devices.
 	for (int i = IoManager::VIRTPORT_1;
 	     i <= IoManager::VIRTPORT_2; i++) {
 		if (ioDevices[i].type == IoManager::IOT_TEAMPLAYER)
@@ -757,7 +757,7 @@ void IoManagerPrivate::latchMegaMouse(int virtPort)
 }
 
 /**
- * Update a Teamplayer device.
+ * Update a Team Player device.
  * @param physPort Physical controller port.
  * @param oldSelect Previous TH (SELECT) line state.
  * @param oldTr Previous TR line state.
@@ -904,7 +904,7 @@ void IoManagerPrivate::updateDevice_4WP_Slave(int physPort)
 
 
 /**
- * Teamplayer: Rebuild the controller index table.
+ * Team Player: Rebuild the controller index table.
  */
 void IoManagerPrivate::rebuildCtrlIndexTable(int physPort)
 {
@@ -1040,7 +1040,7 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 	dev->type = ioType;
 	dev->reset();
 
-	// Rebuild Teamplayer controller index tables for TP devices.
+	// Rebuild Team Player controller index tables for TP devices.
 	if (virtPort >= VIRTPORT_1 && virtPort <= VIRTPORT_2) {
 		if (dev->type == IoManager::IOT_TEAMPLAYER)
 			d->rebuildCtrlIndexTable(virtPort);

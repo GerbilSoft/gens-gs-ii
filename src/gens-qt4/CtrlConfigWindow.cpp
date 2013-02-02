@@ -716,9 +716,9 @@ void CtrlConfigWindow::reload(void)
 		case IoManager::VIRTPORT_TP1B:
 		case IoManager::VIRTPORT_TP1C:
 		case IoManager::VIRTPORT_TP1D:
-			// Make sure port 1 is still Teamplayer.
+			// Make sure port 1 is still Team Player.
 			if (d->ctrlConfig->ioType(IoManager::VIRTPORT_1) != IoManager::IOT_TEAMPLAYER) {
-				// Port 1 is no longer Teamplayer.
+				// Port 1 is no longer Team Player.
 				// Switch to Port 1 instead of the TP1 port.
 				actionPort1->setChecked(true);
 				hasUpdatedPortSettings = true;
@@ -730,9 +730,9 @@ void CtrlConfigWindow::reload(void)
 		case IoManager::VIRTPORT_TP2B:
 		case IoManager::VIRTPORT_TP2C:
 		case IoManager::VIRTPORT_TP2D:
-			// Make sure port 2 is still Teamplayer.
+			// Make sure port 2 is still Team Player.
 			if (d->ctrlConfig->ioType(IoManager::VIRTPORT_2) != IoManager::IOT_TEAMPLAYER) {
-				// Port 2 is no longer Teamplayer.
+				// Port 2 is no longer Team Player.
 				// Switch to Port 2 instead of the TP2 port.
 				actionPort2->setChecked(true);
 				hasUpdatedPortSettings = true;
