@@ -46,6 +46,8 @@ class CtrlConfigPrivate
 {
 	public:
 		CtrlConfigPrivate(CtrlConfig *q);
+		CtrlConfigPrivate(CtrlConfig *q, CtrlConfigPrivate *src);
+		void copyFrom(CtrlConfigPrivate *src);
 
 		// Dirty flag.
 		bool isDirty(void) const;
@@ -151,7 +153,7 @@ const GensKey_t CtrlConfigPrivate::Def_CtrlKeys[IoManager::VIRTPORT_MAX][IoManag
 };
 
 
-CtrlConfigPrivate::CtrlConfigPrivate(CtrlConfig* q)
+CtrlConfigPrivate::CtrlConfigPrivate(CtrlConfig *q)
 	: q(q)
 	, m_dirty(true)
 {
@@ -159,6 +161,25 @@ CtrlConfigPrivate::CtrlConfigPrivate(CtrlConfig* q)
 	// TODO: Load defaults.
 	memset(ctrlTypes, 0x00, sizeof(ctrlTypes));
 	memset(ctrlKeys, 0x00, sizeof(ctrlKeys));
+}
+
+CtrlConfigPrivate::CtrlConfigPrivate(CtrlConfig *q, CtrlConfigPrivate *src)
+	: q(q)
+{
+	// Copy from another CtrlConfigPrivate.
+	copyFrom(src);
+}
+
+/**
+ * Copy from another CtrlConfigPrivate to this CtrlConfigPrivate.
+ * NOTE: Does not copy 'q'.
+ * @param src Other CtrlConfigPrivate to copy from.
+ */
+void CtrlConfigPrivate::copyFrom(CtrlConfigPrivate *src)
+{
+	m_dirty = src->m_dirty;
+	memcpy(ctrlTypes, src->ctrlTypes, sizeof(ctrlTypes));
+	memcpy(ctrlKeys, src->ctrlKeys, sizeof(ctrlKeys));
 }
 
 
@@ -324,11 +345,28 @@ CtrlConfig::CtrlConfig(QObject *parent)
 	, d(new CtrlConfigPrivate(this))
 { }
 
+CtrlConfig::CtrlConfig(CtrlConfig *src, QObject *parent)
+	: QObject(parent)
+	, d(new CtrlConfigPrivate(this))
+{
+	// Copy the CtrlConfigPrivate from the specified source.
+	// (Copy constructors don't work too well with Qt.)
+	d->copyFrom(src->d);
+}
+
 CtrlConfig::~CtrlConfig()
 {
 	delete d;
 }
 
+/**
+ * Copy settings from another CtrlConfig.
+ * @param src Other CtrlConfig to copy from.
+ */
+void CtrlConfig::copyFrom(CtrlConfig *src)
+{
+	d->copyFrom(src->d);
+}
 
 /**
  * CtrlConfig::isDirty(): Check if the controller configuration is dirty.
