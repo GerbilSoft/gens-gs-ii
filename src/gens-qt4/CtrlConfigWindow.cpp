@@ -58,13 +58,44 @@ class CtrlConfigWindowPrivate
 
 		// Controller data.
 		static const char *const CtrlIconFilenames[LibGens::IoManager::IOT_MAX];
-		QString getShortDeviceName(LibGens::IoManager::IoType_t ioType);
-		QString getLongDeviceName(LibGens::IoManager::IoType_t ioType);
-		QString getPortName(LibGens::IoManager::VirtPort_t virtPort);
-		QIcon getCtrlIcon(LibGens::IoManager::IoType_t ioType);
+		QString getShortDeviceName(LibGens::IoManager::IoType_t ioType) const;
+		QString getLongDeviceName(LibGens::IoManager::IoType_t ioType) const;
+		QString getPortName(LibGens::IoManager::VirtPort_t virtPort) const;
+		QIcon getCtrlIcon(LibGens::IoManager::IoType_t ioType) const;
 
 		// Internal CtrlConfig instance.
 		CtrlConfig *ctrlConfig;
+
+	private:
+		// Dropdown device lock.
+		// Used when rebuilding cboDevice.
+		int m_cboDeviceLockCnt;
+
+	public:
+		/**
+		 * Lock cboDevice.
+		 * This turns off signal handling for cboDevice.
+		 */
+		inline void cboDevice_lock(void)
+			{ m_cboDeviceLockCnt++; }
+
+		/**
+		 * Unlock cboDevice.
+		 * This turns on signal handling for cboDevice once m_cboDeviceLockCnt reaches 0.
+		 */
+		inline void cboDevice_unlock(void)
+		{
+			assert(m_cboDeviceLockCnt >= 0);
+			if (m_cboDeviceLockCnt > 0)
+				m_cboDeviceLockCnt--;
+		}
+
+		/**
+		 * Check if cboDevice is locked.
+		 * @return True if locked; false if not.
+		 */
+		inline bool isCboDeviceLocked(void) const
+			{ return (m_cboDeviceLockCnt > 0); }
 };
 
 /**************************************
@@ -90,6 +121,7 @@ const char *const CtrlConfigWindowPrivate::CtrlIconFilenames[IoManager::IOT_MAX]
 CtrlConfigWindowPrivate::CtrlConfigWindowPrivate(CtrlConfigWindow *q)
 	: q(q)
 	, ctrlConfig(new CtrlConfig(q))
+	, m_cboDeviceLockCnt(0)
 {
 	// Set the single window instance pointer.
 	ms_Window = q;
@@ -106,7 +138,7 @@ CtrlConfigWindowPrivate::~CtrlConfigWindowPrivate()
  * @param ioType Device type.
  * @return Short device name.
  */
-QString CtrlConfigWindowPrivate::getShortDeviceName(IoManager::IoType_t ioType)
+QString CtrlConfigWindowPrivate::getShortDeviceName(IoManager::IoType_t ioType) const
 {
 	switch (ioType) {
 		case IoManager::IOT_NONE:
@@ -139,7 +171,7 @@ QString CtrlConfigWindowPrivate::getShortDeviceName(IoManager::IoType_t ioType)
  * @param ioType Device type.
  * @return Long device name.
  */
-QString CtrlConfigWindowPrivate::getLongDeviceName(IoManager::IoType_t ioType)
+QString CtrlConfigWindowPrivate::getLongDeviceName(IoManager::IoType_t ioType) const
 {
 	switch (ioType) {
 		case IoManager::IOT_NONE:
@@ -172,7 +204,7 @@ QString CtrlConfigWindowPrivate::getLongDeviceName(IoManager::IoType_t ioType)
  * @param virtPort Virtual port number.
  * @return Port name, or empty string on error.
  */
-QString CtrlConfigWindowPrivate::getPortName(IoManager::VirtPort_t virtPort)
+QString CtrlConfigWindowPrivate::getPortName(IoManager::VirtPort_t virtPort) const
 {
 	switch (virtPort) {
 		// System controller ports.
@@ -219,7 +251,7 @@ QString CtrlConfigWindowPrivate::getPortName(IoManager::VirtPort_t virtPort)
  * @param ioType Controller type.
  * @return Icon for the specified controller type.
  */
-QIcon CtrlConfigWindowPrivate::getCtrlIcon(IoManager::IoType_t ioType)
+QIcon CtrlConfigWindowPrivate::getCtrlIcon(IoManager::IoType_t ioType) const
 {
 	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
 	
@@ -270,9 +302,6 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	// Remove the window icon. (Mac "proxy icon")
 	this->setWindowIcon(QIcon());
 #endif
-
-	// Initialize the cboDevice lock counter.
-	m_cboDeviceLockCnt = 0;
 
 	// Initialize the toolbar.
 	m_actgrpSelPort = new QActionGroup(this);
@@ -327,14 +356,14 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	// Initialize the "Device" dropdown.
 	// 4WP Master is added here.
 	// on_cboDevice_currentIndexChanged() handles translation for Port 1.
-	cboDevice_lock();
+	d->cboDevice_lock();
 	for (int ioType = IoManager::IOT_NONE;
 	     ioType <= IoManager::IOT_4WP_MASTER; ioType++)
 	{
 		cboDevice->addItem(d->getCtrlIcon((IoManager::IoType_t)ioType),
 				d->getShortDeviceName((IoManager::IoType_t)ioType));
 	}
-	cboDevice_unlock();
+	d->cboDevice_unlock();
 
 	// Copy the current controller settings.
 	d->ctrlConfig->copyFrom(gqt4_cfg->m_ctrlConfig);
@@ -601,12 +630,12 @@ void CtrlConfigWindow::selectPort(IoManager::VirtPort_t virtPort)
 	// Device setting is valid.
 
 	// Make sure the dropdown index is set properly to reduce flicker.
-	cboDevice_lock();
+	d->cboDevice_lock();
 	const int ioType = (int)d->ctrlConfig->ioType(virtPort);
 	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
 	if (ioType < cboDevice->count())
 		cboDevice->setCurrentIndex(ioType);
-	cboDevice_unlock();
+	d->cboDevice_unlock();
 
 	// Update the port settings.
 	m_selPort = virtPort;
@@ -626,7 +655,7 @@ void CtrlConfigWindow::cboDevice_setTP(bool isTP)
 		return;
 
 	// Dropdown needs to be updated.
-	cboDevice_lock();
+	d->cboDevice_lock();
 	if (cboDevice->count() > devCount) {
 		// Remove the extra items.
 		for (int ioType = IoManager::IOT_4WP_MASTER;
@@ -641,26 +670,7 @@ void CtrlConfigWindow::cboDevice_setTP(bool isTP)
 					d->getShortDeviceName((IoManager::IoType_t)ioType));
 		}
 	}
-	cboDevice_unlock();
-}
-
-
-/**
- * cboDevice_lock() / cboDevice_unlock(): Lock or unlock cboDevice.
- * This turns off signal handling for cboDevice.
- * @return 0 on success; non-zero on error.
- */
-int CtrlConfigWindow::cboDevice_lock(void)
-	{ m_cboDeviceLockCnt++; return 0; }
-
-int CtrlConfigWindow::cboDevice_unlock(void)
-{
-	assert(m_cboDeviceLockCnt >= 0);
-	if (m_cboDeviceLockCnt <= 0)
-		return -1;
-	
-	m_cboDeviceLockCnt--;
-	return 0;
+	d->cboDevice_unlock();
 }
 
 
@@ -696,7 +706,7 @@ void CtrlConfigWindow::toolbarPortSelected(int virtPort)
  */
 void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 {
-	if (isCboDeviceLocked())
+	if (d->isCboDeviceLocked())
 		return;
 
 	const IoManager::VirtPort_t virtPort = m_selPort;

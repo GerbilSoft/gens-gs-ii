@@ -73,12 +73,6 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 
 		QActionGroup *m_actgrpSelPort;
 
-		// Dropdown device lock.
-		// Used when rebuilding cboDevice.
-		int cboDevice_lock(void);
-		int cboDevice_unlock(void);
-		bool isCboDeviceLocked(void) const;
-	
 	protected slots:
 		void accept(void);
 		void reject(void);
@@ -105,14 +99,7 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		// Select a port.
 		void selectPort(LibGens::IoManager::VirtPort_t virtPort);
 		void cboDevice_setTP(bool isTP);
-
-		// Dropdown device lock.
-		// Used when rebuilding cboDevice.
-		int m_cboDeviceLockCnt;
 };
-
-inline bool CtrlConfigWindow::isCboDeviceLocked(void) const
-	{ return (m_cboDeviceLockCnt > 0); }
 
 }
 
