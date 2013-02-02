@@ -71,8 +71,6 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		// State change event. (Used for switching the UI language at runtime.)
 		void changeEvent(QEvent *event);
 
-		QActionGroup *m_actgrpSelPort;
-
 	protected slots:
 		void accept(void);
 		void reject(void);
@@ -85,13 +83,6 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		void on_cboDevice_currentIndexChanged(int index);
 	
 	private:
-		// Selected port.
-		LibGens::IoManager::VirtPort_t m_selPort;
-		QSignalMapper *m_mapperSelPort;
-
-		// Toolbar separators.
-		QVector<QAction*> m_vecTbSep;
-
 		// Update port information.
 		void updatePortButton(LibGens::IoManager::VirtPort_t virtPort);
 		void updatePortSettings(LibGens::IoManager::VirtPort_t virtPort);
