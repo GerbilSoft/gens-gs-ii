@@ -29,9 +29,7 @@
 class QSettings;
 
 // LibGens classes.
-namespace LibGens {
-	class IoManager;
-}
+#include "libgens/IoManager.hpp"
 
 namespace GensQt4
 {
@@ -71,6 +69,23 @@ class CtrlConfig : public QObject
 		 * @param ioManager I/O manager class.
 		 */
 		void updateIoManager(LibGens::IoManager *ioManager) const;
+
+		/** CtrlConfigWindow interface. **/
+
+		/**
+		 * Get a controller's I/O device type.
+		 * @param virtPort Virtual controller port.
+		 * @return Device type.
+		 */
+		LibGens::IoManager::IoType_t ioType(LibGens::IoManager::VirtPort_t virtPort);
+
+		/**
+		 * Set a controller's I/O device type.
+		 * NOTE: IoManager should be updated after calling this function.
+		 * @param virtPort Virtual controller port.
+		 * @return Device type.
+		 */
+		void setIoType(LibGens::IoManager::VirtPort_t virtPort, LibGens::IoManager::IoType_t ioType);
 
 	private:
 		friend class CtrlConfigPrivate;

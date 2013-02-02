@@ -23,6 +23,9 @@
 
 #include "CtrlConfig.hpp"
 
+// C includes. (C++ namespace)
+#include <cassert>
+
 // Controller I/O manager.
 #include "libgens/IoManager.hpp"
 using LibGens::IoManager;
@@ -391,5 +394,32 @@ void CtrlConfig::updateIoManager(IoManager *ioManager) const
 	}
 }
 
+
+/** CtrlConfigWindow interface. **/
+
+
+/**
+ * Get a controller's I/O device type.
+ * @param virtPort Virtual controller port.
+ * @return Device type.
+ */
+IoManager::IoType_t CtrlConfig::ioType(IoManager::VirtPort_t virtPort)
+{
+	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
+	return d->ctrlTypes[virtPort];
 }
 
+/**
+ * Set a controller's I/O device type.
+ * NOTE: IoManager should be updated after calling this function.
+ * @param virtPort Virtual controller port.
+ * @return Device type.
+ */
+void CtrlConfig::setIoType(IoManager::VirtPort_t virtPort, IoManager::IoType_t ioType)
+{
+	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
+	assert(ioType >= IoManager::IOT_3BTN && ioType < IoManager::IOT_MAX);
+	d->ctrlTypes[virtPort] = ioType;
+}
+
+}

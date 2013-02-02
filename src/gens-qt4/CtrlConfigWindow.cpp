@@ -154,16 +154,10 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 
 	// Copy the current controller settings.
 	// TODO: Button mapping.
-	// TODO: Load from the configuration cache instead of the emulation context.
-	// TODO: TeamPlayer / EA 4-Way Play support.
-	if (gqt4_emuContext) {
-		// Emulation is running.
-		m_devType[0] = gqt4_emuContext->m_ioManager->devType(IoManager::VIRTPORT_1);
-		m_devType[1] = gqt4_emuContext->m_ioManager->devType(IoManager::VIRTPORT_2);
-	} else {
-		// Emulation is not running.
-		m_devType[0] = IoManager::IOT_NONE;
-		m_devType[1] = IoManager::IOT_NONE;
+	for (int virtPort = IoManager::VIRTPORT_1;
+	     virtPort < IoManager::VIRTPORT_MAX; virtPort++)
+	{
+		m_devType[virtPort] = gqt4_cfg->m_ctrlConfig->ioType((IoManager::VirtPort_t)virtPort);
 	}
 
 	// Initialize all of the port buttons.
