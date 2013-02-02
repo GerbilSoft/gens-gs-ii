@@ -91,6 +91,12 @@ class IoManagerPrivate
 		void updateDevice_4WP_Master(int physPort);
 		void updateDevice_4WP_Slave(int physPort);
 
+		/**
+		 * Latch relX, relY, and signOver for a Sega Mega Mouse.
+		 * @param virtPort Virtual port number.
+		 */
+		void latchMegaMouse(int virtPort);
+
 		// I/O pin definitions.
 		enum IoPinDefs {
 			IOPIN_UP	= 0x01,	// D0
@@ -630,8 +636,7 @@ void IoManagerPrivate::updateDevice_Mouse(int virtPort, bool oldSelect, bool old
 			if (oldSelect && !dev->isSelect()) {
 				// TH falling edge.
 				dev->counter++;
-				// TODO: Implement latchMouseMovement().
-				//latchMouseMovement();
+				latchMegaMouse(virtPort);
 			}
 		} else {
 			// Check for TR transition.
@@ -699,6 +704,56 @@ void IoManagerPrivate::updateDevice_Mouse(int virtPort, bool oldSelect, bool old
 
 	// Save the device data.
 	dev->deviceData = ret;
+}
+
+/**
+ * Latch relX, relY, and signOver for a Sega Mega Mouse.
+ * @param virtPort Virtual port number.
+ */
+void IoManagerPrivate::latchMegaMouse(int virtPort)
+{
+	IoDevice *const dev = &ioDevices[virtPort];
+
+	// TODO: Optimize this function!
+
+	// Format: [YOVER XOVER YSIGN XSIGN]
+	// OVER == overflow occurred
+	// SIGN == 0 for positive, 1 for negative
+
+	dev->data.mouse.latch.signOver = 0;
+
+	// X axis.
+	if (dev->data.mouse.relX > 255) {
+		dev->data.mouse.latch.signOver = 0x4;
+		dev->data.mouse.latch.relX = 255;
+	} else if (dev->data.mouse.relX >= 0) {
+		dev->data.mouse.latch.signOver = 0x0;
+		dev->data.mouse.latch.relX = (dev->data.mouse.relX & 0xFF);
+	} else if (dev->data.mouse.relX < -255) {
+		dev->data.mouse.latch.signOver = 0x5;
+		dev->data.mouse.latch.relX = 255;
+	} else /*if (dev->data.mouse.relX < 0)*/ {
+		dev->data.mouse.latch.signOver = 0x1;
+		dev->data.mouse.latch.relX = (dev->data.mouse.relX & 0xFF);
+	}
+
+	// Y axis.
+	if (dev->data.mouse.relY > 255) {
+		dev->data.mouse.latch.signOver |= 0x8;
+		dev->data.mouse.latch.relY = 255;
+	} else if (dev->data.mouse.relY >= 0) {
+		dev->data.mouse.latch.relY = (dev->data.mouse.relY & 0xFF);
+	} else if (dev->data.mouse.relY < -255) {
+		dev->data.mouse.latch.signOver |= 0xA;
+		dev->data.mouse.latch.relY = 255;
+	} else /*if (dev->data.mouse.relY < 0)*/ {
+		dev->data.mouse.latch.signOver |= 0x2;
+		dev->data.mouse.latch.relY = (dev->data.mouse.relY & 0xFF);
+	}
+
+	// Clear the accumulators.
+	dev->data.mouse.relX = 0;
+	dev->data.mouse.relY = 0;
 }
 
 /**
