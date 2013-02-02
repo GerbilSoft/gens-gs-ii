@@ -86,6 +86,7 @@ class IoManagerPrivate
 		void updateDevice_3BTN(int virtPort);
 		void updateDevice_6BTN(int virtPort, bool oldSelect);
 		void updateDevice_2BTN(int virtPort);
+		void updateDevice_Mouse(int virtPort, bool oldSelect, bool oldTr);
 		void updateDevice_TP(int physPort, bool oldSelect, bool oldTr);
 		void updateDevice_4WP_Master(int physPort);
 		void updateDevice_4WP_Slave(int physPort);
@@ -234,6 +235,9 @@ class IoManagerPrivate
 				buttons = ~0;
 				serCtrl = 0;
 				serLastTx = 0xFF;
+
+				// Clear device-specific data.
+				memset(&data, 0x00, sizeof(data));
 			}
 
 			IoManager::IoType_t type;	// Device type.
@@ -242,7 +246,7 @@ class IoManagerPrivate
 
 			uint8_t ctrl;			// Tristate control.
 			uint8_t mdData;			// Data written from the MD.
-			uint8_t deviceData;		// Device data.
+			uint8_t deviceData;		// Data written from the device.
 			bool th_line;			// TH line state. (SELECT)
 			bool tr_line;			// TR line state.
 
@@ -309,10 +313,26 @@ class IoManagerPrivate
 			GensKey_t keyMap[IoManager::BTNI_MAX];
 
 			/**
-			 * Teamplayer data.
+			 * Device-specific data.
 			 */
-			uint8_t tp_padTypes[4];
-			uint8_t tp_ctrlIndexTbl[TP_DT_MAX - TP_DT_PADA_RLDU];
+			union {
+				struct {
+					// Teamplayer data.
+					uint8_t padTypes[4];
+					uint8_t ctrlIndexTbl[TP_DT_MAX - TP_DT_PADA_RLDU];
+				} tp;
+				struct {
+					// Mouse data.
+					// TODO: Make use of this - currently, only buttons are supported.
+					int relX;
+					int relY;
+					struct {
+						uint8_t signOver;
+						uint8_t relX;
+						uint8_t relY;
+					} latch;
+				} mouse;
+			} data;
 		};
 
 		IoDevice ioDevices[IoManager::VIRTPORT_MAX];
@@ -468,6 +488,14 @@ void IoManagerPrivate::updateDevice(int virtPort)
 		case IoManager::IOT_3BTN: updateDevice_3BTN(virtPort); break;
 		case IoManager::IOT_6BTN: updateDevice_6BTN(virtPort, oldSelect); break;
 		case IoManager::IOT_2BTN: updateDevice_2BTN(virtPort); break;
+
+		case IoManager::IOT_MEGA_MOUSE: {
+			const bool oldTr = dev->isTrLine();
+			dev->updateTrLine();
+			updateDevice_Mouse(virtPort, oldSelect, oldTr);
+			break;
+		}
+
 		case IoManager::IOT_4WP_MASTER: updateDevice_4WP_Master(virtPort); break;
 		case IoManager::IOT_4WP_SLAVE: updateDevice_4WP_Slave(virtPort); break;
 
@@ -582,6 +610,97 @@ void IoManagerPrivate::updateDevice_2BTN(int virtPort)
 	dev->deviceData = (0xC0 | (ioDevices[virtPort].buttons & 0x3F));
 }
 
+void IoManagerPrivate::updateDevice_Mouse(int virtPort, bool oldSelect, bool oldTr)
+{
+	/**
+	 * Sega Mega Mouse protocol documentation by Charles MacDonald:
+	 * http://gendev.spritesmind.net/forum/viewtopic.php?t=579
+	 */
+
+	IoDevice *const dev = &ioDevices[virtPort];
+
+	// Check for RESET.
+	if (dev->isSelect()) {
+		// TH line is high. Reset the counter.
+		dev->counter = 0;
+	} else {
+		// Check if the device data needs to be updated.
+		if (dev->counter == 0) {
+			// Wait for TH falling edge.
+			if (oldSelect && !dev->isSelect()) {
+				// TH falling edge.
+				dev->counter++;
+				// TODO: Implement latchMouseMovement().
+				//latchMouseMovement();
+			}
+		} else {
+			// Check for TR transition.
+			if (oldTr != dev->isTrLine()) {
+				// IOPIN_TR has changed.
+				dev->counter++;
+			}
+		}
+	}
+
+	// Determine the new device data.
+	uint8_t ret;
+	switch (dev->counter) {
+		case 0:
+			// ID #0: $0 (+BF)
+			ret = 0x10;
+			break;
+		case 1:
+			// ID #1: $B (+BF)
+			ret = 0x1B;
+			break;
+		case 2:
+			// ID #2: $F (-BF)
+			ret = 0x0F;
+			break;
+		case 3:
+			// ID #3: $F (+BF)
+			ret = 0x1F;
+			break;
+		case 4:
+			// Axis sign and overflow. (-BF)
+			// Format: [YOVER XOVER YSIGN XSIGN]
+			// OVER == overflow occurred
+			// SIGN == 0 for positive, 1 for negative
+			ret = dev->data.mouse.latch.signOver;
+			break;
+		case 5:
+			// Mouse buttons. (+BF)
+			// Format: [START MIDDLE RIGHT LEFT]
+
+			// NOTE: Mega Mouse buttons are Active High.
+			// m_buttons is active low, so it needs to be inverted.
+			ret = 0x10 | (~dev->buttons & 0x0F);
+			break;
+		case 6:
+			// X axis MSN. (-BF)
+			ret = (dev->data.mouse.latch.relX >> 4) & 0xF;
+			break;
+		case 7:
+			// X axis LSN. (+BF)
+			ret = 0x10 | (dev->data.mouse.latch.relX & 0xF);
+			break;
+		case 8:
+			// Y axis MSN. (-BF)
+			ret = (dev->data.mouse.latch.relY >> 4) & 0xF;
+			break;
+		case 9:
+		default:
+			// Y axis LSN. (+BF)
+			// Also returned if the mouse is polled
+			// more than 10 times.
+			ret = 0x10 | (dev->data.mouse.latch.relY & 0xF);
+			break;
+	}
+
+	// Save the device data.
+	dev->deviceData = ret;
+}
+
 /**
  * Update a Teamplayer device.
  * @param physPort Physical controller port.
@@ -640,14 +759,14 @@ void IoManagerPrivate::updateDevice_TP(int physPort, bool oldSelect, bool oldTr)
 		case TP_DT_PADTYPE_C:
 		case TP_DT_PADTYPE_D:
 			// Controller type.
-			data = dev->tp_padTypes[dev->counter - TP_DT_PADTYPE_A];
+			data = dev->data.tp.padTypes[dev->counter - TP_DT_PADTYPE_A];
 			break;
 
 		default:
 			// Check the controller data index table.
 			int adj_counter = (dev->counter - TP_DT_PADA_RLDU);
-			if ((adj_counter >= (int)(NUM_ELEMENTS(dev->tp_ctrlIndexTbl))) ||
-			    (dev->tp_ctrlIndexTbl[adj_counter] >= TP_DT_MAX))
+			if ((adj_counter >= (int)(NUM_ELEMENTS(dev->data.tp.ctrlIndexTbl))) ||
+			    (dev->data.tp.ctrlIndexTbl[adj_counter] >= TP_DT_MAX))
 			{
 				// Invalid counter state.
 				// TODO: What value should be returned?
@@ -730,7 +849,7 @@ void IoManagerPrivate::updateDevice_4WP_Slave(int physPort)
 
 
 /**
- * Rebuild the controller index table.
+ * Teamplayer: Rebuild the controller index table.
  */
 void IoManagerPrivate::rebuildCtrlIndexTable(int physPort)
 {
@@ -745,7 +864,7 @@ void IoManagerPrivate::rebuildCtrlIndexTable(int physPort)
 				? IoManager::VIRTPORT_TP1A
 				: IoManager::VIRTPORT_TP2A);
 
-	int i = 0;	// tp_ctrlIndexTbl index
+	int i = 0;	// data.tp.ctrlIndexTbl index
 	for (int pad = 0; pad < 4; pad++) {
 		const int dtBase = (TP_DT_PADA_RLDU + (pad * 3));
 		const int virtPort = virtPortBase + pad;
@@ -753,27 +872,27 @@ void IoManagerPrivate::rebuildCtrlIndexTable(int physPort)
 		switch (ioDevices[virtPort].type) {
 			case IoManager::IOT_NONE:
 			default:
-				dev->tp_padTypes[pad] = TP_PT_NONE;
+				dev->data.tp.padTypes[pad] = TP_PT_NONE;
 				break;
 
 			case IoManager::IOT_3BTN:
-				dev->tp_padTypes[pad] = TP_PT_3BTN;
-				dev->tp_ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 0);
-				dev->tp_ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 1);
+				dev->data.tp.padTypes[pad] = TP_PT_3BTN;
+				dev->data.tp.ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 0);
+				dev->data.tp.ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 1);
 				break;
 
 			case IoManager::IOT_6BTN:
-				dev->tp_padTypes[pad] = TP_PT_6BTN;
-				dev->tp_ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 0);
-				dev->tp_ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 1);
-				dev->tp_ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 2);
+				dev->data.tp.padTypes[pad] = TP_PT_6BTN;
+				dev->data.tp.ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 0);
+				dev->data.tp.ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 1);
+				dev->data.tp.ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 2);
 				break;
 		}
 	}
 
 	// Set the rest of the controller data indexes to DT_MAX.
-	for (int x = i; x < NUM_ELEMENTS(dev->tp_ctrlIndexTbl); x++)
-		dev->tp_ctrlIndexTbl[x] = TP_DT_MAX;
+	for (int x = i; x < NUM_ELEMENTS(dev->data.tp.ctrlIndexTbl); x++)
+		dev->data.tp.ctrlIndexTbl[x] = TP_DT_MAX;
 }
 
 
