@@ -26,10 +26,12 @@
 
 // Qt includes and classes.
 #include <QtCore/QObject>
+#include <QtCore/QVector>
 class QSettings;
 
-// LibGens classes.
+// LibGens includes.
 #include "libgens/IoManager.hpp"
+#include "libgens/GensInput/GensKey_t.h"
 
 namespace GensQt4
 {
@@ -93,6 +95,22 @@ class CtrlConfig : public QObject
 		 * @return Device type.
 		 */
 		void setIoType(LibGens::IoManager::VirtPort_t virtPort, LibGens::IoManager::IoType_t ioType);
+
+
+		/**
+		 * Get a controller's keymap.
+		 * @param virtPort Virtual controller port.
+		 * @return Keymap.
+		 */
+		QVector<GensKey_t> keyMap(LibGens::IoManager::VirtPort_t virtPort);
+
+		/**
+		 * Set a controller's keymap.
+		 * NOTE: IoManager should be updated after calling this function.
+		 * @param virtPort Virtual controller port.
+		 * @param keyMap New keymap.
+		 */
+		void setKeyMap(LibGens::IoManager::VirtPort_t virtPort, QVector<GensKey_t> keyMap);
 
 	private:
 		friend class CtrlConfigPrivate;

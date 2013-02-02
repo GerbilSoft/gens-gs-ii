@@ -67,7 +67,9 @@ class GensCtrlCfgWidgetPrivate
 		GensCtrlCfgWidget *const q;
 		Q_DISABLE_COPY(GensCtrlCfgWidgetPrivate)
 
+	public:
 		IoManager::IoType_t m_ioType;
+		int numButtons;		// Cached from IoManager.
 
 		QGridLayout *layout;
 		QLabel *lblButtonName[IoManager::BTNI_MAX];
@@ -89,6 +91,7 @@ class GensCtrlCfgWidgetPrivate
 GensCtrlCfgWidgetPrivate::GensCtrlCfgWidgetPrivate(GensCtrlCfgWidget *q)
 	: q(q)
 	, m_ioType(IoManager::IOT_NONE)
+	, numButtons(0)
 	, layout(new QGridLayout(q))
 {
 	// Eliminate margins and reduce vertical spacing.
@@ -147,15 +150,15 @@ void GensCtrlCfgWidgetPrivate::init(void)
 
 
 /**
- * Get the current I/O type.
- * @return Current I/O type.
+ * Get the current I/O device type.
+ * @return Current I/O device type.
  */
 inline IoManager::IoType_t GensCtrlCfgWidgetPrivate::ioType(void) const
 	{ return m_ioType; }
 
 /**
- * Set the I/O type.
- * @param newIoType New I/O type.
+ * Set the I/O device type.
+ * @param newIoType New I/O device type.
  */
 void GensCtrlCfgWidgetPrivate::setIoType(IoManager::IoType_t newIoType)
 {
@@ -166,7 +169,7 @@ void GensCtrlCfgWidgetPrivate::setIoType(IoManager::IoType_t newIoType)
 	m_ioType = newIoType;
 
 	// Update the grid layout based on the specified controller type.
-	int numButtons = IoManager::NumDevButtons(newIoType);
+	numButtons = IoManager::NumDevButtons(newIoType);
 	if (numButtons > NUM_ELEMENTS(btnCfg))
 		numButtons = NUM_ELEMENTS(btnCfg);
 
@@ -279,7 +282,6 @@ QString GensCtrlCfgWidgetPrivate::buttonName_l(IoManager::ButtonName_t buttonNam
 
 /**
  * Clear all mapped buttons.
- * WRAPPER SLOT for GensCtrlCfgWidetPrivate.
  */
 void GensCtrlCfgWidgetPrivate::clearAllButtons(void)
 {
@@ -307,14 +309,16 @@ GensCtrlCfgWidget::~GensCtrlCfgWidget()
 
 
 /**
- * Get the current I/O type.
+ * Get the current I/O device type.
+ * WRAPPER FUNCTION for GensCtrlCfgWidgetPrivate.
  * @return Current I/O type.
  */
 IoManager::IoType_t GensCtrlCfgWidget::ioType(void) const
 	{ return d->ioType(); }
 
 /**
- * Set the current I/O type.
+ * Set the current I/O device type.
+ * WRAPPER FUNCTION for GensCtrlCfgWidgetPrivate.
  * @param newIoType New I/O type.
  */
 void GensCtrlCfgWidget::setIoType(IoManager::IoType_t newIoType)
@@ -322,8 +326,43 @@ void GensCtrlCfgWidget::setIoType(IoManager::IoType_t newIoType)
 
 
 /**
+ * Get the current keymap.
+ * @return Current keymap.
+ */
+QVector<GensKey_t> GensCtrlCfgWidget::keyMap(void)
+{
+	QVector<GensKey_t> keyMap(d->numButtons);
+	for (int i = 0; i < d->numButtons; i++) {
+		keyMap[i] = d->btnCfg[i]->key();
+	}
+
+	return keyMap;
+}
+
+/**
+ * Set the current keymap.
+ * @param keyMap New keymap.
+ */
+void GensCtrlCfgWidget::setKeyMap(QVector<GensKey_t> keyMap)
+{
+	const int maxButtons = std::min(d->numButtons, keyMap.count());
+
+	for (int i = 0; i < maxButtons; i++) {
+		d->btnCfg[i]->setKey(keyMap[i]);
+	}
+
+	if (maxButtons < d->numButtons) {
+		// Clear the rest of the keys.
+		for (int i = maxButtons; i < d->numButtons; i++) {
+			d->btnCfg[i]->clearKey();
+		}
+	}
+}
+
+
+/**
  * Clear all mapped buttons.
- * WRAPPER SLOT for GensCtrlCfgWidetPrivate.
+ * WRAPPER SLOT for GensCtrlCfgWidgetPrivate.
  */
 void GensCtrlCfgWidget::clearAllButtons(void)
 {

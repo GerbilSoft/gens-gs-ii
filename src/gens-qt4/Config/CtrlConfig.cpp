@@ -184,14 +184,14 @@ void CtrlConfigPrivate::copyFrom(const CtrlConfigPrivate *src)
 
 
 /**
- * CtrlConfigPrivate::isDirty(): Check if the controller configuration is dirty.
+ * Check if the controller configuration is dirty.
  * @return True if the controller configuration is dirty; false otherwise.
  */
 inline bool CtrlConfigPrivate::isDirty(void) const
 	{ return m_dirty; }
 
 /**
- * CtrlConfigPrivate::clearDirty(): Clear the dirty flag.
+ * Clear the dirty flag.
  */
 inline void CtrlConfigPrivate::clearDirty(void)
 	{ m_dirty = false; }
@@ -459,6 +459,49 @@ void CtrlConfig::setIoType(IoManager::VirtPort_t virtPort, IoManager::IoType_t i
 	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
 	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
 	d->ctrlTypes[virtPort] = ioType;
+}
+
+
+/**
+ * Get a controller's keymap.
+ * @param virtPort Virtual controller port.
+ * @return Keymap.
+ */
+QVector<GensKey_t> CtrlConfig::keyMap(IoManager::VirtPort_t virtPort)
+{
+	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
+	const int numButtons = IoManager::NumDevButtons(d->ctrlTypes[virtPort]);
+
+	QVector<GensKey_t> keyMap(numButtons);
+	for (int i = 0; i < numButtons; i++) {
+		keyMap[i] = d->ctrlKeys[virtPort][i];
+	}
+
+	return keyMap;
+}
+
+/**
+ * Set a controller's keymap.
+ * NOTE: IoManager should be updated after calling this function.
+ * @param virtPort Virtual controller port.
+ * @param keyMap New keymap.
+ */
+void CtrlConfig::setKeyMap(LibGens::IoManager::VirtPort_t virtPort, QVector<GensKey_t> keyMap)
+{
+	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
+	const int numButtons = IoManager::NumDevButtons(d->ctrlTypes[virtPort]);
+	const int maxButtons = std::min(keyMap.size(), numButtons);
+
+	for (int i = 0; i < maxButtons; i++) {
+		d->ctrlKeys[virtPort][i] = keyMap[i];
+	}
+
+	if (maxButtons < numButtons) {
+		// Clear the rest of the keys.
+		for (int i = maxButtons; i < numButtons; i++) {
+			d->ctrlKeys[virtPort][i] = 0;
+		}
+	}
 }
 
 }

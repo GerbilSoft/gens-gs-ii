@@ -24,9 +24,11 @@
 
 // LibGens includes.
 #include "libgens/IoManager.hpp"
+#include "libgens/GensInput/GensKey_t.h"
 
 // Qt includes.
 #include <QtGui/QWidget>
+#include <QtCore/QVector>
 
 namespace GensQt4
 {
@@ -41,8 +43,29 @@ class GensCtrlCfgWidget : public QWidget
 		GensCtrlCfgWidget(QWidget* parent = 0);
 		~GensCtrlCfgWidget();
 
+		/**
+		 * Get the current I/O device type.
+		 * @return Current I/O device type.
+		 */
 		LibGens::IoManager::IoType_t ioType(void) const;
+
+		/**
+		 * Set the I/O device type.
+		 * @param newIoType New I/O device type.
+		 */
 		void setIoType(LibGens::IoManager::IoType_t newIoType);
+
+		/**
+		 * Get the current keymap.
+		 * @return Current keymap.
+		 */
+		QVector<GensKey_t> keyMap(void);
+
+		/**
+		 * Set the current keymap.
+		 * @param keyMap New keymap.
+		 */
+		void setKeyMap(QVector<GensKey_t> keyMap);
 
 	private:
 		friend class GensCtrlCfgWidgetPrivate;

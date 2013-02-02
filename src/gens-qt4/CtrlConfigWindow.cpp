@@ -577,9 +577,9 @@ void CtrlConfigWindow::updatePortSettings(IoManager::VirtPort_t virtPort)
 		devIndex--;	// avoid having two 4WP devices in the dropdown
 	cboDevice->setCurrentIndex(devIndex);
 
-	// Set the device type in the CtrlCfgWidget.
-	// TODO: Load the configuration, and save the previous configuration.
+	// Set the device information in the GensCtrlCfgWidget.
 	ctrlCfgWidget->setIoType((IoManager::IoType_t)devIndex);
+	ctrlCfgWidget->setKeyMap(d->ctrlConfig->keyMap(virtPort));
 }
 
 
