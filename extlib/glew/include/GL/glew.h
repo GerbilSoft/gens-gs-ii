@@ -83,6 +83,9 @@
 #if defined(__gl_h_) || defined(__GL_H__) || defined(__X_GL_H)
 #error gl.h included before glew.h
 #endif
+#if defined(__REGAL_H__)
+#error Regal.h included before glew.h
+#endif
 #if defined(__glext_h_) || defined(__GLEXT_H_)
 #error glext.h included before glew.h
 #endif
@@ -92,6 +95,7 @@
 
 #define __gl_h_
 #define __GL_H__
+#define __REGAL_H__
 #define __X_GL_H
 #define __glext_h_
 #define __GLEXT_H_
@@ -171,6 +175,10 @@ typedef _W64 int ptrdiff_t;
 #define GLAPIENTRY APIENTRY
 #endif
 
+#ifndef GLEWAPIENTRY
+#define GLEWAPIENTRY APIENTRY
+#endif
+
 /*
  * GLEW_STATIC is defined for static library.
  * GLEW_BUILD  is defined for building the DLL library.
@@ -231,8 +239,13 @@ typedef _W64 int ptrdiff_t;
 #ifndef GLAPI
 #define GLAPI extern
 #endif
+
 #ifndef GLAPIENTRY
 #define GLAPIENTRY
+#endif
+
+#ifndef GLEWAPIENTRY
+#define GLEWAPIENTRY
 #endif
 
 #endif /* _WIN32 */
@@ -1491,8 +1504,8 @@ typedef void (GLAPIENTRY * PFNGLFOGCOORDDPROC) (GLdouble coord);
 typedef void (GLAPIENTRY * PFNGLFOGCOORDDVPROC) (const GLdouble *coord);
 typedef void (GLAPIENTRY * PFNGLFOGCOORDFPROC) (GLfloat coord);
 typedef void (GLAPIENTRY * PFNGLFOGCOORDFVPROC) (const GLfloat *coord);
-typedef void (GLAPIENTRY * PFNGLMULTIDRAWARRAYSPROC) (GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount);
-typedef void (GLAPIENTRY * PFNGLMULTIDRAWELEMENTSPROC) (GLenum mode, const GLsizei *count, GLenum type, const GLvoid **indices, GLsizei primcount);
+typedef void (GLAPIENTRY * PFNGLMULTIDRAWARRAYSPROC) (GLenum mode, const GLint *first, const GLsizei *count, GLsizei drawcount);
+typedef void (GLAPIENTRY * PFNGLMULTIDRAWELEMENTSPROC) (GLenum mode, const GLsizei *count, GLenum type, const GLvoid **indices, GLsizei drawcount);
 typedef void (GLAPIENTRY * PFNGLPOINTPARAMETERFPROC) (GLenum pname, GLfloat param);
 typedef void (GLAPIENTRY * PFNGLPOINTPARAMETERFVPROC) (GLenum pname, const GLfloat *params);
 typedef void (GLAPIENTRY * PFNGLPOINTPARAMETERIPROC) (GLenum pname, GLint param);
@@ -2057,7 +2070,6 @@ typedef void (GLAPIENTRY * PFNGLUNIFORMMATRIX4X3FVPROC) (GLint location, GLsizei
 #define GL_TEXTURE_LUMINANCE_TYPE 0x8C14
 #define GL_TEXTURE_INTENSITY_TYPE 0x8C15
 #define GL_TEXTURE_DEPTH_TYPE 0x8C16
-#define GL_UNSIGNED_NORMALIZED 0x8C17
 #define GL_TEXTURE_1D_ARRAY 0x8C18
 #define GL_PROXY_TEXTURE_1D_ARRAY 0x8C19
 #define GL_TEXTURE_2D_ARRAY 0x8C1A
@@ -2345,7 +2357,6 @@ typedef void (GLAPIENTRY * PFNGLGETINTEGER64I_VPROC) (GLenum, GLuint, GLint64 *)
 #define GL_VERSION_3_3 1
 
 #define GL_VERTEX_ATTRIB_ARRAY_DIVISOR 0x88FE
-#define GL_ANY_SAMPLES_PASSED 0x8C2F
 #define GL_TEXTURE_SWIZZLE_R 0x8E42
 #define GL_TEXTURE_SWIZZLE_G 0x8E43
 #define GL_TEXTURE_SWIZZLE_B 0x8E44
@@ -2414,9 +2425,26 @@ typedef void (GLAPIENTRY * PFNGLMINSAMPLESHADINGPROC) (GLclampf value);
 #ifndef GL_VERSION_4_2
 #define GL_VERSION_4_2 1
 
+#define GL_COMPRESSED_RGBA_BPTC_UNORM 0x8E8C
+#define GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM 0x8E8D
+#define GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT 0x8E8E
+#define GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT 0x8E8F
+
 #define GLEW_VERSION_4_2 GLEW_GET_VAR(__GLEW_VERSION_4_2)
 
 #endif /* GL_VERSION_4_2 */
+
+/* ----------------------------- GL_VERSION_4_3 ---------------------------- */
+
+#ifndef GL_VERSION_4_3
+#define GL_VERSION_4_3 1
+
+#define GL_NUM_SHADING_LANGUAGE_VERSIONS 0x82E9
+#define GL_VERTEX_ATTRIB_ARRAY_LONG 0x874E
+
+#define GLEW_VERSION_4_3 GLEW_GET_VAR(__GLEW_VERSION_4_3)
+
+#endif /* GL_VERSION_4_3 */
 
 /* ------------------------ GL_ARB_fragment_program ------------------------ */
 
@@ -3864,6 +3892,7 @@ GLEW_VAR_EXPORT GLboolean __GLEW_VERSION_3_3;
 GLEW_VAR_EXPORT GLboolean __GLEW_VERSION_4_0;
 GLEW_VAR_EXPORT GLboolean __GLEW_VERSION_4_1;
 GLEW_VAR_EXPORT GLboolean __GLEW_VERSION_4_2;
+GLEW_VAR_EXPORT GLboolean __GLEW_VERSION_4_3;
 GLEW_VAR_EXPORT GLboolean __GLEW_ARB_fragment_program;
 GLEW_VAR_EXPORT GLboolean __GLEW_ARB_fragment_shader;
 GLEW_VAR_EXPORT GLboolean __GLEW_ARB_multitexture;
@@ -3903,8 +3932,8 @@ GLEW_VAR_EXPORT GLboolean __GLEW_NV_texture_rectangle;
 #ifdef GLEW_MX
 
 typedef struct GLEWContextStruct GLEWContext;
-GLEWAPI GLenum glewContextInit (GLEWContext* ctx);
-GLEWAPI GLboolean glewContextIsSupported (const GLEWContext* ctx, const char* name);
+GLEWAPI GLenum GLEWAPIENTRY glewContextInit (GLEWContext *ctx);
+GLEWAPI GLboolean GLEWAPIENTRY glewContextIsSupported (const GLEWContext *ctx, const char *name);
 
 #define glewInit() glewContextInit(glewGetContext())
 #define glewIsSupported(x) glewContextIsSupported(glewGetContext(), x)
@@ -3919,8 +3948,8 @@ GLEWAPI GLboolean glewContextIsSupported (const GLEWContext* ctx, const char* na
 
 #else /* GLEW_MX */
 
-GLEWAPI GLenum glewInit ();
-GLEWAPI GLboolean glewIsSupported (const char* name);
+GLEWAPI GLenum GLEWAPIENTRY glewInit (void);
+GLEWAPI GLboolean GLEWAPIENTRY glewIsSupported (const char *name);
 #define glewIsExtensionSupported(x) glewIsSupported(x)
 
 #define GLEW_GET_VAR(x) (*(const GLboolean*)&x)
@@ -3929,9 +3958,9 @@ GLEWAPI GLboolean glewIsSupported (const char* name);
 #endif /* GLEW_MX */
 
 GLEWAPI GLboolean glewExperimental;
-GLEWAPI GLboolean glewGetExtension (const char* name);
-GLEWAPI const GLubyte* glewGetErrorString (GLenum error);
-GLEWAPI const GLubyte* glewGetString (GLenum name);
+GLEWAPI GLboolean GLEWAPIENTRY glewGetExtension (const char *name);
+GLEWAPI const GLubyte * GLEWAPIENTRY glewGetErrorString (GLenum error);
+GLEWAPI const GLubyte * GLEWAPIENTRY glewGetString (GLenum name);
 
 #ifdef __cplusplus
 }

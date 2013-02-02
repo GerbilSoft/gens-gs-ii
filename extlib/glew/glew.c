@@ -30,9 +30,10 @@
 */
 
 #include <GL/glew.h>
+
 #if defined(_WIN32)
 #  include <GL/wglew.h>
-#elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX)
+#elif !defined(__ANDROID__) && (!defined(__APPLE__) || defined(GLEW_APPLE_GLX))
 #  include <GL/glxew.h>
 #endif
 
@@ -100,12 +101,17 @@ void* dlGetProcAddress (const GLubyte* name)
 void* NSGLGetProcAddress (const GLubyte *name)
 {
   static void* image = NULL;
+  void* addr;
   if (NULL == image) 
   {
+#ifdef GLEW_REGAL
+    image = dlopen("libRegal.dylib", RTLD_LAZY);
+#else
     image = dlopen("/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL", RTLD_LAZY);
+#endif
   }
   if( !image ) return NULL;
-  void* addr = dlsym(image, (const char*)name);
+  addr = dlsym(image, (const char*)name);
   if( addr ) return addr;
 #ifdef GLEW_APPLE_GLX
   return dlGetProcAddress( name ); // try next for glx symbols
@@ -124,7 +130,11 @@ void* NSGLGetProcAddress (const GLubyte *name)
   char* symbolName;
   if (NULL == image)
   {
+#ifdef GLEW_REGAL
+    image = NSAddImage("libRegal.dylib", NSADDIMAGE_OPTION_RETURN_ON_ERROR);
+#else
     image = NSAddImage("/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL", NSADDIMAGE_OPTION_RETURN_ON_ERROR);
+#endif
   }
   /* prepend a '_' for the Unix C symbol mangling convention */
   symbolName = malloc(strlen((const char*)name) + 2);
@@ -150,16 +160,14 @@ void* NSGLGetProcAddress (const GLubyte *name)
  */
 #if defined(_WIN32)
 #  define glewGetProcAddress(name) wglGetProcAddress((LPCSTR)name)
-#else
-#  if defined(__APPLE__)
-#    define glewGetProcAddress(name) NSGLGetProcAddress(name)
-#  else
-#    if defined(__sgi) || defined(__sun)
-#      define glewGetProcAddress(name) dlGetProcAddress(name)
-#    else /* __linux */
-#      define glewGetProcAddress(name) (*glXGetProcAddressARB)(name)
-#    endif
-#  endif
+#elif defined(__APPLE__) && !defined(GLEW_APPLE_GLX)
+#  define glewGetProcAddress(name) NSGLGetProcAddress(name)
+#elif defined(__sgi) || defined(__sun)
+#  define glewGetProcAddress(name) dlGetProcAddress(name)
+#elif defined(__ANDROID__)
+#  define glewGetProcAddress(name) NULL /* TODO */
+#else /* __linux */
+#  define glewGetProcAddress(name) (*glXGetProcAddressARB)(name)
 #endif
 
 /*
@@ -784,6 +792,7 @@ GLboolean __GLEW_VERSION_3_3 = GL_FALSE;
 GLboolean __GLEW_VERSION_4_0 = GL_FALSE;
 GLboolean __GLEW_VERSION_4_1 = GL_FALSE;
 GLboolean __GLEW_VERSION_4_2 = GL_FALSE;
+GLboolean __GLEW_VERSION_4_3 = GL_FALSE;
 GLboolean __GLEW_ARB_fragment_program = GL_FALSE;
 GLboolean __GLEW_ARB_fragment_shader = GL_FALSE;
 GLboolean __GLEW_ARB_multitexture = GL_FALSE;
@@ -1229,6 +1238,10 @@ static GLboolean _glewInit_GL_VERSION_4_0 (GLEW_CONTEXT_ARG_DEF_INIT)
 
 #endif /* GL_VERSION_4_2 */
 
+#ifdef GL_VERSION_4_3
+
+#endif /* GL_VERSION_4_3 */
+
 #ifdef GL_ARB_fragment_program
 
 #endif /* GL_ARB_fragment_program */
@@ -1533,7 +1546,7 @@ static GLboolean _glewInit_GL_EXT_vertex_shader (GLEW_CONTEXT_ARG_DEF_INIT)
 
 /* ------------------------------------------------------------------------- */
 
-GLboolean glewGetExtension (const char* name)
+GLboolean GLEWAPIENTRY glewGetExtension (const char* name)
 {    
   const GLubyte* start;
   const GLubyte* end;
@@ -1549,7 +1562,7 @@ GLboolean glewGetExtension (const char* name)
 #ifndef GLEW_MX
 static
 #endif
-GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
+GLenum GLEWAPIENTRY glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
 {
   const GLubyte* s;
   GLuint dot;
@@ -1577,7 +1590,8 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
   }
   else
   {
-    CONST_CAST(GLEW_VERSION_4_2)   = ( major > 4 )                 || ( major == 4 && minor >= 2 ) ? GL_TRUE : GL_FALSE;
+    CONST_CAST(GLEW_VERSION_4_3)   = ( major > 4 )                 || ( major == 4 && minor >= 3 ) ? GL_TRUE : GL_FALSE;
+    CONST_CAST(GLEW_VERSION_4_2)   = GLEW_VERSION_4_3   == GL_TRUE || ( major == 4 && minor >= 2 ) ? GL_TRUE : GL_FALSE;
     CONST_CAST(GLEW_VERSION_4_1)   = GLEW_VERSION_4_2   == GL_TRUE || ( major == 4 && minor >= 1 ) ? GL_TRUE : GL_FALSE;
     CONST_CAST(GLEW_VERSION_4_0)   = GLEW_VERSION_4_1   == GL_TRUE || ( major == 4               ) ? GL_TRUE : GL_FALSE;
     CONST_CAST(GLEW_VERSION_3_3)   = GLEW_VERSION_4_0   == GL_TRUE || ( major == 3 && minor >= 3 ) ? GL_TRUE : GL_FALSE;
@@ -1640,6 +1654,8 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
 #endif /* GL_VERSION_4_1 */
 #ifdef GL_VERSION_4_2
 #endif /* GL_VERSION_4_2 */
+#ifdef GL_VERSION_4_3
+#endif /* GL_VERSION_4_3 */
 #ifdef GL_ARB_fragment_program
   CONST_CAST(GLEW_ARB_fragment_program) = _glewSearchExtension("GL_ARB_fragment_program", extStart, extEnd);
 #endif /* GL_ARB_fragment_program */
@@ -1816,7 +1832,7 @@ static GLboolean _glewInit_WGL_EXT_swap_control (WGLEW_CONTEXT_ARG_DEF_INIT)
 static PFNWGLGETEXTENSIONSSTRINGARBPROC _wglewGetExtensionsStringARB = NULL;
 static PFNWGLGETEXTENSIONSSTRINGEXTPROC _wglewGetExtensionsStringEXT = NULL;
 
-GLboolean wglewGetExtension (const char* name)
+GLboolean GLEWAPIENTRY wglewGetExtension (const char* name)
 {    
   const GLubyte* start;
   const GLubyte* end;
@@ -1833,7 +1849,7 @@ GLboolean wglewGetExtension (const char* name)
   return _glewSearchExtension(name, start, end);
 }
 
-GLenum wglewContextInit (WGLEW_CONTEXT_ARG_DEF_LIST)
+GLenum GLEWAPIENTRY wglewContextInit (WGLEW_CONTEXT_ARG_DEF_LIST)
 {
   GLboolean crippled;
   const GLubyte* extStart;
@@ -1885,7 +1901,7 @@ GLenum wglewContextInit (WGLEW_CONTEXT_ARG_DEF_LIST)
   return GLEW_OK;
 }
 
-#elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX)
+#elif !defined(__ANDROID__) && (!defined(__APPLE__) || defined(GLEW_APPLE_GLX))
 
 PFNGLXGETCURRENTDISPLAYPROC __glewXGetCurrentDisplay = NULL;
 
@@ -2115,11 +2131,11 @@ GLenum glxewContextInit (GLXEW_CONTEXT_ARG_DEF_LIST)
   return GLEW_OK;
 }
 
-#endif /* !__APPLE__ || GLEW_APPLE_GLX */
+#endif /* !defined(__ANDROID__) && (!defined(__APPLE__) || defined(GLEW_APPLE_GLX)) */
 
 /* ------------------------------------------------------------------------ */
 
-const GLubyte* glewGetErrorString (GLenum error)
+const GLubyte * GLEWAPIENTRY glewGetErrorString (GLenum error)
 {
   static const GLubyte* _glewErrorString[] =
   {
@@ -2133,14 +2149,14 @@ const GLubyte* glewGetErrorString (GLenum error)
   return _glewErrorString[(int)error > max_error ? max_error : (int)error];
 }
 
-const GLubyte* glewGetString (GLenum name)
+const GLubyte * GLEWAPIENTRY glewGetString (GLenum name)
 {
   static const GLubyte* _glewString[] =
   {
     (const GLubyte*)NULL,
-    (const GLubyte*)"1.7.0",
+    (const GLubyte*)"1.9.0",
     (const GLubyte*)"1",
-    (const GLubyte*)"7",
+    (const GLubyte*)"9",
     (const GLubyte*)"0"
   };
   const int max_string = sizeof(_glewString)/sizeof(*_glewString) - 1;
@@ -2154,18 +2170,19 @@ GLboolean glewExperimental = GL_FALSE;
 #if !defined(GLEW_MX)
 
 #if defined(_WIN32)
-extern GLenum wglewContextInit (void);
-#elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX) /* _UNIX */
-extern GLenum glxewContextInit (void);
+extern GLenum GLEWAPIENTRY wglewContextInit (void);
+#elif !defined(__ANDROID__) && (!defined(__APPLE__) || defined(GLEW_APPLE_GLX))
+extern GLenum GLEWAPIENTRY glxewContextInit (void);
 #endif /* _WIN32 */
 
-GLenum glewInit ()
+GLenum GLEWAPIENTRY glewInit (void)
 {
   GLenum r;
-  if ( (r = glewContextInit()) ) return r;
+  r = glewContextInit();
+  if ( r != 0 ) return r;
 #if defined(_WIN32)
   return wglewContextInit();
-#elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX) /* _UNIX */
+#elif !defined(__ANDROID__) && (!defined(__APPLE__) || defined(GLEW_APPLE_GLX)) /* _UNIX */
   return glxewContextInit();
 #else
   return r;
@@ -2174,9 +2191,9 @@ GLenum glewInit ()
 
 #endif /* !GLEW_MX */
 #ifdef GLEW_MX
-GLboolean glewContextIsSupported (const GLEWContext* ctx, const char* name)
+GLboolean GLEWAPIENTRY glewContextIsSupported (const GLEWContext* ctx, const char* name)
 #else
-GLboolean glewIsSupported (const char* name)
+GLboolean GLEWAPIENTRY glewIsSupported (const char* name)
 #endif
 {
   GLubyte* pos = (GLubyte*)name;
@@ -2283,6 +2300,13 @@ GLboolean glewIsSupported (const char* name)
         if (_glewStrSame3(&pos, &len, (const GLubyte*)"4_2", 3))
         {
           ret = GLEW_VERSION_4_2;
+          continue;
+        }
+#endif
+#ifdef GL_VERSION_4_3
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"4_3", 3))
+        {
+          ret = GLEW_VERSION_4_3;
           continue;
         }
 #endif
@@ -2413,9 +2437,9 @@ GLboolean glewIsSupported (const char* name)
 #if defined(_WIN32)
 
 #if defined(GLEW_MX)
-GLboolean wglewContextIsSupported (const WGLEWContext* ctx, const char* name)
+GLboolean GLEWAPIENTRY wglewContextIsSupported (const WGLEWContext* ctx, const char* name)
 #else
-GLboolean wglewIsSupported (const char* name)
+GLboolean GLEWAPIENTRY wglewIsSupported (const char* name)
 #endif
 {
   GLubyte* pos = (GLubyte*)name;
@@ -2499,7 +2523,7 @@ GLboolean wglewIsSupported (const char* name)
   return ret;
 }
 
-#elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX)
+#elif !defined(__ANDROID__) && !defined(__APPLE__) || defined(GLEW_APPLE_GLX)
 
 #if defined(GLEW_MX)
 GLboolean glxewContextIsSupported (const GLXEWContext* ctx, const char* name)

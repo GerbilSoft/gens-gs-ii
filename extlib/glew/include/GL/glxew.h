@@ -407,56 +407,58 @@ typedef int ( * PFNGLXWAITVIDEOSYNCSGIPROC) (int divisor, int remainder, unsigne
 /* ------------------------------------------------------------------------- */
 
 #ifdef GLEW_MX
-#define GLXEW_EXPORT
+#define GLXEW_FUN_EXPORT
+#define GLXEW_VAR_EXPORT
 #else
-#define GLXEW_EXPORT extern
+#define GLXEW_FUN_EXPORT GLEW_FUN_EXPORT
+#define GLXEW_VAR_EXPORT GLEW_VAR_EXPORT
 #endif /* GLEW_MX */
 
-extern PFNGLXGETCURRENTDISPLAYPROC __glewXGetCurrentDisplay;
+GLXEW_FUN_EXPORT PFNGLXGETCURRENTDISPLAYPROC __glewXGetCurrentDisplay;
 
-extern PFNGLXCHOOSEFBCONFIGPROC __glewXChooseFBConfig;
-extern PFNGLXCREATENEWCONTEXTPROC __glewXCreateNewContext;
-extern PFNGLXCREATEPBUFFERPROC __glewXCreatePbuffer;
-extern PFNGLXCREATEPIXMAPPROC __glewXCreatePixmap;
-extern PFNGLXCREATEWINDOWPROC __glewXCreateWindow;
-extern PFNGLXDESTROYPBUFFERPROC __glewXDestroyPbuffer;
-extern PFNGLXDESTROYPIXMAPPROC __glewXDestroyPixmap;
-extern PFNGLXDESTROYWINDOWPROC __glewXDestroyWindow;
-extern PFNGLXGETCURRENTREADDRAWABLEPROC __glewXGetCurrentReadDrawable;
-extern PFNGLXGETFBCONFIGATTRIBPROC __glewXGetFBConfigAttrib;
-extern PFNGLXGETFBCONFIGSPROC __glewXGetFBConfigs;
-extern PFNGLXGETSELECTEDEVENTPROC __glewXGetSelectedEvent;
-extern PFNGLXGETVISUALFROMFBCONFIGPROC __glewXGetVisualFromFBConfig;
-extern PFNGLXMAKECONTEXTCURRENTPROC __glewXMakeContextCurrent;
-extern PFNGLXQUERYCONTEXTPROC __glewXQueryContext;
-extern PFNGLXQUERYDRAWABLEPROC __glewXQueryDrawable;
-extern PFNGLXSELECTEVENTPROC __glewXSelectEvent;
+GLXEW_FUN_EXPORT PFNGLXCHOOSEFBCONFIGPROC __glewXChooseFBConfig;
+GLXEW_FUN_EXPORT PFNGLXCREATENEWCONTEXTPROC __glewXCreateNewContext;
+GLXEW_FUN_EXPORT PFNGLXCREATEPBUFFERPROC __glewXCreatePbuffer;
+GLXEW_FUN_EXPORT PFNGLXCREATEPIXMAPPROC __glewXCreatePixmap;
+GLXEW_FUN_EXPORT PFNGLXCREATEWINDOWPROC __glewXCreateWindow;
+GLXEW_FUN_EXPORT PFNGLXDESTROYPBUFFERPROC __glewXDestroyPbuffer;
+GLXEW_FUN_EXPORT PFNGLXDESTROYPIXMAPPROC __glewXDestroyPixmap;
+GLXEW_FUN_EXPORT PFNGLXDESTROYWINDOWPROC __glewXDestroyWindow;
+GLXEW_FUN_EXPORT PFNGLXGETCURRENTREADDRAWABLEPROC __glewXGetCurrentReadDrawable;
+GLXEW_FUN_EXPORT PFNGLXGETFBCONFIGATTRIBPROC __glewXGetFBConfigAttrib;
+GLXEW_FUN_EXPORT PFNGLXGETFBCONFIGSPROC __glewXGetFBConfigs;
+GLXEW_FUN_EXPORT PFNGLXGETSELECTEDEVENTPROC __glewXGetSelectedEvent;
+GLXEW_FUN_EXPORT PFNGLXGETVISUALFROMFBCONFIGPROC __glewXGetVisualFromFBConfig;
+GLXEW_FUN_EXPORT PFNGLXMAKECONTEXTCURRENTPROC __glewXMakeContextCurrent;
+GLXEW_FUN_EXPORT PFNGLXQUERYCONTEXTPROC __glewXQueryContext;
+GLXEW_FUN_EXPORT PFNGLXQUERYDRAWABLEPROC __glewXQueryDrawable;
+GLXEW_FUN_EXPORT PFNGLXSELECTEVENTPROC __glewXSelectEvent;
 
-extern PFNGLXSWAPINTERVALEXTPROC __glewXSwapIntervalEXT;
+GLXEW_FUN_EXPORT PFNGLXSWAPINTERVALEXTPROC __glewXSwapIntervalEXT;
 
-extern PFNGLXGETSWAPINTERVALMESAPROC __glewXGetSwapIntervalMESA;
-extern PFNGLXSWAPINTERVALMESAPROC __glewXSwapIntervalMESA;
+GLXEW_FUN_EXPORT PFNGLXGETSWAPINTERVALMESAPROC __glewXGetSwapIntervalMESA;
+GLXEW_FUN_EXPORT PFNGLXSWAPINTERVALMESAPROC __glewXSwapIntervalMESA;
 
-extern PFNGLXSWAPINTERVALSGIPROC __glewXSwapIntervalSGI;
+GLXEW_FUN_EXPORT PFNGLXSWAPINTERVALSGIPROC __glewXSwapIntervalSGI;
 
-extern PFNGLXGETVIDEOSYNCSGIPROC __glewXGetVideoSyncSGI;
-extern PFNGLXWAITVIDEOSYNCSGIPROC __glewXWaitVideoSyncSGI;
+GLXEW_FUN_EXPORT PFNGLXGETVIDEOSYNCSGIPROC __glewXGetVideoSyncSGI;
+GLXEW_FUN_EXPORT PFNGLXWAITVIDEOSYNCSGIPROC __glewXWaitVideoSyncSGI;
 
 #if defined(GLEW_MX)
 struct GLXEWContextStruct
 {
 #endif /* GLEW_MX */
 
-GLXEW_EXPORT GLboolean __GLXEW_VERSION_1_0;
-GLXEW_EXPORT GLboolean __GLXEW_VERSION_1_1;
-GLXEW_EXPORT GLboolean __GLXEW_VERSION_1_2;
-GLXEW_EXPORT GLboolean __GLXEW_VERSION_1_3;
-GLXEW_EXPORT GLboolean __GLXEW_VERSION_1_4;
-GLXEW_EXPORT GLboolean __GLXEW_ARB_get_proc_address;
-GLXEW_EXPORT GLboolean __GLXEW_EXT_swap_control;
-GLXEW_EXPORT GLboolean __GLXEW_MESA_swap_control;
-GLXEW_EXPORT GLboolean __GLXEW_SGI_swap_control;
-GLXEW_EXPORT GLboolean __GLXEW_SGI_video_sync;
+GLXEW_VAR_EXPORT GLboolean __GLXEW_VERSION_1_0;
+GLXEW_VAR_EXPORT GLboolean __GLXEW_VERSION_1_1;
+GLXEW_VAR_EXPORT GLboolean __GLXEW_VERSION_1_2;
+GLXEW_VAR_EXPORT GLboolean __GLXEW_VERSION_1_3;
+GLXEW_VAR_EXPORT GLboolean __GLXEW_VERSION_1_4;
+GLXEW_VAR_EXPORT GLboolean __GLXEW_ARB_get_proc_address;
+GLXEW_VAR_EXPORT GLboolean __GLXEW_EXT_swap_control;
+GLXEW_VAR_EXPORT GLboolean __GLXEW_MESA_swap_control;
+GLXEW_VAR_EXPORT GLboolean __GLXEW_SGI_swap_control;
+GLXEW_VAR_EXPORT GLboolean __GLXEW_SGI_video_sync;
 
 #ifdef GLEW_MX
 }; /* GLXEWContextStruct */
@@ -467,8 +469,8 @@ GLXEW_EXPORT GLboolean __GLXEW_SGI_video_sync;
 #ifdef GLEW_MX
 
 typedef struct GLXEWContextStruct GLXEWContext;
-extern GLenum glxewContextInit (GLXEWContext* ctx);
-extern GLboolean glxewContextIsSupported (const GLXEWContext* ctx, const char* name);
+GLEWAPI GLenum GLEWAPIENTRY glxewContextInit (GLXEWContext *ctx);
+GLEWAPI GLboolean GLEWAPIENTRY glxewContextIsSupported (const GLXEWContext *ctx, const char *name);
 
 #define glxewInit() glxewContextInit(glxewGetContext())
 #define glxewIsSupported(x) glxewContextIsSupported(glxewGetContext(), x)
@@ -481,11 +483,11 @@ extern GLboolean glxewContextIsSupported (const GLXEWContext* ctx, const char* n
 #define GLXEW_GET_VAR(x) (*(const GLboolean*)&x)
 #define GLXEW_GET_FUN(x) x
 
-extern GLboolean glxewIsSupported (const char* name);
+GLEWAPI GLboolean GLEWAPIENTRY glxewIsSupported (const char *name);
 
 #endif /* GLEW_MX */
 
-extern GLboolean glxewGetExtension (const char* name);
+GLEWAPI GLboolean GLEWAPIENTRY glxewGetExtension (const char *name);
 
 #ifdef __cplusplus
 }

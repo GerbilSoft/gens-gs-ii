@@ -275,9 +275,11 @@ typedef BOOL (WINAPI * PFNWGLSWAPINTERVALEXTPROC) (int interval);
 /* ------------------------------------------------------------------------- */
 
 #ifdef GLEW_MX
-#define WGLEW_EXPORT
+#define WGLEW_FUN_EXPORT
+#define WGLEW_VAR_EXPORT
 #else
-#define WGLEW_EXPORT GLEWAPI
+#define WGLEW_FUN_EXPORT GLEW_FUN_EXPORT
+#define WGLEW_VAR_EXPORT GLEW_VAR_EXPORT
 #endif /* GLEW_MX */
 
 #ifdef GLEW_MX
@@ -285,30 +287,30 @@ struct WGLEWContextStruct
 {
 #endif /* GLEW_MX */
 
-WGLEW_EXPORT PFNWGLGETEXTENSIONSSTRINGARBPROC __wglewGetExtensionsStringARB;
+WGLEW_FUN_EXPORT PFNWGLGETEXTENSIONSSTRINGARBPROC __wglewGetExtensionsStringARB;
 
-WGLEW_EXPORT PFNWGLCREATEPBUFFERARBPROC __wglewCreatePbufferARB;
-WGLEW_EXPORT PFNWGLDESTROYPBUFFERARBPROC __wglewDestroyPbufferARB;
-WGLEW_EXPORT PFNWGLGETPBUFFERDCARBPROC __wglewGetPbufferDCARB;
-WGLEW_EXPORT PFNWGLQUERYPBUFFERARBPROC __wglewQueryPbufferARB;
-WGLEW_EXPORT PFNWGLRELEASEPBUFFERDCARBPROC __wglewReleasePbufferDCARB;
+WGLEW_FUN_EXPORT PFNWGLCREATEPBUFFERARBPROC __wglewCreatePbufferARB;
+WGLEW_FUN_EXPORT PFNWGLDESTROYPBUFFERARBPROC __wglewDestroyPbufferARB;
+WGLEW_FUN_EXPORT PFNWGLGETPBUFFERDCARBPROC __wglewGetPbufferDCARB;
+WGLEW_FUN_EXPORT PFNWGLQUERYPBUFFERARBPROC __wglewQueryPbufferARB;
+WGLEW_FUN_EXPORT PFNWGLRELEASEPBUFFERDCARBPROC __wglewReleasePbufferDCARB;
 
-WGLEW_EXPORT PFNWGLCHOOSEPIXELFORMATARBPROC __wglewChoosePixelFormatARB;
-WGLEW_EXPORT PFNWGLGETPIXELFORMATATTRIBFVARBPROC __wglewGetPixelFormatAttribfvARB;
-WGLEW_EXPORT PFNWGLGETPIXELFORMATATTRIBIVARBPROC __wglewGetPixelFormatAttribivARB;
+WGLEW_FUN_EXPORT PFNWGLCHOOSEPIXELFORMATARBPROC __wglewChoosePixelFormatARB;
+WGLEW_FUN_EXPORT PFNWGLGETPIXELFORMATATTRIBFVARBPROC __wglewGetPixelFormatAttribfvARB;
+WGLEW_FUN_EXPORT PFNWGLGETPIXELFORMATATTRIBIVARBPROC __wglewGetPixelFormatAttribivARB;
 
-WGLEW_EXPORT PFNWGLGETEXTENSIONSSTRINGEXTPROC __wglewGetExtensionsStringEXT;
+WGLEW_FUN_EXPORT PFNWGLGETEXTENSIONSSTRINGEXTPROC __wglewGetExtensionsStringEXT;
 
-WGLEW_EXPORT PFNWGLGETSWAPINTERVALEXTPROC __wglewGetSwapIntervalEXT;
-WGLEW_EXPORT PFNWGLSWAPINTERVALEXTPROC __wglewSwapIntervalEXT;
-WGLEW_EXPORT GLboolean __WGLEW_ARB_extensions_string;
-WGLEW_EXPORT GLboolean __WGLEW_ARB_multisample;
-WGLEW_EXPORT GLboolean __WGLEW_ARB_pbuffer;
-WGLEW_EXPORT GLboolean __WGLEW_ARB_pixel_format;
-WGLEW_EXPORT GLboolean __WGLEW_ATI_pixel_format_float;
-WGLEW_EXPORT GLboolean __WGLEW_EXT_extensions_string;
-WGLEW_EXPORT GLboolean __WGLEW_EXT_swap_control;
-WGLEW_EXPORT GLboolean __WGLEW_NV_float_buffer;
+WGLEW_FUN_EXPORT PFNWGLGETSWAPINTERVALEXTPROC __wglewGetSwapIntervalEXT;
+WGLEW_FUN_EXPORT PFNWGLSWAPINTERVALEXTPROC __wglewSwapIntervalEXT;
+WGLEW_VAR_EXPORT GLboolean __WGLEW_ARB_extensions_string;
+WGLEW_VAR_EXPORT GLboolean __WGLEW_ARB_multisample;
+WGLEW_VAR_EXPORT GLboolean __WGLEW_ARB_pbuffer;
+WGLEW_VAR_EXPORT GLboolean __WGLEW_ARB_pixel_format;
+WGLEW_VAR_EXPORT GLboolean __WGLEW_ATI_pixel_format_float;
+WGLEW_VAR_EXPORT GLboolean __WGLEW_EXT_extensions_string;
+WGLEW_VAR_EXPORT GLboolean __WGLEW_EXT_swap_control;
+WGLEW_VAR_EXPORT GLboolean __WGLEW_NV_float_buffer;
 
 #ifdef GLEW_MX
 }; /* WGLEWContextStruct */
@@ -319,8 +321,8 @@ WGLEW_EXPORT GLboolean __WGLEW_NV_float_buffer;
 #ifdef GLEW_MX
 
 typedef struct WGLEWContextStruct WGLEWContext;
-GLEWAPI GLenum wglewContextInit (WGLEWContext* ctx);
-GLEWAPI GLboolean wglewContextIsSupported (const WGLEWContext* ctx, const char* name);
+GLEWAPI GLenum GLEWAPIENTRY wglewContextInit (WGLEWContext *ctx);
+GLEWAPI GLboolean GLEWAPIENTRY wglewContextIsSupported (const WGLEWContext *ctx, const char *name);
 
 #define wglewInit() wglewContextInit(wglewGetContext())
 #define wglewIsSupported(x) wglewContextIsSupported(wglewGetContext(), x)
@@ -333,11 +335,11 @@ GLEWAPI GLboolean wglewContextIsSupported (const WGLEWContext* ctx, const char* 
 #define WGLEW_GET_VAR(x) (*(const GLboolean*)&x)
 #define WGLEW_GET_FUN(x) x
 
-GLEWAPI GLboolean wglewIsSupported (const char* name);
+GLEWAPI GLboolean GLEWAPIENTRY wglewIsSupported (const char *name);
 
 #endif /* GLEW_MX */
 
-GLEWAPI GLboolean wglewGetExtension (const char* name);
+GLEWAPI GLboolean GLEWAPIENTRY wglewGetExtension (const char *name);
 
 #ifdef __cplusplus
 }
