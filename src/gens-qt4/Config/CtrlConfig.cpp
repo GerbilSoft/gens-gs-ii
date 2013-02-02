@@ -25,6 +25,7 @@
 
 // Controller I/O manager.
 #include "libgens/IoManager.hpp"
+using LibGens::IoManager;
 
 // Qt includes.
 #include <QtCore/QString>
@@ -47,14 +48,14 @@ class CtrlConfigPrivate
 		void clearDirty(void);
 
 		// Controller types.
-		LibGens::IoManager::IoType_t ctrlTypes[LibGens::IoManager::VIRTPORT_MAX];
+		IoManager::IoType_t ctrlTypes[IoManager::VIRTPORT_MAX];
 
 		// Key configuration.
 		// TODO: Use next-highest power-of-two?
-		GensKey_t ctrlKeys[LibGens::IoManager::VIRTPORT_MAX][LibGens::IoManager::BTNI_MAX];
+		GensKey_t ctrlKeys[IoManager::VIRTPORT_MAX][IoManager::BTNI_MAX];
 
 		// Get an internal port name. (non-localized)
-		static QString PortName(LibGens::IoManager::VirtPort_t virtPort);
+		static QString PortName(IoManager::VirtPort_t virtPort);
 
 		// Load/Save functions.
 		int load(const QSettings *qSettings);
@@ -71,8 +72,8 @@ class CtrlConfigPrivate
 		static const char chrKeyValSep = ':';
 
 		// Default controller configuration.
-		static const LibGens::IoManager::IoType_t Def_CtrlTypes[LibGens::IoManager::VIRTPORT_MAX];
-		static const GensKey_t Def_CtrlKeys[LibGens::IoManager::VIRTPORT_MAX][LibGens::IoManager::BTNI_MAX];
+		static const IoManager::IoType_t Def_CtrlTypes[IoManager::VIRTPORT_MAX];
+		static const GensKey_t Def_CtrlKeys[IoManager::VIRTPORT_MAX][IoManager::BTNI_MAX];
 };
 
 /********************************
@@ -80,32 +81,32 @@ class CtrlConfigPrivate
  ********************************/
 
 // Default controller configuration.
-const LibGens::IoManager::IoType_t CtrlConfigPrivate::Def_CtrlTypes[LibGens::IoManager::VIRTPORT_MAX] =
+const IoManager::IoType_t CtrlConfigPrivate::Def_CtrlTypes[IoManager::VIRTPORT_MAX] =
 {
 	// System controller ports.
-	LibGens::IoManager::IOT_6BTN,	// Port 1
-	LibGens::IoManager::IOT_3BTN,	// Port 2
+	IoManager::IOT_6BTN,	// Port 1
+	IoManager::IOT_3BTN,	// Port 2
 	
 	// Team Player, Port 1.
-	LibGens::IoManager::IOT_NONE,	// Port TP1A
-	LibGens::IoManager::IOT_NONE,	// Port TP1B
-	LibGens::IoManager::IOT_NONE,	// Port TP1C
-	LibGens::IoManager::IOT_NONE,	// Port TP1D
+	IoManager::IOT_NONE,	// Port TP1A
+	IoManager::IOT_NONE,	// Port TP1B
+	IoManager::IOT_NONE,	// Port TP1C
+	IoManager::IOT_NONE,	// Port TP1D
 	
 	// Team Player, Port 2.
-	LibGens::IoManager::IOT_NONE,	// Port TP2A
-	LibGens::IoManager::IOT_NONE,	// Port TP2B
-	LibGens::IoManager::IOT_NONE,	// Port TP2C
-	LibGens::IoManager::IOT_NONE,	// Port TP2D
+	IoManager::IOT_NONE,	// Port TP2A
+	IoManager::IOT_NONE,	// Port TP2B
+	IoManager::IOT_NONE,	// Port TP2C
+	IoManager::IOT_NONE,	// Port TP2D
 	
 	// 4-Way Play.
-	LibGens::IoManager::IOT_NONE,	// Port 4WPA
-	LibGens::IoManager::IOT_NONE,	// Port 4WPB
-	LibGens::IoManager::IOT_NONE,	// Port 4WPC
-	LibGens::IoManager::IOT_NONE,	// Port 4WPD
+	IoManager::IOT_NONE,	// Port 4WPA
+	IoManager::IOT_NONE,	// Port 4WPB
+	IoManager::IOT_NONE,	// Port 4WPC
+	IoManager::IOT_NONE,	// Port 4WPD
 };
 
-const GensKey_t CtrlConfigPrivate::Def_CtrlKeys[LibGens::IoManager::VIRTPORT_MAX][LibGens::IoManager::BTNI_MAX] =
+const GensKey_t CtrlConfigPrivate::Def_CtrlKeys[IoManager::VIRTPORT_MAX][IoManager::BTNI_MAX] =
 {
 	// Port 1
 	// NOTE: Both shift keys are mapped to LSHIFT on Mac OS X.
@@ -176,35 +177,35 @@ inline void CtrlConfigPrivate::clearDirty(void)
  * @param port Port number.
  * @return Port name, or empty string on error.
  */
-QString CtrlConfigPrivate::PortName(LibGens::IoManager::VirtPort_t virtPort)
+QString CtrlConfigPrivate::PortName(IoManager::VirtPort_t virtPort)
 {
 	switch (virtPort) {
 		// System controller ports.
-		case LibGens::IoManager::VIRTPORT_1:		return QLatin1String("port1");
-		case LibGens::IoManager::VIRTPORT_2:		return QLatin1String("port2");
-		case LibGens::IoManager::VIRTPORT_EXT:	return QLatin1String("portEXT");
+		case IoManager::VIRTPORT_1:		return QLatin1String("port1");
+		case IoManager::VIRTPORT_2:		return QLatin1String("port2");
+		case IoManager::VIRTPORT_EXT:	return QLatin1String("portEXT");
 
 		// Team Player, Port 1.
-		case LibGens::IoManager::VIRTPORT_TP1A:	return QLatin1String("portTP1A");
-		case LibGens::IoManager::VIRTPORT_TP1B:	return QLatin1String("portTP1B");
-		case LibGens::IoManager::VIRTPORT_TP1C:	return QLatin1String("portTP1C");
-		case LibGens::IoManager::VIRTPORT_TP1D:	return QLatin1String("portTP1D");
+		case IoManager::VIRTPORT_TP1A:	return QLatin1String("portTP1A");
+		case IoManager::VIRTPORT_TP1B:	return QLatin1String("portTP1B");
+		case IoManager::VIRTPORT_TP1C:	return QLatin1String("portTP1C");
+		case IoManager::VIRTPORT_TP1D:	return QLatin1String("portTP1D");
 
 		// Team Player, Port 2.
-		case LibGens::IoManager::VIRTPORT_TP2A:	return QLatin1String("portTP2A");
-		case LibGens::IoManager::VIRTPORT_TP2B:	return QLatin1String("portTP2B");
-		case LibGens::IoManager::VIRTPORT_TP2C:	return QLatin1String("portTP2C");
-		case LibGens::IoManager::VIRTPORT_TP2D:	return QLatin1String("portTP2D");
+		case IoManager::VIRTPORT_TP2A:	return QLatin1String("portTP2A");
+		case IoManager::VIRTPORT_TP2B:	return QLatin1String("portTP2B");
+		case IoManager::VIRTPORT_TP2C:	return QLatin1String("portTP2C");
+		case IoManager::VIRTPORT_TP2D:	return QLatin1String("portTP2D");
 
 		// 4-Way Play.
-		case LibGens::IoManager::VIRTPORT_4WPA:	return QLatin1String("port4WPA");
-		case LibGens::IoManager::VIRTPORT_4WPB:	return QLatin1String("port4WPB");
-		case LibGens::IoManager::VIRTPORT_4WPC:	return QLatin1String("port4WPC");
-		case LibGens::IoManager::VIRTPORT_4WPD:	return QLatin1String("port4WPD");
+		case IoManager::VIRTPORT_4WPA:	return QLatin1String("port4WPA");
+		case IoManager::VIRTPORT_4WPB:	return QLatin1String("port4WPB");
+		case IoManager::VIRTPORT_4WPC:	return QLatin1String("port4WPC");
+		case IoManager::VIRTPORT_4WPD:	return QLatin1String("port4WPD");
 
 		// J_Cart
-		case LibGens::IoManager::VIRTPORT_JCART1:	return QLatin1String("portJCart1");
-		case LibGens::IoManager::VIRTPORT_JCART2:	return QLatin1String("portJCart2");
+		case IoManager::VIRTPORT_JCART1:	return QLatin1String("portJCart1");
+		case IoManager::VIRTPORT_JCART2:	return QLatin1String("portJCart2");
 
 		default:
 			// Unknown port.
@@ -224,23 +225,23 @@ QString CtrlConfigPrivate::PortName(LibGens::IoManager::VirtPort_t virtPort)
  */
 int CtrlConfigPrivate::load(const QSettings *qSettings)
 {
-	for (int virtPort = LibGens::IoManager::VIRTPORT_1;
-	     virtPort < LibGens::IoManager::VIRTPORT_MAX; virtPort++) {
+	for (int virtPort = IoManager::VIRTPORT_1;
+	     virtPort < IoManager::VIRTPORT_MAX; virtPort++) {
 		// Get the controller type.
 		// TODO: Allow ASCII controller types?
-		const QString portName = PortName((LibGens::IoManager::VirtPort_t)virtPort);
-		LibGens::IoManager::IoType_t ioType_tmp =
-				(LibGens::IoManager::IoType_t)
+		const QString portName = PortName((IoManager::VirtPort_t)virtPort);
+		IoManager::IoType_t ioType_tmp =
+				(IoManager::IoType_t)
 				(qSettings->value(portName + QLatin1String("/type"), -1).toInt());
-		if (ioType_tmp < LibGens::IoManager::IOT_NONE ||
-		    ioType_tmp >= LibGens::IoManager::IOT_MAX) {
+		if (ioType_tmp < IoManager::IOT_NONE ||
+		    ioType_tmp >= IoManager::IOT_MAX) {
 			// No controller information.
 			// Use the default.
 			ctrlTypes[virtPort] = Def_CtrlTypes[virtPort];
 			memcpy(ctrlKeys[virtPort], Def_CtrlKeys[virtPort], sizeof(ctrlKeys[virtPort]));
 		} else {
 			// Controller information specified.
-			ctrlTypes[virtPort] = (LibGens::IoManager::IoType_t)ioType_tmp;
+			ctrlTypes[virtPort] = (IoManager::IoType_t)ioType_tmp;
 
 			// Clear the controller keys.
 			memset(ctrlKeys[virtPort], 0x00, sizeof(ctrlKeys[virtPort]));
@@ -250,7 +251,7 @@ int CtrlConfigPrivate::load(const QSettings *qSettings)
 				qSettings->value(portName + QLatin1String("/keys"),
 				QString()).toString().split(QChar((uint16_t)chrKeyValSep));
 
-			int numButtons = LibGens::IoManager::NumDevButtons(ctrlTypes[virtPort]);
+			int numButtons = IoManager::NumDevButtons(ctrlTypes[virtPort]);
 			if (numButtons > keyData.size())
 				numButtons = keyData.size();
 
@@ -274,17 +275,17 @@ int CtrlConfigPrivate::load(const QSettings *qSettings)
  */
 int CtrlConfigPrivate::save(QSettings *qSettings)
 {
-	for (int virtPort = LibGens::IoManager::VIRTPORT_1;
-	     virtPort < LibGens::IoManager::VIRTPORT_MAX; virtPort++) {
+	for (int virtPort = IoManager::VIRTPORT_1;
+	     virtPort < IoManager::VIRTPORT_MAX; virtPort++) {
 		// Save the controller type.
 		// TODO: Allow ASCII controller types?
-		const QString portName = PortName((LibGens::IoManager::VirtPort_t)virtPort);
+		const QString portName = PortName((IoManager::VirtPort_t)virtPort);
 		qSettings->setValue(portName + QLatin1String("/type"), (int)ctrlTypes[virtPort]);
 
 		// Save the controller keys.
 		// TODO: Save all keys, even those not being used by the current type.
 		// Trim all 0 buttons from the keys afterwards.
-		int numButtons = LibGens::IoManager::NumDevButtons(ctrlTypes[virtPort]);
+		int numButtons = IoManager::NumDevButtons(ctrlTypes[virtPort]);
 		if (numButtons > NUM_ELEMENTS(ctrlKeys[virtPort]))
 			numButtons = NUM_ELEMENTS(ctrlKeys[virtPort]);
 
@@ -375,12 +376,12 @@ int CtrlConfig::save(QSettings *qSettings)
  * @param ioManager I/O manager class.
  * @param virtPort Virtual port number.
  */
-void CtrlConfig::updateIoManager(LibGens::IoManager *ioManager) const
+void CtrlConfig::updateIoManager(IoManager *ioManager) const
 {
 	for (int virtPort = 0; virtPort < NUM_ELEMENTS(d->ctrlKeys); virtPort++) {
 		// Set the device type.
 		ioManager->setDevType(
-				(LibGens::IoManager::VirtPort_t)virtPort, 
+				(IoManager::VirtPort_t)virtPort, 
 				d->ctrlTypes[virtPort]);
 
 		// Set the new keymaps.
@@ -391,3 +392,4 @@ void CtrlConfig::updateIoManager(LibGens::IoManager *ioManager) const
 }
 
 }
+
