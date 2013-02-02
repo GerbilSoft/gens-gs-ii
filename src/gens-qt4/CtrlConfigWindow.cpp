@@ -524,7 +524,7 @@ void CtrlConfigWindow::updatePortButton(IoManager::VirtPort_t virtPort)
 				QLatin1String(": ") +
 				d->getLongDeviceName(ioType));
 
-	// Disable the EXT port for now.
+	// Hide the EXT port for now.
 	actionPortEXT->setVisible(false);
 
 	if (virtPort == IoManager::VIRTPORT_1) {
