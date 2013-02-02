@@ -37,6 +37,7 @@ IF(OPENGL_LIBRARIES)
 			# Always use the internal copy of GLEW.
 			SET(HAVE_GLEW 1)
 			SET(GLEW_LIBRARY glew)
+			SET(GLEW_COMPILE_DEFINITIONS GLEW_STATIC)
 			SET(GLEW_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extlib/glew/include/")
 			SET(USE_INTERNAL_GLEW 1)
 			MESSAGE(STATUS "Using internal GLEW library.")
