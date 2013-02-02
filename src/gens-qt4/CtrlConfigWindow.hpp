@@ -37,7 +37,7 @@
 class QActionGroup;
 
 // LibGens includes.
-#include "libgens/IO/IoBase.hpp"
+#include "libgens/IoManager.hpp"
 
 // Toolbar separators.
 #define CTRL_CFG_TBSEP_TP1 0
@@ -48,6 +48,8 @@ class QActionGroup;
 namespace GensQt4
 {
 
+class CtrlConfigWindowPrivate;
+
 class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 {
 	Q_OBJECT
@@ -55,69 +57,40 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 	public:
 		static void ShowSingle(QWidget *parent = NULL);
 	
+	private:
+		friend class CtrlConfigWindowPrivate;
+		CtrlConfigWindowPrivate *d;
+		Q_DISABLE_COPY(CtrlConfigWindow)
+
 	protected:
 		CtrlConfigWindow(QWidget *parent = NULL);
 		virtual ~CtrlConfigWindow();
-		
+
 		void keyPressEvent(QKeyEvent *event);
-		
+
 		// State change event. (Used for switching the UI language at runtime.)
 		void changeEvent(QEvent *event);
-		
-		// Internal controller settings.
-		LibGens::IoBase::IoType m_devType[CtrlConfig::PORT_MAX];
-		
-		QActionGroup *m_actgrpSelPort;
-		
-		// Dropdown device lock.
-		// Used when rebuilding cboDevice.
-		int cboDevice_lock(void);
-		int cboDevice_unlock(void);
-		bool isCboDeviceLocked(void) const;
-	
+
 	protected slots:
 		void accept(void);
 		void reject(void);
-		
+
 		void reload(void);
 		void apply(void);
-		
+
 		/** Widget slots. **/
-		void toolbarPortSelected(int i);
+		void toolbarPortSelected(int virtPort);
 		void on_cboDevice_currentIndexChanged(int index);
 	
 	private:
-		static CtrlConfigWindow *m_CtrlConfigWindow;
-		
-		// Controller data.
-		static const char *const ms_CtrlIconFilenames[LibGens::IoBase::IOT_MAX];
-		static QString GetShortDeviceName(LibGens::IoBase::IoType devType);
-		static QString GetLongDeviceName(LibGens::IoBase::IoType devType);
-		static QString GetPortName(int port);
-		static QIcon GetCtrlIcon(LibGens::IoBase::IoType ioType);
-		
-		// Selected port.
-		int m_selPort;
-		QSignalMapper *m_mapperSelPort;
-		
-		// Toolbar separators.
-		QVector<QAction*> m_vecTbSep;
-		
 		// Update port information.
-		void updatePortButton(int port);
-		void updatePortSettings(int port);
-		
-		// Select a port.
-		void selectPort(int port);
-		void cboDevice_setTP(bool isTP);
-		
-		// Dropdown device lock.
-		// Used when rebuilding cboDevice.
-		int m_cboDeviceLockCnt;
-};
+		void updatePortButton(LibGens::IoManager::VirtPort_t virtPort);
+		void updatePortSettings(LibGens::IoManager::VirtPort_t virtPort);
 
-inline bool CtrlConfigWindow::isCboDeviceLocked(void) const
-	{ return (m_cboDeviceLockCnt > 0); }
+		// Select a port.
+		void selectPort(LibGens::IoManager::VirtPort_t virtPort);
+		void cboDevice_setTP(bool isTP);
+};
 
 }
 

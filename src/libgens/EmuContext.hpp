@@ -24,9 +24,8 @@
 #ifndef __LIBGENS_EMUCONTEXT_HPP__
 #define __LIBGENS_EMUCONTEXT_HPP__
 
-// Controllers.
-// TODO: Figure out a better place to put these!
-#include "IO/IoBase.hpp"
+// Controller I/O manager.
+#include "IoManager.hpp"
 
 // ROM image class.
 #include "Rom.hpp"
@@ -126,12 +125,9 @@ class EmuContext
 		// Accessors.
 		inline bool isRomOpened(void) { return (m_rom != NULL); }
 		
-		// Controllers.
-		// TODO: Figure out a better place to put these!
-		// TODO: Make these non-static!
-		static IoBase *m_port1;		// Player 1.
-		static IoBase *m_port2;		// Player 2.
-		static IoBase *m_portE;		// EXT port.
+		// Controller I/O manager.
+		// TODO: Make this non-static!
+		static IoManager *m_ioManager;
 		
 		// SRam / EEPRom access.
 		// TODO: Providing pointers like this is bad...

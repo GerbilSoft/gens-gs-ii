@@ -4,7 +4,7 @@
  *                                                                            *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                         *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                                *
- * Copyright (c) 2008-2011 by David Korth.                                    *
+ * Copyright (c) 2008-2012 by David Korth.                                    *
  *                                                                            *
  * This program is free software; you can redistribute it and/or modify       *
  * it under the terms of the GNU General Public License as published by       *
@@ -109,7 +109,7 @@ int Init(void)
 	fprintf(stderr, "\n"
 		"Copyright (c) 1999-2002 by Stéphane Dallongeville.\n"
 		"Copyright (c) 2003-2004 by Stéphane Akhoun.\n"
-		"Copyright (c) 2008-2011 by David Korth.\n"
+		"Copyright (c) 2008-2012 by David Korth.\n"
 		"\n");
 	
 	// GNU GPLv2 notice.

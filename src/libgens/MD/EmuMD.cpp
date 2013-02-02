@@ -33,8 +33,8 @@
 // Byteswapping macros and functions.
 #include "Util/byteswap.h"
 
-// I/O devices.
-#include "IO/IoBase.hpp"
+// Device Manager.
+#include "GensInput/DevManager.hpp"
 
 // Sound Manager.
 #include "sound/SoundMgr.hpp"
@@ -105,16 +105,14 @@ EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
 	// TODO: Move Vdp::SysStatus to EmuContext.
 	m_vdp->SysStatus.data = 0;
 	m_vdp->SysStatus.Genesis = 1;
-	
-	// Reset the controller ports.
-	m_port1->reset();
-	m_port2->reset();
-	m_portE->reset();
-	
+
+	// Reset the controllers.
+	m_ioManager->reset();
+
 	// Set the system version settings.
 	m_sysVersion.setDisk(false);	// No MCD connected.
 	setRegion_int(region, false);	// Initialize region code.
-	
+
 	// Finished initializing.
 	return;
 }
@@ -162,10 +160,8 @@ int EmuMD::softReset(void)
 int EmuMD::hardReset(void)
 {
 	// Reset the controllers.
-	m_port1->reset();
-	m_port2->reset();
-	m_portE->reset();
-	
+	m_ioManager->reset();
+
 	// ROM checksum:
 	// - If autofix is enabled, fix the checksum.
 	// - If autofix is disabled, restore the checksum.
@@ -282,12 +278,10 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 	SoundMgr::ms_Ym2612.updateDacAndTimers(bufL, bufR, writeLen);
 	SoundMgr::ms_Ym2612.addWriteLen(writeLen);
 	SoundMgr::ms_Psg.addWriteLen(writeLen);
-	
+
 	// Notify controllers that a new scanline is being drawn.
-	m_port1->doScanline();
-	m_port2->doScanline();
-	m_portE->doScanline();
-	
+	m_ioManager->doScanline();
+
 	// Increment the cycles counter.
 	// These values are the "last cycle to execute".
 	// e.g. if Cycles_M68K is 5000, then we'll execute instructions
@@ -390,17 +384,15 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 	
 	// Check if VBlank is allowed.
 	m_vdp->Check_NTSC_V30_VBlank();
-	
+
 	// Update I/O devices.
 	// TODO: Determine the best place for the I/O devices to be updated:
 	// - Beginning of frame.
 	// - Before VBlank.
 	// - End of frame.
 	DevManager::Update();	// Update the Device Manager first.
-	m_port1->update();
-	m_port2->update();
-	m_portE->update();
-	
+	m_ioManager->update();
+
 	// Reset the sound chip buffer pointers and write length.
 	SoundMgr::ResetPtrsAndLens();
 	

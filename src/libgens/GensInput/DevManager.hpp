@@ -72,7 +72,7 @@ class DevManager
 		
 		/**
 		 * IsKeyPressed(): Check if a key is pressed.
-		 * This should ONLY be called from IoBase functions from within LibGens!
+		 * This should ONLY be called from IoManager functions from within LibGens!
 		 * @param key Gens keycode.
 		 * @return True if the key is pressed; false if it isn't.
 		 */
@@ -118,7 +118,7 @@ inline void DevManager::Update(void)
 
 /**
  * IsKeyPressed(): Check if a key is pressed.
- * This should ONLY be called from IoBase functions from within LibGens!
+ * This should ONLY be called from IoManager functions from within LibGens!
  * @param key Gens keycode.
  * @return True if the key is pressed; false if it isn't.
  */

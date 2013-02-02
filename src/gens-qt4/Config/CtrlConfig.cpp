@@ -23,12 +23,12 @@
 
 #include "CtrlConfig.hpp"
 
-// I/O devices.
-#include "libgens/IO/IoBase.hpp"
-#include "libgens/IO/Io3Button.hpp"
-#include "libgens/IO/Io6Button.hpp"
-#include "libgens/IO/Io2Button.hpp"
-#include "libgens/IO/IoMegaMouse.hpp"
+// C includes. (C++ namespace)
+#include <cassert>
+
+// Controller I/O manager.
+#include "libgens/IoManager.hpp"
+using LibGens::IoManager;
 
 // Qt includes.
 #include <QtCore/QString>
@@ -36,86 +36,83 @@
 #include <QtCore/QSettings>
 #include <QtCore/QStringList>
 
+// NUM_ELEMENTS()
+#include "libgens/macros/common.h"
+
 namespace GensQt4
 {
-
-/** Static CtrlConfig members. **/
-const int CtrlConfig::MAX_BTNS;		// initialized in CtrlConfig.hpp
 
 class CtrlConfigPrivate
 {
 	public:
 		CtrlConfigPrivate(CtrlConfig *q);
-		
+		CtrlConfigPrivate(CtrlConfig *q, const CtrlConfigPrivate *src);
+		void copyFrom(const CtrlConfigPrivate *src);
+
 		// Dirty flag.
 		bool isDirty(void) const;
 		void clearDirty(void);
-		
+
 		// Controller types.
-		LibGens::IoBase::IoType ctrlTypes[CtrlConfig::PORT_MAX];
-		
+		IoManager::IoType_t ctrlTypes[IoManager::VIRTPORT_MAX];
+
 		// Key configuration.
-		GensKey_t ctrlKeys[CtrlConfig::PORT_MAX][CtrlConfig::MAX_BTNS];
-		
-		// Get the number of buttons for a given controller type.
-		static int NumButtons(LibGens::IoBase::IoType ioType);
-		
+		// TODO: Use next-highest power-of-two?
+		GensKey_t ctrlKeys[IoManager::VIRTPORT_MAX][IoManager::BTNI_MAX];
+
 		// Get an internal port name. (non-localized)
-		static QString PortName(CtrlConfig::CtrlPort_t port);
-		
+		static QString PortName(IoManager::VirtPort_t virtPort);
+
 		// Load/Save functions.
 		int load(const QSettings *qSettings);
 		int save(QSettings *qSettings);
-	
+
 	private:
 		CtrlConfig *const q;
 		Q_DISABLE_COPY(CtrlConfigPrivate)
-		
+
 		// Dirty flag.
 		bool m_dirty;
-		
+
 		// Key value separator in the config file.
-		static const QChar chrKeyValSep;
-		
+		static const char chrKeyValSep = ':';
+
 		// Default controller configuration.
-		static const LibGens::IoBase::IoType Def_CtrlTypes[CtrlConfig::PORT_MAX];
-		static const GensKey_t Def_CtrlKeys[CtrlConfig::PORT_MAX][CtrlConfig::MAX_BTNS];
+		static const IoManager::IoType_t Def_CtrlTypes[IoManager::VIRTPORT_MAX];
+		static const GensKey_t Def_CtrlKeys[IoManager::VIRTPORT_MAX][IoManager::BTNI_MAX];
 };
 
 /********************************
  * CtrlConfigPrivate functions. *
  ********************************/
 
-// Key value separator in the config file.
-const QChar CtrlConfigPrivate::chrKeyValSep = QChar(L':');
-
 // Default controller configuration.
-const LibGens::IoBase::IoType CtrlConfigPrivate::Def_CtrlTypes[CtrlConfig::PORT_MAX] =
+const IoManager::IoType_t CtrlConfigPrivate::Def_CtrlTypes[IoManager::VIRTPORT_MAX] =
 {
 	// System controller ports.
-	LibGens::IoBase::IOT_6BTN,	// Port 1
-	LibGens::IoBase::IOT_3BTN,	// Port 2
+	IoManager::IOT_6BTN,	// Port 1
+	IoManager::IOT_3BTN,	// Port 2
 	
 	// Team Player, Port 1.
-	LibGens::IoBase::IOT_NONE,	// Port TP1A
-	LibGens::IoBase::IOT_NONE,	// Port TP1B
-	LibGens::IoBase::IOT_NONE,	// Port TP1C
-	LibGens::IoBase::IOT_NONE,	// Port TP1D
+	IoManager::IOT_NONE,	// Port TP1A
+	IoManager::IOT_NONE,	// Port TP1B
+	IoManager::IOT_NONE,	// Port TP1C
+	IoManager::IOT_NONE,	// Port TP1D
 	
 	// Team Player, Port 2.
-	LibGens::IoBase::IOT_NONE,	// Port TP2A
-	LibGens::IoBase::IOT_NONE,	// Port TP2B
-	LibGens::IoBase::IOT_NONE,	// Port TP2C
-	LibGens::IoBase::IOT_NONE,	// Port TP2D
+	IoManager::IOT_NONE,	// Port TP2A
+	IoManager::IOT_NONE,	// Port TP2B
+	IoManager::IOT_NONE,	// Port TP2C
+	IoManager::IOT_NONE,	// Port TP2D
 	
 	// 4-Way Play.
-	LibGens::IoBase::IOT_NONE,	// Port 4WPA
-	LibGens::IoBase::IOT_NONE,	// Port 4WPB
-	LibGens::IoBase::IOT_NONE,	// Port 4WPC
-	LibGens::IoBase::IOT_NONE,	// Port 4WPD
+	IoManager::IOT_NONE,	// Port 4WPA
+	IoManager::IOT_NONE,	// Port 4WPB
+	IoManager::IOT_NONE,	// Port 4WPC
+	IoManager::IOT_NONE,	// Port 4WPD
 };
 
-const GensKey_t CtrlConfigPrivate::Def_CtrlKeys[CtrlConfig::PORT_MAX][CtrlConfig::MAX_BTNS] =
+const GensKey_t CtrlConfigPrivate::Def_CtrlKeys[IoManager::VIRTPORT_MAX][IoManager::BTNI_MAX] =
 {
 	// Port 1
 	// NOTE: Both shift keys are mapped to LSHIFT on Mac OS X.
@@ -156,7 +153,7 @@ const GensKey_t CtrlConfigPrivate::Def_CtrlKeys[CtrlConfig::PORT_MAX][CtrlConfig
 };
 
 
-CtrlConfigPrivate::CtrlConfigPrivate(CtrlConfig* q)
+CtrlConfigPrivate::CtrlConfigPrivate(CtrlConfig *q)
 	: q(q)
 	, m_dirty(true)
 {
@@ -166,87 +163,80 @@ CtrlConfigPrivate::CtrlConfigPrivate(CtrlConfig* q)
 	memset(ctrlKeys, 0x00, sizeof(ctrlKeys));
 }
 
+CtrlConfigPrivate::CtrlConfigPrivate(CtrlConfig *q, const CtrlConfigPrivate *src)
+	: q(q)
+{
+	// Copy from another CtrlConfigPrivate.
+	copyFrom(src);
+}
 
 /**
- * CtrlConfigPrivate::isDirty(): Check if the controller configuration is dirty.
+ * Copy from another CtrlConfigPrivate to this CtrlConfigPrivate.
+ * NOTE: Does not copy 'q'.
+ * @param src Other CtrlConfigPrivate to copy from.
+ */
+void CtrlConfigPrivate::copyFrom(const CtrlConfigPrivate *src)
+{
+	m_dirty = src->m_dirty;
+	memcpy(ctrlTypes, src->ctrlTypes, sizeof(ctrlTypes));
+	memcpy(ctrlKeys, src->ctrlKeys, sizeof(ctrlKeys));
+}
+
+
+/**
+ * Check if the controller configuration is dirty.
  * @return True if the controller configuration is dirty; false otherwise.
  */
 inline bool CtrlConfigPrivate::isDirty(void) const
 	{ return m_dirty; }
 
 /**
- * CtrlConfigPrivate::clearDirty(): Clear the dirty flag.
+ * Clear the dirty flag.
  */
 inline void CtrlConfigPrivate::clearDirty(void)
 	{ m_dirty = false; }
 
 
 /**
- * NumButtons(): Get the number of buttons for a given controller type.
- * @param ioType I/O type.
- * @return Number of buttons, or 0 if none or error. (TODO: -1 for error?)
- * TODO: Make this a CtrlConfig function?
- */
-int CtrlConfigPrivate::NumButtons(LibGens::IoBase::IoType ioType)
-{
-	switch (ioType)
-	{
-		default:
-		case LibGens::IoBase::IOT_NONE:		return LibGens::IoBase::NumButtons();
-		case LibGens::IoBase::IOT_3BTN:		return LibGens::Io3Button::NumButtons();
-		case LibGens::IoBase::IOT_6BTN:		return LibGens::Io6Button::NumButtons();
-		case LibGens::IoBase::IOT_2BTN:		return LibGens::Io2Button::NumButtons();
-		case LibGens::IoBase::IOT_MEGA_MOUSE:	return LibGens::IoMegaMouse::NumButtons();
-		
-		// TODO: Other devices.
-#if 0
-		IOT_TEAMPLAYER	= 5,
-		IOT_4WP_MASTER	= 6,
-		IOT_4WP_SLAVE	= 7,
-#endif
-	}
-	
-	// Should not get here...
-	return 0;
-}
-
-
-/**
- * CtrlConfigPrivate::PortName(): Get an internal port name. (non-localized)
+ * Get an internal port name. (non-localized)
  * @param port Port number.
  * @return Port name, or empty string on error.
  */
-QString CtrlConfigPrivate::PortName(CtrlConfig::CtrlPort_t port)
+QString CtrlConfigPrivate::PortName(IoManager::VirtPort_t virtPort)
 {
-	switch (port)
-	{
+	switch (virtPort) {
 		// System controller ports.
-		case CtrlConfig::PORT_1:	return QLatin1String("port1");
-		case CtrlConfig::PORT_2:	return QLatin1String("port2");
-		
+		case IoManager::VIRTPORT_1:		return QLatin1String("port1");
+		case IoManager::VIRTPORT_2:		return QLatin1String("port2");
+		case IoManager::VIRTPORT_EXT:	return QLatin1String("portEXT");
+
 		// Team Player, Port 1.
-		case CtrlConfig::PORT_TP1A:	return QLatin1String("portTP1A");
-		case CtrlConfig::PORT_TP1B:	return QLatin1String("portTP1B");
-		case CtrlConfig::PORT_TP1C:	return QLatin1String("portTP1C");
-		case CtrlConfig::PORT_TP1D:	return QLatin1String("portTP1D");
+		case IoManager::VIRTPORT_TP1A:	return QLatin1String("portTP1A");
+		case IoManager::VIRTPORT_TP1B:	return QLatin1String("portTP1B");
+		case IoManager::VIRTPORT_TP1C:	return QLatin1String("portTP1C");
+		case IoManager::VIRTPORT_TP1D:	return QLatin1String("portTP1D");
 
 		// Team Player, Port 2.
-		case CtrlConfig::PORT_TP2A:	return QLatin1String("portTP2A");
-		case CtrlConfig::PORT_TP2B:	return QLatin1String("portTP2B");
-		case CtrlConfig::PORT_TP2C:	return QLatin1String("portTP2C");
-		case CtrlConfig::PORT_TP2D:	return QLatin1String("portTP2D");
-		
+		case IoManager::VIRTPORT_TP2A:	return QLatin1String("portTP2A");
+		case IoManager::VIRTPORT_TP2B:	return QLatin1String("portTP2B");
+		case IoManager::VIRTPORT_TP2C:	return QLatin1String("portTP2C");
+		case IoManager::VIRTPORT_TP2D:	return QLatin1String("portTP2D");
+
 		// 4-Way Play.
-		case CtrlConfig::PORT_4WPA:	return QLatin1String("port4WPA");
-		case CtrlConfig::PORT_4WPB:	return QLatin1String("port4WPB");
-		case CtrlConfig::PORT_4WPC:	return QLatin1String("port4WPC");
-		case CtrlConfig::PORT_4WPD:	return QLatin1String("port4WPD");
-		
+		case IoManager::VIRTPORT_4WPA:	return QLatin1String("port4WPA");
+		case IoManager::VIRTPORT_4WPB:	return QLatin1String("port4WPB");
+		case IoManager::VIRTPORT_4WPC:	return QLatin1String("port4WPC");
+		case IoManager::VIRTPORT_4WPD:	return QLatin1String("port4WPD");
+
+		// J_Cart
+		case IoManager::VIRTPORT_JCART1:	return QLatin1String("portJCart1");
+		case IoManager::VIRTPORT_JCART2:	return QLatin1String("portJCart2");
+
 		default:
 			// Unknown port.
 			return QString();
 	}
-	
+
 	// Should not get here...
 	return QString();
 }
@@ -260,41 +250,42 @@ QString CtrlConfigPrivate::PortName(CtrlConfig::CtrlPort_t port)
  */
 int CtrlConfigPrivate::load(const QSettings *qSettings)
 {
-	for (int i = CtrlConfig::PORT_1; i < CtrlConfig::PORT_MAX; i++)
-	{
+	for (int virtPort = IoManager::VIRTPORT_1;
+	     virtPort < IoManager::VIRTPORT_MAX; virtPort++) {
 		// Get the controller type.
 		// TODO: Allow ASCII controller types?
-		const QString portName = PortName((CtrlConfig::CtrlPort_t)i);
-		int ctrlType_tmp = (LibGens::IoBase::IoType)
+		const QString portName = PortName((IoManager::VirtPort_t)virtPort);
+		IoManager::IoType_t ioType_tmp =
+				(IoManager::IoType_t)
 				(qSettings->value(portName + QLatin1String("/type"), -1).toInt());
-		if (ctrlType_tmp < LibGens::IoBase::IOT_NONE ||
-		    ctrlType_tmp >= LibGens::IoBase::IOT_MAX)
-		{
+		if (ioType_tmp < IoManager::IOT_NONE ||
+		    ioType_tmp >= IoManager::IOT_MAX) {
 			// No controller information.
 			// Use the default.
-			ctrlTypes[i] = Def_CtrlTypes[i];
-			memcpy(ctrlKeys[i], Def_CtrlKeys[i], sizeof(ctrlKeys[i]));
-		}
-		else
-		{
+			ctrlTypes[virtPort] = Def_CtrlTypes[virtPort];
+			memcpy(ctrlKeys[virtPort], Def_CtrlKeys[virtPort], sizeof(ctrlKeys[virtPort]));
+		} else {
 			// Controller information specified.
-			ctrlTypes[i] = (LibGens::IoBase::IoType)ctrlType_tmp;
-			
+			ctrlTypes[virtPort] = (IoManager::IoType_t)ioType_tmp;
+
 			// Clear the controller keys.
-			memset(ctrlKeys[i], 0x00, sizeof(ctrlKeys[i]));
-			
+			memset(ctrlKeys[virtPort], 0x00, sizeof(ctrlKeys[virtPort]));
+
 			// Read the controller keys from the configuration file.
 			const QStringList keyData =
-				qSettings->value(portName + QLatin1String("/keys"), QString()).toString().split(chrKeyValSep);
-			
+				qSettings->value(portName + QLatin1String("/keys"),
+				QString()).toString().split(QChar((uint16_t)chrKeyValSep));
+
+			int numButtons = IoManager::NumDevButtons(ctrlTypes[virtPort]);
+			if (numButtons > keyData.size())
+				numButtons = keyData.size();
+
 			// Copy the controller keys into ctrlKeys[].
-			for (int j = qMin(keyData.size(), NumButtons(ctrlTypes[i])) - 1; j >= 0; j--)
-			{
-				ctrlKeys[i][j] = keyData.at(j).toUInt(NULL, 0);
-			}
+			for (int j = numButtons - 1; j >= 0; j--)
+				ctrlKeys[virtPort][j] = keyData.at(j).toUInt(NULL, 0);
 		}
 	}
-	
+
 	// Controller configuration loaded.
 	m_dirty = true;
 	return 0;
@@ -302,41 +293,44 @@ int CtrlConfigPrivate::load(const QSettings *qSettings)
 
 
 /**
- * CtrlConfigPrivate::save(): Save controller configuration to a settings file.
+ * Save controller configuration to a settings file.
  * NOTE: The group must be selected in the QSettings before calling this function!
  * @param qSettings Settings file.
  * @return 0 on success; non-zero on error.
  */
 int CtrlConfigPrivate::save(QSettings *qSettings)
 {
-	for (int i = CtrlConfig::PORT_1; i < CtrlConfig::PORT_MAX; i++)
-	{
+	for (int virtPort = IoManager::VIRTPORT_1;
+	     virtPort < IoManager::VIRTPORT_MAX; virtPort++) {
 		// Save the controller type.
 		// TODO: Allow ASCII controller types?
-		const QString portName = PortName((CtrlConfig::CtrlPort_t)i);
-		qSettings->setValue(portName + QLatin1String("/type"), (int)ctrlTypes[i]);
-		
+		const QString portName = PortName((IoManager::VirtPort_t)virtPort);
+		qSettings->setValue(portName + QLatin1String("/type"), (int)ctrlTypes[virtPort]);
+
 		// Save the controller keys.
+		// TODO: Save all keys, even those not being used by the current type.
+		// Trim all 0 buttons from the keys afterwards.
+		int numButtons = IoManager::NumDevButtons(ctrlTypes[virtPort]);
+		if (numButtons > NUM_ELEMENTS(ctrlKeys[virtPort]))
+			numButtons = NUM_ELEMENTS(ctrlKeys[virtPort]);
+
+		// Write the buttons to the configuration file.
 		QString keyData;
 		QString keyHex;
-		const int numButtons = NumButtons(ctrlTypes[i]);
-		
-		// Write the buttons to the configuration file.
-		for (int j = 0; j < qMin(numButtons, CtrlConfig::MAX_BTNS); j++)
-		{
+		for (int j = 0; j < numButtons; j++) {
 			if (j > 0)
-				keyData += QChar(chrKeyValSep);
-			keyHex = QString::number(ctrlKeys[i][j], 16).toUpper();
+				keyData += QChar((uint16_t)chrKeyValSep);
+			keyHex = QString::number(ctrlKeys[virtPort][j], 16).toUpper();
 			keyData += QLatin1String("0x");
-			if (ctrlKeys[i][j] <= 0xFFFF)
+			if (ctrlKeys[virtPort][j] <= 0xFFFF)
 				keyData += keyHex.rightJustified(4, QChar(L'0'));
 			else
 				keyData += keyHex.rightJustified(8, QChar(L'0'));
 		}
-		
+
 		qSettings->setValue(portName + QLatin1String("/keys"), keyData);
 	}
-	
+
 	// Controller configuration saved.
 	return 0;
 }
@@ -349,7 +343,15 @@ int CtrlConfigPrivate::save(QSettings *qSettings)
 CtrlConfig::CtrlConfig(QObject *parent)
 	: QObject(parent)
 	, d(new CtrlConfigPrivate(this))
+{ }
+
+CtrlConfig::CtrlConfig(const CtrlConfig *src, QObject *parent)
+	: QObject(parent)
+	, d(new CtrlConfigPrivate(this))
 {
+	// Copy the CtrlConfigPrivate from the specified source.
+	// (Copy constructors don't work too well with Qt.)
+	d->copyFrom(src->d);
 }
 
 CtrlConfig::~CtrlConfig()
@@ -357,6 +359,14 @@ CtrlConfig::~CtrlConfig()
 	delete d;
 }
 
+/**
+ * Copy settings from another CtrlConfig.
+ * @param src Other CtrlConfig to copy from.
+ */
+void CtrlConfig::copyFrom(const CtrlConfig *src)
+{
+	d->copyFrom(src->d);
+}
 
 /**
  * CtrlConfig::isDirty(): Check if the controller configuration is dirty.
@@ -404,58 +414,94 @@ int CtrlConfig::save(QSettings *qSettings)
 
 
 /**
- * CtrlConfig::updateSysPort(): Update a system controller port.
- * @param ppOldPort Pointer to IoBase variable, possibly containing an IoBase object.
- * ppOldPort may be updated with the address to the new IoBase object.
- * @param port Port number.
+ * Update the controller I/O manager.
+ * @param ioManager I/O manager class.
+ * @param virtPort Virtual port number.
  */
-void CtrlConfig::updateSysPort(LibGens::IoBase **ppOldPort, int port) const
+void CtrlConfig::updateIoManager(IoManager *ioManager) const
 {
-	// Only system controller ports are supported here.
-	if (port < PORT_1 || port > PORT_2)
-		return;
-	
-	LibGens::IoBase *oldPort = *ppOldPort;
-	LibGens::IoBase *newPort;
-	// TODO: Team Player / 4WP support.
-	
-	if (!oldPort || oldPort->devType() != d->ctrlTypes[port])
-	{
-		// New port needs to be created.
-		switch (d->ctrlTypes[port])
-		{
-			default:
-			case LibGens::IoBase::IOT_NONE:
-				newPort = new LibGens::IoBase(oldPort);
-				break;
-			case LibGens::IoBase::IOT_3BTN:
-				newPort = new LibGens::Io3Button(oldPort);
-				break;
-			case LibGens::IoBase::IOT_6BTN:
-				newPort = new LibGens::Io6Button(oldPort);
-				break;
-			case LibGens::IoBase::IOT_2BTN:
-				newPort = new LibGens::Io2Button(oldPort);
-				break;
-			case LibGens::IoBase::IOT_MEGA_MOUSE:
-				newPort = new LibGens::IoMegaMouse(oldPort);
-				break;
+	for (int virtPort = 0; virtPort < NUM_ELEMENTS(d->ctrlKeys); virtPort++) {
+		// Set the device type.
+		ioManager->setDevType(
+				(IoManager::VirtPort_t)virtPort, 
+				d->ctrlTypes[virtPort]);
+
+		// Set the new keymaps.
+		ioManager->setKeymap(virtPort,
+				&d->ctrlKeys[virtPort][0],
+				NUM_ELEMENTS(d->ctrlKeys[virtPort]));
+	}
+}
+
+
+/** CtrlConfigWindow interface. **/
+
+
+/**
+ * Get a controller's I/O device type.
+ * @param virtPort Virtual controller port.
+ * @return Device type.
+ */
+IoManager::IoType_t CtrlConfig::ioType(IoManager::VirtPort_t virtPort)
+{
+	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
+	return d->ctrlTypes[virtPort];
+}
+
+/**
+ * Set a controller's I/O device type.
+ * NOTE: IoManager should be updated after calling this function.
+ * @param virtPort Virtual controller port.
+ * @return Device type.
+ */
+void CtrlConfig::setIoType(IoManager::VirtPort_t virtPort, IoManager::IoType_t ioType)
+{
+	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
+	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
+	d->ctrlTypes[virtPort] = ioType;
+}
+
+
+/**
+ * Get a controller's keymap.
+ * @param virtPort Virtual controller port.
+ * @return Keymap.
+ */
+QVector<GensKey_t> CtrlConfig::keyMap(IoManager::VirtPort_t virtPort)
+{
+	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
+	const int numButtons = IoManager::NumDevButtons(d->ctrlTypes[virtPort]);
+
+	QVector<GensKey_t> keyMap(numButtons);
+	for (int i = 0; i < numButtons; i++) {
+		keyMap[i] = d->ctrlKeys[virtPort][i];
+	}
+
+	return keyMap;
+}
+
+/**
+ * Set a controller's keymap.
+ * NOTE: IoManager should be updated after calling this function.
+ * @param virtPort Virtual controller port.
+ * @param keyMap New keymap.
+ */
+void CtrlConfig::setKeyMap(LibGens::IoManager::VirtPort_t virtPort, QVector<GensKey_t> keyMap)
+{
+	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
+	const int numButtons = IoManager::NumDevButtons(d->ctrlTypes[virtPort]);
+	const int maxButtons = std::min(keyMap.size(), numButtons);
+
+	for (int i = 0; i < maxButtons; i++) {
+		d->ctrlKeys[virtPort][i] = keyMap[i];
+	}
+
+	if (maxButtons < numButtons) {
+		// Clear the rest of the keys.
+		for (int i = maxButtons; i < numButtons; i++) {
+			d->ctrlKeys[virtPort][i] = 0;
 		}
-		
-		// Delete the old port.
-		delete oldPort;
 	}
-	else
-	{
-		// Device type is the same.
-		newPort = oldPort;
-	}
-	
-	// Set the new keymap.
-	newPort->setKeymap(&d->ctrlKeys[port][0], newPort->numButtons());
-	
-	// Update the port variable.
-	*ppOldPort = newPort;
 }
 
 }

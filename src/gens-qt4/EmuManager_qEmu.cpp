@@ -33,16 +33,6 @@
 // LibGens video includes.
 #include "libgens/Vdp/Vdp.hpp"
 
-// Controller devices.
-#include "libgens/IO/IoBase.hpp"
-#include "libgens/IO/Io3Button.hpp"
-#include "libgens/IO/Io6Button.hpp"
-#include "libgens/IO/Io2Button.hpp"
-#include "libgens/IO/IoMegaMouse.hpp"
-#include "libgens/IO/IoTeamplayer.hpp"
-#include "libgens/IO/Io4WPMaster.hpp"
-#include "libgens/IO/Io4WPSlave.hpp"
-
 // LibGens CPU includes.
 #include "libgens/cpu/M68K.hpp"
 #include "libgens/cpu/Z80.hpp"

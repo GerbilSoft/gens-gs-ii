@@ -29,17 +29,20 @@
 #include <QtGui/QPushButton>
 #include <QtGui/QHBoxLayout>
 
+// C includes. (C++ namespace)
+#include <cassert>
+
+// NUM_ELEMENTS(x)
+#include "libgens/macros/common.h"
+
+// Controller I/O manager.
+#include "libgens/IoManager.hpp"
+using LibGens::IoManager;
+
 // GensKeySequenceWidget.
 // TODO: Add property for "single key" and add gamepad support.
 #include "GensKeySequenceWidget.hpp"
 #include "GensCtrlKeyWidget.hpp"
-
-// I/O devices.
-#include "libgens/IO/IoBase.hpp"
-#include "libgens/IO/Io3Button.hpp"
-#include "libgens/IO/Io6Button.hpp"
-#include "libgens/IO/Io2Button.hpp"
-#include "libgens/IO/IoMegaMouse.hpp"
 
 // Controller configuration.
 #include "Config/CtrlConfig.hpp"
@@ -51,28 +54,29 @@ class GensCtrlCfgWidgetPrivate
 {
 	public:
 		GensCtrlCfgWidgetPrivate(GensCtrlCfgWidget *q);
-		~GensCtrlCfgWidgetPrivate();
 		void init(void);
-		
-		inline LibGens::IoBase::IoType ioType(void);
-		void setIoType(LibGens::IoBase::IoType newIoType);
-		
-		static QString ButtonName_l(LibGens::IoBase::ButtonName_t buttonName);
-		
+
+		inline IoManager::IoType_t ioType(void) const;
+		void setIoType(IoManager::IoType_t newIoType);
+
+		QString buttonName_l(IoManager::ButtonName_t buttonName) const;
+
 		void clearAllButtons(void);
 	
 	private:
 		GensCtrlCfgWidget *const q;
 		Q_DISABLE_COPY(GensCtrlCfgWidgetPrivate)
-		
-		LibGens::IoBase::IoType m_ioType;
-		
-		QGridLayout *m_layout;
-		QLabel *m_lblButtonName[CtrlConfig::MAX_BTNS];
-		QLabel *m_lblKeyDisplay[CtrlConfig::MAX_BTNS];
-		GensCtrlKeyWidget *m_btnCfg[CtrlConfig::MAX_BTNS];
-		QSpacerItem *m_vspcCfg;
-		
+
+	public:
+		IoManager::IoType_t m_ioType;
+		int numButtons;		// Cached from IoManager.
+
+		QGridLayout *layout;
+		QLabel *lblButtonName[IoManager::BTNI_MAX];
+		QLabel *lblKeyDisplay[IoManager::BTNI_MAX];
+		GensCtrlKeyWidget *btnCfg[IoManager::BTNI_MAX];
+		QSpacerItem *vspcCfg;
+
 		// "Change All", "Clear All".
 		QPushButton *btnChangeAll;
 		QPushButton *btnClearAll;
@@ -86,71 +90,59 @@ class GensCtrlCfgWidgetPrivate
 
 GensCtrlCfgWidgetPrivate::GensCtrlCfgWidgetPrivate(GensCtrlCfgWidget *q)
 	: q(q)
-	, m_ioType(LibGens::IoBase::IOT_NONE)
-	, m_layout(new QGridLayout(q))
+	, m_ioType(IoManager::IOT_NONE)
+	, numButtons(0)
+	, layout(new QGridLayout(q))
 {
-	// Eliminate margins.
-	m_layout->setContentsMargins(0, 0, 0, 0);
-	
-	// Reduce vertical spacing in the grid layout.
-	m_layout->setVerticalSpacing(0);
-}
-
-
-GensCtrlCfgWidgetPrivate::~GensCtrlCfgWidgetPrivate()
-{
-	// Delete all the labels and buttons.
-	// TODO: Is this necessary?
-	for (int i = 0; i < CtrlConfig::MAX_BTNS; i++)
-	{
-		delete m_lblButtonName[i];
-		delete m_lblKeyDisplay[i];
-		delete m_btnCfg[i];
-	}
+	// Eliminate margins and reduce vertical spacing.
+	layout->setContentsMargins(0, 0, 0, 0);
+	layout->setVerticalSpacing(0);
 }
 
 
 /**
- * GensCtrlCfgWidgetPrivate::init(): Initialize the grid layout.
+ * Initialize the grid layout.
  */
 void GensCtrlCfgWidgetPrivate::init(void)
 {
 	// Monospaced font.
 	QFont fntMonospace(QLatin1String("Monospace"));
 	fntMonospace.setStyleHint(QFont::TypeWriter);
-	
+
 	// Add CtrlConfig::MAX_BTNS items to the grid layout.
-	for (int i = 0; i < CtrlConfig::MAX_BTNS; i++)
-	{
-		m_lblButtonName[i] = new QLabel();
-		m_lblButtonName[i]->setVisible(false);
-		m_lblKeyDisplay[i] = new QLabel();
-		m_lblKeyDisplay[i]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-		m_lblKeyDisplay[i]->setVisible(false);
-		m_lblKeyDisplay[i]->setFont(fntMonospace);
-		m_btnCfg[i] = new GensCtrlKeyWidget(NULL, m_lblKeyDisplay[i]);
-		m_btnCfg[i]->setVisible(false);
-		
-		m_layout->addWidget(m_lblButtonName[i], i, 0, Qt::AlignLeft);
-		m_layout->addWidget(m_lblKeyDisplay[i], i, 1, Qt::AlignLeft);
-		m_layout->addWidget(m_btnCfg[i], i, 2, Qt::AlignRight);
+	for (int i = 0; i < NUM_ELEMENTS(btnCfg); i++) {
+		// Create the widgets.
+		lblButtonName[i] = new QLabel(q);
+		lblButtonName[i]->setVisible(false);
+		lblKeyDisplay[i] = new QLabel(q);
+		lblKeyDisplay[i]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+		lblKeyDisplay[i]->setVisible(false);
+		lblKeyDisplay[i]->setFont(fntMonospace);
+		btnCfg[i] = new GensCtrlKeyWidget(q, lblKeyDisplay[i]);
+		btnCfg[i]->setVisible(false);
+
+		// Add the widgets to the grid layout.
+		layout->addWidget(lblButtonName[i], i, 0, Qt::AlignLeft);
+		layout->addWidget(lblKeyDisplay[i], i, 1, Qt::AlignLeft);
+		layout->addWidget(btnCfg[i], i, 2, Qt::AlignRight);
 	}
-	
+
 	// Add a vertical spacer at the bottom of the layout.
-	m_vspcCfg = new QSpacerItem(128, 128, QSizePolicy::Expanding, QSizePolicy::Expanding);
-	m_layout->addItem(m_vspcCfg, CtrlConfig::MAX_BTNS, 1, 1, 1, Qt::AlignCenter);
-	
+	vspcCfg = new QSpacerItem(128, 128, QSizePolicy::Expanding, QSizePolicy::Expanding);
+	layout->addItem(vspcCfg, IoManager::BTNI_MAX, 1, 1, 1, Qt::AlignCenter);
+
 	// Create the HBox.
+	// TODO: Verify that this doesn't leak memory.
 	hboxOptions = new QHBoxLayout();
 	hboxOptions->setContentsMargins(0, 8, 0, 0); // TODO: Use style default for Top margin.
-	m_layout->addLayout(hboxOptions, CtrlConfig::MAX_BTNS+1, 0, 1, 3, Qt::AlignCenter);
-	
+	layout->addLayout(hboxOptions, IoManager::BTNI_MAX+1, 0, 1, 3, Qt::AlignCenter);
+
 	// Add the "Change All" and "Clear All" buttons.
 	// TODO: Icons.
-	btnChangeAll = new QPushButton(GensCtrlCfgWidget::tr("&Change All Buttons"), q);
+	btnChangeAll = new QPushButton(q->tr("&Change All Buttons"), q);
 	hboxOptions->addWidget(btnChangeAll);
-	
-	btnClearAll = new QPushButton(GensCtrlCfgWidget::tr("C&lear All Buttons"), q);
+
+	btnClearAll = new QPushButton(q->tr("C&lear All Buttons"), q);
 	QObject::connect(btnClearAll, SIGNAL(clicked(bool)),
 			 q, SLOT(clearAllButtons()));
 	hboxOptions->addWidget(btnClearAll);
@@ -158,185 +150,127 @@ void GensCtrlCfgWidgetPrivate::init(void)
 
 
 /**
- * GensCtrlCfgWidget::ioType(): Get the current I/O type.
- * @return Current I/O type.
+ * Get the current I/O device type.
+ * @return Current I/O device type.
  */
-inline LibGens::IoBase::IoType GensCtrlCfgWidgetPrivate::ioType(void)
+inline IoManager::IoType_t GensCtrlCfgWidgetPrivate::ioType(void) const
 	{ return m_ioType; }
 
 /**
- * GensCtrlCfgWidgetPrivate::setIoType(): Set the I/O type.
- * @param newIoType New I/O type.
+ * Set the I/O device type.
+ * @param newIoType New I/O device type.
  */
-void GensCtrlCfgWidgetPrivate::setIoType(LibGens::IoBase::IoType newIoType)
+void GensCtrlCfgWidgetPrivate::setIoType(IoManager::IoType_t newIoType)
 {
 	if (m_ioType == newIoType)
 		return;
-	
+
 	// Save the new I/O type.
 	m_ioType = newIoType;
-	
+
 	// Update the grid layout based on the specified controller type.
-	int numButtons;
-	int (*pNextLogicalButton)(int button);
-	LibGens::IoBase::ButtonName_t (*pButtonName)(int button);
-	
-	switch (newIoType)
-	{
-		default:
-		case LibGens::IoBase::IOT_NONE:
-			numButtons		= LibGens::IoBase::NumButtons();
-			pNextLogicalButton	= &LibGens::IoBase::NextLogicalButton;
-			pButtonName		= &LibGens::IoBase::ButtonName;
-			break;
-		
-		case LibGens::IoBase::IOT_3BTN:
-			numButtons		= LibGens::Io3Button::NumButtons();
-			pNextLogicalButton	= &LibGens::Io3Button::NextLogicalButton;
-			pButtonName		= &LibGens::Io3Button::ButtonName;
-			break;
-		
-		case LibGens::IoBase::IOT_6BTN:
-			numButtons		= LibGens::Io6Button::NumButtons();
-			pNextLogicalButton	= &LibGens::Io6Button::NextLogicalButton;
-			pButtonName		= &LibGens::Io6Button::ButtonName;
-			break;
-		
-		case LibGens::IoBase::IOT_2BTN:
-			numButtons		= LibGens::Io2Button::NumButtons();
-			pNextLogicalButton	= &LibGens::Io2Button::NextLogicalButton;
-			pButtonName		= &LibGens::Io2Button::ButtonName;
-			break;
-		
-		case LibGens::IoBase::IOT_MEGA_MOUSE:
-			numButtons		= LibGens::IoMegaMouse::NumButtons();
-			pNextLogicalButton	= &LibGens::IoMegaMouse::NextLogicalButton;
-			pButtonName		= &LibGens::IoMegaMouse::ButtonName;
-			break;
-		
-		// TODO: Other devices.
-#if 0
-		IOT_TEAMPLAYER	= 5,
-		IOT_4WP_MASTER	= 6,
-		IOT_4WP_SLAVE	= 7,
-#endif
-	}
-	
-	// Make sure we don't exceed the maximum number of buttons.
-	if (numButtons > CtrlConfig::MAX_BTNS)
-		numButtons = CtrlConfig::MAX_BTNS;
-	
+	numButtons = IoManager::NumDevButtons(newIoType);
+	if (numButtons > NUM_ELEMENTS(btnCfg))
+		numButtons = NUM_ELEMENTS(btnCfg);
+
 	// Show the buttons, in logical button order.
 	QString sBtnLabel;
 	for (int i = 0, button = 0;
-	     i < numButtons && button >= 0; i++)
-	{
-		LibGens::IoBase::ButtonName_t buttonName = pButtonName(button);
-		sBtnLabel = ButtonName_l(buttonName) + QChar(L':');
-		
-		m_lblButtonName[i]->setText(sBtnLabel);
-		m_lblButtonName[i]->setVisible(true);
-		m_lblKeyDisplay[i]->setVisible(true);
-		m_btnCfg[i]->setVisible(true);
-		
-		// Get the next logical button.
-		button = pNextLogicalButton(button);
+	     i < numButtons && button >= 0; i++) {
+		IoManager::ButtonName_t buttonName =
+					IoManager::ButtonName(newIoType, button);
+		sBtnLabel = buttonName_l(buttonName) + QChar(L':');
+
+		// Update the widgets.
+		lblButtonName[i]->setText(sBtnLabel);
+		lblButtonName[i]->setVisible(true);
+		lblKeyDisplay[i]->setVisible(true);
+		btnCfg[i]->setVisible(true);
+
+		// Get the next logical button. (TODO: Update for IoManager.)
+		button = IoManager::NextLogicalButton(newIoType, button);
 	}
-	
+
 	// Hide other buttons.
-	for (int i = numButtons; i < CtrlConfig::MAX_BTNS; i++)
-	{
-		m_lblButtonName[i]->setVisible(false);
-		m_lblKeyDisplay[i]->setVisible(false);
-		m_btnCfg[i]->setVisible(false);
+	for (int i = numButtons; i < NUM_ELEMENTS(btnCfg); i++) {
+		lblButtonName[i]->setVisible(false);
+		lblKeyDisplay[i]->setVisible(false);
+		btnCfg[i]->setVisible(false);
 	}
 }
 
 
 /**
- * ButtonName_l(): Get a localized LibGens button name.
+ * Get a localized LibGens button name.
  * @param buttonName LibGens button name.
  * @return Localized button name, or empty string on error.
  */
-QString GensCtrlCfgWidgetPrivate::ButtonName_l(LibGens::IoBase::ButtonName_t buttonName)
+QString GensCtrlCfgWidgetPrivate::buttonName_l(IoManager::ButtonName_t buttonName) const
 {
-	switch (buttonName)
-	{
+	assert(buttonName >= IoManager::BTNNAME_UP && buttonName <= IoManager::BTNNAME_MAX);
+	switch (buttonName) {
 		// Standard controller buttons.
-		case LibGens::IoBase::BTNNAME_UP:
+		case IoManager::BTNNAME_UP:
 			//: Standard controller: D-Pad UP.
-			return GensCtrlCfgWidget::tr("Up", "controller-standard");
-		
-		case LibGens::IoBase::BTNNAME_DOWN:
+			return q->tr("Up", "controller-standard");
+		case IoManager::BTNNAME_DOWN:
 			//: Standard controller: D-Pad DOWN.
-			return GensCtrlCfgWidget::tr("Down", "controller-standard");
-		
-		case LibGens::IoBase::BTNNAME_LEFT:
+			return q->tr("Down", "controller-standard");
+		case IoManager::BTNNAME_LEFT:
 			//: Standard controller: D-Pad LEFT.
-			return GensCtrlCfgWidget::tr("Left", "controller-standard");
-		
-		case LibGens::IoBase::BTNNAME_RIGHT:
+			return q->tr("Left", "controller-standard");
+		case IoManager::BTNNAME_RIGHT:
 			//: Standard controller: D-Pad RIGHT.
-			return GensCtrlCfgWidget::tr("Right", "controller-standard");
-			
-		case LibGens::IoBase::BTNNAME_B:
+			return q->tr("Right", "controller-standard");
+		case IoManager::BTNNAME_B:
 			//: Standard controller: B button.
-			return GensCtrlCfgWidget::tr("B", "controller-standard");
-		
-		case LibGens::IoBase::BTNNAME_C:
+			return q->tr("B", "controller-standard");
+		case IoManager::BTNNAME_C:
 			//: Standard controller: C button.
-			return GensCtrlCfgWidget::tr("C", "controller-standard");
-			
-		case LibGens::IoBase::BTNNAME_A:
+			return q->tr("C", "controller-standard");
+		case IoManager::BTNNAME_A:
 			//: Standard controller: A button.
-			return GensCtrlCfgWidget::tr("A", "controller-standard");
-		
-		case LibGens::IoBase::BTNNAME_START:
+			return q->tr("A", "controller-standard");
+		case IoManager::BTNNAME_START:
 			//: Standard controller: START button.
-			return GensCtrlCfgWidget::tr("Start", "controller-standard");
-		
-		case LibGens::IoBase::BTNNAME_Z:
+			return q->tr("Start", "controller-standard");
+		case IoManager::BTNNAME_Z:
 			//: Standard controller: Z button.
-			return GensCtrlCfgWidget::tr("Z", "controller-standard");
-		
-		case LibGens::IoBase::BTNNAME_Y:
+			return q->tr("Z", "controller-standard");
+		case IoManager::BTNNAME_Y:
 			//: Standard controller: Y button.
-			return GensCtrlCfgWidget::tr("Y", "controller-standard");
-		
-		case LibGens::IoBase::BTNNAME_X:
+			return q->tr("Y", "controller-standard");
+		case IoManager::BTNNAME_X:
 			//: Standard controller: X button.
-			return GensCtrlCfgWidget::tr("X", "controller-standard");
-		
-		case LibGens::IoBase::BTNNAME_MODE:
+			return q->tr("X", "controller-standard");
+		case IoManager::BTNNAME_MODE:
 			//: Standard controller: MODE button.
-			return GensCtrlCfgWidget::tr("Mode", "controller-standard");
-		
-		// SMS/GG buttons.
-		case LibGens::IoBase::BTNNAME_1:
+			return q->tr("Mode", "controller-standard");
+
+		/** SMS/GG buttons. **/
+
+		case IoManager::BTNNAME_1:
 			//: SMS/Game Gear: 1 button.
-			return GensCtrlCfgWidget::tr("1", "controller-sms-gg");
-		
-		case LibGens::IoBase::BTNNAME_2:
+			return q->tr("1", "controller-sms-gg");
+		case IoManager::BTNNAME_2:
 			//: SMS/Game Gear: 2 button.
-			return GensCtrlCfgWidget::tr("2", "controller-sms-gg");
-		
-		// Sega Mega Mouse buttons.
-		case LibGens::IoBase::BTNNAME_MOUSE_LEFT:
+			return q->tr("2", "controller-sms-gg");
+
+		/** Sega Mega Mouse buttons. **/
+
+		case IoManager::BTNNAME_MOUSE_LEFT:
 			//: Sega Mega Mouse: LEFT mouse button.
-			return GensCtrlCfgWidget::tr("Left", "controller-mouse");
-		
-		case LibGens::IoBase::BTNNAME_MOUSE_RIGHT:
+			return q->tr("Left", "controller-mouse");
+		case IoManager::BTNNAME_MOUSE_RIGHT:
 			//: Sega Mega Mouse: RIGHT mouse button.
-			return GensCtrlCfgWidget::tr("Right", "controller-mouse");
-		
-		case LibGens::IoBase::BTNNAME_MOUSE_MIDDLE:
+			return q->tr("Right", "controller-mouse");
+		case IoManager::BTNNAME_MOUSE_MIDDLE:
 			//: Sega Mega Mouse: MIDDLE mouse button.
-			return GensCtrlCfgWidget::tr("Middle", "controller-mouse");
-		
-		case LibGens::IoBase::BTNNAME_MOUSE_START:
+			return q->tr("Middle", "controller-mouse");
+		case IoManager::BTNNAME_MOUSE_START:
 			//: Sega Mega Mouse: START button.
-			return GensCtrlCfgWidget::tr("Start", "controller-mouse");
-		
+			return q->tr("Start", "controller-mouse");
+
 		default:
 			return QString();
 	}
@@ -347,13 +281,12 @@ QString GensCtrlCfgWidgetPrivate::ButtonName_l(LibGens::IoBase::ButtonName_t but
 
 
 /**
- * GensCtrlCfgWidgetPrivate::clearAllButtons(): Clear all mapped buttons.
- * WRAPPER SLOT for GensCtrlCfgWidetPrivate.
+ * Clear all mapped buttons.
  */
 void GensCtrlCfgWidgetPrivate::clearAllButtons(void)
 {
-	for (int i = 0; i < CtrlConfig::MAX_BTNS; i++)
-		m_btnCfg[i]->clearKey();
+	for (int i = 0; i < NUM_ELEMENTS(btnCfg); i++)
+		btnCfg[i]->clearKey();
 }
 
 
@@ -376,23 +309,60 @@ GensCtrlCfgWidget::~GensCtrlCfgWidget()
 
 
 /**
- * GensCtrlCfgWidget::ioType(): Get the current I/O type.
+ * Get the current I/O device type.
+ * WRAPPER FUNCTION for GensCtrlCfgWidgetPrivate.
  * @return Current I/O type.
  */
-LibGens::IoBase::IoType GensCtrlCfgWidget::ioType(void)
+IoManager::IoType_t GensCtrlCfgWidget::ioType(void) const
 	{ return d->ioType(); }
 
 /**
- * GensCtrlCfgWidget::setIoType(): Set the current I/O type.
+ * Set the current I/O device type.
+ * WRAPPER FUNCTION for GensCtrlCfgWidgetPrivate.
  * @param newIoType New I/O type.
  */
-void GensCtrlCfgWidget::setIoType(LibGens::IoBase::IoType newIoType)
+void GensCtrlCfgWidget::setIoType(IoManager::IoType_t newIoType)
 	{ d->setIoType(newIoType); }
 
 
 /**
- * GensCtrlCfgWidget::clearAllButtons(): Clear all mapped buttons.
- * WRAPPER SLOT for GensCtrlCfgWidetPrivate.
+ * Get the current keymap.
+ * @return Current keymap.
+ */
+QVector<GensKey_t> GensCtrlCfgWidget::keyMap(void)
+{
+	QVector<GensKey_t> keyMap(d->numButtons);
+	for (int i = 0; i < d->numButtons; i++) {
+		keyMap[i] = d->btnCfg[i]->key();
+	}
+
+	return keyMap;
+}
+
+/**
+ * Set the current keymap.
+ * @param keyMap New keymap.
+ */
+void GensCtrlCfgWidget::setKeyMap(QVector<GensKey_t> keyMap)
+{
+	const int maxButtons = std::min(d->numButtons, keyMap.count());
+
+	for (int i = 0; i < maxButtons; i++) {
+		d->btnCfg[i]->setKey(keyMap[i]);
+	}
+
+	if (maxButtons < d->numButtons) {
+		// Clear the rest of the keys.
+		for (int i = maxButtons; i < d->numButtons; i++) {
+			d->btnCfg[i]->clearKey();
+		}
+	}
+}
+
+
+/**
+ * Clear all mapped buttons.
+ * WRAPPER SLOT for GensCtrlCfgWidgetPrivate.
  */
 void GensCtrlCfgWidget::clearAllButtons(void)
 {

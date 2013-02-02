@@ -23,10 +23,12 @@
 #define __GENS_QT4_WIDGETS_GENSCTRLCFGWIDGET_HPP__
 
 // LibGens includes.
-#include "libgens/IO/IoBase.hpp"
+#include "libgens/IoManager.hpp"
+#include "libgens/GensInput/GensKey_t.h"
 
 // Qt includes.
 #include <QtGui/QWidget>
+#include <QtCore/QVector>
 
 namespace GensQt4
 {
@@ -36,20 +38,41 @@ class GensCtrlCfgWidgetPrivate;
 class GensCtrlCfgWidget : public QWidget
 {
 	Q_OBJECT
-	
+
 	public:
 		GensCtrlCfgWidget(QWidget* parent = 0);
 		~GensCtrlCfgWidget();
-		
-		LibGens::IoBase::IoType ioType(void);
-		void setIoType(LibGens::IoBase::IoType newIoType);
-	
+
+		/**
+		 * Get the current I/O device type.
+		 * @return Current I/O device type.
+		 */
+		LibGens::IoManager::IoType_t ioType(void) const;
+
+		/**
+		 * Set the I/O device type.
+		 * @param newIoType New I/O device type.
+		 */
+		void setIoType(LibGens::IoManager::IoType_t newIoType);
+
+		/**
+		 * Get the current keymap.
+		 * @return Current keymap.
+		 */
+		QVector<GensKey_t> keyMap(void);
+
+		/**
+		 * Set the current keymap.
+		 * @param keyMap New keymap.
+		 */
+		void setKeyMap(QVector<GensKey_t> keyMap);
+
 	private:
 		friend class GensCtrlCfgWidgetPrivate;
 		GensCtrlCfgWidgetPrivate *const d;
-		
+
 		Q_DISABLE_COPY(GensCtrlCfgWidget)
-	
+
 	private slots:
 		void clearAllButtons(void);
 };

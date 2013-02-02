@@ -26,10 +26,12 @@
 
 // Qt includes and classes.
 #include <QtCore/QObject>
+#include <QtCore/QVector>
 class QSettings;
 
 // LibGens includes.
-#include "libgens/IO/IoBase.hpp"
+#include "libgens/IoManager.hpp"
+#include "libgens/GensInput/GensKey_t.h"
 
 namespace GensQt4
 {
@@ -42,43 +44,19 @@ class CtrlConfig : public QObject
 	
 	public:
 		CtrlConfig(QObject *parent = 0);
+		CtrlConfig(const CtrlConfig *src, QObject *parent = 0);
 		~CtrlConfig();
-		
+
+		/**
+		 * Copy settings from another CtrlConfig.
+		 * @param src Other CtrlConfig to copy from.
+		 */
+		void copyFrom(const CtrlConfig *src);
+
 		// Dirty flag.
 		bool isDirty(void) const;
 		void clearDirty(void);
-		
-		// Maximum number of buttons.
-		static const int MAX_BTNS = 12;
-		
-		// Controller ports.
-		enum CtrlPort_t
-		{
-			// System controller ports.
-			PORT_1		= 0,
-			PORT_2		= 1,
-			
-			// Team Player, Port 1.
-			PORT_TP1A	= 2,
-			PORT_TP1B	= 3,
-			PORT_TP1C	= 4,
-			PORT_TP1D	= 5,
-			
-			// Team Player, Port 2.
-			PORT_TP2A	= 6,
-			PORT_TP2B	= 7,
-			PORT_TP2C	= 8,
-			PORT_TP2D	= 9,
-			
-			// 4-Way Play.
-			PORT_4WPA	= 10,
-			PORT_4WPB	= 11,
-			PORT_4WPC	= 12,
-			PORT_4WPD	= 13,
-			
-			PORT_MAX
-		};
-		
+
 		/**
 		 * Load controller configuration from a settings file.
 		 * NOTE: The group must be selected in the QSettings before calling this function!
@@ -86,7 +64,7 @@ class CtrlConfig : public QObject
 		 * @return 0 on success; non-zero on error.
 		 */
 		int load(const QSettings *qSettings);
-		
+
 		/**
 		 * Save controller configuration to a settings file.
 		 * NOTE: The group must be selected in the QSettings before calling this function!
@@ -94,15 +72,46 @@ class CtrlConfig : public QObject
 		 * @return 0 on success; non-zero on error.
 		 */
 		int save(QSettings *qSettings);
-		
+
 		/**
-		 * updateSysPort(): Update a system controller port.
-		 * @param ppOldPort Pointer to IoBase variable, possibly containing an IoBase object.
-		 * ppOldPort may be updated with the address to the new IoBase object.
-		 * @param port Port number.
+		 * Update the controller I/O manager.
+		 * @param ioManager I/O manager class.
 		 */
-		void updateSysPort(LibGens::IoBase **ppOldPort, int port) const;
-	
+		void updateIoManager(LibGens::IoManager *ioManager) const;
+
+		/** CtrlConfigWindow interface. **/
+
+		/**
+		 * Get a controller's I/O device type.
+		 * @param virtPort Virtual controller port.
+		 * @return Device type.
+		 */
+		LibGens::IoManager::IoType_t ioType(LibGens::IoManager::VirtPort_t virtPort);
+
+		/**
+		 * Set a controller's I/O device type.
+		 * NOTE: IoManager should be updated after calling this function.
+		 * @param virtPort Virtual controller port.
+		 * @return Device type.
+		 */
+		void setIoType(LibGens::IoManager::VirtPort_t virtPort, LibGens::IoManager::IoType_t ioType);
+
+
+		/**
+		 * Get a controller's keymap.
+		 * @param virtPort Virtual controller port.
+		 * @return Keymap.
+		 */
+		QVector<GensKey_t> keyMap(LibGens::IoManager::VirtPort_t virtPort);
+
+		/**
+		 * Set a controller's keymap.
+		 * NOTE: IoManager should be updated after calling this function.
+		 * @param virtPort Virtual controller port.
+		 * @param keyMap New keymap.
+		 */
+		void setKeyMap(LibGens::IoManager::VirtPort_t virtPort, QVector<GensKey_t> keyMap);
+
 	private:
 		friend class CtrlConfigPrivate;
 		CtrlConfigPrivate *d;
