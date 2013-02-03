@@ -192,8 +192,8 @@ class IoManager
 			BTNNAME_MODE	= 11,
 			
 			// SMS/GG buttons.
-			BTNNAME_1	= 12,
-			BTNNAME_2	= 13,
+			BTNNAME_2	= 12,
+			BTNNAME_1	= 13,
 			
 			// Sega Mega Mouse buttons.
 			BTNNAME_MOUSE_LEFT	= 14,
@@ -223,8 +223,8 @@ class IoManager
 			BTNI_MODE	= 11,
 
 			// SMS/GG buttons.
-			BTNI_1		= 4,
-			BTNI_2		= 5,
+			BTNI_2		= 4,
+			BTNI_1		= 5,
 
 			// Sega Mega Mouse buttons.
 			// NOTE: Mega Mouse buttons are active high,
