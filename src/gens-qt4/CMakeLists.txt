@@ -352,7 +352,7 @@ ADD_EXECUTABLE(gens-qt4
 	${gens-qt4_UIS_H}
 	${gens-qt4_RCC_O}
 	)
-TARGET_LINK_LIBRARIES(gens-qt4 gens)
+TARGET_LINK_LIBRARIES(gens-qt4 gens ${ZLIB_LIBRARY})
 ADD_DEPENDENCIES(gens-qt4 translations_target)
 
 # Fast QString concatenation.
