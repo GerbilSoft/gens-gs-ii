@@ -93,11 +93,6 @@ const ConfigDefaults::DefaultSetting ConfigDefaults::DefaultSettings[] =
 	{"Graphics/fastBlur",			"false", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
 	{"Graphics/bilinearFilter",		"false", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
 	{"Graphics/interlacedMode",		"2", 0, false, false,		DefaultSetting::VT_RANGE, 0, 2}, // INTERLACED_FLICKER
-	{"Graphics/contrast",			"0", 0, false, false,		DefaultSetting::VT_RANGE, -100, 100},
-	{"Graphics/brightness",		"0", 0, false, false,		DefaultSetting::VT_RANGE, -100, 100},
-	{"Graphics/grayscale",			"false", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"Graphics/inverted",			"false", 0, false, false,	DefaultSetting::VT_BOOL, 0, 0},
-	{"Graphics/colorScaleMethod",		"1", 0, false, false,		DefaultSetting::VT_RANGE, 0, 2}, // COLSCALE_FULL
 	{"Graphics/stretchMode",		"1", 0, false, false,		DefaultSetting::VT_RANGE, 0, 3}, // STRETCH_H
 	
 	/** VDP settings. **/

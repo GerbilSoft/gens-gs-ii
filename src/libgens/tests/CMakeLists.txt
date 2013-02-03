@@ -19,24 +19,16 @@ ADD_EXECUTABLE(test_VdpPalette_DAC test_VdpPalette_DAC.cpp ${TESTSUITE_BASE_SRC}
 TARGET_LINK_LIBRARIES(test_VdpPalette_DAC gens)
 
 # Generate the test files.
-ADD_TEST(NAME test_VdpPalette_DAC_generate_MD_Raw
-	COMMAND test_VdpPalette_DAC_generate --palmode MD --csm raw PalTest_MD_Raw.txt)
-ADD_TEST(NAME test_VdpPalette_DAC_generate_MD_Full
-	COMMAND test_VdpPalette_DAC_generate --palmode MD --csm full PalTest_MD_Full.txt)
-ADD_TEST(NAME test_VdpPalette_DAC_generate_MD_Full+SH
-	COMMAND test_VdpPalette_DAC_generate --palmode MD --csm full+sh PalTest_MD_Full+SH.txt)
+ADD_TEST(NAME test_VdpPalette_DAC_generate_MD
+	COMMAND test_VdpPalette_DAC_generate --palmode MD PalTest_MD.txt)
 ADD_TEST(NAME test_VdpPalette_DAC_generate_SMS
 	COMMAND test_VdpPalette_DAC_generate --palmode SMS PalTest_SMS.txt)
 ADD_TEST(NAME test_VdpPalette_DAC_generate_GG
 	COMMAND test_VdpPalette_DAC_generate --palmode GG PalTest_GG.txt)
 
 # Test the VDP DAC.
-ADD_TEST(NAME test_VdpPalette_DAC_MD_Raw
-	COMMAND test_VdpPalette_DAC PalTest_MD_Raw.txt)
-ADD_TEST(NAME test_VdpPalette_DAC_MD_Full
-	COMMAND test_VdpPalette_DAC PalTest_MD_Full.txt)
-ADD_TEST(NAME test_VdpPalette_DAC_MD_Full+SH
-	COMMAND test_VdpPalette_DAC PalTest_MD_Full+SH.txt)
+ADD_TEST(NAME test_VdpPalette_DAC_MD
+	COMMAND test_VdpPalette_DAC PalTest_MD.txt)
 ADD_TEST(NAME test_VdpPalette_DAC_GG
 	COMMAND test_VdpPalette_DAC PalTest_GG.txt)
 ADD_TEST(NAME test_VdpPalette_DAC_SMS

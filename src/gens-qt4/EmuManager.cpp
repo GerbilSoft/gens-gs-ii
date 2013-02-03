@@ -111,16 +111,6 @@ EmuManager::EmuManager(QObject *parent, VBackend *vBackend)
 					this, SLOT(autoFixChecksum_changed_slot(QVariant)));
 	
 	// Graphics settings.
-	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/contrast"),
-					this, SLOT(contrast_changed_slot(QVariant)));
-	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/brightness"),
-					this, SLOT(brightness_changed_slot(QVariant)));
-	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/grayscale"),
-					this, SLOT(grayscale_changed_slot(QVariant)));
-	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/inverted"),
-					this, SLOT(inverted_changed_slot(QVariant)));
-	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/colorScaleMethod"),
-					this, SLOT(colorScaleMethod_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/interlacedMode"),
 					this, SLOT(interlacedMode_changed_slot(QVariant)));
 	
@@ -477,13 +467,6 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	gqt4_emuContext->setSaveDataEnable(gqt4_cfg->get(QLatin1String("Options/enableSRam")).toBool());
 	
 	// Initialize the graphics settings.
-	LibGens::VdpPalette *palette = &gqt4_emuContext->m_vdp->m_palette;
-	palette->setContrast(gqt4_cfg->getInt(QLatin1String("Graphics/contrast")) + 100);
-	palette->setBrightness(gqt4_cfg->getInt(QLatin1String("Graphics/brightness")) + 100);
-	palette->setGrayscale(gqt4_cfg->get(QLatin1String("Graphics/grayscale")).toBool());
-	palette->setInverted(gqt4_cfg->get(QLatin1String("Graphics/inverted")).toBool());
-	palette->setColorScaleMethod(
-			(LibGens::VdpPalette::ColorScaleMethod_t)gqt4_cfg->getInt(QLatin1String("Graphics/colorScaleMethod")));
 	LibGens::Vdp::VdpEmuOptions.intRendMode =
 			(LibGens::VdpTypes::IntRend_Mode_t)gqt4_cfg->getInt(QLatin1String("Graphics/interlacedMode"));
 	

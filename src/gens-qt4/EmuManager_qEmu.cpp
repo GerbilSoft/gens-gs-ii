@@ -387,16 +387,6 @@ void EmuManager::changePaletteSetting(EmuRequest_t::PaletteSettingType type, int
 
 /** Graphics settings. **/
 
-void EmuManager::contrast_changed_slot(QVariant contrast)
-	{ changePaletteSetting(EmuRequest_t::RQT_PS_CONTRAST, contrast.toBool()); }
-void EmuManager::brightness_changed_slot(QVariant brightness)
-	{ changePaletteSetting(EmuRequest_t::RQT_PS_BRIGHTNESS, brightness.toInt()); }
-void EmuManager::grayscale_changed_slot(QVariant grayscale)
-	{ changePaletteSetting(EmuRequest_t::RQT_PS_GRAYSCALE, (int)grayscale.toBool()); }
-void EmuManager::inverted_changed_slot(QVariant inverted)
-	{ changePaletteSetting(EmuRequest_t::RQT_PS_INVERTED, (int)inverted.toBool()); }
-void EmuManager::colorScaleMethod_changed_slot(QVariant colorScaleMethod)
-	{ changePaletteSetting(EmuRequest_t::RQT_PS_COLORSCALEMETHOD, colorScaleMethod.toInt()); }
 void EmuManager::interlacedMode_changed_slot(QVariant interlacedMode)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_INTERLACEDMODE, interlacedMode.toInt()); }
 
@@ -834,100 +824,63 @@ void EmuManager::doResetEmulator(bool hardReset)
  */
 void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, int val)
 {
-	// NOTE: gens-qt4 uses values [-100,100] for contrast and brightness.
-	// libgens uses [0,200] for contrast and brightness.
-	
 	// TODO: Initialize palette settings on ROM startup.
 	if (!gqt4_emuContext)
 		return;
-	LibGens::VdpPalette *palette = &gqt4_emuContext->m_vdp->m_palette;
-	
-	switch (type)
-	{
-		case EmuRequest_t::RQT_PS_CONTRAST:
-			palette->setContrast(val + 100);
-			break;
-		
-		case EmuRequest_t::RQT_PS_BRIGHTNESS:
-			palette->setBrightness(val + 100);
-			break;
-		
-		case EmuRequest_t::RQT_PS_GRAYSCALE:
-			palette->setGrayscale((bool)(!!val));
-			break;
-		
-		case EmuRequest_t::RQT_PS_INVERTED:
-			palette->setInverted((bool)(!!val));
-			break;
-		
-		case EmuRequest_t::RQT_PS_COLORSCALEMETHOD:
-			palette->setColorScaleMethod(
-					(LibGens::VdpPalette::ColorScaleMethod_t)val);
-			break;
-		
-		case EmuRequest_t::RQT_PS_INTERLACEDMODE:
-		{
+
+	switch (type) {
+		case EmuRequest_t::RQT_PS_INTERLACEDMODE: {
 			// Interlaced Mode isn't exactly a "palette" setting.
 			// TODO: Rename to "VDP setting"?
 			// TODO: Consolidate the two interlaced rendering mode enums.
 			LibGens::Vdp::VdpEmuOptions.intRendMode =
 					((LibGens::VdpTypes::IntRend_Mode_t)val);
-			
+
 			// Gens/GS r7+ prints a message to the OSD, so we'll do that too.
 			//: OSD message indicating the interlaced rendering mode was changed.
 			QString msg = tr("Interlaced: %1", "osd");
-			switch (LibGens::Vdp::VdpEmuOptions.intRendMode)
-			{
+			switch (LibGens::Vdp::VdpEmuOptions.intRendMode) {
 				case LibGens::VdpTypes::INTREND_EVEN:
 					//: OSD message indicating the interlaced rendering mode was set to even lines only.
 					msg = msg.arg(tr("Even lines only", "osd"));
 					break;
-				
 				case LibGens::VdpTypes::INTREND_ODD:
 					//: OSD message indicating the interlaced rendering mode was set to odd lines only.
 					msg = msg.arg(tr("Odd lines only", "osd"));
 					break;
-				
 				case LibGens::VdpTypes::INTREND_FLICKER:
 					//: OSD message indicating the interlaced rendering mode was set to alternating lines.
 					msg = msg.arg(tr("Alternating lines", "osd"));
 					break;
-				
 				case LibGens::VdpTypes::INTREND_2X:
 					//: OSD message indicating the interlaced rendering mode was set to 2x resolution.
 					msg = msg.arg(tr("2x resolution", "osd"));
 					break;
-				
 				default:
 					msg.clear();
 					break;
 			}
-			
+
 			// Print the message to the OSD.
 			emit osdPrintMsg(1500, msg);
 			break;
 		}
-		
+
 		case EmuRequest_t::RQT_PS_BORDERCOLOREMULATION:
 			LibGens::Vdp::VdpEmuOptions.borderColorEmulation = (bool)(!!val);
 			break;
-		
 		case EmuRequest_t::RQT_PS_NTSCV30ROLLING:
 			LibGens::Vdp::VdpEmuOptions.ntscV30Rolling = (bool)(!!val);
 			break;
-		
 		case EmuRequest_t::RQT_PS_SPRITELIMITS:
 			LibGens::Vdp::VdpEmuOptions.spriteLimits = (bool)(!!val);
 			break;
-		
 		case EmuRequest_t::RQT_PS_ZEROLENGTHDMA:
 			LibGens::Vdp::VdpEmuOptions.zeroLengthDMA = (bool)(!!val);
 			break;
-		
 		case EmuRequest_t::RQT_PS_VSCROLLBUG:
 			LibGens::Vdp::VdpEmuOptions.vscrollBug = (bool)(!!val);
 			break;
-		
 		default:
 			break;
 	}

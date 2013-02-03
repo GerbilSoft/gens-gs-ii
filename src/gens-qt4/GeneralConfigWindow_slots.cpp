@@ -83,17 +83,6 @@ void GeneralConfigWindow::on_chkBilinearFilter_toggled(bool checked)
 void GeneralConfigWindow::on_cboInterlacedMode_currentIndexChanged(int index)
 	{ GENERIC_OPTION("Graphics/interlacedMode", index); }
 
-void GeneralConfigWindow::on_hsldContrast_valueChanged(int value)
-	{ GENERIC_OPTION("Graphics/contrast", value); }
-void GeneralConfigWindow::on_hsldBrightness_valueChanged(int value)
-	{ GENERIC_OPTION("Graphics/brightness", value); }
-void GeneralConfigWindow::on_chkGrayscale_toggled(bool checked)
-	{ GENERIC_OPTION("Graphics/grayscale", checked); }
-void GeneralConfigWindow::on_chkInverted_toggled(bool checked)
-	{ GENERIC_OPTION("Graphics/inverted", checked); }
-void GeneralConfigWindow::on_cboColorScaleMethod_currentIndexChanged(int index)
-	{ GENERIC_OPTION("Graphics/colorScaleMethod", index); }
-
 /** VDP settings. **/
 void GeneralConfigWindow::on_chkSpriteLimits_toggled(bool checked)
 	{ GENERIC_OPTION("VDP/spriteLimits", checked); }

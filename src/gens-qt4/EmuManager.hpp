@@ -291,13 +291,9 @@ class EmuManager : public QObject
 			enum PaletteSettingType
 			{
 				RQT_PS_UNKNOWN = 0,
-				RQT_PS_CONTRAST	,
-				RQT_PS_BRIGHTNESS,
-				RQT_PS_GRAYSCALE,
-				RQT_PS_INVERTED,
-				RQT_PS_COLORSCALEMETHOD,
 				
 				// These aren't really "palette" settings...
+				// TODO: Rename to VdpSettingType?
 				RQT_PS_INTERLACEDMODE,
 				RQT_PS_BORDERCOLOREMULATION,
 				RQT_PS_NTSCV30ROLLING,
@@ -425,11 +421,6 @@ class EmuManager : public QObject
 	
 	protected slots:
 		/** Graphics settings. **/
-		void contrast_changed_slot(QVariant contrast);
-		void brightness_changed_slot(QVariant brightness);
-		void grayscale_changed_slot(QVariant grayscale);
-		void inverted_changed_slot(QVariant inverted);
-		void colorScaleMethod_changed_slot(QVariant colorScaleMethod);
 		void interlacedMode_changed_slot(QVariant interlacedMode);
 		
 		/** VDP settings. **/

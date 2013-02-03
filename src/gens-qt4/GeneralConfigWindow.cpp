@@ -376,76 +376,68 @@ void GeneralConfigWindow::reload(void)
 {
 	// Onscreen Display.
 	QColor colorText;
-	
+
 	/** Onscreen display: FPS counter. **/
 	chkOsdFpsEnable->setChecked(ValByPath_bool("OSD/fpsEnabled"));
 	m_osdFpsColor = ValByPath_QColor("OSD/fpsColor");
 	btnOsdFpsColor->setBgColor(m_osdFpsColor);
 	btnOsdFpsColor->setText(m_osdFpsColor.name().toUpper());
-	
+
 	/** Onscreen display: Messages. **/
 	chkOsdMsgEnable->setChecked(ValByPath_bool("OSD/msgEnabled"));
 	m_osdMsgColor = ValByPath_QColor("OSD/msgColor");
 	btnOsdMsgColor->setBgColor(m_osdMsgColor);
 	btnOsdMsgColor->setText(m_osdMsgColor.name().toUpper());
-	
+
 	/** General settings. **/
 	chkAutoFixChecksum->setChecked(ValByPath_bool("autoFixChecksum"));
 	chkAutoPause->setChecked(ValByPath_bool("autoPause"));
 	chkPauseTint->setChecked(ValByPath_bool("pauseTint"));
-	
+
 	/** Intro effect. **/
 	cboIntroStyle->setCurrentIndex(ValByPath_int("Intro_Effect/introStyle"));
 	cboIntroColor->setCurrentIndex(ValByPath_int("Intro_Effect/introColor"));
-	
+
 	/** Sega CD Boot ROMs. **/
 	txtMcdRomUSA->setText(ValByPath_QString("Sega_CD/bootRomUSA"));
 	txtMcdRomEUR->setText(ValByPath_QString("Sega_CD/bootRomEUR"));
 	txtMcdRomJPN->setText(ValByPath_QString("Sega_CD/bootRomJPN"));
 	txtMcdRomAsia->setText(ValByPath_QString("Sega_CD/bootRomAsia"));
 	on_txtMcdRomUSA_focusIn();
-	
+
 	/** External programs. **/
 	txtExtPrgUnRAR->setText(ValByPath_QString("External_Programs/UnRAR"));
-	
+
 	/** Graphics settings. **/
 	chkAspectRatioConstraint->setChecked(ValByPath_bool("Graphics/aspectRatioConstraint"));
 	chkFastBlur->setChecked(ValByPath_bool("Graphics/fastBlur"));
 	chkBilinearFilter->setChecked(ValByPath_bool("Graphics/bilinearFilter"));
 	cboInterlacedMode->setCurrentIndex(ValByPath_int("Graphics/interlacedMode"));
-	hsldContrast->setValue(ValByPath_int("Graphics/contrast"));
-	hsldBrightness->setValue(ValByPath_int("Graphics/brightness"));
-	chkGrayscale->setChecked(ValByPath_bool("Graphics/grayscale"));
-	chkInverted->setChecked(ValByPath_bool("Graphics/inverted"));
-	cboColorScaleMethod->setCurrentIndex(ValByPath_int("Graphics/colorScaleMethod"));
-	
+
 	/** VDP settings. **/
 	chkSpriteLimits->setChecked(ValByPath_bool("VDP/spriteLimits"));
 	chkBorderColor->setChecked(ValByPath_bool("VDP/borderColorEmulation"));
 	chkNtscV30Rolling->setChecked(ValByPath_bool("VDP/ntscV30Rolling"));
-	if (isWarrantyVoid())
-	{
+	if (isWarrantyVoid()) {
 		chkVScrollBug->setChecked(ValByPath_bool("VDP/vscrollBug"));
 		chkZeroLengthDMA->setChecked(ValByPath_bool("VDP/zeroLengthDMA"));
 	}
-	
+
 	/** System. **/
 	cboRegionCurrent->setCurrentIndex(ValByPath_int("System/regionCode") + 1);
-	
+
 	// Region auto-detection settings.
 	lstRegionDetect->clear();
 	uint16_t regionCodeOrder = (uint16_t)ValByPath_uint("System/regionCodeOrder");
-	for (int i = 0; i < 4; i++, regionCodeOrder >>= 4)
-	{
+	for (int i = 0; i < 4; i++, regionCodeOrder >>= 4) {
 		const QString str = EmuManager::LgRegionCodeStrMD(regionCodeOrder & 0xF);
-		if (!str.isEmpty())
-		{
+		if (!str.isEmpty()) {
 			QListWidgetItem *item = new QListWidgetItem(str);
 			item->setData(Qt::UserRole, (regionCodeOrder & 0xF));
 			lstRegionDetect->insertItem(0, item);
 		}
 	}
-	
+
 #ifndef GCW_APPLY_IMMED
 	// Disable the Apply button.
 	setApplyButtonEnabled(false);
@@ -476,50 +468,44 @@ void GeneralConfigWindow::apply(void)
 	SetValByPath_QColor("OSD/fpsColor", m_osdFpsColor);
 	SetValByPath_bool("OSD/msgEnabled", chkOsdMsgEnable->isChecked());
 	SetValByPath_QColor("OSD/msgColor", m_osdMsgColor);
-	
+
 	/** Intro effect. **/
 	SetValByPath_int("Intro_Effect/introStyle", cboIntroStyle->currentIndex());
 	SetValByPath_int("Intro_Effect/introColor", cboIntroColor->currentIndex());
-	
+
 	/** General settings. **/
 	SetValByPath_bool("autoFixChecksum", chkAutoFixChecksum->isChecked());
 	SetValByPath_bool("autoPause", chkAutoPause->isChecked());
 	SetValByPath_bool("pauseTint", chkPauseTint->isChecked());
-	
+
 	/** Sega CD Boot ROMs. **/
 	SetValByPath_QString("Sega_CD/bootRomUSA", txtMcdRomUSA->text());
 	SetValByPath_QString("Sega_CD/bootRomEUR", txtMcdRomEUR->text());
 	SetValByPath_QString("Sega_CD/bootRomJPN", txtMcdRomJPN->text());
 	SetValByPath_QString("Sega_CD/bootRomAsia", txtMcdRomAsia->text());
-	
+
 	/** External programs. **/
 	SetValByPath_QString("External_Programs/UnRAR", txtExtPrgUnRAR->text());
-	
+
 	/** Graphics settings. **/
 	SetValByPath_bool("Graphics/aspectRatioConstraint", chkAspectRatioConstraint->isChecked());
 	SetValByPath_bool("Graphics/fastBlur", chkFastBlur->isChecked());
 	SetValByPath_bool("Graphics/bilinearFilter", chkBilinearFilter->isChecked());
 	SetValByPath_int("Graphics/interlacedMode", cboInterlacedMode->currentIndex());
-	SetValByPath_int("Graphics/contrast", hsldContrast->value());
-	SetValByPath_int("Graphics/brightness", hsldBrightness->value());
-	SetValByPath_bool("Graphics/grayscale", chkGrayscale->isChecked());
-	SetValByPath_bool("Graphics/inverted", chkInverted->isChecked());
-	SetValByPath_int("Graphics/colorScaleMethod", cboColorScaleMethod->currentIndex());
-	
+
 	/** VDP settings. **/
 	SetValByPath_bool("VDP/spriteLimits", chkSpriteLimits->isChecked());
 	SetValByPath_bool("VDP/borderColorEmulation", chkBorderColor->isChecked());
 	SetValByPath_bool("VDP/ntscV30Rolling", chkNtscV30Rolling->isChecked());
-	if (isWarrantyVoid())
-	{
+	if (isWarrantyVoid()) {
 		SetValByPath_bool("VDP/vscrollBug", chkVScrollBug->isChecked());
 		SetValByPath_bool("VDP/zeroLengthDMA", chkZeroLengthDMA->isChecked());
 	}
-	
+
 	/** System. **/
 	SetValByPath_int("System/regionCode", (cboRegionCurrent->currentIndex() - 1));
 	SetValByPath_uint("System/regionCodeOrder", regionCodeOrder());
-	
+
 	// Disable the Apply button.
 	// TODO: If Apply was clicked, set focus back to the main window elements.
 	// Otherwise, Cancel will receive focus.
