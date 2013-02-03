@@ -311,6 +311,9 @@
    <extends>QWidget</extends>
    <header>widgets/GensCtrlCfgWidget.hpp</header>
    <container>1</container>
+   <slots>
+    <signal>keyChanged(int,GensKey_t)</signal>
+   </slots>
   </customwidget>
  </customwidgets>
  <tabstops>

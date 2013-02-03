@@ -81,6 +81,13 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		/** Widget slots. **/
 		void toolbarPortSelected(int virtPort);
 		void on_cboDevice_currentIndexChanged(int index);
+
+		/**
+		 * A key's configuration has been changed.
+		 * @param idx Button index.
+		 * @param gensKey New GensKey_t value.
+		 */
+		void on_ctrlCfgWidget_keyChanged(int idx, GensKey_t gensKey);
 	
 	private:
 		// Update port information.

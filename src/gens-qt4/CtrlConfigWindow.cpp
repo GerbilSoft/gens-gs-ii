@@ -884,5 +884,17 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 	updatePortSettings(d->selPort);
 }
 
+/**
+ * A key's configuration has been changed.
+ * @param idx Button index.
+ * @param gensKey New GensKey_t value.
+ */
+void CtrlConfigWindow::on_ctrlCfgWidget_keyChanged(int idx, GensKey_t gensKey)
+{
+	// TODO: Only save the specific key that was changed.
+	// For now, we're going to save everything.
+	printf("KEY CHANGED: idx == %d, gensKey == %08X\n", idx, gensKey);
+	d->ctrlConfig->setKeyMap(d->selPort, ctrlCfgWidget->keyMap());
 }
 
+}

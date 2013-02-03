@@ -28,6 +28,7 @@
 #include <QtGui/QSpacerItem>
 #include <QtGui/QPushButton>
 #include <QtGui/QHBoxLayout>
+#include <QtCore/QSignalMapper>
 
 // C includes. (C++ namespace)
 #include <cassert>
@@ -62,7 +63,7 @@ class GensCtrlCfgWidgetPrivate
 		QString buttonName_l(IoManager::ButtonName_t buttonName) const;
 
 		void clearAllButtons(void);
-	
+
 	private:
 		GensCtrlCfgWidget *const q;
 		Q_DISABLE_COPY(GensCtrlCfgWidgetPrivate)
@@ -76,6 +77,8 @@ class GensCtrlCfgWidgetPrivate
 		QLabel *lblKeyDisplay[IoManager::BTNI_MAX];
 		GensCtrlKeyWidget *btnCfg[IoManager::BTNI_MAX];
 		int btnIdx[IoManager::BTNI_MAX];
+		QSignalMapper *mapperBtnCfg;
+
 		QSpacerItem *vspcCfg;
 
 		// "Change All", "Clear All".
@@ -94,10 +97,15 @@ GensCtrlCfgWidgetPrivate::GensCtrlCfgWidgetPrivate(GensCtrlCfgWidget *q)
 	, m_ioType(IoManager::IOT_NONE)
 	, numButtons(0)
 	, layout(new QGridLayout(q))
+	, mapperBtnCfg(new QSignalMapper(q))
 {
 	// Eliminate margins and reduce vertical spacing.
 	layout->setContentsMargins(0, 0, 0, 0);
 	layout->setVerticalSpacing(0);
+
+	// Signal mapper for configuration buttons.
+	QObject::connect(mapperBtnCfg, SIGNAL(mapped(int)),
+			  q, SLOT(keyChanged_slot(int)));
 }
 
 
@@ -119,8 +127,13 @@ void GensCtrlCfgWidgetPrivate::init(void)
 		lblKeyDisplay[i]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 		lblKeyDisplay[i]->setVisible(false);
 		lblKeyDisplay[i]->setFont(fntMonospace);
+
+		// Configuration button.
 		btnCfg[i] = new GensCtrlKeyWidget(q, lblKeyDisplay[i]);
 		btnCfg[i]->setVisible(false);
+		QObject::connect(btnCfg[i], SIGNAL(keyChanged(GensKey_t)),
+				  mapperBtnCfg, SLOT(map()));
+		mapperBtnCfg->setMapping(btnCfg[i], i);
 
 		// Add the widgets to the grid layout.
 		layout->addWidget(lblButtonName[i], i, 0, Qt::AlignLeft);
@@ -370,6 +383,16 @@ void GensCtrlCfgWidget::setKeyMap(QVector<GensKey_t> keyMap)
 void GensCtrlCfgWidget::clearAllButtons(void)
 {
 	d->clearAllButtons();
+}
+
+/**
+ * A key's configuration has changed.
+ * @param idx Button index.
+ */
+void GensCtrlCfgWidget::keyChanged_slot(int idx)
+{
+	// Emit a signal with the new key value.
+	emit keyChanged(idx, d->btnCfg[idx]->key());
 }
 
 }

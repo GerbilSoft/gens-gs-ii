@@ -67,6 +67,14 @@ class GensCtrlCfgWidget : public QWidget
 		 */
 		void setKeyMap(QVector<GensKey_t> keyMap);
 
+	signals:
+		/**
+		 * A key's configuration has been changed.
+		 * @param idx Button index.
+		 * @param gensKey New GensKey_t value.
+		 */
+		void keyChanged(int idx, GensKey_t gensKey);
+
 	private:
 		friend class GensCtrlCfgWidgetPrivate;
 		GensCtrlCfgWidgetPrivate *const d;
@@ -75,6 +83,7 @@ class GensCtrlCfgWidget : public QWidget
 
 	private slots:
 		void clearAllButtons(void);
+		void keyChanged_slot(int idx);
 };
 
 }
