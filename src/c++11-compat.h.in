@@ -34,9 +34,7 @@
 #define nullptr 0
 
 /* static_assert(): Compile-time assertions. */
-/* Since it's not available, we'll use standard assert(). */
-#include <assert.h>
-#define static_assert(expr, msg) assert(expr)
+#define static_assert(expr, msg) switch (0) { case 0: case (expr): ; }
 
 /* Unicode characters and strings. */
 #include <stdint.h>
