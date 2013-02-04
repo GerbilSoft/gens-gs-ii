@@ -22,9 +22,6 @@
 #ifndef __LIBGENS_UTIL_ENCODING_HPP__
 #define __LIBGENS_UTIL_ENCODING_HPP__
 
-// TODO: Figure out a better way to #include this.
-#include "../c++11-compat.h"
-
 // C++ includes.
 #include <string>
 

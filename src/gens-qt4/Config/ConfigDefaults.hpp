@@ -24,9 +24,6 @@
 #ifndef __GENS_QT4_CONFIG_CONFIGDEFAULTS_HPP__
 #define __GENS_QT4_CONFIG_CONFIGDEFAULTS_HPP__
 
-// C++ 2011 compatibility macros.
-#include "c++11-compat.h"
-
 // Qt includes.
 #include <QtCore/QHash>
 

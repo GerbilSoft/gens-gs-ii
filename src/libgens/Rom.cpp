@@ -25,9 +25,6 @@
 
 #include "Rom.hpp"
 
-// TODO: Figure out a better way to #include this.
-#include "../c++11-compat.h"
-
 // C includes. (C++ namespace)
 #include <cstring>
 #include <cctype>

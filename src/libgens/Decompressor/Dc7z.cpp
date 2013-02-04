@@ -30,9 +30,6 @@
 
 #include "Dc7z.hpp"
 
-// TODO: Figure out a better way to #include this.
-#include "../c++11-compat.h"
-
 // C includes.
 #include <stdlib.h>
 #include <string.h>
