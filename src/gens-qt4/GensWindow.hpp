@@ -50,6 +50,8 @@ class QCloseEvent;
 namespace GensQt4
 {
 
+class GensWindowPrivate;
+
 class GensWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -57,32 +59,37 @@ class GensWindow : public QMainWindow
 	public:
 		GensWindow();
 		~GensWindow();
-		
+
+	private:
+		friend class GensWindowPrivate;
+		GensWindowPrivate *const d;
+		Q_DISABLE_COPY(GensWindow)
+
+	public:
 		// LibGens OSD handler.
 		void osd(OsdType osd_type, int param);
-		
+
 		/**
-		 * rescale(): Rescale the window.
+		 * Rescale the window.
 		 * @param scale New scale value.
 		 */
 		void rescale(int scale);
-		
+
 		// Set color depth.
 		// TODO: Should this really be here, or should it be a slot?
 		void setBpp(LibGens::VdpPalette::ColorDepth newBpp);
-		
+
 		// Idle thread.
-		inline bool idleThreadAllowed(void)
-			{ return m_idleThreadAllowed; }
+		bool idleThreadAllowed(void);
 		void setIdleThreadAllowed(bool newIdleThreadAllowed);
-		
+
 		// Wrapper for GensActions.
 		bool menuItemCheckState(int action);
-	
+
 	public slots:
 		/** Wrapper functions for GensActions. **/
 		/** TODO: Have GensActions emit signals, and link them to EmuManager slots. **/
-		
+
 		// NOTE: Calling m_emuManager functions directly via
 		// friend classes, or using inline functions here,
 		// results in wacky memory corruption on Mac OS X.
@@ -99,131 +106,89 @@ class GensWindow : public QMainWindow
 		void screenShot(void);
 		void setAudioRate(int newRate);
 		void setStereo(bool newStereo);
-		
+
 		/** VBackend properties. **/
 		// TODO: Allow GensActions to access m_vBackend directly?
 		void toggleFastBlur(void);
 		StretchMode_t stretchMode(void);
 		void setStretchMode(StretchMode_t newStretchMode);
-	
+
 	protected:
-		void setupUi(void);
-		
 		// QMainWindow virtual functions.
 		void closeEvent(QCloseEvent *event);
 		void showEvent(QShowEvent *event);
-		
+
 		// QMainWindow virtual functions: drag and drop.
 		void dragEnterEvent(QDragEnterEvent *event);
 		void dropEvent(QDropEvent *event);
-		
+
 		// State change event. (Used for switching the UI language at runtime.)
 		void changeEvent(QEvent *event);
-		
-		// Key handler.
-		KeyHandlerQt *m_keyHandler;
-		
-		// Widgets.
-		VBackend *m_vBackend;		// GensQGLWidget.
-		GensMenuBar *m_gensMenuBar;	// Gens menu bar.
-		
-		QWidget *centralwidget;
-		QVBoxLayout *layout;
-		
-		// GensWindow functions.
-		void gensResize(void);	// Resize the window.
-		
-		int m_scale;		// Temporary scaling variable.
-		bool m_hasInitResize;	// Has the initial resize occurred?
-		
-		// Emulation Manager.
-		EmuManager *m_emuManager;
-		
-		// Actions manager.
-		GensActions *m_gensActions;
-		
-		// Set the Gens window title.
-		void setGensTitle(void);
-		
-		/** Configuration items. **/
-		bool m_cfg_autoPause;
-		int m_cfg_introStyle;
-		bool m_cfg_showMenuBar;
-	
+
 	protected slots:
 		/**
-		 * updateFps(): Update the FPS counter.
+		 * Update the FPS counter.
 		 */
-		void updateFps(double fps)
-			{ m_vBackend->fpsPush(fps); }
-		
+		void updateFps(double fps);
+
 		/**
-		 * stateChanged(): Emulation state changed.
+		 * Emulation state changed.
 		 * - Update the video backend "running" state.
 		 * - Update the Gens title.
 		 */
 		void stateChanged(void);
-		
+
 		/**
-		 * osdPrintMsg(): Print a message on the OSD.
+		 * Print a message on the OSD.
 		 * @param duration Duration for the message to appear, in milliseconds.
 		 * @param msg Message to print.
 		 */
-		void osdPrintMsg(int duration, QString msg)
-			{ m_vBackend->osd_printqs(duration, msg); }
-		
+		void osdPrintMsg(int duration, QString msg);
+
 		/**
-		 * osdShowPreview(): Show a preview image on the OSD.
+		 * Show a preview image on the OSD.
 		 * @param duration Duration for the preview image to appaer, in milliseconds.
 		 * @param img Image to show.
 		 */
-		void osdShowPreview(int duration, const QImage& img)
-			{ m_vBackend->osd_show_preview(duration, img); }
-		
+		void osdShowPreview(int duration, const QImage& img);
+
 		/**
-		 * qAppFocusChanged(): Application focus has changed.
+		 * Application focus has changed.
 		 * @param old Old widget.
 		 * @param now New widget.
 		 */
 		void qAppFocusChanged(QWidget *old, QWidget *now);
-		
+
 		/**
-		 * autoPause_changed_slot(): Auto Pause setting has changed.
+		 * Auto Pause setting has changed.
 		 * @param newAutoPause (bool) New Auto Pause setting.
 		 */
 		void autoPause_changed_slot(QVariant newAutoPause);
-	
+
 		/**
-		 * showMenuBar_changed_slot(): Show Menu Bar setting has changed.
+		 * Show Menu Bar setting has changed.
 		 * @param newShowMenuBar (bool) New Show Menu Bar setting.
 		 */
 		void showMenuBar_changed_slot(QVariant newShowMenuBar);
-		
-	private:
-		/** Idle thread. **/
-		IdleThread *m_idleThread;
-		bool m_idleThreadAllowed;
-		void checkIdleThread(void);
-	
+
 	private slots:
-		void idleThread_frameDone(void);
-		
 		/**
-		 * introStyle_changed_slot(): Intro Style setting has changed.
+		 * The Idle thread is finished rendering a frame.
+		 */
+		void idleThread_frameDone(void);
+
+		/**
+		 * Intro Style setting has changed.
 		 * @param newIntroStyle (int) New Intro Style setting.
 		 */
 		void introStyle_changed_slot(QVariant newIntroStyle);
-		
+
 		/**
-		 * showContextMenu(): Show the context menu.
+		 * Show the context menu.
 		 * @param pos Position to show the context menu. (widget coordinates)
 		 */
 		void showContextMenu(const QPoint& pos);
 };
-
-// Wrapper for GensActions.
-inline bool GensWindow::menuItemCheckState(int action)
-	{ return m_gensMenuBar->menuItemCheckState(action); }
 
 }
 
