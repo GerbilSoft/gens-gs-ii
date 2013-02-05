@@ -407,7 +407,7 @@ QString AboutWindow::GetDebugInfo(void)
 	// CPU flags.
 	// TODO: Move the array of CPU flag names to LibGens.
 	//: CPU flags are extra features found in a CPU, such as SSE.
-	sDebugInfo += tr("CPU flags") + QLatin1String(": ");
+	sDebugInfo += tr("CPU flags:");
 #if defined(__i386__) || defined(__amd64__)
 	static const char *const CpuFlagNames[11] =
 	{
@@ -442,7 +442,7 @@ QString AboutWindow::GetDebugInfo(void)
 	sDebugInfo += sLineBreak;
 	
 	//: Timing method: Function used to handle emulation timing.
-	sDebugInfo += tr("Timing method") + QLatin1String(": ") +
+	sDebugInfo += tr("Timing method:") +
 		QLatin1String(LibGens::Timing::GetTimingMethodName(LibGens::Timing::GetTimingMethod())) +
 		QLatin1String("()") + sLineBreak + sLineBreak;
 	
@@ -469,19 +469,19 @@ QString AboutWindow::GetDebugInfo(void)
 	// Translatable strings.
 	
 	//: String identifying the manufacturer of the OpenGL implementation. (e.g. "X.Org R300 Project")
-	const QString qsid_glVendor = tr("OpenGL vendor string");
+	const QString qsid_glVendor = tr("OpenGL vendor string:");
 	//: String identifying the specific OpenGL renderer. (e.g. "Gallium 0.4 on ATI RV530")
-	const QString qsid_glRenderer = tr("OpenGL renderer string");
+	const QString qsid_glRenderer = tr("OpenGL renderer string:");
 	//: String identifying the OpenGL renderer version. (e.g. "2.1 Mesa 7.11-devel")
-	const QString qsid_glVersion = tr("OpenGL version string");
+	const QString qsid_glVersion = tr("OpenGL version string:");
 	//: Placeholder used if an OpenGL version string could not be retrieved.
 	const QString qsid_unknown = tr("(unknown)");
 	
-	sDebugInfo += qsid_glVendor + QLatin1String(": ") +
+	sDebugInfo += qsid_glVendor +
 			QString(glVendor ? QLatin1String(glVendor) : qsid_unknown) + sLineBreak +
-			qsid_glRenderer + QLatin1String(": ") +
+			qsid_glRenderer +
 			QString(glRenderer ? QLatin1String(glRenderer) : qsid_unknown) + sLineBreak +
-			qsid_glVersion + QLatin1String(": ") +
+			qsid_glVersion +
 			QString(glVersion ? QLatin1String(glVersion) : qsid_unknown) + sLineBreak;
 	
 #ifdef GL_SHADING_LANGUAGE_VERSION
@@ -490,8 +490,8 @@ QString AboutWindow::GetDebugInfo(void)
 		const char *glslVersion = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
 		
 		//: String identifying the OpenGL Shading Language version. (e.g. "1.20")
-		const QString qsid_glslVersion = tr("GLSL version string");
-		sDebugInfo += qsid_glslVersion + QLatin1String(": ") +
+		const QString qsid_glslVersion = tr("GLSL version string:");
+		sDebugInfo += qsid_glslVersion +
 				QString(glslVersion
 					? QLatin1String(glslVersion)
 					: qsid_unknown) + sLineBreak;
@@ -559,87 +559,74 @@ QString AboutWindow::GetDebugInfo(void)
 QString AboutWindow::GetCodePageInfo(void)
 {
 	QString sCodePageInfo;
-	
+
 	// Get the ANSI and OEM code pages.
-	struct cpInfo
-	{
+	struct cpInfo {
 		unsigned int cp;
 		const char *cpStr;
 	};
-	
-	cpInfo m_cpInfo[2] =
-	{
+
+	cpInfo m_cpInfo[2] = {
 		//: Win32: ANSI code page. (e.g. 1252 for US/English, 932 for Japanese)
-		{CP_ACP,	QT_TR_NOOP("System ANSI code page")},
+		{CP_ACP,	QT_TR_NOOP("System ANSI code page:")},
 		//: Win32: OEM code page. (e.g. 437 for US/English)
-		{CP_OEMCP,	QT_TR_NOOP("System OEM code page")}
+		{CP_OEMCP,	QT_TR_NOOP("System OEM code page:")}
 	};
-	
+
 	// TODO: GetCPInfoExU() support?
-	for (int i = 0; i < 2; i++)
-	{
+	for (int i = 0; i < 2; i++) {
 		sCodePageInfo += tr(m_cpInfo[i].cpStr);
-		sCodePageInfo += QLatin1String(": ");
-		
+
 		// Get the code page information.
 		CPINFOEX cpix;
 		BOOL bRet = GetCPInfoExA(m_cpInfo[i].cp, 0, &cpix);
-		if (!bRet)
-		{
+		if (!bRet) {
 			//: GetCPInfoExA() call failed.
 			sCodePageInfo += tr("Unknown [GetCPInfoExA() failed]") + QChar(L'\n');
 			continue;
 		}
-		
+
 		sCodePageInfo += QString::number(cpix.CodePage);
-		
+
 		// if the code page name is blank, don't add extra parentheses.
-		if (cpix.CodePageName[0] == 0x00)
-		{
+		if (cpix.CodePageName[0] == 0x00) {
 			sCodePageInfo += QChar(L'\n');
 			continue;
 		}
-		
+
 		// Add the code page name.
 		sCodePageInfo += QLatin1String(" (");
-		
+
 		// Windows XP has the code page number in cpix.CodePageName,
 		// followed by two spaces, and then the code page name in parentheses.
 		char *parenStart = strchr(cpix.CodePageName, '(');
-		if (!parenStart)
-		{
+		if (!parenStart) {
 			// No parentheses. Use the code page name as-is.
 			sCodePageInfo += QString::fromLocal8Bit(cpix.CodePageName);
-		}
-		else
-		{
+		} else {
 			// Found starting parenthesis. Check for ending parenthesis.
 			char *parenEnd = strrchr(parenStart, ')');
-			if (parenEnd)
-			{
+			if (parenEnd) {
 				// Found ending parenthesis. Null it out.
 				*parenEnd = 0x00;
 			}
-			
+
 			sCodePageInfo += QString::fromLocal8Bit(parenStart + 1);
 		}
-		
+
 		sCodePageInfo += QLatin1String(")\n");
 	}
-	
+
 	// Is Gens/GS II using Unicode?
-	if (GetModuleHandleW(NULL) != NULL)
-	{
+	if (GetModuleHandleW(NULL) != NULL) {
 		//: Win32: Unicode strings are being used. (WinNT)
 		sCodePageInfo += tr("Using Unicode strings for Win32 API.");
-	}
-	else
-	{
+	} else {
 		//: Win32: ANSI strings are being used. (Win9x)
 		sCodePageInfo += tr("Using ANSI strings for Win32 API.");
 	}
 	sCodePageInfo += QChar(L'\n');
-	
+
 	return sCodePageInfo;
 }
 #endif /* Q_OS_WIN32 */
