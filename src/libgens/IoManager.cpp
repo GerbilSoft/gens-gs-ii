@@ -114,18 +114,18 @@ class IoManagerPrivate
 			BTN_DOWN	= 0x02,
 			BTN_LEFT	= 0x04,
 			BTN_RIGHT	= 0x08,
-			BTN_B		= 0x10,
-			BTN_C		= 0x20,
-			BTN_A		= 0x40,
-			BTN_START	= 0x80,
+			BTN_C		= 0x10,
+			BTN_B		= 0x20,
+			BTN_START	= 0x40,
+			BTN_A		= 0x80,
 			BTN_Z		= 0x100,
 			BTN_Y		= 0x200,
 			BTN_X		= 0x400,
 			BTN_MODE	= 0x800,
 
 			// SMS/GG buttons.
-			BTN_1		= 0x10,
-			BTN_2		= 0x20,
+			BTN_2		= 0x10,
+			BTN_1		= 0x20,
 
 			// Sega Mega Mouse buttons.
 			// NOTE: Mega Mouse buttons are active high,
