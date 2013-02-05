@@ -33,6 +33,7 @@
 #include <QtCore/QUrl>
 #include <QtCore/QDir>
 #include <QtGui/QCloseEvent>
+#include <QtGui/QMenuBar>
 #include <QtGui/QShowEvent>
 #include <QtGui/QDragEnterEvent>
 #include <QtGui/QDropEvent>

@@ -40,6 +40,9 @@
 // Recent ROMs menu.
 #include "RecentRomsMenu.hpp"
 
+// Qt includes.
+#include <QtGui/QMenuBar>
+
 namespace GensQt4
 {
 
@@ -150,7 +153,7 @@ void GensMenuBarPrivate::clearHashTables(void)
 inline void GensMenuBarPrivate::retranslate(void)
 {
 	// (Re-)Populate the popup menu.
-	parseMainMenu(&GensMenuBar::ms_gmmiMain[0]);
+	parseMainMenu(&gmmiMain[0]);
 	
 	// Synchronization.
 	syncAll();	// Synchronize the menus.
@@ -163,23 +166,22 @@ inline void GensMenuBarPrivate::retranslate(void)
  * The menus are added to popupMenu.
  * @param mainMenu Pointer to the first item in the GensMainMenuItem array.
  */
-void GensMenuBarPrivate::parseMainMenu(const GensMenuBar::MainMenuItem *mainMenu)
+void GensMenuBarPrivate::parseMainMenu(const MainMenuItem *mainMenu)
 {
 	QMenu *mnuSubMenu;
-	
+
 	// Clear everything.
 	clearHashTables();	// Clear the menu hash tables and lists.
 	popupMenu->clear();	// Clear the popup menu.
-	
-	for (; mainMenu->id != 0; mainMenu++)
-	{
+
+	for (; mainMenu->id != 0; mainMenu++) {
 		// Create a new submenu.
 		mnuSubMenu = new QMenu();
-		mnuSubMenu->setTitle(GensMenuBar::tr(mainMenu->text));
-		
+		mnuSubMenu->setTitle(q->tr(mainMenu->text));
+
 		// Parse the menu.
 		parseMenu(mainMenu->submenu, mnuSubMenu);
-		
+
 		// Add the menu to the popup menu.
 		popupMenu->addMenu(mnuSubMenu);
 	}
@@ -191,83 +193,76 @@ void GensMenuBarPrivate::parseMainMenu(const GensMenuBar::MainMenuItem *mainMenu
  * @param menu Pointer to the first item in the GensMenuItem array.
  * @param parent QMenu to add the menu items to.
  */
-void GensMenuBarPrivate::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
+void GensMenuBarPrivate::parseMenu(const MenuItem *menu, QMenu *parent)
 {
 	QAction *mnuItem;
 	QMenu *mnuSubMenu;			// QMenu for GMI_SUBMENU items.
 	QActionGroup *actionGroup = NULL;	// QActionGroup for GMI_RADIO items.
-	
-	for (; menu->id != 0; menu++)
-	{
-		// TODO: Add other menu item types.
-		// For now, only GMI_NORMAL and GMI_SEPARATOR are supported.
-		
-		if (menu->type == GensMenuBar::GMI_SEPARATOR)
-		{
+
+	for (; menu->id != 0; menu++) {
+		if (menu->type == GMI_SEPARATOR) {
 			// Menu separator.
 			lstSeparators.append(parent->addSeparator());
 			continue;
 		}
-		
+
 		mnuItem = new QAction(q);
-		mnuItem->setText(GensMenuBar::tr(menu->text));
-		
-		switch (menu->type)
-		{
-			case GensMenuBar::GMI_CHECK:
+		mnuItem->setText(q->tr(menu->text));
+
+		switch (menu->type) {
+			case GMI_CHECK:
 				mnuItem->setCheckable(true);
 				break;
-			
-			case GensMenuBar::GMI_SUBMENU:
+
+			case GMI_SUBMENU:
 				// Parse the submenu.
 				mnuSubMenu = new QMenu(parent);
-				mnuSubMenu->setTitle(GensMenuBar::tr(menu->text));
+				mnuSubMenu->setTitle(q->tr(menu->text));
 				parseMenu(menu->submenu, mnuSubMenu);
 				mnuItem->setMenu(mnuSubMenu);
 				break;
-			
-			case GensMenuBar::GMI_RADIO:
+
+			case GMI_RADIO:
 				// Check for the QActionGroup.
 				// TODO: Do we need to save references to QActionGroup to delete them later?
-				if (!actionGroup)
-				{
+				if (!actionGroup) {
 					// Not currently in a QActionGroup.
 					actionGroup = new QActionGroup(q);
 					actionGroup->setExclusive(true);
 				}
-				
+
 				// Mark the menu item as a radio button.
 				// (checkable == true; part of exclusive QActionGroup)
 				mnuItem->setCheckable(true);
 				actionGroup->addAction(mnuItem);
 				break;
-			
+
 			default:
 				break;
 		}
-		
-		if (menu->type != GensMenuBar::GMI_RADIO)
+
+		if (menu->type != GMI_RADIO)
 			actionGroup = NULL;
-		
-#ifndef __APPLE__
+
+#ifndef Q_WS_MAC
 		// Set the menu icon.
 		// (This isn't done on Mac OS X, since icons in menus look out of place there.)
 		if (menu->icon_fdo)
 			mnuItem->setIcon(GensQApplication::IconFromTheme(QLatin1String(menu->icon_fdo)));
 #endif /* __APPLE__ */
-		
+
 		// Set the shortcut key.
 		GensKey_t gensKey = gqt4_cfg->actionToKey(menu->id);
 		mnuItem->setShortcut(KeyHandlerQt::KeyValMToQtKey(gensKey));
-		
+
 		// Connect the signal to the signal mapper.
 		QObject::connect(mnuItem, SIGNAL(triggered()),
 				 this->signalMapper, SLOT(map()));
 		signalMapper->setMapping(mnuItem, menu->id);
-		
+
 		// Add the menu item to the menu.
 		parent->addAction(mnuItem);
-		
+
 		// Add the QAction to the actions map.
 		hashActions.insert(menu->id, mnuItem);
 	}
@@ -300,7 +295,7 @@ int GensMenuBarPrivate::unlock(void)
  * Check if the menu actions are locked.
  * @return True if the menu actions are locked; false otherwise.
  */
-bool GensMenuBarPrivate::isLocked(void)
+bool GensMenuBarPrivate::isLocked(void) const
 	{ return (lockCnt > 0); }
 
 
@@ -369,7 +364,7 @@ void GensMenuBar::retranslate(void)
  * @param id Menu item ID.
  * @return True if checked; false if not checked or not checkable.
  */
-bool GensMenuBar::menuItemCheckState(int id)
+bool GensMenuBar::menuItemCheckState(int id) const
 {
 	QAction *mnuItem = d->hashActions.value(id, NULL);
 	if (!mnuItem)
@@ -420,7 +415,7 @@ int GensMenuBar::unlock(void)
  * WRAPPER FUNCTION for GensMenuBarPrivate::isLocked().
  * @return True if the menu actions are locked; false otherwise.
  */
-bool GensMenuBar::isLocked(void)
+bool GensMenuBar::isLocked(void) const
 	{ return d->isLocked(); }
 
 

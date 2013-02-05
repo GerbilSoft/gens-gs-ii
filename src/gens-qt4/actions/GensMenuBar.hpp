@@ -27,9 +27,11 @@
 // LibGens includes. (utf8_str)
 #include "libgens/macros/common.h"
 
-// Qt includes.
-#include <QtGui/QMenuBar>
+// Qt includes and classes.
+#include <QtCore/QObject>
 #include <QtGui/QKeySequence>
+class QMenu;
+class QMenuBar;
 
 // EmuManager is needed for some settings.
 #include "../EmuManager.hpp"
@@ -42,79 +44,25 @@ class GensMenuBarPrivate;
 class GensMenuBar : public QObject
 {
 	Q_OBJECT
-	
+
 	public:
 		GensMenuBar(QObject *parent = NULL, EmuManager *emuManager = NULL);
 		virtual ~GensMenuBar();
-		
+
 		QMenuBar *createMenuBar(void);
 		QMenuBar *createMenuBar(QMenuBar *menuBar);
 		QMenu *popupMenu(void);
-		
+
 		void retranslate(void);
-		
-		bool menuItemCheckState(int id);
+
+		bool menuItemCheckState(int id) const;
 		int setMenuItemCheckState(int id, bool newCheck);
-		
-		bool isLocked(void);
-	
-	private:
-		enum MenuItemType
-		{
-			GMI_NORMAL,
-			GMI_SEPARATOR,
-			GMI_SUBMENU,
-			GMI_CHECK,
-			GMI_RADIO,
-			
-			GMI_MAX
-		};
-		
-		struct MenuItem
-		{
-			int id;				// Menu identifier. (-1 == separator)
-			MenuItemType type;		// Menu item type.
-			const utf8_str *text;		// Menu item text.
-			QAction::MenuRole menuRole;	// (Mac OS X) Menu item role.
-			
-			int submenu_id;			// Submenu ID.
-			const MenuItem *submenu;	// First element of submenu.
-			
-			const char *icon_fdo;		// FreeDesktop.org icon name.
-		};
-		
-		struct MainMenuItem
-		{
-			int id;				// Menu identifier.
-			const utf8_str *text;		// Menu text.
-			const MenuItem *submenu;	// First element of submenu.
-		};
-		
-		/**
-		 * Menu definitions.
-		 * These are located in GensMenuBar_menus.cpp.
-		 */
-		
-		// Top-level menus.
-		static const MenuItem ms_gmiFile[];
-		static const MenuItem ms_gmiGraphics[];
-			static const MenuItem ms_gmiGraphicsRes[];
-			static const MenuItem ms_gmiGraphicsBpp[];
-			static const MenuItem ms_gmiGraphicsStretch[];
-		static const MenuItem ms_gmiSystem[];
-			static const MenuItem ms_gmiSystemRegion[];
-		static const MenuItem ms_gmiOptions[];
-		static const MenuItem ms_gmiSoundTest[];
-		static const MenuItem ms_gmiHelp[];
-		
-		// Main menu.
-		static const MainMenuItem ms_gmmiMain[];
-		
-		/** END: Menu definitions. **/
-	
+
+		bool isLocked(void) const;
+
 	signals:
 		void triggered(int id, bool state);
-	
+
 	protected:
 		/**
 		 * lock(), unlock(): Temporarily lock menu actions.
@@ -124,32 +72,32 @@ class GensMenuBar : public QObject
 		 */
 		int lock(void);
 		int unlock(void);
-	
+
 	private:
 		friend class GensMenuBarPrivate;
 		GensMenuBarPrivate *const d;
-		
+
 		Q_DISABLE_COPY(GensMenuBar);
-		
+
 	/** Menu synchronization. **/
-	
+
 	public:
 		void setEmuManager(EmuManager *newEmuManager);
-		
+
 	public slots:
 		/** Emulation state has changed. **/
 		void stateChanged(void);
-	
+
 	private:
 		// Internal function for synchronization slots.
 		void stretchMode_changed_slot_int(StretchMode_t stretchMode);
 		void regionCode_changed_slot_int(LibGens::SysVersion::RegionCode_t regionCode);
 		void enableSRam_changed_slot_int(bool enableSRam);
-	
+
 	private slots:
 		/** Menu item selection slot. **/
 		void menuItemSelected(int id);
-		
+
 		/** Menu synchronization slots. **/
 		void recentRoms_updated(void);
 		void stretchMode_changed_slot(QVariant stretchMode);	// StretchMode_t
