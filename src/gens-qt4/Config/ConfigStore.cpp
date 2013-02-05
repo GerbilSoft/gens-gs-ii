@@ -227,12 +227,23 @@ ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
 {
 	// TODO: Rework this with the upcoming all-in-one IoManager.
 	q->m_ctrlConfig = new CtrlConfig(q);
-	
+
 	// Initialize settings to defaults.
 	reset();
-	
+
 	// Load the user's settings.
 	load();
+}
+
+ConfigStorePrivate::~ConfigStorePrivate()
+{
+	// Save the configuration.
+	// TODO: Handle non-default filenames.
+	save();
+
+	// Delete all the signal map vectors.
+	qDeleteAll(signalMaps);
+	signalMaps.clear();
 }
 
 
@@ -314,18 +325,6 @@ void ConfigStorePrivate::unregisterChangeNotification(QString property, QObject 
 			}
 		}
 	}
-}
-
-
-ConfigStorePrivate::~ConfigStorePrivate()
-{
-	// Save the configuration.
-	// TODO: Handle non-default filenames.
-	save();
-	
-	// Delete all the signal map vectors.
-	qDeleteAll(signalMaps);
-	signalMaps.clear();
 }
 
 
