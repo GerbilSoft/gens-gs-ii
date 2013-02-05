@@ -174,13 +174,13 @@ void AboutWindow::initAboutWindowText(void)
 			"(c) 2003-2004 by Stéphane Akhoun.<br />\n<br />\n"
 			"Gens/GS (c) 2008-2012 by David Korth.<br />\n<br />\n");
 	
-	sCopyrights += tr("Visit the Gens homepage") + QChar(L':') + sLineBreak +
+	sCopyrights += tr("Visit the Gens homepage:") + sLineBreak +
 			QLatin1String(
 				"<a href=\"http://www.gens.me/\">"
 				"http://www.gens.me/</a>") +
 			sLineBreak + sLineBreak;
 	
-	sCopyrights += tr("For news on Gens/GS, visit Sonic Retro") + QChar(L':') + sLineBreak +
+	sCopyrights += tr("For news on Gens/GS, visit Sonic Retro:") + sLineBreak +
 			QLatin1String(
 				"<a href=\"http://www.sonicretro.org/\">"
 				"http://www.sonicretro.org/</a>");
@@ -448,7 +448,7 @@ QString AboutWindow::GetDebugInfo(void)
 	
 	//: Save directory: Directory where configuration and savestate files are saved.
 	// TODO: Verify that the link works on Windows and Mac OS X.
-	sDebugInfo += tr("Save directory") + QChar(L':') + sLineBreak +
+	sDebugInfo += tr("Save directory:") + sLineBreak +
 		QLatin1String("<a href=\"file://") + gqt4_cfg->configPath() + QLatin1String("\">") +
 		QDir::toNativeSeparators(gqt4_cfg->configPath()) + QLatin1String("</a>") +
 		sLineBreak + sLineBreak;
@@ -524,7 +524,7 @@ QString AboutWindow::GetDebugInfo(void)
 	else
 	{
 		//: List what OpenGL extensions are in use.
-		sDebugInfo += tr("Using GL extensions") + QChar(L':');
+		sDebugInfo += tr("Using GL extensions:");
 		foreach (QString ext, extsInUse)
 		{
 			sDebugInfo += sLineBreak;
