@@ -25,4 +25,3 @@ ENDIF(NOT WIN32)
 
 # Additional stuff.
 OPTION(BUILD_DOC		"Build documentation." 						1)
-OPTION(BUILD_TESTS		"Build executables required for the LibGens test suite." 	1)

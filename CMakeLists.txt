@@ -17,7 +17,6 @@ list (APPEND CMAKE_MODULE_PATH "${gens-gs-ii_SOURCE_DIR}/CMake/macros")
 INCLUDE(CheckLibraryExists)
 
 # Enable testing.
-ENABLE_TESTING()
 INCLUDE(CTest)
 
 # Set default build options.
