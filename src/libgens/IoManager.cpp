@@ -1062,15 +1062,34 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 	dev->resetDev();
 
 	// Rebuild Team Player controller index tables for TP devices.
-	if (virtPort >= VIRTPORT_1 && virtPort <= VIRTPORT_2) {
-		if (dev->type == IoManager::IOT_TEAMPLAYER)
-			d->rebuildCtrlIndexTable(virtPort);
-	} else if (virtPort >= VIRTPORT_TP1A && virtPort <= VIRTPORT_TP1D) {
-		if (d->ioDevices[VIRTPORT_1].type == IoManager::IOT_TEAMPLAYER)
-			d->rebuildCtrlIndexTable(VIRTPORT_1);
-	} else if (virtPort >= VIRTPORT_TP2A && virtPort <= VIRTPORT_TP2D) {
-		if (d->ioDevices[VIRTPORT_2].type == IoManager::IOT_TEAMPLAYER)
-			d->rebuildCtrlIndexTable(VIRTPORT_2);
+	switch (virtPort) {
+		// System controller ports.
+		case VIRTPORT_1:
+		case VIRTPORT_2:
+			if (dev->type == IoManager::IOT_TEAMPLAYER)
+				d->rebuildCtrlIndexTable(virtPort);
+			break;
+
+		// Team Player, Port 1.
+		case VIRTPORT_TP1A:
+		case VIRTPORT_TP1B:
+		case VIRTPORT_TP1C:
+		case VIRTPORT_TP1D:
+			if (d->ioDevices[VIRTPORT_1].type == IoManager::IOT_TEAMPLAYER)
+				d->rebuildCtrlIndexTable(VIRTPORT_1);
+			break;
+
+		// Team Player, Port 1.
+		case VIRTPORT_TP2A:
+		case VIRTPORT_TP2B:
+		case VIRTPORT_TP2C:
+		case VIRTPORT_TP2D:
+			if (d->ioDevices[VIRTPORT_2].type == IoManager::IOT_TEAMPLAYER)
+				d->rebuildCtrlIndexTable(VIRTPORT_2);
+			break;
+
+		default:
+			break;
 	}
 }
 
