@@ -70,7 +70,12 @@ class GensWindowPrivate
 
 		// Widgets.
 		VBackend *vBackend;		// GensQGLWidget.
-		GensMenuBar *gensMenuBar;	// Gens menu bar.
+
+		// Menu bar.
+		GensMenuBar *gensMenuBar;
+		bool isGlobalMenuBar(void) const;
+		bool isShowMenuBar(void) const;
+		void initMenuBar(void);
 
 		QWidget *centralwidget;
 		QVBoxLayout *layout;
@@ -126,6 +131,9 @@ GensWindowPrivate::GensWindowPrivate(GensWindow *q)
 
 	// Initialize KeyHandlerQt.
 	keyHandler = new KeyHandlerQt(q, gensActions);
+
+	// Create the GensMenuBar.
+	gensMenuBar = new GensMenuBar(q, emuManager);
 }
 
 GensWindowPrivate::~GensWindowPrivate()
@@ -157,10 +165,8 @@ void GensWindowPrivate::setupUi(void)
 	// Connect slots by name.
 	QMetaObject::connectSlotsByName(q);
 
-	// Create the menu bar.
-	gensMenuBar = new GensMenuBar(q, emuManager);
-	if (cfg_showMenuBar)
-		q->setMenuBar(gensMenuBar->createMenuBar());
+	// Initialize the menu bar.
+	initMenuBar();
 
 	// Create the Video Backend.
 	// TODO: Allow selection of all available VBackend classes.
@@ -213,6 +219,67 @@ void GensWindowPrivate::setupUi(void)
 					q, SLOT(introStyle_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("GensWindow/showMenuBar"),
 					q, SLOT(showMenuBar_changed_slot(QVariant)));
+}
+
+
+/**
+ * Do we have a global menu bar?
+ * @return True if yes; false if no.
+ */
+inline bool GensWindowPrivate::isGlobalMenuBar(void) const
+{
+	// TODO: Support Unity and Qt global menu bars.
+#ifdef Q_WS_MAC
+	return true;
+#else
+	return false;
+#endif
+}
+
+/**
+ * Is the menu bar visible?
+ * @return True if yes; false if no.
+ */
+inline bool GensWindowPrivate::isShowMenuBar(void) const
+{
+	return (isGlobalMenuBar() || cfg_showMenuBar);
+}
+
+/**
+ * Initialize the menu bar.
+ */
+void GensWindowPrivate::initMenuBar(void)
+{
+	// TODO: If the value changed and we're windowed,
+	// resize the window to compensate.
+	int height_adjust = 0;
+	if (!isShowMenuBar()) {
+		// Hide the menu bar.
+		if (!q->isMaximized() && !q->isMinimized()) {
+			QWidget *menuBar = q->menuWidget();
+			if (menuBar != NULL)
+				height_adjust = -menuBar->height();
+		}
+		if (!isGlobalMenuBar())
+			q->setMenuBar(NULL);
+	} else {
+		// Check if the menu bar was there already.
+		const bool wasMenuBarThere = !!(q->menuWidget());
+
+		// Show the menu bar.
+		QMenuBar *menuBar = q->menuBar();
+		gensMenuBar->createMenuBar(menuBar);
+
+		if (!wasMenuBarThere && !q->isMaximized() && !q->isMinimized()) {
+			menuBar->adjustSize();	// ensure the menu bar gets the correct size
+			height_adjust = menuBar->height();
+		}
+	}
+
+	if (!isGlobalMenuBar() && height_adjust != 0) {
+		// Adjust the window height to compensate for the menu bar change.
+		q->resize(q->width(), q->height() + height_adjust);
+	}
 }
 
 
@@ -320,12 +387,10 @@ GensWindow::GensWindow()
 	d->idleThreadAllowed = true;
 	stateChanged();
 
-#ifndef Q_WS_MAC
 	// Enable the context menu.
 	connect(this, SIGNAL(customContextMenuRequested(QPoint)),
 		this, SLOT(showContextMenu(QPoint)));
 	setContextMenuPolicy(Qt::CustomContextMenu);
-#endif
 }
 
 
@@ -463,11 +528,7 @@ void GensWindow::changeEvent(QEvent *event)
 	if (event->type() == QEvent::LanguageChange) {
 		// Retranslate the menu bar.
 		d->gensMenuBar->retranslate();
-
-		// If the menu bar is visible, remove it and
-		// add a new menu bar with the new language.
-		if (this->menuWidget() != NULL)
-			this->setMenuBar(d->gensMenuBar->createMenuBar());
+		d->initMenuBar();
 	}
 
 	// Pass the event to the base class.
@@ -699,35 +760,7 @@ void GensWindow::autoPause_changed_slot(QVariant newAutoPause)
 void GensWindow::showMenuBar_changed_slot(QVariant newShowMenuBar)
 {
 	d->cfg_showMenuBar = newShowMenuBar.toBool();
-
-#ifndef Q_WS_MAC
-	// TODO: If the value changed and we're windowed,
-	// resize the window to compensate.
-	int height_adjust = 0;
-	if (!d->cfg_showMenuBar) {
-		// Hide the menu bar.
-		if (!this->isMaximized() && !this->isMinimized()) {
-			QWidget *menuBar = this->menuWidget();
-			if (menuBar != NULL)
-				height_adjust = -menuBar->height();
-		}
-		this->setMenuBar(NULL);
-	} else if (!this->menuWidget()) {
-		// Show the menu bar.
-		QMenuBar *menuBar = d->gensMenuBar->createMenuBar();
-		this->setMenuBar(menuBar);
-
-		if (!this->isMaximized() && !this->isMinimized()) {
-			menuBar->adjustSize();	// ensure the menu bar gets the correct size
-			height_adjust = menuBar->height();
-		}
-	}
-
-	if (height_adjust != 0) {
-		// Adjust the window height to compensate for the menu bar change.
-		this->resize(this->width(), this->height() + height_adjust);
-	}
-#endif /* Q_WS_MAC */
+	d->initMenuBar();
 }
 
 
@@ -819,19 +852,21 @@ void GensWindow::introStyle_changed_slot(QVariant newIntroStyle)
  */
 void GensWindow::showContextMenu(const QPoint& pos)
 {
-#ifdef Q_WS_MAC
-	// Mac OS X has a global menu bar, so this isn't necessary.
-	// TODO: Enable the context menu in full-screen mode?
-	Q_UNUSED(pos)
-	return;
-#else /* !Q_WS_MAC */
-	// Don't do anything if the menu bar is visible.
-	if (this->menuWidget() != NULL)
+	if (d->isGlobalMenuBar()) {
+		// Global menu bar. Popup menus aren't necessary.
+		// TODO: Enable the context menu in full-screen mode?
 		return;
+	} else {
+		// No global menu bar.
 
-	QPoint globalPos = this->mapToGlobal(pos);
-	d->gensMenuBar->popupMenu()->popup(globalPos);
-#endif
+		// on't do anything if the menu bar is visible.
+		if (d->isShowMenuBar())
+			return;
+
+		// Set up the context menu.
+		QPoint globalPos = this->mapToGlobal(pos);
+		d->gensMenuBar->popupMenu()->popup(globalPos);
+	}
 }
 
 }

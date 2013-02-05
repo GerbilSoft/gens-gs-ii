@@ -338,10 +338,20 @@ QMenu *GensMenuBar::popupMenu(void)
 QMenuBar *GensMenuBar::createMenuBar(void)
 {
 	QMenuBar *menuBar = new QMenuBar();
-	
+	return createMenuBar(menuBar);
+}
+
+
+/**
+ * Populate an existing QMenuBar with the Gens menus.
+ * @param menuBar QMenuBar to populate.
+ * @return menuBar
+ */
+QMenuBar *GensMenuBar::createMenuBar(QMenuBar *menuBar)
+{
+	menuBar->clear();
 	foreach(QAction* action, d->popupMenu->actions())
 		menuBar->addAction(action);
-	
 	return menuBar;
 }
 

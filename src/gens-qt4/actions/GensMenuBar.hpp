@@ -48,6 +48,7 @@ class GensMenuBar : public QObject
 		virtual ~GensMenuBar();
 		
 		QMenuBar *createMenuBar(void);
+		QMenuBar *createMenuBar(QMenuBar *menuBar);
 		QMenu *popupMenu(void);
 		
 		void retranslate(void);
