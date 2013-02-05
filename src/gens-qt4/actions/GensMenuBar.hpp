@@ -29,10 +29,10 @@
 
 // Qt includes and classes.
 #include <QtCore/QObject>
+#include <QtGui/QAction>
 #include <QtGui/QKeySequence>
 class QMenu;
 class QMenuBar;
-class QAction;
 
 // EmuManager is needed for some settings.
 #include "../EmuManager.hpp"
@@ -112,6 +112,57 @@ class GensMenuBar : public QObject
 		void regionCode_changed_slot(QVariant regionCode);	// LibGens::SysVersion::RegionCode_t
 		void enableSRam_changed_slot(QVariant enableSRam);	// bool
 		void showMenuBar_changed_slot(QVariant newShowMenuBar);	// bool
+
+	private:
+		enum MenuItemType {
+			GMI_NORMAL,
+			GMI_SEPARATOR,
+			GMI_SUBMENU,
+			GMI_CHECK,
+			GMI_RADIO,
+
+			GMI_MAX
+		};
+		
+		struct MenuItem {
+			int id;				// Menu identifier. (-1 == separator)
+			MenuItemType type;		// Menu item type.
+			const utf8_str *text;		// Menu item text.
+			QAction::MenuRole menuRole;	// (Mac OS X) Menu item role.
+
+			int submenu_id;			// Submenu ID.
+			const MenuItem *submenu;	// First element of submenu.
+
+			const char *icon_fdo;		// FreeDesktop.org icon name.
+		};
+
+		struct MainMenuItem {
+			int id;				// Menu identifier.
+			const utf8_str *text;		// Menu text.
+			const MenuItem *submenu;	// First element of submenu.
+		};
+
+		/**
+		 * Menu definitions.
+		 * These are located in GensMenuBar_menus.cpp.
+		 */
+
+		// Top-level menus.
+		static const MenuItem gmiFile[];
+		static const MenuItem gmiGraphics[];
+			static const MenuItem gmiGraphicsRes[];
+			static const MenuItem gmiGraphicsBpp[];
+			static const MenuItem gmiGraphicsStretch[];
+		static const MenuItem gmiSystem[];
+			static const MenuItem gmiSystemRegion[];
+		static const MenuItem gmiOptions[];
+		static const MenuItem gmiSoundTest[];
+		static const MenuItem gmiHelp[];
+
+		// Main menu.
+		static const MainMenuItem gmmiMain[];
+
+		/** END: Menu definitions. **/
 };
 
 }

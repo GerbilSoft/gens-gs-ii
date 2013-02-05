@@ -153,7 +153,7 @@ void GensMenuBarPrivate::clearHashTables(void)
 inline void GensMenuBarPrivate::retranslate(void)
 {
 	// (Re-)Populate the popup menu.
-	parseMainMenu(&gmmiMain[0]);
+	parseMainMenu(&GensMenuBar::gmmiMain[0]);
 	
 	// Synchronization.
 	syncAll();	// Synchronize the menus.
@@ -166,7 +166,7 @@ inline void GensMenuBarPrivate::retranslate(void)
  * The menus are added to popupMenu.
  * @param mainMenu Pointer to the first item in the GensMainMenuItem array.
  */
-void GensMenuBarPrivate::parseMainMenu(const MainMenuItem *mainMenu)
+void GensMenuBarPrivate::parseMainMenu(const GensMenuBar::MainMenuItem *mainMenu)
 {
 	QMenu *mnuSubMenu;
 
@@ -177,7 +177,7 @@ void GensMenuBarPrivate::parseMainMenu(const MainMenuItem *mainMenu)
 	for (; mainMenu->id != 0; mainMenu++) {
 		// Create a new submenu.
 		mnuSubMenu = new QMenu();
-		mnuSubMenu->setTitle(q->tr(mainMenu->text));
+		mnuSubMenu->setTitle(GensMenuBar::tr(mainMenu->text));
 
 		// Parse the menu.
 		parseMenu(mainMenu->submenu, mnuSubMenu);
@@ -193,36 +193,36 @@ void GensMenuBarPrivate::parseMainMenu(const MainMenuItem *mainMenu)
  * @param menu Pointer to the first item in the GensMenuItem array.
  * @param parent QMenu to add the menu items to.
  */
-void GensMenuBarPrivate::parseMenu(const MenuItem *menu, QMenu *parent)
+void GensMenuBarPrivate::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *parent)
 {
 	QAction *mnuItem;
 	QMenu *mnuSubMenu;			// QMenu for GMI_SUBMENU items.
 	QActionGroup *actionGroup = NULL;	// QActionGroup for GMI_RADIO items.
 
 	for (; menu->id != 0; menu++) {
-		if (menu->type == GMI_SEPARATOR) {
+		if (menu->type == GensMenuBar::GMI_SEPARATOR) {
 			// Menu separator.
 			lstSeparators.append(parent->addSeparator());
 			continue;
 		}
 
 		mnuItem = new QAction(q);
-		mnuItem->setText(q->tr(menu->text));
+		mnuItem->setText(GensMenuBar::tr(menu->text));
 
 		switch (menu->type) {
-			case GMI_CHECK:
+			case GensMenuBar::GMI_CHECK:
 				mnuItem->setCheckable(true);
 				break;
 
-			case GMI_SUBMENU:
+			case GensMenuBar::GMI_SUBMENU:
 				// Parse the submenu.
 				mnuSubMenu = new QMenu(parent);
-				mnuSubMenu->setTitle(q->tr(menu->text));
+				mnuSubMenu->setTitle(GensMenuBar::tr(menu->text));
 				parseMenu(menu->submenu, mnuSubMenu);
 				mnuItem->setMenu(mnuSubMenu);
 				break;
 
-			case GMI_RADIO:
+			case GensMenuBar::GMI_RADIO:
 				// Check for the QActionGroup.
 				// TODO: Do we need to save references to QActionGroup to delete them later?
 				if (!actionGroup) {
@@ -241,7 +241,7 @@ void GensMenuBarPrivate::parseMenu(const MenuItem *menu, QMenu *parent)
 				break;
 		}
 
-		if (menu->type != GMI_RADIO)
+		if (menu->type != GensMenuBar::GMI_RADIO)
 			actionGroup = NULL;
 
 #ifndef Q_WS_MAC

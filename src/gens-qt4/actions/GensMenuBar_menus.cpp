@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * GensMenuBarPrivate_menus.cpp: Gens Menu Bar class: Menu definitions.           *
+ * GensMenuBar_menus.cpp: Gens Menu Bar class: Menu definitions.           *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "GensMenuBar_p.hpp"
+#include "GensMenuBar.hpp"
 #include "GensMenuBar_menus.hpp"
 
 // Qt includes.
@@ -32,7 +32,7 @@ namespace GensQt4
 {
 
 /** File menu. **/
-const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiFile[] =
+const GensMenuBar::MenuItem GensMenuBar::gmiFile[] =
 {
 	{IDM_FILE_OPEN, GMI_NORMAL, QT_TR_NOOP("&Open ROM..."), QAction::NoRole, 0, NULL, "document-open"},
 	{IDM_FILE_RECENT, GMI_NORMAL, QT_TR_NOOP("&Recent ROMs"), QAction::NoRole, 0, NULL, "document-open-recent"},
@@ -59,7 +59,7 @@ const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiFile[] =
 };
 
 /** Graphics menu. **/
-const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiGraphics[] =
+const GensMenuBar::MenuItem GensMenuBar::gmiGraphics[] =
 {
 #ifndef Q_WS_MAC
 	{IDM_GRAPHICS_MENUBAR, GMI_CHECK, QT_TR_NOOP("Show &Menu Bar"), QAction::NoRole, IDM_GRAPHICS_MENUBAR, NULL, NULL},
@@ -78,7 +78,7 @@ const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiGraphics[] =
 };
 
 /** Graphics, Resolution submenu. **/
-const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiGraphicsRes[] =
+const GensMenuBar::MenuItem GensMenuBar::gmiGraphicsRes[] =
 {
 	{IDM_GRAPHICS_RES_1X, GMI_RADIO, QT_TR_NOOP("320x240 (&1x)"), QAction::NoRole, 0, NULL, NULL},
 	{IDM_GRAPHICS_RES_2X, GMI_RADIO, QT_TR_NOOP("640x480 (&2x)"), QAction::NoRole, 0, NULL, NULL},
@@ -89,7 +89,7 @@ const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiGraphicsRes[] =
 };
 
 /** Graphics, Color Depth submenu. **/
-const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiGraphicsBpp[] =
+const GensMenuBar::MenuItem GensMenuBar::gmiGraphicsBpp[] =
 {
 	{IDM_GRAPHICS_BPP_15, GMI_RADIO, QT_TR_NOOP("15-bit (555)"), QAction::NoRole, 0, NULL, NULL},
 	{IDM_GRAPHICS_BPP_16, GMI_RADIO, QT_TR_NOOP("16-bit (565)"), QAction::NoRole, 0, NULL, NULL},
@@ -99,7 +99,7 @@ const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiGraphicsBpp[] =
 };
 
 /** Graphics, Stretch Mode submenu. **/
-const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiGraphicsStretch[] =
+const GensMenuBar::MenuItem GensMenuBar::gmiGraphicsStretch[] =
 {
 	{IDM_GRAPHICS_STRETCH_NONE, GMI_RADIO, QT_TR_NOOP("None"), QAction::NoRole, 0, NULL, NULL},
 	{IDM_GRAPHICS_STRETCH_H, GMI_RADIO, QT_TR_NOOP("Horizontal Only"), QAction::NoRole, 0, NULL, NULL},
@@ -110,7 +110,7 @@ const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiGraphicsStretch[] =
 };
 
 /** System menu. **/
-const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiSystem[] =
+const GensMenuBar::MenuItem GensMenuBar::gmiSystem[] =
 {
 	{IDM_SYSTEM_REGION, GMI_SUBMENU, QT_TR_NOOP("&Region"), QAction::NoRole,
 		IDM_SYSTEM_REGION_MENU, &gmiSystemRegion[0], NULL},
@@ -130,7 +130,7 @@ const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiSystem[] =
 };
 
 /** System, Region submenu. **/
-const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiSystemRegion[] =
+const GensMenuBar::MenuItem GensMenuBar::gmiSystemRegion[] =
 {
 	{IDM_SYSTEM_REGION_AUTODETECT, GMI_RADIO, QT_TR_NOOP("&Auto Detect"), QAction::NoRole, 0, NULL, NULL},
 	{IDM_SYSTEM_REGION_JAPAN, GMI_RADIO, QT_TR_NOOP("&Japan (NTSC)"), QAction::NoRole, 0, NULL, NULL},
@@ -142,7 +142,7 @@ const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiSystemRegion[] =
 };
 
 /** Options menu. **/
-const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiOptions[] =
+const GensMenuBar::MenuItem GensMenuBar::gmiOptions[] =
 {
 	{IDM_OPTIONS_ENABLESRAM, GMI_CHECK, "Enable &SRAM/EEPROM", QAction::NoRole, 0, NULL, NULL},
 	{IDM_SEPARATOR, GMI_SEPARATOR, NULL, QAction::NoRole, 0, NULL, NULL},
@@ -152,7 +152,7 @@ const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiOptions[] =
 };
 
 /** SoundTest menu. **/
-const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiSoundTest[] =
+const GensMenuBar::MenuItem GensMenuBar::gmiSoundTest[] =
 {
 	{IDM_SOUNDTEST_11025, GMI_NORMAL, "&11,025 Hz", QAction::NoRole, 0, NULL, NULL},
 	{IDM_SOUNDTEST_16000, GMI_NORMAL, "1&6,000 Hz", QAction::NoRole, 0, NULL, NULL},
@@ -168,7 +168,7 @@ const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiSoundTest[] =
 };
 
 /** Help menu. **/
-const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiHelp[] =
+const GensMenuBar::MenuItem GensMenuBar::gmiHelp[] =
 {
 	{IDM_HELP_ABOUT, GMI_NORMAL, QT_TR_NOOP("&About Gens/GS II"), QAction::AboutRole, 0, NULL, "help-about"},
 	
@@ -176,7 +176,7 @@ const GensMenuBarPrivate::MenuItem GensMenuBarPrivate::gmiHelp[] =
 };
 
 /** Main menu. **/
-const GensMenuBarPrivate::MainMenuItem GensMenuBarPrivate::gmmiMain[] =
+const GensMenuBar::MainMenuItem GensMenuBar::gmmiMain[] =
 {
 	{IDM_FILE_MENU, QT_TR_NOOP("&File"), &gmiFile[0]},
 	{IDM_GRAPHICS_MENU, QT_TR_NOOP("&Graphics"), &gmiGraphics[0]},
@@ -189,3 +189,4 @@ const GensMenuBarPrivate::MainMenuItem GensMenuBarPrivate::gmmiMain[] =
 };
 
 }
+
