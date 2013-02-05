@@ -253,13 +253,17 @@ void GensWindowPrivate::initMenuBar(void)
 {
 	// TODO: If the value changed and we're windowed,
 	// resize the window to compensate.
+	QMenuBar *menuBar = nullptr;
 	int height_adjust = 0;
+
 	if (!isShowMenuBar()) {
 		// Hide the menu bar.
 		if (!q->isMaximized() && !q->isMinimized()) {
-			QWidget *menuBar = q->menuWidget();
-			if (menuBar != NULL)
+			QWidget *menuWidget = q->menuWidget();
+			if (menuWidget != NULL) {
+				menuBar = q->menuBar();
 				height_adjust = -menuBar->height();
+			}
 		}
 		if (!isGlobalMenuBar())
 			q->setMenuBar(NULL);
@@ -268,7 +272,7 @@ void GensWindowPrivate::initMenuBar(void)
 		const bool wasMenuBarThere = !!(q->menuWidget());
 
 		// Show the menu bar.
-		QMenuBar *menuBar = q->menuBar();
+		menuBar = q->menuBar();
 		gensMenuBar->createMenuBar(menuBar);
 
 		if (!wasMenuBarThere && !q->isMaximized() && !q->isMinimized()) {
@@ -276,6 +280,10 @@ void GensWindowPrivate::initMenuBar(void)
 			height_adjust = menuBar->height();
 		}
 	}
+
+	// Hide "Show Menu Bar" if we're using a global menu bar.
+	QAction *actionShowMenuBar = gensMenuBar->actionFromId(IDM_GRAPHICS_MENUBAR);
+	actionShowMenuBar->setVisible(!isGlobalMenuBar());
 
 	if (!isGlobalMenuBar() && height_adjust != 0) {
 		// Adjust the window height to compensate for the menu bar change.

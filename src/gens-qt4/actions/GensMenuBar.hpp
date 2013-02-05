@@ -32,6 +32,7 @@
 #include <QtGui/QKeySequence>
 class QMenu;
 class QMenuBar;
+class QAction;
 
 // EmuManager is needed for some settings.
 #include "../EmuManager.hpp"
@@ -59,6 +60,13 @@ class GensMenuBar : public QObject
 		int setMenuItemCheckState(int id, bool newCheck);
 
 		bool isLocked(void) const;
+
+		/**
+		 * Get a QAction from a menu item ID.
+		 * @param id Menu item ID.
+		 * @return QAction, or nullptr if the menu item ID is invalid.
+		 */
+		QAction *actionFromId(int id);
 
 	signals:
 		void triggered(int id, bool state);

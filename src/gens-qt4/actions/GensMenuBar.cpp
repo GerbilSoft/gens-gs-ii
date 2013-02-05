@@ -420,6 +420,15 @@ bool GensMenuBar::isLocked(void) const
 
 
 /**
+ * Get a QAction from a menu item ID.
+ * @param id Menu ID.
+ * @return QAction, or nullptr if the menu item ID is invalid.
+ */
+QAction *GensMenuBar::actionFromId(int id)
+	{ return d->hashActions.value(id); }
+
+
+/**
  * A menu item has been selected.
  * @param id Menu item ID.
  */
