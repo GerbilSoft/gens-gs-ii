@@ -159,26 +159,26 @@ QString CtrlConfigWindowPrivate::getShortDeviceName(IoManager::IoType_t ioType) 
 	switch (ioType) {
 		case IoManager::IOT_NONE:
 		default:
-			return q->tr("None");
+			return CtrlConfigWindow::tr("None");
 		case IoManager::IOT_3BTN:
 			//: Standard 3-button control pad.
-			return q->tr("3-button");
+			return CtrlConfigWindow::tr("3-button");
 		case IoManager::IOT_6BTN:
 			//: Sega 6-button "arcade" control pad.
-			return q->tr("6-button");
+			return CtrlConfigWindow::tr("6-button");
 		case IoManager::IOT_2BTN:
 			//: Sega Master System 2-button control pad.
-			return q->tr("2-button");
+			return CtrlConfigWindow::tr("2-button");
 		case IoManager::IOT_MEGA_MOUSE:
 			//: Sega Mega Mouse.
-			return q->tr("Mega Mouse");
+			return CtrlConfigWindow::tr("Mega Mouse");
 		case IoManager::IOT_TEAMPLAYER:
 			//: Sega Team Player. (Specific brand name; only modify if it's different in your region!)
-			return q->tr("Team Player");
+			return CtrlConfigWindow::tr("Team Player");
 		case IoManager::IOT_4WP_MASTER:	/* fallthrough */
 		case IoManager::IOT_4WP_SLAVE:
 			//: EA 4-Way Play. (Specific brand name; only modify if it's different in your region!)
-			return q->tr("4-Way Play");
+			return CtrlConfigWindow::tr("4-Way Play");
 	}
 }
 
@@ -192,26 +192,26 @@ QString CtrlConfigWindowPrivate::getLongDeviceName(IoManager::IoType_t ioType) c
 	switch (ioType) {
 		case IoManager::IOT_NONE:
 		default:
-			return q->tr("No device connected.");
+			return CtrlConfigWindow::tr("No device connected.");
 		case IoManager::IOT_3BTN:
 			//: Standard 3-button control pad.
-			return q->tr("3-button gamepad");
+			return CtrlConfigWindow::tr("3-button gamepad");
 		case IoManager::IOT_6BTN:
 			//: Sega 6-button "arcade" control pad.
-			return q->tr("6-button gamepad");
+			return CtrlConfigWindow::tr("6-button gamepad");
 		case IoManager::IOT_2BTN:
 			//: Sega Master System 2-button control pad.
-			return q->tr("2-button gamepad (SMS)");
+			return CtrlConfigWindow::tr("2-button gamepad (SMS)");
 		case IoManager::IOT_MEGA_MOUSE:
 			//: Sega Mega Mouse.
-			return q->tr("Mega Mouse");
+			return CtrlConfigWindow::tr("Mega Mouse");
 		case IoManager::IOT_TEAMPLAYER:
 			//: Sega Team Player. (Specific brand name; only modify if it's different in your region!)
-			return q->tr("Sega Team Player");
+			return CtrlConfigWindow::tr("Sega Team Player");
 		case IoManager::IOT_4WP_MASTER:	/* fallthrough */
 		case IoManager::IOT_4WP_SLAVE:
 			//: EA 4-Way Play. (Specific brand name; only modify if it's different in your region!)
-			return q->tr("EA 4-Way Play");
+			return CtrlConfigWindow::tr("EA 4-Way Play");
 	}
 }
 
@@ -226,7 +226,7 @@ QString CtrlConfigWindowPrivate::getPortName(IoManager::VirtPort_t virtPort) con
 		// System controller ports.
 		case IoManager::VIRTPORT_1:
 		case IoManager::VIRTPORT_2:
-			return q->tr("Port %1")
+			return CtrlConfigWindow::tr("Port %1")
 				.arg(virtPort - IoManager::VIRTPORT_1 + 1);
 
 		// Team Player, Port 1.
@@ -234,7 +234,7 @@ QString CtrlConfigWindowPrivate::getPortName(IoManager::VirtPort_t virtPort) con
 		case IoManager::VIRTPORT_TP1B:
 		case IoManager::VIRTPORT_TP1C:
 		case IoManager::VIRTPORT_TP1D:
-			return q->tr("Team Player %1, Port %2").arg(1)
+			return CtrlConfigWindow::tr("Team Player %1, Port %2").arg(1)
 				.arg(QChar(L'A' + (virtPort - IoManager::VIRTPORT_TP1A)));
 
 		// Team Player, Port 2.
@@ -242,7 +242,7 @@ QString CtrlConfigWindowPrivate::getPortName(IoManager::VirtPort_t virtPort) con
 		case IoManager::VIRTPORT_TP2B:
 		case IoManager::VIRTPORT_TP2C:
 		case IoManager::VIRTPORT_TP2D:
-			return q->tr("Team Player %1, Port %2").arg(2)
+			return CtrlConfigWindow::tr("Team Player %1, Port %2").arg(2)
 				.arg(QChar(L'A' + (virtPort - IoManager::VIRTPORT_TP2A)));
 
 		// 4-Way Play.
@@ -250,7 +250,7 @@ QString CtrlConfigWindowPrivate::getPortName(IoManager::VirtPort_t virtPort) con
 		case IoManager::VIRTPORT_4WPB:
 		case IoManager::VIRTPORT_4WPC:
 		case IoManager::VIRTPORT_4WPD:
-			return q->tr("4-Way Play, Port %1")
+			return CtrlConfigWindow::tr("4-Way Play, Port %1")
 				.arg(QChar(L'A' + (virtPort - IoManager::VIRTPORT_4WPA)));
 
 		default:

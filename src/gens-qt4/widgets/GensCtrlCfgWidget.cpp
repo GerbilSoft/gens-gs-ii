@@ -153,10 +153,10 @@ void GensCtrlCfgWidgetPrivate::init(void)
 
 	// Add the "Change All" and "Clear All" buttons.
 	// TODO: Icons.
-	btnChangeAll = new QPushButton(q->tr("&Change All Buttons"), q);
+	btnChangeAll = new QPushButton(GensCtrlCfgWidget::tr("&Change All Buttons"), q);
 	hboxOptions->addWidget(btnChangeAll);
 
-	btnClearAll = new QPushButton(q->tr("C&lear All Buttons"), q);
+	btnClearAll = new QPushButton(GensCtrlCfgWidget::tr("C&lear All Buttons"), q);
 	QObject::connect(btnClearAll, SIGNAL(clicked(bool)),
 			 q, SLOT(clearAllButtons()));
 	hboxOptions->addWidget(btnClearAll);
@@ -228,64 +228,64 @@ QString GensCtrlCfgWidgetPrivate::buttonName_l(IoManager::ButtonName_t buttonNam
 		// Standard controller buttons.
 		case IoManager::BTNNAME_UP:
 			//: Standard controller: D-Pad UP.
-			return q->tr("Up", "controller-standard");
+			return GensCtrlCfgWidget::tr("Up", "controller-standard");
 		case IoManager::BTNNAME_DOWN:
 			//: Standard controller: D-Pad DOWN.
-			return q->tr("Down", "controller-standard");
+			return GensCtrlCfgWidget::tr("Down", "controller-standard");
 		case IoManager::BTNNAME_LEFT:
 			//: Standard controller: D-Pad LEFT.
-			return q->tr("Left", "controller-standard");
+			return GensCtrlCfgWidget::tr("Left", "controller-standard");
 		case IoManager::BTNNAME_RIGHT:
 			//: Standard controller: D-Pad RIGHT.
-			return q->tr("Right", "controller-standard");
+			return GensCtrlCfgWidget::tr("Right", "controller-standard");
 		case IoManager::BTNNAME_B:
 			//: Standard controller: B button.
-			return q->tr("B", "controller-standard");
+			return GensCtrlCfgWidget::tr("B", "controller-standard");
 		case IoManager::BTNNAME_C:
 			//: Standard controller: C button.
-			return q->tr("C", "controller-standard");
+			return GensCtrlCfgWidget::tr("C", "controller-standard");
 		case IoManager::BTNNAME_A:
 			//: Standard controller: A button.
-			return q->tr("A", "controller-standard");
+			return GensCtrlCfgWidget::tr("A", "controller-standard");
 		case IoManager::BTNNAME_START:
 			//: Standard controller: START button.
-			return q->tr("Start", "controller-standard");
+			return GensCtrlCfgWidget::tr("Start", "controller-standard");
 		case IoManager::BTNNAME_Z:
 			//: Standard controller: Z button.
-			return q->tr("Z", "controller-standard");
+			return GensCtrlCfgWidget::tr("Z", "controller-standard");
 		case IoManager::BTNNAME_Y:
 			//: Standard controller: Y button.
-			return q->tr("Y", "controller-standard");
+			return GensCtrlCfgWidget::tr("Y", "controller-standard");
 		case IoManager::BTNNAME_X:
 			//: Standard controller: X button.
-			return q->tr("X", "controller-standard");
+			return GensCtrlCfgWidget::tr("X", "controller-standard");
 		case IoManager::BTNNAME_MODE:
 			//: Standard controller: MODE button.
-			return q->tr("Mode", "controller-standard");
+			return GensCtrlCfgWidget::tr("Mode", "controller-standard");
 
 		/** SMS/GG buttons. **/
 
 		case IoManager::BTNNAME_1:
 			//: SMS/Game Gear: 1 button.
-			return q->tr("1", "controller-sms-gg");
+			return GensCtrlCfgWidget::tr("1", "controller-sms-gg");
 		case IoManager::BTNNAME_2:
 			//: SMS/Game Gear: 2 button.
-			return q->tr("2", "controller-sms-gg");
+			return GensCtrlCfgWidget::tr("2", "controller-sms-gg");
 
 		/** Sega Mega Mouse buttons. **/
 
 		case IoManager::BTNNAME_MOUSE_LEFT:
 			//: Sega Mega Mouse: LEFT mouse button.
-			return q->tr("Left", "controller-mouse");
+			return GensCtrlCfgWidget::tr("Left", "controller-mouse");
 		case IoManager::BTNNAME_MOUSE_RIGHT:
 			//: Sega Mega Mouse: RIGHT mouse button.
-			return q->tr("Right", "controller-mouse");
+			return GensCtrlCfgWidget::tr("Right", "controller-mouse");
 		case IoManager::BTNNAME_MOUSE_MIDDLE:
 			//: Sega Mega Mouse: MIDDLE mouse button.
-			return q->tr("Middle", "controller-mouse");
+			return GensCtrlCfgWidget::tr("Middle", "controller-mouse");
 		case IoManager::BTNNAME_MOUSE_START:
 			//: Sega Mega Mouse: START button.
-			return q->tr("Start", "controller-mouse");
+			return GensCtrlCfgWidget::tr("Start", "controller-mouse");
 
 		default:
 			return QString();

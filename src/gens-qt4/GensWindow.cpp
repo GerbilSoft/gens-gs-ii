@@ -327,7 +327,7 @@ void GensWindowPrivate::setGensTitle(void)
 	// Update the window title to reflect the emulation status.
 	QString title;
 #if !defined(GENS_ENABLE_EMULATION)
-	title += tr("[NO-EMU]") + QChar(L' ');
+	title += GensWindow::tr("[NO-EMU]") + QChar(L' ');
 #endif
 
 	if (!emuManager->isRomOpen()) {
@@ -337,7 +337,7 @@ void GensWindowPrivate::setGensTitle(void)
 		// ROM is running.
 		if (emuManager->paused().paused_manual) {
 			// Emulator is paused manually.
-			title += q->tr("[Paused]") + QChar(L' ');
+			title += GensWindow::tr("[Paused]") + QChar(L' ');
 		}
 		title += emuManager->romName();
 	}
