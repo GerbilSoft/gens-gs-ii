@@ -142,6 +142,7 @@ GensWindowPrivate::~GensWindowPrivate()
 	delete keyHandler;
 	delete gensActions;
 	delete emuManager;
+	delete gensMenuBar;
 }
 
 
