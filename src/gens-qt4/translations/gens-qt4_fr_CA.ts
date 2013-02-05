@@ -4,16 +4,6 @@
 <context>
     <name>GensQt4::AboutWindow</name>
     <message>
-        <location filename="../AboutWindow.cpp" line="177"/>
-        <source>Visit the Gens homepage</source>
-        <translation>Visiter le site de Gens</translation>
-    </message>
-    <message>
-        <location filename="../AboutWindow.cpp" line="183"/>
-        <source>For news on Gens/GS, visit Sonic Retro</source>
-        <translation>Pour les dernières informations sur Gens/GS, visitez Sonic Retro</translation>
-    </message>
-    <message>
         <location filename="../AboutWindow.cpp" line="206"/>
         <source>NO-EMULATION BUILD</source>
         <extracomment>&quot;NO-EMULATION BUILD&quot; means CPU cores aren&apos;t compiled in. Used for testing Gens/GS II on new platforms.</extracomment>
@@ -50,12 +40,6 @@
         <translation>Utilise Qt %1.</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="410"/>
-        <source>CPU flags</source>
-        <extracomment>CPU flags are extra features found in a CPU, such as SSE.</extracomment>
-        <translation>Drapeaux CPU</translation>
-    </message>
-    <message>
         <location filename="../AboutWindow.cpp" line="422"/>
         <location filename="../AboutWindow.cpp" line="440"/>
         <source>(none)</source>
@@ -65,73 +49,19 @@ Used to indicate no special CPU features were found.</extracomment>
         <translation>(aucun)</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="445"/>
-        <source>Timing method</source>
-        <extracomment>Timing method: Function used to handle emulation timing.</extracomment>
-        <translation>Méthode de synchronisation</translation>
-    </message>
-    <message>
-        <location filename="../AboutWindow.cpp" line="451"/>
-        <source>Save directory</source>
-        <extracomment>Save directory: Directory where configuration and savestate files are saved.</extracomment>
-        <translation>Répertoire des sauvegardes</translation>
-    </message>
-    <message>
-        <location filename="../AboutWindow.cpp" line="472"/>
-        <source>OpenGL vendor string</source>
-        <extracomment>String identifying the manufacturer of the OpenGL implementation. (e.g. &quot;X.Org R300 Project&quot;)</extracomment>
-        <translation>Fournisseur OpenGL</translation>
-    </message>
-    <message>
-        <location filename="../AboutWindow.cpp" line="474"/>
-        <source>OpenGL renderer string</source>
-        <extracomment>String identifying the specific OpenGL renderer. (e.g. &quot;Gallium 0.4 on ATI RV530&quot;)</extracomment>
-        <translation>Renderer OpenGL</translation>
-    </message>
-    <message>
-        <location filename="../AboutWindow.cpp" line="476"/>
-        <source>OpenGL version string</source>
-        <extracomment>String identifying the OpenGL renderer version. (e.g. &quot;2.1 Mesa 7.11-devel&quot;)</extracomment>
-        <translation>Version OpenGL</translation>
-    </message>
-    <message>
-        <location filename="../AboutWindow.cpp" line="493"/>
-        <source>GLSL version string</source>
-        <extracomment>String identifying the OpenGL Shading Language version. (e.g. &quot;1.20&quot;)</extracomment>
-        <translation>Version GLSL</translation>
-    </message>
-    <message>
-        <location filename="../AboutWindow.cpp" line="527"/>
-        <source>Using GL extensions</source>
-        <extracomment>List what OpenGL extensions are in use.</extracomment>
-        <translation>Utilise les extensions GL</translation>
-    </message>
-    <message>
-        <location filename="../AboutWindow.cpp" line="573"/>
-        <source>System ANSI code page</source>
-        <extracomment>Win32: ANSI code page. (e.g. 1252 for US/English, 932 for Japanese)</extracomment>
-        <translation>Code ANSI du système</translation>
-    </message>
-    <message>
-        <location filename="../AboutWindow.cpp" line="575"/>
-        <source>System OEM code page</source>
-        <extracomment>Win32: OEM code page. (e.g. 437 for US/English)</extracomment>
-        <translation>Code EOM du système</translation>
-    </message>
-    <message>
-        <location filename="../AboutWindow.cpp" line="590"/>
+        <location filename="../AboutWindow.cpp" line="585"/>
         <source>Unknown [GetCPInfoExA() failed]</source>
         <extracomment>GetCPInfoExA() call failed.</extracomment>
         <translation>Inconnu [Échec de GetCPInfoExA]</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="634"/>
+        <location filename="../AboutWindow.cpp" line="623"/>
         <source>Using Unicode strings for Win32 API.</source>
         <extracomment>Win32: Unicode strings are being used. (WinNT)</extracomment>
         <translation>Utilise du texte Unicode pour les API Win32.</translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="639"/>
+        <location filename="../AboutWindow.cpp" line="626"/>
         <source>Using ANSI strings for Win32 API.</source>
         <extracomment>Win32: ANSI strings are being used. (Win9x)</extracomment>
         <translation>Utilise ANSI pour les API Win32.</translation>
@@ -144,10 +74,62 @@ Used to indicate no special CPU features were found.</extracomment>
         <translation>(inconnu)</translation>
     </message>
     <message>
+        <location filename="../AboutWindow.cpp" line="177"/>
+        <source>Visit the Gens homepage:</source>
+        <translation>Visiter le site de Gens :</translation>
+    </message>
+    <message>
+        <location filename="../AboutWindow.cpp" line="183"/>
+        <source>For news on Gens/GS, visit Sonic Retro:</source>
+        <translation>Pour les dernières informations sur Gens/GS, visitez Sonic Retro :</translation>
+    </message>
+    <message>
+        <location filename="../AboutWindow.cpp" line="410"/>
+        <source>CPU flags:</source>
+        <extracomment>CPU flags are extra features found in a CPU, such as SSE.</extracomment>
+        <translation>Drapeaux CPU :</translation>
+    </message>
+    <message>
+        <location filename="../AboutWindow.cpp" line="445"/>
+        <source>Timing method:</source>
+        <extracomment>Timing method: Function used to handle emulation timing.</extracomment>
+        <translation>Méthode de synchronisation :</translation>
+    </message>
+    <message>
+        <location filename="../AboutWindow.cpp" line="451"/>
+        <source>Save directory:</source>
+        <extracomment>Save directory: Directory where configuration and savestate files are saved.</extracomment>
+        <translation>Répertoire des sauvegardes :</translation>
+    </message>
+    <message>
         <location filename="../AboutWindow.cpp" line="463"/>
         <source>OpenGL disabled.</source>
         <extracomment>Displayed if Gens/GS II is compiled without OpenGL support.</extracomment>
         <translation>OpenGL désactivé.</translation>
+    </message>
+    <message>
+        <location filename="../AboutWindow.cpp" line="472"/>
+        <source>OpenGL vendor string:</source>
+        <extracomment>String identifying the manufacturer of the OpenGL implementation. (e.g. &quot;X.Org R300 Project&quot;)</extracomment>
+        <translation>Fournisseur OpenGL :</translation>
+    </message>
+    <message>
+        <location filename="../AboutWindow.cpp" line="474"/>
+        <source>OpenGL renderer string:</source>
+        <extracomment>String identifying the specific OpenGL renderer. (e.g. &quot;Gallium 0.4 on ATI RV530&quot;)</extracomment>
+        <translation>Renderer OpenGL :</translation>
+    </message>
+    <message>
+        <location filename="../AboutWindow.cpp" line="476"/>
+        <source>OpenGL version string:</source>
+        <extracomment>String identifying the OpenGL renderer version. (e.g. &quot;2.1 Mesa 7.11-devel&quot;)</extracomment>
+        <translation>Version GLSL :</translation>
+    </message>
+    <message>
+        <location filename="../AboutWindow.cpp" line="493"/>
+        <source>GLSL version string:</source>
+        <extracomment>String identifying the OpenGL Shading Language version. (e.g. &quot;1.20&quot;)</extracomment>
+        <translation>Version GLSL :</translation>
     </message>
     <message>
         <location filename="../AboutWindow.cpp" line="504"/>
@@ -166,6 +148,24 @@ Used to indicate no special CPU features were found.</extracomment>
         <source>No GL extensions in use.</source>
         <extracomment>No OpenGL extensions are being used.</extracomment>
         <translation>Aucune extension GL n&apos;est utilisée.</translation>
+    </message>
+    <message>
+        <location filename="../AboutWindow.cpp" line="527"/>
+        <source>Using GL extensions:</source>
+        <extracomment>List what OpenGL extensions are in use.</extracomment>
+        <translation>Utilise les extensions GL :</translation>
+    </message>
+    <message>
+        <location filename="../AboutWindow.cpp" line="571"/>
+        <source>System ANSI code page:</source>
+        <extracomment>Win32: ANSI code page. (e.g. 1252 for US/English, 932 for Japanese)</extracomment>
+        <translation>Code ANSI du système :</translation>
+    </message>
+    <message>
+        <location filename="../AboutWindow.cpp" line="573"/>
+        <source>System OEM code page:</source>
+        <extracomment>Win32: OEM code page. (e.g. 437 for US/English)</extracomment>
+        <translation>Code EOM du système :</translation>
     </message>
     <message>
         <location filename="../ui/AboutWindow.ui" line="14"/>
@@ -196,31 +196,31 @@ Used to indicate no special CPU features were found.</extracomment>
 <context>
     <name>GensQt4::CtrlConfigWindow</name>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="285"/>
+        <location filename="../CtrlConfigWindow.cpp" line="162"/>
         <source>None</source>
         <translation>Aucun</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="289"/>
+        <location filename="../CtrlConfigWindow.cpp" line="165"/>
         <source>3-button</source>
         <extracomment>Standard 3-button control pad.</extracomment>
         <translation>3 boutons</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="292"/>
+        <location filename="../CtrlConfigWindow.cpp" line="168"/>
         <source>6-button</source>
         <extracomment>Sega 6-button &quot;arcade&quot; control pad.</extracomment>
         <translation>6 boutons</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="295"/>
+        <location filename="../CtrlConfigWindow.cpp" line="171"/>
         <source>2-button</source>
         <extracomment>Sega Master System 2-button control pad.</extracomment>
         <translation>2 boutons</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="298"/>
-        <location filename="../CtrlConfigWindow.cpp" line="336"/>
+        <location filename="../CtrlConfigWindow.cpp" line="174"/>
+        <location filename="../CtrlConfigWindow.cpp" line="207"/>
         <source>Mega Mouse</source>
         <extracomment>Sega Mega Mouse.
 ----------
@@ -228,65 +228,65 @@ Sega Mega Mouse.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="301"/>
+        <location filename="../CtrlConfigWindow.cpp" line="177"/>
         <source>Team Player</source>
         <extracomment>Sega Team Player. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
         <translation>Team Player</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="305"/>
+        <location filename="../CtrlConfigWindow.cpp" line="181"/>
         <source>4-Way Play</source>
         <extracomment>EA 4-Way Play. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="323"/>
+        <location filename="../CtrlConfigWindow.cpp" line="195"/>
         <source>No device connected.</source>
         <translation>Pas d&apos;appareil connecté.</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="327"/>
+        <location filename="../CtrlConfigWindow.cpp" line="198"/>
         <source>3-button gamepad</source>
         <extracomment>Standard 3-button control pad.</extracomment>
         <translation>Manette 3 boutons</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="330"/>
+        <location filename="../CtrlConfigWindow.cpp" line="201"/>
         <source>6-button gamepad</source>
         <extracomment>Sega 6-button &quot;arcade&quot; control pad.</extracomment>
         <translation>Manette 6 boutons</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="333"/>
+        <location filename="../CtrlConfigWindow.cpp" line="204"/>
         <source>2-button gamepad (SMS)</source>
         <extracomment>Sega Master System 2-button control pad.</extracomment>
         <translation>Manette 2 boutons (SMS)</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="339"/>
+        <location filename="../CtrlConfigWindow.cpp" line="210"/>
         <source>Sega Team Player</source>
         <extracomment>Sega Team Player. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
         <translation>Sega Team Player</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="343"/>
+        <location filename="../CtrlConfigWindow.cpp" line="214"/>
         <source>EA 4-Way Play</source>
         <extracomment>EA 4-Way Play. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
         <translation>EA 4-Way Play</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="360"/>
+        <location filename="../CtrlConfigWindow.cpp" line="229"/>
         <source>Port %1</source>
         <translation>Port %1</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="367"/>
-        <location filename="../CtrlConfigWindow.cpp" line="375"/>
+        <location filename="../CtrlConfigWindow.cpp" line="237"/>
+        <location filename="../CtrlConfigWindow.cpp" line="245"/>
         <source>Team Player %1, Port %2</source>
         <translation>Team Player %1, Port %2</translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="383"/>
+        <location filename="../CtrlConfigWindow.cpp" line="253"/>
         <source>4-Way Play, Port %1</source>
         <translation>Multitap 4 joueurs, Port %1</translation>
     </message>
@@ -311,72 +311,77 @@ Sega Mega Mouse.</extracomment>
         <translation>Configuration des boutons</translation>
     </message>
     <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="191"/>
+        <location filename="../ui/CtrlConfigWindow.ui" line="192"/>
         <source>Port &amp;1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="199"/>
+        <location filename="../ui/CtrlConfigWindow.ui" line="200"/>
         <source>Port &amp;2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="207"/>
+        <location filename="../ui/CtrlConfigWindow.ui" line="208"/>
+        <source>&amp;EXT</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/CtrlConfigWindow.ui" line="216"/>
         <source>TP-1A</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="215"/>
+        <location filename="../ui/CtrlConfigWindow.ui" line="224"/>
         <source>TP-1B</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="223"/>
+        <location filename="../ui/CtrlConfigWindow.ui" line="232"/>
         <source>TP-1C</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="231"/>
+        <location filename="../ui/CtrlConfigWindow.ui" line="240"/>
         <source>TP-1D</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="239"/>
+        <location filename="../ui/CtrlConfigWindow.ui" line="248"/>
         <source>TP-2A</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="247"/>
+        <location filename="../ui/CtrlConfigWindow.ui" line="256"/>
         <source>TP-2B</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="255"/>
+        <location filename="../ui/CtrlConfigWindow.ui" line="264"/>
         <source>TP-2C</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="263"/>
+        <location filename="../ui/CtrlConfigWindow.ui" line="272"/>
         <source>TP-2D</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="271"/>
+        <location filename="../ui/CtrlConfigWindow.ui" line="280"/>
         <source>4WP-A</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="279"/>
+        <location filename="../ui/CtrlConfigWindow.ui" line="288"/>
         <source>4WP-B</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="287"/>
+        <location filename="../ui/CtrlConfigWindow.ui" line="296"/>
         <source>4WP-C</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/CtrlConfigWindow.ui" line="295"/>
+        <location filename="../ui/CtrlConfigWindow.ui" line="304"/>
         <source>4WP-D</source>
         <translation></translation>
     </message>
@@ -384,76 +389,76 @@ Sega Mega Mouse.</extracomment>
 <context>
     <name>GensQt4::EmuManager</name>
     <message>
-        <location filename="../EmuManager.cpp" line="183"/>
+        <location filename="../EmuManager.cpp" line="173"/>
         <source>Open ROM</source>
         <translation>Ouvrir une ROM</translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="185"/>
+        <location filename="../EmuManager.cpp" line="175"/>
         <source>Sega Genesis ROM images</source>
         <translation type="unfinished">ROM Sega Genesis</translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="198"/>
+        <location filename="../EmuManager.cpp" line="188"/>
         <source>Sega Genesis / 32X ROMs; Sega CD disc images</source>
         <translation type="unfinished">ROMs Sega Genesis / 32X ; Images disque Sega CD</translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="201"/>
+        <location filename="../EmuManager.cpp" line="191"/>
         <source>All Files</source>
         <translation>Tout les fichiers</translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="358"/>
+        <location filename="../EmuManager.cpp" line="348"/>
         <source>Unsupported System</source>
         <extracomment>A ROM image was selected for a system that Gens/GS II does not currently support. (error title)</extracomment>
         <translation>Système non supporté</translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="360"/>
+        <location filename="../EmuManager.cpp" line="350"/>
         <source>The selected ROM image is designed for a system that is not currently supported by Gens/GS II.</source>
         <extracomment>A ROM image was selected for a system that Gens/GS II does not currently support. (error description)</extracomment>
         <translation>La ROM sélectionné est destinée à un système n&apos;étant pas pris en charge par Gens/GS II.</translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="364"/>
+        <location filename="../EmuManager.cpp" line="354"/>
         <source>Selected ROM&apos;s system: %1</source>
         <extracomment>Indicate what system the ROM image is for.</extracomment>
         <translation>Système pour cette ROM : %1</translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="367"/>
+        <location filename="../EmuManager.cpp" line="357"/>
         <source>Supported systems:</source>
         <extracomment>List of systems that Gens/GS II currently supports.</extracomment>
         <translation>Systèmes pris en charge :</translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="386"/>
+        <location filename="../EmuManager.cpp" line="376"/>
         <source>(unknown)</source>
         <comment>rom-format</comment>
         <extracomment>Unknown ROM format. (EmuManager::RomFormat() returned an empty string.)</extracomment>
         <translation>(inconnu)</translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="394"/>
+        <location filename="../EmuManager.cpp" line="384"/>
         <source>Unsupported ROM Format</source>
         <extracomment>A ROM image was selected in a format that Gens/GS II does not currently support. (error title)</extracomment>
         <translation>Format de ROM non supporté</translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="396"/>
+        <location filename="../EmuManager.cpp" line="386"/>
         <source>The selected ROM image is in a format that is not currently supported by Gens/GS II.</source>
         <extracomment>A ROM image was selected in a format that Gens/GS II does not currently support. (error description)</extracomment>
         <translation>La ROM sélectionnée est dans un format qui n&apos;est pas encore pris en charge par Gens/GS II.</translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="399"/>
+        <location filename="../EmuManager.cpp" line="389"/>
         <source>Selected ROM image format: %1</source>
         <extracomment>Indicate what format the ROM image is in.</extracomment>
         <translation>Format de la ROM sélectionnée : %1</translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="402"/>
+        <location filename="../EmuManager.cpp" line="392"/>
         <source>Supported ROM formats:</source>
         <extracomment>List of ROM formats that Gens/GS II currently supports.</extracomment>
         <translation>Formats de ROMs pris en charge :</translation>
@@ -655,202 +660,202 @@ Sega Mega Mouse.</extracomment>
         <translation>Image CD-ROM brute (secteurs de %1 bytes)</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="553"/>
+        <location filename="../EmuManager_qEmu.cpp" line="533"/>
         <source>Screenshot %1 saved.</source>
         <extracomment>OSD message indicating a screenshot has been saved.</extracomment>
         <translation>Capture d&apos;écran %1 enregistrée.</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="560"/>
+        <location filename="../EmuManager_qEmu.cpp" line="540"/>
         <source>Error saving screenshot.</source>
         <extracomment>OSD message indicating an error occurred while saving a screenshot.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="578"/>
+        <location filename="../EmuManager_qEmu.cpp" line="558"/>
         <source>Audio sampling rate set to %L1 Hz.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating sampling rate change.</extracomment>
         <translation>Échantillonage audio %L1 Hz.</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="597"/>
+        <location filename="../EmuManager_qEmu.cpp" line="577"/>
         <source>Audio set to %1.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating audio stereo/mono change.</extracomment>
         <translation>Audio %1.</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="600"/>
+        <location filename="../EmuManager_qEmu.cpp" line="580"/>
         <source>Stereo</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating audio has been set to Stereo.</extracomment>
         <translation>Stéréo</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="602"/>
+        <location filename="../EmuManager_qEmu.cpp" line="582"/>
         <source>Mono</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating audio has been set to Mono.</extracomment>
         <translation>Mono</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="636"/>
+        <location filename="../EmuManager_qEmu.cpp" line="616"/>
         <source>State %1 saved.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating a savestate has been saved.</extracomment>
         <translation>État %1 sauvegardé.</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="641"/>
+        <location filename="../EmuManager_qEmu.cpp" line="621"/>
         <source>State saved in %1</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating a savestate has been saved using a specified filename</extracomment>
         <translation>État sauvegardé dans %1</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="648"/>
+        <location filename="../EmuManager_qEmu.cpp" line="628"/>
         <source>Error saving state: %1</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating an error occurred while saving the savestate.</extracomment>
         <translation>Erreur lors de la sauvegarde de l&apos;état : %1</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="677"/>
+        <location filename="../EmuManager_qEmu.cpp" line="657"/>
         <source>State %1 loaded.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating a savestate has been loaded.</extracomment>
         <translation>État %1 chargé.</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="682"/>
+        <location filename="../EmuManager_qEmu.cpp" line="662"/>
         <source>State loaded from %1</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating a savestate has been loaded using a specified filename</extracomment>
         <translation>État chargé depuis %1</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="689"/>
+        <location filename="../EmuManager_qEmu.cpp" line="669"/>
         <source>Error loading state: %1</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating an error occurred while loading the savestate.</extracomment>
         <translation>Erreur lors du chargement de l&apos;état : %1</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="717"/>
+        <location filename="../EmuManager_qEmu.cpp" line="697"/>
         <source>Save Slot %1 selected.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating a save slot is selected while no ROM is loaded.</extracomment>
         <translation>Emplacement de sauvegarde de l&apos;état sélectionné: %1.</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="725"/>
+        <location filename="../EmuManager_qEmu.cpp" line="705"/>
         <source>Save Slot %1 [%2]</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating a save slot is selected while a ROM is loaded.</extracomment>
         <translation>Emplacement de sauvegarde de l&apos;état : %1 [%2]</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="733"/>
+        <location filename="../EmuManager_qEmu.cpp" line="713"/>
         <source>OCCUPIED</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating a savestate exists in the selected slot.</extracomment>
         <translation>OCCUPÉ</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="764"/>
+        <location filename="../EmuManager_qEmu.cpp" line="744"/>
         <source>EMPTY</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating there is no savestate in the selected slot.</extracomment>
         <translation>VIDE</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="824"/>
+        <location filename="../EmuManager_qEmu.cpp" line="804"/>
         <source>Hard Reset.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating a Hard Reset was performed.</extracomment>
         <translation>Réinitialisation matérielle.</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="832"/>
+        <location filename="../EmuManager_qEmu.cpp" line="812"/>
         <source>Soft Reset.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating a Soft Reset was performed.</extracomment>
         <translation>Réinitialisation logicielle.</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="888"/>
+        <location filename="../EmuManager_qEmu.cpp" line="841"/>
         <source>Interlaced: %1</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating the interlaced rendering mode was changed.</extracomment>
         <translation>Interlacement : %1</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="893"/>
+        <location filename="../EmuManager_qEmu.cpp" line="845"/>
         <source>Even lines only</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating the interlaced rendering mode was set to even lines only.</extracomment>
         <translation>Lignes paires uniquement</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="898"/>
+        <location filename="../EmuManager_qEmu.cpp" line="849"/>
         <source>Odd lines only</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating the interlaced rendering mode was set to odd lines only.</extracomment>
         <translation>Lignes impaires seulement</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="903"/>
+        <location filename="../EmuManager_qEmu.cpp" line="853"/>
         <source>Alternating lines</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating the interlaced rendering mode was set to alternating lines.</extracomment>
         <translation>Entrelacement activé</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="908"/>
+        <location filename="../EmuManager_qEmu.cpp" line="857"/>
         <source>2x resolution</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating the interlaced rendering mode was set to 2x resolution.</extracomment>
         <translation>Résolution 2x</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="961"/>
+        <location filename="../EmuManager_qEmu.cpp" line="904"/>
         <source>68000 reset.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating the 68000 CPU was reset.</extracomment>
         <translation>68000 réinitialisé.</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="968"/>
+        <location filename="../EmuManager_qEmu.cpp" line="911"/>
         <source>Z80 reset.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating the Z80 CPU was reset.</extracomment>
         <translation>Z80 réinitialisé.</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="993"/>
+        <location filename="../EmuManager_qEmu.cpp" line="936"/>
         <source>System region set to %1.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating the system region code was changed.</extracomment>
         <translation>Région système sélectionnée : %1.</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="1049"/>
+        <location filename="../EmuManager_qEmu.cpp" line="992"/>
         <source>SRAM/EEPROM enabled.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating SRAM/EEPROM has been enabled.</extracomment>
         <translation>SRAM/EEPROM activées.</translation>
     </message>
     <message>
-        <location filename="../EmuManager_qEmu.cpp" line="1054"/>
+        <location filename="../EmuManager_qEmu.cpp" line="997"/>
         <source>SRAM/EEPROM disabled.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating SRAM/EEPROM has been disabled.</extracomment>
         <translation>SRAM/EEPROM désactivées.</translation>
     </message>
     <message>
-        <location filename="../EmuManager.cpp" line="424"/>
-        <location filename="../EmuManager_qEmu.cpp" line="1014"/>
+        <location filename="../EmuManager.cpp" line="414"/>
+        <location filename="../EmuManager_qEmu.cpp" line="957"/>
         <source>ROM region detected as %1.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating the auto-detected ROM region.
@@ -912,7 +917,7 @@ OSD message indicating the auto-detected ROM region.</extracomment>
 <context>
     <name>GensQt4::FindCdromWin32</name>
     <message>
-        <location filename="../cdrom/FindCdromWin32.cpp" line="143"/>
+        <location filename="../cdrom/FindCdromWin32.cpp" line="146"/>
         <source>Blank %1</source>
         <translation>Vierge %1</translation>
     </message>
@@ -920,301 +925,301 @@ OSD message indicating the auto-detected ROM region.</extracomment>
 <context>
     <name>GensQt4::GeneralConfigWindow</name>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="60"/>
+        <location filename="../GeneralConfigWindow.cpp" line="87"/>
         <source>Warning:</source>
         <translation>Attention :</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="188"/>
+        <location filename="../GeneralConfigWindow.cpp" line="184"/>
         <source>Select a %1 Boot ROM...</source>
         <translation>Choisir une ROM de démarrage %1...</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="189"/>
-        <location filename="../GeneralConfigWindow.cpp" line="731"/>
-        <location filename="../GeneralConfigWindow.cpp" line="925"/>
-        <location filename="../GeneralConfigWindow.cpp" line="939"/>
+        <location filename="../GeneralConfigWindow.cpp" line="185"/>
+        <location filename="../GeneralConfigWindow.cpp" line="713"/>
+        <location filename="../GeneralConfigWindow.cpp" line="907"/>
+        <location filename="../GeneralConfigWindow.cpp" line="921"/>
         <source>Sega CD (U)</source>
         <translation>Sega CD (U)</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="190"/>
-        <location filename="../GeneralConfigWindow.cpp" line="733"/>
-        <location filename="../GeneralConfigWindow.cpp" line="927"/>
-        <location filename="../GeneralConfigWindow.cpp" line="956"/>
+        <location filename="../GeneralConfigWindow.cpp" line="186"/>
+        <location filename="../GeneralConfigWindow.cpp" line="715"/>
+        <location filename="../GeneralConfigWindow.cpp" line="909"/>
+        <location filename="../GeneralConfigWindow.cpp" line="938"/>
         <source>Mega CD (E)</source>
         <translation>Mega CD (E)</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="191"/>
-        <location filename="../GeneralConfigWindow.cpp" line="735"/>
-        <location filename="../GeneralConfigWindow.cpp" line="929"/>
-        <location filename="../GeneralConfigWindow.cpp" line="973"/>
+        <location filename="../GeneralConfigWindow.cpp" line="187"/>
+        <location filename="../GeneralConfigWindow.cpp" line="717"/>
+        <location filename="../GeneralConfigWindow.cpp" line="911"/>
+        <location filename="../GeneralConfigWindow.cpp" line="955"/>
         <source>Mega CD (J)</source>
         <translation>Mega CD (J)</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="192"/>
-        <location filename="../GeneralConfigWindow.cpp" line="737"/>
-        <location filename="../GeneralConfigWindow.cpp" line="931"/>
-        <location filename="../GeneralConfigWindow.cpp" line="990"/>
+        <location filename="../GeneralConfigWindow.cpp" line="188"/>
+        <location filename="../GeneralConfigWindow.cpp" line="719"/>
+        <location filename="../GeneralConfigWindow.cpp" line="913"/>
+        <location filename="../GeneralConfigWindow.cpp" line="972"/>
         <source>Mega CD (Asia)</source>
         <translation>Mega CD (Asie)</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="198"/>
+        <location filename="../GeneralConfigWindow.cpp" line="194"/>
         <source>UnRAR DLL:</source>
         <translation>DLL de UnRAR :</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="200"/>
+        <location filename="../GeneralConfigWindow.cpp" line="196"/>
         <source>Select an UnRAR DLL...</source>
         <translation>Choisir un DLL pour UnRAR...</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="204"/>
+        <location filename="../GeneralConfigWindow.cpp" line="200"/>
         <source>Select a RAR or UnRAR binary...</source>
         <translation>Choisir un binaire pour RAR ou UnRAR...</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="565"/>
+        <location filename="../GeneralConfigWindow.cpp" line="547"/>
         <source>Select OSD %1 Color</source>
         <translation>Choisir la couleur %1 pour l&apos;affichage à l&apos;écran</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="574"/>
+        <location filename="../GeneralConfigWindow.cpp" line="556"/>
         <source>FPS counter</source>
         <translation>Compteur FPS</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="592"/>
+        <location filename="../GeneralConfigWindow.cpp" line="574"/>
         <source>messages</source>
         <translation>messages</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="696"/>
+        <location filename="../GeneralConfigWindow.cpp" line="678"/>
         <source>Select %1 Boot ROM</source>
         <translation>Choisir la ROM de démarrage %1</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="702"/>
+        <location filename="../GeneralConfigWindow.cpp" line="684"/>
         <source>Sega CD Boot ROM images</source>
         <translation>Image ROM de boot Sega CD</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="713"/>
-        <location filename="../GeneralConfigWindow.cpp" line="1024"/>
+        <location filename="../GeneralConfigWindow.cpp" line="695"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1006"/>
         <source>All Files</source>
         <translation>Tout les fichiers</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="769"/>
+        <location filename="../GeneralConfigWindow.cpp" line="751"/>
         <source>No ROM filename specified.</source>
         <translation>Pas de nom de ROM spécifié.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="771"/>
+        <location filename="../GeneralConfigWindow.cpp" line="753"/>
         <source>The specified ROM file was not found.</source>
         <translation>La ROM spécifiée n&apos;a pas été trouvée.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="777"/>
-        <location filename="../GeneralConfigWindow.cpp" line="1069"/>
+        <location filename="../GeneralConfigWindow.cpp" line="759"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1051"/>
         <source>Unknown</source>
         <translation>Inconnu</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="787"/>
+        <location filename="../GeneralConfigWindow.cpp" line="769"/>
         <source>Error opening ROM file.</source>
         <translation>Erreur à l&apos;ouverture de la ROM.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="795"/>
+        <location filename="../GeneralConfigWindow.cpp" line="777"/>
         <source>This archive has multiple files.</source>
         <translation>Cette archive contient plusieurs fichiers.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="796"/>
+        <location filename="../GeneralConfigWindow.cpp" line="778"/>
         <source>Multi-file ROM archives are not currently supported for Sega CD Boot ROMs.</source>
         <translation>Les archives contenant plusieurs fichiers ne sont actuellement pas supportées pour le Sega CD.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="807"/>
+        <location filename="../GeneralConfigWindow.cpp" line="789"/>
         <source>ROM size is incorrect.</source>
         <translation>Taille de ROM incorrecte.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="808"/>
+        <location filename="../GeneralConfigWindow.cpp" line="790"/>
         <source>(expected %L1 bytes; found %L2 bytes)</source>
         <translation>(S&apos;attendait à %L1 bytes ; a rencontré %L2 bytes)</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="825"/>
+        <location filename="../GeneralConfigWindow.cpp" line="807"/>
         <source>Error reading file.</source>
         <translation>Erreur de lecture du fichier.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="826"/>
+        <location filename="../GeneralConfigWindow.cpp" line="808"/>
         <source>(expected %L1 bytes; read %L2 bytes)</source>
         <translation>(S&apos;attendait à %L1 bytes : a lu %L2 bytes)</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="858"/>
+        <location filename="../GeneralConfigWindow.cpp" line="840"/>
         <source>Region code is incorrect.</source>
         <translation>Code de région incorrect.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="859"/>
+        <location filename="../GeneralConfigWindow.cpp" line="841"/>
         <source>(expected %1; found %2)</source>
         <translation>(S&apos;attendait à %1 ; a rencontré %2)</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="878"/>
+        <location filename="../GeneralConfigWindow.cpp" line="860"/>
         <source>This Boot ROM is not supported by Gens/GS II.</source>
         <translation>Cette ROM de boot n&apos;est pas gérée par Gens/GS II.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="884"/>
+        <location filename="../GeneralConfigWindow.cpp" line="866"/>
         <source>This Boot ROM is known to be broken on all emulators.</source>
         <translation>Cette ROM de démarrage est connue pour ne fonctionner sur aucun émulateur.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="901"/>
+        <location filename="../GeneralConfigWindow.cpp" line="883"/>
         <source>ROM identified as: %1</source>
         <translation>ROM identifiée comme :%1</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="918"/>
+        <location filename="../GeneralConfigWindow.cpp" line="900"/>
         <source>Selected ROM: %1</source>
         <translation>ROM sélectionnée : %1</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1012"/>
+        <location filename="../GeneralConfigWindow.cpp" line="994"/>
         <source>Select UnRAR DLL</source>
         <translation>Sélectionner le DLL de UnRAR</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1014"/>
+        <location filename="../GeneralConfigWindow.cpp" line="996"/>
         <source>Select RAR or UnRAR binary</source>
         <translation>Sélectionner le binaire pour RAR ou UnRAR</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1020"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1002"/>
         <source>DLL files</source>
         <translation>Fichiers DLL</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1022"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1004"/>
         <source>rar or unrar</source>
         <translation>rar ou unrar</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1050"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1032"/>
         <source>Selected Program: %1</source>
         <translation>Programme sélectionné : %1</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1059"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1041"/>
         <source>UnRAR DLL</source>
         <translation>DLL de UnRAR</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1061"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1043"/>
         <source>RAR or UnRAR binary</source>
         <translation>RAR ou binaire UnRAR</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1077"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1059"/>
         <source>No filename specified.</source>
         <translation>Pas de nom de fichier spécifié.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1090"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1072"/>
         <source>The specified file was not found.</source>
         <translation>Le fichier spécifié n&apos;a pas été trouvé.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1095"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1077"/>
         <source>The specified file is not executable.</source>
         <translation>Le fichier spécifié n&apos;est pas exécutable.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1101"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1083"/>
         <source>The specified file is not a regular file.</source>
         <translation>Le fichier spécifié n&apos;est pas un fichier normal.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1108"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1090"/>
         <source>Error calling stat().</source>
         <translation>Erreur à l&apos;appel de stat().</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1115"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1097"/>
         <source>UnRAR.dll API version is too old.</source>
         <translation>La version de UnRAR.dll est trop ancienne.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1116"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1098"/>
         <source>Gens/GS II requires API version %1 or later.</source>
         <translation>Gens/GS II nécessite l&apos;API version %1 ou ultérieure.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1124"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1106"/>
         <source>DLL version information not found.</source>
         <translation>Information de version DLL non trouvée.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1126"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1108"/>
         <source>Program version information not found.</source>
         <translation>Information de la version du programme non trouvée.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1134"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1116"/>
         <source>Selected DLL is not UnRAR.dll.</source>
         <translation>Le DLL sélectionné n&apos;est pas UnRAR.dll.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1136"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1118"/>
         <source>Selected program is neither RAR nor UnRAR.</source>
         <translation>Le programme sélectionné n&apos;est ni RAR ni UnRAR.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1143"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1125"/>
         <source>Unknown error code %1 received from RAR file handler.</source>
         <translation>Code d&apos;erreur inconnu %1 reçu de l&apos;archiveur RAR.</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1160"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1142"/>
         <source>UnRAR</source>
         <translation>UnRAR</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1164"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1146"/>
         <source>RAR</source>
         <translation>RAR</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1168"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1150"/>
         <source>UnRAR.dll</source>
         <translation>UnRAR.dll</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1172"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1154"/>
         <source>Identified as: %1</source>
         <translation>Identifié comme : %1</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1183"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1165"/>
         <source>%1 version %2.%3.%4.%5</source>
         <translation>%1 version %2.%3.%4.%5</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1190"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1172"/>
         <source>%1 version %2.%3</source>
         <translation>%1 version %2.%3</translation>
     </message>
     <message>
-        <location filename="../GeneralConfigWindow.cpp" line="1198"/>
+        <location filename="../GeneralConfigWindow.cpp" line="1180"/>
         <source>API version %1</source>
         <translation>Version API %1</translation>
     </message>
@@ -1224,7 +1229,7 @@ OSD message indicating the auto-detected ROM region.</extracomment>
         <translation>Configuration générale</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="1175"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="1005"/>
         <source>&amp;General</source>
         <translation>&amp;Général</translation>
     </message>
@@ -1272,28 +1277,23 @@ the emulation window loses focus.</source>
         <translation>Mettre en &amp;pause l&apos;émulation quand la fenêtre perd le focus.</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="490"/>
-        <source>Color Scale &amp;Method:</source>
-        <translation>Méthode de &amp;mise à l&apos;échelle des couleurs :</translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="561"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="391"/>
         <source>VDP Settings</source>
         <translation>Paramètres du VPD</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="571"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="401"/>
         <source>Enforce &amp;sprite limits</source>
         <translation>Limiter le nombre de &amp;sprites</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="578"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="408"/>
         <source>Use the background color in the border area
 instead of drawing a black border.</source>
         <translation>Utiliser la couleur de fond réelle comme bordure plutôt que de dessiner un cadre noir.</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="582"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="412"/>
         <source>&amp;Border color emulation</source>
         <translation>Émulation de la couleur de &amp;bordure</translation>
     </message>
@@ -1309,7 +1309,7 @@ emulation is paused.</source>
         <translation>&amp;Teindre la fenêtre en violet quand en pause.</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="589"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="419"/>
         <source>Simulates the &quot;rolling&quot; effect observed on the
 Mega Drive hardware if 320x240 mode is set
 on NTSC models.</source>
@@ -1318,7 +1318,7 @@ sur une Genesis lorsque le mode 320x240 est
 activé sur un modèle NTSC.</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="594"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="424"/>
         <source>&amp;NTSC V30 Rolling</source>
         <translation>Rolling &amp;NTSC V30</translation>
     </message>
@@ -1353,7 +1353,7 @@ activé sur un modèle NTSC.</translation>
         <translation>&amp;Couleur :</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="1187"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="1017"/>
         <source>G&amp;raphics</source>
         <translation>&amp;Graphiques</translation>
     </message>
@@ -1423,74 +1423,28 @@ d&apos;origine.</translation>
         <translation>Entrelacement</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="374"/>
-        <source>Color Adjustment</source>
-        <translation>Ajustement des couleurs</translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="380"/>
-        <source>Co&amp;ntrast:</source>
-        <translation>Co&amp;ntraste :</translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="428"/>
-        <source>&amp;Brightness:</source>
-        <translation>&amp;Luminosité :</translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="476"/>
-        <source>Gra&amp;yscale</source>
-        <translation>&amp;Niveaux de gris</translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="483"/>
-        <source>&amp;Inverted</source>
-        <translation>&amp;Inversé</translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="521"/>
-        <source>Raw</source>
-        <comment>color-scale-method</comment>
-        <extracomment>Raw color scaling. (MD $EEE -&gt; #E0E0E0)</extracomment>
-        <translation>Brut</translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="526"/>
-        <source>Full</source>
-        <comment>color-scale-method</comment>
-        <extracomment>Full color scaling. (MD $EEE -&gt; #FFFFFF)</extracomment>
-        <translation>Complète</translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="531"/>
-        <source>Full with S/H</source>
-        <comment>color-scale-method</comment>
-        <extracomment>Full+S/H color scaling. (MD $EEE -&gt; #EEEEEE)</extracomment>
-        <translation>Complète avec S/H</translation>
-    </message>
-    <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="567"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="397"/>
         <source>Enforces the per-line and per-frame sprite limits
 as observed on the actual VDP.</source>
         <translation>Limiter le nombre de sprites par ligne et par image, comme observé sur le VDP réel.</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="1211"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="1041"/>
         <source>&amp;System</source>
         <translation>&amp;Système</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="690"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="520"/>
         <source>&amp;Region Code</source>
         <translation>Code de &amp;région</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="623"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="453"/>
         <source>&lt;span style=&quot;font-weight: bold; color: red&quot;&gt;Warning:&lt;/span&gt; The following settings are low-level emulation settings. Changing these settings may break certain games. You should not change these settings unless you know what you&apos;re doing.</source>
         <translation>&lt;span style=&quot;font-weight: bold; color: red&quot;&gt;Attention :&lt;/span&gt;Les paramètres suivants touchent à l&apos;émulation bas niveau. Changer ces paramètres peut casser la compatibilité avec certains jeux. Ne touchez à ces paramètres que si vous savez ce que vous faîtes.</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="633"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="463"/>
         <source>If enabled, 2-cell vertical scrolling will exhibit glitches in the
 left-most column if horizontal scrolling is used at the same
 time. This matches the behavior seen on Genesis 1 (MK-1601)
@@ -1504,12 +1458,12 @@ this option will more accurately simulate the Genesis 3.</source>
 La Genesis 3 n&apos;a pas ce bug, donc désactiver cette option permettra de s&apos;approcher du rendu vidéo d&apos;une Genesis 3.</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="642"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="472"/>
         <source>Emulate the 2-cell &amp;Vertical Scrolling bug.</source>
         <translation>Émuler le bug de cellules doubles et de scrolling &amp;vertical.</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="649"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="479"/>
         <source>The Genesis VDP has a bug where a DMA transfer with a length
 of 0 results in a transfer of 128 KB. Older versions of Gens did
 not handle this properly, and simply ignored zero-length
@@ -1531,111 +1485,111 @@ Attention, ceci peut poser des problèmes pour certains jeux commerciaux et
 d&apos;autres programmes dépendant du comportement correct du VDP.</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="660"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="490"/>
         <source>Allow zero-length DMA transfers.</source>
         <translation>Autoriser les transferts DMA de longueur nulle.</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="698"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="528"/>
         <source>Current region &amp;setting:</source>
         <translation>Paramètres actuels de &amp;région :</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="718"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="548"/>
         <source>Auto-detect from ROM</source>
         <translation>Détection automatique par la ROM</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="723"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="553"/>
         <source>Japan (NTSC)</source>
         <translation>Japon (NTSC)</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="728"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="558"/>
         <source>Asia (PAL)</source>
         <translation>Asie (PAL)</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="733"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="563"/>
         <source>USA (NTSC)</source>
         <translation>USA (NTSC)</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="738"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="568"/>
         <source>Europe (PAL)</source>
         <translation>Europe (PAL)</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="754"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="584"/>
         <source>Automatic Region Detection &amp;Order</source>
         <translation>&amp;Ordre de la détection automatique de région</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="1199"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="1029"/>
         <source>&amp;VDP</source>
         <translation>&amp;VDP</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="1223"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="1053"/>
         <source>Sega &amp;CD</source>
         <translation>Sega &amp;CD</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="883"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="713"/>
         <source>Boot &amp;ROMs</source>
         <translation>&amp;Démarrer des ROMs</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="892"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="722"/>
         <source>&amp;USA:</source>
         <translation>&amp;USA :</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="908"/>
-        <location filename="../ui/GeneralConfigWindow.ui" line="931"/>
-        <location filename="../ui/GeneralConfigWindow.ui" line="954"/>
-        <location filename="../ui/GeneralConfigWindow.ui" line="1030"/>
-        <location filename="../ui/GeneralConfigWindow.ui" line="1072"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="738"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="761"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="784"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="860"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="902"/>
         <source>Browse...</source>
         <translation>Parcourir...</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="915"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="745"/>
         <source>&amp;Europe:</source>
         <translation>&amp;Europe :</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="938"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="768"/>
         <source>&amp;Japan:</source>
         <translation>&amp;Japon :</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="986"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="816"/>
         <source>Selected ROM: (none)</source>
         <translation>ROM sélectionnée : (aucune)</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="1014"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="844"/>
         <source>&amp;Asia:</source>
         <translation>&amp;Asie :</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="1235"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="1065"/>
         <source>E&amp;xternal Programs</source>
         <translation>Programmes e&amp;xternes</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="1047"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="877"/>
         <source>Data &amp;Compression</source>
         <translation>&amp;Compression des données</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="1056"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="886"/>
         <source>Un&amp;RAR:</source>
         <translation>Un&amp;RAR :</translation>
     </message>
     <message>
-        <location filename="../ui/GeneralConfigWindow.ui" line="1101"/>
+        <location filename="../ui/GeneralConfigWindow.ui" line="931"/>
         <source>Selected Program: (none)</source>
         <translation>Programme sélectionné : (aucun)</translation>
     </message>
@@ -1736,66 +1690,66 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
 <context>
     <name>GensQt4::GensCtrlCfgWidget</name>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="150"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="156"/>
         <source>&amp;Change All Buttons</source>
         <translation>&amp;Changer tout les boutons</translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="153"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="159"/>
         <source>C&amp;lear All Buttons</source>
         <translation>&amp;Effacer tout les boutons</translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="268"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="231"/>
         <source>Up</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: D-Pad UP.</extracomment>
         <translation>Haut</translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="272"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="234"/>
         <source>Down</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: D-Pad DOWN.</extracomment>
         <translation>Bas</translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="276"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="237"/>
         <source>Left</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: D-Pad LEFT.</extracomment>
         <translation>Gauche</translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="280"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="240"/>
         <source>Right</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: D-Pad RIGHT.</extracomment>
         <translation>Droite</translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="284"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="243"/>
         <source>B</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: B button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="288"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="246"/>
         <source>C</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: C button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="292"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="249"/>
         <source>A</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: A button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="296"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="252"/>
         <source>Start</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: START button.</extracomment>
@@ -1803,70 +1757,70 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
         <translation>Start</translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="300"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="255"/>
         <source>Z</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: Z button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="304"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="258"/>
         <source>Y</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: Y button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="308"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="261"/>
         <source>X</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: X button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="312"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="264"/>
         <source>Mode</source>
         <comment>controller-standard</comment>
         <extracomment>Standard controller: MODE button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="317"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="270"/>
         <source>1</source>
         <comment>controller-sms-gg</comment>
         <extracomment>SMS/Game Gear: 1 button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="321"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="273"/>
         <source>2</source>
         <comment>controller-sms-gg</comment>
         <extracomment>SMS/Game Gear: 2 button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="326"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="279"/>
         <source>Left</source>
         <comment>controller-mouse</comment>
         <extracomment>Sega Mega Mouse: LEFT mouse button.</extracomment>
         <translation>Gauche</translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="330"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="282"/>
         <source>Right</source>
         <comment>controller-mouse</comment>
         <extracomment>Sega Mega Mouse: RIGHT mouse button.</extracomment>
         <translation>Droit</translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="334"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="285"/>
         <source>Middle</source>
         <comment>controller-mouse</comment>
         <extracomment>Sega Mega Mouse: MIDDLE mouse button.</extracomment>
         <translation>Milieu</translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="338"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="288"/>
         <source>Start</source>
         <comment>controller-mouse</comment>
         <extracomment>Sega Mega Mouse: START button.</extracomment>
@@ -1933,232 +1887,232 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
 <context>
     <name>GensQt4::GensMenuBar</name>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="36"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="37"/>
         <source>&amp;Open ROM...</source>
         <translation>&amp;Ouvrir une ROM...</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="37"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="38"/>
         <source>&amp;Recent ROMs</source>
         <translation>ROMs &amp;récentes</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="38"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="39"/>
         <source>&amp;Close ROM</source>
         <translation>&amp;Arrêter la ROM</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="40"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="41"/>
         <source>&amp;Save State</source>
         <translation>&amp;Enregistrer l&apos;état</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="41"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="42"/>
         <source>&amp;Load State</source>
         <translation>&amp;Charger un état</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="45"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="46"/>
         <source>&amp;Preferences...</source>
         <translation>&amp;Préférences...</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="47"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="48"/>
         <source>&amp;General Configuration</source>
         <translation>&amp;Configuration Générale</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="49"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="50"/>
         <source>Sega C&amp;D Control Panel</source>
         <translation>&amp;Panneau de Contrôle Sega CD</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="55"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="56"/>
         <source>&amp;Quit</source>
         <translation>&amp;Quitter</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="64"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="65"/>
         <source>Show &amp;Menu Bar</source>
         <translation>Afficher la barre des &amp;menus</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="67"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="68"/>
         <source>&amp;Resolution</source>
         <translation>&amp;Résolution</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="69"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="70"/>
         <source>&amp;Color Depth</source>
         <translation>&amp;Profondeur des couleurs</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="71"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="72"/>
         <source>S&amp;tretch Mode</source>
         <translation>&amp;Mode d&apos;étirement</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="74"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="75"/>
         <source>&amp;Screenshot</source>
         <translation>&amp;Capture d&apos;écran</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="82"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="83"/>
         <source>320x240 (&amp;1x)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="83"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="84"/>
         <source>640x480 (&amp;2x)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="84"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="85"/>
         <source>960x720 (&amp;3x)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="85"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="86"/>
         <source>1280x960 (&amp;4x)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="93"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="94"/>
         <source>15-bit (555)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="94"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="95"/>
         <source>16-bit (565)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="95"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="96"/>
         <source>32-bit (888)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="103"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="104"/>
         <source>None</source>
         <translation>Aucun</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="104"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="105"/>
         <source>Horizontal Only</source>
         <translation>Horizontal seulement</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="105"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="106"/>
         <source>Vertical Only</source>
         <translation>Vertical seulement</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="106"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="107"/>
         <source>Full Stretch</source>
         <translation>Étirement complet</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="114"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="115"/>
         <source>&amp;Region</source>
         <translation>&amp;Région</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="117"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="118"/>
         <source>&amp;Hard Reset</source>
         <translation>&amp;Réinitialisation matérielle</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="118"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="119"/>
         <source>&amp;Soft Reset</source>
         <translation>&amp;Réinitialisation logicielle</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="119"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="120"/>
         <source>&amp;Pause</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="122"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="123"/>
         <source>Reset &amp;68000</source>
         <translation>Réinitialiser &amp;68000</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="123"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="124"/>
         <source>Reset Sub 68000</source>
         <translation>Réinitialiser Sub 68000</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="124"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="125"/>
         <source>Reset Master SH2</source>
         <translation>Réinitialiser SH2 Maître</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="125"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="126"/>
         <source>Reset Slave SH2</source>
         <translation>Réinitialiser SH2 Esclave</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="126"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="127"/>
         <source>Reset &amp;Z80</source>
         <translation>Réinitialiser &amp;Z80</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="134"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="135"/>
         <source>&amp;Auto Detect</source>
         <translation>Détection &amp;Automatique</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="135"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="136"/>
         <source>&amp;Japan (NTSC)</source>
         <translation>&amp;Japon (NTSC)</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="136"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="137"/>
         <source>A&amp;sia (PAL)</source>
         <translation>A&amp;sie (PAL)</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="137"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="138"/>
         <source>&amp;USA (NTSC)</source>
         <translation>&amp;USA (NTSC)</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="138"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="139"/>
         <source>&amp;Europe (PAL)</source>
         <translation>&amp;Europe (PAL)</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="163"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="164"/>
         <source>Mono</source>
         <translation>Mono</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="164"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="165"/>
         <source>Stereo</source>
         <translation>Stéréo</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="172"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="173"/>
         <source>&amp;About Gens/GS II</source>
         <translation>&amp;À propos de Gens/GS II</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="180"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="181"/>
         <source>&amp;File</source>
         <translation>&amp;Fichier</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="181"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="182"/>
         <source>&amp;Graphics</source>
         <translation>&amp;Graphiques</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="182"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="183"/>
         <source>&amp;System</source>
         <translation>&amp;Système</translation>
     </message>
     <message>
-        <location filename="../actions/GensMenuBar_menus.cpp" line="185"/>
+        <location filename="../actions/GensMenuBar_menus.cpp" line="186"/>
         <source>&amp;Help</source>
         <translation>&amp;Aide</translation>
     </message>
@@ -2166,7 +2120,7 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
 <context>
     <name>GensQt4::GensQApplication</name>
     <message>
-        <location filename="../GensQApplication.cpp" line="152"/>
+        <location filename="../GensQApplication.cpp" line="158"/>
         <source>David Korth</source>
         <comment>ts-author</comment>
         <extracomment>Translation file author. Put your name here.</extracomment>
@@ -2176,27 +2130,17 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
 <context>
     <name>GensQt4::GensWindow</name>
     <message>
-        <location filename="../GensWindow.cpp" line="385"/>
-        <source>Gens/GS II</source>
-        <translation></translation>
+        <location filename="../GensWindow.cpp" line="330"/>
+        <source>[NO-EMU]</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GensWindow.cpp" line="386"/>
-        <source>dev</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../GensWindow.cpp" line="388"/>
-        <source>NO-EMU</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../GensWindow.cpp" line="395"/>
-        <source>Idle</source>
-        <translation>Inactif</translation>
+        <location filename="../GensWindow.cpp" line="340"/>
+        <source>[Paused]</source>
+        <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../GensWindow.cpp" line="419"/>
+        <location filename="../GensWindow.cpp" line="575"/>
         <source>SRAM loaded. (%n byte(s))</source>
         <comment>Onscreen Display</comment>
         <translation>
@@ -2205,7 +2149,7 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../GensWindow.cpp" line="422"/>
+        <location filename="../GensWindow.cpp" line="578"/>
         <source>SRAM saved. (%n byte(s))</source>
         <comment>Onscreen Display</comment>
         <translation>
@@ -2214,7 +2158,7 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../GensWindow.cpp" line="425"/>
+        <location filename="../GensWindow.cpp" line="581"/>
         <source>SRAM autosaved. (%n byte(s))</source>
         <comment>Onscreen Display</comment>
         <translation>
@@ -2223,7 +2167,7 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../GensWindow.cpp" line="428"/>
+        <location filename="../GensWindow.cpp" line="584"/>
         <source>EEPROM loaded. (%n byte(s))</source>
         <comment>Onscreen Display</comment>
         <translation>
@@ -2232,7 +2176,7 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../GensWindow.cpp" line="431"/>
+        <location filename="../GensWindow.cpp" line="587"/>
         <source>EEPROM saved. (%n byte(s))</source>
         <comment>Onscreen Display</comment>
         <translation>
@@ -2241,7 +2185,7 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../GensWindow.cpp" line="434"/>
+        <location filename="../GensWindow.cpp" line="590"/>
         <source>EEPROM autosaved. (%n byte(s))</source>
         <comment>Onscreen Display</comment>
         <translation>
@@ -2250,7 +2194,7 @@ d&apos;autres programmes dépendant du comportement correct du VDP.</translation
         </translation>
     </message>
     <message>
-        <location filename="../GensWindow.cpp" line="485"/>
+        <location filename="../GensWindow.cpp" line="640"/>
         <source>Color depth set to %1-bit.</source>
         <comment>osd</comment>
         <extracomment>OSD message indicating color depth change.</extracomment>
