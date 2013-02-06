@@ -1,8 +1,8 @@
 /***************************************************************************
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
- * test_byteswap.cpp: Byteswapping tests.                                  *
+ * ByteswapTest.cpp: Byteswapping tests.                                   *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2013 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
