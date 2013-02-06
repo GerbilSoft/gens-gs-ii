@@ -27,7 +27,7 @@ INCLUDE(CheckC99CompilerFlag)
 CHECK_C99_COMPILER_FLAG(GENS_C99_CFLAG)
 
 # Check what flag is needed for C++ 2011 support.
-# TODO: Move to CMake/platform.cmake
+# TODO: Move to cmake/platform.cmake
 INCLUDE(CheckCXX11CompilerFlag)
 CHECK_CXX11_COMPILER_FLAG(GENS_CXX11_CXXFLAG)
 
@@ -76,9 +76,9 @@ SET(GENS_CFLAGS_PLATFORM "")
 SET(GENS_CXXFLAGS_PLATFORM "")
 SET(GENS_LDFLAGS_PLATFORM "")
 IF(WIN32)
-	INCLUDE(CMake/platform/win32.cmake)
+	INCLUDE(cmake/platform/win32.cmake)
 ELSEIF(UNIX)
-	INCLUDE(CMake/platform/unix.cmake)
+	INCLUDE(cmake/platform/unix.cmake)
 ENDIF()
 
 # Common CFLAGS/CXXFLAGS for each configuration.

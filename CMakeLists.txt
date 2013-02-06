@@ -11,7 +11,7 @@ MACRO(UNSET var)
 	SET(${var})
 ENDMACRO(UNSET)
 
-list (APPEND CMAKE_MODULE_PATH "${gens-gs-ii_SOURCE_DIR}/CMake/macros")
+list (APPEND CMAKE_MODULE_PATH "${gens-gs-ii_SOURCE_DIR}/cmake/macros")
 
 # Mac OS X: CMake doesn't include this by default.
 INCLUDE(CheckLibraryExists)
@@ -20,7 +20,7 @@ INCLUDE(CheckLibraryExists)
 INCLUDE(CTest)
 
 # Set default build options.
-INCLUDE(CMake/options.cmake)
+INCLUDE(cmake/options.cmake)
 
 # Git version information.
 ADD_CUSTOM_TARGET(git_version ALL
@@ -40,12 +40,12 @@ ENDIF()
 #ENDIF()
 
 # Check for platform-specific functionality.
-INCLUDE(CMake/platform.cmake)
+INCLUDE(cmake/platform.cmake)
 
 # Check for required libraries.
-INCLUDE(CMake/libs/CheckZLIB.cmake)
-INCLUDE(CMake/libs/CheckLZMA.cmake)
-INCLUDE(CMake/libs/CheckOpenGL.cmake)
+INCLUDE(cmake/libs/CheckZLIB.cmake)
+INCLUDE(cmake/libs/CheckLZMA.cmake)
+INCLUDE(cmake/libs/CheckOpenGL.cmake)
 
 # Project subdirectories.
 ADD_SUBDIRECTORY(extlib)
