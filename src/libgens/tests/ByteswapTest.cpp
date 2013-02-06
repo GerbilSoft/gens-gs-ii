@@ -122,6 +122,61 @@ TEST_F(ByteswapTest, checkRuntimeByteorder)
 	ASSERT_EQ(byteorder_compiled, byteorder_runtime);
 }
 
+
+/**
+ * Check little-endian byteswapping macros (non-array).
+ */
+TEST_F(ByteswapTest, checkLittleEndianMacros)
+{
+	const uint16_t orig16 = 0x1234;
+	const uint32_t orig32 = 0x12345678;
+#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+	const uint16_t swap16 = 0x1234;
+	const uint32_t swap32 = 0x12345678;
+#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
+	const uint16_t swap16 = 0x3412;
+	const uint32_t swap32 = 0x78563412;
+#endif
+
+	// 16-bit.
+	// NOTE: Must use explicit cast to uint16_t to prevent errors.
+	// TODO: Add explicit cast in byteswap.h, or use (& 0xFFFF)?
+	EXPECT_EQ(swap16, (uint16_t)le16_to_cpu(orig16));
+	EXPECT_EQ(swap16, (uint16_t)cpu_to_le16(orig16));
+
+	// 32-bit.
+	EXPECT_EQ(swap32, le32_to_cpu(orig32));
+	EXPECT_EQ(swap32, cpu_to_le32(orig32));
+}
+
+
+/**
+ * Check big-endian byteswapping macros (non-array).
+ */
+TEST_F(ByteswapTest, checkBigEndianMacros)
+{
+	const uint16_t orig16 = 0x1234;
+	const uint32_t orig32 = 0x12345678;
+#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+	const uint16_t swap16 = 0x3412;
+	const uint32_t swap32 = 0x78563412;
+#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
+	const uint16_t swap16 = 0x1234;
+	const uint32_t swap32 = 0x12345678;
+#endif
+
+	// 16-bit.
+	// NOTE: Must use explicit cast to uint16_t to prevent errors.
+	// TODO: Add explicit cast in byteswap.h, or use (& 0xFFFF)?
+	EXPECT_EQ(swap16, (uint16_t)be16_to_cpu(orig16));
+	EXPECT_EQ(swap16, (uint16_t)cpu_to_be16(orig16));
+
+	// 32-bit.
+	EXPECT_EQ(swap32, be32_to_cpu(orig32));
+	EXPECT_EQ(swap32, cpu_to_be32(orig32));
+}
+
+
 } }
 
 
