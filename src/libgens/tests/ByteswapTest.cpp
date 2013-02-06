@@ -41,8 +41,8 @@ class ByteswapTest : public ::testing::Test
 		ByteswapTest() { }
 		virtual ~ByteswapTest() { }
 
-		virtual void SetUp() { }
-		virtual void TearDown() { }
+		virtual void SetUp(void) { }
+		virtual void TearDown(void) { }
 
 	protected:
 		static const char *ByteorderString(int byteorder);
