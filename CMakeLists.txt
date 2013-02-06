@@ -16,8 +16,8 @@ list (APPEND CMAKE_MODULE_PATH "${gens-gs-ii_SOURCE_DIR}/cmake/macros")
 # Mac OS X: CMake doesn't include this by default.
 INCLUDE(CheckLibraryExists)
 
-# Enable testing.
-INCLUDE(CTest)
+# Testing functions.
+INCLUDE(cmake/gtest.cmake)
 
 # Set default build options.
 INCLUDE(cmake/options.cmake)
