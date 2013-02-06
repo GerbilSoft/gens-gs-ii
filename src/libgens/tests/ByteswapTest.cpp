@@ -182,6 +182,8 @@ TEST_F(ByteswapTest, checkBigEndianMacros)
 
 int main(int argc, char *argv[])
 {
+	fprintf(stderr, "LibGens test suite: Byteswapping tests.\n\n");
+
 	::testing::InitGoogleTest(&argc, argv);
 	//LibGens::Init(); /* not needed for byteswapping code */
 	return RUN_ALL_TESTS();
