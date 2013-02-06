@@ -7,6 +7,9 @@ INCLUDE_DIRECTORIES(${gens-gs-ii_BINARY_DIR})
 # Include the previous directory.
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../")
 
+# Google Test.
+INCLUDE_DIRECTORIES(${GTEST_INCLUDE_DIR})
+
 # TestSuite base sources.
 SET(TESTSUITE_BASE_SRC
 	TestSuite.cpp
@@ -35,10 +38,10 @@ ADD_TEST(NAME test_VdpPalette_DAC_SMS
 	COMMAND test_VdpPalette_DAC PalTest_SMS.txt)
 
 # Byteswap test.
-ADD_EXECUTABLE(test_byteswap test_byteswap.cpp ${TESTSUITE_BASE_SRC})
-TARGET_LINK_LIBRARIES(test_byteswap gens)
-ADD_TEST(NAME test_byteswap
-	COMMAND test_byteswap)
+ADD_EXECUTABLE(ByteswapTest ByteswapTest.cpp ${TESTSUITE_BASE_SRC})
+TARGET_LINK_LIBRARIES(ByteswapTest gens ${GTEST_LIBRARY})
+ADD_TEST(NAME ByteswapTest
+	COMMAND ByteswapTest)
 
 # Sprite Masking & Overflow Test ROM.
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
