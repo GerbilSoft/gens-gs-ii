@@ -1,8 +1,8 @@
 /***************************************************************************
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
- * test_Vdp_SpriteMaskTestRom_data.c: Sprite Masking & Overflow Test ROM.  *
+ * VdpSpriteMaskingTest_data.h: Sprite Masking & Overflow Test ROM.        *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2013 by David Korth.                                 *
  * Original ROM Copyright (c) 2009 by Nemesis.                             *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "test_Vdp_SpriteMaskingTestRom_data.h"
+#include "VdpSpriteMaskingTest_data.h"
 
 /**
  * VRAM for H32 (256x224) sprite masking test.
