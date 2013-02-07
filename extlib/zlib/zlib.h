@@ -1657,8 +1657,8 @@ struct gzFile_s {
 };
 ZEXTERN int ZEXPORT gzgetc_ _Z_OF((gzFile file));  /* backward compatibility */
 #ifdef Z_PREFIX_SET
-#  undef z_gzgetc
-#  define z_gzgetc(g) \
+#  undef gens_z_gzgetc
+#  define gens_z_gzgetc(g) \
           ((g)->have ? ((g)->have--, (g)->pos++, *((g)->next)++) : gzgetc(g))
 #else
 #  define gzgetc(g) \
@@ -1682,12 +1682,12 @@ ZEXTERN int ZEXPORT gzgetc_ _Z_OF((gzFile file));  /* backward compatibility */
 
 #if !defined(ZLIB_INTERNAL) && defined(Z_WANT64)
 #  ifdef Z_PREFIX_SET
-#    define z_gzopen z_gzopen64
-#    define z_gzseek z_gzseek64
-#    define z_gztell z_gztell64
-#    define z_gzoffset z_gzoffset64
-#    define z_adler32_combine z_adler32_combine64
-#    define z_crc32_combine z_crc32_combine64
+#    define gens_z_gzopen gens_z_gzopen64
+#    define gens_z_gzseek gens_z_gzseek64
+#    define gens_z_gztell gens_z_gztell64
+#    define gens_z_gzoffset gens_z_gzoffset64
+#    define gens_z_adler32_combine gens_z_adler32_combine64
+#    define gens_z_crc32_combine gens_z_crc32_combine64
 #  else
 #    define gzopen gzopen64
 #    define gzseek gzseek64
