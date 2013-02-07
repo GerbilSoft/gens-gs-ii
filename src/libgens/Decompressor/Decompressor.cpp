@@ -52,11 +52,9 @@ namespace LibGens
  * @param filename Filename.
  */
 Decompressor::Decompressor(FILE *f, const utf8_str *filename)
-{
-	// Keep copies of the file pointer and filename.
-	m_file = f;
-	m_filename = string(filename);
-}
+	: m_file(f)
+	, m_filename(filename)
+{ }
 
 /**
  * ~Decompressor(): Delete the Decompressor object.

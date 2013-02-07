@@ -60,49 +60,43 @@ static char *gens_iconv(const char *src, size_t src_bytes_len,
 {
 	if (!src || src_bytes_len == 0)
 		return NULL;
-	
+
 	if (!src_charset)
 		src_charset = "";
 	if (!dest_charset)
 		dest_charset = "";
-	
+
 	// Based on examples from:
 	// * http://www.delorie.com/gnu/docs/glibc/libc_101.html
 	// * http://www.codase.com/search/call?name=iconv
-	
+
 	// Open an iconv descriptor.
 	iconv_t cd;
 	cd = iconv_open(dest_charset, src_charset);
-	if (cd == (iconv_t)(-1))
-	{
+	if (cd == (iconv_t)(-1)) {
 		// Error opening iconv.
 		return NULL;
 	}
-	
+
 	// Allocate the output buffer.
 	// UTF-8 is variable length, and the largest UTF-8 character is 4 bytes long.
 	const size_t out_bytes_len = (src_bytes_len * 4) + 4;
 	size_t out_bytes_remaining = out_bytes_len;
 	char *outbuf = (char*)malloc(out_bytes_len);
-	
+
 	// Input and output pointers.
 	char *inptr = (char*)(src);	// Input pointer.
 	char *outptr = &outbuf[0];	// Output pointer.
-	
+
 	int success = 1;
-	
-	while (src_bytes_len > 0)
-	{
-		if (iconv(cd, &inptr, &src_bytes_len, &outptr, &out_bytes_remaining) == (size_t)(-1))
-		{
+
+	while (src_bytes_len > 0) {
+		if (iconv(cd, &inptr, &src_bytes_len, &outptr, &out_bytes_remaining) == (size_t)(-1)) {
 			// An error occurred while converting the string.
-			if (outptr == &outbuf[0])
-			{
+			if (outptr == &outbuf[0]) {
 				// No bytes were converted.
 				success = 0;
-			}
-			else
-			{
+			} else {
 				// Some bytes were converted.
 				// Accept the string up to this point.
 				// Madou Monogatari I has a broken Shift-JIS sequence
@@ -113,25 +107,23 @@ static char *gens_iconv(const char *src, size_t src_bytes_len,
 			break;
 		}
 	}
-	
+
 	// Close the iconv descriptor.
 	iconv_close(cd);
-	
-	if (success)
-	{
+
+	if (success) {
 		// The string was converted successfully.
-		
+
 		// Make sure the string is null-terminated.
 		size_t null_bytes = (out_bytes_remaining > 4 ? 4 : out_bytes_remaining);
-		for (size_t i = null_bytes; i > 0; i--)
-		{
+		for (size_t i = null_bytes; i > 0; i--) {
 			*outptr++ = 0x00;
 		}
-		
+
 		// Return the output buffer.
 		return outbuf;
 	}
-	
+
 	// The string was not converted successfully.
 	free(outbuf);
 	return NULL;
@@ -150,7 +142,7 @@ namespace LibGens
  */
 string Encoding::Utf16_to_Utf8(const char16_t *src, size_t len)
 {
-	char *mbs;
+	char *mbs = nullptr;
 #if defined(_WIN32)
 	// Win32 version. Use W32U_mini.
 	// TODO: Use the "len" parameter.
@@ -163,10 +155,10 @@ string Encoding::Utf16_to_Utf8(const char16_t *src, size_t len)
 	// TODO: #error?
 	return string();
 #endif
-	
+
 	if (!mbs)
 		return string();
-	
+
 	// Convert the allocated data to an std::string.
 	string ret(mbs);
 	free(mbs);
@@ -181,7 +173,7 @@ string Encoding::Utf16_to_Utf8(const char16_t *src, size_t len)
  */
 u16string Encoding::Utf8_to_Utf16(const string& src)
 {
-	char16_t *wcs;
+	char16_t *wcs = nullptr;
 #if defined(_WIN32)
 	// Win32 version. Use W32U_mini.
 	// TODO: Use the source string's length.
@@ -197,7 +189,7 @@ u16string Encoding::Utf8_to_Utf16(const string& src)
 
 	if (!wcs)
 		return u16string();
-	
+
 	// Convert the allocated data to an std::u16string.
 	u16string ret(wcs);
 	free(wcs);
@@ -212,11 +204,10 @@ u16string Encoding::Utf8_to_Utf16(const string& src)
  */
 string Encoding::SJIS_to_Utf8(const string& src)
 {
-	utf8_str *mbs = NULL;
+	utf8_str *mbs = nullptr;
 #if defined(_WIN32)
 	wchar_t *wcs = W32U_mbs_to_UTF16(src.c_str(), 932); // cp932 == Shift-JIS
-	if (wcs)
-	{
+	if (wcs) {
 		mbs = W32U_UTF16_to_mbs(wcs, CP_UTF8);
 		free(wcs);
 	}
@@ -226,7 +217,7 @@ string Encoding::SJIS_to_Utf8(const string& src)
 	// No translation supported.
 	// TODO: #error?
 #endif
-	
+
 	if (!mbs)
 		return string();
 	string ret(mbs);
@@ -248,27 +239,26 @@ int Encoding::Utf16_ncmp(const char16_t *s1, const char16_t *s2, size_t n)
 {
 	// TODO: This expects platform-endian strings.
 	// Add a parameter for LE vs. BE?
-	
+
 	// TODO: Surrogate support. (Maybe.)
 	// Then again, this function's only really used to check
 	// if two strings match, and isn't used for sorting.
-	
-	for (; n > 0; n--)
-	{
+
+	for (; n > 0; n--) {
 		if (*s1 != *s2)
 			return ((int)((*s1) - (*s2)));
-		
+
 		s1++; s2++;
 		if (*s1 == 0 || *s2 == 0)
 			break;
 	}
-	
+
 	// Verify the last character.
 	if (*s1 == 0x00 && *s2 != 0x00)
 		return 1;
 	else if (*s1 != 0x00 && *s2 == 0x00)
 		return -1;
-	
+
 	// Strings match.
 	return 0;
 }

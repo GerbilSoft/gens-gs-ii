@@ -978,6 +978,11 @@ IoManager::IoManager()
 	: d(new IoManagerPrivate(this))
 { }
 
+IoManager::~IoManager()
+{
+	delete d;
+}
+
 
 /**
  * Reset all devices.
