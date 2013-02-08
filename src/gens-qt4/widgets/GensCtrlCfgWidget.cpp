@@ -190,7 +190,7 @@ void GensCtrlCfgWidgetPrivate::setIoType(IoManager::IoType_t newIoType)
 	// Show the buttons, in logical button order.
 	QString sBtnLabel;
 	int i, button;
-	for (i = 0, button = 0;
+	for (i = 0, button = IoManager::FirstLogicalButton(newIoType);
 	     i < numButtons && button > IoManager::BTNNAME_UNKNOWN; i++) {
 		IoManager::ButtonName_t buttonName =
 					IoManager::ButtonName(newIoType, button);
