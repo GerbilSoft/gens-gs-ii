@@ -136,13 +136,26 @@ class IoManager
 
 		enum IoType_t {
 			IOT_NONE	= 0,
-			IOT_3BTN	= 1,
-			IOT_6BTN	= 2,
-			IOT_2BTN	= 3,
-			IOT_MEGA_MOUSE	= 4,
-			IOT_TEAMPLAYER	= 5,
-			IOT_4WP_MASTER	= 6,
-			IOT_4WP_SLAVE	= 7,
+			IOT_3BTN,
+			IOT_6BTN,
+			IOT_2BTN,
+			IOT_TEAMPLAYER,
+			IOT_4WP_MASTER,
+			IOT_4WP_SLAVE,
+
+			// Miscellaneous Master System peripherals.
+			IOT_PADDLE,
+			IOT_SPORTS_PAD,
+
+			// Miscellaneous Mega Drive peripherals.
+			IOT_MEGA_MOUSE,
+			IOT_XE_1AP,
+			IOT_ACTIVATOR,
+
+			// Light guns.
+			IOT_PHASER,
+			IOT_MENACER,
+			IOT_JUSTIFIER,
 
 			IOT_MAX
 		};
@@ -230,34 +243,39 @@ class IoManager
 		 * Logical button names.
 		 * These are used for button name trnaslation in the UI.
 		 */
-		enum ButtonName_t
-		{
+		enum ButtonName_t {
 			BTNNAME_UNKNOWN	= -1,
-			
+
 			// Standard controller buttons.
-			BTNNAME_UP	= 0,
-			BTNNAME_DOWN	= 1,
-			BTNNAME_LEFT	= 2,
-			BTNNAME_RIGHT	= 3,
-			BTNNAME_C	= 4,
-			BTNNAME_B	= 5,
-			BTNNAME_START	= 6,
-			BTNNAME_A	= 7,
-			BTNNAME_Z	= 8,
-			BTNNAME_Y	= 9,
-			BTNNAME_X	= 10,
-			BTNNAME_MODE	= 11,
-			
+			BTNNAME_UP,
+			BTNNAME_DOWN,
+			BTNNAME_LEFT,
+			BTNNAME_RIGHT,
+			BTNNAME_C,
+			BTNNAME_B,
+			BTNNAME_START,
+			BTNNAME_A,
+			BTNNAME_Z,
+			BTNNAME_Y,
+			BTNNAME_X,
+			BTNNAME_MODE,
+
 			// SMS/GG buttons.
-			BTNNAME_2	= 12,
-			BTNNAME_1	= 13,
-			
+			BTNNAME_2,
+			BTNNAME_1,
+
 			// Sega Mega Mouse buttons.
-			BTNNAME_MOUSE_LEFT	= 14,
-			BTNNAME_MOUSE_RIGHT	= 15,
-			BTNNAME_MOUSE_MIDDLE	= 16,
-			BTNNAME_MOUSE_START	= 17,
-			
+			BTNNAME_MOUSE_LEFT,
+			BTNNAME_MOUSE_RIGHT,
+			BTNNAME_MOUSE_MIDDLE,
+			BTNNAME_MOUSE_START,
+
+			// XE-1 AP buttons.
+			BTNNAME_SELECT,
+			BTNNAME_E2,
+			BTNNAME_E1,
+			BTNNAME_D,
+
 			BTNNAME_MAX
 		};
 
@@ -283,6 +301,14 @@ class IoManager
 			BTNI_2		= 4,
 			BTNI_1		= 5,
 
+			// SMS: Paddle controller.
+			BTNI_PADDLE_2	= 0,
+			BTNI_PADDLE_1	= 1,
+
+			// SMS: Sports pad.
+			BTNI_SPAD_2	= 0,
+			BTNI_SPAD_1	= 1,
+
 			// Sega Mega Mouse buttons.
 			// NOTE: Mega Mouse buttons are active high,
 			// and they use a different bitfield layout.
@@ -291,11 +317,22 @@ class IoManager
 			BTNI_MOUSE_MIDDLE	= 2,
 			BTNI_MOUSE_START	= 3,	// Start
 
+			// XE-1AP
+			BTNI_XE1AP_SELECT	= 0,
+			BTNI_XE1AP_START	= 1,
+			BTNI_XE1AP_E2		= 2,
+			BTNI_XE1AP_E1		= 3,
+			BTNI_XE1AP_D		= 4,
+			BTNI_XE1AP_C		= 5,
+			BTNI_XE1AP_B		= 6,
+			BTNI_XE1AP_A		= 7,
+
 			BTNI_MAX	= 12
 		};
 
 		// Get button names.
 		static ButtonName_t ButtonName(IoType_t ioType, int btnIdx);
+		static int FirstLogicalButton(IoType_t ioType);
 		static int NextLogicalButton(IoType_t ioType, int btnIdx);
 
 		/** ZOMG savestate functions. **/

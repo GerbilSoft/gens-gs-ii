@@ -390,10 +390,23 @@ const IoManagerPrivate::IoDevInfo IoManagerPrivate::ioDevInfo[IoManager::IOT_MAX
 	{'3BTN', 8, true},	// IOT_3BTN
 	{'6BTN', 12, true},	// IOT_6BTN
 	{'2BTN', 6, true},	// IOT_2BTN (TODO: Start/Pause?)
-	{'MOUS', 4, false},	// IOT_MEGA_MOUSE
 	{'TEAM', 0, true},	// IOT_TEAMPLAYER
 	{'4WPM', 0, true},	// IOT_4WP_MASTER
 	{'4WPS', 0, true},	// IOT_4WP_SLAVE
+
+	// Miscellaneous Master System peripherals.
+	{'PADL', 2, false},	// IOT_PADDLE
+	{'SPAD', 2, false},	// IOT_SPORTS_PAD
+
+	// Miscellaneous Mega Drive peripherals.
+	{'MOUS', 4, false},	// IOT_MEGA_MOUSE
+	{'XE1A', 8, false},	// IOT_XE_1AP
+	{'ACTV', 0, false},	// IOT_ACTIVATOR
+
+	// Light guns.
+	{'PHAS', 0, false},	// IOT_PHASER
+	{'MENA', 0, false},	// IOT_MENACER
+	{'JUST', 0, false},	// IOT_JUSTIFIER
 };
 
 IoManagerPrivate::IoManagerPrivate(IoManager *q)
@@ -1204,7 +1217,7 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 
 IoManager::ButtonName_t IoManager::ButtonName(IoType_t ioType, int btnIdx)
 {
-	assert(ioType >= IOT_3BTN && ioType < IOT_MAX);
+	assert(ioType >= IOT_NONE && ioType < IOT_MAX);
 	assert(btnIdx >= 0 && btnIdx < BTNI_MAX);
 
 	switch (ioType) {
@@ -1218,7 +1231,8 @@ IoManager::ButtonName_t IoManager::ButtonName(IoType_t ioType, int btnIdx)
 				case BTNI_C:		return BTNNAME_C;
 				case BTNI_A:		return BTNNAME_A;
 				case BTNI_START:	return BTNNAME_START;
-				default:		return BTNNAME_UNKNOWN;
+				default:
+					break;
 			}
 			break;
 
@@ -1236,7 +1250,8 @@ IoManager::ButtonName_t IoManager::ButtonName(IoType_t ioType, int btnIdx)
 				case BTNI_Y:		return BTNNAME_Y;
 				case BTNI_X:		return BTNNAME_X;
 				case BTNI_MODE:		return BTNNAME_MODE;
-				default:		return BTNNAME_UNKNOWN;
+				default:
+					break;
 			}
 			break;
 
@@ -1248,25 +1263,86 @@ IoManager::ButtonName_t IoManager::ButtonName(IoType_t ioType, int btnIdx)
 				case BTNI_RIGHT:	return BTNNAME_RIGHT;
 				case BTNI_1:		return BTNNAME_1;
 				case BTNI_2:		return BTNNAME_2;
-				default:		return BTNNAME_UNKNOWN;
+				default:
+					break;
 			}
 			break;
+
+		/** Miscellaneous Master System peripherals. **/
+
+		case IOT_PADDLE:
+			switch (btnIdx) {
+				case BTNI_PADDLE_1:	return BTNNAME_1;
+				case BTNI_PADDLE_2:	return BTNNAME_2;
+				default:
+					break;
+			}
+			break;
+
+		case IOT_SPORTS_PAD:
+			switch (btnIdx) {
+				case BTNI_SPAD_1:	return BTNNAME_1;
+				case BTNI_SPAD_2:	return BTNNAME_2;
+				default:
+					break;
+			}
+			break;
+
+		/** Miscellaneous Mega Drive peripherals. **/
 
 		case IOT_MEGA_MOUSE:
 			switch (btnIdx) {
-				case BTNI_MOUSE_LEFT:		return BTNNAME_MOUSE_LEFT;
-				case BTNI_MOUSE_RIGHT:		return BTNNAME_MOUSE_RIGHT;
+				case BTNI_MOUSE_LEFT:	return BTNNAME_MOUSE_LEFT;
+				case BTNI_MOUSE_RIGHT:	return BTNNAME_MOUSE_RIGHT;
 				case BTNI_MOUSE_MIDDLE:	return BTNNAME_MOUSE_MIDDLE;
-				case BTNI_MOUSE_START:		return BTNNAME_MOUSE_START;
-				default:			return BTNNAME_UNKNOWN;
+				case BTNI_MOUSE_START:	return BTNNAME_MOUSE_START;
+				default:
+					break;
 			}
 			break;
 
+		case IOT_XE_1AP:
+			switch (btnIdx) {
+				case BTNI_XE1AP_SELECT:	return BTNNAME_SELECT;
+				case BTNI_XE1AP_START:	return BTNNAME_START;
+				case BTNI_XE1AP_E2:	return BTNNAME_E2;
+				case BTNI_XE1AP_E1:	return BTNNAME_E1;
+				case BTNI_XE1AP_D:	return BTNNAME_D;
+				case BTNI_XE1AP_C:	return BTNNAME_C;
+				case BTNI_XE1AP_B:	return BTNNAME_B;
+				case BTNI_XE1AP_A:	return BTNNAME_A;
+				default:
+					break;
+			}
+			break;
+
+		case IOT_NONE:
 		default:
 			break;
 	}
 
 	return BTNNAME_UNKNOWN;
+}
+
+int IoManager::FirstLogicalButton(IoType_t ioType)
+{
+	assert(ioType >= IOT_NONE && ioType < IOT_MAX);
+
+	switch (ioType) {
+		case IOT_3BTN:		return BTNI_UP;
+		case IOT_6BTN:		return BTNI_UP;
+		case IOT_2BTN:		return BTNI_UP;
+		case IOT_PADDLE:	return BTNI_PADDLE_1;
+		case IOT_SPORTS_PAD:	return BTNI_SPAD_1;
+		case IOT_MEGA_MOUSE:	return BTNI_MOUSE_LEFT;
+		case IOT_XE_1AP:	return BTNI_XE1AP_A;
+
+		case IOT_NONE:
+		default:
+			break;
+	}
+
+	return BTNI_UNKNOWN;
 }
 
 int IoManager::NextLogicalButton(IoType_t ioType, int btnIdx)
@@ -1285,7 +1361,8 @@ int IoManager::NextLogicalButton(IoType_t ioType, int btnIdx)
 				case BTNI_A:		return BTNI_B;
 				case BTNI_B:		return BTNI_C;
 				case BTNI_C:
-				default:		return BTNI_UNKNOWN;
+				default:
+					break;
 			}
 			break;
 
@@ -1303,7 +1380,8 @@ int IoManager::NextLogicalButton(IoType_t ioType, int btnIdx)
 				case BTNI_X:		return BTNI_Y;
 				case BTNI_Y:		return BTNI_Z;
 				case BTNI_Z:
-				default:		return BTNI_UNKNOWN;
+				default:
+					break;
 			}
 			break;
 
@@ -1315,17 +1393,56 @@ int IoManager::NextLogicalButton(IoType_t ioType, int btnIdx)
 				case BTNI_RIGHT:	return BTNI_1;
 				case BTNI_1:		return BTNI_2;
 				case BTNI_2:
-				default:		return BTNI_UNKNOWN;
+				default:
+					break;
 			}
 			break;
 
+		/** Miscellaneous Master System peripherals. **/
+
+		case IOT_PADDLE:
+			switch (btnIdx) {
+				case BTNI_PADDLE_1:	return BTNI_PADDLE_2;;
+				case BTNI_PADDLE_2:
+				default:
+					break;
+			}
+			break;
+
+		case IOT_SPORTS_PAD:
+			switch (btnIdx) {
+				case BTNI_SPAD_1:	return BTNI_SPAD_2;
+				case BTNI_SPAD_2:
+				default:
+					break;
+			}
+			break;
+
+		/** Miscellaneous Mega Drive peripherals. **/
+
 		case IOT_MEGA_MOUSE:
 			switch (btnIdx) {
-				case BTNI_MOUSE_LEFT:		return BTNI_MOUSE_MIDDLE;
+				case BTNI_MOUSE_LEFT:	return BTNI_MOUSE_MIDDLE;
 				case BTNI_MOUSE_MIDDLE:	return BTNI_MOUSE_RIGHT;
-				case BTNI_MOUSE_RIGHT:		return BTNI_MOUSE_START;
+				case BTNI_MOUSE_RIGHT:	return BTNI_MOUSE_START;
 				case BTNI_MOUSE_START:
-				default:			return BTNI_UNKNOWN;
+				default:
+					break;
+			}
+			break;
+
+		case IOT_XE_1AP:
+			switch (btnIdx) {
+				case BTNI_XE1AP_A:	return BTNI_XE1AP_B;
+				case BTNI_XE1AP_B:	return BTNI_XE1AP_C;
+				case BTNI_XE1AP_C:	return BTNI_XE1AP_D;
+				case BTNI_XE1AP_D:	return BTNI_XE1AP_E1;
+				case BTNI_XE1AP_E1:	return BTNI_XE1AP_E2;
+				case BTNI_XE1AP_E2:	return BTNI_XE1AP_START;
+				case BTNI_XE1AP_START:	return BTNI_XE1AP_SELECT;
+				case BTNI_XE1AP_SELECT:
+				default:
+					break;
 			}
 			break;
 
