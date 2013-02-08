@@ -1080,7 +1080,7 @@ uint32_t IoManager::IoTypeToFourCC(IoType_t ioType)
  * @param ioType Device type.
  * @return Device type, or IOT_MAX if the FourCC doesn't match any device type.
  */
-uint32_t IoManager::FourCCToIoType(uint32_t fourCC)
+IoManager::IoType_t IoManager::FourCCToIoType(uint32_t fourCC)
 {
 	// Verify that multi-character character constants work properly.
 	static_assert('NONE' == 0x4E4F4E45, "Multi-character character constant 'NONE' is invalid.");

@@ -181,7 +181,7 @@ class IoManager
 		 * @param ioType Device type.
 		 * @return Device type, or IOT_MAX if the FourCC doesn't match any device type.
 		 */
-		static uint32_t FourCCToIoType(uint32_t fourCC);
+		static IoManager::IoType_t FourCCToIoType(uint32_t fourCC);
 
 		/**
 		 * Convert a string to a FourCC.
@@ -209,7 +209,7 @@ class IoManager
 		 * @param str String.
 		 * @return FourCC, or IOT_MAX if the FourCC doesn't match any device type.
 		 */
-		static uint32_t StringToIoType(const std::string& str);
+		static IoManager::IoType_t StringToIoType(const std::string& str);
 
 		/** Get/set device types. **/
 
@@ -327,7 +327,7 @@ inline std::string IoManager::IoTypeToString(IoType_t ioType)
  * @param str String.
  * @return FourCC, or IOT_MAX if the FourCC doesn't match any device type.
  */
-inline uint32_t IoManager::StringToIoType(const std::string& str)
+inline IoManager::IoType_t IoManager::StringToIoType(const std::string& str)
 	{ return FourCCToIoType(StringToFourCC(str)); }
 
 }
