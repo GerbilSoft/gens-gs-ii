@@ -196,97 +196,212 @@ Used to indicate no special CPU features were found.</extracomment>
 <context>
     <name>GensQt4::CtrlConfigWindow</name>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="162"/>
+        <location filename="../CtrlConfigWindow.cpp" line="186"/>
         <source>None</source>
+        <comment>shortDeviceName</comment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="165"/>
+        <location filename="../CtrlConfigWindow.cpp" line="189"/>
         <source>3-button</source>
+        <comment>shortDeviceName</comment>
         <extracomment>Standard 3-button control pad.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="168"/>
+        <location filename="../CtrlConfigWindow.cpp" line="192"/>
         <source>6-button</source>
+        <comment>shortDeviceName</comment>
         <extracomment>Sega 6-button &quot;arcade&quot; control pad.</extracomment>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../CtrlConfigWindow.cpp" line="171"/>
-        <source>2-button</source>
-        <extracomment>Sega Master System 2-button control pad.</extracomment>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../CtrlConfigWindow.cpp" line="174"/>
-        <location filename="../CtrlConfigWindow.cpp" line="207"/>
-        <source>Mega Mouse</source>
-        <extracomment>Sega Mega Mouse.
-----------
-Sega Mega Mouse.</extracomment>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../CtrlConfigWindow.cpp" line="177"/>
-        <source>Team Player</source>
-        <extracomment>Sega Team Player. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../CtrlConfigWindow.cpp" line="181"/>
-        <source>4-Way Play</source>
-        <extracomment>EA 4-Way Play. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
         <translation></translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="195"/>
-        <source>No device connected.</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../CtrlConfigWindow.cpp" line="198"/>
-        <source>3-button gamepad</source>
-        <extracomment>Standard 3-button control pad.</extracomment>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../CtrlConfigWindow.cpp" line="201"/>
-        <source>6-button gamepad</source>
-        <extracomment>Sega 6-button &quot;arcade&quot; control pad.</extracomment>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../CtrlConfigWindow.cpp" line="204"/>
-        <source>2-button gamepad (SMS)</source>
+        <source>2-button</source>
+        <comment>shortDeviceName</comment>
         <extracomment>Sega Master System 2-button control pad.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="210"/>
-        <source>Sega Team Player</source>
+        <location filename="../CtrlConfigWindow.cpp" line="198"/>
+        <source>Team Player</source>
+        <comment>shortDeviceName</comment>
         <extracomment>Sega Team Player. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="214"/>
-        <source>EA 4-Way Play</source>
+        <location filename="../CtrlConfigWindow.cpp" line="202"/>
+        <source>4-Way Play</source>
+        <comment>shortDeviceName</comment>
         <extracomment>EA 4-Way Play. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="229"/>
-        <source>Port %1</source>
+        <location filename="../CtrlConfigWindow.cpp" line="205"/>
+        <source>Paddle Control</source>
+        <comment>shortDeviceName</comment>
+        <extracomment>Paddle Control. (Sega Mark III)</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../CtrlConfigWindow.cpp" line="237"/>
-        <location filename="../CtrlConfigWindow.cpp" line="245"/>
-        <source>Team Player %1, Port %2</source>
+        <location filename="../CtrlConfigWindow.cpp" line="208"/>
+        <source>Sports Pad</source>
+        <comment>shortDeviceName</comment>
+        <extracomment>Sega Sports Pad.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="211"/>
+        <source>Mega Mouse</source>
+        <comment>shortDeviceName</comment>
+        <extracomment>Sega Mega Mouse.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="214"/>
+        <source>XE-1 AP</source>
+        <comment>shortDeviceName</comment>
+        <extracomment>XE-1 AP.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="217"/>
+        <source>Activator</source>
+        <comment>shortDeviceName</comment>
+        <extracomment>Sega Activator.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="220"/>
+        <source>Light Phaser</source>
+        <comment>shortDeviceName</comment>
+        <extracomment>Light Phaser.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="223"/>
+        <source>Menacer</source>
+        <comment>shortDeviceName</comment>
+        <extracomment>Sega Menacer.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="226"/>
+        <source>Justifier</source>
+        <comment>shortDeviceName</comment>
+        <extracomment>Konami Justifier.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="241"/>
+        <source>No device connected.</source>
+        <comment>longDeviceName</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="244"/>
+        <source>3-button gamepad</source>
+        <comment>longDeviceName</comment>
+        <extracomment>Standard 3-button control pad.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="247"/>
+        <source>6-button gamepad</source>
+        <comment>longDeviceName</comment>
+        <extracomment>Sega 6-button &quot;arcade&quot; control pad.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="250"/>
+        <source>2-button gamepad (SMS)</source>
+        <comment>longDeviceName</comment>
+        <extracomment>Sega Master System 2-button control pad.</extracomment>
         <translation></translation>
     </message>
     <message>
         <location filename="../CtrlConfigWindow.cpp" line="253"/>
+        <source>Sega Team Player</source>
+        <comment>longDeviceName</comment>
+        <extracomment>Sega Team Player. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="257"/>
+        <source>EA 4-Way Play</source>
+        <comment>longDeviceName</comment>
+        <extracomment>EA 4-Way Play. (Specific brand name; only modify if it&apos;s different in your region!)</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="260"/>
+        <source>Paddle Control</source>
+        <comment>longDeviceName</comment>
+        <extracomment>Paddle Control. (Sega Mark III)</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="263"/>
+        <source>Sega Sports Pad</source>
+        <comment>longDeviceName</comment>
+        <extracomment>Sega Sports Pad.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="266"/>
+        <source>Mega Mouse</source>
+        <comment>longDeviceName</comment>
+        <extracomment>Sega Mega Mouse.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="269"/>
+        <source>XE-1 AP</source>
+        <comment>longDeviceName</comment>
+        <extracomment>XE-1 AP.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="272"/>
+        <source>Sega Activator</source>
+        <comment>longDeviceName</comment>
+        <extracomment>Sega Activator.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="275"/>
+        <source>Light Phaser</source>
+        <comment>longDeviceName</comment>
+        <extracomment>Light Phaser.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="278"/>
+        <source>Menacer</source>
+        <comment>longDeviceName</comment>
+        <extracomment>Menacer.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="281"/>
+        <source>Justifier</source>
+        <comment>longDeviceName</comment>
+        <extracomment>Konami Justifier.</extracomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="296"/>
+        <source>Port %1</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="304"/>
+        <location filename="../CtrlConfigWindow.cpp" line="312"/>
+        <source>Team Player %1, Port %2</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CtrlConfigWindow.cpp" line="320"/>
         <source>4-Way Play, Port %1</source>
         <translation></translation>
     </message>
@@ -1683,128 +1798,156 @@ programs that depend on the correct VDP behavior.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="231"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="236"/>
         <source>Up</source>
-        <comment>controller-standard</comment>
+        <comment>controllers/3BTN</comment>
         <extracomment>Standard controller: D-Pad UP.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="234"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="239"/>
         <source>Down</source>
-        <comment>controller-standard</comment>
+        <comment>controllers/3BTN</comment>
         <extracomment>Standard controller: D-Pad DOWN.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="237"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="242"/>
         <source>Left</source>
-        <comment>controller-standard</comment>
+        <comment>controllers/3BTN</comment>
         <extracomment>Standard controller: D-Pad LEFT.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="240"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="245"/>
         <source>Right</source>
-        <comment>controller-standard</comment>
+        <comment>controllers/3BTN</comment>
         <extracomment>Standard controller: D-Pad RIGHT.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="243"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="251"/>
         <source>B</source>
-        <comment>controller-standard</comment>
+        <comment>controllers/3BTN</comment>
         <extracomment>Standard controller: B button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="246"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="299"/>
+        <source>Start</source>
+        <comment>controllers/XE1A</comment>
+        <extracomment>XE-1 AP: SELECT button.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="302"/>
+        <source>E2</source>
+        <comment>controllers/XE1A</comment>
+        <extracomment>XE-1 AP: E2 button.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="305"/>
+        <source>E1</source>
+        <comment>controllers/XE1A</comment>
+        <extracomment>XE-1 AP: E1 button.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="308"/>
+        <source>D</source>
+        <comment>controllers/XE1A</comment>
+        <extracomment>XE-1 AP: D button.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="248"/>
         <source>C</source>
-        <comment>controller-standard</comment>
+        <comment>controllers/3BTN</comment>
         <extracomment>Standard controller: C button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="249"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="257"/>
         <source>A</source>
-        <comment>controller-standard</comment>
+        <comment>controllers/3BTN</comment>
         <extracomment>Standard controller: A button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="252"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="254"/>
         <source>Start</source>
-        <comment>controller-standard</comment>
+        <comment>controllers/3BTN</comment>
         <extracomment>Standard controller: START button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="255"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="260"/>
         <source>Z</source>
-        <comment>controller-standard</comment>
+        <comment>controllers/6BTN</comment>
         <extracomment>Standard controller: Z button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="258"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="263"/>
         <source>Y</source>
-        <comment>controller-standard</comment>
+        <comment>controllers/6BTN</comment>
         <extracomment>Standard controller: Y button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="261"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="266"/>
         <source>X</source>
-        <comment>controller-standard</comment>
+        <comment>controllers/6BTN</comment>
         <extracomment>Standard controller: X button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="264"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="269"/>
         <source>Mode</source>
-        <comment>controller-standard</comment>
+        <comment>controllers/6BTN</comment>
         <extracomment>Standard controller: MODE button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="270"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="278"/>
         <source>1</source>
-        <comment>controller-sms-gg</comment>
+        <comment>controllers/2BTN</comment>
         <extracomment>SMS/Game Gear: 1 button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="273"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="275"/>
         <source>2</source>
-        <comment>controller-sms-gg</comment>
+        <comment>controllers/2BTN</comment>
         <extracomment>SMS/Game Gear: 2 button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="279"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="284"/>
         <source>Left</source>
-        <comment>controller-mouse</comment>
+        <comment>controllers/MOUS</comment>
         <extracomment>Sega Mega Mouse: LEFT mouse button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="282"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="287"/>
         <source>Right</source>
-        <comment>controller-mouse</comment>
+        <comment>controllers/MOUS</comment>
         <extracomment>Sega Mega Mouse: RIGHT mouse button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="285"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="290"/>
         <source>Middle</source>
-        <comment>controller-mouse</comment>
+        <comment>controllers/MOUS</comment>
         <extracomment>Sega Mega Mouse: MIDDLE mouse button.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="288"/>
+        <location filename="../widgets/GensCtrlCfgWidget.cpp" line="293"/>
         <source>Start</source>
-        <comment>controller-mouse</comment>
+        <comment>controllers/MOUS</comment>
         <extracomment>Sega Mega Mouse: START button.</extracomment>
         <translation></translation>
     </message>
