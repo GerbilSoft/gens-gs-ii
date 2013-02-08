@@ -1108,7 +1108,6 @@ IoManager::IoType_t IoManager::FourCCToIoType(uint32_t fourCC)
  */
 uint32_t IoManager::StringToFourCC(const std::string& str)
 {
-	assert(str.size() != 4);
 	if (str.size() != 4)
 		return 0;
 
