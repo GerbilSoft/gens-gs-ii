@@ -183,47 +183,47 @@ QString CtrlConfigWindowPrivate::getShortDeviceName(IoManager::IoType_t ioType) 
 		default:
 			return QString::fromStdString(IoManager::IoTypeToString(ioType));
 		case IoManager::IOT_NONE:
-			return CtrlConfigWindow::tr("None");
+			return CtrlConfigWindow::tr("None", "shortDeviceName");
 		case IoManager::IOT_3BTN:
 			//: Standard 3-button control pad.
-			return CtrlConfigWindow::tr("3-button");
+			return CtrlConfigWindow::tr("3-button", "shortDeviceName");
 		case IoManager::IOT_6BTN:
 			//: Sega 6-button "arcade" control pad.
-			return CtrlConfigWindow::tr("6-button");
+			return CtrlConfigWindow::tr("6-button", "shortDeviceName");
 		case IoManager::IOT_2BTN:
 			//: Sega Master System 2-button control pad.
-			return CtrlConfigWindow::tr("2-button");
+			return CtrlConfigWindow::tr("2-button", "shortDeviceName");
 		case IoManager::IOT_TEAMPLAYER:
 			//: Sega Team Player. (Specific brand name; only modify if it's different in your region!)
-			return CtrlConfigWindow::tr("Team Player");
+			return CtrlConfigWindow::tr("Team Player", "shortDeviceName");
 		case IoManager::IOT_4WP_MASTER:	/* fallthrough */
 		case IoManager::IOT_4WP_SLAVE:
 			//: EA 4-Way Play. (Specific brand name; only modify if it's different in your region!)
-			return CtrlConfigWindow::tr("4-Way Play");
+			return CtrlConfigWindow::tr("4-Way Play", "shortDeviceName");
 		case IoManager::IOT_PADDLE:
 			//: Paddle Control. (Sega Mark III)
-			return CtrlConfigWindow::tr("Paddle Control");
+			return CtrlConfigWindow::tr("Paddle Control", "shortDeviceName");
 		case IoManager::IOT_SPORTS_PAD:
 			//: Sega Sports Pad.
-			return CtrlConfigWindow::tr("Sports Pad");
+			return CtrlConfigWindow::tr("Sports Pad", "shortDeviceName");
 		case IoManager::IOT_MEGA_MOUSE:
 			//: Sega Mega Mouse.
-			return CtrlConfigWindow::tr("Mega Mouse");
+			return CtrlConfigWindow::tr("Mega Mouse", "shortDeviceName");
 		case IoManager::IOT_XE_1AP:
 			//: XE-1 AP.
-			return CtrlConfigWindow::tr("XE-1 AP");
+			return CtrlConfigWindow::tr("XE-1 AP", "shortDeviceName");
 		case IoManager::IOT_ACTIVATOR:
 			//: Sega Activator.
-			return CtrlConfigWindow::tr("Activator");
+			return CtrlConfigWindow::tr("Activator", "shortDeviceName");
 		case IoManager::IOT_PHASER:
 			//: Light Phaser.
-			return CtrlConfigWindow::tr("Light Phaser");
+			return CtrlConfigWindow::tr("Light Phaser", "shortDeviceName");
 		case IoManager::IOT_MENACER:
 			//: Sega Menacer.
-			return CtrlConfigWindow::tr("Menacer");
+			return CtrlConfigWindow::tr("Menacer", "shortDeviceName");
 		case IoManager::IOT_JUSTIFIER:
 			//: Konami Justifier.
-			return CtrlConfigWindow::tr("Justifier");
+			return CtrlConfigWindow::tr("Justifier", "shortDeviceName");
 	}
 }
 
@@ -238,47 +238,47 @@ QString CtrlConfigWindowPrivate::getLongDeviceName(IoManager::IoType_t ioType) c
 		default:
 			return QString::fromStdString(IoManager::IoTypeToString(ioType));
 		case IoManager::IOT_NONE:
-			return CtrlConfigWindow::tr("No device connected.");
+			return CtrlConfigWindow::tr("No device connected.", "longDeviceName");
 		case IoManager::IOT_3BTN:
 			//: Standard 3-button control pad.
-			return CtrlConfigWindow::tr("3-button gamepad");
+			return CtrlConfigWindow::tr("3-button gamepad", "longDeviceName");
 		case IoManager::IOT_6BTN:
 			//: Sega 6-button "arcade" control pad.
-			return CtrlConfigWindow::tr("6-button gamepad");
+			return CtrlConfigWindow::tr("6-button gamepad", "longDeviceName");
 		case IoManager::IOT_2BTN:
 			//: Sega Master System 2-button control pad.
-			return CtrlConfigWindow::tr("2-button gamepad (SMS)");
+			return CtrlConfigWindow::tr("2-button gamepad (SMS)", "longDeviceName");
 		case IoManager::IOT_TEAMPLAYER:
 			//: Sega Team Player. (Specific brand name; only modify if it's different in your region!)
-			return CtrlConfigWindow::tr("Sega Team Player");
+			return CtrlConfigWindow::tr("Sega Team Player", "longDeviceName");
 		case IoManager::IOT_4WP_MASTER:	/* fallthrough */
 		case IoManager::IOT_4WP_SLAVE:
 			//: EA 4-Way Play. (Specific brand name; only modify if it's different in your region!)
-			return CtrlConfigWindow::tr("EA 4-Way Play");
+			return CtrlConfigWindow::tr("EA 4-Way Play", "longDeviceName");
 		case IoManager::IOT_PADDLE:
 			//: Paddle Control. (Sega Mark III)
-			return CtrlConfigWindow::tr("Paddle Control");
+			return CtrlConfigWindow::tr("Paddle Control", "longDeviceName");
 		case IoManager::IOT_SPORTS_PAD:
 			//: Sega Sports Pad.
-			return CtrlConfigWindow::tr("Sega Sports Pad");
+			return CtrlConfigWindow::tr("Sega Sports Pad", "longDeviceName");
 		case IoManager::IOT_MEGA_MOUSE:
 			//: Sega Mega Mouse.
-			return CtrlConfigWindow::tr("Mega Mouse");
+			return CtrlConfigWindow::tr("Mega Mouse", "longDeviceName");
 		case IoManager::IOT_XE_1AP:
 			//: XE-1 AP.
-			return CtrlConfigWindow::tr("XE-1 AP");
+			return CtrlConfigWindow::tr("XE-1 AP", "longDeviceName");
 		case IoManager::IOT_ACTIVATOR:
 			//: Sega Activator.
-			return CtrlConfigWindow::tr("Sega Activator");
+			return CtrlConfigWindow::tr("Sega Activator", "longDeviceName");
 		case IoManager::IOT_PHASER:
 			//: Light Phaser.
-			return CtrlConfigWindow::tr("Light Phaser");
+			return CtrlConfigWindow::tr("Light Phaser", "longDeviceName");
 		case IoManager::IOT_MENACER:
 			//: Menacer.
-			return CtrlConfigWindow::tr("Menacer");
+			return CtrlConfigWindow::tr("Menacer", "longDeviceName");
 		case IoManager::IOT_JUSTIFIER:
 			//: Konami Justifier.
-			return CtrlConfigWindow::tr("Justifier");
+			return CtrlConfigWindow::tr("Justifier", "longDeviceName");
 	}
 }
 
