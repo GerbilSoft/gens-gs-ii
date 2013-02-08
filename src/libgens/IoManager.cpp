@@ -1052,7 +1052,16 @@ int IoManager::NumDevButtons(IoType_t ioType)
 bool IoManager::IsDevTypeUsable(IoType_t ioType)
 {
 	assert(ioType >= IOT_NONE && ioType <= IOT_MAX);
+#ifdef NDEBUG
+	// Release build.
+	// Return the actual "isUsable" status.
 	return IoManagerPrivate::ioDevInfo[ioType].isUsable;
+#else
+	// Debug build.
+	// All controllers are usable.
+	// TODO: Mark "unusable" controllers as "partially implemented"?
+	return true;
+#endif
 }
 
 /**
