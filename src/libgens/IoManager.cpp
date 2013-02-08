@@ -1069,7 +1069,7 @@ uint32_t IoManager::IoTypeToFourCC(IoType_t ioType)
 /**
  * Get the device type for a given FourCC.
  * @param ioType Device type.
- * @return Device type, or IOT_MAX if the FourCC is invalid.
+ * @return Device type, or IOT_MAX if the FourCC doesn't match any device type.
  */
 uint32_t IoManager::FourCCToIoType(uint32_t fourCC)
 {
