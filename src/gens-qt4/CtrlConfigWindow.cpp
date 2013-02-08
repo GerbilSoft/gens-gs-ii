@@ -58,11 +58,10 @@ class CtrlConfigWindowPrivate
 		static CtrlConfigWindow *ms_Window;
 
 		// Controller data.
-		static const char *const CtrlIconFilenames[LibGens::IoManager::IOT_MAX];
 		QString getShortDeviceName(LibGens::IoManager::IoType_t ioType) const;
 		QString getLongDeviceName(LibGens::IoManager::IoType_t ioType) const;
 		QString getPortName(LibGens::IoManager::VirtPort_t virtPort) const;
-		QIcon getCtrlIcon(LibGens::IoManager::IoType_t ioType) const;
+		static QIcon getCtrlIcon(LibGens::IoManager::IoType_t ioType);
 
 		// Internal CtrlConfig instance.
 		CtrlConfig *ctrlConfig;
@@ -113,19 +112,6 @@ class CtrlConfigWindowPrivate
 
 // Single window instance.
 CtrlConfigWindow *CtrlConfigWindowPrivate::ms_Window = NULL;
-
-// Controller icon filenames.
-const char *const CtrlConfigWindowPrivate::CtrlIconFilenames[IoManager::IOT_MAX] =
-{
-	"controller-none.png",		// IOT_NONE
-	"controller-3btn.png",		// IOT_3BTN
-	"controller-6btn.png",		// IOT_6BTN
-	"controller-2btn.png",		// IOT_2BTN
-	"controller-mega-mouse.png",	// IOT_MEGA_MOUSE (TODO)
-	"controller-teamplayer.png",	// IOT_TEAMPLAYER (TODO)
-	"controller-4wp.png",		// IOT_4WP_MASTER (TODO)
-	"controller-4wp.png",		// IOT_4WP_SLAVE (TODO)
-};
 
 CtrlConfigWindowPrivate::CtrlConfigWindowPrivate(CtrlConfigWindow *q)
 	: q(q)
@@ -264,13 +250,17 @@ QString CtrlConfigWindowPrivate::getPortName(IoManager::VirtPort_t virtPort) con
 
 /**
  * Get an icon for the specified controller type.
+ * STATIC FUNCTION - tr() isn't needed here.
  * @param ioType Controller type.
  * @return Icon for the specified controller type.
  */
-QIcon CtrlConfigWindowPrivate::getCtrlIcon(IoManager::IoType_t ioType) const
+QIcon CtrlConfigWindowPrivate::getCtrlIcon(IoManager::IoType_t ioType)
 {
 	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
-	
+
+	// Controller icons are named using the FourCC.
+	const QString qsFourCC = QString::fromStdString(IoManager::IoTypeToString(ioType));
+
 	// Create the icon.
 	QIcon ctrlIcon;
 	static const int iconSizes[5] = {64, 48, 32, 22, 16};
@@ -279,14 +269,14 @@ QIcon CtrlConfigWindowPrivate::getCtrlIcon(IoManager::IoType_t ioType) const
 			QString::number(iconSizes[i]) + QChar(L'x') +
 			QString::number(iconSizes[i]) +
 			QLatin1String("/controllers/") +
-			QLatin1String(CtrlIconFilenames[ioType]);
-		
+			qsFourCC + QLatin1String(".png");
+
 		if (QFile::exists(iconFilename)) {
 			// File exists.
 			ctrlIcon.addFile(iconFilename, QSize(iconSizes[i], iconSizes[i]));
 		}
 	}
-	
+
 	// Return the controller icon.
 	return ctrlIcon;
 }
