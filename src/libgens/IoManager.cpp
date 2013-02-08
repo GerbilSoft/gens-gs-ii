@@ -1087,8 +1087,8 @@ IoManager::IoType_t IoManager::FourCCToIoType(uint32_t fourCC)
 	static_assert('    ' == 0x20202020, "Multi-character character constant '    ' is invalid.");
 	static_assert('\0\0\0\0' == 0x00000000, "Multi-character character constant '\\0\\0\\0\\0' is invalid.");
 
-	// Special case: FourCC == 0
-	if (fourCC == 0)
+	// Special case: FourCC == 0 || FourCC == '    '
+	if (fourCC == 0 || fourCC == '    ')
 		return IOT_NONE;
 
 	for (int i = 0; i < NUM_ELEMENTS(IoManagerPrivate::ioDevInfo); i++) {
