@@ -233,64 +233,79 @@ QString GensCtrlCfgWidgetPrivate::buttonName_l(IoManager::ButtonName_t buttonNam
 		// Standard controller buttons.
 		case IoManager::BTNNAME_UP:
 			//: Standard controller: D-Pad UP.
-			return GensCtrlCfgWidget::tr("Up", "controller-standard");
+			return GensCtrlCfgWidget::tr("Up", "controllers/3BTN");
 		case IoManager::BTNNAME_DOWN:
 			//: Standard controller: D-Pad DOWN.
-			return GensCtrlCfgWidget::tr("Down", "controller-standard");
+			return GensCtrlCfgWidget::tr("Down", "controllers/3BTN");
 		case IoManager::BTNNAME_LEFT:
 			//: Standard controller: D-Pad LEFT.
-			return GensCtrlCfgWidget::tr("Left", "controller-standard");
+			return GensCtrlCfgWidget::tr("Left", "controllers/3BTN");
 		case IoManager::BTNNAME_RIGHT:
 			//: Standard controller: D-Pad RIGHT.
-			return GensCtrlCfgWidget::tr("Right", "controller-standard");
-		case IoManager::BTNNAME_B:
-			//: Standard controller: B button.
-			return GensCtrlCfgWidget::tr("B", "controller-standard");
+			return GensCtrlCfgWidget::tr("Right", "controllers/3BTN");
 		case IoManager::BTNNAME_C:
 			//: Standard controller: C button.
-			return GensCtrlCfgWidget::tr("C", "controller-standard");
-		case IoManager::BTNNAME_A:
-			//: Standard controller: A button.
-			return GensCtrlCfgWidget::tr("A", "controller-standard");
+			return GensCtrlCfgWidget::tr("C", "controllers/3BTN");
+		case IoManager::BTNNAME_B:
+			//: Standard controller: B button.
+			return GensCtrlCfgWidget::tr("B", "controllers/3BTN");
 		case IoManager::BTNNAME_START:
 			//: Standard controller: START button.
-			return GensCtrlCfgWidget::tr("Start", "controller-standard");
+			return GensCtrlCfgWidget::tr("Start", "controllers/3BTN");
+		case IoManager::BTNNAME_A:
+			//: Standard controller: A button.
+			return GensCtrlCfgWidget::tr("A", "controllers/3BTN");
 		case IoManager::BTNNAME_Z:
 			//: Standard controller: Z button.
-			return GensCtrlCfgWidget::tr("Z", "controller-standard");
+			return GensCtrlCfgWidget::tr("Z", "controllers/6BTN");
 		case IoManager::BTNNAME_Y:
 			//: Standard controller: Y button.
-			return GensCtrlCfgWidget::tr("Y", "controller-standard");
+			return GensCtrlCfgWidget::tr("Y", "controllers/6BTN");
 		case IoManager::BTNNAME_X:
 			//: Standard controller: X button.
-			return GensCtrlCfgWidget::tr("X", "controller-standard");
+			return GensCtrlCfgWidget::tr("X", "controllers/6BTN");
 		case IoManager::BTNNAME_MODE:
 			//: Standard controller: MODE button.
-			return GensCtrlCfgWidget::tr("Mode", "controller-standard");
+			return GensCtrlCfgWidget::tr("Mode", "controllers/6BTN");
 
 		/** SMS/GG buttons. **/
 
-		case IoManager::BTNNAME_1:
-			//: SMS/Game Gear: 1 button.
-			return GensCtrlCfgWidget::tr("1", "controller-sms-gg");
 		case IoManager::BTNNAME_2:
 			//: SMS/Game Gear: 2 button.
-			return GensCtrlCfgWidget::tr("2", "controller-sms-gg");
+			return GensCtrlCfgWidget::tr("2", "controllers/2BTN");
+		case IoManager::BTNNAME_1:
+			//: SMS/Game Gear: 1 button.
+			return GensCtrlCfgWidget::tr("1", "controllers/2BTN");
 
 		/** Sega Mega Mouse buttons. **/
 
 		case IoManager::BTNNAME_MOUSE_LEFT:
 			//: Sega Mega Mouse: LEFT mouse button.
-			return GensCtrlCfgWidget::tr("Left", "controller-mouse");
+			return GensCtrlCfgWidget::tr("Left", "controllers/MOUS");
 		case IoManager::BTNNAME_MOUSE_RIGHT:
 			//: Sega Mega Mouse: RIGHT mouse button.
-			return GensCtrlCfgWidget::tr("Right", "controller-mouse");
+			return GensCtrlCfgWidget::tr("Right", "controllers/MOUS");
 		case IoManager::BTNNAME_MOUSE_MIDDLE:
 			//: Sega Mega Mouse: MIDDLE mouse button.
-			return GensCtrlCfgWidget::tr("Middle", "controller-mouse");
+			return GensCtrlCfgWidget::tr("Middle", "controllers/MOUS");
 		case IoManager::BTNNAME_MOUSE_START:
 			//: Sega Mega Mouse: START button.
-			return GensCtrlCfgWidget::tr("Start", "controller-mouse");
+			return GensCtrlCfgWidget::tr("Start", "controllers/MOUS");
+
+		/** XE-1 AP buttons. **/
+
+		case IoManager::BTNNAME_SELECT:
+			//: XE-1 AP: SELECT button.
+			return GensCtrlCfgWidget::tr("Start", "controllers/XE1A");
+		case IoManager::BTNNAME_E2:
+			//: XE-1 AP: E2 button.
+			return GensCtrlCfgWidget::tr("E2", "controllers/XE1A");
+		case IoManager::BTNNAME_E1:
+			//: XE-1 AP: E1 button.
+			return GensCtrlCfgWidget::tr("E1", "controllers/XE1A");
+		case IoManager::BTNNAME_D:
+			//: XE-1 AP: D button.
+			return GensCtrlCfgWidget::tr("D", "controllers/XE1A");
 
 		default:
 			return QString();
