@@ -1088,8 +1088,9 @@ IoManager::IoType_t IoManager::FourCCToIoType(uint32_t fourCC)
 	static_assert('\0\0\0\0' == 0x00000000, "Multi-character character constant '\\0\\0\\0\\0' is invalid.");
 
 	// Special case: FourCC == 0 || FourCC == '    '
+	// Assume these are invalid in order to force default settings.
 	if (fourCC == 0 || fourCC == '    ')
-		return IOT_NONE;
+		return IOT_MAX;
 
 	for (int i = 0; i < NUM_ELEMENTS(IoManagerPrivate::ioDevInfo); i++) {
 		if (IoManagerPrivate::ioDevInfo[i].fourCC == fourCC)
