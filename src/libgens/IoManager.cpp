@@ -225,10 +225,8 @@ class IoManagerPrivate
 		struct IoDevice
 		{
 			IoDevice()
-				: type(IoManager::IOT_3BTN)
-			{
-				reset();
-			}
+				: type(IoManager::IOT_NONE)
+			{ reset(); }
 
 			/**
 			 * Reset everything in the IoDevice.
@@ -361,9 +359,19 @@ class IoManagerPrivate
 		IoDevice ioDevices[IoManager::VIRTPORT_MAX];
 
 		/**
-		 * Number of buttons in each device type.
+		 * Device information.
 		 */
-		static const uint8_t devBtnCount[IoManager::IOT_MAX];
+		struct IoDevInfo {
+			uint32_t fourCC;	// FourCC.
+			uint8_t btnCount;	// Number of buttons.
+
+			// Is this device type usable?
+			// If false, disabled in Release builds.
+			bool isUsable;
+			// TODO: UPDATE function pointer?
+		};
+
+		static const IoDevInfo ioDevInfo[IoManager::IOT_MAX];
 
 		/**
 		 * 4-Way Play: Current player.
@@ -372,30 +380,23 @@ class IoManagerPrivate
 };
 
 /**
- * Number of buttons in each device type.
+ * Device information.
  */
-const uint8_t IoManagerPrivate::devBtnCount[IoManager::IOT_MAX] =
+const IoManagerPrivate::IoDevInfo IoManagerPrivate::ioDevInfo[IoManager::IOT_MAX] =
 {
-	0,	// IOT_NONE
-	8,	// IOT_3BTN
-	12,	// IOT_6BTN
-	6,	// IOT_2BTN (TODO: Start/Pause?)
-	4,	// IOT_MEGA_MOUSE
-	0,	// IOT_TEAMPLAYER
-	0,	// IOT_4WP_MASTER
-	0,	// IOT_4WP_SLAVE
+	{'NONE', 0, true},	// IOT_NONE
+	{'3BTN', 8, true},	// IOT_3BTN
+	{'6BTN', 12, true},	// IOT_6BTN
+	{'2BTN', 6, true},	// IOT_2BTN (TODO: Start/Pause?)
+	{'MOUS', 4, false},	// IOT_MEGA_MOUSE
+	{'TEAM', 0, true},	// IOT_TEAMPLAYER
+	{'4WPM', 0, true},	// IOT_4WP_MASTER
+	{'4WPS', 0, true},	// IOT_4WP_SLAVE
 };
 
 IoManagerPrivate::IoManagerPrivate(IoManager *q)
 	: q(q)
-{
-	// Set the default controller types for IOPORT_1 and IOPORT_2.
-	ioDevices[IoManager::VIRTPORT_1].type = IoManager::IOT_6BTN;
-	ioDevices[IoManager::VIRTPORT_2].type = IoManager::IOT_3BTN;
-
-	// Reset all devices.
-	reset();
-}
+{ }
 
 /**
  * Reset all devices.
@@ -478,7 +479,7 @@ void IoManagerPrivate::update(void)
 {
 	// Update keyboard input for all ports.
 	for (int i = 0; i < NUM_ELEMENTS(ioDevices); i++) {
-		int btnCount = devBtnCount[ioDevices[i].type];
+		int btnCount = ioDevInfo[ioDevices[i].type].btnCount;
 		uint32_t buttons = 0;
 		for (int j = (btnCount - 1); j >= 0; j--) {
 			buttons <<= 1;
@@ -1038,7 +1039,7 @@ int IoManager::NumDevButtons(IoType_t ioType)
 	if (ioType < 0 || ioType >= IOT_MAX)
 		return 0;
 
-	return IoManagerPrivate::devBtnCount[ioType];
+	return IoManagerPrivate::ioDevInfo[ioType].btnCount;
 }
 
 /**
