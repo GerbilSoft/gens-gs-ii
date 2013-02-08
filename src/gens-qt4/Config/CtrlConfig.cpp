@@ -252,21 +252,26 @@ int CtrlConfigPrivate::load(const QSettings *qSettings)
 {
 	for (int virtPort = IoManager::VIRTPORT_1;
 	     virtPort < IoManager::VIRTPORT_MAX; virtPort++) {
-		// Get the controller type.
-		// TODO: Allow ASCII controller types?
+		// Get the controller type. (Stored as FourCC.)
 		const QString portName = PortName((IoManager::VirtPort_t)virtPort);
-		IoManager::IoType_t ioType_tmp =
-				(IoManager::IoType_t)
-				(qSettings->value(portName + QLatin1String("/type"), -1).toInt());
+		const QString qsFourCC = qSettings->value(portName + QLatin1String("/type")).toString();
+		IoManager::IoType_t ioType_tmp = IoManager::StringToIoType(qsFourCC.toStdString());
+
 		if (ioType_tmp < IoManager::IOT_NONE ||
 		    ioType_tmp >= IoManager::IOT_MAX) {
 			// No controller information.
 			// Use the default.
 			ctrlTypes[virtPort] = Def_CtrlTypes[virtPort];
 			memcpy(ctrlKeys[virtPort], Def_CtrlKeys[virtPort], sizeof(ctrlKeys[virtPort]));
+		} else if (virtPort > IoManager::VIRTPORT_EXT &&
+			   ioType_tmp > IoManager::IOT_6BTN) {
+			// Team Player / 4WP doesn't support this controller.
+			// Use the default.
+			ctrlTypes[virtPort] = Def_CtrlTypes[virtPort];
+			memcpy(ctrlKeys[virtPort], Def_CtrlKeys[virtPort], sizeof(ctrlKeys[virtPort]));
 		} else {
 			// Controller information specified.
-			ctrlTypes[virtPort] = (IoManager::IoType_t)ioType_tmp;
+			ctrlTypes[virtPort] = ioType_tmp;
 
 			// Clear the controller keys.
 			memset(ctrlKeys[virtPort], 0x00, sizeof(ctrlKeys[virtPort]));
@@ -302,10 +307,10 @@ int CtrlConfigPrivate::save(QSettings *qSettings)
 {
 	for (int virtPort = IoManager::VIRTPORT_1;
 	     virtPort < IoManager::VIRTPORT_MAX; virtPort++) {
-		// Save the controller type.
-		// TODO: Allow ASCII controller types?
+		// Save the controller type as a FourCC.
 		const QString portName = PortName((IoManager::VirtPort_t)virtPort);
-		qSettings->setValue(portName + QLatin1String("/type"), (int)ctrlTypes[virtPort]);
+		const QString qsFourCC = QString::fromStdString(IoManager::IoTypeToString(ctrlTypes[virtPort]));
+		qSettings->setValue(portName + QLatin1String("/type"), qsFourCC);
 
 		// Save the controller keys.
 		// TODO: Save all keys, even those not being used by the current type.
