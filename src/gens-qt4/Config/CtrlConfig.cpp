@@ -118,7 +118,7 @@ const GensKey_t CtrlConfigPrivate::Def_CtrlKeys[IoManager::VIRTPORT_MAX][IoManag
 	// NOTE: Both shift keys are mapped to LSHIFT on Mac OS X.
 	{KEYV_UP, KEYV_DOWN, KEYV_LEFT, KEYV_RIGHT,
 	KEYV_s, KEYV_d, KEYV_a, KEYV_RETURN,
-	KEYV_q, KEYV_w, KEYV_e,
+	KEYV_e, KEYV_w, KEYV_q,
 #ifdef Q_WS_MAC
 	KEYV_LSHIFT
 #else
