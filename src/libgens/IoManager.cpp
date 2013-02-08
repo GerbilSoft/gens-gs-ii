@@ -30,6 +30,8 @@
 
 // C++ includes.
 #include <algorithm>
+#include <string>
+using std::string;
 
 // NUM_ELEMENTS(x)
 #include "macros/common.h"
@@ -1029,6 +1031,8 @@ int IoManager::keymap(int virtPort, GensKey_t *keymap, int siz) const
 	return d->keymap(virtPort, keymap, siz);
 }
 
+/** General device type functions. **/
+
 /**
  * Get the number of buttons present on a specific type of device.
  * @param ioType Device type.
@@ -1036,11 +1040,92 @@ int IoManager::keymap(int virtPort, GensKey_t *keymap, int siz) const
  */
 int IoManager::NumDevButtons(IoType_t ioType)
 {
-	if (ioType < 0 || ioType >= IOT_MAX)
-		return 0;
-
+	assert(ioType >= IOT_NONE && ioType <= IOT_MAX);
 	return IoManagerPrivate::ioDevInfo[ioType].btnCount;
 }
+
+/**
+ * Is a given device type usable?
+ * @param ioType Device type.
+ * @return True if usable; false if not.
+ */
+bool IoManager::IsDevTypeUsable(IoType_t ioType)
+{
+	assert(ioType >= IOT_NONE && ioType <= IOT_MAX);
+	return IoManagerPrivate::ioDevInfo[ioType].isUsable;
+}
+
+/**
+ * Get the FourCC for a given device type.
+ * @param ioType Device type.
+ * @return FourCC for the device type.
+ */
+uint32_t IoManager::IoTypeToFourCC(IoType_t ioType)
+{
+	assert(ioType >= IOT_NONE && ioType <= IOT_MAX);
+	return IoManagerPrivate::ioDevInfo[ioType].fourCC;
+}
+
+/**
+ * Get the device type for a given FourCC.
+ * @param ioType Device type.
+ * @return Device type, or IOT_MAX if the FourCC is invalid.
+ */
+uint32_t IoManager::FourCCToIoType(uint32_t fourCC)
+{
+	// Verify that multi-character character constants work properly.
+	static_assert('NONE' == 0x4E4F4E45, "Multi-character character constant 'NONE' is invalid.");
+	static_assert('    ' == 0x20202020, "Multi-character character constant '    ' is invalid.");
+	static_assert('\0\0\0\0' == 0x00000000, "Multi-character character constant '\\0\\0\\0\\0' is invalid.");
+
+	// Special case: FourCC == 0
+	if (fourCC == 0)
+		return IOT_NONE;
+
+	for (int i = 0; i < NUM_ELEMENTS(IoManagerPrivate::ioDevInfo); i++) {
+		if (IoManagerPrivate::ioDevInfo[i].fourCC == fourCC)
+			return (IoType_t)i;
+	}
+
+	// FourCC not found.
+	return IOT_MAX;
+}
+
+/**
+ * Convert a string to a FourCC.
+ * @param str String.
+ * @return FourCC, or 0 if the string was not four characters long.
+ */
+uint32_t IoManager::StringToFourCC(const std::string& str)
+{
+	assert(str.size() != 4);
+	if (str.size() != 4)
+		return 0;
+
+	uint32_t fourCC = 0;
+	for (int i = 0; i < 4; i++) {
+		fourCC <<= 8;
+		fourCC |= (uint8_t)str.at(i);
+	}
+	return fourCC;
+}
+
+/**
+ * Convert a FourCC to a string.
+ * @param fourCC FourCC.
+ * @return FourCC as a string.
+ */
+string IoManager::FourCCToSTring(uint32_t fourCC)
+{
+	string str(4, '\0');
+	for (int i = 3; i >= 0; i--) {
+		str.at(i) = (fourCC & 0xFF);
+		fourCC >>= 8;
+	}
+	return str;
+}
+
+/** Get/set device types. **/
 
 /**
  * Get the device type for a given virtual port.

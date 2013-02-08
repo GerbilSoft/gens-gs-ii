@@ -24,7 +24,11 @@
 #ifndef __LIBGENS_IOMANAGER_HPP__
 #define __LIBGENS_IOMANAGER_HPP__
 
+// C includes.
 #include <stdint.h>
+
+// C++ includes.
+#include <string>
 
 #include "GensInput/GensKey_t.h"
 
@@ -149,12 +153,51 @@ class IoManager
 		int setKeymap(int virtPort, const GensKey_t *keymap, int siz);
 		int keymap(int virtPort, GensKey_t *keymap, int siz) const;
 
+		/** General device type functions. **/
+
 		/**
 		 * Get the number of buttons present on a specific type of device.
 		 * @param ioType Device type.
 		 * @return Number of buttons.
 		 */
 		static int NumDevButtons(IoType_t ioType);
+
+		/**
+		 * Is a given device type usable?
+		 * @param ioType Device type.
+		 * @return True if usable; false if not.
+		 */
+		static bool IsDevTypeUsable(IoType_t ioType);
+
+		/**
+		 * Get the FourCC for a given device type.
+		 * @param ioType Device type.
+		 * @return FourCC for the device type.
+		 */
+		static uint32_t IoTypeToFourCC(IoType_t ioType);
+
+		/**
+		 * Get the device type for a given FourCC.
+		 * @param ioType Device type.
+		 * @return Device type, or IOT_MAX if the FourCC is invalid.
+		 */
+		static uint32_t FourCCToIoType(uint32_t fourCC);
+
+		/**
+		 * Convert a string to a FourCC.
+		 * @param str String.
+		 * @return FourCC, or 0 if the string was not four characters long.
+		 */
+		static uint32_t StringToFourCC(const std::string& str);
+
+		/**
+		 * Convert a FourCC to a string.
+		 * @param fourCC FourCC.
+		 * @return FourCC as a string.
+		 */
+		static std::string FourCCToSTring(uint32_t fourCC);
+
+		/** Get/set device types. **/
 
 		/**
 		 * Get the device type for a given virtual port.
