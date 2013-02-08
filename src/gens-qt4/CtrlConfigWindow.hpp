@@ -96,7 +96,6 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 
 		// Select a port.
 		void selectPort(LibGens::IoManager::VirtPort_t virtPort);
-		void cboDevice_setTP(bool isTP);
 };
 
 }

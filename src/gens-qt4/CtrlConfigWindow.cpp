@@ -39,6 +39,7 @@ using LibGens::IoManager;
 #include <QtGui/QKeyEvent>
 #include <QtGui/QPushButton>
 #include <QtCore/QFile>
+#include <QtCore/QMap>
 
 namespace GensQt4
 {
@@ -79,6 +80,10 @@ class CtrlConfigWindowPrivate
 		// Used when rebuilding cboDevice.
 		int m_cboDeviceLockCnt;
 
+		// Map of IoManager::IoType_t to cboDevice indexes and vice-versa.
+		QMap<IoManager::IoType_t, int> map_ioTypeToIdx;
+		QMap<int, IoManager::IoType_t> map_idxToIoType;
+
 	public:
 		/**
 		 * Lock cboDevice.
@@ -104,6 +109,38 @@ class CtrlConfigWindowPrivate
 		 */
 		inline bool isCboDeviceLocked(void) const
 			{ return (m_cboDeviceLockCnt > 0); }
+
+	private:
+		/**
+		 * Add an I/O device to cboDevice.
+		 */
+		void addIoTypeToCboDevice(IoManager::IoType_t ioType);
+
+	public:
+		/**
+		 * Initialize cboDevice.
+		 * @param isTP If true, only show devices that can be used on Team Player ports.
+		 */
+		void initCboDevice(bool isTP = false);
+
+		/**
+		 * Set the device type in cboDevice.
+		 * @param ioType I/O device type.
+		 */
+		void setCboDeviceIoType(IoManager::IoType_t ioType);
+
+		/**
+		 * Get cboDevice's currently-selected device type.
+		 * @return I/O device type.
+		 */
+		IoManager::IoType_t cboDeviceIoType(void);
+
+		/**
+		 * Get cboDevice's currently-selected device type.
+		 * @param index Index. (Used in the currentIndexChanged slot.)
+		 * @return I/O device type.
+		 */
+		IoManager::IoType_t cboDeviceIoType(int index);
 };
 
 /**************************************
@@ -282,6 +319,94 @@ QIcon CtrlConfigWindowPrivate::getCtrlIcon(IoManager::IoType_t ioType)
 }
 
 
+/**
+ * Add an I/O device to cboDevice.
+ */
+void CtrlConfigWindowPrivate::addIoTypeToCboDevice(IoManager::IoType_t ioType)
+{
+	q->cboDevice->addItem(getCtrlIcon(ioType), getShortDeviceName(ioType));
+	const int idx = q->cboDevice->count() - 1;
+	map_ioTypeToIdx.insert(ioType, idx);
+	map_idxToIoType.insert(idx, ioType);
+}
+
+
+/**
+ * Initialize cboDevice.
+ * @param isTP If true, only show devices that can be used on Team Player ports.
+ */
+void CtrlConfigWindowPrivate::initCboDevice(bool isTP)
+{
+	// on_cboDevice_currentIndexChanged() handles translation for Port 1.
+	cboDevice_lock();
+
+	// Clear all the maps.
+	map_ioTypeToIdx.clear();
+	map_idxToIoType.clear();
+	q->cboDevice->clear();
+
+	// Determine how many devices should be added to the dropdown.
+	const int ioTypeMax = (isTP ? (IoManager::IOT_6BTN + 1) : IoManager::IOT_MAX);
+
+	for (int ioType = IoManager::IOT_NONE;
+	     ioType < ioTypeMax; ioType++)
+	{
+		switch (ioType) {
+			case IoManager::IOT_TEAMPLAYER:
+			case IoManager::IOT_4WP_MASTER:
+			case IoManager::IOT_4WP_SLAVE:
+				// Multitaps are added at the end of the list.
+				break;
+
+			default:
+				addIoTypeToCboDevice((IoManager::IoType_t)ioType);
+				break;
+		}
+	}
+
+	// Add multitaps.
+	if (!isTP) {
+		addIoTypeToCboDevice(IoManager::IOT_TEAMPLAYER);
+		addIoTypeToCboDevice(IoManager::IOT_4WP_MASTER);
+	}
+
+	cboDevice_unlock();
+}
+
+
+/**
+ * Set the device type in cboDevice.
+ * @param ioType I/O device type.
+ */
+void CtrlConfigWindowPrivate::setCboDeviceIoType(IoManager::IoType_t ioType)
+{
+	assert(ioType >= IoManager::IOT_NONE  && ioType < IoManager::IOT_MAX);
+	const int idx = map_ioTypeToIdx.value(ioType, 0);
+	if (idx < q->cboDevice->count())
+		q->cboDevice->setCurrentIndex(idx);
+}
+
+/**
+ * Get cboDevice's currently-selected device type.
+ * @return I/O device type.
+ */
+IoManager::IoType_t CtrlConfigWindowPrivate::cboDeviceIoType(void)
+{
+	const int idx = q->cboDevice->currentIndex();
+	return map_idxToIoType.value(idx, IoManager::IOT_NONE);
+}
+
+/**
+ * Get cboDevice's currently-selected device type.
+ * @param index Index. (Used in the currentIndexChanged slot.)
+ * @return I/O device type.
+ */
+IoManager::IoType_t CtrlConfigWindowPrivate::cboDeviceIoType(int index)
+{
+	return map_idxToIoType.value(index, IoManager::IOT_NONE);
+}
+
+
 /*******************************
  * CtrlConfigWindow functions. *
  *******************************/
@@ -359,16 +484,7 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	}
 
 	// Initialize the "Device" dropdown.
-	// 4WP Master is added here.
-	// on_cboDevice_currentIndexChanged() handles translation for Port 1.
-	d->cboDevice_lock();
-	for (int ioType = IoManager::IOT_NONE;
-	     ioType <= IoManager::IOT_4WP_MASTER; ioType++)
-	{
-		cboDevice->addItem(d->getCtrlIcon((IoManager::IoType_t)ioType),
-				d->getShortDeviceName((IoManager::IoType_t)ioType));
-	}
-	d->cboDevice_unlock();
+	d->initCboDevice();
 
 	// Load the controller configuration settings.
 	reload();
@@ -559,24 +675,23 @@ void CtrlConfigWindow::updatePortSettings(IoManager::VirtPort_t virtPort)
 {
 	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
 
-	const int ioType = d->ctrlConfig->ioType(virtPort);
+	IoManager::IoType_t ioType = d->ctrlConfig->ioType(virtPort);
 	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
-
-	// Update the port settings.
-	// TODO: Controller keymap.
 
 	// Set the "Port Settings" text.
 	// TODO: Port names for when e.g. EXT, J-Cart, etc. are added.
 	grpPortSettings->setTitle(d->getPortName(virtPort));
 
 	// Set the device type in the dropdown.
-	int devIndex = ioType;
-	if (devIndex >= IoManager::IOT_4WP_SLAVE)
-		devIndex--;	// avoid having two 4WP devices in the dropdown
-	cboDevice->setCurrentIndex(devIndex);
+	if (ioType == IoManager::IOT_4WP_SLAVE) {
+		// 4WP slave isn't listed in the dropdown.
+		// Use 4WP master instead.
+		ioType = IoManager::IOT_4WP_MASTER;
+	}
+	d->setCboDeviceIoType(ioType);
 
 	// Set the device information in the GensCtrlCfgWidget.
-	ctrlCfgWidget->setIoType((IoManager::IoType_t)devIndex);
+	ctrlCfgWidget->setIoType(ioType);
 	ctrlCfgWidget->setKeyMap(d->ctrlConfig->keyMap(virtPort));
 }
 
@@ -637,42 +752,10 @@ void CtrlConfigWindow::selectPort(IoManager::VirtPort_t virtPort)
 
 	// Update the port settings.
 	d->selPort = virtPort;
-	cboDevice_setTP(isTP);		// Update Team Player device availability.
+	d->initCboDevice(isTP);
 	updatePortSettings(virtPort);	// Update the port settings.
 }
 
-
-/**
- * Set cboDevice's Team Player device availability.
- * @param isTP If true, don't show devices that can't be connected to a TeamPlayer/4WP/etc device.
- */
-void CtrlConfigWindow::cboDevice_setTP(bool isTP)
-{
-	const int devCount = (isTP ? IoManager::IOT_6BTN : IoManager::IOT_4WP_MASTER) + 1;
-	if (cboDevice->count() == devCount)
-		return;
-
-	// Dropdown needs to be updated.
-	d->cboDevice_lock();
-	if (cboDevice->count() > devCount) {
-		// Remove the extra items.
-		for (int ioType = IoManager::IOT_4WP_MASTER;
-		     ioType > IoManager::IOT_6BTN; ioType--) {
-			cboDevice->removeItem(ioType);
-		}
-	} else {
-		// Add the extra items.
-		for (int ioType = IoManager::IOT_2BTN;
-		     ioType <= IoManager::IOT_4WP_MASTER; ioType++) {
-			cboDevice->addItem(d->getCtrlIcon((IoManager::IoType_t)ioType),
-					d->getShortDeviceName((IoManager::IoType_t)ioType));
-		}
-	}
-	d->cboDevice_unlock();
-}
-
-
-/** TODO **/
 
 /**
  * Save the configuration.
@@ -799,6 +882,7 @@ void CtrlConfigWindow::toolbarPortSelected(int virtPort)
  */
 void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 {
+	// TODO: Make this function a wrapper for CtrlConfigWindowPrivate?
 	if (d->isCboDeviceLocked())
 		return;
 
@@ -806,20 +890,21 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
 
 	// Check if the device type has been changed.
-	if (index < 0)
-		return;
+	const IoManager::IoType_t newIoType = d->cboDeviceIoType(index);
+	assert(newIoType >= IoManager::IOT_NONE && newIoType < IoManager::IOT_MAX);
 	const IoManager::IoType_t ioType = d->ctrlConfig->ioType(virtPort);
 	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
-	if (ioType == index)
+
+	// Don't do anything if the device type hasn't actually changed.
+	if (ioType == newIoType)
 		return;
 
 	// Check for 4WP.
 	if (d->selPort == IoManager::VIRTPORT_1) {
 		// Port 1.
-		if (index == IoManager::IOT_4WP_MASTER) {
+		if (newIoType == IoManager::IOT_4WP_MASTER) {
 			// 4WP SLAVE set for Port 1.
 			// (4WP_MASTER index used for dropdown.)
-			// TODO: Maybe use the combo box item's data parameter?
 			d->ctrlConfig->setIoType(d->selPort, IoManager::IOT_4WP_SLAVE);
 
 			// Make sure Port 2 is set to 4WP MASTER.
@@ -829,7 +914,7 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 			}
 		} else {
 			// 4WP SLAVE not set for Port 1.
-			d->ctrlConfig->setIoType(d->selPort, (IoManager::IoType_t)index);
+			d->ctrlConfig->setIoType(d->selPort, newIoType);
 			
 			// Check if Port 2 is set to 4WP MASTER. (or 4WP SLAVE for sanity check)
 			if (d->ctrlConfig->ioType(IoManager::VIRTPORT_2) == IoManager::IOT_4WP_MASTER ||
@@ -842,7 +927,7 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 		}
 	} else if (d->selPort == IoManager::VIRTPORT_2) {
 		// Port 2.
-		if (index == IoManager::IOT_4WP_MASTER) {
+		if (newIoType == IoManager::IOT_4WP_MASTER) {
 			// 4WP MASTER set for Port 2.
 			d->ctrlConfig->setIoType(d->selPort, IoManager::IOT_4WP_MASTER);
 			
@@ -853,7 +938,7 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 			}
 		} else {
 			// 4WP MASTER not set for Port 2.
-			d->ctrlConfig->setIoType(d->selPort, (IoManager::IoType_t)index);
+			d->ctrlConfig->setIoType(d->selPort, newIoType);
 			
 			// Check if Port 1 is set to 4WP SLAVE. (or 4WP MASTER for sanity check)
 			if (d->ctrlConfig->ioType(IoManager::VIRTPORT_1) == IoManager::IOT_4WP_SLAVE ||
@@ -866,7 +951,7 @@ void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 		}
 	} else {
 		// Other port.
-		d->ctrlConfig->setIoType(d->selPort, (IoManager::IoType_t)index);
+		d->ctrlConfig->setIoType(d->selPort, newIoType);
 	}
 
 	// Update the port information.
