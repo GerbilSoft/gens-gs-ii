@@ -206,8 +206,8 @@ QString CtrlConfigPrivate::PortName(IoManager::VirtPort_t virtPort)
 {
 	switch (virtPort) {
 		// System controller ports.
-		case IoManager::VIRTPORT_1:		return QLatin1String("port1");
-		case IoManager::VIRTPORT_2:		return QLatin1String("port2");
+		case IoManager::VIRTPORT_1:	return QLatin1String("port1");
+		case IoManager::VIRTPORT_2:	return QLatin1String("port2");
 		case IoManager::VIRTPORT_EXT:	return QLatin1String("portEXT");
 
 		// Team Player, Port 1.
