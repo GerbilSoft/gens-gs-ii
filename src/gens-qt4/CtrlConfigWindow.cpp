@@ -180,8 +180,9 @@ CtrlConfigWindowPrivate::~CtrlConfigWindowPrivate()
 QString CtrlConfigWindowPrivate::getShortDeviceName(IoManager::IoType_t ioType) const
 {
 	switch (ioType) {
-		case IoManager::IOT_NONE:
 		default:
+			return QString::fromStdString(IoManager::IoTypeToString(ioType));
+		case IoManager::IOT_NONE:
 			return CtrlConfigWindow::tr("None");
 		case IoManager::IOT_3BTN:
 			//: Standard 3-button control pad.
@@ -213,8 +214,9 @@ QString CtrlConfigWindowPrivate::getShortDeviceName(IoManager::IoType_t ioType) 
 QString CtrlConfigWindowPrivate::getLongDeviceName(IoManager::IoType_t ioType) const
 {
 	switch (ioType) {
-		case IoManager::IOT_NONE:
 		default:
+			return QString::fromStdString(IoManager::IoTypeToString(ioType));
+		case IoManager::IOT_NONE:
 			return CtrlConfigWindow::tr("No device connected.");
 		case IoManager::IOT_3BTN:
 			//: Standard 3-button control pad.
