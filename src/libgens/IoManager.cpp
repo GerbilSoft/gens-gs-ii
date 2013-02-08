@@ -1115,7 +1115,7 @@ uint32_t IoManager::StringToFourCC(const std::string& str)
  * @param fourCC FourCC.
  * @return FourCC as a string.
  */
-string IoManager::FourCCToSTring(uint32_t fourCC)
+string IoManager::FourCCToString(uint32_t fourCC)
 {
 	string str(4, '\0');
 	for (int i = 3; i >= 0; i--) {

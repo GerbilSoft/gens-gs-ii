@@ -195,7 +195,7 @@ class IoManager
 		 * @param fourCC FourCC.
 		 * @return FourCC as a string.
 		 */
-		static std::string FourCCToSTring(uint32_t fourCC);
+		static std::string FourCCToString(uint32_t fourCC);
 
 		/** Get/set device types. **/
 
