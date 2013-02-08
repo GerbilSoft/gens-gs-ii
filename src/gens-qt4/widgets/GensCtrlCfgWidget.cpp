@@ -223,7 +223,7 @@ void GensCtrlCfgWidgetPrivate::setIoType(IoManager::IoType_t newIoType)
  */
 QString GensCtrlCfgWidgetPrivate::buttonName_l(IoManager::ButtonName_t buttonName) const
 {
-	assert(buttonName >= IoManager::BTNNAME_UP && buttonName <= IoManager::BTNNAME_MAX);
+	assert(buttonName > IoManager::BTNNAME_UNKNOWN && buttonName <= IoManager::BTNNAME_MAX);
 	switch (buttonName) {
 		// Standard controller buttons.
 		case IoManager::BTNNAME_UP:
