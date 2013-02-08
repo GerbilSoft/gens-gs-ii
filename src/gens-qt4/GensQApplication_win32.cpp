@@ -57,53 +57,49 @@
 extern void qWinMain(HINSTANCE, HINSTANCE, LPSTR, int, int &, QVector<char *> &);
 
 /**
- * Enable heap metadata protection.
+ * Enable extra security options.
  * Reference: http://msdn.microsoft.com/en-us/library/bb430720.aspx
  * @return 0 on success; non-zero on error.
  */
-static int SetHeapOptions(void)
+static int SetSecurityOptions(void)
 {
-	SetDllDirectoryA("");
-	HMODULE hLib = LoadLibraryA("kernel32.dll");
-	if (hLib == NULL)
+	HMODULE hKernel32 = LoadLibraryA("kernel32.dll");
+	if (hKernel32 == NULL)
 		return -1;
 
-	typedef BOOL (WINAPI *HSI)
-		(HANDLE, HEAP_INFORMATION_CLASS, PVOID, SIZE_T);
-	HSI pfnHsi = (HSI)GetProcAddress(hLib, "HeapSetInformation");
-	if (!pfnHsi) {
-		FreeLibrary(hLib);
-		return -2;
+	// Enable DEP/NX. (WinXP SP3, Vista, and later.)
+	// NOTE: DEP/NX should be specified in the PE header
+	// using ld's --nxcompat, but we'll set it manually here,
+	// just in case the linker doesn't support it.
+	typedef BOOL (WINAPI *PFNSETDEP)(DWORD dwFlags);
+	PFNSETDEP pfnSetDep = (PFNSETDEP)GetProcAddress(hKernel32, "SetProcessDEPPolicy");
+	if (pfnSetDep)
+		pfnSetDep(PROCESS_DEP_ENABLE);
+
+	// Remove the current directory from the DLL search path.
+	typedef BOOL (WINAPI *PFNSETDLLDIRA)(LPCSTR lpPathName);
+	PFNSETDLLDIRA pfnSetDllDirectoryA = (PFNSETDLLDIRA)GetProcAddress(hKernel32, "SetDllDirectoryA");
+	if (pfnSetDllDirectoryA)
+		pfnSetDllDirectoryA("");
+	SetDllDirectoryA("");
+
+	// Terminate the process if heap corruption is detected.
+	// NOTE: Parameter 2 is usually type enum HEAP_INFORMATION_CLASS,
+	// but this type isn't present in older versions of MinGW, so we're
+	// using int instead.
+	typedef BOOL (WINAPI *PFNHSI)
+		(HANDLE HeapHandle, int HeapInformationClass,
+		 PVOID HeapInformation, SIZE_T HeapInformationLength);
+	PFNHSI pfnHeapSetInformation = (PFNHSI)GetProcAddress(hKernel32, "HeapSetInformation");
+	if (pfnHeapSetInformation) {
+		// HeapEnableTerminationOnCorruption == 1
+		pfnHeapSetInformation(NULL, 1, NULL, 0);
 	}
 
-#ifndef HeapEnableTerminationOnCorruption
-#   define HeapEnableTerminationOnCorruption (HEAP_INFORMATION_CLASS)1
-#endif
+	if (hKernel32)
+		FreeLibrary(hKernel32);
 
-	bool fRet = !!(pfnHsi(NULL, HeapEnableTerminationOnCorruption, NULL, 0));
-	if (hLib)
-		FreeLibrary(hLib);
-
-	return fRet;
-}
-
-/**
- * Enable DEP/NX. (WinXP SP3, Vista, and later.)
- * Reference: http://msdn.microsoft.com/en-us/library/bb430720.aspx
- * NOTE: DEP/NX should be specified in the PE header
- * using ld's --nxcompat, but we'll set it manually here
- * just in case the linker doesn't support it.
- * @return TRUE on success; FALSE on error.
- */
-static BOOL EnableNX(void)
-{
-	HMODULE hKernel32 = GetModuleHandleA("kernel32.dll");
-
-	typedef BOOL (WINAPI *FNSETDEP)(DWORD);
-	FNSETDEP pfnSetDep = (FNSETDEP)GetProcAddress(hKernel32, "SetProcessDEPPolicy");
-	if (pfnSetDep)
-		return pfnSetDep(PROCESS_DEP_ENABLE);
-	return FALSE;
+	return 0;
 }
 
 /**
@@ -119,12 +115,8 @@ static BOOL EnableNX(void)
 extern "C"
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCmdShow)
 {
-	// Enable heap metadata protection.
-	// Reference: http://msdn.microsoft.com/en-us/library/bb430720.aspx
-	SetHeapOptions();
-
-	// Enable DEP/NX.
-	EnableNX();
+	// Enable extra security options.
+	SetSecurityOptions();
 
 	// Tokenize the command line parameters.
 	int argc = 0;
