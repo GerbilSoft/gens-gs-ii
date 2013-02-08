@@ -189,8 +189,9 @@ void GensCtrlCfgWidgetPrivate::setIoType(IoManager::IoType_t newIoType)
 
 	// Show the buttons, in logical button order.
 	QString sBtnLabel;
-	for (int i = 0, button = 0;
-	     i < numButtons && button >= 0; i++) {
+	int i, button;
+	for (i = 0, button = 0;
+	     i < numButtons && button > IoManager::BTNNAME_UNKNOWN; i++) {
 		IoManager::ButtonName_t buttonName =
 					IoManager::ButtonName(newIoType, button);
 		sBtnLabel = buttonName_l(buttonName) + QChar(L':');
@@ -206,8 +207,12 @@ void GensCtrlCfgWidgetPrivate::setIoType(IoManager::IoType_t newIoType)
 		button = IoManager::NextLogicalButton(newIoType, button);
 	}
 
+	// Make sure we have all the logical buttons.
+	// If not, IoManager::NextLogicalButton() probably needs to be updated.
+	assert(i == numButtons);
+
 	// Hide other buttons.
-	for (int i = numButtons; i < NUM_ELEMENTS(btnCfg); i++) {
+	for (i = numButtons; i < NUM_ELEMENTS(btnCfg); i++) {
 		lblButtonName[i]->setVisible(false);
 		lblKeyDisplay[i]->setVisible(false);
 		btnCfg[i]->setVisible(false);
