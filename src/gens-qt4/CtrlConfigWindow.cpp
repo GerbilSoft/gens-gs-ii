@@ -893,7 +893,6 @@ void CtrlConfigWindow::on_ctrlCfgWidget_keyChanged(int idx, GensKey_t gensKey)
 {
 	// TODO: Only save the specific key that was changed.
 	// For now, we're going to save everything.
-	printf("KEY CHANGED: idx == %d, gensKey == %08X\n", idx, gensKey);
 	d->ctrlConfig->setKeyMap(d->selPort, ctrlCfgWidget->keyMap());
 }
 
