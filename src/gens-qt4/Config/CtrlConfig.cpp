@@ -257,16 +257,24 @@ int CtrlConfigPrivate::load(const QSettings *qSettings)
 		const QString qsFourCC = qSettings->value(portName + QLatin1String("/type")).toString();
 		IoManager::IoType_t ioType_tmp = IoManager::StringToIoType(qsFourCC.toStdString());
 
+		// Check if the controller type is valid.
+		bool isValidCtrl = true;
 		if (ioType_tmp < IoManager::IOT_NONE ||
 		    ioType_tmp >= IoManager::IOT_MAX) {
 			// No controller information.
-			// Use the default.
-			ctrlTypes[virtPort] = Def_CtrlTypes[virtPort];
-			memcpy(ctrlKeys[virtPort], Def_CtrlKeys[virtPort], sizeof(ctrlKeys[virtPort]));
+			isValidCtrl = false;
 		} else if (virtPort > IoManager::VIRTPORT_EXT &&
 			   ioType_tmp > IoManager::IOT_6BTN) {
 			// Team Player / 4WP doesn't support this controller.
-			// Use the default.
+			isValidCtrl = false;
+		} else if (!IoManager::IsDevTypeUsable(ioType_tmp)) {
+			// Device type isn't usable in this build.
+			isValidCtrl = false;
+		}
+
+		if (!isValidCtrl) {
+			// Controller information is invalid.
+			// Use the default settings.
 			ctrlTypes[virtPort] = Def_CtrlTypes[virtPort];
 			memcpy(ctrlKeys[virtPort], Def_CtrlKeys[virtPort], sizeof(ctrlKeys[virtPort]));
 		} else {

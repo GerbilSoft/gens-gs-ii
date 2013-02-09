@@ -395,6 +395,9 @@ void CtrlConfigWindowPrivate::initCboDevice(bool isTP)
 	for (int ioType = IoManager::IOT_NONE;
 	     ioType < ioTypeMax; ioType++)
 	{
+		if (!IoManager::IsDevTypeUsable((IoManager::IoType_t)ioType))
+			continue;
+
 		switch (ioType) {
 			case IoManager::IOT_TEAMPLAYER:
 			case IoManager::IOT_4WP_MASTER:
