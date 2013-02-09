@@ -617,7 +617,7 @@ void EmuManager::doSaveState(QString filename, int saveSlot)
 		}
 		else
 		{
-			//: OSD message indicating a savestate has been saved using a specified filename
+			//: OSD message indicating a savestate has been saved using a specified filename.
 			osdMsg = tr("State saved in %1", "osd").arg(nativeFilename);
 		}
 	}
@@ -658,7 +658,7 @@ void EmuManager::doLoadState(QString filename, int saveSlot)
 		}
 		else
 		{
-			//: OSD message indicating a savestate has been loaded using a specified filename
+			//: OSD message indicating a savestate has been loaded using a specified filename.
 			osdMsg = tr("State loaded from %1", "osd").arg(nativeFilename);
 		}
 	}
