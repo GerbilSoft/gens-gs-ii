@@ -31,7 +31,7 @@
 
 // LibGens includes.
 #include "libgens/Rom.hpp"
-#include "libgens/IoManager.hpp"
+#include "libgens/IO/IoManager.hpp"
 #include "libgens/MD/SysVersion.hpp"
 
 // paused_t

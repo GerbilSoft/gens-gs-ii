@@ -23,7 +23,7 @@
 #define __GENS_QT4_WIDGETS_GENSCTRLCFGWIDGET_HPP__
 
 // LibGens includes.
-#include "libgens/IoManager.hpp"
+#include "libgens/IO/IoManager.hpp"
 #include "libgens/GensInput/GensKey_t.h"
 
 // Qt includes.

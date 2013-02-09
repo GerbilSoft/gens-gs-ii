@@ -37,7 +37,7 @@
 #include "libgens/macros/common.h"
 
 // Controller I/O manager.
-#include "libgens/IoManager.hpp"
+#include "libgens/IO/IoManager.hpp"
 using LibGens::IoManager;
 
 // GensKeySequenceWidget.

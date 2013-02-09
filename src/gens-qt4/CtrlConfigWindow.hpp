@@ -37,7 +37,7 @@
 class QActionGroup;
 
 // LibGens includes.
-#include "libgens/IoManager.hpp"
+#include "libgens/IO/IoManager.hpp"
 
 // Toolbar separators.
 #define CTRL_CFG_TBSEP_TP1 0

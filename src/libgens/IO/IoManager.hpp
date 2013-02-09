@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_IOMANAGER_HPP__
-#define __LIBGENS_IOMANAGER_HPP__
+#ifndef __LIBGENS_IO_IOMANAGER_HPP__
+#define __LIBGENS_IO_IOMANAGER_HPP__
 
 // C includes.
 #include <stdint.h>
@@ -30,7 +30,7 @@
 // C++ includes.
 #include <string>
 
-#include "GensInput/GensKey_t.h"
+#include "../GensInput/GensKey_t.h"
 
 namespace LibGens
 {

@@ -27,7 +27,7 @@
 #include <cassert>
 
 // Controller I/O manager.
-#include "libgens/IoManager.hpp"
+#include "libgens/IO/IoManager.hpp"
 using LibGens::IoManager;
 
 // Qt includes.

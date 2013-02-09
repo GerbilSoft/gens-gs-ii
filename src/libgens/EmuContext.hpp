@@ -25,7 +25,7 @@
 #define __LIBGENS_EMUCONTEXT_HPP__
 
 // Controller I/O manager.
-#include "IoManager.hpp"
+#include "IO/IoManager.hpp"
 
 // ROM image class.
 #include "Rom.hpp"

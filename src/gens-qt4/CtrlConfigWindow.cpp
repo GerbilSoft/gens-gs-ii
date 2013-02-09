@@ -28,7 +28,7 @@
 #include <assert.h>
 
 // Controller I/O manager.
-#include "libgens/IoManager.hpp"
+#include "libgens/IO/IoManager.hpp"
 using LibGens::IoManager;
 
 // EmuMD has the I/O devices.

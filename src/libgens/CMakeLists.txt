@@ -114,7 +114,7 @@ SET(libgens_SRCS
 	Util/MdFb.cpp
 	Vdp/VdpStatus.cpp
 	Util/Encoding.cpp
-	IoManager.cpp
+	IO/IoManager.cpp
 	)
 
 IF(HAVE_LZMA)
