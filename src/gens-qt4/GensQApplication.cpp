@@ -47,7 +47,10 @@ class GensQApplicationPrivate
 		// Initialize GensQApplication.
 		void gqaInit(void);
 
-		// Set the Gens translation.
+		/**
+		 * Set the Gens translation.
+		 * @param locale Locale name, e.g. "en_US".
+		 */
 		void setGensTranslation(QString locale);
 
 	private:
@@ -140,6 +143,10 @@ void GensQApplicationPrivate::gqaInit(void)
 }
 
 
+/**
+ * Set the Gens translation.
+ * @param locale Locale name, e.g. "en_US".
+ */
 void GensQApplicationPrivate::setGensTranslation(QString locale)
 {
 	// Initialize the Qt translation system.
@@ -152,7 +159,7 @@ void GensQApplicationPrivate::setGensTranslation(QString locale)
 	qtTranslator->load(
 		QLatin1String("qt_") + locale,
 		QLibraryInfo::location(QLibraryInfo::TranslationsPath));
-	
+
 	// Initialize the Gens translator.
 	// TODO: Check in the following directories:
 	// * Application/translations/
@@ -162,13 +169,13 @@ void GensQApplicationPrivate::setGensTranslation(QString locale)
 	gensTranslator->load(
 		QLatin1String("gens-qt4_") + locale,
 		appDir.absoluteFilePath(QLatin1String("translations/")));
-	
+
 	/** Translation file information. **/
-	
+
 	//: Translation file author. Put your name here.
 	QString tsAuthor = GensQApplication::tr("David Korth", "ts-author");
-	((void)tsAuthor);
-	
+	Q_UNUSED(tsAuthor)
+
 	// TODO: Allow the program to access the translation file information.
 }
 

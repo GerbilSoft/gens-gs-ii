@@ -276,7 +276,7 @@ void GeneralConfigWindow::keyPressEvent(QKeyEvent *event)
 #else /* !GCW_APPLY_IMMED */
 	// Changes are applied immediately.
 	// Don't handle special dialog keys.
-	((void)event);
+	Q_UNUSED(event)
 	return;
 #endif /* GCW_APPLY_IMMED */
 }
