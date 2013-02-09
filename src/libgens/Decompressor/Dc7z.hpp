@@ -41,25 +41,25 @@ class Dc7z : public Decompressor
 	public:
 		Dc7z(FILE *f, const utf8_str *filename);
 		virtual ~Dc7z();
-		
+
 		/**
-		 * DetectFormat(): Detect if the file can be handled by this decompressor.
+		 * Detect if the file can be handled by this decompressor.
 		 * This function should be reimplemented by derived classes.
 		 * NOTE: Do NOT call this function like a virtual function!
 		 * @param f File pointer.
 		 * @return True if the file can be handled by this decompressor.
 		 */
 		static bool DetectFormat(FILE *f);
-		
+
 		/**
-		 * getFileInfo(): Get information about all files in the archive.
+		 * Get information about all files in the archive.
 		 * @param z_entry_out Pointer to mdp_z_entry_t*, which will contain an allocated mdp_z_entry_t.
 		 * @return MDP error code. [TODO]
 		 */
 		int getFileInfo(mdp_z_entry_t **z_entry_out);
-		
+
 		/**
-		 * getFile(): Get a file from the archive.
+		 * Get a file from the archive.
 		 * @param z_entry	[in]  Pointer to mdp_z_entry_t describing the file to extract.
 		 * @param buf		[out] Buffer to read the file into.
 		 * @param siz		[in]  Size of buf.
@@ -67,21 +67,21 @@ class Dc7z : public Decompressor
 		 * @return MDP error code. [TODO]
 		 */
 		int getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *ret_siz);
-	
+
 	private:
 		CFileInStream m_archiveStream;
 		CLookToRead m_lookStream;
 		CSzArEx m_db;
 		ISzAlloc m_allocImp;
 		ISzAlloc m_allocTempImp;
-		
+
 		// Miscellaneous 7-Zip variables.
-		uint32_t m_blockIndex;	// can have any value for first call (if outBuffer == NULL)
-		uint8_t *m_outBuffer;	// must be NULL before first call for each new archive.
-		size_t m_outBufferSize;	// can have any value before first call (if outBuffer == NULL)
-		
+		uint32_t m_blockIndex;	// can have any value for first call (if outBuffer == nullptr)
+		uint8_t *m_outBuffer;	// must be nullptr before first call for each new archive.
+		size_t m_outBufferSize;	// can have any value before first call (if outBuffer == nullptr)
+
 		/**
-		 * ms_CrcInit: Set to true if the 7z CRC table has been initialized.
+		 * Set to true if the 7z CRC table has been initialized.
 		 */
 		static bool ms_CrcInit;
 };

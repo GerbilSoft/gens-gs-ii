@@ -23,20 +23,23 @@
 
 #include "DevManager.hpp"
 
+// C includes. (C++ namespace)
+#include <cstring>
+
 namespace LibGens
 {
 
 /** Static class variables. **/
 
 /**
- * ms_DevFn[], ms_DevParam: Device handler functions and parameters.
+ * Device handler functions and parameters.
  */
 DevManager::DeviceHandler_fn DevManager::ms_DevFn[MAX_DEVICE_TYPES];
 void *DevManager::ms_DevParam[MAX_DEVICE_TYPES];
 
 
 /**
- * Init(): Initialize DevManager.
+ * Initialize DevManager.
  */
 void DevManager::Init(void)
 {
@@ -46,7 +49,7 @@ void DevManager::Init(void)
 }
 
 /**
- * End(): Shut down DevManager.
+ * Shut down DevManager.
  */
 void DevManager::End(void)
 {
@@ -57,7 +60,7 @@ void DevManager::End(void)
 
 
 /**
- * RegisterDeviceHandler(): Register a device handler function.
+ * Register a device handler function.
  * @param devType Device type ID.
  * @param fn Device handler function.
  * @param param Parameter to pass to the device handler function.
@@ -80,7 +83,7 @@ int DevManager::RegisterDeviceHandler(int devType, DeviceHandler_fn fn, void *pa
 }
 
 /**
- * UnregisterDeviceHandler(): Unregister a device handler function.
+ * Unregister a device handler function.
  * @param devType Device type ID.
  * @param fn Device handler function.
  * @param param Parameter specified when registering the device handler function.
@@ -91,14 +94,14 @@ int DevManager::UnregisterDeviceHandler(int devType, DeviceHandler_fn fn, void *
 	// Make sure the device type ID is in range.
 	if (devType < 0 || devType > MAX_DEVICE_TYPES)
 		return 1;
-	
+
 	// Make sure the function is registered.
 	if (ms_DevFn[devType] != fn || ms_DevParam[devType] != param)
 		return 2;
-	
+
 	// Unregister the function.
-	ms_DevFn[devType] = NULL;
-	ms_DevParam[devType] = NULL;
+	ms_DevFn[devType] = nullptr;
+	ms_DevParam[devType] = nullptr;
 	return 0;
 }
 

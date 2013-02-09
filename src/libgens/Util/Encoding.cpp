@@ -48,18 +48,18 @@ using std::u16string;
 
 #ifdef HAVE_ICONV
 /**
- * gens_iconv(): Convert a string from one character set to another.
+ * Convert a string from one character set to another.
  * @param src 		[in] Source string.
  * @param src_bytes_len [in] Source length, in bytes.
  * @param src_charset	[in] Source character set.
  * @param dest_charset	[in] Destination character set.
- * @return malloc()'d UTF-8 string, or NULL on error.
+ * @return malloc()'d UTF-8 string, or nullptr on error.
  */
 static char *gens_iconv(const char *src, size_t src_bytes_len,
 			const char *src_charset, const char *dest_charset)
 {
 	if (!src || src_bytes_len == 0)
-		return NULL;
+		return nullptr;
 
 	if (!src_charset)
 		src_charset = "";
@@ -75,7 +75,7 @@ static char *gens_iconv(const char *src, size_t src_bytes_len,
 	cd = iconv_open(dest_charset, src_charset);
 	if (cd == (iconv_t)(-1)) {
 		// Error opening iconv.
-		return NULL;
+		return nullptr;
 	}
 
 	// Allocate the output buffer.
@@ -126,7 +126,7 @@ static char *gens_iconv(const char *src, size_t src_bytes_len,
 
 	// The string was not converted successfully.
 	free(outbuf);
-	return NULL;
+	return nullptr;
 }
 #endif /* HAVE_ICONV */
 

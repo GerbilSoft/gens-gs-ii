@@ -97,7 +97,7 @@ class DcRar : public Decompressor
 		/**
 		 * CheckExtPrg(): Check if the specified external RAR program is usable.
 		 * @param extprg	[in] External RAR program filename.
-		 * @param prg_info	[out] If not NULL, contains RAR/UnRAR version information.
+		 * @param prg_info	[out] If not nullptr, contains RAR/UnRAR version information.
 		 * @return Possible error codes:
 		 * -  0: Program is usable.
 		 * - -1: File not found.
@@ -127,7 +127,7 @@ class DcRar : public Decompressor
 	
 	private:
 		/**
-		 * ms_RarBinary: RAR executable filename.
+		 * RAR executable filename.
 		 * Unix: Filename of "rar" or "unrar".
 		 * Windows: Filename of "unrar.dll".
 		 */

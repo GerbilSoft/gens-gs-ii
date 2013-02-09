@@ -52,7 +52,7 @@ int EmuContext::ms_RefCount = 0;
 IoManager *EmuContext::m_ioManager;
 
 // Static pointer. Temporarily needed for SRam/EEPRom.
-EmuContext *EmuContext::m_instance = NULL;
+EmuContext *EmuContext::m_instance = nullptr;
 
 /**
  * Global settings.
@@ -68,12 +68,12 @@ string EmuContext::ms_PathSRam;
  */
 EmuContext::EmuContext(Rom *rom, SysVersion::RegionCode_t region)
 {
-	init(NULL, rom, region);
+	init(nullptr, rom, region);
 }
 
 /**
  * Initialize an emulation context.
- * @param fb Existing MdFb to use. (If NULL, allocate a new MdFb.)
+ * @param fb Existing MdFb to use. (If nullptr, allocate a new MdFb.)
  * @param rom ROM.
  * @param region System region. (not used in the base class)
  */
@@ -84,7 +84,7 @@ EmuContext::EmuContext(MdFb *fb, Rom *rom, SysVersion::RegionCode_t region)
 
 /**
  * Initialize an emulation context.
- * @param fb Existing MdFb to use. (If NULL, allocate a new MdFb.)
+ * @param fb Existing MdFb to use. (If nullptr, allocate a new MdFb.)
  * @param rom ROM.
  * @param region System region. (not used in the base class)
  */
@@ -135,22 +135,15 @@ EmuContext::~EmuContext()
 {
 	ms_RefCount--;
 	assert(ms_RefCount == 0);
-	m_instance = NULL;
-	
-	// Delete the I/O devices.
-	// TODO: Don't do this right now.
-#if 0
-	delete m_port1;
-	m_port1 = NULL;
-	delete m_port2;
-	m_port2 = NULL;
-	delete m_portE;
-	m_portE = NULL;
-#endif
-	
+	m_instance = nullptr;
+
+	// TODO: Delete the IoManager?
+	//delete m_ioManager;
+	//m_ioManager = nullptr;
+
 	// Delete the VDP.
 	delete m_vdp;
-	m_vdp = NULL;
+	m_vdp = nullptr;
 }
 
 

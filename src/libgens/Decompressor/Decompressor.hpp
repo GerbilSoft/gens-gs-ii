@@ -59,32 +59,33 @@ class Decompressor
 	public:
 		Decompressor(FILE *f, const utf8_str *filename);
 		virtual ~Decompressor();
-		
+
 		/**
-		 * DetectFormat(): Detect if the file can be handled by this decompressor.
+		 * Detect if the file can be handled by this decompressor.
 		 * This function should be reimplemented by derived classes.
 		 * NOTE: Do NOT call this function like a virtual function!
 		 * @param f File pointer.
 		 * @return True if the file can be handled by this decompressor.
 		 */
-		static bool DetectFormat(FILE *f) { return (f ? true : false); }
-		
+		static bool DetectFormat(FILE *f)
+			{ return (f ? true : false); }
+
 		/**
 		 * GetDecompressor(): Get a Decompressor* for the specified file.
 		* @param filename Filename.
-		* @return New Decompressor* object, or NULL if no decompressor supports it.
+		* @return New Decompressor* object, or nullptr if no decompressor supports it.
 		*/
 		static Decompressor *GetDecompressor(FILE *f, const char *filename);
-		
+
 		/**
-		 * getFileInfo(): Get information about all files in the archive.
+		 * Get information about all files in the archive.
 		 * @param z_entry_out Pointer to mdp_z_entry_t*, which will contain an allocated mdp_z_entry_t.
 		 * @return MDP error code. [TODO]
 		 */
 		virtual int getFileInfo(mdp_z_entry_t **z_entry_out);
-		
+
 		/**
-		 * getFile(): Get a file from the archive.
+		 * Get a file from the archive.
 		 * @param z_entry	[in]  Pointer to mdp_z_entry_t describing the file to extract.
 		 * @param buf		[out] Buffer to read the file into.
 		 * @param siz		[in]  Size of buf.
@@ -92,13 +93,13 @@ class Decompressor
 		 * @return MDP error code. [TODO]
 		 */
 		virtual int getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *ret_siz);
-		
+
 		/**
-		 * z_entry_t_free(): Free an allocated mdp_z_entry_t list.
+		 * Free an allocated mdp_z_entry_t list.
 		 * @param z_entry Pointer to the first entry in the list.
 		 */
 		static void z_entry_t_free(mdp_z_entry_t *z_entry);
-	
+
 	protected:
 		FILE *m_file;
 		std::string m_filename;

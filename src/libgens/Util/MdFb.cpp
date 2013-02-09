@@ -37,7 +37,7 @@ MdFb::MdFb()
 	, m_pxPitch(336)
 	, m_pxStart(8)
 	, m_numLines(240)
-	, m_fb(NULL)
+	, m_fb(nullptr)
 {
 	reinitFb();
 }

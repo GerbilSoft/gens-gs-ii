@@ -45,7 +45,7 @@ class Timing
 	public:
 		static void Init(void);
 		static void End(void);
-		
+
 		enum TimingMethod
 		{
 			TM_GETTIMEOFDAY,
@@ -63,33 +63,33 @@ class Timing
 #endif
 			TM_MAX
 		};
-		
+
 		static TimingMethod GetTimingMethod(void) { return ms_TMethod; }
-		
+
 		/**
-		 * GetTimingMethodName(): Get the name of a timing method.
+		 * Get the name of a timing method.
 		 * @param tMethod Timing method.
 		 * @return Timing method name. (ASCII)
 		 */
 		static const char *GetTimingMethodName(TimingMethod tMethod);
-		
+
 		static double GetTimeD(void);
-	
+
 	protected:
 		static TimingMethod ms_TMethod;
-		
+
 #if defined(_WIN32)
 		// GetTickCount64() function pointer.
 		static HMODULE ms_hKernel32;
 		static GETTICKCOUNT64PROC ms_pGetTickCount64;
-		
+
 		// Performance Frequency.
 		static LARGE_INTEGER ms_PerfFreq;
 #elif defined(__APPLE__)
 		// Mach timebase information.
 		static mach_timebase_info_data_t ms_timebase_info;
 #endif
-	
+
 	private:
 		Timing() { }
 		~Timing() { }

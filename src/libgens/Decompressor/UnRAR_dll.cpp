@@ -39,7 +39,7 @@ UnRAR_dll::UnRAR_dll(void)
 
 
 /**
- * UnRAR_dll::load(): Load UnRAR.dll.
+ * Load UnRAR.dll.
  * @param filename Filename of UnRAR.dll.
  * @return true on success; false on failure.
  */
@@ -50,37 +50,33 @@ bool UnRAR_dll::load(const utf8_str *filename)
 	
 	if (!filename)
 		return false;
-	
+
 	// Convert the filename from UTF-8 to UTF-16.
 	wchar_t *filenameW = W32U_mbs_to_UTF16(filename, CP_UTF8);
 	if (!filename)
 		return false;
-	
-	if (W32U_IsUnicode)
-	{
+
+	if (W32U_IsUnicode) {
 		// Use the Unicode filename.
 		hUnrarDll = LoadLibraryW(filenameW);
-	}
-	else
-	{
+	} else {
 		// System doesn't support Unicode.
 		// Convert the filename from UTF-16 to ANSI.
 		char *filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
-		if (!filenameA)
-		{
+		if (!filenameA) {
 			free(filenameW);
 			return false;
 		}
-		
+
 		// Use the ANSI filename.
 		hUnrarDll = LoadLibraryA(filename);
 		free(filenameA);
 	}
 	free(filenameW);
-	
+
 	if (!hUnrarDll)
 		return false;
-	
+
 	// Load the function pointers.
 	InitFuncPtr_unrar(hUnrarDll, RAROpenArchiveEx);
 	InitFuncPtr_unrar(hUnrarDll, RARCloseArchive);
@@ -88,18 +84,18 @@ bool UnRAR_dll::load(const utf8_str *filename)
 	InitFuncPtr_unrar(hUnrarDll, RARProcessFile);
 	InitFuncPtr_unrar(hUnrarDll, RARSetCallback);
 	InitFuncPtr_unrar(hUnrarDll, RARGetDllVersion);
-	
-	// Check if any of the function pointers are NULL.
+
+	// Check if any of the function pointers are nullptr.
 	if (!pRAROpenArchiveEx || !pRARCloseArchive ||
 	    !pRARReadHeaderEx  || !pRARProcessFile ||
 	    !pRARSetCallback   || !pRARGetDllVersion)
 	{
-		// NULL pointers found. That's bad.
+		// nullptr found. That's bad.
 		m_loaded = true;	// Needed for unload() to work.
 		unload();
 		return false;
 	}
-	
+
 	// UnRAR.dll loaded successfully.
 	m_loaded = true;
 	return true;
@@ -110,7 +106,7 @@ UnRAR_dll::~UnRAR_dll()
 {
 	if (!m_loaded)
 		return;
-	
+
 	// Unload the DLL.
 	unload();
 }
@@ -120,19 +116,19 @@ void UnRAR_dll::unload(void)
 {
 	if (!m_loaded)
 		return;
-	
+
 	// Mark the DLL as unloaded.
 	m_loaded = false;
-	
+
 	// Clear the function pointers.
-	pRAROpenArchiveEx	= NULL;
-	pRARCloseArchive	= NULL;
-	pRARReadHeaderEx	= NULL;
-	pRARProcessFile		= NULL;
-	pRARSetCallback		= NULL;
-	pRARGetDllVersion	= NULL;
-	
+	pRAROpenArchiveEx	= nullptr;
+	pRARCloseArchive	= nullptr;
+	pRARReadHeaderEx	= nullptr;
+	pRARProcessFile		= nullptr;
+	pRARSetCallback		= nullptr;
+	pRARGetDllVersion	= nullptr;
+
 	// Unload the DLL.
 	FreeLibrary(hUnrarDll);
-	hUnrarDll = NULL;
+	hUnrarDll = nullptr;
 }

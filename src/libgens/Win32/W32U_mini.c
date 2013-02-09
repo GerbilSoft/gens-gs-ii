@@ -40,7 +40,7 @@ int W32U_IsUnicode = 0;
  */
 int W32U_Init(void)
 {
-	W32U_IsUnicode = (GetModuleHandleW(NULL) != NULL);
+	W32U_IsUnicode = (GetModuleHandleW(nullptr) != nullptr);
 	return 0;
 }
 
@@ -64,10 +64,10 @@ int W32U_End(void)
  */
 wchar_t *W32U_mbs_to_UTF16(const utf8_str *mbs, unsigned int codepage)
 {
-	int cchWcs = MultiByteToWideChar(codepage, 0, mbs, -1, NULL, 0);
+	int cchWcs = MultiByteToWideChar(codepage, 0, mbs, -1, nullptr, 0);
 	if (cchWcs <= 0)
-		return NULL;
-	
+		return nullptr;
+
 	wchar_t *wcs = (wchar_t*)malloc(cchWcs * sizeof(wchar_t));
 	MultiByteToWideChar(codepage, 0, mbs, -1, wcs, cchWcs);
 	return wcs;
@@ -82,12 +82,12 @@ wchar_t *W32U_mbs_to_UTF16(const utf8_str *mbs, unsigned int codepage)
  */
 char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage)
 {
-	int cbMbs = WideCharToMultiByte(codepage, 0, wcs, -1, NULL, 0, NULL, NULL);
+	int cbMbs = WideCharToMultiByte(codepage, 0, wcs, -1, nullptr, 0, nullptr, nullptr);
 	if (cbMbs <= 0)
-		return NULL;
-	
+		return nullptr;
+
 	char *mbs = (char*)malloc(cbMbs);
-	WideCharToMultiByte(codepage, 0, wcs, -1, mbs, cbMbs, NULL, NULL);
+	WideCharToMultiByte(codepage, 0, wcs, -1, mbs, cbMbs, nullptr, nullptr);
 	return mbs;
 }
 
@@ -108,45 +108,40 @@ FILE *W32U_fopen(const utf8_str *filename, const utf8_str *mode)
 	// Convert the filename from UTF-8 to UTF-16.
 	wchar_t *filenameW = W32U_mbs_to_UTF16(filename, CP_UTF8);
 	if (!filenameW)
-		return NULL;
-	
+		return nullptr;
+
 	// Convert the mode from UTF-8 to UTF-16.
 	wchar_t *modeW = W32U_mbs_to_UTF16(mode, CP_UTF8);
-	if (!modeW)
-	{
+	if (!modeW) {
 		free(filenameW);
-		return NULL;
+		return nullptr;
 	}
-	
-	FILE *fRet = NULL;
-	if (W32U_IsUnicode)
-	{
+
+	FILE *fRet = nullptr;
+	if (W32U_IsUnicode) {
 		// Unicode version.
 		fRet = _wfopen(filenameW, modeW);
-	}
-	else
-	{
+	} else {
 		// ANSI version.
-		
+
 		// Convert the filename from UTF-16 to ANSI.
 		char *filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
 		if (!filenameA)
 			goto fail;
-		
+
 		// Convert the mode from UTF-16 to ANSI.
 		char *modeA = W32U_UTF16_to_mbs(modeW, CP_ACP);
-		if (!modeA)
-		{
+		if (!modeA) {
 			free(filenameA);
 			goto fail;
 		}
-		
+
 		// Open the file.
 		fRet = fopen(filenameA, modeA);
 		free(filenameA);
 		free(modeA);
 	}
-	
+
 fail:
 	free(filenameW);
 	free(modeW);

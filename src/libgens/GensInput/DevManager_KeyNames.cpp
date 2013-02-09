@@ -54,10 +54,10 @@ namespace LibGens
 const char *const DevManager::ms_KeyNames[KEYV_LAST] =
 {
 	// 0x00
-	"None", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	"Backspace", "Tab", NULL, NULL, "Clear", RETURN_KEYNAME, NULL, NULL,
-	NULL, NULL, NULL, "Pause", NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, "Escape", NULL, NULL, NULL, NULL,
+	"None", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+	"Backspace", "Tab", nullptr, nullptr, "Clear", RETURN_KEYNAME, nullptr, nullptr,
+	nullptr, nullptr, nullptr, "Pause", nullptr, nullptr, nullptr, nullptr,
+	nullptr, nullptr, nullptr, "Escape", nullptr, nullptr, nullptr, nullptr,
 	
 	// 0x20
 	"Space", "!", "\"", "#", "$", "%", "&", "'",
@@ -66,16 +66,16 @@ const char *const DevManager::ms_KeyNames[KEYV_LAST] =
 	"8", "9", ":", ";", "<", "=", ">", "?",
 	
 	// 0x40
-	"@", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, "[", "\\", "]", "_", "^",
+	"@", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+	nullptr, nullptr, nullptr, "[", "\\", "]", "_", "^",
 	
 	// 0x60
 	"`", "A", "B", "C", "D", "E", "F", "G",
 	"H", "I", "J", "K", "L", "M", "N", "O",
 	"P", "Q", "R", "S", "T", "U", "V", "W",
-	"X", "Y", "Z", NULL, NULL, NULL, NULL, "Delete",
+	"X", "Y", "Z", nullptr, nullptr, nullptr, nullptr, "Delete",
 	
 	// 0x80
 	"Numpad 0", "Numpad 1", "Numpad 2", "Numpad 3",
@@ -86,8 +86,8 @@ const char *const DevManager::ms_KeyNames[KEYV_LAST] =
 	// 0x90
 	"Numpad =", "Up", "Down", "Right",
 	"Left", "Insert", "Home", "End",
-	"Page Up", "Page Down", NULL, NULL,
-	NULL, NULL, NULL, NULL,
+	"Page Up", "Page Down", nullptr, nullptr,
+	nullptr, nullptr, nullptr, nullptr,
 	
 	/** @name 0xA0: Function keys */
 	"F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8",
@@ -105,31 +105,31 @@ const char *const DevManager::ms_KeyNames[KEYV_LAST] =
 	"Right " SUPER_KEYNAME, "Alt-Gr", "Compose", "Left Hyper",
 	
 	/** @name 0xD0: Key state modifier keys (continued) */
-	"Right Hyper", "Left Direction", "Right Direction", NULL,
-	NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL,
+	"Right Hyper", "Left Direction", "Right Direction", nullptr,
+	nullptr, nullptr, nullptr, nullptr,
+	nullptr, nullptr, nullptr, nullptr,
+	nullptr, nullptr, nullptr, nullptr,
 #else
 	// System doesn't support L/R modifiers.
 	// Map Left keys as general keys and don't map Right keys.
 	
 	/** @name 0xC0: Key state modifier keys */
 	"Num Lock", "Caps Lock", "Scroll Lock", "Shift",
-	NULL, "Ctrl", NULL, ALT_KEYNAME,
-	NULL, "Meta", NULL, SUPER_KEYNAME,
-	NULL, "Alt-Gr", "Compose", "Hyper",
+	nullptr, "Ctrl", nullptr, ALT_KEYNAME,
+	nullptr, "Meta", nullptr, SUPER_KEYNAME,
+	nullptr, "Alt-Gr", "Compose", "Hyper",
 	
 	/** @name 0xD0: Key state modifier keys (continued) */
-	NULL, "Direction", NULL, NULL,
-	NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL,
+	nullptr, "Direction", nullptr, nullptr,
+	nullptr, nullptr, nullptr, nullptr,
+	nullptr, nullptr, nullptr, nullptr,
+	nullptr, nullptr, nullptr, nullptr,
 #endif /* NO_MODIFIER_LR */
 	
 	/** @name 0xE0: Miscellaneous function keys */
 	"Help", "Print Screen", "SysRq", "Break",
 	"Menu", "Power", "Euro", "Undo",
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 	
 	/** @name 0xF0: Mouse buttons */
 	"Unknown Mouse Button", "Left Mouse Button",
@@ -137,8 +137,8 @@ const char *const DevManager::ms_KeyNames[KEYV_LAST] =
 	"Mouse Wheel Up", "Mouse Wheel Down",
 	"Mouse Wheel Left", "Mouse Wheel Right",
 	"Extra Mouse Button 1", "Extra Mouse Button 2",
-	NULL, NULL,
-	NULL, NULL, NULL, NULL,
+	nullptr, nullptr,
+	nullptr, nullptr, nullptr, nullptr,
 	
 	/** @name 0x100: Multimedia/Internet keys */
 	// NOTE: Only back and forward are implemented,

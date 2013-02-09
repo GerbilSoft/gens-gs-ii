@@ -69,7 +69,7 @@ const char *const version_desc = "Development Build";	// ASCII
 #ifdef GENS_GIT_VERSION
 const char *const version_vcs = GENS_GIT_VERSION;
 #else
-const char *const version_vcs = NULL;
+const char *const version_vcs = nullptr;
 #endif
 
 /**

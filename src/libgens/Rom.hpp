@@ -72,16 +72,16 @@ class Rom
 			
 			MDP_SYSTEM_MAX
 		};
-		
+
 		enum RomFormat
 		{
 			RFMT_UNKNOWN = 0,
-			
+
 			RFMT_BINARY,		// Plain binary ROM image.
 			RFMT_SMD,		// Interleaved ROM image from Super Magic Drive.
 			RFMT_SMD_SPLIT,		// Multi-part SMD image. (Probably won't be supported.)
 			RFMT_MGD,		// Interleaved ROM image from Multi Game Doctor.
-			
+
 			// TODO: CD-ROM image handling.
 			RFMT_CD_CUE,		// CD-ROM image, CUE sheet.
 			RFMT_CD_ISO_2048,	// CD-ROM image, ISO-9660 format. (2048-byte sectors)
@@ -89,130 +89,130 @@ class Rom
 			RFMT_CD_BIN_2048,	// CD-ROM image, BIN format. (2048-byte sectors)
 			RFMT_CD_BIN_2352,	// CD-ROM image, BIN format. (2352-byte sectors)
 		};
-		
+
 		Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride = MDP_SYSTEM_UNKNOWN, RomFormat fmtOverride = RFMT_UNKNOWN);
 		~Rom();
-	
+
 	private:
 		friend class RomPrivate;
 		RomPrivate *const d;
-		
+
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
 		Rom(const Rom &);
 		Rom &operator=(const Rom &);
-	
+
 	public:
 		/**
 		 * Check if the ROM file is open.
 		 * @return True if the ROM file is open; false if not.
 		 */
 		bool isOpen(void) const;
-		
+
 		/**
 		 * Close the opened ROM file.
 		 */
 		void close(void);
-		
+
 		/**
 		 * Get the ROM system ID.
 		 * @return ROM system ID.
 		 */
 		MDP_SYSTEM_ID sysId(void) const;
-		
+
 		/**
 		 * Get the ROM format.
 		 * @return ROM format.
 		 */
 		RomFormat romFormat(void) const;
-		
+
 		/**
 		 * Get the ROM size.
 		 * @return ROM size, or 0 on error.
 		 */
 		int romSize(void) const;
-		
+
 		int initSRam(SRam *sram) const;
 		int initEEPRom(EEPRom *eeprom) const;
-		
+
 		/**
-		 * loadRom(): Load the ROM image into a buffer.
+		 * Load the ROM image into a buffer.
 		 * @param buf Buffer.
 		 * @param siz Buffer size.
 		 * @return Positive value indicating amount of data read on success; 0 or negative on error.
 		 */
 		int loadRom(void *buf, size_t siz);
-		
+
 		/**
 		 * Get the ROM filename.
-		 * @return ROM filename (UTF-8), or NULL on error.
+		 * @return ROM filename (UTF-8), or nullptr on error.
 		 */
 		const utf8_str *filename(void) const;
-		
+
 		/**
 		 * Get the ROM filename. (basename, no extension)
-		 * @return ROM filename (UTF-8), or NULL on error.
+		 * @return ROM filename (UTF-8), or nullptr on error.
 		 */
 		const utf8_str *filenameBaseNoExt(void) const;
-		
+
 		/********************
 		 * ROM header data. *
 		 ********************/
-		
+
 		/**
 		 * Get the Japanese (domestic) ROM name.
-		 * @return Japanese (domestic) ROM name (UTF-8), or NULL on error.
+		 * @return Japanese (domestic) ROM name (UTF-8), or nullptr on error.
 		 */
 		const utf8_str *romNameJP(void) const;
-		
+
 		/**
 		 * Get the American (overseas) ROM name.
-		 * @return American (overseas) ROM name (UTF-8), or NULL on error.
+		 * @return American (overseas) ROM name (UTF-8), or nullptr on error.
 		 */
 		const utf8_str *romNameUS(void) const;
-		
+
 		/**
 		 * Get the ROM checksum.
 		 * TODO: This is MD only for now...
 		 * @return ROM checksum.
 		 */
 		uint16_t checksum(void) const;
-		
+
 		/**
 		 * Get the region code. (MD hex format)
 		 * TODO: Change to uint8_t?
 		 * @return ROM region code. (MD hex format)
 		 */
 		int regionCode(void) const;
-		
+
 		/** Multi-file ROM archive support. **/
-		
+
 		/**
 		 * Determine if the loaded ROM archive has multiple files.
 		 * @return True if the ROM archive has multiple files; false if it doesn't.
 		 */
 		bool isMultiFile(void) const;
-		
+
 		/**
 		 * Get the list of files in the ROM archive.
-		 * @return List of files in the ROM archive, or NULL on error.
+		 * @return List of files in the ROM archive, or nullptr on error.
 		 */
 		const mdp_z_entry_t *get_z_entry_list(void) const;
-		
+
 		/**
 		 * Select a file from a multi-file ROM archive to load.
 		 * @param sel File to load.
 		 * @return 0 on success; non-zero on error.
 		 */
 		int select_z_entry(const mdp_z_entry_t *sel);
-		
+
 		/**
 		 * Determine if a ROM has been selected.
 		 * NOTE: This is only correct if the ROM file hasn't been closed.
 		 * @return True if a ROM has been selected.
 		 */
 		bool isRomSelected(void) const;
-		
+
 		/**
 		 * Mappers.
 		 */
@@ -226,14 +226,14 @@ class Rom
 			 * - Flat addressing. (> 4 MB, <= 10 MB)
 			 */
 			MAPPER_STANDARD = 0,
-			
+
 			/**
 			 * Gamtec read-only copy protection mapper.
 			 * Has read-only registers above $400000.
 			 * Used in 777 Casino.
 			 */
 			MAPPER_GAMTEC_REG_RO = 1,
-			
+
 			/**
 			 * Gamtec read-write copy protection mapper.
 			 * Has writable registers above $400000.

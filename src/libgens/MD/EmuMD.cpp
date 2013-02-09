@@ -50,7 +50,7 @@ namespace LibGens
 {
 
 /**
- * EmuMD(): Initialize a Mega Drive context.
+ * Initialize a Mega Drive context.
  * @param rom MD ROM.
  * @param region System region.
  */
@@ -59,48 +59,45 @@ EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
 {
 	// Load the ROM image.
 	m_rom = rom;	// NOTE: This is already done in EmuContext::EmuContext()...
-	if (!m_rom)
-	{
-		// NULL specified.
+	if (!m_rom) {
+		// No ROM specified.
 		// TODO: Set an error code.
 		return;
 	}
-	
+
 	// Check the ROM size.
-	if ((rom->romSize() == 0) || (rom->romSize() > (int)sizeof(M68K_Mem::Rom_Data)))
-	{
+	if ((rom->romSize() == 0) || (rom->romSize() > (int)sizeof(M68K_Mem::Rom_Data))) {
 		// ROM is either empty or too big.
 		// TODO: Set an error code.
-		m_rom = NULL;
+		m_rom = nullptr;
 		return;
 	}
-	
+
 	// Load the ROM into memory.
 	M68K_Mem::Rom_Size = rom->romSize();
 	size_t siz_loaded = rom->loadRom(&M68K_Mem::Rom_Data.u8[0], M68K_Mem::Rom_Size);
-	if (siz_loaded != M68K_Mem::Rom_Size)
-	{
+	if (siz_loaded != M68K_Mem::Rom_Size) {
 		// Error loading the ROM.
 		// TODO: Set an error code.
-		m_rom = NULL;
+		m_rom = nullptr;
 		return;
 	}
-	
+
 	// Byteswap the ROM data.
 	be16_to_cpu_array(&M68K_Mem::Rom_Data.u8[0], M68K_Mem::Rom_Size);
-	
+
 	// Autofix the ROM checksum, if enabled.
 	if (AutoFixChecksum())
 		fixChecksum();
-	
+
 	// Initialize the M68K.
 	M68K::InitSys(M68K::SYSID_MD);
-	
+
 	// Reinitialize the Z80.
 	// Z80's initial state is RESET.
 	M68K_Mem::Z80_State = (Z80_STATE_ENABLED | Z80_STATE_RESET);	// TODO: "Sound, Z80" setting.
 	Z80::ReInit();
-	
+
 	// Initialize the system status.
 	// TODO: Move Vdp::SysStatus to EmuContext.
 	m_vdp->SysStatus.data = 0;
@@ -381,7 +378,7 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 	// Initialize Vdp::VDP_Lines.
 	// Reset the current VDP line variables for the new frame.
 	m_vdp->updateVdpLines(true);
-	
+
 	// Check if VBlank is allowed.
 	m_vdp->Check_NTSC_V30_VBlank();
 
@@ -395,23 +392,23 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 
 	// Reset the sound chip buffer pointers and write length.
 	SoundMgr::ResetPtrsAndLens();
-	
+
 	// Clear all of the cycle counters.
 	M68K_Mem::Cycles_M68K = 0;
 	M68K_Mem::Cycles_Z80 = 0;
 	M68K_Mem::Last_BUS_REQ_Cnt = -1000;
 	M68K::TripOdometer();
 	Z80::ClearOdometer();
-	
+
 	// TODO: MDP. (LibGens)
 #if 0
 	// Raise the MDP_EVENT_PRE_FRAME event.
-	EventMgr::RaiseEvent(MDP_EVENT_PRE_FRAME, NULL);
+	EventMgr::RaiseEvent(MDP_EVENT_PRE_FRAME, nullptr);
 #endif
-	
+
 	// Set the VRam flag to force a VRam update.
 	m_vdp->MarkVRamDirty();
-	
+
 	// Interlaced frame status.
 	// Both Interlaced Modes 1 and 2 set this bit on odd frames.
 	// This bit is cleared on even frames and if not running in interlaced mode.
@@ -419,53 +416,50 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 		m_vdp->Reg_Status.toggleBit(VdpStatus::VDP_STATUS_ODD);
 	else
 		m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_ODD, false);
-	
+
 	/** Main execution loops. **/
-	
+
 	/** Loop 0: Top border. **/
 	/** NOTE: Vdp::VDP_Lines.Visible.Current may initially be 0! (NTSC V30) **/
 	m_vdp->VDP_Lines.Display.Current = 0;
-	while (m_vdp->VDP_Lines.Visible.Current < 0)
-	{
+	while (m_vdp->VDP_Lines.Visible.Current < 0) {
 		T_execLine<LINETYPE_BORDER, VDP>();
-		
+
 		// Next line.
 		m_vdp->VDP_Lines.Display.Current++;
 		m_vdp->VDP_Lines.Visible.Current++;
 	}
-	
+
 	/** Visible line 0. **/
 	m_vdp->HInt_Counter = m_vdp->VDP_Reg.m5.H_Int;			// Initialize HInt_Counter.
 	m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_VBLANK, false);	// Clear VBlank flag.
-	
+
 	/** Loop 1: Active display. **/
-	do
-	{
+	do {
 		T_execLine<LINETYPE_ACTIVEDISPLAY, VDP>();
-		
+
 		// Next line.
 		m_vdp->VDP_Lines.Display.Current++;
 		m_vdp->VDP_Lines.Visible.Current++;
 	} while (m_vdp->VDP_Lines.Visible.Current < m_vdp->VDP_Lines.Visible.Total);
-	
+
 	/** Loop 2: VBlank line. **/
 	T_execLine<LINETYPE_VBLANKLINE, VDP>();
 	m_vdp->VDP_Lines.Display.Current++;
 	m_vdp->VDP_Lines.Visible.Current++;
-	
+
 	/** Loop 3: Bottom border. **/
-	do
-	{
+	do {
 		T_execLine<LINETYPE_BORDER, VDP>();
-		
+
 		// Next line.
 		m_vdp->VDP_Lines.Display.Current++;
 		m_vdp->VDP_Lines.Visible.Current++;
 	} while (m_vdp->VDP_Lines.Display.Current < m_vdp->VDP_Lines.Display.Total);
-	
+
 	// Update the PSG and YM2612 output.
 	SoundMgr::SpecialUpdate();
-	
+
 #if 0
 	// If WAV or GYM is being dumped, update the WAV or GYM.
 	// TODO: VGM dumping
@@ -474,7 +468,7 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 	if (GYM_Dumping)
 		gym_dump_update(0, 0, 0);
 #endif
-	
+
 	// TODO: MDP. (LibGens)
 #if 0
 	// Raise the MDP_EVENT_POST_FRAME event.
@@ -483,16 +477,16 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 	post_frame.height = VDP_Lines.Visible.Total;
 	post_frame.pitch = 336;
 	post_frame.bpp = bppMD;
-	
+
 	int screen_offset = (TAB336[VDP_Lines.Visible.Border_Size] + 8);
 	if (post_frame.width < 320)
 		screen_offset += ((320 - post_frame.width) / 2);
-	
+
 	if (bppMD == 32)
 		post_frame.md_screen = &MD_Screen.u32[screen_offset];
 	else
 		post_frame.md_screen = &MD_Screen.u16[screen_offset];
-	
+
 	EventMgr::RaiseEvent(MDP_EVENT_POST_FRAME, &post_frame);
 #endif
 }

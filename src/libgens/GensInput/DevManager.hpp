@@ -24,9 +24,6 @@
 #ifndef __LIBGENS_GENSINPUT_DEVMANAGER_HPP__
 #define __LIBGENS_GENSINPUT_DEVMANAGER_HPP__
 
-// C includes. (Needed for NULL definition.)
-#include <string.h>
-
 #include "GensKey_t.h"
 
 namespace LibGens
@@ -37,79 +34,78 @@ class DevManager
 	public:
 		static void Init(void);
 		static void End(void);
-		
+
 		/**
-		 * DeviceHandler_fn: Device Handler function prototype.
+		 * Device Handler function prototype.
 		 * TODO: Add MDP_FNCALL or something similar?
 		 * @param param Parameter specified when registering the device handler function.
 		 * @param key Gens keycode. (~0 for Update; return value is true on success.)
 		 * @return True if the key is pressed; false if it isn't.
 		 */
 		typedef bool (*DeviceHandler_fn)(void *param, GensKey_t key);
-		
+
 		/**
-		 * RegisterDeviceHandler(): Register a device handler function.
+		 * Register a device handler function.
 		 * @param devType Device type ID.
 		 * @param fn Device handler function.
 		 * @param param Parameter to pass to the device handler function.
 		 * @return 0 on success; non-zero on error.
 		 */
 		static int RegisterDeviceHandler(int devType, DeviceHandler_fn fn, void *param);
-		
+
 		/**
-		 * UnregisterDeviceHandler(): Unregister a device handler function.
+		 * Unregister a device handler function.
 		 * @param devType Device type ID.
 		 * @param fn Device handler function.
 		 * @param param Parameter specified when registering the device handler function.
 		 * @return 0 on success; non-zero on error.
 		 */
 		static int UnregisterDeviceHandler(int devType, DeviceHandler_fn fn, void *param);
-		
+
 		/**
-		 * Update(): Update the device handlers.
+		 * Update the device handlers.
 		 */
 		static void Update(void);
-		
+
 		/**
-		 * IsKeyPressed(): Check if a key is pressed.
+		 * Check if a key is pressed.
 		 * This should ONLY be called from IoManager functions from within LibGens!
 		 * @param key Gens keycode.
 		 * @return True if the key is pressed; false if it isn't.
 		 */
 		static bool IsKeyPressed(GensKey_t key);
-		
+
 		/**
-		 * KeyName(): Get a key name.
+		 * Get a key name.
 		 * TODO: Move to the UI for key name translation.
 		 * @param key Gens keycode.
-		 * @return Key name, or NULL on error.
+		 * @return Key name, or nullptr on error.
 		 */
 		static const char *KeyName(GensKey_t key);
-	
+
 	private:
 		DevManager() { }
 		~DevManager() { }
-		
+
 		/**
-		 * ms_DevFn[], ms_DevParam: Device handler functions and parameters.
+		 * Device handler functions and parameters.
 		 */
 		static const int MAX_DEVICE_TYPES = 4;
 		static DeviceHandler_fn ms_DevFn[MAX_DEVICE_TYPES];
 		static void *ms_DevParam[MAX_DEVICE_TYPES];
-		
+
 		// Key names.
 		static const char *const ms_KeyNames[KEYV_LAST];
 };
 
 
 /**
- * Update(): Update the device handlers.
+ * Update the device handlers.
  */
 inline void DevManager::Update(void)
 {
 	// Call the device handlers with keycode ~0.
-	for (int devType = 0; devType < MAX_DEVICE_TYPES; devType++)
-	{
+	for (int devType = 0; devType < MAX_DEVICE_TYPES; devType++) {
 		if (ms_DevFn[devType])
 			ms_DevFn[devType](ms_DevParam[devType], (GensKey_t)~0);
 	}
@@ -117,7 +113,7 @@ inline void DevManager::Update(void)
 
 
 /**
- * IsKeyPressed(): Check if a key is pressed.
+ * Check if a key is pressed.
  * This should ONLY be called from IoManager functions from within LibGens!
  * @param key Gens keycode.
  * @return True if the key is pressed; false if it isn't.
@@ -133,19 +129,19 @@ inline bool DevManager::IsKeyPressed(GensKey_t key)
 
 
 /**
- * KeyName(): Get a key name.
+ * Get a key name.
  * TODO: Move to the UI for key name translation.
  * @param key Gens keycode.
- * @return Key name, or NULL on error.
+ * @return Key name, or nullptr on error.
  */
 inline const char *DevManager::KeyName(GensKey_t key)
 {
 	GensKey_u gkey;
 	gkey.keycode = key;
 	if (gkey.dev_id != GKT_KEYBOARD)
-		return NULL;
+		return nullptr;
 	if (gkey.key16 >= KEYV_LAST)
-		return NULL;
+		return nullptr;
 	return ms_KeyNames[gkey.key16];
 }
 

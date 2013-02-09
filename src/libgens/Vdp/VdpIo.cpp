@@ -45,9 +45,9 @@ uint8_t VDP_Int_Ack(void)
 {
 	// TODO: This won't work with multiple contexts...
 	LibGens::EmuContext *instance = LibGens::EmuContext::Instance();
-	if (instance != NULL)
+	if (instance != nullptr)
 		return instance->m_vdp->Int_Ack();
-	
+
 	// TODO: What should we return here?
 	return 0;
 }

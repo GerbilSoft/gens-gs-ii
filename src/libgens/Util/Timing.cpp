@@ -26,9 +26,6 @@
 // Message logging.
 #include "macros/log_msg.h"
 
-// C includes. (string.h is needed for NULL)
-#include <string.h>
-
 // Timing functions.
 #if defined(HAVE_LIBRT) || defined(__APPLE__)
 #include <time.h>
@@ -44,8 +41,8 @@ namespace LibGens
 Timing::TimingMethod Timing::ms_TMethod;
 		
 #if defined(_WIN32)
-HMODULE Timing::ms_hKernel32;
-GETTICKCOUNT64PROC Timing::ms_pGetTickCount64;
+HMODULE Timing::ms_hKernel32 = nullptr;
+GETTICKCOUNT64PROC Timing::ms_pGetTickCount64 = nullptr;
 LARGE_INTEGER Timing::ms_PerfFreq;
 #elif defined(__APPLE__)
 mach_timebase_info_data_t Timing::ms_timebase_info;
@@ -53,45 +50,37 @@ mach_timebase_info_data_t Timing::ms_timebase_info;
 
 
 /**
- * Init(): Initialize the timing subsystem.
+ * Initialize the timing subsystem.
  */
 void Timing::Init(void)
 {
 #ifdef _WIN32
-	// NULL out the DLL and function pointers initially.
-	ms_hKernel32 = NULL;
-	ms_pGetTickCount64 = NULL;
-	
+	// Clear the DLL and function pointers initially.
+	ms_hKernel32 = nullptr;
+	ms_pGetTickCount64 = nullptr;
+
 	// Determine which method to use for the timing subsystem.
 	BOOL bRet;
 	bRet = QueryPerformanceFrequency(&ms_PerfFreq);
-	if (bRet != 0 && ms_PerfFreq.QuadPart > 0)
-	{
+	if (bRet != 0 && ms_PerfFreq.QuadPart > 0) {
 		// System has a high-resolution performance counter.
 		ms_TMethod = TM_QUERYPERFORMANCECOUNTER;
-	}
-	else
-	{
+	} else {
 		// System does not have a high-resolution performance counter.
 		// Fall back to GetTickCount64() or GetTickCount().
 		ms_hKernel32 = LoadLibrary("kernel32.dll");
-		if (ms_hKernel32)
-		{
+		if (ms_hKernel32) {
 			ms_pGetTickCount64 = (GETTICKCOUNT64PROC)GetProcAddress(ms_hKernel32, "GetTickCount64");
-			if (!ms_pGetTickCount64)
-			{
+			if (!ms_pGetTickCount64) {
 				FreeLibrary(ms_hKernel32);
-				ms_hKernel32 = NULL;
+				ms_hKernel32 = nullptr;
 			}
 		}
-		
-		if (ms_pGetTickCount64)
-		{
+
+		if (ms_pGetTickCount64) {
 			// GetTickCount64() was found.
 			ms_TMethod = TM_GETTICKCOUNT64;
-		}
-		else
-		{
+		} else {
 			// GetTickCount64() was not found.
 			// Fall back to GetTickCount().
 			ms_TMethod = TM_GETTICKCOUNT;
@@ -106,7 +95,7 @@ void Timing::Init(void)
 #else
 	ms_TMethod = TM_GETTIMEOFDAY;
 #endif /* _WIN32 */
-	
+
 	// Log the timing method.
 	LOG_MSG(gens, LOG_MSG_LEVEL_INFO,
 		"Using %s() for timing.", GetTimingMethodName(ms_TMethod));
@@ -119,28 +108,26 @@ void Timing::End(void)
 {
 	// Reset the timing method to gettimeofday().
 	ms_TMethod = TM_GETTIMEOFDAY;
-	
+
 #ifdef _WIN32
 	// Close any module handles that were opened.
-	if (ms_hKernel32)
-	{
-		ms_pGetTickCount64 = NULL;
+	if (ms_hKernel32) {
+		ms_pGetTickCount64 = nullptr;
 		FreeLibrary(ms_hKernel32);
-		ms_hKernel32 = NULL;
+		ms_hKernel32 = nullptr;
 	}
 #endif /* _WIN32 */
 }
 
 
 /**
- * GetTimingMethodName(): Get the name of a timing method.
+ * Get the name of a timing method.
  * @param tMethod Timing method.
  * @return Timing method name. (ASCII)
  */
 const char *Timing::GetTimingMethodName(TimingMethod tMethod)
 {
-	switch (tMethod)
-	{
+	switch (tMethod) {
 		case TM_GETTIMEOFDAY:
 		default:
 			// TODO: Default timing method on Win32 is currently GetTickCount().
@@ -166,7 +153,7 @@ const char *Timing::GetTimingMethodName(TimingMethod tMethod)
 
 
 /**
- * GetTimeD(): Get the current time.
+ * Get the current time.
  * @return Current time. (double-precision floating point)
  */
 double Timing::GetTimeD(void)
@@ -176,17 +163,16 @@ double Timing::GetTimeD(void)
 	// Win32-specific timer functions.
 	// TODO: Should TM_GETTIMEOFDAY / TM_CLOCK_GETTIME be supported here?
 	LARGE_INTEGER perf_ctr;
-	switch (ms_TMethod)
-	{
+	switch (ms_TMethod) {
 		case TM_GETTICKCOUNT:
 		default:
 			// GetTickCount().
 			return ((double)GetTickCount() / 1000.0);
-		
+
 		case TM_GETTICKCOUNT64:
 			// GetTickCount64().
 			return ((double)ms_pGetTickCount64() / 1000.0);
-		
+
 		case TM_QUERYPERFORMANCECOUNTER:
 			// QueryPerformanceCounter().
 			QueryPerformanceCounter(&perf_ctr);

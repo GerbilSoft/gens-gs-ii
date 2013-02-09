@@ -29,6 +29,7 @@
 #include <cstring>
 #include <cctype>
 #include <cstdio>
+#include <cassert>
 
 // C++ includes.
 #include <algorithm>
@@ -60,67 +61,67 @@ class RomPrivate
 				Rom::MDP_SYSTEM_ID sysOverride = Rom::MDP_SYSTEM_UNKNOWN,
 				Rom::RomFormat fmtOverride = Rom::RFMT_UNKNOWN);
 		~RomPrivate();
-	
+
 	private:
 		Rom *const q;
-		
+
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
 		RomPrivate(const RomPrivate &);
 		RomPrivate &operator=(const RomPrivate &);
-	
+
 	public:
 		// Space elimination algorithm.
 		static inline FUNC_PURE bool IsGraphChar(uint16_t wchr);
 		static std::string SpaceElim(const std::string& src);
-		
+
 		// System ID and ROM format detection functions.
 		static Rom::RomFormat DetectFormat(const uint8_t *header, size_t header_size);
 		static Rom::MDP_SYSTEM_ID DetectSystem(const uint8_t *header, size_t header_size, Rom::RomFormat fmt);
-		
+
 		// ROM file and decompressor variables.
 		FILE *file;
 		Decompressor *decomp;
 		mdp_z_entry_t *z_entry_list;
 		const mdp_z_entry_t *z_entry_sel;
-		
+
 		/**
 		 * Determine if the loaded ROM archive has multiple files.
 		 * @return True if the ROM archive has multiple files; false if it doesn't.
 		 */
 		inline bool isMultiFile(void) const
 			{ return (z_entry_list && z_entry_list->next); }
-		
+
 		// System ID and ROM format.
 		Rom::MDP_SYSTEM_ID sysId;
 		Rom::RomFormat romFormat;
-		
+
 		// System overrides specified in the constructor.
 		Rom::MDP_SYSTEM_ID sysId_override;
 		Rom::RomFormat romFormat_override;
-		
+
 		// ROM information.
 		std::string filename;		// ROM filename.
 		std::string filenameBaseNoExt;	// ROM filename. (basename; no extension)
 		unsigned int romSize;		// ROM size.
 		int eprType;			// EEPRom type.
-		
+
 		// ROM names.
 		// MD: Obtained from ROM header.
 		std::string romNameJP;	// Domestic name.
 		std::string romNameUS;	// Overseas name.
-		
+
 		/**
 		 * Region code.
 		 * Same format as the newer hex format used in MD ROMs.
 		 */
 		int regionCode;
 		static int DetectRegionCodeMD(const char countryCodes[16]);
-		
+
 		/** ROM header functions. **/
 		int loadRomHeader(Rom::MDP_SYSTEM_ID sysOverride, Rom::RomFormat fmtOverride);
 		void readHeaderMD(const uint8_t *header, size_t header_size);
-		
+
 		/**
 		 * Mega Drive ROM header.
 		 * This matches the MD ROM header format exactly.
@@ -136,13 +137,13 @@ class RomPrivate
 			char serialNumber[14];
 			uint16_t checksum;
 			char ioSupport[16];
-			
+
 			// ROM/RAM address information.
 			uint32_t romStartAddr;
 			uint32_t romEndAddr;
 			uint32_t ramStartAddr;
 			uint32_t ramEndAddr;
-			
+
 			// Save RAM information.
 			// Info format: 'R', 'A', %1x1yz000, 0x20
 			// x == 1 for backup (SRAM), 0 for not backup
@@ -150,32 +151,32 @@ class RomPrivate
 			uint32_t sramInfo;
 			uint32_t sramStartAddr;
 			uint32_t sramEndAddr;
-			
+
 			// Miscellaneous.
 			char modemInfo[12];
 			char notes[40];
 			char countryCodes[16];
 		};
-		
+
 		MD_RomHeader m_mdHeader;
-		
+
 		/**
 		 * ROM fixups table entry. (Mega Drive)
 		 */
 		struct MD_RomFixup
 		{
 			// ROM identification.
-			// If any value is 0 or NULL, that field is ignored.
+			// If any value is 0 or nullptr, that field is ignored.
 			struct
 			{
 				const char *serial;	// ROM serial number.
 				uint16_t checksum;	// MD checksum.
 				uint32_t crc32;		// CRC32.
 			} id;
-			
+
 			// Fixups.
 			Rom::Mapper mapper;		// ROM mapper.
-			
+
 			// SRAM fixups.
 			// If any value is 0, that field is ignored.
 			struct
@@ -185,13 +186,13 @@ class RomPrivate
 				bool force_off;		// Force SRAM off. (Puggsy)
 			} sram;
 		};
-		
+
 		static const MD_RomFixup MD_RomFixups[5];
-		
+
 		uint32_t rom_crc32;	// ROM CRC32.
 		int romFixup;		// ROM fixup index. (-1 == no fixups)
 		Rom::Mapper mapper;	// ROM mapper.
-		
+
 		static int CheckRomFixupsMD(const MD_RomHeader *mdRomHeader, uint32_t crc32);
 };
 
@@ -204,10 +205,10 @@ const RomPrivate::MD_RomFixup RomPrivate::MD_RomFixups[5] =
 	// Puggsy: Shows an anti-piracy message after the third level if SRAM is detected.
 	{{"GM T-113016", 0, 0}, Rom::MAPPER_STANDARD, {0, 0, true}},
 	{{"GM T-550055", 0, 0}, Rom::MAPPER_STANDARD, {0, 0, true}},	// Puggsy (Beta)
-	
+
 	// Psy-O-Blade: Incorrect SRAM header.
 	{{"GM T-26013 ", 0, 0}, Rom::MAPPER_STANDARD, {0x200000, 0x203FFF, false}},
-	
+
 	/**
 	 * Xin Qi Gai Wang Zi (original version of Beggar Prince):
 	 * SRAM is located at 0x400000-0x40FFFF; ROM header is invalid.
@@ -216,8 +217,8 @@ const RomPrivate::MD_RomFixup RomPrivate::MD_RomFixups[5] =
 	 * - Xin Qi Gai Wang Zi (Ch).gen:	DD2F38B5
 	 * - Xin Qi Gai Wang Zi (Ch) [a1].gen:	DA5A4BFE
 	 */
-	{{NULL, 0, 0xDD2F38B5}, Rom::MAPPER_STANDARD, {0x400000, 0x40FFFF, false}},
-	{{NULL, 0, 0xDA5A4BFE}, Rom::MAPPER_STANDARD, {0x400000, 0x40FFFF, false}},
+	{{nullptr, 0, 0xDD2F38B5}, Rom::MAPPER_STANDARD, {0x400000, 0x40FFFF, false}},
+	{{nullptr, 0, 0xDA5A4BFE}, Rom::MAPPER_STANDARD, {0x400000, 0x40FFFF, false}},
 };
 
 
@@ -232,10 +233,10 @@ RomPrivate::RomPrivate(Rom *q, const utf8_str *filename,
 			Rom::MDP_SYSTEM_ID sysOverride,
 			Rom::RomFormat fmtOverride)
 	: q(q)
-	, file(NULL)
-	, decomp(NULL)
-	, z_entry_list(NULL)
-	, z_entry_sel(NULL)
+	, file(nullptr)
+	, decomp(nullptr)
+	, z_entry_list(nullptr)
+	, z_entry_sel(nullptr)
 	, sysId(Rom::MDP_SYSTEM_UNKNOWN)
 	, romFormat(Rom::RFMT_UNKNOWN)
 	, sysId_override(sysOverride)
@@ -247,75 +248,70 @@ RomPrivate::RomPrivate(Rom *q, const utf8_str *filename,
 	, romFixup(-1)
 	, mapper(Rom::MAPPER_STANDARD)
 {
-	// If filename is NULL, don't do anything else.
+	// If filename is nullptr, don't do anything else.
 	if (!filename)
 		return;
-	
+
 	// Save the filename for later.
 	this->filename = string(filename);
-	
+
 	// Remove the directories and extension from the ROM filename.
 	// TODO: Remove all extensions (e.g. ".gen.gz")?
 	string tmpFilename = this->filename;
-	
+
 	// Get the filename portion.
 	size_t dirSep = tmpFilename.rfind(LG_PATH_SEP_CHR);
 	if (dirSep != string::npos)
 		tmpFilename.erase(0, dirSep+1);
-	
+
 	// Remove the file extension.
 	size_t extSep = tmpFilename.rfind('.');
 	if (extSep != string::npos)
 		tmpFilename.erase(extSep, (tmpFilename.size() - extSep));
-	
+
 	// Save the truncated filename.
 	filenameBaseNoExt = tmpFilename;
-	
+
 	// Open the ROM file.
 	file = fopen(filename, "rb");
 	if (!file)
 		return;
-	
+
 	// Determine which decompressor to use.
 	decomp = Decompressor::GetDecompressor(file, filename);
-	if (!decomp)
-	{
+	if (!decomp) {
 		// Couldn't find a suitable decompressor.
 		// TODO: Indicate that a suitable decompressor couldn't be found.
 		fclose(file);
-		file = NULL;
+		file = nullptr;
 		return;
 	}
-	
+
 	// Get the list of files in the archive.
 	int ret = decomp->getFileInfo(&z_entry_list);
-	if (ret != 0) // TODO: MDP_ERR_OK
-	{
+	if (ret != 0) { // TODO: MDP_ERR_OK
 		// Error getting the list of files.
-		z_entry_list = NULL;
-		
+		z_entry_list = nullptr;
+
 		// Delete the decompressor.
 		delete decomp;
-		decomp = NULL;
-		
+		decomp = nullptr;
+
 		// Close the file.
 		fclose(file);
-		file = NULL;
+		file = nullptr;
 		return;
 	}
-	
-	if (!isMultiFile())
-	{
+
+	if (!isMultiFile()) {
 		// Archive is not multi-file.
 		// Load the ROM header.
 		z_entry_sel = z_entry_list;
 		loadRomHeader(sysOverride, fmtOverride);
-	}
-	else
-	{
+	} else {
 		// Archive is multi-file.
 		// We can't continue until the user selects a file to load.
-		z_entry_sel = NULL;
+		z_entry_sel = nullptr;
 	}
 }
 
@@ -327,10 +323,10 @@ RomPrivate::~RomPrivate()
 {
 	// Free the mdp_z_entry_t list.
 	Decompressor::z_entry_t_free(z_entry_list);
-	
+
 	// Delete the decompressor.
 	delete decomp;
-	
+
 	// If the file is open, close it.
 	if (file)
 		fclose(file);
@@ -780,13 +776,11 @@ void RomPrivate::readHeaderMD(const uint8_t *header, size_t header_size)
  */
 int RomPrivate::CheckRomFixupsMD(const RomPrivate::MD_RomHeader *mdRomHeader, uint32_t crc32)
 {
-	for (int i = 0; i < (int)(sizeof(MD_RomFixups)/sizeof(MD_RomFixups[0])); i++)
-	{
+	for (int i = 0; i < (int)(sizeof(MD_RomFixups)/sizeof(MD_RomFixups[0])); i++) {
 		const MD_RomFixup *fixup = &MD_RomFixups[i];
 		bool match = false;
-		
-		if (fixup->id.serial != NULL)
-		{
+
+		if (fixup->id.serial != nullptr) {
 			// Compare the ROM serial number.
 			if (strncmp(mdRomHeader->serialNumber, fixup->id.serial,
 				sizeof(mdRomHeader->serialNumber)-3) != 0)
@@ -795,28 +789,26 @@ int RomPrivate::CheckRomFixupsMD(const RomPrivate::MD_RomHeader *mdRomHeader, ui
 			}
 			match = true;
 		}
-		
-		if (fixup->id.crc32 != 0 && crc32 != 0)
-		{
+
+		if (fixup->id.crc32 != 0 && crc32 != 0) {
 			// Compare the ROM CRC32.
 			if (crc32 != fixup->id.crc32)
 				continue;
 			match = true;
 		}
-		
-		if (fixup->id.checksum != 0)
-		{
+
+		if (fixup->id.checksum != 0) {
 			// Compare the ROM checksum.
 			if (mdRomHeader->checksum != fixup->id.checksum)
 				continue;
 			match = true;
 		}
-		
+
 		// Found a fixup for this ROM.
 		if (match)
 			return i;
 	}
-	
+
 	// No fixup found for this ROM.
 	return -1;
 }
@@ -960,7 +952,7 @@ int Rom::initEEPRom(EEPRom *eeprom) const
 
 
 /**
- * loadRom(): Load the ROM image into a buffer.
+ * Load the ROM image into a buffer.
  * @param buf Buffer.
  * @param siz Buffer size.
  * @return Positive value indicating amount of data read on success; 0 or negative on error.
@@ -969,26 +961,24 @@ int Rom::initEEPRom(EEPRom *eeprom) const
 int Rom::loadRom(void *buf, size_t siz)
 {
 	// TODO: Use error code constants.
-	// NOTE: Don't check for a NULL pointer, since a crash helps diagnose problems.
+	assert(buf);
 	if (!isOpen())
 		return -1;	// File is closed!
 	else if (!d->decomp)
 		return -2;	// Decompressor error!
 	else if (!d->z_entry_sel)
 		return -3;	// No file selected!
-	
-	if (siz == 0 || siz < d->romSize)
-	{
+
+	if (siz == 0 || siz < d->romSize) {
 		// ROM buffer isn't large enough for the ROM image.
 		return -4;
 	}
-	
-	if (d->romFormat != RFMT_BINARY)
-	{
+
+	if (d->romFormat != RFMT_BINARY) {
 		// Unsupported ROM format.
 		return -5;
 	}
-	
+
 	// Load the ROM image.
 	// TODO: Error handling.
 	size_t ret_siz = 0;
@@ -1007,7 +997,7 @@ int Rom::loadRom(void *buf, size_t siz)
  * @return True if the ROM file is open; false if not.
  */
 bool Rom::isOpen(void) const
-	{ return (d->file != NULL); }
+	{ return (d->file != nullptr); }
 
 /**
  * Close the opened ROM file.
@@ -1044,28 +1034,28 @@ int Rom::romSize(void) const
 
 /**
  * Get the ROM filename.
- * @return ROM filename (UTF-8), or NULL on error.
+ * @return ROM filename (UTF-8), or nullptr on error.
  */
 const utf8_str *Rom::filename(void) const
 	{ return d->filename.c_str(); }
 
 /**
  * Get the ROM filename. (basename, no extension)
- * @return ROM filename (UTF-8), or NULL on error.
+ * @return ROM filename (UTF-8), or nullptr on error.
  */
 const utf8_str *Rom::filenameBaseNoExt(void) const
 	{ return d->filenameBaseNoExt.c_str(); }
 
 /**
  * Get the Japanese (domestic) ROM name.
- * @return Japanese (domestic) ROM name (UTF-8), or NULL on error.
+ * @return Japanese (domestic) ROM name (UTF-8), or nullptr on error.
  */
 const utf8_str *Rom::romNameJP(void) const
 	{ return d->romNameJP.c_str(); }
 
 /**
  * Get the American (overseas) ROM name.
- * @return American (overseas) ROM name (UTF-8), or NULL on error.
+ * @return American (overseas) ROM name (UTF-8), or nullptr on error.
  */
 const utf8_str *Rom::romNameUS(void) const
 	{ return d->romNameUS.c_str(); }
@@ -1097,7 +1087,7 @@ bool Rom::isMultiFile(void) const
 
 /**
  * Get the list of files in the ROM archive.
- * @return List of files in the ROM archive, or NULL on error.
+ * @return List of files in the ROM archive, or nullptr on error.
  */
 const mdp_z_entry_t *Rom::get_z_entry_list(void) const
 	{ return d->z_entry_list; }
@@ -1113,16 +1103,16 @@ int Rom::select_z_entry(const mdp_z_entry_t *sel)
 		return -1;	// File is closed!
 	if (!isMultiFile())
 		return -2;	// Not multi-file.
-	if (d->z_entry_sel != NULL)
+	if (d->z_entry_sel != nullptr)
 		return -3;	// ROM was already selected.
-	
+
 	// TODO: Verify that sel is actually in m_z_entry_list.
 	if (!sel)
 		return -4;	// Invalid selection.
-	
+
 	// Select the ROM from the archive.
 	d->z_entry_sel = sel;
-	
+
 	// Load the ROM header.
 	d->loadRomHeader(d->sysId_override, d->romFormat_override);
 	return 0;
@@ -1134,6 +1124,6 @@ int Rom::select_z_entry(const mdp_z_entry_t *sel)
  * @return True if a ROM has been selected.
  */
 bool Rom::isRomSelected(void) const
-	{ return (d->z_entry_sel != NULL); }
+	{ return (d->z_entry_sel != nullptr); }
 
 }

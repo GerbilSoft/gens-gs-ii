@@ -47,7 +47,7 @@ VdpTypes::VdpEmuOptions_t Vdp::VdpEmuOptions =
 
 /**
  * Initialize the VDP subsystem.
- * @param fb Existing MdFb to use. (If NULL, allocate a new MdFb.)
+ * @param fb Existing MdFb to use. (If nullptr, allocate a new MdFb.)
  */
 Vdp::Vdp(MdFb *fb)
 	: MD_Screen(fb ? fb->ref() : new MdFb())

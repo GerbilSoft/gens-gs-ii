@@ -123,7 +123,8 @@ class EmuContext
 		virtual void execFrameFast(void) = 0;
 		
 		// Accessors.
-		inline bool isRomOpened(void) { return (m_rom != NULL); }
+		inline bool isRomOpened(void)
+			{ return (m_rom != nullptr); }
 		
 		// Controller I/O manager.
 		// TODO: Make this non-static!

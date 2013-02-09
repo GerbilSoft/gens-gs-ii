@@ -68,7 +68,7 @@ extern int W32U_IsUnicode;
  * Convert a null-terminated multibyte string to UTF-16.
  * @param mbs Multibyte string. (null-terminated)
  * @param codepage mbs codepage.
- * @return UTF-16 string, or NULL on error.
+ * @return UTF-16 string, or nullptr on error.
  */
 wchar_t *W32U_mbs_to_UTF16(const utf8_str *mbs, unsigned int codepage);
 
@@ -76,7 +76,7 @@ wchar_t *W32U_mbs_to_UTF16(const utf8_str *mbs, unsigned int codepage);
  * Convert a null-terminated UTF-16 string to multibyte.
  * @param wcs UTF-16 string. (null-terminated)
  * @param codepage mbs codepage.
- * @return Multibyte string, or NULL on error.
+ * @return Multibyte string, or nullptr on error.
  */
 char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage);
 
@@ -87,7 +87,7 @@ char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage);
  * Open a file.
  * @param filename Filename.
  * @param mode File mode.
- * @return File pointer, or NULL on error.
+ * @return File pointer, or nullptr on error.
  */
 FILE *W32U_fopen(const utf8_str *filename, const utf8_str *mode);
 
