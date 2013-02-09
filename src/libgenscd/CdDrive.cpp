@@ -193,6 +193,7 @@ CD_DiscType_t CdDrive::getDiscType(void)
 		case 0x14:	return DISC_TYPE_DVD_RW; 	// sequential
 		case 0x15:	return DISC_TYPE_DVD_R_DL;	// sequential
 		case 0x16:	return DISC_TYPE_DVD_R_DL;	// layer jump
+		case 0x17:	return DISC_TYPE_DVD_RW_DL;
 		case 0x1A:	return DISC_TYPE_DVD_PLUS_RW;
 		case 0x1B:	return DISC_TYPE_DVD_PLUS_R;
 		case 0x2A:	return DISC_TYPE_DVD_PLUS_RW_DL;
