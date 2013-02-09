@@ -74,6 +74,7 @@ bool UnRAR_dll::load(const utf8_str *filename)
 		
 		// Use the ANSI filename.
 		hUnrarDll = LoadLibraryA(filename);
+		free(filenameA);
 	}
 	free(filenameW);
 	
