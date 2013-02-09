@@ -102,7 +102,7 @@ int IoManager::keymap(int virtPort, GensKey_t *keymap, int siz) const
  */
 int IoManager::NumDevButtons(IoType_t ioType)
 {
-	assert(ioType >= IOT_NONE && ioType <= IOT_MAX);
+	assert(ioType >= IOT_NONE && ioType < IOT_MAX);
 	return IoManagerPrivate::ioDevInfo[ioType].btnCount;
 }
 
@@ -113,7 +113,7 @@ int IoManager::NumDevButtons(IoType_t ioType)
  */
 bool IoManager::IsDevTypeUsable(IoType_t ioType)
 {
-	assert(ioType >= IOT_NONE && ioType <= IOT_MAX);
+	assert(ioType >= IOT_NONE && ioType < IOT_MAX);
 #ifdef NDEBUG
 	// Release build.
 	// Return the actual "isUsable" status.
@@ -133,7 +133,7 @@ bool IoManager::IsDevTypeUsable(IoType_t ioType)
  */
 uint32_t IoManager::IoTypeToFourCC(IoType_t ioType)
 {
-	assert(ioType >= IOT_NONE && ioType <= IOT_MAX);
+	assert(ioType >= IOT_NONE && ioType < IOT_MAX);
 	return IoManagerPrivate::ioDevInfo[ioType].fourCC;
 }
 
