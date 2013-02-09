@@ -31,6 +31,9 @@
 #include <QtGui/QIcon>
 #include <QtGui/QStyle>
 
+// LibGens includes.
+#include "libgens/lg_main.hpp"
+
 
 namespace GensQt4
 {
@@ -81,43 +84,51 @@ void GensQApplicationPrivate::gqaInit(void)
 {
 	// Save the GUI thread pointer for later.
 	guiThread = QThread::currentThread();
-	
+
 	// Set application information.
 	QCoreApplication::setOrganizationName(QLatin1String("GerbilSoft"));
 	QCoreApplication::setApplicationName(QLatin1String("Gens/GS II"));
-	
+
+	// Version number.
+	// TODO: Use MDP version macros.
+	// NOTE: gens-qt4's version is currently tied to LibGens.
+	const QString sVersion = QString::fromLatin1("%1.%2.%3")
+					.arg((LibGens::version >> 24) & 0xFF)
+					.arg((LibGens::version >> 16) & 0xFF)
+					.arg(LibGens::version & 0xFFFF);
+	QCoreApplication::setApplicationVersion(sVersion);
+
 	// Set the application icon.
 	QIcon iconApp;
 	iconApp.addFile(QLatin1String(":/gens/gensgs_48x48.png"), QSize(48, 48));
 	iconApp.addFile(QLatin1String(":/gens/gensgs_32x32.png"), QSize(32, 32));
 	iconApp.addFile(QLatin1String(":/gens/gensgs_16x16.png"), QSize(16, 16));
 	q->setWindowIcon(iconApp);
-	
+
 #if QT_VERSION >= 0x040600
 	// Check if an icon theme is available.
-	if (!QIcon::hasThemeIcon(QLatin1String("application-exit")))
-	{
+	if (!QIcon::hasThemeIcon(QLatin1String("application-exit"))) {
 		// Icon theme is not available.
 		// Use built-in Oxygen icon theme.
 		// Reference: http://tkrotoff.blogspot.com/2010/02/qiconfromtheme-under-windows.html
 		QIcon::setThemeName(QLatin1String("oxygen"));
 	}
 #endif
-	
+
 #ifdef Q_OS_WIN32
 	// Set the application font.
 	q->SetFont_Win32();
 #endif /* Q_OS_WIN32 */
-	
+
 	// Initialize Qt translators.
 	qtTranslator = new QTranslator(q);
 	q->installTranslator(qtTranslator);
 	gensTranslator = new QTranslator(q);
 	q->installTranslator(gensTranslator);
-	
+
 	// Initialize the Gens translation.
 	setGensTranslation(QLocale::system().name());
-	
+
 	// Connect the crash handler.
 #ifdef HAVE_SIGACTION
 	QObject::connect(q, SIGNAL(signalCrash(int,siginfo_t*,void*)),
