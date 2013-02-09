@@ -35,7 +35,7 @@ namespace LibZomg
 {
 
 /**
- * saveToZomg(): Save a file to the ZOMG file.
+ * Save a file to the ZOMG file.
  * @param filename Filename to save in the ZOMG file.
  * @param buf Buffer containing the file contents.
  * @param len Length of the buffer.
@@ -45,38 +45,37 @@ int Zomg::saveToZomg(const utf8_str *filename, const void *buf, int len)
 {
 	if (m_mode != ZOMG_SAVE || !m_zip)
 		return -1;
-	
+
 	// Open the new file in the ZOMG file.
 	zip_fileinfo zipfi;
 	memcpy(&zipfi.tmz_date, &m_zipfi.tmz_date, sizeof(zipfi.tmz_date));
 	zipfi.dosDate = 0;
 	zipfi.internal_fa = 0x0000; // TODO: Set to 0x0001 for text files.
 	zipfi.external_fa = 0x0000; // MS-DOS directory attribute byte.
-	
+
 	int ret = zipOpenNewFileInZip(
 		m_zip,			// zipFile
 		filename,		// Filename in the Zip archive
 		&zipfi,			// File information (timestamp, attributes)
-		NULL,			// extrafield_local
+		nullptr,		// extrafield_local
 		0,			// size_extrafield_local,
-		NULL,			// extrafield_global,
+		nullptr,		// extrafield_global,
 		0,			// size_extrafield_global,
-		NULL,			// comment
+		nullptr,		// comment
 		Z_DEFLATED,		// method
 		Z_DEFAULT_COMPRESSION	// level
 		);
-	
-	if (ret != UNZ_OK)
-	{
+
+	if (ret != UNZ_OK) {
 		// Error opening the new file in the Zip archive.
 		// TODO: Define return codes somewhere.
 		return -2;
 	}
-	
+
 	// Write the file.
 	zipWriteInFileInZip(m_zip, buf, len);	// TODO: Check the return value!
 	zipCloseFileInZip(m_zip);		// TODO: Check the return value!
-	
+
 	// TODO: What should we return?
 	return 0;
 }

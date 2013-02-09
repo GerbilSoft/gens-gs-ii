@@ -47,50 +47,49 @@ namespace LibZomg
 {
 
 /**
- * Zomg(): Open a ZOMG savestate file.
+ * Open a ZOMG savestate file.
  * @param filename ZOMG filename.
  * @param mode File mode.
  */
 Zomg::Zomg(const utf8_str *filename, ZomgFileMode mode)
 	: ZomgBase(filename, mode)
 {
-	m_unz = NULL;
-	m_zip = NULL;
-	
+	m_unz = nullptr;
+	m_zip = nullptr;
+
 	if (!filename)
 		return;
-	
+
 	// Open the ZOMG file.
 	// TODO: Open for reading to load existing FORMAT.ini even if
 	// the current mode is ZOMG_SAVE.
-	
+
 	// TODO: Split this up into multiple functions?
-	switch (mode)
-	{
+	switch (mode) {
 		case ZOMG_LOAD:
 			if (initZomgLoad(filename) != 0)
 				return;
 			break;
-		
+
 		case ZOMG_SAVE:
 			if (initZomgSave(filename) != 0)
 				return;
 			break;
-		
+
 		default:
 			return;
 	}
-	
+
 	// ZOMG file is open.
 	m_mode = mode;
-	
+
 	// Save the filename.
 	m_filename = string(filename);
 }
 
 
 /**
- * ~Zomg(): Close the ZOMG savestate file.
+ * Close the ZOMG savestate file.
  */
 Zomg::~Zomg()
 {
@@ -100,28 +99,26 @@ Zomg::~Zomg()
 
 
 /**
- * close(): Close the ZOMG savestate file.
+ * Close the ZOMG savestate file.
  */
 void Zomg::close(void)
 {
-	if (m_unz)
-	{
+	if (m_unz) {
 		unzClose(m_unz);
-		m_unz = NULL;
+		m_unz = nullptr;
 	}
-	
-	if (m_zip)
-	{
-		zipClose(m_zip, NULL);
-		m_zip = NULL;
+
+	if (m_zip) {
+		zipClose(m_zip, nullptr);
+		m_zip = nullptr;
 	}
-	
+
 	m_mode = ZOMG_CLOSED;
 }
 
 
 /**
- * DetectFormat(): Detect if a savestate is supported by this class.
+ * Detect if a savestate is supported by this class.
  * @param filename Savestate filename.
  * @return True if the savestate is supported; false if not.
  */
@@ -130,30 +127,29 @@ bool Zomg::DetectFormat(const utf8_str *filename)
 	// TODO: This only checks if the file is a ZIP file.
 	// Check FORMAT.INI once it's implemented.
 	static const uint8_t zip_magic[] = {'P', 'K', 0x03, 0x04};
-	
+
 	// TODO: Win32 Unicode translation.
 	FILE *f = fopen(filename, "rb");
 	if (!f)
 		return false;
-	
+
 	// Read the "magic number".
 	uint8_t header[sizeof(zip_magic)];
 	size_t ret = fread(&header, 1, sizeof(header), f);
 	fclose(f);
-	
-	if (ret < sizeof(header))
-	{
+
+	if (ret < sizeof(header)) {
 		// Error reading the "magic number".
 		return false;
 	}
-	
+
 	// Check the "magic number" and return true if it matches.
 	return (!memcmp(header, zip_magic, sizeof(header)));
 }
 
 
 /**
- * initZomgLoad(): Initialize the Zomg class for loading a Zomg.
+ * Initialize the Zomg class for loading a Zomg.
  * @param filename Zomg file to load.
  * @return 0 on success; non-zero on error.
  */
@@ -168,26 +164,25 @@ int Zomg::initZomgLoad(const utf8_str *filename)
 #endif
 	if (!m_unz)
 		return -1;
-	
+
 	// Check for a PNG preview image.
 	// TODO: Add a mode flag to indicate if we want to load the preview image automatically?
 	int ret = unzLocateFile(m_unz, "preview.png", 2);
-	if (ret == UNZ_OK)
-	{
+	if (ret == UNZ_OK) {
 		// Preview image found.
 		// Get the filesize.
 		unz_file_info unzfi;
-		ret = unzGetCurrentFileInfo(m_unz, &unzfi, NULL, 0, NULL, 0, NULL, 0);
+		ret = unzGetCurrentFileInfo(m_unz, &unzfi, nullptr, 0, nullptr, 0, nullptr, 0);
 		if (ret == UNZ_OK)
 			m_preview_size = unzfi.uncompressed_size;
 	}
-	
+
 	return 0;
 }
 
 
 /**
- * initZomgSave(): Initialize the Zomg class for saving a Zomg.
+ * Initialize the Zomg class for saving a Zomg.
  * @param filename Zomg file to save.
  * @return 0 on success; non-zero on error.
  */
@@ -196,18 +191,18 @@ int Zomg::initZomgSave(const utf8_str *filename)
 #ifdef _WIN32
 	zlib_filefunc64_def ffunc;
 	fill_win32_filefunc64U(&ffunc);
-	m_zip = zipOpen2_64(filename, APPEND_STATUS_CREATE, NULL, &ffunc);
+	m_zip = zipOpen2_64(filename, APPEND_STATUS_CREATE, nullptr, &ffunc);
 #else
 	m_zip = zipOpen(filename, APPEND_STATUS_CREATE);
 #endif
 	if (!m_zip)
 		return -1;
-	
+
 	// Clear the default Zip timestamp first.
 	memset(&m_zipfi, 0x00, sizeof(m_zipfi));
-	
+
 	// Get the current time for the Zip archive.
-	time_t cur_time = time(NULL);
+	time_t cur_time = time(nullptr);
 	struct tm *tm_local;
 #ifdef HAVE_LOCALTIME_R
 	struct tm tm_local_r;
@@ -215,8 +210,7 @@ int Zomg::initZomgSave(const utf8_str *filename)
 #else
 	tm_local = localtime(&cur_time);
 #endif /* HAVE_LOCALTIME_R */
-	if (tm_local)
-	{
+	if (tm_local) {
 		// Local time received.
 		// Convert to Zip time.
 		m_zipfi.tmz_date.tm_sec  = tm_local->tm_sec;
@@ -226,7 +220,7 @@ int Zomg::initZomgSave(const utf8_str *filename)
 		m_zipfi.tmz_date.tm_mon  = tm_local->tm_mon;
 		m_zipfi.tmz_date.tm_year = tm_local->tm_year;
 	}
-	
+
 	return 0;
 }
 
