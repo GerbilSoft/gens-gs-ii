@@ -36,7 +36,7 @@ using LibGens::IoManager;
 #include <QtCore/QSettings>
 #include <QtCore/QStringList>
 
-// NUM_ELEMENTS()
+// ARRAY_SIZE()
 #include "libgens/macros/common.h"
 
 namespace GensQt4
@@ -316,8 +316,8 @@ int CtrlConfigPrivate::save(QSettings *qSettings)
 		// TODO: Save all keys, even those not being used by the current type.
 		// Trim all 0 buttons from the keys afterwards.
 		int numButtons = IoManager::NumDevButtons(ctrlTypes[virtPort]);
-		if (numButtons > NUM_ELEMENTS(ctrlKeys[virtPort]))
-			numButtons = NUM_ELEMENTS(ctrlKeys[virtPort]);
+		if (numButtons > ARRAY_SIZE(ctrlKeys[virtPort]))
+			numButtons = ARRAY_SIZE(ctrlKeys[virtPort]);
 
 		// Write the buttons to the configuration file.
 		QString keyData;
@@ -425,7 +425,7 @@ int CtrlConfig::save(QSettings *qSettings)
  */
 void CtrlConfig::updateIoManager(IoManager *ioManager) const
 {
-	for (int virtPort = 0; virtPort < NUM_ELEMENTS(d->ctrlKeys); virtPort++) {
+	for (int virtPort = 0; virtPort < ARRAY_SIZE(d->ctrlKeys); virtPort++) {
 		// Set the device type.
 		ioManager->setDevType(
 				(IoManager::VirtPort_t)virtPort, 
@@ -434,7 +434,7 @@ void CtrlConfig::updateIoManager(IoManager *ioManager) const
 		// Set the new keymaps.
 		ioManager->setKeymap(virtPort,
 				&d->ctrlKeys[virtPort][0],
-				NUM_ELEMENTS(d->ctrlKeys[virtPort]));
+				ARRAY_SIZE(d->ctrlKeys[virtPort]));
 	}
 }
 

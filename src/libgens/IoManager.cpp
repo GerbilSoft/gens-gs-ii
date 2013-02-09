@@ -33,7 +33,7 @@
 #include <string>
 using std::string;
 
-// NUM_ELEMENTS(x)
+// ARRAY_SIZE(x)
 #include "macros/common.h"
 
 namespace LibGens
@@ -418,7 +418,7 @@ IoManagerPrivate::IoManagerPrivate(IoManager *q)
  */
 void IoManagerPrivate::reset(void)
 {
-	for (int i = 0; i < NUM_ELEMENTS(ioDevices); i++)
+	for (int i = 0; i < ARRAY_SIZE(ioDevices); i++)
 		ioDevices[i].reset();
 
 	// Rebuild Team Player controller index tables for TP devices.
@@ -442,7 +442,7 @@ void IoManagerPrivate::reset(void)
 int IoManagerPrivate::setKeymap(int virtPort, const GensKey_t *keymap, int siz)
 {
 	IoDevice *const dev = &ioDevices[virtPort];
-	const int btns = std::min(siz, NUM_ELEMENTS(dev->keyMap));
+	const int btns = std::min(siz, ARRAY_SIZE(dev->keyMap));
 	for (int i = 0; i < btns; i++)
 		dev->keyMap[i] = *keymap++;
 	return btns;
@@ -458,7 +458,7 @@ int IoManagerPrivate::setKeymap(int virtPort, const GensKey_t *keymap, int siz)
 int IoManagerPrivate::keymap(int virtPort, GensKey_t *keymap, int siz) const
 {
 	const IoDevice *const dev = &ioDevices[virtPort];
-	const int btns = std::min(siz, NUM_ELEMENTS(dev->keyMap));
+	const int btns = std::min(siz, ARRAY_SIZE(dev->keyMap));
 	for (int i = 0; i < btns; i++)
 		*keymap++ = dev->keyMap[i];
 	return btns;
@@ -472,7 +472,7 @@ int IoManagerPrivate::keymap(int virtPort, GensKey_t *keymap, int siz) const
  */
 void IoManagerPrivate::doScanline(void)
 {
-	for (int i = 0; i < NUM_ELEMENTS(ioDevices); i++) {
+	for (int i = 0; i < ARRAY_SIZE(ioDevices); i++) {
 		IoDevice *const dev = &ioDevices[i];
 		if (dev->type != IoManager::IOT_6BTN)
 			continue;
@@ -493,7 +493,7 @@ void IoManagerPrivate::doScanline(void)
 void IoManagerPrivate::update(void)
 {
 	// Update keyboard input for all ports.
-	for (int i = 0; i < NUM_ELEMENTS(ioDevices); i++) {
+	for (int i = 0; i < ARRAY_SIZE(ioDevices); i++) {
 		int btnCount = ioDevInfo[ioDevices[i].type].btnCount;
 		uint32_t buttons = 0;
 		for (int j = (btnCount - 1); j >= 0; j--) {
@@ -856,7 +856,7 @@ void IoManagerPrivate::updateDevice_TP(int physPort, bool oldSelect, bool oldTr)
 		default:
 			// Check the controller data index table.
 			int adj_counter = (dev->counter - TP_DT_PADA_RLDU);
-			if ((adj_counter >= (int)(NUM_ELEMENTS(dev->data.tp.ctrlIndexTbl))) ||
+			if ((adj_counter >= (int)(ARRAY_SIZE(dev->data.tp.ctrlIndexTbl))) ||
 			    (dev->data.tp.ctrlIndexTbl[adj_counter] >= TP_DT_MAX))
 			{
 				// Invalid counter state.
@@ -982,7 +982,7 @@ void IoManagerPrivate::rebuildCtrlIndexTable(int physPort)
 	}
 
 	// Set the rest of the controller data indexes to DT_MAX.
-	for (int x = i; x < NUM_ELEMENTS(dev->data.tp.ctrlIndexTbl); x++)
+	for (int x = i; x < ARRAY_SIZE(dev->data.tp.ctrlIndexTbl); x++)
 		dev->data.tp.ctrlIndexTbl[x] = TP_DT_MAX;
 }
 
@@ -1105,7 +1105,7 @@ IoManager::IoType_t IoManager::FourCCToIoType(uint32_t fourCC)
 	if (fourCC == 0 || fourCC == '    ')
 		return IOT_MAX;
 
-	for (int i = 0; i < NUM_ELEMENTS(IoManagerPrivate::ioDevInfo); i++) {
+	for (int i = 0; i < ARRAY_SIZE(IoManagerPrivate::ioDevInfo); i++) {
 		if (IoManagerPrivate::ioDevInfo[i].fourCC == fourCC)
 			return (IoType_t)i;
 	}

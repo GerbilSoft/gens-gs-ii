@@ -33,7 +33,7 @@
 // C includes. (C++ namespace)
 #include <cassert>
 
-// NUM_ELEMENTS(x)
+// ARRAY_SIZE(x)
 #include "libgens/macros/common.h"
 
 // Controller I/O manager.
@@ -119,7 +119,7 @@ void GensCtrlCfgWidgetPrivate::init(void)
 	fntMonospace.setStyleHint(QFont::TypeWriter);
 
 	// Add CtrlConfig::MAX_BTNS items to the grid layout.
-	for (int i = 0; i < NUM_ELEMENTS(btnCfg); i++) {
+	for (int i = 0; i < ARRAY_SIZE(btnCfg); i++) {
 		// Create the widgets.
 		lblButtonName[i] = new QLabel(q);
 		lblButtonName[i]->setVisible(false);
@@ -184,8 +184,8 @@ void GensCtrlCfgWidgetPrivate::setIoType(IoManager::IoType_t newIoType)
 
 	// Update the grid layout based on the specified controller type.
 	numButtons = IoManager::NumDevButtons(newIoType);
-	if (numButtons > NUM_ELEMENTS(btnCfg))
-		numButtons = NUM_ELEMENTS(btnCfg);
+	if (numButtons > ARRAY_SIZE(btnCfg))
+		numButtons = ARRAY_SIZE(btnCfg);
 
 	// Show the buttons, in logical button order.
 	QString sBtnLabel;
@@ -212,7 +212,7 @@ void GensCtrlCfgWidgetPrivate::setIoType(IoManager::IoType_t newIoType)
 	assert(i == numButtons);
 
 	// Hide other buttons.
-	for (i = numButtons; i < NUM_ELEMENTS(btnCfg); i++) {
+	for (i = numButtons; i < ARRAY_SIZE(btnCfg); i++) {
 		lblButtonName[i]->setVisible(false);
 		lblKeyDisplay[i]->setVisible(false);
 		btnCfg[i]->setVisible(false);
@@ -321,7 +321,7 @@ QString GensCtrlCfgWidgetPrivate::buttonName_l(IoManager::ButtonName_t buttonNam
  */
 void GensCtrlCfgWidgetPrivate::clearAllButtons(void)
 {
-	for (int i = 0; i < NUM_ELEMENTS(btnCfg); i++)
+	for (int i = 0; i < ARRAY_SIZE(btnCfg); i++)
 		btnCfg[i]->clearKey();
 }
 

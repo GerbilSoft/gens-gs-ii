@@ -345,7 +345,7 @@ QIcon CtrlConfigWindowPrivate::getCtrlIcon(IoManager::IoType_t ioType)
 	// Create the icon.
 	QIcon ctrlIcon;
 	static const int iconSizes[5] = {64, 48, 32, 22, 16};
-	for (size_t i = 0; i < NUM_ELEMENTS(iconSizes); i++) {
+	for (size_t i = 0; i < ARRAY_SIZE(iconSizes); i++) {
 		QString iconFilename = QLatin1String(":/gens/") +
 			QString::number(iconSizes[i]) + QChar(L'x') +
 			QString::number(iconSizes[i]) +

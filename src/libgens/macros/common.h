@@ -75,7 +75,15 @@ typedef char utf8_str;
 #define LG_PATH_SEP_STR "/"
 #endif
 
-/** Number of elements in an array. **/
-#define NUM_ELEMENTS(x) (int)(sizeof(x) / sizeof((x)[0]))
+/**
+ * Number of elements in an array.
+ *
+ * Includes a static check for pointers to make sure
+ * a dynamically-allocated array wasn't specified.
+ * Reference: http://stackoverflow.com/questions/8018843/macro-definition-array-size
+ */
+#define ARRAY_SIZE(x) \
+	((int)(((sizeof(x) / sizeof(x[0]))) / \
+	       (size_t)(!(sizeof(x) % sizeof(x[0])))))
 
 #endif /* __LIBGENS_MACROS_COMMON_H__ */
