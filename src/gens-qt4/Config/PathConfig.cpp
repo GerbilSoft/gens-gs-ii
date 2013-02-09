@@ -104,7 +104,7 @@ class PathConfigPrivate
  */
 const PathConfigPrivate::DefConfigPath PathConfigPrivate::DefConfigPaths[PathConfig::GCPATH_MAX] =
 {
-	{NULL, NULL},				// GCPATH_CONFIG
+	{nullptr, nullptr},			// GCPATH_CONFIG
 	{"Savestates", "./Savestates/"},	// GCPATH_SAVESTATES
 	{"SRAM", "./SRAM/"},			// GCPATH_SRAM
 	{"BRAM", "./BRAM/"},			// GCPATH_BRAM

@@ -143,15 +143,15 @@ void GensMenuBar::stretchMode_changed_slot_int(StretchMode_t stretchMode)
 {
 	if (stretchMode < STRETCH_NONE || stretchMode > STRETCH_FULL)
 		return;
-	
+
 	// Convert the stretch mode to a menu item ID.
 	const int id = (int)stretchMode + IDM_GRAPHICS_STRETCH_NONE;
-	
+
 	// Find the action.
-	QAction *action = d->hashActions.value(id, NULL);
+	QAction *action = d->hashActions.value(id, nullptr);
 	if (!action)
 		return;
-	
+
 	// Set the stretch mode.
 	this->lock();
 	action->setChecked(true);
@@ -177,8 +177,7 @@ void GensMenuBar::stretchMode_changed_slot(QVariant stretchMode)
 void GensMenuBar::regionCode_changed_slot_int(LibGens::SysVersion::RegionCode_t regionCode)
 {
 	int id;
-	switch (regionCode)
-	{
+	switch (regionCode) {
 		case LibGens::SysVersion::REGION_AUTO:		id = IDM_SYSTEM_REGION_AUTODETECT; break;
 		case LibGens::SysVersion::REGION_JP_NTSC:	id = IDM_SYSTEM_REGION_JAPAN;      break;
 		case LibGens::SysVersion::REGION_ASIA_PAL:	id = IDM_SYSTEM_REGION_ASIA;       break;
@@ -187,12 +186,12 @@ void GensMenuBar::regionCode_changed_slot_int(LibGens::SysVersion::RegionCode_t 
 		default:
 			break;
 	}
-	
+
 	// Find the action.
-	QAction *action = d->hashActions.value(id, NULL);
+	QAction *action = d->hashActions.value(id, nullptr);
 	if (!action)
 		return;
-	
+
 	// Set the region code.
 	this->lock();
 	action->setChecked(true);
@@ -219,10 +218,10 @@ void GensMenuBar::regionCode_changed_slot(QVariant regionCode)
 void GensMenuBar::enableSRam_changed_slot_int(bool enableSRam)
 {
 	// Find the action.
-	QAction *action = d->hashActions.value(IDM_OPTIONS_ENABLESRAM, NULL);
+	QAction *action = d->hashActions.value(IDM_OPTIONS_ENABLESRAM, nullptr);
 	if (!action)
 		return;
-	
+
 	// Set the check state.
 	this->lock();
 	action->setChecked(enableSRam);
@@ -259,22 +258,21 @@ void GensMenuBar::stateChanged(void)
 {
 	// Update various menu items.
 	QAction *actionPause = d->hashActions.value(IDM_SYSTEM_PAUSE);
-	
+
 	// Lock menu actions to prevent errant signals from being emitted.
 	this->lock();
-	
+
 	const bool isRomOpen = (d->emuManager && d->emuManager->isRomOpen());
 	const bool isPaused = (isRomOpen ? d->emuManager->paused().paused_manual : false);
-	
+
 	// TODO: Do we really need to check for NULL actions?
-	
+
 	// Update menu actions.
-	if (actionPause)
-	{
+	if (actionPause) {
 		actionPause->setEnabled(isRomOpen);
 		actionPause->setChecked(isPaused);
 	}
-	
+
 	// Simple enable-if-ROM-open actions.
 	static const int EnableIfOpen[] =
 	{
@@ -282,55 +280,49 @@ void GensMenuBar::stateChanged(void)
 		IDM_GRAPHICS_SCRSHOT, IDM_SYSTEM_HARDRESET, IDM_SYSTEM_SOFTRESET,
 		0
 	};
-	
-	for (int i = ((sizeof(EnableIfOpen)/sizeof(EnableIfOpen[0]))-2); i >= 0; i--)
-	{
+
+	for (int i = ((sizeof(EnableIfOpen)/sizeof(EnableIfOpen[0]))-2); i >= 0; i--) {
 		QAction *actionEnableIfOpen = d->hashActions.value(EnableIfOpen[i]);
 		if (actionEnableIfOpen)
 			actionEnableIfOpen->setEnabled(isRomOpen);
 	}
-	
+
 	// Z80. (Common for all systems.)
 	QAction *actionCpuReset = d->hashActions.value(IDM_SYSTEM_CPURESET_Z80);
-	if (actionCpuReset)
-	{
+	if (actionCpuReset) {
 		actionCpuReset->setEnabled(isRomOpen);
 		actionCpuReset->setVisible(isRomOpen);
 	}
-	
+
 	// Main 68000. (MD, MCD, 32X, MCD32X)
 	// TODO: Change title to "Main 68000" when Sega CD is enabled?
 	actionCpuReset = d->hashActions.value(IDM_SYSTEM_CPURESET_M68K);
-	if (actionCpuReset)
-	{
+	if (actionCpuReset) {
 		actionCpuReset->setEnabled(isRomOpen);
 		actionCpuReset->setVisible(isRomOpen);
 	}
-	
+
 	// Sub 68000. (MCD, MCD32X)
 	// TODO: Identify active system.
 	actionCpuReset = d->hashActions.value(IDM_SYSTEM_CPURESET_S68K);
-	if (actionCpuReset)
-	{
+	if (actionCpuReset) {
 		actionCpuReset->setEnabled(false);
 		actionCpuReset->setVisible(false);
 	}
-	
+
 	// Master and Slave SH2. (32X, MCD32X)
 	// TODO: Identify active system.
 	actionCpuReset = d->hashActions.value(IDM_SYSTEM_CPURESET_MSH2);
-	if (actionCpuReset)
-	{
+	if (actionCpuReset) {
 		actionCpuReset->setEnabled(false);
 		actionCpuReset->setVisible(false);
 	}
 	actionCpuReset = d->hashActions.value(IDM_SYSTEM_CPURESET_SSH2);
-	if (actionCpuReset)
-	{
+	if (actionCpuReset) {
 		actionCpuReset->setEnabled(false);
 		actionCpuReset->setVisible(false);
 	}
-	
+
 	// Unlock menu actions.
 	this->unlock();
 }

@@ -148,7 +148,7 @@ class CtrlConfigWindowPrivate
  **************************************/
 
 // Single window instance.
-CtrlConfigWindow *CtrlConfigWindowPrivate::ms_Window = NULL;
+CtrlConfigWindow *CtrlConfigWindowPrivate::ms_Window = nullptr;
 
 CtrlConfigWindowPrivate::CtrlConfigWindowPrivate(CtrlConfigWindow *q)
 	: q(q)
@@ -169,7 +169,7 @@ CtrlConfigWindowPrivate::CtrlConfigWindowPrivate(CtrlConfigWindow *q)
 CtrlConfigWindowPrivate::~CtrlConfigWindowPrivate()
 {
 	// Clear the single window instance pointer.
-	ms_Window = NULL;
+	ms_Window = nullptr;
 }
 
 /**
@@ -553,7 +553,7 @@ CtrlConfigWindow::~CtrlConfigWindow()
  */
 void CtrlConfigWindow::ShowSingle(QWidget *parent)
 {
-	if (CtrlConfigWindowPrivate::ms_Window != NULL) {
+	if (CtrlConfigWindowPrivate::ms_Window != nullptr) {
 		// Controller Configuration Window is already displayed.
 		// NOTE: This doesn't seem to work on KDE 4.4.2...
 		QApplication::setActiveWindow(CtrlConfigWindowPrivate::ms_Window);

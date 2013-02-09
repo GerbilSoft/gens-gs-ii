@@ -38,20 +38,20 @@ class GensKeyConfigPrivate
 {
 	public:
 		GensKeyConfigPrivate() { }
-		
+
 		/**
 		 * Key configuration.
 		 * 
 		 * NOTE: Key configuration expects modifiers in high 7 bits of GensKey_t.
 		 * See libgens/GensInput/GensKey_t.h for more information.
 		 */
-		
-		/// m_hashActionToKey: Converts a GensMenuBar_menus.hpp value to a GensKey_t.
+
+		/// Converts a GensMenuBar_menus.hpp value to a GensKey_t.
 		QHash<int, GensKey_t> hashActionToKey;
-		
-		/// m_hashActionToKey: Converts a GensKey_t to a GensMenuBar_menus.hpp value.
+
+		/// Converts a GensKey_t to a GensMenuBar_menus.hpp value.
 		QHash<GensKey_t, int> hashKeyToAction;
-		
+
 		struct DefKeySetting_t
 		{
 			int action;		// GensMenuBar_menus.hpp value.
@@ -60,12 +60,12 @@ class GensKeyConfigPrivate
 			const char *setting;	// Settings location.
 			// TODO: Padding on 32-bit.
 		};
-		
+
 		/**
-		 * DefKeySettings[]: Default key settings.
+		 * Default key settings.
 		 */
 		static const DefKeySetting_t DefKeySettings[];
-	
+
 	private:
 		Q_DISABLE_COPY(GensKeyConfigPrivate);
 };
@@ -100,7 +100,7 @@ const GensKeyConfigPrivate::DefKeySetting_t GensKeyConfigPrivate::DefKeySettings
 #endif
 	{IDM_FILE_MCDCONTROL, 0,				"file/mcdControl"},
 	{IDM_FILE_QUIT, KEYM_CTRL | KEYV_q,			"file/quit"},
-	
+
 	// Graphics menu.
 #ifndef Q_WS_MAC
 	{IDM_GRAPHICS_MENUBAR, KEYM_CTRL | KEYV_m,		"graphics/showMenuBar"},
@@ -126,7 +126,7 @@ const GensKeyConfigPrivate::DefKeySetting_t GensKeyConfigPrivate::DefKeySettings
 	{IDM_GRAPHICS_STRETCH_FULL, 0,				"graphics/stretch/full"},
 	// Graphics menu.
 	{IDM_GRAPHICS_SCRSHOT, KEYM_SHIFT | KEYV_BACKSPACE,	"graphics/screenShot"},
-	
+
 	// System menu.
 	{IDM_SYSTEM_REGION, KEYM_SHIFT | KEYV_F3,		"system/region"},
 	// System, Region submenu.
@@ -144,19 +144,19 @@ const GensKeyConfigPrivate::DefKeySetting_t GensKeyConfigPrivate::DefKeySettings
 	{IDM_SYSTEM_CPURESET_MSH2, 0,				"system/resetMSH2"},
 	{IDM_SYSTEM_CPURESET_SSH2, 0,				"system/resetSSH2"},
 	{IDM_SYSTEM_CPURESET_Z80, 0,				"system/resetZ80"},
-	
+
 	// Options menu.
 	{IDM_OPTIONS_ENABLESRAM, 0,				"options/enableSRam"},
 	{IDM_OPTIONS_CONTROLLERS, 0,				"options/controllers"},
-	
+
 	// NOTE: Test menus aren't going to be added here.
-	
+
 	// Help menu.
 	{IDM_HELP_ABOUT, 0,					"help/about"},
-	
+
 	// Non-menu keys.
 	{IDM_NOMENU_FASTBLUR, KEYV_F9,				"other/fastBlur"},
-	
+
 	{IDM_NOMENU_SAVESLOT_0, KEYV_0,				"other/saveSlot0"},
 	{IDM_NOMENU_SAVESLOT_1, KEYV_1,				"other/saveSlot1"},
 	{IDM_NOMENU_SAVESLOT_2, KEYV_2,				"other/saveSlot2"},
@@ -171,9 +171,9 @@ const GensKeyConfigPrivate::DefKeySetting_t GensKeyConfigPrivate::DefKeySettings
 	{IDM_NOMENU_SAVESLOT_NEXT, KEYV_F7,			"other/saveSlotNext"},
 	{IDM_NOMENU_SAVESLOT_LOADFROM, KEYV_F8 | KEYM_SHIFT,	"other/saveLoadFrom"},
 	{IDM_NOMENU_SAVESLOT_SAVEAS, KEYV_F5 | KEYM_SHIFT,	"other/saveSaveAs"},
-	
+
 	// End of default keys.
-	{0, 0, NULL}
+	{0, 0, nullptr}
 };
 
 
@@ -220,7 +220,7 @@ int GensKeyConfig::actionToKey(int action) const
 
 
 /**
- * load(): Load key configuration from a settings file.
+ * Load key configuration from a settings file.
  * NOTE: The group must be selected in the QSettings before calling this function!
  * @param qSettings Settings file.
  * @return 0 on success; non-zero on error.
@@ -230,25 +230,25 @@ int GensKeyConfig::load(const QSettings *qSettings)
 	// Clear the hash tables before loading.
 	d->hashActionToKey.clear();
 	d->hashKeyToAction.clear();
-	
+
 	// Load the key configuration.
 	for (const GensKeyConfigPrivate::DefKeySetting_t *key = &d->DefKeySettings[0];
 	    key->action != 0; key++)
 	{
 		const GensKey_t gensKey = qSettings->value(
-			QLatin1String(key->setting), key->gensKey).toString().toUInt(NULL, 0);
+			QLatin1String(key->setting), key->gensKey).toString().toUInt(nullptr, 0);
 		d->hashActionToKey.insert(key->action, gensKey);
 		if (key->gensKey != KEYV_UNKNOWN)
 			d->hashKeyToAction.insert(gensKey, key->action);
 	}
-	
+
 	// Key configuration loaded.
 	return 0;
 }
 
 
 /**
- * save(): Save key configuration to a settings file.
+ * Save key configuration to a settings file.
  * NOTE: The group must be selected in the QSettings before calling this function!
  * @param qSettings Settings file.
  * @return 0 on success; non-zero on error.
@@ -262,7 +262,7 @@ int GensKeyConfig::save(QSettings *qSettings) const
 		const GensKey_t gensKey = d->hashActionToKey.value(key->action, 0);
 		QString gensKey_str = QLatin1String("0x") +
 				QString::number(gensKey, 16).toUpper().rightJustified(4, QChar(L'0'));
-		
+
 		qSettings->setValue(QLatin1String(key->setting), gensKey_str);
 	}
 	

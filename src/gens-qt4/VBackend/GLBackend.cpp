@@ -63,7 +63,7 @@ GLBackend::GLBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	, m_tex(0)
 	, m_texOsd(0)
 	, m_glListOsd(0)
-	, m_texPreview(NULL)
+	, m_texPreview(nullptr)
 { }
 
 GLBackend::~GLBackend()
@@ -1005,7 +1005,7 @@ void GLBackend::printOsdLine(int x, int y, const QString &msg)
 void GLBackend::glb_clearPreviewTex(void)
 {
 	delete m_texPreview;
-	m_texPreview = NULL;
+	m_texPreview = nullptr;
 }
 
 
@@ -1032,7 +1032,7 @@ void GLBackend::showOsdPreview(void)
 	if (!m_previewImg.visible || m_previewImg.img.isNull()) {
 		// Don't show the preview image.
 		delete m_texPreview;
-		m_texPreview = NULL;
+		m_texPreview = nullptr;
 		return;
 	}
 
@@ -1042,7 +1042,7 @@ void GLBackend::showOsdPreview(void)
 		// Preview duration has elapsed.
 		// TODO: Combine this code with the !m_preview_show code.
 		delete m_texPreview;
-		m_texPreview = NULL;
+		m_texPreview = nullptr;
 		return;
 	}
 

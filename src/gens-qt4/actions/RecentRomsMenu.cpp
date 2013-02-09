@@ -99,34 +99,32 @@ void RecentRomsMenuPrivate::init(void)
 
 /**
  * Set the Recent ROMs class this menu should represent.
- * @param newRecentRoms New Recent ROMs class, or NULL to unset.
+ * @param newRecentRoms New Recent ROMs class, or nullptr to unset.
  */
 inline void RecentRomsMenuPrivate::setRecentRoms(const RecentRoms *newRecentRoms)
 {
 	if (this->recentRoms == newRecentRoms)
 		return;
-	
-	if (recentRoms)
-	{
+
+	if (recentRoms) {
 		// Disconnect the signals from the existing Recent ROMs class.
 		QObject::disconnect(recentRoms, SIGNAL(destroyed()),
 				    q, SLOT(recentRomsDestroyed()));
 		QObject::disconnect(recentRoms, SIGNAL(updated()),
 				    q, SLOT(recentRomsupdated()));
 	}
-	
+
 	// Set the new Recent ROMs class.
 	recentRoms = newRecentRoms;
-	
-	if (recentRoms)
-	{
+
+	if (recentRoms) {
 		// Connect the signals from the new Recent ROMs class.
 		QObject::connect(recentRoms, SIGNAL(destroyed()),
 				 q, SLOT(recentRomsDestroyed()));
 		QObject::connect(recentRoms, SIGNAL(updated()),
 				 q, SLOT(recentRomsupdated()));
 	}
-	
+
 	// Update the menu.
 	update();
 }
@@ -258,7 +256,7 @@ RecentRomsMenu::~RecentRomsMenu()
 
 /**
  * Get the Recent ROMs class this menu is representing.
- * @return Recent ROMs class, or NULL if no class is assigned.
+ * @return Recent ROMs class, or nullptr if no class is assigned.
  */
 const RecentRoms *RecentRomsMenu::recentRoms(void)
 	{ return d->recentRoms; }
@@ -267,7 +265,7 @@ const RecentRoms *RecentRomsMenu::recentRoms(void)
 /**
  * Set the Recent ROMs class this menu should represent.
  * WRAPPER FUNCTION for RecentRomsMenuPrivate::isDirty().
- * @param newRecentRoms New Recent ROMs class, or NULL to unset.
+ * @param newRecentRoms New Recent ROMs class, or nullptr to unset.
  */
 void RecentRomsMenu::setRecentRoms(const RecentRoms *newRecentRoms)
 	{ d->setRecentRoms(newRecentRoms); }
@@ -277,7 +275,7 @@ void RecentRomsMenu::setRecentRoms(const RecentRoms *newRecentRoms)
  * d->recentRoms was destroyed.
  */
 void RecentRomsMenu::recentRomsDestroyed(void)
-	{ d->recentRoms = NULL; }
+	{ d->recentRoms = nullptr; }
 
 
 /**

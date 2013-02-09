@@ -46,48 +46,47 @@ namespace GensQt4
 
 VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	: QWidget(parent)
-	
+
 	// No source framebuffer initially.
-	, m_srcFb(NULL)
+	, m_srcFb(nullptr)
 	, m_srcBpp(LibGens::VdpPalette::BPP_32)
-	
+
 	// Key handler.
 	, m_keyHandler(keyHandler)
-	
+
 	// Mark the video backend as dirty on startup.
 	, m_vbDirty(true)
 	, m_mdScreenDirty(true)
 	, m_lastBpp(LibGens::VdpPalette::BPP_MAX)
-	
+
 	// Allocate the internal screen buffer.
 	, m_intScreen(new LibGens::MdFb())
-	
+
 	// We're not running anything initially.
 	// TODO: Remove m_running and just use m_emuContext?
-	, m_emuContext(NULL)
+	, m_emuContext(nullptr)
 	, m_running(false)
-	
+
 	// Make sure the aspect ratio constraint is initialized correctly.
 	, m_aspectRatioConstraint_changed(true)
-	
+
 	// Onscreen display.
 	, m_osdLockCnt(0)
 	, m_updateOnNextOsdProcess(false)
 {
-	if (m_keyHandler)
-	{
+	if (m_keyHandler) {
 		// Connect the key handler's "destroyed" signal.
 		connect(m_keyHandler, SIGNAL(destroyed()),
 			this, SLOT(keyHandlerDestroyed()));
 	}
-	
+
 	/** Video effect settings. **/
 	m_cfg_fastBlur = gqt4_cfg->get(QLatin1String("Graphics/fastBlur")).toBool();
 	m_cfg_pauseTint = gqt4_cfg->get(QLatin1String("pauseTint")).toBool();
 	m_cfg_aspectRatioConstraint = gqt4_cfg->get(QLatin1String("Graphics/aspectRatioConstraint")).toBool();
 	m_cfg_bilinearFilter = gqt4_cfg->get(QLatin1String("Graphics/bilinearFilter")).toBool();
 	m_cfg_stretchMode = (StretchMode_t)gqt4_cfg->getInt(QLatin1String("Graphics/stretchMode"));
-	
+
 	/** Video effect settings: Signals. **/
 	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/fastBlur"),
 					this, SLOT(fastBlur_changed_slot(QVariant)));
@@ -102,7 +101,7 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	
 	// Initialize the paused setting.
 	m_paused.data = 0;
-	
+
 	// Initialize the OSD settings.
 	m_cfg_osdFpsEnabled = gqt4_cfg->get(QLatin1String("OSD/fpsEnabled")).toBool();
 	m_cfg_osdFpsColor   = gqt4_cfg->get(QLatin1String("OSD/fpsColor")).value<QColor>();
@@ -112,10 +111,10 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	m_cfg_osdMsgColor   = gqt4_cfg->get(QLatin1String("OSD/msgColor")).value<QColor>();
 	if (!m_cfg_osdMsgColor.isValid())
 		m_cfg_osdMsgColor = QColor(Qt::white);
-	
+
 	// Mark the OSD as dirty initially.
 	setOsdListDirty();
-	
+
 	/** OSD settings: Signals. **/
 	// TODO: Reconnect signals if ConfigStore is deleted/recreated?
 	gqt4_cfg->registerChangeNotification(QLatin1String("OSD/fpsEnabled"),
@@ -126,7 +125,7 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 					this, SLOT(osdMsgEnabled_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("OSD/msgColor"),
 					this, SLOT(osdMsgColor_changed_slot(QVariant)));
-	
+
 	// Connect the message timer to the OSD message timer slot.
 	connect(&m_msgTimer, SIGNAL(timeout()),
 		this, SLOT(osd_process_MsgTimer_slot()));
@@ -174,21 +173,19 @@ void VBackend::vbUpdate(const LibGens::MdFb *fb, LibGens::VdpPalette::ColorDepth
 
 
 /**
- * setKeyHandler(): Set the key handler.
+ * Set the key handler.
  * @param newKeyHandler New key handler.
  */
 void VBackend::setKeyHandler(KeyHandlerQt *newKeyHandler)
 {
-	if (m_keyHandler)
-	{
+	if (m_keyHandler) {
 		// Disconnect the existing key handler's "destroyed" signal.
 		disconnect(m_keyHandler, SIGNAL(destroyed()),
 			   this, SLOT(keyHandlerDestroyed()));
 	}
-	
+
 	m_keyHandler = newKeyHandler;
-	if (m_keyHandler)
-	{
+	if (m_keyHandler) {
 		// Connect the new key handler's "destroyed" signal.
 		connect(m_keyHandler, SIGNAL(destroyed()),
 			this, SLOT(keyHandlerDestroyed()));
@@ -197,11 +194,11 @@ void VBackend::setKeyHandler(KeyHandlerQt *newKeyHandler)
 
 
 /**
- * keyHandlerDestroyed(): Key handler was destroyed.
+ * Key handler was destroyed.
  */
 void VBackend::keyHandlerDestroyed(void)
 {
-	m_keyHandler = NULL;
+	m_keyHandler = nullptr;
 }
 
 

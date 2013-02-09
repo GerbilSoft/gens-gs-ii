@@ -47,7 +47,7 @@ class GensMenuBar : public QObject
 	Q_OBJECT
 
 	public:
-		GensMenuBar(QObject *parent = NULL, EmuManager *emuManager = NULL);
+		GensMenuBar(QObject *parent = nullptr, EmuManager *emuManager = nullptr);
 		virtual ~GensMenuBar();
 
 		QMenuBar *createMenuBar(void);

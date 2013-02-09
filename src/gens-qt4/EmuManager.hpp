@@ -65,7 +65,7 @@ class EmuManager : public QObject
 		
 		// Emulation status and properties.
 		inline bool isRomOpen(void) const
-			{ return (m_rom != NULL); }
+			{ return (m_rom != nullptr); }
 		inline paused_t paused(void) const
 			{ return m_paused; }
 		inline int saveSlot(void) const
@@ -172,7 +172,7 @@ class EmuManager : public QObject
 		void sl_loadRom_int(void)
 		{
 			loadRom_int(m_loadRom_int_tmr_rom);
-			m_loadRom_int_tmr_rom = NULL;
+			m_loadRom_int_tmr_rom = nullptr;
 		}
 	
 	/** Video Backend. **/
@@ -485,10 +485,9 @@ inline LibGens::VdpPalette::ColorDepth EmuManager::romClosedBpp(void)
  */
 inline void EmuManager::clearRomClosedFb(void)
 {
-	if (m_romClosedFb)
-	{
+	if (m_romClosedFb) {
 		m_romClosedFb->unref();
-		m_romClosedFb = NULL;
+		m_romClosedFb = nullptr;
 	}
 }
 

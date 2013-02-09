@@ -257,22 +257,21 @@ void ConfigStorePrivate::registerChangeNotification(QString property, QObject *o
 {
 	if (!object)
 		return;
-	
+
 	// Get the vector of signal maps for this property.
 	QMutexLocker mtxLocker(&mtxSignalMaps);
-	QVector<SignalMap>* signalMapVector = signalMaps.value(property, NULL);
-	if (!signalMapVector)
-	{
+	QVector<SignalMap>* signalMapVector = signalMaps.value(property, nullptr);
+	if (!signalMapVector) {
 		// No vector found. Create one.
 		signalMapVector = new QVector<SignalMap>();
 		signalMaps.insert(property, signalMapVector);
 	}
-	
+
 	// Look up the method index.
 	int method_idx = LookupQtMethod(object, method);
 	if (method_idx < 0)
 		return;
-	
+
 	// Add this object and slot to the signal maps vector.
 	SignalMap smap;
 	smap.object = object;
@@ -285,41 +284,37 @@ void ConfigStorePrivate::registerChangeNotification(QString property, QObject *o
  * Unregister an object for property change notification.
  * @param property Property to watch.
  * @param object QObject to register.
- * @param method Method name. (If NULL, unregisters all slots for this object.)
+ * @param method Method name. (If nullptr, unregisters all slots for this object.)
  */
 void ConfigStorePrivate::unregisterChangeNotification(QString property, QObject *object, const char *method)
 {
 	if (!object)
 		return;
-	
+
 	// Get the vector of signal maps for this property.
 	QMutexLocker mtxLocker(&mtxSignalMaps);
-	QVector<SignalMap>* signalMapVector = signalMaps.value(property, NULL);
+	QVector<SignalMap>* signalMapVector = signalMaps.value(property, nullptr);
 	if (!signalMapVector)
 		return;
-	
+
 	// Get the method index.
 	int method_idx = -1;
-	if (method != NULL)
-	{
+	if (method != nullptr) {
 		method_idx = LookupQtMethod(object, method);
 		if (method_idx < 0)
 			return;
 	}
-	
+
 	// Process the signal map vector in reverse-order.
 	// Reverse order makes it easier to remove deleted objects.
 	// TODO: Use QLinkedList instead?
-	for (int i = (signalMapVector->size() - 1); i >= 0; i--)
-	{
+	for (int i = (signalMapVector->size() - 1); i >= 0; i--) {
 		const SignalMap *smap = &signalMapVector->at(i);
-		if (smap->object.isNull())
+		if (smap->object.isNull()) {
 			signalMapVector->remove(i);
-		else if (smap->object == object)
-		{
+		} else if (smap->object == object) {
 			// Found the object.
-			if (method == NULL || method_idx == smap->method_idx)
-			{
+			if (method == nullptr || method_idx == smap->method_idx) {
 				// Found a matching signal map.
 				signalMapVector->remove(i);
 			}
@@ -336,7 +331,7 @@ void ConfigStorePrivate::reset(void)
 	// Initialize settings with DefaultSettings.
 	settings.clear();
 	for (const ConfigDefaults::DefaultSetting *def = &ConfigDefaults::DefaultSettings[0];
-	     def->key != NULL; def++)
+	     def->key != nullptr; def++)
 	{
 		settings.insert(QLatin1String(def->key),
 				(def->value ? QLatin1String(def->value) : QString()));
@@ -383,19 +378,18 @@ QVariant ConfigStorePrivate::Validate(QString name, QVariant value)
 	const ConfigDefaults::DefaultSetting *def = ConfigDefaults::Instance()->get(name);
 	if (!def)
 		return -1;
-	
-	switch (def->validation)
-	{
+
+	switch (def->validation) {
 		case ConfigDefaults::DefaultSetting::VT_NONE:
 		default:
 			// No validation required.
 			return value;
-		
+
 		case ConfigDefaults::DefaultSetting::VT_BOOL:
 			if (!value.canConvert(QVariant::Bool))
 				return QVariant();
 			return QVariant(value.toBool());
-		
+
 		case ConfigDefaults::DefaultSetting::VT_COLOR:
 		{
 			QColor color = value.value<QColor>();
@@ -403,28 +397,28 @@ QVariant ConfigStorePrivate::Validate(QString name, QVariant value)
 				return QVariant();
 			return QVariant(color.name());
 		}
-		
+
 		case ConfigDefaults::DefaultSetting::VT_RANGE:
 		{
 			if (!value.canConvert(QVariant::Int))
 				return QVariant();
-			int val = value.toString().toInt(NULL, 0);
+			int val = value.toString().toInt(nullptr, 0);
 			if (val < def->range_min || val > def->range_max)
 				return QVariant();
 			return QVariant(val);
 		}
-		
+
 		case ConfigDefaults::DefaultSetting::VT_REGIONCODEORDER:
 		{
 			if (!value.canConvert(QVariant::UInt))
 				return QVariant();
-			uint16_t rc_order = (uint16_t)value.toString().toUInt(NULL, 0);
+			uint16_t rc_order = (uint16_t)value.toString().toUInt(nullptr, 0);
 			if (!IsRegionCodeOrderValid(rc_order))
 				return QVariant();
 			return QVariant(rc_order);
 		}
 	}
-	
+
 	// Should not get here...
 	return QVariant();
 }
@@ -439,8 +433,7 @@ void ConfigStorePrivate::set(QString key, QVariant value)
 {
 #ifndef NDEBUG
 	// Make sure this property exists.
-	if (!settings.contains(key))
-	{
+	if (!settings.contains(key)) {
 		// Property does not exist. Print a warning.
 		// TODO: Make this an error, since it won't be saved?
 		LOG_MSG(gens, LOG_MSG_LEVEL_WARNING,
@@ -448,44 +441,41 @@ void ConfigStorePrivate::set(QString key, QVariant value)
 			key.toUtf8().constData());
 	}
 #endif
-	
+
 	// Get the default value.
 	const ConfigDefaults::DefaultSetting *def = ConfigDefaults::Instance()->get(key);
 	if (!def)
 		return;
-	
-	if (!def->allow_same_value)
-	{
+
+	if (!def->allow_same_value) {
 		// Check if the new value is the same as the old value.
 		QVariant oldValue = settings.value(key);
 		if (value == oldValue)
 			return;
 	}
-	
+
 	// Verify that this value passes validation.
 	QVariant newValue = Validate(key, value);
 	if (!newValue.isValid())
 		return;
-	
+
 	// Set the new value.
 	settings.insert(key, newValue);
-	
+
 	// Invoke methods for registered objects.
 	QMutexLocker mtxLocker(&mtxSignalMaps);
-	QVector<SignalMap> *signalMapVector = signalMaps.value(key, NULL);
+	QVector<SignalMap> *signalMapVector = signalMaps.value(key, nullptr);
 	if (!signalMapVector)
 		return;
-	
+
 	// Process the signal map vector in reverse-order.
 	// Reverse order makes it easier to remove deleted objects.
 	// TODO: Use QLinkedList instead?
-	for (int i = (signalMapVector->size() - 1); i >= 0; i--)
-	{
+	for (int i = (signalMapVector->size() - 1); i >= 0; i--) {
 		const SignalMap *smap = &signalMapVector->at(i);
-		if (smap->object.isNull())
+		if (smap->object.isNull()) {
 			signalMapVector->remove(i);
-		else
-		{
+		} else {
 			// Invoke this method.
 			InvokeQtMethod(smap->object, smap->method_idx, newValue);
 		}
@@ -522,7 +512,7 @@ QVariant ConfigStorePrivate::get(QString key) const
  * @return Property value.
  */
 unsigned int ConfigStorePrivate::getUInt(QString key) const
-	{ return get(key).toString().toUInt(NULL, 0); }
+	{ return get(key).toString().toUInt(nullptr, 0); }
 
 /**
  * Get a property.
@@ -531,7 +521,7 @@ unsigned int ConfigStorePrivate::getUInt(QString key) const
  * @return Property value.
  */
 int ConfigStorePrivate::getInt(QString key) const
-	{ return get(key).toString().toInt(NULL, 0); }
+	{ return get(key).toString().toInt(nullptr, 0); }
 
 
 /**
@@ -542,51 +532,50 @@ int ConfigStorePrivate::getInt(QString key) const
 int ConfigStorePrivate::load(QString filename)
 {
 	QSettings qSettings(filename, QSettings::IniFormat);
-	
+
 	// NOTE: Only known settings will be loaded.
 	settings.clear();
 	// TODO: Add function to get sizeof(DefaultSettings) from ConfigDefaults.
 	settings.reserve(32);
-	
+
 	// Load known settings from the configuration file.
 	for (const ConfigDefaults::DefaultSetting *def = &ConfigDefaults::DefaultSettings[0];
-	     def->key != NULL; def++)
+	     def->key != nullptr; def++)
 	{
 		const QString key = QLatin1String(def->key);
 		QVariant value = qSettings.value(key, QLatin1String(def->value));
-		
+
 		// Validate this value.
 		value = Validate(key, value);
-		if (!value.isValid())
-		{
+		if (!value.isValid()) {
 			// Validation failed. Use the default value.
 			value = QVariant(QLatin1String(def->value));
 		}
-		
+
 		settings.insert(key, value);
 	}
-	
+
 	// Load the PathConfig settings.
 	qSettings.beginGroup(QLatin1String("Directories"));
 	pathConfig->load(&qSettings);
 	qSettings.endGroup();
-	
+
 	// Load the Recent ROMs settings.
 	qSettings.beginGroup(QLatin1String("Recent_ROMs"));
 	recentRoms->load(&qSettings);
 	qSettings.endGroup();
-	
+
 	// Load the key configuration.
 	qSettings.beginGroup(QLatin1String("Shortcut_Keys"));
 	keyConfig.load(&qSettings);
 	qSettings.endGroup();
-	
+
 	// Load the controller configuration.
 	// TODO: Rework this with the upcoming all-in-one IoManager.
 	qSettings.beginGroup(QLatin1String("Controllers"));
 	q->m_ctrlConfig->load(&qSettings);
 	qSettings.endGroup();
-	
+
 	// Finished loading settings.
 	// NOTE: Caller must call emitAll() for settings to take effect.
 	return 0;
@@ -613,9 +602,9 @@ int ConfigStorePrivate::load(void)
 int ConfigStorePrivate::save(QString filename) const
 {
 	QSettings qSettings(filename, QSettings::IniFormat);
-	
+
 	/** Application information. **/
-	
+
 	// Stored in the "General" section.
 	// TODO: Move "General" settings to another section?
 	// ("General" is always moved to the top of the file.)
@@ -625,74 +614,67 @@ int ConfigStorePrivate::save(QString filename) const
 					.arg((LibGens::version >> 24) & 0xFF)
 					.arg((LibGens::version >> 16) & 0xFF)
 					.arg(LibGens::version & 0xFFFF);
-	
+
 	qSettings.setValue(QLatin1String("_Application"), QLatin1String("Gens/GS II"));
 	qSettings.setValue(QLatin1String("_Version"), sVersion);
-	
-	if (LibGens::version_desc)
-	{
+
+	if (LibGens::version_desc) {
 		qSettings.setValue(QLatin1String("_VersionExt"),
 					QString::fromUtf8(LibGens::version_desc));
-	}
-	else
-	{
+	} else {
 		qSettings.remove(QLatin1String("_VersionExt"));
 	}
-	
-	if (LibGens::version_vcs)
-	{
+
+	if (LibGens::version_vcs) {
 		qSettings.setValue(QLatin1String("_VersionVcs"),
 					QString::fromUtf8(LibGens::version_vcs));
-	}
-	else
-	{
+	} else {
 		qSettings.remove(QLatin1String("_VersionVcs"));
 	}
-	
+
 	// NOTE: Only known settings will be saved.
 	
 	// Save known settings to the configuration file.
 	for (const ConfigDefaults::DefaultSetting *def = &ConfigDefaults::DefaultSettings[0];
-	     def->key != NULL; def++)
+	     def->key != nullptr; def++)
 	{
 		if (def->no_save)
 			continue;
-		
+
 		const QString key = QLatin1String(def->key);
 		QVariant value = settings.value(key, QLatin1String(def->value));
-		if (def->hex_digits > 0)
-		{
+		if (def->hex_digits > 0) {
 			// Convert to hexadecimal.
-			unsigned int uint_val = value.toString().toUInt(NULL, 0);
+			unsigned int uint_val = value.toString().toUInt(nullptr, 0);
 			QString str = QLatin1String("0x") +
 					QString::number(uint_val, 16).toUpper().rightJustified(4, QChar(L'0'));
 			value = str;
 		}
-		
+
 		qSettings.setValue(key, value);
 	}
-	
+
 	// Save the PathConfig settings.
 	qSettings.beginGroup(QLatin1String("Directories"));
 	pathConfig->save(&qSettings);
 	qSettings.endGroup();
-	
+
 	// Save the Recent ROMs settings.
 	qSettings.beginGroup(QLatin1String("Recent_ROMs"));
 	recentRoms->save(&qSettings);
 	qSettings.endGroup();
-	
+
 	// Save the key configuration.
 	qSettings.beginGroup(QLatin1String("Shortcut_Keys"));
 	keyConfig.save(&qSettings);
 	qSettings.endGroup();
-	
+
 	// Save the controller configuration.
 	// TODO: Rework this with the upcoming all-in-one IoManager.
 	qSettings.beginGroup(QLatin1String("Controllers"));
 	q->m_ctrlConfig->save(&qSettings);
 	qSettings.endGroup();
-	
+
 	return 0;
 }
 
@@ -717,26 +699,24 @@ void ConfigStorePrivate::notifyAll(void)
 {
 	// Invoke methods for registered objects.
 	QMutexLocker mtxLocker(&mtxSignalMaps);
-	
-	foreach (QString property, signalMaps.keys())
-	{
+
+	foreach (QString property, signalMaps.keys()) {
 		QVector<SignalMap> *signalMapVector = signalMaps.value(property);
 		if (signalMapVector->isEmpty())
 			continue;
-		
+
 		// Get the property value.
 		const QVariant value = settings.value(property);
-		
+
 		// Process the signal map vector in reverse-order.
 		// Reverse order makes it easier to remove deleted objects.
 		// TODO: Use QLinkedList instead?
 		for (int i = (signalMapVector->size() - 1); i >= 0; i--)
 		{
 			const SignalMap *smap = &signalMapVector->at(i);
-			if (smap->object.isNull())
+			if (smap->object.isNull()) {
 				signalMapVector->remove(i);
-			else
-			{
+			} else {
 				// Invoke this method.
 				InvokeQtMethod(smap->object, smap->method_idx, value);
 			}

@@ -105,9 +105,9 @@ class GensCtrlKeyWidgetPrivate
 
 GensCtrlKeyWidgetPrivate::GensCtrlKeyWidgetPrivate(GensCtrlKeyWidget *q, QLabel *lblDisplay)
 	: q(q)
-	, layout(NULL)
-	, keyButton(NULL)
-	, clearButton(NULL)
+	, layout(nullptr)
+	, keyButton(nullptr)
+	, clearButton(nullptr)
 	, lblDisplay(lblDisplay)
 	, gensKey(0)
 	, oldGensKey(0)
@@ -308,7 +308,7 @@ GensCtrlKeyWidget::~GensCtrlKeyWidget()
 
 
 /**
- * GensCtrlKeyWidget::changeEvent(): Widget state has changed.
+ * Widget state has changed.
  * @param event State change event.
  */
 void GensCtrlKeyWidget::changeEvent(QEvent *event)
@@ -325,32 +325,30 @@ void GensCtrlKeyWidget::changeEvent(QEvent *event)
 
 
 /**
- * GensCtrlKeyWidget::setLabel(): Set the display label.
+ * Set the display label.
  */
 void GensCtrlKeyWidget::setLabel(QLabel *label)
 {
-	if (d->lblDisplay)
-	{
+	if (d->lblDisplay) {
 		// Disconnected the destroyed() signal from the current label.
 		disconnect(d->lblDisplay, SIGNAL(destroyed(QObject*)),
 			   this, SLOT(labelDestroyed()));
 	}
-	
+
 	d->lblDisplay = label;
-	if (d->lblDisplay)
-	{
+	if (d->lblDisplay) {
 		// Connect the destroyed() signal from the new label.
 		connect(d->lblDisplay, SIGNAL(destroyed(QObject*)),
 			this, SLOT(labelDestroyed()));
 	}
-	
+
 	// Update the shortcut display.
 	d->updateShortcutDisplay();
 }
 
 
 /**
- * GensCtrlKeyWidget::captureKeyTimeout(): captureKey() has timed out.
+ * captureKey() has timed out.
  * Forwards to GensCtrlKeyWidgetPrivate::doneRecording().
  * We can't use Q_PRIVATE_SLOT() because the private class isn't available,
  * and we're not using KDE's automoc4 to generate mocs without linking
@@ -366,7 +364,7 @@ void GensCtrlKeyWidget::captureKeyTimeout(void)
 
 
 /**
- * GensCtrlKeyWidget::blinkLabel(): Blink the label.
+ * Blink the label.
  * Forwards to GensCtrlKeyWidgetPrivate::blinkLabel().
  * We can't use Q_PRIVATE_SLOT() because the private class isn't available,
  * and we're not using KDE's automoc4 to generate mocs without linking
@@ -379,16 +377,16 @@ void GensCtrlKeyWidget::blinkLabel(void)
 
 
 /**
- * GensCtrlKeyWidget::labelDestroyed(): Label was destroyed.
+ * Label was destroyed.
  */
 void GensCtrlKeyWidget::labelDestroyed(void)
 {
-	d->lblDisplay = NULL;
+	d->lblDisplay = nullptr;
 }
 
 
 /**
- * GensCtrlKeyWidget::key(): Return the currently selected GensKey_t.
+ * Return the currently selected GensKey_t.
  * @return Currently selected GensKey_t.
  */
 GensKey_t GensCtrlKeyWidget::key() const
@@ -398,7 +396,7 @@ GensKey_t GensCtrlKeyWidget::key() const
 
 
 /**
- * GensCtrlKeyWidget::captureKey(): Capture a GensKey_t.
+ * Capture a GensKey_t.
  */
 void GensCtrlKeyWidget::captureKey(void)
 {
@@ -407,7 +405,7 @@ void GensCtrlKeyWidget::captureKey(void)
 
 
 /**
- * GensCtrlKeyWidget::setKey(): Set the current GensKey_t.
+ * Set the current GensKey_t.
  * @param seq Key sequence.
  */
 void GensCtrlKeyWidget::setKey(GensKey_t key)
@@ -418,7 +416,7 @@ void GensCtrlKeyWidget::setKey(GensKey_t key)
 	// sequences are different
 	if (!d->isRecording)
 		d->oldGensKey = d->gensKey;
-	
+
 	d->gensKey = key;
 	d->doneRecording();
 }

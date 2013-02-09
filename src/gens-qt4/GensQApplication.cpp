@@ -68,9 +68,9 @@ class GensQApplicationPrivate
 
 GensQApplicationPrivate::GensQApplicationPrivate(GensQApplication *q)
 	: q(q)
-	, guiThread(NULL)
-	, qtTranslator(NULL)
-	, gensTranslator(NULL)
+	, guiThread(nullptr)
+	, qtTranslator(nullptr)
+	, gensTranslator(nullptr)
 { }
 
 /**

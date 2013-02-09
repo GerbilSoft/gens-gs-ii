@@ -64,7 +64,7 @@ extern void qWinMain(HINSTANCE, HINSTANCE, LPSTR, int, int &, QVector<char *> &)
 static int SetSecurityOptions(void)
 {
 	HMODULE hKernel32 = LoadLibraryA("kernel32.dll");
-	if (hKernel32 == NULL)
+	if (hKernel32 == nullptr)
 		return -1;
 
 	// Enable DEP/NX. (WinXP SP3, Vista, and later.)
@@ -93,7 +93,7 @@ static int SetSecurityOptions(void)
 	PFNHSI pfnHeapSetInformation = (PFNHSI)GetProcAddress(hKernel32, "HeapSetInformation");
 	if (pfnHeapSetInformation) {
 		// HeapEnableTerminationOnCorruption == 1
-		pfnHeapSetInformation(NULL, 1, NULL, 0);
+		pfnHeapSetInformation(nullptr, 1, nullptr, 0);
 	}
 
 	if (hKernel32)
@@ -169,7 +169,7 @@ void GensQApplication::SetFont_Win32(void)
 	::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0);
 
 	int nFontSize = 0;
-	HDC hDC = ::GetDC(NULL);
+	HDC hDC = ::GetDC(nullptr);
 
 	// Calculate the font size in points.
 	// http://www.codeguru.com/forum/showthread.php?t=476244

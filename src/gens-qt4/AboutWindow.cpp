@@ -68,7 +68,7 @@ namespace GensQt4
 {
 
 // Static member initialization.
-AboutWindow *AboutWindow::m_AboutWindow = NULL;
+AboutWindow *AboutWindow::m_AboutWindow = nullptr;
 
 /**
  * AboutWindow(): Initialize the About window.
@@ -115,7 +115,7 @@ AboutWindow::AboutWindow(QWidget *parent)
 AboutWindow::~AboutWindow()
 {
 	// Clear the m_AboutWindow pointer.
-	m_AboutWindow = NULL;
+	m_AboutWindow = nullptr;
 }
 
 
@@ -125,14 +125,11 @@ AboutWindow::~AboutWindow()
  */
 void AboutWindow::ShowSingle(QWidget *parent)
 {
-	if (m_AboutWindow != NULL)
-	{
+	if (m_AboutWindow != nullptr) {
 		// About Window is already displayed.
 		// NOTE: This doesn't seem to work on KDE 4.4.2...
 		QApplication::setActiveWindow(m_AboutWindow);
-	}
-	else
-	{
+	} else {
 		// About Window is not displayed.
 		m_AboutWindow = new AboutWindow(parent);
 		m_AboutWindow->show();
@@ -192,27 +189,25 @@ void AboutWindow::initAboutWindowText(void)
 	// Build the program title text.
 	QString sPrgTitle =
 		QLatin1String("<b>Gens/GS II</b>") + sLineBreak;
-	
-	if (LibGens::version_desc != NULL)
-	{
+
+	if (LibGens::version_desc != nullptr) {
 		// Append the version description.
 		// TODO: Translate it?
 		sPrgTitle += QLatin1String(LibGens::version_desc) + sLineBreak;
 	}
-	
+
 #if !defined(GENS_ENABLE_EMULATION)
 	//: "NO-EMULATION BUILD" means CPU cores aren't compiled in. Used for testing Gens/GS II on new platforms.
 	sPrgTitle += QLatin1String("<b>") +
 			tr("NO-EMULATION BUILD") +
 			QLatin1String("</b>") + sLineBreak;
 #endif
-	
-	if (LibGens::version_vcs != NULL)
-	{
+
+	if (LibGens::version_vcs != nullptr) {
 		// Append the VCS revision to the title text.
 		sPrgTitle += QLatin1String(LibGens::version_vcs) + sLineBreak;
 	}
-	
+
 	// TODO: Should this be translatable?
 	sPrgTitle += sLineBreak +
 		tr("Sega Genesis / Mega Drive,") + sLineBreak +
@@ -618,7 +613,7 @@ QString AboutWindow::GetCodePageInfo(void)
 	}
 
 	// Is Gens/GS II using Unicode?
-	if (GetModuleHandleW(NULL) != NULL) {
+	if (GetModuleHandleW(nullptr) != nullptr) {
 		//: Win32: Unicode strings are being used. (WinNT)
 		sCodePageInfo += tr("Using Unicode strings for Win32 API.");
 	} else {

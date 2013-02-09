@@ -56,10 +56,10 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 	Q_OBJECT
 
 	public:
-		static void ShowSingle(QWidget *parent = NULL);
+		static void ShowSingle(QWidget *parent = nullptr);
 
 	protected:
-		GeneralConfigWindow(QWidget *parent = NULL);
+		GeneralConfigWindow(QWidget *parent = nullptr);
 		virtual ~GeneralConfigWindow();
 
 		QSize sizeHint(void) const

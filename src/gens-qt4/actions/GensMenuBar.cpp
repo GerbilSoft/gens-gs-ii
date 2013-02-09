@@ -53,22 +53,17 @@ namespace GensQt4
 GensMenuBarPrivate::GensMenuBarPrivate(GensMenuBar *q)
 	: q(q)
 	, lockCnt(0)
-	, popupMenu(NULL)
-	, emuManager(NULL)
-	, recentRomsMenu(NULL)
+	, popupMenu(nullptr)
+	, emuManager(nullptr)
+	, recentRomsMenu(nullptr)
 	, signalMapper(new QSignalMapper(q))
 { }
 
 
 GensMenuBarPrivate::~GensMenuBarPrivate()
 {
-	// Clear the menu hash tables.
 	clearHashTables();
-	
-	// Delete the popup menu.
 	delete popupMenu;
-	
-	// Delete the "Recent ROMs" menu.
 	delete recentRomsMenu;
 }
 
@@ -81,18 +76,18 @@ void GensMenuBarPrivate::init(EmuManager *initEmuManager)
 {
 	// Set the Emulation Manager.
 	setEmuManager(initEmuManager);
-	
+
 	// Connect the QSignalMapper's mapped() signal.
 	QObject::connect(signalMapper, SIGNAL(mapped(int)),
 			 q, SLOT(menuItemSelected(int)));
-	
+
 	// Create the "Recent ROMs" menu.
-	recentRomsMenu = new RecentRomsMenu(NULL, gqt4_cfg->recentRomsObject());
+	recentRomsMenu = new RecentRomsMenu(nullptr, gqt4_cfg->recentRomsObject());
 	QObject::connect(recentRomsMenu, SIGNAL(updated()),
 			 q, SLOT(recentRoms_updated()));
 	QObject::connect(recentRomsMenu, SIGNAL(triggered(int)),
 			 q, SLOT(menuItemSelected(int)));
-	
+
 	// Create the popup menu.
 	popupMenu = new QMenu();
 	retranslate();
@@ -197,7 +192,7 @@ void GensMenuBarPrivate::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *par
 {
 	QAction *mnuItem;
 	QMenu *mnuSubMenu;			// QMenu for GMI_SUBMENU items.
-	QActionGroup *actionGroup = NULL;	// QActionGroup for GMI_RADIO items.
+	QActionGroup *actionGroup = nullptr;	// QActionGroup for GMI_RADIO items.
 
 	for (; menu->id != 0; menu++) {
 		if (menu->type == GensMenuBar::GMI_SEPARATOR) {
@@ -242,7 +237,7 @@ void GensMenuBarPrivate::parseMenu(const GensMenuBar::MenuItem *menu, QMenu *par
 		}
 
 		if (menu->type != GensMenuBar::GMI_RADIO)
-			actionGroup = NULL;
+			actionGroup = nullptr;
 
 #ifndef Q_WS_MAC
 		// Set the menu icon.
@@ -366,10 +361,10 @@ void GensMenuBar::retranslate(void)
  */
 bool GensMenuBar::menuItemCheckState(int id) const
 {
-	QAction *mnuItem = d->hashActions.value(id, NULL);
+	QAction *mnuItem = d->hashActions.value(id, nullptr);
 	if (!mnuItem)
 		return false;
-	
+
 	// TODO: Is the isCheckable() check needed?
 	if (!mnuItem->isCheckable())
 		return false;
@@ -385,14 +380,14 @@ bool GensMenuBar::menuItemCheckState(int id) const
  */
 int GensMenuBar::setMenuItemCheckState(int id, bool newCheck)
 {
-	QAction *mnuItem = d->hashActions.value(id, NULL);
+	QAction *mnuItem = d->hashActions.value(id, nullptr);
 	if (!mnuItem)
 		return -1;
-	
+
 	// TODO: Is the isCheckable() check needed?
 	if (!mnuItem->isCheckable())
 		return -2;
-	
+
 	mnuItem->setChecked(newCheck);
 	return 0;
 }

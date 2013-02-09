@@ -77,29 +77,28 @@ void GLTex2D::setImage(const QImage& img)
 {
 	if (img.isNull())
 		return;
-	
+
 	if (m_tex == 0)
 		glGenTextures(1, &m_tex);
-	
+
 	glBindTexture(GL_TEXTURE_2D, m_tex);
-	
+
 	// Set texture parameters.
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	
+
 	// GL filtering.
 	// TODO: Add a user-selectable option.
 	// We're moving preview images here, so it's always filtered.
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	
+
 	// Determine the texture format.
 	int bytes_per_pixel;
 	bool needsPackedPixels = false;
 	QImage new_img = img;
-	
-	switch (new_img.format())
-	{
+
+	switch (new_img.format()) {
 		case QImage::Format_RGB32:
 		case QImage::Format_ARGB32:
 			m_components = 4;
@@ -107,7 +106,7 @@ void GLTex2D::setImage(const QImage& img)
 			m_type = GLTEX2D_FORMAT_32BIT;
 			bytes_per_pixel = 4;
 			break;
-		
+
 		case QImage::Format_RGB888:
 			// TODO: Verify this!
 			m_components = 3;
@@ -115,7 +114,7 @@ void GLTex2D::setImage(const QImage& img)
 			m_type = GL_UNSIGNED_BYTE;	// TODO: Big-endian support.
 			bytes_per_pixel = 3;
 			break;
-		
+
 		case QImage::Format_RGB16:
 			m_components = 3;
 			m_format = GL_RGB;
@@ -123,7 +122,7 @@ void GLTex2D::setImage(const QImage& img)
 			needsPackedPixels = true;
 			bytes_per_pixel = 2;
 			break;
-		
+
 		case QImage::Format_RGB555:
 			m_components = 4;
 			m_format = GL_BGRA;
@@ -131,7 +130,7 @@ void GLTex2D::setImage(const QImage& img)
 			needsPackedPixels = true;
 			bytes_per_pixel = 2;
 			break;
-		
+
 		default:
 			// Convert to 32-bit color.
 			// TODO: Big-endian support.
@@ -142,13 +141,13 @@ void GLTex2D::setImage(const QImage& img)
 			bytes_per_pixel = 4;
 			break;
 	}
-	
+
 #if GENS_BYTEORDER == GENS_BIG_ENDIAN
 	// GL_UNSIGNED_INT_8_8_8_8_REV requires the packed pixels extension.
 	if (m_type == GLTEX2D_FORMAT_32BIT)
 		needsPackedPixels = true;
 #endif
-	
+
 	// 15-bit and 16-bit color requires GL_EXT_packed_pixels.
 	// 32-bit color requires GL_EXT_packed_pixels on big-endian systems.
 	// TODO: GLEW doesn't have GL_APPLE_packed_pixels.
@@ -157,8 +156,7 @@ void GLTex2D::setImage(const QImage& img)
 						|| GLEW_EXT_packed_pixels
 						/*|| GLEW_APPLE_packed_pixels*/
 						);
-	if (needsPackedPixels && !hasExtPackedPixels)
-	{
+	if (needsPackedPixels && !hasExtPackedPixels) {
 		// Packed pixels extension isn't available.
 		// Convert to 32-bit color.
 		new_img = img.convertToFormat(QImage::Format_ARGB32, Qt::ColorOnly);
@@ -166,7 +164,7 @@ void GLTex2D::setImage(const QImage& img)
 		m_format = GL_BGRA;
 		m_type = GLTEX2D_FORMAT_32BIT;
 		bytes_per_pixel = 4;
-		
+
 		// TODO: Byteswap the data on big-endian.
 #if GENS_BYTEORDER == GENS_BIG_ENDIAN
 #ifdef Q_WS_MAC
@@ -180,59 +178,56 @@ void GLTex2D::setImage(const QImage& img)
 				"Textures may appear garbled.");
 #endif /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
 	}
-	
+
 	// Save the original image size.
 	m_img_w = new_img.width();
 	m_img_h = new_img.height();
-	
+
 	// Round the image width and height to the next power of two.
 	int pow2_w = next_pow2s(new_img.width());
 	int pow2_h = next_pow2s(new_img.height());
-	
+
 	void *texBuf;
-	if (pow2_w == new_img.width() && pow2_h == new_img.height())
-	{
+	if (pow2_w == new_img.width() && pow2_h == new_img.height()) {
 		// Image size is already a power of two.
 		m_pow2_w = 1.0;
 		m_pow2_h = 1.0;
-		
+
 		// Don't allocate a blank texture buffer.
-		texBuf = NULL;
-	}
-	else
-	{
+		texBuf = nullptr;
+	} else {
 		// Image size is not a power of two.
 		m_pow2_w = ((double)(new_img.width()) / (double)(pow2_w));
 		m_pow2_h = ((double)(new_img.height()) / (double)(pow2_h));
-		
+
 		// Allocate a memory buffer to use for texture initialization.
 		// This will ensure that the entire texture is initialized to black.
 		// (This fixes garbage on the last column when using the Fast Blur shader.)
 		const size_t texSize = (pow2_w * pow2_h * bytes_per_pixel);
 		texBuf = calloc(1, texSize);
 	}
-	
+
 	// Allocate the texture.
 	glTexImage2D(GL_TEXTURE_2D, 0,
 			m_components,
 			pow2_w, pow2_h,		// Texture size.
 			0,			// No border.
 			m_format, m_type, texBuf);
-	
+
 	// Free the temporary texture buffer.
 	free(texBuf);
-	
+
 	// Upload the image texture.
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, new_img.bytesPerLine() / bytes_per_pixel);
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 8);
-	
+
 	const uchar *img_data = new_img.scanLine(0);
 	glTexSubImage2D(GL_TEXTURE_2D, 0,
 			0, 0,		// x/y offset
 			new_img.width(), new_img.height(),	// width/height
 			m_format, m_type, img_data);
-	
+
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 0);

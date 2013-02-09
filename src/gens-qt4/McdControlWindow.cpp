@@ -49,7 +49,7 @@ namespace GensQt4
 {
 
 // Static member initialization.
-McdControlWindow *McdControlWindow::m_McdControlWindow = NULL;
+McdControlWindow *McdControlWindow::m_McdControlWindow = nullptr;
 
 /**
  * McdControlWindow(): Initialize the General Configuration window.
@@ -59,15 +59,15 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 {
 	// Initialize the Qt4 UI.
 	setupUi(this);
-	
+
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
-	
+
 #ifdef Q_WS_MAC
 	// Remove the window icon. (Mac "proxy icon")
 	this->setWindowIcon(QIcon());
 #endif
-	
+
 	// Create the "Refresh" button.
 	// TODO: Don't load an icon on systems that don't use icons on buttons.
 	btnRefresh = new QPushButton(GensQApplication::IconFromTheme(QLatin1String("view-refresh")),
@@ -76,30 +76,28 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 	// NOTE: "ResetRole" isn't exactly the right thing, but it works.
 	// On KDE, the button's on the left side of the dialog, whereas "Close" is on the right.
 	buttonBox->addButton(btnRefresh, QDialogButtonBox::ResetRole);
-	
+
 	// Initialize the FindCdromBase class.
 #if defined(Q_OS_WIN)
 	m_drives = new FindCdromWin32();
 #elif defined(QT_QTDBUS_FOUND)
 	m_drives = new FindCdromUDisks();
-	if (!m_drives->isUsable())
-	{
+	if (!m_drives->isUsable()) {
 		delete m_drives;
-		m_drives = NULL;
+		m_drives = nullptr;
 	}
 #else
 	// TODO: Implement FindCdromBase subclass for Mac OS X.
-	m_drives = NULL;
+	m_drives = nullptr;
 #endif
-	
+
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
 	// UNIX fallback.
 	if (!m_drives)
 		m_drives = new FindCdromUnix();
 #endif
-	
-	if (m_drives)
-	{
+
+	if (m_drives) {
 		// Set up the FindCdromBase signals
 		connect(m_drives, SIGNAL(driveUpdated(CdromDriveEntry)),
 			this, SLOT(driveUpdated(CdromDriveEntry)));
@@ -108,7 +106,7 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 		connect(m_drives, SIGNAL(driveRemoved(QString)),
 			this, SLOT(driveRemoved(QString)));
 	}
-	
+
 	// Query CD-ROM drives.
 	query();
 }
@@ -120,11 +118,11 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 McdControlWindow::~McdControlWindow()
 {
 	// Clear the m_McdControlWindow pointer.
-	m_McdControlWindow = NULL;
-	
+	m_McdControlWindow = nullptr;
+
 	// Delete m_drives.
 	delete m_drives;
-	m_drives = NULL;
+	m_drives = nullptr;
 }
 
 
@@ -134,14 +132,11 @@ McdControlWindow::~McdControlWindow()
  */
 void McdControlWindow::ShowSingle(QWidget *parent)
 {
-	if (m_McdControlWindow != NULL)
-	{
+	if (m_McdControlWindow != nullptr) {
 		// General Configuration Window is already displayed.
 		// NOTE: This doesn't seem to work on KDE 4.4.2...
 		QApplication::setActiveWindow(m_McdControlWindow);
-	}
-	else
-	{
+	} else {
 		// General Configuration Window is not displayed.
 		m_McdControlWindow = new McdControlWindow(parent);
 		m_McdControlWindow->show();

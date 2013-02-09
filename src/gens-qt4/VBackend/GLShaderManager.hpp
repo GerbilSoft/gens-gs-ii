@@ -87,7 +87,7 @@ class GLShaderManager
 		void setFastBlur(bool enabled);
 #else /* !HAVE_GLEW */
 		/**
-		 * NULL functions that do nothing if GLEW wasn't found at compile time.
+		 * Dummy functions that do nothing if GLEW wasn't found at compile time.
 		 * These functions are provided for a consistent interface.
 		 * TODO: Should these functions be marked as inline?
 		 */

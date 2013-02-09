@@ -116,7 +116,7 @@ GensWindowPrivate::GensWindowPrivate(GensWindow *q)
 	: q(q)
 	, scale(1)			// Set the scale to 1x by default.
 	, hasInitResize(false)		// Initial resize hasn't occurred yet.
-	, idleThread(NULL)
+	, idleThread(nullptr)
 	, idleThreadAllowed(false)	// Not allowed yet.
 {
 	/** Configuration items. **/
@@ -261,13 +261,13 @@ void GensWindowPrivate::initMenuBar(void)
 		// Hide the menu bar.
 		if (!q->isMaximized() && !q->isMinimized()) {
 			QWidget *menuWidget = q->menuWidget();
-			if (menuWidget != NULL) {
+			if (menuWidget != nullptr) {
 				menuBar = q->menuBar();
 				height_adjust = -menuBar->height();
 			}
 		}
 		if (!isGlobalMenuBar())
-			q->setMenuBar(NULL);
+			q->setMenuBar(nullptr);
 	} else {
 		// Check if the menu bar was there already.
 		const bool wasMenuBarThere = !!(q->menuWidget());
@@ -361,7 +361,7 @@ void GensWindowPrivate::checkIdleThread(void)
 			idleThread->stop();
 			idleThread->wait();
 			delete idleThread;
-			idleThread = NULL;
+			idleThread = nullptr;
 		}
 	} else {
 		// Make sure the idle thread is running.
@@ -748,7 +748,7 @@ void GensWindow::autoPause_changed_slot(QVariant newAutoPause)
 
 	if (d->cfg_autoPause) {
 		// Auto Pause is enabled.
-		qAppFocusChanged(NULL, gqt4_app->focusWidget());
+		qAppFocusChanged(nullptr, gqt4_app->focusWidget());
 	} else {
 		// Auto Pause is disabled.
 		// Undo auto pause.

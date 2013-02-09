@@ -29,10 +29,10 @@ namespace GensQt4
 GensZipDirItem::GensZipDirItem(GensZipDirItem *parent)
 {
 	m_parentItem = parent;
-	
+
 	// Initialize internal data.
 	m_itemData.filesize = 0;
-	m_itemData.z_entry = NULL;
+	m_itemData.z_entry = nullptr;
 }
 
 GensZipDirItem::~GensZipDirItem()
@@ -44,16 +44,15 @@ int GensZipDirItem::childNumber(void) const
 {
 	if (m_parentItem)
 		return m_parentItem->m_childItems.indexOf(const_cast<GensZipDirItem*>(this));
-	
+
 	return 0;
 }
 
 QVariant GensZipDirItem::data(int column) const
 {
 	QVariant ret;
-	
-	switch (column)
-	{
+
+	switch (column) {
 		case 0:		return QVariant(m_itemData.disp_filename);
 		case 1:		return QVariant(m_itemData.full_filename);
 		case 2:		return QVariant(m_itemData.filesize);
@@ -64,17 +63,16 @@ QVariant GensZipDirItem::data(int column) const
 bool GensZipDirItem::insertChildren(int position, int count, int columns)
 {
 	// Columns are fixed.
-	((void)columns);
-	
+	Q_UNUSED(columns)
+
 	if (position < 0 || position > m_childItems.size())
 		return false;
-	
-	for (int row = 0; row < count; row++)
-	{
+
+	for (int row = 0; row < count; row++) {
 		GensZipDirItem *item = new GensZipDirItem(this);
 		m_childItems.insert(position, item);
 	}
-	
+
 	return true;
 }
 
@@ -82,10 +80,10 @@ bool GensZipDirItem::removeChildren(int position, int count)
 {
 	if (position < 0 || position + count > m_childItems.size())
 		return false;
-	
+
 	for (int row = 0; row < count; row++)
 		delete m_childItems.takeAt(position);
-	
+
 	return true;
 }
 
@@ -94,15 +92,14 @@ bool GensZipDirItem::setData(int column, const QVariant& value)
 	// TODO: Add a size() function to m_itemData().
 	if (column < 0 || column >= 3)
 		return false;
-	
-	switch (column)
-	{
+
+	switch (column) {
 		case 0:		m_itemData.disp_filename = value.toString(); break;
 		case 1:		m_itemData.full_filename = value.toString(); break;
 		case 2:		m_itemData.filesize = value.toInt(); break;
 		default:	return false;
 	}
-	
+
 	return true;
 }
 
@@ -120,7 +117,7 @@ void GensZipDirItem::sort(int column, Qt::SortOrder order)
 		qSort(m_childItems.begin(), m_childItems.end(), SortFilenameLessThan);
 	else
 		qSort(m_childItems.begin(), m_childItems.end(), SortFilenameGreaterThan);
-	
+
 	// Sort child items of child items.
 	foreach (GensZipDirItem *item, m_childItems)
 		item->sort(column, order);

@@ -35,10 +35,10 @@ class AboutWindow : public QDialog, public Ui::AboutWindow
 	Q_OBJECT
 	
 	public:
-		static void ShowSingle(QWidget *parent = NULL);
+		static void ShowSingle(QWidget *parent = nullptr);
 	
 	protected:
-		AboutWindow(QWidget *parent = NULL);
+		AboutWindow(QWidget *parent = nullptr);
 		virtual ~AboutWindow();
 		
 		// State change event. (Used for switching the UI language at runtime.)

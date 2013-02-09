@@ -52,7 +52,7 @@ namespace GensQt4
 {
 
 // Static member initialization.
-GeneralConfigWindow *GeneralConfigWindow::m_GeneralConfigWindow = NULL;
+GeneralConfigWindow *GeneralConfigWindow::m_GeneralConfigWindow = nullptr;
 
 /**
  * Check if the warranty is void.
@@ -90,7 +90,7 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	if (!isWarrantyVoid()) {
 		// Hide the super secret settings.
 		delete grpAdvancedVDP;
-		grpAdvancedVDP = NULL;
+		grpAdvancedVDP = nullptr;
 	}
 
 	// Create the action group for the toolbar buttons.
@@ -107,7 +107,7 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 		"applications-system",		// System
 		"media-optical",		// Sega CD
 		"utilities-terminal",		// External Programs
-		NULL
+		nullptr
 	};
 
 	// Initialize the toolbar buttons.
@@ -135,7 +135,7 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 		// Remove the buttonBox.
 		QSize szBbox = buttonBox->size();
 		delete buttonBox;
-		buttonBox = NULL;
+		buttonBox = nullptr;
 
 		// Reduce the size of the QMainWindow.
 		QSize szWindow = this->maximumSize();
@@ -212,7 +212,7 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 GeneralConfigWindow::~GeneralConfigWindow()
 {
 	// Clear the m_GeneralConfigWindow pointer.
-	m_GeneralConfigWindow = NULL;
+	m_GeneralConfigWindow = nullptr;
 }
 
 
@@ -222,14 +222,11 @@ GeneralConfigWindow::~GeneralConfigWindow()
  */
 void GeneralConfigWindow::ShowSingle(QWidget *parent)
 {
-	if (m_GeneralConfigWindow != NULL)
-	{
+	if (m_GeneralConfigWindow != nullptr) {
 		// General Configuration Window is already displayed.
 		// NOTE: This doesn't seem to work on KDE 4.4.2...
 		QApplication::setActiveWindow(m_GeneralConfigWindow);
-	}
-	else
-	{
+	} else {
 		// General Configuration Window is not displayed.
 		m_GeneralConfigWindow = new GeneralConfigWindow(parent);
 		m_GeneralConfigWindow->show();
@@ -728,20 +725,19 @@ void GeneralConfigWindow::on_btnMcdRomAsia_clicked(void)
 QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, int region_code)
 {
 	// ROM data buffer.
-	uint8_t *rom_data = NULL;
+	uint8_t *rom_data = nullptr;
 	int data_len;
 	uint32_t rom_crc32;
 	int boot_rom_id;
 	int boot_rom_region_code;
 	MCD_RomStatus_t boot_rom_status;
-	
+
 	// Line break string.
 	const QString sLineBreak = QLatin1String("<br/>\n");
-	
+
 	// Check if the file exists.
 	QString filename = txtRomFile->text();
-	if (!QFile::exists(filename))
-	{
+	if (!QFile::exists(filename)) {
 		// File doesn't exist.
 		// NOTE: KDE 4's Oxygen theme doesn't have a question icon.
 		// SP_MessageBoxQuestion is redirected to SP_MessageBoxInformation on KDE 4.
@@ -752,132 +748,124 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 		else
 			return sLineBreak + tr("The specified ROM file was not found.");
 	}
-	
+
 	// Check the ROM file.
 	// TODO: Decompressor support.
 	QStyle::StandardPixmap filename_icon = QStyle::SP_DialogYesButton;
 	QString rom_id = tr("Unknown");
 	QString rom_notes;
 	QString rom_size_warning;
-	
+
 	// Open the ROM file using LibGens::Rom.
 	auto_ptr<LibGens::Rom> rom(new LibGens::Rom(filename.toUtf8().constData()));
-	if (!rom->isOpen())
-	{
+	if (!rom->isOpen()) {
 		// Error opening ROM file.
 		txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 		return sLineBreak + tr("Error opening ROM file.");
 	}
-	
+
 	// Multi-file ROM archives are not supported for Sega CD Boot ROMs.
-	if (rom->isMultiFile())
-	{
+	if (rom->isMultiFile()) {
 		txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxWarning));
 		return (sLineBreak + m_sWarning +
 				tr("This archive has multiple files.") + sLineBreak +
 				tr("Multi-file ROM archives are not currently supported for Sega CD Boot ROMs."));
 	}
-	
+
 	// Check the ROM filesize.
 	// Valid boot ROMs are 128 KB.
 	// Smaller ROMs will not work; larger ROMs may work, but warn anyway.
-	if (rom->romSize() != MCD_ROM_FILESIZE)
-	{
+	if (rom->romSize() != MCD_ROM_FILESIZE) {
 		// Wrong ROM size.
 		filename_icon = QStyle::SP_MessageBoxWarning;
-		
+
 		rom_size_warning = m_sWarning + tr("ROM size is incorrect.") + sLineBreak +
 				tr("(expected %L1 bytes; found %L2 bytes)").arg(MCD_ROM_FILESIZE).arg(rom->romSize());
-		
+
 		// TODO: Continue ROM identification even if the ROM is too big?
-		//if (file.size() < MCD_ROM_FILESIZE)
-		{
+		if (/*file.size() < MCD_ROM_FILESIZE*/ true) {
 			// ROM is too small, so it's guaranteed to not match anything in the database.
 			goto rom_identified;
 		}
 	}
-	
+
 	// Load the ROM data and calculate the CRC32.
 	// TODO: LibGens::Rom::loadRom() fails if the ROM buffer isn't >= the ROM size.
 	rom_data = (uint8_t*)malloc(MCD_ROM_FILESIZE);
 	data_len = rom->loadRom(rom_data, MCD_ROM_FILESIZE);
-	if (data_len != MCD_ROM_FILESIZE)
-	{
+	if (data_len != MCD_ROM_FILESIZE) {
 		// Error reading data from the file.
 		rom_notes = tr("Error reading file.") + sLineBreak +
 			    tr("(expected %L1 bytes; read %L2 bytes)").arg(MCD_ROM_FILESIZE).arg(data_len);
 		goto rom_identified;
 	}
-	
+
 	// Fix up the ROM's Initial SP and Initial HINT vector.
 	memcpy(&rom_data[0x00], lg_mcd_rom_InitSP, sizeof(lg_mcd_rom_InitSP));
 	memcpy(&rom_data[0x70], lg_mcd_rom_InitHINT, sizeof(lg_mcd_rom_InitHINT));
-	
+
 	// Calculate the CRC32 using zlib.
 	rom_crc32 = crc32(0, rom_data, MCD_ROM_FILESIZE);
-	
+
 	// Look up the CRC32 in the Sega CD Boot ROM database.
 	boot_rom_id = lg_mcd_rom_FindByCRC32(rom_crc32);
-	if (boot_rom_id < 0)
-	{
+	if (boot_rom_id < 0) {
 		// Boot ROM was not found in the database.
 		filename_icon = QStyle::SP_MessageBoxWarning;
 		goto rom_identified;
 	}
-	
+
 	// ROM found. Get the description and other information.
 	rom_id = QString::fromUtf8(lg_mcd_rom_GetDescription(boot_rom_id));
-	
+
 	// Check the region code.
 	boot_rom_region_code = lg_mcd_rom_GetRegion(boot_rom_id);
-	if ((boot_rom_region_code & region_code) == 0)
-	{
+	if ((boot_rom_region_code & region_code) == 0) {
 		// ROM doesn't support this region.
 		int boot_rom_region_primary = lg_mcd_rom_GetPrimaryRegion(boot_rom_id);
 		QString expected_region = QString::fromUtf8(lg_mcd_rom_GetRegionCodeString(region_code));
 		QString boot_rom_region = QString::fromUtf8(lg_mcd_rom_GetRegionCodeString(boot_rom_region_primary));
-		
+
 		rom_notes += m_sWarning + tr("Region code is incorrect.") + sLineBreak +
 			     tr("(expected %1; found %2)").arg(expected_region).arg(boot_rom_region) + sLineBreak;
-		
+
 		// Set the icon to warning.
 		filename_icon = QStyle::SP_MessageBoxWarning;
 	}
-	
+
 	// Check the ROM's support status.
 	boot_rom_status = lg_mcd_rom_GetSupportStatus(boot_rom_id);
-	switch (boot_rom_status)
-	{
+	switch (boot_rom_status) {
 		case RomStatus_Recommended:
 		case RomStatus_Supported:
 			// ROM is either recommended or supported.
 			// TODO: Make a distinction between the two?
 			break;
-		
+
 		case RomStatus_Unsupported:
 		default:
 			// ROM is unsupported.
 			rom_notes += m_sWarning + tr("This Boot ROM is not supported by Gens/GS II.") + sLineBreak;
 			filename_icon = QStyle::SP_MessageBoxWarning;
 			break;
-		
+
 		case RomStatus_Broken:
 			// ROM is known to be broken.
 			rom_notes += m_sWarning + tr("This Boot ROM is known to be broken on all emulators.") + sLineBreak;
 			filename_icon = QStyle::SP_MessageBoxCritical;
 			break;
 	}
-	
+
 	// Get the ROM's notes.
 	rom_notes += QString::fromUtf8(lg_mcd_rom_GetNotes(boot_rom_id)).replace(QChar(L'\n'), sLineBreak);
-	
+
 rom_identified:
 	// Free the ROM data buffer if it was allocated.
 	free(rom_data);
-	
+
 	// Set the Boot ROM filename textbox icon.
 	txtRomFile->setIcon(style()->standardIcon(filename_icon));
-	
+
 	// Set the Boot ROM description.
 	QString s_ret;
 	s_ret = tr("ROM identified as: %1").arg(rom_id);

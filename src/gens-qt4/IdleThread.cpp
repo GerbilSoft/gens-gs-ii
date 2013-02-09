@@ -37,9 +37,9 @@ IdleThread::IdleThread(QObject *parent)
 	: QThread(parent)
 {
 	m_stop = false;
-	
+
 	// Clear the effect classes.
-	m_crazyEffect = NULL;
+	m_crazyEffect = nullptr;
 }
 
 IdleThread::~IdleThread()
@@ -71,42 +71,39 @@ void IdleThread::run(void)
 {
 	// TODO: Use an enum for the Intro Effect Style.
 	int prevIntroStyle = gqt4_cfg->getInt(QLatin1String("Intro_Effect/introStyle"));
-	
+
 	// Run the idle thread.
 	m_mutex.lock();
-	while (!m_stop)
-	{
+	while (!m_stop) {
 		// Check if the intro effect has changed.
 		const int newIntroStyle = gqt4_cfg->getInt(QLatin1String("Intro_Effect/introStyle"));
-		if (prevIntroStyle != newIntroStyle)
-		{
+		if (prevIntroStyle != newIntroStyle) {
 			// Intro effect has changed. Delete existing effects.
 			delete m_crazyEffect;
-			m_crazyEffect = NULL;
+			m_crazyEffect = nullptr;
 		}
-		
+
 		// Run the intro effect.
 		prevIntroStyle = newIntroStyle;
-		switch (prevIntroStyle)
-		{
+		switch (prevIntroStyle) {
 			case 0:
 			default:
 				// No intro effect.
 				// Stop the thread.
 				m_stop = true;
 				break;
-			
+
 			case 1:
 				// Gens Logo effect.
 				// TODO
 				m_stop = true;
 				break;
-			
+
 			case 2:
 				// "Crazy" effect.
 				if (!m_crazyEffect)
 					m_crazyEffect = new LibGens::CrazyEffect();
-				
+
 				m_crazyEffect->run(
 					(LibGens::CrazyEffect::ColorMask)gqt4_cfg->getInt(
 						QLatin1String("Intro_Effect/introColor")));
@@ -114,10 +111,10 @@ void IdleThread::run(void)
 				usleep(20000);
 				break;
 		}
-		
+
 		if (m_stop)
 			break;
-		
+
 		// Wait for a resume command.
 		m_wait.wait(&m_mutex);
 	}

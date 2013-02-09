@@ -94,7 +94,7 @@ class ConfigDefaults
 		/**
 		 * Get a DefaultSetting struct.
 		 * @param key Setting key.
-		 * @return DefaultSetting struct, or NULL if not found.
+		 * @return DefaultSetting struct, or nullptr if not found.
 		 */
 		const DefaultSetting *get(QString key) const;
 	
@@ -106,7 +106,7 @@ class ConfigDefaults
 /**
  * Get a DefaultSetting struct.
  * @param key Setting key.
- * @return DefaultSetting struct, or NULL if not found.
+ * @return DefaultSetting struct, or nullptr if not found.
  */
 inline const ConfigDefaults::DefaultSetting *ConfigDefaults::get(QString key) const
 	{ return defaultSettingsHash.value(key, nullptr); }

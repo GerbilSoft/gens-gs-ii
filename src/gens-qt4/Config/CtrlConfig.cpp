@@ -287,7 +287,7 @@ int CtrlConfigPrivate::load(const QSettings *qSettings)
 
 			// Copy the controller keys into ctrlKeys[].
 			for (int j = numButtons - 1; j >= 0; j--)
-				ctrlKeys[virtPort][j] = keyData.at(j).toUInt(NULL, 0);
+				ctrlKeys[virtPort][j] = keyData.at(j).toUInt(nullptr, 0);
 		}
 	}
 

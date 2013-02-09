@@ -111,7 +111,7 @@ void KeyHandlerQt::setGensActions(GensActions *newGensActions)
  */
 void KeyHandlerQt::gensActionsDestroyed(void)
 {
-	m_gensActions = NULL;
+	m_gensActions = nullptr;
 }
 
 

@@ -100,10 +100,9 @@ void SigHandler::Init(void)
 	sa.sa_flags = SA_RESTART | SA_SIGINFO;
 #endif
 	
-	for (int i = 0; gens_signals[i].signum != 0; i++)
-	{
+	for (int i = 0; gens_signals[i].signum != 0; i++) {
 #ifdef HAVE_SIGACTION
-		sigaction(gens_signals[i].signum, &sa, NULL);
+		sigaction(gens_signals[i].signum, &sa, nullptr);
 #else
 		signal(gens_signals[i].signum, SignalHandler);
 #endif
@@ -116,8 +115,7 @@ void SigHandler::Init(void)
  */
 void SigHandler::End(void)
 {
-	for (int i = 0; gens_signals[i].signum != 0; i++)
-	{
+	for (int i = 0; gens_signals[i].signum != 0; i++) {
 		signal(gens_signals[i].signum, SIG_DFL);
 	}
 }
@@ -128,15 +126,14 @@ void SigHandler::End(void)
  * SigHandler_get_siginfo(): Get the signal information from a received signal.
  * @param signum	[in] Signal number.
  * @param si_code	[in] Signal information code.
- * @return Pointer to gens_signal_t, or NULL if not found.
+ * @return Pointer to gens_signal_t, or nullptr if not found.
  */
 const gens_signal_t *SigHandler::GetSigInfo(int signum, int si_code)
 {
 	// Check if there's any information associated with the signal.
 	const gens_signal_t *siginfo;
-	
-	switch (signum)
-	{
+
+	switch (signum) {
 #ifdef SIGILL
 		case SIGILL:
 			siginfo = &gens_siginfo_SIGILL[0];
@@ -158,22 +155,21 @@ const gens_signal_t *SigHandler::GetSigInfo(int signum, int si_code)
 			break;
 #endif
 		default:
-			siginfo = NULL;
+			siginfo = nullptr;
 			break;
 	}
-	
+
 	if (!siginfo)
-		return NULL;
-	
+		return nullptr;
+
 	// Check for signal information.
-	for (; siginfo->signum != 0; siginfo++)
-	{
+	for (; siginfo->signum != 0; siginfo++) {
 		if (siginfo->signum == si_code)
 			return siginfo;
 	}
-	
+
 	// No signal information was found.
-	return NULL;
+	return nullptr;
 }
 #endif
 
@@ -192,9 +188,9 @@ void SigHandler::SignalHandler(int signum)
 {
 #ifdef HAVE_SIGACTION
 	// The `context' parameter isn't being used right now.
-	((void)context);
+	Q_UNUSED(context)
 #endif
-	
+
 	if (
 #ifdef SIGHUP
 	    signum == SIGHUP ||
@@ -236,14 +232,12 @@ void SigHandler::SignalHandler(int signum)
 			"Signal %d (%s) received; ignoring.", signum, signame);
 		return;
 	}
-	
+
 	// Check what signal this is.
 	const char *signame = "SIGUNKNOWN";
 	const char *sigdesc = "Unknown signal";
-	for (int i = 0; gens_signals[i].signum != 0; i++)
-	{
-		if (gens_signals[i].signum == signum)
-		{
+	for (int i = 0; gens_signals[i].signum != 0; i++) {
+		if (gens_signals[i].signum == signum) {
 			signame = gens_signals[i].signame;
 			sigdesc = gens_signals[i].sigdesc;
 			break;
@@ -251,33 +245,30 @@ void SigHandler::SignalHandler(int signum)
 	}
 	
 #ifdef HAVE_SIGACTION
-	// Note: If context is NULL, then info is invalid.
+	// Note: If context is nullptr, then info is invalid.
 	// This may happen if SIGILL is sent to the program via kill/pkill/killall.
-	const gens_signal_t *siginfo = NULL;
+	const gens_signal_t *siginfo = nullptr;
 	if (info && context)
 		siginfo = GetSigInfo(signum, info->si_code);
 #endif
-	
+
 	// Make sure this is the GUI thread.
-	if (!GensQt4::gqt4_app->isGuiThread())
-	{
+	if (!GensQt4::gqt4_app->isGuiThread()) {
 		// This isn't the GUI thread.
 		// This uses LOG_MSG_LEVEL_ERROR in order to suppress the message box.
 #ifdef HAVE_SIGACTION
-		if (siginfo)
-		{
+		if (siginfo) {
 			LOG_MSG(gens, LOG_MSG_LEVEL_ERROR,
 				"Signal %d (%s: %s) received in a non-GUI thread. Hanging...",
 				signum, signame, siginfo->signame);
-		}
-		else
+		} else
 #endif
 		{
 			LOG_MSG(gens, LOG_MSG_LEVEL_ERROR,
 				"Signal %d (%s) received in a non-GUI thread. Hanging...",
 				signum, signame);
 		}
-		
+
 		// Signal the GUI thread that we crashed.
 		// TODO: Include the ID of the thread that crashed?
 		// (e.g. emulation thread, PortAudio thread)
@@ -286,92 +277,85 @@ void SigHandler::SignalHandler(int signum)
 #else /* HAVE_SIGACTION */
 		gqt4_app->doCrash(signum);
 #endif /* HAVE_SIGACTION */
-		
+
 		// Hang here.
 		HANG();
 	}
-	
+
 	// This uses LOG_MSG_LEVEL_ERROR in order to suppress the message box.
 #ifdef HAVE_SIGACTION
-	if (siginfo)
-	{
+	if (siginfo) {
 		LOG_MSG(gens, LOG_MSG_LEVEL_ERROR,
 			"Signal %d (%s: %s) received. Shutting down.",
 			signum, signame, siginfo->signame);
-	}
-	else
+	} else
 #endif
 	{
 		LOG_MSG(gens, LOG_MSG_LEVEL_ERROR,
 			"Signal %d (%s) received. Shutting down.",
 			signum, signame);
 	}
-	
+
 	// Show a message box.
 #ifdef RICKROLL
 	QString sMsg = QString::fromLatin1("Gens/GS II has given you up. (Signal %1)\n").arg(signum);
 #else
 	QString sMsg = QString::fromLatin1("Gens/GS II has crashed with Signal %1.\n").arg(signum);
 #endif
-	
-	if (signame)
-	{
+
+	if (signame) {
 		sMsg += QString::fromLatin1(signame);
 		if (sigdesc)
 			sMsg += QLatin1String(": ") + QLatin1String(sigdesc);
 		sMsg += QChar(L'\n');
 	}
-	
+
 #ifdef HAVE_SIGACTION
-	if (siginfo && siginfo->signame)
-	{
+	if (siginfo && siginfo->signame) {
 		sMsg += QString::fromLatin1(siginfo->signame);
 		if (siginfo->sigdesc)
 			sMsg += QLatin1String(": ") + QLatin1String(siginfo->sigdesc);
 		sMsg += QChar(L'\n');
 	}
 #endif
-	
+
 	sMsg += QLatin1String("\n"
 			"Build Information:\n"
 			"- Platform: " GENS_PLATFORM "\n"
 			);
-	
+
 	// TODO: Use MDP version number macros.
 	sMsg += QLatin1String("- Version: ") +
 			QString::number((LibGens::version >> 24) & 0xFF) + QChar(L'.') +
 			QString::number((LibGens::version >> 16) & 0xFF) + QChar(L'.') +
 			QString::number(LibGens::version & 0xFFFF);
-	
-	if (LibGens::version_desc)
-	{
+
+	if (LibGens::version_desc) {
 		sMsg += QLatin1String(" (") +
 				QLatin1String(LibGens::version_desc) + QChar(L')');
 	}
 	sMsg += QChar(L'\n');
-	
+
 	// VCS revision.
-	if (LibGens::version_vcs)
-	{
+	if (LibGens::version_vcs) {
 		sMsg += QLatin1String("- ") +
 				QLatin1String(LibGens::version_vcs) + QChar(L'\n');
 	}
-	
+
 	sMsg += QLatin1String("\n"
 			"Please report this error to GerbilSoft.\n"
 			"- E-mail: gerbilsoft@verizon.net\n\n"
 			"Be sure to include detailed information about what you were "
 			"doing when this error occurred."
 			);
-	
+
 	// Display the message box.
 	QMessageBox dialog(QMessageBox::Critical,
 				QLatin1String("Gens/GS II Fatal Error"), sMsg);
 	dialog.setTextFormat(Qt::PlainText);
 #ifdef RICKROLL
 	QPixmap pxmRickRoll(QLatin1String(":/gens/rick-roll.png"));
-	if (!pxmRickRoll.isNull())
-	{
+	if (!pxmRickRoll.isNull()) {
 		dialog.setIconPixmap(pxmRickRoll);
 #ifdef _WIN32
 		// Qt on Win32 doesn't play a message sound if a
@@ -381,7 +365,7 @@ void SigHandler::SignalHandler(int signum)
 	}
 #endif
 	dialog.exec();
-	
+
 	exit(EXIT_FAILURE);
 }
 

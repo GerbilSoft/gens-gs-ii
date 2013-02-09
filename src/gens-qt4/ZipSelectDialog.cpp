@@ -73,35 +73,33 @@ void ZipSelectDialog::changeEvent(QEvent *event)
 
 
 /**
- * setFileList(): Set the file list.
+ * Set the file list.
  * @param z_entry File list.
  */
 void ZipSelectDialog::setFileList(const mdp_z_entry_t* z_entry)
 {
 	// Clear the tree model first.
 	m_dirModel->clear();
-	
+
 	// Save the list pointer and clear the selected file pointer.
 	m_z_entry_list = z_entry;
-	m_z_entry_sel = NULL;
-	
+	m_z_entry_sel = nullptr;
+
 	// For now, let's just do a standard list view.
 	const mdp_z_entry_t *cur = m_z_entry_list;
-	for (; cur != NULL; cur = cur->next)
-	{
-		if (!cur->filename)
-		{
+	for (; cur != nullptr; cur = cur->next) {
+		if (!cur->filename) {
 			// No filename. Go to the next file.
 			continue;
 		}
-		
+
 		QString filename = QString::fromUtf8(cur->filename);
-		
+
 		// TODO: Set icon based on file extension.
 		QIcon icon = this->style()->standardIcon(QStyle::SP_FileIcon);
 		m_dirModel->insertZEntry(cur, icon);
 	}
-	
+
 	// Sort the tree model.
 	m_dirModel->sort(0);
 }

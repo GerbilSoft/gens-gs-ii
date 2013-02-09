@@ -42,37 +42,37 @@ class ZipSelectDialog : public QDialog, public Ui::ZipSelectDialog
 	Q_OBJECT
 	
 	public:
-		ZipSelectDialog(QWidget *parent = NULL);
-		
+		ZipSelectDialog(QWidget *parent = nullptr);
+
 		/**
-		 * setFileList(): Set the file list.
+		 * Set the file list.
 		 * @param z_entry File list.
 		 */
 		void setFileList(const mdp_z_entry_t *z_entry);
-		
+
 		/**
-		 * selectedFile(): Get the selected file.
-		 * @return Selected file, or NULL if no file was selected.
+		 * Get the selected file.
+		 * @return Selected file, or nullptr if no file was selected.
 		 */
 		const mdp_z_entry_t *selectedFile(void) const
 			{ return m_z_entry_sel; }
-	
+
 	protected:
 		// State change event. (Used for switching the UI language at runtime.)
 		void changeEvent(QEvent *event);
-	
+
 	private slots:
 		void accept(void);
-		
+
 		// Widget signals.
 		void on_treeView_clicked(const QModelIndex& index);
 		void on_treeView_collapsed(const QModelIndex& index);
 		void on_treeView_expanded(const QModelIndex& index);
-	
+
 	private:
 		const mdp_z_entry_t *m_z_entry_list;
 		const mdp_z_entry_t *m_z_entry_sel;
-		
+
 		GensZipDirModel *m_dirModel;
 };
 

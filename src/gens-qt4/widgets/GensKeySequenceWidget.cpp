@@ -147,9 +147,9 @@ class GensKeySequenceWidgetPrivate
 
 GensKeySequenceWidgetPrivate::GensKeySequenceWidgetPrivate(GensKeySequenceWidget *q)
 	: q(q)
-	, layout(NULL)
-	, keyButton(NULL)
-	, clearButton(NULL)
+	, layout(nullptr)
+	, keyButton(nullptr)
+	, clearButton(nullptr)
 	, nKey(0)
 	, modifierKeys(0)
 	, isRecording(false)
@@ -157,23 +157,20 @@ GensKeySequenceWidgetPrivate::GensKeySequenceWidgetPrivate(GensKeySequenceWidget
 
 
 /**
- * GensKeySequenceWidgetPrivate::GetClearButtonIcon(): Get the clear button icon.
+ * Get the clear button icon.
  * @return Clear button icon.
  */
 inline QIcon GensKeySequenceWidgetPrivate::GetClearButtonIcon(void)
 {
 	// Determine which icon to use for the clear button.
-	if (QApplication::isLeftToRight())
-	{
+	if (QApplication::isLeftToRight()) {
 		return GensQApplication::IconFromTheme(
 				QLatin1String("edit-clear-locationbar-rtl"));
-	}
-	else
-	{
+	} else {
 		return GensQApplication::IconFromTheme(
 				QLatin1String("edit-clear-locationbar-ltr"));
 	}
-	
+
 	// Should not get here...
 	return QIcon();
 }
