@@ -3,17 +3,16 @@
 #include <cstdlib>
 
 // TODO: CdDriveFactory.
-//#ifdef _WIN32
+#ifdef _WIN32
 #include "CdDriveSpti.hpp"
-//#endif
+#endif
 
 int main(int argc, char *argv[])
 {
 #ifndef _WIN32
 	printf("Sorry, only Win32 is supported right now.\n");
 	return EXIT_FAILURE;
-#endif
-
+#else
 	if (argc != 2) {
 		printf("Syntax: %s D:\n", argv[0]);
 		printf("Replace D: with your CD-ROM drive.\n");
@@ -48,4 +47,5 @@ int main(int argc, char *argv[])
 
 	delete cdrom;
 	return EXIT_SUCCESS;
+#endif
 }
