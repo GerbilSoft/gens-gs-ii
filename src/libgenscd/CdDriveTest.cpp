@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 	printf("\n");
 
 	// Get the disc type.
-	printf("Current Feature Profile: 0x%04X\n", cdrom->getDiscType());
+	printf("Current Disc Type: 0x%08X\n", cdrom->getDiscType());
 
 	delete cdrom;
 	return EXIT_SUCCESS;

@@ -138,7 +138,11 @@ std::string CdDrive::dev_firmware(void)
 	return m_inq_data.firmware;
 }
 
-uint16_t CdDrive::getDiscType(void)
+/**
+ * Get the current feature profile, aka disc type.
+ * @return Feature profile, (0xFFFF on error)
+ */
+uint16_t CdDrive::getCurrentFeatureProfile(void)
 {
 	CDB_MMC_GET_CONFIGURAITON cdb;
 	memset(&cdb, 0x00, sizeof(cdb));
@@ -164,6 +168,50 @@ uint16_t CdDrive::getDiscType(void)
 	// Get the current profile.
 	uint16_t cur_profile = be16_to_cpu(features.CurrentProfile);
 	return cur_profile;
+}
+
+/**
+ * Get the current disc type.
+ * @return Disc type.
+ */
+CD_DiscType_t CdDrive::getDiscType(void)
+{
+	// TODO: Cache the current profile?
+	const uint16_t cur_profile = getCurrentFeatureProfile();
+
+	switch (cur_profile) {
+		case 0x03:	return DISC_TYPE_MO;		// (legacy) MO erasable
+		case 0x04:	return DISC_TYPE_MO;		// (legacy) Optical Write-Once
+		case 0x05:	return DISC_TYPE_MO;		// (legacy) AS-MO
+		case 0x08:	return DISC_TYPE_CDROM;
+		case 0x09:	return DISC_TYPE_CD_R;
+		case 0x0A:	return DISC_TYPE_CD_RW;
+		case 0x10:	return DISC_TYPE_DVD;
+		case 0x11:	return DISC_TYPE_DVD_R;
+		case 0x12:	return DISC_TYPE_DVD_RAM;
+		case 0x13:	return DISC_TYPE_DVD_RW; 	// read-only
+		case 0x14:	return DISC_TYPE_DVD_RW; 	// sequential
+		case 0x15:	return DISC_TYPE_DVD_R_DL;	// sequential
+		case 0x16:	return DISC_TYPE_DVD_R_DL;	// layer jump
+		case 0x1A:	return DISC_TYPE_DVD_PLUS_RW;
+		case 0x1B:	return DISC_TYPE_DVD_PLUS_R;
+		case 0x2A:	return DISC_TYPE_DVD_PLUS_RW_DL;
+		case 0x2B:	return DISC_TYPE_DVD_PLUS_R_DL;
+		case 0x40:	return DISC_TYPE_BDROM;
+		case 0x41:	return DISC_TYPE_BD_R;		// sequential
+		case 0x42:	return DISC_TYPE_BD_R;		// random
+		case 0x43:	return DISC_TYPE_BD_RE;
+		case 0x50:	return DISC_TYPE_HDDVD;
+		case 0x51:	return DISC_TYPE_HDDVD_R;
+		case 0x52:	return DISC_TYPE_HDDVD_RAM;
+		case 0x53:	return DISC_TYPE_HDDVD_RW;
+		case 0x58:	return DISC_TYPE_HDDVD_R_DL;
+		case 0x5A:	return DISC_TYPE_HDDVD_RW_DL;
+
+		case 0x00:
+		default:
+			return DISC_TYPE_NONE;
+	}
 }
 
 }

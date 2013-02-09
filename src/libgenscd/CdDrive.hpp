@@ -7,6 +7,9 @@
 // C++ includes.
 #include <string>
 
+// Disc and drive type definitions.
+#include "DiscType.h"
+
 namespace LibGensCD
 {
 
@@ -25,7 +28,11 @@ class CdDrive
 		std::string dev_model(void);
 		std::string dev_firmware(void);
 
-		uint16_t getDiscType(void);
+		/**
+		 * Get the current disc type.
+		 * @return Disc type.
+		 */
+		CD_DiscType_t getDiscType(void);
 
 	protected:
 		enum scsi_data_mode
@@ -63,6 +70,12 @@ class CdDrive
 			std::string model;
 			std::string firmware;
 		} m_inq_data;
+
+		/**
+		 * Get the current feature profile, aka disc type.
+		 * @return Feature profile, (0xFFFF on error)
+		 */
+		uint16_t getCurrentFeatureProfile(void);
 };
 
 }
