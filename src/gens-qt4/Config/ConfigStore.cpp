@@ -55,6 +55,10 @@
 // Key configuration.
 #include "actions/GensKeyConfig.hpp"
 
+// gqt4_app
+#include "gqt4_main.hpp"
+#include "GensQApplication.hpp"
+
 namespace GensQt4
 {
 
@@ -608,15 +612,8 @@ int ConfigStorePrivate::save(QString filename) const
 	// Stored in the "General" section.
 	// TODO: Move "General" settings to another section?
 	// ("General" is always moved to the top of the file.)
-	// TODO: Get the application information from somewhere else.
-	// TODO: Use MDP version macros.
-	const QString sVersion = QString::fromLatin1("%1.%2.%3")
-					.arg((LibGens::version >> 24) & 0xFF)
-					.arg((LibGens::version >> 16) & 0xFF)
-					.arg(LibGens::version & 0xFFFF);
-
-	qSettings.setValue(QLatin1String("_Application"), QLatin1String("Gens/GS II"));
-	qSettings.setValue(QLatin1String("_Version"), sVersion);
+	qSettings.setValue(QLatin1String("_Application"), gqt4_app->applicationName());
+	qSettings.setValue(QLatin1String("_Version"), gqt4_app->applicationVersion());
 
 	if (LibGens::version_desc) {
 		qSettings.setValue(QLatin1String("_VersionExt"),
