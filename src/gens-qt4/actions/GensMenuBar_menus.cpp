@@ -144,9 +144,9 @@ const GensMenuBar::MenuItem GensMenuBar::gmiSystemRegion[] =
 /** Options menu. **/
 const GensMenuBar::MenuItem GensMenuBar::gmiOptions[] =
 {
-	{IDM_OPTIONS_ENABLESRAM, GMI_CHECK, "Enable &SRAM/EEPROM", QAction::NoRole, 0, nullptr, nullptr},
+	{IDM_OPTIONS_ENABLESRAM, GMI_CHECK, QT_TR_NOOP("Enable &SRAM/EEPROM"), QAction::NoRole, 0, nullptr, nullptr},
 	{IDM_SEPARATOR, GMI_SEPARATOR, nullptr, QAction::NoRole, 0, nullptr, nullptr},
-	{IDM_OPTIONS_CONTROLLERS, GMI_NORMAL, "&Controllers...", QAction::NoRole, 0, nullptr, "input-gaming"},
+	{IDM_OPTIONS_CONTROLLERS, GMI_NORMAL, QT_TR_NOOP("&Controllers..."), QAction::NoRole, 0, nullptr, "input-gaming"},
 
 	{0, GMI_NORMAL, nullptr, QAction::NoRole, 0, nullptr, nullptr}
 };
@@ -154,6 +154,7 @@ const GensMenuBar::MenuItem GensMenuBar::gmiOptions[] =
 /** SoundTest menu. **/
 const GensMenuBar::MenuItem GensMenuBar::gmiSoundTest[] =
 {
+	// NOTE: No translation for the frequency items right now.
 	{IDM_SOUNDTEST_11025, GMI_NORMAL, "&11,025 Hz", QAction::NoRole, 0, nullptr, nullptr},
 	{IDM_SOUNDTEST_16000, GMI_NORMAL, "1&6,000 Hz", QAction::NoRole, 0, nullptr, nullptr},
 	{IDM_SOUNDTEST_22050, GMI_NORMAL, "&22,050 Hz", QAction::NoRole, 0, nullptr, nullptr},
@@ -181,7 +182,8 @@ const GensMenuBar::MainMenuItem GensMenuBar::gmmiMain[] =
 	{IDM_FILE_MENU, QT_TR_NOOP("&File"), &gmiFile[0]},
 	{IDM_GRAPHICS_MENU, QT_TR_NOOP("&Graphics"), &gmiGraphics[0]},
 	{IDM_SYSTEM_MENU, QT_TR_NOOP("&System"), &gmiSystem[0]},
-	{IDM_OPTIONS_MENU, "&Options", &gmiOptions[0]},
+	{IDM_OPTIONS_MENU, QT_TR_NOOP("&Options"), &gmiOptions[0]},
+	// NOTE: No translation for SoundTest - it will be changed later.
 	{IDM_SOUNDTEST_MENU, "&SoundTest", &gmiSoundTest[0]},
 	{IDM_HELP_MENU, QT_TR_NOOP("&Help"), &gmiHelp[0]},
 
