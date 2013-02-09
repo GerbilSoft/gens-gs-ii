@@ -491,6 +491,7 @@ QString AboutWindow::GetDebugInfo(void)
 					? QLatin1String(glslVersion)
 					: qsid_unknown) + sLineBreak;
 	}
+#endif /* GL_SHADING_LANGUAGE_VERSION */
 	
 	// OpenGL extensions.
 	sDebugInfo += sLineBreak;
@@ -530,8 +531,6 @@ QString AboutWindow::GetDebugInfo(void)
 	}
 	
 #endif /* HAVE_GLEW */
-
-#endif /* GL_SHADING_LANGUAGE_VERSION */
 
 #endif /* HAVE_OPENGL */
 	
