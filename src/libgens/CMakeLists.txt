@@ -115,6 +115,9 @@ SET(libgens_SRCS
 	Vdp/VdpStatus.cpp
 	Util/Encoding.cpp
 	IO/IoManager.cpp
+	IO/IoManager_p.cpp
+	IO/IoManager_p_update.cpp
+	IO/IoManager_btnNames.cpp
 	)
 
 IF(HAVE_LZMA)
