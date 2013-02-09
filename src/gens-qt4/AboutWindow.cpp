@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2012 by David Korth.                                 *
+ * Copyright (c) 2008-2013 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -171,7 +171,7 @@ void AboutWindow::initAboutWindowText(void)
 	QString sCopyrights = QString::fromUtf8(
 			"(c) 1999-2002 by Stéphane Dallongeville.<br/>\n"
 			"(c) 2003-2004 by Stéphane Akhoun.<br />\n<br />\n"
-			"Gens/GS (c) 2008-2012 by David Korth.<br />\n<br />\n");
+			"Gens/GS (c) 2008-2013 by David Korth.<br />\n<br />\n");
 	
 	sCopyrights += tr("Visit the Gens homepage:") + sLineBreak +
 			QLatin1String(
