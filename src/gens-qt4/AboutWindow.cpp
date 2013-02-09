@@ -30,6 +30,7 @@
 
 #include "AboutWindow.hpp"
 #include "gqt4_main.hpp"
+#include "GensQApplication.hpp"
 
 // Included libraries.
 #include <zlib.h>
@@ -159,7 +160,7 @@ void AboutWindow::changeEvent(QEvent *event)
 
 
 /**
- * initAboutWindowText(): Initialize the About Window text.
+ * Initialize the About Window text.
  */
 void AboutWindow::initAboutWindowText(void)
 {
@@ -189,7 +190,8 @@ void AboutWindow::initAboutWindowText(void)
 	
 	// Build the program title text.
 	QString sPrgTitle =
-		QLatin1String("<b>Gens/GS II</b>") + sLineBreak;
+		QLatin1String("<b>Gens/GS II</b>") + sLineBreak +
+		tr("Version %1").arg(gqt4_app->applicationVersion()) + sLineBreak;
 
 	if (LibGens::version_desc != nullptr) {
 		// Append the version description.
