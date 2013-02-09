@@ -296,7 +296,7 @@ QString GensCtrlCfgWidgetPrivate::buttonName_l(IoManager::ButtonName_t buttonNam
 
 		case IoManager::BTNNAME_SELECT:
 			//: XE-1 AP: SELECT button.
-			return GensCtrlCfgWidget::tr("Start", "controllers/XE1A");
+			return GensCtrlCfgWidget::tr("Select", "controllers/XE1A");
 		case IoManager::BTNNAME_E2:
 			//: XE-1 AP: E2 button.
 			return GensCtrlCfgWidget::tr("E2", "controllers/XE1A");
