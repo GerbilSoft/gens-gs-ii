@@ -25,6 +25,8 @@ class CdDrive
 		std::string dev_model(void);
 		std::string dev_firmware(void);
 
+		uint16_t getDiscType(void);
+
 	protected:
 		enum scsi_data_mode
 		{

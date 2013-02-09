@@ -41,6 +41,10 @@ int main(int argc, char *argv[])
 	printf("Vendor:   %s\n", cdrom->dev_vendor().c_str());
 	printf("Model:    %s\n", cdrom->dev_model().c_str());
 	printf("Firmware: %s\n", cdrom->dev_firmware().c_str());
+	printf("\n");
+
+	// Get the disc type.
+	printf("Current Feature Profile: 0x%04X\n", cdrom->getDiscType());
 
 	delete cdrom;
 	return EXIT_SUCCESS;

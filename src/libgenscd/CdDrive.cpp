@@ -2,13 +2,39 @@
 
 // C includes. (C++ namespace)
 #include <cstring>
+#include <cstdio>
 
 // C++ includes.
 #include <string>
 using std::string;
 
+// TODO: Byteorder headers from LibGens.
+// Assuming LE host for now.
+#define __swab16(x) (((x) << 8) | ((x) >> 8))
+
+#define __swab32(x) \
+	(((x) << 24) | ((x) >> 24) | \
+		(((x) & 0x0000FF00UL) << 8) | \
+		(((x) & 0x00FF0000UL) >> 8))
+
+#define be16_to_cpu(x)	__swab16(x)
+#define be32_to_cpu(x)	__swab32(x)
+#define le16_to_cpu(x)	(x)
+#define le32_to_cpu(x)	(x)
+
+#define cpu_to_be16(x)	__swab16(x)
+#define cpu_to_be32(x)	__swab32(x)
+#define cpu_to_le16(x)	(x)
+#define cpu_to_le32(x)	(x)
+
 // SCSI commands.
 #include "genscd_scsi.h"
+
+#define PRINT_SCSI_ERROR(op, err) \
+	do { \
+		fprintf(stderr, "SCSI error: OP=%02X, ERR=%02X, SK=%01X ASC=%02X\n", \
+			op, err, SK(err), ASC(err)); \
+	} while (0)
 
 namespace LibGensCD
 {
@@ -35,22 +61,24 @@ CdDrive::~CdDrive()
  */
 int CdDrive::inquiry(void)
 {
-	CDB_SCSI inquiry;
+	CDB_SCSI cdb;
 	SCSI_INQUIRY_STD_DATA data;
 
-	memset(&inquiry, 0x00, sizeof(inquiry));
+	memset(&cdb, 0x00, sizeof(cdb));
 	memset(&data, 0x00, sizeof(data));
 
 	// Inquiry hasn't been done yet.
 	m_inq_data.inq_status = INQ_NOT_DONE;
 
 	// Set SCSI operation type.
-	inquiry.OperationCode = SCSI_INQUIRY;
-	inquiry.AllocationLength = sizeof(data);
+	cdb.OperationCode = SCSI_INQUIRY;
+	cdb.AllocationLength = sizeof(data);
 
 	// Send the SCSI CDB.
-	if (scsi_send_cdb(&inquiry, sizeof(inquiry), &data, sizeof(data))) {
+	int err = scsi_send_cdb(&cdb, sizeof(cdb), &data, sizeof(data), SCSI_DATA_IN);
+	if (err != 0) {
 		// Inquiry failed.
+		PRINT_SCSI_ERROR(cdb.OperationCode, err);
 		m_inq_data.inq_status = INQ_FAILED;
 		return -1;
 	}
@@ -108,6 +136,34 @@ std::string CdDrive::dev_firmware(void)
 		return "";
 
 	return m_inq_data.firmware;
+}
+
+uint16_t CdDrive::getDiscType(void)
+{
+	CDB_MMC_GET_CONFIGURAITON cdb;
+	memset(&cdb, 0x00, sizeof(cdb));
+
+	// Feature header.
+	SCSI_MMC_GET_CONFIGURATION_HEADER_DATA features;
+	memset(&features, 0x00, sizeof(features));
+
+	// Query the current profile.
+	cdb.OperationCode = MMC_GET_CONFIGURATION;
+	cdb.AllocationLength = sizeof(features);
+	cdb.Control = 0;
+
+	int err = scsi_send_cdb(&cdb, sizeof(cdb), &features, sizeof(features), SCSI_DATA_IN);
+	if (err != 0) {
+		// Error occurred.
+		PRINT_SCSI_ERROR(cdb.OperationCode, err);
+
+		// TODO: READ DISC INFORMATION fallback.
+		return 0;
+	}
+
+	// Get the current profile.
+	uint16_t cur_profile = be16_to_cpu(features.CurrentProfile);
+	return cur_profile;
 }
 
 }

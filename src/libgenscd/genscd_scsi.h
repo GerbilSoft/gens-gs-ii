@@ -32,6 +32,8 @@ References
 
 */
 
+#ifdef _WIN32
+
 // If this was not defined we should also assume that some structs are not defined as well
 #ifndef IOCTL_SCSI_PASS_THROUGH_DIRECT
 
@@ -58,7 +60,9 @@ typedef struct PACKED _SCSI_PASS_THROUGH_DIRECT
 	uint8_t Cdb[16];
 } SCSI_PASS_THROUGH_DIRECT, *PSCSI_PASS_THROUGH_DIRECT;
 
-#endif
+#endif /* IOCTL_SCSI_PASS_THROUGH_DIRECT */
+
+#endif /* _WIN32 */
 
 #pragma pack(1)
 
@@ -526,6 +530,44 @@ typedef struct PACKED _SCSI_DATA_RD_CAPAC
 	uint32_t LBA;		// BE32: Maximum LBA
 	uint32_t BlockLength;	// BE32: Block length (in bytes)
 } SCSI_DATA_RD_CAPAC;
+
+/****************************************************************/
+
+/** SCSI error code macros. (From udev) **/
+#define ERRCODE(s)	((((s)[2] & 0x0F) << 16) | ((s)[12] << 8) | ((s)[13]))
+#define SK(errcode)	(((errcode) >> 16) & 0xF)
+#define ASC(errcode)	(((errcode) >> 8) & 0xFF)
+#define ASCQ(errcode)	((errcode) & 0xFF)
+
+/** MMC commands. (Based on udev) **/
+#define MMC_GET_CONFIGURATION		0x46
+#define MMC_READ_DISC_INFORMATION	0x51
+
+/**
+ * CDB for the MMC GET CONFIGURATION command.
+ */
+typedef struct PACKED _CDB_MMC_GET_CONFIGURATION
+{
+	uint8_t OperationCode;		// MMC_GET_CONFIGURATION (0x46)
+	uint8_t RT;
+	uint16_t StartingFeatureNumber;	// BE16
+	uint8_t Reserved[3];
+	uint16_t AllocationLength;	// BE16
+	uint8_t Control;
+} CDB_MMC_GET_CONFIGURAITON;
+
+/**
+ * Response from the MMC GET CONFIGURATION command.
+ * Header only; Feature descriptors are variable-length.
+ */
+typedef struct PACKED _SCSI_MMC_GET_CONFIGURATION_HEADER_DATA
+{
+	uint32_t DataLength;		// BE32
+	uint8_t Reserved[2];
+	uint16_t CurrentProfile;	// BE16
+} SCSI_MMC_GET_CONFIGURATION_HEADER_DATA;
+
+/****************************************************************/
 
 // On Windows, pshpack1.h is needed to byte-pack structs.
 // poppack.h turns off pshpack1.h, since byte-packing is only needed for the ASPI structs.
