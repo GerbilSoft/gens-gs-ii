@@ -102,9 +102,7 @@ const GensKeyConfigPrivate::DefKeySetting_t GensKeyConfigPrivate::DefKeySettings
 	{IDM_FILE_QUIT, KEYM_CTRL | KEYV_q,			"file/quit"},
 
 	// Graphics menu.
-#ifndef Q_WS_MAC
 	{IDM_GRAPHICS_MENUBAR, KEYM_CTRL | KEYV_m,		"graphics/showMenuBar"},
-#endif /* !Q_WS_MAC */
 	{IDM_GRAPHICS_RES, 0,					"graphics/resolution"},
 	// Graphics, Resolution submenu.
 	{IDM_GRAPHICS_RES_1X, 0,				"graphics/resolution/1x"},
