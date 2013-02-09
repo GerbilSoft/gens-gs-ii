@@ -26,6 +26,9 @@
 // C includes.
 #include <string.h>
 
+// ARRAY_SIZE(x)
+#include "macros/common.h"
+
 namespace LibGens
 {
 	
@@ -127,8 +130,7 @@ void Vdp::reset(void)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 	
-	for (int i = 0; i < (int)(sizeof(vdp_reg_init_m5)/sizeof(vdp_reg_init_m5[0])); i++)
-	{
+	for (int i = 0; i < ARRAY_SIZE(vdp_reg_init_m5); i++) {
 		Set_Reg(i, vdp_reg_init_m5[i]);
 	}
 	

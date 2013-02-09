@@ -40,6 +40,7 @@
 #include "libgens/Util/cpuflags.h"
 #include "libgens/Util/Timing.hpp"
 #include "libgens/credits.h"
+#include "libgens/macros/common.h"
 
 // C includes.
 #include <string.h>
@@ -386,43 +387,40 @@ QString AboutWindow::GetIncLibraries(void)
 
 
 /**
- * GetDebugInfo(): Get debug information.
+ * Get debug information.
  * @return Debug information.
  */
 QString AboutWindow::GetDebugInfo(void)
 {
 	// Line break string.
 	const QString sLineBreak = QLatin1String("<br/>\n");
-	
+
 	// Debug information.
 	QString sDebugInfo =
 		tr("Compiled using Qt %1.").arg(QLatin1String(QT_VERSION_STR)) + sLineBreak +
 		tr("Using Qt %1.").arg(QLatin1String(qVersion())) + sLineBreak + sLineBreak;
-	
+
+	// Reserve at least 4 KB for the debug information.
+	sDebugInfo.reserve(4096);
+
 	// CPU flags.
 	// TODO: Move the array of CPU flag names to LibGens.
 	//: CPU flags are extra features found in a CPU, such as SSE.
 	sDebugInfo += tr("CPU flags:");
 #if defined(__i386__) || defined(__amd64__)
-	static const char *const CpuFlagNames[11] =
-	{
+	static const char *const CpuFlagNames[11] = {
 		"MMX", "MMXEXT", "3DNow!", "3DNow! EXT",
 		"SSE", "SSE2", "SSE3", "SSSE3",
 		"SSE4.1", "SSE4.2", "SSE4a"
 	};
-	
-	if (CPU_Flags == 0)
-	{
+
+	if (CPU_Flags == 0) {
 		//: Used to indicate no special CPU features were found.
 		sDebugInfo += tr("(none)");
-	}
-	else
-	{
-		unsigned int cnt = 0;
-		for (unsigned int i = 0; i < (sizeof(CpuFlagNames)/sizeof(CpuFlagNames[0])); i++)
-		{
-			if (CPU_Flags & (1 << i))
-			{
+	} else {
+		int cnt = 0;
+		for (int i = 0; i < ARRAY_SIZE(CpuFlagNames); i++) {
+			if (CPU_Flags & (1 << i)) {
 				if (cnt != 0)
 					sDebugInfo += QLatin1String(", ");
 				sDebugInfo += QLatin1String(CpuFlagNames[i]);
@@ -435,24 +433,24 @@ QString AboutWindow::GetDebugInfo(void)
 	sDebugInfo += tr("(none)");
 #endif /* defined(__i386__) || defined(__amd64__) */
 	sDebugInfo += sLineBreak;
-	
+
 	//: Timing method: Function used to handle emulation timing.
 	sDebugInfo += tr("Timing method:") +
 		QLatin1String(LibGens::Timing::GetTimingMethodName(LibGens::Timing::GetTimingMethod())) +
 		QLatin1String("()") + sLineBreak + sLineBreak;
-	
+
 	//: Save directory: Directory where configuration and savestate files are saved.
 	// TODO: Verify that the link works on Windows and Mac OS X.
 	sDebugInfo += tr("Save directory:") + sLineBreak +
 		QLatin1String("<a href=\"file://") + gqt4_cfg->configPath() + QLatin1String("\">") +
 		QDir::toNativeSeparators(gqt4_cfg->configPath()) + QLatin1String("</a>") +
 		sLineBreak + sLineBreak;
-	
+
 #ifdef Q_OS_WIN32
 	// Win32 code page information.
 	sDebugInfo += GetCodePageInfo() + sLineBreak;
 #endif /* Q_OS_WIN32 */
-	
+
 #ifndef HAVE_OPENGL
 	//: Displayed if Gens/GS II is compiled without OpenGL support.
 	sDebugInfo += tr("OpenGL disabled.") + sLineBreak;
@@ -460,9 +458,9 @@ QString AboutWindow::GetDebugInfo(void)
 	const char *glVendor = (const char*)glGetString(GL_VENDOR);
 	const char *glRenderer = (const char*)glGetString(GL_RENDERER);
 	const char *glVersion = (const char*)glGetString(GL_VERSION);
-	
+
 	// Translatable strings.
-	
+
 	//: String identifying the manufacturer of the OpenGL implementation. (e.g. "X.Org R300 Project")
 	const QString qsid_glVendor = tr("OpenGL vendor string:");
 	//: String identifying the specific OpenGL renderer. (e.g. "Gallium 0.4 on ATI RV530")
@@ -471,17 +469,16 @@ QString AboutWindow::GetDebugInfo(void)
 	const QString qsid_glVersion = tr("OpenGL version string:");
 	//: Placeholder used if an OpenGL version string could not be retrieved.
 	const QString qsid_unknown = tr("(unknown)");
-	
+
 	sDebugInfo += qsid_glVendor +
 			QString(glVendor ? QLatin1String(glVendor) : qsid_unknown) + sLineBreak +
 			qsid_glRenderer +
 			QString(glRenderer ? QLatin1String(glRenderer) : qsid_unknown) + sLineBreak +
 			qsid_glVersion +
 			QString(glVersion ? QLatin1String(glVersion) : qsid_unknown) + sLineBreak;
-	
+
 #ifdef GL_SHADING_LANGUAGE_VERSION
-	if (glVersion && glVersion[0] >= '2' && glVersion[1] == '.')
-	{
+	if (glVersion && glVersion[0] >= '2' && glVersion[1] == '.') {
 		const char *glslVersion = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
 		
 		//: String identifying the OpenGL Shading Language version. (e.g. "1.20")
@@ -492,7 +489,7 @@ QString AboutWindow::GetDebugInfo(void)
 					: qsid_unknown) + sLineBreak;
 	}
 #endif /* GL_SHADING_LANGUAGE_VERSION */
-	
+
 	// OpenGL extensions.
 	sDebugInfo += sLineBreak;
 #ifndef HAVE_GLEW
@@ -500,40 +497,36 @@ QString AboutWindow::GetDebugInfo(void)
 	sDebugInfo += tr("GLEW disabled; no GL extensions supported.") + sLineBreak;
 #else
 	const char *glewVersion = (const char*)glewGetString(GLEW_VERSION);
-	
+
 	//: String identifying the GLEW version.
 	const QString qsid_glewVersion = tr("GLEW version");
 	sDebugInfo += qsid_glewVersion + QChar(L' ') +
 			QString(glewVersion
 				? QLatin1String(glewVersion)
 				: tr("(unknown)")) + sLineBreak;
-	
+
 	// Get a list of OpenGL extensions that are in use.
 	const QChar chrBullet(0x2022);	// U+2022: BULLET
 	const QStringList& extsInUse = GLBackend::GLExtsInUse();
-	
-	if (extsInUse.isEmpty())
-	{
+
+	if (extsInUse.isEmpty()) {
 		//: No OpenGL extensions are being used.
 		sDebugInfo += tr("No GL extensions in use.");
-	}
-	else
-	{
+	} else {
 		//: List what OpenGL extensions are in use.
 		sDebugInfo += tr("Using GL extensions:");
-		foreach (QString ext, extsInUse)
-		{
+		foreach (QString ext, extsInUse) {
 			sDebugInfo += sLineBreak;
 			sDebugInfo += chrBullet;
 			sDebugInfo += QChar(L' ');
 			sDebugInfo += ext;
 		}
 	}
-	
+
 #endif /* HAVE_GLEW */
 
 #endif /* HAVE_OPENGL */
-	
+
 	// Trim whitespace at the end of sDebugInfo.
 	return sDebugInfo.trimmed();
 }

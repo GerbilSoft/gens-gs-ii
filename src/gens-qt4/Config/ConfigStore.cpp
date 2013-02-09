@@ -28,6 +28,7 @@
 
 // LibGens includes.
 #include "libgens/lg_main.hpp"
+#include "libgens/macros/common.h"
 #include "libgens/macros/log_msg.h"
 
 // Qt includes.
@@ -353,13 +354,12 @@ bool ConfigStorePrivate::IsRegionCodeOrderValid(uint16_t regionCodeOrder)
 		0x1482, 0x1428, 0x1824, 0x1842, 0x1248, 0x1284,
 		0x2481, 0x2418,	0x2814, 0x2841, 0x2148, 0x2184
 	};
-	
-	for (size_t i = 0; i < (sizeof(RegionCodeOrder_tbl)/sizeof(RegionCodeOrder_tbl[0])); i++)
-	{
+
+	for (size_t i = 0; i < ARRAY_SIZE(RegionCodeOrder_tbl); i++) {
 		if (regionCodeOrder == RegionCodeOrder_tbl[i])
 			return true;
 	}
-	
+
 	// Region code order is not valid.
 	return false;
 }

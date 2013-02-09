@@ -34,6 +34,9 @@
 // Recent ROMs menu.
 #include "RecentRomsMenu.hpp"
 
+// ARRAY_SIZE(x)
+#include "libgens/macros/common.h"
+
 namespace GensQt4
 {
 
@@ -276,12 +279,15 @@ void GensMenuBar::stateChanged(void)
 	// Simple enable-if-ROM-open actions.
 	static const int EnableIfOpen[] =
 	{
-		IDM_FILE_CLOSE, IDM_FILE_SAVESTATE, IDM_FILE_LOADSTATE,
-		IDM_GRAPHICS_SCRSHOT, IDM_SYSTEM_HARDRESET, IDM_SYSTEM_SOFTRESET,
-		0
+		IDM_FILE_CLOSE,
+		IDM_FILE_SAVESTATE,
+		IDM_FILE_LOADSTATE,
+		IDM_GRAPHICS_SCRSHOT,
+		IDM_SYSTEM_HARDRESET,
+		IDM_SYSTEM_SOFTRESET,
 	};
 
-	for (int i = ((sizeof(EnableIfOpen)/sizeof(EnableIfOpen[0]))-2); i >= 0; i--) {
+	for (int i = 0; i < ARRAY_SIZE(EnableIfOpen); i++) {
 		QAction *actionEnableIfOpen = d->hashActions.value(EnableIfOpen[i]);
 		if (actionEnableIfOpen)
 			actionEnableIfOpen->setEnabled(isRomOpen);

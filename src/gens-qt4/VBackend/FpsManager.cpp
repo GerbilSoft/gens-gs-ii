@@ -23,8 +23,8 @@
 
 #include "FpsManager.hpp"
 
-// C includes. (C++ namespace)
-#include <cstddef>
+// ARRAY_SIZE(x)
+#include "libgens/macros/common.h"
 
 namespace GensQt4
 {
@@ -35,7 +35,7 @@ FpsManager::FpsManager(QObject *parent)
 	, m_fpsPtr(0)
 {
 	// Reset the FPS array.
-	for (size_t i = 0; i < (sizeof(m_fps)/sizeof(m_fps[0])); i++)
+	for (int i = 0; i < ARRAY_SIZE(m_fps); i++)
 		m_fps[i] = -1.0;
 }
 
@@ -47,11 +47,11 @@ void FpsManager::reset(void)
 	// Clear the FPS average and reset the pointer.
 	m_fpsAvg = 0.0;
 	m_fpsPtr = 0;
-	
+
 	// Reset the FPS array.
-	for (size_t i = 0; i < (sizeof(m_fps)/sizeof(m_fps[0])); i++)
+	for (int i = 0; i < ARRAY_SIZE(m_fps); i++)
 		m_fps[i] = -1.0;
-	
+
 	// Average FPS has been updated.
 	emit updated(m_fpsAvg);
 }
@@ -62,26 +62,24 @@ void FpsManager::reset(void)
  */
 void FpsManager::push(double fps)
 {
-	m_fpsPtr = (m_fpsPtr + 1) % (sizeof(m_fps)/sizeof(m_fps[0]));
+	m_fpsPtr = (m_fpsPtr + 1) % ARRAY_SIZE(m_fps);
 	m_fps[m_fpsPtr] = fps;
-	
+
 	// Calculate the new average.
 	int count = 0;
 	double sum = 0;
-	for (size_t i = 0; i < (sizeof(m_fps)/sizeof(m_fps[0])); i++)
-	{
-		if (m_fps[i] >= 0.0)
-		{
+	for (int i = 0; i < ARRAY_SIZE(m_fps); i++) {
+		if (m_fps[i] >= 0.0) {
 			sum += m_fps[i];
 			count++;
 		}
 	}
-	
+
 	if (count <= 0)
 		m_fpsAvg = 0.0;
 	else
 		m_fpsAvg = (sum / (double)count);
-	
+
 	// Average FPS has been updated.
 	emit updated(m_fpsAvg);
 }

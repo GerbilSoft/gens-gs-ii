@@ -40,6 +40,9 @@
 // LOG_MSG() subsystem.
 #include "macros/log_msg.h"
 
+// ARRAY_SIZE(x)
+#include "macros/common.h"
+
 // C++ includes.
 #include <string>
 #include <sstream>
@@ -226,7 +229,7 @@ int DcRar::getFileInfo(mdp_z_entry_t **z_entry_out)
 
 				// Convert ANSI to UTF-16.
 				MultiByteToWideChar(CP_ACP, 0, rar_header.FileName, -1,
-							wcs_buf, (sizeof(wcs_buf)/sizeof(wcs_buf[0])));
+							wcs_buf, ARRAY_SIZE(wcs_buf));
 				// Convert UTF-16 to UTF-8.
 				WideCharToMultiByte(CP_UTF8, 0, wcs_buf, -1,
 							utf8_buf, sizeof(utf8_buf), nullptr, nullptr);

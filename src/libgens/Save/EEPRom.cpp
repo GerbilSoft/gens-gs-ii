@@ -26,24 +26,27 @@
 
 #include "EEPRom.hpp"
 
+// ARRAY_SIZE(x)
+#include "macros/common.h"
+
 namespace LibGens
 {
 
 /**
- * EEPRom(): Initialize the EEPRom chip.
+ * Initialize the EEPRom chip.
  */
 EEPRom::EEPRom()
 {
 	// Clear the EEPRom type.
 	memset(&m_eprType, 0x00, sizeof(m_eprType));
-	
+
 	// Reset the EEPRom on startup.
 	reset();
 }
 
 
 /**
- * reset(): Clear EEPRom and initialize settings.
+ * Clear EEPRom and initialize settings.
  * This function does NOT reset the EEPRom type!
  */
 void EEPRom::reset(void)
@@ -51,19 +54,19 @@ void EEPRom::reset(void)
 	/**
 	 * EEProm is initialized with 0xFF.
 	 */
-	
+
 	memset(m_eeprom, 0xFF, sizeof(m_eeprom));
-	
+
 	// Initial EEPRom state.
 	m_state = EEP_STANDBY;
 	clearDirty();
-	
+
 	// Reset the clock and data lines
 	m_scl = false;
 	m_old_scl = false;
 	m_sda = false;
 	m_old_sda = false;
-	
+
 	// Clear the counter and addresses.
 	m_counter = 0;
 	m_rw = false;
@@ -73,24 +76,21 @@ void EEPRom::reset(void)
 
 
 /**
- * setEEPRomType(): Set the EEPRom type.
+ * Set the EEPRom type.
  * @param type EEPRom type. (Specify a negative number to clear)
  * @return 0 on success; non-zero on error.
  */
 int EEPRom::setEEPRomType(int type)
 {
-	if (type < 0)
-	{
+	if (type < 0) {
 		// Negative type ID. Clear the EEPRom type.
 		memset(&m_eprType, 0x00, sizeof(m_eprType));
 		return 0;
-	}
-	else if (type >= (int)((sizeof(ms_Database)/sizeof(ms_Database[0]))))
-	{
+	} else if (type >= ARRAY_SIZE(ms_Database)) {
 		// Type ID is out of range.
 		return 1;
 	}
-	
+
 	// Set the EEPRom type.
 	memcpy(&m_eprType, &ms_Database[type], sizeof(m_eprType));
 	return 0;
@@ -98,7 +98,7 @@ int EEPRom::setEEPRomType(int type)
 
 
 /**
- * readByte(): Read the specified port. (byte-wide)
+ * Read the specified port. (byte-wide)
  * @param address Address.
  * @return Port value.
  */
@@ -151,7 +151,7 @@ uint8_t EEPRom::readByte(uint32_t address)
 
 
 /**
- * readWord(): Read the specified port. (word-wide)
+ * Read the specified port. (word-wide)
  * @param address Address.
  * @return Port value.
  */
@@ -209,7 +209,7 @@ uint16_t EEPRom::readWord(uint32_t address)
 
 
 /**
- * writeByte(): Write to the specified port. (byte-wide)
+ * Write to the specified port. (byte-wide)
  * @param address Address.
  * @param data Data.
  */
@@ -240,7 +240,7 @@ void EEPRom::writeByte(uint32_t address, uint8_t data)
 
 
 /**
- * writeWord(): Write to the specified port. (word-wide)
+ * Write to the specified port. (word-wide)
  * @param address Address.
  * @param data Data.
  */
@@ -273,7 +273,7 @@ void EEPRom::writeWord(uint32_t address, uint16_t data)
 
 
 /**
- * processWriteCmd(): Process a port write command.
+ * Process a port write command.
  */
 void EEPRom::processWriteCmd(void)
 {
@@ -565,30 +565,25 @@ void EEPRom::processWriteCmd(void)
 
 
 /**
- * checkStart(): Check for a START condition. (/SCL = 1, /SDA = rising edge)
+ * Check for a START condition. (/SCL = 1, /SDA = rising edge)
  */
 void EEPRom::checkStart(void)
 {
-	if (!m_old_scl || !m_scl)
-	{
+	if (!m_old_scl || !m_scl) {
 		// Clock is either low or has made a transition.
 		return;
 	}
-	
-	if (m_old_sda && !m_sda)
-	{
+
+	if (m_old_sda && !m_sda) {
 		// Data In line has a falling edge transition.
 		m_counter = 0;
 		m_slave_mask = 0;
-		
-		if (m_eprType.type.address_bits == 7)
-		{
+
+		if (m_eprType.type.address_bits == 7) {
 			// MODE1. (7-bit)
 			m_word_address = 0;
 			m_state = EEP_GET_WORD_ADR_7BITS;
-		}
-		else
-		{
+		} else {
 			// MODE2 or MODE3.
 			m_state = EEP_GET_SLAVE_ADR;
 		}
@@ -597,18 +592,16 @@ void EEPRom::checkStart(void)
 
 
 /**
- * checkStop(): Check for a STOP condition. (/SCL = 1, /SDA = falling edge)
+ * Check for a STOP condition. (/SCL = 1, /SDA = falling edge)
  */
 void EEPRom::checkStop(void)
 {
-	if (!m_old_scl || !m_scl)
-	{
+	if (!m_old_scl || !m_scl) {
 		// Clock is either low or has made a transition.
 		return;
 	}
-	
-	if (!m_old_sda && m_sda)
-	{
+
+	if (!m_old_sda && m_sda) {
 		// Data In line has a rising edge transition.
 		m_state = EEP_STANDBY;
 	}

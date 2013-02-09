@@ -776,7 +776,7 @@ void RomPrivate::readHeaderMD(const uint8_t *header, size_t header_size)
  */
 int RomPrivate::CheckRomFixupsMD(const RomPrivate::MD_RomHeader *mdRomHeader, uint32_t crc32)
 {
-	for (int i = 0; i < (int)(sizeof(MD_RomFixups)/sizeof(MD_RomFixups[0])); i++) {
+	for (int i = 0; i < ARRAY_SIZE(MD_RomFixups); i++) {
 		const MD_RomFixup *fixup = &MD_RomFixups[i];
 		bool match = false;
 

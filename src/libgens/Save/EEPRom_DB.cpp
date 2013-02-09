@@ -26,6 +26,9 @@
 
 #include "EEPRom.hpp"
 
+// ARRAY_SIZE(x)
+#include "macros/common.h"
+
 namespace LibGens
 {
 
@@ -91,7 +94,7 @@ const EEPRom::GameEEPRomInfo EEPRom::ms_Database[30] =
 
 
 /**
- * DetectEEPRomType(): Detect the EEPRom type used by the specified ROM.
+ * Detect the EEPRom type used by the specified ROM.
  * @param serial Serial number. (NOTE: This does NOT include the "GM " prefix!)
  * @param serial_len Length of the serial number string.
  * @param checksum Checksum.
@@ -100,37 +103,33 @@ const EEPRom::GameEEPRomInfo EEPRom::ms_Database[30] =
 int EEPRom::DetectEEPRomType(const char *serial, size_t serial_len, uint16_t checksum)
 {
 	// Scan the database for potential matches.
-	for (size_t i = 0; i < (sizeof(ms_Database)/sizeof(ms_Database[0])); i++)
+	for (int i = 0; i < ARRAY_SIZE(ms_Database); i++)
 	{
 		// TODO: Figure out how to get rid of the strlen().
 		size_t dbSerial_len = strlen(ms_Database[i].game_id);
-		if (dbSerial_len > serial_len)
-		{
+		if (dbSerial_len > serial_len) {
 			// Serial number in the database is longer than
 			// the given serial number data.
 			continue;
 		}
-		
-		if (!memcmp(serial, ms_Database[i].game_id, dbSerial_len))
-		{
+
+		if (!memcmp(serial, ms_Database[i].game_id, dbSerial_len)) {
 			// Serial number matches.
-			if (ms_Database[i].checksum == 0)
-			{
+			if (ms_Database[i].checksum == 0) {
 				// No checksum verification required.
 				return i;
 			}
-			
+
 			// Checksum verification is required.
-			if (checksum == ms_Database[i].checksum)
-			{
+			if (checksum == ms_Database[i].checksum) {
 				// Checksum matches.
 				return i;
 			}
-			
+
 			// Checksum doesn't match. Wrong ROM.
 		}
 	}
-	
+
 	// The ROM wasn't found in the database.
 	return -1;
 }

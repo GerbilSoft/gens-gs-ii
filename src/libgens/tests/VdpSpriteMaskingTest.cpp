@@ -32,6 +32,9 @@
 #include "MD/SysVersion.hpp"
 #include "Util/byteswap.h"
 
+// ARRAY_SIZE(x)
+#include "macros/common.h"
+
 // Test ROM data.
 #include "VdpSpriteMaskingTest_data.h"
 
@@ -208,7 +211,7 @@ void VdpSpriteMaskingTest::SetUp(void)
 	// Initialize CRam.
 	LibGens::VdpPalette *palette = &m_vdp->m_palette;
 	palette->setBpp(LibGens::VdpPalette::BPP_32);
-	for (size_t i = 0; i < (sizeof(test_spritemask_cram)/sizeof(test_spritemask_cram[0])); i++)
+	for (int i = 0; i < ARRAY_SIZE(test_spritemask_cram); i++)
 		palette->writeCRam_16((i<<1), test_spritemask_cram[i]);
 
 	// Initialize VSRam.
