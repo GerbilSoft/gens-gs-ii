@@ -142,8 +142,14 @@ int CdDriveSpti::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 	// Convert scsi_data_mode to Win32 DataIn.
 	uint8_t DataIn;
 	switch (mode) {
-		case SCSI_DATA_IN:	DataIn = SCSI_IOCTL_DATA_IN; break;
-		case SCSI_DATA_OUT:	DataIn = SCSI_IOCTL_DATA_OUT; break;
+		case SCSI_DATA_NONE:
+		case SCSI_DATA_IN:
+			DataIn = SCSI_IOCTL_DATA_IN;
+			break;
+
+		case SCSI_DATA_OUT:
+			DataIn = SCSI_IOCTL_DATA_OUT;
+			break;
 
 		case SCSI_DATA_UNSPECIFIED:
 		default:

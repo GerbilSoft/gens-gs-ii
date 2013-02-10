@@ -49,6 +49,7 @@ class CdDrive
 	protected:
 		enum scsi_data_mode
 		{
+			SCSI_DATA_NONE,
 			SCSI_DATA_IN,
 			SCSI_DATA_OUT,
 			SCSI_DATA_UNSPECIFIED
