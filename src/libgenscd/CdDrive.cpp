@@ -147,6 +147,10 @@ std::string CdDrive::dev_firmware(void)
  */
 uint16_t CdDrive::getCurrentFeatureProfile(void)
 {
+	// Make sure a disc is present.
+	if (!isOpen() || !isDiscPresent())
+		return 0;
+
 	CDB_MMC_GET_CONFIGURAITON cdb;
 	memset(&cdb, 0x00, sizeof(cdb));
 
@@ -156,7 +160,7 @@ uint16_t CdDrive::getCurrentFeatureProfile(void)
 
 	// Query the current profile.
 	cdb.OperationCode = MMC_GET_CONFIGURATION;
-	cdb.AllocationLength = sizeof(features);
+	cdb.AllocationLength = cpu_to_be16(sizeof(features));
 	cdb.Control = 0;
 
 	int err = scsi_send_cdb(&cdb, sizeof(cdb), &features, sizeof(features), SCSI_DATA_IN);
@@ -188,11 +192,9 @@ uint16_t CdDrive::getCurrentFeatureProfile(void)
  */
 uint16_t CdDrive::getCurrentFeatureProfile_mmc1(void)
 {
-	// Check if a disc is present.
-	if (!isDiscPresent()) {
-		// No disc found.
+	// Make sure a disc is present.
+	if (!isOpen() || !isDiscPresent())
 		return 0;
-	}
 
 	CDB_MMC_READ_DISC_INFORMATION cdb;
 	memset(&cdb, 0x00, sizeof(cdb));
@@ -231,15 +233,109 @@ uint16_t CdDrive::getCurrentFeatureProfile_mmc1(void)
 }
 
 /**
+ * Get a bitfield of supported disc types.
+ * @return Bitfield of supported disc types.
+ */
+uint32_t CdDrive::getSupportedDiscTypes(void)
+{
+	// Make sure the device file is open.
+	if (!isOpen())
+		return 0;
+
+	CDB_MMC_GET_CONFIGURAITON cdb;
+	memset(&cdb, 0x00, sizeof(cdb));
+
+	// Feature buffer.
+	uint8_t features[65530];
+	memset(features, 0x00, sizeof(features));
+
+	// Query all available profiles.
+	cdb.OperationCode = MMC_GET_CONFIGURATION;
+	cdb.AllocationLength = (uint16_t)cpu_to_be16(sizeof(features));
+	cdb.Control = 0;
+
+	int err = scsi_send_cdb(&cdb, sizeof(cdb), &features, sizeof(features), SCSI_DATA_IN);
+	if (err != 0) {
+		// Error occurred.
+		// TODO: Check the sense data.
+		/*
+		if (SK(err) == 0x5 && ASC(err) == 0x20) {
+			// Drive does not support MMC-2 commands.
+			// Determine drive type based on current disc type.
+			switch (getDiscType()) {
+				case DISC_TYPE_CD_RW:
+					return DRIVE_TYPE_CD_RW;
+				case DISC_TYPE_CD_R:
+					return DRIVE_TYPE_CD_R;
+				case DISC_TYPE_CDROM:
+				default:
+					return DRIVE_TYPE_CDROM;
+			}
+		}
+		*/
+
+		// Other error.
+		// TODO: We have to request the sense data. err isn't sense data...
+		PRINT_SCSI_ERROR(cdb.OperationCode, err);
+		return 0;
+	}
+
+	// Check how many features we received.
+	uint32_t len = (features[0] << 24 | features[1] << 16 | features[2] << 8 | features[3]);
+	if (len > sizeof(features)) {
+		// Too many features. Truncate the list
+		len = sizeof(features);
+	}
+
+	// Go through all of the features.
+	int discTypes = 0;
+	for (unsigned int i = 8; i+4 < len; i += (4 + features[i+3])) {
+		const unsigned int feature = (features[i] << 8 | features[i+1]);
+		if (feature == 0x00) {
+			// Feature profiles.
+			const uint8_t *ptr = &features[i+4];
+			const uint8_t *const ptr_end = ptr + features[i+3];
+
+			for (; ptr < ptr_end; ptr += 4) {
+				const uint16_t featureProfile = (ptr[0] << 8 | ptr[1]);
+				printf("Feature Profile: %04X\n", featureProfile);
+				discTypes |= mmcFeatureProfileToDiscType(featureProfile);
+			}
+		}
+	}
+
+	// Return the bitfield of supported disc types.
+	return discTypes;
+}
+
+/**
  * Get the current disc type.
  * @return Disc type.
  */
 CD_DiscType_t CdDrive::getDiscType(void)
 {
 	// TODO: Cache the current profile?
-	const uint16_t cur_profile = getCurrentFeatureProfile();
+	return mmcFeatureProfileToDiscType(getCurrentFeatureProfile());
+}
 
-	switch (cur_profile) {
+/**
+ * Get the current drive type.
+ * @return Drive type.
+ */
+CD_DriveType_t CdDrive::getDriveType(void)
+{
+	// TODO: Cache the current drive type?
+	return discTypesToDriveType(getSupportedDiscTypes());
+}
+
+/**
+ * Convert an MMC feature profile to a CD_DiscType_t.
+ * @param featureProfile MMC feature profile.
+ * @return CD_DiscType_t.
+ */
+CD_DiscType_t CdDrive::mmcFeatureProfileToDiscType(uint16_t featureProfile)
+{
+	switch (featureProfile) {
 		case 0x03:	return DISC_TYPE_MO;		// (legacy) MO erasable
 		case 0x04:	return DISC_TYPE_MO;		// (legacy) Optical Write-Once
 		case 0x05:	return DISC_TYPE_MO;		// (legacy) AS-MO
@@ -273,6 +369,61 @@ CD_DiscType_t CdDrive::getDiscType(void)
 		default:
 			return DISC_TYPE_NONE;
 	}
+}
+
+/**
+ * Convert a bitfield of CD_DiscType_t to a CD_DriveType_t.
+ * @param discTypes Bitfield of all CD_DiscType_t disc types.
+ * @return CD_DriveType_t.
+ */
+CD_DriveType_t CdDrive::discTypesToDriveType(uint32_t discTypes)
+{
+	// TODO: Find various permutations like DVD/CD-RW.
+	// Also, check for multi-format DVD±RW drives.
+	// For now, just get the maximum disc type.
+	if (discTypes & DISC_TYPE_MO)
+		return DRIVE_TYPE_MO;
+	else if (discTypes & DISC_TYPE_HDDVD_RW)
+		return DRIVE_TYPE_HDDVD_RW;
+	else if (discTypes & DISC_TYPE_HDDVD_R)
+		return DRIVE_TYPE_HDDVD_R;
+	else if (discTypes & DISC_TYPE_HDDVD) {
+		// TODO: Check for CD/DVD writing capabilities.
+		return DRIVE_TYPE_HDDVD;
+	} else if (discTypes & DISC_TYPE_BD_RE)
+		return DRIVE_TYPE_BD_RE;
+	else if (discTypes & DISC_TYPE_BD_R)
+		return DRIVE_TYPE_BD_R;
+	else if (discTypes & DISC_TYPE_BDROM) {
+		// TODO: Check for CD/DVD writing capabilities.
+		return DRIVE_TYPE_BDROM;
+	} else if (discTypes & DISC_TYPE_DVD_PLUS_RW_DL)
+		return DRIVE_TYPE_DVD_PLUS_RW_DL;
+	else if (discTypes & DISC_TYPE_DVD_PLUS_R_DL)
+		return DRIVE_TYPE_DVD_PLUS_R_DL;
+	else if (discTypes & (DISC_TYPE_DVD_PLUS_RW | DISC_TYPE_DVD_PLUS_R)) {
+		// DVD+RW was released before DVD+R.
+		// Hence, there's no such thing as a DVD+R-only drive.
+		return DRIVE_TYPE_DVD_PLUS_RW;
+	} else if (discTypes & DISC_TYPE_DVD_RAM)
+		return DRIVE_TYPE_DVD_RAM;
+	else if (discTypes & DISC_TYPE_DVD_RW)
+		return DRIVE_TYPE_DVD_RW;
+	else if (discTypes & DISC_TYPE_DVD_R)
+		return DRIVE_TYPE_DVD_R;
+	else if (discTypes & DISC_TYPE_DVD) {
+		if (discTypes & (DISC_TYPE_CD_R | DISC_TYPE_CD_RW))
+			return DRIVE_TYPE_DVD_CD_RW;
+		else
+			return DRIVE_TYPE_DVD;
+	} else if (discTypes & DISC_TYPE_CD_RW)
+		return DRIVE_TYPE_CD_RW;
+	else if (discTypes & DISC_TYPE_CD_R)
+		return DRIVE_TYPE_CD_R;
+	else if (discTypes & DISC_TYPE_CDROM)
+		return DRIVE_TYPE_CDROM;
+	else
+		return DRIVE_TYPE_NONE;
 }
 
 }

@@ -40,6 +40,12 @@ class CdDrive
 		 */
 		CD_DiscType_t getDiscType(void);
 
+		/**
+		 * Get the current drive type.
+		 * @return Drive type.
+		 */
+		CD_DriveType_t getDriveType(void);
+
 	protected:
 		enum scsi_data_mode
 		{
@@ -91,6 +97,26 @@ class CdDrive
 		 * @return Current feature profile, or 0xFFFF on error.
 		 */
 		uint16_t getCurrentFeatureProfile_mmc1(void);
+
+		/**
+		 * Get a bitfield of supported disc types.
+		 * @return Bitfield of supported disc types.
+		 */
+		uint32_t getSupportedDiscTypes(void);
+
+		/**
+		 * Convert an MMC feature profile to a CD_DiscType_t.
+		 * @param featureProfile MMC feature profile.
+		 * @return CD_DiscType_t.
+		 */
+		CD_DiscType_t mmcFeatureProfileToDiscType(uint16_t featureProfile);
+
+		/**
+		 * Convert a bitfield of CD_DiscType_t to a CD_DriveType_t.
+		 * @param discTypes Bitfield of all CD_DiscType_t disc types.
+		 * @return CD_DriveType_t.
+		 */
+		CD_DriveType_t discTypesToDriveType(uint32_t discTypes);
 };
 
 }

@@ -42,8 +42,9 @@ int main(int argc, char *argv[])
 	printf("Firmware: %s\n", cdrom->dev_firmware().c_str());
 	printf("\n");
 
-	// Get the disc type.
-	printf("Current Disc Type: 0x%08X\n", cdrom->getDiscType());
+	// Get the disc and drive type.
+	printf("Current Disc Type:  0x%08X\n", cdrom->getDiscType());
+	printf("Current Drive Type: 0x%08X\n", cdrom->getDriveType());
 
 	delete cdrom;
 	return EXIT_SUCCESS;
