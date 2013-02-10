@@ -88,6 +88,9 @@ int CdDriveSpti::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 				void *out, size_t out_len,
 				scsi_data_mode mode)
 {
+	if (!isOpen())
+		return -1;	// TODO: Proper SCSI error code.
+
 	// Based on http://www.codeproject.com/KB/system/mydvdregion.aspx
 	DWORD returned;
 
