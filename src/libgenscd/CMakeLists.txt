@@ -13,6 +13,13 @@ IF(WIN32)
 		)
 ENDIF(WIN32)
 
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+	SET(libgenscd_SRCS
+		${libgenscd_SRCS}
+		CdDriveLinux.cpp
+		)
+ENDIF()
+
 # Build the library.
 ADD_LIBRARY(genscd STATIC ${libgenscd_SRCS})
 
