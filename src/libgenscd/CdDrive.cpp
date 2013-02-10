@@ -521,22 +521,27 @@ int CdDrivePrivate::readToc(void)
 		return -1;
 	}
 
-	// Calculate the number of tracks.
-	toc.num_tracks = ((toc.toc.LastTrackNumber - toc.toc.FirstTrackNumber) + 1);
-	if (toc.num_tracks < 0)
+	if (toc.toc.FirstTrackNumber == 0 && toc.toc.LastTrackNumber == 0) {
+		// No tracks.
 		toc.num_tracks = 0;
-	else if (toc.num_tracks > (int)(sizeof(toc.toc.Tracks) / sizeof(toc.toc.Tracks[0])))
-		toc.num_tracks = (int)(sizeof(toc.toc.Tracks) / sizeof(toc.toc.Tracks[0]));
+	} else {
+		// Calculate the number of tracks.
+		toc.num_tracks = ((toc.toc.LastTrackNumber - toc.toc.FirstTrackNumber) + 1);
+		if (toc.num_tracks < 0)
+			toc.num_tracks = 0;
+		else if (toc.num_tracks > (int)(sizeof(toc.toc.Tracks) / sizeof(toc.toc.Tracks[0])))
+			toc.num_tracks = (int)(sizeof(toc.toc.Tracks) / sizeof(toc.toc.Tracks[0]));
 
-	// Make sure num_tracks doesn't exceed the data length.
-	const int num_tracks_data = ((toc.toc.DataLen - 2) / 4);
-	if (toc.num_tracks > num_tracks_data)
-		toc.num_tracks = num_tracks_data;
+		// Make sure num_tracks doesn't exceed the data length.
+		const int num_tracks_data = ((toc.toc.DataLen - 2) / 4);
+		if (toc.num_tracks > num_tracks_data)
+			toc.num_tracks = num_tracks_data;
 
-	// Byteswap the TOC.
-	for (int track = 0; track < toc.num_tracks; track++) {
-		toc.toc.Tracks[track].StartAddress =
-			be32_to_cpu(toc.toc.Tracks[track].StartAddress);
+		// Byteswap the TOC.
+		for (int track = 0; track < toc.num_tracks; track++) {
+			toc.toc.Tracks[track].StartAddress =
+				be32_to_cpu(toc.toc.Tracks[track].StartAddress);
+		}
 	}
 
 	// TOC has been read.
