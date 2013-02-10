@@ -587,9 +587,7 @@ bool CdDrive::isInquirySuccessful(void)
 
 std::string CdDrive::dev_vendor(void)
 {
-	if (d->inq_data.inq_status == CdDrivePrivate::INQ_NOT_DONE)
-		inquiry();
-	if (d->inq_data.inq_status != CdDrivePrivate::INQ_SUCCESSFUL)
+	if (!d->isInquirySuccessful())
 		return "";
 
 	return d->inq_data.vendor;
@@ -597,9 +595,7 @@ std::string CdDrive::dev_vendor(void)
 
 std::string CdDrive::dev_model(void)
 {
-	if (d->inq_data.inq_status == CdDrivePrivate::INQ_NOT_DONE)
-		inquiry();
-	if (d->inq_data.inq_status != CdDrivePrivate::INQ_SUCCESSFUL)
+	if (!d->isInquirySuccessful())
 		return "";
 
 	return d->inq_data.model;
@@ -607,9 +603,7 @@ std::string CdDrive::dev_model(void)
 
 std::string CdDrive::dev_firmware(void)
 {
-	if (d->inq_data.inq_status == CdDrivePrivate::INQ_NOT_DONE)
-		inquiry();
-	if (d->inq_data.inq_status != CdDrivePrivate::INQ_SUCCESSFUL)
+	if (!d->isInquirySuccessful())
 		return "";
 
 	return d->inq_data.firmware;
