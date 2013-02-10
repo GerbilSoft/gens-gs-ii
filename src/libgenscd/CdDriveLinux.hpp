@@ -11,6 +11,8 @@
 namespace LibGensCD
 {
 
+class CdDriveLinuxPrivate;
+
 class CdDriveLinux : public CdDrive
 {
 	public:
@@ -32,10 +34,8 @@ class CdDriveLinux : public CdDrive
 				  scsi_data_mode mode = SCSI_DATA_IN) override;
 
 	private:
-		// TODO: Move to private class?
-
-		// Drive handle.
-		int m_fd;
+		friend class CdDriveLinuxPrivate;
+		CdDriveLinuxPrivate *const d;
 };
 
 }
