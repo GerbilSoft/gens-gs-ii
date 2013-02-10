@@ -567,6 +567,52 @@ typedef struct PACKED _SCSI_MMC_GET_CONFIGURATION_HEADER_DATA
 	uint16_t CurrentProfile;	// BE16
 } SCSI_MMC_GET_CONFIGURATION_HEADER_DATA;
 
+/**
+ * CDB for the MMC READ DISC INFORMATION command.
+ */
+typedef struct PACKED _CDB_MMC_READ_DISC_INFORMATION
+{
+	uint8_t OperationCode;		// MMC_GET_CONFIGURATION (0x46)
+	uint8_t DataType;
+	uint8_t Reserved[5];
+	uint16_t AllocationLength;	// BE16
+	uint8_t Control;
+} CDB_MMC_READ_DISC_INFORMATION;
+
+// Data types for CDB_MMC_READ_DISC_INFORMATION.
+#define MMC_READ_DISC_INFORMATION_DATATYPE_STANDARD	0x00
+#define MMC_READ_DISC_INFORMATION_DATATYPE_TRACK	0x01
+#define MMC_READ_DISC_INFORMATION_DATATYPE_POW		0x02
+
+/**
+ * Response from the MMC_READ_DISC_INFORMATION command.
+ */
+typedef struct PACKED _SCSI_MMC_READ_DISC_INFORMATION_DATA
+{
+	uint16_t DiscInfoLength;		// BE16
+	uint8_t DiscStatusFlags;
+	uint8_t FirstTrackNumber;
+	uint8_t NumSessionsLSB;
+	uint8_t FirstTrackNumberInLastSessionLSB;
+	uint8_t LastTrackNumberInLastSessionLSB;
+	uint8_t ValidFlags;
+	uint8_t DiscType;
+	uint8_t NumSessionsMSB;
+	uint8_t FirstTrackNumberInLastSessionMSB;
+	uint8_t LastTrackNumberInLastSessionMSB;
+	uint32_t DiscIdentification;		// BE32
+	uint32_t LastSessionLeadInStartLBA;	// BE32
+	uint32_t LastPossibleLeadOutStartLBA;	// BE32
+	uint32_t DiscBarCode;			// BE32
+	uint8_t DiscApplicationCode;
+
+	// We don't need the OPC tables.
+	/*
+	uint8_t NumOPCTables;
+	uint8_t OPCTableEntries[];
+	*/
+} SCSI_MMC_READ_DISC_INFORMATION_DATA;
+
 /****************************************************************/
 
 // On Windows, pshpack1.h is needed to byte-pack structs.

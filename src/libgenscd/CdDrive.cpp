@@ -140,7 +140,9 @@ std::string CdDrive::dev_firmware(void)
 
 /**
  * Get the current feature profile, aka disc type.
- * @return Feature profile, (0xFFFF on error)
+ * Uses the MMC-2 GET CONFIGURATION command.
+ * If the command isn't supported, falls back to MMC-1.
+ * @return Current feature profile, or 0xFFFF on error.
  */
 uint16_t CdDrive::getCurrentFeatureProfile(void)
 {
@@ -159,15 +161,65 @@ uint16_t CdDrive::getCurrentFeatureProfile(void)
 	int err = scsi_send_cdb(&cdb, sizeof(cdb), &features, sizeof(features), SCSI_DATA_IN);
 	if (err != 0) {
 		// Error occurred.
-		PRINT_SCSI_ERROR(cdb.OperationCode, err);
+		if (SK(err) == 0x5 && ASC(err) == 0x20) {
+			// Drive does not support MMC-2 commands.
+			// Try the MMC-1 fallback.
+			return getCurrentFeatureProfile_mmc1();
+		}
 
-		// TODO: READ DISC INFORMATION fallback.
+		// Other error.
+		PRINT_SCSI_ERROR(cdb.OperationCode, err);
 		return 0;
 	}
 
 	// Get the current profile.
 	uint16_t cur_profile = be16_to_cpu(features.CurrentProfile);
 	return cur_profile;
+}
+
+/**
+ * Get the current feature profile, aka disc type.
+ * Uses the MMC-1 READ DISC INFORMATION command.
+ * @return Current feature profile, or 0xFFFF on error.
+ */
+uint16_t CdDrive::getCurrentFeatureProfile_mmc1(void)
+{
+	// TODO: Check if a disc is present first.
+
+	CDB_MMC_READ_DISC_INFORMATION cdb;
+	memset(&cdb, 0x00, sizeof(cdb));
+
+	// Disc information data.
+	SCSI_MMC_READ_DISC_INFORMATION_DATA discInfo;
+	memset(&discInfo, 0x00, sizeof(discInfo));
+
+	// Query the current profile.
+	cdb.OperationCode = MMC_GET_CONFIGURATION;
+	cdb.AllocationLength = sizeof(discInfo);
+	cdb.Control = 0;
+
+	int err = scsi_send_cdb(&cdb, sizeof(cdb), &discInfo, sizeof(discInfo), SCSI_DATA_IN);
+	if (err != 0) {
+		// Error occurred.
+		PRINT_SCSI_ERROR(cdb.OperationCode, err);
+		return 0;
+	}
+
+	// Determine the current profile based on the disc information.
+	// MMC-1 devices don't support DVDs, so we can rule out
+	// everything except CD-ROM, CD-R, and CD-RW.
+	// (We're not counting MO here.)
+	if (discInfo.DiscStatusFlags & 0x10) {
+		// Disc is rewritable.
+		return 0x0A;	// MMC CD-RW profile.
+	} else if ((discInfo.DiscStatusFlags & 0x03) < 2) {
+		// Disc is either empty, incomplete, or finalized.
+		// This is a CD-R.
+		return 0x09;	// MMC CD-R profile.
+	}
+
+	// Assume this is a CD-ROM.
+	return 0x08;	// MMC CD-ROM profile.
 }
 
 /**

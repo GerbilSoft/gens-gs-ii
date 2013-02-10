@@ -73,9 +73,18 @@ class CdDrive
 
 		/**
 		 * Get the current feature profile, aka disc type.
-		 * @return Feature profile, (0xFFFF on error)
+		 * Uses the MMC-2 GET CONFIGURATION command.
+		 * If the command isn't supported, falls back to MMC-1.
+		 * @return Current feature profile, or 0xFFFF on error.
 		 */
 		uint16_t getCurrentFeatureProfile(void);
+
+		/**
+		 * Get the current feature profile, aka disc type.
+		 * Use the MMC-1 READ DISC INFORMATION command.
+		 * @return Current feature profile, or 0xFFFF on error.
+		 */
+		uint16_t getCurrentFeatureProfile_mmc1(void);
 };
 
 }
