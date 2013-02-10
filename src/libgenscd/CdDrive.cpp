@@ -53,7 +53,14 @@ CdDrive::CdDrive(const string& filename)
 }
 
 CdDrive::~CdDrive()
-{ }
+{
+	/**
+	 * NOTE: close() is a virtual function.
+	 * We can't call it from the destructor.
+	 * 
+	 * Call close() in the subclass's destructor.
+	 */
+}
 
 /**
  * Run a SCSI INQUIRY command.
