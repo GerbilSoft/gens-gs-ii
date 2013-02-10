@@ -50,6 +50,9 @@ CdDrive::CdDrive(const string& filename)
 	// TODO: Make the inquiry data a class, and put this in the constructor?
 	m_inq_data.inq_status = INQ_NOT_DONE;
 	m_inq_data.device_type = 0;
+
+	// Clear the TOC.
+	memset(&m_toc, 0x00, sizeof(m_toc));
 }
 
 CdDrive::~CdDrive()
@@ -102,6 +105,9 @@ int CdDrive::inquiry(void)
 
 	// SCSI_INQUIRY completed successfully.
 	m_inq_data.inq_status = INQ_SUCCESSFUL;
+
+	readToc();
+
 	return 0;
 }
 
@@ -431,6 +437,65 @@ CD_DriveType_t CdDrive::discTypesToDriveType(uint32_t discTypes)
 		return DRIVE_TYPE_CDROM;
 	else
 		return DRIVE_TYPE_NONE;
+}
+
+/**
+ * Read the Table of Contents into the internal buffer.
+ * @return 0 on success; non-zero on error.
+ */
+int CdDrive::readToc(void)
+{
+	// TODO: Check if the medium has been changed.
+	if (!isDiscPresent()) {
+		// No disc present.
+		m_toc.num_tracks = 0;
+		m_toc.toc.DataLen = 0;
+		m_toc.toc.FirstTrackNumber = 0;
+		m_toc.toc.LastTrackNumber = 0;
+		return 0;
+	}
+
+	CDB_SCSI_READ_TOC cdb;
+	memset(&cdb, 0x00, sizeof(cdb));
+
+	// Attempt to read the TOC.
+	cdb.OperationCode = SCSI_READ_TOC;
+	cdb.MSF = SCSI_READ_TOC_FORMAT_LBA;
+	cdb.Format = 0; // Standard TOC for CD-ROMs.
+	cdb.TrackSessionNumber = 0;
+	cdb.AllocationLength = (uint16_t)cpu_to_be16(sizeof(m_toc.toc));
+
+	int err = scsi_send_cdb(&cdb, sizeof(cdb), &m_toc.toc, sizeof(m_toc.toc), SCSI_DATA_IN);
+	if (err != 0) {
+		// Error occurred.
+		// TODO: We have to request the sense data. err isn't sense data...
+		PRINT_SCSI_ERROR(cdb.OperationCode, err);
+		m_toc.num_tracks = 0;
+		m_toc.toc.DataLen = 0;
+		m_toc.toc.FirstTrackNumber = 0;
+		m_toc.toc.LastTrackNumber = 0;
+		return -1;
+	}
+
+	m_toc.num_tracks = ((m_toc.toc.LastTrackNumber - m_toc.toc.FirstTrackNumber) + 1);
+	if (m_toc.num_tracks < 0)
+		m_toc.num_tracks = 0;
+	else if (m_toc.num_tracks > (int)(sizeof(m_toc.toc.Tracks) / sizeof(m_toc.toc.Tracks[0])))
+		m_toc.num_tracks = (int)(sizeof(m_toc.toc.Tracks) / sizeof(m_toc.toc.Tracks[0]));
+
+	// Make sure num_tracks doesn't exceed the data length.
+	const int num_tracks_data = ((m_toc.toc.DataLen - 2) / 4);
+	if (m_toc.num_tracks > num_tracks_data)
+		m_toc.num_tracks = num_tracks_data;
+
+	// Byteswap the TOC.
+	for (int track = 0; track < m_toc.num_tracks; track++) {
+		m_toc.toc.Tracks[track].StartAddress =
+			be32_to_cpu(m_toc.toc.Tracks[track].StartAddress);
+	}
+
+	// TOC has been read.
+	return 0;
 }
 
 }

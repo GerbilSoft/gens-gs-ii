@@ -10,6 +10,9 @@
 // Disc and drive type definitions.
 #include "DiscType.h"
 
+// Needed for Table of Contents.
+#include "genscd_scsi.h"
+
 namespace LibGensCD
 {
 
@@ -118,6 +121,18 @@ class CdDrive
 		 * @return CD_DriveType_t.
 		 */
 		CD_DriveType_t discTypesToDriveType(uint32_t discTypes);
+
+		// Table of Contents.
+		struct {
+			int num_tracks;
+			SCSI_CDROM_TOC toc;
+		} m_toc;
+
+		/**
+		 * Read the Table of Contents into the internal buffer.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int readToc(void);
 };
 
 }

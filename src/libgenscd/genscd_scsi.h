@@ -531,6 +531,50 @@ typedef struct PACKED _SCSI_DATA_RD_CAPAC
 	uint32_t BlockLength;	// BE32: Block length (in bytes)
 } SCSI_DATA_RD_CAPAC;
 
+/**
+ * CDB_READ_TOC: SCSI CDB for SCSI_READ_TOC.
+ */
+typedef struct PACKED _CDB_SCSI_READ_TOC
+{
+	uint8_t OperationCode;	// SCSI_READ_TOC == 0x43
+	uint8_t MSF;		// Set to 0 for LBA; set to 2 for MSF.
+	uint8_t Format;
+	uint8_t Reserved[3];
+	uint8_t TrackSessionNumber;	// First track/session number to read.
+	uint16_t AllocationLength;	// BE16
+	uint8_t Control;
+} CDB_SCSI_READ_TOC;
+
+#define SCSI_READ_TOC_FORMAT_LBA 0x00
+#define SCSI_READ_TOC_FORMAT_MSF 0x02
+
+/**
+ * CD-ROM Table of Contents: Track entry.
+ */
+typedef struct PACKED _SCSI_CDROM_TOC_TRACK
+{
+	uint8_t rsvd1;
+	uint8_t ControlADR;	// Track type.
+	uint8_t TrackNumber;
+	uint8_t rsvd2;
+	uint32_t StartAddress;	// BE32
+} SCSI_CDROM_TOC_TRACK;
+
+/**
+ * CD-ROM Table of Contents.
+ */
+typedef struct PACKED _SCSI_CDROM_TOC
+{
+	uint16_t DataLen;	// BE16
+	uint8_t FirstTrackNumber;
+	uint8_t LastTrackNumber;
+	SCSI_CDROM_TOC_TRACK Tracks[100];
+} SCSI_CDROM_TOC;
+
+// Data tracks are identified by bit 2 (0x04) being set in ControlADR.
+#define IS_DATA_TRACK(ControlADR) (!!((ControlADR) & 0x04))
+#define IS_AUDIO_TRACK(ControlADR) (!((ControlADR) & 0x04))
+
 /****************************************************************/
 
 /** SCSI error code macros. (From udev) **/
