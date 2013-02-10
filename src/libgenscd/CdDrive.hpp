@@ -10,11 +10,10 @@
 // Disc and drive type definitions.
 #include "DiscType.h"
 
-// Needed for Table of Contents.
-#include "genscd_scsi.h"
-
 namespace LibGensCD
 {
+
+class CdDrivePrivate;
 
 class CdDrive
 {
@@ -22,6 +21,16 @@ class CdDrive
 		CdDrive(const std::string& filename);
 		virtual ~CdDrive();
 
+	private:
+		friend class CdDrivePrivate;
+		CdDrivePrivate *const d;
+
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGensCD-specific version of Q_DISABLE_COPY().
+		CdDrive(const CdDrive &);
+		CdDrive &operator=(const CdDrive &);
+
+	public:
 		virtual bool isOpen(void) const = 0;
 		virtual void close(void) = 0;
 
@@ -61,78 +70,6 @@ class CdDrive
 		virtual int scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 					  void *out, size_t out_len,
 					  scsi_data_mode mode = SCSI_DATA_IN) = 0;
-
-		// Device filename.
-		std::string m_filename;
-
-		enum InquiryStatus
-		{
-			INQ_NOT_DONE,
-			INQ_SUCCESSFUL,
-			INQ_FAILED
-		};
-
-		// INQUIRY results.
-		// TODO: Move to private class?
-		struct {
-			// Inquiry status.
-			InquiryStatus inq_status;
-
-			// Peripheral device type.
-			// Should be 0x05. (DTYPE_CDROM)
-			uint8_t device_type;
-
-			std::string vendor;
-			std::string model;
-			std::string firmware;
-		} m_inq_data;
-
-		/**
-		 * Get the current feature profile, aka disc type.
-		 * Uses the MMC-2 GET CONFIGURATION command.
-		 * If the command isn't supported, falls back to MMC-1.
-		 * @return Current feature profile, or 0xFFFF on error.
-		 */
-		uint16_t getCurrentFeatureProfile(void);
-
-		/**
-		 * Get the current feature profile, aka disc type.
-		 * Use the MMC-1 READ DISC INFORMATION command.
-		 * @return Current feature profile, or 0xFFFF on error.
-		 */
-		uint16_t getCurrentFeatureProfile_mmc1(void);
-
-		/**
-		 * Get a bitfield of supported disc types.
-		 * @return Bitfield of supported disc types.
-		 */
-		uint32_t getSupportedDiscTypes(void);
-
-		/**
-		 * Convert an MMC feature profile to a CD_DiscType_t.
-		 * @param featureProfile MMC feature profile.
-		 * @return CD_DiscType_t.
-		 */
-		CD_DiscType_t mmcFeatureProfileToDiscType(uint16_t featureProfile);
-
-		/**
-		 * Convert a bitfield of CD_DiscType_t to a CD_DriveType_t.
-		 * @param discTypes Bitfield of all CD_DiscType_t disc types.
-		 * @return CD_DriveType_t.
-		 */
-		CD_DriveType_t discTypesToDriveType(uint32_t discTypes);
-
-		// Table of Contents.
-		struct {
-			int num_tracks;
-			SCSI_CDROM_TOC toc;
-		} m_toc;
-
-		/**
-		 * Read the Table of Contents into the internal buffer.
-		 * @return 0 on success; non-zero on error.
-		 */
-		int readToc(void);
 };
 
 }
