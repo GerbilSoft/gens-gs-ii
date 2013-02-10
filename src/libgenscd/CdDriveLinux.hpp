@@ -23,6 +23,11 @@ class CdDriveLinux : public CdDrive
 		friend class CdDriveLinuxPrivate;
 		CdDriveLinuxPrivate *const d;
 
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGensCD-specific version of Q_DISABLE_COPY().
+		CdDriveLinux(const CdDriveLinux &);
+		CdDriveLinux &operator=(const CdDriveLinux &);
+
 	public:
 		bool isOpen(void) const;
 		void close(void);
