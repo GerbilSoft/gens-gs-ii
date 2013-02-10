@@ -78,6 +78,7 @@ int CdDrive::inquiry(void)
 	int err = scsi_send_cdb(&cdb, sizeof(cdb), &data, sizeof(data), SCSI_DATA_IN);
 	if (err != 0) {
 		// Inquiry failed.
+		// TODO: We have to request the sense data. err isn't sense data...
 		PRINT_SCSI_ERROR(cdb.OperationCode, err);
 		m_inq_data.inq_status = INQ_FAILED;
 		return -1;
@@ -161,13 +162,16 @@ uint16_t CdDrive::getCurrentFeatureProfile(void)
 	int err = scsi_send_cdb(&cdb, sizeof(cdb), &features, sizeof(features), SCSI_DATA_IN);
 	if (err != 0) {
 		// Error occurred.
-		if (SK(err) == 0x5 && ASC(err) == 0x20) {
+		// TODO: We have to request the sense data. err isn't sense data...
+		// Let's try the MMC-1 version regardless.
+		/*if (SK(err) == 0x5 && ASC(err) == 0x20)*/ {
 			// Drive does not support MMC-2 commands.
 			// Try the MMC-1 fallback.
 			return getCurrentFeatureProfile_mmc1();
 		}
 
 		// Other error.
+		// TODO: We have to request the sense data. err isn't sense data...
 		PRINT_SCSI_ERROR(cdb.OperationCode, err);
 		return 0;
 	}
@@ -184,8 +188,6 @@ uint16_t CdDrive::getCurrentFeatureProfile(void)
  */
 uint16_t CdDrive::getCurrentFeatureProfile_mmc1(void)
 {
-	// TODO: Check if a disc is present first.
-
 	CDB_MMC_READ_DISC_INFORMATION cdb;
 	memset(&cdb, 0x00, sizeof(cdb));
 
@@ -193,16 +195,16 @@ uint16_t CdDrive::getCurrentFeatureProfile_mmc1(void)
 	SCSI_MMC_READ_DISC_INFORMATION_DATA discInfo;
 	memset(&discInfo, 0x00, sizeof(discInfo));
 
-	// Query the current profile.
-	cdb.OperationCode = MMC_GET_CONFIGURATION;
-	cdb.AllocationLength = sizeof(discInfo);
+	// Get the disc information.
+	cdb.OperationCode = MMC_READ_DISC_INFORMATION;
+	cdb.AllocationLength = cpu_to_be16(sizeof(discInfo));
 	cdb.Control = 0;
 
 	int err = scsi_send_cdb(&cdb, sizeof(cdb), &discInfo, sizeof(discInfo), SCSI_DATA_IN);
 	if (err != 0) {
-		// Error occurred.
-		PRINT_SCSI_ERROR(cdb.OperationCode, err);
-		return 0;
+		// An error occurred requesting READ DISC INFORMATION.
+		// This usually means that we have a CD-ROM.
+		return 0x08;	// MMC CD-ROM profile.
 	}
 
 	// Determine the current profile based on the disc information.

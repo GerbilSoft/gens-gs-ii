@@ -9,8 +9,10 @@
 #include <string>
 using std::string;
 
-// NTDDSCSI is required for SPTI.
+// SCSI and storage IOCTLs.
+#include <winioctl.h>
 #include <ntddscsi.h>
+#include <ntddstor.h>
 
 // SPTI/SCSI headers.
 #include <devioctl.h>
@@ -76,6 +78,35 @@ void CdDriveSpti::close(void)
 }
 
 /**
+ * Check if a disc is present.
+ * @return True if a disc is present; false if not.
+ */
+bool CdDriveSpti::isDiscPresent(void)
+{
+	/**
+	 * SCSI READ CAPACITY seems to return invalid values
+	 * on Wine if no disc is present.
+	 *
+	 * Instead, use the Win32 IOCTL_STORAGE_CHECK_VERIFY.
+	 *
+	 * References:
+	 * - http://stackoverflow.com/questions/3158054/how-to-detect-if-media-is-inserted-into-a-removable-drive-card-reader
+	 * - http://msdn.microsoft.com/en-us/library/windows/desktop/aa363404%28v=vs.85%29.aspx
+	 * - http://msdn.microsoft.com/en-us/library/windows/hardware/ff560535%28v=vs.85%29.aspx
+	 */
+
+	DWORD returned;
+	int ret = DeviceIoControl(
+			m_hDevice, IOCTL_STORAGE_CHECK_VERIFY,
+			nullptr, 0, nullptr, 0,
+			&returned, nullptr);
+
+	// IOCTL_STORAGE_CHECK_VERIFY succeeds if the medium is accessible,
+	// and fails if the medium is not accessible.
+	return !!ret;
+}
+
+/**
  * Send a SCSI command descriptor block to the device.
  * @param cdb		[in] SCSI command.
  * @param cdb_len	[in] Length of cdb.
@@ -88,6 +119,7 @@ int CdDriveSpti::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 				void *out, size_t out_len,
 				scsi_data_mode mode)
 {
+	
 	if (!isOpen())
 		return -1;	// TODO: Proper SCSI error code.
 
@@ -126,18 +158,22 @@ int CdDriveSpti::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 	pcmd->SenseInfoOffset = sizeof(SCSI_PASS_THROUGH_DIRECT);
 	pcmd->TimeOutValue = 5; // 5-second timeout.
 
-	DeviceIoControl(m_hDevice, IOCTL_SCSI_PASS_THROUGH_DIRECT,
+	int ret = DeviceIoControl(
+			m_hDevice, IOCTL_SCSI_PASS_THROUGH_DIRECT,
 			(LPVOID)&cmd, sizeof(cmd),
 			(LPVOID)&cmd, sizeof(cmd),
-			&returned, NULL);
+			&returned, nullptr);
 
-	// TODO: Better error handling.
-	DWORD err = GetLastError();
-	if (err != ERROR_SUCCESS)
-		fprintf(stderr, "%s(): Error: 0x%08X\n", __func__, (unsigned int)err);
+	if (ret == 0) {
+		// DeviceIoControl failed.
+		// TODO: Return the SCSI sense key.
+		DWORD err = GetLastError();
+		if (err != ERROR_SUCCESS)
+			fprintf(stderr, "%s(): Error: 0x%08X\n", __func__, (unsigned int)err);
+	}
 
-	// Return the error code.
-	return err;
+	// Return 0 on success, non-zero on error.
+	return !ret;
 }
 
 }

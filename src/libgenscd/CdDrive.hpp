@@ -29,6 +29,12 @@ class CdDrive
 		std::string dev_firmware(void);
 
 		/**
+		 * Check if a disc is present.
+		 * @return True if a disc is present; false if not.
+		 */
+		virtual bool isDiscPresent(void) = 0;
+
+		/**
 		 * Get the current disc type.
 		 * @return Disc type.
 		 */
