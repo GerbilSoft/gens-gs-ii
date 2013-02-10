@@ -19,6 +19,11 @@ class CdDriveLinux : public CdDrive
 		CdDriveLinux(const std::string& filename);
 		virtual ~CdDriveLinux();
 
+	private:
+		friend class CdDriveLinuxPrivate;
+		CdDriveLinuxPrivate *const d;
+
+	public:
 		bool isOpen(void) const;
 		void close(void);
 
@@ -32,10 +37,6 @@ class CdDriveLinux : public CdDrive
 		int scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 				  void *out, size_t out_len,
 				  scsi_data_mode mode = SCSI_DATA_IN) override;
-
-	private:
-		friend class CdDriveLinuxPrivate;
-		CdDriveLinuxPrivate *const d;
 };
 
 }
