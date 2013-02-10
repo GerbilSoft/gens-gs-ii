@@ -95,6 +95,9 @@ bool CdDriveSpti::isDiscPresent(void)
 	 * - http://msdn.microsoft.com/en-us/library/windows/hardware/ff560535%28v=vs.85%29.aspx
 	 */
 
+	if (!isOpen())
+		return false;
+
 	DWORD returned;
 	int ret = DeviceIoControl(
 			m_hDevice, IOCTL_STORAGE_CHECK_VERIFY,
