@@ -188,6 +188,12 @@ uint16_t CdDrive::getCurrentFeatureProfile(void)
  */
 uint16_t CdDrive::getCurrentFeatureProfile_mmc1(void)
 {
+	// Check if a disc is present.
+	if (!isDiscPresent()) {
+		// No disc found.
+		return 0;
+	}
+
 	CDB_MMC_READ_DISC_INFORMATION cdb;
 	memset(&cdb, 0x00, sizeof(cdb));
 
