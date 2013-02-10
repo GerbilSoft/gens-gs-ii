@@ -46,4 +46,4 @@ class CdDriveSpti : public CdDrive
 
 }
 
-#endif /* __LIBGENSCD_CDDRIVE_HPP__ */
+#endif /* __LIBGENSCD_CDDRIVESPTI_HPP__ */
