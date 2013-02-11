@@ -425,15 +425,24 @@ void IoManagerPrivate::updateDevice_TP(int physPort, bool oldSelect, bool oldTr)
 
 		default:
 			// Check the controller data index table.
+			// TODO: What value should be returned for errors?
 			int adj_counter = (dev->counter - TP_DT_PADA_RLDU);
-			if ((adj_counter >= (int)(ARRAY_SIZE(dev->data.tp.ctrlIndexTbl))) ||
-			    (dev->data.tp.ctrlIndexTbl[adj_counter] >= TP_DT_MAX))
-			{
-				// Invalid counter state.
-				// TODO: What value should be returned?
+			if (adj_counter >= ARRAY_SIZE(dev->data.tp.ctrlIndexTbl)) {
+				// Counter is out of bounds.
 				data = 0x0F;
 				break;
 			}
+
+			// Look up the data type from the controller index table.
+			TP_DataType dataType = (TP_DataType)dev->data.tp.ctrlIndexTbl[adj_counter];
+			if (dataType < TP_DT_PADA_RLDU || dataType >= TP_DT_MAX) {
+				// Invalid counter state.
+				data = 0x0F;
+				break;
+			}
+
+			// Readjust the counter for the correct data type.
+			adj_counter = dataType - TP_DT_PADA_RLDU;
 
 			// Determine the virtual port base.
 			const int virtPortBase = (physPort == 0
@@ -441,8 +450,10 @@ void IoManagerPrivate::updateDevice_TP(int physPort, bool oldSelect, bool oldTr)
 						: IoManager::VIRTPORT_TP2A);
 
 			// Controller data.
-			const int virtPort = virtPortBase + (adj_counter / 3);
-			const int shift = (adj_counter % 3) * 4;
+			// TODO: Move dtPerPortMax to a class constant?
+			static const int dtPerPortMax = (TP_DT_PADA_MXYZ - TP_DT_PADA_RLDU) + 1;
+			const int virtPort = virtPortBase + (adj_counter / dtPerPortMax);
+			const int shift = (adj_counter % dtPerPortMax) * 4;
 
 			data = (ioDevices[virtPort].buttons >> shift) & 0xF;
 			break;
@@ -479,7 +490,9 @@ void IoManagerPrivate::rebuildCtrlIndexTable(int physPort)
 
 	int i = 0;	// data.tp.ctrlIndexTbl index
 	for (int pad = 0; pad < 4; pad++) {
-		const int dtBase = (TP_DT_PADA_RLDU + (pad * 3));
+		// TODO: Move dtPerPortMax to a class constant?
+		static const int dtPerPortMax = (TP_DT_PADA_MXYZ - TP_DT_PADA_RLDU) + 1;
+		const int dtBase = (TP_DT_PADA_RLDU + (pad * dtPerPortMax));
 		const int virtPort = virtPortBase + pad;
 
 		switch (ioDevices[virtPort].type) {
