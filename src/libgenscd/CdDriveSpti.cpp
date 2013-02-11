@@ -110,13 +110,13 @@ bool CdDriveSpti::isDiscPresent(void)
 }
 
 /**
- * Send a SCSI command descriptor block to the device.
- * @param cdb		[in] SCSI command.
+ * Send a SCSI command descriptor block to the drive.
+ * @param cdb		[in] SCSI command descriptor block.
  * @param cdb_len	[in] Length of cdb.
- * @param out		[out] Buffer for data received from the SCSI device.
- * @param out_len	[in] Length of out.
- * @param mode		[in] Data mode. IN == receive from SCSI; OUT == send to SCSI.
- * @return 0 on success; non-zero on error.
+ * @param out		[out] Output buffer, or nullptr if no data is requested.
+ * @param out_len	[out] Length of out.
+ * @param mode		[in] Data direction mode. (IN == receive from device; OUT == send to device)
+ * @return 0 on success, non-zero on error. (TODO: Return SCSI sense key?)
  */
 int CdDriveSpti::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 				void *out, size_t out_len,
@@ -181,6 +181,21 @@ int CdDriveSpti::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 
 	// Return 0 on success, non-zero on error.
 	return !ret;
+}
+
+/**
+ * Check if the disc has changed since the last access.
+ * @return True if the disc has changed; false if not.
+ */
+bool CdDriveSpti::hasDiscChanged(void)
+{
+	// TODO: Figure out a better way to implement this.
+	// MMC's GET_EVENT_STATUS_NOTIFICATION command doesn't seem to work properly,
+	// and Win32's WM_DEVICECHANGE requires a window in order to receive events.
+
+	// Alternatively, just have the main program force a refresh whenever
+	// WM_DEVICECHANGE is received.
+	return false;
 }
 
 }

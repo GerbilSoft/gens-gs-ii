@@ -38,13 +38,7 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	// Inquiry the drive.
-	cdrom->inquiry();
-	if (!cdrom->isInquirySuccessful()) {
-		printf("INQUIRY failed.\n");
-		printf("(TODO: Get the error code!)\n");
-		return EXIT_FAILURE;
-	}
+	// Check if the drive inquiry failed. (TODO)
 
 	// Print the drive information.
 	printf("Device information:\n");
@@ -56,6 +50,7 @@ int main(int argc, char *argv[])
 	// Get the disc and drive type.
 	printf("Current Disc Type:  0x%08X\n", cdrom->getDiscType());
 	printf("Current Drive Type: 0x%08X\n", cdrom->getDriveType());
+	printf("\n");
 
 	delete cdrom;
 	return EXIT_SUCCESS;

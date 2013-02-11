@@ -541,8 +541,9 @@ typedef struct PACKED _SCSI_CDROM_TOC
 #define ASCQ(errcode)	((errcode) & 0xFF)
 
 /** MMC commands. (Based on udev) **/
-#define MMC_GET_CONFIGURATION		0x46
-#define MMC_READ_DISC_INFORMATION	0x51
+#define MMC_GET_CONFIGURATION			0x46
+#define MMC_READ_DISC_INFORMATION		0x51
+#define MMC_GET_EVENT_STATUS_NOTIFICATION	0x4A
 
 /**
  * CDB for the MMC GET CONFIGURATION command.
@@ -613,6 +614,46 @@ typedef struct PACKED _SCSI_MMC_READ_DISC_INFORMATION_DATA
 	uint8_t OPCTableEntries[];
 	*/
 } SCSI_MMC_READ_DISC_INFORMATION_DATA;
+
+/**
+ * CDB for the MMC GET_EVENT_STATUS_NOTIFICATION command. (MMC-5)
+ */
+typedef struct PACKED _CDB_MMC_GET_EVENT_STATUS_NOTIFICATION
+{
+	uint8_t OperationCode;			// MMC_GET_EVENT_STATUS_NOTIFICATION (0x4A)
+	uint8_t Polled;
+	uint8_t Reserved1[2];
+	uint8_t NotificationClassRequest;	// Bitfield.
+	uint8_t Reserved2[2];
+	uint16_t AllocationLength;		// BE16
+	uint8_t Control;
+} CDB_MMC_GET_EVENT_STATUS_NOTIFICATION;
+
+// Notification classes.
+#define MMC_EVENT_STATUS_NOTIFICATION_OPERATIONAL_CHANGE	1
+#define MMC_EVENT_STATUS_NOTIFICATION_POWER_MANAGEMENT		2
+#define MMC_EVENT_STATUS_NOTIFICATION_EXTERNAL_REQUEST		3
+#define MMC_EVENT_STATUS_NOTIFICATION_MEDIA			4
+#define MMC_EVENT_STATUS_NOTIFICATION_MULTI_HOST		5
+#define MMC_EVENT_STATUS_NOTIFICATION_DEVICE_BUSY		6
+
+// Notification classes. (Bitfields for CDB_MMC_GET_EVENT_STATUS_NOTIFICATION)
+#define MMC_EVENT_STATUS_NOTIFICATION_BF_OPERATIONAL_CHANGE	(1 << 1)
+#define MMC_EVENT_STATUS_NOTIFICATION_BF_POWER_MANAGEMENT	(1 << 2)
+#define MMC_EVENT_STATUS_NOTIFICATION_BF_EXTERNAL_REQUEST	(1 << 3)
+#define MMC_EVENT_STATUS_NOTIFICATION_BF_MEDIA			(1 << 4)
+#define MMC_EVENT_STATUS_NOTIFICATION_BF_MULTI_HOST		(1 << 5)
+#define MMC_EVENT_STATUS_NOTIFICATION_BF_DEVICE_BUSY		(1 << 6)
+
+/**
+ * Response header from the MMC_GET_EVENT_STATUS_NOTIFICATION command.
+ */
+typedef struct PACKED _SCSI_MMC_GET_EVENT_STATUS_NOTIFICATION_HEADER_DATA
+{
+	uint16_t EventDescriptorLength;		// BE16: amount of valid data after this header.
+	uint8_t NotificationClass;		// Notification class. (If high bit is set, no data available.)
+	uint8_t SupportedEventClass;		// Supported event classes. (bitfield)
+} SCSI_MMC_GET_EVENT_STATUS_NOTIFICATION_HEADER_DATA;
 
 /****************************************************************/
 

@@ -56,9 +56,6 @@ class CdDrivePrivate
 		// Device filename.
 		std::string filename;
 
-		// TODO: Cache TOC, etc.
-		// Update cache if the media status changes.
-
 		enum InquiryStatus
 		{
 			INQ_NOT_DONE,
@@ -73,11 +70,14 @@ class CdDrivePrivate
 
 			// Peripheral device type.
 			// Should be 0x05. (DTYPE_CDROM)
-			uint8_t device_type;
+			uint8_t scsi_device_type;
 
 			std::string vendor;
 			std::string model;
 			std::string firmware;
+
+			// Drive type. 
+			CD_DriveType_t driveType;
 		} inq_data;
 
 		int inquiry(void);
@@ -118,14 +118,29 @@ class CdDrivePrivate
 		 */
 		static CD_DriveType_t discTypesToDriveType(uint32_t discTypes);
 
-		// Table of Contents.
+		// Cached disc information.
 		struct {
-			int num_tracks;
-			SCSI_CDROM_TOC toc;
-		} toc;
+			// If true, cache is stale and needs to be updated.
+			bool stale;
+
+			// Disc type.
+			CD_DiscType_t discType;
+
+			// Table of Contents.
+			struct {
+				int num_tracks;
+				SCSI_CDROM_TOC toc;
+			} toc;
+		} cache;
 
 		/**
-		 * Read the Table of Contents into the internal buffer.
+		 * Update the cached disc information.
+		 * @param force If true, force a cache update, even if it's not stale.
+		 */
+		void updateCache(bool force = false);
+
+		/**
+		 * Read the Table of Contents into the cache.
 		 * @return 0 on success; non-zero on error.
 		 */
 		int readToc(void);
@@ -140,10 +155,11 @@ CdDrivePrivate::CdDrivePrivate(CdDrive *q, string filename)
 	// Clear the inquiry data.
 	// TODO: Make the inquiry data a class, and put this in the constructor?
 	inq_data.inq_status = INQ_NOT_DONE;
-	inq_data.device_type = 0;
+	inq_data.scsi_device_type = 0;
+	inq_data.driveType = DRIVE_TYPE_NONE;
 
-	// Clear the TOC.
-	memset(&toc, 0x00, sizeof(toc));
+	// Mark the cache as stale.
+	cache.stale = true;
 }
 
 /**
@@ -182,13 +198,16 @@ int CdDrivePrivate::inquiry(void)
 	// Get the information.
 	// TODO: Validate that device type is 0x05. (DTYPE_CDROM)
 	// TODO: Trim spaces in vendor, model, and firmware.
-	inq_data.device_type = data.peripheral_device_type;
+	inq_data.scsi_device_type = data.peripheral_device_type;
 	inq_data.vendor = string(data.vendor_id, sizeof(data.vendor_id));
 	inq_data.model = string(data.product_id, sizeof(data.product_id));
 	inq_data.firmware = string(data.product_revision_level, sizeof(data.product_revision_level));
 
 	// SCSI_INQUIRY completed successfully.
 	inq_data.inq_status = CdDrivePrivate::INQ_SUCCESSFUL;
+
+	// Get the CD_DriveType_t.
+	inq_data.driveType = discTypesToDriveType(getSupportedDiscTypes());
 
 	return 0;
 }
@@ -202,6 +221,44 @@ bool CdDrivePrivate::isInquirySuccessful(void)
 	if (inq_data.inq_status == INQ_NOT_DONE)
 		inquiry();
 	return (inq_data.inq_status == INQ_SUCCESSFUL);
+}
+
+/**
+ * Update the cached disc information.
+ * @param force If true, force a cache update, even if it's not stale.
+ */
+void CdDrivePrivate::updateCache(bool force)
+{
+	if (!q->isDiscPresent()) {
+		// No disc.
+		cache.stale = true;
+		printf("update cache: no disc\n");
+		return;
+	}
+
+	// Check if the disc has been changed.
+	// NOTE: We always do this, even if cache.stale = true,
+	// since it clears the OS's "disc has changed" state.
+	if (q->hasDiscChanged()) {
+		// Disc has changed. Update the cache.
+		cache.stale = true;
+	}
+
+	((void)force);
+	if (!cache.stale && !force) {
+		printf("update cache: not stale\n");
+		return;
+	}
+
+	printf("update cache: running...\n");
+	// Update the disc type.
+	cache.discType = mmcFeatureProfileToDiscType(getCurrentFeatureProfile());
+
+	// Update the TOC.
+	readToc();
+
+	// Cache is updated.
+	cache.stale = false;
 }
 
 /**
@@ -481,7 +538,7 @@ CD_DriveType_t CdDrivePrivate::discTypesToDriveType(uint32_t discTypes)
 }
 
 /**
- * Read the Table of Contents into the internal buffer.
+ * Read the Table of Contents into the cache.
  * @return 0 on success; non-zero on error.
  */
 int CdDrivePrivate::readToc(void)
@@ -489,10 +546,10 @@ int CdDrivePrivate::readToc(void)
 	// TODO: Check if the medium has been changed.
 	if (!q->isDiscPresent()) {
 		// No disc present.
-		toc.num_tracks = 0;
-		toc.toc.DataLen = 0;
-		toc.toc.FirstTrackNumber = 0;
-		toc.toc.LastTrackNumber = 0;
+		cache.toc.num_tracks = 0;
+		cache.toc.toc.DataLen = 0;
+		cache.toc.toc.FirstTrackNumber = 0;
+		cache.toc.toc.LastTrackNumber = 0;
 		return 0;
 	}
 
@@ -504,43 +561,43 @@ int CdDrivePrivate::readToc(void)
 	cdb.MSF = SCSI_READ_TOC_FORMAT_LBA;
 	cdb.Format = 0; // Standard TOC for CD-ROMs.
 	cdb.TrackSessionNumber = 0;
-	cdb.AllocationLength = (uint16_t)cpu_to_be16(sizeof(toc.toc));
+	cdb.AllocationLength = (uint16_t)cpu_to_be16(sizeof(cache.toc.toc));
 
 	int err = q->scsi_send_cdb(
 		&cdb, sizeof(cdb),
-		&toc.toc, sizeof(toc.toc),
+		&cache.toc.toc, sizeof(cache.toc.toc),
 		CdDrive::SCSI_DATA_IN);
 	if (err != 0) {
 		// Error occurred.
 		// TODO: We have to request the sense data. err isn't sense data...
 		PRINT_SCSI_ERROR(cdb.OperationCode, err);
-		toc.num_tracks = 0;
-		toc.toc.DataLen = 0;
-		toc.toc.FirstTrackNumber = 0;
-		toc.toc.LastTrackNumber = 0;
+		cache.toc.num_tracks = 0;
+		cache.toc.toc.DataLen = 0;
+		cache.toc.toc.FirstTrackNumber = 0;
+		cache.toc.toc.LastTrackNumber = 0;
 		return -1;
 	}
 
-	if (toc.toc.FirstTrackNumber == 0 && toc.toc.LastTrackNumber == 0) {
+	if (cache.toc.toc.FirstTrackNumber == 0 && cache.toc.toc.LastTrackNumber == 0) {
 		// No tracks.
-		toc.num_tracks = 0;
+		cache.toc.num_tracks = 0;
 	} else {
 		// Calculate the number of tracks.
-		toc.num_tracks = ((toc.toc.LastTrackNumber - toc.toc.FirstTrackNumber) + 1);
-		if (toc.num_tracks < 0)
-			toc.num_tracks = 0;
-		else if (toc.num_tracks > (int)(sizeof(toc.toc.Tracks) / sizeof(toc.toc.Tracks[0])))
-			toc.num_tracks = (int)(sizeof(toc.toc.Tracks) / sizeof(toc.toc.Tracks[0]));
+		cache.toc.num_tracks = ((cache.toc.toc.LastTrackNumber - cache.toc.toc.FirstTrackNumber) + 1);
+		if (cache.toc.num_tracks < 0)
+			cache.toc.num_tracks = 0;
+		else if (cache.toc.num_tracks > (int)(sizeof(cache.toc.toc.Tracks) / sizeof(cache.toc.toc.Tracks[0])))
+			cache.toc.num_tracks = (int)(sizeof(cache.toc.toc.Tracks) / sizeof(cache.toc.toc.Tracks[0]));
 
 		// Make sure num_tracks doesn't exceed the data length.
-		const int num_tracks_data = ((toc.toc.DataLen - 2) / 4);
-		if (toc.num_tracks > num_tracks_data)
-			toc.num_tracks = num_tracks_data;
+		const int num_tracks_data = ((cache.toc.toc.DataLen - 2) / 4);
+		if (cache.toc.num_tracks > num_tracks_data)
+			cache.toc.num_tracks = num_tracks_data;
 
 		// Byteswap the TOC.
-		for (int track = 0; track < toc.num_tracks; track++) {
-			toc.toc.Tracks[track].StartAddress =
-				be32_to_cpu(toc.toc.Tracks[track].StartAddress);
+		for (int track = 0; track < cache.toc.num_tracks; track++) {
+			cache.toc.toc.Tracks[track].StartAddress =
+				be32_to_cpu(cache.toc.toc.Tracks[track].StartAddress);
 		}
 	}
 
@@ -570,31 +627,10 @@ CdDrive::~CdDrive()
 	delete d;
 }
 
-/**
- * Run a SCSI INQUIRY command.
- * WRAPPER FUNCTION for CdDrivePrivate::inquiry().
- * @return 0 on success; nonzero on error.
- */
-int CdDrive::inquiry(void)
-{
-	return d->inquiry();
-}
-
-/**
- * Check if the inquiry was successful.
- * WRAPPER FUNCTION for CdDrivePrivate::isInquirySuccessful();
- * @return True if successful; false if not.
- */
-bool CdDrive::isInquirySuccessful(void)
-{
-	return d->isInquirySuccessful();
-}
-
 std::string CdDrive::dev_vendor(void)
 {
 	if (!d->isInquirySuccessful())
 		return "";
-
 	return d->inq_data.vendor;
 }
 
@@ -602,7 +638,6 @@ std::string CdDrive::dev_model(void)
 {
 	if (!d->isInquirySuccessful())
 		return "";
-
 	return d->inq_data.model;
 }
 
@@ -610,8 +645,19 @@ std::string CdDrive::dev_firmware(void)
 {
 	if (!d->isInquirySuccessful())
 		return "";
-
 	return d->inq_data.firmware;
+}
+
+/**
+ * Force a cache update.
+ * NOTE: Currently required for SPTI, since the
+ * MMC GET_EVENT_STATUS_NOTIFICATION command
+ * isn't working properly, and WM_DEVICECHANGE
+ * requires a window to receive notifications.
+ */
+void CdDrive::forceCacheUpdate(void)
+{
+	d->updateCache(true);
 }
 
 /**
@@ -620,8 +666,8 @@ std::string CdDrive::dev_firmware(void)
  */
 CD_DiscType_t CdDrive::getDiscType(void)
 {
-	// TODO: Cache the current profile?
-	return d->mmcFeatureProfileToDiscType(d->getCurrentFeatureProfile());
+	d->updateCache();
+	return d->cache.discType;
 }
 
 /**
@@ -630,8 +676,9 @@ CD_DiscType_t CdDrive::getDiscType(void)
  */
 CD_DriveType_t CdDrive::getDriveType(void)
 {
-	// TODO: Cache the current drive type?
-	return d->discTypesToDriveType(d->getSupportedDiscTypes());
+	if (!d->isInquirySuccessful())
+		return DRIVE_TYPE_NONE;
+	return d->inq_data.driveType;
 }
 
 }

@@ -147,19 +147,18 @@ bool CdDriveLinux::isDiscPresent(void)
 }
 
 /**
- * Send a SCSI command descriptor block to the device.
- * @param cdb		[in] SCSI command.
+ * Send a SCSI command descriptor block to the drive.
+ * @param cdb		[in] SCSI command descriptor block.
  * @param cdb_len	[in] Length of cdb.
- * @param out		[out] Buffer for data received from the SCSI device.
- * @param out_len	[in] Length of out.
- * @param mode		[in] Data mode. IN == receive from SCSI; OUT == send to SCSI.
- * @return 0 on success; non-zero on error.
+ * @param out		[out] Output buffer, or nullptr if no data is requested.
+ * @param out_len	[out] Length of out.
+ * @param mode		[in] Data direction mode. (IN == receive from device; OUT == send to device)
+ * @return 0 on success, non-zero on error. (TODO: Return SCSI sense key?)
  */
 int CdDriveLinux::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 				void *out, size_t out_len,
 				scsi_data_mode mode)
 {
-	
 	if (!isOpen())
 		return -1;	// TODO: Proper SCSI error code.
 
@@ -223,6 +222,18 @@ int CdDriveLinux::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 	}
 
 	return ret;
+}
+
+/**
+ * Check if the disc has changed since the last access.
+ * @return True if the disc has changed; false if not.
+ */
+bool CdDriveLinux::hasDiscChanged(void)
+{
+	int chg = ioctl(d->fd, CDROM_MEDIA_CHANGED, 0);
+
+	// TODO: Handle chg == -1 (drive doesn't support checking).
+	return (chg == 1);
 }
 
 }
