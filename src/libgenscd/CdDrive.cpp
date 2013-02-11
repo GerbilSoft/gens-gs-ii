@@ -232,6 +232,7 @@ void CdDrivePrivate::updateCache(bool force)
 	if (!q->isDiscPresent()) {
 		// No disc.
 		cache.stale = true;
+		cache.discType = DISC_TYPE_NONE;
 		printf("update cache: no disc\n");
 		return;
 	}
@@ -244,7 +245,7 @@ void CdDrivePrivate::updateCache(bool force)
 		cache.stale = true;
 	}
 
-	((void)force);
+	// Check if we need to update the cache.
 	if (!cache.stale && !force) {
 		printf("update cache: not stale\n");
 		return;
