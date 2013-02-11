@@ -84,13 +84,10 @@ CdDriveLinux::CdDriveLinux(const string& filename)
 	: CdDrive(filename)
 	, d(new CdDriveLinuxPrivate(this))
 {
-	// TODO: Check if the device is mounted.
-	bool isMounted = false;
-
 	// Open the specified drive.
 	int fd = -1;
 	for (int cnt = 20; cnt > 0; cnt--) {
-		fd = open(filename.c_str(), O_RDONLY | O_NONBLOCK | (isMounted ? 0 : O_EXCL));
+		fd = open(filename.c_str(), O_RDONLY | O_NONBLOCK);
 		if (fd >= 0 || errno != EBUSY)
 			break;
 
