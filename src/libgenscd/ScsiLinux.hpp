@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgenscd: Gens/GS II CD-ROM Handler Library.                           *
- * CdDrive.hpp: CD-ROM drive handler.                                      *
+ * ScsiLinux.hpp: Linux SCSI device handler class.                         *
  *                                                                         *
  * Copyright (c) 2013 by David Korth.                                      *
  *                                                                         *
@@ -19,74 +19,67 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENSCD_CDDRIVE_HPP__
-#define __LIBGENSCD_CDDRIVE_HPP__
+#ifndef __LIBGENSCD_SCSILINUX_HPP__
+#define __LIBGENSCD_SCSILINUX_HPP__
 
-// C includes.
-#include <stdint.h>
+#ifndef __linux__
+#error ScsiLinux is Linux only.
+#endif
 
-// C++ includes.
-#include <string>
-
-// Disc and drive type definitions.
-#include "DiscType.h"
+// ScsiBase class.
+#include "ScsiBase.hpp"
 
 namespace LibGensCD
 {
 
-class CdDrivePrivate;
+class ScsiLinuxPrivate;
 
-class CdDrive
+class ScsiLinux : public ScsiBase
 {
 	public:
-		CdDrive(const std::string& filename);
-		virtual ~CdDrive();
+		ScsiLinux(const std::string& filename);
+		virtual ~ScsiLinux();
 
 	private:
-		friend class CdDrivePrivate;
-		CdDrivePrivate *const d;
+		friend class ScsiLinuxPrivate;
+		ScsiLinuxPrivate *const d;
 
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibGensCD-specific version of Q_DISABLE_COPY().
-		CdDrive(const CdDrive &);
-		CdDrive &operator=(const CdDrive &);
+		ScsiLinux(const ScsiLinux &);
+		ScsiLinux &operator=(const ScsiLinux &);
 
 	public:
-		bool isOpen(void) const;
-		void close(void);
-
-		std::string dev_vendor(void);
-		std::string dev_model(void);
-		std::string dev_firmware(void);
-
-		/**
-		 * Force a cache update.
-		 * NOTE: Currently required for SPTI, since the
-		 * MMC GET_EVENT_STATUS_NOTIFICATION command
-		 * isn't working properly, and WM_DEVICECHANGE
-		 * requires a window to receive notifications.
-		 */
-		void forceCacheUpdate(void);
+		bool isOpen(void) const override final;
+		void close(void) override final;
 
 		/**
 		 * Check if a disc is present.
 		 * @return True if a disc is present; false if not.
 		 */
-		bool isDiscPresent(void);
+		bool isDiscPresent(void) override final;
 
 		/**
-		 * Get the current disc type.
-		 * @return Disc type.
+		 * Check if the disc has changed since the last access.
+		 * @return True if the disc has changed; false if not.
 		 */
-		CD_DiscType_t getDiscType(void);
+		bool hasDiscChanged(void) override final;
 
+	protected:
 		/**
-		 * Get the current drive type.
-		 * @return Drive type.
+		 * Send a SCSI command descriptor block to the drive.
+		 * @param cdb		[in] SCSI command descriptor block.
+		 * @param cdb_len	[in] Length of cdb.
+		 * @param out		[out] Output buffer, or nullptr if no data is requested.
+		 * @param out_len	[out] Length of out.
+		 * @param mode		[in] Data direction mode. (IN == receive from device; OUT == send to device)
+		 * @return 0 on success, non-zero on error. (TODO: Return SCSI sense key?)
 		 */
-		CD_DriveType_t getDriveType(void);
+		int scsi_send_cdb(const void *cdb, uint8_t cdb_len,
+				  void *out, size_t out_len,
+				  scsi_data_mode mode = SCSI_DATA_IN) override final;
 };
 
 }
 
-#endif /* __LIBGENSCD_CDDRIVE_HPP__ */
+#endif /* __LIBGENSCD_SCSILINUX_HPP__ */

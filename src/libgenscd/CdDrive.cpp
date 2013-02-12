@@ -30,6 +30,16 @@ using std::string;
 // SCSI commands.
 #include "genscd_scsi.h"
 
+// TODO: Factory class?
+#include "ScsiBase.hpp"
+#if defined(_WIN32)
+#include "ScsiSpti.hpp"
+#elif defined(__linux__)
+#include "ScsiLinux.hpp"
+#else
+#error CdDrive: Only Win32 and Linux are supported right now.
+#endif
+
 #define PRINT_SCSI_ERROR(op, err) \
 	do { \
 		fprintf(stderr, "SCSI error: OP=%02X, ERR=%02X, SK=%01X ASC=%02X\n", \
@@ -55,6 +65,9 @@ class CdDrivePrivate
 	public:
 		// Device filename.
 		std::string filename;
+
+		// Scsi handler.
+		ScsiBase *p_scsi;
 
 		enum InquiryStatus
 		{
@@ -85,18 +98,18 @@ class CdDrivePrivate
 
 		/**
 		 * Get the current feature profile, aka disc type.
+		 * Uses the MMC-1 READ DISC INFORMATION command.
+		 * @return Current feature profile, or 0xFFFF on error.
+		 */
+		uint16_t getCurrentFeatureProfile_mmc1(void);
+
+		/**
+		 * Get the current feature profile, aka disc type.
 		 * Uses the MMC-2 GET CONFIGURATION command.
 		 * If the command isn't supported, falls back to MMC-1.
 		 * @return Current feature profile, or 0xFFFF on error.
 		 */
 		uint16_t getCurrentFeatureProfile(void);
-
-		/**
-		 * Get the current feature profile, aka disc type.
-		 * Use the MMC-1 READ DISC INFORMATION command.
-		 * @return Current feature profile, or 0xFFFF on error.
-		 */
-		uint16_t getCurrentFeatureProfile_mmc1(void);
 
 		/**
 		 * Get a bitfield of supported disc types.
@@ -152,11 +165,18 @@ CdDrivePrivate::CdDrivePrivate(CdDrive *q, string filename)
 	: q(q)
 	, filename(filename)
 {
-	// Clear the inquiry data.
-	// TODO: Make the inquiry data a class, and put this in the constructor?
-	inq_data.inq_status = INQ_NOT_DONE;
-	inq_data.scsi_device_type = 0;
-	inq_data.driveType = DRIVE_TYPE_NONE;
+	// Initialize the SCSI device handler.
+	// TODO: Factory class?
+#if defined(_WIN32)
+	p_scsi = new ScsiSpti(filename);
+#elif defined(__linux__)
+	p_scsi = new ScsiLinux(filename);
+#else
+#error CdDrive: Only Win32 and Linux are supported right now.
+#endif
+
+	// Run the SCSI INQUIRY command.
+	inquiry();
 
 	// Mark the cache as stale.
 	cache.stale = true;
@@ -182,10 +202,10 @@ int CdDrivePrivate::inquiry(void)
 	cdb.AllocationLength = sizeof(data);
 
 	// Send the SCSI CDB.
-	int err = q->scsi_send_cdb(
+	int err = p_scsi->scsi_send_cdb(
 		&cdb, sizeof(cdb),
 		&data, sizeof(data),
-		CdDrive::SCSI_DATA_IN);
+		ScsiBase::SCSI_DATA_IN);
 	if (err != 0) {
 		// Inquiry failed.
 		// TODO: We have to request the sense data. err isn't sense data...
@@ -229,7 +249,7 @@ bool CdDrivePrivate::isInquirySuccessful(void)
  */
 void CdDrivePrivate::updateCache(bool force)
 {
-	if (!q->isDiscPresent()) {
+	if (!p_scsi->isDiscPresent()) {
 		// No disc.
 		cache.stale = true;
 		cache.discType = DISC_TYPE_NONE;
@@ -240,7 +260,7 @@ void CdDrivePrivate::updateCache(bool force)
 	// Check if the disc has been changed.
 	// NOTE: We always do this, even if cache.stale = true,
 	// since it clears the OS's "disc has changed" state.
-	if (q->hasDiscChanged()) {
+	if (p_scsi->hasDiscChanged()) {
 		// Disc has changed. Update the cache.
 		cache.stale = true;
 	}
@@ -264,62 +284,13 @@ void CdDrivePrivate::updateCache(bool force)
 
 /**
  * Get the current feature profile, aka disc type.
- * Uses the MMC-2 GET CONFIGURATION command.
- * If the command isn't supported, falls back to MMC-1.
- * @return Current feature profile, or 0xFFFF on error.
- */
-uint16_t CdDrivePrivate::getCurrentFeatureProfile(void)
-{
-	// Make sure a disc is present.
-	if (!q->isOpen() || !q->isDiscPresent())
-		return 0;
-
-	CDB_MMC_GET_CONFIGURAITON cdb;
-	memset(&cdb, 0x00, sizeof(cdb));
-
-	// Feature header.
-	SCSI_MMC_GET_CONFIGURATION_HEADER_DATA features;
-	memset(&features, 0x00, sizeof(features));
-
-	// Query the current profile.
-	cdb.OperationCode = MMC_GET_CONFIGURATION;
-	cdb.AllocationLength = cpu_to_be16(sizeof(features));
-	cdb.Control = 0;
-
-	int err = q->scsi_send_cdb(
-		&cdb, sizeof(cdb),
-		&features, sizeof(features),
-		CdDrive::SCSI_DATA_IN);
-	if (err != 0) {
-		// Error occurred.
-		// TODO: We have to request the sense data. err isn't sense data...
-		// Let's try the MMC-1 version regardless.
-		/*if (SK(err) == 0x5 && ASC(err) == 0x20)*/ {
-			// Drive does not support MMC-2 commands.
-			// Try the MMC-1 fallback.
-			return getCurrentFeatureProfile_mmc1();
-		}
-
-		// Other error.
-		// TODO: We have to request the sense data. err isn't sense data...
-		PRINT_SCSI_ERROR(cdb.OperationCode, err);
-		return 0;
-	}
-
-	// Get the current profile.
-	uint16_t cur_profile = be16_to_cpu(features.CurrentProfile);
-	return cur_profile;
-}
-
-/**
- * Get the current feature profile, aka disc type.
  * Uses the MMC-1 READ DISC INFORMATION command.
  * @return Current feature profile, or 0xFFFF on error.
  */
 uint16_t CdDrivePrivate::getCurrentFeatureProfile_mmc1(void)
 {
 	// Make sure a disc is present.
-	if (!q->isOpen() || !q->isDiscPresent())
+	if (!p_scsi->isOpen() || !p_scsi->isDiscPresent())
 		return 0;
 
 	CDB_MMC_READ_DISC_INFORMATION cdb;
@@ -334,10 +305,10 @@ uint16_t CdDrivePrivate::getCurrentFeatureProfile_mmc1(void)
 	cdb.AllocationLength = cpu_to_be16(sizeof(discInfo));
 	cdb.Control = 0;
 
-	int err = q->scsi_send_cdb(
+	int err = p_scsi->scsi_send_cdb(
 		&cdb, sizeof(cdb),
 		&discInfo, sizeof(discInfo),
-		CdDrive::SCSI_DATA_IN);
+		ScsiBase::SCSI_DATA_IN);
 	if (err != 0) {
 		// An error occurred requesting READ DISC INFORMATION.
 		// This usually means that we have a CD-ROM.
@@ -362,13 +333,62 @@ uint16_t CdDrivePrivate::getCurrentFeatureProfile_mmc1(void)
 }
 
 /**
+ * Get the current feature profile, aka disc type.
+ * Uses the MMC-2 GET CONFIGURATION command.
+ * If the command isn't supported, falls back to MMC-1.
+ * @return Current feature profile, or 0xFFFF on error.
+ */
+uint16_t CdDrivePrivate::getCurrentFeatureProfile(void)
+{
+	// Make sure a disc is present.
+	if (!p_scsi->isOpen() || !p_scsi->isDiscPresent())
+		return 0;
+
+	CDB_MMC_GET_CONFIGURAITON cdb;
+	memset(&cdb, 0x00, sizeof(cdb));
+
+	// Feature header.
+	SCSI_MMC_GET_CONFIGURATION_HEADER_DATA features;
+	memset(&features, 0x00, sizeof(features));
+
+	// Query the current profile.
+	cdb.OperationCode = MMC_GET_CONFIGURATION;
+	cdb.AllocationLength = cpu_to_be16(sizeof(features));
+	cdb.Control = 0;
+
+	int err = p_scsi->scsi_send_cdb(
+		&cdb, sizeof(cdb),
+		&features, sizeof(features),
+		ScsiBase::SCSI_DATA_IN);
+	if (err != 0) {
+		// Error occurred.
+		// TODO: We have to request the sense data. err isn't sense data...
+		// Let's try the MMC-1 version regardless.
+		/*if (SK(err) == 0x5 && ASC(err) == 0x20)*/ {
+			// Drive does not support MMC-2 commands.
+			// Try the MMC-1 fallback.
+			return getCurrentFeatureProfile_mmc1();
+		}
+
+		// Other error.
+		// TODO: We have to request the sense data. err isn't sense data...
+		PRINT_SCSI_ERROR(cdb.OperationCode, err);
+		return 0;
+	}
+
+	// Get the current profile.
+	uint16_t cur_profile = be16_to_cpu(features.CurrentProfile);
+	return cur_profile;
+}
+
+/**
  * Get a bitfield of supported disc types.
  * @return Bitfield of supported disc types.
  */
 uint32_t CdDrivePrivate::getSupportedDiscTypes(void)
 {
 	// Make sure the device file is open.
-	if (!q->isOpen())
+	if (!p_scsi->isOpen())
 		return 0;
 
 	CDB_MMC_GET_CONFIGURAITON cdb;
@@ -383,10 +403,10 @@ uint32_t CdDrivePrivate::getSupportedDiscTypes(void)
 	cdb.AllocationLength = (uint16_t)cpu_to_be16(sizeof(features));
 	cdb.Control = 0;
 
-	int err = q->scsi_send_cdb(
+	int err = p_scsi->scsi_send_cdb(
 		&cdb, sizeof(cdb),
 		&features, sizeof(features),
-		CdDrive::SCSI_DATA_IN);
+		ScsiBase::SCSI_DATA_IN);
 	if (err != 0) {
 		// Error occurred.
 		// TODO: Check the sense data.
@@ -545,7 +565,7 @@ CD_DriveType_t CdDrivePrivate::discTypesToDriveType(uint32_t discTypes)
 int CdDrivePrivate::readToc(void)
 {
 	// TODO: Check if the medium has been changed.
-	if (!q->isDiscPresent()) {
+	if (!p_scsi->isDiscPresent()) {
 		// No disc present.
 		cache.toc.num_tracks = 0;
 		cache.toc.toc.DataLen = 0;
@@ -564,10 +584,10 @@ int CdDrivePrivate::readToc(void)
 	cdb.TrackSessionNumber = 0;
 	cdb.AllocationLength = (uint16_t)cpu_to_be16(sizeof(cache.toc.toc));
 
-	int err = q->scsi_send_cdb(
+	int err = p_scsi->scsi_send_cdb(
 		&cdb, sizeof(cdb),
 		&cache.toc.toc, sizeof(cache.toc.toc),
-		CdDrive::SCSI_DATA_IN);
+		ScsiBase::SCSI_DATA_IN);
 	if (err != 0) {
 		// Error occurred.
 		// TODO: We have to request the sense data. err isn't sense data...
@@ -610,11 +630,7 @@ int CdDrivePrivate::readToc(void)
 
 CdDrive::CdDrive(const string& filename)
 	: d(new CdDrivePrivate(this, filename))
-{
-	// Nothing to do here...
-	// We can't inquiry the drive yet, since drive initialization
-	// is performed by the subclass.
-}
+{ }
 
 CdDrive::~CdDrive()
 {
@@ -626,6 +642,16 @@ CdDrive::~CdDrive()
 	 */
 
 	delete d;
+}
+
+bool CdDrive::isOpen(void) const
+{
+	return d->p_scsi->isOpen();
+}
+
+void CdDrive::close(void)
+{
+	d->p_scsi->close();
 }
 
 std::string CdDrive::dev_vendor(void)
@@ -659,6 +685,15 @@ std::string CdDrive::dev_firmware(void)
 void CdDrive::forceCacheUpdate(void)
 {
 	d->updateCache(true);
+}
+
+/**
+ * Check if a disc is present.
+ * @return True if a disc is present; false if not.
+ */
+bool CdDrive::isDiscPresent(void)
+{
+	return d->p_scsi->isDiscPresent();
 }
 
 /**

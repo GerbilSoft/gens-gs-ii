@@ -1,4 +1,25 @@
-#include "CdDriveSpti.hpp"
+/***************************************************************************
+ * libgenscd: Gens/GS II CD-ROM Handler Library.                           *
+ * ScsiSpti.cpp: SPTI (Windows NT) SCSI device handler class.              *
+ *                                                                         *
+ * Copyright (c) 2013 by David Korth.                                      *
+ *                                                                         *
+ * This program is free software; you can redistribute it and/or modify it *
+ * under the terms of the GNU General Public License as published by the   *
+ * Free Software Foundation; either version 2 of the License, or (at your  *
+ * option) any later version.                                              *
+ *                                                                         *
+ * This program is distributed in the hope that it will be useful, but     *
+ * WITHOUT ANY WARRANTY; without even the implied warranty of              *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
+ * GNU General Public License for more details.                            *
+ *                                                                         *
+ * You should have received a copy of the GNU General Public License along *
+ * with this program; if not, write to the Free Software Foundation, Inc., *
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
+ ***************************************************************************/
+
+#include "ScsiSpti.hpp"
 
 // C includes. (C++ namespace)
 #include <cstring>
@@ -21,8 +42,8 @@ using std::string;
 namespace LibGensCD
 {
 
-CdDriveSpti::CdDriveSpti(const string& filename)
-	: CdDrive(filename)
+ScsiSpti::ScsiSpti(const string& filename)
+	: ScsiBase(filename)
 	, m_hDevice(INVALID_HANDLE_VALUE)
 {
 	// Attempt to open the CD-ROM device.
@@ -51,7 +72,7 @@ CdDriveSpti::CdDriveSpti(const string& filename)
 
 }
 
-CdDriveSpti::~CdDriveSpti()
+ScsiSpti::~ScsiSpti()
 {
 	// Make sure the CD-ROM device file is closed.
 	close();
@@ -61,7 +82,7 @@ CdDriveSpti::~CdDriveSpti()
  * Check if the CD-ROM device file is open.
  * @return True if open; false if not.
  */
-bool CdDriveSpti::isOpen(void) const
+bool ScsiSpti::isOpen(void) const
 {
 	return !!m_hDevice;
 }
@@ -69,7 +90,7 @@ bool CdDriveSpti::isOpen(void) const
 /**
  * Close the CD-ROM device file if it's open.
  */
-void CdDriveSpti::close(void)
+void ScsiSpti::close(void)
 {
 	if (m_hDevice != INVALID_HANDLE_VALUE) {
 		CloseHandle(m_hDevice);
@@ -81,10 +102,10 @@ void CdDriveSpti::close(void)
  * Check if a disc is present.
  * @return True if a disc is present; false if not.
  */
-bool CdDriveSpti::isDiscPresent(void)
+bool ScsiSpti::isDiscPresent(void)
 {
 	/**
-	 * SCSI READ CAPACITY seems to return invalid values
+	 * READ CAPACITY seems to return invalid values
 	 * on Wine if no disc is present.
 	 *
 	 * Instead, use the Win32 IOCTL_STORAGE_CHECK_VERIFY.
@@ -110,6 +131,21 @@ bool CdDriveSpti::isDiscPresent(void)
 }
 
 /**
+ * Check if the disc has changed since the last access.
+ * @return True if the disc has changed; false if not.
+ */
+bool ScsiSpti::hasDiscChanged(void)
+{
+	// TODO: Figure out a better way to implement this.
+	// MMC's GET_EVENT_STATUS_NOTIFICATION command doesn't seem to work properly,
+	// and Win32's WM_DEVICECHANGE requires a window in order to receive events.
+
+	// Alternatively, just have the main program force a refresh whenever
+	// WM_DEVICECHANGE is received.
+	return false;
+}
+
+/**
  * Send a SCSI command descriptor block to the drive.
  * @param cdb		[in] SCSI command descriptor block.
  * @param cdb_len	[in] Length of cdb.
@@ -118,7 +154,7 @@ bool CdDriveSpti::isDiscPresent(void)
  * @param mode		[in] Data direction mode. (IN == receive from device; OUT == send to device)
  * @return 0 on success, non-zero on error. (TODO: Return SCSI sense key?)
  */
-int CdDriveSpti::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
+int ScsiSpti::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 				void *out, size_t out_len,
 				scsi_data_mode mode)
 {
@@ -143,15 +179,14 @@ int CdDriveSpti::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 	uint8_t DataIn;
 	switch (mode) {
 		case SCSI_DATA_NONE:
+		default:
+			DataIn = SCSI_IOCTL_DATA_UNSPECIFIED;
+			break;
 		case SCSI_DATA_IN:
 			DataIn = SCSI_IOCTL_DATA_IN;
 			break;
 		case SCSI_DATA_OUT:
 			DataIn = SCSI_IOCTL_DATA_OUT;
-			break;
-		case SCSI_DATA_UNSPECIFIED:
-		default:
-			DataIn = SCSI_IOCTL_DATA_UNSPECIFIED;
 			break;
 	}
 
@@ -181,21 +216,6 @@ int CdDriveSpti::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 
 	// Return 0 on success, non-zero on error.
 	return !ret;
-}
-
-/**
- * Check if the disc has changed since the last access.
- * @return True if the disc has changed; false if not.
- */
-bool CdDriveSpti::hasDiscChanged(void)
-{
-	// TODO: Figure out a better way to implement this.
-	// MMC's GET_EVENT_STATUS_NOTIFICATION command doesn't seem to work properly,
-	// and Win32's WM_DEVICECHANGE requires a window in order to receive events.
-
-	// Alternatively, just have the main program force a refresh whenever
-	// WM_DEVICECHANGE is received.
-	return false;
 }
 
 }

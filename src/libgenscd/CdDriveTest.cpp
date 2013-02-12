@@ -2,24 +2,15 @@
 #include <cstdio>
 #include <cstdlib>
 
-// TODO: CdDriveFactory.
-#ifdef _WIN32
-#include "CdDriveSpti.hpp"
-#elif defined(__linux__)
-#include "CdDriveLinux.hpp"
-#endif
+#include "CdDrive.hpp"
 
 int main(int argc, char *argv[])
 {
-#if !defined(_WIN32) && !defined(__linux__)
-	printf("Sorry, only Win32 and Linux are supported right now.\n");
-	return EXIT_FAILURE;
-#else
 	if (argc != 2) {
 #if defined(_WIN32)
 		printf("Syntax: %s D:\n", argv[0]);
 		printf("Replace D: with your CD-ROM drive.\n");
-#elif defined(__linux__)
+#else
 		printf("Syntax: %s /dev/sr0\n", argv[0]);
 		printf("Replace /dev/sr0 with your CD-ROM drive.\n");
 #endif
@@ -27,11 +18,7 @@ int main(int argc, char *argv[])
 	}
 
 	// Attempt to open the drive.
-#if defined(_WIN32)
-	LibGensCD::CdDriveSpti *cdrom = new LibGensCD::CdDriveSpti(argv[1]);
-#elif defined(__linux__)
-	LibGensCD::CdDriveLinux *cdrom = new LibGensCD::CdDriveLinux(argv[1]);
-#endif
+	LibGensCD::CdDrive *cdrom = new LibGensCD::CdDrive(argv[1]);
 	if (!cdrom->isOpen()) {
 		printf("Error opening %s.\n", argv[1]);
 		printf("(TODO: Get the error code!)\n");
@@ -54,5 +41,4 @@ int main(int argc, char *argv[])
 
 	delete cdrom;
 	return EXIT_SUCCESS;
-#endif
 }

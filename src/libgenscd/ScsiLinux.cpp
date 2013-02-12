@@ -1,4 +1,25 @@
-#include "CdDriveLinux.hpp"
+/***************************************************************************
+ * libgenscd: Gens/GS II CD-ROM Handler Library.                           *
+ * ScsiLinux.cpp: Linux SCSI device handler class.                         *
+ *                                                                         *
+ * Copyright (c) 2013 by David Korth.                                      *
+ *                                                                         *
+ * This program is free software; you can redistribute it and/or modify it *
+ * under the terms of the GNU General Public License as published by the   *
+ * Free Software Foundation; either version 2 of the License, or (at your  *
+ * option) any later version.                                              *
+ *                                                                         *
+ * This program is distributed in the hope that it will be useful, but     *
+ * WITHOUT ANY WARRANTY; without even the implied warranty of              *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
+ * GNU General Public License for more details.                            *
+ *                                                                         *
+ * You should have received a copy of the GNU General Public License along *
+ * with this program; if not, write to the Free Software Foundation, Inc., *
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
+ ***************************************************************************/
+
+#include "ScsiLinux.hpp"
 
 // C includes. (C++ namespace)
 #include <cstring>
@@ -30,19 +51,19 @@ using std::string;
 namespace LibGensCD
 {
 
-class CdDriveLinuxPrivate
+class ScsiLinuxPrivate
 {
 	public:
-		CdDriveLinuxPrivate(CdDriveLinux *q);
-		~CdDriveLinuxPrivate();
+		ScsiLinuxPrivate(ScsiLinux *q);
+		~ScsiLinuxPrivate();
 
 	private:
-		CdDriveLinux *const q;
+		ScsiLinux *const q;
 		
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibGensCD-specific version of Q_DISABLE_COPY().
-		CdDriveLinuxPrivate(const CdDriveLinuxPrivate &);
-		CdDriveLinuxPrivate &operator=(const CdDriveLinuxPrivate &);
+		ScsiLinuxPrivate(const ScsiLinuxPrivate &);
+		ScsiLinuxPrivate &operator=(const ScsiLinuxPrivate &);
 
 	public:
 		// Drive handle.
@@ -58,9 +79,9 @@ class CdDriveLinuxPrivate
 		} _sense;
 };
 
-/** CdDriveLinuxPrivate **/
+/** ScsiLinuxPrivate **/
 
-CdDriveLinuxPrivate::CdDriveLinuxPrivate(CdDriveLinux *q)
+ScsiLinuxPrivate::ScsiLinuxPrivate(ScsiLinux *q)
 	: q(q)
 	, fd(-1)
 {
@@ -72,17 +93,17 @@ CdDriveLinuxPrivate::CdDriveLinuxPrivate(CdDriveLinux *q)
 	sg_io.flags = SG_FLAG_LUN_INHIBIT | SG_FLAG_DIRECT_IO;
 }
 
-CdDriveLinuxPrivate::~CdDriveLinuxPrivate()
+ScsiLinuxPrivate::~ScsiLinuxPrivate()
 {
 	if (fd >= 0)
 		close(fd);
 }
 
-/** CdDriveLinux **/
+/** ScsiLinux **/
 
-CdDriveLinux::CdDriveLinux(const string& filename)
-	: CdDrive(filename)
-	, d(new CdDriveLinuxPrivate(this))
+ScsiLinux::ScsiLinux(const string& filename)
+	: ScsiBase(filename)
+	, d(new ScsiLinuxPrivate(this))
 {
 	// Open the specified drive.
 	int fd = -1;
@@ -106,7 +127,7 @@ CdDriveLinux::CdDriveLinux(const string& filename)
 	d->fd = fd;
 }
 
-CdDriveLinux::~CdDriveLinux()
+ScsiLinux::~ScsiLinux()
 {
 	// Make sure the CD-ROM device file is closed.
 	close();
@@ -118,7 +139,7 @@ CdDriveLinux::~CdDriveLinux()
  * Check if the CD-ROM device file is open.
  * @return True if open; false if not.
  */
-bool CdDriveLinux::isOpen(void) const
+bool ScsiLinux::isOpen(void) const
 {
 	return (d->fd >= 0);
 }
@@ -126,7 +147,7 @@ bool CdDriveLinux::isOpen(void) const
 /**
  * Close the CD-ROM device file if it's open.
  */
-void CdDriveLinux::close(void)
+void ScsiLinux::close(void)
 {
 	if (d->fd >= 0) {
 		::close(d->fd);
@@ -138,12 +159,24 @@ void CdDriveLinux::close(void)
  * Check if a disc is present.
  * @return True if a disc is present; false if not.
  */
-bool CdDriveLinux::isDiscPresent(void)
+bool ScsiLinux::isDiscPresent(void)
 {
 	if (!isOpen())
 		return false;
 
 	return (ioctl(d->fd, CDROM_DRIVE_STATUS, CDSL_CURRENT) == CDS_DISC_OK);
+}
+
+/**
+ * Check if the disc has changed since the last access.
+ * @return True if the disc has changed; false if not.
+ */
+bool ScsiLinux::hasDiscChanged(void)
+{
+	int chg = ioctl(d->fd, CDROM_MEDIA_CHANGED, 0);
+
+	// TODO: Handle chg == -1 (drive doesn't support checking).
+	return (chg == 1);
 }
 
 /**
@@ -155,7 +188,7 @@ bool CdDriveLinux::isDiscPresent(void)
  * @param mode		[in] Data direction mode. (IN == receive from device; OUT == send to device)
  * @return 0 on success, non-zero on error. (TODO: Return SCSI sense key?)
  */
-int CdDriveLinux::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
+int ScsiLinux::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 				void *out, size_t out_len,
 				scsi_data_mode mode)
 {
@@ -182,6 +215,7 @@ int CdDriveLinux::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 		// Convert scsi_data_mode to SG data mode.
 		switch (mode) {
 			case SCSI_DATA_NONE:
+			default:
 				d->sg_io.dxfer_direction = SG_DXFER_NONE;
 				break;
 			case SCSI_DATA_IN:
@@ -189,10 +223,6 @@ int CdDriveLinux::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 				break;
 			case SCSI_DATA_OUT:
 				d->sg_io.dxfer_direction = SG_DXFER_TO_DEV;
-				break;
-			case SCSI_DATA_UNSPECIFIED:
-			default:
-				d->sg_io.dxfer_direction = SG_DXFER_TO_FROM_DEV;
 				break;
 		}
 	} else {
@@ -222,18 +252,6 @@ int CdDriveLinux::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 	}
 
 	return ret;
-}
-
-/**
- * Check if the disc has changed since the last access.
- * @return True if the disc has changed; false if not.
- */
-bool CdDriveLinux::hasDiscChanged(void)
-{
-	int chg = ioctl(d->fd, CDROM_MEDIA_CHANGED, 0);
-
-	// TODO: Handle chg == -1 (drive doesn't support checking).
-	return (chg == 1);
 }
 
 }

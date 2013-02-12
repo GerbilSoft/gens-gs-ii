@@ -4,19 +4,20 @@ cmake_minimum_required(VERSION 2.6.0)
 # Sources.
 SET(libgenscd_SRCS
 	CdDrive.cpp
+	ScsiBase.cpp
 	)
 
 IF(WIN32)
 	SET(libgenscd_SRCS
 		${libgenscd_SRCS}
-		CdDriveSpti.cpp
+		ScsiSpti.cpp
 		)
 ENDIF(WIN32)
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	SET(libgenscd_SRCS
 		${libgenscd_SRCS}
-		CdDriveLinux.cpp
+		ScsiLinux.cpp
 		)
 ENDIF()
 
