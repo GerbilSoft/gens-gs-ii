@@ -24,9 +24,13 @@
 
 // C includes.
 #include <stdint.h>
+#include <cstddef>
 
 // C++ includes.
 #include <string>
+
+// SCSI commands.
+#include "scsi_protocol.h"
 
 namespace LibGensCD
 {
@@ -83,6 +87,40 @@ class ScsiBase
 		virtual int scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 					  void *out, size_t out_len,
 					  scsi_data_mode mode = SCSI_DATA_IN) = 0;
+
+	public:
+		/** SCSI command wrappers. **/
+
+		/**
+		 * INQUIRY: Get device identification information.
+		 * @param resp	[out] Buffer for INQUIRY response.
+		 * @return 0 on success; SCSI SENSE KEY on error.
+		 */
+		int inquiry(SCSI_RESP_INQUIRY_STD *resp);
+
+		/**
+		 * READ TOC: Read the CD-ROM Table of Contents.
+		 * @param toc		[out] Buffer for Table of Contents.
+		 * @param numTracks	[out, opt] Number of tracks.
+		 * @return 0 on success; SCSI SENSE KEY on error.
+		 */
+		int readToc(SCSI_CDROM_TOC *toc, int *numTracks = nullptr);
+
+		/**
+		 * GET CONFIGURATION: Get the MMC configuration.
+		 * This function only returns the header.
+		 * @param resp	[out] Buffer for GET CONFIGURATION response header.
+		 * @return 0 on success; SCSI SENSE KEY on error.
+		 */
+		int getConfiguration(SCSI_RESP_GET_CONFIGURATION_HEADER *resp);
+
+		/**
+		 * READ DISC INFORMATION: Read the disc information.
+		 * This function returns STANDARD disc information, without OPC data.
+		 * @param resp	[out] Buffer for READ DISC INFORMATION response.
+		 * @return 0 on success; SCSI SENSE KEY on error.
+		 */
+		int readDiscInformation(SCSI_RESP_READ_DISC_INFORMATION_STANDARD *resp);
 };
 
 }

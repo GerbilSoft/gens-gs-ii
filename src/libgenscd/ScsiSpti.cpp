@@ -37,7 +37,6 @@ using std::string;
 
 // SPTI/SCSI headers.
 #include <devioctl.h>
-#include "genscd_scsi.h"
 
 namespace LibGensCD
 {

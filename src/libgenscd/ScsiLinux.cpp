@@ -41,7 +41,6 @@ using std::string;
 #include <scsi/sg.h>
 #include <scsi/scsi.h>
 #include <linux/cdrom.h>
-#include "genscd_scsi.h"
 
 // Sleep for a random amonut of time if open() fails.
 #include <unistd.h>

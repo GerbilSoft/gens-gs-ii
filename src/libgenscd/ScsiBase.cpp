@@ -49,7 +49,7 @@ using std::string;
 #define cpu_to_le32(x)	(x)
 
 // SCSI commands.
-#include "genscd_scsi.h"
+#include "scsi_protocol.h"
 
 #define PRINT_SCSI_ERROR(op, err) \
 	do { \
@@ -101,6 +101,165 @@ ScsiBase::~ScsiBase()
 	 */
 
 	delete d;
+}
+
+/** SCSI command wrappers. **/
+
+/**
+ * INQUIRY: Get device identification information.
+ * @param resp	[out] Buffer for INQUIRY response.
+ * @return 0 on success; SCSI SENSE KEY on error.
+ */
+int ScsiBase::inquiry(SCSI_RESP_INQUIRY_STD *resp)
+{
+	SCSI_CDB_INQUIRY cdb;
+	memset(&cdb, 0x00, sizeof(cdb));
+
+	// Set SCSI operation type.
+	cdb.OpCode = SCSI_OP_INQUIRY;
+	cdb.AllocLen = (uint16_t)cpu_to_be16(sizeof(*resp));
+	cdb.Control = 0;
+
+	// Send the SCSI CDB.
+	int err = scsi_send_cdb(&cdb, sizeof(cdb), resp, sizeof(*resp), ScsiBase::SCSI_DATA_IN);
+	if (err != 0) {
+		// Inquiry failed.
+		return err;
+	}
+
+	// Drive inquiry successful.
+	return 0;
+}
+
+/**
+ * READ TOC: Read the CD-ROM Table of Contents.
+ * @param toc		[out] Buffer for Table of Contents.
+ * @param numTracks	[out, opt] Number of tracks.
+ * @return 0 on success; SCSI SENSE KEY on error.
+ */
+int ScsiBase::readToc(SCSI_CDROM_TOC *toc, int *numTracks)
+{
+	SCSI_CDB_READ_TOC cdb;
+	memset(&cdb, 0x00, sizeof(cdb));
+
+	// TOC response includes a data length in addition to toc.
+	SCSI_RESP_READ_TOC resp;
+	memset(&resp, 0x00, sizeof(resp));
+
+	// Attempt to read the TOC.
+	cdb.OpCode = SCSI_OP_READ_TOC;
+	cdb.MSF = SCSI_BIT_READ_TOC_MSF_LBA;	// LBA addressing only.
+	cdb.Format = 0; // Standard TOC for CD-ROMs.
+	cdb.TrackSessionNumber = 0;
+	cdb.AllocLen = (uint16_t)cpu_to_be16(sizeof(resp));
+	cdb.Control = 0;
+
+	int err = scsi_send_cdb(&cdb, sizeof(cdb), &resp, sizeof(resp), ScsiBase::SCSI_DATA_IN);
+	if (err != 0) {
+		// An error occurred.
+		return err;
+	}
+
+	// Byteswap the Table of Contents data length.
+	resp.DataLen = be16_to_cpu(resp.DataLen);
+
+	// Copy the track numbers.
+	toc->FirstTrackNumber = resp.toc.FirstTrackNumber;
+	toc->LastTrackNumber = resp.toc.LastTrackNumber;
+
+	// Determine how many tracks we have.
+	int count;
+	if (resp.toc.FirstTrackNumber == 0 && resp.toc.LastTrackNumber == 0) {
+		// No tracks.
+		// TODO: What if a disc has only one track with number 0?
+		count = 0;
+	} else {
+		// Calculate the number of tracks.
+		count = (resp.toc.LastTrackNumber - resp.toc.FirstTrackNumber + 1);
+		if (count < 0)
+			count = 0;
+		else if (count > (int)(sizeof(resp.toc.Tracks)/sizeof(resp.toc.Tracks[0])))
+			count = (int)(sizeof(resp.toc.Tracks)/sizeof(resp.toc.Tracks[0]));
+
+		// Make sure num_tracks doesn't exceed the data length.
+		const int num_tracks_data = ((resp.DataLen - 2) / 4);
+		if (count > num_tracks_data)
+			count = num_tracks_data;
+
+		// Copy and byteswap the TOC.
+		for (int track = 0; track < count; track++) {
+			toc->Tracks[track].rsvd1 = resp.toc.Tracks[track].rsvd1;
+			toc->Tracks[track].ControlADR = resp.toc.Tracks[track].ControlADR;
+			toc->Tracks[track].TrackNumber = resp.toc.Tracks[track].TrackNumber;
+			toc->Tracks[track].rsvd2 = resp.toc.Tracks[track].rsvd2;
+
+			toc->Tracks[track].StartAddress =
+				be32_to_cpu(resp.toc.Tracks[track].StartAddress);
+		}
+	}
+
+	// Save the number of tracks.
+	if (numTracks)
+		*numTracks = count;
+
+	// TOC has been read.
+	return 0;
+}
+
+/**
+ * GET CONFIGURATION: Get the MMC configuration.
+ * This function only returns the header.
+ * @param resp	[out] Buffer for GET CONFIGURATION response header.
+ * @return 0 on success; SCSI SENSE KEY on error.
+ */
+int ScsiBase::getConfiguration(SCSI_RESP_GET_CONFIGURATION_HEADER *resp)
+{
+	SCSI_CDB_GET_CONFIGURATION cdb;
+	memset(&cdb, 0x00, sizeof(cdb));
+
+	// Get the current configuration.
+	cdb.OpCode = SCSI_OP_GET_CONFIGURATION;
+	cdb.AllocLen = cpu_to_be16(sizeof(*resp));
+	cdb.Control = 0;
+
+	int err = scsi_send_cdb(&cdb, sizeof(cdb), resp, sizeof(*resp), ScsiBase::SCSI_DATA_IN);
+	if (err != 0) {
+		// An error occurred.
+		return err;
+	}
+
+	// Byteswap the fields.
+	resp->DataLength = be32_to_cpu(resp->DataLength);
+	resp->CurrentProfile = (uint16_t)be16_to_cpu(resp->CurrentProfile);
+
+	// Configuration retrieved.
+	return 0;
+}
+
+/**
+ * READ DISC INFORMATION: Read the disc information.
+ * This function returns STANDARD disc information, without OPC data.
+ * @param resp	[out] Buffer for READ DISC INFORMATION response.
+ * @return 0 on success; SCSI SENSE KEY on error.
+ */
+int ScsiBase::readDiscInformation(SCSI_RESP_READ_DISC_INFORMATION_STANDARD *resp)
+{
+	SCSI_CDB_READ_DISC_INFORMATION cdb;
+	memset(&cdb, 0x00, sizeof(cdb));
+
+	// Get the disc information.
+	cdb.OpCode = SCSI_OP_READ_DISC_INFORMATION;
+	cdb.AllocLen = cpu_to_be16(sizeof(*resp));
+	cdb.Control = 0;
+
+	int err = scsi_send_cdb(&cdb, sizeof(cdb), resp, sizeof(*resp), ScsiBase::SCSI_DATA_IN);
+	if (err != 0) {
+		// An error occurred.
+		return err;
+	}
+
+	// Disc information retrieved.
+	return 0;
 }
 
 }

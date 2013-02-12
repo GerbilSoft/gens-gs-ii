@@ -1,3 +1,24 @@
+/***************************************************************************
+ * libgenscd: Gens/GS II CD-ROM Handler Library.                           *
+ * CdDrive.cpp: CD-ROM drive handler class.                                *
+ *                                                                         *
+ * Copyright (c) 2013 by David Korth.                                      *
+ *                                                                         *
+ * This program is free software; you can redistribute it and/or modify it *
+ * under the terms of the GNU General Public License as published by the   *
+ * Free Software Foundation; either version 2 of the License, or (at your  *
+ * option) any later version.                                              *
+ *                                                                         *
+ * This program is distributed in the hope that it will be useful, but     *
+ * WITHOUT ANY WARRANTY; without even the implied warranty of              *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
+ * GNU General Public License for more details.                            *
+ *                                                                         *
+ * You should have received a copy of the GNU General Public License along *
+ * with this program; if not, write to the Free Software Foundation, Inc., *
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
+ ***************************************************************************/
+
 #include "CdDrive.hpp"
 
 // C includes. (C++ namespace)
@@ -27,9 +48,6 @@ using std::string;
 #define cpu_to_le16(x)	(x)
 #define cpu_to_le32(x)	(x)
 
-// SCSI commands.
-#include "genscd_scsi.h"
-
 // TODO: Factory class?
 #include "ScsiBase.hpp"
 #if defined(_WIN32)
@@ -42,8 +60,8 @@ using std::string;
 
 #define PRINT_SCSI_ERROR(op, err) \
 	do { \
-		fprintf(stderr, "SCSI error: OP=%02X, ERR=%02X, SK=%01X ASC=%02X\n", \
-			op, err, SK(err), ASC(err)); \
+		fprintf(stderr, "%s(): SCSI error: OP=%02X, SK=%01X ASC=%02X ASCQ=%02X\n", \
+			__func__, op, SK(err), ASC(err), ASCQ(err)); \
 	} while (0)
 
 namespace LibGensCD
@@ -53,6 +71,7 @@ class CdDrivePrivate
 {
 	public:
 		CdDrivePrivate(CdDrive *q, string filename);
+		~CdDrivePrivate();
 
 	private:
 		CdDrive *const q;
@@ -182,34 +201,22 @@ CdDrivePrivate::CdDrivePrivate(CdDrive *q, string filename)
 	cache.stale = true;
 }
 
+CdDrivePrivate::~CdDrivePrivate()
+{
+	delete p_scsi;
+}
+
 /**
  * Run a SCSI INQUIRY command.
  * @return 0 on success; nonzero on error.
  */
 int CdDrivePrivate::inquiry(void)
 {
-	CDB_SCSI cdb;
-	SCSI_INQUIRY_STD_DATA data;
-
-	memset(&cdb, 0x00, sizeof(cdb));
-	memset(&data, 0x00, sizeof(data));
-
-	// Inquiry hasn't been done yet.
-	inq_data.inq_status = INQ_NOT_DONE;
-
-	// Set SCSI operation type.
-	cdb.OperationCode = SCSI_INQUIRY;
-	cdb.AllocationLength = sizeof(data);
-
-	// Send the SCSI CDB.
-	int err = p_scsi->scsi_send_cdb(
-		&cdb, sizeof(cdb),
-		&data, sizeof(data),
-		ScsiBase::SCSI_DATA_IN);
+	SCSI_RESP_INQUIRY_STD resp;
+	int err = p_scsi->inquiry(&resp);
 	if (err != 0) {
 		// Inquiry failed.
-		// TODO: We have to request the sense data. err isn't sense data...
-		PRINT_SCSI_ERROR(cdb.OperationCode, err);
+		PRINT_SCSI_ERROR(SCSI_OP_INQUIRY, err);
 		inq_data.inq_status = CdDrivePrivate::INQ_FAILED;
 		return -1;
 	}
@@ -218,10 +225,10 @@ int CdDrivePrivate::inquiry(void)
 	// Get the information.
 	// TODO: Validate that device type is 0x05. (DTYPE_CDROM)
 	// TODO: Trim spaces in vendor, model, and firmware.
-	inq_data.scsi_device_type = data.peripheral_device_type;
-	inq_data.vendor = string(data.vendor_id, sizeof(data.vendor_id));
-	inq_data.model = string(data.product_id, sizeof(data.product_id));
-	inq_data.firmware = string(data.product_revision_level, sizeof(data.product_revision_level));
+	inq_data.scsi_device_type = resp.PeripheralDeviceType;
+	inq_data.vendor = string(resp.vendor_id, sizeof(resp.vendor_id));
+	inq_data.model = string(resp.product_id, sizeof(resp.product_id));
+	inq_data.firmware = string(resp.product_revision_level, sizeof(resp.product_revision_level));
 
 	// SCSI_INQUIRY completed successfully.
 	inq_data.inq_status = CdDrivePrivate::INQ_SUCCESSFUL;
@@ -276,7 +283,12 @@ void CdDrivePrivate::updateCache(bool force)
 	cache.discType = mmcFeatureProfileToDiscType(getCurrentFeatureProfile());
 
 	// Update the TOC.
-	readToc();
+	int err = readToc();
+	if (err != 0) {
+		// Error reading the TOC.
+		cache.stale = true;
+		return;
+	}
 
 	// Cache is updated.
 	cache.stale = false;
@@ -293,43 +305,29 @@ uint16_t CdDrivePrivate::getCurrentFeatureProfile_mmc1(void)
 	if (!p_scsi->isOpen() || !p_scsi->isDiscPresent())
 		return 0;
 
-	CDB_MMC_READ_DISC_INFORMATION cdb;
-	memset(&cdb, 0x00, sizeof(cdb));
-
-	// Disc information data.
-	SCSI_MMC_READ_DISC_INFORMATION_DATA discInfo;
-	memset(&discInfo, 0x00, sizeof(discInfo));
-
-	// Get the disc information.
-	cdb.OperationCode = MMC_READ_DISC_INFORMATION;
-	cdb.AllocationLength = cpu_to_be16(sizeof(discInfo));
-	cdb.Control = 0;
-
-	int err = p_scsi->scsi_send_cdb(
-		&cdb, sizeof(cdb),
-		&discInfo, sizeof(discInfo),
-		ScsiBase::SCSI_DATA_IN);
+	SCSI_RESP_READ_DISC_INFORMATION_STANDARD resp;
+	int err = p_scsi->readDiscInformation(&resp);
 	if (err != 0) {
-		// An error occurred requesting READ DISC INFORMATION.
+		// An error occurred executing READ DISC INFORMATION.
 		// This usually means that we have a CD-ROM.
-		return 0x08;	// MMC CD-ROM profile.
+		return SCSI_MMC_PROFILE_CDROM;
 	}
 
 	// Determine the current profile based on the disc information.
 	// MMC-1 devices don't support DVDs, so we can rule out
 	// everything except CD-ROM, CD-R, and CD-RW.
 	// (We're not counting MO here.)
-	if (discInfo.DiscStatusFlags & 0x10) {
+	if (resp.DiscStatusFlags & 0x10) {
 		// Disc is rewritable.
-		return 0x0A;	// MMC CD-RW profile.
-	} else if ((discInfo.DiscStatusFlags & 0x03) < 2) {
+		return SCSI_MMC_PROFILE_CD_RW;
+	} else if ((resp.DiscStatusFlags & 0x03) < 2) {
 		// Disc is either empty, incomplete, or finalized.
 		// This is a CD-R.
-		return 0x09;	// MMC CD-R profile.
+		return SCSI_MMC_PROFILE_CD_R;
 	}
 
 	// Assume this is a CD-ROM.
-	return 0x08;	// MMC CD-ROM profile.
+	return SCSI_MMC_PROFILE_CDROM;
 }
 
 /**
@@ -340,45 +338,24 @@ uint16_t CdDrivePrivate::getCurrentFeatureProfile_mmc1(void)
  */
 uint16_t CdDrivePrivate::getCurrentFeatureProfile(void)
 {
-	// Make sure a disc is present.
-	if (!p_scsi->isOpen() || !p_scsi->isDiscPresent())
-		return 0;
-
-	CDB_MMC_GET_CONFIGURAITON cdb;
-	memset(&cdb, 0x00, sizeof(cdb));
-
-	// Feature header.
-	SCSI_MMC_GET_CONFIGURATION_HEADER_DATA features;
-	memset(&features, 0x00, sizeof(features));
-
-	// Query the current profile.
-	cdb.OperationCode = MMC_GET_CONFIGURATION;
-	cdb.AllocationLength = cpu_to_be16(sizeof(features));
-	cdb.Control = 0;
-
-	int err = p_scsi->scsi_send_cdb(
-		&cdb, sizeof(cdb),
-		&features, sizeof(features),
-		ScsiBase::SCSI_DATA_IN);
+	SCSI_RESP_GET_CONFIGURATION_HEADER resp;
+	int err = p_scsi->getConfiguration(&resp);
 	if (err != 0) {
-		// Error occurred.
-		// TODO: We have to request the sense data. err isn't sense data...
-		// Let's try the MMC-1 version regardless.
-		/*if (SK(err) == 0x5 && ASC(err) == 0x20)*/ {
+		// An error occurred executing GET CONFIGURATION.
+		// If the command wasn't supported, try the
+		// MMC-1 command READ DISC INFORMATION.
+		if (SK(err) == 0x5 && ASC(err) == 0x20) {
 			// Drive does not support MMC-2 commands.
 			// Try the MMC-1 fallback.
 			return getCurrentFeatureProfile_mmc1();
 		}
 
 		// Other error.
-		// TODO: We have to request the sense data. err isn't sense data...
-		PRINT_SCSI_ERROR(cdb.OperationCode, err);
-		return 0;
+		PRINT_SCSI_ERROR(SCSI_OP_GET_CONFIGURATION, err);
 	}
 
-	// Get the current profile.
-	uint16_t cur_profile = be16_to_cpu(features.CurrentProfile);
-	return cur_profile;
+	// Return the current profile.
+	return resp.CurrentProfile;
 }
 
 /**
@@ -387,66 +364,61 @@ uint16_t CdDrivePrivate::getCurrentFeatureProfile(void)
  */
 uint32_t CdDrivePrivate::getSupportedDiscTypes(void)
 {
+	// TODO: Figure out some way to move this to ScsiBase.
+
 	// Make sure the device file is open.
 	if (!p_scsi->isOpen())
 		return 0;
 
-	CDB_MMC_GET_CONFIGURAITON cdb;
+	SCSI_CDB_GET_CONFIGURATION cdb;
 	memset(&cdb, 0x00, sizeof(cdb));
 
-	// Feature buffer.
-	uint8_t features[65530];
-	memset(features, 0x00, sizeof(features));
+	// Response buffer.
+	uint8_t resp[65530];
+	memset(resp, 0x00, sizeof(resp));
 
-	// Query all available profiles.
-	cdb.OperationCode = MMC_GET_CONFIGURATION;
-	cdb.AllocationLength = (uint16_t)cpu_to_be16(sizeof(features));
+	// Get all available feature descriptors.
+	cdb.OpCode = SCSI_OP_GET_CONFIGURATION;
+	cdb.AllocLen = (uint16_t)cpu_to_be16(sizeof(resp));
 	cdb.Control = 0;
 
-	int err = p_scsi->scsi_send_cdb(
-		&cdb, sizeof(cdb),
-		&features, sizeof(features),
-		ScsiBase::SCSI_DATA_IN);
+	int err = p_scsi->scsi_send_cdb(&cdb, sizeof(cdb), &resp, sizeof(resp), ScsiBase::SCSI_DATA_IN);
 	if (err != 0) {
-		// Error occurred.
-		// TODO: Check the sense data.
-		/*
+		// An error occurred.
 		if (SK(err) == 0x5 && ASC(err) == 0x20) {
 			// Drive does not support MMC-2 commands.
 			// Determine drive type based on current disc type.
-			switch (getDiscType()) {
-				case DISC_TYPE_CD_RW:
+			switch (getCurrentFeatureProfile_mmc1()) {
+				case SCSI_MMC_PROFILE_CD_RW:
 					return DRIVE_TYPE_CD_RW;
-				case DISC_TYPE_CD_R:
+				case SCSI_MMC_PROFILE_CD_R:
 					return DRIVE_TYPE_CD_R;
-				case DISC_TYPE_CDROM:
+				case SCSI_MMC_PROFILE_CDROM:
 				default:
 					return DRIVE_TYPE_CDROM;
 			}
 		}
-		*/
 
-		// Other error.
-		// TODO: We have to request the sense data. err isn't sense data...
-		PRINT_SCSI_ERROR(cdb.OperationCode, err);
+		// Some other error occurred.
+		PRINT_SCSI_ERROR(cdb.OpCode, err);
 		return 0;
 	}
 
-	// Check how many features we received.
-	uint32_t len = (features[0] << 24 | features[1] << 16 | features[2] << 8 | features[3]);
-	if (len > sizeof(features)) {
-		// Too many features. Truncate the list
-		len = sizeof(features);
+	// Check how many feature descriptors we received.
+	uint32_t len = (resp[0] << 24 | resp[1] << 16 | resp[2] << 8 | resp[3]);
+	if (len > sizeof(resp)) {
+		// Too many feature descriptors. Truncate the list
+		len = sizeof(resp);
 	}
 
-	// Go through all of the features.
+	// Go through all of the feature descriptors.
 	int discTypes = 0;
-	for (unsigned int i = 8; i+4 < len; i += (4 + features[i+3])) {
-		const unsigned int feature = (features[i] << 8 | features[i+1]);
-		if (feature == 0x00) {
-			// Feature profiles.
-			const uint8_t *ptr = &features[i+4];
-			const uint8_t *const ptr_end = ptr + features[i+3];
+	for (unsigned int i = 8; i+4 < len; i += (4 + resp[i+3])) {
+		const unsigned int featureCode = (resp[i] << 8 | resp[i+1]);
+		if (featureCode == SCSI_MMC_FEATURE_PROFILE_LIST) {
+			// Feature profile.
+			const uint8_t *ptr = &resp[i+4];
+			const uint8_t *const ptr_end = ptr + resp[i+3];
 
 			for (; ptr < ptr_end; ptr += 4) {
 				const uint16_t featureProfile = (ptr[0] << 8 | ptr[1]);
@@ -468,34 +440,37 @@ uint32_t CdDrivePrivate::getSupportedDiscTypes(void)
 CD_DiscType_t CdDrivePrivate::mmcFeatureProfileToDiscType(uint16_t featureProfile)
 {
 	switch (featureProfile) {
-		case 0x03:	return DISC_TYPE_MO;		// (legacy) MO erasable
-		case 0x04:	return DISC_TYPE_MO;		// (legacy) Optical Write-Once
-		case 0x05:	return DISC_TYPE_MO;		// (legacy) AS-MO
-		case 0x08:	return DISC_TYPE_CDROM;
-		case 0x09:	return DISC_TYPE_CD_R;
-		case 0x0A:	return DISC_TYPE_CD_RW;
-		case 0x10:	return DISC_TYPE_DVD;
-		case 0x11:	return DISC_TYPE_DVD_R;
-		case 0x12:	return DISC_TYPE_DVD_RAM;
-		case 0x13:	return DISC_TYPE_DVD_RW; 	// read-only
-		case 0x14:	return DISC_TYPE_DVD_RW; 	// sequential
-		case 0x15:	return DISC_TYPE_DVD_R_DL;	// sequential
-		case 0x16:	return DISC_TYPE_DVD_R_DL;	// layer jump
-		case 0x17:	return DISC_TYPE_DVD_RW_DL;
-		case 0x1A:	return DISC_TYPE_DVD_PLUS_RW;
-		case 0x1B:	return DISC_TYPE_DVD_PLUS_R;
-		case 0x2A:	return DISC_TYPE_DVD_PLUS_RW_DL;
-		case 0x2B:	return DISC_TYPE_DVD_PLUS_R_DL;
-		case 0x40:	return DISC_TYPE_BDROM;
-		case 0x41:	return DISC_TYPE_BD_R;		// sequential
-		case 0x42:	return DISC_TYPE_BD_R;		// random
-		case 0x43:	return DISC_TYPE_BD_RE;
-		case 0x50:	return DISC_TYPE_HDDVD;
-		case 0x51:	return DISC_TYPE_HDDVD_R;
-		case 0x52:	return DISC_TYPE_HDDVD_RAM;
-		case 0x53:	return DISC_TYPE_HDDVD_RW;
-		case 0x58:	return DISC_TYPE_HDDVD_R_DL;
-		case 0x5A:	return DISC_TYPE_HDDVD_RW_DL;
+		case SCSI_MMC_PROFILE_MO_ERASABLE:	return DISC_TYPE_MO;
+		case SCSI_MMC_PROFILE_MO_WRITE_ONCE:	return DISC_TYPE_MO;
+		case SCSI_MMC_PROFILE_AS_MO:		return DISC_TYPE_MO;
+		case SCSI_MMC_PROFILE_CDROM:		return DISC_TYPE_CDROM;
+		case SCSI_MMC_PROFILE_CD_R:		return DISC_TYPE_CD_R;
+		case SCSI_MMC_PROFILE_CD_RW:		return DISC_TYPE_CD_RW;
+		case SCSI_MMC_PROFILE_DVDROM:		return DISC_TYPE_DVDROM;
+		case SCSI_MMC_PROFILE_DVD_R:		return DISC_TYPE_DVD_R;
+		case SCSI_MMC_PROFILE_DVD_RAM:		return DISC_TYPE_DVD_RAM;
+		case SCSI_MMC_PROFILE_DVD_RW_RO:	return DISC_TYPE_DVD_RW;
+		case SCSI_MMC_PROFILE_DVD_RW_SEQ:	return DISC_TYPE_DVD_RW;
+		case SCSI_MMC_PROFILE_DVD_R_DL_SEQ:	return DISC_TYPE_DVD_R_DL;
+		case SCSI_MMC_PROFILE_DVD_R_DL_JUMP:	return DISC_TYPE_DVD_R_DL;
+		case SCSI_MMC_PROFILE_DVD_RW_DL:	return DISC_TYPE_DVD_RW_DL;
+		case SCSI_MMC_PROFILE_DVD_PLUS_RW:	return DISC_TYPE_DVD_PLUS_RW;
+		case SCSI_MMC_PROFILE_DVD_PLUS_R:	return DISC_TYPE_DVD_PLUS_R;
+		case SCSI_MMC_PROFILE_DDCDROM:		return DISC_TYPE_DDCDROM;
+		case SCSI_MMC_PROFILE_DDCD_R:		return DISC_TYPE_DDCD_R;
+		case SCSI_MMC_PROFILE_DDCD_RW:		return DISC_TYPE_DDCD_RW;
+		case SCSI_MMC_PROFILE_DVD_PLUS_RW_DL:	return DISC_TYPE_DVD_PLUS_RW_DL;
+		case SCSI_MMC_PROFILE_DVD_PLUS_R_DL:	return DISC_TYPE_DVD_PLUS_R_DL;
+		case SCSI_MMC_PROFILE_BDROM:		return DISC_TYPE_BDROM;
+		case SCSI_MMC_PROFILE_BD_R_SEQ:		return DISC_TYPE_BD_R;
+		case SCSI_MMC_PROFILE_BD_R_RND:		return DISC_TYPE_BD_R;
+		case SCSI_MMC_PROFILE_BD_RE:		return DISC_TYPE_BD_RE;
+		case SCSI_MMC_PROFILE_HDDVD:		return DISC_TYPE_HDDVD;
+		case SCSI_MMC_PROFILE_HDDVD_R:		return DISC_TYPE_HDDVD_R;
+		case SCSI_MMC_PROFILE_HDDVD_RAM:	return DISC_TYPE_HDDVD_RAM;
+		case SCSI_MMC_PROFILE_HDDVD_RW:		return DISC_TYPE_HDDVD_RW;
+		case SCSI_MMC_PROFILE_HDDVD_R_DL:	return DISC_TYPE_HDDVD_R_DL;
+		case SCSI_MMC_PROFILE_HDDVD_RW_DL:	return DISC_TYPE_HDDVD_RW_DL;
 
 		case 0x00:
 		default:
@@ -543,12 +518,18 @@ CD_DriveType_t CdDrivePrivate::discTypesToDriveType(uint32_t discTypes)
 		return DRIVE_TYPE_DVD_RW;
 	else if (discTypes & DISC_TYPE_DVD_R)
 		return DRIVE_TYPE_DVD_R;
-	else if (discTypes & DISC_TYPE_DVD) {
+	else if (discTypes & DISC_TYPE_DVDROM) {
 		if (discTypes & (DISC_TYPE_CD_R | DISC_TYPE_CD_RW))
 			return DRIVE_TYPE_DVD_CD_RW;
 		else
 			return DRIVE_TYPE_DVD;
-	} else if (discTypes & DISC_TYPE_CD_RW)
+	} else if (discTypes & DISC_TYPE_DDCD_RW)
+		return DRIVE_TYPE_DDCD_RW;
+	else if (discTypes & DISC_TYPE_DDCD_R)
+		return DRIVE_TYPE_DDCD_R;
+	else if (discTypes & DISC_TYPE_DDCDROM)
+		return DRIVE_TYPE_DDCDROM;
+	else if (discTypes & DISC_TYPE_CD_RW)
 		return DRIVE_TYPE_CD_RW;
 	else if (discTypes & DISC_TYPE_CD_R)
 		return DRIVE_TYPE_CD_R;
@@ -568,58 +549,20 @@ int CdDrivePrivate::readToc(void)
 	if (!p_scsi->isDiscPresent()) {
 		// No disc present.
 		cache.toc.num_tracks = 0;
-		cache.toc.toc.DataLen = 0;
 		cache.toc.toc.FirstTrackNumber = 0;
 		cache.toc.toc.LastTrackNumber = 0;
 		return 0;
 	}
 
-	CDB_SCSI_READ_TOC cdb;
-	memset(&cdb, 0x00, sizeof(cdb));
-
-	// Attempt to read the TOC.
-	cdb.OperationCode = SCSI_READ_TOC;
-	cdb.MSF = SCSI_READ_TOC_FORMAT_LBA;
-	cdb.Format = 0; // Standard TOC for CD-ROMs.
-	cdb.TrackSessionNumber = 0;
-	cdb.AllocationLength = (uint16_t)cpu_to_be16(sizeof(cache.toc.toc));
-
-	int err = p_scsi->scsi_send_cdb(
-		&cdb, sizeof(cdb),
-		&cache.toc.toc, sizeof(cache.toc.toc),
-		ScsiBase::SCSI_DATA_IN);
+	// Read the TOC.
+	int err = p_scsi->readToc(&cache.toc.toc, &cache.toc.num_tracks);
 	if (err != 0) {
-		// Error occurred.
-		// TODO: We have to request the sense data. err isn't sense data...
-		PRINT_SCSI_ERROR(cdb.OperationCode, err);
+		// An error occurred.
+		PRINT_SCSI_ERROR(SCSI_OP_READ_TOC, err);
 		cache.toc.num_tracks = 0;
-		cache.toc.toc.DataLen = 0;
 		cache.toc.toc.FirstTrackNumber = 0;
 		cache.toc.toc.LastTrackNumber = 0;
 		return -1;
-	}
-
-	if (cache.toc.toc.FirstTrackNumber == 0 && cache.toc.toc.LastTrackNumber == 0) {
-		// No tracks.
-		cache.toc.num_tracks = 0;
-	} else {
-		// Calculate the number of tracks.
-		cache.toc.num_tracks = ((cache.toc.toc.LastTrackNumber - cache.toc.toc.FirstTrackNumber) + 1);
-		if (cache.toc.num_tracks < 0)
-			cache.toc.num_tracks = 0;
-		else if (cache.toc.num_tracks > (int)(sizeof(cache.toc.toc.Tracks) / sizeof(cache.toc.toc.Tracks[0])))
-			cache.toc.num_tracks = (int)(sizeof(cache.toc.toc.Tracks) / sizeof(cache.toc.toc.Tracks[0]));
-
-		// Make sure num_tracks doesn't exceed the data length.
-		const int num_tracks_data = ((cache.toc.toc.DataLen - 2) / 4);
-		if (cache.toc.num_tracks > num_tracks_data)
-			cache.toc.num_tracks = num_tracks_data;
-
-		// Byteswap the TOC.
-		for (int track = 0; track < cache.toc.num_tracks; track++) {
-			cache.toc.toc.Tracks[track].StartAddress =
-				be32_to_cpu(cache.toc.toc.Tracks[track].StartAddress);
-		}
 	}
 
 	// TOC has been read.
@@ -634,13 +577,6 @@ CdDrive::CdDrive(const string& filename)
 
 CdDrive::~CdDrive()
 {
-	/**
-	 * NOTE: close() is a virtual function.
-	 * We can't call it from the destructor.
-	 * 
-	 * Call close() in the subclass's destructor.
-	 */
-
 	delete d;
 }
 
