@@ -164,15 +164,15 @@ int ScsiSpti::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 	// Based on http://www.codeproject.com/KB/system/mydvdregion.aspx
 	DWORD returned;
 
-	// Size of SCSI_PASS_THROUGH + 96 bytes for sense data.
-	uint8_t cmd[sizeof(SCSI_PASS_THROUGH_DIRECT) + 96];
-	memset(cmd, 0x00, sizeof(cmd));
-
-	// Shortcut to the buffer.
-	SCSI_PASS_THROUGH_DIRECT *pcmd = (SCSI_PASS_THROUGH_DIRECT*)cmd;
+	// SCSI_PASS_THROUGH_DIRECT struct with extra space for sense data.
+	struct {
+		SCSI_PASS_THROUGH_DIRECT p;
+		uint8_t sense[96];	// TODO: Figure out the best size for this.
+	} srb;
+	memset(&srb, 0x00, sizeof(srb));
 
 	// Copy the CDB to the SCSI_PASS_THROUGH structure.
-	memcpy(pcmd->Cdb, cdb, cdb_len);
+	memcpy(srb.p.Cdb, cdb, cdb_len);
 
 	// Convert scsi_data_mode to Win32 DataIn.
 	uint8_t DataIn;
@@ -190,19 +190,19 @@ int ScsiSpti::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 	}
 
 	// Initialize the other SCSI command variables.
-	pcmd->DataBuffer = out;
-	pcmd->DataTransferLength = out_len;
-	pcmd->DataIn = DataIn;
-	pcmd->CdbLength = cdb_len;
-	pcmd->Length = sizeof(SCSI_PASS_THROUGH_DIRECT);
-	pcmd->SenseInfoLength = (sizeof(cmd) - sizeof(SCSI_PASS_THROUGH_DIRECT));
-	pcmd->SenseInfoOffset = sizeof(SCSI_PASS_THROUGH_DIRECT);
-	pcmd->TimeOutValue = 5; // 5-second timeout.
+	srb.p.DataBuffer = out;
+	srb.p.DataTransferLength = out_len;
+	srb.p.DataIn = DataIn;
+	srb.p.CdbLength = cdb_len;
+	srb.p.Length = sizeof(srb.p);
+	srb.p.SenseInfoLength = sizeof(srb.sense);
+	srb.p.SenseInfoOffset = sizeof(srb.p);
+	srb.p.TimeOutValue = 5; // 5-second timeout.
 
 	int ret = DeviceIoControl(
 			m_hDevice, IOCTL_SCSI_PASS_THROUGH_DIRECT,
-			(LPVOID)&cmd, sizeof(cmd),
-			(LPVOID)&cmd, sizeof(cmd),
+			(LPVOID)&srb.p, sizeof(srb.p),
+			(LPVOID)&srb, sizeof(srb),
 			&returned, nullptr);
 
 	if (ret == 0) {
