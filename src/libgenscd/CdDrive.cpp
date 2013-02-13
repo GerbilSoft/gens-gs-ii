@@ -60,8 +60,8 @@ using std::string;
 
 #define PRINT_SCSI_ERROR(op, err) \
 	do { \
-		fprintf(stderr, "%s(): SCSI error: OP=%02X, SK=%01X ASC=%02X ASCQ=%02X\n", \
-			__func__, op, SK(err), ASC(err), ASCQ(err)); \
+		fprintf(stderr, "%s(): SCSI error: ", __func__); \
+		p_scsi->printScsiError(op, err); \
 	} while (0)
 
 namespace LibGensCD
