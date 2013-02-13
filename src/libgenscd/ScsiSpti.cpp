@@ -151,7 +151,7 @@ bool ScsiSpti::hasDiscChanged(void)
  * @param out		[out] Output buffer, or nullptr if no data is requested.
  * @param out_len	[out] Length of out.
  * @param mode		[in] Data direction mode. (IN == receive from device; OUT == send to device)
- * @return 0 on success, non-zero on error. (TODO: Return SCSI sense key?)
+ * @return 0 on success, positive for SCSI sense error, negative for OS error.
  */
 int ScsiSpti::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 				void *out, size_t out_len,
@@ -167,7 +167,10 @@ int ScsiSpti::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 	// SCSI_PASS_THROUGH_DIRECT struct with extra space for sense data.
 	struct {
 		SCSI_PASS_THROUGH_DIRECT p;
-		uint8_t sense[96];	// TODO: Figure out the best size for this.
+		struct {
+			SCSI_RESP_REQUEST_SENSE s;
+			uint8_t b[78];	// Additional sense data. (TODO: Best size?)
+		} sense;
 	} srb;
 	memset(&srb, 0x00, sizeof(srb));
 
@@ -207,14 +210,34 @@ int ScsiSpti::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 
 	if (ret == 0) {
 		// DeviceIoControl failed.
-		// TODO: Return the SCSI sense key.
-		DWORD err = GetLastError();
-		if (err != ERROR_SUCCESS)
-			fprintf(stderr, "%s(): Error: 0x%08X\n", __func__, (unsigned int)err);
+		ret = -GetLastError();
+	} else {
+		// Check if the SCSI command failed.
+		switch (srb.sense.s.ErrorCode) {
+			case SCSI_ERR_REQUEST_SENSE_CURRENT:
+			case SCSI_ERR_REQUEST_SENSE_DEFERRED:
+				// Error. Return the sense key.
+				ret = (srb.sense.s.SenseKey << 16) |
+				      (srb.sense.s.AddSenseCode << 8) |
+				      (srb.sense.s.AddSenseQual);
+				break;
+
+			case SCSI_ERR_REQUEST_SENSE_CURRENT_DESC:
+			case SCSI_ERR_REQUEST_SENSE_DEFERRED_DESC:
+				// Error, but using descriptor format.
+				// Return a generic error.
+				ret = -ERROR_INVALID_PARAMETER;	// The parameter is incorrect.
+				break;
+
+			default:
+				// No error.
+				ret = 0;
+				break;
+		}
 	}
 
-	// Return 0 on success, non-zero on error.
-	return !ret;
+	// Return the error code.
+	return ret;
 }
 
 }
