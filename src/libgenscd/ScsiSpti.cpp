@@ -34,6 +34,7 @@ using std::string;
 #include <winioctl.h>
 #include <ntddscsi.h>
 #include <ntddstor.h>
+#include <winerror.h>
 
 // SPTI/SCSI headers.
 #include <devioctl.h>
