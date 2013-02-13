@@ -82,7 +82,7 @@ class ScsiBase
 		 * @param out		[out] Output buffer, or nullptr if no data is requested.
 		 * @param out_len	[out] Length of out.
 		 * @param mode		[in] Data direction mode. (IN == receive from device; OUT == send to device)
-		 * @return 0 on success, non-zero on error. (TODO: Return SCSI sense key?)
+		 * @return 0 on success, positive for SCSI sense key, negative for OS error.
 		 */
 		virtual int scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 					  void *out, size_t out_len,

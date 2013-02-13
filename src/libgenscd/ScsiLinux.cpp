@@ -185,7 +185,7 @@ bool ScsiLinux::hasDiscChanged(void)
  * @param out		[out] Output buffer, or nullptr if no data is requested.
  * @param out_len	[out] Length of out.
  * @param mode		[in] Data direction mode. (IN == receive from device; OUT == send to device)
- * @return 0 on success, non-zero on error. (TODO: Return SCSI sense key?)
+ * @return 0 on success, positive for SCSI sense key, negative for OS error.
  */
 int ScsiLinux::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 				void *out, size_t out_len,
@@ -234,19 +234,18 @@ int ScsiLinux::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 	// Run the ioctl.
 	if (ioctl(d->fd, SG_IO, &d->sg_io)) {
 		// ioctl failed.
-		// TODO: Return a proper error code...
-		return -1;
+		return -errno;
 	}
 
 	// Check if the command succeeded.
 	int ret = 0;
 	if ((d->sg_io.info & SG_INFO_OK_MASK) != SG_INFO_OK) {
 		// Command failed.
-		ret = -1;
+		ret = -EINVAL;
 		if (d->sg_io.masked_status & CHECK_CONDITION) {
 			ret = ERRCODE(d->_sense.u);
 			if (ret == 0)
-				ret = -1;
+				ret = -EINVAL;
 		}
 	}
 
