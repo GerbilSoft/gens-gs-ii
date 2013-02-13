@@ -152,7 +152,7 @@ bool ScsiSpti::hasDiscChanged(void)
  * @param out		[out] Output buffer, or nullptr if no data is requested.
  * @param out_len	[out] Length of out.
  * @param mode		[in] Data direction mode. (IN == receive from device; OUT == send to device)
- * @return 0 on success, positive for SCSI sense error, negative for OS error.
+ * @return 0 on success, positive for SCSI sense key, negative for OS error.
  */
 int ScsiSpti::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 				void *out, size_t out_len,
