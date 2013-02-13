@@ -155,6 +155,31 @@ void ScsiLinux::close(void)
 }
 
 /**
+ * Print the description of an error code returned by a ScsiBase function.
+ * This may be positive for a SCSI sense key,
+ * negative for an OS error, or 0 for no error.
+ * (No message is printed for 0.)
+ * @param op SCSI operation code.
+ * @param err Error code, as returned by a ScsiBase function.
+ * @param f File handle for fprintf(). (If nullptr, uses stderr.)
+ */
+void ScsiLinux::printScsiError(uint8_t op, int err, FILE *f)
+{
+	if (!f)
+		f = stderr;
+
+	if (err == 0) {
+		return;
+	} else if (err < 0) {
+		// OS-specific error.
+		fprintf(f, "OP=%02X, err=%d: %s\n", op, -err, strerror(-err));
+	} else /*if (err > 0)*/ {
+		// SCSI sense key.
+		ScsiBase::printScsiError(op, err, f);
+	}
+}
+
+/**
  * Check if a disc is present.
  * @return True if a disc is present; false if not.
  */

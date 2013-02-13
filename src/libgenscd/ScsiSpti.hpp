@@ -48,6 +48,17 @@ class ScsiSpti : public ScsiBase
 		void close(void) override final;
 
 		/**
+		 * Print the description of an error code returned by a ScsiBase function.
+		 * This may be positive for a SCSI sense key,
+		 * negative for an OS error, or 0 for no error.
+		 * (No message is printed for 0.)
+		 * @param op SCSI operation code.
+		 * @param err Error code, as returned by a ScsiBase function.
+		 * @param f File handle for fprintf(). (If nullptr, uses stderr.)
+		 */
+		void printScsiError(uint8_t op, int err, FILE *f = nullptr) override final;
+
+		/**
 		 * Check if a disc is present.
 		 * @return True if a disc is present; false if not.
 		 */

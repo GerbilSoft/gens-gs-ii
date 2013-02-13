@@ -25,6 +25,7 @@
 // C includes.
 #include <stdint.h>
 #include <cstddef>
+#include <cstdio>
 
 // C++ includes.
 #include <string>
@@ -55,6 +56,17 @@ class ScsiBase
 	public:
 		virtual bool isOpen(void) const = 0;
 		virtual void close(void) = 0;
+
+		/**
+		 * Print the description of an error code returned by a ScsiBase function.
+		 * This may be positive for a SCSI sense key,
+		 * negative for an OS error, or 0 for no error.
+		 * (No message is printed for 0.)
+		 * @param op SCSI operation code.
+		 * @param err Error code, as returned by a ScsiBase function.
+		 * @param f File handle for fprintf(). (If nullptr, uses stderr.)
+		 */
+		virtual void printScsiError(uint8_t op, int err, FILE *f = nullptr);
 
 		/**
 		 * Check if a disc is present.

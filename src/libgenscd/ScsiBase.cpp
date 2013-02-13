@@ -103,6 +103,34 @@ ScsiBase::~ScsiBase()
 	delete d;
 }
 
+/**
+ * Print the description of an error code returned by a ScsiBase function.
+ * This may be positive for a SCSI sense key,
+ * negative for an OS error, or 0 for no error.
+ * (No message is printed for 0.)
+ * @param op SCSI operation code.
+ * @param err Error code, as returned by a ScsiBase function.
+ * @param f File handle for fprintf(). (If nullptr, uses stderr.)
+ */
+void ScsiBase::printScsiError(uint8_t op, int err, FILE *f)
+{
+	if (!f)
+		f = stderr;
+
+	if (err == 0) {
+		return;
+	} else if (err < 0) {
+		// OS-specific error.
+		// This should've been handled by a subclass...
+		fprintf(f, "OP=%02X, OS-specific error %d\n", op, err);
+	} else /*if (err > 0)*/ {
+		// SCSI sense key.
+		// TODO: Convert values to text?
+		fprintf(f, "OP=%02X, SK=%01X ASC=%02X ASCQ=%02X\n",
+			op, SK(err), ASC(err), ASCQ(err));
+	}
+}
+
 /** SCSI command wrappers. **/
 
 /**

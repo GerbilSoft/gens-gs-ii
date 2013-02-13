@@ -30,11 +30,18 @@
 #include <string>
 using std::string;
 
+// Windows includes.
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+//#include <winerror.h>
+
 // SCSI and storage IOCTLs.
 #include <winioctl.h>
 #include <ntddscsi.h>
 #include <ntddstor.h>
-#include <winerror.h>
 
 // SPTI/SCSI headers.
 #include <devioctl.h>
@@ -76,6 +83,53 @@ ScsiSpti::~ScsiSpti()
 {
 	// Make sure the CD-ROM device file is closed.
 	close();
+}
+
+/**
+ * Print the description of an error code returned by a ScsiBase function.
+ * This may be positive for a SCSI sense key,
+ * negative for an OS error, or 0 for no error.
+ * (No message is printed for 0.)
+ * @param op SCSI operation code.
+ * @param err Error code, as returned by a ScsiBase function.
+ * @param f File handle for fprintf(). (If nullptr, uses stderr.)
+ */
+void ScsiSpti::printScsiError(uint8_t op, int err, FILE *f)
+{
+	if (!f)
+		f = stderr;
+
+	if (err == 0) {
+		return;
+	} else if (err < 0) {
+		// OS-specific error.
+		LPSTR lpBuf = nullptr;
+		int ret = FormatMessageA(
+			FORMAT_MESSAGE_ALLOCATE_BUFFER |
+			FORMAT_MESSAGE_FROM_SYSTEM |
+			FORMAT_MESSAGE_IGNORE_INSERTS,			/* dwFlags */
+			nullptr,					/* lpSource */
+			-err,						/* dwMessageId */
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),	/* dwLanguageId */
+			(LPSTR)&lpBuf,					/* lpBuffer */
+			0,						/* nSize */
+			nullptr);					/* Arguments */
+		if (!ret) {
+			// FormatMessageA() failed.
+			// Just print the error code normally.
+			fprintf(f, "OP=%02X, err=%d\n", op, -err);
+		} else {
+			// FormatMessageA() succeeded.
+			// NOTE: Win32 error messages have a trailing newline.
+			fprintf(f, "OP=%02X, err=%d: %s", op, -err, lpBuf);
+		}
+
+		if (lpBuf)
+			LocalFree(lpBuf);
+	} else /*if (err > 0)*/ {
+		// SCSI sense key.
+		ScsiBase::printScsiError(op, err, f);
+	}
 }
 
 /**
