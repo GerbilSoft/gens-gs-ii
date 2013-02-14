@@ -36,15 +36,22 @@ using std::string;
 #define NOMINMAX
 #endif
 #include <windows.h>
-//#include <winerror.h>
+#include <winerror.h>
 
-// SCSI and storage IOCTLs.
-#include <winioctl.h>
+// NT DDK SCSI functions.
+#if defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)
+// Old MinGW has the NT DDK headers in include/ddk/.
+// IOCTL headers conflict with WinDDK.
+#include <ddk/ntddscsi.h>
+#include <ddk/ntddstor.h>
+#else
+// MinGW-w64 and MSVC has the NT DDK headers in include/.
+// IOCTL headers are also required.
 #include <ntddscsi.h>
 #include <ntddstor.h>
-
-// SPTI/SCSI headers.
+#include <winioctl.h>
 #include <devioctl.h>
+#endif
 
 namespace LibGensCD
 {
@@ -138,7 +145,7 @@ void ScsiSpti::printScsiError(uint8_t op, int err, FILE *f)
  */
 bool ScsiSpti::isOpen(void) const
 {
-	return !!m_hDevice;
+	return (m_hDevice != INVALID_HANDLE_VALUE);
 }
 
 /**
