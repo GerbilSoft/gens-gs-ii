@@ -88,16 +88,16 @@ class ScsiBase
 		};
 
 		/**
-		 * Send a SCSI command descriptor block to the drive.
+		 * Send a SCSI command descriptor block to the device.
 		 * @param cdb		[in] SCSI command descriptor block.
 		 * @param cdb_len	[in] Length of cdb.
-		 * @param out		[out] Output buffer, or nullptr if no data is requested.
-		 * @param out_len	[out] Length of out.
+		 * @param data		[in/out] Data buffer, or nullptr for SCSI_DATA_NONE operations.
+		 * @param data_len	[in] Length of data.
 		 * @param mode		[in] Data direction mode. (IN == receive from device; OUT == send to device)
 		 * @return 0 on success, positive for SCSI sense key, negative for OS error.
 		 */
 		virtual int scsi_send_cdb(const void *cdb, uint8_t cdb_len,
-					  void *out, size_t out_len,
+					  void *data, size_t data_len,
 					  scsi_data_mode mode = SCSI_DATA_IN) = 0;
 
 	public:
