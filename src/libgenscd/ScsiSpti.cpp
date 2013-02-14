@@ -47,10 +47,10 @@ using std::string;
 #else
 // MinGW-w64 and MSVC has the NT DDK headers in include/.
 // IOCTL headers are also required.
-#include <ntddscsi.h>
-#include <ntddstor.h>
 #include <winioctl.h>
 #include <devioctl.h>
+#include <ntddscsi.h>
+#include <ntddstor.h>
 #endif
 
 namespace LibGensCD
