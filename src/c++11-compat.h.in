@@ -42,6 +42,7 @@ typedef uint16_t char16_t;
 typedef uint32_t char32_t;
 
 #ifdef __cplusplus
+
 #include <string>
 namespace std
 {
@@ -49,6 +50,10 @@ namespace std
 	typedef basic_string<char32_t> u32string;
 }
 #endif
+
+/* Explicit override/final. */
+#define override
+#define final
 
 #endif
 
