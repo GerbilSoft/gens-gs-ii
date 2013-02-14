@@ -161,6 +161,7 @@ class CdDrivePrivate
 			// Table of Contents.
 			struct {
 				int num_tracks;
+				int first_data_track_idx;
 				SCSI_CDROM_TOC toc;
 			} toc;
 		} cache;
@@ -549,6 +550,7 @@ int CdDrivePrivate::readToc(void)
 	if (!p_scsi->isDiscPresent()) {
 		// No disc present.
 		cache.toc.num_tracks = 0;
+		cache.toc.first_data_track_idx = -1;
 		cache.toc.toc.FirstTrackNumber = 0;
 		cache.toc.toc.LastTrackNumber = 0;
 		return 0;
@@ -560,9 +562,20 @@ int CdDrivePrivate::readToc(void)
 		// An error occurred.
 		PRINT_SCSI_ERROR(SCSI_OP_READ_TOC, err);
 		cache.toc.num_tracks = 0;
+		cache.toc.first_data_track_idx = -1;
 		cache.toc.toc.FirstTrackNumber = 0;
 		cache.toc.toc.LastTrackNumber = 0;
 		return -1;
+	}
+
+	// Find the first data track.
+	cache.toc.first_data_track_idx = -1;
+	for (int i = 0; i < cache.toc.num_tracks; i++) {
+		if ((cache.toc.toc.Tracks[i].ControlADR & 0x0C) == 0x04) {
+			// Data track found.
+			cache.toc.first_data_track_idx = i;
+			break;
+		}
 	}
 
 	// TOC has been read.
@@ -651,6 +664,88 @@ CD_DriveType_t CdDrive::getDriveType(void)
 	if (!d->isInquirySuccessful())
 		return DRIVE_TYPE_NONE;
 	return d->inq_data.driveType;
+}
+
+/** Disc type queries. **/
+
+/**
+ * To identify track type, check the low four bits of ControlADR:
+ * - 00x0b == 2ch, no pre-emphasis
+ * - 00x1b == 2ch, pre-emphasis of 50/15 us
+ * - 10x0b == 4ch, no pre-emphasis
+ * - 10x1b == 4ch, pre-emphasis of 50/15 us
+ * - 01x0b == Data, recorded uninterrupted
+ * - 01x1b == Data, recorded increment
+ * - 11xxb == Reserved
+ * - xx0xb == Digital copy prohibited
+ * - xx1xb == Digital copy permitted
+ *
+ * For our purposes, we just need to check if bits 2 and 3
+ * are 01 for data and anything else for audio.
+ */
+
+/**
+ * Does the CD have audio tracks only?
+ * @return True if it's an audio CD; false if not.
+ */
+bool CdDrive::isAudioCD(void)
+{
+	d->updateCache();
+	if (d->cache.toc.num_tracks == 0)
+		return false;
+
+	// If there is a "first data track", this isn't an audio CD.
+	return (d->cache.toc.first_data_track_idx < 0);
+}
+
+/**
+ * Does the CD have data tracks?
+ * @return True if at least one data track is found; false if not.
+ */
+bool CdDrive::isDataCD(void)
+{
+	d->updateCache();
+	if (d->cache.toc.num_tracks == 0)
+		return false;
+
+	// If there is a "first data track", this is a data CD.
+	return (d->cache.toc.first_data_track_idx >= 0);
+}
+
+/**
+ * Does the CD have both audio and data tracks?
+ * @return True if at least one data and one audio track are found; false if not.
+ */
+bool CdDrive::isMixedCD(void)
+{
+	d->updateCache();
+	if (d->cache.toc.num_tracks == 0)
+		return false;
+
+	// If there isn't a "first data track", this isn't a mixed-mode CD.
+	if (d->cache.toc.first_data_track_idx < 0)
+		return false;
+
+	// Check for audio tracks.
+	for (int i = 0; i < d->cache.toc.num_tracks; i++) {
+		if ((d->cache.toc.toc.Tracks[i].ControlADR & 0x0C) != 0x04) {
+			// Audio track found.
+			return true;
+		}
+	}
+
+	// No audio tracks found.
+	return false;
+}
+
+/**
+ * Is the CD blank?
+ * @return True if blank; false if not.
+ */
+bool CdDrive::isBlankCD(void)
+{
+	// TODO: Implement this function.
+	return false;
 }
 
 }

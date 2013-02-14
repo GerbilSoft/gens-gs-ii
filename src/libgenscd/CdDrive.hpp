@@ -85,6 +85,13 @@ class CdDrive
 		 * @return Drive type.
 		 */
 		CD_DriveType_t getDriveType(void);
+
+	public:
+		/** Disc type queries. **/
+		bool isAudioCD(void);	// Does the CD have audio tracks only?
+		bool isDataCD(void);	// Does the CD have data tracks?
+		bool isMixedCD(void);	// Does the CD have both audio and data tracks?
+		bool isBlankCD(void);	// Is the CD blank?
 };
 
 }
