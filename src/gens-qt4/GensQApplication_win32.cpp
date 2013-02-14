@@ -81,7 +81,6 @@ static int SetSecurityOptions(void)
 	PFNSETDLLDIRA pfnSetDllDirectoryA = (PFNSETDLLDIRA)GetProcAddress(hKernel32, "SetDllDirectoryA");
 	if (pfnSetDllDirectoryA)
 		pfnSetDllDirectoryA("");
-	SetDllDirectoryA("");
 
 	// Terminate the process if heap corruption is detected.
 	// NOTE: Parameter 2 is usually type enum HEAP_INFORMATION_CLASS,
