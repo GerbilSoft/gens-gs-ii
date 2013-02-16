@@ -232,7 +232,7 @@ int ScsiLinux::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 	d->sg_io.cmdp = cdb_tmp;
 
 	// Determine the output buffer information.
-	if (data_len > 0) {
+	if (data && data_len > 0) {
 		d->sg_io.dxferp = data;
 		d->sg_io.dxfer_len = data_len;
 

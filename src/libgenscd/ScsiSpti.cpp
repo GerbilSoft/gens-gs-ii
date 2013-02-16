@@ -241,17 +241,24 @@ int ScsiSpti::scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 
 	// Convert scsi_data_mode to Win32 DataIn.
 	uint8_t DataIn;
-	switch (mode) {
-		case SCSI_DATA_NONE:
-		default:
-			DataIn = SCSI_IOCTL_DATA_UNSPECIFIED;
-			break;
-		case SCSI_DATA_IN:
-			DataIn = SCSI_IOCTL_DATA_IN;
-			break;
-		case SCSI_DATA_OUT:
-			DataIn = SCSI_IOCTL_DATA_OUT;
-			break;
+	if (data && data_len > 0) {
+		switch (mode) {
+			case SCSI_DATA_NONE:
+			default:
+				DataIn = SCSI_IOCTL_DATA_UNSPECIFIED;
+				break;
+			case SCSI_DATA_IN:
+				DataIn = SCSI_IOCTL_DATA_IN;
+				break;
+			case SCSI_DATA_OUT:
+				DataIn = SCSI_IOCTL_DATA_OUT;
+				break;
+		}
+	} else {
+		// No data buffer.
+		data = nullptr;
+		data_len = 0;
+		DataIn = SCSI_IOCTL_DATA_UNSPECIFIED;
 	}
 
 	// Initialize the other SCSI command variables.
