@@ -39,6 +39,15 @@ int main(int argc, char *argv[])
 	printf("Current Drive Type: 0x%08X\n", cdrom->getDriveType());
 	printf("\n");
 
+	if (cdrom->isDiscPresent()) {
+		printf("Disc information:\n");
+		printf("Is Audio CD: %d\n", cdrom->isAudioCD());
+		printf("Is Data  CD: %d\n", cdrom->isDataCD());
+		printf("Is Mixed CD: %d\n", cdrom->isMixedCD());
+		printf("Is Blank CD: %d\n", cdrom->isBlankCD());
+		printf("Disc label: %s\n", cdrom->getDiscLabel().c_str());
+	}
+
 	delete cdrom;
 	return EXIT_SUCCESS;
 }
