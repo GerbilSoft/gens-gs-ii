@@ -276,4 +276,69 @@ int ScsiBase::readDiscInformation(SCSI_RESP_READ_DISC_INFORMATION_STANDARD *resp
 	return scsi_send_cdb(&cdb, sizeof(cdb), resp, sizeof(*resp), ScsiBase::SCSI_DATA_IN);
 }
 
+/**
+ * READ CD: Read a CD-ROM sector.
+ * This function does not verify the sector type.
+ * @param lba		[in] Logical Block Address.
+ * @param block_count	[in] Number of blocks to read.
+ * @param out		[out] Buffer for output data.
+ * @param out_len	[in] Length of out.
+ * @param sector_type	[in] Expected sector type. (SCSI_READ_CD_SECTORTYPE_*)
+ * @param raw_mode	[in] Raw sector mode.
+ * @return 0 on success; SCSI SENSE KEY on error.
+ */
+int ScsiBase::readCD(uint32_t lba, uint32_t block_count,
+		        void *out, size_t out_len,
+			uint8_t sector_type,
+			ReadCDRawSectorMode raw_mode)
+{
+	if (block_count > 0xFFFFFF) {
+		// READ CD's block count is 24-bit, but the
+		// requested block count exceeds 24 bits.
+		// TODO: Determine the proper KCQ.
+		// We're using Illegal Request - invalid field parameter - invalid parm value.
+		return 0x52602;
+	}
+
+	SCSI_CDB_READ_CD cdb;
+	memset(&cdb, 0x00, sizeof(cdb));
+
+	// Read a block from the CD.
+	cdb.OpCode = SCSI_OP_READ_CD;
+	cdb.SectorType = sector_type;
+	cdb.StartingLBA = cpu_to_be32(lba);
+	cdb.TransferLen[0] = ((block_count >> 16) & 0xFF);
+	cdb.TransferLen[1] = ((block_count >> 8)  & 0xFF);
+	cdb.TransferLen[2] = ((block_count >> 0)  & 0xFF);
+
+	// Should we read the full sector?
+	if (raw_mode & RCDRAW_FULL) {
+		// Full 2352-byte sector.
+		cdb.Flags =
+			SCSI_BIT_READ_CD_FLAGS_EDC_ECC |
+			SCSI_BIT_READ_CD_FLAGS_USER_DATA |
+			SCSI_BIT_READ_CD_FLAGS_HEADER |
+			SCSI_BIT_READ_CD_FLAGS_SUBHEADER |
+			SCSI_BIT_READ_CD_FLAGS_SYNCH_FIELD;
+	} else {
+		// User data only.
+		cdb.Flags = SCSI_BIT_READ_CD_FLAGS_USER_DATA;
+	}
+
+	// Should we transfer subchannels?
+	if (raw_mode & RCDRAW_SUB_RW) {
+		// All subchannels.
+		cdb.Subchannels = SCSI_READ_CD_SUBCHANNELS_R_W;
+	} else if (raw_mode & RCDRAW_SUB_PQ) {
+		// P-Q subchannels.
+		cdb.Subchannels = SCSI_READ_CD_SUBCHANNELS_Q;
+	} else {
+		// No subchannels.
+		cdb.Subchannels = 0;
+	}
+
+	// Send the CDB.
+	return scsi_send_cdb(&cdb, sizeof(cdb), out, out_len, ScsiBase::SCSI_DATA_IN);
+}
+
 }

@@ -133,6 +133,34 @@ class ScsiBase
 		 * @return 0 on success; SCSI SENSE KEY on error.
 		 */
 		int readDiscInformation(SCSI_RESP_READ_DISC_INFORMATION_STANDARD *resp);
+
+		enum ReadCDRawSectorMode
+		{
+			RCDRAW_USER		= 0x00,	// User data only.
+			RCDRAW_FULL		= 0x01,	// Full 2352-byte sector.
+			RCDRAW_SUB_PQ		= 0x02,	// User data + P-Q subchannels.
+			RCDRAW_FULL_SUB_PQ	= 0x03,	// Full sector + P-Q subchannels.
+			RCDRAW_SUB_RW		= 0x04,	// User data + all subchannels.
+			RCDRAW_FULL_SUB_RW	= 0x05,	// Full sector + all subchannels.
+			RCDRAW_SUB_PQ_RW	= 0x06,	// User data + all subchannels.
+			RCDRAW_FULL_SUB_PQ_RW	= 0x07,	// Full sector + all subchannels.
+		};
+
+		/**
+		 * READ CD: Read a CD-ROM sector.
+		 * This function does not verify the sector type.
+		 * @param lba		[in] Logical Block Address.
+		 * @param block_count	[in] Number of blocks to read.
+		 * @param out		[out] Buffer for output data.
+		 * @param out_len	[in] Length of out.
+		 * @param sector_type	[in] Expected sector type. (SCSI_READ_CD_SECTORTYPE_*)
+		 * @param raw_mode	[in] Raw sector mode.
+		 * @return 0 on success; SCSI SENSE KEY on error.
+		 */
+		int readCD(uint32_t lba, uint32_t block_count,
+			   void *out, size_t out_len,
+			   uint8_t sector_type,
+			   ReadCDRawSectorMode raw_mode);
 };
 
 }
