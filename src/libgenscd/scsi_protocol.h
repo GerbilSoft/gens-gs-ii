@@ -625,7 +625,7 @@ typedef struct PACKED _SCSI_CDB_READ_CD
 	uint8_t TransferLen[3];		/* (BE24) Transfer length, in blocks. */
 	uint8_t Flags;
 	uint8_t Subchannels;		/* Subchannel selection bits. */
-	uint8_t Reserved;
+	uint8_t Control;
 } SCSI_CDB_READ_CD;
 
 /* Expected sector types. */
@@ -659,7 +659,7 @@ typedef struct PACKED _SCSI_CDB_READ_CD_MSF
 {
 	uint8_t OpCode;			/* READ CD (0xBE) */
 	uint8_t SectorType;		/* Expected sector type. */
-	uint8_t Reserved1;
+	uint8_t Reserved;
 	struct {
 		uint8_t M;
 		uint8_t S;
@@ -672,7 +672,7 @@ typedef struct PACKED _SCSI_CDB_READ_CD_MSF
 	} End;				/* Ending MSF, inclusive. */
 	uint8_t Flags;
 	uint8_t Subchannels;		/* Subchannel selection bits. */
-	uint8_t Reserved2;
+	uint8_t Control;
 } SCSI_CDB_READ_CD_MSF;
 
 #ifdef __cplusplus
