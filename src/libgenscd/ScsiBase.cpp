@@ -149,14 +149,7 @@ int ScsiBase::inquiry(SCSI_RESP_INQUIRY_STD *resp)
 	cdb.Control = 0;
 
 	// Send the SCSI CDB.
-	int err = scsi_send_cdb(&cdb, sizeof(cdb), resp, sizeof(*resp), ScsiBase::SCSI_DATA_IN);
-	if (err != 0) {
-		// Inquiry failed.
-		return err;
-	}
-
-	// Drive inquiry successful.
-	return 0;
+	return scsi_send_cdb(&cdb, sizeof(cdb), resp, sizeof(*resp), ScsiBase::SCSI_DATA_IN);
 }
 
 /**
@@ -280,14 +273,7 @@ int ScsiBase::readDiscInformation(SCSI_RESP_READ_DISC_INFORMATION_STANDARD *resp
 	cdb.AllocLen = cpu_to_be16(sizeof(*resp));
 	cdb.Control = 0;
 
-	int err = scsi_send_cdb(&cdb, sizeof(cdb), resp, sizeof(*resp), ScsiBase::SCSI_DATA_IN);
-	if (err != 0) {
-		// An error occurred.
-		return err;
-	}
-
-	// Disc information retrieved.
-	return 0;
+	return scsi_send_cdb(&cdb, sizeof(cdb), resp, sizeof(*resp), ScsiBase::SCSI_DATA_IN);
 }
 
 }
