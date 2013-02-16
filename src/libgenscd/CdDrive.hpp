@@ -86,6 +86,12 @@ class CdDrive
 		 */
 		CD_DriveType_t getDriveType(void);
 
+		/**
+		 * Get the disc label.
+		 * @return Disc label.
+		 */
+		std::string getDiscLabel(void);
+
 	public:
 		/** Disc type queries. **/
 		bool isAudioCD(void);	// Does the CD have audio tracks only?

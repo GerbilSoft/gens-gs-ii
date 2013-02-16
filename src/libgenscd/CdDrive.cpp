@@ -150,8 +150,15 @@ class CdDrivePrivate
 		 */
 		static CD_DriveType_t discTypesToDriveType(uint32_t discTypes);
 
+		/**
+		 * Get the data track information..
+		 */
+		void getDataTrackInfo(void);
+
 		// Cached disc information.
 		struct {
+			// TODO: Add a clear() and/or reset() function.
+
 			// If true, cache is stale and needs to be updated.
 			bool stale;
 
@@ -164,6 +171,15 @@ class CdDrivePrivate
 				int first_data_track_idx;
 				SCSI_CDROM_TOC toc;
 			} toc;
+
+			// Can we read R-W subchannels?
+			bool canReadRWSub;
+
+			// First data track info.
+			struct {
+				string label;
+				// TODO: Filesystem, etc.
+			} dataTrack;
 		} cache;
 
 		/**
@@ -261,7 +277,8 @@ void CdDrivePrivate::updateCache(bool force)
 		// No disc.
 		cache.stale = true;
 		cache.discType = DISC_TYPE_NONE;
-		printf("update cache: no disc\n");
+		cache.canReadRWSub = false;
+		cache.dataTrack.label.clear();
 		return;
 	}
 
@@ -274,12 +291,9 @@ void CdDrivePrivate::updateCache(bool force)
 	}
 
 	// Check if we need to update the cache.
-	if (!cache.stale && !force) {
-		printf("update cache: not stale\n");
+	if (!cache.stale && !force)
 		return;
-	}
 
-	printf("update cache: running...\n");
 	// Update the disc type.
 	cache.discType = mmcFeatureProfileToDiscType(getCurrentFeatureProfile());
 
@@ -290,6 +304,14 @@ void CdDrivePrivate::updateCache(bool force)
 		cache.stale = true;
 		return;
 	}
+
+	// Check if we can read R-W subchannels.
+	err = p_scsi->readCD(0, 0, nullptr, 0, SCSI_READ_CD_SECTORTYPE_ANY, ScsiBase::RCDRAW_FULL_SUB_PQ_RW);
+	cache.canReadRWSub = (err == 0);
+
+	// Get the data track information.
+	// TODO: What if there's no data track?
+	getDataTrackInfo();
 
 	// Cache is updated.
 	cache.stale = false;
@@ -553,6 +575,7 @@ int CdDrivePrivate::readToc(void)
 		cache.toc.first_data_track_idx = -1;
 		cache.toc.toc.FirstTrackNumber = 0;
 		cache.toc.toc.LastTrackNumber = 0;
+		cache.dataTrack.label.clear();
 		return 0;
 	}
 
@@ -565,6 +588,7 @@ int CdDrivePrivate::readToc(void)
 		cache.toc.first_data_track_idx = -1;
 		cache.toc.toc.FirstTrackNumber = 0;
 		cache.toc.toc.LastTrackNumber = 0;
+		cache.dataTrack.label.clear();
 		return -1;
 	}
 
@@ -580,6 +604,73 @@ int CdDrivePrivate::readToc(void)
 
 	// TOC has been read.
 	return 0;
+}
+
+/**
+ * Get the data track information..
+ */
+void CdDrivePrivate::getDataTrackInfo(void)
+{
+	static const int MaxTrackNumber = (int)(sizeof(cache.toc.toc.Tracks)/sizeof(cache.toc.toc.Tracks[0]));
+	if (cache.toc.first_data_track_idx < 0 ||
+	    cache.toc.first_data_track_idx > MaxTrackNumber)
+	{
+		// Invalid first data track index.
+		// NOTE: This shouldn't happen...
+		cache.dataTrack.label.clear();
+		return;
+	}
+
+	/**
+	 * TODO: This is just basic ISO-9660.
+	 * Add support for:
+	 * - Joliet
+	 * - Rock Ridge
+	 * - UDF (and ISO+UDF)
+	 * - HFS (and ISO+UDF)
+	 */
+
+	const uint32_t lba_start = cache.toc.toc.Tracks[cache.toc.first_data_track_idx].StartAddress;
+	// TODO: Calculate lba_end...
+
+	// ISO-9660 header is located at LBA 16 relative to the start of the data track.
+	// TODO: Set sector type to match the track information...
+	uint8_t data[2048];
+	int err = p_scsi->readCD(lba_start+16, 1, data, sizeof(data), SCSI_READ_CD_SECTORTYPE_ANY, ScsiBase::RCDRAW_USER);
+	if (err != 0) {
+		// Error reading the track.
+		PRINT_SCSI_ERROR(SCSI_OP_READ_CD, err);
+		cache.dataTrack.label.clear();
+		return;
+	}
+
+	/**
+	 * Verify that this is ISO-9660.
+	 * TODO: Check for multiple volume descriptors in case:
+	 * - First isn't primary. (El Torito may have a boot record first)
+	 * - SVD is present with Joliet information.
+	 * References:
+	 * - http://wiki.osdev.org/ISO_9660
+	 * - http://www.pismotechnic.com/cfs/iso9660-1999.html
+	 */
+	static const uint8_t ISO9660_magic[5] = {'C', 'D', '0', '0', '1'};
+	if (memcmp(&data[1], ISO9660_magic, sizeof(ISO9660_magic)) != 0) {
+		// Not an ISO-9660 volume descriptor.
+		cache.dataTrack.label.clear();
+		return;
+	}
+
+	if (data[0] != 0x01) {
+		// Not an ISO-9660 Primary Volume Descriptor.
+		cache.dataTrack.label.clear();
+		return;
+	}
+
+	// Label should be in ASCII.
+	// TODO: Convert non-ASCII labels to ASCII...
+	// TODO: Trim spaces from the label.
+	// TODO: Use a struct for ISO-9660 data?
+	cache.dataTrack.label = string((char*)&data[0x28], 32);
 }
 
 /** CdDrive **/
@@ -664,6 +755,16 @@ CD_DriveType_t CdDrive::getDriveType(void)
 	if (!d->isInquirySuccessful())
 		return DRIVE_TYPE_NONE;
 	return d->inq_data.driveType;
+}
+
+/**
+ * Get the disc label.
+ * @return Disc label.
+ */
+std::string CdDrive::getDiscLabel(void)
+{
+	d->updateCache();
+	return d->cache.dataTrack.label;
 }
 
 /** Disc type queries. **/
