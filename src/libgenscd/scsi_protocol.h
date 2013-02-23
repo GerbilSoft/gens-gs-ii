@@ -406,11 +406,11 @@ typedef struct PACKED _SCSI_RESP_INQUIRY_STD
 
 typedef struct PACKED _SCSI_CDB_READ_CAPACITY
 {
-	uint8_t OpCode;			/* READ CAPACITY (0x25) */
-	uint8_t RelAdr;			/* 1 == relative to LBA */
-	uint32_t LBA;			/* (BE32) */
+	uint8_t OpCode;		/* READ CAPACITY (0x25) */
+	uint8_t RelAdr;		/* 1 == relative to LBA */
+	uint32_t LBA;		/* (BE32) */
 	uint8_t Reserved[2];
-	uint8_t PMI;			/* 1 == get last LBA that doesn't incur substantial delay */
+	uint8_t PMI;		/* 1 == get last LBA that doesn't incur substantial delay */
 	uint8_t Control;
 } SCSI_CDB_READ_CAPACITY;
 
@@ -420,6 +420,22 @@ typedef struct PACKED _SCSI_RESP_READ_CAPACITY
 	uint32_t LBA;		/* (BE32) Highest LBA number. */
 	uint32_t BlockLen;	/* (BE32) Block length, in bytes. */
 } SCSI_RESP_READ_CAPACITY;
+
+/** READ(10) (0x28) **/
+
+typedef struct PACKED _SCSI_CDB_READ_10
+{
+	uint8_t OpCode;		/* READ(10) (0x28) */
+	uint8_t Flags;
+	uint32_t LBA;		/* (BE32) Starting LBA. */
+	uint8_t Reserved;
+	uint16_t TransferLen;	/* (BE16) Transfer length, in blocks. */
+	uint8_t Control;
+} SCSI_CDB_READ_10;
+
+/* Flags. */
+#define SCSI_BIT_READ_10_FUA		(1 << 3)	/* Force Unit Access */
+#define SCSI_BIT_READ_10_DPO		(1 << 4)	/* Disable Page Out */
 
 /** READ TOC (0x43) [CD-ROM] **/
 

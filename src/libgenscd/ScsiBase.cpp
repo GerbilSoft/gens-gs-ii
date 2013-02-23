@@ -153,6 +153,31 @@ int ScsiBase::inquiry(SCSI_RESP_INQUIRY_STD *resp)
 }
 
 /**
+ * READ: Read one or more sectors from the device.
+ * This implementation uses READ(10), which can read
+ * up to a maximum of 65,535 blocks at one time.
+ * @param lba		[in] Logical Block Address.
+ * @param block_count	[in] Number of blocks to read.
+ * @param out		[out] Buffer for output data.
+ * @param out_len	[in] Length of out.
+ * @return 0 on success; SCSI SENSE KEY on error.
+ */
+int ScsiBase::read(uint32_t lba, uint16_t block_count,
+			void *out, size_t out_len)
+{
+	SCSI_CDB_READ_10 cdb;
+	memset(&cdb, 0x00, sizeof(cdb));
+
+	// Read data from the device.
+	cdb.OpCode = SCSI_OP_READ_10;
+	cdb.LBA = cpu_to_be32(lba);
+	cdb.TransferLen = (uint16_t)cpu_to_be16(block_count);
+
+	// Send the CDB.
+	return scsi_send_cdb(&cdb, sizeof(cdb), out, out_len, ScsiBase::SCSI_DATA_IN);
+}
+
+/**
  * READ TOC: Read the CD-ROM Table of Contents.
  * @param toc		[out] Buffer for Table of Contents.
  * @param numTracks	[out, opt] Number of tracks.
@@ -288,7 +313,7 @@ int ScsiBase::readDiscInformation(SCSI_RESP_READ_DISC_INFORMATION_STANDARD *resp
  * @return 0 on success; SCSI SENSE KEY on error.
  */
 int ScsiBase::readCD(uint32_t lba, uint32_t block_count,
-		        void *out, size_t out_len,
+			void *out, size_t out_len,
 			uint8_t sector_type,
 			ReadCDRawSectorMode raw_mode)
 {

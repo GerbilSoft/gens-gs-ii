@@ -111,6 +111,19 @@ class ScsiBase
 		int inquiry(SCSI_RESP_INQUIRY_STD *resp);
 
 		/**
+		 * READ: Read one or more sectors from the device.
+		 * This implementation uses READ(10), which can read
+		 * up to a maximum of 65,535 blocks at one time.
+		 * @param lba		[in] Logical Block Address.
+		 * @param block_count	[in] Number of blocks to read.
+		 * @param out		[out] Buffer for output data.
+		 * @param out_len	[in] Length of out.
+		 * @return 0 on success; SCSI SENSE KEY on error.
+		 */
+		int read(uint32_t lba, uint16_t block_count,
+				void *out, size_t out_len);
+
+		/**
 		 * READ TOC: Read the CD-ROM Table of Contents.
 		 * @param toc		[out] Buffer for Table of Contents.
 		 * @param numTracks	[out, opt] Number of tracks.
