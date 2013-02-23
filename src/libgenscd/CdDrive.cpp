@@ -640,10 +640,10 @@ void CdDrivePrivate::getDataTrackInfo(void)
 	// TODO: Set sector type to match the track information...
 	ISO9660_VOLUME_DESCRIPTOR vd;
 	static_assert(sizeof(vd) == 2048, "sizeof(ISO9660_VOLUME_DESCRIPTOR) != 2048 - check genscd_iso9660.h!");
-	int err = p_scsi->readCD(lba_start+16, 1, &vd, sizeof(vd), SCSI_READ_CD_SECTORTYPE_ANY, ScsiBase::RCDRAW_USER);
+	int err = p_scsi->read(lba_start+16, 1, &vd, sizeof(vd));
 	if (err != 0) {
 		// Error reading the track.
-		PRINT_SCSI_ERROR(SCSI_OP_READ_CD, err);
+		PRINT_SCSI_ERROR(SCSI_OP_READ_10, err);
 		cache.dataTrack.label.clear();
 		return;
 	}
