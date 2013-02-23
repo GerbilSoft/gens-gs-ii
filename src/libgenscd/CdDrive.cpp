@@ -636,17 +636,18 @@ void CdDrivePrivate::getDataTrackInfo(void)
 	const uint32_t lba_start = cache.toc.toc.Tracks[cache.toc.first_data_track_idx].StartAddress;
 	// TODO: Calculate lba_end...
 
-	// ISO-9660 header is located at LBA 16 relative to the start of the data track.
-	// TODO: Set sector type to match the track information...
-	ISO9660_VOLUME_DESCRIPTOR vd;
-	static_assert(sizeof(vd) == 2048, "sizeof(ISO9660_VOLUME_DESCRIPTOR) != 2048 - check genscd_iso9660.h!");
-	int err = p_scsi->read(lba_start+16, 1, &vd, sizeof(vd));
+	// Read the first 32 sectors of the disc.
+	uint8_t discHeader[32*2048];
+	int err = p_scsi->read(lba_start, 32, discHeader, sizeof(discHeader));
 	if (err != 0) {
 		// Error reading the track.
 		PRINT_SCSI_ERROR(SCSI_OP_READ_10, err);
 		cache.dataTrack.label.clear();
 		return;
 	}
+
+	// ISO-9660 header is located at LBA 16 relative to the start of the data track.
+	ISO9660_VOLUME_DESCRIPTOR *vd = (ISO9660_VOLUME_DESCRIPTOR*)&discHeader[16*2048];
 
 	/**
 	 * Verify that this is ISO-9660.
@@ -658,14 +659,14 @@ void CdDrivePrivate::getDataTrackInfo(void)
 	 * - http://www.pismotechnic.com/cfs/iso9660-1999.html
 	 */
 	static const uint8_t ISO9660_magic[5] = {'C', 'D', '0', '0', '1'};
-	if (memcmp(vd.magic, ISO9660_magic, sizeof(vd.magic)) != 0) {
+	if (memcmp(vd->magic, ISO9660_magic, sizeof(vd->magic)) != 0) {
 		// Not an ISO-9660 volume descriptor.
 		cache.dataTrack.label.clear();
 		return;
 	}
 
 	// Check the volume descriptor type.
-	if (vd.vdtype != ISO9660_VDTYPE_PVD) {
+	if (vd->vdtype != ISO9660_VDTYPE_PVD) {
 		// Not an ISO-9660 Primary Volume Descriptor.
 		// TODO: Parse other descriptor types.
 		cache.dataTrack.label.clear();
@@ -675,7 +676,7 @@ void CdDrivePrivate::getDataTrackInfo(void)
 	// Label should be in ASCII.
 	// TODO: Convert non-ASCII labels to ASCII...
 	// TODO: Trim spaces from the label.
-	cache.dataTrack.label = string(vd.pvd.vol_id, sizeof(vd.pvd.vol_id));
+	cache.dataTrack.label = string(vd->pvd.vol_id, sizeof(vd->pvd.vol_id));
 }
 
 /** CdDrive **/
