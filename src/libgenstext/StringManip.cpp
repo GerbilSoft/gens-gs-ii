@@ -38,7 +38,7 @@ namespace LibGensText
  * @param wchr Character to check.
  * @return True if this is a graphics character; false otherwise.
  */
-static inline bool IsGraphChar(uint16_t wchr)
+static inline bool IsGraphChar(char16_t wchr)
 {
 	// TODO: Figure out why iswgraph() and iswspace() are useless.
 
