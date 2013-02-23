@@ -33,9 +33,9 @@
 # include <windows.h>
 #elif defined(HAVE_ICONV)
 #  include <iconv.h>
-#  if GENS_BYTEORDER == GENS_BIG_ENDIAN
+#  if GENSTEXT_BYTEORDER == GENSTEXT_BIG_ENDIAN
 #    define UTF16_ENCODING "UTF-16BE"
-#  else /* GENS_BYTEORDER == GENS_LIL_ENDIAN */
+#  else /* GENSTEXT_BYTEORDER == GENSTEXT_LIL_ENDIAN */
 #    define UTF16_ENCODING "UTF-16LE"
 #  endif
 #endif
