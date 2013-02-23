@@ -53,6 +53,7 @@ CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/byteorder.h.in" "${CMAKE_CURRENT_BIN
 # Sources.
 SET(libgenstext_SRCS
 	Encoding.cpp
+	StringManip.cpp
 	)
 
 # Build the library.
