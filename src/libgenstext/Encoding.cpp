@@ -1,8 +1,8 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
- * Encoding.cpp: Character encoding helper class.                          *
+ * libgenstext: Gens/GS II Text Manipulation Library.                      *
+ * Encoding.cpp: Character encoding functions.                             *
  *                                                                         *
- * Copyright (c) 2009-2011 by David Korth.                                 *
+ * Copyright (c) 2009-2013 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -19,15 +19,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "config.libgens.h"
-
 #include "Encoding.hpp"
 
-#include "Util/byteswap.h"
+#include "config.libgenstext.h"
+#include "byteorder.h"
 
 // Determine which character set decoder to use.
 #if defined(_WIN32)
-#  include "Win32/W32U_mini.h"
+# define WIN32_LEAN_AND_MEAN
+# ifndef NOMINMAX
+#  define NOMINMAX
+# endif
+# include <windows.h>
 #elif defined(HAVE_ICONV)
 #  include <iconv.h>
 #  if GENS_BYTEORDER == GENS_BIG_ENDIAN
@@ -44,9 +47,48 @@ using std::u16string;
 
 // C includes. (C++ namespace)
 #include <cstdlib>
+#include <cstring>
 
+namespace LibGensText
+{
 
-#ifdef HAVE_ICONV
+#if defined(_WIN32)
+/**
+ * Convert a null-terminated multibyte string to UTF-16.
+ * @param mbs Multibyte string. (null-terminated)
+ * @param codepage mbs codepage.
+ * @return Allocated UTF-16 string, or NULL on error. (Must be free()'d after use!)
+ */
+static wchar_t *W32U_mbs_to_UTF16(const char *mbs, unsigned int codepage)
+{
+	int cchWcs = MultiByteToWideChar(codepage, 0, mbs, -1, nullptr, 0);
+	if (cchWcs <= 0)
+		return nullptr;
+
+	wchar_t *wcs = (wchar_t*)malloc(cchWcs * sizeof(wchar_t));
+	MultiByteToWideChar(codepage, 0, mbs, -1, wcs, cchWcs);
+	return wcs;
+}
+
+/**
+ * Convert a null-terminated UTF-16 string to multibyte.
+ * @param wcs UTF-16 string. (null-terminated)
+ * @param codepage mbs codepage.
+ * @return Allocated multibyte string, or NULL on error. (Must be free()'d after use!)
+ */
+static char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage)
+{
+	int cbMbs = WideCharToMultiByte(codepage, 0, wcs, -1, nullptr, 0, nullptr, nullptr);
+	if (cbMbs <= 0)
+		return nullptr;
+
+	char *mbs = (char*)malloc(cbMbs);
+	WideCharToMultiByte(codepage, 0, wcs, -1, mbs, cbMbs, nullptr, nullptr);
+	return mbs;
+}
+
+#elif defined(HAVE_ICONV)
+
 /**
  * Convert a string from one character set to another.
  * @param src 		[in] Source string.
@@ -130,9 +172,18 @@ static char *gens_iconv(const char *src, size_t src_bytes_len,
 }
 #endif /* HAVE_ICONV */
 
-
-namespace LibGens
+/**
+ * Convert UTF-16 (host-endian) to UTF-8.
+ * @param src UTF-16 string. (host-endian)
+ * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
+ */
+std::string Utf16_to_Utf8(const std::u16string& src)
 {
+	// The raw char16_t* version is used in Dc7z.cpp,
+	// so we'll make the std::u16string version a wrapper
+	// instead of converting the char16_t* to an std::u16string.
+	return Utf16_to_Utf8(src.data(), src.size());
+}
 
 /**
  * Convert UTF-16 (host-endian) to UTF-8.
@@ -140,11 +191,11 @@ namespace LibGens
  * @param len Length of UTF-16 string, in characters.
  * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
  */
-string Encoding::Utf16_to_Utf8(const char16_t *src, size_t len)
+string Utf16_to_Utf8(const char16_t *src, size_t len)
 {
 	char *mbs = nullptr;
 #if defined(_WIN32)
-	// Win32 version. Use W32U_mini.
+	// Win32 version.
 	// TODO: Use the "len" parameter.
 	mbs = W32U_UTF16_to_mbs((wchar_t*)src, CP_UTF8);
 #elif defined(HAVE_ICONV)
@@ -165,13 +216,12 @@ string Encoding::Utf16_to_Utf8(const char16_t *src, size_t len)
 	return ret;
 }
 
-
 /**
  * Convert UTF-8 to UTF-16 (host-endian).
  * @param src UTF-8 string. (null-terminated)
  * @return UTF-16 string, or empty string on error.
  */
-u16string Encoding::Utf8_to_Utf16(const string& src)
+u16string Utf8_to_Utf16(const string& src)
 {
 	char16_t *wcs = nullptr;
 #if defined(_WIN32)
@@ -196,15 +246,14 @@ u16string Encoding::Utf8_to_Utf16(const string& src)
 	return ret;
 }
 
-
 /**
  * Convert Shift-JIS to UTF-8.
  * @param src Shift-JIS string.
  * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
  */
-string Encoding::SJIS_to_Utf8(const string& src)
+string SJIS_to_Utf8(const string& src)
 {
-	utf8_str *mbs = nullptr;
+	char *mbs = nullptr;
 #if defined(_WIN32)
 	wchar_t *wcs = W32U_mbs_to_UTF16(src.c_str(), 932); // cp932 == Shift-JIS
 	if (wcs) {
@@ -225,8 +274,7 @@ string Encoding::SJIS_to_Utf8(const string& src)
 	return ret;
 }
 
-
-#ifndef _WIN32
+#ifdef _WIN32
 /**
  * Compare two UTF-16 strings.
  * NOTE: This function expects host-endian UTF-16.
@@ -235,7 +283,20 @@ string Encoding::SJIS_to_Utf8(const string& src)
  * @param n Maximum number of characters to check.
  * @return Negative value if s1 < s2; 0 if s1 == s2; positive value if s1 > s2.
  */
-int Encoding::Utf16_ncmp(const char16_t *s1, const char16_t *s2, size_t n)
+int Utf16_ncmp(const char16_t *s1, const char16_t *s2, size_t n)
+{
+	return _wcsnicmp((const wchar_t*)s1, (const wchar_t*)s2, n);
+}
+#else
+/**
+ * Compare two UTF-16 strings.
+ * NOTE: This function expects host-endian UTF-16.
+ * @param s1 String 1.
+ * @param s2 String 2.
+ * @param n Maximum number of characters to check.
+ * @return Negative value if s1 < s2; 0 if s1 == s2; positive value if s1 > s2.
+ */
+int Utf16_ncmp(const char16_t *s1, const char16_t *s2, size_t n)
 {
 	// TODO: This expects platform-endian strings.
 	// Add a parameter for LE vs. BE?

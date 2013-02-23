@@ -37,8 +37,8 @@
 using std::string;
 using std::u16string;
 
-// Character set translation.
-#include "Util/Encoding.hpp"
+// Character set conversion.
+#include "libgenstext/Encoding.hpp"
 
 // LibGens includes.
 #include "Util/byteswap.h"
@@ -367,55 +367,50 @@ std::string RomPrivate::SpaceElim(const string& src)
 {
 	// Convert the string to UTF-16 first.
 	// TODO: Check for invalid UTF-8 sequences and handle them as cp1252?
-	u16string wcs_src = Encoding::Utf8_to_Utf16(src);
-	if (wcs_src.empty())
-	{
+	u16string wcs_src = LibGensText::Utf8_to_Utf16(src);
+	if (wcs_src.empty()) {
 		// Error converting the string. Assume the string is ASCII.
 		wcs_src.resize(src.size());
-		for (size_t i = 0; i < src.size(); i++)
-		{
+		for (size_t i = 0; i < src.size(); i++) {
 			wcs_src[i] = (src[i] & 0x7F);
 		}
 	}
-	
+
 	// Allocate the destination string. (UTF-16)
 	u16string wcs_dest(src.size(), 0);
 	int i_dest = 0;
-	
+
 	// Was the last character a graphics character?
 	bool lastCharIsGraph = false;
-	
+
 	// Process the string.
-	for (size_t i = 0; i < wcs_src.size(); i++)
-	{
+	for (size_t i = 0; i < wcs_src.size(); i++) {
 		char16_t wchr = wcs_src[i];
-		if (!lastCharIsGraph && !IsGraphChar(wchr))
-		{
+		if (!lastCharIsGraph && !IsGraphChar(wchr)) {
 			// This is a space character, and the previous
 			// character was not a space character.
 			continue;
 		}
-		
+
 		// This is not a space character,
 		// or it is a space character and the previous character wasn't.
 		wcs_dest[i_dest++] = wchr;
 		lastCharIsGraph = IsGraphChar(wchr);
 	}
-	
-	if (i_dest == 0)
-	{
+
+	if (i_dest == 0) {
 		// Empty string.
 		return string();
 	}
-	
+
 	// Make sure there's no space at the end of the string.
 	if (!IsGraphChar(wcs_dest[i_dest - 1]))
 		wcs_dest.resize(i_dest - 2 + 1);
 	else
 		wcs_dest.resize(i_dest - 1 + 1);
-	
+
 	// Convert the string back to UTF-8.
-	return Encoding::Utf16_to_Utf8(wcs_dest);
+	return LibGensText::Utf16_to_Utf8(wcs_dest);
 }
 
 
@@ -708,16 +703,15 @@ void RomPrivate::readHeaderMD(const uint8_t *header, size_t header_size)
 {
 	// Clear the internal MD header.
 	memset(&m_mdHeader, 0x00, sizeof(m_mdHeader));
-	
-	if (header_size <= 0x100)
-	{
+
+	if (header_size <= 0x100) {
 		// ROM header is too small. Assume it's blank.
 		return;
 	}
-	
+
 	// Copy the header data first.
 	memcpy(&m_mdHeader, &header[0x100], (std::min(header_size, (size_t)0x200) - 0x100));
-	
+
 	// Byteswap numerical values.
 	m_mdHeader.checksum		= be16_to_cpu(m_mdHeader.checksum);
 	m_mdHeader.romStartAddr		= be32_to_cpu(m_mdHeader.romStartAddr);
@@ -727,39 +721,33 @@ void RomPrivate::readHeaderMD(const uint8_t *header, size_t header_size)
 	m_mdHeader.sramInfo		= be32_to_cpu(m_mdHeader.sramInfo);
 	m_mdHeader.sramStartAddr	= be32_to_cpu(m_mdHeader.sramStartAddr);
 	m_mdHeader.sramEndAddr		= be32_to_cpu(m_mdHeader.sramEndAddr);
-	
+
 	// Detect the ROM's region code.
 	regionCode = DetectRegionCodeMD(m_mdHeader.countryCodes);
-	
+
 	// Attempt to convert the Domestic ROM header name from Shift-JIS to UTF-8.
 	string header_sjis = string(m_mdHeader.romNameJP, sizeof(m_mdHeader.romNameJP));
-	string header_utf8 = Encoding::SJIS_to_Utf8(header_sjis);
-	
-	if (!header_utf8.empty())
-	{
+	string header_utf8 = LibGensText::SJIS_to_Utf8(header_sjis);
+
+	if (!header_utf8.empty()) {
 		// Domestic ROM header name has been converted from Shift-JIS to UTF-8.
 		romNameJP = SpaceElim(header_utf8);
-	}
-	else
-	{
+	} else {
 		// Domestic ROM header name was not converted.
 		// Use it as-is.
 		// TODO: Remove characters with the high bit set?
 		romNameJP = SpaceElim(string(m_mdHeader.romNameJP, sizeof(m_mdHeader.romNameJP)));
 	}
-	
+
 	// Attempt to convert the Overseas ROM header name from Shift-JIS to UTF-8.
 	// (Columns uses Shift-JIS for both fields.)
 	header_sjis = string(m_mdHeader.romNameUS, sizeof(m_mdHeader.romNameUS));
-	header_utf8 = Encoding::SJIS_to_Utf8(header_sjis);
-	
-	if (!header_utf8.empty())
-	{
+	header_utf8 = LibGensText::SJIS_to_Utf8(header_sjis);
+
+	if (!header_utf8.empty()) {
 		// Overseas ROM header name has been converted from Shift-JIS to UTF-8.
 		romNameUS = SpaceElim(header_utf8);
-	}
-	else
-	{
+	} else {
 		// Overseas ROM header name was not converted.
 		// Use it as-is.
 		// TODO: Remove characters with the high bit set?
