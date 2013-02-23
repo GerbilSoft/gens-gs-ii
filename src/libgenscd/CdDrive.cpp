@@ -58,6 +58,9 @@ using std::string;
 #error CdDrive: Only Win32 and Linux are supported right now.
 #endif
 
+// ISO-9660 data structure definitions.
+#include "genscd_iso9660.h"
+
 #define PRINT_SCSI_ERROR(op, err) \
 	do { \
 		fprintf(stderr, "%s(): SCSI error: ", __func__); \
@@ -635,8 +638,9 @@ void CdDrivePrivate::getDataTrackInfo(void)
 
 	// ISO-9660 header is located at LBA 16 relative to the start of the data track.
 	// TODO: Set sector type to match the track information...
-	uint8_t data[2048];
-	int err = p_scsi->readCD(lba_start+16, 1, data, sizeof(data), SCSI_READ_CD_SECTORTYPE_ANY, ScsiBase::RCDRAW_USER);
+	ISO9660_VOLUME_DESCRIPTOR vd;
+	static_assert(sizeof(vd) == 2048, "sizeof(ISO9660_VOLUME_DESCRIPTOR) != 2048 - check genscd_iso9660.h!");
+	int err = p_scsi->readCD(lba_start+16, 1, &vd, sizeof(vd), SCSI_READ_CD_SECTORTYPE_ANY, ScsiBase::RCDRAW_USER);
 	if (err != 0) {
 		// Error reading the track.
 		PRINT_SCSI_ERROR(SCSI_OP_READ_CD, err);
@@ -654,14 +658,16 @@ void CdDrivePrivate::getDataTrackInfo(void)
 	 * - http://www.pismotechnic.com/cfs/iso9660-1999.html
 	 */
 	static const uint8_t ISO9660_magic[5] = {'C', 'D', '0', '0', '1'};
-	if (memcmp(&data[1], ISO9660_magic, sizeof(ISO9660_magic)) != 0) {
+	if (memcmp(vd.magic, ISO9660_magic, sizeof(vd.magic)) != 0) {
 		// Not an ISO-9660 volume descriptor.
 		cache.dataTrack.label.clear();
 		return;
 	}
 
-	if (data[0] != 0x01) {
+	// Check the volume descriptor type.
+	if (vd.vdtype != ISO9660_VDTYPE_PVD) {
 		// Not an ISO-9660 Primary Volume Descriptor.
+		// TODO: Parse other descriptor types.
 		cache.dataTrack.label.clear();
 		return;
 	}
@@ -669,8 +675,7 @@ void CdDrivePrivate::getDataTrackInfo(void)
 	// Label should be in ASCII.
 	// TODO: Convert non-ASCII labels to ASCII...
 	// TODO: Trim spaces from the label.
-	// TODO: Use a struct for ISO-9660 data?
-	cache.dataTrack.label = string((char*)&data[0x28], 32);
+	cache.dataTrack.label = string(vd.pvd.vol_id, sizeof(vd.pvd.vol_id));
 }
 
 /** CdDrive **/
