@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_UTIL_ENCODING_HPP__
-#define __LIBGENS_UTIL_ENCODING_HPP__
+#ifndef __LIBGENSTEXT_ENCODING_HPP__
+#define __LIBGENSTEXT_ENCODING_HPP__
 
 // C++ includes.
 #include <string>
@@ -72,4 +72,4 @@ int Utf16_ncmp(const char16_t *s1, const char16_t *s2, size_t n);
 
 }
 
-#endif /* __LIBGENS_UTIL_ENCODING_HPP__ */
+#endif /* __LIBGENSTEXT_ENCODING_HPP__ */
