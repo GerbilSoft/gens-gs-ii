@@ -29,6 +29,7 @@ using std::u16string;
 
 // C includes. (C++ namespace)
 #include <cctype>
+#include <cwctype>
 
 namespace LibGensText
 {
@@ -40,18 +41,28 @@ namespace LibGensText
  */
 static inline bool IsGraphChar(char16_t wchr)
 {
-	// TODO: Figure out why iswgraph() and iswspace() are useless.
+	// NOTE: On some systems, wctype doesn't work properly.
+	// TODO: Optimize this!
+	if (!iswspace(0x3000) || iswgraph(0x3000)) {
+		// U+3000 is IDEOGRAPHIC SPACE.
+		// It's not being detected as such, so fall back to the old algorithm.
+		if (wchr < 0x7F) {
+			return isgraph(wchr);
+		} else if (wchr == 0x3000) {
+			// U+3000: IDEOGRAPHIC SPACE
+			// Used in "Columns"' ROM headers.
+			return false;
+		} else if (wchr == 0x2000) {
+			// U+2000: EN QUAD
+			// Used in "Mega Anser"'s ROM headers.
+			return false;
+		}
 
-	if (wchr < 0x7F) {
-		return isgraph(wchr);
-	} else if (wchr == 0x3000) {
-		// U+3000: IDEOGRAPHIC SPACE
-		// Used in "Columns"' ROM headers.
-		return false;
+		return true;
 	}
 
-	// Assume graphical character by default.
-	return true;
+	// wctype appears to work on this system.
+	return iswgraph(wchr);
 }
 
 /**
