@@ -52,10 +52,6 @@ static inline bool IsGraphChar(char16_t wchr)
 			// U+3000: IDEOGRAPHIC SPACE
 			// Used in "Columns"' ROM headers.
 			return false;
-		} else if (wchr == 0x2000) {
-			// U+2000: EN QUAD
-			// Used in "Mega Anser"'s ROM headers.
-			return false;
 		}
 
 		return true;
