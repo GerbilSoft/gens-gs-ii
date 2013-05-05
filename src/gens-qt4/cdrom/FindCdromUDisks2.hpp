@@ -1,8 +1,8 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * FindCdromUDisks.hpp: Find CD-ROM drives using UDisks.                   *
+ * FindCdromUDisks2.hpp: Find CD-ROM drives: UDisks2 version.              *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2013 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
