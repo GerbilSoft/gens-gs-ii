@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * FindCdromUnix.hpp: Find CD-ROM drives: UNIX fallback.                   *
+ * FindCdromBase.cpp: Find CD-ROM drives: OS-specific base class.          *
  *                                                                         *
  * Copyright (c) 2011-2013 by David Korth.                                 *
  *                                                                         *
@@ -19,35 +19,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_CDROM_FINDCDROMUNIX_HPP__
-#define __GENS_QT4_CDROM_FINDCDROMUNIX_HPP__
-
 #include "FindCdromBase.hpp"
 
 namespace GensQt4
 {
 
-class FindCdromUnix : public FindCdromBase
-{
-	Q_OBJECT
-	
-	public:
-		FindCdromUnix(QObject *parent = 0);
+FindCdromBase::FindCdromBase(QObject *parent)
+	: QObject(parent)
+{ }
 
-		/**
-		 * Determine if this CD-ROM backend is usable.
-		 * @return True if this CD-ROM backend is usable; false if not.
-		 */
-		bool isUsable(void) const
-			{ return true; }
-
-		/**
-		 * Scan the system for CD-ROM devices.
-		 * @return QStringList with all detected CD-ROM device names.
-		 */
-		QStringList scanDeviceNames(void);
-};
+FindCdromBase::~FindCdromBase()
+{ }
 
 }
-
-#endif /* __GENS_QT4_CDROM_FINDCDROMUNIX_HPP__ */

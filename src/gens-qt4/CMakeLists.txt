@@ -149,6 +149,7 @@ SET(gens-qt4_COMMON_SRCS
 	widgets/GensColorButton.cpp
 	ConfigHandler.cpp
 	cdrom/FindCdromDrives.cpp
+	cdrom/FindCdromBase.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -189,6 +190,7 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	widgets/GensColorButton.hpp
 	ConfigHandler.hpp
 	cdrom/FindCdromDrives.hpp
+	cdrom/FindCdromBase.hpp
 	)
 
 SET(gens-qt4_SRCS ${gens-qt4_COMMON_SRCS})
@@ -213,8 +215,8 @@ QT4_WRAP_UI(gens-qt4_UIS_H ${gens-qt4_UIS})
 #SET(gens-qt4_CDROM_UDISKS_SRCS cdrom/FindCdromUDisks.cpp)
 #SET(gens-qt4_CDROM_UDISKS_MOC_HEADERS cdrom/FindCdromUDisks.hpp)
 
-#SET(gens-qt4_CDROM_UNIX_SRCS cdrom/FindCdromUnix.cpp)
-#SET(gens-qt4_CDROM_UNIX_MOC_HEADERS cdrom/FindCdromUnix.hpp)
+SET(gens-qt4_CDROM_UNIX_SRCS cdrom/FindCdromUnix.cpp)
+SET(gens-qt4_CDROM_UNIX_MOC_HEADERS cdrom/FindCdromUnix.hpp)
 
 #SET(gens-qt4_CDROM_WIN32_SRCS
 #	cdrom/FindCdromWin32.cpp
