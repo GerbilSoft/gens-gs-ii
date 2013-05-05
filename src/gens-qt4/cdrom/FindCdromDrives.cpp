@@ -177,10 +177,25 @@ bool FindCdromDrives::isSupported(void) const
 }
 
 /**
+ * Rescan all disc drives.
+ * This clears the QStringList and enumerates all disc drives.
+ */
+void FindCdromDrives::rescan(void)
+{
+	d->clearCdromDevices();
+
+	// Search for drives.
+	// TODO: Use d->findCdromBase. For now, hardcode "/dev/sr0".
+	QString deviceName = QLatin1String("/dev/sr0");
+	d->cdromDeviceNames.append(deviceName);
+	emit driveAdded(deviceName);
+}
+
+/**
  * Get a list of all available CD-ROM device names.
  * @return QStringList containing CD-ROM device names.
  */
-QStringList FindCdromDrives::getDriveNames()
+QStringList FindCdromDrives::getDriveNames() const
 {
 	return d->cdromDeviceNames;
 }
@@ -216,21 +231,6 @@ LibGensCD::CdDrive *FindCdromDrives::getCdDrive(QString deviceName)
 
 	d->mapCdromDevices.insert(deviceName, cdDrive);
 	return cdDrive;
-}
-
-/**
- * Rescan all disc drives.
- * This clears the QStringList and enumerates all disc drives.
- */
-void FindCdromDrives::rescan(void)
-{
-	d->clearCdromDevices();
-
-	// Search for drives.
-	// TODO: Use d->findCdromBase. For now, hardcode "/dev/sr0".
-	QString deviceName = QLatin1String("/dev/sr0");
-	d->cdromDeviceNames.append(deviceName);
-	emit driveAdded(deviceName);
 }
 
 }

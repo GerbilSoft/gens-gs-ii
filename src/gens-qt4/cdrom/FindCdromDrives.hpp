@@ -58,10 +58,16 @@ class FindCdromDrives : public QObject
 		bool isSupported(void) const;
 
 		/**
+		 * Rescan all disc drives.
+		 * This clears the QStringList and enumerates all disc drives.
+		 */
+		void rescan(void);
+
+		/**
 		 * Get a list of all available CD-ROM device names.
 		 * @return QStringList containing CD-ROM device names.
 		 */
-		QStringList getDriveNames();
+		QStringList getDriveNames() const;
 
 		/**
 		 * Get a libgenscd CdDrive instance for a given CD-ROM device name.
@@ -69,12 +75,6 @@ class FindCdromDrives : public QObject
 		 * @return CdDrive instance, or nullptr if unable to open the drive.
 		 */
 		LibGensCD::CdDrive *getCdDrive(QString deviceName);
-
-		/**
-		 * Rescan all disc drives.
-		 * This clears the QStringList and enumerates all disc drives.
-		 */
-		void rescan(void);
 
 	signals:
 		/**
