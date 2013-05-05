@@ -22,6 +22,9 @@
 #include "FindCdromDrives.hpp"
 #include "GensQApplication.hpp"
 
+// C includes.
+#include <stdio.h>
+
 // LibGensCD includes.
 #include "libgenscd/DiscType.h"
 
