@@ -37,6 +37,7 @@
 #include "cdrom/FindCdromWin32.hpp"
 #elif defined(QT_QTDBUS_FOUND)
 #include "cdrom/FindCdromUDisks2.hpp"
+#include "cdrom/FindCdromUDisks.hpp"
 #endif
 
 // UNIX fallback.
@@ -116,7 +117,15 @@ FindCdromDrivesPrivate::FindCdromDrivesPrivate(FindCdromDrives *q)
 #if defined(Q_OS_WIN)
 	findCdromBase = new FindCdromWin32(q);
 #elif defined(QT_QTDBUS_FOUND)
+	// Test UDisks2, then UDisks1.
 	findCdromBase = new FindCdromUDisks2(q);
+	if (findCdromBase && !findCdromBase->isUsable()) {
+		delete findCdromBase;
+		findCdromBase = nullptr;
+	}
+
+	if (!findCdromBase)
+		findCdromBase = new FindCdromUDisks(q);
 #else
 	// TODO: Implement FindCdromBase subclass for Mac OS X.
 	findCdromBase = nullptr;
