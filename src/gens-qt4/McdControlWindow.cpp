@@ -34,19 +34,108 @@
 #include <stdint.h>
 
 // Find CD-ROM drives.
-// TODO: Add Mac OS X, and non-UDisks classes.
-#if defined(Q_OS_WIN)
-#include "cdrom/FindCdromWin32.hpp"
-#elif defined(QT_QTDBUS_FOUND)
-#include "cdrom/FindCdromUDisks.hpp"
-#endif
-
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
-#include "cdrom/FindCdromUnix.hpp"
-#endif
+#include "cdrom/FindCdromDrives.hpp"
 
 namespace GensQt4
 {
+
+class McdControlWindowPrivate
+{
+	public:
+		McdControlWindowPrivate(McdControlWindow *q);
+		~McdControlWindowPrivate();
+
+	private:
+		McdControlWindow *const q;
+		Q_DISABLE_COPY(McdControlWindowPrivate)
+
+	public:
+		FindCdromDrives *findCdromDrives;
+		//bool m_isQuerying;
+		//QList<CdromDriveEntry> m_queryList;
+		void addDriveEntry(QString deviceName, int index = -1);
+};
+
+
+/**************************************
+ * McdControlWindowPrivate functions. *
+ **************************************/
+
+McdControlWindowPrivate::McdControlWindowPrivate(McdControlWindow *q)
+	: q(q)
+{
+	findCdromDrives = new FindCdromDrives(q);
+
+	// Set up the FindCdromDrives signals.
+	// TODO
+	/*
+	connect(findCdromDrives, SIGNAL(driveUpdated(CdromDriveEntry)),
+		this, SLOT(driveUpdated(CdromDriveEntry)));
+	connect(m_drives, SIGNAL(driveQueryFinished(void)),
+		this, SLOT(driveQueryFinished(void)));
+	connect(m_drives, SIGNAL(driveRemoved(QString)),
+		this, SLOT(driveRemoved(QString)));
+	*/
+}
+
+McdControlWindowPrivate::~McdControlWindowPrivate()
+{ }
+
+
+/**
+ * Add a CD-ROM drive to the dropdown box.
+ * TODO: Replace with MVC so the dropdown box automatically populates itself.
+ * @param QString deviceName Device name.
+ * @param index Dropdown index, or -1 for a new entry.
+ */
+void McdControlWindowPrivate::addDriveEntry(QString deviceName, int index)
+{
+	// Get the drive information.
+	LibGensCD::CdDrive *cdDrive = findCdromDrives->getCdDrive(deviceName);
+	if (!cdDrive)
+		return;
+
+	QString item_desc =
+			QString::fromStdString(cdDrive->dev_vendor()) + QChar(L' ') +
+			QString::fromStdString(cdDrive->dev_model()) + QChar(L' ') +
+			QString::fromStdString(cdDrive->dev_firmware()) + QChar(L'\n') +
+			deviceName + QLatin1String(": ");
+
+	// TODO: Move the disc info query to a separate thread.
+
+	// Add the disc label if a disc is present.
+	if (!cdDrive->isDiscPresent())
+		item_desc += q->tr("No medium found.");
+	else
+		item_desc += QString::fromUtf8(cdDrive->getDiscLabel().c_str());
+
+	// Get the drive/disc icon.
+	// TODO: Update for LibGensCD.
+	QIcon icon; // = m_drives->getDriveIcon(drive);
+
+	// Remove the "No CD-ROM drives found." entry if it's there.
+	if (!q->cboCdDrives->isEnabled()) {
+		q->cboCdDrives->clear();
+		q->cboCdDrives->setEnabled(true);
+	}
+
+	// If index is >= 0, this is an existing item.
+	if (index >= 0 && index < q->cboCdDrives->count()) {
+		q->cboCdDrives->setItemText(index, item_desc);
+		q->cboCdDrives->setItemIcon(index, icon);
+	} else {
+		q->cboCdDrives->addItem(icon, item_desc, deviceName);
+	}
+
+	// Make sure a drive is selected.
+	if (q->cboCdDrives->currentIndex() < 0)
+		q->cboCdDrives->setCurrentIndex(0);
+}
+
+
+/*******************************
+ * McdControlWindow functions. *
+ *******************************/
 
 // Static member initialization.
 McdControlWindow *McdControlWindow::m_McdControlWindow = nullptr;
@@ -56,6 +145,7 @@ McdControlWindow *McdControlWindow::m_McdControlWindow = nullptr;
  */
 McdControlWindow::McdControlWindow(QWidget *parent)
 	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
+	, d(new McdControlWindowPrivate(this))
 {
 	// Initialize the Qt4 UI.
 	setupUi(this);
@@ -77,36 +167,6 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 	// On KDE, the button's on the left side of the dialog, whereas "Close" is on the right.
 	buttonBox->addButton(btnRefresh, QDialogButtonBox::ResetRole);
 
-	// Initialize the FindCdromBase class.
-#if defined(Q_OS_WIN)
-	m_drives = new FindCdromWin32();
-#elif defined(QT_QTDBUS_FOUND)
-	m_drives = new FindCdromUDisks();
-	if (!m_drives->isUsable()) {
-		delete m_drives;
-		m_drives = nullptr;
-	}
-#else
-	// TODO: Implement FindCdromBase subclass for Mac OS X.
-	m_drives = nullptr;
-#endif
-
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
-	// UNIX fallback.
-	if (!m_drives)
-		m_drives = new FindCdromUnix();
-#endif
-
-	if (m_drives) {
-		// Set up the FindCdromBase signals
-		connect(m_drives, SIGNAL(driveUpdated(CdromDriveEntry)),
-			this, SLOT(driveUpdated(CdromDriveEntry)));
-		connect(m_drives, SIGNAL(driveQueryFinished(void)),
-			this, SLOT(driveQueryFinished(void)));
-		connect(m_drives, SIGNAL(driveRemoved(QString)),
-			this, SLOT(driveRemoved(QString)));
-	}
-
 	// Query CD-ROM drives.
 	query();
 }
@@ -117,12 +177,10 @@ McdControlWindow::McdControlWindow(QWidget *parent)
  */
 McdControlWindow::~McdControlWindow()
 {
+	delete d;
+
 	// Clear the m_McdControlWindow pointer.
 	m_McdControlWindow = nullptr;
-
-	// Delete m_drives.
-	delete m_drives;
-	m_drives = nullptr;
 }
 
 
@@ -150,12 +208,11 @@ void McdControlWindow::ShowSingle(QWidget *parent)
  */
 void McdControlWindow::changeEvent(QEvent *event)
 {
-	if (event->type() == QEvent::LanguageChange)
-	{
+	if (event->type() == QEvent::LanguageChange) {
 		// Retranslate the UI.
 		retranslateUi(this);
 	}
-	
+
 	// Pass the event to the base class.
 	this->QDialog::changeEvent(event);
 }
@@ -168,9 +225,8 @@ void McdControlWindow::query(void)
 {
 	// Clear the dropdown.
 	cboCdDrives->clear();
-	
-	if (!m_drives)
-	{
+
+	if (!d->findCdromDrives->isSupported()) {
 		// No CD-ROM drive handler is available.
 		// TODO: Center-align the text by using QItemDelegate.
 		cboCdDrives->setEnabled(false);
@@ -178,69 +234,29 @@ void McdControlWindow::query(void)
 		cboCdDrives->setCurrentIndex(0);
 		return;
 	}
-	
+
 	// Set the mouse pointer.
 	setCursor(Qt::WaitCursor);
-	
+
 	// Indicate that drives are being scanned.
 	// TODO: Center-align the text by using QItemDelegate.
 	// TODO: Add an animated "Searching..." icon.
 	cboCdDrives->setEnabled(false);
 	cboCdDrives->addItem(tr("Searching for CD-ROM drives..."));
 	cboCdDrives->setCurrentIndex(0);
-	
-	// Query the drives.
-	m_queryList.clear();
-	m_isQuerying = true;
-	m_drives->query();
+
+	// Retrieve the list of CD-ROM device names.
+	QStringList cdromDeviceNames = d->findCdromDrives->getDriveNames();
+	foreach (QString deviceName, cdromDeviceNames) {
+		d->addDriveEntry(deviceName);
+	}
+
+	unsetCursor();
 }
 
 
-/**
- * addDriveEntry(): Add a CdromDriveEntry to the dropdown box.
- * @param drive Drive entry.
- */
-void McdControlWindow::addDriveEntry(const CdromDriveEntry& drive, int index)
-{
-	// Add the drive to the dropdown box.
-	QString item_desc = drive.drive_vendor + QChar(L' ') +
-				drive.drive_model + QChar(L' ') +
-				drive.drive_firmware + QChar(L'\n') +
-				drive.path + QString::fromLatin1(": ");
-	
-	// Add the disc label if a disc is present.
-	if (drive.disc_type == 0)
-		item_desc += tr("No medium found.");
-	else
-		item_desc += drive.disc_label;
-	
-	// Get the drive/disc icon.
-	QIcon icon = m_drives->getDriveIcon(drive);
-	
-	// Remove the "No CD-ROM drives found." entry if it's there.
-	if (!cboCdDrives->isEnabled())
-	{
-		cboCdDrives->clear();
-		cboCdDrives->setEnabled(true);
-	}
-	
-	// If index is >= 0, this is an existing item.
-	if (index >= 0 && index < cboCdDrives->count())
-	{
-		cboCdDrives->setItemText(index, item_desc);
-		cboCdDrives->setItemIcon(index, icon);
-	}
-	else
-	{
-		cboCdDrives->addItem(icon, item_desc, drive.path);
-	}
-	
-	// Make sure a drive is selected.
-	if (cboCdDrives->currentIndex() < 0)
-		cboCdDrives->setCurrentIndex(0);
-}
-
-
+// TODO: Replace with FindCdromDrives slots.
+#if 0
 /**
  * driveUpdated(): A drive was updated.
  * @param drive CdromDriveEntry.
@@ -337,5 +353,6 @@ void McdControlWindow::driveRemoved(QString path)
 		}
 	}
 }
+#endif
 
 }

@@ -32,11 +32,10 @@
 // Qt forward declarations.
 class QPushButton;
 
-// Find CD-ROM drives base class.
-#include "cdrom/FindCdrom.hpp"
-
 namespace GensQt4
 {
+
+class McdControlWindowPrivate;
 
 class McdControlWindow : public QDialog, public Ui::McdControlWindow
 {
@@ -49,25 +48,29 @@ class McdControlWindow : public QDialog, public Ui::McdControlWindow
 		McdControlWindow(QWidget *parent = nullptr);
 		virtual ~McdControlWindow();
 
+	private:
+		McdControlWindowPrivate *const d;
+		friend class McdControlWindowPrivate;
+		Q_DISABLE_COPY(McdControlWindow);
+
+	private:
 		// State change event. (Used for switching the UI language at runtime.)
 		void changeEvent(QEvent *event);
 
 	protected slots:
 		void query(void);
+		// TODO: Replace with FindCdromDrives slots.
+#if 0
 		void driveUpdated(const CdromDriveEntry& drive);
 		void driveQueryFinished(void);
 		void driveRemoved(QString path);
+#endif
 
 	private:
 		static McdControlWindow *m_McdControlWindow;
 
 		// Refresh button.
 		QPushButton *btnRefresh;
-
-		FindCdrom *m_drives;
-		bool m_isQuerying;
-		QList<CdromDriveEntry> m_queryList;
-		void addDriveEntry(const CdromDriveEntry& drive, int index = -1);
 };
 
 }

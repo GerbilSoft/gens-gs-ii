@@ -131,7 +131,6 @@ SET(gens-qt4_COMMON_SRCS
 	Config/ConfigDefaults.cpp
 	Config/PathConfig.cpp
 	Config/CtrlConfig.cpp
-	cdrom/FindCdrom.cpp
 	McdControlWindow.cpp
 	widgets/GensZipDirModel.cpp
 	widgets/GensZipDirItem.cpp
@@ -173,7 +172,6 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	Config/ConfigStore.hpp
 	Config/PathConfig.hpp
 	Config/CtrlConfig.hpp
-	cdrom/FindCdrom.hpp
 	McdControlWindow.hpp
 	widgets/GensZipDirModel.hpp
 	actions/GensKeyConfig.hpp
@@ -212,19 +210,19 @@ QT4_WRAP_UI(gens-qt4_UIS_H ${gens-qt4_UIS})
 # System-specific CD-ROM drive support. #
 #########################################
 
-SET(gens-qt4_CDROM_UDISKS_SRCS cdrom/FindCdromUDisks.cpp)
-SET(gens-qt4_CDROM_UDISKS_MOC_HEADERS cdrom/FindCdromUDisks.hpp)
+#SET(gens-qt4_CDROM_UDISKS_SRCS cdrom/FindCdromUDisks.cpp)
+#SET(gens-qt4_CDROM_UDISKS_MOC_HEADERS cdrom/FindCdromUDisks.hpp)
 
-SET(gens-qt4_CDROM_UNIX_SRCS cdrom/FindCdromUnix.cpp)
-SET(gens-qt4_CDROM_UNIX_MOC_HEADERS cdrom/FindCdromUnix.hpp)
+#SET(gens-qt4_CDROM_UNIX_SRCS cdrom/FindCdromUnix.cpp)
+#SET(gens-qt4_CDROM_UNIX_MOC_HEADERS cdrom/FindCdromUnix.hpp)
 
-SET(gens-qt4_CDROM_WIN32_SRCS
-	cdrom/FindCdromWin32.cpp
-	cdrom/Spti.cpp
-	)
-SET(gens-qt4_CDROM_WIN32_MOC_HEADERS
-	cdrom/FindCdromWin32.hpp
-	)
+#SET(gens-qt4_CDROM_WIN32_SRCS
+#	cdrom/FindCdromWin32.cpp
+#	cdrom/Spti.cpp
+#	)
+#SET(gens-qt4_CDROM_WIN32_MOC_HEADERS
+#	cdrom/FindCdromWin32.hpp
+#	)
 
 IF(QT_QTDBUS_FOUND)
 	# QtDBus found.
