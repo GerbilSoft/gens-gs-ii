@@ -169,12 +169,20 @@ QStringList FindCdromUDisks::scanDeviceNames(void)
 			continue;
 		}
 
-		// Verify that this drive is a CD-ROM drive.
-		if (drive_if->deviceIsRemovable() &&
-		    drive_if->deviceIsOpticalDisc())
-		{
-			// This is a CD-ROM drive.
-			cdromDeviceNames.append(drive_if->deviceFile());
+		// Make sure this is a removable drive.
+		// NOTE: drive_if->deviceIsOpticalDisc() only returns true if
+		// a disc is inserted. Empty drives will return false.
+		if (drive_if->deviceIsRemovable()) {
+			// Check if "optical_cd" is in the list of supported media.
+			QStringList driveMediaCompatibility = drive_if->driveMediaCompatibility();
+			QString optical_cd = QLatin1String("optical_cd");
+			foreach (QString discTypeId, driveMediaCompatibility) {
+				if (discTypeId == optical_cd) {
+					// Found "optical_cd".
+					cdromDeviceNames.append(drive_if->deviceFile());
+					break;
+				}
+			}
 		}
 	}
 	
