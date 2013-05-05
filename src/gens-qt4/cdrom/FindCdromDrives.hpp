@@ -31,6 +31,8 @@
 // Qt includes.
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
+#include <QtGui/QIcon>
+
 
 namespace GensQt4
 {
@@ -75,6 +77,24 @@ class FindCdromDrives : public QObject
 		 * @return CdDrive instance, or nullptr if unable to open the drive.
 		 */
 		LibGensCD::CdDrive *getCdDrive(QString deviceName);
+
+		/**
+		 * Get the icon for the specified CD-ROM drive.
+		 * Returns the disc icon if a disc is present,
+		 * or the drive icon if no disc is present.
+		 * @param deviceName CD_ROM device name.
+		 * @return Icon for either the disc or the drive.
+		 */
+		QIcon getDriveIcon(QString deviceName);
+
+		/**
+		 * Get the icon for the specified CD-ROM drive.
+		 * Returns the disc icon if a disc is present,
+		 * or the drive icon if no disc is present.
+		 * @param cdDrive LibGensCD::CdDrive.
+		 * @return Icon for either the disc or the drive.
+		 */
+		QIcon getDriveIcon(LibGensCD::CdDrive *cdDrive);
 
 	signals:
 		/**
