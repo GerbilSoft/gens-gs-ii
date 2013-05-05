@@ -103,15 +103,14 @@ void McdControlWindowPrivate::addDriveEntry(QString deviceName, int index)
 
 	// TODO: Move the disc info query to a separate thread.
 
-	// Add the disc label if a disc is present.
+	// Get the disc label.
 	if (!cdDrive->isDiscPresent())
 		item_desc += q->tr("No medium found.");
 	else
 		item_desc += QString::fromUtf8(cdDrive->getDiscLabel().c_str());
 
-	// Get the drive/disc icon.
-	// TODO: Update for LibGensCD.
-	QIcon icon; // = m_drives->getDriveIcon(drive);
+	// Get the drive icon.
+	QIcon icon = findCdromDrives->getDriveIcon(cdDrive);
 
 	// Remove the "No CD-ROM drives found." entry if it's there.
 	if (!q->cboCdDrives->isEnabled()) {
