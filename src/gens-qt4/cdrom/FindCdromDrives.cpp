@@ -33,8 +33,7 @@
 #if defined(Q_OS_WIN)
 #include "cdrom/FindCdromWin32.hpp"
 #elif defined(QT_QTDBUS_FOUND)
-// TODO: Port to FindCdromBase.
-//#include "cdrom/FindCdromUDisks.hpp"
+#include "cdrom/FindCdromUDisks2.hpp"
 #endif
 
 // UNIX fallback.
@@ -112,9 +111,9 @@ FindCdromDrivesPrivate::FindCdromDrivesPrivate(FindCdromDrives *q)
 {
 	// Initialize the FindCdromBase class.
 #if defined(Q_OS_WIN)
-	findCdromBase = new FindCdromWin32();
+	findCdromBase = new FindCdromWin32(q);
 #elif defined(QT_QTDBUS_FOUND)
-	//findCdromBase = new FindCdromUDisks();
+	findCdromBase = new FindCdromUDisks2(q);
 #else
 	// TODO: Implement FindCdromBase subclass for Mac OS X.
 	findCdromBase = nullptr;
@@ -130,7 +129,7 @@ FindCdromDrivesPrivate::FindCdromDrivesPrivate(FindCdromDrives *q)
 	if (!findCdromBase) {
 #if defined(Q_OS_UNIX)
 		// UNIX fallback.
-		findCdromBase = new FindCdromUnix();
+		findCdromBase = new FindCdromUnix(q);
 #endif
 	}
 
@@ -144,6 +143,7 @@ FindCdromDrivesPrivate::FindCdromDrivesPrivate(FindCdromDrives *q)
 FindCdromDrivesPrivate::~FindCdromDrivesPrivate()
 {
 	clearCdromDevices();
+	delete findCdromBase;
 }
 
 
@@ -330,8 +330,7 @@ FindCdromDrives::~FindCdromDrives()
  */
 bool FindCdromDrives::isSupported(void) const
 {
-	// TODO: Implement this!
-	return true;
+	return (d->findCdromBase && d->findCdromBase->isUsable());
 }
 
 /**
