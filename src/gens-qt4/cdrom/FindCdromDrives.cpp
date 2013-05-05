@@ -28,6 +28,21 @@
 // Qt includes.
 #include <QtCore/QMap>
 
+// OS-specific FindCdromBase subclasses.
+// TODO: Add Mac OS X, and non-UDisks classes.
+#if defined(Q_OS_WIN)
+#include "cdrom/FindCdromWin32.hpp"
+#elif defined(QT_QTDBUS_FOUND)
+// TODO: Port to FindCdromBase.
+//#include "cdrom/FindCdromUDisks.hpp"
+#endif
+
+// UNIX fallback.
+#if defined(Q_OS_UNIX)
+#include "cdrom/FindCdromUnix.hpp"
+#endif
+
+
 namespace GensQt4
 {
 
@@ -53,7 +68,7 @@ class FindCdromDrivesPrivate
 
 		// FindCdromBase instance.
 		// TODO: Create FindCdromBase class.
-		void *findCdromBase;
+		FindCdromBase *findCdromBase;
 
 		// Clear all CD-ROM devices.
 		void clearCdromDevices(void);
@@ -93,10 +108,37 @@ class FindCdromDrivesPrivate
 
 FindCdromDrivesPrivate::FindCdromDrivesPrivate(FindCdromDrives *q)
 	: q(q)
+	, findCdromBase(nullptr)
 {
-	// TODO: Figure out which FindCdromBase class to instantiate
-	// in order to find the device names.
+	// Initialize the FindCdromBase class.
+#if defined(Q_OS_WIN)
+	findCdromBase = new FindCdromWin32();
+#elif defined(QT_QTDBUS_FOUND)
+	//findCdromBase = new FindCdromUDisks();
+#else
+	// TODO: Implement FindCdromBase subclass for Mac OS X.
 	findCdromBase = nullptr;
+#endif
+
+	if (findCdromBase && !findCdromBase->isUsable()) {
+		// FindCdromBase class isn't usable.
+		delete findCdromBase;
+		findCdromBase = nullptr;
+	}
+
+	// Check for fallbacks in case the primary FindCdromBase class isn't usable.
+	if (!findCdromBase) {
+#if defined(Q_OS_UNIX)
+		// UNIX fallback.
+		findCdromBase = new FindCdromUnix();
+#endif
+	}
+
+	if (findCdromBase && !findCdromBase->isUsable()) {
+		// FindCdromBase class still isn't usable.
+		delete findCdromBase;
+		findCdromBase = nullptr;
+	}
 }
 
 FindCdromDrivesPrivate::~FindCdromDrivesPrivate()
@@ -301,10 +343,12 @@ void FindCdromDrives::rescan(void)
 	d->clearCdromDevices();
 
 	// Search for drives.
-	// TODO: Use d->findCdromBase. For now, hardcode "/dev/sr0".
-	QString deviceName = QLatin1String("/dev/sr0");
-	d->cdromDeviceNames.append(deviceName);
-	emit driveAdded(deviceName);
+	if (d->findCdromBase) {
+		QStringList cdromDeviceNames = d->findCdromBase->scanDeviceNames();
+		foreach (QString deviceName, cdromDeviceNames) {
+			d->addCdromDevice(deviceName);
+		}
+	}
 }
 
 /**
