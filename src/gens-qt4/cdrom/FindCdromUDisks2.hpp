@@ -50,13 +50,13 @@ class FindCdromUDisks2 : public FindCdromBase
 		 * Determine if this CD-ROM backend is usable.
 		 * @return True if this CD-ROM backend is usable; false if not.
 		 */
-		bool isUsable(void) const override final;
+		bool isUsable(void) const final;
 
 		/**
 		 * Scan the system for CD-ROM devices.
 		 * @return QStringList with all detected CD-ROM device names.
 		 */
-		QStringList scanDeviceNames(void) override final;
+		QStringList scanDeviceNames(void) final;
 
 		// TODO: LibGensCD support for notifications.
 #if 0
