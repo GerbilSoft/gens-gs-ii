@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * FindCdromDrives.cpp: Find CD-ROM drives.                                *
+ * FindCdromDrives.cpp: Find CD-ROM drives: manager class.                 *
  *                                                                         *
  * Copyright (c) 2011-2013 by David Korth.                                 *
  *                                                                         *

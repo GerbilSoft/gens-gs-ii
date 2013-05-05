@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * FindCdromDrives.hpp: Find CD-ROM drives.                                *
+ * FindCdromDrives.hpp: Find CD-ROM drives: manager class.                 *
  *                                                                         *
  * Copyright (c) 2011-2013 by David Korth.                                 *
  *                                                                         *
