@@ -212,8 +212,8 @@ QT4_WRAP_UI(gens-qt4_UIS_H ${gens-qt4_UIS})
 # System-specific CD-ROM drive support. #
 #########################################
 
-#SET(gens-qt4_CDROM_UDISKS2_SRCS cdrom/FindCdromUDisks2.cpp)
-#SET(gens-qt4_CDROM_UDISKS2_MOC_HEADERS cdrom/FindCdromUDisks2.hpp)
+SET(gens-qt4_CDROM_UDISKS2_SRCS cdrom/FindCdromUDisks2.cpp)
+SET(gens-qt4_CDROM_UDISKS2_MOC_HEADERS cdrom/FindCdromUDisks2.hpp)
 
 SET(gens-qt4_CDROM_UNIX_SRCS cdrom/FindCdromUnix.cpp)
 SET(gens-qt4_CDROM_UNIX_MOC_HEADERS cdrom/FindCdromUnix.hpp)

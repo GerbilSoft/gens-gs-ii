@@ -19,10 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_CDROM_FINDCDROMUDISKS_HPP__
-#define __GENS_QT4_CDROM_FINDCDROMUDISKS_HPP__
+#ifndef __GENS_QT4_CDROM_FINDCDROMUDISKS2_HPP__
+#define __GENS_QT4_CDROM_FINDCDROMUDISKS2_HPP__
 
-#include "FindCdrom.hpp"
+#include "FindCdromBase.hpp"
 
 // QtDBus includes.
 #include <QtDBus/QDBusObjectPath>
@@ -30,46 +30,40 @@
 namespace GensQt4
 {
 
-class FindCdromUDisksPrivate;
+class FindCdromUDisks2Private;
 
-class FindCdromUDisks : public FindCdrom
+class FindCdromUDisks2 : public FindCdromBase
 {
 	Q_OBJECT
 	
 	public:
-		FindCdromUDisks();
-		virtual ~FindCdromUDisks();
-	
+		FindCdromUDisks2(QObject *parent = 0);
+		virtual ~FindCdromUDisks2();
+
 	private:
-		friend class FindCdromUDisksPrivate;
-		FindCdromUDisksPrivate *const d;
-		Q_DISABLE_COPY(FindCdromUDisks)
-	
+		friend class FindCdromUDisks2Private;
+		FindCdromUDisks2Private *const d;
+		Q_DISABLE_COPY(FindCdromUDisks2)
+
 	public:
 		/**
-		 * Check if this FindCdrom object is usable.
-		 * @return True if this object is usable; false if not.
+		 * Determine if this CD-ROM backend is usable.
+		 * @return True if this CD-ROM backend is usable; false if not.
 		 */
 		bool isUsable(void) const;
-		
+
 		/**
-		 * Asynchronously query for CD-ROM drives.
-		 * The driveUpdated() signal will be emitted once for each detected drive.
-		 * @return 0 on success; non-zero on error.
+		 * Scan the system for CD-ROM devices.
+		 * @return QStringList with all detected CD-ROM device names.
 		 */
-		int query(void);
-	
-	protected:
-		/**
-		 * Asynchronously query for CD-ROM drives. (INTERNAL FUNCTION)
-		 * The driveUpdated() signal will be emitted once for each detected drive.
-		 * @return 0 on success; non-zero on error.
-		 */
-		int query_int(void);
-	
+		QStringList scanDeviceNames(void);
+
+		// TODO: LibGensCD support for notifications.
+#if 0
 	private slots:
 		void deviceChanged(const QDBusObjectPath& objectPath);
 		void deviceRemoved(const QDBusObjectPath& objectPath);
+#endif
 };
 
 }
