@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 2.6.0)
 SET(libgenscd_SRCS
 	CdDrive.cpp
 	ScsiBase.cpp
+	scsi_errors.c
 	)
 
 IF(WIN32)
