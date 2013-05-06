@@ -54,14 +54,14 @@ class FindCdromBase : public QObject
 		 * Check if this backend supports OS-specific disc/drive icons.
 		 * @return True if OS-specific disc/drive icons are supported; false if not.
 		 */
-		virtual bool isIconSupported(void) const;
+		virtual bool isDriveIconSupported(void) const;
 
 		/**
 		 * Get the OS-specific disc/drive icon.
 		 * @param deviceName Device name.
 		 * @return OS-specific disc/drive icon.
 		 */
-		virtual QIcon getIcon(QString deviceName) const;
+		virtual QIcon getDriveIcon(QString deviceName) const;
 
 	// TODO: Update for FindCdromDrives.
 #if 0

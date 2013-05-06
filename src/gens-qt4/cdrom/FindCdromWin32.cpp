@@ -161,7 +161,7 @@ QStringList FindCdromWin32::scanDeviceNames(void)
  * Check if this backend supports OS-specific disc/drive icons.
  * @return True if OS-specific disc/drive icons are supported; false if not.
  */
-bool FindCdromWin32::isIconSupported(void) const
+bool FindCdromWin32::isDriveIconSupported(void) const
 {
 	// Win32 supports custom disc icons via AUTORUN.INF.
 	return true;
@@ -173,7 +173,7 @@ bool FindCdromWin32::isIconSupported(void) const
  * @param deviceName Device name.
  * @return OS-specific disc/drive icon.
  */
-QIcon FindCdromWin32::getIcon(QString deviceName) const
+QIcon FindCdromWin32::getDriveIcon(QString deviceName) const
 {
 	// Get the icon using SHGetFileInfo().
 	// This requires shell32.dll v4.0 or later.

@@ -55,14 +55,14 @@ class FindCdromWin32 : public FindCdromBase
 		 * Check if this backend supports OS-specific disc/drive icons.
 		 * @return True if OS-specific disc/drive icons are supported; false if not.
 		 */
-		bool isIconSupported(void) const final;
+		bool isDriveIconSupported(void) const final;
 
 		/**
 		 * Get the OS-specific disc/drive icon.
 		 * @param deviceName Device name.
 		 * @return OS-specific disc/drive icon.
 		 */
-		QIcon getIcon(QString deviceName) const final;
+		QIcon getDriveIcon(QString deviceName) const final;
 };
 
 }

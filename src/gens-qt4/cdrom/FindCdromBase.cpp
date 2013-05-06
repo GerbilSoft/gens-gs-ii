@@ -35,7 +35,7 @@ FindCdromBase::~FindCdromBase()
  * Check if this backend supports OS-specific disc/drive icons.
  * @return True if OS-specific disc/drive icons are supported; false if not.
  */
-bool FindCdromBase::isIconSupported(void) const
+bool FindCdromBase::isDriveIconSupported(void) const
 {
 	// By default, backends do not support OS-specific disc/drive icons.
 	return false;
@@ -46,7 +46,7 @@ bool FindCdromBase::isIconSupported(void) const
  * @param deviceName Device name.
  * @return OS-specific disc/drive icon.
  */
-QIcon FindCdromBase::getIcon(QString deviceName) const
+QIcon FindCdromBase::getDriveIcon(QString deviceName) const
 {
 	// By default, backends do not support OS-specific disc/drive icons.
 	return QIcon();
