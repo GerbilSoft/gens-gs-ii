@@ -34,6 +34,10 @@ class FindCdromWin32 : public FindCdromBase
 	public:
 		FindCdromWin32(QObject *parent = 0);
 
+	private:
+		Q_DISABLE_COPY(FindCdromWin32);
+
+	public:
 		/**
 		 * Determine if this CD-ROM backend is usable.
 		 * @return True if this CD-ROM backend is usable; false if not.
@@ -46,6 +50,19 @@ class FindCdromWin32 : public FindCdromBase
 		 * @return QStringList with all detected CD-ROM device names.
 		 */
 		QStringList scanDeviceNames(void) final;
+
+		/**
+		 * Check if this backend supports OS-specific disc/drive icons.
+		 * @return True if OS-specific disc/drive icons are supported; false if not.
+		 */
+		bool isIconSupported(void) const final;
+
+		/**
+		 * Get the OS-specific disc/drive icon.
+		 * @param deviceName Device name.
+		 * @return OS-specific disc/drive icon.
+		 */
+		QIcon getIcon(QString deviceName) const final;
 };
 
 }

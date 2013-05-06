@@ -51,6 +51,75 @@ static const GUID Gens_IID_IImageList = {0x46EB5926, 0x582E, 0x4017, {0x9F, 0xDF
 namespace GensQt4
 {
 
+class FindCdromWin32Private
+{
+	private:
+		FindCdromWin32Private() { }
+		~FindCdromWin32Private() { }
+		Q_DISABLE_COPY(FindCdromWin32Private);
+
+	public:
+		static HICON GetShilIcon(int iIcon, int iImageList);
+};
+
+/************************************
+ * FindCdromWin32Private functions. *
+ ************************************/
+
+/**
+ * Get an icon from the shell image list.
+ * Requires Windows XP or later.
+ * @param iIcon Index in the shell image list.
+ * @param iImageList Image list index. (default == SHIL_LARGE == 0)
+ * @return Icon from shell image list, or NULL on error.
+ */
+HICON FindCdromWin32Private::GetShilIcon(int iIcon, int iImageList)
+{
+	// Open shell32.dll.
+	HINSTANCE hShell32 = LoadLibraryA("shell32.dll");
+	if (!hShell32)
+		return NULL;
+
+	// Attempt to get the process address for shell32.dll::SHGetImageList().
+	MAKE_FUNCPTR(SHGetImageList);
+	pSHGetImageList = (typeof(pSHGetImageList))GetProcAddress(hShell32, "SHGetImageList");
+	if (!pSHGetImageList) {
+		// SHGetImageList() not found.
+		FreeLibrary(hShell32);
+		return NULL;
+	}
+
+	// SHGetImageList() found.
+	// Get the image list.
+	// NOTE: mingw64-runtime 2010/10/03 does not have IID_IImageList in libuuid.
+	IImageList *imgl;
+	HRESULT hr = pSHGetImageList(iImageList, Gens_IID_IImageList, (void**)&imgl);
+	if (FAILED(hr)) {
+		// Failed to retrieve the image list.
+		FreeLibrary(hShell32);
+		return NULL;
+	}
+
+	// Image list obtained.
+	// Get the requested icon.
+	HICON hIcon;
+	hr = imgl->GetIcon(iIcon, ILS_NORMAL, &hIcon);
+	if (FAILED(hr)) {
+		// Failed to retrieve the icon.
+		FreeLibrary(hShell32);
+		return NULL;
+	}
+
+	// Icon retrieved.
+	FreeLibrary(hShell32);
+	return hIcon;
+}
+
+
+/*****************************
+ * FindCdromWin32 functions. *
+ *****************************/
+
 FindCdromWin32::FindCdromWin32(QObject *parent)
 	: FindCdromBase(parent)
 { }
@@ -88,47 +157,52 @@ QStringList FindCdromWin32::scanDeviceNames(void)
 }
 
 
-#if 0
 /**
- * getDriveIcon(): Get the icon for a given CdromDriveEntry.
- * If a disc type is set, gets the disc icon.
- * Otherwise, gets the drive icon.
- * @param drive CdromDriveEntry.
- * @return Icon for either the drive or the disc.
+ * Check if this backend supports OS-specific disc/drive icons.
+ * @return True if OS-specific disc/drive icons are supported; false if not.
  */
-QIcon FindCdromWin32::getDriveIcon(const CdromDriveEntry& drive)
+bool FindCdromWin32::isIconSupported(void) const
+{
+	// Win32 supports custom disc icons via AUTORUN.INF.
+	return true;
+}
+
+
+/**
+ * Get the OS-specific disc/drive icon.
+ * @param deviceName Device name.
+ * @return OS-specific disc/drive icon.
+ */
+QIcon FindCdromWin32::getIcon(QString deviceName) const
 {
 	// Get the icon using SHGetFileInfo().
 	// This requires shell32.dll v4.0 or later.
 	// TODO: Check shell32.dll version first!
 	QIcon ret_icon;
-	
+
 	SHFILEINFOA sfi;
 	memset(&sfi, 0x00, sizeof(sfi));
-	
+
 	// Get the icon information.
-	HRESULT hr = SHGetFileInfoA(drive.path.toLocal8Bit().constData(),
+	HRESULT hr = SHGetFileInfoA(deviceName.toLocal8Bit().constData(),
 					0, &sfi, sizeof(sfi),
 					SHGFI_ICON | SHGFI_LARGEICON);
 	if (FAILED(hr))
 		return QIcon();
-	
+
 	// Icon information retrieved.
-	
+
 	// Attempt to get the SHIL_EXTRALARGE ImageList from the shell.
-	HICON hIcon = getShilIcon(sfi.iIcon, SHIL_EXTRALARGE);
-	if (!hIcon)
-	{
-		// getShilIcon() isn't usable.
+	HICON hIcon = FindCdromWin32Private::GetShilIcon(sfi.iIcon, SHIL_EXTRALARGE);
+	if (!hIcon) {
+		// FindCdromWin32Private::GetShilIcon() isn't usable.
 		hIcon = sfi.hIcon;
-	}
-	else
-	{
+	} else {
 		// getShilIcon() is usable.
 		// Delete the icon retrieved by SHGetFileInfoA().
 		DestroyIcon(sfi.hIcon);
 	}
-	
+
 	// Convert the HICON to a QIcon.
 #if QT_VERSION >= 0x040600
 	// QPixmap::fromWinHICON() was added in Qt 4.6.
@@ -137,16 +211,14 @@ QIcon FindCdromWin32::getDriveIcon(const CdromDriveEntry& drive)
 	// Convert the HICON to a QIcon.
 	// http://lists.trolltech.com/qt-interest/2007-07/thread00170-0.html
 	ICONINFO info;
-	if (!GetIconInfo(hIcon, &info))
-	{
+	if (!GetIconInfo(hIcon, &info)) {
 		DestroyIcon(hIcon);
 		return QIcon();
 	}
 	QPixmap pxm_icon = QPixmap::fromWinHBITMAP(info.hbmColor, QPixmap::Alpha);
 #endif
-	
-	if (pxm_icon.width() != 64 || pxm_icon.height() != 64)
-	{
+
+	if (pxm_icon.width() != 64 || pxm_icon.height() != 64) {
 		// Pixmap is not 64x64.
 		// TODO: Does Qt::KeepAspectRatio result in a centered image
 		// on a 64x64 pixmap, or will it result in a smaller pixmap?
@@ -155,68 +227,14 @@ QIcon FindCdromWin32::getDriveIcon(const CdromDriveEntry& drive)
 		// Maybe I should copy the function from Qt 4.6's source code?
 		pxm_icon = pxm_icon.scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 	}
-	
+
 	// Convert the QPixmap to a QIcon.
 	ret_icon = QIcon(pxm_icon);
-	
+
 	// Delete the retrieved icon.
 	DestroyIcon(hIcon);
-	
+
 	return ret_icon;
 }
-
-
-/**
- * getShilIcon(): Get an icon from the shell image list.
- * Requires Windows XP or later.
- * @param iIcon Index in the shell image list.
- * @param iImageList Image list index. (default == SHIL_LARGE == 0)
- * @return Icon from shell image list, or NULL on error.
- */
-HICON FindCdromWin32::getShilIcon(int iIcon, int iImageList)
-{
-	// Open shell32.dll.
-	HINSTANCE hShell32 = LoadLibraryA("shell32.dll");
-	if (!hShell32)
-		return NULL;
-	
-	// Attempt to get the process address for shell32.dll::SHGetImageList().
-	MAKE_FUNCPTR(SHGetImageList);
-	pSHGetImageList = (typeof(pSHGetImageList))GetProcAddress(hShell32, "SHGetImageList");
-	if (!pSHGetImageList)
-	{
-		// SHGetImageList() not found.
-		FreeLibrary(hShell32);
-		return NULL;
-	}
-	
-	// SHGetImageList() found.
-	// Get the image list.
-	// NOTE: mingw64-runtime 2010/10/03 does not have IID_IImageList in libuuid.
-	IImageList *imgl;
-	HRESULT hr = pSHGetImageList(iImageList, Gens_IID_IImageList, (void**)&imgl);
-	if (FAILED(hr))
-	{
-		// Failed to retrieve the image list.
-		FreeLibrary(hShell32);
-		return NULL;
-	}
-	
-	// Image list obtained.
-	// Get the requested icon.
-	HICON hIcon;
-	hr = imgl->GetIcon(iIcon, ILS_NORMAL, &hIcon);
-	if (FAILED(hr))
-	{
-		// Failed to retrieve the icon.
-		FreeLibrary(hShell32);
-		return NULL;
-	}
-	
-	// Icon retrieved.
-	FreeLibrary(hShell32);
-	return hIcon;
-}
-#endif
 
 }
