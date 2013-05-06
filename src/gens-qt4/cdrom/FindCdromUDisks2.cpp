@@ -76,10 +76,9 @@ FindCdromUDisks2Private::FindCdromUDisks2Private(FindCdromUDisks2 *q)
 	QDBusConnection bus = QDBusConnection::systemBus();
 	OrgFreedesktopUDisks2ManagerInterface *ifUDisks2Mgr;
 	ifUDisks2Mgr = new OrgFreedesktopUDisks2ManagerInterface(
-					QLatin1String("org.freedesktop.UDisks2.Manager"),
+					QLatin1String("org.freedesktop.UDisks2"),
 					QLatin1String("/org/freedesktop/UDisks2/Manager"),
 					bus, q);
-
 	if (!ifUDisks2Mgr->isValid()) {
 		// Error connecting to the UDisks2 Manager.
 		delete ifUDisks2Mgr;
@@ -169,60 +168,87 @@ QStringList FindCdromUDisks2::scanDeviceNames(void)
 	if (!isUsable())
 		return QStringList();
 
-	// TODO: Scan UDisks2's object manager list.
-	return QStringList();
-
-#if 0
-	// NOTE: QDBusConnection is not thread-safe.
-	// See http://bugreports.qt.nokia.com/browse/QTBUG-11413
-	
-	// Attempt to get all disk devices.
-	// Method: EnumerateDevices
-	// Return type: ao (QList<QDBusObjectPath>)
-	QDBusReply<QList<QDBusObjectPath> > reply_EnumerateDevices = d->ifUDisks->EnumerateDevices();
-	if (!reply_EnumerateDevices.isValid()) {
-		LOG_MSG(cd, LOG_MSG_LEVEL_ERROR,
-			"FindCdromUDisks2: EnumerateDevices failed: %s",
-			d->ifUDisks->lastError().message().toLocal8Bit().constData());
-		
-		// TODO: Emit an error signal instead?
-		//emit driveQueryFinished();
-		//return -2;
+	// Get a list of all objects managed by UDisks2.
+	QDBusConnection bus = QDBusConnection::systemBus();
+	QDBusPendingReply<DBusManagerStruct> reply = d->ifObjMgr->GetManagedObjects();
+	reply.waitForFinished();
+	if (!reply.isValid())
 		return QStringList();
+
+	DBusManagerStruct dbus_mgr = reply.value();
+	QStringList cdromDeviceNames;
+
+	// Search for objects that have a "org.freedesktop.UDisks2.Block" interface.
+	// NOTE: "org.freedesktop.UDisks2.Drive" does not have the device name.
+	// "org.freedesktop.UDisks2.Block" has a "device" property.
+	const QString udisks2_block_interface = QLatin1String("org.freedesktop.UDisks2.Block");
+	QList<QDBusObjectPath> block_devices;
+	foreach (QDBusObjectPath obj_path, dbus_mgr.keys()) {
+		QVariantMapMap vmm_ifs = dbus_mgr.value(obj_path);
+		if (vmm_ifs.contains(udisks2_block_interface))
+			block_devices.append(obj_path);
 	}
 
-	// Received disk devices.
-	// Determine which ones are CD-ROM drives.
-	const QList<QDBusObjectPath>& disks = reply_EnumerateDevices.value();
-	QStringList cdromDeviceNames;
-	QDBusConnection bus = QDBusConnection::systemBus();
-	foreach (const QDBusObjectPath& cur_disk, disks) {
-		auto_ptr<OrgFreedesktopUDisksDeviceInterface> drive_if(
-			new OrgFreedesktopUDisksDeviceInterface(
-				QLatin1String("org.freedesktop.UDisks"),
-				cur_disk.path(), bus));
-		if (!drive_if->isValid()) {
-			// Drive interface is invalid.
-			LOG_MSG(cd, LOG_MSG_LEVEL_ERROR,
-				"FindCdromUDisks: Error attaching interface %s: %s",
-				cur_disk.path().toLocal8Bit().constData(),
-				drive_if->lastError().message().toLocal8Bit().constData());
+	// Get the drive interfaces for each block device.
+	// Key: "org.freedesktop.UDisks2.Drive" object path.
+	// Value: Device name.
+	QMap<QDBusObjectPath, QString> device_paths;
+
+	foreach (QDBusObjectPath obj_path, block_devices) {
+		QScopedPointer<OrgFreedesktopUDisks2BlockInterface> ifBlock(
+			new OrgFreedesktopUDisks2BlockInterface(
+						QLatin1String("org.freedesktop.UDisks2"),
+						obj_path.path(),
+						bus, this));
+		if (!ifBlock->isValid()) {
+			// Block device is invalid.
 			continue;
 		}
 
-		// Verify that this drive is a CD-ROM drive.
-		if (drive_if->deviceIsRemovable() &&
-		    drive_if->deviceIsOpticalDisc())
-		{
-			// This is a CD-ROM drive.
-			cdromDeviceNames.append(drive_if->deviceFile());
+		// Ignore "partitionable" devices.
+		// CD-ROM drives aren't partitionable.
+		if (ifBlock->hintPartitionable())
+			continue;
+
+		// Get the device filename and object path.
+		QString dev_filename = QString::fromLocal8Bit(ifBlock->device().constData());
+		QDBusObjectPath dev_path = ifBlock->drive();
+		device_paths.insert(dev_path, dev_filename);
+	}
+
+	// Check the drive interfaces.
+	foreach (QDBusObjectPath obj_path, device_paths.keys()) {
+		QScopedPointer<OrgFreedesktopUDisks2DriveInterface> ifDrive(
+			new OrgFreedesktopUDisks2DriveInterface(
+						QLatin1String("org.freedesktop.UDisks2"),
+						obj_path.path(),
+						bus, this));
+
+		printf("checking %s\n", obj_path.path().toUtf8().constData());
+		if (!ifDrive->isValid()) {
+			// Drive is invalid.
+			continue;
+		}
+
+		// Make sure this is a removable drive.
+		// NOTE: ifDrive->optical() only returns true if a
+		// disc is inserted. Empty drives will return false.
+		if (ifDrive->mediaRemovable()) {
+			// Check if "optical_cd" is in the list of supported media.
+			QStringList mediaCompatibility = ifDrive->mediaCompatibility();
+			const QString optical_cd = QLatin1String("optical_cd");
+			foreach (QString discTypeId, mediaCompatibility) {
+				if (discTypeId == optical_cd) {
+					// Found "optical_cd".
+					cdromDeviceNames.append(device_paths.value(obj_path));
+					break;
+				}
+			}
 		}
 	}
-	
-	// Devices queried.
-	//emit driveQueryFinished();
+
+	// TODO: Add signal handlers for property changes.
 	return cdromDeviceNames;
-#endif
 }
 
 
