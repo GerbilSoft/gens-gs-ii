@@ -37,9 +37,12 @@ using std::auto_ptr;
 #include <QtDBus/QDBusMessage>
 #include <QtDBus/QDBusReply>
 
-// UDisks interfaces.
-#include "udisksinterface.h"
-#include "deviceinterface.h"
+// QtDBus metatypes.
+#include "dbus/DBusMetatypes.hpp"
+
+// UDisks2 interfaces.
+#include "udisks2interface.h"
+#include "objectmanagerinterface.h"
 
 // LOG_MSG() subsystem.
 #include "libgens/macros/log_msg.h"
@@ -51,19 +54,26 @@ class FindCdromUDisks2Private
 {
 	public:
 		FindCdromUDisks2Private(FindCdromUDisks2 *q);
+		~FindCdromUDisks2Private();
 
 	private:
 		FindCdromUDisks2 *const q;
 		Q_DISABLE_COPY(FindCdromUDisks2Private)
 
 	public:
-		// D-BUS interface to UDisks.
-		OrgFreedesktopUDisksInterface *ifUDisks;
+		// D-BUS interface to UDisks2's ObjectManager.
+		OrgFreedesktopDBusObjectManagerInterface *ifObjMgr;
 };
 
 FindCdromUDisks2Private::FindCdromUDisks2Private(FindCdromUDisks2 *q)
 	: q(q)
+	, ifObjMgr(nullptr)
 { }
+
+FindCdromUDisks2Private::~FindCdromUDisks2Private()
+{
+	delete ifObjMgr;
+}
 
 
 /** FindCdromUDisks **/
@@ -73,29 +83,45 @@ FindCdromUDisks2::FindCdromUDisks2(QObject *parent)
 	: FindCdromBase(parent)
 	, d(new FindCdromUDisks2Private(this))
 {
-	// Connect to UDisks2 over D-BUS.
+	// Connect to the UDisks2 Object Manager over D-BUS.
 	QDBusConnection bus = QDBusConnection::systemBus();
-	d->ifUDisks = new OrgFreedesktopUDisksInterface(
-					QLatin1String("org.freedesktop.UDisks"),
-					QLatin1String("/org/freedesktop/UDisks"),
+	d->ifObjMgr = new OrgFreedesktopDBusObjectManagerInterface(
+					QLatin1String("org.freedesktop.DBus.ObjectManager"),
+					QLatin1String("/org/freedesktop/UDisks2"),
 					bus, this);
-	if (!d->ifUDisks->isValid()) {
-		// Error connecting to D-BUS.
-		delete d->ifUDisks;
-		d->ifUDisks = NULL;
+	if (!d->ifObjMgr->isValid()) {
+		// Error connecting to the UDisks2 Object Manager.
+		printf("Manager ERR\n");
+		delete d->ifObjMgr;
 		return;
 	}
+
+#if 0
+	// Connect to UDisks2 over D-BUS.
+	QDBusConnection bus = QDBusConnection::systemBus();
+	d->ifUDisks2 = new OrgFreedesktopUDisks2Interface(
+					QLatin1String("org.freedesktop.UDisks2"),
+					QLatin1String("/org/freedesktop/UDisks2"),
+					bus, this);
+	if (!d->ifUDisks2->isValid()) {
+		// Error connecting to D-BUS.
+		delete d->ifUDisks2;
+		d->ifUDisks2 = nullptr;
+		return;
+	}
+	
 
 	// Run a simple query.
 	// If the returned string is empty, UDisks2 isn't working.
 	// Otherwise, UDisks2 is working.
-	QString daemonVersion = d->ifUDisks->daemonVersion();
+	QString daemonVersion = d->ifUDisks2->daemonVersion();
 	if (d->ifUDisks->lastError().isValid() || daemonVersion.isEmpty()) {
 		// UDisks is not available.
 		delete d->ifUDisks;
 		d->ifUDisks = NULL;
 		return;
 	}
+#endif
 
 	// TODO: Notification signals for LibGensCD.
 #if 0
@@ -120,7 +146,7 @@ FindCdromUDisks2::~FindCdromUDisks2()
 	{ delete d; }
 
 bool FindCdromUDisks2::isUsable(void) const
-	{ return (d->ifUDisks != nullptr); }
+	{ return (d->ifObjMgr != nullptr); }
 
 
 /**
@@ -131,7 +157,10 @@ QStringList FindCdromUDisks2::scanDeviceNames(void)
 {
 	if (!isUsable())
 		return QStringList();
-	
+
+	return QStringList();
+
+#if 0
 	// NOTE: QDBusConnection is not thread-safe.
 	// See http://bugreports.qt.nokia.com/browse/QTBUG-11413
 	
@@ -181,6 +210,7 @@ QStringList FindCdromUDisks2::scanDeviceNames(void)
 	// Devices queried.
 	//emit driveQueryFinished();
 	return cdromDeviceNames;
+#endif
 }
 
 

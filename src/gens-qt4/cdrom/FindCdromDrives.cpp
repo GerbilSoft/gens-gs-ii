@@ -141,7 +141,7 @@ FindCdromDrivesPrivate::FindCdromDrivesPrivate(FindCdromDrives *q)
 	if (!findCdromBase) {
 #if defined(Q_OS_UNIX)
 		// UNIX fallback.
-		findCdromBase = new FindCdromUnix(q);
+		//findCdromBase = new FindCdromUnix(q);
 #endif
 	}
 

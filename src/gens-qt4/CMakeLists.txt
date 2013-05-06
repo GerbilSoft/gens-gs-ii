@@ -236,7 +236,15 @@ IF(QT_QTDBUS_FOUND)
 	# *not* ${CMAKE_CURRENT_BINARY_DIR}/cdrom/dbus/.
 	INCLUDE(QtDBusInterfaceNoNS)
 	QT4_ADD_DBUS_INTERFACES_NONS(
-		gens-qt4-DBUS_SRCS
+		gens-qt4-UDISKS2_DBUS_SRCS
+		INCLUDE cdrom/dbus/DBusMetatypes.hpp
+		cdrom/dbus/org.freedesktop.UDisks2.xml
+		cdrom/dbus/org.freedesktop.DBus.ObjectManager.xml
+		cdrom/dbus/org.freedesktop.DBus.Properties.xml
+		)
+	QT4_ADD_DBUS_INTERFACES_NONS(
+		gens-qt4-UDISKS_DBUS_SRCS
+		INCLUDE cdrom/dbus/DBusMetatypes.hpp
 		cdrom/dbus/org.freedesktop.UDisks.xml
 		cdrom/dbus/org.freedesktop.UDisks.Device.xml
 		)
@@ -245,7 +253,8 @@ IF(QT_QTDBUS_FOUND)
 		${gens-qt4_SRCS}
 		${gens-qt4_CDROM_UDISKS2_SRCS}
 		${gens-qt4_CDROM_UDISKS_SRCS}
-		${gens-qt4-DBUS_SRCS}
+		${gens-qt4-UDISKS2_DBUS_SRCS}
+		${gens-qt4-UDISKS_DBUS_SRCS}
 		)
 	SET(gens-qt4_MOC_HEADERS
 		${gens-qt4_MOC_HEADERS}
