@@ -433,9 +433,13 @@ QIcon FindCdromDrives::getDriveIcon(LibGensCD::CdDrive *cdDrive)
 	if (!cdDrive)
 		return QIcon();
 
-	// TODO: Check if the OS-specific device handler has an icon function.
-	// This will be used for e.g. Windows, which has a specification for
-	// setting disc icons via AUTORUN.INF.
+	// Check if the backend has an OS-specific disc/drive icon function.
+	if (d->findCdromBase->isDriveIconSupported()) {
+		// OS-specific disc/drive icon function is present.
+		QIcon icon = d->findCdromBase->getDriveIcon(QString::fromUtf8(cdDrive->filename().c_str()));
+		if (!icon.isNull())
+			return icon;
+	}
 
 	if (cdDrive->isDiscPresent()) {
 		// Disc is present.
