@@ -54,6 +54,7 @@ class CdDrive
 	public:
 		bool isOpen(void) const;
 		void close(void);
+		std::string filename(void) const;
 
 		std::string dev_vendor(void);
 		std::string dev_model(void);

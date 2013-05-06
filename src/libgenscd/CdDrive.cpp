@@ -700,6 +700,11 @@ void CdDrive::close(void)
 	d->p_scsi->close();
 }
 
+std::string CdDrive::filename(void) const
+{
+	return d->filename;
+}
+
 std::string CdDrive::dev_vendor(void)
 {
 	if (!d->isInquirySuccessful())
