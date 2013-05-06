@@ -51,6 +51,7 @@ class FindCdromUDisksPrivate
 {
 	public:
 		FindCdromUDisksPrivate(FindCdromUDisks *q);
+		~FindCdromUDisksPrivate();
 
 	private:
 		FindCdromUDisks *const q;
@@ -63,7 +64,13 @@ class FindCdromUDisksPrivate
 
 FindCdromUDisksPrivate::FindCdromUDisksPrivate(FindCdromUDisks *q)
 	: q(q)
+	, ifUDisks(nullptr)
 { }
+
+FindCdromUDisksPrivate::~FindCdromUDisksPrivate()
+{
+	delete ifUDisks;
+}
 
 
 /** FindCdromUDisks **/
@@ -118,6 +125,7 @@ FindCdromUDisks::FindCdromUDisks(QObject *parent)
 
 FindCdromUDisks::~FindCdromUDisks()
 	{ delete d; }
+
 
 bool FindCdromUDisks::isUsable(void) const
 	{ return (d->ifUDisks != nullptr); }
