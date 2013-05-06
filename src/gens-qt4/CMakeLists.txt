@@ -221,13 +221,12 @@ SET(gens-qt4_CDROM_UDISKS_MOC_HEADERS cdrom/FindCdromUDisks.hpp)
 SET(gens-qt4_CDROM_UNIX_SRCS cdrom/FindCdromUnix.cpp)
 SET(gens-qt4_CDROM_UNIX_MOC_HEADERS cdrom/FindCdromUnix.hpp)
 
-#SET(gens-qt4_CDROM_WIN32_SRCS
-#	cdrom/FindCdromWin32.cpp
-#	cdrom/Spti.cpp
-#	)
-#SET(gens-qt4_CDROM_WIN32_MOC_HEADERS
-#	cdrom/FindCdromWin32.hpp
-#	)
+SET(gens-qt4_CDROM_WIN32_SRCS
+	cdrom/FindCdromWin32.cpp
+	)
+SET(gens-qt4_CDROM_WIN32_MOC_HEADERS
+	cdrom/FindCdromWin32.hpp
+	)
 
 IF(QT_QTDBUS_FOUND)
 	# QtDBus found.

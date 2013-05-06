@@ -1,8 +1,8 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * FindCdromWin32.hpp: Find CD-ROM drives using Win32 API.                 *
+ * FindCdromWin32.hpp: Find CD-ROM drives: Win32 version.                  *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2013 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -22,64 +22,30 @@
 #ifndef __GENS_QT4_CDROM_FINDCDROMWIN32_HPP__
 #define __GENS_QT4_CDROM_FINDCDROMWIN32_HPP__
 
-#include "FindCdrom.hpp"
-
-// Qt includes.
-#include <QtGui/QIcon>
-
-// Win32 includes.
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
+#include "FindCdromBase.hpp"
 
 namespace GensQt4
 {
 
-class FindCdromWin32 : public FindCdrom
+class FindCdromWin32 : public FindCdromBase
 {
 	Q_OBJECT
 	
 	public:
+		FindCdromWin32(QObject *parent = 0);
+
 		/**
-		 * isUsable(): Determine if this CD-ROM backend is usable.
+		 * Determine if this CD-ROM backend is usable.
 		 * @return True if this CD-ROM backend is usable; false if not.
 		 */
-		bool isUsable(void) const
+		bool isUsable(void) const final
 			{ return true; }
-		
-		/**
-		 * getDriveIcon(): Get the icon for a given CdromDriveEntry.
-		 * @param drive CdromDriveEntry.
-		 * @return Icon for either the drive or the disc.
-		 */
-		QIcon getDriveIcon(const CdromDriveEntry& drive);
 	
-	protected:
 		/**
-		 * query_int(): Asynchronously query for CD-ROM drives. (INTERNAL FUNCTION)
-		 * The driveUpdated() signal will be emitted once for each detected drive.
-		 * @return 0 on success; non-zero on error.
+		 * Scan the system for CD-ROM devices.
+		 * @return QStringList with all detected CD-ROM device names.
 		 */
-		int query_int(void);
-	
-	private:
-		/**
-		 * GetVolumeLabel(): Get the volume label of the specified drive.
-		 * @param drive_letter Drive letter.
-		 * @return Volume label, or empty string on error.
-		 */
-		static QString GetVolumeLabel(char drive_letter);
-		
-		/**
-		 * getShilIcon(): Get an icon from the shell image list.
-		 * Requires Windows XP or later.
-		 * @param iIcon Index in the shell image list.
-		 * @param iImageList Image list index. (default == SHIL_LARGE == 0)
-		 * @return Icon from shell image list, or NULL on error.
-		 */
-		HICON getShilIcon(int iIcon, int iImageList = 0);
+		QStringList scanDeviceNames(void) final;
 };
 
 }

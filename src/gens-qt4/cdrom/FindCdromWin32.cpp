@@ -1,8 +1,8 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * FindCdromWin32.cpp: Find CD-ROM drives using Win32 API.                 *
+ * FindCdromWin32.cpp: Find CD-ROM drives: Win32 version.                  *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2013 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -25,6 +25,12 @@
 #include <stdio.h>
 
 // Win32 includes.
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+
 // Common Controls 6 is required for SHGetImageList().
 #if !defined(_WIN32_IE) || _WIN32_IE < 0x0600
 #undef _WIN32_IE
@@ -41,124 +47,48 @@ static const GUID Gens_IID_IImageList = {0x46EB5926, 0x582E, 0x4017, {0x9F, 0xDF
 #define MAKE_FUNCPTR(f) typeof(f) * p##f
 #endif
 
-// SPTI handler.
-#include "Spti.hpp"
-
 
 namespace GensQt4
 {
 
-/**
- * GetVolumeLabel(): Get the volume label of the specified drive.
- * @param drive_letter Drive letter.
- * @return Volume label, or empty string on error.
- */
-QString FindCdromWin32::GetVolumeLabel(char drive_letter)
-{
-	// TODO: ANSI version.
-	// TODO: Long volume labels on Joliet/UDF CDs are truncated...
-	wchar_t fsNameBuf[MAX_PATH+1];
-	wchar_t drive_path[4] = {0, L':', L'\\', 0};
-	drive_path[0] = drive_letter;
-	
-	int ret = GetVolumeInformationW(drive_path, fsNameBuf, sizeof(fsNameBuf),
-					NULL, NULL, NULL, NULL, 0);
-	if (!ret)
-		return QString();
-	
-	return QString::fromWCharArray(fsNameBuf);
-}
-
+FindCdromWin32::FindCdromWin32(QObject *parent)
+	: FindCdromBase(parent)
+{ }
 
 /**
- * query_int(): Asynchronously query for CD-ROM drives. (INTERNAL FUNCTION)
- * The driveUpdated() signal will be emitted once for each detected drive.
- * @return 0 on success; non-zero on error.
+ * Scan the system for CD-ROM devices.
+ * @return QStringList with all detected CD-ROM device names.
  */
-int FindCdromWin32::query_int(void)
+QStringList FindCdromWin32::scanDeviceNames(void)
 {
-	// Find all CD-ROM devices.
-	// TODO: Make a base class and return standard values.
-	
 	// TODO: We're using GetLogicalDrives() to get drive letters.
 	// There's probably a better way to get optical drive information,
 	// e.g. via WMI, but this is the most compatible.
 	DWORD logical_drives = GetLogicalDrives();
 	if (!logical_drives)
-		return 0;
-	
+		return QStringList();
+
+	// List of CD-ROM device names.
+	QStringList cdromDeviceNames;
+
 	// Go through the 26 drive letters and find CD-ROM drives.
 	// TODO: Get special information like supported disc types.
 	char drive_path[4] = {0, ':', '\\', 0};
 	unsigned int drive_type;
-	for (int i = 0; i < 26; i++)
-	{
+	for (int i = 0; i < 26; i++) {
 		drive_path[0] = 'A' + i;
 		drive_type = GetDriveTypeA(drive_path);
-		if (drive_type != DRIVE_CDROM)
-			continue;
-		
-		// This is a CD-ROM drive.
-		// Construct the CdromDriveEntry.
-		CdromDriveEntry drive;
-		drive.discs_supported = 0;		// TODO
-		drive.drive_type = DRIVE_TYPE_CDROM;	// TODO
-		drive.disc_type = DISC_TYPE_CDROM;	// TODO
-		drive.disc_blank = false;		// TODO
-		
-		// Save the drive path.
-		drive.path = QLatin1String(drive_path);
-		
-		// Get the disc label.
-		drive.disc_label = GetVolumeLabel(drive_path[0]);
-		
-		// Open the drive using SPTI.
-		Spti drive_spti(drive_path[0]);
-		if (drive_spti.isOpen())
-		{
-			// Drive opened for SPTI.
-			// Do a drive inquiry.
-			if (!drive_spti.scsiInquiry())
-			{
-				// Drive inquiry successful.
-				// Get the information.
-				drive.drive_vendor   = QLatin1String(drive_spti.inqVendor());
-				drive.drive_model    = QLatin1String(drive_spti.inqModel());
-				drive.drive_firmware = QLatin1String(drive_spti.inqFirmware());
-			}
-			
-			// Check if a disc is inserted.
-			if (drive_spti.isMediumPresent())
-				drive.disc_type = DISC_TYPE_CDROM;
-			else
-				drive.disc_type = DISC_TYPE_NONE;
+		if (drive_type == DRIVE_CDROM) {
+			// Found a CD-ROM drive.
+			cdromDeviceNames.append(QLatin1String(drive_path));
 		}
-		
-		// Close the drive handle.
-		drive_spti.close();
-		
-		// TODO: Get optical disc type and drive type information.
-		drive.disc_blank = false;
-		
-		// If the disc is blank, set the disc label to "Blank [disc_type]".
-		// TODO: Make this a common FindCdromBase function?
-		if (drive.disc_type != DISC_TYPE_NONE && drive.disc_blank)
-			drive.disc_label = tr("Blank %1").arg(GetDiscTypeName(drive.disc_type));
-		
-		// Emit the driveUpdated() signal for this drive.
-		emit driveUpdated(drive);
-		
-		// Print drive information.
-		fprintf(stderr, "Drive: %s - drive is type %d, disc is 0x%08X\n",
-		       drive.path.toLocal8Bit().constData(), (int)drive.drive_type, drive.disc_type);
 	}
 	
-	// Devices queried.
-	emit driveQueryFinished();
-	return 0;
+	return cdromDeviceNames;
 }
 
 
+#if 0
 /**
  * getDriveIcon(): Get the icon for a given CdromDriveEntry.
  * If a disc type is set, gets the disc icon.
@@ -287,5 +217,6 @@ HICON FindCdromWin32::getShilIcon(int iIcon, int iImageList)
 	FreeLibrary(hShell32);
 	return hIcon;
 }
+#endif
 
 }
