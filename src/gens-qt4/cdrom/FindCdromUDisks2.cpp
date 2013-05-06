@@ -224,7 +224,6 @@ QStringList FindCdromUDisks2::scanDeviceNames(void)
 						obj_path.path(),
 						bus, this));
 
-		printf("checking %s\n", obj_path.path().toUtf8().constData());
 		if (!ifDrive->isValid()) {
 			// Drive is invalid.
 			continue;
