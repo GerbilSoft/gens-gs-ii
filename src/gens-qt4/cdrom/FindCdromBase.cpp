@@ -31,4 +31,25 @@ FindCdromBase::FindCdromBase(QObject *parent)
 FindCdromBase::~FindCdromBase()
 { }
 
+/**
+ * Check if this backend supports OS-specific disc/drive icons.
+ * @return True if OS-specific disc/drive icons are supported; false if not.
+ */
+bool FindCdromBase::isIconSupported(void) const
+{
+	// By default, backends do not support OS-specific disc/drive icons.
+	return false;
+}
+
+/**
+ * Get the OS-specific disc/drive icon.
+ * @param deviceName Device name.
+ * @return OS-specific disc/drive icon.
+ */
+QIcon FindCdromBase::getIcon(QString deviceName) const
+{
+	// By default, backends do not support OS-specific disc/drive icons.
+	return QIcon();
+}
+
 }

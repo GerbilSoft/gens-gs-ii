@@ -25,6 +25,7 @@
 // Qt includes.
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
+#include <QtGui/QIcon>
 
 namespace GensQt4
 {
@@ -48,6 +49,19 @@ class FindCdromBase : public QObject
 		 * @return QStringList with all detected CD-ROM device names.
 		 */
 		virtual QStringList scanDeviceNames(void) = 0;
+
+		/**
+		 * Check if this backend supports OS-specific disc/drive icons.
+		 * @return True if OS-specific disc/drive icons are supported; false if not.
+		 */
+		virtual bool isIconSupported(void) const;
+
+		/**
+		 * Get the OS-specific disc/drive icon.
+		 * @param deviceName Device name.
+		 * @return OS-specific disc/drive icon.
+		 */
+		virtual QIcon getIcon(QString deviceName) const;
 
 	// TODO: Update for FindCdromDrives.
 #if 0
