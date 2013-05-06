@@ -131,7 +131,6 @@ SET(gens-qt4_COMMON_SRCS
 	Config/ConfigDefaults.cpp
 	Config/PathConfig.cpp
 	Config/CtrlConfig.cpp
-	cdrom/FindCdrom.cpp
 	McdControlWindow.cpp
 	widgets/GensZipDirModel.cpp
 	widgets/GensZipDirItem.cpp
@@ -149,6 +148,8 @@ SET(gens-qt4_COMMON_SRCS
 	actions/RecentRomsMenu.cpp
 	widgets/GensColorButton.cpp
 	ConfigHandler.cpp
+	cdrom/FindCdromDrives.cpp
+	cdrom/FindCdromBase.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -172,7 +173,6 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	Config/ConfigStore.hpp
 	Config/PathConfig.hpp
 	Config/CtrlConfig.hpp
-	cdrom/FindCdrom.hpp
 	McdControlWindow.hpp
 	widgets/GensZipDirModel.hpp
 	actions/GensKeyConfig.hpp
@@ -189,6 +189,8 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	actions/RecentRomsMenu.hpp
 	widgets/GensColorButton.hpp
 	ConfigHandler.hpp
+	cdrom/FindCdromDrives.hpp
+	cdrom/FindCdromBase.hpp
 	)
 
 SET(gens-qt4_SRCS ${gens-qt4_COMMON_SRCS})
@@ -210,6 +212,9 @@ QT4_WRAP_UI(gens-qt4_UIS_H ${gens-qt4_UIS})
 # System-specific CD-ROM drive support. #
 #########################################
 
+SET(gens-qt4_CDROM_UDISKS2_SRCS cdrom/FindCdromUDisks2.cpp)
+SET(gens-qt4_CDROM_UDISKS2_MOC_HEADERS cdrom/FindCdromUDisks2.hpp)
+
 SET(gens-qt4_CDROM_UDISKS_SRCS cdrom/FindCdromUDisks.cpp)
 SET(gens-qt4_CDROM_UDISKS_MOC_HEADERS cdrom/FindCdromUDisks.hpp)
 
@@ -218,7 +223,6 @@ SET(gens-qt4_CDROM_UNIX_MOC_HEADERS cdrom/FindCdromUnix.hpp)
 
 SET(gens-qt4_CDROM_WIN32_SRCS
 	cdrom/FindCdromWin32.cpp
-	cdrom/Spti.cpp
 	)
 SET(gens-qt4_CDROM_WIN32_MOC_HEADERS
 	cdrom/FindCdromWin32.hpp
@@ -226,23 +230,34 @@ SET(gens-qt4_CDROM_WIN32_MOC_HEADERS
 
 IF(QT_QTDBUS_FOUND)
 	# QtDBus found.
-	# Enable UDisks support.
+	# Enable UDisks2 support.
 	# NOTE: The D-BUS interfaces are generated in ${CMAKE_CURRENT_BINARY_DIR},
 	# *not* ${CMAKE_CURRENT_BINARY_DIR}/cdrom/dbus/.
 	INCLUDE(QtDBusInterfaceNoNS)
 	QT4_ADD_DBUS_INTERFACES_NONS(
-		gens-qt4-DBUS_SRCS
+		gens-qt4-UDISKS2_DBUS_SRCS
+		INCLUDE cdrom/dbus/DBusMetatypes.hpp
+		cdrom/dbus/org.freedesktop.UDisks2.xml
+		cdrom/dbus/org.freedesktop.DBus.ObjectManager.xml
+		cdrom/dbus/org.freedesktop.DBus.Properties.xml
+		)
+	QT4_ADD_DBUS_INTERFACES_NONS(
+		gens-qt4-UDISKS_DBUS_SRCS
+		INCLUDE cdrom/dbus/DBusMetatypes.hpp
 		cdrom/dbus/org.freedesktop.UDisks.xml
 		cdrom/dbus/org.freedesktop.UDisks.Device.xml
 		)
 	
 	SET(gens-qt4_SRCS
 		${gens-qt4_SRCS}
+		${gens-qt4_CDROM_UDISKS2_SRCS}
 		${gens-qt4_CDROM_UDISKS_SRCS}
-		${gens-qt4-DBUS_SRCS}
+		${gens-qt4-UDISKS2_DBUS_SRCS}
+		${gens-qt4-UDISKS_DBUS_SRCS}
 		)
 	SET(gens-qt4_MOC_HEADERS
 		${gens-qt4_MOC_HEADERS}
+		${gens-qt4_CDROM_UDISKS2_MOC_HEADERS}
 		${gens-qt4_CDROM_UDISKS_MOC_HEADERS}
 		)
 ENDIF(QT_QTDBUS_FOUND)
@@ -352,7 +367,7 @@ ADD_EXECUTABLE(gens-qt4
 	${gens-qt4_UIS_H}
 	${gens-qt4_RCC_O}
 	)
-TARGET_LINK_LIBRARIES(gens-qt4 gens ${ZLIB_LIBRARY})
+TARGET_LINK_LIBRARIES(gens-qt4 gens ${ZLIB_LIBRARY} genscd)
 ADD_DEPENDENCIES(gens-qt4 translations_target)
 
 # Fast QString concatenation.

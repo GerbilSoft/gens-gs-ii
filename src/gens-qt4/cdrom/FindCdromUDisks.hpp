@@ -1,8 +1,8 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * FindCdromUDisks.hpp: Find CD-ROM drives using UDisks.                   *
+ * FindCdromUDisks.hpp: Find CD-ROM drives: UDisks1 version.               *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2013 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -22,7 +22,7 @@
 #ifndef __GENS_QT4_CDROM_FINDCDROMUDISKS_HPP__
 #define __GENS_QT4_CDROM_FINDCDROMUDISKS_HPP__
 
-#include "FindCdrom.hpp"
+#include "FindCdromBase.hpp"
 
 // QtDBus includes.
 #include <QtDBus/QDBusObjectPath>
@@ -32,44 +32,38 @@ namespace GensQt4
 
 class FindCdromUDisksPrivate;
 
-class FindCdromUDisks : public FindCdrom
+class FindCdromUDisks : public FindCdromBase
 {
 	Q_OBJECT
 	
 	public:
-		FindCdromUDisks();
+		FindCdromUDisks(QObject *parent = 0);
 		virtual ~FindCdromUDisks();
-	
+
 	private:
 		friend class FindCdromUDisksPrivate;
 		FindCdromUDisksPrivate *const d;
 		Q_DISABLE_COPY(FindCdromUDisks)
-	
+
 	public:
 		/**
-		 * Check if this FindCdrom object is usable.
-		 * @return True if this object is usable; false if not.
+		 * Determine if this CD-ROM backend is usable.
+		 * @return True if this CD-ROM backend is usable; false if not.
 		 */
 		bool isUsable(void) const;
-		
+
 		/**
-		 * Asynchronously query for CD-ROM drives.
-		 * The driveUpdated() signal will be emitted once for each detected drive.
-		 * @return 0 on success; non-zero on error.
+		 * Scan the system for CD-ROM devices.
+		 * @return QStringList with all detected CD-ROM device names.
 		 */
-		int query(void);
-	
-	protected:
-		/**
-		 * Asynchronously query for CD-ROM drives. (INTERNAL FUNCTION)
-		 * The driveUpdated() signal will be emitted once for each detected drive.
-		 * @return 0 on success; non-zero on error.
-		 */
-		int query_int(void);
-	
+		QStringList scanDeviceNames(void);
+
+		// TODO: LibGensCD support for notifications.
+#if 0
 	private slots:
 		void deviceChanged(const QDBusObjectPath& objectPath);
 		void deviceRemoved(const QDBusObjectPath& objectPath);
+#endif
 };
 
 }

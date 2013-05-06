@@ -1,8 +1,8 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * FindCdromUDisks.cpp: Find CD-ROM drives using UDisks.                   *
+ * FindCdromUDisks.cpp: Find CD-ROM drives: UDisks1 version.               *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2013 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -51,156 +51,34 @@ class FindCdromUDisksPrivate
 {
 	public:
 		FindCdromUDisksPrivate(FindCdromUDisks *q);
-	
+		~FindCdromUDisksPrivate();
+
 	private:
 		FindCdromUDisks *const q;
 		Q_DISABLE_COPY(FindCdromUDisksPrivate)
-	
+
 	public:
-		/**
-		 * UDisks media type IDs.
-		 */
-		static const char *const UDisks_MediaTypeID[20];
-		
 		// D-BUS interface to UDisks.
 		OrgFreedesktopUDisksInterface *ifUDisks;
-		
-		/**
-		 * Query a UDisks Device object.
-		 * @param objectPath UDisks Device object path.
-		 * @return Error code: (TODO: Use an enum?)
-		 * - 0: success
-		 * - 1: not an optical drive
-		 * - negative: error
-		 */
-		int queryUDisksDevice(const QDBusObjectPath& objectPath);
 };
 
 FindCdromUDisksPrivate::FindCdromUDisksPrivate(FindCdromUDisks *q)
 	: q(q)
+	, ifUDisks(nullptr)
 { }
 
-
-/**
- * UDisks media type IDs.
- */
-const char *const FindCdromUDisksPrivate::UDisks_MediaTypeID[20] =
+FindCdromUDisksPrivate::~FindCdromUDisksPrivate()
 {
-	"optical_cd", "optical_cd_r", "optical_cd_rw", "optical_dvd",
-	"optical_dvd_r", "optical_dvd_rw", "optical_dvd_ram",
-	"optical_dvd_plus_r", "optical_dvd_plus_rw",
-	"optical_dvd_plus_r_dl", "optical_dvd_plus_rw_dl",
-	"optical_bd", "optical_bd_r", "optical_bd_re",
-	"optical_hddvd", "optical_hddvd_r", "optical_hddvd_rw",
-	"optical_mo", "optical_mrw", "optical_mrw_w"
-};
-
-
-/**
- * Query a UDisks Device object.
- * @param objectPath UDisks Device object path.
- * @return Error code: (TODO: Use an enum?)
- * - 0: success
- * - 1: not an optical drive
- * - negative: error
- */
-int FindCdromUDisksPrivate::queryUDisksDevice(const QDBusObjectPath& objectPath)
-{
-	QDBusConnection bus = QDBusConnection::systemBus();
-	auto_ptr<OrgFreedesktopUDisksDeviceInterface> drive_if(
-					new OrgFreedesktopUDisksDeviceInterface(
-								QLatin1String("org.freedesktop.UDisks"),
-								objectPath.path(), bus));
-	if (!drive_if->isValid())
-	{
-		// Drive interface is invalid.
-		LOG_MSG(cd, LOG_MSG_LEVEL_ERROR,
-			"FindCdromUDisks: Error attaching interface %s: %s",
-			objectPath.path().toLocal8Bit().constData(),
-			drive_if->lastError().message().toLocal8Bit().constData());
-		return -2;
-	}
-	
-	// Verify that this drive is removable.
-	if (!drive_if->deviceIsRemovable())
-	{
-		// This drive does not support removable media.
-		// Hence, it isn't an optical drive.
-		return 1;
-	}
-	
-	// Construct the CdromDriveEntry.
-	CdromDriveEntry drive;
-	drive.discs_supported = 0;
-	drive.drive_type = DRIVE_TYPE_NONE;
-	drive.disc_type = 0;
-	
-	// Get various properties.
-	drive.path		= drive_if->deviceFile();
-	drive.drive_vendor	= drive_if->driveVendor();
-	drive.drive_model	= drive_if->driveModel();
-	drive.drive_firmware	= drive_if->driveRevision();
-	drive.disc_label	= drive_if->idLabel();
-	drive.disc_blank	= drive_if->opticalDiscIsBlank();
-	
-	// Determine the drive media support.
-	// TODO: Convert ms_UDisks_DriveID[] to a QMap or QHash?
-	QStringList driveMediaCompatibility = drive_if->driveMediaCompatibility();
-	foreach (QString drive_media_id, driveMediaCompatibility)
-	{
-		// Check the drive media table.
-		for (size_t i = 0; i < sizeof(UDisks_MediaTypeID)/sizeof(UDisks_MediaTypeID[0]); i++)
-		{
-			if (drive_media_id == QLatin1String(UDisks_MediaTypeID[i]))
-			{
-				// Found a match.
-				drive.discs_supported |= (1 << i);
-				break;
-			}
-		}
-	}
-	if (drive.discs_supported == 0)
-	{
-		// This is not an optical drive.
-		return 1;
-	}
-	
-	// Get the drive type.
-	drive.drive_type = q->GetDriveType(drive.discs_supported);
-	
-	// Determine the type of disc in the drive.
-	QString DriveMedia = drive_if->driveMedia();
-	if (!DriveMedia.isEmpty())
-	{
-		for (size_t i = 0; i < sizeof(UDisks_MediaTypeID)/sizeof(UDisks_MediaTypeID[0]); i++)
-		{
-			if (DriveMedia == QLatin1String(UDisks_MediaTypeID[i]))
-			{
-				// Found a match.
-				drive.disc_type = (1 << i);
-				break;
-			}
-		}
-	}
-	
-	// TODO: Determine if UDisks is checking what type of disc is present.
-	
-	// If the disc is blank, set the disc label to "Blank [disc_type]".
-	// TODO: Make this a common FindCdromBase function?
-	if (drive.disc_type != DISC_TYPE_NONE && drive.disc_blank)
-		drive.disc_label = FindCdromUDisks::tr("Blank %1").arg(q->GetDiscTypeName(drive.disc_type));
-	
-	// Emit the driveUpdated() signal for this drive.
-	emit q->driveUpdated(drive);
-	return 0;
+	delete ifUDisks;
 }
 
 
 /** FindCdromUDisks **/
 
 
-FindCdromUDisks::FindCdromUDisks()
-	: d(new FindCdromUDisksPrivate(this))
+FindCdromUDisks::FindCdromUDisks(QObject *parent)
+	: FindCdromBase(parent)
+	, d(new FindCdromUDisksPrivate(this))
 {
 	// Connect to UDisks over D-BUS.
 	QDBusConnection bus = QDBusConnection::systemBus();
@@ -208,26 +86,26 @@ FindCdromUDisks::FindCdromUDisks()
 					QLatin1String("org.freedesktop.UDisks"),
 					QLatin1String("/org/freedesktop/UDisks"),
 					bus, this);
-	if (!d->ifUDisks->isValid())
-	{
+	if (!d->ifUDisks->isValid()) {
 		// Error connecting to D-BUS.
 		delete d->ifUDisks;
-		d->ifUDisks = NULL;
+		d->ifUDisks = nullptr;
 		return;
 	}
-	
+
 	// Run a simple query.
 	// If the returned string is empty, UDisks isn't working.
 	// Otherwise, UDisks is working.
 	QString daemonVersion = d->ifUDisks->daemonVersion();
-	if (d->ifUDisks->lastError().isValid() || daemonVersion.isEmpty())
-	{
+	if (d->ifUDisks->lastError().isValid() || daemonVersion.isEmpty()) {
 		// UDisks is not available.
 		delete d->ifUDisks;
-		d->ifUDisks = NULL;
+		d->ifUDisks = nullptr;
 		return;
 	}
-	
+
+	// TODO: Notification signals for LibGensCD.
+#if 0
 	// D-BUS is initialized.
 	// Connect the UDisks signals.
 	// * DeviceChanged(): A device has changed.
@@ -242,74 +120,88 @@ FindCdromUDisks::FindCdromUDisks()
 #endif
 	connect(d->ifUDisks, SIGNAL(DeviceRemoved(QDBusObjectPath)),
 		this, SLOT(deviceRemoved(QDBusObjectPath)));
+#endif
 }
 
 FindCdromUDisks::~FindCdromUDisks()
 	{ delete d; }
 
+
 bool FindCdromUDisks::isUsable(void) const
-	{ return (d->ifUDisks != NULL); }
+	{ return (d->ifUDisks != nullptr); }
 
 
 /**
- * Asynchronously query for CD-ROM drives.
- * The driveUpdated() signal will be emitted once for each detected drive.
- * @return 0 on success; non-zero on error.
+ * Scan the system for CD-ROM devices.
+ * @return QStringList with all detected CD-ROM device names.
  */
-int FindCdromUDisks::query(void)
+QStringList FindCdromUDisks::scanDeviceNames(void)
 {
 	if (!isUsable())
-		return -1;
+		return QStringList();
 	
 	// NOTE: QDBusConnection is not thread-safe.
 	// See http://bugreports.qt.nokia.com/browse/QTBUG-11413
-	
-	// Override the thread mechanism for now.
-	return query_int();
-}
-
-
-/**
- * Asynchronously query for CD-ROM drives. (INTERNAL FUNCTION)
- * The driveUpdated() signal will be emitted once for each detected drive.
- * @return 0 on success; non-zero on error.
- */
-int FindCdromUDisks::query_int(void)
-{
-	// Find all CD-ROM devices.
-	
-	// NOTE: QDBusConnection is not thread-safe.
-	// See http://bugreports.qt.nokia.com/browse/QTBUG-11413
-	if (!d->ifUDisks)
-		return -1;
 	
 	// Attempt to get all disk devices.
 	// Method: EnumerateDevices
 	// Return type: ao (QList<QDBusObjectPath>)
 	QDBusReply<QList<QDBusObjectPath> > reply_EnumerateDevices = d->ifUDisks->EnumerateDevices();
-	if (!reply_EnumerateDevices.isValid())
-	{
+	if (!reply_EnumerateDevices.isValid()) {
 		LOG_MSG(cd, LOG_MSG_LEVEL_ERROR,
-			"FindCdromUdisks: EnumerateDevices failed: %s",
+			"FindCdromUDisks: EnumerateDevices failed: %s",
 			d->ifUDisks->lastError().message().toLocal8Bit().constData());
 		
 		// TODO: Emit an error signal instead?
-		emit driveQueryFinished();
-		return -2;
+		//emit driveQueryFinished();
+		//return -2;
+		return QStringList();
+	}
+
+	// Received disk devices.
+	// Determine which ones are CD-ROM drives.
+	const QList<QDBusObjectPath>& disks = reply_EnumerateDevices.value();
+	QStringList cdromDeviceNames;
+	QDBusConnection bus = QDBusConnection::systemBus();
+	foreach (const QDBusObjectPath& cur_disk, disks) {
+		auto_ptr<OrgFreedesktopUDisksDeviceInterface> drive_if(
+			new OrgFreedesktopUDisksDeviceInterface(
+				QLatin1String("org.freedesktop.UDisks"),
+				cur_disk.path(), bus));
+		if (!drive_if->isValid()) {
+			// Drive interface is invalid.
+			LOG_MSG(cd, LOG_MSG_LEVEL_ERROR,
+				"FindCdromUDisks: Error attaching interface %s: %s",
+				cur_disk.path().toLocal8Bit().constData(),
+				drive_if->lastError().message().toLocal8Bit().constData());
+			continue;
+		}
+
+		// Make sure this is a removable drive.
+		// NOTE: drive_if->deviceIsOpticalDisc() only returns true if
+		// a disc is inserted. Empty drives will return false.
+		if (drive_if->deviceIsRemovable()) {
+			// Check if "optical_cd" is in the list of supported media.
+			QStringList driveMediaCompatibility = drive_if->driveMediaCompatibility();
+			QString optical_cd = QLatin1String("optical_cd");
+			foreach (QString discTypeId, driveMediaCompatibility) {
+				if (discTypeId == optical_cd) {
+					// Found "optical_cd".
+					cdromDeviceNames.append(drive_if->deviceFile());
+					break;
+				}
+			}
+		}
 	}
 	
-	// Received disk devices.
-	// Query each disk device to see if it's a CD-ROM drive.
-	const QList<QDBusObjectPath>& disks = reply_EnumerateDevices.value();
-	foreach (const QDBusObjectPath& cur_disk, disks)
-		d->queryUDisksDevice(cur_disk);
-	
 	// Devices queried.
-	emit driveQueryFinished();
-	return 0;
+	//emit driveQueryFinished();
+	return cdromDeviceNames;
 }
 
 
+// TODO: Notification support for LibGensCD.
+#if 0
 /**
  * deviceChanged(): A device has changed.
  * @param objectPath Device object path.
@@ -334,5 +226,6 @@ void FindCdromUDisks::deviceRemoved(const QDBusObjectPath& objectPath)
 	QString devFile = QLatin1String(_PATH_DEV) + objectPath.path().section(QChar(L'/'), -1);
 	emit driveRemoved(devFile);
 }
+#endif
 
 }

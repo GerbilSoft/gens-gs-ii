@@ -1,7 +1,8 @@
 /***************************************************************************
- * c++11-compat.h.in: C++ 2011 compatibility header.                       *
+ * libgenstext: Gens/GS II Text Manipulation Library.                      *
+ * StringManip.hpp: String manipulation functions.                         *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2010-2013 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -18,43 +19,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __CXX11_COMPAT_H__
-#define __CXX11_COMPAT_H__
+#ifndef __LIBGENSTEXT_STRINGMANIP_HPP__
+#define __LIBGENSTEXT_STRINGMANIP_HPP__
 
-/* Define to 1 if C++ 2011 is supported. */
-#cmakedefine HAVE_CXX_2011 1
-
-#if !defined(HAVE_CXX_2011) || !defined(__cplusplus)
-/**
- * Either C++ 2011 is not supported, or we're compiling C code.
- * Provide replacements for C++ 2011 functionality.
- */
-
-/* nullptr: Represents a NULL pointer. NULL == 0 */
-#define nullptr 0
-
-/* static_assert(): Compile-time assertions. */
-#define static_assert(expr, msg) switch (0) { case 0: case (expr): ; }
-
-/* Unicode characters and strings. */
-#include <stdint.h>
-typedef uint16_t char16_t;
-typedef uint32_t char32_t;
-
-#ifdef __cplusplus
-
+// C++ includes.
 #include <string>
-namespace std
+
+namespace LibGensText
 {
-	typedef basic_string<char16_t> u16string;
-	typedef basic_string<char32_t> u32string;
+
+/**
+ * Remove excess spaces from a string.
+ * This removes spaces at the end of the string,
+ * as well as double-spaces within the string.
+ * TODO: Remove spaces from the beginning of the string?
+ * @param src String. (UTF-8)
+ * @return String with excess spaces removed. (UTF-8)
+ */
+std::string SpaceElim(const std::string& src);
+
 }
-#endif
 
-/* Explicit override/final. */
-#define override
-#define final
-
-#endif
-
-#endif /* __CXX11_COMPAT_H__ */
+#endif /* __LIBGENSTEXT_STRINGMANIP_HPP__ */

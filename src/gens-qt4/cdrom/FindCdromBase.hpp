@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * FindCdromUnix.hpp: Find CD-ROM drives: UNIX fallback.                   *
+ * FindCdromBase.hpp: Find CD-ROM drives: OS-specific base class.          *
  *                                                                         *
  * Copyright (c) 2011-2013 by David Korth.                                 *
  *                                                                         *
@@ -19,39 +19,59 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_CDROM_FINDCDROMUNIX_HPP__
-#define __GENS_QT4_CDROM_FINDCDROMUNIX_HPP__
+#ifndef __GENS_QT4_CDROM_FINDCDROMBASE_HPP__
+#define __GENS_QT4_CDROM_FINDCDROMBASE_HPP__
 
-#include "FindCdromBase.hpp"
+// Qt includes.
+#include <QtCore/QObject>
+#include <QtCore/QStringList>
+#include <QtGui/QIcon>
 
 namespace GensQt4
 {
 
-class FindCdromUnix : public FindCdromBase
+class FindCdromBase : public QObject
 {
 	Q_OBJECT
-	
-	public:
-		FindCdromUnix(QObject *parent = 0);
-
-	private:
-		Q_DISABLE_COPY(FindCdromUnix);
 
 	public:
+		FindCdromBase(QObject *parent = 0);
+		virtual ~FindCdromBase();
+		
 		/**
 		 * Determine if this CD-ROM backend is usable.
 		 * @return True if this CD-ROM backend is usable; false if not.
 		 */
-		bool isUsable(void) const final
-			{ return true; }
+		virtual bool isUsable(void) const = 0;
 
 		/**
 		 * Scan the system for CD-ROM devices.
 		 * @return QStringList with all detected CD-ROM device names.
 		 */
-		QStringList scanDeviceNames(void) final;
+		virtual QStringList scanDeviceNames(void) = 0;
+
+		/**
+		 * Check if this backend supports OS-specific disc/drive icons.
+		 * @return True if OS-specific disc/drive icons are supported; false if not.
+		 */
+		virtual bool isDriveIconSupported(void) const;
+
+		/**
+		 * Get the OS-specific disc/drive icon.
+		 * @param deviceName Device name.
+		 * @return OS-specific disc/drive icon.
+		 */
+		virtual QIcon getDriveIcon(QString deviceName) const;
+
+	// TODO: Update for FindCdromDrives.
+#if 0
+	signals:
+		void driveUpdated(const CdromDriveEntry& drive);
+		void driveQueryFinished(void);
+		void driveRemoved(QString path);
+#endif
 };
 
 }
 
-#endif /* __GENS_QT4_CDROM_FINDCDROMUNIX_HPP__ */
+#endif /* __GENS_QT4_CDROM_FINDCDROMBASE_HPP__ */

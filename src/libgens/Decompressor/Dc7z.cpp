@@ -52,8 +52,8 @@ using std::u16string;
 #include "lzma/7z/7zVersion.h"
 #include "lzma/lzmabase/7zCrc.h"
 
-// Character set translation.
-#include "Util/Encoding.hpp"
+// Character set conversion.
+#include "libgenstext/Encoding.hpp"
 #if defined(_WIN32)
 #include "Win32/W32U_mini.h"
 #endif
@@ -108,7 +108,7 @@ Dc7z::Dc7z(FILE *f, const utf8_str *filename)
 
 #ifdef _WIN32
 	// Convert the filename from UTF-8 to UTF-16.
-	// TODO: Use Encoding::Utf8_to_Utf16?
+	// TODO: Use LibGensText::Utf8_to_Utf16?
 	wchar_t *filenameW = W32U_mbs_to_UTF16(filename, CP_UTF8);
 	if (!filenameW) {
 		// Error converting the filename to UTF-16.
@@ -122,7 +122,7 @@ Dc7z::Dc7z(FILE *f, const utf8_str *filename)
 	} else {
 		// System doesn't support Unicode.
 		// Convert the filename from UTF-16 to ANSI.
-		// TODO: Use Encoding::Utf16_to_[something]?
+		// TODO: Use LibGensText::Utf16_to_[something]?
 		char *filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
 		if (!filenameA) {
 			// Error converting the filename to ANSI.
@@ -262,7 +262,7 @@ int Dc7z::getFileInfo(mdp_z_entry_t **z_entry_out)
 		SzArEx_GetFileNameUtf16(&m_db, i, (uint16_t*)filenameW);
 
 		// Convert the filename to UTF-8.
-		string z_entry_filename = Encoding::Utf16_to_Utf8(filenameW, filenameW_len);
+		string z_entry_filename = LibGensText::Utf16_to_Utf8(filenameW, filenameW_len);
 		if (z_entry_filename.empty()) {
 			// Error converting the filename to UTF-8.
 			// We'll just mask each UTF-16 character by 0x7F for ASCII-compatible filenames.
@@ -331,7 +331,7 @@ int Dc7z::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *r
 	}
 
 	// Convert the z_entry filename to UTF-16.
-	u16string z_entry_filenameW = Encoding::Utf8_to_Utf16(string(z_entry->filename));
+	u16string z_entry_filenameW = LibGensText::Utf8_to_Utf16(string(z_entry->filename));
 	if (z_entry_filenameW.empty()) {
 		// Error converting the filename to Unicode.
 		return -4; // TODO: Return an appropriate MDP error code.
@@ -360,7 +360,7 @@ int Dc7z::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *r
 		SzArEx_GetFileNameUtf16(&m_db, i, (uint16_t*)filenameW);
 
 		// Compare the filename against the z_entry filename.
-		if (Encoding::Utf16_ncmp(z_entry_filenameW.c_str(), filenameW, filenameW_len) != 0) {
+		if (LibGensText::Utf16_ncmp(z_entry_filenameW.c_str(), filenameW, filenameW_len) != 0) {
 			// Not the correct file.
 			continue;
 		}

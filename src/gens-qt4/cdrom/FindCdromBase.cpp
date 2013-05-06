@@ -1,7 +1,8 @@
 /***************************************************************************
- * c++11-compat.h.in: C++ 2011 compatibility header.                       *
+ * gens-qt4: Gens Qt4 UI.                                                  *
+ * FindCdromBase.cpp: Find CD-ROM drives: OS-specific base class.          *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2013 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -18,43 +19,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __CXX11_COMPAT_H__
-#define __CXX11_COMPAT_H__
+#include "FindCdromBase.hpp"
 
-/* Define to 1 if C++ 2011 is supported. */
-#cmakedefine HAVE_CXX_2011 1
-
-#if !defined(HAVE_CXX_2011) || !defined(__cplusplus)
-/**
- * Either C++ 2011 is not supported, or we're compiling C code.
- * Provide replacements for C++ 2011 functionality.
- */
-
-/* nullptr: Represents a NULL pointer. NULL == 0 */
-#define nullptr 0
-
-/* static_assert(): Compile-time assertions. */
-#define static_assert(expr, msg) switch (0) { case 0: case (expr): ; }
-
-/* Unicode characters and strings. */
-#include <stdint.h>
-typedef uint16_t char16_t;
-typedef uint32_t char32_t;
-
-#ifdef __cplusplus
-
-#include <string>
-namespace std
+namespace GensQt4
 {
-	typedef basic_string<char16_t> u16string;
-	typedef basic_string<char32_t> u32string;
+
+FindCdromBase::FindCdromBase(QObject *parent)
+	: QObject(parent)
+{ }
+
+FindCdromBase::~FindCdromBase()
+{ }
+
+/**
+ * Check if this backend supports OS-specific disc/drive icons.
+ * @return True if OS-specific disc/drive icons are supported; false if not.
+ */
+bool FindCdromBase::isDriveIconSupported(void) const
+{
+	// By default, backends do not support OS-specific disc/drive icons.
+	return false;
 }
-#endif
 
-/* Explicit override/final. */
-#define override
-#define final
+/**
+ * Get the OS-specific disc/drive icon.
+ * @param deviceName Device name.
+ * @return OS-specific disc/drive icon.
+ */
+QIcon FindCdromBase::getDriveIcon(QString deviceName) const
+{
+	// By default, backends do not support OS-specific disc/drive icons.
+	return QIcon();
+}
 
-#endif
-
-#endif /* __CXX11_COMPAT_H__ */
+}

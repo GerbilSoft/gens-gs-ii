@@ -32,28 +32,6 @@ IF(HAVE_LIBRT)
 	SET(RT_LIBRARY "-lrt")
 ENDIF(HAVE_LIBRT)
 
-# Check for iconv() on non-Win32 systems.
-IF(WIN32)
-	# Win32 has MultiByteToWideChar() and WideCharToMultiByte().
-ELSE(WIN32)
-	# First, check libc for iconv().
-	CHECK_LIBRARY_EXISTS(c iconv "" HAVE_ICONV_C)	# libc: iconv()
-	IF(HAVE_ICONV_C)
-		# iconv() found in libc.
-		SET(ICONV_LIBRARY "-lc")
-		SET(HAVE_ICONV 1)
-	ELSE(HAVE_ICONV_C)
-		# iconv() not found in libc.
-		# Check in libiconv.
-		CHECK_LIBRARY_EXISTS(iconv iconv "" HAVE_ICONV_LIBICONV)	# libiconv: iconv()
-		IF(HAVE_ICONV_LIBICONV)
-			# iconv() found in libiconv.
-			SET(ICONV_LIBRARY "-liconv")
-			SET(HAVE_ICONV 1)
-		ENDIF(HAVE_ICONV_LIBICONV)
-	ENDIF(HAVE_ICONV_C)
-ENDIF(WIN32)
-
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libgens.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libgens.h")
 
@@ -113,7 +91,6 @@ SET(libgens_SRCS
 	Vdp/VGA_charset.c
 	Util/MdFb.cpp
 	Vdp/VdpStatus.cpp
-	Util/Encoding.cpp
 	IO/IoManager.cpp
 	IO/IoManager_p.cpp
 	IO/IoManager_p_update.cpp
@@ -139,7 +116,7 @@ ENDIF()
 
 # Build the library.
 ADD_LIBRARY(gens STATIC ${libgens_SRCS} ${libgens_OPTIONAL_SRCS} ${libgens_COMPAT_SRCS})
-TARGET_LINK_LIBRARIES(gens ${ZLIB_LIBRARY} ${MINIZIP_LIBRARY} zomg)
+TARGET_LINK_LIBRARIES(gens genstext ${ZLIB_LIBRARY} ${MINIZIP_LIBRARY} zomg)
 IF(GENS_ENABLE_EMULATION)
 	TARGET_LINK_LIBRARIES(gens starscream mdZ80)
 ENDIF(GENS_ENABLE_EMULATION)

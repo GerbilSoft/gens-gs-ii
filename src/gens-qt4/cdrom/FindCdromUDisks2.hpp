@@ -1,7 +1,8 @@
 /***************************************************************************
- * c++11-compat.h.in: C++ 2011 compatibility header.                       *
+ * gens-qt4: Gens Qt4 UI.                                                  *
+ * FindCdromUDisks2.hpp: Find CD-ROM drives: UDisks2 version.              *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2013 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -18,43 +19,53 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __CXX11_COMPAT_H__
-#define __CXX11_COMPAT_H__
+#ifndef __GENS_QT4_CDROM_FINDCDROMUDISKS2_HPP__
+#define __GENS_QT4_CDROM_FINDCDROMUDISKS2_HPP__
 
-/* Define to 1 if C++ 2011 is supported. */
-#cmakedefine HAVE_CXX_2011 1
+#include "FindCdromBase.hpp"
 
-#if !defined(HAVE_CXX_2011) || !defined(__cplusplus)
-/**
- * Either C++ 2011 is not supported, or we're compiling C code.
- * Provide replacements for C++ 2011 functionality.
- */
+// QtDBus includes.
+#include <QtDBus/QDBusObjectPath>
 
-/* nullptr: Represents a NULL pointer. NULL == 0 */
-#define nullptr 0
-
-/* static_assert(): Compile-time assertions. */
-#define static_assert(expr, msg) switch (0) { case 0: case (expr): ; }
-
-/* Unicode characters and strings. */
-#include <stdint.h>
-typedef uint16_t char16_t;
-typedef uint32_t char32_t;
-
-#ifdef __cplusplus
-
-#include <string>
-namespace std
+namespace GensQt4
 {
-	typedef basic_string<char16_t> u16string;
-	typedef basic_string<char32_t> u32string;
+
+class FindCdromUDisks2Private;
+
+class FindCdromUDisks2 : public FindCdromBase
+{
+	Q_OBJECT
+	
+	public:
+		FindCdromUDisks2(QObject *parent = 0);
+		virtual ~FindCdromUDisks2();
+
+	private:
+		friend class FindCdromUDisks2Private;
+		FindCdromUDisks2Private *const d;
+		Q_DISABLE_COPY(FindCdromUDisks2)
+
+	public:
+		/**
+		 * Determine if this CD-ROM backend is usable.
+		 * @return True if this CD-ROM backend is usable; false if not.
+		 */
+		bool isUsable(void) const final;
+
+		/**
+		 * Scan the system for CD-ROM devices.
+		 * @return QStringList with all detected CD-ROM device names.
+		 */
+		QStringList scanDeviceNames(void) final;
+
+		// TODO: LibGensCD support for notifications.
+#if 0
+	private slots:
+		void deviceChanged(const QDBusObjectPath& objectPath);
+		void deviceRemoved(const QDBusObjectPath& objectPath);
+#endif
+};
+
 }
-#endif
 
-/* Explicit override/final. */
-#define override
-#define final
-
-#endif
-
-#endif /* __CXX11_COMPAT_H__ */
+#endif /* __GENS_QT4_CDROM_FINDCDROMUDISKS_HPP__ */

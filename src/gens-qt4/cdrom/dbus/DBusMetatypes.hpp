@@ -1,7 +1,8 @@
 /***************************************************************************
- * c++11-compat.h.in: C++ 2011 compatibility header.                       *
+ * gens-qt4: Gens Qt4 UI.                                                  *
+ * DBusMetatypes.hpp: QtDBus metatypes.                                    *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2013 by David Korth.                                      *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -18,43 +19,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __CXX11_COMPAT_H__
-#define __CXX11_COMPAT_H__
+#ifndef __GENS_QT4_CDROM_DBUS_DBUSMETATYPES_HPP__
+#define __GENS_QT4_CDROM_DBUS_DBUSMETATYPES_HPP__
 
-/* Define to 1 if C++ 2011 is supported. */
-#cmakedefine HAVE_CXX_2011 1
+ /** QtDBus types. **/
+#include <QtDBus/QDBusMetaType>
 
-#if !defined(HAVE_CXX_2011) || !defined(__cplusplus)
+typedef QList<QByteArray> QByteArrayList;
+Q_DECLARE_METATYPE(QByteArrayList)
+
+typedef QMap<QString, QVariantMap> QVariantMapMap;
+Q_DECLARE_METATYPE(QVariantMapMap)
+
+typedef QMap<QDBusObjectPath, QVariantMapMap> DBusManagerStruct;
+Q_DECLARE_METATYPE(DBusManagerStruct)
+
 /**
- * Either C++ 2011 is not supported, or we're compiling C code.
- * Provide replacements for C++ 2011 functionality.
+ * Register the Qt DBus metatypes.
  */
-
-/* nullptr: Represents a NULL pointer. NULL == 0 */
-#define nullptr 0
-
-/* static_assert(): Compile-time assertions. */
-#define static_assert(expr, msg) switch (0) { case 0: case (expr): ; }
-
-/* Unicode characters and strings. */
-#include <stdint.h>
-typedef uint16_t char16_t;
-typedef uint32_t char32_t;
-
-#ifdef __cplusplus
-
-#include <string>
-namespace std
+static inline void registerDBusMetatypes(void)
 {
-	typedef basic_string<char16_t> u16string;
-	typedef basic_string<char32_t> u32string;
+	qDBusRegisterMetaType<QByteArrayList>();
+	qDBusRegisterMetaType<QVariantMapMap>();
+	qDBusRegisterMetaType<DBusManagerStruct>();
 }
-#endif
 
-/* Explicit override/final. */
-#define override
-#define final
-
-#endif
-
-#endif /* __CXX11_COMPAT_H__ */
+#endif /* __GENS_QT4_CDROM_DBUS_DBUSMETATYPES_HPP__ */
