@@ -34,6 +34,10 @@ class FindCdromUnix : public FindCdromBase
 	public:
 		FindCdromUnix(QObject *parent = 0);
 
+	private:
+		Q_DISABLE_COPY(FindCdromUnix);
+
+	public:
 		/**
 		 * Determine if this CD-ROM backend is usable.
 		 * @return True if this CD-ROM backend is usable; false if not.

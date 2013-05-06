@@ -45,6 +45,8 @@ namespace GensQt4
 class FindCdromUnixPrivate
 {
 	private:
+		FindCdromUnixPrivate() { }
+		~FindCdromUnixPrivate() { }
 		Q_DISABLE_COPY(FindCdromUnixPrivate)
 
 	public:
