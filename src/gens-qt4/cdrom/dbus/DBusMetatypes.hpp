@@ -34,4 +34,14 @@ Q_DECLARE_METATYPE(QVariantMapMap)
 typedef QMap<QDBusObjectPath, QVariantMapMap> DBusManagerStruct;
 Q_DECLARE_METATYPE(DBusManagerStruct)
 
+/**
+ * Register the Qt DBus metatypes.
+ */
+static inline void registerDBusMetatypes(void)
+{
+	qDBusRegisterMetaType<QByteArrayList>();
+	qDBusRegisterMetaType<QVariantMapMap>();
+	qDBusRegisterMetaType<DBusManagerStruct>();
+}
+
 #endif /* __GENS_QT4_CDROM_DBUS_DBUSMETATYPES_HPP__ */

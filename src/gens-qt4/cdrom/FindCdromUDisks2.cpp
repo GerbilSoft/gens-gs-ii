@@ -61,14 +61,61 @@ class FindCdromUDisks2Private
 		Q_DISABLE_COPY(FindCdromUDisks2Private)
 
 	public:
-		// D-BUS interface to UDisks2's ObjectManager.
+		// UDisks2's ObjectManager.
 		OrgFreedesktopDBusObjectManagerInterface *ifObjMgr;
 };
 
 FindCdromUDisks2Private::FindCdromUDisks2Private(FindCdromUDisks2 *q)
 	: q(q)
 	, ifObjMgr(nullptr)
-{ }
+{
+	// Make sure the DBus metatypes are registered.
+	registerDBusMetatypes();
+
+	// Connect to the UDisks2 Manager over D-BUS.
+	QDBusConnection bus = QDBusConnection::systemBus();
+	OrgFreedesktopUDisks2ManagerInterface *ifUDisks2Mgr;
+	ifUDisks2Mgr = new OrgFreedesktopUDisks2ManagerInterface(
+					QLatin1String("org.freedesktop.UDisks2.Manager"),
+					QLatin1String("/org/freedesktop/UDisks2/Manager"),
+					bus, q);
+
+	if (!ifUDisks2Mgr->isValid()) {
+		// Error connecting to the UDisks2 Manager.
+		delete ifUDisks2Mgr;
+		ifUDisks2Mgr = nullptr;
+		return;
+	}
+
+	// Run a simple query.
+	// If the returned string is empty, UDisks isn't working.
+	// Otherwise, UDisks is working.
+	QString daemonVersion = ifUDisks2Mgr->version();
+	if (ifUDisks2Mgr->lastError().isValid() || daemonVersion.isEmpty()) {
+		// UDisks2 is not available.
+		delete ifUDisks2Mgr;
+		ifUDisks2Mgr = nullptr;
+		return;
+	}
+
+	// We don't need the UDisks2 Manager anymore.
+	delete ifUDisks2Mgr;
+	ifUDisks2Mgr = nullptr;
+
+	// Connect to the UDisks2 Object Manager over D-BUS.
+	ifObjMgr = new OrgFreedesktopDBusObjectManagerInterface(
+					QLatin1String("org.freedesktop.UDisks2"),
+					QLatin1String("/org/freedesktop/UDisks2"),
+					bus, q);
+	if (!ifObjMgr->isValid()) {
+		// Error connecting to the UDisks2 Object Manager.
+		delete ifObjMgr;
+		ifObjMgr = nullptr;
+		return;
+	}
+
+	// Object manager is connected.
+}
 
 FindCdromUDisks2Private::~FindCdromUDisks2Private()
 {
@@ -83,45 +130,9 @@ FindCdromUDisks2::FindCdromUDisks2(QObject *parent)
 	: FindCdromBase(parent)
 	, d(new FindCdromUDisks2Private(this))
 {
-	// Connect to the UDisks2 Object Manager over D-BUS.
-	QDBusConnection bus = QDBusConnection::systemBus();
-	d->ifObjMgr = new OrgFreedesktopDBusObjectManagerInterface(
-					QLatin1String("org.freedesktop.DBus.ObjectManager"),
-					QLatin1String("/org/freedesktop/UDisks2"),
-					bus, this);
-	if (!d->ifObjMgr->isValid()) {
-		// Error connecting to the UDisks2 Object Manager.
-		printf("Manager ERR\n");
-		delete d->ifObjMgr;
+	// We should have a UDisk2 Object Manager connection.
+	if (!d->ifObjMgr)
 		return;
-	}
-
-#if 0
-	// Connect to UDisks2 over D-BUS.
-	QDBusConnection bus = QDBusConnection::systemBus();
-	d->ifUDisks2 = new OrgFreedesktopUDisks2Interface(
-					QLatin1String("org.freedesktop.UDisks2"),
-					QLatin1String("/org/freedesktop/UDisks2"),
-					bus, this);
-	if (!d->ifUDisks2->isValid()) {
-		// Error connecting to D-BUS.
-		delete d->ifUDisks2;
-		d->ifUDisks2 = nullptr;
-		return;
-	}
-	
-
-	// Run a simple query.
-	// If the returned string is empty, UDisks2 isn't working.
-	// Otherwise, UDisks2 is working.
-	QString daemonVersion = d->ifUDisks2->daemonVersion();
-	if (d->ifUDisks->lastError().isValid() || daemonVersion.isEmpty()) {
-		// UDisks is not available.
-		delete d->ifUDisks;
-		d->ifUDisks = NULL;
-		return;
-	}
-#endif
 
 	// TODO: Notification signals for LibGensCD.
 #if 0
@@ -158,6 +169,7 @@ QStringList FindCdromUDisks2::scanDeviceNames(void)
 	if (!isUsable())
 		return QStringList();
 
+	// TODO: Scan UDisks2's object manager list.
 	return QStringList();
 
 #if 0
