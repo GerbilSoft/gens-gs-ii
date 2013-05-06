@@ -82,7 +82,7 @@ FindCdromUDisks::FindCdromUDisks(QObject *parent)
 	if (!d->ifUDisks->isValid()) {
 		// Error connecting to D-BUS.
 		delete d->ifUDisks;
-		d->ifUDisks = NULL;
+		d->ifUDisks = nullptr;
 		return;
 	}
 
@@ -93,7 +93,7 @@ FindCdromUDisks::FindCdromUDisks(QObject *parent)
 	if (d->ifUDisks->lastError().isValid() || daemonVersion.isEmpty()) {
 		// UDisks is not available.
 		delete d->ifUDisks;
-		d->ifUDisks = NULL;
+		d->ifUDisks = nullptr;
 		return;
 	}
 
