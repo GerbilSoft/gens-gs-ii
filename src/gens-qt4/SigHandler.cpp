@@ -344,7 +344,7 @@ void SigHandler::SignalHandler(int signum)
 
 	sMsg += QLatin1String("\n"
 			"Please report this error to GerbilSoft.\n"
-			"- E-mail: gerbilsoft@verizon.net\n\n"
+			"- E-mail: gerbilsoft@gerbilsoft.com\n\n"
 			"Be sure to include detailed information about what you were "
 			"doing when this error occurred."
 			);
