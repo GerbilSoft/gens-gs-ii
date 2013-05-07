@@ -117,6 +117,8 @@ int Zomg::loadPreview(void *img_buf, size_t siz)
 }
 
 
+namespace {
+
 /**
  * Templated byteswap function.
  * Use this for any memory block that requires byteswapping.
@@ -156,6 +158,8 @@ static inline void LoadMemByteswap(void *mem, size_t siz, ZomgByteorder_t emu_or
 		default:
 			assert(false);
 	}
+}
+
 }
 
 
