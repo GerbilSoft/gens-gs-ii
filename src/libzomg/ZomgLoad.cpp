@@ -152,6 +152,9 @@ static inline void LoadMemByteswap(void *mem, size_t siz, ZomgByteorder_t emu_or
 			// 32-bit data needs to be byteswapped.
 			__zomg_byte_swap_32_array(mem, siz);
 			break;
+
+		default:
+			assert(false);
 	}
 }
 
