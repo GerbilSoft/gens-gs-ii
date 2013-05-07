@@ -38,7 +38,7 @@ namespace LibZomg
 {
 
 /**
- * loadFromZomg(): Load a file from the ZOMG file.
+ * Load a file from the ZOMG file.
  * @param filename Filename to load from the ZOMG file.
  * @param buf Buffer to store the file in.
  * @param len Length of the buffer.
