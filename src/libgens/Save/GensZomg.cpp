@@ -238,17 +238,17 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	zomg.saveVdpReg(context->m_vdp->VDP_Reg.reg, 24);
 	
 	// Save VRam.
-	zomg.saveVRam(context->m_vdp->VRam.u16, sizeof(context->m_vdp->VRam.u16), true);
+	zomg.saveVRam(context->m_vdp->VRam.u16, sizeof(context->m_vdp->VRam.u16), ZOMG_BYTEORDER_16H);
 	
 	// Save CRam.
 	Zomg_CRam_t cram;
 	context->m_vdp->m_palette.zomgSaveCRam(&cram);
-	zomg.saveCRam(&cram);
+	zomg.saveCRam(&cram, ZOMG_BYTEORDER_16H);
 	
 	/** VDP: MD-specific **/
 	
 	// Save VSRam.
-	zomg.saveMD_VSRam(context->m_vdp->VSRam.u16, sizeof(context->m_vdp->VSRam.u16), true);
+	zomg.saveMD_VSRam(context->m_vdp->VSRam.u16, sizeof(context->m_vdp->VSRam.u16), ZOMG_BYTEORDER_16H);
 	
 	/** Audio **/
 	
@@ -278,7 +278,7 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	/** MD: M68K **/
 	
 	// Save the M68K memory.
-	zomg.saveM68KMem(Ram_68k.u16, sizeof(Ram_68k.u16), true);
+	zomg.saveM68KMem(Ram_68k.u16, sizeof(Ram_68k.u16), ZOMG_BYTEORDER_16H);
 	
 	// Save the M68K registers.
 	Zomg_M68KRegSave_t m68k_reg_save;

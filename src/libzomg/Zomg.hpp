@@ -121,9 +121,9 @@ class Zomg : public ZomgBase
 		int saveVdpReg(const uint8_t *reg, size_t siz);
 		int saveVdpCtrl_8(const Zomg_VdpCtrl_8_t *ctrl);
 		int saveVdpCtrl_16(const Zomg_VdpCtrl_16_t *ctrl);
-		int saveVRam(const void *vram, size_t siz, bool byteswap);
-		int saveCRam(const Zomg_CRam_t *cram);
-		int saveMD_VSRam(const uint16_t *vsram, size_t siz, bool byteswap);	/// MD-specific
+		int saveVRam(const void *vram, size_t siz, ZomgByteorder_t byteorder);
+		int saveCRam(const Zomg_CRam_t *cram, ZomgByteorder_t byteorder);
+		int saveMD_VSRam(const uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder);	/// MD-specific
 		
 		// Audio
 		int savePsgReg(const Zomg_PsgSave_t *state);
@@ -134,7 +134,7 @@ class Zomg : public ZomgBase
 		int saveZ80Reg(const Zomg_Z80RegSave_t *state);
 		
 		// M68K (MD-specific)
-		int saveM68KMem(const uint16_t *mem, size_t siz, bool byteswap);
+		int saveM68KMem(const uint16_t *mem, size_t siz, ZomgByteorder_t byteorder);
 		int saveM68KReg(const Zomg_M68KRegSave_t *state);
 		
 		// MD-specific registers
