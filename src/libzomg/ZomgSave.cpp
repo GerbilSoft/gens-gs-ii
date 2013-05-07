@@ -120,6 +120,7 @@ int Zomg::savePreview(const void *img_buf, size_t siz)
 /**
  * Templated byteswap class.
  * Use this for any memory block that requires byteswapping.
+ * TODO: Verify that this class is optimized out if zomg_order == emu_order.
  */
 namespace {
 template<ZomgByteorder_t zomg_order>

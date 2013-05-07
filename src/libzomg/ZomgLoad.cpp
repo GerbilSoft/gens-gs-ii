@@ -122,6 +122,7 @@ namespace {
 /**
  * Templated byteswap function.
  * Use this for any memory block that requires byteswapping.
+ * TODO: Verify that this function is optimized out if zomg_order == emu_order.
  */
 template<ZomgByteorder_t zomg_order>
 static inline void LoadMemByteswap(void *mem, size_t siz, ZomgByteorder_t emu_order)
