@@ -27,11 +27,9 @@
 #include "Zomg.hpp"
 #include "zomg_byteswap.h"
 
-// C includes.
-#include <stdint.h>
-#include <string.h>
-
 // C includes. (C++ namespace)
+#include <cstdint>
+#include <cstring>
 #include <cassert>
 
 namespace LibZomg
