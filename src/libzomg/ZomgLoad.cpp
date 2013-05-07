@@ -270,7 +270,7 @@ int Zomg::loadVRam(void *vram, size_t siz, ZomgByteorder_t byteorder)
 
 
 /**
- * loadCRam(): Load CRam.
+ * Load CRam.
  * File: common/CRam.bin
  * @param cram Destination buffer for CRam.
  * @param byteorder ZOMG byteorder to use for the memory buffer.
@@ -288,7 +288,7 @@ int Zomg::loadCRam(Zomg_CRam_t *cram, ZomgByteorder_t byteorder)
 
 
 /**
- * loadMD_VSRam(): Load VSRam. (MD-specific)
+ * Load VSRam. (MD-specific)
  * File: MD/VSRam.bin
  * @param vsram Destination buffer for VSRam.
  * @param siz Number of bytes to read.
