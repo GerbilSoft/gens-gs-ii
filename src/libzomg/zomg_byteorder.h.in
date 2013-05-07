@@ -30,4 +30,32 @@
 /* System byteorder. */
 #cmakedefine ZOMG_BYTEORDER @ZOMG_BYTEORDER@
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * ZOMG byteorder enumeration.
+ * Used for memory blocks that might be byteswapped.
+ */
+typedef enum _ZomgByteorder_t {
+	ZOMG_BYTEORDER_8,	// 8-bit
+	ZOMG_BYTEORDER_16LE,	// 16-bit LE
+	ZOMG_BYTEORDER_16BE,	// 16-bit BE
+	ZOMG_BYTEORDER_32LE,	// 32-bit LE
+	ZOMG_BYTEORDER_32BE,	// 32-bit BE
+
+#if ZOMG_BYTEORDER == ZOMG_LIL_ENDIAN
+	ZOMG_BYTEORDER_16H = ZOMG_BYTEORDER_16LE,	// 16-bit host-endian
+	ZOMG_BYTEORDER_32H = ZOMG_BYTEORDER_32LE,	// 32-bit host-endian
+#else /* ZOMG_BYTEORDER == ZOMG_BIG_ENDIAN */
+	ZOMG_BYTEORDER_16H = ZOMG_BYTEORDER_16BE,	// 16-bit host-endian
+	ZOMG_BYTEORDER_32H = ZOMG_BYTEORDER_32BE,	// 32-bit host-endian
+#endif
+} ZomgByteorder_t;
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* __LIBZOMG_BYTEORDER_H__ */

@@ -59,7 +59,7 @@ namespace LibGens
 {
 
 /**
- * ZomgLoad(): Load the current state from a ZOMG file.
+ * Load the current state from a ZOMG file.
  * @param filename	[in] ZOMG file.
  * @param context	[out] Emulation context.
  * @return 0 on success; non-zero on error.
@@ -70,82 +70,81 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 	// Make sure the file exists.
 	if (access(filename, F_OK))
 		return -1;
-	
+
 	// Make sure this is a ZOMG file.
 	if (!LibZomg::Zomg::DetectFormat(filename))
 		return -2;
-	
+
 	LibZomg::Zomg zomg(filename, LibZomg::Zomg::ZOMG_LOAD);
 	if (!zomg.isOpen())
 		return -3;
-	
+
 	// TODO: This is MD only!
 	// TODO: Check error codes from the ZOMG functions.
 	// TODO: Load everything first, *then* copy it to LibGens.
-	
+
 	/** VDP **/
-	
+
 	// Load the VDP registers.
 	uint8_t vdp_reg[24];
 	zomg.loadVdpReg(vdp_reg, 24);
 	// TODO: On MD, load the DMA information from the savestate.
 	// Writing to register 23 changes the DMA status.
-	for (int i = 23; i >= 0; i--)
-	{
+	for (int i = 23; i >= 0; i--) {
 		context->m_vdp->Set_Reg(i, vdp_reg[i]);
 	}
-	
+
 	// Load VRam.
-	zomg.loadVRam(context->m_vdp->VRam.u16, sizeof(context->m_vdp->VRam.u16), true);
+	zomg.loadVRam(context->m_vdp->VRam.u16, sizeof(context->m_vdp->VRam.u16), ZOMG_BYTEORDER_16H);
 	context->m_vdp->MarkVRamDirty();
-	
+
 	// Load CRam.
 	Zomg_CRam_t cram;
-	zomg.loadCRam(&cram);
+	zomg.loadCRam(&cram, ZOMG_BYTEORDER_16H);
 	context->m_vdp->m_palette.zomgRestoreCRam(&cram);
-	
+
 	/** VDP: MD-specific **/
-	
+
 	// Load VSRam.
-	zomg.loadMD_VSRam(context->m_vdp->VSRam.u16, sizeof(context->m_vdp->VSRam.u16), true);
-	
+	zomg.loadMD_VSRam(context->m_vdp->VSRam.u16, sizeof(context->m_vdp->VSRam.u16), ZOMG_BYTEORDER_16H);
+
 	/** Audio **/
-	
+
 	// Load the PSG state.
 	Zomg_PsgSave_t psg_save;
 	zomg.loadPsgReg(&psg_save);
 	SoundMgr::ms_Psg.zomgRestore(&psg_save);
-	
+
 	/** Audio: MD-specific **/
-	
+
 	// Load the YM2612 register state.
 	Zomg_Ym2612Save_t ym2612_save;
 	zomg.loadMD_YM2612_reg(&ym2612_save);
 	SoundMgr::ms_Ym2612.zomgRestore(&ym2612_save);
-	
+
 	/** Z80 **/
-	
+
 	// Load the Z80 memory.
 	// TODO: Use the correct size based on system.
 	zomg.loadZ80Mem(Ram_Z80, 8192);
-	
+
 	// Load the Z80 registers.
 	Zomg_Z80RegSave_t z80_reg_save;
 	zomg.loadZ80Reg(&z80_reg_save);
 	Z80::ZomgRestoreReg(&z80_reg_save);
-	
+
 	/** MD: M68K **/
-	
+
 	// Load the M68K memory.
-	zomg.loadM68KMem(Ram_68k.u16, sizeof(Ram_68k.u16), true);
-	
+	zomg.loadM68KMem(Ram_68k.u16, sizeof(Ram_68k.u16), ZOMG_BYTEORDER_16H);
+
 	// Load the M68K registers.
 	Zomg_M68KRegSave_t m68k_reg_save;
 	zomg.loadM68KReg(&m68k_reg_save);
 	M68K::ZomgRestoreReg(&m68k_reg_save);
-	
+
 	/** MD: Other **/
-	
+
 	// Load the I/O registers. ($A10001-$A1001F, odd bytes)
 	// TODO: Create/use the version register function in M68K_Mem.cpp.
 	// TODO: Add ZOMG save support to IoManager.
@@ -176,30 +175,28 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 	io_int.ser_ctrl = md_io_save.port3_ser_ctrl;
 	context->m_portE->zomgRestoreMD(&io_int);
 #endif
-	
+
 	// Load the Z80 control registers.
 	Zomg_MD_Z80CtrlSave_t md_z80_ctrl_save;
 	zomg.loadMD_Z80Ctrl(&md_z80_ctrl_save);
-	
+
 	M68K_Mem::Z80_State &= Z80_STATE_ENABLED;
 	if (!md_z80_ctrl_save.busreq)
 		M68K_Mem::Z80_State |= Z80_STATE_BUSREQ;
 	if (!md_z80_ctrl_save.reset)
 		M68K_Mem::Z80_State |= Z80_STATE_RESET;
 	Z80_MD_Mem::Bank_Z80 = ((md_z80_ctrl_save.m68k_bank & 0x1FF) << 15);
-	
+
 	// Load the MD /TIME registers.
 	Zomg_MD_TimeReg_t md_time_reg_save;
 	int ret = zomg.loadMD_TimeReg(&md_time_reg_save);
-	
+
 	EEPRom *eeprom = context->getEEPRom();
-	if (!eeprom->isEEPRomTypeSet())
-	{
+	if (!eeprom->isEEPRomTypeSet()) {
 		// EEPRom is disabled. Use SRam.
 		// Load SRam control registers from the /TIME register bank.
 		SRam *sram = context->getSRam();
-		if (ret <= 0xF1)
-		{
+		if (ret <= 0xF1) {
 			// SRAM control register wasn't present.
 			// If the ROM is less than 2 MB, force SRAM access on, write-enabled.
 			// Otherwise, set SRAM off, write-protected.
@@ -209,26 +206,24 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 				sram->writeCtrl(1);
 			else
 				sram->writeCtrl(2);
-		}
-		else
-		{
+		} else {
 			// SRAM control register was present.
 			// Write the value from the savestate.
 			sram->writeCtrl(md_time_reg_save.SRAM_ctrl);
 		}
-		
+
 		// Load SRAM.
 		// TODO: Make this optional.
 		sram->loadFromZomg(zomg);
 	}
-	
+
 	// Load SSF2 bank registers.
 	// TODO: Only if SSF2 is detected?
 	M68K_Mem::ZomgRestoreSSF2BankState(&md_time_reg_save);
-	
+
 	// Close the savestate.
 	zomg.close();
-	
+
 	// Savestate loaded.
 	return 0;
 }

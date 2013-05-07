@@ -28,6 +28,7 @@
 #define __LIBZOMG_ZOMG_HPP__
 
 #include "ZomgBase.hpp"
+#include "libzomg/zomg_byteorder.h"
 
 // MiniZip
 #include "minizip/zip.h"
@@ -74,9 +75,9 @@ class Zomg : public ZomgBase
 		int loadVdpReg(uint8_t *reg, size_t siz);
 		int loadVdpCtrl_8(Zomg_VdpCtrl_8_t *ctrl);
 		int loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl);
-		int loadVRam(void *vram, size_t siz, bool byteswap);
-		int loadCRam(Zomg_CRam_t *cram);
-		int loadMD_VSRam(uint16_t *vsram, size_t siz, bool byteswap);	/// MD-specific
+		int loadVRam(void *vram, size_t siz, ZomgByteorder_t byteorder);
+		int loadCRam(Zomg_CRam_t *cram, ZomgByteorder_t byteorder);
+		int loadMD_VSRam(uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder);	/// MD-specific
 		
 		// Audio
 		int loadPsgReg(Zomg_PsgSave_t *state);
@@ -87,7 +88,7 @@ class Zomg : public ZomgBase
 		int loadZ80Reg(Zomg_Z80RegSave_t *state);
 		
 		// M68K (MD-specific)
-		int loadM68KMem(uint16_t *mem, size_t siz, bool byteswap);
+		int loadM68KMem(uint16_t *mem, size_t siz, ZomgByteorder_t byteorder);
 		int loadM68KReg(Zomg_M68KRegSave_t *state);
 		
 		// MD-specific registers
