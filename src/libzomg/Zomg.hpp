@@ -2,7 +2,7 @@
  * libzomg: Zipped Original Memory from Genesis.                           *
  * Zomg.hpp: Savestate handler.                                            *
  *                                                                         *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2013 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -64,7 +64,7 @@ class Zomg : public ZomgBase
 		// (once FORMAT.ini is implemented)
 		
 		/**
-		 * loadPreview(): Load the preview image.
+		 * Load the preview image.
 		 * @param img_buf Image buffer.
 		 * @param siz Size of the image buffer.
 		 * @return Bytes read on success; negative on error.

@@ -2,7 +2,7 @@
  * libzomg: Zipped Original Memory from Genesis.                           *
  * ZomgLoad.cpp: Savestate handler. (Loading functions)                    *
  *                                                                         *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2013 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
