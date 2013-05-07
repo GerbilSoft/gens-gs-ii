@@ -147,34 +147,13 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 
 	// Load the I/O registers. ($A10001-$A1001F, odd bytes)
 	// TODO: Create/use the version register function in M68K_Mem.cpp.
-	// TODO: Add ZOMG save support to IoManager.
-#if 0
-	IoBase::Zomg_MD_IoSave_int_t io_int;
 	Zomg_MD_IoSave_t md_io_save;
 	zomg.loadMD_IO(&md_io_save);
-	
+	context->m_ioManager->zomgRestoreMD(&md_io_save);
+
 	// TODO: Set MD version register.
 	//md_io.version_reg = ((M68K_Mem::ms_Region.region() << 6) | 0x20);
 	//md_io_save.version_reg = context->readVersionRegister_MD();
-	io_int.data     = md_io_save.port1_data;
-	io_int.ctrl     = md_io_save.port1_ctrl;
-	io_int.ser_tx   = md_io_save.port1_ser_tx;
-	io_int.ser_rx   = md_io_save.port1_ser_rx;
-	io_int.ser_ctrl = md_io_save.port1_ser_ctrl;
-	context->m_port1->zomgRestoreMD(&io_int);
-	io_int.data     = md_io_save.port2_data;
-	io_int.ctrl     = md_io_save.port2_ctrl;
-	io_int.ser_tx   = md_io_save.port2_ser_tx;
-	io_int.ser_rx   = md_io_save.port2_ser_rx;
-	io_int.ser_ctrl = md_io_save.port2_ser_ctrl;
-	context->m_port2->zomgRestoreMD(&io_int);
-	io_int.data     = md_io_save.port3_data;
-	io_int.ctrl     = md_io_save.port3_ctrl;
-	io_int.ser_tx   = md_io_save.port3_ser_tx;
-	io_int.ser_rx   = md_io_save.port3_ser_rx;
-	io_int.ser_ctrl = md_io_save.port3_ser_ctrl;
-	context->m_portE->zomgRestoreMD(&io_int);
-#endif
 
 	// Load the Z80 control registers.
 	Zomg_MD_Z80CtrlSave_t md_z80_ctrl_save;
@@ -310,34 +289,11 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	
 	// Save the I/O registers. ($A10001-$A1001F, odd bytes)
 	// TODO: Create/use the version register function in M68K_Mem.cpp.
-	// TODO: Add ZOMG save support to IoManager.
-#if 0
-	IoBase::Zomg_MD_IoSave_int_t io_int;
-#endif	
 	Zomg_MD_IoSave_t md_io_save;
-	md_io_save.version_reg    = context->readVersionRegister_MD();
-#if 0
-	context->m_port1->zomgSaveMD(&io_int);
-	md_io_save.port1_data     = io_int.data;
-	md_io_save.port1_ctrl     = io_int.ctrl;
-	md_io_save.port1_ser_tx   = io_int.ser_tx;
-	md_io_save.port1_ser_rx   = io_int.ser_rx;
-	md_io_save.port1_ser_ctrl = io_int.ser_ctrl;
-	context->m_port2->zomgSaveMD(&io_int);
-	md_io_save.port2_data     = io_int.data;
-	md_io_save.port2_ctrl     = io_int.ctrl;
-	md_io_save.port2_ser_tx   = io_int.ser_tx;
-	md_io_save.port2_ser_rx   = io_int.ser_rx;
-	md_io_save.port2_ser_ctrl = io_int.ser_ctrl;
-	context->m_portE->zomgSaveMD(&io_int);
-	md_io_save.port3_data     = io_int.data;
-	md_io_save.port3_ctrl     = io_int.ctrl;
-	md_io_save.port3_ser_tx   = io_int.ser_tx;
-	md_io_save.port3_ser_rx   = io_int.ser_rx;
-	md_io_save.port3_ser_ctrl = io_int.ser_ctrl;
+	context->m_ioManager->zomgSaveMD(&md_io_save);
+	md_io_save.version_reg = context->readVersionRegister_MD();
 	zomg.saveMD_IO(&md_io_save);
-#endif
-	
+
 	// Save the Z80 control registers.
 	Zomg_MD_Z80CtrlSave_t md_z80_ctrl_save;
 	md_z80_ctrl_save.busreq    = !(M68K_Mem::Z80_State & Z80_STATE_BUSREQ);

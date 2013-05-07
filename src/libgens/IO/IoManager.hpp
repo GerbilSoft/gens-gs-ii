@@ -32,6 +32,9 @@
 
 #include "../GensInput/GensKey_t.h"
 
+// ZOMG savestate structs.
+#include "libzomg/zomg_md_io.h"
+
 namespace LibGens
 {
 
@@ -336,19 +339,8 @@ class IoManager
 		static int NextLogicalButton(IoType_t ioType, int btnIdx);
 
 		/** ZOMG savestate functions. **/
-		// TODO: Move this struct to libzomg.
-		/*
-		struct Zomg_MD_IoSave_int_t
-		{
-			uint8_t data;
-			uint8_t ctrl;
-			uint8_t ser_tx;
-			uint8_t ser_rx;
-			uint8_t ser_ctrl;
-		};
-		void zomgSaveMD(Zomg_MD_IoSave_int_t *state) const;
-		void zomgRestoreMD(const Zomg_MD_IoSave_int_t *state);
-		*/
+		void zomgSaveMD(Zomg_MD_IoSave_t *state) const;
+		void zomgRestoreMD(const Zomg_MD_IoSave_t *state);
 };
 
 /**

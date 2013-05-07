@@ -375,4 +375,68 @@ void IoManager::update(void)
 	d->update();
 }
 
+
+/** ZOMG savestate functions. **/
+
+/**
+ * Save the I/O state. (MD)
+ * @param state Zomg_MD_IoSave_t struct to save to.
+ */
+void IoManager::zomgSaveMD(Zomg_MD_IoSave_t *state) const
+{
+	// Port 1
+	state->port1_data = d->ioDevices[PHYSPORT_1].mdData;
+	state->port1_ctrl = d->ioDevices[PHYSPORT_1].ctrl;
+	state->port1_ser_tx = d->ioDevices[PHYSPORT_1].serLastTx;
+	state->port1_ser_rx = 0xFF; // TODO
+	state->port1_ser_ctrl = d->ioDevices[PHYSPORT_1].serCtrl;
+
+	// Port 2
+	state->port2_data = d->ioDevices[PHYSPORT_2].mdData;
+	state->port2_ctrl = d->ioDevices[PHYSPORT_2].ctrl;
+	state->port2_ser_tx = d->ioDevices[PHYSPORT_2].serLastTx;
+	state->port2_ser_rx = 0xFF; // TODO
+	state->port2_ser_ctrl = d->ioDevices[PHYSPORT_2].serCtrl;
+
+	// Port 3 (EXT)
+	state->port3_data = d->ioDevices[PHYSPORT_EXT].mdData;
+	state->port3_ctrl = d->ioDevices[PHYSPORT_EXT].ctrl;
+	state->port3_ser_tx = d->ioDevices[PHYSPORT_EXT].serLastTx;
+	state->port3_ser_rx = 0xFF; // TODO
+	state->port3_ser_ctrl = d->ioDevices[PHYSPORT_EXT].serCtrl;
+}
+
+/**
+ * Restore the I/O state. (MD)
+ * @param state Zomg_MD_IoSave_t struct to restore from.
+ */
+void IoManager::zomgRestoreMD(const Zomg_MD_IoSave_t *state)
+{
+	// Port 1
+	d->ioDevices[PHYSPORT_1].mdData = state->port1_data;
+	d->ioDevices[PHYSPORT_1].ctrl = state->port1_ctrl;
+	d->ioDevices[PHYSPORT_1].serLastTx = state->port1_ser_tx;
+	//d->ioDevices[PHYSPORT_1].serLastRx = state->port1_ser_rx;	// TODO
+	d->ioDevices[PHYSPORT_1].serCtrl = state->port1_ser_ctrl;
+
+	// Port 2
+	d->ioDevices[PHYSPORT_2].mdData = state->port2_data;
+	d->ioDevices[PHYSPORT_2].ctrl = state->port2_ctrl;
+	d->ioDevices[PHYSPORT_2].serLastTx = state->port2_ser_tx;
+	//d->ioDevices[PHYSPORT_2].serLastRx = state->port2_ser_rx;	// TODO
+	d->ioDevices[PHYSPORT_2].serCtrl = state->port2_ser_ctrl;
+
+	// Port 3 (EXT)
+	d->ioDevices[PHYSPORT_EXT].mdData = state->port3_data;
+	d->ioDevices[PHYSPORT_EXT].ctrl = state->port3_ctrl;
+	d->ioDevices[PHYSPORT_EXT].serLastTx = state->port3_ser_tx;
+	//d->ioDevices[PHYSPORT_EXT].serLastRx = state->port3_ser_rx;	// TODO
+	d->ioDevices[PHYSPORT_EXT].serCtrl = state->port3_ser_ctrl;
+
+	// Update the ports.
+	d->updateDevice(PHYSPORT_1);
+	d->updateDevice(PHYSPORT_2);
+	d->updateDevice(PHYSPORT_EXT);
+}
+
 }
