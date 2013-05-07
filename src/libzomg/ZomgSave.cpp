@@ -146,7 +146,7 @@ class SaveMemByteswap {
 };
 
 template<ZomgByteorder_t zomg_order>
-SaveMemByteswap<zomg_order>::SaveMemByteswap(const void *mem, size_t siz, ZomgByteorder_t emu_order)
+inline SaveMemByteswap<zomg_order>::SaveMemByteswap(const void *mem, size_t siz, ZomgByteorder_t emu_order)
 	: m_mem(reinterpret_cast<uintptr_t>(mem))
 	, m_siz(siz)
 {
@@ -197,7 +197,7 @@ SaveMemByteswap<zomg_order>::SaveMemByteswap(const void *mem, size_t siz, ZomgBy
 }
 
 template<ZomgByteorder_t zomg_order>
-SaveMemByteswap<zomg_order>::~SaveMemByteswap()
+inline SaveMemByteswap<zomg_order>::~SaveMemByteswap()
 {
 	if (m_mem & 1) {
 		// Memory was allocated by us.
