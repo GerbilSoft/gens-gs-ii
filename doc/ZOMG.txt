@@ -49,7 +49,7 @@ subdirectory, e.g. /SMS for Sega Master System or /MD for Sega Mega Drive.
 
 Save files may have a specified endianness. They are "BE" for Big Endian
 (Motorola format) and "LE" for Little Endian (Intel format), along with
-an optional word-size specifier.
+an optional word-size specifier, e.g. 16BE or 32LE.
 
 All structs are packed; that is, they do not have any padding that would
 usually be added by a compiler. On gcc, this is achieved by using
@@ -59,25 +59,27 @@ struct definition.
 
 ================================================================
 
-2. format.ini
+2. ZOMG.ini
 
-Every ZOMG archive contains at least one file: /format.ini
+Every ZOMG archive contains at least one file: /ZOMG.ini
 This file is a text file in INI format, encoded using UTF-8.
 Line endings may be either Unix-style ("\n") or Windows-style
 ("\r\n"). Linebreaks may be embedded within values by using the
 "\n" escape sequence.
 
-Here is an example FORMAT.ini file:
+Here is an example ZOMG.ini file:
 
 [ZOMG]
 FileType=Zipped Original Memory from Genesis
 Version=0.1
 System=MD
-Creator=Genesis Emulator 2.12.194
+Creator=Genesis Emulator
+CreatorVersion=2.12.194
+CreatorVcsVersion=git: master/12345678
 Author=Mario Mario
 ROM=Sonic the Hedgehog (W) (REV01) [!].gen
-ROM CRC32=AFE05EEE
-Region=JUE
+ROM CRC32=0xAFE05EEE
+Region=U
 Description=Sample savestate from Sonic 1.
 Extensions=
 
@@ -87,6 +89,8 @@ Fields: ('*' indicates required; '-' indicates optional.)
 * Version: ZOMG specification version number.
 * System: Systems used for the savestate, comma-separated.
 - Creator: Program that created the savestate.
+- CreatorVersion: Version of Creator.
+- CreatorVcsVersion: Version control identifier of Creator.
 - Author: Person who created the savestate.
 - ROM: Filename of the ROM file used to create the savestate.
 - ROM CRC32: CRC32 checksum of the ROM file used to create the savestate.
@@ -113,6 +117,18 @@ Sega CD 32X games would have a System value of either "MCD,32X" or "MD,MCD,32X".
 
 The ROM field is for user reference only. It should not be used by an emulator
 to determine which ROM to load, or if a savestate is valid for a given ROM.
+
+The ROM_CRC32 field is also for user reference, but it can be used by an
+emulator to verify if the savestate is compatible with the loaded ROM.
+This field should be interpreted as hexadecimal if it starts with 0x;
+otherwise, it should be interpreted as decimal.
+
+The Region field indicates what region the emulator was set to when the
+savestate was created. It may have one of four values:
+- U: North America, NTSC.
+- E: Europe, PAL.
+- J: Japan, NTSC.
+- A: Southeast Asia, PAL.
 
 The Extensions field is usually blank for ZOMG files conforming to the
 ZOMG version listed in the Version field. It is included to allow for
@@ -147,7 +163,7 @@ components that are common throughout the Sega 8-bit and 16-bit hardware line.
 | psg.bin        |             23 |    8-bit   |
 | Z80_mem.bin    |    1, 2, 8 KiB |    8-bit   |
 | Z80_reg.bin    |             28 |     LE     |
-| SRAM.bin       |   up to 65,536 |  8 / 16 BE |
+| SRAM.bin       |   up to 65,536 |    8-bit   |
 +----------------+----------------+------------+
 
 ----------------------------------------------------------------
@@ -193,36 +209,36 @@ C equivalent for vdp_ctrl.bin:
 // 8-bit VDP (Master System)
 typedef struct _ZOMG_VDP_ctrl_8_t
 {
-	uint32_t header;		// 32-bit BE: Should be "SMS " (0x534D5320)
-	
+	uint32_t header;		// 32BE: Should be "SMS " (0x534D5320)
+
 	uint8_t ctrl_byte[2];		// 8-bit: VDP control bytes.
 	uint16_t reserved1;
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
 	uint8_t dest;			// 8-bit: Read/Write location. (TODO)
-	
-	uint16_t address;		// 16-bit BE: VDP address counter.
+
+	uint16_t address;		// 16BE: VDP address counter.
 	uint8_t status;			// 8-bit: VDP status register.
 	uint8_t reserved2;
-	
+
 	uint8_t data_read_buffer;	// 8-bit: Data read buffer.
 } ZOMG_VDP_ctrl_8_t;
 
 // 16-bit VDP (Mega Drive)
 typedef struct _ZOMG_VDP_ctrl_16_t
 {
-	uint32_t header;		// 32-bit BE: Should be "MD  " (0x4D442020)
-	
-	uint16_t ctrl_word[2];		// 16-bit BE: VDP control words.
+	uint32_t header;		// 32BE: Should be "MD  " (0x4D442020)
+
+	uint16_t ctrl_word[2];		// 16BE: VDP control words.
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
 	uint8_t dest;			// 8-bit: Read/Write location. (TODO)
-	
-	uint16_t address;		// 16-bit BE: VDP address counter.
-	uint16_t status;		// 16-bit BE: VDP status register.
-	
-	uint16_t data_fifo[4];		// 16-bit BE: Data FIFO. (4 words)
+
+	uint16_t address;		// 16BE: VDP address counter.
+	uint16_t status;		// 16BE: VDP status register.
+
+	uint16_t data_fifo[4];		// 16BE: Data FIFO. (4 words)
 	uint8_t data_fifo_count;	// 8-bit: Number of words currently in the FIFO.
 	uint8_t reserved2;
-	
+
 	// TODO: Finalize DMA registers.
 	uint32_t dma_src_address;	// 32-bit BE: DMA source address.
 	uint16_t dma_length;		// 16-bit BE: DMA length.
@@ -241,7 +257,7 @@ have a different size and format:
 
 C equivalents for VRam.bin:
 uint8_t vram_8bit[16384];	// Sega 8-bit systems.
-uint16_t vram_md[32768];	// Sega Mega Drive. (16-bit BE)
+uint16_t vram_md[32768];	// Sega Mega Drive. (16BE)
 
 ----------------------------------------------------------------
 
@@ -257,8 +273,8 @@ be remapped. There are three different Color RAM formats.
 
 C equivalents for CRam.bin:
 uint8_t cram_mk3[32];		// Sega Mark III / Sega Master System.
-uint16_t cram_md[64];		// Sega Mega Drive. (16-bit BE)
-uint16_t cram_gg[32];		// Sega Game Gear. (16-bit LE)
+uint16_t cram_md[64];		// Sega Mega Drive. (16BE)
+uint16_t cram_gg[32];		// Sega Game Gear. (16LE)
 
 ----------------------------------------------------------------
 
@@ -306,12 +322,12 @@ C equivalent for psg.bin:
 
 typedef struct _ZOMG_psg_t
 {
-	uint16_t tone_reg[4];	// LE16: Tone values for each channel.
+	uint16_t tone_reg[4];	// 16LE: Tone values for each channel.
 	uint8_t vol_reg[4];	// 8-bit: Volume values for each channel.
-	
-	uint16_t tone_ctr[4];	// LE16: Internal counter values for each channel.
-	uint16_t lfsr_state;	// LE16: Linear Feedback Shift Register state.
-	
+
+	uint16_t tone_ctr[4];	// 16LE: Internal counter values for each channel.
+	uint16_t lfsr_state;	// 16LE: Linear Feedback Shift Register state.
+
 	uint8_t gg_stereo;	// 8-bit: Stereo register. (Game Gear only.)
 } ZOMG_psg_t;
 
@@ -346,21 +362,21 @@ C equivalent for Z80_reg.bin:
 typedef struct _ZOMG_Z80_reg_t
 {
 	// Main register set.
-	uint16_t AF;	// 16-bit LE: AF register.
-	uint16_t BC;	// 16-bit LE: BC register.
-	uint16_t DE;	// 16-bit LE: DE register.
-	uint16_t HL;	// 16-bit LE: HL register.
-	uint16_t IX;	// 16-bit LE: IX register.
-	uint16_t IY;	// 16-bit LE: IY register.
-	uint16_t PC;	// 16-bit LE: PC register.
-	uint16_t SP;	// 16-bit LE: SP register.
-	
+	uint16_t AF;	// 16LE: AF register.
+	uint16_t BC;	// 16LE: BC register.
+	uint16_t DE;	// 16LE: DE register.
+	uint16_t HL;	// 16LE: HL register.
+	uint16_t IX;	// 16LE: IX register.
+	uint16_t IY;	// 16LE: IY register.
+	uint16_t PC;	// 16LE: PC register.
+	uint16_t SP;	// 16LE: SP register.
+
 	// Shadow register set.
-	uint16_t AF2;	// 16-bit LE: AF' register.
-	uint16_t BC2;	// 16-bit LE: BC' register.
-	uint16_t DE2;	// 16-bit LE: DE' register.
-	uint16_t HL2;	// 16-bit LE: HL' register.
-	
+	uint16_t AF2;	// 16LE: AF' register.
+	uint16_t BC2;	// 16LE: BC' register.
+	uint16_t DE2;	// 16LE: DE' register.
+	uint16_t HL2;	// 16LE: HL' register.
+
 	// Other registers.
 	uint8_t IFF;	// 8-bit: IFF flipflops. [0 0 0 0 0 0 IFF2 IFF1]
 	uint8_t R;	// 8-bit: R register.
@@ -377,10 +393,11 @@ in some cartridges.
 
 On Sega 8-bit systems, the Save RAM contents is stored as 8-bit data.
 
-On the Sega Mega Drive, the Save RAM is stored as 16-bit data, in Big-Endian
-format. Typically, the Save RAM chip is 8 bits wide, so only odd or even bytes
-are used; however, the full Save RAM is emulated in order to accomodate games
-that use either method.
+On the Sega Mega Drive, the Save RAM is technically 16-bit, since the system
+bus is 16-bit, but only 8-bit SRAM chips are used. Some games put the SRAM
+chip on odd bytes, and others use even bytes. In order to accomodate both
+types, the full 16-bit data is saved in its native format, which is considered
+"big-endian" by the CPU, but we're treating it as 8-bit.
 
 Save RAM should be initialized with 0xFF.
 
@@ -408,7 +425,7 @@ components that are specific to the Sega Mega Drive hardware.
 | VSRam.bin      |             80 |  16-bit BE |
 | YM2612_reg.bin |            512 |    None    |
 | M68K_mem.bin   |         65,536 |  16-bit BE |
-| M68K_reg.bin   |             74 |     BE     |
+| M68K_reg.bin   |             80 |     BE     |
 | IO.bin         |             16 |    8-bit   |
 | Z80_ctrl.bin   |              4 |   Varies   |
 | TIME_reg.bin   |            256 |    8-bit   |
@@ -430,7 +447,7 @@ Note: In most cases, only the lower 10 bits of each VSRam word are used.
 In interlaced mode, 11 bits are used.
 
 C equivalents for VSRam.bin:
-uint16_t md_vsram[40];		// 16-bit BE: Vertical Scroll RAM.
+uint16_t md_vsram[40];		// 16BE: Vertical Scroll RAM.
 uint16_t md_vsram[20][2];	// Alternate version with simplied A/B access.
 
 ----------------------------------------------------------------
@@ -457,7 +474,7 @@ Main memory is accessed in 16-bit words in big-endian notation.
 
 C equivalent for M68K_mem.bin:
 
-uint16_t m68k_mem[32768];	// 16-bit BE: M68K memory.
+uint16_t m68k_mem[32768];	// 16BE: M68K memory.
 
 ----------------------------------------------------------------
 
@@ -472,14 +489,14 @@ C equivalent for M68K_reg.bin:
 
 typedef struct _ZOMG_M68K_reg_t
 {
-	uint32_t dreg[8];	// 32-bit BE: Data registers.
-	uint32_t areg[7];	// 32-bit BE: Address registers. (a0-a6)
-	uint32_t ssp;		// 32-bit BE: Supervisor stack pointer. (a7/super)
-	uint32_t usp;		// 32-bit BE: User stack pointer. (a7/user)
-	uint32_t pc;		// 32-bit BE: Program counter.
-	uint16_t sr;		// 16-bit BE: Status register.
-	uint16_t reserved1;	// 16-bit BE: Reserved.
-	uint32_t reserved2;	// 32-bit BE: Reserved.
+	uint32_t dreg[8];	// 32BE: Data registers.
+	uint32_t areg[7];	// 32BE: Address registers. (a0-a6)
+	uint32_t ssp;		// 32BE: Supervisor stack pointer. (a7/super)
+	uint32_t usp;		// 32BE: User stack pointer. (a7/user)
+	uint32_t pc;		// 32BE: Program counter.
+	uint16_t sr;		// 16BE: Status register.
+	uint16_t reserved1;	// 16BE: Reserved.
+	uint32_t reserved2;	// 32BE: Reserved.
 } ZOMG_M68K_reg_t;
 
 ***WARNING***: The layout of ZOMG_M68K_reg_t has changed:
@@ -494,11 +511,11 @@ layout for M68K_reg.bin:
 
 typedef struct _ZOMG_M68K_reg_OLD_t
 {
-	uint32_t areg[8];	// 32-bit BE: Address registers.
-	uint32_t dreg[8];	// 32-bit BE: Data registers.
-	uint32_t pc;		// 32-bit BE: Program counter.
-	uint32_t asp;		// 32-bit BE: Alternate stack pointer.
-	uint16_t sr;		// 16-bit BE: Status register.
+	uint32_t areg[8];	// 32BE: Address registers.
+	uint32_t dreg[8];	// 32BE: Data registers.
+	uint32_t pc;		// 32BE: Program counter.
+	uint32_t asp;		// 32BE: Alternate stack pointer.
+	uint16_t sr;		// 16BE: Status register.
 } ZOMG_M68K_reg_OLD_t;
 
 asp is either User Stack Pointer if sr indicates supervisor mode,
@@ -575,12 +592,12 @@ typedef struct _ZOMG_MD_Z80_ctrl_t
 	uint8_t busreq;		// 8-bit: BUSREQ state.
 				// 0 == Z80 has the bus.
 				// 1 == M68K has the bus.
-	
+
 	uint8_t reset;		// 8-bit: RESET state.
 				// 0 == Z80 is RESET.
 				// 1 == Z80 is running.
-	
-	uint16_t m68k_bank;	// 16-bit BE: M68K banking register.
+
+	uint16_t m68k_bank;	// 16BE: M68K banking register.
 				// Low 9 bits of m68k_bank indicate
 				// high 9 bits of M68K address space
 				// for the Z80 banking space.
