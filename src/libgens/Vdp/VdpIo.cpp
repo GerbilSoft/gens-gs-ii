@@ -312,7 +312,7 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 				Spr_Addr = (val & 0x7E) << 9;
 			else
 				Spr_Addr = (val & 0x7F) << 9;
-			
+
 			// Update the Sprite Attribute Table.
 			// TODO: Only set this if the actual value has changed.
 			ms_UpdateFlags.VRam_Spr = 1;
@@ -328,15 +328,15 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 		case 11: {
 			// Mode Set 3.
 			static const uint8_t H_Scroll_Mask_Table[4] = {0x00, 0x07, 0xF8, 0xFF};
-			
+
 			// Check the Vertical Scroll mode. (Bit 3)
 			// 0: Full scrolling. (Mask == 0)
 			// 1: 2CELL scrolling. (Mask == 0x7E)
 			V_Scroll_MMask = ((val & 4) ? 0x7E : 0);
-			
+
 			// Horizontal Scroll mode
 			H_Scroll_Mask = H_Scroll_Mask_Table[val & 3];
-			
+
 			break;
 		}
 
