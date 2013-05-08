@@ -262,7 +262,7 @@ inline void Vdp::Update_Mode(void)
 
 
 /**
- * Vdp::Set_Reg(): Set the value of a register. (Mode 5 only!)
+ * Set the value of a register. (Mode 5 only!)
  * @param reg_num Register number.
  * @param val New value for the register.
  */
@@ -270,30 +270,29 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 {
 	if (reg_num < 0 || reg_num >= 24)
 		return;
-	
+
 	// Save the new register value.
 	VDP_Reg.reg[reg_num] = val;
-	
+
 	// Temporary value for calculation.
 	unsigned int tmp;
-	
+
 	// Update things affected by the register.
-	switch (reg_num)
-	{
+	switch (reg_num) {
 		case 0:
 		case 1:
 			// Mode Set 1, Mode Set 2.
 			Update_IRQ_Line();
-			
+
 			// Update the VDP mode.
 			Update_Mode();
 			break;
-		
+
 		case 2:
 			// Scroll A base address.
 			ScrA_Addr = (val & 0x38) << 10;
 			break;
-		
+
 		case 3:
 			// Window base address.
 			if (isH40())
@@ -301,12 +300,12 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 			else
 				Win_Addr = (val & 0x3E) << 10;	// H32.
 			break;
-		
+
 		case 4:
 			// Scroll B base address.
 			ScrB_Addr = (val & 0x07) << 13;
 			break;
-		
+
 		case 5:
 			// Sprite Attribute Table base address.
 			if (isH40())
@@ -318,16 +317,15 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 			// TODO: Only set this if the actual value has changed.
 			ms_UpdateFlags.VRam_Spr = 1;
 			break;
-		
+
 		case 7:
 			// Background Color.
 			// TODO: This is only valid for MD. SMS and GG function differently.
 			// NOTE: This will automatically mark CRam as dirty if the index has changed.
 			m_palette.setBgColorIdx(val & 0x3F);
 			break;
-		
-		case 11:
-		{
+
+		case 11: {
 			// Mode Set 3.
 			static const uint8_t H_Scroll_Mask_Table[4] = {0x00, 0x07, 0xF8, 0xFF};
 			
@@ -341,65 +339,61 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 			
 			break;
 		}
-		
+
 		case 12:
 			// Mode Set 4.
-			
+
 			// Update the Shadow/Highlight setting.
 			m_palette.setMdShadowHighlight(!!(VDP_Reg.m5.Set4 & 0x08));
-			
+
 			// H40 mode is activated by setting VDP_Reg.m5.Set4, bit 0 (0x01, RS1).
 			// Bit 7 (0x80, RS0) is also needed, but RS1 is what tells the VDP
 			// to increase the pixel counters to 320px per line.
 			// Source: http://wiki.megadrive.org/index.php?title=VDPRegs_Addendum (Jorge)
-			if (val & 0x01)
-			{
+			if (val & 0x01) {
 				// H40 mode.
 				H_Cell = 40;
 				H_Win_Shift = 6;
 				H_Pix = 320;
 				H_Pix_Begin = 0;
-				
+
 				// Check the window horizontal position.
 				Win_X_Pos = ((VDP_Reg.m5.Win_H_Pos & 0x1F) * 2);
 				if (Win_X_Pos > 40)
 					Win_X_Pos = 40;
-				
+
 				// Update the Window and Sprite Attribute Table base addresses.
 				Win_Addr = (VDP_Reg.m5.Pat_Win_Adr & 0x3C) << 10;
 				Spr_Addr = (VDP_Reg.m5.Spr_Att_Adr & 0x7E) << 9;
-			}
-			else
-			{
+			} else {
 				// H32 mode.
 				H_Cell = 32;
 				H_Win_Shift = 5;
 				H_Pix = 256;
 				H_Pix_Begin = 32;
-				
+
 				// Check the window horizontal position.
 				Win_X_Pos = ((VDP_Reg.m5.Win_H_Pos & 0x1F) * 2);
 				if (Win_X_Pos > 32)
 					Win_X_Pos = 32;
-				
+
 				// Update the Window and Sprite Attribute Table base addresses.
 				Win_Addr = (VDP_Reg.m5.Pat_Win_Adr & 0x3E) << 10;
 				Spr_Addr = (VDP_Reg.m5.Spr_Att_Adr & 0x7F) << 9;
 			}
-			
+
 			break;
-		
+
 		case 13:
 			// H Scroll Table base address.
 			H_Scroll_Addr = (val & 0x3F) << 10;
 			break;
-		
-		case 16:
-		{
+
+		case 16: {
 			// Scroll Size.
 			tmp = (val & 0x3);
 			tmp |= (val & 0x30) >> 2;
-			
+
 			/**
 			 * Scroll size table.
 			 * Format:
@@ -415,76 +409,62 @@ void Vdp::Set_Reg(int reg_num, uint8_t val)
 				uint8_t V_Scroll_CMask;
 				uint8_t reserved;
 			};
-			
+
 			static const Scroll_Size_Tbl_t Scroll_Size_Tbl[] =
 			{
 				// V32_H32 (VXX_H32)      // V32_H64 (VXX_H64)
 				{0x05, 0x1F, 0x1F, 0x00}, {0x06, 0x3F, 0x1F, 0x00},
 				// V32_HXX (V??_HXX)      // V32_H128 (V??_H128)
 				{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
-				
+
 				// V64_H32                // V64_H64 (V128_H64)
 				{0x05, 0x1F, 0x3F, 0x00}, {0x06, 0x3F, 0x3F, 0x00},
 				// V64_HXX (V??_HXX)      // V64_H128 (V??_H128)
 				{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
-				
+
 				// VXX_H32 (V32_H32)      // VXX_H64 (V32_H64)
 				{0x05, 0x1F, 0x1F, 0x00}, {0x06, 0x3F, 0x1F, 0x00},
 				// VXX_HXX (V??_HXX)      // VXX_H128 (V??_H128)
 				{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
-				
+
 				// V128_H32               // V128_H64 (V64_H64)
 				{0x05, 0x1F, 0x7F, 0x00}, {0x06, 0x3F, 0x3F, 0x00},
 				// V128_HXX (V??_HXX)     // V128_H128 (V??_H128)
 				{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00}
 			};
-			
+
 			// Get the values from the scroll size table.
 			H_Scroll_CMul  = Scroll_Size_Tbl[tmp].H_Scroll_CMul;
 			H_Scroll_CMask = Scroll_Size_Tbl[tmp].H_Scroll_CMask;
 			V_Scroll_CMask = Scroll_Size_Tbl[tmp].V_Scroll_CMask;
 			break;
 		}
-		
+
 		case 17:
 			// Window H position.
 			Win_X_Pos = ((val & 0x1F) * 2);
 			if (Win_X_Pos > H_Cell)
 				Win_X_Pos = H_Cell;
 			break;
-			
+
 		case 18:
 			// Window V position.
 			Win_Y_Pos = (val & 0x1F);
 			break;
-		
+
 		case 19:
-			// DMA Length Low.
-			DMA_Length = (DMA_Length & 0xFFFFFF00) | val;
-			break;
-		
 		case 20:
-			// DMA Length High.
-			DMA_Length = (DMA_Length & 0xFFFF00FF) | (val << 8);
+			// DMA Length.
 			break;
-		
+
 		case 21:
-			// DMA Address Low.
-			DMA_Address = (DMA_Address & 0xFFFFFF00) | val;
-			break;
-		
 		case 22:
-			// DMA Address Mid.
-			DMA_Address = (DMA_Address & 0xFFFF00FF) | (val << 8);
-			break;
-		
 		case 23:
-			// DMA Address High.
-			// Writing to this register starts a DMA transfer.
-			DMA_Address = (DMA_Address & 0xFF00FFFF) | ((val & 0x7F) << 16);
+			// DMA Source Address.
+			// High 2 bits of Reg.23 indicate DMA mode.
 			VDP_Ctrl.DMA_Mode = (val & 0xC0);
 			break;
-		
+
 		default:	// to make gcc shut up
 			break;
 	}
@@ -756,20 +736,19 @@ void Vdp::Write_Data_Byte(uint8_t data)
 
 
 /**
- * Vdp::DMA_Fill(): Perform a DMA Fill operation. (Called from VDP_Write_Data_Word().)
+ * Perform a DMA Fill operation. (Called from VDP_Write_Data_Word().)
  * @param data 16-bit data.
  */
 void Vdp::DMA_Fill(uint16_t data)
 {
 	// Set the VRam flag.
 	MarkVRamDirty();
-	
+
 	// Get the values. (length is in bytes)
 	// NOTE: DMA Fill uses *bytes* for length, not words!
 	uint16_t address = (VDP_Ctrl.Address & 0xFFFF);
-	unsigned int length = (DMA_Length & 0xFFFF);
-	if (length == 0)
-	{
+	int length = DMA_Length();
+	if (length == 0) {
 		// DMA length is 0. Set it to 65,536 words.
 		// TODO: This was actually not working in the asm,
 		// since I was testing for zero after an or/mov, expecting
@@ -777,60 +756,56 @@ void Vdp::DMA_Fill(uint16_t data)
 		// So I'm not sure if this is right or not.
 		length = 65536;
 	}
-	
+
 	// Set the DMA Busy flag.
 	Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, true);
-	
+
 	// TODO: Although we decrement DMAT_Length correctly based on
 	// DMA cycles per line, we fill everything immediately instead
 	// of filling at the correct rate.
 	// Perhaps this should be combined with DMA_LOOP.
-	DMA_Length = 0;		// Clear the DMA length.
+	set_DMA_Length(0);	// Clear the DMA length.
 	VDP_Ctrl.DMA = 0;	// Clear the DMA mode.
-	
+
 	// Set DMA type and length.
 	DMAT_Type = 0x02;	// DMA Fill.
 	DMAT_Length = length;
-	
+
 	// NOTE: DMA FILL seems to treat VRam as little-endian...
-	if (!(address & 1))
-	{
+	// TODO: Do DMA FILL line-by-line instead of all at once.
+	if (!(address & 1)) {
 		// Even VRam address.
-		
+
 		// Step 1: Write the VRam data to the current address. (little-endian)
 		VRam.u8[address] = (data & 0xFF);
 		address = ((address + 1) & 0xFFFF);
 		VRam.u8[address] = ((data >> 8) & 0xFF);
 		address = ((address - 1 + VDP_Reg.m5.Auto_Inc) & 0xFFFF);
-		
+
 		// Step 2: Write the high byte of the VRam data to the remaining addresses.
 		const uint8_t fill_hi = (data >> 8) & 0xFF;
-		do
-		{
+		do {
 			VRam.u8[address] = fill_hi;
 			address = ((address + VDP_Reg.m5.Auto_Inc) & 0xFFFF);
 		} while (--length != 0);
-	}
-	else
-	{
+	} else {
 		// Odd VRam address.
-		
+
 		// Step 1: Write the VRam data to the previous address. (big-endian)
 		address = ((address - 1) & 0xFFFF);
 		VRam.u8[address] = ((data >> 8) & 0xFF);
 		address = ((address + 1) & 0xFFFF);
 		VRam.u8[address] = (data & 0xFF);
 		address = ((address + VDP_Reg.m5.Auto_Inc) & 0xFFFF);
-		
+
 		// Step 2: Write the high byte of the VRam data to the remaining addresses.
 		const uint8_t fill_hi = (data >> 8) & 0xFF;
-		do
-		{
+		do {
 			VRam.u8[address] = fill_hi;
 			address = ((address + VDP_Reg.m5.Auto_Inc) & 0xFFFF);
 		} while (--length != 0);
 	}
-	
+
 	// Save the new address.
 	VDP_Ctrl.Address = (address & 0xFFFF);
 }
@@ -930,32 +905,31 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 	LOG_MSG(vdp_io, LOG_MSG_LEVEL_DEBUG2,
 		"<%d, %d> src_address == 0x%06X, dest_address == 0x%04X, length == %d",
 		src_component, dest_component, src_address, dest_address, length);
-	
+
 	// Save the DMA length for timing purposes.
 	DMAT_Length = length;
-	
+
 	// Mask the source address, depending on type.
-	switch (src_component)
-	{
+	switch (src_component) {
 		case DMA_SRC_ROM:
 			src_address &= 0x3FFFFE;
 			break;
-		
+
 		case DMA_SRC_M68K_RAM:
 			src_address &= 0xFFFE;
 			break;
-		
+
 		// TODO: Port to LibGens.
 #if 0
 		case DMA_SRC_PRG_RAM:
 			src_address = ((src_address & 0x1FFFE) + Bank_M68K);
 			break;
-		
+
 		case DMA_SRC_WORD_RAM_2M:
 			src_address -= 2;	// TODO: What is this for?
 			src_address &= 0x3FFFE;
 			break;
-		
+
 		case DMA_SRC_WORD_RAM_1M_0:
 		case DMA_SRC_WORD_RAM_1M_1:
 		case DMA_SRC_WORD_RAM_CELL_1M_0:
@@ -964,161 +938,153 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 			src_address &= 0x1FFFE;
 			break;
 #endif
-		
+
 		default:	// to make gcc shut up
 			break;
 	}
-	
+
 	// Determine if any flags should be set.
-	switch (dest_component)
-	{
+	switch (dest_component) {
 		case DMA_DEST_VRAM:
 			MarkVRamDirty();
 			DMAT_Type = 0;
 			break;
-		
+
 		case DMA_DEST_CRAM:
 			DMAT_Type = 1;
 			break;
-		
+
 		case DMA_DEST_VSRAM:
 			DMAT_Type = 1;
 			break;
-		
+
 		default:	// to make gcc shut up
 			break;
 	}
-	
+
 	VDP_Ctrl.DMA = 0;
-	
+
+	// Divide source address by 2 to get word addresses.
+	// This will help with 128 KB wrapping.
+	uint16_t src_word_address = (src_address >> 1);
+
 	// src_base_address is used to ensure 128 KB wrapping.
-	unsigned int src_base_address;
-	if (src_component != DMA_SRC_M68K_RAM)
-		src_base_address = (src_address & 0xFE0000);
-	
-	do
-	{
+	unsigned int src_base_address = ((src_address & 0xFE0000) >> 1);
+
+	// TODO: Do DMA MEM-to-VRAM line-by-line instead of all at once.
+	do {
 		// Get the word.
 		uint16_t w;
-		switch (src_component)
-		{
+		switch (src_component) {
 			case DMA_SRC_ROM:
-				w = M68K_Mem::Rom_Data.u16[src_address >> 1];
+				w = M68K_Mem::Rom_Data.u16[src_word_address | src_base_address];
 				break;
 			
 			case DMA_SRC_M68K_RAM:
-				//w = M68K_Mem::Ram_68k.u16[src_address >> 1];
-				w = Ram_68k.u16[src_address >> 1];
+				//w = M68K_Mem::Ram_68k.u16[src_word_address];
+				w = Ram_68k.u16[src_word_address];
 				break;
 			
 			// TODO: Port to LibGens.
 #if 0
 			case DMA_SRC_PRG_RAM:
 				// TODO: This is untested!
-				w = Ram_Prg.u16[src_address >> 1];
+				w = Ram_Prg.u16[src_word_address];
 				break;
-			
+
 			case DMA_SRC_WORD_RAM_2M:
-				w = Ram_Word_2M.u16[src_address >> 1];
+				w = Ram_Word_2M.u16[src_word_address];
 				break;
-			
+
 			case DMA_SRC_WORD_RAM_1M_0:
 				// TODO: This is untested!
-				w = Ram_Word_1M.u16[src_address >> 1];
+				w = Ram_Word_1M.u16[src_word_address];
 				break;
-			
+
 			case DMA_SRC_WORD_RAM_1M_1:
 				// TODO: This is untested!
-				w = Ram_Word_1M.u16[(src_address + 0x20000) >> 1];
+				w = Ram_Word_1M.u16[src_word_address + (0x20000 >> 1)];
 				break;
-			
+
 			case DMA_SRC_WORD_RAM_CELL_1M_0:
 				// TODO: This is untested!
 				// Cell conversion is required.
-				w = Cell_Conv_Tab[src_address >> 1];
+				w = Cell_Conv_Tab[src_word_address];
 				w = Ram_Word_1M.u16[w];
 				break;
-			
+
 			case DMA_SRC_WORD_RAM_CELL_1M_1:
 				// TODO: This is untested!
 				// Cell conversion is required.
-				w = Cell_Conv_Tab[src_address >> 1];
+				w = Cell_Conv_Tab[src_word_address];
 				w = Ram_Word_1M.u16[w + (0x20000 >> 1)];
 				break;
 #endif
-			
+
 			default:	// to make gcc shut up
 				w = 0;	// NOTE: Remove this once everything is ported to LibGens.
 				break;
 		}
-		
-		// Increment the source address.
-		// TODO: The 128 KB wrapping causes garbage on TmEE's mmf.bin (correct),
-		// but the garbage doesn't match Kega Fusion.
-		if (src_component == DMA_SRC_M68K_RAM)
-			src_address = ((src_address + 2) & 0xFFFF);
-		else
-			src_address = (((src_address + 2) & 0x1FFFF) | src_base_address);
-		
+
+		// Increment the source word address.
+		src_word_address++;
+
 		// Write the word.
-		switch (dest_component)
-		{
+		// TODO: Might not work if Auto_Inc is odd...
+		switch (dest_component) {
 			case DMA_DEST_VRAM:
 				if (dest_address & 1)
 					w = (w << 8 | w >> 8);
 				VRam.u16[dest_address >> 1] = w;
 				break;
-			
+
 			case DMA_DEST_CRAM:
 				m_palette.writeCRam_16(dest_address, w);
 				break;
-			
+
 			case DMA_DEST_VSRAM:
 				// TODO: Mask off high bits? (Only 10/11 bits are present.)
 				VSRam.u16[dest_address >> 1] = w;
 				break;
-			
+
 			default:	// to make gcc shut up
 				break;
 		}
-		
+
 		dest_address = ((dest_address + VDP_Reg.m5.Auto_Inc) & 0xFFFF);
-		
+
 		// Check for CRam or VSRam destination overflow.
 		if (dest_component == DMA_DEST_CRAM ||
 		    dest_component == DMA_DEST_VSRAM)
 		{
-			if (dest_address >= 0x80)
-			{
+			if (dest_address >= 0x80) {
 				// CRam/VSRam overflow!
 				length--;	// for this word
 				break;
 			}
 		}
 	} while (--length != 0);
-	
+
 	// Save the new destination address.
 	VDP_Ctrl.Address = dest_address;
-	
+
 	// If any bytes weren't copied, subtract it from the saved length.
 	DMAT_Length -= length;
-	if (DMAT_Length <= 0)
-	{
+	if (DMAT_Length <= 0) {
 		// No DMA left!
 		Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, false);
 		return;
 	}
-	
+
 	// Save the new source address.
 	// NOTE: The new DMA_Address is the wrapped version.
 	// The old asm code saved the unwrapped version.
 	// Ergo, it simply added length to DMA_Address.
-	DMA_Address += DMAT_Length;
-	DMA_Address &= 0x7FFFFF;
-	
+	inc_DMA_Src_Adr(DMAT_Length);
+
 	// Update DMA.
 	Update_DMA();
-	
+
 	// NOTE: main68k_releaseCycles() takes no parameters,
 	// but the actual function subtracts eax from __io_cycle_counter.
 	// eax was equal to DMAT_Length.
@@ -1133,87 +1099,82 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 void Vdp::Write_Ctrl(uint16_t data)
 {
 	// TODO: Check endianness with regards to the control words. (Wordswapping!)
-	
+
 	// Check if this is the first or second control word.
-	if (!VDP_Ctrl.ctrl_latch)
-	{
+	if (!VDP_Ctrl.ctrl_latch) {
 		// First control word.
 		// Check if this is an actual control word or a register write.
-		if ((data & 0xC000) == 0x8000)
-		{
+		if ((data & 0xC000) == 0x8000) {
 			// Register write.
 			VDP_Ctrl.Access = (VDEST_LOC_VRAM | VDEST_ACC_READ);	// Implicitly set VDP access mode to VRAM READ.
 			VDP_Ctrl.Address = 0x0000;	// Reset the address counter.
-			
+
 			const int reg = (data >> 8) & 0x1F;
 			Set_Reg(reg, (data & 0xFF));
 			return;
 		}
-		
+
 		// Control word.
 		VDP_Ctrl.Data.w[0] = data;
 		VDP_Ctrl.ctrl_latch = true;	// Latch the first control word.
-		
+
 		// Determine the VDP address.
 		VDP_Ctrl.Address = (data & 0x3FFF);
 		VDP_Ctrl.Address |= ((VDP_Ctrl.Data.w[1] & 0x3) << 14);
-		
+
 		// Determine the VDP destination.
 		unsigned int CD_Offset = ((data >> 14) & 0x3);
 		CD_Offset |= ((VDP_Ctrl.Data.w[1] & 0xF0) >> 2);
 		VDP_Ctrl.Access = (CD_Table[CD_Offset] & 0xFF);
 		return;
 	}
-	
+
 	// Second control word.
 	VDP_Ctrl.Data.w[1] = data;
 	VDP_Ctrl.ctrl_latch = false;	// Clear the control word latch.
-	
+
 	// Determine the VDP address.
 	VDP_Ctrl.Address = (VDP_Ctrl.Data.w[0] & 0x3FFF);
 	VDP_Ctrl.Address |= ((data & 3) << 14);
-	
+
 	// Determine the destination.
 	unsigned int CD_Offset = ((VDP_Ctrl.Data.w[0] >> 14) & 0x3);
 	CD_Offset |= ((data & 0xF0) >> 2);
 	uint16_t CD = CD_Table[CD_Offset];
 	VDP_Ctrl.Access = (CD & 0xFF);
-	
+
 	// High byte of CD is the DMA access mode.
-	if (!(CD & 0xFF00))
-	{
+	if (!(CD & 0xFF00)) {
 		// No DMA is needed.
 		return;
 	}
-	
+
 	/** Perform a DMA operation. **/
-	
+
 	// Check if DMA is enabled.
-	if (!(VDP_Reg.m5.Set2 & 0x10))
-	{
+	if (!(VDP_Reg.m5.Set2 & 0x10)) {
 		// DMA is disabled.
 		VDP_Ctrl.DMA = 0;
 		return;
 	}
-	
+
 	// Check for DMA FILL.
-	if ((CD & VDEST_DMA_FILL) && (VDP_Ctrl.DMA_Mode == 0x80))
-	{
+	if ((CD & VDEST_DMA_FILL) && (VDP_Ctrl.DMA_Mode == 0x80)) {
 		// DMA FILL.
 		VDP_Ctrl.DMA = ((CD >> 8) & 0xFF);
 		return;
 	}
-	
+
 	// DMA access mode is the high byte in the CD_Table[] word.
 	CD >>= 8;
-	
+
 	// Determine the DMA destination.
 	DMA_Dest_t dest_component = (DMA_Dest_t)(CD & 0x03);	// 0 == invalid; 1 == VRam; 2 == CRam; 3 == VSRam
-	
+
 	// Get the DMA addresses.
-	unsigned int src_address = DMA_Address;				// Src Address / 2
+	unsigned int src_address = DMA_Src_Adr();		// Src Address / 2
 	uint16_t dest_address = (VDP_Ctrl.Address & 0xFFFF);	// Dest Address
-	
+
 	// Check for CRam or VSRam destination overflow.
 	if (dest_component == DMA_DEST_CRAM ||
 	    dest_component == DMA_DEST_VSRAM)
@@ -1223,240 +1184,221 @@ void Vdp::Write_Ctrl(uint16_t data)
 		// We'll mask it with 0xFF for now.
 		// TODO: Figure out what the actual mask should be later.
 		dest_address &= 0xFF;
-		if (dest_address >= 0x80)
-		{
+		if (dest_address >= 0x80) {
 			// CRam/VSRam overflow! Don't do anything.
 			VDP_Ctrl.DMA = 0;
 			return;
 		}
 	}
-	
-	int length = (DMA_Length & 0xFFFF);
-	if (length == 0)
-	{
+
+	int length = DMA_Length();
+	if (length == 0) {
 		// DMA length is zero.
-		if (VdpEmuOptions.zeroLengthDMA)
-		{
+		if (VdpEmuOptions.zeroLengthDMA) {
 			// Zero-Length DMA transfers are enabled.
 			// Ignore this request.
 			VDP_Ctrl.DMA = 0;
 			return;
 		}
-		
+
 		// Zero-Length DMA trnasfers are disabled.
 		// The MD VDP decrements the DMA length counter before checking if it has
 		// reached zero. So, doing a zero-length DMA request will actually do a
 		// DMA request for 65,536 words.
 		length = 0x10000;
 	}
-	
+
 	// Check for DMA COPY.
-	if (VDP_Ctrl.DMA_Mode == 0xC0)
-	{
+	if (VDP_Ctrl.DMA_Mode == 0xC0) {
 		// DMA COPY.
 		src_address &= 0xFFFF;
 		Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, true);	// Set the DMA BUSY bit.
-		DMA_Length = 0;
+		set_DMA_Length(0);
 		DMAT_Length = length;
 		DMAT_Type = 0x3;
 		MarkVRamDirty();
-		
+
 		// TODO: Is this correct with regards to endianness?
-		do
-		{
+		// TODO: Do DMA COPY line-by-line instead of all at once.
+		do {
 			VRam.u8[dest_address] = VRam.u8[src_address];
-			
+
 			// Increment the addresses.
 			src_address = ((src_address + 1) & 0xFFFF);
 			dest_address = ((dest_address + VDP_Reg.m5.Auto_Inc) & 0xFFFF);
 		} while (--length != 0);
-		
+
 		// Save the new addresses.
-		DMA_Address = src_address;
+		// NOTE: DMA COPY uses bytes, not words.
+		inc_DMA_Src_Adr(DMAT_Length);	// TODO: Should DMA_Src_Adr_H be cleared?
 		VDP_Ctrl.Address = dest_address;
-		//VDP_Do_DMA_COPY_asm(src_address, dest_address, length, VDP_Reg.m5.Auto_Inc);
 		return;
 	}
-	
-	if (VDP_Ctrl.DMA_Mode & 0x80)
-	{
+
+	if (VDP_Ctrl.DMA_Mode & 0x80) {
 		// TODO: What does this mean?
 		VDP_Ctrl.DMA = 0;
 		return;
 	}
-	
+
 	// Multiply the source address by two to get the real source address.
 	src_address *= 2;
-	
+
 	// Determine the source component.
 	DMA_Src_t src_component = DMA_SRC_ROM;	// TODO: Determine a better default.
 	int WRam_Mode;
-	if (src_address < M68K_Mem::Rom_Size)
-	{
+	if (src_address < M68K_Mem::Rom_Size) {
 		// Main ROM.
 		src_component = DMA_SRC_ROM;
-		goto DMA_Src_OK;
-	}
-	if (!SysStatus.SegaCD)
-	{
+	} else if (!SysStatus.SegaCD) {
 		// SegaCD is not started. Assume M68K RAM.
 		// TODO: This includes invalid addresses!
 		src_component = DMA_SRC_M68K_RAM;
-		goto DMA_Src_OK;
-	}
-	
-	// SegaCD is started.
-	if (src_address >= 0x240000)
-	{
-		// Assume M68K RAM.
-		// TODO: This includes invalid addresses!
-		src_component = DMA_SRC_M68K_RAM;
-		goto DMA_Src_OK;
-	}
-	else if (src_address < 0x40000)
-	{
-		// Program RAM.
-		src_component = DMA_SRC_PRG_RAM;
-		goto DMA_Src_OK;
-	}
-	
-	// Word RAM. Check the Word RAM state to determine the mode.
-	// TODO: Determine how this works.
-	// TODO: Port to LibGens.
+	} else {
+		// SegaCD is started.
+		if (src_address >= 0x240000) {
+			// Assume M68K RAM.
+			// TODO: This includes invalid addresses!
+			src_component = DMA_SRC_M68K_RAM;
+		} else if (src_address < 0x40000) {
+			// Program RAM.
+			src_component = DMA_SRC_PRG_RAM;
+		} else {
+			// Word RAM. Check the Word RAM state to determine the mode.
+			// TODO: Determine how this works.
+			// TODO: Port to LibGens.
 #if 0
-	WRam_Mode = (Ram_Word_State & 0x03) + 3;
-	if (WRam_Mode < 5 || src_address < 0x220000)
-	{
-		src_component = (DMA_Src_t)WRam_Mode;
-		goto DMA_Src_OK;
-	}
-	src_component = (DMA_Src_t)(WRam_Mode + 2);
+			WRam_Mode = (Ram_Word_State & 0x03) + 3;
+			if (WRam_Mode < 5 || src_address < 0x220000) {
+				src_component = (DMA_Src_t)WRam_Mode;
+			} else {
+				src_component = (DMA_Src_t)(WRam_Mode + 2);
+			}
 #endif
+		}
+	}
 
-DMA_Src_OK:
-	
 	// Set the DMA BUSY bit.
 	Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, true);
-	
-	switch (DMA_TYPE(src_component, dest_component))
-	{
+
+	switch (DMA_TYPE(src_component, dest_component)) {
 		case DMA_TYPE(DMA_SRC_ROM, DMA_DEST_VRAM):
 			T_DMA_Loop<DMA_SRC_ROM, DMA_DEST_VRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_ROM, DMA_DEST_CRAM):
 			T_DMA_Loop<DMA_SRC_ROM, DMA_DEST_CRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_ROM, DMA_DEST_VSRAM):
 			T_DMA_Loop<DMA_SRC_ROM, DMA_DEST_VSRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_M68K_RAM, DMA_DEST_VRAM):
 			T_DMA_Loop<DMA_SRC_M68K_RAM, DMA_DEST_VRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_M68K_RAM, DMA_DEST_CRAM):
 			T_DMA_Loop<DMA_SRC_M68K_RAM, DMA_DEST_CRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_M68K_RAM, DMA_DEST_VSRAM):
 			T_DMA_Loop<DMA_SRC_M68K_RAM, DMA_DEST_VSRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_PRG_RAM, DMA_DEST_VRAM):
 			// TODO: This is untested!
 			T_DMA_Loop<DMA_SRC_PRG_RAM, DMA_DEST_VRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_PRG_RAM, DMA_DEST_CRAM):
 			// TODO: This is untested!
 			T_DMA_Loop<DMA_SRC_PRG_RAM, DMA_DEST_CRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_PRG_RAM, DMA_DEST_VSRAM):
 			// TODO: This is untested!
 			T_DMA_Loop<DMA_SRC_PRG_RAM, DMA_DEST_VSRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_WORD_RAM_2M, DMA_DEST_VRAM):
 			T_DMA_Loop<DMA_SRC_WORD_RAM_2M, DMA_DEST_VRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_WORD_RAM_2M, DMA_DEST_CRAM):
 			T_DMA_Loop<DMA_SRC_WORD_RAM_2M, DMA_DEST_CRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_WORD_RAM_2M, DMA_DEST_VSRAM):
 			T_DMA_Loop<DMA_SRC_WORD_RAM_2M, DMA_DEST_VSRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_WORD_RAM_1M_0, DMA_DEST_VRAM):
 			// TODO: This is untested!
 			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_0, DMA_DEST_VRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_WORD_RAM_1M_0, DMA_DEST_CRAM):
 			// TODO: This is untested!
 			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_0, DMA_DEST_CRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_WORD_RAM_1M_0, DMA_DEST_VSRAM):
 			// TODO: This is untested!
 			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_0, DMA_DEST_VSRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_WORD_RAM_1M_1, DMA_DEST_VRAM):
 			// TODO: This is untested!
 			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_1, DMA_DEST_VRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_WORD_RAM_1M_1, DMA_DEST_CRAM):
 			// TODO: This is untested!
 			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_1, DMA_DEST_CRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_WORD_RAM_1M_1, DMA_DEST_VSRAM):
 			// TODO: This is untested!
 			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_1, DMA_DEST_VSRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_VRAM):
 			// TODO: This is untested!
 			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_VRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_CRAM):
 			// TODO: This is untested!
 			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_CRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_VSRAM):
 			// TODO: This is untested!
 			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_VSRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_VRAM):
 			// TODO: This is untested!
 			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_VRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_CRAM):
 			// TODO: This is untested!
 			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_CRAM>(src_address, dest_address, length);
 			break;
-		
+
 		case DMA_TYPE(DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_VSRAM):
 			// TODO: This is untested!
 			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_VSRAM>(src_address, dest_address, length);
 			break;
-		
+
 		default:
 			// Invalid DMA mode.
 			VDP_Ctrl.DMA = 0;
 			break;
 	}
-	
+
 	return;
 }
 

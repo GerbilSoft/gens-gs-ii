@@ -89,24 +89,42 @@ class Vdp
 	public:
 		// VDP registers.
 		VdpTypes::VdpReg_t VDP_Reg;
-	
-		/** DMA variables. **/
+
 	private:
-		// These two variables are internal to Gens.
-		// They don't map to any actual VDP registers.
-		// TODO: Do we need separate DMA_Length variables,
-		// or are the DMA length and address registers used by the VDP?
-		int DMA_Length;
-		unsigned int DMA_Address;
-	
+		// DMA helper functions.
+
+		/**
+		 * Get the DMA length from the VDP Mode 5 registers.
+		 * @return DMA length.
+		 */
+		inline uint16_t DMA_Length(void);
+
+		/**
+		 * Set the DMA length in the VDP Mode 5 registers.
+		 * @param length DMA length.
+		 */
+		inline void set_DMA_Length(uint16_t length);
+
+		/**
+		 * Get the DMA source address from the VDP Mode 5 registers.
+		 * @return DMA source address, divided by 2.
+		 */
+		inline uint32_t DMA_Src_Adr(void);
+
+		/**
+		 * Increment the DMA source address from the VDP Mode 5 registers.
+		 * Implements 128 KB wrapping, so only use this from DMA functions!
+		 * @param length Number of words to increment the source address by.
+		 */
+		inline void inc_DMA_Src_Adr(uint16_t length);
+
 		// DMAT variables.
 		// TODO: Mark DMAT_Length private.
 	public:	
 		int DMAT_Length;
 	private:
-		unsigned int DMAT_Tmp;
 		unsigned int DMAT_Type;
-	
+
 	private:
 		/** VDP address functions: Get Pointers. **/
 		uint16_t *ScrA_Addr_Ptr16(uint16_t offset);
@@ -576,6 +594,55 @@ inline bool Vdp::isH40(void) const
 	// to increase the pixel counters to 320px per line.
 	// Source: http://wiki.megadrive.org/index.php?title=VDPRegs_Addendum (Jorge)
 	return (VDP_Reg.m5.Set4 & 0x01);
+}
+
+/**
+ * Get the DMA length from the VDP Mode 5 registers.
+ * @return DMA length.
+ */
+inline uint16_t Vdp::DMA_Length(void)
+{
+	return (VDP_Reg.m5.DMA_Length_H << 8) |
+	       (VDP_Reg.m5.DMA_Length_L);
+}
+
+/**
+ * Set the DMA length in the VDP Mode 5 registers.
+ * @param length DMA length.
+ */
+inline void Vdp::set_DMA_Length(uint16_t length)
+{
+	VDP_Reg.m5.DMA_Length_H = (length >> 8);
+	VDP_Reg.m5.DMA_Length_L = (length & 0xFF);
+}
+
+/**
+ * Get the DMA source address from the VDP Mode 5 registers.
+ * @return DMA source address, divided by 2.
+ */
+inline uint32_t Vdp::DMA_Src_Adr(void)
+{
+	return ((VDP_Reg.m5.DMA_Src_Adr_H & 0x7F) << 16) |
+		(VDP_Reg.m5.DMA_Src_Adr_M << 8) |
+		(VDP_Reg.m5.DMA_Src_Adr_L);
+}
+
+/**
+ * Increment the DMA source address from the VDP Mode 5 registers.
+ * Implements 128 KB wrapping, so only use this from DMA functions!
+ * @param length Number of words to increment the source address by.
+ */
+inline void Vdp::inc_DMA_Src_Adr(uint16_t length)
+{
+	uint16_t src_adr = (VDP_Reg.m5.DMA_Src_Adr_M << 8) |
+			   (VDP_Reg.m5.DMA_Src_Adr_L);
+
+	// Increment the address with 16-bit overflow.
+	src_adr += length;
+
+	// Save the new address.
+	VDP_Reg.m5.DMA_Src_Adr_M = (src_adr >> 8);
+	VDP_Reg.m5.DMA_Src_Adr_L = (src_adr & 0xFF);
 }
 
 /** VDP address functions: Get Pointers. **/

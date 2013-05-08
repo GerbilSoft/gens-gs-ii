@@ -135,9 +135,6 @@ void Vdp::reset(void)
 	}
 	
 	// Reset the DMA variables.
-	DMA_Length = 0;
-	DMA_Address = 0;
-	DMAT_Tmp = 0;
 	DMAT_Length = 0;
 	DMAT_Type = 0;
 	
