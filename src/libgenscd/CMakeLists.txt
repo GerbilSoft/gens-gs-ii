@@ -24,6 +24,7 @@ ENDIF()
 
 # Build the library.
 ADD_LIBRARY(genscd STATIC ${libgenscd_SRCS})
+TARGET_LINK_LIBRARIES(genscd genstext)
 
 # LibGensCD test program.
 SET(genscd_test_SRCS

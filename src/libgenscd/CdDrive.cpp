@@ -29,6 +29,9 @@
 #include <string>
 using std::string;
 
+// String manipulation.
+#include "libgenstext/StringManip.hpp"
+
 // TODO: Byteorder headers from LibGens.
 // Assuming LE host for now.
 #define __swab16(x) (((x) << 8) | ((x) >> 8))
@@ -244,11 +247,10 @@ int CdDrivePrivate::inquiry(void)
 	// Drive inquiry successful.
 	// Get the information.
 	// TODO: Validate that device type is 0x05. (DTYPE_CDROM)
-	// TODO: Trim spaces in vendor, model, and firmware.
 	inq_data.scsi_device_type = resp.PeripheralDeviceType;
-	inq_data.vendor = string(resp.vendor_id, sizeof(resp.vendor_id));
-	inq_data.model = string(resp.product_id, sizeof(resp.product_id));
-	inq_data.firmware = string(resp.product_revision_level, sizeof(resp.product_revision_level));
+	inq_data.vendor = LibGensText::SpaceElim(string(resp.vendor_id, sizeof(resp.vendor_id)));
+	inq_data.model = LibGensText::SpaceElim(string(resp.product_id, sizeof(resp.product_id)));
+	inq_data.firmware = LibGensText::SpaceElim(string(resp.product_revision_level, sizeof(resp.product_revision_level)));
 
 	// SCSI_INQUIRY completed successfully.
 	inq_data.inq_status = CdDrivePrivate::INQ_SUCCESSFUL;
