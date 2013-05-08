@@ -39,6 +39,7 @@ SET(libzomg_SRCS
 	ZomgLoad.cpp
 	ZomgSave.cpp
 	zomg_byteswap.c
+	ZomgIni.cpp
 	)
 
 # Build the library.

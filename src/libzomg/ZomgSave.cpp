@@ -26,12 +26,17 @@
 
 #include "Zomg.hpp"
 #include "zomg_byteswap.h"
+#include "ZomgIni.hpp"
 
 // C includes. (C++ namespace)
 #include <cstdint>
 #include <cstring>
 #include <cassert>
 #include <cstdlib>
+
+// C++ includes.
+#include <string>
+using std::string;
 
 namespace LibZomg
 {
@@ -92,6 +97,24 @@ int Zomg::saveToZomg(const utf8_str *filename, const void *buf, int len)
 
 // TODO: Determine siz and is16bit from the system type?
 // (once FORMAT.ini is implemented)
+
+
+/**
+ * Save ZOMG.ini.
+ * This function MUST be called before any other function when saving!
+ * @param zomgIni ZomgIni class with information about the savestate.
+ * @return 0 on success; non-zero on error.
+ */
+int Zomg::saveZomgIni(const ZomgIni *zomgIni)
+{
+	string zomgIniStr = zomgIni->save();
+	if (zomgIniStr.empty())
+		return -1;
+
+	// Write ZOMG.ini to the ZOMG file.
+	// TODO: Set a flag indicating ZOMG.ini has been saved.
+	return saveToZomg("ZOMG.ini", zomgIniStr.data(), zomgIniStr.size());
+}
 
 
 /**
