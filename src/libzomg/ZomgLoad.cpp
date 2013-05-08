@@ -240,9 +240,7 @@ int Zomg::loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl)
 	for (int i = 0; i < 4; i++)
 		ctrl->data_fifo[i] = be16_to_cpu(ctrl->data_fifo[i]);
 	
-	// DMA
-	ctrl->dma_src_address = be32_to_cpu(ctrl->dma_src_address);
-	ctrl->dma_length = be16_to_cpu(ctrl->dma_length);
+	// DMA (TODO)
 	
 	// Clear the reserved fields.
 	ctrl->reserved2 = 0;

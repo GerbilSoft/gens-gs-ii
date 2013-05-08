@@ -121,9 +121,7 @@ typedef struct _Zomg_VdpCtrl_16_t
 	uint8_t data_fifo_count;	// 8-bit: Number of words currently in the FIFO.
 	uint8_t reserved2;
 	
-	// TODO: Finalize DMA registers.
-	uint32_t dma_src_address;	// 32-bit BE: DMA source address.
-	uint16_t dma_length;		// 16-bit BE: DMA length.
+	// TODO: Internal DMA mode registers,
 } Zomg_VdpCtrl_16_t;
 #pragma pack()
 
