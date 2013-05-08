@@ -179,7 +179,13 @@ class EmuContext
 		
 		/** VDP (TODO) **/
 		Vdp *m_vdp;
-	
+
+		/**
+		 * Get the Rom class being used by this emulator context.
+		 * @return Rom class.
+		 */
+		const Rom *rom(void) const;
+
 	protected:
 		Rom *m_rom;
 		bool m_saveDataEnable;
@@ -229,6 +235,13 @@ inline bool EmuContext::saveDataEnable(void)
 	{ return m_saveDataEnable; }
 inline void EmuContext::setSaveDataEnable(bool newSaveDataEnable)
 	{ m_saveDataEnable = newSaveDataEnable; }
+
+/**
+ * Get the Rom class being used by this emulator context.
+ * @return Rom class.
+ */
+inline const Rom *EmuContext::rom(void) const
+	{ return m_rom; }
 
 }
 

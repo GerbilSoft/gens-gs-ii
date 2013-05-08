@@ -27,6 +27,7 @@
  */
 
 #include "GensZomg.hpp"
+#include "lg_main.hpp"
 
 #include "Vdp/Vdp.hpp"
 #include "sound/SoundMgr.hpp"
@@ -38,6 +39,7 @@
 
 // ZOMG save structs.
 #include "libzomg/Zomg.hpp"
+#include "libzomg/ZomgIni.hpp"
 #include "libzomg/zomg_vdp.h"
 #include "libzomg/zomg_psg.h"
 #include "libzomg/zomg_ym2612.h"
@@ -48,8 +50,11 @@
 
 // C includes.
 #include <stdint.h>
-#include <string.h>
 #include <unistd.h>
+
+// C includes. (C++ namespace)
+#include <cstring>
+#include <cstdio>
 
 // C++ includes.
 #include <string>
@@ -223,7 +228,38 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	LibZomg::Zomg zomg(filename, LibZomg::Zomg::ZOMG_SAVE);
 	if (!zomg.isOpen())
 		return -1;
-	
+
+	// Create ZOMG.ini.
+	// TODO: Get System ID and Region from the emulated system information.
+	LibZomg::ZomgIni zomgIni;
+	zomgIni.setSystemId("MD");
+	zomgIni.setCreator("Gens/GS II");
+
+	// LibGens version.
+	// TODO: Add easy "MDP version to string" function.
+	char lg_version_str[16];
+	snprintf(lg_version_str, sizeof(lg_version_str), "%d.%d.%d",
+		(LibGens::version >> 24),
+		((LibGens::version >> 16) & 0xFF),
+		(LibGens::version & 0xFF));
+	zomgIni.setCreatorVersion(string(lg_version_str));
+	if (LibGens::version_vcs)
+		zomgIni.setCreatorVcsVersion(string(LibGens::version_vcs));
+
+	// TODO: Get username for debugging builds. Make this optional later.
+	zomgIni.setAuthor("Joe User");
+	// TODO: Trim base path from the filename.
+	zomgIni.setRomFilename(context->rom()->filename());
+	zomgIni.setDescription("Some description; should probably\nbe left\\blank.");
+	zomgIni.setExtensions("EXT,THAT,DOESNT,EXIST,LOL");
+
+	// Save ZOMG.ini.
+	int ret = zomg.saveZomgIni(&zomgIni);
+	if (ret != 0) {
+		// Error saving ZOMG.ini.
+		return ret;
+	}
+
 	// If a preview image was specified, save it.
 	if (img_buf && img_siz > 0)
 		zomg.savePreview(img_buf, img_siz);
