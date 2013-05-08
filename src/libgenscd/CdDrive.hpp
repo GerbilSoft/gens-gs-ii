@@ -70,6 +70,12 @@ class CdDrive
 		void forceCacheUpdate(void);
 
 		/**
+		 * Check if this is actually a CD-ROM drive.
+		 * @return True if this is a CD-ROM drive; false if not.
+		 */
+		bool isCdromDrive(void);
+
+		/**
 		 * Check if a disc is present.
 		 * @return True if a disc is present; false if not.
 		 */

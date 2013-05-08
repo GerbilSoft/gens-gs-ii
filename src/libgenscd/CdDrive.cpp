@@ -246,7 +246,6 @@ int CdDrivePrivate::inquiry(void)
 
 	// Drive inquiry successful.
 	// Get the information.
-	// TODO: Validate that device type is 0x05. (DTYPE_CDROM)
 	inq_data.scsi_device_type = resp.PeripheralDeviceType;
 	inq_data.vendor = LibGensText::SpaceElim(string(resp.vendor_id, sizeof(resp.vendor_id)));
 	inq_data.model = LibGensText::SpaceElim(string(resp.product_id, sizeof(resp.product_id)));
@@ -256,7 +255,18 @@ int CdDrivePrivate::inquiry(void)
 	inq_data.inq_status = CdDrivePrivate::INQ_SUCCESSFUL;
 
 	// Get the CD_DriveType_t.
-	inq_data.driveType = discTypesToDriveType(getSupportedDiscTypes());
+	// TODO: Close the SCSI device immediately if it's not a CD-ROM drive?
+	switch (inq_data.scsi_device_type) {
+		case SCSI_DEVICE_TYPE_CDROM:
+			inq_data.driveType = discTypesToDriveType(getSupportedDiscTypes());
+			break;
+		case SCSI_DEVICE_TYPE_DASD:
+			inq_data.driveType = DRIVE_TYPE_HDD;
+			break;
+		default:
+			inq_data.driveType = DRIVE_TYPE_NOT_OPTICAL;
+			break;
+	}
 
 	return 0;
 }
@@ -738,6 +748,17 @@ std::string CdDrive::dev_firmware(void)
 void CdDrive::forceCacheUpdate(void)
 {
 	d->updateCache(true);
+}
+
+/**
+ * Check if this is actually a CD-ROM drive.
+ * @return True if this is a CD-ROM drive; false if not.
+ */
+bool CdDrive::isCdromDrive(void)
+{
+	if (!d->isInquirySuccessful())
+		return false;
+	return (d->inq_data.driveType > DRIVE_TYPE_NOT_OPTICAL);
 }
 
 /**
