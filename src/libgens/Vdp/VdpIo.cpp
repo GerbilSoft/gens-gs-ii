@@ -266,7 +266,7 @@ inline void Vdp::Update_Mode(void)
  * @param reg_num Register number.
  * @param val New value for the register.
  */
-void Vdp::Set_Reg(int reg_num, uint8_t val)
+void Vdp::setReg(int reg_num, uint8_t val)
 {
 	if (reg_num < 0 || reg_num >= 24)
 		return;
@@ -1110,7 +1110,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 			VDP_Ctrl.Address = 0x0000;	// Reset the address counter.
 
 			const int reg = (data >> 8) & 0x1F;
-			Set_Reg(reg, (data & 0xFF));
+			setReg(reg, (data & 0xFF));
 			return;
 		}
 

@@ -106,14 +106,14 @@ void Vdp::reset(void)
 {
 	// Reset the VDP rendering arrays.
 	rend_reset();
-	
+
 	// Clear VRam and VSRam.
 	memset(&VRam, 0x00, sizeof(VRam));
 	memset(&VSRam, 0x00, sizeof(VSRam));
-	
+
 	// Reset the palette. (Includes CRam.)
 	m_palette.reset();
-	
+
 	/**
 	 * VDP registers.
 	 * Default register values: (Mode 5)
@@ -129,23 +129,23 @@ void Vdp::reset(void)
 		0x00, 0x00, 0xFF, 0x00, 0x81, 0x00, 0x00, 0x02,
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
-	
+
 	for (int i = 0; i < ARRAY_SIZE(vdp_reg_init_m5); i++) {
-		Set_Reg(i, vdp_reg_init_m5[i]);
+		setReg(i, vdp_reg_init_m5[i]);
 	}
-	
+
 	// Reset the DMA variables.
 	DMAT_Length = 0;
 	DMAT_Type = 0;
-	
+
 	// VDP status register.
 	// (Maintain the status of the PAL/NTSC bit.)
 	const bool isPal = Reg_Status.isPal();
 	Reg_Status.reset(isPal);
-	
+
 	// Other variables.
 	VDP_Int = 0;
-	
+
 	// VDP control struct.
 	VDP_Ctrl.Data.d = 0;
 	VDP_Ctrl.Access = 0;
@@ -153,10 +153,10 @@ void Vdp::reset(void)
 	VDP_Ctrl.DMA_Mode = 0;
 	VDP_Ctrl.DMA = 0;
 	VDP_Ctrl.ctrl_latch = false;
-	
+
 	// Set the VDP update flags.
 	MarkVRamDirty();
-	
+
 	// Initialize the Horizontal Interrupt counter.
 	HInt_Counter = VDP_Reg.m5.H_Int;
 }

@@ -229,24 +229,29 @@ class Vdp
 		/** Interrupt functions. **/
 		uint8_t Int_Ack(void);
 		void Update_IRQ_Line(void);
-		
+
 		// Lines.
 		void updateVdpLines(bool resetCurrent);
 		void Check_NTSC_V30_VBlank(void);
-		
-		void Set_Reg(int reg_num, uint8_t val);
-		
+
+		/**
+		 * Set the value of a register. (Mode 5 only!)
+		 * @param reg_num Register number.
+		 * @param val New value for the register.
+		 */
+		void setReg(int reg_num, uint8_t val);
+
 		uint8_t Read_H_Counter(void);
 		uint8_t Read_V_Counter(void);
 		uint16_t Read_Status(void);
 		uint16_t Read_Data(void);
-		
+
 		unsigned int Update_DMA(void);
 		
 		void Write_Data_Byte(uint8_t data);
 		void Write_Data_Word(uint16_t data);
 		void Write_Ctrl(uint16_t data);
-		
+
 		/**
 		 * GetHPix(): Get the current horizontal resolution.
 		 * NOTE: Do NOT use this if a ROM isn't loaded!

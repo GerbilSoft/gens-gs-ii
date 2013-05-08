@@ -199,14 +199,14 @@ void VdpSpriteMaskingTest::SetUp(void)
 	m_vdp->setNtsc();
 
 	// Set initial registers.
-	m_vdp->Set_Reg(0x00, 0x04);	// Enable the palette. (?)
-	m_vdp->Set_Reg(0x01, 0x44);	// Enable the display, set Mode 5.
-	m_vdp->Set_Reg(0x02, 0x30);	// Set scroll A name table base to 0xC000.
-	m_vdp->Set_Reg(0x04, 0x05);	// Set scroll B name table base to 0xA000.
-	m_vdp->Set_Reg(0x05, 0x70);	// Set the sprite table base to 0xE000.
-	m_vdp->Set_Reg(0x0D, 0x3F);	// Set the HScroll table base to 0xFC00.
-	m_vdp->Set_Reg(0x10, 0x01);	// Set the scroll size to V32 H64.
-	m_vdp->Set_Reg(0x0F, 0x02);	// Set the auto-increment value to 2.
+	m_vdp->setReg(0x00, 0x04);	// Enable the palette. (?)
+	m_vdp->setReg(0x01, 0x44);	// Enable the display, set Mode 5.
+	m_vdp->setReg(0x02, 0x30);	// Set scroll A name table base to 0xC000.
+	m_vdp->setReg(0x04, 0x05);	// Set scroll B name table base to 0xA000.
+	m_vdp->setReg(0x05, 0x70);	// Set the sprite table base to 0xE000.
+	m_vdp->setReg(0x0D, 0x3F);	// Set the HScroll table base to 0xFC00.
+	m_vdp->setReg(0x10, 0x01);	// Set the scroll size to V32 H64.
+	m_vdp->setReg(0x0F, 0x02);	// Set the auto-increment value to 2.
 
 	// Initialize CRam.
 	LibGens::VdpPalette *palette = &m_vdp->m_palette;
@@ -231,9 +231,9 @@ void VdpSpriteMaskingTest::SetUp(void)
 
 	// Set the screen mode.
 	if (mode.screenMode == SCREEN_MODE_H32)
-		m_vdp->Set_Reg(0x0C, 0x00);
+		m_vdp->setReg(0x0C, 0x00);
 	else
-		m_vdp->Set_Reg(0x0C, 0x81);
+		m_vdp->setReg(0x0C, 0x81);
 
 	// Set the VRam dirty flag.
 	m_vdp->MarkVRamDirty();

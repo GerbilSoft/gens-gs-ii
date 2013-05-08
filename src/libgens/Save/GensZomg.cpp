@@ -96,7 +96,7 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 	// TODO: On MD, load the DMA information from the savestate.
 	// Writing to register 23 changes the DMA status.
 	for (int i = 23; i >= 0; i--) {
-		context->m_vdp->Set_Reg(i, vdp_reg[i]);
+		context->m_vdp->setReg(i, vdp_reg[i]);
 	}
 
 	// Load VRam.
