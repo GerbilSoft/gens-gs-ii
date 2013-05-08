@@ -459,9 +459,12 @@ void Vdp::setReg(int reg_num, uint8_t val)
 
 		case 21:
 		case 22:
+			// DMA Source Address: Low, Mid.
+			break;
+
 		case 23:
-			// DMA Source Address.
-			// High 2 bits of Reg.23 indicate DMA mode.
+			// DMA Source Address: High.
+			// High 2 bits indicate DMA mode.
 			VDP_Ctrl.DMA_Mode = (val & 0xC0);
 			break;
 
@@ -1172,7 +1175,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 	DMA_Dest_t dest_component = (DMA_Dest_t)(CD & 0x03);	// 0 == invalid; 1 == VRam; 2 == CRam; 3 == VSRam
 
 	// Get the DMA addresses.
-	unsigned int src_address = DMA_Src_Adr();		// Src Address / 2
+	uint32_t src_address = DMA_Src_Adr();			// Src Address / 2
 	uint16_t dest_address = (VDP_Ctrl.Address & 0xFFFF);	// Dest Address
 
 	// Check for CRam or VSRam destination overflow.
