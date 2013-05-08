@@ -248,8 +248,31 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 
 	// TODO: Get username for debugging builds. Make this optional later.
 	zomgIni.setAuthor("Joe User");
-	// TODO: Trim base path from the filename.
-	zomgIni.setRomFilename(context->rom()->filename());
+
+	// TODO: Move base path triming code to LibGensText later?
+	string rom_filename(context->rom()->filename());
+	rom_filename += "/";
+#ifdef _WIN32
+	const char chr_slash = '\\';
+#else
+	const char chr_slash = '/';
+#endif
+	size_t slash_pos = rom_filename.find_last_of(chr_slash);
+	if (slash_pos != string::npos) {
+		if ((slash_pos + 1) <= rom_filename.size() && slash_pos > 0) {
+			// Check for another slash.
+			slash_pos = rom_filename.find_last_of(chr_slash, slash_pos - 1);
+			if (slash_pos != string::npos) {
+				// Trim the filename.
+				rom_filename = rom_filename.substr(slash_pos + 1);
+			}
+		} else {
+			// Trim the filename.
+			rom_filename = rom_filename.substr(slash_pos + 1);
+		}
+	}
+	zomgIni.setRomFilename(rom_filename);
+
 	zomgIni.setDescription("Some description; should probably\nbe left\\blank.");
 	zomgIni.setExtensions("EXT,THAT,DOESNT,EXIST,LOL");
 
