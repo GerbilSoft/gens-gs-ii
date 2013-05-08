@@ -21,6 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+/**
+ * References:
+ * - "VDP 128Kb Extended VRAM mode"
+ *   - http://gendev.spritesmind.net/forum/viewtopic.php?t=1368
+ */
+
 #ifndef __LIBGENS_MD_VDPREG_HPP__
 #define __LIBGENS_MD_VDPREG_HPP__
 
@@ -40,7 +46,7 @@ namespace VdpTypes
 			/**
 			 * Mode 5 (MD) registers.
 			 */
-			
+
 			/**
 			 * Register 0: Mode Set 1.
 			 * [   0    0   LCB  IE1    0 PSEL   M3    0]
@@ -53,11 +59,12 @@ namespace VdpTypes
 			 * M3: HV counter latch. (1 == stop HV counter; 0 == enable read, H, V counter)
 			 */
 			uint8_t Set1;
-			
+
 			/**
 			 * Register 1: Mode Set 2.
-			 * [   0 DISP   IE0   M1   M2   M5    0    0]
+			 * [128K DISP   IE0   M1   M2   M5    0    0]
 			 * 
+			 * 128K: Extended VRAM mode. (1 == on; 0 == off)
 			 * DISP: Display Enable. (1 == on; 0 == off)
 			 * IE0: Enable V interrupt. (1 == on; 0 == off)
 			 * M1: DMA Enable. (1 == on; 0 == off)
@@ -65,36 +72,38 @@ namespace VdpTypes
 			 * M5: Mode 4/5 toggle. (1 == M5; 0 == M4)
 			 */
 			uint8_t Set2;
-			
+
 			/**
 			 * Register 2: Pattern name table base address for Scroll A.
 			 * [   x    x SA15 SA14 SA13    x    x    x]
 			 */
 			uint8_t Pat_ScrA_Adr;
-			
+
 			/**
 			 * Register 3: Pattern name table base address for Window.
 			 * [   x    x WD15 WD14 WD13 WD12 WD11    x]
 			 */
 			uint8_t Pat_Win_Adr;
-			
+
 			/**
 			 * Register 4: Pattern name table base address for Scroll B.
 			 * [   x    x    x    x    x SB15 SB14 SB13]
 			 */
 			uint8_t Pat_ScrB_Adr;
-			
+
 			/**
 			 * Register 5: Sprite Attribute Table base address.
 			 * [   x AT15 AT14 AT13 AT12 AT11 AT10  AT9]
 			 */
 			uint8_t Spr_Att_Adr;
-			
+
 			/**
-			 * Register 6: Unused.
+			 * Register 6: Sprite Pattern Generator base address.
+			 * NOTE: ONLY used in 128 KB VRAM mode!
+			 * [   x    x AP16    x    x    x    x    x]
 			 */
-			uint8_t Reg6;
-			
+			uint8_t Spr_Pat_Adr;
+
 			/**
 			 * Register 7: Background color.
 			 * [   x    x CPT1 CPT0 COL3 COL2 COL1 COL0]
@@ -152,9 +161,14 @@ namespace VdpTypes
 			uint8_t H_Scr_Adr;
 			
 			/**
-			 * Register 14: Unused.
+			 * Register 14: Pattern data base address.
+			 * NOTE: ONLY used in 128 KB VRAM mode!
+			 * [   x    x    x PB16    x    x    x PA16]
+			 *
+			 * PA16: When set, layer A is rebased to the upper 64 KB.
+			 * PB16: When this and PA16 are set, layer B is rebased to the upper 64KB.
 			 */
-			uint8_t Reg14;
+			uint8_t Pat_Data_Adr;
 			
 			/**
 			 * Register 15: Auto Increment Data.
@@ -218,12 +232,12 @@ namespace VdpTypes
 			* TODO: Add register descriptions.
 			*/
 			uint8_t Set1;		// Mode Set 1. [ VSI  HSI  LCB  IE1   SS   M4   M3   ES]
-			uint8_t Set2;		// Mode Set 2. [   1 DISP  IE0   M1   M2    0   SZ  MAG]
-			uint8_t NameTbl_Addr;	// Name table base address. [0 0 0 0 A13 A12 A11 *A10]
-			uint8_t ColorTbl_Addr;	// Color table base address.
-			uint8_t	Pat_BG_Addr;	// Background Pattern Generator base address.
-			uint8_t Spr_Att_Addr;	// Sprite Attribute Table base address. [0 A13 A12 A11 A10 A9 A8 *A7]
-			uint8_t Spr_Pat_addr;	// Sprite Pattern Generator base address. [0 0 0 0 0 A13 *A12 *A11]
+			uint8_t Set2;		// Mode Set 2. [DRAM DISP  IE0   M1   M2    0   SZ  MAG]
+			uint8_t NameTbl_Adr;	// Name table base address. [0 0 0 0 A13 A12 A11 *A10]
+			uint8_t ColorTbl_Adr;	// Color table base address.
+			uint8_t	Pat_BG_Adr;	// Background Pattern Generator base address.
+			uint8_t Spr_Att_Adr;	// Sprite Attribute Table base address. [0 A13 A12 A11 A10 A9 A8 *A7]
+			uint8_t Spr_Pat_Adr;	// Sprite Pattern Generator base address. [0 0 0 0 0 A13 *A12 *A11]
 			uint8_t BG_Color;	// Background color. [0 0 0 0 BG3 BG2 BG1 BG0]
 			uint8_t H_Scroll;	// Horizontal scroll. [8-bit]
 			uint8_t V_Scroll;	// Vertical scroll. [8-bit]
