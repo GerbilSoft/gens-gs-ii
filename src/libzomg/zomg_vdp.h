@@ -112,7 +112,7 @@ typedef struct _Zomg_VdpCtrl_16_t
 
 	uint16_t ctrl_word[2];		// 16BE: VDP control words.
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
-	uint8_t access;			// 8-bit: Read/Write location. (TODO: Define this!)
+	uint8_t access;			// 8-bit: Read/Write location. (See LibGens::Vdp::VDEST_t.)
 
 	uint16_t address;		// 16BE: VDP address counter.
 	uint16_t status;		// 16BE: VDP status register.
@@ -122,6 +122,7 @@ typedef struct _Zomg_VdpCtrl_16_t
 	uint8_t reserved2;
 	
 	// TODO: Internal DMA mode registers,
+	uint8_t dma_access;		// 8-bit: DMA access mode. (See LibGens::Vdp::VDEST_t.)
 } Zomg_VdpCtrl_16_t;
 #pragma pack()
 

@@ -242,14 +242,18 @@ typedef struct _ZOMG_VDP_ctrl_16_t
 	uint8_t data_fifo_count;	// 8-bit: Number of words currently in the FIFO.
 	uint8_t reserved2;
 
-	// TODO: Finalize DMA registers.
+	// TODO: Internal DMA mode registers,
+	uint8_t dma_access;		// 8-bit: DMA access mode. (See LibGens::Vdp::VDEST_t.)
 } ZOMG_VDP_ctrl_16_t;
 
-The "access" field is a 16-bit bitfield that indicates the VDP's current
-read/write source or destination. The low byte is for regular VDP functions,
-while the high byte is for DMA functions.
+The "access" field is an 8-bit bitfield that indicates the VDP's current
+memory read or write mode, as well as its source or destination.
 
-In Gens/GS II, the bitfield is defined as follows:
+In Gens/GS II, "access" is a 16-bit bitfield, where the low byte maps to
+standard VDP operations (i.e. the "access" field), and the high byte maps
+to DMA operations (i.e. the "dma_access" field). The two bytes are split
+in the ZOMG savestate format in order to maintain some binary compatibility
+with TMS9918A and SMS modes.
 
 enum VDEST_t {
 	// 0x0000: INVALID.
