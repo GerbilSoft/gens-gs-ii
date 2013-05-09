@@ -155,7 +155,7 @@ void Vdp::reset(void)
 	// VDP control struct.
 	VDP_Ctrl.data[0] = 0;
 	VDP_Ctrl.data[1] = 0;
-	VDP_Ctrl.Access = 0;
+	VDP_Ctrl.Access = 0;	// TODO: Initialize to (VDEST_LOC_VRAM | VDEST_ACC_READ)?
 	VDP_Ctrl.Address = 0;
 	VDP_Ctrl.DMA_Mode = 0;
 	VDP_Ctrl.DMA = 0;
