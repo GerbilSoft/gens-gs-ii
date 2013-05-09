@@ -23,8 +23,11 @@
 
 #include "Vdp.hpp"
 
-// C includes.
-#include <string.h>
+// C includes. (C++ namespace)
+#include <cstring>
+
+// LOG_MSG() subsystem.
+#include "macros/log_msg.h"
 
 // ARRAY_SIZE(x)
 #include "macros/common.h"
@@ -174,12 +177,31 @@ void Vdp::zomgSaveMD(LibZomg::Zomg *zomg) const
 {
 	// NOTE: This is MD only.
 	// TODO: Assert if called when not emulating MD VDP.
+	// TODO: Error handling.
 
 	// Save the user-accessible VDP registers.
 	// TODO: Move "24" to a const somewhere.
 	zomg->saveVdpReg(VDP_Reg.reg, 24);
 
-	// TODO: Save internal registers.
+	// Save the internal registers.
+	Zomg_VdpCtrl_16_t ctrl_reg;
+	ctrl_reg.header = ZOMG_VDPCTRL_16_HEADER;
+	ctrl_reg.ctrl_word[0] = VDP_Ctrl.data[0];
+	ctrl_reg.ctrl_word[1] = VDP_Ctrl.data[1];
+	ctrl_reg.ctrl_latch = !!VDP_Ctrl.ctrl_latch;
+	ctrl_reg.access = VDP_Ctrl.Access;
+	ctrl_reg.address = VDP_Ctrl.Address;
+	ctrl_reg.status = Reg_Status.read_raw();
+
+	// TODO: Implement the FIFO.
+	memset(ctrl_reg.data_fifo, 0x00, sizeof(ctrl_reg.data_fifo));
+	ctrl_reg.data_fifo_count = 0;
+
+	// Make sure reserved fields are zero.
+	ctrl_reg.reserved2 = 0;
+
+	zomg->saveVdpCtrl_16(&ctrl_reg);
+
 	// TODO: Save DMA status.
 
 	// Save VRam.
@@ -203,6 +225,7 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 {
 	// NOTE: This is MD only.
 	// TODO: Assert if called when not emulating MD VDP.
+	// TODO: Error handling.
 
 	// Load the user-accessible VDP registers.
 	// TODO: Move "24" to a const somewhere.
@@ -215,7 +238,25 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 		setReg(i, vdp_reg[i]);
 	}
 
-	// TODO: Load internal registers.
+	// Load the internal registers.
+	// NOTE: LibZomg verifies that the header is correct.
+	Zomg_VdpCtrl_16_t ctrl_reg;
+	int ret = zomg->loadVdpCtrl_16(&ctrl_reg);
+	if (ret > 0) {
+		VDP_Ctrl.data[0] = ctrl_reg.ctrl_word[0];
+		VDP_Ctrl.data[1] = ctrl_reg.ctrl_word[1];
+		VDP_Ctrl.ctrl_latch = !!ctrl_reg.ctrl_latch;
+		VDP_Ctrl.Access = ctrl_reg.access;
+		VDP_Ctrl.Address = ctrl_reg.address;
+		Reg_Status.write_raw(ctrl_reg.status);
+
+		// TODO: Implement the FIFO.
+	} else {
+		// TODO: Handle this error...
+		LOG_MSG(vdp_m5, LOG_MSG_LEVEL_WARNING,
+			"WARNING: zomg-LoadVdpCtrl_16() failed: error %d\n", ret);
+	}
+
 	// TODO: Load DMA status.
 
 	// Load VRam.
