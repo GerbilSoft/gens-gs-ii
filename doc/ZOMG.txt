@@ -214,7 +214,7 @@ typedef struct _ZOMG_VDP_ctrl_8_t
 	uint8_t ctrl_byte[2];		// 8-bit: VDP control bytes.
 	uint16_t reserved1;
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
-	uint8_t dest;			// 8-bit: Read/Write location. (TODO)
+	uint8_t access;			// 8-bit: Read/Write location. (TODO: Define this!)
 
 	uint16_t address;		// 16BE: VDP address counter.
 	uint8_t status;			// 8-bit: VDP status register.
@@ -223,6 +223,9 @@ typedef struct _ZOMG_VDP_ctrl_8_t
 	uint8_t data_read_buffer;	// 8-bit: Data read buffer.
 } ZOMG_VDP_ctrl_8_t;
 
+TODO: Definitions of "access" for Sega 8-bit. It'll probably be the same
+as the low byte of "access" for Sega Mega Drive.
+
 // 16-bit VDP (Mega Drive)
 typedef struct _ZOMG_VDP_ctrl_16_t
 {
@@ -230,7 +233,7 @@ typedef struct _ZOMG_VDP_ctrl_16_t
 
 	uint16_t ctrl_word[2];		// 16BE: VDP control words.
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
-	uint8_t dest;			// 8-bit: Read/Write location. (TODO)
+	uint8_t access;			// 8-bit: Read/Write location.
 
 	uint16_t address;		// 16BE: VDP address counter.
 	uint16_t status;		// 16BE: VDP status register.
@@ -240,9 +243,50 @@ typedef struct _ZOMG_VDP_ctrl_16_t
 	uint8_t reserved2;
 
 	// TODO: Finalize DMA registers.
-	uint32_t dma_src_address;	// 32-bit BE: DMA source address.
-	uint16_t dma_length;		// 16-bit BE: DMA length.
 } ZOMG_VDP_ctrl_16_t;
+
+The "access" variable is a 16-bit bitfield that indicates the VDP's current
+read/write source or destination. The low byte is for regular VDP functions,
+while the high byte is for DMA functions.
+
+In Gens/GS II, the bitfield is defined as follows:
+
+enum VDEST_t {
+	// 0x0000: INVALID.
+	VDEST_INVALID		= 0x0000,
+
+	// Bits 0-2: Location. 
+	VDEST_LOC_INVALID	= 0x0000,
+	VDEST_LOC_VRAM		= 0x0001,
+	VDEST_LOC_CRAM		= 0x0002,
+	VDEST_LOC_VSRAM		= 0x0003,
+
+	// Bits 3-4: Access. (R/W)
+	VDEST_ACC_INVALID	= 0x0000,
+	VDEST_ACC_READ		= 0x0004,
+	VDEST_ACC_WRITE		= 0x0008,
+
+	// Bits 8-11: DMA MEM to VRAM: destination
+	VDEST_DMA_MEM_TO_INVALID	= 0x0000,
+	VDEST_DMA_MEM_TO_VRAM		= 0x0100,
+	VDEST_DMA_MEM_TO_CRAM		= 0x0200,
+	VDEST_DMA_MEM_TO_VSRAM		= 0x0300,
+
+	// Bit 12: DMA VRAM FILL.
+	VDEST_DMA_NO_FILL	= 0x0000,
+	VDEST_DMA_FILL		= 0x0400,
+
+	// Bit 13: DMA VRAM COPY.
+	VDEST_DMA_NO_COPY	= 0x0000,
+	VDEST_DMA_COPY		= 0x0800,
+};
+
+Attempting to read data while the access mode is set to WRITE will
+result in an invalid read, while attempting to write data while the
+access mode is set to READ will do nothing.
+
+After a register write command, the access mode is initialized to
+(VDEST_LOC_VRAM | VDEST_ACC_READ).
 
 ----------------------------------------------------------------
 
