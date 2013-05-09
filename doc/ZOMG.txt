@@ -285,6 +285,10 @@ Attempting to read data while the access mode is set to WRITE will
 result in an invalid read, while attempting to write data while the
 access mode is set to READ will do nothing.
 
+Note that while DMA MEM to VRAM, FILL, and COPY have separate bits,
+they cannot be used simultaneously. The separate bits is merely to
+distinguish each mode from one another.
+
 After a register write command, the access mode is initialized to
 (VDEST_LOC_VRAM | VDEST_ACC_READ).
 
