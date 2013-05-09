@@ -203,6 +203,7 @@ void Vdp::zomgSaveMD(LibZomg::Zomg *zomg) const
 	zomg->saveVdpCtrl_16(&ctrl_reg);
 
 	// TODO: Save DMA status.
+	ctrl_reg.dma_access = ((VDP_Ctrl.Access >> 8) & 0xFF);
 
 	// Save VRam.
 	zomg->saveVRam(VRam.u16, sizeof(VRam.u16), ZOMG_BYTEORDER_16H);
@@ -246,7 +247,7 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 		VDP_Ctrl.data[0] = ctrl_reg.ctrl_word[0];
 		VDP_Ctrl.data[1] = ctrl_reg.ctrl_word[1];
 		VDP_Ctrl.ctrl_latch = !!ctrl_reg.ctrl_latch;
-		VDP_Ctrl.Access = ctrl_reg.access;
+		VDP_Ctrl.Access = (ctrl_reg.access | (ctrl_reg.dma_access << 8));
 		VDP_Ctrl.Address = ctrl_reg.address;
 		Reg_Status.write_raw(ctrl_reg.status);
 
