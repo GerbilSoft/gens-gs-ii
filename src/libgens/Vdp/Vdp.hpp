@@ -213,7 +213,9 @@ class Vdp
 		#define VDP_MODE_M5	(1 << 4)
 		unsigned int VDP_Mode;
 
+	public:
 		// VRam, VSRam.
+		// NOTE: VdpSpriteMaskingTest requires access to these variables.
 		VdpTypes::VRam_t VRam;
 		VdpTypes::VSRam_t VSRam;
 
