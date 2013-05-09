@@ -166,7 +166,7 @@ class VdpPalette
 		//static void Adjust_CRam_32X(void);
 		
 		/** ZOMG savestate functions. **/
-		void zomgSaveCRam(Zomg_CRam_t *cram);
+		void zomgSaveCRam(Zomg_CRam_t *cram) const;
 		void zomgRestoreCRam(const Zomg_CRam_t *cram);
 	
 	private:

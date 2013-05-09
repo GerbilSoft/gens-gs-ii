@@ -1029,15 +1029,19 @@ void Adjust_CRam_32X(void)
 
 /**
  * Save the CRam.
- * @param state Zomg_PsgSave_t struct to save to.
+ * @param state Zomg_CRam_t struct to save to.
  */
-void VdpPalette::zomgSaveCRam(Zomg_CRam_t *cram)
+void VdpPalette::zomgSaveCRam(Zomg_CRam_t *cram) const
 {
 	// TODO: Support systems other than MD.
 	memcpy(cram->md, m_cram.u16, sizeof(cram->md));
 }
 
 
+/**
+ * Load the CRam.
+ * @param state Zomg_CRam_t struct to save to.
+ */
 void VdpPalette::zomgRestoreCRam(const Zomg_CRam_t *cram)
 {
 	// TODO: Support systems other than MD.
