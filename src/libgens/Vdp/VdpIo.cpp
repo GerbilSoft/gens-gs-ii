@@ -1107,30 +1107,30 @@ void Vdp::Write_Ctrl(uint16_t data)
 		}
 
 		// Control word.
-		VDP_Ctrl.Data.w[0] = data;
+		VDP_Ctrl.data[0] = data;
 		VDP_Ctrl.ctrl_latch = true;	// Latch the first control word.
 
 		// Determine the VDP address.
 		VDP_Ctrl.Address = (data & 0x3FFF);
-		VDP_Ctrl.Address |= ((VDP_Ctrl.Data.w[1] & 0x3) << 14);
+		VDP_Ctrl.Address |= ((VDP_Ctrl.data[1] & 0x3) << 14);
 
 		// Determine the VDP destination.
 		unsigned int CD_Offset = ((data >> 14) & 0x3);
-		CD_Offset |= ((VDP_Ctrl.Data.w[1] & 0xF0) >> 2);
+		CD_Offset |= ((VDP_Ctrl.data[1] & 0xF0) >> 2);
 		VDP_Ctrl.Access = (CD_Table[CD_Offset] & 0xFF);
 		return;
 	}
 
 	// Second control word.
-	VDP_Ctrl.Data.w[1] = data;
+	VDP_Ctrl.data[1] = data;
 	VDP_Ctrl.ctrl_latch = false;	// Clear the control word latch.
 
 	// Determine the VDP address.
-	VDP_Ctrl.Address = (VDP_Ctrl.Data.w[0] & 0x3FFF);
+	VDP_Ctrl.Address = (VDP_Ctrl.data[0] & 0x3FFF);
 	VDP_Ctrl.Address |= ((data & 3) << 14);
 
 	// Determine the destination.
-	unsigned int CD_Offset = ((VDP_Ctrl.Data.w[0] >> 14) & 0x3);
+	unsigned int CD_Offset = ((VDP_Ctrl.data[0] >> 14) & 0x3);
 	CD_Offset |= ((data & 0xF0) >> 2);
 	uint16_t CD = CD_Table[CD_Offset];
 	VDP_Ctrl.Access = (CD & 0xFF);

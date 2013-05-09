@@ -150,7 +150,8 @@ void Vdp::reset(void)
 	VDP_Int = 0;
 
 	// VDP control struct.
-	VDP_Ctrl.Data.d = 0;
+	VDP_Ctrl.data[0] = 0;
+	VDP_Ctrl.data[1] = 0;
 	VDP_Ctrl.Access = 0;
 	VDP_Ctrl.Address = 0;
 	VDP_Ctrl.DMA_Mode = 0;
