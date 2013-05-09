@@ -31,7 +31,7 @@ extern "C" {
 #endif
 
 /**
- * vdp_reg: VDP registers.
+ * VDP registers.
  * File: common/vdp_reg.bin
  * NOTE: Byteswapping is done in Zomg.cpp when saving/loading.
  */
@@ -45,7 +45,7 @@ typedef union _vdp_reg
 #pragma pack()
 
 /**
- * VdpCtrl_8: VDP control registers. (8-bit)
+ * VDP control registers. (8-bit)
  * File: common/vdp_ctrl.bin
  * NOTE: Byteswapping is done in Zomg.cpp when saving/loading.
  */
@@ -53,23 +53,23 @@ typedef union _vdp_reg
 #pragma pack(1)
 typedef struct _Zomg_VdpCtrl_8_t
 {
-	uint32_t header;		// 32-bit BE: Should be "SMS " (0x534D5320)
-	
+	uint32_t header;		// 32BE: Should be "SMS " (0x534D5320)
+
 	uint8_t ctrl_byte[2];		// 8-bit: VDP control bytes.
 	uint16_t reserved1;
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
-	uint8_t dest;			// 8-bit: Read/Write location. (TODO)
-	
-	uint16_t address;		// 16-bit BE: VDP address counter.
+	uint8_t access;			// 8-bit: Read/Write location. (TODO: Define this!)
+
+	uint16_t address;		// 16BE: VDP address counter.
 	uint8_t status;			// 8-bit: VDP status register.
 	uint8_t reserved2;
-	
+
 	uint8_t data_read_buffer;	// 8-bit: Data read buffer.
 } Zomg_VdpCtrl_8_t;
 #pragma pack()
 
 /**
- * VRam: Video RAM.
+ * Video RAM.
  * File: common/VRam.bin
  * NOTE: Byteswapping is done in Zomg.cpp when saving/loading.
  */
@@ -82,7 +82,7 @@ typedef union _Zomg_VRam_t
 #pragma pack()
 
 /**
- * CRam: Color RAM.
+ * Color RAM.
  * File: common/CRam.bin
  * NOTE: Byteswapping is done in Zomg.cpp when saving/loading.
  */
@@ -100,7 +100,7 @@ typedef union _Zomg_CRam_t
 /** MD-specific. **/
 
 /**
- * VdpCtrl_16: VDP control registers. (16-bit)
+ * VDP control registers. (16-bit)
  * File: common/vdp_ctrl.bin
  * NOTE: Byteswapping is done in Zomg.cpp when saving/loading.
  */
@@ -108,16 +108,16 @@ typedef union _Zomg_CRam_t
 #pragma pack(1)
 typedef struct _Zomg_VdpCtrl_16_t
 {
-	uint32_t header;		// 32-bit BE: Should be "MD  " (0x4D442020)
-	
-	uint16_t ctrl_word[2];		// 16-bit BE: VDP control words.
+	uint32_t header;		// 32BE: Should be "MD  " (0x4D442020)
+
+	uint16_t ctrl_word[2];		// 16BE: VDP control words.
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
-	uint8_t dest;			// 8-bit: Read/Write location. (TODO)
-	
-	uint16_t address;		// 16-bit BE: VDP address counter.
-	uint16_t status;		// 16-bit BE: VDP status register.
-	
-	uint16_t data_fifo[4];		// 16-bit BE: Data FIFO. (4 words)
+	uint8_t access;			// 8-bit: Read/Write location. (TODO: Define this!)
+
+	uint16_t address;		// 16BE: VDP address counter.
+	uint16_t status;		// 16BE: VDP status register.
+
+	uint16_t data_fifo[4];		// 16BE: Data FIFO. (4 words)
 	uint8_t data_fifo_count;	// 8-bit: Number of words currently in the FIFO.
 	uint8_t reserved2;
 	
@@ -127,7 +127,7 @@ typedef struct _Zomg_VdpCtrl_16_t
 
 #pragma pack(1)
 /**
- * MD_VSRam: Vertical Scroll RAM.
+ * Vertical Scroll RAM.
  * File: MD/VSRam.bin
  */
 typedef struct _Zomg_MD_VSRam_t
