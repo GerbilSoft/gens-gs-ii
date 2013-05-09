@@ -89,29 +89,7 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 	// TODO: Load everything first, *then* copy it to LibGens.
 
 	/** VDP **/
-
-	// Load the VDP registers.
-	uint8_t vdp_reg[24];
-	zomg.loadVdpReg(vdp_reg, 24);
-	// TODO: On MD, load the DMA information from the savestate.
-	// Writing to register 23 changes the DMA status.
-	for (int i = 23; i >= 0; i--) {
-		context->m_vdp->setReg(i, vdp_reg[i]);
-	}
-
-	// Load VRam.
-	zomg.loadVRam(context->m_vdp->VRam.u16, sizeof(context->m_vdp->VRam.u16), ZOMG_BYTEORDER_16H);
-	context->m_vdp->MarkVRamDirty();
-
-	// Load CRam.
-	Zomg_CRam_t cram;
-	zomg.loadCRam(&cram, ZOMG_BYTEORDER_16H);
-	context->m_vdp->m_palette.zomgRestoreCRam(&cram);
-
-	/** VDP: MD-specific **/
-
-	// Load VSRam.
-	zomg.loadMD_VSRam(context->m_vdp->VSRam.u16, sizeof(context->m_vdp->VSRam.u16), ZOMG_BYTEORDER_16H);
+	context->m_vdp->zomgRestoreMD(&zomg);
 
 	/** Audio **/
 
@@ -292,22 +270,7 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	// TODO: Load everything first, *then* copy it to LibGens.
 	
 	/** VDP **/
-	
-	// Save the VDP registers.
-	zomg.saveVdpReg(context->m_vdp->VDP_Reg.reg, 24);
-	
-	// Save VRam.
-	zomg.saveVRam(context->m_vdp->VRam.u16, sizeof(context->m_vdp->VRam.u16), ZOMG_BYTEORDER_16H);
-	
-	// Save CRam.
-	Zomg_CRam_t cram;
-	context->m_vdp->m_palette.zomgSaveCRam(&cram);
-	zomg.saveCRam(&cram, ZOMG_BYTEORDER_16H);
-	
-	/** VDP: MD-specific **/
-	
-	// Save VSRam.
-	zomg.saveMD_VSRam(context->m_vdp->VSRam.u16, sizeof(context->m_vdp->VSRam.u16), ZOMG_BYTEORDER_16H);
+	context->m_vdp->zomgSaveMD(&zomg);
 	
 	/** Audio **/
 	

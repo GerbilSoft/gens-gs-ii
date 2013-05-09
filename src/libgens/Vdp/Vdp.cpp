@@ -29,6 +29,9 @@
 // ARRAY_SIZE(x)
 #include "macros/common.h"
 
+// ZOMG
+#include "libzomg/Zomg.hpp"
+
 namespace LibGens
 {
 	
@@ -87,7 +90,7 @@ Vdp::Vdp(MdFb *fb)
 
 
 /**
- * Vdp::~Vdp(): Shut down the VDP subsystem.
+ * Shut down the VDP subsystem.
  */
 Vdp::~Vdp(void)
 {
@@ -100,7 +103,7 @@ Vdp::~Vdp(void)
 
 
 /**
- * Vdp::reset(): Reset the VDP.
+ * Reset the VDP.
  */
 void Vdp::reset(void)
 {
@@ -159,6 +162,72 @@ void Vdp::reset(void)
 
 	// Initialize the Horizontal Interrupt counter.
 	HInt_Counter = VDP_Reg.m5.H_Int;
+}
+
+
+/**
+ * Save the VDP state. (MD mode)
+ * @param zomg ZOMG savestate object to save to.
+ */
+void Vdp::zomgSaveMD(LibZomg::Zomg *zomg) const
+{
+	// NOTE: This is MD only.
+	// TODO: Assert if called when not emulating MD VDP.
+
+	// Save the user-accessible VDP registers.
+	// TODO: Move "24" to a const somewhere.
+	zomg->saveVdpReg(VDP_Reg.reg, 24);
+
+	// TODO: Save internal registers.
+	// TODO: Save DMA status.
+
+	// Save VRam.
+	zomg->saveVRam(VRam.u16, sizeof(VRam.u16), ZOMG_BYTEORDER_16H);
+
+	// Save CRam.
+	Zomg_CRam_t cram;
+	m_palette.zomgSaveCRam(&cram);
+	zomg->saveCRam(&cram, ZOMG_BYTEORDER_16H);
+
+	// Save VSRam. (MD only)
+	zomg->saveMD_VSRam(VSRam.u16, sizeof(VSRam.u16), ZOMG_BYTEORDER_16H);
+}
+
+
+/**
+ * Restore the VDP state. (MD mode)
+ * @param zomg ZOMG savestate object to restore from.
+ */
+void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
+{
+	// NOTE: This is MD only.
+	// TODO: Assert if called when not emulating MD VDP.
+
+	// Load the user-accessible VDP registers.
+	// TODO: Move "24" to a const somewhere.
+	uint8_t vdp_reg[24];
+	zomg->loadVdpReg(vdp_reg, 24);
+
+	// TODO: On MD, load the DMA information from the savestate.
+	// Writing to register 23 changes the DMA status.
+	for (int i = 23; i >= 0; i--) {
+		setReg(i, vdp_reg[i]);
+	}
+
+	// TODO: Load internal registers.
+	// TODO: Load DMA status.
+
+	// Load VRam.
+	zomg->loadVRam(VRam.u16, sizeof(VRam.u16), ZOMG_BYTEORDER_16H);
+	MarkVRamDirty();
+
+	// Load CRam.
+	Zomg_CRam_t cram;
+	zomg->loadCRam(&cram, ZOMG_BYTEORDER_16H);
+	m_palette.zomgRestoreCRam(&cram);
+
+	// Load VSRam. (MD only)
+	zomg->loadMD_VSRam(VSRam.u16, sizeof(VSRam.u16), ZOMG_BYTEORDER_16H);
 }
 
 }

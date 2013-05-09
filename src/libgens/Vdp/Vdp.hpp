@@ -38,6 +38,10 @@
 #include "VdpPalette.hpp"
 #include "VdpStatus.hpp"
 
+namespace LibZomg {
+	class Zomg;
+}
+
 namespace LibGens
 {
 
@@ -48,26 +52,26 @@ class Vdp
 	public:
 		Vdp(MdFb *fb = nullptr);
 		~Vdp();
-	
+
 	private:
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
 		Vdp(const Vdp &);
 		Vdp &operator=(const Vdp &);
-	
+
 	public:
 		/**
-		 * reset(): Reset the VDP.
+		 * Reset the VDP.
 		 */
 		void reset(void);
-		
+
 		/**
 		 * VDP emulation options.
 		 * TODO: Move somewhere else?
 		 * TODO: Keep static?
 		 */
 		static VdpTypes::VdpEmuOptions_t VdpEmuOptions;
-		
+
 		// PAL/NTSC.
 	public:
 		bool isPal(void);
@@ -75,13 +79,26 @@ class Vdp
 		void setPal(void);
 		void setNtsc(void);
 		void setVideoMode(bool videoMode);
-		
+
 		// Update flags.
 	public:
 		void MarkVRamDirty(void);
 	private:
 		VdpTypes::UpdateFlags_t ms_UpdateFlags;
-	
+
+	public:
+		/**
+		 * Save the VDP state. (MD mode)
+		 * @param zomg ZOMG savestate object to save to.
+		 */
+		void zomgSaveMD(LibZomg::Zomg *zomg) const;
+
+		/**
+		 * Restore the VDP state. (MD mode)
+		 * @param zomg ZOMG savestate object to restore from.
+		 */
+		void zomgRestoreMD(LibZomg::Zomg *zomg);
+
 	/*!**************************************************************
 	 * VdpIo: I/O registers and variables.                          *
 	 ****************************************************************/
