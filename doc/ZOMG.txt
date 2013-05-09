@@ -245,7 +245,7 @@ typedef struct _ZOMG_VDP_ctrl_16_t
 	// TODO: Finalize DMA registers.
 } ZOMG_VDP_ctrl_16_t;
 
-The "access" variable is a 16-bit bitfield that indicates the VDP's current
+The "access" field is a 16-bit bitfield that indicates the VDP's current
 read/write source or destination. The low byte is for regular VDP functions,
 while the high byte is for DMA functions.
 
