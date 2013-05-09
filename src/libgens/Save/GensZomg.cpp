@@ -229,7 +229,6 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 
 	// TODO: Move base path triming code to LibGensText later?
 	string rom_filename(context->rom()->filename());
-	rom_filename += "/";
 #ifdef _WIN32
 	const char chr_slash = '\\';
 #else
