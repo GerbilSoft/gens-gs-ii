@@ -1540,7 +1540,7 @@ void Vdp::Render_Line_m5(void)
 		// Off screen.
 		return;
 	}
-	
+
 	// Determine the starting line in MD_Screen.
 	// TODO: LibGens: Add a user-configurable option for NTSC V30 rolling.
 	int LineStart = VDP_Lines.Visible.Current;
@@ -1550,78 +1550,67 @@ void Vdp::Render_Line_m5(void)
 	{
 		// NTSC V30 mode. Simulate screen rolling.
 		LineStart -= VDP_Lines.NTSC_V30.Offset;
-		
+
 		// Prevent underflow.
 		if (LineStart < 0)
 			LineStart += 240;
 	}
 	LineStart += VDP_Lines.Visible.Border_Size;
-	
+
 	// TODO: LibGens: Reimplement the borderColorEmulation option.
-	if (in_border && !VdpEmuOptions.borderColorEmulation)
-	{
+	if (in_border && !VdpEmuOptions.borderColorEmulation) {
 		// We're in the border area, but border color emulation is disabled.
 		// Clear the border area.
 		// TODO: Only clear this if the option changes or V/H mode changes.
-		if (m_palette.bpp() != VdpPalette::BPP_32)
-		{
+		if (m_palette.bpp() != VdpPalette::BPP_32) {
 			memset(MD_Screen->lineBuf16(LineStart), 0x00,
 				(MD_Screen->pxPerLine() * sizeof(uint16_t)));
-		}
-		else
-		{
+		} else {
 			memset(MD_Screen->lineBuf32(LineStart), 0x00,
 				(MD_Screen->pxPerLine() * sizeof(uint32_t)));
 		}
-		
+
 		// ...and we're done here.
 		return;
 	}
-	
+
 	// Check if the VDP is enabled.
-	if (!(VDP_Reg.m5.Set2 & 0x40) || in_border)
-	{
+	if (!(VDP_Reg.m5.Set2 & 0x40) || in_border) {
 		// VDP is disabled, or this is the border region.
 		// Clear the line buffer.
-		
+
 		// NOTE: S/H is ignored if the VDP is disabled or if
 		// we're in the border region.
 		memset(LineBuf.u8, 0x00, sizeof(LineBuf.u8));
 
 		// Clear the sprite dot overflow variable.
 		SpriteDotOverflow = 0;
-	}
-	else
-	{
+	} else {
 		// VDP is enabled.
-		
+
 		// Check if sprite structures need to be updated.
-		if (Interlaced == VdpTypes::INTERLACED_MODE_2)
-		{
+		if (Interlaced == VdpTypes::INTERLACED_MODE_2) {
 			// Interlaced Mode 2. (2x resolution)
-			if (ms_UpdateFlags.VRam)
+			if (m_updateFlags.VRam)
 				T_Make_Sprite_Struct<true, false>();
-			else if (ms_UpdateFlags.VRam_Spr)
+			else if (m_updateFlags.VRam_Spr)
 				T_Make_Sprite_Struct<true, true>();
-		}
-		else
-		{
+		} else {
 			// Non-Interlaced.
-			if (ms_UpdateFlags.VRam)
+			if (m_updateFlags.VRam)
 				T_Make_Sprite_Struct<false, false>();
-			else if (ms_UpdateFlags.VRam_Spr)
+			else if (m_updateFlags.VRam_Spr)
 				T_Make_Sprite_Struct<false, true>();
 		}
-		
+
 		// Clear the VRam flags.
-		ms_UpdateFlags.VRam = 0;
-		ms_UpdateFlags.VRam_Spr = 0;
-		
+		m_updateFlags.VRam = false;
+		m_updateFlags.VRam_Spr = false;
+
 		// Determine how to render the image.
 		int RenderMode = ((VDP_Reg.m5.Set4 & 0x08) >> 2);		// Shadow/Highlight
 		RenderMode |= (Interlaced == VdpTypes::INTERLACED_MODE_2);	// Interlaced.
-		switch (RenderMode & 3)
-		{
+		switch (RenderMode & 3) {
 			case 0:
 				// H/S disabled; normal display.
 				T_Render_Line_m5<false, false>();
@@ -1643,32 +1632,27 @@ void Vdp::Render_Line_m5(void)
 				break;
 		}
 	}
-	
+
 	// Update the active palette.
 	if (!(VDP_Layers & VdpTypes::VDP_LAYER_PALETTE_LOCK))
 		m_palette.update();
-	
+
 	// Render the image.
 	// TODO: Optimize SMS LCB handling. (maybe use Linux's unlikely() macro?)
-	if (m_palette.bpp() != VdpPalette::BPP_32)
-	{
+	if (m_palette.bpp() != VdpPalette::BPP_32) {
 		uint16_t *lineBuf16 = MD_Screen->lineBuf16(LineStart);
 		T_Render_LineBuf<uint16_t>(lineBuf16, m_palette.m_palActive.u16);
-		
-		if (VDP_Reg.m5.Set1 & 0x20)
-		{
+
+		if (VDP_Reg.m5.Set1 & 0x20) {
 			// SMS left-column blanking bit is set.
 			T_Apply_SMS_LCB<uint16_t>(lineBuf16, 
 				(VdpEmuOptions.borderColorEmulation ? m_palette.m_palActive.u16[0] : 0));
 		}
-	}
-	else
-	{
+	} else {
 		uint32_t *lineBuf32 = MD_Screen->lineBuf32(LineStart);
 		T_Render_LineBuf<uint32_t>(lineBuf32, m_palette.m_palActive.u32);
-		
-		if (VDP_Reg.m5.Set1 & 0x20)
-		{
+
+		if (VDP_Reg.m5.Set1 & 0x20) {
 			// SMS left-column blanking bit is set.
 			T_Apply_SMS_LCB<uint32_t>(lineBuf32, 
 				(VdpEmuOptions.borderColorEmulation ? m_palette.m_palActive.u32[0] : 0));

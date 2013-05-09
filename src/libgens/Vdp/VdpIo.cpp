@@ -315,7 +315,7 @@ void Vdp::setReg(int reg_num, uint8_t val)
 
 			// Update the Sprite Attribute Table.
 			// TODO: Only set this if the actual value has changed.
-			ms_UpdateFlags.VRam_Spr = 1;
+			m_updateFlags.VRam_Spr = true;
 			break;
 
 		case 7:

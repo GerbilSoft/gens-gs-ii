@@ -144,17 +144,6 @@ namespace VdpTypes
 		NTSC_V30_t NTSC_V30;
 	};
 	
-	// Update flags.
-	union UpdateFlags_t
-	{
-		uint8_t flags;
-		struct
-		{
-			bool VRam	:1;	// VRam was modified. (Implies VRam_Spr.)
-			bool VRam_Spr	:1;	// Sprite Attribute Table was modified.
-		};
-	};
-	
 	// VDP emulation options.
 	struct VdpEmuOptions_t
 	{

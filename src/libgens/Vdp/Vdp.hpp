@@ -84,7 +84,14 @@ class Vdp
 	public:
 		void MarkVRamDirty(void);
 	private:
-		VdpTypes::UpdateFlags_t ms_UpdateFlags;
+		// Update flags.
+		union {
+			uint8_t flags;
+			struct {
+				bool VRam	:1;	// VRam was modified. (Implies VRam_Spr.)
+				bool VRam_Spr	:1;	// Sprite Attribute Table was modified.
+			};
+		} m_updateFlags;
 
 	public:
 		/**
@@ -575,7 +582,7 @@ inline void Vdp::setVideoMode(bool videoMode)
  * Mark VRam as dirty.
  */
 inline void Vdp::MarkVRamDirty(void)
-	{ ms_UpdateFlags.VRam = 1; }
+	{ m_updateFlags.VRam = true; }
 
 inline int Vdp::GetHPix(void) const
 	{ return H_Pix; }
