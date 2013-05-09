@@ -255,7 +255,7 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 	} else {
 		// TODO: Handle this error...
 		LOG_MSG(vdp_m5, LOG_MSG_LEVEL_WARNING,
-			"WARNING: zomg-LoadVdpCtrl_16() failed: error %d\n", ret);
+			"WARNING: zomg->loadVdpCtrl_16() failed: error %d\n", ret);
 	}
 
 	// TODO: Load DMA status.
