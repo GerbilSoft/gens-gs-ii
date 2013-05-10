@@ -563,8 +563,11 @@ uint8_t Vdp::Read_V_Counter(void)
  */
 uint16_t Vdp::Read_Status(void)
 {
-	uint16_t status = Reg_Status.read();
-	
+	const uint16_t status = Reg_Status.read();
+
+	// Reading the control port clears the control word latch.
+	VDP_Ctrl.ctrl_latch = 0;
+
 	// If the Display is disabled, set the VBlank flag.
 	if (VDP_Reg.m5.Set2 & 0x40)
 		return status;
@@ -585,9 +588,8 @@ uint16_t Vdp::Read_Data(void)
 		"VDP_Ctrl.code == %02X, VDP_Ctrl.access == %04X",
 		VDP_Ctrl.code, VDP_Ctrl.access);
 
-	// Clear the VDP control word latch.
-	// (It's set when the address is set.)
-	VDP_Ctrl.ctrl_latch = false;
+	// Reading the data port clears the control word latch.
+	VDP_Ctrl.ctrl_latch = 0;
 
 	// NOTE: volatile is needed due to an optimization issue caused by
 	// -ftree-pre on gcc-4.4.2. (It also breaks on gcc-3.4.5, but that
@@ -806,8 +808,8 @@ void Vdp::DMA_Fill(uint16_t data)
  */
 void Vdp::Write_Data_Word(uint16_t data)
 {
-	// Clear the VDP control word latch.
-	VDP_Ctrl.ctrl_latch = false;
+	// Writing to the data port clears the control word latch.
+	VDP_Ctrl.ctrl_latch = 0;
 
 	if (VDP_Ctrl.DMA & 0x04) {
 		// DMA Fill operation is in progress.
@@ -1123,7 +1125,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 		 * when the second control word is processed.
 		 */
 		VDP_Ctrl.data[0] = data;
-		VDP_Ctrl.ctrl_latch = true;	// Latch the first control word.
+		VDP_Ctrl.ctrl_latch = 1;	// Latch the first control word.
 
 		// Update the VDP address counter.
 		VDP_Ctrl.address &= ~0x3FFF;
@@ -1151,7 +1153,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 	 * when the second control word is processed.
 	 */
 	VDP_Ctrl.data[1] = data;
-	VDP_Ctrl.ctrl_latch = false;	// Clear the control word latch.
+	VDP_Ctrl.ctrl_latch = 0;	// Clear the control word latch.
 
 	// Update the VDP address counter.
 	VDP_Ctrl.address &= ~0xC000;
