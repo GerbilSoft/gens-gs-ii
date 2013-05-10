@@ -1136,7 +1136,20 @@ void Vdp::Write_Ctrl(uint16_t data)
 		return;
 	}
 
-	// Second control word.
+	/**
+	 * Second control word.
+	 *
+	 * Format:
+	 * [  x   x   x   x   x   x   x   x] (D15-D8)
+	 * [CD5 CD4 CD3 CD2   x   x A15 A14] (D7-D0)
+	 *
+	 * CD = access code
+	 *  A = address
+	 *
+	 * NOTE: CD1-CD0 and A13-A01 are left intact after the
+	 * first control word is processed. They are replaced
+	 * when the second control word is processed.
+	 */
 	VDP_Ctrl.data[1] = data;
 	VDP_Ctrl.ctrl_latch = false;	// Clear the control word latch.
 
