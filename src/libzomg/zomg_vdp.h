@@ -58,7 +58,7 @@ typedef struct _Zomg_VdpCtrl_8_t
 	uint8_t ctrl_byte[2];		// 8-bit: VDP control bytes.
 	uint16_t reserved1;
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
-	uint8_t access;			// 8-bit: Read/Write location. (TODO: Define this!)
+	uint8_t code;			// 8-bit: VDP access code. (CD1-CD0)
 
 	uint16_t address;		// 16BE: VDP address counter.
 	uint8_t status;			// 8-bit: VDP status register.
@@ -112,7 +112,7 @@ typedef struct _Zomg_VdpCtrl_16_t
 
 	uint16_t ctrl_word[2];		// 16BE: VDP control words.
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
-	uint8_t access;			// 8-bit: Read/Write location. (See LibGens::Vdp::VDEST_t.)
+	uint8_t code;			// 8-bit: VDP access code. (CD5-CD0)
 
 	uint16_t address;		// 16BE: VDP address counter.
 	uint16_t status;		// 16BE: VDP status register.
@@ -120,9 +120,8 @@ typedef struct _Zomg_VdpCtrl_16_t
 	uint16_t data_fifo[4];		// 16BE: Data FIFO. (4 words)
 	uint8_t data_fifo_count;	// 8-bit: Number of words currently in the FIFO.
 	uint8_t reserved2;
-	
-	// TODO: Internal DMA mode registers,
-	uint8_t dma_access;		// 8-bit: DMA access mode. (See LibGens::Vdp::VDEST_t.)
+
+	// TODO: DMA status registers,
 } Zomg_VdpCtrl_16_t;
 #pragma pack()
 
