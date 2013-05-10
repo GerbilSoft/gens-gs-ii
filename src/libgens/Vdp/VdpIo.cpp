@@ -574,7 +574,7 @@ uint16_t Vdp::Read_Status(void)
 
 
 /**
- * Vdp::Read_Data(): Read data from the VDP.
+ * Read data from the VDP.
  * @return Data.
  */
 uint16_t Vdp::Read_Data(void)
@@ -582,12 +582,13 @@ uint16_t Vdp::Read_Data(void)
 	// TODO: Test this function.
 	// Soleil (crusader of Centry) reads from VRam.
 	LOG_MSG(vdp_io, LOG_MSG_LEVEL_DEBUG2,
-		"VDP_Ctrl.Access == %d", VDP_Ctrl.Access);
-	
+		"VDP_Ctrl.code == %02X, VDP_Ctrl.access == %04X",
+		VDP_Ctrl.code, VDP_Ctrl.access);
+
 	// Clear the VDP control word latch.
 	// (It's set when the address is set.)
 	VDP_Ctrl.ctrl_latch = false;
-	
+
 	// NOTE: volatile is needed due to an optimization issue caused by
 	// -ftree-pre on gcc-4.4.2. (It also breaks on gcc-3.4.5, but that
 	// flag doesn't exist on gcc-3.4.5...)
@@ -595,32 +596,31 @@ uint16_t Vdp::Read_Data(void)
 	// The onscreen text is partially corrupted when scrolling.
 	// TODO: Report this as a bug to the gcc developers.
 	volatile uint16_t data;
-	
+
 	// Check the access mode.
-	switch (VDP_Ctrl.Access)
-	{
+	switch (VDP_Ctrl.access) {
 		case (VDEST_LOC_VRAM | VDEST_ACC_READ):
 			// VRam Read.
 			data = VRam.u16[(VDP_Ctrl.Address & 0xFFFF) >> 1];
 			break;
-		
+
 		case (VDEST_LOC_CRAM | VDEST_ACC_READ):
 			// CRam Read.
 			data = m_palette.readCRam_16(VDP_Ctrl.Address & 0x7E);
 			break;
-		
+
 		case (VDEST_LOC_VSRAM | VDEST_ACC_READ):
 			// VSRam Read.
 			// TODO: Mask off high bits? (Only 10/11 bits are present.)
 			// TODO: If we do that, the remaining bits should be what's in the FIFO.
 			data = VSRam.u16[(VDP_Ctrl.Address & 0x7E) >> 1];
 			break;
-		
+
 		default:
 			// Invalid read specification.
 			return 0;
 	}
-	
+
 	VDP_Ctrl.Address += VDP_Reg.m5.Auto_Inc;
 	return data;
 }
@@ -628,7 +628,7 @@ uint16_t Vdp::Read_Data(void)
 
 /**
  * Update the DMA state.
- * @return Number of cycles used.
+ * @return Number of cycles taken from the 68000 for DMA.
  */
 unsigned int Vdp::Update_DMA(void)
 {
@@ -644,11 +644,11 @@ unsigned int Vdp::Update_DMA(void)
 	 * - HRES == horizontal resolution.
 	 * - VBLANK == vertical blanking.
 	 */
-	
+
 	// Horizontal resolution.
 	// TODO: Optimize this conditional? (Not sure if the compiler optimizes it...)
 	unsigned int offset = (isH40() ? 2 : 0);
-	
+
 	// Check if we're in VBlank or if the VDP is disabled.
 	if (VDP_Lines.Visible.Current < 0 ||
 	    VDP_Lines.Visible.Current >= VDP_Lines.Visible.Total ||
@@ -657,32 +657,30 @@ unsigned int Vdp::Update_DMA(void)
 		// In VBlank, or VDP is disabled.
 		offset |= 1;
 	}
-	
+
 	// Cycles elapsed is based on M68K cycles per line.
 	unsigned int cycles = M68K_Mem::CPL_M68K;
-	
+
 	// Get the DMA transfer rate.
 	const uint8_t timing = DMA_Timing_Table[DMAT_Type & 3][offset];
-	if (DMAT_Length > timing)
-	{
+	if (DMAT_Length > timing) {
 		// DMA is not finished.
 		DMAT_Length -= timing;
-		if (DMAT_Type & 2)
-		{
+		if (DMAT_Type & 2) {
 			// DMA to CRam or VSRam.
 			// Return 0.
 			return 0;
 		}
-		
+
 		// DMA to VRam.
 		// Return the total number of cycles.
 		return cycles;
 	}
-	
+
 	// DMA is finished. Do some processing.
 	const unsigned int len_tmp = DMAT_Length;
 	DMAT_Length = 0;
-	
+
 	// Calculate the new cycles value.
 	// (NOTE: I have no idea how this formula was created.)
 	//cycles = (((cycles << 16) / timing) * len_tmp) >> 16;
@@ -690,17 +688,16 @@ unsigned int Vdp::Update_DMA(void)
 	cycles /= timing;
 	cycles *= len_tmp;
 	cycles >>= 16;
-	
+
 	// Clear the DMA Busy flag.
 	Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, false);
-	
-	if (DMAT_Type & 2)
-	{
+
+	if (DMAT_Type & 2) {
 		// DMA to CRam or VSRam.
 		// Return 0.
 		return 0;
 	}
-	
+
 	// DMA to VRam.
 	// Return the total number of cycles.
 	return cycles;
@@ -708,13 +705,13 @@ unsigned int Vdp::Update_DMA(void)
 
 
 /**
- * Vdp::Write_Data_Byte(): Write data to the VDP. (8-bit)
+ * Write data to the VDP. (8-bit)
  * @param data 8-bit data.
  */
 void Vdp::Write_Data_Byte(uint8_t data)
 {
 	/**
-	 * NOTE: In Mode 5, the VDP requires 16-bit data.
+	 * NOTE: In Mega Drive mode, the VDP requires 16-bit data.
 	 * 8-bit writes will result in the data byte being mirrored
 	 * for both high-byte and low-byte.
 	 *
@@ -722,7 +719,7 @@ void Vdp::Write_Data_Byte(uint8_t data)
 	 * move.b   #$58, ($C00000)
 	 * move.w #$5858, ($C00000)
 	 */
-	
+
 	Write_Data_Word(data | (data << 8));
 }
 
@@ -804,31 +801,28 @@ void Vdp::DMA_Fill(uint16_t data)
 
 
 /**
- * Vdp::Write_Data_Word(): Write data to the VDP. (16-bit)
+ * Write data to the VDP. (16-bit)
  * @param data 16-bit data.
  */
 void Vdp::Write_Data_Word(uint16_t data)
 {
 	// Clear the VDP control word latch.
 	VDP_Ctrl.ctrl_latch = false;
-	
-	if (VDP_Ctrl.DMA & 0x04)
-	{
+
+	if (VDP_Ctrl.DMA & 0x04) {
 		// DMA Fill operation is in progress.
 		DMA_Fill(data);
 		return;
 	}
-	
+
 	// Check the access mode.
 	uint16_t address = VDP_Ctrl.Address;
-	switch (VDP_Ctrl.Access)
-	{
+	switch (VDP_Ctrl.access) {
 		case (VDEST_LOC_VRAM | VDEST_ACC_WRITE):
 			// VRam Write.
 			MarkVRamDirty();
 			address &= 0xFFFF;	// VRam is 64 KB. (32 Kwords)
-			if (address & 0x0001)
-			{
+			if (address & 0x0001) {
 				// Odd address.
 				// VRam writes are only allowed at even addresses.
 				// The VDP simply masks the low bit of the address
@@ -836,46 +830,44 @@ void Vdp::Write_Data_Word(uint16_t data)
 				address &= ~0x0001;
 				data = (data << 8 | data >> 8);
 			}
-			
+
 			// Write the word to VRam.
 			VRam.u16[address>>1] = data;
-			
+
 			// Increment the address register.
 			VDP_Ctrl.Address += VDP_Reg.m5.Auto_Inc;
 			break;
-		
+
 		case (VDEST_LOC_CRAM | VDEST_ACC_WRITE):
 			// CRam Write.
 			// TODO: According to the Genesis Software Manual, writing at
 			// odd addresses results in "interesting side effects".
 			// Those side effects aren't listed, so we're just going to
 			// mask the LSB for now.
-			
+
 			// Write the word to CRam.
 			// CRam is 128 bytes. (64 words)
 			m_palette.writeCRam_16((address & 0x7E), data);
-			
+
 			// Increment the address register.
 			VDP_Ctrl.Address += VDP_Reg.m5.Auto_Inc;
 			break;
-		
+
 		case (VDEST_LOC_VSRAM | VDEST_ACC_WRITE):
 			// VSRam Write.
 			// TODO: The Genesis Software Manual doesn't mention what happens
 			// with regards to odd address writes for VSRam.
-			// TODO: Should this be VRam flag instead of CRam flag?
-			//MarkCRamDirty();
-			
+
 			// Write the word to VSRam.
 			// VSRam is 80 bytes. (40 words)
 			// TODO: VSRam is 80 bytes, but we're allowing a maximum of 128 bytes here...
 			// TODO: Mask off high bits? (Only 10/11 bits are present.)
 			VSRam.u16[(address & 0x7E) >> 1] = data;
-			
+
 			// Increment the address register.
 			VDP_Ctrl.Address += VDP_Reg.m5.Auto_Inc;
 			break;
-		
+
 		default:
 			// Invalid write specification.
 			break;
@@ -1095,10 +1087,20 @@ void Vdp::Write_Ctrl(uint16_t data)
 	// Check if this is the first or second control word.
 	if (!VDP_Ctrl.ctrl_latch) {
 		// First control word.
-		// Check if this is an actual control word or a register write.
+		// Check if this is a register write
 		if ((data & 0xC000) == 0x8000) {
-			// Register write.
-			VDP_Ctrl.Access = (VDEST_LOC_VRAM | VDEST_ACC_READ);	// Implicitly set VDP access mode to VRAM READ.
+			/**
+			 * Register write.
+			 *
+			 * Format:
+			 * [  1   0   x R04 R03 R02 R01 R00] (D15-D8)
+			 * [D07 D06 D05 D04 D03 D02 D01 D00] (D7-D0)
+			 *
+			 * R = register number
+			 * D = data
+			 */
+			VDP_Ctrl.code = 0;		// Reset the access code register.
+			VDP_Ctrl.access = CD_Table[VDP_Ctrl.code];
 			VDP_Ctrl.Address = 0x0000;	// Reset the address counter.
 
 			const int reg = (data >> 8) & 0x1F;
@@ -1106,7 +1108,20 @@ void Vdp::Write_Ctrl(uint16_t data)
 			return;
 		}
 
-		// Control word.
+		/**
+		 * First control word.
+		 *
+		 * Format:
+		 * [CD1 CD0 A13 A12 A11 A10 A09 A08] (D15-D8)
+		 * [A07 A06 A05 A04 A03 A02 A01 A00] (D7-D0)
+		 *
+		 * CD = access code
+		 *  A = address
+		 *
+		 * NOTE: CD5-CD2 and A15-A14 are left intact after the
+		 * first control word is processed. They are replaced
+		 * when the second control word is processed.
+		 */
 		VDP_Ctrl.data[0] = data;
 		VDP_Ctrl.ctrl_latch = true;	// Latch the first control word.
 
@@ -1114,10 +1129,10 @@ void Vdp::Write_Ctrl(uint16_t data)
 		VDP_Ctrl.Address = (data & 0x3FFF);
 		VDP_Ctrl.Address |= ((VDP_Ctrl.data[1] & 0x3) << 14);
 
-		// Determine the VDP destination.
-		unsigned int CD_Offset = ((data >> 14) & 0x3);
-		CD_Offset |= ((VDP_Ctrl.data[1] & 0xF0) >> 2);
-		VDP_Ctrl.Access = (CD_Table[CD_Offset] & 0xFF);
+		// Update the VDP access code register.
+		VDP_Ctrl.code &= ~0x03;
+		VDP_Ctrl.code |= ((data >> 14) & 0x03);
+		VDP_Ctrl.access = (CD_Table[VDP_Ctrl.code] & 0xFF);
 		return;
 	}
 
@@ -1129,11 +1144,11 @@ void Vdp::Write_Ctrl(uint16_t data)
 	VDP_Ctrl.Address = (VDP_Ctrl.data[0] & 0x3FFF);
 	VDP_Ctrl.Address |= ((data & 3) << 14);
 
-	// Determine the destination.
-	unsigned int CD_Offset = ((VDP_Ctrl.data[0] >> 14) & 0x3);
-	CD_Offset |= ((data & 0xF0) >> 2);
-	uint16_t CD = CD_Table[CD_Offset];
-	VDP_Ctrl.Access = (CD & 0xFF);
+	// Update the VDP access code register.
+	VDP_Ctrl.code &= ~0x3C;
+	VDP_Ctrl.code |= ((data >> 2) & 0x3C);
+	uint16_t CD = CD_Table[VDP_Ctrl.code];
+	VDP_Ctrl.access = (CD & 0xFF);
 
 	// High byte of CD is the DMA access mode.
 	if (!(CD & 0xFF00)) {

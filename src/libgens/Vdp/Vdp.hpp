@@ -266,6 +266,10 @@ class Vdp
 		uint16_t Read_Status(void);
 		uint16_t Read_Data(void);
 
+		/**
+		 * Update the DMA state.
+		 * @return Number of cycles taken from the 68000 for DMA.
+		 */
 		unsigned int Update_DMA(void);
 		
 		void Write_Data_Byte(uint8_t data);
@@ -362,7 +366,11 @@ class Vdp
 			uint8_t reserved;
 
 			// VDP memory access mode.
-			uint16_t Access;	// Uses VDEST_t values to determine VDP destination.
+			// TODO: Add helper function for updating 'code' that
+			// automatically updates 'access'?
+			// NOTE: 'access' does NOT include DMA information.
+			uint8_t code;		// Access code. (CD5-CD0)
+			uint8_t access;		// Maps code to VDEST_t values.
 			uint16_t Address;	// Address counter.
 
 			// DMA values.
@@ -371,7 +379,8 @@ class Vdp
 		} VDP_Ctrl;
 
 		/**
-		 * VDEST_t: VDP memory destination constants.
+		 * Bitfield values for the VDP access code register.
+		 * This makes handling access destinations a bit easier.
 		 */
 		enum VDEST_t {
 			// 0x0000: INVALID.
@@ -401,6 +410,10 @@ class Vdp
 			// Bit 13: DMA VRAM COPY.
 			VDEST_DMA_NO_COPY	= 0x0000,
 			VDEST_DMA_COPY		= 0x0800,
+
+			// Masks.
+			VDEST_MASK_RWOPS	= 0x00FF,
+			VDEST_MASK_DMA		= 0xFF00,
 		};
 
 		/**
