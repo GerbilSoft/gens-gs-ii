@@ -243,6 +243,10 @@ typedef struct _ZOMG_VDP_ctrl_16_t
 	uint8_t reserved2;
 } ZOMG_VDP_ctrl_16_t;
 
+The "ctrl_byte" and "ctrl_word" fields are strictly for reference and
+debugging. It contains the last two control bytes or words written to
+the VDP. The VDP does not actually store these control words.
+
 The "code" field contains the CD5-CD0 bits (CD1-CD0 for Sega 8-bit) from
 the last pair of control words. This indicates the destination for the
 next read or write operation, as well as the read/write mode and (on MD)
