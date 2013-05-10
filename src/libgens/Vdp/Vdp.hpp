@@ -371,7 +371,7 @@ class Vdp
 			// NOTE: 'access' does NOT include DMA information.
 			uint8_t code;		// Access code. (CD5-CD0)
 			uint8_t access;		// Maps code to VDEST_t values.
-			uint16_t Address;	// Address counter.
+			uint16_t address;	// Address counter.
 
 			// DMA values.
 			uint8_t DMA_Mode;	// (DMA ADDRESS HIGH & 0xC0) [reg 23]

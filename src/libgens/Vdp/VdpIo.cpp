@@ -601,19 +601,19 @@ uint16_t Vdp::Read_Data(void)
 	switch (VDP_Ctrl.access) {
 		case (VDEST_LOC_VRAM | VDEST_ACC_READ):
 			// VRam Read.
-			data = VRam.u16[(VDP_Ctrl.Address & 0xFFFF) >> 1];
+			data = VRam.u16[(VDP_Ctrl.address & 0xFFFF) >> 1];
 			break;
 
 		case (VDEST_LOC_CRAM | VDEST_ACC_READ):
 			// CRam Read.
-			data = m_palette.readCRam_16(VDP_Ctrl.Address & 0x7E);
+			data = m_palette.readCRam_16(VDP_Ctrl.address & 0x7E);
 			break;
 
 		case (VDEST_LOC_VSRAM | VDEST_ACC_READ):
 			// VSRam Read.
 			// TODO: Mask off high bits? (Only 10/11 bits are present.)
 			// TODO: If we do that, the remaining bits should be what's in the FIFO.
-			data = VSRam.u16[(VDP_Ctrl.Address & 0x7E) >> 1];
+			data = VSRam.u16[(VDP_Ctrl.address & 0x7E) >> 1];
 			break;
 
 		default:
@@ -621,7 +621,7 @@ uint16_t Vdp::Read_Data(void)
 			return 0;
 	}
 
-	VDP_Ctrl.Address += VDP_Reg.m5.Auto_Inc;
+	VDP_Ctrl.address += VDP_Reg.m5.Auto_Inc;
 	return data;
 }
 
@@ -735,7 +735,7 @@ void Vdp::DMA_Fill(uint16_t data)
 
 	// Get the values. (length is in bytes)
 	// NOTE: DMA Fill uses *bytes* for length, not words!
-	uint16_t address = (VDP_Ctrl.Address & 0xFFFF);
+	uint16_t address = (VDP_Ctrl.address & 0xFFFF);
 	int length = DMA_Length();
 	if (length == 0) {
 		// DMA length is 0. Set it to 65,536 words.
@@ -796,7 +796,7 @@ void Vdp::DMA_Fill(uint16_t data)
 	}
 
 	// Save the new address.
-	VDP_Ctrl.Address = (address & 0xFFFF);
+	VDP_Ctrl.address = (address & 0xFFFF);
 }
 
 
@@ -816,7 +816,7 @@ void Vdp::Write_Data_Word(uint16_t data)
 	}
 
 	// Check the access mode.
-	uint16_t address = VDP_Ctrl.Address;
+	uint16_t address = VDP_Ctrl.address;
 	switch (VDP_Ctrl.access) {
 		case (VDEST_LOC_VRAM | VDEST_ACC_WRITE):
 			// VRam Write.
@@ -835,7 +835,7 @@ void Vdp::Write_Data_Word(uint16_t data)
 			VRam.u16[address>>1] = data;
 
 			// Increment the address register.
-			VDP_Ctrl.Address += VDP_Reg.m5.Auto_Inc;
+			VDP_Ctrl.address += VDP_Reg.m5.Auto_Inc;
 			break;
 
 		case (VDEST_LOC_CRAM | VDEST_ACC_WRITE):
@@ -850,7 +850,7 @@ void Vdp::Write_Data_Word(uint16_t data)
 			m_palette.writeCRam_16((address & 0x7E), data);
 
 			// Increment the address register.
-			VDP_Ctrl.Address += VDP_Reg.m5.Auto_Inc;
+			VDP_Ctrl.address += VDP_Reg.m5.Auto_Inc;
 			break;
 
 		case (VDEST_LOC_VSRAM | VDEST_ACC_WRITE):
@@ -865,7 +865,7 @@ void Vdp::Write_Data_Word(uint16_t data)
 			VSRam.u16[(address & 0x7E) >> 1] = data;
 
 			// Increment the address register.
-			VDP_Ctrl.Address += VDP_Reg.m5.Auto_Inc;
+			VDP_Ctrl.address += VDP_Reg.m5.Auto_Inc;
 			break;
 
 		default:
@@ -1050,7 +1050,7 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 	} while (--length != 0);
 
 	// Save the new destination address.
-	VDP_Ctrl.Address = dest_address;
+	VDP_Ctrl.address = dest_address;
 
 	// If any bytes weren't copied, subtract it from the saved length.
 	DMAT_Length -= length;
@@ -1077,7 +1077,7 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 
 
 /**
- * Vdp::Write_Ctrl(): Write a control word to the VDP.
+ * Write a control word to the VDP.
  * @param data Control word.
  */
 void Vdp::Write_Ctrl(uint16_t data)
@@ -1101,7 +1101,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 			 */
 			VDP_Ctrl.code = 0;		// Reset the access code register.
 			VDP_Ctrl.access = CD_Table[VDP_Ctrl.code];
-			VDP_Ctrl.Address = 0x0000;	// Reset the address counter.
+			VDP_Ctrl.address = 0x0000;	// Reset the address counter.
 
 			const int reg = (data >> 8) & 0x1F;
 			setReg(reg, (data & 0xFF));
@@ -1125,9 +1125,9 @@ void Vdp::Write_Ctrl(uint16_t data)
 		VDP_Ctrl.data[0] = data;
 		VDP_Ctrl.ctrl_latch = true;	// Latch the first control word.
 
-		// Determine the VDP address.
-		VDP_Ctrl.Address = (data & 0x3FFF);
-		VDP_Ctrl.Address |= ((VDP_Ctrl.data[1] & 0x3) << 14);
+		// Update the VDP address counter.
+		VDP_Ctrl.address &= ~0x3FFF;
+		VDP_Ctrl.address |= (data & 0x3FFF);
 
 		// Update the VDP access code register.
 		VDP_Ctrl.code &= ~0x03;
@@ -1153,9 +1153,9 @@ void Vdp::Write_Ctrl(uint16_t data)
 	VDP_Ctrl.data[1] = data;
 	VDP_Ctrl.ctrl_latch = false;	// Clear the control word latch.
 
-	// Determine the VDP address.
-	VDP_Ctrl.Address = (VDP_Ctrl.data[0] & 0x3FFF);
-	VDP_Ctrl.Address |= ((data & 3) << 14);
+	// Update the VDP address counter.
+	VDP_Ctrl.address &= ~0xC000;
+	VDP_Ctrl.address |= ((data & 0x0003) << 14);
 
 	// Update the VDP access code register.
 	VDP_Ctrl.code &= ~0x3C;
@@ -1193,7 +1193,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 
 	// Get the DMA addresses.
 	uint32_t src_address = DMA_Src_Adr();			// Src Address / 2
-	uint16_t dest_address = (VDP_Ctrl.Address & 0xFFFF);	// Dest Address
+	uint16_t dest_address = (VDP_Ctrl.address & 0xFFFF);	// Dest Address
 
 	// Check for CRam or VSRam destination overflow.
 	if (dest_component == DMA_DEST_CRAM ||
@@ -1251,7 +1251,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 		// Save the new addresses.
 		// NOTE: DMA COPY uses bytes, not words.
 		inc_DMA_Src_Adr(DMAT_Length);	// TODO: Should DMA_Src_Adr_H be cleared?
-		VDP_Ctrl.Address = dest_address;
+		VDP_Ctrl.address = dest_address;
 		return;
 	}
 

@@ -157,7 +157,7 @@ void Vdp::reset(void)
 	VDP_Ctrl.data[1] = 0;
 	VDP_Ctrl.code = 0;
 	VDP_Ctrl.access = CD_Table[VDP_Ctrl.code];
-	VDP_Ctrl.Address = 0;
+	VDP_Ctrl.address = 0;
 	VDP_Ctrl.DMA_Mode = 0;
 	VDP_Ctrl.DMA = 0;
 	VDP_Ctrl.ctrl_latch = false;
@@ -191,7 +191,7 @@ void Vdp::zomgSaveMD(LibZomg::Zomg *zomg) const
 	ctrl_reg.ctrl_word[1] = VDP_Ctrl.data[1];
 	ctrl_reg.ctrl_latch = !!VDP_Ctrl.ctrl_latch;
 	ctrl_reg.code = VDP_Ctrl.code;
-	ctrl_reg.address = VDP_Ctrl.Address;
+	ctrl_reg.address = VDP_Ctrl.address;
 	ctrl_reg.status = Reg_Status.read_raw();
 
 	// TODO: Implement the FIFO.
@@ -249,7 +249,7 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 		VDP_Ctrl.ctrl_latch = !!ctrl_reg.ctrl_latch;
 		VDP_Ctrl.code = ctrl_reg.code;
 		VDP_Ctrl.access = CD_Table[VDP_Ctrl.code];
-		VDP_Ctrl.Address = ctrl_reg.address;
+		VDP_Ctrl.address = ctrl_reg.address;
 		Reg_Status.write_raw(ctrl_reg.status);
 
 		// TODO: Implement the FIFO.
