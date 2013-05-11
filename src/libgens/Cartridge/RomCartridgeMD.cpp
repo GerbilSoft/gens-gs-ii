@@ -580,6 +580,8 @@ void RomCartridgeMD::initMemoryMap(void)
 			// Assign banks $000000-$3FFFFF only.
 			for (int i = 0; i < 7; i++)
 				m_cartBanks[i] = BANK_ROM_00 + i;
+			for (int i = 8; i < ARRAY_SIZE(m_cartBanks); i++)
+				m_cartBanks[i] = BANK_UNUSED;
 
 			// Initialize SSF2 banks to 0xFF (default).
 			memset(m_mapper.ssf2.banks, 0xFF, sizeof(m_mapper.ssf2.banks));
