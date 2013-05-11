@@ -87,12 +87,8 @@ class RomCartridgeMD
 
 		// Internal cartridge banking IDs.
 		enum CartBank_t {
-			// Unused bank. (Return 0xFF)
-			// Also used for SRAM-only banks.
-			BANK_UNUSED = 0,
-
 			// ROM banks. (512 KB each)
-			BANK_ROM_00, BANK_ROM_01, BANK_ROM_02, BANK_ROM_03,
+			BANK_ROM_00 = 0, BANK_ROM_01, BANK_ROM_02, BANK_ROM_03,
 			BANK_ROM_04, BANK_ROM_05, BANK_ROM_06, BANK_ROM_07,
 			BANK_ROM_08, BANK_ROM_09, BANK_ROM_0A, BANK_ROM_0B,
 			BANK_ROM_0C, BANK_ROM_0D, BANK_ROM_0E, BANK_ROM_0F,
@@ -111,6 +107,10 @@ class RomCartridgeMD
 
 			// MAPPER_MD_CONST_400000: Constant data area.
 			BANK_MD_CONST_400000,
+
+			// Unused bank. (Return 0xFF)
+			// Also used for SRAM-only banks.
+			BANK_UNUSED = 0xFF,
 		};
 
 		// Physical memory map: 20 banks of 512 KB each.
