@@ -616,11 +616,11 @@ QString EmuManager::romName(void)
 	// TODO: Multi-context spport.
 
 	// Check the active system region.
-	const char *s_romName;
+	std::string s_romName;
 	if (gqt4_emuContext->versionRegisterObject()->isEast()) {
 		// East (JP). Return the domestic ROM name.
 		s_romName = m_rom->romNameJP();
-		if (!s_romName || s_romName[0] == 0x00) {
+		if (s_romName.empty()) {
 			// Domestic ROM name is empty.
 			// Return the overseas ROM name.
 			s_romName = m_rom->romNameUS();
@@ -628,7 +628,7 @@ QString EmuManager::romName(void)
 	} else {
 		// West (US/EU). Return the overseas ROM name.
 		s_romName = m_rom->romNameUS();
-		if (!s_romName || s_romName[0] == 0x00) {
+		if (s_romName.empty()) {
 			// Overseas ROM name is empty.
 			// Return the domestic ROM name.
 			s_romName = m_rom->romNameJP();
@@ -636,9 +636,9 @@ QString EmuManager::romName(void)
 	}
 
 	// Return the ROM name.
-	if (!s_romName)
+	if (s_romName.empty())
 		return QString();
-	return QString::fromUtf8(s_romName);
+	return QString::fromUtf8(s_romName.c_str());
 }
 
 
@@ -669,7 +669,7 @@ QString EmuManager::getSaveStateFilename(void)
 	
 	const QString filename =
 		gqt4_cfg->configPath(PathConfig::GCPATH_SAVESTATES) +
-		QString::fromUtf8(m_rom->filenameBaseNoExt()) +
+		QString::fromUtf8(m_rom->filenameBaseNoExt().c_str()) +
 		QChar(L'.') + QString::number(m_saveSlot) +
 		QLatin1String(".zomg");
 	return filename;

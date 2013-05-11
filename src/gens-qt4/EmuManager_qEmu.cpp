@@ -504,8 +504,8 @@ void EmuManager::doScreenShot(void)
 	// Get the ROM filename (without extension).
 	// TODO: Remove all extensions, not just the base?
 	// Otherwise, S1.bin.gz will save as S1.bin_000.png.
-	const QString romFilename = QString::fromUtf8(m_rom->filenameBaseNoExt());
-	
+	const QString romFilename = QString::fromUtf8(m_rom->filenameBaseNoExt().c_str());
+
 	// Add the current directory, number, and .png extension.
 	// TODO: Enumerate QImageWriter for supported image formats.
 	const QString scrFilenamePrefix =
@@ -513,33 +513,29 @@ void EmuManager::doScreenShot(void)
 	const QString scrFilenameSuffix = QLatin1String(".png");
 	QString scrFilename;
 	int scrNumber = -1;
-	do
-	{
+	do {
 		// TODO: Figure out how to optimize this!
 		scrNumber++;
 		scrFilename = scrFilenamePrefix + QChar(L'_') +
 				QString::number(scrNumber).rightJustified(3, QChar(L'0')) +
 				scrFilenameSuffix;
 	} while (QFile::exists(scrFilename));
-	
+
 	// Create the screenshot.
 	Screenshot ss(m_rom, gqt4_emuContext, this);
 	int ret = ss.save(scrFilename);
-	
+
 	QString osdMsg;
-	if (ret == 0)
-	{
+	if (ret == 0) {
 		//: OSD message indicating a screenshot has been saved.
 		osdMsg = tr("Screenshot %1 saved.");
 		osdMsg = osdMsg.arg(scrNumber);
-	}
-	else
-	{
+	} else {
 		// TODO: Print the actual error.
 		//: OSD message indicating an error occurred while saving a screenshot.
 		osdMsg = tr("Error saving screenshot.");
 	}
-	
+
 	emit osdPrintMsg(1500, osdMsg);
 }
 

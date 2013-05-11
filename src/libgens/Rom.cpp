@@ -938,31 +938,31 @@ int Rom::romSize(void) const
 
 /**
  * Get the ROM filename.
- * @return ROM filename (UTF-8), or nullptr on error.
+ * @return ROM filename (UTF-8), or empty string on error.
  */
-const utf8_str *Rom::filename(void) const
-	{ return d->filename.c_str(); }
+const string Rom::filename(void) const
+	{ return d->filename; }
 
 /**
  * Get the ROM filename. (basename, no extension)
  * @return ROM filename (UTF-8), or nullptr on error.
  */
-const utf8_str *Rom::filenameBaseNoExt(void) const
-	{ return d->filenameBaseNoExt.c_str(); }
+const string Rom::filenameBaseNoExt(void) const
+	{ return d->filenameBaseNoExt; }
 
 /**
  * Get the Japanese (domestic) ROM name.
- * @return Japanese (domestic) ROM name (UTF-8), or nullptr on error.
+ * @return Japanese (domestic) ROM name (UTF-8), or empty string on error.
  */
-const utf8_str *Rom::romNameJP(void) const
-	{ return d->romNameJP.c_str(); }
+const string Rom::romNameJP(void) const
+	{ return d->romNameJP; }
 
 /**
  * Get the American (overseas) ROM name.
- * @return American (overseas) ROM name (UTF-8), or nullptr on error.
+ * @return American (overseas) ROM name (UTF-8), or empty string on error.
  */
-const utf8_str *Rom::romNameUS(void) const
-	{ return d->romNameUS.c_str(); }
+const string Rom::romNameUS(void) const
+	{ return d->romNameUS; }
 
 /**
  * Get the ROM checksum.

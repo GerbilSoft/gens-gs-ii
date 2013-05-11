@@ -145,15 +145,15 @@ class Rom
 
 		/**
 		 * Get the ROM filename.
-		 * @return ROM filename (UTF-8), or nullptr on error.
+		 * @return ROM filename (UTF-8), or empty string on error.
 		 */
-		const utf8_str *filename(void) const;
+		const std::string filename(void) const;
 
 		/**
 		 * Get the ROM filename. (basename, no extension)
-		 * @return ROM filename (UTF-8), or nullptr on error.
+		 * @return ROM filename (UTF-8), or empty string on error.
 		 */
-		const utf8_str *filenameBaseNoExt(void) const;
+		const std::string filenameBaseNoExt(void) const;
 
 		/********************
 		 * ROM header data. *
@@ -161,15 +161,15 @@ class Rom
 
 		/**
 		 * Get the Japanese (domestic) ROM name.
-		 * @return Japanese (domestic) ROM name (UTF-8), or nullptr on error.
+		 * @return Japanese (domestic) ROM name (UTF-8), or empty string on error.
 		 */
-		const utf8_str *romNameJP(void) const;
+		const std::string romNameJP(void) const;
 
 		/**
 		 * Get the American (overseas) ROM name.
-		 * @return American (overseas) ROM name (UTF-8), or nullptr on error.
+		 * @return American (overseas) ROM name (UTF-8), or empty string on error.
 		 */
-		const utf8_str *romNameUS(void) const;
+		const std::string romNameUS(void) const;
 
 		/**
 		 * Get the ROM checksum.
