@@ -27,6 +27,11 @@
 #include "../Util/byteswap.h"
 
 /**
+ * References:
+ * - ssf2.txt, Second Edition (2000/07/26) by Bart Trzynadlowski
+ */
+
+/**
  * BYTE_ADDR_INVERT: Inversion flag for byte-addressing.
  * ROM and RAM is stored in host 16-bit endian.
  * Hence, bytewide access needs to have the LSB inverted
@@ -150,6 +155,38 @@ uint8_t RomCartridgeMD::readByte(uint32_t address)
 		case BANK_ROM_1D:	return T_readByte_Rom<0x1D>(address);
 		case BANK_ROM_1E:	return T_readByte_Rom<0x1E>(address);
 		case BANK_ROM_1F:	return T_readByte_Rom<0x1F>(address);
+		case BANK_ROM_20:	return T_readByte_Rom<0x20>(address);
+		case BANK_ROM_21:	return T_readByte_Rom<0x21>(address);
+		case BANK_ROM_22:	return T_readByte_Rom<0x22>(address);
+		case BANK_ROM_23:	return T_readByte_Rom<0x23>(address);
+		case BANK_ROM_24:	return T_readByte_Rom<0x24>(address);
+		case BANK_ROM_25:	return T_readByte_Rom<0x25>(address);
+		case BANK_ROM_26:	return T_readByte_Rom<0x26>(address);
+		case BANK_ROM_27:	return T_readByte_Rom<0x27>(address);
+		case BANK_ROM_28:	return T_readByte_Rom<0x28>(address);
+		case BANK_ROM_29:	return T_readByte_Rom<0x29>(address);
+		case BANK_ROM_2A:	return T_readByte_Rom<0x2A>(address);
+		case BANK_ROM_2B:	return T_readByte_Rom<0x2B>(address);
+		case BANK_ROM_2C:	return T_readByte_Rom<0x2C>(address);
+		case BANK_ROM_2D:	return T_readByte_Rom<0x2D>(address);
+		case BANK_ROM_2E:	return T_readByte_Rom<0x2E>(address);
+		case BANK_ROM_2F:	return T_readByte_Rom<0x2F>(address);
+		case BANK_ROM_30:	return T_readByte_Rom<0x30>(address);
+		case BANK_ROM_31:	return T_readByte_Rom<0x31>(address);
+		case BANK_ROM_32:	return T_readByte_Rom<0x32>(address);
+		case BANK_ROM_33:	return T_readByte_Rom<0x33>(address);
+		case BANK_ROM_34:	return T_readByte_Rom<0x34>(address);
+		case BANK_ROM_35:	return T_readByte_Rom<0x35>(address);
+		case BANK_ROM_36:	return T_readByte_Rom<0x36>(address);
+		case BANK_ROM_37:	return T_readByte_Rom<0x37>(address);
+		case BANK_ROM_38:	return T_readByte_Rom<0x38>(address);
+		case BANK_ROM_39:	return T_readByte_Rom<0x39>(address);
+		case BANK_ROM_3A:	return T_readByte_Rom<0x3A>(address);
+		case BANK_ROM_3B:	return T_readByte_Rom<0x3B>(address);
+		case BANK_ROM_3C:	return T_readByte_Rom<0x3C>(address);
+		case BANK_ROM_3D:	return T_readByte_Rom<0x3D>(address);
+		case BANK_ROM_3E:	return T_readByte_Rom<0x3E>(address);
+		case BANK_ROM_3F:	return T_readByte_Rom<0x3F>(address);
 	}
 }
 
@@ -221,6 +258,38 @@ uint16_t RomCartridgeMD::readWord(uint32_t address)
 		case BANK_ROM_1D:	return T_readWord_Rom<0x1D>(address);
 		case BANK_ROM_1E:	return T_readWord_Rom<0x1E>(address);
 		case BANK_ROM_1F:	return T_readWord_Rom<0x1F>(address);
+		case BANK_ROM_20:	return T_readWord_Rom<0x20>(address);
+		case BANK_ROM_21:	return T_readWord_Rom<0x21>(address);
+		case BANK_ROM_22:	return T_readWord_Rom<0x22>(address);
+		case BANK_ROM_23:	return T_readWord_Rom<0x23>(address);
+		case BANK_ROM_24:	return T_readWord_Rom<0x24>(address);
+		case BANK_ROM_25:	return T_readWord_Rom<0x25>(address);
+		case BANK_ROM_26:	return T_readWord_Rom<0x26>(address);
+		case BANK_ROM_27:	return T_readWord_Rom<0x27>(address);
+		case BANK_ROM_28:	return T_readWord_Rom<0x28>(address);
+		case BANK_ROM_29:	return T_readWord_Rom<0x29>(address);
+		case BANK_ROM_2A:	return T_readWord_Rom<0x2A>(address);
+		case BANK_ROM_2B:	return T_readWord_Rom<0x2B>(address);
+		case BANK_ROM_2C:	return T_readWord_Rom<0x2C>(address);
+		case BANK_ROM_2D:	return T_readWord_Rom<0x2D>(address);
+		case BANK_ROM_2E:	return T_readWord_Rom<0x2E>(address);
+		case BANK_ROM_2F:	return T_readWord_Rom<0x2F>(address);
+		case BANK_ROM_30:	return T_readWord_Rom<0x30>(address);
+		case BANK_ROM_31:	return T_readWord_Rom<0x31>(address);
+		case BANK_ROM_32:	return T_readWord_Rom<0x32>(address);
+		case BANK_ROM_33:	return T_readWord_Rom<0x33>(address);
+		case BANK_ROM_34:	return T_readWord_Rom<0x34>(address);
+		case BANK_ROM_35:	return T_readWord_Rom<0x35>(address);
+		case BANK_ROM_36:	return T_readWord_Rom<0x36>(address);
+		case BANK_ROM_37:	return T_readWord_Rom<0x37>(address);
+		case BANK_ROM_38:	return T_readWord_Rom<0x38>(address);
+		case BANK_ROM_39:	return T_readWord_Rom<0x39>(address);
+		case BANK_ROM_3A:	return T_readWord_Rom<0x3A>(address);
+		case BANK_ROM_3B:	return T_readWord_Rom<0x3B>(address);
+		case BANK_ROM_3C:	return T_readWord_Rom<0x3C>(address);
+		case BANK_ROM_3D:	return T_readWord_Rom<0x3D>(address);
+		case BANK_ROM_3E:	return T_readWord_Rom<0x3E>(address);
+		case BANK_ROM_3F:	return T_readWord_Rom<0x3F>(address);
 	}
 }
 
@@ -336,7 +405,7 @@ void RomCartridgeMD::writeByte_TIME(uint8_t address, uint8_t data)
 			// SSF2 bankswitch register.
 			// TODO: Update Starscream instruction fetch.
 			const uint8_t phys_bank = (address & 0xF) >> 1;
-			uint8_t virt_bank = (data & 0x1F);
+			uint8_t virt_bank = (data & 0x3F);
 
 			// Check if the virtual bank address is in range.
 			const uint8_t max_virt_bank = (m_romData_size / 524288);
@@ -376,7 +445,7 @@ void RomCartridgeMD::writeWord_TIME(uint8_t address, uint16_t data)
 			// SSF2 bankswitch register.
 			// TODO: Update Starscream instruction fetch.
 			const uint8_t phys_bank = (address & 0xF) >> 1;
-			uint8_t virt_bank = (data & 0x1F);
+			uint8_t virt_bank = (data & 0x3F);
 
 			// Check if the virtual bank address is in range.
 			const uint8_t max_virt_bank = (m_romData_size / 524288);
