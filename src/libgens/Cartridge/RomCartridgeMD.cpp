@@ -147,11 +147,10 @@ template<uint8_t bank>
 inline uint8_t RomCartridgeMD::T_readByte_Rom(uint32_t address)
 {
 	// TODO: Mirroring; CPU prefetch.
-	if (address >= m_romData_size)
-		return 0xFF;
-
 	address &= 0x7FFFF;
 	address ^= ((bank << 19) | BYTE_ADDR_INVERT);
+	if (address >= m_romData_size)
+		return 0xFF;
 	return (reinterpret_cast<uint8_t*>(m_romData))[address];
 }
 
@@ -165,11 +164,10 @@ template<uint8_t bank>
 inline uint16_t RomCartridgeMD::T_readWord_Rom(uint32_t address)
 {
 	// TODO: Mirroring; CPU prefetch.
-	if (address >= m_romData_size)
-		return 0xFFFF;
-
 	address &= 0x7FFFF;
 	address |= (bank << 19);
+	if (address >= m_romData_size)
+		return 0xFFFF;
 	return (reinterpret_cast<uint16_t*>(m_romData))[address >> 1];
 }
 
