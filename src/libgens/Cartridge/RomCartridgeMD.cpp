@@ -30,6 +30,7 @@
 /**
  * References:
  * - ssf2.txt, Second Edition (2000/07/26) by Bart Trzynadlowski
+ * - http://segaretro.org/Mega_Drive_Unlicensed_Game_Emulation_Notes
  */
 
 /**
@@ -134,6 +135,69 @@ const RomCartridgeMDPrivate::MD_RomFixup_t RomCartridgeMDPrivate::MD_RomFixups[]
 		RomCartridgeMD::MAPPER_MD_FLAT, {{0}, {0}, {0}}},
 	{{nullptr, 0, 0xDA5A4BFE}, {0x400000, 0x40FFFF, false},
 		RomCartridgeMD::MAPPER_MD_FLAT, {{0}, {0}, {0}}},
+
+	/** ROMs that use MAPPER_MD_REGISTERS_RO. **/
+
+	// Huan Le Tao Qi Shu: Smart Mouse
+	{{nullptr, 0, 0xDECDF740}, {0, 0, false},
+		RomCartridgeMD::MAPPER_MD_REGISTERS_RO,
+		{{0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF},
+		 {0x400000, 0x400002, 0x400004, 0x400006},
+		 {0x55FF, 0x0FFF, 0xAAFF, 0xF0FF}}},
+	// Huan Le Tao Qi Shu: Smart Mouse [h1C]
+	{{nullptr, 0, 0xDA5A4587}, {0, 0, false},
+		RomCartridgeMD::MAPPER_MD_REGISTERS_RO,
+		{{0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF},
+		 {0x400000, 0x400002, 0x400004, 0x400006},
+		 {0x55FF, 0x0FFF, 0xAAFF, 0xF0FF}}},
+
+	// 777 Casino
+	// NOTE: Only the first register is used.
+	// The other values are similar to values from
+	// other games that use the same hardware.
+	{{nullptr, 0, 0x42DC03E4}, {0, 0, false},
+		RomCartridgeMD::MAPPER_MD_REGISTERS_RO,
+		{{0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF},
+		 {0x400000, 0x400002, 0x400004, 0x400006},
+		 {0x63FF, 0x98FF, 0xC9FF, 0x18FF}}},
+	// 777 Casino [h1C]
+	{{nullptr, 0, 0xF14D3F2E}, {0, 0, false},
+		RomCartridgeMD::MAPPER_MD_REGISTERS_RO,
+		{{0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF},
+		 {0x400000, 0x400002, 0x400004, 0x400006},
+		 {0x63FF, 0x98FF, 0xC9FF, 0x18FF}}},
+	// 777 Casino [h2C]
+	{{nullptr, 0, 0x74B17EAF}, {0, 0, false},
+		RomCartridgeMD::MAPPER_MD_REGISTERS_RO,
+		{{0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF},
+		 {0x400000, 0x400002, 0x400004, 0x400006},
+		 {0x63FF, 0x98FF, 0xC9FF, 0x18FF}}},
+
+	// Super Bubble Bobble MD
+	{{nullptr, 0, 0x4820A161}, {0, 0, false},
+		RomCartridgeMD::MAPPER_MD_REGISTERS_RO,
+		{{0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF},
+		 {0x400000, 0x400002, 0, 0},
+		 {0x55FF, 0x0FFF, 0, 0}}},
+
+	// Ya Se Chuan Shuo: "The Legend of Arthur" edition
+	{{nullptr, 0, 0x095B9A15}, {0, 0, false},
+		RomCartridgeMD::MAPPER_MD_REGISTERS_RO,
+		{{0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF},
+		 {0x400000, 0x400002, 0, 0},
+		 {0x63FF, 0x98FF, 0xC9FF, 0x18FF}}},
+	// Ya Se Chuan Shuo: "The Legend of Arthur" edition [f1]
+	{{nullptr, 0, 0xFBA90DC4}, {0, 0, false},
+		RomCartridgeMD::MAPPER_MD_REGISTERS_RO,
+		{{0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF},
+		 {0x400000, 0x400002, 0, 0},
+		 {0x63FF, 0x98FF, 0xC9FF, 0x18FF}}},
+	// Ya Se Chuan Shuo: "The Legend of Arthur" edition [f2]
+	{{nullptr, 0, 0x359CB75A}, {0, 0, false},
+		RomCartridgeMD::MAPPER_MD_REGISTERS_RO,
+		{{0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF},
+		 {0x400000, 0x400002, 0, 0},
+		 {0x63FF, 0x98FF, 0xC9FF, 0x18FF}}},
 
 	// End of list.
 	{{nullptr, 0, 0}, {0, 0, false},
