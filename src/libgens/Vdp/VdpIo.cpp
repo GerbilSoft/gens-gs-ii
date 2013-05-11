@@ -912,7 +912,21 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 			break;
 
 		case DMA_SRC_WORD_RAM_2M:
-			src_address -= 2;	// TODO: What is this for?
+			/**
+			 * DMA access from Word RAM has a bug:
+			 * - The first word is transferred incorrectly.
+			 * - The second word written to VRAM is actually the first word requested.
+			 * - The last word requested is not written.
+			 * The -2 source address offset simulates this.
+			 *
+			 * Reference:
+			 * - http://e02stealth.tumblr.com/post/13505293669/sonic-megamix-is-not-sonic-cd
+			 *
+			 * TODO: Verify 128 KB wrap-around works here.
+			 * TODO: Use a garbage value instead?
+			 * genplus-gx increments src_address and dest_address.
+			 */
+			src_address -= 2;
 			src_address &= 0x3FFFE;
 			break;
 
@@ -920,7 +934,7 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 		case DMA_SRC_WORD_RAM_1M_1:
 		case DMA_SRC_WORD_RAM_CELL_1M_0:
 		case DMA_SRC_WORD_RAM_CELL_1M_1:
-			src_address -= 2;	// TODO: What is this for?
+			src_address -= 2;
 			src_address &= 0x1FFFE;
 			break;
 #endif
