@@ -635,9 +635,16 @@ QString EmuManager::romName(void)
 		}
 	}
 
+	if (s_romName.empty()) {
+		// ROM name is empty.
+		// This might be an unlicensed and/or pirated ROM.
+
+		// Return the ROM filename, without extensions.
+		// TODO: Also the zfilename?
+		return QString::fromUtf8(m_rom->filenameBaseNoExt().c_str());
+	}
+
 	// Return the ROM name.
-	if (s_romName.empty())
-		return QString();
 	return QString::fromUtf8(s_romName.c_str());
 }
 
