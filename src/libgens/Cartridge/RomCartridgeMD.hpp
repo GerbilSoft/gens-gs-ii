@@ -110,7 +110,7 @@ class RomCartridgeMD
 			BANK_ROM_3C, BANK_ROM_3D, BANK_ROM_3E, BANK_ROM_3F,
 
 			// MAPPER_MD_CONST_400000: Constant data area.
-			BANK_CONST_400000,
+			BANK_MD_CONST_400000,
 		};
 
 		// Physical memory map: 20 banks of 512 KB each.

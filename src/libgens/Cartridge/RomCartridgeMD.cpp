@@ -336,7 +336,7 @@ uint8_t RomCartridgeMD::readByte(uint32_t address)
 		case BANK_ROM_3F:	return T_readByte_Rom<0x3F>(address);
 
 		// Mappers.
-		case BANK_CONST_400000:	return readByte_CONST_400000(address);
+		case BANK_MD_CONST_400000:	return readByte_CONST_400000(address);
 	}
 }
 
@@ -442,7 +442,7 @@ uint16_t RomCartridgeMD::readWord(uint32_t address)
 		case BANK_ROM_3F:	return T_readWord_Rom<0x3F>(address);
 
 		// Mappers.
-		case BANK_CONST_400000:	return readWord_CONST_400000(address);
+		case BANK_MD_CONST_400000:	return readWord_CONST_400000(address);
 	}
 }
 
