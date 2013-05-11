@@ -123,7 +123,7 @@ class RomCartridgeMD
 		void initMemoryMap(void);
 
 		// Mapper types.
-		enum MapperType_t {
+		enum MD_MapperType_t {
 			/**
 			 * Flat addressing.
 			 * Phys: $000000-$9FFFFF
@@ -164,7 +164,7 @@ class RomCartridgeMD
 
 		// Mapper information.
 		struct {
-			MapperType_t type;
+			MD_MapperType_t type;
 
 			union {
 				// Super Street Fighter II mapper.

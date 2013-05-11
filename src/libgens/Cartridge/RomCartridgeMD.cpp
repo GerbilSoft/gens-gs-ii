@@ -81,7 +81,7 @@ class RomCartridgeMDPrivate
 
 			// ROM mapper.
 			// TODO: Add const register values.
-			RomCartridgeMD::MapperType_t mapperType;
+			RomCartridgeMD::MD_MapperType_t mapperType;
 		};
 
 		static const MD_RomFixup_t MD_RomFixups[];
