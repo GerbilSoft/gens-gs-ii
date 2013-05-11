@@ -71,10 +71,6 @@ class RomCartridgeMDPrivate
 				uint32_t crc32;		// CRC32.
 			} id;
 
-			// ROM mapper.
-			// TODO: Add const register values.
-			RomCartridgeMD::MapperType_t mapperType;
-
 			// SRAM fixups.
 			// If any value is 0, that field is ignored.
 			struct {
@@ -82,6 +78,10 @@ class RomCartridgeMDPrivate
 				uint32_t end_addr;	// SRAM end address.
 				bool force_off;		// Force SRAM off. (Puggsy)
 			} sram;
+
+			// ROM mapper.
+			// TODO: Add const register values.
+			RomCartridgeMD::MapperType_t mapperType;
 		};
 
 		static const MD_RomFixup_t MD_RomFixups[];
@@ -94,16 +94,16 @@ class RomCartridgeMDPrivate
 const RomCartridgeMDPrivate::MD_RomFixup_t RomCartridgeMDPrivate::MD_RomFixups[] =
 {
 	// Puggsy: Shows an anti-piracy message after the third level if SRAM is detected.
-	{{"GM T-113016", 0, 0}, RomCartridgeMD::MAPPER_MD_FLAT, {0, 0, true}},
-	{{"GM T-550055", 0, 0}, RomCartridgeMD::MAPPER_MD_FLAT, {0, 0, true}},	// Puggsy (Beta)
+	{{"GM T-113016", 0, 0}, {0, 0, true}, RomCartridgeMD::MAPPER_MD_FLAT},
+	{{"GM T-550055", 0, 0}, {0, 0, true}, RomCartridgeMD::MAPPER_MD_FLAT},	// Puggsy (Beta)
 
 	// Psy-O-Blade: Incorrect SRAM header.
-	{{"GM T-26013 ", 0, 0}, RomCartridgeMD::MAPPER_MD_FLAT, {0x200000, 0x203FFF, false}},
+	{{"GM T-26013 ", 0, 0}, {0x200000, 0x203FFF, false}, RomCartridgeMD::MAPPER_MD_FLAT},
 
 	// Super Street Fighter II: Use SSF2 mapper.
-	{{"GM T-12056 ", 0, 0}, RomCartridgeMD::MAPPER_MD_SSF2, {0, 0, true}},	// US
-	{{"GM MK-12056", 0, 0}, RomCartridgeMD::MAPPER_MD_SSF2, {0, 0, true}},	// EU
-	{{"GM T-12043 ", 0, 0}, RomCartridgeMD::MAPPER_MD_SSF2, {0, 0, true}},	// JP
+	{{"GM T-12056 ", 0, 0}, {0, 0, true}, RomCartridgeMD::MAPPER_MD_SSF2},	// US
+	{{"GM MK-12056", 0, 0}, {0, 0, true}, RomCartridgeMD::MAPPER_MD_SSF2},	// EU
+	{{"GM T-12043 ", 0, 0}, {0, 0, true}, RomCartridgeMD::MAPPER_MD_SSF2},	// JP
 
 	/**
 	 * Xin Qi Gai Wang Zi (original version of Beggar Prince):
@@ -113,11 +113,11 @@ const RomCartridgeMDPrivate::MD_RomFixup_t RomCartridgeMDPrivate::MD_RomFixups[]
 	 * - Xin Qi Gai Wang Zi (Ch).gen:	DD2F38B5
 	 * - Xin Qi Gai Wang Zi (Ch) [a1].gen:	DA5A4BFE
 	 */
-	{{nullptr, 0, 0xDD2F38B5}, RomCartridgeMD::MAPPER_MD_FLAT, {0x400000, 0x40FFFF, false}},
-	{{nullptr, 0, 0xDA5A4BFE}, RomCartridgeMD::MAPPER_MD_FLAT, {0x400000, 0x40FFFF, false}},
+	{{nullptr, 0, 0xDD2F38B5}, {0x400000, 0x40FFFF, false}, RomCartridgeMD::MAPPER_MD_FLAT},
+	{{nullptr, 0, 0xDA5A4BFE}, {0x400000, 0x40FFFF, false}, RomCartridgeMD::MAPPER_MD_FLAT},
 
 	// End of list.
-	{{nullptr, 0, 0}, RomCartridgeMD::MAPPER_MD_FLAT, {0, 0, false}}
+	{{nullptr, 0, 0}, {0, 0, false}, RomCartridgeMD::MAPPER_MD_FLAT}
 };
 
 
