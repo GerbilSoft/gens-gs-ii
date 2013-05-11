@@ -57,6 +57,10 @@ class RomCartridgeMD
 		template<uint8_t bank>
 		inline uint16_t T_readWord_Rom(uint32_t address);
 
+		// MAPPER_MD_CONST_400000
+		inline uint8_t readByte_CONST_400000(uint32_t address);
+		inline uint16_t readWord_CONST_400000(uint32_t address);
+
 	public:
 		// Cartridge access functions. ($000000-$9FFFFF)
 		uint8_t readByte(uint32_t address);

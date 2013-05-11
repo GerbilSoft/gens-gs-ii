@@ -171,6 +171,66 @@ inline uint16_t RomCartridgeMD::T_readWord_Rom(uint32_t address)
 	return (reinterpret_cast<uint16_t*>(m_romData))[address >> 1];
 }
 
+/** Mapper functions. **/
+
+/**
+ * Read a byte from the constant register area.
+ * MAPPER_MD_CONST_400000
+ * @param address Address.
+ * @return Byte from constant register area.
+ */
+inline uint8_t RomCartridgeMD::readByte_CONST_400000(uint32_t address)
+{
+	address &= 0x7FFFF;
+	if (address > sizeof(m_mapper.const_400000.reg))
+		return 0xFF;
+
+	// Check if this register is defined.
+	if (m_mapper.const_400000.byte_read_mask & (1 << address)) {
+		// Register is defined.
+		return m_mapper.const_400000.reg[address];
+	}
+
+	// Register is not defined.
+	return 0xFF;
+}
+
+/**
+ * Read a Word from the constant register area.
+ * MAPPER_MD_CONST_400000
+ * @param address Address.
+ * @return Word from constant register area.
+ */
+inline uint16_t RomCartridgeMD::readWord_CONST_400000(uint32_t address)
+{
+	address &= 0x7FFFE;
+	if (address > sizeof(m_mapper.const_400000.reg))
+		return 0xFF;
+
+	uint16_t ret = 0;
+
+	// Check if the MSB register is defined.
+	if (m_mapper.const_400000.byte_read_mask & (1 << address)) {
+		// Register is defined.
+		ret |= (m_mapper.const_400000.reg[address] << 8);
+	} else {
+		// Register is not defined.
+		ret |= 0xFF00;
+	}
+
+	// Check if the LSB register is defined.
+	address++;
+	if (m_mapper.const_400000.byte_read_mask & (1 << address)) {
+		// Register is defined.
+		ret |= m_mapper.const_400000.reg[address];
+	} else {
+		// Register is not defined.
+		ret |= 0xFF;
+	}
+
+	return ret;;
+}
+
 
 /** Cartridge access functions. ($000000-$9FFFFF) **/
 
@@ -274,6 +334,9 @@ uint8_t RomCartridgeMD::readByte(uint32_t address)
 		case BANK_ROM_3D:	return T_readByte_Rom<0x3D>(address);
 		case BANK_ROM_3E:	return T_readByte_Rom<0x3E>(address);
 		case BANK_ROM_3F:	return T_readByte_Rom<0x3F>(address);
+
+		// Mappers.
+		case BANK_CONST_400000:	return readByte_CONST_400000(address);
 	}
 }
 
@@ -377,6 +440,9 @@ uint16_t RomCartridgeMD::readWord(uint32_t address)
 		case BANK_ROM_3D:	return T_readWord_Rom<0x3D>(address);
 		case BANK_ROM_3E:	return T_readWord_Rom<0x3E>(address);
 		case BANK_ROM_3F:	return T_readWord_Rom<0x3F>(address);
+
+		// Mappers.
+		case BANK_CONST_400000:	return readWord_CONST_400000(address);
 	}
 }
 
