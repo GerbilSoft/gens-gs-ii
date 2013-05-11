@@ -34,11 +34,21 @@
 namespace LibGens
 {
 
+class RomCartridgeMDPrivate;
+
 class RomCartridgeMD
 {
 	public:
 		RomCartridgeMD();
 		~RomCartridgeMD();
+
+	private:
+		friend class RomCartridgeMDPrivate;
+
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		RomCartridgeMD(const RomCartridgeMD &);
+		RomCartridgeMD &operator=(const RomCartridgeMD &);
 
 	private:
 		// ROM access.
