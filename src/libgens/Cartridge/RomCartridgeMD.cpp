@@ -25,6 +25,7 @@
 
 #include "../EmuContext.hpp"
 #include "../Util/byteswap.h"
+#include "../macros/common.h"
 
 /**
  * References:
@@ -123,6 +124,16 @@ const RomCartridgeMDPrivate::MD_RomFixup_t RomCartridgeMDPrivate::MD_RomFixups[]
 /*****************************
  * RomCartridgeMD functions. *
  *****************************/
+
+RomCartridgeMD::RomCartridgeMD()
+	: m_romData(nullptr)
+	, m_romData_size(0)
+{ }
+
+RomCartridgeMD::~RomCartridgeMD()
+{
+	free(m_romData);
+}
 
 /** ROM access functions. **/
 
@@ -541,6 +552,43 @@ void RomCartridgeMD::writeWord_TIME(uint8_t address, uint16_t data)
 			m_cartBanks[phys_bank] = (BANK_ROM_00 + virt_bank);
 			return;
 		}
+	}
+}
+
+
+/** Initialization functions. **/
+
+/**
+ * Initialize the memory map for the loaded ROM.
+ * This identifies the mapper type to use.
+ */
+void RomCartridgeMD::initMemoryMap(void)
+{
+	// TODO: Identify the ROM.
+	// For now, assume MAPPER_MD_FLAT.
+	m_mapper.type = MAPPER_MD_FLAT;
+
+	switch (m_mapper.type) {
+		default:
+		case MAPPER_MD_FLAT:
+			// Assign all banks normally.
+			for (int i = 0; i < ARRAY_SIZE(m_cartBanks); i++)
+				m_cartBanks[i] = BANK_ROM_00 + i;
+			break;
+
+		case MAPPER_MD_SSF2:
+			// Assign banks $000000-$3FFFFF only.
+			for (int i = 0; i < 7; i++)
+				m_cartBanks[i] = BANK_ROM_00 + i;
+
+			// Initialize SSF2 banks to 0xFF (default).
+			memset(m_mapper.ssf2.banks, 0xFF, sizeof(m_mapper.ssf2.banks));
+			break;
+
+		case MAPPER_MD_CONST_400000:
+		case MAPPER_MD_REALTEC:
+			// TODO: Implement these mappers.
+			break;
 	}
 }
 
