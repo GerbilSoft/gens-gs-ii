@@ -57,9 +57,9 @@ class RomCartridgeMD
 		template<uint8_t bank>
 		inline uint16_t T_readWord_Rom(uint32_t address);
 
-		// MAPPER_MD_CONST_400000
-		inline uint8_t readByte_CONST_400000(uint32_t address);
-		inline uint16_t readWord_CONST_400000(uint32_t address);
+		// MAPPER_MD_REGISTERS_RO
+		inline uint8_t readByte_REGISTERS_RO(uint32_t address);
+		inline uint16_t readWord_REGISTERS_RO(uint32_t address);
 
 	public:
 		// Cartridge access functions. ($000000-$9FFFFF)
@@ -105,8 +105,8 @@ class RomCartridgeMD
 			BANK_ROM_38, BANK_ROM_39, BANK_ROM_3A, BANK_ROM_3B,
 			BANK_ROM_3C, BANK_ROM_3D, BANK_ROM_3E, BANK_ROM_3F,
 
-			// MAPPER_MD_CONST_400000: Constant data area.
-			BANK_MD_CONST_400000,
+			// MAPPER_MD_REGISTERS_RO: Read-only registers.
+			BANK_MD_REGISTERS_RO,
 
 			// Unused bank. (Return 0xFF)
 			// Also used for SRAM-only banks.
@@ -150,7 +150,7 @@ class RomCartridgeMD
 			MAPPER_MD_REALTEC,
 
 			/**
-			 * Constant registers at $400000.
+			 * Read-only registers.
 			 *
 			 * This is used by some unlicensed games,
 			 * including Ya Se Chuan Shuo and
@@ -159,7 +159,7 @@ class RomCartridgeMD
 			 * The specific constants are set in the
 			 * MD ROM fixups function.
 			 */
-			MAPPER_MD_CONST_400000,
+			MAPPER_MD_REGISTERS_RO,
 		};
 
 		// Mapper information.
@@ -178,16 +178,12 @@ class RomCartridgeMD
 					uint8_t banks[8];
 				} ssf2;
 
-				// Constant registers at $400000.
+				// Read-only registers.
 				struct {
-					// Mask of readable bytes at $400000.
-					// 1 == readable
-					// 0 == not readable (use defaults)
-					uint16_t byte_read_mask;
-
-					// Constant registers.
-					uint8_t reg[16];
-				} const_400000;
+					uint32_t addr_mask[4];	// Address mask.
+					uint32_t addr[4];	// Register addresses.
+					uint16_t reg[4];	// Register values.
+				} registers_ro;
 			};
 		} m_mapper;
 };

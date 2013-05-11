@@ -82,6 +82,16 @@ class RomCartridgeMDPrivate
 			// ROM mapper.
 			// TODO: Add const register values.
 			RomCartridgeMD::MD_MapperType_t mapperType;
+
+			// Mapper-specific initialization data.
+
+			// MAPPER_MD_REGISTERS_RO
+			// Read-only registers.
+			struct {
+				uint32_t addr_mask[4];	// Address mask.
+				uint32_t addr[4];	// Register addresses.
+				uint16_t reg[4];	// Register values.
+			} registers_ro;
 		};
 
 		static const MD_RomFixup_t MD_RomFixups[];
@@ -94,16 +104,23 @@ class RomCartridgeMDPrivate
 const RomCartridgeMDPrivate::MD_RomFixup_t RomCartridgeMDPrivate::MD_RomFixups[] =
 {
 	// Puggsy: Shows an anti-piracy message after the third level if SRAM is detected.
-	{{"GM T-113016", 0, 0}, {0, 0, true}, RomCartridgeMD::MAPPER_MD_FLAT},
-	{{"GM T-550055", 0, 0}, {0, 0, true}, RomCartridgeMD::MAPPER_MD_FLAT},	// Puggsy (Beta)
+	{{"GM T-113016", 0, 0}, {0, 0, true},
+		RomCartridgeMD::MAPPER_MD_FLAT, {{0}, {0}, {0}}},
+	// Puggsy (Beta)
+	{{"GM T-550055", 0, 0}, {0, 0, true},
+		RomCartridgeMD::MAPPER_MD_FLAT, {{0}, {0}, {0}}},
 
 	// Psy-O-Blade: Incorrect SRAM header.
-	{{"GM T-26013 ", 0, 0}, {0x200000, 0x203FFF, false}, RomCartridgeMD::MAPPER_MD_FLAT},
+	{{"GM T-26013 ", 0, 0}, {0x200000, 0x203FFF, false},
+		RomCartridgeMD::MAPPER_MD_FLAT, {{0}, {0}, {0}}},
 
 	// Super Street Fighter II: Use SSF2 mapper.
-	{{"GM T-12056 ", 0, 0}, {0, 0, true}, RomCartridgeMD::MAPPER_MD_SSF2},	// US
-	{{"GM MK-12056", 0, 0}, {0, 0, true}, RomCartridgeMD::MAPPER_MD_SSF2},	// EU
-	{{"GM T-12043 ", 0, 0}, {0, 0, true}, RomCartridgeMD::MAPPER_MD_SSF2},	// JP
+	{{"GM T-12056 ", 0, 0}, {0, 0, true},
+		RomCartridgeMD::MAPPER_MD_SSF2, {{0}, {0}, {0}}},	// US
+	{{"GM MK-12056", 0, 0}, {0, 0, true},
+		RomCartridgeMD::MAPPER_MD_SSF2, {{0}, {0}, {0}}},	// EU
+	{{"GM T-12043 ", 0, 0}, {0, 0, true},
+		RomCartridgeMD::MAPPER_MD_SSF2, {{0}, {0}, {0}}},	// JP
 
 	/**
 	 * Xin Qi Gai Wang Zi (original version of Beggar Prince):
@@ -113,11 +130,14 @@ const RomCartridgeMDPrivate::MD_RomFixup_t RomCartridgeMDPrivate::MD_RomFixups[]
 	 * - Xin Qi Gai Wang Zi (Ch).gen:	DD2F38B5
 	 * - Xin Qi Gai Wang Zi (Ch) [a1].gen:	DA5A4BFE
 	 */
-	{{nullptr, 0, 0xDD2F38B5}, {0x400000, 0x40FFFF, false}, RomCartridgeMD::MAPPER_MD_FLAT},
-	{{nullptr, 0, 0xDA5A4BFE}, {0x400000, 0x40FFFF, false}, RomCartridgeMD::MAPPER_MD_FLAT},
+	{{nullptr, 0, 0xDD2F38B5}, {0x400000, 0x40FFFF, false},
+		RomCartridgeMD::MAPPER_MD_FLAT, {{0}, {0}, {0}}},
+	{{nullptr, 0, 0xDA5A4BFE}, {0x400000, 0x40FFFF, false},
+		RomCartridgeMD::MAPPER_MD_FLAT, {{0}, {0}, {0}}},
 
 	// End of list.
-	{{nullptr, 0, 0}, {0, 0, false}, RomCartridgeMD::MAPPER_MD_FLAT}
+	{{nullptr, 0, 0}, {0, 0, false},
+		RomCartridgeMD::MAPPER_MD_FLAT, {{0}, {0}, {0}}}
 };
 
 
@@ -174,21 +194,26 @@ inline uint16_t RomCartridgeMD::T_readWord_Rom(uint32_t address)
 /** Mapper functions. **/
 
 /**
- * Read a byte from the constant register area.
- * MAPPER_MD_CONST_400000
+ * Read a byte from the mapper register area.
+ * MAPPER_MD_REGISTERS_RO
  * @param address Address.
  * @return Byte from constant register area.
  */
-inline uint8_t RomCartridgeMD::readByte_CONST_400000(uint32_t address)
+inline uint8_t RomCartridgeMD::readByte_REGISTERS_RO(uint32_t address)
 {
-	address &= 0x7FFFF;
-	if (address > sizeof(m_mapper.const_400000.reg))
-		return 0xFF;
-
-	// Check if this register is defined.
-	if (m_mapper.const_400000.byte_read_mask & (1 << address)) {
-		// Register is defined.
-		return m_mapper.const_400000.reg[address];
+	for (int i = 0; i < ARRAY_SIZE(m_mapper.registers_ro.reg); i++) {
+		if ((address & m_mapper.registers_ro.addr_mask[i]) ==
+			m_mapper.registers_ro.addr[i])
+		{
+			// Address match.
+			if (!(address & 1)) {
+				// Even byte.
+				return ((m_mapper.registers_ro.reg[i] >> 8) & 0xFF);
+			} else {
+				// Odd byte.
+				return (m_mapper.registers_ro.reg[i] & 0xFF);
+			}
+		}
 	}
 
 	// Register is not defined.
@@ -197,38 +222,23 @@ inline uint8_t RomCartridgeMD::readByte_CONST_400000(uint32_t address)
 
 /**
  * Read a Word from the constant register area.
- * MAPPER_MD_CONST_400000
+ * MAPPER_MD_REGISTERS_RO
  * @param address Address.
  * @return Word from constant register area.
  */
-inline uint16_t RomCartridgeMD::readWord_CONST_400000(uint32_t address)
+inline uint16_t RomCartridgeMD::readWord_REGISTERS_RO(uint32_t address)
 {
-	address &= 0x7FFFE;
-	if (address > sizeof(m_mapper.const_400000.reg))
-		return 0xFF;
-
-	uint16_t ret = 0;
-
-	// Check if the MSB register is defined.
-	if (m_mapper.const_400000.byte_read_mask & (1 << address)) {
-		// Register is defined.
-		ret |= (m_mapper.const_400000.reg[address] << 8);
-	} else {
-		// Register is not defined.
-		ret |= 0xFF00;
+	for (int i = 0; i < ARRAY_SIZE(m_mapper.registers_ro.reg); i++) {
+		if ((address & m_mapper.registers_ro.addr_mask[i]) ==
+			m_mapper.registers_ro.addr[i])
+		{
+			// Address match.
+			return m_mapper.registers_ro.reg[i];
+		}
 	}
 
-	// Check if the LSB register is defined.
-	address++;
-	if (m_mapper.const_400000.byte_read_mask & (1 << address)) {
-		// Register is defined.
-		ret |= m_mapper.const_400000.reg[address];
-	} else {
-		// Register is not defined.
-		ret |= 0xFF;
-	}
-
-	return ret;;
+	// Register is not defined.
+	return 0xFFFF;
 }
 
 
@@ -336,7 +346,7 @@ uint8_t RomCartridgeMD::readByte(uint32_t address)
 		case BANK_ROM_3F:	return T_readByte_Rom<0x3F>(address);
 
 		// Mappers.
-		case BANK_MD_CONST_400000:	return readByte_CONST_400000(address);
+		case BANK_MD_REGISTERS_RO:	return readByte_REGISTERS_RO(address);
 	}
 }
 
@@ -442,7 +452,7 @@ uint16_t RomCartridgeMD::readWord(uint32_t address)
 		case BANK_ROM_3F:	return T_readWord_Rom<0x3F>(address);
 
 		// Mappers.
-		case BANK_MD_CONST_400000:	return readWord_CONST_400000(address);
+		case BANK_MD_REGISTERS_RO:	return readWord_REGISTERS_RO(address);
 	}
 }
 
@@ -651,7 +661,7 @@ void RomCartridgeMD::initMemoryMap(void)
 			memset(m_mapper.ssf2.banks, 0xFF, sizeof(m_mapper.ssf2.banks));
 			break;
 
-		case MAPPER_MD_CONST_400000:
+		case MAPPER_MD_REGISTERS_RO:
 		case MAPPER_MD_REALTEC:
 			// TODO: Implement these mappers.
 			break;
