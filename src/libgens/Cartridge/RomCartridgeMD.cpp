@@ -120,6 +120,10 @@ class RomCartridgeMDPrivate
 		// ROM fixup ID.
 		// If less than 0, no fixup should be applied.
 		int romFixup;
+
+		// EEPROM type.
+		// If less than 0, no EEPROM is in use.
+		int eprType;
 };
 
 /**
@@ -277,6 +281,7 @@ RomCartridgeMDPrivate::RomCartridgeMDPrivate(RomCartridgeMD *q, Rom *rom)
 	: q(q)
 	, rom(rom)
 	, romFixup(-1)
+	, eprType(-1)
 { }
 
 RomCartridgeMDPrivate::~RomCartridgeMDPrivate()
@@ -641,8 +646,21 @@ int RomCartridgeMD::initSRam(void)
  */
 int RomCartridgeMD::initEEPRom(void)
 {
-	// TODO
-	return -1;
+	// TODO: Should that be implemented here or in SRam.cpp?
+
+	// Reset the EEPRom and set the type.
+	m_EEPRom.reset();
+	printf("EEP TYPE: %d\n", d->eprType);
+	m_EEPRom.setEEPRomType(d->eprType);
+
+	// Don't do anything if the ROM isn't in the EEPRom database.
+	if (d->eprType < 0)
+		return 0;
+
+	// Load the EEProm file.
+	// TODO: Use internal filename for multi-file?
+	m_EEPRom.setFilename(d->rom->filename());
+	return m_EEPRom.load();
 }
 
 
@@ -1134,6 +1152,14 @@ void RomCartridgeMD::initMemoryMap(void)
 	const uint16_t checksum = d->rom->checksum();
 	const uint32_t crc32 = d->rom->rom_crc32();
 	d->romFixup = d->CheckRomFixups(serialNumber, checksum, crc32);
+
+	// Check for EEPROM.
+	// TODO: Change DetectEEPRomType to use a full serial?
+	const char *eep_serial = (serialNumber.c_str() + 3);
+	d->eprType = EEPRom::DetectEEPRomType(
+			eep_serial,
+			(serialNumber.size() - 3),
+			checksum);
 
 	// TODO: Identify the ROM.
 	// For now, assume MAPPER_MD_FLAT.
