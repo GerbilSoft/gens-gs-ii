@@ -185,6 +185,7 @@ void M68K::InitSys(SysID system)
 	// Clear M68K RAM.
 	memset(Ram_68k.u8, 0x00, sizeof(Ram_68k.u8));
 
+#ifdef GENS_ENABLE_EMULATION
 	// Initialize M68K RAM handlers.
 	for (int i = 0; i < 32; i++) {
 		uint32_t ram_addr = (0xE00000 | (i << 16));
@@ -193,7 +194,6 @@ void M68K::InitSys(SysID system)
 		M68K_Fetch[i].offset = ((uint32_t)(&Ram_68k.u8[0]) - ram_addr);
 	}
 
-#ifdef GENS_ENABLE_EMULATION
 	// Update the system-specific banking setup.
 	UpdateSysBanking();
 

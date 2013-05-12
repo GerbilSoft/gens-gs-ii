@@ -23,6 +23,8 @@
 
 #include "RomCartridgeMD.hpp"
 
+#include <libgens/config.libgens.h>
+
 #include "../EmuContext.hpp"
 #include "../Util/byteswap.h"
 #include "../macros/common.h"
@@ -406,6 +408,7 @@ bool RomCartridgeMD::isRomLoaded(void) const
  */
 int RomCartridgeMD::updateSysBanking(STARSCREAM_PROGRAMREGION *M68K_Fetch, int banks)
 {
+#ifdef GENS_ENABLE_EMULATION
 	int banksUpdated = 0;
 	if (banks > ARRAY_SIZE(m_cartBanks))
 		banks = ARRAY_SIZE(m_cartBanks);
@@ -430,6 +433,10 @@ int RomCartridgeMD::updateSysBanking(STARSCREAM_PROGRAMREGION *M68K_Fetch, int b
 
 	// Updated.
 	return banksUpdated;
+#else /* !GENS_ENABLE_EMULATION */
+	// Emulation is disabled.
+	return 0;
+#endif /* GENS_ENABLE_EMULATION */
 }
 
 /**
