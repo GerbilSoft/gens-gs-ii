@@ -50,8 +50,8 @@ class ScsiLinux : public ScsiBase
 		ScsiLinux &operator=(const ScsiLinux &);
 
 	public:
-		bool isOpen(void) const override final;
-		void close(void) override final;
+		bool isOpen(void) const final;
+		void close(void) final;
 
 		/**
 		 * Print the description of an error code returned by a ScsiBase function.
@@ -62,19 +62,19 @@ class ScsiLinux : public ScsiBase
 		 * @param err Error code, as returned by a ScsiBase function.
 		 * @param f File handle for fprintf(). (If nullptr, uses stderr.)
 		 */
-		void printScsiError(uint8_t op, int err, FILE *f = nullptr) override final;
+		void printScsiError(uint8_t op, int err, FILE *f = nullptr) final;
 
 		/**
 		 * Check if a disc is present.
 		 * @return True if a disc is present; false if not.
 		 */
-		bool isDiscPresent(void) override final;
+		bool isDiscPresent(void) final;
 
 		/**
 		 * Check if the disc has changed since the last access.
 		 * @return True if the disc has changed; false if not.
 		 */
-		bool hasDiscChanged(void) override final;
+		bool hasDiscChanged(void) final;
 
 	protected:
 		/**
@@ -88,7 +88,7 @@ class ScsiLinux : public ScsiBase
 		 */
 		int scsi_send_cdb(const void *cdb, uint8_t cdb_len,
 				  void *data, size_t data_len,
-				  scsi_data_mode mode = SCSI_DATA_IN) override final;
+				  scsi_data_mode mode = SCSI_DATA_IN) final;
 };
 
 }
