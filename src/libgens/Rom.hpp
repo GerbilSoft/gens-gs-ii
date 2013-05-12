@@ -179,6 +179,19 @@ class Rom
 		uint16_t checksum(void) const;
 
 		/**
+		 * Get the ROM's CRC32.
+		 * @return ROM CRC32.
+		 */
+		uint32_t rom_crc32(void) const;
+
+		/**
+		 * Get the ROM's serial number.
+		 * TODO: This is MD only for now...
+		 * @return ROM serial number.
+		 */
+		std::string rom_serial(void) const;
+
+		/**
 		 * Get the region code. (MD hex format)
 		 * TODO: Change to uint8_t?
 		 * @return ROM region code. (MD hex format)

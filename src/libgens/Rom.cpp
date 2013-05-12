@@ -973,6 +973,21 @@ uint16_t Rom::checksum(void) const
 	{ return d->m_mdHeader.checksum; }
 
 /**
+ * Get the ROM's CRC32.
+ * @return ROM CRC32.
+ */
+uint32_t Rom::rom_crc32(void) const
+	{ return d->rom_crc32; }
+
+/**
+ * Get the ROM's serial number.
+ * TODO: This is MD only for now...
+ * @return ROM serial number.
+ */
+std::string Rom::rom_serial(void) const
+	{ return std::string(d->m_mdHeader.serialNumber, sizeof(d->m_mdHeader.serialNumber)); }
+
+/**
  * Get the region code. (MD hex format)
  * TODO: Change to uint8_t?
  * @return ROM region code. (MD hex format)
