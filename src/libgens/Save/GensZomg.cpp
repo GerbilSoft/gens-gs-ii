@@ -210,6 +210,11 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	if (!zomg.isOpen())
 		return -1;
 
+	// Rom object has some useful ROM information.
+	const LibGens::Rom *rom = context->rom();
+	if (!rom)
+		return -2;
+
 	// Create ZOMG.ini.
 	// TODO: Get System ID and Region from the emulated system information.
 	LibZomg::ZomgIni zomgIni;
@@ -231,7 +236,7 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	zomgIni.setAuthor("Joe User");
 
 	// TODO: Move base path triming code to LibGensText later?
-	string rom_filename(context->rom()->filename());
+	string rom_filename(rom->filename());
 #ifdef _WIN32
 	const char chr_slash = '\\';
 #else
@@ -252,6 +257,9 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 		}
 	}
 	zomgIni.setRomFilename(rom_filename);
+
+	// ROM CRC32.
+	zomgIni.setRomCrc32(rom->rom_crc32());
 
 	zomgIni.setDescription("Some description; should probably\nbe left\\blank.");
 	zomgIni.setExtensions("EXT,THAT,DOESNT,EXIST,LOL");
