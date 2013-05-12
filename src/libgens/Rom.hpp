@@ -177,6 +177,8 @@ class Rom
 
 		/**
 		 * Get the ROM's CRC32.
+		 * NOTE: loadRom() must be called before using this function;
+		 * otherwise, it will return 0.
 		 * @return ROM CRC32.
 		 */
 		uint32_t rom_crc32(void) const;

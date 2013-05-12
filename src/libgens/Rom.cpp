@@ -648,6 +648,11 @@ int Rom::loadRom(void *buf, size_t siz)
 	// TODO: Error handling.
 	size_t ret_siz = 0;
 	d->decomp->getFile(d->z_entry_sel, buf, siz, &ret_siz);
+
+	// Calculate the CRC32.
+	d->rom_crc32 = crc32(0, (const Bytef*)buf, siz);
+
+	// Return the number of bytes read.
 	return ret_siz;
 }
 
@@ -735,6 +740,8 @@ uint16_t Rom::checksum(void) const
 
 /**
  * Get the ROM's CRC32.
+ * NOTE: loadRom() must be called before using this function;
+ * otherwise, it will return 0.
  * @return ROM CRC32.
  */
 uint32_t Rom::rom_crc32(void) const
