@@ -26,6 +26,7 @@
 #include "../EmuContext.hpp"
 #include "../Util/byteswap.h"
 #include "../macros/common.h"
+#include "../Rom.hpp"
 
 /**
  * References:
@@ -50,9 +51,12 @@ namespace LibGens
 
 class RomCartridgeMDPrivate
 {
-	private:
-		RomCartridgeMDPrivate() { }
+	public:
+		RomCartridgeMDPrivate(RomCartridgeMD *q, Rom *rom);
 		~RomCartridgeMDPrivate();
+
+	private:
+		RomCartridgeMD *const q;
 
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
@@ -60,6 +64,9 @@ class RomCartridgeMDPrivate
 		RomCartridgeMDPrivate &operator=(const RomCartridgeMDPrivate &);
 
 	public:
+		// ROM class this RomCartridgeMD is assigned to.
+		Rom *m_rom;
+
 		/**
 		 * ROM fixups table entry.
 		 */
@@ -205,19 +212,42 @@ const RomCartridgeMDPrivate::MD_RomFixup_t RomCartridgeMDPrivate::MD_RomFixups[]
 };
 
 
+RomCartridgeMDPrivate::RomCartridgeMDPrivate(RomCartridgeMD *q, Rom *rom)
+	: q(q)
+	, m_rom(rom)
+{ }
+
+RomCartridgeMDPrivate::~RomCartridgeMDPrivate()
+{ }
+
 /*****************************
  * RomCartridgeMD functions. *
  *****************************/
 
-RomCartridgeMD::RomCartridgeMD()
-	: m_romData(nullptr)
+RomCartridgeMD::RomCartridgeMD(Rom *rom)
+	: d(new RomCartridgeMDPrivate(this, rom))
+	, m_romData(nullptr)
 	, m_romData_size(0)
 { }
 
 RomCartridgeMD::~RomCartridgeMD()
 {
+	delete d;
 	free(m_romData);
 }
+
+/**
+ * Get the maximum supported ROM size.
+ * @return Maximum supported ROM size.
+ */
+int RomCartridgeMD::MaxRomSize(void)
+{
+	// Maximum ROM sizes:
+	// - SSF2 bankswitching: 16 MB
+	// - Flat addressing: 10 MB
+	return (16 * 1024 * 1024);
+}
+
 
 /** ROM access functions. **/
 

@@ -34,21 +34,31 @@
 namespace LibGens
 {
 
+class Rom;
+
 class RomCartridgeMDPrivate;
 
 class RomCartridgeMD
 {
 	public:
-		RomCartridgeMD();
+		RomCartridgeMD(Rom *rom);
 		~RomCartridgeMD();
 
 	private:
 		friend class RomCartridgeMDPrivate;
+		RomCartridgeMDPrivate *const d;
 
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
 		RomCartridgeMD(const RomCartridgeMD &);
 		RomCartridgeMD &operator=(const RomCartridgeMD &);
+
+	public:
+		/**
+		 * Get the maximum supported ROM size.
+		 * @return Maximum supported ROM size.
+		 */
+		static int MaxRomSize(void);
 
 	private:
 		// ROM access.
@@ -76,6 +86,11 @@ class RomCartridgeMD
 		void writeWord_TIME(uint8_t address, uint16_t data);
 
 	private:
+		/**
+		 * NOTE: These variables are not in RomCartridgeMDPrivate
+		 * for performance reasons.
+		 */
+
 		// ROM data. (Should be allocated in 512 KB blocks.)
 		// (Use malloc() and free() for this pointer.)
 		void *m_romData;
