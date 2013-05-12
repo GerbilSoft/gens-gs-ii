@@ -28,6 +28,9 @@
 #include "../macros/common.h"
 #include "../Rom.hpp"
 
+// C includes. (C++ namespace)
+#include <cstdlib>
+
 /**
  * References:
  * - ssf2.txt, Second Edition (2000/07/26) by Bart Trzynadlowski
@@ -65,7 +68,7 @@ class RomCartridgeMDPrivate
 
 	public:
 		// ROM class this RomCartridgeMD is assigned to.
-		Rom *m_rom;
+		Rom *rom;
 
 		/**
 		 * ROM fixups table entry.
@@ -214,7 +217,7 @@ const RomCartridgeMDPrivate::MD_RomFixup_t RomCartridgeMDPrivate::MD_RomFixups[]
 
 RomCartridgeMDPrivate::RomCartridgeMDPrivate(RomCartridgeMD *q, Rom *rom)
 	: q(q)
-	, m_rom(rom)
+	, rom(rom)
 { }
 
 RomCartridgeMDPrivate::~RomCartridgeMDPrivate()
@@ -246,6 +249,63 @@ int RomCartridgeMD::MaxRomSize(void)
 	// - SSF2 bankswitching: 16 MB
 	// - Flat addressing: 10 MB
 	return (16 * 1024 * 1024);
+}
+
+/**
+ * Load the ROM image.
+ * @return 0 on success; non-zero on error.
+ * TODO: Use error code constants?
+ */
+int RomCartridgeMD::loadRom(void)
+{
+	if (!d->rom || !d->rom->isOpen())
+		return -1;
+
+	// Verify that this is a binary ROM image.
+	if (d->rom->romFormat() != Rom::RFMT_BINARY) {
+		// Not a binary ROM image.
+		// TODO: Support SMD, MGD formats?
+		return -2;
+	}
+
+	// Check if the ROM image is too big.
+	if (d->rom->romSize() > MaxRomSize()) {
+		// ROM image is too big.
+		return -3;
+	}
+
+	// Initialize the ROM mapper.
+	initMemoryMap();
+
+	// TODO: Initialize SRAM/EEPROM.
+
+	// Load the ROM image.
+	m_romData_size = d->rom->romSize();
+	m_romData = malloc(m_romData_size);
+	int ret = d->rom->loadRom(m_romData, m_romData_size);
+	if (ret != (int)m_romData_size) {
+		// Error loading the ROM.
+		// TODO: Set an error number somewhere.
+		free(m_romData);
+		m_romData = nullptr;
+		m_romData_size = 0;
+		return -4;
+	}
+
+	// Byteswap the ROM image.
+	be16_to_cpu_array(m_romData, m_romData_size);
+
+	// ...and we're done here.
+	return 0;
+}
+
+/**
+ * Is the ROM loaded?
+ * @return True if loaded; false if not.
+ */
+bool RomCartridgeMD::isRomLoaded(void) const
+{
+	return (m_romData != nullptr);
 }
 
 

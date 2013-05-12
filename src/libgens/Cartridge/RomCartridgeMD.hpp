@@ -60,6 +60,19 @@ class RomCartridgeMD
 		 */
 		static int MaxRomSize(void);
 
+		/**
+		 * Load the ROM image.
+		 * @return 0 on success; non-zero on error.
+		 * TODO: Use error code constants?
+		 */
+		int loadRom(void);
+
+		/**
+		 * Is the ROM loaded?
+		 * @return True if loaded; false if not.
+		 */
+		bool isRomLoaded(void) const;
+
 	private:
 		// ROM access.
 		template<uint8_t bank>
