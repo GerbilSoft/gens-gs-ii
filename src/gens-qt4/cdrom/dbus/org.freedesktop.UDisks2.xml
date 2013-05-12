@@ -46,7 +46,7 @@
     <method name="LoopSetup">
       <annotation name="org.gtk.GDBus.C.UnixFD" value="1"/>
       <arg name="fd" direction="in" type="h"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
       <arg name="resulting_device" direction="out" type="o"/>
     </method>
@@ -80,7 +80,7 @@
       <arg name="level" direction="in" type="s"/>
       <arg name="name" direction="in" type="s"/>
       <arg name="chunk" direction="in" type="t"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In4" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In4" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
       <arg name="resulting_array" direction="out" type="o"/>
     </method>
@@ -175,7 +175,7 @@
          method to change the value of this property.
     -->
     <property name="Configuration" type="a{sv}" access="read">
-      <annotation name="org.qtproject.QtDBus.QtTypeName" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName" value="QVariantMap"/>
     </property>
 
     <!-- Media: The kind of media currently in the drive or blank if unknown.
@@ -369,7 +369,7 @@
         the device</quote>.
     -->
     <method name="Eject">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -387,9 +387,9 @@
         configuration file that @value will be written to.
     -->
     <method name="SetConfiguration">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="value" direction="in" type="a{sv}"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -423,7 +423,7 @@
         is set to %TRUE.
     -->
     <method name="PowerOff">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -556,7 +556,7 @@
         with it being considered an ABI break.
     -->
     <method name="SmartUpdate">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -591,7 +591,7 @@
     -->
     <!-- Disabled for Gens/GS II. (Qt doesn't know what type="a(ysqiiixia{sv})" is.)
     <method name="SmartGetAttributes">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
       <arg name="attributes" direction="out" type="a(ysqiiixia{sv})"/>
     </method>
@@ -611,7 +611,7 @@
     -->
     <method name="SmartSelftestStart">
       <arg name="type" direction="in" type="s"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -622,7 +622,7 @@
         Aborts a running SMART selftest.
     -->
     <method name="SmartSelftestAbort">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -644,7 +644,7 @@
     -->
     <method name="SmartSetEnabled">
       <arg name="value" direction="in" type="b"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -702,7 +702,7 @@
         0x00 and "Drive is spun up" otherwise.
     -->
     <method name="PmGetState">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
       <arg name="state" direction="out" type="y"/>
     </method>
@@ -717,7 +717,7 @@
         <quote>STANDBY IMMEDIATE</quote> to the drive.
     -->
     <method name="PmStandby">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -731,7 +731,7 @@
         disk.
     -->
     <method name="PmWakeup">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -778,7 +778,7 @@
         is %TRUE.
     -->
     <method name="SecurityEraseUnit">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -827,7 +827,7 @@
          <filename>/dev/disk/by-id/wwn-0x5001517387d61905</filename>.
     -->
     <property name="Symlinks" type="aay" access="read">
-      <annotation name="org.qtproject.QtDBus.QtTypeName" value="QByteArrayList"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName" value="QByteArrayList"/>
     </property>
 
     <!-- DeviceNumber: The dev_t of the block device. -->
@@ -1060,7 +1060,7 @@
          <filename>/etc/luks-keys</filename> directory.
     -->
     <property name="Configuration" type="a(sa{sv})" access="read">
-        <annotation name="org.qtproject.QtDBus.QtTypeName" value="QVariantMapMap"/>
+        <annotation name="com.trolltech.QtDBus.QtTypeName" value="QVariantMapMap"/>
     </property>
 
     <!-- CryptoBackingDevice:
@@ -1135,7 +1135,7 @@
     <!-- Disabled for Gens/GS II. (Qt doesn't know what type="(sa{sv})" is.)
     <method name="AddConfigurationItem">
       <arg name="item" direction="in" type="(sa{sv})"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
     -->
@@ -1153,7 +1153,7 @@
     <!-- Disabled for Gens/GS II. (Qt doesn't know what type="(sa{sv})" is.)
     <method name="RemoveConfigurationItem">
       <arg name="item" direction="in" type="(sa{sv})"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
     -->
@@ -1179,7 +1179,7 @@
     <method name="UpdateConfigurationItem">
       <arg name="old_item" direction="in" type="(sa{sv})"/>
       <arg name="new_item" direction="in" type="(sa{sv})"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In2" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In2" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
     -->
@@ -1194,9 +1194,9 @@
         but without secret information filtered out.
     -->
     <method name="GetSecretConfiguration">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="QVariantMapMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="QVariantMapMap"/>
       <arg name="configuration" direction="out" type="a(sa{sv})"/>
     </method>
 
@@ -1258,7 +1258,7 @@
     -->
     <method name="Format">
       <arg name="type" direction="in" type="s"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -1273,7 +1273,7 @@
     -->
     <method name="OpenForBackup">
       <annotation name="org.gtk.GDBus.C.UnixFD" value="1"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
       <arg name="fd" direction="out" type="h"/>
     </method>
@@ -1289,7 +1289,7 @@
     -->
     <method name="OpenForRestore">
       <annotation name="org.gtk.GDBus.C.UnixFD" value="1"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
       <arg name="fd" direction="out" type="h"/>
     </method>
@@ -1311,7 +1311,7 @@
     -->
     <method name="OpenForBenchmark">
       <annotation name="org.gtk.GDBus.C.UnixFD" value="1"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
       <arg name="fd" direction="out" type="h"/>
     </method>
@@ -1331,7 +1331,7 @@
         the device closes it.
     -->
     <method name="Rescan">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -1389,7 +1389,7 @@
       <arg name="size" direction="in" type="t"/>
       <arg name="type" direction="in" type="s"/>
       <arg name="name" direction="in" type="s"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In4" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In4" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
       <arg name="created_partition" direction="out" type="o"/>
     </method>
@@ -1482,7 +1482,7 @@
     -->
     <method name="SetType">
       <arg name="type" direction="in" type="s"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -1494,7 +1494,7 @@
     -->
     <method name="SetName">
       <arg name="name" direction="in" type="s"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -1508,7 +1508,7 @@
     -->
     <method name="SetFlags">
       <arg name="flags" direction="in" type="t"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -1518,7 +1518,7 @@
          Deletes the partition.
     -->
     <method name="Delete">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
   </interface>
@@ -1544,7 +1544,7 @@
     -->
     <method name="SetLabel">
       <arg name="label" direction="in" type="s"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -1554,7 +1554,7 @@
          array is empty.
     -->
     <property name="MountPoints" type="aay" access="read">
-      <annotation name="org.qtproject.QtDBus.QtTypeName" value="QByteArrayList"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName" value="QByteArrayList"/>
     </property>
 
     <!--
@@ -1610,7 +1610,7 @@
         and/or the mount point will be cleaned up.
     -->
     <method name="Mount">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
       <arg name="mount_path" direction="out" type="s"/>
     </method>
@@ -1633,7 +1633,7 @@
         unless the @force option is used.
     -->
     <method name="Unmount">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
   </interface>
@@ -1660,7 +1660,7 @@
         Activates the swap device.
     -->
     <method name="Start">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -1671,7 +1671,7 @@
         Deactivates the swap device.
     -->
     <method name="Stop">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
   </interface>
@@ -1707,7 +1707,7 @@
     -->
     <method name="Unlock">
       <arg name="passphrase" direction="in" type="s"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
       <arg name="cleartext_device" direction="out" type="o"/>
     </method>
@@ -1719,7 +1719,7 @@
         Locks the encrypted device.
     -->
     <method name="Lock">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -1740,7 +1740,7 @@
     <method name="ChangePassphrase">
       <arg name="passphrase" direction="in" type="s"/>
       <arg name="new_passphrase" direction="in" type="s"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In2" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In2" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -1765,7 +1765,7 @@
         Deletes the loop device.
     -->
     <method name="Delete">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -1800,7 +1800,7 @@
     -->
     <method name="SetAutoclear">
       <arg name="value" direction="in" type="b"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
   </interface>
@@ -1978,7 +1978,7 @@
         are missing.
     -->
     <method name="Start">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -1989,7 +1989,7 @@
         Stops the RAID array.
     -->
     <method name="Stop">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -2010,7 +2010,7 @@
     -->
     <method name="RemoveDevice">
       <arg name="device" direction="in" type="o"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -2023,7 +2023,7 @@
     -->
     <method name="AddDevice">
       <arg name="device" direction="in" type="o"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -2036,7 +2036,7 @@
     -->
     <method name="SetBitmapLocation">
       <arg name="value" direction="in" type="ay"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -2059,7 +2059,7 @@
     -->
     <method name="RequestSyncAction">
       <arg name="sync_action" direction="in" type="s"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
@@ -2240,7 +2240,7 @@
         if #org.freedesktop.UDisks2.Job:Cancelable is %FALSE.
     -->
     <method name="Cancel">
-      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QVariantMap"/>
+      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QVariantMap"/>
       <arg name="options" direction="in" type="a{sv}"/>
     </method>
 
