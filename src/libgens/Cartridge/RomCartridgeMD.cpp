@@ -343,9 +343,6 @@ int RomCartridgeMD::loadRom(void)
 		return -3;
 	}
 
-	// Initialize the ROM mapper.
-	initMemoryMap();
-
 	// Allocate memory for the ROM image.
 	// NOTE: malloc() is rounded up to the nearest 512 KB.
 	// TODO: Store the rounded-up size.
@@ -366,6 +363,11 @@ int RomCartridgeMD::loadRom(void)
 
 	// Byteswap the ROM image.
 	be16_to_cpu_array(m_romData, m_romData_size);
+
+	// Initialize the ROM mapper.
+	// NOTE: This must be done after loading the ROM;
+	// otherwise, d->rom->rom_crc32() will return 0.
+	initMemoryMap();
 
 	// Initialize EEPRom.
 	// EEPRom is only used if the ROM is in the EEPRom class's database.
@@ -650,7 +652,6 @@ int RomCartridgeMD::initEEPRom(void)
 
 	// Reset the EEPRom and set the type.
 	m_EEPRom.reset();
-	printf("EEP TYPE: %d\n", d->eprType);
 	m_EEPRom.setEEPRomType(d->eprType);
 
 	// Don't do anything if the ROM isn't in the EEPRom database.
@@ -1161,10 +1162,18 @@ void RomCartridgeMD::initMemoryMap(void)
 			(serialNumber.size() - 3),
 			checksum);
 
-	// TODO: Identify the ROM.
-	// For now, assume MAPPER_MD_FLAT.
-	m_mapper.type = MAPPER_MD_FLAT;
+	// Set the ROM mapper.
+	if (d->romFixup >= 0) {
+		const RomCartridgeMDPrivate::MD_RomFixup_t *fixup =
+			&RomCartridgeMDPrivate::MD_RomFixups[d->romFixup];
+		m_mapper.type = fixup->mapperType;
+	} else {
+		// No fixup for this ROM.
+		// Use flat addressing.
+		m_mapper.type = MAPPER_MD_FLAT;
+	}
 
+	// Set mapper registers based on type.
 	switch (m_mapper.type) {
 		default:
 		case MAPPER_MD_FLAT:
@@ -1175,7 +1184,7 @@ void RomCartridgeMD::initMemoryMap(void)
 
 		case MAPPER_MD_SSF2:
 			// Assign banks $000000-$3FFFFF only.
-			for (int i = 0; i < 7; i++)
+			for (int i = 0; i < 8; i++)
 				m_cartBanks[i] = BANK_ROM_00 + i;
 			for (int i = 8; i < ARRAY_SIZE(m_cartBanks); i++)
 				m_cartBanks[i] = BANK_UNUSED;
@@ -1184,10 +1193,12 @@ void RomCartridgeMD::initMemoryMap(void)
 			memset(m_mapper.ssf2.banks, 0xFF, sizeof(m_mapper.ssf2.banks));
 			break;
 
+#if 0
 		case MAPPER_MD_REGISTERS_RO:
 		case MAPPER_MD_REALTEC:
 			// TODO: Implement these mappers.
 			break;
+#endif
 	}
 }
 
