@@ -1163,9 +1163,9 @@ void RomCartridgeMD::initMemoryMap(void)
 			checksum);
 
 	// Set the ROM mapper.
+	const RomCartridgeMDPrivate::MD_RomFixup_t *fixup = nullptr;
 	if (d->romFixup >= 0) {
-		const RomCartridgeMDPrivate::MD_RomFixup_t *fixup =
-			&RomCartridgeMDPrivate::MD_RomFixups[d->romFixup];
+		fixup = &RomCartridgeMDPrivate::MD_RomFixups[d->romFixup];
 		m_mapper.type = fixup->mapperType;
 	} else {
 		// No fixup for this ROM.
@@ -1193,8 +1193,19 @@ void RomCartridgeMD::initMemoryMap(void)
 			memset(m_mapper.ssf2.banks, 0xFF, sizeof(m_mapper.ssf2.banks));
 			break;
 
-#if 0
 		case MAPPER_MD_REGISTERS_RO:
+			// Read-only registers after the ROM area.
+			for (int i = 0; i < 8; i++)
+				m_cartBanks[i] = BANK_ROM_00 + i;
+			for (int i = 8; i < ARRAY_SIZE(m_cartBanks); i++)
+				m_cartBanks[i] = BANK_MD_REGISTERS_RO;
+
+			// Copy the register data from the fixups table.
+			memcpy(&m_mapper.registers_ro, &fixup->registers_ro,
+				sizeof(m_mapper.registers_ro));
+			break;
+
+#if 0
 		case MAPPER_MD_REALTEC:
 			// TODO: Implement these mappers.
 			break;
