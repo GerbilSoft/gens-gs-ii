@@ -66,7 +66,7 @@ EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
 	}
 
 	// Check the ROM size.
-	if ((rom->romSize() == 0) || (rom->romSize() > (int)sizeof(M68K_Mem::Rom_Data))) {
+	if ((rom->romSize() == 0) || (rom->romSize() > RomCartridgeMD::MaxRomSize())) {
 		// ROM is either empty or too big.
 		// TODO: Set an error code.
 		m_rom = nullptr;
@@ -74,21 +74,20 @@ EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
 	}
 
 	// Load the ROM into memory.
-	M68K_Mem::Rom_Size = rom->romSize();
-	size_t siz_loaded = rom->loadRom(&M68K_Mem::Rom_Data.u8[0], M68K_Mem::Rom_Size);
-	if (siz_loaded != M68K_Mem::Rom_Size) {
+	M68K_Mem::ms_RomCartridge = new RomCartridgeMD(rom);
+	M68K_Mem::ms_RomCartridge->loadRom();
+	if (!M68K_Mem::ms_RomCartridge->isRomLoaded()) {
 		// Error loading the ROM.
 		// TODO: Set an error code.
+		delete M68K_Mem::ms_RomCartridge;
+		M68K_Mem::ms_RomCartridge = nullptr;
 		m_rom = nullptr;
 		return;
 	}
 
-	// Byteswap the ROM data.
-	be16_to_cpu_array(&M68K_Mem::Rom_Data.u8[0], M68K_Mem::Rom_Size);
-
 	// Autofix the ROM checksum, if enabled.
 	if (AutoFixChecksum())
-		fixChecksum();
+		M68K_Mem::ms_RomCartridge->fixChecksum();
 
 	// Initialize the M68K.
 	M68K::InitSys(M68K::SYSID_MD);
@@ -117,12 +116,17 @@ EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
 
 EmuMD::~EmuMD()
 {
-	// TODO
+	// TODO: Other stuff?
+	M68K::EndSys();
+
+	// Delete the RomCartridgeMD.
+	delete M68K_Mem::ms_RomCartridge;
+	M68K_Mem::ms_RomCartridge = nullptr;
 }
 
 
 /**
- * softReset(): Perform a soft reset.
+ * Perform a soft reset.
  * @return 0 on success; non-zero on error.
  */
 int EmuMD::softReset(void)
@@ -131,9 +135,9 @@ int EmuMD::softReset(void)
 	// - If autofix is enabled, fix the checksum.
 	// - If autofix is disabled, restore the checksum.
 	if (AutoFixChecksum())
-		fixChecksum();
+		M68K_Mem::ms_RomCartridge->fixChecksum();
 	else
-		restoreChecksum();
+		M68K_Mem::ms_RomCartridge->restoreChecksum();
 	
 	// Reset the M68K, Z80, and YM2612.
 	M68K::Reset();
@@ -151,7 +155,7 @@ int EmuMD::softReset(void)
 
 
 /**
- * hardReset(): Perform a hard reset.
+ * Perform a hard reset.
  * @return 0 on success; non-zero on error.
  */
 int EmuMD::hardReset(void)
@@ -163,10 +167,10 @@ int EmuMD::hardReset(void)
 	// - If autofix is enabled, fix the checksum.
 	// - If autofix is disabled, restore the checksum.
 	if (AutoFixChecksum())
-		fixChecksum();
+		M68K_Mem::ms_RomCartridge->fixChecksum();
 	else
-		restoreChecksum();
-	
+		M68K_Mem::ms_RomCartridge->restoreChecksum();
+
 	// Hard-Reset the M68K, Z80, VDP, PSG, and YM2612.
 	// This includes clearing RAM.
 	M68K::InitSys(M68K::SYSID_MD);
@@ -174,17 +178,17 @@ int EmuMD::hardReset(void)
 	m_vdp->reset();
 	SoundMgr::ms_Psg.reset();
 	SoundMgr::ms_Ym2612.reset();
-	
+
 	// Make sure the VDP's video mode bit is set properly.
 	m_vdp->setVideoMode(m_sysVersion.isPal());
-	
+
 	// Reset successful.
 	return 0;
 }
 
 
 /**
- * setRegion(): Set the region code.
+ * Set the region code.
  * @param region Region code.
  * @return 0 on success; non-zero on error.
  */
@@ -192,7 +196,7 @@ int EmuMD::setRegion(SysVersion::RegionCode_t region)
 	{ return setRegion_int(region, true); }
 
 /**
- * Round_Double(): Gens rounding function.
+ * Gens rounding function.
  * The implementation doesn't match rint(), so we're defining this here.
  * @param val Value to round.
  * @return Rounded value.
@@ -206,7 +210,7 @@ static inline int Round_Double(double val)
 }
 
 /**
- * setRegion_int(): Set the region code. (INTERNAL VERSION)
+ * Set the region code. (INTERNAL VERSION)
  * @param region Region code.
  * @param preserveState If true, preserve the audio IC state.
  * @return 0 on success; non-zero on error.
@@ -214,23 +218,22 @@ static inline int Round_Double(double val)
 int EmuMD::setRegion_int(SysVersion::RegionCode_t region, bool preserveState)
 {
 	SysVersion newRegion(region);
-	if (preserveState && (m_sysVersion.isPal() == newRegion.isPal()))
-	{
+	if (preserveState && (m_sysVersion.isPal() == newRegion.isPal())) {
 		// preserveState was specified, and the current NTSC/PAL setting
 		// matches the new NTSC/PAL setting. Don't reset anything.
 		m_sysVersion.setRegion(region);
 		return 0;
 	}
-	
+
 	// Set the region.
 	m_sysVersion.setRegion(region);
-	
+
 	// Initialize Vdp::VDP_Lines.
 	// Don't reset the VDP current line variables here,
 	// since this might not be the beginning of the frame.
 	m_vdp->updateVdpLines(false);
 	m_vdp->setVideoMode(m_sysVersion.isPal());
-	
+
 	// Initialize CPL.
 	/* NOTE: Game_Music_Emu uses floor() here, but it seems that using floor()
 	 * causes audio distortion on the title screen of "Beavis and Butt-head" (U).
@@ -238,21 +241,18 @@ int EmuMD::setRegion_int(SysVersion::RegionCode_t region, bool preserveState)
 	 * [rint() uses banker's rounding, which rounds 0.5 to 0 and 1.5 to 2.]
 	 * [Round_Double() rounds 0.5 to 0 and 1.5 to 1.] */
 	// TODO: Jorge says CPL is always 3420 master clock cycles...
-	if (m_sysVersion.isPal())
-	{
+	if (m_sysVersion.isPal()) {
 		M68K_Mem::CPL_M68K = Round_Double((((double)CLOCK_PAL / 7.0) / 50.0) / 312.0);
 		M68K_Mem::CPL_Z80 = Round_Double((((double)CLOCK_PAL / 15.0) / 50.0) / 312.0);
-	}
-	else
-	{
+	} else {
 		M68K_Mem::CPL_M68K = Round_Double((((double)CLOCK_NTSC / 7.0) / 60.0) / 262.0);
 		M68K_Mem::CPL_Z80 = Round_Double((((double)CLOCK_NTSC / 15.0) / 60.0) / 262.0);
 	}
-	
+
 	// Initialize audio.
 	// NOTE: Only set the region. Sound rate is set by the UI.
 	SoundMgr::SetRegion(m_sysVersion.isPal(), preserveState);
-	
+
 	// Region set successfully.
 	return 0;
 }

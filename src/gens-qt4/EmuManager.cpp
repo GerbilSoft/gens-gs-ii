@@ -352,6 +352,7 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	}
 
 	// Check the ROM format.
+	// TODO: Remove this once all ROM formats are supported.
 	if (rom->romFormat() != LibGens::Rom::RFMT_BINARY) {
 		// Only binary ROM images are supported.r
 		LibGens::Rom::RomFormat errRomFormat = rom->romFormat();

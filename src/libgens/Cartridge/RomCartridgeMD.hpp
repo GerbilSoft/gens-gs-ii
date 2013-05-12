@@ -27,6 +27,9 @@
 // C includes.
 #include <stdint.h>
 
+// Starscream.
+#include "libgens/cpu/star_68k.h"
+
 // SRam and EEPRom.
 #include "Save/SRam.hpp"
 #include "Save/EEPRom.hpp"
@@ -72,6 +75,31 @@ class RomCartridgeMD
 		 * @return True if loaded; false if not.
 		 */
 		bool isRomLoaded(void) const;
+
+		/**
+		 * Update M68K CPU program access structs for bankswitching purposes.
+		 * @param M68K_Fetch Pointer to first STARSCREAM_PROGRAMREGION to update.
+		 * @param banks Maximum number of banks to update.
+		 * @return Number of banks updated.
+		 */
+		int updateSysBanking(STARSCREAM_PROGRAMREGION *M68K_Fetch, int banks);
+
+		/**
+		 * Fix the ROM checksum.
+		 * This function uses the standard Sega checksum formula.
+		 * TODO: Add certain non-standard checksums, and fixups
+		 * for games that store code in the header area.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int fixChecksum(void);
+
+		/**
+		 * Restore the ROM checksum.
+		 * This restores the ROM checksum in m_romData
+		 * from the previously-loaded header information.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int restoreChecksum(void);
 
 	private:
 		// ROM access.

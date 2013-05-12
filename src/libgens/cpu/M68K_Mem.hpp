@@ -50,6 +50,8 @@ extern Ram_68k_t Ram_68k;
 namespace LibGens
 {
 
+class RomCartridgeMD;
+
 class M68K_Mem
 {
 	public:
@@ -67,16 +69,9 @@ class M68K_Mem
 		};
 		static Ram_68k_t Ram_68k;
 #endif
-		
-		union Rom_Data_t
-		{
-			uint8_t  u8[6*1024*1024];
-			uint16_t u16[(6*1024*1024)>>1];
-			uint32_t u32[(6*1024*1024)>>2];
-		};
-		static Rom_Data_t Rom_Data;
-		static unsigned int Rom_Size;
-		
+		// ROM cartridge.
+		static RomCartridgeMD *ms_RomCartridge;
+
 		// Genesis TMSS ROM.
 		static uint8_t MD_TMSS_Rom[2 * 1024];
 		
@@ -110,109 +105,60 @@ class M68K_Mem
 	private:
 		/** Z80/M68K cycle table. **/
 		static int Z80_M68K_Cycle_Tab[512];
-		
+
 		/** Bus acquisition timing. **/
 		static const int CYCLE_FOR_TAKE_Z80_BUS_GENESIS = 16;
 		
-		/**
-		 * ms_SSF2_BankState[]: SSF2 bankswitching state.
-		 * TODO: Make a helper class for this?
-		 * Index 0 == unused. (present for alignment and consistency)
-		 * Index 1 == $A130F3 (bank 1)
-		 * Index 2 == $A130F5 (bank 2)
-		 * Index 3 == $A130F7 (bank 3)
-		 * Index 4 == $A130F9 (bank 4)
-		 * Index 5 == $A130FB (bank 5)
-		 * Index 6 == $A130FD (bank 6)
-		 * Index 7 == $A130FF (bank 7)
-		 *
-		 * Values: 0xFF == no bankswitching; 0-63 == bank number
-		 * NOTE: Gens/GS II only implements banks 0-9.
-		 */
-		static uint8_t ms_SSF2_BankState[8];
-		
-		/**
-		 * Number of banks currently supported by SSF2 mapper implementation.
-		 * Rom_Data is currently 6 MB, which is 12 banks of 512 KB. (0x0 - 0xB)
-		 */
-		static const uint8_t SSF2_NUM_BANKS = 12;
-		
-		enum M68KBank_t
-		{
-			// Unused bank. (Return 0xFF)
-			M68K_BANK_UNUSED = 0,
-			
+
+		enum M68KBank_t {
 			// ROM banks.
-			M68K_BANK_ROM_0,	// ROM: $000000 - $07FFFF
-			M68K_BANK_ROM_1,	// ROM: $080000 - $0FFFFF
-			M68K_BANK_ROM_2,	// ROM: $100000 - $17FFFF
-			M68K_BANK_ROM_3,	// ROM: $180000 - $1FFFFF
-			M68K_BANK_ROM_4,	// ROM: $200000 - $27FFFF
-			M68K_BANK_ROM_5,	// ROM: $280000 - $2FFFFF
-			M68K_BANK_ROM_6,	// ROM: $300000 - $37FFFF
-			M68K_BANK_ROM_7,	// ROM: $380000 - $3FFFFF
-			M68K_BANK_ROM_8,	// ROM: $400000 - $47FFFF
-			M68K_BANK_ROM_9,	// ROM: $480000 - $4FFFFF
-			M68K_BANK_ROM_A,	// ROM: $500000 - $57FFFF
-			M68K_BANK_ROM_B,	// ROM: $580000 - $5FFFFF
-			
-			// SRAM only.
-			M68K_BANK_SRAM,		// SRAM. (Used for some games that store SRAM in invalid areas.)
-			
+			M68K_BANK_ROM_0 = 0,	// M68K: $000000 - $1FFFFF
+			M68K_BANK_ROM_1,	// M68K: $200000 - $3FFFFF
+			M68K_BANK_ROM_2,	// M68K: $400000 - $5FFFFF
+			M68K_BANK_ROM_3,	// M68K: $600000 - $7FFFFF
+			M68K_BANK_ROM_4,	// M68K: $800000 - $9FFFFF
+
 			// I/O area.
-			M68K_BANK_IO,		// M68K: $A00000 - $A7FFFF (TODO: Verify mirroring.)
-			
+			M68K_BANK_IO,		// M68K: $A00000 - $BFFFFF
+
 			// VDP area.
 			M68K_BANK_VDP,		// M68K: $C00000 - $DFFFFF (specialized mirroring)
 			
 			// RAM area.
 			M68K_BANK_RAM,		// M68K: $E00000 - $FFFFFF (64K mirroring)
+
+			// Unused bank. (Return 0xFF)
+			M68K_BANK_UNUSED = 0xFF
 		};
-		
+
 		/**
 		 * ms_M68KBank_Type[]: M68K bank type identifiers.
 		 * These type identifiers indicate what's mapped to each virtual bank.
-		 * Banks are 512 KB each, for a total of 32 banks.
+		 * Banks are 2 MB each, for a total of 8 banks.
 		 */
-		static uint8_t ms_M68KBank_Type[32];
-		
+		static uint8_t ms_M68KBank_Type[8];
+
 		/**
 		 * msc_M68KBank_Def_MD[]: Default M68K bank type IDs for MD.
 		 */
-		static const uint8_t msc_M68KBank_Def_MD[32];
-		
+		static const uint8_t msc_M68KBank_Def_MD[8];
+
 		/** Read Byte functions. **/
-		
-		template<uint8_t bank>
-		static uint8_t T_M68K_Read_Byte_Rom(uint32_t address);
-		
-		template<int8_t bank>
-		static uint8_t T_M68K_Read_Byte_Rom_SRam(uint32_t address);
-		
 		static uint8_t M68K_Read_Byte_Ram(uint32_t address);
 		static uint8_t M68K_Read_Byte_Misc(uint32_t address);
 		static uint8_t M68K_Read_Byte_VDP(uint32_t address);
-		
+
 		/** Read Word functions. **/
-		
-		template<uint8_t bank>
-		static uint16_t T_M68K_Read_Word_Rom(uint32_t address);
-		
-		template<int8_t bank>
-		static uint16_t T_M68K_Read_Word_Rom_SRam(uint32_t address);
-		
 		static uint16_t M68K_Read_Word_Ram(uint32_t address);
 		static uint16_t M68K_Read_Word_Misc(uint32_t address);
 		static uint16_t M68K_Read_Word_VDP(uint32_t address);
-		
+
 		/** Write Byte functions. **/
-		static void M68K_Write_Byte_SRam(uint32_t address, uint8_t data);
 		static void M68K_Write_Byte_Ram(uint32_t address, uint8_t data);
 		static void M68K_Write_Byte_Misc(uint32_t address, uint8_t data);
 		static void M68K_Write_Byte_VDP(uint32_t address, uint8_t data);
-		
+
 		/** Write Word functions. **/
-		static void M68K_Write_Word_SRam(uint32_t address, uint16_t data);
 		static void M68K_Write_Word_Ram(uint32_t address, uint16_t data);
 		static void M68K_Write_Word_Misc(uint32_t address, uint16_t data);
 		static void M68K_Write_Word_VDP(uint32_t address, uint16_t data);

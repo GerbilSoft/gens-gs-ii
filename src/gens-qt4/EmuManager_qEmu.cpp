@@ -775,39 +775,26 @@ void EmuManager::doPauseRequest(paused_t newPaused)
 
 
 /**
- * doResetEmulator(): Reset the emulator.
+ * Reset the emulator.
  * @param hardReset If true, do a hard reset; otherwise, do a soft reset.
  */
 void EmuManager::doResetEmulator(bool hardReset)
 {
-	// If autofix checksum is enabled, re-fix the checksum.
-	// Otherwise, restore the checksum.
-	// TODO: Move this call to EmuMD::hardReset() / EmuMD::softReset()?
-	// (That'll require setting a static option in EmuContext.)
-	// TODO: Automatically fix/unfix checksum when the option is changed?
-	if (gqt4_cfg->get(QLatin1String("autoFixChecksum")).toBool())
-		gqt4_emuContext->fixChecksum();
-	else
-		gqt4_emuContext->restoreChecksum();
-	
 	QString msg;
-	if (hardReset)
-	{
+	if (hardReset) {
 		// Do a hard reset.
 		gqt4_emuContext->hardReset();
-		
+
 		//: OSD message indicating a Hard Reset was performed.
 		msg = tr("Hard Reset.", "osd");
-	}
-	else
-	{
+	} else {
 		// Do a soft reset.
 		gqt4_emuContext->softReset();
-		
+
 		//: OSD message indicating a Soft Reset was performed.
 		msg = tr("Soft Reset.", "osd");
 	}
-	
+
 	// Print the message to the OSD.
 	emit osdPrintMsg(2500, msg);
 }

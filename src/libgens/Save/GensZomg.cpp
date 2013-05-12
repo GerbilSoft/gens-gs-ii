@@ -149,6 +149,8 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 		M68K_Mem::Z80_State |= Z80_STATE_RESET;
 	Z80_MD_Mem::Bank_Z80 = ((md_z80_ctrl_save.m68k_bank & 0x1FF) << 15);
 
+	// TODO: Update this for RomCartridgeMD.
+#if 0
 	// Load the MD /TIME registers.
 	Zomg_MD_TimeReg_t md_time_reg_save;
 	int ret = zomg.loadMD_TimeReg(&md_time_reg_save);
@@ -182,6 +184,7 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 	// Load SSF2 bank registers.
 	// TODO: Only if SSF2 is detected?
 	M68K_Mem::ZomgRestoreSSF2BankState(&md_time_reg_save);
+#endif
 
 	// Close the savestate.
 	zomg.close();
@@ -322,6 +325,8 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	md_z80_ctrl_save.m68k_bank = ((Z80_MD_Mem::Bank_Z80 >> 15) & 0x1FF);
 	zomg.saveMD_Z80Ctrl(&md_z80_ctrl_save);
 	
+	// TODO: Update this for RomCartridgeMD.
+#if 0
 	// Save the MD /TIME registers.
 	Zomg_MD_TimeReg_t md_time_reg_save;
 	memset(md_time_reg_save.reg, 0xFF, sizeof(md_time_reg_save.reg));
@@ -346,7 +351,8 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	
 	// Write MD /TIME registers.
 	zomg.saveMD_TimeReg(&md_time_reg_save);
-	
+#endif
+
 	// Close the savestate.
 	zomg.close();
 	

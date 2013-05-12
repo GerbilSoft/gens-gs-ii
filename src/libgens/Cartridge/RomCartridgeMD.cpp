@@ -279,9 +279,14 @@ int RomCartridgeMD::loadRom(void)
 
 	// TODO: Initialize SRAM/EEPROM.
 
-	// Load the ROM image.
+	// Allocate memory for the ROM image.
+	// NOTE: malloc() is rounded up to the nearest 512 KB.
+	// TODO: Store the rounded-up size.
 	m_romData_size = d->rom->romSize();
-	m_romData = malloc(m_romData_size);
+	const uint32_t rnd_512k = ((m_romData_size + 0x7FFFF) & ~0x7FFFF);
+	m_romData = malloc(rnd_512k);
+
+	// Load the ROM image.
 	int ret = d->rom->loadRom(m_romData, m_romData_size);
 	if (ret != (int)m_romData_size) {
 		// Error loading the ROM.
@@ -306,6 +311,89 @@ int RomCartridgeMD::loadRom(void)
 bool RomCartridgeMD::isRomLoaded(void) const
 {
 	return (m_romData != nullptr);
+}
+
+/**
+ * Update M68K CPU program access structs for bankswitching purposes.
+ * @param M68K_Fetch Pointer to first STARSCREAM_PROGRAMREGION to update.
+ * @param banks Maximum number of banks to update.
+ * @return Number of banks updated.
+ */
+int RomCartridgeMD::updateSysBanking(STARSCREAM_PROGRAMREGION *M68K_Fetch, int banks)
+{
+	int banksUpdated = 0;
+	if (banks > ARRAY_SIZE(m_cartBanks))
+		banks = ARRAY_SIZE(m_cartBanks);
+
+	// TODO: This is not 64-bit clean!
+	for (int i = 0; i < banks; i++) {
+		if (/*m_cartBanks[i] >= BANK_ROM_00 &&*/
+		    m_cartBanks[i] <= BANK_ROM_3F) {
+			// ROM bank.
+			// NOTE: m_romData is always a multiple of 512 KB.
+			const uint32_t romAddrStart = (0x80000 * (m_cartBanks[i] - BANK_ROM_00));
+			if (romAddrStart < m_romData_size) {
+				// Valid bank. Map it.
+				(*M68K_Fetch).lowaddr = romAddrStart;
+				(*M68K_Fetch).highaddr = (romAddrStart + 0x7FFFF);
+				(*M68K_Fetch).offset = ((uint32_t)m_romData);
+				M68K_Fetch++;
+				banksUpdated++;
+			}
+		}
+	}
+
+	// Updated.
+	return banksUpdated;
+}
+
+/**
+ * Fix the ROM checksum.
+ * This function uses the standard Sega checksum formula.
+ * TODO: Add certain non-standard checksums, and fixups
+ * for games that store code in the header area.
+ * @return 0 on success; non-zero on error.
+ */
+int RomCartridgeMD::fixChecksum(void)
+{
+	if (!m_romData || m_romData_size <= 0x200)
+		return -1;
+
+	// Calculate the ROM checksum.
+	// NOTE: ROM is byteswapped. (Header data is read before byteswapping.)
+	// NOTE: If ROM is an odd number of bytes, it'll be padded by 1 byte.
+	uint16_t checksum = 0;
+	const uint16_t *rom_ptr = &(reinterpret_cast<uint16_t*>(m_romData))[0x200>>1];
+	const uint16_t *end_ptr = rom_ptr + ((m_romData_size - 0x200) >> 1);
+	if (m_romData_size & 1)
+		end_ptr++;
+
+	for (; rom_ptr != end_ptr; rom_ptr++) {
+		checksum += *rom_ptr;
+	}
+
+	// Set the new checksum.
+	uint16_t *chk_ptr = &(reinterpret_cast<uint16_t*>(m_romData))[0x18E>>1];
+	*chk_ptr = checksum;
+	return 0;
+}
+
+/**
+ * Restore the ROM checksum.
+ * This restores the ROM checksum in m_romData
+ * from the previously-loaded header information.
+ * @return 0 on success; non-zero on error.
+ */
+int RomCartridgeMD::restoreChecksum(void)
+{
+	if (!m_romData || m_romData_size <= 0x200)
+		return -1;
+
+	// Restore the ROM checksum.
+	// NOTE: ROM is byteswapped. (Header data is read before byteswapping.)
+	uint16_t *chk_ptr = &(reinterpret_cast<uint16_t*>(m_romData))[0x18E>>1];
+	*chk_ptr = d->rom->checksum();
+	return 0;
 }
 
 

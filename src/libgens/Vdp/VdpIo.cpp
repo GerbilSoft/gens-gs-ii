@@ -29,6 +29,7 @@
 // M68K CPU.
 #include "cpu/star_68k.h"
 #include "cpu/M68K_Mem.hpp"
+#include "Cartridge/RomCartridgeMD.hpp"
 
 /** Static member initialization. **/
 #include "VdpIo_static.hpp"
@@ -977,14 +978,14 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 		uint16_t w;
 		switch (src_component) {
 			case DMA_SRC_ROM:
-				w = M68K_Mem::Rom_Data.u16[src_word_address | src_base_address];
+				w = M68K_Mem::ms_RomCartridge->readByte(src_word_address | src_base_address);
 				break;
-			
+
 			case DMA_SRC_M68K_RAM:
 				//w = M68K_Mem::Ram_68k.u16[src_word_address];
 				w = Ram_68k.u16[src_word_address];
 				break;
-			
+
 			// TODO: Port to LibGens.
 #if 0
 			case DMA_SRC_PRG_RAM:
@@ -1283,7 +1284,14 @@ void Vdp::Write_Ctrl(uint16_t data)
 	// Determine the source component.
 	DMA_Src_t src_component = DMA_SRC_ROM;	// TODO: Determine a better default.
 	int WRam_Mode;
-	if (src_address < M68K_Mem::Rom_Size) {
+
+	// Maximum ROM source address: 4 MB for Sega CD or 32X, 10 MB for standard MD.
+	const uint32_t maxRomSrcAddress =
+		((SysStatus.SegaCD || SysStatus._32X)
+		 ? 0x3FFFFF
+		 : 0x9FFFFF);
+
+	if (src_address <= maxRomSrcAddress) {
 		// Main ROM.
 		src_component = DMA_SRC_ROM;
 	} else if (!SysStatus.SegaCD) {

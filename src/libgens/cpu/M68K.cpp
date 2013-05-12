@@ -24,8 +24,11 @@
 #include "M68K.hpp"
 #include "M68K_Mem.hpp"
 
-// C includes.
-#include <string.h>
+#include "macros/common.h"
+#include "Cartridge/RomCartridgeMD.hpp"
+
+// C includes. (C++ namespace)
+#include <cstring>
 
 namespace LibGens
 {
@@ -36,45 +39,33 @@ S68000CONTEXT M68K::ms_Context;
 STARSCREAM_PROGRAMREGION M68K::M68K_Fetch[] =
 {
 #ifdef GENS_ENABLE_EMULATION
-	// RAM, including mirrors.
-	{0xE00000, 0xE0FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE00000},
-	{0xE10000, 0xE1FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE10000},
-	{0xE20000, 0xE2FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE20000},
-	{0xE30000, 0xE3FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE30000},
-	{0xE40000, 0xE4FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE40000},
-	{0xE50000, 0xE5FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE50000},
-	{0xE60000, 0xE6FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE60000},
-	{0xE70000, 0xE7FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE70000},
-	{0xE80000, 0xE8FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE80000},
-	{0xE90000, 0xE9FFFF, (unsigned int)&Ram_68k.u8[0] - 0xE90000},
-	{0xEA0000, 0xEAFFFF, (unsigned int)&Ram_68k.u8[0] - 0xEA0000},
-	{0xEB0000, 0xEBFFFF, (unsigned int)&Ram_68k.u8[0] - 0xEB0000},
-	{0xEC0000, 0xECFFFF, (unsigned int)&Ram_68k.u8[0] - 0xEC0000},
-	{0xED0000, 0xEDFFFF, (unsigned int)&Ram_68k.u8[0] - 0xED0000},
-	{0xEE0000, 0xEEFFFF, (unsigned int)&Ram_68k.u8[0] - 0xEE0000},
-	{0xEF0000, 0xEFFFFF, (unsigned int)&Ram_68k.u8[0] - 0xEF0000},
-	{0xF00000, 0xF0FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF00000},
-	{0xF10000, 0xF1FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF10000},
-	{0xF20000, 0xF2FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF20000},
-	{0xF30000, 0xF3FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF30000},
-	{0xF40000, 0xF4FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF40000},
-	{0xF50000, 0xF5FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF50000},
-	{0xF60000, 0xF6FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF60000},
-	{0xF70000, 0xF7FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF70000},
-	{0xF80000, 0xF8FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF80000},
-	{0xF90000, 0xF9FFFF, (unsigned int)&Ram_68k.u8[0] - 0xF90000},
-	{0xFA0000, 0xFAFFFF, (unsigned int)&Ram_68k.u8[0] - 0xFA0000},
-	{0xFB0000, 0xFBFFFF, (unsigned int)&Ram_68k.u8[0] - 0xFB0000},
-	{0xFC0000, 0xFCFFFF, (unsigned int)&Ram_68k.u8[0] - 0xFC0000},
-	{0xFD0000, 0xFDFFFF, (unsigned int)&Ram_68k.u8[0] - 0xFD0000},
-	{0xFE0000, 0xFEFFFF, (unsigned int)&Ram_68k.u8[0] - 0xFE0000},
-	{0xFF0000, 0xFFFFFF, (unsigned int)&Ram_68k.u8[0] - 0xFF0000},
-	
-	// The following four entries are available for the various different systems.
-	{-1, -1, 0},	// 32
-	{-1, -1, 0},	// 33
-	{-1, -1, 0},	// 34
-	{-1, -1, 0},	// 35
+	// 32 entries for RAM, including mirrors.
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+
+	// 64 entries for ROM handlers.
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
 #endif /* GENS_ENABLE_EMULATION */
 	
 	// Terminator.
@@ -85,9 +76,10 @@ STARSCREAM_PROGRAMREGION M68K::M68K_Fetch[] =
 STARSCREAM_DATAREGION M68K::M68K_Read_Byte[4] =
 {
 #ifdef GENS_ENABLE_EMULATION
-	{0x000000, 0x3FFFFF, NULL, NULL},
+	// TODO: 0x9FFFFF is valid for MD only.
+	{0x000000, 0x9FFFFF, NULL, NULL},
 	{0xFF0000, 0xFFFFFF, NULL, &Ram_68k.u8[0]},
-	{0x400000, 0xFEFFFF, (void*)M68K_Mem::M68K_RB, NULL},
+	{0xA00000, 0xFEFFFF, (void*)M68K_Mem::M68K_RB, NULL},
 #endif /* GENS_ENABLE_EMULATION */
 	{-1, -1, NULL, NULL}
 };
@@ -96,9 +88,10 @@ STARSCREAM_DATAREGION M68K::M68K_Read_Byte[4] =
 STARSCREAM_DATAREGION M68K::M68K_Read_Word[4] =
 {
 #ifdef GENS_ENABLE_EMULATION
-	{0x000000, 0x3FFFFF, NULL, NULL},
+	// TODO: 0x9FFFFF is valid for MD only.
+	{0x000000, 0x9FFFFF, NULL, NULL},
 	{0xFF0000, 0xFFFFFF, NULL, &Ram_68k.u8[0]},
-	{0x400000, 0xFEFFFF, (void*)M68K_Mem::M68K_RW, NULL},
+	{0xA00000, 0xFEFFFF, (void*)M68K_Mem::M68K_RW, NULL},
 #endif /* GENS_ENABLE_EMULATION */
 	{-1, -1, NULL, NULL}
 };
@@ -122,6 +115,9 @@ STARSCREAM_DATAREGION M68K::M68K_Write_Word[3] =
 #endif /* GENS_ENABLE_EMULATION */
 	{-1, -1, NULL, NULL}
 };
+
+// Last system ID.
+M68K::SysID M68K::ms_LastSysID = SYSID_NONE;
 
 
 /**
@@ -178,32 +174,65 @@ void M68K::End(void)
 
 
 /**
- * InitSys(): Initialize a specific system for the M68K CPU emulator.
+ * Initialize a specific system for the M68K CPU emulator.
  * @param system System ID.
  */
 void M68K::InitSys(SysID system)
 {
 	// TODO: This is not 64-bit clean!
-	
+	ms_LastSysID = system;
+
 	// Clear M68K RAM.
 	memset(Ram_68k.u8, 0x00, sizeof(Ram_68k.u8));
-	
+
+	// Initialize M68K RAM handlers.
+	for (int i = 0; i < 32; i++) {
+		uint32_t ram_addr = (0xE00000 | (i << 16));
+		M68K_Fetch[i].lowaddr = ram_addr;
+		M68K_Fetch[i].highaddr = (ram_addr | 0xFFFF);
+		M68K_Fetch[i].offset = ((uint32_t)(&Ram_68k.u8[0]) - ram_addr);
+	}
+
 #ifdef GENS_ENABLE_EMULATION
-	// Set the ROM fetch.
-	M68K_Fetch[32].lowaddr  = 0x000000;
-	M68K_Fetch[32].highaddr = (M68K_Mem::Rom_Size - 1);
-	M68K_Fetch[32].offset   = (unsigned int)(&M68K_Mem::Rom_Data.u8[0]) - 0x000000;
+	// Update the system-specific banking setup.
+	UpdateSysBanking();
+
+	// Reset the M68K CPU.
+	main68k_reset();
+#endif /* GENS_ENABLE_EMULATION */
 	
-	switch (system)
-	{
+	// Initialize the M68K memory handlers.
+	M68K_Mem::InitSys(system);
+}
+
+
+/**
+ * Shut down M68K emulation.
+ */
+void M68K::EndSys(void)
+{
+	for (int i = 0; i < ARRAY_SIZE(M68K_Fetch); i++) {
+		M68K_Fetch[i].lowaddr = -1;
+		M68K_Fetch[i].highaddr = -1;
+		M68K_Fetch[i].offset = 0;
+	}
+}
+
+
+/**
+ * Update system-specific memory banking.
+ * Uses the last system initialized via InitSys().
+ */
+void M68K::UpdateSysBanking(void)
+{
+	// Start at M68K_Fetch[0x20].
+	int cur_fetch = 0x20;
+	switch (ms_LastSysID) {
 		case SYSID_MD:
 			// Sega Genesis / Mega Drive.
-			// Nothing else is required. Terminate the list.
-			M68K_Fetch[33].lowaddr  = -1;
-			M68K_Fetch[33].highaddr = -1;
-			M68K_Fetch[33].offset   = (unsigned int)NULL;
+			cur_fetch += M68K_Mem::ms_RomCartridge->updateSysBanking(&M68K_Fetch[cur_fetch], 10);
 			break;
-		
+
 		case SYSID_MCD:
 			// Sega CD.
 			// TODO
@@ -241,13 +270,11 @@ void M68K::InitSys(SysID system)
 		default:
 			break;
 	}
-	
-	// Reset the M68K CPU.
-	main68k_reset();
-#endif /* GENS_ENABLE_EMULATION */
-	
-	// Initialize the M68K memory handlers.
-	M68K_Mem::InitSys(system);
+
+	// Set the terminator.
+	M68K_Fetch[cur_fetch].lowaddr = -1;
+	M68K_Fetch[cur_fetch].highaddr = -1;
+	M68K_Fetch[cur_fetch].offset = 0;
 }
 
 

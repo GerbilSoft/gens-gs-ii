@@ -48,16 +48,19 @@ class M68K
 		 * @name System IDs
 		 * TODO: Use MDP system IDs?
 		 */
-		enum SysID
-		{
-			SYSID_MD	= 0,
-			SYSID_MCD	= 1,
-			SYSID_32X	= 2,
-			
+		enum SysID {
+			SYSID_NONE	= 0,
+
+			SYSID_MD,
+			SYSID_MCD,
+			SYSID_32X,
+
 			SYSID_MAX
 		};
 		
 		static void InitSys(SysID system);
+		static void EndSys(void);
+		static void UpdateSysBanking(void);
 		
 		/** ZOMG savestate functions. **/
 		static void ZomgSaveReg(Zomg_M68KRegSave_t *state);
@@ -175,6 +178,8 @@ class M68K
 	private:
 		M68K() { }
 		~M68K() { }
+
+		static SysID ms_LastSysID;
 };
 
 }
