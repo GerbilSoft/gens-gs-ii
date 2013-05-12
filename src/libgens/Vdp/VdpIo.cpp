@@ -977,9 +977,13 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 		// Get the word.
 		uint16_t w;
 		switch (src_component) {
-			case DMA_SRC_ROM:
-				w = M68K_Mem::ms_RomCartridge->readByte(src_word_address | src_base_address);
+			case DMA_SRC_ROM: {
+				// TODO: Banking is done in 512 KB segments.
+				// Optimize this by getting a pointer to the segment?
+				const uint32_t req_addr = ((src_word_address | src_base_address) << 1);
+				w = M68K_Mem::ms_RomCartridge->readWord(req_addr);
 				break;
+			}
 
 			case DMA_SRC_M68K_RAM:
 				//w = M68K_Mem::Ram_68k.u16[src_word_address];
