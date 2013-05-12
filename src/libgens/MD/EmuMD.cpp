@@ -259,6 +259,36 @@ int EmuMD::setRegion_int(SysVersion::RegionCode_t region, bool preserveState)
 
 
 /**
+ * Save SRam/EEPRom.
+ * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
+ */
+int EmuMD::saveData(void)
+{
+	// TODO: Call lg_osd here instead of in RomCartridgeMD().
+	if (M68K_Mem::ms_RomCartridge)
+		return M68K_Mem::ms_RomCartridge->saveData();
+
+	// Nothing was saved.
+	return 0;
+}
+
+/**
+ * AutoSave SRam/EEPRom.
+ * @param frames Number of frames elapsed, or -1 for paused. (force autosave)
+ * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
+ */
+int EmuMD::autoSaveData(int framesElapsed)
+{
+	// TODO: Call lg_osd here instead of in RomCartridgeMD().
+	if (M68K_Mem::ms_RomCartridge)
+		return M68K_Mem::ms_RomCartridge->autoSaveData(framesElapsed);
+
+	// Nothing was saved.
+	return 0;
+}
+
+
+/**
  * T_execLine(): Run a scanline.
  * @param LineType Line type.
  * @param VDP If true, VDP is updated.

@@ -27,6 +27,7 @@
 #include "../Util/byteswap.h"
 #include "../macros/common.h"
 #include "../Rom.hpp"
+#include "../lg_osd.h"
 
 // C includes. (C++ namespace)
 #include <cstdlib>
@@ -106,6 +107,19 @@ class RomCartridgeMDPrivate
 		};
 
 		static const MD_RomFixup_t MD_RomFixups[];
+
+		/**
+		 * Check for ROM fixups.
+		 * @param serialNumber ROM serial number.
+		 * @param checksum ROM checksum.
+		 * @param crc32 ROM CRC32.
+		 * @return Index in MD_RomFixups[], or -1 if no fixup is required.
+		 */
+		static int CheckRomFixups(const std::string serialNumber, uint16_t checksum, uint32_t crc32);
+
+		// ROM fixup ID.
+		// If less than 0, no fixup should be applied.
+		int romFixup;
 };
 
 /**
@@ -214,10 +228,55 @@ const RomCartridgeMDPrivate::MD_RomFixup_t RomCartridgeMDPrivate::MD_RomFixups[]
 		RomCartridgeMD::MAPPER_MD_FLAT, {{0}, {0}, {0}}}
 };
 
+/**
+ * Check for ROM fixups.
+ * @param serialNumber ROM serial number.
+ * @param checksum ROM checksum.
+ * @param crc32 ROM CRC32.
+ * @return Index in MD_RomFixups[], or -1 if no fixup is required.
+ */
+int RomCartridgeMDPrivate::CheckRomFixups(const std::string serialNumber, uint16_t checksum, uint32_t crc32)
+{
+	const char *serialNumber_c_str = serialNumber.c_str();
+
+	for (int i = 0; i < ARRAY_SIZE(MD_RomFixups); i++) {
+		const MD_RomFixup_t *fixup = &MD_RomFixups[i];
+		bool match = false;
+
+		if (fixup->id.serial != nullptr) {
+			// Compare the ROM serial number. (Max of 11 characters)
+			if (strncmp(serialNumber_c_str, fixup->id.serial, 11) != 0)
+				continue;
+			match = true;
+		}
+
+		if (fixup->id.crc32 != 0 && crc32 != 0) {
+			// Compare the ROM CRC32.
+			if (crc32 != fixup->id.crc32)
+				continue;
+			match = true;
+		}
+
+		if (fixup->id.checksum != 0) {
+			// Compare the ROM checksum.
+			if (checksum != fixup->id.checksum)
+				continue;
+			match = true;
+		}
+
+		// Found a fixup for this ROM.
+		if (match)
+			return i;
+	}
+
+	// No fixup found for this ROM.
+	return -1;
+}
 
 RomCartridgeMDPrivate::RomCartridgeMDPrivate(RomCartridgeMD *q, Rom *rom)
 	: q(q)
 	, rom(rom)
+	, romFixup(-1)
 { }
 
 RomCartridgeMDPrivate::~RomCartridgeMDPrivate()
@@ -231,7 +290,12 @@ RomCartridgeMD::RomCartridgeMD(Rom *rom)
 	: d(new RomCartridgeMDPrivate(this, rom))
 	, m_romData(nullptr)
 	, m_romData_size(0)
-{ }
+{
+	// Set the SRam and EEPRom pathnames.
+	// TODO: Update them if the pathname is changed.
+	m_SRam.setPathname(EmuContext::PathSRam());
+	m_EEPRom.setPathname(EmuContext::PathSRam());
+}
 
 RomCartridgeMD::~RomCartridgeMD()
 {
@@ -277,8 +341,6 @@ int RomCartridgeMD::loadRom(void)
 	// Initialize the ROM mapper.
 	initMemoryMap();
 
-	// TODO: Initialize SRAM/EEPROM.
-
 	// Allocate memory for the ROM image.
 	// NOTE: malloc() is rounded up to the nearest 512 KB.
 	// TODO: Store the rounded-up size.
@@ -299,6 +361,22 @@ int RomCartridgeMD::loadRom(void)
 
 	// Byteswap the ROM image.
 	be16_to_cpu_array(m_romData, m_romData_size);
+
+	// Initialize EEPRom.
+	// EEPRom is only used if the ROM is in the EEPRom class's database.
+	// Otherwise, SRam is used.
+	int cartSaveSize = initEEPRom();
+	if (cartSaveSize >= 0) {
+		// EEPRom was initialized.
+		if (cartSaveSize > 0)
+			lg_osd(OSD_EEPROM_LOAD, cartSaveSize);
+	} else {
+		// EEPRom was not initialized.
+		// Initialize SRam.
+		cartSaveSize = initSRam();
+		if (cartSaveSize > 0)
+			lg_osd(OSD_SRAM_LOAD, cartSaveSize);
+	}
 
 	// ...and we're done here.
 	return 0;
@@ -394,6 +472,177 @@ int RomCartridgeMD::restoreChecksum(void)
 	uint16_t *chk_ptr = &(reinterpret_cast<uint16_t*>(m_romData))[0x18E>>1];
 	*chk_ptr = d->rom->checksum();
 	return 0;
+}
+
+
+/** Save data functions. **/
+
+
+/**
+ * Save SRam/EEPRom.
+ * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
+ */
+int RomCartridgeMD::saveData(void)
+{
+	// TODO: Return a value indicating what was saved and the size.
+	// (that is, move lg_osd out of this function.)
+	if (m_EEPRom.isEEPRomTypeSet()) {
+		// Save EEPRom.
+		int eepromSize = m_EEPRom.save();
+		if (eepromSize > 0) {
+			lg_osd(OSD_EEPROM_SAVE, eepromSize);
+			return 2;
+		}
+	} else {
+		// Save SRam.
+		int sramSize = m_SRam.save();
+		if (sramSize > 0) {
+			lg_osd(OSD_SRAM_SAVE, sramSize);
+			return 1;
+		}
+	}
+
+	// Nothing was saved.
+	return 0;
+}
+
+/**
+ * AutoSave SRam/EEPRom.
+ * @param frames Number of frames elapsed, or -1 for paused. (force autosave)
+ * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
+ */
+int RomCartridgeMD::autoSaveData(int framesElapsed)
+{
+	// TODO: Return a value indicating what was saved and the size.
+	// (that is, move lg_osd out of this function.)
+	if (m_EEPRom.isEEPRomTypeSet()) {
+		// Save EEPRom.
+		int eepromSize = m_EEPRom.autoSave(framesElapsed);
+		if (eepromSize > 0) {
+			lg_osd(OSD_EEPROM_AUTOSAVE, eepromSize);
+			return 2;
+		}
+	} else {
+		// Save SRam.
+		int sramSize = m_SRam.autoSave(framesElapsed);
+		if (sramSize > 0)
+		{
+			lg_osd(OSD_SRAM_AUTOSAVE, sramSize);
+			return 1;
+		}
+	}
+
+	// Nothing was saved.
+	return 0;
+}
+
+/**
+ * Initialize SRAM.
+ * If the loaded ROM has an SRAM fixup, use the fixup.
+ * Otherwise, use the ROM header values and/or defaults.
+ * @return Loaded SRAM size on success; negative on error.
+ */
+int RomCartridgeMD::initSRam(void)
+{
+	// Reset SRam before applying any settings.
+	m_SRam.reset();
+
+	// TODO; Move some of this to the SRam class?
+
+	// SRAM information.
+	uint32_t sramInfo, sramStartAddr, sramEndAddr;
+	int ret = d->rom->romSramInfo(&sramInfo, &sramStartAddr, &sramEndAddr);
+	if (ret != 0) {
+		// Error reading SRAM information.
+		// TODO: Error constant?
+		return -1;
+	}
+
+	// Check if the ROM header has SRam information.
+	// Mask the SRam info value with 0xFFFF4000 and check
+	// if it matches the Magic Number.
+	// Magic Number: 0x52414000 ('R', 'A', 0x40, 0x00)
+	if ((sramInfo & 0xFFFF4000) == 0x52414000) {
+		// ROM header has SRam information. Use these addresses..
+		// SRam starting position must be a multiple of 0xF80000.
+		// TODO: Is that really necessary?
+		sramStartAddr &= 0xF80000;
+		sramEndAddr &= 0xFFFFFF;
+	} else {
+		// ROM header does not have SRam information.
+		// Use default settings.
+		sramStartAddr = 0x200000;
+		sramEndAddr = 0x20FFFF;	// 64 KB
+	}
+
+	// TODO: If S&K, check the lock-on ROM for SRAM headers.
+
+	// Check for invalid SRam addresses.
+	if ((sramStartAddr > sramEndAddr) ||
+	    ((sramEndAddr - sramStartAddr) > 0xFFFF))
+	{
+		// Invalid ending address.
+		// Set the end address to the start + 0xFFFF.
+		sramEndAddr = sramStartAddr + 0xFFFF;
+	}
+
+	// Make sure SRam starts on an even byte and ends on an odd byte.
+	sramStartAddr &= ~1;
+	sramEndAddr |= 1;
+
+	/**
+	 * If the ROM is smaller than the SRAM starting address, always enable SRAM.
+	 * Notes:
+	 * - HardBall '95: SRAM is at $300000; ROM is 3 MB; cartridge does NOT have $A130F1 register.
+	 *                 Need to enable SRAM initially; otherwise, an error appears on startup.
+	 */
+	const bool enableSRam = (m_romData_size <= sramStartAddr);
+	m_SRam.setOn(enableSRam);
+	m_SRam.setWrite(enableSRam);
+
+	// Check if a ROM fixup needs to be applied.
+	if (d->romFixup >= 0) {
+		// Apply a ROM fixup.
+		const RomCartridgeMDPrivate::MD_RomFixup_t *fixup =
+			&RomCartridgeMDPrivate::MD_RomFixups[d->romFixup];
+
+		if (fixup->sram.force_off) {
+			// Force SRAM off.
+			m_SRam.setOn(false);
+			m_SRam.setWrite(false);
+			m_SRam.setStart(1);
+			m_SRam.setEnd(0);
+			return 0;
+		}
+
+		// Fix SRAM start/end addresses.
+		if (fixup->sram.start_addr != 0)
+			sramStartAddr = fixup->sram.start_addr;
+		if (fixup->sram.end_addr != 0)
+			sramEndAddr = fixup->sram.end_addr;
+	}
+
+	// Set the addresses.
+	m_SRam.setStart(sramStartAddr);
+	m_SRam.setEnd(sramEndAddr);
+
+	// Load the SRam file.
+	// TODO: Use internal filename for multi-file?
+	m_SRam.setFilename(d->rom->filename());
+	return m_SRam.load();
+}
+
+/**
+ * Initialize EEPROM.
+ * If the loaded ROM has an entry in the EEPROM database,
+ * that EEPROM setup will be used. Otherwise, EEPROM will
+ * not be enabled.
+ * @return Loaded EEPROM size on success; negative on error.
+ */
+int RomCartridgeMD::initEEPRom(void)
+{
+	// TODO
+	return -1;
 }
 
 
@@ -800,7 +1049,7 @@ void RomCartridgeMD::writeByte_TIME(uint8_t address, uint8_t data)
 {
 	if (address == 0xF1) {
 		// $A130F1: SRAM control register.
-		m_SRam.writeCtrl(address);
+		m_SRam.writeCtrl(data);
 		return;
 	}
 
@@ -840,7 +1089,7 @@ void RomCartridgeMD::writeWord_TIME(uint8_t address, uint16_t data)
 {
 	if (address == 0xF0) {
 		// $A130F0: SRAM control register.
-		m_SRam.writeCtrl(address);
+		m_SRam.writeCtrl(data);
 		return;
 	}
 
@@ -880,6 +1129,12 @@ void RomCartridgeMD::writeWord_TIME(uint8_t address, uint16_t data)
  */
 void RomCartridgeMD::initMemoryMap(void)
 {
+	// Check for a ROM fixup.
+	const std::string serialNumber = d->rom->rom_serial();
+	const uint16_t checksum = d->rom->checksum();
+	const uint32_t crc32 = d->rom->rom_crc32();
+	d->romFixup = d->CheckRomFixups(serialNumber, checksum, crc32);
+
 	// TODO: Identify the ROM.
 	// For now, assume MAPPER_MD_FLAT.
 	m_mapper.type = MAPPER_MD_FLAT;

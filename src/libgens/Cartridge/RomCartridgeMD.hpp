@@ -101,6 +101,39 @@ class RomCartridgeMD
 		 */
 		int restoreChecksum(void);
 
+		/** Save data functions. **/
+
+		/**
+		 * Save SRam/EEPRom.
+		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
+		 */
+		int saveData(void);
+
+		/**
+		 * AutoSave SRam/EEPRom.
+		 * @param frames Number of frames elapsed, or -1 for paused. (force autosave)
+		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
+		 */
+		int autoSaveData(int framesElapsed);
+
+	protected:
+		/**
+		 * Initialize SRAM.
+		 * If the loaded ROM has an SRAM fixup, use the fixup.
+		 * Otherwise, use the ROM header values and/or defaults.
+		 * @return Loaded SRAM size on success; negative on error.
+		 */
+		int initSRam(void);
+
+		/**
+		 * Initialize EEPROM.
+		 * If the loaded ROM has an entry in the EEPROM database,
+		 * that EEPROM setup will be used. Otherwise, EEPROM will
+		 * not be enabled.
+		 * @return Loaded EEPROM size on success; negative on error.
+		 */
+		int initEEPRom(void);
+
 	private:
 		// ROM access.
 		template<uint8_t bank>

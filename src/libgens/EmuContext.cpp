@@ -107,26 +107,6 @@ void EmuContext::init(MdFb *fb, Rom *rom, SysVersion::RegionCode_t region)
 	if (!m_ioManager)
 		m_ioManager = new IoManager();
 
-	// Set the SRam and EEPRom pathnames.
-	// TODO: Update them if the pathname is changed.
-	m_SRam.setPathname(ms_PathSRam);
-	m_EEPRom.setPathname(ms_PathSRam);
-
-	// Initialize EEPRom.
-	// EEPRom is only used if the ROM is in the EEPRom class's database.
-	// Otherwise, SRam is used.
-	int eepromSize = m_rom->initEEPRom(&m_EEPRom);
-	if (eepromSize > 0) {
-		// EEPRom was initialized.
-		lg_osd(OSD_EEPROM_LOAD, eepromSize);
-	} else {
-		// EEPRom was not initialized.
-		// Initialize SRam.
-		int sramSize = m_rom->initSRam(&m_SRam);
-		if (sramSize > 0)
-			lg_osd(OSD_SRAM_LOAD, sramSize);
-	}
-
 	// Initialize the VDP.
 	m_vdp = new Vdp(fb);
 }
@@ -148,83 +128,13 @@ EmuContext::~EmuContext()
 
 
 /**
- * saveData(): Save SRam/EEPRom.
- * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
- */
-int EmuContext::saveData(void)
-{
-	// TODO: Move SRam and EEPRom to the Rom class?
-	if (m_EEPRom.isEEPRomTypeSet())
-	{
-		// Save EEPRom.
-		int eepromSize = m_EEPRom.save();
-		if (eepromSize > 0)
-		{
-			lg_osd(OSD_EEPROM_SAVE, eepromSize);
-			return 2;
-		}
-	}
-	else
-	{
-		// Save SRam.
-		int sramSize = m_SRam.save();
-		if (sramSize > 0)
-		{
-			lg_osd(OSD_SRAM_SAVE, sramSize);
-			return 1;
-		}
-	}
-	
-	// Nothing was saved.
-	return 0;
-}
-
-
-/**
- * autoSaveData(): AutoSave SRam/EEPRom.
- * @param frames Number of frames elapsed, or -1 for paused. (force autosave)
- * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
- */
-int EmuContext::autoSaveData(int framesElapsed)
-{
-	// TODO: Move SRam and EEPRom to the Rom class?
-	if (m_EEPRom.isEEPRomTypeSet())
-	{
-		// Save EEPRom.
-		int eepromSize = m_EEPRom.autoSave(framesElapsed);
-		if (eepromSize > 0)
-		{
-			lg_osd(OSD_EEPROM_AUTOSAVE, eepromSize);
-			return 2;
-		}
-	}
-	else
-	{
-		// Save SRam.
-		int sramSize = m_SRam.autoSave(framesElapsed);
-		if (sramSize > 0)
-		{
-			lg_osd(OSD_SRAM_AUTOSAVE, sramSize);
-			return 1;
-		}
-	}
-	
-	// Nothing was saved.
-	return 0;
-}
-
-
-/**
- * SetPathSRam(): Set the SRam/EEPRom save path [static]
+ * Set the SRam/EEPRom save path [static]
  * @param newPathSRam New SRam/EEPRom save path.
  */
-void EmuContext::SetPathSRam(const char *newPathSRam)
+void EmuContext::SetPathSRam(std::string newPathSRam)
 {
-	if (!newPathSRam)
-		ms_PathSRam.clear();
-	else
-		ms_PathSRam = string(newPathSRam);
-	
+	ms_PathSRam = newPathSRam;
+
 	// TODO: Update SRam/EEPRom classes in active contexts.
 }
 

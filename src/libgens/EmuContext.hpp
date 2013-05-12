@@ -62,17 +62,17 @@ class EmuContext
 		static EmuContext *Instance(void);
 
 		/**
-		 * saveData(): Save SRam/EEPRom.
+		 * Save SRam/EEPRom.
 		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
 		 */
-		int saveData(void);
+		virtual int saveData(void) = 0;
 
 		/**
-		 * autoSaveData(): AutoSave SRam/EEPRom.
+		 * AutoSave SRam/EEPRom.
 		 * @param frames Number of frames elapsed, or -1 for paused. (force autosave)
 		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
 		 */
-		int autoSaveData(int framesElapsed);
+		virtual int autoSaveData(int framesElapsed) = 0;
 
 		/**
 		 * softReset(): Perform a soft reset.
@@ -105,14 +105,6 @@ class EmuContext
 		// TODO: Make this non-static!
 		static IoManager *m_ioManager;
 
-		// SRam / EEPRom access.
-		// TODO: Providing pointers like this is bad...
-		inline SRam *getSRam(void) { return &m_SRam; }
-		inline EEPRom *getEEPRom(void) { return &m_EEPRom; }
-
-		inline const SRam *getSRam(void) const { return &m_SRam; }
-		inline const EEPRom *getEEPRom(void) const { return &m_EEPRom; }
-
 		/**
 		 * Read the system version register. (MD)
 		 * @return MD version register.
@@ -133,8 +125,6 @@ class EmuContext
 
 		// Static functions. Temporarily needed for SRam/EEPRom.
 		static inline bool GetSaveDataEnable(void) { return m_instance->m_saveDataEnable; }
-		static inline SRam *GetSRam(void) { return m_instance->getSRam(); }
-		static inline EEPRom *GetEEPRom(void) { return m_instance->getEEPRom(); }
 
 		/**
 		 * Global settings.
@@ -148,9 +138,9 @@ class EmuContext
 		/**
 		 * Pathnames.
 		 */
-		static inline const char *PathSRam(void)
-			{ return ms_PathSRam.c_str(); }
-		static void SetPathSRam(const char *newPathSRam);
+		static inline std::string PathSRam(void)
+			{ return ms_PathSRam; }
+		static void SetPathSRam(std::string newPathSRam);
 
 		/** VDP (TODO) **/
 		Vdp *m_vdp;
@@ -164,11 +154,6 @@ class EmuContext
 	protected:
 		Rom *m_rom;
 		bool m_saveDataEnable;
-
-		// SRam and EEPRom.
-		// TODO: Add a function to reset all memory handling.
-		SRam m_SRam;
-		EEPRom m_EEPRom;
 
 		/**
 		 * System version register.

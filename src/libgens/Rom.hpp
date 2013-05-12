@@ -132,9 +132,6 @@ class Rom
 		 */
 		int romSize(void) const;
 
-		int initSRam(SRam *sram) const;
-		int initEEPRom(EEPRom *eeprom) const;
-
 		/**
 		 * Load the ROM image into a buffer.
 		 * @param buf Buffer.
@@ -190,6 +187,15 @@ class Rom
 		 * @return ROM serial number.
 		 */
 		std::string rom_serial(void) const;
+
+		/**
+		 * Get the ROM's SRAM information.
+		 * @param sramInfo	[out, opt] SRAM info field.
+		 * @param sramStartAddr	[out, opt] SRAM start address.
+		 * @param sramEndAddr	[out, opt] SRAM end address.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int romSramInfo(uint32_t *sramInfo, uint32_t *sramStartAddr, uint32_t *sramEndAddr) const;
 
 		/**
 		 * Get the region code. (MD hex format)

@@ -57,6 +57,19 @@ class EmuMD : public EmuContext
 		 */
 		int setRegion(SysVersion::RegionCode_t region);
 
+		/**
+		 * Save SRam/EEPRom.
+		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
+		 */
+		int saveData(void) final;
+
+		/**
+		 * AutoSave SRam/EEPRom.
+		 * @param frames Number of frames elapsed, or -1 for paused. (force autosave)
+		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
+		 */
+		int autoSaveData(int framesElapsed) final;
+
 		/** Frame execution functions. **/
 		void execFrame(void);
 		void execFrameFast(void);
