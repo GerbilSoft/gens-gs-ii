@@ -317,9 +317,9 @@ RomCartridgeMD::~RomCartridgeMD()
 int RomCartridgeMD::MaxRomSize(void)
 {
 	// Maximum ROM sizes:
-	// - SSF2 bankswitching: 16 MB
+	// - SSF2 bankswitching: 32 MB
 	// - Flat addressing: 10 MB
-	return (16 * 1024 * 1024);
+	return (32 * 1024 * 1024);
 }
 
 /**
