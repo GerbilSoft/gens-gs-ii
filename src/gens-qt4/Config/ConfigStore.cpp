@@ -451,7 +451,7 @@ void ConfigStorePrivate::set(QString key, QVariant value)
 	if (!def)
 		return;
 
-	if (!def->allow_same_value) {
+	if (!(def->flags & ConfigDefaults::DefaultSetting::DEF_ALLOW_SAME_VALUE)) {
 		// Check if the new value is the same as the old value.
 		QVariant oldValue = settings.value(key);
 		if (value == oldValue)
@@ -635,7 +635,7 @@ int ConfigStorePrivate::save(QString filename) const
 	for (const ConfigDefaults::DefaultSetting *def = &ConfigDefaults::DefaultSettings[0];
 	     def->key != nullptr; def++)
 	{
-		if (def->no_save)
+		if (def->flags & ConfigDefaults::DefaultSetting::DEF_NO_SAVE)
 			continue;
 
 		const QString key = QLatin1String(def->key);
