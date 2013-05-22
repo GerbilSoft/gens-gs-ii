@@ -29,6 +29,7 @@
 #include "../Util/byteswap.h"
 #include "../macros/common.h"
 #include "../Rom.hpp"
+#include "../cpu/M68K.hpp"
 #include "../lg_osd.h"
 
 // C includes. (C++ namespace)
@@ -1129,10 +1130,11 @@ void RomCartridgeMD::writeByte_TIME(uint8_t address, uint8_t data)
 			}
 
 			// Update the memory map.
-			// TODO: Update Starscream instruction fetch.
 			m_cartBanks[phys_bank] = (BANK_ROM_00 + virt_bank);
 			if (m_mars)
 				updateMarsBanking();
+			// TODO: Better way to update Starscream?
+			M68K::UpdateSysBanking();
 			return;
 		}
 	}
@@ -1171,10 +1173,11 @@ void RomCartridgeMD::writeWord_TIME(uint8_t address, uint16_t data)
 			}
 
 			// Update the memory map.
-			// TODO: Update Starscream instruction fetch.
 			m_cartBanks[phys_bank] = (BANK_ROM_00 + virt_bank);
 			if (m_mars)
 				updateMarsBanking();
+			// TODO: Better way to update Starscream?
+			M68K::UpdateSysBanking();
 			return;
 		}
 	}
