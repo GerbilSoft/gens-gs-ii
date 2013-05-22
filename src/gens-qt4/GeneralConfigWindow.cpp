@@ -810,7 +810,7 @@ QString GeneralConfigWindow::mdUpdateTmssRomFileStatus(GensLineEdit *txtRomFile)
 		}
 	}
 
-	// Load the ROM data and calculate the CRC32.
+	// Load the ROM data and calculate the CRC32..
 	// TODO: LibGens::Rom::loadRom() fails if the ROM buffer isn't >= the ROM size.
 	rom_data = (uint8_t*)malloc(rom->romSize());
 	data_len = rom->loadRom(rom_data, rom->romSize());
@@ -823,6 +823,7 @@ QString GeneralConfigWindow::mdUpdateTmssRomFileStatus(GensLineEdit *txtRomFile)
 	}
 
 	// Calculate the CRC32 using zlib.
+	// NOTE: rom->rom_crc32() will be incorrect if the ROM is too bi.
 	rom_crc32 = crc32(0, rom_data, TMSS_ROM_FILESIZE);
 
 	// Check what ROM this is.
@@ -832,6 +833,7 @@ QString GeneralConfigWindow::mdUpdateTmssRomFileStatus(GensLineEdit *txtRomFile)
 			rom_id = tr("Genesis TMSS ROM");
 			rom_notes = tr("This is a known good dump of the Genesis TMSS ROM.");
 			break;
+
 		default:
 			// Unknown TMSS ROM.
 			// TODO: Add more variants.
@@ -966,18 +968,20 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 		rom_size_warning = m_sWarning + tr("ROM size is incorrect.") + sLineBreak +
 				tr("(expected %L1 bytes; found %L2 bytes)").arg(MCD_ROM_FILESIZE).arg(rom->romSize());
 
-		// TODO: Continue ROM identification even if the ROM is too big?
-		if (/*file.size() < MCD_ROM_FILESIZE*/ true) {
+		// Identify the ROM even if it's too big.
+		// (Some copies of the TMSS ROM are overdumped.)
+		// Also, don't check ridiculously large Sega CD boot ROMs.
+		if (rom->romSize() < MCD_ROM_FILESIZE || rom->romSize() > 1048576) {
 			// ROM is too small, so it's guaranteed to not match anything in the database.
 			goto rom_identified;
 		}
 	}
 
-	// Load the ROM data and calculate the CRC32.
+	// Load the ROM data and calculate the CRC32..
 	// TODO: LibGens::Rom::loadRom() fails if the ROM buffer isn't >= the ROM size.
-	rom_data = (uint8_t*)malloc(MCD_ROM_FILESIZE);
-	data_len = rom->loadRom(rom_data, MCD_ROM_FILESIZE);
-	if (data_len != MCD_ROM_FILESIZE) {
+	rom_data = (uint8_t*)malloc(rom->romSize());
+	data_len = rom->loadRom(rom_data, rom->romSize());
+	if (data_len != rom->romSize()) {
 		// Error reading data from the file.
 		rom_notes = tr("Error reading file.") + sLineBreak +
 			    tr("(expected %L1 bytes; read %L2 bytes)").arg(MCD_ROM_FILESIZE).arg(data_len);
@@ -989,6 +993,7 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 	memcpy(&rom_data[0x70], lg_mcd_rom_InitHINT, sizeof(lg_mcd_rom_InitHINT));
 
 	// Calculate the CRC32 using zlib.
+	// NOTE: rom->rom_crc32() will be incorrect if the ROM is too bi.
 	rom_crc32 = crc32(0, rom_data, MCD_ROM_FILESIZE);
 
 	// Look up the CRC32 in the Sega CD Boot ROM database.
