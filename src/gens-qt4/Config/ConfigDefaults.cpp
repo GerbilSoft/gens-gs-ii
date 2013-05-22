@@ -65,10 +65,14 @@ const ConfigDefaults::DefaultSetting ConfigDefaults::DefaultSettings[] =
 	{"System/regionCode",		"-1", 0, 0,		DefaultSetting::VT_RANGE, -1, 4},		// LibGens::SysVersion::REGION_AUTO
 	{"System/regionCodeOrder",	"0x4812", 4, 0,		DefaultSetting::VT_REGIONCODEORDER, 0, 0},	// US, Europe, Japan, Asia
 
+	/** Genesis-specific settings. **/
+	{"Genesis/tmssEnabled",	"false", 0, 0,			DefaultSetting::VT_BOOL, 0, 0},
+	{"Genesis/tmssRom",	"", 0, 0,			DefaultSetting::VT_NONE, 0, 0},
+
 	/** Sega CD Boot ROMs. **/
 	{"Sega_CD/bootRomUSA", 	"", 0, 0,			DefaultSetting::VT_NONE, 0, 0},
-	{"Sega_CD/bootRomEUR",		"", 0, 0,		DefaultSetting::VT_NONE, 0, 0},
-	{"Sega_CD/bootRomJPN",		"", 0, 0,		DefaultSetting::VT_NONE, 0, 0},
+	{"Sega_CD/bootRomEUR",	"", 0, 0,			DefaultSetting::VT_NONE, 0, 0},
+	{"Sega_CD/bootRomJPN",	"", 0, 0,			DefaultSetting::VT_NONE, 0, 0},
 	{"Sega_CD/bootRomAsia",	"", 0, 0,			DefaultSetting::VT_NONE, 0, 0},
 	
 	/** External programs. **/

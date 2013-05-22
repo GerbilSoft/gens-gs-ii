@@ -105,6 +105,7 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 		"applications-graphics",	// Graphics
 		"cpu",				// VDP
 		"applications-system",		// System
+		"",				// Genesis (TODO)
 		"media-optical",		// Sega CD
 		"utilities-terminal",		// External Programs
 		nullptr
@@ -170,6 +171,13 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	// Set the icons for the up/down buttons.
 	btnRegionDetectUp->setIcon(GensQApplication::IconFromTheme(QLatin1String("arrow-up")));
 	btnRegionDetectDown->setIcon(GensQApplication::IconFromTheme(QLatin1String("arrow-down")));
+
+	/** Sega Genesis. **/
+
+	// Sega Genesis: TMSS ROM.
+	txtMDTMSSRom->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
+	const QString sMDTMSSRom_PlaceholderText = tr("Select a %1 TMSS ROM...");
+	txtMDTMSSRom->setPlaceholderText(sMDTMSSRom_PlaceholderText.arg(tr("Genesis")));
 
 	/** Sega CD. **/
 
@@ -249,27 +257,24 @@ void GeneralConfigWindow::keyPressEvent(QKeyEvent *event)
 	
 	if (!event->modifiers() || ((event->modifiers() & Qt::KeypadModifier) && event->key() == Qt::Key_Enter))
 	{
-		switch (event->key())
-		{
+		switch (event->key()) {
 			case Qt::Key_Enter:
 			case Qt::Key_Return:
 				// Accept the dialog changes.
 				accept();
 				break;
-			
+
 			case Qt::Key_Escape:
 				// Reject the dialog changes.
 				reject();
 				break;
-			
+
 			default:
 				// Pass the event to the base class.
 				this->QMainWindow::keyPressEvent(event);
 				return;
 		}
-	}
-	else
-	{
+	} else {
 		// Pass the event to the base class.
 		this->QMainWindow::keyPressEvent(event);
 	}
@@ -288,14 +293,19 @@ void GeneralConfigWindow::keyPressEvent(QKeyEvent *event)
  */
 void GeneralConfigWindow::changeEvent(QEvent *event)
 {
-	if (event->type() == QEvent::LanguageChange)
-	{
+	if (event->type() == QEvent::LanguageChange) {
 		// Retranslate the UI.
 		retranslateUi(this);
-		
-		// Update Sega CD Boot ROM file status.
+
+		// Update Sega Genesis TMSS ROM file status.
 		// TODO: Update the display for the last selected ROM.
 		QString sNewRomStatus;
+		sNewRomStatus = mdUpdateTmssRomFileStatus(txtMDTMSSRom);
+		if (!sNewRomStatus.isEmpty())
+			sMDTmssRomStatus = sNewRomStatus;
+
+		// Update Sega CD Boot ROM file status.
+		// TODO: Update the display for the last selected ROM.
 		sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomUSA, MCD_REGION_USA);
 		if (!sNewRomStatus.isEmpty())
 			sMcdRomStatus_USA = sNewRomStatus;
@@ -308,13 +318,13 @@ void GeneralConfigWindow::changeEvent(QEvent *event)
 		sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomAsia, MCD_REGION_ASIA);
 		if (!sNewRomStatus.isEmpty())
 			sMcdRomStatus_Asia = sNewRomStatus;
-		
+
 		// Update external program status.
 		// TODO: Split the RAR check code out of the on_txtExtPrgUnRAR_textChanged() function.
 		// NOTE: Calling on_txtExtPrgUnRAR_textChanged() will enable the Apply button!
 		on_txtExtPrgUnRAR_textChanged();
 	}
-	
+
 	// Pass the event to the base class.
 	this->QMainWindow::changeEvent(event);
 }
@@ -395,6 +405,10 @@ void GeneralConfigWindow::reload(void)
 	cboIntroStyle->setCurrentIndex(ValByPath_int("Intro_Effect/introStyle"));
 	cboIntroColor->setCurrentIndex(ValByPath_int("Intro_Effect/introColor"));
 
+	/** Sega Genesis TMSS. **/
+	chkMDTMSS->setChecked(ValByPath_bool("Genesis/tmssEnabled"));
+	txtMDTMSSRom->setText(ValByPath_QString("Genesis/tmssRom"));
+
 	/** Sega CD Boot ROMs. **/
 	txtMcdRomUSA->setText(ValByPath_QString("Sega_CD/bootRomUSA"));
 	txtMcdRomEUR->setText(ValByPath_QString("Sega_CD/bootRomEUR"));
@@ -474,6 +488,10 @@ void GeneralConfigWindow::apply(void)
 	SetValByPath_bool("autoFixChecksum", chkAutoFixChecksum->isChecked());
 	SetValByPath_bool("autoPause", chkAutoPause->isChecked());
 	SetValByPath_bool("pauseTint", chkPauseTint->isChecked());
+
+	/** Sega Genesis TMSS. **/
+	SetValByPath_bool("Genesis/tmssEnabled", chkMDTMSS->isChecked());
+	SetValByPath_QString("Genesis/tmssRom", txtMDTMSSRom->text());
 
 	/** Sega CD Boot ROMs. **/
 	SetValByPath_QString("Sega_CD/bootRomUSA", txtMcdRomUSA->text());
@@ -656,29 +674,28 @@ uint16_t GeneralConfigWindow::regionCodeOrder(void) const
 }
 
 
-/** Sega CD. **/
-
+/** Sega Genesis. **/
 
 /**
- * Select a Sega CD Boot ROM file.
- * @param rom_id	[in] Sega CD Boot ROM ID.
+ * Select a ROM file.
+ * @param rom_desc	[in] ROM file description.
  * @param txtRomFile	[in] ROM file textbox.
  */
-void GeneralConfigWindow::mcdSelectRomFile(QString rom_id, GensLineEdit *txtRomFile)
+void GeneralConfigWindow::selectRomFile(QString rom_desc, QLineEdit *txtRomFile)
 {
 	// TODO: Proper compressed file support.
 	#define ZLIB_EXT " *.zip *.zsg *.gz"
 	#define LZMA_EXT " *.7z"
 	#define RAR_EXT " *.rar"
-	
+
 	// Create the dialog title.
-	QString title = tr("Select %1 Boot ROM").arg(rom_id);
-	
+	QString title = tr("Select %1").arg(rom_desc);
+
 	// TODO: Specify the current Boot ROM filename as the default filename.
 	// TODO: Move the filename filters somewhere else.
 	QString filename = QFileDialog::getOpenFileName(this, title,
 			txtRomFile->text(),	// Default filename.
-			tr("Sega CD Boot ROM images") +
+			tr("ROM Images") +
 			QLatin1String(
 				" (*.bin *.gen *.md *.smd"
 #ifdef HAVE_ZLIB
@@ -690,30 +707,197 @@ void GeneralConfigWindow::mcdSelectRomFile(QString rom_id, GensLineEdit *txtRomF
 				RAR_EXT
 				");;") +
 			tr("All Files") + QLatin1String(" (*.*)"));
-	
+
 	if (filename.isEmpty())
 		return;
-	
+
 	// Convert to native pathname separators.
 	filename = QDir::toNativeSeparators(filename);
-	
+
 	// Set the filename text.
 	// ROM file status will be updated automatically by
 	// the textChanged() signal from QLineEdit.
 	txtRomFile->setText(filename);
-	
+
 	// Set focus to the textbox.
 	txtRomFile->setFocus(Qt::OtherFocusReason);
 }
 
+void GeneralConfigWindow::on_btnMDTMSSRom_clicked(void)
+{
+	const QString tmssRom = tr("%1 TMSS ROM");
+	selectRomFile(tmssRom.arg(tr("Genesis")), txtMDTMSSRom);
+}
+
+void GeneralConfigWindow::on_txtMDTMSSRom_focusIn(void)
+{
+	// TODO
+	//mcdDisplayRomFileStatus(tr("Sega CD (U)"), sMcdRomStatus_USA);
+}
+
+/**
+ * Sega Genesis: Update TMSS ROM file status.
+ * @param txtRomFile ROM file textbox.
+ * @return Updated ROM status.
+ */
+QString GeneralConfigWindow::mdUpdateTmssRomFileStatus(GensLineEdit *txtRomFile)
+{
+	// ROM data buffer.
+	uint8_t *rom_data = nullptr;
+	int data_len;
+	uint32_t rom_crc32;
+	int boot_rom_id;
+	int boot_rom_region_code;
+	MCD_RomStatus_t boot_rom_status;
+
+	// Line break string.
+	const QString sLineBreak = QLatin1String("<br/>\n");
+
+	// Check if the file exists.
+	QString filename = txtRomFile->text();
+	if (!QFile::exists(filename)) {
+		// File doesn't exist.
+		// NOTE: KDE 4's Oxygen theme doesn't have a question icon.
+		// SP_MessageBoxQuestion is redirected to SP_MessageBoxInformation on KDE 4.
+		// TODO: Set ROM file notes.
+		txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
+		if (filename.isEmpty())
+			return tr("No ROM filename specified.");
+		else
+			return tr("The specified ROM file was not found.");
+	}
+
+	// Check the ROM file.
+	// TODO: Decompressor support.
+	QStyle::StandardPixmap filename_icon = QStyle::SP_DialogYesButton;
+	QString rom_id = tr("Unknown");
+	QString rom_notes;
+	QString rom_size_warning;
+
+	// Open the ROM file using LibGens::Rom.
+	auto_ptr<LibGens::Rom> rom(new LibGens::Rom(filename.toUtf8().constData()));
+	if (!rom->isOpen()) {
+		// Error opening ROM file.
+		txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
+		return tr("Error opening ROM file.");
+	}
+
+	// Multi-file ROM archives are not supported for TMSS ROMs.
+	if (rom->isMultiFile()) {
+		txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxWarning));
+		return (m_sWarning +
+				tr("This archive has multiple files.") + sLineBreak +
+				tr("Multi-file ROM archives are not currently supported for the TMSS ROM."));
+	}
+
+	// Check the ROM filesize.
+	// Valid TMSS ROMs are 2 KB.
+	static const int TMSS_ROM_FILESIZE = 2048;
+	if (rom->romSize() != TMSS_ROM_FILESIZE) {
+		// Wrong ROM size.
+		filename_icon = QStyle::SP_MessageBoxWarning;
+
+		rom_size_warning = m_sWarning + tr("ROM size is incorrect.") + sLineBreak +
+				tr("(expected %L1 bytes; found %L2 bytes)")
+				.arg(TMSS_ROM_FILESIZE).arg(rom->romSize());
+
+		// Identify the ROM even if it's too big.
+		// (Some copies of the TMSS ROM are overdumped.)
+		// Also, don't check ridiculously large TMSS ROMs.
+		if (rom->romSize() < TMSS_ROM_FILESIZE || rom->romSize() > 1048576) {
+			// ROM is too small, so it's guaranteed to not match anything in the database.
+			goto rom_identified;
+		}
+	}
+
+	// Load the ROM data and calculate the CRC32.
+	// TODO: LibGens::Rom::loadRom() fails if the ROM buffer isn't >= the ROM size.
+	rom_data = (uint8_t*)malloc(rom->romSize());
+	data_len = rom->loadRom(rom_data, rom->romSize());
+	if (data_len != rom->romSize()) {
+		// Error reading data from the file.
+		rom_notes = tr("Error reading file.") + sLineBreak +
+			    tr("(expected %L1 bytes; read %L2 bytes)")
+			    .arg(rom->romSize()).arg(data_len);
+		goto rom_identified;
+	}
+
+	// Calculate the CRC32 using zlib.
+	rom_crc32 = crc32(0, rom_data, TMSS_ROM_FILESIZE);
+
+	// Check what ROM this is.
+	switch (rom_crc32) {
+		case 0x3F888CF4:
+			// Standard TMSS ROM.
+			rom_id = tr("Genesis TMSS ROM");
+			rom_notes = tr("This is a known good dump of the Genesis TMSS ROM.");
+			break;
+		default:
+			// Unknown TMSS ROM.
+			// TODO: Add more variants.
+			filename_icon = QStyle::SP_MessageBoxQuestion;
+			rom_notes = tr("Unknown ROM image.");
+			break;
+	}
+
+rom_identified:
+	// Free the ROM data buffer if it was allocated.
+	free(rom_data);
+
+	// Set the Boot ROM filename textbox icon.
+	txtRomFile->setIcon(style()->standardIcon(filename_icon));
+
+	// Set the Boot ROM description.
+	QString s_ret;
+	s_ret = tr("ROM identified as: %1").arg(rom_id);
+	if (!rom_notes.isEmpty())
+		s_ret += sLineBreak + sLineBreak + rom_notes;
+	if (!rom_size_warning.isEmpty())
+		s_ret += sLineBreak + sLineBreak + rom_size_warning;
+	return QString(s_ret);
+}
+
+
+void GeneralConfigWindow::on_txtMDTMSSRom_textChanged(void)
+{
+	QString sNewRomStatus = mdUpdateTmssRomFileStatus(txtMDTMSSRom);
+	if (!sNewRomStatus.isEmpty()) {
+		sMDTmssRomStatus = sNewRomStatus;
+		lblMDTMSSSelectedRom->setText(sMDTmssRomStatus);
+		lblMDTMSSSelectedRom->setTextFormat(Qt::RichText);
+	}
+
+	// Settings have been changed.
+#ifndef GCW_APPLY_IMMED
+	setApplyButtonEnabled(true);
+#else
+	SetValByPath_QString("Genesis/tmssRom", txtMDTMSSRom->text());
+#endif
+}
+
+
+/** Sega CD. **/
+
 void GeneralConfigWindow::on_btnMcdRomUSA_clicked(void)
-	{ mcdSelectRomFile(tr("Sega CD (U)"), txtMcdRomUSA); }
+{
+	const QString bootRom = tr("%1 Boot ROM");
+	selectRomFile(bootRom.arg(tr("Sega CD (U)")), txtMcdRomUSA);
+}
 void GeneralConfigWindow::on_btnMcdRomEUR_clicked(void)
-	{ mcdSelectRomFile(tr("Mega CD (E)"), txtMcdRomEUR); }
+{
+	const QString bootRom = tr("%1 Boot ROM");
+	selectRomFile(bootRom.arg(tr("Mega CD (E)")), txtMcdRomEUR);
+}
 void GeneralConfigWindow::on_btnMcdRomJPN_clicked(void)
-	{ mcdSelectRomFile(tr("Mega CD (J)"), txtMcdRomJPN); }
+{
+	const QString bootRom = tr("%1 Boot ROM");
+	selectRomFile(bootRom.arg(tr("Mega CD (J)")), txtMcdRomJPN);
+}
 void GeneralConfigWindow::on_btnMcdRomAsia_clicked(void)
-	{ mcdSelectRomFile(tr("Mega CD (Asia)"), txtMcdRomAsia); }
+{
+	const QString bootRom = tr("%1 Boot ROM");
+	selectRomFile(bootRom.arg(tr("Mega CD (Asia)")), txtMcdRomAsia);
+}
 
 
 /**
@@ -744,9 +928,9 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 		// TODO: Set ROM file notes.
 		txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 		if (filename.isEmpty())
-			return sLineBreak + tr("No ROM filename specified.");
+			return tr("No ROM filename specified.");
 		else
-			return sLineBreak + tr("The specified ROM file was not found.");
+			return tr("The specified ROM file was not found.");
 	}
 
 	// Check the ROM file.
@@ -761,7 +945,7 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 	if (!rom->isOpen()) {
 		// Error opening ROM file.
 		txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
-		return sLineBreak + tr("Error opening ROM file.");
+		return tr("Error opening ROM file.");
 	}
 
 	// Multi-file ROM archives are not supported for Sega CD Boot ROMs.
@@ -903,12 +1087,11 @@ void GeneralConfigWindow::on_txtMcdRomAsia_focusIn(void)
 void GeneralConfigWindow::on_txtMcdRomUSA_textChanged(void)
 {
 	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomUSA, MCD_REGION_USA);
-	if (!sNewRomStatus.isEmpty())
-	{
+	if (!sNewRomStatus.isEmpty()) {
 		sMcdRomStatus_USA = sNewRomStatus;
 		mcdDisplayRomFileStatus(tr("Sega CD (U)"), sMcdRomStatus_USA);
 	}
-	
+
 	// Settings have been changed.
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
@@ -920,12 +1103,11 @@ void GeneralConfigWindow::on_txtMcdRomUSA_textChanged(void)
 void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
 {
 	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomEUR, MCD_REGION_EUROPE);
-	if (!sNewRomStatus.isEmpty())
-	{
+	if (!sNewRomStatus.isEmpty()) {
 		sMcdRomStatus_EUR = sNewRomStatus;
 		mcdDisplayRomFileStatus(tr("Mega CD (E)"), sMcdRomStatus_EUR);
 	}
-	
+
 	// Settings have been changed.
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
@@ -937,12 +1119,11 @@ void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
 void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 {
 	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomJPN, MCD_REGION_JAPAN);
-	if (!sNewRomStatus.isEmpty())
-	{
+	if (!sNewRomStatus.isEmpty()) {
 		sMcdRomStatus_JPN = sNewRomStatus;
 		mcdDisplayRomFileStatus(tr("Mega CD (J)"), sMcdRomStatus_JPN);
 	}
-	
+
 	// Settings have been changed.
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);
@@ -954,12 +1135,11 @@ void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 void GeneralConfigWindow::on_txtMcdRomAsia_textChanged(void)
 {
 	QString sNewRomStatus = mcdUpdateRomFileStatus(txtMcdRomAsia, MCD_REGION_ASIA);
-	if (!sNewRomStatus.isEmpty())
-	{
+	if (!sNewRomStatus.isEmpty()) {
 		sMcdRomStatus_Asia = sNewRomStatus;
 		mcdDisplayRomFileStatus(tr("Mega CD (Asia)"), sMcdRomStatus_Asia);
 	}
-	
+
 	// Settings have been changed.
 #ifndef GCW_APPLY_IMMED
 	setApplyButtonEnabled(true);

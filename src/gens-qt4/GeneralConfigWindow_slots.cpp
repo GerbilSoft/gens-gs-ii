@@ -95,4 +95,8 @@ void GeneralConfigWindow::on_chkVScrollBug_toggled(bool checked)
 void GeneralConfigWindow::on_chkZeroLengthDMA_toggled(bool checked)
 	{ GENERIC_OPTION("VDP/zeroLengthDMA", checked); }
 
+/** Sega Genesis. **/
+void GeneralConfigWindow::on_chkMDTMSS_toggled(bool checked)
+	{ GENERIC_OPTION("Genesis/tmssEnabled", checked); }
+
 }

@@ -705,6 +705,101 @@ programs that depend on the correct VDP behavior.</string>
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="page">
+       <layout class="QVBoxLayout" name="verticalLayout_10">
+        <item>
+         <widget class="QGroupBox" name="grpGenesis">
+          <property name="title">
+           <string>Genesis Emulation</string>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+          <layout class="QGridLayout" name="gridGenesis">
+           <item row="1" column="0">
+            <widget class="QLabel" name="lblMDTMSSRom">
+             <property name="text">
+              <string>&amp;TMSS ROM:</string>
+             </property>
+             <property name="textFormat">
+              <enum>Qt::PlainText</enum>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+             <property name="buddy">
+              <cstring>txtMDTMSSRom</cstring>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="GensLineEdit" name="txtMDTMSSRom"/>
+           </item>
+           <item row="2" column="0" colspan="3">
+            <spacer name="vspcMDTMSSRom">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>8</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="3" column="0" colspan="3">
+            <widget class="QLabel" name="lblMDTMSSSelectedRom">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Selected ROM: (none)</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
+             </property>
+             <property name="textInteractionFlags">
+              <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QPushButton" name="btnMDTMSSRom">
+             <property name="text">
+              <string>Browse...</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="3">
+            <widget class="QCheckBox" name="chkMDTMSS">
+             <property name="toolTip">
+              <string>Enables the TradeMark Security System found on Sega Genesis
+consoles manufactured after 1990. This will show a license
+screen on startup, and some early unlicensed titles will not
+function properly.
+
+This option requires a valid TMSS ROM in order to function properly.</string>
+             </property>
+             <property name="text">
+              <string>Enable the Trade&amp;Mark Security System</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tabSegaCD">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
@@ -990,6 +1085,7 @@ programs that depend on the correct VDP behavior.</string>
    <addaction name="actionGraphics"/>
    <addaction name="actionVdp"/>
    <addaction name="actionSystem"/>
+   <addaction name="actionGenesis"/>
    <addaction name="actionSegaCD"/>
    <addaction name="actionExternalPrograms"/>
   </widget>
@@ -1062,7 +1158,18 @@ programs that depend on the correct VDP behavior.</string>
      <normaloff>:/icons/oxygen/32x32/utilities-terminal.png</normaloff>:/icons/oxygen/32x32/utilities-terminal.png</iconset>
    </property>
    <property name="text">
-    <string>E&amp;xternal Programs</string>
+    <string>&amp;Programs</string>
+   </property>
+  </action>
+  <action name="actionGenesis">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>G&amp;enesis</string>
+   </property>
+   <property name="toolTip">
+    <string>Genesis</string>
    </property>
   </action>
  </widget>
@@ -1100,10 +1207,15 @@ programs that depend on the correct VDP behavior.</string>
   <tabstop>chkSpriteLimits</tabstop>
   <tabstop>chkBorderColor</tabstop>
   <tabstop>chkNtscV30Rolling</tabstop>
+  <tabstop>chkVScrollBug</tabstop>
+  <tabstop>chkZeroLengthDMA</tabstop>
   <tabstop>cboRegionCurrent</tabstop>
   <tabstop>lstRegionDetect</tabstop>
   <tabstop>btnRegionDetectUp</tabstop>
   <tabstop>btnRegionDetectDown</tabstop>
+  <tabstop>chkMDTMSS</tabstop>
+  <tabstop>txtMDTMSSRom</tabstop>
+  <tabstop>btnMDTMSSRom</tabstop>
   <tabstop>txtMcdRomUSA</tabstop>
   <tabstop>btnMcdRomUSA</tabstop>
   <tabstop>txtMcdRomEUR</tabstop>
@@ -1127,8 +1239,8 @@ programs that depend on the correct VDP behavior.</string>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>25</x>
-     <y>447</y>
+     <x>34</x>
+     <y>411</y>
     </hint>
     <hint type="destinationlabel">
      <x>2</x>
@@ -1143,8 +1255,8 @@ programs that depend on the correct VDP behavior.</string>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>142</x>
-     <y>447</y>
+     <x>151</x>
+     <y>411</y>
     </hint>
     <hint type="destinationlabel">
      <x>139</x>
