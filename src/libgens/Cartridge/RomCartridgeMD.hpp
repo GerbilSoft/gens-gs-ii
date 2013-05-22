@@ -205,6 +205,9 @@ class RomCartridgeMD
 		// Physical memory map: 20 banks of 512 KB each.
 		uint8_t m_cartBanks[20];
 
+		// 32X mode.
+		bool m_mars;
+
 		/**
 		 * Initialize the memory map for the loaded ROM.
 		 * This identifies the mapper type to use.
@@ -275,6 +278,14 @@ class RomCartridgeMD
 				} registers_ro;
 			};
 		} m_mapper;
+
+		// Mars banking register.
+		uint8_t m_mars_bank_reg;
+
+		/**
+		 * Update Mars banking at $900000-$9FFFFF.
+		 */
+		void updateMarsBanking(void);
 };
 
 }

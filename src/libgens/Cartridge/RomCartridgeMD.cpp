@@ -297,6 +297,8 @@ RomCartridgeMD::RomCartridgeMD(Rom *rom)
 	: d(new RomCartridgeMDPrivate(this, rom))
 	, m_romData(nullptr)
 	, m_romData_size(0)
+	, m_mars(false)
+	, m_mars_bank_reg(0)
 {
 	// Set the SRam and EEPRom pathnames.
 	// TODO: Update them if the pathname is changed.
@@ -343,6 +345,20 @@ int RomCartridgeMD::loadRom(void)
 	if (d->rom->romSize() > MaxRomSize()) {
 		// ROM image is too big.
 		return -3;
+	}
+
+	// Check if this is a 32X ROM.
+	switch (d->rom->sysId()) {
+		case Rom::MDP_SYSTEM_32X:
+		case Rom::MDP_SYSTEM_MCD32X:	// TODO
+			// 32X ROM.
+			m_mars = true;
+			break;
+
+		default:
+			// Not a 32X ROM.
+			m_mars = false;
+			break;
 	}
 
 	// Allocate memory for the ROM image.
@@ -1049,8 +1065,14 @@ void RomCartridgeMD::writeWord(uint32_t address, uint16_t data)
  */
 uint8_t RomCartridgeMD::readByte_TIME(uint8_t address)
 {
-	// No registers are readable from this area...
-	((void)address);
+	// The only readable /TIME registers are MARS registers.
+	if (m_mars && (address >= 0xEC && address <= 0xEF)) {
+		// MARS identification.
+		static const uint8_t mars_id[4] = {'M', 'A', 'R', 'S'};
+		return mars_id[address & 0x3];
+	}
+
+	// Not a readable register.
 	return 0xFF;
 }
 
@@ -1061,8 +1083,16 @@ uint8_t RomCartridgeMD::readByte_TIME(uint8_t address)
  */
 uint16_t RomCartridgeMD::readWord_TIME(uint8_t address)
 {
-	// No registers are readable from this area...
-	((void)address);
+	// The only readable /TIME registers are MARS registers.
+	if (m_mars && (address >= 0xEC && address <= 0xEF)) {
+		// MARS identification.
+		static const uint16_t mars_id[2] = {'MA', 'RS'};
+		static_assert('MA' == 0x4D41, "MARS identification: 'MA' != 0x4D41");
+		static_assert('RS' == 0x5253, "MARS identification: 'RS' != 0x5253");
+		return mars_id[(address >> 1) & 0x1];
+	}
+
+	// Not a readable register.
 	return 0xFFFF;
 }
 
@@ -1101,6 +1131,8 @@ void RomCartridgeMD::writeByte_TIME(uint8_t address, uint8_t data)
 			// Update the memory map.
 			// TODO: Update Starscream instruction fetch.
 			m_cartBanks[phys_bank] = (BANK_ROM_00 + virt_bank);
+			if (m_mars)
+				updateMarsBanking();
 			return;
 		}
 	}
@@ -1141,6 +1173,8 @@ void RomCartridgeMD::writeWord_TIME(uint8_t address, uint16_t data)
 			// Update the memory map.
 			// TODO: Update Starscream instruction fetch.
 			m_cartBanks[phys_bank] = (BANK_ROM_00 + virt_bank);
+			if (m_mars)
+				updateMarsBanking();
 			return;
 		}
 	}
@@ -1218,6 +1252,37 @@ void RomCartridgeMD::initMemoryMap(void)
 			break;
 #endif
 	}
+
+	// 32X banking.
+	if (m_mars) {
+		// TODO: 0x400000-0x7FFFFF?
+
+		// 0x800000-0x87FFFF: Framebuffer.
+		m_cartBanks[16] = BANK_UNUSED;
+
+		// 0x880000-0x8FFFFF: Maps to ROM 0x000000-0x7FFFFF.
+		m_cartBanks[17] = BANK_ROM_00;
+
+		// 0x900000-0x9FFFFF: Maps to a selectable 1 MB ROM bank.
+		// Defaults to 0. (ROM 0x000000 - 0x0FFFFF)
+		m_mars_bank_reg = 0;
+		updateMarsBanking();
+	}
+}
+
+/**
+ * Update Mars banking at $900000-$9FFFFF.
+ */
+void RomCartridgeMD::updateMarsBanking(void)
+{
+	if (!m_mars)
+		return;
+
+	// 0x900000-0x9FFFFF: Maps to a selectable 1 MB ROM bank.
+	// Defaults to 0. (ROM 0x000000 - 0x0FFFFF)
+	const uint8_t bank_start = BANK_ROM_00 + ((m_mars_bank_reg & 3) * 2);
+	m_cartBanks[18] = bank_start;
+	m_cartBanks[19] = bank_start + 1;
 }
 
 }
