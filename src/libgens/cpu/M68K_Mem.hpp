@@ -111,12 +111,8 @@ class M68K_Mem
 		
 
 		enum M68KBank_t {
-			// ROM banks.
-			M68K_BANK_ROM_0 = 0,	// M68K: $000000 - $1FFFFF
-			M68K_BANK_ROM_1,	// M68K: $200000 - $3FFFFF
-			M68K_BANK_ROM_2,	// M68K: $400000 - $5FFFFF
-			M68K_BANK_ROM_3,	// M68K: $600000 - $7FFFFF
-			M68K_BANK_ROM_4,	// M68K: $800000 - $9FFFFF
+			// ROM cartridge.
+			M68K_BANK_CARTRIDGE = 0,	// M68K: $000000 - $9FFFFF
 
 			// I/O area.
 			M68K_BANK_IO,		// M68K: $A00000 - $BFFFFF

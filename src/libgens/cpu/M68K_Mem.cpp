@@ -120,13 +120,10 @@ uint8_t M68K_Mem::ms_M68KBank_Type[8];
  */
 const uint8_t M68K_Mem::msc_M68KBank_Def_MD[8] =
 {
-	// $000000 - $3FFFFF: ROM banks.
-	M68K_BANK_ROM_0, M68K_BANK_ROM_1,
-
-	// $400000 - $9FFFFF: Unused in MD mode.
-	// Some unlicensed ROMs use these as ROM banks.
-	M68K_BANK_ROM_2, M68K_BANK_ROM_3,
-	M68K_BANK_ROM_4,
+	// $000000 - $9FFFFF: ROM cartridge.
+	M68K_BANK_CARTRIDGE, M68K_BANK_CARTRIDGE,
+	M68K_BANK_CARTRIDGE, M68K_BANK_CARTRIDGE,
+	M68K_BANK_CARTRIDGE,
 
 	// $A00000 - $BFFFFF: I/O area.
 	M68K_BANK_IO,
@@ -1081,11 +1078,7 @@ uint8_t M68K_Mem::M68K_RB(uint32_t address)
 		case M68K_BANK_UNUSED:	return 0xFF;
 
 		// ROM cartridge.
-		case M68K_BANK_ROM_0:
-		case M68K_BANK_ROM_1:
-		case M68K_BANK_ROM_2:
-		case M68K_BANK_ROM_3:
-		case M68K_BANK_ROM_4:
+		case M68K_BANK_CARTRIDGE:
 			return ms_RomCartridge->readByte(address);
 
 		// Other MD banks.
@@ -1116,11 +1109,7 @@ uint16_t M68K_Mem::M68K_RW(uint32_t address)
 		case M68K_BANK_UNUSED:	return 0xFFFF;
 		
 		// ROM cartridge.
-		case M68K_BANK_ROM_0:
-		case M68K_BANK_ROM_1:
-		case M68K_BANK_ROM_2:
-		case M68K_BANK_ROM_3:
-		case M68K_BANK_ROM_4:
+		case M68K_BANK_CARTRIDGE:
 			return ms_RomCartridge->readWord(address);
 
 		// Other MD banks.
@@ -1151,11 +1140,7 @@ void M68K_Mem::M68K_WB(uint32_t address, uint8_t data)
 		case M68K_BANK_UNUSED:	break;
 
 		// ROM cartridge.
-		case M68K_BANK_ROM_0:
-		case M68K_BANK_ROM_1:
-		case M68K_BANK_ROM_2:
-		case M68K_BANK_ROM_3:
-		case M68K_BANK_ROM_4:
+		case M68K_BANK_CARTRIDGE:
 			ms_RomCartridge->writeByte(address, data);
 			break;
 
@@ -1184,11 +1169,7 @@ void M68K_Mem::M68K_WW(uint32_t address, uint16_t data)
 		case M68K_BANK_UNUSED:	break;
 
 		// ROM cartridge.
-		case M68K_BANK_ROM_0:
-		case M68K_BANK_ROM_1:
-		case M68K_BANK_ROM_2:
-		case M68K_BANK_ROM_3:
-		case M68K_BANK_ROM_4:
+		case M68K_BANK_CARTRIDGE:
 			ms_RomCartridge->writeWord(address, data);
 			break;
 
