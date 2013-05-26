@@ -242,39 +242,42 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 	 * 0xA1001D: Control Port 3: Serial RxData. (READ-ONLY)
 	 * 0xA1001F: Control Port 3: Serial Control.
 	 */
-	// TODO: Do byte reads from even addresses (e.g. 0xA10002) work?
+	// NOTE: Reads from even addresses are handled the same as odd addresses.
+	// (Least-significant bit is ignored.)
+	uint8_t ret = 0xFF;
 	switch (address & 0x1E) {
 		case 0x00: {
 			// 0xA10001: Genesis version register.
 			EmuContext *context = EmuContext::Instance();
-			if (!context)
-				return 0;
-			return context->readVersionRegister_MD();
+			if (context)
+				ret = context->readVersionRegister_MD();
+			break;
 		}
 
 		// Parallel I/O
-		case 0x02:	return EmuMD::m_ioManager->readDataMD(IoManager::PHYSPORT_1);
-		case 0x04:	return EmuMD::m_ioManager->readDataMD(IoManager::PHYSPORT_2);
-		case 0x06:	return EmuMD::m_ioManager->readDataMD(IoManager::PHYSPORT_EXT);
-		case 0x08:	return EmuMD::m_ioManager->readCtrlMD(IoManager::PHYSPORT_1);
-		case 0x0A:	return EmuMD::m_ioManager->readCtrlMD(IoManager::PHYSPORT_2);
-		case 0x0C:	return EmuMD::m_ioManager->readCtrlMD(IoManager::PHYSPORT_EXT);
+		case 0x02:	ret = EmuMD::m_ioManager->readDataMD(IoManager::PHYSPORT_1); break;
+		case 0x04:	ret = EmuMD::m_ioManager->readDataMD(IoManager::PHYSPORT_2); break;
+		case 0x06:	ret = EmuMD::m_ioManager->readDataMD(IoManager::PHYSPORT_EXT); break;
+		case 0x08:	ret = EmuMD::m_ioManager->readCtrlMD(IoManager::PHYSPORT_1); break;
+		case 0x0A:	ret = EmuMD::m_ioManager->readCtrlMD(IoManager::PHYSPORT_2); break;
+		case 0x0C:	ret = EmuMD::m_ioManager->readCtrlMD(IoManager::PHYSPORT_EXT); break;
 
 		// Serial I/O
 		// TODO: Baud rate handling, etc.
-		case 0x0E:	return EmuMD::m_ioManager->readSerTx(IoManager::PHYSPORT_1);
-		case 0x10:	return EmuMD::m_ioManager->readSerRx(IoManager::PHYSPORT_1);
-		case 0x12:	return EmuMD::m_ioManager->readSerCtrl(IoManager::PHYSPORT_1);
-		case 0x14:	return EmuMD::m_ioManager->readSerTx(IoManager::PHYSPORT_2);
-		case 0x16:	return EmuMD::m_ioManager->readSerRx(IoManager::PHYSPORT_2);
-		case 0x18:	return EmuMD::m_ioManager->readSerCtrl(IoManager::PHYSPORT_2);
-		case 0x1A:	return EmuMD::m_ioManager->readSerTx(IoManager::PHYSPORT_EXT);
-		case 0x1C:	return EmuMD::m_ioManager->readSerRx(IoManager::PHYSPORT_EXT);
-		case 0x1E:	return EmuMD::m_ioManager->readSerCtrl(IoManager::PHYSPORT_EXT);
+		case 0x0E:	ret = EmuMD::m_ioManager->readSerTx(IoManager::PHYSPORT_1); break;
+		case 0x10:	ret = EmuMD::m_ioManager->readSerRx(IoManager::PHYSPORT_1); break;
+		case 0x12:	ret = EmuMD::m_ioManager->readSerCtrl(IoManager::PHYSPORT_1); break;
+		case 0x14:	ret = EmuMD::m_ioManager->readSerTx(IoManager::PHYSPORT_2); break;
+		case 0x16:	ret = EmuMD::m_ioManager->readSerRx(IoManager::PHYSPORT_2); break;
+		case 0x18:	ret = EmuMD::m_ioManager->readSerCtrl(IoManager::PHYSPORT_2); break;
+		case 0x1A:	ret = EmuMD::m_ioManager->readSerTx(IoManager::PHYSPORT_EXT); break;
+		case 0x1C:	ret = EmuMD::m_ioManager->readSerRx(IoManager::PHYSPORT_EXT); break;
+		case 0x1E:	ret = EmuMD::m_ioManager->readSerCtrl(IoManager::PHYSPORT_EXT); break;
 
 		default:
 			// Unknown register.
-			return 0x00;
+			// TODO: Fake Fetch?
+			break;
 	}
 }
 
@@ -435,39 +438,45 @@ inline uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 	 * 0xA1001D: Control Port 3: Serial RxData. (READ-ONLY)
 	 * 0xA1001F: Control Port 3: Serial Control.
 	 */
+	uint8_t ret = 0xFF;
 	switch (address & 0x1E) {
 		case 0x00: {
 			// 0xA10001: Genesis version register.
 			EmuContext *context = EmuContext::Instance();
-			if (!context)
-				return 0;
-			return context->readVersionRegister_MD();
+			if (context)
+				ret = context->readVersionRegister_MD();
+			break;
 		}
 
 		// Parallel I/O
-		case 0x02:	return EmuMD::m_ioManager->readDataMD(IoManager::PHYSPORT_1);
-		case 0x04:	return EmuMD::m_ioManager->readDataMD(IoManager::PHYSPORT_2);
-		case 0x06:	return EmuMD::m_ioManager->readDataMD(IoManager::PHYSPORT_EXT);
-		case 0x08:	return EmuMD::m_ioManager->readCtrlMD(IoManager::PHYSPORT_1);
-		case 0x0A:	return EmuMD::m_ioManager->readCtrlMD(IoManager::PHYSPORT_2);
-		case 0x0C:	return EmuMD::m_ioManager->readCtrlMD(IoManager::PHYSPORT_EXT);
+		case 0x02:	ret = EmuMD::m_ioManager->readDataMD(IoManager::PHYSPORT_1); break;
+		case 0x04:	ret = EmuMD::m_ioManager->readDataMD(IoManager::PHYSPORT_2); break;
+		case 0x06:	ret = EmuMD::m_ioManager->readDataMD(IoManager::PHYSPORT_EXT); break;
+		case 0x08:	ret = EmuMD::m_ioManager->readCtrlMD(IoManager::PHYSPORT_1); break;
+		case 0x0A:	ret = EmuMD::m_ioManager->readCtrlMD(IoManager::PHYSPORT_2); break;
+		case 0x0C:	ret = EmuMD::m_ioManager->readCtrlMD(IoManager::PHYSPORT_EXT); break;
 
 		// Serial I/O
 		// TODO: Baud rate handling, etc.
-		case 0x0E:	return EmuMD::m_ioManager->readSerTx(IoManager::PHYSPORT_1);
-		case 0x10:	return EmuMD::m_ioManager->readSerRx(IoManager::PHYSPORT_1);
-		case 0x12:	return EmuMD::m_ioManager->readSerCtrl(IoManager::PHYSPORT_1);
-		case 0x14:	return EmuMD::m_ioManager->readSerTx(IoManager::PHYSPORT_2);
-		case 0x16:	return EmuMD::m_ioManager->readSerRx(IoManager::PHYSPORT_2);
-		case 0x18:	return EmuMD::m_ioManager->readSerCtrl(IoManager::PHYSPORT_2);
-		case 0x1A:	return EmuMD::m_ioManager->readSerTx(IoManager::PHYSPORT_EXT);
-		case 0x1C:	return EmuMD::m_ioManager->readSerRx(IoManager::PHYSPORT_EXT);
-		case 0x1E:	return EmuMD::m_ioManager->readSerCtrl(IoManager::PHYSPORT_EXT);
+		case 0x0E:	ret = EmuMD::m_ioManager->readSerTx(IoManager::PHYSPORT_1); break;
+		case 0x10:	ret = EmuMD::m_ioManager->readSerRx(IoManager::PHYSPORT_1); break;
+		case 0x12:	ret = EmuMD::m_ioManager->readSerCtrl(IoManager::PHYSPORT_1); break;
+		case 0x14:	ret = EmuMD::m_ioManager->readSerTx(IoManager::PHYSPORT_2); break;
+		case 0x16:	ret = EmuMD::m_ioManager->readSerRx(IoManager::PHYSPORT_2); break;
+		case 0x18:	ret = EmuMD::m_ioManager->readSerCtrl(IoManager::PHYSPORT_2); break;
+		case 0x1A:	ret = EmuMD::m_ioManager->readSerTx(IoManager::PHYSPORT_EXT); break;
+		case 0x1C:	ret = EmuMD::m_ioManager->readSerRx(IoManager::PHYSPORT_EXT); break;
+		case 0x1E:	ret = EmuMD::m_ioManager->readSerCtrl(IoManager::PHYSPORT_EXT); break;
 
 		default:
 			// Unknown register.
-			return 0x0000;
+			// TODO: Fake Fetch?
+			break;
 	}
+
+	// NOTE: Word reads to the $A100xx registers result in the
+	// register value being duplicated for both MSB and LSB.
+	return (ret | (ret << 8));
 }
 
 
@@ -879,6 +888,8 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 	 * 0xA1001D: Control Port 3: Serial RxData. (READ-ONLY)
 	 * 0xA1001F: Control Port 3: Serial Control.
 	 */
+	// TODO: Is there special handling for word writes,
+	// or is it just "LSB is written"?
 	switch (address & 0x1E) {
 		default:
 		case 0x00: /// 0xA10001: Genesis version register.
