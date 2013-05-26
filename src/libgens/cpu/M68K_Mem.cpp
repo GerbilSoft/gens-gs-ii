@@ -279,6 +279,8 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 			// TODO: Fake Fetch?
 			break;
 	}
+
+	return ret;
 }
 
 
