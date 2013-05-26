@@ -86,11 +86,17 @@ void Gens_M68K_WW(uint32_t address, uint16_t data)
 namespace LibGens
 {
 
+/** ROM and RAM variables. **/
+//M68K_Mem::Ram_68k_t M68K_Mem::Ram_68k;	// TODO: Fix Starscream!
+
 // ROM cartridge.
 RomCartridgeMD *M68K_Mem::ms_RomCartridge = nullptr;
 
-/** ROM and RAM variables. **/
-//M68K_Mem::Ram_68k_t M68K_Mem::Ram_68k;	// TODO: Fix Starscream!
+// TMSS ROM.
+M68K_Mem::MD_TMSS_Rom_t M68K_Mem::MD_TMSS_Rom;
+
+// TMSS registers.
+M68K_Mem::TMSS_Reg_t M68K_Mem::tmss_reg;
 
 /** Z80/M68K cycle table. **/
 int M68K_Mem::Z80_M68K_Cycle_Tab[512];
@@ -246,6 +252,26 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 			// 0xA130xx: /TIME registers.
 			return ms_RomCartridge->readByte_TIME(address & 0xFF);
 
+		case 0x40:
+			// 0xA14000: TMSS
+			if (!tmss_reg.tmss_en) {
+				// TMSS is disabled.
+				// TODO: Fake Fetch?
+				return 0xFF;
+			}
+
+			if (address >= 0xA14000 && address <= 0xA14003) {
+				// "SEGA" register.
+				return tmss_reg.a14000.b[(address & 3) ^ U32DATA_U8_INVERT];
+			} else if (address == 0xA14101) {
+				// !CART_CE register.
+				return (tmss_reg.cart_ce & 1);
+			}
+
+			// Invalid TMSS address.
+			// TODO: Fake Fetch?
+			return 0xFF;
+
 		case 0x00: {
 			// 0xA100xx: I/O registers.
 
@@ -377,6 +403,20 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 }
 
 
+/**
+ * Read a byte from the TMSS ROM. (0x000000 - 0x3FFFFF)
+ * TMSS ROM is 2 KB, mirrored throughout the entire range.
+ * @param address Address.
+ * @return Byte from the TMSS ROM.
+ */
+inline uint8_t M68K_Mem::M68K_Read_Byte_TMSS_Rom(uint32_t address)
+{
+	address &= 0x7FF;
+	address ^= U16DATA_U8_INVERT;
+	return MD_TMSS_Rom.u8[address];
+}
+
+
 /** Read Word functions. **/
 
 
@@ -469,6 +509,26 @@ inline uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 		case 0x30:
 			// 0xA130xx: /TIME registers.
 			return ms_RomCartridge->readWord_TIME(address & 0xFF);
+
+		case 0x40:
+			// 0xA14000: TMSS
+			if (!tmss_reg.tmss_en) {
+				// TMSS is disabled.
+				// TODO: Fake Fetch?
+				return 0xFFFF;
+			}
+
+			if (address >= 0xA14000 && address <= 0xA14003) {
+				// "SEGA" register.
+				return tmss_reg.a14000.w[((address & 2) >> 1) ^ U32DATA_U16_INVERT];
+			} else if (address == 0xA14100) {
+				// !CART_CE register.
+				return (tmss_reg.cart_ce & 1);
+			}
+
+			// Invalid TMSS address.
+			// TODO: Fake Fetch?
+			return 0xFFFF;
 
 		case 0x00: {
 			// 0xA100xx: I/O registers.
@@ -584,6 +644,19 @@ inline uint16_t M68K_Mem::M68K_Read_Word_VDP(uint32_t address)
 
 	// Should not get here...
 	return 0x0000;
+}
+
+
+/**
+ * Read a word from the TMSS ROM. (0x000000 - 0x3FFFFF)
+ * TMSS ROM is 2 KB, mirrored throughout the entire range.
+ * @param address Address.
+ * @return Word from the TMSS ROM.
+ */
+inline uint16_t M68K_Mem::M68K_Read_Word_TMSS_Rom(uint32_t address)
+{
+	address &= 0x7FE;
+	return MD_TMSS_Rom.u16[address >> 1];
 }
 
 
@@ -706,6 +779,28 @@ inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 		case 0x30:
 			// 0xA130xx: /TIME registers.
 			ms_RomCartridge->writeByte_TIME(address & 0xFF, data);
+			break;
+
+		case 0x40:
+			// 0xA14000: TMSS
+			if (!tmss_reg.tmss_en) {
+				// TMSS is disabled.
+				break;
+			}
+
+			if (address >= 0xA14000 && address <= 0xA14003) {
+				// "SEGA" register.
+				tmss_reg.a14000.b[(address & 3) ^ U32DATA_U8_INVERT] = data;
+				break;
+			} else if (address == 0xA14101) {
+				// !CART_CE register.
+				tmss_reg.cart_ce = (data & 1);
+
+				// Update TMSS mapping.
+				UpdateTmssMapping();
+			}
+
+			// Invalid TMSS address.
 			break;
 
 		case 0x00: {
@@ -932,6 +1027,28 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 			ms_RomCartridge->writeWord_TIME(address & 0xFF, data);
 			break;
 
+		case 0x40:
+			// 0xA14000: TMSS
+			if (!tmss_reg.tmss_en) {
+				// TMSS is disabled.
+				break;
+			}
+
+			if (address >= 0xA14000 && address <= 0xA14003) {
+				// "SEGA" register.
+				tmss_reg.a14000.w[((address & 2) >> 1) ^ U32DATA_U16_INVERT] = data;
+				break;
+			} else if (address == 0xA14100) {
+				// !CART_CE register.
+				tmss_reg.cart_ce = (data & 1);
+
+				// Update TMSS mapping.
+				UpdateTmssMapping();
+			}
+
+			// Invalid TMSS address.
+			break;
+
 		case 0x00: {
 			// 0xA100xx: I/O registers.
 
@@ -1040,15 +1157,42 @@ inline void M68K_Mem::M68K_Write_Word_VDP(uint32_t address, uint16_t data)
 
 
 /**
+ * Update the TMSS mapping.
+ */
+void M68K_Mem::UpdateTmssMapping(void)
+{
+	if (!tmss_reg.tmss_en || (tmss_reg.cart_ce & 1)) {
+		// TMSS is disabled, or
+		// TMSS is enabled and cartridge is mapped.
+		ms_M68KBank_Type[0] = M68K_BANK_CARTRIDGE;
+		ms_M68KBank_Type[1] = M68K_BANK_CARTRIDGE;
+	} else {
+		// TMSS is enabled.
+		ms_M68KBank_Type[0] = M68K_BANK_TMSS_ROM;
+		ms_M68KBank_Type[1] = M68K_BANK_TMSS_ROM;
+	}
+
+	// TODO: Update Starscream.
+}
+
+/**
  * Initialize the M68K memory handler.
  * @param system System ID.
  */
 void M68K_Mem::InitSys(M68K::SysID system)
 {
+	// Initialize TMSS.
+	memset(&tmss_reg, 0x00, sizeof(tmss_reg));
+
+	// TODO: Enable TMSS based on system version, etc.
+	tmss_reg.tmss_en = false;
+	tmss_reg.tmss_rom_valid = false;
+
 	// Initialize the M68K bank type identifiers.
 	switch (system) {
 		case M68K::SYSID_MD:
 			memcpy(ms_M68KBank_Type, msc_M68KBank_Def_MD, sizeof(ms_M68KBank_Type));
+			UpdateTmssMapping();
 			break;
 
 		default:
@@ -1082,9 +1226,10 @@ uint8_t M68K_Mem::M68K_RB(uint32_t address)
 			return ms_RomCartridge->readByte(address);
 
 		// Other MD banks.
-		case M68K_BANK_IO:	return M68K_Read_Byte_Misc(address);
-		case M68K_BANK_VDP:	return M68K_Read_Byte_VDP(address);
-		case M68K_BANK_RAM:	return M68K_Read_Byte_Ram(address);
+		case M68K_BANK_IO:		return M68K_Read_Byte_Misc(address);
+		case M68K_BANK_VDP:		return M68K_Read_Byte_VDP(address);
+		case M68K_BANK_RAM:		return M68K_Read_Byte_Ram(address);
+		case M68K_BANK_TMSS_ROM:	return M68K_Read_Byte_TMSS_Rom(address);
 	}
 
 	// Should not get here...
@@ -1113,9 +1258,10 @@ uint16_t M68K_Mem::M68K_RW(uint32_t address)
 			return ms_RomCartridge->readWord(address);
 
 		// Other MD banks.
-		case M68K_BANK_IO:	return M68K_Read_Word_Misc(address);
-		case M68K_BANK_VDP:	return M68K_Read_Word_VDP(address);
-		case M68K_BANK_RAM:	return M68K_Read_Word_Ram(address);
+		case M68K_BANK_IO:		return M68K_Read_Word_Misc(address);
+		case M68K_BANK_VDP:		return M68K_Read_Word_VDP(address);
+		case M68K_BANK_RAM:		return M68K_Read_Word_Ram(address);
+		case M68K_BANK_TMSS_ROM:	return M68K_Read_Word_TMSS_Rom(address);
 	}
 	
 	// Should not get here...
@@ -1137,7 +1283,9 @@ void M68K_Mem::M68K_WB(uint32_t address, uint8_t data)
 	// TODO: Optimize the switch using a bitwise AND.
 	switch (ms_M68KBank_Type[bank]) {
 		default:
-		case M68K_BANK_UNUSED:	break;
+		case M68K_BANK_UNUSED:
+		case M68K_BANK_TMSS_ROM:
+			break;
 
 		// ROM cartridge.
 		case M68K_BANK_CARTRIDGE:
@@ -1166,7 +1314,9 @@ void M68K_Mem::M68K_WW(uint32_t address, uint16_t data)
 	// TODO: Optimize the switch using a bitwise AND.
 	switch (ms_M68KBank_Type[bank]) {
 		default:
-		case M68K_BANK_UNUSED:	break;
+		case M68K_BANK_UNUSED:
+		case M68K_BANK_TMSS_ROM:
+			break;
 
 		// ROM cartridge.
 		case M68K_BANK_CARTRIDGE:

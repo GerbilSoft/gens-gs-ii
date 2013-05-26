@@ -73,8 +73,51 @@ class M68K_Mem
 		static RomCartridgeMD *ms_RomCartridge;
 
 		// Genesis TMSS ROM.
-		static uint8_t MD_TMSS_Rom[2 * 1024];
-		
+		union MD_TMSS_Rom_t {
+			uint8_t  u8[2*1024];
+			uint16_t u16[(2*1024)>>1];
+		};
+		static MD_TMSS_Rom_t MD_TMSS_Rom;
+
+		/**
+		 * TMSS registers.
+		 * NOTE: Only effective if system version != 0.
+		 */
+		struct TMSS_Reg_t {
+			/**
+			 * $A14000: TMSS control register.
+			 * This must have 'SEGA' in order to use the VDP.
+			 * Otherwise, the VDP will lock on when accessed.
+			 * NOTE: This is not emulated at the moment.
+			 */
+			struct {
+				uint8_t b[4];
+				uint16_t w[2];
+				uint32_t d;
+			} a14000;
+
+			/**
+			 * $A14101: TMSS ROM mapping register.
+			 * Bit 0 indicates if the cartridge or TMSS ROM is mapped.
+			 * - 0: TMSS ROM is mapped.
+			 * - 1: Cartridge is mapped.
+			 */
+			uint8_t cart_ce;
+
+			/**
+			 * Is the TMSS ROM valid?
+			 * If it isn't, TMSS will be disabled.
+			 */
+			bool tmss_rom_valid;
+
+			/**
+			 * Is TMSS enabled?
+			 * This is set on emulation startup and hard reset.
+			 */
+			bool tmss_en;
+		};
+		static TMSS_Reg_t tmss_reg;
+
 		/** Z80 state. **/
 		#define Z80_STATE_ENABLED	(1 << 0)
 		#define Z80_STATE_BUSREQ	(1 << 1)
@@ -91,8 +134,13 @@ class M68K_Mem
 		static int Cycles_M68K;
 		static int Cycles_Z80;
 		
-		/** Public init and read/write functions. **/
+		/** System initialization functions. **/
+	private:
+		static void UpdateTmssMapping(void);
+	public:
 		static void InitSys(M68K::SysID system);
+
+		/** Public read/write functions. **/
 		static uint8_t M68K_RB(uint32_t address);
 		static uint16_t M68K_RW(uint32_t address);
 		static void M68K_WB(uint32_t address, uint8_t data);
@@ -123,19 +171,23 @@ class M68K_Mem
 			// RAM area.
 			M68K_BANK_RAM,		// M68K: $E00000 - $FFFFFF (64K mirroring)
 
+			// TMSS ROM.
+			// Only if system version > 0 and $A14101 == 0.
+			M68K_BANK_TMSS_ROM,	// M68K: $000000 - $3FFFFF (mirrored every 2 KB)
+
 			// Unused bank. (Return 0xFF)
 			M68K_BANK_UNUSED = 0xFF
 		};
 
 		/**
-		 * ms_M68KBank_Type[]: M68K bank type identifiers.
+		 * M68K bank type identifiers.
 		 * These type identifiers indicate what's mapped to each virtual bank.
 		 * Banks are 2 MB each, for a total of 8 banks.
 		 */
 		static uint8_t ms_M68KBank_Type[8];
 
 		/**
-		 * msc_M68KBank_Def_MD[]: Default M68K bank type IDs for MD.
+		 * Default M68K bank type IDs for MD.
 		 */
 		static const uint8_t msc_M68KBank_Def_MD[8];
 
@@ -143,11 +195,13 @@ class M68K_Mem
 		static uint8_t M68K_Read_Byte_Ram(uint32_t address);
 		static uint8_t M68K_Read_Byte_Misc(uint32_t address);
 		static uint8_t M68K_Read_Byte_VDP(uint32_t address);
+		static uint8_t M68K_Read_Byte_TMSS_Rom(uint32_t address);
 
 		/** Read Word functions. **/
 		static uint16_t M68K_Read_Word_Ram(uint32_t address);
 		static uint16_t M68K_Read_Word_Misc(uint32_t address);
 		static uint16_t M68K_Read_Word_VDP(uint32_t address);
+		static uint16_t M68K_Read_Word_TMSS_Rom(uint32_t address);
 
 		/** Write Byte functions. **/
 		static void M68K_Write_Byte_Ram(uint32_t address, uint8_t data);
