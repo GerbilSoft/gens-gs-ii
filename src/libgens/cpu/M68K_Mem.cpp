@@ -154,15 +154,19 @@ void M68K_Mem::End(void)
 /** Read Byte functions. **/
 
 /**
- * BYTE_ADDR_INVERT: Inversion flag for byte-addressing.
- * ROM and RAM is stored in host 16-bit endian.
- * Hence, bytewide access needs to have the LSB inverted
- * on little-endian machines.
+ * Address inversion flags for byteswapped addressing.
+ * - U16DATA_U8_INVERT: Access U8 data in host-endian 16-bit data.
+ * - U32DATA_U8_INVERT: Access U8 data in host-endian 32-bit data.
+ * - U32DATA_U16_INVERT: Access U16 data in host-endian 32-bit data.
  */
 #if GENS_BYTEORDER == GENS_LIL_ENDIAN
-#define BYTE_ADDR_INVERT 1
+#define U16DATA_U8_INVERT 1
+#define U32DATA_U8_INVERT 3
+#define U32DATA_U16_INVERT 1
 #else /* GENS_BYTEORDER = GENS_BIG_ENDIAN */
-#define BYTE_ADDR_INVERT 0
+#define U16DATA_U8_INVERT 0
+#define U32DATA_U8_INVERT 0
+#define U32DATA_U16_INVERT 0
 #endif
 
 /**
@@ -174,7 +178,7 @@ void M68K_Mem::End(void)
 inline uint8_t M68K_Mem::M68K_Read_Byte_Ram(uint32_t address)
 {
 	address &= 0xFFFF;
-	address ^= 1;	// TODO: LE only!
+	address ^= U16DATA_U8_INVERT;
 	return Ram_68k.u8[address];
 }
 
