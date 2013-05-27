@@ -49,27 +49,26 @@ namespace LibGens
 class SysVersion
 {
 	public:
-		enum RegionCode_t
-		{
+		enum RegionCode_t {
 			REGION_AUTO	= -1,	// Auto-Detect
 			REGION_JP_NTSC	= 0,	// Japan (NTSC)
 			REGION_ASIA_PAL	= 1,	// Asia (PAL)
 			REGION_US_NTSC	= 2,	// USA (NTSC)
 			REGION_EU_PAL	= 3	// Europe (PAL)
 		};
-		
+
 		SysVersion();
 		SysVersion(RegionCode_t initRegion);
-		
+
 		/**
-		 * readData(): Read the register contents.
+		 * Read the register contents.
 		 * @return Register contents.
 		 */
 		uint8_t readData(void) const;
-		
+
 		RegionCode_t region(void) const;
 		void setRegion(RegionCode_t newRegion);
-		
+
 		/**
 		 * Region code: Convenience functions.
 		 */
@@ -77,29 +76,36 @@ class SysVersion
 		bool isPal(void) const;
 		bool isEast(void) const;
 		bool isWest(void) const;
-		
+
 		/**
 		 * /DISK line.
 		 */
 		bool hasDisk(void) const;
 		void setDisk(bool newDisk);
-	
+
+		/**
+		 * Version field.
+		 */
+		uint8_t version(void) const;
+		void setVersion(uint8_t newVersion);
+
 	private:
 		RegionCode_t m_region;
-		bool m_disk;	// True if MCD is connected.
+		bool m_disk;		// True if MCD is connected.
+		uint8_t m_version;	// 0x0 if no TMSS; 0x1 if TMSS is present.
 };
 
 inline SysVersion::SysVersion()
-{
-	m_region = REGION_US_NTSC;
-	m_disk = false;
-}
+	: m_region(REGION_US_NTSC)
+	, m_disk(false)
+	, m_version(0)
+{ }
 
 inline SysVersion::SysVersion(RegionCode_t initRegion)
-{
-	m_region = initRegion;
-	m_disk = false;
-}
+	: m_region(initRegion)
+	, m_disk(false)
+	, m_version(0)
+{ }
 
 inline SysVersion::RegionCode_t SysVersion::region(void) const
 	{ return m_region; }
@@ -127,14 +133,22 @@ inline void SysVersion::setDisk(bool newDisk)
 	{ m_disk = newDisk; }
 
 /**
- * readData(): Read the register contents.
+ * Version field.
+ */
+inline uint8_t SysVersion::version(void) const
+	{ return (m_version & 0xF); }
+inline void SysVersion::setVersion(uint8_t newVersion)
+	{ m_version = (newVersion & 0xF); }
+
+/**
+ * Read the register contents.
  * @return Register contents.
  */
 inline uint8_t SysVersion::readData(void) const
 {
 	// NOTE: m_disk uses active-high logic.
 	// The version register uses active-low logic for /DISK.
-	return (((uint8_t)m_region) << 6 | (!m_disk << 5));
+	return (((uint8_t)m_region) << 6 | (!m_disk << 5) | (m_version & 0xF));
 }
 
 }
