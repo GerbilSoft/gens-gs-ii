@@ -252,25 +252,43 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 			// 0xA130xx: /TIME registers.
 			return ms_RomCartridge->readByte_TIME(address & 0xFF);
 
-		case 0x40:
-			// 0xA14000: TMSS
+		case 0x40: {
+			// 0xA14000: TMSS ('SEGA' register)
 			if (!tmss_reg.tmss_en) {
 				// TMSS is disabled.
 				// TODO: Fake Fetch?
 				return 0xFF;
 			}
 
-			if (address >= 0xA14000 && address <= 0xA14003) {
-				// "SEGA" register.
-				return tmss_reg.a14000.b[(address & 3) ^ U32DATA_U8_INVERT];
-			} else if (address == 0xA14101) {
-				// !CART_CE register.
-				return (tmss_reg.cart_ce & 1);
+			// Verify that this is a valid TMSS address.
+			if ((address & 0xFF) > 0x03) {
+				// Invalid TMSS address.
+				// TODO: Fake Fetch?
+				return 0xFF;
 			}
 
-			// Invalid TMSS address.
-			// TODO: Fake Fetch?
-			return 0xFF;
+			// 'SEGA' register.
+			return tmss_reg.a14000.b[(address & 3) ^ U32DATA_U8_INVERT];
+		}
+
+		case 0x41: {
+			// 0xA14101: TMSS (!CART_CE register)
+			if (!tmss_reg.tmss_en) {
+				// TMSS is disabled.
+				// TODO: Fake Fetch?
+				return 0xFF;
+			}
+
+			// Verify that this is a valid TMSS address.
+			if ((address & 0xFF) != 0x01) {
+				// Invalid TMSS address.
+				// TODO: Fake Fetch?
+				return 0xFF;
+			}
+
+			// !CART_CE register.
+			return (tmss_reg.cart_ce & 1);
+		}
 
 		case 0x00: {
 			// 0xA100xx: I/O registers.
@@ -510,25 +528,45 @@ inline uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 			// 0xA130xx: /TIME registers.
 			return ms_RomCartridge->readWord_TIME(address & 0xFF);
 
-		case 0x40:
-			// 0xA14000: TMSS
+		case 0x40: {
+			// 0xA14101: TMSS ('SEGA' register)
 			if (!tmss_reg.tmss_en) {
 				// TMSS is disabled.
 				// TODO: Fake Fetch?
 				return 0xFFFF;
 			}
 
-			if (address >= 0xA14000 && address <= 0xA14003) {
-				// "SEGA" register.
-				return tmss_reg.a14000.w[((address & 2) >> 1) ^ U32DATA_U16_INVERT];
-			} else if (address == 0xA14100) {
-				// !CART_CE register.
-				return (tmss_reg.cart_ce & 1);
+			// Verify that this is a valid TMSS address.
+			if ((address & 0xFE) > 0x03) {
+				// Invalid TMSS address.
+				// TODO: Fake Fetch?
+				return 0xFFFF;
 			}
 
-			// Invalid TMSS address.
-			// TODO: Fake Fetch?
-			return 0xFFFF;
+			// 'SEGA' register.
+			return tmss_reg.a14000.w[((address & 2) >> 1) ^ U32DATA_U16_INVERT];
+		}
+
+		case 0x41: {
+			// 0xA14101: TMSS (!CART_CE register)
+			if (!tmss_reg.tmss_en) {
+				// TMSS is disabled.
+				// TODO: Fake Fetch?
+				return 0xFFFF;
+			}
+
+			// Verify that this is a valid TMSS address.
+			if ((address & 0xFE) != 0x00) {
+				// Invalid TMSS address.
+				// TODO: Fake Fetch?
+				return 0xFFFF;
+			}
+
+			// !CART_CE register.
+			uint16_t ret = (tmss_reg.cart_ce & 1);
+			Fake_Fetch ^= 0xFF;	// Fake the next fetched instruction. ("random")
+			ret |= ((Fake_Fetch & 0xFF) << 8);
+		}
 
 		case 0x00: {
 			// 0xA100xx: I/O registers.
@@ -781,27 +819,40 @@ inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 			ms_RomCartridge->writeByte_TIME(address & 0xFF, data);
 			break;
 
-		case 0x40:
-			// 0xA14000: TMSS
+		case 0x40: {
+			// 0xA14000: TMSS ('SEGA' register)
 			if (!tmss_reg.tmss_en) {
 				// TMSS is disabled.
 				break;
 			}
 
-			if (address >= 0xA14000 && address <= 0xA14003) {
-				// "SEGA" register.
-				tmss_reg.a14000.b[(address & 3) ^ U32DATA_U8_INVERT] = data;
+			// Verify that this is a valid TMSS address.
+			if ((address & 0xFF) > 0x03)
 				break;
-			} else if (address == 0xA14101) {
-				// !CART_CE register.
-				tmss_reg.cart_ce = (data & 1);
 
-				// Update TMSS mapping.
-				UpdateTmssMapping();
+			// 'SEGA' register.
+			tmss_reg.a14000.b[(address & 3) ^ U32DATA_U8_INVERT] = data;
+			break;
+		}
+
+		case 0x41: {
+			// 0xA14101: TMSS (!CART_CE register)
+			if (!tmss_reg.tmss_en) {
+				// TMSS is disabled.
+				break;
 			}
 
-			// Invalid TMSS address.
+			// Verify that this is a valid TMSS address.
+			if ((address & 0xFF) != 0x01)
+				break;
+
+			// !CART_CE register.
+			tmss_reg.cart_ce = (data & 1);
+
+			// Update TMSS mapping.
+			UpdateTmssMapping();
 			break;
+		}
 
 		case 0x00: {
 			// 0xA100xx: I/O registers.
@@ -1027,27 +1078,40 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 			ms_RomCartridge->writeWord_TIME(address & 0xFF, data);
 			break;
 
-		case 0x40:
-			// 0xA14000: TMSS
+		case 0x40: {
+			// 0xA14000: TMSS ('SEGA' register)
 			if (!tmss_reg.tmss_en) {
 				// TMSS is disabled.
 				break;
 			}
 
-			if (address >= 0xA14000 && address <= 0xA14003) {
-				// "SEGA" register.
-				tmss_reg.a14000.w[((address & 2) >> 1) ^ U32DATA_U16_INVERT] = data;
+			// Verify that this is a valid TMSS address.
+			if ((address & 0xFF) > 0x03)
 				break;
-			} else if (address == 0xA14100) {
-				// !CART_CE register.
-				tmss_reg.cart_ce = (data & 1);
 
-				// Update TMSS mapping.
-				UpdateTmssMapping();
+			// 'SEGA' register.
+			tmss_reg.a14000.w[((address & 2) >> 1) ^ U32DATA_U8_INVERT] = data;
+			break;
+		}
+
+		case 0x41: {
+			// 0xA14101: TMSS (!CART_CE register)
+			if (!tmss_reg.tmss_en) {
+				// TMSS is disabled.
+				break;
 			}
 
-			// Invalid TMSS address.
+			// Verify that this is a valid TMSS address.
+			if ((address & 0xFF) != 0x00)
+				break;
+
+			// !CART_CE register.
+			tmss_reg.cart_ce = (data & 1);
+
+			// Update TMSS mapping.
+			UpdateTmssMapping();
 			break;
+		}
 
 		case 0x00: {
 			// 0xA100xx: I/O registers.
