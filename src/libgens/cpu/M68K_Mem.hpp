@@ -115,6 +115,22 @@ class M68K_Mem
 			 * This is set on emulation startup and hard reset.
 			 */
 			bool tmss_en;
+
+			/**
+			 * Check if TMSS is mapped.
+			 * @return True if mapped; false if not.
+			 */
+			inline bool isTmssMapped(void) const {
+				return (tmss_en && !(cart_ce & 1));
+			}
+
+			/**
+			 * Reset the TMSS registers.
+			 */
+			inline void reset(void) {
+				a14000.d = 0;
+				cart_ce = 0;
+			}
 		};
 		static TMSS_Reg_t tmss_reg;
 
@@ -139,6 +155,14 @@ class M68K_Mem
 		static void UpdateTmssMapping(void);
 	public:
 		static void InitSys(M68K::SysID system);
+
+		/**
+		 * Update M68K CPU program access structs for bankswitching purposes.
+		 * @param M68K_Fetch Pointer to first STARSCREAM_PROGRAMREGION to update.
+		 * @param banks Maximum number of banks to update.
+		 * @return Number of banks updated.
+		 */
+		static int UpdateSysBanking(STARSCREAM_PROGRAMREGION *M68K_Fetch, int banks);
 
 		/** Public read/write functions. **/
 		static uint8_t M68K_RB(uint32_t address);

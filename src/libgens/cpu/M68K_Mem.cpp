@@ -1225,7 +1225,7 @@ inline void M68K_Mem::M68K_Write_Word_VDP(uint32_t address, uint16_t data)
  */
 void M68K_Mem::UpdateTmssMapping(void)
 {
-	if (!tmss_reg.tmss_en || (tmss_reg.cart_ce & 1)) {
+	if (!tmss_reg.isTmssMapped()) {
 		// TMSS is disabled, or
 		// TMSS is enabled and cartridge is mapped.
 		ms_M68KBank_Type[0] = M68K_BANK_CARTRIDGE;
@@ -1236,7 +1236,8 @@ void M68K_Mem::UpdateTmssMapping(void)
 		ms_M68KBank_Type[1] = M68K_BANK_TMSS_ROM;
 	}
 
-	// TODO: Update Starscream.
+	// TODO: Better way to update Starscream?
+	M68K::UpdateSysBanking();
 }
 
 /**
@@ -1245,12 +1246,8 @@ void M68K_Mem::UpdateTmssMapping(void)
  */
 void M68K_Mem::InitSys(M68K::SysID system)
 {
-	// Initialize TMSS.
-	memset(&tmss_reg, 0x00, sizeof(tmss_reg));
-
-	// TODO: Enable TMSS based on system version, etc.
-	tmss_reg.tmss_en = false;
-	tmss_reg.tmss_rom_valid = false;
+	// Reset the TMSS registers.
+	tmss_reg.reset();
 
 	// Initialize the M68K bank type identifiers.
 	switch (system) {
@@ -1262,10 +1259,36 @@ void M68K_Mem::InitSys(M68K::SysID system)
 		default:
 			// Unknown system ID.
 			LOG_MSG(68k, LOG_MSG_LEVEL_ERROR,
-				"Unknwon system ID: %d", system);
+				"Unknown system ID: %d", system);
 			memset(ms_M68KBank_Type, 0x00, sizeof(ms_M68KBank_Type));
 			break;
 	}
+}
+
+/**
+ * Update M68K CPU program access structs for bankswitching purposes.
+ * @param M68K_Fetch Pointer to first STARSCREAM_PROGRAMREGION to update.
+ * @param banks Maximum number of banks to update.
+ * @return Number of banks updated.
+ */
+int M68K_Mem::UpdateSysBanking(STARSCREAM_PROGRAMREGION *M68K_Fetch, int banks)
+{
+	// Mapping depends on if TMSS is mapped.
+	int cur_fetch = 0;
+	if (!tmss_reg.isTmssMapped()) {
+		// TMSS is not mapped.
+		// Update banking using RomCartridgeMD.
+		cur_fetch += ms_RomCartridge->updateSysBanking(&M68K_Fetch[cur_fetch], banks);
+	} else {
+		// TMSS is mapped.
+		M68K_Fetch->lowaddr = 0x000000;
+		M68K_Fetch->highaddr = (sizeof(MD_TMSS_Rom.u16) - 1);
+		M68K_Fetch->offset = (uint32_t)&MD_TMSS_Rom.u16;
+		M68K_Fetch++;
+		cur_fetch++;
+	}
+
+	return cur_fetch;
 }
 
 

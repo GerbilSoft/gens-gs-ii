@@ -439,9 +439,9 @@ int RomCartridgeMD::updateSysBanking(STARSCREAM_PROGRAMREGION *M68K_Fetch, int b
 			const uint32_t romAddrStart = (0x80000 * (m_cartBanks[i] - BANK_ROM_00));
 			if (romAddrStart < m_romData_size) {
 				// Valid bank. Map it.
-				(*M68K_Fetch).lowaddr = romAddrStart;
-				(*M68K_Fetch).highaddr = (romAddrStart + 0x7FFFF);
-				(*M68K_Fetch).offset = ((uint32_t)m_romData);
+				M68K_Fetch->lowaddr = romAddrStart;
+				M68K_Fetch->highaddr = (romAddrStart + 0x7FFFF);
+				M68K_Fetch->offset = ((uint32_t)m_romData);
 				M68K_Fetch++;
 				banksUpdated++;
 			}

@@ -185,6 +185,9 @@ void M68K::InitSys(SysID system)
 	// Clear M68K RAM.
 	memset(Ram_68k.u8, 0x00, sizeof(Ram_68k.u8));
 
+	// Initialize the M68K memory handlers.
+	M68K_Mem::InitSys(system);
+
 #ifdef GENS_ENABLE_EMULATION
 	// Initialize M68K RAM handlers.
 	for (int i = 0; i < 32; i++) {
@@ -196,13 +199,12 @@ void M68K::InitSys(SysID system)
 
 	// Update the system-specific banking setup.
 	UpdateSysBanking();
+#endif /* GENS_ENABLE_EMULATION */
 
+#ifdef GENS_ENABLE_EMULATION
 	// Reset the M68K CPU.
 	main68k_reset();
 #endif /* GENS_ENABLE_EMULATION */
-	
-	// Initialize the M68K memory handlers.
-	M68K_Mem::InitSys(system);
 }
 
 
@@ -230,7 +232,7 @@ void M68K::UpdateSysBanking(void)
 	switch (ms_LastSysID) {
 		case SYSID_MD:
 			// Sega Genesis / Mega Drive.
-			cur_fetch += M68K_Mem::ms_RomCartridge->updateSysBanking(&M68K_Fetch[cur_fetch], 10);
+			cur_fetch += M68K_Mem::UpdateSysBanking(&M68K_Fetch[cur_fetch], 10);
 			break;
 
 		case SYSID_MCD:
