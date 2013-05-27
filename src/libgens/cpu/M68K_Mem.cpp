@@ -96,7 +96,7 @@ RomCartridgeMD *M68K_Mem::ms_RomCartridge = nullptr;
 M68K_Mem::MD_TMSS_Rom_t M68K_Mem::MD_TMSS_Rom;
 
 // TMSS registers.
-M68K_Mem::TMSS_Reg_t M68K_Mem::tmss_reg;
+TmssReg M68K_Mem::tmss_reg;
 
 /** Z80/M68K cycle table. **/
 int M68K_Mem::Z80_M68K_Cycle_Tab[512];
@@ -1090,7 +1090,7 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 				break;
 
 			// 'SEGA' register.
-			tmss_reg.a14000.w[((address & 2) >> 1) ^ U32DATA_U8_INVERT] = data;
+			tmss_reg.a14000.w[((address & 2) >> 1) ^ U32DATA_U16_INVERT] = data;
 			break;
 		}
 

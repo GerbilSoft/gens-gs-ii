@@ -47,6 +47,9 @@ extern Ram_68k_t Ram_68k;
 // ZOMG TIME_reg structs.
 #include "libzomg/zomg_md_time_reg.h"
 
+// TMSS register.
+#include "libgens/MD/TmssReg.hpp"
+
 namespace LibGens
 {
 
@@ -83,56 +86,7 @@ class M68K_Mem
 		 * TMSS registers.
 		 * NOTE: Only effective if system version != 0.
 		 */
-		struct TMSS_Reg_t {
-			/**
-			 * $A14000: TMSS control register.
-			 * This must have 'SEGA' in order to use the VDP.
-			 * Otherwise, the VDP will lock on when accessed.
-			 * NOTE: This is not emulated at the moment.
-			 */
-			struct {
-				uint8_t b[4];
-				uint16_t w[2];
-				uint32_t d;
-			} a14000;
-
-			/**
-			 * $A14101: TMSS ROM mapping register.
-			 * Bit 0 indicates if the cartridge or TMSS ROM is mapped.
-			 * - 0: TMSS ROM is mapped.
-			 * - 1: Cartridge is mapped.
-			 */
-			uint8_t cart_ce;
-
-			/**
-			 * Is the TMSS ROM valid?
-			 * If it isn't, TMSS will be disabled.
-			 */
-			bool tmss_rom_valid;
-
-			/**
-			 * Is TMSS enabled?
-			 * This is set on emulation startup and hard reset.
-			 */
-			bool tmss_en;
-
-			/**
-			 * Check if TMSS is mapped.
-			 * @return True if mapped; false if not.
-			 */
-			inline bool isTmssMapped(void) const {
-				return (tmss_en && !(cart_ce & 1));
-			}
-
-			/**
-			 * Reset the TMSS registers.
-			 */
-			inline void reset(void) {
-				a14000.d = 0;
-				cart_ce = 0;
-			}
-		};
-		static TMSS_Reg_t tmss_reg;
+		static TmssReg tmss_reg;
 
 		/** Z80 state. **/
 		#define Z80_STATE_ENABLED	(1 << 0)
