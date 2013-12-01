@@ -94,6 +94,9 @@ class RomCartridgeMDPrivate
 				bool force_off;		// Force SRAM off. (Puggsy)
 			} sram;
 
+			// Checksum type.
+			RomCartridgeMD::ChecksumType_t checksumType;
+
 			// ROM mapper.
 			// TODO: Add const register values.
 			RomCartridgeMD::MD_MapperType_t mapperType;
@@ -137,21 +140,27 @@ const RomCartridgeMDPrivate::MD_RomFixup_t RomCartridgeMDPrivate::MD_RomFixups[]
 {
 	// Puggsy: Shows an anti-piracy message after the third level if SRAM is detected.
 	{{"GM T-113016", 0, 0}, {0, 0, true},
+		RomCartridgeMD::CHKSUM_SEGA,
 		RomCartridgeMD::MAPPER_MD_FLAT, {{0}, {0}, {0}}},
 	// Puggsy (Beta)
 	{{"GM T-550055", 0, 0}, {0, 0, true},
+		RomCartridgeMD::CHKSUM_SEGA,
 		RomCartridgeMD::MAPPER_MD_FLAT, {{0}, {0}, {0}}},
 
 	// Psy-O-Blade: Incorrect SRAM header.
 	{{"GM T-26013 ", 0, 0}, {0x200000, 0x203FFF, false},
+		RomCartridgeMD::CHKSUM_SEGA,
 		RomCartridgeMD::MAPPER_MD_FLAT, {{0}, {0}, {0}}},
 
 	// Super Street Fighter II: Use SSF2 mapper.
 	{{"GM T-12056 ", 0, 0}, {0, 0, true},
+		RomCartridgeMD::CHKSUM_DISABLED,
 		RomCartridgeMD::MAPPER_MD_SSF2, {{0}, {0}, {0}}},	// US
 	{{"GM MK-12056", 0, 0}, {0, 0, true},
+		RomCartridgeMD::CHKSUM_DISABLED,
 		RomCartridgeMD::MAPPER_MD_SSF2, {{0}, {0}, {0}}},	// EU
 	{{"GM T-12043 ", 0, 0}, {0, 0, true},
+		RomCartridgeMD::CHKSUM_DISABLED,
 		RomCartridgeMD::MAPPER_MD_SSF2, {{0}, {0}, {0}}},	// JP
 
 	/**
@@ -163,20 +172,24 @@ const RomCartridgeMDPrivate::MD_RomFixup_t RomCartridgeMDPrivate::MD_RomFixups[]
 	 * - Xin Qi Gai Wang Zi (Ch) [a1].gen:	DA5A4BFE
 	 */
 	{{nullptr, 0, 0xDD2F38B5}, {0x400000, 0x40FFFF, false},
+		RomCartridgeMD::CHKSUM_DISABLED,
 		RomCartridgeMD::MAPPER_MD_FLAT, {{0}, {0}, {0}}},
 	{{nullptr, 0, 0xDA5A4BFE}, {0x400000, 0x40FFFF, false},
+		RomCartridgeMD::CHKSUM_DISABLED,
 		RomCartridgeMD::MAPPER_MD_FLAT, {{0}, {0}, {0}}},
 
 	/** ROMs that use MAPPER_MD_REGISTERS_RO. **/
 
 	// Huan Le Tao Qi Shu: Smart Mouse
 	{{nullptr, 0, 0xDECDF740}, {0, 0, false},
+		RomCartridgeMD::CHKSUM_DISABLED,
 		RomCartridgeMD::MAPPER_MD_REGISTERS_RO,
 		{{0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF},
 		 {0x400000, 0x400002, 0x400004, 0x400006},
 		 {0x55FF, 0x0FFF, 0xAAFF, 0xF0FF}}},
 	// Huan Le Tao Qi Shu: Smart Mouse [h1C]
 	{{nullptr, 0, 0xDA5A4587}, {0, 0, false},
+		RomCartridgeMD::CHKSUM_DISABLED,
 		RomCartridgeMD::MAPPER_MD_REGISTERS_RO,
 		{{0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF},
 		 {0x400000, 0x400002, 0x400004, 0x400006},
@@ -187,18 +200,21 @@ const RomCartridgeMDPrivate::MD_RomFixup_t RomCartridgeMDPrivate::MD_RomFixups[]
 	// The other values are similar to values from
 	// other games that use the same hardware.
 	{{nullptr, 0, 0x42DC03E4}, {0, 0, false},
+		RomCartridgeMD::CHKSUM_DISABLED,
 		RomCartridgeMD::MAPPER_MD_REGISTERS_RO,
 		{{0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF},
 		 {0x400000, 0x400002, 0x400004, 0x400006},
 		 {0x63FF, 0x98FF, 0xC9FF, 0x18FF}}},
 	// 777 Casino [h1C]
 	{{nullptr, 0, 0xF14D3F2E}, {0, 0, false},
+		RomCartridgeMD::CHKSUM_DISABLED,
 		RomCartridgeMD::MAPPER_MD_REGISTERS_RO,
 		{{0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF},
 		 {0x400000, 0x400002, 0x400004, 0x400006},
 		 {0x63FF, 0x98FF, 0xC9FF, 0x18FF}}},
 	// 777 Casino [h2C]
 	{{nullptr, 0, 0x74B17EAF}, {0, 0, false},
+		RomCartridgeMD::CHKSUM_DISABLED,
 		RomCartridgeMD::MAPPER_MD_REGISTERS_RO,
 		{{0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF},
 		 {0x400000, 0x400002, 0x400004, 0x400006},
@@ -206,6 +222,7 @@ const RomCartridgeMDPrivate::MD_RomFixup_t RomCartridgeMDPrivate::MD_RomFixups[]
 
 	// Super Bubble Bobble MD
 	{{nullptr, 0, 0x4820A161}, {0, 0, false},
+		RomCartridgeMD::CHKSUM_DISABLED,
 		RomCartridgeMD::MAPPER_MD_REGISTERS_RO,
 		{{0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF},
 		 {0x400000, 0x400002, 0, 0},
@@ -213,18 +230,21 @@ const RomCartridgeMDPrivate::MD_RomFixup_t RomCartridgeMDPrivate::MD_RomFixups[]
 
 	// Ya Se Chuan Shuo: "The Legend of Arthur" edition
 	{{nullptr, 0, 0x095B9A15}, {0, 0, false},
+		RomCartridgeMD::CHKSUM_DISABLED,
 		RomCartridgeMD::MAPPER_MD_REGISTERS_RO,
 		{{0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF},
 		 {0x400000, 0x400002, 0, 0},
 		 {0x63FF, 0x98FF, 0xC9FF, 0x18FF}}},
 	// Ya Se Chuan Shuo: "The Legend of Arthur" edition [f1]
 	{{nullptr, 0, 0xFBA90DC4}, {0, 0, false},
+		RomCartridgeMD::CHKSUM_DISABLED,
 		RomCartridgeMD::MAPPER_MD_REGISTERS_RO,
 		{{0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF},
 		 {0x400000, 0x400002, 0, 0},
 		 {0x63FF, 0x98FF, 0xC9FF, 0x18FF}}},
 	// Ya Se Chuan Shuo: "The Legend of Arthur" edition [f2]
 	{{nullptr, 0, 0x359CB75A}, {0, 0, false},
+		RomCartridgeMD::CHKSUM_DISABLED,
 		RomCartridgeMD::MAPPER_MD_REGISTERS_RO,
 		{{0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF},
 		 {0x400000, 0x400002, 0, 0},
@@ -232,6 +252,7 @@ const RomCartridgeMDPrivate::MD_RomFixup_t RomCartridgeMDPrivate::MD_RomFixups[]
 
 	// End of list.
 	{{nullptr, 0, 0}, {0, 0, false},
+		RomCartridgeMD::CHKSUM_DISABLED,
 		RomCartridgeMD::MAPPER_MD_FLAT, {{0}, {0}, {0}}}
 };
 
@@ -458,9 +479,6 @@ int RomCartridgeMD::updateSysBanking(STARSCREAM_PROGRAMREGION *M68K_Fetch, int b
 
 /**
  * Fix the ROM checksum.
- * This function uses the standard Sega checksum formula.
- * TODO: Add certain non-standard checksums, and fixups
- * for games that store code in the header area.
  * @return 0 on success; non-zero on error.
  */
 int RomCartridgeMD::fixChecksum(void)
@@ -468,22 +486,42 @@ int RomCartridgeMD::fixChecksum(void)
 	if (!m_romData || m_romData_size <= 0x200)
 		return -1;
 
-	// Calculate the ROM checksum.
-	// NOTE: ROM is byteswapped. (Header data is read before byteswapping.)
-	// NOTE: If ROM is an odd number of bytes, it'll be padded by 1 byte.
-	uint16_t checksum = 0;
-	const uint16_t *rom_ptr = &(reinterpret_cast<uint16_t*>(m_romData))[0x200>>1];
-	const uint16_t *end_ptr = rom_ptr + ((m_romData_size - 0x200) >> 1);
-	if (m_romData_size & 1)
-		end_ptr++;
-
-	for (; rom_ptr != end_ptr; rom_ptr++) {
-		checksum += *rom_ptr;
+	// Check if this ROM uses a non-standard checksum.
+	ChecksumType_t checksumType = CHKSUM_SEGA;
+	if (d->romFixup >= 0) {
+		// Apply a ROM fixup.
+		const RomCartridgeMDPrivate::MD_RomFixup_t *fixup =
+			&RomCartridgeMDPrivate::MD_RomFixups[d->romFixup];
+		checksumType = fixup->checksumType;
 	}
 
-	// Set the new checksum.
-	uint16_t *chk_ptr = &(reinterpret_cast<uint16_t*>(m_romData))[0x18E>>1];
-	*chk_ptr = checksum;
+	switch (checksumType) {
+		case CHKSUM_DISABLED:
+			// Game does not use a checksum.
+			break;
+
+		case CHKSUM_SEGA: {
+			// Standard Sega checksum.
+
+			// Calculate the ROM checksum.
+			// NOTE: ROM is byteswapped. (Header data is read before byteswapping.)
+			// NOTE: If ROM is an odd number of bytes, it'll be padded by 1 byte.
+			uint16_t checksum = 0;
+			const uint16_t *rom_ptr = &(reinterpret_cast<uint16_t*>(m_romData))[0x200>>1];
+			const uint16_t *end_ptr = rom_ptr + ((m_romData_size - 0x200) >> 1);
+			if (m_romData_size & 1)
+				end_ptr++;
+
+			for (; rom_ptr != end_ptr; rom_ptr++) {
+				checksum += *rom_ptr;
+			}
+
+			// Set the new checksum.
+			uint16_t *chk_ptr = &(reinterpret_cast<uint16_t*>(m_romData))[0x18E>>1];
+			*chk_ptr = checksum;
+		}
+	}
+
 	return 0;
 }
 

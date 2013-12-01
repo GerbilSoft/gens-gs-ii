@@ -205,6 +205,12 @@ class RomCartridgeMD
 		// Physical memory map: 20 banks of 512 KB each.
 		uint8_t m_cartBanks[20];
 
+		// Checksum types.
+		enum ChecksumType_t {
+			CHKSUM_DISABLED = 0,	// No checksum.
+			CHKSUM_SEGA = 1,	// Sega standard checksum.
+		};
+
 		// 32X mode.
 		bool m_mars;
 
