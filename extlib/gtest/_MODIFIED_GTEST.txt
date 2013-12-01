@@ -1,10 +1,11 @@
-This copy of gtest-1.6.0 is a modified version of the original.
+This copy of gtest-1.7.0 is a modified version of the original.
 
 The following changes have been made to the original:
 
 - All autoconf-related files have been removed.
 
 - The following subdirectories have been removed:
-  codegear, fused-src, m4, make, msvc, xcode
+  build-aux, codegear, fused-src, m4, make, msvc, samples,
+  scripts, test, xcode
 
-To obtain the original gtest-1.6.0, visit http://code.google.com/p/googletest/
+To obtain the original gtest-1.7.0, visit http://code.google.com/p/googletest/
