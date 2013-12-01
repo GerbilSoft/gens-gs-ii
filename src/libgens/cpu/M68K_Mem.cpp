@@ -22,6 +22,8 @@
  ***************************************************************************/
 
 #include "M68K_Mem.hpp"
+#include <libgens/config.libgens.h>
+
 #include "Vdp/Vdp.hpp"
 
 // Z80 CPU emulator and memory space.
@@ -1273,6 +1275,7 @@ void M68K_Mem::InitSys(M68K::SysID system)
  */
 int M68K_Mem::UpdateSysBanking(STARSCREAM_PROGRAMREGION *M68K_Fetch, int banks)
 {
+#ifdef GENS_ENABLE_EMULATION
 	// Mapping depends on if TMSS is mapped.
 	int cur_fetch = 0;
 	if (!tmss_reg.isTmssMapped()) {
@@ -1289,6 +1292,9 @@ int M68K_Mem::UpdateSysBanking(STARSCREAM_PROGRAMREGION *M68K_Fetch, int banks)
 	}
 
 	return cur_fetch;
+#else
+	return 0;
+#endif
 }
 
 
