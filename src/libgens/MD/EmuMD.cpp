@@ -89,6 +89,11 @@ EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
 	if (AutoFixChecksum())
 		M68K_Mem::ms_RomCartridge->fixChecksum();
 
+	// Disable TMSS for now.
+	// TODO: Implement proper TMSS loading.
+	M68K_Mem::tmss_reg.tmss_en = false;
+	M68K_Mem::tmss_reg.tmss_rom_valid = false;
+
 	// Initialize the M68K.
 	M68K::InitSys(M68K::SYSID_MD);
 
