@@ -29,10 +29,6 @@
 #include <stdint.h>
 #include <math.h>
 
-// C++ includes.
-#include <memory>
-using std::auto_ptr;
-
 // zlib
 #include <zlib.h>
 
@@ -746,9 +742,6 @@ QString GeneralConfigWindow::mdUpdateTmssRomFileStatus(GensLineEdit *txtRomFile)
 	uint8_t *rom_data = nullptr;
 	int data_len;
 	uint32_t rom_crc32;
-	int boot_rom_id;
-	int boot_rom_region_code;
-	MCD_RomStatus_t boot_rom_status;
 
 	// Line break string.
 	const QString sLineBreak = QLatin1String("<br/>\n");
@@ -775,7 +768,7 @@ QString GeneralConfigWindow::mdUpdateTmssRomFileStatus(GensLineEdit *txtRomFile)
 	QString rom_size_warning;
 
 	// Open the ROM file using LibGens::Rom.
-	auto_ptr<LibGens::Rom> rom(new LibGens::Rom(filename.toUtf8().constData()));
+	QScopedPointer<LibGens::Rom> rom(new LibGens::Rom(filename.toUtf8().constData()));
 	if (!rom->isOpen()) {
 		// Error opening ROM file.
 		txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
@@ -943,7 +936,7 @@ QString GeneralConfigWindow::mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, in
 	QString rom_size_warning;
 
 	// Open the ROM file using LibGens::Rom.
-	auto_ptr<LibGens::Rom> rom(new LibGens::Rom(filename.toUtf8().constData()));
+	QScopedPointer<LibGens::Rom> rom(new LibGens::Rom(filename.toUtf8().constData()));
 	if (!rom->isOpen()) {
 		// Error opening ROM file.
 		txtRomFile->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
