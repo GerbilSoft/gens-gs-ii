@@ -36,6 +36,7 @@
 #include "cpu/Z80_MD_Mem.hpp"
 #include "cpu/Z80.hpp"
 #include "MD/EmuMD.hpp"
+#include "Cartridge/RomCartridgeMD.hpp"
 
 // ZOMG save structs.
 #include "libzomg/Zomg.hpp"
@@ -149,42 +150,9 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 		M68K_Mem::Z80_State |= Z80_STATE_RESET;
 	Z80_MD_Mem::Bank_Z80 = ((md_z80_ctrl_save.m68k_bank & 0x1FF) << 15);
 
-	// TODO: Update this for RomCartridgeMD.
-#if 0
 	// Load the MD /TIME registers.
-	Zomg_MD_TimeReg_t md_time_reg_save;
-	int ret = zomg.loadMD_TimeReg(&md_time_reg_save);
-
-	EEPRom *eeprom = context->getEEPRom();
-	if (!eeprom->isEEPRomTypeSet()) {
-		// EEPRom is disabled. Use SRam.
-		// Load SRam control registers from the /TIME register bank.
-		SRam *sram = context->getSRam();
-		if (ret <= 0xF1) {
-			// SRAM control register wasn't present.
-			// If the ROM is less than 2 MB, force SRAM access on, write-enabled.
-			// Otherwise, set SRAM off, write-protected.
-			// TODO: Save a flag somewhere to indicate that this should be set
-			// instead of checking M68K_Mem::Rom_Size.
-			if (M68K_Mem::Rom_Size < 0x200000)
-				sram->writeCtrl(1);
-			else
-				sram->writeCtrl(2);
-		} else {
-			// SRAM control register was present.
-			// Write the value from the savestate.
-			sram->writeCtrl(md_time_reg_save.SRAM_ctrl);
-		}
-
-		// Load SRAM.
-		// TODO: Make this optional.
-		sram->loadFromZomg(zomg);
-	}
-
-	// Load SSF2 bank registers.
-	// TODO: Only if SSF2 is detected?
-	M68K_Mem::ZomgRestoreSSF2BankState(&md_time_reg_save);
-#endif
+	// TODO: Don't pass the whole ZOMG struct to RomCartridgeMD?
+	M68K_Mem::ms_RomCartridge->zomgRestore(&zomg);
 
 	// Close the savestate.
 	zomg.close();
@@ -333,33 +301,9 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	md_z80_ctrl_save.m68k_bank = ((Z80_MD_Mem::Bank_Z80 >> 15) & 0x1FF);
 	zomg.saveMD_Z80Ctrl(&md_z80_ctrl_save);
 	
-	// TODO: Update this for RomCartridgeMD.
-#if 0
 	// Save the MD /TIME registers.
-	Zomg_MD_TimeReg_t md_time_reg_save;
-	memset(md_time_reg_save.reg, 0xFF, sizeof(md_time_reg_save.reg));
-	
-	// SRam control registers.
-	const EEPRom *eeprom = context->getEEPRom();
-	if (!eeprom->isEEPRomTypeSet())
-	{
-		// EEPRom is disabled. Use SRam.
-		// Save SRam control registers to the /TIME register bank.
-		const SRam *sram = context->getSRam();
-		md_time_reg_save.SRAM_ctrl = sram->zomgReadCtrl();
-		
-		// Save SRAM.
-		// TODO: Make this optional.
-		sram->saveToZomg(zomg);
-	}
-	
-	// Save SSF2 bank registers.
-	// TODO: Only if SSF2 is detected?
-	M68K_Mem::ZomgSaveSSF2BankState(&md_time_reg_save);
-	
-	// Write MD /TIME registers.
-	zomg.saveMD_TimeReg(&md_time_reg_save);
-#endif
+	// TODO: Don't pass the whole ZOMG struct to RomCartridgeMD?
+	M68K_Mem::ms_RomCartridge->zomgSave(&zomg);
 
 	// Close the savestate.
 	zomg.close();

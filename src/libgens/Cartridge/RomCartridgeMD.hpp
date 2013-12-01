@@ -34,6 +34,9 @@
 #include "Save/SRam.hpp"
 #include "Save/EEPRom.hpp"
 
+// ZOMG class.
+#include "libzomg/Zomg.hpp"
+
 namespace LibGens
 {
 
@@ -115,6 +118,10 @@ class RomCartridgeMD
 		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
 		 */
 		int autoSaveData(int framesElapsed);
+
+		/** ZOMG savestate functions. **/
+		void zomgSave(LibZomg::Zomg *zomg) const;
+		void zomgRestore(LibZomg::Zomg *zomg);
 
 	protected:
 		/**

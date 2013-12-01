@@ -1326,4 +1326,121 @@ void RomCartridgeMD::updateMarsBanking(void)
 	m_cartBanks[19] = bank_start + 1;
 }
 
+
+/** ZOMG savestate functions. **/
+
+/**
+ * Save the /TIME register state.
+ * @param state Zomg_MD_TimeReg_t struct to save to.
+ */
+void RomCartridgeMD::zomgSave(LibZomg::Zomg *zomg) const
+{
+	// Save the MD /TIME registers.
+	Zomg_MD_TimeReg_t md_time_reg_save;
+	memset(md_time_reg_save.reg, 0xFF, sizeof(md_time_reg_save.reg));
+	
+	// SRAM / EEPROM control registers.
+	if (!m_EEPRom.isEEPRomTypeSet()) {
+		// EEPRom is disabled. Use SRam.
+		// Save SRam control registers to the /TIME register bank.
+		md_time_reg_save.SRAM_ctrl = m_SRam.zomgReadCtrl();
+		
+		// Save SRAM.
+		// TODO: Make this optional.
+		m_SRam.saveToZomg(zomg);
+	} else {
+		// TODO: EEPRom saving.
+	}
+	
+	// Check if we have to save any bankswitching registers.
+	switch (m_mapper.type) {
+		case MAPPER_MD_SSF2: {
+			// TODO: Move SSF2 bankswitching data out of TIME_reg?
+			for (int address = 0xF3; address <= 0xFF; address += 2) {
+				const uint8_t phys_bank = (address & 0xF) >> 1;
+				md_time_reg_save.reg[address] = m_mapper.ssf2.banks[phys_bank];
+			}
+			break;
+		}
+
+		default:
+			break;
+	}
+
+	// Write MD /TIME registers.
+	zomg->saveMD_TimeReg(&md_time_reg_save);
+}
+
+/**
+ * Restore the /TIME register state.
+ * @param zomg ZOMG savestate to restore from.
+ * (TODO: Do we really want to pass the whole save file?)
+ */
+void RomCartridgeMD::zomgRestore(LibZomg::Zomg *zomg)
+{
+	Zomg_MD_TimeReg_t md_time_reg_save;
+	int ret = zomg->loadMD_TimeReg(&md_time_reg_save);
+
+	// SRAM / EEPROM control registers.
+	if (!m_EEPRom.isEEPRomTypeSet()) {
+		// EEPRom is disabled. Use SRam.
+		// Load SRam control registers from the /TIME register bank.
+		if (ret <= 0xF1) {
+			// SRAM control register wasn't present.
+			// If the ROM is less than 2 MB, force SRAM access on, write-enabled.
+			// Otherwise, set SRAM off, write-protected.
+			// TODO: Save a flag somewhere to indicate that this should be set
+			// instead of checking M68K_Mem::Rom_Size.
+			if (m_romData_size < 0x200000)
+				m_SRam.writeCtrl(1);
+			else
+				m_SRam.writeCtrl(2);
+		} else {
+			// SRAM control register was present.
+			// Write the value from the savestate.
+			m_SRam.writeCtrl(md_time_reg_save.SRAM_ctrl);
+		}
+
+		// Load SRAM.
+		// TODO: Make this optional.
+		m_SRam.loadFromZomg(zomg);
+	} else {
+		// TODO: EEPRom loading.
+	}
+
+	// Check if we have to restore any bankswitching registers.
+	switch (m_mapper.type) {
+		case MAPPER_MD_SSF2: {
+			// TODO: Move SSF2 bankswitching data out of TIME_reg?
+			for (int address = 0xF3; address <= 0xFF; address += 2) {
+				const uint8_t phys_bank = (address & 0xF) >> 1;
+				uint8_t virt_bank = (md_time_reg_save.reg[address] & 0x3F);
+
+				// Check if the virtual bank address is in range.
+				const uint8_t max_virt_bank = (m_romData_size / 524288);
+				if (virt_bank >= max_virt_bank) {
+					// Out of range. Use the default value.
+					virt_bank = phys_bank;
+					m_mapper.ssf2.banks[phys_bank] = 0xFF;
+				} else {
+					// Save the bank number.
+					m_mapper.ssf2.banks[phys_bank] = virt_bank;
+				}
+
+				// Update the memory map.
+				m_cartBanks[phys_bank] = (BANK_ROM_00 + virt_bank);
+			}
+
+			if (m_mars)
+				updateMarsBanking();
+			// TODO: Better way to update Starscream?
+			M68K::UpdateSysBanking();
+			break;
+		}
+
+		default:
+			break;
+	}
+}
+
 }

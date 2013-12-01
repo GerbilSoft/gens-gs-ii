@@ -128,8 +128,8 @@ class SRam
 		/** ZOMG functions. **/
 		// TODO: Do we really want to access the ZOMG file from SRam.cpp directly?
 		// The other method requires accessing m_sram from GensZomg.cpp.
-		int loadFromZomg(LibZomg::Zomg &zomg);
-		int saveToZomg(LibZomg::Zomg &zomg) const;
+		int loadFromZomg(LibZomg::Zomg *zomg);
+		int saveToZomg(LibZomg::Zomg *zomg) const;
 	
 	protected:
 		// Dirty flag.

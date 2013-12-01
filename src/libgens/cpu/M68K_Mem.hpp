@@ -124,10 +124,6 @@ class M68K_Mem
 		static void M68K_WB(uint32_t address, uint8_t data);
 		static void M68K_WW(uint32_t address, uint16_t data);
 		
-		/** ZOMG savestate functions. */
-		static void ZomgSaveSSF2BankState(Zomg_MD_TimeReg_t *state);
-		static void ZomgRestoreSSF2BankState(const Zomg_MD_TimeReg_t *state);
-	
 	private:
 		/** Z80/M68K cycle table. **/
 		static int Z80_M68K_Cycle_Tab[512];
