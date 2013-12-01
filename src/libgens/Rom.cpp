@@ -101,7 +101,6 @@ class RomPrivate
 		std::string filename;		// ROM filename.
 		std::string filenameBaseNoExt;	// ROM filename. (basename; no extension)
 		unsigned int romSize;		// ROM size.
-		int eprType;			// EEPRom type.
 
 		// ROM names.
 		// MD: Obtained from ROM header.
@@ -157,65 +156,7 @@ class RomPrivate
 
 		MD_RomHeader m_mdHeader;
 
-		/**
-		 * ROM fixups table entry. (Mega Drive)
-		 */
-		struct MD_RomFixup
-		{
-			// ROM identification.
-			// If any value is 0 or nullptr, that field is ignored.
-			struct
-			{
-				const char *serial;	// ROM serial number.
-				uint16_t checksum;	// MD checksum.
-				uint32_t crc32;		// CRC32.
-			} id;
-
-			// Fixups.
-			Rom::Mapper mapper;		// ROM mapper.
-
-			// SRAM fixups.
-			// If any value is 0, that field is ignored.
-			struct
-			{
-				uint32_t start_addr;	// SRAM start address.
-				uint32_t end_addr;	// SRAM end address.
-				bool force_off;		// Force SRAM off. (Puggsy)
-			} sram;
-		};
-
-		static const MD_RomFixup MD_RomFixups[5];
-
 		uint32_t rom_crc32;	// ROM CRC32.
-		int romFixup;		// ROM fixup index. (-1 == no fixups)
-		Rom::Mapper mapper;	// ROM mapper.
-
-		static int CheckRomFixupsMD(const MD_RomHeader *mdRomHeader, uint32_t crc32);
-};
-
-
-/**
- * ROM fixup table. (Mega Drive)
- */
-const RomPrivate::MD_RomFixup RomPrivate::MD_RomFixups[5] =
-{
-	// Puggsy: Shows an anti-piracy message after the third level if SRAM is detected.
-	{{"GM T-113016", 0, 0}, Rom::MAPPER_STANDARD, {0, 0, true}},
-	{{"GM T-550055", 0, 0}, Rom::MAPPER_STANDARD, {0, 0, true}},	// Puggsy (Beta)
-
-	// Psy-O-Blade: Incorrect SRAM header.
-	{{"GM T-26013 ", 0, 0}, Rom::MAPPER_STANDARD, {0x200000, 0x203FFF, false}},
-
-	/**
-	 * Xin Qi Gai Wang Zi (original version of Beggar Prince):
-	 * SRAM is located at 0x400000-0x40FFFF; ROM header is invalid.
-	 * 
-	 * CRC32s:
-	 * - Xin Qi Gai Wang Zi (Ch).gen:	DD2F38B5
-	 * - Xin Qi Gai Wang Zi (Ch) [a1].gen:	DA5A4BFE
-	 */
-	{{nullptr, 0, 0xDD2F38B5}, Rom::MAPPER_STANDARD, {0x400000, 0x40FFFF, false}},
-	{{nullptr, 0, 0xDA5A4BFE}, Rom::MAPPER_STANDARD, {0x400000, 0x40FFFF, false}},
 };
 
 
@@ -239,11 +180,8 @@ RomPrivate::RomPrivate(Rom *q, const utf8_str *filename,
 	, sysId_override(sysOverride)
 	, romFormat_override(fmtOverride)
 	, romSize(0)
-	, eprType(-1)
 	, regionCode(0)
 	, rom_crc32(0)
-	, romFixup(-1)
-	, mapper(Rom::MAPPER_STANDARD)
 {
 	// If filename is nullptr, don't do anything else.
 	if (!filename)
@@ -594,17 +532,6 @@ int RomPrivate::loadRomHeader(Rom::MDP_SYSTEM_ID sysOverride, Rom::RomFormat fmt
 	// Load the ROM header information.
 	readHeaderMD(header, header_size);
 	
-	// Check for ROM fixups.
-	// TODO: CRC32 needs to be calculated here...
-	// TODO: Move ROM fixup check to another function?
-	romFixup = CheckRomFixupsMD(&m_mdHeader, rom_crc32);
-	
-	// Detect the EEPRom type from the ROM serial number and checksum.
-	eprType = EEPRom::DetectEEPRomType(
-			&m_mdHeader.serialNumber[3],
-			(sizeof(m_mdHeader.serialNumber) - 3),
-			m_mdHeader.checksum);
-	
 	// ROM header loaded.
 	return 0;
 }
@@ -672,52 +599,6 @@ void RomPrivate::readHeaderMD(const uint8_t *header, size_t header_size)
 }
 
 
-/**
- * Check for ROM fixups. (Mega Drive)
- * @param mdRomHeader ROM header.
- * @param crc32 ROM CRC32.
- * @return Index in MD_RomFixups[], or -1 if no fixup is required.
- */
-int RomPrivate::CheckRomFixupsMD(const RomPrivate::MD_RomHeader *mdRomHeader, uint32_t crc32)
-{
-	for (int i = 0; i < ARRAY_SIZE(MD_RomFixups); i++) {
-		const MD_RomFixup *fixup = &MD_RomFixups[i];
-		bool match = false;
-
-		if (fixup->id.serial != nullptr) {
-			// Compare the ROM serial number.
-			if (strncmp(mdRomHeader->serialNumber, fixup->id.serial,
-				sizeof(mdRomHeader->serialNumber)-3) != 0)
-			{
-				continue;
-			}
-			match = true;
-		}
-
-		if (fixup->id.crc32 != 0 && crc32 != 0) {
-			// Compare the ROM CRC32.
-			if (crc32 != fixup->id.crc32)
-				continue;
-			match = true;
-		}
-
-		if (fixup->id.checksum != 0) {
-			// Compare the ROM checksum.
-			if (mdRomHeader->checksum != fixup->id.checksum)
-				continue;
-			match = true;
-		}
-
-		// Found a fixup for this ROM.
-		if (match)
-			return i;
-	}
-
-	// No fixup found for this ROM.
-	return -1;
-}
-
-
 /** Rom class. **/
 
 
@@ -733,126 +614,6 @@ Rom::Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverr
 
 Rom::~Rom()
 	{ delete d; }
-
-/**
- * initSRam(): Initialize an SRam class using the ROM's header information.
- * @param sram Pointer to SRam class.
- * @return Positive value indicating SRam size on success; negative on error.
- */
-int Rom::initSRam(SRam *sram) const
-{
-	if (!isOpen())
-		return -1;
-	
-	// Reset SRam before applying any settings.
-	sram->reset();
-	
-	// TODO; Move some of this to the SRam class?
-	
-	// SRam addresses.
-	uint32_t start, end;
-	
-	// Check if the ROM header has SRam information.
-	// Mask the SRam info value with 0xFFFF4000 and check
-	// if it matches the Magic Number.
-	// Magic Number: 0x52414000 ('R', 'A', 0x40, 0x00)
-	if ((d->m_mdHeader.sramInfo & 0xFFFF4000) == 0x52414000)
-	{
-		// ROM header has SRam information. Use these addresses..
-		// SRam starting position must be a multiple of 0xF80000.
-		// TODO: Is that really necessary?
-		start = d->m_mdHeader.sramStartAddr & 0xF80000;
-		end = d->m_mdHeader.sramEndAddr & 0xFFFFFF;
-	}
-	else
-	{
-		// ROM header does not have SRam information.
-		// Use default settings.
-		start = 0x200000;
-		end = 0x20FFFF;	// 64 KB
-	}
-	
-	// Check for invalid SRam addresses.
-	if ((start > end) || ((end - start) > 0xFFFF))
-	{
-		// Invalid ending address.
-		// Set the end address to the start + 0xFFFF.
-		end = start + 0xFFFF;
-	}
-	
-	// Make sure SRam starts on an even byte and ends on an odd byte.
-	start &= ~1;
-	end |= 1;
-	
-	/**
-	 * If the ROM is smaller than the SRam starting address, always enable SRam.
-	 * Notes:
-	 * - HardBall '95: SRAM is at $300000; ROM is 3 MB; cartridge does NOT have $A130F1 register.
-	 *                 Need to enable SRAM initially; otherwise, an error appears on startup.
-	 */
-	const bool enableSRam = (d->romSize <= start);
-	sram->setOn(enableSRam);
-	sram->setWrite(enableSRam);
-	
-	// Check if a ROM fixup needs to be applied.
-	if (d->romFixup >= 0)
-	{
-		// Apply a ROM fixup.
-		const RomPrivate::MD_RomFixup *fixup = &RomPrivate::MD_RomFixups[d->romFixup];
-		
-		if (fixup->sram.force_off)
-		{
-			// Force SRAM off.
-			sram->setOn(false);
-			sram->setWrite(false);
-			sram->setStart(1);
-			sram->setEnd(0);
-			return 0;
-		}
-		
-		// Fix SRAM start/end addresses.
-		if (fixup->sram.start_addr != 0)
-			start = fixup->sram.start_addr;
-		if (fixup->sram.end_addr != 0)
-			end = fixup->sram.end_addr;
-	}
-	
-	// Set the addresses.
-	sram->setStart(start);
-	sram->setEnd(end);
-	
-	// Load the SRam file.
-	// TODO: Use internal filename for multi-file?
-	sram->setFilename(d->filename);
-	return sram->load();
-}
-
-
-/**
- * initEEPRom(): Initialize an EEPRom class using the ROM's header information.
- * @param eeprom Pointer to EEPRom class.
- * @return Positive value indicating EEPRom size on success; negative on error.
- */
-int Rom::initEEPRom(EEPRom *eeprom) const
-{
-	// TODO: Load EEPRom from a file.
-	// TODO: Should that be implemented here or in SRam.cpp?
-	if (!isOpen())
-		return -1;
-	
-	// Reset the EEPRom and set the type.
-	eeprom->reset();
-	eeprom->setEEPRomType(d->eprType);
-	
-	// Don't do anything if the ROM isn't in the EEPRom database.
-	if (d->eprType < 0)
-		return 0;
-	
-	// Load the EEProm file.
-	// TODO: Use internal filename for multi-file?
-	eeprom->setFilename(d->filename);
-	return eeprom->load();
-}
 
 
 /**
@@ -887,6 +648,11 @@ int Rom::loadRom(void *buf, size_t siz)
 	// TODO: Error handling.
 	size_t ret_siz = 0;
 	d->decomp->getFile(d->z_entry_sel, buf, siz, &ret_siz);
+
+	// Calculate the CRC32.
+	d->rom_crc32 = crc32(0, (const Bytef*)buf, siz);
+
+	// Return the number of bytes read.
 	return ret_siz;
 }
 
@@ -938,31 +704,31 @@ int Rom::romSize(void) const
 
 /**
  * Get the ROM filename.
- * @return ROM filename (UTF-8), or nullptr on error.
+ * @return ROM filename (UTF-8), or empty string on error.
  */
-const utf8_str *Rom::filename(void) const
-	{ return d->filename.c_str(); }
+const string Rom::filename(void) const
+	{ return d->filename; }
 
 /**
  * Get the ROM filename. (basename, no extension)
  * @return ROM filename (UTF-8), or nullptr on error.
  */
-const utf8_str *Rom::filenameBaseNoExt(void) const
-	{ return d->filenameBaseNoExt.c_str(); }
+const string Rom::filenameBaseNoExt(void) const
+	{ return d->filenameBaseNoExt; }
 
 /**
  * Get the Japanese (domestic) ROM name.
- * @return Japanese (domestic) ROM name (UTF-8), or nullptr on error.
+ * @return Japanese (domestic) ROM name (UTF-8), or empty string on error.
  */
-const utf8_str *Rom::romNameJP(void) const
-	{ return d->romNameJP.c_str(); }
+const string Rom::romNameJP(void) const
+	{ return d->romNameJP; }
 
 /**
  * Get the American (overseas) ROM name.
- * @return American (overseas) ROM name (UTF-8), or nullptr on error.
+ * @return American (overseas) ROM name (UTF-8), or empty string on error.
  */
-const utf8_str *Rom::romNameUS(void) const
-	{ return d->romNameUS.c_str(); }
+const string Rom::romNameUS(void) const
+	{ return d->romNameUS; }
 
 /**
  * Get the ROM checksum.
@@ -971,6 +737,42 @@ const utf8_str *Rom::romNameUS(void) const
  */
 uint16_t Rom::checksum(void) const
 	{ return d->m_mdHeader.checksum; }
+
+/**
+ * Get the ROM's CRC32.
+ * NOTE: loadRom() must be called before using this function;
+ * otherwise, it will return 0.
+ * @return ROM CRC32.
+ */
+uint32_t Rom::rom_crc32(void) const
+	{ return d->rom_crc32; }
+
+/**
+ * Get the ROM's serial number.
+ * TODO: This is MD only for now...
+ * @return ROM serial number.
+ */
+std::string Rom::rom_serial(void) const
+	{ return std::string(d->m_mdHeader.serialNumber, sizeof(d->m_mdHeader.serialNumber)); }
+
+/**
+ * Get the ROM's SRAM information.
+ * @param sramInfo	[out, opt] SRAM info field.
+ * @param sramStartAddr	[out, opt] SRAM start address.
+ * @param sramEndAddr	[out, opt] SRAM end address.
+ * @return 0 on success; non-zero on error.
+ */
+int Rom::romSramInfo(uint32_t *sramInfo, uint32_t *sramStartAddr, uint32_t *sramEndAddr) const
+{
+	// TODO: Return non-zero if the ROM wasn't loaded at all.
+	if (sramInfo)
+		*sramInfo = d->m_mdHeader.sramInfo;
+	if (sramStartAddr)
+		*sramStartAddr = d->m_mdHeader.sramStartAddr;
+	if (sramEndAddr)
+		*sramEndAddr = d->m_mdHeader.sramEndAddr;
+	return 0;
+}
 
 /**
  * Get the region code. (MD hex format)

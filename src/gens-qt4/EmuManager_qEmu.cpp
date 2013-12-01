@@ -504,8 +504,8 @@ void EmuManager::doScreenShot(void)
 	// Get the ROM filename (without extension).
 	// TODO: Remove all extensions, not just the base?
 	// Otherwise, S1.bin.gz will save as S1.bin_000.png.
-	const QString romFilename = QString::fromUtf8(m_rom->filenameBaseNoExt());
-	
+	const QString romFilename = QString::fromUtf8(m_rom->filenameBaseNoExt().c_str());
+
 	// Add the current directory, number, and .png extension.
 	// TODO: Enumerate QImageWriter for supported image formats.
 	const QString scrFilenamePrefix =
@@ -513,33 +513,29 @@ void EmuManager::doScreenShot(void)
 	const QString scrFilenameSuffix = QLatin1String(".png");
 	QString scrFilename;
 	int scrNumber = -1;
-	do
-	{
+	do {
 		// TODO: Figure out how to optimize this!
 		scrNumber++;
 		scrFilename = scrFilenamePrefix + QChar(L'_') +
 				QString::number(scrNumber).rightJustified(3, QChar(L'0')) +
 				scrFilenameSuffix;
 	} while (QFile::exists(scrFilename));
-	
+
 	// Create the screenshot.
 	Screenshot ss(m_rom, gqt4_emuContext, this);
 	int ret = ss.save(scrFilename);
-	
+
 	QString osdMsg;
-	if (ret == 0)
-	{
+	if (ret == 0) {
 		//: OSD message indicating a screenshot has been saved.
 		osdMsg = tr("Screenshot %1 saved.");
 		osdMsg = osdMsg.arg(scrNumber);
-	}
-	else
-	{
+	} else {
 		// TODO: Print the actual error.
 		//: OSD message indicating an error occurred while saving a screenshot.
 		osdMsg = tr("Error saving screenshot.");
 	}
-	
+
 	emit osdPrintMsg(1500, osdMsg);
 }
 
@@ -779,39 +775,26 @@ void EmuManager::doPauseRequest(paused_t newPaused)
 
 
 /**
- * doResetEmulator(): Reset the emulator.
+ * Reset the emulator.
  * @param hardReset If true, do a hard reset; otherwise, do a soft reset.
  */
 void EmuManager::doResetEmulator(bool hardReset)
 {
-	// If autofix checksum is enabled, re-fix the checksum.
-	// Otherwise, restore the checksum.
-	// TODO: Move this call to EmuMD::hardReset() / EmuMD::softReset()?
-	// (That'll require setting a static option in EmuContext.)
-	// TODO: Automatically fix/unfix checksum when the option is changed?
-	if (gqt4_cfg->get(QLatin1String("autoFixChecksum")).toBool())
-		gqt4_emuContext->fixChecksum();
-	else
-		gqt4_emuContext->restoreChecksum();
-	
 	QString msg;
-	if (hardReset)
-	{
+	if (hardReset) {
 		// Do a hard reset.
 		gqt4_emuContext->hardReset();
-		
+
 		//: OSD message indicating a Hard Reset was performed.
 		msg = tr("Hard Reset.", "osd");
-	}
-	else
-	{
+	} else {
 		// Do a soft reset.
 		gqt4_emuContext->softReset();
-		
+
 		//: OSD message indicating a Soft Reset was performed.
 		msg = tr("Soft Reset.", "osd");
 	}
-	
+
 	// Print the message to the OSD.
 	emit osdPrintMsg(2500, msg);
 }

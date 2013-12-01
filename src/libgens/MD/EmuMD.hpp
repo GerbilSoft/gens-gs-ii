@@ -37,49 +37,61 @@ class EmuMD : public EmuContext
 	public:
 		EmuMD(Rom *rom, SysVersion::RegionCode_t region = SysVersion::REGION_US_NTSC);
 		~EmuMD();
-		
+
 		/**
-		 * softReset(): Perform a soft reset.
+		 * Perform a soft reset.
 		 * @return 0 on success; non-zero on error.
 		 */
 		int softReset(void);
-		
+
 		/**
-		 * hardReset(): Perform a hard reset.
+		 * Perform a hard reset.
 		 * @return 0 on success; non-zero on error.
 		 */
 		int hardReset(void);
-		
+
 		/**
-		 * setRegion(): Set the region code.
+		 * Set the region code.
 		 * @param region Region code.
 		 * @return 0 on success; non-zero on error.
 		 */
 		int setRegion(SysVersion::RegionCode_t region);
-		
+
+		/**
+		 * Save SRam/EEPRom.
+		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
+		 */
+		int saveData(void) final;
+
+		/**
+		 * AutoSave SRam/EEPRom.
+		 * @param frames Number of frames elapsed, or -1 for paused. (force autosave)
+		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
+		 */
+		int autoSaveData(int framesElapsed) final;
+
 		/** Frame execution functions. **/
 		void execFrame(void);
 		void execFrameFast(void);
-	
+
 	protected:
 		/**
-		* LineType_t: Line types.
-		*/
-		enum LineType_t
-		{
+		 * Line types.
+		 */
+		enum LineType_t {
 			LINETYPE_ACTIVEDISPLAY	= 0,
 			LINETYPE_VBLANKLINE	= 1,
 			LINETYPE_BORDER		= 2,
 		};
-		
+
 		template<LineType_t LineType, bool VDP>
 		FORCE_INLINE void T_execLine(void);
-		
+
 		template<bool VDP>
 		FORCE_INLINE void T_execFrame(void);
-		
+
 		/**
-		 * setRegion_int(): Set the region code. (INTERNAL VERSION)
+		 * Set the region code. (INTERNAL VERSION)
 		 * @param region Region code.
 		 * @param preserveState If true, preserve the audio IC state.
 		 * @return 0 on success; non-zero on error.

@@ -132,9 +132,6 @@ class Rom
 		 */
 		int romSize(void) const;
 
-		int initSRam(SRam *sram) const;
-		int initEEPRom(EEPRom *eeprom) const;
-
 		/**
 		 * Load the ROM image into a buffer.
 		 * @param buf Buffer.
@@ -145,15 +142,15 @@ class Rom
 
 		/**
 		 * Get the ROM filename.
-		 * @return ROM filename (UTF-8), or nullptr on error.
+		 * @return ROM filename (UTF-8), or empty string on error.
 		 */
-		const utf8_str *filename(void) const;
+		const std::string filename(void) const;
 
 		/**
 		 * Get the ROM filename. (basename, no extension)
-		 * @return ROM filename (UTF-8), or nullptr on error.
+		 * @return ROM filename (UTF-8), or empty string on error.
 		 */
-		const utf8_str *filenameBaseNoExt(void) const;
+		const std::string filenameBaseNoExt(void) const;
 
 		/********************
 		 * ROM header data. *
@@ -161,15 +158,15 @@ class Rom
 
 		/**
 		 * Get the Japanese (domestic) ROM name.
-		 * @return Japanese (domestic) ROM name (UTF-8), or nullptr on error.
+		 * @return Japanese (domestic) ROM name (UTF-8), or empty string on error.
 		 */
-		const utf8_str *romNameJP(void) const;
+		const std::string romNameJP(void) const;
 
 		/**
 		 * Get the American (overseas) ROM name.
-		 * @return American (overseas) ROM name (UTF-8), or nullptr on error.
+		 * @return American (overseas) ROM name (UTF-8), or empty string on error.
 		 */
-		const utf8_str *romNameUS(void) const;
+		const std::string romNameUS(void) const;
 
 		/**
 		 * Get the ROM checksum.
@@ -177,6 +174,30 @@ class Rom
 		 * @return ROM checksum.
 		 */
 		uint16_t checksum(void) const;
+
+		/**
+		 * Get the ROM's CRC32.
+		 * NOTE: loadRom() must be called before using this function;
+		 * otherwise, it will return 0.
+		 * @return ROM CRC32.
+		 */
+		uint32_t rom_crc32(void) const;
+
+		/**
+		 * Get the ROM's serial number.
+		 * TODO: This is MD only for now...
+		 * @return ROM serial number.
+		 */
+		std::string rom_serial(void) const;
+
+		/**
+		 * Get the ROM's SRAM information.
+		 * @param sramInfo	[out, opt] SRAM info field.
+		 * @param sramStartAddr	[out, opt] SRAM start address.
+		 * @param sramEndAddr	[out, opt] SRAM end address.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int romSramInfo(uint32_t *sramInfo, uint32_t *sramStartAddr, uint32_t *sramEndAddr) const;
 
 		/**
 		 * Get the region code. (MD hex format)

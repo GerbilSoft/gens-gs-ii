@@ -407,18 +407,18 @@ class EmuManager : public QObject
 	
 	public slots:
 		/**
-		 * resetEmulator(): Reset the emulator.
+		 * Reset the emulator.
 		 * @param hardReset If true, do a hard reset; otherwise, do a soft reset.
 		 */
 		void resetEmulator(bool hardReset);
-		
+
 		/**
 		 * changePaletteSetting(): Change a palette setting.
 		 * @param type Type of palette setting.
 		 * @param val New value.
 		 */
 		void changePaletteSetting(EmuRequest_t::PaletteSettingType type, int val);
-	
+
 	protected slots:
 		/** Graphics settings. **/
 		void interlacedMode_changed_slot(QVariant interlacedMode);

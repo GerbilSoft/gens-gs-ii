@@ -95,6 +95,7 @@ SET(libgens_SRCS
 	IO/IoManager_p.cpp
 	IO/IoManager_p_update.cpp
 	IO/IoManager_btnNames.cpp
+	Cartridge/RomCartridgeMD.cpp
 	)
 
 IF(HAVE_LZMA)

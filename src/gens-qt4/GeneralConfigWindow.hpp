@@ -116,13 +116,21 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		/** System. **/
 		uint16_t regionCodeOrder(void) const;
 
+		/** Sega Genesis **/
+
+		// Select ROM file.
+		void selectRomFile(QString rom_desc, QLineEdit *txtRomFile);
+
+		// Sega Genesis: Update TMSS ROM file status.
+		QString mdUpdateTmssRomFileStatus(GensLineEdit *txtRomFile);
+
+		// Sega Genesis: TMSS ROM file information.
+		QString sMDTmssRomStatus;
+
 		/** Sega CD: Boot ROM **/
 
 		// Sega CD: Boot ROM filesize.
 		static const int MCD_ROM_FILESIZE = 131072;
-
-		// Sega CD: Select Boot ROM file.
-		void mcdSelectRomFile(QString rom_id, GensLineEdit *txtRomFile);
 
 		// Sega CD: Update Boot ROM file status.
 		QString mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, int region_code);
@@ -149,6 +157,12 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		void on_btnRegionDetectUp_clicked(void);
 		void on_btnRegionDetectDown_clicked(void);
 		// TODO: Detect changes in lstRegionDetect.
+
+		/** Sega Genesis **/
+		void on_chkMDTMSS_toggled(bool checked);
+		void on_txtMDTMSSRom_focusIn(void);
+		void on_txtMDTMSSRom_textChanged(void);
+		void on_btnMDTMSSRom_clicked(void);
 
 		/** Sega CD: Boot ROM **/
 
