@@ -39,6 +39,11 @@ ENDIF(APPLE)
 
 INCLUDE(${QT_USE_FILE})
 
+IF(WIN32 AND QT_IS_STATIC)
+	# Win32: Qt Static requires some extra libraries.
+	SET(WIN32_LIBS ws2_32 winmm imm32)
+ENDIF(WIN32 AND QT_IS_STATIC)
+
 # Link to Carbon on Mac OS X.
 # TODO: Use Cocoa instead if we're compiling against Qt/Cocoa.
 IF(APPLE)
@@ -317,9 +322,7 @@ ENDIF()
 QT4_WRAP_CPP(gens-qt4_MOC_SOURCES ${gens-qt4_MOC_HEADERS})
 
 # Always include the Oxygen icons on Win32 and Mac OS X.
-IF(WIN32)
-	SET(GENS_INCLUDE_OXYGEN_ICONS 1)
-ELSEIF(APPLE)
+IF(WIN32 OR APPLE)
 	SET(GENS_INCLUDE_OXYGEN_ICONS 1)
 ENDIF()
 
@@ -370,15 +373,6 @@ ADD_EXECUTABLE(gens-qt4
 TARGET_LINK_LIBRARIES(gens-qt4 gens ${ZLIB_LIBRARY} genscd)
 ADD_DEPENDENCIES(gens-qt4 translations_target)
 
-# Fast QString concatenation.
-# Introduced with Qt 4.6.
-SET_PROPERTY(TARGET gens-qt4
-	APPEND PROPERTY COMPILE_DEFINITIONS "QT_USE_FAST_CONCATENATION;QT_USE_FAST_OPERATOR_PLUS")
-
-# Disable implicit QString ASCII casts
-SET_PROPERTY(TARGET gens-qt4
-	APPEND PROPERTY COMPILE_DEFINITIONS "QT_NO_CAST_FROM_ASCII;QT_NO_CAST_TO_ASCII")
-
 # Additional libraries.
 IF(APPLE)
 	IF(APPLE_LIBS)
@@ -391,13 +385,61 @@ IF(QT_QTDBUS_FOUND)
 ENDIF(QT_QTDBUS_FOUND)
 IF(HAVE_GLEW)
 	TARGET_LINK_LIBRARIES(gens-qt4 ${GLEW_LIBRARY})
-	SET_PROPERTY(TARGET gens-qt4
-		APPEND PROPERTY COMPILE_DEFINITIONS ${GLEW_COMPILE_DEFINITIONS})
+	SET_PROPERTY(TARGET gens-qt4 APPEND_STRING PROPERTY COMPILE_DEFINITIONS
+			";${GLEW_COMPILE_DEFINITIONS}")
 ENDIF(HAVE_GLEW)
 TARGET_LINK_LIBRARIES(gens-qt4 ${OPENGL_gl_LIBRARY})
 IF(HAVE_PORTAUDIO)
 	TARGET_LINK_LIBRARIES(gens-qt4 ${PORTAUDIO_LIBRARY})
 ENDIF(HAVE_PORTAUDIO)
+
+# NOTE: $<TARGET_FILE:mcrecover> is preferred,
+# but this doesn't seem to work on Ubuntu 10,04.
+# (cmake_2.8.0-5ubuntu1_i386)
+GET_PROPERTY(GENS-QT4_EXE_LOCATION TARGET gens-qt4 PROPERTY LOCATION)
+
+# Split debug information.
+# References:
+# - http://cmake.3232098.n2.nabble.com/Save-stripped-debugging-information-td6819195.html
+# - http://sourceware.org/bugzilla/show_bug.cgi?id=14527
+#   - If debug symbols are stripped before .gnu_debuglink is added,
+#     the section will be truncated to .gnu_deb, and hence won't
+#     be recognized by gdb.
+# - FIXME: If the above .gnu_debuglink workaround is used, Windows XP
+#   and Windows 7 will claim that the executable isn't a valid Win32
+#   executable. (Wine ignores it and works fine!)
+IF(SPLIT_DEBUG)
+	FIND_PROGRAM(OBJCOPY objcopy)
+	ADD_CUSTOM_COMMAND(TARGET gens-qt4 POST_BUILD
+		COMMAND ${OBJCOPY} --only-keep-debug
+			${GENS-QT4_EXE_LOCATION} ${CMAKE_CURRENT_BINARY_DIR}/gens-qt4.debug
+		COMMAND ${OBJCOPY} --strip-debug
+			${GENS-QT4_EXE_LOCATION}
+		COMMAND ${OBJCOPY} --add-gnu-debuglink=gens-qt4.debug
+			${GENS-QT4_EXE_LOCATION}
+		)
+ENDIF(SPLIT_DEBUG)
+
+IF(COMPRESS_EXE)
+	FIND_PROGRAM(UPX upx)
+	IF(WIN32)
+		SET(UPX_OPTIONS "--compress-icons=0")
+	ENDIF(WIN32)
+	IF(UPX)
+		ADD_CUSTOM_COMMAND(TARGET gens-qt4 POST_BUILD
+			COMMAND ${UPX} --best --lzma
+				${GENS-QT4_EXE_LOCATION}
+			)
+	ENDIF(UPX)
+ENDIF(COMPRESS_EXE)
+
+# Qt options:
+# - Fast QString concatenation. (Qt 4.6+, plus 4.8-specific version)
+# - Disable implicit QString ASCII casts.
+SET_PROPERTY(TARGET gens-qt4 APPEND_STRING PROPERTY COMPILE_DEFINITIONS
+		";QT_USE_FAST_CONCATENATION;QT_USE_FAST_OPERATOR_PLUS;QT_USE_QSTRINGBUILDER")
+SET_PROPERTY(TARGET gens-qt4 APPEND_STRING PROPERTY COMPILE_DEFINITIONS
+		";QT_NO_CAST_FROM_ASCII;QT_NO_CAST_TO_ASCII")
 
 # Mac OS X bundle information.
 # TODO: Add "NO-EMU" if necessary.
