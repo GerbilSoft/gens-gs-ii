@@ -1,4 +1,4 @@
-This copy of GLEW 1.9.0 is a modified version of the original.
+This copy of GLEW 1.10.0 is a modified version of the original.
 
 It contains only glew.c and the header files, as well as the
 informational text files.
@@ -10,5 +10,5 @@ by Gens/GS II, or are planned to be used by Gens/GS II.
 See http://glew.sourceforge.net/advanced.html for information on
 customizing GLEW to include only specific extensions.
 
-To obtain the original GLEW 1.9.0, visit
+To obtain the original GLEW 1.10.0, visit
 http://glew.sourceforge.net/
