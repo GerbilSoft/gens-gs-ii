@@ -1,7 +1,7 @@
 /* zlib.h -- interface of the 'zlib' general purpose compression library
-  version 1.2.7, May 2nd, 2012
+  version 1.2.8, April 28th, 2013
 
-  Copyright (C) 1995-2012 Jean-loup Gailly and Mark Adler
+  Copyright (C) 1995-2013 Jean-loup Gailly and Mark Adler
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -37,11 +37,11 @@
 extern "C" {
 #endif
 
-#define ZLIB_VERSION "1.2.7"
-#define ZLIB_VERNUM 0x1270
+#define ZLIB_VERSION "1.2.8"
+#define ZLIB_VERNUM 0x1280
 #define ZLIB_VER_MAJOR 1
 #define ZLIB_VER_MINOR 2
-#define ZLIB_VER_REVISION 7
+#define ZLIB_VER_REVISION 8
 #define ZLIB_VER_SUBREVISION 0
 
 /*
@@ -839,6 +839,21 @@ ZEXTERN int ZEXPORT inflateSetDictionary _Z_OF((z_streamp strm,
    inflate().
 */
 
+ZEXTERN int ZEXPORT inflateGetDictionary _Z_OF((z_streamp strm,
+                                             Bytef *dictionary,
+                                             uInt  *dictLength));
+/*
+     Returns the sliding dictionary being maintained by inflate.  dictLength is
+   set to the number of bytes in the dictionary, and that many bytes are copied
+   to dictionary.  dictionary must have enough space, where 32768 bytes is
+   always enough.  If inflateGetDictionary() is called with dictionary equal to
+   Z_NULL, then only the dictionary length is returned, and nothing is copied.
+   Similary, if dictLength is Z_NULL, then it is not set.
+
+     inflateGetDictionary returns Z_OK on success, or Z_STREAM_ERROR if the
+   stream state is inconsistent.
+*/
+
 ZEXTERN int ZEXPORT inflateSync _Z_OF((z_streamp strm));
 /*
      Skips invalid compressed data until a possible full flush point (see above
@@ -846,7 +861,7 @@ ZEXTERN int ZEXPORT inflateSync _Z_OF((z_streamp strm));
    available input is skipped.  No output is provided.
 
      inflateSync searches for a 00 00 FF FF pattern in the compressed data.
-   All full flush points have this pattern, but not all occurences of this
+   All full flush points have this pattern, but not all occurrences of this
    pattern are full flush points.
 
      inflateSync returns Z_OK if a possible full flush point has been found,
@@ -1007,7 +1022,8 @@ ZEXTERN int ZEXPORT inflateBackInit _Z_OF((z_streamp strm, int windowBits,
    the version of the header file.
 */
 
-typedef unsigned (*in_func) _Z_OF((void FAR *, unsigned char FAR * FAR *));
+typedef unsigned (*in_func) _Z_OF((void FAR *,
+                                z_const unsigned char FAR * FAR *));
 typedef int (*out_func) _Z_OF((void FAR *, unsigned char FAR *, unsigned));
 
 ZEXTERN int ZEXPORT inflateBack _Z_OF((z_streamp strm,
@@ -1015,11 +1031,12 @@ ZEXTERN int ZEXPORT inflateBack _Z_OF((z_streamp strm,
                                     out_func out, void FAR *out_desc));
 /*
      inflateBack() does a raw inflate with a single call using a call-back
-   interface for input and output.  This is more efficient than inflate() for
-   file i/o applications in that it avoids copying between the output and the
-   sliding window by simply making the window itself the output buffer.  This
-   function trusts the application to not change the output buffer passed by
-   the output function, at least until inflateBack() returns.
+   interface for input and output.  This is potentially more efficient than
+   inflate() for file i/o applications, in that it avoids copying between the
+   output and the sliding window by simply making the window itself the output
+   buffer.  inflate() can be faster on modern CPUs when used with large
+   buffers.  inflateBack() trusts the application to not change the output
+   buffer passed by the output function, at least until inflateBack() returns.
 
      inflateBackInit() must be called first to allocate the internal state
    and to initialize the state with the user-provided window buffer.
@@ -1460,12 +1477,12 @@ ZEXTERN int ZEXPORT gzeof _Z_OF((gzFile file));
      Returns true (1) if the end-of-file indicator has been set while reading,
    false (0) otherwise.  Note that the end-of-file indicator is set only if the
    read tried to go past the end of the input, but came up short.  Therefore,
-   just like feof(), gzeof() may return false even if there is no more data to
+   just like fe_Z_OF(), gze_Z_OF() may return false even if there is no more data to
    read, in the event that the last read request was for the exact number of
    bytes remaining in the input file.  This will happen if the input file size
    is an exact multiple of the buffer size.
 
-     If gzeof() returns true, then the read functions will return no more data,
+     If gze_Z_OF() returns true, then the read functions will return no more data,
    unless the end-of-file indicator is reset by gzclearerr() and the input file
    has grown since the previous end of file was detected.
 */
@@ -1657,8 +1674,8 @@ struct gzFile_s {
 };
 ZEXTERN int ZEXPORT gzgetc_ _Z_OF((gzFile file));  /* backward compatibility */
 #ifdef Z_PREFIX_SET
-#  undef gens_z_gzgetc
-#  define gens_z_gzgetc(g) \
+#  undef z_gzgetc
+#  define z_gzgetc(g) \
           ((g)->have ? ((g)->have--, (g)->pos++, *((g)->next)++) : gzgetc(g))
 #else
 #  define gzgetc(g) \
@@ -1682,12 +1699,12 @@ ZEXTERN int ZEXPORT gzgetc_ _Z_OF((gzFile file));  /* backward compatibility */
 
 #if !defined(ZLIB_INTERNAL) && defined(Z_WANT64)
 #  ifdef Z_PREFIX_SET
-#    define gens_z_gzopen gens_z_gzopen64
-#    define gens_z_gzseek gens_z_gzseek64
-#    define gens_z_gztell gens_z_gztell64
-#    define gens_z_gzoffset gens_z_gzoffset64
-#    define gens_z_adler32_combine gens_z_adler32_combine64
-#    define gens_z_crc32_combine gens_z_crc32_combine64
+#    define z_gzopen z_gzopen64
+#    define z_gzseek z_gzseek64
+#    define z_gztell z_gztell64
+#    define z_gzoffset z_gzoffset64
+#    define z_adler32_combine z_adler32_combine64
+#    define z_crc32_combine z_crc32_combine64
 #  else
 #    define gzopen gzopen64
 #    define gzseek gzseek64
@@ -1735,6 +1752,13 @@ ZEXTERN int            ZEXPORT deflateResetKeep _Z_OF((z_streamp));
 #if defined(_WIN32) && !defined(Z_SOLO)
 ZEXTERN gzFile         ZEXPORT gzopen_w _Z_OF((const wchar_t *path,
                                             const char *mode));
+#endif
+#if defined(STDC) || defined(Z_HAVE_STDARG_H)
+#  ifndef Z_SOLO
+ZEXTERN int            ZEXPORTVA gzvprintf Z_ARG((gzFile file,
+                                                  const char *format,
+                                                  va_list va));
+#  endif
 #endif
 
 #ifdef __cplusplus
