@@ -1088,6 +1088,10 @@ while (1) {
 
 	/*! INC/DEC instructions (8-bit) */
 
+	#define __MDZ80_IN_INCDEC 19840519
+	#include "mdZ80_INC_DEC.inc.h"
+	#undef __MDZ80_IN_INCDEC
+
 	// INC/DEC R		R8++/--
 	// TODO: Verify emulation of flags 3 and 5.
 	#define Z80I_INCDEC_R(Op, ValInc, Rdest) \
@@ -1166,6 +1170,9 @@ while (1) {
 
 	// DAA				[who knows?]
 	Z80I_DAA: {
+		#define __MDZ80_IN_DAA 19840519
+		#include "mdZ80_DAA.inc.h"
+		#undef __MDZ80_IN_DAA 19840519
 		unsigned int DAA_offset = (z80->AF & 0x3FF);
 		DAA_offset |= ((z80->F & MDZ80_FLAG_H) << 6);
 		z80->A = mdZ80_DAA_Table[DAA_offset];

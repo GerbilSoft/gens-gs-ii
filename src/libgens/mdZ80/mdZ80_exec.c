@@ -34,10 +34,6 @@
 #include "mdZ80_context.h"
 #include "mdZ80_flags.h"
 
-// INC/DEC and DAA lookup tables.
-#include "mdZ80_INC_DEC.h"
-#include "mdZ80_DAA.h"
-
 /**
  * Set the program counter.
  * @param z80 Z80 context.

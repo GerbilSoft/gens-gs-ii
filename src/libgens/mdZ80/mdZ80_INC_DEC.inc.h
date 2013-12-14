@@ -1,10 +1,10 @@
 /***************************************************************************
  * mdZ80: Gens Z80 Emulator                                                *
- * mdZ80_INC_DEC.c: Increment / Decrement.                                 *
+ * mdZ80_INC_DEC.inc.h: INC / DEC - flags lookup table.                    *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville                       *
  * Copyright (c) 2003-2004 by Stéphane Akhoun                              *
- * Copyright (c) 2008 by David Korth                                       *
+ * Copyright (c) 2008-2013 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,8 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+/* WARNING: This file should ONLY be included by mdZ80_insn_exec.inc.h::Z80I_INCDEC_R()! */
+#if !defined(__MDZ80_IN_INCDEC) || __MDZ80_IN_INCDEC != 19840519
+#error *** ERROR: mdZ80_INC_DEC.inc.h should ONLY be included by mdZ80_insn_exec.inc.h!
+#endif
 
-/*
+/**
  * INC: Increment; DEC: Decrement
  * These instructions are used to increment or decrement registers or
  * memory addresses. Based on the resulting value of the register or
@@ -31,13 +35,11 @@
  * after the INC or DEC instruction is used with a specific value.
  */
 
-
-/*
+/**
  * INC flags table ('borrowed' from MAZE, by Ishmair)
  * Offset: Value of the register or memory address. (TODO: Verify this.)
  */
-const unsigned char mdZ80_INC_Flags_Table[256] =
-{
+static const uint8_t mdZ80_INC_Flags_Table[256] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x10,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x30,
 	0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x28, 0x28, 0x28, 0x28, 0x28, 0x28, 0x28, 0x28, 0x30,
@@ -61,8 +63,7 @@ const unsigned char mdZ80_INC_Flags_Table[256] =
  * DEC flags table ('borrowed' from MAZE, by Ishmair)
  * Offset: Value of the register or memory address. (TODO: Verify this.)
  */
-const unsigned char mdZ80_DEC_Flags_Table[256] =
-{
+static const uint8_t mdZ80_DEC_Flags_Table[256] = {
 	0xBA, 0x42, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A,
 	0x1A, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A,
 	0x1A, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A,

@@ -1,10 +1,10 @@
 /***************************************************************************
  * mdZ80: Gens Z80 Emulator                                                *
- * mdZ80_DAA.c: Decimal Adjust Accumulator.                                *
+ * mdZ80_DAA.inc.h: Decimal Adjust Accumulator - flags lookup table.       *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville                       *
  * Copyright (c) 2003-2004 by Stéphane Akhoun                              *
- * Copyright (c) 2008 by David Korth                                       *
+ * Copyright (c) 2008-2013 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,6 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+/* WARNING: This file should ONLY be included by mdZ80_insn_exec.inc.h::Z80I_DAA! */
+#if !defined(__MDZ80_IN_DAA) || __MDZ80_IN_DAA != 19840519
+#error *** ERROR: mdZ80_DAA.inc.h should ONLY be included by mdZ80_insn_exec.inc.h!
+#endif
 
 /*
  * DAA: Decimal Adjust Accumulator
@@ -30,7 +34,6 @@
  * the correct adjustment.
  */
 
-
 /*
  * DAA table ('borrowed' from Z80Emul, by unknown)
  * Offset:
@@ -38,8 +41,7 @@
  * - Offset & 0x03FF: Lower three bits of the "F" register.
  * - Offset & 0x0400: Set if H flag is set.
  */
-const unsigned short mdZ80_DAA_Table[256 * 8] =
-{
+static const uint16_t mdZ80_DAA_Table[256 * 8] = {
 	0x4400, 0x0001, 0x0002, 0x0403, 0x0004, 0x0405, 0x0406, 0x0007,
 	0x0808, 0x0C09, 0x1010, 0x1411, 0x1412, 0x1013, 0x1414, 0x1015,
 	0x0010, 0x0411, 0x0412, 0x0013, 0x0414, 0x0015, 0x0016, 0x0417,
