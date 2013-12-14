@@ -175,6 +175,21 @@ static inline void DO_OUT(mdZ80_context *z80, uint16_t io_addr, uint8_t data)
 }
 
 /**
+ * Calculate the Z80 parity flag.
+ * @param data Data to check.
+ * @return MDZ80_FLAG_P if even number of bits set; 0 otherwise.
+ */
+static inline uint8_t calc_parity_flag(uint8_t data)
+{
+	// TODO: Lookup table optimization?
+	// TODO: Not needed if 'lahf' optimization is in use?
+	data ^= (data >> 4);
+	data ^= (data >> 2);
+	data ^= (data >> 1);
+	return ((data & 1) << 2);
+}
+
+/**
  * Check for interrupts.
  * @param z80 Z80 context.
  * @return Cycles used.

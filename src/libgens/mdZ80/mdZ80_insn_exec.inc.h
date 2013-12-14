@@ -1469,11 +1469,11 @@ while (1) {
 		NEXT(4);
 	}
 
-	// RLA			Rotate A left through carry
+	// RLA			Rotate A left through CF
 	// TODO: Verify emulation of flags 3 and 5.
 	// TODO: Verify carry emulation.
 	Z80I_RLA: {
-		uint16_t tmp = (z80->A << 1) | (z80->F & MDZ80_FLAG_C);
+		const uint16_t tmp = (z80->A << 1) | (z80->F & MDZ80_FLAG_C);
 		z80->A = (tmp & 0xFF);
 		z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P);
 		z80->F |= (tmp >> 8);	// MDZ80_FLAG_C
@@ -1494,7 +1494,7 @@ while (1) {
 		NEXT(4);
 	}
 
-	// RRA			Rotate A right through carry
+	// RRA			Rotate A right through CF
 	// TODO: Verify emulation of flags 3 and 5.
 	// TODO: Verify carry emulation.
 	Z80I_RRA: {
@@ -1507,7 +1507,184 @@ while (1) {
 		NEXT(4);
 	}
 
-	// TODO: ROT_R/ROT_L (both set flags)
+	// RLC R		Rotate R8 left; copy sign bit to CF
+	// TODO: Verify emulation of flags 3 and 5.
+	// TODO: Verify carry emulation.
+	#define Z80I_RLC_R(Rdest) \
+		Z80I_RLC_ ## Rdest : \
+			do { \
+				z80->R = (z80->Rdest << 1) | (z80->Rdest >> 7); \
+				z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
+				z80->F |= (z80->Rdest & 0x01);	/* MDZ80_FLAG_C */ \
+				z80->F |= (z80->Rdest & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+				z80->F |= calc_parity_flag(z80->Rdest); \
+				z80->PC += 2; \
+				NEXT(8); \
+			} while (0)
+
+	Z80I_RLC_R(A);
+	Z80I_RLC_R(B);
+	Z80I_RLC_R(C);
+	Z80I_RLC_R(D);
+	Z80I_RLC_R(E);
+	Z80I_RLC_R(H);
+	Z80I_RLC_R(L);
+
+	// RL R			Rotate R8 left through CF
+	// TODO: Verify emulation of flags 3 and 5.
+	// TODO: Verify carry emulation.
+	#define Z80I_RL_R(Rdest) \
+		Z80I_RL_ ## Rdest : \
+			do { \
+				const uint16_t tmp = (z80->Rdest << 1) | (z80->F & MDZ80_FLAG_C); \
+				z80->Rdest = (tmp & 0xFF); \
+				z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
+				z80->F |= (tmp >> 8);	/* MDZ80_FLAG_C */ \
+				z80->F |= (z80->Rdest & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+				z80->F |= calc_parity_flag(z80->Rdest); \
+				z80->PC += 2; \
+				NEXT(8); \
+			} while (0)
+
+	Z80I_RL_R(A);
+	Z80I_RL_R(B);
+	Z80I_RL_R(C);
+	Z80I_RL_R(D);
+	Z80I_RL_R(E);
+	Z80I_RL_R(H);
+	Z80I_RL_R(L);
+
+	// RRC R		Rotate R8 right; copy sign bit to CF
+	// TODO: Verify emulation of flags 3 and 5.
+	// TODO: Verify carry emulation.
+	#define Z80I_RRC_R(Rdest) \
+		Z80I_RRC_ ## Rdest : \
+			do { \
+				z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
+				z80->F |= (z80->Rdest & 0x01);	/* MDZ80_FLAG_C */ \
+				z80->A = (z80->Rdest >> 1) | (z80->Rdest << 7); \
+				z80->F |= (z80->Rdest & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+				z80->F |= calc_parity_flag(z80->Rdest); \
+				z80->PC += 2; \
+				NEXT(8); \
+			} while (0)
+
+	Z80I_RRC_R(A);
+	Z80I_RRC_R(B);
+	Z80I_RRC_R(C);
+	Z80I_RRC_R(D);
+	Z80I_RRC_R(E);
+	Z80I_RRC_R(H);
+	Z80I_RRC_R(L);
+
+	// RR R			Rotate R8 right through CF
+	// TODO: Verify emulation of flags 3 and 5.
+	// TODO: Verify carry emulation.
+	#define Z80I_RR_R(Rdest) \
+		Z80I_RR_ ## Rdest : \
+			do { \
+				const uint8_t tmp = (z80->Rdest >> 1) | ((z80->F & MDZ80_FLAG_C) << 7); \
+				z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
+				z80->F |= (tmp & 0x01);	/* MDZ80_FLAG_C */ \
+				z80->A = tmp; \
+				z80->F |= (z80->A & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+				z80->F |= calc_parity_flag(z80->Rdest); \
+				z80->PC += 2; \
+				NEXT(8); \
+			} while (0)
+
+	Z80I_RR_R(A);
+	Z80I_RR_R(B);
+	Z80I_RR_R(C);
+	Z80I_RR_R(D);
+	Z80I_RR_R(E);
+	Z80I_RR_R(H);
+	Z80I_RR_R(L);
+
+	/**
+	 * Shift Left operation.
+	 * @param Op Operation. (SLA, SLL)
+	 * @param Inc Increment, (SLA == 0, SLL == 1)
+	 * @param Rdest Destination register.
+	 *
+	 * TODO: Verify emulation of flags 3 and 5.
+	 * TODO: Verify carry emulation.
+	 */
+	#define Z80I_SHL_R(Op, Inc, Rdest) \
+		Z80I_ ## Op ## _ ## Rdest : \
+			do { \
+				const uint8_t tmp = (z80->Rdest << 1) + (Inc); \
+				z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
+				z80->F |= (z80->Rdest >> 8);	/* MDZ80_FLAG_C */ \
+				z80->F |= (tmp & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+				z80->Rdest = tmp; \
+				z80->F |= calc_parity_flag(z80->Rdest); \
+				z80->PC += 2; \
+				NEXT(8); \
+			} while (0)
+
+	// SLA R		R8 <<= 1 (arithmetic shift)
+	Z80I_SHL_R(SLA, 0, A);
+	Z80I_SHL_R(SLA, 0, B);
+	Z80I_SHL_R(SLA, 0, C);
+	Z80I_SHL_R(SLA, 0, D);
+	Z80I_SHL_R(SLA, 0, E);
+	Z80I_SHL_R(SLA, 0, H);
+	Z80I_SHL_R(SLA, 0, L);
+
+	// SLL R		R8 <<= 1 (logical shift); bit 0 is set
+	Z80I_SHL_R(SLL, 1, A);
+	Z80I_SHL_R(SLL, 1, B);
+	Z80I_SHL_R(SLL, 1, C);
+	Z80I_SHL_R(SLL, 1, D);
+	Z80I_SHL_R(SLL, 1, E);
+	Z80I_SHL_R(SLL, 1, H);
+	Z80I_SHL_R(SLL, 1, L);
+
+	// SRA R		R8 >>= 1 (arithmetic shift)
+	#define Z80I_SRA_R(Rdest) \
+		Z80I_SRA_ ## Rdest : \
+			do { \
+				const int8_t Rorig = *((int8_t*)&z80->Rdest); \
+				const int8_t tmp = (Rorig >> 1); \
+				z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
+				z80->F |= (Rorig & 1);	/* MDZ80_FLAG_C */ \
+				z80->F |= (tmp & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+				z80->Rdest = *((uint8_t*)&tmp); \
+				z80->F |= calc_parity_flag(z80->Rdest); \
+				z80->PC += 2; \
+				NEXT(8); \
+			} while (0)
+
+	Z80I_SRA_R(A);
+	Z80I_SRA_R(B);
+	Z80I_SRA_R(C);
+	Z80I_SRA_R(D);
+	Z80I_SRA_R(E);
+	Z80I_SRA_R(H);
+	Z80I_SRA_R(L);
+
+	// SRL R		R8 >>= 1 (logical shift)
+	#define Z80I_SRL_R(Rdest) \
+		Z80I_SRL_ ## Rdest : \
+			do { \
+				const uint8_t tmp = (z80->Rdest >> 1); \
+				z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
+				z80->F |= (z80->Rdest >> 8);	/* MDZ80_FLAG_C */ \
+				z80->F |= (tmp & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+				z80->Rdest = tmp; \
+				z80->F |= calc_parity_flag(z80->Rdest); \
+				z80->PC += 2; \
+				NEXT(8); \
+			} while (0)
+
+	Z80I_SRL_R(A);
+	Z80I_SRL_R(B);
+	Z80I_SRL_R(C);
+	Z80I_SRL_R(D);
+	Z80I_SRL_R(E);
+	Z80I_SRL_R(H);
+	Z80I_SRL_R(L);
 
 	/*! Bit operation instructions */
 
@@ -2526,29 +2703,8 @@ while (1) {
 	Z80I_XOR_N: Z80I_XOR_mIXd: Z80I_XOR_mIYd:
 
 	// Arithmetic instructions (8-bit)
-	Z80I_RLC_A: Z80I_RLC_B: Z80I_RLC_C: Z80I_RLC_D:
-	Z80I_RLC_E: Z80I_RLC_H: Z80I_RLC_L: Z80I_RLC_mHL:
-
-	Z80I_RL_A: Z80I_RL_B: Z80I_RL_C: Z80I_RL_D:
-	Z80I_RL_E: Z80I_RL_H: Z80I_RL_L: Z80I_RL_mHL:
-
-	Z80I_RRC_A: Z80I_RRC_B: Z80I_RRC_C: Z80I_RRC_D:
-	Z80I_RRC_E: Z80I_RRC_H: Z80I_RRC_L: Z80I_RRC_mHL:
-
-	Z80I_RR_A: Z80I_RR_B: Z80I_RR_C: Z80I_RR_D:
-	Z80I_RR_E: Z80I_RR_H: Z80I_RR_L: Z80I_RR_mHL:
-
-	Z80I_SLA_A: Z80I_SLA_B: Z80I_SLA_C: Z80I_SLA_D:
-	Z80I_SLA_E: Z80I_SLA_H: Z80I_SLA_L: Z80I_SLA_mHL:
-
-	Z80I_SLL_A: Z80I_SLL_B: Z80I_SLL_C: Z80I_SLL_D:
-	Z80I_SLL_E: Z80I_SLL_H: Z80I_SLL_L: Z80I_SLL_mHL:
-
-	Z80I_SRA_A: Z80I_SRA_B: Z80I_SRA_C: Z80I_SRA_D:
-	Z80I_SRA_E: Z80I_SRA_H: Z80I_SRA_L: Z80I_SRA_mHL:
-
-	Z80I_SRL_A: Z80I_SRL_B: Z80I_SRL_C: Z80I_SRL_D:
-	Z80I_SRL_E: Z80I_SRL_H: Z80I_SRL_L: Z80I_SRL_mHL:
+	Z80I_RLC_mHL: Z80I_RL_mHL: Z80I_RRC_mHL: Z80I_RR_mHL:
+	Z80I_SLA_mHL: Z80I_SLL_mHL: Z80I_SRA_mHL: Z80I_SRL_mHL:
 
 	Z80I_RLC_mIXd:   Z80I_RLC_mIXd_A: Z80I_RLC_mIXd_B: Z80I_RLC_mIXd_C:
 	Z80I_RLC_mIXd_D: Z80I_RLC_mIXd_E: Z80I_RLC_mIXd_H: Z80I_RLC_mIXd_L:
