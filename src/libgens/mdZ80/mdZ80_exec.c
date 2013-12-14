@@ -278,8 +278,6 @@ int mdZ80_exec(mdZ80_context *z80, int odo)
 	z80->Status |= MDZ80_STATUS_RUNNING;
 	z80->CycleSup = 0;
 
-	// TODO: Uncomment these after finishing base infrastructure.
-#if 0
 	// Z80 instruction table.
 	#define __MDZ80_IN_EXEC 19840519
 	#include "mdZ80_insn_table.inc.h"
@@ -288,7 +286,6 @@ int mdZ80_exec(mdZ80_context *z80, int odo)
 	// Get the next instruction.
 	uint8_t insn = read_byte_pc(z80);
 	goto *z80_insn_table[insn];
-#endif
 
 	// Instructions!
 	#define __MDZ80_IN_EXEC 19840519
@@ -304,12 +301,9 @@ int mdZ80_exec(mdZ80_context *z80, int odo)
 			// Check if an interrupt happened.
 			odo -= check_interrupts(z80);
 
-	// TODO: Uncomment these after finishing base infrastructure.
-#if 0
 			// Get the next instruction.
 			uint8_t insn = read_byte_pc(z80);
 			goto *z80_insn_table[insn];
-#endif
 		}
 
 	z80_Exec_Really_Quit: {

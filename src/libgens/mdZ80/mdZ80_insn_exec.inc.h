@@ -2,8 +2,8 @@
  * mdZ80: Gens Z80 Emulator                                                *
  * mdZ80_insn_table.c: Z80 instruction execution.                          *
  *                                                                         *
- * Copyright (c) 1999-2002 by StÃ©phane Dallongeville                       *
- * Copyright (c) 2003-2004 by StÃ©phane Akhoun                              *
+ * Copyright (c) 1999-2002 by Stéphane Dallongeville                       *
+ * Copyright (c) 2003-2004 by Stéphane Akhoun                              *
  * Copyright (c) 2008-2013 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
@@ -33,7 +33,6 @@
  * NOTE: Interrupts aren't checked here, though an interrupt
  * can't really happen when we're running...
  */
-// TODO: Uncomment the goto once we're done testing.
 #define NEXT(cycles) \
 	do { \
 		odo -= cycles; \
@@ -44,23 +43,20 @@
 		\
 		/* Next instruction. */ \
 		uint8_t insn = read_byte_pc(z80); \
-		((void)insn); \
-		/*goto *z80_insn_table[insn];*/ \
+		goto *z80_insn_table[insn]; \
 	} while (0)
 
 /**
  * Execute the next instruction without checking the number of cycles.
  * Used in Z80I_EI and Z80I_DI.
  */
-// TODO: Uncomment the goto once we're done testing.
 #define NEXT_NOCHECK(cycles) \
 	do { \
 		odo -= cycles; \
 		\
 		/* Next instruction. */ \
 		uint8_t insn = read_byte_pc(z80); \
-		((void)insn); \
-		/*goto *z80_insn_table[insn];*/ \
+		goto *z80_insn_table[insn]; \
 	} while (0)
 
 while (1) {
@@ -147,10 +143,12 @@ while (1) {
 	Z80I_LD_R_R(H, E);
 	Z80I_LD_R_R(H, H);
 	Z80I_LD_R_R(H, L);
+	/* NOTE: Not actually valid...
 	Z80I_LD_R_R(H, IXh);
 	Z80I_LD_R_R(H, IXl);
 	Z80I_LD_R_R(H, IYh);
 	Z80I_LD_R_R(H, IYl);
+	*/
 
 	Z80I_LD_R_R(L, A);
 	Z80I_LD_R_R(L, B);
@@ -159,22 +157,26 @@ while (1) {
 	Z80I_LD_R_R(L, E);
 	Z80I_LD_R_R(L, H);
 	Z80I_LD_R_R(L, L);
+	/* NOTE: Not actually valid...
 	Z80I_LD_R_R(L, IXh);
 	Z80I_LD_R_R(L, IXl);
 	Z80I_LD_R_R(L, IYh);
 	Z80I_LD_R_R(L, IYl);
+	*/
 
 	Z80I_LD_R_R(IXh, A);
 	Z80I_LD_R_R(IXh, B);
 	Z80I_LD_R_R(IXh, C);
 	Z80I_LD_R_R(IXh, D);
 	Z80I_LD_R_R(IXh, E);
-	Z80I_LD_R_R(IXh, H);
 	Z80I_LD_R_R(IXh, L);
 	Z80I_LD_R_R(IXh, IXh);
+	/* NOTE: Not actually valid...
+	Z80I_LD_R_R(IXh, H);
 	Z80I_LD_R_R(IXh, IXl);
 	Z80I_LD_R_R(IXh, IYh);
 	Z80I_LD_R_R(IXh, IYl);
+	*/
 
 	Z80I_LD_R_R(IXl, A);
 	Z80I_LD_R_R(IXl, B);
@@ -182,23 +184,27 @@ while (1) {
 	Z80I_LD_R_R(IXl, D);
 	Z80I_LD_R_R(IXl, E);
 	Z80I_LD_R_R(IXl, H);
+	Z80I_LD_R_R(IXl, IXl);
+	/* NOTE: Not actually valid...
 	Z80I_LD_R_R(IXl, L);
 	Z80I_LD_R_R(IXl, IXh);
-	Z80I_LD_R_R(IXl, IXl);
 	Z80I_LD_R_R(IXl, IYh);
 	Z80I_LD_R_R(IXl, IYl);
+	*/
 
 	Z80I_LD_R_R(IYh, A);
 	Z80I_LD_R_R(IYh, B);
 	Z80I_LD_R_R(IYh, C);
 	Z80I_LD_R_R(IYh, D);
 	Z80I_LD_R_R(IYh, E);
-	Z80I_LD_R_R(IYh, H);
 	Z80I_LD_R_R(IYh, L);
+	Z80I_LD_R_R(IYh, IYh);
+	/* NOTE: Not actually valid...
+	Z80I_LD_R_R(IYh, H);
 	Z80I_LD_R_R(IYh, IXh);
 	Z80I_LD_R_R(IYh, IXl);
-	Z80I_LD_R_R(IYh, IYh);
 	Z80I_LD_R_R(IYh, IYl);
+	*/
 
 	Z80I_LD_R_R(IYl, A);
 	Z80I_LD_R_R(IYl, B);
@@ -206,11 +212,13 @@ while (1) {
 	Z80I_LD_R_R(IYl, D);
 	Z80I_LD_R_R(IYl, E);
 	Z80I_LD_R_R(IYl, H);
+	Z80I_LD_R_R(IYl, IYl);
+	/* NOTE: Not actually valid...
 	Z80I_LD_R_R(IYl, L);
 	Z80I_LD_R_R(IYl, IXh);
 	Z80I_LD_R_R(IYl, IXl);
 	Z80I_LD_R_R(IYl, IYh);
-	Z80I_LD_R_R(IYl, IYl);
+	*/
 
 	// LD R, N		R8 <- imm8
 	#define Z80I_LD_R_N(Rdest) \
@@ -303,21 +311,21 @@ while (1) {
 				NEXT(15); \
 			} while (0)
 
-	Z80I_LD_mXYd_R(A, IX);
-	Z80I_LD_mXYd_R(B, IX);
-	Z80I_LD_mXYd_R(C, IX);
-	Z80I_LD_mXYd_R(D, IX);
-	Z80I_LD_mXYd_R(E, IX);
-	Z80I_LD_mXYd_R(H, IX);
-	Z80I_LD_mXYd_R(L, IX);
+	Z80I_LD_mXYd_R(IX, A);
+	Z80I_LD_mXYd_R(IX, B);
+	Z80I_LD_mXYd_R(IX, C);
+	Z80I_LD_mXYd_R(IX, D);
+	Z80I_LD_mXYd_R(IX, E);
+	Z80I_LD_mXYd_R(IX, H);
+	Z80I_LD_mXYd_R(IX, L);
 
-	Z80I_LD_mXYd_R(A, IY);
-	Z80I_LD_mXYd_R(B, IY);
-	Z80I_LD_mXYd_R(C, IY);
-	Z80I_LD_mXYd_R(D, IY);
-	Z80I_LD_mXYd_R(E, IY);
-	Z80I_LD_mXYd_R(H, IY);
-	Z80I_LD_mXYd_R(L, IY);
+	Z80I_LD_mXYd_R(IY, A);
+	Z80I_LD_mXYd_R(IY, B);
+	Z80I_LD_mXYd_R(IY, C);
+	Z80I_LD_mXYd_R(IY, D);
+	Z80I_LD_mXYd_R(IY, E);
+	Z80I_LD_mXYd_R(IY, H);
+	Z80I_LD_mXYd_R(IY, L);
 
 	// LD (HL), N		(HL) <- imm8
 	Z80I_LD_mHL_N: {
@@ -434,7 +442,7 @@ while (1) {
 
 	// LD IR, A		I|R <- A
 	#define Z80I_LD_IR_A(Rdest) \
-		Z80_LD_ ## Rdest ## _A : \
+		Z80I_LD_ ## Rdest ## _A : \
 			do { \
 				z80->Rdest = z80->A; \
 				z80->PC += 2; \
@@ -799,46 +807,46 @@ while (1) {
 		} while (0)
 
 	// ADD A, R		A <- A + R
-	#define Z80I_ADD_A_R(Rsrc) \
-		Z80I_ADD_A_ ## Rsrc : \
+	#define Z80I_ADD_R(Rsrc) \
+		Z80I_ADD_ ## Rsrc : \
 			do {\
 				Z80_ADD8_FLAGS(z80->A, z80->Rsrc, 0); \
 				z80->PC++; \
 				NEXT(4); \
 			} while (0)
 
-	Z80I_ADD_A_R(A);
-	Z80I_ADD_A_R(B);
-	Z80I_ADD_A_R(C);
-	Z80I_ADD_A_R(D);
-	Z80I_ADD_A_R(E);
-	Z80I_ADD_A_R(H);
-	Z80I_ADD_A_R(L);
-	Z80I_ADD_A_R(IXl);
-	Z80I_ADD_A_R(IXh);
-	Z80I_ADD_A_R(IYl);
-	Z80I_ADD_A_R(IYh);
+	Z80I_ADD_R(A);
+	Z80I_ADD_R(B);
+	Z80I_ADD_R(C);
+	Z80I_ADD_R(D);
+	Z80I_ADD_R(E);
+	Z80I_ADD_R(H);
+	Z80I_ADD_R(L);
+	Z80I_ADD_R(IXl);
+	Z80I_ADD_R(IXh);
+	Z80I_ADD_R(IYl);
+	Z80I_ADD_R(IYh);
 
 	// ADC A, R		A <- A + R + c
-	#define Z80I_ADC_A_R(Rsrc) \
-		Z80I_ADC_A_ ## Rsrc : \
+	#define Z80I_ADC_R(Rsrc) \
+		Z80I_ADC_ ## Rsrc : \
 			do {\
 				Z80_ADD8_FLAGS(z80->A, z80->Rsrc, (z80->F & MDZ80_FLAG_C)); \
 				z80->PC++; \
 				NEXT(4); \
 			} while (0)
 
-	Z80I_ADC_A_R(A);
-	Z80I_ADC_A_R(B);
-	Z80I_ADC_A_R(C);
-	Z80I_ADC_A_R(D);
-	Z80I_ADC_A_R(E);
-	Z80I_ADC_A_R(H);
-	Z80I_ADC_A_R(L);
-	Z80I_ADC_A_R(IXl);
-	Z80I_ADC_A_R(IXh);
-	Z80I_ADC_A_R(IYl);
-	Z80I_ADC_A_R(IYh);
+	Z80I_ADC_R(A);
+	Z80I_ADC_R(B);
+	Z80I_ADC_R(C);
+	Z80I_ADC_R(D);
+	Z80I_ADC_R(E);
+	Z80I_ADC_R(H);
+	Z80I_ADC_R(L);
+	Z80I_ADC_R(IXl);
+	Z80I_ADC_R(IXh);
+	Z80I_ADC_R(IYl);
+	Z80I_ADC_R(IYh);
 
 	/**
 	 * Perform an 8-bit subtraction and calculate flags.
@@ -872,54 +880,54 @@ while (1) {
 		} while (0)
 
 	// SUB A, R		A <- A - R
-	#define Z80I_SUB_A_R(Rsrc) \
-		Z80I_SUB_A_ ## Rsrc : \
+	#define Z80I_SUB_R(Rsrc) \
+		Z80I_SUB_ ## Rsrc : \
 			do {\
 				Z80_SUB8_FLAGS(z80->A, z80->Rsrc, 0); \
 				z80->PC++; \
 				NEXT(4); \
 			} while (0)
 
-	Z80I_SUB_A_R(A);
-	Z80I_SUB_A_R(B);
-	Z80I_SUB_A_R(C);
-	Z80I_SUB_A_R(D);
-	Z80I_SUB_A_R(E);
-	Z80I_SUB_A_R(H);
-	Z80I_SUB_A_R(L);
-	Z80I_SUB_A_R(IXl);
-	Z80I_SUB_A_R(IXh);
-	Z80I_SUB_A_R(IYl);
-	Z80I_SUB_A_R(IYh);
+	Z80I_SUB_R(A);
+	Z80I_SUB_R(B);
+	Z80I_SUB_R(C);
+	Z80I_SUB_R(D);
+	Z80I_SUB_R(E);
+	Z80I_SUB_R(H);
+	Z80I_SUB_R(L);
+	Z80I_SUB_R(IXl);
+	Z80I_SUB_R(IXh);
+	Z80I_SUB_R(IYl);
+	Z80I_SUB_R(IYh);
 
 	// SBC A, R		A <- A - R - c
-	#define Z80I_SBC_A_R(Rsrc) \
-		Z80I_SBC_A_ ## Rsrc : \
+	#define Z80I_SBC_R(Rsrc) \
+		Z80I_SBC_ ## Rsrc : \
 			do {\
 				Z80_SUB8_FLAGS(z80->A, z80->Rsrc, (z80->F & MDZ80_FLAG_C)); \
 				z80->PC++; \
 				NEXT(4); \
 			} while (0)
 
-	Z80I_SBC_A_R(A);
-	Z80I_SBC_A_R(B);
-	Z80I_SBC_A_R(C);
-	Z80I_SBC_A_R(D);
-	Z80I_SBC_A_R(E);
-	Z80I_SBC_A_R(H);
-	Z80I_SBC_A_R(L);
-	Z80I_SBC_A_R(IXl);
-	Z80I_SBC_A_R(IXh);
-	Z80I_SBC_A_R(IYl);
-	Z80I_SBC_A_R(IYh);
+	Z80I_SBC_R(A);
+	Z80I_SBC_R(B);
+	Z80I_SBC_R(C);
+	Z80I_SBC_R(D);
+	Z80I_SBC_R(E);
+	Z80I_SBC_R(H);
+	Z80I_SBC_R(L);
+	Z80I_SBC_R(IXl);
+	Z80I_SBC_R(IXh);
+	Z80I_SBC_R(IYl);
+	Z80I_SBC_R(IYh);
 
 	// CP R			(null) <- A - R; set flags
-	// NOTE: A is modified. This may waste CPU cycles
-	// if the compiler doesn't optimize it out.
+	// NOTE: Temp variable 'A' is modified. This may waste CPU
+	// cycles if the compiler doesn't optimize it out.
 	#define Z80I_CP_R(Rsrc) \
 		Z80I_CP_ ## Rsrc : \
 			do {\
-				uint8_t A = z80->A; \
+				register uint8_t A = z80->A; \
 				Z80_SUB8_FLAGS(A, z80->Rsrc, 0); \
 				z80->PC++; \
 				NEXT(4); \
@@ -938,7 +946,7 @@ while (1) {
 	Z80I_CP_R(IYh);
 
 	// ADD A, N		A <- A + imm8
-	Z80I_ADD_A_N: {
+	Z80I_ADD_N: {
 		const uint8_t d = read_byte_offset_pc(z80, 1);
 		Z80_ADD8_FLAGS(z80->A, d, 0);
 		z80->PC += 2;
@@ -946,7 +954,7 @@ while (1) {
 	}
 
 	// ADC A, N		A <- A + imm8 + c
-	Z80I_ADC_A_N: {
+	Z80I_ADC_N: {
 		const uint8_t d = read_byte_offset_pc(z80, 1);
 		Z80_ADD8_FLAGS(z80->A, d, (z80->F & MDZ80_FLAG_C));
 		z80->PC += 2;
@@ -954,7 +962,7 @@ while (1) {
 	}
 
 	// SUB A, N		A <- A - imm8
-	Z80I_SUB_A_N: {
+	Z80I_SUB_N: {
 		const uint8_t d = read_byte_offset_pc(z80, 1);
 		Z80_SUB8_FLAGS(z80->A, d, 0);
 		z80->PC += 2;
@@ -962,26 +970,26 @@ while (1) {
 	}
 
 	// SBC A, N		A <- A - imm8 - c
-	Z80I_SBC_A_N: {
+	Z80I_SBC_N: {
 		const uint8_t d = read_byte_offset_pc(z80, 1);
 		Z80_SUB8_FLAGS(z80->A, d, (z80->F & MDZ80_FLAG_C));
 		z80->PC += 2;
 		NEXT(7);
 	}
 
-	// CP N			(null) <- A - N; set flags
-	// NOTE: A is modified. This may waste CPU cycles
-	// if the compiler doesn't optimize it out.
+	// CP A, N		(null) <- A - N; set flags
+	// NOTE: Temp variable 'A' is modified. This may waste CPU
+	// cycles if the compiler doesn't optimize it out.
 	Z80I_CP_N: {
 		const uint8_t d = read_byte_offset_pc(z80, 1);
-		uint8_t A = z80->A;
+		register uint8_t A = z80->A;
 		Z80_SUB8_FLAGS(A, d, 0);
 		z80->PC++;
 		NEXT(7);
 	}
 
 	// ADD A, (HL)		A <- A + (HL)
-	Z80I_ADD_A_mHL: {
+	Z80I_ADD_mHL: {
 		const uint8_t d = READ_BYTE(z80, z80->HL);
 		Z80_ADD8_FLAGS(z80->A, d, 0);
 		z80->PC += 2;
@@ -989,7 +997,7 @@ while (1) {
 	}
 
 	// ADC A, (HL)		A <- A + (HL) + c
-	Z80I_ADC_A_mHL: {
+	Z80I_ADC_mHL: {
 		const uint8_t d = READ_BYTE(z80, z80->HL);
 		Z80_ADD8_FLAGS(z80->A, d, (z80->F & MDZ80_FLAG_C));
 		z80->PC += 2;
@@ -997,7 +1005,7 @@ while (1) {
 	}
 
 	// SUB A, (HL)		A <- A - (HL)
-	Z80I_SUB_A_mHL: {
+	Z80I_SUB_mHL: {
 		const uint8_t d = READ_BYTE(z80, z80->HL);
 		Z80_SUB8_FLAGS(z80->A, d, 0);
 		z80->PC += 2;
@@ -1005,19 +1013,19 @@ while (1) {
 	}
 
 	// SBC A, (HL)		A <- A - (HL) - c
-	Z80I_SBC_A_mHL: {
+	Z80I_SBC_mHL: {
 		const uint8_t d = READ_BYTE(z80, z80->HL);
 		Z80_SUB8_FLAGS(z80->A, d, (z80->F & MDZ80_FLAG_C));
 		z80->PC += 2;
 		NEXT(7);
 	}
 
-	// CP (HL)		(null) <- A - (HL); set flags
-	// NOTE: A is modified. This may waste CPU cycles
-	// if the compiler doesn't optimize it out.
+	// CP A, (HL)		(null) <- A - (HL); set flags
+	// NOTE: Temp variable 'A' is modified. This may waste CPU
+	// cycles if the compiler doesn't optimize it out.
 	Z80I_CP_mHL: {
 		const uint8_t d = READ_BYTE(z80, z80->HL);
-		uint8_t A = z80->A;
+		register uint8_t A = z80->A;
 		Z80_SUB8_FLAGS(A, d, 0);
 		z80->PC++;
 		NEXT(7);
@@ -1025,63 +1033,80 @@ while (1) {
 
 	// ADD A, (XY+d)	A <- A + (XY+d)
 	// FIXME: Z80 docs say 19 cycles; mdZ80 says 15?
-	#define Z80I_ADD_A_mXYd(Ridx) \
-		Z80I_ADD_A_m ## Ridx ## d: \
+	#define Z80I_ADD_mXYd(Ridx) \
+		Z80I_ADD_m ## Ridx ## d : \
 			do { \
 				const int8_t d_idx = read_sbyte_offset_pc(z80, 1); \
-				const uint8_t d = READ_BYTE(z80, z80->Ridx + d); \
+				const uint8_t d = READ_BYTE(z80, z80->Ridx + d_idx); \
 				Z80_ADD8_FLAGS(z80->A, d, 0); \
 				z80->PC += 2; \
 				NEXT(15); \
 			} while (0)
 
-	Z80I_ADD_A_mXYd(IX);
-	Z80I_ADD_A_mXYd(IY);
+	Z80I_ADD_mXYd(IX);
+	Z80I_ADD_mXYd(IY);
 
 	// ADC A, (XY+d)	A <- A + (XY+d) + c
 	// FIXME: Z80 docs say 19 cycles; mdZ80 says 15?
-	#define Z80I_ADC_A_mXYd(Ridx) \
-		Z80I_ADC_A_m ## Ridx ## d: \
+	#define Z80I_ADC_mXYd(Ridx) \
+		Z80I_ADC_m ## Ridx ## d : \
 			do { \
 				const int8_t d_idx = read_sbyte_offset_pc(z80, 1); \
-				const uint8_t d = READ_BYTE(z80, z80->Ridx + d); \
+				const uint8_t d = READ_BYTE(z80, z80->Ridx + d_idx); \
 				Z80_ADD8_FLAGS(z80->A, d, (z80->F & MDZ80_FLAG_C)); \
 				z80->PC += 2; \
 				NEXT(15); \
 			} while (0)
 
-	Z80I_ADC_A_mXYd(IX);
-	Z80I_ADC_A_mXYd(IY);
+	Z80I_ADC_mXYd(IX);
+	Z80I_ADC_mXYd(IY);
 
 	// SUB A, (XY+d)	A <- A - (XY+d)
 	// FIXME: Z80 docs say 19 cycles; mdZ80 says 15?
-	#define Z80I_SUB_A_mXYd(Ridx) \
-		Z80I_SUB_A_m ## Ridx ## d: \
+	#define Z80I_SUB_mXYd(Ridx) \
+		Z80I_SUB_m ## Ridx ## d : \
 			do { \
 				const int8_t d_idx = read_sbyte_offset_pc(z80, 1); \
-				const uint8_t d = READ_BYTE(z80, z80->Ridx + d); \
+				const uint8_t d = READ_BYTE(z80, z80->Ridx + d_idx); \
 				Z80_SUB8_FLAGS(z80->A, d, 0); \
 				z80->PC += 2; \
 				NEXT(15); \
 			} while (0)
 
-	Z80I_SUB_A_mXYd(IX);
-	Z80I_SUB_A_mXYd(IY);
+	Z80I_SUB_mXYd(IX);
+	Z80I_SUB_mXYd(IY);
 
 	// SBC A, (XY+d)	A <- A - (XY+d) - c
 	// FIXME: Z80 docs say 19 cycles; mdZ80 says 15?
-	#define Z80I_SBC_A_mXYd(Ridx) \
-		Z80I_SBC_A_m ## Ridx ## d: \
+	#define Z80I_SBC_mXYd(Ridx) \
+		Z80I_SBC_m ## Ridx ## d : \
 			do { \
 				const int8_t d_idx = read_sbyte_offset_pc(z80, 1); \
-				const uint8_t d = READ_BYTE(z80, z80->Ridx + d); \
+				const uint8_t d = READ_BYTE(z80, z80->Ridx + d_idx); \
 				Z80_SUB8_FLAGS(z80->A, d, (z80->F & MDZ80_FLAG_C)); \
 				z80->PC += 2; \
 				NEXT(15); \
 			} while (0)
 
-	Z80I_SBC_A_mXYd(IX);
-	Z80I_SBC_A_mXYd(IY);
+	Z80I_SBC_mXYd(IX);
+	Z80I_SBC_mXYd(IY);
+
+	// CP A, (XY+d)		(null) <- A - (XY+d); set flags
+	// NOTE: Temp variable 'A' is modified. This may waste CPU
+	// cycles if the compiler doesn't optimize it out.
+	#define Z80I_CP_mXYd(Ridx) \
+		Z80I_CP_m ## Ridx ## d : \
+			do { \
+				const int8_t d_idx = read_sbyte_offset_pc(z80, 1); \
+				const uint8_t d = READ_BYTE(z80, z80->Ridx + d_idx); \
+				register uint8_t A = z80->A; \
+				Z80_SUB8_FLAGS(A, d, 0); \
+				z80->PC += 2; \
+				NEXT(15); \
+			} while (0)
+
+	Z80I_CP_mXYd(IX);
+	Z80I_CP_mXYd(IY);
 
 	/*! Logic instructions (8-bit) */
 	// TODO
@@ -1131,7 +1156,7 @@ while (1) {
 	// INC/DEC (HL)		(HL)++/--
 	// TODO: Verify emulation of flags 3 and 5.
 	#define Z80I_INCDEC_mHL(Op, ValInc) \
-		Z80I_ ## Op : \
+		Z80I_ ## Op ## _mHL : \
 			do { \
 				z80->F &= MDZ80_FLAG_C; \
 				uint8_t tmp8 = READ_BYTE(z80, z80->HL); \
@@ -1172,7 +1197,7 @@ while (1) {
 	Z80I_DAA: {
 		#define __MDZ80_IN_DAA 19840519
 		#include "mdZ80_DAA.inc.h"
-		#undef __MDZ80_IN_DAA 19840519
+		#undef __MDZ80_IN_DAA
 		unsigned int DAA_offset = (z80->AF & 0x3FF);
 		DAA_offset |= ((z80->F & MDZ80_FLAG_H) << 6);
 		z80->A = mdZ80_DAA_Table[DAA_offset];
@@ -2366,7 +2391,7 @@ while (1) {
 	/*! Input/Output instructions */
 
 	// IN A, (N)		A <- IN(A<<8|N)
-	Z80I_IN_A_mN: {
+	Z80I_IN_mN: {
 		const uint16_t io_addr = ((z80->A << 8) | read_byte_offset_pc(z80, 1));
 		// TODO: Implement DO_IN().
 		z80->A = DO_IN(z80, io_addr);
@@ -2405,7 +2430,7 @@ while (1) {
 	// TODO: INX / INXR
 
 	// OUT (N), A		OUT(A<<8|N) <- A
-	Z80I_OUT_mN_A: {
+	Z80I_OUT_mN: {
 		const uint16_t io_addr = ((z80->A << 8) | read_byte_offset_pc(z80, 1));
 		DO_OUT(z80, io_addr, z80->A);
 		z80->PC += 2;
@@ -2442,23 +2467,21 @@ while (1) {
 
 	/*! Instruction prefixes. */
 
-	// TODO: Uncomment these once we're done testing.
-#if 0
 	// CB instruction prefix
 	PREFIX_CB: {
-		const uint8_t CB_opcode = read_byte_offset_pc(1);
+		const uint8_t CB_opcode = read_byte_offset_pc(z80, 1);
 		goto *z80_insn_table_CB[CB_opcode];
 	}
 
 	// ED instruction prefix
 	PREFIX_ED: {
-		const uint8_t ED_opcode = read_byte_offset_pc(1);
+		const uint8_t ED_opcode = read_byte_offset_pc(z80, 1);
 		goto *z80_insn_table_ED[ED_opcode];
 	}
 
 	// DD instruction prefix
 	PREFIX_DD: {
-		const uint8_t DD_opcode = read_byte_offset_pc(1);
+		const uint8_t DD_opcode = read_byte_offset_pc(z80, 1);
 		odo -= 4;
 		z80->PC++;
 		goto *z80_insn_table_DD[DD_opcode];
@@ -2466,13 +2489,13 @@ while (1) {
 
 	// DDCB instruction prefix
 	PREFIX_DDCB: {
-		const uint8_t DDCB_opcode = read_byte_offset_pc(2);
+		const uint8_t DDCB_opcode = read_byte_offset_pc(z80, 2);
 		goto *z80_insn_table_DDCB[DDCB_opcode];
 	}
 
 	// FD instruction prefix
 	PREFIX_FD: {
-		const uint8_t FD_opcode = read_byte_offset_pc(1);
+		const uint8_t FD_opcode = read_byte_offset_pc(z80, 1);
 		odo -= 4;
 		z80->PC++;
 		goto *z80_insn_table_FD[FD_opcode];
@@ -2480,8 +2503,101 @@ while (1) {
 
 	// FDCB instruction prefix
 	PREFIX_FDCB: {
-		const uint8_t FDCB_opcode = read_byte_offset_pc(2);
+		const uint8_t FDCB_opcode = read_byte_offset_pc(z80, 2);
 		goto *z80_insn_table_FDCB[FDCB_opcode];
 	}
-#endif
+
+	// Unimplemented opcodes
+	// FIXME: Implement these!
+
+	// Logic instructions (8-bit)
+	Z80I_AND_A: Z80I_AND_B: Z80I_AND_C: Z80I_AND_D:
+	Z80I_AND_E: Z80I_AND_H: Z80I_AND_L: Z80I_AND_mHL:
+	Z80I_AND_IXl: Z80I_AND_IXh: Z80I_AND_IYh: Z80I_AND_IYl:
+	Z80I_AND_N: Z80I_AND_mIXd: Z80I_AND_mIYd:
+
+	Z80I_OR_A: Z80I_OR_B: Z80I_OR_C: Z80I_OR_D:
+	Z80I_OR_E: Z80I_OR_H: Z80I_OR_L: Z80I_OR_mHL:
+	Z80I_OR_IXl: Z80I_OR_IXh: Z80I_OR_IYh: Z80I_OR_IYl:
+	Z80I_OR_N: Z80I_OR_mIXd: Z80I_OR_mIYd:
+
+	Z80I_XOR_A: Z80I_XOR_B: Z80I_XOR_C: Z80I_XOR_D:
+	Z80I_XOR_E: Z80I_XOR_H: Z80I_XOR_L: Z80I_XOR_mHL:
+	Z80I_XOR_IXl: Z80I_XOR_IXh: Z80I_XOR_IYh: Z80I_XOR_IYl:
+	Z80I_XOR_N: Z80I_XOR_mIXd: Z80I_XOR_mIYd:
+
+	// Arithmetic instructions (8-bit)
+	Z80I_RLC_A: Z80I_RLC_B: Z80I_RLC_C: Z80I_RLC_D:
+	Z80I_RLC_E: Z80I_RLC_H: Z80I_RLC_L: Z80I_RLC_mHL:
+
+	Z80I_RL_A: Z80I_RL_B: Z80I_RL_C: Z80I_RL_D:
+	Z80I_RL_E: Z80I_RL_H: Z80I_RL_L: Z80I_RL_mHL:
+
+	Z80I_RRC_A: Z80I_RRC_B: Z80I_RRC_C: Z80I_RRC_D:
+	Z80I_RRC_E: Z80I_RRC_H: Z80I_RRC_L: Z80I_RRC_mHL:
+
+	Z80I_RR_A: Z80I_RR_B: Z80I_RR_C: Z80I_RR_D:
+	Z80I_RR_E: Z80I_RR_H: Z80I_RR_L: Z80I_RR_mHL:
+
+	Z80I_SLA_A: Z80I_SLA_B: Z80I_SLA_C: Z80I_SLA_D:
+	Z80I_SLA_E: Z80I_SLA_H: Z80I_SLA_L: Z80I_SLA_mHL:
+
+	Z80I_SLL_A: Z80I_SLL_B: Z80I_SLL_C: Z80I_SLL_D:
+	Z80I_SLL_E: Z80I_SLL_H: Z80I_SLL_L: Z80I_SLL_mHL:
+
+	Z80I_SRA_A: Z80I_SRA_B: Z80I_SRA_C: Z80I_SRA_D:
+	Z80I_SRA_E: Z80I_SRA_H: Z80I_SRA_L: Z80I_SRA_mHL:
+
+	Z80I_SRL_A: Z80I_SRL_B: Z80I_SRL_C: Z80I_SRL_D:
+	Z80I_SRL_E: Z80I_SRL_H: Z80I_SRL_L: Z80I_SRL_mHL:
+
+	Z80I_RLC_mIXd:   Z80I_RLC_mIXd_A: Z80I_RLC_mIXd_B: Z80I_RLC_mIXd_C:
+	Z80I_RLC_mIXd_D: Z80I_RLC_mIXd_E: Z80I_RLC_mIXd_H: Z80I_RLC_mIXd_L:
+	Z80I_RLC_mIYd: Z80I_RLC_mIYd_A: Z80I_RLC_mIYd_B: Z80I_RLC_mIYd_C:
+	Z80I_RLC_mIYd_D: Z80I_RLC_mIYd_E: Z80I_RLC_mIYd_H: Z80I_RLC_mIYd_L:
+
+	Z80I_RL_mIXd:   Z80I_RL_mIXd_A: Z80I_RL_mIXd_B: Z80I_RL_mIXd_C:
+	Z80I_RL_mIXd_D: Z80I_RL_mIXd_E: Z80I_RL_mIXd_H: Z80I_RL_mIXd_L:
+	Z80I_RL_mIYd:   Z80I_RL_mIYd_A: Z80I_RL_mIYd_B: Z80I_RL_mIYd_C:
+	Z80I_RL_mIYd_D: Z80I_RL_mIYd_E: Z80I_RL_mIYd_H: Z80I_RL_mIYd_L:
+
+	Z80I_RRC_mIXd:   Z80I_RRC_mIXd_A: Z80I_RRC_mIXd_B: Z80I_RRC_mIXd_C:
+	Z80I_RRC_mIXd_D: Z80I_RRC_mIXd_E: Z80I_RRC_mIXd_H: Z80I_RRC_mIXd_L:
+	Z80I_RRC_mIYd:   Z80I_RRC_mIYd_A: Z80I_RRC_mIYd_B: Z80I_RRC_mIYd_C:
+	Z80I_RRC_mIYd_D: Z80I_RRC_mIYd_E: Z80I_RRC_mIYd_H: Z80I_RRC_mIYd_L:
+
+	Z80I_RR_mIXd:   Z80I_RR_mIXd_A: Z80I_RR_mIXd_B: Z80I_RR_mIXd_C:
+	Z80I_RR_mIXd_D: Z80I_RR_mIXd_E: Z80I_RR_mIXd_H: Z80I_RR_mIXd_L:
+	Z80I_RR_mIYd:   Z80I_RR_mIYd_A: Z80I_RR_mIYd_B: Z80I_RR_mIYd_C:
+	Z80I_RR_mIYd_D: Z80I_RR_mIYd_E: Z80I_RR_mIYd_H: Z80I_RR_mIYd_L:
+
+	Z80I_SLA_mIXd:   Z80I_SLA_mIXd_A: Z80I_SLA_mIXd_B: Z80I_SLA_mIXd_C:
+	Z80I_SLA_mIXd_D: Z80I_SLA_mIXd_E: Z80I_SLA_mIXd_H: Z80I_SLA_mIXd_L:
+	Z80I_SLA_mIYd:   Z80I_SLA_mIYd_A: Z80I_SLA_mIYd_B: Z80I_SLA_mIYd_C:
+	Z80I_SLA_mIYd_D: Z80I_SLA_mIYd_E: Z80I_SLA_mIYd_H: Z80I_SLA_mIYd_L:
+
+	Z80I_SLL_mIXd:   Z80I_SLL_mIXd_A: Z80I_SLL_mIXd_B: Z80I_SLL_mIXd_C:
+	Z80I_SLL_mIXd_D: Z80I_SLL_mIXd_E: Z80I_SLL_mIXd_H: Z80I_SLL_mIXd_L:
+	Z80I_SLL_mIYd:   Z80I_SLL_mIYd_A: Z80I_SLL_mIYd_B: Z80I_SLL_mIYd_C:
+	Z80I_SLL_mIYd_D: Z80I_SLL_mIYd_E: Z80I_SLL_mIYd_H: Z80I_SLL_mIYd_L:
+
+	Z80I_SRA_mIXd:   Z80I_SRA_mIXd_A: Z80I_SRA_mIXd_B: Z80I_SRA_mIXd_C:
+	Z80I_SRA_mIXd_D: Z80I_SRA_mIXd_E: Z80I_SRA_mIXd_H: Z80I_SRA_mIXd_L:
+	Z80I_SRA_mIYd:   Z80I_SRA_mIYd_A: Z80I_SRA_mIYd_B: Z80I_SRA_mIYd_C:
+	Z80I_SRA_mIYd_D: Z80I_SRA_mIYd_E: Z80I_SRA_mIYd_H: Z80I_SRA_mIYd_L:
+
+	Z80I_SRL_mIXd:   Z80I_SRL_mIXd_A: Z80I_SRL_mIXd_B: Z80I_SRL_mIXd_C:
+	Z80I_SRL_mIXd_D: Z80I_SRL_mIXd_E: Z80I_SRL_mIXd_H: Z80I_SRL_mIXd_L:
+	Z80I_SRL_mIYd:   Z80I_SRL_mIYd_A: Z80I_SRL_mIYd_B: Z80I_SRL_mIYd_C:
+	Z80I_SRL_mIYd_D: Z80I_SRL_mIYd_E: Z80I_SRL_mIYd_H: Z80I_SRL_mIYd_L:
+
+	// Rotate and shift instructions
+	Z80I_RLD:  Z80I_RRD:
+
+	// Input/Output instructions
+	Z80I_INI:  Z80I_IND:  Z80I_INIR: Z80I_INDR:
+	Z80I_OUTI: Z80I_OUTD: Z80I_OTIR: Z80I_OTDR:
+
+		// Handle this as a NOP for now.
+		goto Z80I_NOP;
 }
