@@ -1,15 +1,29 @@
-/**********************************************************/
-/*                                                        */
-/* Z80 emulator 0.99                                      */
-/* Copyright 2002 Stéphane Dallongeville                  */
-/* Used for the genesis emulation in Gens                 */
-/*                                                        */
-/**********************************************************/
+/***************************************************************************
+ * mdZ80: Gens Z80 Emulator                                                *
+ * mdZ80.h: Main Z80 emulation functions.                                  *
+ *                                                                         *
+ * Copyright (c) 1999-2002 by Stéphane Dallongeville                       *
+ * Copyright (c) 2003-2004 by Stéphane Akhoun                              *
+ * Copyright (c) 2008-2013 by David Korth                                  *
+ *                                                                         *
+ * This program is free software; you can redistribute it and/or modify it *
+ * under the terms of the GNU General Public License as published by the   *
+ * Free Software Foundation; either version 2 of the License, or (at your  *
+ * option) any later version.                                              *
+ *                                                                         *
+ * This program is distributed in the hope that it will be useful, but     *
+ * WITHOUT ANY WARRANTY; without even the implied warranty of              *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
+ * GNU General Public License for more details.                            *
+ *                                                                         *
+ * You should have received a copy of the GNU General Public License along *
+ * with this program; if not, write to the Free Software Foundation, Inc., *
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
+ ***************************************************************************/
 
-#ifndef __MDZ80_H__
-#define __MDZ80_H__
+#ifndef __MDZ80_MDZ80_H__
+#define __MDZ80_MDZ80_H__
 
-#include "../macros/fastcall.h"
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -21,8 +35,8 @@ struct _mdZ80_context;
 typedef struct _mdZ80_context mdZ80_context;
 
 // Z80 function pointer definitions.
-typedef uint8_t FASTCALL Z80_RB(uint32_t adr);
-typedef void FASTCALL Z80_WB(uint32_t adr, uint8_t data);
+typedef uint8_t Z80_RB(uint32_t adr);
+typedef void Z80_WB(uint32_t adr, uint8_t data);
 
 /*! Z80 context allocation. **/
 
@@ -68,15 +82,9 @@ void mdZ80_add_cycles(mdZ80_context *z80, uint32_t cycles);
 
 /*! Interrupt request functions. **/
 void mdZ80_nmi(mdZ80_context *z80);
-void mdZ80_interrupt(mdZ80_context *z80, unsigned char vector);
+void mdZ80_interrupt(mdZ80_context *z80, uint8_t vector);
 
-/*! Default read/write functions. **/
-uint8_t FASTCALL mdZ80_def_ReadB(uint32_t address);
-uint8_t FASTCALL mdZ80_def_In(uint32_t address);
-void FASTCALL mdZ80_def_WriteB(uint32_t address, uint8_t data);
-void FASTCALL mdZ80_def_Out(uint32_t address, uint8_t data);
-
-/*! Z80 register access. **/
+/*! Z80 register access. (mdZ80_reg.c) **/
 
 uint16_t mdZ80_get_AF(mdZ80_context *z80);
 uint16_t mdZ80_get_BC(mdZ80_context *z80);
@@ -120,10 +128,10 @@ void mdZ80_set_Status(mdZ80_context *z80, uint8_t data);
 
 /*! Z80 main execution loop. **/
 
-uint32_t z80_Exec(mdZ80_context *z80, int odo);
+int mdZ80_exec(mdZ80_context *z80, int odo);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __MDZ80_H__ */
+#endif /* __MDZ80_MDZ80_H__ */

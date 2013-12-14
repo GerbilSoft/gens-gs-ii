@@ -26,9 +26,6 @@
 
 #include <stdint.h>
 
-// NOTE: mdZ80 uses the FASTCALL calling convention.
-#include "macros/fastcall.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -61,13 +58,13 @@ class Z80_MD_Mem
 		
 		/** Public read/write functions. **/
 		// TODO: Make these inline!
-		static uint8_t FASTCALL Z80_ReadB(uint32_t address);
-		static void FASTCALL Z80_WriteB(uint32_t address, uint8_t data);
+		static uint8_t Z80_ReadB(uint32_t address);
+		static void Z80_WriteB(uint32_t address, uint8_t data);
 	
 	private:
 		/** Z80 read/write functions. **/
-		typedef uint8_t  FASTCALL (*Z80_ReadB_fn) (uint32_t address);
-		typedef void     FASTCALL (*Z80_WriteB_fn)(uint32_t address, uint8_t data);
+		typedef uint8_t  (*Z80_ReadB_fn) (uint32_t address);
+		typedef void     (*Z80_WriteB_fn)(uint32_t address, uint8_t data);
 		
 		/** Read Byte functions. **/
 		static uint8_t Z80_ReadB_YM2612(uint32_t address);

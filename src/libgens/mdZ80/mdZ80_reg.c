@@ -36,110 +36,67 @@
 
 /*! Z80 register get functions. **/
 
-#define Z80_GET_REGISTER_FUNC(reg_type, reg_name, reg_access) \
+#define Z80_GET_REGISTER_FUNC(reg_type, reg_name) \
 reg_type mdZ80_get_##reg_name(mdZ80_context *z80) \
 { \
-	if (z80->Status & Z80_STATE_RUNNING) \
+	if (z80->Status & MDZ80_STATUS_RUNNING) \
 		return -1; \
-	return z80->reg_access; \
+	return z80->reg_name; \
 }
 
-uint16_t mdZ80_get_AF(mdZ80_context *z80)
-{
-	if (z80->Status & Z80_STATE_RUNNING)
-		return -1;
-	
-	// F register.
-	// The X and Y flags are stored separately from the
-	// rest of the flags for some reason.
-	unsigned char F = (z80->AF.b.F & ~(Z80_FLAG_X | Z80_FLAG_Y)) |
-			  (z80->AF.b.FXY & (Z80_FLAG_X | Z80_FLAG_Y));
-	
-	// Return AF.
-	return ((z80->AF.b.A << 8) | F);
-}
-
-Z80_GET_REGISTER_FUNC(uint16_t, BC, BC.w)
-Z80_GET_REGISTER_FUNC(uint16_t, DE, DE.w)
-Z80_GET_REGISTER_FUNC(uint16_t, HL, HL.w)
-Z80_GET_REGISTER_FUNC(uint16_t, IX, IX.w)
-Z80_GET_REGISTER_FUNC(uint16_t, IY, IY.w)
+Z80_GET_REGISTER_FUNC(uint16_t, AF)
+Z80_GET_REGISTER_FUNC(uint16_t, BC)
+Z80_GET_REGISTER_FUNC(uint16_t, DE)
+Z80_GET_REGISTER_FUNC(uint16_t, HL)
+Z80_GET_REGISTER_FUNC(uint16_t, IX)
+Z80_GET_REGISTER_FUNC(uint16_t, IY)
 
 uint16_t mdZ80_get_PC(mdZ80_context *z80)
 {
-	if (z80->Status & Z80_STATE_RUNNING)
+	if (z80->Status & MDZ80_STATUS_RUNNING)
 		return -1;
 	
 	// Subtract the BasePC from PC to get the actual Z80 program counter.
 	return (uint16_t)(z80->PC - z80->BasePC);
 }
 
-Z80_GET_REGISTER_FUNC(uint16_t, SP, SP.w)
+Z80_GET_REGISTER_FUNC(uint16_t, SP)
 
-uint16_t mdZ80_get_AF2(mdZ80_context *z80)
-{
-	if (z80->Status & Z80_STATE_RUNNING)
-		return -1;
-	
-	// F' register.
-	// The X and Y flags are stored separately from the
-	// rest of the flags for some reason.
-	unsigned char F2 = (z80->AF2.b.F2 & ~(Z80_FLAG_X | Z80_FLAG_Y)) |
-			  (z80->AF2.b.FXY2 & (Z80_FLAG_X | Z80_FLAG_Y));
-	
-	// Return AF'.
-	return ((z80->AF2.b.A2 << 8) | F2);
-}
-
-Z80_GET_REGISTER_FUNC(uint16_t, BC2, BC2)
-Z80_GET_REGISTER_FUNC(uint16_t, DE2, DE2)
-Z80_GET_REGISTER_FUNC(uint16_t, HL2, HL2)
+Z80_GET_REGISTER_FUNC(uint16_t, AF2)
+Z80_GET_REGISTER_FUNC(uint16_t, BC2)
+Z80_GET_REGISTER_FUNC(uint16_t, DE2)
+Z80_GET_REGISTER_FUNC(uint16_t, HL2)
 
 uint8_t mdZ80_get_IFF(mdZ80_context *z80)
 {
-	if (z80->Status & Z80_STATE_RUNNING)
+	if (z80->Status & MDZ80_STATUS_RUNNING)
 		return -1;
 	return (z80->IFF & 3);
 }
 
-Z80_GET_REGISTER_FUNC(uint8_t, R, R)
-Z80_GET_REGISTER_FUNC(uint8_t, I, I)
-Z80_GET_REGISTER_FUNC(uint8_t, IM, IM)
-Z80_GET_REGISTER_FUNC(uint8_t, IntVect, IntVect)
-Z80_GET_REGISTER_FUNC(uint8_t, IntLine, IntLine)
-Z80_GET_REGISTER_FUNC(uint8_t, Status, Status)
+Z80_GET_REGISTER_FUNC(uint8_t, R)
+Z80_GET_REGISTER_FUNC(uint8_t, I)
+Z80_GET_REGISTER_FUNC(uint8_t, IM)
+Z80_GET_REGISTER_FUNC(uint8_t, IntVect)
+Z80_GET_REGISTER_FUNC(uint8_t, IntLine)
+Z80_GET_REGISTER_FUNC(uint8_t, Status)
 
 /*! Z80 register set functions. **/
 
-#define Z80_SET_REGISTER_FUNC(reg_type, reg_name, reg_access) \
+#define Z80_SET_REGISTER_FUNC(reg_type, reg_name) \
 void mdZ80_set_##reg_name(mdZ80_context *z80, reg_type data) \
 { \
-	if (z80->Status & Z80_STATE_RUNNING) \
+	if (z80->Status & MDZ80_STATUS_RUNNING) \
 		return; \
-	z80->reg_access = data; \
+	z80->reg_name = data; \
 }
 
-void mdZ80_set_AF(mdZ80_context *z80, uint16_t data)
-{
-	if (z80->Status & Z80_STATE_RUNNING)
-		return;
-	
-	// Set the A register.
-	z80->AF.b.A = ((data >> 8) & 0xFF);
-	
-	// Set the F register.
-	data &= 0xFF;
-	z80->AF.b.F = (data & ~(Z80_FLAG_X | Z80_FLAG_Y));
-	
-	// Set the FXY register.
-	z80->AF.b.FXY = (data & (Z80_FLAG_X | Z80_FLAG_Y));
-}
-
-Z80_SET_REGISTER_FUNC(uint16_t, BC, BC.w)
-Z80_SET_REGISTER_FUNC(uint16_t, DE, DE.w)
-Z80_SET_REGISTER_FUNC(uint16_t, HL, HL.w)
-Z80_SET_REGISTER_FUNC(uint16_t, IX, IX.w)
-Z80_SET_REGISTER_FUNC(uint16_t, IY, IY.w)
+Z80_SET_REGISTER_FUNC(uint16_t, AF)
+Z80_SET_REGISTER_FUNC(uint16_t, BC)
+Z80_SET_REGISTER_FUNC(uint16_t, DE)
+Z80_SET_REGISTER_FUNC(uint16_t, HL)
+Z80_SET_REGISTER_FUNC(uint16_t, IX)
+Z80_SET_REGISTER_FUNC(uint16_t, IY)
 
 /**
  * Set the Z80 program counter.
@@ -148,7 +105,7 @@ Z80_SET_REGISTER_FUNC(uint16_t, IY, IY.w)
  */
 void mdZ80_set_PC(mdZ80_context *z80, uint16_t data)
 {
-	if (z80->Status & Z80_STATE_RUNNING)
+	if (z80->Status & MDZ80_STATUS_RUNNING)
 		return;
 	
 	// TODO: 32-bit specific code will break on 64-bit!
@@ -158,32 +115,12 @@ void mdZ80_set_PC(mdZ80_context *z80, uint16_t data)
 	z80->PC = newPC + data;
 }
 
-Z80_SET_REGISTER_FUNC(uint16_t, SP, SP.w)
+Z80_SET_REGISTER_FUNC(uint16_t, SP)
 
-/**
- * Set the AF' register.
- * @param z80 Pointer to Z80 context.
- * @param data New register value.
- */
-void mdZ80_set_AF2(mdZ80_context *z80, uint16_t data)
-{
-	if (z80->Status & Z80_STATE_RUNNING)
-		return;
-	
-	// Set the A' register.
-	z80->AF2.b.A2 = ((data >> 8) & 0xFF);
-	
-	// Set the F' register.
-	data &= 0xFF;
-	z80->AF2.b.F2 = (data & ~(Z80_FLAG_X | Z80_FLAG_Y));
-	
-	// Set the FXY2 register.
-	z80->AF2.b.FXY2 = (data & (Z80_FLAG_X | Z80_FLAG_Y));
-}
-
-Z80_SET_REGISTER_FUNC(uint16_t, BC2, BC2)
-Z80_SET_REGISTER_FUNC(uint16_t, DE2, DE2)
-Z80_SET_REGISTER_FUNC(uint16_t, HL2, HL2)
+Z80_SET_REGISTER_FUNC(uint16_t, AF2)
+Z80_SET_REGISTER_FUNC(uint16_t, BC2)
+Z80_SET_REGISTER_FUNC(uint16_t, DE2)
+Z80_SET_REGISTER_FUNC(uint16_t, HL2)
 
 /**
  * Set the IFF flip-flops
@@ -192,14 +129,14 @@ Z80_SET_REGISTER_FUNC(uint16_t, HL2, HL2)
  */
 void mdZ80_set_IFF(mdZ80_context *z80, uint8_t data)
 {
-	if (z80->Status & Z80_STATE_RUNNING)
+	if (z80->Status & MDZ80_STATUS_RUNNING)
 		return;
 	z80->IFF = (data & 3);
 }
 
-Z80_SET_REGISTER_FUNC(uint8_t, R, R)
-Z80_SET_REGISTER_FUNC(uint8_t, I, I)
-Z80_SET_REGISTER_FUNC(uint8_t, IM, IM)
-Z80_SET_REGISTER_FUNC(uint8_t, IntVect, IntVect)
-Z80_SET_REGISTER_FUNC(uint8_t, IntLine, IntLine)
-Z80_SET_REGISTER_FUNC(uint8_t, Status, Status)
+Z80_SET_REGISTER_FUNC(uint8_t, R)
+Z80_SET_REGISTER_FUNC(uint8_t, I)
+Z80_SET_REGISTER_FUNC(uint8_t, IM)
+Z80_SET_REGISTER_FUNC(uint8_t, IntVect)
+Z80_SET_REGISTER_FUNC(uint8_t, IntLine)
+Z80_SET_REGISTER_FUNC(uint8_t, Status)

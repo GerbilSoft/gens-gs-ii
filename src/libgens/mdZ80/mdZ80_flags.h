@@ -22,25 +22,22 @@
  ***************************************************************************/
 
 
-#ifndef _MDZ80_FLAGS_H
-#define _MDZ80_FLAGS_H
+#ifndef __MDZ80_FLAGS_H__
+#define __MDZ80_FLAGS_H__
 
+// CPU flags. (F register)
+#define MDZ80_FLAG_C	0x01
+#define MDZ80_FLAG_N	0x02
+#define MDZ80_FLAG_P	0x04
+#define MDZ80_FLAG_3	0x08
+#define MDZ80_FLAG_H	0x10
+#define MDZ80_FLAG_5	0x20
+#define MDZ80_FLAG_Z	0x40
+#define MDZ80_FLAG_S	0x80
 
-/* Z80 flags. */
-#define Z80_FLAG_C	(1 << 0)
-#define Z80_FLAG_N	(1 << 1)
-#define Z80_FLAG_P	(1 << 2)
-#define Z80_FLAG_X	(1 << 3)
-#define Z80_FLAG_H	(1 << 4)
-#define Z80_FLAG_Y	(1 << 5)
-#define Z80_FLAG_Z	(1 << 6)
-#define Z80_FLAG_S	(1 << 7)
+// Status flags.
+#define MDZ80_STATUS_RUNNING	0x01
+#define MDZ80_STATUS_HALTED	0x02
+#define MDZ80_STATUS_FAULTED	0x10
 
-
-/* Z80 states. */
-#define Z80_STATE_RUNNING	0x01
-#define Z80_STATE_HALTED	0x02
-#define Z80_STATE_FAULTED	0x10
-
-
-#endif /* _MDZ80_FLAGS_H */
+#endif /* __MDZ80_FLAGS_H__ */

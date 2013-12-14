@@ -36,7 +36,7 @@
  * Offset:
  * - Offset & 0x00FF: "A" register
  * - Offset & 0x03FF: Lower three bits of the "F" register.
- * - Offset & 0x0800: Set if ("Main data" & 0x0100) == true. (TODO: Check this.)
+ * - Offset & 0x0400: Set if H flag is set.
  */
 const unsigned short mdZ80_DAA_Table[256 * 8] =
 {

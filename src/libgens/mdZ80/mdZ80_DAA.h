@@ -28,6 +28,13 @@
 extern "C" {
 #endif
 
+/*
+ * DAA table ('borrowed' from Z80Emul, by unknown)
+ * Offset:
+ * - Offset & 0x00FF: "A" register
+ * - Offset & 0x03FF: Lower three bits of the "F" register.
+ * - Offset & 0x0400: Set if H flag is set.
+ */
 extern const unsigned short mdZ80_DAA_Table[256 * 8];
 
 #ifdef __cplusplus

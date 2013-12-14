@@ -93,7 +93,7 @@ class Z80
 			
 			// Only run the Z80 if it's enabled and it has the bus.
 			if (M68K_Mem::Z80_State == (Z80_STATE_ENABLED | Z80_STATE_BUSREQ))
-				z80_Exec(ms_Z80, cyclesToRun);
+				mdZ80_exec(ms_Z80, cyclesToRun);
 			else
 				mdZ80_set_odo(ms_Z80, cyclesToRun);
 #else
