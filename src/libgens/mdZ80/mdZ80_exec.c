@@ -116,19 +116,63 @@ static inline uint8_t read_word_offset_pc(mdZ80_context *z80, int offset)
 		w2 = tmp16; \
 	} while (0)
 
-// FIXME: Implement these!
+// TODO: This is a hack for "optimization".
+// Remove it later.
+extern uint8_t Ram_Z80[0x2000];
+
 static inline uint8_t READ_BYTE(mdZ80_context *z80, uint16_t addr)
-	{ ((void)z80); ((void)addr); return 0xFF; }
+{
+	if (addr <= 0x3FFF)
+		return Ram_Z80[addr & 0x1FFF];
+	return z80->ReadB(addr);
+}
+
 static inline void WRITE_BYTE(mdZ80_context *z80, uint16_t addr, uint8_t data)
-	{ ((void)z80); ((void)addr); ((void)data); }
+{
+	if (addr <= 0x3FFF) {
+		Ram_Z80[addr & 0x1FFF] = data;
+		return;
+	}
+	z80->WriteB(addr, data);
+}
+
 static inline uint16_t READ_WORD(mdZ80_context *z80, uint16_t addr)
-	{ ((void)z80); ((void)addr); return 0xFFFF; }
+{
+	if (addr <= 0x3FFF) {
+		return (Ram_Z80[addr & 0x1FFF] |
+		        (Ram_Z80[(addr+1) & 0x1FFF] << 8));
+	}
+
+	// TODO: Store odo in z80->CycleIO?
+	uint16_t data = z80->ReadB(addr);
+	data |= (z80->ReadB(addr+1) << 8);
+	return data;
+}
+
 static inline void WRITE_WORD(mdZ80_context *z80, uint16_t addr, uint16_t data)
-	{ ((void)z80); ((void)addr); ((void)data); }
+{
+	if (addr <= 0x3FFF) {
+		Ram_Z80[addr & 0x1FFF] = (data & 0xFF);
+		Ram_Z80[(addr+1) & 0x1FFF] = (data >> 8);
+		return;
+	}
+
+	// TODO: Store odo in z80->CycleIO?
+	z80->WriteB(addr, (data & 0xFF));
+	z80->WriteB((addr+1), (data >> 8));
+}
+
 static inline uint8_t DO_IN(mdZ80_context *z80, uint16_t io_addr)
-	{ ((void)z80); ((void)io_addr); return 0xFF; }
+{
+	// TODO: Store odo in z80->CycleIO?
+	return z80->IN_C(io_addr);
+}
+
 static inline void DO_OUT(mdZ80_context *z80, uint16_t io_addr, uint8_t data)
-	{ ((void)z80); ((void)io_addr); ((void)data); }
+{
+	// TODO: Store odo in z80->CycleIO?
+	z80->OUT_C(io_addr, data);
+}
 
 /**
  * Check for interrupts.

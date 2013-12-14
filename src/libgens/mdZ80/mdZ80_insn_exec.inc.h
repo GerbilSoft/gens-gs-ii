@@ -2393,7 +2393,6 @@ while (1) {
 	// IN A, (N)		A <- IN(A<<8|N)
 	Z80I_IN_mN: {
 		const uint16_t io_addr = ((z80->A << 8) | read_byte_offset_pc(z80, 1));
-		// TODO: Implement DO_IN().
 		z80->A = DO_IN(z80, io_addr);
 		z80->PC += 2;
 		NEXT(11);
