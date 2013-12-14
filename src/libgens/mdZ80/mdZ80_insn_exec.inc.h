@@ -33,6 +33,7 @@
  * NOTE: Interrupts aren't checked here, though an interrupt
  * can't really happen when we're running...
  */
+// TODO: Uncomment the goto once we're done testing.
 #define NEXT(cycles) \
 	do { \
 		odo -= cycles; \
@@ -42,21 +43,24 @@
 		} \
 		\
 		/* Next instruction. */ \
-		insn = read_byte_pc(z80); \
-		goto *z80_insn_table[insn]; \
+		uint8_t insn = read_byte_pc(z80); \
+		((void)insn); \
+		/*goto *z80_insn_table[insn];*/ \
 	} while (0)
 
 /**
  * Execute the next instruction without checking the number of cycles.
  * Used in Z80I_EI and Z80I_DI.
  */
+// TODO: Uncomment the goto once we're done testing.
 #define NEXT_NOCHECK(cycles) \
 	do { \
 		odo -= cycles; \
 		\
 		/* Next instruction. */ \
-		insn = read_byte_pc(z80); \
-		goto *z80_insn_table[insn]; \
+		uint8_t insn = read_byte_pc(z80); \
+		((void)insn); \
+		/*goto *z80_insn_table[insn];*/ \
 	} while (0)
 
 while (1) {
@@ -233,7 +237,7 @@ while (1) {
 	#define Z80I_LD_R_mHL(Rdest) \
 		Z80I_LD_ ## Rdest ## _mHL : \
 			do {\
-				z80->Rdest = READ_BYTE(z80->HL); \
+				z80->Rdest = READ_BYTE(z80, z80->HL); \
 				z80->PC++; \
 				NEXT(7); \
 			} while (0)
@@ -251,7 +255,7 @@ while (1) {
 		Z80I_LD_ ## Rdest ## _m ## Ridx ## d : \
 			do { \
 				const int8_t d = read_sbyte_offset_pc(z80, 1); \
-				z80->Rdest = READ_BYTE(z80->Ridx + d); \
+				z80->Rdest = READ_BYTE(z80, z80->Ridx + d); \
 				z80->PC += 2; \
 				NEXT(15); \
 			} while (0)
@@ -276,7 +280,7 @@ while (1) {
 	#define Z80I_LD_mHL_R(Rsrc) \
 		Z80I_LD_mHL_ ## Rsrc : \
 			do {\
-				WRITE_BYTE(z80->Rsrc); \
+				WRITE_BYTE(z80, z80->HL, z80->Rsrc); \
 				z80->PC++; \
 				NEXT(7); \
 			} while (0)
@@ -294,7 +298,7 @@ while (1) {
 		Z80I_LD_m ## Ridx ## d_ ## Rsrc : \
 			do { \
 				const int8_t d = read_sbyte_offset_pc(z80, 1); \
-				WRITE_BYTE(z80->Ridx + d, z80->Rsrc); \
+				WRITE_BYTE(z80, z80->Ridx + d, z80->Rsrc); \
 				z80->PC += 2; \
 				NEXT(15); \
 			} while (0)
@@ -318,7 +322,7 @@ while (1) {
 	// LD (HL), N		(HL) <- imm8
 	Z80I_LD_mHL_N: {
 		const uint8_t n = read_byte_offset_pc(z80, 1);
-		WRITE_BYTE(z80->HL, n);
+		WRITE_BYTE(z80, z80->HL, n);
 		z80->PC += 2;
 		NEXT(10);
 	}
@@ -329,7 +333,7 @@ while (1) {
 			do { \
 				const int8_t d = read_sbyte_offset_pc(z80, 1); \
 				const uint8_t n = read_byte_offset_pc(z80, 2); \
-				WRITE_BYTE(z80->Ridx + d, n); \
+				WRITE_BYTE(z80, z80->Ridx + d, n); \
 				z80->PC += 3; \
 				NEXT(15); \
 			} while (0)
@@ -342,7 +346,7 @@ while (1) {
 	#define Z80I_LD_A_mRR(Rsrc) \
 		Z80I_LD_A_m ## Rsrc : \
 			do { \
-				z80->A = READ_BYTE(z80->Rsrc); \
+				z80->A = READ_BYTE(z80, z80->Rsrc); \
 				z80->PC++; \
 				NEXT(7); \
 			} while (0)
@@ -353,7 +357,7 @@ while (1) {
 	// LD A, (imm16)	A <- (imm16)
 	Z80I_LD_A_mNN: {
 		uint16_t src_addr = read_word_offset_pc(z80, 1);
-		z80->A = READ_BYTE(src_addr);
+		z80->A = READ_BYTE(z80, src_addr);
 		z80->PC += 3;
 		NEXT(13);
 	}
@@ -363,7 +367,7 @@ while (1) {
 	#define Z80I_LD_mRR_A(Rdest) \
 		Z80I_LD_m ## Rdest ## _A : \
 			do { \
-				WRITE_BYTE(z80->Rdest, z80->A); \
+				WRITE_BYTE(z80, z80->Rdest, z80->A); \
 				z80->PC++; \
 				NEXT(7); \
 			} while (0)
@@ -374,7 +378,7 @@ while (1) {
 	// LD (imm16), A	(imm16) <- A
 	Z80I_LD_mNN_A: {
 		uint16_t dest_addr = read_word_offset_pc(z80, 1);
-		WRITE_BYTE(dest_addr, z80->A);
+		WRITE_BYTE(z80, dest_addr, z80->A);
 		z80->PC += 3;
 		NEXT(13);
 	}
@@ -411,7 +415,7 @@ while (1) {
 		// FIXME: Terrible hack for the R register.
 		// Implement a more reliable (but slower) R register later.
 		uint32_t tmp = z80->CycleCnt - odo + z80->CycleTD;
-		tmp >= 2;
+		tmp >>= 2;
 		uint8_t cl = z80->R;
 		z80->A = ((tmp & 0xFF) + cl);
 		// NOTE: "and A, 0x7F" would work instead of "test A, A".
@@ -430,15 +434,15 @@ while (1) {
 
 	// LD IR, A		I|R <- A
 	#define Z80I_LD_IR_A(Rdest) \
-		Z80_LD_ ## Rdest ## _A: \
+		Z80_LD_ ## Rdest ## _A : \
 			do { \
 				z80->Rdest = z80->A; \
 				z80->PC += 2; \
 				NEXT(9); \
 			} while (0)
 
-	Z80I_LD_IR_A(I)
-	Z80I_LD_IR_A(R)
+	Z80I_LD_IR_A(I);
+	Z80I_LD_IR_A(R);
 
 	/*! LD: 16-bit */
 
@@ -462,7 +466,7 @@ while (1) {
 	// LD HL, (NN)		HL <- (imm16)
 	Z80I_LD_HL_mNN: {
 		uint16_t src_addr = read_word_offset_pc(z80, 1);
-		z80->HL = READ_WORD(src_addr);
+		z80->HL = READ_WORD(z80, src_addr);
 		z80->PC += 3;
 		NEXT(16);
 	}
@@ -471,10 +475,10 @@ while (1) {
 	// NOTE: This includes LD HL, (NN); however, it's a slower
 	// version that uses an extra byte.
 	#define Z80I_LD_RR_mNN(Rdest, LDsuffix) \
-		Z80I_LD ## LDsuffix ## _ ## Rdest ## _NN : \
+		Z80I_LD ## LDsuffix ## _ ## Rdest ## _mNN : \
 			do { \
 				uint16_t src_addr = read_word_offset_pc(z80, 2); \
-				z80->Rdest = READ_WORD(src_addr); \
+				z80->Rdest = READ_WORD(z80, src_addr); \
 				z80->PC += 4; \
 				NEXT(20); \
 			} while (0)
@@ -487,10 +491,10 @@ while (1) {
 	// LD XY, (NN)		IX/IY <- (imm16)
 	// TODO: Combine with optimized LD HL, (NN)?
 	#define Z80I_LD_XY_mNN(Rdest) \
-		Z80I_LD_ ## Rdest ## _NN : \
+		Z80I_LD_ ## Rdest ## _mNN : \
 			do { \
 				uint16_t src_addr = read_word_offset_pc(z80, 1); \
-				z80->Rdest = READ_WORD(src_addr); \
+				z80->Rdest = READ_WORD(z80, src_addr); \
 				z80->PC += 3; \
 				NEXT(16); \
 			} while (0)
@@ -501,7 +505,7 @@ while (1) {
 	// LD (NN), HL		(imm16) <- HL
 	Z80I_LD_mNN_HL: {
 		uint16_t dest_addr = read_word_offset_pc(z80, 1);
-		WRITE_WORD(dest_addr, z80->HL);
+		WRITE_WORD(z80, dest_addr, z80->HL);
 		z80->PC += 3;
 		NEXT(16);
 	}
@@ -513,7 +517,7 @@ while (1) {
 		Z80I_LD ## LDsuffix ## _mNN_ ## Rsrc : \
 			do { \
 				uint16_t dest_addr = read_word_offset_pc(z80, 2); \
-				WRITE_WORD(src_addr, z80->Rsrc); \
+				WRITE_WORD(z80, dest_addr, z80->Rsrc); \
 				z80->PC += 4; \
 				NEXT(20); \
 			} while (0)
@@ -529,7 +533,7 @@ while (1) {
 		Z80I_LD_mNN_ ## Rsrc : \
 			do { \
 				uint16_t dest_addr = read_word_offset_pc(z80, 1); \
-				WRITE_WORD(src_addr, z80->Rsrc); \
+				WRITE_WORD(z80, dest_addr, z80->Rsrc); \
 				z80->PC += 3; \
 				NEXT(16); \
 			} while (0)
@@ -555,7 +559,7 @@ while (1) {
 		Z80I_PUSH_ ## Rsrc : \
 			do { \
 				z80->SP -= 2; \
-				WRITE_WORD(z80->SP, z80->Rsrc); \
+				WRITE_WORD(z80, z80->SP, z80->Rsrc); \
 				z80->PC++; \
 				NEXT(11); \
 			} while (0)
@@ -571,7 +575,7 @@ while (1) {
 	#define Z80I_POP_RR(Rdest) \
 		Z80I_POP_ ## Rdest : \
 			do { \
-				z80->Rdest = READ_WORD(z80->SP); \
+				z80->Rdest = READ_WORD(z80, z80->SP); \
 				z80->SP += 2; \
 				z80->PC++; \
 				NEXT(10); \
@@ -611,8 +615,8 @@ while (1) {
 	#define Z80I_EX_mSP_DD(Rdest) \
 		Z80I_EX_mSP_ ## Rdest : \
 			do { \
-				uint16_t sp_data = READ_WORD(z80->SP); \
-				WRITE_WORD(z80->SP, z80->Rdest); \
+				uint16_t sp_data = READ_WORD(z80, z80->SP); \
+				WRITE_WORD(z80, z80->SP, z80->Rdest); \
 				z80->Rdest = sp_data; \
 				z80->PC++; \
 				NEXT(19); \
@@ -627,8 +631,8 @@ while (1) {
 	#define Z80I_LDX(Op, AdrInc) \
 		Z80I_LD ## Op : \
 			do { \
-				const uint8_t tmp8 = READ_BYTE(z80->HL); \
-				WRITE_BYTE(z80->DE, tmp8); \
+				const uint8_t tmp8 = READ_BYTE(z80, z80->HL); \
+				WRITE_BYTE(z80, z80->DE, tmp8); \
 				z80->HL += AdrInc; \
 				z80->DE += AdrInc; \
 				z80->BC--; \
@@ -656,8 +660,8 @@ while (1) {
 	#define Z80I_LDXR(Op, AdrInc) \
 		Z80I_LD ## Op ## R : \
 			do { \
-				const uint8_t tmp8 = READ_BYTE(z80->HL); \
-				WRITE_BYTE(z80->DE, tmp8); \
+				const uint8_t tmp8 = READ_BYTE(z80, z80->HL); \
+				WRITE_BYTE(z80, z80->DE, tmp8); \
 				z80->HL += AdrInc; \
 				z80->DE += AdrInc; \
 				z80->BC--; \
@@ -688,7 +692,7 @@ while (1) {
 	#define Z80I_CPX(Op, AdrInc) \
 		Z80I_CP ## Op : \
 			do { \
-				const uint8_t tmp8 = READ_BYTE(z80->HL); \
+				const uint8_t tmp8 = READ_BYTE(z80, z80->HL); \
 				const uint8_t cmp = (z80->A - tmp8); \
 				z80->HL += AdrInc; \
 				z80->BC--; \
@@ -722,10 +726,10 @@ while (1) {
 	// CPIR/CPDR		do { A - (HL++/--) } while (--BC)
 	// TODO: Verify emulation of flags 3 and 5; also S, Z, H, and N.
 	// TODO: Verify CPIR/CPDR termination behavior.
-	#define Z80I_CPX(Op, AdrInc) \
-		Z80I_CP ## Op : \
+	#define Z80I_CPXR(Op, AdrInc) \
+		Z80I_CP ## Op ## R : \
 			do { \
-				const uint8_t tmp8 = READ_BYTE(z80->HL); \
+				const uint8_t tmp8 = READ_BYTE(z80, z80->HL); \
 				const uint8_t cmp = (z80->A - tmp8); \
 				z80->HL += AdrInc; \
 				z80->BC--; \
@@ -892,7 +896,7 @@ while (1) {
 	#define Z80I_SBC_A_R(Rsrc) \
 		Z80I_SBC_A_ ## Rsrc : \
 			do {\
-				Z80_SBC8_FLAGS(z80->A, z80->Rsrc, (z80->F & MDZ80_FLAG_C)); \
+				Z80_SUB8_FLAGS(z80->A, z80->Rsrc, (z80->F & MDZ80_FLAG_C)); \
 				z80->PC++; \
 				NEXT(4); \
 			} while (0)
@@ -978,7 +982,7 @@ while (1) {
 
 	// ADD A, (HL)		A <- A + (HL)
 	Z80I_ADD_A_mHL: {
-		const uint8_t d = READ_WORD(z80->HL);
+		const uint8_t d = READ_BYTE(z80, z80->HL);
 		Z80_ADD8_FLAGS(z80->A, d, 0);
 		z80->PC += 2;
 		NEXT(7);
@@ -986,7 +990,7 @@ while (1) {
 
 	// ADC A, (HL)		A <- A + (HL) + c
 	Z80I_ADC_A_mHL: {
-		const uint8_t d = READ_WORD(z80->HL);
+		const uint8_t d = READ_BYTE(z80, z80->HL);
 		Z80_ADD8_FLAGS(z80->A, d, (z80->F & MDZ80_FLAG_C));
 		z80->PC += 2;
 		NEXT(7);
@@ -994,15 +998,15 @@ while (1) {
 
 	// SUB A, (HL)		A <- A - (HL)
 	Z80I_SUB_A_mHL: {
-		const uint8_t d = READ_WORD(z80->HL);
+		const uint8_t d = READ_BYTE(z80, z80->HL);
 		Z80_SUB8_FLAGS(z80->A, d, 0);
 		z80->PC += 2;
 		NEXT(7);
 	}
 
-	// SBC A, (HL)		A <- A - imm8 - c
+	// SBC A, (HL)		A <- A - (HL) - c
 	Z80I_SBC_A_mHL: {
-		const uint8_t d = READ_WORD(z80->HL);
+		const uint8_t d = READ_BYTE(z80, z80->HL);
 		Z80_SUB8_FLAGS(z80->A, d, (z80->F & MDZ80_FLAG_C));
 		z80->PC += 2;
 		NEXT(7);
@@ -1012,7 +1016,7 @@ while (1) {
 	// NOTE: A is modified. This may waste CPU cycles
 	// if the compiler doesn't optimize it out.
 	Z80I_CP_mHL: {
-		const uint8_t d = READ_WORD(z80->HL);
+		const uint8_t d = READ_BYTE(z80, z80->HL);
 		uint8_t A = z80->A;
 		Z80_SUB8_FLAGS(A, d, 0);
 		z80->PC++;
@@ -1025,7 +1029,7 @@ while (1) {
 		Z80I_ADD_A_m ## Ridx ## d: \
 			do { \
 				const int8_t d_idx = read_sbyte_offset_pc(z80, 1); \
-				const uint8_t d = READ_BYTE(z80->Ridx + d); \
+				const uint8_t d = READ_BYTE(z80, z80->Ridx + d); \
 				Z80_ADD8_FLAGS(z80->A, d, 0); \
 				z80->PC += 2; \
 				NEXT(15); \
@@ -1040,7 +1044,7 @@ while (1) {
 		Z80I_ADC_A_m ## Ridx ## d: \
 			do { \
 				const int8_t d_idx = read_sbyte_offset_pc(z80, 1); \
-				const uint8_t d = READ_BYTE(z80->Ridx + d); \
+				const uint8_t d = READ_BYTE(z80, z80->Ridx + d); \
 				Z80_ADD8_FLAGS(z80->A, d, (z80->F & MDZ80_FLAG_C)); \
 				z80->PC += 2; \
 				NEXT(15); \
@@ -1055,7 +1059,7 @@ while (1) {
 		Z80I_SUB_A_m ## Ridx ## d: \
 			do { \
 				const int8_t d_idx = read_sbyte_offset_pc(z80, 1); \
-				const uint8_t d = READ_BYTE(z80->Ridx + d); \
+				const uint8_t d = READ_BYTE(z80, z80->Ridx + d); \
 				Z80_SUB8_FLAGS(z80->A, d, 0); \
 				z80->PC += 2; \
 				NEXT(15); \
@@ -1070,7 +1074,7 @@ while (1) {
 		Z80I_SBC_A_m ## Ridx ## d: \
 			do { \
 				const int8_t d_idx = read_sbyte_offset_pc(z80, 1); \
-				const uint8_t d = READ_BYTE(z80->Ridx + d); \
+				const uint8_t d = READ_BYTE(z80, z80->Ridx + d); \
 				Z80_SUB8_FLAGS(z80->A, d, (z80->F & MDZ80_FLAG_C)); \
 				z80->PC += 2; \
 				NEXT(15); \
@@ -1126,10 +1130,10 @@ while (1) {
 		Z80I_ ## Op : \
 			do { \
 				z80->F &= MDZ80_FLAG_C; \
-				uint8_t tmp8 = READ_BYTE(z80->HL); \
-				z80->F |= mdZ80_ ## Op ## _Flags_Table[z80->Rdest]; \
+				uint8_t tmp8 = READ_BYTE(z80, z80->HL); \
+				z80->F |= mdZ80_ ## Op ## _Flags_Table[tmp8]; \
 				tmp8 += ValInc; \
-				WRITE_BYTE(z80->HL, tmp8); \
+				WRITE_BYTE(z80, z80->HL, tmp8); \
 				z80->PC++; \
 				NEXT(11); \
 			} while (0)
@@ -1140,15 +1144,15 @@ while (1) {
 	// INC/DEC (XY+d)		(XY+d)++/--
 	// TODO: Verify emulation of flags 3 and 5.
 	#define Z80I_INCDEC_mXYd(Op, ValInc, Ridx) \
-		Z80I_ ## Op ## _ ## Ridx : \
+		Z80I_ ## Op ## _m ## Ridx ## d : \
 			do { \
 				z80->F &= MDZ80_FLAG_C; \
 				const int8_t d = read_sbyte_offset_pc(z80, 1); \
 				const uint16_t addr = (z80->Ridx + d); \
-				uint8_t tmp8 = READ_BYTE(addr); \
-				z80->F |= mdZ80_ ## Op ## _Flags_Table[z80->Rdest]; \
+				uint8_t tmp8 = READ_BYTE(z80, addr); \
+				z80->F |= mdZ80_ ## Op ## _Flags_Table[tmp8]; \
 				tmp8 += ValInc; \
-				WRITE_BYTE(addr, tmp8); \
+				WRITE_BYTE(z80, addr, tmp8); \
 				z80->PC += 2; \
 				NEXT(22); \
 			} while (0)
@@ -1188,13 +1192,21 @@ while (1) {
 
 	// CCF				F ^= MDZ80_FLAG_C
 	// TODO: Verify emulation of flags 3 and 5.
+	/**
+	 * Flags:
+	 * - S: not modified
+	 * - Z: not modified
+	 * - 5: copy of bit 5 from A
+	 * - H: old C bit
+	 * - 3: copy of bit 3 from A
+	 * - P/V: not modified
+	 * - N: reset
+	 * - C: ~C
+	 */
 	Z80I_CCF: {
 		uint8_t flags = (z80->F & (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P | MDZ80_FLAG_C));
-		// Old C is now H.
-		flags |= ((z80->F & MDZ80_FLAG_C) << 4)
-		// New C is inverted old C.
+		flags |= ((z80->F & MDZ80_FLAG_C) << 4);
 		flags ^= MDZ80_FLAG_C;
-		// Copy bits 3 and 5 from A.
 		flags |= (z80->A & (MDZ80_FLAG_5 | MDZ80_FLAG_3));
 		z80->PC++;
 		NEXT(4);
@@ -1202,11 +1214,20 @@ while (1) {
 
 	// SCF				F |= MDZ80_FLAG_C
 	// TODO: Verify emulation of flags 3 and 5.
+	/**
+	 * Flags:
+	 * - S: not modified
+	 * - Z: not modified
+	 * - 5: copy of bit 5 from A
+	 * - H: reset
+	 * - 3: copy of bit 3 from A
+	 * - P/V: not modified
+	 * - N: reset
+	 * - C: set
+	 */
 	Z80I_SCF: {
 		uint8_t flags = (z80->F & (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P));
-		// Set C.
 		flags |= MDZ80_FLAG_C;
-		// Copy bits 3 and 5 from A.
 		flags |= (z80->A & (MDZ80_FLAG_5 | MDZ80_FLAG_3));
 		z80->PC++;
 		NEXT(4);
@@ -1459,7 +1480,7 @@ while (1) {
 	/*! Bit operation instructions */
 
 	// BIT B, R		Test bit B in register R
-	#define Z80I_BITb_R(Rdest, BitID, FlagsToSet) \
+	#define Z80I_BITb_R(BitID, Rdest, FlagsToSet) \
 		Z80I_BIT ## BitID ## _ ## Rdest : \
 			do { \
 				z80->F &= MDZ80_FLAG_C; \
@@ -1544,7 +1565,7 @@ while (1) {
 			do { \
 				z80->F &= MDZ80_FLAG_C; \
 				const uint8_t bitValue = (1 << BitID); \
-				const uint8_t tmp8 = READ_BYTE(z80->HL); \
+				const uint8_t tmp8 = READ_BYTE(z80, z80->HL); \
 				if (tmp8 & bitValue) { \
 					z80->F |= (FlagsToSet | MDZ80_FLAG_H); \
 				} else { \
@@ -1574,7 +1595,7 @@ while (1) {
 				const uint8_t bitValue = (1 << BitID); \
 				const int8_t d = read_sbyte_offset_pc(z80, 1); \
 				const uint16_t addr = (z80->Ridx + d); \
-				const uint8_t tmp8 = READ_BYTE(addr); \
+				const uint8_t tmp8 = READ_BYTE(z80, addr); \
 				if (tmp8 & bitValue) { \
 					switch (BitID) { \
 						case 7: /* MDZ80_FLAG_S */ \
@@ -1763,9 +1784,9 @@ while (1) {
 	#define Z80I_SETb_mHL(BitID) \
 		Z80I_SET ## BitID ## _mHL : \
 			do { \
-				uint8_t tmp8 = READ_BYTE(z80->HL); \
+				uint8_t tmp8 = READ_BYTE(z80, z80->HL); \
 				tmp8 |= (1 << BitID); \
-				WRITE_BYTE(z80->HL, tmp8); \
+				WRITE_BYTE(z80, z80->HL, tmp8); \
 				z80->PC += 2; \
 				NEXT(15); \
 			} while (0)
@@ -1783,9 +1804,9 @@ while (1) {
 	#define Z80I_RESb_mHL(BitID) \
 		Z80I_RES ## BitID ## _mHL : \
 			do { \
-				uint8_t tmp8 = READ_BYTE(z80->HL); \
+				uint8_t tmp8 = READ_BYTE(z80, z80->HL); \
 				tmp8 &= ~(1 << BitID); \
-				WRITE_BYTE(z80->HL, tmp8); \
+				WRITE_BYTE(z80, z80->HL, tmp8); \
 				z80->PC += 2; \
 				NEXT(15); \
 			} while (0)
@@ -1805,23 +1826,23 @@ while (1) {
 			do { \
 				const int8_t d = read_sbyte_offset_pc(z80, 1); \
 				const uint16_t addr = (z80->Ridx + d); \
-				uint8_t tmp8 = READ_BYTE(addr); \
+				uint8_t tmp8 = READ_BYTE(z80, addr); \
 				tmp8 |= (1 << BitID); \
-				WRITE_BYTE(addr, tmp8); \
+				WRITE_BYTE(z80, addr, tmp8); \
 				z80->PC += 3; \
 				NEXT(19); \
 			} while (0)
 
-	// SET B, (XY+d)->R	(XY+d) |= (1 << B)
-	#define Z80I_SETb_mXYd_R(BitID, Rdest) \
+	// SET B, (XY+d)->R	(XY+d) |= (1 << B); R8 <- (XY+d)
+	#define Z80I_SETb_mXYd_R(BitID, Ridx, Rdest) \
 		Z80I_SET ## BitID ## _m ## Ridx ## d_ ## Rdest : \
 			do { \
 				const int8_t d = read_sbyte_offset_pc(z80, 1); \
 				const uint16_t addr = (z80->Ridx + d); \
-				uint8_t tmp8 = READ_BYTE(addr); \
+				uint8_t tmp8 = READ_BYTE(z80, addr); \
 				tmp8 |= (1 << BitID); \
 				z80->Rdest = tmp8; \
-				WRITE_BYTE(addr, tmp8); \
+				WRITE_BYTE(z80, addr, tmp8); \
 				z80->PC += 3; \
 				NEXT(19); \
 			} while (0)
@@ -1976,23 +1997,23 @@ while (1) {
 			do { \
 				const int8_t d = read_sbyte_offset_pc(z80, 1); \
 				const uint16_t addr = (z80->Ridx + d); \
-				uint8_t tmp8 = READ_BYTE(addr); \
+				uint8_t tmp8 = READ_BYTE(z80, addr); \
 				tmp8 &= ~(1 << BitID); \
-				WRITE_BYTE(addr, tmp8); \
+				WRITE_BYTE(z80, addr, tmp8); \
 				z80->PC += 3; \
 				NEXT(19); \
 			} while (0)
 
-	// RES B, (XY+d)->R	(XY+d) &= ~(1 << B)
-	#define Z80I_RESb_mXYd_R(BitID, Rdest) \
+	// RES B, (XY+d)->R	(XY+d) &= ~(1 << B); R8 <- (XY+d)
+	#define Z80I_RESb_mXYd_R(BitID, Ridx, Rdest) \
 		Z80I_RES ## BitID ## _m ## Ridx ## d_ ## Rdest : \
 			do { \
 				const int8_t d = read_sbyte_offset_pc(z80, 1); \
 				const uint16_t addr = (z80->Ridx + d); \
-				uint8_t tmp8 = READ_BYTE(addr); \
+				uint8_t tmp8 = READ_BYTE(z80, addr); \
 				tmp8 &= ~(1 << BitID); \
 				z80->Rdest = tmp8; \
-				WRITE_BYTE(addr, tmp8); \
+				WRITE_BYTE(z80, addr, tmp8); \
 				z80->PC += 3; \
 				NEXT(19); \
 			} while (0)
@@ -2171,7 +2192,7 @@ while (1) {
 	Z80I_JPcc_NN(P,P,);
 	Z80I_JPcc_NN(P,NP,!);
 	Z80I_JPcc_NN(S,S,);
-	Z80I_JPcc_NN(S,NS!);
+	Z80I_JPcc_NN(S,NS,!);
 
 	// JR N			Relative jump by N bytes
 	Z80I_JR_N: {
@@ -2201,7 +2222,7 @@ while (1) {
 
 	// JP RR		Jump to address in R16
 	#define Z80I_JP_RR(Rsrc) \
-		Z80I_JP_ ## Rsrc ## : \
+		Z80I_JP_ ## Rsrc : \
 			do { \
 				set_pc(z80, z80->Rsrc); \
 				NEXT(4); \
@@ -2233,7 +2254,7 @@ while (1) {
 		/* Push the current PC onto the stack. */
 		const uint16_t pc = ((z80->PC + 3) - z80->BasePC);
 		z80->SP -= 2;
-		WRITE_WORD(z80->SP, pc);
+		WRITE_WORD(z80, z80->SP, pc);
 		/* Jump to the new address. */
 		const uint16_t addr = read_word_offset_pc(z80, 1);
 		set_pc(z80, addr);
@@ -2248,7 +2269,7 @@ while (1) {
 					/* Push the current PC onto the stack. */ \
 					const uint16_t pc = ((z80->PC + 3) - z80->BasePC); \
 					z80->SP -= 2; \
-					WRITE_WORD(z80->SP, pc); \
+					WRITE_WORD(z80, z80->SP, pc); \
 					/* Jump to the new address. */ \
 					const uint16_t addr = read_word_offset_pc(z80, 1); \
 					set_pc(z80, addr); \
@@ -2271,7 +2292,7 @@ while (1) {
 	// RET			RET
 	Z80I_RET: {
 		/* Get the previous PC from the stack. */
-		const uint16_t addr = READ_WORD(z80->SP);
+		const uint16_t addr = READ_WORD(z80, z80->SP);
 		z80->SP += 2;
 		/* Jump to the previous address. */
 		set_pc(z80, addr);
@@ -2284,7 +2305,7 @@ while (1) {
 			do { \
 				if (invert(z80->F & MDZ80_FLAG_ ## cond)) { \
 					/* Get the previous PC from the stack. */ \
-					const uint16_t addr = READ_WORD(z80->SP); \
+					const uint16_t addr = READ_WORD(z80, z80->SP); \
 					z80->SP += 2; \
 					/* Jump to the previous address. */ \
 					set_pc(z80, addr); \
@@ -2311,7 +2332,7 @@ while (1) {
 	Z80I_RETI:
 	Z80I_RETN: {
 		/* Get the previous PC from the stack. */
-		const uint16_t addr = READ_WORD(z80->SP);
+		const uint16_t addr = READ_WORD(z80, z80->SP);
 		z80->SP += 2;
 		/* Copy IFF2 to IFF1. */
 		z80->IFF &= ~1;
@@ -2327,7 +2348,7 @@ while (1) {
 		/* Push the current PC onto the stack. */
 		const uint16_t pc = ((z80->PC + 3) - z80->BasePC);
 		z80->SP -= 2;
-		WRITE_WORD(z80->SP, pc);
+		WRITE_WORD(z80, z80->SP, pc);
 		/* Get the interrupt vector address. */
 		const uint16_t addr = (read_byte_pc(z80) & 0x38);
 		/* Jump to the interrupt vector. */
@@ -2341,7 +2362,7 @@ while (1) {
 	Z80I_IN_A_mN: {
 		const uint16_t io_addr = ((z80->A << 8) | read_byte_offset_pc(z80, 1));
 		// TODO: Implement DO_IN().
-		z80->A = DO_IN(io_addr);
+		z80->A = DO_IN(z80, io_addr);
 		z80->PC += 2;
 		NEXT(11);
 	}
@@ -2351,7 +2372,7 @@ while (1) {
 	#define Z80I_IN_R_mBC(Rdest) \
 		Z80I_IN_ ## Rdest ## _mBC : \
 			do { \
-				z80->Rdest = DO_IN(z80->BC); \
+				z80->Rdest = DO_IN(z80, z80->BC); \
 				/* TODO: Set flags! */ \
 				z80->PC += 2; \
 				NEXT(12); \
@@ -2368,7 +2389,7 @@ while (1) {
 	// IN F, (BC)		F <- flags after IN(BC)
 	// TODO: Set flags!
 	Z80I_IN_F_mBC: {
-		const uint8_t in_data = DO_IN(z80->BC);
+		const uint8_t in_data = DO_IN(z80, z80->BC);
 		/* TODO: Set flags! */
 		z80->PC += 2;
 		NEXT(12);
@@ -2379,34 +2400,33 @@ while (1) {
 	// OUT (N), A		OUT(A<<8|N) <- A
 	Z80I_OUT_mN_A: {
 		const uint16_t io_addr = ((z80->A << 8) | read_byte_offset_pc(z80, 1));
-		// TODO: Implement DO_OUT().
-		DO_OUT(io_addr, A);
+		DO_OUT(z80, io_addr, z80->A);
 		z80->PC += 2;
 		NEXT(11);
 	}
 
 	// OUT (BC), R		OUT(BC) <- R8
 	#define Z80I_OUT_mBC_R(Rsrc) \
-		Z80I_OUT_mBC_ ## Rdest : \
+		Z80I_OUT_mBC_ ## Rsrc : \
 			do { \
-				DO_OUT(z80->BC, z80->Rsrc); \
+				DO_OUT(z80, z80->BC, z80->Rsrc); \
 				z80->PC += 2; \
 				NEXT(12); \
 			} while (0)
 
-	Z80_OUT_mBC_R(A);
-	Z80_OUT_mBC_R(B);
-	Z80_OUT_mBC_R(C);
-	Z80_OUT_mBC_R(D);
-	Z80_OUT_mBC_R(E);
-	Z80_OUT_mBC_R(H);
-	Z80_OUT_mBC_R(L);
+	Z80I_OUT_mBC_R(A);
+	Z80I_OUT_mBC_R(B);
+	Z80I_OUT_mBC_R(C);
+	Z80I_OUT_mBC_R(D);
+	Z80I_OUT_mBC_R(E);
+	Z80I_OUT_mBC_R(H);
+	Z80I_OUT_mBC_R(L);
 
 	// OUT (BC), 0		OUT(BC) <- 0
 	// NOTE: This would've been OUT (BC), F, but the
 	// Z80 doesn't actually support that operation.
 	Z80I_OUT_mBC_0: {
-		DO_OUT(z80->BC, 0);
+		DO_OUT(z80, z80->BC, 0);
 		z80->PC += 2;
 		NEXT(12);
 	}
@@ -2415,6 +2435,8 @@ while (1) {
 
 	/*! Instruction prefixes. */
 
+	// TODO: Uncomment these once we're done testing.
+#if 0
 	// CB instruction prefix
 	PREFIX_CB: {
 		const uint8_t CB_opcode = read_byte_offset_pc(1);
@@ -2454,4 +2476,5 @@ while (1) {
 		const uint8_t FDCB_opcode = read_byte_offset_pc(2);
 		goto *z80_insn_table_FDCB[FDCB_opcode];
 	}
+#endif
 }

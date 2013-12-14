@@ -120,9 +120,19 @@ static inline uint8_t read_word_offset_pc(mdZ80_context *z80, int offset)
 		w2 = tmp16; \
 	} while (0)
 
-// TODO: Remove these after finishing base infrastructure.
-#define READ_WORD(z80, addr) 0xFFFF
-#define WRITE_WORD(z80, addr, data) do { } while (0)
+// FIXME: Implement these!
+static inline uint8_t READ_BYTE(mdZ80_context *z80, uint16_t addr)
+	{ ((void)z80); ((void)addr); return 0xFF; }
+static inline void WRITE_BYTE(mdZ80_context *z80, uint16_t addr, uint8_t data)
+	{ ((void)z80); ((void)addr); ((void)data); }
+static inline uint16_t READ_WORD(mdZ80_context *z80, uint16_t addr)
+	{ ((void)z80); ((void)addr); return 0xFFFF; }
+static inline void WRITE_WORD(mdZ80_context *z80, uint16_t addr, uint16_t data)
+	{ ((void)z80); ((void)addr); ((void)data); }
+static inline uint8_t DO_IN(mdZ80_context *z80, uint16_t io_addr)
+	{ ((void)z80); ((void)io_addr); return 0xFF; }
+static inline void DO_OUT(mdZ80_context *z80, uint16_t io_addr, uint8_t data)
+	{ ((void)z80); ((void)io_addr); ((void)data); }
 
 /**
  * Check for interrupts.
@@ -234,6 +244,11 @@ static inline int check_interrupts(mdZ80_context *z80)
  */
 int mdZ80_exec(mdZ80_context *z80, int odo)
 {
+	// TODO: Remove this once cycle stuff is done being tested.
+	// This is needed to prevent lag.
+	z80->CycleCnt += odo;
+	return 0;
+
 	// Check if we've used up all the cycles already.
 	odo -= z80->CycleCnt;
 	if (odo <= 0) {
@@ -277,17 +292,12 @@ int mdZ80_exec(mdZ80_context *z80, int odo)
 	// Get the next instruction.
 	uint8_t insn = read_byte_pc(z80);
 	goto *z80_insn_table[insn];
+#endif
 
 	// Instructions!
 	#define __MDZ80_IN_EXEC 19840519
 	#include "mdZ80_insn_exec.inc.h"
 	#undef __MDZ80_IN_EXEC
-#endif
-
-	// TODO: Remove this once cycle stuff is done being tested.
-	// This is needed to prevent lag.
-	z80->CycleCnt += odo + 1;
-	return 0;
 
 	z80_Exec_Quit:
 		// Out of cycles.
