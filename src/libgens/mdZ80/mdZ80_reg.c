@@ -51,11 +51,16 @@ Z80_GET_REGISTER_FUNC(uint16_t, HL)
 Z80_GET_REGISTER_FUNC(uint16_t, IX)
 Z80_GET_REGISTER_FUNC(uint16_t, IY)
 
+/**
+ * Get the Z80 program counter.
+ * @param z80 Z80 context.
+ * @return Z80 program counter.
+ */
 uint16_t mdZ80_get_PC(mdZ80_context *z80)
 {
 	if (z80->Status & MDZ80_STATUS_RUNNING)
 		return -1;
-	
+
 	// Subtract the BasePC from PC to get the actual Z80 program counter.
 	return (uint16_t)(z80->PC - z80->BasePC);
 }
@@ -100,7 +105,7 @@ Z80_SET_REGISTER_FUNC(uint16_t, IY)
 
 /**
  * Set the Z80 program counter.
- * @param z80 Pointer to Z80 context.
+ * @param z80 Z80 context.
  * @param data New program counter.
  */
 void mdZ80_set_PC(mdZ80_context *z80, uint16_t data)
@@ -108,11 +113,10 @@ void mdZ80_set_PC(mdZ80_context *z80, uint16_t data)
 	if (z80->Status & MDZ80_STATUS_RUNNING)
 		return;
 	
-	// TODO: 32-bit specific code will break on 64-bit!
 	data &= 0xFFFF;
-	unsigned int newPC = (unsigned int)(z80->Fetch[data >> 8]);
+	uintptr_t newPC = (uintptr_t)(z80->Fetch[data >> 8]);
 	z80->BasePC = newPC;
-	z80->PC = newPC + data;
+	z80->PC = (newPC + data);
 }
 
 Z80_SET_REGISTER_FUNC(uint16_t, SP)
