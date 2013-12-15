@@ -169,11 +169,11 @@ while (1) {
 	Z80I_LD_R_R(IXh, C);
 	Z80I_LD_R_R(IXh, D);
 	Z80I_LD_R_R(IXh, E);
-	Z80I_LD_R_R(IXh, L);
+	Z80I_LD_R_R(IXh, IXl);
 	Z80I_LD_R_R(IXh, IXh);
 	/* NOTE: Not actually valid...
 	Z80I_LD_R_R(IXh, H);
-	Z80I_LD_R_R(IXh, IXl);
+	Z80I_LD_R_R(IXh, L);
 	Z80I_LD_R_R(IXh, IYh);
 	Z80I_LD_R_R(IXh, IYl);
 	*/
@@ -183,11 +183,11 @@ while (1) {
 	Z80I_LD_R_R(IXl, C);
 	Z80I_LD_R_R(IXl, D);
 	Z80I_LD_R_R(IXl, E);
-	Z80I_LD_R_R(IXl, H);
+	Z80I_LD_R_R(IXl, IXh);
 	Z80I_LD_R_R(IXl, IXl);
 	/* NOTE: Not actually valid...
+	Z80I_LD_R_R(IXl, H);
 	Z80I_LD_R_R(IXl, L);
-	Z80I_LD_R_R(IXl, IXh);
 	Z80I_LD_R_R(IXl, IYh);
 	Z80I_LD_R_R(IXl, IYl);
 	*/
@@ -197,13 +197,13 @@ while (1) {
 	Z80I_LD_R_R(IYh, C);
 	Z80I_LD_R_R(IYh, D);
 	Z80I_LD_R_R(IYh, E);
-	Z80I_LD_R_R(IYh, L);
 	Z80I_LD_R_R(IYh, IYh);
+	Z80I_LD_R_R(IYh, IYl);
 	/* NOTE: Not actually valid...
 	Z80I_LD_R_R(IYh, H);
+	Z80I_LD_R_R(IYh, L);
 	Z80I_LD_R_R(IYh, IXh);
 	Z80I_LD_R_R(IYh, IXl);
-	Z80I_LD_R_R(IYh, IYl);
 	*/
 
 	Z80I_LD_R_R(IYl, A);
@@ -211,13 +211,13 @@ while (1) {
 	Z80I_LD_R_R(IYl, C);
 	Z80I_LD_R_R(IYl, D);
 	Z80I_LD_R_R(IYl, E);
-	Z80I_LD_R_R(IYl, H);
+	Z80I_LD_R_R(IYl, IYh);
 	Z80I_LD_R_R(IYl, IYl);
 	/* NOTE: Not actually valid...
+	Z80I_LD_R_R(IYl, H);
 	Z80I_LD_R_R(IYl, L);
 	Z80I_LD_R_R(IYl, IXh);
 	Z80I_LD_R_R(IYl, IXl);
-	Z80I_LD_R_R(IYl, IYh);
 	*/
 
 	// LD R, N		R8 <- imm8

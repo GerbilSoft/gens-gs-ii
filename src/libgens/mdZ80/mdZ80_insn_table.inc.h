@@ -189,9 +189,9 @@ static void *z80_insn_table_DD[] = {
 	&&Z80I_LD_E_B, &&Z80I_LD_E_C, &&Z80I_LD_E_D, &&Z80I_LD_E_E,		// 58-5B
 	&&Z80I_LD_E_IXh, &&Z80I_LD_E_IXl, &&Z80I_LD_E_mIXd, &&Z80I_LD_E_A,	// 5C-5F
 	&&Z80I_LD_IXh_B, &&Z80I_LD_IXh_C, &&Z80I_LD_IXh_D, &&Z80I_LD_IXh_E,	// 60-63
-	&&Z80I_LD_IXh_IXh, &&Z80I_LD_IXh_L, &&Z80I_LD_H_mIXd, &&Z80I_LD_IXh_A,	// 64-67
+	&&Z80I_LD_IXh_IXh, &&Z80I_LD_IXh_IXl, &&Z80I_LD_H_mIXd, &&Z80I_LD_IXh_A,// 64-67
 	&&Z80I_LD_IXl_B, &&Z80I_LD_IXl_C, &&Z80I_LD_IXl_D, &&Z80I_LD_IXl_E,	// 68-6B
-	&&Z80I_LD_IXl_H, &&Z80I_LD_IXl_IXl, &&Z80I_LD_L_mIXd, &&Z80I_LD_IXl_A,	// 6C-6F
+	&&Z80I_LD_IXl_IXh, &&Z80I_LD_IXl_IXl, &&Z80I_LD_L_mIXd, &&Z80I_LD_IXl_A,// 6C-6F
 	&&Z80I_LD_mIXd_B, &&Z80I_LD_mIXd_C, &&Z80I_LD_mIXd_D, &&Z80I_LD_mIXd_E,	// 70-73
 	&&Z80I_LD_mIXd_H, &&Z80I_LD_mIXd_L, &&Z80I_HALT, &&Z80I_LD_mIXd_A,	// 74-77
 	&&Z80I_LD_A_B, &&Z80I_LD_A_C, &&Z80I_LD_A_D, &&Z80I_LD_A_E,		// 78-7B
@@ -325,9 +325,9 @@ static void *z80_insn_table_FD[] = {
 	&&Z80I_LD_E_B, &&Z80I_LD_E_C, &&Z80I_LD_E_D, &&Z80I_LD_E_E,		// 58-5B
 	&&Z80I_LD_E_IYh, &&Z80I_LD_E_IYl, &&Z80I_LD_E_mIYd, &&Z80I_LD_E_A,	// 5C-5F
 	&&Z80I_LD_IYh_B, &&Z80I_LD_IYh_C, &&Z80I_LD_IYh_D, &&Z80I_LD_IYh_E,	// 60-63
-	&&Z80I_LD_IYh_IYh, &&Z80I_LD_IYh_L, &&Z80I_LD_H_mIYd, &&Z80I_LD_IYh_A,	// 64-67
+	&&Z80I_LD_IYh_IYh, &&Z80I_LD_IYh_IYl, &&Z80I_LD_H_mIYd, &&Z80I_LD_IYh_A,// 64-67
 	&&Z80I_LD_IYl_B, &&Z80I_LD_IYl_C, &&Z80I_LD_IYl_D, &&Z80I_LD_IYl_E,	// 68-6B
-	&&Z80I_LD_IYl_H, &&Z80I_LD_IYl_IYl, &&Z80I_LD_L_mIYd, &&Z80I_LD_IYl_A,	// 6C-6F
+	&&Z80I_LD_IYl_IYh, &&Z80I_LD_IYl_IYl, &&Z80I_LD_L_mIYd, &&Z80I_LD_IYl_A,// 6C-6F
 	&&Z80I_LD_mIYd_B, &&Z80I_LD_mIYd_C, &&Z80I_LD_mIYd_D, &&Z80I_LD_mIYd_E,	// 70-73
 	&&Z80I_LD_mIYd_H, &&Z80I_LD_mIYd_L, &&Z80I_HALT, &&Z80I_LD_mIYd_A,	// 74-77
 	&&Z80I_LD_A_B, &&Z80I_LD_A_C, &&Z80I_LD_A_D, &&Z80I_LD_A_E,		// 78-7B
