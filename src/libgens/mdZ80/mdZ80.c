@@ -38,10 +38,10 @@
 static uint8_t mdZ80_insn_fetch[256];
 
 /*! Default read/write functions. **/
-static uint8_t mdZ80_def_ReadB(uint32_t address);
-static uint8_t mdZ80_def_In(uint32_t address);
-static void mdZ80_def_WriteB(uint32_t address, uint8_t data);
-static void mdZ80_def_Out(uint32_t address, uint8_t data);
+static uint8_t mdZ80_def_ReadB(uint16_t address);
+static uint8_t mdZ80_def_In(uint16_t address);
+static void mdZ80_def_WriteB(uint16_t address, uint8_t data);
+static void mdZ80_def_Out(uint16_t address, uint8_t data);
 
 /*! Z80 context allocation. **/
 
@@ -246,7 +246,7 @@ void mdZ80_interrupt(mdZ80_context *z80, uint8_t vector)
  * @param address Address.
  * @return 0xFF.
  */
-static uint8_t mdZ80_def_ReadB(uint32_t address)
+static uint8_t mdZ80_def_ReadB(uint16_t address)
 	{ ((void)address); return 0xFF; }
 
 /**
@@ -254,7 +254,7 @@ static uint8_t mdZ80_def_ReadB(uint32_t address)
  * @param address Address.
  * @return 0xFF.
  */
-static uint8_t mdZ80_def_In(uint32_t address)
+static uint8_t mdZ80_def_In(uint16_t address)
 	{ ((void)address); return 0xFF; }
 
 /**
@@ -262,7 +262,7 @@ static uint8_t mdZ80_def_In(uint32_t address)
  * @param address Address.
  * @param data Data.
  */
-static void mdZ80_def_WriteB(uint32_t address, uint8_t data)
+static void mdZ80_def_WriteB(uint16_t address, uint8_t data)
 	{ ((void)address); ((void)data); }
 
 /**
@@ -270,7 +270,7 @@ static void mdZ80_def_WriteB(uint32_t address, uint8_t data)
  * @param address Address.
  * @param data Data.
  */
-static void mdZ80_def_Out(uint32_t address, uint8_t data)
+static void mdZ80_def_Out(uint16_t address, uint8_t data)
 	{ ((void)address); ((void)data); }
 
 
