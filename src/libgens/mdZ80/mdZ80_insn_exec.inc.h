@@ -1633,11 +1633,10 @@ while (1) {
 	 */
 	#define Z80U_OP_SLA(Dest) \
 		do { \
-			const uint8_t tmp = (Dest << 1); \
-			z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
-			z80->F |= (Dest >> 8);	/* MDZ80_FLAG_C */ \
-			z80->F |= (tmp & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-			Dest = tmp; \
+			z80->F = (Dest >> 7);	/* MDZ80_FLAG_C */ \
+			Dest = (Dest << 1); \
+			z80->F |= (Dest & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+			if (Dest) z80->F |= MDZ80_FLAG_Z; \
 			z80->F |= calc_parity_flag(Dest); \
 		} while (0)
 
@@ -1651,11 +1650,10 @@ while (1) {
 	 */
 	#define Z80U_OP_SLL(Dest) \
 		do { \
-			const uint8_t tmp = ((Dest << 1) + 1); \
-			z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
-			z80->F |= (Dest >> 8);	/* MDZ80_FLAG_C */ \
-			z80->F |= (tmp & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-			Dest = tmp; \
+			z80->F = (Dest >> 7);	/* MDZ80_FLAG_C */ \
+			Dest = ((Dest << 1) + 1); \
+			z80->F |= (Dest & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+			if (Dest) z80->F |= MDZ80_FLAG_Z; \
 			z80->F |= calc_parity_flag(Dest); \
 		} while (0)
 
@@ -1684,12 +1682,12 @@ while (1) {
 	 */
 	#define Z80U_OP_SRA(Dest) \
 		do { \
-			const int8_t Orig = *((int8_t*)&(Dest)); \
-			const int8_t tmp = (Orig >> 1); \
-			z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
-			z80->F |= (Orig & 1);	/* MDZ80_FLAG_C */ \
-			z80->F |= (tmp & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-			Dest = *((uint8_t*)&tmp); \
+			int8_t Orig = *((int8_t*)&(Dest)); \
+			z80->F = (Orig & 1);	/* MDZ80_FLAG_C */ \
+			Orig >>= 1; \
+			Dest = *((uint8_t*)&Orig); \
+			z80->F |= (Dest & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+			if (Dest) z80->F |= MDZ80_FLAG_Z; \
 			z80->F |= calc_parity_flag(Dest); \
 		} while (0)
 
@@ -1702,11 +1700,10 @@ while (1) {
 	 */
 	#define Z80U_OP_SRL(Dest) \
 		do { \
-			const uint8_t tmp = (Dest >> 1); \
-			z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
-			z80->F |= (Dest >> 8);	/* MDZ80_FLAG_C */ \
-			z80->F |= (tmp & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-			Dest = tmp; \
+			z80->F = (Dest & 1);	/* MDZ80_FLAG_C */ \
+			Dest >>= 1; \
+			z80->F |= (Dest & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+			if (Dest) z80->F |= MDZ80_FLAG_Z; \
 			z80->F |= calc_parity_flag(Dest); \
 		} while (0)
 
