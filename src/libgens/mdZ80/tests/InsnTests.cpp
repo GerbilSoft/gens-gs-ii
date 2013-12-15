@@ -60,13 +60,20 @@ class InsnTests : public ::testing::Test
 		static void z80_WriteB(uint16_t addr, uint8_t data);
 
 		// Register state.
+		// TODO: Big-endian support.
 		struct RegState {
-			uint16_t AF; uint16_t BC;
-			uint16_t DE; uint16_t HL;
-			uint16_t IX; uint16_t IY;
-			uint16_t SP;
-			uint16_t AF2; uint16_t BC2;
-			uint16_t DE2; uint16_t HL2;
+			union { struct { uint8_t A; uint8_t F; }; uint16_t AF; };
+			union { struct { uint8_t C; uint8_t B; }; uint16_t BC; };
+			union { struct { uint8_t E; uint8_t D; }; uint16_t DE; };
+			union { struct { uint8_t L; uint8_t H; }; uint16_t HL; };
+			union { struct { uint8_t IXl; uint8_t IXh; }; uint16_t IX; };
+			union { struct { uint8_t IYl; uint8_t IYh; }; uint16_t IY; };
+			union { struct { uint8_t SPL; uint8_t SPH; }; uint16_t SP; };
+			uint16_t AF2;
+			uint16_t BC2;
+			uint16_t DE2;
+			uint16_t HL2;
+
 			uint8_t IFF; uint8_t R;
 			uint8_t I; uint8_t IM;
 		};
@@ -219,10 +226,97 @@ TEST_F(InsnTests, INSN_NOP)
 	const uint16_t endPC = initPC + 2;
 	mdZ80_set_PC(z80, initPC);
 	mdZ80_exec(z80, 100);
+
 	EXPECT_TRUE(mdZ80_get_Status(z80) & MDZ80_STATUS_HALTED);
 	EXPECT_EQ(endPC, mdZ80_get_PC(z80));
 	expectRegState(&initRegState);
 }
+
+#define INSN_LD_R_R(Rdest, Rsrc, Prefix, PrgStart, len) \
+TEST_F(InsnTests, INSN_ ## Prefix ## LD_ ## Rdest ## _ ## Rsrc) \
+{ \
+	const uint16_t initPC = (PrgStart); \
+	const uint16_t endPC = initPC + (len); \
+	mdZ80_set_PC(z80, initPC); \
+	mdZ80_exec(z80, 100); \
+	\
+	EXPECT_TRUE(mdZ80_get_Status(z80) & MDZ80_STATUS_HALTED); \
+	EXPECT_EQ(endPC, mdZ80_get_PC(z80)); \
+	RegState expectedRegState = initRegState; \
+	expectedRegState.Rdest = expectedRegState.Rsrc; \
+	expectRegState(&expectedRegState); \
+}
+
+/* LD R, R */
+#define INSN_LD_R_R_ABCDEHL(Rdest, PrgStart) \
+INSN_LD_R_R(Rdest, A, , PrgStart, 2) \
+INSN_LD_R_R(Rdest, B, , PrgStart+2, 2) \
+INSN_LD_R_R(Rdest, C, , PrgStart+4, 2) \
+INSN_LD_R_R(Rdest, D, , PrgStart+6, 2) \
+INSN_LD_R_R(Rdest, E, , PrgStart+8, 2) \
+INSN_LD_R_R(Rdest, H, , PrgStart+10, 2) \
+INSN_LD_R_R(Rdest, L, , PrgStart+12, 2) \
+
+INSN_LD_R_R_ABCDEHL(A, 0x8002)
+INSN_LD_R_R_ABCDEHL(B, 0x8010)
+INSN_LD_R_R_ABCDEHL(C, 0x801E)
+INSN_LD_R_R_ABCDEHL(D, 0x802C)
+INSN_LD_R_R_ABCDEHL(E, 0x803A)
+INSN_LD_R_R_ABCDEHL(H, 0x8048)
+INSN_LD_R_R_ABCDEHL(L, 0x8056)
+
+/* DD (IX): LD R, R */
+#define INSN_DD_LD_R_R_ABCDEHL(Rdest, PrgStart) \
+INSN_LD_R_R(Rdest, A, DD_, PrgStart, 3) \
+INSN_LD_R_R(Rdest, B, DD_, PrgStart+3, 3) \
+INSN_LD_R_R(Rdest, C, DD_, PrgStart+6, 3) \
+INSN_LD_R_R(Rdest, D, DD_, PrgStart+9, 3) \
+INSN_LD_R_R(Rdest, E, DD_, PrgStart+12, 3) \
+INSN_LD_R_R(Rdest, IXh, DD_, PrgStart+15, 3) \
+INSN_LD_R_R(Rdest, IXl, DD_, PrgStart+18, 3) \
+
+INSN_DD_LD_R_R_ABCDEHL(A, 0x8064)
+INSN_DD_LD_R_R_ABCDEHL(B, 0x8079)
+INSN_DD_LD_R_R_ABCDEHL(C, 0x808E)
+INSN_DD_LD_R_R_ABCDEHL(D, 0x80A3)
+INSN_DD_LD_R_R_ABCDEHL(E, 0x80B8)
+INSN_DD_LD_R_R_ABCDEHL(IXh, 0x80CD)
+INSN_DD_LD_R_R_ABCDEHL(IXl, 0x80E2)
+
+/* FD (IY): LD R, R */
+#define INSN_FD_LD_R_R_ABCDEHL(Rdest, PrgStart) \
+INSN_LD_R_R(Rdest, A, FD_, PrgStart, 3) \
+INSN_LD_R_R(Rdest, B, FD_, PrgStart+3, 3) \
+INSN_LD_R_R(Rdest, C, FD_, PrgStart+6, 3) \
+INSN_LD_R_R(Rdest, D, FD_, PrgStart+9, 3) \
+INSN_LD_R_R(Rdest, E, FD_, PrgStart+12, 3) \
+INSN_LD_R_R(Rdest, IYh, FD_, PrgStart+15, 3) \
+INSN_LD_R_R(Rdest, IYl, FD_, PrgStart+18, 3) \
+
+INSN_FD_LD_R_R_ABCDEHL(A, 0x80F7)
+INSN_FD_LD_R_R_ABCDEHL(B, 0x810C)
+INSN_FD_LD_R_R_ABCDEHL(C, 0x8121)
+INSN_FD_LD_R_R_ABCDEHL(D, 0x8136)
+INSN_FD_LD_R_R_ABCDEHL(E, 0x814B)
+INSN_FD_LD_R_R_ABCDEHL(IYh, 0x8160)
+INSN_FD_LD_R_R_ABCDEHL(IYl, 0x8175)
+
+#define INSN_LD_RR_NN(Rdest, PrgStart) \
+TEST_F(InsnTests, INSN_LD_ ## Rdest ## _NN) \
+{ \
+	const uint16_t initPC = PrgStart; \
+	const uint16_t endPC = initPC + 4; \
+	mdZ80_set_PC(z80, initPC); \
+	mdZ80_exec(z80, 100); \
+	\
+	EXPECT_TRUE(mdZ80_get_Status(z80) & MDZ80_STATUS_HALTED); \
+	EXPECT_EQ(endPC, mdZ80_get_PC(z80)); \
+	RegState expectedRegState = initRegState; \
+	expectedRegState.Rdest = 0x1234; \
+	expectRegState(&expectedRegState); \
+}
+
+//INSN_LD_RR_NN(BC, 0x8002)
 
 } }
 
