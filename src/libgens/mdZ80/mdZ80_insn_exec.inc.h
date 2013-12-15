@@ -1677,6 +1677,212 @@ while (1) {
 	Z80I_ROT_R(SRL, H);
 	Z80I_ROT_R(SRL, L);
 
+	/**
+	 * Z80I_ROT_mHL: Rotate (HL) using the given operation.
+	 * This is a Z80 extended instruction. (CB-prefix)
+	 * @param Op Rotate operation.
+	 */
+	#define Z80I_ROT_mHL(Op) \
+		Z80I_ ## Op ## _mHL : \
+			do { \
+				uint8_t tmp8 = READ_BYTE(z80, z80->HL); \
+				Z80U_OP_ ## Op(tmp8); \
+				WRITE_BYTE(z80, z80->HL, tmp8); \
+				z80->PC += 2; \
+				NEXT(15); \
+			} while (0)
+
+	Z80I_ROT_mHL(RLC);
+	Z80I_ROT_mHL(RL);
+	Z80I_ROT_mHL(RRC);
+	Z80I_ROT_mHL(RR);
+	Z80I_ROT_mHL(SLA);
+	Z80I_ROT_mHL(SLL);
+	Z80I_ROT_mHL(SRA);
+	Z80I_ROT_mHL(SRL);
+
+	/**
+	 * Z80I_ROT_mXYd: Rotate (XY+d) using the given operation.
+	 * This is a Z80 extended instruction. (DDCB/FDCB-prefix)
+	 * @param Op Rotate operation.
+	 * @param Ridx Index register.
+	 */
+	#define Z80I_ROT_mXYd(Op, Ridx) \
+		Z80I_ ## Op ## _m ## Ridx ## d : \
+			do { \
+				const int8_t d = read_sbyte_offset_pc(z80, 1); \
+				const uint16_t addr = (z80->Ridx + d); \
+				uint8_t tmp8 = READ_BYTE(z80, addr); \
+				Z80U_OP_ ## Op(tmp8); \
+				WRITE_BYTE(z80, addr, tmp8); \
+				z80->PC += 2; \
+				NEXT(23); \
+			} while (0)
+
+	/**
+	 * Z80I_ROT_mXYd_R: Rotate (XY+d) using the given operation.
+	 * Result is also copied to R8.
+	 * This is a Z80 extended instruction. (DDCB/FDCB-prefix)
+	 * @param Op Rotate operation.
+	 * @param Ridx Index register.
+	 */
+	#define Z80I_ROT_mXYd_R(Op, Ridx, Rdest) \
+		Z80I_ ## Op ## _m ## Ridx ## d_ ## Rdest : \
+			do { \
+				const int8_t d = read_sbyte_offset_pc(z80, 1); \
+				const uint16_t addr = (z80->Ridx + d); \
+				uint8_t tmp8 = READ_BYTE(z80, addr); \
+				Z80U_OP_ ## Op(tmp8); \
+				z80->Rdest = tmp8; \
+				WRITE_BYTE(z80, addr, tmp8); \
+				z80->PC += 2; \
+				NEXT(23); \
+			} while (0)
+
+	Z80I_ROT_mXYd(RLC, IX);
+	Z80I_ROT_mXYd_R(RLC, IX, A);
+	Z80I_ROT_mXYd_R(RLC, IX, B);
+	Z80I_ROT_mXYd_R(RLC, IX, C);
+	Z80I_ROT_mXYd_R(RLC, IX, D);
+	Z80I_ROT_mXYd_R(RLC, IX, E);
+	Z80I_ROT_mXYd_R(RLC, IX, H);
+	Z80I_ROT_mXYd_R(RLC, IX, L);
+
+	Z80I_ROT_mXYd(RLC, IY);
+	Z80I_ROT_mXYd_R(RLC, IY, A);
+	Z80I_ROT_mXYd_R(RLC, IY, B);
+	Z80I_ROT_mXYd_R(RLC, IY, C);
+	Z80I_ROT_mXYd_R(RLC, IY, D);
+	Z80I_ROT_mXYd_R(RLC, IY, E);
+	Z80I_ROT_mXYd_R(RLC, IY, H);
+	Z80I_ROT_mXYd_R(RLC, IY, L);
+
+	Z80I_ROT_mXYd(RL, IX);
+	Z80I_ROT_mXYd_R(RL, IX, A);
+	Z80I_ROT_mXYd_R(RL, IX, B);
+	Z80I_ROT_mXYd_R(RL, IX, C);
+	Z80I_ROT_mXYd_R(RL, IX, D);
+	Z80I_ROT_mXYd_R(RL, IX, E);
+	Z80I_ROT_mXYd_R(RL, IX, H);
+	Z80I_ROT_mXYd_R(RL, IX, L);
+
+	Z80I_ROT_mXYd(RL, IY);
+	Z80I_ROT_mXYd_R(RL, IY, A);
+	Z80I_ROT_mXYd_R(RL, IY, B);
+	Z80I_ROT_mXYd_R(RL, IY, C);
+	Z80I_ROT_mXYd_R(RL, IY, D);
+	Z80I_ROT_mXYd_R(RL, IY, E);
+	Z80I_ROT_mXYd_R(RL, IY, H);
+	Z80I_ROT_mXYd_R(RL, IY, L);
+
+	Z80I_ROT_mXYd(RRC, IX);
+	Z80I_ROT_mXYd_R(RRC, IX, A);
+	Z80I_ROT_mXYd_R(RRC, IX, B);
+	Z80I_ROT_mXYd_R(RRC, IX, C);
+	Z80I_ROT_mXYd_R(RRC, IX, D);
+	Z80I_ROT_mXYd_R(RRC, IX, E);
+	Z80I_ROT_mXYd_R(RRC, IX, H);
+	Z80I_ROT_mXYd_R(RRC, IX, L);
+
+	Z80I_ROT_mXYd(RRC, IY);
+	Z80I_ROT_mXYd_R(RRC, IY, A);
+	Z80I_ROT_mXYd_R(RRC, IY, B);
+	Z80I_ROT_mXYd_R(RRC, IY, C);
+	Z80I_ROT_mXYd_R(RRC, IY, D);
+	Z80I_ROT_mXYd_R(RRC, IY, E);
+	Z80I_ROT_mXYd_R(RRC, IY, H);
+	Z80I_ROT_mXYd_R(RRC, IY, L);
+
+	Z80I_ROT_mXYd(RR, IX);
+	Z80I_ROT_mXYd_R(RR, IX, A);
+	Z80I_ROT_mXYd_R(RR, IX, B);
+	Z80I_ROT_mXYd_R(RR, IX, C);
+	Z80I_ROT_mXYd_R(RR, IX, D);
+	Z80I_ROT_mXYd_R(RR, IX, E);
+	Z80I_ROT_mXYd_R(RR, IX, H);
+	Z80I_ROT_mXYd_R(RR, IX, L);
+
+	Z80I_ROT_mXYd(RR, IY);
+	Z80I_ROT_mXYd_R(RR, IY, A);
+	Z80I_ROT_mXYd_R(RR, IY, B);
+	Z80I_ROT_mXYd_R(RR, IY, C);
+	Z80I_ROT_mXYd_R(RR, IY, D);
+	Z80I_ROT_mXYd_R(RR, IY, E);
+	Z80I_ROT_mXYd_R(RR, IY, H);
+	Z80I_ROT_mXYd_R(RR, IY, L);
+
+	Z80I_ROT_mXYd(SLA, IX);
+	Z80I_ROT_mXYd_R(SLA, IX, A);
+	Z80I_ROT_mXYd_R(SLA, IX, B);
+	Z80I_ROT_mXYd_R(SLA, IX, C);
+	Z80I_ROT_mXYd_R(SLA, IX, D);
+	Z80I_ROT_mXYd_R(SLA, IX, E);
+	Z80I_ROT_mXYd_R(SLA, IX, H);
+	Z80I_ROT_mXYd_R(SLA, IX, L);
+
+	Z80I_ROT_mXYd(SLA, IY);
+	Z80I_ROT_mXYd_R(SLA, IY, A);
+	Z80I_ROT_mXYd_R(SLA, IY, B);
+	Z80I_ROT_mXYd_R(SLA, IY, C);
+	Z80I_ROT_mXYd_R(SLA, IY, D);
+	Z80I_ROT_mXYd_R(SLA, IY, E);
+	Z80I_ROT_mXYd_R(SLA, IY, H);
+	Z80I_ROT_mXYd_R(SLA, IY, L);
+
+	Z80I_ROT_mXYd(SLL, IX);
+	Z80I_ROT_mXYd_R(SLL, IX, A);
+	Z80I_ROT_mXYd_R(SLL, IX, B);
+	Z80I_ROT_mXYd_R(SLL, IX, C);
+	Z80I_ROT_mXYd_R(SLL, IX, D);
+	Z80I_ROT_mXYd_R(SLL, IX, E);
+	Z80I_ROT_mXYd_R(SLL, IX, H);
+	Z80I_ROT_mXYd_R(SLL, IX, L);
+
+	Z80I_ROT_mXYd(SLL, IY);
+	Z80I_ROT_mXYd_R(SLL, IY, A);
+	Z80I_ROT_mXYd_R(SLL, IY, B);
+	Z80I_ROT_mXYd_R(SLL, IY, C);
+	Z80I_ROT_mXYd_R(SLL, IY, D);
+	Z80I_ROT_mXYd_R(SLL, IY, E);
+	Z80I_ROT_mXYd_R(SLL, IY, H);
+	Z80I_ROT_mXYd_R(SLL, IY, L);
+
+	Z80I_ROT_mXYd(SRA, IX);
+	Z80I_ROT_mXYd_R(SRA, IX, A);
+	Z80I_ROT_mXYd_R(SRA, IX, B);
+	Z80I_ROT_mXYd_R(SRA, IX, C);
+	Z80I_ROT_mXYd_R(SRA, IX, D);
+	Z80I_ROT_mXYd_R(SRA, IX, E);
+	Z80I_ROT_mXYd_R(SRA, IX, H);
+	Z80I_ROT_mXYd_R(SRA, IX, L);
+
+	Z80I_ROT_mXYd(SRA, IY);
+	Z80I_ROT_mXYd_R(SRA, IY, A);
+	Z80I_ROT_mXYd_R(SRA, IY, B);
+	Z80I_ROT_mXYd_R(SRA, IY, C);
+	Z80I_ROT_mXYd_R(SRA, IY, D);
+	Z80I_ROT_mXYd_R(SRA, IY, E);
+	Z80I_ROT_mXYd_R(SRA, IY, H);
+	Z80I_ROT_mXYd_R(SRA, IY, L);
+
+	Z80I_ROT_mXYd(SRL, IX);
+	Z80I_ROT_mXYd_R(SRL, IX, A);
+	Z80I_ROT_mXYd_R(SRL, IX, B);
+	Z80I_ROT_mXYd_R(SRL, IX, C);
+	Z80I_ROT_mXYd_R(SRL, IX, D);
+	Z80I_ROT_mXYd_R(SRL, IX, E);
+	Z80I_ROT_mXYd_R(SRL, IX, H);
+	Z80I_ROT_mXYd_R(SRL, IX, L);
+
+	Z80I_ROT_mXYd(SRL, IY);
+	Z80I_ROT_mXYd_R(SRL, IY, A);
+	Z80I_ROT_mXYd_R(SRL, IY, B);
+	Z80I_ROT_mXYd_R(SRL, IY, C);
+	Z80I_ROT_mXYd_R(SRL, IY, D);
+	Z80I_ROT_mXYd_R(SRL, IY, E);
+	Z80I_ROT_mXYd_R(SRL, IY, H);
+	Z80I_ROT_mXYd_R(SRL, IY, L);
+
 	/*! Bit operation instructions */
 
 	// BIT B, R		Test bit B in register R
@@ -2692,50 +2898,6 @@ while (1) {
 	Z80I_XOR_E: Z80I_XOR_H: Z80I_XOR_L: Z80I_XOR_mHL:
 	Z80I_XOR_IXl: Z80I_XOR_IXh: Z80I_XOR_IYh: Z80I_XOR_IYl:
 	Z80I_XOR_N: Z80I_XOR_mIXd: Z80I_XOR_mIYd:
-
-	// Arithmetic instructions (8-bit)
-	Z80I_RLC_mHL: Z80I_RL_mHL: Z80I_RRC_mHL: Z80I_RR_mHL:
-	Z80I_SLA_mHL: Z80I_SLL_mHL: Z80I_SRA_mHL: Z80I_SRL_mHL:
-
-	Z80I_RLC_mIXd:   Z80I_RLC_mIXd_A: Z80I_RLC_mIXd_B: Z80I_RLC_mIXd_C:
-	Z80I_RLC_mIXd_D: Z80I_RLC_mIXd_E: Z80I_RLC_mIXd_H: Z80I_RLC_mIXd_L:
-	Z80I_RLC_mIYd: Z80I_RLC_mIYd_A: Z80I_RLC_mIYd_B: Z80I_RLC_mIYd_C:
-	Z80I_RLC_mIYd_D: Z80I_RLC_mIYd_E: Z80I_RLC_mIYd_H: Z80I_RLC_mIYd_L:
-
-	Z80I_RL_mIXd:   Z80I_RL_mIXd_A: Z80I_RL_mIXd_B: Z80I_RL_mIXd_C:
-	Z80I_RL_mIXd_D: Z80I_RL_mIXd_E: Z80I_RL_mIXd_H: Z80I_RL_mIXd_L:
-	Z80I_RL_mIYd:   Z80I_RL_mIYd_A: Z80I_RL_mIYd_B: Z80I_RL_mIYd_C:
-	Z80I_RL_mIYd_D: Z80I_RL_mIYd_E: Z80I_RL_mIYd_H: Z80I_RL_mIYd_L:
-
-	Z80I_RRC_mIXd:   Z80I_RRC_mIXd_A: Z80I_RRC_mIXd_B: Z80I_RRC_mIXd_C:
-	Z80I_RRC_mIXd_D: Z80I_RRC_mIXd_E: Z80I_RRC_mIXd_H: Z80I_RRC_mIXd_L:
-	Z80I_RRC_mIYd:   Z80I_RRC_mIYd_A: Z80I_RRC_mIYd_B: Z80I_RRC_mIYd_C:
-	Z80I_RRC_mIYd_D: Z80I_RRC_mIYd_E: Z80I_RRC_mIYd_H: Z80I_RRC_mIYd_L:
-
-	Z80I_RR_mIXd:   Z80I_RR_mIXd_A: Z80I_RR_mIXd_B: Z80I_RR_mIXd_C:
-	Z80I_RR_mIXd_D: Z80I_RR_mIXd_E: Z80I_RR_mIXd_H: Z80I_RR_mIXd_L:
-	Z80I_RR_mIYd:   Z80I_RR_mIYd_A: Z80I_RR_mIYd_B: Z80I_RR_mIYd_C:
-	Z80I_RR_mIYd_D: Z80I_RR_mIYd_E: Z80I_RR_mIYd_H: Z80I_RR_mIYd_L:
-
-	Z80I_SLA_mIXd:   Z80I_SLA_mIXd_A: Z80I_SLA_mIXd_B: Z80I_SLA_mIXd_C:
-	Z80I_SLA_mIXd_D: Z80I_SLA_mIXd_E: Z80I_SLA_mIXd_H: Z80I_SLA_mIXd_L:
-	Z80I_SLA_mIYd:   Z80I_SLA_mIYd_A: Z80I_SLA_mIYd_B: Z80I_SLA_mIYd_C:
-	Z80I_SLA_mIYd_D: Z80I_SLA_mIYd_E: Z80I_SLA_mIYd_H: Z80I_SLA_mIYd_L:
-
-	Z80I_SLL_mIXd:   Z80I_SLL_mIXd_A: Z80I_SLL_mIXd_B: Z80I_SLL_mIXd_C:
-	Z80I_SLL_mIXd_D: Z80I_SLL_mIXd_E: Z80I_SLL_mIXd_H: Z80I_SLL_mIXd_L:
-	Z80I_SLL_mIYd:   Z80I_SLL_mIYd_A: Z80I_SLL_mIYd_B: Z80I_SLL_mIYd_C:
-	Z80I_SLL_mIYd_D: Z80I_SLL_mIYd_E: Z80I_SLL_mIYd_H: Z80I_SLL_mIYd_L:
-
-	Z80I_SRA_mIXd:   Z80I_SRA_mIXd_A: Z80I_SRA_mIXd_B: Z80I_SRA_mIXd_C:
-	Z80I_SRA_mIXd_D: Z80I_SRA_mIXd_E: Z80I_SRA_mIXd_H: Z80I_SRA_mIXd_L:
-	Z80I_SRA_mIYd:   Z80I_SRA_mIYd_A: Z80I_SRA_mIYd_B: Z80I_SRA_mIYd_C:
-	Z80I_SRA_mIYd_D: Z80I_SRA_mIYd_E: Z80I_SRA_mIYd_H: Z80I_SRA_mIYd_L:
-
-	Z80I_SRL_mIXd:   Z80I_SRL_mIXd_A: Z80I_SRL_mIXd_B: Z80I_SRL_mIXd_C:
-	Z80I_SRL_mIXd_D: Z80I_SRL_mIXd_E: Z80I_SRL_mIXd_H: Z80I_SRL_mIXd_L:
-	Z80I_SRL_mIYd:   Z80I_SRL_mIYd_A: Z80I_SRL_mIYd_B: Z80I_SRL_mIYd_C:
-	Z80I_SRL_mIYd_D: Z80I_SRL_mIYd_E: Z80I_SRL_mIYd_H: Z80I_SRL_mIYd_L:
 
 	// Rotate and shift instructions
 	Z80I_RLD:  Z80I_RRD:
