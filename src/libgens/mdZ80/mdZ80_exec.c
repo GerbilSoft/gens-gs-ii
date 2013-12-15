@@ -299,11 +299,6 @@ static inline int check_interrupts(mdZ80_context *z80)
  */
 int mdZ80_exec(mdZ80_context *z80, int odo)
 {
-	// TODO: Remove this once cycle stuff is done being tested.
-	// This is needed to prevent lag.
-	z80->CycleCnt += odo;
-	return 0;
-
 	// Check if we've used up all the cycles already.
 	odo -= z80->CycleCnt;
 	if (odo <= 0) {
