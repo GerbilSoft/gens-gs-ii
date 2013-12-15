@@ -55,6 +55,34 @@ class InsnTests : public ::testing::Test
 		// Program ROM. (Mapped to $8000)
 		static const uint8_t prg_rom[0x8000];
 
+		// Default RAM data.
+		static const uint8_t default_ram_data[0x20];
+
+		/**
+		 * Get the next HL address.
+		 * HL must be within [0x00, 0x1F].
+		 */
+		static inline uint16_t get_HL_address(void)
+		{
+			static uint16_t HL_address = 0;
+			HL_address++;
+			HL_address %= sizeof(default_ram_data);
+			return HL_address;
+		}
+
+		/**
+		 * Get the next IX/IY address.
+		 * IX/IY must be within [0x04, 0x1B].
+		 */
+		static inline uint16_t get_XY_address(void)
+		{
+			static uint16_t XY_address = 4;
+			XY_address++;
+			if (XY_address >= (sizeof(default_ram_data)-0x4))
+				XY_address = 0x04;
+			return XY_address;
+		}
+
 		// Z80 memory access functions.
 		static uint8_t z80_ReadB(uint16_t addr);
 		static void z80_WriteB(uint16_t addr, uint8_t data);
@@ -90,6 +118,14 @@ class InsnTests : public ::testing::Test
 extern "C" uint8_t Ram_Z80[0x2000];
 uint8_t Ram_Z80[0x2000];
 
+// Default RAM data. ($0000 - $001F)
+const uint8_t InsnTests::default_ram_data[0x20] = {
+	'Y','o','u',' ','j','u','s','t',
+	' ','l','o','s','t',' ','T','h',
+	'e',' ','G','a','m','e','.',' ',
+	'R','I','C','K','R','O','L','L'
+};
+
 // Program memory.
 #include "InsnTests.prg_rom.inc.h"
 
@@ -112,6 +148,9 @@ void InsnTests::SetUp(void)
 	// Initialize the CPU state to random values.
 	RandomizeRegState(&initRegState);
 	setRegState(&initRegState);
+
+	// Copy default RAM data.
+	memcpy(&Ram_Z80[0], &default_ram_data[0], sizeof(default_ram_data));
 }
 
 /**
@@ -359,22 +398,159 @@ INSN_LD_R_N(E, FD_, 0x81CB, 4, 0x9A)
 INSN_LD_R_N(IYh, FD_, 0x81CF, 4, 0xBC)
 INSN_LD_R_N(IYl, FD_, 0x81D3, 4, 0xDE)
 
-#define INSN_LD_RR_NN(Rdest, PrgStart) \
-TEST_F(InsnTests, INSN_LD_ ## Rdest ## _NN) \
+/**
+ * LD R, (HL)
+ * @param Rdest Destination register.
+ * @param PrgStart Program start address.
+ * @param len Program length.
+ */
+#define INSN_LD_R_mHL(Rdest, PrgStart, len) \
+TEST_F(InsnTests, INSN_ ## LD_ ## Rdest ## _mHL) \
 { \
-	const uint16_t initPC = PrgStart; \
-	const uint16_t endPC = initPC + 4; \
+	const uint16_t initPC = (PrgStart); \
+	const uint16_t endPC = initPC + (len); \
 	mdZ80_set_PC(z80, initPC); \
+	uint16_t HL_addr = get_HL_address(); \
+	initRegState.HL = (HL_addr); \
+	mdZ80_set_HL(z80, HL_addr); \
 	mdZ80_exec(z80, 100); \
 	\
 	EXPECT_TRUE(mdZ80_get_Status(z80) & MDZ80_STATUS_HALTED); \
 	EXPECT_EQ(endPC, mdZ80_get_PC(z80)); \
 	RegState expectedRegState = initRegState; \
-	expectedRegState.Rdest = 0x1234; \
+	expectedRegState.Rdest = default_ram_data[HL_addr]; \
 	expectRegState(&expectedRegState); \
 }
 
-//INSN_LD_RR_NN(BC, 0x8002)
+/* LD R, (HL) */
+INSN_LD_R_mHL(A, 0x81D7, 2)
+INSN_LD_R_mHL(B, 0x81D9, 2)
+INSN_LD_R_mHL(C, 0x81DB, 2)
+INSN_LD_R_mHL(D, 0x81DD, 2)
+INSN_LD_R_mHL(E, 0x81DF, 2)
+INSN_LD_R_mHL(H, 0x81E1, 2)
+INSN_LD_R_mHL(L, 0x81E3, 2)
+
+/**
+ * LD R, (XY+d)
+ * @param Rdest Destination register.
+ * @param Ridx Index register.
+ * @param disp Displacement.
+ * @param PrgStart Program start address.
+ * @param len Program length.
+ */
+#define INSN_LD_R_mXYd(Rdest, Ridx, disp, PrgStart, len) \
+TEST_F(InsnTests, INSN_LD_ ## Rdest ## _m ## Ridx ## d) \
+{ \
+	const uint16_t initPC = (PrgStart); \
+	const uint16_t endPC = initPC + (len); \
+	mdZ80_set_PC(z80, initPC); \
+	uint16_t XY_addr = get_XY_address(); \
+	initRegState.Ridx = XY_addr; \
+	mdZ80_set_ ## Ridx(z80, XY_addr); \
+	mdZ80_exec(z80, 100); \
+	\
+	EXPECT_TRUE(mdZ80_get_Status(z80) & MDZ80_STATUS_HALTED); \
+	EXPECT_EQ(endPC, mdZ80_get_PC(z80)); \
+	RegState expectedRegState = initRegState; \
+	expectedRegState.Rdest = default_ram_data[XY_addr + disp]; \
+	expectRegState(&expectedRegState); \
+}
+
+/* LD R, (IX+d) */
+INSN_LD_R_mXYd(A, IX,  0, 0x81E5, 4)
+INSN_LD_R_mXYd(B, IX,  1, 0x81E9, 4)
+INSN_LD_R_mXYd(C, IX,  2, 0x81ED, 4)
+INSN_LD_R_mXYd(D, IX,  3, 0x81F1, 4)
+INSN_LD_R_mXYd(E, IX, -1, 0x81F5, 4)
+INSN_LD_R_mXYd(H, IX, -2, 0x81F9, 4)
+INSN_LD_R_mXYd(L, IX, -3, 0x81FD, 4)
+
+/* LD R, (IY+d) */
+INSN_LD_R_mXYd(A, IY,  0, 0x8201, 4)
+INSN_LD_R_mXYd(B, IY,  1, 0x8205, 4)
+INSN_LD_R_mXYd(C, IY,  2, 0x8209, 4)
+INSN_LD_R_mXYd(D, IY,  3, 0x820D, 4)
+INSN_LD_R_mXYd(E, IY, -1, 0x8211, 4)
+INSN_LD_R_mXYd(H, IY, -2, 0x8215, 4)
+INSN_LD_R_mXYd(L, IY, -3, 0x8219, 4)
+
+/**
+ * LD (HL), R
+ * @param Rsrc Source register.
+ * @param PrgStart Program start address.
+ * @param len Program length.
+ */
+#define INSN_LD_mHL_R(Rsrc, PrgStart, len) \
+TEST_F(InsnTests, INSN_ ## LD_mHL_ ## Rsrc) \
+{ \
+	const uint16_t initPC = (PrgStart); \
+	const uint16_t endPC = initPC + (len); \
+	mdZ80_set_PC(z80, initPC); \
+	uint16_t HL_addr = get_HL_address(); \
+	initRegState.HL = (HL_addr); \
+	mdZ80_set_HL(z80, HL_addr); \
+	mdZ80_exec(z80, 100); \
+	\
+	EXPECT_TRUE(mdZ80_get_Status(z80) & MDZ80_STATUS_HALTED); \
+	EXPECT_EQ(endPC, mdZ80_get_PC(z80)); \
+	EXPECT_EQ(initRegState.Rsrc, Ram_Z80[HL_addr]); \
+	RegState expectedRegState = initRegState; \
+	expectRegState(&expectedRegState); \
+}
+
+/* LD (HL), R */
+INSN_LD_mHL_R(A, 0x821D, 2)
+INSN_LD_mHL_R(B, 0x821F, 2)
+INSN_LD_mHL_R(C, 0x8221, 2)
+INSN_LD_mHL_R(D, 0x8223, 2)
+INSN_LD_mHL_R(E, 0x8225, 2)
+INSN_LD_mHL_R(H, 0x8227, 2)
+INSN_LD_mHL_R(L, 0x8229, 2)
+
+/**
+ * LD (XY+d), R
+ * @param Ridx Index register.
+ * @param disp Displacement.
+ * @param Rsrc Destination register.
+ * @param PrgStart Program start address.
+ * @param len Program length.
+ */
+#define INSN_LD_mXYd_R(Ridx, disp, Rsrc, PrgStart, len) \
+TEST_F(InsnTests, INSN_LD_m_ ## Ridx ## d_ ## Rsrc) \
+{ \
+	const uint16_t initPC = (PrgStart); \
+	const uint16_t endPC = initPC + (len); \
+	mdZ80_set_PC(z80, initPC); \
+	uint16_t XY_addr = get_XY_address(); \
+	initRegState.Ridx = XY_addr; \
+	mdZ80_set_ ## Ridx(z80, XY_addr); \
+	mdZ80_exec(z80, 100); \
+	\
+	EXPECT_TRUE(mdZ80_get_Status(z80) & MDZ80_STATUS_HALTED); \
+	EXPECT_EQ(endPC, mdZ80_get_PC(z80)); \
+	EXPECT_EQ(initRegState.Rsrc, Ram_Z80[XY_addr + disp]); \
+	RegState expectedRegState = initRegState; \
+	expectRegState(&expectedRegState); \
+}
+
+/* LD (IX+d), R */
+INSN_LD_mXYd_R(IX,  0, A, 0x822B, 4)
+INSN_LD_mXYd_R(IX,  1, B, 0x822F, 4)
+INSN_LD_mXYd_R(IX,  2, C, 0x8233, 4)
+INSN_LD_mXYd_R(IX,  3, D, 0x8237, 4)
+INSN_LD_mXYd_R(IX, -1, E, 0x823B, 4)
+INSN_LD_mXYd_R(IX, -2, H, 0x823F, 4)
+INSN_LD_mXYd_R(IX, -3, L, 0x8243, 4)
+
+/* LD (IY+d), R */
+INSN_LD_mXYd_R(IY,  0, A, 0x8247, 4)
+INSN_LD_mXYd_R(IY,  1, B, 0x824B, 4)
+INSN_LD_mXYd_R(IY,  2, C, 0x824F, 4)
+INSN_LD_mXYd_R(IY,  3, D, 0x8253, 4)
+INSN_LD_mXYd_R(IY, -1, E, 0x8257, 4)
+INSN_LD_mXYd_R(IY, -2, H, 0x825B, 4)
+INSN_LD_mXYd_R(IY, -3, L, 0x825F, 4)
 
 } }
 
