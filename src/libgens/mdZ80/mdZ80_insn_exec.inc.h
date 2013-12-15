@@ -362,7 +362,7 @@ while (1) {
 	Z80I_LD_A_mRR(BC);
 	Z80I_LD_A_mRR(DE);
 
-	// LD A, (imm16)	A <- (imm16)
+	// LD A, (NN)		A <- (imm16)
 	Z80I_LD_A_mNN: {
 		uint16_t src_addr = read_word_offset_pc(z80, 1);
 		z80->A = READ_BYTE(z80, src_addr);
@@ -383,7 +383,7 @@ while (1) {
 	Z80I_LD_mRR_A(BC);
 	Z80I_LD_mRR_A(DE);
 
-	// LD (imm16), A	(imm16) <- A
+	// LD (NN), A		(imm16) <- A
 	Z80I_LD_mNN_A: {
 		uint16_t dest_addr = read_word_offset_pc(z80, 1);
 		WRITE_BYTE(z80, dest_addr, z80->A);
