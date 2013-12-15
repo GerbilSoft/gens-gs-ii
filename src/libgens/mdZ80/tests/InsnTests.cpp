@@ -232,6 +232,14 @@ TEST_F(InsnTests, INSN_NOP)
 	expectRegState(&initRegState);
 }
 
+/**
+ * LD R, R
+ * @param Rdest Destination register.
+ * @param Rsrc Source register.
+ * @param Prefix IX/IY prefix.
+ * @param PrgStart Program start address.
+ * @param len Program length.
+ */
 #define INSN_LD_R_R(Rdest, Rsrc, Prefix, PrgStart, len) \
 TEST_F(InsnTests, INSN_ ## Prefix ## LD_ ## Rdest ## _ ## Rsrc) \
 { \
@@ -300,6 +308,56 @@ INSN_FD_LD_R_R_ABCDEHL(D, 0x8136)
 INSN_FD_LD_R_R_ABCDEHL(E, 0x814B)
 INSN_FD_LD_R_R_ABCDEHL(IYh, 0x8160)
 INSN_FD_LD_R_R_ABCDEHL(IYl, 0x8175)
+
+/**
+ * LD R, N
+ * @param Rdest Destination register.
+ * @param Prefix IX/IY prefix.
+ * @param PrgStart Program start address.
+ * @param len Program length.
+ * @param expected Expected 'N' value.
+ */
+#define INSN_LD_R_N(Rdest, Prefix, PrgStart, len, expected) \
+TEST_F(InsnTests, INSN_ ## Prefix ## LD_ ## Rdest ## _N) \
+{ \
+	const uint16_t initPC = (PrgStart); \
+	const uint16_t endPC = initPC + (len); \
+	mdZ80_set_PC(z80, initPC); \
+	mdZ80_exec(z80, 100); \
+	\
+	EXPECT_TRUE(mdZ80_get_Status(z80) & MDZ80_STATUS_HALTED); \
+	EXPECT_EQ(endPC, mdZ80_get_PC(z80)); \
+	RegState expectedRegState = initRegState; \
+	expectedRegState.Rdest = expected; \
+	expectRegState(&expectedRegState); \
+}
+
+/* LD R, N */
+INSN_LD_R_N(A, , 0x818A, 3, 0x12)
+INSN_LD_R_N(B, , 0x818D, 3, 0x34)
+INSN_LD_R_N(C, , 0x8190, 3, 0x56)
+INSN_LD_R_N(D, , 0x8193, 3, 0x78)
+INSN_LD_R_N(E, , 0x8196, 3, 0x9A)
+INSN_LD_R_N(H, , 0x8199, 3, 0xBC)
+INSN_LD_R_N(L, , 0x819C, 3, 0xDE)
+
+/* DD (IX): LD R, N */
+INSN_LD_R_N(A, DD_, 0x819F, 4, 0x12)
+INSN_LD_R_N(B, DD_, 0x81A3, 4, 0x34)
+INSN_LD_R_N(C, DD_, 0x81A7, 4, 0x56)
+INSN_LD_R_N(D, DD_, 0x81AB, 4, 0x78)
+INSN_LD_R_N(E, DD_, 0x81AF, 4, 0x9A)
+INSN_LD_R_N(IXh, DD_, 0x81B3, 4, 0xBC)
+INSN_LD_R_N(IXl, DD_, 0x81B7, 4, 0xDE)
+
+/* FD (IY): LD R, N */
+INSN_LD_R_N(A, FD_, 0x81BB, 4, 0x12)
+INSN_LD_R_N(B, FD_, 0x81BF, 4, 0x34)
+INSN_LD_R_N(C, FD_, 0x81C3, 4, 0x56)
+INSN_LD_R_N(D, FD_, 0x81C7, 4, 0x78)
+INSN_LD_R_N(E, FD_, 0x81CB, 4, 0x9A)
+INSN_LD_R_N(IYh, FD_, 0x81CF, 4, 0xBC)
+INSN_LD_R_N(IYl, FD_, 0x81D3, 4, 0xDE)
 
 #define INSN_LD_RR_NN(Rdest, PrgStart) \
 TEST_F(InsnTests, INSN_LD_ ## Rdest ## _NN) \
