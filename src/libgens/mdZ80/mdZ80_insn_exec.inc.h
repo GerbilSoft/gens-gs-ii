@@ -1457,6 +1457,56 @@ while (1) {
 
 	/*! Rotate and shift instructions */
 
+	// RLCA			Rotate A left; copy sign bit to CF
+	// TODO: Verify emulation of flags 3 and 5.
+	// TODO: Verify carry emulation.
+	Z80I_RLCA: {
+		z80->A = (z80->A << 1) | (z80->A >> 7);
+		z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P);
+		z80->F |= (z80->A & 0x01); /* MDZ80_FLAG_C */
+		z80->F |= (z80->A & (MDZ80_FLAG_5 | MDZ80_FLAG_3));
+		z80->PC++;
+		NEXT(4);
+	}
+
+	// RLA			Rotate A left through CF
+	// TODO: Verify emulation of flags 3 and 5.
+	// TODO: Verify carry emulation.
+	Z80I_RLA: {
+		const unsigned int tmp = (z80->A << 1) | (z80->F & MDZ80_FLAG_C);
+		z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P);
+		z80->A = (tmp & 0xFF);
+		z80->F |= (tmp >> 8); /* MDZ80_FLAG_C */
+		z80->F |= (z80->A & (MDZ80_FLAG_5 | MDZ80_FLAG_3));
+		z80->PC++;
+		NEXT(4);
+	}
+
+	// RRCA			Rotate A right; copy sign bit to CF
+	// TODO: Verify emulation of flags 3 and 5.
+	// TODO: Verify carry emulation.
+	Z80I_RRCA: {
+		z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P);
+		z80->F |= (z80->A & 0x01);	/* MDZ80_FLAG_C */
+		z80->A = (z80->A >> 1) | (z80->A << 7);
+		z80->F |= (z80->A & (MDZ80_FLAG_5 | MDZ80_FLAG_3));
+		z80->PC++;
+		NEXT(4);
+	}
+
+	// RRA			Rotate A right through CF
+	// TODO: Verify emulation of flags 3 and 5.
+	// TODO: Verify carry emulation.
+	Z80I_RRA: {
+		const uint8_t tmp = (z80->A >> 1) | ((z80->F & MDZ80_FLAG_C) << 7); \
+		z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P); \
+		z80->F |= (z80->A & MDZ80_FLAG_C); \
+		z80->A = tmp; \
+		z80->F |= (z80->A & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+		z80->PC++;
+		NEXT(4);
+	}
+
 	/**
 	 * Z80U_OP_RLC: Rotate Dest left; copy sign bit to CF.
 	 * @param Dest Destination.
@@ -1466,9 +1516,10 @@ while (1) {
 	#define Z80U_OP_RLC(Dest) \
 		do { \
 			Dest = (Dest << 1) | (Dest >> 7); \
-			z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P); \
-			z80->F |= (Dest & 0x01); /* MDZ80_FLAG_C */ \
-			z80->F |= (Dest & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+			z80->F = (Dest & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+			z80->F |= (Dest >> 7);	/* MDZ80_FLAG_C */ \
+			if (Dest) z80->F |= MDZ80_FLAG_Z; \
+			z80->F |= calc_parity_flag(Dest); \
 		} while (0)
 
 	/**
@@ -1480,10 +1531,10 @@ while (1) {
 	#define Z80U_OP_RL(Dest) \
 		do { \
 			const unsigned int tmp = (Dest << 1) | (z80->F & MDZ80_FLAG_C); \
-			z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P); \
 			Dest = (tmp & 0xFF); \
+			z80->F = (Dest & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
 			z80->F |= (tmp >> 8); /* MDZ80_FLAG_C */ \
-			z80->F |= (Dest & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+			z80->F |= calc_parity_flag(Dest); \
 		} while (0)
 
 	/**
@@ -1494,10 +1545,10 @@ while (1) {
 	 */
 	#define Z80U_OP_RRC(Dest) \
 		do { \
-			z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P); \
-			z80->F |= (Dest & 0x01);	/* MDZ80_FLAG_C */ \
+			z80->F = (Dest & 0x01);	/* MDZ80_FLAG_C */ \
 			Dest = (Dest >> 1) | (Dest << 7); \
-			z80->F |= (Dest & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+			z80->F = (Dest & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+			z80->F |= calc_parity_flag(Dest); \
 		} while (0)
 
 	/**
@@ -1509,29 +1560,11 @@ while (1) {
 	#define Z80U_OP_RR(Dest) \
 		do { \
 			const uint8_t tmp = (Dest >> 1) | ((z80->F & MDZ80_FLAG_C) << 7); \
-			z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P); \
-			z80->F |= (Dest & MDZ80_FLAG_C); \
+			z80->F = (Dest & 0x01);	/* MDZ80_FLAG_C */ \
 			Dest = tmp; \
-			z80->F |= (Dest & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+			z80->F = (Dest & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+			z80->F |= calc_parity_flag(Dest); \
 		} while (0)
-
-	/**
-	 * Z80I_ROTA: Rotate A using the given operation.
-	 * This is an 8080-compatible 1-byte instruction.
-	 * @param Op Rotate operation.
-	 */
-	#define Z80I_ROTA(Op) \
-		Z80I_ ## Op ## A : \
-			do { \
-				Z80U_OP_ ## Op(z80->A); \
-				z80->PC++; \
-				NEXT(4); \
-			} while (0)
-
-	Z80I_ROTA(RLC);
-	Z80I_ROTA(RL);
-	Z80I_ROTA(RRC);
-	Z80I_ROTA(RR);
 
 	/**
 	 * Z80I_ROT_R: Rotate R8 using the given operation.
