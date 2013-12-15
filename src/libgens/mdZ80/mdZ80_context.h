@@ -24,6 +24,8 @@
 #ifndef __MDZ80_CONTEXT_H__
 #define __MDZ80_CONTEXT_H__
 
+// NOTE: This file should ONLY be included directly by mdZ80 code!
+
 /****************************/
 /* Structures & definitions */
 /****************************/

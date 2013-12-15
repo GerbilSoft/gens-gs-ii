@@ -35,8 +35,8 @@ struct _mdZ80_context;
 typedef struct _mdZ80_context mdZ80_context;
 
 // Z80 function pointer definitions.
-typedef uint8_t Z80_RB(uint32_t adr);
-typedef void Z80_WB(uint32_t adr, uint8_t data);
+typedef uint8_t Z80_RB(uint16_t adr);
+typedef void Z80_WB(uint16_t adr, uint8_t data);
 
 /*! Z80 context allocation. **/
 

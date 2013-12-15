@@ -58,24 +58,24 @@ class Z80_MD_Mem
 		
 		/** Public read/write functions. **/
 		// TODO: Make these inline!
-		static uint8_t Z80_ReadB(uint32_t address);
-		static void Z80_WriteB(uint32_t address, uint8_t data);
+		static uint8_t Z80_ReadB(uint16_t address);
+		static void Z80_WriteB(uint16_t address, uint8_t data);
 	
 	private:
 		/** Z80 read/write functions. **/
-		typedef uint8_t  (*Z80_ReadB_fn) (uint32_t address);
-		typedef void     (*Z80_WriteB_fn)(uint32_t address, uint8_t data);
+		typedef uint8_t  (*Z80_ReadB_fn) (uint16_t address);
+		typedef void     (*Z80_WriteB_fn)(uint16_t address, uint8_t data);
 		
 		/** Read Byte functions. **/
-		static uint8_t Z80_ReadB_YM2612(uint32_t address);
-		static uint8_t Z80_ReadB_VDP(uint32_t address);
-		static uint8_t Z80_ReadB_68K_Rom(uint32_t address);
+		static uint8_t Z80_ReadB_YM2612(uint16_t address);
+		static uint8_t Z80_ReadB_VDP(uint16_t address);
+		static uint8_t Z80_ReadB_68K_Rom(uint16_t address);
 		
 		/** Write Byte functions. **/
-		static void Z80_WriteB_Bank(uint32_t address, uint8_t data);
-		static void Z80_WriteB_YM2612(uint32_t address, uint8_t data);
-		static void Z80_WriteB_VDP(uint32_t address, uint8_t data);
-		static void Z80_WriteB_68K_Rom(uint32_t address, uint8_t data);
+		static void Z80_WriteB_Bank(uint16_t address, uint8_t data);
+		static void Z80_WriteB_YM2612(uint16_t address, uint8_t data);
+		static void Z80_WriteB_VDP(uint16_t address, uint8_t data);
+		static void Z80_WriteB_68K_Rom(uint16_t address, uint8_t data);
 };
 
 }
