@@ -3039,48 +3039,48 @@ while (1) {
 		NEXT(12);
 	}
 
-	// TODO: OUTX/OUTXR
+	// TODO: OUTX/OTXR
 
 	/*! Instruction prefixes. */
 
 	// CB instruction prefix
 	PREFIX_CB: {
-		const uint8_t CB_opcode = read_byte_offset_pc(z80, 1);
-		goto *z80_insn_table_CB[CB_opcode];
+		const uint8_t insn = read_byte_offset_pc(z80, 1);
+		goto *z80_insn_table_CB[insn];
 	}
 
 	// ED instruction prefix
 	PREFIX_ED: {
-		const uint8_t ED_opcode = read_byte_offset_pc(z80, 1);
-		goto *z80_insn_table_ED[ED_opcode];
+		const uint8_t insn = read_byte_offset_pc(z80, 1);
+		goto *z80_insn_table_ED[insn];
 	}
 
 	// DD instruction prefix
 	PREFIX_DD: {
-		const uint8_t DD_opcode = read_byte_offset_pc(z80, 1);
+		const uint8_t insn = read_byte_offset_pc(z80, 1);
 		odo -= 4;
 		z80->PC++;
-		goto *z80_insn_table_DD[DD_opcode];
+		goto *z80_insn_table_DD[insn];
 	}
 
 	// DDCB instruction prefix
 	PREFIX_DDCB: {
-		const uint8_t DDCB_opcode = read_byte_offset_pc(z80, 2);
-		goto *z80_insn_table_DDCB[DDCB_opcode];
+		const uint8_t insn = read_byte_offset_pc(z80, 2);
+		goto *z80_insn_table_DDCB[insn];
 	}
 
 	// FD instruction prefix
 	PREFIX_FD: {
-		const uint8_t FD_opcode = read_byte_offset_pc(z80, 1);
+		const uint8_t insn = read_byte_offset_pc(z80, 1);
 		odo -= 4;
 		z80->PC++;
-		goto *z80_insn_table_FD[FD_opcode];
+		goto *z80_insn_table_FD[insn];
 	}
 
 	// FDCB instruction prefix
 	PREFIX_FDCB: {
-		const uint8_t FDCB_opcode = read_byte_offset_pc(z80, 2);
-		goto *z80_insn_table_FDCB[FDCB_opcode];
+		const uint8_t insn = read_byte_offset_pc(z80, 2);
+		goto *z80_insn_table_FDCB[insn];
 	}
 
 	// Unimplemented opcodes
