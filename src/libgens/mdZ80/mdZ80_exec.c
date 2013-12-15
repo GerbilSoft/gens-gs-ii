@@ -210,9 +210,9 @@ static inline int check_interrupts(mdZ80_context *z80)
 		// NMI
 
 		// Push the current PC onto the stack.
-		uint16_t sp = z80->SP - 2;
 		uint16_t curPC = (z80->PC - z80->BasePC);
-		WRITE_WORD(z80, sp, curPC);
+		z80->SP -= 2;
+		WRITE_WORD(z80, z80->SP, curPC);
 
 		// Clear IFF1. (IFF2 remains as-is.)
 		z80->IFF &= ~1;
@@ -230,9 +230,9 @@ static inline int check_interrupts(mdZ80_context *z80)
 		// Interrupt.
 
 		// Push the current PC onto the stack.
-		uint16_t sp = z80->SP - 2;
 		uint16_t curPC = (z80->PC - z80->BasePC);
-		WRITE_WORD(z80, sp, curPC);
+		z80->SP -= 2;
+		WRITE_WORD(z80, z80->SP, curPC);
 
 		// INT clears both IFF1 and IFF2.
 		z80->IFF = 0;
