@@ -1457,234 +1457,225 @@ while (1) {
 
 	/*! Rotate and shift instructions */
 
-	// RLCA			Rotate A left; copy sign bit to CF
-	// TODO: Verify emulation of flags 3 and 5.
-	// TODO: Verify carry emulation.
-	Z80I_RLCA: {
-		z80->A = (z80->A << 1) | (z80->A >> 7);
-		z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P);
-		z80->F |= (z80->A & 0x01);	// MDZ80_FLAG_C
-		z80->F |= (z80->A & (MDZ80_FLAG_5 | MDZ80_FLAG_3));
-		z80->PC++;
-		NEXT(4);
-	}
-
-	// RLA			Rotate A left through CF
-	// TODO: Verify emulation of flags 3 and 5.
-	// TODO: Verify carry emulation.
-	Z80I_RLA: {
-		const uint16_t tmp = (z80->A << 1) | (z80->F & MDZ80_FLAG_C);
-		z80->A = (tmp & 0xFF);
-		z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P);
-		z80->F |= (tmp >> 8);	// MDZ80_FLAG_C
-		z80->F |= (z80->A & (MDZ80_FLAG_5 | MDZ80_FLAG_3));
-		z80->PC++;
-		NEXT(4);
-	}
-
-	// RRCA			Rotate A right; copy sign bit to CF
-	// TODO: Verify emulation of flags 3 and 5.
-	// TODO: Verify carry emulation.
-	Z80I_RRCA: {
-		z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P);
-		z80->F |= (z80->A & 0x01);	// MDZ80_FLAG_C
-		z80->A = (z80->A >> 1) | (z80->A << 7);
-		z80->F |= (z80->A & (MDZ80_FLAG_5 | MDZ80_FLAG_3));
-		z80->PC++;
-		NEXT(4);
-	}
-
-	// RRA			Rotate A right through CF
-	// TODO: Verify emulation of flags 3 and 5.
-	// TODO: Verify carry emulation.
-	Z80I_RRA: {
-		const uint8_t tmp = (z80->A >> 1) | ((z80->F & MDZ80_FLAG_C) << 7);
-		z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P);
-		z80->F |= (tmp & 0x01);	// MDZ80_FLAG_C
-		z80->A = tmp;
-		z80->F |= (z80->A & (MDZ80_FLAG_5 | MDZ80_FLAG_3));
-		z80->PC++;
-		NEXT(4);
-	}
-
-	// RLC R		Rotate R8 left; copy sign bit to CF
-	// TODO: Verify emulation of flags 3 and 5.
-	// TODO: Verify carry emulation.
-	#define Z80I_RLC_R(Rdest) \
-		Z80I_RLC_ ## Rdest : \
-			do { \
-				z80->R = (z80->Rdest << 1) | (z80->Rdest >> 7); \
-				z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
-				z80->F |= (z80->Rdest & 0x01);	/* MDZ80_FLAG_C */ \
-				z80->F |= (z80->Rdest & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-				z80->F |= calc_parity_flag(z80->Rdest); \
-				z80->PC += 2; \
-				NEXT(8); \
-			} while (0)
-
-	Z80I_RLC_R(A);
-	Z80I_RLC_R(B);
-	Z80I_RLC_R(C);
-	Z80I_RLC_R(D);
-	Z80I_RLC_R(E);
-	Z80I_RLC_R(H);
-	Z80I_RLC_R(L);
-
-	// RL R			Rotate R8 left through CF
-	// TODO: Verify emulation of flags 3 and 5.
-	// TODO: Verify carry emulation.
-	#define Z80I_RL_R(Rdest) \
-		Z80I_RL_ ## Rdest : \
-			do { \
-				const uint16_t tmp = (z80->Rdest << 1) | (z80->F & MDZ80_FLAG_C); \
-				z80->Rdest = (tmp & 0xFF); \
-				z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
-				z80->F |= (tmp >> 8);	/* MDZ80_FLAG_C */ \
-				z80->F |= (z80->Rdest & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-				z80->F |= calc_parity_flag(z80->Rdest); \
-				z80->PC += 2; \
-				NEXT(8); \
-			} while (0)
-
-	Z80I_RL_R(A);
-	Z80I_RL_R(B);
-	Z80I_RL_R(C);
-	Z80I_RL_R(D);
-	Z80I_RL_R(E);
-	Z80I_RL_R(H);
-	Z80I_RL_R(L);
-
-	// RRC R		Rotate R8 right; copy sign bit to CF
-	// TODO: Verify emulation of flags 3 and 5.
-	// TODO: Verify carry emulation.
-	#define Z80I_RRC_R(Rdest) \
-		Z80I_RRC_ ## Rdest : \
-			do { \
-				z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
-				z80->F |= (z80->Rdest & 0x01);	/* MDZ80_FLAG_C */ \
-				z80->A = (z80->Rdest >> 1) | (z80->Rdest << 7); \
-				z80->F |= (z80->Rdest & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-				z80->F |= calc_parity_flag(z80->Rdest); \
-				z80->PC += 2; \
-				NEXT(8); \
-			} while (0)
-
-	Z80I_RRC_R(A);
-	Z80I_RRC_R(B);
-	Z80I_RRC_R(C);
-	Z80I_RRC_R(D);
-	Z80I_RRC_R(E);
-	Z80I_RRC_R(H);
-	Z80I_RRC_R(L);
-
-	// RR R			Rotate R8 right through CF
-	// TODO: Verify emulation of flags 3 and 5.
-	// TODO: Verify carry emulation.
-	#define Z80I_RR_R(Rdest) \
-		Z80I_RR_ ## Rdest : \
-			do { \
-				const uint8_t tmp = (z80->Rdest >> 1) | ((z80->F & MDZ80_FLAG_C) << 7); \
-				z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
-				z80->F |= (tmp & 0x01);	/* MDZ80_FLAG_C */ \
-				z80->A = tmp; \
-				z80->F |= (z80->A & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-				z80->F |= calc_parity_flag(z80->Rdest); \
-				z80->PC += 2; \
-				NEXT(8); \
-			} while (0)
-
-	Z80I_RR_R(A);
-	Z80I_RR_R(B);
-	Z80I_RR_R(C);
-	Z80I_RR_R(D);
-	Z80I_RR_R(E);
-	Z80I_RR_R(H);
-	Z80I_RR_R(L);
-
 	/**
-	 * Shift Left operation.
-	 * @param Op Operation. (SLA, SLL)
-	 * @param Inc Increment, (SLA == 0, SLL == 1)
-	 * @param Rdest Destination register.
-	 *
+	 * Z80U_OP_RLC: Rotate Dest left; copy sign bit to CF.
+	 * @param Dest Destination.
 	 * TODO: Verify emulation of flags 3 and 5.
 	 * TODO: Verify carry emulation.
 	 */
-	#define Z80I_SHL_R(Op, Inc, Rdest) \
+	#define Z80U_OP_RLC(Dest) \
+		do { \
+			Dest = (Dest << 1) | (Dest >> 7); \
+			z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P); \
+			z80->F |= (Dest & 0x01); /* MDZ80_FLAG_C */ \
+			z80->F |= (Dest & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+		} while (0)
+
+	/**
+	 * Z80U_OP_RL: Rotate Dest left through CF.
+	 * @param Dest Destination.
+	 * TODO: Verify emulation of flags 3 and 5.
+	 * TODO: Verify carry emulation.
+	 */
+	#define Z80U_OP_RL(Dest) \
+		do { \
+			const unsigned int tmp = (Dest << 1) | (z80->F & MDZ80_FLAG_C); \
+			z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P); \
+			Dest = (tmp & 0xFF); \
+			z80->F |= (tmp >> 8); /* MDZ80_FLAG_C */ \
+			z80->F |= (Dest & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+		} while (0)
+
+	/**
+	 * Z80U_OP_RRC: Rotate Dest right; copy sign bit to CF.
+	 * @param Dest Destination.
+	 * TODO: Verify emulation of flags 3 and 5.
+	 * TODO: Verify carry emulation.
+	 */
+	#define Z80U_OP_RRC(Dest) \
+		do { \
+			z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P); \
+			z80->F |= (Dest & 0x01);	/* MDZ80_FLAG_C */ \
+			Dest = (Dest >> 1) | (Dest << 7); \
+			z80->F |= (Dest & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+		} while (0)
+
+	/**
+	 * Z80U_OP_RR: Rotate Dest right through CF.
+	 * @param Dest Destination.
+	 * TODO: Verify emulation of flags 3 and 5.
+	 * TODO: Verify carry emulation.
+	 */
+	#define Z80U_OP_RR(Dest) \
+		do { \
+			const uint8_t tmp = (Dest >> 1) | ((z80->F & MDZ80_FLAG_C) << 7); \
+			z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z | MDZ80_FLAG_P); \
+			z80->F |= (Dest & MDZ80_FLAG_C); \
+			Dest = tmp; \
+			z80->F |= (Dest & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+		} while (0)
+
+	/**
+	 * Z80I_ROTA: Rotate A using the given operation.
+	 * This is an 8080-compatible 1-byte instruction.
+	 * @param Op Rotate operation.
+	 */
+	#define Z80I_ROTA(Op) \
+		Z80I_ ## Op ## A : \
+			do { \
+				Z80U_OP_ ## Op(z80->A); \
+				z80->PC++; \
+				NEXT(4); \
+			} while (0)
+
+	Z80I_ROTA(RLC);
+	Z80I_ROTA(RL);
+	Z80I_ROTA(RRC);
+	Z80I_ROTA(RR);
+
+	/**
+	 * Z80I_ROT_R: Rotate R8 using the given operation.
+	 * This is a Z80 extended instruction. (CB-prefix)
+	 * @param Op Rotate operation.
+	 * @param Rdest Destination register.
+	 */
+	#define Z80I_ROT_R(Op, Rdest) \
 		Z80I_ ## Op ## _ ## Rdest : \
 			do { \
-				const uint8_t tmp = (z80->Rdest << 1) + (Inc); \
-				z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
-				z80->F |= (z80->Rdest >> 8);	/* MDZ80_FLAG_C */ \
-				z80->F |= (tmp & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-				z80->Rdest = tmp; \
-				z80->F |= calc_parity_flag(z80->Rdest); \
+				Z80U_OP_ ## Op(z80->Rdest); \
 				z80->PC += 2; \
 				NEXT(8); \
 			} while (0)
 
-	// SLA R		R8 <<= 1 (arithmetic shift)
-	Z80I_SHL_R(SLA, 0, A);
-	Z80I_SHL_R(SLA, 0, B);
-	Z80I_SHL_R(SLA, 0, C);
-	Z80I_SHL_R(SLA, 0, D);
-	Z80I_SHL_R(SLA, 0, E);
-	Z80I_SHL_R(SLA, 0, H);
-	Z80I_SHL_R(SLA, 0, L);
+	Z80I_ROT_R(RLC, A);
+	Z80I_ROT_R(RLC, B);
+	Z80I_ROT_R(RLC, C);
+	Z80I_ROT_R(RLC, D);
+	Z80I_ROT_R(RLC, E);
+	Z80I_ROT_R(RLC, H);
+	Z80I_ROT_R(RLC, L);
 
-	// SLL R		R8 <<= 1 (logical shift); bit 0 is set
-	Z80I_SHL_R(SLL, 1, A);
-	Z80I_SHL_R(SLL, 1, B);
-	Z80I_SHL_R(SLL, 1, C);
-	Z80I_SHL_R(SLL, 1, D);
-	Z80I_SHL_R(SLL, 1, E);
-	Z80I_SHL_R(SLL, 1, H);
-	Z80I_SHL_R(SLL, 1, L);
+	Z80I_ROT_R(RL, A);
+	Z80I_ROT_R(RL, B);
+	Z80I_ROT_R(RL, C);
+	Z80I_ROT_R(RL, D);
+	Z80I_ROT_R(RL, E);
+	Z80I_ROT_R(RL, H);
+	Z80I_ROT_R(RL, L);
 
-	// SRA R		R8 >>= 1 (arithmetic shift)
-	#define Z80I_SRA_R(Rdest) \
-		Z80I_SRA_ ## Rdest : \
-			do { \
-				const int8_t Rorig = *((int8_t*)&z80->Rdest); \
-				const int8_t tmp = (Rorig >> 1); \
-				z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
-				z80->F |= (Rorig & 1);	/* MDZ80_FLAG_C */ \
-				z80->F |= (tmp & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-				z80->Rdest = *((uint8_t*)&tmp); \
-				z80->F |= calc_parity_flag(z80->Rdest); \
-				z80->PC += 2; \
-				NEXT(8); \
-			} while (0)
+	Z80I_ROT_R(RRC, A);
+	Z80I_ROT_R(RRC, B);
+	Z80I_ROT_R(RRC, C);
+	Z80I_ROT_R(RRC, D);
+	Z80I_ROT_R(RRC, E);
+	Z80I_ROT_R(RRC, H);
+	Z80I_ROT_R(RRC, L);
 
-	Z80I_SRA_R(A);
-	Z80I_SRA_R(B);
-	Z80I_SRA_R(C);
-	Z80I_SRA_R(D);
-	Z80I_SRA_R(E);
-	Z80I_SRA_R(H);
-	Z80I_SRA_R(L);
+	Z80I_ROT_R(RR, A);
+	Z80I_ROT_R(RR, B);
+	Z80I_ROT_R(RR, C);
+	Z80I_ROT_R(RR, D);
+	Z80I_ROT_R(RR, E);
+	Z80I_ROT_R(RR, H);
+	Z80I_ROT_R(RR, L);
 
-	// SRL R		R8 >>= 1 (logical shift)
-	#define Z80I_SRL_R(Rdest) \
-		Z80I_SRL_ ## Rdest : \
-			do { \
-				const uint8_t tmp = (z80->Rdest >> 1); \
-				z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
-				z80->F |= (z80->Rdest >> 8);	/* MDZ80_FLAG_C */ \
-				z80->F |= (tmp & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-				z80->Rdest = tmp; \
-				z80->F |= calc_parity_flag(z80->Rdest); \
-				z80->PC += 2; \
-				NEXT(8); \
-			} while (0)
+	/**
+	 * Z80U_OP_SLA: Shift Left (arithmetic)
+	 * @param Dest Destination.
+	 * TODO: Verify emulation of flags 3 and 5.
+	 * TODO: Verify carry emulation.
+	 */
+	#define Z80U_OP_SLA(Dest) \
+		do { \
+			const uint8_t tmp = (Dest << 1); \
+			z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
+			z80->F |= (Dest >> 8);	/* MDZ80_FLAG_C */ \
+			z80->F |= (tmp & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+			Dest = tmp; \
+			z80->F |= calc_parity_flag(Dest); \
+		} while (0)
 
-	Z80I_SRL_R(A);
-	Z80I_SRL_R(B);
-	Z80I_SRL_R(C);
-	Z80I_SRL_R(D);
-	Z80I_SRL_R(E);
-	Z80I_SRL_R(H);
-	Z80I_SRL_R(L);
+	/**
+	 * Z80U_OP_SLL: Shift Left (logical)
+	 * NOTE: Same as SLA, but sets bit 0. [Undocumented instruction!]
+	 * @param Dest Destination.
+	 * TODO: Verify emulation of flags 3 and 5.
+	 * TODO: Verify carry emulation.
+	 */
+	#define Z80U_OP_SLL(Dest) \
+		do { \
+			const uint8_t tmp = ((Dest << 1) + 1); \
+			z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
+			z80->F |= (Dest >> 8);	/* MDZ80_FLAG_C */ \
+			z80->F |= (tmp & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+			Dest = tmp; \
+			z80->F |= calc_parity_flag(Dest); \
+		} while (0)
+
+	Z80I_ROT_R(SLA, A);
+	Z80I_ROT_R(SLA, B);
+	Z80I_ROT_R(SLA, C);
+	Z80I_ROT_R(SLA, D);
+	Z80I_ROT_R(SLA, E);
+	Z80I_ROT_R(SLA, H);
+	Z80I_ROT_R(SLA, L);
+
+	Z80I_ROT_R(SLL, A);
+	Z80I_ROT_R(SLL, B);
+	Z80I_ROT_R(SLL, C);
+	Z80I_ROT_R(SLL, D);
+	Z80I_ROT_R(SLL, E);
+	Z80I_ROT_R(SLL, H);
+	Z80I_ROT_R(SLL, L);
+
+	/**
+	 * Z80U_OP_SRA: Shift Right (arithmetic)
+	 * @param Dest Destination.
+	 * TODO: Verify emulation of flags 3 and 5.
+	 * TODO: Verify carry emulation.
+	 */
+	#define Z80U_OP_SRA(Dest) \
+		do { \
+			const int8_t Orig = *((int8_t*)&(Dest)); \
+			const int8_t tmp = (Orig >> 1); \
+			z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
+			z80->F |= (Orig & 1);	/* MDZ80_FLAG_C */ \
+			z80->F |= (tmp & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+			Dest = *((uint8_t*)&tmp); \
+			z80->F |= calc_parity_flag(Dest); \
+		} while (0)
+
+	/**
+	 * Z80U_OP_SRL: Shift Right (logical)
+	 * @param Dest Destination.
+	 * TODO: Verify emulation of flags 3 and 5.
+	 * TODO: Verify carry emulation.
+	 */
+	#define Z80U_OP_SRL(Dest) \
+		do { \
+			const uint8_t tmp = (Dest >> 1); \
+			z80->F &= (MDZ80_FLAG_S | MDZ80_FLAG_Z); \
+			z80->F |= (Dest >> 8);	/* MDZ80_FLAG_C */ \
+			z80->F |= (tmp & (MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+			Dest = tmp; \
+			z80->F |= calc_parity_flag(Dest); \
+		} while (0)
+
+	Z80I_ROT_R(SRA, A);
+	Z80I_ROT_R(SRA, B);
+	Z80I_ROT_R(SRA, C);
+	Z80I_ROT_R(SRA, D);
+	Z80I_ROT_R(SRA, E);
+	Z80I_ROT_R(SRA, H);
+	Z80I_ROT_R(SRA, L);
+
+	Z80I_ROT_R(SRL, A);
+	Z80I_ROT_R(SRL, B);
+	Z80I_ROT_R(SRL, C);
+	Z80I_ROT_R(SRL, D);
+	Z80I_ROT_R(SRL, E);
+	Z80I_ROT_R(SRL, H);
+	Z80I_ROT_R(SRL, L);
 
 	/*! Bit operation instructions */
 
