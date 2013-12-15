@@ -123,7 +123,7 @@ struct _mdZ80_context {
 	uint32_t CycleSup;
 
 	// Instruction fetch locations.
-	uint8_t *Fetch[0x100];
+	const uint8_t *Fetch[0x100];
 
 	// Memory read/write functions.
 	Z80_RB *ReadB;

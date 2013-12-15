@@ -317,7 +317,7 @@ void mdZ80_Set_Out(mdZ80_context *z80, Z80_WB *func)
  * @param high_adr High page.
  * @param region Memory region.
  */
-void mdZ80_Add_Fetch(mdZ80_context *z80, uint8_t low_adr, uint8_t high_adr, uint8_t *region)
+void mdZ80_Add_Fetch(mdZ80_context *z80, uint8_t low_adr, uint8_t high_adr, const uint8_t *region)
 {
 	region -= (low_adr << 8);
 	for (int i = low_adr; i <= high_adr; i++)

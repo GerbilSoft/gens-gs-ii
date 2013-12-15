@@ -72,7 +72,7 @@ void mdZ80_Set_ReadB(mdZ80_context *z80, Z80_RB *func);
 void mdZ80_Set_WriteB(mdZ80_context *z80, Z80_WB *func);
 void mdZ80_Set_In(mdZ80_context *z80, Z80_RB *func);
 void mdZ80_Set_Out(mdZ80_context *z80, Z80_WB *func);
-void mdZ80_Add_Fetch(mdZ80_context *z80, uint8_t low_adr, uint8_t high_adr, uint8_t *region);
+void mdZ80_Add_Fetch(mdZ80_context *z80, uint8_t low_adr, uint8_t high_adr, const uint8_t *region);
 
 /*! Odometer (clock cycle) functions. **/
 unsigned int mdZ80_read_odo(mdZ80_context *z80);
