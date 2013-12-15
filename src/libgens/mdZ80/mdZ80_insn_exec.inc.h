@@ -1458,6 +1458,7 @@ while (1) {
 	/*! Rotate and shift instructions */
 
 	// RLCA			Rotate A left; copy sign bit to CF
+	// Flags: --503-0C
 	// TODO: Verify emulation of flags 3 and 5.
 	// TODO: Verify carry emulation.
 	Z80I_RLCA: {
@@ -1470,6 +1471,7 @@ while (1) {
 	}
 
 	// RLA			Rotate A left through CF
+	// Flags: --503-0C
 	// TODO: Verify emulation of flags 3 and 5.
 	// TODO: Verify carry emulation.
 	Z80I_RLA: {
@@ -1483,6 +1485,7 @@ while (1) {
 	}
 
 	// RRCA			Rotate A right; copy sign bit to CF
+	// Flags: --503-0C
 	// TODO: Verify emulation of flags 3 and 5.
 	// TODO: Verify carry emulation.
 	Z80I_RRCA: {
@@ -1495,6 +1498,7 @@ while (1) {
 	}
 
 	// RRA			Rotate A right through CF
+	// Flags: --503-0C
 	// TODO: Verify emulation of flags 3 and 5.
 	// TODO: Verify carry emulation.
 	Z80I_RRA: {
@@ -1510,6 +1514,7 @@ while (1) {
 	/**
 	 * Z80U_OP_RLC: Rotate Dest left; copy sign bit to CF.
 	 * @param Dest Destination.
+	 * Flags: SZ503P0C
 	 * TODO: Verify emulation of flags 3 and 5.
 	 * TODO: Verify carry emulation.
 	 */
@@ -1525,6 +1530,7 @@ while (1) {
 	/**
 	 * Z80U_OP_RL: Rotate Dest left through CF.
 	 * @param Dest Destination.
+	 * Flags: SZ503P0C
 	 * TODO: Verify emulation of flags 3 and 5.
 	 * TODO: Verify carry emulation.
 	 */
@@ -1540,6 +1546,7 @@ while (1) {
 	/**
 	 * Z80U_OP_RRC: Rotate Dest right; copy sign bit to CF.
 	 * @param Dest Destination.
+	 * Flags: SZ503P0C
 	 * TODO: Verify emulation of flags 3 and 5.
 	 * TODO: Verify carry emulation.
 	 */
@@ -1554,6 +1561,7 @@ while (1) {
 	/**
 	 * Z80U_OP_RR: Rotate Dest right through CF.
 	 * @param Dest Destination.
+	 * Flags: SZ503P0C
 	 * TODO: Verify emulation of flags 3 and 5.
 	 * TODO: Verify carry emulation.
 	 */
@@ -1569,6 +1577,7 @@ while (1) {
 	/**
 	 * Z80I_ROT_R: Rotate R8 using the given operation.
 	 * This is a Z80 extended instruction. (CB-prefix)
+	 * Flags: SZ503P0C
 	 * @param Op Rotate operation.
 	 * @param Rdest Destination register.
 	 */
@@ -1615,6 +1624,7 @@ while (1) {
 	/**
 	 * Z80U_OP_SLA: Shift Left (arithmetic)
 	 * @param Dest Destination.
+	 * Flags: SZ503P0C
 	 * TODO: Verify emulation of flags 3 and 5.
 	 * TODO: Verify carry emulation.
 	 */
@@ -1632,6 +1642,7 @@ while (1) {
 	 * Z80U_OP_SLL: Shift Left (logical)
 	 * NOTE: Same as SLA, but sets bit 0. [Undocumented instruction!]
 	 * @param Dest Destination.
+	 * Flags: SZ503P0C
 	 * TODO: Verify emulation of flags 3 and 5.
 	 * TODO: Verify carry emulation.
 	 */
@@ -1664,6 +1675,7 @@ while (1) {
 	/**
 	 * Z80U_OP_SRA: Shift Right (arithmetic)
 	 * @param Dest Destination.
+	 * Flags: SZ503P0C
 	 * TODO: Verify emulation of flags 3 and 5.
 	 * TODO: Verify carry emulation.
 	 */
@@ -1681,6 +1693,7 @@ while (1) {
 	/**
 	 * Z80U_OP_SRL: Shift Right (logical)
 	 * @param Dest Destination.
+	 * Flags: SZ503P0C
 	 * TODO: Verify emulation of flags 3 and 5.
 	 * TODO: Verify carry emulation.
 	 */
@@ -1714,6 +1727,7 @@ while (1) {
 	 * Z80I_ROT_mHL: Rotate (HL) using the given operation.
 	 * This is a Z80 extended instruction. (CB-prefix)
 	 * @param Op Rotate operation.
+	 * Flags: SZ503P0C
 	 */
 	#define Z80I_ROT_mHL(Op) \
 		Z80I_ ## Op ## _mHL : \
@@ -1739,6 +1753,7 @@ while (1) {
 	 * This is a Z80 extended instruction. (DDCB/FDCB-prefix)
 	 * @param Op Rotate operation.
 	 * @param Ridx Index register.
+	 * Flags: SZ503P0C
 	 */
 	#define Z80I_ROT_mXYd(Op, Ridx) \
 		Z80I_ ## Op ## _m ## Ridx ## d : \
@@ -1758,6 +1773,7 @@ while (1) {
 	 * This is a Z80 extended instruction. (DDCB/FDCB-prefix)
 	 * @param Op Rotate operation.
 	 * @param Ridx Index register.
+	 * Flags: SZ503P0C
 	 */
 	#define Z80I_ROT_mXYd_R(Op, Ridx, Rdest) \
 		Z80I_ ## Op ## _m ## Ridx ## d_ ## Rdest : \
