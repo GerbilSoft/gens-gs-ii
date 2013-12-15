@@ -1109,7 +1109,158 @@ while (1) {
 	Z80I_CP_mXYd(IY);
 
 	/*! Logic instructions (8-bit) */
-	// TODO
+
+	/**
+	 * Z80U_OP_A_AND: Bitwise AND to A.
+	 * Flags: SZ513P00
+	 * @param Dest Destination.
+	 * @param Src Source.
+	 */
+	#define Z80U_OP_A_AND(Src) \
+		do { \
+			z80->A &= (Src); \
+			z80->F = (z80->A & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+			z80->F |= MDZ80_FLAG_H; \
+			if (z80->A) z80->F |= MDZ80_FLAG_Z; \
+			z80->F |= calc_parity_flag(z80->A); \
+		} while (0)
+
+	/**
+	 * Z80U_OP_A_OR: Bitwise OR to A.
+	 * Flags: SZ503P00
+	 * @param Src Source.
+	 */
+	#define Z80U_OP_A_OR(Src) \
+		do { \
+			z80->A |= (Src); \
+			z80->F = (z80->A & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+			if (z80->A) z80->F |= MDZ80_FLAG_Z; \
+			z80->F |= calc_parity_flag(z80->A); \
+		} while (0)
+
+	/**
+	 * Z80U_OP_A_XOR: Bitwise XOR to A.
+	 * Flags: SZ503P00
+	 * @param Src Source.
+	 */
+	#define Z80U_OP_A_XOR(Src) \
+		do { \
+			z80->A ^= (Src); \
+			z80->F = (z80->A & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
+			if (z80->A) z80->F |= MDZ80_FLAG_Z; \
+			z80->F |= calc_parity_flag(z80->A); \
+		} while (0)
+
+	/**
+	 * Z80I_LOGIC_A_R: Apply a bitwise logic operation to A from R8.
+	 * Flags: SZ503P0C
+	 * @param Op Rotate operation.
+	 * @param Rsrc Source register.
+	 */
+	#define Z80I_LOGIC_A_R(Op, Rsrc) \
+		Z80I_ ## Op ## _ ## Rsrc : \
+			do { \
+				Z80U_OP_A_ ## Op(z80->Rsrc); \
+				z80->PC++; \
+				NEXT(4); \
+			} while (0)
+
+	Z80I_LOGIC_A_R(AND, A);
+	Z80I_LOGIC_A_R(AND, B);
+	Z80I_LOGIC_A_R(AND, C);
+	Z80I_LOGIC_A_R(AND, D);
+	Z80I_LOGIC_A_R(AND, E);
+	Z80I_LOGIC_A_R(AND, H);
+	Z80I_LOGIC_A_R(AND, L);
+	Z80I_LOGIC_A_R(AND, IXl);
+	Z80I_LOGIC_A_R(AND, IXh);
+	Z80I_LOGIC_A_R(AND, IYl);
+	Z80I_LOGIC_A_R(AND, IYh);
+
+	Z80I_LOGIC_A_R(OR, A);
+	Z80I_LOGIC_A_R(OR, B);
+	Z80I_LOGIC_A_R(OR, C);
+	Z80I_LOGIC_A_R(OR, D);
+	Z80I_LOGIC_A_R(OR, E);
+	Z80I_LOGIC_A_R(OR, H);
+	Z80I_LOGIC_A_R(OR, L);
+	Z80I_LOGIC_A_R(OR, IXl);
+	Z80I_LOGIC_A_R(OR, IXh);
+	Z80I_LOGIC_A_R(OR, IYl);
+	Z80I_LOGIC_A_R(OR, IYh);
+
+	Z80I_LOGIC_A_R(XOR, A);
+	Z80I_LOGIC_A_R(XOR, B);
+	Z80I_LOGIC_A_R(XOR, C);
+	Z80I_LOGIC_A_R(XOR, D);
+	Z80I_LOGIC_A_R(XOR, E);
+	Z80I_LOGIC_A_R(XOR, H);
+	Z80I_LOGIC_A_R(XOR, L);
+	Z80I_LOGIC_A_R(XOR, IXl);
+	Z80I_LOGIC_A_R(XOR, IXh);
+	Z80I_LOGIC_A_R(XOR, IYl);
+	Z80I_LOGIC_A_R(XOR, IYh);
+
+	/**
+	 * Z80I_LOGIC_A_N: Apply a bitwise logic operation to A from imm8.
+	 * Flags: SZ503P0C
+	 * @param Op Rotate operation.
+	 */
+	#define Z80I_LOGIC_A_N(Op) \
+		Z80I_ ## Op ## _N : \
+			do { \
+				const uint8_t src = read_byte_offset_pc(z80, 1); \
+				Z80U_OP_A_ ## Op(src); \
+				z80->PC++; \
+				NEXT(7); \
+			} while (0)
+
+	Z80I_LOGIC_A_N(AND);
+	Z80I_LOGIC_A_N(OR);
+	Z80I_LOGIC_A_N(XOR);
+
+	/**
+	 * Z80I_LOGIC_A_mHL: Apply a bitwise logic operation to A from (HL).
+	 * Flags: SZ503P0C
+	 * @param Op Rotate operation.
+	 */
+	#define Z80I_LOGIC_A_mHL(Op) \
+		Z80I_ ## Op ## _mHL : \
+			do { \
+				const uint8_t src = READ_BYTE(z80, z80->HL); \
+				Z80U_OP_A_ ## Op(src); \
+				z80->PC++; \
+				NEXT(7); \
+			} while (0)
+
+	Z80I_LOGIC_A_mHL(AND);
+	Z80I_LOGIC_A_mHL(OR);
+	Z80I_LOGIC_A_mHL(XOR);
+
+	/**
+	 * Z80I_LOGIC_A_mXYd: Apply a bitwise logic operation to A from (XY+d).
+	 * Flags: SZ503P0C
+	 * @param Op Rotate operation.
+	 * @param Ridx Index register.
+	 */
+	#define Z80I_LOGIC_A_mXYd(Op, Ridx) \
+		Z80I_ ## Op ## _m ## Ridx ## d : \
+			do { \
+				const int8_t d = read_sbyte_offset_pc(z80, 1); \
+				const uint16_t addr = (z80->Ridx + d); \
+				const uint8_t src = READ_BYTE(z80, addr); \
+				Z80U_OP_A_ ## Op(src); \
+				z80->PC++; \
+				NEXT(15); \
+			} while (0)
+
+	Z80I_LOGIC_A_mXYd(AND, IX);
+	Z80I_LOGIC_A_mXYd(OR,  IX);
+	Z80I_LOGIC_A_mXYd(XOR, IX);
+
+	Z80I_LOGIC_A_mXYd(AND, IY);
+	Z80I_LOGIC_A_mXYd(OR,  IY);
+	Z80I_LOGIC_A_mXYd(XOR, IY);
 
 	/*! INC/DEC instructions (8-bit) */
 
@@ -2931,22 +3082,6 @@ while (1) {
 
 	// Unimplemented opcodes
 	// FIXME: Implement these!
-
-	// Logic instructions (8-bit)
-	Z80I_AND_A: Z80I_AND_B: Z80I_AND_C: Z80I_AND_D:
-	Z80I_AND_E: Z80I_AND_H: Z80I_AND_L: Z80I_AND_mHL:
-	Z80I_AND_IXl: Z80I_AND_IXh: Z80I_AND_IYh: Z80I_AND_IYl:
-	Z80I_AND_N: Z80I_AND_mIXd: Z80I_AND_mIYd:
-
-	Z80I_OR_A: Z80I_OR_B: Z80I_OR_C: Z80I_OR_D:
-	Z80I_OR_E: Z80I_OR_H: Z80I_OR_L: Z80I_OR_mHL:
-	Z80I_OR_IXl: Z80I_OR_IXh: Z80I_OR_IYh: Z80I_OR_IYl:
-	Z80I_OR_N: Z80I_OR_mIXd: Z80I_OR_mIYd:
-
-	Z80I_XOR_A: Z80I_XOR_B: Z80I_XOR_C: Z80I_XOR_D:
-	Z80I_XOR_E: Z80I_XOR_H: Z80I_XOR_L: Z80I_XOR_mHL:
-	Z80I_XOR_IXl: Z80I_XOR_IXh: Z80I_XOR_IYh: Z80I_XOR_IYl:
-	Z80I_XOR_N: Z80I_XOR_mIXd: Z80I_XOR_mIYd:
 
 	// Rotate and shift instructions
 	Z80I_RLD:  Z80I_RRD:
