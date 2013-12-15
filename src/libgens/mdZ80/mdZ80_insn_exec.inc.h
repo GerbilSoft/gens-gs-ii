@@ -611,12 +611,13 @@ while (1) {
 	Z80I_EX_RR_RR(AF, AF2);
 
 	// EXX			BC/DE/HL <-> BC'/DE'/HL'
-	Z80I_EXX:
+	Z80I_EXX: {
 		SWAP16(z80->BC, z80->BC2);
 		SWAP16(z80->DE, z80->DE2);
 		SWAP16(z80->HL, z80->HL2);
 		z80->PC++;
 		NEXT(4);
+	}
 
 	// EX (SP), DD		(SP) <-> HL|IX|IY
 	// TODO: Why DD?
@@ -633,6 +634,8 @@ while (1) {
 	Z80I_EX_mSP_DD(HL);
 	Z80I_EX_mSP_DD(IX);
 	Z80I_EX_mSP_DD(IY);
+
+	/*! Block transfer/search instructions */
 
 	// LDI/LDD		(DE++/--) <- (HL++/--); BC--
 	// TODO: Verify emulation of flags 3 and 5.
@@ -992,7 +995,7 @@ while (1) {
 	Z80I_ADD_mHL: {
 		const uint8_t d = READ_BYTE(z80, z80->HL);
 		Z80_ADD8_FLAGS(z80->A, d, 0);
-		z80->PC += 2;
+		z80->PC++;
 		NEXT(7);
 	}
 
@@ -1000,7 +1003,7 @@ while (1) {
 	Z80I_ADC_mHL: {
 		const uint8_t d = READ_BYTE(z80, z80->HL);
 		Z80_ADD8_FLAGS(z80->A, d, (z80->F & MDZ80_FLAG_C));
-		z80->PC += 2;
+		z80->PC++;
 		NEXT(7);
 	}
 
@@ -1008,7 +1011,7 @@ while (1) {
 	Z80I_SUB_mHL: {
 		const uint8_t d = READ_BYTE(z80, z80->HL);
 		Z80_SUB8_FLAGS(z80->A, d, 0);
-		z80->PC += 2;
+		z80->PC++;
 		NEXT(7);
 	}
 
@@ -1016,7 +1019,7 @@ while (1) {
 	Z80I_SBC_mHL: {
 		const uint8_t d = READ_BYTE(z80, z80->HL);
 		Z80_SUB8_FLAGS(z80->A, d, (z80->F & MDZ80_FLAG_C));
-		z80->PC += 2;
+		z80->PC++;
 		NEXT(7);
 	}
 
@@ -1211,7 +1214,7 @@ while (1) {
 			do { \
 				const uint8_t src = read_byte_offset_pc(z80, 1); \
 				Z80U_OP_A_ ## Op(src); \
-				z80->PC++; \
+				z80->PC += 2; \
 				NEXT(7); \
 			} while (0)
 
@@ -1250,7 +1253,7 @@ while (1) {
 				const uint16_t addr = (z80->Ridx + d); \
 				const uint8_t src = READ_BYTE(z80, addr); \
 				Z80U_OP_A_ ## Op(src); \
-				z80->PC++; \
+				z80->PC += 2; \
 				NEXT(15); \
 			} while (0)
 
@@ -1526,7 +1529,7 @@ while (1) {
 		Z80I_ADC_HL_ ## Rsrc : \
 			do {\
 				Z80_ADD16_FLAGS(z80->HL, z80->Rsrc, (z80->F & MDZ80_FLAG_C)); \
-				z80->PC++; \
+				z80->PC += 2; \
 				NEXT(15); \
 			} while (0)
 
@@ -1574,7 +1577,7 @@ while (1) {
 		Z80I_SBC_HL_ ## Rsrc : \
 			do {\
 				Z80_SUB16_FLAGS(z80->HL, z80->Rsrc, (z80->F & MDZ80_FLAG_C)); \
-				z80->PC++; \
+				z80->PC += 2; \
 				NEXT(15); \
 			} while (0)
 
@@ -1914,7 +1917,7 @@ while (1) {
 				uint8_t tmp8 = READ_BYTE(z80, addr); \
 				Z80U_OP_ ## Op(tmp8); \
 				WRITE_BYTE(z80, addr, tmp8); \
-				z80->PC += 2; \
+				z80->PC += 3; \
 				NEXT(23); \
 			} while (0)
 
@@ -1935,7 +1938,7 @@ while (1) {
 				Z80U_OP_ ## Op(tmp8); \
 				z80->Rdest = tmp8; \
 				WRITE_BYTE(z80, addr, tmp8); \
-				z80->PC += 2; \
+				z80->PC += 3; \
 				NEXT(23); \
 			} while (0)
 
@@ -2952,7 +2955,7 @@ while (1) {
 	// NOTE: This does NOT modify IFF!
 	Z80I_RST: {
 		/* Push the current PC onto the stack. */
-		const uint16_t pc = ((z80->PC + 3) - z80->BasePC);
+		const uint16_t pc = ((z80->PC + 1) - z80->BasePC);
 		z80->SP -= 2;
 		WRITE_WORD(z80, z80->SP, pc);
 		/* Get the interrupt vector address. */
