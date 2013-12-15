@@ -324,7 +324,11 @@ TEST_F(InsnTests, INSN_LD_ ## Rdest ## _NN) \
 int main(int argc, char *argv[])
 {
 	fprintf(stderr, "mdZ80 test suite: Instruction tests.\n\n");
-	srandom(gettimeofday(NULL, NULL));
+
+	// Initialize the Random Number Generator.
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	srandom(tv.tv_usec);
 
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
