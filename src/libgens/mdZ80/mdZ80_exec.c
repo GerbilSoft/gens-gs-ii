@@ -95,7 +95,7 @@ static inline int8_t read_sbyte_offset_pc(mdZ80_context *z80, int offset)
  * @param offset Byte offset. (0 == PC)
  * @return Word after the program counter.
  */
-static inline uint8_t read_word_offset_pc(mdZ80_context *z80, int offset)
+static inline uint16_t read_word_offset_pc(mdZ80_context *z80, int offset)
 {
 	// WARNING: This can potentially crash the emulator
 	// if the program attempts to run past 0xFFFF!
