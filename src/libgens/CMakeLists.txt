@@ -4,8 +4,8 @@ cmake_minimum_required(VERSION 2.6.0)
 # LibGens subprojects.
 IF(GENS_ENABLE_EMULATION)
 	ADD_SUBDIRECTORY(starscream)
-	ADD_SUBDIRECTORY(mdZ80)
 ENDIF(GENS_ENABLE_EMULATION)
+ADD_SUBDIRECTORY(mdZ80)
 
 # Main binary directory. Needed for git_version.h
 INCLUDE_DIRECTORIES(${gens-gs-ii_BINARY_DIR})
