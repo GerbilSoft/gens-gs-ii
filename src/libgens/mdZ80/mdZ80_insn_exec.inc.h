@@ -987,7 +987,7 @@ while (1) {
 		const uint8_t d = read_byte_offset_pc(z80, 1);
 		register uint8_t A = z80->A;
 		Z80_SUB8_FLAGS(A, d, 0);
-		z80->PC++;
+		z80->PC += 2;
 		NEXT(7);
 	}
 
