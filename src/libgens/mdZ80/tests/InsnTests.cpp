@@ -552,6 +552,99 @@ INSN_LD_mXYd_R(IY, -1, E, 0x8257, 4)
 INSN_LD_mXYd_R(IY, -2, H, 0x825B, 4)
 INSN_LD_mXYd_R(IY, -3, L, 0x825F, 4)
 
+/**
+ * Set an 8-bit register.
+ * @param z80 Z80 context.
+ * @param Rfull Full register name.
+ * @param High If 1, high byte.
+ * @param Val Value.
+ */
+#define SET_8BIT_REG(z80, Rfull, High, Val) \
+	do { \
+		uint16_t reg = mdZ80_get_ ## Rfull(z80); \
+		if (High) { \
+			reg &= 0xFF; \
+			reg |= ((Val & 0xFF) << 8); \
+		} else { \
+			reg &= 0xFF00; \
+			reg |= (Val & 0xFF); \
+		} \
+		mdZ80_set_ ## Rfull(z80, reg); \
+	} while (0)
+
+#define SET_8BIT_REG_F(z80, Val) SET_8BIT_REG(z80, AF, 1, Val)
+#define SET_8BIT_REG_A(z80, Val) SET_8BIT_REG(z80, AF, 0, Val)
+#define SET_8BIT_REG_B(z80, Val) SET_8BIT_REG(z80, BC, 1, Val)
+#define SET_8BIT_REG_C(z80, Val) SET_8BIT_REG(z80, BC, 0, Val)
+#define SET_8BIT_REG_D(z80, Val) SET_8BIT_REG(z80, DE, 1, Val)
+#define SET_8BIT_REG_E(z80, Val) SET_8BIT_REG(z80, DE, 0, Val)
+#define SET_8BIT_REG_H(z80, Val) SET_8BIT_REG(z80, HL, 1, Val)
+#define SET_8BIT_REG_L(z80, Val) SET_8BIT_REG(z80, HL, 0, Val)
+
+/**
+ * Rotate/shift instructions.
+ * @param Op Operation.
+ * @param Rdest Destination register.
+ * @param InitVal Initial value for the rotate.
+ * @param InitC Initial value for carry. (0 or 1; others for don't care)
+ * @param FinVal Final value for the rotate.
+ * @param FMask Mask of flags to check.
+ * @param FExpect Expected flags.
+ * @param PrgStart Program start address.
+ * @param len Program length.
+ */
+#define INSN_ROT_R(Op, Rdest, InitVal, InitC, FinVal, FMask, FExpect, PrgStart, len) \
+TEST_F(InsnTests, INSN_ ## Op ## _ ## Rdest) \
+{ \
+	const uint16_t initPC = PrgStart; \
+	const uint16_t endPC = initPC + (len); \
+	mdZ80_set_PC(z80, initPC); \
+	\
+	/* Set the initial 8-bit register value. */ \
+	initRegState.Rdest = InitVal; \
+	SET_8BIT_REG_ ## Rdest(z80, InitVal); \
+	\
+	if ((InitC) == 0 || (InitC) == 1) { \
+		/* Set the initial carry value. */ \
+		initRegState.F &= ~MDZ80_FLAG_C; \
+		initRegState.F |= ((InitC) & 1); \
+		SET_8BIT_REG_F(z80, initRegState.F); \
+	} \
+	\
+	mdZ80_exec(z80, 100); \
+	\
+	EXPECT_TRUE(mdZ80_get_Status(z80) & MDZ80_STATUS_HALTED); \
+	EXPECT_EQ(endPC, mdZ80_get_PC(z80)); \
+	\
+	RegState expectedRegState = initRegState; \
+	expectedRegState.Rdest = FinVal; \
+	expectedRegState.F &= ~FMask; \
+	expectedRegState.F |= (FExpect & FMask); \
+	expectRegState(&expectedRegState); \
+}
+
+/**
+ * Single-byte rotate instructions.
+ * Flags: --503-0C
+ * Test suffixes:
+ * - 1: Operation has carry-out.
+ * - 0: Operation does not have carry-out.
+ * - NC: Carry is cleared initially.
+ * - C: Carry is set initially.
+ */
+INSN_ROT_R(RLCA_1,   A, 0x9D, -1, 0x3B, 0x3B, 0x29, 0x8263, 2)
+INSN_ROT_R(RLA_1_NC, A, 0x9D,  0, 0x3A, 0x3B, 0x29, 0x8265, 2)
+INSN_ROT_R(RLA_1_C,  A, 0x9D,  1, 0x3B, 0x3B, 0x29, 0x8265, 2)
+INSN_ROT_R(RRCA_1,   A, 0x9D, -1, 0xCE, 0x3B, 0x09, 0x8267, 2)
+INSN_ROT_R(RRA_1_NC, A, 0x9D,  0, 0x4E, 0x3B, 0x09, 0x8269, 2)
+INSN_ROT_R(RRA_1_C,  A, 0x9D,  1, 0xCE, 0x3B, 0x09, 0x8269, 2)
+INSN_ROT_R(RLCA_0,   A, 0x5C, -1, 0xB8, 0x3B, 0x28, 0x8263, 2)
+INSN_ROT_R(RLA_0_NC, A, 0x5C,  0, 0xB8, 0x3B, 0x28, 0x8265, 2)
+INSN_ROT_R(RLA_0_C,  A, 0x5C,  1, 0xB9, 0x3B, 0x28, 0x8265, 2)
+INSN_ROT_R(RRCA_0,   A, 0x5C, -1, 0x2E, 0x3B, 0x28, 0x8267, 2)
+INSN_ROT_R(RRA_0_NC, A, 0x5C,  0, 0x2E, 0x3B, 0x28, 0x8269, 2)
+INSN_ROT_R(RRA_0_C,  A, 0x5C,  1, 0xAE, 0x3B, 0x28, 0x8269, 2)
+
 } }
 
 
