@@ -186,7 +186,7 @@ static inline uint8_t calc_parity_flag(uint8_t data)
 	data ^= (data >> 4);
 	data ^= (data >> 2);
 	data ^= (data >> 1);
-	return ((data & 1) << 2);
+	return ((!(data & 1)) << 2);
 }
 
 /**
