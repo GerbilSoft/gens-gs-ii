@@ -801,7 +801,7 @@ while (1) {
 			/* S, 5, and 3 are copied directly from the result. */ \
 			const uint8_t r = ((A) + (d) + (c)); \
 			z80->F = (r & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-			if (r == 0) z80->F |= MDZ80_FLAG_Z;			/* Z */ \
+			if (!r) z80->F |= MDZ80_FLAG_Z;				/* Z */ \
 			z80->F |= ((A)^(d)^(r)) & MDZ80_FLAG_H;			/* H */ \
 			z80->F |= ((((A)^(r))&((d)^(r))) >> 5) & MDZ80_FLAG_P;	/* P/V */ \
 			z80->F |= ((A) > r);					/* C */ \
@@ -874,7 +874,7 @@ while (1) {
 			/* S, 5, and 3 are copied directly from the result. */ \
 			const uint8_t r = ((A) - (d) - (c)); \
 			z80->F = (r & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)) | MDZ80_FLAG_N; \
-			if (r == 0) z80->F |= MDZ80_FLAG_Z;			/* Z */ \
+			if (!r) z80->F |= MDZ80_FLAG_Z;				/* Z */ \
 			z80->F |= ((A)^(d)^(r)) & MDZ80_FLAG_H;			/* H */ \
 			z80->F |= ((((A)^(d))&((A)^(r))) >> 5) & MDZ80_FLAG_P;	/* P/V */ \
 			z80->F |= ((A) < r);					/* C */ \
@@ -1124,7 +1124,7 @@ while (1) {
 			z80->A &= (Src); \
 			z80->F = (z80->A & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
 			z80->F |= MDZ80_FLAG_H; \
-			if (z80->A) z80->F |= MDZ80_FLAG_Z; \
+			if (!z80->A) z80->F |= MDZ80_FLAG_Z; \
 			z80->F |= calc_parity_flag(z80->A); \
 		} while (0)
 
@@ -1137,7 +1137,7 @@ while (1) {
 		do { \
 			z80->A |= (Src); \
 			z80->F = (z80->A & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-			if (z80->A) z80->F |= MDZ80_FLAG_Z; \
+			if (!z80->A) z80->F |= MDZ80_FLAG_Z; \
 			z80->F |= calc_parity_flag(z80->A); \
 		} while (0)
 
@@ -1150,7 +1150,7 @@ while (1) {
 		do { \
 			z80->A ^= (Src); \
 			z80->F = (z80->A & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-			if (z80->A) z80->F |= MDZ80_FLAG_Z; \
+			if (!z80->A) z80->F |= MDZ80_FLAG_Z; \
 			z80->F |= calc_parity_flag(z80->A); \
 		} while (0)
 
@@ -1494,7 +1494,7 @@ while (1) {
 			const uint8_t dHI = ((d) >> 8); \
 			const uint8_t rHI = (r >> 8); \
 			z80->F = (rHI & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-			if (r == 0) z80->F |= MDZ80_FLAG_Z;				/* Z */ \
+			if (!r) z80->F |= MDZ80_FLAG_Z;					/* Z */ \
 			z80->F |= ((AHI)^(dHI)^(rHI)) & MDZ80_FLAG_H;			/* H */ \
 			z80->F |= ((((AHI)^(rHI))&((dHI)^(rHI))) >> 5) & MDZ80_FLAG_P;	/* P/V */ \
 			z80->F |= ((AHI) > rHI);					/* C */ \
@@ -1564,7 +1564,7 @@ while (1) {
 			const uint8_t dHI = ((d) >> 8); \
 			const uint8_t rHI = (r >> 8); \
 			z80->F = (rHI & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)) | MDZ80_FLAG_N; \
-			if (r == 0) z80->F |= MDZ80_FLAG_Z;				/* Z */ \
+			if (!r) z80->F |= MDZ80_FLAG_Z;					/* Z */ \
 			z80->F |= ((AHI)^(dHI)^(rHI)) & MDZ80_FLAG_H;			/* H */ \
 			z80->F |= ((((AHI)^(dHI))&((AHI)^(rHI))) >> 5) & MDZ80_FLAG_P;	/* P/V */ \
 			z80->F |= ((AHI) < rHI);					/* C */ \
@@ -1677,7 +1677,7 @@ while (1) {
 			Dest = (Dest << 1) | (Dest >> 7); \
 			z80->F = (Dest & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
 			z80->F |= (Dest >> 7);	/* MDZ80_FLAG_C */ \
-			if (Dest) z80->F |= MDZ80_FLAG_Z; \
+			if (!(Dest)) z80->F |= MDZ80_FLAG_Z; \
 			z80->F |= calc_parity_flag(Dest); \
 		} while (0)
 
@@ -1694,7 +1694,7 @@ while (1) {
 			Dest = (tmp & 0xFF); \
 			z80->F = (Dest & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
 			z80->F |= (tmp >> 8); /* MDZ80_FLAG_C */ \
-			if (Dest) z80->F |= MDZ80_FLAG_Z; \
+			if (!(Dest)) z80->F |= MDZ80_FLAG_Z; \
 			z80->F |= calc_parity_flag(Dest); \
 		} while (0)
 
@@ -1710,7 +1710,7 @@ while (1) {
 			z80->F = (Dest & 0x01);	/* MDZ80_FLAG_C */ \
 			Dest = (Dest >> 1) | (Dest << 7); \
 			z80->F |= (Dest & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-			if (Dest) z80->F |= MDZ80_FLAG_Z; \
+			if (!(Dest)) z80->F |= MDZ80_FLAG_Z; \
 			z80->F |= calc_parity_flag(Dest); \
 		} while (0)
 
@@ -1727,7 +1727,7 @@ while (1) {
 			z80->F = (Dest & 0x01);	/* MDZ80_FLAG_C */ \
 			Dest = tmp; \
 			z80->F |= (Dest & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-			if (Dest) z80->F |= MDZ80_FLAG_Z; \
+			if (!(Dest)) z80->F |= MDZ80_FLAG_Z; \
 			z80->F |= calc_parity_flag(Dest); \
 		} while (0)
 
@@ -1790,7 +1790,7 @@ while (1) {
 			z80->F = (Dest >> 7);	/* MDZ80_FLAG_C */ \
 			Dest = (Dest << 1); \
 			z80->F |= (Dest & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-			if (Dest) z80->F |= MDZ80_FLAG_Z; \
+			if (!(Dest)) z80->F |= MDZ80_FLAG_Z; \
 			z80->F |= calc_parity_flag(Dest); \
 		} while (0)
 
@@ -1807,7 +1807,7 @@ while (1) {
 			z80->F = (Dest >> 7);	/* MDZ80_FLAG_C */ \
 			Dest = ((Dest << 1) + 1); \
 			z80->F |= (Dest & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-			if (Dest) z80->F |= MDZ80_FLAG_Z; \
+			if (!(Dest)) z80->F |= MDZ80_FLAG_Z; \
 			z80->F |= calc_parity_flag(Dest); \
 		} while (0)
 
@@ -1841,7 +1841,7 @@ while (1) {
 			Orig >>= 1; \
 			Dest = *((uint8_t*)&Orig); \
 			z80->F |= (Dest & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-			if (Dest) z80->F |= MDZ80_FLAG_Z; \
+			if (!(Dest)) z80->F |= MDZ80_FLAG_Z; \
 			z80->F |= calc_parity_flag(Dest); \
 		} while (0)
 
@@ -1857,7 +1857,7 @@ while (1) {
 			z80->F = (Dest & 1);	/* MDZ80_FLAG_C */ \
 			Dest >>= 1; \
 			z80->F |= (Dest & (MDZ80_FLAG_S | MDZ80_FLAG_5 | MDZ80_FLAG_3)); \
-			if (Dest) z80->F |= MDZ80_FLAG_Z; \
+			if (!(Dest)) z80->F |= MDZ80_FLAG_Z; \
 			z80->F |= calc_parity_flag(Dest); \
 		} while (0)
 
