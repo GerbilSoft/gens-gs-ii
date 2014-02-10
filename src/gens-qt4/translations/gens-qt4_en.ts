@@ -2,46 +2,46 @@
 <!DOCTYPE TS>
 <TS version="2.0" language="en">
 <context>
-    <name>GensQt4::AboutWindow</name>
+    <name>GensQt4::AboutDialog</name>
     <message>
-        <location filename="../AboutWindow.cpp" line="205"/>
+        <location filename="../AboutDialog.cpp" line="205"/>
         <source>NO-EMULATION BUILD</source>
         <extracomment>&quot;NO-EMULATION BUILD&quot; means CPU cores aren&apos;t compiled in. Used for testing Gens/GS II on new platforms.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="216"/>
+        <location filename="../AboutDialog.cpp" line="216"/>
         <source>Sega Genesis / Mega Drive,</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="217"/>
+        <location filename="../AboutDialog.cpp" line="217"/>
         <source>Sega CD / Mega CD,</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="218"/>
+        <location filename="../AboutDialog.cpp" line="218"/>
         <source>Sega 32X emulator</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="332"/>
+        <location filename="../AboutDialog.cpp" line="332"/>
         <source>Internal copy of %1.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="402"/>
+        <location filename="../AboutDialog.cpp" line="402"/>
         <source>Compiled using Qt %1.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="403"/>
+        <location filename="../AboutDialog.cpp" line="403"/>
         <source>Using Qt %1.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="421"/>
-        <location filename="../AboutWindow.cpp" line="435"/>
+        <location filename="../AboutDialog.cpp" line="421"/>
+        <location filename="../AboutDialog.cpp" line="435"/>
         <source>(none)</source>
         <extracomment>Used to indicate no special CPU features were found.
 ----------
@@ -49,151 +49,151 @@ Used to indicate no special CPU features were found.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="574"/>
+        <location filename="../AboutDialog.cpp" line="574"/>
         <source>Unknown [GetCPInfoExA() failed]</source>
         <extracomment>GetCPInfoExA() call failed.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="612"/>
+        <location filename="../AboutDialog.cpp" line="612"/>
         <source>Using Unicode strings for Win32 API.</source>
         <extracomment>Win32: Unicode strings are being used. (WinNT)</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="615"/>
+        <location filename="../AboutDialog.cpp" line="615"/>
         <source>Using ANSI strings for Win32 API.</source>
         <extracomment>Win32: ANSI strings are being used. (Win9x)</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="473"/>
-        <location filename="../AboutWindow.cpp" line="508"/>
+        <location filename="../AboutDialog.cpp" line="473"/>
+        <location filename="../AboutDialog.cpp" line="508"/>
         <source>(unknown)</source>
         <extracomment>Placeholder used if an OpenGL version string could not be retrieved.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="176"/>
+        <location filename="../AboutDialog.cpp" line="176"/>
         <source>Visit the Gens homepage:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="182"/>
+        <location filename="../AboutDialog.cpp" line="182"/>
         <source>For news on Gens/GS, visit Sonic Retro:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="194"/>
+        <location filename="../AboutDialog.cpp" line="194"/>
         <source>Version %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="411"/>
+        <location filename="../AboutDialog.cpp" line="411"/>
         <source>CPU flags:</source>
         <extracomment>CPU flags are extra features found in a CPU, such as SSE.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="440"/>
+        <location filename="../AboutDialog.cpp" line="440"/>
         <source>Timing method:</source>
         <extracomment>Timing method: Function used to handle emulation timing.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="446"/>
+        <location filename="../AboutDialog.cpp" line="446"/>
         <source>Save directory:</source>
         <extracomment>Save directory: Directory where configuration and savestate files are saved.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="458"/>
+        <location filename="../AboutDialog.cpp" line="458"/>
         <source>OpenGL disabled.</source>
         <extracomment>Displayed if Gens/GS II is compiled without OpenGL support.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="467"/>
+        <location filename="../AboutDialog.cpp" line="467"/>
         <source>OpenGL vendor string:</source>
         <extracomment>String identifying the manufacturer of the OpenGL implementation. (e.g. &quot;X.Org R300 Project&quot;)</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="469"/>
+        <location filename="../AboutDialog.cpp" line="469"/>
         <source>OpenGL renderer string:</source>
         <extracomment>String identifying the specific OpenGL renderer. (e.g. &quot;Gallium 0.4 on ATI RV530&quot;)</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="471"/>
+        <location filename="../AboutDialog.cpp" line="471"/>
         <source>OpenGL version string:</source>
         <extracomment>String identifying the OpenGL renderer version. (e.g. &quot;2.1 Mesa 7.11-devel&quot;)</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="487"/>
+        <location filename="../AboutDialog.cpp" line="487"/>
         <source>GLSL version string:</source>
         <extracomment>String identifying the OpenGL Shading Language version. (e.g. &quot;1.20&quot;)</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="499"/>
+        <location filename="../AboutDialog.cpp" line="499"/>
         <source>GLEW disabled; no GL extensions supported.</source>
         <extracomment>GL Extension Wrangler support was not compiled in.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="504"/>
+        <location filename="../AboutDialog.cpp" line="504"/>
         <source>GLEW version</source>
         <extracomment>String identifying the GLEW version.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="516"/>
+        <location filename="../AboutDialog.cpp" line="516"/>
         <source>No GL extensions in use.</source>
         <extracomment>No OpenGL extensions are being used.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="519"/>
+        <location filename="../AboutDialog.cpp" line="519"/>
         <source>Using GL extensions:</source>
         <extracomment>List what OpenGL extensions are in use.</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="560"/>
+        <location filename="../AboutDialog.cpp" line="560"/>
         <source>System ANSI code page:</source>
         <extracomment>Win32: ANSI code page. (e.g. 1252 for US/English, 932 for Japanese)</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../AboutWindow.cpp" line="562"/>
+        <location filename="../AboutDialog.cpp" line="562"/>
         <source>System OEM code page:</source>
         <extracomment>Win32: OEM code page. (e.g. 437 for US/English)</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/AboutWindow.ui" line="14"/>
+        <location filename="../ui/AboutDialog.ui" line="14"/>
         <source>About Gens/GS II</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/AboutWindow.ui" line="57"/>
+        <location filename="../ui/AboutDialog.ui" line="57"/>
         <source>&amp;Copyrights</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/AboutWindow.ui" line="95"/>
+        <location filename="../ui/AboutDialog.ui" line="95"/>
         <source>Included &amp;Libraries</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/AboutWindow.ui" line="130"/>
+        <location filename="../ui/AboutDialog.ui" line="130"/>
         <source>&amp;Debug Info</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/AboutWindow.ui" line="168"/>
+        <location filename="../ui/AboutDialog.ui" line="168"/>
         <source>C&amp;redits</source>
         <translation></translation>
     </message>
