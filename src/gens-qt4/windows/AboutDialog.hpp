@@ -30,6 +30,8 @@
 namespace GensQt4
 {
 
+class AboutDialogPrivate;
+
 class AboutDialog : public QDialog, public Ui::AboutDialog
 {
 	Q_OBJECT
@@ -41,24 +43,15 @@ class AboutDialog : public QDialog, public Ui::AboutDialog
 		AboutDialog(QWidget *parent = nullptr);
 		virtual ~AboutDialog();
 		
-		// State change event. (Used for switching the UI language at runtime.)
-		void changeEvent(QEvent *event);
-		
-		// Initialize the About Dialog text.
-		void initAboutDialogText(void);
-		bool m_scrlAreaInit;
-		
-		// Included libraries.
-		static QString GetIncLibraries(void);
-		
-		// Debug information.
-		static QString GetDebugInfo(void);
-#ifdef Q_OS_WIN32
-		static QString GetCodePageInfo(void);
-#endif /* Q_OS_WIN32 */
-	
 	private:
-		static AboutDialog *m_AboutDialog;
+		AboutDialogPrivate *const d_ptr;
+		Q_DECLARE_PRIVATE(AboutDialog)
+	private:
+		Q_DISABLE_COPY(AboutDialog)
+
+	protected:
+		// State change event. (Used for switching the UI language at runtime.)
+		virtual void changeEvent(QEvent *event) override;
 };
 
 }
