@@ -57,15 +57,15 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 	public:
 		static void ShowSingle(QWidget *parent = nullptr);
 
+	protected:
+		CtrlConfigWindow(QWidget *parent = nullptr);
+		virtual ~CtrlConfigWindow();
+
 	private:
 		CtrlConfigWindowPrivate *const d_ptr;
 		Q_DECLARE_PRIVATE(CtrlConfigWindow)
 	private:
 		Q_DISABLE_COPY(CtrlConfigWindow)
-
-	protected:
-		CtrlConfigWindow(QWidget *parent = nullptr);
-		virtual ~CtrlConfigWindow();
 
 	protected:
 		virtual void keyPressEvent(QKeyEvent *event) override;
