@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -32,45 +32,84 @@
 namespace GensQt4
 {
 
+class ZipSelectDialogPrivate
+{
+	public:
+		ZipSelectDialogPrivate(ZipSelectDialog *q);
+		~ZipSelectDialogPrivate();
+
+	private:
+		ZipSelectDialog *const q_ptr;
+		Q_DECLARE_PUBLIC(ZipSelectDialog)
+	private:
+		Q_DISABLE_COPY(ZipSelectDialogPrivate)
+
+	public:
+		const mdp_z_entry_t *z_entry_list;
+		const mdp_z_entry_t *z_entry_sel;
+
+		GensZipDirModel *dirModel;
+};
+
+/** ZipSelectDialogPrivate **/
+
+ZipSelectDialogPrivate::ZipSelectDialogPrivate(ZipSelectDialog *q)
+	: q_ptr(q)
+	, z_entry_list(nullptr)
+	, z_entry_sel(nullptr)
+	, dirModel(new GensZipDirModel(q))
+{ }
+
+ZipSelectDialogPrivate::~ZipSelectDialogPrivate()
+{
+	delete dirModel;
+}
+
+/** ZipSelectDialog **/
+
 /**
- * ZipSelectDialog(): Initialize the Multi-File Archive Selection Dialog.
+ * Initialize the Multi-File Archive Selection Dialog.
  */
 ZipSelectDialog::ZipSelectDialog(QWidget *parent)
 	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
+	, d_ptr(new ZipSelectDialogPrivate(this))
 {
 	setupUi(this);
-	
+
 #ifdef Q_WS_MAC
 	// Remove the window icon. (Mac "proxy icon")
 	this->setWindowIcon(QIcon());
 #endif
-	
+
 	// Disable the "OK" button initially.
+	Q_D(ZipSelectDialog);
 	QPushButton *button = buttonBox->button(QDialogButtonBox::Ok);
 	if (button)
 		button->setEnabled(false);
-	
-	m_dirModel = new GensZipDirModel(this);
-	treeView->setModel(m_dirModel);
+
+	// Set the tree model.
+	treeView->setModel(d->dirModel);
 }
 
+ZipSelectDialog::~ZipSelectDialog()
+{
+	delete d_ptr;
+}
 
 /**
- * changeEvent(): Widget state has changed.
+ * Widget state has changed.
  * @param event State change event.
  */
 void ZipSelectDialog::changeEvent(QEvent *event)
 {
-	if (event->type() == QEvent::LanguageChange)
-	{
+	if (event->type() == QEvent::LanguageChange) {
 		// Retranslate the UI.
 		retranslateUi(this);
 	}
-	
-	// Pass the event to the base class.
-	this->QDialog::changeEvent(event);
-}
 
+	// Pass the event to the base class.
+	QDialog::changeEvent(event);
+}
 
 /**
  * Set the file list.
@@ -78,15 +117,17 @@ void ZipSelectDialog::changeEvent(QEvent *event)
  */
 void ZipSelectDialog::setFileList(const mdp_z_entry_t* z_entry)
 {
+	Q_D(ZipSelectDialog);
+
 	// Clear the tree model first.
-	m_dirModel->clear();
+	d->dirModel->clear();
 
 	// Save the list pointer and clear the selected file pointer.
-	m_z_entry_list = z_entry;
-	m_z_entry_sel = nullptr;
+	d->z_entry_list = z_entry;
+	d->z_entry_sel = nullptr;
 
 	// For now, let's just do a standard list view.
-	const mdp_z_entry_t *cur = m_z_entry_list;
+	const mdp_z_entry_t *cur = d->z_entry_list;
 	for (; cur != nullptr; cur = cur->next) {
 		if (!cur->filename) {
 			// No filename. Go to the next file.
@@ -97,71 +138,81 @@ void ZipSelectDialog::setFileList(const mdp_z_entry_t* z_entry)
 
 		// TODO: Set icon based on file extension.
 		QIcon icon = this->style()->standardIcon(QStyle::SP_FileIcon);
-		m_dirModel->insertZEntry(cur, icon);
+		d->dirModel->insertZEntry(cur, icon);
 	}
 
 	// Sort the tree model.
-	m_dirModel->sort(0);
+	d->dirModel->sort(0);
 }
 
+/**
+ * Get the selected file.
+ * @return Selected file, or nullptr if no file was selected.
+ */
+const mdp_z_entry_t *ZipSelectDialog::selectedFile(void) const
+{
+	Q_D(const ZipSelectDialog);
+	return d->z_entry_sel;
+}
 
 /**
- * accept(): User accepted the selection.
+ * User accepted the selection.
  */
 void ZipSelectDialog::accept(void)
 {
+	Q_D(ZipSelectDialog);
+
 	// Get the selected item.
 	QModelIndexList indexList = treeView->selectionModel()->selectedIndexes();
 	if (indexList.size() != 1)
 		return;
-	
-	if (m_dirModel->hasChildren(indexList[0]))
-	{
+
+	if (d->dirModel->hasChildren(indexList[0])) {
 		// This is a directory.
 		// Don't do anything.
 		return;
 	}
-	
+
 	// This is a file.
 	// Get the selected z_entry.
-	m_z_entry_sel = m_dirModel->getZEntry(indexList[0]);
-	
+	d->z_entry_sel = d->dirModel->getZEntry(indexList[0]);
+
 	// Call the base accept() function.
-	this->QDialog::accept();
+	QDialog::accept();
 }
 
-
 /**
- * on_treeView_clicked(): An item in the QTreeView was clicked.
+ * An item in the QTreeView was clicked.
  * @param index Item index.
  */
 void ZipSelectDialog::on_treeView_clicked(const QModelIndex& index)
 {
 	// If this item is a directory, disable the "OK" button.
 	// If this item is a file, enable the "OK" button.
+	Q_D(ZipSelectDialog);
 	QPushButton *button = buttonBox->button(QDialogButtonBox::Ok);
 	if (button)
-		button->setEnabled(!m_dirModel->hasChildren(index));
+		button->setEnabled(!d->dirModel->hasChildren(index));
 }
 
-
 /**
- * on_treeView_collapsed(): An item in the QTreeView was collapsed.
+ * An item in the QTreeView was collapsed.
  * @param index Item index.
  */
 void ZipSelectDialog::on_treeView_collapsed(const QModelIndex& index)
 {
-	m_dirModel->setDirIconState(index, false);
+	Q_D(ZipSelectDialog);
+	d->dirModel->setDirIconState(index, false);
 }
 
-
 /**
- * on_treeView_expanded(): An item in the QTreeView was expanded.
+ * An item in the QTreeView was expanded.
  * @param index Item index.
  */
 void ZipSelectDialog::on_treeView_expanded(const QModelIndex& index)
 {
-	m_dirModel->setDirIconState(index, true);
+	Q_D(ZipSelectDialog);
+	d->dirModel->setDirIconState(index, true);
 }
 
 }
