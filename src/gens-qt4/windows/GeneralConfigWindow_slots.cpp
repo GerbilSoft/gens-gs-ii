@@ -5,7 +5,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #include "GeneralConfigWindow.hpp"
+#include "GeneralConfigWindow_p.hpp"
 
 #include "gqt4_main.hpp"
 
@@ -39,7 +40,8 @@ namespace GensQt4
 #define GENERIC_OPTION(path, var) \
 do { \
 	((void)var); \
-	setApplyButtonEnabled(true); \
+	Q_D(GeneralConfigWindow); \
+	d->setApplyButtonEnabled(true); \
 } while (0)
 #else
 #define GENERIC_OPTION(path, var) \

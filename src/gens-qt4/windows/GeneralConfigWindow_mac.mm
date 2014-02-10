@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GeneralConfigWindow_mac.mm: General Configuration Window. (Mac OS X)    *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -26,6 +26,7 @@
 #endif
 
 #include "GeneralConfigWindow.hpp"
+#include "GeneralConfigWindow_p.hpp"
 #include "GensQApplication.hpp"
 
 // Qt includes.
@@ -42,42 +43,43 @@
 #endif
 #endif
 
-
 namespace GensQt4
 {
 
 /**
  * Set up the Mac OS X-specific UI elements.
  */
-void GeneralConfigWindow::setupUi_mac(void)
+void GeneralConfigWindowPrivate::setupUi_mac(void)
 {
+	Q_Q(GeneralConfigWindow);
+
 	// Remove the window icon.
 	// SuitCase says the window icon is only used if there's
 	// a document open in the window, i.e. a "proxy icon".
-	this->setWindowIcon(QIcon());
-		
+	q->setWindowIcon(QIcon());
+
 	// Increase the margins for the QDialogButtonBox.
 	// TODO: Remove QDialogButtonBox on Mac OS X,
 	// and have settings apply immediately.
-	vboxButtonBox->setContentsMargins(16, 16, 16, 16);
-	
+	q->vboxButtonBox->setContentsMargins(16, 16, 16, 16);
+
 	// Force a fixed-size layout.
 	// Mac OS X's Carbon and Cocoa libraries are annoying and
 	// will enable the Zoom button if the layout isn't fixed.
 	// (On Cocoa, using Qt::CustomizeWindowHint breaks the
 	//  unified titlebar/toolbar setup.)
 	// TODO: Re-verify this with the recent GeneralConfigWindow changes.
-	this->layout()->setSizeConstraint(QLayout::SetFixedSize);
-	
+	q->layout()->setSizeConstraint(QLayout::SetFixedSize);
+
 	// Hide the toolbar show/hide button in the titlebar.
 	// TODO: Do this on a window update event too?
 #ifdef QT_MAC_USE_COCOA
 	// Qt is using Cocoa.
-	OSWindowRef window = qt_mac_window_for(this);
+	OSWindowRef window = qt_mac_window_for(q);
 	[window setShowsToolbarButton:false];
 #else
 	// Qt is using Carbon.
-	ChangeWindowAttributes(qt_mac_window_for(this),
+	ChangeWindowAttributes(qt_mac_window_for(q),
 				0, kWindowToolbarButtonAttribute);
 #endif
 }

@@ -148,6 +148,7 @@ SET(gens-qt4_WINDOW_SRCS
 	windows/CtrlConfigWindow.cpp
 	windows/ZipSelectDialog.cpp
 	windows/GeneralConfigWindow.cpp
+	windows/GeneralConfigWindow_p.cpp
 	windows/GeneralConfigWindow_slots.cpp
 	windows/McdControlWindow.cpp
 	)

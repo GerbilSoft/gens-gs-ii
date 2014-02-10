@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,35 +21,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_GENERALCONFIGWINDOW_HPP__
-#define __GENS_QT4_GENERALCONFIGWINDOW_HPP__
+#ifndef __GENS_QT4_WINDOWS_GENERALCONFIGWINDOW_HPP__
+#define __GENS_QT4_WINDOWS_GENERALCONFIGWINDOW_HPP__
 
 #include "ui_GeneralConfigWindow.h"
 
 // Qt includes.
 #include <QtGui/QMainWindow>
-#include <QtGui/QColor>
-
-class QAction;
-class QActionGroup;
-
-// Apply changes immediately.
-#ifdef Q_WS_MAC
-#define GCW_APPLY_IMMED
-#else /* !Q_WS_MAC */
-#ifdef GCW_APPLY_IMMED
-#undef GCW_APPLY_IMMED
-#endif /* GCW_APPLY_IMMED */
-#endif /* Q_WS_MAC */
-
-// GensLineEdit widget.
-#include "widgets/GensLineEdit.hpp"
 
 // libgens: Sega CD Boot ROM database.
 #include "libgens/Data/mcd_rom_db.h"
 
 namespace GensQt4
 {
+
+class GeneralConfigWindowPrivate;
 
 class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 {
@@ -62,31 +48,20 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		GeneralConfigWindow(QWidget *parent = nullptr);
 		virtual ~GeneralConfigWindow();
 
-		QSize sizeHint(void) const
+	private:
+		GeneralConfigWindowPrivate *const d_ptr;
+		Q_DECLARE_PRIVATE(GeneralConfigWindow);
+	private:
+		Q_DISABLE_COPY(GeneralConfigWindow);
+
+	protected:
+		virtual QSize sizeHint(void) const override
 			{ return this->baseSize(); }
 
-		void keyPressEvent(QKeyEvent *event);
+		virtual void keyPressEvent(QKeyEvent *event) override;
 
 		// State change event. (Used for switching the UI language at runtime.)
-		void changeEvent(QEvent *event);
-
-		// Warning string.
-		// NOTE: This must be built at runtime;
-		// otherwise, QObject might not be initialized.
-		QString m_sWarning;
-
-#ifndef GCW_APPLY_IMMED
-		/**
-		 * setApplyButtonEnabled(): Enable or disable the Apply button.
-		 * @param enabled True to enable; false to disable.
-		 */
-		void setApplyButtonEnabled(bool enabled);
-#endif
-
-#ifdef Q_WS_MAC
-		// Mac OS X UI customizations.
-		void setupUi_mac(void);
-#endif
+		virtual void changeEvent(QEvent *event) override;
 
 	protected slots:
 		void accept(void);
@@ -95,58 +70,9 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 		void reload(void);
 		void apply(void);
 
-	private:
-		// Toolbar action group.
-		QActionGroup *m_agBtnGroup;
-
 	private slots:
 		// Toolbar action group.
 		void toolbarTriggered(QAction *action);
-
-	private:
-		static GeneralConfigWindow *m_GeneralConfigWindow;
-
-		/** Onscreen Display **/
-		QColor osdSelectColor(QString color_id, const QColor& init_color);
-
-		// Onscreen Display: Colors.
-		QColor m_osdFpsColor;
-		QColor m_osdMsgColor;
-
-		/** System. **/
-		uint16_t regionCodeOrder(void) const;
-
-		/** Sega Genesis **/
-
-		// Select ROM file.
-		void selectRomFile(QString rom_desc, QLineEdit *txtRomFile);
-
-		// Sega Genesis: Update TMSS ROM file status.
-		QString mdUpdateTmssRomFileStatus(GensLineEdit *txtRomFile);
-
-		// Sega Genesis: TMSS ROM file information.
-		QString sMDTmssRomStatus;
-
-		/** Sega CD: Boot ROM **/
-
-		// Sega CD: Boot ROM filesize.
-		static const int MCD_ROM_FILESIZE = 131072;
-
-		// Sega CD: Update Boot ROM file status.
-		QString mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, int region_code);
-
-		// Sega CD: Display Boot ROM file status.
-		void mcdDisplayRomFileStatus(QString rom_id, QString rom_desc);
-
-		// Sega CD: Boot ROM file information.
-		QString sMcdRomStatus_USA;
-		QString sMcdRomStatus_EUR;
-		QString sMcdRomStatus_JPN;
-		QString sMcdRomStatus_Asia;
-
-		/** External Programs **/
-		QString sExtPrgStatus_UnRAR;
-		void extprgDisplayFileStatus(QString file_id, QString file_desc);
 	
 	private slots:
 		/** Onscreen Display **/
@@ -221,4 +147,4 @@ class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
 
 }
 
-#endif /* __GENS_QT4_GENERALCONFIGWINDOW_HPP__ */
+#endif /* __GENS_QT4_WINDOWS_GENERALCONFIGWINDOW_HPP__ */
