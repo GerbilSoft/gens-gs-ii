@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2012 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -44,162 +44,164 @@ class ConfigStorePrivate;
 class ConfigStore : public QObject
 {
 	Q_OBJECT
-	
+
 	public:
 		ConfigStore(QObject *parent = 0);
 		~ConfigStore();
-	
+
 	private:
-		friend class ConfigStorePrivate;
-		ConfigStorePrivate *const d;
+		ConfigStorePrivate *const d_ptr;
+		Q_DECLARE_PRIVATE(ConfigStore)
+	private:
 		Q_DISABLE_COPY(ConfigStore)
-	
+
 	public:
 		/**
 		 * Reset all settings to defaults.
 		 */
 		void reset(void);
-		
+
 		/**
 		 * Set a property.
 		 * @param key Property name.
 		 * @param value Property value.
 		 */
-		void set(QString key, QVariant value);
-		
+		void set(const QString &key, const QVariant &value);
+
 		/**
 		 * Get a property.
 		 * @param key Property name.
 		 * @return Property value.
 		 */
-		QVariant get(QString key) const;
-		
+		QVariant get(const QString &key) const;
+
 		/**
 		 * Get a property.
 		 * Converts hexadecimal string values to unsigned int.
 		 * @param key Property name.
 		 * @return Property value.
 		 */
-		unsigned int getUInt(QString key) const;
-		
+		unsigned int getUInt(const QString &key) const;
+
 		/**
 		 * Get a property.
 		 * Converts hexadecimal string values to signed int.
 		 * @param key Property name.
 		 * @return Property value.
 		 */
-		int getInt(QString key) const;
-		
+		int getInt(const QString &key) const;
+
 		/**
 		 * Load the configuration file.
 		 * @param filename Configuration filename.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int load(QString filename);
-		
+		int load(const QString &filename);
+
 		/**
 		 * Load the configuration file.
 		 * No filename specified; use the default filename.
 		 * @return 0 on success; non-zero on error.
 		 */
 		int load(void);
-		
+
 		/**
 		 * Save the configuration file.
 		 * @param filename Filename.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int save(QString filename) const;
-		
+		int save(const QString &filename) const;
+
 		/**
 		 * Save the configuration file.
 		 * No filename specified; use the default filename.
 		 * @return 0 on success; non-zero on error.
 		 */
 		int save(void) const;
-		
+
 		/**
 		 * Register an object for property change notification.
 		 * @param property Property to watch.
 		 * @param object QObject to register.
 		 * @param method Method name.
 		 */
-		void registerChangeNotification(QString property, QObject *object, const char *method);
-		
+		void registerChangeNotification(const QString &property, QObject *object, const char *method);
+
 		/**
 		 * Unregister an object for property change notification.
 		 * @param property Property to watch.
 		 * @param object QObject to register.
 		 * @param method Method name.
 		 */
-		void unregisterChangeNotification(QString property, QObject *object, const char *method);
-		
+		void unregisterChangeNotification(const QString &property, QObject *object, const char *method);
+
 		/**
 		 * Notify all registered objects that configuration settings have changed.
 		 * Useful when starting the emulator.
 		 */
 		void notifyAll(void);
-		
+
 		/** Configuration Paths. **/
-		
+
 		/**
 		 * Get the main configuration path. (GCPATH_CONFIG)
 		 * @return Main configuration path.
 		 */
 		QString configPath(void) const;
-		
+
 		/**
 		 * Get the specified configuration path.
 		 * @param path Configuration path to get. (Invalid paths act like GCPATH_CONFIG.)
 		 * @return Configuration path.
 		 */
 		QString configPath(PathConfig::ConfigPath path) const;
-		
+
 		/**
 		 * Get a const pointer to the PathConfig object.
 		 * @return Const pointer to the PathConfig object.
 		 */
 		const PathConfig *pathConfigObject(void) const;
-		
+
 		/** Recent ROMs. **/
-		
+
 		/**
 		 * Update the Recent ROMs list.
 		 * @param filename ROM filename.
 		 * @param z_filename Filename of ROM within archive.
 		 * @param sysId System ID.
 		 */
-		void recentRomsUpdate(QString filename, QString z_filename,
-					LibGens::Rom::MDP_SYSTEM_ID sysId);
-		
+		void recentRomsUpdate(const QString &filename,
+				      const QString &z_filename,
+				      LibGens::Rom::MDP_SYSTEM_ID sysId);
+
 		/**
 		 * Get a const pointer to the Recent ROMs object.
 		 * @return Const pointer to the Recent ROMs object.
 		 */
 		const RecentRoms *recentRomsObject(void) const;
-		
+
 		/**
 		 * Get a Recent ROMs entry.
 		 * @param id Recent ROM ID.
 		 */
 		RecentRom_t recentRomsEntry(int id) const;
-		
+
 		/** Key configuration. **/
-		
+
 		/**
 		 * Get the action associated with a GensKey_t.
 		 * @param key GensKey_t.
 		 * @return Action ID.
 		 */
 		int keyToAction(GensKey_t key) const;
-		
+
 		/**
 		 * Get the GensKey_t associated with an action.
 		 * @param actoin Action ID.
 		 * @return GensKey_t.
 		 */
 		GensKey_t actionToKey(int action) const;
-	
+
 	public:
 		// Controller configuration class.
 		// TODO: Rework this with the upcoming all-in-one IoManager.
