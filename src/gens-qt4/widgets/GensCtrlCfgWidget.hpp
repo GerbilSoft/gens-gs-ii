@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GensCtrlCfgWidget.hpp: Controller configuration widget.                 *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -41,8 +41,15 @@ class GensCtrlCfgWidget : public QWidget
 
 	public:
 		GensCtrlCfgWidget(QWidget* parent = 0);
-		~GensCtrlCfgWidget();
+		virtual ~GensCtrlCfgWidget();
 
+	private:
+		GensCtrlCfgWidgetPrivate *const d_ptr;
+		Q_DECLARE_PRIVATE(GensCtrlCfgWidget)
+	private:
+		Q_DISABLE_COPY(GensCtrlCfgWidget)
+
+	public:
 		/**
 		 * Get the current I/O device type.
 		 * @return Current I/O device type.
@@ -59,7 +66,7 @@ class GensCtrlCfgWidget : public QWidget
 		 * Get the current keymap.
 		 * @return Current keymap.
 		 */
-		QVector<GensKey_t> keyMap(void);
+		QVector<GensKey_t> keyMap(void) const;
 
 		/**
 		 * Set the current keymap.
@@ -74,12 +81,6 @@ class GensCtrlCfgWidget : public QWidget
 		 * @param gensKey New GensKey_t value.
 		 */
 		void keyChanged(int idx, GensKey_t gensKey);
-
-	private:
-		friend class GensCtrlCfgWidgetPrivate;
-		GensCtrlCfgWidgetPrivate *const d;
-
-		Q_DISABLE_COPY(GensCtrlCfgWidget)
 
 	private slots:
 		void clearAllButtons(void);

@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -51,7 +51,9 @@ class CtrlConfigWindowPrivate
 		~CtrlConfigWindowPrivate();
 
 	private:
-		CtrlConfigWindow *const q;
+		CtrlConfigWindow *const q_ptr;
+		Q_DECLARE_PUBLIC(CtrlConfigWindow)
+	private:
 		Q_DISABLE_COPY(CtrlConfigWindowPrivate)
 
 	public:
@@ -151,7 +153,7 @@ class CtrlConfigWindowPrivate
 CtrlConfigWindow *CtrlConfigWindowPrivate::ms_Window = nullptr;
 
 CtrlConfigWindowPrivate::CtrlConfigWindowPrivate(CtrlConfigWindow *q)
-	: q(q)
+	: q_ptr(q)
 	, ctrlConfig(new CtrlConfig(q))
 	, selPort(IoManager::VIRTPORT_1)
 	, actgrpSelPort(new QActionGroup(q))
@@ -368,6 +370,7 @@ QIcon CtrlConfigWindowPrivate::getCtrlIcon(IoManager::IoType_t ioType)
  */
 void CtrlConfigWindowPrivate::addIoTypeToCboDevice(IoManager::IoType_t ioType)
 {
+	Q_Q(CtrlConfigWindow);
 	q->cboDevice->addItem(getCtrlIcon(ioType), getShortDeviceName(ioType));
 	const int idx = q->cboDevice->count() - 1;
 	map_ioTypeToIdx.insert(ioType, idx);
@@ -381,6 +384,8 @@ void CtrlConfigWindowPrivate::addIoTypeToCboDevice(IoManager::IoType_t ioType)
  */
 void CtrlConfigWindowPrivate::initCboDevice(bool isTP)
 {
+	Q_Q(CtrlConfigWindow);
+
 	// on_cboDevice_currentIndexChanged() handles translation for Port 1.
 	cboDevice_lock();
 
@@ -428,6 +433,7 @@ void CtrlConfigWindowPrivate::initCboDevice(bool isTP)
 void CtrlConfigWindowPrivate::setCboDeviceIoType(IoManager::IoType_t ioType)
 {
 	assert(ioType >= IoManager::IOT_NONE  && ioType < IoManager::IOT_MAX);
+	Q_Q(CtrlConfigWindow);
 	const int idx = map_ioTypeToIdx.value(ioType, 0);
 	if (idx < q->cboDevice->count())
 		q->cboDevice->setCurrentIndex(idx);
@@ -439,6 +445,7 @@ void CtrlConfigWindowPrivate::setCboDeviceIoType(IoManager::IoType_t ioType)
  */
 IoManager::IoType_t CtrlConfigWindowPrivate::cboDeviceIoType(void)
 {
+	Q_Q(CtrlConfigWindow);
 	const int idx = q->cboDevice->currentIndex();
 	return map_idxToIoType.value(idx, IoManager::IOT_NONE);
 }
@@ -452,7 +459,6 @@ IoManager::IoType_t CtrlConfigWindowPrivate::cboDeviceIoType(int index)
 {
 	return map_idxToIoType.value(index, IoManager::IOT_NONE);
 }
-
 
 /*******************************
  * CtrlConfigWindow functions. *
@@ -468,7 +474,7 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 		Qt::WindowSystemMenuHint |
 		Qt::WindowMinimizeButtonHint |
 		Qt::WindowCloseButtonHint)
-	, d(new CtrlConfigWindowPrivate(this))
+	, d_ptr(new CtrlConfigWindowPrivate(this))
 {
 	// Initialize the Qt4 UI.
 	setupUi(this);
@@ -485,6 +491,8 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	// Connect a signal for the "Apply" button.
 	QPushButton *btnApply = buttonBox->button(QDialogButtonBox::Apply);
 	connect(btnApply, SIGNAL(clicked(bool)), this, SLOT(apply()));
+
+	Q_D(CtrlConfigWindow);
 
 	// Initialize the toolbar.
 	d->actgrpSelPort->setExclusive(true);
@@ -540,15 +548,13 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	actionPort1->setChecked(true);
 }
 
-
 /**
  * Shut down the Controller Configuration window.
  */
 CtrlConfigWindow::~CtrlConfigWindow()
 {
-	delete d;
+	delete d_ptr;
 }
-
 
 /**
  * Show a single instance of the Controller Configuration window.
@@ -567,7 +573,6 @@ void CtrlConfigWindow::ShowSingle(QWidget *parent)
 	}
 }
 
-
 /**
  * Key press handler.
  * @param event Key event.
@@ -576,25 +581,24 @@ void CtrlConfigWindow::keyPressEvent(QKeyEvent *event)
 {
 	// TODO: Handle Cmd-Period on Mac?
 	// NOTE: Cmd-W triggers the "Close ROM" action...
-	
+
 	// Check for special dialog keys.
 	// Adapted from QDialog::keyPressEvent().
 	if (!event->modifiers() || ((event->modifiers() & Qt::KeypadModifier)
 	    && event->key() == Qt::Key_Enter))
 	{
-		switch (event->key())
-		{
+		switch (event->key()) {
 			case Qt::Key_Enter:
 			case Qt::Key_Return:
 				// Accept the dialog changes.
 				accept();
 				break;
-			
+
 			case Qt::Key_Escape:
 				// Reject the dialog changes.
 				reject();
 				break;
-			
+
 			default:
 				// Pass the event to the base class.
 				this->QMainWindow::keyPressEvent(event);
@@ -605,7 +609,6 @@ void CtrlConfigWindow::keyPressEvent(QKeyEvent *event)
 		this->QMainWindow::keyPressEvent(event);
 	}
 }
-
 
 /**
  * Widget state has changed.
@@ -624,6 +627,7 @@ void CtrlConfigWindow::changeEvent(QEvent *event)
 		}
 
 		// Update the selected port information.
+		Q_D(CtrlConfigWindow);
 		updatePortSettings(d->selPort);
 	}
 
@@ -668,6 +672,7 @@ void CtrlConfigWindow::updatePortButton(IoManager::VirtPort_t virtPort)
 	}
 
 	// Make sure the device type is in bounds.
+	Q_D(CtrlConfigWindow);
 	const IoManager::IoType_t ioType = d->ctrlConfig->ioType(virtPort);
 	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
 
@@ -713,7 +718,6 @@ void CtrlConfigWindow::updatePortButton(IoManager::VirtPort_t virtPort)
 	}
 }
 
-
 /**
  * Update port settings.
  * @param virtPort Virtual port to display.
@@ -722,6 +726,7 @@ void CtrlConfigWindow::updatePortSettings(IoManager::VirtPort_t virtPort)
 {
 	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
 
+	Q_D(CtrlConfigWindow);
 	IoManager::IoType_t ioType = d->ctrlConfig->ioType(virtPort);
 	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
 
@@ -751,6 +756,7 @@ void CtrlConfigWindow::selectPort(IoManager::VirtPort_t virtPort)
 {
 	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
 
+	Q_D(CtrlConfigWindow);
 	// Check if this is a Team Player port.
 	bool isTP = false;
 	switch (virtPort) {
@@ -825,6 +831,7 @@ void CtrlConfigWindow::reject(void)
 void CtrlConfigWindow::reload(void)
 {
 	// Copy the current controller settings.
+	Q_D(CtrlConfigWindow);
 	d->ctrlConfig->copyFrom(gqt4_cfg->m_ctrlConfig);
 
 	// Initialize all of the port buttons.
@@ -899,6 +906,7 @@ void CtrlConfigWindow::reload(void)
 void CtrlConfigWindow::apply(void)
 {
 	// Copy the controller configuration settings to gqt4_cfg.
+	Q_D(CtrlConfigWindow);
 	gqt4_cfg->m_ctrlConfig->copyFrom(d->ctrlConfig);
 
 	// Update the I/O manager if emulation is running.
@@ -907,9 +915,7 @@ void CtrlConfigWindow::apply(void)
 		gqt4_cfg->m_ctrlConfig->updateIoManager(gqt4_emuContext->m_ioManager);
 }
 
-
 /** Widget slots. **/
-
 
 /**
  * The selected port in the toolbar has been changed.
@@ -917,6 +923,7 @@ void CtrlConfigWindow::apply(void)
  */
 void CtrlConfigWindow::toolbarPortSelected(int virtPort)
 {
+	Q_D(CtrlConfigWindow);
 	QAction *action = qobject_cast<QAction*>(d->mapperSelPort->mapping(virtPort));
 	if (action && action->isChecked())
 		selectPort((IoManager::VirtPort_t)virtPort);
@@ -930,6 +937,7 @@ void CtrlConfigWindow::toolbarPortSelected(int virtPort)
 void CtrlConfigWindow::on_cboDevice_currentIndexChanged(int index)
 {
 	// TODO: Make this function a wrapper for CtrlConfigWindowPrivate?
+	Q_D(CtrlConfigWindow);
 	if (d->isCboDeviceLocked())
 		return;
 
@@ -1015,6 +1023,7 @@ void CtrlConfigWindow::on_ctrlCfgWidget_keyChanged(int idx, GensKey_t gensKey)
 {
 	// TODO: Only save the specific key that was changed.
 	// For now, we're going to save everything.
+	Q_D(CtrlConfigWindow);
 	d->ctrlConfig->setKeyMap(d->selPort, ctrlCfgWidget->keyMap());
 }
 

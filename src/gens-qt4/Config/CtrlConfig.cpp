@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -49,6 +49,13 @@ class CtrlConfigPrivate
 		CtrlConfigPrivate(CtrlConfig *q, const CtrlConfigPrivate *src);
 		void copyFrom(const CtrlConfigPrivate *src);
 
+	private:
+		CtrlConfig *const q_ptr;
+		Q_DECLARE_PUBLIC(CtrlConfig)
+	private:
+		Q_DISABLE_COPY(CtrlConfigPrivate)
+
+	public:
 		// Dirty flag.
 		bool isDirty(void) const;
 		void clearDirty(void);
@@ -65,12 +72,9 @@ class CtrlConfigPrivate
 
 		// Load/Save functions.
 		int load(const QSettings *qSettings);
-		int save(QSettings *qSettings);
+		int save(QSettings *qSettings) const;
 
 	private:
-		CtrlConfig *const q;
-		Q_DISABLE_COPY(CtrlConfigPrivate)
-
 		// Dirty flag.
 		bool m_dirty;
 
@@ -152,9 +156,8 @@ const GensKey_t CtrlConfigPrivate::Def_CtrlKeys[IoManager::VIRTPORT_MAX][IoManag
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port 4WPD
 };
 
-
 CtrlConfigPrivate::CtrlConfigPrivate(CtrlConfig *q)
-	: q(q)
+	: q_ptr(q)
 	, m_dirty(true)
 {
 	// Clear the controller types and key configuration arrays.
@@ -164,7 +167,7 @@ CtrlConfigPrivate::CtrlConfigPrivate(CtrlConfig *q)
 }
 
 CtrlConfigPrivate::CtrlConfigPrivate(CtrlConfig *q, const CtrlConfigPrivate *src)
-	: q(q)
+	: q_ptr(q)
 {
 	// Copy from another CtrlConfigPrivate.
 	copyFrom(src);
@@ -182,7 +185,6 @@ void CtrlConfigPrivate::copyFrom(const CtrlConfigPrivate *src)
 	memcpy(ctrlKeys, src->ctrlKeys, sizeof(ctrlKeys));
 }
 
-
 /**
  * Check if the controller configuration is dirty.
  * @return True if the controller configuration is dirty; false otherwise.
@@ -195,7 +197,6 @@ inline bool CtrlConfigPrivate::isDirty(void) const
  */
 inline void CtrlConfigPrivate::clearDirty(void)
 	{ m_dirty = false; }
-
 
 /**
  * Get an internal port name. (non-localized)
@@ -240,7 +241,6 @@ QString CtrlConfigPrivate::PortName(IoManager::VirtPort_t virtPort)
 	// Should not get here...
 	return QString();
 }
-
 
 /**
  * Load controller configuration from a settings file.
@@ -304,14 +304,13 @@ int CtrlConfigPrivate::load(const QSettings *qSettings)
 	return 0;
 }
 
-
 /**
  * Save controller configuration to a settings file.
  * NOTE: The group must be selected in the QSettings before calling this function!
  * @param qSettings Settings file.
  * @return 0 on success; non-zero on error.
  */
-int CtrlConfigPrivate::save(QSettings *qSettings)
+int CtrlConfigPrivate::save(QSettings *qSettings) const
 {
 	for (int virtPort = IoManager::VIRTPORT_1;
 	     virtPort < IoManager::VIRTPORT_MAX; virtPort++) {
@@ -348,28 +347,27 @@ int CtrlConfigPrivate::save(QSettings *qSettings)
 	return 0;
 }
 
-
 /*************************
  * CtrlConfig functions. *
  *************************/
 
 CtrlConfig::CtrlConfig(QObject *parent)
 	: QObject(parent)
-	, d(new CtrlConfigPrivate(this))
+	, d_ptr(new CtrlConfigPrivate(this))
 { }
 
 CtrlConfig::CtrlConfig(const CtrlConfig *src, QObject *parent)
 	: QObject(parent)
-	, d(new CtrlConfigPrivate(this))
+	, d_ptr(new CtrlConfigPrivate(this))
 {
 	// Copy the CtrlConfigPrivate from the specified source.
 	// (Copy constructors don't work too well with Qt.)
-	d->copyFrom(src->d);
+	d_ptr->copyFrom(src->d_ptr);
 }
 
 CtrlConfig::~CtrlConfig()
 {
-	delete d;
+	delete d_ptr;
 }
 
 /**
@@ -378,24 +376,30 @@ CtrlConfig::~CtrlConfig()
  */
 void CtrlConfig::copyFrom(const CtrlConfig *src)
 {
-	d->copyFrom(src->d);
+	Q_D(CtrlConfig);
+	d->copyFrom(src->d_ptr);
 }
 
 /**
- * CtrlConfig::isDirty(): Check if the controller configuration is dirty.
+ * Check if the controller configuration is dirty.
  * WRAPPER FUNCTION for CtrlConfigPrivate::isDirty().
  * @return True if the controller configuration is dirty; false otherwise.
  */
 bool CtrlConfig::isDirty(void) const
-	{ return d->isDirty(); }
+{
+	Q_D(const CtrlConfig);
+	return d->isDirty();
+}
 
 /**
- * CtrlConfig::clearDirty(): Clear the dirty flag.
+ * Clear the dirty flag.
  * WRAPPER FUNCTION for CtrlConfigPrivate::clearDirty().
  */
 void CtrlConfig::clearDirty(void)
-	{ d->clearDirty(); }
-
+{
+	Q_D(CtrlConfig);
+	d->clearDirty();
+}
 
 /**
  * Load controller configuration from a settings file.
@@ -406,9 +410,9 @@ void CtrlConfig::clearDirty(void)
  */
 int CtrlConfig::load(const QSettings *qSettings)
 {
+	Q_D(CtrlConfig);
 	return d->load(qSettings);
 }
-
 
 /**
  * Save controller configuration to a settings file.
@@ -417,14 +421,13 @@ int CtrlConfig::load(const QSettings *qSettings)
  * @param settings Settings file.
  * @return 0 on success; non-zero on error.
  */
-int CtrlConfig::save(QSettings *qSettings)
+int CtrlConfig::save(QSettings *qSettings) const
 {
+	Q_D(const CtrlConfig);
 	return d->save(qSettings);
 }
 
-
 /** Controller update functions. **/
-
 
 /**
  * Update the controller I/O manager.
@@ -433,6 +436,7 @@ int CtrlConfig::save(QSettings *qSettings)
  */
 void CtrlConfig::updateIoManager(IoManager *ioManager) const
 {
+	Q_D(const CtrlConfig);
 	for (int virtPort = 0; virtPort < ARRAY_SIZE(d->ctrlKeys); virtPort++) {
 		// Set the device type.
 		ioManager->setDevType(
@@ -446,9 +450,7 @@ void CtrlConfig::updateIoManager(IoManager *ioManager) const
 	}
 }
 
-
 /** CtrlConfigWindow interface. **/
-
 
 /**
  * Get a controller's I/O device type.
@@ -458,6 +460,7 @@ void CtrlConfig::updateIoManager(IoManager *ioManager) const
 IoManager::IoType_t CtrlConfig::ioType(IoManager::VirtPort_t virtPort)
 {
 	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
+	Q_D(CtrlConfig);
 	return d->ctrlTypes[virtPort];
 }
 
@@ -471,9 +474,9 @@ void CtrlConfig::setIoType(IoManager::VirtPort_t virtPort, IoManager::IoType_t i
 {
 	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
 	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
+	Q_D(CtrlConfig);
 	d->ctrlTypes[virtPort] = ioType;
 }
-
 
 /**
  * Get a controller's keymap.
@@ -483,6 +486,7 @@ void CtrlConfig::setIoType(IoManager::VirtPort_t virtPort, IoManager::IoType_t i
 QVector<GensKey_t> CtrlConfig::keyMap(IoManager::VirtPort_t virtPort)
 {
 	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
+	Q_D(CtrlConfig);
 	const int numButtons = IoManager::NumDevButtons(d->ctrlTypes[virtPort]);
 
 	QVector<GensKey_t> keyMap(numButtons);
@@ -502,6 +506,7 @@ QVector<GensKey_t> CtrlConfig::keyMap(IoManager::VirtPort_t virtPort)
 void CtrlConfig::setKeyMap(LibGens::IoManager::VirtPort_t virtPort, QVector<GensKey_t> keyMap)
 {
 	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
+	Q_D(CtrlConfig);
 	const int numButtons = IoManager::NumDevButtons(d->ctrlTypes[virtPort]);
 	const int maxButtons = std::min(keyMap.size(), numButtons);
 

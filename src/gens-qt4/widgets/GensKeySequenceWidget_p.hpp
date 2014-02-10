@@ -7,7 +7,7 @@
  * Copyright (c) 1998 Mark Donohoe <donohoe@kde.org>                       *
  * Copyright (c) 2001 Ellis Whitehead <ellis@kde.org>                      *
  * Copyright (c) 2007 Andreas Hartmetz <ahartmetz@gmail.com>               *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -37,27 +37,26 @@ class GensKeySequenceWidgetPrivate;
 class GensKeySequenceButton : public QPushButton
 {
 	Q_OBJECT
-	
+
 	public:
 		explicit GensKeySequenceButton(GensKeySequenceWidgetPrivate *d, QWidget *parent = 0)
 			: QPushButton(parent), d(d) { }
-		
-		~GensKeySequenceButton();
-		
-		// Reimplemented.
-		void setText(const QString& text);
-	
-	protected:
-		// Reimplemented for internal reasons.
-		bool event(QEvent *event);
-		void keyPressEvent(QKeyEvent *event);
-		void keyReleaseEvent(QKeyEvent *event);
-		void focusOutEvent(QFocusEvent *event);
-	
+		virtual ~GensKeySequenceButton() { };
+
 	private:
 		GensKeySequenceWidgetPrivate *const d;
-		
 		Q_DISABLE_COPY(GensKeySequenceButton);
+
+	public:
+		// Reimplemented. [NOTE: NOT VIRTUAL!]
+		void setText(const QString& text);
+
+	protected:
+		// Reimplemented for internal reasons.
+		virtual bool event(QEvent *event) override;
+		virtual void keyPressEvent(QKeyEvent *event) override;
+		virtual void keyReleaseEvent(QKeyEvent *event) override;
+		virtual void focusOutEvent(QFocusEvent *event) override;
 };
 
 }

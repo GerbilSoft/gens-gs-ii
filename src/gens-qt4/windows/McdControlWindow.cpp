@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -54,8 +54,10 @@ class McdControlWindowPrivate
 		//bool m_isQuerying;
 		//QList<CdromDriveEntry> m_queryList;
 		void addDriveEntry(QString deviceName, int index = -1);
-};
 
+		// Refresh button.
+		QPushButton *btnRefresh;
+};
 
 /**************************************
  * McdControlWindowPrivate functions. *
@@ -63,9 +65,9 @@ class McdControlWindowPrivate
 
 McdControlWindowPrivate::McdControlWindowPrivate(McdControlWindow *q)
 	: q(q)
+	, findCdromDrives(new FindCdromDrives(q))
+	, btnRefresh(nullptr)
 {
-	findCdromDrives = new FindCdromDrives(q);
-
 	// Set up the FindCdromDrives signals.
 	// TODO
 	/*
@@ -80,7 +82,6 @@ McdControlWindowPrivate::McdControlWindowPrivate(McdControlWindow *q)
 
 McdControlWindowPrivate::~McdControlWindowPrivate()
 { }
-
 
 /**
  * Add a CD-ROM drive to the dropdown box.
@@ -131,7 +132,6 @@ void McdControlWindowPrivate::addDriveEntry(QString deviceName, int index)
 		q->cboCdDrives->setCurrentIndex(0);
 }
 
-
 /*******************************
  * McdControlWindow functions. *
  *******************************/
@@ -140,11 +140,11 @@ void McdControlWindowPrivate::addDriveEntry(QString deviceName, int index)
 McdControlWindow *McdControlWindow::m_McdControlWindow = nullptr;
 
 /**
- * McdControlWindow(): Initialize the General Configuration window.
+ * Initialize the General Configuration window.
  */
 McdControlWindow::McdControlWindow(QWidget *parent)
 	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
-	, d(new McdControlWindowPrivate(this))
+	, d_ptr(new McdControlWindowPrivate(this))
 {
 	// Initialize the Qt4 UI.
 	setupUi(this);
@@ -159,32 +159,31 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 
 	// Create the "Refresh" button.
 	// TODO: Don't load an icon on systems that don't use icons on buttons.
-	btnRefresh = new QPushButton(GensQApplication::IconFromTheme(QLatin1String("view-refresh")),
+	Q_D(McdControlWindow);
+	d->btnRefresh = new QPushButton(GensQApplication::IconFromTheme(QLatin1String("view-refresh")),
 					tr("&Refresh"), this);
-	connect(btnRefresh, SIGNAL(clicked()), this, SLOT(query()));
+	connect(d->btnRefresh, SIGNAL(clicked()), this, SLOT(query()));
 	// NOTE: "ResetRole" isn't exactly the right thing, but it works.
 	// On KDE, the button's on the left side of the dialog, whereas "Close" is on the right.
-	buttonBox->addButton(btnRefresh, QDialogButtonBox::ResetRole);
+	buttonBox->addButton(d->btnRefresh, QDialogButtonBox::ResetRole);
 
 	// Query CD-ROM drives.
 	query();
 }
 
-
 /**
- * ~McdControlWindow(): Shut down the Controller Configuration window.
+ * Shut down the Controller Configuration window.
  */
 McdControlWindow::~McdControlWindow()
 {
-	delete d;
+	delete d_ptr;
 
 	// Clear the m_McdControlWindow pointer.
 	m_McdControlWindow = nullptr;
 }
 
-
 /**
- * ShowSingle(): Show a single instance of the General Configuration window.
+ * Show a single instance of the General Configuration window.
  * @param parent Parent window.
  */
 void McdControlWindow::ShowSingle(QWidget *parent)
@@ -202,7 +201,7 @@ void McdControlWindow::ShowSingle(QWidget *parent)
 
 
 /**
- * changeEvent(): Widget state has changed.
+ * Widget state has changed.
  * @param event State change event.
  */
 void McdControlWindow::changeEvent(QEvent *event)
@@ -218,13 +217,14 @@ void McdControlWindow::changeEvent(QEvent *event)
 
 
 /**
- * query(): Query CD-ROM drives.
+ * Query CD-ROM drives.
  */
 void McdControlWindow::query(void)
 {
 	// Clear the dropdown.
 	cboCdDrives->clear();
 
+	Q_D(McdControlWindow);
 	if (!d->findCdromDrives->isSupported()) {
 		// No CD-ROM drive handler is available.
 		// TODO: Center-align the text by using QItemDelegate.
@@ -253,23 +253,19 @@ void McdControlWindow::query(void)
 	unsetCursor();
 }
 
-
 // TODO: Replace with FindCdromDrives slots.
 #if 0
 /**
- * driveUpdated(): A drive was updated.
+ * A drive was updated.
  * @param drive CdromDriveEntry.
  */
 void McdControlWindow::driveUpdated(const CdromDriveEntry& drive)
 {
-	if (m_isQuerying)
-	{
+	if (m_isQuerying) {
 		// Querying all drives.
 		// Add the drive entry to m_queryList.
 		m_queryList.append(drive);
-	}
-	else
-	{
+	} else {
 		// Not querying drives.
 		// This is an actual drive update signal.
 		int index = cboCdDrives->findData(drive.path, Qt::UserRole,
@@ -279,25 +275,23 @@ void McdControlWindow::driveUpdated(const CdromDriveEntry& drive)
 						Qt::MatchFixedString
 #endif
 				       );
-		
+
 		addDriveEntry(drive, index);
 	}
 }
 
-
 /**
- * driveQueryFinished(): A FindCdromBase::query() request has finished.
+ * A FindCdromBase::query() request has finished.
  */
 void McdControlWindow::driveQueryFinished(void)
 {
 	// Unset the mouse pointer.
 	unsetCursor();
-	
+
 	// Remove the "Searching" text from the dropdown box.
 	cboCdDrives->clear();
-	
-	if (m_queryList.isEmpty())
-	{
+
+	if (m_queryList.isEmpty()) {
 		// Query list is empty.
 		// TODO: Center-align the text by using QItemDelegate.
 		cboCdDrives->setEnabled(false);
@@ -305,23 +299,23 @@ void McdControlWindow::driveQueryFinished(void)
 		cboCdDrives->setCurrentIndex(0);
 		return;
 	}
-	
-	foreach (const CdromDriveEntry& drive, m_queryList)
+
+	foreach (const CdromDriveEntry& drive, m_queryList) {
 		addDriveEntry(drive);
-	
+	}
+
 	// Set cboCdDrive's selected index to 0 so that the
 	// first CD-ROM drive is displayed.
 	cboCdDrives->setCurrentIndex(0);
 	cboCdDrives->setEnabled(true);
-	
+
 	// Clear the query list.
 	m_queryList.clear();
 	m_isQuerying = false;
 }
 
-
 /**
- * driveRemoved(): A drive was removed.
+ * A drive was removed.
  * @param path Device path.
  */
 void McdControlWindow::driveRemoved(QString path)
@@ -330,7 +324,7 @@ void McdControlWindow::driveRemoved(QString path)
 		return;
 	if (!cboCdDrives->isEnabled())
 		return;
-	
+
 	// If the drive exists in the dropdown, remove it.
 	int index = cboCdDrives->findData(path, Qt::UserRole,
 #if defined(Q_OS_WIN)
@@ -339,12 +333,10 @@ void McdControlWindow::driveRemoved(QString path)
 					Qt::MatchFixedString
 #endif
 			       );
-	
-	if (index >= 0 && index < cboCdDrives->count())
-	{
+
+	if (index >= 0 && index < cboCdDrives->count()) {
 		cboCdDrives->removeItem(index);
-		if (cboCdDrives->count() <= 0)
-		{
+		if (cboCdDrives->count() <= 0) {
 			// No drives left.
 			cboCdDrives->setEnabled(false);
 			cboCdDrives->addItem(tr("No CD-ROM drives found."));

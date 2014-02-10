@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -50,6 +50,13 @@ class GensMenuBar : public QObject
 		GensMenuBar(QObject *parent = nullptr, EmuManager *emuManager = nullptr);
 		virtual ~GensMenuBar();
 
+	private:
+		GensMenuBarPrivate *const d_ptr;
+		Q_DECLARE_PRIVATE(GensMenuBar)
+	private:
+		Q_DISABLE_COPY(GensMenuBar)
+
+	public:
 		QMenuBar *createMenuBar(void);
 		QMenuBar *createMenuBar(QMenuBar *menuBar);
 		QMenu *popupMenu(void);
@@ -80,12 +87,6 @@ class GensMenuBar : public QObject
 		 */
 		int lock(void);
 		int unlock(void);
-
-	private:
-		friend class GensMenuBarPrivate;
-		GensMenuBarPrivate *const d;
-
-		Q_DISABLE_COPY(GensMenuBar);
 
 	/** Menu synchronization. **/
 

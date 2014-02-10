@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -41,14 +41,22 @@ class CtrlConfigPrivate;
 class CtrlConfig : public QObject
 {
 	Q_OBJECT
-	
+
 	public:
 		CtrlConfig(QObject *parent = 0);
 		CtrlConfig(const CtrlConfig *src, QObject *parent = 0);
-		~CtrlConfig();
+		virtual ~CtrlConfig();
 
+	private:
+		CtrlConfigPrivate *const d_ptr;
+		Q_DECLARE_PRIVATE(CtrlConfig)
+	private:
+		Q_DISABLE_COPY(CtrlConfig)
+
+	public:
 		/**
 		 * Copy settings from another CtrlConfig.
+		 * TODO: Make this a copy constructor.
 		 * @param src Other CtrlConfig to copy from.
 		 */
 		void copyFrom(const CtrlConfig *src);
@@ -71,7 +79,7 @@ class CtrlConfig : public QObject
 		 * @param qSettings Settings file.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int save(QSettings *qSettings);
+		int save(QSettings *qSettings) const;
 
 		/**
 		 * Update the controller I/O manager.
@@ -111,11 +119,6 @@ class CtrlConfig : public QObject
 		 * @param keyMap New keymap.
 		 */
 		void setKeyMap(LibGens::IoManager::VirtPort_t virtPort, QVector<GensKey_t> keyMap);
-
-	private:
-		friend class CtrlConfigPrivate;
-		CtrlConfigPrivate *d;
-		Q_DISABLE_COPY(CtrlConfig)
 };
 
 }

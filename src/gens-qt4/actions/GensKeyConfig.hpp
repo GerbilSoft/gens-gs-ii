@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -45,41 +45,44 @@ class GensKeyConfig : public QObject
 	
 	public:
 		GensKeyConfig(QObject *parent = 0);
-		~GensKeyConfig();
-		
+		virtual ~GensKeyConfig();
+
+	private:
+		GensKeyConfigPrivate *const d_ptr;
+		Q_DECLARE_PRIVATE(GensKeyConfig);
+	private:
+		Q_DISABLE_COPY(GensKeyConfig);
+
+	public:
 		/**
-		 * keyToAction(): Look up an action based on a GensKey_t value.
+		 * Look up an action based on a GensKey_t value.
 		 * @param key GensKey_t value. (WITH MODIFIERS)
 		 * @return Action, or 0 if no action was found.
 		 */
 		int keyToAction(GensKey_t key) const;
-		
+
 		/**
-		 * actionToKey(): Look up a GensKey_t based on an action value.
+		 * Look up a GensKey_t based on an action value.
 		 * @param action Action value.
 		 * @return GensKey_t (WITH MODIFIERS), or 0 if no key was found.
 		 */
 		int actionToKey(int action) const;
-		
+
 		/**
-		 * load(): Load key configuration from a settings file.
+		 * Load key configuration from a settings file.
 		 * NOTE: The group must be selected in the QSettings before calling this function!
 		 * @param qSettings Settings file.
 		 * @return 0 on success; non-zero on error.
 		 */
 		int load(const QSettings *qSettings);
-		
+
 		/**
-		 * save(): Save key configuration to a settings file.
+		 * Save key configuration to a settings file.
 		 * NOTE: The group must be selected in the QSettings before calling this function!
 		 * @param qSettings Settings file.
 		 * @return 0 on success; non-zero on error.
 		 */
 		int save(QSettings *qSettings) const;
-	
-	private:
-		GensKeyConfigPrivate *d;
-		Q_DISABLE_COPY(GensKeyConfig);
 };
 
 }

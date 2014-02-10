@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -43,9 +43,10 @@ class PathConfig : public QObject
 		virtual ~PathConfig();
 	
 	private:
-		friend class PathConfigPrivate;
-		PathConfigPrivate *const d;
-		Q_DISABLE_COPY(PathConfig);
+		PathConfigPrivate *const d_ptr;
+		Q_DECLARE_PRIVATE(PathConfig)
+	private:
+		Q_DISABLE_COPY(PathConfig)
 	
 	public:
 		/** QSettings functions. **/
@@ -89,14 +90,14 @@ class PathConfig : public QObject
 		 * Get the main configuration path. (GCPATH_CONFIG)
 		 * @return Main configuration path.
 		 */
-		QString configPath(void);
+		QString configPath(void) const;
 		
 		/**
 		 * Get the specified configuration path.
 		 * @param path Configuration path to get. (Invalid paths act like GCPATH_CONFIG.)
 		 * @return Configuration path.
 		 */
-		QString configPath(ConfigPath path);
+		QString configPath(ConfigPath path) const;
 	
 	signals:
 		// NOTE: Signals must use the full namespace specification

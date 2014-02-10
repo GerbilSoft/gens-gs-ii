@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -58,11 +58,12 @@ class GensWindow : public QMainWindow
 	
 	public:
 		GensWindow();
-		~GensWindow();
+		virtual ~GensWindow();
 
 	private:
-		friend class GensWindowPrivate;
-		GensWindowPrivate *const d;
+		GensWindowPrivate *const d_ptr;
+		Q_DECLARE_PRIVATE(GensWindow)
+	private:
 		Q_DISABLE_COPY(GensWindow)
 
 	public:
@@ -115,15 +116,15 @@ class GensWindow : public QMainWindow
 
 	protected:
 		// QMainWindow virtual functions.
-		void closeEvent(QCloseEvent *event);
-		void showEvent(QShowEvent *event);
+		virtual void closeEvent(QCloseEvent *event) override;
+		virtual void showEvent(QShowEvent *event) override;
 
 		// QMainWindow virtual functions: drag and drop.
-		void dragEnterEvent(QDragEnterEvent *event);
-		void dropEvent(QDropEvent *event);
+		virtual void dragEnterEvent(QDragEnterEvent *event) override;
+		virtual void dropEvent(QDropEvent *event) override;
 
 		// State change event. (Used for switching the UI language at runtime.)
-		void changeEvent(QEvent *event);
+		virtual void changeEvent(QEvent *event) override;
 
 	protected slots:
 		/**

@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -49,13 +49,14 @@ class McdControlWindow : public QDialog, public Ui::McdControlWindow
 		virtual ~McdControlWindow();
 
 	private:
-		McdControlWindowPrivate *const d;
-		friend class McdControlWindowPrivate;
-		Q_DISABLE_COPY(McdControlWindow);
-
+		McdControlWindowPrivate *const d_ptr;
+		Q_DECLARE_PRIVATE(McdControlWindow)
 	private:
+		Q_DISABLE_COPY(McdControlWindow)
+
+	protected:
 		// State change event. (Used for switching the UI language at runtime.)
-		void changeEvent(QEvent *event);
+		virtual void changeEvent(QEvent *event) override;
 
 	protected slots:
 		void query(void);
@@ -68,9 +69,6 @@ class McdControlWindow : public QDialog, public Ui::McdControlWindow
 
 	private:
 		static McdControlWindow *m_McdControlWindow;
-
-		// Refresh button.
-		QPushButton *btnRefresh;
 };
 
 }

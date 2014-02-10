@@ -39,6 +39,10 @@ class GensKeyConfigPrivate
 	public:
 		GensKeyConfigPrivate() { }
 
+	private:
+		Q_DISABLE_COPY(GensKeyConfigPrivate);
+
+	public:
 		/**
 		 * Key configuration.
 		 * 
@@ -65,15 +69,11 @@ class GensKeyConfigPrivate
 		 * Default key settings.
 		 */
 		static const DefKeySetting_t DefKeySettings[];
-
-	private:
-		Q_DISABLE_COPY(GensKeyConfigPrivate);
 };
 
+/** GensKeyConfigPrivate **/
 
-/**
- * ms_DefKeySettings[]: Default key settings.
- */
+// Default key settings.
 const GensKeyConfigPrivate::DefKeySetting_t GensKeyConfigPrivate::DefKeySettings[] =
 {
 	// File menu.
@@ -174,11 +174,14 @@ const GensKeyConfigPrivate::DefKeySetting_t GensKeyConfigPrivate::DefKeySettings
 	{0, 0, nullptr}
 };
 
+/** GensKeyConfig **/
 
 GensKeyConfig::GensKeyConfig(QObject *parent)
 	: QObject(parent)
-	, d(new GensKeyConfigPrivate())
+	, d_ptr(new GensKeyConfigPrivate())
 {
+	Q_D(GensKeyConfig);
+
 	// Load the default key configuration.
 	for (const GensKeyConfigPrivate::DefKeySetting_t *key = &d->DefKeySettings[0];
 	    key->action != 0; key++)
@@ -191,31 +194,30 @@ GensKeyConfig::GensKeyConfig(QObject *parent)
 
 GensKeyConfig::~GensKeyConfig()
 {
-	delete d;
+	delete d_ptr;
 }
 
-
 /**
- * keyToAction(): Look up an action based on a GensKey_t value.
+ * Look up an action based on a GensKey_t value.
  * @param key GensKey_t value. (WITH MODIFIERS)
  * @return Action, or 0 if no action was found.
  */
 int GensKeyConfig::keyToAction(GensKey_t key) const
 {
+	Q_D(const GensKeyConfig);
 	return d->hashKeyToAction.value(key, 0);
 }
 
-
 /**
- * actionToKey(): Look up a GensKey_t based on an action value.
+ * Look up a GensKey_t based on an action value.
  * @param action Action value.
  * @return GensKey_t (WITH MODIFIERS), or 0 if no key was found.
  */
 int GensKeyConfig::actionToKey(int action) const
 {
-	return d->hashActionToKey.value(action, 0);
+	Q_D(const GensKeyConfig);
+	return d_ptr->hashActionToKey.value(action, 0);
 }
-
 
 /**
  * Load key configuration from a settings file.
@@ -225,6 +227,8 @@ int GensKeyConfig::actionToKey(int action) const
  */
 int GensKeyConfig::load(const QSettings *qSettings)
 {
+	Q_D(GensKeyConfig);
+
 	// Clear the hash tables before loading.
 	d->hashActionToKey.clear();
 	d->hashKeyToAction.clear();
@@ -244,7 +248,6 @@ int GensKeyConfig::load(const QSettings *qSettings)
 	return 0;
 }
 
-
 /**
  * Save key configuration to a settings file.
  * NOTE: The group must be selected in the QSettings before calling this function!
@@ -253,6 +256,8 @@ int GensKeyConfig::load(const QSettings *qSettings)
  */
 int GensKeyConfig::save(QSettings *qSettings) const
 {
+	Q_D(const GensKeyConfig);
+
 	// Save the key configuration.
 	for (const GensKeyConfigPrivate::DefKeySetting_t *key = &d->DefKeySettings[0];
 	    key->action != 0; key++)

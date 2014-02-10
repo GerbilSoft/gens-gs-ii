@@ -6,7 +6,7 @@
  * Copyright (c) 1998 Mark Donohoe <donohoe@kde.org>                       *
  * Copyright (c) 2001 Ellis Whitehead <ellis@kde.org>                      *
  * Copyright (c) 2007 Andreas Hartmetz <ahartmetz@gmail.com>               *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -40,19 +40,27 @@ class GensKeySequenceWidget : public QWidget
 	
 	public:
 		explicit GensKeySequenceWidget(QWidget *parent = 0);
-		~GensKeySequenceWidget();
-		
-		// State change event. (Used for switching the UI language at runtime.)
-		void changeEvent(QEvent *event);
-		
+		virtual ~GensKeySequenceWidget();
+
+	private:
+		GensKeySequenceWidgetPrivate *const d_ptr;
+		Q_DECLARE_PRIVATE(GensKeySequenceWidget)
+	private:
+		Q_DISABLE_COPY(GensKeySequenceWidget)
+
+	public:
 		/**
 		 * Return the currently selected key sequence.
 		 */
 		QKeySequence keySequence() const;
-	
+
+	protected:
+		// State change event. (Used for switching the UI language at runtime.)
+		virtual void changeEvent(QEvent *event) override;
+
 	signals:
 		void keySequenceChanged(const QKeySequence& seq);
-	
+
 	public slots:
 		/**
 		 * Capture a shortcut from the keyboard. This call will only return once a key sequence
@@ -60,27 +68,21 @@ class GensKeySequenceWidget : public QWidget
 		 * If a key sequence was input, keySequenceChanged() will be emitted.
 		 */
 		void captureKeySequence(void);
-		
+
 		/**
 		 * Set the key sequence.
 		 */
 		void setKeySequence(const QKeySequence& seq);
-		
+
 		/**
 		 * Clear the key sequence.
 		 */
 		void clearKeySequence(void);
-	
+
 	private slots:
 		// NOTE: We can't use Q_PRIVATE_SLOT() properly without KDE's automoc4.
 		//Q_PRIVATE_SLOT(d, void doneRecording(void))
 		void doneRecording(void);
-	
-	private:
-		friend class GensKeySequenceWidgetPrivate;
-		GensKeySequenceWidgetPrivate *const d;
-		
-		Q_DISABLE_COPY(GensKeySequenceWidget)
 };
 
 }

@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -49,6 +49,7 @@ namespace GensQt4
  */
 void GensMenuBarPrivate::syncConnect(void)
 {
+	Q_Q(GensMenuBar);
 	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/stretchMode"),
 					q, SLOT(stretchMode_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("System/regionCode"),
@@ -59,17 +60,17 @@ void GensMenuBarPrivate::syncConnect(void)
 					q, SLOT(showMenuBar_changed_slot(QVariant)));
 }
 
-
 /**
  * Synchronize all menus.
  */
 void GensMenuBarPrivate::syncAll(void)
 {
 	this->lock();
-	
+
 	// Do synchronization.
 	syncRecent();
 	syncShowMenuBar();
+	Q_Q(GensMenuBar);
 	q->stretchMode_changed_slot_int(
 			(StretchMode_t)gqt4_cfg->getInt(QLatin1String("Graphics/stretchMode")));
 	q->regionCode_changed_slot_int(
@@ -77,10 +78,9 @@ void GensMenuBarPrivate::syncAll(void)
 	q->enableSRam_changed_slot_int(
 			gqt4_cfg->get(QLatin1String("Options/enableSRam")).toBool());
 	q->stateChanged();
-	
+
 	this->unlock();
 }
-
 
 /**
  * Synchronize the "Recent ROMs" menu.
@@ -88,22 +88,18 @@ void GensMenuBarPrivate::syncAll(void)
 void GensMenuBarPrivate::syncRecent(void)
 {
 	this->lock();
-	
+
 	// Find the "Recent ROMs" action.
 	QAction *actionRecentRoms = hashActions.value(IDM_FILE_RECENT);
-	if (!actionRecentRoms)
-		goto out;
-	
-	// Set the submenu.
-	actionRecentRoms->setMenu(recentRomsMenu);
-	
-	// If there aren't any ROMs in the list, disable the action.
-	actionRecentRoms->setEnabled(!recentRomsMenu->actions().isEmpty());
-	
-out:
+	if (actionRecentRoms) {
+		// Set the submenu.
+		actionRecentRoms->setMenu(recentRomsMenu);
+		// If there aren't any ROMs in the list, disable the action.
+		actionRecentRoms->setEnabled(!recentRomsMenu->actions().isEmpty());
+	}
+
 	this->unlock();
 }
-
 
 /**
  * Synchronize the "Show Menu Bar" item.
@@ -120,13 +116,11 @@ void GensMenuBarPrivate::syncShowMenuBar(void)
 #endif /* Q_WS_MAC */
 }
 
-
 /**************************
  * GensMenuBar functions. *
  **************************/
 
 /** Synchronization slots. **/
-
 
 /**
  * Recent ROMs menu has been updated.
@@ -134,6 +128,7 @@ void GensMenuBarPrivate::syncShowMenuBar(void)
 void GensMenuBar::recentRoms_updated(void)
 {
 	// Synchronize the "Recent ROMs" menu action.
+	Q_D(GensMenuBar);
 	d->syncRecent();
 }
 
@@ -151,6 +146,7 @@ void GensMenuBar::stretchMode_changed_slot_int(StretchMode_t stretchMode)
 	const int id = (int)stretchMode + IDM_GRAPHICS_STRETCH_NONE;
 
 	// Find the action.
+	Q_D(GensMenuBar);
 	QAction *action = d->hashActions.value(id, nullptr);
 	if (!action)
 		return;
@@ -172,7 +168,6 @@ void GensMenuBar::stretchMode_changed_slot(QVariant stretchMode)
 	stretchMode_changed_slot_int((StretchMode_t)stretchMode.toInt());
 }
 
-
 /**
  * Region code has changed.
  * @param regionCode New region code.
@@ -191,6 +186,7 @@ void GensMenuBar::regionCode_changed_slot_int(LibGens::SysVersion::RegionCode_t 
 	}
 
 	// Find the action.
+	Q_D(GensMenuBar);
 	QAction *action = d->hashActions.value(id, nullptr);
 	if (!action)
 		return;
@@ -213,7 +209,6 @@ void GensMenuBar::regionCode_changed_slot(QVariant regionCode)
 		(LibGens::SysVersion::RegionCode_t)regionCode.toInt());
 }
 
-
 /**
  * Enable SRam/EEPRom setting has changed.
  * @param enableSRam New Enable SRam/EEPRom setting.
@@ -221,6 +216,7 @@ void GensMenuBar::regionCode_changed_slot(QVariant regionCode)
 void GensMenuBar::enableSRam_changed_slot_int(bool enableSRam)
 {
 	// Find the action.
+	Q_D(GensMenuBar);
 	QAction *action = d->hashActions.value(IDM_OPTIONS_ENABLESRAM, nullptr);
 	if (!action)
 		return;
@@ -242,17 +238,16 @@ void GensMenuBar::enableSRam_changed_slot(QVariant enableSRam)
 	enableSRam_changed_slot_int(enableSRam.toBool());
 }
 
-
 /**
  * "Show Menu Bar" setting has changed.
  * @param newShowMenuBar New "Show Menu Bar" setting.
  */
 void GensMenuBar::showMenuBar_changed_slot(QVariant newShowMenuBar)
 {
-	((void)newShowMenuBar);
+	Q_UNUSED(newShowMenuBar)
+	Q_D(GensMenuBar);
 	d->syncShowMenuBar();
 }
-
 
 /**
  * Emulation state has changed.
@@ -260,6 +255,7 @@ void GensMenuBar::showMenuBar_changed_slot(QVariant newShowMenuBar)
 void GensMenuBar::stateChanged(void)
 {
 	// Update various menu items.
+	Q_D(GensMenuBar);
 	QAction *actionPause = d->hashActions.value(IDM_SYSTEM_PAUSE);
 
 	// Lock menu actions to prevent errant signals from being emitted.

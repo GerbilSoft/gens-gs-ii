@@ -144,7 +144,7 @@ SET(gens-qt4_COMMON_SRCS
 
 SET(gens-qt4_WINDOW_SRCS
 	windows/GensWindow.cpp
-	windows/AboutWindow.cpp
+	windows/AboutDialog.cpp
 	windows/CtrlConfigWindow.cpp
 	windows/ZipSelectDialog.cpp
 	windows/GeneralConfigWindow.cpp
@@ -191,7 +191,7 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 
 SET(gens-qt4_WINDOW_MOC_HEADERS
 	windows/GensWindow.hpp
-	windows/AboutWindow.hpp
+	windows/AboutDialog.hpp
 	windows/CtrlConfigWindow.hpp
 	windows/ZipSelectDialog.hpp
 	windows/GeneralConfigWindow.hpp
@@ -212,7 +212,7 @@ SET(gens-qt4_WIDGET_MOC_HEADERS
 
 # UI files.
 SET(gens-qt4_WINDOW_UIS
-	windows/AboutWindow.ui
+	windows/AboutDialog.ui
 	windows/CtrlConfigWindow.ui
 	windows/ZipSelectDialog.ui
 	windows/GeneralConfigWindow.ui

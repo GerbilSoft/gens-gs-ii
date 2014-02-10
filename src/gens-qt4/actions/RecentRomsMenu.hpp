@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -42,33 +42,34 @@ class RecentRomsMenu : public QMenu
 	public:
 		RecentRomsMenu(QWidget *parent = 0, const RecentRoms *recentRoms = 0);
 		RecentRomsMenu(QString title, QWidget *parent = 0, const RecentRoms *recentRoms = 0);
-		~RecentRomsMenu();
-		
+		virtual ~RecentRomsMenu();
+
+	private:
+		RecentRomsMenuPrivate *const d_ptr;
+		Q_DECLARE_PRIVATE(RecentRomsMenu)
+	private:
+		Q_DISABLE_COPY(RecentRomsMenu)
+
+	public:
 		const RecentRoms *recentRoms(void);
 		void setRecentRoms(const RecentRoms *newRecentRoms);
-	
+
 	signals:
 		/**
-		 * updated(): The Recent ROMs list was updated.
+		 * The Recent ROMs list was updated.
 		 */
 		void updated(void);
-		
+
 		/**
-		 * triggered(): A Recent ROM was selected.
+		 * A Recent ROM was selected.
 		 * @param id Menu item ID.
 		 */
 		void triggered(int id);
-	
-	private:
-		friend class RecentRomsMenuPrivate;
-		RecentRomsMenuPrivate *const d;
-		
-		Q_DISABLE_COPY(RecentRomsMenu)
-	
+
 	private slots:
 		// d->recentRoms signals.
-		void recentRomsDestroyed(void);
-		void recentRomsUpdated(void);
+		void recentRomsDestroyed_slot(void);
+		void recentRomsUpdated_slot(void);
 };
 
 }

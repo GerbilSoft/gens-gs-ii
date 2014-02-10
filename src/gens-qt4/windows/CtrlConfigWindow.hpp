@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -53,23 +53,25 @@ class CtrlConfigWindowPrivate;
 class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 {
 	Q_OBJECT
-	
+
 	public:
 		static void ShowSingle(QWidget *parent = nullptr);
-	
+
 	private:
-		friend class CtrlConfigWindowPrivate;
-		CtrlConfigWindowPrivate *d;
+		CtrlConfigWindowPrivate *const d_ptr;
+		Q_DECLARE_PRIVATE(CtrlConfigWindow)
+	private:
 		Q_DISABLE_COPY(CtrlConfigWindow)
 
 	protected:
 		CtrlConfigWindow(QWidget *parent = nullptr);
 		virtual ~CtrlConfigWindow();
 
-		void keyPressEvent(QKeyEvent *event);
+	protected:
+		virtual void keyPressEvent(QKeyEvent *event) override;
 
 		// State change event. (Used for switching the UI language at runtime.)
-		void changeEvent(QEvent *event);
+		virtual void changeEvent(QEvent *event) override;
 
 	protected slots:
 		void accept(void);
@@ -88,7 +90,7 @@ class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
 		 * @param gensKey New GensKey_t value.
 		 */
 		void on_ctrlCfgWidget_keyChanged(int idx, GensKey_t gensKey);
-	
+
 	private:
 		// Update port information.
 		void updatePortButton(LibGens::IoManager::VirtPort_t virtPort);

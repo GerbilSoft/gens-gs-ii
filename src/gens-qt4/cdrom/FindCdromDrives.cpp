@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * FindCdromDrives.cpp: Find CD-ROM drives: Manager class.                 *
  *                                                                         *
- * Copyright (c) 2011-2013 by David Korth.                                 *
+ * Copyright (c) 2011-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -45,7 +45,6 @@
 #include "cdrom/FindCdromUnix.hpp"
 #endif
 
-
 namespace GensQt4
 {
 
@@ -56,7 +55,9 @@ class FindCdromDrivesPrivate
 		~FindCdromDrivesPrivate();
 
 	private:
-		FindCdromDrives *const q;
+		FindCdromDrives *const q_ptr;
+		Q_DECLARE_PUBLIC(FindCdromDrives);
+	private:
 		Q_DISABLE_COPY(FindCdromDrivesPrivate)
 
 	public:
@@ -110,7 +111,7 @@ class FindCdromDrivesPrivate
  *************************************/
 
 FindCdromDrivesPrivate::FindCdromDrivesPrivate(FindCdromDrives *q)
-	: q(q)
+	: q_ptr(q)
 	, findCdromBase(nullptr)
 {
 	// Initialize the FindCdromBase class.
@@ -158,13 +159,13 @@ FindCdromDrivesPrivate::~FindCdromDrivesPrivate()
 	delete findCdromBase;
 }
 
-
 /**
  * Clear all CD-ROM devices.
  */
 void FindCdromDrivesPrivate::clearCdromDevices(void)
 {
 	// Clear the device name string list.
+	Q_Q(FindCdromDrives);
 	foreach (QString deviceName, cdromDeviceNames) {
 		emit q->driveRemoved(deviceName);
 	}
@@ -174,7 +175,6 @@ void FindCdromDrivesPrivate::clearCdromDevices(void)
 	qDeleteAll(mapCdromDevices);
 	mapCdromDevices.clear();
 }
-
 
 /**
  * Add a CD-ROM device.
@@ -190,10 +190,10 @@ void FindCdromDrivesPrivate::addCdromDevice(QString deviceName)
 	}
 
 	// Add the CD-ROM drive.
+	Q_Q(FindCdromDrives);
 	cdromDeviceNames.append(deviceName);
 	emit q->driveAdded(deviceName);
 }
-
 
 /**
  * Remove a CD-ROM device.
@@ -218,9 +218,9 @@ void FindCdromDrivesPrivate::removeCdromDevice(QString deviceName)
 	}
 
 	// Drive is removed.
+	Q_Q(FindCdromDrives);
 	emit q->driveRemoved(deviceName);
 }
-
 
 /**
  * Get the icon for a given drive type.
@@ -237,7 +237,6 @@ QIcon FindCdromDrivesPrivate::GetDriveTypeIcon(CD_DriveType_t driveType)
 	Q_UNUSED(driveType)
 	return GensQApplication::IconFromTheme(QLatin1String("drive-optical"));
 }
-
 
 /**
  * Get the icon for a given disc type.
@@ -318,14 +317,13 @@ QIcon FindCdromDrivesPrivate::GetDiscTypeIcon(CD_DiscType_t discType)
 	return GensQApplication::IconFromTheme(iconFdo);
 }
 
-
 /******************************
  * FindCdromDrives functions. *
  ******************************/
 
 FindCdromDrives::FindCdromDrives(QObject *parent)
 	: QObject(parent)
-	, d(new FindCdromDrivesPrivate(this))
+	, d_ptr(new FindCdromDrivesPrivate(this))
 {
 	// Rescan disc drives.
 	rescan();
@@ -333,7 +331,7 @@ FindCdromDrives::FindCdromDrives(QObject *parent)
 
 FindCdromDrives::~FindCdromDrives()
 {
-	delete d;
+	delete d_ptr;
 }
 
 /**
@@ -342,6 +340,7 @@ FindCdromDrives::~FindCdromDrives()
  */
 bool FindCdromDrives::isSupported(void) const
 {
+	Q_D(const FindCdromDrives);
 	return (d->findCdromBase && d->findCdromBase->isUsable());
 }
 
@@ -351,6 +350,7 @@ bool FindCdromDrives::isSupported(void) const
  */
 void FindCdromDrives::rescan(void)
 {
+	Q_D(FindCdromDrives);
 	d->clearCdromDevices();
 
 	// Search for drives.
@@ -366,8 +366,9 @@ void FindCdromDrives::rescan(void)
  * Get a list of all available CD-ROM device names.
  * @return QStringList containing CD-ROM device names.
  */
-QStringList FindCdromDrives::getDriveNames() const
+QStringList FindCdromDrives::getDriveNames(void) const
 {
+	Q_D(const FindCdromDrives);
 	return d->cdromDeviceNames;
 }
 
@@ -379,6 +380,7 @@ QStringList FindCdromDrives::getDriveNames() const
 LibGensCD::CdDrive *FindCdromDrives::getCdDrive(QString deviceName)
 {
 	// TODO: Use a QSet instead of QStringList?
+	Q_D(FindCdromDrives);
 	if (!d->cdromDeviceNames.contains(deviceName)) {
 		// Device is not present.
 		return nullptr;
@@ -434,6 +436,7 @@ QIcon FindCdromDrives::getDriveIcon(LibGensCD::CdDrive *cdDrive)
 		return QIcon();
 
 	// Check if the backend has an OS-specific disc/drive icon function.
+	Q_D(FindCdromDrives);
 	if (d->findCdromBase->isDriveIconSupported()) {
 		// OS-specific disc/drive icon function is present.
 		QIcon icon = d->findCdromBase->getDriveIcon(QString::fromUtf8(cdDrive->filename().c_str()));

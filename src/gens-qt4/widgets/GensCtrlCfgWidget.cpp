@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GensCtrlCfgWidget.hpp: Controller configuration widget.                 *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -87,7 +87,6 @@ class GensCtrlCfgWidgetPrivate
 		QHBoxLayout *hboxOptions;
 };
 
-
 /***************************************
  * GensCtrlCfgWidgetPrivate functions. *
  ***************************************/
@@ -107,7 +106,6 @@ GensCtrlCfgWidgetPrivate::GensCtrlCfgWidgetPrivate(GensCtrlCfgWidget *q)
 	QObject::connect(mapperBtnCfg, SIGNAL(mapped(int)),
 			  q, SLOT(keyChanged_slot(int)));
 }
-
 
 /**
  * Initialize the grid layout.
@@ -161,7 +159,6 @@ void GensCtrlCfgWidgetPrivate::init(void)
 			 q, SLOT(clearAllButtons()));
 	hboxOptions->addWidget(btnClearAll);
 }
-
 
 /**
  * Get the current I/O device type.
@@ -219,7 +216,6 @@ void GensCtrlCfgWidgetPrivate::setIoType(IoManager::IoType_t newIoType)
 		btnIdx[i] = -1;
 	}
 }
-
 
 /**
  * Get a localized LibGens button name.
@@ -315,7 +311,6 @@ QString GensCtrlCfgWidgetPrivate::buttonName_l(IoManager::ButtonName_t buttonNam
 	return QString();
 }
 
-
 /**
  * Clear all mapped buttons.
  */
@@ -325,24 +320,23 @@ void GensCtrlCfgWidgetPrivate::clearAllButtons(void)
 		btnCfg[i]->clearKey();
 }
 
-
 /********************************
  * GensCtrlCfgWidget functions. *
  ********************************/
 
 GensCtrlCfgWidget::GensCtrlCfgWidget(QWidget* parent)
 	: QWidget(parent)
-	, d(new GensCtrlCfgWidgetPrivate(this))
+	, d_ptr(new GensCtrlCfgWidgetPrivate(this))
 {
 	// Initialize the private members.
+	Q_D(GensCtrlCfgWidget);
 	d->init();
 }
 
 GensCtrlCfgWidget::~GensCtrlCfgWidget()
 {
-	delete d;
+	delete d_ptr;
 }
-
 
 /**
  * Get the current I/O device type.
@@ -350,7 +344,10 @@ GensCtrlCfgWidget::~GensCtrlCfgWidget()
  * @return Current I/O type.
  */
 IoManager::IoType_t GensCtrlCfgWidget::ioType(void) const
-	{ return d->ioType(); }
+{
+	Q_D(const GensCtrlCfgWidget);
+	return d->ioType();
+}
 
 /**
  * Set the current I/O device type.
@@ -358,15 +355,18 @@ IoManager::IoType_t GensCtrlCfgWidget::ioType(void) const
  * @param newIoType New I/O type.
  */
 void GensCtrlCfgWidget::setIoType(IoManager::IoType_t newIoType)
-	{ d->setIoType(newIoType); }
-
+{
+	Q_D(GensCtrlCfgWidget);
+	d->setIoType(newIoType);
+}
 
 /**
  * Get the current keymap.
  * @return Current keymap.
  */
-QVector<GensKey_t> GensCtrlCfgWidget::keyMap(void)
+QVector<GensKey_t> GensCtrlCfgWidget::keyMap(void) const
 {
+	Q_D(const GensCtrlCfgWidget);
 	QVector<GensKey_t> keyMap(d->numButtons);
 	for (int i = 0; i < d->numButtons; i++) {
 		keyMap[i] = d->btnCfg[d->btnIdx[i]]->key();
@@ -381,6 +381,7 @@ QVector<GensKey_t> GensCtrlCfgWidget::keyMap(void)
  */
 void GensCtrlCfgWidget::setKeyMap(QVector<GensKey_t> keyMap)
 {
+	Q_D(GensCtrlCfgWidget);
 	const int maxButtons = std::min(d->numButtons, keyMap.count());
 
 	for (int i = 0; i < maxButtons; i++) {
@@ -395,13 +396,13 @@ void GensCtrlCfgWidget::setKeyMap(QVector<GensKey_t> keyMap)
 	}
 }
 
-
 /**
  * Clear all mapped buttons.
  * WRAPPER SLOT for GensCtrlCfgWidgetPrivate.
  */
 void GensCtrlCfgWidget::clearAllButtons(void)
 {
+	Q_D(GensCtrlCfgWidget);
 	d->clearAllButtons();
 }
 
@@ -412,6 +413,7 @@ void GensCtrlCfgWidget::clearAllButtons(void)
 void GensCtrlCfgWidget::keyChanged_slot(int idx)
 {
 	// Emit a signal with the new key value.
+	Q_D(GensCtrlCfgWidget);
 	emit keyChanged(idx, d->btnCfg[idx]->key());
 }
 
