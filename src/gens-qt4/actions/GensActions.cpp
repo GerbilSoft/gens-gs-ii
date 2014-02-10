@@ -31,11 +31,11 @@
 #include "GensMenuBar_menus.hpp"
 
 // Windows.
-#include "GensWindow.hpp"
-#include "AboutWindow.hpp"
-#include "CtrlConfigWindow.hpp"
-#include "GeneralConfigWindow.hpp"
-#include "McdControlWindow.hpp"
+#include "windows/GensWindow.hpp"
+#include "windows/AboutWindow.hpp"
+#include "windows/CtrlConfigWindow.hpp"
+#include "windows/GeneralConfigWindow.hpp"
+#include "windows/McdControlWindow.hpp"
 
 // LibGens includes.
 #include "libgens/Vdp/VdpPalette.hpp"

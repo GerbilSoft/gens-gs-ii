@@ -45,7 +45,7 @@
 #include "libgens/cpu/M68K_Mem.hpp"
 
 // Multi-File Archive Selection Dialog.
-#include "ZipSelectDialog.hpp"
+#include "windows/ZipSelectDialog.hpp"
 
 // libzomg. Needed for savestate preview images.
 #include "libzomg/Zomg.hpp"

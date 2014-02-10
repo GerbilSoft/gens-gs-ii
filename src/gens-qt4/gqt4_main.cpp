@@ -35,7 +35,7 @@
 #include <QtCore/QDir>
 
 #include "GensQApplication.hpp"
-#include "GensWindow.hpp"
+#include "windows/GensWindow.hpp"
 #include "SigHandler.hpp"
 
 // General configuration signal handler.

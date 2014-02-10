@@ -104,8 +104,6 @@ CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.gens-qt4.h.in" "${CMAKE_CURRE
 # Sources.
 SET(gens-qt4_COMMON_SRCS
 	gqt4_main.cpp
-	GensWindow.cpp
-	AboutWindow.cpp
 	EmuThread.cpp
 	IdleThread.cpp
 	GensQApplication.cpp
@@ -116,7 +114,6 @@ SET(gens-qt4_COMMON_SRCS
 	VBackend/GensQGLWidget.cpp
 	VBackend/GLBackend.cpp
 	Input/KeyHandlerQt.cpp
-	CtrlConfigWindow.cpp
 	Audio/GensPortAudio.cpp
 	EmuManager.cpp
 	Audio/ABackend.cpp
@@ -125,42 +122,49 @@ SET(gens-qt4_COMMON_SRCS
 	VBackend/GLShaderPaused.cpp
 	VBackend/GLShaderFastBlur.cpp
 	Audio/ARingBuffer.cpp
-	ZipSelectDialog.cpp
 	EmuManager_qEmu.cpp
 	Screenshot.cpp
 	VBackend/GLTex2D.cpp
-	GeneralConfigWindow.cpp
-	GeneralConfigWindow_slots.cpp
-	widgets/GensLineEdit.cpp
 	Config/ConfigStore.cpp
 	Config/ConfigDefaults.cpp
 	Config/PathConfig.cpp
 	Config/CtrlConfig.cpp
-	McdControlWindow.cpp
-	widgets/GensZipDirModel.cpp
-	widgets/GensZipDirItem.cpp
 	actions/GensKeyConfig.cpp
 	actions/GensMenuBar.cpp
 	actions/GensMenuBar_menus.cpp
 	actions/GensMenuBar_sync.cpp
 	actions/GensActions.cpp
-	widgets/GensColorComboBox.cpp
-	widgets/GensKeySequenceWidget.cpp
-	widgets/GensCtrlCfgWidget.cpp
 	EmuManager_str.cpp
-	widgets/GensCtrlKeyWidget.cpp
 	Config/RecentRoms.cpp
 	actions/RecentRomsMenu.cpp
-	widgets/GensColorButton.cpp
 	ConfigHandler.cpp
 	cdrom/FindCdromDrives.cpp
 	cdrom/FindCdromBase.cpp
 	)
 
+SET(gens-qt4_WINDOW_SRCS
+	windows/GensWindow.cpp
+	windows/AboutWindow.cpp
+	windows/CtrlConfigWindow.cpp
+	windows/ZipSelectDialog.cpp
+	windows/GeneralConfigWindow.cpp
+	windows/GeneralConfigWindow_slots.cpp
+	windows/McdControlWindow.cpp
+	)
+
+SET(gens-qt4_WIDGET_SRCS
+	widgets/GensLineEdit.cpp
+	widgets/GensZipDirModel.cpp
+	widgets/GensZipDirItem.cpp
+	widgets/GensColorComboBox.cpp
+	widgets/GensKeySequenceWidget.cpp
+	widgets/GensCtrlCfgWidget.cpp
+	widgets/GensCtrlKeyWidget.cpp
+	widgets/GensColorButton.cpp
+	)
+
 # Headers with Qt4 objects.
 SET(gens-qt4_COMMON_MOC_HEADERS
-	GensWindow.hpp
-	AboutWindow.hpp
 	EmuThread.hpp
 	IdleThread.hpp
 	GensQApplication.hpp
@@ -169,69 +173,58 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	VBackend/GLBackend.hpp
 	VBackend/GensQGLWidget.hpp
 	VBackend/GensQGLWidget_p.hpp
-	CtrlConfigWindow.hpp
 	EmuManager.hpp
-	ZipSelectDialog.hpp
 	Screenshot.hpp
-	GeneralConfigWindow.hpp
-	widgets/GensLineEdit.hpp
 	Config/ConfigStore.hpp
 	Config/PathConfig.hpp
 	Config/CtrlConfig.hpp
-	McdControlWindow.hpp
-	widgets/GensZipDirModel.hpp
 	actions/GensKeyConfig.hpp
 	actions/GensMenuBar.hpp
 	actions/GensActions.hpp
+	Input/KeyHandlerQt.hpp
+	Config/RecentRoms.hpp
+	actions/RecentRomsMenu.hpp
+	ConfigHandler.hpp
+	cdrom/FindCdromDrives.hpp
+	cdrom/FindCdromBase.hpp
+	)
+
+SET(gens-qt4_WINDOW_MOC_HEADERS
+	windows/GensWindow.hpp
+	windows/AboutWindow.hpp
+	windows/CtrlConfigWindow.hpp
+	windows/ZipSelectDialog.hpp
+	windows/GeneralConfigWindow.hpp
+	windows/McdControlWindow.hpp
+	)
+
+SET(gens-qt4_WIDGET_MOC_HEADERS
+	widgets/GensLineEdit.hpp
+	widgets/GensZipDirModel.hpp
 	widgets/GensColorComboBox.hpp
 	widgets/GensKeySequenceWidget.hpp
 	widgets/GensKeySequenceWidget_p.hpp
 	widgets/GensCtrlCfgWidget.hpp
 	widgets/GensCtrlKeyWidget.hpp
 	widgets/GensCtrlKeyWidget_p.hpp
-	Input/KeyHandlerQt.hpp
-	Config/RecentRoms.hpp
-	actions/RecentRomsMenu.hpp
 	widgets/GensColorButton.hpp
-	ConfigHandler.hpp
-	cdrom/FindCdromDrives.hpp
-	cdrom/FindCdromBase.hpp
 	)
 
-SET(gens-qt4_SRCS ${gens-qt4_COMMON_SRCS})
-SET(gens-qt4_MOC_HEADERS ${gens-qt4_COMMON_MOC_HEADERS})
-
 # UI files.
-SET(gens-qt4_UIS
-	ui/AboutWindow.ui
-	ui/CtrlConfigWindow.ui
-	ui/ZipSelectDialog.ui
-	ui/GeneralConfigWindow.ui
-	ui/McdControlWindow.ui
+SET(gens-qt4_WINDOW_UIS
+	windows/AboutWindow.ui
+	windows/CtrlConfigWindow.ui
+	windows/ZipSelectDialog.ui
+	windows/GeneralConfigWindow.ui
+	windows/McdControlWindow.ui
 	)
 
 # Generate the header files from the UI files.
-QT4_WRAP_UI(gens-qt4_UIS_H ${gens-qt4_UIS})
+QT4_WRAP_UI(gens-qt4_UIS_H ${gens-qt4_WINDOW_UIS})
 
 #########################################
 # System-specific CD-ROM drive support. #
 #########################################
-
-SET(gens-qt4_CDROM_UDISKS2_SRCS cdrom/FindCdromUDisks2.cpp)
-SET(gens-qt4_CDROM_UDISKS2_MOC_HEADERS cdrom/FindCdromUDisks2.hpp)
-
-SET(gens-qt4_CDROM_UDISKS_SRCS cdrom/FindCdromUDisks.cpp)
-SET(gens-qt4_CDROM_UDISKS_MOC_HEADERS cdrom/FindCdromUDisks.hpp)
-
-SET(gens-qt4_CDROM_UNIX_SRCS cdrom/FindCdromUnix.cpp)
-SET(gens-qt4_CDROM_UNIX_MOC_HEADERS cdrom/FindCdromUnix.hpp)
-
-SET(gens-qt4_CDROM_WIN32_SRCS
-	cdrom/FindCdromWin32.cpp
-	)
-SET(gens-qt4_CDROM_WIN32_MOC_HEADERS
-	cdrom/FindCdromWin32.hpp
-	)
 
 IF(QT_QTDBUS_FOUND)
 	# QtDBus found.
@@ -253,40 +246,32 @@ IF(QT_QTDBUS_FOUND)
 		cdrom/dbus/org.freedesktop.UDisks.Device.xml
 		)
 	
-	SET(gens-qt4_SRCS
-		${gens-qt4_SRCS}
-		${gens-qt4_CDROM_UDISKS2_SRCS}
-		${gens-qt4_CDROM_UDISKS_SRCS}
+	SET(gens-qt4_DBUS_SRCS
+		cdrom/FindCdromUDisks2.cpp
+		cdrom/FindCdromUDisks.cpp
 		${gens-qt4-UDISKS2_DBUS_SRCS}
 		${gens-qt4-UDISKS_DBUS_SRCS}
 		)
-	SET(gens-qt4_MOC_HEADERS
-		${gens-qt4_MOC_HEADERS}
-		${gens-qt4_CDROM_UDISKS2_MOC_HEADERS}
-		${gens-qt4_CDROM_UDISKS_MOC_HEADERS}
+	SET(gens-qt4_DBUS_MOC_HEADERS
+		cdrom/FindCdromUDisks2.hpp
+		cdrom/FindCdromUDisks.hpp
 		)
 ENDIF(QT_QTDBUS_FOUND)
 
-IF(UNIX)
-	IF(NOT APPLE)
-		SET(gens-qt4_SRCS
-			${gens-qt4_SRCS}
-			${gens-qt4_CDROM_UNIX_SRCS}
-			)
-		SET(gens-qt4_MOC_HEADERS
-			${gens-qt4_MOC_HEADERS}
-			${gens-qt4_CDROM_UNIX_MOC_HEADERS}
-			)
-	ENDIF(NOT APPLE)
+IF(UNIX AND NOT APPLE)
+	SET(gens-qt4_PLATFORM_SRCS
+		cdrom/FindCdromUnix.cpp
+		)
+	SET(gens-qt4_PLATFORM_MOC_HEADERS
+		cdrom/FindCdromUnix.hpp
+		)
 ELSEIF(WIN32)
 	# Win32: Enable Win32 CD-ROM suport.
-	SET(gens-qt4_SRCS
-		${gens-qt4_SRCS}
-		${gens-qt4_CDROM_WIN32_SRCS}
+	SET(gens-qt4_PLATFORM_SRCS
+		cdrom/FindCdromWin32.cpp
 		)
-	SET(gens-qt4_MOC_HEADERS
-		${gens-qt4_MOC_HEADERS}
-		${gens-qt4_CDROM_WIN32_MOC_HEADERS}
+	SET(gens-qt4_PLATFORM_MOC_HEADERS
+		cdrom/FindCdromWin32.hpp
 		)
 ENDIF()
 
@@ -294,32 +279,26 @@ ENDIF()
 # System-specific UI code. #
 ############################
 
-SET(gens-qt4_WIN32_UI_SRCS
-	GensQApplication_win32.cpp
-	ui/resources/win32/gens-qt4.rc
-	)
-SET(gens-qt4_MAC_UI_SRCS
-	GeneralConfigWindow_mac.mm
-	)
-SET(gens-qt4_MAC_ICONS
-	"${CMAKE_CURRENT_SOURCE_DIR}/ui/resources/mac/gensgs.icns"
-	)
-
 IF(WIN32)
-	SET(gens-qt4_SRCS
-		${gens-qt4_SRCS}
-		${gens-qt4_WIN32_UI_SRCS}
+	SET(gens-qt4_PLATFORM_UI_SRCS
+		GensQApplication_win32.cpp
+		resources/win32/gens-qt4.rc
 		)
 ELSEIF(APPLE)
-	SET(gens-qt4_SRCS
-		${gens-qt4_SRCS}
-		${gens-qt4_MAC_UI_SRCS}
-		${gens-qt4_MAC_ICONS}
+	SET(gens-qt4_PLATFORM_UI_SRCS
+		window/GeneralConfigWindow_mac.mm
+		resources/mac/gensgs.icns
 		)
 ENDIF()
 
 # Create .moc files for sources that need them.
-QT4_WRAP_CPP(gens-qt4_MOC_SOURCES ${gens-qt4_MOC_HEADERS})
+QT4_WRAP_CPP(gens-qt4_MOC_SOURCES
+		${gens-qt4_COMMON_MOC_HEADERS}
+		${gens-qt4_WINDOW_MOC_HEADERS}
+		${gens-qt4_WIDGET_MOC_HEADERS}
+		${gens-qt4_DBUS_MOC_HEADERS}
+		${gens-qt4_PLATFORM_MOC_HEADERS}
+		)
 
 # Always include the Oxygen icons on Win32 and Mac OS X.
 IF(WIN32 OR APPLE)
@@ -328,12 +307,12 @@ ENDIF()
 
 # Resource files.
 SET(gens-qt4_RCC_SRCS
-	ui/resources/gens-qt4.qrc
+	resources/gens-qt4.qrc
 	)
 IF(GENS_INCLUDE_OXYGEN_ICONS)
 	SET(gens-qt4_RCC_SRCS
 		${gens-qt4_RCC_SRCS}
-		ui/resources/oxygen/oxygen.qrc
+		resources/oxygen/oxygen.qrc
 		)
 ENDIF(GENS_INCLUDE_OXYGEN_ICONS)
 
@@ -365,7 +344,12 @@ ADD_SUBDIRECTORY(translations)
 ADD_EXECUTABLE(gens-qt4
 	WIN32 MACOSX_BUNDLE
 	${gens-qt4_SRCS}
-	${gens-qt4_COMPAT_SRCS}
+	${gens-qt4_COMMON_SRCS}
+	${gens-qt4_WINDOW_SRCS}
+	${gens-qt4_WIDGET_SRCS}
+	${gens-qt4_DBUS_SRCS}
+	${gens-qt4_PLATFORM_SRCS}
+	${gens-qt4_PLATFORM_UI_SRCS}
 	${gens-qt4_MOC_SOURCES}
 	${gens-qt4_UIS_H}
 	${gens-qt4_RCC_O}
@@ -374,11 +358,9 @@ TARGET_LINK_LIBRARIES(gens-qt4 gens ${ZLIB_LIBRARY} genscd)
 ADD_DEPENDENCIES(gens-qt4 translations_target)
 
 # Additional libraries.
-IF(APPLE)
-	IF(APPLE_LIBS)
-		TARGET_LINK_LIBRARIES(gens-qt4 ${APPLE_LIBS})
-	ENDIF(APPLE_LIBS)
-ENDIF(APPLE)
+IF(APPLE AND APPLE_LIBS)
+	TARGET_LINK_LIBRARIES(gens-qt4 ${APPLE_LIBS})
+ENDIF(APPLE AND APPLE_LIBS)
 TARGET_LINK_LIBRARIES(gens-qt4 ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY})
 IF(QT_QTDBUS_FOUND)
 	TARGET_LINK_LIBRARIES(gens-qt4 ${QT_QTDBUS_LIBRARY})
@@ -393,44 +375,16 @@ IF(HAVE_PORTAUDIO)
 	TARGET_LINK_LIBRARIES(gens-qt4 ${PORTAUDIO_LIBRARY})
 ENDIF(HAVE_PORTAUDIO)
 
-# NOTE: $<TARGET_FILE:mcrecover> is preferred,
-# but this doesn't seem to work on Ubuntu 10,04.
-# (cmake_2.8.0-5ubuntu1_i386)
-GET_PROPERTY(GENS-QT4_EXE_LOCATION TARGET gens-qt4 PROPERTY LOCATION)
-
 # Split debug information.
-# References:
-# - http://cmake.3232098.n2.nabble.com/Save-stripped-debugging-information-td6819195.html
-# - http://sourceware.org/bugzilla/show_bug.cgi?id=14527
-#   - If debug symbols are stripped before .gnu_debuglink is added,
-#     the section will be truncated to .gnu_deb, and hence won't
-#     be recognized by gdb.
-# - FIXME: If the above .gnu_debuglink workaround is used, Windows XP
-#   and Windows 7 will claim that the executable isn't a valid Win32
-#   executable. (Wine ignores it and works fine!)
 IF(SPLIT_DEBUG)
-	FIND_PROGRAM(OBJCOPY objcopy)
-	ADD_CUSTOM_COMMAND(TARGET gens-qt4 POST_BUILD
-		COMMAND ${OBJCOPY} --only-keep-debug
-			${GENS-QT4_EXE_LOCATION} ${CMAKE_CURRENT_BINARY_DIR}/gens-qt4.debug
-		COMMAND ${OBJCOPY} --strip-debug
-			${GENS-QT4_EXE_LOCATION}
-		COMMAND ${OBJCOPY} --add-gnu-debuglink=gens-qt4.debug
-			${GENS-QT4_EXE_LOCATION}
-		)
+	INCLUDE(SplitDebugInformation)
+	SPLIT_DEBUG_INFORMATION(gens-qt4)
 ENDIF(SPLIT_DEBUG)
 
+# Compress the EXE.
 IF(COMPRESS_EXE)
-	FIND_PROGRAM(UPX upx)
-	IF(WIN32)
-		SET(UPX_OPTIONS "--compress-icons=0")
-	ENDIF(WIN32)
-	IF(UPX)
-		ADD_CUSTOM_COMMAND(TARGET gens-qt4 POST_BUILD
-			COMMAND ${UPX} --best --lzma
-				${GENS-QT4_EXE_LOCATION}
-			)
-	ENDIF(UPX)
+	INCLUDE(CompressExeWithUpx)
+	COMPRESS_EXE_WITH_UPX(gens-qt4)
 ENDIF(COMPRESS_EXE)
 
 # Qt options:
@@ -454,4 +408,4 @@ ENDIF(NOT GENS_ENABLE_EMULATION)
 
 # Mac OS X: Set a custom info.plist file for the application bundle.
 SET_PROPERTY(TARGET gens-qt4
-	PROPERTY MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/ui/resources/mac/Info-CMake.plist")
+	PROPERTY MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/resources/mac/Info-CMake.plist")
