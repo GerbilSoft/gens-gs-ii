@@ -1,10 +1,10 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * AboutWindow.cpp: About Window.                                          *
+ * AboutDialog.cpp: About Dialog.                                          *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2013 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -28,7 +28,7 @@
 #include <GL/glew.h>
 #endif
 
-#include "AboutWindow.hpp"
+#include "AboutDialog.hpp"
 #include "gqt4_main.hpp"
 #include "GensQApplication.hpp"
 
@@ -70,12 +70,12 @@ namespace GensQt4
 {
 
 // Static member initialization.
-AboutWindow *AboutWindow::m_AboutWindow = nullptr;
+AboutDialog *AboutDialog::m_AboutDialog = nullptr;
 
 /**
- * AboutWindow(): Initialize the About window.
+ * AboutDialog(): Initialize the About window.
  */
-AboutWindow::AboutWindow(QWidget *parent)
+AboutDialog::AboutDialog(QWidget *parent)
 	: QDialog(parent,
 		Qt::Dialog |
 		Qt::WindowTitleHint |
@@ -107,17 +107,17 @@ AboutWindow::AboutWindow(QWidget *parent)
 	m_scrlAreaInit = false;
 	
 	// Initialize the About window teXt.
-	initAboutWindowText();
+	initAboutDialogText();
 }
 
 
 /**
- * ~AboutWindow(): Shut down the About window.
+ * ~AboutDialog(): Shut down the About window.
  */
-AboutWindow::~AboutWindow()
+AboutDialog::~AboutDialog()
 {
-	// Clear the m_AboutWindow pointer.
-	m_AboutWindow = nullptr;
+	// Clear the m_AboutDialog pointer.
+	m_AboutDialog = nullptr;
 }
 
 
@@ -125,16 +125,16 @@ AboutWindow::~AboutWindow()
  * ShowSingle(): Show a single instance of the About window.
  * @param parent Parent window.
  */
-void AboutWindow::ShowSingle(QWidget *parent)
+void AboutDialog::ShowSingle(QWidget *parent)
 {
-	if (m_AboutWindow != nullptr) {
-		// About Window is already displayed.
+	if (m_AboutDialog != nullptr) {
+		// About Dialog is already displayed.
 		// NOTE: This doesn't seem to work on KDE 4.4.2...
-		QApplication::setActiveWindow(m_AboutWindow);
+		QApplication::setActiveWindow(m_AboutDialog);
 	} else {
-		// About Window is not displayed.
-		m_AboutWindow = new AboutWindow(parent);
-		m_AboutWindow->show();
+		// About Dialog is not displayed.
+		m_AboutDialog = new AboutDialog(parent);
+		m_AboutDialog->show();
 	}
 }
 
@@ -143,15 +143,15 @@ void AboutWindow::ShowSingle(QWidget *parent)
  * changeEvent(): Widget state has changed.
  * @param event State change event.
  */
-void AboutWindow::changeEvent(QEvent *event)
+void AboutDialog::changeEvent(QEvent *event)
 {
 	if (event->type() == QEvent::LanguageChange)
 	{
 		// Retranslate the UI.
 		retranslateUi(this);
 		
-		// Reinitialize the About Window text.
-		initAboutWindowText();
+		// Reinitialize the About Dialog text.
+		initAboutDialogText();
 	}
 	
 	// Pass the event to the base class.
@@ -160,9 +160,9 @@ void AboutWindow::changeEvent(QEvent *event)
 
 
 /**
- * Initialize the About Window text.
+ * Initialize the About Dialog text.
  */
-void AboutWindow::initAboutWindowText(void)
+void AboutDialog::initAboutDialogText(void)
 {
 	// Line break string.
 	const QString sLineBreak = QLatin1String("<br/>\n");
@@ -221,11 +221,11 @@ void AboutWindow::initAboutWindowText(void)
         lblPrgTitle->setText(sPrgTitle);
 	
 	// Set the included libraries text.
-	lblIncLibraries->setText(AboutWindow::GetIncLibraries());
+	lblIncLibraries->setText(AboutDialog::GetIncLibraries());
 	lblIncLibraries->setTextFormat(Qt::RichText);
 	
 	// Set the debug information text.
-	lblDebugInfo->setText(AboutWindow::GetDebugInfo());
+	lblDebugInfo->setText(AboutDialog::GetDebugInfo());
 	lblDebugInfo->setTextFormat(Qt::RichText);
 	
 	// Build the credits text.
@@ -326,7 +326,7 @@ void AboutWindow::initAboutWindowText(void)
  * GetIncLibraries(): Get included libraries.
  * @return Included libraries.
  */
-QString AboutWindow::GetIncLibraries(void)
+QString AboutDialog::GetIncLibraries(void)
 {
 	// Common strings.
 	const QString sIntCopyOf = tr("Internal copy of %1.");
@@ -392,7 +392,7 @@ QString AboutWindow::GetIncLibraries(void)
  * Get debug information.
  * @return Debug information.
  */
-QString AboutWindow::GetDebugInfo(void)
+QString AboutDialog::GetDebugInfo(void)
 {
 	// Line break string.
 	const QString sLineBreak = QLatin1String("<br/>\n");
@@ -545,7 +545,7 @@ QString AboutWindow::GetDebugInfo(void)
  * GetCodePageInfo(): Get information about the system code pages.
  * @return System code page information.
  */
-QString AboutWindow::GetCodePageInfo(void)
+QString AboutDialog::GetCodePageInfo(void)
 {
 	QString sCodePageInfo;
 

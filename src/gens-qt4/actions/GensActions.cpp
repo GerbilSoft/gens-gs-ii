@@ -32,7 +32,7 @@
 
 // Windows.
 #include "windows/GensWindow.hpp"
-#include "windows/AboutWindow.hpp"
+#include "windows/AboutDialog.hpp"
 #include "windows/CtrlConfigWindow.hpp"
 #include "windows/GeneralConfigWindow.hpp"
 #include "windows/McdControlWindow.hpp"
@@ -140,7 +140,7 @@ bool GensActions::doAction(int action, bool state)
 			{
 				case MNUID_ITEM(IDM_HELP_ABOUT):
 					// About Gens/GS II.
-					AboutWindow::ShowSingle(m_parent);
+					AboutDialog::ShowSingle(m_parent);
 					return true;
 				
 				default:

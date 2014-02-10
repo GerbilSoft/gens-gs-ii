@@ -1,10 +1,10 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * AboutWindow.hpp: About Window.                                          *
+ * AboutDialog.hpp: About Dialog.                                          *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -25,12 +25,12 @@
 #define __GENS_QT4_ABOUTWINDOW_HPP__
 
 #include <QtGui/QDialog>
-#include "ui_AboutWindow.h"
+#include "ui_AboutDialog.h"
 
 namespace GensQt4
 {
 
-class AboutWindow : public QDialog, public Ui::AboutWindow
+class AboutDialog : public QDialog, public Ui::AboutDialog
 {
 	Q_OBJECT
 	
@@ -38,14 +38,14 @@ class AboutWindow : public QDialog, public Ui::AboutWindow
 		static void ShowSingle(QWidget *parent = nullptr);
 	
 	protected:
-		AboutWindow(QWidget *parent = nullptr);
-		virtual ~AboutWindow();
+		AboutDialog(QWidget *parent = nullptr);
+		virtual ~AboutDialog();
 		
 		// State change event. (Used for switching the UI language at runtime.)
 		void changeEvent(QEvent *event);
 		
-		// Initialize the About Window text.
-		void initAboutWindowText(void);
+		// Initialize the About Dialog text.
+		void initAboutDialogText(void);
 		bool m_scrlAreaInit;
 		
 		// Included libraries.
@@ -58,9 +58,10 @@ class AboutWindow : public QDialog, public Ui::AboutWindow
 #endif /* Q_OS_WIN32 */
 	
 	private:
-		static AboutWindow *m_AboutWindow;
+		static AboutDialog *m_AboutDialog;
 };
 
 }
 
 #endif /* __GENS_QT4_ABOUTWINDOW_HPP__ */
+
