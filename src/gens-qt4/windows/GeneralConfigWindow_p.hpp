@@ -42,6 +42,7 @@ class QLineEdit;
 #endif /* GCW_APPLY_IMMED */
 #endif /* Q_WS_MAC */
 
+#include "ui_GeneralConfigWindow.h"
 namespace GensQt4
 {
 
@@ -64,6 +65,7 @@ class GeneralConfigWindowPrivate
 	public:
 		// Single window instance.
 		static GeneralConfigWindow *ms_GeneralConfigWindow;
+		Ui::GeneralConfigWindow ui;
 
 		// Warning string.
 		// NOTE: This must be built at runtime;

@@ -24,20 +24,15 @@
 #ifndef __GENS_QT4_MCDCONTROLWINDOW_HPP__
 #define __GENS_QT4_MCDCONTROLWINDOW_HPP__
 
-#include "ui_McdControlWindow.h"
-
 // Qt includes.
 #include <QtGui/QDialog>
-
-// Qt forward declarations.
-class QPushButton;
 
 namespace GensQt4
 {
 
 class McdControlWindowPrivate;
 
-class McdControlWindow : public QDialog, public Ui::McdControlWindow
+class McdControlWindow : public QDialog
 {
 	Q_OBJECT
 	
@@ -66,9 +61,6 @@ class McdControlWindow : public QDialog, public Ui::McdControlWindow
 		void driveQueryFinished(void);
 		void driveRemoved(QString path);
 #endif
-
-	private:
-		static McdControlWindow *m_McdControlWindow;
 };
 
 }

@@ -36,6 +36,7 @@
 // Find CD-ROM drives.
 #include "cdrom/FindCdromDrives.hpp"
 
+#include "ui_McdControlWindow.h"
 namespace GensQt4
 {
 
@@ -46,10 +47,16 @@ class McdControlWindowPrivate
 		~McdControlWindowPrivate();
 
 	private:
-		McdControlWindow *const q;
+		McdControlWindow *const q_ptr;
+		Q_DECLARE_PUBLIC(McdControlWindow)
+	private:
 		Q_DISABLE_COPY(McdControlWindowPrivate)
 
 	public:
+		// Single window instance.
+		static McdControlWindow *ms_McdControlWindow;
+		Ui::McdControlWindow ui;
+
 		FindCdromDrives *findCdromDrives;
 		//bool m_isQuerying;
 		//QList<CdromDriveEntry> m_queryList;
@@ -59,12 +66,13 @@ class McdControlWindowPrivate
 		QPushButton *btnRefresh;
 };
 
-/**************************************
- * McdControlWindowPrivate functions. *
- **************************************/
+/** McdControlWindowPrivate **/
+
+// Static member initialization.
+McdControlWindow *McdControlWindowPrivate::ms_McdControlWindow = nullptr;
 
 McdControlWindowPrivate::McdControlWindowPrivate(McdControlWindow *q)
-	: q(q)
+	: q_ptr(q)
 	, findCdromDrives(new FindCdromDrives(q))
 	, btnRefresh(nullptr)
 {
@@ -106,7 +114,7 @@ void McdControlWindowPrivate::addDriveEntry(QString deviceName, int index)
 
 	// Get the disc label.
 	if (!cdDrive->isDiscPresent())
-		item_desc += q->tr("No medium found.");
+		item_desc += McdControlWindow::tr("No medium found.");
 	else
 		item_desc += QString::fromUtf8(cdDrive->getDiscLabel().c_str());
 
@@ -114,30 +122,25 @@ void McdControlWindowPrivate::addDriveEntry(QString deviceName, int index)
 	QIcon icon = findCdromDrives->getDriveIcon(cdDrive);
 
 	// Remove the "No CD-ROM drives found." entry if it's there.
-	if (!q->cboCdDrives->isEnabled()) {
-		q->cboCdDrives->clear();
-		q->cboCdDrives->setEnabled(true);
+	if (!ui.cboCdDrives->isEnabled()) {
+		ui.cboCdDrives->clear();
+		ui.cboCdDrives->setEnabled(true);
 	}
 
 	// If index is >= 0, this is an existing item.
-	if (index >= 0 && index < q->cboCdDrives->count()) {
-		q->cboCdDrives->setItemText(index, item_desc);
-		q->cboCdDrives->setItemIcon(index, icon);
+	if (index >= 0 && index < ui.cboCdDrives->count()) {
+		ui.cboCdDrives->setItemText(index, item_desc);
+		ui.cboCdDrives->setItemIcon(index, icon);
 	} else {
-		q->cboCdDrives->addItem(icon, item_desc, deviceName);
+		ui.cboCdDrives->addItem(icon, item_desc, deviceName);
 	}
 
 	// Make sure a drive is selected.
-	if (q->cboCdDrives->currentIndex() < 0)
-		q->cboCdDrives->setCurrentIndex(0);
+	if (ui.cboCdDrives->currentIndex() < 0)
+		ui.cboCdDrives->setCurrentIndex(0);
 }
 
-/*******************************
- * McdControlWindow functions. *
- *******************************/
-
-// Static member initialization.
-McdControlWindow *McdControlWindow::m_McdControlWindow = nullptr;
+/** McdControlWindow **/
 
 /**
  * Initialize the General Configuration window.
@@ -146,8 +149,8 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
 	, d_ptr(new McdControlWindowPrivate(this))
 {
-	// Initialize the Qt4 UI.
-	setupUi(this);
+	Q_D(McdControlWindow);
+	d->ui.setupUi(this);
 
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
@@ -159,13 +162,12 @@ McdControlWindow::McdControlWindow(QWidget *parent)
 
 	// Create the "Refresh" button.
 	// TODO: Don't load an icon on systems that don't use icons on buttons.
-	Q_D(McdControlWindow);
 	d->btnRefresh = new QPushButton(GensQApplication::IconFromTheme(QLatin1String("view-refresh")),
 					tr("&Refresh"), this);
 	connect(d->btnRefresh, SIGNAL(clicked()), this, SLOT(query()));
 	// NOTE: "ResetRole" isn't exactly the right thing, but it works.
 	// On KDE, the button's on the left side of the dialog, whereas "Close" is on the right.
-	buttonBox->addButton(d->btnRefresh, QDialogButtonBox::ResetRole);
+	d->ui.buttonBox->addButton(d->btnRefresh, QDialogButtonBox::ResetRole);
 
 	// Query CD-ROM drives.
 	query();
@@ -179,7 +181,7 @@ McdControlWindow::~McdControlWindow()
 	delete d_ptr;
 
 	// Clear the m_McdControlWindow pointer.
-	m_McdControlWindow = nullptr;
+	McdControlWindowPrivate::ms_McdControlWindow = nullptr;
 }
 
 /**
@@ -188,17 +190,16 @@ McdControlWindow::~McdControlWindow()
  */
 void McdControlWindow::ShowSingle(QWidget *parent)
 {
-	if (m_McdControlWindow != nullptr) {
+	if (McdControlWindowPrivate::ms_McdControlWindow != nullptr) {
 		// General Configuration Window is already displayed.
 		// NOTE: This doesn't seem to work on KDE 4.4.2...
-		QApplication::setActiveWindow(m_McdControlWindow);
+		QApplication::setActiveWindow(McdControlWindowPrivate::ms_McdControlWindow);
 	} else {
 		// General Configuration Window is not displayed.
-		m_McdControlWindow = new McdControlWindow(parent);
-		m_McdControlWindow->show();
+		McdControlWindowPrivate::ms_McdControlWindow = new McdControlWindow(parent);
+		McdControlWindowPrivate::ms_McdControlWindow->show();
 	}
 }
-
 
 /**
  * Widget state has changed.
@@ -208,29 +209,30 @@ void McdControlWindow::changeEvent(QEvent *event)
 {
 	if (event->type() == QEvent::LanguageChange) {
 		// Retranslate the UI.
-		retranslateUi(this);
+		Q_D(McdControlWindow);
+		d->ui.retranslateUi(this);
 	}
 
 	// Pass the event to the base class.
-	this->QDialog::changeEvent(event);
+	QDialog::changeEvent(event);
 }
-
 
 /**
  * Query CD-ROM drives.
  */
 void McdControlWindow::query(void)
 {
-	// Clear the dropdown.
-	cboCdDrives->clear();
-
 	Q_D(McdControlWindow);
+
+	// Clear the dropdown.
+	d->ui.cboCdDrives->clear();
+
 	if (!d->findCdromDrives->isSupported()) {
 		// No CD-ROM drive handler is available.
 		// TODO: Center-align the text by using QItemDelegate.
-		cboCdDrives->setEnabled(false);
-		cboCdDrives->addItem(tr("No CD-ROM drive handler is available."));
-		cboCdDrives->setCurrentIndex(0);
+		d->ui.cboCdDrives->setEnabled(false);
+		d->ui.cboCdDrives->addItem(tr("No CD-ROM drive handler is available."));
+		d->ui.cboCdDrives->setCurrentIndex(0);
 		return;
 	}
 
@@ -240,9 +242,9 @@ void McdControlWindow::query(void)
 	// Indicate that drives are being scanned.
 	// TODO: Center-align the text by using QItemDelegate.
 	// TODO: Add an animated "Searching..." icon.
-	cboCdDrives->setEnabled(false);
-	cboCdDrives->addItem(tr("Searching for CD-ROM drives..."));
-	cboCdDrives->setCurrentIndex(0);
+	d->ui.cboCdDrives->setEnabled(false);
+	d->ui.cboCdDrives->addItem(tr("Searching for CD-ROM drives..."));
+	d->ui.cboCdDrives->setCurrentIndex(0);
 
 	// Retrieve the list of CD-ROM device names.
 	QStringList cdromDeviceNames = d->findCdromDrives->getDriveNames();

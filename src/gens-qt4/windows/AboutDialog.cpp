@@ -65,7 +65,7 @@
 // GLBackend is required in order to obtain list of extensions.
 #include "VBackend/GLBackend.hpp"
 
-
+#include "ui_AboutDialog.h"
 namespace GensQt4
 {
 
@@ -83,10 +83,11 @@ class AboutDialogPrivate
 	public:
 		// Single window instance.
 		static AboutDialog *ms_AboutDialog;
+		Ui::AboutDialog ui;
 
 		// Initialize the About Dialog text.
 		void initAboutDialogText(void);
-		bool m_scrlAreaInit;
+		bool scrlAreaInit;
 		
 		// Included libraries.
 		static QString GetIncLibraries(void);
@@ -105,6 +106,7 @@ AboutDialog *AboutDialogPrivate::ms_AboutDialog = nullptr;
 
 AboutDialogPrivate::AboutDialogPrivate(AboutDialog *q)
 	: q_ptr(q)
+	, scrlAreaInit(false)
 { }
 
 /**
@@ -133,9 +135,8 @@ void AboutDialogPrivate::initAboutDialogText(void)
 				"http://www.sonicretro.org/</a>");
 	
 	// Set the copyright string.
-	Q_Q(AboutDialog);
-	q->lblCopyrights->setText(sCopyrights);
-	q->lblCopyrights->setTextFormat(Qt::RichText);
+	ui.lblCopyrights->setText(sCopyrights);
+	ui.lblCopyrights->setTextFormat(Qt::RichText);
 	
 	// Build the program title text.
 	// TODO: Use QCoreApplication::applicationName()?
@@ -168,15 +169,15 @@ void AboutDialogPrivate::initAboutDialogText(void)
 		AboutDialog::tr("Sega 32X emulator");
 	
 	// Set the program title text.
-	q->lblPrgTitle->setText(sPrgTitle);
+	ui.lblPrgTitle->setText(sPrgTitle);
 	
 	// Set the included libraries text.
-	q->lblIncLibraries->setText(GetIncLibraries());
-	q->lblIncLibraries->setTextFormat(Qt::RichText);
+	ui.lblIncLibraries->setText(GetIncLibraries());
+	ui.lblIncLibraries->setTextFormat(Qt::RichText);
 
 	// Set the debug information text.
-	q->lblDebugInfo->setText(GetDebugInfo());
-	q->lblDebugInfo->setTextFormat(Qt::RichText);
+	ui.lblDebugInfo->setText(GetDebugInfo());
+	ui.lblDebugInfo->setTextFormat(Qt::RichText);
 
 	// Build the credits text.
 	QString sCredits;
@@ -222,10 +223,10 @@ void AboutDialogPrivate::initAboutDialogText(void)
 	}
 
 	// Set the credits text.
-	q->lblCredits->setText(sCredits);
-	q->lblCredits->setTextFormat(Qt::RichText);
+	ui.lblCredits->setText(sCredits);
+	ui.lblCredits->setTextFormat(Qt::RichText);
 
-	if (!m_scrlAreaInit) {
+	if (!scrlAreaInit) {
 		// Create the scroll areas.
 		// Qt Designer's QScrollArea implementation is horribly broken.
 		// Also, this has to be done after the labels are set, because
@@ -234,31 +235,31 @@ void AboutDialogPrivate::initAboutDialogText(void)
 		scrlIncLibraries->setFrameShape(QFrame::NoFrame);
 		scrlIncLibraries->setFrameShadow(QFrame::Plain);
 		scrlIncLibraries->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-		scrlIncLibraries->setWidget(q->lblIncLibraries);
+		scrlIncLibraries->setWidget(ui.lblIncLibraries);
 		scrlIncLibraries->setWidgetResizable(true);
-		q->vboxIncLibraries->addWidget(scrlIncLibraries);
+		ui.vboxIncLibraries->addWidget(scrlIncLibraries);
 		scrlIncLibraries->setAutoFillBackground(false);
 
 		QScrollArea *scrlDebugInfo = new QScrollArea();
 		scrlDebugInfo->setFrameShape(QFrame::NoFrame);
 		scrlDebugInfo->setFrameShadow(QFrame::Plain);
 		scrlDebugInfo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-		scrlDebugInfo->setWidget(q->lblDebugInfo);
+		scrlDebugInfo->setWidget(ui.lblDebugInfo);
 		scrlDebugInfo->setWidgetResizable(true);
-		q->vboxDebugInfo->addWidget(scrlDebugInfo);
+		ui.vboxDebugInfo->addWidget(scrlDebugInfo);
 		scrlDebugInfo->setAutoFillBackground(false);
 
 		QScrollArea *scrlCredits = new QScrollArea();
 		scrlCredits->setFrameShape(QFrame::NoFrame);
 		scrlCredits->setFrameShadow(QFrame::Plain);
 		scrlCredits->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-		scrlCredits->setWidget(q->lblCredits);
+		scrlCredits->setWidget(ui.lblCredits);
 		scrlCredits->setWidgetResizable(true);
-		q->vboxCredits->addWidget(scrlCredits);
+		ui.vboxCredits->addWidget(scrlCredits);
 		scrlCredits->setAutoFillBackground(false);
 
 		// Scroll areas initialized.
-		m_scrlAreaInit = true;
+		scrlAreaInit = true;
 	}
 }
 
@@ -576,11 +577,12 @@ AboutDialog::AboutDialog(QWidget *parent)
 		Qt::WindowCloseButtonHint)
 	, d_ptr(new AboutDialogPrivate(this))
 {
-	setupUi(this);
-	
+	Q_D(AboutDialog);
+	d->ui.setupUi(this);
+
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
-	
+
 #ifdef Q_WS_MAC
 	// Remove the window icon. (Mac "proxy icon")
 	this->setWindowIcon(QIcon());
@@ -595,10 +597,6 @@ AboutDialog::AboutDialog(QWidget *parent)
 	fraCredits->setFrameShape(QFrame::NoFrame);
 	fraCredits->layout()->setContentsMargins(0, 0, 0, 0);
 #endif
-
-	// Scroll areas aren't initialized.
-	Q_D(AboutDialog);
-	d->m_scrlAreaInit = false;
 
 	// Initialize the About window teXt.
 	d->initAboutDialogText();
@@ -642,10 +640,10 @@ void AboutDialog::changeEvent(QEvent *event)
 	if (event->type() == QEvent::LanguageChange)
 	{
 		// Retranslate the UI.
-		retranslateUi(this);
+		Q_D(AboutDialog);
+		d->ui.retranslateUi(this);
 		
 		// Reinitialize the About Dialog text.
-		Q_D(AboutDialog);
 		d->initAboutDialogText();
 	}
 

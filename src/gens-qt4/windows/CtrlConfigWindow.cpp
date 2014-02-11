@@ -35,12 +35,14 @@ using LibGens::IoManager;
 #include "libgens/MD/EmuMD.hpp"
 
 // Qt includes.
+#include <QtCore/QFile>
+#include <QtCore/QMap>
+#include <QtCore/QSignalMapper>
 #include <QtGui/QActionGroup>
 #include <QtGui/QKeyEvent>
 #include <QtGui/QPushButton>
-#include <QtCore/QFile>
-#include <QtCore/QMap>
 
+#include "ui_CtrlConfigWindow.h"
 namespace GensQt4
 {
 
@@ -59,6 +61,7 @@ class CtrlConfigWindowPrivate
 	public:
 		// Single window instance.
 		static CtrlConfigWindow *ms_Window;
+		Ui::CtrlConfigWindow ui;
 
 		// Controller data.
 		QString getShortDeviceName(LibGens::IoManager::IoType_t ioType) const;
@@ -145,9 +148,7 @@ class CtrlConfigWindowPrivate
 		IoManager::IoType_t cboDeviceIoType(int index);
 };
 
-/**************************************
- * CtrlConfigWindowPrivate functions. *
- **************************************/
+/** CtrlConfigWindowPrivate **/
 
 // Single window instance.
 CtrlConfigWindow *CtrlConfigWindowPrivate::ms_Window = nullptr;
@@ -165,7 +166,7 @@ CtrlConfigWindowPrivate::CtrlConfigWindowPrivate(CtrlConfigWindow *q)
 
 	// Signal mapper for toolbar buttons.
 	QObject::connect(mapperSelPort, SIGNAL(mapped(int)),
-			  q, SLOT(toolbarPortSelected(int)));
+			 q, SLOT(toolbarPortSelected(int)));
 }
 
 CtrlConfigWindowPrivate::~CtrlConfigWindowPrivate()
@@ -370,9 +371,8 @@ QIcon CtrlConfigWindowPrivate::getCtrlIcon(IoManager::IoType_t ioType)
  */
 void CtrlConfigWindowPrivate::addIoTypeToCboDevice(IoManager::IoType_t ioType)
 {
-	Q_Q(CtrlConfigWindow);
-	q->cboDevice->addItem(getCtrlIcon(ioType), getShortDeviceName(ioType));
-	const int idx = q->cboDevice->count() - 1;
+	ui.cboDevice->addItem(getCtrlIcon(ioType), getShortDeviceName(ioType));
+	const int idx = ui.cboDevice->count() - 1;
 	map_ioTypeToIdx.insert(ioType, idx);
 	map_idxToIoType.insert(idx, ioType);
 }
@@ -384,15 +384,13 @@ void CtrlConfigWindowPrivate::addIoTypeToCboDevice(IoManager::IoType_t ioType)
  */
 void CtrlConfigWindowPrivate::initCboDevice(bool isTP)
 {
-	Q_Q(CtrlConfigWindow);
-
 	// on_cboDevice_currentIndexChanged() handles translation for Port 1.
 	cboDevice_lock();
 
 	// Clear all the maps.
 	map_ioTypeToIdx.clear();
 	map_idxToIoType.clear();
-	q->cboDevice->clear();
+	ui.cboDevice->clear();
 
 	// Determine how many devices should be added to the dropdown.
 	const int ioTypeMax = (isTP ? (IoManager::IOT_6BTN + 1) : IoManager::IOT_MAX);
@@ -433,10 +431,9 @@ void CtrlConfigWindowPrivate::initCboDevice(bool isTP)
 void CtrlConfigWindowPrivate::setCboDeviceIoType(IoManager::IoType_t ioType)
 {
 	assert(ioType >= IoManager::IOT_NONE  && ioType < IoManager::IOT_MAX);
-	Q_Q(CtrlConfigWindow);
 	const int idx = map_ioTypeToIdx.value(ioType, 0);
-	if (idx < q->cboDevice->count())
-		q->cboDevice->setCurrentIndex(idx);
+	if (idx < ui.cboDevice->count())
+		ui.cboDevice->setCurrentIndex(idx);
 }
 
 /**
@@ -445,8 +442,7 @@ void CtrlConfigWindowPrivate::setCboDeviceIoType(IoManager::IoType_t ioType)
  */
 IoManager::IoType_t CtrlConfigWindowPrivate::cboDeviceIoType(void)
 {
-	Q_Q(CtrlConfigWindow);
-	const int idx = q->cboDevice->currentIndex();
+	const int idx = ui.cboDevice->currentIndex();
 	return map_idxToIoType.value(idx, IoManager::IOT_NONE);
 }
 
@@ -460,9 +456,7 @@ IoManager::IoType_t CtrlConfigWindowPrivate::cboDeviceIoType(int index)
 	return map_idxToIoType.value(index, IoManager::IOT_NONE);
 }
 
-/*******************************
- * CtrlConfigWindow functions. *
- *******************************/
+/** CtrlConfigWindow **/
 
 /**
  * Initialize the Controller Configuration window.
@@ -476,8 +470,8 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 		Qt::WindowCloseButtonHint)
 	, d_ptr(new CtrlConfigWindowPrivate(this))
 {
-	// Initialize the Qt4 UI.
-	setupUi(this);
+	Q_D(CtrlConfigWindow);
+	d->ui.setupUi(this);
 	
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
@@ -489,43 +483,41 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 
 	// "OK" and "Cancel" are automatically connected by uic.
 	// Connect a signal for the "Apply" button.
-	QPushButton *btnApply = buttonBox->button(QDialogButtonBox::Apply);
+	QPushButton *btnApply = d->ui.buttonBox->button(QDialogButtonBox::Apply);
 	connect(btnApply, SIGNAL(clicked(bool)), this, SLOT(apply()));
-
-	Q_D(CtrlConfigWindow);
 
 	// Initialize the toolbar.
 	d->actgrpSelPort->setExclusive(true);
 
 	// Base ports.
-	d->actgrpSelPort->addAction(actionPort1);
-	d->actgrpSelPort->addAction(actionPort2);
-	d->actgrpSelPort->addAction(actionPortEXT);
+	d->actgrpSelPort->addAction(d->ui.actionPort1);
+	d->actgrpSelPort->addAction(d->ui.actionPort2);
+	d->actgrpSelPort->addAction(d->ui.actionPortEXT);
 
 	// TeamPlayer 1.
-	d->actgrpSelPort->addAction(actionPortTP1A);
-	d->actgrpSelPort->addAction(actionPortTP1B);
-	d->actgrpSelPort->addAction(actionPortTP1C);
-	d->actgrpSelPort->addAction(actionPortTP1D);
+	d->actgrpSelPort->addAction(d->ui.actionPortTP1A);
+	d->actgrpSelPort->addAction(d->ui.actionPortTP1B);
+	d->actgrpSelPort->addAction(d->ui.actionPortTP1C);
+	d->actgrpSelPort->addAction(d->ui.actionPortTP1D);
 
 	// TeamPlayer 2.
-	d->actgrpSelPort->addAction(actionPortTP2A);
-	d->actgrpSelPort->addAction(actionPortTP2B);
-	d->actgrpSelPort->addAction(actionPortTP2C);
-	d->actgrpSelPort->addAction(actionPortTP2D);
+	d->actgrpSelPort->addAction(d->ui.actionPortTP2A);
+	d->actgrpSelPort->addAction(d->ui.actionPortTP2B);
+	d->actgrpSelPort->addAction(d->ui.actionPortTP2C);
+	d->actgrpSelPort->addAction(d->ui.actionPortTP2D);
 
 	// EA 4-Way Play.
-	d->actgrpSelPort->addAction(actionPort4WPA);
-	d->actgrpSelPort->addAction(actionPort4WPB);
-	d->actgrpSelPort->addAction(actionPort4WPC);
-	d->actgrpSelPort->addAction(actionPort4WPD);
+	d->actgrpSelPort->addAction(d->ui.actionPort4WPA);
+	d->actgrpSelPort->addAction(d->ui.actionPort4WPB);
+	d->actgrpSelPort->addAction(d->ui.actionPort4WPC);
+	d->actgrpSelPort->addAction(d->ui.actionPort4WPD);
 
 	// Find the toolbar separators.
 	// Qt Designer doesn't save them for some reason.
 	// Also, add port buttons to the signal mapper.
 	int portNum = 0;
 	d->vecTbSep.reserve(CTRL_CFG_TBSEP_MAX);
-	foreach(QAction *action, toolBar->actions()) {
+	foreach(QAction *action, d->ui.toolBar->actions()) {
 		if (action->isSeparator()) {
 			// Append to the vector of separators.
 			d->vecTbSep.append(action);
@@ -545,7 +537,7 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	reload();
 
 	// Set Port 1 as active.
-	actionPort1->setChecked(true);
+	d->ui.actionPort1->setChecked(true);
 }
 
 /**
@@ -618,7 +610,8 @@ void CtrlConfigWindow::changeEvent(QEvent *event)
 {
 	if (event->type() == QEvent::LanguageChange) {
 		// Retranslate the UI.
-		retranslateUi(this);
+		Q_D(CtrlConfigWindow);
+		d->ui.retranslateUi(this);
 
 		// Update the port buttons.
 		for (int virtPort = IoManager::VIRTPORT_1;
@@ -627,7 +620,6 @@ void CtrlConfigWindow::changeEvent(QEvent *event)
 		}
 
 		// Update the selected port information.
-		Q_D(CtrlConfigWindow);
 		updatePortSettings(d->selPort);
 	}
 
@@ -642,29 +634,30 @@ void CtrlConfigWindow::changeEvent(QEvent *event)
  */
 void CtrlConfigWindow::updatePortButton(IoManager::VirtPort_t virtPort)
 {
+	Q_D(CtrlConfigWindow);
 	QAction *actionPort;
 	switch (virtPort) {
 		// System controller ports.
-		case IoManager::VIRTPORT_1:		actionPort = actionPort1; break;
-		case IoManager::VIRTPORT_2:		actionPort = actionPort2; break;
+		case IoManager::VIRTPORT_1:		actionPort = d->ui.actionPort1; break;
+		case IoManager::VIRTPORT_2:		actionPort = d->ui.actionPort2; break;
 
 		// Team Player, Port 1.
-		case IoManager::VIRTPORT_TP1A:		actionPort = actionPortTP1A; break;
-		case IoManager::VIRTPORT_TP1B:		actionPort = actionPortTP1B; break;
-		case IoManager::VIRTPORT_TP1C:		actionPort = actionPortTP1C; break;
-		case IoManager::VIRTPORT_TP1D:		actionPort = actionPortTP1D; break;
+		case IoManager::VIRTPORT_TP1A:		actionPort = d->ui.actionPortTP1A; break;
+		case IoManager::VIRTPORT_TP1B:		actionPort = d->ui.actionPortTP1B; break;
+		case IoManager::VIRTPORT_TP1C:		actionPort = d->ui.actionPortTP1C; break;
+		case IoManager::VIRTPORT_TP1D:		actionPort = d->ui.actionPortTP1D; break;
 
 		// Team Player, Port 2.
-		case IoManager::VIRTPORT_TP2A:		actionPort = actionPortTP2A; break;
-		case IoManager::VIRTPORT_TP2B:		actionPort = actionPortTP2B; break;
-		case IoManager::VIRTPORT_TP2C:		actionPort = actionPortTP2C; break;
-		case IoManager::VIRTPORT_TP2D:		actionPort = actionPortTP2D; break;
+		case IoManager::VIRTPORT_TP2A:		actionPort = d->ui.actionPortTP2A; break;
+		case IoManager::VIRTPORT_TP2B:		actionPort = d->ui.actionPortTP2B; break;
+		case IoManager::VIRTPORT_TP2C:		actionPort = d->ui.actionPortTP2C; break;
+		case IoManager::VIRTPORT_TP2D:		actionPort = d->ui.actionPortTP2D; break;
 
 		// 4-Way Play.
-		case IoManager::VIRTPORT_4WPA:		actionPort = actionPort4WPA; break;
-		case IoManager::VIRTPORT_4WPB:		actionPort = actionPort4WPB; break;
-		case IoManager::VIRTPORT_4WPC:		actionPort = actionPort4WPC; break;
-		case IoManager::VIRTPORT_4WPD:		actionPort = actionPort4WPD; break;
+		case IoManager::VIRTPORT_4WPA:		actionPort = d->ui.actionPort4WPA; break;
+		case IoManager::VIRTPORT_4WPB:		actionPort = d->ui.actionPort4WPB; break;
+		case IoManager::VIRTPORT_4WPC:		actionPort = d->ui.actionPort4WPC; break;
+		case IoManager::VIRTPORT_4WPD:		actionPort = d->ui.actionPort4WPD; break;
 
 		default:
 			// Unknown port.
@@ -672,7 +665,6 @@ void CtrlConfigWindow::updatePortButton(IoManager::VirtPort_t virtPort)
 	}
 
 	// Make sure the device type is in bounds.
-	Q_D(CtrlConfigWindow);
 	const IoManager::IoType_t ioType = d->ctrlConfig->ioType(virtPort);
 	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
 
@@ -683,24 +675,24 @@ void CtrlConfigWindow::updatePortButton(IoManager::VirtPort_t virtPort)
 				d->getLongDeviceName(ioType));
 
 	// Hide the EXT port for now.
-	actionPortEXT->setVisible(false);
+	d->ui.actionPortEXT->setVisible(false);
 
 	if (virtPort == IoManager::VIRTPORT_1) {
 		// Port 1. Update TeamPlayer 1 button state.
 		const bool isTP = (ioType == IoManager::IOT_TEAMPLAYER);
 		d->vecTbSep[CTRL_CFG_TBSEP_TP1]->setVisible(isTP);
-		actionPortTP1A->setVisible(isTP);
-		actionPortTP1B->setVisible(isTP);
-		actionPortTP1C->setVisible(isTP);
-		actionPortTP1D->setVisible(isTP);
+		d->ui.actionPortTP1A->setVisible(isTP);
+		d->ui.actionPortTP1B->setVisible(isTP);
+		d->ui.actionPortTP1C->setVisible(isTP);
+		d->ui.actionPortTP1D->setVisible(isTP);
 	} else if (virtPort == IoManager::VIRTPORT_2) {
 		// Port 2. Update TeamPlayer 2 button state.
 		const bool isTP = (ioType == IoManager::IOT_TEAMPLAYER);
 		d->vecTbSep[CTRL_CFG_TBSEP_TP2]->setVisible(isTP);
-		actionPortTP2A->setVisible(isTP);
-		actionPortTP2B->setVisible(isTP);
-		actionPortTP2C->setVisible(isTP);
-		actionPortTP2D->setVisible(isTP);
+		d->ui.actionPortTP2A->setVisible(isTP);
+		d->ui.actionPortTP2B->setVisible(isTP);
+		d->ui.actionPortTP2C->setVisible(isTP);
+		d->ui.actionPortTP2D->setVisible(isTP);
 	}
 
 	if (virtPort == IoManager::VIRTPORT_1 ||
@@ -711,10 +703,10 @@ void CtrlConfigWindow::updatePortButton(IoManager::VirtPort_t virtPort)
 			 d->ctrlConfig->ioType(IoManager::VIRTPORT_2) == IoManager::IOT_4WP_MASTER);
 
 		d->vecTbSep[CTRL_CFG_TBSEP_4WP]->setVisible(is4WP);
-		actionPort4WPA->setVisible(is4WP);
-		actionPort4WPB->setVisible(is4WP);
-		actionPort4WPC->setVisible(is4WP);
-		actionPort4WPD->setVisible(is4WP);
+		d->ui.actionPort4WPA->setVisible(is4WP);
+		d->ui.actionPort4WPB->setVisible(is4WP);
+		d->ui.actionPort4WPC->setVisible(is4WP);
+		d->ui.actionPort4WPD->setVisible(is4WP);
 	}
 }
 
@@ -732,7 +724,7 @@ void CtrlConfigWindow::updatePortSettings(IoManager::VirtPort_t virtPort)
 
 	// Set the "Port Settings" text.
 	// TODO: Port names for when e.g. EXT, J-Cart, etc. are added.
-	grpPortSettings->setTitle(d->getPortName(virtPort));
+	d->ui.grpPortSettings->setTitle(d->getPortName(virtPort));
 
 	// Set the device type in the dropdown.
 	if (ioType == IoManager::IOT_4WP_SLAVE) {
@@ -743,8 +735,8 @@ void CtrlConfigWindow::updatePortSettings(IoManager::VirtPort_t virtPort)
 	d->setCboDeviceIoType(ioType);
 
 	// Set the device information in the GensCtrlCfgWidget.
-	ctrlCfgWidget->setIoType(ioType);
-	ctrlCfgWidget->setKeyMap(d->ctrlConfig->keyMap(virtPort));
+	d->ui.ctrlCfgWidget->setIoType(ioType);
+	d->ui.ctrlCfgWidget->setKeyMap(d->ctrlConfig->keyMap(virtPort));
 }
 
 
@@ -799,8 +791,8 @@ void CtrlConfigWindow::selectPort(IoManager::VirtPort_t virtPort)
 	d->cboDevice_lock();
 	const int ioType = (int)d->ctrlConfig->ioType(virtPort);
 	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
-	if (ioType < cboDevice->count())
-		cboDevice->setCurrentIndex(ioType);
+	if (ioType < d->ui.cboDevice->count())
+		d->ui.cboDevice->setCurrentIndex(ioType);
 	d->cboDevice_unlock();
 
 	// Update the port settings.
@@ -856,7 +848,7 @@ void CtrlConfigWindow::reload(void)
 			if (d->ctrlConfig->ioType(IoManager::VIRTPORT_1) != IoManager::IOT_TEAMPLAYER) {
 				// Port 1 is no longer Team Player.
 				// Switch to Port 1 instead of the TP1 port.
-				actionPort1->setChecked(true);
+				d->ui.actionPort1->setChecked(true);
 				hasUpdatedPortSettings = true;
 			}
 			break;
@@ -870,7 +862,7 @@ void CtrlConfigWindow::reload(void)
 			if (d->ctrlConfig->ioType(IoManager::VIRTPORT_2) != IoManager::IOT_TEAMPLAYER) {
 				// Port 2 is no longer Team Player.
 				// Switch to Port 2 instead of the TP2 port.
-				actionPort2->setChecked(true);
+				d->ui.actionPort2->setChecked(true);
 				hasUpdatedPortSettings = true;
 			}
 			break;
@@ -885,7 +877,7 @@ void CtrlConfigWindow::reload(void)
 			if (d->ctrlConfig->ioType(IoManager::VIRTPORT_1) != IoManager::IOT_4WP_SLAVE ||
 			    d->ctrlConfig->ioType(IoManager::VIRTPORT_2) != IoManager::IOT_4WP_MASTER) {
 				// 4WP is no longer set. Switch to Port 1.
-				actionPort1->setChecked(true);
+				d->ui.actionPort1->setChecked(true);
 				hasUpdatedPortSettings = true;
 			}
 			break;
@@ -1024,7 +1016,7 @@ void CtrlConfigWindow::on_ctrlCfgWidget_keyChanged(int idx, GensKey_t gensKey)
 	// TODO: Only save the specific key that was changed.
 	// For now, we're going to save everything.
 	Q_D(CtrlConfigWindow);
-	d->ctrlConfig->setKeyMap(d->selPort, ctrlCfgWidget->keyMap());
+	d->ctrlConfig->setKeyMap(d->selPort, d->ui.ctrlCfgWidget->keyMap());
 }
 
 }

@@ -40,6 +40,9 @@
 #include <QtGui/QFileDialog>
 #include <QtGui/QKeyEvent>
 
+// libgens: Sega CD Boot ROM database.
+#include "libgens/Data/mcd_rom_db.h"
+
 // libgens: RAR decompressor
 #include "libgens/Decompressor/DcRar.hpp"
 
@@ -61,17 +64,18 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 		Qt::WindowCloseButtonHint)
 	, d_ptr(new GeneralConfigWindowPrivate(this))
 {
-	// Initialize the Qt4 UI.
-	setupUi(this);
+	Q_D(GeneralConfigWindow);
+	d->ui.setupUi(this);
 
 	// Make sure the window is deleted on close.
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
 
-	Q_D(GeneralConfigWindow);
 	if (!d->isWarrantyVoid()) {
 		// Hide the super secret settings.
-		delete grpAdvancedVDP;
-		grpAdvancedVDP = nullptr;
+		delete d->ui.grpAdvancedVDP;
+		d->ui.grpAdvancedVDP = nullptr;
+		d->ui.chkVScrollBug = nullptr;
+		d->ui.chkZeroLengthDMA = nullptr;
 	}
 
 	// Set up the action group for the toolbar buttons.
@@ -93,7 +97,7 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 
 	// Initialize the toolbar buttons.
 	int i = 0;
-	foreach (QAction *action, toolBar->actions()) {
+	foreach (QAction *action, d->ui.toolBar->actions()) {
 		action->setIcon(GensQApplication::IconFromTheme(QLatin1String(icon_fdo[i])));
 		action->setData(i);
 		d->actgrpToolbar->addAction(action);
@@ -103,25 +107,25 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	}
 
 	// Select the "General" tab.
-	actionGeneral->setChecked(true);
+	d->ui.actionGeneral->setChecked(true);
 
 #ifndef GCW_APPLY_IMMED
 	// Set up a signal for the Apply button.
-	QPushButton *btnApply = buttonBox->button(QDialogButtonBox::Apply);
+	QPushButton *btnApply = d->ui.buttonBox->button(QDialogButtonBox::Apply);
 	if (btnApply)
 		connect(btnApply, SIGNAL(clicked()), this, SLOT(apply()));
 #else
 	{
 		// Apply settings immediately.
 		// Remove the buttonBox.
-		QSize szBbox = buttonBox->size();
-		delete buttonBox;
-		buttonBox = nullptr;
+		QSize szBbox = d->ui.buttonBox->size();
+		delete d->ui.buttonBox;
+		d->ui.buttonBox = nullptr;
 
 		// Reduce the size of the QMainWindow.
 		QSize szWindow = this->maximumSize();
 		int left, top, right, bottom;
-		vboxDialog->getContentsMargins(&left, &top, &right, &bottom);
+		d->ui.vboxDialog->getContentsMargins(&left, &top, &right, &bottom);
 		szWindow.rheight() -= (szBbox.height() + ((top + bottom) / 2));
 		this->setMinimumSize(szWindow);
 		this->setMaximumSize(szWindow);
@@ -137,55 +141,55 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	/** Intro effect. **/
 
 	// Intro Effect Color: Add the color entries.
-	cboIntroColor->addItem(Qt::black);
-	cboIntroColor->addItem(Qt::blue);
-	cboIntroColor->addItem(Qt::green);
-	cboIntroColor->addItem(Qt::cyan);
-	cboIntroColor->addItem(Qt::red);
-	cboIntroColor->addItem(Qt::magenta);
-	cboIntroColor->addItem(Qt::yellow);
-	cboIntroColor->addItem(Qt::white);
+	d->ui.cboIntroColor->addItem(Qt::black);
+	d->ui.cboIntroColor->addItem(Qt::blue);
+	d->ui.cboIntroColor->addItem(Qt::green);
+	d->ui.cboIntroColor->addItem(Qt::cyan);
+	d->ui.cboIntroColor->addItem(Qt::red);
+	d->ui.cboIntroColor->addItem(Qt::magenta);
+	d->ui.cboIntroColor->addItem(Qt::yellow);
+	d->ui.cboIntroColor->addItem(Qt::white);
 
 	/** System. **/
 
 	// Set the icons for the up/down buttons.
-	btnRegionDetectUp->setIcon(GensQApplication::IconFromTheme(QLatin1String("arrow-up")));
-	btnRegionDetectDown->setIcon(GensQApplication::IconFromTheme(QLatin1String("arrow-down")));
+	d->ui.btnRegionDetectUp->setIcon(GensQApplication::IconFromTheme(QLatin1String("arrow-up")));
+	d->ui.btnRegionDetectDown->setIcon(GensQApplication::IconFromTheme(QLatin1String("arrow-down")));
 
 	/** Sega Genesis. **/
 
 	// Sega Genesis: TMSS ROM.
-	txtMDTMSSRom->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
+	d->ui.txtMDTMSSRom->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 	const QString sMDTMSSRom_PlaceholderText = tr("Select a %1 TMSS ROM...");
-	txtMDTMSSRom->setPlaceholderText(sMDTMSSRom_PlaceholderText.arg(tr("Genesis")));
+	d->ui.txtMDTMSSRom->setPlaceholderText(sMDTMSSRom_PlaceholderText.arg(tr("Genesis")));
 
 	/** Sega CD. **/
 
 	// Sega CD: Initialize the Boot ROM textbox icons.
-	txtMcdRomUSA->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
-	txtMcdRomEUR->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
-	txtMcdRomJPN->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
-	txtMcdRomAsia->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
+	d->ui.txtMcdRomUSA->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
+	d->ui.txtMcdRomEUR->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
+	d->ui.txtMcdRomJPN->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
+	d->ui.txtMcdRomAsia->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 
 	// Sega CD: Set the placeholder text.
 #if QT_VERSION >= 0x040700
 	const QString sMcdBootRom_PlaceholderText = tr("Select a %1 Boot ROM...");
-	txtMcdRomUSA->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Sega CD (U)")));
-	txtMcdRomEUR->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Mega CD (E)")));
-	txtMcdRomJPN->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Mega CD (J)")));
-	txtMcdRomAsia->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Mega CD (Asia)")));
+	d->ui.txtMcdRomUSA->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Sega CD (U)")));
+	d->ui.txtMcdRomEUR->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Mega CD (E)")));
+	d->ui.txtMcdRomJPN->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Mega CD (J)")));
+	d->ui.txtMcdRomAsia->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Mega CD (Asia)")));
 #endif /* QT_VERSION >= 0x040700 */
 
 	// External Programs: Set the textbox icon and placeholder text.
-	txtExtPrgUnRAR->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
+	d->ui.txtExtPrgUnRAR->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 #ifdef Q_OS_WIN32
-	lblExtPrgUnRAR->setText(tr("UnRAR DLL:"));
+	d->ui.lblExtPrgUnRAR->setText(tr("UnRAR DLL:"));
 #if QT_VERSION >= 0x040700
-	txtExtPrgUnRAR->setPlaceholderText(tr("Select an UnRAR DLL..."));
+	d->ui.txtExtPrgUnRAR->setPlaceholderText(tr("Select an UnRAR DLL..."));
 #endif /* QT_VERSION >= 0x040700 */
 #else /* !Q_OS_WIN32 */
 #if QT_VERSION >= 0x040700
-	txtExtPrgUnRAR->setPlaceholderText(tr("Select a RAR or UnRAR binary..."));
+	d->ui.txtExtPrgUnRAR->setPlaceholderText(tr("Select a RAR or UnRAR binary..."));
 #endif /* QT_VERSION >= 0x040700 */
 #endif /* Q_OS_WIN32 */
 
@@ -274,11 +278,11 @@ void GeneralConfigWindow::changeEvent(QEvent *event)
 {
 	if (event->type() == QEvent::LanguageChange) {
 		// Retranslate the UI.
-		retranslateUi(this);
+		Q_D(GeneralConfigWindow);
+		d->ui.retranslateUi(this);
 
 		// Update the ROM file status.
 		// TODO: Update labels?
-		Q_D(GeneralConfigWindow);
 		d->updateRomFileStatus();
 
 		// Update external program status.
@@ -332,67 +336,67 @@ void GeneralConfigWindow::reload(void)
 	QColor colorText;
 
 	/** Onscreen display: FPS counter. **/
-	chkOsdFpsEnable->setChecked(ValByPath_bool("OSD/fpsEnabled"));
+	d->ui.chkOsdFpsEnable->setChecked(ValByPath_bool("OSD/fpsEnabled"));
 	d->osdFpsColor = ValByPath_QColor("OSD/fpsColor");
-	btnOsdFpsColor->setBgColor(d->osdFpsColor);
-	btnOsdFpsColor->setText(d->osdFpsColor.name().toUpper());
+	d->ui.btnOsdFpsColor->setBgColor(d->osdFpsColor);
+	d->ui.btnOsdFpsColor->setText(d->osdFpsColor.name().toUpper());
 
 	/** Onscreen display: Messages. **/
-	chkOsdMsgEnable->setChecked(ValByPath_bool("OSD/msgEnabled"));
+	d->ui.chkOsdMsgEnable->setChecked(ValByPath_bool("OSD/msgEnabled"));
 	d->osdMsgColor = ValByPath_QColor("OSD/msgColor");
-	btnOsdMsgColor->setBgColor(d->osdMsgColor);
-	btnOsdMsgColor->setText(d->osdMsgColor.name().toUpper());
+	d->ui.btnOsdMsgColor->setBgColor(d->osdMsgColor);
+	d->ui.btnOsdMsgColor->setText(d->osdMsgColor.name().toUpper());
 
 	/** General settings. **/
-	chkAutoFixChecksum->setChecked(ValByPath_bool("autoFixChecksum"));
-	chkAutoPause->setChecked(ValByPath_bool("autoPause"));
-	chkPauseTint->setChecked(ValByPath_bool("pauseTint"));
+	d->ui.chkAutoFixChecksum->setChecked(ValByPath_bool("autoFixChecksum"));
+	d->ui.chkAutoPause->setChecked(ValByPath_bool("autoPause"));
+	d->ui.chkPauseTint->setChecked(ValByPath_bool("pauseTint"));
 
 	/** Intro effect. **/
-	cboIntroStyle->setCurrentIndex(ValByPath_int("Intro_Effect/introStyle"));
-	cboIntroColor->setCurrentIndex(ValByPath_int("Intro_Effect/introColor"));
+	d->ui.cboIntroStyle->setCurrentIndex(ValByPath_int("Intro_Effect/introStyle"));
+	d->ui.cboIntroColor->setCurrentIndex(ValByPath_int("Intro_Effect/introColor"));
 
 	/** Sega Genesis TMSS. **/
-	chkMDTMSS->setChecked(ValByPath_bool("Genesis/tmssEnabled"));
-	txtMDTMSSRom->setText(ValByPath_QString("Genesis/tmssRom"));
+	d->ui.chkMDTMSS->setChecked(ValByPath_bool("Genesis/tmssEnabled"));
+	d->ui.txtMDTMSSRom->setText(ValByPath_QString("Genesis/tmssRom"));
 
 	/** Sega CD Boot ROMs. **/
-	txtMcdRomUSA->setText(ValByPath_QString("Sega_CD/bootRomUSA"));
-	txtMcdRomEUR->setText(ValByPath_QString("Sega_CD/bootRomEUR"));
-	txtMcdRomJPN->setText(ValByPath_QString("Sega_CD/bootRomJPN"));
-	txtMcdRomAsia->setText(ValByPath_QString("Sega_CD/bootRomAsia"));
+	d->ui.txtMcdRomUSA->setText(ValByPath_QString("Sega_CD/bootRomUSA"));
+	d->ui.txtMcdRomEUR->setText(ValByPath_QString("Sega_CD/bootRomEUR"));
+	d->ui.txtMcdRomJPN->setText(ValByPath_QString("Sega_CD/bootRomJPN"));
+	d->ui.txtMcdRomAsia->setText(ValByPath_QString("Sega_CD/bootRomAsia"));
 	on_txtMcdRomUSA_focusIn();
 
 	/** External programs. **/
-	txtExtPrgUnRAR->setText(ValByPath_QString("External_Programs/UnRAR"));
+	d->ui.txtExtPrgUnRAR->setText(ValByPath_QString("External_Programs/UnRAR"));
 
 	/** Graphics settings. **/
-	chkAspectRatioConstraint->setChecked(ValByPath_bool("Graphics/aspectRatioConstraint"));
-	chkFastBlur->setChecked(ValByPath_bool("Graphics/fastBlur"));
-	chkBilinearFilter->setChecked(ValByPath_bool("Graphics/bilinearFilter"));
-	cboInterlacedMode->setCurrentIndex(ValByPath_int("Graphics/interlacedMode"));
+	d->ui.chkAspectRatioConstraint->setChecked(ValByPath_bool("Graphics/aspectRatioConstraint"));
+	d->ui.chkFastBlur->setChecked(ValByPath_bool("Graphics/fastBlur"));
+	d->ui.chkBilinearFilter->setChecked(ValByPath_bool("Graphics/bilinearFilter"));
+	d->ui.cboInterlacedMode->setCurrentIndex(ValByPath_int("Graphics/interlacedMode"));
 
 	/** VDP settings. **/
-	chkSpriteLimits->setChecked(ValByPath_bool("VDP/spriteLimits"));
-	chkBorderColor->setChecked(ValByPath_bool("VDP/borderColorEmulation"));
-	chkNtscV30Rolling->setChecked(ValByPath_bool("VDP/ntscV30Rolling"));
+	d->ui.chkSpriteLimits->setChecked(ValByPath_bool("VDP/spriteLimits"));
+	d->ui.chkBorderColor->setChecked(ValByPath_bool("VDP/borderColorEmulation"));
+	d->ui.chkNtscV30Rolling->setChecked(ValByPath_bool("VDP/ntscV30Rolling"));
 	if (d->isWarrantyVoid()) {
-		chkVScrollBug->setChecked(ValByPath_bool("VDP/vscrollBug"));
-		chkZeroLengthDMA->setChecked(ValByPath_bool("VDP/zeroLengthDMA"));
+		d->ui.chkVScrollBug->setChecked(ValByPath_bool("VDP/vscrollBug"));
+		d->ui.chkZeroLengthDMA->setChecked(ValByPath_bool("VDP/zeroLengthDMA"));
 	}
 
 	/** System. **/
-	cboRegionCurrent->setCurrentIndex(ValByPath_int("System/regionCode") + 1);
+	d->ui.cboRegionCurrent->setCurrentIndex(ValByPath_int("System/regionCode") + 1);
 
 	// Region auto-detection settings.
-	lstRegionDetect->clear();
+	d->ui.lstRegionDetect->clear();
 	uint16_t regionCodeOrder = (uint16_t)ValByPath_uint("System/regionCodeOrder");
 	for (int i = 0; i < 4; i++, regionCodeOrder >>= 4) {
 		const QString str = EmuManager::LgRegionCodeStrMD(regionCodeOrder & 0xF);
 		if (!str.isEmpty()) {
 			QListWidgetItem *item = new QListWidgetItem(str);
 			item->setData(Qt::UserRole, (regionCodeOrder & 0xF));
-			lstRegionDetect->insertItem(0, item);
+			d->ui.lstRegionDetect->insertItem(0, item);
 		}
 	}
 
@@ -423,50 +427,50 @@ void GeneralConfigWindow::apply(void)
 	Q_D(GeneralConfigWindow);
 
 	/** Onscreen display. **/
-	SetValByPath_bool("OSD/fpsEnabled", chkOsdFpsEnable->isChecked());
+	SetValByPath_bool("OSD/fpsEnabled", d->ui.chkOsdFpsEnable->isChecked());
 	SetValByPath_QColor("OSD/fpsColor", d->osdFpsColor);
-	SetValByPath_bool("OSD/msgEnabled", chkOsdMsgEnable->isChecked());
+	SetValByPath_bool("OSD/msgEnabled", d->ui.chkOsdMsgEnable->isChecked());
 	SetValByPath_QColor("OSD/msgColor", d->osdMsgColor);
 
 	/** Intro effect. **/
-	SetValByPath_int("Intro_Effect/introStyle", cboIntroStyle->currentIndex());
-	SetValByPath_int("Intro_Effect/introColor", cboIntroColor->currentIndex());
+	SetValByPath_int("Intro_Effect/introStyle", d->ui.cboIntroStyle->currentIndex());
+	SetValByPath_int("Intro_Effect/introColor", d->ui.cboIntroColor->currentIndex());
 
 	/** General settings. **/
-	SetValByPath_bool("autoFixChecksum", chkAutoFixChecksum->isChecked());
-	SetValByPath_bool("autoPause", chkAutoPause->isChecked());
-	SetValByPath_bool("pauseTint", chkPauseTint->isChecked());
+	SetValByPath_bool("autoFixChecksum", d->ui.chkAutoFixChecksum->isChecked());
+	SetValByPath_bool("autoPause", d->ui.chkAutoPause->isChecked());
+	SetValByPath_bool("pauseTint", d->ui.chkPauseTint->isChecked());
 
 	/** Sega Genesis TMSS. **/
-	SetValByPath_bool("Genesis/tmssEnabled", chkMDTMSS->isChecked());
-	SetValByPath_QString("Genesis/tmssRom", txtMDTMSSRom->text());
+	SetValByPath_bool("Genesis/tmssEnabled", d->ui.chkMDTMSS->isChecked());
+	SetValByPath_QString("Genesis/tmssRom", d->ui.txtMDTMSSRom->text());
 
 	/** Sega CD Boot ROMs. **/
-	SetValByPath_QString("Sega_CD/bootRomUSA", txtMcdRomUSA->text());
-	SetValByPath_QString("Sega_CD/bootRomEUR", txtMcdRomEUR->text());
-	SetValByPath_QString("Sega_CD/bootRomJPN", txtMcdRomJPN->text());
-	SetValByPath_QString("Sega_CD/bootRomAsia", txtMcdRomAsia->text());
+	SetValByPath_QString("Sega_CD/bootRomUSA", d->ui.txtMcdRomUSA->text());
+	SetValByPath_QString("Sega_CD/bootRomEUR", d->ui.txtMcdRomEUR->text());
+	SetValByPath_QString("Sega_CD/bootRomJPN", d->ui.txtMcdRomJPN->text());
+	SetValByPath_QString("Sega_CD/bootRomAsia", d->ui.txtMcdRomAsia->text());
 
 	/** External programs. **/
-	SetValByPath_QString("External_Programs/UnRAR", txtExtPrgUnRAR->text());
+	SetValByPath_QString("External_Programs/UnRAR", d->ui.txtExtPrgUnRAR->text());
 
 	/** Graphics settings. **/
-	SetValByPath_bool("Graphics/aspectRatioConstraint", chkAspectRatioConstraint->isChecked());
-	SetValByPath_bool("Graphics/fastBlur", chkFastBlur->isChecked());
-	SetValByPath_bool("Graphics/bilinearFilter", chkBilinearFilter->isChecked());
-	SetValByPath_int("Graphics/interlacedMode", cboInterlacedMode->currentIndex());
+	SetValByPath_bool("Graphics/aspectRatioConstraint", d->ui.chkAspectRatioConstraint->isChecked());
+	SetValByPath_bool("Graphics/fastBlur", d->ui.chkFastBlur->isChecked());
+	SetValByPath_bool("Graphics/bilinearFilter", d->ui.chkBilinearFilter->isChecked());
+	SetValByPath_int("Graphics/interlacedMode", d->ui.cboInterlacedMode->currentIndex());
 
 	/** VDP settings. **/
-	SetValByPath_bool("VDP/spriteLimits", chkSpriteLimits->isChecked());
-	SetValByPath_bool("VDP/borderColorEmulation", chkBorderColor->isChecked());
-	SetValByPath_bool("VDP/ntscV30Rolling", chkNtscV30Rolling->isChecked());
+	SetValByPath_bool("VDP/spriteLimits", d->ui.chkSpriteLimits->isChecked());
+	SetValByPath_bool("VDP/borderColorEmulation", d->ui.chkBorderColor->isChecked());
+	SetValByPath_bool("VDP/ntscV30Rolling", d->ui.chkNtscV30Rolling->isChecked());
 	if (d->isWarrantyVoid()) {
-		SetValByPath_bool("VDP/vscrollBug", chkVScrollBug->isChecked());
-		SetValByPath_bool("VDP/zeroLengthDMA", chkZeroLengthDMA->isChecked());
+		SetValByPath_bool("VDP/vscrollBug", d->ui.chkVScrollBug->isChecked());
+		SetValByPath_bool("VDP/zeroLengthDMA", d->ui.chkZeroLengthDMA->isChecked());
 	}
 
 	/** System. **/
-	SetValByPath_int("System/regionCode", (cboRegionCurrent->currentIndex() - 1));
+	SetValByPath_int("System/regionCode", (d->ui.cboRegionCurrent->currentIndex() - 1));
 	SetValByPath_uint("System/regionCodeOrder", d->regionCodeOrder());
 
 	// Disable the Apply button.
@@ -485,12 +489,13 @@ void GeneralConfigWindow::toolbarTriggered(QAction *action)
 	QVariant data = action->data();
 	if (!data.isValid() || !data.canConvert(QVariant::Int))
 		return;
-	
+
+	Q_D(GeneralConfigWindow);
 	int tab = data.toInt();
-	if (tab < 0 || tab >= stackedWidget->count())
+	if (tab < 0 || tab >= d->ui.stackedWidget->count())
 		return;
-	
-	stackedWidget->setCurrentIndex(tab);
+
+	d->ui.stackedWidget->setCurrentIndex(tab);
 }
 
 /** Onscreen display **/
@@ -503,8 +508,8 @@ void GeneralConfigWindow::on_btnOsdFpsColor_clicked(void)
 		return;
 
 	d->osdFpsColor = color;
-	btnOsdFpsColor->setBgColor(d->osdFpsColor);
-	btnOsdFpsColor->setText(d->osdFpsColor.name().toUpper());
+	d->ui.btnOsdFpsColor->setBgColor(d->osdFpsColor);
+	d->ui.btnOsdFpsColor->setText(d->osdFpsColor.name().toUpper());
 
 	// Settings have been changed.
 #ifndef GCW_APPLY_IMMED
@@ -522,8 +527,8 @@ void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
 		return;
 
 	d->osdMsgColor = color;
-	btnOsdMsgColor->setBgColor(color);
-	btnOsdMsgColor->setText(d->osdMsgColor.name().toUpper());
+	d->ui.btnOsdMsgColor->setBgColor(color);
+	d->ui.btnOsdMsgColor->setText(d->osdMsgColor.name().toUpper());
 
 	// Settings have been changed.
 #ifndef GCW_APPLY_IMMED
@@ -541,19 +546,19 @@ void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
  */
 void GeneralConfigWindow::on_btnRegionDetectUp_clicked(void)
 {
-	QListWidgetItem *cur = lstRegionDetect->currentItem();
+	Q_D(GeneralConfigWindow);
+	QListWidgetItem *cur = d->ui.lstRegionDetect->currentItem();
 	if (!cur)
 		return;
-	int cur_idx = lstRegionDetect->row(cur);
+	int cur_idx = d->ui.lstRegionDetect->row(cur);
 
-	QListWidgetItem *prev = lstRegionDetect->takeItem(cur_idx - 1);
+	QListWidgetItem *prev = d->ui.lstRegionDetect->takeItem(cur_idx - 1);
 	if (!prev)
 		return;
 
-	lstRegionDetect->insertItem(cur_idx, prev);
+	d->ui.lstRegionDetect->insertItem(cur_idx, prev);
 
 	// Settings have been changed.
-	Q_D(GeneralConfigWindow);
 #ifndef GCW_APPLY_IMMED
 	d->setApplyButtonEnabled(true);
 #else
@@ -566,19 +571,19 @@ void GeneralConfigWindow::on_btnRegionDetectUp_clicked(void)
  */
 void GeneralConfigWindow::on_btnRegionDetectDown_clicked(void)
 {
-	QListWidgetItem *cur = lstRegionDetect->currentItem();
+	Q_D(GeneralConfigWindow);
+	QListWidgetItem *cur = d->ui.lstRegionDetect->currentItem();
 	if (!cur)
 		return;
-	int cur_idx = lstRegionDetect->row(cur);
+	int cur_idx = d->ui.lstRegionDetect->row(cur);
 
-	QListWidgetItem *next = lstRegionDetect->takeItem(cur_idx + 1);
+	QListWidgetItem *next = d->ui.lstRegionDetect->takeItem(cur_idx + 1);
 	if (!next)
 		return;
 
-	lstRegionDetect->insertItem(cur_idx, next);
+	d->ui.lstRegionDetect->insertItem(cur_idx, next);
 
 	// Settings have been changed.
-	Q_D(GeneralConfigWindow);
 #ifndef GCW_APPLY_IMMED
 	d->setApplyButtonEnabled(true);
 #else
@@ -592,7 +597,7 @@ void GeneralConfigWindow::on_btnMDTMSSRom_clicked(void)
 {
 	Q_D(GeneralConfigWindow);
 	const QString tmssRom = tr("%1 TMSS ROM");
-	d->selectRomFile(tmssRom.arg(tr("Genesis")), txtMDTMSSRom);
+	d->selectRomFile(tmssRom.arg(tr("Genesis")), d->ui.txtMDTMSSRom);
 }
 
 void GeneralConfigWindow::on_txtMDTMSSRom_focusIn(void)
@@ -604,18 +609,18 @@ void GeneralConfigWindow::on_txtMDTMSSRom_focusIn(void)
 void GeneralConfigWindow::on_txtMDTMSSRom_textChanged(void)
 {
 	Q_D(GeneralConfigWindow);
-	QString sNewRomStatus = d->mdUpdateTmssRomFileStatus(txtMDTMSSRom);
+	QString sNewRomStatus = d->mdUpdateTmssRomFileStatus(d->ui.txtMDTMSSRom);
 	if (!sNewRomStatus.isEmpty()) {
 		d->sMDTmssRomStatus = sNewRomStatus;
-		lblMDTMSSSelectedRom->setText(d->sMDTmssRomStatus);
-		lblMDTMSSSelectedRom->setTextFormat(Qt::RichText);
+		d->ui.lblMDTMSSSelectedRom->setText(d->sMDTmssRomStatus);
+		d->ui.lblMDTMSSSelectedRom->setTextFormat(Qt::RichText);
 	}
 
 	// Settings have been changed.
 #ifndef GCW_APPLY_IMMED
 	d->setApplyButtonEnabled(true);
 #else
-	SetValByPath_QString("Genesis/tmssRom", txtMDTMSSRom->text());
+	SetValByPath_QString("Genesis/tmssRom", d->ui.txtMDTMSSRom->text());
 #endif
 }
 
@@ -625,25 +630,25 @@ void GeneralConfigWindow::on_btnMcdRomUSA_clicked(void)
 {
 	Q_D(GeneralConfigWindow);
 	const QString bootRom = tr("%1 Boot ROM");
-	d->selectRomFile(bootRom.arg(tr("Sega CD (U)")), txtMcdRomUSA);
+	d->selectRomFile(bootRom.arg(tr("Sega CD (U)")), d->ui.txtMcdRomUSA);
 }
 void GeneralConfigWindow::on_btnMcdRomEUR_clicked(void)
 {
 	Q_D(GeneralConfigWindow);
 	const QString bootRom = tr("%1 Boot ROM");
-	d->selectRomFile(bootRom.arg(tr("Mega CD (E)")), txtMcdRomEUR);
+	d->selectRomFile(bootRom.arg(tr("Mega CD (E)")), d->ui.txtMcdRomEUR);
 }
 void GeneralConfigWindow::on_btnMcdRomJPN_clicked(void)
 {
 	Q_D(GeneralConfigWindow);
 	const QString bootRom = tr("%1 Boot ROM");
-	d->selectRomFile(bootRom.arg(tr("Mega CD (J)")), txtMcdRomJPN);
+	d->selectRomFile(bootRom.arg(tr("Mega CD (J)")), d->ui.txtMcdRomJPN);
 }
 void GeneralConfigWindow::on_btnMcdRomAsia_clicked(void)
 {
 	Q_D(GeneralConfigWindow);
 	const QString bootRom = tr("%1 Boot ROM");
-	d->selectRomFile(bootRom.arg(tr("Mega CD (Asia)")), txtMcdRomAsia);
+	d->selectRomFile(bootRom.arg(tr("Mega CD (Asia)")), d->ui.txtMcdRomAsia);
 }
 
 void GeneralConfigWindow::on_txtMcdRomUSA_focusIn(void)
@@ -670,7 +675,7 @@ void GeneralConfigWindow::on_txtMcdRomAsia_focusIn(void)
 void GeneralConfigWindow::on_txtMcdRomUSA_textChanged(void)
 {
 	Q_D(GeneralConfigWindow);
-	QString sNewRomStatus = d->mcdUpdateRomFileStatus(txtMcdRomUSA, MCD_REGION_USA);
+	QString sNewRomStatus = d->mcdUpdateRomFileStatus(d->ui.txtMcdRomUSA, MCD_REGION_USA);
 	if (!sNewRomStatus.isEmpty()) {
 		d->sMcdRomStatus_USA = sNewRomStatus;
 		d->mcdDisplayRomFileStatus(tr("Sega CD (U)"), d->sMcdRomStatus_USA);
@@ -680,14 +685,14 @@ void GeneralConfigWindow::on_txtMcdRomUSA_textChanged(void)
 #ifndef GCW_APPLY_IMMED
 	d->setApplyButtonEnabled(true);
 #else
-	SetValByPath_QString("Sega_CD/bootRomUSA", txtMcdRomUSA->text());
+	SetValByPath_QString("Sega_CD/bootRomUSA", d->ui.txtMcdRomUSA->text());
 #endif
 }
 
 void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
 {
 	Q_D(GeneralConfigWindow);
-	QString sNewRomStatus = d->mcdUpdateRomFileStatus(txtMcdRomEUR, MCD_REGION_EUROPE);
+	QString sNewRomStatus = d->mcdUpdateRomFileStatus(d->ui.txtMcdRomEUR, MCD_REGION_EUROPE);
 	if (!sNewRomStatus.isEmpty()) {
 		d->sMcdRomStatus_EUR = sNewRomStatus;
 		d->mcdDisplayRomFileStatus(tr("Mega CD (E)"), d->sMcdRomStatus_EUR);
@@ -697,14 +702,14 @@ void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
 #ifndef GCW_APPLY_IMMED
 	d->setApplyButtonEnabled(true);
 #else
-	SetValByPath_QString("Sega_CD/bootRomEUR", txtMcdRomEUR->text());
+	SetValByPath_QString("Sega_CD/bootRomEUR", d->ui.txtMcdRomEUR->text());
 #endif
 }
 
 void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 {
 	Q_D(GeneralConfigWindow);
-	QString sNewRomStatus = d->mcdUpdateRomFileStatus(txtMcdRomJPN, MCD_REGION_JAPAN);
+	QString sNewRomStatus = d->mcdUpdateRomFileStatus(d->ui.txtMcdRomJPN, MCD_REGION_JAPAN);
 	if (!sNewRomStatus.isEmpty()) {
 		d->sMcdRomStatus_JPN = sNewRomStatus;
 		d->mcdDisplayRomFileStatus(tr("Mega CD (J)"), d->sMcdRomStatus_JPN);
@@ -714,14 +719,14 @@ void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 #ifndef GCW_APPLY_IMMED
 	d->setApplyButtonEnabled(true);
 #else
-	SetValByPath_QString("Sega_CD/bootRomJPN", txtMcdRomJPN->text());
+	SetValByPath_QString("Sega_CD/bootRomJPN", d->ui.txtMcdRomJPN->text());
 #endif
 }
 
 void GeneralConfigWindow::on_txtMcdRomAsia_textChanged(void)
 {
 	Q_D(GeneralConfigWindow);
-	QString sNewRomStatus = d->mcdUpdateRomFileStatus(txtMcdRomAsia, MCD_REGION_ASIA);
+	QString sNewRomStatus = d->mcdUpdateRomFileStatus(d->ui.txtMcdRomAsia, MCD_REGION_ASIA);
 	if (!sNewRomStatus.isEmpty()) {
 		d->sMcdRomStatus_Asia = sNewRomStatus;
 		d->mcdDisplayRomFileStatus(tr("Mega CD (Asia)"), d->sMcdRomStatus_Asia);
@@ -731,7 +736,7 @@ void GeneralConfigWindow::on_txtMcdRomAsia_textChanged(void)
 #ifndef GCW_APPLY_IMMED
 	d->setApplyButtonEnabled(true);
 #else
-	SetValByPath_QString("Sega_CD/bootRomAsia", txtMcdRomAsia->text());
+	SetValByPath_QString("Sega_CD/bootRomAsia", d->ui.txtMcdRomAsia->text());
 #endif
 }
 
@@ -749,8 +754,9 @@ void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
 	const QString title = tr("Select RAR or UnRAR binary");
 #endif
 
+	Q_D(GeneralConfigWindow);
 	QString filename = QFileDialog::getOpenFileName(this, title,
-			txtExtPrgUnRAR->text(),		// Default filename.
+			d->ui.txtExtPrgUnRAR->text(),	// Default filename.
 #ifdef Q_OS_WIN32
 			tr("DLL files") + QLatin1String(" (*.dll);;") +
 #else
@@ -767,10 +773,10 @@ void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
 	// Set the filename text.
 	// Program file status will be updated automatically by
 	// the textChanged() signal from QLineEdit.
-	txtExtPrgUnRAR->setText(filename);
+	d->ui.txtExtPrgUnRAR->setText(filename);
 
 	// Set focus to the textbox.
-	txtExtPrgUnRAR->setFocus(Qt::OtherFocusReason);
+	d->ui.txtExtPrgUnRAR->setFocus(Qt::OtherFocusReason);
 }
 
 void GeneralConfigWindow::on_txtExtPrgUnRAR_focusIn(void)
@@ -794,11 +800,11 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 	
 	// Check if the file exists.
 	Q_D(GeneralConfigWindow);
-	QString filename = txtExtPrgUnRAR->text();
+	QString filename = d->ui.txtExtPrgUnRAR->text();
 	if (filename.isEmpty()) {
 		prg_status = tr("No filename specified.");
 	} else {
-		int status = LibGens::DcRar::CheckExtPrg(txtExtPrgUnRAR->text().toUtf8().constData(), &prg_info);
+		int status = LibGens::DcRar::CheckExtPrg(d->ui.txtExtPrgUnRAR->text().toUtf8().constData(), &prg_info);
 		switch (status) {
 			case 0:
 				// RAR is usable.
@@ -922,7 +928,7 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 		d->sExtPrgStatus_UnRAR += sLineBreak + sLineBreak + prg_status;
 
 	// Set the textbox's icon.
-	txtExtPrgUnRAR->setIcon(style()->standardIcon(filename_icon));
+	d->ui.txtExtPrgUnRAR->setIcon(style()->standardIcon(filename_icon));
 
 	// TODO: Create a constant string for DLL vs. binary.
 	// For now, just call focusIn() to update the description.
@@ -932,7 +938,7 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 #ifndef GCW_APPLY_IMMED
 	d->setApplyButtonEnabled(true);
 #else
-	SetValByPath_QString("External_Programs/UnRAR", txtExtPrgUnRAR->text());
+	SetValByPath_QString("External_Programs/UnRAR", d->ui.txtExtPrgUnRAR->text());
 #endif
 }
 

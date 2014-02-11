@@ -33,6 +33,9 @@
 // Gens widgets.
 #include "widgets/GensLineEdit.hpp"
 
+// libgens: Sega CD Boot ROM database.
+#include "libgens/Data/mcd_rom_db.h"
+
 namespace GensQt4
 {
 
@@ -85,11 +88,9 @@ QColor GeneralConfigWindowPrivate::osdSelectColor(QString color_id, const QColor
  */
 uint16_t GeneralConfigWindowPrivate::regionCodeOrder(void) const
 {
-	Q_Q(const GeneralConfigWindow);
-
 	uint16_t ret = 0;
-	for (int i = 0; i < q->lstRegionDetect->count(); i++) {
-		const QListWidgetItem *item = q->lstRegionDetect->item(i);
+	for (int i = 0; i < ui.lstRegionDetect->count(); i++) {
+		const QListWidgetItem *item = ui.lstRegionDetect->item(i);
 		ret <<= 4;
 		ret |= (uint16_t)item->data(Qt::UserRole).toUInt();
 	}
@@ -149,27 +150,25 @@ void GeneralConfigWindowPrivate::selectRomFile(QString rom_desc, QLineEdit *txtR
  */
 void GeneralConfigWindowPrivate::updateRomFileStatus(void)
 {
-	Q_Q(GeneralConfigWindow);
-
 	// Update Sega Genesis TMSS ROM file status.
 	// TODO: Update the display for the last selected ROM.
 	QString sNewRomStatus;
-	sNewRomStatus = mdUpdateTmssRomFileStatus(q->txtMDTMSSRom);
+	sNewRomStatus = mdUpdateTmssRomFileStatus(ui.txtMDTMSSRom);
 	if (!sNewRomStatus.isEmpty())
 		sMDTmssRomStatus = sNewRomStatus;
 
 	// Update Sega CD Boot ROM file status.
 	// TODO: Update the display for the last selected ROM.
-	sNewRomStatus = mcdUpdateRomFileStatus(q->txtMcdRomUSA, MCD_REGION_USA);
+	sNewRomStatus = mcdUpdateRomFileStatus(ui.txtMcdRomUSA, MCD_REGION_USA);
 	if (!sNewRomStatus.isEmpty())
 		sMcdRomStatus_USA = sNewRomStatus;
-	sNewRomStatus = mcdUpdateRomFileStatus(q->txtMcdRomEUR, MCD_REGION_EUROPE);
+	sNewRomStatus = mcdUpdateRomFileStatus(ui.txtMcdRomEUR, MCD_REGION_EUROPE);
 	if (!sNewRomStatus.isEmpty())
 		sMcdRomStatus_EUR = sNewRomStatus;
-	sNewRomStatus = mcdUpdateRomFileStatus(q->txtMcdRomJPN, MCD_REGION_JAPAN);
+	sNewRomStatus = mcdUpdateRomFileStatus(ui.txtMcdRomJPN, MCD_REGION_JAPAN);
 	if (!sNewRomStatus.isEmpty())
 		sMcdRomStatus_JPN = sNewRomStatus;
-	sNewRomStatus = mcdUpdateRomFileStatus(q->txtMcdRomAsia, MCD_REGION_ASIA);
+	sNewRomStatus = mcdUpdateRomFileStatus(ui.txtMcdRomAsia, MCD_REGION_ASIA);
 	if (!sNewRomStatus.isEmpty())
 		sMcdRomStatus_Asia = sNewRomStatus;
 }
@@ -475,13 +474,11 @@ rom_identified:
  */
 void GeneralConfigWindowPrivate::mcdDisplayRomFileStatus(QString rom_id, QString rom_desc)
 {
-	Q_Q(GeneralConfigWindow);
-
 	// Set the ROM description.
 	QString sel_rom = GeneralConfigWindow::tr("Selected ROM: %1");
-	q->lblMcdSelectedRom->setText(sel_rom.arg(rom_id) +
+	ui.lblMcdSelectedRom->setText(sel_rom.arg(rom_id) +
 				QLatin1String("<br/>\n") + rom_desc);
-	q->lblMcdSelectedRom->setTextFormat(Qt::RichText);
+	ui.lblMcdSelectedRom->setTextFormat(Qt::RichText);
 }
 
 /**
@@ -491,13 +488,11 @@ void GeneralConfigWindowPrivate::mcdDisplayRomFileStatus(QString rom_id, QString
  */
 void GeneralConfigWindowPrivate::extprgDisplayFileStatus(QString file_id, QString file_desc)
 {
-	Q_Q(GeneralConfigWindow);
-
 	// Set the file description.
 	QString sel_prg = GeneralConfigWindow::tr("Selected Program: %1");
-	q->lblExtPrgSel->setText(sel_prg.arg(file_id) +
+	ui.lblExtPrgSel->setText(sel_prg.arg(file_id) +
 				QLatin1String("<br/>\n") + file_desc);
-	q->lblExtPrgSel->setTextFormat(Qt::RichText);
+	ui.lblExtPrgSel->setTextFormat(Qt::RichText);
 }
 
 #ifndef GCW_APPLY_IMMED
@@ -507,8 +502,7 @@ void GeneralConfigWindowPrivate::extprgDisplayFileStatus(QString file_id, QStrin
  */
 void GeneralConfigWindowPrivate::setApplyButtonEnabled(bool enabled)
 {
-	Q_Q(GeneralConfigWindow);
-	QPushButton *btnApply = q->buttonBox->button(QDialogButtonBox::Apply);
+	QPushButton *btnApply = ui.buttonBox->button(QDialogButtonBox::Apply);
 	if (btnApply)
 		btnApply->setEnabled(enabled);
 }

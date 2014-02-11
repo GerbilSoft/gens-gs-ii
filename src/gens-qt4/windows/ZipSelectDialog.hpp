@@ -25,7 +25,7 @@
 #define __GENS_QT4_WINDOWS_ZIPSELECTDIALOG_HPP__
 
 #include <QtGui/QDialog>
-#include "ui_ZipSelectDialog.h"
+#include <QtCore/QModelIndex>
 
 // LibGens includes.
 // TODO: Use MDP's mdp_z_entry_t instead of LibGens::Decompressor.
@@ -36,7 +36,7 @@ namespace GensQt4
 
 class ZipSelectDialogPrivate;
 
-class ZipSelectDialog : public QDialog, public Ui::ZipSelectDialog
+class ZipSelectDialog : public QDialog
 {
 	Q_OBJECT
 	

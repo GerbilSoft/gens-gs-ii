@@ -61,7 +61,7 @@ void GeneralConfigWindowPrivate::setupUi_mac(void)
 	// Increase the margins for the QDialogButtonBox.
 	// TODO: Remove QDialogButtonBox on Mac OS X,
 	// and have settings apply immediately.
-	q->vboxButtonBox->setContentsMargins(16, 16, 16, 16);
+	ui.vboxButtonBox->setContentsMargins(16, 16, 16, 16);
 
 	// Force a fixed-size layout.
 	// Mac OS X's Carbon and Cocoa libraries are annoying and

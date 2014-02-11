@@ -25,16 +25,9 @@
 #define __GENS_QT4_CTRLCONFIGWINDOW_HPP__
 
 #include <QtGui/QMainWindow>
-#include "ui_CtrlConfigWindow.h"
 
 // Controller Configuration class.
 #include "Config/CtrlConfig.hpp"
-
-// Qt includes and classes.
-#include <QtGui/QIcon>
-#include <QtCore/QSignalMapper>
-#include <QtCore/QVector>
-class QActionGroup;
 
 // LibGens includes.
 #include "libgens/IO/IoManager.hpp"
@@ -50,7 +43,7 @@ namespace GensQt4
 
 class CtrlConfigWindowPrivate;
 
-class CtrlConfigWindow : public QMainWindow, public Ui::CtrlConfigWindow
+class CtrlConfigWindow : public QMainWindow
 {
 	Q_OBJECT
 

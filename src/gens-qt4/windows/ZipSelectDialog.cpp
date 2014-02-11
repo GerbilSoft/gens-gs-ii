@@ -29,6 +29,7 @@
 // Zip Directory Tree Model.
 #include "widgets/GensZipDirModel.hpp"
 
+#include "ui_ZipSelectDialog.h"
 namespace GensQt4
 {
 
@@ -45,6 +46,8 @@ class ZipSelectDialogPrivate
 		Q_DISABLE_COPY(ZipSelectDialogPrivate)
 
 	public:
+		Ui::ZipSelectDialog ui;
+
 		const mdp_z_entry_t *z_entry_list;
 		const mdp_z_entry_t *z_entry_sel;
 
@@ -74,7 +77,8 @@ ZipSelectDialog::ZipSelectDialog(QWidget *parent)
 	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
 	, d_ptr(new ZipSelectDialogPrivate(this))
 {
-	setupUi(this);
+	Q_D(ZipSelectDialog);
+	d->ui.setupUi(this);
 
 #ifdef Q_WS_MAC
 	// Remove the window icon. (Mac "proxy icon")
@@ -82,13 +86,12 @@ ZipSelectDialog::ZipSelectDialog(QWidget *parent)
 #endif
 
 	// Disable the "OK" button initially.
-	Q_D(ZipSelectDialog);
-	QPushButton *button = buttonBox->button(QDialogButtonBox::Ok);
+	QPushButton *button = d->ui.buttonBox->button(QDialogButtonBox::Ok);
 	if (button)
 		button->setEnabled(false);
 
 	// Set the tree model.
-	treeView->setModel(d->dirModel);
+	d->ui.treeView->setModel(d->dirModel);
 }
 
 ZipSelectDialog::~ZipSelectDialog()
@@ -104,7 +107,8 @@ void ZipSelectDialog::changeEvent(QEvent *event)
 {
 	if (event->type() == QEvent::LanguageChange) {
 		// Retranslate the UI.
-		retranslateUi(this);
+		Q_D(ZipSelectDialog);
+		d->ui.retranslateUi(this);
 	}
 
 	// Pass the event to the base class.
@@ -163,7 +167,7 @@ void ZipSelectDialog::accept(void)
 	Q_D(ZipSelectDialog);
 
 	// Get the selected item.
-	QModelIndexList indexList = treeView->selectionModel()->selectedIndexes();
+	QModelIndexList indexList = d->ui.treeView->selectionModel()->selectedIndexes();
 	if (indexList.size() != 1)
 		return;
 
@@ -190,7 +194,7 @@ void ZipSelectDialog::on_treeView_clicked(const QModelIndex& index)
 	// If this item is a directory, disable the "OK" button.
 	// If this item is a file, enable the "OK" button.
 	Q_D(ZipSelectDialog);
-	QPushButton *button = buttonBox->button(QDialogButtonBox::Ok);
+	QPushButton *button = d->ui.buttonBox->button(QDialogButtonBox::Ok);
 	if (button)
 		button->setEnabled(!d->dirModel->hasChildren(index));
 }

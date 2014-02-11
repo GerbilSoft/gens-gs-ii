@@ -25,14 +25,13 @@
 #define __GENS_QT4_ABOUTWINDOW_HPP__
 
 #include <QtGui/QDialog>
-#include "ui_AboutDialog.h"
 
 namespace GensQt4
 {
 
 class AboutDialogPrivate;
 
-class AboutDialog : public QDialog, public Ui::AboutDialog
+class AboutDialog : public QDialog
 {
 	Q_OBJECT
 	

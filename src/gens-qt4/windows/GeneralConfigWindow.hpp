@@ -24,20 +24,15 @@
 #ifndef __GENS_QT4_WINDOWS_GENERALCONFIGWINDOW_HPP__
 #define __GENS_QT4_WINDOWS_GENERALCONFIGWINDOW_HPP__
 
-#include "ui_GeneralConfigWindow.h"
-
 // Qt includes.
 #include <QtGui/QMainWindow>
-
-// libgens: Sega CD Boot ROM database.
-#include "libgens/Data/mcd_rom_db.h"
 
 namespace GensQt4
 {
 
 class GeneralConfigWindowPrivate;
 
-class GeneralConfigWindow : public QMainWindow, public Ui::GeneralConfigWindow
+class GeneralConfigWindow : public QMainWindow
 {
 	Q_OBJECT
 
