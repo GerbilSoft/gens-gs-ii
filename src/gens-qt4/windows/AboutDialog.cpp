@@ -121,7 +121,7 @@ void AboutDialogPrivate::initAboutDialogText(void)
 	QString sCopyrights = QString::fromUtf8(
 			"(c) 1999-2002 by Stéphane Dallongeville.<br/>\n"
 			"(c) 2003-2004 by Stéphane Akhoun.<br />\n<br />\n"
-			"Gens/GS (c) 2008-2013 by David Korth.<br />\n<br />\n");
+			"Gens/GS (c) 2008-2014 by David Korth.<br />\n<br />\n");
 	
 	sCopyrights += AboutDialog::tr("Visit the Gens homepage:") + sLineBreak +
 			QLatin1String(
