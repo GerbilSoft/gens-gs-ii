@@ -136,23 +136,23 @@ local static_tree_desc  static_bl_desc =
  */
 
 local void tr_static_init _Z_OF((void));
-local void init_block     _Z_OF((deflate_state *s));
-local void pqdownheap     _Z_OF((deflate_state *s, ct_data *tree, int k));
-local void gen_bitlen     _Z_OF((deflate_state *s, tree_desc *desc));
-local void gen_codes      _Z_OF((ct_data *tree, int max_code, ushf *bl_count));
-local void build_tree     _Z_OF((deflate_state *s, tree_desc *desc));
-local void scan_tree      _Z_OF((deflate_state *s, ct_data *tree, int max_code));
-local void send_tree      _Z_OF((deflate_state *s, ct_data *tree, int max_code));
-local int  build_bl_tree  _Z_OF((deflate_state *s));
+local void init_block    _Z_OF((deflate_state *s));
+local void pqdownheap    _Z_OF((deflate_state *s, ct_data *tree, int k));
+local void gen_bitlen    _Z_OF((deflate_state *s, tree_desc *desc));
+local void gen_codes     _Z_OF((ct_data *tree, int max_code, ushf *bl_count));
+local void build_tree    _Z_OF((deflate_state *s, tree_desc *desc));
+local void scan_tree     _Z_OF((deflate_state *s, ct_data *tree, int max_code));
+local void send_tree     _Z_OF((deflate_state *s, ct_data *tree, int max_code));
+local int  build_bl_tree _Z_OF((deflate_state *s));
 local void send_all_trees _Z_OF((deflate_state *s, int lcodes, int dcodes,
                               int blcodes));
 local void compress_block _Z_OF((deflate_state *s, const ct_data *ltree,
                               const ct_data *dtree));
 local int  detect_data_type _Z_OF((deflate_state *s));
 local unsigned bi_reverse _Z_OF((unsigned value, int length));
-local void bi_windup      _Z_OF((deflate_state *s));
-local void bi_flush       _Z_OF((deflate_state *s));
-local void copy_block     _Z_OF((deflate_state *s, charf *buf, unsigned len,
+local void bi_windup     _Z_OF((deflate_state *s));
+local void bi_flush      _Z_OF((deflate_state *s));
+local void copy_block    _Z_OF((deflate_state *s, charf *buf, unsigned len,
                               int header));
 
 #ifdef GEN_TREES_H
@@ -183,7 +183,7 @@ local void gen_trees_header _Z_OF((void));
  * IN assertion: length <= 16 and value fits in length bits.
  */
 #ifdef DEBUG
-local void send_bits      _Z_OF((deflate_state *s, int value, int length));
+local void send_bits     _Z_OF((deflate_state *s, int value, int length));
 
 local void send_bits(s, value, length)
     deflate_state *s;
@@ -1224,3 +1224,4 @@ local void copy_block(s, buf, len, header)
         put_byte(s, *buf++);
     }
 }
+

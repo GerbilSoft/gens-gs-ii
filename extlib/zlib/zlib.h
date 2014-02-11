@@ -1477,12 +1477,12 @@ ZEXTERN int ZEXPORT gzeof _Z_OF((gzFile file));
      Returns true (1) if the end-of-file indicator has been set while reading,
    false (0) otherwise.  Note that the end-of-file indicator is set only if the
    read tried to go past the end of the input, but came up short.  Therefore,
-   just like fe_Z_OF(), gze_Z_OF() may return false even if there is no more data to
+   just like feof(), gzeof() may return false even if there is no more data to
    read, in the event that the last read request was for the exact number of
    bytes remaining in the input file.  This will happen if the input file size
    is an exact multiple of the buffer size.
 
-     If gze_Z_OF() returns true, then the read functions will return no more data,
+     If gzeof() returns true, then the read functions will return no more data,
    unless the end-of-file indicator is reset by gzclearerr() and the input file
    has grown since the previous end of file was detected.
 */
