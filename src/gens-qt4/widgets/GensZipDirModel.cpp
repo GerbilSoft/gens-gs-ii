@@ -31,20 +31,66 @@
 namespace GensQt4
 {
 
-GensZipDirModel::GensZipDirModel(QObject *parent)
-		: QAbstractItemModel(parent)
+class GensZipDirModelPrivate
 {
-	m_rootItem = new GensZipDirItem(nullptr);
+	public:
+		GensZipDirModelPrivate(GensZipDirModel *q);
+		~GensZipDirModelPrivate();
+
+	private:
+		GensZipDirModel *const q_ptr;
+		Q_DECLARE_PUBLIC(GensZipDirModel)
+	private:
+		Q_DISABLE_COPY(GensZipDirModelPrivate)
+
+	public:
+		GensZipDirItem *rootItem;
+		GensZipDirItem *getItem(const QModelIndex& index) const;
+		
+		QMap<QString, QPersistentModelIndex> dirMap;
+};
+
+/** GensZipDirModelPrivate **/
+
+GensZipDirModelPrivate::GensZipDirModelPrivate(GensZipDirModel *q)
+	: q_ptr(q)
+	, rootItem(new GensZipDirItem(nullptr))
+{ }
+
+GensZipDirModelPrivate::~GensZipDirModelPrivate()
+{
+	delete rootItem;
 }
+
+GensZipDirItem *GensZipDirModelPrivate::getItem(const QModelIndex& index) const
+{
+	if (index.isValid()) {
+		GensZipDirItem *item = static_cast<GensZipDirItem*>(index.internalPointer());
+		if (item)
+			return item;
+	}
+
+	return rootItem;
+}
+
+/** GensZipDirModel **/
+
+GensZipDirModel::GensZipDirModel(QObject *parent)
+	: QAbstractItemModel(parent)
+	, d_ptr(new GensZipDirModelPrivate(this))
+{ }
 
 GensZipDirModel::~GensZipDirModel()
 {
-	delete m_rootItem;
+	delete d_ptr;
 }
+
+/** QAbstractItemModel functions. **/
 
 int GensZipDirModel::rowCount(const QModelIndex& parent) const
 {
-	GensZipDirItem *item = getItem(parent);
+	Q_D(const GensZipDirModel);
+	GensZipDirItem *item = d->getItem(parent);
 	return item->childCount();
 }
 
@@ -62,7 +108,8 @@ QVariant GensZipDirModel::data(const QModelIndex& index, int role) const
 	if (!index.isValid())
 		return QVariant();
 
-	GensZipDirItem *item = getItem(index);
+	Q_D(const GensZipDirModel);
+	GensZipDirItem *item = d->getItem(index);
 	switch (role) {
 		case Qt::DecorationRole:
 			if (index.column() != 0)
@@ -82,7 +129,8 @@ const mdp_z_entry_t *GensZipDirModel::getZEntry(const QModelIndex& index) const
 	if (!index.isValid())
 		return nullptr;
 
-	GensZipDirItem *item = getItem(index);
+	Q_D(const GensZipDirModel);
+	GensZipDirItem *item = d->getItem(index);
 	return item->getZEntry();
 }
 
@@ -92,17 +140,6 @@ Qt::ItemFlags GensZipDirModel::flags(const QModelIndex& index) const
 		return 0;
 
 	return (Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-}
-
-GensZipDirItem *GensZipDirModel::getItem(const QModelIndex& index) const
-{
-	if (index.isValid()) {
-		GensZipDirItem *item = static_cast<GensZipDirItem*>(index.internalPointer());
-		if (item)
-			return item;
-	}
-
-	return m_rootItem;
 }
 
 QVariant GensZipDirModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -124,7 +161,8 @@ QModelIndex GensZipDirModel::index(int row, int column, const QModelIndex& paren
 	if (parent.isValid() && parent.column() != 0)
 		return QModelIndex();
 
-	GensZipDirItem *parentItem = getItem(parent);
+	Q_D(const GensZipDirModel);
+	GensZipDirItem *parentItem = d->getItem(parent);
 	GensZipDirItem *childItem = parentItem->child(row);
 
 	if (childItem)
@@ -138,10 +176,11 @@ QModelIndex GensZipDirModel::parent(const QModelIndex& index) const
 	if (!index.isValid())
 		return QModelIndex();
 
-	GensZipDirItem *childItem = getItem(index);
+	Q_D(const GensZipDirModel);
+	GensZipDirItem *childItem = d->getItem(index);
 	GensZipDirItem *parentItem = childItem->parent();
 
-	if (parentItem == m_rootItem)
+	if (parentItem == d->rootItem)
 		return QModelIndex();
 
 	return createIndex(parentItem->childNumber(), 0, parentItem);
@@ -167,11 +206,12 @@ bool GensZipDirModel::removeColumns(int position, int columns, const QModelIndex
 
 bool GensZipDirModel::insertRows(int position, int rows, const QModelIndex& parent)
 {
-	GensZipDirItem *parentItem = getItem(parent);
+	Q_D(GensZipDirModel);
+	GensZipDirItem *parentItem = d->getItem(parent);
 	bool success;
 
 	beginInsertRows(parent, position, position + rows - 1);
-	success = parentItem->insertChildren(position, rows, m_rootItem->columnCount());
+	success = parentItem->insertChildren(position, rows, d->rootItem->columnCount());
 	endInsertRows();
 
 	return success;
@@ -179,7 +219,8 @@ bool GensZipDirModel::insertRows(int position, int rows, const QModelIndex& pare
 
 bool GensZipDirModel::removeRows(int position, int rows, const QModelIndex& parent)
 {
-	GensZipDirItem *parentItem = getItem(parent);
+	Q_D(GensZipDirModel);
+	GensZipDirItem *parentItem = d->getItem(parent);
 	bool success;
 
 	beginRemoveRows(parent, position, position + rows - 1);
@@ -189,17 +230,36 @@ bool GensZipDirModel::removeRows(int position, int rows, const QModelIndex& pare
 	return success;
 }
 
+/**
+ * Sort the data model.
+ * @param column Column to sort by.
+ * @param order Sort order.
+ */
+void GensZipDirModel::sort(int column, Qt::SortOrder order)
+{
+	Q_D(GensZipDirModel);
+	if (!d->rootItem)
+		return;
+
+	emit layoutAboutToBeChanged();
+	d->rootItem->sort(column, order);
+	emit layoutChanged();
+}
+
+/** GensZipDirModel functions. **/
+
 bool GensZipDirModel::clear(void)
 {
-	int rows = m_rootItem->childCount();
+	Q_D(GensZipDirModel);
+	int rows = d->rootItem->childCount();
 	if (rows == 0)
 		return true;
 	bool success;
 
-	QModelIndex index = createIndex(0, 0, m_rootItem);
+	QModelIndex index = createIndex(0, 0, d->rootItem);
 	beginRemoveRows(index, 0, rows - 1);
-	success = m_rootItem->removeChildren(0, rows);
-	m_dirMap.clear();
+	success = d->rootItem->removeChildren(0, rows);
+	d->dirMap.clear();
 	endRemoveRows();
 
 	return success;
@@ -208,7 +268,8 @@ bool GensZipDirModel::clear(void)
 bool GensZipDirModel::insertZEntry(const mdp_z_entry_t *z_entry,
 				   const QIcon& icon)
 {
-	GensZipDirItem *parentItem = m_rootItem;
+	Q_D(GensZipDirModel);
+	GensZipDirItem *parentItem = d->rootItem;
 	QModelIndex itemIndex = createIndex(0, 0, parentItem);
 	QString full_filename = QString::fromUtf8(z_entry->filename);
 	QString disp_filename;
@@ -223,8 +284,8 @@ bool GensZipDirModel::insertZEntry(const mdp_z_entry_t *z_entry,
 		for (int i = 0; i < (dirList.size() - 1); i++) {
 			// Get the directory component.
 			cur_path += dirList.at(i) + QChar(L'/');
-			dirIter = m_dirMap.find(cur_path);
-			if (dirIter == m_dirMap.end()) {
+			dirIter = d->dirMap.find(cur_path);
+			if (dirIter == d->dirMap.end()) {
 				// Directory not found. Add it.
 
 				// Insert a row at the end.
@@ -242,11 +303,11 @@ bool GensZipDirModel::insertZEntry(const mdp_z_entry_t *z_entry,
 				parentItem->setIcon(QApplication::style()->standardIcon(QStyle::SP_DirClosedIcon));
 
 				// Add the directory to m_dirMap.
-				m_dirMap.insert(cur_path, itemIndex);
+				d->dirMap.insert(cur_path, itemIndex);
 			} else {
 				// Directory found.
 				itemIndex = *dirIter;
-				parentItem = getItem(itemIndex);
+				parentItem = d->getItem(itemIndex);
 			}
 		}
 	}
@@ -272,37 +333,20 @@ bool GensZipDirModel::insertZEntry(const mdp_z_entry_t *z_entry,
 	return true;
 }
 
-
-/**
- * Sort the data model.
- * @param column Column to sort by.
- * @param order Sort order.
- */
-void GensZipDirModel::sort(int column, Qt::SortOrder order)
-{
-	if (!m_rootItem)
-		return;
-
-	emit layoutAboutToBeChanged();
-	m_rootItem->sort(column, order);
-	emit layoutChanged();
-}
-
-
 /**
  * Check if a given item has children.
  * @param parent Parent item.
  * @return True if the item has children.
  */
-bool GensZipDirModel::hasChildren(const QModelIndex& parent)
+bool GensZipDirModel::hasChildren(const QModelIndex& parent) const
 {
 	if (!parent.isValid())
 		return false;
 
-	GensZipDirItem *item = getItem(parent);
+	Q_D(const GensZipDirModel);
+	GensZipDirItem *item = d->getItem(parent);
 	return (item->childCount() > 0);
 }
-
 
 /**
  * Set the icon state for a directory item.
@@ -315,7 +359,8 @@ bool GensZipDirModel::setDirIconState(const QModelIndex& dirIndex, bool isOpen)
 	if (!dirIndex.isValid())
 		return false;
 
-	GensZipDirItem *item = getItem(dirIndex);
+	Q_D(GensZipDirModel);
+	GensZipDirItem *item = d->getItem(dirIndex);
 	if (!item)
 		return false;
 

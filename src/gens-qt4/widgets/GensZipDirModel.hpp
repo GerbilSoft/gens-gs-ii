@@ -37,51 +37,58 @@
 namespace GensQt4
 {
 
+class GensZipDirModelPrivate;
+
 class GensZipDirModel : public QAbstractItemModel
 {
 	Q_OBJECT
-	
+
 	public:
 		GensZipDirModel(QObject *parent = 0);
-		~GensZipDirModel();
-		
-		int rowCount(const QModelIndex& parent = QModelIndex()) const;
-		int columnCount(const QModelIndex& parent = QModelIndex()) const;
-		
-		QVariant data(const QModelIndex& index, int role) const;
-		QVariant headerData(int section, Qt::Orientation orientation,
-				    int role = Qt::DisplayRole) const;
-		
-		Qt::ItemFlags flags(const QModelIndex& index) const;
-		
-		QModelIndex index(int row, int column,
-				  const QModelIndex& parent = QModelIndex()) const;
-		QModelIndex parent(const QModelIndex& index) const;
-		
-		bool insertColumns(int position, int columns,
-				   const QModelIndex& parent = QModelIndex());
-		bool removeColumns(int position, int columns,
-				   const QModelIndex& parent = QModelIndex());
-		bool insertRows(int position, int rows,
-				const QModelIndex& parent = QModelIndex());
-		bool removeRows(int position, int rows,
-				const QModelIndex& parent = QModelIndex());
-		
+		virtual ~GensZipDirModel();
+
+	private:
+		GensZipDirModelPrivate *const d_ptr;
+		Q_DECLARE_PRIVATE(GensZipDirModel)
+	private:
+		Q_DISABLE_COPY(GensZipDirModel)
+
+	public:
+		/** QAbstractItemModel functions. **/
+
+		virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+		virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+
+		virtual QVariant data(const QModelIndex& index, int role) const override;
+		virtual QVariant headerData(int section, Qt::Orientation orientation,
+				int role = Qt::DisplayRole) const override;
+
+		virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
+
+		virtual QModelIndex index(int row, int column,
+				const QModelIndex& parent = QModelIndex()) const override;
+		virtual QModelIndex parent(const QModelIndex& index) const override;
+
+		virtual bool insertColumns(int position, int columns,
+				const QModelIndex& parent = QModelIndex()) override;
+		virtual bool removeColumns(int position, int columns,
+				const QModelIndex& parent = QModelIndex()) override;
+		virtual bool insertRows(int position, int rows,
+				const QModelIndex& parent = QModelIndex()) override;
+		virtual bool removeRows(int position, int rows,
+				const QModelIndex& parent = QModelIndex()) override;
+
+		virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+
+		/** GensZipDirModel functions. **/
+
 		bool clear(void);
 		bool insertZEntry(const mdp_z_entry_t *z_entry,
 				  const QIcon& icon = QIcon());
 		const mdp_z_entry_t *getZEntry(const QModelIndex& index) const;
-		
-		void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
-		
-		bool hasChildren(const QModelIndex& parent = QModelIndex());
-		bool setDirIconState(const QModelIndex& dirIndex, bool isOpen);
 
-protected:
-		GensZipDirItem *m_rootItem;
-		GensZipDirItem *getItem(const QModelIndex& index) const;
-		
-		QMap<QString, QPersistentModelIndex> m_dirMap;
+		bool hasChildren(const QModelIndex& parent = QModelIndex()) const;
+		bool setDirIconState(const QModelIndex& dirIndex, bool isOpen);
 };
 
 }
