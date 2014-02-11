@@ -100,7 +100,7 @@ class GensWindow : public QMainWindow
 		// it's off by two bytes when reading the address from
 		// the GensWindow instance.
 		void openRom(void);
-		void openRom(QString filename, QString z_filename = QString());
+		void openRom(const QString &filename, const QString &z_filename = QString());
 		void closeRom(void);
 		void saveState(void);
 		void loadState(void);
@@ -144,7 +144,7 @@ class GensWindow : public QMainWindow
 		 * @param duration Duration for the message to appear, in milliseconds.
 		 * @param msg Message to print.
 		 */
-		void osdPrintMsg(int duration, QString msg);
+		void osdPrintMsg(int duration, const QString &msg);
 
 		/**
 		 * Show a preview image on the OSD.
@@ -164,13 +164,13 @@ class GensWindow : public QMainWindow
 		 * Auto Pause setting has changed.
 		 * @param newAutoPause (bool) New Auto Pause setting.
 		 */
-		void autoPause_changed_slot(QVariant newAutoPause);
+		void autoPause_changed_slot(const QVariant &newAutoPause);
 
 		/**
 		 * Show Menu Bar setting has changed.
 		 * @param newShowMenuBar (bool) New Show Menu Bar setting.
 		 */
-		void showMenuBar_changed_slot(QVariant newShowMenuBar);
+		void showMenuBar_changed_slot(const QVariant &newShowMenuBar);
 
 	private slots:
 		/**
@@ -182,7 +182,7 @@ class GensWindow : public QMainWindow
 		 * Intro Style setting has changed.
 		 * @param newIntroStyle (int) New Intro Style setting.
 		 */
-		void introStyle_changed_slot(QVariant newIntroStyle);
+		void introStyle_changed_slot(const QVariant &newIntroStyle);
 
 		/**
 		 * Show the context menu.

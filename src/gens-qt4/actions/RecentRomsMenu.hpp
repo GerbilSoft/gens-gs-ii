@@ -41,7 +41,7 @@ class RecentRomsMenu : public QMenu
 	
 	public:
 		RecentRomsMenu(QWidget *parent = 0, const RecentRoms *recentRoms = 0);
-		RecentRomsMenu(QString title, QWidget *parent = 0, const RecentRoms *recentRoms = 0);
+		RecentRomsMenu(const QString &title, QWidget *parent = 0, const RecentRoms *recentRoms = 0);
 		virtual ~RecentRomsMenu();
 
 	private:

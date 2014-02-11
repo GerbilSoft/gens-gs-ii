@@ -379,7 +379,7 @@ QVector<GensKey_t> GensCtrlCfgWidget::keyMap(void) const
  * Set the current keymap.
  * @param keyMap New keymap.
  */
-void GensCtrlCfgWidget::setKeyMap(QVector<GensKey_t> keyMap)
+void GensCtrlCfgWidget::setKeyMap(const QVector<GensKey_t> &keyMap)
 {
 	Q_D(GensCtrlCfgWidget);
 	const int maxButtons = std::min(d->numButtons, keyMap.count());

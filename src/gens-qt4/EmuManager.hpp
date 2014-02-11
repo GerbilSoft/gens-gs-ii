@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -49,20 +49,20 @@ class GensPortAudio;
 class EmuManager : public QObject
 {
 	Q_OBJECT
-	
+
 	public:
 		EmuManager(QObject *parent = 0, VBackend *vBackend = 0);
 		~EmuManager();
-		
+
 		int openRom(void);
-		int openRom(QString filename, QString z_filename = QString());
+		int openRom(const QString &filename, const QString &z_filename = QString());
 		int loadRom(LibGens::Rom *rom);
-		
+
 		/**
-		 * closeRom(): Close the open ROM file and stop emulation.
+		 * Close the open ROM file and stop emulation.
 		 */
 		int closeRom(void);
-		
+
 		// Emulation status and properties.
 		inline bool isRomOpen(void) const
 			{ return (m_rom != nullptr); }
@@ -70,59 +70,59 @@ class EmuManager : public QObject
 			{ return m_paused; }
 		inline int saveSlot(void) const
 			{ return m_saveSlot; }
-		
+
 		// ROM information.
 		QString romName(void);	// Active ROM name.
 		QString sysName(void);	// System name for the active ROM, based on ROM region.
-		
+
 		/** Rom class passthrough functions. **/
-		
+
 		inline LibGens::Rom::RomFormat romFormat(void) const
 		{
 			if (!m_rom)
 				return LibGens::Rom::RFMT_UNKNOWN;
 			return m_rom->romFormat();
 		}
-		
+
 		inline LibGens::Rom::MDP_SYSTEM_ID sysId(void) const
 		{
 			if (!m_rom)
 				return LibGens::Rom::MDP_SYSTEM_UNKNOWN;
 			return m_rom->sysId();
 		}
-		
+
 		/**
 		 * Update video on the current VBackend.
 		 */
 		void updateVideo(void);
-	
+
 	signals:
 		void updateFps(double fps);
 		void stateChanged(void);		// Emulation state changed. Update the Gens title.
-		
+
 		/**
-		 * osdPrintMsg(): Print a message on the OSD.
+		 * Print a message on the OSD.
 		 * @param duration Duration for the message to appear, in milliseconds.
 		 * @param msg Message to print.
 		 */
-		void osdPrintMsg(int duration, QString msg);
-		
+		void osdPrintMsg(int duration, const QString &msg);
+
 		/**
-		 * osdShowPreview(): Show a preview image on the OSD.
+		 * Show a preview image on the OSD.
 		 * @param duration Duration for the preview image to appaer, in milliseconds.
 		 * @param img Image to show.
 		 */
 		void osdShowPreview(int duration, const QImage& img);
-	
+
 	protected:
 		// Load ROM.
 		// HACK: Works around the threading issue when opening a new ROM without closing the old one.
 		// TODO: Fix the threading issue!
 		int loadRom_int(LibGens::Rom *rom);
 		LibGens::Rom *m_loadRom_int_tmr_rom;
-		
+
 		/**
-		 * GetLgRegionCode(): Determine the LibGens region code to use.
+		 * Determine the LibGens region code to use.
 		 * @param confRegionCode Current GensConfig region code.
 		 * @param mdHexRegionCode ROM region code, in MD hex format.
 		 * @param regionCodeOrder Region code order for auto-detection. (MSN == highest priority)
@@ -131,30 +131,30 @@ class EmuManager : public QObject
 		static LibGens::SysVersion::RegionCode_t GetLgRegionCode(
 			LibGens::SysVersion::RegionCode_t confRegionCode,
 			int mdHexRegionCode, uint16_t regionCodeOrder);
-		
+
 		/**
-		 * closeRom(): Close the open ROM file and stop emulation.
+		 * Close the open ROM file and stop emulation.
 		 * @param emitStateChanged If true, emits the stateChanged() signal after the ROM is closed.
 		 */
 		int closeRom(bool emitStateChanged);
-		
+
 		// Timing management.
 		double m_lastTime;	// Last time a frame was updated.
 		double m_lastTime_fps;	// Last time value used for FPS counter.
 		int m_frames;
-		
+
 		// ROM object.
 		LibGens::Rom *m_rom;
-		
+
 		// Audio backend.
 		GensPortAudio *m_audio;
-		
+
 		// Paused state.
 		paused_t m_paused;
-		
+
 		/** Savestates. **/
 		int m_saveSlot;
-		
+
 		/**
 		 * Get the savestate filename.
 		 * TODO: Move savestate code to another file?
@@ -162,11 +162,11 @@ class EmuManager : public QObject
 		 * @return Savestate filename, or empty string if no ROM is loaded.
 		 */
 		QString getSaveStateFilename(void);
-	
+
 	protected slots:
 		// Frame done signal from EmuThread.
 		void emuFrameDone(bool wasFastFrame);
-		
+
 		// Calls openRom_int() with the stored filename.
 		// HACK: Works around the threading issue when opening a new ROM without closing the old one.
 		void sl_loadRom_int(void)
@@ -174,7 +174,7 @@ class EmuManager : public QObject
 			loadRom_int(m_loadRom_int_tmr_rom);
 			m_loadRom_int_tmr_rom = nullptr;
 		}
-	
+
 	/** Video Backend. **/
 	public:
 		void setVBackend(VBackend *vBackend);
@@ -186,7 +186,7 @@ class EmuManager : public QObject
 		VBackend *m_vBackend;
 	private slots:
 		void vBackend_destroyed(QObject *obj);
-	
+
 	/** Temporary source FB for ROM close handling. **/
 	public:
 		/**
@@ -194,13 +194,13 @@ class EmuManager : public QObject
 		 * @return MdFb.
 		 */
 		LibGens::MdFb *romClosedFb(void);
-		
+
 		/**
 		 * Get the bpp for the MdFb from the last closed ROM.
 		 * @return Color depth.
 		 */
 		LibGens::VdpPalette::ColorDepth romClosedBpp(void);
-		
+
 		/**
 		 * Reset the last closed ROM MdFb.
 		 */
@@ -208,49 +208,49 @@ class EmuManager : public QObject
 	private:
 		LibGens::MdFb *m_romClosedFb;
 		LibGens::VdpPalette::ColorDepth m_romClosedBpp;
-	
+
 	/** Translatable string functions. **/
-	
+
 	public:
 		/**
-		 * LgRegionCodeStr(): Get a string identifying a given LibGens region code.
+		 * Get a string identifying a given LibGens region code.
 		 * @param region Region code.
 		 * @return Region code string, or empty string on error.
 		 */
 		static QString LgRegionCodeStr(LibGens::SysVersion::RegionCode_t region);
-		
+
 		/**
 		 * StrMD(): Get a string identifying a given region code. (MD hex code)
 		 * @param region Region code.
 		 * @return Region code string, or empty string on error.
 		 */
 		static QString LgRegionCodeStrMD(int region);
-		
+
 		/**
-		 * SysName(): Get the system name for the specified system ID and region.
+		 * Get the system name for the specified system ID and region.
 		 * @param sysID System ID.
 		 * @param region Region.
 		 * @return System name, or empty string on error.
 		 */
 		static QString SysName(LibGens::Rom::MDP_SYSTEM_ID sysId,
 					LibGens::SysVersion::RegionCode_t region);
-		
+
 		/**
-		 * SysName_l(): Get the localized system name for the specified system ID.
+		 * Get the localized system name for the specified system ID.
 		 * @param sysID System ID.
 		 * @return Localized system name, or empty string on error.
 		 */
 		static QString SysName_l(LibGens::Rom::MDP_SYSTEM_ID sysId);
-	
+
 		/**
 		 * RomFormat(): Get the ROM format name for the specified ROM format ID.
 		 * @param romFormat ROM format ID.
 		 * @return ROM format name, or empty string on error.
 		 */
 		QString RomFormat(LibGens::Rom::RomFormat romFormat);
-	
+
 	/** Emulation Request Struct. **/
-	
+
 	public:
 		// RQT_RESET_CPU indexes.
 		// TODO: Use MDP CPU indexes.
@@ -262,7 +262,7 @@ class EmuManager : public QObject
 			RQT_CPU_MSH2		= 3,
 			RQT_CPU_SSH2		= 4,
 		};
-	
+
 	protected:
 		/**
 		 * EmuRequest_t: Emulation Request struct.
@@ -286,7 +286,7 @@ class EmuManager : public QObject
 				RQT_REGION_CODE,
 				RQT_ENABLE_SRAM,
 			};
-			
+
 			// RQT_PALETTE_SETTING types.
 			enum PaletteSettingType
 			{
@@ -301,7 +301,7 @@ class EmuManager : public QObject
 				RQT_PS_ZEROLENGTHDMA,
 				RQT_PS_VSCROLLBUG,
 			};
-			
+
 			RequestType rqType;
 			union
 			{
@@ -310,10 +310,10 @@ class EmuManager : public QObject
 					int port;
 					LibGens::IoManager::IoType_t ctrlType;
 				} ctrlChange;
-				
+
 				int audioRate;
 				bool audioStereo;
-				
+
 				// Savestates.
 				struct
 				{
@@ -321,90 +321,90 @@ class EmuManager : public QObject
 					QString *filename;
 					int saveSlot;
 				} saveState;
-				
+
 				// Paused settings.
 				paused_t newPaused;
-				
+
 				// Emulator Reset.
 				bool hardReset;
-				
+
 				// Auto Fix Checksum.
 				bool autoFixChecksum;
-				
+
 				// Palette Settings.
 				struct
 				{
 					PaletteSettingType ps_type;
 					int ps_val;
 				} PaletteSettings;
-				
+
 				// Reset CPU.
 				ResetCpuIndex cpu_idx;
-				
+
 				// Region code.
 				LibGens::SysVersion::RegionCode_t region;
-				
+
 				// Enable/disable SRam.
 				bool enableSRam;
 			};
 		};
-		
+
 		/**
-		 * m_qEmuRequest: Emulation Request Queue.
+		 * Emulation Request Queue.
 		 */
 		QQueue<EmuRequest_t> m_qEmuRequest;
-	
+
 	/** Emulation Request Queue: Submission functions. **/
-	
+
 	public slots:
 		/** Emulation settings. **/
 		void screenShot(void);
 		void setAudioRate(int newRate);
 		void setStereo(bool newStereo);
 		void resetCpu(int cpu_idx);
-		
+
 		/** Savestates. **/
 		void saveState(void); // Save to current slot.
 		void loadState(void); // Load from current slot.
-		
+
 		/**
-		 * pauseRequest(): Toggle the paused state.
+		 * Toggle the paused state.
 		 */
 		void pauseRequest(bool newManualPaused);
 		void pauseRequest(paused_t newPaused);
 		void pauseRequest(paused_t paused_set, paused_t paused_clear);
-	
+
 	protected slots:
 		/**
-		 * saveSlot_changed_slot(): Set the save slot number.
+		 * Set the save slot number.
 		 * @param saveSlot (int) Save slot number, (0-9)
 		 */
-		void saveSlot_changed_slot(QVariant saveSlot);
-		
+		void saveSlot_changed_slot(const QVariant &saveSlot);
+
 		/**
-		 * autoFixChecksum_changed_slot(): Change the Auto Fix Checksum setting.
+		 * Change the Auto Fix Checksum setting.
 		 * @param autoFixChecksum (bool) New Auto Fix Checksum setting.
 		 */
-		void autoFixChecksum_changed_slot(QVariant autoFixChecksum);
-	
+		void autoFixChecksum_changed_slot(const QVariant &autoFixChecksum);
+
 		/**
-		 * regionCode_changed_slot(): Region code has changed.
+		 * Region code has changed.
 		 * @param regionCode (int) New region code setting.
 		 */
-		void regionCode_changed_slot(QVariant regionCode); // LibGens::SysVersion::RegionCode_t
-		
+		void regionCode_changed_slot(const QVariant &regionCode); // LibGens::SysVersion::RegionCode_t
+
 		/**
-		 * regionCodeOrder_changed_slot(): Region code auto-detection order has changed.
+		 * Region code auto-detection order has changed.
 		 * @param regionCodeOrder (uint16_t) New region code auto-detection order setting.
 		 */
-		void regionCodeOrder_changed_slot(QVariant regionCodeOrder);
-		
+		void regionCodeOrder_changed_slot(const QVariant &regionCodeOrder);
+
 		/**
-		 * enableSRam_changed_slot(): Enable SRam/EEPRom setting has changed.
+		 * Enable SRam/EEPRom setting has changed.
 		 * @param enableSRam (bool) New Enable SRam/EEPRom setting.
 		 */
-		void enableSRam_changed_slot(QVariant enableSRam);
-	
+		void enableSRam_changed_slot(const QVariant &enableSRam);
+
 	public slots:
 		/**
 		 * Reset the emulator.
@@ -421,42 +421,41 @@ class EmuManager : public QObject
 
 	protected slots:
 		/** Graphics settings. **/
-		void interlacedMode_changed_slot(QVariant interlacedMode);
-		
+		void interlacedMode_changed_slot(const QVariant &interlacedMode);
+
 		/** VDP settings. **/
-		void borderColorEmulation_changed_slot(QVariant borderColorEmulation);
-		void ntscV30Rolling_changed_slot(QVariant ntscV30Rolling);
-		void spriteLimits_changed_slot(QVariant spriteLimits);
-		void zeroLengthDMA_changed_slot(QVariant zeroLengthDMA);
-		void vscrollBug_changed_slot(QVariant vscrollBug);
-	
+		void borderColorEmulation_changed_slot(const QVariant &borderColorEmulation);
+		void ntscV30Rolling_changed_slot(const QVariant &ntscV30Rolling);
+		void spriteLimits_changed_slot(const QVariant &spriteLimits);
+		void zeroLengthDMA_changed_slot(const QVariant &zeroLengthDMA);
+		void vscrollBug_changed_slot(const QVariant &vscrollBug);
+
 	/** Emulation Request Queue: Processing functions. **/
-	
+
 	private:
 		void processQEmuRequest(void);
-		
+
 		QImage getMDScreen(void) const;
 		void doScreenShot(void);
-		
+
 		void doAudioRate(int newRate);
 		void doAudioStereo(bool newStereo);
-		
+
 		/** Savestates. **/
 		void doSaveState(QString filename, int saveSlot);
 		void doLoadState(QString filename, int saveSlot);
 		void doSaveSlot(int newSaveSlot);
-		
+
 		void doPauseRequest(paused_t newPaused);
 		void doResetEmulator(bool hardReset);
-		
+
 		void doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, int val);
 		void doResetCpu(ResetCpuIndex cpu_idx);
-		
+
 		void doRegionCode(LibGens::SysVersion::RegionCode_t region);
-		
+
 		void doEnableSRam(bool enableSRam);
 };
-
 
 /**
  * Close the open ROM file and stop emulation.

@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * FindCdromBase.cpp: Find CD-ROM drives: OS-specific base class.          *
  *                                                                         *
- * Copyright (c) 2011-2013 by David Korth.                                 *
+ * Copyright (c) 2011-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -46,9 +46,10 @@ bool FindCdromBase::isDriveIconSupported(void) const
  * @param deviceName Device name.
  * @return OS-specific disc/drive icon.
  */
-QIcon FindCdromBase::getDriveIcon(QString deviceName) const
+QIcon FindCdromBase::getDriveIcon(const QString &deviceName) const
 {
 	// By default, backends do not support OS-specific disc/drive icons.
+	Q_UNUSED(deviceName)
 	return QIcon();
 }
 

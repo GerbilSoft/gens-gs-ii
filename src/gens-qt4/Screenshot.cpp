@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -43,47 +43,41 @@ Screenshot::Screenshot(LibGens::Rom *rom, LibGens::EmuContext *context, QObject 
 	update();
 }
 
-
 Screenshot::~Screenshot()
 {
 	// TODO: Unreference the ROM and EmuContext.
 	// (This requires adding reference counting...)
 }
 
-
 /**
  * Update the internal image using the given ROM and EmuContext.
  */
 void Screenshot::update(void)
 {
-	if (!m_rom || !m_context)
-	{
+	if (!m_rom || !m_context) {
 		// Missing ROM or EmuContext.
 		m_img = QImage();
 		return;
 	}
-	
+
 	// VDP object.
 	const LibGens::Vdp *vdp = m_context->m_vdp;
-	
+
 	// Get the color depth.
 	const LibGens::VdpPalette::ColorDepth bpp = vdp->m_palette.bpp();
-	
+
 	// Create the QImage.
 	const uint8_t *start;
 	const int startY = ((240 - vdp->GetVPix()) / 2);
 	const int startX = (vdp->GetHPixBegin());
 	int bytesPerLine;
 	QImage::Format imgFormat;
-	
-	if (bpp == LibGens::VdpPalette::BPP_32)
-	{
+
+	if (bpp == LibGens::VdpPalette::BPP_32) {
 		start = (const uint8_t*)(vdp->MD_Screen->lineBuf32(startY) + startX);
 		bytesPerLine = (vdp->MD_Screen->pxPitch() * sizeof(uint32_t));
 		imgFormat = QImage::Format_RGB32;
-	}
-	else
-	{
+	} else {
 		start = (const uint8_t*)(vdp->MD_Screen->lineBuf16(startY) + startX);
 		bytesPerLine = (vdp->MD_Screen->pxPitch() * sizeof(uint16_t));
 		if (bpp == LibGens::VdpPalette::BPP_16)
@@ -91,27 +85,25 @@ void Screenshot::update(void)
 		else
 			imgFormat = QImage::Format_RGB555;
 	}
-	
+
 	// TODO: Check for errors.
 	m_img = QImage(start, vdp->GetHPix(), vdp->GetVPix(),
 			bytesPerLine, imgFormat);	
 }
-
 
 /**
  * Save the image to a file.
  * @param filename Filename.
  * @return 0 on success; non-zero on error.
  */
-int Screenshot::save(QString filename)
+int Screenshot::save(const QString &filename)
 {
 	if (m_img.isNull())
 		return -1;
-	
+
 	QImageWriter writer(filename, "png");
 	return save_int(writer);
 }
-
 
 /**
  * Save the image to a QIODevice.
@@ -122,11 +114,10 @@ int Screenshot::save(QIODevice *device)
 {
 	if (m_img.isNull())
 		return -1;
-	
+
 	QImageWriter writer(device, "png");
 	return save_int(writer);
 }
-
 
 /**
  * Save the image using a QImageWriter.

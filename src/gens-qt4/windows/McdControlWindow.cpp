@@ -60,7 +60,7 @@ class McdControlWindowPrivate
 		FindCdromDrives *findCdromDrives;
 		//bool m_isQuerying;
 		//QList<CdromDriveEntry> m_queryList;
-		void addDriveEntry(QString deviceName, int index = -1);
+		void addDriveEntry(const QString &deviceName, int index = -1);
 
 		// Refresh button.
 		QPushButton *btnRefresh;
@@ -97,7 +97,7 @@ McdControlWindowPrivate::~McdControlWindowPrivate()
  * @param QString deviceName Device name.
  * @param index Dropdown index, or -1 for a new entry.
  */
-void McdControlWindowPrivate::addDriveEntry(QString deviceName, int index)
+void McdControlWindowPrivate::addDriveEntry(const QString &deviceName, int index)
 {
 	// Get the drive information.
 	LibGensCD::CdDrive *cdDrive = findCdromDrives->getCdDrive(deviceName);

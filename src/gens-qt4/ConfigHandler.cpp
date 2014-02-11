@@ -47,7 +47,7 @@ ConfigHandler::ConfigHandler(QObject *parent)
  * UnRAR program filename has changed.
  * @param extprgUnRAR New UnRAR program.
  */
-void ConfigHandler::extprgUnRAR_changed_slot(QVariant extprgUnRAR)
+void ConfigHandler::extprgUnRAR_changed_slot(const QVariant &extprgUnRAR)
 {
 	LibGens::DcRar::SetExtPrg(extprgUnRAR.toString().toUtf8().constData());
 }
@@ -57,7 +57,7 @@ void ConfigHandler::extprgUnRAR_changed_slot(QVariant extprgUnRAR)
  * @param path Configuration path.
  * @param dir New directory.
  */
-void ConfigHandler::pathChanged(PathConfig::ConfigPath path, QString dir)
+void ConfigHandler::pathChanged(PathConfig::ConfigPath path, const QString &dir)
 {
 	switch (path)
 	{

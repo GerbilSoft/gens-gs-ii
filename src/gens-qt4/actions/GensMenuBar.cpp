@@ -46,9 +46,7 @@
 namespace GensQt4
 {
 
-/*********************************
- * GensMenuBarPrivate functions. *
- *********************************/
+/** GensMenuBarPrivate **/
 
 GensMenuBarPrivate::GensMenuBarPrivate(GensMenuBar *q)
 	: q_ptr(q)
@@ -288,9 +286,7 @@ int GensMenuBarPrivate::unlock(void)
 bool GensMenuBarPrivate::isLocked(void) const
 	{ return (lockCnt > 0); }
 
-/**************************
- * GensMenuBar functions. *
- **************************/
+/** GensMenuBar **/
 
 GensMenuBar::GensMenuBar(QObject *parent, EmuManager *emuManager)
 	: QObject(parent)

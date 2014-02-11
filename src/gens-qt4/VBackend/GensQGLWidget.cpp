@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -59,8 +59,6 @@ GensQGLWidget::GensQGLWidget(QWidget *parent, KeyHandlerQt *keyHandler)
 GensQGLWidget::~GensQGLWidget()
 	{ delete d; }
 
-
-
 /**
  * Video Backend update function. (INTERNAL FUNCTION)
  */
@@ -71,44 +69,40 @@ void GensQGLWidget::vbUpdate_int(void)
 	d->updateGL();
 }
 
-
 /**
- * fastBlur_changed_slot(): Fast Blur effect has changed.
+ * Fast Blur effect has changed.
  * @param newFastBlur (bool) New Fast Blur effect setting.
  */
-void GensQGLWidget::fastBlur_changed_slot(QVariant newFastBlur)
+void GensQGLWidget::fastBlur_changed_slot(const QVariant &newFastBlur)
 {
-	if (isRunning() && isPaused())
-	{
+	if (isRunning() && isPaused()) {
 		// Emulation is running, but is currently paused.
 		// (TODO: Check shader status, and only update if
 		// we're not using the Fast Blur shader.)
 		// Update the MD screen.
 		m_mdScreenDirty = true;
 	}
-	
+
 	// Call VBackend's fastBlur_changed_slot().
 	VBackend::fastBlur_changed_slot(newFastBlur);
 }
 
-
 /**
- * bilinearFilter_changed_slot(): Bilinear filter setting has changed.
+ * Bilinear filter setting has changed.
  * @param newBilinearFilter (bool) New bilinear filter setting.
  */
-void GensQGLWidget::bilinearFilter_changed_slot(QVariant newBilinearFilter)
+void GensQGLWidget::bilinearFilter_changed_slot(const QVariant &newBilinearFilter)
 {
 	// Update GLBackend's bilinear filter setting.
 	d->makeCurrent();
 	GLBackend::bilinearFilter_changed_slot(newBilinearFilter);
 }
 
-
 /**
- * pauseTint_changed_slot(): Pause Tint effect setting has changed.
+ * Pause Tint effect setting has changed.
  * @param newPauseTint (bool) New pause tint effect setting.
  */
-void GensQGLWidget::pauseTint_changed_slot(QVariant newPauseTint)
+void GensQGLWidget::pauseTint_changed_slot(const QVariant &newPauseTint)
 {
 	// Update GLBackend's pause tint setting.
 	d->makeCurrent();

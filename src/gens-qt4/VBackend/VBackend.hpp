@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2012 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -62,16 +62,16 @@ class KeyHandlerQt;
 class VBackend : public QWidget
 {
 	Q_OBJECT
-	
+
 	public:
 		VBackend(QWidget *parent = 0, KeyHandlerQt *keyHandler = 0);
 		virtual ~VBackend();
-		
+
 		void setVbDirty(void)
 			{ m_vbDirty = true; }
 		void setMdScreenDirty(void)
 			{ m_mdScreenDirty = true; }
-		
+
 	// Video Backend update function.
 	public:
 		/**
@@ -80,22 +80,22 @@ class VBackend : public QWidget
 		 * @param bpp Framebuffer color depth.
 		 */
 		void vbUpdate(const LibGens::MdFb *fb, LibGens::VdpPalette::ColorDepth bpp);
-	
+
 	protected:
 		/**
 		 * Video Backend update function. (INTERNAL FUNCTION)
 		 */
 		virtual void vbUpdate_int(void) = 0;
-		
+
 		// Current MdFb and color depth.
 		const LibGens::MdFb *m_srcFb;
 		LibGens::VdpPalette::ColorDepth m_srcBpp;
-	
+
 	public:
 		void setKeyHandler(KeyHandlerQt *newKeyHandler);
-		
+
 		/** Properties. **/
-		
+
 		/** Video settings. **/
 		inline bool isPaused(void) const
 			{ return !!(m_paused.data); }
@@ -104,11 +104,11 @@ class VBackend : public QWidget
 		inline bool isManualPaused(void) const
 			{ return !!(m_paused.paused_manual); }
 		void setPaused(paused_t newPaused);
-		
+
 		/** Properties. **/
 		bool fastBlur(void) const;
 		void setFastBlur(bool newFastBlur);
-		
+
 		bool aspectRatioConstraint(void) const;
 		bool hasAspectRatioConstraintChanged(void) const;
 		void resetAspectRatioConstraintChanged(void);
@@ -116,76 +116,76 @@ class VBackend : public QWidget
 		bool pauseTint(void) const;
 		StretchMode_t stretchMode(void) const;
 		void setStretchMode(StretchMode_t newStretchMode);
-		
+
 		/** Emulation Context. **/
 		LibGens::EmuContext *emuContext(void) const;
 		void setEmuContext(LibGens::EmuContext *newEmuContext);
 		bool isRunning(void) const;
-		
+
 	protected:
 		// Key handler.
 		KeyHandlerQt *m_keyHandler;
-		
+
 		// Dirty flags.
 		bool m_vbDirty;		// VBackend dirty: screen must be redrawn.
 		bool m_mdScreenDirty;	// MD Screen dirty: texture must be reuploaded.
-		
+
 		// Color depth information.
 		LibGens::VdpPalette::ColorDepth m_lastBpp;
-		
+
 		// Effects.
 		void updatePausedEffect(bool fromMdScreen = true);
 		void updateFastBlur(bool fromMdScreen = true);
-		
+
 		// Internal rendering buffer used for software effects.
 		// NOTE: This takes up (336*240*4) == 322,560 bytes!
 		LibGens::MdFb *m_intScreen;
-		
+
 		/** Emulation Context. **/
 		LibGens::EmuContext *m_emuContext;
 		QMutex m_mtxEmuContext;
-		
+
 		/**
 		 * Reset Stretch Mode. (Called if the stretch mode is invalid.)
 		 */
 		void stretchMode_reset(void);
-	
+
 	protected slots:
-		virtual void fastBlur_changed_slot(QVariant newFastBlur);				// bool
-		virtual void aspectRatioConstraint_changed_slot(QVariant newAspectRatioConstraint);	// bool
-		virtual void bilinearFilter_changed_slot(QVariant newBilinearFilter);		// bool
-		virtual void pauseTint_changed_slot(QVariant newPauseTint);				// bool
-		virtual void stretchMode_changed_slot(QVariant newStretchMode);			// int
-	
+		virtual void fastBlur_changed_slot(const QVariant &newFastBlur);				// bool
+		virtual void aspectRatioConstraint_changed_slot(const QVariant &newAspectRatioConstraint);	// bool
+		virtual void bilinearFilter_changed_slot(const QVariant &newBilinearFilter);			// bool
+		virtual void pauseTint_changed_slot(const QVariant &newPauseTint);				// bool
+		virtual void stretchMode_changed_slot(const QVariant &newStretchMode);				// int
+
 	private:
 		// Effects.
 		paused_t m_paused;
 		bool m_cfg_fastBlur;
 		bool m_cfg_pauseTint;
-		
+
 		// Is the emulator running?
 		bool m_running;
-	
+
 	private:
 		/** Video settings. **/
 		bool m_cfg_aspectRatioConstraint;
 		bool m_aspectRatioConstraint_changed;
 		bool m_cfg_bilinearFilter;
 		StretchMode_t m_cfg_stretchMode;
-	
+
 	private slots:
 		// Key handler destroyed slot.
 		void keyHandlerDestroyed(void);
-	
+
 	/*! Onscreen display. **/
-	
+
 	public:
 		/** Properties. **/
 		bool osdFpsEnabled(void) const;
 		QColor osdFpsColor(void) const;
 		bool osdMsgEnabled(void) const;
 		QColor osdMsgColor(void) const;
-		
+
 		/** printf()-style functions. **/
 		// NOTE: Format string argument is 3 instead of 2.
 		// This is due to the implicit "this" parameter.
@@ -193,9 +193,9 @@ class VBackend : public QWidget
 			__attribute__ ((format (printf, 3, 0)));
 		void osd_printf(const int duration, const utf8_str *msg, ...)
 			__attribute__ ((format (printf, 3, 4)));
-		void osd_printqs(const int duration, QString msg, bool forceVbDirty);
-		void osd_printqs(const int duration, QString msg);
-		
+		void osd_printqs(const int duration, const QString &msg, bool forceVbDirty);
+		void osd_printqs(const int duration, const QString &msg);
+
 		/**
 		 * osd_lock() / osd_unlock(): Temporarily lock the OSD.
 		 * Primarily used when loading settings all at once.
@@ -205,31 +205,31 @@ class VBackend : public QWidget
 		 */
 		int osd_lock(void);
 		int osd_unlock(void);
-		
+
 		/**
-		 * osd_show_preview(): Show a preview image on the OSD.
+		 * Show a preview image on the OSD.
 		 * @param duration Duration for the preview image to appaer, in milliseconds.
 		 * @param img Image to show.
 		 */
 		virtual void osd_show_preview(int duration, const QImage& img);
-		
+
 		// FPS manager.
 		void fpsReset(void);
 		void fpsPush(double fps);
-		
+
 		// Recording OSD.
-		int recSetStatus(QString component, bool isRecording);
-		int recSetDuration(QString component, int duration);
-		int recStart(QString component);
-		int recStop(QString component);
+		int recSetStatus(const QString &component, bool isRecording);
+		int recSetDuration(const QString &component, int duration);
+		int recStart(const QString &component);
+		int recStop(const QString &component);
 
 	protected slots:
 		/** Properties. **/
-		void osdFpsEnabled_changed_slot(QVariant enable);	// bool
-		void osdFpsColor_changed_slot(QVariant var_color);	// QColor
-		void osdMsgEnabled_changed_slot(QVariant enable);	// bool
-		void osdMsgColor_changed_slot(QVariant var_color);	// QColor
-	
+		void osdFpsEnabled_changed_slot(const QVariant &enable);	// bool
+		void osdFpsColor_changed_slot(const QVariant &var_color);	// QColor
+		void osdMsgEnabled_changed_slot(const QVariant &enable);	// bool
+		void osdMsgColor_changed_slot(const QVariant &var_color);	// QColor
+
 	protected:
 		// OSD message struct.
 		struct OsdMessage
@@ -240,35 +240,35 @@ class VBackend : public QWidget
 			double endTime;
 		};
 		QList<OsdMessage> m_osdList;
-		
+
 		bool isOsdListDirty(void);
 		void setOsdListDirty(void);
 		void clearOsdListDirty(void);
-		
+
 		// FPS manager.
 		FpsManager m_fpsManager;
-		
+
 		// Preview image.
 		struct PreviewImage
 		{
 			PreviewImage() : endTime(0.0), visible(false) { }
-			
+
 			void clear(void)
 				{ this->visible = false; this->img = QImage(); }
-			
+
 			void set(int duration, const QImage& img)
 			{
 				this->img = img;
 				this->visible = true;
 				this->endTime = LibGens::Timing::GetTimeD() + ((double)duration / 1000.0);
 			}
-			
+
 			QImage img;
 			double endTime;
 			bool visible;
 		};
 		PreviewImage m_previewImg;
-		
+
 		struct RecOsd
 		{
 			QString component;
@@ -277,35 +277,35 @@ class VBackend : public QWidget
 			bool isRecording;	// True if recording; false if stopped.
 		};
 		QList<RecOsd> m_osdRecList;
-	
+
 	private:
 		// Message timer.
 		QTimer m_msgTimer;
 		// 100 ms is a decent interval when emulation isn't running.
 		static const int MSGTIMER_INTERVAL = 100;
 		static const int MSGTIMER_INTERVAL_QUICK = 20;
-		
+
 		/** Onscreen Display. **/
-		
+
 		// FPS manager.
 		double m_fps[8];
 		double m_fpsAvg;	// Average fps.
 		int m_fpsPtr;		// Pointer to next fps slot to use.
-		
+
 		// m_osdListDirty: Set if the OSD message list has been changed.
 		bool m_osdListDirty;
-		
+
 		// OSD enable bits.
 		bool m_cfg_osdFpsEnabled;
 		bool m_cfg_osdMsgEnabled;
-		
+
 		// OSD colors.
 		QColor m_cfg_osdFpsColor;
 		QColor m_cfg_osdMsgColor;
-		
+
 		// OSD lock counter.
 		int m_osdLockCnt;
-		
+
 		/**
 		 * Process the OSD queue.
 		 * This should be called by MsgTimer with updateVBackend == true,
@@ -315,13 +315,13 @@ class VBackend : public QWidget
 		 */
 		int osd_process_int(bool updateVBackend);
 		bool m_updateOnNextOsdProcess;
-	
+
 	private slots:
 		/**
 		 * Process the OSD queue. (MsgTimer only)
 		 */
 		void osd_process_MsgTimer_slot(void);
-	
+
 	protected:
 		/**
 		 * Process the OSD queue. (Subclasses only)
@@ -351,9 +351,9 @@ inline void VBackend::clearOsdListDirty(void)
 	{ m_osdListDirty = false; }
 
 /** Recording OSD. **/
-inline int VBackend::recStart(QString component)
+inline int VBackend::recStart(const QString &component)
 	{ return recSetStatus(component, true); }
-inline int VBackend::recStop(QString component)
+inline int VBackend::recStop(const QString &component)
 	{ return recSetStatus(component, false); }
 
 /** Property read functions. **/

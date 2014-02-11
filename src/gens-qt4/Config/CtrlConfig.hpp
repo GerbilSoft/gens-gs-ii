@@ -118,7 +118,7 @@ class CtrlConfig : public QObject
 		 * @param virtPort Virtual controller port.
 		 * @param keyMap New keymap.
 		 */
-		void setKeyMap(LibGens::IoManager::VirtPort_t virtPort, QVector<GensKey_t> keyMap);
+		void setKeyMap(LibGens::IoManager::VirtPort_t virtPort, const QVector<GensKey_t> &keyMap);
 };
 
 }

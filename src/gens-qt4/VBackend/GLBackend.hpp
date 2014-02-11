@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -62,73 +62,73 @@ class GLBackend : public VBackend
 	public:
 		GLBackend(QWidget *parent, KeyHandlerQt *keyHandler = 0);
 		virtual ~GLBackend();
-		
+
 #ifdef HAVE_GLEW
 		/**
-		 * GLExtsInUse(): Get a list of the OpenGL extensions in use.
+		 * Get a list of the OpenGL extensions in use.
 		 * @return List of OpenGL extensions in use.
 		 */
 		static QStringList GLExtsInUse(void);
 #endif /* HAVE_GLEW */
-		
+
 		/**
-		 * osd_show_preview(): Show a preview image on the OSD.
+		 * Show a preview image on the OSD.
 		 * @param duration Duration for the preview image to appaer, in milliseconds.
 		 * @param img Image to show.
 		 */
 		void osd_show_preview(int duration, const QImage& img);
-	
+
 	protected slots:
 		/**
-		 * bilinearFilter_changed_slot(): Bilinear filter setting has changed.
+		 * Bilinear filter setting has changed.
 		 * NOTE: This function MUST be called from within an active OpenGL context!
 		 * @param newBilinearFilter (bool) New bilinear filter setting.
 		 */
-		virtual void bilinearFilter_changed_slot(QVariant newBilinearFilter);
-		
+		virtual void bilinearFilter_changed_slot(const QVariant &newBilinearFilter);
+
 		/**
-		 * pauseTint_changed_slot(): Pause Tint effect setting has changed.
+		 * Pause Tint effect setting has changed.
 		 * @param newPauseTint (bool) New pause tint effect setting.
 		 */
-		virtual void pauseTint_changed_slot(QVariant newPauseTint);
-		
+		virtual void pauseTint_changed_slot(const QVariant &newPauseTint);
+
 		/**
-		 * stretchMode_changed_slot(): Stretch mode setting has changed.
+		 * Stretch mode setting has changed.
 		 * @param newStretchMode (int) New stretch mode setting.
 		 */
-		void stretchMode_changed_slot(QVariant newStretchMode);
-	
+		void stretchMode_changed_slot(const QVariant &newStretchMode);
+
 	protected:
 		/**
-		 * glb_initializeGL(): Called when OpenGL is initialized.
+		 * Called when OpenGL is initialized.
 		 * NOTE: This function MUST be called from within an active OpenGL context!
 		 */
 		void glb_initializeGL(void);
-		
+
 		/**
-		 * glb_resizeGL(): Window has been resized.
+		 * Window has been resized.
 		 * NOTE: This function MUST be called from within an active OpenGL context!
 		 * @param width Window width.
 		 * @param height Window height.inline
 		 */
 		void glb_resizeGL(int width, int height);
-		
+
 		/**
-		 * paintGL(): OpenGL paint event.
+		 * OpenGL paint event.
 		 * NOTE: This function MUST be called from within an active OpenGL context!
 		 */
 		void glb_paintGL(void);
-		
+
 		/**
-		 * glb_clearPreviewTex(): Clear the preview image.
+		 * Clear the preview image.
 		 * TODO: Does this function need to be called from within an active OpenGL context?
 		 */
-		void glb_clearPreviewTex();
-	
+		void glb_clearPreviewTex(void);
+
 	private:
 		// Window size.
 		QSize m_winSize;
-		
+
 		// Find the next highest power of two. (signed integers)
 		// http://en.wikipedia.org/wiki/Power_of_two#Algorithm_to_find_the_next-highest_power_of_two
 		template <class T>
@@ -139,7 +139,7 @@ class GLBackend : public VBackend
 				k = k | k >> i;
 			return k + 1;
 		}
-		
+
 		// Main texture.
 		GLuint m_tex;		// Texture ID.
 		int m_colorComponents;	// Number of color components. (3 == RGB; 4 == BGRA)
@@ -147,48 +147,47 @@ class GLBackend : public VBackend
 		GLenum m_texType;	// Texture type. (GL_UNSIGNED_BYTE, etc.)
 		QSize m_texSize;	// Texture size. (1x == 512x256 for power-of-two textures.)
 		QSize m_texVisSize;	// Texture visible size. (1x == 320x240)
-		
+
 		// Stretch mode.
 		QRectF m_stretchRectF;		// Current stretch coordinates.
 		QSize m_stretchLastRes;		// Last MD screen resolution.
 		void recalcStretchRectF(void);
 		void recalcStretchRectF(StretchMode_t mode);
-		
+
 		// OSD texture.
 		GLTex2D *m_texOsd;	// Texture containing U+0000 - U+00FF.
 		GLuint m_glListOsd;	// Display list.
 		QRectF m_rectfOsd;	// Projection rectangle.
-		
+
 		// Reallocate Texture functions.
 		void reallocTexture(void);
 		void reallocTexOsd(void);
-		
+
 		// OSD functions.
 		void printOsdText(void);
 		void printOsdLine(int x, int y, const QString &msg);
-		
+
 		// OSD preview image.
 		GLTex2D *m_texPreview;
 		void showOsdPreview(void);
-		
+
 		// OSD font information.
 		// TODO: Maybe make the font customizable in the future.
 		static const int ms_Osd_chrW = 8;
 		static const int ms_Osd_chrH = 16;
-		
+
 		// OpenGL Shader Manager.
 		GLShaderManager m_shaderMgr;
-		
+
 		/**
-		 * glb_setColor(): Set the current OpenGL color.
+		 * Set the current OpenGL color.
 		 * @param color QColor.
 		 */
 		void glb_setColor(const QColor& color);
 };
 
-
 /**
- * recalcStretchRectF(): Recalculate the stretch mode rectangle.
+ * Recalculate the stretch mode rectangle.
  * This version uses the current stretch mode.
  */
 inline void GLBackend::recalcStretchRectF(void)
@@ -196,9 +195,8 @@ inline void GLBackend::recalcStretchRectF(void)
 	recalcStretchRectF(stretchMode());
 }
 
-
 /**
- * glb_setColor(): Set the current OpenGL color.
+ * Set the current OpenGL color.
  * @param color QColor.
  */
 inline void GLBackend::glb_setColor(const QColor& color)

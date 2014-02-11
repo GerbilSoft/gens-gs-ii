@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * FindCdromWin32.cpp: Find CD-ROM drives: Win32 version.                  *
  *                                                                         *
- * Copyright (c) 2011-2013 by David Korth.                                 *
+ * Copyright (c) 2011-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -47,7 +47,6 @@ static const GUID Gens_IID_IImageList = {0x46EB5926, 0x582E, 0x4017, {0x9F, 0xDF
 #define MAKE_FUNCPTR(f) typeof(f) * p##f
 #endif
 
-
 namespace GensQt4
 {
 
@@ -62,9 +61,7 @@ class FindCdromWin32Private
 		static HICON GetShilIcon(int iIcon, int iImageList);
 };
 
-/************************************
- * FindCdromWin32Private functions. *
- ************************************/
+/** FindCdromWin32Private **/
 
 /**
  * Get an icon from the shell image list.
@@ -115,10 +112,7 @@ HICON FindCdromWin32Private::GetShilIcon(int iIcon, int iImageList)
 	return hIcon;
 }
 
-
-/*****************************
- * FindCdromWin32 functions. *
- *****************************/
+/** FindCdromWin32 **/
 
 FindCdromWin32::FindCdromWin32(QObject *parent)
 	: FindCdromBase(parent)
@@ -173,7 +167,7 @@ bool FindCdromWin32::isDriveIconSupported(void) const
  * @param deviceName Device name.
  * @return OS-specific disc/drive icon.
  */
-QIcon FindCdromWin32::getDriveIcon(QString deviceName) const
+QIcon FindCdromWin32::getDriveIcon(const QString &deviceName) const
 {
 	// Get the icon using SHGetFileInfo().
 	// This requires shell32.dll v4.0 or later.

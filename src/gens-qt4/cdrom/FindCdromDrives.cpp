@@ -81,13 +81,13 @@ class FindCdromDrivesPrivate
 		 * Add a CD-ROM device.
 		 * @param deviceName CD-ROM device name.
 		 */
-		void addCdromDevice(QString deviceName);
+		void addCdromDevice(const QString &deviceName);
 
 		/**
 		 * Remove a CD-ROM device.
 		 * @param deviceName CD-ROM device name.
 		 */
-		void removeCdromDevice(QString deviceName);
+		void removeCdromDevice(const QString &deviceName);
 
 		/**
 		 * Get the icon for a given drive type.
@@ -106,9 +106,7 @@ class FindCdromDrivesPrivate
 };
 
 
-/*************************************
- * FindCdromDrivesPrivate functions. *
- *************************************/
+/** FindCdromDrivesPrivate **/
 
 FindCdromDrivesPrivate::FindCdromDrivesPrivate(FindCdromDrives *q)
 	: q_ptr(q)
@@ -180,7 +178,7 @@ void FindCdromDrivesPrivate::clearCdromDevices(void)
  * Add a CD-ROM device.
  * @param deviceName CD-ROM device name.
  */
-void FindCdromDrivesPrivate::addCdromDevice(QString deviceName)
+void FindCdromDrivesPrivate::addCdromDevice(const QString &deviceName)
 {
 	// TODO: Use a QSet instead of QStringList?
 	if (cdromDeviceNames.contains(deviceName)) {
@@ -199,7 +197,7 @@ void FindCdromDrivesPrivate::addCdromDevice(QString deviceName)
  * Remove a CD-ROM device.
  * @param deviceName CD-ROM device name.
  */
-void FindCdromDrivesPrivate::removeCdromDevice(QString deviceName)
+void FindCdromDrivesPrivate::removeCdromDevice(const QString &deviceName)
 {
 	// TODO: Use a QSet instead of QStringList?
 	if (!cdromDeviceNames.contains(deviceName)) {
@@ -317,9 +315,7 @@ QIcon FindCdromDrivesPrivate::GetDiscTypeIcon(CD_DiscType_t discType)
 	return GensQApplication::IconFromTheme(iconFdo);
 }
 
-/******************************
- * FindCdromDrives functions. *
- ******************************/
+/** FindCdromDrives **/
 
 FindCdromDrives::FindCdromDrives(QObject *parent)
 	: QObject(parent)
@@ -377,7 +373,7 @@ QStringList FindCdromDrives::getDriveNames(void) const
  * @param deviceName CD-ROM device name.
  * @return CdDrive instance, or nullptr if unable to open the drive.
  */
-LibGensCD::CdDrive *FindCdromDrives::getCdDrive(QString deviceName)
+LibGensCD::CdDrive *FindCdromDrives::getCdDrive(const QString &deviceName)
 {
 	// TODO: Use a QSet instead of QStringList?
 	Q_D(FindCdromDrives);
@@ -413,7 +409,7 @@ LibGensCD::CdDrive *FindCdromDrives::getCdDrive(QString deviceName)
  * @param deviceName CD_ROM device name.
  * @return Icon for either the disc or the drive.
  */
-QIcon FindCdromDrives::getDriveIcon(QString deviceName)
+QIcon FindCdromDrives::getDriveIcon(const QString &deviceName)
 {
 	LibGensCD::CdDrive *cdDrive = getCdDrive(deviceName);
 	if (cdDrive)

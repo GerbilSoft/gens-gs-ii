@@ -108,7 +108,7 @@ class GeneralConfigWindowPrivate
 		/** Sega Genesis **/
 
 		// Select ROM file.
-		void selectRomFile(QString rom_desc, QLineEdit *txtRomFile);
+		void selectRomFile(const QString &rom_desc, QLineEdit *txtRomFile);
 
 		// Sega Genesis: Update TMSS ROM file status.
 		QString mdUpdateTmssRomFileStatus(GensLineEdit *txtRomFile);
@@ -125,7 +125,7 @@ class GeneralConfigWindowPrivate
 		QString mcdUpdateRomFileStatus(GensLineEdit *txtRomFile, int region_code);
 
 		// Sega CD: Display Boot ROM file status.
-		void mcdDisplayRomFileStatus(QString rom_id, QString rom_desc);
+		void mcdDisplayRomFileStatus(const QString &rom_id, const QString &rom_desc);
 
 		// Sega CD: Boot ROM file information.
 		QString sMcdRomStatus_USA;
@@ -140,7 +140,7 @@ class GeneralConfigWindowPrivate
 
 		/** External Programs **/
 		QString sExtPrgStatus_UnRAR;
-		void extprgDisplayFileStatus(QString file_id, QString file_desc);
+		void extprgDisplayFileStatus(const QString &file_id, const QString &file_desc);
 };
 
 }

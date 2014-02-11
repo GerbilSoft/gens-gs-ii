@@ -72,7 +72,7 @@ class GensCtrlCfgWidget : public QWidget
 		 * Set the current keymap.
 		 * @param keyMap New keymap.
 		 */
-		void setKeyMap(QVector<GensKey_t> keyMap);
+		void setKeyMap(const QVector<GensKey_t> &keyMap);
 
 	signals:
 		/**

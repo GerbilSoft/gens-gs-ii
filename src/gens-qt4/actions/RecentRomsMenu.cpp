@@ -66,9 +66,7 @@ class RecentRomsMenuPrivate
 		const RecentRoms *recentRoms;
 };
 
-/************************************
- * RecentRomsMenuPrivate functions. *
- ************************************/
+/** RecentRomsMenuPrivate **/
 
 RecentRomsMenuPrivate::RecentRomsMenuPrivate(RecentRomsMenu *q, const RecentRoms *initRecentRoms)
 	: q_ptr(q)
@@ -229,9 +227,7 @@ void RecentRomsMenuPrivate::update(void)
 	emit q->updated();
 }
 
-/*****************************
- * RecentRomsMenu functions. *
- *****************************/
+/** RecentRomsMenu **/
 
 RecentRomsMenu::RecentRomsMenu(QWidget* parent, const RecentRoms* recentRoms)
 	: QMenu(parent)
@@ -242,7 +238,7 @@ RecentRomsMenu::RecentRomsMenu(QWidget* parent, const RecentRoms* recentRoms)
 	d->init();
 }
 
-RecentRomsMenu::RecentRomsMenu(QString title, QWidget *parent, const RecentRoms *recentRoms)
+RecentRomsMenu::RecentRomsMenu(const QString &title, QWidget *parent, const RecentRoms *recentRoms)
 	: QMenu(title, parent)
 	, d_ptr(new RecentRomsMenuPrivate(this, recentRoms))
 {

@@ -4,7 +4,7 @@
  *                                                                            *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                         *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                                *
- * Copyright (c) 2008-2011 by David Korth.                                    *
+ * Copyright (c) 2008-2014 by David Korth.                                    *
  *                                                                            *
  * This program is free software; you can redistribute it and/or modify       *
  * it under the terms of the GNU General Public License as published by       *
@@ -67,7 +67,6 @@
 #else
 #define FILENAME_CASE_SENSITIVE Qt::CaseSensitive
 #endif
-
 
 namespace GensQt4
 {
@@ -154,7 +153,6 @@ EmuManager::~EmuManager()
 		m_romClosedFb->unref();
 }
 
-
 /**
  * Open a ROM file.
  * Prompts the user to select a ROM file, then opens it.
@@ -199,14 +197,13 @@ int EmuManager::openRom(void)
 	return openRom(filename);
 }
 
-
 /**
  * Open a ROM file.
  * @param filename ROM filename. (Must have native separators!)
  * @param z_filename Internal archive filename. (If not specified, user will be prompted.)
  * @return 0 on success; non-zero on error.
  */
-int EmuManager::openRom(QString filename, QString z_filename)
+int EmuManager::openRom(const QString &filename, const QString &z_filename)
 {
 	// Open the file using the LibGens::Rom class.
 	// TODO: This won't work for KIO...
@@ -219,6 +216,7 @@ int EmuManager::openRom(QString filename, QString z_filename)
 	}
 
 	// Check if this is a multi-file ROM archive.
+	QString sel_z_filename = z_filename;
 	if (rom->isMultiFile()) {
 		// Multi-file ROM archive.
 		const mdp_z_entry_t *z_entry;
@@ -258,21 +256,20 @@ int EmuManager::openRom(QString filename, QString z_filename)
 		}
 
 		// Get the selected file.
-		z_filename = QString::fromUtf8(z_entry->filename);
+		sel_z_filename = QString::fromUtf8(z_entry->filename);
 		rom->select_z_entry(z_entry);
 	}
 
 	// Add the ROM file to the Recent ROMs list.
 	// TODO: Don't do this if the ROM couldn't be loaded.
-	gqt4_cfg->recentRomsUpdate(filename, z_filename, rom->sysId());
+	gqt4_cfg->recentRomsUpdate(filename, sel_z_filename, rom->sysId());
 
 	// Load the selected ROM file.
 	return loadRom(rom);
 }
 
-
 /**
- * loadRom(): Load a ROM file.
+ * Load a ROM file.
  * Loads a ROM file previously opened via LibGens::Rom().
  * @param rom [in] Previously opened ROM object.
  * @return 0 on success; non-zero on error.
@@ -300,7 +297,6 @@ int EmuManager::loadRom(LibGens::Rom *rom)
 	// ROM isn't running. Open the ROM directly.
 	return loadRom_int(rom);
 }
-
 
 /**
  * Load a ROM file. (Internal function.)
@@ -482,7 +478,6 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	return 0;
 }
 
-
 /**
  * Determine the LibGens region code to use.
  * @param confRegionCode Current GensConfig region code.
@@ -531,7 +526,6 @@ LibGens::SysVersion::RegionCode_t EmuManager::GetLgRegionCode(
 		case 0x2:	return LibGens::SysVersion::REGION_ASIA_PAL;
 	}
 }
-
 
 /**
  * Close the open ROM file and stop emulation.
@@ -603,7 +597,6 @@ int EmuManager::closeRom(bool emitStateChanged)
 	return 0;
 }
 
-
 /**
  * Get the ROM name.
  * @return ROM name, or empty string if no ROM is loaded.
@@ -649,20 +642,18 @@ QString EmuManager::romName(void)
 	return QString::fromUtf8(s_romName.c_str());
 }
 
-
 /**
- * sysName(): Get the system name for the active ROM, based on ROM region.
+ * Get the system name for the active ROM, based on ROM region.
  * @return System name, or empty string if unknown or no ROM is loaded.
  */
 QString EmuManager::sysName(void)
 {
 	if (!m_rom || !gqt4_emuContext)
 		return QString();
-	
+
 	return SysName(m_rom->sysId(),
 			gqt4_emuContext->versionRegisterObject()->region());
 }
-
 
 /**
  * Get the savestate filename.
@@ -674,7 +665,7 @@ QString EmuManager::getSaveStateFilename(void)
 {
 	if (!m_rom)
 		return QString();
-	
+
 	const QString filename =
 		gqt4_cfg->configPath(PathConfig::GCPATH_SAVESTATES) +
 		QString::fromUtf8(m_rom->filenameBaseNoExt().c_str()) +
@@ -683,9 +674,8 @@ QString EmuManager::getSaveStateFilename(void)
 	return filename;
 }
 
-
 /**
- * emuFrameDone(): Emulation thread is finished rendering a frame.
+ * Emulation thread is finished rendering a frame.
  * @param wasFastFrame The frame was rendered "fast", i.e. no VDP updates.
  */
 void EmuManager::emuFrameDone(bool wasFastFrame)
@@ -693,43 +683,40 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	// Make sure the emulation thread is still running.
 	if (!gqt4_emuThread || gqt4_emuThread->isStopRequested())
 		return;
-	
+
+	// FIXME: This code is terrible.
 	if (!wasFastFrame)
 		m_frames++;
-	
+
 	double timeDiff;
 	double thisTime = LibGens::Timing::GetTimeD();
 	
-	if (m_lastTime < 0.001)
-	{
+	if (m_lastTime < 0.001) {
 		m_lastTime = thisTime;
 		m_lastTime_fps = m_lastTime;
 		timeDiff = 0.0;
-	}
-	else
-	{
+	} else {
 		// Get the time difference.
 		timeDiff = (thisTime - m_lastTime);
-		
+
 		// Check the FPS counter.
 		double timeDiff_fps = (thisTime - m_lastTime_fps);
-		if (timeDiff_fps >= 0.250)
-		{
+		if (timeDiff_fps >= 0.250) {
 			// Push the current fps.
 			// (Updated four times per second.)
 			double fps = ((double)m_frames / timeDiff_fps);
 			emit updateFps(fps);
-			
+
 			// Reset the timer and frame counter.
 			m_lastTime_fps = thisTime;
 			m_frames = 0;
 		}
 	}
-	
+
 	// Check for SRam/EEPRom autosave.
 	// TODO: Frames elapsed.
 	gqt4_emuContext->autoSaveData(1);
-	
+
 	// Check for requests in the emulation queue.
 	if (!m_qEmuRequest.isEmpty())
 		processQEmuRequest();
@@ -744,11 +731,11 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	// Update the Video Backend.
 	if (!wasFastFrame)
 		updateVBackend();
-	
+
 	// If emulation is paused, don't resume the emulation thread.
 	if (m_paused.data)
 		return;
-	
+
 	/** Auto Frame Skip **/
 	// TODO: Figure out how to properly implement the old Gens method of synchronizing to audio.
 #if 0
@@ -761,28 +748,24 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	// TODO: Remove the ring buffer and just use the classic SDL-esque method.
 	m_audio->write();	// Write audio.
 #endif
-	
+
 	// Check if we're higher or lower than the required framerate.
 	bool doFastFrame = false;
 	const double frameRate = (1.0 /
 			(gqt4_emuContext->versionRegisterObject()->isPal() ? 50.0 : 60.0));
 	const double threshold = 0.001;
-	if (timeDiff > (frameRate + threshold))
-	{
+	if (timeDiff > (frameRate + threshold)) {
 		// Lower than the required framerate.
 		// Do a fast frame.
 		//printf("doing fast frame; ");
 		doFastFrame = true;
-	}
-	else if (timeDiff < (frameRate - threshold))
-	{
+	} else if (timeDiff < (frameRate - threshold)) {
 		// Higher than the required framerate.
 		// Wait for the required amount of time.
-		do
-		{
+		do {
 			thisTime = LibGens::Timing::GetTimeD();
 			timeDiff = (thisTime - m_lastTime);
-			
+
 			// NOTE: Putting usleep(0) here reduces CPU usage,
 			// but increases stuttering.
 			// TODO: Fix framedropping entirely.
@@ -795,7 +778,7 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	}
 	// Update the last time value.
 	m_lastTime = thisTime;
-	
+
 	// Tell the emulation thread that we're ready for another frame.
 	if (gqt4_emuThread)
 		gqt4_emuThread->resume(doFastFrame);
@@ -809,18 +792,16 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
  */
 void EmuManager::setVBackend(VBackend *vBackend)
 {
-	if (m_vBackend)
-	{
+	if (m_vBackend) {
 		// Disconnect the destroyed() signal from the current VBackend.
 		disconnect(m_vBackend, SIGNAL(destroyed(QObject*)),
 			   this, SLOT(vBackend_destroyed(QObject*)));
 	}
-	
+
 	// Save the new Video Backend.
 	m_vBackend = vBackend;
-	
-	if (m_vBackend)
-	{
+
+	if (m_vBackend) {
 		// Connect the destroyed() signal to the new VBackend.
 		connect(m_vBackend, SIGNAL(destroyed(QObject*)),
 			this, SLOT(vBackend_destroyed(QObject*)));

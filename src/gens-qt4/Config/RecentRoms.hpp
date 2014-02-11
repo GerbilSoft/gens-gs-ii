@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -45,59 +45,59 @@ struct RecentRom_t
 class RecentRoms : public QObject
 {
 	Q_OBJECT
-	
+
 	public:
 		RecentRoms(QObject *parent = 0);
-		
+
 	private:
 		Q_DISABLE_COPY(RecentRoms)
-	
+
 	public:
 		// Maximum number of ROMs allowed in Recent ROMs.
 		static const int MAX_ROMS;
-		
+
 		/**
-		 * update(): Update the recent ROMs list.
+		 * Update the recent ROMs list.
 		 * @param filename Filename of the new ROM.
 		 * @param z_filename Internal filename for multi-file archives.
 		 * @param sysId System ID.
 		 */
-		void update(QString filename, QString z_filename,
-				LibGens::Rom::MDP_SYSTEM_ID sysId);
-		
+		void update(const QString &filename, const QString &z_filename,
+			    LibGens::Rom::MDP_SYSTEM_ID sysId);
+
 		/**
-		 * load(): Load the recent ROMs list from a settings file.
+		 * Load the recent ROMs list from a settings file.
 		 * NOTE: The group must be selected in the QSettings before calling this function!
 		 * @param qSettings Settings file.
 		 * @return Size of Recent ROMs list on success; negative on error.
 		 */
 		int load(const QSettings *qSettings);
-		
+
 		/**
-		 * save(): Save the recent ROMs list to a settings file.
+		 * Save the recent ROMs list to a settings file.
 		 * NOTE: The group must be selected in the QSettings before calling this function!
 		 * @param qSettings Settings file.
 		 * @return Size of Recent ROMs list on success; negative on error.
 		 */
-		int save(QSettings *qSettings);
-		
+		int save(QSettings *qSettings) const;
+
 		/**
-		 * getRom(): Get a recent ROM entry.
+		 * Get a recent ROM entry.
 		 * @param id Recent ROM ID. (starting at 1)
 		 * @return RecentRom_t describing the ROM entry.
 		 */
-		RecentRom_t getRom(int id);
-		
+		RecentRom_t getRom(int id) const;
+
 		/**
-		 * romList(): Get a const reference to the ROM list.
+		 * Get a const reference to the ROM list.
 		 * @return Const reference to the ROM list.
 		 */
 		const QList<RecentRom_t>& romList(void) const;
-	
+
 	signals:
 		// Recent ROMs list has been updated.
 		void updated(void);
-	
+
 	protected:
 		QList<RecentRom_t> m_lstRoms;
 };

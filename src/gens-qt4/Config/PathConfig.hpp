@@ -108,7 +108,7 @@ class PathConfig : public QObject
 		 * @param path Configuration path.
 		 * @param dir New directory.
 		 */
-		void pathChanged(GensQt4::PathConfig::ConfigPath path, QString dir);
+		void pathChanged(GensQt4::PathConfig::ConfigPath path, const QString &dir);
 };
 
 }

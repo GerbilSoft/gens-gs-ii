@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2012 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -134,16 +134,15 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 VBackend::~VBackend()
 {
 	// Delete internal objects.
-	
+
 	// Internal screen buffer.
 	if (m_intScreen)
 		m_intScreen->unref();
-	
+
 	// Source framebuffer.
 	if (m_srcFb)
 		m_srcFb->unref();
 }
-
 
 /**
  * Video Backend update function.
@@ -153,8 +152,7 @@ VBackend::~VBackend()
 void VBackend::vbUpdate(const LibGens::MdFb *fb, LibGens::VdpPalette::ColorDepth bpp)
 {
 	// Save the framebuffer.
-	if (m_srcFb != fb)
-	{
+	if (m_srcFb != fb) {
 		// Framebuffer has changed.
 		if (m_srcFb)
 			m_srcFb->unref();
@@ -163,14 +161,13 @@ void VBackend::vbUpdate(const LibGens::MdFb *fb, LibGens::VdpPalette::ColorDepth
 			m_srcFb->ref();
 		m_mdScreenDirty = true;
 	}
-	
+
 	// Save the color depth.
 	m_srcBpp = bpp;
-	
+
 	// Update the video backend.
 	vbUpdate_int();
 }
-
 
 /**
  * Set the key handler.
@@ -192,7 +189,6 @@ void VBackend::setKeyHandler(KeyHandlerQt *newKeyHandler)
 	}
 }
 
-
 /**
  * Key handler was destroyed.
  */
@@ -200,7 +196,6 @@ void VBackend::keyHandlerDestroyed(void)
 {
 	m_keyHandler = nullptr;
 }
-
 
 /**
  * setPaused(): Set the emulation paused state.
@@ -210,96 +205,88 @@ void VBackend::setPaused(paused_t newPaused)
 {
 	if (m_paused.data == newPaused.data)
 		return;
-	
+
 	// Update the paused status.
 	const bool pause_manual_changed = (m_paused.paused_manual != newPaused.paused_manual);
 	m_paused.data = newPaused.data;
-	
+
 	// Update VBackend on one of the following conditions:
 	// - Manual pause changed and pause tint is enabled.
 	// - FPS is enabled.
-	if ((pause_manual_changed && m_cfg_pauseTint) || osdFpsEnabled())
-	{
+	if ((pause_manual_changed && m_cfg_pauseTint) || osdFpsEnabled()) {
 		// Update the video backend.
-		if (isRunning())
-		{
+		if (isRunning()) {
 			setVbDirty();
 			if (osdFpsEnabled())
 				setOsdListDirty();
 			vbUpdate_int(); // TODO: Do we really need to call this here?
 		}
 	}
-	
+
 	// If emulation isn't running or emulation is paused, start the message timer.
 	if (!isRunning() || isPaused())
 		m_msgTimer.start(MSGTIMER_INTERVAL);
 }
 
-
 /**
- * stretchMode_changed_slot(): Stretch mode setting has changed.
+ * Stretch mode setting has changed.
  * @param newStretchMode (int) New stretch mode setting.
  */
-void VBackend::stretchMode_changed_slot(QVariant newStretchMode)
+void VBackend::stretchMode_changed_slot(const QVariant &newStretchMode)
 {
 	m_cfg_stretchMode = (StretchMode_t)newStretchMode.toInt();
-	
+
 	// Print a message to the OSD.
 	//: OSD message indicating the Stretch Mode has been changed.
 	QString msg = tr("Stretch Mode set to %1.", "osd-stretch");
-	switch (m_cfg_stretchMode)
-	{
+	switch (m_cfg_stretchMode) {
 		case STRETCH_NONE:
 			//: OSD message indicating the Stretch Mode has been set to None.
 			msg = msg.arg(tr("None", "osd-stretch"));
 			break;
-		
+
 		case STRETCH_H:
 			//: OSD message indicating the Stretch Mode has been set to Horizontal.
 			msg = msg.arg(tr("Horizontal", "osd-stretch"));
 			break;
-		
+
 		case STRETCH_V:
 			//: OSD message indicating the Stretch Mode has been set to Vertical.
 			msg = msg.arg(tr("Vertical", "osd-stretch"));
 			break;
-		
+
 		case STRETCH_FULL:
 			//: OSD message indicating the Stretch Mode has been set to Full.
 			msg = msg.arg(tr("Full", "osd-stretch"));
 			break;
-		
+
 		default:
 			msg.clear();
 			break;
 	}
-	
+
 	osd_printqs(1500, msg, true);
 }
 
-
 /**
- * fastBlur_changed_slot(): Fast Blur effect has changed.
+ * Fast Blur effect has changed.
  * @param newFastBlur (bool) New Fast Blur effect setting.
  */
-void VBackend::fastBlur_changed_slot(QVariant newFastBlur)
+void VBackend::fastBlur_changed_slot(const QVariant &newFastBlur)
 {
 	// Save the new Fast Blur setting.
 	m_cfg_fastBlur = newFastBlur.toBool();
-	
+
 	// Print a message to the OSD.
 	QString msg;
-	if (m_cfg_fastBlur)
-	{
+	if (m_cfg_fastBlur) {
 		//: OSD message indicating Fast Blur has been enabled.
 		msg = tr("Fast Blur enabled.", "osd");
-	}
-	else
-	{
+	} else {
 		//: OSD message indicating Fast Blur has been disabled.
 		msg = tr("Fast Blur disabled.", "osd");
 	}
-	
+
 	osd_printqs(1500, msg, true);
 }
 
@@ -308,59 +295,54 @@ void VBackend::fastBlur_changed_slot(QVariant newFastBlur)
  * Aspect ratio constraint setting has changed.
  * @param newAspectRatioConstraint (bool) New aspect ratio constraint setting.
  */
-void VBackend::aspectRatioConstraint_changed_slot(QVariant newAspectRatioConstraint)
+void VBackend::aspectRatioConstraint_changed_slot(const QVariant &newAspectRatioConstraint)
 {
 	// Save the new Aspect Ratio Constraint setting.
 	m_cfg_aspectRatioConstraint = newAspectRatioConstraint.toBool();
-	
+
 	// Aspect Ratio Constraint setting has changed.
 	m_aspectRatioConstraint_changed = true;
-	
+
 	// Update the Video Backend even when not running.
 	setVbDirty();
-	
+
 	// TODO: Only if paused, or regardless of pause?
 	if (!isRunning() || isPaused())
 		vbUpdate_int();
 }
-
 
 /**
  * Bilinear Filter setting has changed.
  * @param newBilinearFilter (bool) New bilinear filter setting.
  */
-void VBackend::bilinearFilter_changed_slot(QVariant newBilinearFilter)
+void VBackend::bilinearFilter_changed_slot(const QVariant &newBilinearFilter)
 {
 	// Save the new Bilinear Filter setting.
 	m_cfg_bilinearFilter = newBilinearFilter.toBool();
-	
+
 	// TODO: Only if paused, or regardless of pause?
-	if (!isRunning() || isPaused())
-	{
+	if (!isRunning() || isPaused()) {
 		setVbDirty();
 		vbUpdate_int();
 	}
 }
-
 
 /**
  * Pause Tint effect setting has changed.
  * @param newPauseTint (bool) New pause tint effect setting.
  */
-void VBackend::pauseTint_changed_slot(QVariant newPauseTint)
+void VBackend::pauseTint_changed_slot(const QVariant &newPauseTint)
 {
 	// Save the new Pause Tint effect setting.
 	m_cfg_pauseTint = newPauseTint.toBool();
-	
+
 	// Update the video backend if emulation is running,
 	// and if we're currently paused manually.
-	if (isRunning() && isManualPaused())
-	{
+	if (isRunning() && isManualPaused()) {
 		setVbDirty();
 		vbUpdate_int();
 	}
 }
-
 
 /**
  * Update the Paused effect.
@@ -370,11 +352,10 @@ void VBackend::updatePausedEffect(bool fromMdScreen)
 {
 	// Use LibGens' software paused effect function.
 	LibGens::PausedEffect::DoPausedEffect(m_intScreen, fromMdScreen);
-	
+
 	// Mark the video backend as dirty.
 	setVbDirty();
 }
-
 
 /**
  * Update the Fast Blur effect.
@@ -384,11 +365,10 @@ void VBackend::updateFastBlur(bool fromMdScreen)
 {
 	// Use LibGens' software paused effect function.
 	LibGens::FastBlur::DoFastBlur(m_intScreen, fromMdScreen);
-	
+
 	// Mark the video backend as dirty.
 	setVbDirty();
 }
-
 
 /**
  * setEmuContext(): Set the emulation context for this video backend.
@@ -402,20 +382,20 @@ void VBackend::setEmuContext(LibGens::EmuContext *newEmuContext)
 		return;
 	m_emuContext = newEmuContext;
 	lockEmuContext.unlock();
-	
+
 	// setEmuContext() replaces setRunning().
 	// Mark the OSD list as dirty if the FPS counter is visible.
 	if (osdFpsEnabled())
 		setOsdListDirty();
-	
+
 	setVbDirty();
 	setMdScreenDirty();
-	
+
 	// TODO: Should we update the video buffer here?
 	// Updated if there's no emulation contextor if emulation is paused.
 	if (!newEmuContext || isPaused())
 		vbUpdate_int();
-	
+
 	// If there's no emulation context or emulation is paused,
 	// start the message timer.
 	if (!newEmuContext || isPaused())

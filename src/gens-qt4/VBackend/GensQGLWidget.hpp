@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -60,9 +60,9 @@ class GensQGLWidget : public GLBackend
 		QSize sizeHint(void) const { return QSize(320, 240); }
 	
 	protected slots:
-		void fastBlur_changed_slot(QVariant newFastBlur);			// bool
-		void bilinearFilter_changed_slot(QVariant newBilinearFilter);	// bool
-		void pauseTint_changed_slot(QVariant newPauseTint);			// bool
+		void fastBlur_changed_slot(const QVariant &newFastBlur);		// bool
+		void bilinearFilter_changed_slot(const QVariant &newBilinearFilter);	// bool
+		void pauseTint_changed_slot(const QVariant &newPauseTint);		// bool
 	
 	private:
 		friend class GensQGLWidgetPrivate;

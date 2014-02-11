@@ -40,9 +40,7 @@
 namespace GensQt4
 {
 
-/*********************************
- * GensMenuBarPrivate functions. *
- *********************************/
+/** GensMenuBarPrivate **/
 
 /**
  * Connect menu synchronization slots.
@@ -116,9 +114,7 @@ void GensMenuBarPrivate::syncShowMenuBar(void)
 #endif /* Q_WS_MAC */
 }
 
-/**************************
- * GensMenuBar functions. *
- **************************/
+/** GensMenuBar **/
 
 /** Synchronization slots. **/
 
@@ -162,7 +158,7 @@ void GensMenuBar::stretchMode_changed_slot_int(StretchMode_t stretchMode)
  * (WRAPPER FUNCTION for stretchMode_changed_slot_int().)
  * @param stretchMode (StretchMode_t) New stretch mode.
  */
-void GensMenuBar::stretchMode_changed_slot(QVariant stretchMode)
+void GensMenuBar::stretchMode_changed_slot(const QVariant &stretchMode)
 {
 	// Wrapper for stretchMode_changed_slot_int().
 	stretchMode_changed_slot_int((StretchMode_t)stretchMode.toInt());
@@ -202,7 +198,7 @@ void GensMenuBar::regionCode_changed_slot_int(LibGens::SysVersion::RegionCode_t 
  * (WRAPPER FUNCTION for regionCode_changed_slot_int().)
  * @param regionCode (RegionCode_t) New region code.
  */
-void GensMenuBar::regionCode_changed_slot(QVariant regionCode)
+void GensMenuBar::regionCode_changed_slot(const QVariant &regionCode)
 {
 	// Wrapper for regionCode_changed_slot_int().
 	regionCode_changed_slot_int(
@@ -232,7 +228,7 @@ void GensMenuBar::enableSRam_changed_slot_int(bool enableSRam)
  * (WRAPPER FUNCTION for enableSRam_changed_slot_int().)
  * @param enableSRam (bool) New Enable SRam/EEPRom setting.
  */
-void GensMenuBar::enableSRam_changed_slot(QVariant enableSRam)
+void GensMenuBar::enableSRam_changed_slot(const QVariant &enableSRam)
 {
 	// Wrapper for enableSRam_changed_slot_int().
 	enableSRam_changed_slot_int(enableSRam.toBool());
@@ -242,7 +238,7 @@ void GensMenuBar::enableSRam_changed_slot(QVariant enableSRam)
  * "Show Menu Bar" setting has changed.
  * @param newShowMenuBar New "Show Menu Bar" setting.
  */
-void GensMenuBar::showMenuBar_changed_slot(QVariant newShowMenuBar)
+void GensMenuBar::showMenuBar_changed_slot(const QVariant &newShowMenuBar)
 {
 	Q_UNUSED(newShowMenuBar)
 	Q_D(GensMenuBar);

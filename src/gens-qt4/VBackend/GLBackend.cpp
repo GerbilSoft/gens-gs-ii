@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -52,7 +52,7 @@ namespace GensQt4
 {
 
 /**
- * GLBackend(): Initialize the common OpenGL backend.
+ * Initialize the common OpenGL backend.
  */
 GLBackend::GLBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	: VBackend(parent, keyHandler)
@@ -81,7 +81,6 @@ GLBackend::~GLBackend()
 	// Shut down the OpenGL Shader Manager.
 	m_shaderMgr.end();
 }
-
 
 #ifdef HAVE_GLEW
 /**
@@ -141,7 +140,6 @@ QStringList GLBackend::GLExtsInUse(void)
 	return exts;
 }
 #endif /* HAVE_GLEW */
-
 
 /**
  * (Re-)Allocate the OpenGL texture.
@@ -267,7 +265,6 @@ void GLBackend::reallocTexture(void)
 	m_vbDirty = true;
 }
 
-
 /**
  * Called when OpenGL is initialized.
  * This function MUST be called from within an active OpenGL context!
@@ -309,7 +306,6 @@ void GLBackend::glb_initializeGL(void)
 	// Generate a display list for the OSD.
 	m_glListOsd = glGenLists(1);
 }
-
 
 /**
  * (Re-)Allocate the OSD texture.
@@ -377,7 +373,6 @@ void GLBackend::reallocTexOsd(void) {
 	glDisable(GL_TEXTURE_2D);
 }
 
-
 /**
  * Window has been resized.
  * This function MUST be called from within an active OpenGL context!
@@ -444,7 +439,6 @@ void GLBackend::glb_resizeGL(int width, int height)
 	setVbDirty();
 	setOsdListDirty();
 }
-
 
 /**
  * OpenGL paint event.
@@ -650,7 +644,6 @@ void GLBackend::glb_paintGL(void)
 	m_vbDirty = false;		// Video backend is no longer dirty.
 }
 
-
 /**
  * Recalculate the stretch mode rectangle.
  * @param mode Stretch mode.
@@ -728,7 +721,6 @@ void GLBackend::recalcStretchRectF(StretchMode_t mode)
 		}
 	}
 }
-
 
 /**
  * Print the OSD text to the screen.
@@ -911,7 +903,6 @@ void GLBackend::printOsdText(void)
 	clearOsdListDirty();	// OSD message list is no longer dirty.
 }
 
-
 /**
  * Print a line of text on the screen.
  * NOTE: This should ONLY be called from printOsdText()!
@@ -997,7 +988,6 @@ void GLBackend::printOsdLine(int x, int y, const QString &msg)
 	}
 }
 
-
 /**
  * Clear the preview image.
  * TODO: Does this function need to be called from within an active OpenGL context?
@@ -1007,7 +997,6 @@ void GLBackend::glb_clearPreviewTex(void)
 	delete m_texPreview;
 	m_texPreview = nullptr;
 }
-
 
 /**
  * Show a preview image on the OSD.
@@ -1022,7 +1011,6 @@ void GLBackend::osd_show_preview(int duration, const QImage& img)
 	// Delete the preview texture to force a refresh.
 	glb_clearPreviewTex();
 }
-
 
 /**
  * Show the OSD preview image.
@@ -1095,13 +1083,12 @@ void GLBackend::showOsdPreview(void)
 	glEnable(GL_TEXTURE_2D);
 }
 
-
 /**
  * Bilinear filter setting has changed.
  * NOTE: This function MUST be called from within an active OpenGL context!
  * @param newBilinearFilter (bool) New bilinear filter setting.
  */
-void GLBackend::bilinearFilter_changed_slot(QVariant newBilinearFilter)
+void GLBackend::bilinearFilter_changed_slot(const QVariant &newBilinearFilter)
 {
 	if (m_tex > 0) {
 		// Bind the texture.
@@ -1126,7 +1113,7 @@ void GLBackend::bilinearFilter_changed_slot(QVariant newBilinearFilter)
  * Pause Tint effect setting has changed.
  * @param newPauseTint (bool) New pause tint effect setting.
  */
-void GLBackend::pauseTint_changed_slot(QVariant newPauseTint)
+void GLBackend::pauseTint_changed_slot(const QVariant &newPauseTint)
 {
 	if (!m_shaderMgr.hasPaused() &&
 	    (isRunning() && isPaused()))
@@ -1146,7 +1133,7 @@ void GLBackend::pauseTint_changed_slot(QVariant newPauseTint)
  * Stretch mode setting has changed.
  * @param newStretchMode (int) New stretch mode setting.
  */
-void GLBackend::stretchMode_changed_slot(QVariant newStretchMode)
+void GLBackend::stretchMode_changed_slot(const QVariant &newStretchMode)
 {
 	StretchMode_t stretch = (StretchMode_t)newStretchMode.toInt();
 

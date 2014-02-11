@@ -109,10 +109,10 @@ class GensMenuBar : public QObject
 
 		/** Menu synchronization slots. **/
 		void recentRoms_updated(void);
-		void stretchMode_changed_slot(QVariant stretchMode);	// StretchMode_t
-		void regionCode_changed_slot(QVariant regionCode);	// LibGens::SysVersion::RegionCode_t
-		void enableSRam_changed_slot(QVariant enableSRam);	// bool
-		void showMenuBar_changed_slot(QVariant newShowMenuBar);	// bool
+		void stretchMode_changed_slot(const QVariant &stretchMode);	// StretchMode_t
+		void regionCode_changed_slot(const QVariant &regionCode);	// LibGens::SysVersion::RegionCode_t
+		void enableSRam_changed_slot(const QVariant &enableSRam);	// bool
+		void showMenuBar_changed_slot(const QVariant &newShowMenuBar);	// bool
 
 	private:
 		enum MenuItemType {

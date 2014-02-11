@@ -73,14 +73,14 @@ class PathConfigPrivate
 		 * @param path Path to convert.
 		 * @return Relative path. (with leading "./" and trailing slash)
 		 */
-		QString toRelativePath(QString path) const;
+		QString toRelativePath(const QString &path) const;
 
 		/**
 		 * Convert a relative path to absolute (within GCPATH_CONFIG).
 		 * @param path Path to convert.
 		 * @return Absolute path, with trailing slash.
 		 */
-		QString toAbsolutePath(QString path) const;
+		QString toAbsolutePath(const QString &path) const;
 
 		/** Variables. **/
 
@@ -223,7 +223,7 @@ int PathConfigPrivate::save(QSettings *qSettings) const
  * @param path Path to convert.
  * @return Relative path. (with leading "./" and trailing slash)
  */
-QString PathConfigPrivate::toRelativePath(QString path) const
+QString PathConfigPrivate::toRelativePath(const QString &path) const
 {
 	// Make sure the path is an absolute path.
 	QString fullPath = QDir(path).absolutePath();
@@ -255,7 +255,7 @@ QString PathConfigPrivate::toRelativePath(QString path) const
 	// Not a relative path.
 	// Ensure that it has a trailing slash.
 	if (!path.endsWith(QChar(L'/')))
-		path.append(QChar(L'/'));
+		return (path + QChar(L'/'));
 	return path;
 }
 
@@ -264,7 +264,7 @@ QString PathConfigPrivate::toRelativePath(QString path) const
  * @param path Path to convert.
  * @return Absolute path, with trailing slash.
  */
-QString PathConfigPrivate::toAbsolutePath(QString path) const
+QString PathConfigPrivate::toAbsolutePath(const QString &path) const
 {
 	// Check if the specified path is absolute or relative.
 	QDir relDir(path);

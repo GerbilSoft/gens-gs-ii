@@ -684,7 +684,7 @@ void GensWindow::stateChanged(void)
  * @param duration Duration for the message to appear, in milliseconds.
  * @param msg Message to print.
  */
-void GensWindow::osdPrintMsg(int duration, QString msg)
+void GensWindow::osdPrintMsg(int duration, const QString &msg)
 {
 	Q_D(GensWindow);
 	d->ui.vBackend->osd_printqs(duration, msg);
@@ -743,7 +743,7 @@ void GensWindow::qAppFocusChanged(QWidget *old, QWidget *now)
  * Auto Pause setting has changed.
  * @param newAutoPause (bool) New Auto Pause setting.
  */
-void GensWindow::autoPause_changed_slot(QVariant newAutoPause)
+void GensWindow::autoPause_changed_slot(const QVariant &newAutoPause)
 {
 	Q_D(GensWindow);
 	d->cfg_autoPause = newAutoPause.toBool();
@@ -768,7 +768,7 @@ void GensWindow::autoPause_changed_slot(QVariant newAutoPause)
  * Show Menu Bar setting has changed.
  * @param newShowMenuBar (bool) New Show Menu Bar setting.
  */
-void GensWindow::showMenuBar_changed_slot(QVariant newShowMenuBar)
+void GensWindow::showMenuBar_changed_slot(const QVariant &newShowMenuBar)
 {
 	Q_D(GensWindow);
 	d->cfg_showMenuBar = newShowMenuBar.toBool();
@@ -783,7 +783,7 @@ void GensWindow::openRom(void)
 	Q_D(GensWindow);
 	d->ui.emuManager->openRom();
 }
-void GensWindow::openRom(QString filename, QString z_filename)
+void GensWindow::openRom(const QString &filename, const QString &z_filename)
 {
 	Q_D(GensWindow);
 	d->ui.emuManager->openRom(filename, z_filename);
@@ -879,7 +879,7 @@ void GensWindow::idleThread_frameDone(void)
  * Intro Style setting has changed.
  * @param newIntroStyle (int) New Intro Style setting.
  */
-void GensWindow::introStyle_changed_slot(QVariant newIntroStyle)
+void GensWindow::introStyle_changed_slot(const QVariant &newIntroStyle)
 {
 	Q_D(GensWindow);
 	d->cfg_introStyle = newIntroStyle.toInt();

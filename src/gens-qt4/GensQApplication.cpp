@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -51,7 +51,7 @@ class GensQApplicationPrivate
 		 * Set the Gens translation.
 		 * @param locale Locale name, e.g. "en_US".
 		 */
-		void setGensTranslation(QString locale);
+		void setGensTranslation(const QString &locale);
 
 	private:
 		GensQApplication *const q;
@@ -147,7 +147,7 @@ void GensQApplicationPrivate::gqaInit(void)
  * Set the Gens translation.
  * @param locale Locale name, e.g. "en_US".
  */
-void GensQApplicationPrivate::setGensTranslation(QString locale)
+void GensQApplicationPrivate::setGensTranslation(const QString &locale)
 {
 	// Initialize the Qt translation system.
 	// TODO: Allow switching languages on the fly?
@@ -222,7 +222,7 @@ bool GensQApplication::isGuiThread(void)
  * @param name Icon name.
  * @return QIcon.
  */
-QIcon GensQApplication::IconFromTheme(QString name)
+QIcon GensQApplication::IconFromTheme(const QString &name)
 {
 #ifndef Q_WS_X11
 	// Check if a system icon exists.

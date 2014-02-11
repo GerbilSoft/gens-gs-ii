@@ -102,7 +102,7 @@ uint16_t GeneralConfigWindowPrivate::regionCodeOrder(void) const
  * @param rom_desc	[in] ROM file description.
  * @param txtRomFile	[in] ROM file textbox.
  */
-void GeneralConfigWindowPrivate::selectRomFile(QString rom_desc, QLineEdit *txtRomFile)
+void GeneralConfigWindowPrivate::selectRomFile(const QString &rom_desc, QLineEdit *txtRomFile)
 {
 	// TODO: Proper compressed file support.
 	#define ZLIB_EXT " *.zip *.zsg *.gz"
@@ -472,7 +472,7 @@ rom_identified:
  * @param rom_id Sega CD Boot ROM ID.
  * @param rom_desc ROM file description. (detected by examining the ROM)
  */
-void GeneralConfigWindowPrivate::mcdDisplayRomFileStatus(QString rom_id, QString rom_desc)
+void GeneralConfigWindowPrivate::mcdDisplayRomFileStatus(const QString &rom_id, const QString &rom_desc)
 {
 	// Set the ROM description.
 	QString sel_rom = GeneralConfigWindow::tr("Selected ROM: %1");
@@ -486,7 +486,7 @@ void GeneralConfigWindowPrivate::mcdDisplayRomFileStatus(QString rom_id, QString
  * @param file_id File ID.
  * @param file_desc File description. (detected by examining the file)
  */
-void GeneralConfigWindowPrivate::extprgDisplayFileStatus(QString file_id, QString file_desc)
+void GeneralConfigWindowPrivate::extprgDisplayFileStatus(const QString &file_id, const QString &file_desc)
 {
 	// Set the file description.
 	QString sel_prg = GeneralConfigWindow::tr("Selected Program: %1");

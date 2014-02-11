@@ -503,7 +503,7 @@ QVector<GensKey_t> CtrlConfig::keyMap(IoManager::VirtPort_t virtPort)
  * @param virtPort Virtual controller port.
  * @param keyMap New keymap.
  */
-void CtrlConfig::setKeyMap(LibGens::IoManager::VirtPort_t virtPort, QVector<GensKey_t> keyMap)
+void CtrlConfig::setKeyMap(LibGens::IoManager::VirtPort_t virtPort, const QVector<GensKey_t> &keyMap)
 {
 	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
 	Q_D(CtrlConfig);

@@ -77,7 +77,7 @@ class FindCdromDrives : public QObject
 		 * @param deviceName CD-ROM device name.
 		 * @return CdDrive instance, or nullptr if unable to open the drive.
 		 */
-		LibGensCD::CdDrive *getCdDrive(QString deviceName);
+		LibGensCD::CdDrive *getCdDrive(const QString &deviceName);
 
 		/**
 		 * Get the icon for the specified CD-ROM drive.
@@ -86,7 +86,7 @@ class FindCdromDrives : public QObject
 		 * @param deviceName CD_ROM device name.
 		 * @return Icon for either the disc or the drive.
 		 */
-		QIcon getDriveIcon(QString deviceName);
+		QIcon getDriveIcon(const QString &deviceName);
 
 		/**
 		 * Get the icon for the specified CD-ROM drive.
@@ -104,7 +104,7 @@ class FindCdromDrives : public QObject
 		 * or a rescan() was requested.
 		 * @param deviceName Device name of the added CD-ROM drive.
 		 */
-		void driveAdded(QString deviceName);
+		void driveAdded(const QString &deviceName);
 
 		/**
 		 * Disc drive removed.
@@ -112,14 +112,14 @@ class FindCdromDrives : public QObject
 		 * or a rescan() was requested.
 		 * @param deviceName Device name of the removed CD-ROM drive.
 		 */
-		void driveRemoved(QString deviceName);
+		void driveRemoved(const QString &deviceName);
 
 		/**
 		 * Disc drive changed.
 		 * This happens if the media in a disc drive was changed.
 		 * @param deviceName Device name of the changed CD-ROM drive.
 		 */
-		void driveChanged(QString deviceName);
+		void driveChanged(const QString &deviceName);
 };
 
 }

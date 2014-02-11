@@ -4,7 +4,7 @@
  *                                                                            *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                         *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                                *
- * Copyright (c) 2008-2011 by David Korth.                                    *
+ * Copyright (c) 2008-2014 by David Korth.                                    *
  *                                                                            *
  * This program is free software; you can redistribute it and/or modify       *
  * it under the terms of the GNU General Public License as published by       *
@@ -53,50 +53,47 @@
 // Screenshot handler.
 #include "Screenshot.hpp"
 
-
 namespace GensQt4
 {
 
 /** Emulation Request Queue: Submission functions. **/
 
 /**
- * screenShot(): Request a screenshot.
+ * Request a screenshot.
  */
 void EmuManager::screenShot(void)
 {
 	if (!m_rom)
 		return;
-	
+
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_SCREENSHOT;
 	m_qEmuRequest.enqueue(rq);
-	
+
 	if (m_paused.data)
 		processQEmuRequest();
 }
 
-
 /**
- * setAudioRate(): Set the audio sampling rate.
+ * Set the audio sampling rate.
  * @param newRate New audio sampling rate.
  */
 void EmuManager::setAudioRate(int newRate)
 {
 	if (newRate > LibGens::SoundMgr::MAX_SAMPLING_RATE)
 		return;
-	
+
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_AUDIO_RATE;
 	rq.audioRate = newRate;
 	m_qEmuRequest.enqueue(rq);
-	
+
 	if (!m_rom || m_paused.data)
 		processQEmuRequest();
 }
 
-
 /**
- * setStereo(): Set stereo or mono.
+ * Set stereo or mono.
  * @param newStereo True for stereo; false for mono.
  */
 void EmuManager::setStereo(bool newStereo)
@@ -105,14 +102,13 @@ void EmuManager::setStereo(bool newStereo)
 	rq.rqType = EmuRequest_t::RQT_AUDIO_STEREO;
 	rq.audioStereo = newStereo;
 	m_qEmuRequest.enqueue(rq);
-	
+
 	if (!m_rom || m_paused.data)
 		processQEmuRequest();
 }
 
-
 /**
- * resetCpu(): Reset a CPU.
+ * Reset a CPU.
  * @param cpu_idx CPU index.
  * TODO: Use MDP CPU indexes.
  */
@@ -120,62 +116,60 @@ void EmuManager::resetCpu(int cpu_idx)
 {
 	if (!m_rom)
 		return;
-	
+
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_RESET_CPU;
 	rq.cpu_idx = (ResetCpuIndex)cpu_idx;
 	m_qEmuRequest.enqueue(rq);
-	
+
 	if (m_paused.data)
 		processQEmuRequest();
 }
 
-
 /**
- * saveState(): Save the current emulation state.
+ * Save the current emulation state.
  */
 void EmuManager::saveState(void)
 {
 	if (!m_rom)
 		return;
-	
+
 	// Get the savestate filename.
 	QString filename = getSaveStateFilename();
-	
+
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_SAVE_STATE;
 	rq.saveState.filename = new QString(filename);
 	rq.saveState.saveSlot = m_saveSlot;
 	m_qEmuRequest.enqueue(rq);
-	
+
 	if (m_paused.data)
 		processQEmuRequest();
 }
 
 /**
- * loadState(): Load the emulation state from a file.
+ * Load the emulation state from a file.
  */
 void EmuManager::loadState(void)
 {
 	if (!m_rom)
 		return;
-	
+
 	// Get the savestate filename.
 	QString filename = getSaveStateFilename();
-	
+
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_LOAD_STATE;
 	rq.saveState.filename = new QString(filename);
 	rq.saveState.saveSlot = m_saveSlot;
 	m_qEmuRequest.enqueue(rq);
-	
+
 	if (m_paused.data)
 		processQEmuRequest();
 }
 
-
 /**
- * pauseRequest(): Set the paused state.
+ * Set the paused state.
  * @param paused_set Paused flags to set.
  * @param paused_clear Paused flags to clear.
  */
@@ -184,13 +178,13 @@ void EmuManager::pauseRequest(paused_t paused_set, paused_t paused_clear)
 	paused_t newPause = m_paused;
 	newPause.data |= paused_set.data;
 	newPause.data &= ~paused_clear.data;
-	
+
 	// Toggle the paused state.
 	pauseRequest(newPause);
 }
 
 /**
- * pauseRequest(): Set the manual paused state.
+ * Set the manual paused state.
  * @param newManualPaused New manual paused state.
  */
 void EmuManager::pauseRequest(bool newManualPaused)
@@ -201,26 +195,24 @@ void EmuManager::pauseRequest(bool newManualPaused)
 }
 
 /**
- * pauseRequest(): Set the paused state.
+ * Set the paused state.
  * @param newPaused New paused state.
  */
 void EmuManager::pauseRequest(paused_t newPaused)
 {
 	if (!m_rom)
 		return;
-	
-	if (!!(m_paused.data) == !!(newPaused.data))
-	{
+
+	if (!!(m_paused.data) == !!(newPaused.data)) {
 		// Paused state is effectively the same.
 		// Simply update the emulator state.
 		m_paused = newPaused;
 		emit stateChanged();
 		return;
 	}
-	
+
 	// Check if we should pause or unpause the emulator.
-	if (!newPaused.data)
-	{
+	if (!newPaused.data) {
 		// Unpause the ROM immediately.
 		// TODO: Reset the FPS counter?
 		m_paused = newPaused;
@@ -228,9 +220,7 @@ void EmuManager::pauseRequest(paused_t newPaused)
 		if (gqt4_emuThread)
 			gqt4_emuThread->resume(false);
 		emit stateChanged();
-	}
-	else
-	{
+	} else {
 		// Queue the pause request.
 		EmuRequest_t rq;
 		rq.rqType = EmuRequest_t::RQT_PAUSE_EMULATION;
@@ -239,100 +229,95 @@ void EmuManager::pauseRequest(paused_t newPaused)
 	}
 }
 
-
 /**
- * saveSlot_changed_slot(): Save slot changed.
+ * Save slot changed.
  * @param saveSlot (int) Save slot number, (0-9)
  */
-void EmuManager::saveSlot_changed_slot(QVariant saveSlot)
+void EmuManager::saveSlot_changed_slot(const QVariant &saveSlot)
 {
 	// NOTE: Don't check if the save slot is the same.
 	// This allows users to recheck a savestate's preview image.
-	
+
 	// Queue the save slot request.
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_SAVE_SLOT;
 	rq.saveState.saveSlot = saveSlot.toInt();
 	m_qEmuRequest.enqueue(rq);
-	
+
 	if (!m_rom || m_paused.data)
 		processQEmuRequest();
 }
 
-
 /**
- * enableSRam_changed_slot(): Enable SRam/EEPRom setting has changed.
+ * Enable SRam/EEPRom setting has changed.
  * @param enableSRam (bool) New Enable SRam/EEPRom setting.
  */
-void EmuManager::enableSRam_changed_slot(QVariant enableSRam)
+void EmuManager::enableSRam_changed_slot(const QVariant &enableSRam)
 {
 	// Queue the Enable SRam/EEPRom request.
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_ENABLE_SRAM;
 	rq.enableSRam = enableSRam.toBool();
 	m_qEmuRequest.enqueue(rq);
-	
+
 	if (!m_rom || m_paused.data)
 		processQEmuRequest();
 }
 
-
 /**
- * autoFixChecksum_changed_slot(): Change the Auto Fix Checksum setting.
+ * Change the Auto Fix Checksum setting.
  * @param autoFixChecksum (bool) New Auto Fix Checksum setting.
  */
-void EmuManager::autoFixChecksum_changed_slot(QVariant autoFixChecksum)
+void EmuManager::autoFixChecksum_changed_slot(const QVariant &autoFixChecksum)
 {
 	// Queue the autofix checksum change request.
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_AUTOFIX_CHANGE;
 	rq.autoFixChecksum = autoFixChecksum.toBool();
 	m_qEmuRequest.enqueue(rq);
-	
+
 	if (!m_rom || m_paused.data)
 		processQEmuRequest();
 }
 
-
 /**
- * regionCode_changed_slot(): Region code has changed.
+ * Region code has changed.
  * @param regionCode (int) New region code setting.
  */
-void EmuManager::regionCode_changed_slot(QVariant regionCode)
+void EmuManager::regionCode_changed_slot(const QVariant &regionCode)
 {
 	// NOTE: Region code change is processed even if a ROM isn't loaded,
 	// since we're printing a message to the screen.
-	
+
 	// Queue the region code change.
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_REGION_CODE;
 	rq.region = (LibGens::SysVersion::RegionCode_t)regionCode.toInt();
 	m_qEmuRequest.enqueue(rq);
-	
+
 	if (!m_rom || m_paused.data)
 		processQEmuRequest();
 }
 
-
 /**
- * regionCodeOrder_changed_slot(): Region code auto-detection order has changed.
+ * Region code auto-detection order has changed.
  * @param regionCodeOrder New region code auto-detection order setting.
  */
-void EmuManager::regionCodeOrder_changed_slot(QVariant regionCodeOrder)
+void EmuManager::regionCodeOrder_changed_slot(const QVariant &regionCodeOrder)
 {
 	if (!m_rom)
 		return;
-	
+
 	// regionCodeOrder isn't actually used here...
 	Q_UNUSED(regionCodeOrder);
-	
+
 	// If we're not using region code auto-detection, don't do anything else.
 	if (gqt4_cfg->getInt(QLatin1String("System/regionCode")) !=
 	    (int)LibGens::SysVersion::REGION_AUTO)
 	{
 		return;
 	}
-	
+
 	// Auto-detect order has changed, and we're currently using auto-detect.
 	// Handle it as a regular region code change.
 	// Queue the region code change.
@@ -340,34 +325,32 @@ void EmuManager::regionCodeOrder_changed_slot(QVariant regionCodeOrder)
 	rq.rqType = EmuRequest_t::RQT_REGION_CODE;
 	rq.region = LibGens::SysVersion::REGION_AUTO;
 	m_qEmuRequest.enqueue(rq);
-	
+
 	if (!m_rom || m_paused.data)
 		processQEmuRequest();
 }
 
-
 /**
- * resetEmulator(): Reset the emulator.
+ * Reset the emulator.
  * @param hardReset If true, do a hard reset; otherwise, do a soft reset.
  */
 void EmuManager::resetEmulator(bool hardReset)
 {
 	if (!m_rom)
 		return;
-	
+
 	// Queue the reset request.
 	EmuRequest_t rq;
 	rq.rqType = EmuRequest_t::RQT_RESET;
 	rq.hardReset = hardReset;
 	m_qEmuRequest.enqueue(rq);
-	
+
 	if (m_paused.data)
 		processQEmuRequest();
 }
 
-
 /**
- * changePaletteSetting(): Change a palette setting.
+ * Change a palette setting.
  * @param type Type of palette setting.
  * @param val New value.
  */
@@ -379,113 +362,108 @@ void EmuManager::changePaletteSetting(EmuRequest_t::PaletteSettingType type, int
 	rq.PaletteSettings.ps_type = type;
 	rq.PaletteSettings.ps_val = val;
 	m_qEmuRequest.enqueue(rq);
-	
+
 	if (!m_rom || m_paused.data)
 		processQEmuRequest();
 }
 
-
 /** Graphics settings. **/
 
-void EmuManager::interlacedMode_changed_slot(QVariant interlacedMode)
+void EmuManager::interlacedMode_changed_slot(const QVariant &interlacedMode)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_INTERLACEDMODE, interlacedMode.toInt()); }
 
 /** VDP settings. **/
 
-void EmuManager::borderColorEmulation_changed_slot(QVariant borderColorEmulation)
+void EmuManager::borderColorEmulation_changed_slot(const QVariant &borderColorEmulation)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_BORDERCOLOREMULATION, (int)borderColorEmulation.toBool()); }
-void EmuManager::ntscV30Rolling_changed_slot(QVariant ntscV30Rolling)
+void EmuManager::ntscV30Rolling_changed_slot(const QVariant &ntscV30Rolling)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_NTSCV30ROLLING, (int)ntscV30Rolling.toBool()); }
-void EmuManager::spriteLimits_changed_slot(QVariant spriteLimits)
+void EmuManager::spriteLimits_changed_slot(const QVariant &spriteLimits)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_SPRITELIMITS, (int)spriteLimits.toBool()); }
-void EmuManager::zeroLengthDMA_changed_slot(QVariant zeroLengthDMA)
+void EmuManager::zeroLengthDMA_changed_slot(const QVariant &zeroLengthDMA)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_ZEROLENGTHDMA, (int)zeroLengthDMA.toBool()); }
-void EmuManager::vscrollBug_changed_slot(QVariant vscrollBug)
+void EmuManager::vscrollBug_changed_slot(const QVariant &vscrollBug)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_VSCROLLBUG, (int)vscrollBug.toBool()); }
-
 
 /** Emulation Request Queue: Processing functions. **/
 
-
 /**
- * processQEmuRequest(): Process the Emulation Request queue.
+ * Process the Emulation Request queue.
  */
 void EmuManager::processQEmuRequest(void)
 {
-	while (!m_qEmuRequest.isEmpty())
-	{
+	while (!m_qEmuRequest.isEmpty()) {
 		EmuRequest_t rq = m_qEmuRequest.dequeue();
-		
-		switch (rq.rqType)
-		{
+
+		switch (rq.rqType) {
 			case EmuRequest_t::RQT_SCREENSHOT:
 				// Screenshot.
 				doScreenShot();
 				break;
-			
+
 			case EmuRequest_t::RQT_AUDIO_RATE:
 				// Audio sampling rate.
 				doAudioRate(rq.audioRate);
 				break;
-			
+
 			case EmuRequest_t::RQT_AUDIO_STEREO:
 				// Stereo / Mono.
 				doAudioStereo(rq.audioStereo);
 				break;
-			
+
 			case EmuRequest_t::RQT_SAVE_STATE:
 				// Save a savestate.
 				doSaveState(*rq.saveState.filename, rq.saveState.saveSlot);
 				delete rq.saveState.filename;
 				break;
-			
+
 			case EmuRequest_t::RQT_LOAD_STATE:
 				// Load a savestate.
 				doLoadState(*rq.saveState.filename, rq.saveState.saveSlot);
 				delete rq.saveState.filename;
 				break;
-			
+
 			case EmuRequest_t::RQT_SAVE_SLOT:
 				// Set the save slot.
 				doSaveSlot(rq.saveState.saveSlot);
 				break;
-			
+
 			case EmuRequest_t::RQT_PAUSE_EMULATION:
 				// Pause emulation.
 				// Unpausing emulation is handled in EmuManager::pauseRequest().
 				doPauseRequest(rq.newPaused);
 				break;
-			
+
 			case EmuRequest_t::RQT_RESET:
 				doResetEmulator(rq.hardReset);
 				break;
-			
+
 			case EmuRequest_t::RQT_AUTOFIX_CHANGE:
 				// Set the Auto Fix Checksum setting.
 				// TODO: Apply changes immediately?
 				LibGens::EmuContext::SetAutoFixChecksum(rq.autoFixChecksum);
 				break;
-			
+
 			case EmuRequest_t::RQT_PALETTE_SETTING:
 				// Set a palette setting.
 				doChangePaletteSetting(rq.PaletteSettings.ps_type, rq.PaletteSettings.ps_val);
 				break;
-			
+
 			case EmuRequest_t::RQT_RESET_CPU:
 				// Reset a CPU.
 				doResetCpu(rq.cpu_idx);
 				break;
-			
+
 			case EmuRequest_t::RQT_REGION_CODE:
 				// Set the region code.
 				doRegionCode(rq.region);
 				break;
-			
+
 			case EmuRequest_t::RQT_ENABLE_SRAM:
 				// Enable/disable SRam/EEPRom.
 				doEnableSRam(rq.enableSRam);
 				break;
-			
+
 			case EmuRequest_t::RQT_UNKNOWN:
 			default:
 				// Unknown emulation request.
@@ -493,7 +471,6 @@ void EmuManager::processQEmuRequest(void)
 		}
 	}
 }
-
 
 /**
  * Do a screenshot.
@@ -539,9 +516,8 @@ void EmuManager::doScreenShot(void)
 	emit osdPrintMsg(1500, osdMsg);
 }
 
-
 /**
- * doAudioRate(): Set the audio sampling rate.
+ * Set the audio sampling rate.
  * @param newRate New audio sampling rate.
  */
 void EmuManager::doAudioRate(int newRate)
@@ -549,18 +525,17 @@ void EmuManager::doAudioRate(int newRate)
 	if (m_audio->rate() == newRate)
 		return;
 	m_audio->setRate(newRate);
-	
+
 	//: OSD message indicating sampling rate change.
 	QString osdMsg = tr("Audio sampling rate set to %L1 Hz.", "osd");
 	osdMsg = osdMsg.arg(newRate);
-	
+
 	// Emit the signal.
 	emit osdPrintMsg(1500, osdMsg);
 }
 
-
 /**
- * doAudioStereo(): Set stereo or mono.
+ * Set stereo or mono.
  * @param newStereo True for stereo; false for mono.
  */
 void EmuManager::doAudioStereo(bool newStereo)
@@ -568,7 +543,7 @@ void EmuManager::doAudioStereo(bool newStereo)
 	if (m_audio->isStereo() == newStereo)
 		return;
 	m_audio->setStereo(newStereo);
-	
+
 	//: OSD message indicating audio stereo/mono change.
 	QString osdMsg = tr("Audio set to %1.", "osd");
 	osdMsg = osdMsg.arg(newStereo
@@ -579,9 +554,8 @@ void EmuManager::doAudioStereo(bool newStereo)
 	emit osdPrintMsg(1500, osdMsg);
 }
 
-
 /**
- * doSaveState(): Save the current emulation state to a file.
+ * Save the current emulation state to a file.
  * @param filename Filename.
  * @param saveSlot Save slot number. (0-9)
  */
@@ -591,7 +565,7 @@ void EmuManager::doSaveState(QString filename, int saveSlot)
 	Screenshot ss(m_rom, gqt4_emuContext, this);
 	QBuffer imgBuf;
 	ss.save(&imgBuf);
-	
+
 	// Save the ZOMG file.
 	const QString nativeFilename = QDir::toNativeSeparators(filename);
 	int ret = LibGens::ZomgSave(
@@ -600,78 +574,64 @@ void EmuManager::doSaveState(QString filename, int saveSlot)
 				imgBuf.buffer().constData(),	// Preview image.
 				imgBuf.buffer().size()		// Size of preview image.
 				);
-	
+
 	QString osdMsg;
-	
-	if (ret == 0)
-	{
+
+	if (ret == 0) {
 		// Savestate saved.
-		if (saveSlot >= 0)
-		{
+		if (saveSlot >= 0) {
 			//: OSD message indicating a savestate has been saved.
 			osdMsg = tr("State %1 saved.", "osd").arg(saveSlot);
-		}
-		else
-		{
+		} else {
 			//: OSD message indicating a savestate has been saved using a specified filename.
 			osdMsg = tr("State saved in %1", "osd").arg(nativeFilename);
 		}
-	}
-	else
-	{
+	} else {
 		// Error saving savestate.
 		//: OSD message indicating an error occurred while saving the savestate.
 		osdMsg = tr("Error saving state: %1", "osd").arg(ret);
 	}
-	
+
 	// Print the message to the OSD.
 	emit osdPrintMsg(1500, osdMsg);
 }
 
-
 /**
- * doLoadState(): Load the emulation state from a file.
+ * Load the emulation state from a file.
  * @param filename Filename.
  * @param saveSlot Save slot number. (0-9)
  */
 void EmuManager::doLoadState(QString filename, int saveSlot)
 {
 	// TODO: Redraw the screen if emulation is paused.
-	
+
 	// Load the ZOMG file.
 	const QString nativeFilename = QDir::toNativeSeparators(filename);
 	int ret = LibGens::ZomgLoad(nativeFilename.toUtf8().constData(), gqt4_emuContext);
-	
+
 	QString osdMsg;
-	
-	if (ret == 0)
-	{
+
+	if (ret == 0) {
 		// Savestate loaded.
-		if (saveSlot >= 0)
-		{
+		if (saveSlot >= 0) {
 			//: OSD message indicating a savestate has been loaded.
 			osdMsg = tr("State %1 loaded.", "osd").arg(saveSlot);
-		}
-		else
-		{
+		} else {
 			//: OSD message indicating a savestate has been loaded using a specified filename.
 			osdMsg = tr("State loaded from %1", "osd").arg(nativeFilename);
 		}
-	}
-	else
-	{
+	} else {
 		// Error loading savestate.
 		//: OSD message indicating an error occurred while loading the savestate.
 		osdMsg = tr("Error loading state: %1", "osd").arg(ret);
 	}
-	
+
 	// Print the message to the OSD.
 	emit osdPrintMsg(1500, osdMsg);
 }
 
-
 /**
- * saveSlot(): Set the current savestate slot.
+ * Set the current savestate slot.
  * @param newSaveSlot Save slot number. (0-9)
  */
 void EmuManager::doSaveSlot(int newSaveSlot)
@@ -679,15 +639,14 @@ void EmuManager::doSaveSlot(int newSaveSlot)
 	if (newSaveSlot < 0 || newSaveSlot > 9)
 		return;
 	m_saveSlot = newSaveSlot;
-	
+
 	// Standard OSD duration for save slot selection.
 	static const int OsdDuration = 1500;
-	
+
 	// Preview image.
 	QImage imgPreview;
-	
-	if (!m_rom)
-	{
+
+	if (!m_rom) {
 		// No ROM is loaded.
 		//: OSD message indicating a save slot is selected while no ROM is loaded.
 		QString osdMsg = tr("Save Slot %1 selected.", "osd").arg(m_saveSlot);
@@ -695,33 +654,30 @@ void EmuManager::doSaveSlot(int newSaveSlot)
 		emit osdShowPreview(0, imgPreview);
 		return;
 	}
-	
+
 	// ROM is loaded.
 	//: OSD message indicating a save slot is selected while a ROM is loaded.
 	QString osdMsg = tr("Save Slot %1 [%2]", "osd").arg(m_saveSlot);
-	
+
 	// Check if the file exists.
 	QString filename = getSaveStateFilename();
-	if (QFile::exists(filename))
-	{
+	if (QFile::exists(filename)) {
 		// Savestate exists.
 		//: OSD message indicating a savestate exists in the selected slot.
 		osdMsg = osdMsg.arg(tr("OCCUPIED", "osd"));
-		
+
 		// Check if the savestate has a preview image.
 		QString nativeFilename = QDir::toNativeSeparators(filename);
 		LibZomg::Zomg zomg(nativeFilename.toUtf8().constData(), LibZomg::Zomg::ZOMG_LOAD);
-		if (zomg.getPreviewSize() > 0)
-		{
+		if (zomg.getPreviewSize() > 0) {
 			// Preview image found.
 			QByteArray img_ByteArray;
 			img_ByteArray.resize(zomg.getPreviewSize());
 			int ret = zomg.loadPreview(img_ByteArray.data(), img_ByteArray.size());
-			
-			if (ret == 0)
-			{
+
+			if (ret == 0) {
 				// Preview image loaded from the ZOMG file.
-				
+
 				// Convert the preview image to a QImage.
 				QBuffer imgBuf(&img_ByteArray);
 				imgBuf.open(QIODevice::ReadOnly);
@@ -729,50 +685,45 @@ void EmuManager::doSaveSlot(int newSaveSlot)
 				imgPreview = imgReader.read();
 			}
 		}
-		
+
 		// Close the savestate.
 		zomg.close();
-	}
-	else
-	{
+	} else {
 		// Savestate doesn't exist.
 		//: OSD message indicating there is no savestate in the selected slot.
 		osdMsg = osdMsg.arg(tr("EMPTY", "osd"));
 	}
-	
+
 	// Print the OSD.
 	emit osdPrintMsg(OsdDuration, osdMsg);
 	emit osdShowPreview((imgPreview.isNull() ? 0 : OsdDuration), imgPreview);
 }
 
-
 /**
- * doPauseRequest(): Pause emulation.
+ * Pause emulation.
  * Unpausing emulation is handled in EmuManager::pauseRequest().
  * @param newPaused New paused state.
  */
 void EmuManager::doPauseRequest(paused_t newPaused)
 {
-	if (m_paused.data)
-	{
+	if (m_paused.data) {
 		// Emulator is already paused.
 		// Simply update the paused state.
 		m_paused = newPaused;
 		emit stateChanged();
 		return;
 	}
-	
+
 	// Pause the emulator.
 	m_paused = newPaused;
-	
+
 	// Turn off audio and autosave SRam/EEPRom.
 	m_audio->close();	// TODO: Add a pause() function.
 	gqt4_emuContext->autoSaveData(-1);
-	
+
 	// Emulation state has changed.
 	emit stateChanged();
 }
-
 
 /**
  * Reset the emulator.
@@ -801,7 +752,7 @@ void EmuManager::doResetEmulator(bool hardReset)
 
 
 /**
- * doChangePaletteSetting(): Change a palette setting.
+ * Change a palette setting.
  * @param type Type of palette setting.
  * @param val New value.
  */
@@ -869,9 +820,8 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 	}
 }
 
-
 /**
- * doResetCpu(): Reset a CPU.
+ * Reset a CPU.
  * @param cpu_idx CPU index.
  * TODO: Use MDP CPU indexes.
  */
@@ -879,107 +829,96 @@ void EmuManager::doResetCpu(EmuManager::ResetCpuIndex cpu_idx)
 {
 	// TODO: Reset CPUs through the emulation context using MDP CPU indexes.
 	QString msg;
-	switch (cpu_idx)
-	{
+	switch (cpu_idx) {
 		case RQT_CPU_M68K:
 			LibGens::M68K::Reset();
 			//: OSD message indicating the 68000 CPU was reset.
 			msg = tr("68000 reset.", "osd");
 			break;
-		
+
 		case RQT_CPU_Z80:
 			LibGens::Z80::SoftReset();
 			// TODO: Add Z80 hard reset option?
 			//: OSD message indicating the Z80 CPU was reset.
 			msg = tr("Z80 reset.", "osd");
 			break;
-		
+
 		default:
 			msg.clear();
 			break;
 	}
-	
+
 	// Print the message to the OSD.
 	emit osdPrintMsg(1500, msg);
 }
 
-
 /**
- * doRegionCode(): Set the region code.
+ * Set the region code.
  * @param region New region code setting.
  */
 void EmuManager::doRegionCode(LibGens::SysVersion::RegionCode_t region)
 {
 	// TODO: Verify if this is an actual change.
 	// If it isn't, don't do anything.
-	
+
 	// Print a message to the OSD.
 	const QString region_str = LgRegionCodeStr(region);
 	//: OSD message indicating the system region code was changed.
 	const QString str = tr("System region set to %1.", "osd");
 	emit osdPrintMsg(1500, str.arg(region_str));
-	
+
 	// NOTE: Region code order validation isn't needed here,
 	// since it's done elsewhere.
-	if (m_rom)
-	{
+	if (m_rom) {
 		// Emulation is running. Change the region.
 		// GetLgRegionCode() is needed for region auto-detection.
 		LibGens::SysVersion::RegionCode_t lg_region = GetLgRegionCode(
 					region, m_rom->regionCode(),
 					(uint16_t)gqt4_cfg->getUInt(QLatin1String("System/regionCodeOrder")));
 		gqt4_emuContext->setRegion(lg_region);
-		
-		if (region == LibGens::SysVersion::REGION_AUTO)
-		{
+
+		if (region == LibGens::SysVersion::REGION_AUTO) {
 			// Print the auto-detected region.
 			const QString detect_str = LgRegionCodeStr(lg_region);
-			if (!detect_str.isEmpty())
-			{
+			if (!detect_str.isEmpty()) {
 				//: OSD message indicating the auto-detected ROM region.
 				const QString auto_str = tr("ROM region detected as %1.", "osd");
 				emit osdPrintMsg(1500, auto_str.arg(detect_str));
 			}
 		}
 	}
-	
+
 	// Update the system name in the GensWindow title bar.
 	emit stateChanged();
 }
 
-
 /**
- * doEnableSRam(): Enable/disable SRam/EEPRom.
+ * Enable/disable SRam/EEPRom.
  * @param enableSRam New enable/disable SRam/EEPRom value.
  */
 void EmuManager::doEnableSRam(bool enableSRam)
 {
-	if (gqt4_emuContext)
-	{
-		if (gqt4_emuContext->saveDataEnable() == enableSRam)
-		{
+	if (gqt4_emuContext) {
+		if (gqt4_emuContext->saveDataEnable() == enableSRam) {
 			// SRAM enabled value is the same.
 			// Don't show a message.
 			return;
 		}
-		
+
 		// Set the SRAM enabled value.
 		gqt4_emuContext->setSaveDataEnable(enableSRam);
 	}
-	
+
 	// Print a message to the screen.
 	QString msg;
-	if (enableSRam)
-	{
+	if (enableSRam) {
 		//: OSD message indicating SRAM/EEPROM has been enabled.
 		msg = tr("SRAM/EEPROM enabled.", "osd");
-	}
-	else
-	{
+	} else {
 		//: OSD message indicating SRAM/EEPROM has been disabled.
 		msg = tr("SRAM/EEPROM disabled.", "osd");
 	}
-	
+
 	// Print the message to the OSD.
 	emit osdPrintMsg(1500, msg);
 }

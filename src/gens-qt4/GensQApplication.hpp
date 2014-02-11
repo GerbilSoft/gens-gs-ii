@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -58,7 +58,7 @@ class GensQApplication : public QApplication
 		 * @param name Icon name.
 		 * @return QIcon.
 		 */
-		static QIcon IconFromTheme(QString name);
+		static QIcon IconFromTheme(const QString &name);
 
 #ifdef Q_OS_WIN32
 		// Win32 event filter.

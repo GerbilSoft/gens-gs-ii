@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2012 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -100,7 +100,7 @@ class ConfigDefaults
 		 * @param key Setting key.
 		 * @return DefaultSetting struct, or nullptr if not found.
 		 */
-		const DefaultSetting *get(QString key) const;
+		const DefaultSetting *get(const QString &key) const;
 
 	private:
 		// Internal settings hash.
@@ -112,7 +112,7 @@ class ConfigDefaults
  * @param key Setting key.
  * @return DefaultSetting struct, or nullptr if not found.
  */
-inline const ConfigDefaults::DefaultSetting *ConfigDefaults::get(QString key) const
+inline const ConfigDefaults::DefaultSetting *ConfigDefaults::get(const QString &key) const
 	{ return defaultSettingsHash.value(key, nullptr); }
 
 }
