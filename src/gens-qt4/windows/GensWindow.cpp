@@ -66,22 +66,24 @@ class GensWindowPrivate
 		Q_DISABLE_COPY(GensWindowPrivate)
 
 	public:
-		void setupUi(void);
+		struct Ui_GensWindow {
+			QWidget *centralwidget;
+			QVBoxLayout *layout;
 
-		// Key handler.
-		KeyHandlerQt *keyHandler;
+			EmuManager *emuManager;
+			GensMenuBar *gensMenuBar;
+			KeyHandlerQt *keyHandler;
+			GensActions *gensActions;
+			VBackend *vBackend;
 
-		// Widgets.
-		VBackend *vBackend;		// GensQGLWidget.
+			void setupUi(GensWindow *GensWindow);
+		};
+		Ui_GensWindow ui;
 
 		// Menu bar.
-		GensMenuBar *gensMenuBar;
 		bool isGlobalMenuBar(void) const;
 		bool isShowMenuBar(void) const;
 		void initMenuBar(void);
-
-		QWidget *centralwidget;
-		QVBoxLayout *layout;
 
 		int scale;		// Temporary scaling variable.
 		bool hasInitResize;	// Has the initial resize occurred?
@@ -91,12 +93,6 @@ class GensWindowPrivate
 
 		// Set the Gens window title.
 		void setGensTitle(void);
-
-		// Emulation Manager.
-		EmuManager *emuManager;
-
-		// Actions manager.
-		GensActions *gensActions;
 
 		/** Configuration items. **/
 		bool cfg_autoPause;
@@ -109,10 +105,7 @@ class GensWindowPrivate
 		void checkIdleThread(void);
 };
 
-
-/********************************
- * GensWindowPrivate functions. *
- ********************************/
+/** GensWindowPrivate **/
 
 GensWindowPrivate::GensWindowPrivate(GensWindow *q)
 	: q_ptr(q)
@@ -125,36 +118,26 @@ GensWindowPrivate::GensWindowPrivate(GensWindow *q)
 	cfg_autoPause = gqt4_cfg->get(QLatin1String("autoPause")).toBool();
 	cfg_introStyle = gqt4_cfg->getInt(QLatin1String("Intro_Effect/introStyle"));
 	cfg_showMenuBar = gqt4_cfg->get(QLatin1String("GensWindow/showMenuBar")).toBool();
-
-	// Initialize the Emulation Manager.
-	emuManager = new EmuManager();
-
-	// Initialize the Gens Action Manager.
-	gensActions = new GensActions(q);
-
-	// Initialize KeyHandlerQt.
-	keyHandler = new KeyHandlerQt(q, gensActions);
-
-	// Create the GensMenuBar.
-	gensMenuBar = new GensMenuBar(q, emuManager);
 }
 
 GensWindowPrivate::~GensWindowPrivate()
 {
-	delete keyHandler;
-	delete gensActions;
-	delete emuManager;
-	delete gensMenuBar;
+	delete ui.emuManager;
+	delete ui.keyHandler;
+	delete ui.gensActions;
+	delete ui.gensMenuBar;
 }
+
+/** GensWindowPrivate::Ui_GensWindow **/
 
 /**
  * Set up the User Interface.
+ * @param GensWindow GensWindow to set up.
  */
-void GensWindowPrivate::setupUi(void)
+void GensWindowPrivate::Ui_GensWindow::setupUi(GensWindow *GensWindow)
 {
-	Q_Q(GensWindow);
-	if (q->objectName().isEmpty())
-		q->setObjectName(QLatin1String("GensWindow"));
+	if (GensWindow->objectName().isEmpty())
+		GensWindow->setObjectName(QLatin1String("GensWindow"));
 
 #ifdef Q_WS_MAC
 	// Remove the window icon. (Mac "proxy icon")
@@ -162,15 +145,24 @@ void GensWindowPrivate::setupUi(void)
 #endif
 
 	// Create the central widget.
-	centralwidget = new QWidget(q);
+	centralwidget = new QWidget(GensWindow);
 	centralwidget->setObjectName(QLatin1String("centralwidget"));
-	q->setCentralWidget(centralwidget);
+	GensWindow->setCentralWidget(centralwidget);
 
 	// Connect slots by name.
-	QMetaObject::connectSlotsByName(q);
+	QMetaObject::connectSlotsByName(GensWindow);
+
+	// Initialize the Emulation Manager.
+	emuManager = new EmuManager();
 
 	// Initialize the menu bar.
-	initMenuBar();
+	gensMenuBar = new GensMenuBar(GensWindow, emuManager);
+
+	// Initialize the Gens Action Manager.
+	gensActions = new GensActions(GensWindow);
+
+	// Initialize KeyHandlerQt.
+	keyHandler = new KeyHandlerQt(GensWindow, gensActions);
 
 	// Create the Video Backend.
 	// TODO: Allow selection of all available VBackend classes.
@@ -188,7 +180,7 @@ void GensWindowPrivate::setupUi(void)
 	layout->addWidget(vBackend);
 
 	// Enable drag and drop.
-	q->setAcceptDrops(true);
+	GensWindow->setAcceptDrops(true);
 
 	// Connect the GensMenuBar's triggered() signal.
 	QObject::connect(gensMenuBar, SIGNAL(triggered(int,bool)),
@@ -196,13 +188,13 @@ void GensWindowPrivate::setupUi(void)
 
 	// Connect Emulation Manager signals to GensWindow.
 	QObject::connect(emuManager, SIGNAL(updateFps(double)),
-		q, SLOT(updateFps(double)));
+		GensWindow, SLOT(updateFps(double)));
 	QObject::connect(emuManager, SIGNAL(stateChanged(void)),
-		q, SLOT(stateChanged(void)));
+		GensWindow, SLOT(stateChanged(void)));
 	QObject::connect(emuManager, SIGNAL(osdPrintMsg(int,QString)),
-		q, SLOT(osdPrintMsg(int,QString)));
+		GensWindow, SLOT(osdPrintMsg(int,QString)));
 	QObject::connect(emuManager, SIGNAL(osdShowPreview(int,QImage)),
-		q, SLOT(osdShowPreview(int,QImage)));
+		GensWindow, SLOT(osdShowPreview(int,QImage)));
 
 	// Gens Action Manager signals.
 	QObject::connect(gensActions, SIGNAL(actionSetPaused(bool)),
@@ -214,40 +206,18 @@ void GensWindowPrivate::setupUi(void)
 
 	// Auto Pause: Application Focus Changed signal, and setting change signal.
 	QObject::connect(gqt4_app, SIGNAL(focusChanged(QWidget*,QWidget*)),
-		q, SLOT(qAppFocusChanged(QWidget*,QWidget*)));
+		GensWindow, SLOT(qAppFocusChanged(QWidget*,QWidget*)));
 
 	/** Configuration items: Signals. **/
 	gqt4_cfg->registerChangeNotification(QLatin1String("autoPause"),
-					q, SLOT(autoPause_changed_slot(QVariant)));
+				GensWindow, SLOT(autoPause_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("Intro_Effect/introStyle"),
-					q, SLOT(introStyle_changed_slot(QVariant)));
+				GensWindow, SLOT(introStyle_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("GensWindow/showMenuBar"),
-					q, SLOT(showMenuBar_changed_slot(QVariant)));
+				GensWindow, SLOT(showMenuBar_changed_slot(QVariant)));
 }
 
-
-/**
- * Do we have a global menu bar?
- * @return True if yes; false if no.
- */
-inline bool GensWindowPrivate::isGlobalMenuBar(void) const
-{
-	// TODO: Support Unity and Qt global menu bars.
-#ifdef Q_WS_MAC
-	return true;
-#else
-	return false;
-#endif
-}
-
-/**
- * Is the menu bar visible?
- * @return True if yes; false if no.
- */
-inline bool GensWindowPrivate::isShowMenuBar(void) const
-{
-	return (isGlobalMenuBar() || cfg_showMenuBar);
-}
+/** GensWindowPrivate **/
 
 /**
  * Initialize the menu bar.
@@ -277,7 +247,7 @@ void GensWindowPrivate::initMenuBar(void)
 
 		// Show the menu bar.
 		menuBar = q->menuBar();
-		gensMenuBar->createMenuBar(menuBar);
+		ui.gensMenuBar->createMenuBar(menuBar);
 
 		if (!wasMenuBarThere && !q->isMaximized() && !q->isMinimized()) {
 			menuBar->adjustSize();	// ensure the menu bar gets the correct size
@@ -286,7 +256,7 @@ void GensWindowPrivate::initMenuBar(void)
 	}
 
 	// Hide "Show Menu Bar" if we're using a global menu bar.
-	QAction *actionShowMenuBar = gensMenuBar->actionFromId(IDM_GRAPHICS_MENUBAR);
+	QAction *actionShowMenuBar = ui.gensMenuBar->actionFromId(IDM_GRAPHICS_MENUBAR);
 	actionShowMenuBar->setVisible(!isGlobalMenuBar());
 
 	if (!isGlobalMenuBar() && height_adjust != 0) {
@@ -322,6 +292,29 @@ void GensWindowPrivate::gensResize(void)
 }
 
 /**
+ * Do we have a global menu bar?
+ * @return True if yes; false if no.
+ */
+inline bool GensWindowPrivate::isGlobalMenuBar(void) const
+{
+	// TODO: Support Unity and Qt global menu bars.
+#ifdef Q_WS_MAC
+	return true;
+#else
+	return false;
+#endif
+}
+
+/**
+ * Is the menu bar visible?
+ * @return True if yes; false if no.
+ */
+inline bool GensWindowPrivate::isShowMenuBar(void) const
+{
+	return (isGlobalMenuBar() || cfg_showMenuBar);
+}
+
+/**
  * Set the Gens window title.
  */
 void GensWindowPrivate::setGensTitle(void)
@@ -332,16 +325,16 @@ void GensWindowPrivate::setGensTitle(void)
 	title += GensWindow::tr("[NO-EMU]") + QChar(L' ');
 #endif
 
-	if (!emuManager->isRomOpen()) {
+	if (!ui.emuManager->isRomOpen()) {
 		// No ROM is running.
 		title += gqt4_app->applicationName();
 	} else {
 		// ROM is running.
-		if (emuManager->paused().paused_manual) {
+		if (ui.emuManager->paused().paused_manual) {
 			// Emulator is paused manually.
 			title += GensWindow::tr("[Paused]") + QChar(L' ');
 		}
-		title += emuManager->romName();
+		title += ui.emuManager->romName();
 	}
 
 	Q_Q(GensWindow);
@@ -353,7 +346,7 @@ void GensWindowPrivate::setGensTitle(void)
  */
 void GensWindowPrivate::checkIdleThread(void)
 {
-	if (emuManager->isRomOpen() ||
+	if (ui.emuManager->isRomOpen() ||
 		!idleThreadAllowed ||
 		cfg_introStyle == 0)
 	{
@@ -390,12 +383,14 @@ void GensWindowPrivate::checkIdleThread(void)
  * Initialize the Gens window.
  */
 GensWindow::GensWindow()
-	: d_ptr(new GensWindowPrivate(this))
+	: QMainWindow()
+	, d_ptr(new GensWindowPrivate(this))
 {
 	Q_D(GensWindow);
 
 	// Set up the User Interface.
-	d->setupUi();
+	d->ui.setupUi(this);
+	d->initMenuBar();
 
 	// Initialize the emulation state.
 	d->idleThreadAllowed = true;
@@ -430,7 +425,7 @@ void GensWindow::closeEvent(QCloseEvent *event)
 
 	// Quit.
 	Q_D(GensWindow);
-	d->emuManager->closeRom();
+	d->ui.emuManager->closeRom();
 	QuitGens();
 
 	// Accept the close event.
@@ -526,7 +521,7 @@ void GensWindow::dropEvent(QDropEvent *event)
 
 	// Open the ROM.
 	Q_D(GensWindow);
-	d->emuManager->openRom(filename);
+	d->ui.emuManager->openRom(filename);
 }
 
 /**
@@ -538,7 +533,7 @@ void GensWindow::changeEvent(QEvent *event)
 	if (event->type() == QEvent::LanguageChange) {
 		// Retranslate the menu bar.
 		Q_D(GensWindow);
-		d->gensMenuBar->retranslate();
+		d->ui.gensMenuBar->retranslate();
 		d->initMenuBar();
 	}
 
@@ -599,7 +594,7 @@ void GensWindow::osd(OsdType osd_type, int param)
 
 	// Print the message to the screen.
 	Q_D(GensWindow);
-	d->vBackend->osd_printqs(1500, msg);
+	d->ui.vBackend->osd_printqs(1500, msg);
 }
 
 /**
@@ -648,7 +643,7 @@ void GensWindow::setBpp(LibGens::VdpPalette::ColorDepth newBpp)
 void GensWindow::updateFps(double fps)
 {
 	Q_D(GensWindow);
-	d->vBackend->fpsPush(fps);
+	d->ui.vBackend->fpsPush(fps);
 }
 
 /**
@@ -661,20 +656,20 @@ void GensWindow::stateChanged(void)
 	// TODO: Make sure that m_vBackend gets the new gqt4_emuContext in time.
 	// FIXME: This is probably a race condition.
 	Q_D(GensWindow);
-	// d->vBackend->setEmuContext() should be called when gqt4_emuContext changes.
-	d->vBackend->setEmuContext(gqt4_emuContext);
+	// d->ui.vBackend->setEmuContext() should be called when gqt4_emuContext changes.
+	d->ui.vBackend->setEmuContext(gqt4_emuContext);
 
-	if (d->emuManager->isRomOpen()) {
+	if (d->ui.emuManager->isRomOpen()) {
 		// ROM is open.
-		d->vBackend->setPaused(d->emuManager->paused());
+		d->ui.vBackend->setPaused(d->ui.emuManager->paused());
 	} else {
 		// ROM is closed.
 		paused_t unPause;
 		unPause.data = 0;
 
-		d->vBackend->osd_show_preview(0, QImage());
-		d->vBackend->setPaused(unPause);
-		d->vBackend->fpsReset();
+		d->ui.vBackend->osd_show_preview(0, QImage());
+		d->ui.vBackend->setPaused(unPause);
+		d->ui.vBackend->fpsReset();
 	}
 
 	// Check the idle thread state.
@@ -692,7 +687,7 @@ void GensWindow::stateChanged(void)
 void GensWindow::osdPrintMsg(int duration, QString msg)
 {
 	Q_D(GensWindow);
-	d->vBackend->osd_printqs(duration, msg);
+	d->ui.vBackend->osd_printqs(duration, msg);
 }
 
 /**
@@ -703,7 +698,7 @@ void GensWindow::osdPrintMsg(int duration, QString msg)
 void GensWindow::osdShowPreview(int duration, const QImage& img)
 {
 	Q_D(GensWindow);
-	d->vBackend->osd_show_preview(duration, img);
+	d->ui.vBackend->osd_show_preview(duration, img);
 }
 
 /**
@@ -716,7 +711,7 @@ void GensWindow::qAppFocusChanged(QWidget *old, QWidget *now)
 	Q_UNUSED(old)
 
 	Q_D(GensWindow);
-	if (!d->cfg_autoPause || !d->emuManager->isRomOpen()) {
+	if (!d->cfg_autoPause || !d->ui.emuManager->isRomOpen()) {
 		// Auto Pause is disabled,
 		// or no ROM is running.
 		return;
@@ -741,7 +736,7 @@ void GensWindow::qAppFocusChanged(QWidget *old, QWidget *now)
 	else
 		paused_clear.paused_auto = 1;
 
-	d->emuManager->pauseRequest(paused_set, paused_clear);
+	d->ui.emuManager->pauseRequest(paused_set, paused_clear);
 }
 
 /**
@@ -765,7 +760,7 @@ void GensWindow::autoPause_changed_slot(QVariant newAutoPause)
 		paused_clear.data = 0;
 		paused_clear.paused_auto = 1;
 
-		d->emuManager->pauseRequest(paused_set, paused_clear);
+		d->ui.emuManager->pauseRequest(paused_set, paused_clear);
 	}
 }
 
@@ -786,59 +781,59 @@ void GensWindow::showMenuBar_changed_slot(QVariant newShowMenuBar)
 void GensWindow::openRom(void)
 {
 	Q_D(GensWindow);
-	d->emuManager->openRom();
+	d->ui.emuManager->openRom();
 }
 void GensWindow::openRom(QString filename, QString z_filename)
 {
 	Q_D(GensWindow);
-	d->emuManager->openRom(filename, z_filename);
+	d->ui.emuManager->openRom(filename, z_filename);
 }
 void GensWindow::closeRom(void)
 {
 	Q_D(GensWindow);
-	d->emuManager->closeRom();
+	d->ui.emuManager->closeRom();
 }
 void GensWindow::saveState(void)
 {
 	Q_D(GensWindow);
-	d->emuManager->saveState();
+	d->ui.emuManager->saveState();
 }
 void GensWindow::loadState(void)
 {
 	Q_D(GensWindow);
-	d->emuManager->loadState();
+	d->ui.emuManager->loadState();
 }
 void GensWindow::screenShot(void)
 {
 	Q_D(GensWindow);
-	d->emuManager->screenShot();
+	d->ui.emuManager->screenShot();
 }
 void GensWindow::setAudioRate(int newRate)
 {
 	Q_D(GensWindow);
-	d->emuManager->setAudioRate(newRate);
+	d->ui.emuManager->setAudioRate(newRate);
 }
 void GensWindow::setStereo(bool newStereo)
 {
 	Q_D(GensWindow);
-	d->emuManager->setStereo(newStereo);
+	d->ui.emuManager->setStereo(newStereo);
 }
 
 /** VBackend properties. **/
 void GensWindow::toggleFastBlur(void)
 {
 	Q_D(GensWindow);
-	d->vBackend->setFastBlur(!d->vBackend->fastBlur());
+	d->ui.vBackend->setFastBlur(!d->ui.vBackend->fastBlur());
 }
 StretchMode_t GensWindow::stretchMode(void)
 {
 	Q_D(GensWindow);
-	return d->vBackend->stretchMode();
+	return d->ui.vBackend->stretchMode();
 }
 void GensWindow::setStretchMode(StretchMode_t newStretchMode)
 {
 	Q_D(GensWindow);
-	d->vBackend->setStretchMode(newStretchMode);
+	d->ui.vBackend->setStretchMode(newStretchMode);
 }
 
 bool GensWindow::idleThreadAllowed(void)
@@ -858,7 +853,7 @@ void GensWindow::setIdleThreadAllowed(bool newIdleThreadAllowed)
 bool GensWindow::menuItemCheckState(int action)
 {
 	Q_D(GensWindow);
-	return d->gensMenuBar->menuItemCheckState(action);
+	return d->ui.gensMenuBar->menuItemCheckState(action);
 }
 
 /**
@@ -870,11 +865,11 @@ void GensWindow::idleThread_frameDone(void)
 	Q_D(GensWindow);
 	if (!d->idleThread || d->idleThread->isStopRequested())
 		return;
-	if (d->emuManager->isRomOpen())
+	if (d->ui.emuManager->isRomOpen())
 		return;
 
 	// Update video.
-	d->emuManager->updateVBackend();
+	d->ui.emuManager->updateVBackend();
 
 	// Resume the idle thread.
 	d->idleThread->resume();
@@ -891,13 +886,13 @@ void GensWindow::introStyle_changed_slot(QVariant newIntroStyle)
 	d->checkIdleThread();
 
 	// Prevent race conditions.
-	if (!d->emuManager)
+	if (!d->ui.emuManager)
 		return;
 
-	if (!d->emuManager->isRomOpen() && d->cfg_introStyle == 0) {
+	if (!d->ui.emuManager->isRomOpen() && d->cfg_introStyle == 0) {
 		// Intro style was changed to "None", and emulation isn't running.
 		// Clear the screen.
-		d->emuManager->updateVBackend();
+		d->ui.emuManager->updateVBackend();
 	}
 }
 
@@ -921,7 +916,7 @@ void GensWindow::showContextMenu(const QPoint& pos)
 
 		// Set up the context menu.
 		QPoint globalPos = this->mapToGlobal(pos);
-		d->gensMenuBar->popupMenu()->popup(globalPos);
+		d->ui.gensMenuBar->popupMenu()->popup(globalPos);
 	}
 }
 
