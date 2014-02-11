@@ -507,7 +507,7 @@ QString AboutDialogPrivate::GetCodePageInfo(void)
 
 	// TODO: GetCPInfoExU() support?
 	for (int i = 0; i < 2; i++) {
-		sCodePageInfo += tr(m_cpInfo[i].cpStr);
+		sCodePageInfo += AboutDialog::tr(m_cpInfo[i].cpStr);
 
 		// Get the code page information.
 		CPINFOEX cpix;
