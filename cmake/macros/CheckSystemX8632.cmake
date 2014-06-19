@@ -26,7 +26,7 @@ MACRO(CHECK_SYSTEM_X86_32 _RESULT)
 	MESSAGE(STATUS "Checking if the system is X86_32:")
 	
 	CHECK_C_SOURCE_COMPILES(
-		"#if (defined(__i386) || defined(__i386__)) && (!defined(__x86_64) && !defined(__x86_64__) && !defined(__amd64) && !defined(__amd64__))
+		"#if (defined(__i386) || defined(__i386__) || defined(_M_IX86)) && (!defined(__x86_64) && !defined(__x86_64__) && !defined(__amd64) && !defined(__amd64__) && !defined(_M_X64) && !defined(_M_AMD64))
 		/* System is X86_32 */
 		#else
 		/* System is not X86_32 */

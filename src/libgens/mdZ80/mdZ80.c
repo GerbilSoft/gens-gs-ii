@@ -45,26 +45,28 @@ static uint8_t mdZ80_insn_fetch[256];
  */
 mdZ80_context *mdZ80_new(void)
 {
+	int i;
+
 	// Create a new Z80 context.
 	mdZ80_context *z80 = (mdZ80_context*)calloc(1, sizeof(mdZ80_context));
 	if (!z80)
 		return NULL;
-	
+
 	// Initialize the default instruction fetch area.
 	// TODO: Only initialize this once!
-	for (size_t i = 0; i < (sizeof(mdZ80_insn_fetch)/sizeof(mdZ80_insn_fetch[0])); i++)
+	for (i = 0; i < (int)(sizeof(mdZ80_insn_fetch)/sizeof(mdZ80_insn_fetch[0])); i++)
 		mdZ80_insn_fetch[i] = 0x76;	// HLT
-	
+
 	// Initialize Fetch[].
-	for (size_t i = 0; i < (sizeof(z80->Fetch)/sizeof(z80->Fetch[0])); i++)
+	for (i = 0; i < (int)(sizeof(z80->Fetch)/sizeof(z80->Fetch[0])); i++)
 		z80->Fetch[i] = (mdZ80_insn_fetch - (i * 256));
-	
+
 	// Set up the default memory and I/O handlers.
 	z80->ReadB = mdZ80_def_ReadB;
 	z80->WriteB = mdZ80_def_WriteB;
 	z80->IN_C = mdZ80_def_In;
 	z80->OUT_C = mdZ80_def_Out;
-	
+
 	// Return the new Z80 context.
 	return z80;
 }
@@ -325,7 +327,8 @@ void mdZ80_Set_Out(mdZ80_context *z80, Z80_WB *func)
  */
 void mdZ80_Add_Fetch(mdZ80_context *z80, uint8_t low_adr, uint8_t high_adr, uint8_t *region)
 {
+	int i;
 	region -= (low_adr << 8);
-	for (int i = low_adr; i <= high_adr; i++)
+	for (i = low_adr; i <= high_adr; i++)
 		z80->Fetch[i] = region;
 }

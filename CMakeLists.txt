@@ -11,7 +11,13 @@ MACRO(UNSET var)
 	SET(${var})
 ENDMACRO(UNSET)
 
-list (APPEND CMAKE_MODULE_PATH "${gens-gs-ii_SOURCE_DIR}/cmake/macros")
+# Set default build options.
+INCLUDE(cmake/options.cmake)
+
+list (APPEND CMAKE_MODULE_PATH
+		"${gens-gs-ii_SOURCE_DIR}/cmake/macros"
+		"${gens-gs-ii_SOURCE_DIR}/cmake/libs"
+		)
 
 # Mac OS X: CMake doesn't include this by default.
 INCLUDE(CheckLibraryExists)
@@ -22,11 +28,43 @@ INCLUDE(cmake/gtest.cmake)
 # Set default build options.
 INCLUDE(cmake/options.cmake)
 
+# Program information.
+SET(DESCRIPTION "Gens/GS II")
+SET(AUTHOR "David Korth")
+SET(VERSION_MAJOR 0)
+SET(VERSION_MINOR 0)
+SET(VERSION_PATCH 0)
+SET(VERSION_DEVEL 1)
+IF(VERSION_PATCH)
+	SET(VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}+")
+ELSE(VERSION_PATCH)
+	SET(VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}")
+ENDIF(VERSION_PATCH)
+IF(VERSION_DEVEL)
+	SET(VERSION_STRING "${VERSION_STRING}+")
+ENDIF(VERSION_DEVEL)
+SET(VERSION_STRING_WIN32 "${VERSION_MAJOR},${VERSION_MINOR},${VERSION_PATCH},${VERSION_DEVEL}")
+
 # Git version information.
-ADD_CUSTOM_TARGET(git_version ALL
-	${gens-gs-ii_SOURCE_DIR}/git_version.sh -s "${gens-gs-ii_SOURCE_DIR}" -o "${gens-gs-ii_BINARY_DIR}/git_version.h"
-	VERBATIM
-)
+FIND_PROGRAM(POSIX_SH sh)
+IF(POSIX_SH)
+	# sh is available.
+	# Run the git version script.
+	IF(WIN32)
+		SET(ENV{SHELLOPTS} igncr)
+	ENDIF(WIN32)
+	ADD_CUSTOM_TARGET(git_version ALL
+		${POSIX_SH} ${gens-gs-ii_SOURCE_DIR}/git_version.sh
+		-s "${gens-gs-ii_SOURCE_DIR}"
+		-o "${gens-gs-ii_BINARY_DIR}/git_version.h"
+		VERBATIM
+		)
+ELSE(POSIX_SH)
+	# sh isn't available.
+	# Create a blank git_version.h.
+	FILE(WRITE "${gens-gs-ii_BINARY_DIR}/git_version.h"
+		"/* dummy file; POSIX sh is not available */\n")
+ENDIF(POSIX_SH)
 
 # If no build type is set, default to "debug".
 IF(CMAKE_BUILD_TYPE MATCHES ^$)
@@ -36,16 +74,16 @@ ENDIF()
 # Don't bother with verbose makefiles for now.
 # TODO: Make it an option?
 #IF (CMAKE_BUILD_TYPE MATCHES ^debug$)
-#	SET(CMAKE_VERBOSE_MAKEFILE ON)
+	#SET(CMAKE_VERBOSE_MAKEFILE ON)
 #ENDIF()
 
 # Check for platform-specific functionality.
 INCLUDE(cmake/platform.cmake)
 
 # Check for required libraries.
-INCLUDE(cmake/libs/CheckZLIB.cmake)
-INCLUDE(cmake/libs/CheckLZMA.cmake)
-INCLUDE(cmake/libs/CheckOpenGL.cmake)
+INCLUDE(CheckZLIB)
+INCLUDE(CheckLZMA)
+INCLUDE(CheckOpenGL)
 
 # Project subdirectories.
 ADD_SUBDIRECTORY(extlib)

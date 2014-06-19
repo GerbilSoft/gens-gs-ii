@@ -35,9 +35,10 @@
 #include "libgens/MD/EmuMD.hpp"
 
 // Win32 requires GL/glext.h for OpenGL 1.2/1.3.
+// TODO: Verify this - MSVC doesn't have glext.h.
 #if defined(Q_WS_MAC)
 #include <OpenGL/glext.h>
-#else
+#elif !defined(_MSC_VER)
 #include <GL/glext.h>
 #endif
 

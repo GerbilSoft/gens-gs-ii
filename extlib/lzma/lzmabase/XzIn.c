@@ -193,11 +193,13 @@ static SRes Xz_ReadBackward(CXzStream *p, ILookInStream *stream, Int64 *startOff
     return SZ_ERROR_UNSUPPORTED;
 
   // Gens/GS II: Strict aliasing fix. [2011/09/02]
-  union { Byte b[4]; UInt32 d; } b2d;
-  memcpy(b2d.b, buf, 4);
-  //if (GetUi32(buf) != CrcCalc(buf + 4, 6))
-  if (b2d.d != CrcCalc(buf + 4, 6))
-    return SZ_ERROR_ARCHIVE;
+  {
+    union { Byte b[4]; UInt32 d; } b2d;
+    memcpy(b2d.b, buf, 4);
+    //if (GetUi32(buf) != CrcCalc(buf + 4, 6))
+    if (b2d.d != CrcCalc(buf + 4, 6))
+      return SZ_ERROR_ARCHIVE;
+  }
 
   indexSize = ((UInt64)GetUi32(buf + 4) + 1) << 2;
 

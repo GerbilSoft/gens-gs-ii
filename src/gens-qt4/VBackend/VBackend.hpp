@@ -53,6 +53,14 @@
 // gqt4_cfg
 #include "gqt4_main.hpp"
 
+// TODO: Minimum gcc version, other compilers?
+#ifdef __GNUC__
+#define ATTR_FORMAT_PRINTF(fmt, varargs) \
+	__attribute__ ((format (printf, (fmt), (varargs))))
+#else
+#define ATTR_FORMAT_PRINTF(fmt, varargs)
+#endif
+
 namespace GensQt4
 {
 
@@ -190,9 +198,9 @@ class VBackend : public QWidget
 		// NOTE: Format string argument is 3 instead of 2.
 		// This is due to the implicit "this" parameter.
 		void osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
-			__attribute__ ((format (printf, 3, 0)));
+			ATTR_FORMAT_PRINTF(3, 0);
 		void osd_printf(const int duration, const utf8_str *msg, ...)
-			__attribute__ ((format (printf, 3, 4)));
+			ATTR_FORMAT_PRINTF(3, 4);
 		void osd_printqs(const int duration, const QString &msg, bool forceVbDirty);
 		void osd_printqs(const int duration, const QString &msg);
 

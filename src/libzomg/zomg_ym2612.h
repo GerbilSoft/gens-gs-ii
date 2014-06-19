@@ -44,7 +44,7 @@ typedef struct PACKED _Zomg_Ym2612Save_t
 	// TODO: YM timers.
 	// TODO: Other stuff to save.
 } Zomg_Ym2612Save_t;
-#pragma pack(0)
+#pragma pack()
 
 #ifdef __cplusplus
 }

@@ -32,9 +32,6 @@
 #include <cstring>
 using namespace std;
 
-// C includes.
-#include <unistd.h>
-
 // C++ includes.
 #include <string>
 

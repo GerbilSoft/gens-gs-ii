@@ -24,4 +24,12 @@ ADD_CUSTOM_COMMAND(
 
 # Starscream library.
 ENABLE_LANGUAGE(ASM_NASM)
-ADD_LIBRARY(starscream STATIC ${CMAKE_CURRENT_BINARY_DIR}/main68k.asm ${CMAKE_CURRENT_BINARY_DIR}/sub68k.asm asm-wrapper.asm)
+ADD_LIBRARY(starscream STATIC
+	${CMAKE_CURRENT_BINARY_DIR}/main68k.asm
+	${CMAKE_CURRENT_BINARY_DIR}/sub68k.asm
+	asm-wrapper.asm
+
+	# Dummy C file to force CMake to handle this as a C library.
+	# (CMake's NMake generator can't handle a pure ASM_NASM library.)
+	dummy.c
+	)

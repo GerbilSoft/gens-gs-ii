@@ -288,7 +288,8 @@ typedef struct PACKED _SCSI_RESP_REQUEST_SENSE
 	uint8_t AddSenseQual;		/* Additional sense code qualifier. */
 	uint8_t FRUCode;		/* Field replaceable unit code. */
 	uint8_t SenKeySpec[3];		/* Sense-key specific. */
-	uint8_t AddSenseBytes[0];	/* Additional sense bytes. */
+	// NOTE: MSVC doesn't really like 0-byte arrays.
+	//uint8_t AddSenseBytes[0];	/* Additional sense bytes. */
 } SCSI_RESP_REQUEST_SENSE;
 
 /** SCSI error code macros. (From udev) **/
@@ -605,7 +606,8 @@ typedef struct PACKED _SCSI_RESP_READ_DISC_INFORMATION_STANDARD
 
 	/* OPC tables. */
 	uint8_t NumOPCTables;
-	uint8_t OPCTableEntries[0];
+	// NOTE: MSVC doesn't really like 0-byte arrays.
+	//uint8_t OPCTableEntries[0];
 } SCSI_RESP_READ_DISC_INFORMATION_STANDARD;
 
 /* READ DISC INFORMATION response: Track resources information. */

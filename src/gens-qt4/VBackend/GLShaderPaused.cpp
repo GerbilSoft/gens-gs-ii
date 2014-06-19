@@ -163,7 +163,7 @@ void GLShaderPaused::init()
 		glBeginFragmentShaderATI();
 		
 		// Constants.
-		static const float RGBtoGrayscale[4] = {0.299, 0.587, 0.114, 0.0};
+		static const float RGBtoGrayscale[4] = {0.299f, 0.587f, 0.114f, 0.0f};
 		glSetFragmentShaderConstantATI(GL_CON_0_ATI, RGBtoGrayscale);
 		
 		// SampleMap r0, t0.str;

@@ -34,11 +34,12 @@ class TmssReg
 {
 	public:
 		TmssReg()
-			: a14000({0})
-			, cart_ce(0)
+			: cart_ce(0)
 			, tmss_rom_valid(false)
 			, tmss_en(false)
-			{ }
+		{
+			a14000.d = 0;
+		}
 
 		/**
 		 * $A14000: TMSS control register.

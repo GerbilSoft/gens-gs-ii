@@ -23,7 +23,6 @@
 
 // Resource script for Gens/GS Win32
 #include "gens-qt4.h"
-#include "afxres.h"
 #include "winuser.h"
 
 // git version

@@ -24,6 +24,18 @@
 // C includes.
 #include <stdio.h>
 
+// Common Controls 6 is required for SHGetImageList().
+// TODO: Add an SHGetImageList() definition here in case
+// the Windows SDK is pre-XP?
+#if !defined(_WIN32_IE) || _WIN32_IE < 0x0600
+#undef _WIN32_IE
+#define _WIN32_IE 0x0600
+#endif /* _WIN32_IE */
+#if !defined(_WIN32_WINNT) || (_WIN32_WINNT < 0x0501)
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501
+#endif /* _WIN32_WINNT */
+
 // Win32 includes.
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX
@@ -31,11 +43,6 @@
 #endif
 #include <windows.h>
 
-// Common Controls 6 is required for SHGetImageList().
-#if !defined(_WIN32_IE) || _WIN32_IE < 0x0600
-#undef _WIN32_IE
-#define _WIN32_IE 0x0600
-#endif
 #include <shellapi.h>
 #include <commctrl.h>
 #include <commoncontrols.h>
@@ -187,6 +194,7 @@ QIcon FindCdromWin32::getDriveIcon(const QString &deviceName) const
 	// Icon information retrieved.
 
 	// Attempt to get the SHIL_EXTRALARGE ImageList from the shell.
+	// TODO: Get all icons, including SHIL_JUMBO on Vista and later.
 	HICON hIcon = FindCdromWin32Private::GetShilIcon(sfi.iIcon, SHIL_EXTRALARGE);
 	if (!hIcon) {
 		// FindCdromWin32Private::GetShilIcon() isn't usable.

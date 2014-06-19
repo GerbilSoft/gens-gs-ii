@@ -26,11 +26,10 @@
 // C includes.
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <stdint.h>
 
 #ifdef _WIN32
-// Win32 requires io.h for dup().
+// Win32 requires io.h for dup() and close().
 #include <io.h>
 #endif /* _WIn32 */
 

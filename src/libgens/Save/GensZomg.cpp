@@ -51,7 +51,6 @@
 
 // C includes.
 #include <stdint.h>
-#include <unistd.h>
 
 // C includes. (C++ namespace)
 #include <cstring>
@@ -60,6 +59,11 @@
 // C++ includes.
 #include <string>
 using std::string;
+
+// Win32 Unicode Translation Layer.
+#ifdef _WIN32
+#include "Win32/W32U_mini.h"
+#endif
 
 namespace LibGens
 {

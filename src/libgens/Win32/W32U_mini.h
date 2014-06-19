@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -34,6 +34,7 @@
 // C includes.
 #include <wchar.h>
 #include <stdio.h>
+#include <io.h>
 
 // Win32 includes.
 #define WIN32_LEAN_AND_MEAN
@@ -90,6 +91,31 @@ char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage);
  * @return File pointer, or nullptr on error.
  */
 FILE *W32U_fopen(const utf8_str *filename, const utf8_str *mode);
+
+// Redefine access() as W32U_access().
+#define access(path, mode) W32U_access(path, mode)
+
+// Modes.
+#ifndef F_OK
+#define F_OK 0
+#endif
+#ifndef X_OK
+#define X_OK 1
+#endif
+#ifndef W_OK
+#define W_OK 2
+#endif
+#ifndef R_OK
+#define R_OK 4
+#endif
+
+/**
+ * Check if a path can be accessed.
+ * @param path Pathname.
+ * @param mode Mode.
+ * @return 0 if the file has the given mode; -1 if not or if the file does not exist.
+ */
+int W32U_access(const utf8_str *path, int mode);
 
 #ifdef __cplusplus
 }

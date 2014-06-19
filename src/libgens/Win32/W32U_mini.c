@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -25,14 +25,15 @@
 
 // C includes.
 #include <stdlib.h>
-
+#include <errno.h>
+// Win32 includes.
+#include <io.h>
 
 /**
  * Indicates if the system is Unicode.
  * NOTE: Do NOT edit this variable outside of W32U!
  */
 int W32U_IsUnicode = 0;
-
 
 /**
  * Initialize the Win32 Unicode Translation Layer.
@@ -44,7 +45,6 @@ int W32U_Init(void)
 	return 0;
 }
 
-
 /**
  * Shut down the Win32 Unicode Translation Layer.
  * @return 0 on success; non-zero on error.
@@ -55,7 +55,6 @@ int W32U_End(void)
 	return 0;
 }
 
-
 /**
  * Convert a null-terminated multibyte string to UTF-16.
  * @param mbs Multibyte string. (null-terminated)
@@ -64,15 +63,17 @@ int W32U_End(void)
  */
 wchar_t *W32U_mbs_to_UTF16(const utf8_str *mbs, unsigned int codepage)
 {
-	int cchWcs = MultiByteToWideChar(codepage, 0, mbs, -1, nullptr, 0);
+	int cchWcs;
+	wchar_t *wcs;
+
+	cchWcs = MultiByteToWideChar(codepage, 0, mbs, -1, nullptr, 0);
 	if (cchWcs <= 0)
 		return nullptr;
 
-	wchar_t *wcs = (wchar_t*)malloc(cchWcs * sizeof(wchar_t));
+	wcs = (wchar_t*)malloc(cchWcs * sizeof(wchar_t));
 	MultiByteToWideChar(codepage, 0, mbs, -1, wcs, cchWcs);
 	return wcs;
 }
-
 
 /**
  * Convert a null-terminated UTF-16 string to multibyte.
@@ -82,15 +83,17 @@ wchar_t *W32U_mbs_to_UTF16(const utf8_str *mbs, unsigned int codepage)
  */
 char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage)
 {
-	int cbMbs = WideCharToMultiByte(codepage, 0, wcs, -1, nullptr, 0, nullptr, nullptr);
+	int cbMbs;
+	char *mbs;
+
+	cbMbs = WideCharToMultiByte(codepage, 0, wcs, -1, nullptr, 0, nullptr, nullptr);
 	if (cbMbs <= 0)
 		return nullptr;
 
-	char *mbs = (char*)malloc(cbMbs);
+	mbs = (char*)malloc(cbMbs);
 	WideCharToMultiByte(codepage, 0, wcs, -1, mbs, cbMbs, nullptr, nullptr);
 	return mbs;
 }
-
 
 // Make sure fopen() isn't redefined.
 #ifdef fopen
@@ -105,32 +108,37 @@ char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage)
  */
 FILE *W32U_fopen(const utf8_str *filename, const utf8_str *mode)
 {
+	wchar_t *filenameW, *modeW;
+	FILE *fRet;
+
 	// Convert the filename from UTF-8 to UTF-16.
-	wchar_t *filenameW = W32U_mbs_to_UTF16(filename, CP_UTF8);
+	filenameW = W32U_mbs_to_UTF16(filename, CP_UTF8);
 	if (!filenameW)
 		return nullptr;
 
 	// Convert the mode from UTF-8 to UTF-16.
-	wchar_t *modeW = W32U_mbs_to_UTF16(mode, CP_UTF8);
+	modeW = W32U_mbs_to_UTF16(mode, CP_UTF8);
 	if (!modeW) {
 		free(filenameW);
 		return nullptr;
 	}
 
-	FILE *fRet = nullptr;
+	fRet = nullptr;
 	if (W32U_IsUnicode) {
 		// Unicode version.
 		fRet = _wfopen(filenameW, modeW);
 	} else {
 		// ANSI version.
+		char *filenameA;
+		char *modeA;
 
 		// Convert the filename from UTF-16 to ANSI.
-		char *filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
+		filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
 		if (!filenameA)
 			goto fail;
 
 		// Convert the mode from UTF-16 to ANSI.
-		char *modeA = W32U_UTF16_to_mbs(modeW, CP_ACP);
+		modeA = W32U_UTF16_to_mbs(modeW, CP_ACP);
 		if (!modeA) {
 			free(filenameA);
 			goto fail;
@@ -146,4 +154,58 @@ fail:
 	free(filenameW);
 	free(modeW);
 	return fRet;
+}
+
+// Make sure access() and _access() aren't redefined.
+#ifdef access
+#undef access
+#endif
+#ifdef _access
+#undef _access
+#endif
+
+/**
+ * Check if a path can be accessed.
+ * @param path Pathname.
+ * @param mode Mode.
+ * @return 0 if the file has the given mode; -1 if not or if the file does not exist.
+ */
+int W32U_access(const utf8_str *path, int mode)
+{
+	wchar_t *pathW;
+	int ret = -1;
+
+	// NOTE: MSVCRT in Windows Vista and later will fail
+	// if mode contains X_OK.
+	mode &= ~X_OK;
+
+	// Convert the path from UTF-8 to UTF-16.
+	pathW = W32U_mbs_to_UTF16(path, CP_UTF8);
+	if (!pathW) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (W32U_IsUnicode) {
+		// Unicode version.
+		ret = _waccess(pathW, mode);
+	} else {
+		// ANSI version.
+		char *pathA;
+
+		// Convert the filename from UTF-16 to ANSI.
+		pathA = W32U_UTF16_to_mbs(pathW, CP_ACP);
+		if (!pathA) {
+			errno = EINVAL;
+			goto fail;
+		}
+
+		// Check the access.
+		ret = _access(pathA, mode);
+		free(pathA);
+	}
+
+fail:
+	free(pathW);
+	return ret;
 }

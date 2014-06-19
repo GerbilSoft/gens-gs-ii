@@ -27,9 +27,10 @@ INCLUDE_DIRECTORIES(${MINIZIP_INCLUDE_DIR})
 INCLUDE(CheckLibraryExists)
 CHECK_LIBRARY_EXISTS(c sigaction "" HAVE_SIGACTION)	# libc: sigaction()
 
+# FIXME: Non-Windows only?
 CHECK_LIBRARY_EXISTS(rt clock_gettime "" HAVE_LIBRT)	# librt: clock_gettime()
 IF(HAVE_LIBRT)
-	SET(RT_LIBRARY "-lrt")
+	SET(RT_LIBRARY rt)
 ENDIF(HAVE_LIBRT)
 
 # Write the config.h file.
@@ -138,7 +139,7 @@ IF(WIN32)
 	# - GetFileVersionInfoSize()
 	# - GetFileVersionInfo()
 	# - VerQueryValue()
-	TARGET_LINK_LIBRARIES(gens -lversion)
+	TARGET_LINK_LIBRARIES(gens version)
 ENDIF(WIN32)
 
 # Test suite.

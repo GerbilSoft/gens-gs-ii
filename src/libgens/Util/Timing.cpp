@@ -27,12 +27,7 @@
 #include "macros/log_msg.h"
 
 // Timing functions.
-#if defined(HAVE_LIBRT) || defined(__APPLE__)
 #include <time.h>
-#else
-#include <sys/time.h>
-#endif
-
 
 namespace LibGens
 {

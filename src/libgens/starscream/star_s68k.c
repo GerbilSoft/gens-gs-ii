@@ -301,9 +301,6 @@ static void gen_variables(void) {
 	emit("\textern SYM(hook_pc_cd)\n");
 	emit("\textern SYM(hook_address_cd)\n");
 	emit("\textern SYM(hook_value_cd)\n");	
-
-	emit("\textern SYM(Rom_Data)\n");
-	emit("\textern SYM(Rom_Size)\n");
 	emit("\n");
 #endif
 	
@@ -590,6 +587,10 @@ static void copy_memory_map(char *map, char *reg) {
 /***************************************************************************/
 
 static void gen_interface(void) {
+	// Context size preprocessor macros.
+	// NOTE: Moved here for MSVC compatibility.
+	char rep_csize[128], if_csize[128];
+
 	emit("section .text\n");
 	emit("bits 32\n");
 	
@@ -1100,7 +1101,6 @@ emit("js near execquit\n");
 	begin_source_proc("GetContext");
 
 	// Context size preprocessor macros.
-	char rep_csize[128], if_csize[128];
 	snprintf(rep_csize, sizeof(rep_csize), "%%%%rep(%d / 8)\n", context_size);
 	snprintf(if_csize,  sizeof(if_csize),  "%%%%if (%d %%%% 8)!=0\n", context_size);
 	

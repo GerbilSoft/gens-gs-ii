@@ -45,9 +45,6 @@
 #include <cstdlib>
 using namespace std;
 
-// C includes.
-#include <unistd.h>
-
 // ZLib.
 #define CHUNK 4096
 #include <zlib.h>

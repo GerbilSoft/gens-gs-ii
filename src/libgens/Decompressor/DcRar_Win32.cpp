@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -30,12 +30,19 @@
 // C includes.
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <stdint.h>
 
 // stat()
 #include <sys/types.h>
 #include <sys/stat.h>
+
+// MSVC lacks some stat macros.
+#ifndef S_ISDIR
+#define S_ISDIR(mode) (((mode) & _S_IFMT) == S_IFDIR)
+#endif
+#ifndef S_ISREG
+#define S_ISREG(mode) (((mode) & _S_IFMT) == S_IFREG)
+#endif
 
 // LOG_MSG() subsystem.
 #include "macros/log_msg.h"
@@ -505,11 +512,11 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
 		memset(prg_info, 0x00, sizeof(*prg_info));
 
 	// Check that the UnRAR DLL is available.
-	// TODO: W32U version of access()?
 	if (access(extprg, F_OK) != 0)
 		return -1;
 
 	// Make sure that this is a regular file.
+	// FIXME: W32U version of stat()?
 	struct stat st_buf;
 	if (stat(extprg, &st_buf) != 0)
 		return -4;

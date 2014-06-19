@@ -3,7 +3,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville                       *
  * Copyright (c) 2003-2004 by Stéphane Akhoun                              *
- * Copyright (c) 2008-2009 by David Korth                                  *
+ * Copyright (c) 2008-2014 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -145,8 +145,7 @@ do { \
 #define LOG_MSG_ONCE(channel, level, msg, ...)	\
 do { \
 	static unsigned char __warned = 0; \
-	if (!__warned) \
-	{ \
+	if (!__warned) { \
 		LOG_MSG(channel, level, msg, ##__VA_ARGS__); \
 		__warned = 1; \
 	} \

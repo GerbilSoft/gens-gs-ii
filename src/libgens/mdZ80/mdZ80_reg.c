@@ -46,15 +46,16 @@ reg_type mdZ80_get_##reg_name(mdZ80_context *z80) \
 
 uint16_t mdZ80_get_AF(mdZ80_context *z80)
 {
+	unsigned char F;
 	if (z80->Status & Z80_STATE_RUNNING)
 		return -1;
-	
+
 	// F register.
 	// The X and Y flags are stored separately from the
 	// rest of the flags for some reason.
-	unsigned char F = (z80->AF.b.F & ~(Z80_FLAG_X | Z80_FLAG_Y)) |
-			  (z80->AF.b.FXY & (Z80_FLAG_X | Z80_FLAG_Y));
-	
+	F = (z80->AF.b.F & ~(Z80_FLAG_X | Z80_FLAG_Y)) |
+	    (z80->AF.b.FXY & (Z80_FLAG_X | Z80_FLAG_Y));
+
 	// Return AF.
 	return ((z80->AF.b.A << 8) | F);
 }
@@ -78,15 +79,16 @@ Z80_GET_REGISTER_FUNC(uint16_t, SP, SP.w)
 
 uint16_t mdZ80_get_AF2(mdZ80_context *z80)
 {
+	unsigned char F2;
 	if (z80->Status & Z80_STATE_RUNNING)
 		return -1;
-	
+
 	// F' register.
 	// The X and Y flags are stored separately from the
 	// rest of the flags for some reason.
-	unsigned char F2 = (z80->AF2.b.F2 & ~(Z80_FLAG_X | Z80_FLAG_Y)) |
-			  (z80->AF2.b.FXY2 & (Z80_FLAG_X | Z80_FLAG_Y));
-	
+	F2 = (z80->AF2.b.F2 & ~(Z80_FLAG_X | Z80_FLAG_Y)) |
+	     (z80->AF2.b.FXY2 & (Z80_FLAG_X | Z80_FLAG_Y));
+
 	// Return AF'.
 	return ((z80->AF2.b.A2 << 8) | F2);
 }
@@ -148,12 +150,13 @@ Z80_SET_REGISTER_FUNC(uint16_t, IY, IY.w)
  */
 void mdZ80_set_PC(mdZ80_context *z80, uint16_t data)
 {
+	unsigned int newPC;
 	if (z80->Status & Z80_STATE_RUNNING)
 		return;
-	
+
 	// TODO: 32-bit specific code will break on 64-bit!
 	data &= 0xFFFF;
-	unsigned int newPC = (unsigned int)(z80->Fetch[data >> 8]);
+	newPC = (unsigned int)(z80->Fetch[data >> 8]);
 	z80->BasePC = newPC;
 	z80->PC = newPC + data;
 }

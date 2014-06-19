@@ -28,8 +28,10 @@
 
 // C includes.
 #include <stdint.h>
-#include <unistd.h>
 #include <stdlib.h>
+#ifndef _MSC_VER
+#include <unistd.h>
+#endif
 
 // Qt includes.
 #include <QtCore/QMutex>
@@ -42,81 +44,83 @@ class ARingBuffer
 	public:
 		ARingBuffer();
 		~ARingBuffer();
-		
+
 		/**
-		 * reInit(): Reinitialize the Ring Buffer.
+		 * Reinitialize the Ring Buffer.
 		 * @param segSize Segment size. (Number of samples)
 		 * @param stereo If true, segments are stereo; otherwise, they're mono.
 		 */
 		void reInit(int segSize, bool stereo);
-		
+
 		int getSegWP(void) const { return m_segWP; }
 		int getSegRP(void) const { return m_segRP; }
-		
+
 		/**
-		 * writeLock(): Lock the buffer for writing one segment.
+		 * Lock the buffer for writing one segment.
 		 * @return Pointer to current write segment.
 		 */
 		int16_t *writeLock(void);
 		
 		/**
-		 * writeUnlock(): Unlock the buffer and advance the write pointer.
+		 * Unlock the buffer and advance the write pointer.
 		 */
 		void writeUnlock(void);
-		
+
 		/**
 		 * read(): Read data into the specified output buffer.
 		 * @param out Output buffer.
 		 * @param samples Samples to read.
 		 */
 		void read(int16_t *out, int samples);
-		
+
 		/**
-		 * wpSegWait(): Wait for the read pointer to pass the write pointer.
+		 * Wait for the read pointer to pass the write pointer.
 		 */
 		void wpSegWait(void) const
 		{
-			while (m_segWP == m_segRP)
-			{
+			while (m_segWP == m_segRP) {
 				// NOTE: On Gens/GS Win32, I had to remove usleep()
 				// due to lag issues. Let's see if that happens here.
+				// TODO: MSVC equivalent.
+#ifndef _MSC_VER
 				usleep(100);
+#endif /* !_MSC_VER */
 			}
 		}
-		
+
 		/**
-		 * isBufferEmpty(): Check if the write pointer matches the read pointer.
+		 * Check if the write pointer matches the read pointer.
 		 * @return True if it does; false if it doesn't.
 		 */
 		bool isBufferEmpty(void) const
 		{
 			return (m_segWP == m_segRP);
 		}
-		
+
 		static const int NUM_SEGMENTS = 8;
 		static const int MAX_SEGMENT_SIZE = LibGens::SoundMgr::MAX_SEGMENT_SIZE;
-	
+
 	protected:
 		/**
-		 * m_buffer[]: Segment buffer.
+		 * Segment buffer.
 		 * Stores up to NUM_SEGMENTS segments.
 		 * Up to 1024 samples. (1024*2 for stereo)
 		 */
 		int16_t m_buffer[NUM_SEGMENTS][1024*2];
-		
+
 		// Buffer segment locks.
 		QMutex m_bufLock[NUM_SEGMENTS];
-		
+
 		/**
-		 * m_segLength: Length of a segment, in int16_t units.
+		 * Length of a segment, in int16_t units.
 		 */
 		int m_segLength;
-		
+
 		/**
-		 * m_stereo: Stereo/Mono setting.
+		 * Stereo/Mono setting.
 		 */
 		bool m_stereo;
-		
+
 		/**
 		 * Read/Write pointers. (segment indexes)
 		 * m_segWP: emulator to m_buffer

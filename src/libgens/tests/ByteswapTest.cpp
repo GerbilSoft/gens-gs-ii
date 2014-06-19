@@ -30,9 +30,6 @@
 #include <cstring>
 using namespace std;
 
-// C includes.
-#include <unistd.h>
-
 namespace LibGens { namespace Tests {
 
 class ByteswapTest : public ::testing::Test

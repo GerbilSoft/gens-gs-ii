@@ -49,7 +49,7 @@ class Z80_MD_Mem
 	public:
 		static void Init(void);
 		static void End(void);
-		
+
 #if 0
 		// TODO: mdZ80 accesses Ram_Z80 directly.
 		// Move Ram_Z80 back to Z80_MD_Mem once mdZ80 is updated.
@@ -58,22 +58,22 @@ class Z80_MD_Mem
 		
 		// M68K ROM banking address.
 		static int Bank_Z80;
-		
+
 		/** Public read/write functions. **/
 		// TODO: Make these inline!
 		static uint8_t FASTCALL Z80_ReadB(uint32_t address);
 		static void FASTCALL Z80_WriteB(uint32_t address, uint8_t data);
-	
+
 	private:
 		/** Z80 read/write functions. **/
-		typedef uint8_t  FASTCALL (*Z80_ReadB_fn) (uint32_t address);
-		typedef void     FASTCALL (*Z80_WriteB_fn)(uint32_t address, uint8_t data);
-		
+		typedef uint8_t (FASTCALL *Z80_ReadB_fn) (uint32_t address);
+		typedef void    (FASTCALL *Z80_WriteB_fn)(uint32_t address, uint8_t data);
+
 		/** Read Byte functions. **/
 		static uint8_t Z80_ReadB_YM2612(uint32_t address);
 		static uint8_t Z80_ReadB_VDP(uint32_t address);
 		static uint8_t Z80_ReadB_68K_Rom(uint32_t address);
-		
+
 		/** Write Byte functions. **/
 		static void Z80_WriteB_Bank(uint32_t address, uint8_t data);
 		static void Z80_WriteB_YM2612(uint32_t address, uint8_t data);

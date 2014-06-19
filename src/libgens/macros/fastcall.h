@@ -2,7 +2,7 @@
  * libgens: Gens Emulation Library.                                        *
  * fastcall.h: FASTCALL macros.                                            *
  *                                                                         *
- * Copyright (c) 2008-2010 by David Korth                                  *
+ * Copyright (c) 2008-2014 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -22,13 +22,8 @@
 #ifndef __LIBGENS_MACROS_FASTCALL_H__
 #define __LIBGENS_MACROS_FASTCALL_H__
 
-#if !defined(__i386__)
-
-/* FASTCALL only exists on i386. */
-#define FASTCALL
-#define __fastcall
-
-#else /* defined(__i386__) */
+#if (defined(__i386) || defined(__i386__) || defined(_M_IX86)) && \
+    (!defined(__x86_64) && !defined(__x86_64__) && !defined(__amd64) && !defined(__amd64__) && !defined(_M_X64) && !defined(_M_AMD64))
 
 /* i386 system. */
 
@@ -49,6 +44,12 @@
 
 #endif /* defined(_WIN32) */
 
-#endif /* !defined(__i386__) */
+#else /* !defined(__i386__) */
+
+/* FASTCALL only exists on i386. */
+#define FASTCALL
+#define __fastcall
+
+#endif /* defined(__i386__) */
 
 #endif /* __LIBGENS_MACROS_FASTCALL_H__ */
