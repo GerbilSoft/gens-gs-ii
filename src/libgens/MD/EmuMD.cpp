@@ -27,7 +27,7 @@
 #include "Vdp/Vdp.hpp"
 
 // CPU emulators.
-#include "cpu/M68K.cpp"
+#include "cpu/M68K.hpp"
 #include "cpu/Z80.hpp"
 
 // Byteswapping macros and functions.
