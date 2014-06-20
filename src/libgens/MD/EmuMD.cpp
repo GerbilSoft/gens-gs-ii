@@ -42,6 +42,9 @@
 // LibGens OSD handler.
 #include "lg_osd.h"
 
+// ROM cartridge.
+#include "Cartridge/RomCartridgeMD.hpp"
+
 // C includes.
 #include <stdio.h>
 #include <math.h>
