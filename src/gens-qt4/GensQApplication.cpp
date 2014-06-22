@@ -233,12 +233,13 @@ QIcon GensQApplication::IconFromTheme(const QString &name)
 	// Get the built-in icon.
 	QString startDir = QLatin1String(":/oxygen/");
 	static const int iconSizes[] = {256, 128, 64, 48, 32, 24, 22, 16};
+	static const QString pngExt = QLatin1String(".png");
 
 	QIcon icon;
 	for (int i = 0; i < ARRAY_SIZE(iconSizes); i++) {
 		int sz = iconSizes[i];
 		QString num = QString::number(sz);
-		QString filename = startDir + num + QChar(L'x') + num + QChar(L'/') + name;
+		QString filename = startDir + num + QChar(L'x') + num + QChar(L'/') + name + pngExt;
 		QPixmap pxm(filename);
 		if (!pxm.isNull())
 			icon.addPixmap(pxm);
@@ -263,16 +264,18 @@ QIcon GensQApplication::IconFromProgram(const QString &name, const QString &subc
 	};
 
 	QString startDir = QLatin1String(":/gens/");
-	if (!subcategory.isEmpty())
-		startDir += subcategory + QChar(L'/');
 
 	static const int iconSizes[] = {256, 128, 64, 48, 32, 24, 22, 16};
+	static const QString pngExt = QLatin1String(".png");
 
 	QIcon icon;
 	for (int i = 0; i < ARRAY_SIZE(iconSizes); i++) {
 		int sz = iconSizes[i];
 		QString num = QString::number(sz);
-		QString filename = startDir + num + QChar(L'x') + num + QChar(L'/') + name;
+		QString filename = startDir + num + QChar(L'x') + num + QChar(L'/');
+		if (!subcategory.isEmpty())
+			filename += subcategory + QChar(L'/');
+		filename += name + pngExt;
 		QPixmap pxm(filename);
 		if (!pxm.isNull())
 			icon.addPixmap(pxm);
