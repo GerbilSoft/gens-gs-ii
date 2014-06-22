@@ -7,10 +7,22 @@
     <file>gens/rick-roll.png</file>
     <file>gens/vga-charset.png</file>
 
+    <file>gens/16x16/controllers/NONE.png</file>
+
+    <file>gens/22x22/controllers/NONE.png</file>
+
+    <file>gens/24x24/controllers/NONE.png</file>
+
+    <file>gens/32x32/controllers/NONE.png</file>
+
     <file>gens/48x48/controllers/NONE.png</file>
 
     <file>gens/64x64/controllers/NONE.png</file>
     <file>gens/64x64/controllers/3BTN.png</file>
     <file>gens/64x64/controllers/6BTN.png</file>
+
+    <file>gens/128x128/controllers/NONE.png</file>
+
+    <file>gens/256x256/controllers/NONE.png</file>
   </qresource>
 </RCC>
