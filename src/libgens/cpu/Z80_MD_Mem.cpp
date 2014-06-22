@@ -93,65 +93,59 @@ inline uint8_t Z80_MD_Mem::Z80_ReadB_YM2612(uint32_t address)
 	return SoundMgr::ms_Ym2612.read();
 }
 
-
 /**
- * Z80_ReadB_VDP(): Read a byte from the VDP.
+ * Read a byte from the VDP.
  * @param address Address to read from.
  * @return VDP register.
  */
 inline uint8_t Z80_MD_Mem::Z80_ReadB_VDP(uint32_t address)
 {
-	if (address < 0x7F00 || address > 0x7F1F)
-	{
+	if (address < 0x7F00 || address > 0x7F1F) {
 		// Invalid address.
 		// TODO: Crash the system?
 		return 0;
 	}
-	
+
 	// TODO: Don't use EmuContext here...
 	EmuContext *context = EmuContext::Instance();
 	if (!context)
 		return 0;
-	
-	// TODO: Add all supported VDP ports.
-	switch (address & 0x1F)
-	{
+
+	Vdp *vdp = context->m_vdp;
+	switch (address & 0x1F) {
 		case 0x00: case 0x01: case 0x02: case 0x03:
 			// VDP data port.
 			// TODO: Gens doesn't support reading this from the Z80...
 			return 0;
-		
-		case 0x04: case 0x06:
-		{
+
+		case 0x04: case 0x06: {
 			// VDP control port. (high byte)
-			uint16_t vdp_status = context->m_vdp->Read_Status();
+			uint16_t vdp_status = vdp->Read_Status();
 			return ((vdp_status >> 8) & 0xFF);
 		}
-		
-		case 0x05: case 0x07:
-		{
+
+		case 0x05: case 0x07: {
 			// VDP control port. (low byte)
-			uint16_t vdp_status = context->m_vdp->Read_Status();
+			uint16_t vdp_status = vdp->Read_Status();
 			return (vdp_status & 0xFF);
 		}
-		
+
 		case 0x08:
 			// V counter.
-			return context->m_vdp->Read_V_Counter();
-		
+			return vdp->Read_V_Counter();
+
 		case 0x09:
 			// H counter.
-			return context->m_vdp->Read_H_Counter();
-		
+			return vdp->Read_H_Counter();
+
 		default:
 			// Invalid or unsupported VDP port.
 			return 0x00;
 	}
-	
+
 	// Should not get here...
 	return 0x00;
 }
-
 
 /**
  * Z80_ReadB_68K_Rom(): Read a byte from MC68000 ROM.
@@ -209,34 +203,38 @@ inline void Z80_MD_Mem::Z80_WriteB_YM2612(uint32_t address, uint8_t data)
 	SoundMgr::ms_Ym2612.write(address & 0x03, data);
 }
 
-
 /**
- * Z80_WriteB_VDP(): Write a byte to the VDP.
+ * Write a byte to the VDP.
  * @param address Address to write to.
  * @param data Byte to write.
  */
 inline void Z80_MD_Mem::Z80_WriteB_VDP(uint32_t address, uint8_t data)
 {
-	if (address < 0x7F00 || address > 0x7F1F)
-	{
+	if (address < 0x7F00 || address > 0x7F1F) {
 		// Invalid address.
 		// TODO: Crash the system?
 		return;
 	}
-	
+
 	// TODO: Don't use EmuContext here...
 	EmuContext *context = EmuContext::Instance();
 	if (!context)
 		return;
-	
-	// TODO: Add all supported VDP ports.
-	switch (address & 0x1F)
-	{
+
+	Vdp *vdp = context->m_vdp;
+	switch (address & 0x1F) {
 		case 0x00: case 0x01: case 0x02: case 0x03:
 			// VDP data port.
-			context->m_vdp->Write_Data_Byte(data);
+			vdp->Write_Data_Byte(data);
 			break;
-		
+
+		case 0x04: case 0x05: case 0x06: case 0x07: {
+			// VDP control port.
+			uint16_t data16 = (data | data << 8);
+			vdp->Write_Ctrl(data16);
+			break;
+		}
+
 		case 0x11:
 			// PSG control port.
 			SoundMgr::ms_Psg.write(data);
@@ -247,7 +245,6 @@ inline void Z80_MD_Mem::Z80_WriteB_VDP(uint32_t address, uint8_t data)
 			break;
 	}
 }
-
 
 /**
  * Z80_WriteB_68K_Rom(): Write a byte to MC68000 ROM.
