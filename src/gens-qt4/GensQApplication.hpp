@@ -28,9 +28,11 @@
 
 #include "SigHandler.hpp"
 
+// Qt includes.
 #include <QtGui/QApplication>
 #include <QtGui/QIcon>
 #include <QtCore/QThread>
+#include <QtGui/QStyle>
 
 namespace GensQt4
 {
@@ -59,6 +61,24 @@ class GensQApplication : public QApplication
 		 * @return QIcon.
 		 */
 		static QIcon IconFromTheme(const QString &name);
+
+		/**
+		 * Get an icon from the Gens/GS II icon set.
+		 * @param name Icon name.
+		 * @return QIcon.
+		 */
+		static QIcon IconFromProgram(const QString &name);
+
+		/**
+		 * Get a standard icon.
+		 * @param standardIcon Standard pixmap.
+		 * @param option QStyleOption.
+		 * @param widget QWidget.
+		 * @return QIcon.
+		 */
+		static QIcon StandardIcon(QStyle::StandardPixmap standardIcon,
+				const QStyleOption *option = 0,
+				const QWidget *widget = 0);
 
 #ifdef Q_OS_WIN32
 		// Win32 event filter.

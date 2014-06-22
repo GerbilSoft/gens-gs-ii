@@ -33,7 +33,7 @@
 
 // LibGens includes.
 #include "libgens/lg_main.hpp"
-
+#include "libgens/macros/common.h"
 
 namespace GensQt4
 {
@@ -224,28 +224,149 @@ bool GensQApplication::isGuiThread(void)
  */
 QIcon GensQApplication::IconFromTheme(const QString &name)
 {
-#ifndef Q_WS_X11
-	// Check if a system icon exists.
-	// TODO: Add standardPixmap parameter to reduce string comparisons?
-	// TODO: Native Win32 icons for everything else.
-	QStyle *style = GensQApplication::style();
-	if (name == QLatin1String("document-open"))
-		return style->standardPixmap(QStyle::SP_DirOpenIcon);
-#endif
-	
 #if QT_VERSION >= 0x040600
 	if (QIcon::hasThemeIcon(name))
 		return QIcon::fromTheme(name);
 #endif
-	
+
 	// System icon doesn't exist.
 	// Get the fallback icon.
+	struct IconSz_t {
+		QString path;
+		int sz;
+	};
+
+	static const IconSz_t iconSz[] = {
+		{QLatin1String(":/oxygen/256x256/"), 256},
+		{QLatin1String(":/oxygen/128x128/"), 128},
+		{QLatin1String(":/oxygen/64x64/"), 64},
+		{QLatin1String(":/oxygen/48x48/"), 48},
+		{QLatin1String(":/oxygen/32x32/"), 32},
+		{QLatin1String(":/oxygen/24x24/"), 24},
+		{QLatin1String(":/oxygen/22x22/"), 22},
+		{QLatin1String(":/oxygen/16x16/"), 16}
+	};
+	static const QString pngExt = QLatin1String(".png");
+
 	QIcon icon;
-	icon.addFile(QLatin1String(":/oxygen/64x64/") + name + QLatin1String(".png"), QSize(64, 64));
-	icon.addFile(QLatin1String(":/oxygen/48x48/") + name + QLatin1String(".png"), QSize(48, 48));
-	icon.addFile(QLatin1String(":/oxygen/32x32/") + name + QLatin1String(".png"), QSize(32, 32));
-	icon.addFile(QLatin1String(":/oxygen/22x22/") + name + QLatin1String(".png"), QSize(22, 22));
-	icon.addFile(QLatin1String(":/oxygen/16x16/") + name + QLatin1String(".png"), QSize(16, 16));
+	for (int i = 0; i < ARRAY_SIZE(iconSz); i++) {
+		QPixmap pxm(iconSz[i].path + name + pngExt);
+		if (!pxm.isNull())
+			icon.addPixmap(pxm);
+	}
+
+	return icon;
+}
+
+/**
+ * Get an icon from the Gens/GS II icon set.
+ * @param name Icon name.
+ * @return QIcon.
+ */
+QIcon GensQApplication::IconFromProgram(const QString &name)
+{
+#if QT_VERSION >= 0x040600
+	if (QIcon::hasThemeIcon(name))
+		return QIcon::fromTheme(name);
+#endif
+
+	// System icon doesn't exist.
+	// Get the fallback icon.
+	struct IconSz_t {
+		QString path;
+		int sz;
+	};
+
+	static const IconSz_t iconSz[] = {
+		{QLatin1String(":/gens/256x256/"), 256},
+		{QLatin1String(":/gens/128x128/"), 128},
+		{QLatin1String(":/gens/64x64/"), 64},
+		{QLatin1String(":/gens/48x48/"), 48},
+		{QLatin1String(":/gens/32x32/"), 32},
+		{QLatin1String(":/gens/24x24/"), 24},
+		{QLatin1String(":/gens/22x22/"), 22},
+		{QLatin1String(":/gens/16x16/"), 16}
+	};
+	static const QString pngExt = QLatin1String(".png");
+
+	QIcon icon;
+	for (int i = 0; i < ARRAY_SIZE(iconSz); i++) {
+		QPixmap pxm(iconSz[i].path + name + pngExt);
+		if (!pxm.isNull())
+			icon.addPixmap(pxm);
+	}
+
+	return icon;
+}
+
+/**
+ * Get a standard icon.
+ * @param standardIcon Standard pixmap.
+ * @param option QStyleOption.
+ * @param widget QWidget.
+ * @return QIcon.
+ */
+QIcon GensQApplication::StandardIcon(QStyle::StandardPixmap standardIcon,
+				const QStyleOption *option,
+				const QWidget *widget)
+{
+	QStyle *style = QApplication::style();
+	QIcon icon;
+	const char *xdg_icon = nullptr;
+
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
+	// Always use StandardPixmap.
+	// Qt will use the xdg icon if the StandardPixmap isn't found.
+	// TODO: Verify this behavior on old systems.
+	switch (standardIcon) {
+		case QStyle::SP_MessageBoxQuestion:
+			xdg_icon = "dialog-question";
+			break;
+		default:
+			xdg_icon = nullptr;
+			break;
+	}
+#else
+	// Other systems.
+	// TODO: Check icons on Mac.
+	switch (standardIcon) {
+		// Windows only.
+		case QStyle::SP_MessageBoxQuestion:
+#if defined(Q_OS_WIN)
+			icon = style->standardIcon(standardIcon, option, widget);
+#else /* !Q_OS_WIN */
+			xdg_icon = "dialog-question";
+#endif /* Q_OS_WIN */
+			break;
+
+		// Neither Windows nor Mac OS X.
+		case QStyle::SP_DialogApplyButton:
+			xdg_icon = "dialog-ok-apply";
+			break;
+		case QStyle::SP_DialogCloseButton:
+			xdg_icon = "dialog-close";
+			break;
+
+		// Available on all systems.
+		case QStyle::SP_MessageBoxInformation:
+		case QStyle::SP_MessageBoxWarning:
+		case QStyle::SP_MessageBoxCritical:
+		default:
+			// TODO: Add more icons.
+			icon = style->standardIcon(standardIcon, option, widget);
+			break;
+	}
+#endif /* defined(Q_OS_UNIX) && !defined(Q_OS_MAC) */
+
+	if (icon.isNull()) {
+		if (xdg_icon)
+			icon = IconFromTheme(QLatin1String(xdg_icon));
+		if (icon.isNull()) {
+			// We don't have a custom icon for this one.
+			return style->standardIcon(standardIcon, option, widget);
+		}
+	}
+
 	return icon;
 }
 
