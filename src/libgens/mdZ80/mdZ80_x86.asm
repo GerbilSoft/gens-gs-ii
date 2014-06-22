@@ -623,9 +623,6 @@ align 16
 
 %macro DO_IN 0-1
 
-%if (GENS_OPT == 1)
-	xor	dl, dl
-%else
 %ifnidn %1, A
 	SAVE_A
 %endif
@@ -644,7 +641,6 @@ align 16
 	RELOAD_A
 %endif
 	RELOAD_F
-%endif
 
 %endmacro
 
@@ -659,8 +655,6 @@ align 16
 
 %macro DO_OUT 0-1
 
-%if (GENS_OPT == 1)
-%else
 %if %0 > 0
 	mov	dl, z%1
 %endif
@@ -669,7 +663,6 @@ align 16
 	call	[ebp + Z80.OUT]
 	mov	edi, [ebp + Z80.CycleIO]
 	RELOAD_AF
-%endif
 
 %endmacro
 
