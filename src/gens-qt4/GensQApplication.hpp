@@ -65,6 +65,14 @@ class GensQApplication : public QApplication
 		/**
 		 * Get an icon from the Gens/GS II icon set.
 		 * @param name Icon name.
+		 * @param subcategory Subcategory.
+		 * @return QIcon.
+		 */
+		static QIcon IconFromProgram(const QString &name, const QString &subcategory);
+
+		/**
+		 * Get an icon from the Gens/GS II icon set.
+		 * @param name Icon name.
 		 * @return QIcon.
 		 */
 		static QIcon IconFromProgram(const QString &name);

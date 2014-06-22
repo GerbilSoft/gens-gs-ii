@@ -230,27 +230,50 @@ QIcon GensQApplication::IconFromTheme(const QString &name)
 #endif
 
 	// System icon doesn't exist.
+	// Get the built-in icon.
+	QString startDir = QLatin1String(":/oxygen/");
+	static const int iconSizes[] = {256, 128, 64, 48, 32, 24, 22, 16};
+
+	QIcon icon;
+	for (int i = 0; i < ARRAY_SIZE(iconSizes); i++) {
+		int sz = iconSizes[i];
+		QString num = QString::number(sz);
+		QString filename = startDir + num + QChar(L'x') + num + QChar(L'/') + name;
+		QPixmap pxm(filename);
+		if (!pxm.isNull())
+			icon.addPixmap(pxm);
+	}
+
+	return icon;
+}
+
+/**
+ * Get an icon from the Gens/GS II icon set.
+ * @param name Icon name.
+ * @param subcategory Subcategory.
+ * @return QIcon.
+ */
+QIcon GensQApplication::IconFromProgram(const QString &name, const QString &subcategory)
+{
+	// System icon doesn't exist.
 	// Get the fallback icon.
 	struct IconSz_t {
 		QString path;
 		int sz;
 	};
 
-	static const IconSz_t iconSz[] = {
-		{QLatin1String(":/oxygen/256x256/"), 256},
-		{QLatin1String(":/oxygen/128x128/"), 128},
-		{QLatin1String(":/oxygen/64x64/"), 64},
-		{QLatin1String(":/oxygen/48x48/"), 48},
-		{QLatin1String(":/oxygen/32x32/"), 32},
-		{QLatin1String(":/oxygen/24x24/"), 24},
-		{QLatin1String(":/oxygen/22x22/"), 22},
-		{QLatin1String(":/oxygen/16x16/"), 16}
-	};
-	static const QString pngExt = QLatin1String(".png");
+	QString startDir = QLatin1String(":/gens/");
+	if (!subcategory.isEmpty())
+		startDir += subcategory + QChar(L'/');
+
+	static const int iconSizes[] = {256, 128, 64, 48, 32, 24, 22, 16};
 
 	QIcon icon;
-	for (int i = 0; i < ARRAY_SIZE(iconSz); i++) {
-		QPixmap pxm(iconSz[i].path + name + pngExt);
+	for (int i = 0; i < ARRAY_SIZE(iconSizes); i++) {
+		int sz = iconSizes[i];
+		QString num = QString::number(sz);
+		QString filename = startDir + num + QChar(L'x') + num + QChar(L'/') + name;
+		QPixmap pxm(filename);
 		if (!pxm.isNull())
 			icon.addPixmap(pxm);
 	}
@@ -265,38 +288,7 @@ QIcon GensQApplication::IconFromTheme(const QString &name)
  */
 QIcon GensQApplication::IconFromProgram(const QString &name)
 {
-#if QT_VERSION >= 0x040600
-	if (QIcon::hasThemeIcon(name))
-		return QIcon::fromTheme(name);
-#endif
-
-	// System icon doesn't exist.
-	// Get the fallback icon.
-	struct IconSz_t {
-		QString path;
-		int sz;
-	};
-
-	static const IconSz_t iconSz[] = {
-		{QLatin1String(":/gens/256x256/"), 256},
-		{QLatin1String(":/gens/128x128/"), 128},
-		{QLatin1String(":/gens/64x64/"), 64},
-		{QLatin1String(":/gens/48x48/"), 48},
-		{QLatin1String(":/gens/32x32/"), 32},
-		{QLatin1String(":/gens/24x24/"), 24},
-		{QLatin1String(":/gens/22x22/"), 22},
-		{QLatin1String(":/gens/16x16/"), 16}
-	};
-	static const QString pngExt = QLatin1String(".png");
-
-	QIcon icon;
-	for (int i = 0; i < ARRAY_SIZE(iconSz); i++) {
-		QPixmap pxm(iconSz[i].path + name + pngExt);
-		if (!pxm.isNull())
-			icon.addPixmap(pxm);
-	}
-
-	return icon;
+	return IconFromProgram(name, QString());
 }
 
 /**
