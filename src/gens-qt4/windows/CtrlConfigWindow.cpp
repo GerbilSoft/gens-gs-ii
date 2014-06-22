@@ -23,6 +23,7 @@
 
 #include "CtrlConfigWindow.hpp"
 #include "gqt4_main.hpp"
+#include "GensQApplication.hpp"
 
 // C includes.
 #include <assert.h>
@@ -67,7 +68,10 @@ class CtrlConfigWindowPrivate
 		QString getShortDeviceName(LibGens::IoManager::IoType_t ioType) const;
 		QString getLongDeviceName(LibGens::IoManager::IoType_t ioType) const;
 		QString getPortName(LibGens::IoManager::VirtPort_t virtPort) const;
-		static QIcon getCtrlIcon(LibGens::IoManager::IoType_t ioType);
+
+		// Controller icons.
+		void loadCtrlIcons(void);
+		QIcon ctrlIcons[LibGens::IoManager::IOT_MAX];
 
 		// Internal CtrlConfig instance.
 		CtrlConfig *ctrlConfig;
@@ -163,6 +167,9 @@ CtrlConfigWindowPrivate::CtrlConfigWindowPrivate(CtrlConfigWindow *q)
 {
 	// Set the single window instance pointer.
 	ms_Window = q;
+
+	// Load controller icons.
+	loadCtrlIcons();
 
 	// Signal mapper for toolbar buttons.
 	QObject::connect(mapperSelPort, SIGNAL(mapped(int)),
@@ -333,45 +340,29 @@ QString CtrlConfigWindowPrivate::getPortName(IoManager::VirtPort_t virtPort) con
 }
 
 /**
- * Get an icon for the specified controller type.
- * STATIC FUNCTION - tr() isn't needed here.
- * @param ioType Controller type.
- * @return Icon for the specified controller type.
+ * Load all controller icons.
  */
-QIcon CtrlConfigWindowPrivate::getCtrlIcon(IoManager::IoType_t ioType)
+void CtrlConfigWindowPrivate::loadCtrlIcons(void)
 {
-	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
+	const QString qsControllers = QLatin1String("controllers");
 
-	// Controller icons are named using the FourCC.
-	const QString qsFourCC = QString::fromStdString(IoManager::IoTypeToString(ioType));
+	for (int ioType = 0; ioType < LibGens::IoManager::IOT_MAX; ioType++) {
+		// Controller icons are named using the FourCC.
+		const QString qsFourCC = QString::fromStdString(
+			IoManager::IoTypeToString((IoManager::IoType_t)ioType));
 
-	// Create the icon.
-	QIcon ctrlIcon;
-	static const int iconSizes[5] = {64, 48, 32, 22, 16};
-	for (size_t i = 0; i < ARRAY_SIZE(iconSizes); i++) {
-		QString iconFilename = QLatin1String(":/gens/") +
-			QString::number(iconSizes[i]) + QChar(L'x') +
-			QString::number(iconSizes[i]) +
-			QLatin1String("/controllers/") +
-			qsFourCC + QLatin1String(".png");
-
-		if (QFile::exists(iconFilename)) {
-			// File exists.
-			ctrlIcon.addFile(iconFilename, QSize(iconSizes[i], iconSizes[i]));
-		}
+		// Get the icon.
+		QIcon ctrlIcon = GensQApplication::IconFromProgram(qsFourCC, qsControllers);
+		ctrlIcons[ioType] = ctrlIcon;
 	}
-
-	// Return the controller icon.
-	return ctrlIcon;
 }
-
 
 /**
  * Add an I/O device to cboDevice.
  */
 void CtrlConfigWindowPrivate::addIoTypeToCboDevice(IoManager::IoType_t ioType)
 {
-	ui.cboDevice->addItem(getCtrlIcon(ioType), getShortDeviceName(ioType));
+	ui.cboDevice->addItem(ctrlIcons[ioType], getShortDeviceName(ioType));
 	const int idx = ui.cboDevice->count() - 1;
 	map_ioTypeToIdx.insert(ioType, idx);
 	map_idxToIoType.insert(idx, ioType);
@@ -669,7 +660,7 @@ void CtrlConfigWindow::updatePortButton(IoManager::VirtPort_t virtPort)
 	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
 
 	// Update the port icon and tooltip.
-	actionPort->setIcon(d->getCtrlIcon(ioType));
+	actionPort->setIcon(d->ctrlIcons[ioType]);
 	actionPort->setToolTip(d->getPortName(virtPort) +
 				QLatin1String(": ") +
 				d->getLongDeviceName(ioType));
