@@ -80,6 +80,8 @@ class GensZipDirModel : public QAbstractItemModel
 
 		virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
 
+		virtual bool hasChildren(const QModelIndex& parent = QModelIndex()) const override;
+
 		/** GensZipDirModel functions. **/
 
 		bool clear(void);
@@ -87,7 +89,6 @@ class GensZipDirModel : public QAbstractItemModel
 				  const QIcon& icon = QIcon());
 		const mdp_z_entry_t *getZEntry(const QModelIndex& index) const;
 
-		bool hasChildren(const QModelIndex& parent = QModelIndex()) const;
 		bool setDirIconState(const QModelIndex& dirIndex, bool isOpen);
 };
 

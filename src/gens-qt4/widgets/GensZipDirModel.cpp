@@ -246,6 +246,24 @@ void GensZipDirModel::sort(int column, Qt::SortOrder order)
 	emit layoutChanged();
 }
 
+/**
+ * Check if a given item has children.
+ * @param parent Parent item.
+ * @return True if the item has children.
+ */
+bool GensZipDirModel::hasChildren(const QModelIndex& parent) const
+{
+	Q_D(const GensZipDirModel);
+	if (!parent.isValid()) {
+		// Parent is invalid.
+		// Assume we're using the root item.
+		return d->rootItem->childCount();
+	}
+
+	GensZipDirItem *item = d->getItem(parent);
+	return (item->childCount() > 0);
+}
+
 /** GensZipDirModel functions. **/
 
 bool GensZipDirModel::clear(void)
@@ -331,21 +349,6 @@ bool GensZipDirModel::insertZEntry(const mdp_z_entry_t *z_entry,
 	// Data has changed.
 	emit dataChanged(itemIndex, itemIndex);
 	return true;
-}
-
-/**
- * Check if a given item has children.
- * @param parent Parent item.
- * @return True if the item has children.
- */
-bool GensZipDirModel::hasChildren(const QModelIndex& parent) const
-{
-	if (!parent.isValid())
-		return false;
-
-	Q_D(const GensZipDirModel);
-	GensZipDirItem *item = d->getItem(parent);
-	return (item->childCount() > 0);
 }
 
 /**
