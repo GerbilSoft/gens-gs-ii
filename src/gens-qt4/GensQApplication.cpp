@@ -102,10 +102,7 @@ void GensQApplicationPrivate::gqaInit(void)
 	QCoreApplication::setApplicationVersion(sVersion);
 
 	// Set the application icon.
-	QIcon iconApp;
-	iconApp.addFile(QLatin1String(":/gens/gensgs_48x48.png"), QSize(48, 48));
-	iconApp.addFile(QLatin1String(":/gens/gensgs_32x32.png"), QSize(32, 32));
-	iconApp.addFile(QLatin1String(":/gens/gensgs_16x16.png"), QSize(16, 16));
+	QIcon iconApp = GensQApplication::IconFromProgram(QLatin1String("gensgs"));
 	q->setWindowIcon(iconApp);
 
 #if QT_VERSION >= 0x040600

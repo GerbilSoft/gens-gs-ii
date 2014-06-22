@@ -1,20 +1,20 @@
 <RCC>
   <qresource prefix="">
-    <file>gens/gensgs_16x16.png</file>
-    <file>gens/gensgs_32x32.png</file>
-    <file>gens/gensgs_48x48.png</file>
     <file>gens/gens_small.png</file>
     <file>gens/rick-roll.png</file>
     <file>gens/vga-charset.png</file>
 
+    <file>gens/16x16/gensgs.png</file>
     <file>gens/16x16/controllers/NONE.png</file>
 
     <file>gens/22x22/controllers/NONE.png</file>
 
     <file>gens/24x24/controllers/NONE.png</file>
 
+    <file>gens/32x32/gensgs.png</file>
     <file>gens/32x32/controllers/NONE.png</file>
 
+    <file>gens/48x48/gensgs.png</file>
     <file>gens/48x48/controllers/NONE.png</file>
 
     <file>gens/64x64/controllers/NONE.png</file>
