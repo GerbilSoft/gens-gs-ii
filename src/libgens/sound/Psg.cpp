@@ -430,9 +430,8 @@ int Psg::getReg(int regID)
 	return (int)m_reg[regID];
 }
 
-
 /**
- * specialUpdate(): Update the PSG buffer.
+ * Update the PSG buffer.
  */
 void Psg::specialUpdate(void)
 {
@@ -447,7 +446,7 @@ void Psg::specialUpdate(void)
 	int line_num = 1;
 	EmuContext *context = EmuContext::Instance();
 	if (context != nullptr)
-		line_num = (context->m_vdp->VDP_Lines.Display.Current + 1);
+		line_num = (context->m_vdp->VDP_Lines.currentLine + 1);
 
 	// Determine the new starting position.
 	int writePos = SoundMgr::GetWritePos(line_num);
@@ -456,7 +455,6 @@ void Psg::specialUpdate(void)
 	m_bufPtrL = &SoundMgr::ms_SegBufL[writePos];
 	m_bufPtrR = &SoundMgr::ms_SegBufR[writePos];
 }
-
 
 /**
  * resetBufferPtrs(): Reset the PSG buffer pointers.

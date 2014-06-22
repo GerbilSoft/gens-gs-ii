@@ -116,28 +116,34 @@ namespace VdpTypes
 	
 	// VDP line counters.
 	// NOTE: Gens/GS currently uses 312 lines for PAL. It should use 313!
-	struct VdpLines_t
-	{
-		/** Total lines using NTSC/PAL line numbering. **/
-		struct Display_t
-		{
-			unsigned int Total;	// Total number of lines on the display. (262, 313)
-			unsigned int Current;	// Current display line.
+	struct VdpLines_t {
+		// Total number of lines.
+		int totalDisplayLines;
+
+		// Total number of visible lines.
+		int totalVisibleLines;
+
+		// Current line.
+		// - If < 0, top border.
+		// - If >= totalVisibleLines, bottom border.
+		int currentLine;
+
+		// Border information.
+		struct Border_t {
+			// Border size. (192 lines == 24; 224 lines == 8)
+			int borderSize;
+
+			// Border line numbers. (Examples are 320x224 NTSC.)
+			// Bottom border.
+			int borderStartBottom;	// 224
+			int borderEndBottom;	// 231
+			int borderStartTop;	// 254
+			int borderEndTop;	// 261
 		};
-		Display_t Display;
-		
-		/** Visible lines using VDP line numbering. **/
-		struct Visible_t
-		{
-			int Total;		// Total number of visible lines. (192, 224, 240)
-			int Current;		// Current visible line. (May be negative for top border.)
-			int Border_Size;	// Size of the border. (192 lines == 24; 224 lines == 8)
-		};
-		Visible_t Visible;
+		Border_t Border;
 		
 		/** NTSC V30 handling. **/
-		struct NTSC_V30_t
-		{
+		struct NTSC_V30_t {
 			int Offset;		// Current NTSC V30 roll offset.
 			int VBlank_Div;		// VBlank divider. (0 == VBlank is OK; 1 == no VBlank allowed)
 		};

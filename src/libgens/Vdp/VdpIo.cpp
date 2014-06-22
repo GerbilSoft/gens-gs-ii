@@ -121,36 +121,31 @@ void Vdp::updateVdpLines(bool resetCurrent)
 	// Indexes: 0 == 192 lines; 1 == 224 lines; 2 == 240 lines.
 	static const int VisLines_Total[3] = {192, 224, 240};
 	static const int VisLines_Border_Size[3] = {24, 8, 0};
-	static const int VisLines_Current_NTSC[3] = {-40, -24, 0};
-	static const int VisLines_Current_PAL[3] = {-67+1, -51+1, -43+1};
-	
+	//static const int VisLines_Current_NTSC[3] = {-40, -24, 0};
+	//static const int VisLines_Current_PAL[3] = {-67+1, -51+1, -43+1};
+
 	// Initialize VDP_Lines.Display.
-	VDP_Lines.Display.Total = (Reg_Status.isPal() ? 312 : 262);
-	if (resetCurrent)
-		VDP_Lines.Display.Current = 0;
-	
+	// TODO: 312 or 313 for PAL?
+	VDP_Lines.totalDisplayLines = (Reg_Status.isPal() ? 312 : 262);
+
 	// Line offset.
 	int LineOffset;
-	
+
 	// Check the current video mode.
 	// NOTE: Unlike Gens/GS, we don't check if a ROM is loaded because
 	// the VDP code isn't used at all in Gens/GS II during "idle".
-	if (VDP_Mode & VDP_MODE_M5)
-	{
+	if (VDP_Mode & VDP_MODE_M5) {
 		// Mode 5. Must be either 224 lines or 240 lines.
 		if (VDP_Mode & VDP_MODE_M3)
 			LineOffset = 2; // 240 lines.
 		else
 			LineOffset = 1; // 224 lines.
-	}
-	else
-	{
+	} else {
 		// Mode 4 or TMS9918 mode.
 		// Mode 4 may be 192 lines, 224 lines, or 240 lines.
 		// Modes 0-3 may only be 192 lines.
 		// TODO: If emulating SMS1, disable 224-line and 240-line modes.
-		switch (VDP_Mode)
-		{
+		switch (VDP_Mode) {
 			case 0x0B:
 				// Mode 4: 224 lines.
 				LineOffset = 1;
@@ -165,17 +160,31 @@ void Vdp::updateVdpLines(bool resetCurrent)
 				break;
 		}
 	}
-	
-	VDP_Lines.Visible.Total = VisLines_Total[LineOffset];
-	VDP_Lines.Visible.Border_Size = VisLines_Border_Size[LineOffset];
-	if (resetCurrent)
-	{
-		// Reset VDP_Lines.Visible.Current.
-		VDP_Lines.Visible.Current = (Reg_Status.isPal()
-						? VisLines_Current_PAL[LineOffset]
-						: VisLines_Current_NTSC[LineOffset]);
+
+	VDP_Lines.totalVisibleLines = VisLines_Total[LineOffset];
+	VDP_Lines.Border.borderSize = VisLines_Border_Size[LineOffset];
+
+	// Calculate border parameters.
+	if (VDP_Lines.Border.borderSize > 0) {
+		VDP_Lines.Border.borderStartBottom = VDP_Lines.totalVisibleLines;
+		VDP_Lines.Border.borderEndBottom = VDP_Lines.Border.borderStartBottom + VDP_Lines.Border.borderSize - 1;
+
+		VDP_Lines.Border.borderEndTop = VDP_Lines.totalDisplayLines - 1;
+		VDP_Lines.Border.borderStartTop = VDP_Lines.Border.borderEndTop - VDP_Lines.Border.borderSize + 1;
+	} else {
+		// No border.
+		VDP_Lines.Border.borderStartBottom = -1;
+		VDP_Lines.Border.borderEndBottom = -1;
+		VDP_Lines.Border.borderStartTop = -1;
+		VDP_Lines.Border.borderEndTop = -1;
 	}
-	
+
+	if (resetCurrent) {
+		// Reset VDP_Lines.currentLine.
+		// NOTE: VDP starts at visible line 0.
+		VDP_Lines.currentLine = 0;
+	}
+
 	// Check interlaced mode.
 	Interlaced = (VdpTypes::Interlaced_t)
 			(((VDP_Reg.m5.Set4 & 0x02) >> 1) |	// LSM0
@@ -494,7 +503,6 @@ uint8_t Vdp::Read_H_Counter(void)
 		return H_Counter_Table[odo_68K][0];
 }
 
-
 /**
  * Read the V Counter.
  * @return V Counter.
@@ -522,9 +530,7 @@ uint8_t Vdp::Read_V_Counter(void)
 	bl = ((H_Counter >= bl) ? 1 : 0);
 	bl &= bh;
 
-	int V_Counter = VDP_Lines.Visible.Current;
-	if (V_Counter < 0)
-		V_Counter += VDP_Lines.Display.Total;
+	int V_Counter = VDP_Lines.currentLine;
 	V_Counter += (bl ? 1 : 0);
 
 	// TODO: Some of these values are wrong.
@@ -556,7 +562,6 @@ uint8_t Vdp::Read_V_Counter(void)
 	// Interlaced mode is not enabled.
 	return (uint8_t)(V_Counter & 0xFF);
 }
-
 
 /**
  * Vdp::Read_Status(): Read the VDP status register.
@@ -653,8 +658,7 @@ unsigned int Vdp::Update_DMA(void)
 	unsigned int offset = (isH40() ? 2 : 0);
 
 	// Check if we're in VBlank or if the VDP is disabled.
-	if (VDP_Lines.Visible.Current < 0 ||
-	    VDP_Lines.Visible.Current >= VDP_Lines.Visible.Total ||
+	if (VDP_Lines.currentLine >= VDP_Lines.totalVisibleLines ||
 	    (!(VDP_Reg.m5.Set2 & 0x40)))
 	{
 		// In VBlank, or VDP is disabled.

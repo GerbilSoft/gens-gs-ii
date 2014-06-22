@@ -609,7 +609,7 @@ inline int Vdp::GetHCells(void) const
 	{ return H_Cell; }
 
 inline int Vdp::GetVPix(void) const
-	{ return VDP_Lines.Visible.Total; }
+	{ return VDP_Lines.totalVisibleLines; }
 
 /**
  * Determine if the display mode is H40. (320px wide)

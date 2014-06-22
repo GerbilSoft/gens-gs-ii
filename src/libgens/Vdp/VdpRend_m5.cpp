@@ -89,7 +89,7 @@ namespace LibGens
 {
 
 /**
- * Vdp::T_GetLineNumber(): Get the current line number, adjusted for interlaced display.
+ * Get the current line number, adjusted for interlaced display.
  * @param interlaced True for interlaced; false for non-interlaced.
  * @return Line number.
  */
@@ -97,26 +97,24 @@ template<bool interlaced>
 FORCE_INLINE int Vdp::T_GetLineNumber(void) const
 {
 	// Get the current line number.
-	int vdp_line = VDP_Lines.Visible.Current;
+	int vdp_line = VDP_Lines.currentLine;
 	
-	if (interlaced)
-	{
+	if (interlaced) {
 		// Adjust the VDP line number for Flickering Interlaced display.
 		vdp_line *= 2;
-		
-		switch (VdpEmuOptions.intRendMode)
-		{
+
+		switch (VdpEmuOptions.intRendMode) {
 			case VdpTypes::INTREND_EVEN:
 			default:
 				// Even lines only.
 				// Don't do anything.
 				break;
-			
+
 			case VdpTypes::INTREND_ODD:
 				// Odd lines only.
 				vdp_line++;
 				break;
-			
+
 			case VdpTypes::INTREND_FLICKER:
 				// Flickering Interlaced mode.
 				if (Reg_Status.isOddFrame())
@@ -124,7 +122,7 @@ FORCE_INLINE int Vdp::T_GetLineNumber(void) const
 				break;
 		}
 	}
-	
+
 	return vdp_line;
 }
 
@@ -498,9 +496,8 @@ FORCE_INLINE void Vdp::T_PutLine_Sprite(int disp_pixnum, uint32_t pattern, int p
 		Reg_Status.setBit(VdpStatus::VDP_STATUS_COLLISION, true);
 }
 
-
 /**
- * Vdp::T_Get_X_Offset(): Get the X offset for the line. (Horizontal Scroll Table)
+ * Get the X offset for the line. (Horizontal Scroll Table)
  * @param plane True for Scroll A; false for Scroll B.
  * @return X offset.
  */
@@ -509,20 +506,16 @@ FORCE_INLINE uint16_t Vdp::T_Get_X_Offset(void)
 {
 	// NOTE: Multiply by 4 for 16-bit access.
 	// * 2 == select A/B; * 2 == 16-bit
-	const unsigned int H_Scroll_Offset = (VDP_Lines.Visible.Current & H_Scroll_Mask) * 4;
-	
-	if (plane)
-	{
+	const unsigned int H_Scroll_Offset = (VDP_Lines.currentLine & H_Scroll_Mask) * 4;
+
+	if (plane) {
 		// Scroll A.
 		return H_Scroll_Addr_u16(H_Scroll_Offset) & 0x3FF;
-	}
-	else
-	{
+	} else {
 		// Scroll B.
 		return H_Scroll_Addr_u16(H_Scroll_Offset + 2) & 0x3FF;
 	}
 }
-
 
 /**
  * Get the Y offset.
@@ -829,7 +822,6 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
 	}
 }
 
-
 /**
  * Render a line for Scroll A / Window.
  * @param interlaced	[in] True for interlaced; false for non-interlaced.
@@ -845,12 +837,10 @@ FORCE_INLINE void Vdp::T_Render_Line_ScrollA_Window(void)
 	
 	// Check if the entire line is part of the window.
 	// TODO: Verify interlaced operation!
-	const int vdp_cells = (VDP_Lines.Visible.Current >> 3);
-	if (VDP_Reg.m5.Win_V_Pos & 0x80)
-	{
+	const int vdp_cells = (VDP_Lines.currentLine >> 3);
+	if (VDP_Reg.m5.Win_V_Pos & 0x80) {
 		// Window starts from the bottom.
-		if (vdp_cells >= Win_Y_Pos)
-		{
+		if (vdp_cells >= Win_Y_Pos) {
 			// Current line is >= starting line.
 			// Entire line is part of the window.
 			ScrA_Start = 0;
@@ -858,9 +848,7 @@ FORCE_INLINE void Vdp::T_Render_Line_ScrollA_Window(void)
 			Win_Start = 0;
 			Win_Length = GetHCells();
 		}
-	}
-	else if (vdp_cells < Win_Y_Pos)
-	{
+	} else if (vdp_cells < Win_Y_Pos) {
 		// Current line is < ending line.
 		// Entire line is part of the window.
 		ScrA_Start = 0;
@@ -868,20 +856,16 @@ FORCE_INLINE void Vdp::T_Render_Line_ScrollA_Window(void)
 		Win_Start = 0;
 		Win_Length = GetHCells();
 	}
-	
-	if (Win_Length == 0)
-	{
+
+	if (Win_Length == 0) {
 		// Determine the cell starting position and length.
-		if (VDP_Reg.m5.Win_H_Pos & 0x80)
-		{
+		if (VDP_Reg.m5.Win_H_Pos & 0x80) {
 			// Window is right-aligned.
 			ScrA_Start = 0;
 			ScrA_Length = Win_X_Pos;
 			Win_Start = Win_X_Pos;
 			Win_Length = (GetHCells() - Win_X_Pos);
-		}
-		else
-		{
+		} else {
 			// Window is left-aligned.
 			Win_Start = 0;
 			Win_Length = Win_X_Pos;
@@ -889,54 +873,49 @@ FORCE_INLINE void Vdp::T_Render_Line_ScrollA_Window(void)
 			ScrA_Length = (GetHCells() - Win_X_Pos);
 		}
 	}
-	
-	if (Win_Length > 0)
-	{
+
+	if (Win_Length > 0) {
 		// Draw the window.
-		
+
 		// Drawing will start at the first window cell.
 		// (Window is not scrollable.)
 		unsigned int disp_pixnum = (Win_Start * 8) + 8;
-		
+
 		// Calculate the Y offsets.
 		const int y_offset = T_GetLineNumber<interlaced>();
 		unsigned int y_cell_offset, y_fine_offset;
-		
+
 		// Non-Interlaced: 8x8 cells
 		// Interlaced: 8x16 cells
 		y_cell_offset = T_Get_Y_Cell_Offset<interlaced, false>(y_offset);
 		y_fine_offset = T_Get_Y_Fine_Offset<interlaced>(y_offset);
-		
+
 		// TODO: See if we need to handle address wraparound.
 		// NOTE: Multiply by 2 for 16-bit access.
 		const uint16_t *Win_Row_Addr = Win_Addr_Ptr16((y_cell_offset << H_Win_Shift) * 2) + Win_Start;
-		
+
 		// Loop through the cells.
-		for (int x = Win_Length; x > 0; x--, disp_pixnum += 8)
-		{
+		for (int x = Win_Length; x > 0; x--, disp_pixnum += 8) {
 			// Get the pattern info and data for the current tile.
 			register uint16_t pattern_info = *Win_Row_Addr++;
 			uint32_t pattern_data = T_Get_Pattern_Data<interlaced>(pattern_info, y_fine_offset);
-			
+
 			// Extract the palette number.
 			// Resulting number is palette * 16.
 			unsigned int palette = (pattern_info >> 9) & 0x30;
-			
+
 			// Check for swapped Scroll A priority.
 			if (VDP_Layers & VdpTypes::VDP_LAYER_SCROLLA_SWAP)
 				pattern_info ^= 0x8000;
-			
+
 			// Check for horizontal flip.
-			if (pattern_info & 0x0800)
-			{
+			if (pattern_info & 0x0800) {
 				// Pattern has H-Flip enabled.
 				if (pattern_info & 0x8000)
 					T_PutLine_P1<true, h_s, true>(disp_pixnum, pattern_data, palette);
 				else
 					T_PutLine_P0<true, h_s, true>(disp_pixnum, pattern_data, palette);
-			}
-			else
-			{
+			} else {
 				// Pattern doesn't have flip enabled.
 				if (pattern_info & 0x8000)
 					T_PutLine_P1<true, h_s, false>(disp_pixnum, pattern_data, palette);
@@ -944,26 +923,23 @@ FORCE_INLINE void Vdp::T_Render_Line_ScrollA_Window(void)
 					T_PutLine_P0<true, h_s, false>(disp_pixnum, pattern_data, palette);
 			}
 		}
-		
+
 		// Mark window pixels.
 		// TODO: Do this in the Window drawing code!
-		if (ScrA_Length > 0)
-		{
+		if (ScrA_Length > 0) {
 			const int StartPx = ((Win_Start * 8) + 8) / 2;
 			const int EndPx = StartPx + ((Win_Length * 8) / 2);
-			
+
 			for (int x = StartPx; x < EndPx; x++)
 				LineBuf.u32[x] |= LINEBUF_WIN_D;
 		}
 	}
-	
-	if (ScrA_Length > 0)
-	{
+
+	if (ScrA_Length > 0) {
 		// Draw the scroll area.
 		T_Render_Line_Scroll<true, interlaced, vscroll, h_s>(ScrA_Start, ScrA_Length);
 	}
 }
-
 
 /**
  * Fill Sprite_Struct[] with information from the Sprite Attribute Table.
@@ -1522,51 +1498,49 @@ void Vdp::Render_Line_m5(void)
 {
 	// Determine what part of the screen we're in.
 	bool in_border = false;
-	if (VDP_Lines.Visible.Current >= -VDP_Lines.Visible.Border_Size &&
-	    VDP_Lines.Visible.Current < 0)
-	{
-		// Top border.
-		in_border = true;
-	}
-	else if (VDP_Lines.Visible.Current >= VDP_Lines.Visible.Total &&
-		 VDP_Lines.Visible.Current < (VDP_Lines.Visible.Total + VDP_Lines.Visible.Border_Size))
+	int lineNum = VDP_Lines.currentLine;
+	if (lineNum >= VDP_Lines.Border.borderStartBottom &&
+	    lineNum <= VDP_Lines.Border.borderEndBottom)
 	{
 		// Bottom border.
 		in_border = true;
 	}
-	else if (VDP_Lines.Visible.Current < -VDP_Lines.Visible.Border_Size ||
-		 VDP_Lines.Visible.Current >= (VDP_Lines.Visible.Total + VDP_Lines.Visible.Border_Size))
+	else if (lineNum >= VDP_Lines.Border.borderStartTop &&
+	         lineNum <= VDP_Lines.Border.borderEndTop)
 	{
+		// Top border.
+		in_border = true;
+		lineNum -= VDP_Lines.Border.borderStartTop;
+		lineNum -= VDP_Lines.Border.borderSize;
+	}
+	else if (VDP_Lines.currentLine >= VDP_Lines.totalVisibleLines) {
 		// Off screen.
 		return;
 	}
 
 	// Determine the starting line in MD_Screen.
-	// TODO: LibGens: Add a user-configurable option for NTSC V30 rolling.
-	int LineStart = VDP_Lines.Visible.Current;
 	if (Reg_Status.isNtsc() &&
 	    (VDP_Reg.m5.Set2 & 0x08) &&
 	    VdpEmuOptions.ntscV30Rolling)
 	{
 		// NTSC V30 mode. Simulate screen rolling.
-		LineStart -= VDP_Lines.NTSC_V30.Offset;
+		lineNum -= VDP_Lines.NTSC_V30.Offset;
 
 		// Prevent underflow.
-		if (LineStart < 0)
-			LineStart += 240;
+		if (lineNum < 0)
+			lineNum += 240;
 	}
-	LineStart += VDP_Lines.Visible.Border_Size;
+	lineNum += VDP_Lines.Border.borderSize;
 
-	// TODO: LibGens: Reimplement the borderColorEmulation option.
 	if (in_border && !VdpEmuOptions.borderColorEmulation) {
 		// We're in the border area, but border color emulation is disabled.
 		// Clear the border area.
 		// TODO: Only clear this if the option changes or V/H mode changes.
 		if (m_palette.bpp() != VdpPalette::BPP_32) {
-			memset(MD_Screen->lineBuf16(LineStart), 0x00,
+			memset(MD_Screen->lineBuf16(lineNum), 0x00,
 				(MD_Screen->pxPerLine() * sizeof(uint16_t)));
 		} else {
-			memset(MD_Screen->lineBuf32(LineStart), 0x00,
+			memset(MD_Screen->lineBuf32(lineNum), 0x00,
 				(MD_Screen->pxPerLine() * sizeof(uint32_t)));
 		}
 
@@ -1640,7 +1614,7 @@ void Vdp::Render_Line_m5(void)
 	// Render the image.
 	// TODO: Optimize SMS LCB handling. (maybe use Linux's unlikely() macro?)
 	if (m_palette.bpp() != VdpPalette::BPP_32) {
-		uint16_t *lineBuf16 = MD_Screen->lineBuf16(LineStart);
+		uint16_t *lineBuf16 = MD_Screen->lineBuf16(lineNum);
 		T_Render_LineBuf<uint16_t>(lineBuf16, m_palette.m_palActive.u16);
 
 		if (VDP_Reg.m5.Set1 & 0x20) {
@@ -1649,7 +1623,7 @@ void Vdp::Render_Line_m5(void)
 				(VdpEmuOptions.borderColorEmulation ? m_palette.m_palActive.u16[0] : 0));
 		}
 	} else {
-		uint32_t *lineBuf32 = MD_Screen->lineBuf32(LineStart);
+		uint32_t *lineBuf32 = MD_Screen->lineBuf32(lineNum);
 		T_Render_LineBuf<uint32_t>(lineBuf32, m_palette.m_palActive.u32);
 
 		if (VDP_Reg.m5.Set1 & 0x20) {

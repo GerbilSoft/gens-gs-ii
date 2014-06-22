@@ -118,85 +118,72 @@ inline void VdpRend_Err_Private::T_DrawColorBars(MdFb *fb, const pixel palette[2
 {
 	// Go to the correct position in the screen.
 	// TODO: Update to use MdFb.
-	pixel *screen = fb->lineBuf<pixel>(q->VDP_Lines.Visible.Border_Size);
+	pixel *screen = fb->lineBuf<pixel>(q->VDP_Lines.Border.borderSize);
 	const int HPix = q->GetHPix();			// Get horizontal pixel count.
 	const int pitch_diff = (fb->pxPitch() - HPix);	// Calculate pitch difference.
-	
+
 	// X bar positions.
 	int barX_1[7];
-	for (int i = 1; i <= 7; i++)
-	{
+	for (int i = 1; i <= 7; i++) {
 		barX_1[i-1] = ((HPix * i) / 7);
 	}
 	barX_1[6] = 999;
-	
+
 	int barX_2[8];
-	for (int i = 1; i <= 4; i++)
-	{
+	for (int i = 1; i <= 4; i++) {
 		barX_2[i-1] = ((HPix * i * 120) / 672);
 	}
-	for (int i = 1; i <= 3; i++)
-	{
+	for (int i = 1; i <= 3; i++) {
 		barX_2[i+3] = barX_2[3] + ((HPix * i * 32) / 672);
 	}
 	barX_2[7] = 999;
-	
+
 	// Y bar positions.
-	const int barY_1 = ((q->VDP_Lines.Visible.Total * 2) / 3);
-	const int barY_2 = (barY_1 + (q->VDP_Lines.Visible.Total / 12));
-	
+	const int barY_1 = ((q->VDP_Lines.totalVisibleLines * 2) / 3);
+	const int barY_2 = (barY_1 + (q->VDP_Lines.totalVisibleLines / 12));
+
 	// Adjust the screen position for the horizontal resolution.
 	screen += ((320 - HPix) / 2);
-	
+
 	// Current color.
 	int color;
-	
-	for (int y = 0; y < q->VDP_Lines.Visible.Total; y++)
-	{
+
+	for (int y = 0; y < q->VDP_Lines.totalVisibleLines; y++) {
 		color = 0;
-		
-		if (y < barY_1)
-		{
+
+		if (y < barY_1) {
 			// Primary bars.
-			for (int x = 0; x < HPix; x++)
-			{
+			for (int x = 0; x < HPix; x++) {
 				if (x >= barX_1[color])
 					color++;
-				
+
 				// Draw the color.
 				*screen++ = palette[color];
 			}
-		}
-		else if (y < barY_2)
-		{
+		} else if (y < barY_2) {
 			// Secondary bars.
-			for (int x = 0; x < HPix; x++)
-			{
+			for (int x = 0; x < HPix; x++) {
 				if (x >= barX_1[color])
 					color++;
-				
+
 				// Draw the color.
 				*screen++ = palette[color+7];
 			}
-		}
-		else
-		{
+		} else {
 			// Final bars.
-			for (int x = 0; x < HPix; x++)
-			{
+			for (int x = 0; x < HPix; x++) {
 				if (x >= barX_2[color])
 					color++;
-				
+
 				// Draw the color.
 				*screen++ = palette[color+14];
 			}
 		}
-		
+
 		// Next row.
 		screen += pitch_diff;
 	}
 }
-
 
 /**
  * Draw the border area for the color bars.
@@ -209,7 +196,7 @@ inline void VdpRend_Err_Private::T_DrawColorBars_Border(MdFb *fb, const pixel bg
 {
 	// Draw the top border.
 	pixel *screen = fb->lineBuf<pixel>(0);
-	for (unsigned int i = (q->VDP_Lines.Visible.Border_Size * fb->pxPitch());
+	for (unsigned int i = (q->VDP_Lines.Border.borderSize * fb->pxPitch());
 	     i != 0; i -= 4, screen += 4)
 	{
 		*screen = bg_color;
@@ -217,53 +204,47 @@ inline void VdpRend_Err_Private::T_DrawColorBars_Border(MdFb *fb, const pixel bg
 		*(screen + 2) = bg_color;
 		*(screen + 3) = bg_color;
 	}
-	
+
 	const int HPix = q->GetHPix();
-	if (HPix < 320)
-	{
+	if (HPix < 320) {
 		// Draw the left and right borders.
 		const int HPixBegin = q->GetHPixBegin();
-		
-		for (int y = q->VDP_Lines.Visible.Total; y != 0; y--)
-		{
+
+		for (int y = q->VDP_Lines.totalVisibleLines; y != 0; y--) {
 			// Left border.
-			for (int x = HPixBegin; x != 0; x -= 4, screen += 4)
-			{
+			for (int x = HPixBegin; x != 0; x -= 4, screen += 4) {
 				*screen = bg_color;
 				*(screen + 1) = bg_color;
 				*(screen + 2) = bg_color;
 				*(screen + 3) = bg_color;
 			}
-			
+
 			// Skip the visible area.
 			screen += HPix;
-			
+
 			// Right border.
-			for (int x = HPixBegin; x != 0; x -= 4, screen += 4)
-			{
+			for (int x = HPixBegin; x != 0; x -= 4, screen += 4) {
 				*screen = bg_color;
 				*(screen + 1) = bg_color;
 				*(screen + 2) = bg_color;
 				*(screen + 3) = bg_color;
 			}
-			
+
 			// Next line.
 			screen += 16;
 		}
-		
+
 		// Go back to the (invisible) start of the line.
 		screen -= 8;
-	}
-	else
-	{
+	} else {
 		// Go to the bottom border.
 		// TODO: Update to use MdFb.
-		screen += (q->VDP_Lines.Visible.Total * fb->pxPitch());
+		screen += (q->VDP_Lines.totalVisibleLines * fb->pxPitch());
 	}
-	
+
 	// Draw the bottom border.
 	// TODO: Update to use MdFb.
-	for (unsigned int i = (q->VDP_Lines.Visible.Border_Size * fb->pxPitch());
+	for (unsigned int i = (q->VDP_Lines.Border.borderSize * fb->pxPitch());
 	     i != 0; i -= 4, screen += 4)
 	{
 		*screen = bg_color;
@@ -272,7 +253,6 @@ inline void VdpRend_Err_Private::T_DrawColorBars_Border(MdFb *fb, const pixel bg
 		*(screen + 3) = bg_color;
 	}
 }
-
 
 /**
  * Draw a character.
@@ -367,14 +347,14 @@ template<typename pixel, pixel text_color>
 inline void VdpRend_Err_Private::T_DrawVDPErrorMessage(MdFb *fb)
 {
 	// Determine the starting position.
-	const int barY_1 = ((q->VDP_Lines.Visible.Total * 2) / 3);
-	int y = q->VDP_Lines.Visible.Border_Size + ((barY_1 - (16*5)) / 2);
+	const int barY_1 = ((q->VDP_Lines.totalVisibleLines * 2) / 3);
+	int y = q->VDP_Lines.Border.borderSize + ((barY_1 - (16*5)) / 2);
 	int x = ((q->GetHPix() - (29*8)) / 2) + q->GetHPixBegin();
-	
+
 	T_DrawText<pixel, text_color>(fb, x, y,    "Gens/GS II does not currently");
 	T_DrawText<pixel, text_color>(fb, x+((8*7)/2), y+16, "support this VDP mode.");
 	y += 48;
-	
+
 	// Mode bits.
 	char buf[32];
 	const uint8_t vdpMode = q->VDP_Mode;
@@ -386,10 +366,9 @@ inline void VdpRend_Err_Private::T_DrawVDPErrorMessage(MdFb *fb)
 			(vdpMode & VDP_MODE_M1));
 	x = ((q->GetHPix() - (16*8)) / 2) + q->GetHPixBegin();
 	T_DrawText<pixel, text_color>(fb, x, y, buf);
-	
+
 	// TMS9918 modes.
-	static const char *const tms9918_modes[8] =
-	{
+	static const char *const tms9918_modes[8] = {
 		"0 (Graphic I)",
 		"1 (Text)",
 		"2 (Graphic II)",
@@ -400,18 +379,18 @@ inline void VdpRend_Err_Private::T_DrawVDPErrorMessage(MdFb *fb)
 		"1+2+3"
 	};
 	const char *cur_mode;
-	
-	if (vdpMode & VDP_MODE_M4)
-	{
+
+	if (vdpMode & VDP_MODE_M5) {
+		// Mode 5. (SHOULDN'T HAPPEN!)
+		cur_mode = "5 (Mega Drive)";
+	} else if (vdpMode & VDP_MODE_M4) {
 		// Mode 4.
 		cur_mode = "4 (SMS/GG)";
-	}
-	else
-	{
+	} else {
 		// TMS9918 mode.
 		cur_mode = tms9918_modes[vdpMode & 0x07];
 	}
-	
+
 	// Determine the horizontal starting position.
 	// TODO: Don't use strlen().
 	x = ((q->GetHPix() - ((10+strlen(cur_mode))*8)) / 2) + q->GetHPixBegin();
@@ -419,9 +398,7 @@ inline void VdpRend_Err_Private::T_DrawVDPErrorMessage(MdFb *fb)
 	T_DrawText<pixel, text_color>(fb, x+(8*10), y+16, cur_mode);
 }
 
-
 /** Vdp class functions. **/
-
 
 /**
  * Draw a render error message.
@@ -429,7 +406,7 @@ inline void VdpRend_Err_Private::T_DrawVDPErrorMessage(MdFb *fb)
 void Vdp::Render_Line_Err(void)
 {
 	bool updateBorders = false;
-	
+
 	if (d_err->lastVdpMode != VDP_Mode ||
 	    d_err->lastHPix != GetHPix() ||
 	    d_err->lastVPix != GetVPix() ||
@@ -437,58 +414,53 @@ void Vdp::Render_Line_Err(void)
 	{
 		// VDP mode has changed.
 		// Redraw the color bars and reprint the error message.
-		switch (m_palette.bpp())
-		{
+		switch (m_palette.bpp()) {
 			case VdpPalette::BPP_15:
 				d_err->T_DrawColorBars<uint16_t>(MD_Screen, VdpRend_Err_Private::ColorBarsPalette_15);
 				d_err->T_DrawVDPErrorMessage<uint16_t, 0x7FFF>(MD_Screen);
 				break;
-			
+
 			case VdpPalette::BPP_16:
 				d_err->T_DrawColorBars<uint16_t>(MD_Screen, VdpRend_Err_Private::ColorBarsPalette_16);
 				d_err->T_DrawVDPErrorMessage<uint16_t, 0xFFFF>(MD_Screen);
 				break;
-			
+
 			case VdpPalette::BPP_32:
 			default:
 				d_err->T_DrawColorBars<uint32_t>(MD_Screen, VdpRend_Err_Private::ColorBarsPalette_32);
 				d_err->T_DrawVDPErrorMessage<uint32_t, 0xFFFFFF>(MD_Screen);
 				break;
 		}
-		
+
 		// Update the borders.
 		updateBorders = true;
 	}
-	
+
 	// Update the palette.
 	m_palette.update();
-	
+
 	// Get the current border color.
 	uint32_t newBorderColor;
 	if (m_palette.bpp() != VdpPalette::BPP_32)
 		newBorderColor = (uint32_t)m_palette.m_palActive.u16[0];
 	else
 		newBorderColor = m_palette.m_palActive.u32[0];
-	
+
 	// Check if we need to update the borders.
-	if (updateBorders ||
-	    newBorderColor != d_err->lastBorderColor)
-	{
+	if (updateBorders || newBorderColor != d_err->lastBorderColor) {
 		// TODO: Check for horizontal borders too.
-		if (VDP_Lines.Visible.Border_Size != 0)
-		{
+		if (VDP_Lines.Border.borderSize != 0) {
 			// Update the color bar borders.
 			if (m_palette.bpp() != VdpPalette::BPP_32)
 				d_err->T_DrawColorBars_Border<uint16_t>(MD_Screen, (uint16_t)newBorderColor);
 			else
 				d_err->T_DrawColorBars_Border<uint32_t>(MD_Screen, newBorderColor);
 		}
-		
+
 		// Save the new border color.
 		d_err->lastBorderColor = newBorderColor;
 	}
 }
-
 
 /**
  * Update the VDP Render Error cache.

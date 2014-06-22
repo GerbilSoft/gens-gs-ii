@@ -397,8 +397,8 @@ TEST_P(VdpSpriteMaskingTest, spriteMaskingTest)
 
 	// Run the VDP for one frame.
 	m_vdp->updateVdpLines(true);
-	for (; m_vdp->VDP_Lines.Display.Current < m_vdp->VDP_Lines.Display.Total;
-	     m_vdp->VDP_Lines.Display.Current++, m_vdp->VDP_Lines.Visible.Current++)
+	for (; m_vdp->VDP_Lines.currentLine < m_vdp->VDP_Lines.totalDisplayLines;
+	     m_vdp->VDP_Lines.currentLine++)
 	{
 		m_vdp->Render_Line();
 	}

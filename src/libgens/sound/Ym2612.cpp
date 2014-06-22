@@ -2426,7 +2426,7 @@ void Ym2612::updateDacAndTimers(int32_t *bufL, int32_t *bufR, int length)
 
 
 /**
- * specialUpdate(): Update the YM2612 buffer.
+ * Update the YM2612 buffer.
  */
 void Ym2612::specialUpdate(void)
 {
@@ -2441,7 +2441,7 @@ void Ym2612::specialUpdate(void)
 	int line_num = 1;
 	EmuContext *context = EmuContext::Instance();
 	if (context != nullptr)
-		line_num = (context->m_vdp->VDP_Lines.Display.Current + 1);
+		line_num = (context->m_vdp->VDP_Lines.currentLine + 1);
 
 	// Determine the new starting position.
 	int writePos = SoundMgr::GetWritePos(line_num);

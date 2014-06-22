@@ -295,21 +295,20 @@ int EmuMD::autoSaveData(int framesElapsed)
 	return 0;
 }
 
-
 /**
- * T_execLine(): Run a scanline.
+ * Run a scanline.
  * @param LineType Line type.
  * @param VDP If true, VDP is updated.
  */
 template<EmuMD::LineType_t LineType, bool VDP>
 FORCE_INLINE void EmuMD::T_execLine(void)
 {
-	int writePos = SoundMgr::GetWritePos(m_vdp->VDP_Lines.Display.Current);
+	int writePos = SoundMgr::GetWritePos(m_vdp->VDP_Lines.currentLine);
 	int32_t *bufL = &SoundMgr::ms_SegBufL[writePos];
 	int32_t *bufR = &SoundMgr::ms_SegBufR[writePos];
-	
+
 	// Update the sound chips.
-	int writeLen = SoundMgr::GetWriteLen(m_vdp->VDP_Lines.Display.Current);
+	int writeLen = SoundMgr::GetWriteLen(m_vdp->VDP_Lines.currentLine);
 	SoundMgr::ms_Ym2612.updateDacAndTimers(bufL, bufR, writeLen);
 	SoundMgr::ms_Ym2612.addWriteLen(writeLen);
 	SoundMgr::ms_Psg.addWriteLen(writeLen);
@@ -323,36 +322,32 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 	// until the 68000's "odometer" reaches 5000.
 	M68K_Mem::Cycles_M68K += M68K_Mem::CPL_M68K;
 	M68K_Mem::Cycles_Z80 += M68K_Mem::CPL_Z80;
-	
+
 	if (m_vdp->DMAT_Length)
 		M68K::AddCycles(m_vdp->Update_DMA());
-	
-	switch (LineType)
-	{
+
+	switch (LineType) {
 		case LINETYPE_ACTIVEDISPLAY:
 			// In visible area.
 			m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_HBLANK, true);	// HBlank = 1
 			M68K::Exec(M68K_Mem::Cycles_M68K - 404);
 			m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_HBLANK, false);	// HBlank = 0
-			
-			if (--m_vdp->HInt_Counter < 0)
-			{
+
+			if (--m_vdp->HInt_Counter < 0) {
 				m_vdp->VDP_Int |= 0x4;
 				m_vdp->Update_IRQ_Line();
 				m_vdp->HInt_Counter = m_vdp->VDP_Reg.m5.H_Int;
 			}
-			
+
 			break;
-		
-		case LINETYPE_VBLANKLINE:
-		{
+
+		case LINETYPE_VBLANKLINE: {
 			// VBlank line!
-			if (--m_vdp->HInt_Counter < 0)
-			{
+			if (--m_vdp->HInt_Counter < 0) {
 				m_vdp->VDP_Int |= 0x4;
 				m_vdp->Update_IRQ_Line();
 			}
-			
+
 #if 0
 			// TODO: Congratulations! (LibGens)
 			CONGRATULATIONS_PRECHECK();
@@ -360,51 +355,48 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 			// VBlank = 1 et HBlank = 1 (retour de balayage vertical en cours)
 			m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_HBLANK, true);
 			m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_VBLANK, true);
-			
+
 			// If we're using NTSC V30 and this is an "even" frame,
 			// don't set the VBlank flag.
 			if (m_vdp->VDP_Lines.NTSC_V30.VBlank_Div != 0)
 				m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_VBLANK, false);
-			
+
 			M68K::Exec(M68K_Mem::Cycles_M68K - 360);
 			Z80::Exec(168);
 #if 0
 			// TODO: Congratulations! (LibGens)
 			CONGRATULATIONS_POSTCHECK();
 #endif
-			
+
 			m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_HBLANK, false);	// HBlank = 0
-			if (m_vdp->VDP_Lines.NTSC_V30.VBlank_Div == 0)
-			{
+			if (m_vdp->VDP_Lines.NTSC_V30.VBlank_Div == 0) {
 				m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_F, true);	// V Int happened
-				
+
 				m_vdp->VDP_Int |= 0x8;
 				m_vdp->Update_IRQ_Line();
-				
+
 				// Z80 interrupt.
 				// TODO: Does this trigger on all VBlanks,
 				// or only if VINTs are enabled in the VDP?
 				Z80::Interrupt(0xFF);
 			}
-			
+
 			break;
 		}
-		
+
 		case LINETYPE_BORDER:
 		default:
 			break;
 	}
-	
-	if (VDP)
-	{
+
+	if (VDP) {
 		// VDP needs to be updated.
 		m_vdp->Render_Line();
 	}
-	
+
 	M68K::Exec(M68K_Mem::Cycles_M68K);
 	Z80::Exec(0);
 }
-
 
 /**
  * T_execFrame(): Run a frame.
@@ -457,18 +449,8 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 
 	/** Main execution loops. **/
 
-	/** Loop 0: Top border. **/
-	/** NOTE: Vdp::VDP_Lines.Visible.Current may initially be 0! (NTSC V30) **/
-	m_vdp->VDP_Lines.Display.Current = 0;
-	while (m_vdp->VDP_Lines.Visible.Current < 0) {
-		T_execLine<LINETYPE_BORDER, VDP>();
-
-		// Next line.
-		m_vdp->VDP_Lines.Display.Current++;
-		m_vdp->VDP_Lines.Visible.Current++;
-	}
-
 	/** Visible line 0. **/
+	m_vdp->VDP_Lines.currentLine = 0;
 	m_vdp->HInt_Counter = m_vdp->VDP_Reg.m5.H_Int;			// Initialize HInt_Counter.
 	m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_VBLANK, false);	// Clear VBlank flag.
 
@@ -477,23 +459,20 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 		T_execLine<LINETYPE_ACTIVEDISPLAY, VDP>();
 
 		// Next line.
-		m_vdp->VDP_Lines.Display.Current++;
-		m_vdp->VDP_Lines.Visible.Current++;
-	} while (m_vdp->VDP_Lines.Visible.Current < m_vdp->VDP_Lines.Visible.Total);
+		m_vdp->VDP_Lines.currentLine++;
+	} while (m_vdp->VDP_Lines.currentLine < m_vdp->VDP_Lines.totalVisibleLines);
 
 	/** Loop 2: VBlank line. **/
 	T_execLine<LINETYPE_VBLANKLINE, VDP>();
-	m_vdp->VDP_Lines.Display.Current++;
-	m_vdp->VDP_Lines.Visible.Current++;
+	m_vdp->VDP_Lines.currentLine++;
 
-	/** Loop 3: Bottom border. **/
+	/** Loop 3: Borders. **/
 	do {
 		T_execLine<LINETYPE_BORDER, VDP>();
 
 		// Next line.
-		m_vdp->VDP_Lines.Display.Current++;
-		m_vdp->VDP_Lines.Visible.Current++;
-	} while (m_vdp->VDP_Lines.Display.Current < m_vdp->VDP_Lines.Display.Total);
+		m_vdp->VDP_Lines.currentLine++;
+	} while (m_vdp->VDP_Lines.currentLine < m_vdp->VDP_Lines.totalDisplayLines);
 
 	// Update the PSG and YM2612 output.
 	SoundMgr::SpecialUpdate();
