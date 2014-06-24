@@ -36,8 +36,7 @@ const uint8_t lg_mcd_rom_InitHINT[4] = {0xFF, 0xFF, 0xFD, 0x0C};
 /**
  * mcd_rom_db_t: Sega CD Boot ROM database entry.
  */
-typedef struct _mcd_rom_db_t
-{
+typedef struct _mcd_rom_db_t {
 	uint32_t crc32;			// ROM CRC32. (with original HINT vector)
 	uint8_t md5sum[16];		// ROM md5sum. (with original HINT vector)
 
@@ -53,6 +52,25 @@ typedef struct _mcd_rom_db_t
 #define MCD_ROM_DATABASE_ENTRIES ((int)((sizeof(McdRomDatabase) / sizeof(McdRomDatabase[0])) - 1))
 static const mcd_rom_db_t McdRomDatabase[] = {
 	/** Sega CD: Model 1 **/
+
+	// Mega CD (J) Boot ROM v1.00g
+	// 1991/11/20 17:00
+	{
+		0x9BCE40B2,		// CRC32
+
+		// md5sum
+		{0xBC, 0x6A, 0xE4, 0xE1, 0xDB, 0x01, 0xA2, 0xF3,
+		 0x49, 0xD9, 0xAF, 0x39, 0x2B, 0xF7, 0xE2, 0xBD},
+
+		// Region code and ROM support status.
+		MCD_REGION_JAPAN | MCD_REGION_ASIA | MCD_REGION_USA | MCD_REGION_EUROPE,
+		MCD_REGION_JAPAN,
+		RomStatus_Supported,
+
+		// Description and notes.
+		"Mega CD (J) v1.00g",
+		"This ROM will work on all regions, but will only run Japanese games."
+	},
 
 	// Mega CD (J) Boot ROM v1.00l
 	// 1991/12/02 15:20
@@ -71,6 +89,25 @@ static const mcd_rom_db_t McdRomDatabase[] = {
 		// Description and notes.
 		"Mega CD (J) v1.00l",
 		"This ROM will work on all regions, but will only run Japanese games."
+	},
+
+	// Mega CD (J) Boot ROM v1.00o
+	// 1991/12/06 10:10
+	{
+		0x2EA250C0,		// CRC32
+
+		// md5sum
+		{0xCC, 0x04, 0x91, 0x59, 0xD7, 0xE7, 0x44, 0xC1,
+		 0x5E, 0xEE, 0x08, 0x0C, 0x24, 0x12, 0x73, 0xB4},
+
+		// Region code and ROM support status.
+		MCD_REGION_JAPAN,
+		MCD_REGION_JAPAN,
+		RomStatus_Supported,
+
+		// Description and notes.
+		"Mega CD (J) v1.00o",
+		""
 	},
 
 	// Mega CD (J) Boot ROM v1.00p
