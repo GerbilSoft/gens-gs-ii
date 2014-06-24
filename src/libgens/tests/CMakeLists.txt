@@ -61,7 +61,7 @@ ADD_TEST(NAME VdpSpriteMaskingTest
 ADD_EXECUTABLE(Z80Tests
 	Z80/Z80Tests.cpp
 	)
-TARGET_LINK_LIBRARIES(Z80Tests gens ${GTEST_LIBRARY})
+TARGET_LINK_LIBRARIES(Z80Tests mdZ80 ${GTEST_LIBRARY})
 # NOTE: zexdoc/zexall isn't working.
 #ADD_TEST(NAME Z80Tests
 #	COMMAND Z80Tests)
