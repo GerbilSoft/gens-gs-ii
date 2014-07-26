@@ -39,7 +39,7 @@
 #include <string>
 #include <sstream>
 using std::string;
-using std::stringstream;
+using std::ostringstream;
 
 namespace LibGens
 {
@@ -144,7 +144,7 @@ int DcRar::getFileInfo(mdp_z_entry_t **z_entry_out)
 	// Read from the pipe.
 	char buf[4096+1];
 	size_t rv;
-	stringstream ss;
+	ostringstream ss;
 	while ((rv = fread(buf, 1, sizeof(buf)-1, pRar))) {
 		buf[rv] = 0x00;
 		ss << buf;

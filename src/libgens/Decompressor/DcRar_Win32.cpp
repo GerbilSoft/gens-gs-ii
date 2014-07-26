@@ -54,7 +54,6 @@
 #include <string>
 #include <sstream>
 using std::string;
-using std::stringstream;
 
 namespace LibGens
 {
