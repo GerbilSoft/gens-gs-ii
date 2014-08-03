@@ -63,7 +63,7 @@ class KeyManagerPrivate
 		 * - Index 0: Virtual Port.
 		 * - Index 1: Key. (TODO: Use the next-highest power of two?)
 		 */
-		GensKey_t keymap[IoManager::VIRTPORT_MAX][IoManager::BTNI_MAX];
+		GensKey_t keyMap[IoManager::VIRTPORT_MAX][IoManager::BTNI_MAX];
 
 		/**
 		 * Device types.
@@ -90,7 +90,7 @@ KeyManagerPrivate::KeyManagerPrivate(KeyManager *q)
 {
 	// Initialize keymaps.
 	// TODO: Load keymap from configuration?
-	memset(keymap, 0, sizeof(keymap));
+	memset(keyMap, 0, sizeof(keyMap));
 
 	// Initialize device types.
 	// TODO: Load device types from configuration?
@@ -101,14 +101,14 @@ KeyManagerPrivate::KeyManagerPrivate(KeyManager *q)
 
 	// Set a basic keymap for port 1 for now.
 	devTypes[0] = IoManager::IOT_3BTN;
-	keymap[0][0] = KEYV_UP;
-	keymap[0][1] = KEYV_DOWN;
-	keymap[0][2] = KEYV_LEFT;
-	keymap[0][3] = KEYV_RIGHT;
-	keymap[0][4] = KEYV_d;
-	keymap[0][5] = KEYV_s;
-	keymap[0][6] = KEYV_a;
-	keymap[0][7] = KEYV_RETURN;
+	keyMap[0][0] = KEYV_UP;
+	keyMap[0][1] = KEYV_DOWN;
+	keyMap[0][2] = KEYV_LEFT;
+	keyMap[0][3] = KEYV_RIGHT;
+	keyMap[0][4] = KEYV_d;
+	keyMap[0][5] = KEYV_s;
+	keyMap[0][6] = KEYV_a;
+	keyMap[0][7] = KEYV_RETURN;
 }
 
 /** KeyManager **/
@@ -128,7 +128,7 @@ KeyManager::~KeyManager()
  */
 void KeyManager::copyFromOther(const KeyManager &keyManager)
 {
-	memcpy(d->keymap, keyManager.d->keymap, sizeof(d->keymap));
+	memcpy(d->keyMap, keyManager.d->keyMap, sizeof(d->keyMap));
 	memcpy(d->devTypes, keyManager.d->devTypes, sizeof(d->devTypes));
 }
 
@@ -167,10 +167,10 @@ void KeyManager::updateIoManager(IoManager *ioManager)
 
 		const int numButtons = ioManager->NumDevButtons(ioType);
 		uint32_t buttons = 0;
-		const GensKey_t *port_keymap = &d->keymap[virtPort][numButtons - 1];
+		const GensKey_t *port_keyMap = &d->keyMap[virtPort][numButtons - 1];
 		for (int btn = numButtons - 1; btn >= 0; btn--) {
 			buttons <<= 1;
-			buttons |= isKeyPressed(*port_keymap--);
+			buttons |= isKeyPressed(*port_keyMap--);
 		}
 
 		// Buttons are typically active-low. (except Mega Mouse)
@@ -184,19 +184,19 @@ void KeyManager::updateIoManager(IoManager *ioManager)
 /**
  * Get the keymap for the specified Virtual Port.
  * @param virtPort I/O Manager Virtual Port.
- * @param keymap Keymap.
+ * @param keyMap Keymap.
  * @param siz Size of keymap.
  * @return Number of keys copied on success; non-zero on error.
  */
-int KeyManager::keymap(IoManager::VirtPort_t virtPort, GensKey_t *keymap, int siz) const
+int KeyManager::keyMap(IoManager::VirtPort_t virtPort, GensKey_t *keyMap, int siz) const
 {
 	if (virtPort < IoManager::VIRTPORT_1 || virtPort >= IoManager::VIRTPORT_MAX)
 		return -EINVAL;
 
-	const uint32_t *src_keymap = d->keymap[virtPort];
-	int btns = std::min(siz, ARRAY_SIZE(d->keymap[virtPort]));
+	const uint32_t *src_keyMap = d->keyMap[virtPort];
+	int btns = std::min(siz, ARRAY_SIZE(d->keyMap[virtPort]));
 	for (int i = 0; i < btns; i++) {
-		keymap[i] = src_keymap[i];
+		keyMap[i] = src_keyMap[i];
 	}
 
 	return btns;
@@ -205,19 +205,19 @@ int KeyManager::keymap(IoManager::VirtPort_t virtPort, GensKey_t *keymap, int si
 /**
  * Set the keymap for the specified Virtual Port.
  * @param virtPort I/O Manager Virtual Port.
- * @param keymap Keymap.
+ * @param keyMap Keymap.
  * @param siz Number of keys in the keymap.
  * @return Number of keys copied on success; non-zero on error.
  */
-int KeyManager::setKeymap(IoManager::VirtPort_t virtPort, const GensKey_t *keymap, int siz)
+int KeyManager::setKeyMap(IoManager::VirtPort_t virtPort, const GensKey_t *keyMap, int siz)
 {
 	if (virtPort < IoManager::VIRTPORT_1 || virtPort >= IoManager::VIRTPORT_MAX)
 		return -EINVAL;
 
-	uint32_t *dest_keymap = d->keymap[virtPort];
-	int btns = std::min(siz, ARRAY_SIZE(d->keymap[virtPort]));
+	uint32_t *dest_keyMap = d->keyMap[virtPort];
+	int btns = std::min(siz, ARRAY_SIZE(d->keyMap[virtPort]));
 	for (int i = 0; i < btns; i++) {
-		dest_keymap[i] = keymap[i];
+		dest_keyMap[i] = keyMap[i];
 	}
 
 	return btns;
@@ -228,7 +228,7 @@ int KeyManager::setKeymap(IoManager::VirtPort_t virtPort, const GensKey_t *keyma
  * @param virtPort I/O Manager Virtual Port.
  * @param ioType New device type.
  */
-IoManager::IoType_t KeyManager::devType(IoManager::VirtPort_t virtPort)
+IoManager::IoType_t KeyManager::ioType(IoManager::VirtPort_t virtPort)
 {
 	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
 	return d->devTypes[virtPort];
@@ -239,7 +239,7 @@ IoManager::IoType_t KeyManager::devType(IoManager::VirtPort_t virtPort)
  * @param virtPort I/O Manager Virtual Port.
  * @param ioType New device type.
  */
-void KeyManager::setDevType(IoManager::VirtPort_t virtPort, IoManager::IoType_t ioType)
+void KeyManager::setIoType(IoManager::VirtPort_t virtPort, IoManager::IoType_t ioType)
 {
 	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
 	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
