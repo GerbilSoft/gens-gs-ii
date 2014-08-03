@@ -169,6 +169,25 @@ int KeyManager::setKeymap(int virtPort, const GensKey_t *keymap, int siz)
 }
 
 /**
+ * Check if a key is pressed.
+ * @param keycode Key code.
+ * @return True if pressed; false if not.
+ */
+bool KeyManager::isKeyPressed(GensKey_t keycode) const
+{
+	GensKey_u keyu;
+	keyu.keycode = keycode;
+	if (keyu.type != GKT_KEYBOARD)
+		return false;
+	if (keyu.dev_id != 0)
+		return false;
+
+	return d->kbdState[keyu.key16 & 0x1FF];
+}
+
+/** Keyboard **/
+
+/**
  * Keyboard: "Key Down" event.
  * @param keycode Key code.
  */
@@ -198,23 +217,6 @@ void KeyManager::keyUp(GensKey_t keycode)
 		return;
 
 	d->kbdState[keyu.key16 & 0x1FF] = false;
-}
-
-/**
- * Check if a key is pressed.
- * @param keycode Key code.
- * @return True if pressed; false if not.
- */
-bool KeyManager::isKeyPressed(GensKey_t keycode) const
-{
-	GensKey_u keyu;
-	keyu.keycode = keycode;
-	if (keyu.type != GKT_KEYBOARD)
-		return false;
-	if (keyu.dev_id != 0)
-		return false;
-
-	return d->kbdState[keyu.key16 & 0x1FF];
 }
 
 }

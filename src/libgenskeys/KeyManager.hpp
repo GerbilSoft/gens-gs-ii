@@ -72,6 +72,17 @@ class KeyManager
 		 */
 		int setKeymap(int virtPort, const GensKey_t *keymap, int siz);
 
+	public:
+		/**
+		 * Check if a key is pressed.
+		 * @param keycode Key code.
+		 * @return True if pressed; false if not.
+		 */
+		bool isKeyPressed(GensKey_t keycode) const;
+
+	public:
+		/** Keyboard **/
+
 		/**
 		 * Keyboard: "Key Down" event.
 		 * @param keycode Key code.
@@ -83,13 +94,6 @@ class KeyManager
 		 * @param keycode Key code.
 		 */
 		void keyUp(GensKey_t keycode);
-
-		/**
-		 * Check if a key is pressed.
-		 * @param keycode Key code.
-		 * @return True if pressed; false if not.
-		 */
-		bool isKeyPressed(GensKey_t keycode) const;
 };
 
 }
