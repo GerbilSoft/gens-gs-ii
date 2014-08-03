@@ -68,6 +68,7 @@ class GensCtrlKeyWidget : public QWidget
 
 	signals:
 		void keyChanged(GensKey_t key);
+		void keyUnchanged(void);
 
 	public slots:
 		/**

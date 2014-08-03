@@ -197,14 +197,16 @@ void GensCtrlKeyWidgetPrivate::doneRecording(void)
 	keyButton->releaseKeyboard();
 	keyButton->setDown(false);
 
+	Q_Q(GensCtrlKeyWidget);
 	if (gensKey == oldGensKey) {
 		// The sequence hasn't changed
 		updateShortcutDisplay();
+		// TODO: Separate signal for "cancelled".
+		emit q->keyUnchanged();
 		return;
 	}
 
 	// Key sequence has changed.
-	Q_Q(GensCtrlKeyWidget);
         emit q->keyChanged(gensKey);
 	updateShortcutDisplay();
 }

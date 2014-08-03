@@ -85,8 +85,30 @@ class GensCtrlCfgWidget : public QWidget
 		void keyChanged(int idx, GensKey_t gensKey);
 
 	private slots:
+		/**
+		 * Clear all buttons for the selected controller.
+		 * WRAPPER SLOT for GensCtrlCfgWidgetPrivate.
+		 */
 		void clearAllButtons(void);
+
+		/**
+		 * Change all buttons for the selected controller.
+		 * WRAPPER SLOT for GensCtrlCfgWidgetPrivate.
+		 */
+		void changeAllButtons(void);
+
+		/**
+		 * A key was changed.
+		 * @param idx Key index.
+		 */
 		void keyChanged_slot(int idx);
+
+		/**
+		 * A key was left unchanged.
+		 * (This may also mean the capture was cancelled. TODO: Add another slot)
+		 * @param idx Key index.
+		 */
+		void keyUnchanged_slot(int idx);
 };
 
 }
