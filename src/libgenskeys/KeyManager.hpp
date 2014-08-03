@@ -48,13 +48,11 @@ class KeyManager
 		KeyManager &operator=(const KeyManager &);
 
 	public:
-		LibGens::IoManager *ioManager(void) const;
-		void setIoManager(LibGens::IoManager *ioManager);
-
 		/**
-		 * Update the I/O manager with the current key states.
+		 * Update the I/O Manager with the current key states.
+		 * @param ioManager I/O Manager to update.
 		 */
-		void updateIoManager(void);
+		void updateIoManager(LibGens::IoManager *ioManager);
 
 		/**
 		 * Get the keymap for the specified Virtual Port.

@@ -66,16 +66,12 @@ class KeyManagerPrivate
 
 		// TODO: Improve performance by adding a GensKey_t to Device lookup?
 		// (may be needed when joysticks are added)
-
-		// I/O Manager.
-		LibGens::IoManager *ioManager;
 };
 
 /** KeyManagerPrivate **/
 
 KeyManagerPrivate::KeyManagerPrivate(KeyManager *q)
 	: q(q)
-	, ioManager(nullptr)
 {
 	// Initialize keymaps.
 	// TODO: Load keymap from configuration?
@@ -107,31 +103,11 @@ KeyManager::~KeyManager()
 }
 
 /**
- * Get the current I/O Manager.
- * @return I/O Manager.
+ * Update the I/O Manager with the current key states.
+ * @param ioManager I/O Manager to update.
  */
-LibGens::IoManager *KeyManager::ioManager(void) const
+void KeyManager::updateIoManager(LibGens::IoManager *ioManager)
 {
-	return d->ioManager;
-}
-
-/**
- * Set the current I/O Manager.
- * @param ioManager I/O Manager.
- */
-void KeyManager::setIoManager(LibGens::IoManager *ioManager)
-{
-	d->ioManager = ioManager;
-}
-
-/**
- * Update the I/O manager with the current key states.
- */
-void KeyManager::updateIoManager(void)
-{
-	if (!d->ioManager)
-		return;
-
 #ifdef _WIN32
 	// Windows: Update Shift/Control/Alt states.
 	// TODO: Only do this if the input backend doesn't support L/R modifiers natively.
@@ -150,8 +126,8 @@ void KeyManager::updateIoManager(void)
 
 	// Scan the keymap and determine buttons.
 	for (int virtPort = 0; virtPort < LibGens::IoManager::VIRTPORT_MAX; virtPort++) {
-		LibGens::IoManager::IoType_t ioType = d->ioManager->devType((LibGens::IoManager::VirtPort_t)virtPort);
-		int numButtons = d->ioManager->NumDevButtons(ioType);
+		LibGens::IoManager::IoType_t ioType = ioManager->devType((LibGens::IoManager::VirtPort_t)virtPort);
+		int numButtons = ioManager->NumDevButtons(ioType);
 
 		uint32_t buttons = 0;
 		const GensKey_t *port_keymap = &d->keymap[virtPort][numButtons - 1];
@@ -164,7 +140,7 @@ void KeyManager::updateIoManager(void)
 		if (ioType != LibGens::IoManager::IOT_MEGA_MOUSE)
 			buttons = ~buttons;
 
-		d->ioManager->update(virtPort, buttons);
+		ioManager->update(virtPort, buttons);
 	}
 }
 

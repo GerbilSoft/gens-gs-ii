@@ -586,11 +586,6 @@ int EmuManager::closeRom(bool emitStateChanged)
 	m_audio->close();
 	m_paused.data = 0;
 
-	// Remove the I/O manager from the Key Manager.
-	if (m_keyManager) {
-		m_keyManager->setIoManager(nullptr);
-	}
-
 	// Only clear the screen if we're emitting stateChanged().
 	// If we're not emitting stateChanged(), this usually means
 	// we're loading a new ROM immediately afterwards, so
@@ -736,9 +731,7 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 
 	// Update the Key Manager.
 	if (m_keyManager) {
-		// TODO: Eliminate this set, or make I/O Manager a parameter for updateIoManager()?
-		m_keyManager->setIoManager(gqt4_emuContext->m_ioManager);
-		m_keyManager->updateIoManager();
+		m_keyManager->updateIoManager(gqt4_emuContext->m_ioManager);
 	}
 
 	// Update the Video Backend.
