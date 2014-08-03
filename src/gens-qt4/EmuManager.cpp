@@ -73,6 +73,7 @@ namespace GensQt4
 
 EmuManager::EmuManager(QObject *parent, VBackend *vBackend)
 	: QObject(parent)
+	, m_keyManager(nullptr)
 	, m_vBackend(vBackend)
 	, m_romClosedFb(nullptr)
 {
@@ -141,7 +142,7 @@ EmuManager::~EmuManager()
 	m_audio->close();
 	delete m_audio;
 	m_audio = nullptr;
-	
+
 	// Delete the ROM.
 	// TODO
 	
@@ -585,6 +586,11 @@ int EmuManager::closeRom(bool emitStateChanged)
 	m_audio->close();
 	m_paused.data = 0;
 
+	// Remove the I/O manager from the Key Manager.
+	if (m_keyManager) {
+		m_keyManager->setIoManager(nullptr);
+	}
+
 	// Only clear the screen if we're emitting stateChanged().
 	// If we're not emitting stateChanged(), this usually means
 	// we're loading a new ROM immediately afterwards, so
@@ -726,6 +732,13 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 		// Update the controller ports.
 		gqt4_cfg->m_ctrlConfig->updateIoManager(gqt4_emuContext->m_ioManager);
 		gqt4_cfg->m_ctrlConfig->clearDirty();
+	}
+
+	// Update the Key Manager.
+	if (m_keyManager) {
+		// TODO: Eliminate this set, or make I/O Manager a parameter for updateIoManager()?
+		m_keyManager->setIoManager(gqt4_emuContext->m_ioManager);
+		m_keyManager->updateIoManager();
 	}
 
 	// Update the Video Backend.

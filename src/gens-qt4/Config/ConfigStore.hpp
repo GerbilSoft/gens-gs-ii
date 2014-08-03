@@ -26,7 +26,9 @@
 
 // LibGens includes.
 #include "libgens/Rom.hpp"
-#include "libgens/GensInput/GensKey_t.h"
+
+// LibGensKeys. (TODO: Save from KeyManager)
+#include "libgenskeys/GensKey_t.h"
 
 // Qt includes.
 #include <QtCore/QObject>

@@ -162,6 +162,19 @@ SET(gens-qt4_WIDGET_SRCS
 	widgets/GensCtrlCfgWidget.cpp
 	widgets/GensCtrlKeyWidget.cpp
 	widgets/GensColorButton.cpp
+	widgets/KeyNames.cpp
+	)
+
+SET(gens-qt4_WIDGET_H
+	widgets/GensLineEdit.hpp
+	widgets/GensZipDirModel.hpp
+	widgets/GensZipDirItem.hpp
+	widgets/GensColorComboBox.hpp
+	widgets/GensKeySequenceWidget.hpp
+	widgets/GensCtrlCfgWidget.hpp
+	widgets/GensCtrlKeyWidget.hpp
+	widgets/GensColorButton.hpp
+	widgets/KeyNames.hpp
 	)
 
 # Headers with Qt4 objects.
@@ -347,7 +360,7 @@ ADD_EXECUTABLE(gens-qt4
 	${gens-qt4_SRCS}
 	${gens-qt4_COMMON_SRCS}
 	${gens-qt4_WINDOW_SRCS}
-	${gens-qt4_WIDGET_SRCS}
+	${gens-qt4_WIDGET_SRCS} ${gens-qt4_WIDGET_H}
 	${gens-qt4_DBUS_SRCS}
 	${gens-qt4_PLATFORM_SRCS}
 	${gens-qt4_PLATFORM_UI_SRCS}
@@ -355,7 +368,7 @@ ADD_EXECUTABLE(gens-qt4
 	${gens-qt4_UIS_H}
 	${gens-qt4_RCC_O}
 	)
-TARGET_LINK_LIBRARIES(gens-qt4 gens ${ZLIB_LIBRARY} genscd)
+TARGET_LINK_LIBRARIES(gens-qt4 gens ${ZLIB_LIBRARY} genscd genskeys)
 ADD_DEPENDENCIES(gens-qt4 translations_target)
 
 # Additional libraries.

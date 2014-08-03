@@ -31,7 +31,9 @@ class QSettings;
 
 // LibGens includes.
 #include "libgens/IO/IoManager.hpp"
-#include "libgens/GensInput/GensKey_t.h"
+
+// LibGensKeys. (TODO: Save from KeyManager)
+#include "libgenskeys/GensKey_t.h"
 
 namespace GensQt4
 {

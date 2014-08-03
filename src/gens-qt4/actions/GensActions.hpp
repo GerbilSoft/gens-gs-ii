@@ -25,8 +25,8 @@
 #ifndef __GENS_QT4_INPUT_ACTIONS_GENSACTIONS_HPP__
 #define __GENS_QT4_INPUT_ACTIONS_GENSACTIONS_HPP__
 
-// Gens Keys.
-#include "libgens/GensInput/GensKey_t.h"
+// LibGensKeys.
+#include "libgenskeys/GensKey_t.h"
 
 // Qt includes.
 #include <QtCore/QObject>

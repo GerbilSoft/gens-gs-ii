@@ -24,7 +24,9 @@
 
 // LibGens includes.
 #include "libgens/IO/IoManager.hpp"
-#include "libgens/GensInput/GensKey_t.h"
+
+// LibGensKeys.
+#include "libgenskeys/GensKey_t.h"
 
 // Qt includes.
 #include <QtGui/QWidget>

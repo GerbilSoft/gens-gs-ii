@@ -79,38 +79,6 @@ void IoManagerPrivate::reset(void)
 }
 
 /**
- * Set the device keymap.
- * @param virtPort Virtual port number.
- * @param keymap Array of GensKey_t values.
- * @param siz Size of keymap array.
- * @return Number of keys set, or negative on error.
- */
-int IoManagerPrivate::setKeymap(int virtPort, const GensKey_t *keymap, int siz)
-{
-	IoDevice *const dev = &ioDevices[virtPort];
-	const int btns = std::min(siz, ARRAY_SIZE(dev->keyMap));
-	for (int i = 0; i < btns; i++)
-		dev->keyMap[i] = *keymap++;
-	return btns;
-}
-
-/**
- * Get the device keymap.
- * @param virtPort Virtual port number.
- * @param keymap Array to store the GensKey_t values in.
- * @param siz Size of keymap array.
- * @return Number of keys returned, or negative on error.
- */
-int IoManagerPrivate::keymap(int virtPort, GensKey_t *keymap, int siz) const
-{
-	const IoDevice *const dev = &ioDevices[virtPort];
-	const int btns = std::min(siz, ARRAY_SIZE(dev->keyMap));
-	for (int i = 0; i < btns; i++)
-		*keymap++ = dev->keyMap[i];
-	return btns;
-}
-
-/**
  * Update the scanline counter for all controllers.
  * This is used by the 6-button controller,
  * which resets its internal counter after

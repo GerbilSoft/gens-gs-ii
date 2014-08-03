@@ -43,6 +43,9 @@
 #include "../GensQApplication.hpp"
 #include "Input/KeyHandlerQt.hpp"
 
+// Key names.
+#include "KeyNames.hpp"
+
 // Needed for GetAsyncKeyState().
 #if defined(Q_WS_WIN)
 #define WIN32_LEAN_AND_MEAN
@@ -236,16 +239,13 @@ void GensCtrlKeyWidgetPrivate::updateShortcutDisplay(void)
 	} else {
 		// Display the key.
 		// TODO: Move LibGens::DevManager::KeyName to the UI.
-		const char *keyName = LibGens::DevManager::KeyName(gensKey);
-		QString sKeyName;
-		if (!keyName) {
+		QString keyName = KeyNames::keyName(gensKey);
+		if (keyName.isEmpty()) {
 			//: No key is assigned.
-			sKeyName = GensCtrlKeyWidget::tr("None", "key-name");
-		} else {
-			sKeyName = QLatin1String(keyName);
+			keyName = GensCtrlKeyWidget::tr("None", "key-name");
 		}
 
-		lblDisplay->setText(sKeyName);
+		lblDisplay->setText(keyName);
 		lblDisplay->setTextFormat(Qt::PlainText);
 	}
 }

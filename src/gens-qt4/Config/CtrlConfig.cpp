@@ -444,9 +444,12 @@ void CtrlConfig::updateIoManager(IoManager *ioManager) const
 				d->ctrlTypes[virtPort]);
 
 		// Set the new keymaps.
+		// FIXME: Update for LibGensKeys.
+#if 0
 		ioManager->setKeymap(virtPort,
 				&d->ctrlKeys[virtPort][0],
 				ARRAY_SIZE(d->ctrlKeys[virtPort]));
+#endif
 	}
 }
 
@@ -485,6 +488,7 @@ void CtrlConfig::setIoType(IoManager::VirtPort_t virtPort, IoManager::IoType_t i
  */
 QVector<GensKey_t> CtrlConfig::keyMap(IoManager::VirtPort_t virtPort)
 {
+	// FIXME: Update for LibGensKeys.
 	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
 	Q_D(CtrlConfig);
 	const int numButtons = IoManager::NumDevButtons(d->ctrlTypes[virtPort]);

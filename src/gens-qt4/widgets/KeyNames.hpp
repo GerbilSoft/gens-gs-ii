@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * GensKeyConfig.hpp: Gens key configuration.                              *
+ * KeyNames.hpp: Qt key names.                                             *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,70 +21,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_ACTIONS_GENSKEYCONFIG_HPP__
-#define __GENS_QT4_ACTIONS_GENSKEYCONFIG_HPP__
+#ifndef __GENS_QT4_WIDGETS_KEYNAMES_HPP__
+#define __GENS_QT4_WIDGETS_KEYNAMES_HPP__
+
+// LibGensKeys
+#include "libgenskeys/GensKey_t.h"
 
 // Qt includes.
-#include <QtCore/QObject>
-#include <QtCore/QHash>
-
-// Qt classes.
-class QSettings;
-
-// LibGensKeys.
-#include "libgenskeys/GensKey_t.h"
+#include <QtCore/QString>
 
 namespace GensQt4
 {
 
-class GensKeyConfigPrivate;
-
-class GensKeyConfig : public QObject
+class KeyNames
 {
-	Q_OBJECT
-	
-	public:
-		GensKeyConfig(QObject *parent = 0);
-		virtual ~GensKeyConfig();
-
+	// Static class.
 	private:
-		GensKeyConfigPrivate *const d_ptr;
-		Q_DECLARE_PRIVATE(GensKeyConfig);
-	private:
-		Q_DISABLE_COPY(GensKeyConfig);
+		KeyNames() { }
+		~KeyNames() { }
 
 	public:
 		/**
-		 * Look up an action based on a GensKey_t value.
-		 * @param key GensKey_t value. (WITH MODIFIERS)
-		 * @return Action, or 0 if no action was found.
+		 * Get a key name.
+		 * @param keycode Gens keycode.
+		 * @return Key name, or empty string if invalid.
 		 */
-		int keyToAction(GensKey_t key) const;
-
-		/**
-		 * Look up a GensKey_t based on an action value.
-		 * @param action Action value.
-		 * @return GensKey_t (WITH MODIFIERS), or 0 if no key was found.
-		 */
-		int actionToKey(int action) const;
-
-		/**
-		 * Load key configuration from a settings file.
-		 * NOTE: The group must be selected in the QSettings before calling this function!
-		 * @param qSettings Settings file.
-		 * @return 0 on success; non-zero on error.
-		 */
-		int load(const QSettings *qSettings);
-
-		/**
-		 * Save key configuration to a settings file.
-		 * NOTE: The group must be selected in the QSettings before calling this function!
-		 * @param qSettings Settings file.
-		 * @return 0 on success; non-zero on error.
-		 */
-		int save(QSettings *qSettings) const;
+		static QString keyName(GensKey_t keycode);
 };
 
 }
 
-#endif /* __GENS_QT4_ACTIONS_GENSKEYCONFIG_HPP__ */
+#endif /* __GENS_QT4_WIDGETS_KEYNAMES_HPP__ */

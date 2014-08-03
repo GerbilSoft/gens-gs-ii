@@ -24,8 +24,6 @@
 #define __LIBGENS_IN_IOMANAGER_CLASS__
 #include "IoManager_p.hpp"
 
-#include "GensInput/DevManager.hpp"
-
 // C includes. (C++ namespace)
 #include <cassert>
 
@@ -33,26 +31,19 @@ namespace LibGens
 {
 
 /**
- * I/O device update function.
+ * Update an I/O device.
+ * @param virtPort Virtual port.
+ * @param buttons New button state.
  */
-void IoManagerPrivate::update(void)
+void IoManagerPrivate::update(int virtPort, uint32_t buttons)
 {
-	// Update keyboard input for all ports.
-	for (int i = 0; i < ARRAY_SIZE(ioDevices); i++) {
-		int btnCount = ioDevInfo[ioDevices[i].type].btnCount;
-		uint32_t buttons = 0;
-		for (int j = (btnCount - 1); j >= 0; j--) {
-			buttons <<= 1;
-			buttons |= DevManager::IsKeyPressed(ioDevices[i].keyMap[j]);
-		}
+	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
 
-		// Buttons typically use active-low logic.
-		ioDevices[i].buttons = ~buttons;
-	}
+	// Set the new button state.
+	ioDevices[virtPort].buttons = buttons;
 
-	// Update all ports.
-	for (int i = IoManager::PHYSPORT_1; i < IoManager::PHYSPORT_MAX; i++)
-		updateDevice(i);
+	// Update the port state.
+	updateDevice(virtPort);
 }
 
 /**
@@ -61,8 +52,6 @@ void IoManagerPrivate::update(void)
  */
 void IoManagerPrivate::updateDevice(int virtPort)
 {
-	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
-
 	IoDevice *const dev = &ioDevices[virtPort];
 	const bool oldSelect = dev->isSelect();
 	dev->updateSelectLine();

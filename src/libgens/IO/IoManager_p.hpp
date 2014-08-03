@@ -63,10 +63,6 @@ class IoManagerPrivate
 		 */
 		void reset(void);
 
-		// Set/get keymap.
-		int setKeymap(int virtPort, const GensKey_t *keymap, int siz);
-		int keymap(int virtPort, GensKey_t *keymap, int siz) const;
-
 		/**
 		 * Update the scanline counter for all controllers.
 		 * This is used by the 6-button controller,
@@ -77,9 +73,11 @@ class IoManagerPrivate
 		static const int SCANLINE_COUNT_MAX_6BTN = 25;
 
 		/**
-		 * I/O device update function.
+		 * Update an I/O device.
+		 * @param virtPort Virtual port.
+		 * @param buttons New button state.
 		 */
-		void update(void);
+		void update(int virtPort, uint32_t buttons);
 
 		/**
 		 * Update an I/O device's state based on ctrl/data lines.
@@ -332,10 +330,6 @@ class IoManagerPrivate
 			// TODO: Serial data buffer.
 			uint8_t serCtrl;	// Serial control.
 			uint8_t serLastTx;	// Last transmitted data byte.
-
-			// Button mapping.
-			// TODO: Use next-highest power-of-two?
-			GensKey_t keyMap[IoManager::BTNI_MAX];
 
 			/**
 			 * Device-specific data.
