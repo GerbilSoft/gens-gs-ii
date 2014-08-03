@@ -61,7 +61,7 @@ class KeyManager
 		 * @param siz Size of keymap.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int keymap(int virtPort, GensKey_t *keymap, int siz) const;
+		int keymap(LibGens::IoManager::VirtPort_t virtPort, GensKey_t *keymap, int siz) const;
 
 		/**
 		 * Set the keymap for the specified Virtual Port.
@@ -70,7 +70,21 @@ class KeyManager
 		 * @param siz Number of keys in the keymap.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int setKeymap(int virtPort, const GensKey_t *keymap, int siz);
+		int setKeymap(LibGens::IoManager::VirtPort_t virtPort, const GensKey_t *keymap, int siz);
+
+		/**
+		 * Get the device type for the specified Virtual Port.
+		 * @param virtPort I/O Manager Virtual Port.
+		 * @param ioType New device type.
+		 */
+		LibGens::IoManager::IoType_t devType(LibGens::IoManager::VirtPort_t virtPort);
+
+		/**
+		 * Set the device type for the specified Virtual Port.
+		 * @param virtPort I/O Manager Virtual Port.
+		 * @param ioType New device type.
+		 */
+		void setDevType(LibGens::IoManager::VirtPort_t virtPort, LibGens::IoManager::IoType_t ioType);
 
 	public:
 		/**
