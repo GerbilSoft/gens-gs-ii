@@ -25,14 +25,19 @@
 
 // C includes. (C++ namespace)
 #include <cassert>
+#include <cerrno>
 #include <cstring>
 #include <cstdio>
+
+// C++ includes.
+#include <algorithm>
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
 
+#include "libgens/macros/common.h"
 #include "libgens/IO/IoManager.hpp"
 using LibGens::IoManager;
 
@@ -171,11 +176,20 @@ void KeyManager::updateIoManager(IoManager *ioManager)
  * @param virtPort I/O Manager Virtual Port.
  * @param keymap Keymap.
  * @param siz Size of keymap.
- * @return 0 on success; non-zero on error.
+ * @return Number of keys copied on success; non-zero on error.
  */
 int KeyManager::keymap(IoManager::VirtPort_t virtPort, GensKey_t *keymap, int siz) const
 {
-	// TODO
+	if (virtPort < IoManager::VIRTPORT_1 || virtPort >= IoManager::VIRTPORT_MAX)
+		return -EINVAL;
+
+	const uint32_t *src_keymap = d->keymap[virtPort];
+	int btns = std::min(siz, ARRAY_SIZE(d->keymap[virtPort]));
+	for (int i = 0; i < btns; i++) {
+		keymap[i] = src_keymap[i];
+	}
+
+	return btns;
 }
 
 /**
@@ -183,11 +197,20 @@ int KeyManager::keymap(IoManager::VirtPort_t virtPort, GensKey_t *keymap, int si
  * @param virtPort I/O Manager Virtual Port.
  * @param keymap Keymap.
  * @param siz Number of keys in the keymap.
- * @return 0 on success; non-zero on error.
+ * @return Number of keys copied on success; non-zero on error.
  */
 int KeyManager::setKeymap(IoManager::VirtPort_t virtPort, const GensKey_t *keymap, int siz)
 {
-	// TODO
+	if (virtPort < IoManager::VIRTPORT_1 || virtPort >= IoManager::VIRTPORT_MAX)
+		return -EINVAL;
+
+	uint32_t *dest_keymap = d->keymap[virtPort];
+	int btns = std::min(siz, ARRAY_SIZE(d->keymap[virtPort]));
+	for (int i = 0; i < btns; i++) {
+		dest_keymap[i] = keymap[i];
+	}
+
+	return btns;
 }
 
 /**

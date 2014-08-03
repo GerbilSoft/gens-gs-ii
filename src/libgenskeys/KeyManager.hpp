@@ -59,7 +59,7 @@ class KeyManager
 		 * @param virtPort I/O Manager Virtual Port.
 		 * @param keymap Keymap.
 		 * @param siz Size of keymap.
-		 * @return 0 on success; non-zero on error.
+		 * @return Number of keys copied on success; non-zero on error.
 		 */
 		int keymap(LibGens::IoManager::VirtPort_t virtPort, GensKey_t *keymap, int siz) const;
 
@@ -68,7 +68,7 @@ class KeyManager
 		 * @param virtPort I/O Manager Virtual Port.
 		 * @param keymap Keymap.
 		 * @param siz Number of keys in the keymap.
-		 * @return 0 on success; non-zero on error.
+		 * @return Number of keys copied on success; non-zero on error.
 		 */
 		int setKeymap(LibGens::IoManager::VirtPort_t virtPort, const GensKey_t *keymap, int siz);
 
