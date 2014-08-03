@@ -55,7 +55,6 @@ class GensCtrlCfgWidgetPrivate
 {
 	public:
 		GensCtrlCfgWidgetPrivate(GensCtrlCfgWidget *q);
-		void init(void);
 
 		inline IoManager::IoType_t ioType(void) const;
 		void setIoType(IoManager::IoType_t newIoType);
@@ -69,26 +68,31 @@ class GensCtrlCfgWidgetPrivate
 		Q_DISABLE_COPY(GensCtrlCfgWidgetPrivate)
 
 	public:
+		struct Ui_GensCtrlCfgWidget {
+			QGridLayout *layout;
+			QLabel *lblButtonName[IoManager::BTNI_MAX];
+			QLabel *lblKeyDisplay[IoManager::BTNI_MAX];
+			GensCtrlKeyWidget *btnCfg[IoManager::BTNI_MAX];
+
+			QSpacerItem *vspcCfg;
+
+			// "Change All", "Clear All".
+			QPushButton *btnChangeAll;
+			QPushButton *btnClearAll;
+			QHBoxLayout *hboxOptions;
+
+			// keyChanged() signal mapper.
+			QSignalMapper *mapperKeyChanged;
+			// keyUnchanged() signal mapper.
+			QSignalMapper *mapperKeyUnchanged;
+
+			void setupUi(QWidget *GensCtrlCfgWidget);
+		};
+		Ui_GensCtrlCfgWidget ui;
+
 		IoManager::IoType_t m_ioType;
 		int numButtons;		// Cached from IoManager.
-
-		QGridLayout *layout;
-		QLabel *lblButtonName[IoManager::BTNI_MAX];
-		QLabel *lblKeyDisplay[IoManager::BTNI_MAX];
-		GensCtrlKeyWidget *btnCfg[IoManager::BTNI_MAX];
 		int btnIdx[IoManager::BTNI_MAX];
-
-		// keyChanged() signal mapper.
-		QSignalMapper *mapperKeyChanged;
-		// keyUnchanged() signal mapper.
-		QSignalMapper *mapperKeyUnchanged;
-
-		QSpacerItem *vspcCfg;
-
-		// "Change All", "Clear All".
-		QPushButton *btnChangeAll;
-		QPushButton *btnClearAll;
-		QHBoxLayout *hboxOptions;
 
 		// Are we changing all buttons?
 		bool isChangingAllButtons;
@@ -102,27 +106,28 @@ GensCtrlCfgWidgetPrivate::GensCtrlCfgWidgetPrivate(GensCtrlCfgWidget *q)
 	: q(q)
 	, m_ioType(IoManager::IOT_NONE)
 	, numButtons(0)
-	, layout(new QGridLayout(q))
-	, mapperKeyChanged(new QSignalMapper(q))
-	, mapperKeyUnchanged(new QSignalMapper(q))
 	, isChangingAllButtons(false)
+{ }
+
+/**
+ * Initialize the UI.
+ * @param MessageWidget MessageWidget.
+ */
+void GensCtrlCfgWidgetPrivate::Ui_GensCtrlCfgWidget::setupUi(QWidget *GensCtrlCfgWidget)
 {
+	// Initialize the grid layout.
+	layout = new QGridLayout(GensCtrlCfgWidget);
+	layout->setObjectName(QLatin1String("layout"));
 	// Eliminate margins and reduce vertical spacing.
 	layout->setContentsMargins(0, 0, 0, 0);
 	layout->setVerticalSpacing(0);
 
-	// Signal mappers for configuration buttons.
-	QObject::connect(mapperKeyChanged, SIGNAL(mapped(int)),
-			  q, SLOT(keyChanged_slot(int)));
-	QObject::connect(mapperKeyUnchanged, SIGNAL(mapped(int)),
-			  q, SLOT(keyUnchanged_slot(int)));
-}
+	// Create the signal mappers.
+	mapperKeyChanged = new QSignalMapper(GensCtrlCfgWidget);
+	mapperKeyChanged->setObjectName(QLatin1String("mapperKeyChanged"));
+	mapperKeyUnchanged  = new QSignalMapper(GensCtrlCfgWidget);
+	mapperKeyUnchanged->setObjectName(QLatin1String("mapperKeyUnchanged"));
 
-/**
- * Initialize the grid layout.
- */
-void GensCtrlCfgWidgetPrivate::init(void)
-{
 	// Monospaced font.
 	QFont fntMonospace(QLatin1String("Monospace"));
 	fntMonospace.setStyleHint(QFont::TypeWriter);
@@ -130,15 +135,15 @@ void GensCtrlCfgWidgetPrivate::init(void)
 	// Add CtrlConfig::MAX_BTNS items to the grid layout.
 	for (int i = 0; i < ARRAY_SIZE(btnCfg); i++) {
 		// Create the widgets.
-		lblButtonName[i] = new QLabel(q);
+		lblButtonName[i] = new QLabel(GensCtrlCfgWidget);
 		lblButtonName[i]->setVisible(false);
-		lblKeyDisplay[i] = new QLabel(q);
+		lblKeyDisplay[i] = new QLabel(GensCtrlCfgWidget);
 		lblKeyDisplay[i]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 		lblKeyDisplay[i]->setVisible(false);
 		lblKeyDisplay[i]->setFont(fntMonospace);
 
 		// Configuration button.
-		btnCfg[i] = new GensCtrlKeyWidget(q, lblKeyDisplay[i]);
+		btnCfg[i] = new GensCtrlKeyWidget(GensCtrlCfgWidget, lblKeyDisplay[i]);
 		btnCfg[i]->setVisible(false);
 		QObject::connect(btnCfg[i], SIGNAL(keyChanged(GensKey_t)),
 				  mapperKeyChanged, SLOT(map()));
@@ -160,20 +165,21 @@ void GensCtrlCfgWidgetPrivate::init(void)
 	// Create the HBox.
 	// TODO: Verify that this doesn't leak memory.
 	hboxOptions = new QHBoxLayout();
+	hboxOptions->setObjectName(QLatin1String("hboxOptions"));
 	hboxOptions->setContentsMargins(0, 8, 0, 0); // TODO: Use style default for Top margin.
 	layout->addLayout(hboxOptions, IoManager::BTNI_MAX+1, 0, 1, 3, Qt::AlignCenter);
 
 	// Add the "Change All" and "Clear All" buttons.
 	// TODO: Icons.
-	btnChangeAll = new QPushButton(GensCtrlCfgWidget::tr("&Change All Buttons"), q);
-	QObject::connect(btnChangeAll, SIGNAL(clicked(bool)),
-			 q, SLOT(changeAllButtons()));
+	btnChangeAll = new QPushButton(GensCtrlCfgWidget::tr("&Change All Buttons"), GensCtrlCfgWidget);
+	btnChangeAll->setObjectName(QLatin1String("btnChangeAll"));
 	hboxOptions->addWidget(btnChangeAll);
 
-	btnClearAll = new QPushButton(GensCtrlCfgWidget::tr("C&lear All Buttons"), q);
-	QObject::connect(btnClearAll, SIGNAL(clicked(bool)),
-			 q, SLOT(clearAllButtons()));
+	btnClearAll = new QPushButton(GensCtrlCfgWidget::tr("C&lear All Buttons"), GensCtrlCfgWidget);
+	btnClearAll->setObjectName(QLatin1String("btnClearAll"));
 	hboxOptions->addWidget(btnClearAll);
+
+	QMetaObject::connectSlotsByName(GensCtrlCfgWidget);
 }
 
 /**
@@ -197,8 +203,8 @@ void GensCtrlCfgWidgetPrivate::setIoType(IoManager::IoType_t newIoType)
 
 	// Update the grid layout based on the specified controller type.
 	numButtons = IoManager::NumDevButtons(newIoType);
-	if (numButtons > ARRAY_SIZE(btnCfg))
-		numButtons = ARRAY_SIZE(btnCfg);
+	if (numButtons > ARRAY_SIZE(ui.btnCfg))
+		numButtons = ARRAY_SIZE(ui.btnCfg);
 
 	// Show the buttons, in logical button order.
 	QString sBtnLabel;
@@ -210,10 +216,10 @@ void GensCtrlCfgWidgetPrivate::setIoType(IoManager::IoType_t newIoType)
 		sBtnLabel = buttonName_l(buttonName) + QChar(L':');
 
 		// Update the widgets.
-		lblButtonName[i]->setText(sBtnLabel);
-		lblButtonName[i]->setVisible(true);
-		lblKeyDisplay[i]->setVisible(true);
-		btnCfg[i]->setVisible(true);
+		ui.lblButtonName[i]->setText(sBtnLabel);
+		ui.lblButtonName[i]->setVisible(true);
+		ui.lblKeyDisplay[i]->setVisible(true);
+		ui.btnCfg[i]->setVisible(true);
 		btnIdx[i] = button;
 
 		// Get the next logical button. (TODO: Update for IoManager.)
@@ -225,10 +231,10 @@ void GensCtrlCfgWidgetPrivate::setIoType(IoManager::IoType_t newIoType)
 	assert(i == numButtons);
 
 	// Hide other buttons.
-	for (i = numButtons; i < ARRAY_SIZE(btnCfg); i++) {
-		lblButtonName[i]->setVisible(false);
-		lblKeyDisplay[i]->setVisible(false);
-		btnCfg[i]->setVisible(false);
+	for (i = numButtons; i < ARRAY_SIZE(ui.btnCfg); i++) {
+		ui.lblButtonName[i]->setVisible(false);
+		ui.lblKeyDisplay[i]->setVisible(false);
+		ui.btnCfg[i]->setVisible(false);
 		btnIdx[i] = -1;
 	}
 }
@@ -333,11 +339,11 @@ QString GensCtrlCfgWidgetPrivate::buttonName_l(IoManager::ButtonName_t buttonNam
 void GensCtrlCfgWidgetPrivate::clearAllButtons(void)
 {
 	isChangingAllButtons = false;
-	btnChangeAll->setEnabled(true);
-	btnClearAll->setEnabled(true);
+	ui.btnChangeAll->setEnabled(true);
+	ui.btnClearAll->setEnabled(true);
 
-	for (int i = 0; i < ARRAY_SIZE(btnCfg); i++)
-		btnCfg[i]->clearKey();
+	for (int i = 0; i < ARRAY_SIZE(ui.btnCfg); i++)
+		ui.btnCfg[i]->clearKey();
 }
 
 /********************************
@@ -350,7 +356,9 @@ GensCtrlCfgWidget::GensCtrlCfgWidget(QWidget* parent)
 {
 	// Initialize the private members.
 	Q_D(GensCtrlCfgWidget);
-	d->init();
+
+	// Initialize the UI.
+	d->ui.setupUi(this);
 }
 
 GensCtrlCfgWidget::~GensCtrlCfgWidget()
@@ -389,7 +397,7 @@ QVector<GensKey_t> GensCtrlCfgWidget::keyMap(void) const
 	Q_D(const GensCtrlCfgWidget);
 	QVector<GensKey_t> keyMap(d->numButtons);
 	for (int i = 0; i < d->numButtons; i++) {
-		keyMap[i] = d->btnCfg[d->btnIdx[i]]->key();
+		keyMap[i] = d->ui.btnCfg[d->btnIdx[i]]->key();
 	}
 
 	return keyMap;
@@ -405,13 +413,13 @@ void GensCtrlCfgWidget::setKeyMap(const QVector<GensKey_t> &keyMap)
 	const int maxButtons = std::min(d->numButtons, keyMap.count());
 
 	for (int i = 0; i < maxButtons; i++) {
-		d->btnCfg[d->btnIdx[i]]->setKey(keyMap[i]);
+		d->ui.btnCfg[d->btnIdx[i]]->setKey(keyMap[i]);
 	}
 
 	if (maxButtons < d->numButtons) {
 		// Clear the rest of the keys.
 		for (int i = maxButtons; i < d->numButtons; i++) {
-			d->btnCfg[i]->clearKey();
+			d->ui.btnCfg[i]->clearKey();
 		}
 	}
 }
@@ -420,7 +428,7 @@ void GensCtrlCfgWidget::setKeyMap(const QVector<GensKey_t> &keyMap)
  * Clear all buttons for the selected controller.
  * WRAPPER SLOT for GensCtrlCfgWidgetPrivate.
  */
-void GensCtrlCfgWidget::clearAllButtons(void)
+void GensCtrlCfgWidget::on_btnClearAll_clicked(void)
 {
 	Q_D(GensCtrlCfgWidget);
 	d->clearAllButtons();
@@ -430,7 +438,7 @@ void GensCtrlCfgWidget::clearAllButtons(void)
  * Change all buttons for the selected controller.
  * WRAPPER SLOT for GensCtrlCfgWidgetPrivate.
  */
-void GensCtrlCfgWidget::changeAllButtons(void)
+void GensCtrlCfgWidget::on_btnChangeAll_clicked(void)
 {
 	Q_D(GensCtrlCfgWidget);
 	if (d->isChangingAllButtons)
@@ -440,25 +448,25 @@ void GensCtrlCfgWidget::changeAllButtons(void)
 
 	// Start changing all buttons.
 	// TODO: Cancel if we lose focus?
-	d->btnChangeAll->setEnabled(false);
-	d->btnClearAll->setEnabled(false);
+	d->ui.btnChangeAll->setEnabled(false);
+	d->ui.btnClearAll->setEnabled(false);
 	d->isChangingAllButtons = true;
-	d->btnCfg[0]->setFocus();
-	d->btnCfg[0]->captureKey();
+	d->ui.btnCfg[0]->setFocus();
+	d->ui.btnCfg[0]->captureKey();
 }
 
 /**
  * A key's configuration has changed.
  * @param idx Button index.
  */
-void GensCtrlCfgWidget::keyChanged_slot(int idx)
+void GensCtrlCfgWidget::on_mapperKeyChanged_mapped(int idx)
 {
 	// Emit a signal with the new key value.
 	Q_D(GensCtrlCfgWidget);
-	emit keyChanged(idx, d->btnCfg[idx]->key());
+	emit keyChanged(idx, d->ui.btnCfg[idx]->key());
 
 	// Check if we're changing all buttons.
-	keyUnchanged_slot(idx);
+	on_mapperKeyUnchanged_mapped(idx);
 }
 
 /**
@@ -466,7 +474,7 @@ void GensCtrlCfgWidget::keyChanged_slot(int idx)
  * (This may also mean the capture was cancelled. TODO: Add another slot)
  * @param idx Key index.
  */
-void GensCtrlCfgWidget::keyUnchanged_slot(int idx)
+void GensCtrlCfgWidget::on_mapperKeyUnchanged_mapped(int idx)
 {
 	// TODO: If we lost focus, cancel changing buttons.
 
@@ -478,12 +486,12 @@ void GensCtrlCfgWidget::keyUnchanged_slot(int idx)
 		if (nextBtn >= d->numButtons) {
 			// Finished changing all buttons.
 			d->isChangingAllButtons = false;
-			d->btnChangeAll->setEnabled(true);
-			d->btnClearAll->setEnabled(true);
+			d->ui.btnChangeAll->setEnabled(true);
+			d->ui.btnClearAll->setEnabled(true);
 		} else {
 			// Next button.
-			d->btnCfg[nextBtn]->setFocus();
-			d->btnCfg[nextBtn]->captureKey();
+			d->ui.btnCfg[nextBtn]->setFocus();
+			d->ui.btnCfg[nextBtn]->captureKey();
 		}
 	}
 }
