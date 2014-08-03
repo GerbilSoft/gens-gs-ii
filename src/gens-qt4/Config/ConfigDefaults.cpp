@@ -102,8 +102,10 @@ const ConfigDefaults::DefaultSetting ConfigDefaults::DefaultSettings[] =
 	/** VDP settings. **/
 	{"VDP/borderColorEmulation",	"true", 0, 0,		DefaultSetting::VT_BOOL, 0, 0},
 	{"VDP/ntscV30Rolling",		"true", 0, 0,		DefaultSetting::VT_BOOL, 0, 0},
-	{"VDP/zeroLengthDMA",		"false", 0, 0,		DefaultSetting::VT_BOOL, 0, 0},
 	{"VDP/spriteLimits",		"true", 0, 0,		DefaultSetting::VT_BOOL, 0, 0},
+	// The following options should not be changed
+	// unless the user knows what they're doing!
+	{"VDP/zeroLengthDMA",		"false", 0, 0,		DefaultSetting::VT_BOOL, 0, 0},
 	{"VDP/vscrollBug",		"true", 0, 0,		DefaultSetting::VT_BOOL, 0, 0},
 	{"VDP/updatePaletteInVBlankOnly", "false", 0, 0,	DefaultSetting::VT_BOOL, 0, 0},
 

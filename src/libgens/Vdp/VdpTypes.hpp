@@ -171,18 +171,23 @@ namespace VdpTypes
 		bool ntscV30Rolling;
 		
 		/**
-		 * Enables zero-length DMA.
-		 * Default is false (hardware-accurate).
-		 * May need to be enabled for buggy hacks.
-		 */
-		bool zeroLengthDMA;
-		
-		/**
 		 * Enables sprite limits.
 		 * Default is true (hardware-accurate).
 		 * May need to be disabled for buggy hacks.
 		 */
 		bool spriteLimits;
+
+		/**
+		 * The following options should NOT be changed
+		 * unless the user knows what they're doing!
+		 */
+
+		/**
+		 * Enables zero-length DMA.
+		 * Default is false (hardware-accurate).
+		 * May need to be enabled for buggy hacks.
+		 */
+		bool zeroLengthDMA;
 		
 		/**
 		 * Enables left-column VScroll bug emulation.
