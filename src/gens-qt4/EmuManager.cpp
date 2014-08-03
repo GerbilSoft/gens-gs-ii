@@ -442,8 +442,8 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	m_frames = 0;
 
 	// Initialize controllers.
-	gqt4_cfg->m_ctrlConfig->updateIoManager(gqt4_emuContext->m_ioManager);
-	gqt4_cfg->m_ctrlConfig->clearDirty();
+	// TODO: Clear key state?
+	gqt4_cfg->m_keyManager->updateIoManager(gqt4_emuContext->m_ioManager);
 
 	// Set the EmuContext settings.
 	// TODO: Load these in EmuContext directly?
@@ -722,14 +722,7 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	if (!m_qEmuRequest.isEmpty())
 		processQEmuRequest();
 
-	// Check for controller configuration updates.
-	if (gqt4_cfg->m_ctrlConfig->isDirty()) {
-		// Update the controller ports.
-		gqt4_cfg->m_ctrlConfig->updateIoManager(gqt4_emuContext->m_ioManager);
-		gqt4_cfg->m_ctrlConfig->clearDirty();
-	}
-
-	// Update the Key Manager.
+	// Update the I/O Manager.
 	if (m_keyManager) {
 		m_keyManager->updateIoManager(gqt4_emuContext->m_ioManager);
 	}

@@ -50,9 +50,6 @@
 // Video Backend classes.
 #include "VBackend/GensQGLWidget.hpp"
 
-// Key Manager.
-#include "libgenskeys/KeyManager.hpp"
-
 namespace GensQt4
 {
 
@@ -77,7 +74,6 @@ class GensWindowPrivate
 			GensMenuBar *gensMenuBar;
 			GensActions *gensActions;
 
-			LibGensKeys::KeyManager *keyManager;
 			KeyHandlerQt *keyHandler;
 
 			VBackend *vBackend;
@@ -130,7 +126,6 @@ GensWindowPrivate::~GensWindowPrivate()
 {
 	delete ui.emuManager;
 	delete ui.keyHandler;
-	delete ui.keyManager;
 	delete ui.gensActions;
 	delete ui.gensMenuBar;
 }
@@ -169,9 +164,8 @@ void GensWindowPrivate::Ui_GensWindow::setupUi(GensWindow *GensWindow)
 	gensActions = new GensActions(GensWindow);
 
 	// Initialize the Key Manager and KeyHandlerQt.
-	keyManager = new LibGensKeys::KeyManager();
-	emuManager->setKeyManager(keyManager);
-	keyHandler = new KeyHandlerQt(GensWindow, gensActions, keyManager);
+	emuManager->setKeyManager(gqt4_cfg->m_keyManager);
+	keyHandler = new KeyHandlerQt(GensWindow, gensActions, gqt4_cfg->m_keyManager);
 
 	// Create the Video Backend.
 	// TODO: Allow selection of all available VBackend classes.

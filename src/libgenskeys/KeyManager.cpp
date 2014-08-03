@@ -70,7 +70,7 @@ class KeyManagerPrivate
 		 * - Index: Virtual Port.
 		 * - Value: Device type.
 		 */
-		IoManager::IoType_t devTypes[IoManager::VIRTPORT_MAX];
+		IoManager::IoType_t ioTypes[IoManager::VIRTPORT_MAX];
 
 		/**
 		 * Keyboard state.
@@ -81,34 +81,89 @@ class KeyManagerPrivate
 
 		// TODO: Improve performance by adding a GensKey_t to Device lookup?
 		// (may be needed when joysticks are added)
+
+		// Default keymap.
+		static const IoManager::IoType_t def_ioTypes[IoManager::VIRTPORT_MAX];
+		static const GensKey_t def_keyMap[IoManager::VIRTPORT_MAX][IoManager::BTNI_MAX];
 };
 
 /** KeyManagerPrivate **/
 
+// Default controller configuration.
+const IoManager::IoType_t KeyManagerPrivate::def_ioTypes[IoManager::VIRTPORT_MAX] =
+{
+	// System controller ports.
+	IoManager::IOT_6BTN,	// Port 1
+	IoManager::IOT_3BTN,	// Port 2
+
+	// Team Player, Port 1.
+	IoManager::IOT_NONE,	// Port TP1A
+	IoManager::IOT_NONE,	// Port TP1B
+	IoManager::IOT_NONE,	// Port TP1C
+	IoManager::IOT_NONE,	// Port TP1D
+
+	// Team Player, Port 2.
+	IoManager::IOT_NONE,	// Port TP2A
+	IoManager::IOT_NONE,	// Port TP2B
+	IoManager::IOT_NONE,	// Port TP2C
+	IoManager::IOT_NONE,	// Port TP2D
+
+	// 4-Way Play.
+	IoManager::IOT_NONE,	// Port 4WPA
+	IoManager::IOT_NONE,	// Port 4WPB
+	IoManager::IOT_NONE,	// Port 4WPC
+	IoManager::IOT_NONE,	// Port 4WPD
+};
+
+const GensKey_t KeyManagerPrivate::def_keyMap[IoManager::VIRTPORT_MAX][IoManager::BTNI_MAX] =
+{
+	// Port 1
+	// NOTE: Both shift keys are mapped to LSHIFT on Mac OS X.
+	{KEYV_UP, KEYV_DOWN, KEYV_LEFT, KEYV_RIGHT,
+	KEYV_s, KEYV_d, KEYV_a, KEYV_RETURN,
+	KEYV_e, KEYV_w, KEYV_q,
+#ifdef __APPLE__
+	KEYV_LSHIFT
+#else
+	KEYV_RSHIFT
+#endif
+	},
+
+	// Port 2 (TODO: This needs to be improved!)
+	{KEYV_i, KEYV_k, KEYV_j, KEYV_l,
+	KEYV_t, KEYV_y, KEYV_r, KEYV_u,
+	0, 0, 0, 0},
+
+	// Other ports are left undefined.
+
+	// Team Player, Port 1.
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP1A
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP1B
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP1C
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP1D
+
+	// Team Player, Port 2.
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP2A
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP2B
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP2C
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP2D
+
+	// 4-Way Play.
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port 4WPA
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port 4WPB
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port 4WPC
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port 4WPD
+};
+
 KeyManagerPrivate::KeyManagerPrivate(KeyManager *q)
 	: q(q)
 {
-	// Initialize keymaps.
-	// TODO: Load keymap from configuration?
-	memset(keyMap, 0, sizeof(keyMap));
-
-	// Initialize device types.
-	// TODO: Load device types from configuration?
-	memset(devTypes, 0, sizeof(devTypes));
+	// Initialize keymaps to the defaults.
+	memcpy(keyMap, def_keyMap, sizeof(keyMap));
+	memcpy(ioTypes, def_ioTypes, sizeof(ioTypes));
 
 	// Initialize keyboard state.
 	memset(kbdState, 0, sizeof(kbdState));
-
-	// Set a basic keymap for port 1 for now.
-	devTypes[0] = IoManager::IOT_3BTN;
-	keyMap[0][0] = KEYV_UP;
-	keyMap[0][1] = KEYV_DOWN;
-	keyMap[0][2] = KEYV_LEFT;
-	keyMap[0][3] = KEYV_RIGHT;
-	keyMap[0][4] = KEYV_d;
-	keyMap[0][5] = KEYV_s;
-	keyMap[0][6] = KEYV_a;
-	keyMap[0][7] = KEYV_RETURN;
 }
 
 /** KeyManager **/
@@ -126,10 +181,10 @@ KeyManager::~KeyManager()
  * Copy keymaps and device types, but not key states.
  * @param keyManager Source keyManager.
  */
-void KeyManager::copyFromOther(const KeyManager &keyManager)
+void KeyManager::copyFrom(const KeyManager &keyManager)
 {
 	memcpy(d->keyMap, keyManager.d->keyMap, sizeof(d->keyMap));
-	memcpy(d->devTypes, keyManager.d->devTypes, sizeof(d->devTypes));
+	memcpy(d->ioTypes, keyManager.d->ioTypes, sizeof(d->ioTypes));
 }
 
 /**
@@ -157,12 +212,12 @@ void KeyManager::updateIoManager(IoManager *ioManager)
 	// Scan the keymap and determine buttons.
 	for (int virtPort = 0; virtPort < IoManager::VIRTPORT_MAX; virtPort++) {
 		IoManager::IoType_t ioType = ioManager->devType((IoManager::VirtPort_t)virtPort);
-		if (d->devTypes[virtPort] != ioType) {
+		if (d->ioTypes[virtPort] != ioType) {
 			// Update the device type.
 			ioManager->setDevType(
 				(IoManager::VirtPort_t)virtPort, 
-				d->devTypes[virtPort]);
-			ioType = d->devTypes[virtPort];
+				d->ioTypes[virtPort]);
+			ioType = d->ioTypes[virtPort];
 		}
 
 		const int numButtons = ioManager->NumDevButtons(ioType);
@@ -224,14 +279,29 @@ int KeyManager::setKeyMap(IoManager::VirtPort_t virtPort, const GensKey_t *keyMa
 }
 
 /**
+ * Reset virtual port to the default keymap.
+ * @param virtPort I/O Manager Virtual port.
+ * @return 0 on success; non-zero on error.
+ */
+int KeyManager::resetKeyMap(IoManager::VirtPort_t virtPort)
+{
+	if (virtPort < IoManager::VIRTPORT_1 || virtPort >= IoManager::VIRTPORT_MAX)
+		return -EINVAL;
+
+	d->ioTypes[virtPort] = d->def_ioTypes[virtPort];
+	memcpy(d->keyMap[virtPort], d->def_keyMap[virtPort], sizeof(d->keyMap[virtPort]));
+	return 0;
+}
+
+/**
  * Get the device type for the specified Virtual Port.
  * @param virtPort I/O Manager Virtual Port.
  * @param ioType New device type.
  */
-IoManager::IoType_t KeyManager::ioType(IoManager::VirtPort_t virtPort)
+IoManager::IoType_t KeyManager::ioType(IoManager::VirtPort_t virtPort) const
 {
 	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
-	return d->devTypes[virtPort];
+	return d->ioTypes[virtPort];
 }
 
 /**
@@ -243,7 +313,7 @@ void KeyManager::setIoType(IoManager::VirtPort_t virtPort, IoManager::IoType_t i
 {
 	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
 	assert(ioType >= IoManager::IOT_NONE && ioType < IoManager::IOT_MAX);
-	d->devTypes[virtPort] = ioType;
+	d->ioTypes[virtPort] = ioType;
 }
 
 /**

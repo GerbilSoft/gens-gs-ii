@@ -52,7 +52,7 @@ class KeyManager
 		 * Copy keymaps and device types, but not key states.
 		 * @param keyManager Source keyManager.
 		 */
-		void copyFromOther(const KeyManager &keyManager);
+		void copyFrom(const KeyManager &keyManager);
 
 	public:
 		/**
@@ -80,11 +80,18 @@ class KeyManager
 		int setKeyMap(LibGens::IoManager::VirtPort_t virtPort, const GensKey_t *keyMap, int siz);
 
 		/**
+		 * Reset virtual port to the default keymap.
+		 * @param virtPort I/O Manager Virtual port.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int resetKeyMap(LibGens::IoManager::VirtPort_t virtPort);
+
+		/**
 		 * Get the device type for the specified Virtual Port.
 		 * @param virtPort I/O Manager Virtual Port.
 		 * @param ioType New device type.
 		 */
-		LibGens::IoManager::IoType_t ioType(LibGens::IoManager::VirtPort_t virtPort);
+		LibGens::IoManager::IoType_t ioType(LibGens::IoManager::VirtPort_t virtPort) const;
 
 		/**
 		 * Set the device type for the specified Virtual Port.

@@ -125,19 +125,13 @@ SET(gens-qt4_COMMON_SRCS
 	EmuManager_qEmu.cpp
 	Screenshot.cpp
 	VBackend/GLTex2D.cpp
-	Config/ConfigStore.cpp
-	Config/ConfigDefaults.cpp
-	Config/PathConfig.cpp
-	Config/CtrlConfig.cpp
 	actions/GensKeyConfig.cpp
 	actions/GensMenuBar.cpp
 	actions/GensMenuBar_menus.cpp
 	actions/GensMenuBar_sync.cpp
 	actions/GensActions.cpp
 	EmuManager_str.cpp
-	Config/RecentRoms.cpp
 	actions/RecentRomsMenu.cpp
-	ConfigHandler.cpp
 	cdrom/FindCdromDrives.cpp
 	cdrom/FindCdromBase.cpp
 	)
@@ -165,6 +159,15 @@ SET(gens-qt4_WIDGET_SRCS
 	widgets/KeyNames.cpp
 	)
 
+SET(gens-qt4_CONFIG_SRCS
+	Config/ConfigStore.cpp
+	Config/ConfigDefaults.cpp
+	Config/PathConfig.cpp
+	Config/CtrlConfig.cpp
+	Config/RecentRoms.cpp
+	ConfigHandler.cpp
+	)
+
 SET(gens-qt4_WIDGET_H
 	widgets/GensLineEdit.hpp
 	widgets/GensZipDirModel.hpp
@@ -189,16 +192,11 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	VBackend/GensQGLWidget_p.hpp
 	EmuManager.hpp
 	Screenshot.hpp
-	Config/ConfigStore.hpp
-	Config/PathConfig.hpp
-	Config/CtrlConfig.hpp
 	actions/GensKeyConfig.hpp
 	actions/GensMenuBar.hpp
 	actions/GensActions.hpp
 	Input/KeyHandlerQt.hpp
-	Config/RecentRoms.hpp
 	actions/RecentRomsMenu.hpp
-	ConfigHandler.hpp
 	cdrom/FindCdromDrives.hpp
 	cdrom/FindCdromBase.hpp
 	)
@@ -222,6 +220,13 @@ SET(gens-qt4_WIDGET_MOC_HEADERS
 	widgets/GensCtrlKeyWidget.hpp
 	widgets/GensCtrlKeyWidget_p.hpp
 	widgets/GensColorButton.hpp
+	)
+
+SET(gens-qt4_CONFIG_MOC_HEADERS
+	Config/ConfigStore.hpp
+	Config/PathConfig.hpp
+	Config/RecentRoms.hpp
+	ConfigHandler.hpp
 	)
 
 # UI files.
@@ -310,6 +315,7 @@ QT4_WRAP_CPP(gens-qt4_MOC_SOURCES
 		${gens-qt4_COMMON_MOC_HEADERS}
 		${gens-qt4_WINDOW_MOC_HEADERS}
 		${gens-qt4_WIDGET_MOC_HEADERS}
+		${gens-qt4_CONFIG_MOC_HEADERS}
 		${gens-qt4_DBUS_MOC_HEADERS}
 		${gens-qt4_PLATFORM_MOC_HEADERS}
 		)
@@ -361,6 +367,7 @@ ADD_EXECUTABLE(gens-qt4
 	${gens-qt4_COMMON_SRCS}
 	${gens-qt4_WINDOW_SRCS}
 	${gens-qt4_WIDGET_SRCS} ${gens-qt4_WIDGET_H}
+	${gens-qt4_CONFIG_SRCS}
 	${gens-qt4_DBUS_SRCS}
 	${gens-qt4_PLATFORM_SRCS}
 	${gens-qt4_PLATFORM_UI_SRCS}

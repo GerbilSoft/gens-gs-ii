@@ -55,6 +55,10 @@
 // Key configuration.
 #include "actions/GensKeyConfig.hpp"
 
+// Controller Configuration.
+// (now only has static load/save functions)
+#include "CtrlConfig.hpp"
+
 // gqt4_app
 #include "gqt4_main.hpp"
 #include "GensQApplication.hpp"
@@ -144,8 +148,8 @@ ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
 	, pathConfig(new PathConfig(q))
 	, recentRoms(new RecentRoms(q))
 {
-	// TODO: Rework this with the upcoming all-in-one IoManager.
-	q->m_ctrlConfig = new CtrlConfig(q);
+	// TODO: This shouldn't be publicly accessible...
+	q->m_keyManager = new LibGensKeys::KeyManager();
 }
 
 ConfigStorePrivate::~ConfigStorePrivate()
@@ -153,6 +157,9 @@ ConfigStorePrivate::~ConfigStorePrivate()
 	// Delete all the signal map vectors.
 	qDeleteAll(signalMaps);
 	signalMaps.clear();
+
+	Q_Q(ConfigStore);
+	delete q->m_keyManager;
 }
 
 /**
@@ -466,7 +473,7 @@ int ConfigStore::load(const QString &filename)
 	// Load the controller configuration.
 	// TODO: Rework this with the upcoming all-in-one IoManager.
 	qSettings.beginGroup(QLatin1String("Controllers"));
-	m_ctrlConfig->load(&qSettings);
+	CtrlConfig::load(qSettings, m_keyManager);
 	qSettings.endGroup();
 
 	// Finished loading settings.
@@ -559,7 +566,7 @@ int ConfigStore::save(const QString &filename) const
 	// Save the controller configuration.
 	// TODO: Rework this with the upcoming all-in-one IoManager.
 	qSettings.beginGroup(QLatin1String("Controllers"));
-	m_ctrlConfig->save(&qSettings);
+	CtrlConfig::save(qSettings, m_keyManager);
 	qSettings.endGroup();
 
 	return 0;

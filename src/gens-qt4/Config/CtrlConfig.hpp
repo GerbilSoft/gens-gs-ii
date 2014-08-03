@@ -25,102 +25,45 @@
 #define __GENS_QT4_CTRLCONFIG_HPP__
 
 // Qt includes and classes.
-#include <QtCore/QObject>
-#include <QtCore/QVector>
+#include <QtCore/qglobal.h>
 class QSettings;
 
 // LibGens includes.
 #include "libgens/IO/IoManager.hpp"
 
-// LibGensKeys. (TODO: Save from KeyManager)
-#include "libgenskeys/GensKey_t.h"
+// LibGensKeys.
+#include "libgenskeys/KeyManager.hpp"
 
 namespace GensQt4
 {
 
-class CtrlConfigPrivate;
-
-class CtrlConfig : public QObject
+class CtrlConfig
 {
-	Q_OBJECT
-
-	public:
-		CtrlConfig(QObject *parent = 0);
-		CtrlConfig(const CtrlConfig *src, QObject *parent = 0);
-		virtual ~CtrlConfig();
+	// Static class.
 
 	private:
-		CtrlConfigPrivate *const d_ptr;
-		Q_DECLARE_PRIVATE(CtrlConfig)
-	private:
-		Q_DISABLE_COPY(CtrlConfig)
+		CtrlConfig() { }
+		~CtrlConfig() { }
+		Q_DISABLE_COPY(CtrlConfig);
 
 	public:
-		/**
-		 * Copy settings from another CtrlConfig.
-		 * TODO: Make this a copy constructor.
-		 * @param src Other CtrlConfig to copy from.
-		 */
-		void copyFrom(const CtrlConfig *src);
-
-		// Dirty flag.
-		bool isDirty(void) const;
-		void clearDirty(void);
-
 		/**
 		 * Load controller configuration from a settings file.
 		 * NOTE: The group must be selected in the QSettings before calling this function!
 		 * @param qSettings Settings file.
+		 * @param keyManager Key Manager to load settings into.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int load(const QSettings *qSettings);
+		static int load(const QSettings &qSettings, LibGensKeys::KeyManager *keyManager);
 
 		/**
 		 * Save controller configuration to a settings file.
 		 * NOTE: The group must be selected in the QSettings before calling this function!
 		 * @param qSettings Settings file.
+		 * @param keyManager Key Manager to save settings from.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int save(QSettings *qSettings) const;
-
-		/**
-		 * Update the controller I/O manager.
-		 * @param ioManager I/O manager class.
-		 */
-		void updateIoManager(LibGens::IoManager *ioManager) const;
-
-		/** CtrlConfigWindow interface. **/
-
-		/**
-		 * Get a controller's I/O device type.
-		 * @param virtPort Virtual controller port.
-		 * @return Device type.
-		 */
-		LibGens::IoManager::IoType_t ioType(LibGens::IoManager::VirtPort_t virtPort);
-
-		/**
-		 * Set a controller's I/O device type.
-		 * NOTE: IoManager should be updated after calling this function.
-		 * @param virtPort Virtual controller port.
-		 * @return Device type.
-		 */
-		void setIoType(LibGens::IoManager::VirtPort_t virtPort, LibGens::IoManager::IoType_t ioType);
-
-
-		/**
-		 * Get a controller's keymap.
-		 * @param virtPort Virtual controller port.
-		 * @return Keymap.
-		 */
-		QVector<GensKey_t> keyMap(LibGens::IoManager::VirtPort_t virtPort);
-
-		/**
-		 * Set a controller's keymap.
-		 * NOTE: IoManager should be updated after calling this function.
-		 * @param virtPort Virtual controller port.
-		 * @param keyMap New keymap.
-		 */
-		void setKeyMap(LibGens::IoManager::VirtPort_t virtPort, const QVector<GensKey_t> &keyMap);
+		static int save(QSettings &qSettings, const LibGensKeys::KeyManager *keyManager);
 };
 
 }
