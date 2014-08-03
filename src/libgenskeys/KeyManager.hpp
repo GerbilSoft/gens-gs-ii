@@ -49,6 +49,13 @@ class KeyManager
 
 	public:
 		/**
+		 * Copy keymaps and device types, but not key states.
+		 * @param keyManager Source keyManager.
+		 */
+		void copyFromOther(const KeyManager &keyManager);
+
+	public:
+		/**
 		 * Update the I/O Manager with the current key states.
 		 * @param ioManager I/O Manager to update.
 		 */

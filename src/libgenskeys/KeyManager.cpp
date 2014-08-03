@@ -123,6 +123,16 @@ KeyManager::~KeyManager()
 }
 
 /**
+ * Copy keymaps and device types, but not key states.
+ * @param keyManager Source keyManager.
+ */
+void KeyManager::copyFromOther(const KeyManager &keyManager)
+{
+	memcpy(d->keymap, keyManager.d->keymap, sizeof(d->keymap));
+	memcpy(d->devTypes, keyManager.d->devTypes, sizeof(d->devTypes));
+}
+
+/**
  * Update the I/O Manager with the current key states.
  * @param ioManager I/O Manager to update.
  */
