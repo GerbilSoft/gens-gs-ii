@@ -384,6 +384,8 @@ void EmuManager::zeroLengthDMA_changed_slot(const QVariant &zeroLengthDMA)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_ZEROLENGTHDMA, (int)zeroLengthDMA.toBool()); }
 void EmuManager::vscrollBug_changed_slot(const QVariant &vscrollBug)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_VSCROLLBUG, (int)vscrollBug.toBool()); }
+void EmuManager::updatePaletteInVBlankOnly_changed_slot(const QVariant &updatePaletteInVBlankOnly)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_UPDATEPALETTEINVBLANKONLY, (int)updatePaletteInVBlankOnly.toBool()); }
 
 /** Emulation Request Queue: Processing functions. **/
 
@@ -759,6 +761,7 @@ void EmuManager::doResetEmulator(bool hardReset)
 void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, int val)
 {
 	// TODO: Initialize palette settings on ROM startup.
+	// TODO: These should be context-specific.
 	if (!gqt4_emuContext)
 		return;
 
@@ -814,6 +817,9 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 			break;
 		case EmuRequest_t::RQT_PS_VSCROLLBUG:
 			LibGens::Vdp::VdpEmuOptions.vscrollBug = (bool)(!!val);
+			break;
+		case EmuRequest_t::RQT_PS_UPDATEPALETTEINVBLANKONLY:
+			LibGens::Vdp::VdpEmuOptions.updatePaletteInVBlankOnly = (bool)(!!val);
 			break;
 		default:
 			break;

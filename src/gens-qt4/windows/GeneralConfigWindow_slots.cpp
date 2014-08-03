@@ -92,10 +92,12 @@ void GeneralConfigWindow::on_chkBorderColor_toggled(bool checked)
 	{ GENERIC_OPTION("VDP/borderColorEmulation", checked); }
 void GeneralConfigWindow::on_chkNtscV30Rolling_toggled(bool checked)
 	{ GENERIC_OPTION("VDP/ntscV30Rolling", checked); }
-void GeneralConfigWindow::on_chkVScrollBug_toggled(bool checked)
-	{ GENERIC_OPTION("VDP/vscrollBug", checked); }
 void GeneralConfigWindow::on_chkZeroLengthDMA_toggled(bool checked)
 	{ GENERIC_OPTION("VDP/zeroLengthDMA", checked); }
+void GeneralConfigWindow::on_chkVScrollBug_toggled(bool checked)
+	{ GENERIC_OPTION("VDP/vscrollBug", checked); }
+void GeneralConfigWindow::on_chkUpdatePaletteInVBlankOnly_toggled(bool checked)
+	{ GENERIC_OPTION("VDP/updatePaletteInVBlankOnly", checked); }
 
 /** Sega Genesis. **/
 void GeneralConfigWindow::on_chkMDTMSS_toggled(bool checked)

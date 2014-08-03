@@ -300,6 +300,7 @@ class EmuManager : public QObject
 				RQT_PS_SPRITELIMITS,
 				RQT_PS_ZEROLENGTHDMA,
 				RQT_PS_VSCROLLBUG,
+				RQT_PS_UPDATEPALETTEINVBLANKONLY
 			};
 
 			RequestType rqType;
@@ -429,6 +430,7 @@ class EmuManager : public QObject
 		void spriteLimits_changed_slot(const QVariant &spriteLimits);
 		void zeroLengthDMA_changed_slot(const QVariant &zeroLengthDMA);
 		void vscrollBug_changed_slot(const QVariant &vscrollBug);
+		void updatePaletteInVBlankOnly_changed_slot(const QVariant &updatePaletteInVBlankOnly);
 
 	/** Emulation Request Queue: Processing functions. **/
 

@@ -51,6 +51,7 @@ VdpTypes::VdpEmuOptions_t Vdp::VdpEmuOptions =
 	false,				// zeroLengthDMA
 	true,				// spriteLimits
 	true,				// vscrollBug
+	false,				// updatePaletteInVBlankOnly
 };
 
 

@@ -74,8 +74,9 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 		// Hide the super secret settings.
 		delete d->ui.grpAdvancedVDP;
 		d->ui.grpAdvancedVDP = nullptr;
-		d->ui.chkVScrollBug = nullptr;
 		d->ui.chkZeroLengthDMA = nullptr;
+		d->ui.chkVScrollBug = nullptr;
+		d->ui.chkUpdatePaletteInVBlankOnly = nullptr;
 	}
 
 	// Set up the action group for the toolbar buttons.
@@ -381,8 +382,9 @@ void GeneralConfigWindow::reload(void)
 	d->ui.chkBorderColor->setChecked(ValByPath_bool("VDP/borderColorEmulation"));
 	d->ui.chkNtscV30Rolling->setChecked(ValByPath_bool("VDP/ntscV30Rolling"));
 	if (d->isWarrantyVoid()) {
-		d->ui.chkVScrollBug->setChecked(ValByPath_bool("VDP/vscrollBug"));
 		d->ui.chkZeroLengthDMA->setChecked(ValByPath_bool("VDP/zeroLengthDMA"));
+		d->ui.chkVScrollBug->setChecked(ValByPath_bool("VDP/vscrollBug"));
+		d->ui.chkUpdatePaletteInVBlankOnly->setChecked(ValByPath_bool("VDP/updatePaletteInVBlankOnly"));
 	}
 
 	/** System. **/
@@ -465,8 +467,9 @@ void GeneralConfigWindow::apply(void)
 	SetValByPath_bool("VDP/borderColorEmulation", d->ui.chkBorderColor->isChecked());
 	SetValByPath_bool("VDP/ntscV30Rolling", d->ui.chkNtscV30Rolling->isChecked());
 	if (d->isWarrantyVoid()) {
-		SetValByPath_bool("VDP/vscrollBug", d->ui.chkVScrollBug->isChecked());
 		SetValByPath_bool("VDP/zeroLengthDMA", d->ui.chkZeroLengthDMA->isChecked());
+		SetValByPath_bool("VDP/vscrollBug", d->ui.chkVScrollBug->isChecked());
+		SetValByPath_bool("VDP/updatePaletteInVBlankOnly", d->ui.chkUpdatePaletteInVBlankOnly->isChecked());
 	}
 
 	/** System. **/

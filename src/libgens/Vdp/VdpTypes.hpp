@@ -192,6 +192,12 @@ namespace VdpTypes
 		 * FIXME: Not implemented at the moment!
 		 */
 		bool vscrollBug;
+
+		/**
+		 * Don't update the palette except in VBlank.
+		 * This is similar to Genecyst.
+		 */
+		bool updatePaletteInVBlankOnly;
 	};
 	
 	// VDP layer flags.

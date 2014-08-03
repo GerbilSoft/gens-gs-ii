@@ -123,6 +123,8 @@ EmuManager::EmuManager(QObject *parent, VBackend *vBackend)
 					this, SLOT(zeroLengthDMA_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("VDP/vscrollBug"),
 					this, SLOT(vscrollBug_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("VDP/updatePaletteInVBlankOnly"),
+					this, SLOT(updatePaletteInVBlankOnly_changed_slot(QVariant)));
 
 	// Region code settings.
 	gqt4_cfg->registerChangeNotification(QLatin1String("System/regionCode"),
@@ -465,6 +467,8 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 			gqt4_cfg->get(QLatin1String("VDP/zeroLengthDMA")).toBool();
 	LibGens::Vdp::VdpEmuOptions.vscrollBug =
 			gqt4_cfg->get(QLatin1String("VDP/vscrollBug")).toBool();
+	LibGens::Vdp::VdpEmuOptions.updatePaletteInVBlankOnly =
+			gqt4_cfg->get(QLatin1String("VDP/updatePaletteInVBlankOnly")).toBool();
 
 	// Start the emulation thread.
 	m_paused.data = 0;

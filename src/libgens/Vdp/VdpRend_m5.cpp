@@ -1608,8 +1608,11 @@ void Vdp::Render_Line_m5(void)
 	}
 
 	// Update the active palette.
-	if (!(VDP_Layers & VdpTypes::VDP_LAYER_PALETTE_LOCK))
-		m_palette.update();
+	if (!(VDP_Layers & VdpTypes::VDP_LAYER_PALETTE_LOCK)) {
+		if (!VdpEmuOptions.updatePaletteInVBlankOnly || in_border) {
+			m_palette.update();
+		}
+	}
 
 	// Render the image.
 	// TODO: Optimize SMS LCB handling. (maybe use Linux's unlikely() macro?)
