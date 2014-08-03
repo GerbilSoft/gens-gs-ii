@@ -34,8 +34,8 @@ SET(HAVE_MINIZIP 1)
 
 IF (MINIZIP_FOUND)
 	# System MiniZip was found.
-	SET(MINIZIP_LIBRARY -lminizip)
-	
+	SET(MINIZIP_LIBRARY minizip)
+
 	# Set the MiniZip include directory to an empty string to prevent errors.
 	SET(MINIZIP_INCLUDE_DIR "")
 ELSE(MINIZIP_FOUND)

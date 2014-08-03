@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 2.6.0)
 
 # Assembly optimizations.
 # TODO: Test on all archs and fix Z_PREFIX issues.
+# FIXME: Building 32-bit on 64-bit Linux results in CMAKE_SYSTEM_PROCESSOR == x86_64.
 # TODO: If MASM, only enable on cmake-2.6.3+
 # TODO: If nasm/yasm, only enable on cmake-2.8.4+
 # TODO: Symbol redefinitions.
@@ -14,7 +15,7 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.|x)86\$")
 ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^x86_64\$")
 	SET(AMD64 "ON")
 ENDIF()
-ENDIF(0)
+ENDIF()
 
 # Don't install any of these libraries.
 SET(OLD_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
