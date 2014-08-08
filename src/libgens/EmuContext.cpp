@@ -109,6 +109,21 @@ void EmuContext::init(MdFb *fb, Rom *rom, SysVersion::RegionCode_t region)
 
 	// Initialize the VDP.
 	m_vdp = new Vdp(fb);
+
+	// Default VDP emulation options.
+	static const VdpTypes::VdpEmuOptions_t def_vdpEmuOptions =
+	{
+		VdpTypes::INTREND_FLICKER,	// intRendMode
+		true,				// borderColorEmulation
+		true,				// ntscV30Rolling
+		true,				// spriteLimits
+		// The following options should not be changed
+		// unless the user knows what they're doing!
+		false,				// zeroLengthDMA
+		true,				// vscrollBug
+		false,				// updatePaletteInVBlankOnly
+	};
+	m_vdp->options = def_vdpEmuOptions;
 }
 
 EmuContext::~EmuContext()

@@ -223,7 +223,7 @@ void VdpSpriteMaskingTest::SetUp(void)
 		<< (mode.screenMode == SCREEN_MODE_H32 ? "H32" : "H40");
 
 	// Set sprite limits.
-	m_vdp->VdpEmuOptions.spriteLimits =
+	m_vdp->options.spriteLimits =
 		(mode.spriteLimits == SPRITE_LIMITS_ENABLED);
 
 	// Set the screen mode.

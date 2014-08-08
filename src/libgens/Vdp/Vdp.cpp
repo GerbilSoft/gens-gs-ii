@@ -41,22 +41,6 @@ namespace LibGens
 // VdpRend_Err private class.
 #include "VdpRend_Err_p.hpp"
 
-/** Static member initialization. (VDP global items) **/
-// TODO: Make these non-static?
-VdpTypes::VdpEmuOptions_t Vdp::VdpEmuOptions =
-{
-	VdpTypes::INTREND_FLICKER,	// intRendMode
-	true,				// borderColorEmulation
-	true,				// ntscV30Rolling
-	true,				// spriteLimits
-	// The following options should not be changed
-	// unless the user knows what they're doing!
-	false,				// zeroLengthDMA
-	true,				// vscrollBug
-	false,				// updatePaletteInVBlankOnly
-};
-
-
 /**
  * Initialize the VDP subsystem.
  * @param fb Existing MdFb to use. (If nullptr, allocate a new MdFb.)

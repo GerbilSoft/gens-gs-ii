@@ -452,22 +452,21 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 
 	// TODO: The following should be set in the specific EmuContext.
 
-	// Initialize the graphics settings.
-	LibGens::Vdp::VdpEmuOptions.intRendMode =
-			(LibGens::VdpTypes::IntRend_Mode_t)gqt4_cfg->getInt(QLatin1String("Graphics/interlacedMode"));
-
 	// Initialize the VDP settings.
-	LibGens::Vdp::VdpEmuOptions.borderColorEmulation =
+	LibGens::VdpTypes::VdpEmuOptions_t *options = &gqt4_emuContext->m_vdp->options;
+	options->intRendMode =
+			(LibGens::VdpTypes::IntRend_Mode_t)gqt4_cfg->getInt(QLatin1String("Graphics/interlacedMode"));
+	options->borderColorEmulation =
 			gqt4_cfg->get(QLatin1String("VDP/borderColorEmulation")).toBool();
-	LibGens::Vdp::VdpEmuOptions.ntscV30Rolling =
+	options->ntscV30Rolling =
 			gqt4_cfg->get(QLatin1String("VDP/ntscV30Rolling")).toBool();
-	LibGens::Vdp::VdpEmuOptions.spriteLimits =
+	options->spriteLimits =
 			gqt4_cfg->get(QLatin1String("VDP/spriteLimits")).toBool();
-	LibGens::Vdp::VdpEmuOptions.zeroLengthDMA =
+	options->zeroLengthDMA =
 			gqt4_cfg->get(QLatin1String("VDP/zeroLengthDMA")).toBool();
-	LibGens::Vdp::VdpEmuOptions.vscrollBug =
+	options->vscrollBug =
 			gqt4_cfg->get(QLatin1String("VDP/vscrollBug")).toBool();
-	LibGens::Vdp::VdpEmuOptions.updatePaletteInVBlankOnly =
+	options->updatePaletteInVBlankOnly =
 			gqt4_cfg->get(QLatin1String("VDP/updatePaletteInVBlankOnly")).toBool();
 
 	// Start the emulation thread.

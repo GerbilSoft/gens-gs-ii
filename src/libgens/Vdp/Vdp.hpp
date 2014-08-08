@@ -65,13 +65,6 @@ class Vdp
 		 */
 		void reset(void);
 
-		/**
-		 * VDP emulation options.
-		 * TODO: Move somewhere else?
-		 * TODO: Keep static?
-		 */
-		static VdpTypes::VdpEmuOptions_t VdpEmuOptions;
-
 		// PAL/NTSC.
 	public:
 		bool isPal(void);
@@ -92,6 +85,13 @@ class Vdp
 				bool VRam_Spr	:1;	// Sprite Attribute Table was modified.
 			};
 		} m_updateFlags;
+
+	public:
+		/**
+		 * VDP emulation options.
+		 * TODO: Make private, and add accessor/mutator?
+		 */
+		VdpTypes::VdpEmuOptions_t options;
 
 	public:
 		/**

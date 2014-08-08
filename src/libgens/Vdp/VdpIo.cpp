@@ -83,26 +83,22 @@ uint8_t Vdp::Int_Ack(void)
 	return 0;
 }
 
-
 /**
- * Vdp::Update_IRQ_Line(): Update the IRQ line.
+ * Update the IRQ line.
  */
 void Vdp::Update_IRQ_Line(void)
 {
 	// TODO: HBlank interrupt should take priority over VBlank interrupt.
-	if ((VDP_Reg.m5.Set2 & 0x20) && (VDP_Int & 0x08))
-	{
+	if ((VDP_Reg.m5.Set2 & 0x20) && (VDP_Int & 0x08)) {
 		// VBlank interrupt.
 		M68K::Interrupt(6, -1);
 		return;
-	}
-	else if ((VDP_Reg.m5.Set1 & 0x10) && (VDP_Int & 0x04))
-	{
+	} else if ((VDP_Reg.m5.Set1 & 0x10) && (VDP_Int & 0x04)) {
 		// HBlank interrupt.
 		M68K::Interrupt(4, -1);
 		return;
 	}
-	
+
 	// No VDP interrupts.
 	// TODO: Move to M68K class.
 #ifdef GENS_ENABLE_EMULATION
@@ -110,9 +106,8 @@ void Vdp::Update_IRQ_Line(void)
 #endif /* GENS_ENABLE_EMULATION */
 }
 
-
 /**
- * updateVdpLines(): Update VDP_Lines based on CPU and VDP mode settings.
+ * Update VDP_Lines based on CPU and VDP mode settings.
  * @param resetCurrent If true, reset VDP_Lines.Display.Current and VDP_Lines.Visible.Current.
  */
 void Vdp::updateVdpLines(bool resetCurrent)
@@ -191,44 +186,38 @@ void Vdp::updateVdpLines(bool resetCurrent)
 			 ((VDP_Reg.m5.Set4 & 0x04) >> 1));	// LSM1
 }
 
-
 /**
- * Vdp::Check_NTSC_V30_VBlank(): Check if VBlank is allowed in NTSC V30 mode.
+ * Check if VBlank is allowed in NTSC V30 mode.
  */
 void Vdp::Check_NTSC_V30_VBlank(void)
 {
 	// TODO: Only do this in Mode 5, and maybe Mode 4 if SMS2 is in use.
-	if (Reg_Status.isPal() || !(VDP_Reg.m5.Set2 & 0x08))
-	{
+	if (Reg_Status.isPal() || !(VDP_Reg.m5.Set2 & 0x08)) {
 		// Either we're in PAL mode, where V30 is allowed, or V30 isn't set.
 		// VBlank is always OK.
 		// TODO: Clear the NTSC V30 offset?
 		VDP_Lines.NTSC_V30.VBlank_Div = 0;
 		return;
 	}
-	
+
 	// NTSC V30 mode. Simulate screen rolling.
-	
+
 	// If VDP_Lines.NTSC_V30.VBlank is set, we can't do a VBlank.
 	// This effectively divides VBlank into 30 Hz.
 	// See http://gendev.spritesmind.net/forum/viewtopic.php?p=8128#8128 for more information.
 	VDP_Lines.NTSC_V30.VBlank_Div = !VDP_Lines.NTSC_V30.VBlank_Div;
-	
-	if (VdpEmuOptions.ntscV30Rolling)
-	{
+
+	if (options.ntscV30Rolling) {
 		VDP_Lines.NTSC_V30.Offset += 11;	// TODO: Figure out a good offset increment.
 		VDP_Lines.NTSC_V30.Offset %= 240;	// Prevent overflow.
-	}
-	else
-	{
+	} else {
 		// Rolling is disabled.
 		VDP_Lines.NTSC_V30.Offset = 0;
 	}
 }
 
-
 /**
- * Vdp::Update_Mode(): Update VDP_Mode.
+ * Update VDP_Mode.
  */
 inline void Vdp::Update_Mode(void)
 {
@@ -240,36 +229,30 @@ inline void Vdp::Update_Mode(void)
 		   ((Set2 & 0x08) >> 1)	|	// M3
 		   ((Set1 & 0x04) << 1) |	// M4/PSEL
 		   ((Set2 & 0x04) << 2);	// M5
-	
-	if (!(Set2 & 0x08))
-	{
+
+	if (!(Set2 & 0x08)) {
 		// V28 mode. Reset the NTSC V30 roll values.
 		VDP_Lines.NTSC_V30.Offset = 0;
 		VDP_Lines.NTSC_V30.VBlank_Div = 0;
 	}
-	
+
 	// If the VDP mode has changed, CRam needs to be updated.
-	if (prevVdpMode != VDP_Mode)
-	{
+	if (prevVdpMode != VDP_Mode) {
 		// Update the VDP mode variables.
-		if (VDP_Mode & 0x10)
-		{
+		if (VDP_Mode & 0x10) {
 			// Mode 5.
 			m_palette.setPalMode(VdpPalette::PALMODE_MD);
 			m_palette.setMdColorMask(!(VDP_Mode & 0x08));	// M4/PSEL
-		}
-		else
-		{
+		} else {
 			// TODO: Support other palette modes.
 		}
 	}
-	
+
 	// Initialize Vdp::VDP_Lines.
 	// Don't reset the VDP current line variables here,
 	// since this might not be the beginning of the frame.
 	updateVdpLines(false);
 }
-
 
 /**
  * Set the value of a register. (Mode 5 only!)
@@ -1239,7 +1222,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 	int length = DMA_Length();
 	if (length == 0) {
 		// DMA length is zero.
-		if (VdpEmuOptions.zeroLengthDMA) {
+		if (options.zeroLengthDMA) {
 			// Zero-Length DMA transfers are enabled.
 			// Ignore this request.
 			VDP_Ctrl.DMA = 0;

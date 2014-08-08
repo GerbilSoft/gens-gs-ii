@@ -764,19 +764,19 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 	// TODO: These should be context-specific.
 	if (!gqt4_emuContext)
 		return;
+	LibGens::VdpTypes::VdpEmuOptions_t *options = &gqt4_emuContext->m_vdp->options;
 
 	switch (type) {
 		case EmuRequest_t::RQT_PS_INTERLACEDMODE: {
 			// Interlaced Mode isn't exactly a "palette" setting.
 			// TODO: Rename to "VDP setting"?
 			// TODO: Consolidate the two interlaced rendering mode enums.
-			LibGens::Vdp::VdpEmuOptions.intRendMode =
-					((LibGens::VdpTypes::IntRend_Mode_t)val);
+			options->intRendMode = ((LibGens::VdpTypes::IntRend_Mode_t)val);
 
 			// Gens/GS r7+ prints a message to the OSD, so we'll do that too.
 			//: OSD message indicating the interlaced rendering mode was changed.
 			QString msg = tr("Interlaced: %1", "osd");
-			switch (LibGens::Vdp::VdpEmuOptions.intRendMode) {
+			switch (options->intRendMode) {
 				case LibGens::VdpTypes::INTREND_EVEN:
 					//: OSD message indicating the interlaced rendering mode was set to even lines only.
 					msg = msg.arg(tr("Even lines only", "osd"));
@@ -804,22 +804,22 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 		}
 
 		case EmuRequest_t::RQT_PS_BORDERCOLOREMULATION:
-			LibGens::Vdp::VdpEmuOptions.borderColorEmulation = (bool)(!!val);
+			options->borderColorEmulation = !!val;
 			break;
 		case EmuRequest_t::RQT_PS_NTSCV30ROLLING:
-			LibGens::Vdp::VdpEmuOptions.ntscV30Rolling = (bool)(!!val);
+			options->ntscV30Rolling = !!val;
 			break;
 		case EmuRequest_t::RQT_PS_SPRITELIMITS:
-			LibGens::Vdp::VdpEmuOptions.spriteLimits = (bool)(!!val);
+			options->spriteLimits = !!val;
 			break;
 		case EmuRequest_t::RQT_PS_ZEROLENGTHDMA:
-			LibGens::Vdp::VdpEmuOptions.zeroLengthDMA = (bool)(!!val);
+			options->zeroLengthDMA = !!val;
 			break;
 		case EmuRequest_t::RQT_PS_VSCROLLBUG:
-			LibGens::Vdp::VdpEmuOptions.vscrollBug = (bool)(!!val);
+			options->vscrollBug = !!val;
 			break;
 		case EmuRequest_t::RQT_PS_UPDATEPALETTEINVBLANKONLY:
-			LibGens::Vdp::VdpEmuOptions.updatePaletteInVBlankOnly = (bool)(!!val);
+			options->updatePaletteInVBlankOnly = !!val;
 			break;
 		default:
 			break;
