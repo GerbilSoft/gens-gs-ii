@@ -1113,18 +1113,35 @@ void GLBackend::showOsdPreview(void)
 	else
 		y2 = y1 - std::min(((m_texPreview->img_h() / 240.0) * 0.5), 0.5);
 
+	// Texture coordinates.
+	GLdouble txc[4][2];
+	txc[0][0] = 0.0;
+	txc[0][1] = 0.0;
+	txc[1][0] = m_texPreview->pow2_w();
+	txc[1][1] = 0.0;
+	txc[2][0] = m_texPreview->pow2_w();
+	txc[2][1] = m_texPreview->pow2_h();
+	txc[3][0] = 0.0;
+	txc[3][1] = m_texPreview->pow2_h();
+
+	// Vertex coordinates.
+	GLdouble vtx[4][2];
+	vtx[0][0] = x1; vtx[0][1] = y1;
+	vtx[1][0] = x2; vtx[1][1] = y1;
+	vtx[2][0] = x2; vtx[2][1] = y2;
+	vtx[3][0] = x1; vtx[3][1] = y2;
+
 	// Draw the texture.
 	// TODO: Determine where to display it and what size to use.
-	glBegin(GL_QUADS);
-	glTexCoord2i(0, 0);
-	glVertex2d(x1, y1);
-	glTexCoord2d(m_texPreview->pow2_w(), 0);
-	glVertex2d(x2, y1);
-	glTexCoord2d(m_texPreview->pow2_w(), m_texPreview->pow2_h());
-	glVertex2d(x2, y2);
-	glTexCoord2d(0, m_texPreview->pow2_h());
-	glVertex2d(x1, y2);
-	glEnd();
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	glVertexPointer(2, GL_DOUBLE, 0, vtx);
+	glTexCoordPointer(2, GL_DOUBLE, 0, txc);
+	glDrawArrays(GL_QUADS, 0, 4);
+
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 	// Disable 2D textures.
 	glEnable(GL_TEXTURE_2D);
