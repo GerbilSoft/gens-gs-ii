@@ -228,9 +228,8 @@ void KeyManager::updateIoManager(IoManager *ioManager)
 			buttons |= isKeyPressed(*port_keyMap--);
 		}
 
-		// Buttons are typically active-low. (except Mega Mouse)
-		if (ioType != IoManager::IOT_MEGA_MOUSE)
-			buttons = ~buttons;
+		// Buttons are typically active-low.
+		buttons = ~buttons;
 
 		ioManager->update(virtPort, buttons);
 	}
