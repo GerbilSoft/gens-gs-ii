@@ -149,10 +149,11 @@ class GLBackend : public VBackend
 		QSize m_texVisSize;	// Texture visible size. (1x == 320x240)
 
 		// Stretch mode.
-		QRectF m_stretchRectF;		// Current stretch coordinates.
+		GLdouble m_stretchRectF[4][2];	// Current stretch coordinates.
 		QSize m_stretchLastRes;		// Last MD screen resolution.
 		void recalcStretchRectF(void);
 		void recalcStretchRectF(StretchMode_t mode);
+		void setStretchRectF(double x, double y, double w, double h);
 
 		// OSD texture.
 		GLTex2D *m_texOsd;	// Texture containing U+0000 - U+00FF.

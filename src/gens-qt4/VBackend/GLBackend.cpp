@@ -631,16 +631,16 @@ void GLBackend::glb_paintGL(void)
 
 	// Draw the texture.
 	glBindTexture(GL_TEXTURE_2D, m_tex);
-	glBegin(GL_QUADS);
-	glTexCoord2d(m_stretchRectF.x(), m_stretchRectF.y());
-	glVertex2i(-1, 1);
-	glTexCoord2d(m_stretchRectF.width(), m_stretchRectF.y());
-	glVertex2i(1, 1);
-	glTexCoord2d(m_stretchRectF.width(), m_stretchRectF.height());
-	glVertex2i(1, -1);
-	glTexCoord2d(m_stretchRectF.x(), m_stretchRectF.height());
-	glVertex2i(-1, -1);
-	glEnd();
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	static const int vtx[4][2] = {{-1, 1}, {1, 1}, {1, -1}, {-1, -1}};
+	glVertexPointer(2, GL_INT, 0, vtx);
+	glTexCoordPointer(2, GL_DOUBLE, 0, m_stretchRectF);
+	glDrawArrays(GL_QUADS, 0, 4);
+
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 	// Disable shaders, if necessary.
 	if (isRunning() && m_srcFb) {
@@ -696,19 +696,18 @@ void GLBackend::recalcStretchRectF(StretchMode_t mode)
 	m_stretchLastRes.setHeight(ctxVPix);
 
 	// Default to no stretch.
-	m_stretchRectF = QRectF(
-		0.0,		// X coordinate.
-		0.0,		// Y coordinate.
-		((double)m_texVisSize.width() / (double)m_texSize.width()),	// Width.
-		((double)m_texVisSize.height() / (double)m_texSize.height())	// Height.
-		);
+	double x = 0.0, y = 0.0;
+	double w = (double)m_texVisSize.width() / (double)m_texSize.width();
+	double h = (double)m_texVisSize.height() / (double)m_texSize.height();
 
 	// Don't apply any stretch parameters if:
 	// - stretching is disabled
 	// - emulation isn't running
 	// - no emulation context is present (TODO: Combine isRunning() with m_emuContext?)
-	if (mode == STRETCH_NONE || !isRunning() || !isEmuContext)
+	if (mode == STRETCH_NONE || !isRunning() || !isEmuContext) {
+		setStretchRectF(x, y, w, h);
 		return;
+	}
 
 	// Horizontal stretch.
 	// TODO: Adjust for visible texture size.
@@ -717,9 +716,8 @@ void GLBackend::recalcStretchRectF(StretchMode_t mode)
 		if (ctxHPixBegin > 0) {
 			// Less than 320 pixels wide.
 			// Adjust horizontal stretch.
-			// NOTE: Width is adjusted automatically by QRectF when setting X.
-			m_stretchRectF.setX((double)ctxHPixBegin / (double)m_texSize.width());
-			//m_stretchRectF.setWidth(img_dest.width() - img_dest.x());
+			x = (double)ctxHPixBegin / (double)m_texSize.width();
+			w -= x;
 		}
 	}
 
@@ -731,12 +729,33 @@ void GLBackend::recalcStretchRectF(StretchMode_t mode)
 		if (v_pix > 0) {
 			// Less than 240 pixels tall.
 			// Adjust vertical stretch.
-			// NOTE: Height is adjusted automatically by QRectF when setting Y.
 			v_pix /= 2;
-			m_stretchRectF.setY((double)v_pix / (double)m_texSize.height());
-			//m_stretchRectF.setHeight(img_dest.height() - img_dest.y());
+			y = (double)v_pix / (double)m_texSize.height();
+			h -= y;
 		}
 	}
+
+	setStretchRectF(x, y, w, h);
+}
+
+/**
+ * Set the m_stretchRectF coordinates.
+ * @param x
+ * @param y
+ * @param w
+ * @param h
+ */
+void GLBackend::setStretchRectF(double x, double y, double w, double h)
+{
+	// Set the stretch coordinates.
+	m_stretchRectF[0][0] = x;
+	m_stretchRectF[0][1] = y;
+	m_stretchRectF[1][0] = w;
+	m_stretchRectF[1][1] = y;
+	m_stretchRectF[2][0] = w;
+	m_stretchRectF[2][1] = h;
+	m_stretchRectF[3][0] = x;
+	m_stretchRectF[3][1] = h;
 }
 
 /**
