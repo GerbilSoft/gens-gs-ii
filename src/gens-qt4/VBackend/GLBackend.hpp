@@ -158,6 +158,7 @@ class GLBackend : public VBackend
 		GLTex2D *m_texOsd;	// Texture containing U+0000 - U+00FF.
 		GLuint m_glListOsd;	// Display list.
 		QRectF m_rectfOsd;	// Projection rectangle.
+		GLfloat m_osdVertex[256][8];	// Texture vertex array.
 
 		// Reallocate Texture functions.
 		void reallocTexture(void);

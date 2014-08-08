@@ -372,6 +372,22 @@ void GLBackend::reallocTexOsd(void) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	glDisable(GL_TEXTURE_2D);
+
+	// Calculate the GL vertex array.
+	GLfloat *vtx = &m_osdVertex[0][0];
+	for (int y = 0; y < 16; y++) {
+		for (int x = 0; x < 16; x++) {
+			vtx[0] = ((float)(x+0) / 16.0f);
+			vtx[1] = ((float)(y+0) / 16.0f);
+			vtx[2] = ((float)(x+1) / 16.0f);
+			vtx[3] = ((float)(y+0) / 16.0f);
+			vtx[4] = ((float)(x+1) / 16.0f);
+			vtx[5] = ((float)(y+1) / 16.0f);
+			vtx[6] = ((float)(x+0) / 16.0f);
+			vtx[7] = ((float)(y+1) / 16.0f);
+			vtx += 8;
+		}
+	}
 }
 
 /**
@@ -775,7 +791,10 @@ void GLBackend::printOsdText(void)
 
 	// Bind the OSD texture.
 	glBindTexture(GL_TEXTURE_2D, m_texOsd->tex());
-	glBegin(GL_QUADS);	// Start drawing quads.
+
+	// Enable vertex and texture coordinate arrays.
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	// Text shadow color.
 	// TODO: Make this customizable?
@@ -884,8 +903,9 @@ void GLBackend::printOsdText(void)
 		}
 	}
 
-	// We're done drawing.
-	glEnd();
+	// Done with vertex and texture coordinate arrays.
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 	// Reset the GL state.
 	glb_setColor(QColor(Qt::white));	// Reset the color.
@@ -915,6 +935,10 @@ void GLBackend::printOsdLine(int x, int y, const QString &msg)
 {
 	// TODO: Font information.
 	// TODO: Wordwrapping.
+
+	// TODO: Precalculate vertices?
+	GLint *vtx = new GLint[msg.size() * 8];
+	GLfloat *txc = new GLfloat[msg.size() * 8];
 
 	for (int i = 0; i < msg.size(); i++, x += ms_Osd_chrW) {
 		uint16_t chr = msg[i].unicode();
@@ -970,23 +994,26 @@ void GLBackend::printOsdLine(int x, int y, const QString &msg)
 				continue;
 		}
 
-		// Calculate the texture coordinates.
-		const GLfloat tx1 = ((float)(chr & 0xF) / 16.0f);
-		const GLfloat ty1 = ((float)((chr & 0xF0) >> 4) / 16.0f);
-		const GLfloat tx2 = (tx1 + (1.0f / 16.0f));
-		const GLfloat ty2 = (ty1 + (1.0f / 16.0f));
+		// Vertex coordinates.
+		vtx[(i*8)+0] = x;
+		vtx[(i*8)+1] = y;
+		vtx[(i*8)+2] = x+ms_Osd_chrW;
+		vtx[(i*8)+3] = y;
+		vtx[(i*8)+4] = x+ms_Osd_chrW;
+		vtx[(i*8)+5] = y+ms_Osd_chrH;
+		vtx[(i*8)+6] = x;
+		vtx[(i*8)+7] = y+ms_Osd_chrH;
 
-		// Draw the texture.
-		// NOTE: glBegin() / glEnd() are called in printOsdText().
-		glTexCoord2f(tx1, ty1);
-		glVertex2i(x, y);
-		glTexCoord2f(tx2, ty1);
-		glVertex2i(x+ms_Osd_chrW, y);
-		glTexCoord2f(tx2, ty2);
-		glVertex2i(x+ms_Osd_chrW, y+ms_Osd_chrH);
-		glTexCoord2f(tx1, ty2);
-		glVertex2i(x, y+ms_Osd_chrH);
+		// Texture coordinates.
+		memcpy(&txc[i*8], &m_osdVertex[chr][0], sizeof(m_osdVertex[chr]));
 	}
+
+	glVertexPointer(2, GL_INT, 0, vtx);
+	glTexCoordPointer(2, GL_FLOAT, 0, txc);
+	glDrawArrays(GL_QUADS, 0, msg.size()*4);
+
+	delete txc;
+	delete vtx;
 }
 
 /**
