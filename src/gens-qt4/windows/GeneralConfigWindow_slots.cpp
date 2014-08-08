@@ -1,7 +1,7 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GeneralConfigWindow_slots.cpp: General Configuration Window.            *
- * Slots for generic configuration items, e.g. simple checkboxes.          *
+ * Slots for updating configuration settings.                              *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -25,10 +25,72 @@
 #include "GeneralConfigWindow.hpp"
 #include "GeneralConfigWindow_p.hpp"
 
-#include "gqt4_main.hpp"
-
 namespace GensQt4
 {
+
+/**
+ * Apply the configuration changes.
+ * Triggered if "Apply" is clicked.
+ */
+void GeneralConfigWindow::apply(void)
+{
+	Q_D(GeneralConfigWindow);
+	if (d->applySettingsImmediately)
+		return;
+
+	/** Onscreen display. **/
+	SetValByPath_bool("OSD/fpsEnabled", d->ui.chkOsdFpsEnable->isChecked());
+	SetValByPath_QColor("OSD/fpsColor", d->osdFpsColor);
+	SetValByPath_bool("OSD/msgEnabled", d->ui.chkOsdMsgEnable->isChecked());
+	SetValByPath_QColor("OSD/msgColor", d->osdMsgColor);
+
+	/** Intro effect. **/
+	SetValByPath_int("Intro_Effect/introStyle", d->ui.cboIntroStyle->currentIndex());
+	SetValByPath_int("Intro_Effect/introColor", d->ui.cboIntroColor->currentIndex());
+
+	/** General settings. **/
+	SetValByPath_bool("autoFixChecksum", d->ui.chkAutoFixChecksum->isChecked());
+	SetValByPath_bool("autoPause", d->ui.chkAutoPause->isChecked());
+	SetValByPath_bool("pauseTint", d->ui.chkPauseTint->isChecked());
+
+	/** Sega Genesis TMSS. **/
+	SetValByPath_bool("Genesis/tmssEnabled", d->ui.chkMDTMSS->isChecked());
+	SetValByPath_QString("Genesis/tmssRom", d->ui.txtMDTMSSRom->text());
+
+	/** Sega CD Boot ROMs. **/
+	SetValByPath_QString("Sega_CD/bootRomUSA", d->ui.txtMcdRomUSA->text());
+	SetValByPath_QString("Sega_CD/bootRomEUR", d->ui.txtMcdRomEUR->text());
+	SetValByPath_QString("Sega_CD/bootRomJPN", d->ui.txtMcdRomJPN->text());
+	SetValByPath_QString("Sega_CD/bootRomAsia", d->ui.txtMcdRomAsia->text());
+
+	/** External programs. **/
+	SetValByPath_QString("External_Programs/UnRAR", d->ui.txtExtPrgUnRAR->text());
+
+	/** Graphics settings. **/
+	SetValByPath_bool("Graphics/aspectRatioConstraint", d->ui.chkAspectRatioConstraint->isChecked());
+	SetValByPath_bool("Graphics/fastBlur", d->ui.chkFastBlur->isChecked());
+	SetValByPath_bool("Graphics/bilinearFilter", d->ui.chkBilinearFilter->isChecked());
+	SetValByPath_int("Graphics/interlacedMode", d->ui.cboInterlacedMode->currentIndex());
+
+	/** VDP settings. **/
+	SetValByPath_bool("VDP/spriteLimits", d->ui.chkSpriteLimits->isChecked());
+	SetValByPath_bool("VDP/borderColorEmulation", d->ui.chkBorderColor->isChecked());
+	SetValByPath_bool("VDP/ntscV30Rolling", d->ui.chkNtscV30Rolling->isChecked());
+	if (d->isWarrantyVoid()) {
+		SetValByPath_bool("VDP/zeroLengthDMA", d->ui.chkZeroLengthDMA->isChecked());
+		SetValByPath_bool("VDP/vscrollBug", d->ui.chkVScrollBug->isChecked());
+		SetValByPath_bool("VDP/updatePaletteInVBlankOnly", d->ui.chkUpdatePaletteInVBlankOnly->isChecked());
+	}
+
+	/** System. **/
+	SetValByPath_int("System/regionCode", (d->ui.cboRegionCurrent->currentIndex() - 1));
+	SetValByPath_uint("System/regionCodeOrder", d->regionCodeOrder());
+
+	// Disable the Apply button.
+	// TODO: If Apply was clicked, set focus back to the main window elements.
+	// Otherwise, Cancel will receive focus.
+	d->setApplyButtonEnabled(false);
+}
 
 // TODO: GNOME applies settings immediately.
 // Change from compile-time option to runtime option.
@@ -36,20 +98,20 @@ namespace GensQt4
 // with stray signals from e.g. cboIntroColor while
 // the window is being initialized.
 
-#ifndef GCW_APPLY_IMMED
 #define GENERIC_OPTION(path, var) \
 do { \
-	((void)var); \
 	Q_D(GeneralConfigWindow); \
-	d->setApplyButtonEnabled(true); \
+	if (!d->applySettingsImmediately) { \
+		/* Don't apply the setting immediately. */ \
+		/* Just enable the "Apply" button. */ \
+		d->setApplyButtonEnabled(true); \
+	} else { \
+		/* Apply the setting immediately. */ \
+		if (this->isVisible()) { \
+			gqt4_cfg->set(QLatin1String(path), var); \
+		} \
+	} \
 } while (0)
-#else
-#define GENERIC_OPTION(path, var) \
-do { \
-	if (this->isVisible()) \
-		gqt4_cfg->set(QLatin1String(path), var); \
-} while (0)
-#endif
 
 /** Onscreen display. **/
 void GeneralConfigWindow::on_chkOsdFpsEnable_toggled(bool checked)

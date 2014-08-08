@@ -33,18 +33,22 @@
 class QActionGroup;
 class QLineEdit;
 
-// Apply changes immediately.
-#ifdef Q_WS_MAC
-#define GCW_APPLY_IMMED
-#else /* !Q_WS_MAC */
-#ifdef GCW_APPLY_IMMED
-#undef GCW_APPLY_IMMED
-#endif /* GCW_APPLY_IMMED */
-#endif /* Q_WS_MAC */
+#include "gqt4_main.hpp"
 
 #include "ui_GeneralConfigWindow.h"
 namespace GensQt4
 {
+
+static inline void SetValByPath_bool(const char *path, bool value)
+	{ gqt4_cfg->set(QLatin1String(path), value); }
+static inline void SetValByPath_QColor(const char *path, const QColor& value)
+	{ gqt4_cfg->set(QLatin1String(path), value.name()); }
+static inline void SetValByPath_int(const char *path, int value)
+	{ gqt4_cfg->set(QLatin1String(path), value); }
+static inline void SetValByPath_uint(const char *path, unsigned int value)
+	{ gqt4_cfg->set(QLatin1String(path), value); }
+static inline void SetValByPath_QString(const char *path, QString value)
+	{ gqt4_cfg->set(QLatin1String(path), value); }
 
 // Gens widgets.
 class GensLineEdit;
@@ -72,13 +76,13 @@ class GeneralConfigWindowPrivate
 		// otherwise, QObject might not be initialized.
 		QString sWarning;
 
-#ifndef GCW_APPLY_IMMED
+		// Should settings be applied immediately?
+		bool applySettingsImmediately;
 		/**
 		 * Enable or disable the Apply button.
 		 * @param enabled True to enable; false to disable.
 		 */
 		void setApplyButtonEnabled(bool enabled);
-#endif /* !GCW_APPLY_IMMED */
 
 #ifdef Q_WS_MAC
 		// Mac OS X UI customizations.

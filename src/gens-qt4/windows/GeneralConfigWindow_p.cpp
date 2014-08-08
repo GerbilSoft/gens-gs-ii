@@ -53,6 +53,13 @@ GeneralConfigWindowPrivate::GeneralConfigWindowPrivate(GeneralConfigWindow *q)
 
 	// Create the toolbar action group.
 	actgrpToolbar = new QActionGroup(q);
+
+	// TODO: Determine this at runtime for Linux.
+#ifdef Q_WS_MAC
+	applySettingsImmediately = true;
+#else /* !Q_WS_MAC */
+	applySettingsImmediately = true;
+#endif /* Q_WS_MAC */
 }
 
 /**
@@ -495,7 +502,6 @@ void GeneralConfigWindowPrivate::extprgDisplayFileStatus(const QString &file_id,
 	ui.lblExtPrgSel->setTextFormat(Qt::RichText);
 }
 
-#ifndef GCW_APPLY_IMMED
 /**
  * Enable or disable the Apply button.
  * @param enabled True to enable; false to disable.
@@ -506,6 +512,5 @@ void GeneralConfigWindowPrivate::setApplyButtonEnabled(bool enabled)
 	if (btnApply)
 		btnApply->setEnabled(enabled);
 }
-#endif
 
 }

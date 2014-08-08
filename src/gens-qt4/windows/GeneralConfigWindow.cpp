@@ -110,20 +110,22 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	// Select the "General" tab.
 	d->ui.actionGeneral->setChecked(true);
 
-#ifndef GCW_APPLY_IMMED
-	// Set up a signal for the Apply button.
-	QPushButton *btnApply = d->ui.buttonBox->button(QDialogButtonBox::Apply);
-	if (btnApply)
-		connect(btnApply, SIGNAL(clicked()), this, SLOT(apply()));
-#else
-	{
+	if (!d->applySettingsImmediately) {
+		// Don't apply settings immediately.
+
+		// Set up a signal for the Apply button.
+		QPushButton *btnApply = d->ui.buttonBox->button(QDialogButtonBox::Apply);
+		if (btnApply)
+			connect(btnApply, SIGNAL(clicked()), this, SLOT(apply()));
+	} else {
 		// Apply settings immediately.
 		// Remove the buttonBox.
 		QSize szBbox = d->ui.buttonBox->size();
-		delete d->ui.buttonBox;
-		d->ui.buttonBox = nullptr;
+		d->ui.buttonBox->hide(); // TODO: Allow reenabling this at runtime?
 
 		// Reduce the size of the QMainWindow.
+		// FIXME: This seems to be broken. (at least on Linux)
+#if 0
 		QSize szWindow = this->maximumSize();
 		int left, top, right, bottom;
 		d->ui.vboxDialog->getContentsMargins(&left, &top, &right, &bottom);
@@ -131,8 +133,8 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 		this->setMinimumSize(szWindow);
 		this->setMaximumSize(szWindow);
 		this->setBaseSize(szWindow);
-	}
 #endif
+	}
 
 #ifdef Q_WS_MAC
 	// Set up the Mac OS X-specific UI elements.
@@ -235,40 +237,42 @@ void GeneralConfigWindow::keyPressEvent(QKeyEvent *event)
 {
 	// TODO: Handle Cmd-Period on Mac?
 	// NOTE: Cmd-W triggers the "Close ROM" action...
-#ifndef GCW_APPLY_IMMED
-	// Changes are not applied immediately.
-	// Check for special dialog keys.
-	// Adapted from QDialog::keyPressEvent().
 
-	if (!event->modifiers() || ((event->modifiers() & Qt::KeypadModifier) && event->key() == Qt::Key_Enter))
-	{
-		switch (event->key()) {
-			case Qt::Key_Enter:
-			case Qt::Key_Return:
-				// Accept the dialog changes.
-				accept();
-				break;
+	Q_D(const GeneralConfigWindow);
+	if (!d->applySettingsImmediately) {
+		// Changes are not applied immediately.
+		// Check for special dialog keys.
+		// Adapted from QDialog::keyPressEvent().
 
-			case Qt::Key_Escape:
-				// Reject the dialog changes.
-				reject();
-				break;
+		if (!event->modifiers() || ((event->modifiers() & Qt::KeypadModifier) && event->key() == Qt::Key_Enter))
+		{
+			switch (event->key()) {
+				case Qt::Key_Enter:
+				case Qt::Key_Return:
+					// Accept the dialog changes.
+					accept();
+					break;
 
-			default:
-				// Pass the event to the base class.
-				this->QMainWindow::keyPressEvent(event);
-				return;
+				case Qt::Key_Escape:
+					// Reject the dialog changes.
+					reject();
+					break;
+
+				default:
+					// Pass the event to the base class.
+					this->QMainWindow::keyPressEvent(event);
+					return;
+			}
+		} else {
+			// Pass the event to the base class.
+			this->QMainWindow::keyPressEvent(event);
 		}
 	} else {
-		// Pass the event to the base class.
-		this->QMainWindow::keyPressEvent(event);
+		// Changes are applied immediately.
+		// Don't handle special dialog keys.
+		// TODO: Pass this event to the base class?
+		Q_UNUSED(event)
 	}
-#else /* !GCW_APPLY_IMMED */
-	// Changes are applied immediately.
-	// Don't handle special dialog keys.
-	Q_UNUSED(event)
-	return;
-#endif /* GCW_APPLY_IMMED */
 }
 
 /**
@@ -402,85 +406,8 @@ void GeneralConfigWindow::reload(void)
 		}
 	}
 
-#ifndef GCW_APPLY_IMMED
 	// Disable the Apply button.
 	d->setApplyButtonEnabled(false);
-#endif
-}
-
-static inline void SetValByPath_bool(const char *path, bool value)
-	{ gqt4_cfg->set(QLatin1String(path), value); }
-static inline void SetValByPath_QColor(const char *path, const QColor& value)
-	{ gqt4_cfg->set(QLatin1String(path), value.name()); }
-static inline void SetValByPath_int(const char *path, int value)
-	{ gqt4_cfg->set(QLatin1String(path), value); }
-static inline void SetValByPath_uint(const char *path, unsigned int value)
-	{ gqt4_cfg->set(QLatin1String(path), value); }
-static inline void SetValByPath_QString(const char *path, QString value)
-	{ gqt4_cfg->set(QLatin1String(path), value); }
-
-/**
- * Apply the configuration changes.
- * Triggered if "Apply" is clicked.
- */
-void GeneralConfigWindow::apply(void)
-{
-#ifndef GCW_APPLY_IMMED
-	Q_D(GeneralConfigWindow);
-
-	/** Onscreen display. **/
-	SetValByPath_bool("OSD/fpsEnabled", d->ui.chkOsdFpsEnable->isChecked());
-	SetValByPath_QColor("OSD/fpsColor", d->osdFpsColor);
-	SetValByPath_bool("OSD/msgEnabled", d->ui.chkOsdMsgEnable->isChecked());
-	SetValByPath_QColor("OSD/msgColor", d->osdMsgColor);
-
-	/** Intro effect. **/
-	SetValByPath_int("Intro_Effect/introStyle", d->ui.cboIntroStyle->currentIndex());
-	SetValByPath_int("Intro_Effect/introColor", d->ui.cboIntroColor->currentIndex());
-
-	/** General settings. **/
-	SetValByPath_bool("autoFixChecksum", d->ui.chkAutoFixChecksum->isChecked());
-	SetValByPath_bool("autoPause", d->ui.chkAutoPause->isChecked());
-	SetValByPath_bool("pauseTint", d->ui.chkPauseTint->isChecked());
-
-	/** Sega Genesis TMSS. **/
-	SetValByPath_bool("Genesis/tmssEnabled", d->ui.chkMDTMSS->isChecked());
-	SetValByPath_QString("Genesis/tmssRom", d->ui.txtMDTMSSRom->text());
-
-	/** Sega CD Boot ROMs. **/
-	SetValByPath_QString("Sega_CD/bootRomUSA", d->ui.txtMcdRomUSA->text());
-	SetValByPath_QString("Sega_CD/bootRomEUR", d->ui.txtMcdRomEUR->text());
-	SetValByPath_QString("Sega_CD/bootRomJPN", d->ui.txtMcdRomJPN->text());
-	SetValByPath_QString("Sega_CD/bootRomAsia", d->ui.txtMcdRomAsia->text());
-
-	/** External programs. **/
-	SetValByPath_QString("External_Programs/UnRAR", d->ui.txtExtPrgUnRAR->text());
-
-	/** Graphics settings. **/
-	SetValByPath_bool("Graphics/aspectRatioConstraint", d->ui.chkAspectRatioConstraint->isChecked());
-	SetValByPath_bool("Graphics/fastBlur", d->ui.chkFastBlur->isChecked());
-	SetValByPath_bool("Graphics/bilinearFilter", d->ui.chkBilinearFilter->isChecked());
-	SetValByPath_int("Graphics/interlacedMode", d->ui.cboInterlacedMode->currentIndex());
-
-	/** VDP settings. **/
-	SetValByPath_bool("VDP/spriteLimits", d->ui.chkSpriteLimits->isChecked());
-	SetValByPath_bool("VDP/borderColorEmulation", d->ui.chkBorderColor->isChecked());
-	SetValByPath_bool("VDP/ntscV30Rolling", d->ui.chkNtscV30Rolling->isChecked());
-	if (d->isWarrantyVoid()) {
-		SetValByPath_bool("VDP/zeroLengthDMA", d->ui.chkZeroLengthDMA->isChecked());
-		SetValByPath_bool("VDP/vscrollBug", d->ui.chkVScrollBug->isChecked());
-		SetValByPath_bool("VDP/updatePaletteInVBlankOnly", d->ui.chkUpdatePaletteInVBlankOnly->isChecked());
-	}
-
-	/** System. **/
-	SetValByPath_int("System/regionCode", (d->ui.cboRegionCurrent->currentIndex() - 1));
-	SetValByPath_uint("System/regionCodeOrder", d->regionCodeOrder());
-
-	// Disable the Apply button.
-	// TODO: If Apply was clicked, set focus back to the main window elements.
-	// Otherwise, Cancel will receive focus.
-	d->setApplyButtonEnabled(false);
-#endif
 }
 
 /**
@@ -501,8 +428,6 @@ void GeneralConfigWindow::toolbarTriggered(QAction *action)
 	d->ui.stackedWidget->setCurrentIndex(tab);
 }
 
-/** Onscreen display **/
-
 void GeneralConfigWindow::on_btnOsdFpsColor_clicked(void)
 {
 	Q_D(GeneralConfigWindow);
@@ -515,11 +440,11 @@ void GeneralConfigWindow::on_btnOsdFpsColor_clicked(void)
 	d->ui.btnOsdFpsColor->setText(d->osdFpsColor.name().toUpper());
 
 	// Settings have been changed.
-#ifndef GCW_APPLY_IMMED
-	d->setApplyButtonEnabled(true);
-#else
-	SetValByPath_QColor("OSD/fpsColor", d->osdMsgColor);
-#endif
+	if (!d->applySettingsImmediately) {
+		d->setApplyButtonEnabled(true);
+	} else {
+		SetValByPath_QColor("OSD/fpsColor", d->osdMsgColor);
+	}
 }
 
 void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
@@ -534,11 +459,11 @@ void GeneralConfigWindow::on_btnOsdMsgColor_clicked(void)
 	d->ui.btnOsdMsgColor->setText(d->osdMsgColor.name().toUpper());
 
 	// Settings have been changed.
-#ifndef GCW_APPLY_IMMED
-	d->setApplyButtonEnabled(true);
-#else
-	SetValByPath_QColor("OSD/msgColor", d->osdMsgColor);
-#endif
+	if (!d->applySettingsImmediately) {
+		d->setApplyButtonEnabled(true);
+	} else {
+		SetValByPath_QColor("OSD/msgColor", d->osdMsgColor);
+	}
 }
 
 /** System. **/
@@ -562,11 +487,11 @@ void GeneralConfigWindow::on_btnRegionDetectUp_clicked(void)
 	d->ui.lstRegionDetect->insertItem(cur_idx, prev);
 
 	// Settings have been changed.
-#ifndef GCW_APPLY_IMMED
-	d->setApplyButtonEnabled(true);
-#else
-	SetValByPath_uint("System/regionCodeOrder", d->regionCodeOrder());
-#endif
+	if (!d->applySettingsImmediately) {
+		d->setApplyButtonEnabled(true);
+	} else {
+		SetValByPath_uint("System/regionCodeOrder", d->regionCodeOrder());
+	}
 }
 
 /**
@@ -587,11 +512,11 @@ void GeneralConfigWindow::on_btnRegionDetectDown_clicked(void)
 	d->ui.lstRegionDetect->insertItem(cur_idx, next);
 
 	// Settings have been changed.
-#ifndef GCW_APPLY_IMMED
-	d->setApplyButtonEnabled(true);
-#else
-	SetValByPath_uint("System/regionCodeOrder", d->regionCodeOrder());
-#endif
+	if (!d->applySettingsImmediately) {
+		d->setApplyButtonEnabled(true);
+	} else {
+		SetValByPath_uint("System/regionCodeOrder", d->regionCodeOrder());
+	}
 }
 
 /** Sega Genesis. **/
@@ -620,11 +545,11 @@ void GeneralConfigWindow::on_txtMDTMSSRom_textChanged(void)
 	}
 
 	// Settings have been changed.
-#ifndef GCW_APPLY_IMMED
-	d->setApplyButtonEnabled(true);
-#else
-	SetValByPath_QString("Genesis/tmssRom", d->ui.txtMDTMSSRom->text());
-#endif
+	if (!d->applySettingsImmediately) {
+		d->setApplyButtonEnabled(true);
+	} else {
+		SetValByPath_QString("Genesis/tmssRom", d->ui.txtMDTMSSRom->text());
+	}
 }
 
 /** Sega CD. **/
@@ -685,11 +610,11 @@ void GeneralConfigWindow::on_txtMcdRomUSA_textChanged(void)
 	}
 
 	// Settings have been changed.
-#ifndef GCW_APPLY_IMMED
-	d->setApplyButtonEnabled(true);
-#else
-	SetValByPath_QString("Sega_CD/bootRomUSA", d->ui.txtMcdRomUSA->text());
-#endif
+	if (!d->applySettingsImmediately) {
+		d->setApplyButtonEnabled(true);
+	} else {
+		SetValByPath_QString("Sega_CD/bootRomUSA", d->ui.txtMcdRomUSA->text());
+	}
 }
 
 void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
@@ -702,11 +627,11 @@ void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
 	}
 
 	// Settings have been changed.
-#ifndef GCW_APPLY_IMMED
-	d->setApplyButtonEnabled(true);
-#else
-	SetValByPath_QString("Sega_CD/bootRomEUR", d->ui.txtMcdRomEUR->text());
-#endif
+	if (!d->applySettingsImmediately) {
+		d->setApplyButtonEnabled(true);
+	} else {
+		SetValByPath_QString("Sega_CD/bootRomEUR", d->ui.txtMcdRomEUR->text());
+	}
 }
 
 void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
@@ -719,11 +644,11 @@ void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 	}
 
 	// Settings have been changed.
-#ifndef GCW_APPLY_IMMED
-	d->setApplyButtonEnabled(true);
-#else
-	SetValByPath_QString("Sega_CD/bootRomJPN", d->ui.txtMcdRomJPN->text());
-#endif
+	if (!d->applySettingsImmediately) {
+		d->setApplyButtonEnabled(true);
+	} else {
+		SetValByPath_QString("Sega_CD/bootRomJPN", d->ui.txtMcdRomJPN->text());
+	}
 }
 
 void GeneralConfigWindow::on_txtMcdRomAsia_textChanged(void)
@@ -736,11 +661,11 @@ void GeneralConfigWindow::on_txtMcdRomAsia_textChanged(void)
 	}
 
 	// Settings have been changed.
-#ifndef GCW_APPLY_IMMED
-	d->setApplyButtonEnabled(true);
-#else
-	SetValByPath_QString("Sega_CD/bootRomAsia", d->ui.txtMcdRomAsia->text());
-#endif
+	if (!d->applySettingsImmediately) {
+		d->setApplyButtonEnabled(true);
+	} else {
+		SetValByPath_QString("Sega_CD/bootRomAsia", d->ui.txtMcdRomAsia->text());
+	}
 }
 
 /** External programs **/
@@ -938,11 +863,11 @@ void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
 	on_txtExtPrgUnRAR_focusIn();
 
 	// Settings have been changed.
-#ifndef GCW_APPLY_IMMED
-	d->setApplyButtonEnabled(true);
-#else
-	SetValByPath_QString("External_Programs/UnRAR", d->ui.txtExtPrgUnRAR->text());
-#endif
+	if (!d->applySettingsImmediately) {
+		d->setApplyButtonEnabled(true);
+	} else {
+		SetValByPath_QString("External_Programs/UnRAR", d->ui.txtExtPrgUnRAR->text());
+	}
 }
 
 }
