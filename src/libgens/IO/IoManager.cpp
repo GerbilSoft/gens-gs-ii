@@ -459,6 +459,63 @@ uint8_t IoManager::readDataSMS_DD(void) const
 }
 
 /**
+ * Is the SMS Pause button pressed?
+ * (Also Game Gear Start button.)
+ * @return True if pressed; false if not.
+ */
+bool IoManager::isPauseSMS(void) const
+{
+	// TODO: Untested!
+
+	// Check all controllers.
+	// TODO: Optimize this so we don't have to check all controllers?
+	for (int i = 0; i < ARRAY_SIZE(d->ioDevices); i++) {
+		IoManagerPrivate::IoDevice *ioDevice = &d->ioDevices[i];
+		if (ioDevice->type == IOT_2BTN) {
+			if (ioDevice->data.sms.pause) {
+				// Pause is pressed.
+				return true;
+			}
+		}
+	}
+
+	// Pause is not pressed.
+	// TODO: Should be a single-shot...
+	return false;
+}
+
+/**
+ * Read the Game Gear Start button register.
+ * @return Game Gear Start button register.
+ */
+uint8_t IoManager::readStartGG(void) const
+{
+	// TODO: Untested!
+
+	/**
+	 * Start button: Register $00
+	 * Bit 7 represents the state, active low. (0 == pressed)
+	 *
+	 * Reference: http://www.smspower.org/Development/StartButton
+	 */
+
+	// Check all controllers.
+	// TODO: Optimize this so we don't have to check all controllers?
+	for (int i = 0; i < ARRAY_SIZE(d->ioDevices); i++) {
+		IoManagerPrivate::IoDevice *ioDevice = &d->ioDevices[i];
+		if (ioDevice->type == IOT_2BTN) {
+			if (ioDevice->data.sms.pause) {
+				// Start is pressed.
+				return 0x7F;
+			}
+		}
+	}
+
+	// Start is not pressed.
+	return 0xFF;
+}
+
+/**
  * Update an I/O device.
  * @param virtPort Virtual port.
  * @param buttons New button state.

@@ -77,6 +77,7 @@ IoManager::ButtonName_t IoManager::ButtonName(IoType_t ioType, int btnIdx)
 				case BTNI_RIGHT:	return BTNNAME_RIGHT;
 				case BTNI_1:		return BTNNAME_1;
 				case BTNI_2:		return BTNNAME_2;
+				case BTNI_STARTPAUSE:	return BTNNAME_STARTPAUSE;
 				default:
 					break;
 			}
@@ -206,7 +207,8 @@ int IoManager::NextLogicalButton(IoType_t ioType, int btnIdx)
 				case BTNI_LEFT:		return BTNI_RIGHT;
 				case BTNI_RIGHT:	return BTNI_1;
 				case BTNI_1:		return BTNI_2;
-				case BTNI_2:
+				case BTNI_2:		return BTNI_STARTPAUSE;
+				case BTNI_STARTPAUSE:
 				default:
 					break;
 			}
@@ -216,7 +218,7 @@ int IoManager::NextLogicalButton(IoType_t ioType, int btnIdx)
 
 		case IOT_PADDLE:
 			switch (btnIdx) {
-				case BTNI_PADDLE_1:	return BTNI_PADDLE_2;;
+				case BTNI_PADDLE_1:	return BTNI_PADDLE_2;
 				case BTNI_PADDLE_2:
 				default:
 					break;

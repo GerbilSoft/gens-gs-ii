@@ -294,6 +294,9 @@ QString GensCtrlCfgWidgetPrivate::buttonName_l(IoManager::ButtonName_t buttonNam
 		case IoManager::BTNNAME_1:
 			//: SMS/Game Gear: 1 button.
 			return GensCtrlCfgWidget::tr("1", "controllers/2BTN");
+		case IoManager::BTNNAME_STARTPAUSE:
+			//: SMS: Pause button; Game Gear: Start button.
+			return GensCtrlCfgWidget::tr("Start/Pause", "controllers/2BTN");
 
 		/** Sega Mega Mouse buttons. **/
 

@@ -96,6 +96,8 @@ class IoManager
 		void writeCtrlSMS(uint8_t ctrl);
 		uint8_t readDataSMS_DC(void) const;
 		uint8_t readDataSMS_DD(void) const;
+		bool isPauseSMS(void) const;
+		uint8_t readStartGG(void) const;
 
 		/**
 		 * Update an I/O device.
@@ -270,6 +272,7 @@ class IoManager
 			// SMS/GG buttons.
 			BTNNAME_2,
 			BTNNAME_1,
+			BTNNAME_STARTPAUSE,
 
 			// Sega Mega Mouse buttons.
 			BTNNAME_MOUSE_LEFT,
@@ -307,6 +310,7 @@ class IoManager
 			// SMS/GG buttons.
 			BTNI_2		= 4,
 			BTNI_1		= 5,
+			BTNI_STARTPAUSE	= 6,
 
 			// SMS: Paddle controller.
 			BTNI_PADDLE_2	= 0,

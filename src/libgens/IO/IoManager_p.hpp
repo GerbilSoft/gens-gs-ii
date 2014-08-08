@@ -351,6 +351,11 @@ class IoManagerPrivate
 						uint8_t relY;
 					} latch;
 				} mouse;
+				struct {
+					// SMS: Pause button.
+					// Game Gear: Start button.
+					bool pause;
+				} sms;
 			} data;
 		};
 

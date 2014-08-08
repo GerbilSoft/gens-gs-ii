@@ -35,7 +35,7 @@ const IoManagerPrivate::IoDevInfo IoManagerPrivate::ioDevInfo[IoManager::IOT_MAX
 	{'NONE', 0, true},	// IOT_NONE
 	{'3BTN', 8, true},	// IOT_3BTN
 	{'6BTN', 12, true},	// IOT_6BTN
-	{'2BTN', 6, true},	// IOT_2BTN (TODO: Start/Pause?)
+	{'2BTN', 7, true},	// IOT_2BTN
 	{'TEAM', 0, true},	// IOT_TEAMPLAYER
 	{'4WPM', 0, true},	// IOT_4WP_MASTER
 	{'4WPS', 0, true},	// IOT_4WP_SLAVE
@@ -57,6 +57,7 @@ const IoManagerPrivate::IoDevInfo IoManagerPrivate::ioDevInfo[IoManager::IOT_MAX
 
 IoManagerPrivate::IoManagerPrivate(IoManager *q)
 	: q(q)
+	, ea4wp_curPlayer(7)
 { }
 
 /**
