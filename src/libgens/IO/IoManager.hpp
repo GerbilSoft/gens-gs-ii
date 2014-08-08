@@ -90,6 +90,14 @@ class IoManager
 		uint8_t readSerRx(int physPort) const;
 
 		/**
+		 * SMS I/O functions.
+		 * These are mapped to MD registers internally.
+		 */
+		void writeCtrlSMS(uint8_t ctrl);
+		uint8_t readDataSMS_DC(void) const;
+		uint8_t readDataSMS_DD(void) const;
+
+		/**
 		 * Update an I/O device.
 		 * @param virtPort Virtual port.
 		 * @param buttons New button state.

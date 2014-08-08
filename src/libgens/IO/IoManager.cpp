@@ -340,6 +340,124 @@ uint8_t IoManager::readSerRx(int physPort) const
 	return 0xFF;
 }
 
+/** SMS-side controller functions. **/
+
+/**
+ * Write to the SMS I/O port control register.
+ * @param ctrl Control register data.
+ */
+void IoManager::writeCtrlSMS(uint8_t ctrl)
+{
+	// TODO: Untested!
+
+	// FIXME: On Japanese hardware, this should be a no-op.
+	// ...or, maintain the state and then apply it if
+	// the system region is changed back to non-JP.
+
+	/**
+	 * SMS I/O port control register layout. ($3F)
+	 * Reference: http://www.smspower.org/Development/PeripheralPorts
+	 *
+	 * 7 == Port B TH pin output level
+	 * 6 == Port B TR pin output level
+	 * 5 == Port A TH pin output level
+	 * 4 == Port A TR pin output level
+	 * 3 == Port B TH pin direction
+	 * 2 == Port B TR pin direction
+	 * 1 == Port A TH pin direction
+	 * 0 == Port A TR pin direction
+	 *
+	 * Direction is 1 for input, 0 for output.
+	 * System default is 0x00.
+	 */
+
+	// Calculate MD control lines.
+	// MD ctrl: [0 TH TR TL R L D U]
+	const uint8_t ctrl1 = ((ctrl & 0x3) << 5);
+	const uint8_t ctrl2 = ((ctrl & 0xC) << 3);
+
+	// Calculate MD data lines.
+	// MD data: [0 TH TR TL R L D U]
+	const uint8_t data1 = ((ctrl & 0x30) << 1);
+	const uint8_t data2 = ((ctrl & 0xC0) >> 1);
+
+	// Write the control and data values.
+	writeCtrlMD(PHYSPORT_1, ctrl1);
+	writeDataMD(PHYSPORT_1, data1);
+	writeCtrlMD(PHYSPORT_2, ctrl2);
+	writeDataMD(PHYSPORT_2, data2);
+}
+
+/**
+ * Read the SMS $DC register: I/O port A and B.
+ * @return SMS $DC register.
+ */
+uint8_t IoManager::readDataSMS_DC(void) const
+{
+	// TODO: Untested!
+
+	/**
+	 * SMS I/O port A and B register layout. ($DC)
+	 * Read-only; all pins are inputs.
+	 * Reference: http://www.smspower.org/Development/PeripheralPorts
+	 *
+	 * 7 == Port B Down
+	 * 6 == Port B Up
+	 * 5 == Port A TR
+	 * 4 == Port A TL
+	 * 3 == Port A Right
+	 * 2 == Port A Left
+	 * 1 == Port A Down
+	 * 0 == Port A Up
+	 */
+
+	// MD data: [0 TH TR TL R L D U]
+	const uint8_t data1 = readDataMD(PHYSPORT_1);
+	const uint8_t data2 = readDataMD(PHYSPORT_2);
+
+	// Calculate the SMS data.
+	uint8_t data = (data1 & 0x3F);
+	data |= ((data2 & 0x3) << 6);
+	return data;
+}
+
+/**
+ * Read the SMS $DD register: I/O port B and miscellaneous.
+ * @return SMS $DD register.
+ */
+uint8_t IoManager::readDataSMS_DD(void) const
+{
+	// TODO: Untested!
+	// TODO: Implement the CONT line and the Reset button.
+	// CONT apparently returns 1 on 8-bit and 0 on MD.
+
+	/**
+	 * SMS I/O port B and miscellaneous register layout. ($DD)
+	 * Read-only; all pins are inputs.
+	 * Reference: http://www.smspower.org/Development/PeripheralPorts
+	 *
+	 * 7 == Port B TH
+	 * 6 == Port A TH
+	 * 5 == Cartridge slot CONT pin
+	 * 4 == Reset button (active low)
+	 * 3 == Port B TR
+	 * 2 == Port B TL
+	 * 1 == Port B Right
+	 * 0 == Port B Left
+	 */
+
+	// MD data: [0 TH TR TL R L D U]
+	const uint8_t data1 = readDataMD(PHYSPORT_1);
+	const uint8_t data2 = readDataMD(PHYSPORT_2);
+
+	// Calculate the SMS data.
+	uint8_t data = ((data2 & 0x3C) >> 2);
+	data |= 0x20; // CONT pin
+	data |= (data1 & IoManagerPrivate::IOPIN_TH);
+	data |= ((data2 & IoManagerPrivate::IOPIN_TH) << 1);
+	return data;
+}
+
 /**
  * Update an I/O device.
  * @param virtPort Virtual port.
