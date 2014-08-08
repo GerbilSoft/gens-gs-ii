@@ -1,10 +1,10 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
+ * libgenskeys: Gens Key Handling Library.                                 *
  * GensKey_t.h: Gens keycode information.                                  *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,19 +21,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_IO_GENSKEY_T_H__
-#define __LIBGENS_IO_GENSKEY_T_H__
+#ifndef __LIBGENSKEYS_GENSKEY_T_H__
+#define __LIBGENSKEYS_GENSKEY_T_H__
 
 #include <stdint.h>
 
-#include "../Util/byteswap.h"
+// TODO: Determine endianness.
+// For now, assume little-endian.
+#ifndef GENS_BYTEORDER
+#define GENS_LIL_ENDIAN 1234
+#define GENS_BIG_ENDIAN 4321
+#define GENS_BYTEORDER GENS_LIL_ENDIAN
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * GensKey_t: Gens keycode.
+ * Gens keycode.
  * Format: [TYPE ID KEYHI KEYLO]
  * TYPE: Keyboard == 0x00; Joystick == 0x01; Wii Remote == 0x02
  * ID == Device ID. (Keyboard is always 0)
@@ -47,13 +53,11 @@ typedef uint32_t GensKey_t;
 
 // Gens keycode struct and union.
 // NOTE: FOR INTERNAL USE ONLY!
-typedef union
-{
+typedef union {
 	GensKey_t keycode;
 	
 	// TODO: Endianness.
-	struct
-	{
+	struct {
 		// Key value.
 		// WARNING: key[] may be byteswapped based on host-endian!
 		// NOTE: key16 can contain modifier keys.
@@ -74,10 +78,9 @@ typedef union
 } GensKey_u;
 
 /**
- * GensKeyType_t: Gens keycode type enum.
+ * Gens keycode type enum.
  */
-typedef enum
-{
+typedef enum {
 	GKT_KEYBOARD	= 0,
 	GKT_MOUSE	= 1,
 	GKT_JOYSTICK	= 2,
@@ -91,8 +94,7 @@ typedef enum
  * @name Key values
  * Based on SDL_keysym.h.
  */
-typedef enum
-{
+typedef enum {
 	/**
 	 * @name ASCII-mapped keysyms
 	 * The keyboard syms have been cleverly chosen to map to ASCII.
@@ -315,8 +317,7 @@ typedef enum
  * @name Modifier keys.
  * Used for menus and special hotkeys
  */
-typedef enum
-{
+typedef enum {
 	KEYM_SHIFT	= 0x0200,
 	KEYM_CTRL	= 0x0400,
 	KEYM_ALT	= 0x0800,
@@ -331,8 +332,7 @@ typedef enum
  * These are ONLY used for MousePressEvent() / MouseReleaseEvent()!
  * Everything else should use the KeyVal versions.
  */
-typedef enum
-{
+typedef enum {
 	MBTN_UNKNOWN	= 0,
 	MBTN_LEFT	= 1,
 	MBTN_MIDDLE	= 2,
@@ -354,4 +354,4 @@ typedef enum
 }
 #endif
 
-#endif /* __LIBGENS_IO_GENSKEY_T_H__ */
+#endif /* __LIBGENSKEYS_GENSKEY_T_H__ */

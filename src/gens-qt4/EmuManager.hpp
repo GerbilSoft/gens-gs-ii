@@ -34,6 +34,9 @@
 #include "libgens/IO/IoManager.hpp"
 #include "libgens/MD/SysVersion.hpp"
 
+// LibGensKeys: Key Manager
+#include "libgenskeys/KeyManager.hpp"
+
 // paused_t
 #include "gqt4_datatypes.h"
 
@@ -174,6 +177,17 @@ class EmuManager : public QObject
 			loadRom_int(m_loadRom_int_tmr_rom);
 			m_loadRom_int_tmr_rom = nullptr;
 		}
+
+	/** Key Manager. **/
+	// NOTE: Not owned by EmuManager.
+	protected:
+		LibGensKeys::KeyManager *m_keyManager;
+	public:
+		// TODO: Better way to handle this.
+		LibGensKeys::KeyManager *keyManager(void) const
+			{ return m_keyManager; }
+		void setKeyManager(LibGensKeys::KeyManager *keyManager)
+			{ m_keyManager = keyManager; }
 
 	/** Video Backend. **/
 	public:

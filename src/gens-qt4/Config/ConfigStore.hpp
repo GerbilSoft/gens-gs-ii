@@ -26,7 +26,9 @@
 
 // LibGens includes.
 #include "libgens/Rom.hpp"
-#include "libgens/GensInput/GensKey_t.h"
+
+// LibGensKeys. (TODO: Save from KeyManager)
+#include "libgenskeys/GensKey_t.h"
 
 // Qt includes.
 #include <QtCore/QObject>
@@ -34,7 +36,7 @@
 // Configuration classes.
 #include "RecentRoms.hpp"
 #include "PathConfig.hpp"
-#include "CtrlConfig.hpp"	// TODO: Rework this with the upcoming all-in-one IoManager.
+#include "libgenskeys/KeyManager.hpp"
 
 namespace GensQt4
 {
@@ -203,9 +205,9 @@ class ConfigStore : public QObject
 		GensKey_t actionToKey(int action) const;
 
 	public:
-		// Controller configuration class.
-		// TODO: Rework this with the upcoming all-in-one IoManager.
-		CtrlConfig *m_ctrlConfig;
+		// Key Manager.
+		// TODO: Rework this so it isn't public.
+		LibGensKeys::KeyManager *m_keyManager;
 };
 
 }

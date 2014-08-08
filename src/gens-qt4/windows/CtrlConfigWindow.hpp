@@ -26,11 +26,11 @@
 
 #include <QtGui/QMainWindow>
 
-// Controller Configuration class.
-#include "Config/CtrlConfig.hpp"
-
 // LibGens includes.
 #include "libgens/IO/IoManager.hpp"
+
+// LibGensKeys
+#include "libgenskeys/GensKey_t.h"
 
 // Toolbar separators.
 #define CTRL_CFG_TBSEP_TP1 0

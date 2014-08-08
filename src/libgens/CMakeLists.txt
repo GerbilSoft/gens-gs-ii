@@ -79,8 +79,6 @@ SET(libgens_SRCS
 	lg_osd.c
 	Save/EEPRom_File.cpp
 	sound/SoundMgr.cpp
-	GensInput/DevManager.cpp
-	GensInput/DevManager_KeyNames.cpp
 	Decompressor/Decompressor.cpp
 	Decompressor/DcGzip.cpp
 	Decompressor/DcZip.cpp

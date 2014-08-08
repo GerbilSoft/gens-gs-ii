@@ -26,7 +26,8 @@
 #ifndef __GENS_QT4_WIDGETS_GENSCTRLKEYWIDGET_HPP__
 #define __GENS_QT4_WIDGETS_GENSCTRLKEYWIDGET_HPP__
 
-#include "libgens/GensInput/GensKey_t.h"
+// LibGensKeys
+#include "libgenskeys/GensKey_t.h"
 
 // Qt includes and classes.
 #include <QtGui/QWidget>
@@ -67,6 +68,7 @@ class GensCtrlKeyWidget : public QWidget
 
 	signals:
 		void keyChanged(GensKey_t key);
+		void keyUnchanged(void);
 
 	public slots:
 		/**

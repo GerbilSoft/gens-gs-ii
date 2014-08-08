@@ -72,8 +72,10 @@ class GensWindowPrivate
 
 			EmuManager *emuManager;
 			GensMenuBar *gensMenuBar;
-			KeyHandlerQt *keyHandler;
 			GensActions *gensActions;
+
+			KeyHandlerQt *keyHandler;
+
 			VBackend *vBackend;
 
 			void setupUi(GensWindow *GensWindow);
@@ -161,8 +163,9 @@ void GensWindowPrivate::Ui_GensWindow::setupUi(GensWindow *GensWindow)
 	// Initialize the Gens Action Manager.
 	gensActions = new GensActions(GensWindow);
 
-	// Initialize KeyHandlerQt.
-	keyHandler = new KeyHandlerQt(GensWindow, gensActions);
+	// Initialize the Key Manager and KeyHandlerQt.
+	emuManager->setKeyManager(gqt4_cfg->m_keyManager);
+	keyHandler = new KeyHandlerQt(GensWindow, gensActions, gqt4_cfg->m_keyManager);
 
 	// Create the Video Backend.
 	// TODO: Allow selection of all available VBackend classes.

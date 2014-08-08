@@ -30,8 +30,6 @@
 // C++ includes.
 #include <string>
 
-#include "../GensInput/GensKey_t.h"
-
 // ZOMG savestate structs.
 #include "libzomg/zomg_md_io.h"
 
@@ -92,9 +90,11 @@ class IoManager
 		uint8_t readSerRx(int physPort) const;
 
 		/**
-		 * I/O device update function.
+		 * Update an I/O device.
+		 * @param virtPort Virtual port.
+		 * @param buttons New button state.
 		 */
-		void update(void);
+		void update(int virtPort, uint32_t buttons);
 
 		/**
 		 * Update the scanline counter for all controllers.
@@ -164,10 +164,6 @@ class IoManager
 		};
 
 		// Controller configuration.
-
-		// Set/get keymap.
-		int setKeymap(int virtPort, const GensKey_t *keymap, int siz);
-		int keymap(int virtPort, GensKey_t *keymap, int siz) const;
 
 		/** General device type functions. **/
 

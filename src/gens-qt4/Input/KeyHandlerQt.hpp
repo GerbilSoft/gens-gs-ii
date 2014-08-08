@@ -24,10 +24,11 @@
 #ifndef __GENS_QT4_INPUT_KEYHANDLERQT_HPP__
 #define __GENS_QT4_INPUT_KEYHANDLERQT_HPP__
 
-#include "libgens/GensInput/DevManager.hpp"
-
 // Gens Action Manager.
 #include "../actions/GensActions.hpp"
+
+// Key Manager.
+#include "libgenskeys/KeyManager.hpp"
 
 // Qt includes and classes.
 #include <QtCore/QObject>
@@ -42,31 +43,35 @@ class KeyHandlerQt : public QObject
 	Q_OBJECT
 	
 	public:
-		KeyHandlerQt(QObject *parent = 0, GensActions *gensActions = 0);
+		KeyHandlerQt(QObject *parent = 0, GensActions *gensActions = 0, LibGensKeys::KeyManager *keyManager = 0);
 		~KeyHandlerQt();
-		
-		void setGensActions(GensActions *newGensActions);
-		
+
+		GensActions *gensActions(void) const;
+		void setGensActions(GensActions *gensActions);
+
+		LibGensKeys::KeyManager *keyManager(void) const;
+		void setKeyManager(LibGensKeys::KeyManager *keyManager);
+
 		// QKeyEvent to LibGens Key Value.
 		static GensKey_t QKeyEventToKeyVal(QKeyEvent *event);
 		static GensKey_t NativeModifierToKeyVal(QKeyEvent *event);
-		
+
 		/**
 		 * KeyValMToQtKey(): Convert a GensKey_t to a Qt key value, with GensKey modifiers.
 		 * @param keyM Gens keycode, with modifiers.
 		 * @return Qt key value, or 0 on error.
 		 */
 		static int KeyValMToQtKey(GensKey_t keyM);
-		
+
 		// QKeyEvent wrappers.
 		void keyPressEvent(QKeyEvent *event);
 		void keyReleaseEvent(QKeyEvent *event);
-		
+
 		// QMouseEvent wrappers.
 		void mouseMoveEvent(QMouseEvent *event);
 		void mousePressEvent(QMouseEvent *event);
 		void mouseReleaseEvent(QMouseEvent *event);
-	
+
 	private:
 		/**
 		 * DevHandler(): LibGens Device Handler function. (STATIC function)
@@ -85,10 +90,10 @@ class KeyHandlerQt : public QObject
 		
 		// Gens Actions Manager.
 		GensActions *m_gensActions;
-		
-		// Keypress array.
-		bool m_keyPress[KEYV_LAST];
-		
+
+		// Key Manager.
+		LibGensKeys::KeyManager *m_keyManager;
+
 #if 0
 		// TODO
 		// Last mouse position.

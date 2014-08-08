@@ -37,9 +37,6 @@
 // System emulation code.
 #include "Vdp/Vdp.hpp"
 
-// Input Device Manager.
-#include "GensInput/DevManager.hpp"
-
 // Sound Manager.
 #include "sound/SoundMgr.hpp"
 
@@ -149,7 +146,6 @@ int Init(void)
 	Z80::Init();
 	Z80_MD_Mem::Init();
 	
-	DevManager::Init();
 	SoundMgr::Init();
 	
 	ms_IsInit = true;
@@ -178,7 +174,6 @@ int End(void)
 	Z80::End();
 	Z80_MD_Mem::End();
 	
-	DevManager::End();
 	SoundMgr::End();
 	
 	// Win32 Unicode Translation Layer.

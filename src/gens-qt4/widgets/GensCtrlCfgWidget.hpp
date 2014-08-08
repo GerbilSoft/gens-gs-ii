@@ -24,7 +24,9 @@
 
 // LibGens includes.
 #include "libgens/IO/IoManager.hpp"
-#include "libgens/GensInput/GensKey_t.h"
+
+// LibGensKeys.
+#include "libgenskeys/GensKey_t.h"
 
 // Qt includes.
 #include <QtGui/QWidget>
@@ -83,8 +85,30 @@ class GensCtrlCfgWidget : public QWidget
 		void keyChanged(int idx, GensKey_t gensKey);
 
 	private slots:
-		void clearAllButtons(void);
-		void keyChanged_slot(int idx);
+		/**
+		 * Clear all buttons for the selected controller.
+		 * WRAPPER SLOT for GensCtrlCfgWidgetPrivate.
+		 */
+		void on_btnClearAll_clicked(void);
+
+		/**
+		 * Change all buttons for the selected controller.
+		 * WRAPPER SLOT for GensCtrlCfgWidgetPrivate.
+		 */
+		void on_btnChangeAll_clicked(void);
+
+		/**
+		 * A key was changed.
+		 * @param idx Key index.
+		 */
+		void on_mapperKeyChanged_mapped(int idx);
+
+		/**
+		 * A key was left unchanged.
+		 * (This may also mean the capture was cancelled. TODO: Add another slot)
+		 * @param idx Key index.
+		 */
+		void on_mapperKeyUnchanged_mapped(int idx);
 };
 
 }

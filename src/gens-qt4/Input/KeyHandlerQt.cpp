@@ -23,9 +23,6 @@
 
 #include "KeyHandlerQt.hpp"
 
-// LibGens includes.
-#include "libgens/GensInput/GensKey_t.h"
-
 // Qt includes
 #include <QtCore/qglobal.h>
 #include <QtGui/QKeyEvent>
@@ -50,64 +47,79 @@ namespace GensQt4
 {
 
 /**
- * KeyHanderQt(): Initialize KeyHandlerQt.
+ * Initialize KeyHandlerQt.
  * @param gensActions Gens Actions Manager.
- * NOTE: This class does NOT delete the GensActions object on shutdown!
+ * @param keyManager Key Manager.
+ * NOTE: This class does NOT delete gensActions or keyManager on shutdown!
  */
-KeyHandlerQt::KeyHandlerQt(QObject *parent, GensActions *gensActions)
+KeyHandlerQt::KeyHandlerQt(QObject *parent, GensActions *gensActions, LibGensKeys::KeyManager *keyManager)
 	: QObject(parent)
 	, m_gensActions(gensActions)
+	, m_keyManager(keyManager)
 {
-	if (m_gensActions)
-	{
+	if (m_gensActions) {
 		// Connect the Gens Actions object's "destroyed" signal.
 		connect(m_gensActions, SIGNAL(destroyed()),
 			this, SLOT(gensActionsDestroyed()));
 	}
-	
-	// Clear the keypress array.
-	memset(m_keyPress, 0x00, sizeof(m_keyPress));
-	
-	// Register as LibGens device type GKT_KEYBOARD.
-	LibGens::DevManager::RegisterDeviceHandler(GKT_KEYBOARD, KeyHandlerQt::DevHandler, this);
 }
 
 /**
- * ~KeyHandlerQt(): Shut down KeyHandlerQt.
+ * Shut down KeyHandlerQt.
  */
 KeyHandlerQt::~KeyHandlerQt(void)
-{
-	// Unregister as LibGens device type 0.
-	// TODO: Symbolic constants for device types.
-	LibGens::DevManager::UnregisterDeviceHandler(GKT_KEYBOARD, KeyHandlerQt::DevHandler, this);
-}
-
+{ }
 
 /**
- * setGensActions(): Set the Gens Actions object.
- * @param newKeyHandler New Gens Actions object.
+ * Get the GensActions object.
+ * @return GensActions object.
  */
-void KeyHandlerQt::setGensActions(GensActions *newGensActions)
+GensActions *KeyHandlerQt::gensActions(void) const
 {
-	if (newGensActions)
-	{
+	return m_gensActions;
+}
+
+/**
+ * Set the GensActions object.
+ * @param gensActions New GensActions object.
+ */
+void KeyHandlerQt::setGensActions(GensActions *gensActions)
+{
+	if (m_gensActions) {
 		// Disconnect the existing key handler's "destroyed" signal.
 		disconnect(m_gensActions, SIGNAL(destroyed()),
 			   this, SLOT(gensActionsDestroyed()));
 	}
-	
-	m_gensActions = newGensActions;
-	if (m_gensActions)
-	{
+
+	m_gensActions = gensActions;
+
+	if (m_gensActions) {
 		// Connect the new key handler's "destroyed" signal.
 		connect(m_gensActions, SIGNAL(destroyed()),
 			this, SLOT(gensActionsDestroyed()));
 	}
 }
 
+/**
+ * Get the KeyManager object.
+ * @return KeyManager object.
+ */
+LibGensKeys::KeyManager *KeyHandlerQt::keyManager(void) const
+{
+	return m_keyManager;
+}
 
 /**
- * gensActionsDestroyed(): Gens Actions object was destroyed.
+ * Set the KeyManager object.
+ * @return KeyManager object.
+ */
+void KeyHandlerQt::setKeyManager(LibGensKeys::KeyManager *keyManager)
+{
+	m_keyManager = keyManager;
+}
+
+/**
+ * GensActions object was destroyed.
  */
 void KeyHandlerQt::gensActionsDestroyed(void)
 {
@@ -116,7 +128,7 @@ void KeyHandlerQt::gensActionsDestroyed(void)
 
 
 /**
- * keyPressEvent(): Key press handler.
+ * Key press handler.
  * @param event Key event.
  */
 void KeyHandlerQt::keyPressEvent(QKeyEvent *event)
@@ -129,29 +141,26 @@ void KeyHandlerQt::keyPressEvent(QKeyEvent *event)
 	GensKey_t gensKey = QKeyEventToKeyVal(event);
 	if (gensKey == KEYV_UNKNOWN)
 		return;
-	
+
 	// If this is an event key, don't handle it as a controller key.
 	// We need to apply the modifiers for this to work.
 	// Qt's modifiers conveniently map to GensKeyMod_t.
 	// TODO: Use GensKeyM_t to indicate modifiers?
 	GensKey_t gensKeyMod = (gensKey | ((event->modifiers() >> 16) & 0x1E00));
-	if (m_gensActions && m_gensActions->checkEventKey(gensKeyMod))
-	{
+	if (m_gensActions && m_gensActions->checkEventKey(gensKeyMod)) {
 		// Key was handled as an event key.
 		return;
 	}
-	
+
 	// Not an event key. Mark it as pressed.
-	if (gensKey > KEYV_UNKNOWN && gensKey < KEYV_LAST)
-	{
-		// Mark the key as pressed.
-		m_keyPress[gensKey] = true;
+	if (m_keyManager) {
+		m_keyManager->keyDown(gensKey);
 	}
 }
 
 
 /**
- * keyPressEvent(): Key release handler.
+ * Key release handler.
  * @param event Key event.
  */
 void KeyHandlerQt::keyReleaseEvent(QKeyEvent *event)
@@ -161,16 +170,13 @@ void KeyHandlerQt::keyReleaseEvent(QKeyEvent *event)
 		return;
 
 	int gensKey = QKeyEventToKeyVal(event);
-	if (gensKey > KEYV_UNKNOWN)
-	{
-		// Mark the key as released.
-		m_keyPress[gensKey] = false;
+	if (m_keyManager) {
+		m_keyManager->keyUp(gensKey);
 	}
 }
 
-
 /**
- * mouseMoveEvent(): Mouse movement handler.
+ * Mouse movement handler.
  * TODO: This function is broken!
  * @param event Mouse event.
  */
@@ -178,24 +184,22 @@ void KeyHandlerQt::mouseMoveEvent(QMouseEvent *event)
 {
 	// TODO
 #if 0
-	if (!gqt4_emuThread)
-	{
+	if (!gqt4_emuThread) {
 		m_lastMousePosValid = false;
 		return;
 	}
-	
-	if (!m_lastMousePosValid)
-	{
+
+	if (!m_lastMousePosValid) {
 		// Last mouse movement event was invalid.
 		m_lastMousePos = event->pos();
 		m_lastMousePosValid = true;
 		return;
 	}
-	
+
 	// Calculate the relative movement.
 	QPoint posDiff = (event->pos() - m_lastMousePos);
 	m_lastMousePos = event->pos();
-	
+
 	// Forward the relative movement to the I/O devices.
 	// NOTE: Port E isn't forwarded, since it isn't really usable as a controller.
 	LibGens::EmuMD::m_port1->mouseMove(posDiff.x(), posDiff.y());
@@ -203,16 +207,14 @@ void KeyHandlerQt::mouseMoveEvent(QMouseEvent *event)
 #endif
 }
 
-
 /**
- * mousePressEvent(): Mouse button press handler.
+ * Mouse button press handler.
  * @param event Mouse event.
  */
 void KeyHandlerQt::mousePressEvent(QMouseEvent *event)
 {
 	int gensButton;
-	switch (event->button())
-	{
+	switch (event->button()) {
 		case Qt::NoButton:	return;
 		case Qt::LeftButton:	gensButton = MBTN_LEFT; break;
 		case Qt::MidButton:	gensButton = MBTN_MIDDLE; break;
@@ -221,14 +223,16 @@ void KeyHandlerQt::mousePressEvent(QMouseEvent *event)
 		case Qt::XButton2:	gensButton = MBTN_X2; break;
 		default:		gensButton = MBTN_UNKNOWN; break;
 	}
-	
+
 	// Mark the key as pressed.
-	m_keyPress[KEYV_MOUSE_UNKNOWN + gensButton] = true;
+	if (m_keyManager) {
+		m_keyManager->keyDown(KEYV_MOUSE_UNKNOWN + gensButton);
+	}
 }
 
 
 /**
- * mouseReleaseEvent(): Mouse button release handler.
+ * Mouse button release handler.
  * @param event Mouse event.
  */
 void KeyHandlerQt::mouseReleaseEvent(QMouseEvent *event)
@@ -244,68 +248,15 @@ void KeyHandlerQt::mouseReleaseEvent(QMouseEvent *event)
 		case Qt::XButton2:	gensButton = MBTN_X2; break;
 		default:		gensButton = MBTN_UNKNOWN; break;
 	}
-	
-	// Mark the key as released.
-	m_keyPress[KEYV_MOUSE_UNKNOWN + gensButton] = false;
-}
 
-
-/**
- * DevHandler(): LibGens Device Handler function. (STATIC function)
- * @param param Parameter specified when registering the device handler function.
- * @param key Gens keycode.
- * @return True if the key is pressed; false if it isn't.
- */
-bool KeyHandlerQt::DevHandler(void *param, GensKey_t key)
-{
-	return ((KeyHandlerQt*)param)->devHandler(key);
-}
-
-/**
- * devHandler(): LibGens Device Handler function. (member function)
- * @param key Gens keycode.
- * @return True if the key is pressed; false if it isn't.
- */
-bool KeyHandlerQt::devHandler(GensKey_t key)
-{
-	if (key == (GensKey_t)~0)
-	{
-		// Update event request.
-		// TODO: Copy the internal ms_KeyPress[] array to a latched array.
-#ifdef _WIN32
-		// Update Shift/Control/Alt states.
-		// TODO: Only do this if the input backend doesn't support L/R modifiers natively.
-		// QWidget doesn't; GLFW does.
-		// TODO: When should these key states be updated?
-		// - Beginning of frame.
-		// - Before VBlank.
-		// - End of frame.
-		m_keyPress[KEYV_LSHIFT] = (!!(GetAsyncKeyState(VK_LSHIFT) & 0x8000));
-		m_keyPress[KEYV_RSHIFT] = (!!(GetAsyncKeyState(VK_RSHIFT) & 0x8000));
-		m_keyPress[KEYV_LCTRL]	= (!!(GetAsyncKeyState(VK_LCONTROL) & 0x8000));
-		m_keyPress[KEYV_RCTRL]	= (!!(GetAsyncKeyState(VK_RCONTROL) & 0x8000));
-		m_keyPress[KEYV_LALT]	= (!!(GetAsyncKeyState(VK_LMENU) & 0x8000));
-		m_keyPress[KEYV_RALT]	= (!!(GetAsyncKeyState(VK_RMENU) & 0x8000));
-#endif
-		// Update event returns true on success.
-		return true;
+	// Mark the key as pressed.
+	if (m_keyManager) {
+		m_keyManager->keyUp(KEYV_MOUSE_UNKNOWN + gensButton);
 	}
-	
-	// Check the keycode.
-	GensKey_u gkey;
-	gkey.keycode = key;
-	
-	// TODO: Multiple keyboard support.
-	// For now, assume all keyboards are the primary keyboard.
-	if (gkey.key16 >= KEYV_LAST)
-		return false;
-	
-	return m_keyPress[gkey.key16];
 }
 
-
 /**
- * QKeyEventToKeyVal(): Convert a QKeyEvent to a LibGens key value.
+ * Convert a QKeyEvent to a LibGens key value.
  * TODO: Move somewhere else?
  * @param event QKeyEvent.
  * @return LibGens key value. (0 for unknown; -1 for unhandled left/right modifier key.)
@@ -316,8 +267,7 @@ GensKey_t KeyHandlerQt::QKeyEventToKeyVal(QKeyEvent *event)
 	
 	// Table of Qt::Keys in range 0x00-0x7F.
 	// (Based on Qt 4.6.3)
-	static const int QtKey_Ascii[0x80] =
-	{
+	static const int QtKey_Ascii[0x80] = {
 		// 0x00
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -351,8 +301,7 @@ GensKey_t KeyHandlerQt::QKeyEventToKeyVal(QKeyEvent *event)
 	// TODO: Check how numpad keys act with numlock on/off!
 	// NOTE: Keys with a value of -1 aren't handled by Qt. (left/right modifiers)
 	// NOTE: Media keys are not included.
-	static const int QtKey_Extended[0x80] =
-	{
+	static const int QtKey_Extended[0x80] = {
 		// 0x01000000
 		KEYV_ESCAPE, KEYV_TAB, KEYV_TAB, KEYV_BACKSPACE,
 		KEYV_RETURN, KEYV_KP_ENTER, KEYV_INSERT, KEYV_DELETE,
@@ -385,12 +334,10 @@ GensKey_t KeyHandlerQt::QKeyEventToKeyVal(QKeyEvent *event)
 		0, 0, 0, 0, 0, 0, 0, 0
 	};
 	
-	if (event->modifiers() & Qt::KeypadModifier)
-	{
+	if (event->modifiers() & Qt::KeypadModifier) {
 		// Numeric keypad key.
 		// TODO: Optimize this to use lookup tables instead of switch/case.
-		switch (event->key())
-		{
+		switch (event->key()) {
 #ifdef Q_WS_MAC
 			case Qt::Key_0: case Qt::Key_Insert:	return KEYV_KP0;
 			case Qt::Key_1: case Qt::Key_End:	return KEYV_KP1;
@@ -435,15 +382,13 @@ GensKey_t KeyHandlerQt::QKeyEventToKeyVal(QKeyEvent *event)
 	}
 	
 	int key = event->key();
-	switch (key & ~0x7F)
-	{
+	switch (key & ~0x7F) {
 		case 0x00000000:
 			// ASCII key.
 			// TODO: Make sure Qt doesn't apply shifting!
 			return QtKey_Ascii[key];
 		
-		case 0x01000000:
-		{
+		case 0x01000000: {
 			// Extended key.
 			int gensKey = QtKey_Extended[key & 0x7F];
 			if (gensKey >= 0)
@@ -454,11 +399,10 @@ GensKey_t KeyHandlerQt::QKeyEventToKeyVal(QKeyEvent *event)
 			// (Qt reports both keys as the same.)
 			return NativeModifierToKeyVal(event);
 		}
-			
+
 		default:
 			// Other key.
-			switch (key)
-			{
+			switch (key) {
 				case Qt::Key_AltGr:
 					return KEYV_MODE;
 				case Qt::Key_Multi_key:
@@ -469,9 +413,8 @@ GensKey_t KeyHandlerQt::QKeyEventToKeyVal(QKeyEvent *event)
 	}
 }
 
-
 /**
- * NativeModifierToKeyVal(): Convert a native virtual key for a modifier to a LibGens key value.
+ * Convert a native virtual key for a modifier to a LibGens key value.
  * TODO: Move somewhere else?
  * @param event QKeyEvent.
  * @return LibGens key value. (0 for unknown)
@@ -482,8 +425,7 @@ GensKey_t KeyHandlerQt::NativeModifierToKeyVal(QKeyEvent *event)
 	
 #if defined(Q_WS_X11)
 	// X11 keysym.
-	switch (event->nativeVirtualKey())
-	{
+	switch (event->nativeVirtualKey()) {
 		case XK_Shift_L:	return KEYV_LSHIFT;
 		case XK_Shift_R:	return KEYV_RSHIFT;
 		case XK_Control_L:	return KEYV_LCTRL;
@@ -504,8 +446,7 @@ GensKey_t KeyHandlerQt::NativeModifierToKeyVal(QKeyEvent *event)
 	// WM_KEYDOWN/WM_KEYUP report VK_SHIFT, VK_CONTORL, and VK_MENU (Alt).
 	// These are useless for testing left/right keys.
 	// Instead, GetAsyncKeyState() is used in KeyHandlerQt::DevHandler().
-	switch (event->nativeVirtualKey())
-	{
+	switch (event->nativeVirtualKey()) {
 		case VK_LWIN:		return KEYV_LSUPER;
 		case VK_RWIN:		return KEYV_RSUPER;
 		default:		break;
@@ -526,8 +467,7 @@ GensKey_t KeyHandlerQt::NativeModifierToKeyVal(QKeyEvent *event)
 #endif
 	
 	// Unhandled key. Return left key by default.
-	switch (event->key())
-	{
+	switch (event->key()) {
 		case Qt::Key_Shift:	return KEYV_LSHIFT;
 #ifdef Q_OS_MAC
 		// Qt/Mac remaps some keys:
@@ -548,9 +488,8 @@ GensKey_t KeyHandlerQt::NativeModifierToKeyVal(QKeyEvent *event)
 	}
 }
 
-
 /**
- * KeyValMToQtKey(): Convert a GensKey_t to a Qt key value, with GensKey modifiers.
+ * Convert a GensKey_t to a Qt key value, with GensKey modifiers.
  * @param keyM Gens keycode, with modifiers.
  * @return Qt key value, or 0 on error.
  */
@@ -560,13 +499,13 @@ int KeyHandlerQt::KeyValMToQtKey(GensKey_t keyM)
 	keyU.keycode = keyM;
 	if (keyU.type != 0)
 		return 0;
-	
+
 	// Get the modifiers first.
 	// TODO: Convert GensKeys with numeric keypad modifier.
 	// (There are dedicated key values for numpad keys,
 	// but Qt uses a modifier so it may get confused.)
 	int qtKey = (keyM & 0x1E00) << 16;
-	
+
 	// Determine the key.
 	keyM &= 0x1FF;
 	if (keyM > KEYV_LAST)
@@ -575,43 +514,42 @@ int KeyHandlerQt::KeyValMToQtKey(GensKey_t keyM)
 		return (qtKey | Qt::Key_Forward);
 	else if (keyM == KEYV_BACK)
 		return (qtKey | Qt::Key_Back);
-	
+
 	// Other keys. Use a lookup table.
 	// TODO: Numeric keypad modifier.
-	static const int keyvalMtoQtKey_tbl[0x100] =
-	{
+	static const int keyvalMtoQtKey_tbl[0x100] = {
 		// 0x00
 		0, 0, 0, 0, 0, 0, 0, 0,
 		Qt::Key_Backspace, Qt::Key_Tab, 0, 0,
 		Qt::Key_Clear, Qt::Key_Return, 0, 0,
 		0, 0, 0, Qt::Key_Pause, 0, 0, 0, 0,
 		0, 0, 0, Qt::Key_Escape, 0, 0, 0, 0,
-		
+
 		// 0x20
 		Qt::Key_Space, Qt::Key_Exclam, Qt::Key_QuoteDbl, Qt::Key_NumberSign,
 		Qt::Key_Dollar, Qt::Key_Percent, Qt::Key_Ampersand, Qt::Key_Apostrophe,
 		Qt::Key_ParenLeft, Qt::Key_ParenRight, Qt::Key_Asterisk, Qt::Key_Plus,
 		Qt::Key_Comma, Qt::Key_Minus, Qt::Key_Period, Qt::Key_Slash,
-		
+
 		// 0x30
 		Qt::Key_0, Qt::Key_1, Qt::Key_2, Qt::Key_3,
 		Qt::Key_4, Qt::Key_5, Qt::Key_6, Qt::Key_7,
 		Qt::Key_8, Qt::Key_9, Qt::Key_Colon, Qt::Key_Semicolon,
 		Qt::Key_Less, Qt::Key_Equal, Qt::Key_Greater, Qt::Key_Question,
-		
+
 		// 0x40
 		Qt::Key_At, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, Qt::Key_BracketLeft,
 		Qt::Key_Backslash, Qt::Key_BracketRight, Qt::Key_AsciiCircum, Qt::Key_Underscore,
-		
+
 		// 0x60
 		Qt::Key_QuoteLeft, Qt::Key_A, Qt::Key_B, Qt::Key_C, Qt::Key_D, Qt::Key_E, Qt::Key_F, Qt::Key_G,
 		Qt::Key_H, Qt::Key_I, Qt::Key_J, Qt::Key_K, Qt::Key_L, Qt::Key_M, Qt::Key_N, Qt::Key_O,
 		Qt::Key_P, Qt::Key_Q, Qt::Key_R, Qt::Key_S, Qt::Key_T, Qt::Key_U, Qt::Key_V, Qt::Key_W,
 		Qt::Key_X, Qt::Key_Y, Qt::Key_Z, Qt::Key_BraceLeft,
 		Qt::Key_Bar, Qt::Key_BraceRight, Qt::Key_AsciiTilde, Qt::Key_Delete,
-		
+
 		// 0x80: Numeric keypad.
 		// TODO: Verify numeric keypad modifier.
 		(Qt::KeypadModifier | Qt::Key_0), (Qt::KeypadModifier | Qt::Key_1),
@@ -622,48 +560,48 @@ int KeyHandlerQt::KeyValMToQtKey(GensKey_t keyM)
 		(Qt::KeypadModifier | Qt::Key_Period), (Qt::KeypadModifier | Qt::Key_Slash),
 		(Qt::KeypadModifier | Qt::Key_Asterisk), (Qt::KeypadModifier | Qt::Key_Minus),
 		(Qt::KeypadModifier | Qt::Key_Plus), (Qt::KeypadModifier | Qt::Key_Enter),
-		
+
 		// 0x90
 		(Qt::KeypadModifier | Qt::Key_Equal), Qt::Key_Up,
 		Qt::Key_Down, Qt::Key_Right,
 		Qt::Key_Left, Qt::Key_Insert, Qt::Key_Home, Qt::Key_End,
 		Qt::Key_PageUp, Qt::Key_PageDown, 0, 0,
 		0, 0, 0, 0,
-		
+
 		// 0xA0: Function keys. (F1-F16)
 		Qt::Key_F1, Qt::Key_F2, Qt::Key_F3, Qt::Key_F4,
 		Qt::Key_F5, Qt::Key_F6, Qt::Key_F7, Qt::Key_F8,
 		Qt::Key_F9, Qt::Key_F10, Qt::Key_F11, Qt::Key_F12,
 		Qt::Key_F13, Qt::Key_F14, Qt::Key_F15, Qt::Key_F16,
-		
+
 		// 0xB0: Function keys. (F17-F32)
 		Qt::Key_F17, Qt::Key_F18, Qt::Key_F19, Qt::Key_F20,
 		Qt::Key_F21, Qt::Key_F22, Qt::Key_F23, Qt::Key_F24,
 		Qt::Key_F25, Qt::Key_F26, Qt::Key_F27, Qt::Key_F28,
 		Qt::Key_F29, Qt::Key_F30, Qt::Key_F31, Qt::Key_F32,
-		
+
 		// 0xC0: Key state modifier keys.
 		// TODO: Left/Right modifiers.
 		Qt::Key_NumLock, Qt::Key_CapsLock, Qt::Key_ScrollLock, Qt::Key_Shift,
 		Qt::Key_Shift, Qt::Key_Control, Qt::Key_Control, Qt::Key_Alt,
 		Qt::Key_Alt, Qt::Key_Meta, Qt::Key_Meta, Qt::Key_Super_L,
 		Qt::Key_Super_R, Qt::Key_AltGr, Qt::Key_Multi_key, Qt::Key_Hyper_L,
-		
+
 		// 0xD0
 		Qt::Key_Hyper_R, Qt::Key_Direction_L, Qt::Key_Direction_R, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		
+
 		// 0xE0: Miscellaneous function keys.
 		// TODO: KEYV_BREAK, Key_PowerOff vs. Key_PowerDown; KEYV_EURO, KEYV_UNDO
 		Qt::Key_Help, Qt::Key_Print, Qt::Key_SysReq, 0,
 		Qt::Key_Menu, Qt::Key_PowerOff, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0,
-		
+
 		// 0xF0: Mouse buttons.
 		0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0
 	};
-	
+
 	qtKey |= keyvalMtoQtKey_tbl[keyM & 0xFF];
 	return qtKey;
 }

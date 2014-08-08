@@ -33,9 +33,6 @@
 // Byteswapping macros and functions.
 #include "Util/byteswap.h"
 
-// Device Manager.
-#include "GensInput/DevManager.hpp"
-
 // Sound Manager.
 #include "sound/SoundMgr.hpp"
 
@@ -412,13 +409,8 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 	// Check if VBlank is allowed.
 	m_vdp->Check_NTSC_V30_VBlank();
 
-	// Update I/O devices.
-	// TODO: Determine the best place for the I/O devices to be updated:
-	// - Beginning of frame.
-	// - Before VBlank.
-	// - End of frame.
-	DevManager::Update();	// Update the Device Manager first.
-	m_ioManager->update();
+	// NOTE: I/O devices must be updated by the UI.
+	//m_ioManager->update();
 
 	// Reset the sound chip buffer pointers and write length.
 	SoundMgr::ResetPtrsAndLens();

@@ -48,7 +48,6 @@ IoManager::~IoManager()
 	delete d;
 }
 
-
 /**
  * Reset all devices.
  */
@@ -56,7 +55,6 @@ void IoManager::reset(void)
 {
 	d->reset();
 }
-
 
 /**
  * Update the scanline counter for all controllers.
@@ -67,30 +65,6 @@ void IoManager::reset(void)
 void IoManager::doScanline(void)
 {
 	d->doScanline();
-}
-
-/**
- * Set the device keymap.
- * @param virtPort Virtual port number.
- * @param keymap Array of GensKey_t values.
- * @param siz Size of keymap array.
- * @return Number of keys set, or negative on error.
- */
-int IoManager::setKeymap(int virtPort, const GensKey_t *keymap, int siz)
-{
-	return d->setKeymap(virtPort, keymap, siz);
-}
-
-/**
- * Get the device keymap.
- * @param virtPort Virtual port number.
- * @param keymap Array to store the GensKey_t values in.
- * @param siz Size of keymap array.
- * @return Number of keys returned, or negative on error.
- */
-int IoManager::keymap(int virtPort, GensKey_t *keymap, int siz) const
-{
-	return d->keymap(virtPort, keymap, siz);
 }
 
 /** General device type functions. **/
@@ -366,15 +340,15 @@ uint8_t IoManager::readSerRx(int physPort) const
 	return 0xFF;
 }
 
-
 /**
- * I/O device update function.
+ * Update an I/O device.
+ * @param virtPort Virtual port.
+ * @param buttons New button state.
  */
-void IoManager::update(void)
+void IoManager::update(int virtPort, uint32_t buttons)
 {
-	d->update();
+	d->update(virtPort, buttons);
 }
-
 
 /** ZOMG savestate functions. **/
 
