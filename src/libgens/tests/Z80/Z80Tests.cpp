@@ -38,7 +38,9 @@ using namespace std;
 // NOTE: Due to limitations in mdZ80 right now,
 // the first 8 KB must be RAM, and must be
 // accessible as Ram_Z80.
-uint8_t Ram_Z80[65536];
+extern "C" {
+	uint8_t Ram_Z80[65536];
+}
 
 namespace LibGens { namespace Tests {
 
