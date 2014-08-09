@@ -34,6 +34,7 @@
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <windows.h>
 #endif
 
@@ -225,7 +226,7 @@ void KeyManager::updateIoManager(IoManager *ioManager)
 		const GensKey_t *port_keyMap = &d->keyMap[virtPort][numButtons - 1];
 		for (int btn = numButtons - 1; btn >= 0; btn--) {
 			buttons <<= 1;
-			buttons |= isKeyPressed(*port_keyMap--);
+			buttons |= (uint32_t)isKeyPressed(*port_keyMap--);
 		}
 
 		// Buttons are typically active-low.
