@@ -349,6 +349,7 @@ uint8_t IoManager::readSerRx(int physPort) const
 void IoManager::writeCtrlSMS(uint8_t ctrl)
 {
 	// TODO: Untested!
+	// TODO: Is this port readable?
 
 	// FIXME: On Japanese hardware, this should be a no-op.
 	// ...or, maintain the state and then apply it if
@@ -368,13 +369,14 @@ void IoManager::writeCtrlSMS(uint8_t ctrl)
 	 * 0 == Port A TR pin direction
 	 *
 	 * Direction is 1 for input, 0 for output.
+	 * [This is the OPPOSITE of MD!]
 	 * System default is 0x00.
 	 */
 
 	// Calculate MD control lines.
 	// MD ctrl: [0 TH TR TL R L D U]
-	const uint8_t ctrl1 = ((ctrl & 0x3) << 5);
-	const uint8_t ctrl2 = ((ctrl & 0xC) << 3);
+	const uint8_t ctrl1 = (((ctrl & 0x3) << 5) ^ 0x60);
+	const uint8_t ctrl2 = (((ctrl & 0xC) << 3) ^ 0x60);
 
 	// Calculate MD data lines.
 	// MD data: [0 TH TR TL R L D U]
