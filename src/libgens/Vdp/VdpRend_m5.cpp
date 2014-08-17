@@ -939,16 +939,16 @@ FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
 					: (unsigned int)ARRAY_SIZE(Sprite_Struct));
 
 	// Get the first sprite address in VRam.
-	const uint16_t *CurSpr = Spr_Addr_Ptr16(0);
+	const VdpStructs::SprEntry_m5 *CurSpr = Spr_Addr_PtrM5(0);
 
 	do {
 		// Sprite X position and size is updated for all types of updates.
 
 		// Sprite X position.
-		Sprite_Struct[spr_num].Pos_X = (CurSpr[3] & 0x1FF) - 128;
+		Sprite_Struct[spr_num].Pos_X = (CurSpr->x & 0x1FF) - 128;
 
 		// Sprite size.
-		const uint8_t sz = ((CurSpr[1] >> 8) & 0xFF);
+		const uint8_t sz = CurSpr->sz;
 		Sprite_Struct[spr_num].Size_X = ((sz >> 2) & 3) + 1;	// 1 more than the original value.
 
 		// Determine the maximum positions.
@@ -958,13 +958,13 @@ FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
 
 		if (!partial) {
 			// Full sprite update: Update Y position, size, and tile number.
-			Sprite_Struct[spr_num].Size_Y = sz & 3;	// Exactly the original value.
+			Sprite_Struct[spr_num].Size_Y = (sz & 3);	// Exactly the original value.
 
 			if (interlaced) {
 				// Interlaced mode:
 				// * Y position is 11-bit.
 				// * Cells are 8x16.
-				Sprite_Struct[spr_num].Pos_Y = (CurSpr[0] & 0x3FF) - 256;
+				Sprite_Struct[spr_num].Pos_Y = (CurSpr->y & 0x3FF) - 256;
 				Sprite_Struct[spr_num].Pos_Y_Max =
 						Sprite_Struct[spr_num].Pos_Y +
 						((Sprite_Struct[spr_num].Size_Y * 16) + 15);
@@ -972,14 +972,14 @@ FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
 				// Non-Interlaced mode:
 				// * Y position is 10-bit.
 				// * Cells are 8x8.
-				Sprite_Struct[spr_num].Pos_Y = (CurSpr[0] & 0x1FF) - 128;
+				Sprite_Struct[spr_num].Pos_Y = (CurSpr->y & 0x1FF) - 128;
 				Sprite_Struct[spr_num].Pos_Y_Max =
 						Sprite_Struct[spr_num].Pos_Y +
 						((Sprite_Struct[spr_num].Size_Y * 8) + 7);
 			}
 
 			// Tile number. (Also includes palette, priority, and flip bits.)
-			Sprite_Struct[spr_num].Num_Tile = CurSpr[2];
+			Sprite_Struct[spr_num].Num_Tile = CurSpr->attr;
 		}
 
 		// Link field.
@@ -988,7 +988,7 @@ FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
 		// Dino Land incorrectly sets the high bit on some sprites,
 		// so we have to mask it off.
 		// TODO: Do we update the link field on partial updates?
-		link = (CurSpr[1] & 0x7F);
+		link = (CurSpr->link & 0x7F);
 
 		// Increment the sprite number.
 		spr_num++;
@@ -998,7 +998,7 @@ FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
 		// Get the next sprite address in VRam.
 		// NOTE: Original byte offset needs to be used here.
 		// (Spr_Addr_Ptr16() divides by 2 for 16-bit access.)
-		CurSpr = Spr_Addr_Ptr16(link * 8);
+		CurSpr = Spr_Addr_PtrM5(link * 8);
 
 		// Stop processing after:
 		// - Link number is 0. (checked above)

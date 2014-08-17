@@ -37,6 +37,7 @@
 #include "VdpReg.hpp"
 #include "VdpPalette.hpp"
 #include "VdpStatus.hpp"
+#include "VdpStructs.hpp"
 
 namespace LibZomg {
 	class Zomg;
@@ -154,7 +155,7 @@ class Vdp
 		uint16_t *ScrA_Addr_Ptr16(uint16_t offset);
 		uint16_t *ScrB_Addr_Ptr16(uint16_t offset);
 		uint16_t *Win_Addr_Ptr16(uint16_t offset);
-		uint16_t *Spr_Addr_Ptr16(uint16_t offset);
+		VdpStructs::SprEntry_m5 *Spr_Addr_PtrM5(uint16_t offset);
 		uint16_t *H_Scroll_Addr_Ptr16(uint16_t offset);
 
 		/** VDP address functions: Get Values. **/
@@ -680,8 +681,8 @@ inline uint16_t *Vdp::ScrB_Addr_Ptr16(uint16_t offset)
 	{ return &VRam.u16[((ScrB_Addr + offset) & 0xFFFF) >> 1]; }
 inline uint16_t *Vdp::Win_Addr_Ptr16(uint16_t offset)
 	{ return &VRam.u16[((Win_Addr + offset) & 0xFFFF) >> 1]; }
-inline uint16_t *Vdp::Spr_Addr_Ptr16(uint16_t offset)
-	{ return &VRam.u16[((Spr_Addr + offset) & 0xFFFF) >> 1]; }
+inline VdpStructs::SprEntry_m5 *Vdp::Spr_Addr_PtrM5(uint16_t offset)
+	{ return (VdpStructs::SprEntry_m5*)&VRam.u16[((Spr_Addr + offset) & 0xFFFF) >> 1]; }
 inline uint16_t *Vdp::H_Scroll_Addr_Ptr16(uint16_t offset)
 	{ return &VRam.u16[((H_Scroll_Addr + offset) & 0xFFFF) >> 1]; }
 

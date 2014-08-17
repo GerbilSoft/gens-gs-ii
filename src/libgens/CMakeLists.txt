@@ -51,12 +51,7 @@ CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/Util/byteorder.h.in" "${CMAKE_CURREN
 # Sources.
 SET(libgens_SRCS
 	lg_main.cpp
-	Vdp/Vdp.cpp
-	Vdp/VdpIo.cpp
-	Vdp/VdpRend.cpp
-	Vdp/VdpRend_m5.cpp
 	MD/EmuMD.cpp
-	Vdp/VdpPalette.cpp
 	Save/GensZomg.cpp
 	cpu/M68K.cpp
 	cpu/M68K_Mem.cpp
@@ -86,15 +81,37 @@ SET(libgens_SRCS
 	Save/EEPRom_DB.cpp
 	Data/mcd_rom_db.c
 	Data/32X/fw_32x.c
-	Vdp/VdpRend_Err.cpp
-	Vdp/VGA_charset.c
 	Util/MdFb.cpp
-	Vdp/VdpStatus.cpp
 	IO/IoManager.cpp
 	IO/IoManager_p.cpp
 	IO/IoManager_p_update.cpp
 	IO/IoManager_btnNames.cpp
 	Cartridge/RomCartridgeMD.cpp
+	)
+
+SET(libgens_VDP_SRCS
+	Vdp/Vdp.cpp
+	Vdp/VdpIo.cpp
+	Vdp/VdpRend.cpp
+	Vdp/VdpRend_m5.cpp
+	Vdp/VdpPalette.cpp
+	Vdp/VdpRend_Err.cpp
+	Vdp/VGA_charset.c
+	Vdp/VdpStatus.cpp
+	)
+
+# TODO: All headers, or just public headers?
+SET(libgens_VDP_H
+	Vdp/Vdp.hpp
+	Vdp/VdpIo_static.hpp
+	Vdp/VdpIo_static.hpp
+	Vdp/VdpRend_static.hpp
+	Vdp/VdpPalette.hpp
+	Vdp/VdpRend_Err_p.hpp
+	Vdp/VGA_charset.h
+	Vdp/VdpStatus.hpp
+	Vdp/VdpTypes.hpp
+	Vdp/VdpStructs.hpp
 	)
 
 IF(HAVE_LZMA)
@@ -115,7 +132,13 @@ ELSE()
 ENDIF()
 
 # Build the library.
-ADD_LIBRARY(gens STATIC ${libgens_SRCS} ${libgens_OPTIONAL_SRCS} ${libgens_COMPAT_SRCS})
+ADD_LIBRARY(gens STATIC
+	${libgens_SRCS}
+	${libgens_VDP_SRCS}
+	${libgens_VDP_H}
+	${libgens_OPTIONAL_SRCS}
+	${libgens_COMPAT_SRCS}
+	)
 TARGET_LINK_LIBRARIES(gens genstext ${ZLIB_LIBRARY} ${MINIZIP_LIBRARY} zomg)
 IF(GENS_ENABLE_EMULATION)
 	TARGET_LINK_LIBRARIES(gens starscream mdZ80)
