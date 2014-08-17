@@ -38,7 +38,7 @@ namespace VdpStructs
 {
 	// Sprite attribute table entry. (M5)
 	// NOTE: VRAM is 16-bit host-endian.
-	#pragma pack(0)
+	#pragma pack(1)
 	struct PACKED SprEntry_m5 {
 		uint16_t y;	// Mask == 0x1FF (0x3FF in IM2)
 #if GENS_BYTEORDER == GENS_LIL_ENDIAN
@@ -56,7 +56,7 @@ namespace VdpStructs
 	// Sprite attribute table. (M4)
 	// Note that sprite attributes aren't packed here,
 	// so we have to have the entire table in one struct.
-	#pragma pack(0)
+	#pragma pack(1)
 	struct PACKED SprTable_m4 {
 		uint8_t y[64];	// Y coordinate + 1
 		uint8_t reserved[64];
