@@ -32,67 +32,63 @@ namespace LibGens
 namespace VdpTypes
 {
 	/**
-	 * VRam: Video RAM.
+	 * Video RAM.
 	 * SMS/GG: 16 KB.
 	 * MD: 64 KB. (32 KW)
 	 */
-	union VRam_t
-	{
+	union VRam_t {
 		uint8_t  u8[64*1024];
 		uint16_t u16[(64*1024)>>1];
 		uint32_t u32[(64*1024)>>2];
 	};
 
 	/**
-	 * CRam: Color RAM.
+	 * Color RAM. (M4+)
 	 * SMS: 32 bytes.
 	 * MD: 128 bytes. (64 words)
 	 * GG: 64 bytes. (32 words)
 	 */
-	union CRam_t
-	{
+	union CRam_t {
 		uint8_t  u8[64<<1];
 		uint16_t u16[64];
 		uint32_t u32[64>>1];
 	};
 
 	/**
-	 * VSRam: Vertical Scroll RAM.
+	 * VSRam: Vertical Scroll RAM. (M5)
 	 * MD: 40 words.
 	 */
-	union VSRam_t
-	{
+	union VSRam_t {
 		uint8_t  u8[40<<1];
 		uint16_t u16[40];
-		
+
 		uint8_t  reserved[128];		// TODO: Figure out how to remove this.
 	};
-	
+
 	/**
 	 * Interlaced display mode. (See VdpReg_t.m5.Set4)
 	 * Source: http://wiki.megadrive.org/index.php?title=VDPRegs_Addendum (Jorge)
 	 */
-	enum Interlaced_t
-	{
+	enum Interlaced_t {
 		/**
 		 * Interlaced mode is off. [LSM1 LSM0] == [0 0]
 		 */
 		INTERLACED_OFF		= 0,
-		
+
 		/**
 		 * Interlaced Mode 1. [LSM1 LSM0] == [0 1]
 		 * The display is interlaced, but the image
 		 * is exactly the same as INTERLACED_OFF.
 		 */
 		INTERLACED_MODE_1	= 1,	// [LSM1 LSM0] == [0 1]
-		
+
 		/**
 		 * Interlaced mode is off. [LSM1 LSM0] = [1 0]
 		 * Although LSM1 is set, the screen is still non-interlaced,
 		 * and the image is regular resolution.
 		 */
 		INTERLACED_OFF2		= 2,
-		
+
 		/**
 		 * Interlaced Mode 2. [LSM1 LSM0] = [1 1]
 		 * The display is interlaced, and the vertical resolution
@@ -100,20 +96,19 @@ namespace VdpTypes
 		 */
 		INTERLACED_MODE_2	= 3,
 	};
-	
+
 	/**
 	 * Interlaced rendering mode.
 	 * This controls the way INTERLACED_MODE_2 is rendered onscreen.
 	 * TODO: Make Interlaced_t and IntRend_Mode_t less confusing.
 	 */
-	enum IntRend_Mode_t
-	{
+	enum IntRend_Mode_t {
 		INTREND_EVEN	= 0,	// Even lines only. (Old Gens)
 		INTREND_ODD	= 1,	// Odd lines only.
 		INTREND_FLICKER	= 2,	// Alternating fields. (Flickering Interlaced)
 		INTREND_2X	= 3,	// 2x Resolution. (TODO)
 	};
-	
+
 	// VDP line counters.
 	// NOTE: Gens/GS currently uses 312 lines for PAL. It should use 313!
 	struct VdpLines_t {
@@ -151,25 +146,24 @@ namespace VdpTypes
 	};
 	
 	// VDP emulation options.
-	struct VdpEmuOptions_t
-	{
+	struct VdpEmuOptions_t {
 		// Interlaced rendering mode.
 		IntRend_Mode_t intRendMode;
-		
+
 		/**
 		 * Enables border color emulation.
 		 * If true, draws the background color in the screen borders.
 		 * Otherwise, the screen borders default to black.
 		 */
 		bool borderColorEmulation;
-		
+
 		/**
 		 * Enables "rolling" graphics in V30 on NTSC.
 		 * This simulates the effect seen on an NTSC Genesis
 		 * if 240-line mode is enabled.
 		 */
 		bool ntscV30Rolling;
-		
+
 		/**
 		 * Enables sprite limits.
 		 * Default is true (hardware-accurate).
@@ -188,7 +182,7 @@ namespace VdpTypes
 		 * May need to be enabled for buggy hacks.
 		 */
 		bool zeroLengthDMA;
-		
+
 		/**
 		 * Enables left-column VScroll bug emulation.
 		 * Options:
@@ -206,8 +200,7 @@ namespace VdpTypes
 	};
 	
 	// VDP layer flags.
-	enum VdpLayerFlags
-	{
+	enum VdpLayerFlags {
 		VDP_LAYER_SCROLLA_LOW		= (1 << 0),
 		VDP_LAYER_SCROLLA_HIGH		= (1 << 1),
 		VDP_LAYER_SCROLLA_SWAP		= (1 << 2),
@@ -220,7 +213,7 @@ namespace VdpTypes
 		VDP_LAYER_SPRITE_ALWAYSONTOP	= (1 << 9),
 		VDP_LAYER_PALETTE_LOCK		= (1 << 10),
 	};
-	
+
 	static const unsigned int VDP_LAYERS_DEFAULT =
 		(VDP_LAYER_SCROLLA_LOW	|
 			VDP_LAYER_SCROLLA_HIGH	|
