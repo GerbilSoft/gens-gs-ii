@@ -195,6 +195,21 @@ if(MINGW)
     set(ZLIB_DLL_SRCS ${CMAKE_CURRENT_BINARY_DIR}/zlib1rc.obj)
 endif(MINGW)
 
+SET(ZLIBSTATIC_PDB_FILE "${CMAKE_CURRENT_BINARY_DIR}/zlibstatic.pdb")
+
+IF(MSVC)
+	# CMake seems to use weird settings for the PDB file.
+	# (at least version 2.8.12.2; 3.0.0 might be different)
+	STRING(REGEX REPLACE
+		"/Fd<OBJECT_DIR>/${_FS_C}"
+		"/Fd${ZLIBSTATIC_PDB_FILE}"
+		CMAKE_C_COMPILE_OBJECT "${CMAKE_C_COMPILE_OBJECT}")
+	STRING(REGEX REPLACE
+		"/Fd<OBJECT_DIR>/${_FS_CXX}"
+		"/Fd${ZLIBSTATIC_PDB_FILE}"
+		CMAKE_CXX_COMPILE_OBJECT "${CMAKE_CXX_COMPILE_OBJECT}")
+ENDIF(MSVC)
+
 # GCN MemCard Recover: Don't build zlib as a shared library.
 #add_library(zlib SHARED ${ZLIB_SRCS} ${ZLIB_ASMS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
 add_custom_target(zlib)

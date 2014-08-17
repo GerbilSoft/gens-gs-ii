@@ -54,9 +54,13 @@ ENDIF(USE_INTERNAL_GLEW)
 
 # Google Test
 IF(BUILD_TESTING)
+	# Reference: http://stackoverflow.com/questions/12540970/how-to-make-gtest-build-mdd-instead-of-mtd-by-default-using-cmake
+	SET(gtest_force_shared_crt ON CACHE BOOL "Always use msvcrt.dll")
 	ADD_SUBDIRECTORY(gtest)
 ENDIF(BUILD_TESTING)
 
+# FIXME: Probably unnecessary, since these variables
+# only apply to the extlib/ subdirectory.
 SET(BUILD_SHARED_LIBS ${OLD_BUILD_SHARED_LIBS})
 SET(SKIP_INSTALL_LIBRARIES ${OLD_SKIP_INSTALL_LIBRARIES})
 SET(SKIP_INSTALL_HEADERS ${OLD_SKIP_INSTALL_HEADERS})

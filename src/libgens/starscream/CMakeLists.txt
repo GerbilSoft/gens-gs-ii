@@ -23,6 +23,7 @@ ADD_CUSTOM_COMMAND(
 	)
 
 # Starscream library.
+# FIXME: Set the PDB filename.
 ENABLE_LANGUAGE(ASM_NASM)
 ADD_LIBRARY(starscream STATIC
 	${CMAKE_CURRENT_BINARY_DIR}/main68k.asm
