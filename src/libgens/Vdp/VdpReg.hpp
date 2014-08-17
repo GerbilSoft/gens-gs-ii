@@ -1,10 +1,10 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * VdpTypes.hpp: VDP types.                                                *
+ * VdpReg.hpp: VDP registers.                                              *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2014 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -38,11 +38,9 @@ namespace LibGens
 namespace VdpTypes
 {
 	// VDP registers.
-	union VdpReg_t
-	{
+	union VdpReg_t {
 		uint8_t reg[24];
-		struct m5_t
-		{
+		struct m5_t {
 			/**
 			 * Mode 5 (MD) registers.
 			 */
@@ -109,23 +107,23 @@ namespace VdpTypes
 			 * [   x    x CPT1 CPT0 COL3 COL2 COL1 COL0]
 			 */
 			uint8_t BG_Color;
-			
+
 			/**
 			 * Register 8: Unused.
 			 */
 			uint8_t Reg8;
-			
+
 			/**
 			 * Register 9: Unused.
 			 */
 			uint8_t Reg9;
-			
+
 			/**
 			 * Register 10: H Interrupt register.
 			 * [HIT7 HIT6 HIT5 HIT4 HIT3 HIT2 HIT1 HIT0]
 			 */
 			uint8_t H_Int;
-			
+
 			/**
 			 * Register 11: Mode Set 3.
 			 * [   0    0    0    0  IE2 VSCR HSCR LSCR]
@@ -139,7 +137,7 @@ namespace VdpTypes
 			 *   - 11 == per-line
 			 */
 			uint8_t Set3;
-			
+
 			/**
 			 * Register 12: Mode Set 4.
 			 * [ RS0    0    0    0 S/TE LSM1 LSM0  RS1]
@@ -153,13 +151,13 @@ namespace VdpTypes
 			 *   - 11 == interlace mode 2
 			 */
 			uint8_t Set4;
-			
+
 			/**
 			 * Register 13: H Scroll Data Table base address.
 			 * [   x    x HS15 HS14 HS13 HS12 HS11 HS10]
 			 */
 			uint8_t H_Scr_Adr;
-			
+
 			/**
 			 * Register 14: Pattern data base address.
 			 * NOTE: ONLY used in 128 KB VRAM mode!
@@ -169,13 +167,13 @@ namespace VdpTypes
 			 * PB16: When this and PA16 are set, layer B is rebased to the upper 64KB.
 			 */
 			uint8_t Pat_Data_Adr;
-			
+
 			/**
 			 * Register 15: Auto Increment Data.
 			 * [INC7 INC6 INC5 INC4 INC3 INC2 INC1 INC0]
 			 */
 			uint8_t Auto_Inc;
-			
+
 			/**
 			 * Register 16: Scroll Size.
 			 * [   0    0 VSZ1 VSZ2    0    0 HSZ1 HSZ0]
@@ -190,25 +188,25 @@ namespace VdpTypes
 			 * - 11 == 128 cells
 			 */
 			uint8_t Scr_Size;
-			
+
 			/**
 			 * Register 17: Window H position.
 			 * [RIGT    0    0 WHP5 WHP4 WHP3 WHP2 WHP1]
 			 */
 			uint8_t Win_H_Pos;
-			
+
 			/**
 			 * Register 18: Window V position.
 			 * [DOWN    0    0 WVP5 WVP4 WVP3 WVP2 WVP1]
 			 */
 			uint8_t Win_V_Pos;
-			
+
 			/**
 			 * Registers 19, 20: DMA Length counter.
 			 */
 			uint8_t DMA_Length_L;
 			uint8_t DMA_Length_H;
-			
+
 			/**
 			 * Registers 21, 22, 23: DMA Source address.
 			 */
@@ -217,9 +215,8 @@ namespace VdpTypes
 			uint8_t DMA_Src_Adr_H;
 		};
 		m5_t m5;
-		
-		struct m4_t
-		{
+
+		struct m4_t {
 			/**
 			* Mode 4 (SMS) registers.
 			* NOTE: Mode 4 is currently not implemented.
