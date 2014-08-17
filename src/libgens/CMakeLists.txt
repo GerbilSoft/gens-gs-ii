@@ -135,21 +135,6 @@ ENDIF()
 # Build the library. #
 ######################
 
-SET(LIBGENS_PDB_FILE "${CMAKE_CURRENT_BINARY_DIR}/gens.pdb")
-
-IF(MSVC)
-	# CMake seems to use weird settings for the PDB file.
-	# (at least version 2.8.12.2; 3.0.0 might be different)
-	STRING(REGEX REPLACE
-		"/Fd<OBJECT_DIR>/${_FS_C}"
-		"/Fd${LIBGENS_PDB_FILE}"
-		CMAKE_C_COMPILE_OBJECT "${CMAKE_C_COMPILE_OBJECT}")
-	STRING(REGEX REPLACE
-		"/Fd<OBJECT_DIR>/${_FS_CXX}"
-		"/Fd${LIBGENS_PDB_FILE}"
-		CMAKE_CXX_COMPILE_OBJECT "${CMAKE_CXX_COMPILE_OBJECT}")
-ENDIF(MSVC)
-
 ADD_LIBRARY(gens STATIC
 	${libgens_SRCS}
 	${libgens_VDP_SRCS}
@@ -157,6 +142,9 @@ ADD_LIBRARY(gens STATIC
 	${libgens_OPTIONAL_SRCS}
 	${libgens_COMPAT_SRCS}
 	)
+INCLUDE(SetMSVCDebugPath)
+SET_MSVC_DEBUG_PATH(gens)
+
 TARGET_LINK_LIBRARIES(gens genstext ${ZLIB_LIBRARY} ${MINIZIP_LIBRARY} zomg)
 IF(GENS_ENABLE_EMULATION)
 	TARGET_LINK_LIBRARIES(gens starscream mdZ80)
