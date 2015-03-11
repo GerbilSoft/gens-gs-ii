@@ -183,6 +183,7 @@ TEST_F(Z80Tests, zexdoc)
 {
 	// Load ZEXDOC.
 	FILE *f = fopen("zexdoc.com", "rb");
+	ASSERT_TRUE(f != nullptr);
 	fread(&Ram_Z80[0x0100], 1, 8585, f);
 	fclose(f);
 
@@ -208,6 +209,7 @@ TEST_F(Z80Tests, zexall)
 {
 	// Load ZEXALL.
 	FILE *f = fopen("zexall.com", "rb");
+	ASSERT_TRUE(f != nullptr);
 	fread(&Ram_Z80[0x0100], 1, 8585, f);
 	fclose(f);
 
