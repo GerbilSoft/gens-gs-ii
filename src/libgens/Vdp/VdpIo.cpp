@@ -1191,14 +1191,24 @@ void Vdp::Write_Ctrl(uint16_t data)
 		return;
 	}
 
-	// TODO: Remove CD_Table.
-	uint16_t CD = CD_Table[VDP_Ctrl.code];
-
-	// DMA access mode is the high byte in the CD_Table[] word.
-	CD >>= 8;
-
 	// Determine the DMA destination.
-	DMA_Dest_t dest_component = (DMA_Dest_t)(CD & 0x03);	// 0 == invalid; 1 == VRam; 2 == CRam; 3 == VSRam
+	// NOTE: Ignoring CD0.
+	DMA_Dest_t dest_component;
+	switch (VDP_Ctrl.code & VdpTypes::CD_DEST_MASK) {
+		case VdpTypes::CD_DEST_VRAM:
+			dest_component = DMA_DEST_VRAM;
+			break;
+		case VdpTypes::CD_DEST_CRAM_INT_W:
+		case VdpTypes::CD_DEST_CRAM_INT_R:	// TODO: Is this needed?
+			dest_component = DMA_DEST_CRAM;
+			break;
+		case VdpTypes::CD_DEST_VSRAM:
+			dest_component = DMA_DEST_VSRAM;
+			break;
+		default:
+			// Invalid destination component.
+			return;
+	}
 
 	// Get the DMA addresses.
 	uint32_t src_address = DMA_Src_Adr();			// Src Address / 2
