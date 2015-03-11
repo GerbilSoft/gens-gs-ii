@@ -83,15 +83,13 @@ struct VdpSpriteMaskingTest_mode
 class VdpSpriteMaskingTest : public ::testing::TestWithParam<VdpSpriteMaskingTest_mode>
 {
 	protected:
-		VdpSpriteMaskingTest()
-			: m_vdp(nullptr) { }
+		VdpSpriteMaskingTest() { }
 		virtual ~VdpSpriteMaskingTest() { }
 
-		virtual void SetUp(void);
-		virtual void TearDown(void);
+		virtual void SetUp(void) override;
 
 	protected:
-		Vdp *m_vdp;
+		static Vdp *m_vdp;
 
 		int loadVRam(ScreenMode screenMode);
 
@@ -135,6 +133,7 @@ class VdpSpriteMaskingTest : public ::testing::TestWithParam<VdpSpriteMaskingTes
 		SpriteTestResult checkSpriteTest(int test, TestMinMax testMinMax);
 };
 
+Vdp *VdpSpriteMaskingTest::m_vdp = nullptr;
 
 const VdpSpriteMaskingTest::TestNames VdpSpriteMaskingTest::SpriteTestNames[9] =
 {
@@ -155,7 +154,8 @@ const VdpSpriteMaskingTest::TestNames VdpSpriteMaskingTest::SpriteTestNames[9] =
  * NOTE: This makes use of VdpSpriteMaskingTest::SpriteTestNames[],
  * so it must be defined after VdpSpriteMaskingTest is declared.
  */
-inline ::std::ostream& operator<<(::std::ostream& os, const VdpSpriteMaskingTest_mode& mode) {
+inline ::std::ostream& operator<<(::std::ostream& os, const VdpSpriteMaskingTest_mode& mode)
+{
 	return os << "Screen Mode "
 		<< (mode.screenMode == SCREEN_MODE_H32 ? "H32" : "H40")
 		<< ", Sprite Limits "
@@ -166,11 +166,11 @@ inline ::std::ostream& operator<<(::std::ostream& os, const VdpSpriteMaskingTest
 		<< VdpSpriteMaskingTest::SpriteTestNames[mode.test-1].name;
 };
 
-
 /**
  * Formatting function for SpriteTestResult.
  */
-inline ::std::ostream& operator<<(::std::ostream& os, const VdpSpriteMaskingTest::SpriteTestResult& result) {
+inline ::std::ostream& operator<<(::std::ostream& os, const VdpSpriteMaskingTest::SpriteTestResult& result)
+{
 	switch (result) {
 		case VdpSpriteMaskingTest::TEST_PASSED:
 			return os << "Passed";
@@ -185,34 +185,36 @@ inline ::std::ostream& operator<<(::std::ostream& os, const VdpSpriteMaskingTest
 	return os << "Unknown";
 }
 
-
 /**
  * Set up the Vdp for testing.
  */
 void VdpSpriteMaskingTest::SetUp(void)
 {
 	// Initialize the VDP.
-	m_vdp = new Vdp();
-	m_vdp->setNtsc();
+	if (!m_vdp) {
+		// VDP hasn't been created yet.
+		m_vdp = new Vdp();
+		m_vdp->setNtsc();
 
-	// Set initial registers.
-	m_vdp->setReg(0x00, 0x04);	// Enable the palette. (?)
-	m_vdp->setReg(0x01, 0x44);	// Enable the display, set Mode 5.
-	m_vdp->setReg(0x02, 0x30);	// Set scroll A name table base to 0xC000.
-	m_vdp->setReg(0x04, 0x05);	// Set scroll B name table base to 0xA000.
-	m_vdp->setReg(0x05, 0x70);	// Set the sprite table base to 0xE000.
-	m_vdp->setReg(0x0D, 0x3F);	// Set the HScroll table base to 0xFC00.
-	m_vdp->setReg(0x10, 0x01);	// Set the scroll size to V32 H64.
-	m_vdp->setReg(0x0F, 0x02);	// Set the auto-increment value to 2.
+		// Set initial registers.
+		m_vdp->setReg(0x00, 0x04);	// Enable the palette. (?)
+		m_vdp->setReg(0x01, 0x44);	// Enable the display, set Mode 5.
+		m_vdp->setReg(0x02, 0x30);	// Set scroll A name table base to 0xC000.
+		m_vdp->setReg(0x04, 0x05);	// Set scroll B name table base to 0xA000.
+		m_vdp->setReg(0x05, 0x70);	// Set the sprite table base to 0xE000.
+		m_vdp->setReg(0x0D, 0x3F);	// Set the HScroll table base to 0xFC00.
+		m_vdp->setReg(0x10, 0x01);	// Set the scroll size to V32 H64.
+		m_vdp->setReg(0x0F, 0x02);	// Set the auto-increment value to 2.
 
-	// Initialize CRam.
-	LibGens::VdpPalette *palette = &m_vdp->m_palette;
-	palette->setBpp(LibGens::VdpPalette::BPP_32);
-	for (int i = 0; i < ARRAY_SIZE(test_spritemask_cram); i++)
-		palette->writeCRam_16((i<<1), test_spritemask_cram[i]);
+		// Initialize CRam.
+		LibGens::VdpPalette *palette = &m_vdp->m_palette;
+		palette->setBpp(LibGens::VdpPalette::BPP_32);
+		for (int i = 0; i < ARRAY_SIZE(test_spritemask_cram); i++)
+			palette->writeCRam_16((i<<1), test_spritemask_cram[i]);
 
-	// Initialize VSRam.
-	memset(m_vdp->VSRam.u16, 0x00, sizeof(m_vdp->VSRam.u16));
+		// Initialize VSRam.
+		memset(m_vdp->VSRam.u16, 0x00, sizeof(m_vdp->VSRam.u16));
+	}
 
 	// Determine the parameters for this test.
 	VdpSpriteMaskingTest_mode mode = GetParam();
@@ -235,17 +237,6 @@ void VdpSpriteMaskingTest::SetUp(void)
 	// Set the VRam dirty flag.
 	m_vdp->MarkVRamDirty();
 }
-
-
-/**
- * Tear down the Vdp.
- */
-void VdpSpriteMaskingTest::TearDown(void)
-{
-	delete m_vdp;
-	m_vdp = nullptr;
-}
-
 
 /**
  * Load VRam.
