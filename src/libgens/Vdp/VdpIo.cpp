@@ -800,6 +800,10 @@ void Vdp::DMA_Fill(uint16_t data)
  */
 void Vdp::Write_Data_Word(uint16_t data)
 {
+	LOG_MSG(vdp_io, LOG_MSG_LEVEL_DEBUG2,
+		"VDP_Ctrl.code == %02X, VDP_Ctrl.address == %04X, data == %04X",
+		VDP_Ctrl.code, VDP_Ctrl.address, data);
+
 	// Writing to the data port clears the control word latch.
 	VDP_Ctrl.ctrl_latch = 0;
 
