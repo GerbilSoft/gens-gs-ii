@@ -353,9 +353,6 @@ class Vdp
 		 * VDP control struct.
 		 */
 		struct {
-			// Control word buffer.
-			uint16_t data[2];
-
 			/**
 			 * ctrl_latch: Control word latch.
 			 * 0: Next control word is FIRST word.
@@ -371,12 +368,20 @@ class Vdp
 			// automatically updates 'access'?
 			// NOTE: 'access' does NOT include DMA information.
 			uint8_t code;		// Access code. (CD5-CD0)
-			uint8_t access;		// Maps code to VDEST_t values.
 			uint16_t address;	// Address counter.
 
 			// DMA values.
 			uint8_t DMA_Mode;	// (DMA ADDRESS HIGH & 0xC0) [reg 23]
 			uint8_t DMA;		// HIGH byte from CD_Table[].
+
+			void reset(void)
+			{
+				ctrl_latch = 0;
+				code = 0;
+				address = 0;
+				DMA_Mode = 0;
+				DMA = 0;
+			}
 		} VDP_Ctrl;
 
 		/**

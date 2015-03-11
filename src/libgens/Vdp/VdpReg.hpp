@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -241,6 +241,48 @@ namespace VdpTypes
 			uint8_t H_Int;		// H Interrupt. [8-bit]
 		};
 		m4_t m4;
+	};
+
+	/**
+	  * VDP Codeword register.
+	  * MD: [CD5 CD4 CD3 CD2 CD1 CD0]
+	  * - CD5: DMA enable.
+	  * - CD4: Busy.
+	  * - CD3-CD1: Destination.
+	  * - CD0: Read/Write. (0 = read, 1 = write)
+	  */
+	enum VDP_CodeWord {
+		// CD5: DMA enable.
+		CD_DMA_ENABLE		= (1 << 5),
+
+		// CD4: Busy.
+		CD_BUSY			= (1 << 4),
+
+		// CD3-1: Destination.
+		// NOTE: CRAM has different destinations
+		// depending on read/write mode.
+		CD_DEST_VRAM		= 0x00,
+		CD_DEST_REGISTER_INT_W	= 0x02, // CD0=0
+		CD_DEST_CRAM_INT_W	= 0x02,
+		CD_DEST_VSRAM		= 0x04,
+		CD_DEST_CRAM_INT_R	= 0x08,
+		CD_DEST_MASK		= 0x0E,
+
+		// CD0: Read/write.
+		CD_MODE_READ		= 0x00,
+		CD_MODE_WRITE		= 0x01,
+		CD_MODE_MASK		= 0x01,
+
+		// CD3-0 combined.
+		CD_DEST_VRAM_READ	= (CD_DEST_VRAM | CD_MODE_READ),
+		CD_DEST_VRAM_WRITE	= (CD_DEST_VRAM | CD_MODE_WRITE),
+		CD_DEST_CRAM_READ	= (CD_DEST_CRAM_INT_R | CD_MODE_READ),
+		CD_DEST_CRAM_WRITE	= (CD_DEST_CRAM_INT_W | CD_MODE_WRITE),
+		CD_DEST_VSRAM_READ	= (CD_DEST_VSRAM | CD_MODE_READ),
+		CD_DEST_VSRAM_WRITE	= (CD_DEST_VSRAM | CD_MODE_WRITE),
+		// NOTE: REGISTER_WRITE looks like a READ, but it isn't!
+		CD_DEST_REGISTER_WRITE	= (CD_DEST_REGISTER_INT_W | CD_MODE_READ),
+		CD_DEST_MODE_MASK	= 0x0F,
 	};
 }
 
