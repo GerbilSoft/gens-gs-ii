@@ -747,7 +747,6 @@ void Vdp::DMA_Fill(uint16_t data)
 	// of filling at the correct rate.
 	// Perhaps this should be combined with DMA_LOOP.
 	set_DMA_Length(0);	// Clear the DMA length.
-	VDP_Ctrl.DMA = 0;	// Clear the DMA mode.
 	VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;	// Clear CD5.
 
 	// Set DMA type and length.
@@ -756,6 +755,7 @@ void Vdp::DMA_Fill(uint16_t data)
 
 	// NOTE: DMA FILL seems to treat VRam as little-endian...
 	// TODO: Do DMA FILL line-by-line instead of all at once.
+	// FIXME: DMA FILL to non-VRAM ends up writing to VRAM right now.
 	if (!(address & 1)) {
 		// Even VRam address.
 
@@ -804,7 +804,9 @@ void Vdp::Write_Data_Word(uint16_t data)
 	VDP_Ctrl.ctrl_latch = 0;
 
 	// Check for DMA FILL.
-	if (VDP_Ctrl.DMA & 0x04) {
+	if ((VDP_Ctrl.code & VdpTypes::CD_DMA_ENABLE) &&
+	    (VDP_Ctrl.DMA_Mode == 0x80))
+	{
 		// DMA Fill operation is in progress.
 		// FIXME: DMA FILL should NOT block the underlying VDP write operation.
 		DMA_Fill(data);
@@ -951,8 +953,6 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 			break;
 	}
 
-	VDP_Ctrl.DMA = 0;
-
 	// Divide source address by 2 to get word addresses.
 	// This will help with 128 KB wrapping.
 	uint16_t src_word_address = (src_address >> 1);
@@ -1060,6 +1060,9 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 
 	// Save the new destination address.
 	VDP_Ctrl.address = dest_address;
+
+	// DMA is done.
+	VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
 
 	// If any bytes weren't copied, subtract it from the saved length.
 	DMAT_Length -= length;
@@ -1180,13 +1183,16 @@ void Vdp::Write_Ctrl(uint16_t data)
 		return;
 
 	// Check for DMA FILL.
-	// TODO: Remove CD_Table.
-	uint16_t CD = CD_Table[VDP_Ctrl.code];
-	if ((CD & VDEST_DMA_FILL) && (VDP_Ctrl.DMA_Mode == 0x80)) {
+	if ((VDP_Ctrl.code & VdpTypes::CD_DMA_ENABLE) &&
+	    (VDP_Ctrl.DMA_Mode == 0x80))
+	{
 		// DMA FILL.
-		VDP_Ctrl.DMA = ((CD >> 8) & 0xFF);
+		// Wait for a data port write.
 		return;
 	}
+
+	// TODO: Remove CD_Table.
+	uint16_t CD = CD_Table[VDP_Ctrl.code];
 
 	// DMA access mode is the high byte in the CD_Table[] word.
 	CD >>= 8;
@@ -1209,7 +1215,6 @@ void Vdp::Write_Ctrl(uint16_t data)
 		dest_address &= 0xFF;
 		if (dest_address >= 0x80) {
 			// CRam/VSRam overflow! Don't do anything.
-			VDP_Ctrl.DMA = 0;
 			VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
 			return;
 		}
@@ -1221,7 +1226,6 @@ void Vdp::Write_Ctrl(uint16_t data)
 		if (options.zeroLengthDMA) {
 			// Zero-Length DMA transfers are enabled.
 			// Ignore this request.
-			VDP_Ctrl.DMA = 0;
 			VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
 			return;
 		}
@@ -1262,7 +1266,6 @@ void Vdp::Write_Ctrl(uint16_t data)
 
 	if (VDP_Ctrl.DMA_Mode & 0x80) {
 		// TODO: What does this mean?
-		VDP_Ctrl.DMA = 0;
 		VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
 		return;
 	}
@@ -1428,7 +1431,6 @@ void Vdp::Write_Ctrl(uint16_t data)
 
 		default:
 			// Invalid DMA mode.
-			VDP_Ctrl.DMA = 0;
 			VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
 			break;
 	}

@@ -360,9 +360,6 @@ class Vdp
 			 */
 			uint8_t ctrl_latch;	// Control word latch.
 
-			// Padding.
-			uint8_t reserved;
-
 			// VDP memory access mode.
 			// TODO: Add helper function for updating 'code' that
 			// automatically updates 'access'?
@@ -372,7 +369,6 @@ class Vdp
 
 			// DMA values.
 			uint8_t DMA_Mode;	// (DMA ADDRESS HIGH & 0xC0) [reg 23]
-			uint8_t DMA;		// HIGH byte from CD_Table[].
 
 			void reset(void)
 			{
@@ -380,7 +376,6 @@ class Vdp
 				code = 0;
 				address = 0;
 				DMA_Mode = 0;
-				DMA = 0;
 			}
 		} VDP_Ctrl;
 
