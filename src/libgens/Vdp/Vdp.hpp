@@ -377,50 +377,6 @@ class Vdp
 		} VDP_Ctrl;
 
 		/**
-		 * Bitfield values for the VDP access code register.
-		 * This makes handling access destinations a bit easier.
-		 */
-		enum VDEST_t {
-			// 0x0000: INVALID.
-			VDEST_INVALID		= 0x0000,
-
-			// Bits 0-2: Location. 
-			VDEST_LOC_INVALID	= 0x0000,
-			VDEST_LOC_VRAM		= 0x0001,
-			VDEST_LOC_CRAM		= 0x0002,
-			VDEST_LOC_VSRAM		= 0x0003,
-
-			// Bits 3-4: Access. (R/W)
-			VDEST_ACC_INVALID	= 0x0000,
-			VDEST_ACC_READ		= 0x0004,
-			VDEST_ACC_WRITE		= 0x0008,
-
-			// Bits 8-11: DMA MEM to VRAM: destination
-			VDEST_DMA_MEM_TO_INVALID	= 0x0000,
-			VDEST_DMA_MEM_TO_VRAM		= 0x0100,
-			VDEST_DMA_MEM_TO_CRAM		= 0x0200,
-			VDEST_DMA_MEM_TO_VSRAM		= 0x0300,
-
-			// Bit 12: DMA VRAM FILL.
-			VDEST_DMA_NO_FILL	= 0x0000,
-			VDEST_DMA_FILL		= 0x0400,
-
-			// Bit 13: DMA VRAM COPY.
-			VDEST_DMA_NO_COPY	= 0x0000,
-			VDEST_DMA_COPY		= 0x0800,
-
-			// Masks.
-			VDEST_MASK_RWOPS	= 0x00FF,
-			VDEST_MASK_DMA		= 0xFF00,
-		};
-
-		/**
-		 * VDP memory destination table.
-		 * Maps VDP control word destinations to Gens destinations.
-		 */
-		static const uint16_t CD_Table[64];
-
-		/**
 		 * Scroll_Size_t: Convenience enum for dealing with scroll plane sizes.
 		 */
 		enum Scroll_Size_t {

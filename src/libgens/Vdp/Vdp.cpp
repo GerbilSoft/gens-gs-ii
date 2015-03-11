@@ -246,8 +246,6 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 			"WARNING: zomg->loadVdpCtrl_16() failed: error %d\n", ret);
 	}
 
-	// TODO: Load DMA status.
-
 	// Load VRam.
 	zomg->loadVRam(VRam.u16, sizeof(VRam.u16), ZOMG_BYTEORDER_16H);
 	MarkVRamDirty();
