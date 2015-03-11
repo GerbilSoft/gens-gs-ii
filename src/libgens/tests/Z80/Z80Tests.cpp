@@ -104,6 +104,7 @@ void Z80Tests::SetUp()
 
 	// Load BDOS.
 	FILE *f = fopen("bdos.bin", "rb");
+	ASSERT_TRUE(f != nullptr);
 	fread(&Ram_Z80[0xF000], 1, 1068, f);
 	fclose(f);
 
