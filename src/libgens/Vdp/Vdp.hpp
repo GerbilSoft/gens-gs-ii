@@ -360,10 +360,7 @@ class Vdp
 			 */
 			uint8_t ctrl_latch;	// Control word latch.
 
-			// VDP memory access mode.
-			// TODO: Add helper function for updating 'code' that
-			// automatically updates 'access'?
-			// NOTE: 'access' does NOT include DMA information.
+			// VDP internal registers.
 			uint8_t code;		// Access code. (CD5-CD0)
 			uint16_t address;	// Address counter.
 
