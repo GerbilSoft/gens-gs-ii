@@ -54,9 +54,8 @@ typedef union _vdp_reg
 typedef struct _Zomg_VdpCtrl_8_t
 {
 	uint32_t header;		// 32BE: Should be "SMS " (0x534D5320)
+	uint8_t reserved1[4];		// Reserved.
 
-	uint8_t ctrl_byte[2];		// 8-bit: VDP control bytes.
-	uint16_t reserved1;
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
 	uint8_t code;			// 8-bit: VDP access code. (CD1-CD0)
 
@@ -109,8 +108,8 @@ typedef union _Zomg_CRam_t
 typedef struct _Zomg_VdpCtrl_16_t
 {
 	uint32_t header;		// 32BE: Should be "MD  " (0x4D442020)
+	uint8_t reserved1[4];		// Reserved.
 
-	uint16_t ctrl_word[2];		// 16BE: VDP control words.
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
 	uint8_t code;			// 8-bit: VDP access code. (CD5-CD0)
 

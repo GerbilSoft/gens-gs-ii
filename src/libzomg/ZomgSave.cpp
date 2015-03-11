@@ -271,7 +271,7 @@ int Zomg::saveVdpCtrl_8(const Zomg_VdpCtrl_8_t *ctrl)
 	bswap_ctrl.address = cpu_to_be16(bswap_ctrl.address);
 
 	// Clear the reserved fields.
-	bswap_ctrl.reserved1 = 0;
+	memset(&bswap_ctrl.reserved1, 0, sizeof(bswap_ctrl.reserved1));
 	bswap_ctrl.reserved2 = 0;
 
 	// Save the file.
@@ -303,8 +303,6 @@ int Zomg::saveVdpCtrl_16(const Zomg_VdpCtrl_16_t *ctrl)
 	bswap_ctrl.header = cpu_to_be32(bswap_ctrl.header);
 
 	// Byteswap the fields.
-	bswap_ctrl.ctrl_word[0]	= cpu_to_be16(bswap_ctrl.ctrl_word[0]);
-	bswap_ctrl.ctrl_word[1]	= cpu_to_be16(bswap_ctrl.ctrl_word[1]);
 	bswap_ctrl.address	= cpu_to_be16(bswap_ctrl.address);
 	bswap_ctrl.status	= cpu_to_be16(bswap_ctrl.status);
 
@@ -315,6 +313,7 @@ int Zomg::saveVdpCtrl_16(const Zomg_VdpCtrl_16_t *ctrl)
 	// DMA (TODO)
 
 	// Clear the reserved fields.
+	memset(&bswap_ctrl.reserved1, 0, sizeof(bswap_ctrl.reserved1));
 	bswap_ctrl.reserved2 = 0;
 
 	// Save the file.

@@ -210,9 +210,8 @@ C equivalent for vdp_ctrl.bin:
 typedef struct _ZOMG_VDP_ctrl_8_t
 {
 	uint32_t header;		// 32BE: Should be "SMS " (0x534D5320)
+	uint8_t reserved1[4];		// Reserved.
 
-	uint8_t ctrl_byte[2];		// 8-bit: VDP control bytes.
-	uint16_t reserved1;
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
 	uint8_t code;			// 8-bit: VDP access code. (CD1-CD0)
 
@@ -230,8 +229,8 @@ as the low byte of "access" for Sega Mega Drive.
 typedef struct _ZOMG_VDP_ctrl_16_t
 {
 	uint32_t header;		// 32BE: Should be "MD  " (0x4D442020)
+	uint8_t reserved1[4];		// Reserved.
 
-	uint16_t ctrl_word[2];		// 16BE: VDP control words.
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
 	uint8_t code;			// 8-bit: VDP access code. (CD5-CD0)
 
@@ -243,9 +242,14 @@ typedef struct _ZOMG_VDP_ctrl_16_t
 	uint8_t reserved2;
 } ZOMG_VDP_ctrl_16_t;
 
-The "ctrl_byte" and "ctrl_word" fields are strictly for reference and
-debugging. It contains the last two control bytes or words written to
-the VDP. The VDP does not actually store these control words.
+NOTE: reserved1[4] was previously "ctrl_byte" (SMS) and "ctrl_word" (MD), which
+contained the two control bytes or words that were written to the VDP. These
+are not actually stored in the VDP, so they're no longer stored in the save file;
+however, for compatibility, the space is now reserved.
+
+NOTE: The internal data buffer *does* exist on MD, though it has less of an
+effect due to misuse than the SMS version. reserved1[] may be repurposed
+for the internal data buffer at a later point.
 
 The "code" field contains the CD5-CD0 bits (CD1-CD0 for Sega 8-bit) from
 the last pair of control words. This indicates the destination for the

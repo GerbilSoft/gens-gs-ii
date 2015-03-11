@@ -203,9 +203,9 @@ int Zomg::loadVdpCtrl_8(Zomg_VdpCtrl_8_t *ctrl)
 	ctrl->address = be16_to_cpu(ctrl->address);
 	
 	// Clear the reserved fields.
-	ctrl->reserved1 = 0;
+	memset(&ctrl->reserved1, 0, sizeof(ctrl->reserved1));
 	ctrl->reserved2 = 0;
-	
+
 	// Return the number of bytes read.
 	return ret;
 }
@@ -231,8 +231,6 @@ int Zomg::loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl)
 		return -2;
 	
 	// Byteswap the fields.
-	ctrl->ctrl_word[0]	= be16_to_cpu(ctrl->ctrl_word[0]);
-	ctrl->ctrl_word[1]	= be16_to_cpu(ctrl->ctrl_word[1]);
 	ctrl->address		= be16_to_cpu(ctrl->address);
 	ctrl->status		= be16_to_cpu(ctrl->status);
 	
@@ -243,6 +241,7 @@ int Zomg::loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl)
 	// DMA (TODO)
 	
 	// Clear the reserved fields.
+	memset(&ctrl->reserved1, 0, sizeof(ctrl->reserved1));
 	ctrl->reserved2 = 0;
 	
 	// Return the number of bytes read.

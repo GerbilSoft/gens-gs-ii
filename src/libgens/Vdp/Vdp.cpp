@@ -167,12 +167,6 @@ void Vdp::zomgSaveMD(LibZomg::Zomg *zomg) const
 	// Save the internal registers.
 	Zomg_VdpCtrl_16_t ctrl_reg;
 	ctrl_reg.header = ZOMG_VDPCTRL_16_HEADER;
-#if 0
-	// FIXME: Remove these from ZOMG.
-	// NOTE: Address latch MAY be needed for SMS...
-	ctrl_reg.ctrl_word[0] = VDP_Ctrl.data[0];
-	ctrl_reg.ctrl_word[1] = VDP_Ctrl.data[1];
-#endif
 	ctrl_reg.ctrl_latch = !!VDP_Ctrl.ctrl_latch;
 	ctrl_reg.code = VDP_Ctrl.code;
 	ctrl_reg.address = VDP_Ctrl.address;
@@ -228,12 +222,6 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 	Zomg_VdpCtrl_16_t ctrl_reg;
 	int ret = zomg->loadVdpCtrl_16(&ctrl_reg);
 	if (ret > 0) {
-#if 0
-		// FIXME: Remove these from ZOMG.
-		// NOTE: Address latch MAY be needed for SMS...
-		VDP_Ctrl.data[0] = ctrl_reg.ctrl_word[0];
-		VDP_Ctrl.data[1] = ctrl_reg.ctrl_word[1];
-#endif
 		VDP_Ctrl.ctrl_latch = !!ctrl_reg.ctrl_latch;
 		VDP_Ctrl.code = ctrl_reg.code;
 		VDP_Ctrl.address = ctrl_reg.address;
@@ -256,6 +244,7 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 	m_palette.zomgRestoreCRam(&cram);
 
 	// Load VSRam. (MD only)
+	// FIXME: 80 bytes normally; 128 bytes for Genesis 3.
 	zomg->loadMD_VSRam(VSRam.u16, sizeof(VSRam.u16), ZOMG_BYTEORDER_16H);
 }
 
