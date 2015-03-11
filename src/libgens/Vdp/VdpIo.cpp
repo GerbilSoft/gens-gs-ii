@@ -1183,9 +1183,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 		return;
 
 	// Check for DMA FILL.
-	if ((VDP_Ctrl.code & VdpTypes::CD_DMA_ENABLE) &&
-	    (VDP_Ctrl.DMA_Mode == 0x80))
-	{
+	if (VDP_Ctrl.DMA_Mode == 0x80) {
 		// DMA FILL.
 		// Wait for a data port write.
 		return;
