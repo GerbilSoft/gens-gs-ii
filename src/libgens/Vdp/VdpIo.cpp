@@ -606,8 +606,7 @@ uint16_t Vdp::Read_Data(void)
 	volatile uint16_t data;
 
 	// Check the destination.
-	// TODO: Internal "vdp memory read" function.
-	switch (VDP_Ctrl.code & VdpTypes::CD_DEST_MODE_MASK) {
+	switch (VDP_Ctrl.code & VdpTypes::CD_DEST_MODE_CD4_MASK) {
 		case VdpTypes::CD_DEST_VRAM_READ:
 			// VRam Read.
 			data = VRam.u16[(VDP_Ctrl.address & 0xFFFF) >> 1];
@@ -615,14 +614,21 @@ uint16_t Vdp::Read_Data(void)
 
 		case VdpTypes::CD_DEST_CRAM_READ:
 			// CRam Read.
+			// FIXME: Missing bits should come from the FIFO.
 			data = m_palette.readCRam_16(VDP_Ctrl.address & 0x7E);
 			break;
 
 		case VdpTypes::CD_DEST_VSRAM_READ:
 			// VSRam Read.
-			// TODO: Mask off high bits? (Only 10/11 bits are present.)
-			// TODO: If we do that, the remaining bits should be what's in the FIFO.
+			// FIXME: Missing bits should come from the FIFO.
 			data = VSRam.u16[(VDP_Ctrl.address & 0x7E) >> 1];
+			break;
+
+		case VdpTypes::CD_DEST_VRAM_8BIT:
+			// VRam Read. (8-bit; undocumented)
+			// Low byte is from VRAM, with inverted LSB.
+			// High byte is the high byte of the next FIFO entry. (TODO)
+			data = VRam.u8[(VDP_Ctrl.address & 0xFFFF) ^ 1 ^ U16DATA_U8_INVERT];
 			break;
 
 		default:

@@ -266,6 +266,7 @@ namespace VdpTypes
 		CD_DEST_CRAM_INT_W	= 0x02, // CD0=1
 		CD_DEST_VSRAM		= 0x04,
 		CD_DEST_CRAM_INT_R	= 0x08,
+		CD_DEST_VRAM_8BIT	= 0x0C,	// undocumented
 		CD_DEST_MASK		= 0x0E,
 
 		// CD0: Read/write.
@@ -283,6 +284,7 @@ namespace VdpTypes
 		// NOTE: REGISTER_WRITE looks like a READ, but it isn't!
 		CD_DEST_REGISTER_WRITE	= (CD_DEST_REGISTER_INT_W | CD_MODE_READ),
 		CD_DEST_MODE_MASK	= 0x0F,
+		CD_DEST_MODE_CD4_MASK	= 0x1F,
 	};
 }
 
