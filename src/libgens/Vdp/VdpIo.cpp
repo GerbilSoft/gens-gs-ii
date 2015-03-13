@@ -73,6 +73,9 @@ uint8_t Vdp::Int_Ack(void)
 	{
 		// VBlank interrupt acknowledge.
 		VDP_Int &= ~0x08;
+		// VINT HAPPENED bit is cleared *here*,
+		// not on control port read.
+		Reg_Status.setBit(VdpStatus::VDP_STATUS_F, false);
 		
 		uint8_t rval_mask = VDP_Reg.m5.Set1;
 		rval_mask &= 0x10;
