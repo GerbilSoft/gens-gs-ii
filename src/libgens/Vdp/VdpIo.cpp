@@ -664,7 +664,7 @@ unsigned int Vdp::Update_DMA(void)
 		DMAT_Length -= timing;
 		if ((int)DMAT_Type & 2) {
 			// Internal DMA. (FILL, COPY)
-			// M68K does not have to wait.
+			// M68K doesn't have to wait.
 			return 0;
 		}
 
@@ -690,7 +690,7 @@ unsigned int Vdp::Update_DMA(void)
 
 	if ((int)DMAT_Type & 2) {
 		// Internal DMA. (FILL, COPY)
-		// M68K does not have to wait.
+		// M68K doesn't have to wait.
 		return 0;
 	}
 
