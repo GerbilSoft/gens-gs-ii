@@ -753,14 +753,45 @@ void Vdp::DMA_Fill(uint16_t data)
 	DMAT_Length = (length > 0 ? length : 65536);
 
 	// TODO: Do DMA FILL line-by-line instead of all at once.
-	// FIXME: DMA FILL to non-VRAM ends up writing to VRAM right now.
 	const uint8_t fill_hi = (data >> 8) & 0xFF;
-	do {
-		// NOTE: DMA FILL writes to the adjacent byte.
-		VRam.u8[address ^ 1 ^ U16DATA_U8_INVERT] = fill_hi;
-		address += VDP_Reg.m5.Auto_Inc;
-		address &= 0xFFFF;	// TODO: 128 KB support.
-	} while (--length != 0);
+	switch (VDP_Ctrl.code & VdpTypes::CD_DEST_MODE_MASK) {
+		case VdpTypes::CD_DEST_VRAM_WRITE:
+			// Write to VRAM.
+			do {
+				// NOTE: DMA FILL writes to the adjacent byte.
+				VRam.u8[address ^ 1 ^ U16DATA_U8_INVERT] = fill_hi;
+				address += VDP_Reg.m5.Auto_Inc;
+				address &= 0xFFFF;	// TODO: 128 KB support.
+			} while (--length != 0);
+			break;
+
+		case VdpTypes::CD_DEST_CRAM_WRITE:
+			// Write to CRAM.
+			// TODO: FIFO emulation.
+			do {
+				m_palette.writeCRam_16((address & 0x7E), data);
+				address += VDP_Reg.m5.Auto_Inc;
+				address &= 0xFFFF;	// TODO: 128 KB support.
+			} while (--length != 0);
+			break;
+
+		case VdpTypes::CD_DEST_VSRAM_WRITE:
+			// Write to VSRAM.
+			// TODO: FIFO emulation.
+			do {
+				VSRam.u16[(address & 0x7E) >> 1] = data;
+				address += VDP_Reg.m5.Auto_Inc;
+				address &= 0xFFFF;	// TODO: 128 KB support.
+			} while (--length != 0);
+			break;
+
+		default:
+			// Unsupported...
+			DMAT_Type = DMAT_MEM_TO_VRAM;
+			DMAT_Length = 0;
+			Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, false);
+			break;
+	}
 
 	// Save the new address.
 	VDP_Ctrl.address = (address & 0xFFFF);	// TODO: 128 KB support.
