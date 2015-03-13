@@ -806,6 +806,10 @@ void Vdp::DMA_Fill(uint16_t data)
 
 	// Save the new address.
 	VDP_Ctrl.address = (address & 0xFFFF);	// TODO: 128 KB support.
+
+	// NOTE: DMA FILL updates the DMA source address,
+	// even though it isn't used.
+	inc_DMA_Src_Adr(DMAT_Length);
 }
 
 
