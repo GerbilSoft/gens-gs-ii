@@ -688,7 +688,7 @@ unsigned int Vdp::Update_DMA(void)
 	const unsigned int len_tmp = DMAT_Length;
 	DMAT_Length = 0;
 
-	// Calculate the new cycles value.
+	// Calculate the DMA cycles used on this scanline.
 	// (NOTE: I have no idea how this formula was created.)
 	//cycles = (((cycles << 16) / timing) * len_tmp) >> 16;
 	cycles <<= 16;
@@ -756,12 +756,12 @@ void Vdp::DMA_Fill(uint16_t data)
 	// DMA cycles per line, we fill everything immediately instead
 	// of filling at the correct rate.
 	// Perhaps this should be combined with DMA_LOOP.
-	set_DMA_Length(0);	// Clear the DMA length.
 	VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;	// Clear CD5.
 
 	// Set DMA type and length.
 	DMAT_Type = DMAT_FILL;
 	DMAT_Length = (length > 0 ? length : 65536);
+	set_DMA_Length(0);
 
 	// TODO: Do DMA FILL line-by-line instead of all at once.
 	const uint8_t fill_hi = (data >> 8) & 0xFF;
@@ -911,29 +911,14 @@ inline void Vdp::T_DMA_Loop(void)
 	// NOTE: DMA_Src_Adr is the source address / 2.
 	uint32_t src_address = DMA_Src_Adr() * 2;
 
-	int length = DMA_Length();
-	if (length == 0) {
-		// DMA length is zero.
-		if (options.zeroLengthDMA) {
-			// Zero-Length DMA transfers are enabled.
-			// Ignore this request.
-			VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
-			return;
-		}
-
-		// Zero-Length DMA trnasfers are disabled.
-		// The MD VDP decrements the DMA length counter before checking if it has
-		// reached zero. So, doing a zero-length DMA request will actually do a
-		// DMA request for 65,536 words.
-		length = 0x10000;
-	}
-
 	LOG_MSG(vdp_io, LOG_MSG_LEVEL_DEBUG2,
 		"<%d, %d> src_address == 0x%06X, dest_address == 0x%04X, length == %d",
-		src_component, dest_component, src_address, VDP_Ctrl.address, length);
+		src_component, dest_component, src_address, VDP_Ctrl.address, DMAT_Length);
 
-	// Save the DMA length for timing purposes.
-	DMAT_Length = length;
+	// NOTE: DON'T get DMA length from the registers.
+	// It's been reset to 0 already.
+	// Just use DMAT_Length.
+	int length = DMAT_Length;
 
 	// Mask the source address, depending on type.
 	switch (src_component) {
@@ -1071,10 +1056,9 @@ inline void Vdp::T_DMA_Loop(void)
 		// Write the word.
 		// TODO: Might not work if Auto_Inc is odd...
 		vdpDataWrite_int(w);
-
-		// Check for CRam or VSRam destination overflow.
+               // Check for CRam or VSRam destination overflow.
 		if (dest_component == DMA_DEST_CRAM ||
-		    dest_component == DMA_DEST_VSRAM)
+			dest_component == DMA_DEST_VSRAM)
 		{
 			if (VDP_Ctrl.address >= 0x80) {
 				// CRam/VSRam overflow!
@@ -1100,9 +1084,6 @@ inline void Vdp::T_DMA_Loop(void)
 	// The old asm code saved the unwrapped version.
 	// Ergo, it simply added length to DMA_Address.
 	inc_DMA_Src_Adr(DMAT_Length);
-
-	// Reset the DMA length registers.
-	set_DMA_Length(0);
 
 	// Update DMA.
 	Update_DMA();
@@ -1276,9 +1257,9 @@ void Vdp::Write_Ctrl(uint16_t data)
 		// TODO: Verify that CD4 is set; if it isn't, VDP should lock up.
 		src_address &= 0xFFFF;
 		Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, true);	// Set the DMA BUSY bit.
-		set_DMA_Length(0);
 		DMAT_Length = length;
 		DMAT_Type = DMAT_COPY;
+		set_DMA_Length(0);
 		MarkVRamDirty();
 
 		// TODO: Is this correct with regards to endianness?
@@ -1350,6 +1331,13 @@ void Vdp::Write_Ctrl(uint16_t data)
 
 	// Set the DMA BUSY bit.
 	Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, true);
+
+	// Save the length, and clear the length registers.
+	// FIXME: Should be updating the length registers
+	// as we go along, but the M68K isn't properly "locked"
+	// for the entire time period.
+	DMAT_Length = length;
+	set_DMA_Length(0);
 
 	switch (DMA_TYPE(src_component, dest_component)) {
 		case DMA_TYPE(DMA_SRC_ROM, DMA_DEST_VRAM):
