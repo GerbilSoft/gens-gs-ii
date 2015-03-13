@@ -255,15 +255,15 @@ namespace VdpTypes
 		// CD5: DMA enable.
 		CD_DMA_ENABLE		= (1 << 5),
 
-		// CD4: Busy.
-		CD_BUSY			= (1 << 4),
+		// CD4: Done. (if 0, VDP has work to do)
+		CD_DONE			= (1 << 4),
 
 		// CD3-1: Destination.
 		// NOTE: CRAM has different destinations
 		// depending on read/write mode.
 		CD_DEST_VRAM		= 0x00,
 		CD_DEST_REGISTER_INT_W	= 0x02, // CD0=0
-		CD_DEST_CRAM_INT_W	= 0x02,
+		CD_DEST_CRAM_INT_W	= 0x02, // CD0=1
 		CD_DEST_VSRAM		= 0x04,
 		CD_DEST_CRAM_INT_R	= 0x08,
 		CD_DEST_MASK		= 0x0E,
