@@ -369,7 +369,7 @@ class Vdp
 		#define DMA_TYPE(src, dest) (((int)src << 2) | ((int)dest))
 
 		template<DMA_Src_t src_component, DMA_Dest_t dest_component>
-		inline void T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int length);
+		inline void T_DMA_Loop(void);
 
 		/**
 		 * VDP control struct.

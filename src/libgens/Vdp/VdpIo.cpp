@@ -885,19 +885,37 @@ void Vdp::vdpDataWrite_int(uint16_t data)
 }
 
 /**
- * Vdp::T_DMA_Loop(): Mem-to-DMA loop.
+ * Mem-to-DMA loop.
  * @param src_component Source component.
  * @param dest_component Destination component.
- * @param src_address Source address.
- * @param dest_address Destination address.
- * @param length Length.
  */
 template<Vdp::DMA_Src_t src_component, Vdp::DMA_Dest_t dest_component>
-inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int length)
+inline void Vdp::T_DMA_Loop(void)
 {
+	// Get the DMA source address.
+	// NOTE: DMA_Src_Adr is the source address / 2.
+	uint32_t src_address = DMA_Src_Adr() * 2;
+
+	int length = DMA_Length();
+	if (length == 0) {
+		// DMA length is zero.
+		if (options.zeroLengthDMA) {
+			// Zero-Length DMA transfers are enabled.
+			// Ignore this request.
+			VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
+			return;
+		}
+
+		// Zero-Length DMA trnasfers are disabled.
+		// The MD VDP decrements the DMA length counter before checking if it has
+		// reached zero. So, doing a zero-length DMA request will actually do a
+		// DMA request for 65,536 words.
+		length = 0x10000;
+	}
+
 	LOG_MSG(vdp_io, LOG_MSG_LEVEL_DEBUG2,
 		"<%d, %d> src_address == 0x%06X, dest_address == 0x%04X, length == %d",
-		src_component, dest_component, src_address, dest_address, length);
+		src_component, dest_component, src_address, VDP_Ctrl.address, length);
 
 	// Save the DMA length for timing purposes.
 	DMAT_Length = length;
@@ -1037,42 +1055,19 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 
 		// Write the word.
 		// TODO: Might not work if Auto_Inc is odd...
-		switch (dest_component) {
-			case DMA_DEST_VRAM:
-				if (dest_address & 1)
-					w = (w << 8 | w >> 8);
-				VRam.u16[dest_address >> 1] = w;
-				break;
-
-			case DMA_DEST_CRAM:
-				m_palette.writeCRam_16(dest_address, w);
-				break;
-
-			case DMA_DEST_VSRAM:
-				// TODO: Mask off high bits? (Only 10/11 bits are present.)
-				VSRam.u16[dest_address >> 1] = w;
-				break;
-
-			default:	// to make gcc shut up
-				break;
-		}
-
-		dest_address = ((dest_address + VDP_Reg.m5.Auto_Inc) & 0xFFFF);
+		vdpDataWrite_int(w);
 
 		// Check for CRam or VSRam destination overflow.
 		if (dest_component == DMA_DEST_CRAM ||
 		    dest_component == DMA_DEST_VSRAM)
 		{
-			if (dest_address >= 0x80) {
+			if (VDP_Ctrl.address >= 0x80) {
 				// CRam/VSRam overflow!
 				length--;	// for this word
 				break;
 			}
 		}
 	} while (--length != 0);
-
-	// Save the new destination address.
-	VDP_Ctrl.address = dest_address;
 
 	// DMA is done.
 	VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
@@ -1222,8 +1217,8 @@ void Vdp::Write_Ctrl(uint16_t data)
 	}
 
 	// Get the DMA addresses.
-	uint32_t src_address = DMA_Src_Adr();			// Src Address / 2
-	uint16_t dest_address = (VDP_Ctrl.address & 0xFFFF);	// Dest Address
+	uint32_t src_address = DMA_Src_Adr();		// Src Address / 2
+	uint16_t dest_address = VDP_Ctrl.address;	// Dest Address (TODO: uint32_t for 128 KB)
 
 	// Check for CRam or VSRam destination overflow.
 	if (dest_component == DMA_DEST_CRAM ||
@@ -1261,6 +1256,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 	// Check for DMA COPY.
 	if (VDP_Ctrl.DMA_Mode == 0xC0) {
 		// DMA COPY.
+		// TODO: Verify that CD4 is set; if it isn't, VDP should lock up.
 		src_address &= 0xFFFF;
 		Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, true);	// Set the DMA BUSY bit.
 		set_DMA_Length(0);
@@ -1340,114 +1336,114 @@ void Vdp::Write_Ctrl(uint16_t data)
 
 	switch (DMA_TYPE(src_component, dest_component)) {
 		case DMA_TYPE(DMA_SRC_ROM, DMA_DEST_VRAM):
-			T_DMA_Loop<DMA_SRC_ROM, DMA_DEST_VRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_ROM, DMA_DEST_VRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_ROM, DMA_DEST_CRAM):
-			T_DMA_Loop<DMA_SRC_ROM, DMA_DEST_CRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_ROM, DMA_DEST_CRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_ROM, DMA_DEST_VSRAM):
-			T_DMA_Loop<DMA_SRC_ROM, DMA_DEST_VSRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_ROM, DMA_DEST_VSRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_M68K_RAM, DMA_DEST_VRAM):
-			T_DMA_Loop<DMA_SRC_M68K_RAM, DMA_DEST_VRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_M68K_RAM, DMA_DEST_VRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_M68K_RAM, DMA_DEST_CRAM):
-			T_DMA_Loop<DMA_SRC_M68K_RAM, DMA_DEST_CRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_M68K_RAM, DMA_DEST_CRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_M68K_RAM, DMA_DEST_VSRAM):
-			T_DMA_Loop<DMA_SRC_M68K_RAM, DMA_DEST_VSRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_M68K_RAM, DMA_DEST_VSRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_PRG_RAM, DMA_DEST_VRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_PRG_RAM, DMA_DEST_VRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_PRG_RAM, DMA_DEST_VRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_PRG_RAM, DMA_DEST_CRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_PRG_RAM, DMA_DEST_CRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_PRG_RAM, DMA_DEST_CRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_PRG_RAM, DMA_DEST_VSRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_PRG_RAM, DMA_DEST_VSRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_PRG_RAM, DMA_DEST_VSRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_WORD_RAM_2M, DMA_DEST_VRAM):
-			T_DMA_Loop<DMA_SRC_WORD_RAM_2M, DMA_DEST_VRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_WORD_RAM_2M, DMA_DEST_VRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_WORD_RAM_2M, DMA_DEST_CRAM):
-			T_DMA_Loop<DMA_SRC_WORD_RAM_2M, DMA_DEST_CRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_WORD_RAM_2M, DMA_DEST_CRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_WORD_RAM_2M, DMA_DEST_VSRAM):
-			T_DMA_Loop<DMA_SRC_WORD_RAM_2M, DMA_DEST_VSRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_WORD_RAM_2M, DMA_DEST_VSRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_WORD_RAM_1M_0, DMA_DEST_VRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_0, DMA_DEST_VRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_0, DMA_DEST_VRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_WORD_RAM_1M_0, DMA_DEST_CRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_0, DMA_DEST_CRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_0, DMA_DEST_CRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_WORD_RAM_1M_0, DMA_DEST_VSRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_0, DMA_DEST_VSRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_0, DMA_DEST_VSRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_WORD_RAM_1M_1, DMA_DEST_VRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_1, DMA_DEST_VRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_1, DMA_DEST_VRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_WORD_RAM_1M_1, DMA_DEST_CRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_1, DMA_DEST_CRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_1, DMA_DEST_CRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_WORD_RAM_1M_1, DMA_DEST_VSRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_1, DMA_DEST_VSRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_1, DMA_DEST_VSRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_VRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_VRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_VRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_CRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_CRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_CRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_VSRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_VSRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_VSRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_VRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_VRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_VRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_CRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_CRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_CRAM>();
 			break;
 
 		case DMA_TYPE(DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_VSRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_VSRAM>(src_address, dest_address, length);
+			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_VSRAM>();
 			break;
 
 		default:
