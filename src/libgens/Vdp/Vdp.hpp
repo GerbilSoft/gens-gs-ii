@@ -290,6 +290,15 @@ class Vdp
 		void Write_Data_Word(uint16_t data);
 		void Write_Ctrl(uint16_t data);
 
+	private:
+		/**
+		 * Internal VDP data write function.
+		 * Used by Write_Data_Word() and DMA.
+		 * @param data Data word.
+		 */
+		void vdpDataWrite_int(uint16_t data);
+
+	public:
 		/**
 		 * GetHPix(): Get the current horizontal resolution.
 		 * NOTE: Do NOT use this if a ROM isn't loaded!

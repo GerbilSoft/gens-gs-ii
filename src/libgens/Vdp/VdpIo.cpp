@@ -811,11 +811,29 @@ void Vdp::Write_Data_Word(uint16_t data)
 	// Writing to the data port clears the control word latch.
 	VDP_Ctrl.ctrl_latch = 0;
 
+	if (VDP_Ctrl.code & VdpTypes::CD_MODE_WRITE)
+		vdpDataWrite_int(data);
+
+	// Check for DMA FILL.
+	if ((VDP_Ctrl.code & VdpTypes::CD_DMA_ENABLE) &&
+	    (VDP_Ctrl.DMA_Mode == 0x80))
+	{
+		// DMA Fill operation is in progress.
+		DMA_Fill(data);
+	}
+}
+
+/**
+ * Internal VDP data write function.
+ * Used by Write_Data_Word() and DMA.
+ * @param data Data word.
+ */
+void Vdp::vdpDataWrite_int(uint16_t data)
+{
 	// Check the destination.
-	// TODO: Internal "vdp memory write" function.
-	uint16_t address = VDP_Ctrl.address;
-	switch (VDP_Ctrl.code & VdpTypes::CD_DEST_MODE_MASK) {
-		case VdpTypes::CD_DEST_VRAM_WRITE:
+	uint32_t address = VDP_Ctrl.address;
+	switch (VDP_Ctrl.code & VdpTypes::CD_DEST_MASK) {
+		case VdpTypes::CD_DEST_VRAM:
 			// VRam Write.
 			MarkVRamDirty();
 			address &= 0xFFFF;	// VRam is 64 KB. (32 Kwords)
@@ -831,7 +849,8 @@ void Vdp::Write_Data_Word(uint16_t data)
 			}
 			break;
 
-		case VdpTypes::CD_DEST_CRAM_WRITE:
+		case VdpTypes::CD_DEST_CRAM_INT_W:
+		case VdpTypes::CD_DEST_CRAM_INT_R:	// TODO: Not needed?
 			// CRam Write.
 			// TODO: According to the Genesis Software Manual, writing at
 			// odd addresses results in "interesting side effects".
@@ -843,7 +862,7 @@ void Vdp::Write_Data_Word(uint16_t data)
 			m_palette.writeCRam_16((address & 0x7E), data);
 			break;
 
-		case VdpTypes::CD_DEST_VSRAM_WRITE:
+		case VdpTypes::CD_DEST_VSRAM:
 			// VSRam Write.
 			// TODO: The Genesis Software Manual doesn't mention what happens
 			// with regards to odd address writes for VSRam.
@@ -856,23 +875,14 @@ void Vdp::Write_Data_Word(uint16_t data)
 			break;
 
 		default:
-			// Invalid write specification.
+			// Invalid destination.
 			break;
 	}
 
 	// Increment the address register.
 	VDP_Ctrl.address += VDP_Reg.m5.Auto_Inc;
 	VDP_Ctrl.address &= 0xFFFF;	// TODO: 128 KB support.
-
-	// Check for DMA FILL.
-	if ((VDP_Ctrl.code & VdpTypes::CD_DMA_ENABLE) &&
-	    (VDP_Ctrl.DMA_Mode == 0x80))
-	{
-		// DMA Fill operation is in progress.
-		DMA_Fill(data);
-	}
 }
-
 
 /**
  * Vdp::T_DMA_Loop(): Mem-to-DMA loop.
