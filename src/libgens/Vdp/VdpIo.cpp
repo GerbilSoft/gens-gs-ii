@@ -1117,27 +1117,6 @@ void Vdp::Write_Ctrl(uint16_t data)
 
 	// Check if this is the first or second control word.
 	if (!VDP_Ctrl.ctrl_latch) {
-		// First control word.
-		// Check if this is a register write
-		if ((data & 0xC000) == 0x8000) {
-			/**
-			 * Register write.
-			 *
-			 * Format:
-			 * [  1   0   x R04 R03 R02 R01 R00] (D15-D8)
-			 * [D07 D06 D05 D04 D03 D02 D01 D00] (D7-D0)
-			 *
-			 * R = register number
-			 * D = data
-			 */
-			VDP_Ctrl.code = 0;		// Reset the access code register.
-			VDP_Ctrl.address = 0x0000;	// Reset the address counter.
-
-			const int reg = (data >> 8) & 0x1F;
-			setReg(reg, (data & 0xFF));
-			return;
-		}
-
 		/**
 		 * First control word.
 		 *
@@ -1152,7 +1131,6 @@ void Vdp::Write_Ctrl(uint16_t data)
 		 * first control word is processed. They are replaced
 		 * when the second control word is processed.
 		 */
-		VDP_Ctrl.ctrl_latch = 1;	// Latch the first control word.
 
 		// Update the VDP address counter.
 		VDP_Ctrl.address &= ~0x3FFF;
@@ -1161,6 +1139,27 @@ void Vdp::Write_Ctrl(uint16_t data)
 		// Update the VDP access code register.
 		VDP_Ctrl.code &= ~0x03;
 		VDP_Ctrl.code |= ((data >> 14) & 0x03);
+
+		// Check if this is a register write
+		if ((data & 0xC000) == 0x8000) {
+			/**
+			 * Register write.
+			 *
+			 * Format:
+			 * [  1   0   x R04 R03 R02 R01 R00] (D15-D8)
+			 * [D07 D06 D05 D04 D03 D02 D01 D00] (D7-D0)
+			 *
+			 * R = register number
+			 * D = data
+			 */
+			const int reg = (data >> 8) & 0x1F;
+			setReg(reg, (data & 0xFF));
+		} else {
+			// First control word.
+			VDP_Ctrl.ctrl_latch = 1;
+		}
+
+		// We're done here.
 		return;
 	}
 
