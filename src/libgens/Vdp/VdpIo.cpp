@@ -1059,16 +1059,6 @@ inline void Vdp::T_DMA_Loop(void)
 		// Write the word.
 		// TODO: Might not work if Auto_Inc is odd...
 		vdpDataWrite_int(w);
-               // Check for CRam or VSRam destination overflow.
-		if (dest_component == DMA_DEST_CRAM ||
-			dest_component == DMA_DEST_VSRAM)
-		{
-			if (VDP_Ctrl.address >= 0x80) {
-				// CRam/VSRam overflow!
-				length--;	// for this word
-				break;
-			}
-		}
 	} while (--length != 0);
 
 	// DMA is done.
@@ -1220,22 +1210,6 @@ void Vdp::Write_Ctrl(uint16_t data)
 	// Get the DMA addresses.
 	uint32_t src_address = DMA_Src_Adr();		// Src Address / 2
 	uint16_t dest_address = VDP_Ctrl.address;	// Dest Address (TODO: uint32_t for 128 KB)
-
-	// Check for CRam or VSRam destination overflow.
-	if (dest_component == DMA_DEST_CRAM ||
-	    dest_component == DMA_DEST_VSRAM)
-	{
-		// FIXME: Frogger (U) does DMA writes to CRAM $8000.
-		// Obviously this won't work if we're aborting on dest_address >= 0x80.
-		// We'll mask it with 0xFF for now.
-		// TODO: Figure out what the actual mask should be later.
-		dest_address &= 0xFF;
-		if (dest_address >= 0x80) {
-			// CRam/VSRam overflow! Don't do anything.
-			VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
-			return;
-		}
-	}
 
 	int length = DMA_Length();
 	if (length == 0) {
