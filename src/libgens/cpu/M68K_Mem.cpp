@@ -159,22 +159,6 @@ void M68K_Mem::End(void)
 /** Read Byte functions. **/
 
 /**
- * Address inversion flags for byteswapped addressing.
- * - U16DATA_U8_INVERT: Access U8 data in host-endian 16-bit data.
- * - U32DATA_U8_INVERT: Access U8 data in host-endian 32-bit data.
- * - U32DATA_U16_INVERT: Access U16 data in host-endian 32-bit data.
- */
-#if GENS_BYTEORDER == GENS_LIL_ENDIAN
-#define U16DATA_U8_INVERT 1
-#define U32DATA_U8_INVERT 3
-#define U32DATA_U16_INVERT 1
-#else /* GENS_BYTEORDER = GENS_BIG_ENDIAN */
-#define U16DATA_U8_INVERT 0
-#define U32DATA_U8_INVERT 0
-#define U32DATA_U16_INVERT 0
-#endif
-
-/**
  * Read a byte from RAM. (0xE00000 - 0xFFFFFF)
  * RAM is 64 KB, mirrored throughout the entire range.
  * @param address Address.

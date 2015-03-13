@@ -26,6 +26,9 @@
 // LOG_MSG() subsystem.
 #include "macros/log_msg.h"
 
+// Byteswapping macros.
+#include "Util/byteswap.h"
+
 // M68K CPU.
 #include "cpu/star_68k.h"
 #include "cpu/M68K_Mem.hpp"
@@ -727,19 +730,15 @@ void Vdp::DMA_Fill(uint16_t data)
 	MarkVRamDirty();
 
 	// Get the values. (length is in bytes)
-	// NOTE: DMA Fill uses *bytes* for length, not words!
-	uint16_t address = (VDP_Ctrl.address & 0xFFFF);
-	int length = DMA_Length();
-	if (length == 0) {
-		// DMA length is 0. Set it to 65,536 words.
-		// TODO: This was actually not working in the asm,
-		// since I was testing for zero after an or/mov, expecting
-		// the mov to set flags. mov doesn't set flags!
-		// So I'm not sure if this is right or not.
-		length = 65536;
-	}
+	// NOTE: When writing to VRAM, DMA FILL uses bytes, not words.
+	// When writing to CRAM or VSRAM, DMA FILL uses words.
+	uint32_t address = VDP_Ctrl.address;
+	// NOTE: length == 0 is handled as 65536, since the value
+	// isn't checked until after the first iteration.
+	uint16_t length = DMA_Length();
 
 	// Set the DMA Busy flag.
+	// TODO: Needs to run on a line-by-line basis.
 	Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, true);
 
 	// TODO: Although we decrement DMAT_Length correctly based on
@@ -751,46 +750,20 @@ void Vdp::DMA_Fill(uint16_t data)
 
 	// Set DMA type and length.
 	DMAT_Type = 0x02;	// DMA Fill.
-	DMAT_Length = length;
+	DMAT_Length = (length > 0 ? length : 65536);
 
-	// NOTE: DMA FILL seems to treat VRam as little-endian...
 	// TODO: Do DMA FILL line-by-line instead of all at once.
 	// FIXME: DMA FILL to non-VRAM ends up writing to VRAM right now.
-	if (!(address & 1)) {
-		// Even VRam address.
-
-		// Step 1: Write the VRam data to the current address. (little-endian)
-		VRam.u8[address] = (data & 0xFF);
-		address = ((address + 1) & 0xFFFF);
-		VRam.u8[address] = ((data >> 8) & 0xFF);
-		address = ((address - 1 + VDP_Reg.m5.Auto_Inc) & 0xFFFF);
-
-		// Step 2: Write the high byte of the VRam data to the remaining addresses.
-		const uint8_t fill_hi = (data >> 8) & 0xFF;
-		do {
-			VRam.u8[address] = fill_hi;
-			address = ((address + VDP_Reg.m5.Auto_Inc) & 0xFFFF);
-		} while (--length != 0);
-	} else {
-		// Odd VRam address.
-
-		// Step 1: Write the VRam data to the previous address. (big-endian)
-		address = ((address - 1) & 0xFFFF);
-		VRam.u8[address] = ((data >> 8) & 0xFF);
-		address = ((address + 1) & 0xFFFF);
-		VRam.u8[address] = (data & 0xFF);
-		address = ((address + VDP_Reg.m5.Auto_Inc) & 0xFFFF);
-
-		// Step 2: Write the high byte of the VRam data to the remaining addresses.
-		const uint8_t fill_hi = (data >> 8) & 0xFF;
-		do {
-			VRam.u8[address] = fill_hi;
-			address = ((address + VDP_Reg.m5.Auto_Inc) & 0xFFFF);
-		} while (--length != 0);
-	}
+	const uint8_t fill_hi = (data >> 8) & 0xFF;
+	do {
+		// NOTE: DMA FILL writes to the adjacent byte.
+		VRam.u8[address ^ 1 ^ U16DATA_U8_INVERT] = fill_hi;
+		address += VDP_Reg.m5.Auto_Inc;
+		address &= 0xFFFF;	// TODO: 128 KB support.
+	} while (--length != 0);
 
 	// Save the new address.
-	VDP_Ctrl.address = (address & 0xFFFF);
+	VDP_Ctrl.address = (address & 0xFFFF);	// TODO: 128 KB support.
 }
 
 
@@ -807,16 +780,6 @@ void Vdp::Write_Data_Word(uint16_t data)
 	// Writing to the data port clears the control word latch.
 	VDP_Ctrl.ctrl_latch = 0;
 
-	// Check for DMA FILL.
-	if ((VDP_Ctrl.code & VdpTypes::CD_DMA_ENABLE) &&
-	    (VDP_Ctrl.DMA_Mode == 0x80))
-	{
-		// DMA Fill operation is in progress.
-		// FIXME: DMA FILL should NOT block the underlying VDP write operation.
-		DMA_Fill(data);
-		return;
-	}
-
 	// Check the destination.
 	// TODO: Internal "vdp memory write" function.
 	uint16_t address = VDP_Ctrl.address;
@@ -827,15 +790,14 @@ void Vdp::Write_Data_Word(uint16_t data)
 			address &= 0xFFFF;	// VRam is 64 KB. (32 Kwords)
 			if (address & 0x0001) {
 				// Odd address.
-				// VRam writes are only allowed at even addresses.
-				// The VDP simply masks the low bit of the address
-				// and swaps the high and low bytes before writing.
-				address &= ~0x0001;
-				data = (data << 8 | data >> 8);
+				// This results in the data bytes being swapped
+				// before writing to (address & ~1).
+				VRam.u16[address>>1] = (data << 8 | data >> 8);
+			} else {
+				// Even address.
+				// Data is written normally.
+				VRam.u16[address>>1] = data;
 			}
-
-			// Write the word to VRam.
-			VRam.u16[address>>1] = data;
 			break;
 
 		case VdpTypes::CD_DEST_CRAM_WRITE:
@@ -869,6 +831,15 @@ void Vdp::Write_Data_Word(uint16_t data)
 
 	// Increment the address register.
 	VDP_Ctrl.address += VDP_Reg.m5.Auto_Inc;
+	VDP_Ctrl.address &= 0xFFFF;	// TODO: 128 KB support.
+
+	// Check for DMA FILL.
+	if ((VDP_Ctrl.code & VdpTypes::CD_DMA_ENABLE) &&
+	    (VDP_Ctrl.DMA_Mode == 0x80))
+	{
+		// DMA Fill operation is in progress.
+		DMA_Fill(data);
+	}
 }
 
 
