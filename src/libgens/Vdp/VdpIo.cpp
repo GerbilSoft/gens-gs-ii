@@ -1097,6 +1097,9 @@ inline void Vdp::T_DMA_Loop(void)
 	// Ergo, it simply added length to DMA_Address.
 	inc_DMA_Src_Adr(DMAT_Length);
 
+	// Reset the DMA length registers.
+	set_DMA_Length(0);
+
 	// Update DMA.
 	Update_DMA();
 
