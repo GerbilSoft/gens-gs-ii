@@ -706,7 +706,7 @@ int RomCartridgeMD::initSRam(void)
  * If the loaded ROM has an entry in the EEPROM database,
  * that EEPROM setup will be used. Otherwise, EEPROM will
  * not be enabled.
- * @return Loaded EEPROM size on success; negative on error.
+ * @return Loaded EEPROM size on success; -1 if no EEPROM; other negative on error.
  */
 int RomCartridgeMD::initEEPRom(void)
 {
@@ -718,7 +718,7 @@ int RomCartridgeMD::initEEPRom(void)
 
 	// Don't do anything if the ROM isn't in the EEPRom database.
 	if (d->eprType < 0)
-		return 0;
+		return -1;
 
 	// Load the EEProm file.
 	// TODO: Use internal filename for multi-file?
