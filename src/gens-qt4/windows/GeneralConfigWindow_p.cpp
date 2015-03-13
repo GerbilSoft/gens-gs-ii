@@ -58,7 +58,7 @@ GeneralConfigWindowPrivate::GeneralConfigWindowPrivate(GeneralConfigWindow *q)
 #ifdef Q_WS_MAC
 	applySettingsImmediately = true;
 #else /* !Q_WS_MAC */
-	applySettingsImmediately = true;
+	applySettingsImmediately = false;
 #endif /* Q_WS_MAC */
 }
 
