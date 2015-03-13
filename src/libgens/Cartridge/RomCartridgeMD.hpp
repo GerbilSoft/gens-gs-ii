@@ -137,7 +137,7 @@ class RomCartridgeMD
 		 * If the loaded ROM has an entry in the EEPROM database,
 		 * that EEPROM setup will be used. Otherwise, EEPROM will
 		 * not be enabled.
-		 * @return Loaded EEPROM size on success; negative on error.
+		 * @return Loaded EEPROM size on success; -1 if no EEPROM; other negative on error.
 		 */
 		int initEEPRom(void);
 
