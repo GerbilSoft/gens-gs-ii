@@ -129,7 +129,7 @@ void Vdp::reset(void)
 
 	// Reset the DMA variables.
 	DMAT_Length = 0;
-	DMAT_Type = 0;
+	DMAT_Type = DMAT_MEM_TO_VRAM;
 
 	// VDP status register.
 	// (Maintain the status of the PAL/NTSC bit.)
@@ -212,6 +212,7 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 	zomg->loadVdpReg(vdp_reg, 24);
 
 	// TODO: On MD, load the DMA information from the savestate.
+	// (Calculate DMAT_Type.)
 	// Writing to register 23 changes the DMA status.
 	for (int i = 23; i >= 0; i--) {
 		setReg(i, vdp_reg[i]);

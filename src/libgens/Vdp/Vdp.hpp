@@ -148,7 +148,20 @@ class Vdp
 	public:	
 		int DMAT_Length;
 	private:
-		unsigned int DMAT_Type;
+		/**
+		 * DMA transfer type:
+		 * - 0: External ROM/RAM to VRAM
+		 * - 1: External ROM/RAM to CRAM/VSRAM
+		 * - 2: DMA FILL
+		 * - 3: DMA COPY
+		 */
+		enum DMAT_Type_t {
+			DMAT_MEM_TO_VRAM = 0,
+			DMAT_MEM_TO_CRAM_VSRAM,
+			DMAT_FILL,
+			DMAT_COPY,
+		};
+		DMAT_Type_t DMAT_Type;
 
 	private:
 		/** VDP address functions: Get Pointers. **/

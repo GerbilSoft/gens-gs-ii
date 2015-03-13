@@ -658,18 +658,18 @@ unsigned int Vdp::Update_DMA(void)
 	unsigned int cycles = M68K_Mem::CPL_M68K;
 
 	// Get the DMA transfer rate.
-	const uint8_t timing = DMA_Timing_Table[DMAT_Type & 3][offset];
+	const uint8_t timing = DMA_Timing_Table[(int)DMAT_Type & 3][offset];
 	if (DMAT_Length > timing) {
 		// DMA is not finished.
 		DMAT_Length -= timing;
-		if (DMAT_Type & 2) {
-			// DMA to CRam or VSRam.
-			// Return 0.
+		if ((int)DMAT_Type & 2) {
+			// Internal DMA. (FILL, COPY)
+			// M68K does not have to wait.
 			return 0;
 		}
 
-		// DMA to VRam.
-		// Return the total number of cycles.
+		// External DMA. (ROM/RAM to VRAM)
+		// Return the total number of cycles the M68K should wait.
 		return cycles;
 	}
 
@@ -688,14 +688,14 @@ unsigned int Vdp::Update_DMA(void)
 	// Clear the DMA Busy flag.
 	Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, false);
 
-	if (DMAT_Type & 2) {
-		// DMA to CRam or VSRam.
-		// Return 0.
+	if ((int)DMAT_Type & 2) {
+		// Internal DMA. (FILL, COPY)
+		// M68K does not have to wait.
 		return 0;
 	}
 
-	// DMA to VRam.
-	// Return the total number of cycles.
+	// External DMA. (ROM/RAM to VRAM)
+	// Return the total number of cycles the M68K should wait.
 	return cycles;
 }
 
@@ -749,7 +749,7 @@ void Vdp::DMA_Fill(uint16_t data)
 	VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;	// Clear CD5.
 
 	// Set DMA type and length.
-	DMAT_Type = 0x02;	// DMA Fill.
+	DMAT_Type = DMAT_FILL;
 	DMAT_Length = (length > 0 ? length : 65536);
 
 	// TODO: Do DMA FILL line-by-line instead of all at once.
@@ -913,15 +913,12 @@ inline void Vdp::T_DMA_Loop(unsigned int src_address, uint16_t dest_address, int
 	switch (dest_component) {
 		case DMA_DEST_VRAM:
 			MarkVRamDirty();
-			DMAT_Type = 0;
+			DMAT_Type = DMAT_MEM_TO_VRAM;
 			break;
 
 		case DMA_DEST_CRAM:
-			DMAT_Type = 1;
-			break;
-
 		case DMA_DEST_VSRAM:
-			DMAT_Type = 1;
+			DMAT_Type = DMAT_MEM_TO_CRAM_VSRAM;
 			break;
 
 		default:	// to make gcc shut up
@@ -1227,7 +1224,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 		Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, true);	// Set the DMA BUSY bit.
 		set_DMA_Length(0);
 		DMAT_Length = length;
-		DMAT_Type = 0x3;
+		DMAT_Type = DMAT_COPY;
 		MarkVRamDirty();
 
 		// TODO: Is this correct with regards to endianness?
