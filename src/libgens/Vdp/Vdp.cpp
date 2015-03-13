@@ -65,7 +65,7 @@ Vdp::Vdp(MdFb *fb)
 	// Clear VDP_Reg before initializing the VDP.
 	// Valgrind complains if we don't do this.
 	memset(&VDP_Reg.reg[0], 0x00, sizeof(VDP_Reg.reg));
-	VDP_Mode = 0;
+	VDP_Mode = (VDP_Mode_t)0;
 	
 	// Initialize system status.
 	// TODO: Move SysStatus somewhere else?

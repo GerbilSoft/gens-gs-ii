@@ -220,12 +220,26 @@ class Vdp
 		 * VDP_Mode: Current VDP mode.
 		 * TODO: Mark as private after integrating VdpRend_Err within the Vdp class.
 		 */
-		#define VDP_MODE_M1	(1 << 0)
-		#define VDP_MODE_M2	(1 << 1)
-		#define VDP_MODE_M3	(1 << 2)
-		#define VDP_MODE_M4	(1 << 3)
-		#define VDP_MODE_M5	(1 << 4)
-		unsigned int VDP_Mode;
+		enum VDP_Mode_t {
+			// Individual mode bits.
+			VDP_MODE_M1 = (1 << 0),
+			VDP_MODE_M2 = (1 << 1),
+			VDP_MODE_M3 = (1 << 2),
+			VDP_MODE_M4 = (1 << 3),
+			VDP_MODE_M5 = (1 << 4),
+
+			// TMS9918 modes.
+			// TODO: Add invalid modes?
+			VDP_MODE_TMS_GRAPHIC_I = 0,
+			VDP_MODE_TMS_TEXT = 1,
+			VDP_MODE_TMS_GRAPHIC_II = 2,
+			VDP_MODE_TMS_MULTICOLOR = 4,
+
+			// Sega Master System II modes.
+			VDP_MODE_M4_224 = 0xB,
+			VDP_MODE_M4_240 = 0xE,
+		};
+		VDP_Mode_t VDP_Mode;
 
 	public:
 		// VRam, VSRam.

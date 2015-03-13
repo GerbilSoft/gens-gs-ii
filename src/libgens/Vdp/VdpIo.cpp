@@ -144,11 +144,11 @@ void Vdp::updateVdpLines(bool resetCurrent)
 		// Modes 0-3 may only be 192 lines.
 		// TODO: If emulating SMS1, disable 224-line and 240-line modes.
 		switch (VDP_Mode) {
-			case 0x0B:
+			case VDP_MODE_M4_224:
 				// Mode 4: 224 lines.
 				LineOffset = 1;
 				break;
-			case 0x0E:
+			case VDP_MODE_M4_240:
 				// Mode 4: 240 lines.
 				LineOffset = 2;
 				break;
@@ -227,11 +227,12 @@ inline void Vdp::Update_Mode(void)
 	const unsigned int prevVdpMode = VDP_Mode;
 	const register uint8_t Set1 = VDP_Reg.m5.Set1;
 	const register uint8_t Set2 = VDP_Reg.m5.Set2;
-	VDP_Mode = ((Set2 & 0x10) >> 4) |	// M1
-		   ((Set1 & 0x02))      |	// M2
-		   ((Set2 & 0x08) >> 1)	|	// M3
-		   ((Set1 & 0x04) << 1) |	// M4/PSEL
-		   ((Set2 & 0x04) << 2);	// M5
+	VDP_Mode = (VDP_Mode_t)
+		   (((Set2 & 0x10) >> 4) |	// M1
+		    ((Set1 & 0x02))      |	// M2
+		    ((Set2 & 0x08) >> 1) |	// M3
+		    ((Set1 & 0x04) << 1) |	// M4/PSEL
+		    ((Set2 & 0x04) << 2));	// M5
 
 	if (!(Set2 & 0x08)) {
 		// V28 mode. Reset the NTSC V30 roll values.
@@ -242,7 +243,7 @@ inline void Vdp::Update_Mode(void)
 	// If the VDP mode has changed, CRam needs to be updated.
 	if (prevVdpMode != VDP_Mode) {
 		// Update the VDP mode variables.
-		if (VDP_Mode & 0x10) {
+		if (VDP_Mode & VDP_MODE_M5) {
 			// Mode 5.
 			m_palette.setPalMode(VdpPalette::PALMODE_MD);
 			m_palette.setMdColorMask(!(VDP_Mode & 0x08));	// M4/PSEL
@@ -264,7 +265,17 @@ inline void Vdp::Update_Mode(void)
  */
 void Vdp::setReg(int reg_num, uint8_t val)
 {
-	if (reg_num < 0 || reg_num >= 24)
+	if (reg_num < 0)
+		return;
+
+	/**
+	 * Highest addressable register depends on VDP mode.
+	 * - Mode 5: Register 23
+	 * - Mode 4: Register 10
+	 * - TODO: Other modes? (assuming 10 for now)
+	 */
+	const int max_reg = ((VDP_Mode & VDP_MODE_M5) ? 23 : 10);
+	if (reg_num > max_reg)
 		return;
 
 	// Save the new register value.
