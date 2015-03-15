@@ -98,6 +98,7 @@ SET(libgens_VDP_SRCS
 	Vdp/VdpRend_Err.cpp
 	Vdp/VGA_charset.c
 	Vdp/VdpStatus.cpp
+	Vdp/VdpDebug.cpp
 	)
 
 # TODO: All headers, or just public headers?

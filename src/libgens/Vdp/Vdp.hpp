@@ -237,6 +237,24 @@ class Vdp
 			};
 			unsigned int data;
 		} SysStatus;
+
+	public:
+		// Super secret debug stuff!
+		// For use by MDP plugins and test suites.
+		// Return value is an MDP error code.
+		int dbg_getReg(int reg_num, uint8_t *out) const;
+		int dbg_setReg(int reg_num, uint8_t val);
+		int dbg_getCode(uint8_t *CD) const;
+		int dbg_setCode(uint8_t CD);
+		int dbg_getAddress(uint32_t *address) const;
+		int dbg_setAddress(uint32_t address);
+		int dbg_getCtrlLatch(int *latch) const;
+		int dbg_setCtrlLatch(int latch);
+
+		// TODO: Better VRAM writing functions.
+		int dbg_writeVRam_16(uint32_t address, const uint16_t *vram, int length);
+		int dbg_writeCRam_16(uint8_t address, const uint16_t *cram, int length);
+		int dbg_writeVSRam_16(uint8_t address, const uint16_t *vsram, int length);
 };
 
 }
