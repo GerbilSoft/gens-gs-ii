@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -64,22 +64,24 @@ void Screenshot::update(void)
 	const LibGens::Vdp *vdp = m_context->m_vdp;
 
 	// Get the color depth.
-	const LibGens::VdpPalette::ColorDepth bpp = vdp->m_palette.bpp();
+	// FIXME: Color depth should be a property of the MdFb.
+	const LibGens::VdpPalette::ColorDepth bpp = vdp->bpp();
 
 	// Create the QImage.
 	const uint8_t *start;
-	const int startY = ((240 - vdp->GetVPix()) / 2);
-	const int startX = (vdp->GetHPixBegin());
+	const int startY = ((240 - vdp->getVPix()) / 2);
+	const int startX = (vdp->getHPixBegin());
 	int bytesPerLine;
 	QImage::Format imgFormat;
+	LibGens::MdFb *fb = vdp->MD_Screen;
 
 	if (bpp == LibGens::VdpPalette::BPP_32) {
-		start = (const uint8_t*)(vdp->MD_Screen->lineBuf32(startY) + startX);
-		bytesPerLine = (vdp->MD_Screen->pxPitch() * sizeof(uint32_t));
+		start = (const uint8_t*)(fb->lineBuf32(startY) + startX);
+		bytesPerLine = (fb->pxPitch() * sizeof(uint32_t));
 		imgFormat = QImage::Format_RGB32;
 	} else {
-		start = (const uint8_t*)(vdp->MD_Screen->lineBuf16(startY) + startX);
-		bytesPerLine = (vdp->MD_Screen->pxPitch() * sizeof(uint16_t));
+		start = (const uint8_t*)(fb->lineBuf16(startY) + startX);
+		bytesPerLine = (fb->pxPitch() * sizeof(uint16_t));
 		if (bpp == LibGens::VdpPalette::BPP_16)
 			imgFormat = QImage::Format_RGB16;
 		else
@@ -87,7 +89,7 @@ void Screenshot::update(void)
 	}
 
 	// TODO: Check for errors.
-	m_img = QImage(start, vdp->GetHPix(), vdp->GetVPix(),
+	m_img = QImage(start, vdp->getHPix(), vdp->getVPix(),
 			bytesPerLine, imgFormat);	
 }
 

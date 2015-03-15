@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -26,77 +26,74 @@
 // C includes.
 #include <string.h>
 
-namespace LibGens
-{
+// Vdp private class.
+#include "Vdp_p.hpp"
+
+namespace LibGens {
 
 /**
- * Vdp::rend_init(): Initialize the VDP rendering subsystem.
- * This function should only be called from Init()!
+ * Initialize the VDP rendering subsystem.
+ * This function should only be called from Vdp::Vdp()!
  */
-void Vdp::rend_init(void)
+void VdpPrivate::rend_init(void)
 {
 	// Initialize the VDP rendering variables.
 	VDP_Layers = VdpTypes::VDP_LAYERS_DEFAULT;
 }
 
-
 /**
- * Vdp::rend_end(): Shut down the VDP rendering subsystem.
- * This function should only be called from Vdp::Init()!
+ * Shut down the VDP rendering subsystem.
+ * This function should only be called from Vdp::~Vdp()!
  */
-void Vdp::rend_end(void)
+void VdpPrivate::rend_end(void)
 {
 	// TODO
 }
 
-
 /**
- * Vdp::rend_reset(): Reset the VDP rendering arrays.
+ * Reset the VDP rendering arrays.
  * This function should only be called from Vdp::reset()!
  */
-void Vdp::rend_reset(void)
+void VdpPrivate::rend_reset(void)
 {
 	// Clear MD_Screen.
-	MD_Screen->clear();
-	
+	q->MD_Screen->clear();
+
 	// Reset the active palettes.
 	// TODO: Handle VDP_LAYER_PALETTE_LOCK in VdpPalette.
 #if 0
 	if (!(VDP_Layers & VdpTypes::VDP_LAYER_PALETTE_LOCK))
 		m_palette.resetActive();
 #endif
-	
+
 	// Sprite arrays.
 	memset(&Sprite_Struct, 0x00, sizeof(Sprite_Struct));
 	memset(&Sprite_Visible, 0x00, sizeof(Sprite_Visible));
 }
 
-
 /**
  * Render a line.
  */
-void Vdp::Render_Line(void)
+void Vdp::renderLine(void)
 {
 	// TODO: 32X-specific function.
-	if (VDP_Mode & VDP_MODE_M5)
-	{
+	if (d->VDP_Mode & VdpPrivate::VDP_MODE_M5) {
 		// Mode 5.
 		// TODO: Port to LibGens.
-		if (SysStatus._32X) { }
+		if (SysStatus._32X) {
 #if 0
-			VDP_Render_Line_m5_32X();
+			d->renderLine_m5_32X();
 #endif
-		else
-			Render_Line_m5();
-	}
-	else
-	{
+		} else {
+			d->renderLine_m5();
+		}
+	} else {
 		// Unsupported mode.
-		Render_Line_Err();
+		d->renderLine_Err();
 	}
-	
+
 	// Update the VDP render error cache.
-	Update_Err();
+	d->updateErr();
 }
 
 }

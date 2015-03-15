@@ -4,7 +4,7 @@
  *                                                                            *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                         *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                                *
- * Copyright (c) 2008-2014 by David Korth.                                    *
+ * Copyright (c) 2008-2015 by David Korth.                                    *
  *                                                                            *
  * This program is free software; you can redistribute it and/or modify       *
  * it under the terms of the GNU General Public License as published by       *
@@ -561,7 +561,7 @@ int EmuManager::closeRom(bool emitStateChanged)
 				// Save the previous source framebuffer.
 
 				m_romClosedFb = gqt4_emuContext->m_vdp->MD_Screen->ref();
-				m_romClosedBpp = gqt4_emuContext->m_vdp->m_palette.bpp();
+				m_romClosedBpp = gqt4_emuContext->m_vdp->bpp();
 			}
 
 			// Unreference the last previous source framebuffer.
@@ -833,7 +833,7 @@ void EmuManager::updateVBackend(void)
 
 	if (gqt4_emuContext) {
 		const LibGens::Vdp *vdp = gqt4_emuContext->m_vdp;
-		m_vBackend->vbUpdate(vdp->MD_Screen, vdp->m_palette.bpp());
+		m_vBackend->vbUpdate(vdp->MD_Screen, vdp->bpp());
 	} else {
 		// TODO: Get color depth from ConfigStore.
 		m_vBackend->vbUpdate(nullptr, LibGens::VdpPalette::BPP_32);

@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -23,32 +23,45 @@
 
 #include "Vdp.hpp"
 
+#include "macros/log_msg.h"
+#include "macros/common.h"
+
 // C includes. (C++ namespace)
 #include <cstring>
-
-// LOG_MSG() subsystem.
-#include "macros/log_msg.h"
-
-// ARRAY_SIZE(x)
-#include "macros/common.h"
 
 // ZOMG
 #include "libzomg/Zomg.hpp"
 
-namespace LibGens
-{
-	
-// VdpRend_Err private class.
+// VDP includes.
+#include "VdpPalette.hpp"
+
+// Private classes.
+#include "Vdp_p.hpp"
 #include "VdpRend_Err_p.hpp"
 
-/**
- * Initialize the VDP subsystem.
- * @param fb Existing MdFb to use. (If nullptr, allocate a new MdFb.)
- */
-Vdp::Vdp(MdFb *fb)
-	: MD_Screen(fb ? fb->ref() : new MdFb())
-	, d_err(new VdpRend_Err_Private(this))
+namespace LibGens {
+
+/** VdpPrivate **/
+
+// Default VDP emulation options.
+const VdpTypes::VdpEmuOptions_t VdpPrivate::def_vdpEmuOptions = {
+	VdpTypes::INTREND_FLICKER,	// intRendMode
+	true,				// borderColorEmulation
+	true,				// ntscV30Rolling
+	true,				// spriteLimits
+	// The following options should not be changed
+	// unless the user knows what they're doing!
+	false,				// zeroLengthDMA
+	true,				// vscrollBug
+	false,				// updatePaletteInVBlankOnly
+};
+
+VdpPrivate::VdpPrivate(Vdp *q)
+	: q(q)
+	, d_err(new VdpRend_Err_Private(q))
 {
+	// TODO: Initialize all private variables.
+
 	// Initialize the Horizontal Counter table.
 	unsigned int hc_val;
 	for (unsigned int hc = 0; hc < 512; hc++)
@@ -56,28 +69,84 @@ Vdp::Vdp(MdFb *fb)
 		// H32
 		hc_val = ((hc * 170) / 488) - 0x18;
 		H_Counter_Table[hc][0] = (uint8_t)hc_val;
-		
+
 		// H40
 		hc_val = ((hc * 205) / 488) - 0x1C;
 		H_Counter_Table[hc][1] = (uint8_t)hc_val;
 	}
-	
+
 	// Clear VDP_Reg before initializing the VDP.
 	// Valgrind complains if we don't do this.
 	memset(&VDP_Reg.reg[0], 0x00, sizeof(VDP_Reg.reg));
 	VDP_Mode = (VDP_Mode_t)0;
-	
+}
+
+VdpPrivate::~VdpPrivate()
+{
+	delete d_err;
+}
+
+/**
+ * Update VDP_Mode.
+ */
+void VdpPrivate::updateVdpMode(void)
+{
+	const VDP_Mode_t prevVdpMode = VDP_Mode;
+	const register uint8_t Set1 = VDP_Reg.m5.Set1;
+	const register uint8_t Set2 = VDP_Reg.m5.Set2;
+	VDP_Mode = (VDP_Mode_t)
+		   (((Set2 & 0x10) >> 4) |	// M1
+		    ((Set1 & 0x02))      |	// M2
+		    ((Set2 & 0x08) >> 1) |	// M3
+		    ((Set1 & 0x04) << 1) |	// M4/PSEL
+		    ((Set2 & 0x04) << 2));	// M5
+
+	if (!(Set2 & 0x08)) {
+		// V28 mode. Reset the NTSC V30 roll values.
+		q->VDP_Lines.NTSC_V30.Offset = 0;
+		q->VDP_Lines.NTSC_V30.VBlank_Div = 0;
+	}
+
+	// If the VDP mode has changed, CRam needs to be updated.
+	if (prevVdpMode != VDP_Mode) {
+		// Update the VDP mode variables.
+		if (VDP_Mode & VDP_MODE_M5) {
+			// Mode 5.
+			palette.setPalMode(VdpPalette::PALMODE_MD);
+			palette.setMdColorMask(!(VDP_Mode & 0x08));	// M4/PSEL
+		} else {
+			// TODO: Support other palette modes.
+		}
+	}
+
+	// Initialize Vdp::VDP_Lines.
+	// Don't reset the VDP current line variables here,
+	// since this might not be the beginning of the frame.
+	q->updateVdpLines(false);
+}
+
+/** Vdp **/
+
+/**
+ * Initialize the VDP subsystem.
+ * @param fb Existing MdFb to use. (If nullptr, allocate a new MdFb.)
+ */
+Vdp::Vdp(MdFb *fb)
+	: d(new VdpPrivate(this))
+	, options(VdpPrivate::def_vdpEmuOptions)
+	, DMAT_Length(0)
+	, MD_Screen(fb ? fb->ref() : new MdFb())
+{
 	// Initialize system status.
 	// TODO: Move SysStatus somewhere else?
 	SysStatus.data = 0;
-	
+
 	// Initialize the VDP rendering subsystem.
-	rend_init();
-	
+	d->rend_init();
+
 	// Reset the VDP.
 	reset();
 }
-
 
 /**
  * Shut down the VDP subsystem.
@@ -85,12 +154,11 @@ Vdp::Vdp(MdFb *fb)
 Vdp::~Vdp(void)
 {
 	// Shut down the VDP rendering subsystem.
-	rend_end();
-	
+	d->rend_end();
+
 	// Unreference the framebuffer.
 	MD_Screen->unref();
 }
-
 
 /**
  * Reset the VDP.
@@ -98,14 +166,14 @@ Vdp::~Vdp(void)
 void Vdp::reset(void)
 {
 	// Reset the VDP rendering arrays.
-	rend_reset();
+	d->rend_reset();
 
 	// Clear VRam and VSRam.
-	memset(&VRam, 0x00, sizeof(VRam));
-	memset(&VSRam, 0x00, sizeof(VSRam));
+	memset(&d->VRam, 0x00, sizeof(d->VRam));
+	memset(&d->VSRam, 0x00, sizeof(d->VSRam));
 
 	// Reset the palette. (Includes CRam.)
-	m_palette.reset();
+	d->palette.reset();
 
 	/**
 	 * VDP registers.
@@ -116,39 +184,228 @@ void Vdp::reset(void)
 	 * - 0x0F (AutoInc): 0x02 (auto-increment by 2 on memory access)
 	 * All other registers are set to 0x00 by default.
 	 */
-	static const uint8_t vdp_reg_init_m5[24] =
-	{
+	static const uint8_t vdp_reg_init_m5[24] = {
 		0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0xFF, 0x00, 0x81, 0x00, 0x00, 0x02,
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 
 	for (int i = 0; i < ARRAY_SIZE(vdp_reg_init_m5); i++) {
-		setReg(i, vdp_reg_init_m5[i]);
+		d->setReg(i, vdp_reg_init_m5[i]);
 	}
 
 	// Reset the DMA variables.
 	DMAT_Length = 0;
-	DMAT_Type = DMAT_MEM_TO_VRAM;
+	d->DMAT_Type = VdpPrivate::DMAT_MEM_TO_VRAM;
 
 	// VDP status register.
 	// (Maintain the status of the PAL/NTSC bit.)
-	const bool isPal = Reg_Status.isPal();
-	Reg_Status.reset(isPal);
+	const bool isPal = d->Reg_Status.isPal();
+	d->Reg_Status.reset(isPal);
 
-	// Other variables.
-	VDP_Int = 0;
-
-	// VDP control struct.
-	VDP_Ctrl.reset();
-
-	// Set the VDP update flags.
-	MarkVRamDirty();
+	// Reset more stuff.
+	d->VDP_Int = 0;		// No pending interrupts.
+	d->VDP_Ctrl.reset();	// VDP control struct.
+	d->markVRamDirty();	// Force a VRAM update.
 
 	// Initialize the Horizontal Interrupt counter.
-	HInt_Counter = VDP_Reg.m5.H_Int;
+	d->HInt_Counter = d->VDP_Reg.m5.H_Int;
 }
 
+// PAL/NTSC.
+bool Vdp::isPal(void) const
+	{ return d->Reg_Status.isPal(); }
+bool Vdp::isNtsc(void) const
+	{ return d->Reg_Status.isNtsc(); }
+void Vdp::setPal(void)
+	{ d->Reg_Status.setBit(VdpStatus::VDP_STATUS_PAL, true); }
+void Vdp::setNtsc(void)
+	{ d->Reg_Status.setBit(VdpStatus::VDP_STATUS_PAL, false); }
+void Vdp::setVideoMode(bool videoMode)
+	{ d->Reg_Status.setBit(VdpStatus::VDP_STATUS_PAL, videoMode); }
+
+// Display resolution.
+// Required by the frontend for proper rendering.
+// Also used by VdpRend_Err.
+int Vdp::getHPix(void) const
+	{ return d->H_Pix; }
+int Vdp::getHPixBegin(void) const
+	{ return d->H_Pix_Begin; }
+int Vdp::getVPix(void) const
+	{ return VDP_Lines.totalVisibleLines; }
+
+/**
+ * Update VDP_Lines based on CPU and VDP mode settings.
+ * @param resetCurrent If true, reset VDP_Lines.Display.Current and VDP_Lines.Visible.Current.
+ */
+void Vdp::updateVdpLines(bool resetCurrent)
+{
+	// Arrays of values.
+	// Indexes: 0 == 192 lines; 1 == 224 lines; 2 == 240 lines.
+	static const int VisLines_Total[3] = {192, 224, 240};
+	static const int VisLines_Border_Size[3] = {24, 8, 0};
+	//static const int VisLines_Current_NTSC[3] = {-40, -24, 0};
+	//static const int VisLines_Current_PAL[3] = {-67+1, -51+1, -43+1};
+
+	// Initialize VDP_Lines.Display.
+	// TODO: 312 or 313 for PAL?
+	VDP_Lines.totalDisplayLines = (d->Reg_Status.isPal() ? 312 : 262);
+
+	// Line offset.
+	int LineOffset;
+
+	// Check the current video mode.
+	// NOTE: Unlike Gens/GS, we don't check if a ROM is loaded because
+	// the VDP code isn't used at all in Gens/GS II during "idle".
+	if (d->VDP_Mode & VdpPrivate::VDP_MODE_M5) {
+		// Mode 5. Must be either 224 lines or 240 lines.
+		if (d->VDP_Mode & VdpPrivate::VDP_MODE_M3)
+			LineOffset = 2; // 240 lines.
+		else
+			LineOffset = 1; // 224 lines.
+	} else {
+		// Mode 4 or TMS9918 mode.
+		// Mode 4 may be 192 lines, 224 lines, or 240 lines.
+		// Modes 0-3 may only be 192 lines.
+		// TODO: If emulating SMS1, disable 224-line and 240-line modes.
+		switch (d->VDP_Mode) {
+			case VdpPrivate::VDP_MODE_M4_224:
+				// Mode 4: 224 lines.
+				LineOffset = 1;
+				break;
+			case VdpPrivate::VDP_MODE_M4_240:
+				// Mode 4: 240 lines.
+				LineOffset = 2;
+				break;
+			default:
+				// Modes 0-4: 192 lines.
+				LineOffset = 0;
+				break;
+		}
+	}
+
+	VDP_Lines.totalVisibleLines = VisLines_Total[LineOffset];
+	VDP_Lines.Border.borderSize = VisLines_Border_Size[LineOffset];
+
+	// Calculate border parameters.
+	if (VDP_Lines.Border.borderSize > 0) {
+		VDP_Lines.Border.borderStartBottom = VDP_Lines.totalVisibleLines;
+		VDP_Lines.Border.borderEndBottom = VDP_Lines.Border.borderStartBottom + VDP_Lines.Border.borderSize - 1;
+
+		VDP_Lines.Border.borderEndTop = VDP_Lines.totalDisplayLines - 1;
+		VDP_Lines.Border.borderStartTop = VDP_Lines.Border.borderEndTop - VDP_Lines.Border.borderSize + 1;
+	} else {
+		// No border.
+		VDP_Lines.Border.borderStartBottom = -1;
+		VDP_Lines.Border.borderEndBottom = -1;
+		VDP_Lines.Border.borderStartTop = -1;
+		VDP_Lines.Border.borderEndTop = -1;
+	}
+
+	if (resetCurrent) {
+		// Reset VDP_Lines.currentLine.
+		// NOTE: VDP starts at visible line 0.
+		VDP_Lines.currentLine = 0;
+	}
+
+	// Check interlaced mode.
+	d->Interlaced = (VdpTypes::Interlaced_t)
+			(((d->VDP_Reg.m5.Set4 & 0x02) >> 1) |	// LSM0
+			 ((d->VDP_Reg.m5.Set4 & 0x04) >> 1));	// LSM1
+}
+
+/**
+ * Check if VBlank is allowed in NTSC V30 mode.
+ */
+void Vdp::Check_NTSC_V30_VBlank(void)
+{
+	// TODO: Only do this in Mode 5, and maybe Mode 4 if SMS2 is in use.
+	if (d->Reg_Status.isPal() || !(d->VDP_Reg.m5.Set2 & 0x08)) {
+		// Either we're in PAL mode, where V30 is allowed, or V30 isn't set.
+		// VBlank is always OK.
+		// TODO: Clear the NTSC V30 offset?
+		VDP_Lines.NTSC_V30.VBlank_Div = 0;
+		return;
+	}
+
+	// NTSC V30 mode. Simulate screen rolling.
+
+	// If VDP_Lines.NTSC_V30.VBlank is set, we can't do a VBlank.
+	// This effectively divides VBlank into 30 Hz.
+	// See http://gendev.spritesmind.net/forum/viewtopic.php?p=8128#8128 for more information.
+	VDP_Lines.NTSC_V30.VBlank_Div = !VDP_Lines.NTSC_V30.VBlank_Div;
+
+	if (options.ntscV30Rolling) {
+		VDP_Lines.NTSC_V30.Offset += 11;	// TODO: Figure out a good offset increment.
+		VDP_Lines.NTSC_V30.Offset %= 240;	// Prevent overflow.
+	} else {
+		// Rolling is disabled.
+		VDP_Lines.NTSC_V30.Offset = 0;
+	}
+}
+
+/**
+ * Start of frame.
+ * This updates the "Interlaced" flag and HINT counter,
+ * and clears the VBLANK flag.
+ *
+ * "Interlaced" flag behavior: (VDP_STATUS_ODD)
+ * - If interlaced mode is not set, the flag is cleared.
+ * - If interlaced mode is set, the flag is toggled.
+ * TODO: Move to VdpIo.cpp?
+ */
+void Vdp::startFrame(void)
+{
+	// Update the "Interlaced" flag.
+	if (d->VDP_Reg.m5.Set4 & 0x06)
+		d->Reg_Status.toggleBit(VdpStatus::VDP_STATUS_ODD);
+	else
+		d->Reg_Status.setBit(VdpStatus::VDP_STATUS_ODD, false);
+
+	d->HInt_Counter = d->VDP_Reg.m5.H_Int;
+	d->Reg_Status.setBit(VdpStatus::VDP_STATUS_VBLANK, false);
+}
+
+/**
+ * Set a bit in the status register.
+ * Wrapper for VdpStatus::setBit().
+ * Needed because the emulation loops toggle HBLANK/VBLANK.
+ * @param bit Status bit to set.
+ * @param value New value.
+ * TODO: Move to VdpIo.cpp?
+ */
+void Vdp::setStatusBit(VdpStatus::StatusBits bit, bool value)
+{
+	d->Reg_Status.setBit(bit, value);
+}
+
+/**
+ * Decrement the HINT counter.
+ * If it goes below 0, an HBLANK interrupt will occur.
+ * @param reload If true, reload the HINT counter afterwards.
+ * TODO: Move to VdpIo.cpp?
+ */
+void Vdp::decrementHIntCounter(bool reload)
+{
+	if (--d->HInt_Counter < 0) {
+		updateIRQLine(0x4);
+		if (reload) {
+			d->HInt_Counter = d->VDP_Reg.m5.H_Int;
+		}
+	}
+}
+
+// FIXME: Bpp should be a property of the framebuffer.
+VdpPalette::ColorDepth Vdp::bpp(void) const
+{
+	return d->palette.bpp();
+}
+void Vdp::setBpp(VdpPalette::ColorDepth bpp)
+{
+	d->palette.setBpp(bpp);
+}
+
+/** ZOMG!!1! **/
 
 /**
  * Save the VDP state. (MD mode)
@@ -162,15 +419,15 @@ void Vdp::zomgSaveMD(LibZomg::Zomg *zomg) const
 
 	// Save the user-accessible VDP registers.
 	// TODO: Move "24" to a const somewhere.
-	zomg->saveVdpReg(VDP_Reg.reg, 24);
+	zomg->saveVdpReg(d->VDP_Reg.reg, 24);
 
 	// Save the internal registers.
 	Zomg_VdpCtrl_16_t ctrl_reg;
 	ctrl_reg.header = ZOMG_VDPCTRL_16_HEADER;
-	ctrl_reg.ctrl_latch = !!VDP_Ctrl.ctrl_latch;
-	ctrl_reg.code = VDP_Ctrl.code;
-	ctrl_reg.address = VDP_Ctrl.address;
-	ctrl_reg.status = Reg_Status.read_raw();
+	ctrl_reg.ctrl_latch = !!(d->VDP_Ctrl.ctrl_latch);
+	ctrl_reg.code = d->VDP_Ctrl.code;
+	ctrl_reg.address = d->VDP_Ctrl.address;
+	ctrl_reg.status = d->Reg_Status.read_raw();
 
 	// TODO: Implement the FIFO.
 	memset(ctrl_reg.data_fifo, 0x00, sizeof(ctrl_reg.data_fifo));
@@ -184,15 +441,15 @@ void Vdp::zomgSaveMD(LibZomg::Zomg *zomg) const
 	// TODO: Save DMA status.
 
 	// Save VRam.
-	zomg->saveVRam(VRam.u16, sizeof(VRam.u16), ZOMG_BYTEORDER_16H);
+	zomg->saveVRam(d->VRam.u16, sizeof(d->VRam.u16), ZOMG_BYTEORDER_16H);
 
 	// Save CRam.
 	Zomg_CRam_t cram;
-	m_palette.zomgSaveCRam(&cram);
+	d->palette.zomgSaveCRam(&cram);
 	zomg->saveCRam(&cram, ZOMG_BYTEORDER_16H);
 
 	// Save VSRam. (MD only)
-	zomg->saveMD_VSRam(VSRam.u16, sizeof(VSRam.u16), ZOMG_BYTEORDER_16H);
+	zomg->saveMD_VSRam(d->VSRam.u16, sizeof(d->VSRam.u16), ZOMG_BYTEORDER_16H);
 }
 
 
@@ -215,7 +472,7 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 	// (Calculate DMAT_Type.)
 	// Writing to register 23 changes the DMA status.
 	for (int i = 23; i >= 0; i--) {
-		setReg(i, vdp_reg[i]);
+		d->setReg(i, vdp_reg[i]);
 	}
 
 	// Load the internal registers.
@@ -223,10 +480,10 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 	Zomg_VdpCtrl_16_t ctrl_reg;
 	int ret = zomg->loadVdpCtrl_16(&ctrl_reg);
 	if (ret > 0) {
-		VDP_Ctrl.ctrl_latch = !!ctrl_reg.ctrl_latch;
-		VDP_Ctrl.code = ctrl_reg.code;
-		VDP_Ctrl.address = ctrl_reg.address;
-		Reg_Status.write_raw(ctrl_reg.status);
+		d->VDP_Ctrl.ctrl_latch = !!ctrl_reg.ctrl_latch;
+		d->VDP_Ctrl.code = ctrl_reg.code;
+		d->VDP_Ctrl.address = ctrl_reg.address;
+		d->Reg_Status.write_raw(ctrl_reg.status);
 
 		// TODO: Implement the FIFO.
 	} else {
@@ -236,17 +493,17 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 	}
 
 	// Load VRam.
-	zomg->loadVRam(VRam.u16, sizeof(VRam.u16), ZOMG_BYTEORDER_16H);
-	MarkVRamDirty();
+	zomg->loadVRam(d->VRam.u16, sizeof(d->VRam.u16), ZOMG_BYTEORDER_16H);
+	d->markVRamDirty();
 
 	// Load CRam.
 	Zomg_CRam_t cram;
 	zomg->loadCRam(&cram, ZOMG_BYTEORDER_16H);
-	m_palette.zomgRestoreCRam(&cram);
+	d->palette.zomgRestoreCRam(&cram);
 
 	// Load VSRam. (MD only)
 	// FIXME: 80 bytes normally; 128 bytes for Genesis 3.
-	zomg->loadMD_VSRam(VSRam.u16, sizeof(VSRam.u16), ZOMG_BYTEORDER_16H);
+	zomg->loadMD_VSRam(d->VSRam.u16, sizeof(d->VSRam.u16), ZOMG_BYTEORDER_16H);
 }
 
 }

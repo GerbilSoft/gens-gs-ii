@@ -40,7 +40,7 @@ namespace VdpTypes
 	// VDP registers.
 	union VdpReg_t {
 		uint8_t reg[24];
-		struct m5_t {
+		struct {
 			/**
 			 * Mode 5 (MD) registers.
 			 */
@@ -213,10 +213,9 @@ namespace VdpTypes
 			uint8_t DMA_Src_Adr_L;
 			uint8_t DMA_Src_Adr_M;
 			uint8_t DMA_Src_Adr_H;
-		};
-		m5_t m5;
+		} m5;
 
-		struct m4_t {
+		struct {
 			/**
 			* Mode 4 (SMS) registers.
 			* NOTE: Mode 4 is currently not implemented.
@@ -239,8 +238,7 @@ namespace VdpTypes
 			uint8_t H_Scroll;	// Horizontal scroll. [8-bit]
 			uint8_t V_Scroll;	// Vertical scroll. [8-bit]
 			uint8_t H_Int;		// H Interrupt. [8-bit]
-		};
-		m4_t m4;
+		} m4;
 	};
 
 	/**

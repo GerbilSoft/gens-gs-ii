@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -85,8 +85,10 @@
 #define TILE_SHIFT7	0
 #endif
 
-namespace LibGens
-{
+// Vdp private class.
+#include "Vdp_p.hpp"
+
+namespace LibGens {
 
 /**
  * Get the current line number, adjusted for interlaced display.
@@ -94,16 +96,16 @@ namespace LibGens
  * @return Line number.
  */
 template<bool interlaced>
-FORCE_INLINE int Vdp::T_GetLineNumber(void) const
+FORCE_INLINE int VdpPrivate::T_GetLineNumber(void) const
 {
 	// Get the current line number.
-	int vdp_line = VDP_Lines.currentLine;
-	
+	int vdp_line = q->VDP_Lines.currentLine;
+
 	if (interlaced) {
 		// Adjust the VDP line number for Flickering Interlaced display.
 		vdp_line *= 2;
 
-		switch (options.intRendMode) {
+		switch (q->options.intRendMode) {
 			case VdpTypes::INTREND_EVEN:
 			default:
 				// Even lines only.
@@ -127,7 +129,7 @@ FORCE_INLINE int Vdp::T_GetLineNumber(void) const
 }
 
 /**
- * Vdp::T_PutPixel_P0(): Put a pixel in background graphics layer 0. (low-priority)
+ * Put a pixel in background graphics layer 0. (low-priority)
  * @param plane		[in] True for Scroll A; false for Scroll B.
  * @param h_s		[in] Highlight/Shadow enable.
  * @param pat_pixnum	[in] Pattern pixel number.
@@ -138,33 +140,31 @@ FORCE_INLINE int Vdp::T_GetLineNumber(void) const
  * @param palette	[in] Palette number * 16.
  */
 template<bool plane, bool h_s, int pat_pixnum, uint32_t mask, int shift>
-FORCE_INLINE void Vdp::T_PutPixel_P0(int disp_pixnum, uint32_t pattern, unsigned int palette)
+FORCE_INLINE void VdpPrivate::T_PutPixel_P0(int disp_pixnum, uint32_t pattern, unsigned int palette)
 {
 	// Check if this is a transparent pixel.
 	if (!(pattern & mask))
 		return;
-	
+
 	// Check the layer bits of the current pixel.
 	const unsigned int LineBuf_pixnum = (disp_pixnum + pat_pixnum);
 	uint8_t layer_bits = LineBuf.px[LineBuf_pixnum].layer;
-	
+
 	// Check if this pixel is masked.
-	if (plane && (layer_bits & (LINEBUF_PRIO_B | LINEBUF_WIN_B)))
-	{
+	if (plane && (layer_bits & (LINEBUF_PRIO_B | LINEBUF_WIN_B))) {
 		// Scroll A: Either the pixel has priority set,
 		// or the pixel is a window pixel.
 		return;
 	}
-	
+
 	// Shift the pattern data.
 	uint8_t pat8 = (pattern >> shift) & 0x0F;
-	
+
 	// Apply palette data.
 	pat8 |= palette;
-	
+
 	// If Highlight/Shadow is enabled, adjust the shadow flags.
-	if (h_s)
-	{
+	if (h_s) {
 		// Scroll A: Mark as shadow if the layer is marked as shadow.
 		// Scroll B: Always mark as shadow.
 		if (plane)
@@ -172,14 +172,13 @@ FORCE_INLINE void Vdp::T_PutPixel_P0(int disp_pixnum, uint32_t pattern, unsigned
 		else
 			pat8 |= LINEBUF_SHAD_B;
 	}
-	
+
 	// Write the new pixel to the line buffer.
 	LineBuf.px[LineBuf_pixnum].pixel = pat8;
 }
 
-
 /**
- * Vdp::T_PutPixel_P1(): Put a pixel in background graphics layer 1. (high-priority)
+ * Put a pixel in background graphics layer 1. (high-priority)
  * @param plane		[in] True for Scroll A; false for Scroll B.
  * @param h_s		[in] Highlight/Shadow enable.
  * @param pat_pixnum	[in] Pattern pixel number.
@@ -190,25 +189,24 @@ FORCE_INLINE void Vdp::T_PutPixel_P0(int disp_pixnum, uint32_t pattern, unsigned
  * @param palette	[in] Palette number * 16.
  */
 template<bool plane, bool h_s, int pat_pixnum, uint32_t mask, int shift>
-FORCE_INLINE void Vdp::T_PutPixel_P1(int disp_pixnum, uint32_t pattern, unsigned int palette)
+FORCE_INLINE void VdpPrivate::T_PutPixel_P1(int disp_pixnum, uint32_t pattern, unsigned int palette)
 {
 	// Check if this is a transparent pixel.
 	unsigned int px = (pattern & mask);
 	if (px == 0)
 		return;
-	
+
 	const unsigned int LineBuf_pixnum = (disp_pixnum + pat_pixnum);
-	
-	if (plane)
-	{
+
+	if (plane) {
 		// Scroll A: If the pixel is a Window pixel, don't do anything.
 		if (LineBuf.px[LineBuf_pixnum].layer & LINEBUF_WIN_B)
 			return;
 	}
-	
+
 	// Shift the pixel.
 	px >>= shift;
-	
+
 	// Update the pixel:
 	// - Add palette information.
 	// - Mark the pixel as priority.
@@ -217,9 +215,8 @@ FORCE_INLINE void Vdp::T_PutPixel_P1(int disp_pixnum, uint32_t pattern, unsigned
 	LineBuf.u16[LineBuf_pixnum] = (uint16_t)px;
 }
 
-
 /**
- * Vdp::T_PutPixel_Sprite(): Put a pixel in the sprite layer.
+ * Put a pixel in the sprite layer.
  * @param priority	[in] Sprite priority.
  * @param h_s		[in] Highlight/Shadow enable.
  * @param pat_pixnum	[in] Pattern pixel number.
@@ -231,80 +228,68 @@ FORCE_INLINE void Vdp::T_PutPixel_P1(int disp_pixnum, uint32_t pattern, unsigned
  * @return Linebuffer byte.
  */
 template<bool priority, bool h_s, int pat_pixnum, uint32_t mask, int shift>
-FORCE_INLINE uint8_t Vdp::T_PutPixel_Sprite(int disp_pixnum, uint32_t pattern, unsigned int palette)
+FORCE_INLINE uint8_t VdpPrivate::T_PutPixel_Sprite(int disp_pixnum, uint32_t pattern, unsigned int palette)
 {
 	// Check if this is a transparent pixel.
 	unsigned int px = (pattern & mask);
 	if (px == 0)
 		return 0;
-	
+
 	// Get the pixel number in the linebuffer.
 	const unsigned int LineBuf_pixnum = (disp_pixnum + pat_pixnum + 8);
 	uint8_t layer_bits = LineBuf.px[LineBuf_pixnum].layer;
-	
-	if (layer_bits & ((LINEBUF_PRIO_B | LINEBUF_SPR_B) - priority))
-	{
+
+	if (layer_bits & ((LINEBUF_PRIO_B | LINEBUF_SPR_B) - priority)) {
 		// Priority bit is set. (TODO: Is that what this means?)
-		if (!priority)
-		{
+		if (!priority) {
 			// Set the sprite bit in the linebuffer.
 			LineBuf.px[LineBuf_pixnum].layer |= LINEBUF_SPR_B;
 		}
-		
+
 		// Return the original linebuffer priority data.
 		return layer_bits;
 	}
-	
+
 	// Shift the pixel and apply the palette.
 	px = ((px >> shift) | palette);
-	
-	if (h_s)
-	{
+
+	if (h_s) {
 		// Highlight/Shadow enabled.
-		if (px == 0x3E)
-		{
+		if (px == 0x3E) {
 			// Palette 3, color 14: Highlight. (Sprite pixel doesn't show up.)
 			LineBuf.u16[LineBuf_pixnum] |= LINEBUF_HIGH_W;
 			return 0;
-		}
-		else if (px == 0x3F)
-		{
+		} else if (px == 0x3F) {
 			// Palette 3, color 15: Shadow. (Sprite pixel doesn't show up.)
 			LineBuf.u16[LineBuf_pixnum] |= LINEBUF_SHAD_W;
 			return 0;
 		}
-		
+
 		// Apply highlight/shadow based on priority.
-		if (!priority)
-		{
+		if (!priority) {
 			// Low priority. Pixel can be normal, shadowed, or highlighted.
 			layer_bits &= (LINEBUF_SHAD_B | LINEBUF_HIGH_B);
-			
-			if ((px & 0x0F) == 0x0E)
-			{
+
+			if ((px & 0x0F) == 0x0E) {
 				// Color 14 in palettes 0-2 are never shadowed.
 				layer_bits &= ~LINEBUF_SHAD_B;
 			}
-		}
-		else
-		{
+		} else {
 			// High priority. Pixel can either be normal or highlighted.
 			layer_bits &= LINEBUF_HIGH_B;
 		}
-		
+
 		// Apply the layer bits.
 		px |= layer_bits;
 	}
-	
+
 	// Mark the pixel as a sprite pixel.
 	px |= LINEBUF_SPR_W;
-	
+
 	// Save the pixel in the linebuffer.
 	LineBuf.u16[LineBuf_pixnum] = px;
-	
 	return 0;
 }
-
 
 #define LINEBUF_HIGH_D	0x80808080
 #define LINEBUF_SHAD_D	0x40404040
@@ -312,9 +297,8 @@ FORCE_INLINE uint8_t Vdp::T_PutPixel_Sprite(int disp_pixnum, uint32_t pattern, u
 #define LINEBUF_SPR_D	0x20002000
 #define LINEBUF_WIN_D	0x02000200
 
-
 /**
- * Vdp::T_PutLine_P0(): Put a line in background graphics layer 0. (low-priority)
+ * Put a line in background graphics layer 0. (low-priority)
  * @param plane		[in] True for Scroll A; false for Scroll B.
  * @param h_s		[in] Highlight/Shadow enable.
  * @param flip		[in] True to flip the line horizontally.
@@ -323,30 +307,26 @@ FORCE_INLINE uint8_t Vdp::T_PutPixel_Sprite(int disp_pixnum, uint32_t pattern, u
  * @param palette	[in] Palette number * 16.
  */
 template<bool plane, bool h_s, bool flip>
-FORCE_INLINE void Vdp::T_PutLine_P0(int disp_pixnum, uint32_t pattern, int palette)
+FORCE_INLINE void VdpPrivate::T_PutLine_P0(int disp_pixnum, uint32_t pattern, int palette)
 {
-	if (!plane)
-	{
+	if (!plane) {
 		// Scroll B.
 		// If ScrollB_Low is disabled, don't do anything.
 		if (!(VDP_Layers & VdpTypes::VDP_LAYER_SCROLLB_LOW))
 			return;
-	}
-	else
-	{
+	} else {
 		// Scroll A.
 		// If ScrollA Low is disabled. don't do anything.
 		if (!(VDP_Layers & VdpTypes::VDP_LAYER_SCROLLA_LOW))
 			return;
 	}
-	
+
 	// Don't do anything if the pattern is empty.
 	if (pattern == 0)
 		return;
-	
+
 	// Put the pixels.
-	if (!flip)
-	{
+	if (!flip) {
 		// No flip.
 		T_PutPixel_P0<plane, h_s, 0, TILE_PX0, TILE_SHIFT0>(disp_pixnum, pattern, palette);
 		T_PutPixel_P0<plane, h_s, 1, TILE_PX1, TILE_SHIFT1>(disp_pixnum, pattern, palette);
@@ -356,9 +336,7 @@ FORCE_INLINE void Vdp::T_PutLine_P0(int disp_pixnum, uint32_t pattern, int palet
 		T_PutPixel_P0<plane, h_s, 5, TILE_PX5, TILE_SHIFT5>(disp_pixnum, pattern, palette);
 		T_PutPixel_P0<plane, h_s, 6, TILE_PX6, TILE_SHIFT6>(disp_pixnum, pattern, palette);
 		T_PutPixel_P0<plane, h_s, 7, TILE_PX7, TILE_SHIFT7>(disp_pixnum, pattern, palette);
-	}
-	else
-	{
+	} else {
 		// Horizontal flip.
 		T_PutPixel_P0<plane, h_s, 0, TILE_PX7, TILE_SHIFT7>(disp_pixnum, pattern, palette);
 		T_PutPixel_P0<plane, h_s, 1, TILE_PX6, TILE_SHIFT6>(disp_pixnum, pattern, palette);
@@ -371,9 +349,8 @@ FORCE_INLINE void Vdp::T_PutLine_P0(int disp_pixnum, uint32_t pattern, int palet
 	}
 }
 
-
 /**
- * Vdp::T_PutLine_P1(): Put a line in background graphics layer 1. (high-priority)
+ * Put a line in background graphics layer 1. (high-priority)
  * @param plane		[in] True for Scroll A; false for Scroll B.
  * @param h_s		[in] Highlight/Shadow enable.
  * @param flip		[in] True to flip the line horizontally.
@@ -382,25 +359,22 @@ FORCE_INLINE void Vdp::T_PutLine_P0(int disp_pixnum, uint32_t pattern, int palet
  * @param palette	[in] Palette number * 16.
  */
 template<bool plane, bool h_s, bool flip>
-FORCE_INLINE void Vdp::T_PutLine_P1(int disp_pixnum, uint32_t pattern, int palette)
+FORCE_INLINE void VdpPrivate::T_PutLine_P1(int disp_pixnum, uint32_t pattern, int palette)
 {
-	if (!plane)
-	{
+	if (!plane) {
 		// Scroll B.
 		// Clear the line.
 		memset(&LineBuf.u16[disp_pixnum], 0x00, 8*2);
-		
+
 		// If ScrollB_Low is disabled, don't do anything.
 		if (!(VDP_Layers & VdpTypes::VDP_LAYER_SCROLLB_LOW))
 			return;
-	}
-	else
-	{
+	} else {
 		// Scroll A.
 		// If ScrollA Low is disabled. don't do anything.
 		if (!(VDP_Layers & VdpTypes::VDP_LAYER_SCROLLA_LOW))
 			return;
-		
+
 		// AND the linebuffer with ~LINEBUF_SHAD_W.
 		// TODO: Optimize this to use 32-bit operations instead of 16-bit.
 		LineBuf.u16[disp_pixnum]   &= ~LINEBUF_SHAD_W;
@@ -412,14 +386,13 @@ FORCE_INLINE void Vdp::T_PutLine_P1(int disp_pixnum, uint32_t pattern, int palet
 		LineBuf.u16[disp_pixnum+6] &= ~LINEBUF_SHAD_W;
 		LineBuf.u16[disp_pixnum+7] &= ~LINEBUF_SHAD_W;
 	}
-	
+
 	// Don't do anything if the pattern is empty.
 	if (pattern == 0)
 		return;
-	
+
 	// Put the pixels.
-	if (!flip)
-	{
+	if (!flip) {
 		// No flip.
 		T_PutPixel_P1<plane, h_s, 0, TILE_PX0, TILE_SHIFT0>(disp_pixnum, pattern, palette);
 		T_PutPixel_P1<plane, h_s, 1, TILE_PX1, TILE_SHIFT1>(disp_pixnum, pattern, palette);
@@ -429,9 +402,7 @@ FORCE_INLINE void Vdp::T_PutLine_P1(int disp_pixnum, uint32_t pattern, int palet
 		T_PutPixel_P1<plane, h_s, 5, TILE_PX5, TILE_SHIFT5>(disp_pixnum, pattern, palette);
 		T_PutPixel_P1<plane, h_s, 6, TILE_PX6, TILE_SHIFT6>(disp_pixnum, pattern, palette);
 		T_PutPixel_P1<plane, h_s, 7, TILE_PX7, TILE_SHIFT7>(disp_pixnum, pattern, palette);
-	}
-	else
-	{
+	} else {
 		// Horizontal flip.
 		T_PutPixel_P1<plane, h_s, 0, TILE_PX7, TILE_SHIFT7>(disp_pixnum, pattern, palette);
 		T_PutPixel_P1<plane, h_s, 1, TILE_PX6, TILE_SHIFT6>(disp_pixnum, pattern, palette);
@@ -444,9 +415,8 @@ FORCE_INLINE void Vdp::T_PutLine_P1(int disp_pixnum, uint32_t pattern, int palet
 	}
 }
 
-
 /**
- * Vdp::T_PutLine_Sprite(): Put a line in the sprite layer.
+ * Put a line in the sprite layer.
  * @param priority	[in] Sprite priority. (false == low, true == high)
  * @param h_s		[in] Highlight/Shadow enable.
  * @param flip		[in] True to flip the line horizontally.
@@ -455,19 +425,20 @@ FORCE_INLINE void Vdp::T_PutLine_P1(int disp_pixnum, uint32_t pattern, int palet
  * @param palette	[in] Palette number * 16.
  */
 template<bool priority, bool h_s, bool flip>
-FORCE_INLINE void Vdp::T_PutLine_Sprite(int disp_pixnum, uint32_t pattern, int palette)
+FORCE_INLINE void VdpPrivate::T_PutLine_Sprite(int disp_pixnum, uint32_t pattern, int palette)
 {
 	// Check if the sprite layer is disabled.
-	if (!(VDP_Layers & (priority ? VdpTypes::VDP_LAYER_SPRITE_HIGH : VdpTypes::VDP_LAYER_SPRITE_LOW)))
-	{
+	const unsigned int priority_check = (priority
+			? VdpTypes::VDP_LAYER_SPRITE_HIGH
+			: VdpTypes::VDP_LAYER_SPRITE_LOW);
+	if (!(VDP_Layers & priority_check)) {
 		// Sprite layer is disabled.
 		return;
 	}
-	
+
 	// Put the sprite pixels.
 	uint8_t status = 0;
-	if (!flip)
-	{
+	if (!flip) {
 		// No flip.
 		status |= T_PutPixel_Sprite<priority, h_s, 0, TILE_PX0, TILE_SHIFT0>(disp_pixnum, pattern, palette);
 		status |= T_PutPixel_Sprite<priority, h_s, 1, TILE_PX1, TILE_SHIFT1>(disp_pixnum, pattern, palette);
@@ -477,9 +448,7 @@ FORCE_INLINE void Vdp::T_PutLine_Sprite(int disp_pixnum, uint32_t pattern, int p
 		status |= T_PutPixel_Sprite<priority, h_s, 5, TILE_PX5, TILE_SHIFT5>(disp_pixnum, pattern, palette);
 		status |= T_PutPixel_Sprite<priority, h_s, 6, TILE_PX6, TILE_SHIFT6>(disp_pixnum, pattern, palette);
 		status |= T_PutPixel_Sprite<priority, h_s, 7, TILE_PX7, TILE_SHIFT7>(disp_pixnum, pattern, palette);
-	}
-	else
-	{
+	} else {
 		// Horizontal flip.
 		status |= T_PutPixel_Sprite<priority, h_s, 0, TILE_PX7, TILE_SHIFT7>(disp_pixnum, pattern, palette);
 		status |= T_PutPixel_Sprite<priority, h_s, 1, TILE_PX6, TILE_SHIFT6>(disp_pixnum, pattern, palette);
@@ -490,7 +459,7 @@ FORCE_INLINE void Vdp::T_PutLine_Sprite(int disp_pixnum, uint32_t pattern, int p
 		status |= T_PutPixel_Sprite<priority, h_s, 6, TILE_PX1, TILE_SHIFT1>(disp_pixnum, pattern, palette);
 		status |= T_PutPixel_Sprite<priority, h_s, 7, TILE_PX0, TILE_SHIFT0>(disp_pixnum, pattern, palette);
 	}
-	
+
 	// Check for sprite collision.
 	if (status & LINEBUF_SPR_B)
 		Reg_Status.setBit(VdpStatus::VDP_STATUS_COLLISION, true);
@@ -502,11 +471,11 @@ FORCE_INLINE void Vdp::T_PutLine_Sprite(int disp_pixnum, uint32_t pattern, int p
  * @return X offset.
  */
 template<bool plane>
-FORCE_INLINE uint16_t Vdp::T_Get_X_Offset(void)
+FORCE_INLINE uint16_t VdpPrivate::T_Get_X_Offset(void)
 {
 	// NOTE: Multiply by 4 for 16-bit access.
 	// * 2 == select A/B; * 2 == 16-bit
-	const unsigned int H_Scroll_Offset = (VDP_Lines.currentLine & H_Scroll_Mask) * 4;
+	const unsigned int H_Scroll_Offset = (q->VDP_Lines.currentLine & H_Scroll_Mask) * 4;
 
 	if (plane) {
 		// Scroll A.
@@ -525,7 +494,7 @@ FORCE_INLINE uint16_t Vdp::T_Get_X_Offset(void)
  * @return Y offset, in pixels. (Includes cell offset and fine offset.)
  */
 template<bool plane, bool interlaced>
-FORCE_INLINE unsigned int Vdp::T_Get_Y_Offset(int cell_cur)
+FORCE_INLINE unsigned int VdpPrivate::T_Get_Y_Offset(int cell_cur)
 {
 	// NOTE: Cell offset masking is handled in T_Get_Y_Cell_Offset().
 	// We don't need to do it here.
@@ -535,7 +504,7 @@ FORCE_INLINE unsigned int Vdp::T_Get_Y_Offset(int cell_cur)
 		// Cell number is invalid.
 		// This usually happens if 2-cell VScroll is used
 		// at the same time as HScroll.
-		if (options.vscrollBug) {
+		if (q->options.vscrollBug) {
 			/**
 			 * VScroll bug is enabled. (MD1, MD2)
 			 * 
@@ -595,7 +564,7 @@ FORCE_INLINE unsigned int Vdp::T_Get_Y_Offset(int cell_cur)
  * @return Cell offset.
  */
 template<bool interlaced, bool vscroll_mask>
-FORCE_INLINE unsigned int Vdp::T_Get_Y_Cell_Offset(unsigned int y_offset)
+FORCE_INLINE unsigned int VdpPrivate::T_Get_Y_Cell_Offset(unsigned int y_offset)
 {
 	// Non-Interlaced: 8x8 cells
 	// Interlaced: 8x16 cells
@@ -617,7 +586,7 @@ FORCE_INLINE unsigned int Vdp::T_Get_Y_Cell_Offset(unsigned int y_offset)
  * @return Fine offset.
  */
 template<bool interlaced>
-FORCE_INLINE unsigned int Vdp::T_Get_Y_Fine_Offset(unsigned int y_offset)
+FORCE_INLINE unsigned int VdpPrivate::T_Get_Y_Fine_Offset(unsigned int y_offset)
 {
 	// Non-Interlaced: 8x8 cells
 	// Interlaced: 8x16 cells
@@ -636,7 +605,7 @@ FORCE_INLINE unsigned int Vdp::T_Get_Y_Fine_Offset(unsigned int y_offset)
  * @return Pattern info.
  */
 template<bool plane>
-FORCE_INLINE uint16_t Vdp::T_Get_Pattern_Info(unsigned int x, unsigned int y)
+FORCE_INLINE uint16_t VdpPrivate::T_Get_Pattern_Info(unsigned int x, unsigned int y)
 {
 	// Get the offset.
 	// H_Scroll_CMul is the shift value required for the proper vertical offset.
@@ -655,7 +624,7 @@ FORCE_INLINE uint16_t Vdp::T_Get_Pattern_Info(unsigned int x, unsigned int y)
  * @return Pattern data.
  */
 template<bool interlaced>
-FORCE_INLINE uint32_t Vdp::T_Get_Pattern_Data(uint16_t pattern, unsigned int y_fine_offset)
+FORCE_INLINE uint32_t VdpPrivate::T_Get_Pattern_Data(uint16_t pattern, unsigned int y_fine_offset)
 {
 	// Get the tile address.
 	unsigned int TileAddr;
@@ -686,7 +655,7 @@ FORCE_INLINE uint32_t Vdp::T_Get_Pattern_Data(uint16_t pattern, unsigned int y_f
  * @param cell_length	[in] (Scroll A) Number of cells to draw.
  */
 template<bool plane, bool interlaced, bool vscroll, bool h_s>
-FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
+FORCE_INLINE void VdpPrivate::T_Render_Line_Scroll(int cell_start, int cell_length)
 {
 	// Get the horizontal scroll offset. (cell and fine offset)
 	unsigned int x_cell_offset = T_Get_X_Offset<plane>();
@@ -806,15 +775,15 @@ FORCE_INLINE void Vdp::T_Render_Line_Scroll(int cell_start, int cell_length)
  * @param h_s		[in] Highlight/Shadow enable.
  */
 template<bool interlaced, bool vscroll, bool h_s>
-FORCE_INLINE void Vdp::T_Render_Line_ScrollA_Window(void)
+FORCE_INLINE void VdpPrivate::T_Render_Line_ScrollA_Window(void)
 {
 	// Cell counts for Scroll A.
-	int ScrA_Start, ScrA_Length;
+	unsigned int ScrA_Start, ScrA_Length;
 	int Win_Start, Win_Length = 0;
 	
 	// Check if the entire line is part of the window.
 	// TODO: Verify interlaced operation!
-	const int vdp_cells = (VDP_Lines.currentLine >> 3);
+	const unsigned int vdp_cells = (q->VDP_Lines.currentLine >> 3);
 	if (VDP_Reg.m5.Win_V_Pos & 0x80) {
 		// Window starts from the bottom.
 		if (vdp_cells >= Win_Y_Pos) {
@@ -823,7 +792,7 @@ FORCE_INLINE void Vdp::T_Render_Line_ScrollA_Window(void)
 			ScrA_Start = 0;
 			ScrA_Length = 0;
 			Win_Start = 0;
-			Win_Length = GetHCells();
+			Win_Length = H_Cell;
 		}
 	} else if (vdp_cells < Win_Y_Pos) {
 		// Current line is < ending line.
@@ -831,7 +800,7 @@ FORCE_INLINE void Vdp::T_Render_Line_ScrollA_Window(void)
 		ScrA_Start = 0;
 		ScrA_Length = 0;
 		Win_Start = 0;
-		Win_Length = GetHCells();
+		Win_Length = H_Cell;
 	}
 
 	if (Win_Length == 0) {
@@ -841,13 +810,13 @@ FORCE_INLINE void Vdp::T_Render_Line_ScrollA_Window(void)
 			ScrA_Start = 0;
 			ScrA_Length = Win_X_Pos;
 			Win_Start = Win_X_Pos;
-			Win_Length = (GetHCells() - Win_X_Pos);
+			Win_Length = (H_Cell - Win_X_Pos);
 		} else {
 			// Window is left-aligned.
 			Win_Start = 0;
 			Win_Length = Win_X_Pos;
 			ScrA_Start = Win_X_Pos;
-			ScrA_Length = (GetHCells() - Win_X_Pos);
+			ScrA_Length = (H_Cell - Win_X_Pos);
 		}
 	}
 
@@ -924,18 +893,18 @@ FORCE_INLINE void Vdp::T_Render_Line_ScrollA_Window(void)
  * @param partial If true, only do a partial update. (X pos, X size)
  */
 template<bool interlaced, bool partial>
-FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
+FORCE_INLINE void VdpPrivate::T_Make_Sprite_Struct(void)
 {
 	uint8_t spr_num = 0;
 	uint8_t link = 0;
 
 	// H40 allows 80 sprites; H32 allows 64 sprites.
-	// Essentially, it's (GetHCells() * 2).
+	// Essentially, it's (H_Cell * 2).
 	// [Nemesis' Sprite Masking and Overflow Test ROM: Test #9]
 	// TODO: 80 sprites with Sprite Limit disabled, or 128?
 	// (Old Gens limited to 80 sprites regardless of video mode.)
-	const unsigned int max_spr = (options.spriteLimits
-					? (GetHCells() * 2)
+	const unsigned int max_spr = (q->options.spriteLimits
+					? (H_Cell * 2)
 					: (unsigned int)ARRAY_SIZE(Sprite_Struct));
 
 	// Get the first sprite address in VRam.
@@ -1018,12 +987,12 @@ FORCE_INLINE void Vdp::T_Make_Sprite_Struct(void)
  * @return Number of visible sprites.
  */
 template<bool sprite_limit, bool interlaced>
-FORCE_INLINE unsigned int Vdp::T_Update_Mask_Sprite(void)
+FORCE_INLINE unsigned int VdpPrivate::T_Update_Mask_Sprite(void)
 {
 	// If Sprite Limit is on, the following limits are enforced: (H32/H40)
 	// - Maximum sprite dots per line: 256/320
 	// - Maximum sprites per line: 16/20
-	int max_cells = GetHCells();
+	int max_cells = H_Cell;
 	int max_sprites = (max_cells / 2);
 
 	bool overflow = false;
@@ -1084,7 +1053,7 @@ FORCE_INLINE unsigned int Vdp::T_Update_Mask_Sprite(void)
 
 			// Check if the sprite is onscreen.
 			if (!sprite_mask_active &&
-				Sprite_Struct[spr_num].Pos_X < GetHPix() &&
+				Sprite_Struct[spr_num].Pos_X < H_Pix &&
 				Sprite_Struct[spr_num].Pos_X_Max >= 0)
 			{
 				// Sprite is onscreen.
@@ -1155,11 +1124,11 @@ FORCE_INLINE unsigned int Vdp::T_Update_Mask_Sprite(void)
  * @param h_s		[in] Highlight/Shadow enable.
  */
 template<bool interlaced, bool h_s>
-FORCE_INLINE void Vdp::T_Render_Line_Sprite(void)
+FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 {
 	// Update the sprite masks.
 	unsigned int num_spr;
-	if (options.spriteLimits)
+	if (q->options.spriteLimits)
 		num_spr = T_Update_Mask_Sprite<true, interlaced>();
 	else
 		num_spr = T_Update_Mask_Sprite<false, interlaced>();
@@ -1249,7 +1218,7 @@ FORCE_INLINE void Vdp::T_Render_Line_Sprite(void)
 			H_Pos_Max = Sprite_Struct[spr_num].Pos_X_Max_Vis;
 
 			H_Pos_Max -= 7;				// to post the last pattern in first
-			while (H_Pos_Max >= GetHPix()) {
+			while (H_Pos_Max >= H_Pix) {
 				H_Pos_Max -= 8;			// move back to the preceding pattern (screen)
 				tile_num += Y_cell_size;	// go to the next pattern (VRam)
 			}
@@ -1275,8 +1244,8 @@ FORCE_INLINE void Vdp::T_Render_Line_Sprite(void)
 			// Check the minimum edge of the sprite.
 			H_Pos_Min = Sprite_Struct[spr_num].Pos_X;
 			H_Pos_Max = Sprite_Struct[spr_num].Pos_X_Max_Vis;
-			if (H_Pos_Max >= GetHPix())
-				H_Pos_Max = GetHPix();
+			if (H_Pos_Max >= H_Pix)
+				H_Pos_Max = H_Pix;
 
 			while (H_Pos_Min < -7) {
 				H_Pos_Min += 8;			// advance to the next pattern (screen)
@@ -1310,24 +1279,23 @@ FORCE_INLINE void Vdp::T_Render_Line_Sprite(void)
  * @param h_s		[in] Highlight/Shadow enable.
  */
 template<bool interlaced, bool h_s>
-FORCE_INLINE void Vdp::T_Render_Line_m5(void)
+FORCE_INLINE void VdpPrivate::T_Render_Line_m5(void)
 {
 	// Clear the line first.
 	memset(&LineBuf, (h_s ? LINEBUF_SHAD_B : 0), sizeof(LineBuf));
 
 	if (VDP_Reg.m5.Set3 & 0x04) {
 		// 2-cell VScroll.
-		T_Render_Line_Scroll<false, interlaced, true, h_s>(0, GetHCells());	// Scroll B
-		T_Render_Line_ScrollA_Window<interlaced, true, h_s>();			// Scroll A
+		T_Render_Line_Scroll<false, interlaced, true, h_s>(0, H_Cell);	// Scroll B
+		T_Render_Line_ScrollA_Window<interlaced, true, h_s>();		// Scroll A
 	} else {
 		// Full VScroll.
-		T_Render_Line_Scroll<false, interlaced, false, h_s>(0, GetHCells());	// Scroll B
-		T_Render_Line_ScrollA_Window<interlaced, false, h_s>();			// Scroll A
+		T_Render_Line_Scroll<false, interlaced, false, h_s>(0, H_Cell);	// Scroll B
+		T_Render_Line_ScrollA_Window<interlaced, false, h_s>();		// Scroll A
 	}
 
 	T_Render_Line_Sprite<interlaced, h_s>();
 }
-
 
 /**
  * Render the line buffer to the destination surface.
@@ -1336,13 +1304,12 @@ FORCE_INLINE void Vdp::T_Render_Line_m5(void)
  * @param md_palette MD palette buffer.
  */
 template<typename pixel>
-FORCE_INLINE void Vdp::T_Render_LineBuf(pixel *dest, pixel *md_palette)
+FORCE_INLINE void VdpPrivate::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 {
 	const LineBuf_t::LineBuf_px_t *src = &LineBuf.px[8];
 
 	// Render the line buffer to the destination surface.
-	const int HPixBegin = GetHPixBegin();
-	dest += HPixBegin;
+	dest += H_Pix_Begin;
 	for (int i = H_Cell; i != 0; i--, dest += 8, src += 8) {
 		*dest     = md_palette[src->pixel];
 		*(dest+1) = md_palette[(src+1)->pixel];
@@ -1354,7 +1321,7 @@ FORCE_INLINE void Vdp::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 		*(dest+7) = md_palette[(src+7)->pixel];
 	}
 
-	if (HPixBegin == 0)
+	if (H_Pix_Begin == 0)
 		return;
 
 	// Draw the borders.
@@ -1362,13 +1329,12 @@ FORCE_INLINE void Vdp::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 
 	// Get the border color.
 	register const pixel border_color =
-		(options.borderColorEmulation ? md_palette[0] : 0);
+		(q->options.borderColorEmulation ? md_palette[0] : 0);
 
 	// Left border.
-	const int HPix = GetHPix();
-	dest -= HPixBegin;
-	dest -= HPix;
-	for (int i = (HPixBegin / 8); i != 0; i--, dest += 8) {
+	dest -= H_Pix_Begin;
+	dest -= H_Pix;
+	for (int i = (H_Pix_Begin / 8); i != 0; i--, dest += 8) {
 		*dest     = border_color;
 		*(dest+1) = border_color;
 		*(dest+2) = border_color;
@@ -1380,8 +1346,8 @@ FORCE_INLINE void Vdp::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 	}
 
 	// Right border.
-	dest += HPix;
-	for (int i = (HPixBegin / 8); i != 0; i--, dest += 8) {
+	dest += H_Pix;
+	for (int i = (H_Pix_Begin / 8); i != 0; i--, dest += 8) {
 		*dest     = border_color;
 		*(dest+1) = border_color;
 		*(dest+2) = border_color;
@@ -1395,14 +1361,16 @@ FORCE_INLINE void Vdp::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 
 /**
  * Apply SMS left-column blanking to the destination surface.
+ * FIXME: Should not be post-processing...
+ * FIXME: LCB probably doesn't affect sprites. (Check genplus-gx)
  * @param pixel Type of pixel.
  * @param dest Destination surface.
  * @param border_color Border color.
  */
 template<typename pixel>
-FORCE_INLINE void Vdp::T_Apply_SMS_LCB(pixel *dest, pixel border_color)
+FORCE_INLINE void VdpPrivate::T_Apply_SMS_LCB(pixel *dest, pixel border_color)
 {
-	dest += GetHPixBegin();
+	dest += H_Pix_Begin;
 
 	*dest     = border_color;
 	*(dest+1) = border_color;
@@ -1417,26 +1385,26 @@ FORCE_INLINE void Vdp::T_Apply_SMS_LCB(pixel *dest, pixel border_color)
 /**
  * Render a line. (Mode 5)
  */
-void Vdp::Render_Line_m5(void)
+void VdpPrivate::renderLine_m5(void)
 {
 	// Determine what part of the screen we're in.
 	bool in_border = false;
-	int lineNum = VDP_Lines.currentLine;
-	if (lineNum >= VDP_Lines.Border.borderStartBottom &&
-	    lineNum <= VDP_Lines.Border.borderEndBottom)
+	int lineNum = q->VDP_Lines.currentLine;
+	if (lineNum >= q->VDP_Lines.Border.borderStartBottom &&
+	    lineNum <= q->VDP_Lines.Border.borderEndBottom)
 	{
 		// Bottom border.
 		in_border = true;
 	}
-	else if (lineNum >= VDP_Lines.Border.borderStartTop &&
-	         lineNum <= VDP_Lines.Border.borderEndTop)
+	else if (lineNum >= q->VDP_Lines.Border.borderStartTop &&
+	         lineNum <= q->VDP_Lines.Border.borderEndTop)
 	{
 		// Top border.
 		in_border = true;
-		lineNum -= VDP_Lines.Border.borderStartTop;
-		lineNum -= VDP_Lines.Border.borderSize;
+		lineNum -= q->VDP_Lines.Border.borderStartTop;
+		lineNum -= q->VDP_Lines.Border.borderSize;
 	}
-	else if (VDP_Lines.currentLine >= VDP_Lines.totalVisibleLines) {
+	else if (q->VDP_Lines.currentLine >= q->VDP_Lines.totalVisibleLines) {
 		// Off screen.
 		return;
 	}
@@ -1444,27 +1412,27 @@ void Vdp::Render_Line_m5(void)
 	// Determine the starting line in MD_Screen.
 	if (Reg_Status.isNtsc() &&
 	    (VDP_Reg.m5.Set2 & 0x08) &&
-	    options.ntscV30Rolling)
+	    q->options.ntscV30Rolling)
 	{
 		// NTSC V30 mode. Simulate screen rolling.
-		lineNum -= VDP_Lines.NTSC_V30.Offset;
+		lineNum -= q->VDP_Lines.NTSC_V30.Offset;
 
 		// Prevent underflow.
 		if (lineNum < 0)
 			lineNum += 240;
 	}
-	lineNum += VDP_Lines.Border.borderSize;
+	lineNum += q->VDP_Lines.Border.borderSize;
 
-	if (in_border && !options.borderColorEmulation) {
+	if (in_border && !q->options.borderColorEmulation) {
 		// We're in the border area, but border color emulation is disabled.
 		// Clear the border area.
 		// TODO: Only clear this if the option changes or V/H mode changes.
-		if (m_palette.bpp() != VdpPalette::BPP_32) {
-			memset(MD_Screen->lineBuf16(lineNum), 0x00,
-				(MD_Screen->pxPerLine() * sizeof(uint16_t)));
+		if (palette.bpp() != VdpPalette::BPP_32) {
+			memset(q->MD_Screen->lineBuf16(lineNum), 0x00,
+				(q->MD_Screen->pxPerLine() * sizeof(uint16_t)));
 		} else {
-			memset(MD_Screen->lineBuf32(lineNum), 0x00,
-				(MD_Screen->pxPerLine() * sizeof(uint32_t)));
+			memset(q->MD_Screen->lineBuf32(lineNum), 0x00,
+				(q->MD_Screen->pxPerLine() * sizeof(uint32_t)));
 		}
 
 		// ...and we're done here.
@@ -1532,32 +1500,32 @@ void Vdp::Render_Line_m5(void)
 
 	// Update the active palette.
 	if (!(VDP_Layers & VdpTypes::VDP_LAYER_PALETTE_LOCK)) {
-		if (!options.updatePaletteInVBlankOnly || in_border) {
-			m_palette.update();
+		if (!q->options.updatePaletteInVBlankOnly || in_border) {
+			palette.update();
 		}
 	}
 
 	// Render the image.
 	// TODO: Optimize SMS LCB handling. (maybe use Linux's unlikely() macro?)
-	if (m_palette.bpp() != VdpPalette::BPP_32) {
-		uint16_t *lineBuf16 = MD_Screen->lineBuf16(lineNum);
-		T_Render_LineBuf<uint16_t>(lineBuf16, m_palette.m_palActive.u16);
+	if (palette.bpp() != VdpPalette::BPP_32) {
+		uint16_t *lineBuf16 = q->MD_Screen->lineBuf16(lineNum);
+		T_Render_LineBuf<uint16_t>(lineBuf16, palette.m_palActive.u16);
 
 		if (VDP_Reg.m5.Set1 & 0x20) {
 			// SMS left-column blanking bit is set.
 			// FIXME: Should borderColorEmulation apply here?
 			T_Apply_SMS_LCB<uint16_t>(lineBuf16, 
-				(options.borderColorEmulation ? m_palette.m_palActive.u16[0] : 0));
+				(q->options.borderColorEmulation ? palette.m_palActive.u16[0] : 0));
 		}
 	} else {
-		uint32_t *lineBuf32 = MD_Screen->lineBuf32(lineNum);
-		T_Render_LineBuf<uint32_t>(lineBuf32, m_palette.m_palActive.u32);
+		uint32_t *lineBuf32 = q->MD_Screen->lineBuf32(lineNum);
+		T_Render_LineBuf<uint32_t>(lineBuf32, palette.m_palActive.u32);
 
 		if (VDP_Reg.m5.Set1 & 0x20) {
 			// SMS left-column blanking bit is set.
 			// FIXME: Should borderColorEmulation apply here?
 			T_Apply_SMS_LCB<uint32_t>(lineBuf32, 
-				(options.borderColorEmulation ? m_palette.m_palActive.u32[0] : 0));
+				(q->options.borderColorEmulation ? palette.m_palActive.u32[0] : 0));
 		}
 	}
 }
@@ -1580,42 +1548,39 @@ static FORCE_INLINE void T_Render_LineBuf_32X(pixel *dest, pixel *md_palette,
 {
 	int VRam_Ind = ((_32X_VDP.State & 1) << 16);
 	VRam_Ind += _32X_VDP_Ram.u16[VRam_Ind + VDP_Lines.Visible.Current];
-	
+
 	// Get the line buffer pointer.
 	LineBuf_px_t *lbptr = &LineBuf.px[8];
-	
+
 	// Adjust the destination pointer for the horizontal resolution.
 	// TODO: Draw horizontal borders, if necessary.
-	dest += GetHPixBegin();
-	
+	dest += H_Pix_Begin;
+
 	// Pixel registers.
 	register unsigned int px1, px2;
-	
+
 	// Old pixel registers.
 	// TODO: Eliminate these!
 	unsigned char pixC;
 	unsigned short pixS;
-	
+
 	// The following 32X games use H32 for the SEGA screen:
 	// - Mortal Kombat II
 	// - Primal Rage
 	// - Sangokushi IV
-	
-	switch (_32X_Rend_Mode)
-	{
+
+	switch (_32X_Rend_Mode) {
 		case 0:
 		case 4:
 		case 8:
 		case 12:
 			//POST_LINE_32X_M00;
-			for (unsigned int px = GetHPix(); px != 0; px -= 4, dest += 4, lbptr += 4)
-			{
+			for (unsigned int px = H_Pix; px != 0; px -= 4, dest += 4, lbptr += 4) {
 				*dest = md_palette[lbptr->pixel];
 				*(dest+1) = md_palette[(lbptr+1)->pixel];
 				*(dest+2) = md_palette[(lbptr+2)->pixel];
 				*(dest+3) = md_palette[(lbptr+3)->pixel];
 			}
-			
 			break;
 		
 		case 1:	// POST_LINE_32X_M01
@@ -1623,17 +1588,16 @@ static FORCE_INLINE void T_Render_LineBuf_32X(pixel *dest, pixel *md_palette,
 		{
 			// TODO: Endianness conversions.
 			const uint8_t *src = &_32X_VDP_Ram.u8[VRam_Ind << 1];
-			for (unsigned int px = GetHPix(); px != 0; px -= 2, src += 2, dest += 2, lbptr += 2)
-			{
+			for (unsigned int px = H_Pix; px != 0; px -= 2, src += 2, dest += 2, lbptr += 2) {
 				// NOTE: Destination pixels are swapped.
 				px1 = *src;
 				px2 = *(src+1);
-				
+
 				if ((_32X_VDP_CRam[px2] & 0x8000) || !(lbptr->pixel & 0x0F))
 					*dest = _32X_vdp_cram_adjusted[px2];
 				else
 					*dest = md_palette[lbptr->pixel];
-				
+
 				if ((_32X_VDP_CRam[px1] & 0x8000) || !((lbptr+1)->pixel & 0x0F))
 					*(dest+1) = _32X_vdp_cram_adjusted[px1];
 				else
@@ -1641,23 +1605,21 @@ static FORCE_INLINE void T_Render_LineBuf_32X(pixel *dest, pixel *md_palette,
 			}
 			break;
 		}
-		
+
 		case 2:
-		case 10:
-		{
+		case 10: {
 			//POST_LINE_32X_M01;
 			const uint16_t *src = &_32X_VDP_Ram.u16[VRam_Ind];
-			for (unsigned int px = GetHPix(); px != 0; px -= 2, src += 2, dest += 2, lbptr += 2)
-			{
+			for (unsigned int px = H_Pix; px != 0; px -= 2, src += 2, dest += 2, lbptr += 2) {
 				// NOTE: Destination pixels are NOT swapped.
 				px1 = *src;
 				px2 = *(src+1);
-				
+
 				if ((px1 & 0x8000) || !(lbptr->pixel & 0x0F))
 					*dest = _32X_palette[px1];
 				else
 					*dest = md_palette[lbptr->pixel];
-				
+
 				if ((px2 & 0x8000) || !((lbptr+1)->pixel & 0x0F))
 					*(dest+1) = _32X_palette[px2];
 				else
@@ -1665,19 +1627,17 @@ static FORCE_INLINE void T_Render_LineBuf_32X(pixel *dest, pixel *md_palette,
 			}
 			break;
 		}
-		
+
 		case 3:
 		case 7:
 		case 11:
-		case 15:
-		{
+		case 15: {
 			// POST_LINE_32X_M11
 			// This appears to be a form of RLE compression.
 			int px = 0;
 			int px_end;
 			const uint8_t *src = &_32X_VDP_Ram.u8[VRam_Ind << 1];
-			while (px < GetHPix())
-			{
+			while (px < H_Pix) {
 #if GSFT_BYTEORDER == GSFT_LIL_ENDIAN
 				px1 = _32X_vdp_cram_adjusted[*src];
 				px_end = px + *(src+1);
@@ -1686,35 +1646,32 @@ static FORCE_INLINE void T_Render_LineBuf_32X(pixel *dest, pixel *md_palette,
 				px_end = px + *src;
 #endif
 				src += 2;
-				
+
 				// Make sure it doesn't go out of bounds.
-				if (px_end >= GetHPix())
-					px_end = (GetHPix() - 1);
+				if (px_end >= H_Pix)
+					px_end = (H_Pix - 1);
 				
-				for (; px <= px_end; px++)
-				{
+				for (; px <= px_end; px++) {
 					dest[px] = px1;
 				}
 			}
 			break;
 		}
-		
-		case 5:
-		{
+
+		case 5: {
 			//POST_LINE_32X_M01_P;
 			// TODO: Endianness conversions.
 			const uint8_t *src = &_32X_VDP_Ram.u8[VRam_Ind << 1];
-			for (unsigned int px = GetHPix(); px != 0; px -= 2, src += 2, dest += 2, lbptr += 2)
-			{
+			for (unsigned int px = H_Pix; px != 0; px -= 2, src += 2, dest += 2, lbptr += 2) {
 				// NOTE: Destination pixels are swapped.
 				px1 = *src;
 				px2 = *(src+1);
-				
+
 				if ((_32X_VDP_CRam[px2] & 0x8000) && (lbptr->pixel & 0x0F))
 					*dest = md_palette[lbptr->pixel];
 				else
 					*dest = _32X_vdp_cram_adjusted[px2];
-				
+
 				if ((_32X_VDP_CRam[px1] & 0x8000) && ((lbptr+1)->pixel & 0x0F))
 					*(dest+1) = md_palette[(lbptr+1)->pixel];
 				else
@@ -1722,39 +1679,37 @@ static FORCE_INLINE void T_Render_LineBuf_32X(pixel *dest, pixel *md_palette,
 			}
 			break;
 		}
-			
+
 		case 6:
 		case 14:
 			//POST_LINE_32X_M10_P;
 			// TODO: Optimize this!
-			for (unsigned int px = GetHPix(); px != 0; px--, dest++, lbptr++)
-			{
+			for (unsigned int px = H_Pix; px != 0; px--, dest++, lbptr++) {
 				pixS = _32X_VDP_Ram.u16[VRam_Ind++];
-				
+
 				if (!(pixS & 0x8000) && (lbptr->pixel & 0x0F))
 					*dest = _32X_palette[pixS];
 				else
 					*dest = md_palette[lbptr->pixel];
 			}
 			break;
-		
+
 		case 13:
 			//POST_LINE_32X_SM01_P;
 			// TODO: Optimize this!
 			// TODO: Endianness conversions.
 			VRam_Ind *= 2;
-			for (unsigned int px = GetHPix(); px != 0; px--, dest++, lbptr++)
-			{
+			for (unsigned int px = H_Pix; px != 0; px--, dest++, lbptr++) {
 				pixC = _32X_VDP_Ram.u8[VRam_Ind++ ^ 1];
 				pixS = _32X_VDP_CRam[pixC];
-				
+
 				if ((pixS & 0x8000) && (lbptr->pixel & 0x0F))
 					*dest = md_palette[lbptr->pixel];
 				else
 					*dest = _32X_vdp_cram_adjusted[pixC];
 			}
 			break;
-		
+
 		default:
 			// Invalid.
 			break;
@@ -1762,7 +1717,7 @@ static FORCE_INLINE void T_Render_LineBuf_32X(pixel *dest, pixel *md_palette,
 }
 
 /**
- * VDP_Render_Line_m5_32X(): Render a line. (Mode 5, 32X)
+ * Render a line. (Mode 5, 32X)
  */
 void VDP_Render_Line_m5_32X(void)
 {
@@ -1786,74 +1741,65 @@ void VDP_Render_Line_m5_32X(void)
 		// Off screen.
 		return;
 	}
-	
+
 	// Determine the starting line in MD_Screen.
 	int LineStart = VDP_Lines.Visible.Current;
-	if ((CPU_Mode == 0) && (VDP_Reg.m5.Set2 & 0x08) && Video.ntscV30rolling)
-	{
+	if ((CPU_Mode == 0) && (VDP_Reg.m5.Set2 & 0x08) && Video.ntscV30rolling) {
 		// NTSC V30 mode. Simulate screen rolling.
 		LineStart -= VDP_Lines.NTSC_V30.Offset;
-		
+
 		// Prevent underflow.
 		if (LineStart < 0)
 			LineStart += 240;
 	}
 	LineStart = TAB336[LineStart + VDP_Lines.Visible.Border_Size] + 8;
-	
-	if (in_border && !Video.borderColorEmulation)
-	{
+
+	if (in_border && !Video.borderColorEmulation) {
 		// We're in the border area, but border color emulation is disabled.
 		// Clear the border area.
 		// TODO: Only clear this if the option changes or V/H mode changes.
 		if (bppMD == 32)
-			memset(&MD_Screen.u32[LineStart], 0x00, GetHPix()*sizeof(uint32_t));
+			memset(&MD_Screen.u32[LineStart], 0x00, (H_Pix * sizeof(uint32_t)));
 		else
-			memset(&MD_Screen.u16[LineStart], 0x00, GetHPix()*sizeof(uint16_t));
-		
+			memset(&MD_Screen.u16[LineStart], 0x00, (H_Pix * sizeof(uint16_t)));
+
 		// ...and we're done here.
 		return;
 	}
-	
+
 	// Check if the VDP is enabled.
-	if (!(VDP_Reg.m5.Set2 & 0x40) || in_border)
-	{
+	if (!(VDP_Reg.m5.Set2 & 0x40) || in_border) {
 		// VDP is disabled, or this is the border region.
 		// Clear the line buffer.
-		
+
 		// NOTE: S/H is ignored if the VDP is disabled or if
 		// we're in the border region.
 		memset(LineBuf.u8, 0x00, sizeof(LineBuf.u8));
-	}
-	else
-	{
+	} else {
 		// VDP is enabled.
-		
+
 		// Check if sprite structures need to be updated.
-		if (VDP_Reg.Interlaced.DoubleRes)
-		{
+		if (VDP_Reg.Interlaced.DoubleRes) {
 			// Interlaced.
 			if (VDP_Flags.VRam)
 				T_Make_Sprite_Struct<true, false>();
 			else if (VDP_Flags.VRam_Spr)
 				T_Make_Sprite_Struct<true, true>();
-		}
-		else
-		{
+		} else {
 			// Non-Interlaced.
 			if (VDP_Flags.VRam)
 				T_Make_Sprite_Struct<false, false>();
 			else if (VDP_Flags.VRam_Spr)
 				T_Make_Sprite_Struct<false, true>();
 		}
-		
+
 		// Clear the VRam flags.
 		VDP_Flags.VRam = 0;
 		VDP_Flags.VRam_Spr = 0;
-		
+
 		// Determine how to render the image.
 		const int RenderMode = ((VDP_Reg.m5.Set4 & 0x08) >> 2) | VDP_Reg.Interlaced.DoubleRes;
-		switch (RenderMode & 3)
-		{
+		switch (RenderMode & 3) {
 			case 0:
 				// H/S disabled; interlaced disabled.
 				T_Render_Line_m5<false, false>();
@@ -1875,45 +1821,38 @@ void VDP_Render_Line_m5_32X(void)
 				break;
 		}
 	}
-	
+
 	// Check if the palette was modified.
-	if (VDP_Flags.CRam)
-	{
+	if (VDP_Flags.CRam) {
 		// Update the palette.
 		if (VDP_Reg.m5.Set4 & 0x08)
 			VDP_Update_Palette_HS();
 		else
 			VDP_Update_Palette();
 	}
-	
+
 	// 32X processing.
 	unsigned int eax = (_32X_VDP.Mode);
 	unsigned int edx = (eax >> 3) & 0x10;
 	unsigned int ebp = (eax >> 11) & 0x20;
 	eax &= 0x03;
 	edx |= ebp;
-	
+
 	// Set the 32X render mode for the 32-bit color C macros.
 	int _32X_Rend_Mode = (eax | ((edx >> 2) & 0xFF));
-	
+
 	// Render the 32X line.
-	if (!in_border)
-	{
-		if (bppMD != 32)
-		{
+	if (!in_border) {
+		if (bppMD != 32) {
 			T_Render_LineBuf_32X<uint16_t>
 						(&MD_Screen.u16[LineStart], MD_Palette.u16,
 						_32X_Rend_Mode, _32X_Palette.u16, _32X_VDP_CRam_Adjusted.u16);
-		}
-		else
-		{
+		} else {
 			T_Render_LineBuf_32X<uint32_t>
 						(&MD_Screen.u32[LineStart], MD_Palette.u32,
 						_32X_Rend_Mode, _32X_Palette.u32, _32X_VDP_CRam_Adjusted.u32);
 		}
-	}
-	else
-	{
+	} else {
 		// In border. Use standard MD rendering.
 		if (bppMD != 32)
 			T_Render_LineBuf<uint16_t>(&MD_Screen.u16[LineStart], MD_Palette.u16);

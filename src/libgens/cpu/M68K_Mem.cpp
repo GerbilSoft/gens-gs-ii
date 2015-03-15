@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -143,14 +143,12 @@ const uint8_t M68K_Mem::msc_M68KBank_Def_MD[8] =
 	M68K_BANK_RAM
 };
 
-
 void M68K_Mem::Init(void)
 {
 	// Initialize the Z80/M68K cycle table.
 	for (int x = 0; x < 512; x++)
 		Z80_M68K_Cycle_Tab[x] = (int)((double) x * 7.0 / 15.0);
 }
-
 
 void M68K_Mem::End(void)
 { }
@@ -346,7 +344,6 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 	return 0xFF;
 }
 
-
 /**
  * Read a byte from the VDP data banks. (0xC00000 - 0xDFFFFF)
  * @param address Address.
@@ -377,36 +374,36 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 			// VDP data port. (high byte)
 			// NOTE: Gens doesn't read the data port here,
 			// but it should still be readable...
-			ret = ((vdp->Read_Data() >> 8) & 0xFF);
+			ret = ((vdp->readDataMD() >> 8) & 0xFF);
 			break;
 
 		case 0x01: case 0x03:
 			// VDP data port. (low byte)
 			// NOTE: Gens doesn't read the data port here,
 			// but it should still be readable...
-			ret = (vdp->Read_Data() & 0xFF);
+			ret = (vdp->readDataMD() & 0xFF);
 			break;
 
 		case 0x04: case 0x06:
 			// VDP control port. (high byte)
 			// FIXME: Unused bits return prefetch data.
-			ret = ((vdp->Read_Status() >> 8) & 0xFF);
+			ret = ((vdp->readCtrlMD() >> 8) & 0xFF);
 			break;
 
 		case 0x05: case 0x07:
 			// VDP control port. (low byte)
 			// FIXME: Unused bits return prefetch data.
-			ret = (vdp->Read_Status() & 0xFF);
+			ret = (vdp->readCtrlMD() & 0xFF);
 			break;
 
 		case 0x08:
 			// V counter.
-			ret = vdp->Read_V_Counter();
+			ret = vdp->readVCounter();
 			break;
 
 		case 0x09:
 			// H counter.
-			ret = vdp->Read_H_Counter();
+			ret = vdp->readHCounter();
 			break;
 
 		default:
@@ -416,7 +413,6 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 
 	return ret;
 }
-
 
 /**
  * Read a byte from the TMSS ROM. (0x000000 - 0x3FFFFF)
@@ -431,9 +427,7 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_TMSS_Rom(uint32_t address)
 	return MD_TMSS_Rom.u8[address];
 }
 
-
 /** Read Word functions. **/
-
 
 /**
  * Read a word from RAM. (0xE00000 - 0xFFFFFF)
@@ -446,7 +440,6 @@ inline uint16_t M68K_Mem::M68K_Read_Word_Ram(uint32_t address)
 	address &= 0xFFFE;
 	return Ram_68k.u16[address >> 1];
 }
-
 
 /**
  * Read a word from the miscellaneous data bank. (0xA00000 - 0xA7FFFF)
@@ -635,7 +628,6 @@ inline uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 	return 0xFFFF;
 }
 
-
 /**
  * Read a word from the VDP data banks. (0xC00000 - 0xDFFFFF)
  * @param address Address.
@@ -664,18 +656,18 @@ inline uint16_t M68K_Mem::M68K_Read_Word_VDP(uint32_t address)
 	switch (address & 0x1E) {
 		case 0x00: case 0x02:
 			// VDP data port.
-			ret = vdp->Read_Data();
+			ret = vdp->readDataMD();
 			break;
 
 		case 0x04: case 0x06:
 			// VDP control port.
 			// FIXME: Unused bits return prefetch data.
-			ret = vdp->Read_Status();
+			ret = vdp->readCtrlMD();
 			break;
 
 		case 0x08:
 			// HV counter.
-			ret = ((vdp->Read_V_Counter() << 8) | vdp->Read_H_Counter());
+			ret = vdp->readHVCounterMD();
 			break;
 
 		default:
@@ -685,7 +677,6 @@ inline uint16_t M68K_Mem::M68K_Read_Word_VDP(uint32_t address)
 
 	return ret;
 }
-
 
 /**
  * Read a word from the TMSS ROM. (0x000000 - 0x3FFFFF)
@@ -939,21 +930,16 @@ inline void M68K_Mem::M68K_Write_Byte_VDP(uint32_t address, uint8_t data)
 	switch (address & 0x1F) {
 		case 0x00: case 0x01: case 0x02: case 0x03:
 			// VDP data port.
-			context->m_vdp->Write_Data_Byte(data);
+			vdp->writeDataMD_8(data);
 			break;
-
-		case 0x04: case 0x05: case 0x06: case 0x07: {
+		case 0x04: case 0x05: case 0x06: case 0x07:
 			// VDP control port.
-			uint16_t data16 = (data | data << 8);
-			vdp->Write_Ctrl(data16);
+			vdp->writeCtrlMD_8(data);
 			break;
-		}
-
 		case 0x11:
 			// PSG control port.
 			SoundMgr::ms_Psg.write(data);
 			break;
-
 		default:
 			// Invalid or unsupported VDP port.
 			break;
@@ -1201,29 +1187,24 @@ inline void M68K_Mem::M68K_Write_Word_VDP(uint32_t address, uint16_t data)
 	switch (address & 0x1E) {
 		case 0x00: case 0x02:
 			// VDP data port.
-			vdp->Write_Data_Word(data);
+			vdp->writeDataMD(data);
 			break;
-
 		case 0x04: case 0x06:
 			// VDP control port.
-			vdp->Write_Ctrl(data);
+			vdp->writeCtrlMD(data);
 			break;
-
 		case 0x10:
 			// PSG control port.
 			// TODO: mem_m68k.asm doesn't support this for word writes...
 			//SoundMgr::ms_Psg.write(data);
 			break;
-
 		default:
 			// Invalid or unsupported VDP port.
 			break;
 	}
 }
 
-
 /** Public init and read/write functions. **/
-
 
 /**
  * Update the TMSS mapping.
@@ -1332,9 +1313,8 @@ uint8_t M68K_Mem::M68K_RB(uint32_t address)
 	return 0xFF;
 }
 
-
 /**
- * M68K_Mem::M68K_RW(): Read a word from the M68K address space.
+ * Read a word from the M68K address space.
  * @param address Address.
  * @return Word from the M68K address space.
  */

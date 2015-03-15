@@ -103,9 +103,7 @@ SET(libgens_VDP_SRCS
 # TODO: All headers, or just public headers?
 SET(libgens_VDP_H
 	Vdp/Vdp.hpp
-	Vdp/VdpIo_static.hpp
-	Vdp/VdpIo_static.hpp
-	Vdp/VdpRend_static.hpp
+	Vdp/Vdp_p.hpp
 	Vdp/VdpPalette.hpp
 	Vdp/VdpRend_Err_p.hpp
 	Vdp/VGA_charset.h

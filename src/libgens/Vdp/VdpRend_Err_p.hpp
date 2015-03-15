@@ -2,7 +2,7 @@
  * libgens: Gens Emulation Library.                                        *
  * VdpRend_Err_p.hpp: VDP error message class. (Private class.)            *
  *                                                                         *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -28,54 +28,63 @@
 #include <stdint.h>
 
 #include "Util/MdFb.hpp"
+#include "VdpPalette.hpp"
+
+namespace LibGens {
 
 /**
  * Vdp: Error message rendering.
  * Private class.
  */
+class Vdp;
 class VdpRend_Err_Private
 {
 	public:
 		VdpRend_Err_Private(Vdp *q);
-	
+
 	private:
 		Vdp *const q;
-		
+
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
 		VdpRend_Err_Private(const VdpRend_Err_Private &);
 		VdpRend_Err_Private &operator=(const VdpRend_Err_Private &);
-	
+
 	public:
 		static const uint16_t ColorBarsPalette_15[22];
 		static const uint16_t ColorBarsPalette_16[22];
 		static const uint32_t ColorBarsPalette_32[22];
-		
+
+		// Current VDP_Mode.
+		unsigned int curVdpMode;
+
 		// VDP mode data.
 		unsigned int lastVdpMode;
 		int lastHPix;
 		int lastVPix;
 		VdpPalette::ColorDepth lastBpp;
 		uint32_t lastBorderColor;
-	
+
 	public:
 		// Drawing functions.
 		template<typename pixel>
 		void T_DrawColorBars(MdFb *fb, const pixel palette[22]);
-		
+
 		template<typename pixel>
 		void T_DrawColorBars_Border(MdFb *fb, const pixel bg_color);
-		
+
 		template<typename pixel, pixel text_color>
 		void T_DrawChr(pixel *screen, int chr);
-		
+
 	private:
 		template<typename pixel, pixel text_color>
 		void T_DrawText(MdFb *fb, int x, int y, const char *str);
-	
+
 	public:
 		template<typename pixel, pixel text_color>
 		void T_DrawVDPErrorMessage(MdFb *fb);
 };
 
-#endif /* __LIBGENS_VDP_VDPRENDERR_P_HPP__ */
+}
+
+#endif /* __LIBGENS_VDP_VDPRENDERER_P_HPP__ */

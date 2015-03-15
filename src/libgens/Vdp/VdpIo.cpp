@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -34,11 +34,11 @@
 #include "cpu/M68K_Mem.hpp"
 #include "Cartridge/RomCartridgeMD.hpp"
 
-/** Static member initialization. **/
-#include "VdpIo_static.hpp"
-
 // Emulation Context.
 #include "../EmuContext.hpp"
+
+// Vdp private class.
+#include "Vdp_p.hpp"
 
 // C wrapper functions for Starscream.
 #ifdef __cplusplus
@@ -60,46 +60,49 @@ uint8_t VDP_Int_Ack(void)
 }
 #endif
 
-namespace LibGens
-{
+namespace LibGens {
 
 /**
- * Vdp::Int_Ack(): Acknowledge an interrupt.
+ * Acknowledge an interrupt.
  * @return ???
  */
 uint8_t Vdp::Int_Ack(void)
 {
-	if ((VDP_Reg.m5.Set2 & 0x20) && (VDP_Int & 0x08))
+	if ((d->VDP_Reg.m5.Set2 & 0x20) && (d->VDP_Int & 0x08))
 	{
 		// VBlank interrupt acknowledge.
-		VDP_Int &= ~0x08;
+		d->VDP_Int &= ~0x08;
 		// VINT HAPPENED bit is cleared *here*,
 		// not on control port read.
-		Reg_Status.setBit(VdpStatus::VDP_STATUS_F, false);
-		
-		uint8_t rval_mask = VDP_Reg.m5.Set1;
+		d->Reg_Status.setBit(VdpStatus::VDP_STATUS_F, false);
+
+		uint8_t rval_mask = d->VDP_Reg.m5.Set1;
 		rval_mask &= 0x10;
 		rval_mask >>= 2;
-		
-		return ((VDP_Int) & rval_mask);
+
+		return (d->VDP_Int & rval_mask);
 	}
-	
+
 	// Reset the interrupt counter.
-	VDP_Int = 0;
+	d->VDP_Int = 0;
 	return 0;
 }
 
 /**
  * Update the IRQ line.
+ * @param interrupt Interrupt that just occurred. (If 0, no interrupt occurred.)
  */
-void Vdp::Update_IRQ_Line(void)
+void Vdp::updateIRQLine(int interrupt)
 {
+	// 'interrupt' contains a new interrupt value.
+	d->VDP_Int |= interrupt;
+
 	// TODO: HBlank interrupt should take priority over VBlank interrupt.
-	if ((VDP_Reg.m5.Set2 & 0x20) && (VDP_Int & 0x08)) {
+	if ((d->VDP_Reg.m5.Set2 & 0x20) && (d->VDP_Int & 0x08)) {
 		// VBlank interrupt.
 		M68K::Interrupt(6, -1);
 		return;
-	} else if ((VDP_Reg.m5.Set1 & 0x10) && (VDP_Int & 0x04)) {
+	} else if ((d->VDP_Reg.m5.Set1 & 0x10) && (d->VDP_Int & 0x04)) {
 		// HBlank interrupt.
 		M68K::Interrupt(4, -1);
 		return;
@@ -113,160 +116,11 @@ void Vdp::Update_IRQ_Line(void)
 }
 
 /**
- * Update VDP_Lines based on CPU and VDP mode settings.
- * @param resetCurrent If true, reset VDP_Lines.Display.Current and VDP_Lines.Visible.Current.
- */
-void Vdp::updateVdpLines(bool resetCurrent)
-{
-	// Arrays of values.
-	// Indexes: 0 == 192 lines; 1 == 224 lines; 2 == 240 lines.
-	static const int VisLines_Total[3] = {192, 224, 240};
-	static const int VisLines_Border_Size[3] = {24, 8, 0};
-	//static const int VisLines_Current_NTSC[3] = {-40, -24, 0};
-	//static const int VisLines_Current_PAL[3] = {-67+1, -51+1, -43+1};
-
-	// Initialize VDP_Lines.Display.
-	// TODO: 312 or 313 for PAL?
-	VDP_Lines.totalDisplayLines = (Reg_Status.isPal() ? 312 : 262);
-
-	// Line offset.
-	int LineOffset;
-
-	// Check the current video mode.
-	// NOTE: Unlike Gens/GS, we don't check if a ROM is loaded because
-	// the VDP code isn't used at all in Gens/GS II during "idle".
-	if (VDP_Mode & VDP_MODE_M5) {
-		// Mode 5. Must be either 224 lines or 240 lines.
-		if (VDP_Mode & VDP_MODE_M3)
-			LineOffset = 2; // 240 lines.
-		else
-			LineOffset = 1; // 224 lines.
-	} else {
-		// Mode 4 or TMS9918 mode.
-		// Mode 4 may be 192 lines, 224 lines, or 240 lines.
-		// Modes 0-3 may only be 192 lines.
-		// TODO: If emulating SMS1, disable 224-line and 240-line modes.
-		switch (VDP_Mode) {
-			case VDP_MODE_M4_224:
-				// Mode 4: 224 lines.
-				LineOffset = 1;
-				break;
-			case VDP_MODE_M4_240:
-				// Mode 4: 240 lines.
-				LineOffset = 2;
-				break;
-			default:
-				// Modes 0-4: 192 lines.
-				LineOffset = 0;
-				break;
-		}
-	}
-
-	VDP_Lines.totalVisibleLines = VisLines_Total[LineOffset];
-	VDP_Lines.Border.borderSize = VisLines_Border_Size[LineOffset];
-
-	// Calculate border parameters.
-	if (VDP_Lines.Border.borderSize > 0) {
-		VDP_Lines.Border.borderStartBottom = VDP_Lines.totalVisibleLines;
-		VDP_Lines.Border.borderEndBottom = VDP_Lines.Border.borderStartBottom + VDP_Lines.Border.borderSize - 1;
-
-		VDP_Lines.Border.borderEndTop = VDP_Lines.totalDisplayLines - 1;
-		VDP_Lines.Border.borderStartTop = VDP_Lines.Border.borderEndTop - VDP_Lines.Border.borderSize + 1;
-	} else {
-		// No border.
-		VDP_Lines.Border.borderStartBottom = -1;
-		VDP_Lines.Border.borderEndBottom = -1;
-		VDP_Lines.Border.borderStartTop = -1;
-		VDP_Lines.Border.borderEndTop = -1;
-	}
-
-	if (resetCurrent) {
-		// Reset VDP_Lines.currentLine.
-		// NOTE: VDP starts at visible line 0.
-		VDP_Lines.currentLine = 0;
-	}
-
-	// Check interlaced mode.
-	Interlaced = (VdpTypes::Interlaced_t)
-			(((VDP_Reg.m5.Set4 & 0x02) >> 1) |	// LSM0
-			 ((VDP_Reg.m5.Set4 & 0x04) >> 1));	// LSM1
-}
-
-/**
- * Check if VBlank is allowed in NTSC V30 mode.
- */
-void Vdp::Check_NTSC_V30_VBlank(void)
-{
-	// TODO: Only do this in Mode 5, and maybe Mode 4 if SMS2 is in use.
-	if (Reg_Status.isPal() || !(VDP_Reg.m5.Set2 & 0x08)) {
-		// Either we're in PAL mode, where V30 is allowed, or V30 isn't set.
-		// VBlank is always OK.
-		// TODO: Clear the NTSC V30 offset?
-		VDP_Lines.NTSC_V30.VBlank_Div = 0;
-		return;
-	}
-
-	// NTSC V30 mode. Simulate screen rolling.
-
-	// If VDP_Lines.NTSC_V30.VBlank is set, we can't do a VBlank.
-	// This effectively divides VBlank into 30 Hz.
-	// See http://gendev.spritesmind.net/forum/viewtopic.php?p=8128#8128 for more information.
-	VDP_Lines.NTSC_V30.VBlank_Div = !VDP_Lines.NTSC_V30.VBlank_Div;
-
-	if (options.ntscV30Rolling) {
-		VDP_Lines.NTSC_V30.Offset += 11;	// TODO: Figure out a good offset increment.
-		VDP_Lines.NTSC_V30.Offset %= 240;	// Prevent overflow.
-	} else {
-		// Rolling is disabled.
-		VDP_Lines.NTSC_V30.Offset = 0;
-	}
-}
-
-/**
- * Update VDP_Mode.
- */
-inline void Vdp::Update_Mode(void)
-{
-	const unsigned int prevVdpMode = VDP_Mode;
-	const register uint8_t Set1 = VDP_Reg.m5.Set1;
-	const register uint8_t Set2 = VDP_Reg.m5.Set2;
-	VDP_Mode = (VDP_Mode_t)
-		   (((Set2 & 0x10) >> 4) |	// M1
-		    ((Set1 & 0x02))      |	// M2
-		    ((Set2 & 0x08) >> 1) |	// M3
-		    ((Set1 & 0x04) << 1) |	// M4/PSEL
-		    ((Set2 & 0x04) << 2));	// M5
-
-	if (!(Set2 & 0x08)) {
-		// V28 mode. Reset the NTSC V30 roll values.
-		VDP_Lines.NTSC_V30.Offset = 0;
-		VDP_Lines.NTSC_V30.VBlank_Div = 0;
-	}
-
-	// If the VDP mode has changed, CRam needs to be updated.
-	if (prevVdpMode != VDP_Mode) {
-		// Update the VDP mode variables.
-		if (VDP_Mode & VDP_MODE_M5) {
-			// Mode 5.
-			m_palette.setPalMode(VdpPalette::PALMODE_MD);
-			m_palette.setMdColorMask(!(VDP_Mode & 0x08));	// M4/PSEL
-		} else {
-			// TODO: Support other palette modes.
-		}
-	}
-
-	// Initialize Vdp::VDP_Lines.
-	// Don't reset the VDP current line variables here,
-	// since this might not be the beginning of the frame.
-	updateVdpLines(false);
-}
-
-/**
  * Set the value of a register. (Mode 5 only!)
  * @param reg_num Register number.
  * @param val New value for the register.
  */
-void Vdp::setReg(int reg_num, uint8_t val)
+void VdpPrivate::setReg(int reg_num, uint8_t val)
 {
 	if (reg_num < 0)
 		return;
@@ -292,10 +146,8 @@ void Vdp::setReg(int reg_num, uint8_t val)
 		case 0:
 		case 1:
 			// Mode Set 1, Mode Set 2.
-			Update_IRQ_Line();
-
-			// Update the VDP mode.
-			Update_Mode();
+			q->updateIRQLine(0);
+			updateVdpMode();
 			break;
 
 		case 2:
@@ -332,7 +184,7 @@ void Vdp::setReg(int reg_num, uint8_t val)
 			// Background Color.
 			// TODO: This is only valid for MD. SMS and GG function differently.
 			// NOTE: This will automatically mark CRam as dirty if the index has changed.
-			m_palette.setBgColorIdx(val & 0x3F);
+			palette.setBgColorIdx(val & 0x3F);
 			break;
 
 		case 11: {
@@ -354,13 +206,10 @@ void Vdp::setReg(int reg_num, uint8_t val)
 			// Mode Set 4.
 
 			// Update the Shadow/Highlight setting.
-			m_palette.setMdShadowHighlight(!!(VDP_Reg.m5.Set4 & 0x08));
+			palette.setMdShadowHighlight(!!(VDP_Reg.m5.Set4 & 0x08));
 
-			// H40 mode is activated by setting VDP_Reg.m5.Set4, bit 0 (0x01, RS1).
-			// Bit 7 (0x80, RS0) is also needed, but RS1 is what tells the VDP
-			// to increase the pixel counters to 320px per line.
-			// Source: http://wiki.megadrive.org/index.php?title=VDPRegs_Addendum (Jorge)
-			if (val & 0x01) {
+			// TODO: Split the full recalculation into a separate function?
+			if (isH40()) {
 				// H40 mode.
 				H_Cell = 40;
 				H_Win_Shift = 6;
@@ -412,16 +261,12 @@ void Vdp::setReg(int reg_num, uint8_t val)
 			 * - idx 2: V_Scroll_CMask
 			 * - idx 3: reserved (padding)
 			 */
-			struct Scroll_Size_Tbl_t
-			{
+			static const struct {
 				uint8_t H_Scroll_CMul;
 				uint8_t H_Scroll_CMask;
 				uint8_t V_Scroll_CMask;
 				uint8_t reserved;
-			};
-
-			static const Scroll_Size_Tbl_t Scroll_Size_Tbl[] =
-			{
+			} Scroll_Size_Tbl[] = {
 				// V32_H32 (VXX_H32)      // V32_H64 (VXX_H64)
 				{0x05, 0x1F, 0x1F, 0x00}, {0x06, 0x3F, 0x1F, 0x00},
 				// V32_HXX (V??_HXX)      // V32_H128 (V??_H128)
@@ -483,12 +328,11 @@ void Vdp::setReg(int reg_num, uint8_t val)
 	}
 }
 
-
 /**
  * Read the H Counter.
  * @return H Counter.
  */
-uint8_t Vdp::Read_H_Counter(void)
+uint8_t Vdp::readHCounter(void)
 {
 	unsigned int odo_68K = M68K::ReadOdometer();
 	odo_68K -= (M68K_Mem::Cycles_M68K - M68K_Mem::CPL_M68K);
@@ -497,17 +341,17 @@ uint8_t Vdp::Read_H_Counter(void)
 	// H_Counter_Table[][0] == H32.
 	// H_Counter_Table[][1] == H40.
 
-	if (isH40())
-		return H_Counter_Table[odo_68K][1];
+	if (d->isH40())
+		return d->H_Counter_Table[odo_68K][1];
 	else
-		return H_Counter_Table[odo_68K][0];
+		return d->H_Counter_Table[odo_68K][0];
 }
 
 /**
  * Read the V Counter.
  * @return V Counter.
  */
-uint8_t Vdp::Read_V_Counter(void)
+uint8_t Vdp::readVCounter(void)
 {
 	unsigned int odo_68K = M68K::ReadOdometer();
 	odo_68K -= (M68K_Mem::Cycles_M68K - M68K_Mem::CPL_M68K);
@@ -516,13 +360,13 @@ uint8_t Vdp::Read_V_Counter(void)
 	unsigned int H_Counter;
 	uint8_t bl, bh;		// TODO: Figure out what this actually means.
 
-	if (isH40()) {
+	if (d->isH40()) {
 		// H40
-		H_Counter = H_Counter_Table[odo_68K][0];
+		H_Counter = d->H_Counter_Table[odo_68K][0];
 		bl = 0xA4;
 	} else {
 		// H32
-		H_Counter = H_Counter_Table[odo_68K][1];
+		H_Counter = d->H_Counter_Table[odo_68K][1];
 		bl = 0x84;
 	}
 
@@ -537,7 +381,7 @@ uint8_t Vdp::Read_V_Counter(void)
 	// Rewrite HV handling to match Genesis Plus.
 
 	// V_Counter_Overflow depends on PAL/NTSC status.
-	if (Reg_Status.isPal()) {
+	if (d->Reg_Status.isPal()) {
 		// PAL.
 		if (V_Counter >= 0x103) {
 			// Overflow.
@@ -552,7 +396,7 @@ uint8_t Vdp::Read_V_Counter(void)
 	}
 
 	// Check for Interlaced Mode 2. (2x resolution)
-	if (Interlaced == VdpTypes::INTERLACED_MODE_2) {
+	if (d->Interlaced == VdpTypes::INTERLACED_MODE_2) {
 		// Interlaced mode is enabled.
 		uint8_t vc_tmp = (V_Counter & 0xFF);
 		vc_tmp = (vc_tmp << 1) | (vc_tmp >> 7);
@@ -564,38 +408,50 @@ uint8_t Vdp::Read_V_Counter(void)
 }
 
 /**
- * Vdp::Read_Status(): Read the VDP status register.
+ * Read the HV Counter.
+ * Convenience function for MD.
+ * @return HV Counter.
+ */
+uint16_t Vdp::readHVCounterMD(void)
+{
+	return ((readVCounter() << 8) | readHCounter());
+}
+
+/**
+ * Read the VDP control port. (M5)
+ * This returns the status register.
  * @return VDP status register.
  */
-uint16_t Vdp::Read_Status(void)
+uint16_t Vdp::readCtrlMD(void)
 {
-	const uint16_t status = Reg_Status.read();
+	const uint16_t status = d->Reg_Status.read();
 
 	// Reading the control port clears the control word latch.
-	VDP_Ctrl.ctrl_latch = 0;
+	d->VDP_Ctrl.ctrl_latch = 0;
 
 	// If the Display is disabled, set the VBlank flag.
-	if (VDP_Reg.m5.Set2 & 0x40)
+	if (d->VDP_Reg.m5.Set2 & 0x40)
 		return status;
 	else
 		return (status | VdpStatus::VDP_STATUS_VBLANK);
 }
 
-
 /**
- * Read data from the VDP.
+ * Read the VDP data port. (M5)
+ * This returns the requested data as set by the control word.
+ * TODO: Implement the one-word cache.
  * @return Data.
  */
-uint16_t Vdp::Read_Data(void)
+uint16_t Vdp::readDataMD(void)
 {
 	// TODO: Test this function.
 	// Soleil (crusader of Centry) reads from VRam.
 	LOG_MSG(vdp_io, LOG_MSG_LEVEL_DEBUG2,
 		"VDP_Ctrl.code == %02X, VDP_Ctrl.address == %04X",
-		VDP_Ctrl.code, VDP_Ctrl.address);
+		d->VDP_Ctrl.code, d->VDP_Ctrl.address);
 
 	// Reading the data port clears the control word latch.
-	VDP_Ctrl.ctrl_latch = 0;
+	d->VDP_Ctrl.ctrl_latch = 0;
 
 	// NOTE: volatile is needed due to an optimization issue caused by
 	// -ftree-pre on gcc-4.4.2. (It also breaks on gcc-3.4.5, but that
@@ -606,29 +462,30 @@ uint16_t Vdp::Read_Data(void)
 	volatile uint16_t data;
 
 	// Check the destination.
-	switch (VDP_Ctrl.code & VdpTypes::CD_DEST_MODE_CD4_MASK) {
+	switch (d->VDP_Ctrl.code & VdpTypes::CD_DEST_MODE_CD4_MASK) {
 		case VdpTypes::CD_DEST_VRAM_READ:
 			// VRam Read.
-			data = VRam.u16[(VDP_Ctrl.address & 0xFFFF) >> 1];
+			data = d->VRam.u16[(d->VDP_Ctrl.address & 0xFFFF) >> 1];
 			break;
 
 		case VdpTypes::CD_DEST_CRAM_READ:
 			// CRam Read.
 			// FIXME: Missing bits should come from the FIFO.
-			data = m_palette.readCRam_16(VDP_Ctrl.address & 0x7E);
+			data = d->palette.readCRam_16(d->VDP_Ctrl.address & 0x7E);
 			break;
 
 		case VdpTypes::CD_DEST_VSRAM_READ:
 			// VSRam Read.
 			// FIXME: Missing bits should come from the FIFO.
-			data = VSRam.u16[(VDP_Ctrl.address & 0x7E) >> 1];
+			// FIXME: MD1 and MD2 only have 80 bytes. (Genesis 3 has 128.)
+			data = d->VSRam.u16[(d->VDP_Ctrl.address & 0x7E) >> 1];
 			break;
 
 		case VdpTypes::CD_DEST_VRAM_8BIT:
 			// VRam Read. (8-bit; undocumented)
 			// Low byte is from VRAM, with inverted LSB.
 			// High byte is the high byte of the next FIFO entry. (TODO)
-			data = VRam.u8[(VDP_Ctrl.address & 0xFFFF) ^ 1 ^ U16DATA_U8_INVERT];
+			data = d->VRam.u8[(d->VDP_Ctrl.address & 0xFFFF) ^ 1 ^ U16DATA_U8_INVERT];
 			break;
 
 		default:
@@ -638,16 +495,15 @@ uint16_t Vdp::Read_Data(void)
 			break;
 	}
 
-	VDP_Ctrl.address += VDP_Reg.m5.Auto_Inc;
+	d->VDP_Ctrl.address += d->VDP_Reg.m5.Auto_Inc;
 	return data;
 }
-
 
 /**
  * Update the DMA state.
  * @return Number of cycles taken from the 68000 for DMA.
  */
-unsigned int Vdp::Update_DMA(void)
+unsigned int Vdp::updateDMA(void)
 {
 	/**
 	 * DMA transfer rate depends on the following:
@@ -664,11 +520,11 @@ unsigned int Vdp::Update_DMA(void)
 
 	// Horizontal resolution.
 	// TODO: Optimize this conditional? (Not sure if the compiler optimizes it...)
-	unsigned int offset = (isH40() ? 2 : 0);
+	unsigned int offset = (d->isH40() ? 2 : 0);
 
 	// Check if we're in VBlank or if the VDP is disabled.
 	if (VDP_Lines.currentLine >= VDP_Lines.totalVisibleLines ||
-	    (!(VDP_Reg.m5.Set2 & 0x40)))
+	    (!(d->VDP_Reg.m5.Set2 & 0x40)))
 	{
 		// In VBlank, or VDP is disabled.
 		offset |= 1;
@@ -677,12 +533,21 @@ unsigned int Vdp::Update_DMA(void)
 	// Cycles elapsed is based on M68K cycles per line.
 	unsigned int cycles = M68K_Mem::CPL_M68K;
 
+	// DMA timing table.
+	static const uint8_t DMA_Timing_Table[4][4] = {
+		/* Format: H32 active, H32 blanking, H40 active, H40 blanking */
+		{8,    83,   9, 102},	/* 68K to VRam (1 word == 2 bytes) */
+		{16,  167,  18, 205},	/* 68K to CRam or VSRam */
+		{15,  166,  17, 204},	/* VRam Fill */
+		{8,    83,   9, 102},	/* VRam Copy (1 word == 2 bytes) */
+	};
+
 	// Get the DMA transfer rate.
-	const uint8_t timing = DMA_Timing_Table[(int)DMAT_Type & 3][offset];
+	const uint8_t timing = DMA_Timing_Table[(int)d->DMAT_Type & 3][offset];
 	if (DMAT_Length > timing) {
 		// DMA is not finished.
 		DMAT_Length -= timing;
-		if ((int)DMAT_Type & 2) {
+		if ((int)d->DMAT_Type & 2) {
 			// Internal DMA. (FILL, COPY)
 			// M68K doesn't have to wait.
 			return 0;
@@ -706,9 +571,9 @@ unsigned int Vdp::Update_DMA(void)
 	cycles >>= 16;
 
 	// Clear the DMA Busy flag.
-	Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, false);
+	d->Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, false);
 
-	if ((int)DMAT_Type & 2) {
+	if ((int)d->DMAT_Type & 2) {
 		// Internal DMA. (FILL, COPY)
 		// M68K doesn't have to wait.
 		return 0;
@@ -719,12 +584,13 @@ unsigned int Vdp::Update_DMA(void)
 	return cycles;
 }
 
-
 /**
- * Write data to the VDP. (8-bit)
+ * Write to the VDP data port. (M5, 8-bit)
+ * Convenience function. This function doubles the bytes
+ * into both halves of a word, then calls writeDataMD().
  * @param data 8-bit data.
  */
-void Vdp::Write_Data_Byte(uint8_t data)
+void Vdp::writeDataMD_8(uint8_t data)
 {
 	/**
 	 * NOTE: In Mega Drive mode, the VDP requires 16-bit data.
@@ -736,18 +602,17 @@ void Vdp::Write_Data_Byte(uint8_t data)
 	 * move.w #$5858, ($C00000)
 	 */
 
-	Write_Data_Word(data | (data << 8));
+	writeDataMD(data | (data << 8));
 }
 
-
 /**
- * Perform a DMA Fill operation. (Called from VDP_Write_Data_Word().)
+ * Perform a DMA Fill operation. (Called from Vdp::writeDataMD().)
  * @param data 16-bit data.
  */
-void Vdp::DMA_Fill(uint16_t data)
+void VdpPrivate::DMA_Fill(uint16_t data)
 {
 	// Set the VRam flag.
-	MarkVRamDirty();
+	markVRamDirty();
 
 	// Get the values. (length is in bytes)
 	// NOTE: When writing to VRAM, DMA FILL uses bytes, not words.
@@ -769,7 +634,7 @@ void Vdp::DMA_Fill(uint16_t data)
 
 	// Set DMA type and length.
 	DMAT_Type = DMAT_FILL;
-	DMAT_Length = (length > 0 ? length : 65536);
+	q->DMAT_Length = (length > 0 ? length : 65536);
 	set_DMA_Length(0);
 
 	// TODO: Do DMA FILL line-by-line instead of all at once.
@@ -789,7 +654,7 @@ void Vdp::DMA_Fill(uint16_t data)
 			// Write to CRAM.
 			// TODO: FIFO emulation.
 			do {
-				m_palette.writeCRam_16((address & 0x7E), data);
+				palette.writeCRam_16((address & 0x7E), data);
 				address += VDP_Reg.m5.Auto_Inc;
 				address &= 0xFFFF;	// TODO: 128 KB support.
 			} while (--length != 0);
@@ -808,7 +673,7 @@ void Vdp::DMA_Fill(uint16_t data)
 		default:
 			// Unsupported...
 			DMAT_Type = DMAT_MEM_TO_VRAM;
-			DMAT_Length = 0;
+			q->DMAT_Length = 0;
 			Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, false);
 			break;
 	}
@@ -818,48 +683,49 @@ void Vdp::DMA_Fill(uint16_t data)
 
 	// NOTE: DMA FILL updates the DMA source address,
 	// even though it isn't used.
-	inc_DMA_Src_Adr(DMAT_Length);
+	inc_DMA_Src_Adr(q->DMAT_Length);
 }
 
-
 /**
- * Write data to the VDP. (16-bit)
+ * Read to the VDP data port. (M5)
+ * This writes to the target memory as set by the control word.
+ * TODO: Implement the FIFO.
  * @param data 16-bit data.
  */
-void Vdp::Write_Data_Word(uint16_t data)
+void Vdp::writeDataMD(uint16_t data)
 {
 	LOG_MSG(vdp_io, LOG_MSG_LEVEL_DEBUG2,
 		"VDP_Ctrl.code == %02X, VDP_Ctrl.address == %04X, data == %04X",
-		VDP_Ctrl.code, VDP_Ctrl.address, data);
+		d->VDP_Ctrl.code, d->VDP_Ctrl.address, data);
 
 	// Writing to the data port clears the control word latch.
-	VDP_Ctrl.ctrl_latch = 0;
+	d->VDP_Ctrl.ctrl_latch = 0;
 
-	if (VDP_Ctrl.code & VdpTypes::CD_MODE_WRITE)
-		vdpDataWrite_int(data);
+	if (d->VDP_Ctrl.code & VdpTypes::CD_MODE_WRITE)
+		d->vdpDataWrite_int(data);
 
 	// Check for DMA FILL.
-	if ((VDP_Ctrl.code & VdpTypes::CD_DMA_ENABLE) &&
-	    (VDP_Ctrl.DMA_Mode == 0x80))
+	if ((d->VDP_Ctrl.code & VdpTypes::CD_DMA_ENABLE) &&
+	    (d->VDP_Ctrl.DMA_Mode == 0x80))
 	{
 		// DMA Fill operation is in progress.
-		DMA_Fill(data);
+		d->DMA_Fill(data);
 	}
 }
 
 /**
  * Internal VDP data write function.
- * Used by Write_Data_Word() and DMA.
+ * Used by Vdp::writeDataMD() and DMA.
  * @param data Data word.
  */
-void Vdp::vdpDataWrite_int(uint16_t data)
+void VdpPrivate::vdpDataWrite_int(uint16_t data)
 {
 	// Check the destination.
 	uint32_t address = VDP_Ctrl.address;
 	switch (VDP_Ctrl.code & VdpTypes::CD_DEST_MASK) {
 		case VdpTypes::CD_DEST_VRAM:
 			// VRam Write.
-			MarkVRamDirty();
+			markVRamDirty();
 			address &= 0xFFFF;	// VRam is 64 KB. (32 Kwords)
 			if (address & 0x0001) {
 				// Odd address.
@@ -883,7 +749,7 @@ void Vdp::vdpDataWrite_int(uint16_t data)
 
 			// Write the word to CRam.
 			// CRam is 128 bytes. (64 words)
-			m_palette.writeCRam_16((address & 0x7E), data);
+			palette.writeCRam_16((address & 0x7E), data);
 			break;
 
 		case VdpTypes::CD_DEST_VSRAM:
@@ -913,21 +779,21 @@ void Vdp::vdpDataWrite_int(uint16_t data)
  * @param src_component Source component.
  * @param dest_component Destination component.
  */
-template<Vdp::DMA_Src_t src_component, Vdp::DMA_Dest_t dest_component>
-inline void Vdp::T_DMA_Loop(void)
+template<VdpPrivate::DMA_Src_t src_component, VdpPrivate::DMA_Dest_t dest_component>
+inline void VdpPrivate::T_DMA_Loop(void)
 {
 	// Get the DMA source address.
 	// NOTE: DMA_Src_Adr is the source address / 2.
 	uint32_t src_address = DMA_Src_Adr() * 2;
 
-	LOG_MSG(vdp_io, LOG_MSG_LEVEL_DEBUG2,
-		"<%d, %d> src_address == 0x%06X, dest_address == 0x%04X, length == %d",
-		src_component, dest_component, src_address, VDP_Ctrl.address, DMAT_Length);
-
 	// NOTE: DON'T get DMA length from the registers.
 	// It's been reset to 0 already.
 	// Just use DMAT_Length.
-	int length = DMAT_Length;
+	int length = q->DMAT_Length;
+
+	LOG_MSG(vdp_io, LOG_MSG_LEVEL_DEBUG2,
+		"<%d, %d> src_address == 0x%06X, dest_address == 0x%04X, length == %d",
+		src_component, dest_component, src_address, VDP_Ctrl.address, length);
 
 	// Mask the source address, depending on type.
 	switch (src_component) {
@@ -980,7 +846,7 @@ inline void Vdp::T_DMA_Loop(void)
 	// Determine if any flags should be set.
 	switch (dest_component) {
 		case DMA_DEST_VRAM:
-			MarkVRamDirty();
+			markVRamDirty();
 			DMAT_Type = DMAT_MEM_TO_VRAM;
 			break;
 
@@ -1071,8 +937,8 @@ inline void Vdp::T_DMA_Loop(void)
 	VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
 
 	// If any bytes weren't copied, subtract it from the saved length.
-	DMAT_Length -= length;
-	if (DMAT_Length <= 0) {
+	q->DMAT_Length -= length;
+	if (q->DMAT_Length <= 0) {
 		// No DMA left!
 		Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, false);
 		return;
@@ -1082,28 +948,48 @@ inline void Vdp::T_DMA_Loop(void)
 	// NOTE: The new DMA_Address is the wrapped version.
 	// The old asm code saved the unwrapped version.
 	// Ergo, it simply added length to DMA_Address.
-	inc_DMA_Src_Adr(DMAT_Length);
+	inc_DMA_Src_Adr(q->DMAT_Length);
 
 	// Update DMA.
-	Update_DMA();
+	q->updateDMA();
 
 	// NOTE: main68k_releaseCycles() takes no parameters,
 	// but the actual function subtracts eax from __io_cycle_counter.
 	// eax was equal to DMAT_Length.
-	M68K::ReleaseCycles(DMAT_Length);
+	M68K::ReleaseCycles(q->DMAT_Length);
 }
 
+/**
+ * Write to the VDP control port. (M5, 8-bit)
+ * Convenience function. This function doubles the bytes
+ * into both halves of a word, then calls writeCtrlMD().
+ * @param ctrl 8-bit control word.
+ */
+void Vdp::writeCtrlMD_8(uint8_t ctrl)
+{
+	/**
+	 * NOTE: In Mega Drive mode, the VDP requires 16-bit data.
+	 * 8-bit writes will result in the data byte being mirrored
+	 * for both high-byte and low-byte.
+	 *
+	 * The following two instructions are equivalent.
+	 * move.b   #$58, ($C00004)
+	 * move.w #$5858, ($C00004)
+	 */
+
+	writeCtrlMD(ctrl | (ctrl << 8));
+}
 
 /**
- * Write a control word to the VDP.
- * @param data Control word.
+ * Write to the VDP control port. (M5)
+ * @param ctrl Control word.
  */
-void Vdp::Write_Ctrl(uint16_t data)
+void Vdp::writeCtrlMD(uint16_t ctrl)
 {
 	// TODO: Check endianness with regards to the control words. (Wordswapping!)
 
 	// Check if this is the first or second control word.
-	if (!VDP_Ctrl.ctrl_latch) {
+	if (!d->VDP_Ctrl.ctrl_latch) {
 		/**
 		 * First control word.
 		 *
@@ -1120,15 +1006,15 @@ void Vdp::Write_Ctrl(uint16_t data)
 		 */
 
 		// Update the VDP address counter.
-		VDP_Ctrl.address &= ~0x3FFF;
-		VDP_Ctrl.address |= (data & 0x3FFF);
+		d->VDP_Ctrl.address &= ~0x3FFF;
+		d->VDP_Ctrl.address |= (ctrl & 0x3FFF);
 
 		// Update the VDP access code register.
-		VDP_Ctrl.code &= ~0x03;
-		VDP_Ctrl.code |= ((data >> 14) & 0x03);
+		d->VDP_Ctrl.code &= ~0x03;
+		d->VDP_Ctrl.code |= ((ctrl >> 14) & 0x03);
 
 		// Check if this is a register write
-		if ((data & 0xC000) == 0x8000) {
+		if ((ctrl & 0xC000) == 0x8000) {
 			/**
 			 * Register write.
 			 *
@@ -1139,11 +1025,11 @@ void Vdp::Write_Ctrl(uint16_t data)
 			 * R = register number
 			 * D = data
 			 */
-			const int reg = (data >> 8) & 0x1F;
-			setReg(reg, (data & 0xFF));
+			const int reg = (ctrl >> 8) & 0x1F;
+			d->setReg(reg, (ctrl & 0xFF));
 		} else {
 			// First control word.
-			VDP_Ctrl.ctrl_latch = 1;
+			d->VDP_Ctrl.ctrl_latch = 1;
 		}
 
 		// We're done here.
@@ -1167,28 +1053,28 @@ void Vdp::Write_Ctrl(uint16_t data)
 	 * NOTE 2: CD5 is only updated if DMA Enabled == 1.
 	 * (VDP_Reg.m5.Set2 & 0x04)
 	 */
-	VDP_Ctrl.ctrl_latch = 0;	// Clear the control word latch.
+	d->VDP_Ctrl.ctrl_latch = 0;	// Clear the control word latch.
 
 	// Update the VDP address counter.
-	VDP_Ctrl.address &= ~0xC000;
-	VDP_Ctrl.address |= ((data & 0x0003) << 14);
+	d->VDP_Ctrl.address &= ~0xC000;
+	d->VDP_Ctrl.address |= ((ctrl & 0x0003) << 14);
 
 	// Update the VDP access code register: CD(4..2)
-	VDP_Ctrl.code &= ~0x1C;
-	VDP_Ctrl.code |= ((data >> 2) & 0x1C);
-	if (VDP_Reg.m5.Set2 & 0x04) {
+	d->VDP_Ctrl.code &= ~0x1C;
+	d->VDP_Ctrl.code |= ((ctrl >> 2) & 0x1C);
+	if (d->VDP_Reg.m5.Set2 & 0x04) {
 		// DMA is enabled. Update CD5.
-		VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
-		VDP_Ctrl.code |= ((data >> 2) & VdpTypes::CD_DMA_ENABLE);
+		d->VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
+		d->VDP_Ctrl.code |= ((ctrl >> 2) & VdpTypes::CD_DMA_ENABLE);
 	}
 
 	// If CD5 is not set, DMA is disabled,
 	// so we're done here.
-	if (!(VDP_Ctrl.code & VdpTypes::CD_DMA_ENABLE))
+	if (!(d->VDP_Ctrl.code & VdpTypes::CD_DMA_ENABLE))
 		return;
 
 	// Check for DMA FILL.
-	if (VDP_Ctrl.DMA_Mode == 0x80) {
+	if (d->VDP_Ctrl.DMA_Mode == 0x80) {
 		// DMA FILL.
 		// Operation is processed on DATA WRITE.
 		return;
@@ -1196,17 +1082,17 @@ void Vdp::Write_Ctrl(uint16_t data)
 
 	// Determine the DMA destination.
 	// NOTE: Ignoring CD0.
-	DMA_Dest_t dest_component;
-	switch (VDP_Ctrl.code & VdpTypes::CD_DEST_MASK) {
+	VdpPrivate::DMA_Dest_t dest_component;
+	switch (d->VDP_Ctrl.code & VdpTypes::CD_DEST_MASK) {
 		case VdpTypes::CD_DEST_VRAM:
-			dest_component = DMA_DEST_VRAM;
+			dest_component = VdpPrivate::DMA_DEST_VRAM;
 			break;
 		case VdpTypes::CD_DEST_CRAM_INT_W:
 		case VdpTypes::CD_DEST_CRAM_INT_R:	// TODO: Is this needed?
-			dest_component = DMA_DEST_CRAM;
+			dest_component = VdpPrivate::DMA_DEST_CRAM;
 			break;
 		case VdpTypes::CD_DEST_VSRAM:
-			dest_component = DMA_DEST_VSRAM;
+			dest_component = VdpPrivate::DMA_DEST_VSRAM;
 			break;
 		default:
 			// Invalid destination component.
@@ -1214,16 +1100,16 @@ void Vdp::Write_Ctrl(uint16_t data)
 	}
 
 	// Get the DMA addresses.
-	uint32_t src_address = DMA_Src_Adr();		// Src Address / 2
-	uint16_t dest_address = VDP_Ctrl.address;	// Dest Address (TODO: uint32_t for 128 KB)
+	uint32_t src_address = d->DMA_Src_Adr();	// Src Address / 2
+	uint16_t dest_address = d->VDP_Ctrl.address;	// Dest Address (TODO: uint32_t for 128 KB)
 
-	int length = DMA_Length();
+	int length = d->DMA_Length();
 	if (length == 0) {
 		// DMA length is zero.
 		if (options.zeroLengthDMA) {
 			// Zero-Length DMA transfers are enabled.
 			// Ignore this request.
-			VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
+			d->VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
 			return;
 		}
 
@@ -1235,36 +1121,36 @@ void Vdp::Write_Ctrl(uint16_t data)
 	}
 
 	// Check for DMA COPY.
-	if (VDP_Ctrl.DMA_Mode == 0xC0) {
+	if (d->VDP_Ctrl.DMA_Mode == 0xC0) {
 		// DMA COPY.
 		// TODO: Verify that CD4 is set; if it isn't, VDP should lock up.
 		src_address &= 0xFFFF;
-		Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, true);	// Set the DMA BUSY bit.
+		d->Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, true);	// Set the DMA BUSY bit.
 		DMAT_Length = length;
-		DMAT_Type = DMAT_COPY;
-		set_DMA_Length(0);
-		MarkVRamDirty();
+		d->DMAT_Type = VdpPrivate::DMAT_COPY;
+		d->set_DMA_Length(0);
+		d->markVRamDirty();
 
 		// TODO: Is this correct with regards to endianness?
 		// TODO: Do DMA COPY line-by-line instead of all at once.
 		do {
-			VRam.u8[dest_address] = VRam.u8[src_address];
+			d->VRam.u8[dest_address] = d->VRam.u8[src_address];
 
 			// Increment the addresses.
 			src_address = ((src_address + 1) & 0xFFFF);
-			dest_address = ((dest_address + VDP_Reg.m5.Auto_Inc) & 0xFFFF);
+			dest_address = ((dest_address + d->VDP_Reg.m5.Auto_Inc) & 0xFFFF);
 		} while (--length != 0);
 
 		// Save the new addresses.
 		// NOTE: DMA COPY uses bytes, not words.
-		inc_DMA_Src_Adr(DMAT_Length);	// TODO: Should DMA_Src_Adr_H be cleared?
-		VDP_Ctrl.address = dest_address;
+		d->inc_DMA_Src_Adr(DMAT_Length);	// TODO: Should DMA_Src_Adr_H's DMA flags be cleared?
+		d->VDP_Ctrl.address = dest_address;
 		return;
 	}
 
-	if (VDP_Ctrl.DMA_Mode & 0x80) {
+	if (d->VDP_Ctrl.DMA_Mode & 0x80) {
 		// TODO: What does this mean?
-		VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
+		d->VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
 		return;
 	}
 
@@ -1272,7 +1158,7 @@ void Vdp::Write_Ctrl(uint16_t data)
 	src_address *= 2;
 
 	// Determine the source component.
-	DMA_Src_t src_component = DMA_SRC_ROM;	// TODO: Determine a better default.
+	VdpPrivate::DMA_Src_t src_component = VdpPrivate::DMA_SRC_ROM;	// TODO: Determine a better default.
 	int WRam_Mode;
 
 	// Maximum ROM source address: 4 MB for Sega CD or 32X, 10 MB for standard MD.
@@ -1283,20 +1169,20 @@ void Vdp::Write_Ctrl(uint16_t data)
 
 	if (src_address <= maxRomSrcAddress) {
 		// Main ROM.
-		src_component = DMA_SRC_ROM;
+		src_component = VdpPrivate::DMA_SRC_ROM;
 	} else if (!SysStatus.SegaCD) {
 		// SegaCD is not started. Assume M68K RAM.
 		// TODO: This includes invalid addresses!
-		src_component = DMA_SRC_M68K_RAM;
+		src_component = VdpPrivate::DMA_SRC_M68K_RAM;
 	} else {
 		// SegaCD is started.
 		if (src_address >= 0x240000) {
 			// Assume M68K RAM.
 			// TODO: This includes invalid addresses!
-			src_component = DMA_SRC_M68K_RAM;
+			src_component = VdpPrivate::DMA_SRC_M68K_RAM;
 		} else if (src_address < 0x40000) {
 			// Program RAM.
-			src_component = DMA_SRC_PRG_RAM;
+			src_component = VdpPrivate::DMA_SRC_PRG_RAM;
 		} else {
 			// Word RAM. Check the Word RAM state to determine the mode.
 			// TODO: Determine how this works.
@@ -1304,139 +1190,139 @@ void Vdp::Write_Ctrl(uint16_t data)
 #if 0
 			WRam_Mode = (Ram_Word_State & 0x03) + 3;
 			if (WRam_Mode < 5 || src_address < 0x220000) {
-				src_component = (DMA_Src_t)WRam_Mode;
+				src_component = (VdpPrivate::DMA_Src_t)WRam_Mode;
 			} else {
-				src_component = (DMA_Src_t)(WRam_Mode + 2);
+				src_component = (VdpPrivate::DMA_Src_t)(WRam_Mode + 2);
 			}
 #endif
 		}
 	}
 
 	// Set the DMA BUSY bit.
-	Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, true);
+	d->Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, true);
 
 	// Save the length, and clear the length registers.
 	// FIXME: Should be updating the length registers
 	// as we go along, but the M68K isn't properly "locked"
 	// for the entire time period.
 	DMAT_Length = length;
-	set_DMA_Length(0);
+	d->set_DMA_Length(0);
 
 	switch (DMA_TYPE(src_component, dest_component)) {
-		case DMA_TYPE(DMA_SRC_ROM, DMA_DEST_VRAM):
-			T_DMA_Loop<DMA_SRC_ROM, DMA_DEST_VRAM>();
+		case DMA_TYPE(VdpPrivate::DMA_SRC_ROM, VdpPrivate::DMA_DEST_VRAM):
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_ROM, VdpPrivate::DMA_DEST_VRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_ROM, DMA_DEST_CRAM):
-			T_DMA_Loop<DMA_SRC_ROM, DMA_DEST_CRAM>();
+		case DMA_TYPE(VdpPrivate::DMA_SRC_ROM, VdpPrivate::DMA_DEST_CRAM):
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_ROM, VdpPrivate::DMA_DEST_CRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_ROM, DMA_DEST_VSRAM):
-			T_DMA_Loop<DMA_SRC_ROM, DMA_DEST_VSRAM>();
+		case DMA_TYPE(VdpPrivate::DMA_SRC_ROM, VdpPrivate::DMA_DEST_VSRAM):
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_ROM, VdpPrivate::DMA_DEST_VSRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_M68K_RAM, DMA_DEST_VRAM):
-			T_DMA_Loop<DMA_SRC_M68K_RAM, DMA_DEST_VRAM>();
+		case DMA_TYPE(VdpPrivate::DMA_SRC_M68K_RAM, VdpPrivate::DMA_DEST_VRAM):
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_M68K_RAM, VdpPrivate::DMA_DEST_VRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_M68K_RAM, DMA_DEST_CRAM):
-			T_DMA_Loop<DMA_SRC_M68K_RAM, DMA_DEST_CRAM>();
+		case DMA_TYPE(VdpPrivate::DMA_SRC_M68K_RAM, VdpPrivate::DMA_DEST_CRAM):
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_M68K_RAM, VdpPrivate::DMA_DEST_CRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_M68K_RAM, DMA_DEST_VSRAM):
-			T_DMA_Loop<DMA_SRC_M68K_RAM, DMA_DEST_VSRAM>();
+		case DMA_TYPE(VdpPrivate::DMA_SRC_M68K_RAM, VdpPrivate::DMA_DEST_VSRAM):
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_M68K_RAM, VdpPrivate::DMA_DEST_VSRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_PRG_RAM, DMA_DEST_VRAM):
+		case DMA_TYPE(VdpPrivate::DMA_SRC_PRG_RAM, VdpPrivate::DMA_DEST_VRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_PRG_RAM, DMA_DEST_VRAM>();
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_PRG_RAM, VdpPrivate::DMA_DEST_VRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_PRG_RAM, DMA_DEST_CRAM):
+		case DMA_TYPE(VdpPrivate::DMA_SRC_PRG_RAM, VdpPrivate::DMA_DEST_CRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_PRG_RAM, DMA_DEST_CRAM>();
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_PRG_RAM, VdpPrivate::DMA_DEST_CRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_PRG_RAM, DMA_DEST_VSRAM):
+		case DMA_TYPE(VdpPrivate::DMA_SRC_PRG_RAM, VdpPrivate::DMA_DEST_VSRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_PRG_RAM, DMA_DEST_VSRAM>();
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_PRG_RAM, VdpPrivate::DMA_DEST_VSRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_WORD_RAM_2M, DMA_DEST_VRAM):
-			T_DMA_Loop<DMA_SRC_WORD_RAM_2M, DMA_DEST_VRAM>();
+		case DMA_TYPE(VdpPrivate::DMA_SRC_WORD_RAM_2M, VdpPrivate::DMA_DEST_VRAM):
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_WORD_RAM_2M, VdpPrivate::DMA_DEST_VRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_WORD_RAM_2M, DMA_DEST_CRAM):
-			T_DMA_Loop<DMA_SRC_WORD_RAM_2M, DMA_DEST_CRAM>();
+		case DMA_TYPE(VdpPrivate::DMA_SRC_WORD_RAM_2M, VdpPrivate::DMA_DEST_CRAM):
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_WORD_RAM_2M, VdpPrivate::DMA_DEST_CRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_WORD_RAM_2M, DMA_DEST_VSRAM):
-			T_DMA_Loop<DMA_SRC_WORD_RAM_2M, DMA_DEST_VSRAM>();
+		case DMA_TYPE(VdpPrivate::DMA_SRC_WORD_RAM_2M, VdpPrivate::DMA_DEST_VSRAM):
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_WORD_RAM_2M, VdpPrivate::DMA_DEST_VSRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_WORD_RAM_1M_0, DMA_DEST_VRAM):
+		case DMA_TYPE(VdpPrivate::DMA_SRC_WORD_RAM_1M_0, VdpPrivate::DMA_DEST_VRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_0, DMA_DEST_VRAM>();
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_WORD_RAM_1M_0, VdpPrivate::DMA_DEST_VRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_WORD_RAM_1M_0, DMA_DEST_CRAM):
+		case DMA_TYPE(VdpPrivate::DMA_SRC_WORD_RAM_1M_0, VdpPrivate::DMA_DEST_CRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_0, DMA_DEST_CRAM>();
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_WORD_RAM_1M_0, VdpPrivate::DMA_DEST_CRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_WORD_RAM_1M_0, DMA_DEST_VSRAM):
+		case DMA_TYPE(VdpPrivate::DMA_SRC_WORD_RAM_1M_0, VdpPrivate::DMA_DEST_VSRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_0, DMA_DEST_VSRAM>();
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_WORD_RAM_1M_0, VdpPrivate::DMA_DEST_VSRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_WORD_RAM_1M_1, DMA_DEST_VRAM):
+		case DMA_TYPE(VdpPrivate::DMA_SRC_WORD_RAM_1M_1, VdpPrivate::DMA_DEST_VRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_1, DMA_DEST_VRAM>();
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_WORD_RAM_1M_1, VdpPrivate::DMA_DEST_VRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_WORD_RAM_1M_1, DMA_DEST_CRAM):
+		case DMA_TYPE(VdpPrivate::DMA_SRC_WORD_RAM_1M_1, VdpPrivate::DMA_DEST_CRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_1, DMA_DEST_CRAM>();
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_WORD_RAM_1M_1, VdpPrivate::DMA_DEST_CRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_WORD_RAM_1M_1, DMA_DEST_VSRAM):
+		case DMA_TYPE(VdpPrivate::DMA_SRC_WORD_RAM_1M_1, VdpPrivate::DMA_DEST_VSRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_1M_1, DMA_DEST_VSRAM>();
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_WORD_RAM_1M_1, VdpPrivate::DMA_DEST_VSRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_VRAM):
+		case DMA_TYPE(VdpPrivate::DMA_SRC_WORD_RAM_CELL_1M_0, VdpPrivate::DMA_DEST_VRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_VRAM>();
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_WORD_RAM_CELL_1M_0, VdpPrivate::DMA_DEST_VRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_CRAM):
+		case DMA_TYPE(VdpPrivate::DMA_SRC_WORD_RAM_CELL_1M_0, VdpPrivate::DMA_DEST_CRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_CRAM>();
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_WORD_RAM_CELL_1M_0, VdpPrivate::DMA_DEST_CRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_VSRAM):
+		case DMA_TYPE(VdpPrivate::DMA_SRC_WORD_RAM_CELL_1M_0, VdpPrivate::DMA_DEST_VSRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_0, DMA_DEST_VSRAM>();
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_WORD_RAM_CELL_1M_0, VdpPrivate::DMA_DEST_VSRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_VRAM):
+		case DMA_TYPE(VdpPrivate::DMA_SRC_WORD_RAM_CELL_1M_1, VdpPrivate::DMA_DEST_VRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_VRAM>();
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_WORD_RAM_CELL_1M_1, VdpPrivate::DMA_DEST_VRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_CRAM):
+		case DMA_TYPE(VdpPrivate::DMA_SRC_WORD_RAM_CELL_1M_1, VdpPrivate::DMA_DEST_CRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_CRAM>();
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_WORD_RAM_CELL_1M_1, VdpPrivate::DMA_DEST_CRAM>();
 			break;
 
-		case DMA_TYPE(DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_VSRAM):
+		case DMA_TYPE(VdpPrivate::DMA_SRC_WORD_RAM_CELL_1M_1, VdpPrivate::DMA_DEST_VSRAM):
 			// TODO: This is untested!
-			T_DMA_Loop<DMA_SRC_WORD_RAM_CELL_1M_1, DMA_DEST_VSRAM>();
+			d->T_DMA_Loop<VdpPrivate::DMA_SRC_WORD_RAM_CELL_1M_1, VdpPrivate::DMA_DEST_VSRAM>();
 			break;
 
 		default:
 			// Invalid DMA mode.
-			VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
+			d->VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
 			break;
 	}
 

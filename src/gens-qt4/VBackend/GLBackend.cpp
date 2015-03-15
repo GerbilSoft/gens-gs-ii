@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -624,8 +624,8 @@ void GLBackend::glb_paintGL(void)
 	// Check if the MD resolution has changed.
 	// If it has, recalculate the stretch mode rectangle.
 	// TODO: Remove use of m_emuContext?
-	const QSize mdResCur(m_emuContext->m_vdp->GetHPix(),
-			     m_emuContext->m_vdp->GetVPix());
+	const QSize mdResCur(m_emuContext->m_vdp->getHPix(),
+			     m_emuContext->m_vdp->getVPix());
 	if (mdResCur != m_stretchLastRes)
 		recalcStretchRectF();
 
@@ -677,9 +677,9 @@ void GLBackend::recalcStretchRectF(StretchMode_t mode)
 	if (isEmuContext) {
 		// Emulation context is active. Get the video resolution.
 		// TODO: Adjust for visible texture size.
-		ctxHPix = m_emuContext->m_vdp->GetHPix();
-		ctxHPixBegin = m_emuContext->m_vdp->GetHPixBegin();
-		ctxVPix = m_emuContext->m_vdp->GetVPix();
+		ctxHPix = m_emuContext->m_vdp->getHPix();
+		ctxHPixBegin = m_emuContext->m_vdp->getHPixBegin();
+		ctxVPix = m_emuContext->m_vdp->getVPix();
 	} else {
 		// No emulation context.
 		// Assume 320x240 image for now.
