@@ -58,14 +58,14 @@ const VdpTypes::VdpEmuOptions_t VdpPrivate::def_vdpEmuOptions = {
 
 VdpPrivate::VdpPrivate(Vdp *q)
 	: q(q)
+	, VRam_Mask(0xFFFF)	// Always ensure this mask is valid.
 	, d_err(new VdpRend_Err_Private(q))
 {
 	// TODO: Initialize all private variables.
 
 	// Initialize the Horizontal Counter table.
 	unsigned int hc_val;
-	for (unsigned int hc = 0; hc < 512; hc++)
-	{
+	for (int hc = 0; hc < 512; hc++) {
 		// H32
 		hc_val = ((hc * 170) / 488) - 0x18;
 		H_Counter_Table[hc][0] = (uint8_t)hc_val;

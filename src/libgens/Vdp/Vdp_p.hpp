@@ -61,7 +61,7 @@ class VdpPrivate
 		// Screen mode. [H32, H40]
 		// NOTE: Signed, not unsigned, due to
 		// the way some things are calculated.
-		int H_Cell;		// [16, 20]
+		unsigned int H_Cell;	// [16, 20]
 		int H_Pix;		// [256, 320]
 		int H_Pix_Begin;	// [32, 0] (may not be necessary?)
 
@@ -76,6 +76,18 @@ class VdpPrivate
 			// to increase the pixel counters to 320px per line.
 			// Source: http://wiki.megadrive.org/index.php?title=VDPRegs_Addendum (Jorge)
 			return (VDP_Reg.m5.Set4 & 0x01);
+		}
+
+		/**
+		 * Check if 128 KB VRAM mode is enabled.
+		 * This checks both the register value and
+		 * whether or not 128 KB is enabled in the emulator.
+		 * @return True if 128 KB VRAM mode is enabled.
+		 */
+		inline bool is128KB(void) const
+		{
+			// TODO: Implement 128 KB mode.
+			return false;
 		}
 
 		// Window row shift. (H40 == 6, H32 == 5)
@@ -183,37 +195,46 @@ class VdpPrivate
 		/**
 		 * VDP address pointers.
 		 * These are relative to VRam[] and are based on register values.
-		 * TODO: Convert to uint32_t for 128 KB support.
 		 */
-		uint16_t ScrA_Addr;
-		uint16_t ScrB_Addr;
-		uint16_t Win_Addr;
-		uint16_t Spr_Addr;
-		uint16_t H_Scroll_Addr;
+		uint32_t ScrA_Addr;
+		uint32_t ScrB_Addr;
+		uint32_t Win_Addr;
+		uint32_t Spr_Addr;
+		uint32_t H_Scroll_Addr;
+
+		/**
+		 * VDP address masks.
+		 * H40 mode typically has one bit masked compared to H32
+		 * for certain registers. Note that this mask does NOT
+		 * include extra bits for 128 KB mode.
+		 */
+		uint32_t VRam_Mask;
+		uint32_t Win_Mask;
+		uint32_t Spr_Mask;
 
 		/** VDP address functions: Get Pointers. **/
-		inline uint16_t *ScrA_Addr_Ptr16(uint16_t offset)
-			{ return &VRam.u16[((ScrA_Addr + offset) & 0xFFFF) >> 1]; }
-		inline uint16_t *ScrB_Addr_Ptr16(uint16_t offset)
-			{ return &VRam.u16[((ScrB_Addr + offset) & 0xFFFF) >> 1]; }
-		inline uint16_t *Win_Addr_Ptr16(uint16_t offset)
-			{ return &VRam.u16[((Win_Addr + offset) & 0xFFFF) >> 1]; }
-		inline VdpStructs::SprEntry_m5 *Spr_Addr_PtrM5(uint16_t offset)
-			{ return (VdpStructs::SprEntry_m5*)&VRam.u16[((Spr_Addr + offset) & 0xFFFF) >> 1]; }
-		inline uint16_t *H_Scroll_Addr_Ptr16(uint16_t offset)
-			{ return &VRam.u16[((H_Scroll_Addr + offset) & 0xFFFF) >> 1]; }
+		inline uint16_t *ScrA_Addr_Ptr16(uint32_t offset)
+			{ return &VRam.u16[((ScrA_Addr + offset) & VRam_Mask) >> 1]; }
+		inline uint16_t *ScrB_Addr_Ptr16(uint32_t offset)
+			{ return &VRam.u16[((ScrB_Addr + offset) & VRam_Mask) >> 1]; }
+		inline uint16_t *Win_Addr_Ptr16(uint32_t offset)
+			{ return &VRam.u16[((Win_Addr + offset) & VRam_Mask) >> 1]; }
+		inline VdpStructs::SprEntry_m5 *Spr_Addr_PtrM5(uint32_t offset)
+			{ return (VdpStructs::SprEntry_m5*)&VRam.u16[((Spr_Addr + offset) & VRam_Mask) >> 1]; }
+		inline uint16_t *H_Scroll_Addr_Ptr16(uint32_t offset)
+			{ return &VRam.u16[((H_Scroll_Addr + offset) & VRam_Mask) >> 1]; }
 
 		/** VDP address functions: Get Values. **/
-		inline uint16_t ScrA_Addr_u16(uint16_t offset) const
-			{ return VRam.u16[((ScrA_Addr + offset) & 0xFFFF) >> 1]; }
-		inline uint16_t ScrB_Addr_u16(uint16_t offset) const
-			{ return VRam.u16[((ScrB_Addr + offset) & 0xFFFF) >> 1]; }
-		inline uint16_t Win_Addr_u16(uint16_t offset) const
-			{ return VRam.u16[((Win_Addr + offset) & 0xFFFF) >> 1]; }
-		inline uint16_t Spr_Addr_u16(uint16_t offset) const
-			{ return VRam.u16[((Spr_Addr + offset) & 0xFFFF) >> 1]; }
-		inline uint16_t H_Scroll_Addr_u16(uint16_t offset) const
-			{ return VRam.u16[((H_Scroll_Addr + offset) & 0xFFFF) >> 1]; }
+		inline uint16_t ScrA_Addr_u16(uint32_t offset) const
+			{ return VRam.u16[((ScrA_Addr + offset) & VRam_Mask) >> 1]; }
+		inline uint16_t ScrB_Addr_u16(uint32_t offset) const
+			{ return VRam.u16[((ScrB_Addr + offset) & VRam_Mask) >> 1]; }
+		inline uint16_t Win_Addr_u16(uint32_t offset) const
+			{ return VRam.u16[((Win_Addr + offset) & VRam_Mask) >> 1]; }
+		inline uint16_t Spr_Addr_u16(uint32_t offset) const
+			{ return VRam.u16[((Spr_Addr + offset) & VRam_Mask) >> 1]; }
+		inline uint16_t H_Scroll_Addr_u16(uint32_t offset) const
+			{ return VRam.u16[((H_Scroll_Addr + offset) & VRam_Mask) >> 1]; }
 
 		// VDP control struct.
 		struct {
@@ -224,20 +245,22 @@ class VdpPrivate
 			 */
 			uint8_t ctrl_latch;	// Control word latch.
 
-			// VDP internal registers.
-			uint8_t code;		// Access code. (CD5-CD0)
-			uint16_t address;	// Address counter.
-
 			// DMA values.
 			uint8_t DMA_Mode;	// (DMA ADDRESS HIGH & 0xC0) [reg 23]
 			//int DMAT_Length;	// TODO: Move it here.
+			uint16_t reserved;
+
+			// VDP internal registers.
+			uint32_t address;	// Address counter.
+			uint8_t code;		// Access code. (CD5-CD0)
 
 			void reset(void)
 			{
 				ctrl_latch = 0;
-				code = 0;
-				address = 0;
 				DMA_Mode = 0;
+				reserved = 0;
+				address = 0;
+				code = 0;
 			}
 		} VDP_Ctrl;
 

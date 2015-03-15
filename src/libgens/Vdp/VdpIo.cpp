@@ -284,7 +284,7 @@ uint16_t Vdp::readDataMD(void)
 	switch (d->VDP_Ctrl.code & VdpTypes::CD_DEST_MODE_CD4_MASK) {
 		case VdpTypes::CD_DEST_VRAM_READ:
 			// VRam Read.
-			data = d->VRam.u16[(d->VDP_Ctrl.address & 0xFFFF) >> 1];
+			data = d->VRam.u16[(d->VDP_Ctrl.address & d->VRam_Mask) >> 1];
 			break;
 
 		case VdpTypes::CD_DEST_CRAM_READ:
@@ -304,7 +304,7 @@ uint16_t Vdp::readDataMD(void)
 			// VRam Read. (8-bit; undocumented)
 			// Low byte is from VRAM, with inverted LSB.
 			// High byte is the high byte of the next FIFO entry. (TODO)
-			data = d->VRam.u8[(d->VDP_Ctrl.address & 0xFFFF) ^ 1 ^ U16DATA_U8_INVERT];
+			data = d->VRam.u8[(d->VDP_Ctrl.address & d->VRam_Mask) ^ 1 ^ U16DATA_U8_INVERT];
 			break;
 
 		default:
@@ -465,7 +465,7 @@ void VdpPrivate::DMA_Fill(uint16_t data)
 				// NOTE: DMA FILL writes to the adjacent byte.
 				VRam.u8[address ^ 1 ^ U16DATA_U8_INVERT] = fill_hi;
 				address += VDP_Reg.m5.Auto_Inc;
-				address &= 0xFFFF;	// TODO: 128 KB support.
+				address &= VRam_Mask;
 			} while (--length != 0);
 			break;
 
@@ -475,7 +475,7 @@ void VdpPrivate::DMA_Fill(uint16_t data)
 			do {
 				palette.writeCRam_16((address & 0x7E), data);
 				address += VDP_Reg.m5.Auto_Inc;
-				address &= 0xFFFF;	// TODO: 128 KB support.
+				address &= VRam_Mask;
 			} while (--length != 0);
 			break;
 
@@ -485,7 +485,7 @@ void VdpPrivate::DMA_Fill(uint16_t data)
 			do {
 				VSRam.u16[(address & 0x7E) >> 1] = data;
 				address += VDP_Reg.m5.Auto_Inc;
-				address &= 0xFFFF;	// TODO: 128 KB support.
+				address &= VRam_Mask;
 			} while (--length != 0);
 			break;
 
@@ -498,7 +498,7 @@ void VdpPrivate::DMA_Fill(uint16_t data)
 	}
 
 	// Save the new address.
-	VDP_Ctrl.address = (address & 0xFFFF);	// TODO: 128 KB support.
+	VDP_Ctrl.address = (address & VRam_Mask);
 
 	// NOTE: DMA FILL updates the DMA source address,
 	// even though it isn't used.
@@ -545,7 +545,7 @@ void VdpPrivate::vdpDataWrite_int(uint16_t data)
 		case VdpTypes::CD_DEST_VRAM:
 			// VRam Write.
 			markVRamDirty();
-			address &= 0xFFFF;	// VRam is 64 KB. (32 Kwords)
+			address &= VRam_Mask;
 			if (address & 0x0001) {
 				// Odd address.
 				// This results in the data bytes being swapped
@@ -590,7 +590,7 @@ void VdpPrivate::vdpDataWrite_int(uint16_t data)
 
 	// Increment the address register.
 	VDP_Ctrl.address += VDP_Reg.m5.Auto_Inc;
-	VDP_Ctrl.address &= 0xFFFF;	// TODO: 128 KB support.
+	VDP_Ctrl.address &= VRam_Mask;
 }
 
 /**
@@ -919,8 +919,8 @@ void Vdp::writeCtrlMD(uint16_t ctrl)
 	}
 
 	// Get the DMA addresses.
-	uint32_t src_address = d->DMA_Src_Adr();	// Src Address / 2
-	uint16_t dest_address = d->VDP_Ctrl.address;	// Dest Address (TODO: uint32_t for 128 KB)
+	uint32_t src_address = d->DMA_Src_Adr();			// Src Address / 2
+	uint32_t dest_address = d->VDP_Ctrl.address & d->VRam_Mask;	// Dest Address
 
 	int length = d->DMA_Length();
 	if (length == 0) {
@@ -943,7 +943,7 @@ void Vdp::writeCtrlMD(uint16_t ctrl)
 	if (d->VDP_Ctrl.DMA_Mode == 0xC0) {
 		// DMA COPY.
 		// TODO: Verify that CD4 is set; if it isn't, VDP should lock up.
-		src_address &= 0xFFFF;
+		src_address &= d->VRam_Mask;
 		d->Reg_Status.setBit(VdpStatus::VDP_STATUS_DMA, true);	// Set the DMA BUSY bit.
 		DMAT_Length = length;
 		d->DMAT_Type = VdpPrivate::DMAT_COPY;
@@ -956,8 +956,12 @@ void Vdp::writeCtrlMD(uint16_t ctrl)
 			d->VRam.u8[dest_address] = d->VRam.u8[src_address];
 
 			// Increment the addresses.
-			src_address = ((src_address + 1) & 0xFFFF);
-			dest_address = ((dest_address + d->VDP_Reg.m5.Auto_Inc) & 0xFFFF);
+			src_address++;
+			dest_address += d->VDP_Reg.m5.Auto_Inc;
+
+			// Mask the addresses.
+			src_address &= d->VRam_Mask;
+			dest_address &= d->VRam_Mask;
 		} while (--length != 0);
 
 		// Save the new addresses.
