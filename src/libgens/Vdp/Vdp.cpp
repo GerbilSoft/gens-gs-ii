@@ -86,45 +86,6 @@ VdpPrivate::~VdpPrivate()
 	delete d_err;
 }
 
-/**
- * Update VDP_Mode.
- */
-void VdpPrivate::updateVdpMode(void)
-{
-	const VDP_Mode_t prevVdpMode = VDP_Mode;
-	const register uint8_t Set1 = VDP_Reg.m5.Set1;
-	const register uint8_t Set2 = VDP_Reg.m5.Set2;
-	VDP_Mode = (VDP_Mode_t)
-		   (((Set2 & 0x10) >> 4) |	// M1
-		    ((Set1 & 0x02))      |	// M2
-		    ((Set2 & 0x08) >> 1) |	// M3
-		    ((Set1 & 0x04) << 1) |	// M4/PSEL
-		    ((Set2 & 0x04) << 2));	// M5
-
-	if (!(Set2 & 0x08)) {
-		// V28 mode. Reset the NTSC V30 roll values.
-		q->VDP_Lines.NTSC_V30.Offset = 0;
-		q->VDP_Lines.NTSC_V30.VBlank_Div = 0;
-	}
-
-	// If the VDP mode has changed, CRam needs to be updated.
-	if (prevVdpMode != VDP_Mode) {
-		// Update the VDP mode variables.
-		if (VDP_Mode & VDP_MODE_M5) {
-			// Mode 5.
-			palette.setPalMode(VdpPalette::PALMODE_MD);
-			palette.setMdColorMask(!(VDP_Mode & 0x08));	// M4/PSEL
-		} else {
-			// TODO: Support other palette modes.
-		}
-	}
-
-	// Initialize Vdp::VDP_Lines.
-	// Don't reset the VDP current line variables here,
-	// since this might not be the beginning of the frame.
-	q->updateVdpLines(false);
-}
-
 /** Vdp **/
 
 /**
