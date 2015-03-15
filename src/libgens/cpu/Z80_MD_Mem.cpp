@@ -112,23 +112,32 @@ inline uint8_t Z80_MD_Mem::Z80_ReadB_VDP(uint32_t address)
 		return 0;
 
 	Vdp *vdp = context->m_vdp;
+	uint8_t ret = 0; // TODO: Default to 0xFF?
 	switch (address & 0x1F) {
-		case 0x00: case 0x01: case 0x02: case 0x03:
-			// VDP data port.
-			// TODO: Gens doesn't support reading this from the Z80...
-			return 0;
+		case 0x00: case 0x02:
+			// VDP data port. (high byte)
+			// NOTE: Gens doesn't read the data port here,
+			// but it should still be readable...
+			ret = ((vdp->Read_Data() >> 8) & 0xFF);
+			break;
 
-		case 0x04: case 0x06: {
+		case 0x01: case 0x03:
+			// VDP data port. (low byte)
+			// NOTE: Gens doesn't read the data port here,
+			// but it should still be readable...
+			ret = (vdp->Read_Data() & 0xFF);
+			break;
+
+		case 0x04: case 0x06:
 			// VDP control port. (high byte)
-			uint16_t vdp_status = vdp->Read_Status();
-			return ((vdp_status >> 8) & 0xFF);
-		}
+			ret = ((vdp->Read_Status() >> 8) & 0xFF);
+			break;
 
-		case 0x05: case 0x07: {
+		case 0x05: case 0x07:
 			// VDP control port. (low byte)
-			uint16_t vdp_status = vdp->Read_Status();
-			return (vdp_status & 0xFF);
-		}
+			// FIXME: Unused bits return prefetch data.
+			ret = (vdp->Read_Status() & 0xFF);
+			break;
 
 		case 0x08:
 			// V counter.
@@ -140,11 +149,10 @@ inline uint8_t Z80_MD_Mem::Z80_ReadB_VDP(uint32_t address)
 
 		default:
 			// Invalid or unsupported VDP port.
-			return 0x00;
+			break;
 	}
 
-	// Should not get here...
-	return 0x00;
+	return ret;
 }
 
 /**
