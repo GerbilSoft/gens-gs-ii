@@ -34,9 +34,6 @@
 #include "cpu/Z80.hpp"
 #include "cpu/Z80_MD_Mem.hpp"
 
-// System emulation code.
-#include "Vdp/Vdp.hpp"
-
 // Sound Manager.
 #include "sound/SoundMgr.hpp"
 
