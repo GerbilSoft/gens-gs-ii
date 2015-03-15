@@ -49,8 +49,9 @@
 #include <GL/glxew.h>
 #endif
 
-namespace GensQt4
-{
+using LibGens::MdFb;
+
+namespace GensQt4 {
 
 /**
  * Initialize the common OpenGL backend.
@@ -155,12 +156,12 @@ void GLBackend::reallocTexture(void)
 	if (!isRunning()) {
 		// Clear texture; set last bpp as invalid to force update.
 		m_tex = 0;
-		m_lastBpp = LibGens::VdpPalette::BPP_MAX;
+		m_lastBpp = MdFb::BPP_MAX;
 		return;
 	}
 
 	// Get the current color depth.
-	m_lastBpp = m_srcBpp;
+	m_lastBpp = m_srcFb->bpp();
 
 	// Create and initialize a GL texture.
 	// TODO: Add support for NPOT textures and/or GL_TEXTURE_RECTANGLE_ARB.
@@ -177,19 +178,19 @@ void GLBackend::reallocTexture(void)
 
 	// Determine the texture format and type.
 	switch (m_lastBpp) {
-		case LibGens::VdpPalette::BPP_15:
+		case MdFb::BPP_15:
 			m_colorComponents = 4;
 			m_texFormat = GL_BGRA;
 			m_texType = GL_UNSIGNED_SHORT_1_5_5_5_REV;
 			break;
 
-		case LibGens::VdpPalette::BPP_16:
+		case MdFb::BPP_16:
 			m_colorComponents = 3;
 			m_texFormat = GL_RGB;
 			m_texType = GL_UNSIGNED_SHORT_5_6_5;
 			break;
 
-		case LibGens::VdpPalette::BPP_32:
+		case MdFb::BPP_32:
 		default:
 			m_colorComponents = 4;
 			m_texFormat = GL_BGRA;
@@ -243,7 +244,7 @@ void GLBackend::reallocTexture(void)
 	// This will ensure that the entire texture is initialized to black.
 	// (This fixes garbage on the last column when using the Fast Blur shader.)
 	const size_t texSize = (m_texSize.width() * m_texSize.height() *
-				(m_lastBpp == LibGens::VdpPalette::BPP_32 ? 4 : 2));
+				(m_lastBpp == MdFb::BPP_32 ? 4 : 2));
 	void *texBuf = calloc(1, texSize);
 
 	// Allocate the texture.
@@ -252,7 +253,7 @@ void GLBackend::reallocTexture(void)
 		     m_texSize.width(), m_texSize.height(),
 		     0,		// No border.
 		     m_texFormat, m_texType, texBuf);
-	
+
 	// Free the temporary texture buffer.
 	free(texBuf);
 
@@ -520,11 +521,11 @@ void GLBackend::glb_paintGL(void)
 		resetAspectRatioConstraintChanged();
 	}
 
-	if (m_mdScreenDirty) {
+	if (m_mdScreenDirty && m_srcFb) {
 		// MD_Screen is dirty.
 
 		// Check if the Bpp or texture size has changed.
-		if (m_srcBpp != m_lastBpp || texVisSizeChanged) {
+		if (m_srcFb->bpp() != m_lastBpp || texVisSizeChanged) {
 			// Bpp has changed. Reallocate the texture.
 			// VDP palettes will be recalculated on the next frame.
 			reallocTexture();
@@ -575,7 +576,7 @@ void GLBackend::glb_paintGL(void)
 
 		// Get the screen buffer from the LibGens::MdFb.
 		const GLvoid *screen;
-		if (m_srcBpp != LibGens::VdpPalette::BPP_32)
+		if (m_srcFb->bpp() != MdFb::BPP_32)
 			screen = src_fb->fb16();
 		else
 			screen = src_fb->fb32();

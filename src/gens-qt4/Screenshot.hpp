@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -26,7 +26,7 @@
 
 // LibGens includes.
 #include "libgens/Rom.hpp"
-#include "libgens/EmuContext.hpp"
+#include "libgens/Util/MdFb.hpp"
 
 // Qt includes.
 #include <QtCore/QObject>
@@ -35,26 +35,26 @@
 class QIODevice;
 class QImageWriter;
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
+// TODO: Private class.
 class Screenshot : public QObject
 {
 	Q_OBJECT
-	
+
 	public:
-		Screenshot(LibGens::Rom *rom, LibGens::EmuContext *context, QObject *parent = 0);
+		Screenshot(LibGens::Rom *rom, LibGens::MdFb *fb, QObject *parent = 0);
 		~Screenshot();
-		
+
 		QImage get(void);
 		int save(const QString &filename);
 		int save(QIODevice *device);
-	
+
 	protected:
 		LibGens::Rom *m_rom;
-		LibGens::EmuContext *m_context;
+		LibGens::MdFb *m_fb;
 		QImage m_img;
-		
+
 		void update(void);
 		int save_int(QImageWriter& writer);
 };

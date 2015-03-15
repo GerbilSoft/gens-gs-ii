@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -38,8 +38,7 @@
 #include <math.h>
 #include <string.h>
 
-namespace LibGens
-{
+namespace LibGens {
 
 /**
  * VdpPalette private class.
@@ -48,20 +47,20 @@ class VdpPalettePrivate
 {
 	public:
 		VdpPalettePrivate(VdpPalette *q);
-	
+
 	private:
 		VdpPalette *const q;
-		
+
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
 		VdpPalettePrivate(const VdpPalettePrivate &);
 		VdpPalettePrivate &operator=(const VdpPalettePrivate &);
-	
+
 	public:
 		/** Properties. **/
 		VdpPalette::PalMode_t palMode;	// Palette mode.
 		uint8_t bgColorIdx;		// Background color index.
-		
+
 		/**
 		 * MD color mask. (Mode 5 only)
 		 * Used with the Palette Select bit.
@@ -69,58 +68,54 @@ class VdpPalettePrivate
 		uint16_t mdColorMask;
 		static const uint16_t MD_COLOR_MASK_FULL;
 		static const uint16_t MD_COLOR_MASK_LSB;
-		
+
 		/**
 		 * Shadow/Highlight enable bit. (Mode 5 only)
 		 */
 		bool mdShadowHighlight;
-		
+
 		// Full MD/SMS/GG palette.
-		union PalFull_t
-		{
+		union {
 			uint16_t u16[0x1000];
 			uint32_t u32[0x1000];
-		};
-		PalFull_t palFull;
-		
+		} palFull;
+
 		// Full 32X palette.
 		// TODO: Only allocate this if 32X mode is enabled?
-		union PalFull_32X_t
-		{
+		union {
 			uint16_t u16[0x10000];
 			uint32_t u32[0x10000];
-		};
-		PalFull_32X_t palFull32X;
-		
+		} palFull32X;
+
 		/** Full palette recalculation functions. **/
-		
+
 		template<typename pixel,
 			int RBits, int GBits, int BBits,
 			int RMask, int GMask, int BMask>
 		FORCE_INLINE void T_recalcFull_MD(pixel *palFull);
-		
+
 		template<typename pixel,
 			int RBits, int GBits, int BBits,
 			int RMask, int GMask, int BMask>
 		FORCE_INLINE void T_recalcFull_32X(pixel *palFull32X);
-		
+
 		template<typename pixel,
 			int RBits, int GBits, int BBits,
 			int RMask, int GMask, int BMask>
 		FORCE_INLINE void T_recalcFull_SMS(pixel *palFull);
-		
+
 		template<typename pixel,
 			int RBits, int GBits, int BBits,
 			int RMask, int GMask, int BMask>
 		FORCE_INLINE void T_recalcFull_GG(pixel *palFull);
-		
+
 		template<typename pixel,
 			int RBits, int GBits, int BBits,
 			int RMask, int GMask, int BMask>
 		FORCE_INLINE void T_recalcFull_TMS9918(pixel *palFull);
-		
+
 		void recalcFull(void);
-	
+
 	public:
 		/** Static functions. **/
 		static int FUNC_PURE ClampColorComponent(int mask, int c);
@@ -193,7 +188,6 @@ void VdpPalettePrivate::T_recalcFull_MD(pixel *palFull)
 	}
 }
 
-
 /**
  * Recalculate the full palette. (Sega 32X)
  * This applies brightness, contrast, grayscale, and inverted palette settings.
@@ -253,7 +247,6 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_32X(pixel *palFull32X)
 #endif
 }
 
-
 /**
  * Recalculate the full palette. (Sega Master System)
  * This applies brightness, contrast, grayscale, and inverted palette settings.
@@ -301,7 +294,6 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_SMS(pixel *palFull)
 	}
 }
 
-
 /**
  * Recalculate the full palette. (Game Gear)
  * This applies brightness, contrast, grayscale, and inverted palette settings.
@@ -347,7 +339,6 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_GG(pixel *palFull)
 	}
 }
 
-
 /**
  * Recalculate the full palette. (TMS9918)
  * This applies brightness, contrast, grayscale, and inverted palette settings.
@@ -366,9 +357,8 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_TMS9918(pixel *palFull)
 	 * Reference: http://www.smspower.org/forums/viewtopic.php?t=8224
 	 */
 	// TODO: Byteswapping on big-endian?
-	struct PalRGB_t { uint8_t a; uint8_t r; uint8_t g; uint8_t b; };
-	static const PalRGB_t PalTMS9918_Analog[16] =
-	{
+	struct { uint8_t a; uint8_t r; uint8_t g; uint8_t b; }
+	PalTMS9918_Analog[16] = {
 		{0x00, 0x00, 0x00, 0x00},	// 0: Transparent
 		{0x00, 0x00, 0x00, 0x00},	// 1: Black
 		{0x00, 0x47, 0xB7, 0x3B},	// 2: Medium Green
@@ -425,14 +415,13 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_TMS9918(pixel *palFull)
 	memcpy(&palFull[0x10], &palFull[0x00], (sizeof(palFull[0]) * 16));
 }
 
-
 /**
  * Recalculate the full VDP palette.
  */
 void VdpPalettePrivate::recalcFull(void)
 {
 	switch (q->m_bpp) {
-		case VdpPalette::BPP_15:
+		case MdFb::BPP_15:
 			switch (this->palMode) {
 				case VdpPalette::PALMODE_32X:
 					T_recalcFull_32X<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(palFull32X.u16);
@@ -453,8 +442,8 @@ void VdpPalettePrivate::recalcFull(void)
 					break;
 			}
 			break;
-		
-		case VdpPalette::BPP_16:
+
+		case MdFb::BPP_16:
 			switch (this->palMode) {
 				case VdpPalette::PALMODE_32X:
 					T_recalcFull_32X<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(palFull32X.u16);
@@ -475,8 +464,8 @@ void VdpPalettePrivate::recalcFull(void)
 					break;
 			}
 			break;
-		
-		case VdpPalette::BPP_32:
+
+		case MdFb::BPP_32:
 		default:
 			switch (this->palMode) {
 				case VdpPalette::PALMODE_32X:
@@ -542,7 +531,7 @@ int FUNC_PURE VdpPalettePrivate::ClampColorComponent(int mask, int c)
  */
 VdpPalette::VdpPalette()
 	: d(new VdpPalettePrivate(this))
-	, m_bpp(BPP_32)
+	, m_bpp(MdFb::BPP_32)
 {
 	// Set the dirty flags.
 	m_dirty.active = true;
@@ -560,9 +549,8 @@ VdpPalette::~VdpPalette()
 	// TODO: Other cleanup.
 }
 
-
 /**
- * reset(): Reset the palette, including CRam.
+ * Reset the palette, including CRam.
  */
 void VdpPalette::reset(void)
 {
@@ -607,7 +595,7 @@ void VdpPalette::set##setPropName(setPropType new##setPropName) \
 }
 
 /** Property write functions. **/
-PAL_PROPERTY_WRITE_NOPRIV(bpp, ColorDepth, Bpp)
+PAL_PROPERTY_WRITE_NOPRIV(bpp, MdFb::ColorDepth, Bpp)
 
 /**
  * Get the palette mode.
@@ -947,8 +935,8 @@ void VdpPalette::update(void)
 		d->recalcFull();
 	if (!m_dirty.active)
 		return;
-	
-	if (m_bpp != BPP_32) {
+
+	if (m_bpp != MdFb::BPP_32) {
 		switch (d->palMode) {
 			case PALMODE_32X:
 				// TODO: Implement T_update_32X().
@@ -1008,7 +996,6 @@ void VdpPalette::update(void)
 	m_dirty.active = false;
 }
 
-
 // TODO: Port to LibGens: T_update_32X()
 #if 0
 /**
@@ -1023,9 +1010,7 @@ void Adjust_CRam_32X(void)
 }
 #endif
 
-
 /** ZOMG savestate functions. **/
-
 
 /**
  * Save the CRam.
@@ -1036,7 +1021,6 @@ void VdpPalette::zomgSaveCRam(Zomg_CRam_t *cram) const
 	// TODO: Support systems other than MD.
 	memcpy(cram->md, m_cram.u16, sizeof(cram->md));
 }
-
 
 /**
  * Load the CRam.

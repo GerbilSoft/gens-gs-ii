@@ -46,7 +46,7 @@ VdpRend_Err_Private::VdpRend_Err_Private(Vdp *q)
 	, lastVdpMode(~0)
 	, lastHPix(~0)
 	, lastVPix(~0)
-	, lastBpp(VdpPalette::BPP_32)
+	, lastBpp(MdFb::BPP_32)
 	, lastBorderColor(~0)
 { }
 
@@ -407,17 +407,17 @@ void VdpPrivate::renderLine_Err(void)
 		// VDP mode has changed.
 		// Redraw the color bars and reprint the error message.
 		switch (palette.bpp()) {
-			case VdpPalette::BPP_15:
+			case MdFb::BPP_15:
 				d_err->T_DrawColorBars<uint16_t>(q->MD_Screen, VdpRend_Err_Private::ColorBarsPalette_15);
 				d_err->T_DrawVDPErrorMessage<uint16_t, 0x7FFF>(q->MD_Screen);
 				break;
 
-			case VdpPalette::BPP_16:
+			case MdFb::BPP_16:
 				d_err->T_DrawColorBars<uint16_t>(q->MD_Screen, VdpRend_Err_Private::ColorBarsPalette_16);
 				d_err->T_DrawVDPErrorMessage<uint16_t, 0xFFFF>(q->MD_Screen);
 				break;
 
-			case VdpPalette::BPP_32:
+			case MdFb::BPP_32:
 			default:
 				d_err->T_DrawColorBars<uint32_t>(q->MD_Screen, VdpRend_Err_Private::ColorBarsPalette_32);
 				d_err->T_DrawVDPErrorMessage<uint32_t, 0xFFFFFF>(q->MD_Screen);
@@ -433,7 +433,7 @@ void VdpPrivate::renderLine_Err(void)
 
 	// Get the current border color.
 	uint32_t newBorderColor;
-	if (palette.bpp() != VdpPalette::BPP_32)
+	if (palette.bpp() != MdFb::BPP_32)
 		newBorderColor = (uint32_t)palette.m_palActive.u16[0];
 	else
 		newBorderColor = palette.m_palActive.u32[0];
@@ -443,7 +443,7 @@ void VdpPrivate::renderLine_Err(void)
 		// TODO: Check for horizontal borders too.
 		if (q->VDP_Lines.Border.borderSize != 0) {
 			// Update the color bar borders.
-			if (palette.bpp() != VdpPalette::BPP_32)
+			if (palette.bpp() != MdFb::BPP_32)
 				d_err->T_DrawColorBars_Border<uint16_t>(q->MD_Screen, (uint16_t)newBorderColor);
 			else
 				d_err->T_DrawColorBars_Border<uint32_t>(q->MD_Screen, newBorderColor);
@@ -466,7 +466,7 @@ void VdpPrivate::updateErr(void)
 	d_err->lastBpp = palette.bpp();
 
 	// Check border color.
-	if (palette.bpp() != VdpPalette::BPP_32)
+	if (palette.bpp() != MdFb::BPP_32)
 		d_err->lastBorderColor = (uint32_t)palette.m_palActive.u16[0];
 	else
 		d_err->lastBorderColor = palette.m_palActive.u32[0];

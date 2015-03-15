@@ -26,18 +26,21 @@
 // LibGens includes.
 #include "libgens/Vdp/Vdp.hpp"
 #include "libgens/Vdp/VdpPalette.hpp"
+// TODO: Move stuff to MdFb.
+#include "gqt4_main.hpp"
 
 // Qt includes.
 #include <QtCore/QDateTime>
 #include <QtGui/QImageWriter>
 
-namespace GensQt4
-{
+using LibGens::MdFb;
 
-Screenshot::Screenshot(LibGens::Rom *rom, LibGens::EmuContext *context, QObject *parent)
+namespace GensQt4 {
+
+Screenshot::Screenshot(LibGens::Rom *rom, LibGens::MdFb *fb, QObject *parent)
 	: QObject(parent)
 	, m_rom(rom)
-	, m_context(context)
+	, m_fb(fb)
 {
 	// Update the internal image.
 	update();
@@ -45,29 +48,27 @@ Screenshot::Screenshot(LibGens::Rom *rom, LibGens::EmuContext *context, QObject 
 
 Screenshot::~Screenshot()
 {
-	// TODO: Unreference the ROM and EmuContext.
+	// TODO: Unreference the ROM and MdFb.
 	// (This requires adding reference counting...)
 }
 
 /**
- * Update the internal image using the given ROM and EmuContext.
+ * Update the internal image using the given ROM and MdFb.
  */
 void Screenshot::update(void)
 {
-	if (!m_rom || !m_context) {
-		// Missing ROM or EmuContext.
+	if (!m_rom || !m_fb) {
+		// Missing ROM or MdFb.
 		m_img = QImage();
 		return;
 	}
 
 	// VDP object.
-	const LibGens::Vdp *vdp = m_context->m_vdp;
-
-	// Get the color depth.
-	// FIXME: Color depth should be a property of the MdFb.
-	const LibGens::VdpPalette::ColorDepth bpp = vdp->bpp();
+	// TODO: Store VPix and HPixBegin in the MdFb.
+	const LibGens::Vdp *vdp = gqt4_emuContext->m_vdp;
 
 	// Create the QImage.
+	// TODO: Store VPix and HPixBegin in the MdFb.
 	const uint8_t *start;
 	const int startY = ((240 - vdp->getVPix()) / 2);
 	const int startX = (vdp->getHPixBegin());
@@ -75,14 +76,15 @@ void Screenshot::update(void)
 	QImage::Format imgFormat;
 	LibGens::MdFb *fb = vdp->MD_Screen;
 
-	if (bpp == LibGens::VdpPalette::BPP_32) {
+	const MdFb::ColorDepth bpp = fb->bpp();
+	if (bpp == MdFb::BPP_32) {
 		start = (const uint8_t*)(fb->lineBuf32(startY) + startX);
 		bytesPerLine = (fb->pxPitch() * sizeof(uint32_t));
 		imgFormat = QImage::Format_RGB32;
 	} else {
 		start = (const uint8_t*)(fb->lineBuf16(startY) + startX);
 		bytesPerLine = (fb->pxPitch() * sizeof(uint16_t));
-		if (bpp == LibGens::VdpPalette::BPP_16)
+		if (bpp == MdFb::BPP_16)
 			imgFormat = QImage::Format_RGB16;
 		else
 			imgFormat = QImage::Format_RGB555;

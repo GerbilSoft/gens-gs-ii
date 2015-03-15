@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -41,15 +41,15 @@
 // Qt Key Handler.
 #include "Input/KeyHandlerQt.hpp"
 
-namespace GensQt4
-{
+using LibGens::MdFb;
+
+namespace GensQt4 {
 
 VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	: QWidget(parent)
 
 	// No source framebuffer initially.
 	, m_srcFb(nullptr)
-	, m_srcBpp(LibGens::VdpPalette::BPP_32)
 
 	// Key handler.
 	, m_keyHandler(keyHandler)
@@ -57,7 +57,7 @@ VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
 	// Mark the video backend as dirty on startup.
 	, m_vbDirty(true)
 	, m_mdScreenDirty(true)
-	, m_lastBpp(LibGens::VdpPalette::BPP_MAX)
+	, m_lastBpp(MdFb::BPP_MAX)
 
 	// Allocate the internal screen buffer.
 	, m_intScreen(new LibGens::MdFb())
@@ -147,9 +147,8 @@ VBackend::~VBackend()
 /**
  * Video Backend update function.
  * @param fb Framebuffer to use.
- * @param bpp Color depth.
  */
-void VBackend::vbUpdate(const LibGens::MdFb *fb, LibGens::VdpPalette::ColorDepth bpp)
+void VBackend::vbUpdate(const LibGens::MdFb *fb)
 {
 	// Save the framebuffer.
 	if (m_srcFb != fb) {
@@ -161,9 +160,6 @@ void VBackend::vbUpdate(const LibGens::MdFb *fb, LibGens::VdpPalette::ColorDepth
 			m_srcFb->ref();
 		m_mdScreenDirty = true;
 	}
-
-	// Save the color depth.
-	m_srcBpp = bpp;
 
 	// Update the video backend.
 	vbUpdate_int();

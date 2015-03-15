@@ -4,7 +4,7 @@
  *                                                                            *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                         *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                                *
- * Copyright (c) 2008-2014 by David Korth.                                    *
+ * Copyright (c) 2008-2015 by David Korth.                                    *
  *                                                                            *
  * This program is free software; you can redistribute it and/or modify       *
  * it under the terms of the GNU General Public License as published by       *
@@ -501,7 +501,8 @@ void EmuManager::doScreenShot(void)
 	} while (QFile::exists(scrFilename));
 
 	// Create the screenshot.
-	Screenshot ss(m_rom, gqt4_emuContext, this);
+	LibGens::MdFb *fb = gqt4_emuContext->m_vdp->MD_Screen;
+	Screenshot ss(m_rom, fb, this);
 	int ret = ss.save(scrFilename);
 
 	QString osdMsg;
@@ -564,7 +565,8 @@ void EmuManager::doAudioStereo(bool newStereo)
 void EmuManager::doSaveState(QString filename, int saveSlot)
 {
 	// Create the preview image.
-	Screenshot ss(m_rom, gqt4_emuContext, this);
+	LibGens::MdFb *fb = gqt4_emuContext->m_vdp->MD_Screen;
+	Screenshot ss(m_rom, fb, this);
 	QBuffer imgBuf;
 	ss.save(&imgBuf);
 

@@ -559,9 +559,7 @@ int EmuManager::closeRom(bool emitStateChanged)
 			if (introStyle != 0) {
 				// Intro Effect is enabled.
 				// Save the previous source framebuffer.
-
 				m_romClosedFb = gqt4_emuContext->m_vdp->MD_Screen->ref();
-				m_romClosedBpp = gqt4_emuContext->m_vdp->bpp();
 			}
 
 			// Unreference the last previous source framebuffer.
@@ -833,10 +831,10 @@ void EmuManager::updateVBackend(void)
 
 	if (gqt4_emuContext) {
 		const LibGens::Vdp *vdp = gqt4_emuContext->m_vdp;
-		m_vBackend->vbUpdate(vdp->MD_Screen, vdp->bpp());
+		m_vBackend->vbUpdate(vdp->MD_Screen);
 	} else {
-		// TODO: Get color depth from ConfigStore.
-		m_vBackend->vbUpdate(nullptr, LibGens::VdpPalette::BPP_32);
+		// TODO: Create blank MdFb with default color depth from ConfigStore?
+		m_vBackend->vbUpdate(nullptr);
 	}
 }
 

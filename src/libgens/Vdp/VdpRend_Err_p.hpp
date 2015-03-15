@@ -28,7 +28,6 @@
 #include <stdint.h>
 
 #include "Util/MdFb.hpp"
-#include "VdpPalette.hpp"
 
 namespace LibGens {
 
@@ -62,7 +61,7 @@ class VdpRend_Err_Private
 		unsigned int lastVdpMode;
 		int lastHPix;
 		int lastVPix;
-		VdpPalette::ColorDepth lastBpp;
+		MdFb::ColorDepth lastBpp;
 		uint32_t lastBorderColor;
 
 	public:

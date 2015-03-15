@@ -2,7 +2,7 @@
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
  * VdpSpriteMaskingTest.cpp: Sprite Masking & Overflow Test ROM.           *
  *                                                                         *
- * Copyright (c) 2011-2013 by David Korth.                                 *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  * Original ROM Copyright (c) 2009 by Nemesis.                             *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
@@ -206,8 +206,8 @@ void VdpSpriteMaskingTest::SetUp(void)
 		// Initialize CRam.
 		// FIXME: Needs to be byteswapped?
 		m_vdp->dbg_writeCRam_16(0, test_spritemask_cram, ARRAY_SIZE(test_spritemask_cram));
-		// FIXME: Set bpp in the framebuffer instead?
-		m_vdp->setBpp(LibGens::VdpPalette::BPP_32);
+		// FIXME: Move MD_Screen out of m_vdp.
+		m_vdp->MD_Screen->setBpp(LibGens::MdFb::BPP_32);
 
 		// Initialize VSRam.
 		uint16_t vsblock[40];

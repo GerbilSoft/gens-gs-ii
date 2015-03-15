@@ -356,16 +356,6 @@ void Vdp::decrementHIntCounter(bool reload)
 	}
 }
 
-// FIXME: Bpp should be a property of the framebuffer.
-VdpPalette::ColorDepth Vdp::bpp(void) const
-{
-	return d->palette.bpp();
-}
-void Vdp::setBpp(VdpPalette::ColorDepth bpp)
-{
-	d->palette.setBpp(bpp);
-}
-
 /** ZOMG!!1! **/
 
 /**

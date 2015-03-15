@@ -216,13 +216,6 @@ class Vdp
 		// passed to renderLine().
 		MdFb *MD_Screen;
 
-		// FIXME: Bpp should be a property of the framebuffer.
-		// Currently needed by GensQt4::EmuManager::closeRom()
-		// in order to show the "intro effect".
-		// Also for updating the VBackend.
-		VdpPalette::ColorDepth bpp(void) const;
-		void setBpp(VdpPalette::ColorDepth bpp);
-
 		// VDP line counters.
 		// NOTE: Gens/GS currently uses 312 lines for PAL. It should use 313!
 		VdpTypes::VdpLines_t VDP_Lines;

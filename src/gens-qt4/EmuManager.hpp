@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -210,18 +210,11 @@ class EmuManager : public QObject
 		LibGens::MdFb *romClosedFb(void);
 
 		/**
-		 * Get the bpp for the MdFb from the last closed ROM.
-		 * @return Color depth.
-		 */
-		LibGens::VdpPalette::ColorDepth romClosedBpp(void);
-
-		/**
 		 * Reset the last closed ROM MdFb.
 		 */
 		void clearRomClosedFb(void);
 	private:
 		LibGens::MdFb *m_romClosedFb;
-		LibGens::VdpPalette::ColorDepth m_romClosedBpp;
 
 	/** Translatable string functions. **/
 
@@ -487,13 +480,6 @@ inline int EmuManager::closeRom(void)
  */
 inline LibGens::MdFb *EmuManager::romClosedFb(void)
 	{ return m_romClosedFb; }
-
-/**
- * Get the bpp for the MdFb from the last closed ROM.
- * @return Color depth.
- */
-inline LibGens::VdpPalette::ColorDepth EmuManager::romClosedBpp(void)
-	{ return m_romClosedBpp; }
 
 /**
  * Reset the last closed ROM MdFb.

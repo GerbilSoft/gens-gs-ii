@@ -1427,7 +1427,7 @@ void VdpPrivate::renderLine_m5(void)
 		// We're in the border area, but border color emulation is disabled.
 		// Clear the border area.
 		// TODO: Only clear this if the option changes or V/H mode changes.
-		if (palette.bpp() != VdpPalette::BPP_32) {
+		if (palette.bpp() != MdFb::BPP_32) {
 			memset(q->MD_Screen->lineBuf16(lineNum), 0x00,
 				(q->MD_Screen->pxPerLine() * sizeof(uint16_t)));
 		} else {
@@ -1499,15 +1499,19 @@ void VdpPrivate::renderLine_m5(void)
 	}
 
 	// Update the active palette.
+	// FIXME: If palette is locked and bpp is changed, convert it.
 	if (!(VDP_Layers & VdpTypes::VDP_LAYER_PALETTE_LOCK)) {
 		if (!q->options.updatePaletteInVBlankOnly || in_border) {
-			palette.update();
+			if (palette.bpp() != q->MD_Screen->bpp())
+				palette.setBpp(q->MD_Screen->bpp());
+			else
+				palette.update();
 		}
 	}
 
 	// Render the image.
 	// TODO: Optimize SMS LCB handling. (maybe use Linux's unlikely() macro?)
-	if (palette.bpp() != VdpPalette::BPP_32) {
+	if (q->MD_Screen->bpp() != MdFb::BPP_32) {
 		uint16_t *lineBuf16 = q->MD_Screen->lineBuf16(lineNum);
 		T_Render_LineBuf<uint16_t>(lineBuf16, palette.m_palActive.u16);
 

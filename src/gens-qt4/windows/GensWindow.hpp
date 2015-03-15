@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -34,7 +34,6 @@ class QCloseEvent;
 
 // LibGens includes.
 #include "libgens/lg_osd.h"
-#include "libgens/Vdp/VdpPalette.hpp"
 
 // gens-qt4 classes.
 #include "gqt4_main.hpp"
@@ -78,7 +77,7 @@ class GensWindow : public QMainWindow
 
 		// Set color depth.
 		// TODO: Should this really be here, or should it be a slot?
-		void setBpp(LibGens::VdpPalette::ColorDepth newBpp);
+		void setBpp(LibGens::MdFb::ColorDepth bpp);
 
 		// Idle thread.
 		bool idleThreadAllowed(void);
