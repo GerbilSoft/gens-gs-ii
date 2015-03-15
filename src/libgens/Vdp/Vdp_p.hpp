@@ -146,6 +146,7 @@ class VdpPrivate
 		int HInt_Counter;	// Horizontal Interrupt Counter.
 		int VDP_Int;		// VDP interrupt state.
 		VdpStatus Reg_Status;	// VDP status register.
+		uint16_t testReg;	// Test register.
 
 		// VDP registers.
 		VdpTypes::VdpReg_t VDP_Reg;

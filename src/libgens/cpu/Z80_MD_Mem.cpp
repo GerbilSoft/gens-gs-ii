@@ -143,6 +143,16 @@ inline uint8_t Z80_MD_Mem::Z80_ReadB_VDP(uint32_t address)
 			// H counter.
 			return vdp->readHCounter();
 
+		case 0x1C: case 0x1E:
+			// VDP test register. (high byte)
+			ret = ((vdp->readTestRegMD() >> 8) & 0xFF);
+			break;
+
+		case 0x1D: case 0x1F:
+			// VDP test register. (low byte)
+			ret = (vdp->readTestRegMD() & 0xFF);
+			break;
+
 		default:
 			// Invalid or unsupported VDP port.
 			break;
@@ -235,6 +245,10 @@ inline void Z80_MD_Mem::Z80_WriteB_VDP(uint32_t address, uint8_t data)
 		case 0x11:
 			// PSG control port.
 			SoundMgr::ms_Psg.write(data);
+			break;
+		case 0x1C: case 0x1D: case 0x1E: case 0x1F:
+			// VDP test register.
+			vdp->writeTestRegMD_8(data);
 			break;
 		default:
 			// Invalid or unsupported VDP port.

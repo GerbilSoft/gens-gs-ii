@@ -418,6 +418,38 @@ uint16_t Vdp::readHVCounterMD(void)
 }
 
 /**
+ * Read the test register. ($C0001C)
+ * TODO: Not implemented.
+ * @return Test register value.
+ */
+uint16_t Vdp::readTestRegMD(void) const
+{
+	return d->testReg;
+}
+
+/**
+ * Write the test register. ($C0001C)
+ * TODO: Not implemented.
+ * @param data Test register value.
+ */
+void Vdp::writeTestRegMD(uint16_t data)
+{
+	// TODO
+	d->testReg = data;
+}
+
+/**
+ * Write the test register. ($C0001C)
+ * Convenience function. This function doubles the bytes
+ * into both halves of a word, then calls writeTestRegMD().
+ * @param data 8-bit test register value.
+ */
+void Vdp::writeTestRegMD_8(uint8_t data)
+{
+	writeTestRegMD(data | (data << 8));
+}
+
+/**
  * Read the VDP control port. (M5)
  * This returns the status register.
  * @return VDP status register.

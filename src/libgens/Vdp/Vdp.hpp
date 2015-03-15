@@ -173,6 +173,25 @@ class Vdp
 		// PSG: $C00011 [mirrors: 13, 15, 17]
 		// Not implemented here.
 
+		/**
+		 * Test register: $C0001C [mirrors: 1E]
+		 * TODO
+		 * From http://md.squee.co/wiki/VDP#Debug_Register
+		 * [   ? SHDE2 SHDE1 SHDE0 CLICK CLICK PSGEN BGHDE] (15..8)
+		 * [SDBG  DISP CORR1     ? KILL1     ?     ?     ?] (7..0)
+		 * - SHDE: Hides sprites on the screen.
+		 * - CLICK: When toggled, a click can be heard in the audio.
+		 * - PSGEN: When set, PSG is disabled.
+		 * - BGHDE: When BG layer is hidden, dots appear and sprites are hidden.
+		 * - SDBG: When set, the VDP draws a black box around sprites.
+		 * - DISP: When set, display can be disabled. (Overrides Reg.#1)
+		 * - CORR1: When set, corrupt data is displayed, and may corrupt internal VDP state.
+		 * - KILL1: When set, causes streaks down the screen as if there's continuous 68k -> CRAM DMA.
+		 */
+		uint16_t readTestRegMD(void) const;
+		void writeTestRegMD(uint16_t data);
+		void writeTestRegMD_8(uint8_t data);
+
 	public:
 		/** ZOMG savestate functions. **/
 
