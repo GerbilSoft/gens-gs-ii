@@ -860,7 +860,7 @@ void Vdp::writeCtrlMD(uint16_t ctrl)
 	 *
 	 * Format:
 	 * [  x   x   x   x   x   x   x   x] (D15-D8)
-	 * [CD5 CD4 CD3 CD2   x   x A15 A14] (D7-D0)
+	 * [CD5 CD4 CD3 CD2   x A16 A15 A14] (D7-D0)
 	 *
 	 * CD = access code
 	 *  A = address
@@ -871,12 +871,16 @@ void Vdp::writeCtrlMD(uint16_t ctrl)
 	 *
 	 * NOTE 2: CD5 is only updated if DMA Enabled == 1.
 	 * (VDP_Reg.m5.Set2 & 0x04)
+	 *
+	 * NOTE 3: A16 is only used if 128 KB mode is enabled.
 	 */
 	d->VDP_Ctrl.ctrl_latch = 0;	// Clear the control word latch.
 
 	// Update the VDP address counter.
-	d->VDP_Ctrl.address &= ~0xC000;
-	d->VDP_Ctrl.address |= ((ctrl & 0x0003) << 14);
+	d->VDP_Ctrl.address &= ~0x1C000;
+	// TODO: Cache the mask here?
+	const uint16_t ctrl_mask = (d->is128KB() ? 0x0007 : 0x0003);
+	d->VDP_Ctrl.address |= ((uint32_t)(ctrl & ctrl_mask) << 14);
 
 	// Update the VDP access code register: CD(4..2)
 	d->VDP_Ctrl.code &= ~0x1C;
