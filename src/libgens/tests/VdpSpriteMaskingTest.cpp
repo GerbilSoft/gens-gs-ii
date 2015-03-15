@@ -204,6 +204,7 @@ void VdpSpriteMaskingTest::SetUp(void)
 		m_vdp->dbg_setReg(0x0F, 0x02);	// Set the auto-increment value to 2.
 
 		// Initialize CRam.
+		// FIXME: Needs to be byteswapped?
 		m_vdp->dbg_writeCRam_16(0, test_spritemask_cram, ARRAY_SIZE(test_spritemask_cram));
 		// FIXME: Set bpp in the framebuffer instead?
 		m_vdp->setBpp(LibGens::VdpPalette::BPP_32);
