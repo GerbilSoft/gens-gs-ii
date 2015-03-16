@@ -309,8 +309,9 @@ INSTANTIATE_TEST_CASE_P(Page4, VdpFIFOTesting,
 		VdpFIFOTesting_mode(24, "DMA Transfer Length Reg Update", 12, 1, false),
 		VdpFIFOTesting_mode(25, "DMA Fill Length Reg Update", 14, 1, false),
 		VdpFIFOTesting_mode(26, "DMA Copy Length Reg Update", 16, 1, false),
-		VdpFIFOTesting_mode(27, "DMA Fill Source Reg Update", 18, 1, false),
-		VdpFIFOTesting_mode(28, "DMA Copy Source Reg Update", 20, 1, false)
+		VdpFIFOTesting_mode(27, "DMA Transfer Source Reg Update", 18, 1, false),
+		VdpFIFOTesting_mode(28, "DMA Fill Source Reg Update", 18, 1, false),
+		VdpFIFOTesting_mode(29, "DMA Copy Source Reg Update", 20, 1, false)
 		));
 } }
 
