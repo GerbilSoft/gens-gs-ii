@@ -163,7 +163,7 @@ namespace VdpTypes
 			uint8_t H_Scr_Adr;
 
 			/**
-			 * Register 14: Pattern name table data base address.
+			 * Register 14: Nametable Pattern Generator base address.
 			 * NOTE: ONLY used in 128 KB VRAM mode!
 			 * [   x    x    x PB16    x    x    x PA16]
 			 *
