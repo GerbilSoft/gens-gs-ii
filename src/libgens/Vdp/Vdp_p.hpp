@@ -27,6 +27,9 @@
 #include <stdint.h>
 #include "Util/byteswap.h"
 
+// Needed for FORCE_INLINE.
+#include "../macros/common.h"
+
 // VDP types.
 #include "VdpTypes.hpp"
 #include "VdpReg.hpp"

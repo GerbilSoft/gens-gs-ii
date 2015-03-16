@@ -29,9 +29,6 @@
 // VdpRend includes.
 #include "../Util/MdFb.hpp"
 
-// Needed for FORCE_INLINE.
-#include "../macros/common.h"
-
 // VDP types.
 #include "VdpTypes.hpp"
 #include "VdpStatus.hpp"
