@@ -1,9 +1,9 @@
 /***************************************************************************
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
- * VdpFIFOTesting.cpp: Sprite Masking & Overflow Test ROM.           *
+ * VdpFIFOTesting.cpp: VDP FIFO Test ROM.                                  *
  *                                                                         *
  * Copyright (c) 2011-2015 by David Korth.                                 *
- * Original ROM Copyright (c) 2009 by Nemesis.                             *
+ * Original ROM Copyright (c) 2013 by Nemesis.                             *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
