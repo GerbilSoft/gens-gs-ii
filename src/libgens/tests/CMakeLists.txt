@@ -41,7 +41,7 @@ ADD_TEST(NAME test_VdpPalette_DAC_SMS
 ENDIF(NOT MSVC)
 
 # Byteswap test.
-ADD_EXECUTABLE(ByteswapTest ByteswapTest.cpp ${TESTSUITE_BASE_SRC})
+ADD_EXECUTABLE(ByteswapTest ByteswapTest.cpp)
 TARGET_LINK_LIBRARIES(ByteswapTest gens ${GTEST_LIBRARY})
 ADD_TEST(NAME ByteswapTest
 	COMMAND ByteswapTest)
@@ -51,7 +51,6 @@ INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 ADD_EXECUTABLE(VdpSpriteMaskingTest
 	VdpSpriteMaskingTest.cpp
 	VdpSpriteMaskingTest_data.c
-	${TESTSUITE_BASE_SRC}
 	)
 TARGET_LINK_LIBRARIES(VdpSpriteMaskingTest gens ${ZLIB_LIBRARY} ${GTEST_LIBRARY})
 ADD_TEST(NAME VdpSpriteMaskingTest
