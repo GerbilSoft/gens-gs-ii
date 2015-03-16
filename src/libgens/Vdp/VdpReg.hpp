@@ -73,25 +73,29 @@ namespace VdpTypes
 
 			/**
 			 * Register 2: Pattern name table base address for Scroll A.
-			 * [   x    x SA15 SA14 SA13    x    x    x]
+			 * NOTE: SA16 is only valid in 128 KB mode.
+			 * [   x SA16 SA15 SA14 SA13    x    x    x]
 			 */
 			uint8_t Pat_ScrA_Adr;
 
 			/**
 			 * Register 3: Pattern name table base address for Window.
-			 * [   x    x WD15 WD14 WD13 WD12 WD11    x]
+			 * NOTE: WD16 is only valid in 128 KB mode.
+			 * [   x WD16 WD15 WD14 WD13 WD12 WD11    x]
 			 */
 			uint8_t Pat_Win_Adr;
 
 			/**
 			 * Register 4: Pattern name table base address for Scroll B.
-			 * [   x    x    x    x    x SB15 SB14 SB13]
+			 * NOTE: SB16 is only valid in 128 KB mode.
+			 * [   x    x    x    x SB16 SB15 SB14 SB13]
 			 */
 			uint8_t Pat_ScrB_Adr;
 
 			/**
 			 * Register 5: Sprite Attribute Table base address.
-			 * [   x AT15 AT14 AT13 AT12 AT11 AT10  AT9]
+			 * NOTE: AT16 is only valid in 128 KB mode.
+			 * [AT16 AT15 AT14 AT13 AT12 AT11 AT10  AT9]
 			 */
 			uint8_t Spr_Att_Adr;
 

@@ -101,57 +101,89 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 			q->updateIRQLine(0);
 			updateVdpMode();
 
-			// Reset the masks and addresses for 64 KB mode.
-			VRam_Mask = 0xFFFF;
-			ScrA_Addr &= 0xFFFF;
-			ScrB_Addr &= 0xFFFF;
-			Win_Addr &= 0xFFFF;
-			Spr_Addr &= 0xFFFF;
+			// Reset the Window and Sprite masks for H32/H40.
+			if (isH40()) {
+				// H40 mode.
+				Win_Tbl_Mask = 0xF000;
+				Spr_Tbl_Mask = 0xFC00;
+			} else {
+				// H32 mode.
+				Win_Tbl_Mask = 0xF800;
+				Spr_Tbl_Mask = 0xFE00;
+			}
 
-			// If 128 KB mode is enabled, append the bits.
-			if (is128KB()) {
+			if (!is128KB()) {
+				// 64 KB mode.
+				VRam_Mask = 0xFFFF;
+				ScrA_Tbl_Mask = 0xE000;
+				ScrB_Tbl_Mask = 0xE000;
+				H_Scroll_Tbl_Mask = 0xFC00;
+
+				// All pattern generator base addresses are 0.
+				ScrA_Gen_Addr = 0;
+				ScrB_Gen_Addr = 0;
+				Spr_Gen_Addr = 0;
+			} else {
+				// 128 KB mode.
 				VRam_Mask = 0x1FFFF;
+				ScrA_Tbl_Mask = 0x1E000;
+				ScrB_Tbl_Mask = 0x1E000;
+				H_Scroll_Tbl_Mask = 0x1FC00;
+				Win_Tbl_Mask |= 0x10000;
+				Spr_Tbl_Mask |= 0x10000;
+			}
+
+			// Update nametable addresses.
+			// TODO: Split into common function shared by H32/H40 update?
+			ScrA_Tbl_Addr = (VDP_Reg.m5.Pat_ScrA_Adr << 10) & ScrA_Tbl_Mask;
+			Win_Tbl_Addr = (VDP_Reg.m5.Pat_Win_Adr << 10) & Win_Tbl_Mask;
+			ScrB_Tbl_Addr = (VDP_Reg.m5.Pat_ScrB_Adr << 13) & ScrB_Tbl_Mask;
+			Spr_Tbl_Addr = (VDP_Reg.m5.Spr_Att_Adr << 9) & Spr_Tbl_Mask;
+			Win_Tbl_Addr = (VDP_Reg.m5.Pat_Win_Adr << 10) & Win_Tbl_Mask;
+			H_Scroll_Tbl_Addr = (VDP_Reg.m5.H_Scr_Adr << 10) & H_Scroll_Tbl_Mask;
+
+			// Update pattern generator addresses.
+			if (is128KB()) {
+				// TODO: Cache ScrA_A16?
 				const uint32_t ScrA_A16 = ((VDP_Reg.m5.Pat_Data_Adr & 0x01) << 16);
-				ScrA_Addr |= ScrA_A16;
-				Win_Addr |= ScrA_A16;
+				ScrA_Gen_Addr = ScrA_A16;
 				if (ScrA_A16) {
-					ScrB_Addr |= ((VDP_Reg.m5.Pat_Data_Adr & 0x10) << 12);
+					ScrB_Gen_Addr = ((VDP_Reg.m5.Pat_Data_Adr & 0x10) << 12);
 				}
-				Spr_Addr |= ((VDP_Reg.m5.Spr_Pat_Adr & 0x20) << 11);
+				Spr_Gen_Addr = ((VDP_Reg.m5.Spr_Pat_Adr & 0x20) << 11);
 			}
 			break;
 
 		case 2:
 			// Scroll A base address.
-			ScrA_Addr = (val << 10) & 0xE000;
-			if (is128KB()) {
-				ScrA_Addr |= ((VDP_Reg.m5.Pat_Data_Adr & 0x01) << 16);
-			}
+			ScrA_Tbl_Addr = (val << 10) & ScrA_Tbl_Mask;
 			break;
 
 		case 3:
 			// Window base address.
-			Win_Addr = (val << 10) & Win_Mask;
-			if (is128KB()) {
-				Win_Addr |= ((VDP_Reg.m5.Pat_Data_Adr & 0x01) << 16);
-			}
+			Win_Tbl_Addr = (val << 10) & Win_Tbl_Mask;
 			break;
 
 		case 4:
 			// Scroll B base address.
-			ScrB_Addr = (val << 13) & 0xE000;
-			if (is128KB() && (VDP_Reg.m5.Pat_Data_Adr & 0x01)) {
-				ScrB_Addr |= ((VDP_Reg.m5.Pat_Data_Adr & 0x10) << 12);
-			}
+			ScrB_Tbl_Addr = (val << 13) & ScrB_Tbl_Mask;
 			break;
 
 		case 5:
+			// Sprite Attribute Table base address.
+			Spr_Tbl_Addr = (VDP_Reg.m5.Spr_Att_Adr << 9) & Spr_Tbl_Mask;
+			break;
+
 		case 6:
-			// 5: Sprite Attribute Table base address.
-			// 6: Sprite Pattern Generator base address. (128 KB mode only)
-			Spr_Addr = (VDP_Reg.m5.Spr_Att_Adr << 9) & Spr_Mask;
-			if (is128KB()) {
-				Spr_Addr |= ((VDP_Reg.m5.Spr_Pat_Adr & 0x20) << 11);
+			// Sprite Pattern Generator base address.
+			// (128 KB mode only)
+			if (!is128KB()) {
+				// 64 KB mode.
+				// All pattern generator base addresses are 0.
+				Spr_Gen_Addr = 0;
+			} else {
+				// 128 KB mode.
+				Spr_Gen_Addr = ((val & 0x20) << 11);
 			}
 
 			// Update the Sprite Attribute Table.
@@ -196,8 +228,8 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 				H_Pix_Begin = 0;
 
 				// Update the table masks.
-				Win_Mask = 0xF000;
-				Spr_Mask = 0xFC00;
+				Win_Tbl_Mask = 0xF000;
+				Spr_Tbl_Mask = 0xFC00;
 			} else {
 				// H32 mode.
 				H_Cell = 32;
@@ -206,8 +238,14 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 				H_Pix_Begin = 32;
 
 				// Update the table masks.
-				Win_Mask = 0xF800;
-				Spr_Mask = 0xFE00;
+				Win_Tbl_Mask = 0xF800;
+				Spr_Tbl_Mask = 0xFE00;
+			}
+
+			if (is128KB()) {
+				// Extend the masks.
+				Win_Tbl_Mask |= 0x10000;
+				Spr_Tbl_Mask |= 0x10000;
 			}
 
 			// Check the window horizontal position.
@@ -216,31 +254,30 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 				Win_X_Pos = H_Cell;
 
 			// Update the Window and Sprite Attribute Table base addresses.
-			Win_Addr = (VDP_Reg.m5.Pat_Win_Adr << 10) & Win_Mask;
-			if (is128KB()) {
-				Win_Addr |= ((VDP_Reg.m5.Pat_Data_Adr & 0x01) << 16);
-			}
-			Spr_Addr = (VDP_Reg.m5.Spr_Att_Adr << 9) & Spr_Mask;
+			Win_Tbl_Addr = (VDP_Reg.m5.Pat_Win_Adr << 10) & Win_Tbl_Mask;
+			Spr_Tbl_Addr = (VDP_Reg.m5.Spr_Att_Adr << 9) & Spr_Tbl_Mask;
 			break;
 
 		case 13:
 			// H Scroll Table base address.
-			H_Scroll_Addr = (val << 10) & 0xFC00;
+			H_Scroll_Tbl_Addr = (val << 10) & H_Scroll_Tbl_Mask;
 			break;
 
 		case 14:
 			// Nametable Pattern Generator base address.
 			// (128 KB mode only.)
-			ScrA_Addr = (VDP_Reg.m5.Pat_ScrA_Adr << 10) & 0xE000;
-			Win_Addr = (val << 10) & Win_Mask;
-			ScrB_Addr = (VDP_Reg.m5.Pat_ScrB_Adr << 13) & 0xE000;
-			if (is128KB()) {
+			if (!is128KB()) {
+				// 64 KB mode.
+				// All pattern generator base addresses are 0.
+				ScrA_Gen_Addr = 0;
+				ScrB_Gen_Addr = 0;
+			} else {
+				// 128 KB mode.
 				// TODO: Cache ScrA_A16?
 				const uint32_t ScrA_A16 = ((VDP_Reg.m5.Pat_Data_Adr & 0x01) << 16);
-				ScrA_Addr |= ScrA_A16;
-				Win_Addr |= ScrA_A16;
+				ScrA_Gen_Addr = ScrA_A16;
 				if (ScrA_A16) {
-					ScrB_Addr |= ((VDP_Reg.m5.Pat_Data_Adr & 0x10) << 12);
+					ScrB_Gen_Addr = ((VDP_Reg.m5.Pat_Data_Adr & 0x10) << 12);
 				}
 			}
 			break;

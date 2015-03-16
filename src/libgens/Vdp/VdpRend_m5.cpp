@@ -479,10 +479,10 @@ FORCE_INLINE uint16_t VdpPrivate::T_Get_X_Offset(void)
 
 	if (plane) {
 		// Scroll A.
-		return H_Scroll_Addr_u16(H_Scroll_Offset) & 0x3FF;
+		return H_Scroll_Tbl_Addr_u16(H_Scroll_Offset) & 0x3FF;
 	} else {
 		// Scroll B.
-		return H_Scroll_Addr_u16(H_Scroll_Offset + 2) & 0x3FF;
+		return H_Scroll_Tbl_Addr_u16(H_Scroll_Offset + 2) & 0x3FF;
 	}
 }
 
@@ -597,15 +597,15 @@ FORCE_INLINE unsigned int VdpPrivate::T_Get_Y_Fine_Offset(unsigned int y_offset)
 }
 
 /**
- * Get pattern info from a scroll plane.
+ * Get a nametable word from a scroll plane.
  * H_Scroll_CMul must be initialized correctly.
  * @param plane True for Scroll A; false for Scroll B.
  * @param x X tile number.
  * @param y Y tile number.
- * @return Pattern info.
+ * @return Nametable word.
  */
 template<bool plane>
-FORCE_INLINE uint16_t VdpPrivate::T_Get_Pattern_Info(unsigned int x, unsigned int y)
+FORCE_INLINE uint16_t VdpPrivate::T_Get_Nametable_Word(unsigned int x, unsigned int y)
 {
 	// Get the offset.
 	// H_Scroll_CMul is the shift value required for the proper vertical offset.
@@ -613,7 +613,7 @@ FORCE_INLINE uint16_t VdpPrivate::T_Get_Pattern_Info(unsigned int x, unsigned in
 	const unsigned int offset = ((y << H_Scroll_CMul) + x) * 2;
 
 	// Return the pattern information.
-	return (plane ? ScrA_Addr_u16(offset) : ScrB_Addr_u16(offset));
+	return (plane ? ScrA_Tbl_Addr_u16(offset) : ScrB_Tbl_Addr_u16(offset));
 }
 
 /**
@@ -628,20 +628,25 @@ FORCE_INLINE uint32_t VdpPrivate::T_Get_Pattern_Data(uint16_t pattern, unsigned 
 {
 	// Get the tile address.
 	unsigned int TileAddr;
-	if (interlaced)
+	if (interlaced) {
+		// FIXME: High bit may be usable for 128 KB mode.
 		TileAddr = (pattern & 0x3FF) << 6;
-	else
+	} else {
+		// Non-interlaced, or Interlaced Mode 1.
 		TileAddr = (pattern & 0x7FF) << 5;
+	}
 
 	if (pattern & 0x1000) {
 		// V Flip enabled. Flip the tile vertically.
-		if (interlaced)
+		if (interlaced) {
 			y_fine_offset ^= 15;
-		else
+		} else {
 			y_fine_offset ^= 7;
+		}
 	}
 
 	// Return the pattern data.
+	// FIXME: Rebase to upper 64 KB if necessary. (128 KB VRAM mode)
 	return VRam.u32[(TileAddr + (y_fine_offset * 4)) >> 2];
 }
 
@@ -716,45 +721,45 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Scroll(int cell_start, int cell_leng
 			y_fine_offset = T_Get_Y_Fine_Offset<interlaced>(y_offset);
 		}
 
-		// Get the pattern info for the current tile.
-		uint16_t pattern_info;
+		// Get the nametable word for the current tile.
+		uint16_t nametable_word;
 		if (!plane) {
 			// Scroll B.
-			pattern_info = T_Get_Pattern_Info<plane>(x_cell_offset, y_cell_offset);
+			nametable_word = T_Get_Nametable_Word<plane>(x_cell_offset, y_cell_offset);
 		} else {
 			// Scroll A. Check if we need to emulate the Left Window bug.
 			if (LeftWindowBugCnt <= 0) {
 				// Left Window bug doesn't apply or has already been emulated.
-				pattern_info = T_Get_Pattern_Info<plane>(x_cell_offset, y_cell_offset);
+				nametable_word = T_Get_Nametable_Word<plane>(x_cell_offset, y_cell_offset);
 			} else {
 				// Left Window bug applies.
 				LeftWindowBugCnt--;
 				const unsigned int TmpXCell = ((x_cell_offset + 2) & H_Scroll_CMask);
-				pattern_info = T_Get_Pattern_Info<plane>(TmpXCell, y_cell_offset);
+				nametable_word = T_Get_Nametable_Word<plane>(TmpXCell, y_cell_offset);
 			}
 		}
 
 		// Get the pattern data for the current tile.
-		uint32_t pattern_data = T_Get_Pattern_Data<interlaced>(pattern_info, y_fine_offset);
+		uint32_t pattern_data = T_Get_Pattern_Data<interlaced>(nametable_word, y_fine_offset);
 
 		// Extract the palette number.
 		// Resulting number is palette * 16.
-		unsigned int palette = (pattern_info >> 9) & 0x30;
+		unsigned int palette = (nametable_word >> 9) & 0x30;
 
 		// Check for swapped Scroll B priority.
 		if (VDP_Layers & VdpTypes::VDP_LAYER_SCROLLB_SWAP)
-			pattern_info ^= 0x8000;
+			nametable_word ^= 0x8000;
 
 		// Check for horizontal flip.
-		if (pattern_info & 0x0800) {
+		if (nametable_word & 0x0800) {
 			// Pattern has H-Flip enabled.
-			if (pattern_info & 0x8000)
+			if (nametable_word & 0x8000)
 				T_PutLine_P1<plane, h_s, true>(disp_pixnum, pattern_data, palette);
 			else
 				T_PutLine_P0<plane, h_s, true>(disp_pixnum, pattern_data, palette);
 		} else {
 			// Pattern doesn't have flip enabled.
-			if (pattern_info & 0x8000)
+			if (nametable_word & 0x8000)
 				T_PutLine_P1<plane, h_s, false>(disp_pixnum, pattern_data, palette);
 			else
 				T_PutLine_P0<plane, h_s, false>(disp_pixnum, pattern_data, palette);
@@ -838,7 +843,7 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_ScrollA_Window(void)
 
 		// TODO: See if we need to handle address wraparound.
 		// NOTE: Multiply by 2 for 16-bit access.
-		const uint16_t *Win_Row_Addr = Win_Addr_Ptr16((y_cell_offset << H_Win_Shift) * 2) + Win_Start;
+		const uint16_t *Win_Row_Addr = Win_Tbl_Addr_Ptr16((y_cell_offset << H_Win_Shift) * 2) + Win_Start;
 
 		// Loop through the cells.
 		for (int x = Win_Length; x > 0; x--, disp_pixnum += 8) {
@@ -908,7 +913,7 @@ FORCE_INLINE void VdpPrivate::T_Make_Sprite_Struct(void)
 					: (unsigned int)ARRAY_SIZE(Sprite_Struct));
 
 	// Get the first sprite address in VRam.
-	const VdpStructs::SprEntry_m5 *CurSpr = Spr_Addr_PtrM5(0);
+	const VdpStructs::SprEntry_m5 *CurSpr = Spr_Tbl_Addr_PtrM5(0);
 
 	do {
 		// Sprite X position and size is updated for all types of updates.
@@ -966,8 +971,8 @@ FORCE_INLINE void VdpPrivate::T_Make_Sprite_Struct(void)
 
 		// Get the next sprite address in VRam.
 		// NOTE: Original byte offset needs to be used here.
-		// (Spr_Addr_Ptr16() divides by 2 for 16-bit access.)
-		CurSpr = Spr_Addr_PtrM5(link * 8);
+		// (Spr_Tbl_Addr_Ptr16() divides by 2 for 16-bit access.)
+		CurSpr = Spr_Tbl_Addr_PtrM5(link * 8);
 
 		// Stop processing after:
 		// - Link number is 0. (checked above)
@@ -1227,14 +1232,14 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 			if ((VDP_Layers & VdpTypes::VDP_LAYER_SPRITE_ALWAYSONTOP) || (spr_info & 0x8000)) {
 				// High priority.
 				for (; H_Pos_Max >= H_Pos_Min; H_Pos_Max -= 8) {
-					uint32_t pattern = VRam.u32[tile_num >> 2];
+					uint32_t pattern = Spr_Gen_Addr_u32(tile_num);
 					T_PutLine_Sprite<true, h_s, true>(H_Pos_Max, pattern, palette);
 					tile_num += Y_cell_size;
 				}
 			} else {
 				// Low priority.
 				for (; H_Pos_Max >= H_Pos_Min; H_Pos_Max -= 8) {
-					uint32_t pattern = VRam.u32[tile_num >> 2];
+					uint32_t pattern = Spr_Gen_Addr_u32(tile_num);
 					T_PutLine_Sprite<false, h_s, true>(H_Pos_Max, pattern, palette);
 					tile_num += Y_cell_size;
 				}
@@ -1255,16 +1260,15 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 			// Draw the sprite.
 			if ((VDP_Layers & VdpTypes::VDP_LAYER_SPRITE_ALWAYSONTOP) || (spr_info & 0x8000)) {
 				// High priority.
-				for (; H_Pos_Min < H_Pos_Max; H_Pos_Min += 8)
-				{
-					uint32_t pattern = VRam.u32[tile_num >> 2];
+				for (; H_Pos_Min < H_Pos_Max; H_Pos_Min += 8) {
+					uint32_t pattern = Spr_Gen_Addr_u32(tile_num);
 					T_PutLine_Sprite<true, h_s, false>(H_Pos_Min, pattern, palette);
 					tile_num += Y_cell_size;
 				}
 			} else {
 				// Low priority.
 				for (; H_Pos_Min < H_Pos_Max; H_Pos_Min += 8) {
-					uint32_t pattern = VRam.u32[tile_num >> 2];
+					uint32_t pattern = Spr_Gen_Addr_u32(tile_num);
 					T_PutLine_Sprite<false, h_s, false>(H_Pos_Min, pattern, palette);
 					tile_num += Y_cell_size;
 				}

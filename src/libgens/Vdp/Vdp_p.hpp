@@ -199,45 +199,73 @@ class VdpPrivate
 		 * VDP address pointers.
 		 * These are relative to VRam[] and are based on register values.
 		 */
-		uint32_t ScrA_Addr;
-		uint32_t ScrB_Addr;
-		uint32_t Win_Addr;
-		uint32_t Spr_Addr;
-		uint32_t H_Scroll_Addr;
+		uint32_t ScrA_Tbl_Addr;		// Scroll A Name Table base address.
+		uint32_t ScrB_Tbl_Addr;		// Scroll B Name Table base address.
+		uint32_t Win_Tbl_Addr;		// Window Name Table bas address.
+		uint32_t Spr_Tbl_Addr;		// Sprite Table base address.
+		uint32_t H_Scroll_Tbl_Addr;	// Horizontal Scroll Table base address.
+
+		// Pattern base addresses.
+		uint32_t ScrA_Gen_Addr;		// Scroll A Pattern Generator base address.
+		uint32_t ScrB_Gen_Addr;		// Scroll B Pattern Generator base address.
+		uint32_t Spr_Gen_Addr;		// Sprite Pattern Generator base address.
 
 		/**
 		 * VDP address masks.
 		 * H40 mode typically has one bit masked compared to H32
-		 * for certain registers. Note that this mask does NOT
-		 * include extra bits for 128 KB mode.
+		 * for certain registers. This mask also handles the extra
+		 * address bit for 128 KB mode.
 		 */
-		uint32_t VRam_Mask;
-		uint32_t Win_Mask;
-		uint32_t Spr_Mask;
+		uint32_t VRam_Mask;		// Based on 128 KB.
+		uint32_t ScrA_Tbl_Mask;		// Based on 128 KB.
+		uint32_t ScrB_Tbl_Mask;		// Based on 128 KB.
+		uint32_t Win_Tbl_Mask;		// Based on 128 KB and H32/H40.
+		uint32_t Spr_Tbl_Mask;		// Based on 128 KB and H32/H40.
+		uint32_t H_Scroll_Tbl_Mask;	// Based on 128 KB.
 
 		/** VDP address functions: Get Pointers. **/
-		inline uint16_t *ScrA_Addr_Ptr16(uint32_t offset)
-			{ return &VRam.u16[((ScrA_Addr + offset) & VRam_Mask) >> 1]; }
-		inline uint16_t *ScrB_Addr_Ptr16(uint32_t offset)
-			{ return &VRam.u16[((ScrB_Addr + offset) & VRam_Mask) >> 1]; }
-		inline uint16_t *Win_Addr_Ptr16(uint32_t offset)
-			{ return &VRam.u16[((Win_Addr + offset) & VRam_Mask) >> 1]; }
-		inline VdpStructs::SprEntry_m5 *Spr_Addr_PtrM5(uint32_t offset)
-			{ return (VdpStructs::SprEntry_m5*)&VRam.u16[((Spr_Addr + offset) & VRam_Mask) >> 1]; }
-		inline uint16_t *H_Scroll_Addr_Ptr16(uint32_t offset)
-			{ return &VRam.u16[((H_Scroll_Addr + offset) & VRam_Mask) >> 1]; }
+		// Name Tables
+		inline uint16_t *ScrA_Tbl_Addr_Ptr16(uint32_t offset)
+			{ return &VRam.u16[((ScrA_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
+		inline uint16_t *ScrB_Tbl_Addr_Ptr16(uint32_t offset)
+			{ return &VRam.u16[((ScrB_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
+		inline uint16_t *Win_Tbl_Addr_Ptr16(uint32_t offset)
+			{ return &VRam.u16[((Win_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
+		inline VdpStructs::SprEntry_m5 *Spr_Tbl_Addr_PtrM5(uint32_t offset)
+			{ return (VdpStructs::SprEntry_m5*)&VRam.u16[((Spr_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
+		inline uint16_t *H_Scroll_Tbl_Addr_Ptr16(uint32_t offset)
+			{ return &VRam.u16[((H_Scroll_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
+		// Pattern Generators
+		inline uint16_t *ScrA_Gen_Addr_Ptr16(uint32_t offset)
+			{ return &VRam.u16[((ScrA_Gen_Addr + offset) & VRam_Mask) >> 1]; }
+		inline uint16_t *ScrB_Gen_Addr_Ptr16(uint32_t offset)
+			{ return &VRam.u16[((ScrB_Gen_Addr + offset) & VRam_Mask) >> 1]; }
+		inline uint16_t *Win_Gen_Addr_Ptr16(uint32_t offset)	// Same as Scroll A.
+			{ return ScrA_Gen_Addr_Ptr16(offset); }
+		inline uint16_t *Spr_Gen_Addr_Ptr16(uint32_t offset)
+			{ return &VRam.u16[((Spr_Gen_Addr + offset) & VRam_Mask) >> 1]; }
 
 		/** VDP address functions: Get Values. **/
-		inline uint16_t ScrA_Addr_u16(uint32_t offset) const
-			{ return VRam.u16[((ScrA_Addr + offset) & VRam_Mask) >> 1]; }
-		inline uint16_t ScrB_Addr_u16(uint32_t offset) const
-			{ return VRam.u16[((ScrB_Addr + offset) & VRam_Mask) >> 1]; }
-		inline uint16_t Win_Addr_u16(uint32_t offset) const
-			{ return VRam.u16[((Win_Addr + offset) & VRam_Mask) >> 1]; }
-		inline uint16_t Spr_Addr_u16(uint32_t offset) const
-			{ return VRam.u16[((Spr_Addr + offset) & VRam_Mask) >> 1]; }
-		inline uint16_t H_Scroll_Addr_u16(uint32_t offset) const
-			{ return VRam.u16[((H_Scroll_Addr + offset) & VRam_Mask) >> 1]; }
+		// Name Tables
+		inline uint16_t ScrA_Tbl_Addr_u16(uint32_t offset) const
+			{ return VRam.u16[((ScrA_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
+		inline uint16_t ScrB_Tbl_Addr_u16(uint32_t offset) const
+			{ return VRam.u16[((ScrB_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
+		inline uint16_t Win_Tbl_Addr_u16(uint32_t offset) const
+			{ return VRam.u16[((Win_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
+		inline uint16_t Spr_Tbl_Addr_u16(uint32_t offset) const
+			{ return VRam.u16[((Spr_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
+		inline uint16_t H_Scroll_Tbl_Addr_u16(uint32_t offset) const
+			{ return VRam.u16[((H_Scroll_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
+		// Pattern Generators
+		inline uint16_t ScrA_Gen_Addr_u16(uint32_t offset) const
+			{ return VRam.u16[((ScrA_Gen_Addr + offset) & VRam_Mask) >> 1]; }
+		inline uint16_t ScrB_Gen_Addr_u16(uint32_t offset) const
+			{ return VRam.u16[((ScrB_Gen_Addr + offset) & VRam_Mask) >> 1]; }
+		inline uint16_t Win_Gen_Addr_u16(uint32_t offset) const	// Same as Scroll A.
+			{ return ScrA_Gen_Addr_u16(offset); }
+		inline uint32_t Spr_Gen_Addr_u32(uint32_t offset) const
+			{ return VRam.u32[((Spr_Gen_Addr + offset) & VRam_Mask) >> 2]; }
 
 		// VDP control struct.
 		struct {
@@ -454,7 +482,7 @@ class VdpPrivate
 		FORCE_INLINE unsigned int T_Get_Y_Fine_Offset(unsigned int y_offset);
 
 		template<bool plane>
-		FORCE_INLINE uint16_t T_Get_Pattern_Info(unsigned int x, unsigned int y);
+		FORCE_INLINE uint16_t T_Get_Nametable_Word(unsigned int x, unsigned int y);
 
 		template<bool interlaced>
 		FORCE_INLINE uint32_t T_Get_Pattern_Data(uint16_t pattern, unsigned int y_fine_offset);
