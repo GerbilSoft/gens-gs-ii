@@ -2,7 +2,7 @@
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
  * VdpFIFOTesting.cpp: VDP FIFO Test ROM.                                  *
  *                                                                         *
- * Copyright (c) 2011-2015 by David Korth.                                 *
+ * Copyright (c) 2015 by David Korth.                                      *
  * Original ROM Copyright (c) 2013 by Nemesis.                             *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
