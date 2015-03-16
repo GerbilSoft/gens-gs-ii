@@ -163,7 +163,7 @@ namespace VdpTypes
 			 * NOTE: ONLY used in 128 KB VRAM mode!
 			 * [   x    x    x PB16    x    x    x PA16]
 			 *
-			 * PA16: When set, layer A is rebased to the upper 64 KB.
+			 * PA16: When set, layer A is rebased to the upper 64 KB. [includes window]
 			 * PB16: When this and PA16 are set, layer B is rebased to the upper 64KB.
 			 */
 			uint8_t Pat_Data_Adr;

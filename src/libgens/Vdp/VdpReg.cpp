@@ -105,13 +105,18 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 			VRam_Mask = 0xFFFF;
 			ScrA_Addr &= 0xFFFF;
 			ScrB_Addr &= 0xFFFF;
+			Win_Addr &= 0xFFFF;
 			Spr_Addr &= 0xFFFF;
 
 			// If 128 KB mode is enabled, append the bits.
 			if (is128KB()) {
 				VRam_Mask = 0x1FFFF;
-				ScrA_Addr |= ((VDP_Reg.m5.Pat_Data_Adr & 0x01) << 16);
-				ScrB_Addr |= ((VDP_Reg.m5.Pat_Data_Adr & 0x10) << 12);
+				const uint32_t ScrA_A16 = ((VDP_Reg.m5.Pat_Data_Adr & 0x01) << 16);
+				ScrA_Addr |= ScrA_A16;
+				Win_Addr |= ScrA_A16;
+				if (ScrA_A16) {
+					ScrB_Addr |= ((VDP_Reg.m5.Pat_Data_Adr & 0x10) << 12);
+				}
 				Spr_Addr |= ((VDP_Reg.m5.Spr_Pat_Adr & 0x20) << 11);
 			}
 			break;
@@ -127,12 +132,15 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 		case 3:
 			// Window base address.
 			Win_Addr = (val << 10) & Win_Mask;
+			if (is128KB()) {
+				Win_Addr |= ((VDP_Reg.m5.Pat_Data_Adr & 0x01) << 16);
+			}
 			break;
 
 		case 4:
 			// Scroll B base address.
 			ScrB_Addr = (val << 13) & 0xE000;
-			if (is128KB()) {
+			if (is128KB() && (VDP_Reg.m5.Pat_Data_Adr & 0x01)) {
 				ScrB_Addr |= ((VDP_Reg.m5.Pat_Data_Adr & 0x10) << 12);
 			}
 			break;
@@ -209,6 +217,9 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 
 			// Update the Window and Sprite Attribute Table base addresses.
 			Win_Addr = (VDP_Reg.m5.Pat_Win_Adr << 10) & Win_Mask;
+			if (is128KB()) {
+				Win_Addr |= ((VDP_Reg.m5.Pat_Data_Adr & 0x01) << 16);
+			}
 			Spr_Addr = (VDP_Reg.m5.Spr_Att_Adr << 9) & Spr_Mask;
 			break;
 
@@ -221,10 +232,16 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 			// Nametable Pattern Generator base address.
 			// (128 KB mode only.)
 			ScrA_Addr = (VDP_Reg.m5.Pat_ScrA_Adr << 10) & 0xE000;
+			Win_Addr = (val << 10) & Win_Mask;
 			ScrB_Addr = (VDP_Reg.m5.Pat_ScrB_Adr << 13) & 0xE000;
 			if (is128KB()) {
-				ScrA_Addr |= ((val & 0x01) << 16);
-				ScrB_Addr |= ((val & 0x10) << 12);
+				// TODO: Cache ScrA_A16?
+				const uint32_t ScrA_A16 = ((VDP_Reg.m5.Pat_Data_Adr & 0x01) << 16);
+				ScrA_Addr |= ScrA_A16;
+				Win_Addr |= ScrA_A16;
+				if (ScrA_A16) {
+					ScrB_Addr |= ((VDP_Reg.m5.Pat_Data_Adr & 0x10) << 12);
+				}
 			}
 			break;
 
