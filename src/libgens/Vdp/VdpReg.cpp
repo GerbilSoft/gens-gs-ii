@@ -243,7 +243,7 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 			}
 
 			if (is128KB()) {
-				// Extend the masks.
+				// Extend the table masks.
 				Win_Tbl_Mask |= 0x10000;
 				Spr_Tbl_Mask |= 0x10000;
 			}
