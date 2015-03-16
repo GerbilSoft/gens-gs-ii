@@ -313,6 +313,171 @@ INSTANTIATE_TEST_CASE_P(Page4, VdpFIFOTesting,
 		VdpFIFOTesting_mode(28, "DMA Fill Source Reg Update", 18, 1, false),
 		VdpFIFOTesting_mode(29, "DMA Copy Source Reg Update", 20, 1, false)
 		));
+
+INSTANTIATE_TEST_CASE_P(Page5, VdpFIFOTesting,
+	::testing::Values(
+		VdpFIFOTesting_mode(30, "FIFO Full Before DMA Transfer", 4, 1, true),
+		VdpFIFOTesting_mode(31, "DP Writes During DMA Fill VRAM", 6, 3, false),
+		VdpFIFOTesting_mode(32, "DP Writes During DMA Fill CRAM", 10, 3, false),
+		VdpFIFOTesting_mode(33, "DP Writes During DMA Fill VSRAM", 14, 3, false),
+		VdpFIFOTesting_mode(34, "DMA Fill Control Port Writes", 18, 5, false)
+		));
+
+INSTANTIATE_TEST_CASE_P(Page6, VdpFIFOTesting,
+	::testing::Values(
+		VdpFIFOTesting_mode(35, "DMA Busy Flag DMA Transfer", 4, 1, true),
+		VdpFIFOTesting_mode(36, "DMA Busy Flag DMA Fill", 6, 1, false),
+		VdpFIFOTesting_mode(37, "DMA Busy Flag DMA Copy", 8, 1, false),
+		VdpFIFOTesting_mode(38, "DMA Busy Flag DMA Toggle Fill", 10, 2, false),
+		VdpFIFOTesting_mode(39, "DMA Busy Flag DMA Toggle Copy", 13, 1, false),
+		VdpFIFOTesting_mode(40, "DMA Busy Flag DMA Disabled Fill", 15, 1, false),
+		VdpFIFOTesting_mode(41, "DMA Busy Flag DMA Disabled Copy", 17, 1, false)
+		));
+
+INSTANTIATE_TEST_CASE_P(Page7, VdpFIFOTesting,
+	::testing::Values(
+		VdpFIFOTesting_mode(42, "DMA Transfer to VRAM inc=0", 4, 1, true),
+		VdpFIFOTesting_mode(43, "DMA Transfer to CRAM inc=0", 6, 1, false),
+		VdpFIFOTesting_mode(44, "DMA Transfer to VSRAM inc=0", 8, 1, false),
+		VdpFIFOTesting_mode(45, "DMA Transfer to VRAM inc=1", 10, 1, false),
+		VdpFIFOTesting_mode(46, "DMA Transfer to CRAM inc=1", 12, 1, false),
+		VdpFIFOTesting_mode(47, "DMA Transfer to VSRAM inc=1", 14, 1, false),
+		VdpFIFOTesting_mode(48, "DMA Transfer to VRAM inc=2", 16, 1, false),
+		VdpFIFOTesting_mode(49, "DMA Transfer to CRAM inc=2", 18, 1, false),
+		VdpFIFOTesting_mode(50, "DMA Transfer to VSRAM inc=2", 20, 1, false)
+		));
+
+INSTANTIATE_TEST_CASE_P(Page8, VdpFIFOTesting,
+	::testing::Values(
+		VdpFIFOTesting_mode(51, "DMA Transfer to VRAM inc=3", 4, 1, true),
+		VdpFIFOTesting_mode(52, "DMA Transfer to CRAM inc=3", 6, 1, false),
+		VdpFIFOTesting_mode(53, "DMA Transfer to VSRAM inc=3", 8, 1, false),
+		VdpFIFOTesting_mode(54, "DMA Transfer to VRAM inc=4", 10, 1, false),
+		VdpFIFOTesting_mode(55, "DMA Transfer to CRAM inc=4", 12, 1, false),
+		VdpFIFOTesting_mode(56, "DMA Transfer to VSRAM inc=4", 14, 1, false)
+		));
+
+INSTANTIATE_TEST_CASE_P(Page9, VdpFIFOTesting,
+	::testing::Values(
+		VdpFIFOTesting_mode(57, "DMA Transfer to VRAM CD4=1 inc=0", 4, 1, true),
+		VdpFIFOTesting_mode(58, "DMA Transfer to CRAM CD4=1 inc=0", 6, 1, false),
+		VdpFIFOTesting_mode(59, "DMA Transfer to VSRAM CD4=1 inc=0", 8, 1, false),
+		VdpFIFOTesting_mode(60, "DMA Transfer to VRAM CD4=1 inc=1", 10, 1, false),
+		VdpFIFOTesting_mode(61, "DMA Transfer to CRAM CD4=1 inc=1", 12, 1, false),
+		VdpFIFOTesting_mode(62, "DMA Transfer to VSRAM CD4=1 inc=1", 14, 1, false),
+		VdpFIFOTesting_mode(63, "DMA Transfer to VRAM CD4=1 inc=2", 16, 1, false),
+		VdpFIFOTesting_mode(64, "DMA Transfer to CRAM CD4=1 inc=2", 18, 1, false),
+		VdpFIFOTesting_mode(65, "DMA Transfer to VSRAM CD4=1 inc=2", 20, 1, false)
+		));
+
+INSTANTIATE_TEST_CASE_P(Page10, VdpFIFOTesting,
+	::testing::Values(
+		VdpFIFOTesting_mode(66, "DMA Transfer to VRAM CD4=1 inc=3", 4, 1, true),
+		VdpFIFOTesting_mode(67, "DMA Transfer to CRAM CD4=1 inc=3", 6, 1, false),
+		VdpFIFOTesting_mode(68, "DMA Transfer to VSRAM CD4=1 inc=3", 8, 1, false),
+		VdpFIFOTesting_mode(69, "DMA Transfer to VRAM CD4=1 inc=4", 10, 1, false),
+		VdpFIFOTesting_mode(70, "DMA Transfer to CRAM CD4=1 inc=4", 12, 1, false),
+		VdpFIFOTesting_mode(71, "DMA Transfer to VSRAM CD4=1 inc=4", 14, 1, false)
+		));
+
+INSTANTIATE_TEST_CASE_P(Page11, VdpFIFOTesting,
+	::testing::Values(
+		VdpFIFOTesting_mode(72, "DMA Fill to VRAM inc=0", 4, 2, true),
+		VdpFIFOTesting_mode(73, "DMA Fill to CRAM inc=0", 7, 8, false),
+		VdpFIFOTesting_mode(74, "DMA Fill to VSRAM inc=0", 16, 8, false)
+		));
+
+INSTANTIATE_TEST_CASE_P(Page12, VdpFIFOTesting,
+	::testing::Values(
+		VdpFIFOTesting_mode(75, "DMA Fill to VRAM inc=1", 4, 2, true),
+		VdpFIFOTesting_mode(76, "DMA Fill to CRAM inc=1", 7, 8, false),
+		VdpFIFOTesting_mode(77, "DMA Fill to VSRAM inc=1", 16, 8, false)
+		));
+
+INSTANTIATE_TEST_CASE_P(Page13, VdpFIFOTesting,
+	::testing::Values(
+		VdpFIFOTesting_mode(78, "DMA Fill to VRAM inc=2", 4, 2, true),
+		VdpFIFOTesting_mode(79, "DMA Fill to CRAM inc=2", 7, 8, false),
+		VdpFIFOTesting_mode(80, "DMA Fill to VSRAM inc=2", 16, 8, false)
+		));
+
+INSTANTIATE_TEST_CASE_P(Page14, VdpFIFOTesting,
+	::testing::Values(
+		VdpFIFOTesting_mode(81, "DMA Fill to VRAM inc=4", 4, 2, true),
+		VdpFIFOTesting_mode(82, "DMA Fill to CRAM inc=4", 7, 8, false),
+		VdpFIFOTesting_mode(83, "DMA Fill to VSRAM inc=4", 16, 8, false)
+		));
+
+INSTANTIATE_TEST_CASE_P(Page15, VdpFIFOTesting,
+	::testing::Values(
+		VdpFIFOTesting_mode(84, "DMA Fill to VRAM CD4=1 inc=0", 4, 2, true),
+		VdpFIFOTesting_mode(85, "DMA Fill to CRAM CD4=1 inc=0", 7, 8, false),
+		VdpFIFOTesting_mode(86, "DMA Fill to VSRAM CD4=1 inc=0", 16, 8, false)
+		));
+
+INSTANTIATE_TEST_CASE_P(Page16, VdpFIFOTesting,
+	::testing::Values(
+		VdpFIFOTesting_mode(87, "DMA Fill to VRAM CD4=1 inc=1", 4, 1, true),
+		VdpFIFOTesting_mode(88, "DMA Fill to CRAM CD4=1 inc=1", 7, 8, false),
+		VdpFIFOTesting_mode(89, "DMA Fill to VSRAM CD4=1 inc=1", 16, 8, false)
+		));
+
+INSTANTIATE_TEST_CASE_P(Page17, VdpFIFOTesting,
+	::testing::Values(
+		VdpFIFOTesting_mode(90, "DMA Fill to VRAM CD4=1 inc=2", 4, 1, true),
+		VdpFIFOTesting_mode(91, "DMA Fill to CRAM CD4=1 inc=2", 7, 8, false),
+		VdpFIFOTesting_mode(92, "DMA Fill to VSRAM CD4=1 inc=2", 16, 8, false)
+		));
+
+INSTANTIATE_TEST_CASE_P(Page18, VdpFIFOTesting,
+	::testing::Values(
+		VdpFIFOTesting_mode(93, "DMA Fill to VRAM CD4=1 inc=4", 4, 2, true),
+		VdpFIFOTesting_mode(94, "DMA Fill to CRAM CD4=1 inc=4", 7, 8, false),
+		VdpFIFOTesting_mode(95, "DMA Fill to VSRAM CD4=1 inc=4", 16, 8, false)
+		));
+
+INSTANTIATE_TEST_CASE_P(Page19, VdpFIFOTesting,
+	::testing::Values(
+		VdpFIFOTesting_mode(96, "DMA Copy 9000 to 8000 inc=0", 4, 1, true),
+		VdpFIFOTesting_mode(97, "DMA Copy 9000 to 8000 inc=1", 6, 1, false),
+		VdpFIFOTesting_mode(98, "DMA Copy 9000 to 8000 inc=2", 8, 1, false),
+		VdpFIFOTesting_mode(99, "DMA Copy 9000 to 8000 inc=4", 10, 1, false),
+		VdpFIFOTesting_mode(100, "DMA Copy 8000 to 8002 for 0A", 12, 1, false),
+		VdpFIFOTesting_mode(101, "DMA Copy 8000 to 8001 for 0A", 14, 1, false),
+		VdpFIFOTesting_mode(102, "DMA Copy 8000 to 8003 for 0A", 16, 1, false)
+		));
+
+INSTANTIATE_TEST_CASE_P(Page20, VdpFIFOTesting,
+	::testing::Values(
+		VdpFIFOTesting_mode(103, "DMA Copy 9000 to 8000 for 09", 4, 1, true),
+		VdpFIFOTesting_mode(104, "DMA Copy 9000 to 8001 for 09", 6, 1, false),
+		VdpFIFOTesting_mode(105, "DMA Copy 9001 to 8000 for 09", 8, 1, false),
+		VdpFIFOTesting_mode(106, "DMA Copy 9001 to 8001 for 09", 10, 1, false),
+		VdpFIFOTesting_mode(107, "DMA Copy 9000 to 8000 for 0A", 12, 1, false),
+		VdpFIFOTesting_mode(108, "DMA Copy 9000 to 8001 for 0A", 14, 1, false),
+		VdpFIFOTesting_mode(109, "DMA Copy 9001 to 8000 for 0A", 16, 1, false),
+		VdpFIFOTesting_mode(110, "DMA Copy 9001 to 8001 for 0A", 18, 1, false)
+		));
+
+INSTANTIATE_TEST_CASE_P(Page21, VdpFIFOTesting,
+	::testing::Values(
+		VdpFIFOTesting_mode(111, "DMA Copy 9000 to 8000 CD0-3=0000", 4, 1, true),
+		VdpFIFOTesting_mode(112, "DMA Copy 9000 to 8000 CD0-3=0001", 6, 1, false),
+		VdpFIFOTesting_mode(113, "DMA Copy 9000 to 8000 CD0-3=0011", 8, 1, false),
+		VdpFIFOTesting_mode(114, "DMA Copy 9000 to 8000 CD0-3=0100", 10, 1, false),
+		VdpFIFOTesting_mode(115, "DMA Copy 9000 to 8000 CD0-3=0101", 12, 1, false),
+		VdpFIFOTesting_mode(116, "DMA Copy 9000 to 8000 CD0-3=0111", 14, 1, false)
+		));
+
+INSTANTIATE_TEST_CASE_P(Page22, VdpFIFOTesting,
+	::testing::Values(
+		VdpFIFOTesting_mode(117, "DMA Copy 9000 to 8000 CD0-3=1000", 4, 1, true),
+		VdpFIFOTesting_mode(118, "DMA Copy 9000 to 8000 CD0-3=1001", 6, 1, false),
+		VdpFIFOTesting_mode(119, "DMA Copy 9000 to 8000 CD0-3=1011", 8, 1, false),
+		VdpFIFOTesting_mode(120, "DMA Copy 9000 to 8000 CD0-3=1100", 10, 1, false),
+		VdpFIFOTesting_mode(121, "DMA Copy 9000 to 8000 CD0-3=1101", 12, 1, false),
+		VdpFIFOTesting_mode(122, "DMA Copy 9000 to 8000 CD0-3=1111", 14, 1, false)
+		));
 } }
 
 int main(int argc, char *argv[])
