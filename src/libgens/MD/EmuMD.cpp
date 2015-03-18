@@ -42,12 +42,15 @@
 // ROM cartridge.
 #include "Cartridge/RomCartridgeMD.hpp"
 
-// C includes.
-#include <stdio.h>
-#include <math.h>
+// C includes. (C++ namespace)
+#include <cstdio>
+#include <cmath>
 
-namespace LibGens
-{
+// C++ namespace.
+#include <memory>
+using std::auto_ptr;
+
+namespace LibGens {
 
 /**
  * Initialize a Mega Drive context.
@@ -89,10 +92,8 @@ EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
 	if (AutoFixChecksum())
 		M68K_Mem::ms_RomCartridge->fixChecksum();
 
-	// Disable TMSS for now.
-	// TODO: Implement proper TMSS loading.
-	M68K_Mem::tmss_reg.tmss_en = false;
-	M68K_Mem::tmss_reg.tmss_rom_valid = false;
+	// Initialize TMSS.
+	initTmss();
 
 	// Initialize the M68K.
 	M68K::InitSys(M68K::SYSID_MD);
@@ -118,7 +119,6 @@ EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
 	return;
 }
 
-
 EmuMD::~EmuMD()
 {
 	// TODO: Other stuff?
@@ -128,7 +128,6 @@ EmuMD::~EmuMD()
 	delete M68K_Mem::ms_RomCartridge;
 	M68K_Mem::ms_RomCartridge = nullptr;
 }
-
 
 /**
  * Perform a soft reset.
@@ -158,7 +157,6 @@ int EmuMD::softReset(void)
 	return 0;
 }
 
-
 /**
  * Perform a hard reset.
  * @return 0 on success; non-zero on error.
@@ -187,10 +185,12 @@ int EmuMD::hardReset(void)
 	// Make sure the VDP's video mode bit is set properly.
 	m_vdp->setVideoMode(m_sysVersion.isPal());
 
+	// Re-initialize TMSS.
+	initTmss();
+
 	// Reset successful.
 	return 0;
 }
-
 
 /**
  * Set the region code.
@@ -262,7 +262,6 @@ int EmuMD::setRegion_int(SysVersion::RegionCode_t region, bool preserveState)
 	return 0;
 }
 
-
 /**
  * Save SRam/EEPRom.
  * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
@@ -290,6 +289,66 @@ int EmuMD::autoSaveData(int framesElapsed)
 
 	// Nothing was saved.
 	return 0;
+}
+
+/**
+ * Initialize TMSS.
+ * If TMSS is enabled by the user, this
+ * causes the TMSS ROM to be activated.
+ */
+void EmuMD::initTmss(void)
+{
+	// TODO: Update TMSS settings when loading a savestate?
+
+	// Assume TMSS is disabled by default.
+	M68K_Mem::tmss_reg.tmss_en = false;
+	M68K_Mem::tmss_reg.reset();
+	m_sysVersion.setVersion(0);
+	M68K_Mem::UpdateTmssMapping();
+
+	// Check if TMSS is enabled.
+	if (!ms_TmssEnabled) {
+		// TMSS is disabled.
+		return;
+	}
+
+	// TMSS is enabled.
+	// Attempt to load the ROM.
+	if (ms_TmssRomFilename.empty()) {
+		// No ROM filename specified.
+		return;
+	}
+
+	auto_ptr<LibGens::Rom> rom(new LibGens::Rom(ms_TmssRomFilename.c_str()));
+	if (!rom->isOpen() || rom->isMultiFile()) {
+		// Invalid ROM.
+		return;
+	}
+
+	// Check the TMSS ROM filesize.
+	// Up to 2 KB is supported right now.
+	// TODO: Up to 512 KB later?
+	if (rom->romSize() > sizeof(M68K_Mem::MD_TMSS_Rom)) {
+		// ROM is too big.
+		return;
+	}
+
+	// Load the ROM.
+	int ret = rom->loadRom(M68K_Mem::MD_TMSS_Rom.u8, sizeof(M68K_Mem::MD_TMSS_Rom.u8));
+	if (ret <= 0) {
+		// Error loading the ROM.
+		return;
+	}
+
+	// Byteswap the ROM image.
+	be16_to_cpu_array(M68K_Mem::MD_TMSS_Rom.u16, sizeof(M68K_Mem::MD_TMSS_Rom.u16));
+
+	// TMSS ROM is loaded.
+	// TODO: Don't bother reloading it if it has already been loaded
+	// and the ROM filename hasn't changed?
+	M68K_Mem::tmss_reg.tmss_en = true;
+	m_sysVersion.setVersion(1);
+	M68K_Mem::UpdateTmssMapping();
 }
 
 /**

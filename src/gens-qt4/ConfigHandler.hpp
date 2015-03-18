@@ -41,6 +41,9 @@ class ConfigHandler : public QObject
 	
 	public slots:
 		void extprgUnRAR_changed_slot(const QVariant &extprgUnRAR);
+
+		void tmssRomFilename_changed_slot(const QVariant &tmssRomFilename);
+		void tmssEnabled_changed_slot(const QVariant &tmssEnabled);
 		
 		/**
 		 * A configuration path has been changed.

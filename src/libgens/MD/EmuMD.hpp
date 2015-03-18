@@ -97,6 +97,13 @@ class EmuMD : public EmuContext
 		 * @return 0 on success; non-zero on error.
 		 */
 		int setRegion_int(SysVersion::RegionCode_t region, bool preserveState);
+
+		/**
+		 * Initialize TMSS.
+		 * If TMSS is enabled by the user, this
+		 * causes the TMSS ROM to be activated.
+		 */
+		void initTmss(void);
 };
 
 }

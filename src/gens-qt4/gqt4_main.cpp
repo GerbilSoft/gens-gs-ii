@@ -185,6 +185,15 @@ int gens_main(int argc, char *argv[])
 		GensQt4::gqt4_cfg->pathConfigObject(), SIGNAL(pathChanged(GensQt4::PathConfig::ConfigPath,QString)),
 		configHandler, SLOT(pathChanged(GensQt4::PathConfig::ConfigPath,QString)));
 
+	// Set boot ROM filenames.
+	// TODO: Do this here or in GensWindow initialization?
+	// TODO: Something similar to PathConfig?
+	// TODO: Add convenience getString(), getBool(), etc. functions.
+	QString tmssRomFilename = GensQt4::gqt4_cfg->get(QLatin1String("Genesis/tmssRom")).toString();
+	LibGens::EmuContext::SetTmssRomFilename(tmssRomFilename.toUtf8().constData());
+	bool tmssEnabled = GensQt4::gqt4_cfg->get(QLatin1String("Genesis/tmssEnabled")).toBool();
+	LibGens::EmuContext::SetTmssEnabled(tmssEnabled);
+
 	gens_window = new GensQt4::GensWindow();
 	gens_window->show();
 

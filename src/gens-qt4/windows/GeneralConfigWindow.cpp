@@ -49,8 +49,7 @@
 // EmuManager is needed for region code strings.
 #include "EmuManager.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 /**
  * Initialize the General Configuration window.
@@ -526,12 +525,6 @@ void GeneralConfigWindow::on_btnMDTMSSRom_clicked(void)
 	Q_D(GeneralConfigWindow);
 	const QString tmssRom = tr("%1 TMSS ROM");
 	d->selectRomFile(tmssRom.arg(tr("Genesis")), d->ui.txtMDTMSSRom);
-}
-
-void GeneralConfigWindow::on_txtMDTMSSRom_focusIn(void)
-{
-	// TODO
-	//mcdDisplayRomFileStatus(tr("Sega CD (U)"), sMcdRomStatus_USA);
 }
 
 void GeneralConfigWindow::on_txtMDTMSSRom_textChanged(void)

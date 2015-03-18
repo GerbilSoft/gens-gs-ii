@@ -76,6 +76,7 @@ class M68K_Mem
 		static RomCartridgeMD *ms_RomCartridge;
 
 		// Genesis TMSS ROM.
+		// FIXME: Dynamically allocate; allow up to 512 KB?
 		union MD_TMSS_Rom_t {
 			uint8_t  u8[2*1024];
 			uint16_t u16[(2*1024)>>1];
@@ -105,9 +106,8 @@ class M68K_Mem
 		static int Cycles_Z80;
 		
 		/** System initialization functions. **/
-	private:
-		static void UpdateTmssMapping(void);
 	public:
+		static void UpdateTmssMapping(void);	// FIXME: Needs to be private?
 		static void InitSys(M68K::SysID system);
 
 		/**

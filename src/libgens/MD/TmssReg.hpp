@@ -35,7 +35,6 @@ class TmssReg
 	public:
 		TmssReg()
 			: cart_ce(0)
-			, tmss_rom_valid(false)
 			, tmss_en(false)
 		{
 			a14000.d = 0;
@@ -62,14 +61,11 @@ class TmssReg
 		uint8_t cart_ce;
 
 		/**
-		 * Is the TMSS ROM valid?
-		 * If it isn't, TMSS will be disabled.
-		 */
-		bool tmss_rom_valid;
-
-		/**
 		 * Is TMSS enabled?
 		 * This is set on emulation startup and hard reset.
+		 * NOTE: If no TMSS ROM is available, this value will
+		 * be set to false, even if the user specified that
+		 * TMSS should be enabled.
 		 */
 		bool tmss_en;
 

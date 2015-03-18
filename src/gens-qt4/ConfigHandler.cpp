@@ -41,6 +41,12 @@ ConfigHandler::ConfigHandler(QObject *parent)
 	// Connect the notification signals.
 	gqt4_cfg->registerChangeNotification(QLatin1String("External_Programs/UnRAR"),
 					this, SLOT(extprgUnRAR_changed_slot(QVariant)));
+
+	// Boot ROMs.
+	gqt4_cfg->registerChangeNotification(QLatin1String("Genesis/tmssRom"),
+					this, SLOT(tmssRomFilename_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Genesis/tmssEnabled"),
+					this, SLOT(tmssEnabled_changed_slot(QVariant)));
 }
 
 /**
@@ -50,6 +56,16 @@ ConfigHandler::ConfigHandler(QObject *parent)
 void ConfigHandler::extprgUnRAR_changed_slot(const QVariant &extprgUnRAR)
 {
 	LibGens::DcRar::SetExtPrg(extprgUnRAR.toString().toUtf8().constData());
+}
+
+void ConfigHandler::tmssRomFilename_changed_slot(const QVariant &tmssRomFilename)
+{
+	LibGens::EmuContext::SetTmssRomFilename(tmssRomFilename.toString().toUtf8().constData());
+}
+
+void ConfigHandler::tmssEnabled_changed_slot(const QVariant &tmssEnabled)
+{
+	LibGens::EmuContext::SetTmssEnabled(tmssEnabled.toBool());
 }
 
 /**

@@ -140,7 +140,16 @@ class EmuContext
 		 */
 		static inline std::string PathSRam(void)
 			{ return ms_PathSRam; }
-		static void SetPathSRam(std::string newPathSRam);
+		static void SetPathSRam(const std::string &newPathSRam);
+
+		static inline std::string TmssRomFilename(void)
+			{ return ms_TmssRomFilename; }
+		static void SetTmssRomFilename(const std::string &tmssRomFilename)
+			{ ms_TmssRomFilename = tmssRomFilename; }
+		static inline bool TmssEnabled(void)
+			{ return ms_TmssEnabled; }
+		static void SetTmssEnabled(bool tmssEnabled)
+			{ ms_TmssEnabled = tmssEnabled; }
 
 		/** VDP (TODO) **/
 		Vdp *m_vdp;
@@ -168,6 +177,8 @@ class EmuContext
 		 */
 		static bool ms_AutoFixChecksum;
 		static std::string ms_PathSRam;
+		static std::string ms_TmssRomFilename;
+		static bool ms_TmssEnabled;
 
 	private:
 		static int ms_RefCount;
