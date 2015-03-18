@@ -93,6 +93,8 @@ EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
 		M68K_Mem::ms_RomCartridge->fixChecksum();
 
 	// Initialize TMSS.
+	// NOTE: This must be done *before* calling InitSys(), since
+	// Starscream initializes the internal program counter on reset.
 	initTmss();
 
 	// Initialize the M68K.
@@ -163,6 +165,11 @@ int EmuMD::softReset(void)
  */
 int EmuMD::hardReset(void)
 {
+	// Re-initialize TMSS.
+	// NOTE: This must be done *before* calling InitSys(), since
+	// Starscream initializes the internal program counter on reset.
+	initTmss();
+
 	// Reset the controllers.
 	m_ioManager->reset();
 
@@ -184,9 +191,6 @@ int EmuMD::hardReset(void)
 
 	// Make sure the VDP's video mode bit is set properly.
 	m_vdp->setVideoMode(m_sysVersion.isPal());
-
-	// Re-initialize TMSS.
-	initTmss();
 
 	// Reset successful.
 	return 0;
@@ -299,6 +303,7 @@ int EmuMD::autoSaveData(int framesElapsed)
 void EmuMD::initTmss(void)
 {
 	// TODO: Update TMSS settings when loading a savestate?
+	// TODO: Save TMSS settings to the savestate.
 
 	// Assume TMSS is disabled by default.
 	M68K_Mem::tmss_reg.tmss_en = false;
