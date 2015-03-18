@@ -198,17 +198,28 @@ QString GeneralConfigWindowPrivate::mdUpdateTmssRomFileStatus(GensLineEdit *txtR
 	// Check if the file exists.
 	Q_Q(GeneralConfigWindow);
 	QString filename = txtRomFile->text();
-	if (!QFile::exists(filename)) {
+	if (filename.isEmpty()) {
+		// No filename specified.
+		// NOTE: KDE 4's Oxygen theme doesn't have a question icon.
+		// SP_MessageBoxQuestion is redirected to SP_MessageBoxInformation on KDE 4.
+		// TODO: Set ROM file notes.
+		txtRomFile->setIcon(q->style()->standardIcon(QStyle::SP_MessageBoxQuestion));
+		return GeneralConfigWindow::tr("No ROM filename specified.");
+	}
+
+	QFileInfo fileInfo(filename);
+	if (!fileInfo.exists()) {
 		// File doesn't exist.
 		// NOTE: KDE 4's Oxygen theme doesn't have a question icon.
 		// SP_MessageBoxQuestion is redirected to SP_MessageBoxInformation on KDE 4.
 		// TODO: Set ROM file notes.
 		txtRomFile->setIcon(q->style()->standardIcon(QStyle::SP_MessageBoxQuestion));
-		if (filename.isEmpty())
-			return GeneralConfigWindow::tr("No ROM filename specified.");
-		else
-			return GeneralConfigWindow::tr("The specified ROM file was not found.");
+		return GeneralConfigWindow::tr("The specified ROM file was not found.");
+	} else if (fileInfo.isDir()) {
+		// File is a directory.
+		return GeneralConfigWindow::tr("The specified path is a directory.");
 	}
+	// TODO: Check for device files.
 
 	// Check the ROM file.
 	// TODO: Decompressor support.
@@ -325,17 +336,28 @@ QString GeneralConfigWindowPrivate::mcdUpdateRomFileStatus(GensLineEdit *txtRomF
 	// Check if the file exists.
 	Q_Q(GeneralConfigWindow);
 	QString filename = txtRomFile->text();
-	if (!QFile::exists(filename)) {
+	if (filename.isEmpty()) {
+		// No filename specified.
+		// NOTE: KDE 4's Oxygen theme doesn't have a question icon.
+		// SP_MessageBoxQuestion is redirected to SP_MessageBoxInformation on KDE 4.
+		// TODO: Set ROM file notes.
+		txtRomFile->setIcon(q->style()->standardIcon(QStyle::SP_MessageBoxQuestion));
+		return GeneralConfigWindow::tr("No ROM filename specified.");
+	}
+
+	QFileInfo fileInfo(filename);
+	if (!fileInfo.exists()) {
 		// File doesn't exist.
 		// NOTE: KDE 4's Oxygen theme doesn't have a question icon.
 		// SP_MessageBoxQuestion is redirected to SP_MessageBoxInformation on KDE 4.
 		// TODO: Set ROM file notes.
 		txtRomFile->setIcon(q->style()->standardIcon(QStyle::SP_MessageBoxQuestion));
-		if (filename.isEmpty())
-			return GeneralConfigWindow::tr("No ROM filename specified.");
-		else
-			return GeneralConfigWindow::tr("The specified ROM file was not found.");
+		return GeneralConfigWindow::tr("The specified ROM file was not found.");
+	} else if (fileInfo.isDir()) {
+		// File is a directory.
+		return GeneralConfigWindow::tr("The specified path is a directory.");
 	}
+	// TODO: Check for device files and skip them.
 
 	// Check the ROM file.
 	// TODO: Decompressor support.
