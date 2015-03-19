@@ -893,67 +893,103 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_ScrollA_Window(void)
 }
 
 /**
- * Fill Sprite_Struct[] with information from the Sprite Attribute Table.
- * @param interlaced If true, using Interlaced Mode 2. (2x res)
- * @param partial If true, only do a partial update. (X pos, X size)
+ * Update the Sprite Line Cache for the next line.
+ * Wrapper function to handle interlacing.
+ * @param line Current line number, *not* adjusted for IM2.
  */
-template<bool interlaced, bool partial>
-FORCE_INLINE void VdpPrivate::T_Make_Sprite_Struct(void)
+#include <stdio.h>
+FORCE_INLINE void VdpPrivate::Update_Sprite_Line_Cache(int line)
 {
-	uint8_t spr_num = 0;
+	unsigned int sovr;
+	if (Interlaced == VdpTypes::INTERLACED_MODE_2) {
+		sovr = T_Update_Sprite_Line_Cache<true>(line);
+	} else {
+		sovr = T_Update_Sprite_Line_Cache<false>(line);
+	}
+
+	if (sovr) {
+		// Sprite overflow!
+		Reg_Status.setBit(VdpStatus::VDP_STATUS_SOVR, true);
+	}
+}
+
+/**
+ * Update the Sprite Line Cache for the next line.
+ * @param interlaced If true, using Interlaced Mode 2. (2x res)
+ * @param line Current line number, *not* adjusted for IM2.
+ * @return VdpStatus::VDP_STATUS_SOVR if sprite limit is exceeded; otherwise, 0.
+ */
+template<bool interlaced>
+FORCE_INLINE unsigned int VdpPrivate::T_Update_Sprite_Line_Cache(int line)
+{
+	unsigned int ret = 0;
 	uint8_t link = 0;
 
-	// H40 allows 80 sprites; H32 allows 64 sprites.
-	// Essentially, it's (H_Cell * 2).
-	// [Nemesis' Sprite Masking and Overflow Test ROM: Test #9]
-	// TODO: 80 sprites with Sprite Limit disabled, or 128?
-	// (Old Gens limited to 80 sprites regardless of video mode.)
-	const unsigned int max_spr = (q->options.spriteLimits
-					? (H_Cell * 2)
-					: (unsigned int)ARRAY_SIZE(Sprite_Struct));
+	// Maximum number of sprites per frame is (H_Cell * 2).
+	// Maximum number of sprites per line is (H_Cell / 2).
+	// NOTE: We can't disable sprite limits anymore, since
+	// we're processing sprites on a per-line basis.
+	// TODO: Maybe extend the line cache to allow disabling sprite limits?
+	const uint8_t max_spr_line = (uint8_t)(H_Cell / 2);
+	const uint8_t max_spr_frame = (uint8_t)(H_Cell * 2);
 
-	// Get the first sprite address in VRam.
-	const VdpStructs::SprEntry_m5 *CurSpr = Spr_Tbl_Addr_PtrM5(0);
+	// We're updating the cache for the *next* line.
+	line++;
+	SprLineCache_t *cache = &sprLineCache[line & 1][0];
+	uint8_t count = 0;
 
+	/**
+	 * The following values are read from the cached
+	 * Sprite Attribute Table instead of VRAM:
+	 * - Y position
+	 * - Sprite size
+	 * - Link number
+	 */
+	const VdpStructs::SprEntry_m5 *spr_VRam = Spr_Tbl_Addr_PtrM5(0);
+	const VdpStructs::SprEntry_m5 *spr_SAT = &SprAttrTbl_m5.spr[0];
+
+	// Process up to max_spr_line sprites.
+	// (16 in H32, 20 in H40.)
+	int total_spr_count = max_spr_frame;
 	do {
-		// Sprite X position and size is updated for all types of updates.
-
-		// Sprite X position.
-		Sprite_Struct[spr_num].Pos_X = (CurSpr->x & 0x1FF) - 128;
-
-		// Sprite size.
-		const uint8_t sz = CurSpr->sz;
-		Sprite_Struct[spr_num].Size_X = ((sz >> 2) & 3) + 1;	// 1 more than the original value.
-
-		// Determine the maximum positions.
-		Sprite_Struct[spr_num].Pos_X_Max =
-				Sprite_Struct[spr_num].Pos_X +
-				((Sprite_Struct[spr_num].Size_X * 8) - 1);
-
-		if (!partial) {
-			// Full sprite update: Update Y position, size, and tile number.
-			Sprite_Struct[spr_num].Size_Y = (sz & 3);	// Exactly the original value.
-
+		// Check the Y position.
+		const int y = spr_SAT->y - (interlaced ? 256 : 128);
+		if (line >= y) {
+			// Calculate the sprite's height.
+			const uint8_t sz = spr_SAT->sz;
+			int height = (sz & 3);
 			if (interlaced) {
-				// Interlaced mode:
-				// * Y position is 11-bit.
-				// * Cells are 8x16.
-				Sprite_Struct[spr_num].Pos_Y = (CurSpr->y & 0x3FF) - 256;
-				Sprite_Struct[spr_num].Pos_Y_Max =
-						Sprite_Struct[spr_num].Pos_Y +
-						((Sprite_Struct[spr_num].Size_Y * 16) + 15);
+				height = (height * 16) + 15;
 			} else {
-				// Non-Interlaced mode:
-				// * Y position is 10-bit.
-				// * Cells are 8x8.
-				Sprite_Struct[spr_num].Pos_Y = (CurSpr->y & 0x1FF) - 128;
-				Sprite_Struct[spr_num].Pos_Y_Max =
-						Sprite_Struct[spr_num].Pos_Y +
-						((Sprite_Struct[spr_num].Size_Y * 8) + 7);
+				height = (height * 8) + 7;
 			}
 
-			// Tile number. (Also includes palette, priority, and flip bits.)
-			Sprite_Struct[spr_num].Num_Tile = CurSpr->attr;
+			// Check if the bottom of the sprite is in range.
+			const int y_max = y + height;	// height is already -1
+			if (line <= y_max) {
+				// Sprite is in range.
+				if (count == max_spr_line) {
+					// Sprite overflow!
+					ret = VdpStatus::VDP_STATUS_SOVR;
+					break;
+				}
+
+				// Save the sprite information in the line cache.
+				cache->Pos_X = (spr_VRam->x & 0x1FF) - 128;
+				cache->Pos_Y = y;
+				// NOTE: Size_? is in units of cells, not pixels.
+				cache->Size_X = ((sz >> 2) & 3) + 1;	// 1 more than the original value.
+				cache->Size_Y = (sz & 3);		// Exactly the original value.
+				// Pos_?_Max is in units of pixels.
+				cache->Pos_X_Max = cache->Pos_X + (cache->Size_X * 8) - 1;
+				cache->Pos_Y_Max = y_max;
+				// Tile number. (Also includes palette, priority, and flip bits.)
+				cache->Num_Tile = spr_VRam->attr;
+
+				// Added a sprite.
+				count++;
+				cache++;
+			}
 		}
 
 		// Link field.
@@ -961,166 +997,22 @@ FORCE_INLINE void VdpPrivate::T_Make_Sprite_Struct(void)
 		// since most games won't set the high bit.
 		// Dino Land incorrectly sets the high bit on some sprites,
 		// so we have to mask it off.
-		// TODO: Do we update the link field on partial updates?
-		link = (CurSpr->link & 0x7F);
-
-		// Increment the sprite number.
-		spr_num++;
-		if (link == 0)
+		link = spr_SAT->link & 0x7F;
+		if (link == 0 || link >= max_spr_frame)
 			break;
 
-		// Get the next sprite address in VRam.
-		// NOTE: Original byte offset needs to be used here.
+		// Get the next sprite address in VRAM and SAT.
+		// NOTE: Original byte offset needs to be used for VRAM access..
 		// (Spr_Tbl_Addr_Ptr16() divides by 2 for 16-bit access.)
-		CurSpr = Spr_Tbl_Addr_PtrM5(link * 8);
+		spr_VRam = Spr_Tbl_Addr_PtrM5(link * 8);
+		spr_SAT = &SprAttrTbl_m5.spr[link];
+	} while (--total_spr_count);
 
-		// Stop processing after:
-		// - Link number is 0. (checked above)
-		// - Link number exceeds maximum number of sprites.
-		// - We've processed the maximum number of sprites.
-	} while (link < max_spr && spr_num < max_spr);
+	// Save the sprite count for the next line.
+	sprCountCache[line & 1] = count;
 
-	// Store the total number of sprites.
-	if (!partial)
-		TotalSprites = spr_num;
-}
-
-/**
- * Update Sprite_Visible[] using sprite masking.
- * @param sprite_limit If true, emulates sprite limits.
- * @param interlaced If true, uses interlaced mode.
- * @return Number of visible sprites.
- */
-template<bool sprite_limit, bool interlaced>
-FORCE_INLINE unsigned int VdpPrivate::T_Update_Mask_Sprite(void)
-{
-	// If Sprite Limit is on, the following limits are enforced: (H32/H40)
-	// - Maximum sprite dots per line: 256/320
-	// - Maximum sprites per line: 16/20
-	int max_cells = H_Cell;
-	int max_sprites = (max_cells / 2);
-
-	bool overflow = false;
-
-	// sprite_on_line is set if at least one sprite is on the scanline
-	// that is not a sprite mask (x == 0). Sprite masks are only effective
-	// if there is at least one higher-priority sprite on the scanline.
-	// Thus, if a sprite mask is the first sprite on the scanline it is ignored.
-	// However, if the previous line had a sprite dot overflow, it is *not*
-	// ignored, so it is processed as a regular mask.
-	bool sprite_on_line = !!SpriteDotOverflow;
-
-	// sprite_mask_active is set if a sprite mask is preventing
-	// remaining sprites from showing up on the scanline.
-	// Those sprites still count towards total sprite and sprite dot counts.
-	bool sprite_mask_active = false;
-
-	uint8_t spr_num = 0;	// Current sprite number in Sprite_Struct[].
-	uint8_t spr_vis = 0;	// Current visible sprite in Sprite_Visible[].
-
-	// Get the current line number.
-	const int vdp_line = T_GetLineNumber<interlaced>();
-
-	// Search for all sprites visible on the current scanline.
-	for (; spr_num < TotalSprites; spr_num++) {
-		if (Sprite_Struct[spr_num].Pos_Y > vdp_line ||
-		    Sprite_Struct[spr_num].Pos_Y_Max < vdp_line)
-		{
-			// Sprite is not on the current line.
-			continue;
-		}
-
-		if (sprite_limit) {
-			// Sprite limit is enabled.
-			// Decrement the maximum cell and sprite counters.
-			max_cells -= Sprite_Struct[spr_num].Size_X;
-			max_sprites--;
-		}
-
-		// Check for sprite masking.
-		if (Sprite_Struct[spr_num].Pos_X == -128) {
-			// Sprite mask.
-			if (sprite_on_line) {
-				// There is at least one higher-priority sprite on the scanline.
-				// No more sprites should be visible.
-				// However, remaining sprites will still count towards total sprite and sprite dot counts.
-				// [Nemesis' Sprite Masking and Overflow Test ROM: Test #5]
-				if (!sprite_limit)
-					break;
-				sprite_mask_active = true;
-			}
-
-			// There aren't any higher-priority sprites on the scanline.
-			// This sprite will still count towards sprite and sprite dot counts.
-		} else {
-			// Regular sprite.
-			sprite_on_line = true;
-
-			// Check if the sprite is onscreen.
-			if (!sprite_mask_active &&
-				Sprite_Struct[spr_num].Pos_X < H_Pix &&
-				Sprite_Struct[spr_num].Pos_X_Max >= 0)
-			{
-				// Sprite is onscreen.
-				Sprite_Visible[spr_vis] = spr_num;
-				spr_vis++;
-			}
-
-			// Set the visible X max.
-			Sprite_Struct[spr_num].Pos_X_Max_Vis = Sprite_Struct[spr_num].Pos_X_Max;
-		}
-
-		if (sprite_limit) {
-			// Check for cell or sprite overflow.
-			if (max_cells <= 0) {
-				// Cell overflow!
-				// Remove the extra cells from the sprite.
-				// [Nemesis' Sprite Masking and Overflow Test ROM: Tests #2 and #3]
-				// #2 == total sprite dot count; #3 == per-cell dot count.
-				// TODO: Verify how Pos_X_Max_Vis should work with regards to H Flip.
-				overflow = true;
-
-				// Decrement the displayed number of cells for the sprite.
-				Sprite_Struct[spr_num].Pos_X_Max_Vis += (max_cells * 8);
-				spr_num++;
-				break;
-			} else if (max_sprites == 0) {
-				// Sprite overflow!
-				// [Nemesis' Sprite Masking and Overflow Test ROM: Test #1]
-				overflow = true;
-				spr_num++;
-				break;
-			}
-		}
-	}
-
-	// Update the SpriteDotOverflow value.
-	// [Nemesis' Sprite Masking and Overflow Test ROM: Test #6]
-	SpriteDotOverflow = (max_cells <= 0);
-
-	if (sprite_limit && overflow) {
-		// Sprite overflow. Check if there are any more sprites.
-		for (; spr_num < TotalSprites; spr_num++) {
-			// Check if the sprite is on the current line.
-			if (Sprite_Struct[spr_num].Pos_Y > vdp_line ||
-			    Sprite_Struct[spr_num].Pos_Y_Max < vdp_line)
-			{
-				// Sprite is not on the current line.
-				continue;
-			}
-
-			// Sprite is on the current line.
-			if (--max_sprites < 0) {
-				// Sprite overflow!
-				// Set the SOVR flag.
-				Reg_Status.setBit(VdpStatus::VDP_STATUS_SOVR, true);
-				break;
-			}
-		}
-	}
-
-	// Return the number of visible sprites.
-	return spr_vis;
+	// Return the SOVR flag.
+	return ret;
 }
 
 /**
@@ -1131,19 +1023,40 @@ FORCE_INLINE unsigned int VdpPrivate::T_Update_Mask_Sprite(void)
 template<bool interlaced, bool h_s>
 FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 {
-	// Update the sprite masks.
-	unsigned int num_spr;
-	if (q->options.spriteLimits)
-		num_spr = T_Update_Mask_Sprite<true, interlaced>();
-	else
-		num_spr = T_Update_Mask_Sprite<false, interlaced>();
+	// Get the sprite line cache for the current line.
+	// NOTE: This is based on physical lines, so don't
+	// use the Interlaced line value.
+	const int cacheId = (T_GetLineNumber<false>() & 1);
+	const SprLineCache_t *cache = &sprLineCache[cacheId][0];
 
-	for (unsigned int spr_vis = 0; spr_vis < num_spr; spr_vis++) {
-		// Get the sprite number.
-		const uint8_t spr_num = Sprite_Visible[spr_vis];
+	// Current line number, adjusting for Interlaced Mode 2.
+	const int line = T_GetLineNumber<interlaced>();
+
+	// Sprite masking.
+	// NOTE: Pos_X is screen-relative. Sprite masking is implemented
+	// with x == 0, but with screen coordinates, it's x == -128.
+	bool found_valid_x = false;	// Found at least one sprite with x > -128.
+	bool sprites_masked = false;	// If true, remaining sprites will not be drawn.
+
+	// Process all sprites on this line.
+	for (int i = sprCountCache[cacheId]; i > 0; i--, cache++) {
+		// Check for a masked sprite.
+		// NOTE: Pos_X is screen-relative.
+		if (cache->Pos_X > -128) {
+			// Found a sprite with x > -128.
+			found_valid_x = true;
+		} else if (found_valid_x) {
+			// We had a sprite with x > -128 already.
+			// Mask the rest of the sprites.
+			// (NOTE: They still count for sprite dots.)
+			sprites_masked = true;
+		}
+
+		if (sprites_masked)
+			continue;
 
 		// Determine the cell and line offsets.
-		unsigned int cell_offset = (T_GetLineNumber<interlaced>() - Sprite_Struct[spr_num].Pos_Y);
+		unsigned int cell_offset = (line - cache->Pos_Y);
 		unsigned int line_offset;
 
 		if (interlaced) {
@@ -1157,11 +1070,11 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 		}
 
 		// Get the Y cell size.
-		unsigned int Y_cell_size = Sprite_Struct[spr_num].Size_Y;
+		unsigned int Y_cell_size = cache->Size_Y;
 
 		// Get the sprite information.
 		// Also, check for swapped sprite layer priority.
-		unsigned int spr_info = Sprite_Struct[spr_num].Num_Tile;
+		unsigned int spr_info = cache->Num_Tile;
 		if (VDP_Layers & VdpTypes::VDP_LAYER_SPRITE_SWAP)
 			spr_info ^= 0x8000;
 
@@ -1183,16 +1096,13 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 		// Check for V Flip.
 		if (spr_info & 0x1000) {
 			// V Flip enabled.
-			if (interlaced)
-				line_offset ^= 15;
-			else
-				line_offset ^= 7;
-
 			tile_num += (Y_cell_size - cell_offset);
 			if (interlaced) {
+				line_offset ^= 15;
 				Y_cell_size += 64;
 				tile_num += (line_offset * 4);
 			} else {
+				line_offset ^= 7;
 				Y_cell_size += 32;
 				tile_num += (line_offset * 4);
 			}
@@ -1215,12 +1125,14 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 		if (spr_info & 0x800) {
 			// H Flip enabled.
 			// Check the minimum edge of the sprite.
-			H_Pos_Min = Sprite_Struct[spr_num].Pos_X;
+			H_Pos_Min = cache->Pos_X;
 			if (H_Pos_Min < -7)
 				H_Pos_Min = -7;	// minimum edge = clip screen
 
 			// TODO: Verify how Pos_X_Max_Vis should work with regards to H Flip.
-			H_Pos_Max = Sprite_Struct[spr_num].Pos_X_Max_Vis;
+			// FIXME: Reimplement Pos_X_Max_Vis.
+			//H_Pos_Max = cache->Pos_X_Max_Vis;
+			H_Pos_Max = cache->Pos_X_Max;
 
 			H_Pos_Max -= 7;				// to post the last pattern in first
 			while (H_Pos_Max >= H_Pix) {
@@ -1247,8 +1159,10 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 		} else {
 			// H Flip disabled.
 			// Check the minimum edge of the sprite.
-			H_Pos_Min = Sprite_Struct[spr_num].Pos_X;
-			H_Pos_Max = Sprite_Struct[spr_num].Pos_X_Max_Vis;
+			H_Pos_Min = cache->Pos_X;
+			// FIXME: Reimplement Pos_X_Max_Vis.
+			//H_Pos_Max = cache->Pos_X_Max_Vis;
+			H_Pos_Max = cache->Pos_X_Max;
 			if (H_Pos_Max >= H_Pix)
 				H_Pos_Max = H_Pix;
 
@@ -1393,7 +1307,19 @@ void VdpPrivate::renderLine_m5(void)
 {
 	// Determine what part of the screen we're in.
 	bool in_border = false;
+	bool off_screen = false;
 	int lineNum = q->VDP_Lines.currentLine;
+
+	// TODO: This check needs to be optimized.
+	if (lineNum == (q->VDP_Lines.totalDisplayLines - 1) &&
+	    (VDP_Reg.m5.Set2 & 0x40))
+	{
+		// Line -1, and display is on.
+		// Update the sprite line cache.
+		Update_Sprite_Line_Cache(-1);
+	}
+
+	// Check for borders.
 	if (lineNum >= q->VDP_Lines.Border.borderStartBottom &&
 	    lineNum <= q->VDP_Lines.Border.borderEndBottom)
 	{
@@ -1408,7 +1334,8 @@ void VdpPrivate::renderLine_m5(void)
 		lineNum -= q->VDP_Lines.Border.borderStartTop;
 		lineNum -= q->VDP_Lines.Border.borderSize;
 	}
-	else if (q->VDP_Lines.currentLine >= q->VDP_Lines.totalVisibleLines) {
+
+	if (!in_border && q->VDP_Lines.currentLine >= q->VDP_Lines.totalVisibleLines) {
 		// Off screen.
 		return;
 	}
@@ -1457,25 +1384,6 @@ void VdpPrivate::renderLine_m5(void)
 	} else {
 		// VDP is enabled.
 
-		// Check if sprite structures need to be updated.
-		if (Interlaced == VdpTypes::INTERLACED_MODE_2) {
-			// Interlaced Mode 2. (2x resolution)
-			if (m_updateFlags.VRam)
-				T_Make_Sprite_Struct<true, false>();
-			else if (m_updateFlags.VRam_Spr)
-				T_Make_Sprite_Struct<true, true>();
-		} else {
-			// Non-Interlaced.
-			if (m_updateFlags.VRam)
-				T_Make_Sprite_Struct<false, false>();
-			else if (m_updateFlags.VRam_Spr)
-				T_Make_Sprite_Struct<false, true>();
-		}
-
-		// Clear the VRam flags.
-		m_updateFlags.VRam = false;
-		m_updateFlags.VRam_Spr = false;
-
 		// Determine how to render the image.
 		int RenderMode = ((VDP_Reg.m5.Set4 & 0x08) >> 2);		// Shadow/Highlight
 		RenderMode |= (Interlaced == VdpTypes::INTERLACED_MODE_2);	// Interlaced.
@@ -1500,6 +1408,18 @@ void VdpPrivate::renderLine_m5(void)
 				// to make gcc shut up
 				break;
 		}
+
+		// Update the sprite line cache for the next line.
+		// NOTE: Must use the physical line number, not the
+		// line number adjusted for interlacing.
+		if (q->VDP_Lines.currentLine < (q->VDP_Lines.totalDisplayLines - 1)) {
+			// Update only for lines 0-223.
+			Update_Sprite_Line_Cache(q->VDP_Lines.currentLine);
+		}
+
+		// Clear the VRam flags.
+		m_updateFlags.VRam = false;
+		m_updateFlags.VRam_Spr = false;
 	}
 
 	// Update the active palette.

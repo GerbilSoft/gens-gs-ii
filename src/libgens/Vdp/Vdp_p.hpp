@@ -445,8 +445,10 @@ class VdpPrivate
 			VdpStructs::SprEntry_m5 spr[128];
 		} SprAttrTbl_m5;
 
-		// Sprite structs.
-		struct {
+		// Sprite line cache.
+		// Caches the current line and the next line.
+		struct SprLineCache_t {
+			// TODO: Optimize this!
 			int Pos_X;
 			int Pos_Y;
 			unsigned int Size_X;
@@ -454,10 +456,15 @@ class VdpPrivate
 			int Pos_X_Max;
 			int Pos_Y_Max;
 			unsigned int Num_Tile;	// Includes palette, priority, and flip bits.
+			// NOTE: Might not be used anymore.
 			int Pos_X_Max_Vis;	// Number of visible horizontal pixels. (Used for Sprite Limit.)
-		} Sprite_Struct[80];
-		uint8_t Sprite_Visible[80];	// List of visible sprites. (element == sprite idx in Sprite_Struct[])
-		uint8_t TotalSprites;		// Total number of visible sprites.
+		};
+		// TODO: Extend to 80 sprites to allow disabling sprite limits.
+		SprLineCache_t sprLineCache[2][20];
+
+		// Sprite count cache.
+		// Includes both the current line and the next line.
+		uint8_t sprCountCache[2];
 
 		template<bool interlaced>
 		FORCE_INLINE int T_GetLineNumber(void) const;
@@ -504,11 +511,10 @@ class VdpPrivate
 		template<bool interlaced, bool vscroll, bool h_s>
 		FORCE_INLINE void T_Render_Line_ScrollA_Window(void);
 
-		template<bool interlaced, bool partial>
-		FORCE_INLINE void T_Make_Sprite_Struct(void);
+		FORCE_INLINE void Update_Sprite_Line_Cache(int line);
 
-		template<bool sprite_limit, bool interlaced>
-		FORCE_INLINE unsigned int T_Update_Mask_Sprite(void);
+		template<bool interlaced>
+		FORCE_INLINE unsigned int T_Update_Sprite_Line_Cache(int line);
 
 		template<bool interlaced, bool h_s>
 		FORCE_INLINE void T_Render_Line_Sprite(void);

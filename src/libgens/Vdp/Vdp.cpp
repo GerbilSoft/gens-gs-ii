@@ -475,6 +475,26 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 		// TODO: If ret < d->SprAttrTbl_sz?
 		memcpy(d->SprAttrTbl_m5.w, d->Spr_Tbl_Addr_PtrM5(0), d->SprAttrTbl_sz);
 	}
+
+	// Re-cache the current and next lines.
+	// TODO: Only if display is enabled.
+	// TODO: Is this necessary?
+	unsigned int sovr;
+	int line = VDP_Lines.currentLine;
+	if (line >= VDP_Lines.totalDisplayLines)
+		line -= VDP_Lines.totalDisplayLines;
+	if (d->Interlaced == VdpTypes::INTERLACED_MODE_2) {
+		d->T_Update_Sprite_Line_Cache<true>(line - 1);
+		sovr = d->T_Update_Sprite_Line_Cache<true>(line);
+	} else {
+		d->T_Update_Sprite_Line_Cache<false>(line - 1);
+		sovr = d->T_Update_Sprite_Line_Cache<false>(line);
+	}
+
+	if (sovr) {
+		// Sprite overflow!
+		d->Reg_Status.setBit(VdpStatus::VDP_STATUS_SOVR, true);
+	}
 }
 
 }
