@@ -454,8 +454,10 @@ class VdpPrivate
 			// NOTE: Might not be used anymore.
 			int Pos_X_Max_Vis;	// Number of visible horizontal pixels. (Used for Sprite Limit.)
 		};
-		// TODO: Extend to 80 sprites to allow disabling sprite limits.
-		SprLineCache_t sprLineCache[2][20];
+		union {
+			SprLineCache_t sprLineCache[2][20];
+			SprLineCache_t sprLineCache_80[2][80];
+		};
 
 		// Sprite count cache.
 		// Includes both the current line and the next line.
