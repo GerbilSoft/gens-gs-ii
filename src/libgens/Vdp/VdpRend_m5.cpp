@@ -1031,6 +1031,12 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 	// Current line number, adjusting for Interlaced Mode 2.
 	const int line = T_GetLineNumber<interlaced>();
 
+	// Pixel count for sprite limit.
+	// NOTE: If the user disabled sprite limit, then there's no maximum.
+	const unsigned int pixel_count_max =
+		(q->options.spriteLimits ? H_Pix : 65536);
+	unsigned int pixel_count = 0;
+
 	// Sprite masking.
 	// NOTE: Pos_X is screen-relative. Sprite masking is implemented
 	// with x == 0, but with screen coordinates, it's x == -128.
@@ -1049,6 +1055,19 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 			// Mask the rest of the sprites.
 			// (NOTE: They still count for sprite dots.)
 			sprites_masked = true;
+		}
+
+		// Get the X positions.
+		int H_Pos_Min = cache->Pos_X;
+		int H_Pos_Max = cache->Pos_X_Max;
+
+		// NOTE: Masked sprites still count towards the sprite dot limit.
+		pixel_count += (cache->Size_X * 8);
+		if (pixel_count > pixel_count_max) {
+			// Sprite overflow.
+			H_Pos_Max -= (pixel_count - pixel_count_max);
+			if (H_Pos_Max < H_Pos_Min)
+				break;
 		}
 
 		if (sprites_masked)
@@ -1118,20 +1137,11 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 		}
 
 		// Check for H Flip.
-		register int H_Pos_Min;
-		register int H_Pos_Max;
-
 		if (spr_info & 0x800) {
 			// H Flip enabled.
 			// Check the minimum edge of the sprite.
-			H_Pos_Min = cache->Pos_X;
 			if (H_Pos_Min < -7)
 				H_Pos_Min = -7;	// minimum edge = clip screen
-
-			// TODO: Verify how Pos_X_Max_Vis should work with regards to H Flip.
-			// FIXME: Reimplement Pos_X_Max_Vis.
-			//H_Pos_Max = cache->Pos_X_Max_Vis;
-			H_Pos_Max = cache->Pos_X_Max;
 
 			H_Pos_Max -= 7;				// to post the last pattern in first
 			while (H_Pos_Max >= H_Pix) {
@@ -1157,11 +1167,6 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 			}
 		} else {
 			// H Flip disabled.
-			// Check the minimum edge of the sprite.
-			H_Pos_Min = cache->Pos_X;
-			// FIXME: Reimplement Pos_X_Max_Vis.
-			//H_Pos_Max = cache->Pos_X_Max_Vis;
-			H_Pos_Max = cache->Pos_X_Max;
 			if (H_Pos_Max >= H_Pix)
 				H_Pos_Max = H_Pix;
 
