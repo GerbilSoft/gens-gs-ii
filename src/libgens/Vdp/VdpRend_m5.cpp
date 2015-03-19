@@ -924,13 +924,22 @@ FORCE_INLINE unsigned int VdpPrivate::T_Update_Sprite_Line_Cache(int line)
 	unsigned int ret = 0;
 	uint8_t link = 0;
 
-	// Maximum number of sprites per frame is (H_Cell * 2).
-	// Maximum number of sprites per line is (H_Cell / 2).
-	// NOTE: We can't disable sprite limits anymore, since
-	// we're processing sprites on a per-line basis.
-	// TODO: Maybe extend the line cache to allow disabling sprite limits?
-	const uint8_t max_spr_line = (uint8_t)(H_Cell / 2);
-	const uint8_t max_spr_frame = (uint8_t)(H_Cell * 2);
+	// Determine the maximum number of sprites.
+	uint8_t max_spr_line, max_spr_frame;
+	if (q->options.spriteLimits) {
+		// Sprite limits are enabled:
+		// - Max sprites per line:  16 (H32), 20 (H40)
+		// - Max sprites per frame: 64 (H32), 80 (H40)
+		max_spr_line = (H_Cell / 2);
+		max_spr_frame = (H_Cell * 2);
+	} else {
+		// Sprite limits are disabled.
+		// NOTE: The sprite line cache currently has a maximum
+		// of 20 sprites per line. This needs to be extended
+		// to 80 in order to truly disable sprite limits.
+		max_spr_line = ARRAY_SIZE(sprLineCache[0]);
+		max_spr_frame = 80;
+	}
 
 	// We're updating the cache for the *next* line.
 	line++;
