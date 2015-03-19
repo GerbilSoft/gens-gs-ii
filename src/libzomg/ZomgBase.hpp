@@ -2,7 +2,7 @@
  * libzomg: Zipped Original Memory from Genesis.                           *
  * ZomgBase.hpp: Savestate base class.                                     *
  *                                                                         *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -32,6 +32,9 @@
 // TODO: Don't depend on LibGens.
 #include "../libgens/macros/common.h"
 
+// ZOMG byteorder.
+#include "libzomg/zomg_byteorder.h"
+
 // ZOMG save structs.
 #include "zomg_vdp.h"
 #include "zomg_psg.h"
@@ -42,14 +45,12 @@
 #include "zomg_md_z80_ctrl.h"
 #include "zomg_md_time_reg.h"
 
-namespace LibZomg
-{
+namespace LibZomg {
 
 class ZomgBase
 {
 	public:
-		enum ZomgFileMode
-		{
+		enum ZomgFileMode {
 			ZOMG_CLOSED,
 			ZOMG_LOAD,
 			ZOMG_SAVE
@@ -64,7 +65,8 @@ class ZomgBase
 		}
 		virtual ~ZomgBase() { }		// NOTE: Can't call close() here because close() is virtual.
 		
-		inline bool isOpen(void) const { return (m_mode != ZOMG_CLOSED); }
+		inline bool isOpen(void) const
+			{ return (m_mode != ZOMG_CLOSED); }
 		virtual void close(void) = 0;
 		
 		/**
@@ -79,13 +81,13 @@ class ZomgBase
 		// (once FORMAT.ini is implemented)
 		
 		/**
-		 * getPreviewSize(): Get the size of the preview image.
+		 * Get the size of the preview image.
 		 * @return Size of the preview image, or 0 if none was found.
 		 */
 		inline size_t getPreviewSize(void) const { return m_preview_size; }
 		
 		/**
-		 * loadPreview(): Load the preview image.
+		 * Load the preview image.
 		 * @param img_buf Image buffer.
 		 * @param siz Size of the image buffer.
 		 * @return Bytes read on success; negative on error.
@@ -96,12 +98,17 @@ class ZomgBase
 		// VDP
 		virtual int loadVdpReg(uint8_t *reg, size_t siz)
 			{ (void)reg; (void)siz; return 0; }
-		virtual int loadVRam(void *vram, size_t siz, bool byteswap)
-			{ (void)vram; (void)siz; (void)byteswap; return 0; }
-		virtual int loadCRam(void *cram, size_t siz, bool byteswap)
-			{ (void)cram; (void)siz; (void)byteswap; return 0; }
-		virtual int loadMD_VSRam(uint16_t *vsram, size_t siz, bool byteswap)	/// MD-specific
-			{ (void)vsram; (void)siz; (void)byteswap; return 0; }
+		virtual int loadVdpCtrl_8(Zomg_VdpCtrl_8_t *ctrl)
+			{ (void)ctrl; return 0; }
+		virtual int loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl)
+			{ (void)ctrl; return 0; }
+		virtual int loadVRam(void *vram, size_t siz, ZomgByteorder_t byteorder)
+			{ (void)vram; (void)siz; (void)byteorder; return 0; }
+		virtual int loadCRam(Zomg_CRam_t *cram, ZomgByteorder_t byteorder)
+			{ (void)cram; (void)byteorder; return 0; }
+		/// MD-specific
+		virtual int loadMD_VSRam(uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder)
+			{ (void)vsram; (void)siz; (void)byteorder; return 0; }
 		
 		// Audio
 		virtual int loadPsgReg(Zomg_PsgSave_t *state)
@@ -116,8 +123,8 @@ class ZomgBase
 			{ (void)state; return 0; }
 		
 		// M68K (MD-specific)
-		virtual int loadM68KMem(uint16_t *mem, size_t siz, bool byteswap)
-			{ (void)mem; (void)siz; (void)byteswap; return 0; }
+		virtual int loadM68KMem(uint16_t *mem, size_t siz, ZomgByteorder_t byteorder)
+			{ (void)mem; (void)siz; (void)byteorder; return 0; }
 		virtual int loadM68KReg(Zomg_M68KRegSave_t *state)
 			{ (void)state; return 0; }
 		
@@ -144,7 +151,7 @@ class ZomgBase
 		// (once FORMAT.ini is implemented)
 		
 		/**
-		 * savePreview(): Save the preview image.
+		 * Save the preview image.
 		 * @param img_buf Image buffer. (Must have a PNG image.)
 		 * @param siz Size of the image buffer.
 		 * @return 0 on success; non-zero on error.
@@ -155,17 +162,23 @@ class ZomgBase
 		// VDP
 		virtual int saveVdpReg(const uint8_t *reg, size_t siz)
 			{ (void)reg; (void)siz; return 0; }
-		virtual int saveVRam(const void *vram, size_t siz, bool byteswap)
-			{ (void)vram; (void)siz; (void)byteswap; return 0; }
-		virtual int saveCRam(const void *cram, size_t siz, bool byteswap)
-			{ (void)cram; (void)siz; (void)byteswap; return 0; }
-		virtual int saveMD_VSRam(const uint16_t *vsram, size_t siz, bool byteswap)	/// MD-specific
-			{ (void)vsram; (void)siz; (void)byteswap; return 0; }
+		virtual int saveVdpCtrl_8(const Zomg_VdpCtrl_8_t *ctrl)
+			{ (void)ctrl; return 0; }
+		virtual int saveVdpCtrl_16(const Zomg_VdpCtrl_16_t *ctrl)
+			{ (void)ctrl; return 0; }
+		virtual int saveVRam(const void *vram, size_t siz, ZomgByteorder_t byteorder)
+			{ (void)vram; (void)siz; (void)byteorder; return 0; }
+		virtual int saveCRam(const Zomg_CRam_t *cram, ZomgByteorder_t byteorder)
+			{ (void)cram; (void)byteorder; return 0; }
+		/// MD-specific
+		virtual int saveMD_VSRam(const uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder)
+			{ (void)vsram; (void)siz; (void)byteorder; return 0; }
 		
 		// Audio
 		virtual int savePsgReg(const Zomg_PsgSave_t *state)
 			{ (void)state; return 0; }
-		virtual int saveMD_YM2612_reg(const Zomg_Ym2612Save_t *state)	/// MD-specific
+		/// MD-specific
+		virtual int saveMD_YM2612_reg(const Zomg_Ym2612Save_t *state)
 			{ (void)state; return 0; }
 		
 		// Z80
@@ -175,8 +188,8 @@ class ZomgBase
 			{ (void)state; return 0; }
 		
 		// M68K (MD-specific)
-		virtual int saveM68KMem(const uint16_t *mem, size_t siz, bool byteswap)
-			{ (void)mem; (void)siz; (void)byteswap; return 0; }
+		virtual int saveM68KMem(const uint16_t *mem, size_t siz, ZomgByteorder_t byteorder)
+			{ (void)mem; (void)siz; (void)byteorder; return 0; }
 		virtual int saveM68KReg(const Zomg_M68KRegSave_t *state)
 			{ (void)state; return 0; }
 		

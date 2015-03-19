@@ -2,7 +2,7 @@
  * libzomg: Zipped Original Memory from Genesis.                           *
  * Zomg.hpp: Savestate handler.                                            *
  *                                                                         *
- * Copyright (c) 2008-2013 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -28,14 +28,12 @@
 #define __LIBZOMG_ZOMG_HPP__
 
 #include "ZomgBase.hpp"
-#include "libzomg/zomg_byteorder.h"
 
 // MiniZip
 #include "minizip/zip.h"
 #include "minizip/unzip.h"
 
-namespace LibZomg
-{
+namespace LibZomg {
 
 class ZomgIni;
 
@@ -45,8 +43,7 @@ class Zomg : public ZomgBase
 		Zomg(const utf8_str *filename, ZomgFileMode mode);
 		virtual ~Zomg(void);
 
-		inline bool isOpen(void) const { return (m_mode != ZOMG_CLOSED); }
-		void close(void);
+		virtual void close(void) override;
 
 		/**
 		 * Detect if a savestate is supported by this class.
@@ -71,35 +68,37 @@ class Zomg : public ZomgBase
 		 * @param siz Size of the image buffer.
 		 * @return Bytes read on success; negative on error.
 		 */
-		int loadPreview(void *img_buf, size_t siz);
+		virtual int loadPreview(void *img_buf, size_t siz) override;
 
 		// VDP
-		int loadVdpReg(uint8_t *reg, size_t siz);
-		int loadVdpCtrl_8(Zomg_VdpCtrl_8_t *ctrl);
-		int loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl);
-		int loadVRam(void *vram, size_t siz, ZomgByteorder_t byteorder);
-		int loadCRam(Zomg_CRam_t *cram, ZomgByteorder_t byteorder);
-		int loadMD_VSRam(uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder);	/// MD-specific
+		virtual int loadVdpReg(uint8_t *reg, size_t siz) override;
+		virtual int loadVdpCtrl_8(Zomg_VdpCtrl_8_t *ctrl) override;
+		virtual int loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl) override;
+		virtual int loadVRam(void *vram, size_t siz, ZomgByteorder_t byteorder) override;
+		virtual int loadCRam(Zomg_CRam_t *cram, ZomgByteorder_t byteorder) override;
+		/// MD-specific
+		virtual int loadMD_VSRam(uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder) override;
 
 		// Audio
-		int loadPsgReg(Zomg_PsgSave_t *state);
-		int loadMD_YM2612_reg(Zomg_Ym2612Save_t *state);	/// MD-specific
+		virtual int loadPsgReg(Zomg_PsgSave_t *state) override;
+		/// MD-specific
+		virtual int loadMD_YM2612_reg(Zomg_Ym2612Save_t *state) override;
 
 		// Z80
-		int loadZ80Mem(uint8_t *mem, size_t siz);
-		int loadZ80Reg(Zomg_Z80RegSave_t *state);
+		virtual int loadZ80Mem(uint8_t *mem, size_t siz) override;
+		virtual int loadZ80Reg(Zomg_Z80RegSave_t *state) override;
 
 		// M68K (MD-specific)
-		int loadM68KMem(uint16_t *mem, size_t siz, ZomgByteorder_t byteorder);
-		int loadM68KReg(Zomg_M68KRegSave_t *state);
+		virtual int loadM68KMem(uint16_t *mem, size_t siz, ZomgByteorder_t byteorder) override;
+		virtual int loadM68KReg(Zomg_M68KRegSave_t *state) override;
 
 		// MD-specific registers
-		int loadMD_IO(Zomg_MD_IoSave_t *state);
-		int loadMD_Z80Ctrl(Zomg_MD_Z80CtrlSave_t *state);
-		int loadMD_TimeReg(Zomg_MD_TimeReg_t *state);
+		virtual int loadMD_IO(Zomg_MD_IoSave_t *state) override;
+		virtual int loadMD_Z80Ctrl(Zomg_MD_Z80CtrlSave_t *state) override;
+		virtual int loadMD_TimeReg(Zomg_MD_TimeReg_t *state) override;
 
 		// Miscellaneous
-		int loadSRam(uint8_t *sram, size_t siz);
+		virtual int loadSRam(uint8_t *sram, size_t siz) override;
 
 		/**
 		 * Save savestate functions.
@@ -125,35 +124,37 @@ class Zomg : public ZomgBase
 		 * @param siz Size of the image buffer.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int savePreview(const void *img_buf, size_t siz);
+		virtual int savePreview(const void *img_buf, size_t siz) override;
 
 		// VDP
-		int saveVdpReg(const uint8_t *reg, size_t siz);
-		int saveVdpCtrl_8(const Zomg_VdpCtrl_8_t *ctrl);
-		int saveVdpCtrl_16(const Zomg_VdpCtrl_16_t *ctrl);
-		int saveVRam(const void *vram, size_t siz, ZomgByteorder_t byteorder);
-		int saveCRam(const Zomg_CRam_t *cram, ZomgByteorder_t byteorder);
-		int saveMD_VSRam(const uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder);	/// MD-specific
+		virtual int saveVdpReg(const uint8_t *reg, size_t siz) override;
+		virtual int saveVdpCtrl_8(const Zomg_VdpCtrl_8_t *ctrl) override;
+		virtual int saveVdpCtrl_16(const Zomg_VdpCtrl_16_t *ctrl) override;
+		virtual int saveVRam(const void *vram, size_t siz, ZomgByteorder_t byteorder) override;
+		virtual int saveCRam(const Zomg_CRam_t *cram, ZomgByteorder_t byteorder) override;
+		/// MD-specific
+		virtual int saveMD_VSRam(const uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder) override;
 
 		// Audio
-		int savePsgReg(const Zomg_PsgSave_t *state);
-		int saveMD_YM2612_reg(const Zomg_Ym2612Save_t *state);	/// MD-specific
+		virtual int savePsgReg(const Zomg_PsgSave_t *state) override;
+		/// MD-specific
+		virtual int saveMD_YM2612_reg(const Zomg_Ym2612Save_t *state) override;
 
 		// Z80
-		int saveZ80Mem(const uint8_t *mem, size_t siz);
-		int saveZ80Reg(const Zomg_Z80RegSave_t *state);
+		virtual int saveZ80Mem(const uint8_t *mem, size_t siz) override;
+		virtual int saveZ80Reg(const Zomg_Z80RegSave_t *state) override;
 
 		// M68K (MD-specific)
-		int saveM68KMem(const uint16_t *mem, size_t siz, ZomgByteorder_t byteorder);
-		int saveM68KReg(const Zomg_M68KRegSave_t *state);
+		virtual int saveM68KMem(const uint16_t *mem, size_t siz, ZomgByteorder_t byteorder) override;
+		virtual int saveM68KReg(const Zomg_M68KRegSave_t *state) override;
 
 		// MD-specific registers
-		int saveMD_IO(const Zomg_MD_IoSave_t *state);
-		int saveMD_Z80Ctrl(const Zomg_MD_Z80CtrlSave_t *state);
-		int saveMD_TimeReg(const Zomg_MD_TimeReg_t *state);
+		virtual int saveMD_IO(const Zomg_MD_IoSave_t *state) override;
+		virtual int saveMD_Z80Ctrl(const Zomg_MD_Z80CtrlSave_t *state) override;
+		virtual int saveMD_TimeReg(const Zomg_MD_TimeReg_t *state) override;
 
 		// Miscellaneous
-		int saveSRam(const uint8_t *sram, size_t siz);
+		virtual int saveSRam(const uint8_t *sram, size_t siz) override;
 
 	protected:
 		unzFile m_unz;
