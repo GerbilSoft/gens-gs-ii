@@ -897,7 +897,6 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_ScrollA_Window(void)
  * Wrapper function to handle interlacing.
  * @param line Current line number, *not* adjusted for IM2.
  */
-#include <stdio.h>
 FORCE_INLINE void VdpPrivate::Update_Sprite_Line_Cache(int line)
 {
 	unsigned int sovr;
