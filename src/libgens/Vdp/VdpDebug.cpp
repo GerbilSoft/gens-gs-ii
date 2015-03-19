@@ -149,10 +149,27 @@ int Vdp::dbg_writeVRam_16(uint32_t address, const uint16_t *vram, int length)
 		// - Address and length must be even.
 		// - Must start within VRAM.
 		// - Must not wrap around the end of VRAM.
+		// TODO: Support 128 KB VRAM?
 		return -1;
 	}
 
 	memcpy(&d->VRam.u16[address>>1], vram, length);
+
+	// Check if the VRAM write overlaps the Sprite Attribute Table.
+	// TODO: Optimize this into a few calculations and a memcpy.
+	for (; length > 0; address += 2, length -= 2, vram++) {
+		if ((address & d->Spr_Tbl_Mask) == d->Spr_Tbl_Addr) {
+			// Sprite Attribute Table.
+			d->SprAttrTbl_m5.w[(address & ~d->Spr_Tbl_Mask) >> 1] = *vram;
+		}
+	}
+
+	/* TODO: Potential optimization things...
+	const uint32_t VRAM_end = address + length + 1;
+	uint32_t SAT_min = d->Spr_Tbl_Addr;
+	uint32_t SAT_max = SAT_min + ~d->Spr_Tbl_Mask;
+	*/
+
 	d->markVRamDirty();
 	return 0;
 }
