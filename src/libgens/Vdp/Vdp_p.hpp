@@ -121,11 +121,6 @@ class VdpPrivate
 		// Interlaced mode.
 		VdpTypes::Interlaced_t Interlaced;
 
-		// Sprite dot overflow.
-		// If set, the previous line had a sprite dot overflow.
-		// This is needed to properly implement Sprite Masking in S1.
-		int SpriteDotOverflow;
-
 		/**
 		 * VDP_Mode: Current VDP mode.
 		 * TODO: Mark as private after integrating VdpRend_Err within the Vdp class.
@@ -465,6 +460,11 @@ class VdpPrivate
 		// Sprite count cache.
 		// Includes both the current line and the next line.
 		uint8_t sprCountCache[2];
+
+		// Sprite dot overflow flag.
+		// If set, the previous line had a sprite dot overflow.
+		// This is needed to properly implement Sprite Masking in S1.
+		bool sprDotOverflow;
 
 		template<bool interlaced>
 		FORCE_INLINE int T_GetLineNumber(void) const;

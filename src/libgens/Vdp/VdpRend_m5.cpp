@@ -1040,8 +1040,10 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 	// Sprite masking.
 	// NOTE: Pos_X is screen-relative. Sprite masking is implemented
 	// with x == 0, but with screen coordinates, it's x == -128.
-	bool found_valid_x = false;	// Found at least one sprite with x > -128.
-	bool sprites_masked = false;	// If true, remaining sprites will not be drawn.
+	// NOTE 2: If a sprite dot overflow occurred on the previous line,
+	// it counts as if this line always has a valid sprite
+	bool found_valid_x = sprDotOverflow;	// Found at least one sprite with x > -128.
+	bool sprites_masked = false;		// If true, remaining sprites will not be drawn.
 
 	// Process all sprites on this line.
 	for (int i = sprCountCache[cacheId]; i > 0; i--, cache++) {
@@ -1064,14 +1066,18 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 		// NOTE: Masked sprites still count towards the sprite dot limit.
 		pixel_count += (cache->Size_X * 8);
 		if (pixel_count > pixel_count_max) {
-			// Sprite overflow.
+			// Sprite dot overflow.
 			H_Pos_Max -= (pixel_count - pixel_count_max);
 			if (H_Pos_Max < H_Pos_Min)
 				break;
 		}
 
-		if (sprites_masked)
+		if (sprites_masked) {
+			// Sprites are masked.
+			// Continue processing sprites,
+			// but don't render any.
 			continue;
+		}
 
 		// Determine the cell and line offsets.
 		unsigned int cell_offset = (line - cache->Pos_Y);
@@ -1192,6 +1198,14 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 				}
 			}
 		}
+	}
+
+	if (pixel_count > pixel_count_max) {
+		// Sprite dot overflow.
+		sprDotOverflow = true;
+	} else {
+		// No sprite dot overflow.
+		sprDotOverflow = false;
 	}
 }
 
@@ -1318,6 +1332,10 @@ void VdpPrivate::renderLine_m5(void)
 	if (lineNum == (q->VDP_Lines.totalDisplayLines - 1) &&
 	    (VDP_Reg.m5.Set2 & 0x40))
 	{
+		// Clear the sprite dot overflow variable.
+		// (TODO: Is this correct?)
+		sprDotOverflow = false;
+
 		// Line -1, and display is on.
 		// Update the sprite line cache.
 		Update_Sprite_Line_Cache(-1);
@@ -1384,7 +1402,7 @@ void VdpPrivate::renderLine_m5(void)
 		memset(LineBuf.u8, 0x00, sizeof(LineBuf.u8));
 
 		// Clear the sprite dot overflow variable.
-		SpriteDotOverflow = 0;
+		sprDotOverflow = false;
 	} else {
 		// VDP is enabled.
 

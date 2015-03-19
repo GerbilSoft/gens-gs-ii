@@ -476,6 +476,9 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 		memcpy(d->SprAttrTbl_m5.w, d->Spr_Tbl_Addr_PtrM5(0), d->SprAttrTbl_sz);
 	}
 
+	// Clear the sprite dot overflow flag.
+	d->sprDotOverflow = false;
+
 	// Re-cache the current and next lines.
 	// TODO: Only if display is enabled.
 	// TODO: Is this necessary?

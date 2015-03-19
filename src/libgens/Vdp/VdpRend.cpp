@@ -72,6 +72,9 @@ void VdpPrivate::rend_reset(void)
 	// Sprite line cache.
 	memset(sprLineCache, 0, sizeof(sprLineCache));
 	memset(sprCountCache, 0, sizeof(sprCountCache));
+
+	// Sprite dot overflow flag.
+	sprDotOverflow = false;
 }
 
 /**
