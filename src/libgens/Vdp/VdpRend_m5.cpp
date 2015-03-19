@@ -1334,7 +1334,6 @@ void VdpPrivate::renderLine_m5(void)
 {
 	// Determine what part of the screen we're in.
 	bool in_border = false;
-	bool off_screen = false;
 	int lineNum = q->VDP_Lines.currentLine;
 
 	if (lineNum == 0) {
