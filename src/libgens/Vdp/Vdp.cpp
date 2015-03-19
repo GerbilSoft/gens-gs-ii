@@ -401,6 +401,11 @@ void Vdp::zomgSaveMD(LibZomg::Zomg *zomg) const
 
 	// Save VSRam. (MD only)
 	zomg->saveMD_VSRam(d->VSRam.u16, sizeof(d->VSRam.u16), ZOMG_BYTEORDER_16H);
+
+	// Save VDP SAT. (MD only)
+	// NOTE: VDP SAT only has 80 entries.
+	// SprAttrTbl_m5 is 128 entries to prevent overflow.
+	zomg->saveMD_VDP_SAT(d->SprAttrTbl_m5.w, d->SprAttrTbl_sz, ZOMG_BYTEORDER_16H);
 }
 
 
@@ -455,6 +460,17 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 	// Load VSRam. (MD only)
 	// FIXME: 80 bytes normally; 128 bytes for Genesis 3.
 	zomg->loadMD_VSRam(d->VSRam.u16, sizeof(d->VSRam.u16), ZOMG_BYTEORDER_16H);
+
+	// Load VDP SAT. (MD only)
+	// NOTE: VDP SAT only has 80 entries.
+	// SprAttrTbl_m5 is 128 entries to prevent overflow.
+	ret = zomg->loadMD_VDP_SAT(d->SprAttrTbl_m5.w, d->SprAttrTbl_sz, ZOMG_BYTEORDER_16H);
+	if (ret <= 0) {
+		// Savestate doesn't have an SAT.
+		// Create it by copying from VRAM.
+		// TODO: If ret < d->SprAttrTbl_sz?
+		memcpy(d->SprAttrTbl_m5.w, d->Spr_Tbl_Addr_PtrM5(0), d->SprAttrTbl_sz);
+	}
 }
 
 }

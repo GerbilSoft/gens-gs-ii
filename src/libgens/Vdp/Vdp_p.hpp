@@ -405,10 +405,8 @@ class VdpPrivate
 		unsigned int VDP_Layers;
 
 		// Line buffer for current line.
-		union LineBuf_t
-		{
-			struct LineBuf_px_t
-			{
+		union LineBuf_t {
+			struct LineBuf_px_t {
 #if GENS_BYTEORDER == GENS_LIL_ENDIAN
 				uint8_t pixel;
 				uint8_t layer;
@@ -433,6 +431,19 @@ class VdpPrivate
 	public:
 		/** Line rendering functions. **/
 		void renderLine_m5(void);
+
+	private:
+		// Sprite Attribute Table cache. (Mode 5)
+		// NOTE: Only 80 entries are present on the actual VDP,
+		// but we have 128 here to prevent overflows.
+		static const int SprAttrTbl_sz = (80 * sizeof(VdpStructs::SprEntry_m5));
+		union {
+			// Direct byte/word access for SAT caching.
+			uint8_t b[128*8];
+			uint16_t w[128*4];
+			// Sprite entries.
+			VdpStructs::SprEntry_m5 spr[128];
+		} SprAttrTbl_m5;
 
 		// Sprite structs.
 		struct {

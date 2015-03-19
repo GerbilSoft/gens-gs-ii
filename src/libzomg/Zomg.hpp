@@ -78,6 +78,7 @@ class Zomg : public ZomgBase
 		virtual int loadCRam(Zomg_CRam_t *cram, ZomgByteorder_t byteorder) override;
 		/// MD-specific
 		virtual int loadMD_VSRam(uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder) override;
+		virtual int loadMD_VDP_SAT(uint16_t *vdp_sat, size_t siz, ZomgByteorder_t byteorder) override;
 
 		// Audio
 		virtual int loadPsgReg(Zomg_PsgSave_t *state) override;
@@ -134,6 +135,7 @@ class Zomg : public ZomgBase
 		virtual int saveCRam(const Zomg_CRam_t *cram, ZomgByteorder_t byteorder) override;
 		/// MD-specific
 		virtual int saveMD_VSRam(const uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder) override;
+		virtual int saveMD_VDP_SAT(const void *vdp_sat, size_t siz, ZomgByteorder_t byteorder) override;
 
 		// Audio
 		virtual int savePsgReg(const Zomg_PsgSave_t *state) override;

@@ -38,8 +38,7 @@
 #include <string>
 using std::string;
 
-namespace LibZomg
-{
+namespace LibZomg {
 
 /**
  * Save a file to the ZOMG file.
@@ -87,7 +86,6 @@ int Zomg::saveToZomg(const utf8_str *filename, const void *buf, int len)
 	return 0;
 }
 
-
 /**
  * Save savestate functions.
  * @param siz Number of bytes to write.
@@ -97,7 +95,6 @@ int Zomg::saveToZomg(const utf8_str *filename, const void *buf, int len)
 
 // TODO: Determine siz and is16bit from the system type?
 // (once FORMAT.ini is implemented)
-
 
 /**
  * Save ZOMG.ini.
@@ -115,7 +112,6 @@ int Zomg::saveZomgIni(const ZomgIni *zomgIni)
 	// TODO: Set a flag indicating ZOMG.ini has been saved.
 	return saveToZomg("ZOMG.ini", zomgIniStr.data(), zomgIniStr.size());
 }
-
 
 /**
  * Save the preview image.
@@ -139,13 +135,13 @@ int Zomg::savePreview(const void *img_buf, size_t siz)
 	return saveToZomg("preview.png", img_buf, siz);
 }
 
+namespace {
 
 /**
  * Templated byteswap class.
  * Use this for any memory block that requires byteswapping.
  * TODO: Verify that this class is optimized out if zomg_order == emu_order.
  */
-namespace {
 template<ZomgByteorder_t zomg_order>
 class SaveMemByteswap {
 	public:
@@ -189,8 +185,7 @@ inline SaveMemByteswap<zomg_order>::SaveMemByteswap(const void *mem, size_t siz,
 			break;
 
 		case ZOMG_BYTEORDER_16LE:
-		case ZOMG_BYTEORDER_16BE:
-		{
+		case ZOMG_BYTEORDER_16BE: {
 			assert(emu_order == ZOMG_BYTEORDER_16LE || emu_order == ZOMG_BYTEORDER_16BE);
 			// 16-bit data needs to be byteswapped.
 			// TODO: Byteswapping memcpy().
@@ -202,8 +197,7 @@ inline SaveMemByteswap<zomg_order>::SaveMemByteswap(const void *mem, size_t siz,
 		}
 
 		case ZOMG_BYTEORDER_32LE:
-		case ZOMG_BYTEORDER_32BE:
-		{
+		case ZOMG_BYTEORDER_32BE: {
 			assert(emu_order == ZOMG_BYTEORDER_32LE || emu_order == ZOMG_BYTEORDER_32BE);
 			// 32-bit data needs to be byteswapped.
 			// TODO: Byteswapping memcpy().
@@ -231,9 +225,7 @@ inline SaveMemByteswap<zomg_order>::~SaveMemByteswap()
 
 };
 
-
 /** VDP **/
-
 
 /**
  * Save VDP registers.
@@ -246,7 +238,6 @@ int Zomg::saveVdpReg(const uint8_t *reg, size_t siz)
 {
 	return saveToZomg("common/vdp_reg.bin", reg, siz);
 }
-
 
 /**
  * Save VDP control registers. (8-bit)
@@ -281,7 +272,6 @@ int Zomg::saveVdpCtrl_8(const Zomg_VdpCtrl_8_t *ctrl)
 	return saveToZomg("common/vdp_ctrl.bin", &ctrl, sizeof(*ctrl));
 #endif
 }
-
 
 /**
  * Save VDP control registers. (16-bit)
@@ -324,11 +314,10 @@ int Zomg::saveVdpCtrl_16(const Zomg_VdpCtrl_16_t *ctrl)
 #endif
 }
 
-
 /**
  * Save VRam.
  * File: common/VRam.bin
- * @param vram Destination buffer for VRam.
+ * @param vram Source buffer for VRam.
  * @param siz Number of bytes to read.
  * @param byteorder ZOMG byteorder to use for the memory buffer.
  * @return 0 on success; non-zero on error.
@@ -341,11 +330,10 @@ int Zomg::saveVRam(const void *vram, size_t siz, ZomgByteorder_t byteorder)
 	return saveToZomg("common/VRam.bin", saveMemByteswap.data(), saveMemByteswap.size());
 }
 
-
 /**
  * Save CRam.
  * File: common/CRam.bin
- * @param cram Destination buffer for CRam.
+ * @param cram Source buffer for CRam.
  * @param byteorder ZOMG byteorder to use for the memory buffer.
  * @return 0 on success; non-zero on error.
  * TODO: Apply byteswapping only for MD.
@@ -357,12 +345,11 @@ int Zomg::saveCRam(const Zomg_CRam_t *cram, ZomgByteorder_t byteorder)
 	return saveToZomg("common/CRam.bin", saveMemByteswap.data(), saveMemByteswap.size());
 }
 
-
 /**
  * Save VSRam. (MD-specific)
  * File: MD/VSRam.bin
- * @param vsram Destination buffer for VSRam.
- * @param siz Number of bytes to read.
+ * @param vsram Source buffer for VSRam.
+ * @param siz Number of bytes to save.
  * @param byteorder ZOMG byteorder to use for the memory buffer.
  * @return 0 on success; non-zero on error.
  * TODO: Return an error if the system isn't MD.
@@ -373,9 +360,23 @@ int Zomg::saveMD_VSRam(const uint16_t *vsram, size_t siz, ZomgByteorder_t byteor
 	return saveToZomg("MD/VSRam.bin", saveMemByteswap.data(), saveMemByteswap.size());
 }
 
+/**
+ * Save the cached VDP Sprite Attribute Table. (MD-specific)
+ * File: MD/vdp_sat.bin
+ * @param vdp_sat Source buffer for the VDP SAT.
+ * @param siz Number of bytes to save.
+ * @param byteorder ZOMG byteorder to use for the memory buffer.
+ * @return 0 on success; non-zero on error.
+ * TODO: Apply byteswapping only for MD.
+ */
+int Zomg::saveMD_VDP_SAT(const void *vdp_sat, size_t siz, ZomgByteorder_t byteorder)
+{
+	// TODO: MD-only; update for other systems later.
+	SaveMemByteswap<ZOMG_BYTEORDER_16BE> saveMemByteswap(vdp_sat, siz, byteorder);
+	return saveToZomg("MD/vdp_sat.bin", saveMemByteswap.data(), saveMemByteswap.size());
+}
 
 /** Audio **/
-
 
 /**
  * Save PSG registers.
@@ -389,10 +390,9 @@ int Zomg::savePsgReg(const Zomg_PsgSave_t *state)
 #if ZOMG_BYTEORDER == ZOMG_BIG_ENDIAN
 	Zomg_PsgSave_t bswap_state;
 	memcpy(&bswap_state, state, sizeof(bswap_state));
-	
+
 	// Byteswap the 16-bit fields.
-	for (int i = 0; i < 4; i++)
-	{
+	for (int i = 0; i < 4; i++) {
 		bswap_state.tone_reg[i] = cpu_to_le16(bswap_state.tone_reg[i]);
 		bswap_state.tone_ctr[i] = cpu_to_le16(bswap_state.tone_ctr[i]);
 	}
@@ -402,7 +402,6 @@ int Zomg::savePsgReg(const Zomg_PsgSave_t *state)
 	return saveToZomg("common/psg.bin", state, sizeof(*state));
 #endif
 }
-
 
 /**
  * Save YM2612 registers. (MD-specific)
@@ -416,9 +415,7 @@ int Zomg::saveMD_YM2612_reg(const Zomg_Ym2612Save_t *state)
 	return saveToZomg("MD/YM2612_reg.bin", state, sizeof(*state));
 }
 
-
 /** Z80 **/
-
 
 /**
  * Save Z80 memory.
@@ -431,7 +428,6 @@ int Zomg::saveZ80Mem(const uint8_t *mem, size_t siz)
 {
 	return saveToZomg("common/Z80_mem.bin", mem, siz);
 }
-
 
 /**
  * Save Z80 registers.
@@ -470,9 +466,7 @@ int Zomg::saveZ80Reg(const Zomg_Z80RegSave_t *state)
 #endif
 }
 
-
 /** M68K (MD-specific) **/
-
 
 /**
  * Save M68K memory. (MD-specific)
@@ -487,7 +481,6 @@ int Zomg::saveM68KMem(const uint16_t *mem, size_t siz, ZomgByteorder_t byteorder
 	SaveMemByteswap<ZOMG_BYTEORDER_16BE> saveMemByteswap(mem, siz, byteorder);
 	return saveToZomg("MD/M68K_mem.bin", saveMemByteswap.data(), saveMemByteswap.size());
 }
-
 
 /**
  * Save M68K registers. (MD-specific)
@@ -525,9 +518,7 @@ int Zomg::saveM68KReg(const Zomg_M68KRegSave_t *state)
 #endif
 }
 
-
 /** MD-specific registers. **/
-
 
 /**
  * Save MD I/O port registers. (MD-specific)
@@ -539,7 +530,6 @@ int Zomg::saveMD_IO(const Zomg_MD_IoSave_t *state)
 {
 	return saveToZomg("MD/IO.bin", state, sizeof(*state));
 }
-
 
 /**
  * Save MD Z80 control registers. (MD-specific)
@@ -563,7 +553,6 @@ int Zomg::saveMD_Z80Ctrl(const Zomg_MD_Z80CtrlSave_t *state)
 #endif
 }
 
-
 /**
  * Save MD /TIME registers. (MD-specific)
  * @param state MD /TIME register buffer.
@@ -575,9 +564,7 @@ int Zomg::saveMD_TimeReg(const Zomg_MD_TimeReg_t *state)
 	return saveToZomg("MD/TIME_reg.bin", state, sizeof(*state));
 }
 
-
 /** Miscellaneous **/
-
 
 /**
  * Save SRAM.

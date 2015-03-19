@@ -464,6 +464,10 @@ void VdpPrivate::DMA_Fill(uint16_t data)
 			do {
 				// NOTE: DMA FILL writes to the adjacent byte.
 				VRam.u8[address ^ 1 ^ U16DATA_U8_INVERT] = fill_hi;
+				if ((address & Spr_Tbl_Mask) == Spr_Tbl_Addr) {
+					// Sprite Attribute Table.
+					SprAttrTbl_m5.b[(address & ~Spr_Tbl_Mask) ^ U16DATA_U8_INVERT] = fill_hi;
+				}
 				address += VDP_Reg.m5.Auto_Inc;
 				address &= VRam_Mask;
 			} while (--length != 0);
@@ -542,21 +546,28 @@ void VdpPrivate::vdpDataWrite_int(uint16_t data)
 	// Check the destination.
 	uint32_t address = VDP_Ctrl.address;
 	switch (VDP_Ctrl.code & VdpTypes::CD_DEST_MASK) {
-		case VdpTypes::CD_DEST_VRAM:
+		case VdpTypes::CD_DEST_VRAM: {
 			// VRam Write.
 			markVRamDirty();
 			address &= VRam_Mask;
+			uint16_t tmp_data;
 			if (address & 0x0001) {
 				// Odd address.
 				// This results in the data bytes being swapped
 				// before writing to (address & ~1).
-				VRam.u16[address>>1] = (data << 8 | data >> 8);
+				tmp_data = (data << 8 | data >> 8);
 			} else {
 				// Even address.
 				// Data is written normally.
-				VRam.u16[address>>1] = data;
+				tmp_data = data;
+			}
+			VRam.u16[address>>1] = tmp_data;
+			if ((address & Spr_Tbl_Mask) == Spr_Tbl_Addr) {
+				// Sprite Attribute Table.
+				SprAttrTbl_m5.w[(address & ~Spr_Tbl_Mask) >> 1] = tmp_data;
 			}
 			break;
+		}
 
 		case VdpTypes::CD_DEST_CRAM_INT_W:
 		case VdpTypes::CD_DEST_CRAM_INT_R:	// TODO: Not needed?
@@ -957,7 +968,12 @@ void Vdp::writeCtrlMD(uint16_t ctrl)
 		// TODO: Is this correct with regards to endianness?
 		// TODO: Do DMA COPY line-by-line instead of all at once.
 		do {
-			d->VRam.u8[dest_address] = d->VRam.u8[src_address];
+			uint8_t src = d->VRam.u8[src_address];
+			d->VRam.u8[dest_address] = src;
+			if ((dest_address & d->Spr_Tbl_Mask) == d->Spr_Tbl_Addr) {
+				// Sprite Attribute Table.
+				d->SprAttrTbl_m5.b[(dest_address & ~d->Spr_Tbl_Mask) ^ U16DATA_U8_INVERT] = src;
+			}
 
 			// Increment the addresses.
 			src_address++;

@@ -66,6 +66,9 @@ void VdpPrivate::rend_reset(void)
 		m_palette.resetActive();
 #endif
 
+	// Sprite Attribute Table cache. (Mode 5)
+	memset(SprAttrTbl_m5.b, 0, sizeof(SprAttrTbl_m5.b));
+
 	// Sprite arrays.
 	memset(&Sprite_Struct, 0x00, sizeof(Sprite_Struct));
 	memset(&Sprite_Visible, 0x00, sizeof(Sprite_Visible));
