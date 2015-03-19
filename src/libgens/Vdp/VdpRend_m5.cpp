@@ -1337,6 +1337,16 @@ void VdpPrivate::renderLine_m5(void)
 	bool off_screen = false;
 	int lineNum = q->VDP_Lines.currentLine;
 
+	if (lineNum == 0) {
+		// Update the SAT cache mask using sprite limits.
+		// TODO: Optimize this so we don't need to set it every time.
+		Spr_Tbl_Mask &= ~0x0200;
+		if (q->options.spriteLimits && !isH40()) {
+			// H32; sprite limits disabled.
+			Spr_Tbl_Mask |= 0x0200;
+		}
+	}
+
 	// TODO: This check needs to be optimized.
 	if (lineNum == (q->VDP_Lines.totalDisplayLines - 1) &&
 	    (VDP_Reg.m5.Set2 & 0x40))
