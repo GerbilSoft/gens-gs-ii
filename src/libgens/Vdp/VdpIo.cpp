@@ -430,9 +430,6 @@ void Vdp::writeDataMD_8(uint8_t data)
  */
 void VdpPrivate::DMA_Fill(uint16_t data)
 {
-	// Set the VRam flag.
-	markVRamDirty();
-
 	// Get the values. (length is in bytes)
 	// NOTE: When writing to VRAM, DMA FILL uses bytes, not words.
 	// When writing to CRAM or VSRAM, DMA FILL uses words.
@@ -548,7 +545,6 @@ void VdpPrivate::vdpDataWrite_int(uint16_t data)
 	switch (VDP_Ctrl.code & VdpTypes::CD_DEST_MASK) {
 		case VdpTypes::CD_DEST_VRAM: {
 			// VRam Write.
-			markVRamDirty();
 			address &= VRam_Mask;
 			uint16_t tmp_data;
 			if (address & 0x0001) {
@@ -676,7 +672,6 @@ inline void VdpPrivate::T_DMA_Loop(void)
 	// Determine if any flags should be set.
 	switch (dest_component) {
 		case DMA_DEST_VRAM:
-			markVRamDirty();
 			DMAT_Type = DMAT_MEM_TO_VRAM;
 			break;
 
@@ -963,7 +958,6 @@ void Vdp::writeCtrlMD(uint16_t ctrl)
 		DMAT_Length = length;
 		d->DMAT_Type = VdpPrivate::DMAT_COPY;
 		d->set_DMA_Length(0);
-		d->markVRamDirty();
 
 		// TODO: Is this correct with regards to endianness?
 		// TODO: Do DMA COPY line-by-line instead of all at once.

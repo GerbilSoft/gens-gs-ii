@@ -179,17 +179,6 @@ class VdpPrivate
 		 */
 		void vdpDataWrite_int(uint16_t data);
 
-		// Update flags.
-		union {
-			uint8_t flags;
-			struct {
-				bool VRam	:1;	// VRam was modified. (Implies VRam_Spr.)
-				bool VRam_Spr	:1;	// Sprite Attribute Table was modified.
-			};
-		} m_updateFlags;
-		inline void markVRamDirty(void)
-			{ m_updateFlags.VRam = true; }
-
 		/**
 		 * VDP address pointers.
 		 * These are relative to VRam[] and are based on register values.

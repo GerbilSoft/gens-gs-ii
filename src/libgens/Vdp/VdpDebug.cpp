@@ -170,7 +170,6 @@ int Vdp::dbg_writeVRam_16(uint32_t address, const uint16_t *vram, int length)
 	uint32_t SAT_max = SAT_min + ~d->Spr_Tbl_Mask;
 	*/
 
-	d->markVRamDirty();
 	return 0;
 }
 

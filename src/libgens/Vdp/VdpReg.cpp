@@ -178,6 +178,14 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 		case 5:
 			// Sprite Attribute Table base address.
 			Spr_Tbl_Addr = (VDP_Reg.m5.Spr_Att_Adr << 9) & Spr_Tbl_Mask;
+
+			/**
+			 * NOTE: The Sprite Attribute Table does *not*
+			 * get updated if this register changes.
+			 * In order for it to get updated, the ROM
+			 * will need to rewrite the SAT to VRAM
+			 * using either port writes or DMA.
+			 */
 			break;
 
 		case 6:
@@ -191,10 +199,6 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 				// 128 KB mode.
 				Spr_Gen_Addr = ((val & 0x20) << 11);
 			}
-
-			// Update the Sprite Attribute Table.
-			// TODO: Only set this if the actual value has changed.
-			m_updateFlags.VRam_Spr = true;
 			break;
 
 		case 7:

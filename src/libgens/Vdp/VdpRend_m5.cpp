@@ -1457,10 +1457,6 @@ void VdpPrivate::renderLine_m5(void)
 			// Update only for lines 0-223.
 			Update_Sprite_Line_Cache(q->VDP_Lines.currentLine);
 		}
-
-		// Clear the VRam flags.
-		m_updateFlags.VRam = false;
-		m_updateFlags.VRam_Spr = false;
 	}
 
 	// Update the active palette.

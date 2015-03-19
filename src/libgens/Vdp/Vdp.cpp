@@ -167,7 +167,6 @@ void Vdp::reset(void)
 	// Reset more stuff.
 	d->VDP_Int = 0;		// No pending interrupts.
 	d->VDP_Ctrl.reset();	// VDP control struct.
-	d->markVRamDirty();	// Force a VRAM update.
 
 	// Initialize the Horizontal Interrupt counter.
 	d->HInt_Counter = d->VDP_Reg.m5.H_Int;
@@ -454,7 +453,6 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 
 	// Load VRam.
 	zomg->loadVRam(d->VRam.u16, sizeof(d->VRam.u16), ZOMG_BYTEORDER_16H);
-	d->markVRamDirty();
 
 	// Load CRam.
 	Zomg_CRam_t cram;

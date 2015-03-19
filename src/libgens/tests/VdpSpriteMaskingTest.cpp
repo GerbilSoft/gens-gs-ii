@@ -230,10 +230,6 @@ void VdpSpriteMaskingTest::SetUp(void)
 	// Set the screen mode.
 	const uint8_t reg0C = (mode.screenMode == SCREEN_MODE_H32) ? 0x00 : 0x81;
 	m_vdp->dbg_setReg(0x0C, reg0C);
-
-	// Set the VRam dirty flag.
-	// FIXME: This shouldn't be needed, and we can't do it anyway...
-	//m_vdp->markVRamDirty();
 }
 
 /**
