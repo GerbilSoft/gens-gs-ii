@@ -439,7 +439,11 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 		d->VDP_Ctrl.ctrl_latch = !!ctrl_reg.ctrl_latch;
 		d->VDP_Ctrl.code = ctrl_reg.code;
 		d->VDP_Ctrl.address = ctrl_reg.address;
-		d->Reg_Status.write_raw(ctrl_reg.status);
+
+		// TODO: Do we want to load the NTSC/PAL bit from the savestate?
+		uint16_t status = d->Reg_Status.read_raw() & VdpStatus::VDP_STATUS_PAL;
+		status |= ctrl_reg.status & ~VdpStatus::VDP_STATUS_PAL;
+		d->Reg_Status.write_raw(status);
 
 		// TODO: Implement the FIFO.
 	} else {
