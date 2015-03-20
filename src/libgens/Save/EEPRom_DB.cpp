@@ -1,9 +1,9 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * EEPRom_File.cpp: Serial EEPROM handler. (ROM database)                  *
+ * EEPRom_DB.hpp: Serial EEPROM handler. (I2C) (ROM database)              *
  *                                                                         *
  * Copyright (C) 2007, 2008, 2009  Eke-Eke (Genesis Plus GCN/Wii port)     *
- * Copyright (c) 2010-2011 by David Korth.                                 *
+ * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -23,20 +23,27 @@
 /**
  * Based on cart_hw/eeprom.c from Genesis Plus GX.
  */
-
 #include "EEPRom.hpp"
+#include "EEPRom_p.hpp"
 
 // ARRAY_SIZE(x)
 #include "macros/common.h"
 
-namespace LibGens
-{
+// C includes. (C++ namespace)
+#include <cstring>
+
+namespace LibGens {
 
 /**
- * ms_Database[]: EEPROM information database.
+ * EEPROM information database.
  */
-const EEPRom::GameEEPRomInfo EEPRom::ms_Database[30] =
+const EEPRomPrivate::GameEEPRomInfo_t EEPRomPrivate::rom_db[1] =
 {
+	// TODO: Port other EEPROMs.
+
+	/** SEGA mapper (X24C01) **/
+	{"T-12046"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EPR_X24C01}},   /* Megaman - The Wily Wars */
+#if 0
 	/** ACCLAIM mappers **/
 	
 	/* 24C02 (old mapper) */
@@ -90,8 +97,8 @@ const EEPRom::GameEEPRomInfo EEPRom::ms_Database[30] =
 	
 	/* 24C65 */
 	{"T-120146-50", 0,      {16, 0x1FFF, 0x1FFF, 0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Brian Lara Cricket 96, Shane Warne Cricket */
+#endif
 };
-
 
 /**
  * Detect the EEPRom type used by the specified ROM.
@@ -103,25 +110,24 @@ const EEPRom::GameEEPRomInfo EEPRom::ms_Database[30] =
 int EEPRom::DetectEEPRomType(const char *serial, size_t serial_len, uint16_t checksum)
 {
 	// Scan the database for potential matches.
-	for (int i = 0; i < ARRAY_SIZE(ms_Database); i++)
-	{
+	for (int i = 0; i < ARRAY_SIZE(EEPRomPrivate::rom_db); i++) {
 		// TODO: Figure out how to get rid of the strlen().
-		size_t dbSerial_len = strlen(ms_Database[i].game_id);
+		size_t dbSerial_len = strlen(EEPRomPrivate::rom_db[i].game_id);
 		if (dbSerial_len > serial_len) {
 			// Serial number in the database is longer than
 			// the given serial number data.
 			continue;
 		}
 
-		if (!memcmp(serial, ms_Database[i].game_id, dbSerial_len)) {
+		if (!memcmp(serial, EEPRomPrivate::rom_db[i].game_id, dbSerial_len)) {
 			// Serial number matches.
-			if (ms_Database[i].checksum == 0) {
+			if (EEPRomPrivate::rom_db[i].checksum == 0) {
 				// No checksum verification required.
 				return i;
 			}
 
 			// Checksum verification is required.
-			if (checksum == ms_Database[i].checksum) {
+			if (checksum == EEPRomPrivate::rom_db[i].checksum) {
 				// Checksum matches.
 				return i;
 			}

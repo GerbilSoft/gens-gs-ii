@@ -22,180 +22,167 @@
  ***************************************************************************/
 
 #include "EEPRom.hpp"
+#include "EEPRom_p.hpp"
+
+// ARRAY_SIZE(x)
 #include "macros/common.h"
 
-// C includes.
-#include <stdio.h>
+// C includes. (C++ namespace)
+#include <cstdio>
+#include <cstring>
 
 // C++ includes.
 #include <string>
 using std::string;
 
-namespace LibGens
-{
+namespace LibGens {
 
 // Static variable initialization.
-const char *const EEPRom::ms_FileExt = "epr";	// TODO: .epr, .sep, or just .srm?
-
-// TODO: EEPRom directory path.
-// For now, just save in the ROM directory.
+const char EEPRomPrivate::fileExt[] = "epr";	// TODO: .epr, .sep, or just .srm?
 
 /**
- * setFilename(): Set the EEPRom filename based on a ROM filename.
+ * Set the EEPRom filename based on a ROM filename.
  * The file extension is changed to ".srm".
  * @param filename ROM filename.
  */
 void EEPRom::setFilename(const string &filename)
 {
-	if (filename.empty())
-	{
+	if (filename.empty()) {
 		// Empty filename.
-		m_filename.clear();
-		m_fullPathname = m_pathname;
+		d->filename.clear();
+		d->fullPathname = d->pathname;
 		return;
 	}
-	
+
 	// Remove any subdirectories from the ROM filename.
-	m_filename = filename;
-	size_t path_pos = m_filename.rfind(LG_PATH_SEP_CHR);
-	if (path_pos != string::npos)
-	{
+	d->filename = filename;
+	size_t path_pos = d->filename.rfind(LG_PATH_SEP_CHR);
+	if (path_pos != string::npos) {
 		// Found a subdirectory.
-		if (path_pos == m_filename.size())
-			m_filename.clear();
-		else
-			m_filename = m_filename.substr(path_pos+1);
+		if (path_pos == d->filename.size()) {
+			d->filename.clear();
+		} else {
+			d->filename = d->filename.substr(path_pos+1);
+		}
 	}
-	
+
 	// Replace the file extension.
-	size_t dot_pos = m_filename.rfind('.');
-	
-	if (dot_pos == string::npos)
-	{
+	size_t dot_pos = d->filename.rfind('.');
+
+	if (dot_pos == string::npos) {
 		// File extension not found. Add one.
-		m_filename += '.';
-		m_filename += ms_FileExt;
-	}
-	else
-	{
+		d->filename += '.';
+	} else {
 		// File extension found. Change it.
-		m_filename.resize(dot_pos + 1);
-		m_filename += ms_FileExt;
+		d->filename.resize(dot_pos + 1);
 	}
-	
+	d->filename += string(d->fileExt);
+
 	// Set the full pathname.
-	m_fullPathname = m_pathname + m_filename;
+	d->fullPathname = d->pathname + d->filename;
 }
 
-
 /**
- * setPathname(): Set the SRam pathname.
- * @param pathname SRam pathname.
+ * Set the EEPRom pathname.
+ * @param pathname EEPRom pathname.
  */
 void EEPRom::setPathname(const string& pathname)
 {
-	m_pathname = pathname;
+	d->pathname = pathname;
 	
 	// Rebuild the full pathname.
-	if (m_pathname.empty())
-		m_fullPathname = m_filename;
-	else
-	{
+	if (d->pathname.empty()) {
+		d->fullPathname = d->filename;
+	} else {
 		// Make sure the pathname ends with a separator.
-		if (m_pathname.at(m_pathname.size()-1) != LG_PATH_SEP_CHR)
-			m_pathname += LG_PATH_SEP_CHR;
-		
+		if (d->pathname.at(d->pathname.size()-1) != LG_PATH_SEP_CHR)
+			d->pathname += LG_PATH_SEP_CHR;
+
 		// Create the full pathname.
-		m_fullPathname = m_pathname + m_filename;
+		d->fullPathname = d->pathname + d->filename;
 	}
 }
 
-
 /**
- * load(): Load the EEPRom file.
+ * Load the EEPRom file.
  * @return Positive value indicating EEPRom size on success; negative on error.
  */
 int EEPRom::load(void)
 {
 	if (!isEEPRomTypeSet())
 		return -2;
-	
+
 	// Attempt to open the EEPRom file.
-	FILE *f = fopen(m_fullPathname.c_str(), "rb");
-	if (!f)
-	{
+	FILE *f = fopen(d->fullPathname.c_str(), "rb");
+	if (!f) {
 		// Unable to open the EEPRom file.
 		// TODO: Error code constants.
 		return -1;
 	}
-	
+
 	// Erase EEPRom before loading the file.
 	// NOTE: Don't use reset() - reset() also resets the control logic.
-	memset(m_eeprom, 0xFF, sizeof(m_eeprom));
-	
+	memset(d->eeprom, 0xFF, sizeof(d->eeprom));
+
 	// Load the EEPRom data.
-	int ret = fread(m_eeprom, 1, sizeof(m_eeprom), f);
+	int ret = fread(d->eeprom, 1, sizeof(d->eeprom), f);
 	fclose(f);
-	
+
 	// Return the number of bytes read.
-	clearDirty();
+	d->clearDirty();
 	return ret;
 }
 
-
 /**
- * getUsedSize(): Determine how many bytes are used in the EEPRom chip.
+ * Determine how many bytes are used in the EEPRom chip.
+ * TODO: Use the EEPRom type to determine the size?
  * @return Number of bytes used, rounded to the highest power of two.
  */
 int EEPRom::getUsedSize(void)
 {
-	int i = (sizeof(m_eeprom) - 1);
-	while (i >= 0 && m_eeprom[i] == 0xFF)
+	int i = (sizeof(d->eeprom) - 1);
+	while (i >= 0 && d->eeprom[i] == 0xFF)
 		i--;
-	
+
 	// Return the next-highest power of two.
-	return next_pow2u(i);
+	return d->next_pow2u(i);
 }
 
-
 /**
- * save(): Save the EEPRom file.
+ * Save the EEPRom file.
  * @return Positive value indicating EEPRom size on success; 0 if no save is needed; negative on error.
  */
 int EEPRom::save(void)
 {
 	if (!isEEPRomTypeSet())
 		return -2;
-	if (!m_dirty)
+	if (!d->isDirty())
 		return 0;
-	
+
 	int size = getUsedSize();
-	if (size <= 0)
-	{
+	if (size <= 0) {
 		// EEPRom is empty.
 		return 0;
 	}
-	
-	FILE *f = fopen(m_fullPathname.c_str(), "wb");
-	if (!f)
-	{
+
+	FILE *f = fopen(d->fullPathname.c_str(), "wb");
+	if (!f) {
 		// Unable to open EEPRom file.
 		// TODO: Error code constants.
 		return -1;
 	}
-	
+
 	// Save EEPRom to the file.
-	int ret = fwrite(m_eeprom, 1, size, f);
+	int ret = fwrite(d->eeprom, 1, size, f);
 	fclose(f);
-	
+
 	// Return the number of bytes saved.
-	clearDirty();
+	d->clearDirty();
 	return ret;
 }
 
-
 /**
- * autoSave(): Autosave the EEPRom file.
+ * Autosave the EEPRom file.
  * This saves the EEPRom file if its last modification time is past a certain threshold.
  * @param framesElapsed Number of frames elapsed, or -1 for paused.
  * @return Positive value indicating EEPRom size on success; 0 if no save is needed; negative on error.
@@ -204,20 +191,19 @@ int EEPRom::autoSave(int framesElapsed)
 {
 	if (!isEEPRomTypeSet())
 		return -2;
-	if (!m_dirty)
+	if (!d->isDirty())
 		return 0;
-	
+
 	// TODO: Customizable autosave threshold.
 	// TODO: PAL/NTSC detection.
-	if (framesElapsed >= 0)
-	{
+	if (d->framesElapsed >= 0) {
 		// Check if we've passed the autosave threshold.
 		bool isPal = false;
-		m_framesElapsed += framesElapsed;
-		if (m_framesElapsed < (AUTOSAVE_THRESHOLD_DEFAULT / (isPal ? 20 : 16)))
+		d->framesElapsed += framesElapsed;
+		if (d->framesElapsed < (d->AUTOSAVE_THRESHOLD_DEFAULT / (isPal ? 20 : 16)))
 			return 0;
 	}
-	
+
 	// Autosave threshold has passed.
 	return save();
 }
