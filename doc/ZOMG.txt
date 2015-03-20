@@ -1,6 +1,6 @@
 Zipped Original Memory from Genesis
 Version 0.1, Draft Revision 0
-Copyright (c) 2008-2010 by David Korth.
+Copyright (c) 2008-2015 by David Korth.
 
 ================================================================
 
@@ -445,6 +445,7 @@ components that are specific to the Sega Mega Drive hardware.
 | IO.bin         |             16 |    8-bit   |
 | Z80_ctrl.bin   |              4 |   Varies   |
 | TIME_reg.bin   |            256 |    8-bit   |
+| vdp_sat.bin    |            640 |  16-bit BE |
 +----------------+----------------+------------+
 
 ----------------------------------------------------------------
@@ -674,3 +675,29 @@ typedef struct _ZOMG_MD_TIME_reg_t
 		};
 	};
 } ZOMG_MD_TIME_reg_t;
+
+----------------------------------------------------------------
+
+5.8. vdp_sat.bin: VDP Sprite Attribute Table cache.
+
+The Mega Drive VDP has an internal cache for the Spirte Attribute Table.
+This cache can hold up to 80 sprite entries (640 bytes), and is updated
+whenever a VRAM write occurs in the Sprite Attribute Table area.
+
+NOTE: Changing the Sprite Attribute Table base address will result in
+the cache getting desynchronized with the contents of VRAM, which can
+cause unusual effects onscreen due to the Y, size, and link fields
+being read from the cache, while the attribute and X fields are read
+from VRAM.
+
+NOTE 2: The SAT cache in ZOMG is the full 640 bytes. It's currently
+unknown whether or not the cache actually stores the attribute and X
+fields, but for now, they're stored here.
+
+NOTE 3: If this file is missing, the cache can be created by copying
+the Sprite Attribute Table from VRAM. This may not be as accurate, but
+it's "good enough" in most cases.
+
+C equivalent for vdp_sat.bin:
+
+uint16_t vdp_sat[320];	// 16BE: VDP Sprite Attribute Table cache.
