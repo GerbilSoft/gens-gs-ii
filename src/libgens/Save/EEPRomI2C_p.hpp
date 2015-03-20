@@ -30,20 +30,20 @@
 
 namespace LibGens {
 
-class EEPRom;
-class EEPRomPrivate
+class EEPRomI2C;
+class EEPRomI2CPrivate
 {
 	public:
-		EEPRomPrivate(EEPRom *q);
+		EEPRomI2CPrivate(EEPRomI2C *q);
 
 	protected:
-		friend class EEPRom;
-		EEPRom *const q;
+		friend class EEPRomI2C;
+		EEPRomI2C *const q;
 	private:
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
-		EEPRomPrivate(const EEPRomPrivate &);
-		EEPRomPrivate &operator=(const EEPRomPrivate &);
+		EEPRomI2CPrivate(const EEPRomI2CPrivate &);
+		EEPRomI2CPrivate &operator=(const EEPRomI2CPrivate &);
 
 	public:
 		static const char fileExt[];

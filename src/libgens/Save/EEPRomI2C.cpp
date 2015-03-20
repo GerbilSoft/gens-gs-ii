@@ -1,9 +1,8 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * EEPRom.cpp: Serial EEPROM handler.                                      *
+ * EEPRomI2C.cpp: I2C Serial EEPROM handler.                               *
  *                                                                         *
- * Copyright (C) 2007, 2008, 2009  Eke-Eke (Genesis Plus GCN/Wii port)     *
- * Copyright (c) 2010-2011 by David Korth.                                 *
+ * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -24,17 +23,20 @@
  * Based on cart_hw/eeprom.c from Genesis Plus GX.
  */
 
-#include "EEPRom.hpp"
+#include "EEPRomI2C.hpp"
 
 // ARRAY_SIZE(x)
 #include "macros/common.h"
 
-#include "EEPRom_p.hpp"
+// C includes (C++ namespace).
+#include <cstring>
+
+#include "EEPRomI2C_p.hpp"
 namespace LibGens {
 
-/** EEPRomPrivate **/
+/** EEPRomI2CPrivate **/
 
-EEPRomPrivate::EEPRomPrivate(EEPRom *q)
+EEPRomI2CPrivate::EEPRomI2CPrivate(EEPRomI2C *q)
 	: q(q)
 	, dirty(false)
 	, framesElapsed(0)
@@ -50,7 +52,7 @@ EEPRomPrivate::EEPRomPrivate(EEPRom *q)
  * Clear the EEPRom and initialize settings.
  * This function does NOT reset the EEPRom type!
  */
-void EEPRomPrivate::reset(void)
+void EEPRomI2CPrivate::reset(void)
 {
 	// EEProm is initialized with 0xFF.
 	memset(eeprom, 0xFF, sizeof(eeprom));
@@ -76,7 +78,7 @@ void EEPRomPrivate::reset(void)
 /**
  * Process an I2C bit.
  */
-void EEPRomPrivate::processI2Cbit(void)
+void EEPRomI2CPrivate::processI2Cbit(void)
 {
 	// TODO
 
@@ -91,11 +93,11 @@ void EEPRomPrivate::processI2Cbit(void)
 /**
  * Initialize the EEPRom chip.
  */
-EEPRom::EEPRom()
-	: d(new EEPRomPrivate(this))
+EEPRomI2C::EEPRomI2C()
+	: d(new EEPRomI2CPrivate(this))
 { }
 
-EEPRom::~EEPRom()
+EEPRomI2C::~EEPRomI2C()
 {
 	delete d;
 }
@@ -104,7 +106,7 @@ EEPRom::~EEPRom()
  * Clear the EEPRom and initialize settings.
  * This function does NOT reset the EEPRom type!
  */
-void EEPRom::reset(void)
+void EEPRomI2C::reset(void)
 {
 	d->reset();
 }
@@ -114,7 +116,7 @@ void EEPRom::reset(void)
  * @param type EEPRom type. (Specify a negative number to clear)
  * @return 0 on success; non-zero on error.
  */
-int EEPRom::setEEPRomType(int type)
+int EEPRomI2C::setEEPRomType(int type)
 {
 	if (type < 0) {
 		// Negative type ID. Reset the EEPRom.
@@ -134,7 +136,7 @@ int EEPRom::setEEPRomType(int type)
  * Determine if the EEPRom type is set.
  * @return True if the EEPRom type is set; false if not.
  */
-bool EEPRom::isEEPRomTypeSet(void) const
+bool EEPRomI2C::isEEPRomTypeSet(void) const
 {
 	return !(d->eprType.type.scl_adr == 0);
 }
@@ -154,23 +156,23 @@ bool EEPRom::isEEPRomTypeSet(void) const
  * @return True if the address is usable for the specified purpose.
  */
 
-bool EEPRom::isReadBytePort(uint32_t address) const
+bool EEPRomI2C::isReadBytePort(uint32_t address) const
 {
 	return (address == d->eprType.type.sda_out_adr);
 }
 
-bool EEPRom::isReadWordPort(uint32_t address) const
+bool EEPRomI2C::isReadWordPort(uint32_t address) const
 {
 	return ((address | 1) == (d->eprType.type.sda_out_adr | 1));
 }
 
-bool EEPRom::isWriteBytePort(uint32_t address) const
+bool EEPRomI2C::isWriteBytePort(uint32_t address) const
 {
 	return (address == d->eprType.type.scl_adr ||
 		address == d->eprType.type.sda_in_adr);
 }
 
-bool EEPRom::isWriteWordPort(uint32_t address) const
+bool EEPRomI2C::isWriteWordPort(uint32_t address) const
 {
 	address |= 1;
 	return ((address == (d->eprType.type.scl_adr | 1)) ||
@@ -181,7 +183,7 @@ bool EEPRom::isWriteWordPort(uint32_t address) const
  * Check if the EEPRom is dirty.
  * @return True if EEPRom has been modified since the last save; false otherwise.
  */
-bool EEPRom::isDirty(void) const
+bool EEPRomI2C::isDirty(void) const
 	{ return d->isDirty(); }
 
 /**
@@ -189,7 +191,7 @@ bool EEPRom::isDirty(void) const
  * @param address Address.
  * @return Port value.
  */
-uint8_t EEPRom::readByte(uint32_t address)
+uint8_t EEPRomI2C::readByte(uint32_t address)
 {
 	if (address != d->eprType.type.sda_out_adr) {
 		// Wrong address.
@@ -209,7 +211,7 @@ uint8_t EEPRom::readByte(uint32_t address)
  * @param address Address.
  * @return Port value.
  */
-uint16_t EEPRom::readWord(uint32_t address)
+uint16_t EEPRomI2C::readWord(uint32_t address)
 {
 	// TODO: address probably doesn't need to be masked,
 	// since M68K is word-aligned...
@@ -233,7 +235,7 @@ uint16_t EEPRom::readWord(uint32_t address)
  * @param address Address.
  * @param data Data.
  */
-void EEPRom::writeByte(uint32_t address, uint8_t data)
+void EEPRomI2C::writeByte(uint32_t address, uint8_t data)
 {
 	if (address != d->eprType.type.scl_adr &&
 	    address != d->eprType.type.sda_in_adr)
@@ -265,7 +267,7 @@ void EEPRom::writeByte(uint32_t address, uint8_t data)
  * @param address Address.
  * @param data Data.
  */
-void EEPRom::writeWord(uint32_t address, uint16_t data)
+void EEPRomI2C::writeWord(uint32_t address, uint16_t data)
 {
 	// TODO: Verify that the address is valid.
 

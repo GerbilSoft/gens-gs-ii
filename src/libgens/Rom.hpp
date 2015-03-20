@@ -30,11 +30,6 @@
 // C++ includes.
 #include <string>
 
-// LibGens includes.
-#include "Save/SRam.hpp"
-#include "Save/EEPRom.hpp"
-#include "macros/common.h"
-
 // Decompressor subsystem.
 #include "Decompressor/Decompressor.hpp"
 
@@ -47,8 +42,7 @@
  */
 #define ROM_HEADER_SIZE 65536
 
-namespace LibGens
-{
+namespace LibGens {
 
 class RomPrivate;
 
@@ -56,8 +50,7 @@ class Rom
 {
 	public:
 		// TODO: Use MDP headers for system identifiers.
-		enum MDP_SYSTEM_ID
-		{
+		enum MDP_SYSTEM_ID {
 			/*! BEGIN: MDP v1.0 system IDs. !*/
 			MDP_SYSTEM_UNKNOWN = 0,
 			MDP_SYSTEM_MD      = 1,
@@ -73,8 +66,7 @@ class Rom
 			MDP_SYSTEM_MAX
 		};
 
-		enum RomFormat
-		{
+		enum RomFormat {
 			RFMT_UNKNOWN = 0,
 
 			RFMT_BINARY,		// Plain binary ROM image.
@@ -237,8 +229,7 @@ class Rom
 		/**
 		 * Mappers.
 		 */
-		enum Mapper
-		{
+		enum Mapper {
 			/**
 			 * Standard MD mapper.
 			 * Can represent either of the following:

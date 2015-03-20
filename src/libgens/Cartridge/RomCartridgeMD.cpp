@@ -1239,7 +1239,7 @@ void RomCartridgeMD::initMemoryMap(void)
 	// Check for EEPROM.
 	// TODO: Change DetectEEPRomType to use a full serial?
 	const char *eep_serial = (serialNumber.c_str() + 3);
-	d->eprType = EEPRom::DetectEEPRomType(
+	d->eprType = EEPRomI2C::DetectEEPRomType(
 			eep_serial,
 			(serialNumber.size() - 3),
 			checksum);

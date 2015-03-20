@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * EEPRom.hpp: Serial EEPROM handler. (I2C)                                *
+ * EEPRomI2C.hpp: I2C Serial EEPROM handler.                               *
  *                                                                         *
  * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
@@ -19,34 +19,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_SAVE_EEPROM_HPP__
-#define __LIBGENS_SAVE_EEPROM_HPP__
+#ifndef __LIBGENS_SAVE_EEPROMI2C_HPP__
+#define __LIBGENS_SAVE_EEPROMI2C_HPP__
 
 // C includes.
 #include <stdint.h>
-#include <string.h>
-#include <limits.h>
 
 // C++ includes.
 #include <string>
 
 namespace LibGens {
 
-class EEPRomPrivate;
-class EEPRom
+class EEPRomI2CPrivate;
+class EEPRomI2C
 {
 	public:
-		EEPRom();
-		~EEPRom();
+		EEPRomI2C();
+		~EEPRomI2C();
 
 	protected:
-		friend class EEPRomPrivate;
-		EEPRomPrivate *const d;
+		friend class EEPRomI2CPrivate;
+		EEPRomI2CPrivate *const d;
 	private:
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
-		EEPRom(const EEPRom &);
-		EEPRom &operator=(const EEPRom &);
+		EEPRomI2C(const EEPRomI2C &);
+		EEPRomI2C &operator=(const EEPRomI2C &);
 
 	public:
 		/**
@@ -141,4 +139,4 @@ class EEPRom
 
 }
 
-#endif /* __LIBGENS_SAVE_EEPROM_HPP__ */
+#endif /* __LIBGENS_SAVE_EEPROMI2C_HPP__ */

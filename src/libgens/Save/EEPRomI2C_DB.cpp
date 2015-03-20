@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * EEPRom_DB.hpp: Serial EEPROM handler. (I2C) (ROM database)              *
+ * EEPRomI2C_DB.hpp: I2C Serial EEPROM handler. (ROM database)             *
  *                                                                         *
  * Copyright (C) 2007, 2008, 2009  Eke-Eke (Genesis Plus GCN/Wii port)     *
  * Copyright (c) 2015 by David Korth.                                      *
@@ -23,8 +23,8 @@
 /**
  * Based on cart_hw/eeprom.c from Genesis Plus GX.
  */
-#include "EEPRom.hpp"
-#include "EEPRom_p.hpp"
+#include "EEPRomI2C.hpp"
+#include "EEPRomI2C_p.hpp"
 
 // ARRAY_SIZE(x)
 #include "macros/common.h"
@@ -37,7 +37,7 @@ namespace LibGens {
 /**
  * EEPROM information database.
  */
-const EEPRomPrivate::GameEEPRomInfo_t EEPRomPrivate::rom_db[1] =
+const EEPRomI2CPrivate::GameEEPRomInfo_t EEPRomI2CPrivate::rom_db[1] =
 {
 	// TODO: Port other EEPROMs.
 
@@ -107,27 +107,27 @@ const EEPRomPrivate::GameEEPRomInfo_t EEPRomPrivate::rom_db[1] =
  * @param checksum Checksum.
  * @return EEPRom type, or -1 if this ROM isn't known.
  */
-int EEPRom::DetectEEPRomType(const char *serial, size_t serial_len, uint16_t checksum)
+int EEPRomI2C::DetectEEPRomType(const char *serial, size_t serial_len, uint16_t checksum)
 {
 	// Scan the database for potential matches.
-	for (int i = 0; i < ARRAY_SIZE(EEPRomPrivate::rom_db); i++) {
+	for (int i = 0; i < ARRAY_SIZE(EEPRomI2CPrivate::rom_db); i++) {
 		// TODO: Figure out how to get rid of the strlen().
-		size_t dbSerial_len = strlen(EEPRomPrivate::rom_db[i].game_id);
+		size_t dbSerial_len = strlen(EEPRomI2CPrivate::rom_db[i].game_id);
 		if (dbSerial_len > serial_len) {
 			// Serial number in the database is longer than
 			// the given serial number data.
 			continue;
 		}
 
-		if (!memcmp(serial, EEPRomPrivate::rom_db[i].game_id, dbSerial_len)) {
+		if (!memcmp(serial, EEPRomI2CPrivate::rom_db[i].game_id, dbSerial_len)) {
 			// Serial number matches.
-			if (EEPRomPrivate::rom_db[i].checksum == 0) {
+			if (EEPRomI2CPrivate::rom_db[i].checksum == 0) {
 				// No checksum verification required.
 				return i;
 			}
 
 			// Checksum verification is required.
-			if (checksum == EEPRomPrivate::rom_db[i].checksum) {
+			if (checksum == EEPRomI2CPrivate::rom_db[i].checksum) {
 				// Checksum matches.
 				return i;
 			}

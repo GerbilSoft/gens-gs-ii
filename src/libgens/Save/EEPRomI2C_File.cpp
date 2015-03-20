@@ -1,10 +1,8 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * EEPRom_File.cpp: Serial EEPROM handler. (File handling functions)       *
+ * EEPRomI2C_File.cpp: I2C Serial EEPROM handler. (File handling functions)*
  *                                                                         *
- * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
- * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "EEPRom.hpp"
-#include "EEPRom_p.hpp"
+#include "EEPRomI2C.hpp"
+#include "EEPRomI2C_p.hpp"
 
 // ARRAY_SIZE(x)
 #include "macros/common.h"
@@ -38,14 +36,14 @@ using std::string;
 namespace LibGens {
 
 // Static variable initialization.
-const char EEPRomPrivate::fileExt[] = "epr";	// TODO: .epr, .sep, or just .srm?
+const char EEPRomI2CPrivate::fileExt[] = "epr";	// TODO: .epr, .sep, or just .srm?
 
 /**
  * Set the EEPRom filename based on a ROM filename.
  * The file extension is changed to ".srm".
  * @param filename ROM filename.
  */
-void EEPRom::setFilename(const string &filename)
+void EEPRomI2C::setFilename(const string &filename)
 {
 	if (filename.empty()) {
 		// Empty filename.
@@ -86,7 +84,7 @@ void EEPRom::setFilename(const string &filename)
  * Set the EEPRom pathname.
  * @param pathname EEPRom pathname.
  */
-void EEPRom::setPathname(const string& pathname)
+void EEPRomI2C::setPathname(const string& pathname)
 {
 	d->pathname = pathname;
 	
@@ -107,7 +105,7 @@ void EEPRom::setPathname(const string& pathname)
  * Load the EEPRom file.
  * @return Positive value indicating EEPRom size on success; negative on error.
  */
-int EEPRom::load(void)
+int EEPRomI2C::load(void)
 {
 	if (!isEEPRomTypeSet())
 		return -2;
@@ -138,7 +136,7 @@ int EEPRom::load(void)
  * TODO: Use the EEPRom type to determine the size?
  * @return Number of bytes used, rounded to the highest power of two.
  */
-int EEPRom::getUsedSize(void)
+int EEPRomI2C::getUsedSize(void)
 {
 	int i = (sizeof(d->eeprom) - 1);
 	while (i >= 0 && d->eeprom[i] == 0xFF)
@@ -152,7 +150,7 @@ int EEPRom::getUsedSize(void)
  * Save the EEPRom file.
  * @return Positive value indicating EEPRom size on success; 0 if no save is needed; negative on error.
  */
-int EEPRom::save(void)
+int EEPRomI2C::save(void)
 {
 	if (!isEEPRomTypeSet())
 		return -2;
@@ -187,7 +185,7 @@ int EEPRom::save(void)
  * @param framesElapsed Number of frames elapsed, or -1 for paused.
  * @return Positive value indicating EEPRom size on success; 0 if no save is needed; negative on error.
  */
-int EEPRom::autoSave(int framesElapsed)
+int EEPRomI2C::autoSave(int framesElapsed)
 {
 	if (!isEEPRomTypeSet())
 		return -2;
