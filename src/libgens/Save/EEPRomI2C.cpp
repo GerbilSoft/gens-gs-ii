@@ -25,8 +25,8 @@
 
 #include "EEPRomI2C.hpp"
 
-// ARRAY_SIZE(x)
 #include "macros/common.h"
+#include "macros/log_msg.h"
 
 // C includes (C++ namespace).
 #include <cstring>
@@ -42,6 +42,7 @@ EEPRomI2CPrivate::EEPRomI2CPrivate(EEPRomI2C *q)
 	, framesElapsed(0)
 {
 	// Clear the EEPRom type.
+	memset(&eprSpec, 0, sizeof(eprSpec));
 	memset(&eprType, 0, sizeof(eprType));
 
 	// Reset the EEPRom.
@@ -66,13 +67,13 @@ void EEPRomI2CPrivate::reset(void)
 	sda_out_prev = 1;
 	sda_in_prev = 1;
 
-	// Reset the internal counter.
+	// Reset the internal registers.
+	address = 0;
 	counter = 0;
 	rw = 0;
 
-	// TODO: State, address registers.
-	//m_state = EEP_STANDBY;
-	//m_word_address = 0;
+	// Reset the state.
+	state = EPR_STANDBY;
 }
 
 /**
@@ -80,12 +81,84 @@ void EEPRomI2CPrivate::reset(void)
  */
 void EEPRomI2CPrivate::processI2Cbit(void)
 {
-	// TODO
+	// Save the current /SDA out.
+	sda_out_prev = sda_out;
 
+	if (eprType.type.epr_type == EPR_NONE) {
+		// No EEPRom.
+		goto done;
+	}
+
+	// Check for a STOP condition.
+	if (checkStop()) {
+		// STOP condition reached.
+		LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+			"Received STOP condition.");
+		counter = 0;
+		sda_out = 1;
+		state = EPR_STANDBY;
+		goto done;
+	}
+
+	// Check the current state.
+	switch (state) {
+		case EPR_STANDBY:
+			// Has a START condition been issued?
+			if (checkStart()) {
+				// START condition.
+				LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+					"EPR_STANDBY: Received START condition.");
+				counter = 0;
+				if (eprType.type.epr_type == EPR_X24C01) {
+					// Mode 1.
+					state = EPR_MODE1_WORD_ADDRESS;
+				} else {
+					// Mode 2 or 3.
+					// TODO
+					//state = EPR_MODE2_WORD_ADDRESS;
+				}
+			}
+			break;
+
+		case EPR_MODE1_WORD_ADDRESS:
+			// Check for SCL low-to-high.
+			if (checkSCL_LtoH()) {
+				if (counter >= 8) {
+					// Acknowledge receipt of the data bit.
+					sda_out = 0;
+				} else if (counter == 7) {
+					// Data bit is valid.
+					// This bit is R/W.
+					rw = getSDA();
+					counter++;
+				} else {
+					// Data bit is valid.
+					address <<= 1;
+					address |= getSDA();
+					address &= eprSpec.sz_mask;
+					counter++;
+				}
+			} else if (checkSCL_HtoL()) {
+				// Release the data line.
+				sda_out = 1;
+				if (counter >= 8) {
+					LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+						"EPR_MODE1_WORD_ADDRESS: address=%02X, rw=%d",
+						address, rw);
+					// TODO: Next step.
+					counter = 0;
+					state = EPR_STANDBY;
+				}
+			}
+
+		default:
+			break;
+	}
+
+done:
 	// Save the current /SCL and /SDA.
 	scl_prev = scl;
 	sda_in_prev = sda_in;
-	sda_out_prev = sda_out;
 }
 
 /** EEPRom **/
@@ -129,6 +202,7 @@ int EEPRomI2C::setEEPRomType(int type)
 
 	// Set the EEPRom type.
 	memcpy(&d->eprType, &d->rom_db[type], sizeof(d->eprType));
+	memcpy(&d->eprSpec, &d->eeprom_spec[d->eprType.type.epr_type], sizeof(d->eprSpec));
 	return 0;
 }
 

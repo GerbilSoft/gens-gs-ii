@@ -34,9 +34,14 @@
 
 namespace LibGens {
 
-/**
- * EEPROM information database.
- */
+/** EEPROM specifications. **/
+const EEPRomI2CPrivate::EEPRomSpec_t EEPRomI2CPrivate::eeprom_spec[EPR_MAX] =
+{
+	{0, 0, 0},		// EPR_NONE
+	{0x7F, 0x03, 0},	// EPR_X24C01
+};
+
+/** ROM database. **/
 const EEPRomI2CPrivate::GameEEPRomInfo_t EEPRomI2CPrivate::rom_db[1] =
 {
 	// TODO: Port other EEPROMs.

@@ -68,8 +68,19 @@ class EEPRomI2CPrivate
 		uint8_t sda_out_prev;	// /SDA: Data. (output)
 		uint8_t sda_in_prev;	// /SDA: Data. (input)
 
-		int counter;		// Cycle counter.
+		uint16_t address;	// Word address.
+		uint8_t counter;	// Cycle counter.
 		uint8_t rw;		// Read/Write mode. (1 == read; 0 == write)
+
+		// Internal EEPROM state.
+		enum EEPRomState_t {
+			EPR_STANDBY = 0,
+
+			// Mode 1: Receiving word address.
+			// Format: [A6 A5 A4 A3 A2 A1 A0 RW]
+			EPR_MODE1_WORD_ADDRESS,
+		};
+		EEPRomState_t state;
 
 	private:
 		// Dirty flag.
@@ -105,33 +116,31 @@ class EEPRomI2CPrivate
 		inline uint8_t getSDA_prev(void) const
 			{ return (sda_out_prev & sda_in_prev); }
 
-		/**
-		 * Has an /SCL low-to-high transition occurred?
-		 * @return True if an /SCL low-to-high transition has occurred.
-		 */
+		// SCL/SDL transition checks.
 		inline bool checkSCL_LtoH(void) const
 			{ return (!scl_prev && scl); }
-
-		/**
-		 * Has an /SCL high-to-low transition occurred?
-		 * @return True if an /SCL high-to-low transition has occurred.
-		 */
 		inline bool checkSCL_HtoL(void) const
 			{ return (scl_prev && !scl); }
+		inline bool checkSCL_H(void) const
+			{ return (scl_prev && scl); }
+		inline bool checkSCL_L(void) const
+			{ return (!scl_prev && !scl); }
 
-		/**
-		 * Has an /SDA low-to-high transition occurred?
-		 * @return True if an /SDA low-to-high transition has occurred.
-		 */
 		inline bool checkSDA_LtoH(void) const
 			{ return (!getSDA_prev() && getSDA()); }
-
-		/**
-		 * Has an /SDA high-to-low transition occurred?
-		 * @return True if an /SDA high-to-low transition has occurred.
-		 */
 		inline bool checkSDA_HtoL(void) const
 			{ return (getSDA_prev() && !getSDA()); }
+		inline bool checkSDA_H(void) const
+			{ return (getSDA_prev() && getSDA()); }
+		inline bool checkSDA_L(void) const
+			{ return (!getSDA_prev() && !getSDA()); }
+
+		// Check for START.
+		inline bool checkStart(void) const
+			{ return (checkSCL_H() && checkSDA_HtoL()); }
+		// Check for STOP.
+		inline bool checkStop(void) const
+			{ return (checkSCL_H() && checkSDA_LtoH()); }
 
 	public:
 		/** EEPROM types. **/
@@ -140,7 +149,17 @@ class EEPRomI2CPrivate
 
 			// Mode 1: 7-bit addressing.
 			EPR_X24C01,
+
+			EPR_MAX
 		};
+
+		/** EEPROM specifications. **/
+		struct EEPRomSpec_t {
+			uint16_t sz_mask;	// Size mask.
+			uint8_t pg_mask;	// Page mask.
+			uint8_t reserved;
+		};
+		static const EEPRomSpec_t eeprom_spec[EPR_MAX];
 
 		/** EEPROM map. **/
 		struct EEPRomMap_t {
@@ -162,6 +181,7 @@ class EEPRomI2CPrivate
 		static const GameEEPRomInfo_t rom_db[1];
 
 		// Current EEPRom type.
+		EEPRomSpec_t eprSpec;
 		GameEEPRomInfo_t eprType;
 
 	public:

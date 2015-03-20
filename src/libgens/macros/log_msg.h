@@ -83,6 +83,9 @@
 #define LOG_MSG_CHANNEL_psg	LOG_MSG_LEVEL_NONE
 #define LOG_MSG_CHANNEL_pcm	LOG_MSG_LEVEL_NONE
 
+// Save handling.
+#define LOG_MSG_CHANNEL_eeprom_i2c	LOG_MSG_LEVEL_DEBUG1
+
 // SegaCD emulation.
 #define LOG_MSG_CHANNEL_lc89510	LOG_MSG_LEVEL_NONE
 
