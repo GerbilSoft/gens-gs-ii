@@ -990,8 +990,7 @@ FORCE_INLINE unsigned int VdpPrivate::T_Update_Sprite_Line_Cache(int line)
 				// NOTE: Size_? is in units of cells, not pixels.
 				cache->Size_X = ((sz >> 2) & 3) + 1;	// 1 more than the original value.
 				cache->Size_Y = (sz & 3);		// Exactly the original value.
-				// Pos_?_Max is in units of pixels.
-				cache->Pos_X_Max = cache->Pos_X + (cache->Size_X * 8) - 1;
+				// Pos_Y_Max is in units of pixels.
 				cache->Pos_Y_Max = y_max;
 				// Tile number. (Also includes palette, priority, and flip bits.)
 				cache->Num_Tile = spr_VRam->attr;
@@ -1072,7 +1071,7 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 
 		// Get the X positions.
 		int H_Pos_Min = cache->Pos_X;
-		int H_Pos_Max = cache->Pos_X_Max;
+		int H_Pos_Max = H_Pos_Min + (cache->Size_X * 8) - 1;
 
 		// NOTE: Masked sprites still count towards the sprite dot limit.
 		pixel_count += (cache->Size_X * 8);
@@ -1109,7 +1108,7 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 
 		// Get the sprite information.
 		// Also, check for swapped sprite layer priority.
-		unsigned int spr_info = cache->Num_Tile;
+		uint16_t spr_info = cache->Num_Tile;
 		if (VDP_Layers & VdpTypes::VDP_LAYER_SPRITE_SWAP)
 			spr_info ^= 0x8000;
 

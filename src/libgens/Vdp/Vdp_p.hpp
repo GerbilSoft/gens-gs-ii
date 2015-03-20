@@ -431,17 +431,14 @@ class VdpPrivate
 
 		// Sprite line cache.
 		// Caches the current line and the next line.
+		// TODO: Reduce to a power-of-two size?
 		struct SprLineCache_t {
-			// TODO: Optimize this!
-			int Pos_X;
-			int Pos_Y;
-			unsigned int Size_X;
-			unsigned int Size_Y;
-			int Pos_X_Max;
-			int Pos_Y_Max;
-			unsigned int Num_Tile;	// Includes palette, priority, and flip bits.
-			// NOTE: Might not be used anymore.
-			int Pos_X_Max_Vis;	// Number of visible horizontal pixels. (Used for Sprite Limit.)
+			int16_t Pos_X;
+			int16_t Pos_Y;
+			uint8_t Size_X;
+			uint8_t Size_Y;
+			int16_t Pos_Y_Max;
+			uint16_t Num_Tile;	// Includes palette, priority, and flip bits.
 		};
 		union {
 			SprLineCache_t sprLineCache[2][20];
