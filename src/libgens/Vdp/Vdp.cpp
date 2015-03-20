@@ -130,8 +130,8 @@ void Vdp::reset(void)
 	d->rend_reset();
 
 	// Clear VRam and VSRam.
-	memset(&d->VRam, 0x00, sizeof(d->VRam));
-	memset(&d->VSRam, 0x00, sizeof(d->VSRam));
+	memset(&d->VRam, 0, sizeof(d->VRam));
+	memset(&d->VSRam, 0, sizeof(d->VSRam));
 	// Clear the Sprite Attribute Table cache.
 	memset(&d->SprAttrTbl_m5.b, 0, sizeof(d->SprAttrTbl_m5.b));
 	// Clear the sprite line cache.
