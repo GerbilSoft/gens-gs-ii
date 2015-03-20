@@ -72,6 +72,8 @@ class EEPRomI2CPrivate
 		uint8_t counter;	// Cycle counter.
 		uint8_t rw;		// Read/Write mode. (1 == read; 0 == write)
 
+		uint8_t data_buf;	// Temporary data buffer.
+
 		// Internal EEPROM state.
 		enum EEPRomState_t {
 			EPR_STANDBY = 0,
@@ -79,6 +81,14 @@ class EEPRomI2CPrivate
 			// Mode 1: Receiving word address.
 			// Format: [A6 A5 A4 A3 A2 A1 A0 RW]
 			EPR_MODE1_WORD_ADDRESS,
+
+			// Reading data.
+			// Format: [D7 D6 D5 D4 D3 D2 D1 D0]
+			EPR_READ_DATA,
+
+			// Writing data.
+			// Format: [D7 D6 D5 D4 D3 D2 D1 D0]
+			EPR_WRITE_DATA,
 		};
 		EEPRomState_t state;
 

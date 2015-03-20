@@ -71,6 +71,7 @@ void EEPRomI2CPrivate::reset(void)
 	address = 0;
 	counter = 0;
 	rw = 0;
+	data_buf = 0;
 
 	// Reset the state.
 	state = EPR_STANDBY;
@@ -126,6 +127,7 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 				if (counter >= 8) {
 					// Acknowledge receipt of the data bit.
 					sda_out = 0;
+					counter++;
 				} else if (counter == 7) {
 					// Data bit is valid.
 					// This bit is R/W.
@@ -141,17 +143,69 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 			} else if (checkSCL_HtoL()) {
 				// Release the data line.
 				sda_out = 1;
-				if (counter >= 8) {
-					LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
-						"EPR_MODE1_WORD_ADDRESS: address=%02X, rw=%d",
-						address, rw);
-					// TODO: Next step.
+				if (counter >= 9) {
 					counter = 0;
-					state = EPR_STANDBY;
+					if (rw) {
+						// Read data.
+						data_buf = eeprom[address];
+						state = EPR_READ_DATA;
+					} else {
+						// Write data.
+						data_buf = 0;
+						state = EPR_WRITE_DATA;
+					}
+					LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+						"EPR_MODE1_WORD_ADDRESS: address=%02X, rw=%d, data_buf=%d",
+						address, rw, data_buf);
 				}
 			}
+			break;
+
+		case EPR_READ_DATA:
+			// Check for SCL high-to-low.
+			if (checkSCL_LtoH()) {
+				if (counter >= 9) {
+					// Is this an acknowlege?
+					if (!getSDA()) {
+						// Acknowledged by master.
+						// Go to the next byte.
+						unsigned int addr_low_tmp = address;
+						addr_low_tmp++;
+						addr_low_tmp &= eprSpec.pg_mask;
+						address = ((address & ~eprSpec.pg_mask) | addr_low_tmp);
+						data_buf = eeprom[address];
+						counter = 0;
+						LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+							"EPR_READ_DATA: ACK received: address=%02X, data_buf=%d",
+							address, rw, data_buf);
+					}
+				}
+			} else if (checkSCL_HtoL()) {
+				if (counter < 8) {
+					// Send a data bit to the host.
+					// NOTE: MSB is out first.
+					sda_out = !!(data_buf & 0x80);
+					data_buf <<= 1;
+					counter++;
+				} else if (counter == 8) {
+					// Release the data line.
+					sda_out = 1;
+					counter++;
+				}
+
+				if (counter == 8) {
+					LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+						"EPR_READ_DATA: all 8 bits read: address=%02X",
+						address);
+				}
+			}
+			break;
 
 		default:
+			// Unknown state.
+			sda_out = 1;
+			counter = 0;
+			state = EPR_STANDBY;
 			break;
 	}
 
