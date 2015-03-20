@@ -207,8 +207,7 @@ TODO: Internal DMA registers: DMA destination, etc.
 C equivalent for vdp_ctrl.bin:
 
 // 8-bit VDP (Master System)
-typedef struct _ZOMG_VDP_ctrl_8_t
-{
+typedef struct _ZOMG_VDP_ctrl_8_t {
 	uint32_t header;		// 32BE: Should be "SMS " (0x534D5320)
 	uint8_t reserved1[4];		// Reserved.
 
@@ -226,8 +225,7 @@ TODO: Definitions of "access" for Sega 8-bit. It'll probably be the same
 as the low byte of "access" for Sega Mega Drive.
 
 // 16-bit VDP (Mega Drive)
-typedef struct _ZOMG_VDP_ctrl_16_t
-{
+typedef struct _ZOMG_VDP_ctrl_16_t {
 	uint32_t header;		// 32BE: Should be "MD  " (0x4D442020)
 	uint8_t reserved1[4];		// Reserved.
 
@@ -336,8 +334,7 @@ set the field to 0xFF.
 
 C equivalent for psg.bin:
 
-typedef struct _ZOMG_psg_t
-{
+typedef struct _ZOMG_psg_t {
 	uint16_t tone_reg[4];	// 16LE: Tone values for each channel.
 	uint8_t vol_reg[4];	// 8-bit: Volume values for each channel.
 
@@ -375,8 +372,7 @@ This file contains the registers found in the Z80 CPU.
 
 C equivalent for Z80_reg.bin:
 
-typedef struct _ZOMG_Z80_reg_t
-{
+typedef struct _ZOMG_Z80_reg_t {
 	// Main register set.
 	uint16_t AF;	// 16LE: AF register.
 	uint16_t BC;	// 16LE: BC register.
@@ -504,8 +500,7 @@ be set to 0 for now.
 
 C equivalent for M68K_reg.bin:
 
-typedef struct _ZOMG_M68K_reg_t
-{
+typedef struct _ZOMG_M68K_reg_t {
 	uint32_t dreg[8];	// 32BE: Data registers.
 	uint32_t areg[7];	// 32BE: Address registers. (a0-a6)
 	uint32_t ssp;		// 32BE: Supervisor stack pointer. (a7/super)
@@ -526,8 +521,7 @@ typedef struct _ZOMG_M68K_reg_t
 Previous revisions of the ZOMG specification used the following
 layout for M68K_reg.bin:
 
-typedef struct _ZOMG_M68K_reg_OLD_t
-{
+typedef struct _ZOMG_M68K_reg_OLD_t {
 	uint32_t areg[8];	// 32BE: Address registers.
 	uint32_t dreg[8];	// 32BE: Data registers.
 	uint32_t pc;		// 32BE: Program counter.
@@ -573,8 +567,7 @@ Notes:
 
 C equivalent for IO.bin:
 
-typedef struct _ZOMG_MD_IO_t
-{
+typedef struct _ZOMG_MD_IO_t {
 	uint8_t version_reg;	// $A10001: Version register.
 	uint8_t port1_data;	// $A10003: Control Port 1: Data.
 	uint8_t port2_data;	// $A10005: Control Port 2: Data.
@@ -604,8 +597,7 @@ page (0x8000-0xFFFF in Z80 space).
 
 C equivalent for Z80_ctrl.bin:
 
-typedef struct _ZOMG_MD_Z80_ctrl_t
-{
+typedef struct _ZOMG_MD_Z80_ctrl_t {
 	uint8_t busreq;		// 8-bit: BUSREQ state.
 				// 0 == Z80 has the bus.
 				// 1 == M68K has the bus.
@@ -648,13 +640,10 @@ instead of SRAM for saving. In this case, SRAM_ctrl should be 0.
 
 C equivalent for TIME_reg.bin:
 
-typedef struct _ZOMG_MD_TIME_reg_t
-{
-	union
-	{
+typedef struct _ZOMG_MD_TIME_reg_t {
+	union {
 		uint8_t reg[256];			// All registers.
-		struct
-		{
+		struct {
 			uint8_t reserved_00_EF[240];	// $A13000 - $A130EF: Reserved.
 			uint8_t reserved_F0;		// $A130F0: Reserved.
 			uint8_t SRAM_ctrl;		// $A130F1: SRAM control.
