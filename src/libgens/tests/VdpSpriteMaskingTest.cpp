@@ -417,20 +417,20 @@ TEST_P(VdpSpriteMaskingTest, spriteMaskingTest)
 
 		// If sprite limits are on, all tests should passed.
 		// If sprite limits are off, tests 1, 2, 3, should fail;
-		// test 9 should fail only for H32; others should pass.
+		// others should pass.
 		//
-		// NOTE: Test 9 doesn't fail in H40 because Gens currently
-		// limits sprites to a maximum of 80 regardless of sprite limits.
-		// This matches H40's limit. It might change in the future.
+		// NOTE: Test 9 previously failed in H32 because Gens allowed
+		// up to 80 sprites per frame as a hard limit. The SAT cache
+		// uses the sprite table mask, so it's impossible to write to
+		// any sprite over 63 in H32 mode now.
 		if (mode.spriteLimits == SPRITE_LIMITS_DISABLED) {
-			if (mode.test == 9 && mode.screenMode == SCREEN_MODE_H32)
-				expected = TEST_FAILED;
-			else if (mode.test <= 3)
+			if (mode.test <= 3)
 				expected = TEST_FAILED;
 			else
 				expected = TEST_PASSED;
-		} else
+		} else {
 			expected = TEST_PASSED;
+		}
 
 		actual = checkSpriteTest(mode.test, TEST_MAX);
 		EXPECT_EQ(expected, actual)

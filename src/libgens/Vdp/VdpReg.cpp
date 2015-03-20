@@ -112,12 +112,6 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 				Spr_Tbl_Mask = 0xFE00;
 			}
 
-			if (!q->options.spriteLimits) {
-				// Sprite limits are disabled.
-				// Always use the H40 mask.
-				Spr_Tbl_Mask = 0xFC00;
-			}
-
 			if (!is128KB()) {
 				// 64 KB mode.
 				VRam_Mask = 0xFFFF;
@@ -250,12 +244,6 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 				// Update the table masks.
 				Win_Tbl_Mask = 0xF800;
 				Spr_Tbl_Mask = 0xFE00;
-			}
-
-			if (!q->options.spriteLimits) {
-				// Sprite limits are disabled.
-				// Always use the H40 mask.
-				Spr_Tbl_Mask = 0xFC00;
 			}
 
 			if (is128KB()) {

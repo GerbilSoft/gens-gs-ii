@@ -925,13 +925,15 @@ FORCE_INLINE unsigned int VdpPrivate::T_Update_Sprite_Line_Cache(int line)
 	uint8_t link = 0;
 
 	// Determine the maximum number of sprites.
-	uint8_t max_spr_line, max_spr_frame;
+	// NOTE: Max sprites per frame is always limited
+	// due to Sprite Address Table cache masking.
+	const uint8_t max_spr_frame = (H_Cell * 2);
+	uint8_t max_spr_line;
 	if (q->options.spriteLimits) {
 		// Sprite limits are enabled:
 		// - Max sprites per line:  16 (H32), 20 (H40)
 		// - Max sprites per frame: 64 (H32), 80 (H40)
 		max_spr_line = (H_Cell / 2);
-		max_spr_frame = (H_Cell * 2);
 	} else {
 		// Sprite limits are disabled.
 		// NOTE: sprLineCache_80 is in a union with sprLineCache
@@ -939,7 +941,6 @@ FORCE_INLINE unsigned int VdpPrivate::T_Update_Sprite_Line_Cache(int line)
 		// 80 sprites, which is needed in order to disable
 		// sprite limits.
 		max_spr_line = ARRAY_SIZE(sprLineCache_80[0]);
-		max_spr_frame = 80;
 	}
 
 	// We're updating the cache for the *next* line.
@@ -1336,16 +1337,6 @@ void VdpPrivate::renderLine_m5(void)
 	// Determine what part of the screen we're in.
 	bool in_border = false;
 	int lineNum = q->VDP_Lines.currentLine;
-
-	if (lineNum == 0) {
-		// Update the SAT cache mask using sprite limits.
-		// TODO: Optimize this so we don't need to set it every time.
-		Spr_Tbl_Mask &= ~0x0200;
-		if (q->options.spriteLimits && !isH40()) {
-			// H32; sprite limits disabled.
-			Spr_Tbl_Mask |= 0x0200;
-		}
-	}
 
 	// TODO: This check needs to be optimized.
 	if (lineNum == (q->VDP_Lines.totalDisplayLines - 1) &&
