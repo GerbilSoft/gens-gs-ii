@@ -200,6 +200,46 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 			}
 			break;
 
+		case EPR_WRITE_DATA:
+			// Check for SCL low-to-high.
+			if (checkSCL_LtoH()) {
+				if (counter >= 8) {
+					// Acknowledge receipt of the data bit.
+					sda_out = 0;
+					counter++;
+
+					// Save the data byte.
+					eeprom[address] = data_buf;
+					setDirty();
+
+					// Next byte in the page.
+					uint16_t prev_address = address;
+					uint16_t addr_low_tmp = address;
+					addr_low_tmp++;
+					addr_low_tmp &= eprSpec.pg_mask;
+					address = ((address & ~eprSpec.pg_mask) | addr_low_tmp);
+
+					data_buf = 0;
+					LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+						"EPR_WRITE_DATA: %02X -> [%04X]; address=%02X",
+						eeprom[prev_address], prev_address, address);
+				} else {
+					// Data bit is valid.
+					data_buf <<= 1;
+					data_buf |= getSDA();
+					counter++;
+				}
+			} else if (checkSCL_HtoL()) {
+				// Release the data line.
+				sda_out = 1;
+				if (counter >= 9) {
+					// Acknowledged.
+					// Reset the counter.
+					counter = 0;
+				}
+			}
+			break;
+
 		default:
 			// Unknown state.
 			sda_out = 1;
