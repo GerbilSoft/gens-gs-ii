@@ -188,7 +188,7 @@ class EEPRomI2CPrivate
 			uint16_t checksum;
 			EEPRomMap_t type;
 		};
-		static const GameEEPRomInfo_t rom_db[1];
+		static const GameEEPRomInfo_t rom_db[12];
 
 		// Current EEPRom type.
 		EEPRomSpec_t eprSpec;

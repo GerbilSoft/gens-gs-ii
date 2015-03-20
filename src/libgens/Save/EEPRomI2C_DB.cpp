@@ -42,12 +42,24 @@ const EEPRomI2CPrivate::EEPRomSpec_t EEPRomI2CPrivate::eeprom_spec[EPR_MAX] =
 };
 
 /** ROM database. **/
-const EEPRomI2CPrivate::GameEEPRomInfo_t EEPRomI2CPrivate::rom_db[1] =
+const EEPRomI2CPrivate::GameEEPRomInfo_t EEPRomI2CPrivate::rom_db[12] =
 {
 	// TODO: Port other EEPROMs.
 
 	/** SEGA mapper (X24C01) **/
 	{"T-12046"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EPR_X24C01}},   /* Megaman - The Wily Wars */
+	{"T-12046"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EPR_X24C01}},   /* Megaman - The Wily Wars */
+	{"T-12053"    , 0xEA80, {0x200001, 0x200001, 0x200001, 0, 0, 1, EPR_X24C01}},   /* Rockman Mega World (J) [A] */
+	{"MK-1215"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EPR_X24C01}},   /* Evander 'Real Deal' Holyfield's Boxing */
+	{"MK-1228"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EPR_X24C01}},   /* Greatest Heavyweights of the Ring (U) */
+	{"G-5538"     , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EPR_X24C01}},   /* Greatest Heavyweights of the Ring (J) */
+	{"PR-1993"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EPR_X24C01}},   /* Greatest Heavyweights of the Ring (E) */
+	{"G-4060"     , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EPR_X24C01}},   /* Wonderboy in Monster World */
+	{"00001211-00", 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EPR_X24C01}},   /* Sports Talk Baseball */
+	{"00004076-00", 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EPR_X24C01}},   /* Honoo no Toukyuuji Dodge Danpei */
+	{"G-4524"     , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EPR_X24C01}},   /* Ninja Burai Densetsu */
+	{"00054503-00", 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EPR_X24C01}},   /* Game Toshokan */
+
 #if 0
 	/** ACCLAIM mappers **/
 	
