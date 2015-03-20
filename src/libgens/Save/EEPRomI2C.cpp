@@ -169,10 +169,9 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 					if (!getSDA()) {
 						// Acknowledged by master.
 						// Go to the next byte.
-						unsigned int addr_low_tmp = address;
-						addr_low_tmp++;
-						addr_low_tmp &= eprSpec.pg_mask;
-						address = ((address & ~eprSpec.pg_mask) | addr_low_tmp);
+						// NOTE: Page mask does NOT apply to reads.
+						address++;
+						address &= eprSpec.sz_mask;
 						data_buf = eeprom[address];
 						counter = 0;
 						LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
