@@ -1043,7 +1043,10 @@ void Vdp::writeCtrlMD(uint16_t ctrl)
 	// as we go along, but the M68K isn't properly "locked"
 	// for the entire time period.
 	DMAT_Length = length;
-	d->set_DMA_Length(0);
+	// FIXME: This is needed in order to fix VDPFIFOTesting
+	// Test #24: "DMA Transfer Length Reg Update", but it
+	// breaks "Frank Thomas Big Hurt Baseball".
+	//d->set_DMA_Length(0);
 
 	switch (DMA_TYPE(src_component, dest_component)) {
 		case DMA_TYPE(VdpPrivate::DMA_SRC_ROM, VdpPrivate::DMA_DEST_VRAM):
