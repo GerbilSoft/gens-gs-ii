@@ -127,7 +127,19 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 				if (counter >= 8) {
 					// Acknowledge receipt of the data bit.
 					sda_out = 0;
-					counter++;
+					counter = 0;
+					if (rw) {
+						// Read data.
+						data_buf = eeprom[address];
+						state = EPR_READ_DATA;
+					} else {
+						// Write data.
+						data_buf = 0;
+						state = EPR_WRITE_DATA;
+					}
+					LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+						"EPR_MODE1_WORD_ADDRESS: address=%02X, rw=%d, data_buf=%02X",
+						address, rw, data_buf);
 				} else if (counter == 7) {
 					// Data bit is valid.
 					// This bit is R/W.
@@ -143,21 +155,6 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 			} else if (checkSCL_HtoL()) {
 				// Release the data line.
 				sda_out = 1;
-				if (counter >= 9) {
-					counter = 0;
-					if (rw) {
-						// Read data.
-						data_buf = eeprom[address];
-						state = EPR_READ_DATA;
-					} else {
-						// Write data.
-						data_buf = 0;
-						state = EPR_WRITE_DATA;
-					}
-					LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
-						"EPR_MODE1_WORD_ADDRESS: address=%02X, rw=%d, data_buf=%d",
-						address, rw, data_buf);
-				}
 			}
 			break;
 
@@ -175,8 +172,8 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 						data_buf = eeprom[address];
 						counter = 0;
 						LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
-							"EPR_READ_DATA: ACK received: address=%02X, data_buf=%d",
-							address, rw, data_buf);
+							"EPR_READ_DATA: ACK received: address=%02X, data_buf=%02X",
+							address, data_buf);
 					}
 				}
 			} else if (checkSCL_HtoL()) {
@@ -221,7 +218,7 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 
 					data_buf = 0;
 					LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
-						"EPR_WRITE_DATA: %02X -> [%04X]; address=%02X",
+						"EPR_WRITE_DATA: %02X -> [%02X]; address=%02X",
 						eeprom[prev_address], prev_address, address);
 				} else {
 					// Data bit is valid.
