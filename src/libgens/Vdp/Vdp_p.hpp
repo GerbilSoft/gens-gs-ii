@@ -251,6 +251,12 @@ class VdpPrivate
 		inline uint32_t Spr_Gen_Addr_u32(uint32_t offset) const
 			{ return VRam.u32[((Spr_Gen_Addr + offset) & VRam_Mask) >> 2]; }
 
+		/**
+		 * Update the VDP address cache. (Mode 5)
+		 * @param updateMask 1 == 64KB/128KB; 2 == H32/H40; 3 == both
+		 */
+		void updateVdpAddrCache_m5(unsigned int updateMask);
+
 		// VDP control struct.
 		struct {
 			/**

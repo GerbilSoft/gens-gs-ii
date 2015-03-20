@@ -32,11 +32,9 @@
 
 #include <stdint.h>
 
-namespace LibGens
-{
+namespace LibGens {
 
-namespace VdpTypes
-{
+namespace VdpTypes {
 	// VDP registers.
 	union VdpReg_t {
 		uint8_t reg[24];
@@ -50,7 +48,7 @@ namespace VdpTypes
 			 * [   0    0   LCB  IE1    0 PSEL   M3    0]
 			 * 
 			 * LCB: Left Column Blank. SMS VDP leftover; if set, masks the first 8 pixels
-			 *      with the background color.
+			 *      with the background color. (SG-1000 MkII and later)
 			 * IE1: Enable H interrupt. (1 == on; 0 == off)
 			 * M4/PSEL: Palette Select. If clear, masks high two bits of each CRam color component.
 			 *          If M5 is off, acts like M4 instead of PSEL.
@@ -233,9 +231,10 @@ namespace VdpTypes
 			*/
 			uint8_t Set1;		// Mode Set 1. [ VSI  HSI  LCB  IE1   SS   M4   M3   ES]
 			uint8_t Set2;		// Mode Set 2. [DRAM DISP  IE0   M1   M2    0   SZ  MAG]
-			uint8_t NameTbl_Adr;	// Name table base address. [0 0 0 0 A13 A12 A11 *A10]
-			uint8_t ColorTbl_Adr;	// Color table base address.
-			uint8_t	Pat_BG_Adr;	// Background Pattern Generator base address.
+			uint8_t Bkg_Tbl_Adr;    // Name table base address. [0 0 0 0 A13 A12 A11 *A10]
+			uint8_t Color_Tbl_Adr;  // Color table base address. (Unused in m4?)
+			// TODO: Rename Pat_*_Adr to *_Pat_Adr for both M4 and M5?
+			uint8_t Pat_Bkg_Adr;    // Background Pattern Generator base address. (Unused in m4, except for bottom 3 bits?)
 			uint8_t Spr_Att_Adr;	// Sprite Attribute Table base address. [0 A13 A12 A11 A10 A9 A8 *A7]
 			uint8_t Spr_Pat_Adr;	// Sprite Pattern Generator base address. [0 0 0 0 0 A13 *A12 *A11]
 			uint8_t BG_Color;	// Background color. [0 0 0 0 BG3 BG2 BG1 BG0]

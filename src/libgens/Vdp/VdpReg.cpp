@@ -68,6 +68,85 @@ void VdpPrivate::updateVdpMode(void)
 }
 
 /**
+ * Update the VDP address cache. (Mode 5)
+ * @param updateMask 1 == 64KB/128KB; 2 == H32/H40; 3 == both
+ */
+void VdpPrivate::updateVdpAddrCache_m5(unsigned int updateMask)
+{
+	// TODO: Optimize based on updateMask?
+	((void)updateMask);
+
+	// Reset the Window and Sprite masks for H32/H40.
+	// TODO: Make a const array and copy from that?
+	if (isH40()) {
+		// H40 mode.
+		H_Cell = 40;
+		H_Win_Shift = 6;
+		H_Pix = 320;
+		H_Pix_Begin = 0;
+
+		// Update the table masks.
+		Win_Tbl_Mask = 0xF000;
+		Spr_Tbl_Mask = 0xFC00;
+	} else {
+		// H32 mode.
+		H_Cell = 32;
+		H_Win_Shift = 5;
+		H_Pix = 256;
+		H_Pix_Begin = 32;
+
+		// Update the table masks.
+		Win_Tbl_Mask = 0xF800;
+		Spr_Tbl_Mask = 0xFE00;
+	}
+
+	if (!is128KB()) {
+		// 64 KB mode.
+		VRam_Mask = 0xFFFF;
+		ScrA_Tbl_Mask = 0xE000;
+		ScrB_Tbl_Mask = 0xE000;
+		H_Scroll_Tbl_Mask = 0xFC00;
+	} else {
+		// 128 KB mode.
+		VRam_Mask = 0x1FFFF;
+		ScrA_Tbl_Mask = 0x1E000;
+		ScrB_Tbl_Mask = 0x1E000;
+		H_Scroll_Tbl_Mask = 0x1FC00;
+		Win_Tbl_Mask |= 0x10000;
+		Spr_Tbl_Mask |= 0x10000;
+	}
+
+	// Check the window horizontal position.
+	Win_X_Pos = ((VDP_Reg.m5.Win_H_Pos & 0x1F) * 2);
+	if (Win_X_Pos > H_Cell)
+		Win_X_Pos = H_Cell;
+
+	// Update nametable addresses.
+	ScrA_Tbl_Addr = (VDP_Reg.m5.Pat_ScrA_Adr << 10) & ScrA_Tbl_Mask;
+	Win_Tbl_Addr = (VDP_Reg.m5.Pat_Win_Adr << 10) & Win_Tbl_Mask;
+	ScrB_Tbl_Addr = (VDP_Reg.m5.Pat_ScrB_Adr << 13) & ScrB_Tbl_Mask;
+	Spr_Tbl_Addr = (VDP_Reg.m5.Spr_Att_Adr << 9) & Spr_Tbl_Mask;
+	Win_Tbl_Addr = (VDP_Reg.m5.Pat_Win_Adr << 10) & Win_Tbl_Mask;
+	H_Scroll_Tbl_Addr = (VDP_Reg.m5.H_Scr_Adr << 10) & H_Scroll_Tbl_Mask;
+
+	// Update pattern generator addresses.
+	if (!is128KB()) {
+		// All pattern generator base addresses are 0.
+		ScrA_Gen_Addr = 0;
+		ScrB_Gen_Addr = 0;
+		Spr_Gen_Addr = 0;
+	} else {
+		// TODO: Cache ScrA_A16?
+		const uint32_t ScrA_A16 = ((VDP_Reg.m5.Pat_Data_Adr & 0x01) << 16);
+		ScrA_Gen_Addr = ScrA_A16;
+		if (ScrA_A16) {
+			ScrB_Gen_Addr = ((VDP_Reg.m5.Pat_Data_Adr & 0x10) << 12);
+		}
+		Spr_Gen_Addr = ((VDP_Reg.m5.Spr_Pat_Adr & 0x20) << 11);	// Update the Window and Sprite Attribute Table base addresses.
+	}
+}
+
+/**
  * Set the value of a register. (Mode 5 only!)
  * @param reg_num Register number.
  * @param val New value for the register.
@@ -101,57 +180,8 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 			q->updateIRQLine(0);
 			updateVdpMode();
 
-			// Reset the Window and Sprite masks for H32/H40.
-			if (isH40()) {
-				// H40 mode.
-				Win_Tbl_Mask = 0xF000;
-				Spr_Tbl_Mask = 0xFC00;
-			} else {
-				// H32 mode.
-				Win_Tbl_Mask = 0xF800;
-				Spr_Tbl_Mask = 0xFE00;
-			}
-
-			if (!is128KB()) {
-				// 64 KB mode.
-				VRam_Mask = 0xFFFF;
-				ScrA_Tbl_Mask = 0xE000;
-				ScrB_Tbl_Mask = 0xE000;
-				H_Scroll_Tbl_Mask = 0xFC00;
-
-				// All pattern generator base addresses are 0.
-				ScrA_Gen_Addr = 0;
-				ScrB_Gen_Addr = 0;
-				Spr_Gen_Addr = 0;
-			} else {
-				// 128 KB mode.
-				VRam_Mask = 0x1FFFF;
-				ScrA_Tbl_Mask = 0x1E000;
-				ScrB_Tbl_Mask = 0x1E000;
-				H_Scroll_Tbl_Mask = 0x1FC00;
-				Win_Tbl_Mask |= 0x10000;
-				Spr_Tbl_Mask |= 0x10000;
-			}
-
-			// Update nametable addresses.
-			// TODO: Split into common function shared by H32/H40 update?
-			ScrA_Tbl_Addr = (VDP_Reg.m5.Pat_ScrA_Adr << 10) & ScrA_Tbl_Mask;
-			Win_Tbl_Addr = (VDP_Reg.m5.Pat_Win_Adr << 10) & Win_Tbl_Mask;
-			ScrB_Tbl_Addr = (VDP_Reg.m5.Pat_ScrB_Adr << 13) & ScrB_Tbl_Mask;
-			Spr_Tbl_Addr = (VDP_Reg.m5.Spr_Att_Adr << 9) & Spr_Tbl_Mask;
-			Win_Tbl_Addr = (VDP_Reg.m5.Pat_Win_Adr << 10) & Win_Tbl_Mask;
-			H_Scroll_Tbl_Addr = (VDP_Reg.m5.H_Scr_Adr << 10) & H_Scroll_Tbl_Mask;
-
-			// Update pattern generator addresses.
-			if (is128KB()) {
-				// TODO: Cache ScrA_A16?
-				const uint32_t ScrA_A16 = ((VDP_Reg.m5.Pat_Data_Adr & 0x01) << 16);
-				ScrA_Gen_Addr = ScrA_A16;
-				if (ScrA_A16) {
-					ScrB_Gen_Addr = ((VDP_Reg.m5.Pat_Data_Adr & 0x10) << 12);
-				}
-				Spr_Gen_Addr = ((VDP_Reg.m5.Spr_Pat_Adr & 0x20) << 11);
-			}
+			// FIXME: Only if a relevant bit has been changed?
+			updateVdpAddrCache_m5(1);
 			break;
 
 		case 2:
@@ -223,43 +253,8 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 			// Update the Shadow/Highlight setting.
 			palette.setMdShadowHighlight(!!(VDP_Reg.m5.Set4 & 0x08));
 
-			// TODO: Split the full recalculation into a separate function?
-			if (isH40()) {
-				// H40 mode.
-				H_Cell = 40;
-				H_Win_Shift = 6;
-				H_Pix = 320;
-				H_Pix_Begin = 0;
-
-				// Update the table masks.
-				Win_Tbl_Mask = 0xF000;
-				Spr_Tbl_Mask = 0xFC00;
-			} else {
-				// H32 mode.
-				H_Cell = 32;
-				H_Win_Shift = 5;
-				H_Pix = 256;
-				H_Pix_Begin = 32;
-
-				// Update the table masks.
-				Win_Tbl_Mask = 0xF800;
-				Spr_Tbl_Mask = 0xFE00;
-			}
-
-			if (is128KB()) {
-				// Extend the table masks.
-				Win_Tbl_Mask |= 0x10000;
-				Spr_Tbl_Mask |= 0x10000;
-			}
-
-			// Check the window horizontal position.
-			Win_X_Pos = ((VDP_Reg.m5.Win_H_Pos & 0x1F) * 2);
-			if (Win_X_Pos > H_Cell)
-				Win_X_Pos = H_Cell;
-
-			// Update the Window and Sprite Attribute Table base addresses.
-			Win_Tbl_Addr = (VDP_Reg.m5.Pat_Win_Adr << 10) & Win_Tbl_Mask;
-			Spr_Tbl_Addr = (VDP_Reg.m5.Spr_Att_Adr << 9) & Spr_Tbl_Mask;
+			// FIXME: Only if a relevant bit has been changed?
+			updateVdpAddrCache_m5(2);
 			break;
 
 		case 13:
