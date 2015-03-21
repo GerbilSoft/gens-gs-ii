@@ -113,6 +113,75 @@ TEST_P(EEPRomI2CTest_Random, X24C01_randomReadEmpty)
 	}
 }
 
+/**
+ * X24C01: Test random reading of a full EEPROM.
+ * Reads 64 bytes at random addresses.
+ * @param enableRepeatedStart If zero, a STOP condition will be emitted after every read.
+ */
+TEST_P(EEPRomI2CTest_Random, X24C01_randomReadFull)
+{
+	unsigned int enableRepeatedStart = GetParam();
+
+	// Set the EEPROM as X24C01.
+	// TODO: Move to SetUp().
+	m_eeprom->dbg_setEEPRomType(EEPRomI2C::EPR_X24C01);
+	unsigned int eepromSize;
+	m_eeprom->dbg_getEEPRomSize(&eepromSize);
+	ASSERT_EQ(128U, eepromSize) << "X24C01 should be 128 bytes.";
+	unsigned int eepromMask = eepromSize - 1;
+
+	// Make sure we're in a STOP condition at first.
+	doStop();
+
+	// EEPROM values.
+	uint8_t cmd, response;
+
+	// Read up to 64 random addresses.
+	for (int i = 64; i > 0; i--) {
+		const unsigned int addr = (rand() & eepromMask);
+
+		// START an I2C transfer.
+		// We'll request a READ from address 0x00.
+		// Mode 1 word address: [A6 A5 A4 A3 A2 A1 A0 RW]
+
+		if (enableRepeatedStart) {
+			// No STOP condition, so we have to
+			// release /SDA from ACK while /SCL=0.
+			m_eeprom->dbg_setSCL(0);
+			m_eeprom->dbg_setSDA(1);
+		}
+
+		// Send a START.
+		m_eeprom->dbg_setSCL(1);
+		m_eeprom->dbg_setSDA(0);
+
+		cmd = (addr << 1) | 1;		// RW=1
+		response = sendData(cmd);
+
+		// Check for ACK.
+		m_eeprom->dbg_getSDA(&response);
+		EXPECT_EQ(0, response) << "NACK received; expected ACK.";
+
+		// Read the data from the EEPROM.
+		uint8_t data_actual = recvData();
+		uint8_t data_expected = test_EEPRomI2C_data[addr & eepromMask];
+		EXPECT_EQ(data_expected, data_actual) <<
+			"EEPROM address 0x" <<
+			std::hex << std::setw(2) << std::setfill('0') << std::uppercase << addr <<
+			" should be 0x" << data_expected << " (test EEPROM).";
+
+		if (!enableRepeatedStart) {
+			// STOP the transfer.
+			doStop();
+		}
+	}
+
+	if (enableRepeatedStart) {
+		// STOP the transfer.
+		doStop();
+	}
+}
+
 // Random Read tests.
 // Value is non-zero to enable repeated start conditions.
 INSTANTIATE_TEST_CASE_P(RandomRead, EEPRomI2CTest_Random,
