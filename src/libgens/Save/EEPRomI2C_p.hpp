@@ -194,6 +194,16 @@ class EEPRomI2CPrivate
 		void reset(void);
 
 		/**
+		 * Process a shifted-in data word.
+		 */
+		void processI2CShiftIn(void);
+
+		/**
+		 * Determine what to do after shifting out a data word.
+		 */
+		void processI2CShiftOut(void);
+
+		/**
 		 * Process an I2C bit.
 		 */
 		void processI2Cbit(void);

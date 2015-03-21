@@ -81,6 +81,96 @@ void EEPRomI2CPrivate::reset(void)
 }
 
 /**
+ * Process a shifted-in data word.
+ */
+void EEPRomI2CPrivate::processI2CShiftIn(void)
+{
+	// Determine what to do based on the current state.
+	switch (state) {
+		case EPR_MODE1_WORD_ADDRESS:
+			// X24C01 word address.
+			address = (data_buf >> 1) & 0x7F;
+			rw = (data_buf & 1);
+			counter = 0;
+			if (rw) {
+				// Read data.
+				data_buf = eeprom[address];
+				shift_rw = 1;	// Shifting out.
+				state = EPR_READ_DATA;
+			} else {
+				// Write data.
+				data_buf = 0;
+				shift_rw = 0;	// Shifting in.
+				state = EPR_WRITE_DATA;
+			}
+			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+				"EPR_MODE1_WORD_ADDRESS: address=%02X, rw=%d, data_buf=%02X",
+				address, rw, data_buf);
+			break;
+
+		case EPR_WRITE_DATA: {
+			// Save the data byte.
+			eeprom[address] = data_buf;
+			setDirty();
+
+			// Next byte in the page.
+			uint16_t prev_address = address;
+			uint16_t addr_low_tmp = address;
+			addr_low_tmp++;
+			addr_low_tmp &= eprSpec.pg_mask;
+			address = ((address & ~eprSpec.pg_mask) | addr_low_tmp);
+
+			data_buf = 0;
+			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+				"EPR_WRITE_DATA: %02X -> [%02X]; address=%02X",
+				eeprom[prev_address], prev_address, address);
+			break;
+		}
+
+		default:
+			// Unknown.
+			// Go back to standby.
+			sda_out = 1;
+			counter = 0;
+			data_buf = 0;
+			shift_rw = 0;
+			state = EPR_STANDBY;
+			break;
+	}
+}
+
+/**
+ * Determine what to do after shifting out a data word.
+ */
+void EEPRomI2CPrivate::processI2CShiftOut(void)
+{
+	// Determine what to do based on the current state.
+	switch (state) {
+		case EPR_READ_DATA:
+			// Go to the next byte.
+			// NOTE: Page mask does NOT apply to reads.
+			address++;
+			address &= eprSpec.sz_mask;
+			data_buf = eeprom[address];
+			counter = 0;
+			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+				"EPR_READ_DATA: ACK received: address=%02X, data_buf=%02X",
+				address, data_buf);
+			break;
+
+		default:
+			// Unknown.
+			// Go back to standby.
+			sda_out = 1;
+			counter = 0;
+			data_buf = 0;
+			shift_rw = 0;
+			state = EPR_STANDBY;
+			break;
+	}
+}
+
+/**
  * Process an I2C bit.
  */
 void EEPRomI2CPrivate::processI2Cbit(void)
@@ -144,58 +234,8 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 				sda_out = 0;
 				counter++;
 
-				// Determine what to do based on the current state.
-				// TODO: Split into a separate function?
-				switch (state) {
-					case EPR_MODE1_WORD_ADDRESS:
-						// X24C01 word address.
-						address = (data_buf >> 1) & 0x7F;
-						rw = (data_buf & 1);
-						counter = 0;
-						if (rw) {
-							// Read data.
-							data_buf = eeprom[address];
-							shift_rw = 1;	// Shifting out.
-							state = EPR_READ_DATA;
-						} else {
-							// Write data.
-							data_buf = 0;
-							shift_rw = 0;	// Shifting in.
-							state = EPR_WRITE_DATA;
-						}
-						LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
-							"EPR_MODE1_WORD_ADDRESS: address=%02X, rw=%d, data_buf=%02X",
-							address, rw, data_buf);
-						break;
-
-					case EPR_WRITE_DATA: {
-						// Save the data byte.
-						eeprom[address] = data_buf;
-						setDirty();
-
-						// Next byte in the page.
-						uint16_t prev_address = address;
-						uint16_t addr_low_tmp = address;
-						addr_low_tmp++;
-						addr_low_tmp &= eprSpec.pg_mask;
-						address = ((address & ~eprSpec.pg_mask) | addr_low_tmp);
-
-						data_buf = 0;
-						LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
-							"EPR_WRITE_DATA: %02X -> [%02X]; address=%02X",
-							eeprom[prev_address], prev_address, address);
-						break;
-					}
-
-					default:
-						// Unknown.
-						// Go back to standby.
-						sda_out = 1;
-						counter = 0;
-						data_buf = 0;
-						shift_rw = 0;
-						state = EPR_STANDBY;
-				}
+				// Process the data word.
+				processI2CShiftIn();
 			} else {
 				// Data bit is valid.
 				data_buf <<= 1;
@@ -222,31 +262,8 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 				// Is this an acknowlege?
 				if (!getSDA()) {
 					// Acknowledged by master.
-
-					// Determine what to do based on the current state.
-					// TODO: Split into a separate function?
-					switch (state) {
-						case EPR_READ_DATA:
-							// Go to the next byte.
-							// NOTE: Page mask does NOT apply to reads.
-							address++;
-							address &= eprSpec.sz_mask;
-							data_buf = eeprom[address];
-							counter = 0;
-							LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
-								"EPR_READ_DATA: ACK received: address=%02X, data_buf=%02X",
-								address, data_buf);
-							break;
-
-						default:
-							// Unknown.
-							// Go back to standby.
-							sda_out = 1;
-							counter = 0;
-							data_buf = 0;
-							shift_rw = 0;
-							state = EPR_STANDBY;
-					}
+					// Determine what should be shifted out next.
+					processI2CShiftOut();
 				}
 			}
 		} else if (checkSCL_HtoL()) {
