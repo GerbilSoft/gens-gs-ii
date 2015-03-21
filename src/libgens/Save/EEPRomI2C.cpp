@@ -294,7 +294,7 @@ int EEPRomI2C::setEEPRomType(int type)
 	}
 
 	// Set the EEPRom type.
-	memcpy(&d->eprMapper, &d->rom_db[type], sizeof(d->eprMapper));
+	memcpy(&d->eprMapper, &d->rom_db[type].mapper, sizeof(d->eprMapper));
 	memcpy(&d->eprSpec, &d->eeprom_spec[d->eprMapper.epr_type], sizeof(d->eprSpec));
 	return 0;
 }
@@ -305,6 +305,7 @@ int EEPRomI2C::setEEPRomType(int type)
  */
 bool EEPRomI2C::isEEPRomTypeSet(void) const
 {
+	//printf("sz mask: 0x%02X\n", d->eprSpec.sz_mask);
 	return !(d->eprSpec.sz_mask == 0);
 }
 

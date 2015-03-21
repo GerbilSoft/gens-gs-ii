@@ -177,7 +177,7 @@ class EEPRomI2CPrivate
 		struct GameEEPRomInfo_t {
 			char game_id[16];
 			uint16_t checksum;
-			EEPRomMap_t type;
+			EEPRomMap_t mapper;
 		};
 		static const GameEEPRomInfo_t rom_db[12];
 
