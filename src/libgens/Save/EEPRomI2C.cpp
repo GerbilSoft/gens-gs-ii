@@ -302,7 +302,7 @@ int EEPRomI2C::setEEPRomType(int type)
  */
 bool EEPRomI2C::isEEPRomTypeSet(void) const
 {
-	return !(d->eprType.type.scl_adr == 0);
+	return !(d->eprSpec.sz_mask == 0);
 }
 
 /**
@@ -362,11 +362,9 @@ uint8_t EEPRomI2C::readByte(uint32_t address)
 		return 0xFF;
 	}
 
-	// TODO: Read /SCL?
-
-	// Return sda_out, shifted over to the appropriate position.
+	// Return /SDA, shifted over to the appropriate position.
 	// TODO: Other bits should be prefetch?
-	return (d->sda_out << d->eprType.type.sda_out_bit);
+	return (d->getSDA() << d->eprType.type.sda_out_bit);
 }
 
 
@@ -379,19 +377,16 @@ uint16_t EEPRomI2C::readWord(uint32_t address)
 {
 	// TODO: address probably doesn't need to be masked,
 	// since M68K is word-aligned...
-	if ((address & ~1) != (d->eprType.type.sda_out_adr & ~1))
-	{
+	if ((address & ~1) != (d->eprType.type.sda_out_adr & ~1)) {
 		// Wrong address.
 		return 0xFFFF;
 	}
 
-	// TODO: Read /SCL?
-
-	// Return sda_out, shifted over to the appropriate position.
+	// Return /SDA, shifted over to the appropriate position.
 	// TODO: Other bits should be prefetch?
 	uint8_t sda_out_bit = d->eprType.type.sda_out_bit;
 	sda_out_bit += ((d->eprType.type.sda_out_adr & 1) * 8);
-	return (d->sda_out << sda_out_bit);
+	return (d->getSDA() << sda_out_bit);
 }
 
 /**
@@ -410,19 +405,20 @@ void EEPRomI2C::writeByte(uint32_t address, uint8_t data)
 
 	// Check if this is the clock line. (/SCL)
 	if (address == d->eprType.type.scl_adr) {
-		d->scl = !!(data & (1 << d->eprType.type.scl_bit));
+		d->scl = (data >> (d->eprType.type.scl_bit)) & 1;
 	} else {
 		d->scl = d->scl_prev;
 	}
 
 	// Check if this is the data line. (/SDA)
 	if (address == d->eprType.type.sda_in_adr) {
-		d->sda_in = !!(data & (1 << d->eprType.type.sda_in_bit));
+		d->sda_in = (data >> (d->eprType.type.sda_in_bit)) & 1;
 	} else {
 		d->sda_in = d->sda_in_prev;
 	}
 
 	// Process the I2C command.
+	// TODO: Only if /SDA or /SCL has changed?
 	d->processI2Cbit();
 }
 
@@ -440,23 +436,24 @@ void EEPRomI2C::writeWord(uint32_t address, uint16_t data)
 
 	// Check if this is the clock line. (/SCL)
 	if (address == d->eprType.type.scl_adr) {
-		d->scl = !!(data & (1 << (d->eprType.type.scl_bit + 8)));
+		d->scl = (data >> (d->eprType.type.scl_bit + 8)) & 1;
 	} else if ((address | 1) == d->eprType.type.scl_adr) {
-		d->scl = !!(data & (1 << d->eprType.type.scl_bit));
+		d->scl = (data >> (d->eprType.type.scl_bit)) & 1;
 	} else {
 		d->scl = d->scl_prev;
 	}
 
 	// Check if this is the data line. (/SDA)
 	if (address == d->eprType.type.sda_in_adr) {
-		d->sda_in = !!(data & (1 << (d->eprType.type.sda_in_bit + 8)));
+		d->sda_in = (data >> (d->eprType.type.sda_in_bit + 8)) & 1;
 	} else if ((address | 1) == d->eprType.type.sda_in_adr) {
-		d->sda_in = !!(data & (1 << d->eprType.type.sda_in_bit));
+		d->sda_in = (data >> (d->eprType.type.sda_in_bit)) & 1;
 	} else {
 		d->sda_in = d->sda_in_prev;
 	}
 
 	// Process the I2C bit.
+	// TODO: Only if /SDA or /SCL has changed?
 	d->processI2Cbit();
 }
 
