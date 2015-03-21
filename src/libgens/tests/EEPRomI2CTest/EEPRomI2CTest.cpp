@@ -91,9 +91,10 @@ uint8_t EEPRomI2CTest::sendData(uint8_t data)
 
 /**
  * Receive an 8-bit data word from the EEPROM.
+ * @param ack If true, acknowledge the data word.
  * @return 8-bit data word.
  */
-uint8_t EEPRomI2CTest::recvData(void)
+uint8_t EEPRomI2CTest::recvData(bool ack)
 {
 	uint8_t data = 0;
 	uint8_t sda_in;
@@ -112,10 +113,12 @@ uint8_t EEPRomI2CTest::recvData(void)
 	}
 
 	// Data has been received.
-	// Send an acknowledgement.
-	m_eeprom->dbg_setSCL(0);
-	m_eeprom->dbg_setSDA(0);
-	m_eeprom->dbg_setSCL(1);
+	if (ack) {
+		// Send an acknowledgement.
+		m_eeprom->dbg_setSCL(0);
+		m_eeprom->dbg_setSDA(0);
+		m_eeprom->dbg_setSCL(1);
+	}
 	return data;
 }
 

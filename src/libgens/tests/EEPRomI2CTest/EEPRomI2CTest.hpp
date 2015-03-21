@@ -63,9 +63,10 @@ class EEPRomI2CTest : public ::testing::TestWithParam<unsigned int>
 
 		/**
 		 * Receive an 8-bit data word from the EEPROM.
+		 * @param ack If true, acknowledge the data word.
 		 * @return 8-bit data word.
 		 */
-		uint8_t recvData(void);
+		uint8_t recvData(bool ack);
 };
 
 } }

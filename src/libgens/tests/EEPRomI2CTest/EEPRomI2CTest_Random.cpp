@@ -95,11 +95,14 @@ TEST_P(EEPRomI2CTest_Random, X24C01_randomReadEmpty)
 		EXPECT_EQ(0, response) << "NACK received; expected ACK.";
 
 		// Read the data from the EEPROM.
-		uint8_t data = recvData();
-		EXPECT_EQ(0xFF, data) <<
+		// NOTE: Do NOT acknowledge the data word; otherwise, the
+		// EPROM will start sending the next word immediately, which
+		// can prevent the START/STOP condition from being recognized.
+		uint8_t data_actual = recvData(false);
+		EXPECT_EQ(0xFF, data_actual) <<
 			"EEPROM address 0x" <<
 			std::hex << std::setw(2) << std::setfill('0') << std::uppercase << addr <<
-			" should be 0xFF (empty ROM).";
+			" should be 0xFF (empty EEPROM).";
 
 		if (!enableRepeatedStart) {
 			// STOP the transfer.
@@ -129,6 +132,9 @@ TEST_P(EEPRomI2CTest_Random, X24C01_randomReadFull)
 	m_eeprom->dbg_getEEPRomSize(&eepromSize);
 	ASSERT_EQ(128U, eepromSize) << "X24C01 should be 128 bytes.";
 	unsigned int eepromMask = eepromSize - 1;
+
+	// Initialize the EEPROM data.
+	ASSERT_EQ(0, m_eeprom->dbg_writeEEPRom(0x00, test_EEPRomI2C_data, eepromSize));
 
 	// Make sure we're in a STOP condition at first.
 	doStop();
@@ -163,12 +169,15 @@ TEST_P(EEPRomI2CTest_Random, X24C01_randomReadFull)
 		EXPECT_EQ(0, response) << "NACK received; expected ACK.";
 
 		// Read the data from the EEPROM.
-		uint8_t data_actual = recvData();
+		// NOTE: Do NOT acknowledge the data word; otherwise, the
+		// EPROM will start sending the next word immediately, which
+		// can prevent the START/STOP condition from being recognized.
+		uint8_t data_actual = recvData(false);
 		uint8_t data_expected = test_EEPRomI2C_data[addr & eepromMask];
 		EXPECT_EQ(data_expected, data_actual) <<
 			"EEPROM address 0x" <<
 			std::hex << std::setw(2) << std::setfill('0') << std::uppercase << addr <<
-			" should be 0x" << data_expected << " (test EEPROM).";
+			" should be 0x" << data_actual << " (test EEPROM).";
 
 		if (!enableRepeatedStart) {
 			// STOP the transfer.

@@ -79,9 +79,13 @@ TEST_P(EEPRomI2CTest_Seq, X24C01_seqReadEmpty)
 	EXPECT_EQ(0, response) << "NACK received; expected ACK.";
 
 	// Read up to two times the size of the EEPROM.
-	for (unsigned int addr = addr_start; addr < addr_start + (eepromSize * 2); addr++) {
-		uint8_t data = recvData();
-		EXPECT_EQ(0xFF, data) <<
+	unsigned int end_addr = addr_start + (eepromSize * 2) - 1;
+	for (unsigned int addr = addr_start; addr <= end_addr; addr++) {
+		// Data word should only be acknowledged if this is not
+		// the last byte being read.
+		bool isLastByte = (addr != end_addr);
+		uint8_t data_actual = recvData(isLastByte);
+		EXPECT_EQ(0xFF, data_actual) <<
 			"EEPROM address 0x" <<
 			std::hex << std::setw(2) << std::setfill('0') << std::uppercase << addr <<
 			" should be 0xFF (empty ROM).";
@@ -130,12 +134,17 @@ TEST_P(EEPRomI2CTest_Seq, X24C01_seqReadFull)
 	EXPECT_EQ(0, response) << "NACK received; expected ACK.";
 
 	// Read up to two times the size of the EEPROM.
-	for (unsigned int addr = addr_start; addr < addr_start + (eepromSize * 2); addr++) {
-		uint8_t data = recvData();
-		EXPECT_EQ(test_EEPRomI2C_data[addr & eepromMask], data) <<
+	unsigned int end_addr = addr_start + (eepromSize * 2) - 1;
+	for (unsigned int addr = addr_start; addr <= end_addr; addr++) {
+		// Data word should only be acknowledged if this is not
+		// the last byte being read.
+		bool isLastByte = (addr != end_addr);
+		uint8_t data_actual = recvData(isLastByte);
+		uint8_t data_expected = test_EEPRomI2C_data[addr & eepromMask];
+		EXPECT_EQ(data_expected, data_actual) <<
 			"EEPROM address 0x" <<
 			std::hex << std::setw(2) << std::setfill('0') << std::uppercase << addr <<
-			" should be 0xFF (empty ROM).";
+			" should be 0x" << data_actual << " (test EEPROM).";
 	}
 
 	// STOP the transfer.
