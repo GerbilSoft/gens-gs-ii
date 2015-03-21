@@ -177,7 +177,7 @@ TEST_P(EEPRomI2CTest_Random, X24C01_randomReadFull)
 		EXPECT_EQ(data_expected, data_actual) <<
 			"EEPROM address 0x" <<
 			std::hex << std::setw(2) << std::setfill('0') << std::uppercase << addr <<
-			" should be 0x" << data_actual << " (test EEPROM).";
+			" should be 0x" << (int)data_expected << " (test EEPROM).";
 
 		if (!enableRepeatedStart) {
 			// STOP the transfer.
