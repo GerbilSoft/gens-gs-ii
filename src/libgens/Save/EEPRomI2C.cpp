@@ -71,6 +71,9 @@ void EEPRomI2CPrivate::reset(void)
 	address = 0;
 	counter = 0;
 	rw = 0;
+
+	// Shift register.
+	shift_rw = 0,	// Shift-in by default.
 	data_buf = 0;
 
 	// Reset the state.
@@ -97,6 +100,8 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 			"Received STOP condition.");
 		counter = 0;
 		sda_out = 1;
+		data_buf = 0;
+		shift_rw = 0;	// shift in
 		state = EPR_STANDBY;
 		goto done;
 	}
@@ -108,6 +113,8 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 			"Received START condition.");
 		counter = 0;
 		sda_out = 1;
+		data_buf = 0;
+		shift_rw = 0;	// shift in
 		if (eprMapper.epr_type == EEPRomI2C::EPR_X24C01) {
 			// Mode 1.
 			state = EPR_MODE1_WORD_ADDRESS;
@@ -119,133 +126,149 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 		goto done;
 	}
 
-	// Check the current state.
-	switch (state) {
-		case EPR_STANDBY:
-			break;
+	if (state == EPR_STANDBY) {
+		// Nothing to do right now.
+		goto done;
+	}
 
-		case EPR_MODE1_WORD_ADDRESS:
-			// Check for SCL low-to-high.
-			if (checkSCL_LtoH()) {
-				if (counter >= 8) {
-					// Acknowledge receipt of the data bit.
-					sda_out = 0;
-					counter = 0;
-					if (rw) {
-						// Read data.
-						data_buf = eeprom[address];
-						state = EPR_READ_DATA;
-					} else {
-						// Write data.
-						data_buf = 0;
-						state = EPR_WRITE_DATA;
-					}
-					LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
-						"EPR_MODE1_WORD_ADDRESS: address=%02X, rw=%d, data_buf=%02X",
-						address, rw, data_buf);
-				} else if (counter == 7) {
-					// Data bit is valid.
-					// This bit is R/W.
-					rw = getSDA();
-					counter++;
-				} else {
-					// Data bit is valid.
-					address <<= 1;
-					address |= getSDA();
-					address &= eprSpec.sz_mask;
-					counter++;
-				}
-			} else if (checkSCL_HtoL()) {
-				// Release the data line.
-				sda_out = 1;
-			}
-			break;
+	// Check if we're shifting in or shifting out.
+	if (!shift_rw) {
+		// Shifting in.
+		// Master device is writing an 8-bit data word.
 
-		case EPR_READ_DATA:
-			// Check for SCL high-to-low.
-			if (checkSCL_LtoH()) {
-				if (counter >= 9) {
-					// Is this an acknowlege?
-					if (!getSDA()) {
-						// Acknowledged by master.
-						// Go to the next byte.
-						// NOTE: Page mask does NOT apply to reads.
-						address++;
-						address &= eprSpec.sz_mask;
-						data_buf = eeprom[address];
+		// Check for SCL low-to-high.
+		if (checkSCL_LtoH()) {
+			if (counter >= 8) {
+				// Finished receiving the data word.
+				// Acknowledge it.
+				sda_out = 0;
+				counter++;
+
+				// Determine what to do based on the current state.
+				// TODO: Split into a separate function?
+				switch (state) {
+					case EPR_MODE1_WORD_ADDRESS:
+						// X24C01 word address.
+						address = (data_buf >> 1) & 0x7F;
+						rw = (data_buf & 1);
 						counter = 0;
+						if (rw) {
+							// Read data.
+							data_buf = eeprom[address];
+							shift_rw = 1;	// Shifting out.
+							state = EPR_READ_DATA;
+						} else {
+							// Write data.
+							data_buf = 0;
+							shift_rw = 0;	// Shifting in.
+							state = EPR_WRITE_DATA;
+						}
 						LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
-							"EPR_READ_DATA: ACK received: address=%02X, data_buf=%02X",
-							address, data_buf);
+							"EPR_MODE1_WORD_ADDRESS: address=%02X, rw=%d, data_buf=%02X",
+							address, rw, data_buf);
+						break;
+
+					case EPR_WRITE_DATA: {
+						// Save the data byte.
+						eeprom[address] = data_buf;
+						setDirty();
+
+						// Next byte in the page.
+						uint16_t prev_address = address;
+						uint16_t addr_low_tmp = address;
+						addr_low_tmp++;
+						addr_low_tmp &= eprSpec.pg_mask;
+						address = ((address & ~eprSpec.pg_mask) | addr_low_tmp);
+
+						data_buf = 0;
+						LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+							"EPR_WRITE_DATA: %02X -> [%02X]; address=%02X",
+							eeprom[prev_address], prev_address, address);
+						break;
+					}
+
+					default:
+						// Unknown.
+						// Go back to standby.
+						sda_out = 1;
+						counter = 0;
+						data_buf = 0;
+						shift_rw = 0;
+						state = EPR_STANDBY;
+				}
+			} else {
+				// Data bit is valid.
+				data_buf <<= 1;
+				data_buf |= getSDA();
+				counter++;
+			}
+		} else if (checkSCL_HtoL()) {
+			// Release the data line.
+			sda_out = 1;
+			if (counter >= 9) {
+				// Acknowledged.
+				// Reset the counter.
+				counter = 0;
+			}
+		}
+	} else {
+		// Shifting out.
+		// Master device is reading an 8-bit data word.
+		// NOTE: This is usually EPR_READ_DATA.
+
+		// Check for SCL high-to-low.
+		if (checkSCL_LtoH()) {
+			if (counter >= 9) {
+				// Is this an acknowlege?
+				if (!getSDA()) {
+					// Acknowledged by master.
+
+					// Determine what to do based on the current state.
+					// TODO: Split into a separate function?
+					switch (state) {
+						case EPR_READ_DATA:
+							// Go to the next byte.
+							// NOTE: Page mask does NOT apply to reads.
+							address++;
+							address &= eprSpec.sz_mask;
+							data_buf = eeprom[address];
+							counter = 0;
+							LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+								"EPR_READ_DATA: ACK received: address=%02X, data_buf=%02X",
+								address, data_buf);
+							break;
+
+						default:
+							// Unknown.
+							// Go back to standby.
+							sda_out = 1;
+							counter = 0;
+							data_buf = 0;
+							shift_rw = 0;
+							state = EPR_STANDBY;
 					}
 				}
-			} else if (checkSCL_HtoL()) {
-				if (counter < 8) {
-					// Send a data bit to the host.
-					// NOTE: MSB is out first.
-					sda_out = !!(data_buf & 0x80);
-					data_buf <<= 1;
-					counter++;
-				} else if (counter == 8) {
-					// Release the data line.
-					sda_out = 1;
-					counter++;
-				}
-
-				if (counter == 8) {
-					LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
-						"EPR_READ_DATA: all 8 bits read: address=%02X",
-						address);
-				}
 			}
-			break;
-
-		case EPR_WRITE_DATA:
-			// Check for SCL low-to-high.
-			if (checkSCL_LtoH()) {
-				if (counter >= 8) {
-					// Acknowledge receipt of the data bit.
-					sda_out = 0;
-					counter++;
-
-					// Save the data byte.
-					eeprom[address] = data_buf;
-					setDirty();
-
-					// Next byte in the page.
-					uint16_t prev_address = address;
-					uint16_t addr_low_tmp = address;
-					addr_low_tmp++;
-					addr_low_tmp &= eprSpec.pg_mask;
-					address = ((address & ~eprSpec.pg_mask) | addr_low_tmp);
-
-					data_buf = 0;
-					LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
-						"EPR_WRITE_DATA: %02X -> [%02X]; address=%02X",
-						eeprom[prev_address], prev_address, address);
-				} else {
-					// Data bit is valid.
-					data_buf <<= 1;
-					data_buf |= getSDA();
-					counter++;
-				}
-			} else if (checkSCL_HtoL()) {
+		} else if (checkSCL_HtoL()) {
+			if (counter < 8) {
+				// Send a data bit to the host.
+				// NOTE: MSB is out first.
+				sda_out = !!(data_buf & 0x80);
+				data_buf <<= 1;
+				counter++;
+			} else if (counter == 8) {
 				// Release the data line.
 				sda_out = 1;
-				if (counter >= 9) {
-					// Acknowledged.
-					// Reset the counter.
-					counter = 0;
-				}
+				counter++;
 			}
-			break;
 
-		default:
-			// Unknown state.
-			sda_out = 1;
-			counter = 0;
-			state = EPR_STANDBY;
-			break;
+			// TODO: Not necessarily EPR_READ_DATA.
+			if (counter == 8) {
+				LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+					"EPR_READ_DATA: all 8 bits read: address=%02X",
+					address);
+			}
+		}
 	}
 
 done:

@@ -73,6 +73,7 @@ class EEPRomI2CPrivate
 		uint8_t counter;	// Cycle counter.
 		uint8_t rw;		// Read/Write mode. (1 == read; 0 == write)
 
+		uint8_t shift_rw;	// Shifting state. (1 == shift-out, 0 == shift-in)
 		uint8_t data_buf;	// Temporary data buffer.
 
 		// Internal EEPROM state.
