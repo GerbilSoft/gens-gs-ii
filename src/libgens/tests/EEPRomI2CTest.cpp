@@ -63,6 +63,12 @@ class EEPRomI2CTest : public ::testing::Test
 		 * @return 0 if ACK; 1 if NACK.
 		 */
 		uint8_t sendData(uint8_t data);
+
+		/**
+		 * Receive an 8-bit data word from the EEPROM.
+		 * @return 8-bit data word.
+		 */
+		uint8_t recvData(void);
 };
 
 /**
@@ -121,6 +127,36 @@ uint8_t EEPRomI2CTest::sendData(uint8_t data)
 }
 
 /**
+ * Receive an 8-bit data word from the EEPROM.
+ * @return 8-bit data word.
+ */
+uint8_t EEPRomI2CTest::recvData(void)
+{
+	uint8_t data = 0;
+	uint8_t sda_in;
+
+	// Release the SDA line.
+	m_eeprom->dbg_setSCL(0);
+	m_eeprom->dbg_setSDA(1);
+
+	for (int i = 8; i > 0; i--) {
+		// Data is received when SCL=0.
+		m_eeprom->dbg_setSCL(0);
+		m_eeprom->dbg_getSDA(&sda_in);
+		data <<= 1;
+		data |= (sda_in & 1);
+		m_eeprom->dbg_setSCL(1);
+	}
+
+	// Data has been received.
+	// Send an acknowledgement.
+	m_eeprom->dbg_setSCL(0);
+	m_eeprom->dbg_setSDA(0);
+	m_eeprom->dbg_setSCL(1);
+	return data;
+}
+
+/**
  * I2C notes:
  * - START condition: SCL high, SDA high-to-low
  * - STOP condition: SCL high, SDA low-to-high
@@ -156,6 +192,14 @@ TEST_F(EEPRomI2CTest, X24C01_seqReadEmpty)
 	// Check for ACK.
 	m_eeprom->dbg_getSDA(&response);
 	EXPECT_EQ(0, response) << "NACK received; expected ACK.";
+
+	// Read up to two times the size of the EEPROM.
+	for (unsigned int addr = 0; addr < (eepromSize * 2); addr++) {
+		uint8_t data = recvData();
+		EXPECT_EQ(0xFF, data) << "EEPROM address 0x" <<
+			std::hex << std::setw(2) << std::setfill('0') << std::uppercase << addr <<
+			" should be 0xFF (empty ROM).";
+	}
 }
 
 } }
