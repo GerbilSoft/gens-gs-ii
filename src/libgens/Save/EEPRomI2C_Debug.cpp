@@ -89,7 +89,7 @@ int EEPRomI2C::dbg_readEEPRom(uint32_t address, uint8_t *data, int length) const
 {
 	unsigned int eprSize;
 	dbg_getEEPRomSize(&eprSize);
-	if (eprSize <= 0 || address >= eprSize || address + length >= eprSize) {
+	if (eprSize <= 0 || address >= eprSize || address + length > eprSize) {
 		return -1;
 	}
 
@@ -110,7 +110,7 @@ int EEPRomI2C::dbg_writeEEPRom(uint32_t address, const uint8_t *data, int length
 {
 	unsigned int eprSize;
 	dbg_getEEPRomSize(&eprSize);
-	if (eprSize <= 0 || address >= eprSize || address + length >= eprSize) {
+	if (eprSize <= 0 || address >= eprSize || address + length > eprSize) {
 		return -1;
 	}
 
