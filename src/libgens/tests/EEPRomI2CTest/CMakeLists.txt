@@ -16,8 +16,8 @@ ADD_EXECUTABLE(EEPRomI2CTest
 	EEPRomI2CTest.hpp
 	EEPRomI2CTest_data.c
 	EEPRomI2CTest_data.h
-	EEPRomI2CTest_Seq.cpp
-	EEPRomI2CTest_Random.cpp
+	EEPRomI2CTest_SeqRead.cpp
+	EEPRomI2CTest_RandomRead.cpp
 	)
 TARGET_LINK_LIBRARIES(EEPRomI2CTest gens ${ZLIB_LIBRARY} ${GTEST_LIBRARY})
 ADD_TEST(NAME EEPRomI2CTest

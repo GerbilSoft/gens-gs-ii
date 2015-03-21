@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
- * EEPRomI2CTest.cpp: EEPRomI2C test: Sequential Access tests.             *
+ * EEPRomI2CTest_SeqRead.cpp: EEPRomI2C test: Sequential Read tests.       *
  *                                                                         *
  * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
@@ -31,7 +31,7 @@
 #include "EEPRomI2CTest.hpp"
 namespace LibGens { namespace Tests {
 
-class EEPRomI2CTest_Seq : public EEPRomI2CTest
+class EEPRomI2CTest_SeqRead : public EEPRomI2CTest
 {
 	// TODO: Add stuff?
 };
@@ -50,7 +50,7 @@ class EEPRomI2CTest_Seq : public EEPRomI2CTest
  * Starts at the specified address.
  * @param addr_start Starting address.
  */
-TEST_P(EEPRomI2CTest_Seq, X24C01_seqReadEmpty)
+TEST_P(EEPRomI2CTest_SeqRead, X24C01_seqReadEmpty)
 {
 	unsigned int addr_start = GetParam();
 
@@ -101,7 +101,7 @@ TEST_P(EEPRomI2CTest_Seq, X24C01_seqReadEmpty)
  * Starts at the specified address.
  * @param addr_start Starting address.
  */
-TEST_P(EEPRomI2CTest_Seq, X24C01_seqReadFull)
+TEST_P(EEPRomI2CTest_SeqRead, X24C01_seqReadFull)
 {
 	unsigned int addr_start = GetParam();
 
@@ -153,7 +153,7 @@ TEST_P(EEPRomI2CTest_Seq, X24C01_seqReadFull)
 
 // Sequential Read with various starting addresses.
 // TODO: Add more addresses for larger EEPROMs?
-INSTANTIATE_TEST_CASE_P(SeqRead, EEPRomI2CTest_Seq,
+INSTANTIATE_TEST_CASE_P(SeqRead, EEPRomI2CTest_SeqRead,
 	::testing::Values(0x00, 0x12, 0x4F, 0x72, 0x90, 0xA3, 0xC4, 0xFF)
 	);
 

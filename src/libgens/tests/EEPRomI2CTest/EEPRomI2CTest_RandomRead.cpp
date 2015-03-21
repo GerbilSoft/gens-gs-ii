@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
- * EEPRomI2CTest_Random.cpp: EEPRomI2C test: Random Access tests.          *
+ * EEPRomI2CTest_RandomRead.cpp: EEPRomI2C test: Random Read tests.        *
  *                                                                         *
  * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
@@ -31,7 +31,7 @@
 #include "EEPRomI2CTest.hpp"
 namespace LibGens { namespace Tests {
 
-class EEPRomI2CTest_Random : public EEPRomI2CTest
+class EEPRomI2CTest_RandomRead : public EEPRomI2CTest
 {
 	// TODO: Add stuff?
 };
@@ -50,7 +50,7 @@ class EEPRomI2CTest_Random : public EEPRomI2CTest
  * Reads 64 bytes at random addresses.
  * @param enableRepeatedStart If zero, a STOP condition will be emitted after every read.
  */
-TEST_P(EEPRomI2CTest_Random, X24C01_randomReadEmpty)
+TEST_P(EEPRomI2CTest_RandomRead, X24C01_randomReadEmpty)
 {
 	unsigned int enableRepeatedStart = GetParam();
 
@@ -121,7 +121,7 @@ TEST_P(EEPRomI2CTest_Random, X24C01_randomReadEmpty)
  * Reads 64 bytes at random addresses.
  * @param enableRepeatedStart If zero, a STOP condition will be emitted after every read.
  */
-TEST_P(EEPRomI2CTest_Random, X24C01_randomReadFull)
+TEST_P(EEPRomI2CTest_RandomRead, X24C01_randomReadFull)
 {
 	unsigned int enableRepeatedStart = GetParam();
 
@@ -193,7 +193,7 @@ TEST_P(EEPRomI2CTest_Random, X24C01_randomReadFull)
 
 // Random Read tests.
 // Value is non-zero to enable repeated start conditions.
-INSTANTIATE_TEST_CASE_P(RandomRead, EEPRomI2CTest_Random,
+INSTANTIATE_TEST_CASE_P(RandomRead, EEPRomI2CTest_RandomRead,
 	::testing::Values(0, 1)
 	);
 
