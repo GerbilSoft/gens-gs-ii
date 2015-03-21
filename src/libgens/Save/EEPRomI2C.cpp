@@ -101,24 +101,27 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 		goto done;
 	}
 
+	// Has a START condition been issued?
+	if (checkStart()) {
+		// START condition.
+		LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+			"Received START condition.");
+		counter = 0;
+		sda_out = 1;
+		if (eprMapper.epr_type == EEPRomI2C::EPR_X24C01) {
+			// Mode 1.
+			state = EPR_MODE1_WORD_ADDRESS;
+		} else {
+			// Mode 2 or 3.
+			// TODO
+			//state = EPR_MODE2_WORD_ADDRESS;
+		}
+		goto done;
+	}
+
 	// Check the current state.
 	switch (state) {
 		case EPR_STANDBY:
-			// Has a START condition been issued?
-			if (checkStart()) {
-				// START condition.
-				LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
-					"EPR_STANDBY: Received START condition.");
-				counter = 0;
-				if (eprMapper.epr_type == EEPRomI2C::EPR_X24C01) {
-					// Mode 1.
-					state = EPR_MODE1_WORD_ADDRESS;
-				} else {
-					// Mode 2 or 3.
-					// TODO
-					//state = EPR_MODE2_WORD_ADDRESS;
-				}
-			}
 			break;
 
 		case EPR_MODE1_WORD_ADDRESS:

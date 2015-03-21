@@ -75,7 +75,18 @@ TEST_P(EEPRomI2CTest_Random, X24C01_randomReadEmpty)
 		// START an I2C transfer.
 		// We'll request a READ from address 0x00.
 		// Mode 1 word address: [A6 A5 A4 A3 A2 A1 A0 RW]
-		m_eeprom->dbg_setSDA(0);	// START
+
+		if (enableRepeatedStart) {
+			// No STOP condition, so we have to
+			// release /SDA from ACK while /SCL=0.
+			m_eeprom->dbg_setSCL(0);
+			m_eeprom->dbg_setSDA(1);
+		}
+
+		// Send a START.
+		m_eeprom->dbg_setSCL(1);
+		m_eeprom->dbg_setSDA(0);
+
 		cmd = (addr << 1) | 1;		// RW=1
 		response = sendData(cmd);
 
