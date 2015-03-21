@@ -210,6 +210,11 @@ TEST_P(EEPRomI2CTest, X24C01_seqReadEmpty)
 	doStop();
 }
 
+// X24C01: Sequential Read of empty EEPROM with various starting addresses.
+INSTANTIATE_TEST_CASE_P(X24C01_seqReadEmpty, EEPRomI2CTest,
+	::testing::Values(0x00, 0x12, 0x4F, 0x72, 0x90, 0xA3, 0xC4, 0xFF)
+	);
+
 /**
  * X24C01: Test sequential reading of a full EEPROM.
  * EEPROM will contain random data from test_EEPRomI2C_data[].
@@ -259,11 +264,6 @@ TEST_P(EEPRomI2CTest, X24C01_seqReadFull)
 	// STOP the transfer.
 	doStop();
 }
-
-// X24C01: Sequential Read of empty EEPROM with various starting addresses.
-INSTANTIATE_TEST_CASE_P(X24C01_seqReadEmpty, EEPRomI2CTest,
-	::testing::Values(0x00, 0x12, 0x4F, 0x72, 0x90, 0xA3, 0xC4, 0xFF)
-	);
 
 // X24C01: Sequential Read of full EEPROM with various starting addresses.
 INSTANTIATE_TEST_CASE_P(X24C01_seqReadFull, EEPRomI2CTest,
