@@ -28,6 +28,7 @@
 // C++ includes.
 #include <string>
 
+#include "EEPRomI2C.hpp"
 namespace LibGens {
 
 class EEPRomI2C;
@@ -153,23 +154,13 @@ class EEPRomI2CPrivate
 			{ return (checkSCL_H() && checkSDA_LtoH()); }
 
 	public:
-		/** EEPROM types. **/
-		enum EEPRomType_t {
-			EPR_NONE = 0,
-
-			// Mode 1: 7-bit addressing.
-			EPR_X24C01,
-
-			EPR_MAX
-		};
-
 		/** EEPROM specifications. **/
 		struct EEPRomSpec_t {
 			uint16_t sz_mask;	// Size mask.
 			uint8_t pg_mask;	// Page mask.
 			uint8_t reserved;
 		};
-		static const EEPRomSpec_t eeprom_spec[EPR_MAX];
+		static const EEPRomSpec_t eeprom_spec[EEPRomI2C::EPR_MAX];
 
 		/** EEPROM map. **/
 		struct EEPRomMap_t {
@@ -192,7 +183,7 @@ class EEPRomI2CPrivate
 
 		// Current EEPRom type.
 		EEPRomSpec_t eprSpec;
-		GameEEPRomInfo_t eprType;
+		EEPRomMap_t eprMapper;
 
 	public:
 		/**

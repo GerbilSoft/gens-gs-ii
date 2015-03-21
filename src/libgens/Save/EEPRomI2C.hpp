@@ -135,6 +135,33 @@ class EEPRomI2C
 	protected:
 		/** EEPRom file handling functions. **/
 		int getUsedSize(void);
+
+	public:
+		// Super secret debug stuff!
+		// For use by MDP plugins and test suites.
+		// Return value is an MDP error code.
+
+		/** EEPRom types. **/
+		enum EEPRomType_t {
+			EPR_NONE = 0,
+
+			// Mode 1: 7-bit addressing.
+			EPR_X24C01,
+
+			EPR_MAX
+		};
+
+		int dbg_getEEPRomType(EEPRomType_t *eprType) const;
+		int dbg_setEEPRomType(EEPRomType_t eprType);
+		int dbg_getEEPRomSize(unsigned int *sz) const;
+
+		int dbg_readEEPRom(uint32_t address, uint8_t *data, int length) const;
+		int dbg_writeEEPRom(uint32_t address, const uint8_t *data, int length);
+
+		int dbg_getSCL(uint8_t *scl) const;
+		int dbg_setSCL(uint8_t scl);
+		int dbg_getSDA(uint8_t *sda) const;
+		int dbg_setSDA(uint8_t sda);
 };
 
 }

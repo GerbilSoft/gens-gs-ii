@@ -87,6 +87,7 @@ SET(libgens_SRCS
 	Save/EEPRomI2C.cpp
 	Save/EEPRomI2C_File.cpp
 	Save/EEPRomI2C_DB.cpp
+	Save/EEPRomI2C_Debug.cpp
 	)
 
 SET(libgens_VDP_SRCS

@@ -43,7 +43,7 @@ EEPRomI2CPrivate::EEPRomI2CPrivate(EEPRomI2C *q)
 {
 	// Clear the EEPRom type.
 	memset(&eprSpec, 0, sizeof(eprSpec));
-	memset(&eprType, 0, sizeof(eprType));
+	memset(&eprMapper, 0, sizeof(eprMapper));
 
 	// Reset the EEPRom.
 	reset();
@@ -85,7 +85,7 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 	// Save the current /SDA out.
 	sda_out_prev = sda_out;
 
-	if (eprType.type.epr_type == EPR_NONE) {
+	if (eprMapper.epr_type == EEPRomI2C::EPR_NONE) {
 		// No EEPRom.
 		goto done;
 	}
@@ -110,7 +110,7 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 				LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
 					"EPR_STANDBY: Received START condition.");
 				counter = 0;
-				if (eprType.type.epr_type == EPR_X24C01) {
+				if (eprMapper.epr_type == EEPRomI2C::EPR_X24C01) {
 					// Mode 1.
 					state = EPR_MODE1_WORD_ADDRESS;
 				} else {
@@ -291,8 +291,8 @@ int EEPRomI2C::setEEPRomType(int type)
 	}
 
 	// Set the EEPRom type.
-	memcpy(&d->eprType, &d->rom_db[type], sizeof(d->eprType));
-	memcpy(&d->eprSpec, &d->eeprom_spec[d->eprType.type.epr_type], sizeof(d->eprSpec));
+	memcpy(&d->eprMapper, &d->rom_db[type], sizeof(d->eprMapper));
+	memcpy(&d->eprSpec, &d->eeprom_spec[d->eprMapper.epr_type], sizeof(d->eprSpec));
 	return 0;
 }
 
@@ -322,25 +322,25 @@ bool EEPRomI2C::isEEPRomTypeSet(void) const
 
 bool EEPRomI2C::isReadBytePort(uint32_t address) const
 {
-	return (address == d->eprType.type.sda_out_adr);
+	return (address == d->eprMapper.sda_out_adr);
 }
 
 bool EEPRomI2C::isReadWordPort(uint32_t address) const
 {
-	return ((address | 1) == (d->eprType.type.sda_out_adr | 1));
+	return ((address | 1) == (d->eprMapper.sda_out_adr | 1));
 }
 
 bool EEPRomI2C::isWriteBytePort(uint32_t address) const
 {
-	return (address == d->eprType.type.scl_adr ||
-		address == d->eprType.type.sda_in_adr);
+	return (address == d->eprMapper.scl_adr ||
+		address == d->eprMapper.sda_in_adr);
 }
 
 bool EEPRomI2C::isWriteWordPort(uint32_t address) const
 {
 	address |= 1;
-	return ((address == (d->eprType.type.scl_adr | 1)) ||
-		(address == (d->eprType.type.sda_in_adr | 1)));
+	return ((address == (d->eprMapper.scl_adr | 1)) ||
+		(address == (d->eprMapper.sda_in_adr | 1)));
 }
 
 /**
@@ -357,14 +357,14 @@ bool EEPRomI2C::isDirty(void) const
  */
 uint8_t EEPRomI2C::readByte(uint32_t address)
 {
-	if (address != d->eprType.type.sda_out_adr) {
+	if (address != d->eprMapper.sda_out_adr) {
 		// Wrong address.
 		return 0xFF;
 	}
 
 	// Return /SDA, shifted over to the appropriate position.
 	// TODO: Other bits should be prefetch?
-	return (d->getSDA() << d->eprType.type.sda_out_bit);
+	return (d->getSDA() << d->eprMapper.sda_out_bit);
 }
 
 
@@ -377,15 +377,15 @@ uint16_t EEPRomI2C::readWord(uint32_t address)
 {
 	// TODO: address probably doesn't need to be masked,
 	// since M68K is word-aligned...
-	if ((address & ~1) != (d->eprType.type.sda_out_adr & ~1)) {
+	if ((address & ~1) != (d->eprMapper.sda_out_adr & ~1)) {
 		// Wrong address.
 		return 0xFFFF;
 	}
 
 	// Return /SDA, shifted over to the appropriate position.
 	// TODO: Other bits should be prefetch?
-	uint8_t sda_out_bit = d->eprType.type.sda_out_bit;
-	sda_out_bit += ((d->eprType.type.sda_out_adr & 1) * 8);
+	uint8_t sda_out_bit = d->eprMapper.sda_out_bit;
+	sda_out_bit += ((d->eprMapper.sda_out_adr & 1) * 8);
 	return (d->getSDA() << sda_out_bit);
 }
 
@@ -396,23 +396,23 @@ uint16_t EEPRomI2C::readWord(uint32_t address)
  */
 void EEPRomI2C::writeByte(uint32_t address, uint8_t data)
 {
-	if (address != d->eprType.type.scl_adr &&
-	    address != d->eprType.type.sda_in_adr)
+	if (address != d->eprMapper.scl_adr &&
+	    address != d->eprMapper.sda_in_adr)
 	{
 		// Invalid address.
 		return;
 	}
 
 	// Check if this is the clock line. (/SCL)
-	if (address == d->eprType.type.scl_adr) {
-		d->scl = (data >> (d->eprType.type.scl_bit)) & 1;
+	if (address == d->eprMapper.scl_adr) {
+		d->scl = (data >> (d->eprMapper.scl_bit)) & 1;
 	} else {
 		d->scl = d->scl_prev;
 	}
 
 	// Check if this is the data line. (/SDA)
-	if (address == d->eprType.type.sda_in_adr) {
-		d->sda_in = (data >> (d->eprType.type.sda_in_bit)) & 1;
+	if (address == d->eprMapper.sda_in_adr) {
+		d->sda_in = (data >> (d->eprMapper.sda_in_bit)) & 1;
 	} else {
 		d->sda_in = d->sda_in_prev;
 	}
@@ -435,19 +435,19 @@ void EEPRomI2C::writeWord(uint32_t address, uint16_t data)
 	address &= ~1;
 
 	// Check if this is the clock line. (/SCL)
-	if (address == d->eprType.type.scl_adr) {
-		d->scl = (data >> (d->eprType.type.scl_bit + 8)) & 1;
-	} else if ((address | 1) == d->eprType.type.scl_adr) {
-		d->scl = (data >> (d->eprType.type.scl_bit)) & 1;
+	if (address == d->eprMapper.scl_adr) {
+		d->scl = (data >> (d->eprMapper.scl_bit + 8)) & 1;
+	} else if ((address | 1) == d->eprMapper.scl_adr) {
+		d->scl = (data >> (d->eprMapper.scl_bit)) & 1;
 	} else {
 		d->scl = d->scl_prev;
 	}
 
 	// Check if this is the data line. (/SDA)
-	if (address == d->eprType.type.sda_in_adr) {
-		d->sda_in = (data >> (d->eprType.type.sda_in_bit + 8)) & 1;
-	} else if ((address | 1) == d->eprType.type.sda_in_adr) {
-		d->sda_in = (data >> (d->eprType.type.sda_in_bit)) & 1;
+	if (address == d->eprMapper.sda_in_adr) {
+		d->sda_in = (data >> (d->eprMapper.sda_in_bit + 8)) & 1;
+	} else if ((address | 1) == d->eprMapper.sda_in_adr) {
+		d->sda_in = (data >> (d->eprMapper.sda_in_bit)) & 1;
 	} else {
 		d->sda_in = d->sda_in_prev;
 	}
