@@ -48,9 +48,12 @@ class EEPRomI2CTest_Random : public EEPRomI2CTest
 /**
  * X24C01: Test random reading of an empty EEPROM.
  * Reads 64 bytes at random addresses.
+ * @param enableRepeatedStart If zero, a STOP condition will be emitted after every read.
  */
-TEST_F(EEPRomI2CTest_Random, X24C01_randomReadEmpty)
+TEST_P(EEPRomI2CTest_Random, X24C01_randomReadEmpty)
 {
+	unsigned int enableRepeatedStart = GetParam();
+
 	// Set the EEPROM as X24C01.
 	// TODO: Move to SetUp().
 	m_eeprom->dbg_setEEPRomType(EEPRomI2C::EPR_X24C01);
@@ -87,9 +90,22 @@ TEST_F(EEPRomI2CTest_Random, X24C01_randomReadEmpty)
 			std::hex << std::setw(2) << std::setfill('0') << std::uppercase << addr <<
 			" should be 0xFF (empty ROM).";
 
+		if (!enableRepeatedStart) {
+			// STOP the transfer.
+			doStop();
+		}
+	}
+
+	if (enableRepeatedStart) {
 		// STOP the transfer.
 		doStop();
 	}
 }
+
+// Random Read tests.
+// Value is non-zero to enable repeated start conditions.
+INSTANTIATE_TEST_CASE_P(RandomRead, EEPRomI2CTest_Random,
+	::testing::Values(0, 1)
+	);
 
 } }
