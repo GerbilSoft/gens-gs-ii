@@ -48,6 +48,7 @@ class EEPRomI2CTest_Seq : public EEPRomI2CTest
 /**
  * X24C01: Test sequential reading of an empty EEPROM.
  * Starts at the specified address.
+ * @param addr_start Starting address.
  */
 TEST_P(EEPRomI2CTest_Seq, X24C01_seqReadEmpty)
 {
@@ -94,6 +95,7 @@ TEST_P(EEPRomI2CTest_Seq, X24C01_seqReadEmpty)
  * X24C01: Test sequential reading of a full EEPROM.
  * EEPROM will contain random data from test_EEPRomI2C_data[].
  * Starts at the specified address.
+ * @param addr_start Starting address.
  */
 TEST_P(EEPRomI2CTest_Seq, X24C01_seqReadFull)
 {
