@@ -19,6 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+// NOTE: Page sizes used for MODE2 EEPROMs are taken from the
+// Atmel AT24C01A/02/04/08/16 datasheet.
+
 // EEPRomI2C class.
 #include "Save/EEPRomI2C.hpp"
 
@@ -244,8 +247,8 @@ void EEPRomI2CTest_RandomRead::eprMode2_randomReadEmpty(unsigned int enableRepea
 
 		// Device select.
 		// Assuming device address is 0.
-		cmd = (0xA0 | 0);			// RW=0
-		cmd |= ((addr & eepromMask) >> 7);	// A10-A8
+		cmd = (0xA0 | 0);				// RW=0
+		cmd |= (((addr & eepromMask) >> 7) & ~1);	// A10-A8
 		response = sendData(cmd);
 		// Check for ACK.
 		m_eeprom->dbg_getSDA(&response);
@@ -273,8 +276,9 @@ void EEPRomI2CTest_RandomRead::eprMode2_randomReadEmpty(unsigned int enableRepea
 
 		// Device select.
 		// Assuming device address is 0.
-		cmd = (0xA0 | 1);			// RW=1
-		cmd |= ((addr & eepromMask) >> 7);	// A10-A8
+		fprintf(stderr, "addr=%02X\n", addr);
+		cmd = (0xA0 | 1);				// RW=1
+		cmd |= (((addr & eepromMask) >> 7) & ~1);	// A10-A8
 		response = sendData(cmd);
 		// Check for ACK.
 		m_eeprom->dbg_getSDA(&response);
@@ -315,7 +319,91 @@ TEST_P(EEPRomI2CTest_RandomRead, epr24C01_randomReadEmpty)
 	const unsigned int eepromSize = 128;
 	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomMode(EEPRomI2C::EPR_MODE2));
 	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomSize(eepromSize));
-	const unsigned int pgSize = 4;
+	const unsigned int pgSize = 8;
+	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
+	ASSERT_EQ(0, m_eeprom->dbg_setDevAddr(0));
+
+	// Run the Mode 2 test.
+	eprMode2_randomReadEmpty(enableRepeatedStart, eepromSize);
+}
+
+/**
+ * 24C02: Test random reading of an empty EEPROM.
+ * Reads 64 bytes at random addresses.
+ * @param enableRepeatedStart If zero, a STOP condition will be emitted after every read.
+ */
+TEST_P(EEPRomI2CTest_RandomRead, epr24C02_randomReadEmpty)
+{
+	unsigned int enableRepeatedStart = GetParam();
+
+	// Set the EEPROM as 24C02.
+	const unsigned int eepromSize = 256;
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomMode(EEPRomI2C::EPR_MODE2));
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomSize(eepromSize));
+	const unsigned int pgSize = 8;
+	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
+	ASSERT_EQ(0, m_eeprom->dbg_setDevAddr(0));
+
+	// Run the Mode 2 test.
+	eprMode2_randomReadEmpty(enableRepeatedStart, eepromSize);
+}
+
+/**
+ * 24C04: Test random reading of an empty EEPROM.
+ * Reads 64 bytes at random addresses.
+ * @param enableRepeatedStart If zero, a STOP condition will be emitted after every read.
+ */
+TEST_P(EEPRomI2CTest_RandomRead, epr24C04_randomReadEmpty)
+{
+	unsigned int enableRepeatedStart = GetParam();
+
+	// Set the EEPROM as 24C01.
+	const unsigned int eepromSize = 512;
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomMode(EEPRomI2C::EPR_MODE2));
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomSize(eepromSize));
+	const unsigned int pgSize = 16;
+	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
+	ASSERT_EQ(0, m_eeprom->dbg_setDevAddr(0));
+
+	// Run the Mode 2 test.
+	eprMode2_randomReadEmpty(enableRepeatedStart, eepromSize);
+}
+
+/**
+ * 24C08: Test random reading of an empty EEPROM.
+ * Reads 64 bytes at random addresses.
+ * @param enableRepeatedStart If zero, a STOP condition will be emitted after every read.
+ */
+TEST_P(EEPRomI2CTest_RandomRead, epr24C08_randomReadEmpty)
+{
+	unsigned int enableRepeatedStart = GetParam();
+
+	// Set the EEPROM as 24C01.
+	const unsigned int eepromSize = 1024;
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomMode(EEPRomI2C::EPR_MODE2));
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomSize(eepromSize));
+	const unsigned int pgSize = 16;
+	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
+	ASSERT_EQ(0, m_eeprom->dbg_setDevAddr(0));
+
+	// Run the Mode 2 test.
+	eprMode2_randomReadEmpty(enableRepeatedStart, eepromSize);
+}
+
+/**
+ * 24C16: Test random reading of an empty EEPROM.
+ * Reads 64 bytes at random addresses.
+ * @param enableRepeatedStart If zero, a STOP condition will be emitted after every read.
+ */
+TEST_P(EEPRomI2CTest_RandomRead, epr24C16_randomReadEmpty)
+{
+	unsigned int enableRepeatedStart = GetParam();
+
+	// Set the EEPROM as 24C01.
+	const unsigned int eepromSize = 2048;
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomMode(EEPRomI2C::EPR_MODE2));
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomSize(eepromSize));
+	const unsigned int pgSize = 16;
 	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
 	ASSERT_EQ(0, m_eeprom->dbg_setDevAddr(0));
 
@@ -365,8 +453,8 @@ void EEPRomI2CTest_RandomRead::eprMode2_randomReadFull(unsigned int enableRepeat
 
 		// Device select.
 		// Assuming device address is 0.
-		cmd = (0xA0 | 0);			// RW=0
-		cmd |= ((addr & eepromMask) >> 7);	// A10-A8
+		cmd = (0xA0 | 0);				// RW=0
+		cmd |= (((addr & eepromMask) >> 7) & ~1);	// A10-A8
 		response = sendData(cmd);
 		// Check for ACK.
 		m_eeprom->dbg_getSDA(&response);
@@ -394,8 +482,8 @@ void EEPRomI2CTest_RandomRead::eprMode2_randomReadFull(unsigned int enableRepeat
 
 		// Device select.
 		// Assuming device address is 0.
-		cmd = (0xA0 | 1);			// RW=1
-		cmd |= ((addr & eepromMask) >> 7);	// A10-A8
+		cmd = (0xA0 | 1);				// RW=1
+		cmd |= (((addr & eepromMask) >> 7) & ~1);	// A10-A8
 		response = sendData(cmd);
 		// Check for ACK.
 		m_eeprom->dbg_getSDA(&response);
@@ -437,7 +525,91 @@ TEST_P(EEPRomI2CTest_RandomRead, epr24C01_randomReadFull)
 	const unsigned int eepromSize = 128;
 	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomMode(EEPRomI2C::EPR_MODE2));
 	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomSize(eepromSize));
-	const unsigned int pgSize = 4;
+	const unsigned int pgSize = 8;
+	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
+	ASSERT_EQ(0, m_eeprom->dbg_setDevAddr(0));
+
+	// Run the Mode 2 test.
+	eprMode2_randomReadFull(enableRepeatedStart, eepromSize);
+}
+
+/**
+ * 24C02: Test random reading of a full EEPROM.
+ * Reads 64 bytes at random addresses.
+ * @param enableRepeatedStart If zero, a STOP condition will be emitted after every read.
+ */
+TEST_P(EEPRomI2CTest_RandomRead, epr24C02_randomReadFull)
+{
+	unsigned int enableRepeatedStart = GetParam();
+
+	// Set the EEPROM as 24C02.
+	const unsigned int eepromSize = 256;
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomMode(EEPRomI2C::EPR_MODE2));
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomSize(eepromSize));
+	const unsigned int pgSize = 8;
+	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
+	ASSERT_EQ(0, m_eeprom->dbg_setDevAddr(0));
+
+	// Run the Mode 2 test.
+	eprMode2_randomReadFull(enableRepeatedStart, eepromSize);
+}
+
+/**
+ * 24C04: Test random reading of a full EEPROM.
+ * Reads 64 bytes at random addresses.
+ * @param enableRepeatedStart If zero, a STOP condition will be emitted after every read.
+ */
+TEST_P(EEPRomI2CTest_RandomRead, epr24C04_randomReadFull)
+{
+	unsigned int enableRepeatedStart = GetParam();
+
+	// Set the EEPROM as 24C04.
+	const unsigned int eepromSize = 512;
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomMode(EEPRomI2C::EPR_MODE2));
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomSize(eepromSize));
+	const unsigned int pgSize = 16;
+	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
+	ASSERT_EQ(0, m_eeprom->dbg_setDevAddr(0));
+
+	// Run the Mode 2 test.
+	eprMode2_randomReadFull(enableRepeatedStart, eepromSize);
+}
+
+/**
+ * 24C08: Test random reading of a full EEPROM.
+ * Reads 64 bytes at random addresses.
+ * @param enableRepeatedStart If zero, a STOP condition will be emitted after every read.
+ */
+TEST_P(EEPRomI2CTest_RandomRead, epr24C08_randomReadFull)
+{
+	unsigned int enableRepeatedStart = GetParam();
+
+	// Set the EEPROM as 24C08.
+	const unsigned int eepromSize = 1024;
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomMode(EEPRomI2C::EPR_MODE2));
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomSize(eepromSize));
+	const unsigned int pgSize = 16;
+	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
+	ASSERT_EQ(0, m_eeprom->dbg_setDevAddr(0));
+
+	// Run the Mode 2 test.
+	eprMode2_randomReadFull(enableRepeatedStart, eepromSize);
+}
+
+/**
+ * 24C16: Test random reading of a full EEPROM.
+ * Reads 64 bytes at random addresses.
+ * @param enableRepeatedStart If zero, a STOP condition will be emitted after every read.
+ */
+TEST_P(EEPRomI2CTest_RandomRead, epr24C16_randomReadFull)
+{
+	unsigned int enableRepeatedStart = GetParam();
+
+	// Set the EEPROM as 24C02.
+	const unsigned int eepromSize = 2048;
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomMode(EEPRomI2C::EPR_MODE2));
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomSize(eepromSize));
+	const unsigned int pgSize = 16;
 	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
 	ASSERT_EQ(0, m_eeprom->dbg_setDevAddr(0));
 
