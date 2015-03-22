@@ -112,7 +112,7 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 				shift_rw = 0;	// Shifting in.
 				state = EPR_WRITE_DATA;
 			}
-			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG2,
 				"EPR_MODE1_WORD_ADDRESS: address=%02X, rw=%d, data_buf=%02X",
 				address, rw, data_buf);
 			break;
@@ -130,7 +130,7 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 			address = ((address & ~eprChip.pg_mask) | addr_low_tmp);
 
 			data_buf = 0;
-			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG2,
 				"EPR_WRITE_DATA: %02X -> [%02X]; address=%02X",
 				eeprom[prev_address], prev_address, address);
 			break;
@@ -145,7 +145,7 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 			if (dev_type != 0xA) {
 				// Not an EEPROM command.
 				// Go back to standby.
-				LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+				LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG2,
 					"EPR_MODE2_DEVICE_ADDRESS: %02X: dev_type=%1X, ignoring",
 					data_buf, dev_type);
 				doStandby();
@@ -165,7 +165,7 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 				// Incorrect device address.
 				// Ignore this request.
 				// TODO: Split into doStandby() function?
-				LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+				LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG2,
 					"EPR_MODE2_DEVICE_ADDRESS: dev_type=%1X, dev_addr=%1X; my dev_addr=%1X, ignoring",
 					dev_type, dev_addr, eprChip.dev_addr);
 				doStandby();
@@ -183,7 +183,7 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 				address &= eprChip.sz_mask;
 			}
 
-			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG2,
 				"EPR_MODE2_DEVICE_ADDRESS: %02X: type=%1X, dev=%02X, address=%04X, rw=%d",
 				data_buf, dev_type, dev_addr, address, rw);
 
@@ -210,7 +210,7 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 			// Format: [A7 A6 A5 A4 A3 A2 A1 A0]
 			address = (address & ~0xFF) | data_buf;
 			address &= eprChip.sz_mask;
-			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG2,
 				"EPR_MODE2_WORD_ADDRESS_LOW: %02X: dev_addr=%02X, address=%04X",
 				data_buf, dev_addr, address);
 
@@ -226,7 +226,7 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 			// Format: [A15 A14 A13 A12 A11 A10 A9 A8]
 			address = (address & ~0xFF00) | (data_buf << 8);
 			address &= eprChip.sz_mask;
-			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG2,
 				"EPR_MODE3_WORD_ADDRESS_HIGH: %02X: dev_addr=%02X, address=%04X",
 				data_buf, dev_addr, address);
 
@@ -259,7 +259,7 @@ void EEPRomI2CPrivate::processI2CShiftOut(void)
 			address &= eprChip.sz_mask;
 			data_buf = eeprom[address];
 			counter = 0;
-			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG2,
 				"EPR_READ_DATA: ACK received: address=%04X, data_buf=%02X",
 				address, data_buf);
 			break;
@@ -288,7 +288,7 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 	// Check for a STOP condition.
 	if (checkStop()) {
 		// STOP condition reached.
-		LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+		LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG2,
 			"Received STOP condition.");
 		doStandby();
 		goto done;
@@ -297,7 +297,7 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 	// Has a START condition been issued?
 	if (checkStart()) {
 		// START condition.
-		LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+		LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG2,
 			"Received START condition.");
 		counter = 0;
 		sda_out = 1;
@@ -383,7 +383,7 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 
 			// TODO: Not necessarily EPR_READ_DATA.
 			if (counter == 8) {
-				LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+				LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG2,
 					"EPR_READ_DATA: all 8 bits read: address=%04X",
 					address);
 			}
