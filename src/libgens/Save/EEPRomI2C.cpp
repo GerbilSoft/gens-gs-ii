@@ -491,7 +491,6 @@ bool EEPRomI2C::isDirty(void) const
  */
 uint8_t EEPRomI2C::readByte(uint32_t address)
 {
-	printf("READ BYTE:  addr=%06X, sda_out_adr=%06X\n", address, d->eprMapper.sda_out_adr);
 	if (address != d->eprMapper.sda_out_adr) {
 		// Wrong address.
 		return 0xFF;
@@ -499,8 +498,6 @@ uint8_t EEPRomI2C::readByte(uint32_t address)
 
 	// Return /SDA, shifted over to the appropriate position.
 	// TODO: Other bits should be prefetch?
-	fprintf(stderr, "READ BYTE:  addr=%06X, data=%02X, sda=%d\n",
-		address, (d->getSDA() << d->eprMapper.sda_out_bit), d->getSDA());
 	return (d->getSDA() << d->eprMapper.sda_out_bit);
 }
 
@@ -514,7 +511,6 @@ uint16_t EEPRomI2C::readWord(uint32_t address)
 {
 	// TODO: address probably doesn't need to be masked,
 	// since M68K is word-aligned...
-	printf("READ WORD:  addr=%06X, sda_out_adr=%06X\n", address, d->eprMapper.sda_out_adr);
 	if ((address & ~1) != (d->eprMapper.sda_out_adr & ~1)) {
 		// Wrong address.
 		return 0xFFFF;
@@ -524,8 +520,6 @@ uint16_t EEPRomI2C::readWord(uint32_t address)
 	// TODO: Other bits should be prefetch?
 	uint8_t sda_out_bit = d->eprMapper.sda_out_bit;
 	sda_out_bit += (!(d->eprMapper.sda_out_adr & 1) * 8);
-	fprintf(stderr, "READ WORD:  addr=%06X, data=%04X, sda=%d\n",
-		address, (d->getSDA() << sda_out_bit), d->getSDA());
 	return (d->getSDA() << sda_out_bit);
 }
 
@@ -557,8 +551,6 @@ void EEPRomI2C::writeByte(uint32_t address, uint8_t data)
 		d->sda_in = d->sda_in_prev;
 	}
 
-	fprintf(stderr, "WRITE BYTE: addr=%06X, data=%02X, scl=%d, sda_in=%d\n",
-		address, data, d->scl, d->sda_in);
 	// Process the I2C command.
 	// TODO: Only if /SDA or /SCL has changed?
 	d->processI2Cbit();
@@ -594,8 +586,6 @@ void EEPRomI2C::writeWord(uint32_t address, uint16_t data)
 		d->sda_in = d->sda_in_prev;
 	}
 
-	fprintf(stderr, "WRITE WORD: addr=%06X, data=%04X, scl=%d, sda_in=%d\n",
-		address, data, d->scl, d->sda_in);
 	// Process the I2C bit.
 	// TODO: Only if /SDA or /SCL has changed?
 	d->processI2Cbit();
