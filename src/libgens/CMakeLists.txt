@@ -69,16 +69,13 @@ SET(libgens_SRCS
 	cpu/Z80.cpp
 	cpu/Z80_MD_Mem.cpp
 	Save/SRam.cpp
-	Save/EEPRom.cpp
 	credits.c
 	lg_osd.c
-	Save/EEPRom_File.cpp
 	sound/SoundMgr.cpp
 	Decompressor/Decompressor.cpp
 	Decompressor/DcGzip.cpp
 	Decompressor/DcZip.cpp
 	EmuContext.cpp
-	Save/EEPRom_DB.cpp
 	Data/mcd_rom_db.c
 	Data/32X/fw_32x.c
 	Util/MdFb.cpp
@@ -87,6 +84,10 @@ SET(libgens_SRCS
 	IO/IoManager_p_update.cpp
 	IO/IoManager_btnNames.cpp
 	Cartridge/RomCartridgeMD.cpp
+	Save/EEPRomI2C.cpp
+	Save/EEPRomI2C_File.cpp
+	Save/EEPRomI2C_DB.cpp
+	Save/EEPRomI2C_Debug.cpp
 	)
 
 SET(libgens_VDP_SRCS

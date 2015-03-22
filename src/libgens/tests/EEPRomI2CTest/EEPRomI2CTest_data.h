@@ -1,8 +1,8 @@
 /***************************************************************************
- * libgenstext: Gens/GS II Text Manipulation Library.                      *
- * StringManip.hpp: String manipulation functions.                         *
+ * libgens/tests: Gens Emulation Library. (Test Suite)                     *
+ * EEPRomI2CTest_data.h: EEPRomI2C test data.                              *
  *                                                                         *
- * Copyright (c) 2010-2015 by David Korth.                                 *
+ * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -19,31 +19,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENSTEXT_STRINGMANIP_HPP__
-#define __LIBGENSTEXT_STRINGMANIP_HPP__
+#ifndef __LIBGENS_TESTS_EEPROMI2CTEST_DATA_H__
+#define __LIBGENS_TESTS_EEPROMI2CTEST_DATA_H__
 
-// C++ includes.
-#include <string>
+// C includes.
+#include <stdint.h>
 
-namespace LibGensText {
-
-/**
- * Remove excess spaces from a string.
- * This removes spaces at the end of the string,
- * as well as double-spaces within the string.
- * TODO: Remove spaces from the beginning of the string?
- * @param src String. (UTF-8)
- * @return String with excess spaces removed. (UTF-8)
- */
-std::string SpaceElim(const std::string &src);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * Get the filename portion of a path without its extension.
- * @param filename Original filename.
- * @return Filename without directories or its extension.
+ * Test data for 8 KB EEPROMs.
+ * Smaller EEPROMs can use a smaller chunk of the data.
  */
-std::string FilenameNoExt(const std::string &filename);
+extern const uint8_t test_EEPRomI2C_data[8192];
 
+#ifdef __cplusplus
 }
+#endif
 
-#endif /* __LIBGENSTEXT_STRINGMANIP_HPP__ */
+#endif /* __LIBGENS_TESTS_EEPROMI2CTEST_DATA_H__ */

@@ -36,8 +36,10 @@
 // libgens: Sega CD Boot ROM database.
 #include "libgens/Data/mcd_rom_db.h"
 
-namespace GensQt4
-{
+// crc32()
+#include <zlib.h>
+
+namespace GensQt4 {
 
 // Static member initialization.
 GeneralConfigWindow *GeneralConfigWindowPrivate::ms_GeneralConfigWindow = nullptr;

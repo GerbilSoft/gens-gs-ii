@@ -32,7 +32,7 @@
 
 // SRam and EEPRom.
 #include "Save/SRam.hpp"
-#include "Save/EEPRom.hpp"
+#include "Save/EEPRomI2C.hpp"
 
 // ZOMG class.
 #include "libzomg/Zomg.hpp"
@@ -179,7 +179,7 @@ class RomCartridgeMD
 
 		// SRam and EEPRom.
 		SRam m_SRam;
-		EEPRom m_EEPRom;
+		EEPRomI2C m_EEPRom;
 
 		// Internal cartridge banking IDs.
 		enum CartBank_t {
