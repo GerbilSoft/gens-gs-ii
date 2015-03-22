@@ -514,7 +514,7 @@ uint16_t EEPRomI2C::readWord(uint32_t address)
 	// Return /SDA, shifted over to the appropriate position.
 	// TODO: Other bits should be prefetch?
 	uint8_t sda_out_bit = d->eprMapper.sda_out_bit;
-	sda_out_bit += ((d->eprMapper.sda_out_adr & 1) * 8);
+	sda_out_bit += (!(d->eprMapper.sda_out_adr & 1) * 8);
 	return (d->getSDA() << sda_out_bit);
 }
 
