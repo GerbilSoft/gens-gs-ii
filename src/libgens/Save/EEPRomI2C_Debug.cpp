@@ -78,6 +78,23 @@ int EEPRomI2C::dbg_getEEPRomSize(unsigned int *sz) const
 }
 
 /**
+ * Get the page size.
+ * This is used for sequential write, and varies based on EEPROM.
+ * @param sz Buffer for the page size.
+ * @return MDP error code.
+ */
+
+int EEPRomI2C::dbg_getPageSize(unsigned int *pgSize) const
+{
+	if (d->eprSpec.sz_mask == 0) {
+		*pgSize = 0;
+	} else {
+		*pgSize = d->eprSpec.pg_mask + 1;
+	}
+	return 0;
+}
+
+/**
  * Read data from the EEPROM.
  * NOTE: Wraparound is not supported.
  * @param address Start address.

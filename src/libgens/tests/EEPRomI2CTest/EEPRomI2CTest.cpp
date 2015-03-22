@@ -32,6 +32,12 @@
 #include <cstdlib>
 #include <ctime>
 
+// C++ includes.
+#include <iostream>
+#include <string>
+using std::endl;
+using std::string;
+
 namespace LibGens { namespace Tests {
 
 /**
@@ -120,6 +126,62 @@ uint8_t EEPRomI2CTest::recvData(bool ack)
 		m_eeprom->dbg_setSCL(1);
 	}
 	return data;
+}
+
+/**
+ * Compare two byte arrays.
+ * The byte arrays are converted to hexdumps and then
+ * compared using EXPECT_EQ().
+ * @param expected Expected data.
+ * @param actual Actual data.
+ * @param size Size of both arrays.
+ */
+void EEPRomI2CTest::CompareByteArrays(const uint8_t *expected, const uint8_t *actual, unsigned int size)
+{
+	// Output format: (assume ~64 bytes per line)
+	// 0000: 01 23 45 67 89 AB CD EF  01 23 45 67 89 AB CD EF
+	const unsigned int bufSize = ((size / 16) + !!(size % 16)) * 64;
+	char printf_buf[16];
+	string s_expected, s_actual;
+	s_expected.reserve(bufSize);
+	s_actual.reserve(bufSize);
+
+	// TODO: Use stringstream instead?
+	const uint8_t *pE = expected, *pA = actual;
+	for (size_t i = 0; i < size; i++, pE++, pA++) {
+		if (i % 16 == 0) {
+			// New line.
+			if (i > 0) {
+				// Append newlines.
+				s_expected += '\n';
+				s_actual += '\n';
+			}
+
+			snprintf(printf_buf, sizeof(printf_buf), "%04X: ", i);
+			s_expected += printf_buf;
+			s_actual += printf_buf;
+		}
+
+		// Print the byte.
+		snprintf(printf_buf, sizeof(printf_buf), "%02X", *pE);
+		s_expected += printf_buf;
+		snprintf(printf_buf, sizeof(printf_buf), "%02X", *pA);
+		s_actual += printf_buf;
+
+		if (i % 16 == 7) {
+			s_expected += "  ";
+			s_actual += "  ";
+		} else if (i % 16  < 15) {
+			s_expected += ' ';
+			s_actual += ' ';
+		}
+	}
+
+	// Compare the byte arrays, and
+	// print the strings on failure.
+	EXPECT_EQ(0, memcmp(expected, actual, size)) <<
+		"Expected EEPROM data:" << endl << s_expected << endl <<
+		"Actual EEPROM data:" << endl << s_actual << endl;
 }
 
 } }

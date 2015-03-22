@@ -67,6 +67,16 @@ class EEPRomI2CTest : public ::testing::TestWithParam<unsigned int>
 		 * @return 8-bit data word.
 		 */
 		uint8_t recvData(bool ack);
+
+		/**
+		 * Compare two byte arrays.
+		 * The byte arrays are converted to hexdumps and then
+		 * compared using EXPECT_EQ().
+		 * @param expected Expected data.
+		 * @param actual Actual data.
+		 * @param size Size of both arrays.
+		 */
+		void CompareByteArrays(const uint8_t *expected, const uint8_t *actual, unsigned int size);
 };
 
 } }

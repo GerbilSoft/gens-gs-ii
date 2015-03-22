@@ -154,6 +154,7 @@ class EEPRomI2C
 		int dbg_getEEPRomType(EEPRomType_t *eprType) const;
 		int dbg_setEEPRomType(EEPRomType_t eprType);
 		int dbg_getEEPRomSize(unsigned int *sz) const;
+		int dbg_getPageSize(unsigned int *pgSize) const;
 
 		int dbg_readEEPRom(uint32_t address, uint8_t *data, int length) const;
 		int dbg_writeEEPRom(uint32_t address, const uint8_t *data, int length);
