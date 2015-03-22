@@ -43,7 +43,6 @@ const EEPRomI2CPrivate::GameEEPRomInfo_t EEPRomI2CPrivate::rom_db[14] =
 
 	/* 24C02 (old mapper) */
 	/* NBA Jam (UE) */
-	// WARNING: BROKEN!
 	{"T-081326"   , 0,      {0x200001, 0x200001, 0x200001, 0, 1, 1}, {EEPRomI2C::EPR_MODE2, 0, 0xFF, 0x03}},
 
 	/* 24C04 */
