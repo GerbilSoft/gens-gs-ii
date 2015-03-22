@@ -224,6 +224,98 @@ TEST_P(EEPRomI2CTest_PageWrite, epr24C01_pageWrite)
 	eprMode2_pageWrite(addr_start, eepromSize, pgSize);
 }
 
+/**
+ * 24C02: Test sequential writing of full pages.
+ * Starts at the specified address.
+ * NOTE: Each byte is written exactly once.
+ * Wraparound can be tested by starting at an address
+ * within the page instead of at the start of the page.
+ * @param addr_start Starting address.
+ */
+TEST_P(EEPRomI2CTest_PageWrite, epr24C02_pageWrite)
+{
+	unsigned int addr_start = GetParam();
+
+	// Set the EEPROM as 24C02.
+	const unsigned int eepromSize = 256;
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomMode(EEPRomI2C::EPR_MODE2));
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomSize(eepromSize));
+	const unsigned int pgSize = 8;
+	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
+
+	// Run the Mode 2 test.
+	eprMode2_pageWrite(addr_start, eepromSize, pgSize);
+}
+
+/**
+ * 24C04: Test sequential writing of full pages.
+ * Starts at the specified address.
+ * NOTE: Each byte is written exactly once.
+ * Wraparound can be tested by starting at an address
+ * within the page instead of at the start of the page.
+ * @param addr_start Starting address.
+ */
+TEST_P(EEPRomI2CTest_PageWrite, epr24C04_pageWrite)
+{
+	unsigned int addr_start = GetParam();
+
+	// Set the EEPROM as 24C04.
+	const unsigned int eepromSize = 512;
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomMode(EEPRomI2C::EPR_MODE2));
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomSize(eepromSize));
+	const unsigned int pgSize = 16;
+	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
+
+	// Run the Mode 2 test.
+	eprMode2_pageWrite(addr_start, eepromSize, pgSize);
+}
+
+/**
+ * 24C08: Test sequential writing of full pages.
+ * Starts at the specified address.
+ * NOTE: Each byte is written exactly once.
+ * Wraparound can be tested by starting at an address
+ * within the page instead of at the start of the page.
+ * @param addr_start Starting address.
+ */
+TEST_P(EEPRomI2CTest_PageWrite, epr24C08_pageWrite)
+{
+	unsigned int addr_start = GetParam();
+
+	// Set the EEPROM as 24C08.
+	const unsigned int eepromSize = 1024;
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomMode(EEPRomI2C::EPR_MODE2));
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomSize(eepromSize));
+	const unsigned int pgSize = 16;
+	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
+
+	// Run the Mode 2 test.
+	eprMode2_pageWrite(addr_start, eepromSize, pgSize);
+}
+
+/**
+ * 24C16: Test sequential writing of full pages.
+ * Starts at the specified address.
+ * NOTE: Each byte is written exactly once.
+ * Wraparound can be tested by starting at an address
+ * within the page instead of at the start of the page.
+ * @param addr_start Starting address.
+ */
+TEST_P(EEPRomI2CTest_PageWrite, epr24C16_pageWrite)
+{
+	unsigned int addr_start = GetParam();
+
+	// Set the EEPROM as 24C16.
+	const unsigned int eepromSize = 2048;
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomMode(EEPRomI2C::EPR_MODE2));
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomSize(eepromSize));
+	const unsigned int pgSize = 16;
+	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
+
+	// Run the Mode 2 test.
+	eprMode2_pageWrite(addr_start, eepromSize, pgSize);
+}
+
 // Page Write with various starting addresses.
 INSTANTIATE_TEST_CASE_P(PageWrite_0x0000_0x03FF, EEPRomI2CTest_PageWrite,
 	::testing::Values(
