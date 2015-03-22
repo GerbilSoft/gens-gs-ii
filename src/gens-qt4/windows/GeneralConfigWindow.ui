@@ -491,21 +491,21 @@ this option will more accurately simulate the Genesis 3.</string>
                 </property>
                </widget>
               </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="chkUpdatePaletteInVBlankOnly">
-             <property name="toolTip">
-              <string>If enabled, the palette will only be updated during the
+              <item>
+               <widget class="QCheckBox" name="chkUpdatePaletteInVBlankOnly">
+                <property name="toolTip">
+                 <string>If enabled, the palette will only be updated during the
 Vertical Blanking interval. This simulates the behavior of
 the Genecyst emulator, which e.g. only rendered underwater
 levels using the underwater palette if the entire screen
 was submerged.</string>
-             </property>
-             <property name="text">
-              <string>&amp;Update the palette in VBlank only.</string>
-             </property>
+                </property>
+                <property name="text">
+                 <string>&amp;Update the palette in VBlank only.</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </widget>
            </item>
            <item>
