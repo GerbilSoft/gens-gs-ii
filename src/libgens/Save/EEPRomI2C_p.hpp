@@ -178,28 +178,17 @@ class EEPRomI2CPrivate
 			uint8_t pg_mask;	// Page mask.
 		};
 
-		/** EEPROM map. **/
-		struct EEPRomMap_t {
-			uint32_t sda_in_adr;		// 68000 memory address mapped to SDA_IN.
-			uint32_t sda_out_adr;		// 68000 memory address mapped to SDA_OUT.
-			uint32_t scl_adr;		// 68000 memory address mapped to SCL.
-			uint8_t sda_in_bit;		// Bit offset for SDA_IN.
-			uint8_t sda_out_bit;		// Bit offset for SDA_OUT.
-			uint8_t scl_bit;		// Bit offset for SCL.
-		};
-
 		/** ROM database. **/
 		struct GameEEPRomInfo_t {
 			char game_id[16];
 			uint16_t checksum;
-			EEPRomMap_t mapper;
+			EEPRomI2C::EEPRomMap_t mapper;
 			EEPRomChip_t epr_chip;		// EEPROM chip specification.
 		};
 		static const GameEEPRomInfo_t rom_db[30];
 
 		// Current EEPRom type.
 		EEPRomChip_t eprChip;
-		EEPRomMap_t eprMapper;
 
 	public:
 		/**

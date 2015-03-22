@@ -89,10 +89,10 @@ class EEPRomI2C
 		 * @param address Address.
 		 * @return True if the address is usable for the specified purpose.
 		 */
-		bool isReadBytePort(uint32_t address) const;
-		bool isReadWordPort(uint32_t address) const;
-		bool isWriteBytePort(uint32_t address) const;
-		bool isWriteWordPort(uint32_t address) const;
+		inline bool isReadBytePort(uint32_t address) const;
+		inline bool isReadWordPort(uint32_t address) const;
+		inline bool isWriteBytePort(uint32_t address) const;
+		inline bool isWriteWordPort(uint32_t address) const;
 
 		/**
 		 * Check if the EEPRom is dirty.
@@ -166,7 +166,65 @@ class EEPRomI2C
 		int dbg_setSCL(uint8_t scl);
 		int dbg_getSDA(uint8_t *sda) const;
 		int dbg_setSDA(uint8_t sda);
+
+	protected:
+		// For performance reasons, these structs and functions
+		// need to be moved here.
+
+		/** EEPROM map. **/
+		struct EEPRomMap_t {
+			uint32_t sda_in_adr;		// 68000 memory address mapped to SDA_IN.
+			uint32_t sda_out_adr;		// 68000 memory address mapped to SDA_OUT.
+			uint32_t scl_adr;		// 68000 memory address mapped to SCL.
+			uint8_t sda_in_bit;		// Bit offset for SDA_IN.
+			uint8_t sda_out_bit;		// Bit offset for SDA_OUT.
+			uint8_t scl_bit;		// Bit offset for SCL.
+		};
+
+		// Current EEPROM mapper.
+		EEPRomMap_t eprMapper;
 };
+
+// For performance reasons, these structs and functions
+// need to be moved here.
+
+/**
+ * Address verification functions.
+ *
+ * Notes:
+ *
+ * - Address 0 doesn't need to be checked, since the M68K memory handler
+ *   never checks EEPROM in the first bank (0x000000 - 0x07FFFF).
+ *
+ * - Word-wide addresses are checked by OR'ing both the specified address
+ *   and the preset address with 1.
+ *
+ * @param address Address.
+ * @return True if the address is usable for the specified purpose.
+ */
+
+bool EEPRomI2C::isReadBytePort(uint32_t address) const
+{
+	return (address == eprMapper.sda_out_adr);
+}
+
+bool EEPRomI2C::isReadWordPort(uint32_t address) const
+{
+	return ((address | 1) == (eprMapper.sda_out_adr | 1));
+}
+
+bool EEPRomI2C::isWriteBytePort(uint32_t address) const
+{
+	return (address == eprMapper.scl_adr ||
+		address == eprMapper.sda_in_adr);
+}
+
+bool EEPRomI2C::isWriteWordPort(uint32_t address) const
+{
+	address |= 1;
+	return ((address == (eprMapper.scl_adr | 1)) ||
+		(address == (eprMapper.sda_in_adr | 1)));
+}
 
 }
 

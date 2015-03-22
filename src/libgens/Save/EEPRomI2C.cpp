@@ -41,9 +41,8 @@ EEPRomI2CPrivate::EEPRomI2CPrivate(EEPRomI2C *q)
 	, dirty(false)
 	, framesElapsed(0)
 {
-	// Clear the EEPRom type.
+	// Clear the EEPRom chip specification.
 	memset(&eprChip, 0, sizeof(eprChip));
-	memset(&eprMapper, 0, sizeof(eprMapper));
 
 	// Reset the EEPRom.
 	reset();
@@ -403,7 +402,10 @@ done:
  */
 EEPRomI2C::EEPRomI2C()
 	: d(new EEPRomI2CPrivate(this))
-{ }
+{
+	// Clear the EEPRom mapper.
+	memset(&eprMapper, 0, sizeof(eprMapper));
+}
 
 EEPRomI2C::~EEPRomI2C()
 {
@@ -436,7 +438,7 @@ int EEPRomI2C::setEEPRomType(int type)
 	}
 
 	// Set the EEPRom type.
-	memcpy(&d->eprMapper, &d->rom_db[type].mapper, sizeof(d->eprMapper));
+	memcpy(&eprMapper, &d->rom_db[type].mapper, sizeof(eprMapper));
 	memcpy(&d->eprChip, &d->rom_db[type].epr_chip, sizeof(d->eprChip));
 	return 0;
 }
@@ -448,44 +450,6 @@ int EEPRomI2C::setEEPRomType(int type)
 bool EEPRomI2C::isEEPRomTypeSet(void) const
 {
 	return (d->eprChip.sz_mask != 0);
-}
-
-/**
- * Address verification functions.
- *
- * Notes:
- *
- * - Address 0 doesn't need to be checked, since the M68K memory handler
- *   never checks EEPROM in the first bank (0x000000 - 0x07FFFF).
- *
- * - Word-wide addresses are checked by OR'ing both the specified address
- *   and the preset address with 1.
- *
- * @param address Address.
- * @return True if the address is usable for the specified purpose.
- */
-
-bool EEPRomI2C::isReadBytePort(uint32_t address) const
-{
-	return (address == d->eprMapper.sda_out_adr);
-}
-
-bool EEPRomI2C::isReadWordPort(uint32_t address) const
-{
-	return ((address | 1) == (d->eprMapper.sda_out_adr | 1));
-}
-
-bool EEPRomI2C::isWriteBytePort(uint32_t address) const
-{
-	return (address == d->eprMapper.scl_adr ||
-		address == d->eprMapper.sda_in_adr);
-}
-
-bool EEPRomI2C::isWriteWordPort(uint32_t address) const
-{
-	address |= 1;
-	return ((address == (d->eprMapper.scl_adr | 1)) ||
-		(address == (d->eprMapper.sda_in_adr | 1)));
 }
 
 /**
@@ -502,14 +466,14 @@ bool EEPRomI2C::isDirty(void) const
  */
 uint8_t EEPRomI2C::readByte(uint32_t address)
 {
-	if (address != d->eprMapper.sda_out_adr) {
+	if (address != eprMapper.sda_out_adr) {
 		// Wrong address.
 		return 0xFF;
 	}
 
 	// Return /SDA, shifted over to the appropriate position.
 	// TODO: Other bits should be prefetch?
-	return (d->getSDA() << d->eprMapper.sda_out_bit);
+	return (d->getSDA() << eprMapper.sda_out_bit);
 }
 
 
@@ -522,15 +486,15 @@ uint16_t EEPRomI2C::readWord(uint32_t address)
 {
 	// TODO: address probably doesn't need to be masked,
 	// since M68K is word-aligned...
-	if ((address & ~1) != (d->eprMapper.sda_out_adr & ~1)) {
+	if ((address & ~1) != (eprMapper.sda_out_adr & ~1)) {
 		// Wrong address.
 		return 0xFFFF;
 	}
 
 	// Return /SDA, shifted over to the appropriate position.
 	// TODO: Other bits should be prefetch?
-	uint8_t sda_out_bit = d->eprMapper.sda_out_bit;
-	sda_out_bit += (!(d->eprMapper.sda_out_adr & 1) * 8);
+	uint8_t sda_out_bit = eprMapper.sda_out_bit;
+	sda_out_bit += (!(eprMapper.sda_out_adr & 1) * 8);
 	return (d->getSDA() << sda_out_bit);
 }
 
@@ -541,23 +505,23 @@ uint16_t EEPRomI2C::readWord(uint32_t address)
  */
 void EEPRomI2C::writeByte(uint32_t address, uint8_t data)
 {
-	if (address != d->eprMapper.scl_adr &&
-	    address != d->eprMapper.sda_in_adr)
+	if (address != eprMapper.scl_adr &&
+	    address != eprMapper.sda_in_adr)
 	{
 		// Invalid address.
 		return;
 	}
 
 	// Check if this is the clock line. (/SCL)
-	if (address == d->eprMapper.scl_adr) {
-		d->scl = (data >> (d->eprMapper.scl_bit)) & 1;
+	if (address == eprMapper.scl_adr) {
+		d->scl = (data >> (eprMapper.scl_bit)) & 1;
 	} else {
 		d->scl = d->scl_prev;
 	}
 
 	// Check if this is the data line. (/SDA)
-	if (address == d->eprMapper.sda_in_adr) {
-		d->sda_in = (data >> (d->eprMapper.sda_in_bit)) & 1;
+	if (address == eprMapper.sda_in_adr) {
+		d->sda_in = (data >> (eprMapper.sda_in_bit)) & 1;
 	} else {
 		d->sda_in = d->sda_in_prev;
 	}
@@ -580,19 +544,19 @@ void EEPRomI2C::writeWord(uint32_t address, uint16_t data)
 	address &= ~1;
 
 	// Check if this is the clock line. (/SCL)
-	if (address == d->eprMapper.scl_adr) {
-		d->scl = (data >> (d->eprMapper.scl_bit + 8)) & 1;
-	} else if ((address | 1) == d->eprMapper.scl_adr) {
-		d->scl = (data >> (d->eprMapper.scl_bit)) & 1;
+	if (address == eprMapper.scl_adr) {
+		d->scl = (data >> (eprMapper.scl_bit + 8)) & 1;
+	} else if ((address | 1) == eprMapper.scl_adr) {
+		d->scl = (data >> (eprMapper.scl_bit)) & 1;
 	} else {
 		d->scl = d->scl_prev;
 	}
 
 	// Check if this is the data line. (/SDA)
-	if (address == d->eprMapper.sda_in_adr) {
-		d->sda_in = (data >> (d->eprMapper.sda_in_bit + 8)) & 1;
-	} else if ((address | 1) == d->eprMapper.sda_in_adr) {
-		d->sda_in = (data >> (d->eprMapper.sda_in_bit)) & 1;
+	if (address == eprMapper.sda_in_adr) {
+		d->sda_in = (data >> (eprMapper.sda_in_bit + 8)) & 1;
+	} else if ((address | 1) == eprMapper.sda_in_adr) {
+		d->sda_in = (data >> (eprMapper.sda_in_bit)) & 1;
 	} else {
 		d->sda_in = d->sda_in_prev;
 	}
