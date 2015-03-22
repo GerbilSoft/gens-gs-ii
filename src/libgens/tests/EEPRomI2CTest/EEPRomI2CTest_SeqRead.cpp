@@ -20,7 +20,7 @@
  ***************************************************************************/
 
 // NOTE: Page sizes used for MODE2 EEPROMs are taken from the
-// Atmel AT24C01A/02/04/08/16 datasheet.
+// Atmel AT24C01A/02/04/08A/16A datasheet.
 
 // EEPRomI2C class.
 #include "Save/EEPRomI2C.hpp"
