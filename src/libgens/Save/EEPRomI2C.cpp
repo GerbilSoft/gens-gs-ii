@@ -69,15 +69,22 @@ void EEPRomI2CPrivate::reset(void)
 
 	// Reset the internal registers.
 	address = 0;
-	counter = 0;
 	rw = 0;
 	dev_addr = 0;
 
-	// Shift register.
-	shift_rw = 0,	// Shift-in by default.
-	data_buf = 0;
-
 	// Reset the state.
+	doStandby();
+}
+
+/**
+ * Go into standby mode.
+ */
+void EEPRomI2CPrivate::doStandby(void)
+{
+	sda_out = 1;	// release /SDA
+	counter = 0;	// reset the counter
+	data_buf = 0;	// clear the data buffer
+	shift_rw = 0;	// shift in
 	state = EPR_STANDBY;
 }
 
@@ -138,15 +145,10 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 			if (dev_type != 0xA) {
 				// Not an EEPROM command.
 				// Go back to standby.
-				// TODO: Split into doStandby() function?
 				LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
 					"EPR_MODE2_DEVICE_ADDRESS: %02X: dev_type=%1X, ignoring",
 					data_buf, dev_type);
-				sda_out = 1;
-				counter = 0;
-				data_buf = 0;
-				shift_rw = 0;
-				state = EPR_STANDBY;
+				doStandby();
 				break;
 			}
 
@@ -166,11 +168,7 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 				LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
 					"EPR_MODE2_DEVICE_ADDRESS: dev_type=%1X, dev_addr=%1X; my dev_addr=%1X, ignoring",
 					dev_type, dev_addr, eprChip.dev_addr);
-				sda_out = 1;
-				counter = 0;
-				data_buf = 0;
-				shift_rw = 0;
-				state = EPR_STANDBY;
+				doStandby();
 				break;
 			}
 
@@ -242,11 +240,7 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 		default:
 			// Unknown.
 			// Go back to standby.
-			sda_out = 1;
-			counter = 0;
-			data_buf = 0;
-			shift_rw = 0;
-			state = EPR_STANDBY;
+			doStandby();
 			break;
 	}
 }
@@ -273,11 +267,7 @@ void EEPRomI2CPrivate::processI2CShiftOut(void)
 		default:
 			// Unknown.
 			// Go back to standby.
-			sda_out = 1;
-			counter = 0;
-			data_buf = 0;
-			shift_rw = 0;
-			state = EPR_STANDBY;
+			doStandby();
 			break;
 	}
 }
@@ -300,11 +290,7 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 		// STOP condition reached.
 		LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
 			"Received STOP condition.");
-		counter = 0;
-		sda_out = 1;
-		data_buf = 0;
-		shift_rw = 0;	// shift in
-		state = EPR_STANDBY;
+		doStandby();
 		goto done;
 	}
 

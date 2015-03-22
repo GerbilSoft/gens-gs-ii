@@ -209,6 +209,11 @@ class EEPRomI2CPrivate
 		void reset(void);
 
 		/**
+		 * Go into standby mode.
+		 */
+		void doStandby(void);
+
+		/**
 		 * Process a shifted-in data word.
 		 */
 		void processI2CShiftIn(void);
