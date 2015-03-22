@@ -38,6 +38,18 @@ class EEPRomI2CTest_PageWrite : public EEPRomI2CTest
 {
 	protected:
 		/**
+		 * Mode 1 EEPROM: Test full pages writes in an EEPROM.
+		 * Starts at the specified address.
+		 * NOTE: Each byte is written exactly once.
+		 * Wraparound can be tested by starting at an address
+		 * within the page instead of at the start of the page.
+		 * @param addr_start Starting address.
+		 * @param eepromSize EEPROM size.
+		 * @param pgSize Page size.
+		 */
+		void eprMode1_pageWrite(unsigned int addr_start, unsigned int eepromSize, unsigned int pgSize);
+
+		/**
 		 * Mode 2 EEPROM: Test full pages writes in an EEPROM.
 		 * Starts at the specified address.
 		 * NOTE: Each byte is written exactly once.
@@ -60,25 +72,19 @@ class EEPRomI2CTest_PageWrite : public EEPRomI2CTest
  */
 
 /**
- * X24C01: Test sequential writing of full pages.
+ * Mode 1 EEPROM: Test full pages writes in an EEPROM.
  * Starts at the specified address.
  * NOTE: Each byte is written exactly once.
  * Wraparound can be tested by starting at an address
  * within the page instead of at the start of the page.
  * @param addr_start Starting address.
+ * @param eepromSize EEPROM size.
+ * @param pgSize Page size.
  */
-TEST_P(EEPRomI2CTest_PageWrite, eprX24C01_pageWrite)
+void EEPRomI2CTest_PageWrite::eprMode1_pageWrite(unsigned int addr_start, unsigned int eepromSize, unsigned int pgSize)
 {
-	unsigned int addr_start = GetParam();
-
-	// Set the EEPROM as X24C01.
-	const unsigned int eepromSize = 128;
 	const unsigned int eepromMask = eepromSize - 1;
-	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomMode(EEPRomI2C::EPR_MODE1));
-	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomSize(eepromSize));
-	const unsigned int pgSize = 4;
 	const unsigned int pgMask = pgSize - 1;
-	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
 
 	// Make sure we're in a STOP condition at first.
 	doStop();
@@ -127,6 +133,29 @@ TEST_P(EEPRomI2CTest_PageWrite, eprX24C01_pageWrite)
 
 	// Verify the EEPROM data.
 	CompareByteArrays(eeprom_expected, eeprom_actual, sizeof(eeprom_expected));
+}
+
+/**
+ * X24C01: Test sequential writing of full pages.
+ * Starts at the specified address.
+ * NOTE: Each byte is written exactly once.
+ * Wraparound can be tested by starting at an address
+ * within the page instead of at the start of the page.
+ * @param addr_start Starting address.
+ */
+TEST_P(EEPRomI2CTest_PageWrite, eprX24C01_pageWrite)
+{
+	unsigned int addr_start = GetParam();
+
+	// Set the EEPROM as X24C01.
+	const unsigned int eepromSize = 128;
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomMode(EEPRomI2C::EPR_MODE1));
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomSize(eepromSize));
+	const unsigned int pgSize = 4;
+	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
+
+	// Run the Mode 1 test.
+	eprMode1_pageWrite(addr_start, eepromSize, pgSize);
 }
 
 /**
