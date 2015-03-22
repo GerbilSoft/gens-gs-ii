@@ -145,6 +145,19 @@ class Rom
 		 */
 		std::string filenameBaseNoExt(void) const;
 
+		/**
+		 * Get the ROM filename of the selected file in a multi-file archive.
+		 * @return ROM filename (UTF-8), or empty string on error.
+		 */
+		std::string z_filename(void) const;
+
+		/**
+		 * Get the ROM filename of the selected file in a multi-file archive.
+		 * (Basename, no extension.)
+		 * @return ROM filename (UTF-8), or empty string on error.
+		 */
+		std::string z_filename_baseNoExt(void) const;
+
 		/********************
 		 * ROM header data. *
 		 ********************/

@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -23,6 +23,7 @@
 
 #include "SRam.hpp"
 #include "macros/common.h"
+#include "libgenstext/StringManip.hpp"
 
 // C includes.
 #include <stdio.h>
@@ -32,8 +33,7 @@
 #include <string>
 using std::string;
 
-namespace LibGens
-{
+namespace LibGens {
 
 // Static variable initialization.
 const char *const SRam::ms_FileExt = "srm";
@@ -42,7 +42,7 @@ const char *const SRam::ms_FileExt = "srm";
 // For now, just save in the ROM directory.
 
 /**
- * reset(): Clear SRam and initialize settings.
+ * Clear SRam and initialize settings.
  */
 void SRam::reset(void)
 {
@@ -64,54 +64,29 @@ void SRam::reset(void)
 	clearDirty();
 }
 
-
 /**
- * setFilename(): Set the SRam filename based on a ROM filename.
+ * Set the SRam filename based on a ROM filename.
  * The file extension is changed to ".srm".
  * @param filename ROM filename.
  */
 void SRam::setFilename(const string& filename)
 {
-	if (filename.empty())
-	{
+	if (filename.empty()) {
 		// Empty filename.
 		m_filename.clear();
 		m_fullPathname = m_pathname;
 		return;
 	}
-	
-	// Remove any subdirectories from the ROM filename.
-	m_filename = filename;
-	size_t path_pos = m_filename.rfind(LG_PATH_SEP_CHR);
-	if (path_pos != string::npos)
-	{
-		// Found a subdirectory.
-		if (path_pos == m_filename.size())
-			m_filename.clear();
-		else
-			m_filename = m_filename.substr(path_pos+1);
-	}
-	
-	// Replace the file extension.
-	size_t dot_pos = m_filename.rfind('.');
-	
-	if (dot_pos == string::npos)
-	{
-		// File extension not found. Add one.
-		m_filename += '.';
-		m_filename += ms_FileExt;
-	}
-	else
-	{
-		// File extension found. Change it.
-		m_filename.resize(dot_pos + 1);
-		m_filename += ms_FileExt;
-	}
-	
+
+	// Remove any subdirectories and extensions from the ROM filename.
+	m_filename = LibGensText::FilenameNoExt(filename);
+	// Append our extension.
+	m_filename += '.';
+	m_filename += ms_FileExt;
+
 	// Set the full pathname.
 	m_fullPathname = m_pathname + m_filename;
 }
-
 
 /**
  * setPathname(): Set the SRam pathname.
@@ -122,51 +97,47 @@ void SRam::setPathname(const string& pathname)
 	m_pathname = pathname;
 	
 	// Rebuild the full pathname.
-	if (m_pathname.empty())
+	if (m_pathname.empty()) {
 		m_fullPathname = m_filename;
-	else
-	{
+	} else {
 		// Make sure the pathname ends with a separator.
 		if (m_pathname.at(m_pathname.size()-1) != LG_PATH_SEP_CHR)
 			m_pathname += LG_PATH_SEP_CHR;
-		
+
 		// Create the full pathname.
 		m_fullPathname = m_pathname + m_filename;
 	}
 }
 
-
 /**
- * load(): Load the SRam file.
+ * Load the SRam file.
  * @return Positive value indicating SRam size on success; negative on error.
  */
 int SRam::load(void)
 {
 	// Attempt to open the SRam file.
 	FILE *f = fopen(m_fullPathname.c_str(), "rb");
-	if (!f)
-	{
+	if (!f) {
 		// Unable to open the SRam file.
 		// TODO: Error code constants.
 		return -1;
 	}
-	
+
 	// Erase SRam before loading the file.
 	// NOTE: Don't use reset() - reset() also resets the control logic.
 	memset(m_sram, 0xFF, sizeof(m_sram));
-	
+
 	// Load the SRam data.
 	int ret = fread(m_sram, 1, sizeof(m_sram), f);
 	fclose(f);
-	
+
 	// Return the number of bytes read.
 	clearDirty();
 	return ret;
 }
 
-
 /**
- * getUsedSize(): Determine how many bytes are used in the SRam chip.
+ * Determine how many bytes are used in the SRam chip.
  * @return Number of bytes used, rounded to the highest power of two.
  */
 int SRam::getUsedSize(void) const
@@ -174,52 +145,48 @@ int SRam::getUsedSize(void) const
 	int i = (sizeof(m_sram) - 1);
 	while (i > 0 && m_sram[i] == 0xFF)
 		i--;
-	
+
 	// Make sure we return 0 if SRam is empty.
 	if (i <= 0)
 		return 0;
-	
+
 	// Return the next-highest power of two.
 	return next_pow2u(i);
 }
 
-
 /**
- * save(): Save the SRam file.
+ * Save the SRam file.
  * @return Positive value indicating SRam size on success; 0 if no save is needed; negative on error.
  */
 int SRam::save(void)
 {
 	if (!m_dirty)
 		return 0;
-	
+
 	int size = getUsedSize();
-	if (size <= 0)
-	{
+	if (size <= 0) {
 		// SRam is empty.
 		return 0;
 	}
-	
+
 	FILE *f = fopen(m_fullPathname.c_str(), "wb");
-	if (!f)
-	{
+	if (!f) {
 		// Unable to open SRam file.
 		// TODO: Error code constants.
 		return -1;
 	}
-	
+
 	// Save SRam to the file.
 	int ret = fwrite(m_sram, 1, size, f);
 	fclose(f);
-	
+
 	// Return the number of bytes saved.
 	clearDirty();
 	return ret;
 }
 
-
 /**
- * autoSave(): Autosave the SRam file.
+ * Autosave the SRam file.
  * This saves the SRam file if its last modification time is past a certain threshold.
  * @param framesElapsed Number of frames elapsed, or -1 for paused. (force autosave)
  * @return Positive value indicating SRam size on success; 0 if no save is needed; negative on error.
@@ -228,25 +195,23 @@ int SRam::autoSave(int framesElapsed)
 {
 	if (!m_dirty)
 		return 0;
-	
+
 	// TODO: Customizable autosave threshold.
 	// TODO: PAL/NTSC detection.
-	if (framesElapsed >= 0)
-	{
+	if (framesElapsed >= 0) {
 		// Check if we've passed the autosave threshold.
 		bool isPal = false;
 		m_framesElapsed += framesElapsed;
 		if (m_framesElapsed < (AUTOSAVE_THRESHOLD_DEFAULT / (isPal ? 20 : 16)))
 			return 0;
 	}
-	
+
 	// Autosave threshold has passed.
 	return save();
 }
 
-
 /**
- * loadFromZomg(): Load an SRAM file from a ZOMG savestate.
+ * Load an SRAM file from a ZOMG savestate.
  * @param zomg ZOMG savestate.
  * @return 0 on success; non-zero on error.
  */
@@ -266,7 +231,7 @@ int SRam::loadFromZomg(LibZomg::Zomg *zomg)
 
 
 /**
- * saveToZomg(): Save an SRAM file to a ZOMG savestate.
+ * Save an SRAM file to a ZOMG savestate.
  * @param zomg ZOMG savestate.
  * @return 0 on success; non-zero on error.
  */

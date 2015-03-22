@@ -705,6 +705,34 @@ string Rom::filenameBaseNoExt(void) const
 	{ return d->filenameBaseNoExt; }
 
 /**
+ * Get the ROM filename of the selected file in a multi-file archive.
+ * @return ROM filename (UTF-8), or empty string on error.
+ */
+string Rom::z_filename(void) const
+{
+	// TODO: Cache it?
+	if (d->z_entry_sel && d->z_entry_sel->filename) {
+		return string(d->z_entry_sel->filename);
+	}
+	return string();
+}
+
+/**
+ * Get the ROM filename of the selected file in a multi-file archive.
+ * (Basename, no extension.)
+ * @return ROM filename (UTF-8), or empty string on error.
+ */
+string Rom::z_filename_baseNoExt(void) const
+{
+	// TODO: Cache it?
+	string tmp = z_filename();
+	if (!tmp.empty()) {
+		tmp = LibGensText::FilenameNoExt(tmp);
+	}
+	return tmp;
+}
+
+/**
  * Get the Japanese (domestic) ROM name.
  * @return Japanese (domestic) ROM name (UTF-8), or empty string on error.
  */

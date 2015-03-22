@@ -22,8 +22,8 @@
 #include "EEPRomI2C.hpp"
 #include "EEPRomI2C_p.hpp"
 
-// ARRAY_SIZE(x)
 #include "macros/common.h"
+#include "libgenstext/StringManip.hpp"
 
 // C includes. (C++ namespace)
 #include <cstdio>
@@ -52,29 +52,11 @@ void EEPRomI2C::setFilename(const string &filename)
 		return;
 	}
 
-	// Remove any subdirectories from the ROM filename.
-	d->filename = filename;
-	size_t path_pos = d->filename.rfind(LG_PATH_SEP_CHR);
-	if (path_pos != string::npos) {
-		// Found a subdirectory.
-		if (path_pos == d->filename.size()) {
-			d->filename.clear();
-		} else {
-			d->filename = d->filename.substr(path_pos+1);
-		}
-	}
-
-	// Replace the file extension.
-	size_t dot_pos = d->filename.rfind('.');
-
-	if (dot_pos == string::npos) {
-		// File extension not found. Add one.
-		d->filename += '.';
-	} else {
-		// File extension found. Change it.
-		d->filename.resize(dot_pos + 1);
-	}
-	d->filename += string(d->fileExt);
+	// Remove any subdirectories and extensions from the ROM filename.
+	d->filename = LibGensText::FilenameNoExt(filename);
+	// Append our extension.
+	d->filename += '.';
+	d->filename += d->fileExt;
 
 	// Set the full pathname.
 	d->fullPathname = d->pathname + d->filename;

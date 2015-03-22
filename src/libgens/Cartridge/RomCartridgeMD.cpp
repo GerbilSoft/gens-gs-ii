@@ -35,6 +35,10 @@
 // C includes. (C++ namespace)
 #include <cstdlib>
 
+// C++ includes.
+#include <string>
+using std::string;
+
 /**
  * References:
  * - ssf2.txt, Second Edition (2000/07/26) by Bart Trzynadlowski
@@ -121,7 +125,7 @@ class RomCartridgeMDPrivate
 		 * @param crc32 ROM CRC32.
 		 * @return Index in MD_RomFixups[], or -1 if no fixup is required.
 		 */
-		static int CheckRomFixups(const std::string serialNumber, uint16_t checksum, uint32_t crc32);
+		static int CheckRomFixups(const string serialNumber, uint16_t checksum, uint32_t crc32);
 
 		// ROM fixup ID.
 		// If less than 0, no fixup should be applied.
@@ -263,7 +267,7 @@ const RomCartridgeMDPrivate::MD_RomFixup_t RomCartridgeMDPrivate::MD_RomFixups[]
  * @param crc32 ROM CRC32.
  * @return Index in MD_RomFixups[], or -1 if no fixup is required.
  */
-int RomCartridgeMDPrivate::CheckRomFixups(const std::string serialNumber, uint16_t checksum, uint32_t crc32)
+int RomCartridgeMDPrivate::CheckRomFixups(const string serialNumber, uint16_t checksum, uint32_t crc32)
 {
 	const char *serialNumber_c_str = serialNumber.c_str();
 
@@ -696,8 +700,15 @@ int RomCartridgeMD::initSRam(void)
 	m_SRam.setEnd(sramEndAddr);
 
 	// Load the SRam file.
-	// TODO: Use internal filename for multi-file?
-	m_SRam.setFilename(d->rom->filename());
+	// NOTE: SRam::setFilename() uses LibGensText::FilenameNoExt().
+	string rom_filename;
+	if (d->rom->isMultiFile()) {
+		rom_filename = d->rom->z_filename();
+	}
+	if (rom_filename.empty()) {
+		rom_filename = d->rom->filename();
+	}
+	m_SRam.setFilename(rom_filename);
 	return m_SRam.load();
 }
 
@@ -720,9 +731,16 @@ int RomCartridgeMD::initEEPRom(void)
 	if (d->eprType < 0)
 		return -1;
 
-	// Load the EEProm file.
-	// TODO: Use internal filename for multi-file?
-	m_EEPRom.setFilename(d->rom->filename());
+	// Load the EEPRom file.
+	// NOTE: EEPRomI2C::setFilename() uses LibGensText::FilenameNoExt().
+	string rom_filename;
+	if (d->rom->isMultiFile()) {
+		rom_filename = d->rom->z_filename();
+	}
+	if (rom_filename.empty()) {
+		rom_filename = d->rom->filename();
+	}
+	m_EEPRom.setFilename(rom_filename);
 	return m_EEPRom.load();
 }
 
@@ -1231,7 +1249,7 @@ void RomCartridgeMD::writeWord_TIME(uint8_t address, uint16_t data)
 void RomCartridgeMD::initMemoryMap(void)
 {
 	// Check for a ROM fixup.
-	const std::string serialNumber = d->rom->rom_serial();
+	const string serialNumber = d->rom->rom_serial();
 	const uint16_t checksum = d->rom->checksum();
 	const uint32_t crc32 = d->rom->rom_crc32();
 	d->romFixup = d->CheckRomFixups(serialNumber, checksum, crc32);
