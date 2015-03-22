@@ -73,7 +73,7 @@ TEST_P(EEPRomI2CTest_RandomRead, X24C01_randomReadEmpty)
 		const unsigned int addr = (rand() & eepromMask);
 
 		// START an I2C transfer.
-		// We'll request a READ from address 0x00.
+		// We'll request a READ from a random address
 		// Mode 1 word address: [A6 A5 A4 A3 A2 A1 A0 RW]
 
 		if (enableRepeatedStart) {
@@ -147,7 +147,7 @@ TEST_P(EEPRomI2CTest_RandomRead, X24C01_randomReadFull)
 		const unsigned int addr = (rand() & eepromMask);
 
 		// START an I2C transfer.
-		// We'll request a READ from address 0x00.
+		// We'll request a READ from a random address.
 		// Mode 1 word address: [A6 A5 A4 A3 A2 A1 A0 RW]
 
 		if (enableRepeatedStart) {

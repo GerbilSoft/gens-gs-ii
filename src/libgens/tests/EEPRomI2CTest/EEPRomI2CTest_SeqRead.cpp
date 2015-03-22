@@ -68,7 +68,7 @@ TEST_P(EEPRomI2CTest_SeqRead, X24C01_seqReadEmpty)
 	uint8_t cmd, response;
 
 	// START an I2C transfer.
-	// We'll request a READ from address 0x00.
+	// We'll request a READ from the specified address.
 	// Mode 1 word address: [A6 A5 A4 A3 A2 A1 A0 RW]
 	m_eeprom->dbg_setSDA(0);	// START
 	cmd = (addr_start << 1) | 1;	// RW=1
@@ -123,7 +123,7 @@ TEST_P(EEPRomI2CTest_SeqRead, X24C01_seqReadFull)
 	uint8_t cmd, response;
 
 	// START an I2C transfer.
-	// We'll request a READ from address 0x00.
+	// We'll request a READ from the specified address.
 	// Mode 1 word address: [A6 A5 A4 A3 A2 A1 A0 RW]
 	m_eeprom->dbg_setSDA(0);	// START
 	cmd = (addr_start << 1) | 1;	// RW=1
