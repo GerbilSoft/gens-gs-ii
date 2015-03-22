@@ -937,7 +937,7 @@ uint16_t RomCartridgeMD::readWord(uint32_t address)
 	if (EmuContext::GetSaveDataEnable()) {
 		if (m_EEPRom.isEEPRomTypeSet()) {
 			// EEPRom is enabled.
-			if (m_EEPRom.isReadBytePort(address)) {
+			if (m_EEPRom.isReadWordPort(address)) {
 				// EEPRom read port.
 				return m_EEPRom.readWord(address);
 			}
