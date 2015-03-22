@@ -205,6 +205,7 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 			// Modes 2, 3: Word address, low byte.
 			// Format: [A7 A6 A5 A4 A3 A2 A1 A0]
 			address = (address & ~0xFF) | data_buf;
+			address &= eprChip.sz_mask;
 			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
 				"EPR_MODE2_WORD_ADDRESS_LOW: dev_addr=%02X, data_buf=%02X, address=%02X",
 				dev_addr, data_buf, address);
