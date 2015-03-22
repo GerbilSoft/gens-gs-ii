@@ -406,16 +406,6 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 			ret = vdp->readHCounter();
 			break;
 
-		case 0x1C: case 0x1E:
-			// VDP test register. (high byte)
-			ret = ((vdp->readTestRegMD() >> 8) & 0xFF);
-			break;
-
-		case 0x1D: case 0x1F:
-			// VDP test register. (low byte)
-			ret = (vdp->readTestRegMD() & 0xFF);
-			break;
-
 		default:
 			// Invalid or unsupported VDP port.
 			break;
@@ -678,11 +668,6 @@ inline uint16_t M68K_Mem::M68K_Read_Word_VDP(uint32_t address)
 		case 0x08:
 			// HV counter.
 			ret = vdp->readHVCounterMD();
-			break;
-
-		case 0x1C: case 0x1E:
-			// VDP test register.
-			ret = vdp->readTestRegMD();
 			break;
 
 		default:

@@ -206,16 +206,6 @@ uint16_t Vdp::readHVCounterMD(void)
 }
 
 /**
- * Read the test register. ($C0001C)
- * TODO: Not implemented.
- * @return Test register value.
- */
-uint16_t Vdp::readTestRegMD(void) const
-{
-	return d->testReg;
-}
-
-/**
  * Write the test register. ($C0001C)
  * TODO: Not implemented.
  * @param data Test register value.

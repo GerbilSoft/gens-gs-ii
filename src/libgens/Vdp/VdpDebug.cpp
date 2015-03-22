@@ -135,6 +135,29 @@ int Vdp::dbg_setCtrlLatch(int latch)
 }
 
 /**
+ * Get the VDP test register value.
+ * @param out Buffer for test register value.
+ * @return MDP error code.
+ */
+int Vdp::dbg_getTestReg(uint8_t *out) const
+{
+	*out = d->testReg;
+	return 0;
+}
+
+/**
+ * Set the VDP test register value.
+ * @param val Test register value.
+ * @return MDP error code.
+ */
+int Vdp::dbg_setTestReg(uint8_t val)
+{
+	// TODO: Additional processing?
+	d->testReg = val;
+	return 0;
+}
+
+/**
  * Write data to VRAM.
  * @param address Destination address.
  * @param vram VRAM data.
