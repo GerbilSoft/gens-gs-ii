@@ -141,20 +141,21 @@ class EEPRomI2C
 		// For use by MDP plugins and test suites.
 		// Return value is an MDP error code.
 
-		/** EEPRom types. **/
-		enum EEPRomType_t {
+		/** EEPRom modes. **/
+		enum EEPRomMode_t {
 			EPR_NONE = 0,
-
-			// Mode 1: 7-bit addressing.
-			EPR_X24C01,
-
+			EPR_MODE1,	// 7-bit addressing. (X24C01)
+			EPR_MODE2,	// 8-11 bit addressing. (24C02-24C16)
+			EPR_MODE3,	// 12-bit+ addressing. (24C32+)
 			EPR_MAX
 		};
 
-		int dbg_getEEPRomType(EEPRomType_t *eprType) const;
-		int dbg_setEEPRomType(EEPRomType_t eprType);
+		int dbg_getEEPRomMode(EEPRomMode_t *eprMode) const;
+		int dbg_setEEPRomMode(EEPRomMode_t eprMode);
 		int dbg_getEEPRomSize(unsigned int *sz) const;
+		int dbg_setEEPRomSize(unsigned int sz);
 		int dbg_getPageSize(unsigned int *pgSize) const;
+		int dbg_setPageSize(unsigned int pgSize);
 
 		int dbg_readEEPRom(uint32_t address, uint8_t *data, int length) const;
 		int dbg_writeEEPRom(uint32_t address, const uint8_t *data, int length);

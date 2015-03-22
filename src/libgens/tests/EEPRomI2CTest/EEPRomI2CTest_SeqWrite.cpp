@@ -57,19 +57,13 @@ TEST_P(EEPRomI2CTest_SeqWrite, X24C01_seqReadEmpty)
 {
 	unsigned int addr_start = GetParam();
 
-	// Set the EEPROM as X24C01.
-	// TODO: Move to SetUp().
-	m_eeprom->dbg_setEEPRomType(EEPRomI2C::EPR_X24C01);
-
-	unsigned int eepromSize;
-	m_eeprom->dbg_getEEPRomSize(&eepromSize);
-	ASSERT_EQ(128U, eepromSize) << "X24C01 should be 128 bytes.";
+	const unsigned int eepromSize = 128;
 	const unsigned int eepromMask = eepromSize - 1;
-
-	unsigned int pgSize;
-	m_eeprom->dbg_getPageSize(&pgSize);
-	ASSERT_EQ(4U, pgSize) << "X24C01 should have 4-byte pages.";
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomMode(EEPRomI2C::EPR_MODE1));
+	ASSERT_EQ(0, m_eeprom->dbg_setEEPRomSize(eepromSize));
+	const unsigned int pgSize = 4;
 	const unsigned int pgMask = pgSize - 1;
+	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
 
 	// Make sure we're in a STOP condition at first.
 	doStop();

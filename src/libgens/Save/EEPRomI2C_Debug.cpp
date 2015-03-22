@@ -31,49 +31,67 @@ namespace LibGens {
 // TODO: Use MDP error codes.
 
 /**
- * Get the EEPROM chip type.
- * @param eprType Buffer for EEPROM chip type.
+ * Get the EEPROM mode.
+ * @param eprType Buffer for EEPROM mode.
  * @return MDP error code.
  */
-int EEPRomI2C::dbg_getEEPRomType(EEPRomType_t *eprType) const
+int EEPRomI2C::dbg_getEEPRomMode(EEPRomMode_t *eprMode) const
 {
-	*eprType = (EEPRomType_t)d->eprMapper.epr_type;
+	*eprMode = (EEPRomMode_t)d->eprChip.epr_mode;
 	return 0;
 }
 
 /**
- * Set the EEPROM chip type.
+ * Set the EEPROM mode.
  * This function will reset the EEPROM status and clear the data.
- * @param eprType EEPROM chip type.
+ * @param eprMode EEPROM mode.
  * @return MDP error code.
  */
-int EEPRomI2C::dbg_setEEPRomType(EEPRomType_t eprType)
+int EEPRomI2C::dbg_setEEPRomMode(EEPRomMode_t eprMode)
 {
-	if (eprType < EPR_NONE || eprType >= EPR_MAX)
+	if (eprMode < EPR_NONE || eprMode >= EPR_MAX)
 		return -1;
 
 	// Set the EEPROM type.
-	memset(&d->eprMapper, 0, sizeof(d->eprMapper));
-	d->eprMapper.epr_type = eprType;
-
-	// Set the EEPROM chip specification.
-	memcpy(&d->eprSpec, &d->eeprom_spec[eprType], sizeof(d->eprSpec));
+	d->eprChip.epr_mode = eprMode;
+	d->reset();
 	return 0;
 }
 
 /**
  * Get the EEPROM size.
- * This is the total size of the EEPROM based on the chip specification.
+ * This is the total size of the EEPROM based on the size mask.
  * @param sz Buffer for the EEPROM size.
  * @return MDP error code.
  */
 int EEPRomI2C::dbg_getEEPRomSize(unsigned int *sz) const
 {
-	if (d->eprSpec.sz_mask == 0) {
+	if (d->eprChip.sz_mask == 0) {
 		*sz = 0;
 	} else {
-		*sz = d->eprSpec.sz_mask + 1;
+		*sz = d->eprChip.sz_mask + 1;
 	}
+	return 0;
+}
+
+/**
+ * Set the EEPROM size.
+ * Must be a power of two. (TODO: Enforce this!)
+ * This function will reset the EEPROM status and clear the data.
+ * @param sz EEPROM size.
+ * @return MDP error code.
+ */
+int EEPRomI2C::dbg_setEEPRomSize(unsigned int sz)
+{
+	if (sz > sizeof(d->eeprom)) {
+		// TODO: Dynamic allocation?
+		return -1;
+	}
+
+	// TODO: Verify that sz is a power of two.
+	// Set the EEPROM size mask.
+	d->eprChip.sz_mask = (sz > 0 ? sz - 1 : 0);
+	d->reset();
 	return 0;
 }
 
@@ -86,11 +104,35 @@ int EEPRomI2C::dbg_getEEPRomSize(unsigned int *sz) const
 
 int EEPRomI2C::dbg_getPageSize(unsigned int *pgSize) const
 {
-	if (d->eprSpec.sz_mask == 0) {
+	if (d->eprChip.sz_mask == 0) {
 		*pgSize = 0;
 	} else {
-		*pgSize = d->eprSpec.pg_mask + 1;
+		*pgSize = d->eprChip.pg_mask + 1;
 	}
+	return 0;
+}
+
+/**
+ * Set the page size.
+ * Must be a power of two. (TODO: Enforce this!)
+ * Must be <= the EEPROM size. (TODO: Enforce this!)
+ * This function will reset the EEPROM status and clear the data.
+ * @param pgSize Page size.
+ * @return MDP error code.
+ */
+int EEPRomI2C::dbg_setPageSize(unsigned int pgSize)
+{
+	if (pgSize > sizeof(d->eeprom)) {
+		// TODO: Dynamic allocation?
+		return -1;
+	}
+
+	// TODO: Verify that pgSize is a power of two.
+	// TODO: Verify that pgSize is <= the size mask.
+
+	// Set the page size mask.
+	d->eprChip.pg_mask = (pgSize > 0 ? pgSize - 1 : 0);
+	d->reset();
 	return 0;
 }
 

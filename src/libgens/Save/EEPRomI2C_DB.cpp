@@ -34,31 +34,47 @@
 
 namespace LibGens {
 
-/** EEPROM specifications. **/
-const EEPRomI2CPrivate::EEPRomSpec_t EEPRomI2CPrivate::eeprom_spec[EEPRomI2C::EPR_MAX] =
-{
-	{0, 0, 0},		// EPR_NONE
-	{0x7F, 0x03, 0},	// EPR_X24C01
-};
-
 /** ROM database. **/
-const EEPRomI2CPrivate::GameEEPRomInfo_t EEPRomI2CPrivate::rom_db[12] =
+const EEPRomI2CPrivate::GameEEPRomInfo_t EEPRomI2CPrivate::rom_db[14] =
 {
 	// TODO: Port other EEPROMs.
 
+	/** ACCLAIM mappers **/
+
+	/* 24C02 (old mapper) */
+	/* NBA Jam (UE) */
+	// WARNING: BROKEN!
+	{"T-081326"   , 0,      {0x200001, 0x200001, 0x200001, 0, 1, 1}, {EEPRomI2C::EPR_MODE2, 0, 0xFF, 0x03}},
+
+	/* 24C04 */
+	/* NBA Jam TE */
+	{"T-81406"    , 0,      {0x200001, 0x200001, 0x200000, 0, 0, 0}, {EEPRomI2C::EPR_MODE2, 0, 0x1FF, 0x03}},
+
 	/** SEGA mapper (X24C01) **/
-	{"T-12046"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EEPRomI2C::EPR_X24C01}},   /* Megaman - The Wily Wars */
-	{"T-12046"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EEPRomI2C::EPR_X24C01}},   /* Megaman - The Wily Wars */
-	{"T-12053"    , 0xEA80, {0x200001, 0x200001, 0x200001, 0, 0, 1, EEPRomI2C::EPR_X24C01}},   /* Rockman Mega World (J) [A] */
-	{"MK-1215"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EEPRomI2C::EPR_X24C01}},   /* Evander 'Real Deal' Holyfield's Boxing */
-	{"MK-1228"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EEPRomI2C::EPR_X24C01}},   /* Greatest Heavyweights of the Ring (U) */
-	{"G-5538"     , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EEPRomI2C::EPR_X24C01}},   /* Greatest Heavyweights of the Ring (J) */
-	{"PR-1993"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EEPRomI2C::EPR_X24C01}},   /* Greatest Heavyweights of the Ring (E) */
-	{"G-4060"     , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EEPRomI2C::EPR_X24C01}},   /* Wonderboy in Monster World */
-	{"00001211-00", 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EEPRomI2C::EPR_X24C01}},   /* Sports Talk Baseball */
-	{"00004076-00", 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EEPRomI2C::EPR_X24C01}},   /* Honoo no Toukyuuji Dodge Danpei */
-	{"G-4524"     , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EEPRomI2C::EPR_X24C01}},   /* Ninja Burai Densetsu */
-	{"00054503-00", 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1, EEPRomI2C::EPR_X24C01}},   /* Game Toshokan */
+	/* Megaman - The Wily Wars */
+	{"T-12046"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
+	/* Megaman - The Wily Wars */
+	{"T-12046"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
+	/* Rockman Mega World (J) [A] */
+	{"T-12053"    , 0xEA80, {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
+	/* Evander 'Real Deal' Holyfield's Boxing */
+	{"MK-1215"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
+	/* Greatest Heavyweights of the Ring (U) */
+	{"MK-1228"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
+	/* Greatest Heavyweights of the Ring (J) */
+	{"G-5538"     , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
+	/* Greatest Heavyweights of the Ring (E) */
+	{"PR-1993"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
+	/* Wonderboy in Monster World */
+	{"G-4060"     , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
+	/* Sports Talk Baseball */
+	{"00001211-00", 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
+	/* Honoo no Toukyuuji Dodge Danpei */
+	{"00004076-00", 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
+	/* Ninja Burai Densetsu */
+	{"G-4524"     , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
+	/* Game Toshokan */
+	{"00054503-00", 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
 
 #if 0
 	/** ACCLAIM mappers **/

@@ -42,7 +42,7 @@ EEPRomI2CPrivate::EEPRomI2CPrivate(EEPRomI2C *q)
 	, framesElapsed(0)
 {
 	// Clear the EEPRom type.
-	memset(&eprSpec, 0, sizeof(eprSpec));
+	memset(&eprChip, 0, sizeof(eprChip));
 	memset(&eprMapper, 0, sizeof(eprMapper));
 
 	// Reset the EEPRom.
@@ -71,6 +71,7 @@ void EEPRomI2CPrivate::reset(void)
 	address = 0;
 	counter = 0;
 	rw = 0;
+	dev_addr = 0;
 
 	// Shift register.
 	shift_rw = 0,	// Shift-in by default.
@@ -88,7 +89,8 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 	// Determine what to do based on the current state.
 	switch (state) {
 		case EPR_MODE1_WORD_ADDRESS:
-			// X24C01 word address.
+			// Mode 1: Word address. (X24C01)
+			// Format: [A6 A5 A4 A3 A2 A1 A0 RW]
 			address = (data_buf >> 1) & 0x7F;
 			rw = (data_buf & 1);
 			counter = 0;
@@ -117,8 +119,8 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 			uint16_t prev_address = address;
 			uint16_t addr_low_tmp = address;
 			addr_low_tmp++;
-			addr_low_tmp &= eprSpec.pg_mask;
-			address = ((address & ~eprSpec.pg_mask) | addr_low_tmp);
+			addr_low_tmp &= eprChip.pg_mask;
+			address = ((address & ~eprChip.pg_mask) | addr_low_tmp);
 
 			data_buf = 0;
 			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
@@ -126,6 +128,91 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 				eeprom[prev_address], prev_address, address);
 			break;
 		}
+
+		case EPR_MODE2_DEVICE_ADDRESS: {
+			// Modes 2, 3: Device address.
+			// Format: [ 1  0  1  0 A2 A1 A0 RW]
+			// A2-A0 may be device select for smaller chips,
+			// or address bits A11-A8 for larger chips.
+			const uint8_t dev_type = (data_buf >> 4) & 0xF;
+			if (dev_type != 0xA) {
+				// Not an EEPROM command.
+				// Go back to standby.
+				// TODO: Split into doStandby() function?
+				LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+					"EPR_MODE2_DEVICE_ADDRESS: dev_type=%1X, ignoring",
+					dev_type);
+				sda_out = 1;
+				counter = 0;
+				data_buf = 0;
+				shift_rw = 0;
+				state = EPR_STANDBY;
+				break;
+			}
+
+			// Verify the device address.
+			// TODO: This is Mode 2 ONLY.
+			// Needs to be updated for Mode 3.
+			dev_addr = (data_buf >> 1) & (eprChip.sz_mask >> 8);
+			if (dev_addr != eprChip.dev_addr) {
+				// Incorrect device address.
+				// Ignore this request.
+				// TODO: Split into doStandby() function?
+				LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+					"EPR_MODE2_DEVICE_ADDRESS: dev_type=%1X, dev_addr=%1X; my dev_addr=%1X, ignoring",
+					dev_type, dev_addr, eprChip.dev_addr);
+				sda_out = 1;
+				counter = 0;
+				data_buf = 0;
+				shift_rw = 0;
+				state = EPR_STANDBY;
+				break;
+			}
+
+			// TODO: Verify A2-A0 for smaller chips.
+			dev_addr = (data_buf >> 1) & 0x7;
+			rw = (data_buf & 1);
+
+			// Update the address.
+			// TODO: This is Mode 2 ONLY.
+			// Needs to be updated for Mode 3.
+			address = (dev_addr << 8) | (address & 0xFF);
+			address &= eprChip.sz_mask;
+
+			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+				"EPR_MODE2_DEVICE_ADDRESS: dev_type=%1X, dev_addr=%02X, rw=%d",
+				dev_type, dev_addr, rw);
+
+			if (rw) {
+				// Current address read.
+				data_buf = eeprom[address];
+				shift_rw = 1;	// Shifting out.
+				state = EPR_READ_DATA;
+			} else {
+				// Write data.
+				// Needs another command word to set
+				// Word Address bits A7-A0.
+				// TODO: Mode 3?
+				data_buf = 0;
+				shift_rw = 0;	// Shifting in.
+				state = EPR_MODE2_WORD_ADDRESS_LOW;
+			}
+			break;
+		}
+
+		case EPR_MODE2_WORD_ADDRESS_LOW:
+			// Modes 2, 3: Word address, low byte.
+			// Format: [A7 A6 A5 A4 A3 A2 A1 A0]
+			address = (address & ~0xFF) | data_buf;
+			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+				"EPR_MODE2_WORD_ADDRESS_LOW: dev_addr=%02X, data_buf=%02X, address=%02X",
+				dev_addr, data_buf, address);
+
+			// Write data.
+			data_buf = 0;
+			shift_rw = 0;	// Shifting in.
+			state = EPR_WRITE_DATA;
+			break;
 
 		default:
 			// Unknown.
@@ -150,7 +237,7 @@ void EEPRomI2CPrivate::processI2CShiftOut(void)
 			// Go to the next byte.
 			// NOTE: Page mask does NOT apply to reads.
 			address++;
-			address &= eprSpec.sz_mask;
+			address &= eprChip.sz_mask;
 			data_buf = eeprom[address];
 			counter = 0;
 			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
@@ -178,7 +265,7 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 	// Save the current /SDA out.
 	sda_out_prev = sda_out;
 
-	if (eprMapper.epr_type == EEPRomI2C::EPR_NONE) {
+	if (eprChip.epr_mode == EEPRomI2C::EPR_NONE) {
 		// No EEPRom.
 		goto done;
 	}
@@ -205,13 +292,12 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 		sda_out = 1;
 		data_buf = 0;
 		shift_rw = 0;	// shift in
-		if (eprMapper.epr_type == EEPRomI2C::EPR_X24C01) {
-			// Mode 1.
+		if (eprChip.epr_mode == EEPRomI2C::EPR_MODE1) {
+			// Mode 1. (X24C01)
 			state = EPR_MODE1_WORD_ADDRESS;
 		} else {
 			// Mode 2 or 3.
-			// TODO
-			//state = EPR_MODE2_WORD_ADDRESS;
+			state = EPR_MODE2_DEVICE_ADDRESS;
 		}
 		goto done;
 	}
@@ -335,7 +421,7 @@ int EEPRomI2C::setEEPRomType(int type)
 
 	// Set the EEPRom type.
 	memcpy(&d->eprMapper, &d->rom_db[type].mapper, sizeof(d->eprMapper));
-	memcpy(&d->eprSpec, &d->eeprom_spec[d->eprMapper.epr_type], sizeof(d->eprSpec));
+	memcpy(&d->eprChip, &d->rom_db[type].epr_chip, sizeof(d->eprChip));
 	return 0;
 }
 
@@ -345,8 +431,7 @@ int EEPRomI2C::setEEPRomType(int type)
  */
 bool EEPRomI2C::isEEPRomTypeSet(void) const
 {
-	//printf("sz mask: 0x%02X\n", d->eprSpec.sz_mask);
-	return !(d->eprSpec.sz_mask == 0);
+	return (d->eprChip.sz_mask != 0);
 }
 
 /**

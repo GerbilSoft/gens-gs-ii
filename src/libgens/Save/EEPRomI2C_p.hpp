@@ -72,6 +72,7 @@ class EEPRomI2CPrivate
 		uint16_t address;	// Word address.
 		uint8_t counter;	// Cycle counter.
 		uint8_t rw;		// Read/Write mode. (1 == read; 0 == write)
+		uint8_t dev_addr;	// Device address. (Modes 2 and 3)
 
 		uint8_t shift_rw;	// Shifting state. (1 == shift-out, 0 == shift-in)
 		uint8_t data_buf;	// Temporary data buffer.
@@ -80,7 +81,7 @@ class EEPRomI2CPrivate
 		enum EEPRomState_t {
 			EPR_STANDBY = 0,
 
-			// Mode 1: Receiving word address.
+			// Mode 1: Word address.
 			// Format: [A6 A5 A4 A3 A2 A1 A0 RW]
 			EPR_MODE1_WORD_ADDRESS,
 
@@ -91,6 +92,16 @@ class EEPRomI2CPrivate
 			// Writing data.
 			// Format: [D7 D6 D5 D4 D3 D2 D1 D0]
 			EPR_WRITE_DATA,
+
+			// Modes 2, 3: Device address.
+			// Format: [ 1  0  1  0 A2 A1 A0 RW]
+			// A2-A0 may be device select for smaller chips,
+			// or address bits A11-A8 for larger chips.
+			EPR_MODE2_DEVICE_ADDRESS,
+
+			// Modes 2, 3: Word address, low byte.
+			// Format: [A7 A6 A5 A4 A3 A2 A1 A0]
+			EPR_MODE2_WORD_ADDRESS_LOW,
 		};
 		EEPRomState_t state;
 
@@ -156,12 +167,12 @@ class EEPRomI2CPrivate
 
 	public:
 		/** EEPROM specifications. **/
-		struct EEPRomSpec_t {
+		struct EEPRomChip_t {
+			uint8_t epr_mode;	// EEPROM mode.
+			uint8_t dev_addr;	// Device address.
 			uint16_t sz_mask;	// Size mask.
 			uint8_t pg_mask;	// Page mask.
-			uint8_t reserved;
 		};
-		static const EEPRomSpec_t eeprom_spec[EEPRomI2C::EPR_MAX];
 
 		/** EEPROM map. **/
 		struct EEPRomMap_t {
@@ -171,7 +182,6 @@ class EEPRomI2CPrivate
 			uint8_t sda_in_bit;		// Bit offset for SDA_IN.
 			uint8_t sda_out_bit;		// Bit offset for SDA_OUT.
 			uint8_t scl_bit;		// Bit offset for SCL.
-			uint8_t epr_type;		// EEPROM type.
 		};
 
 		/** ROM database. **/
@@ -179,11 +189,12 @@ class EEPRomI2CPrivate
 			char game_id[16];
 			uint16_t checksum;
 			EEPRomMap_t mapper;
+			EEPRomChip_t epr_chip;		// EEPROM chip specification.
 		};
-		static const GameEEPRomInfo_t rom_db[12];
+		static const GameEEPRomInfo_t rom_db[14];
 
 		// Current EEPRom type.
-		EEPRomSpec_t eprSpec;
+		EEPRomChip_t eprChip;
 		EEPRomMap_t eprMapper;
 
 	public:
