@@ -111,7 +111,7 @@ TEST_P(EEPRomI2CTest_SeqRead, X24C01_seqReadFull)
 	unsigned int eepromSize;
 	m_eeprom->dbg_getEEPRomSize(&eepromSize);
 	ASSERT_EQ(128U, eepromSize) << "X24C01 should be 128 bytes.";
-	unsigned int eepromMask = eepromSize - 1;
+	const unsigned int eepromMask = eepromSize - 1;
 
 	// Initialize the EEPROM data.
 	ASSERT_EQ(0, m_eeprom->dbg_writeEEPRom(0x00, test_EEPRomI2C_data, eepromSize));
