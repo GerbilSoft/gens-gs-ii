@@ -153,7 +153,7 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 			// Verify the device address.
 			// TODO: This is Mode 2 ONLY.
 			// Needs to be updated for Mode 3.
-			dev_addr = (data_buf >> 1) & (eprChip.sz_mask >> 8);
+			dev_addr = ((data_buf >> 1) & 0x07) & ~(eprChip.sz_mask >> 8);
 			if (dev_addr != eprChip.dev_addr) {
 				// Incorrect device address.
 				// Ignore this request.
