@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
- * EEPRomI2CTest_SeqWrite.cpp: EEPRomI2C test: Sequential Write tests.     *
+ * EEPRomI2CTest_PageWrite.cpp: EEPRomI2C test: Page Write tests.          *
  *                                                                         *
  * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
@@ -31,7 +31,7 @@
 #include "EEPRomI2CTest.hpp"
 namespace LibGens { namespace Tests {
 
-class EEPRomI2CTest_SeqWrite : public EEPRomI2CTest
+class EEPRomI2CTest_PageWrite : public EEPRomI2CTest
 {
 	// TODO: Add stuff?
 };
@@ -53,7 +53,7 @@ class EEPRomI2CTest_SeqWrite : public EEPRomI2CTest
  * within the page instead of at the start of the page.
  * @param addr_start Starting address.
  */
-TEST_P(EEPRomI2CTest_SeqWrite, X24C01_seqReadEmpty)
+TEST_P(EEPRomI2CTest_PageWrite, X24C01_seqReadEmpty)
 {
 	unsigned int addr_start = GetParam();
 
@@ -116,7 +116,7 @@ TEST_P(EEPRomI2CTest_SeqWrite, X24C01_seqReadEmpty)
 
 // Sequential Read with various starting addresses.
 // TODO: Add more addresses for larger EEPROMs?
-INSTANTIATE_TEST_CASE_P(SeqWrite, EEPRomI2CTest_SeqWrite,
+INSTANTIATE_TEST_CASE_P(PageWrite, EEPRomI2CTest_PageWrite,
 	::testing::Values(0x00, 0x12, 0x4F, 0x72, 0x90, 0xA3, 0xC4, 0xFF)
 	);
 
