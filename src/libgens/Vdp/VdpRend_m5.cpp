@@ -946,8 +946,25 @@ FORCE_INLINE unsigned int VdpPrivate::T_Update_Sprite_Line_Cache(int line)
 	// We're updating the cache for the *next* line.
 	int cacheId;
 	if (interlaced) {
-		// FIXME: If < 0, should adjust to 0 or 1 depending on odd/even.
-		line += 2;
+		if (line < 0) {
+			// Offscreen.
+			// Set to 0 for even frame, 1 for odd.
+			// TODO: Optimize this?
+			switch (q->options.intRendMode) {
+				case VdpTypes::INTREND_EVEN:
+				default:
+					line = 0;
+					break;
+				case VdpTypes::INTREND_ODD:
+					line = 1;
+					break;
+				case VdpTypes::INTREND_FLICKER:
+					line = !!(Reg_Status.isOddFrame());
+					break;
+			}
+		} else {
+			line += 2;
+		}
 		cacheId = (line >> 1) & 1;
 	} else {
 		line++;
