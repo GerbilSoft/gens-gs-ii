@@ -178,10 +178,10 @@ namespace VdpTypes {
 
 			/**
 			 * Register 16: Scroll Size.
-			 * [   0    0 VSZ1 VSZ2    0    0 HSZ1 HSZ0]
+			 * [   0    0 VSZ1 VSZ0    0    0 HSZ1 HSZ0]
 			 * 
-			 * VSZ1/VSZ2: Vertical scroll size.
-			 * HSZ1/HSZ2: Horizontal scroll size.
+			 * VSZ1/VSZ0: Vertical scroll size.
+			 * HSZ1/HSZ0: Horizontal scroll size.
 			 * 
 			 * Scroll sizes:
 			 * - 00 == 32 cells
