@@ -255,7 +255,7 @@ void EEPRomI2CTest_RandomRead::eprMode2_randomReadEmpty(unsigned int enableRepea
 		EXPECT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=0: NACK received; expected ACK.";
 
 		// Word address, low byte.
-		cmd = (addr & 0xFF);			// A7-A0
+		cmd = (addr & 0xFF);				// A7-A0
 		response = sendData(cmd);
 		// Check for ACK.
 		m_eeprom->dbg_getSDA(&response);
@@ -461,7 +461,7 @@ void EEPRomI2CTest_RandomRead::eprMode2_randomReadFull(unsigned int enableRepeat
 		EXPECT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=0: NACK received; expected ACK.";
 
 		// Word address, low byte.
-		cmd = (addr & 0xFF);			// A7-A0
+		cmd = (addr & 0xFF);				// A7-A0
 		response = sendData(cmd);
 		// Check for ACK.
 		m_eeprom->dbg_getSDA(&response);
