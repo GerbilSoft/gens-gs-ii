@@ -172,6 +172,7 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 			// TODO: Verify A2-A0 for smaller chips.
 			dev_addr = (data_buf >> 1) & 0x7;
 			rw = (data_buf & 1);
+			counter = 0;
 
 			// Update the address.
 			// TODO: This is Mode 2 ONLY.
@@ -209,6 +210,7 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 				dev_addr, data_buf, address);
 
 			// Write data.
+			counter = 0;
 			data_buf = 0;
 			shift_rw = 0;	// Shifting in.
 			state = EPR_WRITE_DATA;
