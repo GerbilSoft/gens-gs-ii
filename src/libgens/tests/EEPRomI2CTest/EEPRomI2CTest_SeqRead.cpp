@@ -489,21 +489,21 @@ void EEPRomI2CTest_SeqRead::eprMode3_seqRead(bool useTestData, unsigned int addr
 
 	// Device select.
 	// Assuming device address is 0.
-	cmd = (0xA0 | 0);				// RW=0
+	cmd = (0xA0 | 0);			// RW=0
 	response = sendData(cmd);
 	// Check for ACK.
 	m_eeprom->dbg_getSDA(&response);
 	EXPECT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=0: NACK received; expected ACK.";
 
 	// Word address, high byte.
-	cmd = ((addr_start >> 8) & 0xFF);		// A15-A0
+	cmd = ((addr_start >> 8) & 0xFF);	// A15-A0
 	response = sendData(cmd);
 	// Check for ACK.
 	m_eeprom->dbg_getSDA(&response);
 	EXPECT_EQ(0, response) << "EPR_MODE3_WORD_ADDRESS_LOW: NACK received; expected ACK.";
 
 	// Word address, low byte.
-	cmd = (addr_start & 0xFF);			// A7-A0
+	cmd = (addr_start & 0xFF);		// A7-A0
 	response = sendData(cmd);
 	// Check for ACK.
 	m_eeprom->dbg_getSDA(&response);
@@ -517,7 +517,7 @@ void EEPRomI2CTest_SeqRead::eprMode3_seqRead(bool useTestData, unsigned int addr
 
 	// Device select.
 	// Assuming device address is 0.
-	cmd = (0xA0 | 1);				// RW=1
+	cmd = (0xA0 | 1);			// RW=1
 	response = sendData(cmd);
 	// Check for ACK.
 	m_eeprom->dbg_getSDA(&response);
