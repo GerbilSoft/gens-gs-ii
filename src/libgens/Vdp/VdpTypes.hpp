@@ -66,41 +66,9 @@ namespace VdpTypes
 	};
 
 	/**
-	 * Interlaced display mode. (See VdpReg_t.m5.Set4)
-	 * Source: http://wiki.megadrive.org/index.php?title=VDPRegs_Addendum (Jorge)
-	 */
-	enum Interlaced_t {
-		/**
-		 * Interlaced mode is off. [LSM1 LSM0] == [0 0]
-		 */
-		INTERLACED_OFF		= 0,
-
-		/**
-		 * Interlaced Mode 1. [LSM1 LSM0] == [0 1]
-		 * The display is interlaced, but the image
-		 * is exactly the same as INTERLACED_OFF.
-		 */
-		INTERLACED_MODE_1	= 1,	// [LSM1 LSM0] == [0 1]
-
-		/**
-		 * Interlaced mode is off. [LSM1 LSM0] = [1 0]
-		 * Although LSM1 is set, the screen is still non-interlaced,
-		 * and the image is regular resolution.
-		 */
-		INTERLACED_OFF2		= 2,
-
-		/**
-		 * Interlaced Mode 2. [LSM1 LSM0] = [1 1]
-		 * The display is interlaced, and the vertical resolution
-		 * is doubled. (x448, x480)
-		 */
-		INTERLACED_MODE_2	= 3,
-	};
-
-	/**
 	 * Interlaced rendering mode.
 	 * This controls the way INTERLACED_MODE_2 is rendered onscreen.
-	 * TODO: Make Interlaced_t and IntRend_Mode_t less confusing.
+	 * TODO: Make IntRend_Mode_t less confusing.
 	 */
 	enum IntRend_Mode_t {
 		INTREND_EVEN	= 0,	// Even lines only. (Old Gens)

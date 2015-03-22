@@ -118,8 +118,31 @@ class VdpPrivate
 		unsigned int Win_X_Pos;
 		unsigned int Win_Y_Pos;
 
-		// Interlaced mode.
-		VdpTypes::Interlaced_t Interlaced;
+		// Is Interlaced Mode 2 set?
+		// Cached flag that can be overridden
+		// by VDP options.
+		bool im2_flag;
+
+		/**
+		 * Is Interlaced Mode 1 set?
+		 * @return True if IM1 is set; false if not.
+		 */
+		inline bool isIM1(void) const
+			{ return ((VDP_Reg.m5.Set4 & 0x06) == 0x02); }
+
+		/**
+		 * Is Interlaced Mode 2 set?
+		 * @return True if IM2 is set; false if not.
+		 */
+		inline bool isIM2(void) const
+			{ return ((VDP_Reg.m5.Set4 & 0x06) == 0x06); }
+
+		/**
+		 * Is any Interlaced mode set?
+		 * @return True if either IM1 or IM2 is set; false if not.
+		 */
+		inline bool isIM1orIM2(void) const
+			{ return ((VDP_Reg.m5.Set4 & 0x02) == 0x02); }
 
 		/**
 		 * VDP_Mode: Current VDP mode.

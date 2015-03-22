@@ -900,7 +900,7 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_ScrollA_Window(void)
 FORCE_INLINE void VdpPrivate::Update_Sprite_Line_Cache(int line)
 {
 	unsigned int sovr;
-	if (Interlaced == VdpTypes::INTERLACED_MODE_2) {
+	if (im2_flag) {
 		sovr = T_Update_Sprite_Line_Cache<true>(line);
 	} else {
 		sovr = T_Update_Sprite_Line_Cache<false>(line);
@@ -1445,8 +1445,8 @@ void VdpPrivate::renderLine_m5(void)
 		// VDP is enabled.
 
 		// Determine how to render the image.
-		int RenderMode = ((VDP_Reg.m5.Set4 & 0x08) >> 2);		// Shadow/Highlight
-		RenderMode |= (Interlaced == VdpTypes::INTERLACED_MODE_2);	// Interlaced.
+		int RenderMode = ((VDP_Reg.m5.Set4 & 0x08) >> 2);	// Shadow/Highlight
+		RenderMode |= !!im2_flag;				// Interlaced.
 		switch (RenderMode & 3) {
 			case 0:
 				// H/S disabled; normal display.
@@ -1472,7 +1472,7 @@ void VdpPrivate::renderLine_m5(void)
 		// Update the sprite line cache for the next line.
 		if (q->VDP_Lines.currentLine < (q->VDP_Lines.totalDisplayLines - 1)) {
 			// Update only for visible lines.
-			if (Interlaced == VdpTypes::INTERLACED_MODE_2) {
+			if (im2_flag) {
 				Update_Sprite_Line_Cache(T_GetLineNumber<true>());
 			} else {
 				Update_Sprite_Line_Cache(T_GetLineNumber<false>());

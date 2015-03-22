@@ -274,9 +274,7 @@ void Vdp::updateVdpLines(bool resetCurrent)
 	}
 
 	// Check interlaced mode.
-	d->Interlaced = (VdpTypes::Interlaced_t)
-			(((d->VDP_Reg.m5.Set4 & 0x02) >> 1) |	// LSM0
-			 ((d->VDP_Reg.m5.Set4 & 0x04) >> 1));	// LSM1
+	d->im2_flag = d->isIM2();
 }
 
 /**
@@ -321,11 +319,12 @@ void Vdp::Check_NTSC_V30_VBlank(void)
  */
 void Vdp::startFrame(void)
 {
-	// Update the "Interlaced" flag.
-	if (d->VDP_Reg.m5.Set4 & 0x06)
+	// Update the odd/even frame flag.
+	if (d->isIM1orIM2()) {
 		d->Reg_Status.toggleBit(VdpStatus::VDP_STATUS_ODD);
-	else
+	} else {
 		d->Reg_Status.setBit(VdpStatus::VDP_STATUS_ODD, false);
+	}
 
 	d->HInt_Counter = d->VDP_Reg.m5.H_Int;
 	d->Reg_Status.setBit(VdpStatus::VDP_STATUS_VBLANK, false);
@@ -489,7 +488,7 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 	int line = VDP_Lines.currentLine;
 	if (line >= VDP_Lines.totalDisplayLines)
 		line -= VDP_Lines.totalDisplayLines;
-	if (d->Interlaced == VdpTypes::INTERLACED_MODE_2) {
+	if (d->im2_flag) {
 		d->T_Update_Sprite_Line_Cache<true>(line - 1);
 		sovr = d->T_Update_Sprite_Line_Cache<true>(line);
 	} else {

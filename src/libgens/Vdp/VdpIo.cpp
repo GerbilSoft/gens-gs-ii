@@ -183,7 +183,7 @@ uint8_t Vdp::readVCounter(void)
 	}
 
 	// Check for Interlaced Mode 2. (2x resolution)
-	if (d->Interlaced == VdpTypes::INTERLACED_MODE_2) {
+	if (d->im2_flag) {
 		// Interlaced mode is enabled.
 		uint8_t vc_tmp = (V_Counter & 0xFF);
 		vc_tmp = (vc_tmp << 1) | (vc_tmp >> 7);
