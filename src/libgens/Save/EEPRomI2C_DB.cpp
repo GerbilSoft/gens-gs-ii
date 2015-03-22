@@ -35,7 +35,7 @@
 namespace LibGens {
 
 /** ROM database. **/
-const EEPRomI2CPrivate::GameEEPRomInfo_t EEPRomI2CPrivate::rom_db[27] =
+const EEPRomI2CPrivate::GameEEPRomInfo_t EEPRomI2CPrivate::rom_db[30] =
 {
 	// TODO: Port other EEPROMs.
 
@@ -63,9 +63,9 @@ const EEPRomI2CPrivate::GameEEPRomInfo_t EEPRomI2CPrivate::rom_db[27] =
 	// NOTE: Emulated as 24C64; same chip but without "smart" features.
 	// TODO: Needs MODE 3.
 	/* College Slam */
-	//{"T-81576"    , 0,      {0x200001, 0x200001, 0x200000, 0, 0, 0}, {EEPRomI2C::EPR_MODE3, 0, 0x1FFF, 0x07}},
+	{"T-81576"    , 0,      {0x200001, 0x200001, 0x200000, 0, 0, 0}, {EEPRomI2C::EPR_MODE3, 0, 0x1FFF, 0x07}},
 	/* Frank Thomas Big Hurt Baseball */
-	//{"T-81476"    , 0,      {0x200001, 0x200001, 0x200000, 0, 0, 0}, {EEPRomI2C::EPR_MODE3, 0, 0x1FFF, 0x07}},
+	{"T-81476"    , 0,      {0x200001, 0x200001, 0x200000, 0, 0, 0}, {EEPRomI2C::EPR_MODE3, 0, 0x1FFF, 0x07}},
 
 	/** EA mapper (X24C01 only) **/
 	/* Rings of Power */
@@ -92,9 +92,9 @@ const EEPRomI2CPrivate::GameEEPRomInfo_t EEPRomI2CPrivate::rom_db[27] =
 	{"G-5538"     , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
 	/* Greatest Heavyweights of the Ring (E) */
 	{"PR-1993"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
-	/* Wonderboy in Monster World */
+	/* Wonder Boy in Monster World */
 	{"G-4060"     , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
-	/* Sports Talk Baseball */
+	/* MLBPA Sports Talk Baseball */
 	{"00001211-00", 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
 	/* Honoo no Toukyuuji Dodge Danpei */
 	{"00004076-00", 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
@@ -116,7 +116,7 @@ const EEPRomI2CPrivate::GameEEPRomInfo_t EEPRomI2CPrivate::rom_db[27] =
 	/* 24C16 */
 	/* Micro Machines 2 - Turbo Tournament (E) */
 	{"T-120096"   , 0,      {0x300000, 0x380001, 0x300000, 0, 7, 1}, {EEPRomI2C::EPR_MODE2, 0, 0x7FF, 0x0F}},
-	/* Micro Machines Turbo Tournament 96 */
+	/* Micro Machines - Turbo Tournament '96 */
 	{"00000000-00", 0x165E, {0x300000, 0x380001, 0x300000, 0, 7, 1}, {EEPRomI2C::EPR_MODE2, 0, 0x7FF, 0x0F}},
 	/* Micro Machines Turbo Tournament 96 (Bad?)*/
 	{"00000000-00", 0x2C41, {0x300000, 0x380001, 0x300000, 0, 7, 1}, {EEPRomI2C::EPR_MODE2, 0, 0x7FF, 0x0F}},
@@ -126,7 +126,7 @@ const EEPRomI2CPrivate::GameEEPRomInfo_t EEPRomI2CPrivate::rom_db[27] =
 	// TODO: Needs MODE 3.
 	// TODO: Verify page mask.
 	/* Brian Lara Cricket 96, Shane Warne Cricket */
-	//{"T-120146-50", 0,      {0x300000, 0x380001, 0x300000, 0, 7, 1}, {EEPRomI2C::EPR_MODE3, 0, 0x1FFF, 0x07}},
+	{"T-120146-50", 0,      {0x300000, 0x380001, 0x300000, 0, 7, 1}, {EEPRomI2C::EPR_MODE3, 0, 0x1FFF, 0x07}},
 };
 
 /**

@@ -151,9 +151,13 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 			}
 
 			// Verify the device address.
-			// TODO: This is Mode 2 ONLY.
-			// Needs to be updated for Mode 3.
-			dev_addr = ((data_buf >> 1) & 0x07) & ~(eprChip.sz_mask >> 8);
+			dev_addr = ((data_buf >> 1) & 0x07);
+			if (eprChip.epr_mode == EEPRomI2C::EPR_MODE2) {
+				// Mode 2. Part of the device address may be
+				// high bits of the word address.
+				dev_addr &= ~(eprChip.sz_mask >> 8);
+			}
+
 			// TODO: Mask eprChip.dev_addr?
 			if (dev_addr != eprChip.dev_addr) {
 				// Incorrect device address.
@@ -170,19 +174,20 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 				break;
 			}
 
-			dev_addr = (data_buf >> 1) & 0x7;
 			rw = (data_buf & 1);
 			counter = 0;
 
-			// Update the address.
-			// TODO: This is Mode 2 ONLY.
-			// Needs to be updated for Mode 3.
-			address = (dev_addr << 8) | (address & 0xFF);
-			address &= eprChip.sz_mask;
+			// Mode 2. Part of the device address may be
+			// high bits of the word address.
+			if (eprChip.epr_mode == EEPRomI2C::EPR_MODE2) {
+				uint16_t m2_hiaddr = (data_buf << 7) & 0x700;
+				address = m2_hiaddr | (address & 0xFF);
+				address &= eprChip.sz_mask;
+			}
 
 			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
-				"EPR_MODE2_DEVICE_ADDRESS: dev_type=%1X, dev_addr=%02X, rw=%d",
-				dev_type, dev_addr, rw);
+				"EPR_MODE2_DEVICE_ADDRESS: %02X: type=%1X, dev=%02X, address=%04X, rw=%d",
+				data_buf, dev_type, dev_addr, address, rw);
 
 			if (rw) {
 				// Current address read.
@@ -193,10 +198,11 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 				// Write data.
 				// Needs another command word to set
 				// Word Address bits A7-A0.
-				// TODO: Mode 3?
 				data_buf = 0;
 				shift_rw = 0;	// Shifting in.
-				state = EPR_MODE2_WORD_ADDRESS_LOW;
+				state = (eprChip.epr_mode == EEPRomI2C::EPR_MODE2
+					? EPR_MODE2_WORD_ADDRESS_LOW
+					: EPR_MODE3_WORD_ADDRESS_HIGH);
 			}
 			break;
 		}
@@ -204,17 +210,33 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 		case EPR_MODE2_WORD_ADDRESS_LOW:
 			// Modes 2, 3: Word address, low byte.
 			// Format: [A7 A6 A5 A4 A3 A2 A1 A0]
-			address = (address & ~0xFF) | data_buf;
+			address = (address & ~0xFF) | (data_buf << 8);
 			address &= eprChip.sz_mask;
 			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
-				"EPR_MODE2_WORD_ADDRESS_LOW: dev_addr=%02X, data_buf=%02X, address=%02X",
-				dev_addr, data_buf, address);
+				"EPR_MODE3_WORD_ADDRESS_LOW: %02X: dev_addr=%02X, address=%04X",
+				data_buf, dev_addr, address);
 
 			// Write data.
 			counter = 0;
 			data_buf = 0;
 			shift_rw = 0;	// Shifting in.
 			state = EPR_WRITE_DATA;
+			break;
+
+		case EPR_MODE3_WORD_ADDRESS_HIGH:
+			// Modes 2, 3: Word address, high byte.
+			// Format: [A15 A14 A13 A12 A11 A10 A9 A8]
+			address = (address & ~0xFF00) | data_buf;
+			address &= eprChip.sz_mask;
+			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
+				"EPR_MODE3_WORD_ADDRESS_HIGH: %02X: dev_addr=%02X, address=%04X",
+				data_buf, dev_addr, address);
+
+			// Get the low byte of the word address.
+			counter = 0;
+			data_buf = 0;
+			shift_rw = 0;	// Shifting in.
+			state = EPR_MODE2_WORD_ADDRESS_LOW;
 			break;
 
 		default:

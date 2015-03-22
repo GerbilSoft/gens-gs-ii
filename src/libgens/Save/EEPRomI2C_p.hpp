@@ -102,6 +102,10 @@ class EEPRomI2CPrivate
 			// Modes 2, 3: Word address, low byte.
 			// Format: [A7 A6 A5 A4 A3 A2 A1 A0]
 			EPR_MODE2_WORD_ADDRESS_LOW,
+
+			// Mode 3: Word address, high byte.
+			// Format: [A15 A14 A13 A12 A11 A10 A9 A8]
+			EPR_MODE3_WORD_ADDRESS_HIGH,
 		};
 		EEPRomState_t state;
 
@@ -191,7 +195,7 @@ class EEPRomI2CPrivate
 			EEPRomMap_t mapper;
 			EEPRomChip_t epr_chip;		// EEPROM chip specification.
 		};
-		static const GameEEPRomInfo_t rom_db[27];
+		static const GameEEPRomInfo_t rom_db[30];
 
 		// Current EEPRom type.
 		EEPRomChip_t eprChip;
