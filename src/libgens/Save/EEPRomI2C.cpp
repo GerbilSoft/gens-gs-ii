@@ -210,10 +210,10 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 		case EPR_MODE2_WORD_ADDRESS_LOW:
 			// Modes 2, 3: Word address, low byte.
 			// Format: [A7 A6 A5 A4 A3 A2 A1 A0]
-			address = (address & ~0xFF) | (data_buf << 8);
+			address = (address & ~0xFF) | data_buf;
 			address &= eprChip.sz_mask;
 			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
-				"EPR_MODE3_WORD_ADDRESS_LOW: %02X: dev_addr=%02X, address=%04X",
+				"EPR_MODE2_WORD_ADDRESS_LOW: %02X: dev_addr=%02X, address=%04X",
 				data_buf, dev_addr, address);
 
 			// Write data.
@@ -226,7 +226,7 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 		case EPR_MODE3_WORD_ADDRESS_HIGH:
 			// Modes 2, 3: Word address, high byte.
 			// Format: [A15 A14 A13 A12 A11 A10 A9 A8]
-			address = (address & ~0xFF00) | data_buf;
+			address = (address & ~0xFF00) | (data_buf << 8);
 			address &= eprChip.sz_mask;
 			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
 				"EPR_MODE3_WORD_ADDRESS_HIGH: %02X: dev_addr=%02X, address=%04X",
@@ -266,7 +266,7 @@ void EEPRomI2CPrivate::processI2CShiftOut(void)
 			data_buf = eeprom[address];
 			counter = 0;
 			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
-				"EPR_READ_DATA: ACK received: address=%02X, data_buf=%02X",
+				"EPR_READ_DATA: ACK received: address=%04X, data_buf=%02X",
 				address, data_buf);
 			break;
 
@@ -398,7 +398,7 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 			// TODO: Not necessarily EPR_READ_DATA.
 			if (counter == 8) {
 				LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
-					"EPR_READ_DATA: all 8 bits read: address=%02X",
+					"EPR_READ_DATA: all 8 bits read: address=%04X",
 					address);
 			}
 		}
