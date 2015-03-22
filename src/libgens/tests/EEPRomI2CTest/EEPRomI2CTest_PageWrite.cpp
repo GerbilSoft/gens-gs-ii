@@ -95,7 +95,7 @@ TEST_P(EEPRomI2CTest_PageWrite, eprX24C01_pageWrite)
 
 	// Check for ACK.
 	m_eeprom->dbg_getSDA(&response);
-	EXPECT_EQ(0, response) << "NACK received; expected ACK.";
+	ASSERT_EQ(0, response) << "NACK received; expected ACK.";
 
 	// Write the page twice.
 	unsigned int src_addr = addr_start & eepromMask;
@@ -160,14 +160,14 @@ void EEPRomI2CTest_PageWrite::eprMode2_pageWrite(unsigned int addr_start, unsign
 	response = sendData(cmd);
 	// Check for ACK.
 	m_eeprom->dbg_getSDA(&response);
-	EXPECT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=0: NACK received; expected ACK.";
+	ASSERT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=0: NACK received; expected ACK.";
 
 	// Word address, low byte.
 	cmd = (addr_start & 0xFF);			// A7-A0
 	response = sendData(cmd);
 	// Check for ACK.
 	m_eeprom->dbg_getSDA(&response);
-	EXPECT_EQ(0, response) << "EPR_MODE2_WORD_ADDRESS_LOW: NACK received; expected ACK.";
+	ASSERT_EQ(0, response) << "EPR_MODE2_WORD_ADDRESS_LOW: NACK received; expected ACK.";
 
 	// Write the page twice.
 	unsigned int src_addr = addr_start & eepromMask;

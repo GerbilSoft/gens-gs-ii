@@ -94,7 +94,7 @@ TEST_P(EEPRomI2CTest_SeqRead, eprX24C01_seqReadEmpty)
 
 	// Check for ACK.
 	m_eeprom->dbg_getSDA(&response);
-	EXPECT_EQ(0, response) << "NACK received; expected ACK.";
+	ASSERT_EQ(0, response) << "NACK received; expected ACK.";
 
 	// Read up to two times the size of the EEPROM.
 	unsigned int end_addr = addr_start + (eepromSize * 2) - 1;
@@ -150,7 +150,7 @@ TEST_P(EEPRomI2CTest_SeqRead, eprX24C01_seqReadFull)
 
 	// Check for ACK.
 	m_eeprom->dbg_getSDA(&response);
-	EXPECT_EQ(0, response) << "NACK received; expected ACK.";
+	ASSERT_EQ(0, response) << "NACK received; expected ACK.";
 
 	// Read up to two times the size of the EEPROM.
 	unsigned int end_addr = addr_start + (eepromSize * 2) - 1;
@@ -198,14 +198,14 @@ void EEPRomI2CTest_SeqRead::eprMode2_seqReadEmpty(unsigned int addr_start, unsig
 	response = sendData(cmd);
 	// Check for ACK.
 	m_eeprom->dbg_getSDA(&response);
-	EXPECT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=0: NACK received; expected ACK.";
+	ASSERT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=0: NACK received; expected ACK.";
 
 	// Word address, low byte.
 	cmd = (addr_start & 0xFF);			// A7-A0
 	response = sendData(cmd);
 	// Check for ACK.
 	m_eeprom->dbg_getSDA(&response);
-	EXPECT_EQ(0, response) << "EPR_MODE2_WORD_ADDRESS_LOW: NACK received; expected ACK.";
+	ASSERT_EQ(0, response) << "EPR_MODE2_WORD_ADDRESS_LOW: NACK received; expected ACK.";
 
 	// STOP the write; START a new transfer.
 	doStop();
@@ -220,7 +220,7 @@ void EEPRomI2CTest_SeqRead::eprMode2_seqReadEmpty(unsigned int addr_start, unsig
 	response = sendData(cmd);
 	// Check for ACK.
 	m_eeprom->dbg_getSDA(&response);
-	EXPECT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=1: NACK received; expected ACK.";
+	ASSERT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=1: NACK received; expected ACK.";
 
 	// Read up to two times the size of the EEPROM.
 	unsigned int end_addr = addr_start + (eepromSize * 2) - 1;
@@ -370,14 +370,14 @@ void EEPRomI2CTest_SeqRead::eprMode2_seqReadFull(unsigned int addr_start, unsign
 	response = sendData(cmd);
 	// Check for ACK.
 	m_eeprom->dbg_getSDA(&response);
-	EXPECT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=0: NACK received; expected ACK.";
+	ASSERT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=0: NACK received; expected ACK.";
 
 	// Word address, low byte.
 	cmd = (addr_start & 0xFF);			// A7-A0
 	response = sendData(cmd);
 	// Check for ACK.
 	m_eeprom->dbg_getSDA(&response);
-	EXPECT_EQ(0, response) << "EPR_MODE2_WORD_ADDRESS_LOW: NACK received; expected ACK.";
+	ASSERT_EQ(0, response) << "EPR_MODE2_WORD_ADDRESS_LOW: NACK received; expected ACK.";
 
 	// STOP the write; START a new transfer.
 	doStop();
@@ -392,7 +392,7 @@ void EEPRomI2CTest_SeqRead::eprMode2_seqReadFull(unsigned int addr_start, unsign
 	response = sendData(cmd);
 	// Check for ACK.
 	m_eeprom->dbg_getSDA(&response);
-	EXPECT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=1: NACK received; expected ACK.";
+	ASSERT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=1: NACK received; expected ACK.";
 
 	// Read up to two times the size of the EEPROM.
 	unsigned int end_addr = addr_start + (eepromSize * 2) - 1;

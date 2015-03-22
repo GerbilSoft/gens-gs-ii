@@ -109,7 +109,7 @@ TEST_P(EEPRomI2CTest_RandomRead, eprX24C01_randomReadEmpty)
 
 		// Check for ACK.
 		m_eeprom->dbg_getSDA(&response);
-		EXPECT_EQ(0, response) << "EPR_MODE1_WORD_ADDRESS: NACK received; expected ACK.";
+		ASSERT_EQ(0, response) << "EPR_MODE1_WORD_ADDRESS: NACK received; expected ACK.";
 
 		// Read the data from the EEPROM.
 		// NOTE: Do NOT acknowledge the data word; otherwise, the
@@ -183,7 +183,7 @@ TEST_P(EEPRomI2CTest_RandomRead, eprX24C01_randomReadFull)
 
 		// Check for ACK.
 		m_eeprom->dbg_getSDA(&response);
-		EXPECT_EQ(0, response) << "EPR_MODE1_WORD_ADDRESS: NACK received; expected ACK.";
+		ASSERT_EQ(0, response) << "EPR_MODE1_WORD_ADDRESS: NACK received; expected ACK.";
 
 		// Read the data from the EEPROM.
 		// NOTE: Do NOT acknowledge the data word; otherwise, the
@@ -252,14 +252,14 @@ void EEPRomI2CTest_RandomRead::eprMode2_randomReadEmpty(unsigned int enableRepea
 		response = sendData(cmd);
 		// Check for ACK.
 		m_eeprom->dbg_getSDA(&response);
-		EXPECT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=0: NACK received; expected ACK.";
+		ASSERT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=0: NACK received; expected ACK.";
 
 		// Word address, low byte.
 		cmd = (addr & 0xFF);				// A7-A0
 		response = sendData(cmd);
 		// Check for ACK.
 		m_eeprom->dbg_getSDA(&response);
-		EXPECT_EQ(0, response) << "EPR_MODE2_WORD_ADDRESS_LOW: NACK received; expected ACK.";
+		ASSERT_EQ(0, response) << "EPR_MODE2_WORD_ADDRESS_LOW: NACK received; expected ACK.";
 
 		if (!enableRepeatedStart) {
 			doStop();
@@ -282,7 +282,7 @@ void EEPRomI2CTest_RandomRead::eprMode2_randomReadEmpty(unsigned int enableRepea
 		response = sendData(cmd);
 		// Check for ACK.
 		m_eeprom->dbg_getSDA(&response);
-		EXPECT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=1: NACK received; expected ACK.";
+		ASSERT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=1: NACK received; expected ACK.";
 
 		// Read the data from the EEPROM.
 		// NOTE: Do NOT acknowledge the data word; otherwise, the
@@ -458,14 +458,14 @@ void EEPRomI2CTest_RandomRead::eprMode2_randomReadFull(unsigned int enableRepeat
 		response = sendData(cmd);
 		// Check for ACK.
 		m_eeprom->dbg_getSDA(&response);
-		EXPECT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=0: NACK received; expected ACK.";
+		ASSERT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=0: NACK received; expected ACK.";
 
 		// Word address, low byte.
 		cmd = (addr & 0xFF);				// A7-A0
 		response = sendData(cmd);
 		// Check for ACK.
 		m_eeprom->dbg_getSDA(&response);
-		EXPECT_EQ(0, response) << "EPR_MODE2_WORD_ADDRESS_LOW: NACK received; expected ACK.";
+		ASSERT_EQ(0, response) << "EPR_MODE2_WORD_ADDRESS_LOW: NACK received; expected ACK.";
 
 		if (!enableRepeatedStart) {
 			doStop();
@@ -487,7 +487,7 @@ void EEPRomI2CTest_RandomRead::eprMode2_randomReadFull(unsigned int enableRepeat
 		response = sendData(cmd);
 		// Check for ACK.
 		m_eeprom->dbg_getSDA(&response);
-		EXPECT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=1: NACK received; expected ACK.";
+		ASSERT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=1: NACK received; expected ACK.";
 
 		// Read the data from the EEPROM.
 		// NOTE: Do NOT acknowledge the data word; otherwise, the
