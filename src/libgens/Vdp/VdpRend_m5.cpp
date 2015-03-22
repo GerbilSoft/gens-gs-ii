@@ -895,7 +895,7 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_ScrollA_Window(void)
 /**
  * Update the Sprite Line Cache for the next line.
  * Wrapper function to handle interlacing.
- * @param line Current line number, *not* adjusted for IM2.
+ * @param line Current line number, adjusted for IM2.
  */
 FORCE_INLINE void VdpPrivate::Update_Sprite_Line_Cache(int line)
 {
@@ -915,7 +915,7 @@ FORCE_INLINE void VdpPrivate::Update_Sprite_Line_Cache(int line)
 /**
  * Update the Sprite Line Cache for the next line.
  * @param interlaced If true, using Interlaced Mode 2. (2x res)
- * @param line Current line number, *not* adjusted for IM2.
+ * @param line Current line number, adjusted for IM2.
  * @return VdpStatus::VDP_STATUS_SOVR if sprite limit is exceeded; otherwise, 0.
  */
 template<bool interlaced>
@@ -944,8 +944,16 @@ FORCE_INLINE unsigned int VdpPrivate::T_Update_Sprite_Line_Cache(int line)
 	}
 
 	// We're updating the cache for the *next* line.
-	line++;
-	SprLineCache_t *cache = &sprLineCache[line & 1][0];
+	int cacheId;
+	if (interlaced) {
+		// FIXME: If < 0, should adjust to 0 or 1 depending on odd/even.
+		line += 2;
+		cacheId = (line >> 1) & 1;
+	} else {
+		line++;
+		cacheId = line & 1;
+	}
+	SprLineCache_t *cache = &sprLineCache[cacheId][0];
 	uint8_t count = 0;
 
 	/**
@@ -963,7 +971,13 @@ FORCE_INLINE unsigned int VdpPrivate::T_Update_Sprite_Line_Cache(int line)
 	int total_spr_count = max_spr_frame;
 	do {
 		// Check the Y position.
-		const int y = spr_SAT->y - (interlaced ? 256 : 128);
+		int y = spr_SAT->y;
+		if (interlaced) {
+			y = (y & 0x3FF) - 256;
+		} else {
+			y = (y & 0x1FF) - 128;
+		}
+
 		if (line >= y) {
 			// Calculate the sprite's height.
 			const uint8_t sz = spr_SAT->sz;
@@ -1018,7 +1032,7 @@ FORCE_INLINE unsigned int VdpPrivate::T_Update_Sprite_Line_Cache(int line)
 	} while (--total_spr_count);
 
 	// Save the sprite count for the next line.
-	sprCountCache[line & 1] = count;
+	sprCountCache[cacheId] = count;
 
 	// Return the SOVR flag.
 	return ret;
@@ -1032,14 +1046,12 @@ FORCE_INLINE unsigned int VdpPrivate::T_Update_Sprite_Line_Cache(int line)
 template<bool interlaced, bool h_s>
 FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 {
-	// Get the sprite line cache for the current line.
-	// NOTE: This is based on physical lines, so don't
-	// use the Interlaced line value.
-	const int cacheId = (T_GetLineNumber<false>() & 1);
-	const SprLineCache_t *cache = &sprLineCache[cacheId][0];
-
 	// Current line number, adjusting for Interlaced Mode 2.
 	const int line = T_GetLineNumber<interlaced>();
+
+	// Get the sprite line cache for the current line.
+	const int cacheId = (interlaced ? (line >> 1) : line) & 1;
+	const SprLineCache_t *cache = &sprLineCache[cacheId][0];
 
 	// Pixel count for sprite limit.
 	// NOTE: If the user disabled sprite limit, then there's no maximum.
@@ -1441,11 +1453,13 @@ void VdpPrivate::renderLine_m5(void)
 		}
 
 		// Update the sprite line cache for the next line.
-		// NOTE: Must use the physical line number, not the
-		// line number adjusted for interlacing.
 		if (q->VDP_Lines.currentLine < (q->VDP_Lines.totalDisplayLines - 1)) {
-			// Update only for lines 0-223.
-			Update_Sprite_Line_Cache(q->VDP_Lines.currentLine);
+			// Update only for visible lines.
+			if (Interlaced == VdpTypes::INTERLACED_MODE_2) {
+				Update_Sprite_Line_Cache(T_GetLineNumber<true>());
+			} else {
+				Update_Sprite_Line_Cache(T_GetLineNumber<false>());
+			}
 		}
 	}
 
