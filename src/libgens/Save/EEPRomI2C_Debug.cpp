@@ -137,6 +137,46 @@ int EEPRomI2C::dbg_setPageSize(unsigned int pgSize)
 }
 
 /**
+ * Get the device address.
+ * MODE2/MODE3 only.
+ * @param devAddr Buffer for the device address.
+ * @return MDP error code.
+ */
+int EEPRomI2C::dbg_getDevAddr(uint8_t *devAddr) const
+{
+	if (d->eprChip.epr_mode != EPR_MODE2 &&
+	    d->eprChip.epr_mode != EPR_MODE3)
+	{
+		// Wrong EEPROM mode.
+		return -1;
+	}
+
+	*devAddr = d->eprChip.dev_addr;
+	return 0;
+}
+
+/**
+ * Set the device address.
+ * MODE2/MODE3 only.
+ * NOTE: For MODE2, valid device addresses depend on the
+ * size of the EEPROM. They aren't checked here.
+ * @param devAddr Device address.
+ * @return MDP error code.
+ */
+int EEPRomI2C::dbg_setDevAddr(uint8_t devAddr)
+{
+	if (d->eprChip.epr_mode != EPR_MODE2 &&
+	    d->eprChip.epr_mode != EPR_MODE3)
+	{
+		// Wrong EEPROM mode.
+		return -1;
+	}
+
+	d->eprChip.dev_addr = devAddr;
+	return 0;
+}
+
+/**
  * Read data from the EEPROM.
  * NOTE: Wraparound is not supported.
  * @param address Start address.

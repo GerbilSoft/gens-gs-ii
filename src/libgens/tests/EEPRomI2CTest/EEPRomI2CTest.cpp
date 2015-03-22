@@ -111,6 +111,7 @@ uint8_t EEPRomI2CTest::recvData(bool ack)
 
 	for (int i = 8; i > 0; i--) {
 		// Data is received when SCL=0.
+		// FIXME: Should it be SCL=1?
 		m_eeprom->dbg_setSCL(0);
 		m_eeprom->dbg_getSDA(&sda_in);
 		data <<= 1;
