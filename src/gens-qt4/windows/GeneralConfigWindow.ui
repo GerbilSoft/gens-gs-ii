@@ -460,11 +460,14 @@ on NTSC models.</string>
               <item>
                <widget class="QCheckBox" name="chkZeroLengthDMA">
                 <property name="toolTip">
-                 <string>The Genesis VDP has a bug where a DMA transfer with a length
-of 0 results in a transfer of 128 KB. Older versions of Gens did
-not handle this properly, and simply ignored zero-length
-transfers. This was incorrectly used by some hacks, so those
-hacks will break in emulators that handle this correctly.
+                 <string>
+The Genesis VDP doesn't check the DMA transfer length until after
+it decrements it. If the transfer length is 0, this means it will
+wrap around to 0xFFFF (65535), resulting in a transfer of 128 KB.
+Older versions of Gens did not handle this properly, and simply
+ignored zero-length transfers. This was incorrectly used by some
+hacks, so those hacks will break in emulators that handle this
+function correctly.
 
 If you want to play one of these hacks, enable this option.
 Be warned that it may break commercial games and other
