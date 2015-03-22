@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -165,8 +165,18 @@ namespace VdpTypes
 		 * This is similar to Genecyst.
 		 */
 		bool updatePaletteInVBlankOnly;
+
+		/**
+		 * Enable Interlaced mode.
+		 * This allows Interlaced Mode 2 to function normally.
+		 * If disabled, this will result in garbage appearing
+		 * on the screen if a game attempts to use IM2, e.g.
+		 * Sonic 2's 2P VS mode.
+		 * This is similar to Genecyst.
+		 */
+		bool enableInterlacedMode;
 	};
-	
+
 	// VDP layer flags.
 	enum VdpLayerFlags {
 		VDP_LAYER_SCROLLA_LOW		= (1 << 0),

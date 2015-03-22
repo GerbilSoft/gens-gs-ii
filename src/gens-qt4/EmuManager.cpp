@@ -126,6 +126,8 @@ EmuManager::EmuManager(QObject *parent, VBackend *vBackend)
 					this, SLOT(vscrollBug_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("VDP/updatePaletteInVBlankOnly"),
 					this, SLOT(updatePaletteInVBlankOnly_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("VDP/enableInterlacedMode"),
+					this, SLOT(enableInterlacedMode_changed_slot(QVariant)));
 
 	// Region code settings.
 	gqt4_cfg->registerChangeNotification(QLatin1String("System/regionCode"),
@@ -469,6 +471,8 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 			gqt4_cfg->get(QLatin1String("VDP/vscrollBug")).toBool();
 	options->updatePaletteInVBlankOnly =
 			gqt4_cfg->get(QLatin1String("VDP/updatePaletteInVBlankOnly")).toBool();
+	options->enableInterlacedMode =
+			gqt4_cfg->get(QLatin1String("VDP/enableInterlacedMode")).toBool();
 
 	// Start the emulation thread.
 	m_paused.data = 0;

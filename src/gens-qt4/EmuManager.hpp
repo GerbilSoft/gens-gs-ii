@@ -307,7 +307,8 @@ class EmuManager : public QObject
 				RQT_PS_SPRITELIMITS,
 				RQT_PS_ZEROLENGTHDMA,
 				RQT_PS_VSCROLLBUG,
-				RQT_PS_UPDATEPALETTEINVBLANKONLY
+				RQT_PS_UPDATEPALETTEINVBLANKONLY,
+				RQT_PS_ENABLEINTERLACEDMODE
 			};
 
 			RequestType rqType;
@@ -438,6 +439,7 @@ class EmuManager : public QObject
 		void zeroLengthDMA_changed_slot(const QVariant &zeroLengthDMA);
 		void vscrollBug_changed_slot(const QVariant &vscrollBug);
 		void updatePaletteInVBlankOnly_changed_slot(const QVariant &updatePaletteInVBlankOnly);
+		void enableInterlacedMode_changed_slot(const QVariant &enableInterlacedMode);
 
 	/** Emulation Request Queue: Processing functions. **/
 

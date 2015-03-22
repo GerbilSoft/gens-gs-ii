@@ -386,6 +386,8 @@ void EmuManager::vscrollBug_changed_slot(const QVariant &vscrollBug)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_VSCROLLBUG, (int)vscrollBug.toBool()); }
 void EmuManager::updatePaletteInVBlankOnly_changed_slot(const QVariant &updatePaletteInVBlankOnly)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_UPDATEPALETTEINVBLANKONLY, (int)updatePaletteInVBlankOnly.toBool()); }
+void EmuManager::enableInterlacedMode_changed_slot(const QVariant &enableInterlacedMode)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_ENABLEINTERLACEDMODE, (int)enableInterlacedMode.toBool()); }
 
 /** Emulation Request Queue: Processing functions. **/
 
@@ -822,6 +824,9 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 			break;
 		case EmuRequest_t::RQT_PS_UPDATEPALETTEINVBLANKONLY:
 			options->updatePaletteInVBlankOnly = !!val;
+			break;
+		case EmuRequest_t::RQT_PS_ENABLEINTERLACEDMODE:
+			options->enableInterlacedMode = !!val;
 			break;
 		default:
 			break;

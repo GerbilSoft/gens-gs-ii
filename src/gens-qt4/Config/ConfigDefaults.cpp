@@ -108,6 +108,7 @@ const ConfigDefaults::DefaultSetting ConfigDefaults::DefaultSettings[] =
 	{"VDP/zeroLengthDMA",		"false", 0, 0,		DefaultSetting::VT_BOOL, 0, 0},
 	{"VDP/vscrollBug",		"true", 0, 0,		DefaultSetting::VT_BOOL, 0, 0},
 	{"VDP/updatePaletteInVBlankOnly", "false", 0, 0,	DefaultSetting::VT_BOOL, 0, 0},
+	{"VDP/enableInterlacedMode",	"true", 0, 0,		DefaultSetting::VT_BOOL, 0, 0},
 
 	/** Savestates. **/
 	{"Savestates/saveSlot", "0", 0, DefaultSetting::DEF_ALLOW_SAME_VALUE, DefaultSetting::VT_RANGE, 0, 9},

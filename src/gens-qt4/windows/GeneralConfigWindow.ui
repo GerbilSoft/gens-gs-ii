@@ -505,6 +505,19 @@ was submerged.</string>
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QCheckBox" name="chkEnableInterlacedMode">
+                <property name="toolTip">
+                 <string>Disabling Interlaced mode will result in garbage appearing
+on the screen if a game attempts to use it. This simulates
+the behavior of the Genecyst emulator when playing games
+that used Interlaced mode, e.g. Sonic 2's 2P VS mode.</string>
+                </property>
+                <property name="text">
+                 <string>Enable &amp;Interlaced mode.</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </widget>
            </item>
@@ -1240,6 +1253,7 @@ This option requires a valid TMSS ROM in order to function properly.</string>
   <tabstop>chkZeroLengthDMA</tabstop>
   <tabstop>chkVScrollBug</tabstop>
   <tabstop>chkUpdatePaletteInVBlankOnly</tabstop>
+  <tabstop>chkEnableInterlacedMode</tabstop>
   <tabstop>cboRegionCurrent</tabstop>
   <tabstop>lstRegionDetect</tabstop>
   <tabstop>btnRegionDetectUp</tabstop>

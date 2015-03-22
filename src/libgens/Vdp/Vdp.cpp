@@ -54,6 +54,7 @@ const VdpTypes::VdpEmuOptions_t VdpPrivate::def_vdpEmuOptions = {
 	false,				// zeroLengthDMA
 	true,				// vscrollBug
 	false,				// updatePaletteInVBlankOnly
+	true,				// enableInterlacedMode
 };
 
 VdpPrivate::VdpPrivate(Vdp *q)
@@ -274,7 +275,11 @@ void Vdp::updateVdpLines(bool resetCurrent)
 	}
 
 	// Check interlaced mode.
-	d->im2_flag = d->isIM2();
+	if (options.enableInterlacedMode) {
+		d->im2_flag = d->isIM2();
+	} else {
+		d->im2_flag = false;
+	}
 }
 
 /**
@@ -320,6 +325,7 @@ void Vdp::Check_NTSC_V30_VBlank(void)
 void Vdp::startFrame(void)
 {
 	// Update the odd/even frame flag.
+	// NOTE: enableInterlacedMode does NOT affect this function.
 	if (d->isIM1orIM2()) {
 		d->Reg_Status.toggleBit(VdpStatus::VDP_STATUS_ODD);
 	} else {
