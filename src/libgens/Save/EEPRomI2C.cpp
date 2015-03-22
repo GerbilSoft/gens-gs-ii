@@ -140,8 +140,8 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 				// Go back to standby.
 				// TODO: Split into doStandby() function?
 				LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG1,
-					"EPR_MODE2_DEVICE_ADDRESS: dev_type=%1X, ignoring",
-					dev_type);
+					"EPR_MODE2_DEVICE_ADDRESS: %02X: dev_type=%1X, ignoring",
+					data_buf, dev_type);
 				sda_out = 1;
 				counter = 0;
 				data_buf = 0;
