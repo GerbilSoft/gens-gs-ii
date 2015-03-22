@@ -35,7 +35,7 @@
 namespace LibGens {
 
 /** ROM database. **/
-const EEPRomI2CPrivate::GameEEPRomInfo_t EEPRomI2CPrivate::rom_db[14] =
+const EEPRomI2CPrivate::GameEEPRomInfo_t EEPRomI2CPrivate::rom_db[27] =
 {
 	// TODO: Port other EEPROMs.
 
@@ -44,16 +44,44 @@ const EEPRomI2CPrivate::GameEEPRomInfo_t EEPRomI2CPrivate::rom_db[14] =
 	/* 24C02 (old mapper) */
 	/* NBA Jam (UE) */
 	{"T-081326"   , 0,      {0x200001, 0x200001, 0x200001, 0, 1, 1}, {EEPRomI2C::EPR_MODE2, 0, 0xFF, 0x03}},
+	/* NBA Jam (J) */
+	{"T-81033"    , 0,      {0x200001, 0x200001, 0x200001, 0, 1, 1}, {EEPRomI2C::EPR_MODE2, 0, 0xFF, 0x03}},
+
+	/* 24C02 */
+	/* NFL Quarterback Club */
+	{"T-081276"   , 0,      {0x200001, 0x200001, 0x200000, 0, 0, 0}, {EEPRomI2C::EPR_MODE2, 0, 0xFF, 0x03}},
 
 	/* 24C04 */
 	/* NBA Jam TE */
 	{"T-81406"    , 0,      {0x200001, 0x200001, 0x200000, 0, 0, 0}, {EEPRomI2C::EPR_MODE2, 0, 0x1FF, 0x03}},
 
+	/* 24C16 */
+	/* NFL Quarterback Club '96 */
+	{"T-081586"   , 0,      {0x200001, 0x200001, 0x200000, 0, 0, 0}, {EEPRomI2C::EPR_MODE2, 0, 0x7FF, 0x07}},
+
+	/* 24C65 */
+	// NOTE: Emulated as 24C64; same chip but without "smart" features.
+	// TODO: Needs MODE 3.
+	/* College Slam */
+	//{"T-81576"    , 0,      {0x200001, 0x200001, 0x200000, 0, 0, 0}, {EEPRomI2C::EPR_MODE3, 0, 0x1FFF, 0x07}},
+	/* Frank Thomas Big Hurt Baseball */
+	//{"T-81476"    , 0,      {0x200001, 0x200001, 0x200000, 0, 0, 0}, {EEPRomI2C::EPR_MODE3, 0, 0x1FFF, 0x07}},
+
+	/** EA mapper (X24C01 only) **/
+	/* Rings of Power */
+	{"T-50176"    , 0,      {0x200001, 0x200001, 0x200001, 7, 7, 6}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
+	/* NHLPA Hockey 93 */
+	{"T-50396"    , 0,      {0x200001, 0x200001, 0x200001, 7, 7, 6}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
+	/* John Madden Football 93 */
+	{"T-50446"    , 0,      {0x200001, 0x200001, 0x200001, 7, 7, 6}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
+	/* John Madden Football 93 (Championship Ed.) */
+	{"T-50516"    , 0,      {0x200001, 0x200001, 0x200001, 7, 7, 6}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
+	/* Bill Walsh College Football */
+	{"T-50606"    , 0,      {0x200001, 0x200001, 0x200001, 7, 7, 6}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
+
 	/** SEGA mapper (X24C01) **/
 	/* Megaman - The Wily Wars */
-	{"T-12046"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
-	/* Megaman - The Wily Wars */
-	{"T-12046"    , 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
+	{"T-12046"    , 0xAD23, {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
 	/* Rockman Mega World (J) [A] */
 	{"T-12053"    , 0xEA80, {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
 	/* Evander 'Real Deal' Holyfield's Boxing */
@@ -75,61 +103,30 @@ const EEPRomI2CPrivate::GameEEPRomInfo_t EEPRomI2CPrivate::rom_db[14] =
 	/* Game Toshokan */
 	{"00054503-00", 0,      {0x200001, 0x200001, 0x200001, 0, 0, 1}, {EEPRomI2C::EPR_MODE1, 0, 0x7F, 0x03}},
 
-#if 0
-	/** ACCLAIM mappers **/
-	
-	/* 24C02 (old mapper) */
-	{"T-081326"   , 0,      {8,  0xFF,   0xFF,   0x200001, 0x200001, 0x200001, 0, 1, 1}},   /* NBA Jam (UE) */
-	{"T-81033"    , 0,      {8,  0xFF,   0xFF,   0x200001, 0x200001, 0x200001, 0, 1, 1}},   /* NBA Jam (J) */
-	
-	/* 24C02 */
-	{"T-081276"   , 0,      {8,  0xFF,   0xFF,   0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* NFL Quarterback Club */
-	
-	/* 24C04 */
-	{"T-81406"    , 0,      {8,  0x1FF,  0x1FF,  0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* NBA Jam TE */
-	
-	/* 24C16 */
-	{"T-081586"   , 0,      {8,  0x7FF,  0x7FF,  0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* NFL Quarterback Club '96 */
-	
-	/* 24C65 */
-	{"T-81576"    , 0,      {16, 0x1FFF, 0x1FFF, 0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* College Slam */
-	{"T-81476"    , 0,      {16, 0x1FFF, 0x1FFF, 0x200001, 0x200001, 0x200000, 0, 0, 0}},   /* Frank Thomas Big Hurt Baseball */
-	
-	/** EA mapper (24C01 only) **/
-	{"T-50176"    , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 7, 7, 6}},   /* Rings of Power */
-	{"T-50396"    , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 7, 7, 6}},   /* NHLPA Hockey 93 */
-	{"T-50446"    , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 7, 7, 6}},   /* John Madden Football 93 */
-	{"T-50516"    , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 7, 7, 6}},   /* John Madden Football 93 (Championship Ed.) */
-	{"T-50606"    , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 7, 7, 6}},   /* Bill Walsh College Football */
-	
-	/** SEGA mapper (24C01 only) **/
-	{"T-12046"    , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Megaman - The Wily Wars */
-	{"T-12053"    , 0xEA80, {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Rockman Mega World (J) [A] */
-	{"MK-1215"    , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Evander 'Real Deal' Holyfield's Boxing */
-	{"MK-1228"    , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Greatest Heavyweights of the Ring (U) */
-	{"G-5538"     , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Greatest Heavyweights of the Ring (J) */
-	{"PR-1993"    , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Greatest Heavyweights of the Ring (E) */
-	{"G-4060"     , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Wonderboy in Monster World */
-	{"00001211-00", 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Sports Talk Baseball */
-	{"00004076-00", 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Honoo no Toukyuuji Dodge Danpei */
-	{"G-4524"     , 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Ninja Burai Densetsu */
-	{"00054503-00", 0,      {7,  0x7F,   0x7F,   0x200001, 0x200001, 0x200001, 0, 0, 1}},   /* Game Toshokan */
-	
 	/** CODEMASTERS mapper **/
 	
 	/* 24C08 */
-	{"T-120106",    0,      {7,  0x3FF,  0x3FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Brian Lara Cricket */
-	{"00000000-00", 0x168B, {8,  0x3FF,  0x3FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Micro Machines Military */
-	{"00000000-00", 0xCEE0, {8,  0x3FF,  0x3FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Micro Machines Military (Bad)*/
-	{"T-120096"   , 0,      {8,  0x7FF,  0x7FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Micro Machines 2 - Turbo Tournament (E) */
-	
+	/* Brian Lara Cricket */ // TODO: Verify page mask.
+	{"T-120106",    0,      {0x300000, 0x380001, 0x300000, 0, 7, 1}, {EEPRomI2C::EPR_MODE2, 0, 0x3FF, 0x0F}},
+	/* Micro Machines Military */
+	{"00000000-00", 0x168B, {0x300000, 0x380001, 0x300000, 0, 7, 1}, {EEPRomI2C::EPR_MODE2, 0, 0x3FF, 0x0F}},
+	/* Micro Machines Military (Bad?)*/
+	{"00000000-00", 0xCEE0, {0x300000, 0x380001, 0x300000, 0, 7, 1}, {EEPRomI2C::EPR_MODE2, 0, 0x3FF, 0x0F}},
+
 	/* 24C16 */
-	{"00000000-00", 0x165E, {8,  0x7FF,  0x7FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Micro Machines Turbo Tournament 96 */
-	{"00000000-00", 0x2C41, {8,  0x7FF,  0x7FF,  0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Micro Machines Turbo Tournament 96 (Bad)*/
-	
+	/* Micro Machines 2 - Turbo Tournament (E) */
+	{"T-120096"   , 0,      {0x300000, 0x380001, 0x300000, 0, 7, 1}, {EEPRomI2C::EPR_MODE2, 0, 0x7FF, 0x0F}},
+	/* Micro Machines Turbo Tournament 96 */
+	{"00000000-00", 0x165E, {0x300000, 0x380001, 0x300000, 0, 7, 1}, {EEPRomI2C::EPR_MODE2, 0, 0x7FF, 0x0F}},
+	/* Micro Machines Turbo Tournament 96 (Bad?)*/
+	{"00000000-00", 0x2C41, {0x300000, 0x380001, 0x300000, 0, 7, 1}, {EEPRomI2C::EPR_MODE2, 0, 0x7FF, 0x0F}},
+
 	/* 24C65 */
-	{"T-120146-50", 0,      {16, 0x1FFF, 0x1FFF, 0x300000, 0x380001, 0x300000, 0, 7, 1}},   /* Brian Lara Cricket 96, Shane Warne Cricket */
-#endif
+	// NOTE: Emulated as 24C64; same chip but without "smart" features.
+	// TODO: Needs MODE 3.
+	// TODO: Verify page mask.
+	/* Brian Lara Cricket 96, Shane Warne Cricket */
+	//{"T-120146-50", 0,      {0x300000, 0x380001, 0x300000, 0, 7, 1}, {EEPRomI2C::EPR_MODE3, 0, 0x1FFF, 0x07}},
 };
 
 /**

@@ -191,7 +191,7 @@ class EEPRomI2CPrivate
 			EEPRomMap_t mapper;
 			EEPRomChip_t epr_chip;		// EEPROM chip specification.
 		};
-		static const GameEEPRomInfo_t rom_db[14];
+		static const GameEEPRomInfo_t rom_db[27];
 
 		// Current EEPRom type.
 		EEPRomChip_t eprChip;
