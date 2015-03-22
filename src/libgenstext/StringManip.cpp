@@ -2,7 +2,7 @@
  * libgenstext: Gens/GS II Text Manipulation Library.                      *
  * StringManip.hpp: String manipulation functions.                         *
  *                                                                         *
- * Copyright (c) 2010-2013 by David Korth.                                 *
+ * Copyright (c) 2010-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -31,8 +31,13 @@ using std::u16string;
 #include <cctype>
 #include <cwctype>
 
-namespace LibGensText
-{
+namespace LibGensText {
+
+#ifdef _WIN32
+#define PATH_SEP_CHR '\\'
+#else
+#define PATH_SEP_CHR '/'
+#endif
 
 /**
  * Determine if a character is a graphics character.
@@ -117,6 +122,30 @@ string SpaceElim(const string& src)
 
 	// Convert the string back to UTF-8.
 	return Utf16_to_Utf8(wcs_dest);
+}
+
+/**
+ * Get the filename portion of a path without its extension.
+ * @param filename Original filename.
+ * @return Filename without directories or its extension.
+ */
+string FilenameNoExt(const string &filename)
+{
+	// Remove the directories and extension from the ROM filename.
+	// TODO: Remove all extensions (e.g. ".gen.gz")?
+	string tmp = filename;
+
+	// Get the filename portion.
+	size_t dirSep = tmp.rfind(PATH_SEP_CHR);
+	if (dirSep != string::npos)
+		tmp.erase(0, dirSep+1);
+
+	// Remove the file extension.
+	size_t extSep = tmp.rfind('.');
+	if (extSep != string::npos)
+		tmp.erase(extSep, (tmp.size() - extSep));
+
+	return tmp;
 }
 
 }

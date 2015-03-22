@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -136,13 +136,14 @@ class Rom
 		 * Get the ROM filename.
 		 * @return ROM filename (UTF-8), or empty string on error.
 		 */
-		const std::string filename(void) const;
+		std::string filename(void) const;
 
 		/**
-		 * Get the ROM filename. (basename, no extension)
+		 * Get the ROM filename.
+		 * (Basename, no extension)
 		 * @return ROM filename (UTF-8), or empty string on error.
 		 */
-		const std::string filenameBaseNoExt(void) const;
+		std::string filenameBaseNoExt(void) const;
 
 		/********************
 		 * ROM header data. *
@@ -152,13 +153,13 @@ class Rom
 		 * Get the Japanese (domestic) ROM name.
 		 * @return Japanese (domestic) ROM name (UTF-8), or empty string on error.
 		 */
-		const std::string romNameJP(void) const;
+		std::string romNameJP(void) const;
 
 		/**
 		 * Get the American (overseas) ROM name.
 		 * @return American (overseas) ROM name (UTF-8), or empty string on error.
 		 */
-		const std::string romNameUS(void) const;
+		std::string romNameUS(void) const;
 
 		/**
 		 * Get the ROM checksum.
