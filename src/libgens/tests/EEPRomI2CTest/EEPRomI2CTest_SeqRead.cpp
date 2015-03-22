@@ -38,36 +38,22 @@ class EEPRomI2CTest_SeqRead : public EEPRomI2CTest
 {
 	protected:
 		/**
-		 * Mode 2 EEPROM: Test sequential reading of an empty EEPROM.
+		 * Mode 2 EEPROM: Test sequential reading of an EEPROM.
 		 * Starts at the specified address.
+		 * @param useTestData If true, use test data; if false, use a blank EEPROM.
 		 * @param addr_start Starting address.
 		 * @param eepromSize EEPROM size.
 		 */
-		void eprMode2_seqReadEmpty(unsigned int addr_start, unsigned int eepromSize);
+		void eprMode2_seqRead(bool useTestData, unsigned int addr_start, unsigned int eepromSize);
 
 		/**
-		 * Mode 2 EEPROM: Test sequential reading of a full EEPROM.
-		 * Reads 64 bytes at random addresses.
-		 * @param addr_start Starting address.
-		 * @param eepromSize EEPROM size.
-		 */
-		void eprMode2_seqReadFull(unsigned int addr_start, unsigned int eepromSize);
-
-		/**
-		 * Mode 3 EEPROM: Test sequential reading of an empty EEPROM.
+		 * Mode 3 EEPROM: Test sequential reading of an EEPROM.
 		 * Starts at the specified address.
+		 * @param useTestData If true, use test data; if false, use a blank EEPROM.
 		 * @param addr_start Starting address.
 		 * @param eepromSize EEPROM size.
 		 */
-		void eprMode3_seqReadEmpty(unsigned int addr_start, unsigned int eepromSize);
-
-		/**
-		 * Mode 3 EEPROM: Test sequential reading of a full EEPROM.
-		 * Reads 64 bytes at random addresses.
-		 * @param addr_start Starting address.
-		 * @param eepromSize EEPROM size.
-		 */
-		void eprMode3_seqReadFull(unsigned int addr_start, unsigned int eepromSize);
+		void eprMode3_seqRead(bool useTestData, unsigned int addr_start, unsigned int eepromSize);
 };
 
 /**
@@ -187,14 +173,20 @@ TEST_P(EEPRomI2CTest_SeqRead, eprX24C01_seqReadFull)
 }
 
 /**
- * Mode 2 EEPROM: Test sequential reading of an empty EEPROM.
+ * Mode 2 EEPROM: Test sequential reading of an EEPROM.
  * Starts at the specified address.
+ * @param useTestData If true, use test data; if false, use a blank EEPROM.
  * @param addr_start Starting address.
  * @param eepromSize EEPROM size.
  */
-void EEPRomI2CTest_SeqRead::eprMode2_seqReadEmpty(unsigned int addr_start, unsigned int eepromSize)
+void EEPRomI2CTest_SeqRead::eprMode2_seqRead(bool useTestData, unsigned int addr_start, unsigned int eepromSize)
 {
 	const unsigned int eepromMask = eepromSize - 1;
+
+	if (useTestData) {
+		// Initialize the EEPROM data.
+		ASSERT_EQ(0, m_eeprom->dbg_writeEEPRom(0x00, test_EEPRomI2C_data, eepromSize));
+	}
 
 	// Make sure we're in a STOP condition at first.
 	doStop();
@@ -245,10 +237,20 @@ void EEPRomI2CTest_SeqRead::eprMode2_seqReadEmpty(unsigned int addr_start, unsig
 		// the last byte being read.
 		bool isLastByte = (addr != end_addr);
 		uint8_t data_actual = recvData(isLastByte);
-		EXPECT_EQ(0xFF, data_actual) <<
-			"EEPROM address 0x" <<
-			std::hex << std::setw(2) << std::setfill('0') << std::uppercase << addr <<
-			" should be 0xFF (empty ROM).";
+		if (!useTestData) {
+			// Empty EEPROM.
+			EXPECT_EQ(0xFF, data_actual) <<
+				"EEPROM address 0x" <<
+				std::hex << std::setw(2) << std::setfill('0') << std::uppercase << addr <<
+				" should be 0xFF (empty ROM).";
+		} else {
+			// Full EEPROM.
+			uint8_t data_expected = test_EEPRomI2C_data[addr & eepromMask];
+			EXPECT_EQ(data_expected, data_actual) <<
+				"EEPROM address 0x" <<
+				std::hex << std::setw(2) << std::setfill('0') << std::uppercase << addr <<
+				" should be 0x" << (int)data_expected << " (test EEPROM).";
+		}
 	}
 
 	// STOP the transfer.
@@ -272,7 +274,7 @@ TEST_P(EEPRomI2CTest_SeqRead, epr24C01_seqReadEmpty)
 	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
 
 	// Run the Mode 2 test.
-	eprMode2_seqReadEmpty(addr_start, eepromSize);
+	eprMode2_seqRead(false, addr_start, eepromSize);
 }
 
 /**
@@ -292,7 +294,7 @@ TEST_P(EEPRomI2CTest_SeqRead, epr24C02_seqReadEmpty)
 	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
 
 	// Run the Mode 2 test.
-	eprMode2_seqReadEmpty(addr_start, eepromSize);
+	eprMode2_seqRead(false, addr_start, eepromSize);
 }
 
 /**
@@ -312,7 +314,7 @@ TEST_P(EEPRomI2CTest_SeqRead, epr24C04_seqReadEmpty)
 	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
 
 	// Run the Mode 2 test.
-	eprMode2_seqReadEmpty(addr_start, eepromSize);
+	eprMode2_seqRead(false, addr_start, eepromSize);
 }
 
 /**
@@ -332,7 +334,7 @@ TEST_P(EEPRomI2CTest_SeqRead, epr24C08_seqReadEmpty)
 	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
 
 	// Run the Mode 2 test.
-	eprMode2_seqReadEmpty(addr_start, eepromSize);
+	eprMode2_seqRead(false, addr_start, eepromSize);
 }
 
 /**
@@ -352,80 +354,7 @@ TEST_P(EEPRomI2CTest_SeqRead, epr24C16_seqReadEmpty)
 	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
 
 	// Run the Mode 2 test.
-	eprMode2_seqReadEmpty(addr_start, eepromSize);
-}
-
-/**
- * Mode 2 EEPROM: Test sequential reading of a full EEPROM.
- * Starts at the specified address.
- * @param addr_start Starting address.
- * @param eepromSize EEPROM size.
- */
-void EEPRomI2CTest_SeqRead::eprMode2_seqReadFull(unsigned int addr_start, unsigned int eepromSize)
-{
-	const unsigned int eepromMask = eepromSize - 1;
-
-	// Initialize the EEPROM data.
-	ASSERT_EQ(0, m_eeprom->dbg_writeEEPRom(0x00, test_EEPRomI2C_data, eepromSize));
-
-	// Make sure we're in a STOP condition at first.
-	doStop();
-
-	// EEPROM values.
-	uint8_t cmd, response;
-
-	// START an I2C transfer.
-	m_eeprom->dbg_setSDA(0);	// START
-
-	/** Dummy write cycle. **/
-
-	// Device select.
-	// Assuming device address is 0.
-	cmd = (0xA0 | 0);				// RW=0
-	cmd |= (((addr_start & eepromMask) >> 7) & ~1);	// A10-A8
-	response = sendData(cmd);
-	// Check for ACK.
-	m_eeprom->dbg_getSDA(&response);
-	ASSERT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=0: NACK received; expected ACK.";
-
-	// Word address, low byte.
-	cmd = (addr_start & 0xFF);			// A7-A0
-	response = sendData(cmd);
-	// Check for ACK.
-	m_eeprom->dbg_getSDA(&response);
-	ASSERT_EQ(0, response) << "EPR_MODE2_WORD_ADDRESS_LOW: NACK received; expected ACK.";
-
-	// STOP the write; START a new transfer.
-	doStop();
-	m_eeprom->dbg_setSDA(0);
-
-	/** Current address read. **/
-
-	// Device select.
-	// Assuming device address is 0.
-	cmd = (0xA0 | 1);				// RW=1
-	cmd |= (((addr_start & eepromMask) >> 7) & ~1);	// A10-A8
-	response = sendData(cmd);
-	// Check for ACK.
-	m_eeprom->dbg_getSDA(&response);
-	ASSERT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=1: NACK received; expected ACK.";
-
-	// Read up to two times the size of the EEPROM.
-	unsigned int end_addr = addr_start + (eepromSize * 2) - 1;
-	for (unsigned int addr = addr_start; addr <= end_addr; addr++) {
-		// Data word should only be acknowledged if this is not
-		// the last byte being read.
-		bool isLastByte = (addr != end_addr);
-		uint8_t data_actual = recvData(isLastByte);
-		uint8_t data_expected = test_EEPRomI2C_data[addr & eepromMask];
-		EXPECT_EQ(data_expected, data_actual) <<
-			"EEPROM address 0x" <<
-			std::hex << std::setw(2) << std::setfill('0') << std::uppercase << addr <<
-			" should be 0x" << (int)data_expected << " (test EEPROM).";
-	}
-
-	// STOP the transfer.
-	doStop();
+	eprMode2_seqRead(false, addr_start, eepromSize);
 }
 
 /**
@@ -445,7 +374,7 @@ TEST_P(EEPRomI2CTest_SeqRead, epr24C01_seqReadFull)
 	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
 
 	// Run the Mode 2 test.
-	eprMode2_seqReadFull(addr_start, eepromSize);
+	eprMode2_seqRead(true, addr_start, eepromSize);
 }
 
 /**
@@ -465,7 +394,7 @@ TEST_P(EEPRomI2CTest_SeqRead, epr24C02_seqReadFull)
 	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
 
 	// Run the Mode 2 test.
-	eprMode2_seqReadFull(addr_start, eepromSize);
+	eprMode2_seqRead(true, addr_start, eepromSize);
 }
 
 /**
@@ -485,7 +414,7 @@ TEST_P(EEPRomI2CTest_SeqRead, epr24C04_seqReadFull)
 	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
 
 	// Run the Mode 2 test.
-	eprMode2_seqReadFull(addr_start, eepromSize);
+	eprMode2_seqRead(true, addr_start, eepromSize);
 }
 
 /**
@@ -505,7 +434,7 @@ TEST_P(EEPRomI2CTest_SeqRead, epr24C08_seqReadFull)
 	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
 
 	// Run the Mode 2 test.
-	eprMode2_seqReadFull(addr_start, eepromSize);
+	eprMode2_seqRead(true, addr_start, eepromSize);
 }
 
 /**
@@ -525,17 +454,25 @@ TEST_P(EEPRomI2CTest_SeqRead, epr24C16_seqReadFull)
 	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
 
 	// Run the Mode 2 test.
-	eprMode2_seqReadFull(addr_start, eepromSize);
+	eprMode2_seqRead(true, addr_start, eepromSize);
 }
 
 /**
  * Mode 3 EEPROM: Test sequential reading of an empty EEPROM.
  * Starts at the specified address.
+ * @param useTestData If true, use test data; if false, use a blank EEPROM.
  * @param addr_start Starting address.
  * @param eepromSize EEPROM size.
  */
-void EEPRomI2CTest_SeqRead::eprMode3_seqReadEmpty(unsigned int addr_start, unsigned int eepromSize)
+void EEPRomI2CTest_SeqRead::eprMode3_seqRead(bool useTestData, unsigned int addr_start, unsigned int eepromSize)
 {
+	const unsigned int eepromMask = eepromSize - 1;
+
+	if (useTestData) {
+		// Initialize the EEPROM data.
+		ASSERT_EQ(0, m_eeprom->dbg_writeEEPRom(0x00, test_EEPRomI2C_data, eepromSize));
+	}
+
 	// Make sure we're in a STOP condition at first.
 	doStop();
 
@@ -590,10 +527,20 @@ void EEPRomI2CTest_SeqRead::eprMode3_seqReadEmpty(unsigned int addr_start, unsig
 		// the last byte being read.
 		bool isLastByte = (addr != end_addr);
 		uint8_t data_actual = recvData(isLastByte);
-		EXPECT_EQ(0xFF, data_actual) <<
-			"EEPROM address 0x" <<
-			std::hex << std::setw(2) << std::setfill('0') << std::uppercase << addr <<
-			" should be 0xFF (empty ROM).";
+		if (!useTestData) {
+			// Empty EEPROM.
+			EXPECT_EQ(0xFF, data_actual) <<
+				"EEPROM address 0x" <<
+				std::hex << std::setw(2) << std::setfill('0') << std::uppercase << addr <<
+				" should be 0xFF (empty ROM).";
+		} else {
+			// Full EEPROM.
+			uint8_t data_expected = test_EEPRomI2C_data[addr & eepromMask];
+			EXPECT_EQ(data_expected, data_actual) <<
+				"EEPROM address 0x" <<
+				std::hex << std::setw(2) << std::setfill('0') << std::uppercase << addr <<
+				" should be 0x" << (int)data_expected << " (test EEPROM).";
+		}
 	}
 
 	// STOP the transfer.
@@ -617,7 +564,7 @@ TEST_P(EEPRomI2CTest_SeqRead, epr24C32_seqReadEmpty)
 	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
 
 	// Run the Mode 3 test.
-	eprMode3_seqReadEmpty(addr_start, eepromSize);
+	eprMode3_seqRead(false, addr_start, eepromSize);
 }
 
 /**
@@ -637,85 +584,7 @@ TEST_P(EEPRomI2CTest_SeqRead, epr24C64_seqReadEmpty)
 	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
 
 	// Run the Mode 3 test.
-	eprMode3_seqReadEmpty(addr_start, eepromSize);
-}
-
-/**
- * Mode 3 EEPROM: Test sequential reading of a full EEPROM.
- * Starts at the specified address.
- * @param addr_start Starting address.
- * @param eepromSize EEPROM size.
- */
-void EEPRomI2CTest_SeqRead::eprMode3_seqReadFull(unsigned int addr_start, unsigned int eepromSize)
-{
-	const unsigned int eepromMask = eepromSize - 1;
-
-	// Initialize the EEPROM data.
-	ASSERT_EQ(0, m_eeprom->dbg_writeEEPRom(0x00, test_EEPRomI2C_data, eepromSize));
-
-	// Make sure we're in a STOP condition at first.
-	doStop();
-
-	// EEPROM values.
-	uint8_t cmd, response;
-
-	// START an I2C transfer.
-	m_eeprom->dbg_setSDA(0);	// START
-
-	/** Dummy write cycle. **/
-
-	// Device select.
-	// Assuming device address is 0.
-	cmd = (0xA0 | 0);				// RW=0
-	response = sendData(cmd);
-	// Check for ACK.
-	m_eeprom->dbg_getSDA(&response);
-	EXPECT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=0: NACK received; expected ACK.";
-
-	// Word address, high byte.
-	cmd = ((addr_start >> 8) & 0xFF);		// A15-A0
-	response = sendData(cmd);
-	// Check for ACK.
-	m_eeprom->dbg_getSDA(&response);
-	EXPECT_EQ(0, response) << "EPR_MODE3_WORD_ADDRESS_LOW: NACK received; expected ACK.";
-
-	// Word address, low byte.
-	cmd = (addr_start & 0xFF);			// A7-A0
-	response = sendData(cmd);
-	// Check for ACK.
-	m_eeprom->dbg_getSDA(&response);
-	EXPECT_EQ(0, response) << "EPR_MODE2_WORD_ADDRESS_LOW: NACK received; expected ACK.";
-
-	// STOP the write; START a new transfer.
-	doStop();
-	m_eeprom->dbg_setSDA(0);
-
-	/** Current address read. **/
-
-	// Device select.
-	// Assuming device address is 0.
-	cmd = (0xA0 | 1);				// RW=1
-	response = sendData(cmd);
-	// Check for ACK.
-	m_eeprom->dbg_getSDA(&response);
-	EXPECT_EQ(0, response) << "EPR_MODE2_DEVICE_ADDRESS, RW=1: NACK received; expected ACK.";
-
-	// Read up to two times the size of the EEPROM.
-	unsigned int end_addr = addr_start + (eepromSize * 2) - 1;
-	for (unsigned int addr = addr_start; addr <= end_addr; addr++) {
-		// Data word should only be acknowledged if this is not
-		// the last byte being read.
-		bool isLastByte = (addr != end_addr);
-		uint8_t data_actual = recvData(isLastByte);
-		uint8_t data_expected = test_EEPRomI2C_data[addr & eepromMask];
-		EXPECT_EQ(data_expected, data_actual) <<
-			"EEPROM address 0x" <<
-			std::hex << std::setw(2) << std::setfill('0') << std::uppercase << addr <<
-			" should be 0x" << (int)data_expected << " (test EEPROM).";
-	}
-
-	// STOP the transfer.
-	doStop();
+	eprMode3_seqRead(false, addr_start, eepromSize);
 }
 
 /**
@@ -735,7 +604,7 @@ TEST_P(EEPRomI2CTest_SeqRead, epr24C32_seqReadFull)
 	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
 
 	// Run the Mode 3 test.
-	eprMode3_seqReadFull(addr_start, eepromSize);
+	eprMode3_seqRead(true, addr_start, eepromSize);
 }
 
 /**
@@ -755,7 +624,7 @@ TEST_P(EEPRomI2CTest_SeqRead, epr24C64_seqReadFull)
 	ASSERT_EQ(0, m_eeprom->dbg_setPageSize(pgSize));
 
 	// Run the Mode 3 test.
-	eprMode3_seqReadFull(addr_start, eepromSize);
+	eprMode3_seqRead(true, addr_start, eepromSize);
 }
 
 // Sequential Read with various starting addresses.
