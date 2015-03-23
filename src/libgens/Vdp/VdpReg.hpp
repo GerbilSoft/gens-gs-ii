@@ -156,7 +156,8 @@ namespace VdpTypes {
 
 			/**
 			 * Register 13: H Scroll Data Table base address.
-			 * [   x    x HS15 HS14 HS13 HS12 HS11 HS10]
+			 * NOTE: HS16 is only valid in 128 KB mode.
+			 * [   x HS16 HS15 HS14 HS13 HS12 HS11 HS10]
 			 */
 			uint8_t H_Scr_Adr;
 
