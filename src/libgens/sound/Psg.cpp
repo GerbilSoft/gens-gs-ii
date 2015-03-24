@@ -274,13 +274,20 @@ void Psg::write(uint8_t data)
 		gym_dump_update(3, (uint8_t)data, 0);
 #endif
 
+	// TODO: Combine the masking used in both cases.
 	if (data & 0x80) {
 		// LATCH/DATA byte.
 		d->curReg = ((data & 0x70) >> 4);
 		d->curChan = (d->curReg >> 1);
 
 		// Save the data value in the register.
-		d->reg[d->curReg] = ((d->reg[d->curReg] & 0x3F0) | (data & 0x0F));
+		if (!(d->curReg & 1) && d->curChan != 3) {
+			// TONE channel: Preserve the upper 6 bits.
+			d->reg[d->curReg] = ((d->reg[d->curReg] & 0x3F0) | (data & 0x0F));
+		} else {
+			// NOISE channel or Volume Register: Lower 4 bits only.
+			d->reg[d->curReg] = (data & 0x0F);
+		}
 	} else {
 		// DATA byte.
 		if (!(d->curReg & 1) && d->curChan != 3) {
