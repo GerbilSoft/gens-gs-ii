@@ -28,8 +28,9 @@
 // Test EEPROM data.
 #include "EEPRomI2CTest_data.h"
 
-// C includes.
-#include <alloca.h>
+// C++ includes.
+#include <vector>
+using std::vector;
 
 #include "EEPRomI2CTest.hpp"
 namespace LibGens { namespace Tests {
@@ -134,17 +135,19 @@ void EEPRomI2CTest_PageWrite::eprMode1_pageWrite(unsigned int addr_start, unsign
 
 	// Determine the expected EEPROM data.
 	// Should be all empty except for the page being written.
-	uint8_t eeprom_expected[eepromSize];
+	vector<uint8_t> eeprom_expected;
+	eeprom_expected.reserve(eepromSize);
 	unsigned int pgStart = (addr_start & eepromMask & ~pgMask);
-	memset(eeprom_expected, 0xFF, sizeof(eeprom_expected));
+	memset(eeprom_expected.data(), 0xFF, eepromSize);
 	memcpy(&eeprom_expected[pgStart], &test_EEPRomI2C_data[pgStart], pgSize);
 
 	// Get the data from the EEPROM.
-	uint8_t eeprom_actual[eepromSize];
-	ASSERT_EQ(0, m_eeprom->dbg_readEEPRom(0x00, eeprom_actual, sizeof(eeprom_actual)));
+	vector<uint8_t> eeprom_actual;
+	eeprom_actual.reserve(eepromSize);
+	ASSERT_EQ(0, m_eeprom->dbg_readEEPRom(0x00, eeprom_actual.data(), eepromSize));
 
 	// Verify the EEPROM data.
-	CompareByteArrays(eeprom_expected, eeprom_actual, sizeof(eeprom_expected));
+	CompareByteArrays(eeprom_expected.data(), eeprom_actual.data(), eepromSize);
 }
 
 /**
@@ -229,17 +232,19 @@ void EEPRomI2CTest_PageWrite::eprMode2_pageWrite(unsigned int addr_start, unsign
 
 	// Determine the expected EEPROM data.
 	// Should be all empty except for the page being written.
-	uint8_t *eeprom_expected = (uint8_t*)alloca(eepromSize);
+	vector<uint8_t> eeprom_expected;
+	eeprom_expected.reserve(eepromSize);
 	unsigned int pgStart = (addr_start & eepromMask & ~pgMask);
-	memset(eeprom_expected, 0xFF, eepromSize);
+	memset(eeprom_expected.data(), 0xFF, eepromSize);
 	memcpy(&eeprom_expected[pgStart], &test_EEPRomI2C_data[pgStart], pgSize);
 
 	// Get the data from the EEPROM.
-	uint8_t *eeprom_actual = (uint8_t*)alloca(eepromSize);
-	ASSERT_EQ(0, m_eeprom->dbg_readEEPRom(0x00, eeprom_actual, eepromSize));
+	vector<uint8_t> eeprom_actual;
+	eeprom_actual.reserve(eepromSize);
+	ASSERT_EQ(0, m_eeprom->dbg_readEEPRom(0x00, eeprom_actual.data(), eepromSize));
 
 	// Verify the EEPROM data.
-	CompareByteArrays(eeprom_expected, eeprom_actual, eepromSize);
+	CompareByteArrays(eeprom_expected.data(), eeprom_actual.data(), eepromSize);
 }
 
 /**
@@ -422,17 +427,19 @@ void EEPRomI2CTest_PageWrite::eprMode3_pageWrite(unsigned int addr_start, unsign
 
 	// Determine the expected EEPROM data.
 	// Should be all empty except for the page being written.
-	uint8_t *eeprom_expected = (uint8_t*)alloca(eepromSize);
+	vector<uint8_t> eeprom_expected;
+	eeprom_expected.reserve(eepromSize);
 	unsigned int pgStart = (addr_start & eepromMask & ~pgMask);
-	memset(eeprom_expected, 0xFF, eepromSize);
+	memset(eeprom_expected.data(), 0xFF, eepromSize);
 	memcpy(&eeprom_expected[pgStart], &test_EEPRomI2C_data[pgStart], pgSize);
 
 	// Get the data from the EEPROM.
-	uint8_t *eeprom_actual = (uint8_t*)alloca(eepromSize);
-	ASSERT_EQ(0, m_eeprom->dbg_readEEPRom(0x00, eeprom_actual, eepromSize));
+	vector<uint8_t> eeprom_actual;
+	eeprom_actual.reserve(eepromSize);
+	ASSERT_EQ(0, m_eeprom->dbg_readEEPRom(0x00, eeprom_actual.data(), eepromSize));
 
 	// Verify the EEPROM data.
-	CompareByteArrays(eeprom_expected, eeprom_actual, eepromSize);
+	CompareByteArrays(eeprom_expected.data(), eeprom_actual.data(), eepromSize);
 }
 
 /**
