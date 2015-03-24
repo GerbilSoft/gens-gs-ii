@@ -4,7 +4,7 @@
  *                                                                            *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                         *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                                *
- * Copyright (c) 2008-2014 by David Korth.                                    *
+ * Copyright (c) 2008-2015 by David Korth.                                    *
  *                                                                            *
  * This program is free software; you can redistribute it and/or modify       *
  * it under the terms of the GNU General Public License as published by       *
@@ -40,8 +40,8 @@
 // Sound Manager.
 #include "sound/SoundMgr.hpp"
 
-// C includes.
-#include <stdio.h>
+// C includes. (C++ namespace)
+#include <cstdio>
 
 // C++ includes.
 #include <string>
@@ -52,9 +52,7 @@ using std::string;
 #include "Win32/W32U_mini.h"
 #endif
 
-
-namespace LibGens
-{
+namespace LibGens {
 
 static bool ms_IsInit = false;
 
@@ -70,7 +68,7 @@ const char *const version_vcs = nullptr;
 #endif
 
 /**
- * IsRunning(): Determines if LibGens is running.
+ * Determines if LibGens is running.
  * @return True if the LibGens thread is running; false otherwise.
  */
 bool IsRunning(void)
@@ -78,9 +76,8 @@ bool IsRunning(void)
 	return ms_IsInit;
 }
 
-
 /**
- * Init(): Initialize LibGens.
+ * Initialize LibGens.
  * @return 0 on success; non-zero on error.
  */
 int Init(void)
@@ -91,8 +88,9 @@ int Init(void)
 	
 	// Print the Gens/GS startup message.
 	fprintf(stderr, "Gens/GS II");
-	if (version_desc)
+	if (version_desc) {
 		fprintf(stderr, " (%s)", version_desc);
+	}
 	fputc('\n', stderr);
 	
 #if !defined(GENS_ENABLE_EMULATION)
@@ -100,13 +98,14 @@ int Init(void)
 #endif
 	
 	// VCS version.
-	if (version_vcs)
+	if (version_vcs) {
 		fprintf(stderr, "(%s)\n", version_vcs);
+	}
 	
 	fprintf(stderr, "\n"
 		"Copyright (c) 1999-2002 by Stéphane Dallongeville.\n"
 		"Copyright (c) 2003-2004 by Stéphane Akhoun.\n"
-		"Copyright (c) 2008-2014 by David Korth.\n"
+		"Copyright (c) 2008-2015 by David Korth.\n"
 		"\n");
 	
 	// GNU GPLv2 notice.
@@ -147,14 +146,15 @@ int Init(void)
 	Z80_MD_Mem::Init();
 	
 	SoundMgr::Init();
-	
+
+	fflush(nullptr);	
 	ms_IsInit = true;
 	return 0;
 }
 
 
 /**
- * End(): Stop LibGens.
+ * Stop LibGens.
  * TODO
  * @return 0 on success; non-zero on error.
  */
