@@ -5,7 +5,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville                       *
  * Copyright (c) 2003-2004 by Stéphane Akhoun                              *
- * Copyright (c) 2008-2010 by David Korth                                  *
+ * Copyright (c) 2008-2015 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -32,8 +32,10 @@
 // TODO: Convert to static const ints and move elsewhere.
 #include "cpu/M68K.hpp"
 
-namespace LibGens
-{
+// ZOMG
+#include "libzomg/zomg_psg.h"
+
+namespace LibGens {
 
 // Static variable initialization.
 int SoundMgr::ms_SegLength = 0;
@@ -67,9 +69,8 @@ void SoundMgr::End(void)
 	// TODO
 }
 
-
 /**
- * ReInit(): Reinitialize the Sound Manager.
+ * Reinitialize the Sound Manager.
  * @param rate Sound rate, in Hz.
  * @param isPal If true, system is PAL.
  * @param preserveState If true, save the PSG/YM state before reinitializing them.
@@ -78,68 +79,59 @@ void SoundMgr::ReInit(int rate, bool isPal, bool preserveState)
 {
 	ms_Rate = rate;
 	ms_IsPal = isPal;
-	
+
 	// Calculate the segment length.
 	ms_SegLength = CalcSegLength(rate, isPal);
-	
+
 	// Build the sound extrapolation table.
 	const int lines = (isPal ? 312 : 262);
-	for (int i = 0; i < lines; i++)
-	{
+	for (int i = 0; i < lines; i++) {
 		ms_Extrapol[i][0] = ((ms_SegLength * i) / lines);
 		ms_Extrapol[i][1] = (((ms_SegLength * (i+1)) / lines) - ms_Extrapol[i][0]);
 	}
-	
+
 	// Clear the segment buffers.
 	memset(ms_SegBufL, 0x00, sizeof(ms_SegBufL));
 	memset(ms_SegBufR, 0x00, sizeof(ms_SegBufR));
-	
+
 	// If requested, save the PSG/YM state.
 	Zomg_PsgSave_t psgState;
 	Zomg_Ym2612Save_t ym2612State;
-	if (preserveState)
-	{
+	if (preserveState) {
 		ms_Psg.zomgSave(&psgState);
 		ms_Ym2612.zomgSave(&ym2612State);
 	}
-	
+
 	// Initialize the PSG and YM2612.
-	if (isPal)
-	{
+	if (isPal) {
 		ms_Psg.reInit((int)((double)CLOCK_PAL / 15.0), rate);
 		ms_Ym2612.reInit((int)((double)CLOCK_PAL / 7.0), rate);
-	}
-	else
-	{
+	} else {
 		ms_Psg.reInit((int)((double)CLOCK_NTSC / 15.0), rate);
 		ms_Ym2612.reInit((int)((double)CLOCK_NTSC / 7.0), rate);
 	}
-	
+
 	// If requested, restore the PSG/YM state.
-	if (preserveState)
-	{
+	if (preserveState) {
 		ms_Psg.zomgRestore(&psgState);
 		ms_Ym2612.zomgRestore(&ym2612State);
 	}
 }
 
-
 /**
- * CalcSegLength(): Calculate the segment length.
+ * Calculate the segment length.
  * @param rate Sound rate, in Hz.
  * @param isPal If true, system is PAL.
  * @return Segment length.
  */
 int SoundMgr::CalcSegLength(int rate, bool isPal)
 {
-	if (rate > MAX_SAMPLING_RATE)
-	{
+	if (rate > MAX_SAMPLING_RATE) {
 		// TODO: Support higher rates than 48 kHz.
 		rate = MAX_SAMPLING_RATE;
 	}
-	
-	switch (rate)
-	{
+
+	switch (rate) {
 		case 11025:	return (isPal ? 220 : 184);
 		case 16000:	return (isPal ? 320 : 267);
 		case 22050:	return (isPal ? 441 : 368);
