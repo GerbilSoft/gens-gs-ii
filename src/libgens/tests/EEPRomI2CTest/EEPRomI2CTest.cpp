@@ -190,13 +190,13 @@ void EEPRomI2CTest::CompareByteArrays(const uint8_t *expected, const uint8_t *ac
 int main(int argc, char *argv[])
 {
 	fprintf(stderr, "LibGens test suite: EEPRomI2C tests.\n");
-
+	LibGens::Init();
 	// Initialize the random number seed.
 	unsigned int seed = time(nullptr);
 	srand(seed);
 	fprintf(stderr, "Random number seed is: %08X\n\n", seed);
+	fflush(nullptr);
 
 	::testing::InitGoogleTest(&argc, argv);
-	LibGens::Init();
 	return RUN_ALL_TESTS();
 }

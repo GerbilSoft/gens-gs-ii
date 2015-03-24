@@ -520,11 +520,12 @@ INSTANTIATE_TEST_CASE_P(ScreenH40SpriteLimit, VdpSpriteMaskingTest,
 int main(int argc, char *argv[])
 {
 	fprintf(stderr, "LibGens test suite: VDP Sprite Masking & Overflow tests.\n\n");
-
-	::testing::InitGoogleTest(&argc, argv);
 	LibGens::Init();
 	fprintf(stderr, "\n");
 	fprintf(stderr, "LibGens: VDP Sprite Masking & Overflow Test ROM.\n"
 			"Original ROM (c) 2009 by Nemesis.\n\n");
+	fflush(nullptr);
+
+	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 }

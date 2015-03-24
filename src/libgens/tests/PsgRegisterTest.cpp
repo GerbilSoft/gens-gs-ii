@@ -195,8 +195,9 @@ TEST_F(PsgRegisterTest, setNoiseRegisterTo0x5_then_0x4_NoLatch)
 int main(int argc, char *argv[])
 {
 	fprintf(stderr, "LibGens test suite: PSG register test.\n\n");
+	LibGens::Init();
+	fflush(nullptr);
 
 	::testing::InitGoogleTest(&argc, argv);
-	LibGens::Init();
 	return RUN_ALL_TESTS();
 }
