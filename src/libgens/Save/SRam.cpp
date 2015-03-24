@@ -158,15 +158,18 @@ uint8_t SRam::readByte(uint32_t address) const
 {
 	if (address < m_start || address > m_end)
 		return 0xFF;
+
 	// Note: SRam is NOT byteswapped.
 	// TODO: SRAM enable check.
-	return m_sram[address - m_start];
+	address -= m_start;
+	return m_sram[address];
 }
 
 uint16_t SRam::readWord(uint32_t address) const
 {
 	if (address < m_start || address > m_end)
 		return 0xFFFF;
+
 	// Note: SRam is NOT byteswapped.
 	// TODO: Proper byteswapping.
 	// TODO: SRAM enable check.
@@ -178,29 +181,34 @@ void SRam::writeByte(uint32_t address, uint8_t data)
 {
 	if (address < m_start || address > m_end)
 		return;
+
 	// Note: SRam is NOT byteswapped.
 	// TODO: Write protection, SRAM enable check.
-	m_sram[address - m_start] = data;
-
-	// Set the dirty flag.
-	// TODO: Only if the word was actually modified?
-	setDirty();
+	address -= m_start;
+	if (m_sram[address] != data) {
+		m_sram[address] = data;
+		// Set the dirty flag.
+		setDirty();
+	}
 }
 
 void SRam::writeWord(uint32_t address, uint16_t data)
 {
 	if (address < m_start || address > m_end)
 		return;
+
 	// Note: SRam is NOT byteswapped.
 	// TODO: Proper byteswapping.
 	// TODO: Write protection, SRAM enable check.
 	address -= m_start;
-	m_sram[address] = ((data >> 8) & 0xFF);
-	m_sram[address + 1] = (data & 0xFF);
-
-	// Set the dirty flag.
-	// TODO: Only if the word was actually modified?
-	setDirty();
+	const uint8_t hi = ((data >> 8) & 0xFF);
+	const uint8_t lo = (data & 0xFF);
+	if (m_sram[address] != hi || m_sram[address+1] != lo) {
+		m_sram[address] = hi;
+		m_sram[address+1] = lo;
+		// Set the dirty flag.
+		setDirty();
+	}
 }
 
 /**
