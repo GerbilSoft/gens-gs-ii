@@ -181,6 +181,9 @@ Psg::Psg()
 {
 	// TODO: Some initialization should go here!
 	resetBufferPtrs();
+
+	// NOTE: PSG isn't reset here because the
+	// clock values haven't been initialized yet.
 }
 
 Psg::Psg(int clock, int rate)
@@ -209,7 +212,7 @@ void Psg::reset(void)
 }
 
 /**
- * reInit(): (Re-)Initialize the PSG chip.
+ * (Re-)Initialize the PSG chip.
  * @param clock Clock frequency.
  * @param rate Sound rate.
  */
@@ -335,7 +338,7 @@ void Psg::write(uint8_t data)
 /** ZOMG savestate functions. **/
 
 /**
- * zomgSave(): Save the PSG state.
+ * Save the PSG state.
  * @param state Zomg_PsgSave_t struct to save to.
  */
 void Psg::zomgSave(Zomg_PsgSave_t *state)
@@ -347,11 +350,11 @@ void Psg::zomgSave(Zomg_PsgSave_t *state)
 	state->vol_reg[1]  = (d->reg[3] & 0xF);
 	state->tone_reg[2] = (d->reg[4] & 0x3FF);
 	state->vol_reg[2]  = (d->reg[5] & 0xF);
-	
+
 	// NOISE channel.
 	state->tone_reg[3] = (d->reg[6] & 0x7); // Only 3 bits are relevant for NOISE.
 	state->vol_reg[3]  = (d->reg[7] & 0xF);
-	
+
 	// TODO: TONE counters.
 	// Psg uses an interpolated counter that overflows at 65,536.
 	// ZOMG counter should use the same value as the original PSG.
@@ -359,60 +362,46 @@ void Psg::zomgSave(Zomg_PsgSave_t *state)
 	state->tone_ctr[1] = 0xFFFF;
 	state->tone_ctr[2] = 0xFFFF;
 	state->tone_ctr[3] = 0xFFFF;
-	
+
 	// LFSR state.
 	state->lfsr_state = d->lfsr;
-	
+
 	// Game Gear stereo register.
 	// TODO: Implement Game Gear stereo.
 	state->gg_stereo = 0x00;
 }
 
-
 /**
- * zomgRestore(): Restore the PSG state.
+ * Restore the PSG state.
  * @param state Zomg_PsgSave_t struct to restore from.
  */
 void Psg::zomgRestore(const Zomg_PsgSave_t *state)
 {
-	for (int i = 0; i < 4; i++)
-	{
+	for (int i = 0; i < 4; i++) {
 		// Register latch and data value.
 		this->write(0x80 | ((i*2) << 4) | (state->tone_reg[i] & 0xF));
-		
+
 		// Second data value for TONE registers.
-		if (i < 3)
+		if (i < 3) {
 			this->write((state->tone_reg[i] >> 4) & 0x3F);
-		
+		}
+
 		// VOLUME register.
 		this->write(0x80 | (((i*2)+1) << 4) | (state->vol_reg[i] & 0xF));
-		
+
 		// TODO: TONE counters.
 		// Psg uses an interpolated counter that overflows at 65,536.
 		// ZOMG counter should use the same value as the original PSG.
 	}
-	
+
 	// LFSR state.
 	d->lfsr = state->lfsr_state;
-	
+
 	// Game Gear stereo register.
 	// TODO: Implement Game Gear stereo.
 }
 
 /** Gens-specific code **/
-
-/**
- * Get the value of a register.
- * @param regID Register ID.
- * @return Value of the register.
- */
-int Psg::getReg(int regID)
-{
-	if (regID < 0 || regID >= 8)
-		return -1;
-	
-	return (int)d->reg[regID];
-}
 
 /**
  * Update the PSG buffer.

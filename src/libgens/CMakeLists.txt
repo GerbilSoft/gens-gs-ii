@@ -56,6 +56,7 @@ SET(libgens_SRCS
 	cpu/M68K.cpp
 	cpu/M68K_Mem.cpp
 	sound/Psg.cpp
+	sound/PsgDebug.cpp
 	sound/Ym2612.cpp
 	macros/log_msg.c
 	Util/byteswap.c

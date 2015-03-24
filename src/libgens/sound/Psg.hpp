@@ -70,7 +70,6 @@ class Psg
 		void zomgRestore(const _Zomg_PsgSave_t *state);
 		
 		/** Gens-specific code. */
-		int getReg(int regID);
 		void specialUpdate(void);
 
 		/** FIXME: This sound mixing code needs to be totally redone. **/
@@ -81,6 +80,15 @@ class Psg
 
 		// Reset buffer pointers.
 		void resetBufferPtrs(void);
+
+	public:
+		// Super secret debug stuff!
+		// For use by MDP plugins and test suites.
+		// Return value is an MDP error code.
+		int dbg_getReg(int reg_num, uint16_t *out) const;
+		int dbg_setReg(int reg_num, uint16_t val);
+		int dbg_getRegNumLatch(uint8_t *out) const;
+		int dbg_setRegNumLatch(uint8_t val);
 };
 
 /* Gens */
