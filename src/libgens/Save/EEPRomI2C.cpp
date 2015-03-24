@@ -118,11 +118,13 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 
 		case EPR_WRITE_DATA: {
 			// Save the data byte.
-			eeprom[address] = data_buf;
-			setDirty();
+			if (eeprom[address] != data_buf) {
+				eeprom[address] = data_buf;
+				setDirty();
+			}
 
 			// Next byte in the page.
-			uint16_t prev_address = address;
+			const uint16_t prev_address = address;
 			uint16_t addr_low_tmp = address;
 			addr_low_tmp++;
 			addr_low_tmp &= eprChip.pg_mask;
