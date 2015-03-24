@@ -35,8 +35,28 @@ using std::string;
 
 namespace LibGens {
 
+/** EEPRomI2CPrivate **/
+
 // Static variable initialization.
 const char EEPRomI2CPrivate::fileExt[] = "epr";	// TODO: .epr, .sep, or just .srm?
+
+/**
+ * Determine how many bytes are used in the EEPRom chip.
+ * TODO: Use the EEPRom type to determine the size?
+ * @return Number of bytes used, rounded to the highest power of two.
+ */
+int EEPRomI2CPrivate::getUsedSize(void) const
+{
+	int i = (sizeof(eeprom) - 1);
+	while (i >= 0 && eeprom[i] == 0xFF) {
+		i--;
+	}
+
+	// Return the next-highest power of two.
+	return next_pow2u(i);
+}
+
+/** EEPRomI2C **/
 
 /**
  * Set the EEPRom filename based on a ROM filename.
@@ -114,21 +134,6 @@ int EEPRomI2C::load(void)
 }
 
 /**
- * Determine how many bytes are used in the EEPRom chip.
- * TODO: Use the EEPRom type to determine the size?
- * @return Number of bytes used, rounded to the highest power of two.
- */
-int EEPRomI2C::getUsedSize(void)
-{
-	int i = (sizeof(d->eeprom) - 1);
-	while (i >= 0 && d->eeprom[i] == 0xFF)
-		i--;
-
-	// Return the next-highest power of two.
-	return d->next_pow2u(i);
-}
-
-/**
  * Save the EEPRom file.
  * @return Positive value indicating EEPRom size on success; 0 if no save is needed; negative on error.
  */
@@ -139,7 +144,7 @@ int EEPRomI2C::save(void)
 	if (!d->isDirty())
 		return 0;
 
-	int size = getUsedSize();
+	int size = d->getUsedSize();
 	if (size <= 0) {
 		// EEPRom is empty.
 		return 0;

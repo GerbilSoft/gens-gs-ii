@@ -132,10 +132,6 @@ class EEPRomI2C
 		 */
 		int autoSave(int framesElapsed);
 
-	protected:
-		/** EEPRom file handling functions. **/
-		int getUsedSize(void);
-
 	public:
 		// Super secret debug stuff!
 		// For use by MDP plugins and test suites.

@@ -130,6 +130,12 @@ class EEPRomI2CPrivate
 		static const int AUTOSAVE_THRESHOLD_DEFAULT = 1000;
 
 		/**
+		 * Determine how many bytes are used in the SRam chip.
+		 * @return Number of bytes used, rounded to the highest power of two.
+		 */
+		int getUsedSize(void) const;
+
+		/**
 		 * Determine the current /SDA line state.
 		 * @return 1 for high; 0 for low.
 		 */
