@@ -34,6 +34,7 @@
 
 // ZOMG
 #include "libzomg/zomg_psg.h"
+#include "libzomg/zomg_ym2612.h"
 
 namespace LibGens {
 
@@ -140,7 +141,7 @@ int SoundMgr::CalcSegLength(int rate, bool isPal)
 		case 48000:	return (isPal ? 960 : 800);
 		default:
 			// Segment size is ceil(rate / framesPerSecond).
-			return ceil((double)rate / (isPal ? 50.0 : 60.0));
+			return (int)ceil((double)rate / (isPal ? 50.0 : 60.0));
 	}
 }
 
