@@ -200,9 +200,9 @@ extern unzFile ZEXPORT unzOpen2_64 _MZ_OF((const void *path,
 
 extern int ZEXPORT unzClose _MZ_OF((unzFile file));
 /*
-  Close a ZipFile opened with unzipOpen.
+  Close a ZipFile opened with unzOpen.
   If there is files inside the .Zip opened with unzOpenCurrentFile (see later),
-    these files MUST be closed with unzipCloseCurrentFile before call unzipClose.
+    these files MUST be closed with unzCloseCurrentFile before call unzClose.
   return UNZ_OK if there is no problem. */
 
 extern int ZEXPORT unzGetGlobalInfo _MZ_OF((unzFile file,
