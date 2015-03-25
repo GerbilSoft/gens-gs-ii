@@ -34,7 +34,7 @@ class TmssReg
 {
 	public:
 		TmssReg()
-			: cart_ce(0)
+			: n_cart_ce(0)
 			, tmss_en(false)
 		{
 			a14000.d = 0;
@@ -45,6 +45,9 @@ class TmssReg
 		 * This must have 'SEGA' in order to use the VDP.
 		 * Otherwise, the VDP will lock on when accessed.
 		 * NOTE: This is not emulated at the moment.
+		 *
+		 * NOTE 2: This is stored in 32-bit host-endian.
+		 * TODO: Add read/write functions.
 		 */
 		union {
 			uint32_t d;
@@ -53,12 +56,12 @@ class TmssReg
 		} a14000;
 
 		/**
-		 * $A14101: TMSS ROM mapping register.
+		 * $A14101: TMSS ROM mapping register. (!CART_CE)
 		 * Bit 0 indicates if the cartridge or TMSS ROM is mapped.
 		 * - 0: TMSS ROM is mapped.
 		 * - 1: Cartridge is mapped.
 		 */
-		uint8_t cart_ce;
+		uint8_t n_cart_ce;
 
 		/**
 		 * Is TMSS enabled?
@@ -86,7 +89,7 @@ class TmssReg
  * @return True if mapped; false if not.
  */
 inline bool TmssReg::isTmssMapped(void) const
-	{ return (tmss_en && !(cart_ce & 1)); }
+	{ return (tmss_en && !(n_cart_ce & 1)); }
 
 /**
  * Reset the TMSS registers.
@@ -94,7 +97,7 @@ inline bool TmssReg::isTmssMapped(void) const
 inline void TmssReg::reset(void)
 {
 	a14000.d = 0;
-	cart_ce = 0;
+	n_cart_ce = 0;
 }
 
 }

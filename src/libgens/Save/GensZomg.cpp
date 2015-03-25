@@ -65,6 +65,24 @@ using std::string;
 #include "Win32/W32U_mini.h"
 #endif
 
+#include "Util/byteswap.h"
+// TODO: Move to byteswap.h.
+/**
+ * Address inversion flags for byteswapped addressing.
+ * - U16DATA_U8_INVERT: Access U8 data in host-endian 16-bit data.
+ * - U32DATA_U8_INVERT: Access U8 data in host-endian 32-bit data.
+ * - U32DATA_U16_INVERT: Access U16 data in host-endian 32-bit data.
+ */
+#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+#define U16DATA_U8_INVERT 1
+#define U32DATA_U8_INVERT 3
+#define U32DATA_U16_INVERT 1
+#else /* GENS_BYTEORDER = GENS_BIG_ENDIAN */
+#define U16DATA_U8_INVERT 0
+#define U32DATA_U8_INVERT 0
+#define U32DATA_U16_INVERT 0
+#endif
+
 namespace LibGens
 {
 
@@ -157,6 +175,26 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 	// Load the MD /TIME registers.
 	// TODO: Don't pass the whole ZOMG struct to RomCartridgeMD?
 	M68K_Mem::ms_RomCartridge->zomgRestore(&zomg);
+
+	if (M68K_Mem::tmss_reg.tmss_en) {
+		// TMSS is enabled.
+		// Load the MD TMSS registers.
+		Zomg_MD_TMSS_reg_t tmss;
+		int ret = zomg.loadMD_TMSS_reg(&tmss);
+		if (ret <= 0) {
+			// This savestate doesn't have the TMSS registers.
+			// Assume TMSS is set up properly.
+			M68K_Mem::tmss_reg.a14000.d = 0x53454741; // 'SEGA'
+			M68K_Mem::tmss_reg.n_cart_ce = 1;
+		} else {
+			// Loaded the TMSS registers.
+			// TODO: Wordswapping.
+			M68K_Mem::tmss_reg.a14000.d = tmss.a14000;
+			M68K_Mem::tmss_reg.n_cart_ce = (tmss.n_cart_ce & 1);
+		}
+		// TODO: Only if cart_ce has changed?
+		M68K_Mem::UpdateTmssMapping();
+	}
 
 	// Close the savestate.
 	zomg.close();
@@ -308,6 +346,19 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	// Save the MD /TIME registers.
 	// TODO: Don't pass the whole ZOMG struct to RomCartridgeMD?
 	M68K_Mem::ms_RomCartridge->zomgSave(&zomg);
+
+	if (M68K_Mem::tmss_reg.tmss_en) {
+		// TMSS is enabled.
+		// Save the MD TMSS registers.
+		Zomg_MD_TMSS_reg_t tmss;
+		// TODO: Wordswapping.
+		tmss.header = ZOMG_MD_TMSS_REG_HEADER;
+		tmss.a14000 = M68K_Mem::tmss_reg.a14000.d;
+		tmss.n_cart_ce = M68K_Mem::tmss_reg.n_cart_ce & 1;
+		zomg.saveMD_TMSS_reg(&tmss);
+	} else {
+		// TODO: Delete MD/TMSS_reg.bin from the savestate?
+	}
 
 	// Close the savestate.
 	zomg.close();

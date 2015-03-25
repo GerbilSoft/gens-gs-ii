@@ -289,7 +289,7 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 			}
 
 			// !CART_CE register.
-			return (tmss_reg.cart_ce & 1);
+			return (tmss_reg.n_cart_ce & 1);
 		}
 
 		case 0x00: {
@@ -566,7 +566,7 @@ inline uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 			}
 
 			// !CART_CE register.
-			uint16_t ret = (tmss_reg.cart_ce & 1);
+			uint16_t ret = (tmss_reg.n_cart_ce & 1);
 			Fake_Fetch ^= 0xFF;	// Fake the next fetched instruction. ("random")
 			ret |= ((Fake_Fetch & 0xFF) << 8);
 		}
@@ -851,7 +851,7 @@ inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 				break;
 
 			// !CART_CE register.
-			tmss_reg.cart_ce = (data & 1);
+			tmss_reg.n_cart_ce = (data & 1);
 
 			// Update TMSS mapping.
 			UpdateTmssMapping();
@@ -1112,7 +1112,7 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 				break;
 
 			// !CART_CE register.
-			tmss_reg.cart_ce = (data & 1);
+			tmss_reg.n_cart_ce = (data & 1);
 
 			// Update TMSS mapping.
 			UpdateTmssMapping();
