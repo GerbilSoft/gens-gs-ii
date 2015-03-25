@@ -176,6 +176,8 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 	// TODO: Don't pass the whole ZOMG struct to RomCartridgeMD?
 	M68K_Mem::ms_RomCartridge->zomgRestore(&zomg);
 
+	// TODO: Does this need to be loaded before
+	// M68K registers are restored?
 	if (M68K_Mem::tmss_reg.tmss_en) {
 		// TMSS is enabled.
 		// Load the MD TMSS registers.
