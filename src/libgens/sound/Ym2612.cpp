@@ -119,7 +119,7 @@ const uint8_t Ym2612Private::LFO_AMS_TAB[4] = {
 	31, 4, 1, 0
 };
 
-const unsigned int Ym2612Private::LFO_FMS_TAB[8] = {
+const uint8_t Ym2612Private::LFO_FMS_TAB[8] = {
 	LFO_FMS_BASE * 0, LFO_FMS_BASE * 1,
 	LFO_FMS_BASE * 2, LFO_FMS_BASE * 3,
 	LFO_FMS_BASE * 4, LFO_FMS_BASE * 6,
@@ -331,7 +331,12 @@ inline void Ym2612Private::CALC_FINC_CH(channel_t *CH)
  * Functions for setting values. *
  *********************************/
 
-inline void Ym2612Private::KEY_ON(channel_t *CH, int nsl)
+/**
+ * KEY_ON event.
+ * @param ch Channel.
+ * @param nsl Slot number.
+ */
+void Ym2612Private::KEY_ON(channel_t *CH, int nsl)
 {
 	slot_t *SL = &(CH->_SLOT[nsl]);	// on recupère le bon pointeur de slot
 
@@ -341,7 +346,7 @@ inline void Ym2612Private::KEY_ON(channel_t *CH, int nsl)
 
 		// Fix Ecco 2 splash sound
 		SL->Ecnt = (DECAY_TO_ATTACK[ENV_TAB[SL->Ecnt >> ENV_LBITS]] + ENV_ATTACK) & SL->ChgEnM;
-		SL->ChgEnM = 0xFFFFFFFF;
+		SL->ChgEnM = ~0;
 
 		/*
 		SL->Ecnt = DECAY_TO_ATTACK[ENV_TAB[SL->Ecnt >> ENV_LBITS]] + ENV_ATTACK;
@@ -354,7 +359,12 @@ inline void Ym2612Private::KEY_ON(channel_t *CH, int nsl)
 	}
 }
 
-inline void Ym2612Private::KEY_OFF(channel_t *CH, int nsl)
+/**
+ * KEY_OFF event.
+ * @param ch Channel.
+ * @param nsl Slot number.
+ */
+void Ym2612Private::KEY_OFF(channel_t *CH, int nsl)
 {
 	slot_t *SL = &(CH->_SLOT[nsl]);	// on recupère le bon pointeur de slot
 
@@ -379,25 +389,26 @@ inline void Ym2612Private::CSM_Key_Control(void)
 	KEY_ON(&state.CHANNEL[2], 3);
 }
 
+/**
+ * Set a value for a slot.
+ * @param address Register address.
+ * @param data Data.
+ */
 int Ym2612Private::SLOT_SET(int address, uint8_t data)
 {
-	channel_t *CH;
-	slot_t *SL;
-	int nch, nsl;
-
-	if ((nch = (address & 3)) == 3)
+	int nch = address & 3;
+	if (nch == 3)
 		return 1;
-	nsl = (address >> 2) & 3;
-
 	if (address & 0x100)
 		nch += 3;
+	channel_t *CH = &state.CHANNEL[nch];
 
-	CH = &(state.CHANNEL[nch]);
-	SL = &(CH->_SLOT[nsl]);
+	const int nsl = (address >> 2) & 3;
+	slot_t *SL = &CH->_SLOT[nsl];
 
 	switch (address & 0xF0) {
 		case 0x30:
-			if ((SL->MUL = (data & 0x0F))) {
+			if ((SL->MUL = (data & 0x0F)) != 0) {
 				SL->MUL <<= 1;
 			} else {
 				SL->MUL = 1;
@@ -528,20 +539,23 @@ int Ym2612Private::SLOT_SET(int address, uint8_t data)
 	return 0;
 }
 
+/**
+ * Set a value for a channel.
+ * @param address Register address.
+ * @param data Data.
+ */
 int Ym2612Private::CHANNEL_SET(int address, uint8_t data)
 {
-	channel_t *CH;
-	int num;
-
-	if ((num = (address & 3)) == 3)
+	int nch = address & 3;
+	if (nch == 3)
 		return 1;
-	
+	if (address & 0x100)
+		nch += 3;
+
+	channel_t *CH = &state.CHANNEL[nch];
+
 	switch (address & 0xFC) {
 		case 0xA0:
-			if (address & 0x100)
-				num += 3;
-			CH = &(state.CHANNEL[num]);
-
 			q->specialUpdate();
 
 			CH->FNUM[0] = (CH->FNUM[0] & 0x700) + data;
@@ -551,14 +565,10 @@ int Ym2612Private::CHANNEL_SET(int address, uint8_t data)
 
 			LOG_MSG(ym2612, LOG_MSG_LEVEL_DEBUG2,
 				"CHANNEL[%d] part1 FNUM = %d  KC = %d",
-				num, CH->FNUM[0], CH->KC[0]);
+				nch, CH->FNUM[0], CH->KC[0]);
 			break;
 
 		case 0xA4:
-			if (address & 0x100)
-				num += 3;
-			CH = &(state.CHANNEL[num]);
-
 			q->specialUpdate();
 
 			CH->FNUM[0] = (CH->FNUM[0] & 0x0FF) + ((int) (data & 0x07) << 8);
@@ -569,55 +579,53 @@ int Ym2612Private::CHANNEL_SET(int address, uint8_t data)
 
 			LOG_MSG(ym2612, LOG_MSG_LEVEL_DEBUG2,
 				"CHANNEL[%d] part2 FNUM = %d  FOCT = %d  KC = %d",
-				num, CH->FNUM[0], CH->FOCT[0], CH->KC[0]);
+				nch, CH->FNUM[0], CH->FOCT[0], CH->KC[0]);
 			break;
 
 		case 0xA8:
 			if (address < 0x100) {
-				num++;
+				// Channel 3: Specific slot operator.
+				const int nsl = nch + 1;
 
 				q->specialUpdate();
 
-				state.CHANNEL[2].FNUM[num] = (state.CHANNEL[2].FNUM[num] & 0x700) + data;
-				state.CHANNEL[2].KC[num] = (state.CHANNEL[2].FOCT[num] << 2) |
-								FKEY_TAB[state.CHANNEL[2].FNUM[num] >> 7];
+				state.CHANNEL[2].FNUM[nsl] = (state.CHANNEL[2].FNUM[nsl] & 0x700) + data;
+				state.CHANNEL[2].KC[nsl] = (state.CHANNEL[2].FOCT[nsl] << 2) |
+								FKEY_TAB[state.CHANNEL[2].FNUM[nsl] >> 7];
 
 				state.CHANNEL[2]._SLOT[0].Finc = -1;
 
 				LOG_MSG(ym2612, LOG_MSG_LEVEL_DEBUG2,
 					"CHANNEL[2] part1 FNUM[%d] = %d  KC[%d] = %d",
-					num, state.CHANNEL[2].FNUM[num],
-					num, state.CHANNEL[2].KC[num]);
+					nsl, state.CHANNEL[2].FNUM[nsl],
+					nsl, state.CHANNEL[2].KC[nsl]);
 			}
 			break;
 
 		case 0xAC:
 			if (address < 0x100) {
-				num++;
+				// Channel 3: Specific slot operator.
+				const int nsl = nch + 1;
 
 				q->specialUpdate();
 
-				state.CHANNEL[2].FNUM[num] = (state.CHANNEL[2].FNUM[num] & 0x0FF) +
+				state.CHANNEL[2].FNUM[nsl] = (state.CHANNEL[2].FNUM[nsl] & 0x0FF) +
 								((int) (data & 0x07) << 8);
-				state.CHANNEL[2].FOCT[num] = (data & 0x38) >> 3;
-				state.CHANNEL[2].KC[num] = (state.CHANNEL[2].FOCT[num] << 2) |
-								FKEY_TAB[state.CHANNEL[2].FNUM[num] >> 7];
+				state.CHANNEL[2].FOCT[nsl] = (data & 0x38) >> 3;
+				state.CHANNEL[2].KC[nsl] = (state.CHANNEL[2].FOCT[nsl] << 2) |
+								FKEY_TAB[state.CHANNEL[2].FNUM[nsl] >> 7];
 
 				state.CHANNEL[2]._SLOT[0].Finc = -1;
 
 				LOG_MSG(ym2612, LOG_MSG_LEVEL_DEBUG2,
 					"CHANNEL[2] part2 FNUM[%d] = %d  FOCT[%d] = %d  KC[%d] = %d",
-					num, state.CHANNEL[2].FNUM[num],
-					num, state.CHANNEL[2].FOCT[num],
-					num, state.CHANNEL[2].KC[num]);
+					nsl, state.CHANNEL[2].FNUM[nsl],
+					nsl, state.CHANNEL[2].FOCT[nsl],
+					nsl, state.CHANNEL[2].KC[nsl]);
 			}
 			break;
 
 		case 0xB0:
-			if (address & 0x100)
-				num += 3;
-			CH = &(state.CHANNEL[num]);
-
 			if (CH->ALGO != (data & 7)) {
 				// Fix VectorMan 2 heli sound (level 1)
 				q->specialUpdate();
@@ -632,64 +640,50 @@ int Ym2612Private::CHANNEL_SET(int address, uint8_t data)
 
 			CH->FB = 9 - ((data >> 3) & 7);	// Real thing ?
 
-			/*
-			if (CH->FB = ((data >> 3) & 7)) {
+			/*if (CH->FB = ((data >> 3) & 7)) {
 				// Thunder force 4 (music stage 8), Gynoug, Aladdin bug sound...
 				CH->FB = 9 - CH->FB;
 			} else {
 				CH->FB = 31;
-			}
-			*/
+			}*/
 
 			LOG_MSG(ym2612, LOG_MSG_LEVEL_DEBUG2,
-				"CHANNEL[%d] ALGO = %d  FB = %d", num, CH->ALGO, CH->FB);
+				"CHANNEL[%d] ALGO = %d  FB = %d", nch, CH->ALGO, CH->FB);
 			break;
 
 		case 0xB4:
-			if (address & 0x100)
-				num += 3;
-			CH = &(state.CHANNEL[num]);
-
 			q->specialUpdate();
 
-			if (data & 0x80) {
-				CH->LEFT = 0xFFFFFFFF;
-			} else {
-				CH->LEFT = 0;
-			}
-
-			if (data & 0x40) {
-				CH->RIGHT = 0xFFFFFFFF;
-			} else {
-				CH->RIGHT = 0;
-			}
+			// -1 = 0xFFFFFFFF. Useful trick from game-music-emu.
+			CH->LEFT = 0 - ((data >> 7) & 1);
+			CH->RIGHT = 0 - ((data >> 6) & 1);
 
 			CH->AMS = LFO_AMS_TAB[(data >> 4) & 3];
 			CH->FMS = LFO_FMS_TAB[data & 7];
 
 			for (int i = 0; i < 3; i++) {
-				if (CH->_SLOT[i].AMSon) {
-					CH->_SLOT[i].AMS = CH->AMS;
-				} else {
-					CH->_SLOT[i].AMS = 31;
-				}
+				slot_t *SL = &CH->_SLOT[i];
+				SL->AMS = (SL->AMSon ? CH->AMS : 31);
 			}
 
 			LOG_MSG(ym2612, LOG_MSG_LEVEL_DEBUG1,
-				"CHANNEL[%d] AMS = %d  FMS = %d", num, CH->AMS, CH->FMS);
+				"CHANNEL[%d] AMS = %d  FMS = %d", nch, CH->AMS, CH->FMS);
 			break;
 	}
 
 	return 0;
 }
 
+/**
+ * Set a value for the entire device.
+ * @param address Register address.
+ * @param data Data.
+ */
 int Ym2612Private::YM_SET(int address, uint8_t data)
 {
-	channel_t *CH;
-	int nch;
-
 	switch (address) {
 		case 0x22:
+			// LFO enable
 			if (data & 8) {
 				// Cool Spot music 1, LFO modified severals time which
 				// distord the sound, have to check that on a real genesis...
@@ -713,7 +707,7 @@ int Ym2612Private::YM_SET(int address, uint8_t data)
 			break;
 
 		case 0x25:
-			state.TimerA = (state.TimerA & 0x3fc) | (data & 3);
+			state.TimerA = (state.TimerA & 0x3FC) | (data & 3);
 			if (state.TimerAL != (1024 - state.TimerA) << 12) {
 				state.TimerAcnt = state.TimerAL = (1024 - state.TimerA) << 12;
 				LOG_MSG(ym2612, LOG_MSG_LEVEL_DEBUG2,
@@ -764,16 +758,18 @@ int Ym2612Private::YM_SET(int address, uint8_t data)
 				"Mode reg = %.2X", data);
 			break;
 
-		case 0x28:
-			if ((nch = (data & 3)) == 3)
+		case 0x28: {
+			int nch = data & 3;
+			if (nch == 3)
 				return 1;
 
 			if (data & 4)
 				nch += 3;
-			CH = &(state.CHANNEL[nch]);
+			channel_t *CH = &state.CHANNEL[nch];
 
 			q->specialUpdate();
 
+			// KEY_ON or KEY_OFF the selected operator(s).
 			if (data & 0x10)
 				KEY_ON(CH, S0);		// On appuie sur la touche pour le slot 1
 			else
@@ -794,8 +790,10 @@ int Ym2612Private::YM_SET(int address, uint8_t data)
 			LOG_MSG(ym2612, LOG_MSG_LEVEL_DEBUG1,
 				"CHANNEL[%d]  KEY %.1X", nch, ((data & 0xF0) >> 4));
 			break;
+		}
 
 		case 0x2A:
+			// Set the DAC value.
 			state.DACdata = ((int)data - 0x80) << 7;	// donnée du DAC
 			break;
 
@@ -803,6 +801,7 @@ int Ym2612Private::YM_SET(int address, uint8_t data)
 			if (state.DAC ^ (data & 0x80))
 				q->specialUpdate();
 
+			// Enable/disable the DAC.
 			state.DAC = data & 0x80;	// Activate / Deactivate the DAC.
 			break;
 	}
@@ -1506,7 +1505,7 @@ Ym2612::~Ym2612()
 }
 
 /**
- * reInit(): (Re-)Initialize the YM2612.
+ * (Re-)Initialize the YM2612.
  * @param clock YM2612 clock frequency.
  * @param rate Sound rate.
  * @return 0 on success; non-zero on error.
@@ -1514,7 +1513,9 @@ Ym2612::~Ym2612()
 // Initialisation de l'émulateur YM2612
 int Ym2612::reInit(int clock, int rate)
 {
-	if ((rate == 0) || (clock == 0))
+	assert(rate > 0);
+	assert(clock > rate);
+	if (rate <= 0 || clock <= rate)
 		return -1;
 
 	// Clear the state struct.

@@ -285,7 +285,7 @@ class Ym2612Private
 
 		static const uint8_t FKEY_TAB[16];
 		static const uint8_t LFO_AMS_TAB[4];
-		static const unsigned int LFO_FMS_TAB[8];
+		static const uint8_t LFO_FMS_TAB[8];
 
 		// Interpolation calculation.
 		int int_cnt;
