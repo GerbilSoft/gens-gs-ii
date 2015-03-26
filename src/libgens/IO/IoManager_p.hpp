@@ -278,7 +278,7 @@ class IoManagerPrivate
 			 * - 6-button: ????MXYZ SACBRLDU
 			 * NOTE: ACTIVE LOW! (1 == released; 0 == pressed)
 			 */
-			unsigned int buttons;
+			uint32_t buttons;
 
 			/**
 			 * Update the tristate cache for data coming from the MD.
