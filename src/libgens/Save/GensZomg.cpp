@@ -178,7 +178,7 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 
 	// TODO: Does this need to be loaded before
 	// M68K registers are restored?
-	if (M68K_Mem::tmss_reg.tmss_en) {
+	if (M68K_Mem::tmss_reg.isTmssEnabled()) {
 		// TMSS is enabled.
 		// Load the MD TMSS registers.
 		Zomg_MD_TMSS_reg_t tmss;
@@ -349,7 +349,7 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	// TODO: Don't pass the whole ZOMG struct to RomCartridgeMD?
 	M68K_Mem::ms_RomCartridge->zomgSave(&zomg);
 
-	if (M68K_Mem::tmss_reg.tmss_en) {
+	if (M68K_Mem::tmss_reg.isTmssEnabled()) {
 		// TMSS is enabled.
 		// Save the MD TMSS registers.
 		Zomg_MD_TMSS_reg_t tmss;

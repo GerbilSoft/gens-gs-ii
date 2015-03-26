@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2013 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -27,18 +27,19 @@
 // C includes.
 #include <stdint.h>
 
-namespace LibGens
-{
+// C includes. (C++ namespace)
+#include <climits>
+
+// Starscream.
+#include "libgens/cpu/star_68k.h"
+
+namespace LibGens {
 
 class TmssReg
 {
 	public:
-		TmssReg()
-			: n_cart_ce(0)
-			, tmss_en(false)
-		{
-			a14000.d = 0;
-		}
+		TmssReg();
+		~TmssReg();
 
 		/**
 		 * $A14000: TMSS control register.
@@ -64,15 +65,6 @@ class TmssReg
 		uint8_t n_cart_ce;
 
 		/**
-		 * Is TMSS enabled?
-		 * This is set on emulation startup and hard reset.
-		 * NOTE: If no TMSS ROM is available, this value will
-		 * be set to false, even if the user specified that
-		 * TMSS should be enabled.
-		 */
-		bool tmss_en;
-
-		/**
 		 * Check if TMSS is mapped.
 		 * @return True if mapped; false if not.
 		 */
@@ -82,6 +74,67 @@ class TmssReg
 		 * Reset the TMSS registers.
 		 */
 		void reset(void);
+
+		/**
+		 * Load the TMSS ROM and enable TMSS.
+		 * M68K memory map must be updated afterwards.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int loadTmssRom(void);
+
+		/**
+		 * Clear the TMSS ROM and disable TMSS.
+		 * M68K memory map must be updated afterwards.
+		 */
+		void clearTmssRom(void);
+
+		/**
+		 * Is TMSS enabled and loaded?
+		 * @return True if TMSS is enabled and loaded; false if not.
+		 */
+		bool isTmssEnabled(void) const;
+
+		/**
+		 * Read a byte from the TMSS ROM.
+		 * @param address Address.
+		 * @return Byte from the TMSS ROM.
+		 */
+		uint8_t readByte(uint32_t address) const;
+
+		/**
+		 * Read a word from the TMSS ROM.
+		 * @param address Address.
+		 * @return Word from the TMSS ROM.
+		 */
+		uint16_t readWord(uint32_t address) const;
+
+		/**
+		 * Update M68K CPU program access structs for bankswitching purposes.
+		 * @param M68K_Fetch Pointer to first STARSCREAM_PROGRAMREGION to update.
+		 * @param banks Maximum number of banks to update.
+		 * @return Number of banks updated.
+		 */
+		int updateSysBanking(STARSCREAM_PROGRAMREGION *M68K_Fetch, int banks);
+
+	private:
+		// TMSS ROM data. (Should be a power of two.)
+		uint8_t *m_tmssRom;		// If not nullptr, TMSS is enabled.
+		uint32_t m_tmssRom_size_real;	// Actual size of the TMSS ROM.
+		uint32_t m_tmssRom_size;	// Allocated size. (TODO: Is this needed?)
+		uint32_t m_tmssRom_mask;	// Address mask.
+
+		// Find the next highest power of two. (unsigned integers)
+		// http://en.wikipedia.org/wiki/Power_of_two#Algorithm_to_find_the_next-highest_power_of_two
+		template <class T>
+		static inline T next_pow2u(T k)
+		{
+			if (k == 0)
+				return 1;
+			k--;
+			for (unsigned int i = 1; i < sizeof(T)*CHAR_BIT; i <<= 1)
+				k = k | k >> i;
+			return k + 1;
+		}
 };
 
 /**
@@ -89,7 +142,7 @@ class TmssReg
  * @return True if mapped; false if not.
  */
 inline bool TmssReg::isTmssMapped(void) const
-	{ return (tmss_en && !(n_cart_ce & 1)); }
+	{ return (m_tmssRom != nullptr && !(n_cart_ce & 1)); }
 
 /**
  * Reset the TMSS registers.
@@ -98,6 +151,15 @@ inline void TmssReg::reset(void)
 {
 	a14000.d = 0;
 	n_cart_ce = 0;
+}
+
+/**
+ * Is TMSS enabled and loaded?
+ * @return True if TMSS is enabled and loaded; false if not.
+ */
+inline bool TmssReg::isTmssEnabled(void) const
+{
+	return (m_tmssRom != nullptr);
 }
 
 }

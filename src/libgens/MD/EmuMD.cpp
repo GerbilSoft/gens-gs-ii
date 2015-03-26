@@ -304,55 +304,13 @@ void EmuMD::initTmss(void)
 {
 	// TODO: Update TMSS settings when loading a savestate?
 	// TODO: Save TMSS settings to the savestate.
-
-	// Assume TMSS is disabled by default.
-	M68K_Mem::tmss_reg.tmss_en = false;
-	M68K_Mem::tmss_reg.reset();
 	m_sysVersion.setVersion(0);
-	M68K_Mem::UpdateTmssMapping();
-
-	// Check if TMSS is enabled.
-	if (!ms_TmssEnabled) {
-		// TMSS is disabled.
-		return;
+	if (!M68K_Mem::tmss_reg.loadTmssRom()) {
+		// TMSS ROM initialized.
+		m_sysVersion.setVersion(1);
 	}
 
-	// TMSS is enabled.
-	// Attempt to load the ROM.
-	if (ms_TmssRomFilename.empty()) {
-		// No ROM filename specified.
-		return;
-	}
-
-	auto_ptr<LibGens::Rom> rom(new LibGens::Rom(ms_TmssRomFilename.c_str()));
-	if (!rom->isOpen() || rom->isMultiFile()) {
-		// Invalid ROM.
-		return;
-	}
-
-	// Check the TMSS ROM filesize.
-	// Up to 2 KB is supported right now.
-	// TODO: Up to 512 KB later?
-	if (rom->romSize() > sizeof(M68K_Mem::MD_TMSS_Rom)) {
-		// ROM is too big.
-		return;
-	}
-
-	// Load the ROM.
-	int ret = rom->loadRom(M68K_Mem::MD_TMSS_Rom.u8, sizeof(M68K_Mem::MD_TMSS_Rom.u8));
-	if (ret <= 0) {
-		// Error loading the ROM.
-		return;
-	}
-
-	// Byteswap the ROM image.
-	be16_to_cpu_array(M68K_Mem::MD_TMSS_Rom.u16, sizeof(M68K_Mem::MD_TMSS_Rom.u16));
-
-	// TMSS ROM is loaded.
-	// TODO: Don't bother reloading it if it has already been loaded
-	// and the ROM filename hasn't changed?
-	M68K_Mem::tmss_reg.tmss_en = true;
-	m_sysVersion.setVersion(1);
+	// Update the TMSS mapping.
 	M68K_Mem::UpdateTmssMapping();
 }
 
