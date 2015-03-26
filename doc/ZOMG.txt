@@ -209,7 +209,7 @@ C equivalent for vdp_ctrl.bin:
 // 8-bit VDP (Master System)
 typedef struct _ZOMG_VDP_ctrl_8_t
 {
-	uint32_t header;		// 32BE: Should be "SMS " (0x534D5320)
+	uint32_t header;		// 32BE: Should be 'SMS '. (0x534D5320)
 
 	uint8_t ctrl_byte[2];		// 8-bit: VDP control bytes.
 	uint16_t reserved1;
@@ -229,7 +229,7 @@ as the low byte of "access" for Sega Mega Drive.
 // 16-bit VDP (Mega Drive)
 typedef struct _ZOMG_VDP_ctrl_16_t
 {
-	uint32_t header;		// 32BE: Should be "MD  " (0x4D442020)
+	uint32_t header;		// 32BE: Should be 'MD  '. (0x4D442020)
 
 	uint16_t ctrl_word[2];		// 16BE: VDP control words.
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
@@ -435,13 +435,13 @@ components that are specific to the Sega Mega Drive hardware.
 | Filename       |  Size (bytes)  | Endianness |
 +----------------+----------------+------------+
 | VSRam.bin      |             80 |  16-bit BE |
-| YM2612_reg.bin |            512 |    None    |
+| YM2612_reg.bin |            512 |    8-bit   |
 | M68K_mem.bin   |         65,536 |  16-bit BE |
 | M68K_reg.bin   |             80 |     BE     |
 | IO.bin         |             16 |    8-bit   |
 | Z80_ctrl.bin   |              4 |   Varies   |
 | TIME_reg.bin   |            256 |    8-bit   |
-| TMSS_reg.bin   |                |   Varies   |
+| TMSS_reg.bin   |              9 |   Varies   |
 +----------------+----------------+------------+
 
 ----------------------------------------------------------------
@@ -729,7 +729,7 @@ If the emulator does support TMSS and the user has enabled it:
 C equivalent for TMSS_reg.bin:
 
 typedef struct _Zomg_MD_TMSS_reg_t {
-	uint32_t header;	// 32BE:  Should be "TMSS" (0x544D5353)
-	uint32_t a14000;	// 32BE:  $A14000 - "SEGA" register
+	uint32_t header;	// 32BE:  Should be 'TMSS' (0x544D5353)
+	uint32_t a14000;	// 32BE:  $A14000 - 'SEGA' register
 	uint8_t n_cart_ce;	// 8-bit: $A14101 - ROM mapping
 } Zomg_MD_TMSS_reg_t;
