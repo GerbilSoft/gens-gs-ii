@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>540</width>
-    <height>421</height>
+    <width>520</width>
+    <height>411</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -39,13 +39,16 @@
        <number>0</number>
       </property>
       <widget class="QWidget" name="tabGeneral">
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QVBoxLayout" name="vboxTabGeneral">
+        <property name="margin">
+         <number>0</number>
+        </property>
         <item>
          <widget class="QGroupBox" name="grpOsd">
           <property name="title">
            <string>Onscreen &amp;Display</string>
           </property>
-          <layout class="QVBoxLayout" name="gridOsd">
+          <layout class="QVBoxLayout" name="vboxOsd">
            <item>
             <layout class="QHBoxLayout" name="hboxOsdFps">
              <item>
@@ -270,7 +273,10 @@ emulation is paused.</string>
        </layout>
       </widget>
       <widget class="QWidget" name="tabGraphics">
-       <layout class="QVBoxLayout" name="verticalLayout_4">
+       <layout class="QVBoxLayout" name="vboxTabGraphics">
+        <property name="margin">
+         <number>0</number>
+        </property>
         <item>
          <widget class="QGroupBox" name="grpGraphics">
           <property name="title">
@@ -384,13 +390,16 @@ window to a larger size than its original resolution.</string>
        </layout>
       </widget>
       <widget class="QWidget" name="tabVdp">
-       <layout class="QVBoxLayout" name="verticalLayout_8">
+       <layout class="QVBoxLayout" name="vboxTabVdp">
+        <property name="margin">
+         <number>0</number>
+        </property>
         <item>
-         <widget class="QGroupBox" name="grpVDP">
+         <widget class="QGroupBox" name="grpVdp">
           <property name="title">
            <string>VDP Settings</string>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_7">
+          <layout class="QVBoxLayout" name="vboxVdp">
            <item>
             <widget class="QCheckBox" name="chkSpriteLimits">
              <property name="toolTip">
@@ -442,8 +451,8 @@ on NTSC models.</string>
             </spacer>
            </item>
            <item>
-            <widget class="QWidget" name="grpAdvancedVDP" native="true">
-             <layout class="QVBoxLayout" name="verticalLayout_9">
+            <widget class="QWidget" name="grpAdvancedVdp" native="true">
+             <layout class="QVBoxLayout" name="vboxAdvancedVdp">
               <property name="margin">
                <number>0</number>
               </property>
@@ -527,15 +536,18 @@ was submerged.</string>
        </layout>
       </widget>
       <widget class="QWidget" name="tabSystem">
-       <layout class="QVBoxLayout" name="verticalLayout_5">
+       <layout class="QVBoxLayout" name="vboxTabSystem">
+        <property name="margin">
+         <number>0</number>
+        </property>
         <item>
          <widget class="QGroupBox" name="grpRegionCode">
           <property name="title">
            <string>&amp;Region Code</string>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_6">
+          <layout class="QVBoxLayout" name="vboxRegionCode">
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout">
+            <layout class="QHBoxLayout" name="hboxRegionCurrent">
              <item>
               <widget class="QLabel" name="lblRegionCurrent">
                <property name="text">
@@ -597,7 +609,7 @@ was submerged.</string>
              <property name="title">
               <string>Automatic Region Detection &amp;Order</string>
              </property>
-             <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <layout class="QHBoxLayout" name="hboxRegionDetect">
               <item>
                <widget class="QListWidget" name="lstRegionDetect">
                 <property name="dragDropMode">
@@ -719,8 +731,11 @@ was submerged.</string>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page">
-       <layout class="QVBoxLayout" name="verticalLayout_10">
+      <widget class="QWidget" name="tabGenesis">
+       <layout class="QVBoxLayout" name="vboxTabGenesis">
+        <property name="margin">
+         <number>0</number>
+        </property>
         <item>
          <widget class="QGroupBox" name="grpGenesis">
           <property name="title">
@@ -815,7 +830,10 @@ This option requires a valid TMSS ROM in order to function properly.</string>
        </layout>
       </widget>
       <widget class="QWidget" name="tabSegaCD">
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QVBoxLayout" name="vboxTabSegaCD">
+        <property name="margin">
+         <number>0</number>
+        </property>
         <item>
          <widget class="QGroupBox" name="grpMcdRoms">
           <property name="title">
@@ -979,7 +997,10 @@ This option requires a valid TMSS ROM in order to function properly.</string>
        </layout>
       </widget>
       <widget class="QWidget" name="tabExtPrg">
-       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <layout class="QVBoxLayout" name="vboxTabExtPrg">
+        <property name="margin">
+         <number>0</number>
+        </property>
         <item>
          <widget class="QGroupBox" name="grpExtPrg">
           <property name="title">

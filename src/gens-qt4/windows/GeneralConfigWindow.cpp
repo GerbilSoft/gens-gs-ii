@@ -30,6 +30,7 @@
 #include <stdint.h>
 
 // C includes. (C++ namespace)
+#include <cassert>
 #include <cmath>
 #include <cstdlib>
 
@@ -40,11 +41,10 @@
 #include <QtGui/QFileDialog>
 #include <QtGui/QKeyEvent>
 
-// libgens: Sega CD Boot ROM database.
+// libgens
 #include "libgens/Data/mcd_rom_db.h"
-
-// libgens: RAR decompressor
 #include "libgens/Decompressor/DcRar.hpp"
+#include "libgens/macros/common.h"
 
 // EmuManager is needed for region code strings.
 #include "EmuManager.hpp"
@@ -71,8 +71,8 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 
 	if (!d->isWarrantyVoid()) {
 		// Hide the super secret settings.
-		delete d->ui.grpAdvancedVDP;
-		d->ui.grpAdvancedVDP = nullptr;
+		delete d->ui.grpAdvancedVdp;
+		d->ui.grpAdvancedVdp = nullptr;
 		d->ui.chkZeroLengthDMA = nullptr;
 		d->ui.chkVScrollBug = nullptr;
 		d->ui.chkUpdatePaletteInVBlankOnly = nullptr;
@@ -97,6 +97,7 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 
 	// Initialize the toolbar buttons.
 	int i = 0;
+	assert(ARRAY_SIZE(icon_fdo)-1 == d->ui.toolBar->actions().size());
 	foreach (QAction *action, d->ui.toolBar->actions()) {
 		action->setIcon(GensQApplication::IconFromTheme(QLatin1String(icon_fdo[i])));
 		action->setData(i);
