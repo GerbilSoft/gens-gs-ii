@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2013 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -38,8 +38,7 @@
 // ARRAY_SIZE(x)
 #include "../macros/common.h"
 
-namespace LibGens
-{
+namespace LibGens {
 
 /**
  * IoManager private class.
@@ -86,10 +85,10 @@ class IoManagerPrivate
 		void updateDevice(int virtPort);
 
 		void updateDevice_3BTN(int virtPort);
-		void updateDevice_6BTN(int virtPort, bool oldSelect);
+		void updateDevice_6BTN(int virtPort, uint8_t oldTristateInput);
 		void updateDevice_2BTN(int virtPort);
-		void updateDevice_Mouse(int virtPort, bool oldSelect, bool oldTr);
-		void updateDevice_TP(int physPort, bool oldSelect, bool oldTr);
+		void updateDevice_Mouse(int virtPort, uint8_t oldTristateInput);
+		void updateDevice_TP(int physPort, uint8_t oldTristateInput);
 		void updateDevice_4WP_Master(int physPort);
 		void updateDevice_4WP_Slave(int physPort);
 
@@ -100,7 +99,7 @@ class IoManagerPrivate
 		void latchMegaMouse(int virtPort);
 
 		// I/O pin definitions.
-		enum IoPinDefs {
+		enum IoPin_t {
 			IOPIN_UP	= 0x01,	// D0
 			IOPIN_DOWN	= 0x02,	// D1
 			IOPIN_LEFT	= 0x04,	// D2
@@ -251,8 +250,7 @@ class IoManagerPrivate
 				scanlines = 0;
 				buttons = ~0;
 				deviceData = 0xFF;
-				updateSelectLine();
-				updateTrLine();
+				updateTristateInputCache();
 
 				// Clear device-specific data.
 				memset(&data, 0x00, sizeof(data));
@@ -269,9 +267,8 @@ class IoManagerPrivate
 			uint8_t ctrl;			// Tristate control.
 			uint8_t mdData;			// Data written from the MD.
 
-			// Cache variables.
-			bool th_line;			// TH line state. (SELECT)
-			bool tr_line;			// TR line state.
+			// Tristate cache for data from MD.
+			uint8_t mdData_tris;		// MD data cache.
 
 			/**
 			 * Controller bitfield.
@@ -284,31 +281,28 @@ class IoManagerPrivate
 			unsigned int buttons;
 
 			/**
-			 * Determine the SELECT line state.
+			 * Update the tristate cache for data coming from the MD.
+			 * NOTE: "In" == MD to controller; "Out" == controller to MD.
 			 */
-			inline void updateSelectLine(void) {
-				// TODO: Apply the device data.
-				th_line = (!(ctrl & IOPIN_TH) ||
-					    (mdData & IOPIN_TH));
+			inline void updateTristateInputCache(void) {
+				// TODO: Apply the device data?
+				mdData_tris = (~ctrl | mdData);
 			}
 
-			inline bool isSelect(void) const
-				{ return th_line; }
-
 			/**
-			 * Determine the TR line state.
+			 * Check an input line's state.
+			 * @param ioPin I/O pin, or multiple pins.
+			 * @return 0 if low; non-zero if high.
 			 */
-			inline void updateTrLine(void) {
-				// TODO: Apply the device data.
-				tr_line = (!(ctrl & IOPIN_TR) ||
-					    (mdData & IOPIN_TR));
+			inline uint8_t checkInputLine(IoPin_t ioPin) const
+			{
+				return (mdData_tris & ioPin);
 			}
 
-			inline bool isTrLine(void) const
-				{ return tr_line; }
+			// TODO: Consolidate this stuff so it can be cached properly.
 
 			/**
-			 * Read the last data value, with tristates applied.
+			 * Read the last output data value, with tristates applied.
 			 * @return Data value with tristate settings applied.
 			 */
 			inline uint8_t readData(void) const {
