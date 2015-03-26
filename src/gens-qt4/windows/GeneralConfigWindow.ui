@@ -805,7 +805,7 @@ function properly.
 This option requires a valid TMSS ROM in order to function properly.</string>
              </property>
              <property name="text">
-              <string>Enable the Trade&amp;Mark Security System</string>
+              <string>Enable the Trade&amp;Mark Security System.</string>
              </property>
             </widget>
            </item>
