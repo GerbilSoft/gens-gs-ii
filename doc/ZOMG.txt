@@ -553,6 +553,9 @@ since they're technically the same state?}
 
 All other values should be handled as STANDBY.
 
+Filesizes:
+- I2C: 34 bytes (12 bytes main header, 22 bytes I2C)
+
 C equivalents for EPR_ctrl.bin:
 
 typedef struct _ZOMG_EPR_ctrl_t {
