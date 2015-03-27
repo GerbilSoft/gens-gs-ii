@@ -130,7 +130,7 @@ void IoManagerPrivate::updateDevice_6BTN(int virtPort, uint8_t oldTristateInput)
 	
 	// Use the TH counter to determine the controller state.
 	// TODO: There should be a 2-NOP delay between TH change and reaction...
-	const int idx = (dev->counter | (dev->checkInputLine(IOPIN_TH) ? 1 : 0));
+	const int idx = (dev->counter | (dev->checkInputLine(IOPIN_TH) ? 0 : 1));
 	switch (idx) {
 		case 0:
 		case 2:
