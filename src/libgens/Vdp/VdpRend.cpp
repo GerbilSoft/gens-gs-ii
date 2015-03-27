@@ -70,7 +70,7 @@ void VdpPrivate::rend_reset(void)
 	memset(SprAttrTbl_m5.b, 0, sizeof(SprAttrTbl_m5.b));
 
 	// Sprite line cache.
-	memset(sprLineCache_80, 0, sizeof(sprLineCache_80));
+	memset(sprLineCache, 0, sizeof(sprLineCache));
 	memset(sprCountCache, 0, sizeof(sprCountCache));
 
 	// Sprite dot overflow flag.

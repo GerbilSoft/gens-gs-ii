@@ -136,7 +136,7 @@ void Vdp::reset(void)
 	// Clear the Sprite Attribute Table cache.
 	memset(&d->SprAttrTbl_m5.b, 0, sizeof(d->SprAttrTbl_m5.b));
 	// Clear the sprite line cache.
-	memset(d->sprLineCache_80, 0, sizeof(d->sprLineCache_80));
+	memset(d->sprLineCache, 0, sizeof(d->sprLineCache));
 	memset(d->sprCountCache, 0, sizeof(d->sprCountCache));
 
 	// Reset the palette. (Includes CRam.)

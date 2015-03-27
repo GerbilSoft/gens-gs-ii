@@ -936,11 +936,7 @@ FORCE_INLINE unsigned int VdpPrivate::T_Update_Sprite_Line_Cache(int line)
 		max_spr_line = (H_Cell / 2);
 	} else {
 		// Sprite limits are disabled.
-		// NOTE: sprLineCache_80 is in a union with sprLineCache
-		// in order to extend the sprite line cache to the full
-		// 80 sprites, which is needed in order to disable
-		// sprite limits.
-		max_spr_line = ARRAY_SIZE(sprLineCache_80[0]);
+		max_spr_line = ARRAY_SIZE(sprLineCache[0]);
 	}
 
 	// We're updating the cache for the *next* line.

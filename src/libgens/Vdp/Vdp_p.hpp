@@ -469,10 +469,21 @@ class VdpPrivate
 			int16_t Pos_Y_Max;
 			uint16_t Num_Tile;	// Includes palette, priority, and flip bits.
 		};
-		union {
-			SprLineCache_t sprLineCache[2][20];
-			SprLineCache_t sprLineCache_80[2][80];
-		};
+
+		/**
+		 * Sprite line cache array.
+		 * - TMS9918A: 4 sprites per line.
+		 * - SMS/GG: 8 sprites per line.
+		 * - MD: 16 or 20 sprites per line.
+		 * - Full 80 is used if sprite limits are disabled.
+		 *
+		 * NOTE: This was previously a union of variously-sized
+		 * arrays, e.g. tms[2][4], sms[2][8], etc, but it has
+		 * been changed to prevent issues on mode switch, since
+		 * the previous approach would result in wrong addresses:
+		 * &sms[1][0] == &md[0][8]
+		 */
+		SprLineCache_t sprLineCache[2][80];
 
 		// Sprite count cache.
 		// Includes both the current line and the next line.
