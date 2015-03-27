@@ -164,6 +164,8 @@ components that are common throughout the Sega 8-bit and 16-bit hardware line.
 | Z80_mem.bin    |    1, 2, 8 KiB |    8-bit   |
 | Z80_reg.bin    |             28 |     LE     |
 | SRAM.bin       |   up to 65,536 |    8-bit   |
+| EPR_ctrl.bin   |         Varies |   Varies   |
+| EEPROM.bin     |   up to 65,536 |    8-bit   |
 +----------------+----------------+------------+
 
 ----------------------------------------------------------------
@@ -423,6 +425,210 @@ SRAM in savestates.
 
 C equivalent for SRAM.bin:
 uint8_t sram[65536];	// Up to 65,536 bytes.
+
+----------------------------------------------------------------
+
+4.9. EPR_ctrl.bin: EEPROM control. [OPTIONAL]
+
+This file contains the internal state of the serial EEPROM chip,
+which is present in some cartridges.
+
+NOTE: This file should be present if the game uses an EEPROM,
+whether or not the actual EEPROM contents are saved.
+
+At least three types of EEPROMs are known to be used in games for
+Sega's 8-bit and 16-bit systems:
+
+- I2C: X24C01, 24C01-24C16, 24C32-24C512
+  Used on a few Mega Drive games, including:
+  - NBA Jam
+  - NBA Jam: Tournament Edition
+  - Mega Man: The Wily Wars
+  Notably, "NBA Jam: Tournament Edition" will lock up on startup
+  with blue and black vertical bars if the EEPROM isn't emulated.
+
+- SPI: 25xxx, 95xxx
+  Some newer unlicensed Mega Drive titles use SPI EEPROMs.
+
+- Microwire: 93Cxx
+  Used on some Sega Master System and Game Gear games.
+
+NOTE: Currently, this document only covers I2C EEPROMs.
+Support for SPI and Microwire EEPROMs may be added later.
+
+The different types of EEPROMs have different internal state.
+To make access easier, a single struct with unions is used.
+Only the portion used by the specified type of EEPROM should
+be saved or loaded.
+
+The epr_type field indicates the type of EEPROM the file represents:
+- 'I2C ' (0x49324320): I2C EEPROM. (X24C01, 24C01-24C16, 24C32-24C512)
+- 'SPI ' (0x53504920): SPI EEPROM. (25xxx, 95xxx)
+- '93C ' (0x39334320): Microwire EEPROM. (93Cxx)
+
+4.9.1. I2C EEPROM
+
+Three I2C EEPROM variants are known to be used by Mega Drive games:
+- Mode 1: X24C01. Uses a single command byte to set the word address
+          and the read/write mode.
+- Mode 2: 24C01-24C16. Uses two command bytes to select a device and
+          set the word address. Three pins are available on the chip
+	  to set a specific device address, which allows for using
+	  multiple EEPROMs on the same I2C bus; however, 24C04
+	  repurposes E0 as address bit A9, 24C08 repurposes E1-E0
+	  as A10-A9, and 24C16 repurposes E2-E0 as A11-A9. This limits
+	  the number of device addresses.
+- Mode 3: 24C32-24C512. Uses three command bytes to select a device
+          and set the word address. Three pins are available on the chip
+	  to set a specific device address, which allows for using
+	  multiple EEPROMs on the same I2C bus.
+	  NOTE: 1 Mbit EEPROMs repurpose a device address bit for bit
+	  A16 of the word address; however, Atmel's 24C1024 uses bit
+	  E0, and Microchip's 24LC1025 uses bit E2. For the purposes
+	  of Mega Drive emulation, we will assume a maximum supported
+	  chip of 24C512. The largest chip used in a licensed game
+	  was the 24C64 (64 Kbit, 8 KB).
+
+The dev_addr field indicates the device address as selected by the
+E2-E0 (or P2-P0 or A2-A0) pins on the chip. This applies to Mode 2
+and Mode 3 EEPROMs only; Mode 1 (X24C01) EEPROMs have the pins, but
+they aren't used for anything.
+
+On larger Mode 2 chips, some of the dev_addr field bits in the command
+byte may be repurposed for the word address. This effectively makes the
+device select pin useless, and limits the number of EEPROM chips that
+can be used on the I2C bus:
+
+* 24C01: E2, E1, E0
+* 24C02: E2, E1, E0
+* 24C04: E2, E1, xx
+* 24C08: E2, xx, xx
+* 24C16: xx, xx, xx
+
+In the cases of 24C04 and 24C08, the device address field is still used,
+but only partially. The bits should NOT be shifted over, so the usable
+addresses for 24C04 are 0x00, 0x02, 0x04, and 0x06, and the usable
+addresses for 24C08 are 0x00 and 0x04. 24C16 ignores the dev_addr field
+entirely.
+
+For Mode 1 and 24C16 chips, dev_addr should be set to 0.
+Most other cartridges also map the EEPROM to device 0.
+
+The page size indicates the total number of bytes that can be written
+with a single write command. This varies amongst different makes and
+models of EEPROM chips: a 24C01 from one manufacturer might have a 4-byte
+page, whereas a 24C01 from another manufacturer might have an 8-byte page.
+This value is important and must be set properly for each game, since the
+wrong page size could result in the game overwriting the wrong data if it
+expects wraparound at certain addresses.
+
+NOTE: Two /SDA values are specified:
+- Input: Last /SDA value written by the host system.
+- Output: Last /SDA value written by the EEPROM.
+
+These values are logically ANDed together to get the actual line state;
+however, they represent how each device is holding the line. Both values
+are needed for proper operation of the /SDA line.
+
+EEPROM state can be one of the following values:
+{TODO: Use an enum; combine MODE 1 word address with MODE 2 device address,
+since they're technically the same state?}
+- 0: STANDBY.
+     EEPROM is waiting for a START condition.
+- 1: MODE 1 Word Address.
+     Host is writing a word address to a MODE 1 EEPROM.
+- 2: READ DATA.
+     Host is reading a data byte from the EEPROM.
+- 3: WRITE DATA.
+     Host is writing a data byte to the EEPROM.
+- 4: MODE 2/3 device address.
+     Host is writing a command word with device address and
+     R/W bit to the EEPROM.
+- 5: MODE 2/3 Word Address, low byte.
+     Host is writing the low 8 bits (A7-A0) of the Word Address to
+     a MODE 2 or MODE 3 EEPROM.
+- 6: MODE 3 Word Address, high byte.
+     Host is writing the high 8 bits (A15-A8) of the Word Address to
+     a MODE 3 EEPROM. Note that 24C1024 takes A16 from the Device Address.
+
+All other values should be handled as STANDBY.
+
+C equivalents for EPR_ctrl.bin:
+
+typedef struct _ZOMG_EPR_ctrl_t {
+	uint32_t header;	// 32BE: Should be 'EPR '. (0x45505220)
+	uint32_t epr_type;	// 32BE: EEPROM type. (See above.)
+	uint8_t count;		// 8-bit: Number of EEPROM chips.
+				// NOTE: Only 1 is officially supported right now.
+	uint8_t reserved[3];	// Reserved.
+
+	union {
+		struct {
+			// I2C EEPROM configuration.
+			uint8_t mode;		// 8-bit: Mode.
+						// 1 = X24C01
+						// 2 = 24C01-24C16
+						// 3 = 24C32-24C512
+			uint8_t dev_addr;	// 8-bit: Device address. (3 bits)
+						// Used on some Mode 2 and
+						// all Mode 3 devices.
+			uint8_t dev_mask;	// 8-bit: Device address mask.
+						// Mode 3 only. Masks bits of
+						// the device address. Needed
+						// for certain chips.
+			uint8_t reserved1;	// Reserved.
+
+			uint32_t size;		// 32BE: EEPROM size, in bytes.
+						// Should be a power of two.
+			uint16_t page_size;	// 16BE: Page size.
+						// Usually at least 4 bytes.
+						// Should be a power of two.
+			uint16_t reserved2;	// Reserved.
+
+			// I2C EEPROM state.
+			uint8_t state;		// Current EEPROM state.
+			uint8_t i2c_lines;	// Current I2C line state.
+						// Bit 0 == /SCL
+						// Bit 1 == /SDA input from host
+						// Bit 2 == /SDA output from EEPROM
+			uint8_t i2c_prev;	// Previous I2C line state.
+						// Bit 0 == /SCL
+						// Bit 1 == /SDA input from host
+						// Bit 2 == /SDA output from EEPROM
+			uint8_t counter;	// Cycle counter.
+
+			uint32_t address;	// Word Address register.
+			uint8_t data_buf;	// Internal data buffer.
+			uint8_t rw;		// R/W mode. (1 == read; 0 == write)
+		} i2c;
+	};
+} ZOMG_EPR_ctrl_t;
+
+----------------------------------------------------------------
+
+4.10. EEPROM.bin: EEPROM data. [OPTIONAL]
+
+This file contains the contents of EEPROM, which is present
+in some cartridges.
+
+Most EEPROM chips store data as 8-bit words. Microwire (93C) EEPROM chips
+have an ORG pin that allows selecting 8-bit or 16-bit words. In the case
+of 16-bit words, the data is stored internally as 16BE. [TODO: Verify?]
+
+The EEPROM should be initialized with 0xFF.
+
+EEPROM can be up to 65,536 bytes in the ZOMG format, and file sizes should
+be powers of 2. If the EEPROM file in a savestate is smaller than the total
+EEPROM area in the emulator, the remainder should be filled with 0xFF.
+
+Note that saving EEPROM in a savestate is optional. For emulators that support
+it, there should be a user-configurable option to enable or disable saving
+EEPROM in savestates. Also note that if EEPROM is saved, EPR_ctrl.bin should
+also be saved. (See section 4.9.)
+
+C equivalent for EEPROM.bin:
+uint8_t  eeprom[65536];		// Up to 131,072 bytes.
+uint16_t eeprom_93c[32768];	// 16BE: Microwire 16-bit version.
 
 ================================================================
 
