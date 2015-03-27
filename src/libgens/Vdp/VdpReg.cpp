@@ -157,6 +157,15 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 		return;
 
 	/**
+	 * Register write notes:
+	 * - Genesis VDP: mask = 0x1F, max = 23
+	 *   - max = 10 when Mode 5 is disabled.
+	 *   - mask is 0x0F when in SMS system mode.
+	 * - SMS1/2 VDP: mask = 0x0F, max = 10
+	 * - TMS9918A: mask = 0x07, max = 7
+	 */
+
+	/**
 	 * Highest addressable register depends on VDP mode.
 	 * - Mode 5: Register 23
 	 * - Mode 4: Register 10
@@ -166,22 +175,36 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 	if (reg_num > max_reg)
 		return;
 
-	// Save the new register value.
-	VDP_Reg.reg[reg_num] = val;
+	// Check what bits have changed.
+	// Used to optimize away some recalculations.
+	const uint8_t diff = (VDP_Reg.reg[reg_num] ^ val);
 
-	// Temporary value for calculation.
-	unsigned int tmp;
+	// Save the new register value.
+	// NOTE: Cannot optimize away write if the value is
+	// the same because some registers trigger operations,
+	// e.g. DMA registers. (Maybe Mode 4 or less?)
+	VDP_Reg.reg[reg_num] = val;
 
 	// Update things affected by the register.
 	switch (reg_num) {
-		case 0:
-		case 1:
-			// Mode Set 1, Mode Set 2.
+		case 0:	// Mode Set 1
 			q->updateIRQLine(0);
-			updateVdpMode();
 
-			// FIXME: Only if a relevant bit has been changed?
-			updateVdpAddrCache_m5(1);
+			if (diff & 0x06) {
+				// PSEL and/or M3 have changed.
+				// TODO: Handle them separately?
+				updateVdpMode();
+				updateVdpAddrCache_m5(1);
+			}
+			break;
+
+		case 1:	// Mode Set 2
+			if (diff & 0x8C) {
+				// VRAM, M1, M2, and/or M5 have changed.
+				updateVdpMode();
+			}
+			// TODO: If emulating TMS9918A, and VRAM bit has changed,
+			// swap memory organization from 4K to 16K or vice-versa.
 			break;
 
 		case 2:
@@ -249,12 +272,14 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 
 		case 12:
 			// Mode Set 4.
-
-			// Update the Shadow/Highlight setting.
-			palette.setMdShadowHighlight(!!(VDP_Reg.m5.Set4 & 0x08));
-
-			// FIXME: Only if a relevant bit has been changed?
-			updateVdpAddrCache_m5(2);
+			if (diff & 0x08) {
+				// Update the Shadow/Highlight setting.
+				palette.setMdShadowHighlight(!!(VDP_Reg.m5.Set4 & 0x08));
+			}
+			if (diff & 0x81) {
+				// H32/H40 mode has changed.
+				updateVdpAddrCache_m5(2);
+			}
 			break;
 
 		case 13:
@@ -283,7 +308,7 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 
 		case 16: {
 			// Scroll Size.
-			tmp = (val & 0x3);
+			int tmp = (val & 0x3);
 			tmp |= (val & 0x30) >> 2;
 
 			/**
