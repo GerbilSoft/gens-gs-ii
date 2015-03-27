@@ -138,8 +138,8 @@ class EEPRomI2C
 		int autoSave(int framesElapsed);
 
 		/** ZOMG functions. **/
-		int loadFromZomg(LibZomg::Zomg *zomg, bool loadData);
-		int saveToZomg(LibZomg::Zomg *zomg) const;
+		int zomgRestore(LibZomg::Zomg *zomg, bool loadSaveData);
+		int zomgSave(LibZomg::Zomg *zomg) const;
 
 	public:
 		// Super secret debug stuff!

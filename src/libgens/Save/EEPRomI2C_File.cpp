@@ -200,10 +200,10 @@ int EEPRomI2C::autoSave(int framesElapsed)
 /**
  * Load the EEPROM state and data from a ZOMG savestate.
  * @param zomg ZOMG savestate.
- * @param loadData If true, load the data in addition to the state.
+ * @param loadData If true, load the save data in addition to the state.
  * @return 0 on success; non-zero on error.
  */
-int EEPRomI2C::loadFromZomg(LibZomg::Zomg *zomg, bool loadData)
+int EEPRomI2C::zomgRestore(LibZomg::Zomg *zomg, bool loadSaveData)
 {
 	// TODO
 	return -1;
@@ -215,7 +215,7 @@ int EEPRomI2C::loadFromZomg(LibZomg::Zomg *zomg, bool loadData)
  * @param zomg ZOMG savestate.
  * @return 0 on success; non-zero on error.
  */
-int EEPRomI2C::saveToZomg(LibZomg::Zomg *zomg) const
+int EEPRomI2C::zomgSave(LibZomg::Zomg *zomg) const
 {
 	// Save the EEPROM state.
 	Zomg_EPR_ctrl_t ctrl;

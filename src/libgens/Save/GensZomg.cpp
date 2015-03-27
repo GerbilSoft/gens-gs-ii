@@ -176,9 +176,10 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 	// Load the cartridge data.
 	// This includes:
 	// - MD /TIME registers. (SRAM control, etc.)
-	// - SRAM data. [TODO]
-	// - EEPROM control and [TODO] data.
-	M68K_Mem::ms_RomCartridge->zomgRestore(&zomg);
+	// - SRAM data.
+	// - EEPROM control and data.
+	// TODO: Make the 'loadSaveData' parameter user-configurable.
+	M68K_Mem::ms_RomCartridge->zomgRestore(&zomg, false);
 
 	// TODO: Does this need to be loaded before
 	// M68K registers are restored?
@@ -354,7 +355,6 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	// - MD /TIME registers. (SRAM control, etc.)
 	// - SRAM data.
 	// - EEPROM control and data.
-	// TODO: Don't pass the whole ZOMG struct to RomCartridgeMD?
 	M68K_Mem::ms_RomCartridge->zomgSave(&zomg);
 
 	if (M68K_Mem::tmss_reg.isTmssEnabled()) {

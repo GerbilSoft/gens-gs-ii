@@ -32,7 +32,8 @@
 #include "../cpu/M68K.hpp"
 #include "../lg_osd.h"
 
-// ZOMG save structs.
+// ZOMG
+#include "libzomg/Zomg.hpp"
 #include "libzomg/zomg_md_time_reg.h"
 
 // C includes. (C++ namespace)
@@ -1350,8 +1351,8 @@ void RomCartridgeMD::updateMarsBanking(void)
 /** ZOMG savestate functions. **/
 
 /**
- * Save the /TIME register state.
- * @param state Zomg_MD_TimeReg_t struct to save to.
+ * Save the cartridge data, including /TIME, SRAM, and/or EEPROM.
+ * @param zomg ZOMG savestate to save to.
  */
 void RomCartridgeMD::zomgSave(LibZomg::Zomg *zomg) const
 {
@@ -1371,7 +1372,7 @@ void RomCartridgeMD::zomgSave(LibZomg::Zomg *zomg) const
 	} else {
 		// Save the EEPROM control registers and data.
 		// TODO: Make saving EEPROM data optional?
-		m_EEPRom.saveToZomg(zomg);
+		m_EEPRom.zomgSave(zomg);
 	}
 
 	// Check if we have to save any bankswitching registers.
@@ -1394,11 +1395,11 @@ void RomCartridgeMD::zomgSave(LibZomg::Zomg *zomg) const
 }
 
 /**
- * Restore the /TIME register state.
+ * Restore the cartridge data, including /TIME, SRAM, and/or EEPROM.
  * @param zomg ZOMG savestate to restore from.
- * (TODO: Do we really want to pass the whole save file?)
+ * @param loadSaveData If true, load the save data in addition to the state.
  */
-void RomCartridgeMD::zomgRestore(LibZomg::Zomg *zomg)
+void RomCartridgeMD::zomgRestore(LibZomg::Zomg *zomg, bool loadSaveData)
 {
 	Zomg_MD_TimeReg_t md_time_reg_save;
 	int ret = zomg->loadMD_TimeReg(&md_time_reg_save);
@@ -1424,10 +1425,12 @@ void RomCartridgeMD::zomgRestore(LibZomg::Zomg *zomg)
 		}
 
 		// Load SRAM.
-		// TODO: Make this optional.
-		m_SRam.loadFromZomg(zomg);
+		if (loadSaveData) {
+			m_SRam.loadFromZomg(zomg);
+		}
 	} else {
-		// TODO: EEPRom loading.
+		// Load EEPROM.
+		m_EEPRom.zomgRestore(zomg, loadSaveData);
 	}
 
 	// Check if we have to restore any bankswitching registers.

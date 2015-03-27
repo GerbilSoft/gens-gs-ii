@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2013 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_CPU_ROMCARTRIDGEMD_HPP__
-#define __LIBGENS_CPU_ROMCARTRIDGEMD_HPP__
+#ifndef __LIBGENS_CARTRIDGE_ROMCARTRIDGEMD_HPP__
+#define __LIBGENS_CARTRIDGE_ROMCARTRIDGEMD_HPP__
 
 // C includes.
 #include <stdint.h>
@@ -34,11 +34,11 @@
 #include "Save/SRam.hpp"
 #include "Save/EEPRomI2C.hpp"
 
-// ZOMG class.
-#include "libzomg/Zomg.hpp"
+namespace LibZomg {
+	class Zomg;
+}
 
-namespace LibGens
-{
+namespace LibGens {
 
 class Rom;
 
@@ -121,7 +121,7 @@ class RomCartridgeMD
 
 		/** ZOMG savestate functions. **/
 		void zomgSave(LibZomg::Zomg *zomg) const;
-		void zomgRestore(LibZomg::Zomg *zomg);
+		void zomgRestore(LibZomg::Zomg *zomg, bool loadSaveData);
 
 	protected:
 		/**
@@ -303,4 +303,4 @@ class RomCartridgeMD
 
 }
 
-#endif /* __LIBGENS_CPU_ROMCARTRIDGEMD_HPP__ */
+#endif /* __LIBGENS_CARTRIDGE_ROMCARTRIDGEMD_HPP__ */
