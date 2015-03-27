@@ -59,6 +59,8 @@ EmuContext *EmuContext::m_instance = nullptr;
  */
 bool EmuContext::ms_AutoFixChecksum = true;
 string EmuContext::ms_PathSRam;
+string EmuContext::ms_TmssRomFilename;
+bool EmuContext::ms_TmssEnabled = false;
 
 
 /**
@@ -146,7 +148,7 @@ EmuContext::~EmuContext()
  * Set the SRam/EEPRom save path [static]
  * @param newPathSRam New SRam/EEPRom save path.
  */
-void EmuContext::SetPathSRam(std::string newPathSRam)
+void EmuContext::SetPathSRam(const std::string &newPathSRam)
 {
 	ms_PathSRam = newPathSRam;
 

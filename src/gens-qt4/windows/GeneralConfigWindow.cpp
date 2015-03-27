@@ -30,6 +30,7 @@
 #include <stdint.h>
 
 // C includes. (C++ namespace)
+#include <cassert>
 #include <cmath>
 #include <cstdlib>
 
@@ -40,17 +41,15 @@
 #include <QtGui/QFileDialog>
 #include <QtGui/QKeyEvent>
 
-// libgens: Sega CD Boot ROM database.
+// libgens
 #include "libgens/Data/mcd_rom_db.h"
-
-// libgens: RAR decompressor
 #include "libgens/Decompressor/DcRar.hpp"
+#include "libgens/macros/common.h"
 
 // EmuManager is needed for region code strings.
 #include "EmuManager.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 /**
  * Initialize the General Configuration window.
@@ -72,8 +71,8 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 
 	if (!d->isWarrantyVoid()) {
 		// Hide the super secret settings.
-		delete d->ui.grpAdvancedVDP;
-		d->ui.grpAdvancedVDP = nullptr;
+		delete d->ui.grpAdvancedVdp;
+		d->ui.grpAdvancedVdp = nullptr;
 		d->ui.chkZeroLengthDMA = nullptr;
 		d->ui.chkVScrollBug = nullptr;
 		d->ui.chkUpdatePaletteInVBlankOnly = nullptr;
@@ -98,6 +97,7 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 
 	// Initialize the toolbar buttons.
 	int i = 0;
+	assert(ARRAY_SIZE(icon_fdo)-1 == d->ui.toolBar->actions().size());
 	foreach (QAction *action, d->ui.toolBar->actions()) {
 		action->setIcon(GensQApplication::IconFromTheme(QLatin1String(icon_fdo[i])));
 		action->setData(i);
@@ -526,12 +526,6 @@ void GeneralConfigWindow::on_btnMDTMSSRom_clicked(void)
 	Q_D(GeneralConfigWindow);
 	const QString tmssRom = tr("%1 TMSS ROM");
 	d->selectRomFile(tmssRom.arg(tr("Genesis")), d->ui.txtMDTMSSRom);
-}
-
-void GeneralConfigWindow::on_txtMDTMSSRom_focusIn(void)
-{
-	// TODO
-	//mcdDisplayRomFileStatus(tr("Sega CD (U)"), sMcdRomStatus_USA);
 }
 
 void GeneralConfigWindow::on_txtMDTMSSRom_textChanged(void)

@@ -30,8 +30,7 @@
 // C includes. (C++ namespace)
 #include <cstring>
 
-namespace LibGens
-{
+namespace LibGens {
 
 S68000CONTEXT M68K::ms_Context;
 
@@ -119,9 +118,8 @@ STARSCREAM_DATAREGION M68K::M68K_Write_Word[3] =
 // Last system ID.
 M68K::SysID M68K::ms_LastSysID = SYSID_NONE;
 
-
 /**
- * M68K_Reset_Handler(): Reset handler.
+ * Reset handler.
  * TODO: What does this function do?
  */
 void M68K::M68K_Reset_Handler(void)
@@ -129,33 +127,32 @@ void M68K::M68K_Reset_Handler(void)
 	//Init_Memory_M68K(GENESIS);
 }
 
-
 /**
- * Init(): Initialize the M68K CPU emulator.
+ * Initialize the M68K CPU emulator.
  */
 void M68K::Init(void)
 {
 	// Clear the 68000 context.
 	memset(&ms_Context, 0x00, sizeof(ms_Context));
-	
+
 	// Initialize the memory handlers.
 	ms_Context.s_fetch = ms_Context.u_fetch =
 		ms_Context.fetch = M68K_Fetch;
-	
+
 	ms_Context.s_readbyte = ms_Context.u_readbyte =
 		ms_Context.readbyte = M68K_Read_Byte;
-	
+
 	ms_Context.s_readword = ms_Context.u_readword =
 		ms_Context.readword = M68K_Read_Word;
-	
+
 	ms_Context.s_writebyte = ms_Context.u_writebyte =
 		ms_Context.writebyte = M68K_Write_Byte;
-	
+
 	ms_Context.s_writeword = ms_Context.u_writeword =
 		ms_Context.writeword = M68K_Write_Word;
-	
+
 	ms_Context.resethandler = M68K_Reset_Handler;
-	
+
 #ifdef GENS_ENABLE_EMULATION
 	// Set up the main68k context.
 	main68k_SetContext(&ms_Context);
@@ -163,15 +160,13 @@ void M68K::Init(void)
 #endif /* GENS_ENABLE_EMULATION */
 }
 
-
 /**
- * End(): Shut down the M68K CPU emulator.
+ * Shut down the M68K CPU emulator.
  */
 void M68K::End(void)
 {
 	// TODO
 }
-
 
 /**
  * Initialize a specific system for the M68K CPU emulator.
@@ -199,14 +194,11 @@ void M68K::InitSys(SysID system)
 
 	// Update the system-specific banking setup.
 	UpdateSysBanking();
-#endif /* GENS_ENABLE_EMULATION */
 
-#ifdef GENS_ENABLE_EMULATION
 	// Reset the M68K CPU.
 	main68k_reset();
 #endif /* GENS_ENABLE_EMULATION */
 }
-
 
 /**
  * Shut down M68K emulation.
@@ -219,7 +211,6 @@ void M68K::EndSys(void)
 		M68K_Fetch[i].offset = 0;
 	}
 }
-
 
 /**
  * Update system-specific memory banking.
@@ -277,11 +268,12 @@ void M68K::UpdateSysBanking(void)
 	M68K_Fetch[cur_fetch].lowaddr = -1;
 	M68K_Fetch[cur_fetch].highaddr = -1;
 	M68K_Fetch[cur_fetch].offset = 0;
+
+	// FIXME: Make sure Starscream's internal program counter
+	// is updated to reflect the updated M68K_Fetch[].
 }
 
-
 /** ZOMG savestate functions. **/
-
 
 /**
  * ZomgSaveReg(): Save the M68K registers.
@@ -302,27 +294,24 @@ void M68K::ZomgSaveReg(Zomg_M68KRegSave_t *state)
 		state->areg[i] = m68k_context.areg[i];
 	
 	// Save the stack pointers.
-	if (m68k_context.sr & 0x2000)
-	{
+	if (m68k_context.sr & 0x2000) {
 		// Supervisor mode.
 		// m68k_context.areg[7] == ssp
 		// m68k_context.asp     == usp
 		state->ssp = m68k_context.areg[7];
 		state->usp = m68k_context.asp;
-	}
-	else
-	{
+	} else {
 		// User mode.
 		// m68k_context.areg[7] == usp
 		// m68k_context.asp     == ssp
 		state->ssp = m68k_context.asp;
 		state->usp = m68k_context.areg[7];
 	}
-	
+
 	// Other registers.
 	state->pc = m68k_context.pc;
 	state->sr = m68k_context.sr;
-	
+
 	// Reserved fields.
 	state->reserved1 = 0;
 	state->reserved2 = 0;
@@ -333,42 +322,39 @@ void M68K::ZomgSaveReg(Zomg_M68KRegSave_t *state)
 
 
 /**
- * ZomgRestoreReg(): Restore the M68K registers.
+ * Restore the M68K registers.
  * @param state Zomg_M68KRegSave_t struct to restore from.
  */
 void M68K::ZomgRestoreReg(const Zomg_M68KRegSave_t *state)
 {
 #ifdef GENS_ENABLE_EMULATION
 	main68k_GetContext(&ms_Context);
-	
+
 	// Load the main registers.
 	for (int i = 0; i < 8; i++)
 		ms_Context.dreg[i] = state->dreg[i];
 	for (int i = 0; i < 7; i++)
 		ms_Context.areg[i] = state->areg[i];
-	
+
 	// Load the stack pointers.
-	if (ms_Context.sr & 0x2000)
-	{
+	if (ms_Context.sr & 0x2000) {
 		// Supervisor mode.
 		// ms_Context.areg[7] == ssp
 		// ms_Context.asp     == usp
 		ms_Context.areg[7] = state->ssp;
 		ms_Context.asp     = state->usp;
-	}
-	else
-	{
+	} else {
 		// User mode.
 		// ms_Context.areg[7] == usp
 		// ms_Context.asp     == ssp
 		ms_Context.asp     = state->ssp;
 		ms_Context.areg[7] = state->usp;
 	}
-	
+
 	// Other registers.
 	ms_Context.pc = state->pc;
 	ms_Context.sr = state->sr;
-	
+
 	main68k_SetContext(&ms_Context);
 #endif /* GENS_ENABLE_EMULATION */
 }

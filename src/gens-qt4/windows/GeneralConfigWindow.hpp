@@ -81,7 +81,6 @@ class GeneralConfigWindow : public QMainWindow
 
 		/** Sega Genesis **/
 		void on_chkMDTMSS_toggled(bool checked);
-		void on_txtMDTMSSRom_focusIn(void);
 		void on_txtMDTMSSRom_textChanged(void);
 		void on_btnMDTMSSRom_clicked(void);
 

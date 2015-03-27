@@ -96,6 +96,7 @@ class Zomg : public ZomgBase
 		virtual int loadMD_IO(Zomg_MD_IoSave_t *state) override;
 		virtual int loadMD_Z80Ctrl(Zomg_MD_Z80CtrlSave_t *state) override;
 		virtual int loadMD_TimeReg(Zomg_MD_TimeReg_t *state) override;
+		virtual int loadMD_TMSS_reg(Zomg_MD_TMSS_reg_t *tmss) override;
 
 		// Miscellaneous
 		virtual int loadSRam(uint8_t *sram, size_t siz) override;
@@ -152,6 +153,7 @@ class Zomg : public ZomgBase
 		virtual int saveMD_IO(const Zomg_MD_IoSave_t *state) override;
 		virtual int saveMD_Z80Ctrl(const Zomg_MD_Z80CtrlSave_t *state) override;
 		virtual int saveMD_TimeReg(const Zomg_MD_TimeReg_t *state) override;
+		virtual int saveMD_TMSS_reg(const Zomg_MD_TMSS_reg_t *tmss) override;
 
 		// Miscellaneous
 		virtual int saveSRam(const uint8_t *sram, size_t siz) override;

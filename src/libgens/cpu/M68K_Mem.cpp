@@ -94,9 +94,6 @@ namespace LibGens
 // ROM cartridge.
 RomCartridgeMD *M68K_Mem::ms_RomCartridge = nullptr;
 
-// TMSS ROM.
-M68K_Mem::MD_TMSS_Rom_t M68K_Mem::MD_TMSS_Rom;
-
 // TMSS registers.
 TmssReg M68K_Mem::tmss_reg;
 
@@ -256,7 +253,7 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 
 		case 0x40: {
 			// 0xA14000: TMSS ('SEGA' register)
-			if (!tmss_reg.tmss_en) {
+			if (!tmss_reg.isTmssEnabled()) {
 				// TMSS is disabled.
 				// TODO: Fake Fetch?
 				return 0xFF;
@@ -275,7 +272,7 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 
 		case 0x41: {
 			// 0xA14101: TMSS (!CART_CE register)
-			if (!tmss_reg.tmss_en) {
+			if (!tmss_reg.isTmssEnabled()) {
 				// TMSS is disabled.
 				// TODO: Fake Fetch?
 				return 0xFF;
@@ -289,7 +286,7 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 			}
 
 			// !CART_CE register.
-			return (tmss_reg.cart_ce & 1);
+			return (tmss_reg.n_cart_ce & 1);
 		}
 
 		case 0x00: {
@@ -432,9 +429,8 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
  */
 inline uint8_t M68K_Mem::M68K_Read_Byte_TMSS_Rom(uint32_t address)
 {
-	address &= 0x7FF;
-	address ^= U16DATA_U8_INVERT;
-	return MD_TMSS_Rom.u8[address];
+	// TODO: Remove this function?
+	return tmss_reg.readByte(address);
 }
 
 
@@ -533,7 +529,7 @@ inline uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 
 		case 0x40: {
 			// 0xA14101: TMSS ('SEGA' register)
-			if (!tmss_reg.tmss_en) {
+			if (!tmss_reg.isTmssEnabled()) {
 				// TMSS is disabled.
 				// TODO: Fake Fetch?
 				return 0xFFFF;
@@ -552,7 +548,7 @@ inline uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 
 		case 0x41: {
 			// 0xA14101: TMSS (!CART_CE register)
-			if (!tmss_reg.tmss_en) {
+			if (!tmss_reg.isTmssEnabled()) {
 				// TMSS is disabled.
 				// TODO: Fake Fetch?
 				return 0xFFFF;
@@ -566,7 +562,7 @@ inline uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 			}
 
 			// !CART_CE register.
-			uint16_t ret = (tmss_reg.cart_ce & 1);
+			uint16_t ret = (tmss_reg.n_cart_ce & 1);
 			Fake_Fetch ^= 0xFF;	// Fake the next fetched instruction. ("random")
 			ret |= ((Fake_Fetch & 0xFF) << 8);
 		}
@@ -697,8 +693,8 @@ inline uint16_t M68K_Mem::M68K_Read_Word_VDP(uint32_t address)
  */
 inline uint16_t M68K_Mem::M68K_Read_Word_TMSS_Rom(uint32_t address)
 {
-	address &= 0x7FE;
-	return MD_TMSS_Rom.u16[address >> 1];
+	// TODO: Remove this function?
+	return tmss_reg.readWord(address);
 }
 
 
@@ -825,7 +821,7 @@ inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 
 		case 0x40: {
 			// 0xA14000: TMSS ('SEGA' register)
-			if (!tmss_reg.tmss_en) {
+			if (!tmss_reg.isTmssEnabled()) {
 				// TMSS is disabled.
 				break;
 			}
@@ -841,7 +837,7 @@ inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 
 		case 0x41: {
 			// 0xA14101: TMSS (!CART_CE register)
-			if (!tmss_reg.tmss_en) {
+			if (!tmss_reg.isTmssEnabled()) {
 				// TMSS is disabled.
 				break;
 			}
@@ -851,7 +847,7 @@ inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 				break;
 
 			// !CART_CE register.
-			tmss_reg.cart_ce = (data & 1);
+			tmss_reg.n_cart_ce = (data & 1);
 
 			// Update TMSS mapping.
 			UpdateTmssMapping();
@@ -1086,7 +1082,7 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 
 		case 0x40: {
 			// 0xA14000: TMSS ('SEGA' register)
-			if (!tmss_reg.tmss_en) {
+			if (!tmss_reg.isTmssEnabled()) {
 				// TMSS is disabled.
 				break;
 			}
@@ -1102,7 +1098,7 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 
 		case 0x41: {
 			// 0xA14101: TMSS (!CART_CE register)
-			if (!tmss_reg.tmss_en) {
+			if (!tmss_reg.isTmssEnabled()) {
 				// TMSS is disabled.
 				break;
 			}
@@ -1112,7 +1108,7 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 				break;
 
 			// !CART_CE register.
-			tmss_reg.cart_ce = (data & 1);
+			tmss_reg.n_cart_ce = (data & 1);
 
 			// Update TMSS mapping.
 			UpdateTmssMapping();
@@ -1289,11 +1285,7 @@ int M68K_Mem::UpdateSysBanking(STARSCREAM_PROGRAMREGION *M68K_Fetch, int banks)
 		cur_fetch += ms_RomCartridge->updateSysBanking(&M68K_Fetch[cur_fetch], banks);
 	} else {
 		// TMSS is mapped.
-		M68K_Fetch->lowaddr = 0x000000;
-		M68K_Fetch->highaddr = (sizeof(MD_TMSS_Rom.u16) - 1);
-		M68K_Fetch->offset = (uint32_t)&MD_TMSS_Rom.u16;
-		M68K_Fetch++;
-		cur_fetch++;
+		cur_fetch += tmss_reg.updateSysBanking(&M68K_Fetch[cur_fetch], banks);
 	}
 
 	return cur_fetch;
