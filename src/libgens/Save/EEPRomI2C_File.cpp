@@ -25,6 +25,10 @@
 #include "macros/common.h"
 #include "libgenstext/StringManip.hpp"
 
+// ZOMG
+#include "libzomg/Zomg.hpp"
+#include "libzomg/zomg_eeprom.h"
+
 // C includes. (C++ namespace)
 #include <cstdio>
 #include <cstring>
@@ -191,6 +195,64 @@ int EEPRomI2C::autoSave(int framesElapsed)
 
 	// Autosave threshold has passed.
 	return save();
+}
+
+/**
+ * Load the EEPROM state and data from a ZOMG savestate.
+ * @param zomg ZOMG savestate.
+ * @param loadData If true, load the data in addition to the state.
+ * @return 0 on success; non-zero on error.
+ */
+int EEPRomI2C::loadFromZomg(LibZomg::Zomg *zomg, bool loadData)
+{
+	// TODO
+	return -1;
+}
+
+
+/**
+ * Save the EEPROM state and data to a ZOMG savestate.
+ * @param zomg ZOMG savestate.
+ * @return 0 on success; non-zero on error.
+ */
+int EEPRomI2C::saveToZomg(LibZomg::Zomg *zomg) const
+{
+	// Save the EEPROM state.
+	Zomg_EPR_ctrl_t ctrl;
+	memset(&ctrl, 0, sizeof(ctrl));
+
+	// Main header.
+	ctrl.header = ZOMG_EPR_CTRL_HEADER;
+	ctrl.epr_type = ZOMG_EPR_TYPE_I2C;
+	ctrl.count = 1;
+
+	// I2C configuration.
+	ctrl.i2c.mode		= d->eprChip.epr_mode;
+	ctrl.i2c.dev_addr	= d->eprChip.dev_addr;
+	ctrl.i2c.dev_mask	= 0xFF;	// TODO: Implement for Mode 2 and Mode 3.
+	ctrl.i2c.size		= d->eprChip.sz_mask + 1;
+	ctrl.i2c.page_size	= d->eprChip.pg_mask + 1;
+
+	// I2C state.
+	ctrl.i2c.state		= d->state;
+	ctrl.i2c.i2c_lines	= d->scl | (d->sda_in << 1) | (d->sda_out << 2);
+	ctrl.i2c.i2c_prev	= d->scl_prev | (d->sda_in_prev << 1) | (d->sda_out_prev << 2);
+	ctrl.i2c.counter	= d->counter;
+	ctrl.i2c.address	= d->address;
+	ctrl.i2c.data_buf	= d->data_buf;
+	ctrl.i2c.rw		= d->rw;
+
+	zomg->saveEEPRomCtrl(&ctrl);
+
+	// Save the EEPROM data.
+
+	// Determine how much of the SRam is currently in use.
+	int ret = 0;
+	int bytesUsed = d->getUsedSize();
+	if (bytesUsed > 0) {
+		ret = zomg->saveEEPRom(d->eeprom, bytesUsed);
+	}
+	return ret;
 }
 
 }

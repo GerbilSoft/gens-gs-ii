@@ -30,7 +30,9 @@
 #include <string>
 
 // ZOMG
-#include "libzomg/Zomg.hpp"
+namespace LibZomg {
+	class Zomg;
+}
 
 namespace LibGens {
 
@@ -115,8 +117,6 @@ class SRam
 		int autoSave(int framesElapsed);
 		
 		/** ZOMG functions. **/
-		// TODO: Do we really want to access the ZOMG file from SRam.cpp directly?
-		// The other method requires accessing m_sram from GensZomg.cpp.
 		int loadFromZomg(LibZomg::Zomg *zomg);
 		int saveToZomg(LibZomg::Zomg *zomg) const;
 

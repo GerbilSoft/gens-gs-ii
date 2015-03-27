@@ -47,6 +47,7 @@ struct _Zomg_MD_IoSave_t;
 struct _Zomg_MD_Z80CtrlSave_t;
 struct _Zomg_MD_TimeReg_t;
 struct _Zomg_MD_TMSS_reg_t;
+struct _Zomg_EPR_ctrl_t;
 
 namespace LibZomg {
 
@@ -124,7 +125,7 @@ class ZomgBase
 			{ (void)mem; (void)siz; return 0; }
 		virtual int loadZ80Reg(_Zomg_Z80RegSave_t *state)
 			{ (void)state; return 0; }
-		
+
 		// M68K (MD-specific)
 		virtual int loadM68KMem(uint16_t *mem, size_t siz, ZomgByteorder_t byteorder)
 			{ (void)mem; (void)siz; (void)byteorder; return 0; }
@@ -144,6 +145,10 @@ class ZomgBase
 		// Miscellaneous
 		virtual int loadSRam(uint8_t *sram, size_t siz)
 			{ (void)sram; (void)siz; return 0; }
+		virtual int loadEEPRomCtrl(_Zomg_EPR_ctrl_t *ctrl)
+			{ (void)ctrl; return 0; }
+		virtual int loadEEPRom(uint8_t *eeprom, size_t siz)
+			{ (void)eeprom; (void)siz; return 0; }
 		
 		/**
 		 * Save savestate functions.
@@ -211,7 +216,11 @@ class ZomgBase
 		// Miscellaneous
 		virtual int saveSRam(const uint8_t *sram, size_t siz)
 			{ (void)sram; (void)siz; return 0; }
-	
+		virtual int saveEEPRomCtrl(const _Zomg_EPR_ctrl_t *ctrl)
+			{ (void)ctrl; return 0; }
+		virtual int saveEEPRom(const uint8_t *eeprom, size_t siz)
+			{ (void)eeprom; (void)siz; return 0; }
+
 	protected:
 		std::string m_filename;
 		ZomgFileMode m_mode;

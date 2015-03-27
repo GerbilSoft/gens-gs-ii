@@ -25,6 +25,9 @@
 #include "macros/common.h"
 #include "libgenstext/StringManip.hpp"
 
+// ZOMG
+#include "libzomg/Zomg.hpp"
+
 // C includes. (C++ namespace)
 #include <climits>
 #include <cstdio>

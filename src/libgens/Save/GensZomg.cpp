@@ -173,8 +173,11 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 		M68K_Mem::Z80_State |= Z80_STATE_RESET;
 	Z80_MD_Mem::Bank_Z80 = ((md_z80_ctrl_save.m68k_bank & 0x1FF) << 15);
 
-	// Load the MD /TIME registers.
-	// TODO: Don't pass the whole ZOMG struct to RomCartridgeMD?
+	// Load the cartridge data.
+	// This includes:
+	// - MD /TIME registers. (SRAM control, etc.)
+	// - SRAM data. [TODO]
+	// - EEPROM control and [TODO] data.
 	M68K_Mem::ms_RomCartridge->zomgRestore(&zomg);
 
 	// TODO: Does this need to be loaded before
@@ -346,7 +349,11 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	md_z80_ctrl_save.m68k_bank = ((Z80_MD_Mem::Bank_Z80 >> 15) & 0x1FF);
 	zomg.saveMD_Z80Ctrl(&md_z80_ctrl_save);
 	
-	// Save the MD /TIME registers.
+	// Save the cartridge data.
+	// This includes:
+	// - MD /TIME registers. (SRAM control, etc.)
+	// - SRAM data.
+	// - EEPROM control and data.
 	// TODO: Don't pass the whole ZOMG struct to RomCartridgeMD?
 	M68K_Mem::ms_RomCartridge->zomgSave(&zomg);
 

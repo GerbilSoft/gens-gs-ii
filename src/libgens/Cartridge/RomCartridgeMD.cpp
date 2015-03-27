@@ -1347,7 +1347,6 @@ void RomCartridgeMD::updateMarsBanking(void)
 	m_cartBanks[19] = bank_start + 1;
 }
 
-
 /** ZOMG savestate functions. **/
 
 /**
@@ -1359,20 +1358,22 @@ void RomCartridgeMD::zomgSave(LibZomg::Zomg *zomg) const
 	// Save the MD /TIME registers.
 	Zomg_MD_TimeReg_t md_time_reg_save;
 	memset(md_time_reg_save.reg, 0xFF, sizeof(md_time_reg_save.reg));
-	
+
 	// SRAM / EEPROM control registers.
 	if (!m_EEPRom.isEEPRomTypeSet()) {
 		// EEPRom is disabled. Use SRam.
 		// Save SRam control registers to the /TIME register bank.
 		md_time_reg_save.SRAM_ctrl = m_SRam.zomgReadCtrl();
-		
+
 		// Save SRAM.
 		// TODO: Make this optional.
 		m_SRam.saveToZomg(zomg);
 	} else {
-		// TODO: EEPRom saving.
+		// Save the EEPROM control registers and data.
+		// TODO: Make saving EEPROM data optional?
+		m_EEPRom.saveToZomg(zomg);
 	}
-	
+
 	// Check if we have to save any bankswitching registers.
 	switch (m_mapper.type) {
 		case MAPPER_MD_SSF2: {

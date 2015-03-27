@@ -28,6 +28,11 @@
 // C++ includes.
 #include <string>
 
+// ZOMG
+namespace LibZomg {
+	class Zomg;
+}
+
 namespace LibGens {
 
 class EEPRomI2CPrivate;
@@ -131,6 +136,10 @@ class EEPRomI2C
 		 * @return Positive value indicating SRam size on success; 0 if no save is needed; negative on error.
 		 */
 		int autoSave(int framesElapsed);
+
+		/** ZOMG functions. **/
+		int loadFromZomg(LibZomg::Zomg *zomg, bool loadData);
+		int saveToZomg(LibZomg::Zomg *zomg) const;
 
 	public:
 		// Super secret debug stuff!
