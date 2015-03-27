@@ -264,10 +264,10 @@ class IoManager
 			BTNNAME_C,
 			BTNNAME_A,
 			BTNNAME_START,
-			BTNNAME_MODE,
-			BTNNAME_X,
-			BTNNAME_Y,
 			BTNNAME_Z,
+			BTNNAME_Y,
+			BTNNAME_X,
+			BTNNAME_MODE,
 
 			// SMS/GG buttons.
 			BTNNAME_1,
@@ -302,10 +302,10 @@ class IoManager
 			BTNI_C		= 5,
 			BTNI_A		= 6,
 			BTNI_START	= 7,
-			BTNI_MODE	= 8,
-			BTNI_X		= 9,
-			BTNI_Y		= 10,
-			BTNI_Z		= 11,
+			BTNI_Z		= 8,
+			BTNI_Y		= 9,
+			BTNI_X		= 10,
+			BTNI_MODE	= 11,
 
 			// SMS/GG buttons.
 			BTNI_1		= 4,
