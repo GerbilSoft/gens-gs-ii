@@ -117,8 +117,8 @@ class SRam
 		int autoSave(int framesElapsed);
 		
 		/** ZOMG functions. **/
-		int loadFromZomg(LibZomg::Zomg *zomg);
-		int saveToZomg(LibZomg::Zomg *zomg) const;
+		int zomgRestore(LibZomg::Zomg *zomg);
+		int zomgSave(LibZomg::Zomg *zomg) const;
 
 	protected:
 		// Dirty flag.

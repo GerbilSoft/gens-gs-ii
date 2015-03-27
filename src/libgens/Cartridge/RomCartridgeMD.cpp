@@ -1368,7 +1368,7 @@ void RomCartridgeMD::zomgSave(LibZomg::Zomg *zomg) const
 
 		// Save SRAM.
 		// TODO: Make this optional.
-		m_SRam.saveToZomg(zomg);
+		m_SRam.zomgSave(zomg);
 	} else {
 		// Save the EEPROM control registers and data.
 		// TODO: Make saving EEPROM data optional?
@@ -1426,7 +1426,7 @@ void RomCartridgeMD::zomgRestore(LibZomg::Zomg *zomg, bool loadSaveData)
 
 		// Load SRAM.
 		if (loadSaveData) {
-			m_SRam.loadFromZomg(zomg);
+			m_SRam.zomgRestore(zomg);
 		}
 	} else {
 		// Load EEPROM.

@@ -348,7 +348,7 @@ int SRam::autoSave(int framesElapsed)
  * @param zomg ZOMG savestate.
  * @return 0 on success; non-zero on error.
  */
-int SRam::loadFromZomg(LibZomg::Zomg *zomg)
+int SRam::zomgRestore(LibZomg::Zomg *zomg)
 {
 	// Load the SRam.
 	int ret = zomg->loadSRam(m_sram, sizeof(m_sram));
@@ -368,7 +368,7 @@ int SRam::loadFromZomg(LibZomg::Zomg *zomg)
  * @param zomg ZOMG savestate.
  * @return 0 on success; non-zero on error.
  */
-int SRam::saveToZomg(LibZomg::Zomg *zomg) const
+int SRam::zomgSave(LibZomg::Zomg *zomg) const
 {
 	// Determine how much of the SRam is currently in use.
 	int bytesUsed = d->getUsedSize();
