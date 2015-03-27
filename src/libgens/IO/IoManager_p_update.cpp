@@ -167,7 +167,6 @@ void IoManagerPrivate::updateDevice_6BTN(int virtPort, uint8_t oldTristateInput)
 			// TH=0: Fourth
 			// Format: D0SA1111
 			data = (dev->buttons & 0xC0) >> 2;
-			data |= (dev->buttons & 0x03);
 			data |= 0x0F;
 			break;
 		
