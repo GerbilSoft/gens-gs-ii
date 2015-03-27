@@ -92,6 +92,10 @@ class GensCtrlCfgWidgetPrivate
 
 		IoManager::IoType_t m_ioType;
 		int numButtons;		// Cached from IoManager.
+
+		// Logical to physical button mapping
+		// Index == logical button ID.
+		// Value == physical button ID.
 		int btnIdx[IoManager::BTNI_MAX];
 
 		// Are we changing all buttons?
@@ -400,7 +404,8 @@ QVector<GensKey_t> GensCtrlCfgWidget::keyMap(void) const
 	Q_D(const GensCtrlCfgWidget);
 	QVector<GensKey_t> keyMap(d->numButtons);
 	for (int i = 0; i < d->numButtons; i++) {
-		keyMap[i] = d->ui.btnCfg[d->btnIdx[i]]->key();
+		const int btnIdx = d->btnIdx[i];
+		keyMap[btnIdx] = d->ui.btnCfg[i]->key();
 	}
 
 	return keyMap;
@@ -416,7 +421,8 @@ void GensCtrlCfgWidget::setKeyMap(const QVector<GensKey_t> &keyMap)
 	const int maxButtons = std::min(d->numButtons, keyMap.count());
 
 	for (int i = 0; i < maxButtons; i++) {
-		d->ui.btnCfg[d->btnIdx[i]]->setKey(keyMap[i]);
+		const int btnIdx = d->btnIdx[i];
+		d->ui.btnCfg[i]->setKey(keyMap[btnIdx]);
 	}
 
 	if (maxButtons < d->numButtons) {
