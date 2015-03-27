@@ -572,10 +572,12 @@ typedef struct _ZOMG_EPR_ctrl_t {
 			uint8_t dev_addr;	// 8-bit: Device address. (3 bits)
 						// Used on some Mode 2 and
 						// all Mode 3 devices.
-			uint8_t dev_mask;	// 8-bit: Device address mask.
-						// Mode 3 only. Masks bits of
-						// the device address. Needed
-						// for certain chips.
+			uint8_t dev_mask;	// 8-bit: Device address mask. (3 bits)
+						// Used for Modes 2 and 3.
+						// (Set to 0xFF for Mode 1.)
+						// Masks bits of the device
+						// address. Needed for
+						// certain chips.
 			uint8_t reserved1;	// Reserved.
 
 			uint32_t size;		// 32BE: EEPROM size, in bytes.
