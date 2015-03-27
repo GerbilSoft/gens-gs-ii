@@ -72,31 +72,31 @@ class Zomg : public ZomgBase
 
 		// VDP
 		virtual int loadVdpReg(uint8_t *reg, size_t siz) override;
-		virtual int loadVdpCtrl_8(Zomg_VdpCtrl_8_t *ctrl) override;
-		virtual int loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl) override;
+		virtual int loadVdpCtrl_8(_Zomg_VdpCtrl_8_t *ctrl) override;
+		virtual int loadVdpCtrl_16(_Zomg_VdpCtrl_16_t *ctrl) override;
 		virtual int loadVRam(void *vram, size_t siz, ZomgByteorder_t byteorder) override;
-		virtual int loadCRam(Zomg_CRam_t *cram, ZomgByteorder_t byteorder) override;
+		virtual int loadCRam(_Zomg_CRam_t *cram, ZomgByteorder_t byteorder) override;
 		/// MD-specific
 		virtual int loadMD_VSRam(uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder) override;
 
 		// Audio
-		virtual int loadPsgReg(Zomg_PsgSave_t *state) override;
+		virtual int loadPsgReg(_Zomg_PsgSave_t *state) override;
 		/// MD-specific
-		virtual int loadMD_YM2612_reg(Zomg_Ym2612Save_t *state) override;
+		virtual int loadMD_YM2612_reg(_Zomg_Ym2612Save_t *state) override;
 
 		// Z80
 		virtual int loadZ80Mem(uint8_t *mem, size_t siz) override;
-		virtual int loadZ80Reg(Zomg_Z80RegSave_t *state) override;
+		virtual int loadZ80Reg(_Zomg_Z80RegSave_t *state) override;
 
 		// M68K (MD-specific)
 		virtual int loadM68KMem(uint16_t *mem, size_t siz, ZomgByteorder_t byteorder) override;
-		virtual int loadM68KReg(Zomg_M68KRegSave_t *state) override;
+		virtual int loadM68KReg(_Zomg_M68KRegSave_t *state) override;
 
 		// MD-specific registers
-		virtual int loadMD_IO(Zomg_MD_IoSave_t *state) override;
-		virtual int loadMD_Z80Ctrl(Zomg_MD_Z80CtrlSave_t *state) override;
-		virtual int loadMD_TimeReg(Zomg_MD_TimeReg_t *state) override;
-		virtual int loadMD_TMSS_reg(Zomg_MD_TMSS_reg_t *tmss) override;
+		virtual int loadMD_IO(_Zomg_MD_IoSave_t *state) override;
+		virtual int loadMD_Z80Ctrl(_Zomg_MD_Z80CtrlSave_t *state) override;
+		virtual int loadMD_TimeReg(_Zomg_MD_TimeReg_t *state) override;
+		virtual int loadMD_TMSS_reg(_Zomg_MD_TMSS_reg_t *tmss) override;
 
 		// Miscellaneous
 		virtual int loadSRam(uint8_t *sram, size_t siz) override;
@@ -129,31 +129,31 @@ class Zomg : public ZomgBase
 
 		// VDP
 		virtual int saveVdpReg(const uint8_t *reg, size_t siz) override;
-		virtual int saveVdpCtrl_8(const Zomg_VdpCtrl_8_t *ctrl) override;
-		virtual int saveVdpCtrl_16(const Zomg_VdpCtrl_16_t *ctrl) override;
+		virtual int saveVdpCtrl_8(const _Zomg_VdpCtrl_8_t *ctrl) override;
+		virtual int saveVdpCtrl_16(const _Zomg_VdpCtrl_16_t *ctrl) override;
 		virtual int saveVRam(const void *vram, size_t siz, ZomgByteorder_t byteorder) override;
-		virtual int saveCRam(const Zomg_CRam_t *cram, ZomgByteorder_t byteorder) override;
+		virtual int saveCRam(const _Zomg_CRam_t *cram, ZomgByteorder_t byteorder) override;
 		/// MD-specific
 		virtual int saveMD_VSRam(const uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder) override;
 
 		// Audio
-		virtual int savePsgReg(const Zomg_PsgSave_t *state) override;
+		virtual int savePsgReg(const _Zomg_PsgSave_t *state) override;
 		/// MD-specific
-		virtual int saveMD_YM2612_reg(const Zomg_Ym2612Save_t *state) override;
+		virtual int saveMD_YM2612_reg(const _Zomg_Ym2612Save_t *state) override;
 
 		// Z80
 		virtual int saveZ80Mem(const uint8_t *mem, size_t siz) override;
-		virtual int saveZ80Reg(const Zomg_Z80RegSave_t *state) override;
+		virtual int saveZ80Reg(const _Zomg_Z80RegSave_t *state) override;
 
 		// M68K (MD-specific)
 		virtual int saveM68KMem(const uint16_t *mem, size_t siz, ZomgByteorder_t byteorder) override;
-		virtual int saveM68KReg(const Zomg_M68KRegSave_t *state) override;
+		virtual int saveM68KReg(const _Zomg_M68KRegSave_t *state) override;
 
 		// MD-specific registers
-		virtual int saveMD_IO(const Zomg_MD_IoSave_t *state) override;
-		virtual int saveMD_Z80Ctrl(const Zomg_MD_Z80CtrlSave_t *state) override;
-		virtual int saveMD_TimeReg(const Zomg_MD_TimeReg_t *state) override;
-		virtual int saveMD_TMSS_reg(const Zomg_MD_TMSS_reg_t *tmss) override;
+		virtual int saveMD_IO(const _Zomg_MD_IoSave_t *state) override;
+		virtual int saveMD_Z80Ctrl(const _Zomg_MD_Z80CtrlSave_t *state) override;
+		virtual int saveMD_TimeReg(const _Zomg_MD_TimeReg_t *state) override;
+		virtual int saveMD_TMSS_reg(const _Zomg_MD_TMSS_reg_t *tmss) override;
 
 		// Miscellaneous
 		virtual int saveSRam(const uint8_t *sram, size_t siz) override;

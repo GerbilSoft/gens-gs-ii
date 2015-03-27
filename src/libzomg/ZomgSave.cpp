@@ -28,6 +28,17 @@
 #include "zomg_byteswap.h"
 #include "ZomgIni.hpp"
 
+// ZOMG save structs.
+#include "zomg_vdp.h"
+#include "zomg_psg.h"
+#include "zomg_ym2612.h"
+#include "zomg_m68k.h"
+#include "zomg_z80.h"
+#include "zomg_md_io.h"
+#include "zomg_md_z80_ctrl.h"
+#include "zomg_md_time_reg.h"
+#include "zomg_md_tmss_reg.h"
+
 // C includes. (C++ namespace)
 #include <cstdint>
 #include <cstring>

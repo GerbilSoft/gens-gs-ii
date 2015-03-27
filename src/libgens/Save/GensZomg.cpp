@@ -48,6 +48,7 @@
 #include "libzomg/zomg_z80.h"
 #include "libzomg/zomg_md_io.h"
 #include "libzomg/zomg_md_z80_ctrl.h"
+#include "libzomg/zomg_md_tmss_reg.h"
 
 // C includes.
 #include <stdint.h>

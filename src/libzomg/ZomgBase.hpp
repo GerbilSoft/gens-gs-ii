@@ -36,15 +36,17 @@
 #include "libzomg/zomg_byteorder.h"
 
 // ZOMG save structs.
-#include "zomg_vdp.h"
-#include "zomg_psg.h"
-#include "zomg_ym2612.h"
-#include "zomg_m68k.h"
-#include "zomg_z80.h"
-#include "zomg_md_io.h"
-#include "zomg_md_z80_ctrl.h"
-#include "zomg_md_time_reg.h"
-#include "zomg_md_tmss_reg.h"
+struct _Zomg_VdpCtrl_8_t;
+struct _Zomg_VdpCtrl_16_t;
+union _Zomg_CRam_t;
+struct _Zomg_PsgSave_t;
+struct _Zomg_Ym2612Save_t;
+struct _Zomg_Z80RegSave_t;
+struct _Zomg_M68KRegSave_t;
+struct _Zomg_MD_IoSave_t;
+struct _Zomg_MD_Z80CtrlSave_t;
+struct _Zomg_MD_TimeReg_t;
+struct _Zomg_MD_TMSS_reg_t;
 
 namespace LibZomg {
 
@@ -99,44 +101,44 @@ class ZomgBase
 		// VDP
 		virtual int loadVdpReg(uint8_t *reg, size_t siz)
 			{ (void)reg; (void)siz; return 0; }
-		virtual int loadVdpCtrl_8(Zomg_VdpCtrl_8_t *ctrl)
+		virtual int loadVdpCtrl_8(_Zomg_VdpCtrl_8_t *ctrl)
 			{ (void)ctrl; return 0; }
-		virtual int loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl)
+		virtual int loadVdpCtrl_16(_Zomg_VdpCtrl_16_t *ctrl)
 			{ (void)ctrl; return 0; }
 		virtual int loadVRam(void *vram, size_t siz, ZomgByteorder_t byteorder)
 			{ (void)vram; (void)siz; (void)byteorder; return 0; }
-		virtual int loadCRam(Zomg_CRam_t *cram, ZomgByteorder_t byteorder)
+		virtual int loadCRam(_Zomg_CRam_t *cram, ZomgByteorder_t byteorder)
 			{ (void)cram; (void)byteorder; return 0; }
 		/// MD-specific
 		virtual int loadMD_VSRam(uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder)
 			{ (void)vsram; (void)siz; (void)byteorder; return 0; }
 		
 		// Audio
-		virtual int loadPsgReg(Zomg_PsgSave_t *state)
+		virtual int loadPsgReg(_Zomg_PsgSave_t *state)
 			{ (void)state; return 0; }
-		virtual int loadMD_YM2612_reg(Zomg_Ym2612Save_t *state) /// MD-specific
+		virtual int loadMD_YM2612_reg(_Zomg_Ym2612Save_t *state) /// MD-specific
 			{ (void)state; return 0; }
 		
 		// Z80
 		virtual int loadZ80Mem(uint8_t *mem, size_t siz)
 			{ (void)mem; (void)siz; return 0; }
-		virtual int loadZ80Reg(Zomg_Z80RegSave_t *state)
+		virtual int loadZ80Reg(_Zomg_Z80RegSave_t *state)
 			{ (void)state; return 0; }
 		
 		// M68K (MD-specific)
 		virtual int loadM68KMem(uint16_t *mem, size_t siz, ZomgByteorder_t byteorder)
 			{ (void)mem; (void)siz; (void)byteorder; return 0; }
-		virtual int loadM68KReg(Zomg_M68KRegSave_t *state)
+		virtual int loadM68KReg(_Zomg_M68KRegSave_t *state)
 			{ (void)state; return 0; }
 		
 		// MD-specific registers
-		virtual int loadMD_IO(Zomg_MD_IoSave_t *state)
+		virtual int loadMD_IO(_Zomg_MD_IoSave_t *state)
 			{ (void)state; return 0; }
-		virtual int loadMD_Z80Ctrl(Zomg_MD_Z80CtrlSave_t *state)
+		virtual int loadMD_Z80Ctrl(_Zomg_MD_Z80CtrlSave_t *state)
 			{ (void)state; return 0; }
-		virtual int loadMD_TimeReg(Zomg_MD_TimeReg_t *state)
+		virtual int loadMD_TimeReg(_Zomg_MD_TimeReg_t *state)
 			{ (void)state; return 0; }
-		virtual int loadMD_TMSS_reg(Zomg_MD_TMSS_reg_t *tmss)
+		virtual int loadMD_TMSS_reg(_Zomg_MD_TMSS_reg_t *tmss)
 			{ (void)tmss; return 0; }
 		
 		// Miscellaneous
@@ -165,45 +167,45 @@ class ZomgBase
 		// VDP
 		virtual int saveVdpReg(const uint8_t *reg, size_t siz)
 			{ (void)reg; (void)siz; return 0; }
-		virtual int saveVdpCtrl_8(const Zomg_VdpCtrl_8_t *ctrl)
+		virtual int saveVdpCtrl_8(const _Zomg_VdpCtrl_8_t *ctrl)
 			{ (void)ctrl; return 0; }
-		virtual int saveVdpCtrl_16(const Zomg_VdpCtrl_16_t *ctrl)
+		virtual int saveVdpCtrl_16(const _Zomg_VdpCtrl_16_t *ctrl)
 			{ (void)ctrl; return 0; }
 		virtual int saveVRam(const void *vram, size_t siz, ZomgByteorder_t byteorder)
 			{ (void)vram; (void)siz; (void)byteorder; return 0; }
-		virtual int saveCRam(const Zomg_CRam_t *cram, ZomgByteorder_t byteorder)
+		virtual int saveCRam(const _Zomg_CRam_t *cram, ZomgByteorder_t byteorder)
 			{ (void)cram; (void)byteorder; return 0; }
 		/// MD-specific
 		virtual int saveMD_VSRam(const uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder)
 			{ (void)vsram; (void)siz; (void)byteorder; return 0; }
 		
 		// Audio
-		virtual int savePsgReg(const Zomg_PsgSave_t *state)
+		virtual int savePsgReg(const _Zomg_PsgSave_t *state)
 			{ (void)state; return 0; }
 		/// MD-specific
-		virtual int saveMD_YM2612_reg(const Zomg_Ym2612Save_t *state)
+		virtual int saveMD_YM2612_reg(const _Zomg_Ym2612Save_t *state)
 			{ (void)state; return 0; }
 		
 		// Z80
 		virtual int saveZ80Mem(const uint8_t *mem, size_t siz)
 			{ (void)mem; (void)siz; return 0; }
-		virtual int saveZ80Reg(const Zomg_Z80RegSave_t *state)
+		virtual int saveZ80Reg(const _Zomg_Z80RegSave_t *state)
 			{ (void)state; return 0; }
 		
 		// M68K (MD-specific)
 		virtual int saveM68KMem(const uint16_t *mem, size_t siz, ZomgByteorder_t byteorder)
 			{ (void)mem; (void)siz; (void)byteorder; return 0; }
-		virtual int saveM68KReg(const Zomg_M68KRegSave_t *state)
+		virtual int saveM68KReg(const _Zomg_M68KRegSave_t *state)
 			{ (void)state; return 0; }
 		
 		// MD-specific registers
-		virtual int saveMD_IO(const Zomg_MD_IoSave_t *state)
+		virtual int saveMD_IO(const _Zomg_MD_IoSave_t *state)
 			{ (void)state; return 0; }
-		virtual int saveMD_Z80Ctrl(const Zomg_MD_Z80CtrlSave_t *state)
+		virtual int saveMD_Z80Ctrl(const _Zomg_MD_Z80CtrlSave_t *state)
 			{ (void)state; return 0; }
-		virtual int saveMD_TimeReg(const Zomg_MD_TimeReg_t *state)
+		virtual int saveMD_TimeReg(const _Zomg_MD_TimeReg_t *state)
 			{ (void)state; return 0; }
-		virtual int saveMD_TMSS_reg(const Zomg_MD_TMSS_reg_t *tmss)
+		virtual int saveMD_TMSS_reg(const _Zomg_MD_TMSS_reg_t *tmss)
 			{ (void)tmss; return 0; }
 
 		// Miscellaneous

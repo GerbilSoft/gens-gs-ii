@@ -32,6 +32,9 @@
 #include "../cpu/M68K.hpp"
 #include "../lg_osd.h"
 
+// ZOMG save structs.
+#include "libzomg/zomg_md_time_reg.h"
+
 // C includes. (C++ namespace)
 #include <cstdlib>
 
