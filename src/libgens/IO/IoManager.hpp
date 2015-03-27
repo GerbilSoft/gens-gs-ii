@@ -260,18 +260,18 @@ class IoManager
 			BTNNAME_DOWN,
 			BTNNAME_LEFT,
 			BTNNAME_RIGHT,
-			BTNNAME_C,
 			BTNNAME_B,
-			BTNNAME_START,
+			BTNNAME_C,
 			BTNNAME_A,
-			BTNNAME_Z,
-			BTNNAME_Y,
-			BTNNAME_X,
+			BTNNAME_START,
 			BTNNAME_MODE,
+			BTNNAME_X,
+			BTNNAME_Y,
+			BTNNAME_Z,
 
 			// SMS/GG buttons.
-			BTNNAME_2,
 			BTNNAME_1,
+			BTNNAME_2,
 			BTNNAME_STARTPAUSE,
 
 			// Sega Mega Mouse buttons.
