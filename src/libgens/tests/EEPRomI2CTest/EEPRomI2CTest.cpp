@@ -35,8 +35,10 @@
 // C++ includes.
 #include <iostream>
 #include <string>
+#include <vector>
 using std::endl;
 using std::string;
+using std::vector;
 
 namespace LibGens { namespace Tests {
 
@@ -130,14 +132,41 @@ uint8_t EEPRomI2CTest::recvData(bool ack)
 }
 
 /**
+ * Verify EEPROM data.
+ * This function reads the EEPROM using dbg functions,
+ * not the I2C interface.
+ * The expected EEPROM data is compared to the
+ * actual EEPROM data and then compared using
+ * CompareByteArrays().
+ * @param eeprom_expected Expected data.
+ * @param size Size of expected data.
+ * @param message Optional message for this verification.
+ */
+void EEPRomI2CTest::VerifyEEPRomData_dbg(const uint8_t *eeprom_expected, unsigned int size, const string &message)
+{
+	unsigned int eepromSize;
+	ASSERT_EQ(0, m_eeprom->dbg_getEEPRomSize(&eepromSize));
+	ASSERT_EQ(eepromSize, size);
+
+	// Get the data from the EEPROM.
+	vector<uint8_t> eeprom_actual(eepromSize, 0xFF);
+	ASSERT_EQ(0, m_eeprom->dbg_readEEPRom(0, eeprom_actual.data(), eepromSize));
+
+	// Verify the EEPROM data.
+	CompareByteArrays(eeprom_expected, eeprom_actual.data(), eepromSize, message);
+}
+
+/**
  * Compare two byte arrays.
  * The byte arrays are converted to hexdumps and then
  * compared using EXPECT_EQ().
  * @param expected Expected data.
  * @param actual Actual data.
  * @param size Size of both arrays.
+ * @param message Optional message for this verification.
  */
-void EEPRomI2CTest::CompareByteArrays(const uint8_t *expected, const uint8_t *actual, unsigned int size)
+void EEPRomI2CTest::CompareByteArrays(const uint8_t *expected, const uint8_t *actual, unsigned int size,
+				      const string &message)
 {
 	// Output format: (assume ~64 bytes per line)
 	// 0000: 01 23 45 67 89 AB CD EF  01 23 45 67 89 AB CD EF
@@ -181,6 +210,7 @@ void EEPRomI2CTest::CompareByteArrays(const uint8_t *expected, const uint8_t *ac
 	// Compare the byte arrays, and
 	// print the strings on failure.
 	EXPECT_EQ(0, memcmp(expected, actual, size)) <<
+		message << (!message.empty() ? "\n" : "") <<
 		"Expected EEPROM data:" << endl << s_expected << endl <<
 		"Actual EEPROM data:" << endl << s_actual << endl;
 }

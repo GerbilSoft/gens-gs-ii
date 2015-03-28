@@ -30,6 +30,9 @@
 // Google Test
 #include "gtest/gtest.h"
 
+// C++ includes.
+#include <string>
+
 namespace LibGens {
 
 class EEPRomI2C;
@@ -69,14 +72,29 @@ class EEPRomI2CTest : public ::testing::TestWithParam<unsigned int>
 		uint8_t recvData(bool ack);
 
 		/**
+		 * Verify EEPROM data.
+		 * This function reads the EEPROM using dbg functions,
+		 * not the I2C interface.
+		 * The expected EEPROM data is compared to the
+		 * actual EEPROM data and then compared using
+		 * CompareByteArrays().
+		 * @param eeprom_expected Expected data.
+		 * @param size Size of expected data.
+		 * @param message Optional message for this verification.
+		 */
+		void VerifyEEPRomData_dbg(const uint8_t *eeprom_expected, unsigned int size, const std::string &message = "");
+
+		/**
 		 * Compare two byte arrays.
 		 * The byte arrays are converted to hexdumps and then
 		 * compared using EXPECT_EQ().
 		 * @param expected Expected data.
 		 * @param actual Actual data.
 		 * @param size Size of both arrays.
+		 * @param message Optional message for this verification.
 		 */
-		void CompareByteArrays(const uint8_t *expected, const uint8_t *actual, unsigned int size);
+		void CompareByteArrays(const uint8_t *expected, const uint8_t *actual, unsigned int size,
+				       const std::string &message = "");
 };
 
 } }
