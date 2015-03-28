@@ -643,7 +643,7 @@ int Zomg::saveEEPRomCtrl(const Zomg_EPR_ctrl_t *ctrl)
 	// I2C EEPROM.
 	bswap_eeprom.i2c.size		= cpu_to_be32(bswap_eeprom.i2c.size);
 	bswap_eeprom.i2c.page_size	= cpu_to_be16(bswap_eeprom.i2c.page_size);
-	bswap_eeprom.i2c.address	= cpu_to_be16(bswap_eeprom.i2c.address);
+	bswap_eeprom.i2c.address	= cpu_to_be32(bswap_eeprom.i2c.address);
 
 	return saveToZomg("common/EPR_ctrl.bin", &bswap_eeprom, sizeof(bswap_eeprom));
 #else
