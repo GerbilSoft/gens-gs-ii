@@ -220,6 +220,27 @@ int EEPRomI2C::dbg_writeEEPRom(uint32_t address, const uint8_t *data, int length
 }
 
 /**
+ * Read data from the page cache.
+ * NOTE: Wraparound is not supported.
+ * @param address Start address.
+ * @param data Buffer to store the data.
+ * @param length Length of data to read.
+ * @return MDP error code.
+ */
+int EEPRomI2C::dbg_readPageCache(uint32_t address, uint8_t *data, int length) const
+{
+	unsigned int pgSize;
+	dbg_getPageSize(&pgSize);
+	if (pgSize <= 0 || address >= pgSize || address + length > pgSize) {
+		return -1;
+	}
+
+	// Read the data.
+	memcpy(data, &d->page_cache[address], length);
+	return 0;
+}
+
+/**
  * Get the state of the /SCL line.
  * @param scl Buffer to store the /SCL line state. (0 or 1)
  * @return MDP error code.

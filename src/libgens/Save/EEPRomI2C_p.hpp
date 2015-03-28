@@ -54,6 +54,8 @@ class EEPRomI2CPrivate
 
 		// EEPRom. (8 KB max)
 		uint8_t eeprom[0x2000];
+		// Page cache. Largest known is 256 bytes. (24C1024)
+		uint8_t page_cache[256];
 
 		// /SCL and /SDA are both open-drain.
 		// The line is 1 unless either the EEPROM or the
@@ -207,6 +209,19 @@ class EEPRomI2CPrivate
 		 * Go into standby mode.
 		 */
 		void doStandby(void);
+
+		/**
+		 * Start an EPR_WRITE_DATA operation.
+		 * Sets internal variables and initializes the page cache.
+		 */
+		void startWriteData(void);
+
+		/**
+		 * Write the page cache to the EEPROM.
+		 * This is done when a STOP condition is received
+		 * after a byte is written during EPR_WRITE_DATA.
+		 */
+		void stopWriteData(void);
 
 		/**
 		 * Process a shifted-in data word.

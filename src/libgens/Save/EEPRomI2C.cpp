@@ -29,6 +29,7 @@
 #include "macros/log_msg.h"
 
 // C includes (C++ namespace).
+#include <cassert>
 #include <cstring>
 
 #include "EEPRomI2C_p.hpp"
@@ -56,6 +57,7 @@ void EEPRomI2CPrivate::reset(void)
 {
 	// EEProm is initialized with 0xFF.
 	memset(eeprom, 0xFF, sizeof(eeprom));
+	memset(page_cache, 0xFF, sizeof(page_cache));
 	clearDirty();
 
 	// Reset the clock and data line states.
@@ -88,6 +90,54 @@ void EEPRomI2CPrivate::doStandby(void)
 }
 
 /**
+ * Start an EPR_WRITE_DATA operation.
+ * Sets internal variables and initializes the page cache.
+ */
+void EEPRomI2CPrivate::startWriteData(void)
+{
+	// Partial page writes do NOT erase unwritten data.
+	// To implement that, we read the entire page into
+	// the page cache before doing any writes.
+
+	// This also works for BYTE WRITE, but may be slightly
+	// slower because we're always copying the entire page.
+	// Caching the last page address is probably not helpful,
+	// since it's unlikely that the host device will be
+	// rewriting the same page multiple times in a row.
+
+	// Initialize the page cache.
+	const unsigned int pgSize = eprChip.pg_mask + 1;
+	const unsigned int pgAddress = address & ~eprChip.pg_mask;
+	memcpy(page_cache, &eeprom[pgAddress], pgSize);
+
+	// Set the internal variables for EPR_WRITE_DATA.
+	counter = 0;
+	data_buf = 0;
+	shift_rw = 0;	// Shifting in.
+	state = EPR_WRITE_DATA;
+}
+
+/**
+ * Write the page cache to the EEPROM.
+ * This is done when a STOP condition is received
+ * after a byte is written during EPR_WRITE_DATA.
+ */
+void EEPRomI2CPrivate::stopWriteData(void)
+{
+	const unsigned int pgAddress = address & ~eprChip.pg_mask;
+	const unsigned int pgSize = eprChip.pg_mask + 1;
+
+	for (unsigned int i = 0; i < pgSize; i++) {
+		const unsigned int byte_address = pgAddress | i;
+		if (page_cache[i] != eeprom[byte_address]) {
+			// Byte has changed.
+			eeprom[byte_address] = page_cache[i];
+			setDirty();
+		}
+	}
+}
+
+/**
  * Process a shifted-in data word.
  */
 void EEPRomI2CPrivate::processI2CShiftIn(void)
@@ -107,9 +157,7 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 				state = EPR_READ_DATA;
 			} else {
 				// Write data.
-				data_buf = 0;
-				shift_rw = 0;	// Shifting in.
-				state = EPR_WRITE_DATA;
+				startWriteData();
 			}
 			LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG2,
 				"EPR_MODE1_WORD_ADDRESS: address=%02X, rw=%d, data_buf=%02X",
@@ -117,11 +165,8 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 			break;
 
 		case EPR_WRITE_DATA: {
-			// Save the data byte.
-			if (eeprom[address] != data_buf) {
-				eeprom[address] = data_buf;
-				setDirty();
-			}
+			// Write the data byte to the page cache.
+			page_cache[address & eprChip.pg_mask] = data_buf;
 
 			// Next byte in the page.
 			const uint16_t prev_address = address;
@@ -216,10 +261,7 @@ void EEPRomI2CPrivate::processI2CShiftIn(void)
 				data_buf, dev_addr, address);
 
 			// Write data.
-			counter = 0;
-			data_buf = 0;
-			shift_rw = 0;	// Shifting in.
-			state = EPR_WRITE_DATA;
+			startWriteData();
 			break;
 
 		case EPR_MODE3_WORD_ADDRESS_HIGH:
@@ -289,6 +331,11 @@ void EEPRomI2CPrivate::processI2Cbit(void)
 	// Check for a STOP condition.
 	if (checkStop()) {
 		// STOP condition reached.
+		if (state == EPR_WRITE_DATA) {
+			// Complete the EPR_WRITE_DATA operation.
+			stopWriteData();
+		}
+
 		LOG_MSG(eeprom_i2c, LOG_MSG_LEVEL_DEBUG2,
 			"Received STOP condition.");
 		doStandby();
@@ -442,6 +489,10 @@ int EEPRomI2C::setEEPRomType(int type)
 	// Set the EEPRom type.
 	memcpy(&eprMapper, &d->rom_db[type].mapper, sizeof(eprMapper));
 	memcpy(&d->eprChip, &d->rom_db[type].epr_chip, sizeof(d->eprChip));
+
+	// Make sure the chip is valid.
+	assert(d->eprChip.sz_mask > 0 && d->eprChip.sz_mask+1 <= sizeof(d->eeprom));
+	assert(d->eprChip.pg_mask > 0 && d->eprChip.pg_mask+1 <= sizeof(d->page_cache));
 	return 0;
 }
 

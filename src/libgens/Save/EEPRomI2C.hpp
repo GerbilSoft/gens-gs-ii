@@ -167,6 +167,10 @@ class EEPRomI2C
 		int dbg_readEEPRom(uint32_t address, uint8_t *data, int length) const;
 		int dbg_writeEEPRom(uint32_t address, const uint8_t *data, int length);
 
+		// Page cache read. Used for tests.
+		// Write version not provided because it's not useful.
+		int dbg_readPageCache(uint32_t address, uint8_t *data, int length) const;
+
 		int dbg_getSCL(uint8_t *scl) const;
 		int dbg_setSCL(uint8_t scl);
 		int dbg_getSDA(uint8_t *sda) const;
