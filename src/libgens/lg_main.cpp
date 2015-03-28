@@ -139,7 +139,6 @@ int Init(void)
 #endif
 	
 	// Initialize LibGens subsystems.
-	Timing::Init();
 	M68K::Init();
 	M68K_Mem::Init();
 	Z80::Init();
@@ -168,7 +167,6 @@ int End(void)
 	CPU_Flags = 0;
 	
 	// Shut down LibGens subsystems.
-	Timing::End();
 	M68K::End();
 	M68K_Mem::End();
 	Z80::End();

@@ -114,6 +114,7 @@ int main(int argc, char *argv[])
 
 	// TODO: Initialize I/O manager.
 
+	LibGens::Timing timing;
 	bool running = true;
 	while (running) {
 		SDL_Event event;
@@ -129,7 +130,7 @@ int main(int argc, char *argv[])
 		}
 
 		// Get the high-resolution time for synchronization.
-		uint64_t time_start = Timing::GetTime();
+		uint64_t time_start = timing.getTime();
 
 		// Run a frame.
 		context->execFrame();
@@ -139,7 +140,7 @@ int main(int argc, char *argv[])
 		// - NTSC: 15ms
 		// - PAL: 19ms
 		uint64_t time_wait = (isPal ? 19000 : 15000);
-		while (time_start + time_wait > Timing::GetTime()) {
+		while (time_start + time_wait > timing.getTime()) {
 			usleep(0);
 		}
 
