@@ -45,6 +45,12 @@ class MdFb
 		~MdFb();
 		mutable int m_refcnt;	// Allow ref()/unref() even for const MdFb.
 
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		MdFb(const MdFb &);
+		MdFb &operator=(const MdFb &);
+
 	public:
 		// Clear the screen.
 		void clear(void);
