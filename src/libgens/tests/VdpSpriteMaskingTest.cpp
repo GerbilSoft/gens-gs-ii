@@ -51,14 +51,12 @@ using namespace std;
 
 namespace LibGens { namespace Tests {
 
-enum ScreenMode
-{
+enum ScreenMode {
 	SCREEN_MODE_H32 = 0,
 	SCREEN_MODE_H40 = 1,
 };
 
-enum SpriteLimits
-{
+enum SpriteLimits {
 	SPRITE_LIMITS_DISABLED = 0,
 	SPRITE_LIMITS_ENABLED  = 1,
 };
@@ -132,7 +130,6 @@ class VdpSpriteMaskingTest : public ::testing::TestWithParam<VdpSpriteMaskingTes
 		SpriteTestResult checkSpriteTest(int test, TestMinMax testMinMax);
 };
 
-
 const VdpSpriteMaskingTest::TestNames VdpSpriteMaskingTest::SpriteTestNames[9] =
 {
 	{"Max Sprites per Line", true},
@@ -145,7 +142,6 @@ const VdpSpriteMaskingTest::TestNames VdpSpriteMaskingTest::SpriteTestNames[9] =
 	{"Mask S1, X=40; S2, X=0", false},
 	{"Max Sprites per Frame", true},
 };
-
 
 /**
  * Formatting function for VdpSpriteMaskingTest.
@@ -181,7 +177,6 @@ inline ::std::ostream& operator<<(::std::ostream& os, const VdpSpriteMaskingTest
 	// Should not get here...
 	return os << "Unknown";
 }
-
 
 /**
  * Set up the Vdp for testing.
@@ -230,7 +225,6 @@ void VdpSpriteMaskingTest::SetUp(void)
 	m_vdp->dbg_setReg(0x0C, reg0C);
 }
 
-
 /**
  * Tear down the Vdp.
  */
@@ -239,7 +233,6 @@ void VdpSpriteMaskingTest::TearDown(void)
 	delete m_vdp;
 	m_vdp = nullptr;
 }
-
 
 /**
  * Load VRam.
@@ -344,7 +337,6 @@ int VdpSpriteMaskingTest::loadVRam(ScreenMode screenMode)
 	return 0;
 }
 
-
 /**
  * Check a sprite test using screen scraping.
  * @param test Test number. (1-9)
@@ -380,7 +372,6 @@ VdpSpriteMaskingTest::SpriteTestResult VdpSpriteMaskingTest::checkSpriteTest(int
 	// Unknown pixel value.
 	return TEST_UNKNOWN;
 }
-
 
 /**
  * Run a sprite test.
@@ -447,7 +438,6 @@ TEST_P(VdpSpriteMaskingTest, spriteMaskingTest)
 	}
 }
 
-
 // Test cases.
 // NOTE: Test case numbers start with 0 in Google Test.
 // TODO: Add a dummy test 0?
@@ -510,7 +500,6 @@ INSTANTIATE_TEST_CASE_P(ScreenH40SpriteLimit, VdpSpriteMaskingTest,
 
 } }
 
-
 int main(int argc, char *argv[])
 {
 	fprintf(stderr, "LibGens test suite: VDP Sprite Masking & Overflow tests.\n\n");
@@ -520,5 +509,7 @@ int main(int argc, char *argv[])
 	fprintf(stderr, "\n");
 	fprintf(stderr, "LibGens: VDP Sprite Masking & Overflow Test ROM.\n"
 			"Original ROM (c) 2009 by Nemesis.\n\n");
-	return RUN_ALL_TESTS();
+	int ret = RUN_ALL_TESTS();
+	LibGens::End();
+	return ret;
 }
