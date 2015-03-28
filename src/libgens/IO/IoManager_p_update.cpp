@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2013 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -27,8 +27,7 @@
 // C includes. (C++ namespace)
 #include <cassert>
 
-namespace LibGens
-{
+namespace LibGens {
 
 /**
  * Update an I/O device.
@@ -53,19 +52,17 @@ void IoManagerPrivate::update(int virtPort, uint32_t buttons)
 void IoManagerPrivate::updateDevice(int virtPort)
 {
 	IoDevice *const dev = &ioDevices[virtPort];
-	const bool oldSelect = dev->isSelect();
-	dev->updateSelectLine();
+	const uint8_t oldTristateInput = dev->mdData_tris;
+	dev->updateTristateInputCache();
 
 	// Handle devices that require updating when certain lines change.
 	switch (dev->type) {
 		case IoManager::IOT_3BTN: updateDevice_3BTN(virtPort); break;
-		case IoManager::IOT_6BTN: updateDevice_6BTN(virtPort, oldSelect); break;
+		case IoManager::IOT_6BTN: updateDevice_6BTN(virtPort, oldTristateInput); break;
 		case IoManager::IOT_2BTN: updateDevice_2BTN(virtPort); break;
 
 		case IoManager::IOT_MEGA_MOUSE: {
-			const bool oldTr = dev->isTrLine();
-			dev->updateTrLine();
-			updateDevice_Mouse(virtPort, oldSelect, oldTr);
+			updateDevice_Mouse(virtPort, oldTristateInput);
 			break;
 		}
 
@@ -73,9 +70,7 @@ void IoManagerPrivate::updateDevice(int virtPort)
 		case IoManager::IOT_4WP_SLAVE: updateDevice_4WP_Slave(virtPort); break;
 
 		case IoManager::IOT_TEAMPLAYER: {
-			const bool oldTr = dev->isTrLine();
-			dev->updateTrLine();
-			updateDevice_TP(virtPort, oldSelect, oldTr);
+			updateDevice_TP(virtPort, oldTristateInput);
 			break;
 		}
 
@@ -87,7 +82,6 @@ void IoManagerPrivate::updateDevice(int virtPort)
 			break;
 	}
 }
-
 
 /**
  * Update a 3-button controller.
@@ -103,7 +97,7 @@ void IoManagerPrivate::updateDevice_3BTN(int virtPort)
 	
 	IoDevice *const dev = &ioDevices[virtPort];
 	uint8_t data;
-	if (dev->isSelect()) {
+	if (dev->checkInputLine(IOPIN_TH)) {
 		// TH=1.
 		data = (dev->buttons & 0x3F) | 0x40;
 	} else {
@@ -115,18 +109,17 @@ void IoManagerPrivate::updateDevice_3BTN(int virtPort)
 	dev->deviceData = data;
 }
 
-
 /**
  * Update a 6-button controller.
  * @param virtPort Virtual port number.
- * @param oldSelect Previous TH (SELECT) line state.
+ * @param oldTristateInput Previous MD data, adjusted for tristate control.
  */
-void IoManagerPrivate::updateDevice_6BTN(int virtPort, bool oldSelect)
+void IoManagerPrivate::updateDevice_6BTN(int virtPort, uint8_t oldTristateInput)
 {
 	IoDevice *const dev = &ioDevices[virtPort];
 	uint8_t data;
 
-	if (!oldSelect && dev->isSelect()) {
+	if (!(oldTristateInput & IOPIN_TH) && dev->checkInputLine(IOPIN_TH)) {
 		// IOPIN_TH rising edge.
 		// Increment the counter.
 		dev->counter = ((dev->counter + 2) & 0x06);
@@ -137,7 +130,8 @@ void IoManagerPrivate::updateDevice_6BTN(int virtPort, bool oldSelect)
 	
 	// Use the TH counter to determine the controller state.
 	// TODO: There should be a 2-NOP delay between TH change and reaction...
-	switch (dev->counter | !dev->isSelect()) {
+	const int idx = (dev->counter | (dev->checkInputLine(IOPIN_TH) ? 1 : 0));
+	switch (idx) {
 		case 0:
 		case 2:
 		case 4:
@@ -185,7 +179,6 @@ void IoManagerPrivate::updateDevice_6BTN(int virtPort, bool oldSelect)
 	dev->deviceData = data;
 }
 
-
 /**
  * Update a 2-button controller.
  * @param virtPort Virtual port number.
@@ -202,14 +195,12 @@ void IoManagerPrivate::updateDevice_2BTN(int virtPort)
 	dev->deviceData = (0xC0 | (ioDevices[virtPort].buttons & 0x3F));
 }
 
-
 /**
  * Update a Mega Mouse controller.
  * @param virtPort Virtual port number.
- * @param oldSelect Previous TH (SELECT) line state.
- * @param oldTr Previous TR line state.
+ * @param oldTristateInput Previous MD data, adjusted for tristate control.
  */
-void IoManagerPrivate::updateDevice_Mouse(int virtPort, bool oldSelect, bool oldTr)
+void IoManagerPrivate::updateDevice_Mouse(int virtPort, uint8_t oldTristateInput)
 {
 	/**
 	 * Sega Mega Mouse protocol documentation by Charles MacDonald:
@@ -219,21 +210,22 @@ void IoManagerPrivate::updateDevice_Mouse(int virtPort, bool oldSelect, bool old
 	IoDevice *const dev = &ioDevices[virtPort];
 
 	// Check for RESET.
-	if (dev->isSelect()) {
+	if (dev->checkInputLine(IOPIN_TH)) {
 		// TH line is high. Reset the counter.
 		dev->counter = 0;
 	} else {
 		// Check if the device data needs to be updated.
 		if (dev->counter == 0) {
 			// Wait for TH falling edge.
-			if (oldSelect && !dev->isSelect()) {
+			if ((oldTristateInput & IOPIN_TH) && !dev->checkInputLine(IOPIN_TH)) {
 				// TH falling edge.
 				dev->counter++;
 				latchMegaMouse(virtPort);
 			}
 		} else {
 			// Check for TR transition.
-			if (oldTr != dev->isTrLine()) {
+			// NOTE: checkInputLine returns 0 or IOPIN_TR.
+			if ((oldTristateInput & IOPIN_TR) != dev->checkInputLine(IOPIN_TR)) {
 				// IOPIN_TR has changed.
 				dev->counter++;
 			}
@@ -299,7 +291,6 @@ void IoManagerPrivate::updateDevice_Mouse(int virtPort, bool oldSelect, bool old
 	dev->deviceData = ret;
 }
 
-
 /**
  * Latch relX, relY, and signOver for a Sega Mega Mouse.
  * @param virtPort Virtual port number.
@@ -350,24 +341,25 @@ void IoManagerPrivate::latchMegaMouse(int virtPort)
 	dev->data.mouse.relY = 0;
 }
 
-
 /**
  * Update a Team Player device.
  * @param physPort Physical controller port.
- * @param oldSelect Previous TH (SELECT) line state.
- * @param oldTr Previous TR line state.
+ * @param oldTristateInput Previous MD data, adjusted for tristate control.
  */
-void IoManagerPrivate::updateDevice_TP(int physPort, bool oldSelect, bool oldTr)
+void IoManagerPrivate::updateDevice_TP(int physPort, uint8_t oldTristateInput)
 {
 	assert(physPort >= IoManager::PHYSPORT_1 && physPort <= IoManager::PHYSPORT_2);
 
 	IoDevice *const dev = &ioDevices[physPort];
 
 	// Check if either TH or TR has changed.
-	if ((dev->isSelect() != oldSelect) ||
-	    (dev->isTrLine() != oldTr)) {
+	// NOTE: checkInputLine(line) returns either 0 or line.
+	// TODO: Optimize this, maybe?
+	if ((oldTristateInput & IOPIN_TH) != dev->checkInputLine(IOPIN_TH) ||
+	    (oldTristateInput & IOPIN_TR) != dev->checkInputLine(IOPIN_TR))
+	{
 		// Check if TH is high.
-		if (dev->isSelect()) {
+		if (dev->checkInputLine(IOPIN_TH)) {
 			// TH high. Reset the counter.
 			dev->counter = TP_DT_INIT;
 		} else {
@@ -385,8 +377,7 @@ void IoManagerPrivate::updateDevice_TP(int physPort, bool oldSelect, bool oldTr)
 
 	// Check the controller data index table.
 	uint8_t data = 0;
-	switch (dev->counter)
-	{
+	switch (dev->counter) {
 		case TP_DT_INIT:
 			// Initial state.
 			data = 0x73;
@@ -451,14 +442,13 @@ void IoManagerPrivate::updateDevice_TP(int physPort, bool oldSelect, bool oldTr)
 	// TL should match TR.
 	// (from Genesis Plus GX)
 	// NOTE: TR is always an MD output line.
-	if (dev->isTrLine())
+	if (dev->checkInputLine(IOPIN_TR))
 		data |= IOPIN_TL;
 	else
 		data &= ~IOPIN_TL;
 
 	dev->deviceData = data;
 }
-
 
 /**
  * Team Player: Rebuild the controller index table.
@@ -510,7 +500,6 @@ void IoManagerPrivate::rebuildCtrlIndexTable(int physPort)
 		dev->data.tp.ctrlIndexTbl[x] = TP_DT_MAX;
 }
 
-
 /**
  * Update the 4WP Master device.
  * @param physPort Physical controller port. (MUST be PHYSPORT_2!)
@@ -521,7 +510,7 @@ void IoManagerPrivate::updateDevice_4WP_Master(int physPort)
 	IoDevice *const dev = &ioDevices[physPort];
 
 	// Update the slave port number.
-	ea4wp_curPlayer = (dev->applyTristate(0xFF) >> 4) & 0x07;
+	ea4wp_curPlayer = (dev->mdData_tris >> 4) & 0x07;
 
 	// Update the slave device.
 	assert(ioDevices[IoManager::PHYSPORT_1].type == IoManager::IOT_4WP_SLAVE);
@@ -530,7 +519,6 @@ void IoManagerPrivate::updateDevice_4WP_Master(int physPort)
 	// Device data is always 0x7F.
 	dev->deviceData = 0x7F;
 }
-
 
 /**
  * Update the 4WP Slave device.

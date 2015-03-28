@@ -298,27 +298,27 @@ class IoManager
 			BTNI_DOWN	= 1,
 			BTNI_LEFT	= 2,
 			BTNI_RIGHT	= 3,
-			BTNI_C		= 4,
-			BTNI_B		= 5,
-			BTNI_START	= 6,
-			BTNI_A		= 7,
-			BTNI_Z		= 8,
-			BTNI_Y		= 9,
-			BTNI_X		= 10,
-			BTNI_MODE	= 11,
+			BTNI_B		= 4,
+			BTNI_C		= 5,
+			BTNI_A		= 6,
+			BTNI_START	= 7,
+			BTNI_MODE	= 8,
+			BTNI_X		= 9,
+			BTNI_Y		= 10,
+			BTNI_Z		= 11,
 
 			// SMS/GG buttons.
-			BTNI_2		= 4,
-			BTNI_1		= 5,
+			BTNI_1		= 4,
+			BTNI_2		= 5,
 			BTNI_STARTPAUSE	= 6,
 
 			// SMS: Paddle controller.
-			BTNI_PADDLE_2	= 0,
-			BTNI_PADDLE_1	= 1,
+			BTNI_PADDLE_1	= 0,
+			BTNI_PADDLE_2	= 1,
 
 			// SMS: Sports pad.
-			BTNI_SPAD_2	= 0,
-			BTNI_SPAD_1	= 1,
+			BTNI_SPAD_1	= 0,
+			BTNI_SPAD_2	= 1,
 
 			// Sega Mega Mouse buttons.
 			// NOTE: Mega Mouse buttons are active high,

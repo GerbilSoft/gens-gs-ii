@@ -208,7 +208,7 @@ C equivalent for vdp_ctrl.bin:
 
 // 8-bit VDP (Master System)
 typedef struct _ZOMG_VDP_ctrl_8_t {
-	uint32_t header;		// 32BE: Should be "SMS " (0x534D5320)
+	uint32_t header;		// 32BE: Should be 'SMS ' (0x534D5320)
 	uint8_t reserved1[4];		// Reserved.
 
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
@@ -226,7 +226,7 @@ as the low byte of "access" for Sega Mega Drive.
 
 // 16-bit VDP (Mega Drive)
 typedef struct _ZOMG_VDP_ctrl_16_t {
-	uint32_t header;		// 32BE: Should be "MD  " (0x4D442020)
+	uint32_t header;		// 32BE: Should be 'MD  ' (0x4D442020)
 	uint8_t reserved1[4];		// Reserved.
 
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
@@ -435,12 +435,13 @@ components that are specific to the Sega Mega Drive hardware.
 | Filename       |  Size (bytes)  | Endianness |
 +----------------+----------------+------------+
 | VSRam.bin      |             80 |  16-bit BE |
-| YM2612_reg.bin |            512 |    None    |
+| YM2612_reg.bin |            512 |    8-bit   |
 | M68K_mem.bin   |         65,536 |  16-bit BE |
 | M68K_reg.bin   |             80 |     BE     |
 | IO.bin         |             16 |    8-bit   |
 | Z80_ctrl.bin   |              4 |   Varies   |
 | TIME_reg.bin   |            256 |    8-bit   |
+| TMSS_reg.bin   |              9 |   Varies   |
 | vdp_sat.bin    |            640 |  16-bit BE |
 +----------------+----------------+------------+
 
@@ -667,7 +668,69 @@ typedef struct _ZOMG_MD_TIME_reg_t {
 
 ----------------------------------------------------------------
 
-5.8. vdp_sat.bin: VDP Sprite Attribute Table cache.
+5.8. TMSS_reg.bin: TMSS registers.
+
+Introduced on the VA6 revision of the original Mega Drive, TMSS was an
+attempt to restrict unlicensed developers from releasing titles for the
+system. The theory was that since it required the game cartridge to
+contain the word "SEGA", which was trademarked, Sega could use trademark
+law to sue unlicensed developers for trademark infringement. However, in
+the case of Sega Enterprises Ltd. v. Accolade, Inc., the court ruled that
+the use of the SEGA trademark in order to get past TMSS did not count as
+infringement because Sega was attempting to use its trademark as a way to
+limit competition for software on their console.
+
+For more information on the history of TMSS, check out:
+- http://segaretro.org/TradeMark_Security_System
+- http://segaretro.org/Sega_v._Accolade
+- http://en.wikipedia.org/wiki/Sega_Enterprises_Ltd._v._Accolade,_Inc.
+
+Systems with TMSS are easily identified by this message appearing on
+startup if a game cartridge is inserted:
+
+                       PRODUCED BY OR
+                     UNDER LICENSE FROM
+                    SEGA ENTERPRISES LTD.
+
+This is implemented using a tiny boot ROM (2 KB, though 4 KB is reserved
+on the bus) and a couple of registers:
+
+- $A14000: "SEGA" - 32BE value needed to initialize TMSS.
+- $A14101: ROM mapping register; 0=TMSS, 1=cartridge
+- $A10001: Version register - low 4 bits are 0001.
+
+On systems without TMSS, the low 4 bits of the version register are
+always 0000; with TMSS, the low 4 bits are always 0001.
+
+On startup, the $A14101 register is set to 0, which enables the internal
+TMSS ROM. This ROM checks for the presence of the strings "SEGA" or " SEGA"
+at cartridge ROM address $100. If the string is not found, it halts all
+activity immediately; otherwise, it shows the above startup message, waits
+a few seconds, then enables the cartridge and resets the CPU.
+
+--------
+
+If the emulator does not support TMSS, or if the user has disabled TMSS,
+this file should *not* be saved to the savestate at all. It also should
+not load the TMSS registers on load.
+
+If the emulator does support TMSS and the user has enabled it:
+- The TMSS registers should be saved.
+- If the TMSS registers are present in the savestate, they should be loaded.
+- If the TMSS registers are not present in the savestate, they should be
+  set to $A14000='SEGA' and $A14101=1.
+
+C equivalent for TMSS_reg.bin:
+
+typedef struct _Zomg_MD_TMSS_reg_t {
+	uint32_t header;	// 32BE:  Should be 'TMSS' (0x544D5353)
+	uint32_t a14000;	// 32BE:  $A14000 - 'SEGA' register
+	uint8_t n_cart_ce;	// 8-bit: $A14101 - ROM mapping
+} Zomg_MD_TMSS_reg_t;
+
+----------------------------------------------------------------
+
+5.9. vdp_sat.bin: VDP Sprite Attribute Table cache.
 
 The Mega Drive VDP has an internal cache for the Spirte Attribute Table.
 This cache can hold up to 80 sprite entries (640 bytes), and is updated

@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -31,8 +31,7 @@ extern "C" {
 #endif
 // TODO: Starscream accesses Ram_68k directly.
 // Move Ram_68k back to M68K once Starscream is updated.
-typedef union
-{
+typedef union {
 	uint8_t  u8[64*1024];
 	uint16_t u16[(64*1024)>>1];
 	uint32_t u32[(64*1024)>>2];
@@ -50,8 +49,7 @@ extern Ram_68k_t Ram_68k;
 // TMSS register.
 #include "libgens/MD/TmssReg.hpp"
 
-namespace LibGens
-{
+namespace LibGens {
 
 class RomCartridgeMD;
 
@@ -60,12 +58,11 @@ class M68K_Mem
 	public:
 		static void Init(void);
 		static void End(void);
-		
+
 #if 0
 		// TODO: Starscream accesses Ram_68k directly.
 		// Move Ram_68k back here once Starscream is updated.
-		union Ram_68k_t
-		{
+		union Ram_68k_t {
 			uint8_t  u8[64*1024];
 			uint16_t u16[(64*1024)>>1];
 			uint32_t u32[(64*1024)>>2];
@@ -74,13 +71,6 @@ class M68K_Mem
 #endif
 		// ROM cartridge.
 		static RomCartridgeMD *ms_RomCartridge;
-
-		// Genesis TMSS ROM.
-		union MD_TMSS_Rom_t {
-			uint8_t  u8[2*1024];
-			uint16_t u16[(2*1024)>>1];
-		};
-		static MD_TMSS_Rom_t MD_TMSS_Rom;
 
 		/**
 		 * TMSS registers.
@@ -105,9 +95,8 @@ class M68K_Mem
 		static int Cycles_Z80;
 		
 		/** System initialization functions. **/
-	private:
-		static void UpdateTmssMapping(void);
 	public:
+		static void UpdateTmssMapping(void);	// FIXME: Needs to be private?
 		static void InitSys(M68K::SysID system);
 
 		/**

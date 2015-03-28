@@ -1,8 +1,9 @@
 /***************************************************************************
- * gens-qt4: Gens Qt4 UI.                                                  *
- * ConfigHandler.hpp: General configuration signal handler.                *
+ * libzomg: Zipped Original Memory from Genesis.                           *
+ * zomg_md_tmss_reg.h: ZOMG save definitions for the MD TMSS registers.    *
+ * MD TMSS registers: $A14000, $A14101                                     *
  *                                                                         *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2015 by David Korth                                       *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -19,40 +20,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_CONFIGHANDLER_HPP__
-#define __GENS_QT4_CONFIGHANDLER_HPP__
+#ifndef __LIBGENS_SAVE_ZOMG_ZOMG_MD_TMSS_REG_H__
+#define __LIBGENS_SAVE_ZOMG_ZOMG_MD_TMSS_REG_H__
 
-// Qt includes.
-#include <QtCore/QObject>
+#include "zomg_common.h"
 
-// PathConfig.
-#include "Config/PathConfig.hpp"
+#include <stdint.h>
 
-namespace GensQt4
-{
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-// General configuration signal handler.
-class ConfigHandler : public QObject
-{
-	Q_OBJECT
-	
-	public:
-		ConfigHandler(QObject *parent = 0);
-	
-	public slots:
-		void extprgUnRAR_changed_slot(const QVariant &extprgUnRAR);
+/**
+ * MD TMSS register save struct.
+ * ZOMG file: MD/TMSS_reg.bin
+ */
+#define ZOMG_MD_TMSS_REG_HEADER	0x544D5353
+#pragma pack(1)
+typedef struct PACKED _Zomg_MD_TMSS_reg_t {
+	uint32_t header;	// 32BE:  Should be "TMSS" (0x544D5353)
+	uint32_t a14000;	// 32BE:  $A14000 - "SEGA" register
+	uint8_t n_cart_ce;	// 8-bit: $A14101 - ROM mapping
+} Zomg_MD_TMSS_reg_t;
+#pragma pack()
 
-		void tmssRomFilename_changed_slot(const QVariant &tmssRomFilename);
-		void tmssEnabled_changed_slot(const QVariant &tmssEnabled);
-		
-		/**
-		 * A configuration path has been changed.
-		 * @param path Configuration path.
-		 * @param dir New directory.
-		 */
-		void pathChanged(GensQt4::PathConfig::ConfigPath path, const QString &dir);
-};
-
+#ifdef __cplusplus
 }
+#endif
 
-#endif /* __GENS_QT4_CONFIGHANDLER_HPP__ */
+#endif /* __LIBGENS_SAVE_ZOMG_ZOMG_MD_TMSS_REG_H__ */

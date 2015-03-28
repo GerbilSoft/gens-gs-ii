@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2013 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -24,8 +24,7 @@
 #define __LIBGENS_IN_IOMANAGER_CLASS__
 #include "IoManager_p.hpp"
 
-namespace LibGens
-{
+namespace LibGens {
 
 /**
  * Device information.

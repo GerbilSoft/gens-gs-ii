@@ -537,6 +537,24 @@ int Zomg::loadMD_TimeReg(Zomg_MD_TimeReg_t *state)
 	return ret;
 }
 
+/**
+ * Load MD TMSS registers. (MD-specific)
+ * @param state MD TMSS register buffer.
+ * @return Number of bytes read on success; negative on error.
+ * TODO: Return an error if the system isn't MD.
+ */
+int Zomg::loadMD_TMSS_reg(Zomg_MD_TMSS_reg_t *tmss)
+{
+	int ret = loadFromZomg("MD/TMSS_reg.bin", tmss, sizeof(*tmss));
+
+	// Byteswap the 32-bit fields.
+	// TODO: Verify tmss->header?
+	tmss->header = be32_to_cpu(tmss->header);
+	tmss->a14000 = be32_to_cpu(tmss->header);
+
+	return ret;
+}
+
 /** Miscellaneous **/
 
 /**

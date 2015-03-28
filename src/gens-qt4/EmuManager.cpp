@@ -281,13 +281,12 @@ int EmuManager::openRom(const QString &filename, const QString &z_filename)
  */
 int EmuManager::loadRom(LibGens::Rom *rom)
 {
-	if (gqt4_emuThread || m_rom)
-	{
+	if (gqt4_emuThread || m_rom) {
 		// Close the ROM first.
 		// Don't emit a stateChanged() signal, since
 		// we're opening a ROM immediately afterwards.
 		closeRom(false);
-		
+
 		// HACK: Set a QTimer for 100 ms to actually load the ROM to make sure
 		// the emulation thread is shut down properly.
 		// If we don't do that, then loading savestates causes
@@ -298,7 +297,7 @@ int EmuManager::loadRom(LibGens::Rom *rom)
 		QTimer::singleShot(100, this, SLOT(sl_loadRom_int()));
 		return 0;
 	}
-	
+
 	// ROM isn't running. Open the ROM directly.
 	return loadRom_int(rom);
 }

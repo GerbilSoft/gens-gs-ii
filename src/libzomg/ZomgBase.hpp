@@ -44,6 +44,7 @@
 #include "zomg_md_io.h"
 #include "zomg_md_z80_ctrl.h"
 #include "zomg_md_time_reg.h"
+#include "zomg_md_tmss_reg.h"
 
 namespace LibZomg {
 
@@ -138,6 +139,8 @@ class ZomgBase
 			{ (void)state; return 0; }
 		virtual int loadMD_TimeReg(Zomg_MD_TimeReg_t *state)
 			{ (void)state; return 0; }
+		virtual int loadMD_TMSS_reg(Zomg_MD_TMSS_reg_t *tmss)
+			{ (void)tmss; return 0; }
 
 		// Miscellaneous
 		virtual int loadSRam(uint8_t *sram, size_t siz)
@@ -205,6 +208,8 @@ class ZomgBase
 			{ (void)state; return 0; }
 		virtual int saveMD_TimeReg(const Zomg_MD_TimeReg_t *state)
 			{ (void)state; return 0; }
+		virtual int saveMD_TMSS_reg(const Zomg_MD_TMSS_reg_t *tmss)
+			{ (void)tmss; return 0; }
 
 		// Miscellaneous
 		virtual int saveSRam(const uint8_t *sram, size_t siz)

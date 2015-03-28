@@ -564,6 +564,25 @@ int Zomg::saveMD_TimeReg(const Zomg_MD_TimeReg_t *state)
 	return saveToZomg("MD/TIME_reg.bin", state, sizeof(*state));
 }
 
+/**
+ * Save MD TMSS registers. (MD-specific)
+ * @param state MD TMSS register buffer.
+ * @return 0 on success; non-zero on error.
+ * TODO: Return an error if the system isn't MD.
+ */
+int Zomg::saveMD_TMSS_reg(const Zomg_MD_TMSS_reg_t *tmss)
+{
+#if ZOMG_BYTEORDER == ZOMG_LIL_ENDIAN
+	Zomg_MD_TMSS_reg_t bswap_tmss;
+	bswap_tmss.header = cpu_to_be32(tmss->header);
+	bswap_tmss.a14000 = cpu_to_be32(tmss->a14000);
+	bswap_tmss.n_cart_ce = tmss->n_cart_ce;
+	return saveToZomg("MD/TMSS_reg.bin", &bswap_tmss, sizeof(bswap_tmss));
+#else
+	return saveToZomg("MD/TMSS_reg.bin", tmss, sizeof(*tmss));
+#endif
+}
+
 /** Miscellaneous **/
 
 /**

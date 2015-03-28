@@ -42,12 +42,15 @@
 // ROM cartridge.
 #include "Cartridge/RomCartridgeMD.hpp"
 
-// C includes.
-#include <stdio.h>
-#include <math.h>
+// C includes. (C++ namespace)
+#include <cstdio>
+#include <cmath>
 
-namespace LibGens
-{
+// C++ namespace.
+#include <memory>
+using std::auto_ptr;
+
+namespace LibGens {
 
 /**
  * Initialize a Mega Drive context.
@@ -89,10 +92,10 @@ EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
 	if (AutoFixChecksum())
 		M68K_Mem::ms_RomCartridge->fixChecksum();
 
-	// Disable TMSS for now.
-	// TODO: Implement proper TMSS loading.
-	M68K_Mem::tmss_reg.tmss_en = false;
-	M68K_Mem::tmss_reg.tmss_rom_valid = false;
+	// Initialize TMSS.
+	// NOTE: This must be done *before* calling InitSys(), since
+	// Starscream initializes the internal program counter on reset.
+	initTmss();
 
 	// Initialize the M68K.
 	M68K::InitSys(M68K::SYSID_MD);
@@ -118,7 +121,6 @@ EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
 	return;
 }
 
-
 EmuMD::~EmuMD()
 {
 	// TODO: Other stuff?
@@ -128,7 +130,6 @@ EmuMD::~EmuMD()
 	delete M68K_Mem::ms_RomCartridge;
 	M68K_Mem::ms_RomCartridge = nullptr;
 }
-
 
 /**
  * Perform a soft reset.
@@ -158,13 +159,17 @@ int EmuMD::softReset(void)
 	return 0;
 }
 
-
 /**
  * Perform a hard reset.
  * @return 0 on success; non-zero on error.
  */
 int EmuMD::hardReset(void)
 {
+	// Re-initialize TMSS.
+	// NOTE: This must be done *before* calling InitSys(), since
+	// Starscream initializes the internal program counter on reset.
+	initTmss();
+
 	// Reset the controllers.
 	m_ioManager->reset();
 
@@ -190,7 +195,6 @@ int EmuMD::hardReset(void)
 	// Reset successful.
 	return 0;
 }
-
 
 /**
  * Set the region code.
@@ -262,7 +266,6 @@ int EmuMD::setRegion_int(SysVersion::RegionCode_t region, bool preserveState)
 	return 0;
 }
 
-
 /**
  * Save SRam/EEPRom.
  * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
@@ -290,6 +293,25 @@ int EmuMD::autoSaveData(int framesElapsed)
 
 	// Nothing was saved.
 	return 0;
+}
+
+/**
+ * Initialize TMSS.
+ * If TMSS is enabled by the user, this
+ * causes the TMSS ROM to be activated.
+ */
+void EmuMD::initTmss(void)
+{
+	// TODO: Update TMSS settings when loading a savestate?
+	// TODO: Save TMSS settings to the savestate.
+	m_sysVersion.setVersion(0);
+	if (!M68K_Mem::tmss_reg.loadTmssRom()) {
+		// TMSS ROM initialized.
+		m_sysVersion.setVersion(1);
+	}
+
+	// Update the TMSS mapping.
+	M68K_Mem::UpdateTmssMapping();
 }
 
 /**

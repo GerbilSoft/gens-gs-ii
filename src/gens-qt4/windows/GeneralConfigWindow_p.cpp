@@ -187,10 +187,11 @@ void GeneralConfigWindowPrivate::updateRomFileStatus(void)
  */
 QString GeneralConfigWindowPrivate::mdUpdateTmssRomFileStatus(GensLineEdit *txtRomFile)
 {
-	// ROM data buffer.
+	// ROM data.
 	uint8_t *rom_data = nullptr;
+	z_crc_t rom_crc32;
 	int data_len;
-	uint32_t rom_crc32;
+	bool is_overdump = false;
 
 	// Line break string.
 	static const QString sLineBreak = QLatin1String("<br/>\n");
@@ -204,10 +205,11 @@ QString GeneralConfigWindowPrivate::mdUpdateTmssRomFileStatus(GensLineEdit *txtR
 		// SP_MessageBoxQuestion is redirected to SP_MessageBoxInformation on KDE 4.
 		// TODO: Set ROM file notes.
 		txtRomFile->setIcon(q->style()->standardIcon(QStyle::SP_MessageBoxQuestion));
-		if (filename.isEmpty())
+		if (filename.isEmpty()) {
 			return GeneralConfigWindow::tr("No ROM filename specified.");
-		else
+		} else {
 			return GeneralConfigWindow::tr("The specified ROM file was not found.");
+		}
 	}
 
 	// Check the ROM file.
@@ -215,7 +217,6 @@ QString GeneralConfigWindowPrivate::mdUpdateTmssRomFileStatus(GensLineEdit *txtR
 	QStyle::StandardPixmap filename_icon = QStyle::SP_DialogYesButton;
 	QString rom_id = GeneralConfigWindow::tr("Unknown");
 	QString rom_notes;
-	QString rom_size_warning;
 
 	// Open the ROM file using LibGens::Rom.
 	QScopedPointer<LibGens::Rom> rom(new LibGens::Rom(filename.toUtf8().constData()));
@@ -238,18 +239,12 @@ QString GeneralConfigWindowPrivate::mdUpdateTmssRomFileStatus(GensLineEdit *txtR
 	static const int TMSS_ROM_FILESIZE = 2048;
 	if (rom->romSize() != TMSS_ROM_FILESIZE) {
 		// Wrong ROM size.
-		filename_icon = QStyle::SP_MessageBoxWarning;
-
-		rom_size_warning = sWarning +
-				GeneralConfigWindow::tr("ROM size is incorrect.") + sLineBreak +
-				GeneralConfigWindow::tr("(expected %L1 bytes; found %L2 bytes)")
-				.arg(TMSS_ROM_FILESIZE).arg(rom->romSize());
-
 		// Identify the ROM even if it's too big.
 		// (Some copies of the TMSS ROM are overdumped.)
 		// Also, don't check ridiculously large TMSS ROMs.
-		if (rom->romSize() < TMSS_ROM_FILESIZE || rom->romSize() > 1048576) {
+		if (rom->romSize() < TMSS_ROM_FILESIZE || rom->romSize() > 524288) {
 			// ROM is too small, so it's guaranteed to not match anything in the database.
+			// Also, our TMSS implementation has a maximum size of 512 KB.
 			goto rom_identified;
 		}
 	}
@@ -266,13 +261,66 @@ QString GeneralConfigWindowPrivate::mdUpdateTmssRomFileStatus(GensLineEdit *txtR
 		goto rom_identified;
 	}
 
-	// Calculate the CRC32 using zlib.
-	// NOTE: rom->rom_crc32() will be incorrect if the ROM is too bi.
+	// Calculate the CRC32 of the first 2 KB using zlib.
+	static const z_crc_t TMSS_ROM_CRC32 = 0x3F888CF4;
 	rom_crc32 = crc32(0, rom_data, TMSS_ROM_FILESIZE);
+
+	// Check if this is an overdump.
+	// TMSS ROM is 2 KB, but may be overdumped to 4 KB with the
+	// second half as open-bus. (usually 0x00 or 0xFF)
+	// NOTE: If the TMSS ROM filesize isn't divisible by 2 KB,
+	// don't bother checking for overdumps.
+	if (data_len > TMSS_ROM_FILESIZE &&
+	    (data_len % TMSS_ROM_FILESIZE == 0))
+	{
+		// TMSS ROM is larger than 2KB, and is a multiple of 2 KB.
+		// - Check all 2 KB blocks for 0x00 or 0xFF.
+		// - Also check even 2 KB blocks for the TMSS CRC32. [This overrides the 0x00/0xFF check.]
+		// TODO: Optimize this.
+		is_overdump = true;
+		for (int i = TMSS_ROM_FILESIZE; i < data_len; i += TMSS_ROM_FILESIZE) {
+			const uint8_t *ptr = &rom_data[i];
+
+			// Check for all 0x00 or all 0xFF.
+			const uint8_t first_byte = *ptr++;
+			if (first_byte != 0x00 && first_byte != 0xFF) {
+				// Not an overdump.
+				is_overdump = false;
+			} else {
+				for (int j = TMSS_ROM_FILESIZE-1; j > 0; j--, ptr++) {
+					if (*ptr != first_byte) {
+						// Not an overdump.
+						is_overdump = false;
+						break;
+					}
+				}
+			}
+
+			if (!is_overdump) {
+				// Block is not all 0x00 or 0xFF.
+				if ((i % (TMSS_ROM_FILESIZE*2)) == 0) {
+					// Even block. Check for TMSS CRC32.
+					is_overdump = true;
+					const z_crc_t overdump_crc32 = crc32(0, &rom_data[i], TMSS_ROM_FILESIZE);
+					if (overdump_crc32 != TMSS_ROM_CRC32) {
+						// Wrong CRC32.
+						is_overdump = false;
+						break;
+					}
+				} else {
+					// Odd block. Not an overdump.
+					break;
+				}
+			}
+		}
+	} else {
+		// TMSS ROM is too small, or is not a multiple of 2 KB.
+		is_overdump = false;
+	}
 
 	// Check what ROM this is.
 	switch (rom_crc32) {
-		case 0x3F888CF4:
+		case TMSS_ROM_CRC32:
 			// Standard TMSS ROM.
 			rom_id = GeneralConfigWindow::tr("Genesis TMSS ROM");
 			rom_notes = GeneralConfigWindow::tr("This is a known good dump of the Genesis TMSS ROM.");
@@ -282,25 +330,50 @@ QString GeneralConfigWindowPrivate::mdUpdateTmssRomFileStatus(GensLineEdit *txtR
 			// Unknown TMSS ROM.
 			// TODO: Add more variants.
 			filename_icon = QStyle::SP_MessageBoxQuestion;
-			rom_notes = GeneralConfigWindow::tr("Unknown ROM image.");
+			rom_notes = GeneralConfigWindow::tr("Unknown ROM image. May not work properly for TMSS.");
 			break;
 	}
 
 rom_identified:
-	// Free the ROM data buffer if it was allocated.
+	// Free the ROM data if it was allocated.
 	free(rom_data);
+
+	// Set the Boot ROM description.
+	QString s_ret = GeneralConfigWindow::tr("ROM identified as: %1").arg(rom_id);
+	if (!rom_notes.isEmpty()) {
+		s_ret += sLineBreak + sLineBreak + rom_notes;
+	}
+
+	// Check if the ROM is the right size.
+	if (rom->romSize() != TMSS_ROM_FILESIZE) {
+		// Wrong ROM size.
+		QString rom_size_warning;
+		if (is_overdump) {
+			// Overdump. This ROM is okay.
+			// TODO: Convert bytes to KB, MB, etc.
+			rom_size_warning = 
+				GeneralConfigWindow::tr("This ROM is larger than the expected size of the TMSS ROM.") + sLineBreak +
+				GeneralConfigWindow::tr("(expected %L1 bytes; found %L2 bytes)")
+				.arg(TMSS_ROM_FILESIZE).arg(rom->romSize()) + sLineBreak + sLineBreak +
+				GeneralConfigWindow::tr("The extra data is either empty space or extra copies of the "
+							"TMSS ROM, so it will work correctly.");
+		} else {
+			// Not an overdump.
+			filename_icon = QStyle::SP_MessageBoxWarning;
+
+			rom_size_warning = sWarning +
+					GeneralConfigWindow::tr("ROM size is incorrect.") + sLineBreak +
+					GeneralConfigWindow::tr("(expected %L1 bytes; found %L2 bytes)")
+					.arg(TMSS_ROM_FILESIZE).arg(rom->romSize());
+		}
+
+		s_ret += sLineBreak + sLineBreak + rom_size_warning;
+	}
 
 	// Set the Boot ROM filename textbox icon.
 	txtRomFile->setIcon(q->style()->standardIcon(filename_icon));
 
-	// Set the Boot ROM description.
-	QString s_ret;
-	s_ret = GeneralConfigWindow::tr("ROM identified as: %1").arg(rom_id);
-	if (!rom_notes.isEmpty())
-		s_ret += sLineBreak + sLineBreak + rom_notes;
-	if (!rom_size_warning.isEmpty())
-		s_ret += sLineBreak + sLineBreak + rom_size_warning;
-	return QString(s_ret);
+	return s_ret;
 }
 
 /**
