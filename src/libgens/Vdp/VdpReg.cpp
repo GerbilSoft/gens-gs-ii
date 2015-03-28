@@ -386,4 +386,73 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 	}
 }
 
+/**
+ * Reset the VDP registers.
+ * @param bootRomFix If true, set the registers as the boot ROM would.
+ */
+void VdpPrivate::resetRegisters(bool bootRomFix)
+{
+	// Always clear the actual register data before
+	// updating the cache.
+	memset(VDP_Reg.reg, 0, sizeof(VDP_Reg.reg));
+
+	// TODO: Handle systems other than MD here.
+	if (bootRomFix) {
+		/**
+		 * Assuming TMSS is not present.
+		 * Set the VDP registers the same way TMSS does:
+		 * - Reg.00: 0x04	(ModeSet1) Hint OFF, Full Palette, No HV latch, VDP disabled
+		 * - Reg.01: 0x04	(ModeSet2) 64 KB VRAM, Mode 5, Video OFF, Vint OFF, DMA disabled, 224 lines
+		 * - Reg.02: 0x30	PlaneA = 0xC000
+		 * - Reg.03: 0x3C	Window = 0xF000
+		 * - Reg.04: 0x07	PlaneB = 0xE000
+		 * - Reg.05: 0x6C	Sprite = 0xD800
+		 * - Reg.06: 0x00	(128 KB) Sprite Pattern Generator base address (unused)
+		 * - Reg.07: 0x00	Background color
+		 * - Reg.08: 0x00	SMS X scroll, unused in Mode 5
+		 * - Reg.09: 0x00	SMS Y scroll, unused in Mode 5
+		 * - Reg.10: 0xFF	Hint lines (0xFF = disabled)
+		 * - Reg.11: 0x00	(ModeSet3) THint OFF, Full Y Scroll, Full X Scroll
+		 * - Reg.12: 0x81	(ModeSet4) H40, S/H disable, no interlace
+		 * - Reg.13: 0x37	HScroll = 0xDC00
+		 * - Reg.14: 0x00	(128 KB) Nametable Pattern Generator base address (unused)
+		 * - Reg.15: 0x02	VDP address auto-increment value
+		 * - Reg.16: 0x01	Scroll plane size: 64x32
+		 * - Reg.17: 0x00	Window width
+		 * - Reg.18: 0x00	Window height
+		 * - Reg.19: 0x00	DMA Length L
+		 * - Reg.20: 0x00	DMA Length H
+		 * - Reg.21: 0x00	DMA Source L
+		 * - Reg.22: 0x00	DMA Source M
+		 * - Reg.23: 0x80	DMA Source H
+		 *
+		 * NOTE: These are the effective register values *after*
+		 * TMSS is run, not the initial values.
+		 *
+		 * Reference: TmEE's TMSS disassembly.
+		 */
+
+		static const uint8_t vdp_reg_init_m5[24] = {
+			0x04, 0x04, 0x30, 0x3C, 0x07, 0x6C, 0x00, 0x00,
+			0x00, 0x00, 0xFF, 0x00, 0x81, 0x37, 0x00, 0x02,
+			0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80
+		};
+		for (int i = 0; i < ARRAY_SIZE(vdp_reg_init_m5); i++) {
+			setReg(i, vdp_reg_init_m5[i]);
+		}
+	} else {
+		// Registers are cleared.
+		// Update the caches.
+		updateVdpMode();
+		updateVdpAddrCache_m5(3);
+
+		// Scroll size isn't updated by the above functions.
+		setReg(16, 0);
+	}
+
+	// Always set Reg.10 to 0xFF to prevent
+	// spurious horizontal interrupts.
+	setReg(10, 0xFF);
+}
+
 }

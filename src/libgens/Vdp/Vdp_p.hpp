@@ -196,6 +196,12 @@ class VdpPrivate
 		void setReg(int reg_num, uint8_t val);
 
 		/**
+		 * Reset the VDP registers.
+		 * @param bootRomFix If true, set the registers as the boot ROM would.
+		 */
+		void resetRegisters(bool bootRomFix);
+
+		/**
 		 * Internal VDP data write function.
 		 * Used by writeDataMD() and DMA.
 		 * @param data Data word.

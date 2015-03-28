@@ -142,25 +142,6 @@ void Vdp::reset(void)
 	// Reset the palette. (Includes CRam.)
 	d->palette.reset();
 
-	/**
-	 * VDP registers.
-	 * Default register values: (Mode 5)
-	 * - 0x01 (Mode1):   0x04 (H_Int off, Mode 5 [MD])
-	 * - 0x0A (H_Int):   0xFF (disabled).
-	 * - 0x0C (Mode4):   0x81 (H40, S/H off, no interlace)
-	 * - 0x0F (AutoInc): 0x02 (auto-increment by 2 on memory access)
-	 * All other registers are set to 0x00 by default.
-	 */
-	static const uint8_t vdp_reg_init_m5[24] = {
-		0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0xFF, 0x00, 0x81, 0x00, 0x00, 0x02,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-	};
-
-	for (int i = 0; i < ARRAY_SIZE(vdp_reg_init_m5); i++) {
-		d->setReg(i, vdp_reg_init_m5[i]);
-	}
-
 	// Reset the DMA variables.
 	DMAT_Length = 0;
 	d->DMAT_Type = VdpPrivate::DMAT_MEM_TO_VRAM;
@@ -173,6 +154,15 @@ void Vdp::reset(void)
 	// Reset more stuff.
 	d->VDP_Int = 0;		// No pending interrupts.
 	d->VDP_Ctrl.reset();	// VDP control struct.
+
+	// Reset all VDP registers.
+	// NOTE: Parameter indicates if we want to apply the
+	// values that would usually be set by the boot ROM.
+	// False == leave them at 0.
+	// TODO: Use an enum?
+	// TODO: Set to false if TMSS is enabled.
+	// TODO: When that's done, disable the "error" screen?
+	d->resetRegisters(true);
 
 	// Initialize the Horizontal Interrupt counter.
 	d->HInt_Counter = d->VDP_Reg.m5.H_Int;
