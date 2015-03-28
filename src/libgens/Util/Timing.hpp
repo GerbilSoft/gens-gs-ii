@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -49,10 +49,18 @@ namespace LibGens {
 class Timing
 {
 	public:
-		static void Init(void);
-		static void End(void);
+		Timing();
+		~Timing();
 
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		Timing(const Timing &);
+		Timing &operator=(const Timing &);
+
+	public:
 		enum TimingMethod {
+			TM_UNKNOWN,
 			TM_GETTIMEOFDAY,
 #ifdef HAVE_LIBRT
 			TM_CLOCK_GETTIME,
@@ -69,7 +77,8 @@ class Timing
 			TM_MAX
 		};
 
-		static TimingMethod GetTimingMethod(void) { return ms_TMethod; }
+		inline TimingMethod getTimingMethod(void)
+			{ return m_tMethod; }
 
 		/**
 		 * Get the name of a timing method.
@@ -82,36 +91,31 @@ class Timing
 		 * Get the elapsed time in seconds.
 		 * @return Elapsed time, in seconds.
 		 */
-		static double GetTimeD(void);
+		double getTimeD(void);
 
 		/**
 		 * Get the elapsed time in microseconds.
 		 * @return Elapsed time, in microseconds.
 		 */
-		static uint64_t GetTime(void);
+		uint64_t getTime(void);
 
 	protected:
-		static TimingMethod ms_TMethod;
-
-#if defined(_WIN32)
-		// GetTickCount64() function pointer.
-		static HMODULE ms_hKernel32;
-		static GETTICKCOUNT64PROC ms_pGetTickCount64;
-
-		// Performance Frequency.
-		static LARGE_INTEGER ms_PerfFreq;
-#elif defined(__APPLE__)
-		// Mach timebase information.
-		static mach_timebase_info_data_t ms_timebase_info;
-#endif
+		TimingMethod m_tMethod;
 
 		// Base value for seconds.
 		// Needed to prevent overflow.
-		static time_t ms_tv_sec_base;
+		time_t m_tv_sec_base;
 
-	private:
-		Timing() { }
-		~Timing() { }
+#if defined(_WIN32)
+		// GetTickCount64() function pointer.
+		HMODULE m_hKernel32;
+		GETTICKCOUNT64PROC m_pGetTickCount64;
+		// Performance Frequency.
+		LARGE_INTEGER m_perfFreq;
+#elif defined(__APPLE__)
+		// Mach timebase information.
+		mach_timebase_info_data_t m_timebase_info;
+#endif
 };
 
 }
