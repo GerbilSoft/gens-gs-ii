@@ -27,7 +27,9 @@
 
 
 #if defined(WINAPI_FAMILY_PARTITION) && (!(defined(IOWIN32_USING_WINRT_API)))
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
+// Windows 8.1 SDK assumes all programs are apps.
+// Check for "not desktop" instead.
+#if !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 #define IOWIN32_USING_WINRT_API 1
 #endif
 #endif
