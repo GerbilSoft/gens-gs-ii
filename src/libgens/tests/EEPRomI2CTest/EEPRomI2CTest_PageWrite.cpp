@@ -130,19 +130,25 @@ void EEPRomI2CTest_PageWrite::eprMode1_pageWrite(unsigned int addr_start, unsign
 		src_addr = ((src_addr & ~pgMask) | ((src_addr + 1) & pgMask));
 	}
 
+	// Data should be in the page cache,
+	// but should *not* be written at this point.
+	// Verify the page cache.
+	unsigned int pgStart = (addr_start & eepromMask & ~pgMask);
+	const uint8_t *pgExpected = &test_EEPRomI2C_data[pgStart];
+	VerifyPageCacheData_dbg(pgExpected, pgSize);
+
+	// Verify that the EEPROM is still empty at this point.
+	vector<uint8_t> eeprom_expected(eepromSize, 0xFF);
+	VerifyEEPRomData_dbg(eeprom_expected.data(), eepromSize, "No STOP condition; page should NOT be written to EEPROM.");
+
 	// STOP the transfer.
+	// TODO: If a START is done, is the page cache discarded?
 	doStop();
 
-	// Determine the expected EEPROM data.
+	// Verify that the EEPROM has the new data.
 	// Should be all empty except for the page being written.
-	vector<uint8_t> eeprom_expected;
-	eeprom_expected.reserve(eepromSize);
-	unsigned int pgStart = (addr_start & eepromMask & ~pgMask);
-	memset(eeprom_expected.data(), 0xFF, eepromSize);
 	memcpy(&eeprom_expected[pgStart], &test_EEPRomI2C_data[pgStart], pgSize);
-
-	// Verify the EEPROM data.
-	VerifyEEPRomData_dbg(eeprom_expected.data(), eepromSize);
+	VerifyEEPRomData_dbg(eeprom_expected.data(), eepromSize, "STOP condition received, page should be written to EEPROM.");
 }
 
 /**
@@ -222,19 +228,25 @@ void EEPRomI2CTest_PageWrite::eprMode2_pageWrite(unsigned int addr_start, unsign
 		src_addr = ((src_addr & ~pgMask) | ((src_addr + 1) & pgMask));
 	}
 
+	// Data should be in the page cache,
+	// but should *not* be written at this point.
+	// Verify the page cache.
+	unsigned int pgStart = (addr_start & eepromMask & ~pgMask);
+	const uint8_t *pgExpected = &test_EEPRomI2C_data[pgStart];
+	VerifyPageCacheData_dbg(pgExpected, pgSize);
+
+	// Verify that the EEPROM is still empty at this point.
+	vector<uint8_t> eeprom_expected(eepromSize, 0xFF);
+	VerifyEEPRomData_dbg(eeprom_expected.data(), eepromSize, "No STOP condition; page should NOT be written to EEPROM.");
+
 	// STOP the transfer.
+	// TODO: If a START is done, is the page cache discarded?
 	doStop();
 
-	// Determine the expected EEPROM data.
+	// Verify that the EEPROM has the new data.
 	// Should be all empty except for the page being written.
-	vector<uint8_t> eeprom_expected;
-	eeprom_expected.reserve(eepromSize);
-	unsigned int pgStart = (addr_start & eepromMask & ~pgMask);
-	memset(eeprom_expected.data(), 0xFF, eepromSize);
 	memcpy(&eeprom_expected[pgStart], &test_EEPRomI2C_data[pgStart], pgSize);
-
-	// Verify the EEPROM data.
-	VerifyEEPRomData_dbg(eeprom_expected.data(), eepromSize);
+	VerifyEEPRomData_dbg(eeprom_expected.data(), eepromSize, "STOP condition received, page should be written to EEPROM.");
 }
 
 /**
@@ -412,19 +424,25 @@ void EEPRomI2CTest_PageWrite::eprMode3_pageWrite(unsigned int addr_start, unsign
 		src_addr = ((src_addr & ~pgMask) | ((src_addr + 1) & pgMask));
 	}
 
+	// Data should be in the page cache,
+	// but should *not* be written at this point.
+	// Verify the page cache.
+	unsigned int pgStart = (addr_start & eepromMask & ~pgMask);
+	const uint8_t *pgExpected = &test_EEPRomI2C_data[pgStart];
+	VerifyPageCacheData_dbg(pgExpected, pgSize);
+
+	// Verify that the EEPROM is still empty at this point.
+	vector<uint8_t> eeprom_expected(eepromSize, 0xFF);
+	VerifyEEPRomData_dbg(eeprom_expected.data(), eepromSize, "No STOP condition; page should NOT be written to EEPROM.");
+
 	// STOP the transfer.
+	// TODO: If a START is done, is the page cache discarded?
 	doStop();
 
-	// Determine the expected EEPROM data.
+	// Verify that the EEPROM has the new data.
 	// Should be all empty except for the page being written.
-	vector<uint8_t> eeprom_expected;
-	eeprom_expected.reserve(eepromSize);
-	unsigned int pgStart = (addr_start & eepromMask & ~pgMask);
-	memset(eeprom_expected.data(), 0xFF, eepromSize);
 	memcpy(&eeprom_expected[pgStart], &test_EEPRomI2C_data[pgStart], pgSize);
-
-	// Verify the EEPROM data.
-	VerifyEEPRomData_dbg(eeprom_expected.data(), eepromSize);
+	VerifyEEPRomData_dbg(eeprom_expected.data(), eepromSize, "STOP condition received, page should be written to EEPROM.");
 }
 
 /**

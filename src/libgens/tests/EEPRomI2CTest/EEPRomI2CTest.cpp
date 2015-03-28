@@ -153,7 +153,33 @@ void EEPRomI2CTest::VerifyEEPRomData_dbg(const uint8_t *eeprom_expected, unsigne
 	ASSERT_EQ(0, m_eeprom->dbg_readEEPRom(0, eeprom_actual.data(), eepromSize));
 
 	// Verify the EEPROM data.
-	CompareByteArrays(eeprom_expected, eeprom_actual.data(), eepromSize, message);
+	CompareByteArrays(eeprom_expected, eeprom_actual.data(), eepromSize, "EEPROM", message);
+}
+
+/**
+ * Verify page cache data.
+ * This function reads the EEPROM using dbg functions,
+ * since there's no way to read the contents of the cache
+ * using the I2C interface.
+ * The expected page cache data is compared to the
+ * actual page cache data and then compared using
+ * CompareByteArrays().
+ * @param page_cache_expected Expected data.
+ * @param size Size of expected data.
+ * @param message Optional message for this verification.
+ */
+void EEPRomI2CTest::VerifyPageCacheData_dbg(const uint8_t *page_cache_expected, unsigned int size, const string &message)
+{
+	unsigned int pgSize;
+	ASSERT_EQ(0, m_eeprom->dbg_getPageSize(&pgSize));
+	ASSERT_EQ(pgSize, size);
+
+	// Get the data from the page cache.
+	vector<uint8_t> page_cache_actual(pgSize, 0xFF);
+	ASSERT_EQ(0, m_eeprom->dbg_readPageCache(0, page_cache_actual.data(), pgSize));
+
+	// Verify the page cache data.
+	CompareByteArrays(page_cache_expected, page_cache_actual.data(), pgSize, "page cache", message);
 }
 
 /**
@@ -163,10 +189,11 @@ void EEPRomI2CTest::VerifyEEPRomData_dbg(const uint8_t *eeprom_expected, unsigne
  * @param expected Expected data.
  * @param actual Actual data.
  * @param size Size of both arrays.
+ * @param data_type Data type.
  * @param message Optional message for this verification.
  */
 void EEPRomI2CTest::CompareByteArrays(const uint8_t *expected, const uint8_t *actual, unsigned int size,
-				      const string &message)
+				      const string &data_type, const string &message)
 {
 	// Output format: (assume ~64 bytes per line)
 	// 0000: 01 23 45 67 89 AB CD EF  01 23 45 67 89 AB CD EF
@@ -211,8 +238,8 @@ void EEPRomI2CTest::CompareByteArrays(const uint8_t *expected, const uint8_t *ac
 	// print the strings on failure.
 	EXPECT_EQ(0, memcmp(expected, actual, size)) <<
 		message << (!message.empty() ? "\n" : "") <<
-		"Expected EEPROM data:" << endl << s_expected << endl <<
-		"Actual EEPROM data:" << endl << s_actual << endl;
+		"Expected " << data_type << " data:" << endl << s_expected << endl <<
+		"Actual " << data_type << " data:" << endl << s_actual << endl;
 }
 
 } }

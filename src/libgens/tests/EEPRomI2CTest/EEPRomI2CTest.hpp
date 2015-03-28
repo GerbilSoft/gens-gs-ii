@@ -85,16 +85,31 @@ class EEPRomI2CTest : public ::testing::TestWithParam<unsigned int>
 		void VerifyEEPRomData_dbg(const uint8_t *eeprom_expected, unsigned int size, const std::string &message = "");
 
 		/**
+		 * Verify page cache data.
+		 * This function reads the EEPROM using dbg functions,
+		 * since there's no way to read the contents of the cache
+		 * using the I2C interface.
+		 * The expected page cache data is compared to the
+		 * actual page cache data and then compared using
+		 * CompareByteArrays().
+		 * @param page_cache_expected Expected data.
+		 * @param size Size of expected data.
+		 * @param message Optional message for this verification.
+		 */
+		void VerifyPageCacheData_dbg(const uint8_t *page_cache_expected, unsigned int size, const std::string &message = "");
+
+		/**
 		 * Compare two byte arrays.
 		 * The byte arrays are converted to hexdumps and then
 		 * compared using EXPECT_EQ().
 		 * @param expected Expected data.
 		 * @param actual Actual data.
 		 * @param size Size of both arrays.
+		 * @param data_type Data type.
 		 * @param message Optional message for this verification.
 		 */
 		void CompareByteArrays(const uint8_t *expected, const uint8_t *actual, unsigned int size,
-				       const std::string &message = "");
+				       const std::string &data_type = "EEPROM", const std::string &message = "");
 };
 
 } }
