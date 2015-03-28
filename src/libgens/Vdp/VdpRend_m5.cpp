@@ -1011,7 +1011,7 @@ FORCE_INLINE unsigned int VdpPrivate::T_Update_Sprite_Line_Cache(int line)
 				}
 
 				// Get the remaining sprite information from VRAM.
-				const VdpStructs::SprEntry_m5 *spr_VRam = Spr_Tbl_Addr_PtrM5(link);
+				const VdpStructs::SprEntry_m5 *spr_VRam = Spr_Tbl_Addr_PtrM5(link*8);
 
 				// Save the sprite information in the line cache.
 				cache->Pos_X = (spr_VRam->x & 0x1FF) - 128;
