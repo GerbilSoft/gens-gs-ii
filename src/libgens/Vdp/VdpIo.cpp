@@ -764,7 +764,10 @@ inline void VdpPrivate::T_DMA_Loop(void)
 	// NOTE: The new DMA_Address is the wrapped version.
 	// The old asm code saved the unwrapped version.
 	// Ergo, it simply added length to DMA_Address.
-	inc_DMA_Src_Adr(q->DMAT_Length);
+	// FIXME: This breaks "NBA Jam" and "NBA Jam: Tournament Edition".
+	// Disabling it breaks a test in VDPFIFOTesting.
+	// Clearly there's an issue with DMA timing somewhere.
+	//inc_DMA_Src_Adr(q->DMAT_Length);
 
 	// Update DMA.
 	q->updateDMA();
@@ -1036,7 +1039,8 @@ void Vdp::writeCtrlMD(uint16_t ctrl)
 	DMAT_Length = length;
 	// FIXME: This is needed in order to fix VDPFIFOTesting
 	// Test #24: "DMA Transfer Length Reg Update", but it
-	// breaks "Frank Thomas Big Hurt Baseball".
+	// breaks "Frank Thomas Big Hurt Baseball",
+	// "NBA Jam", and "NBA Jam: Tournament Edition".
 	//d->set_DMA_Length(0);
 
 	switch (DMA_TYPE(src_component, dest_component)) {
