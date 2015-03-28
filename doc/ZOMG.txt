@@ -165,6 +165,7 @@ components that are common throughout the Sega 8-bit and 16-bit hardware line.
 | Z80_reg.bin    |             28 |     LE     |
 | SRAM.bin       |   up to 65,536 |    8-bit   |
 | EPR_ctrl.bin   |         Varies |   Varies   |
+| EPR_cache.bin  |      up to 256 |    8-bit   |
 | EEPROM.bin     |   up to 65,536 |    8-bit   |
 +----------------+----------------+------------+
 
@@ -611,7 +612,36 @@ typedef struct _ZOMG_EPR_ctrl_t {
 
 ----------------------------------------------------------------
 
-4.10. EEPROM.bin: EEPROM data. [OPTIONAL]
+4.10. EPR_cache.bin: EEPROM page cache. [OPTIONAL]
+
+[NOTE: This section only applies to games that use I2C EEPROMs. If the
+game being saved does not use EEPROM, or uses a different EEPROM, this
+file should NOT be saved.]
+
+I2C EEPROMs have a small page cache that's used when writing data to the
+EEPROM. For example, the X24C01, which has 128 bytes of EEPROM, has a
+4-byte page cache. Writes are done to the page cache, not the EEPROM,
+so if 5 or more bytes are written, it ends up overwriting a part of the
+page that was written previously.
+
+The contents of the page cache are not written to EEPROM until a STOP
+condition is received. Therefore, it is important that the page cache
+is saved if the EEPROM is currently in ZOMG_EPR_I2C_WRITE_DATA.
+
+If the EEPROM is NOT in ZOMG_EPR_I2C_WRITE_DATA, this file should not
+be saved, since the contents of the page cache are undefined.
+
+On load: If the EEPROM is in ZOMG_EPR_I2C_WRITE_DATA and this file is
+not present, the page cache should be initialized with the relevant
+bytes from the EEPROM data.
+
+C equivalent for EPR_cache.bin:
+
+uint8_t epr_cache[256];		// Up to 256 bytes.
+
+----------------------------------------------------------------
+
+4.11. EEPROM.bin: EEPROM data. [OPTIONAL]
 
 This file contains the contents of EEPROM, which is present
 in some cartridges.
@@ -632,7 +662,7 @@ EEPROM in savestates. Also note that if EEPROM is saved, EPR_ctrl.bin should
 also be saved. (See section 4.9.)
 
 C equivalent for EEPROM.bin:
-uint8_t  eeprom[65536];		// Up to 131,072 bytes.
+uint8_t  eeprom[65536];		// Up to 65,536 bytes.
 uint16_t eeprom_93c[32768];	// 16BE: Microwire 16-bit version.
 
 ================================================================

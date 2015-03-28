@@ -242,12 +242,20 @@ int EEPRomI2C::zomgSave(LibZomg::Zomg *zomg) const
 	ctrl.i2c.data_buf	= d->data_buf;
 	ctrl.i2c.rw		= d->rw;
 
-	zomg->saveEEPRomCtrl(&ctrl);
+	int ret = zomg->saveEEPRomCtrl(&ctrl);
+	if (ret != 0)
+		return ret;
+
+	// Save the EEPROM page cache.
+	if (d->state == d->EEPRomI2CPrivate::EPR_WRITE_DATA) {
+		// Page cache is valid.
+		ret = zomg->saveEEPRomCache(d->page_cache, d->eprChip.pg_mask+1);
+		if (ret != 0)
+			return ret;
+	}
 
 	// Save the EEPROM data.
-
-	// Determine how much of the SRam is currently in use.
-	int ret = 0;
+	// Determine how much of the EEPROM is currently in use.
 	int bytesUsed = d->getUsedSize();
 	if (bytesUsed > 0) {
 		ret = zomg->saveEEPRom(d->eeprom, bytesUsed);

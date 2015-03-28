@@ -652,6 +652,18 @@ int Zomg::saveEEPRomCtrl(const Zomg_EPR_ctrl_t *ctrl)
 }
 
 /**
+ * Save the EEPROM page cache.
+ * @param cache EEPROM page cache.
+ * @param siz Size of EEPROM page cache.
+ * @return 0 on success; non-zero on error.
+ */
+int Zomg::saveEEPRomCache(const uint8_t *cache, size_t siz)
+{
+	// TODO: Don't allow >256?
+	return saveToZomg("common/EPR_cache.bin", cache, siz);
+}
+
+/**
  * Save EEPROM.
  * @param sram Pointer to EEPROM buffer.
  * @param siz Size of EEPROM buffer.

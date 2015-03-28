@@ -101,6 +101,7 @@ class Zomg : public ZomgBase
 		// Miscellaneous
 		virtual int loadSRam(uint8_t *sram, size_t siz) override;
 		virtual int loadEEPRomCtrl(_Zomg_EPR_ctrl_t *ctrl) override;
+		virtual int loadEEPRomCache(uint8_t *cache, size_t siz) override;
 		virtual int loadEEPRom(uint8_t *eeprom, size_t siz) override;
 
 		/**
@@ -160,6 +161,7 @@ class Zomg : public ZomgBase
 		// Miscellaneous
 		virtual int saveSRam(const uint8_t *sram, size_t siz) override;
 		virtual int saveEEPRomCtrl(const _Zomg_EPR_ctrl_t *ctrl) override;
+		virtual int saveEEPRomCache(const uint8_t *cache, size_t siz) override;
 		virtual int saveEEPRom(const uint8_t *eeprom, size_t siz) override;
 
 	protected:

@@ -147,6 +147,8 @@ class ZomgBase
 			{ (void)sram; (void)siz; return 0; }
 		virtual int loadEEPRomCtrl(_Zomg_EPR_ctrl_t *ctrl)
 			{ (void)ctrl; return 0; }
+		virtual int loadEEPRomCache(uint8_t *cache, size_t siz)
+			{ (void)cache; (void)siz; return 0; }
 		virtual int loadEEPRom(uint8_t *eeprom, size_t siz)
 			{ (void)eeprom; (void)siz; return 0; }
 		
@@ -218,6 +220,8 @@ class ZomgBase
 			{ (void)sram; (void)siz; return 0; }
 		virtual int saveEEPRomCtrl(const _Zomg_EPR_ctrl_t *ctrl)
 			{ (void)ctrl; return 0; }
+		virtual int saveEEPRomCache(const uint8_t *cache, size_t siz)
+			{ (void)cache; (void)siz; return 0; }
 		virtual int saveEEPRom(const uint8_t *eeprom, size_t siz)
 			{ (void)eeprom; (void)siz; return 0; }
 

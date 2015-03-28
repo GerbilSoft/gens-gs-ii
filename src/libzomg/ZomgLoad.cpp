@@ -616,6 +616,20 @@ int Zomg::loadEEPRomCtrl(Zomg_EPR_ctrl_t *ctrl)
 }
 
 /**
+ * Load the EEPROM page cache.
+ * @param cache Pointer to EEPROM page cache buffer.
+ * @param siz Size of EEPROM page cache buffer.
+ * @return Number of bytes read on success; negative on error.
+ */
+int Zomg::loadEEPRomCache(uint8_t *cache, size_t siz)
+{
+	int ret = loadFromZomg("common/EPR_cache.bin", cache, siz);
+	if (ret != (int)siz)
+		return -1;
+	return ret;
+}
+
+/**
  * Load EEPROM.
  * @param eeprom Pointer to SRAM buffer.
  * @param siz Size of SRAM buffer.
