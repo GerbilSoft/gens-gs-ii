@@ -26,6 +26,13 @@
 
 #include <libgens/config.libgens.h>
 
+// C includes.
+#include <stdint.h>
+
+// C includes. (C++ namespace)
+#include <ctime>
+
+// OS-specific headers.
 #if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX
@@ -37,8 +44,7 @@ typedef ULONGLONG (WINAPI *GETTICKCOUNT64PROC)(void);
 #include <mach/mach_time.h>
 #endif
 
-namespace LibGens
-{
+namespace LibGens {
 
 class Timing
 {
@@ -46,8 +52,7 @@ class Timing
 		static void Init(void);
 		static void End(void);
 
-		enum TimingMethod
-		{
+		enum TimingMethod {
 			TM_GETTIMEOFDAY,
 #ifdef HAVE_LIBRT
 			TM_CLOCK_GETTIME,
@@ -73,7 +78,17 @@ class Timing
 		 */
 		static const char *GetTimingMethodName(TimingMethod tMethod);
 
+		/**
+		 * Get the elapsed time in seconds.
+		 * @return Elapsed time, in seconds.
+		 */
 		static double GetTimeD(void);
+
+		/**
+		 * Get the elapsed time in microseconds.
+		 * @return Elapsed time, in microseconds.
+		 */
+		static uint64_t GetTime(void);
 
 	protected:
 		static TimingMethod ms_TMethod;
@@ -89,6 +104,10 @@ class Timing
 		// Mach timebase information.
 		static mach_timebase_info_data_t ms_timebase_info;
 #endif
+
+		// Base value for seconds.
+		// Needed to prevent overflow.
+		static time_t ms_tv_sec_base;
 
 	private:
 		Timing() { }

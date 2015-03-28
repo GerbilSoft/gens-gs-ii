@@ -26,11 +26,7 @@
 // Message logging.
 #include "macros/log_msg.h"
 
-// Timing functions.
-#include <time.h>
-
-namespace LibGens
-{
+namespace LibGens {
 
 // Static class variables.
 Timing::TimingMethod Timing::ms_TMethod;
@@ -43,6 +39,9 @@ LARGE_INTEGER Timing::ms_PerfFreq;
 mach_timebase_info_data_t Timing::ms_timebase_info;
 #endif
 
+// Base value for seconds.
+// Needed to prevent overflow.
+time_t Timing::ms_tv_sec_base;
 
 /**
  * Initialize the timing subsystem.
@@ -87,8 +86,18 @@ void Timing::Init(void)
 	ms_TMethod = TM_MACH_ABSOLUTE_TIME;
 #elif defined(HAVE_LIBRT)
 	ms_TMethod = TM_CLOCK_GETTIME;
+
+	// Initialize the base value for seconds.
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	ms_tv_sec_base = ts.tv_sec;
 #else
 	ms_TMethod = TM_GETTIMEOFDAY;
+
+	// Initialize the base value for seconds.
+	struct timeval tv;
+	gettimeofday(&tv, nullptr);
+	ms_tv_sec_base = tv.tv_sec;
 #endif /* _WIN32 */
 
 	// Log the timing method.
@@ -188,6 +197,57 @@ double Timing::GetTimeD(void)
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	return ((double)tv.tv_sec + ((double)tv.tv_usec / 1.0e6));
+#endif
+}
+
+/**
+ * Get the elapsed time in microseconds.
+ * @return Elapsed time, in microseconds.
+ */
+uint64_t Timing::GetTime(void)
+{
+#if defined(_WIN32)
+	// Win32-specific timer functions.
+	// TODO: Should TM_GETTIMEOFDAY / TM_CLOCK_GETTIME be supported here?
+	// TODO: Prevent overflow.
+	LARGE_INTEGER perf_ctr;
+	switch (ms_TMethod) {
+		case TM_GETTICKCOUNT:
+		default:
+			// GetTickCount().
+			return ((uint64_t)GetTickCount() * 1000);
+
+		case TM_GETTICKCOUNT64:
+			// GetTickCount64().
+			return (ms_pGetTickCount64() * 1000.0);
+
+		case TM_QUERYPERFORMANCECOUNTER:
+			// QueryPerformanceCounter().
+			QueryPerformanceCounter(&perf_ctr);
+			const uint64_t divisor = ms_PerfFreq.QuadPart / 1000000;
+			return (perf_ctr.QuadPart / divisor);
+	}
+#elif defined(__APPLE__)
+	// Mach absolute time. (Mac OS X)
+	// TODO: http://stackoverflow.com/questions/23378063/how-can-i-use-mach-absolute-time-without-overflowing
+#if 0
+	uint64_t abs_time = mach_absolute_time();
+	double d_abs_time = (double)abs_time * (double)ms_timebase_info.numer / (double)ms_timebase_info.denom;
+	return (d_abs_time / 1.0e9);
+#endif
+	return 0;
+#elif defined(HAVE_LIBRT)
+	// librt is available: use clock_gettime().
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	ts.tv_sec -= ms_tv_sec_base;
+	return ((ts.tv_sec * 1000000) + (ts.tv_nsec / 1000));
+#else
+	// Fall back to gettimeofday().
+	struct timeval tv;
+	gettimeofday(&tv, nullptr);
+	tv.tv_sec -= ms_tv_sec_base;
+	return ((tv.tv_sec * 1000000) + tv.tv_usec);
 #endif
 }
 
