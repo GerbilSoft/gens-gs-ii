@@ -137,9 +137,9 @@ int main(int argc, char *argv[])
 		sdlHandler->update_video();
 
 		// Wait some time after the frame is finished:
-		// - NTSC: 15ms
-		// - PAL: 19ms
-		uint64_t time_wait = (isPal ? 19000 : 15000);
+		// - NTSC: 16ms
+		// - PAL: 19.5ms
+		uint64_t time_wait = (isPal ? 19500 : 16000);
 		while (time_start + time_wait > timing.getTime()) {
 			usleep(0);
 		}

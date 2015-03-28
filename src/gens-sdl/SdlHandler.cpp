@@ -186,6 +186,7 @@ void SdlHandler::start_timer(bool isPal)
 uint32_t SdlHandler::sdl_timer_callback(uint32_t interval, void *param)
 {
 	SdlHandler *handler = (SdlHandler*)param;
+	// TODO: Skip frames if it's running too slowly?
 	SDL_SemPost(handler->m_sem);
 	handler->m_ticks++;
 	if (handler->m_ticks == (handler->m_isPal ? 50 : 20)) {
