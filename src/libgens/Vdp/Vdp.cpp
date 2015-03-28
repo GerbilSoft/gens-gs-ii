@@ -156,16 +156,25 @@ void Vdp::reset(void)
 	d->VDP_Ctrl.reset();	// VDP control struct.
 
 	// Reset all VDP registers.
-	// NOTE: Parameter indicates if we want to apply the
-	// values that would usually be set by the boot ROM.
-	// False == leave them at 0.
-	// TODO: Use an enum?
-	// TODO: Set to false if TMSS is enabled.
-	// TODO: When that's done, disable the "error" screen?
-	d->resetRegisters(true);
+	// We're assuming the boot ROM is present.
+	// If it isn't, the caller will have to call
+	// Vdp::doFakeBootRomInit().
+	d->resetRegisters(false);
 
 	// Initialize the Horizontal Interrupt counter.
 	d->HInt_Counter = d->VDP_Reg.m5.H_Int;
+}
+
+/**
+ * Initialize the VDP as if the boot ROM was present.
+ * This function should be called if the boot ROM
+ * is not available.
+ */
+void Vdp::doFakeBootRomInit(void)
+{
+	// Initialize the VDP registers to the state
+	// they'd be in if the boot ROM was present.
+	d->resetRegisters(true);
 }
 
 // PAL/NTSC.

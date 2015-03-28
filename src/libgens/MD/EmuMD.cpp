@@ -109,6 +109,10 @@ EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
 	// TODO: Move Vdp::SysStatus to EmuContext.
 	m_vdp->SysStatus.data = 0;
 	m_vdp->SysStatus.Genesis = 1;
+	// If TMSS is disabled, initialize the VDP registers.
+	if (!M68K_Mem::tmss_reg.isTmssEnabled()) {
+		m_vdp->doFakeBootRomInit();
+	}
 
 	// Reset the controllers.
 	m_ioManager->reset();
@@ -185,10 +189,15 @@ int EmuMD::hardReset(void)
 	// This includes clearing RAM.
 	M68K::InitSys(M68K::SYSID_MD);
 	Z80::ReInit();
-	m_vdp->reset();
 	SoundMgr::ms_Psg.reset();
 	SoundMgr::ms_Ym2612.reset();
 
+	// Reset the VDP.
+	m_vdp->reset();
+	// If TMSS is disabled, initialize the VDP registers.
+	if (!M68K_Mem::tmss_reg.isTmssEnabled()) {
+		m_vdp->doFakeBootRomInit();
+	}
 	// Make sure the VDP's video mode bit is set properly.
 	m_vdp->setVideoMode(m_sysVersion.isPal());
 

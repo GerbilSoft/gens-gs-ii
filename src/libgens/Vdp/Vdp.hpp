@@ -64,6 +64,13 @@ class Vdp
 		 */
 		void reset(void);
 
+		/**
+		 * Initialize the VDP as if the boot ROM was present.
+		 * This function should be called if the boot ROM
+		 * is not available.
+		 */
+		void doFakeBootRomInit(void);
+
 	public:
 		/** VDP settings. **/
 
