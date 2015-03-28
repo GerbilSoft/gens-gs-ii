@@ -21,13 +21,10 @@
 #ifndef __CXX11_COMPAT_H__
 #define __CXX11_COMPAT_H__
 
-/* Define to 1 if C++ 2011 is supported. */
-#cmakedefine HAVE_CXX_2011 1
-
-#if !defined(HAVE_CXX_2011) || !defined(__cplusplus)
+#if !defined(__cplusplus)
 
 /**
- * Either C++ 2011 is not supported, or we're compiling C code.
+ * We're compiling C code.
  * Provide replacements for C++ 2011 functionality.
  */
 #define CXX11_COMPAT_NULLPTR
