@@ -1011,7 +1011,7 @@ FORCE_INLINE unsigned int VdpPrivate::T_Update_Sprite_Line_Cache(int line)
 				}
 
 				// Get the remaining sprite information from VRAM.
-				const VdpStructs::SprEntry_m5 *spr_VRam = Spr_Tbl_Addr_PtrM5(link*8);
+				const VdpStructs::SprEntry_m5 *spr_VRam = Spr_Tbl_Addr_PtrM5(link);
 
 				// Save the sprite information in the line cache.
 				cache->Pos_X = (spr_VRam->x & 0x1FF) - 128;
@@ -1039,9 +1039,7 @@ FORCE_INLINE unsigned int VdpPrivate::T_Update_Sprite_Line_Cache(int line)
 		if (link == 0 || link >= max_spr_frame)
 			break;
 
-		// Get the next sprite address in VRAM and SAT.
-		// NOTE: Original byte offset needs to be used for VRAM access..
-		// (Spr_Tbl_Addr_Ptr16() divides by 2 for 16-bit access.)
+		// Get the next sprite address in the SAT.
 		spr_SAT = &SprAttrTbl_m5.spr[link];
 	} while (--total_spr_count);
 

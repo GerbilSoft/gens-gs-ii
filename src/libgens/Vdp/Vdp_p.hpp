@@ -238,8 +238,8 @@ class VdpPrivate
 			{ return &VRam.u16[((ScrB_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
 		inline uint16_t *Win_Tbl_Addr_Ptr16(uint32_t offset)
 			{ return &VRam.u16[((Win_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
-		inline VdpStructs::SprEntry_m5 *Spr_Tbl_Addr_PtrM5(uint32_t offset)
-			{ return (VdpStructs::SprEntry_m5*)&VRam.u16[((Spr_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
+		inline VdpStructs::SprEntry_m5 *Spr_Tbl_Addr_PtrM5(uint32_t link)
+			{ return (VdpStructs::SprEntry_m5*)&VRam.u16[((Spr_Tbl_Addr + (link*8)) & VRam_Mask) >> 1]; }
 		inline uint16_t *H_Scroll_Tbl_Addr_Ptr16(uint32_t offset)
 			{ return &VRam.u16[((H_Scroll_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
 		// Pattern Generators
