@@ -60,11 +60,6 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	// Initialize SDL handlers.
-	sdlHandler = new SdlHandler();
-	if (sdlHandler->init_video() < 0)
-		return EXIT_FAILURE;
-
 	// Initialize LibGens.
 	LibGens::Init();
 
@@ -91,6 +86,17 @@ int main(int argc, char *argv[])
 			rom_filename);
 		return EXIT_FAILURE;
 	}
+
+	// Initialize SDL handlers.
+	sdlHandler = new SdlHandler();
+	if (sdlHandler->init_video() < 0)
+		return EXIT_FAILURE;
+	if (sdlHandler->init_timers() < 0)
+		return EXIT_FAILURE;
+
+	// Start the frame timer.
+	// TODO: Region code?
+	sdlHandler->start_timer(false);
 
 	// TODO: Close the ROM, or let EmuContext do it?
 
@@ -119,5 +125,8 @@ int main(int argc, char *argv[])
 		// Run a frame.
 		context->execFrame();
 		sdlHandler->update_video();
+
+		// Synchronize.
+		sdlHandler->wait_for_frame_sync();
 	}
 }

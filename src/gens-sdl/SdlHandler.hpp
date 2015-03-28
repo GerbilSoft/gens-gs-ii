@@ -22,7 +22,10 @@
 #ifndef __GENS_SDL_SDLHANDLER_HPP__
 #define __GENS_SDL_SDLHANDLER_HPP__
 
-struct SDL_Surface;
+#include <stdint.h>
+
+// SDL
+#include <SDL.h>
 
 namespace LibGens {
 	class MdFb;
@@ -66,6 +69,38 @@ class SdlHandler {
 		 */
 		void update_video(void);
 
+		/**
+		 * Initialize SDL timers and threads.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int init_timers(void);
+
+		/**
+		 * Shut down SDL timers and threads.
+		 */
+		void end_timers(void);
+
+		/**
+		 * Start and/or restart the synchronization timer.
+		 * @param isPal If true, use PAL timing.
+		 */
+		void start_timer(bool isPal);
+
+		/**
+		 * Wait for frame synchronization.
+		 * On every third frame, wait for the timer.
+		 */
+		void wait_for_frame_sync(void);
+
+	private:
+		/**
+		 * SDL synchronization timer callback.
+		 * @param interval Timer interval.
+		 * @param param SdlHandler class pointer.
+		 * @return Timer interval to use.
+		 */
+		static uint32_t sdl_timer_callback(uint32_t interval, void *param);
+
 	private:
 		// Screen buffer.
 		SDL_Surface *m_screen;
@@ -74,6 +109,15 @@ class SdlHandler {
 		// MD screen buffer.
 		// Points to data on an MdFb.
 		SDL_Surface *m_md;
+
+		// Timers and threads.
+		SDL_sem *m_sem;
+		unsigned int m_ticks;
+		SDL_TimerID m_timer;
+		bool m_isPal;
+
+		// Frames rendered.
+		int m_framesRendered;
 };
 
 }
