@@ -27,10 +27,15 @@ using GensSdl::SdlHandler;
 #include "libgens/Rom.hpp"
 #include "libgens/MD/EmuMD.hpp"
 #include "libgens/Vdp/VdpPalette.hpp"
+#include "libgens/Util/Timing.hpp"
 using LibGens::Rom;
 using LibGens::EmuContext;
 using LibGens::EmuMD;
 using LibGens::VdpPalette;
+using LibGens::Timing;
+
+// C includes.
+#include <unistd.h>
 
 // C includes. (C++ namespace)
 #include <cstdio>
@@ -96,7 +101,8 @@ int main(int argc, char *argv[])
 
 	// Start the frame timer.
 	// TODO: Region code?
-	sdlHandler->start_timer(false);
+	bool isPal = false;
+	sdlHandler->start_timer(isPal);
 
 	// TODO: Close the ROM, or let EmuContext do it?
 
@@ -122,9 +128,20 @@ int main(int argc, char *argv[])
 			}
 		}
 
+		// Get the high-resolution time for synchronization.
+		uint64_t time_start = Timing::GetTime();
+
 		// Run a frame.
 		context->execFrame();
 		sdlHandler->update_video();
+
+		// Wait some time after the frame is finished:
+		// - NTSC: 15ms
+		// - PAL: 19ms
+		uint64_t time_wait = (isPal ? 19000 : 15000);
+		while (time_start + time_wait > Timing::GetTime()) {
+			usleep(0);
+		}
 
 		// Synchronize.
 		sdlHandler->wait_for_frame_sync();
