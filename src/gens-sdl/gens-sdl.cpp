@@ -34,6 +34,14 @@ using LibGens::EmuMD;
 using LibGens::VdpPalette;
 using LibGens::Timing;
 
+// LibGensKeys
+#include "libgens/IO/IoManager.hpp"
+#include "libgens/macros/common.h"
+#include "libgenskeys/KeyManager.hpp"
+#include "libgenskeys/GensKey_t.h"
+using LibGens::IoManager;
+using LibGensKeys::KeyManager;
+
 // yield(), aka usleep(0) or Sleep(0)
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -54,8 +62,16 @@ using LibGens::Timing;
 static SdlHandler *sdlHandler = nullptr;
 static Rom *rom = nullptr;
 static EmuMD *context = nullptr;
-
 static const char *rom_filename = nullptr;
+
+static KeyManager *keyManager = nullptr;
+// NOTE: Using SDL keycodes here.
+// TODO: Proper SDL to GensKey conversion.
+static const GensKey_t keyMap[] = {
+	SDLK_UP, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT,	// UDLR
+	SDLK_s, SDLK_d, SDLK_a, SDLK_RETURN,		// BCAS
+	SDLK_e, SDLK_w, SDLK_q, SDLK_RSHIFT		// ZYXM
+};
 
 int main(int argc, char *argv[])
 {
@@ -131,7 +147,10 @@ int main(int argc, char *argv[])
 	// Start audio.
 	SDL_PauseAudio(0);
 
-	// TODO: Initialize I/O manager.
+	// Initialize the I/O Manager with a default key layout.
+	keyManager = new KeyManager();
+	keyManager->setIoType(IoManager::VIRTPORT_1, IoManager::IOT_6BTN);
+	keyManager->setKeyMap(IoManager::VIRTPORT_1, keyMap, ARRAY_SIZE(keyMap));
 
 	LibGens::Timing timing;
 	bool running = true;
@@ -150,6 +169,16 @@ int main(int argc, char *argv[])
 					running = 0;
 					break;
 
+				case SDL_KEYDOWN:
+					// SDL keycodes nearly match GensKey.
+					keyManager->keyDown(event.key.keysym.sym);
+					break;
+
+				case SDL_KEYUP:
+					// SDL keycodes nearly match GensKey.
+					keyManager->keyUp(event.key.keysym.sym);
+					break;
+
 				default:
 					break;
 			}
@@ -157,6 +186,9 @@ int main(int argc, char *argv[])
 
 		// Get the high-resolution time for synchronization.
 		uint64_t time_start = timing.getTime();
+
+		// Update the I/O manager.
+		keyManager->updateIoManager(context->m_ioManager);
 
 		// Run a frame.
 		context->execFrame();
@@ -177,6 +209,7 @@ int main(int argc, char *argv[])
 
 	// Shut. Down. EVERYTHING.
 	delete sdlHandler;
+	delete keyManager;
 	delete context;
 	delete rom;
 	return EXIT_SUCCESS;
