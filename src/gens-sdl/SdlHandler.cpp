@@ -130,7 +130,11 @@ void SdlHandler::update_video(void)
 		SDL_FillRect(m_screen, nullptr, 0);
 	} else {
 		// Source surface is available.
-		SDL_Rect rect { 0, 0, 320, 240 };
+		SDL_Rect rect;
+		rect.x = 0;
+		rect.y = 0;
+		rect.w = 320;
+		rect.h = 240;
 		SDL_BlitSurface(m_md, &rect, m_screen, &rect);
 	}
 
@@ -291,6 +295,7 @@ void SdlHandler::end_audio(void)
 	free(m_audioBuffer);
 	m_audioBuffer = nullptr;
 	m_audioBufferLen = 0;
+	m_audioBufferUsed = 0;
 	m_sampleSize = 0;
 	m_audioWritePos = nullptr;
 }
