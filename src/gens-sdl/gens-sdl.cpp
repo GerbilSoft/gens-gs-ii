@@ -73,6 +73,12 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
+#ifdef _WIN32
+	// Reference: http://sdl.beuc.net/sdl.wiki/FAQ_Console
+	freopen("CON", "w", stdout);
+	freopen("CON", "w", stderr);
+#endif /* _WIN32 */
+
 	// Initialize LibGens.
 	LibGens::Init();
 
