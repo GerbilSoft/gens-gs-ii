@@ -98,6 +98,8 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	if (sdlHandler->init_timers() < 0)
 		return EXIT_FAILURE;
+	if (sdlHandler->init_audio() < 0)
+		return EXIT_FAILURE;
 
 	// Start the frame timer.
 	// TODO: Region code?
@@ -111,6 +113,9 @@ int main(int argc, char *argv[])
 
 	// Set the SDL video source.
 	sdlHandler->set_video_source(context->m_vdp->MD_Screen);
+
+	// Start audio.
+	SDL_PauseAudio(0);
 
 	// TODO: Initialize I/O manager.
 
@@ -135,6 +140,7 @@ int main(int argc, char *argv[])
 		// Run a frame.
 		context->execFrame();
 		sdlHandler->update_video();
+		sdlHandler->update_audio();
 
 		// Wait some time after the frame is finished:
 		// - NTSC: 16ms

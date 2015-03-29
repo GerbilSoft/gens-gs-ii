@@ -92,6 +92,22 @@ class SdlHandler {
 		 */
 		void wait_for_frame_sync(void);
 
+		/**
+		 * Initialize SDL audio.
+		 * @return 0 on success; non-zero on error.
+		 */
+		int init_audio(void);
+
+		/**
+		 * Shut down SDL audio.
+		 */
+		void end_audio(void);
+
+		/**
+		 * Update SDL audio using SoundMgr.
+		 */
+		void update_audio(void);
+
 	private:
 		/**
 		 * SDL synchronization timer callback.
@@ -100,6 +116,14 @@ class SdlHandler {
 		 * @return Timer interval to use.
 		 */
 		static uint32_t sdl_timer_callback(uint32_t interval, void *param);
+
+		/**
+		 * SDL audio callback.
+		 * @param userdata SdlHandler class pointer.
+		 * @param stream SDL audio stream.
+		 * @param len Number of bytes requested.
+		 */
+		static void sdl_audio_callback(void *userdata, uint8_t *stream, int len);
 
 	private:
 		// Screen buffer.
@@ -118,6 +142,14 @@ class SdlHandler {
 
 		// Frames rendered.
 		int m_framesRendered;
+
+		// Audio.
+		const int SEGMENTS_TO_BUFFER = 4;
+		uint8_t *m_audioBuffer;
+		int m_audioBufferLen;		// Length of the audio buffer.
+		int m_audioBufferUsed;		// Current number of bytes used in the buffer.
+		int m_sampleSize;		// Sample size. (Should be 4)
+		uint8_t *m_audioWritePos;	// Write position within the buffer.
 };
 
 }
