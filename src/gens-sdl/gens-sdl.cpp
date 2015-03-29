@@ -151,6 +151,7 @@ int main(int argc, char *argv[])
 	keyManager = new KeyManager();
 	keyManager->setIoType(IoManager::VIRTPORT_1, IoManager::IOT_6BTN);
 	keyManager->setKeyMap(IoManager::VIRTPORT_1, keyMap, ARRAY_SIZE(keyMap));
+	keyManager->setIoType(IoManager::VIRTPORT_2, IoManager::IOT_NONE);
 
 	LibGens::Timing timing;
 	bool running = true;
