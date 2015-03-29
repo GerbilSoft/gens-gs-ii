@@ -49,6 +49,7 @@ SdlHandler::~SdlHandler()
 {
 	// Shut. Down. EVERYTHING.
 	end_video();
+	end_timers();
 	end_audio();
 }
 

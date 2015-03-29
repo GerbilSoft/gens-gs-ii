@@ -161,4 +161,10 @@ int main(int argc, char *argv[])
 		// Synchronize.
 		sdlHandler->wait_for_frame_sync();
 	}
+
+	// Shut. Down. EVERYTHING.
+	delete sdlHandler;
+	delete context;
+	delete rom;
+	return EXIT_SUCCESS;
 }
