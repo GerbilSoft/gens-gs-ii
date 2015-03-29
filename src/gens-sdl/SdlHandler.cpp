@@ -204,7 +204,24 @@ uint32_t SdlHandler::sdl_timer_callback(uint32_t interval, void *param)
 	SDL_SemPost(handler->m_sem);
 	handler->m_ticks++;
 	if (handler->m_ticks == (handler->m_isPal ? 50 : 20)) {
-		// TODO: Update the framerate on the window title.
+		SDL_Event event;
+		SDL_UserEvent userevent;
+
+		int frameRate;
+		if (handler->m_isPal) {
+			frameRate = handler->m_framesRendered * 10 / 3;
+		} else {
+			frameRate = handler->m_framesRendered * 10;
+		}
+
+		userevent.type = SDL_USEREVENT;
+		userevent.code = frameRate;
+		userevent.data1 = NULL;
+		userevent.data2 = NULL;
+
+		event.type = SDL_USEREVENT;
+		event.user = userevent;
+		SDL_PushEvent(&event);
 
 		// Clear the tick and frame rendering count.
 		handler->m_ticks = 0;
