@@ -34,8 +34,16 @@ using LibGens::EmuMD;
 using LibGens::VdpPalette;
 using LibGens::Timing;
 
-// C includes.
+// yield(), aka usleep(0) or Sleep(0)
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+#define yield() do { Sleep(0); } while (0)
+#else
 #include <unistd.h>
+#define yield() do { usleep(0); } while (0)
+#endif
 
 // C includes. (C++ namespace)
 #include <cstdio>
@@ -147,7 +155,7 @@ int main(int argc, char *argv[])
 		// - PAL: 19.5ms
 		uint64_t time_wait = (isPal ? 19500 : 16000);
 		while (time_start + time_wait > timing.getTime()) {
-			usleep(0);
+			yield();
 		}
 
 		// Synchronize.
