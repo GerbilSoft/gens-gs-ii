@@ -144,7 +144,7 @@ class SdlHandler {
 		int m_framesRendered;
 
 		// Audio.
-		const int SEGMENTS_TO_BUFFER = 4;
+		static const int SEGMENTS_TO_BUFFER = 4;
 		uint8_t *m_audioBuffer;
 		int m_audioBufferLen;		// Length of the audio buffer.
 		int m_audioBufferUsed;		// Current number of bytes used in the buffer.
