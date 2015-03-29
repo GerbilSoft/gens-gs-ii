@@ -371,8 +371,8 @@ void SdlHandler::update_audio(void)
 	if (SegLength * m_sampleSize > m_audioBufferLen - m_audioBufferUsed) {
 		// Not enough space left in the buffer...
 		// TODO: What should we do here?
-		printf("audio buffer out of space; %d bytes used, %d total, needs %d more bytes\n",
-		       m_audioBufferLen, m_audioBufferUsed, SegBytes);
+		printf("audio buffer out of space; %d/%d bytes used, needs %d more bytes\n",
+		       m_audioBufferUsed, m_audioBufferLen, SegBytes);
 		return;
 	}
 
