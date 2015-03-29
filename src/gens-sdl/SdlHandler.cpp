@@ -325,9 +325,11 @@ void SdlHandler::sdl_audio_callback(void *userdata, uint8_t *stream, int len)
 
 		// Compesate for desynchronization.
 		// FIXME: This causes audio to randomly speed up...
+		/*
 		do {
 			handler->m_audioBufferUsed -= len;
 		} while (handler->m_audioBufferUsed > (2 * len));
+		*/
 
 		// Adjust the buffer contents.
 		memmove(handler->m_audioBuffer,
