@@ -301,7 +301,11 @@ class VdpPrivate
 			uint16_t reserved;
 
 			// VDP internal registers.
+			// addr_hi_latch is stored with the bits in the
+			// shifted A16-A14 positions for performance reasons.
+			// Reference: http://gendev.spritesmind.net/forum/viewtopic.php?t=1277&p=17430#17430
 			uint32_t address;	// Address counter.
+			uint32_t addr_hi_latch;	// Latch for A16-A14. (TODO: Save to ZOMG.)
 			uint8_t code;		// Access code. (CD5-CD0)
 
 			void reset(void)
@@ -310,6 +314,7 @@ class VdpPrivate
 				DMA_Mode = 0;
 				reserved = 0;
 				address = 0;
+				addr_hi_latch = 0;
 				code = 0;
 			}
 		} VDP_Ctrl;

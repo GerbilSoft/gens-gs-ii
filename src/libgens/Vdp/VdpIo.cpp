@@ -825,8 +825,10 @@ void Vdp::writeCtrlMD(uint16_t ctrl)
 		 */
 
 		// Update the VDP address counter.
-		d->VDP_Ctrl.address &= ~0x3FFF;
-		d->VDP_Ctrl.address |= (ctrl & 0x3FFF);
+		// NOTE: High bits are reloaded from the latch.
+		// Reference: http://gendev.spritesmind.net/forum/viewtopic.php?t=1277&p=17430#17430
+		d->VDP_Ctrl.address = (ctrl & 0x3FFF);
+		d->VDP_Ctrl.address |= d->VDP_Ctrl.addr_hi_latch;
 
 		// Update the VDP access code register.
 		d->VDP_Ctrl.code &= ~0x03;
@@ -876,11 +878,13 @@ void Vdp::writeCtrlMD(uint16_t ctrl)
 	 */
 	d->VDP_Ctrl.ctrl_latch = 0;	// Clear the control word latch.
 
-	// Update the VDP address counter.
-	d->VDP_Ctrl.address &= ~0x1C000;
+	// Update the VDP address high bits latch.
 	// TODO: Cache the mask here?
 	const uint16_t ctrl_mask = (d->is128KB() ? 0x0007 : 0x0003);
-	d->VDP_Ctrl.address |= ((uint32_t)(ctrl & ctrl_mask) << 14);
+	d->VDP_Ctrl.addr_hi_latch = ((uint32_t)(ctrl & ctrl_mask) << 14);
+	// Update the VDP address counter.
+	d->VDP_Ctrl.address &= ~0x1C000;
+	d->VDP_Ctrl.address |= d->VDP_Ctrl.addr_hi_latch;
 
 	// Update the VDP access code register: CD(4..2)
 	d->VDP_Ctrl.code &= ~0x1C;
