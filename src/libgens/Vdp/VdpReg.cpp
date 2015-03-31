@@ -36,10 +36,14 @@ void VdpPrivate::updateVdpMode(void)
 	const VDP_Mode_t prevVdpMode = VDP_Mode;
 	const register uint8_t Set1 = VDP_Reg.m5.Set1;
 	const register uint8_t Set2 = VDP_Reg.m5.Set2;
+	// NOTE: M1, M2, and M3 descriptions match the official
+	// TMS9918A datasheet. M2 is *not* Graphic II, since
+	// this mode was not present in the original TMS9918,
+	// and was added in the TMS9918A.
 	VDP_Mode = (VDP_Mode_t)
-		   (((Set2 & 0x10) >> 4) |	// M1
-		    ((Set1 & 0x02))      |	// M2
-		    ((Set2 & 0x08) >> 1) |	// M3
+		   (((Set2 & 0x10) >> 4) |	// M1 (Text)
+		    ((Set2 & 0x08) >> 2) |	// M2 (Multicolor)
+		    ((Set1 & 0x02) << 1) |	// M3 (Graphic II)
 		    ((Set1 & 0x04) << 1) |	// M4/PSEL
 		    ((Set2 & 0x04) << 2));	// M5
 
@@ -54,8 +58,9 @@ void VdpPrivate::updateVdpMode(void)
 		// Update the VDP mode variables.
 		if (VDP_Mode & VDP_MODE_M5) {
 			// Mode 5.
+			// TODO: Only if we weren't in Mode 5 before?
 			palette.setPalMode(VdpPalette::PALMODE_MD);
-			palette.setMdColorMask(!(VDP_Mode & 0x08));	// M4/PSEL
+			palette.setMdColorMask(!(VDP_Mode & VDP_MODE_M4));
 		} else {
 			// TODO: Support other palette modes.
 		}
