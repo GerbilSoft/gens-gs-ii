@@ -172,7 +172,18 @@ int main(int argc, char *argv[])
 
 				case SDL_KEYDOWN:
 					// SDL keycodes nearly match GensKey.
-					keyManager->keyDown(event.key.keysym.sym);
+					if (event.key.keysym.sym == SDLK_TAB) {
+						// Check for Shift.
+						if (event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
+							// Hard Reset.
+							context->hardReset();
+						} else {
+							// Soft Reset.
+							context->softReset();
+						}
+					} else {
+						keyManager->keyDown(event.key.keysym.sym);
+					}
 					break;
 
 				case SDL_KEYUP:
