@@ -519,11 +519,11 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 	if (line >= VDP_Lines.totalDisplayLines)
 		line -= VDP_Lines.totalDisplayLines;
 	if (d->im2_flag) {
-		d->T_Update_Sprite_Line_Cache<true>(line - 1);
-		sovr = d->T_Update_Sprite_Line_Cache<true>(line);
+		d->T_Update_Sprite_Line_Cache_m5<true>(line - 1);
+		sovr = d->T_Update_Sprite_Line_Cache_m5<true>(line);
 	} else {
-		d->T_Update_Sprite_Line_Cache<false>(line - 1);
-		sovr = d->T_Update_Sprite_Line_Cache<false>(line);
+		d->T_Update_Sprite_Line_Cache_m5<false>(line - 1);
+		sovr = d->T_Update_Sprite_Line_Cache_m5<false>(line);
 	}
 
 	if (sovr) {

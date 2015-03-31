@@ -553,10 +553,10 @@ class VdpPrivate
 		template<bool interlaced, bool vscroll, bool h_s>
 		FORCE_INLINE void T_Render_Line_ScrollA_Window(void);
 
-		FORCE_INLINE void Update_Sprite_Line_Cache(int line);
+		FORCE_INLINE void Update_Sprite_Line_Cache_m5(int line);
 
 		template<bool interlaced>
-		FORCE_INLINE unsigned int T_Update_Sprite_Line_Cache(int line);
+		FORCE_INLINE unsigned int T_Update_Sprite_Line_Cache_m5(int line);
 
 		template<bool interlaced, bool h_s>
 		FORCE_INLINE void T_Render_Line_Sprite(void);

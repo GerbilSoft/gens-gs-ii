@@ -897,13 +897,13 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_ScrollA_Window(void)
  * Wrapper function to handle interlacing.
  * @param line Current line number, adjusted for IM2.
  */
-FORCE_INLINE void VdpPrivate::Update_Sprite_Line_Cache(int line)
+FORCE_INLINE void VdpPrivate::Update_Sprite_Line_Cache_m5(int line)
 {
 	unsigned int sovr;
 	if (im2_flag) {
-		sovr = T_Update_Sprite_Line_Cache<true>(line);
+		sovr = T_Update_Sprite_Line_Cache_m5<true>(line);
 	} else {
-		sovr = T_Update_Sprite_Line_Cache<false>(line);
+		sovr = T_Update_Sprite_Line_Cache_m5<false>(line);
 	}
 
 	if (sovr) {
@@ -919,7 +919,7 @@ FORCE_INLINE void VdpPrivate::Update_Sprite_Line_Cache(int line)
  * @return VdpStatus::VDP_STATUS_SOVR if sprite limit is exceeded; otherwise, 0.
  */
 template<bool interlaced>
-FORCE_INLINE unsigned int VdpPrivate::T_Update_Sprite_Line_Cache(int line)
+FORCE_INLINE unsigned int VdpPrivate::T_Update_Sprite_Line_Cache_m5(int line)
 {
 	unsigned int ret = 0;
 	uint8_t link = 0;
@@ -1371,7 +1371,7 @@ void VdpPrivate::renderLine_m5(void)
 
 		// Line -1, and display is on.
 		// Update the sprite line cache.
-		Update_Sprite_Line_Cache(-1);
+		Update_Sprite_Line_Cache_m5(-1);
 	}
 
 	// Check for borders.
@@ -1468,9 +1468,9 @@ void VdpPrivate::renderLine_m5(void)
 		if (q->VDP_Lines.currentLine < (q->VDP_Lines.totalDisplayLines - 1)) {
 			// Update only for visible lines.
 			if (im2_flag) {
-				Update_Sprite_Line_Cache(T_GetLineNumber<true>());
+				Update_Sprite_Line_Cache_m5(T_GetLineNumber<true>());
 			} else {
-				Update_Sprite_Line_Cache(T_GetLineNumber<false>());
+				Update_Sprite_Line_Cache_m5(T_GetLineNumber<false>());
 			}
 		}
 	}
