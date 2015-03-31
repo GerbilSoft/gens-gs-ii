@@ -431,10 +431,54 @@ void IoManagerPrivate::updateDevice_TP(int physPort, uint8_t oldTristateInput)
 			// Controller data.
 			// TODO: Move dtPerPortMax to a class constant?
 			static const int dtPerPortMax = (TP_DT_PADA_MOUSE_Y_LSN - TP_DT_PADA_RLDU) + 1;
-			const int virtPort = virtPortBase + (adj_counter / dtPerPortMax);
-			const int shift = (adj_counter % dtPerPortMax) * 4;
+			const int state = (adj_counter % dtPerPortMax);
+			const int tpPort = (adj_counter / dtPerPortMax);
+			const int virtPort = virtPortBase + tpPort;
+			const IoDevice *tpDev = &ioDevices[virtPort];
+			// NOTE: Added masks to switch/case for jump table optimization.
+			switch (dev->data.tp.padTypes[tpPort] & 0xF) {
+				case TP_PT_NONE:
+				default:
+					data = 0xF;
+					break;
 
-			data = (ioDevices[virtPort].buttons >> shift) & 0xF;
+				case TP_PT_3BTN:
+				case TP_PT_6BTN: {
+					const int shift = state * 4;
+					data = (tpDev->buttons >> shift) & 0xF;
+					break;
+				}
+
+				case TP_PT_MOUSE: {
+					// Mouse.
+					// TODO: Somehow combine with updateDevice_Mouse().
+					// NOTE: We're not setting "BF" here.
+					switch (state & 7) {
+						case 0:	// MOUSE_SIGNOVER
+							data = tpDev->data.mouse.latch.signOver;
+							break;
+						case 1:	// MOUSE_BUTTONS
+							data = ~tpDev->buttons & 0xF;
+							break;
+						case 2:	// MOUSE_X_MSN
+							data = tpDev->data.mouse.latch.relX >> 4;
+							break;
+						case 3: // MOUSE_X_LSN
+							data = tpDev->data.mouse.latch.relX & 0xF;
+							break;
+						case 4:	// MOUSE_Y_MSN
+							data = tpDev->data.mouse.latch.relY >> 4;
+							break;
+						case 5: // MOUSE_Y_LSN
+							data = tpDev->data.mouse.latch.relY & 0xF;
+							break;
+						default:
+							data = 0xF;
+							break;
+					}
+					break;
+				}
+			}
 			break;
 	}
 
