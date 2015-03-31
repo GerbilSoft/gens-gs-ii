@@ -75,8 +75,7 @@ int SdlHandler::init_video(void)
 
 	// Create the screen surface.
 	// TODO: Fullscreen option.
-	// TODO: Remove SDL_ASYNCBLIT when using OpenGL.
-	m_screen = SDL_SetVideoMode(320, 240, 32, SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_ASYNCBLIT);
+	m_screen = SDL_SetVideoMode(320, 240, 32, SDL_HWSURFACE);
 	return 0;
 }
 
@@ -140,7 +139,7 @@ void SdlHandler::update_video(void)
 	}
 
 	// Update the screen.
-	SDL_Flip(m_screen);
+	SDL_UpdateRect(m_screen, 0, 0, 0, 0);
 	m_framesRendered++;
 }
 
