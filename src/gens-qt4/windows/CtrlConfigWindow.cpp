@@ -411,6 +411,14 @@ void CtrlConfigWindowPrivate::initCboDevice(bool isTP)
 		}
 	}
 
+	// Also add Mega Mouse to Team Player devices.
+	// (NOT 4WP though...)
+	if (selPort >= IoManager::VIRTPORT_TP1A &&
+	    selPort <= IoManager::VIRTPORT_TP2D)
+	{
+		addIoTypeToCboDevice(IoManager::IOT_MEGA_MOUSE);
+	}
+
 	// Add multitaps.
 	if (!isTP) {
 		addIoTypeToCboDevice(IoManager::IOT_TEAMPLAYER);

@@ -181,7 +181,8 @@ class IoManagerPrivate
 		enum TP_PadType {
 			TP_PT_NONE	= 0xF,
 			TP_PT_3BTN	= 0x0,
-			TP_PT_6BTN	= 0x1
+			TP_PT_6BTN	= 0x1,
+			TP_PT_MOUSE	= 0x2,
 		};
 
 		/**
@@ -191,34 +192,66 @@ class IoManagerPrivate
 		 */
 		enum TP_DataType {
 			// Initialization
-			TP_DT_INIT		= 0,	// 0: Initial state.
-			TP_DT_START		= 1,	// 1: Start request.
-			TP_DT_ACK1		= 2,	// 2: Acknowledgement.
-			TP_DT_ACK2		= 3,	// 3: Acknowledgement.
-			TP_DT_PADTYPE_A		= 4,	// 4: Pad type for Controller A
-			TP_DT_PADTYPE_B		= 5,	// 5: Pad type for Controller A
-			TP_DT_PADTYPE_C		= 6,	// 6: Pad type for Controller A
-			TP_DT_PADTYPE_D		= 7,	// 7: Pad type for Controller A
+			TP_DT_INIT			= 0,	// Initial state.
+			TP_DT_START			= 1,	// Start request.
+			TP_DT_ACK1			= 2,	// Acknowledgement.
+			TP_DT_ACK2			= 3,	// Acknowledgement.
+			TP_DT_PADTYPE_A			= 4,	// Pad type for Controller A
+			TP_DT_PADTYPE_B			= 5,	// Pad type for Controller A
+			TP_DT_PADTYPE_C			= 6,	// Pad type for Controller A
+			TP_DT_PADTYPE_D			= 7,	// Pad type for Controller A
 
 			// Controller A
-			TP_DT_PADA_RLDU		= 8,	// D-pad
-			TP_DT_PADA_SACB		= 9,	// Start, A, C, B
-			TP_DT_PADA_MXYZ		= 10,	// Mode, X, Y, Z (6-button only)
+			TP_DT_PADA_RLDU			= 8,	// D-pad
+			TP_DT_PADA_SACB			= 9,	// Start, A, C, B
+			TP_DT_PADA_MXYZ			= 10,	// Mode, X, Y, Z (6-button only)
+
+			// Controller A (Mega Mouse)
+			TP_DT_PADA_MOUSE_SIGNOVER	= 8,
+			TP_DT_PADA_MOUSE_BUTTONS	= 9,
+			TP_DT_PADA_MOUSE_X_MSN		= 10,
+			TP_DT_PADA_MOUSE_X_LSN		= 11,
+			TP_DT_PADA_MOUSE_Y_MSN		= 12,
+			TP_DT_PADA_MOUSE_Y_LSN		= 13,
 
 			// Controller B
-			TP_DT_PADB_RLDU		= 11,	// D-pad
-			TP_DT_PADB_SACB		= 12,	// Start, A, C, B
-			TP_DT_PADB_MXYZ		= 13,	// Mode, X, Y, Z (6-button only)
+			TP_DT_PADB_RLDU			= 14,	// D-pad
+			TP_DT_PADB_SACB			= 15,	// Start, A, C, B
+			TP_DT_PADB_MXYZ			= 16,	// Mode, X, Y, Z (6-button only)
+
+			// Controller B (Mega Mouse)
+			TP_DT_PADB_MOUSE_SIGNOVER	= 14,
+			TP_DT_PADB_MOUSE_BUTTONS	= 15,
+			TP_DT_PADB_MOUSE_X_MSN		= 16,
+			TP_DT_PADB_MOUSE_X_LSN		= 17,
+			TP_DT_PADB_MOUSE_Y_MSN		= 18,
+			TP_DT_PADB_MOUSE_Y_LSN		= 19,
 
 			// Controller C
-			TP_DT_PADC_RLDU		= 14,	// D-pad
-			TP_DT_PADC_SACB		= 15,	// Start, A, C, B
-			TP_DT_PADC_MXYZ		= 16,	// Mode, X, Y, Z (6-button only)
+			TP_DT_PADC_RLDU			= 20,	// D-pad
+			TP_DT_PADC_SACB			= 21,	// Start, A, C, B
+			TP_DT_PADC_MXYZ			= 22,	// Mode, X, Y, Z (6-button only)
+
+			// Controller C (Mega Mouse)
+			TP_DT_PADC_MOUSE_SIGNOVER	= 20,
+			TP_DT_PADC_MOUSE_BUTTONS	= 21,
+			TP_DT_PADC_MOUSE_X_MSN		= 22,
+			TP_DT_PADC_MOUSE_X_LSN		= 23,
+			TP_DT_PADC_MOUSE_Y_MSN		= 24,
+			TP_DT_PADC_MOUSE_Y_LSN		= 25,
 
 			// Controller D
-			TP_DT_PADD_RLDU		= 17,	// D-pad
-			TP_DT_PADD_SACB		= 18,	// Start, A, C, B
-			TP_DT_PADD_MXYZ		= 19,	// Mode, X, Y, Z (6-button only)
+			TP_DT_PADD_RLDU			= 26,	// D-pad
+			TP_DT_PADD_SACB			= 27,	// Start, A, C, B
+			TP_DT_PADD_MXYZ			= 28,	// Mode, X, Y, Z (6-button only)
+
+			// Controller D (Mega Mouse)
+			TP_DT_PADD_MOUSE_SIGNOVER	= 26,
+			TP_DT_PADD_MOUSE_BUTTONS	= 27,
+			TP_DT_PADD_MOUSE_X_MSN		= 28,
+			TP_DT_PADD_MOUSE_X_LSN		= 29,
+			TP_DT_PADD_MOUSE_Y_MSN		= 30,
+			TP_DT_PADD_MOUSE_Y_LSN		= 31,
 
 			TP_DT_MAX
 		};

@@ -202,12 +202,18 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 	assert(ioType >= IOT_NONE && ioType < IOT_MAX);
 
 	if (virtPort > VIRTPORT_EXT) {
-		// Virtual ports above EXT do not support anything
-		// except 3-button and 6-button controllers.
-		assert(ioType >= IOT_NONE && ioType <= IOT_6BTN);
-		// TODO: Set IOT_NONE if the assertion fails in release?
-		if (ioType < IOT_NONE || ioType > IOT_6BTN)
-			return;
+		// Team Player supports 3BTN, 6BTN, and MOUS.
+		// Other ports only support 3BTN and 6BTN.
+		if (virtPort >= VIRTPORT_TP1A && virtPort <= VIRTPORT_TP2D) {
+			assert((ioType >= IOT_NONE && ioType <= IOT_6BTN) || ioType == IOT_MEGA_MOUSE);
+			if (ioType < IOT_NONE || (ioType > IOT_6BTN && ioType != IOT_MEGA_MOUSE))
+				return;
+		} else {
+			assert(ioType >= IOT_NONE && ioType <= IOT_6BTN);
+			// TODO: Set IOT_NONE if the assertion fails in release?
+			if (ioType < IOT_NONE || ioType > IOT_6BTN)
+				return;
+		}
 	}
 
 	IoManagerPrivate::IoDevice *const dev = &d->ioDevices[virtPort];

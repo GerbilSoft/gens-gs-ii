@@ -469,7 +469,7 @@ void IoManagerPrivate::rebuildCtrlIndexTable(int physPort)
 	int i = 0;	// data.tp.ctrlIndexTbl index
 	for (int pad = 0; pad < 4; pad++) {
 		// TODO: Move dtPerPortMax to a class constant?
-		static const int dtPerPortMax = (TP_DT_PADA_MXYZ - TP_DT_PADA_RLDU) + 1;
+		static const int dtPerPortMax = (TP_DT_PADA_MOUSE_Y_LSN - TP_DT_PADA_RLDU) + 1;
 		const int dtBase = (TP_DT_PADA_RLDU + (pad * dtPerPortMax));
 		const int virtPort = virtPortBase + pad;
 
@@ -481,15 +481,25 @@ void IoManagerPrivate::rebuildCtrlIndexTable(int physPort)
 
 			case IoManager::IOT_3BTN:
 				dev->data.tp.padTypes[pad] = TP_PT_3BTN;
-				dev->data.tp.ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 0);
-				dev->data.tp.ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 1);
+				dev->data.tp.ctrlIndexTbl[i++] = dtBase + 0;
+				dev->data.tp.ctrlIndexTbl[i++] = dtBase + 1;
 				break;
 
 			case IoManager::IOT_6BTN:
 				dev->data.tp.padTypes[pad] = TP_PT_6BTN;
-				dev->data.tp.ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 0);
-				dev->data.tp.ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 1);
-				dev->data.tp.ctrlIndexTbl[i++] = (TP_DataType)(dtBase + 2);
+				dev->data.tp.ctrlIndexTbl[i++] = dtBase + 0;
+				dev->data.tp.ctrlIndexTbl[i++] = dtBase + 1;
+				dev->data.tp.ctrlIndexTbl[i++] = dtBase + 2;
+				break;
+
+			case IoManager::IOT_MEGA_MOUSE:
+				dev->data.tp.padTypes[pad] = TP_PT_MOUSE;
+				dev->data.tp.ctrlIndexTbl[i++] = dtBase + 0;
+				dev->data.tp.ctrlIndexTbl[i++] = dtBase + 1;
+				dev->data.tp.ctrlIndexTbl[i++] = dtBase + 2;
+				dev->data.tp.ctrlIndexTbl[i++] = dtBase + 3;
+				dev->data.tp.ctrlIndexTbl[i++] = dtBase + 4;
+				dev->data.tp.ctrlIndexTbl[i++] = dtBase + 5;
 				break;
 		}
 	}

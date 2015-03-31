@@ -137,6 +137,14 @@ int CtrlConfig::load(const QSettings &qSettings, KeyManager *keyManager)
 		    ioType >= IoManager::IOT_MAX) {
 			// No controller information.
 			isValidCtrl = false;
+		} else if (virtPort >= IoManager::VIRTPORT_TP1A &&
+			   virtPort <= IoManager::VIRTPORT_TP2A)
+		{
+			// Team Player supports NONE, 3BTN, 6BTN, and MOUS.
+			if (ioType > IoManager::IOT_6BTN && ioType != IoManager::IOT_MEGA_MOUSE) {
+				// Not supported.
+				isValidCtrl = false;
+			}
 		} else if (virtPort > IoManager::VIRTPORT_EXT &&
 			   ioType > IoManager::IOT_6BTN) {
 			// Team Player / 4WP doesn't support this controller.
