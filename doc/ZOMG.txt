@@ -442,7 +442,7 @@ components that are specific to the Sega Mega Drive hardware.
 | Z80_ctrl.bin   |              4 |   Varies   |
 | TIME_reg.bin   |            256 |    8-bit   |
 | TMSS_reg.bin   |              9 |   Varies   |
-| vdp_sat.bin    |            640 |  16-bit BE |
+| vdp_sat.bin    |            320 |  16-bit BE |
 +----------------+----------------+------------+
 
 ----------------------------------------------------------------
@@ -742,9 +742,8 @@ cause unusual effects onscreen due to the Y, size, and link fields
 being read from the cache, while the attribute and X fields are read
 from VRAM.
 
-NOTE 2: The SAT cache in ZOMG is the full 640 bytes. It's currently
-unknown whether or not the cache actually stores the attribute and X
-fields, but for now, they're stored here.
+NOTE 2: The SAT cache in ZOMG is only 320 bytes. Only the first three
+fields (Y position, size, and link) are stored in the cache.
 
 NOTE 3: If this file is missing, the cache can be created by copying
 the Sprite Attribute Table from VRAM. This may not be as accurate, but
@@ -752,4 +751,4 @@ it's "good enough" in most cases.
 
 C equivalent for vdp_sat.bin:
 
-uint16_t vdp_sat[320];	// 16BE: VDP Sprite Attribute Table cache.
+uint16_t vdp_sat[160];	// 16BE: VDP Sprite Attribute Table cache.

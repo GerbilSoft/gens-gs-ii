@@ -413,7 +413,16 @@ void Vdp::zomgSaveMD(LibZomg::Zomg *zomg) const
 	// Save VDP SAT. (MD only)
 	// NOTE: VDP SAT only has 80 entries.
 	// SprAttrTbl_m5 is 128 entries to prevent overflow.
-	zomg->saveMD_VDP_SAT(d->SprAttrTbl_m5.w, d->SprAttrTbl_sz, ZOMG_BYTEORDER_16H);
+	uint16_t vdp_sat[160];  // Only store the first two words of each sprite entry.
+	const uint16_t *sat_cache = &d->SprAttrTbl_m5.w[0];
+	uint16_t *sat_zomg = &vdp_sat[0];
+	for (; sat_cache < &d->SprAttrTbl_m5.w[80*2]; sat_cache += 8, sat_zomg += 4) {
+		sat_zomg[0] = sat_cache[0];
+		sat_zomg[1] = sat_cache[1];
+		sat_zomg[2] = sat_cache[4];
+		sat_zomg[3] = sat_cache[5];
+	}
+	zomg->saveMD_VDP_SAT(vdp_sat, sizeof(vdp_sat), ZOMG_BYTEORDER_16H);
 }
 
 
@@ -475,12 +484,28 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 	// Load VDP SAT. (MD only)
 	// NOTE: VDP SAT only has 80 entries.
 	// SprAttrTbl_m5 is 128 entries to prevent overflow.
-	ret = zomg->loadMD_VDP_SAT(d->SprAttrTbl_m5.w, d->SprAttrTbl_sz, ZOMG_BYTEORDER_16H);
+	uint16_t vdp_sat[320];  // Compatibility with older vdp_sat.bin that stored the full 640 bytes.
+	ret = zomg->loadMD_VDP_SAT(vdp_sat, sizeof(vdp_sat), ZOMG_BYTEORDER_16H);
 	if (ret <= 0) {
 		// Savestate doesn't have an SAT.
 		// Create it by copying from VRAM.
-		// TODO: If ret < d->SprAttrTbl_sz?
+		// TODO: If ret < 320?
 		memcpy(d->SprAttrTbl_m5.w, d->Spr_Tbl_Addr_PtrM5(0), d->SprAttrTbl_sz);
+	} else if (ret >= 640) {
+		// Full 640-byte SAT is stored.
+		// Copy it all over as-is.
+		memcpy(d->SprAttrTbl_m5.w, vdp_sat, sizeof(d->SprAttrTbl_sz));
+	} else {
+		// 320-byte SAT cache is stored.
+		// Expand it in memory.
+		uint16_t *sat_cache = &d->SprAttrTbl_m5.w[0];
+		const uint16_t *sat_zomg = &vdp_sat[0];
+		for (; sat_cache < &d->SprAttrTbl_m5.w[80*2]; sat_cache += 8, sat_zomg += 4) {
+			sat_cache[0] = sat_zomg[0];
+			sat_cache[1] = sat_zomg[1];
+			sat_cache[4] = sat_zomg[2];
+			sat_cache[5] = sat_zomg[3];
+		}
 	}
 
 	// Clear the sprite dot overflow flag.
