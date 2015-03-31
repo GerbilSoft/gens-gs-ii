@@ -430,7 +430,7 @@ void IoManagerPrivate::updateDevice_TP(int physPort, uint8_t oldTristateInput)
 
 			// Controller data.
 			// TODO: Move dtPerPortMax to a class constant?
-			static const int dtPerPortMax = (TP_DT_PADA_MXYZ - TP_DT_PADA_RLDU) + 1;
+			static const int dtPerPortMax = (TP_DT_PADA_MOUSE_Y_LSN - TP_DT_PADA_RLDU) + 1;
 			const int virtPort = virtPortBase + (adj_counter / dtPerPortMax);
 			const int shift = (adj_counter % dtPerPortMax) * 4;
 
