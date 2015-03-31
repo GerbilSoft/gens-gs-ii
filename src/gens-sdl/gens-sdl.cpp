@@ -219,8 +219,16 @@ int main(int argc, char *argv[])
 		sdlHandler->wait_for_frame_sync();
 	}
 
+	// NOTE: Deleting sdlHandler can cause crashes on Windows
+	// due to the timer callback trying to post the semaphore
+	// after it's been deleted.
+	// Shut down the SDL functions manually.
+	sdlHandler->end_timers();
+	sdlHandler->end_audio();
+	sdlHandler->end_video();
+	//delete sdlHandler;
+
 	// Shut. Down. EVERYTHING.
-	delete sdlHandler;
 	delete keyManager;
 	delete context;
 	delete rom;
