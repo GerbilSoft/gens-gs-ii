@@ -75,7 +75,7 @@ int SdlHandler::init_video(void)
 
 	// Create the screen surface.
 	// TODO: Fullscreen option.
-	m_screen = SDL_SetVideoMode(320, 240, 32, SDL_HWSURFACE);
+	m_screen = SDL_SetVideoMode(320, 240, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
 	return 0;
 }
 
