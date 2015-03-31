@@ -240,6 +240,8 @@ class VdpPrivate
 		uint32_t H_Scroll_Tbl_Mask;	// Based on 128 KB.
 
 		/** VDP address functions: Get Pointers. **/
+		// FIXME: "& VRam_Mask" is probably not needed,
+		// since the table addresses are already masked.
 		// Name Tables
 		inline uint16_t *ScrA_Tbl_Addr_Ptr16(uint32_t offset)
 			{ return &VRam.u16[((ScrA_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
@@ -503,6 +505,10 @@ class VdpPrivate
 		// Includes both the current line and the next line.
 		uint8_t sprCountCache[2];
 
+	/*!*****************************************
+	 * VdpRend_m5: Mode 5 rendering functions. *
+	 *******************************************/
+	public:
 		// Sprite dot overflow flag.
 		// If set, the previous line had a sprite dot overflow.
 		// This is needed to properly implement Sprite Masking in S1.
@@ -569,6 +575,12 @@ class VdpPrivate
 
 		template<typename pixel>
 		FORCE_INLINE void T_Apply_SMS_LCB(pixel *dest, pixel border_color);
+
+	/*!*****************************************
+	 * VdpRend_m4: Mode 4 rendering functions. *
+	 *******************************************/
+	public:
+		FORCE_INLINE unsigned int Update_Sprite_Line_Cache_m4(int line);
 
 	/*!***************************************************************
 	 * VdpRend_Err: Error message rendering functions and variables. *
