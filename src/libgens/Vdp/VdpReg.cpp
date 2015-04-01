@@ -33,14 +33,14 @@ namespace LibGens {
  */
 void VdpPrivate::updateVdpMode(void)
 {
-	const VDP_Mode_t prevVdpMode = VDP_Mode;
+	const VdpTypes::VDP_Mode_t prevVdpMode = VDP_Mode;
 	const register uint8_t Set1 = VDP_Reg.m5.Set1;
 	const register uint8_t Set2 = VDP_Reg.m5.Set2;
 	// NOTE: M1, M2, and M3 descriptions match the official
 	// TMS9918A datasheet. M2 is *not* Graphic II, since
 	// this mode was not present in the original TMS9918,
 	// and was added in the TMS9918A.
-	VDP_Mode = (VDP_Mode_t)
+	VDP_Mode = (VdpTypes::VDP_Mode_t)
 		   (((Set2 & 0x10) >> 4) |	// M1 (Text)
 		    ((Set2 & 0x08) >> 2) |	// M2 (Multicolor)
 		    ((Set1 & 0x02) << 1) |	// M3 (Graphic II)
@@ -56,11 +56,11 @@ void VdpPrivate::updateVdpMode(void)
 	// If the VDP mode has changed, CRam needs to be updated.
 	if (prevVdpMode != VDP_Mode) {
 		// Update the VDP mode variables.
-		if (VDP_Mode & VDP_MODE_M5) {
+		if (VDP_Mode & VdpTypes::VDP_MODE_M5) {
 			// Mode 5.
 			// TODO: Only if we weren't in Mode 5 before?
 			palette.setPalMode(VdpPalette::PALMODE_MD);
-			palette.setMdColorMask(!(VDP_Mode & VDP_MODE_M4));
+			palette.setMdColorMask(!(VDP_Mode & VdpTypes::VDP_MODE_M4));
 		} else {
 			// TODO: Support other palette modes.
 		}
@@ -176,7 +176,7 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 	 * - Mode 4: Register 10
 	 * - TODO: Other modes? (assuming 10 for now)
 	 */
-	const int max_reg = ((VDP_Mode & VDP_MODE_M5) ? 23 : 10);
+	const int max_reg = ((VDP_Mode & VdpTypes::VDP_MODE_M5) ? 23 : 10);
 	if (reg_num > max_reg)
 		return;
 

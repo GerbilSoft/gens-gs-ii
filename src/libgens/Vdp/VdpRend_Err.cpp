@@ -348,11 +348,11 @@ inline void VdpRend_Err_Private::T_DrawVDPErrorMessage(MdFb *fb)
 	char buf[32];
 	const uint8_t vdpMode = curVdpMode;
 	snprintf(buf, sizeof(buf), "Mode Bits: %d%d%d%d%d",
-			(vdpMode & VdpPrivate::VDP_MODE_M5) >> 4,
-			(vdpMode & VdpPrivate::VDP_MODE_M4) >> 3,
-			(vdpMode & VdpPrivate::VDP_MODE_M3) >> 2,
-			(vdpMode & VdpPrivate::VDP_MODE_M2) >> 1,
-			(vdpMode & VdpPrivate::VDP_MODE_M1));
+			(vdpMode & VdpTypes::VDP_MODE_M5) >> 4,
+			(vdpMode & VdpTypes::VDP_MODE_M4) >> 3,
+			(vdpMode & VdpTypes::VDP_MODE_M3) >> 2,
+			(vdpMode & VdpTypes::VDP_MODE_M2) >> 1,
+			(vdpMode & VdpTypes::VDP_MODE_M1));
 	x = ((q->getHPix() - (16*8)) / 2) + q->getHPixBegin();
 	T_DrawText<pixel, text_color>(fb, x, y, buf);
 
@@ -369,10 +369,10 @@ inline void VdpRend_Err_Private::T_DrawVDPErrorMessage(MdFb *fb)
 	};
 	const char *cur_mode;
 
-	if (vdpMode & VdpPrivate::VDP_MODE_M5) {
+	if (vdpMode & VdpTypes::VDP_MODE_M5) {
 		// Mode 5. (SHOULDN'T HAPPEN!)
 		cur_mode = "5 (Mega Drive)";
-	} else if (vdpMode & VdpPrivate::VDP_MODE_M4) {
+	} else if (vdpMode & VdpTypes::VDP_MODE_M4) {
 		// Mode 4.
 		cur_mode = "4 (SMS/GG)";
 	} else {

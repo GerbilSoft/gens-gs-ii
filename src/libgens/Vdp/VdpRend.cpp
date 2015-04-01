@@ -83,7 +83,7 @@ void VdpPrivate::rend_reset(void)
 void Vdp::renderLine(void)
 {
 	// TODO: 32X-specific function.
-	if (d->VDP_Mode & VdpPrivate::VDP_MODE_M5) {
+	if (d->VDP_Mode & VdpTypes::VDP_MODE_M5) {
 		// Mode 5.
 		// TODO: Port to LibGens.
 		if (SysStatus._32X) {

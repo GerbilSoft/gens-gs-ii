@@ -144,33 +144,7 @@ class VdpPrivate
 		inline bool isIM1orIM2(void) const
 			{ return ((VDP_Reg.m5.Set4 & 0x02) == 0x02); }
 
-		/**
-		 * Current VDP mode.
-		 * Bitfield using the M1-M5 bits from the VDP registers.
-		 */
-		enum VDP_Mode_t {
-			// Individual mode bits.
-			VDP_MODE_M1 = (1 << 0),	// Text
-			VDP_MODE_M2 = (1 << 1),	// Multicolor
-			VDP_MODE_M3 = (1 << 2),	// Graphic II
-			VDP_MODE_M4 = (1 << 3),	// Sega Master System
-			VDP_MODE_M5 = (1 << 4),	// Sega Mega Drive
-
-			// TMS9918 modes.
-			VDP_MODE_TMS_GRAPHIC_I		= 0,
-			VDP_MODE_TMS_TEXT		= VDP_MODE_M1,
-			VDP_MODE_TMS_MULTICOLOR		= VDP_MODE_M2,
-			VDP_MODE_TMS_GRAPHIC_II		= VDP_MODE_M3,
-			VDP_MODE_TMS_INVALID_M1_M2	= VDP_MODE_M1 | VDP_MODE_M2,
-			VDP_MODE_TMS_TEXT_EXT		= VDP_MODE_M1 | VDP_MODE_M3,
-			VDP_MODE_TMS_MULTICOLOR_EXT	= VDP_MODE_M2 | VDP_MODE_M3,
-			VDP_MODE_TMS_INVALID_M1_M2_M3	= VDP_MODE_M1 | VDP_MODE_M2 | VDP_MODE_M3,
-
-			// Sega Master System II modes.
-			VDP_MODE_M4_224 = VDP_MODE_M4 | VDP_MODE_M3 | VDP_MODE_M1,
-			VDP_MODE_M4_240 = VDP_MODE_M4 | VDP_MODE_M3 | VDP_MODE_M2,
-		};
-		VDP_Mode_t VDP_Mode;
+		VdpTypes::VDP_Mode_t VDP_Mode;
 		void updateVdpMode(void);
 
 		// VRam, VSRam.

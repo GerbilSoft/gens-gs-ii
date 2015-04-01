@@ -79,7 +79,7 @@ VdpPrivate::VdpPrivate(Vdp *q)
 	// Clear VDP_Reg before initializing the VDP.
 	// Valgrind complains if we don't do this.
 	memset(&VDP_Reg.reg[0], 0x00, sizeof(VDP_Reg.reg));
-	VDP_Mode = (VDP_Mode_t)0;
+	VDP_Mode = (VdpTypes::VDP_Mode_t)0;
 }
 
 VdpPrivate::~VdpPrivate()
@@ -222,9 +222,9 @@ void Vdp::updateVdpLines(bool resetCurrent)
 	// Check the current video mode.
 	// NOTE: Unlike Gens/GS, we don't check if a ROM is loaded because
 	// the VDP code isn't used at all in Gens/GS II during "idle".
-	if (d->VDP_Mode & VdpPrivate::VDP_MODE_M5) {
+	if (d->VDP_Mode & VdpTypes::VDP_MODE_M5) {
 		// Mode 5. Must be either 224 lines or 240 lines.
-		if (d->VDP_Mode & VdpPrivate::VDP_MODE_M3)
+		if (d->VDP_Mode & VdpTypes::VDP_MODE_M3)
 			LineOffset = 2; // 240 lines.
 		else
 			LineOffset = 1; // 224 lines.
@@ -234,11 +234,11 @@ void Vdp::updateVdpLines(bool resetCurrent)
 		// Modes 0-3 may only be 192 lines.
 		// TODO: If emulating SMS1, disable 224-line and 240-line modes.
 		switch (d->VDP_Mode) {
-			case VdpPrivate::VDP_MODE_M4_224:
+			case VdpTypes::VDP_MODE_M4_224:
 				// Mode 4: 224 lines.
 				LineOffset = 1;
 				break;
-			case VdpPrivate::VDP_MODE_M4_240:
+			case VdpTypes::VDP_MODE_M4_240:
 				// Mode 4: 240 lines.
 				LineOffset = 2;
 				break;

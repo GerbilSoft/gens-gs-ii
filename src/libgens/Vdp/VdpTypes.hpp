@@ -26,11 +26,10 @@
 
 #include <stdint.h>
 
-namespace LibGens
-{
+namespace LibGens {
 
-namespace VdpTypes
-{
+namespace VdpTypes {
+
 	/**
 	 * Video RAM.
 	 * SMS/GG: 16 KB.
@@ -199,6 +198,33 @@ namespace VdpTypes
 			VDP_LAYER_SCROLLB_HIGH	|
 			VDP_LAYER_SPRITE_LOW	|
 			VDP_LAYER_SPRITE_HIGH);
+
+	/**
+	 * VDP mode.
+	 * Bitfield using the M1-M5 bits from the VDP registers.
+	 */
+	enum VDP_Mode_t {
+		// Individual mode bits.
+		VDP_MODE_M1 = (1 << 0),	// Text
+		VDP_MODE_M2 = (1 << 1),	// Multicolor
+		VDP_MODE_M3 = (1 << 2),	// Graphic II
+		VDP_MODE_M4 = (1 << 3),	// Sega Master System
+		VDP_MODE_M5 = (1 << 4),	// Sega Mega Drive
+
+		// TMS9918 modes.
+		VDP_MODE_TMS_GRAPHIC_I		= 0,
+		VDP_MODE_TMS_TEXT		= VDP_MODE_M1,
+		VDP_MODE_TMS_MULTICOLOR		= VDP_MODE_M2,
+		VDP_MODE_TMS_GRAPHIC_II		= VDP_MODE_M3,
+		VDP_MODE_TMS_INVALID_M1_M2	= VDP_MODE_M1 | VDP_MODE_M2,
+		VDP_MODE_TMS_TEXT_EXT		= VDP_MODE_M1 | VDP_MODE_M3,
+		VDP_MODE_TMS_MULTICOLOR_EXT	= VDP_MODE_M2 | VDP_MODE_M3,
+		VDP_MODE_TMS_INVALID_M1_M2_M3	= VDP_MODE_M1 | VDP_MODE_M2 | VDP_MODE_M3,
+
+		// Sega Master System II modes.
+		VDP_MODE_M4_224 = VDP_MODE_M4 | VDP_MODE_M3 | VDP_MODE_M1,
+		VDP_MODE_M4_240 = VDP_MODE_M4 | VDP_MODE_M3 | VDP_MODE_M2,
+	};
 }
 
 }
