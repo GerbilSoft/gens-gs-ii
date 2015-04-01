@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * VdpRend_m5.cpp: VDP Mode 4 rendering code. (Part of the Vdp class.)     *
+ * VdpRend_m4.cpp: VDP Mode 4 rendering code. (Part of the Vdp class.)     *
  *                                                                         *
  * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
@@ -55,8 +55,6 @@ FORCE_INLINE unsigned int VdpPrivate::Update_Sprite_Line_Cache_m4(int line)
 	SprLineCache_t *cache = &sprLineCache[cacheId][0];
 	uint8_t count = 0;
 
-	// Process up to max_spr_line sprites.
-	// (8 for Mode 4, unless sprite limits are disabled.)
 	const int screen_h = 192;	// TODO: 224, 240?
 	// Sprite height. (8x8 or 8x16, depending on reg1)
 	int sprite_h = 8 + ((VDP_Reg.m4.Set2 & 0x02) << 2);
@@ -64,7 +62,8 @@ FORCE_INLINE unsigned int VdpPrivate::Update_Sprite_Line_Cache_m4(int line)
 	uint8_t sprite_zoom = (VDP_Reg.m4.Set2 & 0x01);
 
 	const uint8_t *spr_VRam = &VRam.u8[Spr_Tbl_Addr];
-	for (int i = 0; i < 64; i++) {
+	int i = 0;
+	do {
 		/**
 		 * Sprite entries aren't contiguous in Mode 4.
 		 * Format:
@@ -93,20 +92,19 @@ FORCE_INLINE unsigned int VdpPrivate::Update_Sprite_Line_Cache_m4(int line)
 			break;
 		}
 
-		if (y >= 240) {
+		if (y >= (256-16)) {
 			// Wrap around to the top of the screen.
 			y -= 256;
 		}
 
 		// Determine y_max.
 		const int y_max = y + (sprite_h << sprite_zoom) - 1;
-		if (y >= line && line <= y_max) {
+		if (line >= y && line <= y_max) {
 			// Sprite is in range.
 			if (count == max_spr_line) {
 				// Sprite overflow!
 				// NOTE: Flag is only set in the active area.
-				// TODO: 224/240-line mode?
-				if (line >= 0 && line < 192) {
+				if (line >= 0 && line < screen_h) {
 					ret = VdpStatus::VDP_STATUS_SOVR;
 				}
 				break;
@@ -130,7 +128,7 @@ FORCE_INLINE unsigned int VdpPrivate::Update_Sprite_Line_Cache_m4(int line)
 				sprite_zoom = 0;
 			}
 		}
-	}
+	} while (++i < 64);
 
 	// Save the sprite count for the next line.
 	sprCountCache[cacheId] = count;
