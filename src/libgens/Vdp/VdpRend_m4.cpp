@@ -123,10 +123,6 @@ FORCE_INLINE unsigned int VdpPrivate::Update_Sprite_Line_Cache_m4(int line)
 			// Added a sprite.
 			count++;
 			cache++;
-			if (count == 4) {
-				// TODO: On SMS2 and GG, allow all sprites to be zoomed.
-				sprite_zoom = 0;
-			}
 		}
 	} while (++i < 64);
 
