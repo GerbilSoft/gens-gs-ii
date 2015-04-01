@@ -483,7 +483,19 @@ class VdpPrivate
 			uint8_t Size_X;
 			uint8_t Size_Y;
 			int16_t Pos_Y_Max;
-			uint16_t Num_Tile;	// Includes palette, priority, and flip bits.
+			union {
+				uint16_t Num_Tile;	// M5: Includes palette, priority, and flip bits.
+				struct {
+					// M4/TMS sprite information.
+#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+					uint8_t sprite;	// TMS/M4: Sprite pattern number.
+					uint8_t color;	// TMS:    Color number.
+#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
+					uint8_t color;	// TMS:    Color number.
+					uint8_t sprite;	// TMS/M4: Sprite pattern number.
+#endif
+				};
+			};
 		};
 
 		/**
@@ -581,6 +593,12 @@ class VdpPrivate
 	 *******************************************/
 	public:
 		FORCE_INLINE unsigned int Update_Sprite_Line_Cache_m4(int line);
+
+	/*!******************************************************
+	 * VdpRend_tms: TMS9918A Modes 0-3 rendering functions. *
+	 ********************************************************/
+	public:
+		FORCE_INLINE unsigned int Update_Sprite_Line_Cache_tms(int line);
 
 	/*!***************************************************************
 	 * VdpRend_Err: Error message rendering functions and variables. *
