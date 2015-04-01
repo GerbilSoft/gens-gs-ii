@@ -58,8 +58,15 @@ FORCE_INLINE unsigned int VdpPrivate::Update_Sprite_Line_Cache_m4(int line)
 	const int screen_h = 192;	// TODO: 224, 240?
 	// Sprite height. (8x8 or 8x16, depending on reg1)
 	int sprite_h = 8 + ((VDP_Reg.m4.Set2 & 0x02) << 2);
-	// Sprite zoom flag. (TODO: Ignore on MD.)
-	uint8_t sprite_zoom = (VDP_Reg.m4.Set2 & 0x01);
+	// Sprite zoom flag.
+	// - SMS1: All 8 sprites can be zoomed vertically;
+	//         only first 4 sprites can be zoomed horizontally.
+	// - SMS2, GG: All 8 sprites can be zoomed in both directions.
+	// - MD(PBC): No sprites can be zoomed at all.
+	uint8_t sprite_zoom = 0;
+	if (VDP_Model < VdpTypes::VDP_MODEL_MD_PBC) {
+		sprite_zoom = (VDP_Reg.m4.Set2 & 0x01);
+	}
 
 	const uint8_t *spr_VRam = &VRam.u8[Spr_Tbl_Addr];
 	int i = 0;

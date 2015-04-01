@@ -225,6 +225,46 @@ namespace VdpTypes {
 		VDP_MODE_M4_224 = VDP_MODE_M4 | VDP_MODE_M3 | VDP_MODE_M1,
 		VDP_MODE_M4_240 = VDP_MODE_M4 | VDP_MODE_M3 | VDP_MODE_M2,
 	};
+
+	// VDP models.
+	enum VDP_Model_t {
+		// TMS9918A
+		// Used on SG-1000, SG-1000 MkII,
+		// Othello MultiVision, ColecoVision,
+		// and others.
+		VDP_MODEL_TMS9918A = 0,
+
+		// Sega Master System, model 1 (315-5124)
+		VDP_MODEL_SMS1,
+
+		// Sega Master System, model 2 (315-5246)
+		// Fixes 'unused' register bits,
+		// and adds 224-line and 240-line modes.
+		VDP_MODEL_SMS2,
+
+		// Sega Game Gear (315-5378)
+		// Same as SMS2, but has expanded CRAM.
+		VDP_MODEL_GG,
+
+		// Sega Mega Drive (315-5313), in MkIII mode.
+		// Same as SMS2, except: [see msvdp-20021112.txt]
+		// - Does not support 224-line or 240-line modes.
+		// - TMS9918A modes do not work. (screen is black)
+		// - First byte of command word is latched, and
+		//   is not processed until the next byte is received.
+		// - Data port writes do not update the read buffer.
+		// - Data writes always go to CRAM if CD1=1. (CD0 is ignored)
+		//   Other VDP models require CD1=1, CD0=1.
+		// - MAG bit does not function.
+		// - Mode 5 is supported, but with limitations.
+		VDP_MODEL_MD_PBC,
+
+		// Sega Mega Drive (315-5313) in native mode.
+		// Uses a completely different 16-bit interface.
+		VDP_MODEL_MD,
+
+		VDP_MODEL_MAX
+	};
 }
 
 }

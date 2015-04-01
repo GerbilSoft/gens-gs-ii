@@ -144,8 +144,13 @@ class VdpPrivate
 		inline bool isIM1orIM2(void) const
 			{ return ((VDP_Reg.m5.Set4 & 0x02) == 0x02); }
 
+		// VDP mode.
 		VdpTypes::VDP_Mode_t VDP_Mode;
 		void updateVdpMode(void);
+
+		// VDP model.
+		// TODO: Allow user to change this.
+		VdpTypes::VDP_Model_t VDP_Model;
 
 		// VRam, VSRam.
 		// NOTE: VdpSpriteMaskingTest requires access to VRam.

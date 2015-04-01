@@ -59,6 +59,7 @@ const VdpTypes::VdpEmuOptions_t VdpPrivate::def_vdpEmuOptions = {
 
 VdpPrivate::VdpPrivate(Vdp *q)
 	: q(q)
+	, VDP_Model(VdpTypes::VDP_MODEL_MD)	// TODO: Add support for more models.
 	, VRam_Mask(0xFFFF)	// Always ensure this mask is valid.
 	, d_err(new VdpRend_Err_Private(q))
 {
