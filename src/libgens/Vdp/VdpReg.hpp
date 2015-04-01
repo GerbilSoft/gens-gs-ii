@@ -292,7 +292,7 @@ namespace VdpTypes {
 
 			/**
 			 * Register 4: Background Pattern Generator base address.
-			 * [   x    x    x    x    x    1    1    1]
+			 * [   x    x    x    x    x *G13 *G12 *G11]
 			 *
 			 * SMS1: Bits 2-0 should be set. Otherwise, the VDP will
 			 *       fetch pattern and name table data incorrectly.
