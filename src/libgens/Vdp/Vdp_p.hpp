@@ -292,6 +292,16 @@ class VdpPrivate
 			uint32_t addr_hi_latch;	// Latch for A16-A14. (TODO: Save to ZOMG.)
 			uint8_t code;		// Access code. (CD5-CD0)
 
+			// TODO: Address LSB latch for MD Mode 4?
+
+			// Game Gear: CRAM latch.
+			// Writes to even CRAM addresses go here.
+			// Writes to odd CRAM addresses act as a word write,
+			// with the written data as the even byte and
+			// this latch as the odd byte.
+			// NOTE: Game Gear CRAM is LE16.
+			uint8_t cram_latch_gg;
+
 			void reset(void)
 			{
 				ctrl_latch = 0;
@@ -300,6 +310,7 @@ class VdpPrivate
 				address = 0;
 				addr_hi_latch = 0;
 				code = 0;
+				cram_latch_gg = 0;
 			}
 		} VDP_Ctrl;
 
