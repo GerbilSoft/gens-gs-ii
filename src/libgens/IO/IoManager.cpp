@@ -270,7 +270,12 @@ uint8_t IoManager::readDataMD(int physPort) const
 	// Note that tristate bit 7 is used for TH interrupt.
 	// All input bits should read the device data.
 	// All output bits should read the MD data.
-	return d->ioDevices[physPort].readData();
+	uint8_t data = d->ioDevices[physPort].readData();
+	if (d->ioDevices[physPort].type == IOT_XE_1AP) {
+		// XE-1AP's protocol is partially unclocked.
+		d->updateDevice_XE_1AP_onRead(physPort);
+	}
+	return data;
 }
 
 /**
@@ -284,7 +289,6 @@ void IoManager::writeDataMD(int physPort, uint8_t data)
 
 	d->ioDevices[physPort].mdData = data;
 	d->updateDevice(physPort);
-	// TODO: 4WP needs to copy this to the active device.
 }
 
 

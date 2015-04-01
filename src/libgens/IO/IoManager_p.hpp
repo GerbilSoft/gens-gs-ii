@@ -91,6 +91,9 @@ class IoManagerPrivate
 		void updateDevice_TP(int physPort, uint8_t oldTristateInput);
 		void updateDevice_4WP_Master(int physPort);
 		void updateDevice_4WP_Slave(int physPort);
+		void updateDevice_XE_1AP(int virtPort, uint8_t oldTristateInput);
+
+		void updateDevice_XE_1AP_onRead(int virtPort);
 
 		/**
 		 * Latch relX, relY, and signOver for a Sega Mega Mouse.
@@ -383,6 +386,10 @@ class IoManagerPrivate
 					// Game Gear: Start button.
 					bool pause;
 				} sms;
+				struct {
+					// XE-1Ap
+					uint8_t latency;
+				} xe_1ap;
 			} data;
 		};
 

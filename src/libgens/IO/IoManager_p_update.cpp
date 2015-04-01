@@ -66,11 +66,16 @@ void IoManagerPrivate::updateDevice(int virtPort)
 			break;
 		}
 
+		case IoManager::IOT_TEAMPLAYER: {
+			updateDevice_TP(virtPort, oldTristateInput);
+			break;
+		}
+
 		case IoManager::IOT_4WP_MASTER: updateDevice_4WP_Master(virtPort); break;
 		case IoManager::IOT_4WP_SLAVE: updateDevice_4WP_Slave(virtPort); break;
 
-		case IoManager::IOT_TEAMPLAYER: {
-			updateDevice_TP(virtPort, oldTristateInput);
+		case IoManager::IOT_XE_1AP: {
+			updateDevice_XE_1AP(virtPort, oldTristateInput);
 			break;
 		}
 
@@ -348,7 +353,6 @@ void IoManagerPrivate::latchMegaMouse(int virtPort)
 void IoManagerPrivate::updateDevice_TP(int physPort, uint8_t oldTristateInput)
 {
 	assert(physPort >= IoManager::PHYSPORT_1 && physPort <= IoManager::PHYSPORT_2);
-
 	IoDevice *const dev = &ioDevices[physPort];
 
 	// Check if either TH or TR has changed.
@@ -597,6 +601,120 @@ void IoManagerPrivate::updateDevice_4WP_Slave(int physPort)
 	virtDev->mdData = dev->mdData;
 	updateDevice(virtPort);
 	dev->deviceData = virtDev->deviceData;
+}
+
+void IoManagerPrivate::updateDevice_XE_1AP(int virtPort, uint8_t oldTristateInput)
+{
+	// Protocol reference:
+	// https://code.google.com/p/genplus-gx/issues/detail?id=156#c17
+
+	// XE-1AP device was written to.
+	IoDevice *const dev = &ioDevices[virtPort];
+
+	// Check for TH falling edge.
+	if ((oldTristateInput & IOPIN_TH) && !dev->checkInputLine(IOPIN_TH)) {
+		// TH falling edge.
+		// Next acquisition cycle.
+		dev->data.xe_1ap.latency = 0;
+		dev->counter = 0;
+	} else {
+		// Make sure we've had enough reads for this sequence.
+		if (dev->data.xe_1ap.latency > 2) {
+			// Next acquisition sequence.
+			// Each sequence is 8 cycles, so we want to
+			// mask out the individual cycles in the
+			// current sequence while keeping the
+			// current sequence number.
+			dev->counter = (dev->counter & ~0x07) + 8;
+			if (dev->counter > 32) {
+				// Too many cycles.
+				dev->counter = 32;
+			}
+
+			// Do the first READ cycle.
+			updateDevice_XE_1AP_onRead(virtPort);
+		}
+	}
+}
+
+void IoManagerPrivate::updateDevice_XE_1AP_onRead(int virtPort)
+{
+	IoDevice *const dev = &ioDevices[virtPort];
+	uint8_t data = 0x40;
+
+	// Determine what data is being requested.
+	// Each acquisition sequence has eight internal data cycles,
+	// of which only a few are actually usable.
+	// TODO: Add analog sources to IoManager.
+	const uint8_t x = 128;
+	const uint8_t y = 128;
+	const uint8_t z = 128;
+
+	switch ((dev->counter >> 2) & 0x0F) {
+		case 0:
+			// E1, E2, Start, Select
+			data |= (dev->buttons & 0x0F);
+			break;
+		case 1:
+			// A, B, C, D
+			data |= ((dev->buttons >> 4) & 0x0F);
+			break;
+		case 2:
+			// X, MSB
+			data |= ((x >> 4) & 0xF);
+			break;
+		case 3:
+			// Y, MSB
+			data |= ((y >> 4) & 0xF);
+			break;
+		case 4:
+			// Unknown data...
+			break;
+		case 5:
+			// Z, MSB
+			data |= ((z >> 4) & 0xF);
+			break;
+		case 6:
+			// X, LSB
+			data |= (x & 0xF);
+			break;
+		case 7:
+			// Y, LSB
+			data |= (y & 0xF);
+			break;
+		case 8:
+			// Unknown data...
+			break;
+		case 9:
+			// Z, LSB
+			data |= (z & 0xF);
+			break;
+		default:
+			// Unknown data cycle.
+			break;
+	}
+
+	// Determine the internal cycle number.
+	uint8_t cycle = dev->counter & 0x07;
+
+	// TL indicates which part of the data acquisition is being returned.
+	// 0 == 1st part, 1 == 2nd part
+	data |= ((cycle & 4) << 2);
+
+	// TR indicates if data is ready.
+	// 1 == not ready, 0 == ready
+	// First part of cycle needs to be "not ready".
+	// Some games expect to see the "Not Ready" cycle,
+	// e.g. "Fastest One".
+	data |= (!(cycle & 3) << 5);
+
+	// Save the output data.
+	dev->deviceData = data;
+
+	// Go to the next cycle.
+	cycle = (cycle + 1) & 0x07;
+	dev->counter = (dev->counter & ~0x07) | cycle;
+	dev->data.xe_1ap.latency++;
 }
 
 }
