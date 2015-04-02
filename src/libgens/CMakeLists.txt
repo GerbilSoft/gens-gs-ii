@@ -80,10 +80,6 @@ SET(libgens_SRCS
 	Data/mcd_rom_db.c
 	Data/32X/fw_32x.c
 	Util/MdFb.cpp
-	IO/IoManager.cpp
-	IO/IoManager_p.cpp
-	IO/IoManager_p_update.cpp
-	IO/IoManager_btnNames.cpp
 	Cartridge/RomCartridgeMD.cpp
 	Save/EEPRomI2C.cpp
 	Save/EEPRomI2C_File.cpp
@@ -117,6 +113,37 @@ SET(libgens_VDP_H
 	Vdp/VdpStructs.hpp
 	)
 
+SET(libgens_IO_SRCS
+	IO/IoManager.cpp
+	IO/IoManager_p.cpp
+	IO/IoManager_p_update.cpp
+	IO/IoManager_btnNames.cpp
+	IO/Device.cpp
+	IO/Io3BTN.cpp
+	IO/Io6BTN.cpp
+	IO/Io2BTN.cpp
+	IO/IoTeamPlayer.cpp
+	IO/IoMegaMouse.cpp
+	IO/Io4WPM.cpp
+	IO/Io4WPS.cpp
+	IO/IoXE1AP.cpp
+	)
+
+# TODO: All headers, or just public headers?
+SET(libgens_IO_H
+	IO/IoManager.hpp
+	IO/IoManager_p.hpp
+	IO/Device.hpp
+	IO/Io3BTN.hpp
+	IO/Io6BTN.hpp
+	IO/Io2BTN.hpp
+	IO/IoTeamPlayer.hpp
+	IO/IoMegaMouse.hpp
+	IO/Io4WPM.hpp
+	IO/Io4WPS.hpp
+	IO/IoXE1AP.hpp
+	)
+
 IF(HAVE_LZMA)
 	SET(libgens_OPTIONAL_SRCS Decompressor/Dc7z.cpp)
 ELSE()
@@ -142,6 +169,8 @@ ADD_LIBRARY(gens STATIC
 	${libgens_SRCS}
 	${libgens_VDP_SRCS}
 	${libgens_VDP_H}
+	${libgens_IO_SRCS}
+	${libgens_IO_H}
 	${libgens_OPTIONAL_SRCS}
 	${libgens_COMPAT_SRCS}
 	)
