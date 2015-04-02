@@ -21,6 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#ifndef __LIBGENS_IO_IO4WPS_HPP__
+#define __LIBGENS_IO_IO4WPS_HPP__
+
 #include "Device.hpp"
 
 namespace LibGens { namespace IO {
@@ -68,3 +71,5 @@ class Io4WPS : public Device
 };
 
 } }
+
+#endif /* __LIBGENS_IO_IO4WPS_HPP__ */

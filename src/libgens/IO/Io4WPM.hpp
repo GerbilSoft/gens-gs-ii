@@ -21,6 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#ifndef __LIBGENS_IO_IO4WPM_HPP__
+#define __LIBGENS_IO_IO4WPM_HPP__
+
 #include "Device.hpp"
 #include "Io4WPS.hpp"
 
@@ -56,3 +59,5 @@ class Io4WPM : public Device
 };
 
 } }
+
+#endif /* __LIBGENS_IO_IO4WPM_HPP__ */
