@@ -678,29 +678,35 @@ void IoManager::update(int virtPort, uint32_t buttons)
  */
 void IoManager::zomgSaveMD(Zomg_MD_IoSave_t *state) const
 {
-	// TODO: Update for new device classes.
-	/*
+	const IO::Device *const dev1 = d->ioDevices[PHYSPORT_1];
+	const IO::Device *const dev2 = d->ioDevices[PHYSPORT_2];
+	const IO::Device *const devE = d->ioDevices[PHYSPORT_EXT];
+
+	// Physical ports must be allocated.
+	assert(dev1 != nullptr);
+	assert(dev2 != nullptr);
+	assert(devE != nullptr);
+
 	// Port 1
-	state->port1_data = d->ioDevices[PHYSPORT_1].mdData;
-	state->port1_ctrl = d->ioDevices[PHYSPORT_1].ctrl;
-	state->port1_ser_tx = d->ioDevices[PHYSPORT_1].serLastTx;
-	state->port1_ser_rx = 0xFF; // TODO
-	state->port1_ser_ctrl = d->ioDevices[PHYSPORT_1].serCtrl;
+	state->port1_data	= dev1->mdData;
+	state->port1_ctrl	= dev1->ctrl;
+	state->port1_ser_tx	= dev1->serLastTx;
+	state->port1_ser_rx	= 0xFF; // TODO
+	state->port1_ser_ctrl	= dev1->serCtrl;
 
 	// Port 2
-	state->port2_data = d->ioDevices[PHYSPORT_2].mdData;
-	state->port2_ctrl = d->ioDevices[PHYSPORT_2].ctrl;
-	state->port2_ser_tx = d->ioDevices[PHYSPORT_2].serLastTx;
-	state->port2_ser_rx = 0xFF; // TODO
-	state->port2_ser_ctrl = d->ioDevices[PHYSPORT_2].serCtrl;
+	state->port2_data	= dev2->mdData;
+	state->port2_ctrl	= dev2->ctrl;
+	state->port2_ser_tx	= dev2->serLastTx;
+	state->port2_ser_rx	= 0xFF; // TODO
+	state->port2_ser_ctrl	= dev2->serCtrl;
 
 	// Port 3 (EXT)
-	state->port3_data = d->ioDevices[PHYSPORT_EXT].mdData;
-	state->port3_ctrl = d->ioDevices[PHYSPORT_EXT].ctrl;
-	state->port3_ser_tx = d->ioDevices[PHYSPORT_EXT].serLastTx;
-	state->port3_ser_rx = 0xFF; // TODO
-	state->port3_ser_ctrl = d->ioDevices[PHYSPORT_EXT].serCtrl;
-	*/
+	state->port3_data	= devE->mdData;
+	state->port3_ctrl	= devE->ctrl;
+	state->port3_ser_tx	= devE->serLastTx;
+	state->port3_ser_rx	= 0xFF; // TODO
+	state->port3_ser_ctrl	= devE->serCtrl;
 }
 
 /**
@@ -709,34 +715,40 @@ void IoManager::zomgSaveMD(Zomg_MD_IoSave_t *state) const
  */
 void IoManager::zomgRestoreMD(const Zomg_MD_IoSave_t *state)
 {
-	// TODO: Update for new device classes.
-	/*
+	IO::Device *const dev1 = d->ioDevices[PHYSPORT_1];
+	IO::Device *const dev2 = d->ioDevices[PHYSPORT_2];
+	IO::Device *const devE = d->ioDevices[PHYSPORT_EXT];
+
+	// Physical ports must be allocated.
+	assert(dev1 != nullptr);
+	assert(dev2 != nullptr);
+	assert(devE != nullptr);
+
 	// Port 1
-	d->ioDevices[PHYSPORT_1].mdData = state->port1_data;
-	d->ioDevices[PHYSPORT_1].ctrl = state->port1_ctrl;
-	d->ioDevices[PHYSPORT_1].serLastTx = state->port1_ser_tx;
-	//d->ioDevices[PHYSPORT_1].serLastRx = state->port1_ser_rx;	// TODO
-	d->ioDevices[PHYSPORT_1].serCtrl = state->port1_ser_ctrl;
+	dev1->mdData	= state->port1_data;
+	dev1->ctrl	= state->port1_ctrl;
+	dev1->serLastTx	= state->port1_ser_tx;
+	//dev1->serLastRx	= state->port1_ser_rx;	// TODO
+	dev1->serCtrl	= state->port1_ser_ctrl;
 
 	// Port 2
-	d->ioDevices[PHYSPORT_2].mdData = state->port2_data;
-	d->ioDevices[PHYSPORT_2].ctrl = state->port2_ctrl;
-	d->ioDevices[PHYSPORT_2].serLastTx = state->port2_ser_tx;
-	//d->ioDevices[PHYSPORT_2].serLastRx = state->port2_ser_rx;	// TODO
-	d->ioDevices[PHYSPORT_2].serCtrl = state->port2_ser_ctrl;
+	dev2->mdData	= state->port2_data;
+	dev2->ctrl	= state->port2_ctrl;
+	dev2->serLastTx	= state->port2_ser_tx;
+	//dev2->serLastRx	= state->port2_ser_rx;	// TODO
+	dev2->serCtrl	= state->port2_ser_ctrl;
 
 	// Port 3 (EXT)
-	d->ioDevices[PHYSPORT_EXT].mdData = state->port3_data;
-	d->ioDevices[PHYSPORT_EXT].ctrl = state->port3_ctrl;
-	d->ioDevices[PHYSPORT_EXT].serLastTx = state->port3_ser_tx;
-	//d->ioDevices[PHYSPORT_EXT].serLastRx = state->port3_ser_rx;	// TODO
-	d->ioDevices[PHYSPORT_EXT].serCtrl = state->port3_ser_ctrl;
+	devE->mdData	= state->port3_data;
+	devE->ctrl	= state->port3_ctrl;
+	devE->serLastTx	= state->port3_ser_tx;
+	//devE->serLastRx	= state->port3_ser_rx;	// TODO
+	devE->serCtrl	= state->port3_ser_ctrl;
 
 	// Update the ports.
-	d->updateDevice(PHYSPORT_1);
-	d->updateDevice(PHYSPORT_2);
-	d->updateDevice(PHYSPORT_EXT);
-	*/
+	dev1->update();
+	dev2->update();
+	devE->update();
 }
 
 }
