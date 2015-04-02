@@ -32,6 +32,9 @@ Device::Device()
 	reset();
 }
 
+Device::~Device()
+{ }
+
 /**
  * Completely reset the Device.
  * This should be done on emulation startup or Hard Reset only.

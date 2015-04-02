@@ -32,6 +32,7 @@ class Device
 {
 	public:
 		Device();
+		virtual ~Device();
 		// TODO: Add constructor that takes another IoDevice
 		// in order to copy ctrl/etc.
 		// Do this for subclasses, too.
