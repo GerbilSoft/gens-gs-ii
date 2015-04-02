@@ -209,7 +209,7 @@ IoManager::IoType_t IoManager::devType(VirtPort_t virtPort) const
 {
 	assert(virtPort >= VIRTPORT_1 && virtPort < VIRTPORT_MAX);
 
-	IO::Device *const dev = d->ioDevices[virtPort];
+	const IO::Device *const dev = d->ioDevices[virtPort];
 	// Physical ports must be allocated.
 	assert(virtPort > VIRTPORT_EXT || dev != nullptr);
 
@@ -404,7 +404,7 @@ uint8_t IoManager::readCtrlMD(int physPort) const
 {
 	assert(physPort >= PHYSPORT_1 && physPort < PHYSPORT_MAX);
 
-	IO::Device *const dev = d->ioDevices[physPort];
+	const IO::Device *const dev = d->ioDevices[physPort];
 	assert(dev != nullptr);	// Physical ports must be allocated.
 
 	return dev->ctrl;
@@ -436,7 +436,7 @@ uint8_t IoManager::readSerCtrl(int physPort) const
 {
 	assert(physPort >= PHYSPORT_1 && physPort < PHYSPORT_MAX);
 
-	IO::Device *const dev = d->ioDevices[physPort];
+	const IO::Device *const dev = d->ioDevices[physPort];
 	assert(dev != nullptr);	// Physical ports must be allocated.
 
 	return (dev->serCtrl & 0xF8);
@@ -456,7 +456,7 @@ uint8_t IoManager::readSerTx(int physPort) const
 {
 	assert(physPort >= PHYSPORT_1 && physPort < PHYSPORT_MAX);
 
-	IO::Device *const dev = d->ioDevices[physPort];
+	const IO::Device *const dev = d->ioDevices[physPort];
 	assert(dev != nullptr);	// Physical ports must be allocated.
 
 	return dev->serLastTx;
@@ -476,7 +476,7 @@ uint8_t IoManager::readSerRx(int physPort) const
 {
 	assert(physPort >= PHYSPORT_1 && physPort < PHYSPORT_MAX);
 
-	IO::Device *const dev = d->ioDevices[physPort];
+	const IO::Device *const dev = d->ioDevices[physPort];
 	assert(dev != nullptr);	// Physical ports must be allocated.
 
 	// TODO
