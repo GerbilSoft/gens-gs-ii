@@ -201,6 +201,13 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 	assert(virtPort >= VIRTPORT_1 && virtPort < VIRTPORT_MAX);
 	assert(ioType >= IOT_NONE && ioType < IOT_MAX);
 
+	// Does the port actually need to be changed?
+	IoManagerPrivate::IoDevice *const dev = &d->ioDevices[virtPort];
+	if (dev->type == ioType) {
+		// Device does not need to be changed.
+		return;
+	}
+
 	if (virtPort > VIRTPORT_EXT) {
 		// Team Player supports 3BTN, 6BTN, and MOUS.
 		// Other ports only support 3BTN and 6BTN.
@@ -216,7 +223,6 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 		}
 	}
 
-	IoManagerPrivate::IoDevice *const dev = &d->ioDevices[virtPort];
 	dev->type = ioType;
 	// Only reset device data so we don't screw up emulation.
 	dev->resetDev();
