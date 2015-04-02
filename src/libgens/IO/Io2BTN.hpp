@@ -50,10 +50,10 @@ class Io2BTN : public Device
 		 */
 		virtual void update(void) override;
 
-	protected:
+	public:
 		// SMS: Pause button.
 		// Game Gear: Start button.
-		// TODO
+		// TODO: Add an accessor; make this work.
 		bool pause;
 };
 

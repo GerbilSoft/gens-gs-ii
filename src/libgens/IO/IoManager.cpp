@@ -26,6 +26,16 @@
 #define __LIBGENS_IN_IOMANAGER_CLASS__
 #include "IoManager_p.hpp"
 
+// I/O devices.
+#include "Device.hpp"
+#include "Io3BTN.hpp"
+#include "Io6BTN.hpp"
+#include "Io2BTN.hpp"
+#include "IoTeamPlayer.hpp"
+#include "Io4WPM.hpp"
+#include "Io4WPS.hpp"
+#include "IoMegaMouse.hpp"
+
 // C includes. (C++ namespace)
 #include <cassert>
 
@@ -53,7 +63,12 @@ IoManager::~IoManager()
  */
 void IoManager::reset(void)
 {
-	d->reset();
+	for (int i = 0; i < ARRAY_SIZE(d->ioDevices); i++) {
+		IO::Device *const dev = d->ioDevices[i];
+		if (dev != nullptr) {
+			dev->reset();
+		}
+	}
 }
 
 /**
@@ -64,7 +79,12 @@ void IoManager::reset(void)
  */
 void IoManager::doScanline(void)
 {
-	d->doScanline();
+	for (int i = 0; i < ARRAY_SIZE(d->ioDevices); i++) {
+		IO::Device *const dev = d->ioDevices[i];
+		if (dev != nullptr) {
+			dev->update_onScanline();
+		}
+	}
 }
 
 /** General device type functions. **/
@@ -188,7 +208,15 @@ string IoManager::FourCCToString(uint32_t fourCC)
 IoManager::IoType_t IoManager::devType(VirtPort_t virtPort) const
 {
 	assert(virtPort >= VIRTPORT_1 && virtPort < VIRTPORT_MAX);
-	return d->ioDevices[virtPort].type;
+
+	IO::Device *const dev = d->ioDevices[virtPort];
+	// Physical ports must be allocated.
+	assert(virtPort > VIRTPORT_EXT || dev != nullptr);
+
+	if (!dev) {
+		return IOT_NONE;
+	}
+	return d->ioDevices[virtPort]->type();
 }
 
 /**
@@ -198,36 +226,100 @@ IoManager::IoType_t IoManager::devType(VirtPort_t virtPort) const
  */
 void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 {
+	// TODO: This will require creating a new I/O device.
 	assert(virtPort >= VIRTPORT_1 && virtPort < VIRTPORT_MAX);
 	assert(ioType >= IOT_NONE && ioType < IOT_MAX);
 
 	// Does the port actually need to be changed?
-	IoManagerPrivate::IoDevice *const dev = &d->ioDevices[virtPort];
-	if (dev->type == ioType) {
-		// Device does not need to be changed.
-		return;
+	IO::Device *const old_dev = d->ioDevices[virtPort];
+	if (ioType == IOT_NONE) {
+		if (!old_dev || old_dev->type() == IOT_NONE) {
+			// Device does not need to be changed.
+			return;
+		}
+	} else {
+		if (old_dev && old_dev->type() == ioType) {
+			// Device does not need to be changed.
+			return;
+		}
 	}
 
 	if (virtPort > VIRTPORT_EXT) {
 		// Team Player supports 3BTN, 6BTN, and MOUS.
 		// Other ports only support 3BTN and 6BTN.
 		if (virtPort >= VIRTPORT_TP1A && virtPort <= VIRTPORT_TP2D) {
+			// Team Player virtual ports support 3BTN, 6BTN, and MOUS.
 			assert((ioType >= IOT_NONE && ioType <= IOT_6BTN) || ioType == IOT_MEGA_MOUSE);
 			if (ioType < IOT_NONE || (ioType > IOT_6BTN && ioType != IOT_MEGA_MOUSE))
 				return;
 		} else {
+			// Other virtual ports only support 3BTN and 6BTN.
 			assert(ioType >= IOT_NONE && ioType <= IOT_6BTN);
-			// TODO: Set IOT_NONE if the assertion fails in release?
 			if (ioType < IOT_NONE || ioType > IOT_6BTN)
 				return;
 		}
 	}
 
-	dev->type = ioType;
-	// Only reset device data so we don't screw up emulation.
-	dev->resetDev();
+	// Create a new device.
+	// TODO: Copy MD-side data from old device using a pseudo-copy constructor...
+	// TODO: Don't create TP/4WP sub-devices if the main devices are missing?
+	IO::Device *dev = nullptr;
+	switch (ioType) {
+		case IOT_NONE:
+			if (virtPort <= VIRTPORT_EXT) {
+				// Must have a generic Device.
+				dev = new IO::Device();
+			}
+			break;
+		case IOT_3BTN:
+			dev = new IO::Io3BTN();
+			break;
+		case IOT_6BTN:
+			dev = new IO::Io6BTN();
+			break;
+		case IOT_2BTN:
+			dev = new IO::Io2BTN();
+			break;
+		case IOT_MEGA_MOUSE:
+			dev = new IO::IoMegaMouse();
+			break;
+		case IOT_TEAMPLAYER:
+		case IOT_4WP_MASTER:
+		case IOT_4WP_SLAVE:
+		default:
+			// TODO: Handle Team Player correctly.
+			return;
+	}
+
+	if (dev && old_dev) {
+		// Copy data from the old device.
+		dev->ctrl = old_dev->ctrl;
+		dev->mdData = old_dev->mdData;
+		dev->mdData_tris = old_dev->mdData_tris;
+		dev->deviceData = old_dev->deviceData;
+		// TODO: Copy over sub-devices for multitaps.
+
+		// Replace the old device.
+		d->ioDevices[virtPort] = dev;
+		delete old_dev;
+	} else if (!dev) {
+		// New device is nullptr.
+		// Delete the old device.
+		d->ioDevices[virtPort] = nullptr;
+		delete old_dev;
+	} else /*if (dev)*/ {
+		// New device is valid; old device is nullptr.
+		d->ioDevices[virtPort] = dev;
+	}
+
+	// Update the device.
+	if (dev) {
+		dev->update();
+	}
 
 	// Rebuild Team Player controller index tables for TP devices.
+	// TODO
+	/*
 	switch (virtPort) {
 		// System controller ports.
 		case VIRTPORT_1:
@@ -257,8 +349,8 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 		default:
 			break;
 	}
+	*/
 }
-
 
 /** MD-side controller functions. **/
 
@@ -276,11 +368,13 @@ uint8_t IoManager::readDataMD(int physPort) const
 	// Note that tristate bit 7 is used for TH interrupt.
 	// All input bits should read the device data.
 	// All output bits should read the MD data.
-	uint8_t data = d->ioDevices[physPort].readData();
-	if (d->ioDevices[physPort].type == IOT_XE_1AP) {
-		// XE-1AP's protocol is partially unclocked.
-		d->updateDevice_XE_1AP_onRead(physPort);
-	}
+
+	// TODO: 4WP (and maybe TP?) needs to receive updates from the virtual potrs.
+	IO::Device *const dev = d->ioDevices[physPort];
+	assert(dev != nullptr);	// Physical ports must be allocated.
+
+	uint8_t data = dev->readData();
+	dev->update_onRead();	// TODO: Check for XE-1AP first?
 	return data;
 }
 
@@ -293,8 +387,11 @@ void IoManager::writeDataMD(int physPort, uint8_t data)
 {
 	assert(physPort >= PHYSPORT_1 && physPort < PHYSPORT_MAX);
 
-	d->ioDevices[physPort].mdData = data;
-	d->updateDevice(physPort);
+	IO::Device *const dev = d->ioDevices[physPort];
+	assert(dev != nullptr);	// Physical ports must be allocated.
+
+	dev->mdData = data;
+	dev->update();	// TODO: updateWithData()?
 }
 
 
@@ -306,7 +403,11 @@ void IoManager::writeDataMD(int physPort, uint8_t data)
 uint8_t IoManager::readCtrlMD(int physPort) const
 {
 	assert(physPort >= PHYSPORT_1 && physPort < PHYSPORT_MAX);
-	return d->ioDevices[physPort].ctrl;
+
+	IO::Device *const dev = d->ioDevices[physPort];
+	assert(dev != nullptr);	// Physical ports must be allocated.
+
+	return dev->ctrl;
 }
 
 /**
@@ -318,11 +419,13 @@ void IoManager::writeCtrlMD(int physPort, uint8_t ctrl)
 {
 	assert(physPort >= PHYSPORT_1 && physPort < PHYSPORT_MAX);
 
-	d->ioDevices[physPort].ctrl = ctrl;
-	d->updateDevice(physPort);
+	IO::Device *const dev = d->ioDevices[physPort];
+	assert(dev != nullptr);	// Physical ports must be allocated.
+
+	dev->ctrl = ctrl;
+	dev->update();	// TODO: updateWithCtrl()?
 	// TODO: 4WP needs to copy this to the active device.
 }
-
 
 /** Serial I/O virtual functions. **/
 
@@ -332,26 +435,50 @@ void IoManager::writeCtrlMD(int physPort, uint8_t ctrl)
 uint8_t IoManager::readSerCtrl(int physPort) const
 {
 	assert(physPort >= PHYSPORT_1 && physPort < PHYSPORT_MAX);
-	return (d->ioDevices[physPort].serCtrl & 0xF8);
+
+	IO::Device *const dev = d->ioDevices[physPort];
+	assert(dev != nullptr);	// Physical ports must be allocated.
+
+	return (dev->serCtrl & 0xF8);
 }
+
 void IoManager::writeSerCtrl(int physPort, uint8_t serCtrl)
 {
 	assert(physPort >= PHYSPORT_1 && physPort < PHYSPORT_MAX);
-	d->ioDevices[physPort].serCtrl = serCtrl;
+
+	IO::Device *const dev = d->ioDevices[physPort];
+	assert(dev != nullptr);	// Physical ports must be allocated.
+
+	dev->serCtrl = serCtrl;
 }
+
 uint8_t IoManager::readSerTx(int physPort) const
 {
 	assert(physPort >= PHYSPORT_1 && physPort < PHYSPORT_MAX);
-	return d->ioDevices[physPort].serLastTx;
+
+	IO::Device *const dev = d->ioDevices[physPort];
+	assert(dev != nullptr);	// Physical ports must be allocated.
+
+	return dev->serLastTx;
 }
+
 void IoManager::writeSerTx(int physPort, uint8_t data)
 {
 	assert(physPort >= PHYSPORT_1 && physPort < PHYSPORT_MAX);
-	d->ioDevices[physPort].serLastTx = data;
+
+	IO::Device *const dev = d->ioDevices[physPort];
+	assert(dev != nullptr);	// Physical ports must be allocated.
+
+	dev->serLastTx = data;
 }
+
 uint8_t IoManager::readSerRx(int physPort) const
 {
 	assert(physPort >= PHYSPORT_1 && physPort < PHYSPORT_MAX);
+
+	IO::Device *const dev = d->ioDevices[physPort];
+	assert(dev != nullptr);	// Physical ports must be allocated.
+
 	// TODO
 	return 0xFF;
 }
@@ -470,9 +597,9 @@ uint8_t IoManager::readDataSMS_DD(void) const
 
 	// Calculate the SMS data.
 	uint8_t data = ((data2 & 0x3C) >> 2);
-	data |= 0x20; // CONT pin
-	data |= (data1 & IoManagerPrivate::IOPIN_TH);
-	data |= ((data2 & IoManagerPrivate::IOPIN_TH) << 1);
+	data |= 0x20; // CONT pin (TODO: Set to 0x00 for MD with PBC.)
+	data |= (data1 & IO::Device::IOPIN_TH);
+	data |= ((data2 & IO::Device::IOPIN_TH) << 1);
 	return data;
 }
 
@@ -488,9 +615,10 @@ bool IoManager::isPauseSMS(void) const
 	// Check all controllers.
 	// TODO: Optimize this so we don't have to check all controllers?
 	for (int i = 0; i < ARRAY_SIZE(d->ioDevices); i++) {
-		IoManagerPrivate::IoDevice *ioDevice = &d->ioDevices[i];
-		if (ioDevice->type == IOT_2BTN) {
-			if (ioDevice->data.sms.pause) {
+		const IO::Device *dev = d->ioDevices[i];
+		if (dev->type() == IOT_2BTN) {
+			const IO::Io2BTN *dev2BTN = (const IO::Io2BTN*)dev;
+			if (dev2BTN->pause) {
 				// Pause is pressed.
 				return true;
 			}
@@ -517,16 +645,10 @@ uint8_t IoManager::readStartGG(void) const
 	 * Reference: http://www.smspower.org/Development/StartButton
 	 */
 
-	// Check all controllers.
-	// TODO: Optimize this so we don't have to check all controllers?
-	for (int i = 0; i < ARRAY_SIZE(d->ioDevices); i++) {
-		IoManagerPrivate::IoDevice *ioDevice = &d->ioDevices[i];
-		if (ioDevice->type == IOT_2BTN) {
-			if (ioDevice->data.sms.pause) {
-				// Start is pressed.
-				return 0x7F;
-			}
-		}
+	bool start = isPauseSMS();
+	if (start) {
+		// Start is pressed.
+		return 0x7F;
 	}
 
 	// Start is not pressed.
@@ -540,7 +662,12 @@ uint8_t IoManager::readStartGG(void) const
  */
 void IoManager::update(int virtPort, uint32_t buttons)
 {
-	d->update(virtPort, buttons);
+	assert(virtPort >= VIRTPORT_1 && virtPort < VIRTPORT_MAX);
+	IO::Device *const dev = d->ioDevices[virtPort];
+	if (dev != nullptr) {
+		// Update the device.
+		dev->update(buttons);
+	}
 }
 
 /** ZOMG savestate functions. **/
@@ -551,6 +678,8 @@ void IoManager::update(int virtPort, uint32_t buttons)
  */
 void IoManager::zomgSaveMD(Zomg_MD_IoSave_t *state) const
 {
+	// TODO: Update for new device classes.
+	/*
 	// Port 1
 	state->port1_data = d->ioDevices[PHYSPORT_1].mdData;
 	state->port1_ctrl = d->ioDevices[PHYSPORT_1].ctrl;
@@ -571,6 +700,7 @@ void IoManager::zomgSaveMD(Zomg_MD_IoSave_t *state) const
 	state->port3_ser_tx = d->ioDevices[PHYSPORT_EXT].serLastTx;
 	state->port3_ser_rx = 0xFF; // TODO
 	state->port3_ser_ctrl = d->ioDevices[PHYSPORT_EXT].serCtrl;
+	*/
 }
 
 /**
@@ -579,6 +709,8 @@ void IoManager::zomgSaveMD(Zomg_MD_IoSave_t *state) const
  */
 void IoManager::zomgRestoreMD(const Zomg_MD_IoSave_t *state)
 {
+	// TODO: Update for new device classes.
+	/*
 	// Port 1
 	d->ioDevices[PHYSPORT_1].mdData = state->port1_data;
 	d->ioDevices[PHYSPORT_1].ctrl = state->port1_ctrl;
@@ -604,6 +736,7 @@ void IoManager::zomgRestoreMD(const Zomg_MD_IoSave_t *state)
 	d->updateDevice(PHYSPORT_1);
 	d->updateDevice(PHYSPORT_2);
 	d->updateDevice(PHYSPORT_EXT);
+	*/
 }
 
 }

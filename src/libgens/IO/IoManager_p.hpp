@@ -31,6 +31,7 @@
 #endif
 
 #include "IoManager.hpp"
+#include "Device.hpp"
 
 // C includes. (C++ namespace)
 #include <cstring>
@@ -47,6 +48,7 @@ class IoManagerPrivate
 {
 	public:
 		IoManagerPrivate(IoManager *q);
+		~IoManagerPrivate();
 
 	private:
 		IoManager *const q;
@@ -57,61 +59,6 @@ class IoManagerPrivate
 		IoManagerPrivate &operator=(const IoManagerPrivate &);
 
 	public:
-		/**
-		 * Reset all devices.
-		 */
-		void reset(void);
-
-		/**
-		 * Update the scanline counter for all controllers.
-		 * This is used by the 6-button controller,
-		 * which resets its internal counter after
-		 * around 25 scanlines of no TH rising edges.
-		 */
-		void doScanline(void);
-		static const int SCANLINE_COUNT_MAX_6BTN = 25;
-
-		/**
-		 * Update an I/O device.
-		 * @param virtPort Virtual port.
-		 * @param buttons New button state.
-		 */
-		void update(int virtPort, uint32_t buttons);
-
-		/**
-		 * Update an I/O device's state based on ctrl/data lines.
-		 * @param virtPort Virtual port number.
-		 */
-		void updateDevice(int virtPort);
-
-		void updateDevice_3BTN(int virtPort);
-		void updateDevice_6BTN(int virtPort, uint8_t oldTristateInput);
-		void updateDevice_2BTN(int virtPort);
-		void updateDevice_Mouse(int virtPort, uint8_t oldTristateInput);
-		void updateDevice_TP(int physPort, uint8_t oldTristateInput);
-		void updateDevice_4WP_Master(int physPort);
-		void updateDevice_4WP_Slave(int physPort);
-		void updateDevice_XE_1AP(int virtPort, uint8_t oldTristateInput);
-
-		void updateDevice_XE_1AP_onRead(int virtPort);
-
-		/**
-		 * Latch relX, relY, and signOver for a Sega Mega Mouse.
-		 * @param virtPort Virtual port number.
-		 */
-		void latchMegaMouse(int virtPort);
-
-		// I/O pin definitions.
-		enum IoPin_t {
-			IOPIN_UP	= 0x01,	// D0
-			IOPIN_DOWN	= 0x02,	// D1
-			IOPIN_LEFT	= 0x04,	// D2
-			IOPIN_RIGHT	= 0x08,	// D3
-			IOPIN_TL	= 0x10,	// D4
-			IOPIN_TR	= 0x20,	// D5
-			IOPIN_TH	= 0x40	// D6
-		};
-
 		// Button bitfield values.
 		enum ButtonBitfield {
 			BTN_UP		= 0x01,
@@ -167,233 +114,13 @@ class IoManagerPrivate
 		};
 
 		/**
-		 * Team Player.
+		 * I/O devices.
+		 * NOTE: Ports 1, 2, and EXT must have valid
+		 * devices. If those ports are empty, they should
+		 * have a generic Device object. Other ports may
+		 * be nullptr for empty ports.
 		 */
-
-		/**
-		 * Rebuild the controller index table.
-		 * @param physPort Physical controller port. (0 or 1)
-		 */
-		void rebuildCtrlIndexTable(int physPort);
-
-		/**
-		 * @name TP_PadType
-		 * Indicates the type of controller connected to
-		 * a given port on the Sega Team Player adapter.
-		 */
-		enum TP_PadType {
-			TP_PT_NONE	= 0xF,
-			TP_PT_3BTN	= 0x0,
-			TP_PT_6BTN	= 0x1,
-			TP_PT_MOUSE	= 0x2,
-		};
-
-		/**
-		 * @name TP_DataType
-		 * Indicates the type of data that should be returned
-		 * in the current cycle.
-		 */
-		enum TP_DataType {
-			// Initialization
-			TP_DT_INIT			= 0,	// Initial state.
-			TP_DT_START			= 1,	// Start request.
-			TP_DT_ACK1			= 2,	// Acknowledgement.
-			TP_DT_ACK2			= 3,	// Acknowledgement.
-			TP_DT_PADTYPE_A			= 4,	// Pad type for Controller A
-			TP_DT_PADTYPE_B			= 5,	// Pad type for Controller A
-			TP_DT_PADTYPE_C			= 6,	// Pad type for Controller A
-			TP_DT_PADTYPE_D			= 7,	// Pad type for Controller A
-
-			// Controller A
-			TP_DT_PADA_RLDU			= 8,	// D-pad
-			TP_DT_PADA_SACB			= 9,	// Start, A, C, B
-			TP_DT_PADA_MXYZ			= 10,	// Mode, X, Y, Z (6-button only)
-
-			// Controller A (Mega Mouse)
-			TP_DT_PADA_MOUSE_SIGNOVER	= 8,
-			TP_DT_PADA_MOUSE_BUTTONS	= 9,
-			TP_DT_PADA_MOUSE_X_MSN		= 10,
-			TP_DT_PADA_MOUSE_X_LSN		= 11,
-			TP_DT_PADA_MOUSE_Y_MSN		= 12,
-			TP_DT_PADA_MOUSE_Y_LSN		= 13,
-
-			// Controller B
-			TP_DT_PADB_RLDU			= 14,	// D-pad
-			TP_DT_PADB_SACB			= 15,	// Start, A, C, B
-			TP_DT_PADB_MXYZ			= 16,	// Mode, X, Y, Z (6-button only)
-
-			// Controller B (Mega Mouse)
-			TP_DT_PADB_MOUSE_SIGNOVER	= 14,
-			TP_DT_PADB_MOUSE_BUTTONS	= 15,
-			TP_DT_PADB_MOUSE_X_MSN		= 16,
-			TP_DT_PADB_MOUSE_X_LSN		= 17,
-			TP_DT_PADB_MOUSE_Y_MSN		= 18,
-			TP_DT_PADB_MOUSE_Y_LSN		= 19,
-
-			// Controller C
-			TP_DT_PADC_RLDU			= 20,	// D-pad
-			TP_DT_PADC_SACB			= 21,	// Start, A, C, B
-			TP_DT_PADC_MXYZ			= 22,	// Mode, X, Y, Z (6-button only)
-
-			// Controller C (Mega Mouse)
-			TP_DT_PADC_MOUSE_SIGNOVER	= 20,
-			TP_DT_PADC_MOUSE_BUTTONS	= 21,
-			TP_DT_PADC_MOUSE_X_MSN		= 22,
-			TP_DT_PADC_MOUSE_X_LSN		= 23,
-			TP_DT_PADC_MOUSE_Y_MSN		= 24,
-			TP_DT_PADC_MOUSE_Y_LSN		= 25,
-
-			// Controller D
-			TP_DT_PADD_RLDU			= 26,	// D-pad
-			TP_DT_PADD_SACB			= 27,	// Start, A, C, B
-			TP_DT_PADD_MXYZ			= 28,	// Mode, X, Y, Z (6-button only)
-
-			// Controller D (Mega Mouse)
-			TP_DT_PADD_MOUSE_SIGNOVER	= 26,
-			TP_DT_PADD_MOUSE_BUTTONS	= 27,
-			TP_DT_PADD_MOUSE_X_MSN		= 28,
-			TP_DT_PADD_MOUSE_X_LSN		= 29,
-			TP_DT_PADD_MOUSE_Y_MSN		= 30,
-			TP_DT_PADD_MOUSE_Y_LSN		= 31,
-
-			TP_DT_MAX
-		};
-
-		struct IoDevice
-		{
-			IoDevice()
-				: type(IoManager::IOT_NONE)
-			{ reset(); }
-
-			/**
-			 * Reset everything in the IoDevice.
-			 * WARNING: Do NOT use this while emulation is running!
-			 */
-			void reset(void) {
-				ctrl = 0;
-				mdData = 0xFF;
-				serCtrl = 0;
-				serLastTx = 0xFF;
-				resetDev();
-			}
-
-			/**
-			 * Reset IoDevice data that only affects the device
-			 * and not the emulation-side registers.
-			 */
-			void resetDev(void) {
-				counter = 0;
-				scanlines = 0;
-				buttons = ~0;
-				deviceData = 0xFF;
-				updateTristateInputCache();
-
-				// Clear device-specific data.
-				memset(&data, 0x00, sizeof(data));
-			}
-
-			IoManager::IoType_t type;	// Device type.
-
-			// Device-side variables.
-			int counter;			// Internal counter.
-			int scanlines;			// Scanline counter.
-			uint8_t deviceData;		// Data written from the device.
-
-			// System-side variables.
-			uint8_t ctrl;			// Tristate control.
-			uint8_t mdData;			// Data written from the MD.
-
-			// Tristate cache for data from MD.
-			uint8_t mdData_tris;		// MD data cache.
-
-			/**
-			 * Controller bitfield.
-			 * Format:
-			 * - 2-button:          ??CBRLDU
-			 * - 3-button:          SACBRLDU
-			 * - 6-button: ????MXYZ SACBRLDU
-			 * NOTE: ACTIVE LOW! (1 == released; 0 == pressed)
-			 */
-			uint32_t buttons;
-
-			/**
-			 * Update the tristate cache for data coming from the MD.
-			 * NOTE: "In" == MD to controller; "Out" == controller to MD.
-			 */
-			inline void updateTristateInputCache(void) {
-				// TODO: Apply the device data?
-				mdData_tris = (~ctrl | mdData);
-			}
-
-			/**
-			 * Check an input line's state.
-			 * @param ioPin I/O pin, or multiple pins.
-			 * @return 0 if low; non-zero if high.
-			 */
-			inline uint8_t checkInputLine(IoPin_t ioPin) const
-			{
-				return (mdData_tris & ioPin);
-			}
-
-			// TODO: Consolidate this stuff so it can be cached properly.
-
-			/**
-			 * Read the last output data value, with tristates applied.
-			 * @return Data value with tristate settings applied.
-			 */
-			inline uint8_t readData(void) const {
-				return applyTristate(deviceData);
-			}
-
-			/**
-			 * Apply the Tristate settings to the data value.
-			 * @param data Data value.
-			 * @return Data value with tristate settings applied.
-			 */
-			inline uint8_t applyTristate(uint8_t data) const {
-				data &= (~ctrl & 0x7F);		// Mask output bits.
-				data |= (mdData & (ctrl | 0x80));	// Apply data buffer.
-				return data;
-			}
-
-			// Serial I/O variables.
-			// TODO: Serial data buffer.
-			uint8_t serCtrl;	// Serial control.
-			uint8_t serLastTx;	// Last transmitted data byte.
-
-			/**
-			 * Device-specific data.
-			 */
-			union {
-				struct {
-					// Team Player data.
-					uint8_t padTypes[4];
-					uint8_t ctrlIndexTbl[TP_DT_MAX - TP_DT_PADA_RLDU];
-				} tp;
-				struct {
-					// Mouse data.
-					// TODO: Make use of this - currently, only buttons are supported.
-					int relX;
-					int relY;
-					struct {
-						uint8_t signOver;
-						uint8_t relX;
-						uint8_t relY;
-					} latch;
-				} mouse;
-				struct {
-					// SMS: Pause button.
-					// Game Gear: Start button.
-					bool pause;
-				} sms;
-				struct {
-					// XE-1Ap
-					uint8_t latency;
-				} xe_1ap;
-			} data;
-		};
-
-		IoDevice ioDevices[IoManager::VIRTPORT_MAX];
+		IO::Device *ioDevices[IoManager::VIRTPORT_MAX];
 
 		/**
 		 * Device information.
@@ -409,11 +136,6 @@ class IoManagerPrivate
 		};
 
 		static const IoDevInfo ioDevInfo[IoManager::IOT_MAX];
-
-		/**
-		 * 4-Way Play: Current player.
-		 */
-		int ea4wp_curPlayer;
 };
 
 }

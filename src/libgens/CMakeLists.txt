@@ -116,7 +116,6 @@ SET(libgens_VDP_H
 SET(libgens_IO_SRCS
 	IO/IoManager.cpp
 	IO/IoManager_p.cpp
-	IO/IoManager_p_update.cpp
 	IO/IoManager_btnNames.cpp
 	IO/Device.cpp
 	IO/Io3BTN.cpp
