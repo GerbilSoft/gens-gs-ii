@@ -29,6 +29,8 @@
 #include "VdpPalette.hpp"
 #include "VdpTypes.hpp"
 
+#include "macros/common.h"
+
 namespace LibGens {
 
 /**
@@ -78,6 +80,9 @@ class VdpPalettePrivate
 			uint32_t u32[0x10000];
 		} palFull32X;
 
+		/** Static functions. **/
+		static int FUNC_PURE ClampColorComponent(int mask, int c);
+
 		/** Full palette recalculation functions. **/
 
 		template<typename pixel,
@@ -106,10 +111,6 @@ class VdpPalettePrivate
 		FORCE_INLINE void T_recalcFull_TMS9918(pixel *palFull);
 
 		void recalcFull(void);
-
-	public:
-		/** Static functions. **/
-		static int FUNC_PURE ClampColorComponent(int mask, int c);
 };
 
 }

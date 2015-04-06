@@ -63,6 +63,7 @@ int FUNC_PURE VdpPalettePrivate::ClampColorComponent(int mask, int c)
 VdpPalette::VdpPalette()
 	: d(new VdpPalettePrivate(this))
 	, m_bpp(MdFb::BPP_32)
+	, cram_addr_mask(0x7F)
 {
 	// Set the dirty flags.
 	m_dirty.active = true;

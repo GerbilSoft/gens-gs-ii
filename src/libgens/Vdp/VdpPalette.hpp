@@ -33,8 +33,8 @@
 // ZOMG CRam struct.
 #include "libzomg/zomg_vdp.h"
 
-// Needed for FORCE_INLINE.
 #include "../macros/common.h"
+#include "../Util/byteswap.h"
 
 namespace LibGens {
 
@@ -149,11 +149,10 @@ class VdpPalette
 		 */
 		void initSegaTMSPalette(void);
 
-		/** Palette recalculation functions. **/
+		/**
+		 * Update the active palette.
+		 */
 		void update(void);
-
-		// TODO
-		//static void Adjust_CRam_32X(void);
 
 		/** ZOMG savestate functions. **/
 		void zomgSaveCRam(Zomg_CRam_t *cram) const;
@@ -170,6 +169,7 @@ class VdpPalette
 
 		// Color RAM.
 		VdpTypes::CRam_t m_cram;
+		uint8_t cram_addr_mask;
 
 		// Color depth.
 		MdFb::ColorDepth m_bpp;
@@ -182,6 +182,7 @@ class VdpPalette
 			struct {
 				bool active	:1;
 				bool full	:1;
+				// TODO: Add a separate bit for 32X CRAM.
 			};
 		} m_dirty;
 
@@ -193,7 +194,7 @@ class VdpPalette
 
 		template<typename pixel>
 		FORCE_INLINE void T_update_SMS(pixel *SMS_palette,
-					const pixel *palette);
+					 const pixel *palette);
 
 		template<typename pixel>
 		FORCE_INLINE void T_update_GG(pixel *GG_palette,
@@ -201,7 +202,10 @@ class VdpPalette
 
 		template<typename pixel>
 		FORCE_INLINE void T_update_TMS9918(pixel *TMS_palette,
-					const pixel *palette);
+					     const pixel *palette);
+
+		// TODO
+		//static void Adjust_CRam_32X(void);
 };
 
 /**
@@ -221,8 +225,8 @@ inline bool VdpPalette::isDirty(void) const
  */
 inline uint8_t VdpPalette::readCRam_8(uint8_t address) const
 {
-	// TODO: Apply address masking based on system ID.
-	return m_cram.u8[address & 0x7F];
+	address &= cram_addr_mask;
+	return m_cram.u8[address ^ U16DATA_U8_INVERT];
 }
 
 /**
@@ -233,8 +237,8 @@ inline uint8_t VdpPalette::readCRam_8(uint8_t address) const
  */
 inline uint16_t VdpPalette::readCRam_16(uint8_t address) const
 {
-	// TODO: Apply address masking based on system ID.
-	return m_cram.u16[(address & 0x7F) >> 1];
+	address &= cram_addr_mask;
+	return m_cram.u16[address >> 1];
 }
 
 /**
@@ -245,8 +249,9 @@ inline uint16_t VdpPalette::readCRam_16(uint8_t address) const
  */
 inline void VdpPalette::writeCRam_8(uint8_t address, uint8_t data)
 {
-	// TODO: Apply address masking based on system ID.
-	m_cram.u8[address & 0x7F] = data;
+	address &= cram_addr_mask;
+	m_cram.u8[address ^ U16DATA_U8_INVERT] = data;
+	// TODO: Per-color dirty flag?
 	m_dirty.active = true;
 }
 
@@ -258,8 +263,9 @@ inline void VdpPalette::writeCRam_8(uint8_t address, uint8_t data)
  */
 inline void VdpPalette::writeCRam_16(uint8_t address, uint16_t data)
 {
-	// TODO: Apply address masking based on system ID.
-	m_cram.u16[(address & 0x7F) >> 1] = data;
+	address &= cram_addr_mask;
+	m_cram.u16[address >> 1] = data;
+	// TODO: Per-color dirty flag?
 	m_dirty.active = true;
 }
 
