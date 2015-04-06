@@ -209,19 +209,16 @@ QString CtrlConfigWindowPrivate::getShortDeviceName(IoManager::IoType_t ioType) 
 		case IoManager::IOT_2BTN:
 			//: Sega Master System 2-button control pad.
 			return CtrlConfigWindow::tr("2-button", "shortDeviceName");
-		case IoManager::IOT_TEAMPLAYER:
-			//: Sega Team Player. (Specific brand name; only modify if it's different in your region!)
-			return CtrlConfigWindow::tr("Team Player", "shortDeviceName");
-		case IoManager::IOT_4WP_MASTER:	/* fallthrough */
-		case IoManager::IOT_4WP_SLAVE:
-			//: EA 4-Way Play. (Specific brand name; only modify if it's different in your region!)
-			return CtrlConfigWindow::tr("4-Way Play", "shortDeviceName");
+
+		// Miscellaneous Master System peripherals.
 		case IoManager::IOT_PADDLE:
 			//: Paddle Control. (Sega Mark III)
 			return CtrlConfigWindow::tr("Paddle Control", "shortDeviceName");
 		case IoManager::IOT_SPORTS_PAD:
 			//: Sega Sports Pad.
 			return CtrlConfigWindow::tr("Sports Pad", "shortDeviceName");
+
+		// Miscellaneous Mega Drive peripherals.
 		case IoManager::IOT_MEGA_MOUSE:
 			//: Sega Mega Mouse.
 			return CtrlConfigWindow::tr("Mega Mouse", "shortDeviceName");
@@ -231,6 +228,8 @@ QString CtrlConfigWindowPrivate::getShortDeviceName(IoManager::IoType_t ioType) 
 		case IoManager::IOT_ACTIVATOR:
 			//: Sega Activator.
 			return CtrlConfigWindow::tr("Activator", "shortDeviceName");
+
+		// Light guns.
 		case IoManager::IOT_PHASER:
 			//: Light Phaser.
 			return CtrlConfigWindow::tr("Light Phaser", "shortDeviceName");
@@ -240,6 +239,15 @@ QString CtrlConfigWindowPrivate::getShortDeviceName(IoManager::IoType_t ioType) 
 		case IoManager::IOT_JUSTIFIER:
 			//: Konami Justifier.
 			return CtrlConfigWindow::tr("Justifier", "shortDeviceName");
+
+		// Multitaps.
+		case IoManager::IOT_TEAMPLAYER:
+			//: Sega Team Player. (Specific brand name; only modify if it's different in your region!)
+			return CtrlConfigWindow::tr("Team Player", "shortDeviceName");
+		case IoManager::IOT_4WP_MASTER:	/* fallthrough */
+		case IoManager::IOT_4WP_SLAVE:
+			//: EA 4-Way Play. (Specific brand name; only modify if it's different in your region!)
+			return CtrlConfigWindow::tr("4-Way Play", "shortDeviceName");
 	}
 }
 
@@ -264,19 +272,16 @@ QString CtrlConfigWindowPrivate::getLongDeviceName(IoManager::IoType_t ioType) c
 		case IoManager::IOT_2BTN:
 			//: Sega Master System 2-button control pad.
 			return CtrlConfigWindow::tr("2-button gamepad (SMS)", "longDeviceName");
-		case IoManager::IOT_TEAMPLAYER:
-			//: Sega Team Player. (Specific brand name; only modify if it's different in your region!)
-			return CtrlConfigWindow::tr("Sega Team Player", "longDeviceName");
-		case IoManager::IOT_4WP_MASTER:	/* fallthrough */
-		case IoManager::IOT_4WP_SLAVE:
-			//: EA 4-Way Play. (Specific brand name; only modify if it's different in your region!)
-			return CtrlConfigWindow::tr("EA 4-Way Play", "longDeviceName");
+
+		// Miscellaneous Master System peripherals.
 		case IoManager::IOT_PADDLE:
 			//: Paddle Control. (Sega Mark III)
 			return CtrlConfigWindow::tr("Paddle Control", "longDeviceName");
 		case IoManager::IOT_SPORTS_PAD:
 			//: Sega Sports Pad.
 			return CtrlConfigWindow::tr("Sega Sports Pad", "longDeviceName");
+
+		// Miscellaneous Mega Drive peripherals.
 		case IoManager::IOT_MEGA_MOUSE:
 			//: Sega Mega Mouse.
 			return CtrlConfigWindow::tr("Mega Mouse", "longDeviceName");
@@ -286,6 +291,8 @@ QString CtrlConfigWindowPrivate::getLongDeviceName(IoManager::IoType_t ioType) c
 		case IoManager::IOT_ACTIVATOR:
 			//: Sega Activator.
 			return CtrlConfigWindow::tr("Sega Activator", "longDeviceName");
+
+		// Light guns.
 		case IoManager::IOT_PHASER:
 			//: Light Phaser.
 			return CtrlConfigWindow::tr("Light Phaser", "longDeviceName");
@@ -295,6 +302,15 @@ QString CtrlConfigWindowPrivate::getLongDeviceName(IoManager::IoType_t ioType) c
 		case IoManager::IOT_JUSTIFIER:
 			//: Konami Justifier.
 			return CtrlConfigWindow::tr("Justifier", "longDeviceName");
+
+		// Multitaps.
+		case IoManager::IOT_TEAMPLAYER:
+			//: Sega Team Player. (Specific brand name; only modify if it's different in your region!)
+			return CtrlConfigWindow::tr("Sega Team Player", "longDeviceName");
+		case IoManager::IOT_4WP_MASTER:	/* fallthrough */
+		case IoManager::IOT_4WP_SLAVE:
+			//: EA 4-Way Play. (Specific brand name; only modify if it's different in your region!)
+			return CtrlConfigWindow::tr("EA 4-Way Play", "longDeviceName");
 	}
 }
 
@@ -499,13 +515,13 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	d->actgrpSelPort->addAction(d->ui.actionPort2);
 	d->actgrpSelPort->addAction(d->ui.actionPortEXT);
 
-	// TeamPlayer 1.
+	// Team Player 1.
 	d->actgrpSelPort->addAction(d->ui.actionPortTP1A);
 	d->actgrpSelPort->addAction(d->ui.actionPortTP1B);
 	d->actgrpSelPort->addAction(d->ui.actionPortTP1C);
 	d->actgrpSelPort->addAction(d->ui.actionPortTP1D);
 
-	// TeamPlayer 2.
+	// Team Player 2.
 	d->actgrpSelPort->addAction(d->ui.actionPortTP2A);
 	d->actgrpSelPort->addAction(d->ui.actionPortTP2B);
 	d->actgrpSelPort->addAction(d->ui.actionPortTP2C);
@@ -858,7 +874,7 @@ void CtrlConfigWindow::reload(void)
 		case IoManager::VIRTPORT_TP1B:
 		case IoManager::VIRTPORT_TP1C:
 		case IoManager::VIRTPORT_TP1D:
-			// Make sure port 1 is still Team Player.
+			// Make sure Port 1 is still Team Player.
 			if (d->keyManager->ioType(IoManager::VIRTPORT_1) != IoManager::IOT_TEAMPLAYER) {
 				// Port 1 is no longer Team Player.
 				// Switch to Port 1 instead of the TP1 port.
@@ -867,12 +883,12 @@ void CtrlConfigWindow::reload(void)
 			}
 			break;
 
-		// Team Player, Port 1.
+		// Team Player, Port 2.
 		case IoManager::VIRTPORT_TP2A:
 		case IoManager::VIRTPORT_TP2B:
 		case IoManager::VIRTPORT_TP2C:
 		case IoManager::VIRTPORT_TP2D:
-			// Make sure port 2 is still Team Player.
+			// Make sure Port 2 is still Team Player.
 			if (d->keyManager->ioType(IoManager::VIRTPORT_2) != IoManager::IOT_TEAMPLAYER) {
 				// Port 2 is no longer Team Player.
 				// Switch to Port 2 instead of the TP2 port.
@@ -881,7 +897,7 @@ void CtrlConfigWindow::reload(void)
 			}
 			break;
 
-		// 4-Way Play.
+		// EA 4-Way Play.
 		case IoManager::VIRTPORT_4WPA:
 		case IoManager::VIRTPORT_4WPB:
 		case IoManager::VIRTPORT_4WPC:

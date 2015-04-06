@@ -41,9 +41,6 @@ const IoManagerPrivate::IoDevInfo IoManagerPrivate::ioDevInfo[IoManager::IOT_MAX
 	{'3BTN', 8, true},	// IOT_3BTN
 	{'6BTN', 12, true},	// IOT_6BTN
 	{'2BTN', 7, true},	// IOT_2BTN
-	{'TEAM', 0, true},	// IOT_TEAMPLAYER
-	{'4WPM', 0, true},	// IOT_4WP_MASTER
-	{'4WPS', 0, true},	// IOT_4WP_SLAVE
 
 	// Miscellaneous Master System peripherals.
 	{'PADL', 2, false},	// IOT_PADDLE
@@ -58,6 +55,11 @@ const IoManagerPrivate::IoDevInfo IoManagerPrivate::ioDevInfo[IoManager::IOT_MAX
 	{'PHAS', 0, false},	// IOT_PHASER
 	{'MENA', 0, false},	// IOT_MENACER
 	{'JUST', 0, false},	// IOT_JUSTIFIER
+
+	// Multitaps.
+	{'TEAM', 0, true},	// IOT_TEAMPLAYER
+	{'4WPM', 0, true},	// IOT_4WP_MASTER
+	{'4WPS', 0, true},	// IOT_4WP_SLAVE
 };
 
 IoManagerPrivate::IoManagerPrivate(IoManager *q)

@@ -152,9 +152,6 @@ class IoManager
 			IOT_3BTN,
 			IOT_6BTN,
 			IOT_2BTN,
-			IOT_TEAMPLAYER,
-			IOT_4WP_MASTER,
-			IOT_4WP_SLAVE,
 
 			// Miscellaneous Master System peripherals.
 			IOT_PADDLE,
@@ -169,6 +166,11 @@ class IoManager
 			IOT_PHASER,
 			IOT_MENACER,
 			IOT_JUSTIFIER,
+
+			// Multitaps.
+			IOT_TEAMPLAYER,
+			IOT_4WP_MASTER,
+			IOT_4WP_SLAVE,
 
 			IOT_MAX
 		};

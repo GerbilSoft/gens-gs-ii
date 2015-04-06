@@ -121,11 +121,12 @@ SET(libgens_IO_SRCS
 	IO/Io3BTN.cpp
 	IO/Io6BTN.cpp
 	IO/Io2BTN.cpp
-	IO/IoTeamPlayer.cpp
 	IO/IoMegaMouse.cpp
+	IO/IoXE1AP.cpp
+	# Multitaps
+	IO/IoTeamPlayer.cpp
 	IO/Io4WPM.cpp
 	IO/Io4WPS.cpp
-	IO/IoXE1AP.cpp
 	)
 
 # TODO: All headers, or just public headers?
@@ -136,11 +137,12 @@ SET(libgens_IO_H
 	IO/Io3BTN.hpp
 	IO/Io6BTN.hpp
 	IO/Io2BTN.hpp
-	IO/IoTeamPlayer.hpp
 	IO/IoMegaMouse.hpp
+	IO/IoXE1AP.hpp
+	# Multitaps
+	IO/IoTeamPlayer.hpp
 	IO/Io4WPM.hpp
 	IO/Io4WPS.hpp
-	IO/IoXE1AP.hpp
 	)
 
 IF(HAVE_LZMA)
