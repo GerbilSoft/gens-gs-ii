@@ -57,7 +57,7 @@ class IoTeamPlayer : public Device
 		 * Update the I/O device.
 		 * Runs the internal device update.
 		 */
-		virtual void update(void);
+		virtual void update(void) override;
 
 		/**
 		 * Set a sub-device.
