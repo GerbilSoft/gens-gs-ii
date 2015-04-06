@@ -204,20 +204,20 @@ class VdpPalette
 		/** Active palette recalculation functions. **/
 
 		template<typename pixel>
-		FORCE_INLINE void T_update_MD(pixel *MD_palette,
-					const pixel *palette);
+		FORCE_INLINE void T_update_MD(pixel *palActiveMD,
+					const pixel *palFullMD);
 
 		template<typename pixel>
-		FORCE_INLINE void T_update_SMS(pixel *SMS_palette,
-					 const pixel *palette);
+		FORCE_INLINE void T_update_SMS(pixel *palActiveSMS,
+					 const pixel *palFullSMS);
 
 		template<typename pixel>
-		FORCE_INLINE void T_update_GG(pixel *GG_palette,
-					const pixel *palette);
+		FORCE_INLINE void T_update_GG(pixel *palActiveGG,
+					const pixel *palFullGG);
 
 		template<typename pixel>
-		FORCE_INLINE void T_update_TMS9918A(pixel *TMS_palette,
-					     const pixel *palette);
+		FORCE_INLINE void T_update_TMS9918A(pixel *palActiveTMS,
+					      const pixel *palFullTMS);
 
 		// TODO
 		//static void Adjust_CRam_32X(void);

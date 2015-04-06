@@ -32,12 +32,12 @@ namespace LibGens {
 
 /**
  * Recalculate the active palette. (Mega Drive, Mode 5)
- * @param MD_palette MD color palette.
- * @param palette Full color palette.
+ * @param palActiveMD Active MD palette. (Must have 0x40 entries!)
+ * @param palFullMD Full MD palette. (Must have 0x1000 entries!)
  */
 template<typename pixel>
-FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
-					const pixel *palette)
+FORCE_INLINE void VdpPalette::T_update_MD(pixel *palActiveMD,
+				    const pixel *palFullMD)
 {
 	// Check the M4 bit to determine the color mask.
 	const uint16_t mdColorMask = (d->m5m4bits & 1 ? 0xEEE : 0x222);
@@ -48,16 +48,16 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 		const uint16_t color2_raw = (m_cram.u16[i + 1] & mdColorMask);
 
 		// Get the palette color.
-		pixel color1 = palette[color1_raw];
-		pixel color2 = palette[color2_raw];
+		pixel color1 = palFullMD[color1_raw];
+		pixel color2 = palFullMD[color2_raw];
 
 		// Set the new color.
-		MD_palette[i]     = color1;
-		MD_palette[i + 1] = color2;
+		palActiveMD[i]     = color1;
+		palActiveMD[i + 1] = color2;
 	}
 
 	// Update the background color.
-	MD_palette[0] = MD_palette[d->maskedBgColorIdx];
+	palActiveMD[0] = palActiveMD[d->maskedBgColorIdx];
 
 	if (d->mdShadowHighlight) {
 		// Update the shadow and highlight colors.
@@ -71,33 +71,33 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 			uint16_t color2_raw = ((m_cram.u16[i + 1] & mdColorMask) >> 1);
 
 			// Shadow color. (0xxx)
-			MD_palette[i + 64]	= palette[color1_raw];
-			MD_palette[i + 1 + 64]	= palette[color2_raw];
+			palActiveMD[i + 64]      = palFullMD[color1_raw];
+			palActiveMD[i + 1 + 64]  = palFullMD[color2_raw];
 
 			// Highlight color. (1xxx - 0001)
-			MD_palette[i + 128]	= palette[(0x888 | color1_raw) - 0x111];
-			MD_palette[i + 1 + 128]	= palette[(0x888 | color2_raw) - 0x111];
+			palActiveMD[i + 128]     = palFullMD[(0x888 | color1_raw) - 0x111];
+			palActiveMD[i + 1 + 128] = palFullMD[(0x888 | color2_raw) - 0x111];
 		}
 
 		// Copy the normal colors (0-63) to shadow+highlight (192-255).
 		// Pixels with both shadow and highlight show up as normal.
-		memcpy(&MD_palette[192], &MD_palette[0], (sizeof(MD_palette[0]) * 64));
+		memcpy(&palActiveMD[192], &palActiveMD[0], (sizeof(palActiveMD[0]) * 64));
 
 		// Update the background color for the shadow and highlight palettes.
-		MD_palette[64]  = MD_palette[d->maskedBgColorIdx + 64];	// Shadow color.
-		MD_palette[128] = MD_palette[d->maskedBgColorIdx + 128];	// Highlight color.
+		palActiveMD[64]  = palActiveMD[d->maskedBgColorIdx + 64];	// Shadow color.
+		palActiveMD[128] = palActiveMD[d->maskedBgColorIdx + 128];	// Highlight color.
 	}
 }
 
 /**
  * Recalculate the active palette. (Sega Master System, Mode 4)
  * TODO: UNTESTED!
- * @param SMS_palette SMS color palette.
- * @param palette Full color palette.
+ * @param palActiveSMS Active SMS palette. (Must have 0x20 entries!)
+ * @param palFullSMS Full SMS palette. (Must have 0x40 entries!)
  */
 template<typename pixel>
-FORCE_INLINE void VdpPalette::T_update_SMS(pixel *SMS_palette,
-					const pixel *palette)
+FORCE_INLINE void VdpPalette::T_update_SMS(pixel *palActiveSMS,
+				     const pixel *palFullSMS)
 {
 #if !defined(DO_FOUR_PALETTE_LINES_IN_ALL_MODES_FOR_LULZ)
 	// Update all 32 colors.
@@ -113,27 +113,27 @@ FORCE_INLINE void VdpPalette::T_update_SMS(pixel *SMS_palette,
 		const uint8_t color2_raw = (m_cram.u8[i + 1] & 0x3F);
 
 		// Get the palette color.
-		pixel color1 = palette[color1_raw];
-		pixel color2 = palette[color2_raw];
+		pixel color1 = palFullSMS[color1_raw];
+		pixel color2 = palFullSMS[color2_raw];
 
 		// Set the new color.
-		SMS_palette[i]     = color1;
-		SMS_palette[i + 1] = color2;
+		palActiveSMS[i]     = color1;
+		palActiveSMS[i + 1] = color2;
 	}
 
 	// Update the background color.
-	SMS_palette[0] = SMS_palette[d->maskedBgColorIdx];
+	palActiveSMS[0] = palActiveSMS[d->maskedBgColorIdx];
 }
 
 /**
  * Recalculate the active palette. (Sega Game Gear, Mode 4 [12-bit RGB])
  * TODO: UNTESTED!
- * @param GG_palette Game Gear color palette.
- * @param palette Full color palette.
+ * @param palActiveGG Active GG palette. (Must have 0x20 entries!)
+ * @param palFullGG Full GG palette. (Must have 0x1000 entries!)
  */
 template<typename pixel>
-FORCE_INLINE void VdpPalette::T_update_GG(pixel *GG_palette,
-					const pixel *palette)
+FORCE_INLINE void VdpPalette::T_update_GG(pixel *palActiveGG,
+				    const pixel *palFullGG)
 {
 #if !defined(DO_FOUR_PALETTE_LINES_IN_ALL_MODES_FOR_LULZ)
 	// Update all 32 colors.
@@ -148,27 +148,27 @@ FORCE_INLINE void VdpPalette::T_update_GG(pixel *GG_palette,
 		const uint16_t color2_raw = (m_cram.u16[i + 1] & 0xFFF);
 
 		// Get the palette color.
-		pixel color1 = palette[color1_raw];
-		pixel color2 = palette[color2_raw];
+		pixel color1 = palFullGG[color1_raw];
+		pixel color2 = palFullGG[color2_raw];
 
 		// Set the new color.
-		GG_palette[i]     = color1;
-		GG_palette[i + 1] = color2;
+		palActiveGG[i]     = color1;
+		palActiveGG[i + 1] = color2;
 	}
 
 	// Update the background color.
-	GG_palette[0] = GG_palette[d->maskedBgColorIdx];
+	palActiveGG[0] = palActiveGG[d->maskedBgColorIdx];
 }
 
 /**
  * Recalculate the active palette. (TMS9918A)
  * TODO: UNTESTED!
- * @param GG_palette Game Gear color palette.
- * @param palette Full color palette.
+ * @param palActiveTMS Active TMS9918A palette. (Must have 0x20 entries!)
+ * @param palFullTMS Full TMS9918A palette. (Must have 0x10 entries!)
  */
 template<typename pixel>
-FORCE_INLINE void VdpPalette::T_update_TMS9918A(pixel *TMS_palette,
-					const pixel *palette)
+FORCE_INLINE void VdpPalette::T_update_TMS9918A(pixel *palActiveTMS,
+					  const pixel *palFullTMS)
 {
 	/**
 	 * NOTE: This function doesn't actually recalculate palettes.
@@ -177,16 +177,16 @@ FORCE_INLINE void VdpPalette::T_update_TMS9918A(pixel *TMS_palette,
 	 */
 
 	// Copy the colors.
-	memcpy(&TMS_palette[0x00], &palette[0x00], (sizeof(TMS_palette[0]) * 16));
-	memcpy(&TMS_palette[0x10], &palette[0x00], (sizeof(TMS_palette[0]) * 16));
+	memcpy(&palActiveTMS[0x00], &palFullTMS[0x00], (sizeof(palActiveTMS[0]) * 16));
+	memcpy(&palActiveTMS[0x10], &palFullTMS[0x00], (sizeof(palActiveTMS[0]) * 16));
 #if defined(DO_FOUR_PALETTE_LINES_IN_ALL_MODES_FOR_LULZ)
-	memcpy(&TMS_palette[0x20], &palette[0x00], (sizeof(TMS_palette[0]) * 16));
-	memcpy(&TMS_palette[0x30], &palette[0x00], (sizeof(TMS_palette[0]) * 16));
+	memcpy(&palActiveTMS[0x20], &palFullTMS[0x00], (sizeof(palActiveTMS[0]) * 16));
+	memcpy(&palActiveTMS[0x30], &palFullTMS[0x00], (sizeof(palActiveTMS[0]) * 16));
 #endif
 
 	// Update the background color.
 	// TODO: How is the background color handled in TMS9918A modes?
-	//TMS_palette[0] = TMS_palette[d->maskedBgColorIdx];
+	//palActiveTMS[0] = palActiveTMS[d->maskedBgColorIdx];
 }
 
 // TODO: Port to LibGens.
@@ -216,58 +216,57 @@ void VdpPalette::update(void)
 	if (!m_dirty.active)
 		return;
 
+	// TODO: Add an AND to each switch() for optimization?
 	if (m_bpp != MdFb::BPP_32) {
 		switch (d->palMode) {
 			case PALMODE_32X:
 				// TODO: Implement T_update_32X().
-#if 0
-				T_update_32X<uint16_t>(m_palActive32X.u16, m_palFull32X.u16);
-#endif
+				//T_update_32X<uint16_t>(m_palActive32X.u16, m_palFull32X.u16);
 				// NOTE: 32X falls through to MD, since both 32X and MD palettes must be updated.
 				// TODO: Add a separate dirty flag for the 32X palette?
+				// FALLTHROUGH
 
 			case PALMODE_MD:
 			default:
-				T_update_MD<uint16_t>(m_palActive.u16, d->palFull.u16);
+				T_update_MD<uint16_t>(m_palActive.u16, d->palFullMD.u16);
 				break;
 
 			case PALMODE_SMS:
-				T_update_SMS<uint16_t>(m_palActive.u16, d->palFull.u16);
+				T_update_SMS<uint16_t>(m_palActive.u16, d->palFullSMS.u16);
 				break;
 
 			case PALMODE_GG:
-				T_update_GG<uint16_t>(m_palActive.u16, d->palFull.u16);
+				T_update_GG<uint16_t>(m_palActive.u16, d->palFullMD.u16);
 				break;
 
 			case PALMODE_TMS9918A:
-				T_update_TMS9918A<uint16_t>(m_palActive.u16, d->palFull.u16);
+				T_update_TMS9918A<uint16_t>(m_palActive.u16, d->palFullSMS.u16);
 				break;
 		}
 	} else {
 		switch (d->palMode) {
 			case PALMODE_32X:
 				// TODO: Implement T_update_32X().
-#if 0
-				T_update_32X<uint32_t>(m_palActive32X.u32, m_palFull32X.u32);
-#endif
+				//T_update_32X<uint32_t>(m_palActive32X.u32, m_palFull32X.u32);
 				// NOTE: 32X falls through to MD, since both 32X and MD palettes must be updated.
 				// TODO: Add a separate dirty flag for the 32X palette?
+				// FALLTHROUGH
 
 			case PALMODE_MD:
 			default:
-				T_update_MD<uint32_t>(m_palActive.u32, d->palFull.u32);
+				T_update_MD<uint32_t>(m_palActive.u32, d->palFullMD.u32);
 				break;
 
 			case PALMODE_SMS:
-				T_update_SMS<uint32_t>(m_palActive.u32, d->palFull.u32);
+				T_update_SMS<uint32_t>(m_palActive.u32, d->palFullSMS.u32);
 				break;
 
 			case PALMODE_GG:
-				T_update_GG<uint32_t>(m_palActive.u32, d->palFull.u32);
+				T_update_GG<uint32_t>(m_palActive.u32, d->palFullMD.u32);
 				break;
 
 			case PALMODE_TMS9918A:
-				T_update_TMS9918A<uint32_t>(m_palActive.u32, d->palFull.u32);
+				T_update_TMS9918A<uint32_t>(m_palActive.u32, d->palFullSMS.u32);
 				break;
 		}
 	}

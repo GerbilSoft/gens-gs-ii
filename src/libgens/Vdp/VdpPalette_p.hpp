@@ -68,11 +68,19 @@ class VdpPalettePrivate
 		 */
 		bool mdShadowHighlight;
 
-		// Full MD/SMS/GG palette.
+		// Full TMS9918A/SMS palette.
+		// SMS palette may be used in MD mode.
+		// TMS9918A only uses 0x10 entries.
+		union {
+			uint16_t u16[0x40];
+			uint32_t u32[0x40];
+		} palFullSMS;
+
+		// Full MD/GG palette.
 		union {
 			uint16_t u16[0x1000];
 			uint32_t u32[0x1000];
-		} palFull;
+		} palFullMD;
 
 		// Full 32X palette.
 		// TODO: Only allocate this if 32X mode is enabled?
@@ -89,7 +97,7 @@ class VdpPalettePrivate
 		template<typename pixel,
 			int RBits, int GBits, int BBits,
 			int RMask, int GMask, int BMask>
-		FORCE_INLINE void T_recalcFull_MD(pixel *palFull);
+		FORCE_INLINE void T_recalcFull_MD(pixel *palFullMD);
 
 		template<typename pixel,
 			int RBits, int GBits, int BBits,
@@ -99,17 +107,17 @@ class VdpPalettePrivate
 		template<typename pixel,
 			int RBits, int GBits, int BBits,
 			int RMask, int GMask, int BMask>
-		FORCE_INLINE void T_recalcFull_SMS(pixel *palFull);
+		FORCE_INLINE void T_recalcFull_SMS(pixel *palFullSMS);
 
 		template<typename pixel,
 			int RBits, int GBits, int BBits,
 			int RMask, int GMask, int BMask>
-		FORCE_INLINE void T_recalcFull_GG(pixel *palFull);
+		FORCE_INLINE void T_recalcFull_GG(pixel *palFullGG);
 
 		template<typename pixel,
 			int RBits, int GBits, int BBits,
 			int RMask, int GMask, int BMask>
-		FORCE_INLINE void T_recalcFull_TMS9918A(pixel *palFull);
+		FORCE_INLINE void T_recalcFull_TMS9918A(pixel *palFullTMS);
 
 		void recalcFull(void);
 };
