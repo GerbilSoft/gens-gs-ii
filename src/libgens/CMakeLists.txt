@@ -110,6 +110,7 @@ SET(libgens_VDP_H
 	Vdp/Vdp.hpp
 	Vdp/Vdp_p.hpp
 	Vdp/VdpPalette.hpp
+	Vdp/VdpPalette_p.hpp
 	Vdp/VdpRend_Err_p.hpp
 	Vdp/VGA_charset.h
 	Vdp/VdpStatus.hpp
