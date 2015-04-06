@@ -96,6 +96,8 @@ SET(libgens_VDP_SRCS
 	Vdp/VdpRend.cpp
 	Vdp/VdpRend_m5.cpp
 	Vdp/VdpPalette.cpp
+	Vdp/VdpPalette_recalc.cpp
+	Vdp/VdpPalette_update.cpp
 	Vdp/VdpRend_Err.cpp
 	Vdp/VGA_charset.c
 	Vdp/VdpStatus.cpp
