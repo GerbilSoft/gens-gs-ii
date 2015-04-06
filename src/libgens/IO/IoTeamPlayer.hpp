@@ -59,16 +59,14 @@ class IoTeamPlayer : public Device
 		 */
 		virtual void update(void);
 
-		// Connected controllers.
-		// NOTE: This object does NOT own these IoDevices.
-		// TODO: Add mutator function to automatically rebuild
-		// the Team Player control table.
-		Device *pads[4];
-
 		/**
-		 * Rebuild the controller index table.
+		 * Set a sub-device.
+		 * Used for multitaps.
+		 * @param virtPort Virtual port number. (0-3)
+		 * @param ioDevice I/O device.
+		 * @return 0 on success; non-zero on error.
 		 */
-		void rebuildCtrlIndexTable(void);
+		virtual int setSubDevice(int virtPort, Device *ioDevice) override;
 
 	protected:
 		/**
@@ -154,9 +152,18 @@ class IoTeamPlayer : public Device
 			TP_DT_MAX
 		};
 
+		// Connected controllers.
+		// NOTE: This object does NOT own these IoDevices.
+		Device *pads[4];
+
 		// Team Player data.
 		uint8_t padTypes[4];					// TP_PadType
 		uint8_t ctrlIndexTbl[TP_DT_MAX - TP_DT_PADA_RLDU];	// TP_DataType
+
+		/**
+		 * Rebuild the controller index table.
+		 */
+		void rebuildCtrlIndexTable(void);
 };
 
 } }

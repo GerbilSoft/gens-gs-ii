@@ -23,7 +23,10 @@
 
 #include "Io4WPS.hpp"
 
+#include "macros/common.h"
+
 // C includes. (C++ namespace)
+#include <cassert>
 #include <cstring>
 
 namespace LibGens { namespace IO {
@@ -88,6 +91,41 @@ void Io4WPS::update(void)
 	pad->update();
 	// TODO: Should be run on readDataMD() as well.
 	this->deviceData = pad->deviceData;
+}
+
+/**
+ * Set the current player.
+ * Should only be called by Io4WPM.
+ * @param player Current player.
+ */
+void Io4WPS::setCurrentPlayer(uint8_t player)
+{
+	assert(/*player >= 0 &&*/ player <= 7);
+	this->player = (player & 7);
+	update();
+}
+
+/**
+ * Set a sub-device.
+ * Used for multitaps.
+ * @param virtPort Virtual port number. (0-3)
+ * @param ioDevice I/O device.
+ * @return 0 on success; non-zero on error.
+ */
+int Io4WPS::setSubDevice(int virtPort, Device *ioDevice)
+{
+	assert(virtPort >= 0 && virtPort < ARRAY_SIZE(pads));
+	if (virtPort < 0 || virtPort >= ARRAY_SIZE(pads))
+		return -1;
+
+	// Set the pad.
+	// TODO: Also add a "set all sub devices" function
+	// so we don't have to rebuild the index table
+	// multiple times?
+	// TODO: Verify device type.
+	// TODO: update()?
+	pads[virtPort] = ioDevice;
+	return 0;
 }
 
 } }

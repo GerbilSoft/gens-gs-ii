@@ -166,6 +166,15 @@ class Device
 		 * Needed for some devices that have partially-unclocked protocols.
 		 */
 		virtual void update_onRead(void);
+
+		/**
+		 * Set a sub-device.
+		 * Used for multitaps. (Base implementation does nothing.)
+		 * @param virtPort Virtual port number.
+		 * @param ioDevice I/O device.
+		 * @return 0 on success; non-zero on error.
+		 */
+		virtual int setSubDevice(int virtPort, Device *ioDevice);
 };
 
 } }

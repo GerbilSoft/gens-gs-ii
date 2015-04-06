@@ -31,10 +31,12 @@
 #include "Io3BTN.hpp"
 #include "Io6BTN.hpp"
 #include "Io2BTN.hpp"
+#include "IoMegaMouse.hpp"
+
+// Multitaps.
 #include "IoTeamPlayer.hpp"
 #include "Io4WPM.hpp"
 #include "Io4WPS.hpp"
-#include "IoMegaMouse.hpp"
 
 // C includes. (C++ namespace)
 #include <cassert>
@@ -223,6 +225,7 @@ IoManager::IoType_t IoManager::devType(VirtPort_t virtPort) const
  * Set the device type for a given virtual port.
  * @param virtPort Virtual port.
  * @param ioType New device type.
+ * TODO: Return an error code?
  */
 void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 {
@@ -284,8 +287,22 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 			dev = new IO::IoMegaMouse();
 			break;
 		case IOT_TEAMPLAYER:
+			dev = new IO::IoTeamPlayer();
+			break;
 		case IOT_4WP_MASTER:
+			if (virtPort != VIRTPORT_2) {
+				// EA 4-Way Play Master device must be on port 2.
+				return;
+			}
+			dev = new IO::Io4WPM();
+			break;
 		case IOT_4WP_SLAVE:
+			if (virtPort != VIRTPORT_1) {
+				// EA 4-Way Play Slave device must be on port 1.
+				return;
+			}
+			dev = new IO::Io4WPS();
+			break;
 		default:
 			// TODO: Handle Team Player correctly.
 			return;
@@ -312,44 +329,78 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 		d->ioDevices[virtPort] = dev;
 	}
 
-	// Update the device.
-	if (dev) {
-		dev->update();
-	}
-
-	// Rebuild Team Player controller index tables for TP devices.
-	// TODO
-	/*
+	// Update multitaps.
 	switch (virtPort) {
 		// System controller ports.
-		case VIRTPORT_1:
+		case VIRTPORT_1: {
+			const IoType_t type = dev->type();
+			if (type == IoManager::IOT_TEAMPLAYER) {
+				// Team Player.
+				for (int i = VIRTPORT_TP1A; i <= VIRTPORT_TP1D; i++) {
+					dev->setSubDevice(i - VIRTPORT_TP1A, d->ioDevices[i]);
+				}
+			} else if (type == IoManager::IOT_4WP_SLAVE) {
+				// EA 4-Way Play Slave device.
+				for (int i = VIRTPORT_4WPA; i <= VIRTPORT_4WPD; i++) {
+					dev->setSubDevice(i - VIRTPORT_4WPA, d->ioDevices[i]);
+				}
+			}
+			break;
+		}
+
 		case VIRTPORT_2:
-			if (dev->type == IoManager::IOT_TEAMPLAYER)
-				d->rebuildCtrlIndexTable(virtPort);
+			if (dev->type() == IoManager::IOT_TEAMPLAYER) {
+				// Team Player.
+				for (int i = VIRTPORT_TP2A; i <= VIRTPORT_TP2D; i++) {
+					dev->setSubDevice(i - VIRTPORT_TP2A, d->ioDevices[i]);
+				}
+			}
 			break;
 
 		// Team Player, Port 1.
 		case VIRTPORT_TP1A:
 		case VIRTPORT_TP1B:
 		case VIRTPORT_TP1C:
-		case VIRTPORT_TP1D:
-			if (d->ioDevices[VIRTPORT_1].type == IoManager::IOT_TEAMPLAYER)
-				d->rebuildCtrlIndexTable(VIRTPORT_1);
+		case VIRTPORT_TP1D: {
+			IO::Device *const dev1 = d->ioDevices[VIRTPORT_1];
+			if (dev1->type() == IoManager::IOT_TEAMPLAYER) {
+				dev1->setSubDevice(virtPort - VIRTPORT_TP1A, dev);
+			}
 			break;
+		}
 
 		// Team Player, Port 1.
 		case VIRTPORT_TP2A:
 		case VIRTPORT_TP2B:
 		case VIRTPORT_TP2C:
-		case VIRTPORT_TP2D:
-			if (d->ioDevices[VIRTPORT_2].type == IoManager::IOT_TEAMPLAYER)
-				d->rebuildCtrlIndexTable(VIRTPORT_2);
+		case VIRTPORT_TP2D: {
+			IO::Device *const dev2 = d->ioDevices[VIRTPORT_2];
+			if (dev2->type() == IoManager::IOT_TEAMPLAYER) {
+				dev2->setSubDevice(virtPort - VIRTPORT_TP2A, dev);
+			}
 			break;
+		}
+
+		// EA 4-Way Play.
+		case VIRTPORT_4WPA:
+		case VIRTPORT_4WPB:
+		case VIRTPORT_4WPC:
+		case VIRTPORT_4WPD: {
+			IO::Device *const dev1 = d->ioDevices[VIRTPORT_1];
+			if (dev1->type() == IoManager::IOT_4WP_SLAVE) {
+				dev1->setSubDevice(virtPort - VIRTPORT_4WPA, dev);
+			}
+			break;
+		}
 
 		default:
 			break;
 	}
-	*/
+
+	// Update the device.
+	if (dev) {
+		dev->update();
+	}
 }
 
 /** MD-side controller functions. **/

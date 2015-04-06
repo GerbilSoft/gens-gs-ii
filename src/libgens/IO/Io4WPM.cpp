@@ -55,7 +55,8 @@ void Io4WPM::update(void)
 	assert(slave != nullptr);
 	if (slave) {
 		assert(slave->type() == IoManager::IOT_4WP_SLAVE);
-		slave->player = (this->mdData_tris >> 4) & 0x07;
+		const uint8_t player = (this->mdData_tris >> 4) & 0x07;
+		slave->setCurrentPlayer(player);
 	}
 
 	// Device data is always 0x7F.

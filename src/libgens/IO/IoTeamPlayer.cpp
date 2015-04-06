@@ -27,6 +27,7 @@
 #include "macros/common.h"
 
 // C includes. (C++ namespace)
+#include <cassert>
 #include <cstring>
 
 namespace LibGens { namespace IO {
@@ -267,6 +268,30 @@ void IoTeamPlayer::rebuildCtrlIndexTable(void)
 	for (int x = i; x < ARRAY_SIZE(ctrlIndexTbl); x++) {
 		ctrlIndexTbl[x] = TP_DT_MAX;
 	}
+}
+
+/**
+ * Set a sub-device.
+ * Used for multitaps.
+ * @param virtPort Virtual port number. (0-3)
+ * @param ioDevice I/O device.
+ * @return 0 on success; non-zero on error.
+ */
+int IoTeamPlayer::setSubDevice(int virtPort, Device *ioDevice)
+{
+	assert(virtPort >= 0 && virtPort < ARRAY_SIZE(pads));
+	if (virtPort < 0 || virtPort >= ARRAY_SIZE(pads))
+		return -1;
+
+	// Set the pad and rebuild the index table.
+	// TODO: Also add a "set all sub devices" function
+	// so we don't have to rebuild the index table
+	// multiple times?
+	// TODO: Verify device type.
+	// TODO: update()?
+	pads[virtPort] = ioDevice;
+	rebuildCtrlIndexTable();
+	return 0;
 }
 
 } }

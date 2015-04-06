@@ -59,6 +59,23 @@ class Io4WPS : public Device
 		 */
 		virtual void update(void) override;
 
+		/**
+		 * Set a sub-device.
+		 * Used for multitaps.
+		 * @param virtPort Virtual port number. (0-3)
+		 * @param ioDevice I/O device.
+		 * @return 0 on success; non-zero on error.
+		 */
+		virtual int setSubDevice(int virtPort, Device *ioDevice) override;
+
+		/**
+		 * Set the current player.
+		 * Should only be called by Io4WPM.
+		 * @param player Current player.
+		 */
+		void setCurrentPlayer(uint8_t player);
+
+	protected:
 		// Connected controllers.
 		// NOTE: This object does NOT own these Devices.
 		// TODO: Add mutator function to automatically rebuild

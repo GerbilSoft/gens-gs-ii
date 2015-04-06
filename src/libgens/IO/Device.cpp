@@ -115,4 +115,17 @@ void Device::update_onRead(void)
 	// to exist in the vtable.
 }
 
+/**
+ * Set a sub-device.
+ * Used for multitaps. (Base implementation does nothing.)
+ * @param virtPort Virtual port number.
+ * @param ioDevice I/O device.
+ * @return 0 on success; non-zero on error.
+ */
+int Device::setSubDevice(int virtPort, Device *ioDevice)
+{
+	// Nothing to do here...
+	return -1;
+}
+
 } }
