@@ -60,6 +60,7 @@ const IoManagerPrivate::IoDevInfo IoManagerPrivate::ioDevInfo[IoManager::IOT_MAX
 	{'TEAM', 0, true},	// IOT_TEAMPLAYER
 	{'4WPM', 0, true},	// IOT_4WP_MASTER
 	{'4WPS', 0, true},	// IOT_4WP_SLAVE
+	{'MTAP', 0, false},	// IOT_MASTERTAP
 };
 
 IoManagerPrivate::IoManagerPrivate(IoManager *q)

@@ -122,27 +122,39 @@ class IoManager
 			VIRTPORT_2	= 1,	// Player 2
 			VIRTPORT_EXT	= 2,	// Extension port
 
-			// Team Player 1
+			// Team Player, Port 1
 			VIRTPORT_TP1A	= 3,	// TP-1A
 			VIRTPORT_TP1B	= 4,	// TP-1B
 			VIRTPORT_TP1C	= 5,	// TP-1C
 			VIRTPORT_TP1D	= 6,	// TP-1D
 
-			// Team Player 2
+			// Team Player, Port 2
 			VIRTPORT_TP2A	= 7,	// TP-1A
 			VIRTPORT_TP2B	= 8,	// TP-1B
 			VIRTPORT_TP2C	= 9,	// TP-1C
 			VIRTPORT_TP2D	= 10,	// TP-1D
 
-			// 4-Way Play
+			// EA 4-Way Play
 			VIRTPORT_4WPA	= 11,	// 4WP-A
 			VIRTPORT_4WPB	= 12,	// 4WP-B
 			VIRTPORT_4WPC	= 13,	// 4WP-C
 			VIRTPORT_4WPD	= 14,	// 4WP-D
 
+			// Master Tap, Port 1
+			VIRTPORT_MTAP1A	= 15,	// MTAP-1A
+			VIRTPORT_MTAP1B	= 16,	// MTAP-1B
+			VIRTPORT_MTAP1C	= 17,	// MTAP-1C
+			VIRTPORT_MTAP1D	= 18,	// MTAP-1D
+
+			// Master Tap, Port 2
+			VIRTPORT_MTAP2A	= 19,	// MTAP-2A
+			VIRTPORT_MTAP2B	= 20,	// MTAP-2B
+			VIRTPORT_MTAP2C	= 21,	// MTAP-2C
+			VIRTPORT_MTAP2D	= 22,	// MTAP-2D
+
 			// J-Cart (TODO)
-			VIRTPORT_JCART1	= 15,
-			VIRTPORT_JCART2	= 16,
+			VIRTPORT_JCART1	= 23,
+			VIRTPORT_JCART2	= 24,
 
 			VIRTPORT_MAX
 		};
@@ -171,6 +183,7 @@ class IoManager
 			IOT_TEAMPLAYER,
 			IOT_4WP_MASTER,
 			IOT_4WP_SLAVE,
+			IOT_MASTERTAP,
 
 			IOT_MAX
 		};

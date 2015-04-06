@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -48,8 +48,7 @@ using LibGensKeys::KeyManager;
 #include <QtGui/QPushButton>
 
 #include "ui_CtrlConfigWindow.h"
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class CtrlConfigWindowPrivate
 {
@@ -87,6 +86,15 @@ class CtrlConfigWindowPrivate
 
 		// Toolbar separators.
 		QVector<QAction*> vecTbSep;
+		enum CtrlCfgTBSep_t {
+			CTRL_CFG_TBSEP_TP1 = 0,
+			CTRL_CFG_TBSEP_TP2,
+			CTRL_CFG_TBSEP_4WP,
+			CTRL_CFG_TBSEP_MTAP1,
+			CTRL_CFG_TBSEP_MTAP2,
+
+			CTRL_CFG_TBSEP_MAX
+		};
 
 	private:
 		// Dropdown device lock.
@@ -248,6 +256,9 @@ QString CtrlConfigWindowPrivate::getShortDeviceName(IoManager::IoType_t ioType) 
 		case IoManager::IOT_4WP_SLAVE:
 			//: EA 4-Way Play. (Specific brand name; only modify if it's different in your region!)
 			return CtrlConfigWindow::tr("4-Way Play", "shortDeviceName");
+		case IoManager::IOT_MASTERTAP:
+			//: Master Tap. (Homebrew multitap for Sega Master System.)
+			return CtrlConfigWindow::tr("Master Tap", "shortDeviceName");
 	}
 }
 
@@ -311,6 +322,9 @@ QString CtrlConfigWindowPrivate::getLongDeviceName(IoManager::IoType_t ioType) c
 		case IoManager::IOT_4WP_SLAVE:
 			//: EA 4-Way Play. (Specific brand name; only modify if it's different in your region!)
 			return CtrlConfigWindow::tr("EA 4-Way Play", "longDeviceName");
+		case IoManager::IOT_MASTERTAP:
+			//: Master Tap. (Homebrew multitap for Sega Master System.)
+			return CtrlConfigWindow::tr("Master Tap", "longDeviceName");
 	}
 }
 
@@ -351,6 +365,22 @@ QString CtrlConfigWindowPrivate::getPortName(IoManager::VirtPort_t virtPort) con
 		case IoManager::VIRTPORT_4WPD:
 			return CtrlConfigWindow::tr("4-Way Play, Port %1")
 				.arg(QChar(L'A' + (virtPort - IoManager::VIRTPORT_4WPA)));
+
+		// Master Tap, Port 1.
+		case IoManager::VIRTPORT_MTAP1A:
+		case IoManager::VIRTPORT_MTAP1B:
+		case IoManager::VIRTPORT_MTAP1C:
+		case IoManager::VIRTPORT_MTAP1D:
+			return CtrlConfigWindow::tr("Master Tap %1, Port %2").arg(1)
+				.arg(QChar(L'A' + (virtPort - IoManager::VIRTPORT_MTAP1A)));
+
+		// Master Tap, Port 2.
+		case IoManager::VIRTPORT_MTAP2A:
+		case IoManager::VIRTPORT_MTAP2B:
+		case IoManager::VIRTPORT_MTAP2C:
+		case IoManager::VIRTPORT_MTAP2D:
+			return CtrlConfigWindow::tr("Master Tap %1, Port %2").arg(2)
+				.arg(QChar(L'A' + (virtPort - IoManager::VIRTPORT_MTAP2A)));
 
 		default:
 			// Unknown port number.
@@ -406,39 +436,50 @@ void CtrlConfigWindowPrivate::initCboDevice(bool isTP)
 	ui.cboDevice->clear();
 
 	// Determine how many devices should be added to the dropdown.
+	// TODO: Use bitfields for each port instead of this mess.
 	const int ioTypeMax = (isTP ? (IoManager::IOT_6BTN + 1) : IoManager::IOT_MAX);
 
-	for (int ioType = IoManager::IOT_NONE;
-	     ioType < ioTypeMax; ioType++)
+	if (selPort >= IoManager::VIRTPORT_MTAP1A &&
+	    selPort <= IoManager::VIRTPORT_MTAP2D)
 	{
-		if (!IoManager::IsDevTypeUsable((IoManager::IoType_t)ioType))
-			continue;
+		// Master Tap. Only NONE and 2BTN are allowed.
+		addIoTypeToCboDevice(IoManager::IOT_NONE);
+		addIoTypeToCboDevice(IoManager::IOT_2BTN);
+	} else {
+		for (int ioType = IoManager::IOT_NONE;
+		     ioType < ioTypeMax; ioType++)
+		{
+			if (!IoManager::IsDevTypeUsable((IoManager::IoType_t)ioType))
+				continue;
 
-		switch (ioType) {
-			case IoManager::IOT_TEAMPLAYER:
-			case IoManager::IOT_4WP_MASTER:
-			case IoManager::IOT_4WP_SLAVE:
-				// Multitaps are added at the end of the list.
-				break;
+			switch (ioType) {
+				case IoManager::IOT_TEAMPLAYER:
+				case IoManager::IOT_4WP_MASTER:
+				case IoManager::IOT_4WP_SLAVE:
+				case IoManager::IOT_MASTERTAP:
+					// Multitaps are added at the end of the list.
+					break;
 
-			default:
-				addIoTypeToCboDevice((IoManager::IoType_t)ioType);
-				break;
+				default:
+					addIoTypeToCboDevice((IoManager::IoType_t)ioType);
+					break;
+			}
 		}
-	}
 
-	// Also add Mega Mouse to Team Player devices.
-	// (NOT 4WP though...)
-	if (selPort >= IoManager::VIRTPORT_TP1A &&
-	    selPort <= IoManager::VIRTPORT_TP2D)
-	{
-		addIoTypeToCboDevice(IoManager::IOT_MEGA_MOUSE);
+		// Also add Mega Mouse to Team Player devices.
+		// (NOT 4WP though...)
+		if (selPort >= IoManager::VIRTPORT_TP1A &&
+		    selPort <= IoManager::VIRTPORT_TP2D)
+		{
+			addIoTypeToCboDevice(IoManager::IOT_MEGA_MOUSE);
+		}
 	}
 
 	// Add multitaps.
 	if (!isTP) {
 		addIoTypeToCboDevice(IoManager::IOT_TEAMPLAYER);
 		addIoTypeToCboDevice(IoManager::IOT_4WP_MASTER);
+		addIoTypeToCboDevice(IoManager::IOT_MASTERTAP);
 	}
 
 	cboDevice_unlock();
@@ -515,13 +556,13 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	d->actgrpSelPort->addAction(d->ui.actionPort2);
 	d->actgrpSelPort->addAction(d->ui.actionPortEXT);
 
-	// Team Player 1.
+	// Team Player, Port 1.
 	d->actgrpSelPort->addAction(d->ui.actionPortTP1A);
 	d->actgrpSelPort->addAction(d->ui.actionPortTP1B);
 	d->actgrpSelPort->addAction(d->ui.actionPortTP1C);
 	d->actgrpSelPort->addAction(d->ui.actionPortTP1D);
 
-	// Team Player 2.
+	// Team Player, Port 2.
 	d->actgrpSelPort->addAction(d->ui.actionPortTP2A);
 	d->actgrpSelPort->addAction(d->ui.actionPortTP2B);
 	d->actgrpSelPort->addAction(d->ui.actionPortTP2C);
@@ -533,11 +574,25 @@ CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
 	d->actgrpSelPort->addAction(d->ui.actionPort4WPC);
 	d->actgrpSelPort->addAction(d->ui.actionPort4WPD);
 
+	// Master Tap, Port 1.
+	d->actgrpSelPort->addAction(d->ui.actionPortMTAP1A);
+	d->actgrpSelPort->addAction(d->ui.actionPortMTAP1B);
+	d->actgrpSelPort->addAction(d->ui.actionPortMTAP1C);
+	d->actgrpSelPort->addAction(d->ui.actionPortMTAP1D);
+
+	// Master Tap, Port 2.
+	d->actgrpSelPort->addAction(d->ui.actionPortMTAP2A);
+	d->actgrpSelPort->addAction(d->ui.actionPortMTAP2B);
+	d->actgrpSelPort->addAction(d->ui.actionPortMTAP2C);
+	d->actgrpSelPort->addAction(d->ui.actionPortMTAP2D);
+
+	// TODO: J-Cart ports?
+
 	// Find the toolbar separators.
 	// Qt Designer doesn't save them for some reason.
 	// Also, add port buttons to the signal mapper.
 	int portNum = 0;
-	d->vecTbSep.reserve(CTRL_CFG_TBSEP_MAX);
+	d->vecTbSep.reserve(d->CTRL_CFG_TBSEP_MAX);
 	foreach(QAction *action, d->ui.toolBar->actions()) {
 		if (action->isSeparator()) {
 			// Append to the vector of separators.
@@ -674,11 +729,25 @@ void CtrlConfigWindow::updatePortButton(IoManager::VirtPort_t virtPort)
 		case IoManager::VIRTPORT_TP2C:		actionPort = d->ui.actionPortTP2C; break;
 		case IoManager::VIRTPORT_TP2D:		actionPort = d->ui.actionPortTP2D; break;
 
-		// 4-Way Play.
+		// EA 4-Way Play.
 		case IoManager::VIRTPORT_4WPA:		actionPort = d->ui.actionPort4WPA; break;
 		case IoManager::VIRTPORT_4WPB:		actionPort = d->ui.actionPort4WPB; break;
 		case IoManager::VIRTPORT_4WPC:		actionPort = d->ui.actionPort4WPC; break;
 		case IoManager::VIRTPORT_4WPD:		actionPort = d->ui.actionPort4WPD; break;
+
+		// Master Tap, Port 1.
+		case IoManager::VIRTPORT_MTAP1A:	actionPort = d->ui.actionPortMTAP1A; break;
+		case IoManager::VIRTPORT_MTAP1B:	actionPort = d->ui.actionPortMTAP1B; break;
+		case IoManager::VIRTPORT_MTAP1C:	actionPort = d->ui.actionPortMTAP1C; break;
+		case IoManager::VIRTPORT_MTAP1D:	actionPort = d->ui.actionPortMTAP1D; break;
+
+		// Master Tap, Port 2.
+		case IoManager::VIRTPORT_MTAP2A:	actionPort = d->ui.actionPortMTAP2A; break;
+		case IoManager::VIRTPORT_MTAP2B:	actionPort = d->ui.actionPortMTAP2B; break;
+		case IoManager::VIRTPORT_MTAP2C:	actionPort = d->ui.actionPortMTAP2C; break;
+		case IoManager::VIRTPORT_MTAP2D:	actionPort = d->ui.actionPortMTAP2D; break;
+
+		// TODO: J-Cart
 
 		default:
 			// Unknown port.
@@ -699,21 +768,33 @@ void CtrlConfigWindow::updatePortButton(IoManager::VirtPort_t virtPort)
 	d->ui.actionPortEXT->setVisible(false);
 
 	if (virtPort == IoManager::VIRTPORT_1) {
-		// Port 1. Update TeamPlayer 1 button state.
+		// Update multitap button state for Port 1.
 		const bool isTP = (ioType == IoManager::IOT_TEAMPLAYER);
-		d->vecTbSep[CTRL_CFG_TBSEP_TP1]->setVisible(isTP);
+		const bool isMTAP = (ioType == IoManager::IOT_MASTERTAP);
+		d->vecTbSep[d->CTRL_CFG_TBSEP_TP1]->setVisible(isTP);
+		d->vecTbSep[d->CTRL_CFG_TBSEP_MTAP1]->setVisible(isMTAP);
 		d->ui.actionPortTP1A->setVisible(isTP);
 		d->ui.actionPortTP1B->setVisible(isTP);
 		d->ui.actionPortTP1C->setVisible(isTP);
 		d->ui.actionPortTP1D->setVisible(isTP);
+		d->ui.actionPortMTAP1A->setVisible(isMTAP);
+		d->ui.actionPortMTAP1B->setVisible(isMTAP);
+		d->ui.actionPortMTAP1C->setVisible(isMTAP);
+		d->ui.actionPortMTAP1D->setVisible(isMTAP);
 	} else if (virtPort == IoManager::VIRTPORT_2) {
-		// Port 2. Update TeamPlayer 2 button state.
+		// Update multitap button state for Port 2.
 		const bool isTP = (ioType == IoManager::IOT_TEAMPLAYER);
-		d->vecTbSep[CTRL_CFG_TBSEP_TP2]->setVisible(isTP);
+		const bool isMTAP = (ioType == IoManager::IOT_MASTERTAP);
+		d->vecTbSep[d->CTRL_CFG_TBSEP_TP2]->setVisible(isTP);
+		d->vecTbSep[d->CTRL_CFG_TBSEP_MTAP2]->setVisible(isMTAP);
 		d->ui.actionPortTP2A->setVisible(isTP);
 		d->ui.actionPortTP2B->setVisible(isTP);
 		d->ui.actionPortTP2C->setVisible(isTP);
 		d->ui.actionPortTP2D->setVisible(isTP);
+		d->ui.actionPortMTAP2A->setVisible(isMTAP);
+		d->ui.actionPortMTAP2B->setVisible(isMTAP);
+		d->ui.actionPortMTAP2C->setVisible(isMTAP);
+		d->ui.actionPortMTAP2D->setVisible(isMTAP);
 	}
 
 	if (virtPort == IoManager::VIRTPORT_1 ||
@@ -723,7 +804,7 @@ void CtrlConfigWindow::updatePortButton(IoManager::VirtPort_t virtPort)
 			(d->keyManager->ioType(IoManager::VIRTPORT_1) == IoManager::IOT_4WP_SLAVE &&
 			 d->keyManager->ioType(IoManager::VIRTPORT_2) == IoManager::IOT_4WP_MASTER);
 
-		d->vecTbSep[CTRL_CFG_TBSEP_4WP]->setVisible(is4WP);
+		d->vecTbSep[d->CTRL_CFG_TBSEP_4WP]->setVisible(is4WP);
 		d->ui.actionPort4WPA->setVisible(is4WP);
 		d->ui.actionPort4WPB->setVisible(is4WP);
 		d->ui.actionPort4WPC->setVisible(is4WP);
@@ -779,7 +860,7 @@ void CtrlConfigWindow::selectPort(IoManager::VirtPort_t virtPort)
 	assert(virtPort >= IoManager::VIRTPORT_1 && virtPort < IoManager::VIRTPORT_MAX);
 
 	Q_D(CtrlConfigWindow);
-	// Check if this is a Team Player port.
+	// Check if this is a multitap port.
 	bool isTP = false;
 	switch (virtPort) {
 		// Team Player, Port 1.
@@ -800,13 +881,31 @@ void CtrlConfigWindow::selectPort(IoManager::VirtPort_t virtPort)
 				isTP = true;
 			break;
 
-		// 4-Way Play.
+		// EA 4-Way Play.
 		case IoManager::VIRTPORT_4WPA:
 		case IoManager::VIRTPORT_4WPB:
 		case IoManager::VIRTPORT_4WPC:
 		case IoManager::VIRTPORT_4WPD:
 			if (d->keyManager->ioType(IoManager::VIRTPORT_1) == IoManager::IOT_4WP_SLAVE &&
 			    d->keyManager->ioType(IoManager::VIRTPORT_2) == IoManager::IOT_4WP_MASTER)
+				isTP = true;
+			break;
+
+		// Master Tap, Port 1.
+		case IoManager::VIRTPORT_MTAP1A:
+		case IoManager::VIRTPORT_MTAP1B:
+		case IoManager::VIRTPORT_MTAP1C:
+		case IoManager::VIRTPORT_MTAP1D:
+			if (d->keyManager->ioType(IoManager::VIRTPORT_1) == IoManager::IOT_MASTERTAP)
+				isTP = true;
+			break;
+
+		// Master Tap, Port 2.
+		case IoManager::VIRTPORT_MTAP2A:
+		case IoManager::VIRTPORT_MTAP2B:
+		case IoManager::VIRTPORT_MTAP2C:
+		case IoManager::VIRTPORT_MTAP2D:
+			if (d->keyManager->ioType(IoManager::VIRTPORT_2) == IoManager::IOT_MASTERTAP)
 				isTP = true;
 			break;
 
@@ -902,12 +1001,40 @@ void CtrlConfigWindow::reload(void)
 		case IoManager::VIRTPORT_4WPB:
 		case IoManager::VIRTPORT_4WPC:
 		case IoManager::VIRTPORT_4WPD:
-			// Make sure port 1 is still 4WP slave,
-			// and port 2 is still 4WP master.
+			// Make sure Port 1 is still 4WP slave,
+			// and Port 2 is still 4WP master.
 			if (d->keyManager->ioType(IoManager::VIRTPORT_1) != IoManager::IOT_4WP_SLAVE ||
 			    d->keyManager->ioType(IoManager::VIRTPORT_2) != IoManager::IOT_4WP_MASTER) {
 				// 4WP is no longer set. Switch to Port 1.
 				d->ui.actionPort1->setChecked(true);
+				hasUpdatedPortSettings = true;
+			}
+			break;
+
+		// Master Tap, Port 1.
+		case IoManager::VIRTPORT_MTAP1A:
+		case IoManager::VIRTPORT_MTAP1B:
+		case IoManager::VIRTPORT_MTAP1C:
+		case IoManager::VIRTPORT_MTAP1D:
+			// Make sure Port 1 is still Master Tap.
+			if (d->keyManager->ioType(IoManager::VIRTPORT_1) != IoManager::IOT_MASTERTAP) {
+				// Port 1 is no longer Master Tap.
+				// Switch to Port 1 instead of the MTAP1 port.
+				d->ui.actionPort1->setChecked(true);
+				hasUpdatedPortSettings = true;
+			}
+			break;
+
+		// Master Tap, Port 2.
+		case IoManager::VIRTPORT_MTAP2A:
+		case IoManager::VIRTPORT_MTAP2B:
+		case IoManager::VIRTPORT_MTAP2C:
+		case IoManager::VIRTPORT_MTAP2D:
+			// Make sure Port 2 is still Master Tap.
+			if (d->keyManager->ioType(IoManager::VIRTPORT_2) != IoManager::IOT_MASTERTAP) {
+				// Port 2 is no longer Master Tap.
+				// Switch to Port 2 instead of the MTAP2 port.
+				d->ui.actionPort2->setChecked(true);
 				hasUpdatedPortSettings = true;
 			}
 			break;

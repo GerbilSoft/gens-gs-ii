@@ -37,6 +37,7 @@
 #include "IoTeamPlayer.hpp"
 #include "Io4WPM.hpp"
 #include "Io4WPS.hpp"
+#include "IoMasterTap.hpp"
 
 // C includes. (C++ namespace)
 #include <cassert>
@@ -247,6 +248,7 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 		}
 	}
 
+	// TODO: Use bitfields to speed this up?
 	if (virtPort > VIRTPORT_EXT) {
 		// Team Player supports 3BTN, 6BTN, and MOUS.
 		// Other ports only support 3BTN and 6BTN.
@@ -254,6 +256,11 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 			// Team Player virtual ports support 3BTN, 6BTN, and MOUS.
 			assert((ioType >= IOT_NONE && ioType <= IOT_6BTN) || ioType == IOT_MEGA_MOUSE);
 			if (ioType < IOT_NONE || (ioType > IOT_6BTN && ioType != IOT_MEGA_MOUSE))
+				return;
+		} else if (virtPort >= VIRTPORT_MTAP1A && virtPort <= VIRTPORT_MTAP2D) {
+			// Master Tap virtual ports only support 2BTN.
+			assert(ioType == IOT_NONE || ioType == IOT_2BTN);
+			if (ioType != IOT_NONE && ioType != IOT_2BTN)
 				return;
 		} else {
 			// Other virtual ports only support 3BTN and 6BTN.
@@ -302,6 +309,9 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 				return;
 			}
 			dev = new IO::Io4WPS();
+			break;
+		case IOT_MASTERTAP:
+			dev = new IO::IoMasterTap();
 			break;
 		default:
 			// TODO: Handle Team Player correctly.
@@ -389,6 +399,30 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 			IO::Device *const dev1 = d->ioDevices[VIRTPORT_1];
 			if (dev1->type() == IoManager::IOT_4WP_SLAVE) {
 				dev1->setSubDevice(virtPort - VIRTPORT_4WPA, dev);
+			}
+			break;
+		}
+
+		// Master Tap, Port 1.
+		case VIRTPORT_MTAP1A:
+		case VIRTPORT_MTAP1B:
+		case VIRTPORT_MTAP1C:
+		case VIRTPORT_MTAP1D: {
+			IO::Device *const dev1 = d->ioDevices[VIRTPORT_1];
+			if (dev1->type() == IoManager::IOT_MASTERTAP) {
+				dev1->setSubDevice(virtPort - VIRTPORT_MTAP1A, dev);
+			}
+			break;
+		}
+
+		// Master Tap, Port 2.
+		case VIRTPORT_MTAP2A:
+		case VIRTPORT_MTAP2B:
+		case VIRTPORT_MTAP2C:
+		case VIRTPORT_MTAP2D: {
+			IO::Device *const dev2 = d->ioDevices[VIRTPORT_2];
+			if (dev2->type() == IoManager::IOT_MASTERTAP) {
+				dev2->setSubDevice(virtPort - VIRTPORT_MTAP2A, dev);
 			}
 			break;
 		}

@@ -127,6 +127,7 @@ SET(libgens_IO_SRCS
 	IO/IoTeamPlayer.cpp
 	IO/Io4WPM.cpp
 	IO/Io4WPS.cpp
+	IO/IoMasterTap.cpp
 	)
 
 # TODO: All headers, or just public headers?
@@ -143,6 +144,7 @@ SET(libgens_IO_H
 	IO/IoTeamPlayer.hpp
 	IO/Io4WPM.hpp
 	IO/Io4WPS.hpp
+	IO/IoMasterTap.hpp
 	)
 
 IF(HAVE_LZMA)
