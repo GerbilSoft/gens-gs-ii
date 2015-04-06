@@ -57,7 +57,7 @@ class Io4WPS : public Device
 		 * Update the I/O device.
 		 * Runs the internal device update.
 		 */
-		virtual void update(void);
+		virtual void update(void) override;
 
 		// Connected controllers.
 		// NOTE: This object does NOT own these Devices.
