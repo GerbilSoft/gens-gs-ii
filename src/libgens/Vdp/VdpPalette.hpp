@@ -105,11 +105,26 @@ class VdpPalette
 
 		// Palette mode.
 		enum PalMode_t {
-			PALMODE_MD,
-			PALMODE_32X,
-			PALMODE_SMS,
-			PALMODE_GG,
+			// TMS9918A: Hard-coded 16-color palette.
 			PALMODE_TMS9918A,
+
+			// Sega Master System: 6-bit CRAM.
+			// Uses a hard-coded color ROM when in TMS9918A modes.
+			PALMODE_SMS,
+
+			// Sega Game Gear: 12-bit CRAM.
+			PALMODE_GG,
+
+			// Sega Mega Drive: 9-bit CRAM.
+			// Usage depends on M5/M4 bits:
+			// - M5=1,M4=1: 3-bit DAC
+			// - M5=1,M4=0: 3-bit DAC, LSB only
+			// - M5=0,M4=1: 2-bit DAC, high 2 bits only
+			// - M5=0,M4=0: Black screen.
+			PALMODE_MD,
+
+			// Sega 32X: MD + 15-bit RGB
+			PALMODE_32X,
 
 			PALMODE_MAX
 		};
