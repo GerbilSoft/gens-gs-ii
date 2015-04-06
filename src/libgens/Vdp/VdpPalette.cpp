@@ -32,7 +32,7 @@ VdpPalettePrivate::VdpPalettePrivate(VdpPalette *q)
 	: q(q)
 	, palMode(VdpPalette::PALMODE_MD)
 	, bgColorIdx(0x00)
-	, mdColorMask(MD_COLOR_MASK_FULL)
+	, m5m4bits(0)
 	, mdShadowHighlight(false)
 { }
 
@@ -181,28 +181,24 @@ void VdpPalette::setBgColorIdx(uint8_t newBgColorIdx)
 }
 
 /**
- * Get the MD color mask. (Mode 5 only)
- * @return True if all but LSBs are masked; false for normal operation.
+ * Get the M5/M4 bits.
+ * Used for Mega Drive and Master System modes.
+ * @return M5/M4 bits. [ x  x  x  x  x  x M5 M4]
  */
-bool VdpPalette::mdColorMask(void) const
-	{ return (d->mdColorMask == VdpPalettePrivate::MD_COLOR_MASK_LSB); }
+PAL_PROPERTY_READ(uint8_t, m5m4bits)
 
 /**
- * Set the MD color mask. (Mode 5 only)
- * @param newMdColorMask If true, masks all but LSBs.
+ * Set the M5/M4 bits.
+ * Used for Mega Drive and Master System modes.
+ * @param m5m4bits M5/M4 bits. [ x  x  x  x  x  x M5 M4]
  */
-void VdpPalette::setMdColorMask(bool newMdColorMask)
+void VdpPalette::setM5M4bits(uint8_t m5m4bits)
 {
-	const uint16_t newMask = (newMdColorMask
-				? VdpPalettePrivate::MD_COLOR_MASK_LSB
-				: VdpPalettePrivate::MD_COLOR_MASK_FULL);
-
-	if (d->mdColorMask == newMask)
+	if (d->m5m4bits == m5m4bits)
 		return;
-	d->mdColorMask = newMask;
+	d->m5m4bits = m5m4bits;
 
-	// Mark both full and active palettes as dirty.
-	m_dirty.full = true;
+	// TODO: Only recalculate on SMS and MD VDPs.
 	m_dirty.active = true;
 }
 

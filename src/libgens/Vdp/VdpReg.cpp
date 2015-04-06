@@ -60,10 +60,13 @@ void VdpPrivate::updateVdpMode(void)
 			// Mode 5.
 			// TODO: Only if we weren't in Mode 5 before?
 			palette.setPalMode(VdpPalette::PALMODE_MD);
-			palette.setMdColorMask(!(VDP_Mode & VdpTypes::VDP_MODE_M4));
 		} else {
 			// TODO: Support other palette modes.
 		}
+
+		// Set the M5/M4 bits.
+		// NOTE: The AND is probably not necessary...
+		palette.setM5M4bits((VDP_Mode >> 3) & 0x03);
 	}
 
 	// Initialize Vdp::VDP_Lines.

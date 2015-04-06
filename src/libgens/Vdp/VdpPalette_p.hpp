@@ -55,12 +55,11 @@ class VdpPalettePrivate
 		uint8_t bgColorIdx;		// Background color index.
 
 		/**
-		 * MD color mask. (Mode 5 only)
-		 * Used with the Palette Select bit.
+		 * M5/M4 bits.
+		 * Used for Mega Drive and Master System.
+		 * [ x  x  x  x  x  x M5 M4]
 		 */
-		uint16_t mdColorMask;
-		static const uint16_t MD_COLOR_MASK_FULL = 0xEEE;
-		static const uint16_t MD_COLOR_MASK_LSB = 0x222;
+		uint8_t m5m4bits;
 
 		/**
 		 * Shadow/Highlight enable bit. (Mode 5 only)

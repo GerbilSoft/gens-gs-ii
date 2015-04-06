@@ -39,10 +39,13 @@ template<typename pixel>
 FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 					const pixel *palette)
 {
+	// Check the M4 bit to determine the color mask.
+	const uint16_t mdColorMask = (d->m5m4bits & 1 ? 0xEEE : 0x222);
+
 	// Update all 64 colors.
 	for (int i = 62; i >= 0; i -= 2) {
-		const uint16_t color1_raw = (m_cram.u16[i] & d->mdColorMask);
-		const uint16_t color2_raw = (m_cram.u16[i + 1] & d->mdColorMask);
+		const uint16_t color1_raw = (m_cram.u16[i] & mdColorMask);
+		const uint16_t color2_raw = (m_cram.u16[i + 1] & mdColorMask);
 
 		// Get the palette color.
 		pixel color1 = palette[color1_raw];
@@ -64,8 +67,8 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 		
 		// Shadow (64-127) and highlight (128-191) palettes.
 		for (int i = 62; i >= 0; i -= 2) {
-			uint16_t color1_raw = ((m_cram.u16[i] & d->mdColorMask) >> 1);
-			uint16_t color2_raw = ((m_cram.u16[i + 1] & d->mdColorMask) >> 1);
+			uint16_t color1_raw = ((m_cram.u16[i] & mdColorMask) >> 1);
+			uint16_t color2_raw = ((m_cram.u16[i + 1] & mdColorMask) >> 1);
 
 			// Shadow color. (0xxx)
 			MD_palette[i + 64]	= palette[color1_raw];
@@ -85,7 +88,6 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 		MD_palette[128] = MD_palette[d->bgColorIdx + 128];	// Highlight color.
 	}
 }
-
 
 /**
  * Recalculate the active palette. (Sega Master System, Mode 4)
@@ -123,7 +125,6 @@ FORCE_INLINE void VdpPalette::T_update_SMS(pixel *SMS_palette,
 	SMS_palette[0] = SMS_palette[d->bgColorIdx];
 }
 
-
 /**
  * Recalculate the active palette. (Sega Game Gear, Mode 4 [12-bit RGB])
  * TODO: UNTESTED!
@@ -159,7 +160,6 @@ FORCE_INLINE void VdpPalette::T_update_GG(pixel *GG_palette,
 	GG_palette[0] = GG_palette[d->bgColorIdx];
 }
 
-
 /**
  * Recalculate the active palette. (TMS9918)
  * TODO: UNTESTED!
@@ -189,7 +189,6 @@ FORCE_INLINE void VdpPalette::T_update_TMS9918(pixel *TMS_palette,
 	//TMS_palette[0] = TMS_palette[d->bgColorIdx];
 }
 
-
 // TODO: Port to LibGens.
 #if 0
 /**
@@ -206,7 +205,6 @@ static FORCE_INLINE void T_Adjust_CRam_32X(pixel *pal32X, pixel *cramAdjusted32X
 	}
 }
 #endif
-
 
 /**
  * Update the active palette.

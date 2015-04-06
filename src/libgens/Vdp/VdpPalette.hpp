@@ -122,15 +122,15 @@ class VdpPalette
 		uint8_t bgColorIdx(void) const;
 		void setBgColorIdx(uint8_t newBgColorIdx);
 
-		/** MD-specific properties. **/
-
 		/**
-		 * Set if color masking is enabled. (Mode 5 only)
-		 * False: Full color range is used.
-		 * True: Only LSBs are used.
+		 * Set the M5/M4 bits.
+		 * Used for Mega Drive and Master System modes.
+		 * @param m5m4bits M5/M4 bits. [ x  x  x  x  x  x M5 M4]
 		 */
-		bool mdColorMask(void) const;
-		void setMdColorMask(bool newMdColorMask);
+		uint8_t m5m4bits(void) const;
+		void setM5M4bits(uint8_t m5m4bits);
+
+		/** MD-specific properties. **/
 
 		/**
 		 * Set if the Shadow/Highlight functionality is enabled. (Mode 5 only)
