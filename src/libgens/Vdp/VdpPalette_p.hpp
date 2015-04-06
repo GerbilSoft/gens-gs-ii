@@ -107,7 +107,7 @@ class VdpPalettePrivate
 		template<typename pixel,
 			int RBits, int GBits, int BBits,
 			int RMask, int GMask, int BMask>
-		FORCE_INLINE void T_recalcFull_TMS9918(pixel *palFull);
+		FORCE_INLINE void T_recalcFull_TMS9918A(pixel *palFull);
 
 		void recalcFull(void);
 };

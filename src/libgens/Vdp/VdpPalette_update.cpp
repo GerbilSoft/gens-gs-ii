@@ -161,13 +161,13 @@ FORCE_INLINE void VdpPalette::T_update_GG(pixel *GG_palette,
 }
 
 /**
- * Recalculate the active palette. (TMS9918)
+ * Recalculate the active palette. (TMS9918A)
  * TODO: UNTESTED!
  * @param GG_palette Game Gear color palette.
  * @param palette Full color palette.
  */
 template<typename pixel>
-FORCE_INLINE void VdpPalette::T_update_TMS9918(pixel *TMS_palette,
+FORCE_INLINE void VdpPalette::T_update_TMS9918A(pixel *TMS_palette,
 					const pixel *palette)
 {
 	/**
@@ -185,7 +185,7 @@ FORCE_INLINE void VdpPalette::T_update_TMS9918(pixel *TMS_palette,
 #endif
 
 	// Update the background color.
-	// TODO: How is the background color handled in TMS9918 modes?
+	// TODO: How is the background color handled in TMS9918A modes?
 	//TMS_palette[0] = TMS_palette[d->bgColorIdx];
 }
 
@@ -239,8 +239,8 @@ void VdpPalette::update(void)
 				T_update_GG<uint16_t>(m_palActive.u16, d->palFull.u16);
 				break;
 
-			case PALMODE_TMS9918:
-				T_update_TMS9918<uint16_t>(m_palActive.u16, d->palFull.u16);
+			case PALMODE_TMS9918A:
+				T_update_TMS9918A<uint16_t>(m_palActive.u16, d->palFull.u16);
 				break;
 		}
 	} else {
@@ -266,8 +266,8 @@ void VdpPalette::update(void)
 				T_update_GG<uint32_t>(m_palActive.u32, d->palFull.u32);
 				break;
 
-			case PALMODE_TMS9918:
-				T_update_TMS9918<uint32_t>(m_palActive.u32, d->palFull.u32);
+			case PALMODE_TMS9918A:
+				T_update_TMS9918A<uint32_t>(m_palActive.u32, d->palFull.u32);
 				break;
 		}
 	}

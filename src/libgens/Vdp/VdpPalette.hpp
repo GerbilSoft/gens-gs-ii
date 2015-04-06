@@ -109,7 +109,7 @@ class VdpPalette
 			PALMODE_32X,
 			PALMODE_SMS,
 			PALMODE_GG,
-			PALMODE_TMS9918,
+			PALMODE_TMS9918A,
 
 			PALMODE_MAX
 		};
@@ -143,7 +143,7 @@ class VdpPalette
 		/** SMS-specific functions. **/
 
 		/**
-		 * Initialize CRam with the SMS TMS9918 palette.
+		 * Initialize CRam with the SMS TMS9918A palette.
 		 * Only used on Sega Master System!
 		 * Palette mode must be set to PALMODE_SMS.
 		 */
@@ -201,7 +201,7 @@ class VdpPalette
 					const pixel *palette);
 
 		template<typename pixel>
-		FORCE_INLINE void T_update_TMS9918(pixel *TMS_palette,
+		FORCE_INLINE void T_update_TMS9918A(pixel *TMS_palette,
 					     const pixel *palette);
 
 		// TODO

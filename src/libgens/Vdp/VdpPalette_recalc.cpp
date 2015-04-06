@@ -229,7 +229,7 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_GG(pixel *palFull)
 }
 
 /**
- * Recalculate the full palette. (TMS9918)
+ * Recalculate the full palette. (TMS9918A)
  * This applies brightness, contrast, grayscale, and inverted palette settings.
  * TODO: UNTESTED!
  * @param palFull Full palette. (Must have enough space for at least 0x20 entries!)
@@ -238,16 +238,16 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_GG(pixel *palFull)
 template<typename pixel,
 	int RBits, int GBits, int BBits,
 	int RMask, int GMask, int BMask>
-FORCE_INLINE void VdpPalettePrivate::T_recalcFull_TMS9918(pixel *palFull)
+FORCE_INLINE void VdpPalettePrivate::T_recalcFull_TMS9918A(pixel *palFull)
 {
 	/**
-	 * PalTMS9918_Analog[] TMS9918 analog palette, in 32-bit RGB.
+	 * PalTMS9918A_Analog[] TMS9918A analog palette, in 32-bit RGB.
 	 * Source: http://www.smspower.org/maxim/forumstuff/colours.html
 	 * Reference: http://www.smspower.org/forums/viewtopic.php?t=8224
 	 */
 	// TODO: Byteswapping on big-endian?
 	struct { uint8_t a; uint8_t r; uint8_t g; uint8_t b; }
-	PalTMS9918_Analog[16] = {
+	PalTMS9918A_Analog[16] = {
 		{0x00, 0x00, 0x00, 0x00},	// 0: Transparent
 		{0x00, 0x00, 0x00, 0x00},	// 1: Black
 		{0x00, 0x47, 0xB7, 0x3B},	// 2: Medium Green
@@ -266,14 +266,14 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_TMS9918(pixel *palFull)
 		{0x00, 0xFF, 0xFF, 0xFF},	// F: White
 	};
 
-	// Calculate the TMS9918 palette.
+	// Calculate the TMS9918A palette.
 	for (int i = 0; i < 16; i++) {
-		// TMS9918 uses analog color circuitry.
+		// TMS9918A uses analog color circuitry.
 		// We're using close approximations of the colors as 32-bit RGB.
 		// Source: http://www.smspower.org/maxim/forumstuff/colours.html
-		int r = PalTMS9918_Analog[i].r;
-		int g = PalTMS9918_Analog[i].g;
-		int b = PalTMS9918_Analog[i].b;
+		int r = PalTMS9918A_Analog[i].r;
+		int g = PalTMS9918A_Analog[i].g;
+		int b = PalTMS9918A_Analog[i].b;
 
 		// Reduce color components to original color depth.
 		r >>= (8 - RBits);
@@ -300,7 +300,7 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_TMS9918(pixel *palFull)
 			     (b);
 	}
 	
-	// Copy the TMS9918 palette to the second SMS palettes.
+	// Copy the TMS9918A palette to the second SMS palettes.
 	memcpy(&palFull[0x10], &palFull[0x00], (sizeof(palFull[0]) * 16));
 }
 
@@ -326,8 +326,8 @@ void VdpPalettePrivate::recalcFull(void)
 				case VdpPalette::PALMODE_GG:
 					T_recalcFull_GG<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(palFull.u16);
 					break;
-				case VdpPalette::PALMODE_TMS9918:
-					T_recalcFull_TMS9918<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(palFull.u16);
+				case VdpPalette::PALMODE_TMS9918A:
+					T_recalcFull_TMS9918A<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(palFull.u16);
 					break;
 			}
 			break;
@@ -348,8 +348,8 @@ void VdpPalettePrivate::recalcFull(void)
 				case VdpPalette::PALMODE_GG:
 					T_recalcFull_GG<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(palFull.u16);
 					break;
-				case VdpPalette::PALMODE_TMS9918:
-					T_recalcFull_TMS9918<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(palFull.u16);
+				case VdpPalette::PALMODE_TMS9918A:
+					T_recalcFull_TMS9918A<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(palFull.u16);
 					break;
 			}
 			break;
@@ -371,8 +371,8 @@ void VdpPalettePrivate::recalcFull(void)
 				case VdpPalette::PALMODE_GG:
 					T_recalcFull_GG<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(palFull.u32);
 					break;
-				case VdpPalette::PALMODE_TMS9918:
-					T_recalcFull_TMS9918<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(palFull.u32);
+				case VdpPalette::PALMODE_TMS9918A:
+					T_recalcFull_TMS9918A<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(palFull.u32);
 					break;
 			}
 			break;
