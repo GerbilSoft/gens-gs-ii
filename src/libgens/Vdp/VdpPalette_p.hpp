@@ -53,6 +53,8 @@ class VdpPalettePrivate
 		/** Properties. **/
 		VdpPalette::PalMode_t palMode;	// Palette mode.
 		uint8_t bgColorIdx;		// Background color index.
+		uint8_t maskedBgColorIdx;	// Masked background color index.
+		void applyBgColorIdxMask(void);
 
 		/**
 		 * M5/M4 bits.

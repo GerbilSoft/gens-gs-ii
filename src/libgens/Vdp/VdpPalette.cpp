@@ -31,10 +31,53 @@ namespace LibGens {
 VdpPalettePrivate::VdpPalettePrivate(VdpPalette *q)
 	: q(q)
 	, palMode(VdpPalette::PALMODE_MD)
-	, bgColorIdx(0x00)
+	, bgColorIdx(0)
+	, maskedBgColorIdx(0)
 	, m5m4bits(0)
 	, mdShadowHighlight(false)
 { }
+
+/**
+ * Apply masking to the background color index.
+ */
+void VdpPalettePrivate::applyBgColorIdxMask(void)
+{
+	uint8_t masked = 0;
+	switch (palMode) {
+		case VdpPalette::PALMODE_TMS9918A:
+			masked = (bgColorIdx & 0xF);
+			break;
+
+		case VdpPalette::PALMODE_SMS:
+		case VdpPalette::PALMODE_GG:
+			// SMS/GG always uses the second palette
+			// for the background color.
+			masked = (bgColorIdx & 0xF);
+			masked |= 0x10;
+			break;
+
+		case VdpPalette::PALMODE_MD:
+		case VdpPalette::PALMODE_32X:
+		default:
+			// Mask value depends on m5m4bits.
+			if (m5m4bits & 0x02) {
+				// Mode 5. All 64 colors are usable.
+				masked = (bgColorIdx & 0x3F);
+			} else {
+				// Mode 4. Only the second palette is usable.
+				masked = (bgColorIdx & 0xF);
+				masked |= 0x10;
+			}
+			break;
+	}
+
+	if (maskedBgColorIdx != masked) {
+		// Masked background color index has changed.
+		// TODO: Only update the background color?
+		maskedBgColorIdx = masked;
+		q->m_dirty.active = true;
+	}
+}
 
 /**
  * Clamp a color component to [0, mask].
@@ -62,8 +105,8 @@ int FUNC_PURE VdpPalettePrivate::ClampColorComponent(int mask, int c)
  */
 VdpPalette::VdpPalette()
 	: d(new VdpPalettePrivate(this))
-	, m_bpp(MdFb::BPP_32)
 	, cram_addr_mask(0x7F)
+	, m_bpp(MdFb::BPP_32)
 {
 	// Set the dirty flags.
 	m_dirty.active = true;
@@ -136,15 +179,17 @@ PAL_PROPERTY_READ(VdpPalette::PalMode_t, palMode);
 
 /**
  * Set the palette mode.
- * @param newPalMode New palette mode.
+ * @param palMode New palette mode.
  */
-void VdpPalette::setPalMode(PalMode_t newPalMode)
+void VdpPalette::setPalMode(PalMode_t palMode)
 {
-	if (d->palMode == newPalMode)
+	if (d->palMode = palMode)
 		return;
-	d->palMode = newPalMode;
-	
+	d->palMode = palMode;
+	// TODO: May need other changes...
+
 	// Both the full and active palettes must be recalculated.
+	d->applyBgColorIdxMask();
 	m_dirty.full = true;
 	m_dirty.active = true;
 }
@@ -157,27 +202,14 @@ PAL_PROPERTY_READ(uint8_t, bgColorIdx)
 
 /**
  * Set the background color index.
- * @param newBgColorIdx New background color index.
+ * @param bgColorIdx New background color index.
  */
-void VdpPalette::setBgColorIdx(uint8_t newBgColorIdx)
+void VdpPalette::setBgColorIdx(uint8_t bgColorIdx)
 {
-	if (d->bgColorIdx == newBgColorIdx)
+	if (d->bgColorIdx == bgColorIdx)
 		return;
-	
-	// Mega Drive:
-	d->bgColorIdx = (newBgColorIdx & 0x3F);
-	
-#if 0
-	// TODO: On SMS and Game Gear:
-	d->bgColorIdx &= 0x0F;
-	d->bgColorIdx |= 0x10;
-#endif
-	
-	// TODO: Store the original BG color index as well as the masked version?
-	// (and re-mask the original index on mode change)
-	
-	// Mark the active palette as dirty.
-	m_dirty.active = true;
+	d->bgColorIdx = bgColorIdx;
+	d->applyBgColorIdxMask();
 }
 
 /**
@@ -198,8 +230,13 @@ void VdpPalette::setM5M4bits(uint8_t m5m4bits)
 		return;
 	d->m5m4bits = m5m4bits;
 
-	// TODO: Only recalculate on SMS and MD VDPs.
-	m_dirty.active = true;
+	if (d->palMode == PALMODE_SMS || d->palMode == PALMODE_MD) {
+		// Mode bits have changed.
+		// Recalculate the active palette.
+		// NOTE: Game Gear does not have a hard-coded TMS palette.
+		d->applyBgColorIdxMask();
+		m_dirty.active = true;
+	}
 }
 
 /**

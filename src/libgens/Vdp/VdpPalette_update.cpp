@@ -57,7 +57,7 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 	}
 
 	// Update the background color.
-	MD_palette[0] = MD_palette[d->bgColorIdx];
+	MD_palette[0] = MD_palette[d->maskedBgColorIdx];
 
 	if (d->mdShadowHighlight) {
 		// Update the shadow and highlight colors.
@@ -84,8 +84,8 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *MD_palette,
 		memcpy(&MD_palette[192], &MD_palette[0], (sizeof(MD_palette[0]) * 64));
 
 		// Update the background color for the shadow and highlight palettes.
-		MD_palette[64]  = MD_palette[d->bgColorIdx + 64];	// Shadow color.
-		MD_palette[128] = MD_palette[d->bgColorIdx + 128];	// Highlight color.
+		MD_palette[64]  = MD_palette[d->maskedBgColorIdx + 64];	// Shadow color.
+		MD_palette[128] = MD_palette[d->maskedBgColorIdx + 128];	// Highlight color.
 	}
 }
 
@@ -122,7 +122,7 @@ FORCE_INLINE void VdpPalette::T_update_SMS(pixel *SMS_palette,
 	}
 
 	// Update the background color.
-	SMS_palette[0] = SMS_palette[d->bgColorIdx];
+	SMS_palette[0] = SMS_palette[d->maskedBgColorIdx];
 }
 
 /**
@@ -157,7 +157,7 @@ FORCE_INLINE void VdpPalette::T_update_GG(pixel *GG_palette,
 	}
 
 	// Update the background color.
-	GG_palette[0] = GG_palette[d->bgColorIdx];
+	GG_palette[0] = GG_palette[d->maskedBgColorIdx];
 }
 
 /**
@@ -186,7 +186,7 @@ FORCE_INLINE void VdpPalette::T_update_TMS9918A(pixel *TMS_palette,
 
 	// Update the background color.
 	// TODO: How is the background color handled in TMS9918A modes?
-	//TMS_palette[0] = TMS_palette[d->bgColorIdx];
+	//TMS_palette[0] = TMS_palette[d->maskedBgColorIdx];
 }
 
 // TODO: Port to LibGens.

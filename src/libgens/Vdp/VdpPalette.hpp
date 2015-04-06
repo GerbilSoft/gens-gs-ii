@@ -129,13 +129,13 @@ class VdpPalette
 			PALMODE_MAX
 		};
 		PalMode_t palMode(void) const;
-		void setPalMode(PalMode_t newPalMode);
+		void setPalMode(PalMode_t palMode);
 
 		/**
 		 * Background color index.
 		 */
 		uint8_t bgColorIdx(void) const;
-		void setBgColorIdx(uint8_t newBgColorIdx);
+		void setBgColorIdx(uint8_t bgColorIdx);
 
 		/**
 		 * Set the M5/M4 bits.
