@@ -263,43 +263,6 @@ void VdpPalette::setMdShadowHighlight(bool newMdShadowHighlight)
 	}
 }
 
-/** SMS-specific functions. **/
-
-/**
- * Initialize CRam with the SMS TMS9918 palette.
- * Only used on Sega Master System!
- * Palette mode must be set to PALMODE_SMS.
- * TODO: UNTESTED!
- */
-void VdpPalette::initSegaTMSPalette(void)
-{
-	/**
-	 * PalTMS9918_SMS[]: TMS9918 palette as used on the SMS. (6-bit RGB)
-	 * Used in SMS backwards-compatibility mode.
-	 * VdpPalette should be set to SMS mode to use this palette.
-	 * Source: http://www.smspower.org/maxim/forumstuff/colours.html
-	 * Reference: http://www.smspower.org/forums/viewtopic.php?t=8224
-	 */
-	static const uint8_t PalTMS9918_SMS[16] =
-		{0x00, 0x00, 0x08, 0x0C, 0x10, 0x30, 0x01, 0x3C,
-		 0x02, 0x03, 0x04, 0x0F, 0x04, 0x33, 0x15, 0x3F};
-
-	// TODO: Verify that palette mode is set to PALMODE_SMS.
-	// TODO: Implement multiple palette modes.
-	// TODO: Use alternating bytes in SMS CRam for MD compatibility?
-
-	// Copy PalTMS9918_SMS to both SMS palettes in CRam.
-	memcpy(&m_cram.u8[0x00], PalTMS9918_SMS, sizeof(PalTMS9918_SMS));
-	memcpy(&m_cram.u8[0x10], PalTMS9918_SMS, sizeof(PalTMS9918_SMS));
-#if defined(DO_FOUR_PALETTE_LINES_IN_ALL_MODES_FOR_LULZ)
-	memcpy(&m_cram.u8[0x20], PalTMS9918_SMS, sizeof(PalTMS9918_SMS));
-	memcpy(&m_cram.u8[0x30], PalTMS9918_SMS, sizeof(PalTMS9918_SMS));
-#endif
-
-	// Palette is dirty.
-	m_dirty.active = true;
-}
-
 /** ZOMG savestate functions. **/
 
 /**

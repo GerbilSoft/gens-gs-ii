@@ -178,10 +178,45 @@ FORCE_INLINE void VdpPalette::T_update_SMS(pixel *palActiveSMS,
 	static const int color_start = (64 - 2);
 #endif
 
+	/**
+	 * TMS9918A palette as used on the SMS1. (6-bit RGB)
+	 * Used in VDP modes 0-3.
+	 * NOTE: Two copies are included for compatibility.
+	 * Source: http://www.smspower.org/maxim/forumstuff/colours.html
+	 * Reference: http://www.smspower.org/forums/8224-TMS9918ColorsForSMSVDP
+	 */
+	static const uint8_t PalTMS9918A_SMS[] = {
+		// First palette line
+		// TODO for commit: Color index 0xA is actually 0x05 from the forum post.
+		// colours.html also has 0x05 as the color, but incorrectly says 0x04.
+		0x00, 0x00, 0x08, 0x0C, 0x10, 0x30, 0x01, 0x3C,
+		0x02, 0x03, 0x05, 0x0F, 0x04, 0x33, 0x15, 0x3F,
+		// Second palette line
+		0x00, 0x00, 0x08, 0x0C, 0x10, 0x30, 0x01, 0x3C,
+		0x02, 0x03, 0x05, 0x0F, 0x04, 0x33, 0x15, 0x3F,
+#if defined(DO_FOUR_PALETTE_LINES_IN_ALL_MODES_FOR_LULZ)
+		// Third palette line
+		0x00, 0x00, 0x08, 0x0C, 0x10, 0x30, 0x01, 0x3C,
+		0x02, 0x03, 0x05, 0x0F, 0x04, 0x33, 0x15, 0x3F,
+		// Fourth palette line
+		0x00, 0x00, 0x08, 0x0C, 0x10, 0x30, 0x01, 0x3C,
+		0x02, 0x03, 0x05, 0x0F, 0x04, 0x33, 0x15, 0x3F,
+#endif
+	};
+
+	const uint8_t *cram;
+	if (m5m4bits & 0x01) {
+		// M4 is set. Use SMS CRAM.
+		cram = &m_cram.u8[0];
+	} else {
+		// M4 is not set. Use TMS9918A-equivalent CROM.
+		cram = &PalTMS9918A_SMS[0];
+	}
+
 	for (int i = color_start; i >= 0; i -= 2) {
 		// TODO: Use alternating bytes in SMS CRam for MD compatibility?
-		const uint8_t color1_raw = (m_cram.u8[i] & 0x3F);
-		const uint8_t color2_raw = (m_cram.u8[i + 1] & 0x3F);
+		const uint8_t color1_raw = (cram.u8[i] & 0x3F);
+		const uint8_t color2_raw = (cram.u8[i + 1] & 0x3F);
 
 		// Get the palette color.
 		pixel color1 = palFullSMS[color1_raw];

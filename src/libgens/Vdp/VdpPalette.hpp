@@ -155,15 +155,6 @@ class VdpPalette
 		bool mdShadowHighlight(void) const;
 		void setMdShadowHighlight(bool newMdShadowHighlight);
 
-		/** SMS-specific functions. **/
-
-		/**
-		 * Initialize CRam with the SMS TMS9918A palette.
-		 * Only used on Sega Master System!
-		 * Palette mode must be set to PALMODE_SMS.
-		 */
-		void initSegaTMSPalette(void);
-
 		/**
 		 * Update the active palette.
 		 */
