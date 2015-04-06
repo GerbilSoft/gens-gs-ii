@@ -204,8 +204,13 @@ class VdpPalette
 		/** Active palette recalculation functions. **/
 
 		template<typename pixel>
+		FORCE_INLINE void T_update_MD_M4(pixel *palActiveMD,
+					   const pixel *palFullSMS);
+
+		template<typename pixel>
 		FORCE_INLINE void T_update_MD(pixel *palActiveMD,
-					const pixel *palFullMD);
+					const pixel *palFullMD,
+					const pixel *palFullSMS);
 
 		template<typename pixel>
 		FORCE_INLINE void T_update_SMS(pixel *palActiveSMS,

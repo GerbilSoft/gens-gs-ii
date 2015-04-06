@@ -31,16 +31,87 @@
 namespace LibGens {
 
 /**
+ * Recalculate the active palette. (Mega Drive, Mode 4)
+ * CRAM is in MD format; however, only the top two bits are relevant.
+ * @param palActiveMD Active MD palette. (Must have 0x40 entries!)
+ * @param palFullSMS Full SMS palette. (Must have 0x40 entries!)
+ */
+template<typename pixel>
+FORCE_INLINE void VdpPalette::T_update_MD_M4(pixel *palActiveMD,
+				       const pixel *palFullSMS)
+{
+#if !defined(DO_FOUR_PALETTE_LINES_IN_ALL_MODES_FOR_LULZ)
+	// Update all 32 colors.
+	static const int color_start = (32 - 2);
+#else
+	// Process all 64 colors for lulz.
+	static const int color_start = (64 - 2);
+#endif
+
+	// CRAM format for MD, Mode 4: (TODO: Needs verification.)
+	// ---- -BB- -GG- -RR-
+	for (int i = color_start; i >= 0; i -= 2) {
+		// TODO: Use alternating bytes in SMS CRAM for MD compatibility?
+		uint16_t color1_raw = m_cram.u16[i];
+		uint16_t color2_raw = m_cram.u16[i + 1];
+
+		// Shift the colors into SMS-compatible values.
+		// TODO: Create a lookup table? (Or don't - this mode is rarely used.)
+		color1_raw = ((color1_raw & 0x0600) >> 5) |
+			     ((color1_raw & 0x0060) >> 3) |
+			     ((color1_raw & 0x0006) >> 1);
+		color2_raw = ((color2_raw & 0x0600) >> 5) |
+			     ((color2_raw & 0x0060) >> 3) |
+			     ((color2_raw & 0x0006) >> 1);
+
+		// Get the palette color.
+		pixel color1 = palFullSMS[color1_raw];
+		pixel color2 = palFullSMS[color2_raw];
+
+		// Set the new color.
+		palActiveMD[i]     = color1;
+		palActiveMD[i + 1] = color2;
+	}
+
+	// Update the background color.
+	palActiveMD[0] = palActiveMD[d->maskedBgColorIdx];
+}
+
+/**
  * Recalculate the active palette. (Mega Drive, Mode 5)
  * @param palActiveMD Active MD palette. (Must have 0x40 entries!)
  * @param palFullMD Full MD palette. (Must have 0x1000 entries!)
+ * @param palFullSMS Full SMS palette. (Must have 0x40 entries!)
+ * TODO: Figure out a way to get rid of palFullSMS.
  */
 template<typename pixel>
 FORCE_INLINE void VdpPalette::T_update_MD(pixel *palActiveMD,
-				    const pixel *palFullMD)
+				    const pixel *palFullMD,
+				    const pixel *palFullSMS)
 {
-	// Check the M4 bit to determine the color mask.
-	const uint16_t mdColorMask = (d->m5m4bits & 1 ? 0xEEE : 0x222);
+	uint16_t mdColorMask;
+	switch (d->m5m4bits & 0x03) {
+		case 0:
+			// M5=0, M4=0
+			// Blank screen.
+			memset(palActiveMD, 0, (sizeof(pixel) * 64));
+			return;
+		case 1:
+			// M5=0, M4=1
+			// Mode 4: CRAM only has two significant bits.
+			T_update_MD_M4(palActiveMD, palFullSMS);
+			return;
+		case 2:
+			// M5=1, M4=0
+			// Mode 5, PSEL=0: CRAM masks all but the LSB.
+			mdColorMask = 0x222;
+			break;
+		case 3:
+			// M5=1, M4=1
+			// Mode 5, PSEL=1: Normal operation.
+			mdColorMask = 0xEEE;
+			break;
+	}
 
 	// Update all 64 colors.
 	for (int i = 62; i >= 0; i -= 2) {
@@ -228,7 +299,7 @@ void VdpPalette::update(void)
 
 			case PALMODE_MD:
 			default:
-				T_update_MD<uint16_t>(m_palActive.u16, d->palFullMD.u16);
+				T_update_MD<uint16_t>(m_palActive.u16, d->palFullMD.u16, d->palFullSMS.u16);
 				break;
 
 			case PALMODE_SMS:
@@ -254,7 +325,7 @@ void VdpPalette::update(void)
 
 			case PALMODE_MD:
 			default:
-				T_update_MD<uint32_t>(m_palActive.u32, d->palFullMD.u32);
+				T_update_MD<uint32_t>(m_palActive.u32, d->palFullMD.u32, d->palFullSMS.u32);
 				break;
 
 			case PALMODE_SMS:
