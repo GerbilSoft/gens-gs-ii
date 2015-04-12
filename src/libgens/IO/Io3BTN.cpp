@@ -45,6 +45,15 @@ void Io3BTN::update(void)
 	// Update the tristate input cache.
 	this->updateTristateInputCache();
 
+	// TODO: "unlikely()"?
+	if (pin58 != 2) {
+		// +5V/GND pins are wrong.
+		// No valid data will be returned.
+		// Also, the IC is probably fried now.
+		this->deviceData = 0xFF;
+		return;
+	}
+
 	/**
 	 * Data formats: (D == last written MSB)
 	 * TH=1: D1CBRLDU

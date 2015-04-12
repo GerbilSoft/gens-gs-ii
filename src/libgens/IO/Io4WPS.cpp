@@ -88,6 +88,7 @@ void Io4WPS::update(void)
 	// Set the device ctrl/data values.
 	pad->ctrl = this->ctrl;
 	pad->mdData = this->mdData;
+	pad->setPin58(this->pin58);	// FIXME: May run update().
 	pad->update();
 	// TODO: Should be run on readDataMD() as well.
 	this->deviceData = pad->deviceData;

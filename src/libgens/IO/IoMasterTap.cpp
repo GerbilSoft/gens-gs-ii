@@ -78,6 +78,15 @@ void IoMasterTap::update(void)
 	const uint8_t oldTrisIn = this->mdData_tris;
 	this->updateTristateInputCache();
 
+	// TODO: "unlikely()"?
+	if (pin58 != 2) {
+		// +5V/GND pins are wrong.
+		// No valid data will be returned.
+		// Also, the ICs are probably fried now.
+		this->deviceData = 0xFF;
+		return;
+	}
+
 	// Master Tap is a homebrew multitap for Sega Master System.
 	// It *only* works with 2BTN (SMS) controllers; using controllers
 	// with active logic devices can result in hardware damage, since

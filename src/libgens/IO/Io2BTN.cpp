@@ -45,6 +45,14 @@ void Io2BTN::update(void)
 	// Update the tristate input cache.
 	this->updateTristateInputCache();
 
+	// TODO: "unlikely()"?
+	if (pin58 & 1) {
+		// Ground pin is high.
+		// No valid data will be returned.
+		this->deviceData = 0xFF;
+		return;
+	}
+
 	/**
 	 * Data format: (x == tristate value)
 	 * - xxCBRLDU

@@ -51,6 +51,15 @@ void Io4WPM::update(void)
 	// Update the tristate input cache.
 	this->updateTristateInputCache();
 
+	// TODO: "unlikely()"?
+	if (pin58 != 2) {
+		// +5V/GND pins are wrong.
+		// No valid data will be returned.
+		// Also, the IC is probably fried now.
+		this->deviceData = 0xFF;
+		return;
+	}
+
 	// Update the slave port number.
 	assert(slave != nullptr);
 	if (slave) {

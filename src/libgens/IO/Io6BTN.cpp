@@ -62,6 +62,15 @@ void Io6BTN::update(void)
 	const uint8_t oldTrisIn = this->mdData_tris;
 	this->updateTristateInputCache();
 
+	// TODO: "unlikely()"?
+	if (pin58 != 2) {
+		// +5V/GND pins are wrong.
+		// No valid data will be returned.
+		// Also, the IC is probably fried now.
+		this->deviceData = 0xFF;
+		return;
+	}
+
 	if (!(oldTrisIn & IOPIN_TH) && checkInputLine(IOPIN_TH)) {
 		// IOPIN_TH rising edge.
 		// Increment the counter.
