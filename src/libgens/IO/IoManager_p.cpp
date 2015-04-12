@@ -56,6 +56,9 @@ const IoManagerPrivate::IoDevInfo IoManagerPrivate::ioDevInfo[IoManager::IOT_MAX
 	{'MENA', 0, false},	// IOT_MENACER
 	{'JUST', 0, false},	// IOT_JUSTIFIER
 
+	// ColecoVision.
+	{'COLV', 0, false},	// IOT_COLECOVISION
+
 	// Multitaps.
 	{'TEAM', 0, true},	// IOT_TEAMPLAYER
 	{'4WPM', 0, true},	// IOT_4WP_MASTER

@@ -1,4 +1,4 @@
-﻿/***************************************************************************
+/***************************************************************************
  * libgens: Gens Emulation Library.                                        *
  * Device.hpp: Base I/O device.                                            *
  *                                                                         *
@@ -175,6 +175,25 @@ class Device
 		 * @return 0 on success; non-zero on error.
 		 */
 		virtual int setSubDevice(int virtPort, Device *ioDevice);
+
+		/**
+		 * Set the Pin 5/8 status.
+		 * NOTE: Only the low two bits are saved.
+		 * @param pin58 New pin 5/8 status.
+		 */
+		void setPin58(uint8_t pin58);
+
+	protected:
+		/**
+		 * Pin 5/8 status.
+		 * Pin 5 is usually +5V; pin 8 is usually ground.
+		 * ColecoVision uses this to switch between joystick and keypad.
+		 * Other systems should not use this at all.
+		 *
+		 * Bit 0 == pin 8 (low for joystick)
+		 * Bit 1 == pin 5 (low for keypad)
+		 */
+		uint8_t pin58;
 };
 
 } }

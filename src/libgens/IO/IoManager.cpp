@@ -830,6 +830,8 @@ void IoManager::zomgRestoreMD(const Zomg_MD_IoSave_t *state)
 	//devE->serLastRx	= state->port3_ser_rx;	// TODO
 	devE->serCtrl	= state->port3_ser_ctrl;
 
+	// TODO: Ensure pin58 is set to 2. (Pin 5 = +5V, Pin 8 = GND)
+
 	// Update the ports.
 	dev1->update();
 	dev2->update();

@@ -1,4 +1,4 @@
-﻿/***************************************************************************
+/***************************************************************************
  * libgens: Gens Emulation Library.                                        *
  * Device.cpp: Base I/O device.                                            *
  *                                                                         *
@@ -45,6 +45,7 @@ void Device::reset(void)
 	mdData = 0xFF;
 	serCtrl = 0;
 	serLastTx = 0xFF;
+	pin58 = 2;	// Pin 5 == +5V, Pin 8 == GND
 	resetDev();
 }
 
@@ -125,7 +126,24 @@ void Device::update_onRead(void)
 int Device::setSubDevice(int virtPort, Device *ioDevice)
 {
 	// Nothing to do here...
+	((void)virtPort);
+	((void)ioDevice);
 	return -1;
+}
+
+/**
+ * Set the Pin 5/8 status.
+ * NOTE: Only the low two bits are saved.
+ * @param pin58 New pin 5/8 status.
+ */
+void Device::setPin58(uint8_t pin58)
+{
+	pin58 &= 3;
+	if (this->pin58 != pin58) {
+		// Pin 5/8 status has changed.
+		this->pin58 = pin58;
+		update();
+	}
 }
 
 } }

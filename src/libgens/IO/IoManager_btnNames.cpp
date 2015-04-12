@@ -34,6 +34,7 @@ IoManager::ButtonName_t IoManager::ButtonName(IoType_t ioType, int btnIdx)
 	assert(ioType >= IOT_NONE && ioType < IOT_MAX);
 	assert(btnIdx >= 0 && btnIdx < BTNI_MAX);
 
+	// TODO: Use AND optimizations?
 	switch (ioType) {
 		case IOT_3BTN:
 			switch (btnIdx) {
@@ -126,6 +127,35 @@ IoManager::ButtonName_t IoManager::ButtonName(IoType_t ioType, int btnIdx)
 				case BTNI_XE1AP_C:	return BTNNAME_C;
 				case BTNI_XE1AP_B:	return BTNNAME_B;
 				case BTNI_XE1AP_A:	return BTNNAME_A;
+				default:
+					break;
+			}
+			break;
+
+		/** ColecoVision. **/
+
+		case IOT_COLECOVISION:
+			switch (btnIdx) {
+				case BTNI_UP:			return BTNNAME_UP;
+				case BTNI_DOWN:			return BTNNAME_DOWN;
+				case BTNI_LEFT:			return BTNNAME_LEFT;
+				case BTNI_RIGHT:		return BTNNAME_RIGHT;
+				case BTNI_CV_TL_YELLOW:		return BTNNAME_CV_TL_YELLOW;
+				case BTNI_CV_TR_RED:		return BTNNAME_CV_TR_RED;
+				case BTNI_CV_BLUE:		return BTNNAME_CV_BLUE;
+				case BTNI_CV_PURPLE:		return BTNNAME_CV_PURPLE;
+				case BTNI_CV_KEYPAD_1:		return BTNNAME_CV_KEYPAD_1;
+				case BTNI_CV_KEYPAD_2:		return BTNNAME_CV_KEYPAD_2;
+				case BTNI_CV_KEYPAD_3:		return BTNNAME_CV_KEYPAD_3;
+				case BTNI_CV_KEYPAD_4:		return BTNNAME_CV_KEYPAD_4;
+				case BTNI_CV_KEYPAD_5:		return BTNNAME_CV_KEYPAD_5;
+				case BTNI_CV_KEYPAD_6:		return BTNNAME_CV_KEYPAD_6;
+				case BTNI_CV_KEYPAD_7:		return BTNNAME_CV_KEYPAD_7;
+				case BTNI_CV_KEYPAD_8:		return BTNNAME_CV_KEYPAD_8;
+				case BTNI_CV_KEYPAD_9:		return BTNNAME_CV_KEYPAD_9;
+				case BTNI_CV_KEYPAD_ASTERISK:	return BTNNAME_CV_KEYPAD_ASTERISK;
+				case BTNI_CV_KEYPAD_0:		return BTNNAME_CV_KEYPAD_0;
+				case BTNI_CV_KEYPAD_OCTOTHORPE:	return BTNNAME_CV_KEYPAD_OCTOTHORPE;
 				default:
 					break;
 			}
