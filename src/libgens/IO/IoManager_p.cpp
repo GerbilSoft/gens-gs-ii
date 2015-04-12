@@ -57,7 +57,7 @@ const IoManagerPrivate::IoDevInfo IoManagerPrivate::ioDevInfo[IoManager::IOT_MAX
 	{'JUST', 0, false},	// IOT_JUSTIFIER
 
 	// ColecoVision.
-	{'COLV', 0, false},	// IOT_COLECOVISION
+	{'COLV', 20, false},	// IOT_COLECOVISION
 
 	// Multitaps.
 	{'TEAM', 0, true},	// IOT_TEAMPLAYER
