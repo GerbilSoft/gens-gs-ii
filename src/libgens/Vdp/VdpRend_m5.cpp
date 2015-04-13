@@ -1280,8 +1280,9 @@ FORCE_INLINE void VdpPrivate::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 
 	// Render the line buffer to the destination surface.
 	dest += H_Pix_Begin;
-	for (int i = H_Cell; i != 0; i--, dest += 8, src += 8) {
-		*dest     = md_palette[src->pixel];
+	const pixel *dest_end = dest + H_Pix;
+	for (; dest < dest_end; dest += 8, src += 8) {
+		*(dest+0) = md_palette[src->pixel];
 		*(dest+1) = md_palette[(src+1)->pixel];
 		*(dest+2) = md_palette[(src+2)->pixel];
 		*(dest+3) = md_palette[(src+3)->pixel];
@@ -1304,8 +1305,9 @@ FORCE_INLINE void VdpPrivate::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 	// Left border.
 	dest -= H_Pix_Begin;
 	dest -= H_Pix;
-	for (int i = (H_Pix_Begin / 8); i != 0; i--, dest += 8) {
-		*dest     = border_color;
+	dest_end = dest + H_Pix_Begin;
+	for (; dest < dest_end; dest += 8) {
+		*(dest+0) = border_color;
 		*(dest+1) = border_color;
 		*(dest+2) = border_color;
 		*(dest+3) = border_color;
@@ -1317,8 +1319,9 @@ FORCE_INLINE void VdpPrivate::T_Render_LineBuf(pixel *dest, pixel *md_palette)
 
 	// Right border.
 	dest += H_Pix;
-	for (int i = (H_Pix_Begin / 8); i != 0; i--, dest += 8) {
-		*dest     = border_color;
+	dest_end = dest + H_Pix_Begin;
+	for (; dest < dest_end; dest += 8) {
+		*(dest+0) = border_color;
 		*(dest+1) = border_color;
 		*(dest+2) = border_color;
 		*(dest+3) = border_color;
