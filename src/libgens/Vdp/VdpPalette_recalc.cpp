@@ -275,10 +275,106 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_TMS9918A(pixel *palFullTMS)
 }
 
 /**
+ * Recalculate the full palette. (CGA)
+ * TODO: UNTESTED!
+ * @param palFullCGA Full CGA palette. (Must have enough space for at least 0x10 entries!)
+ */
+template<typename pixel,
+	int RBits, int GBits, int BBits,
+	int RMask, int GMask, int BMask>
+FORCE_INLINE void VdpPalettePrivate::T_recalcFull_CGA(pixel *palFullCGA)
+{
+	/**
+	 * IBM CGA palette, in 32-bit RGB.
+	 * Source: http://en.wikipedia.org/wiki/Color_Graphics_Adapter
+	 */
+	// TODO: Byteswapping on big-endian?
+	// NOTE: Format is xRGB.
+	// TODO: Change to xBGR?
+	// NOTE: The "intensity" bit is swapped, since most MD games
+	// use the lower half of the palette for primary objects, so
+	// the lower half of the palette should be brighter.
+	static const uint32_t PalCGA[16] = {
+		0x00555555,     // 8: Gray
+		0x005555FF,     // 9: Light Blue
+		0x0055FF55,     // A: Light Green
+		0x0055FFFF,     // B: Light Cyan
+		0x00FF5555,     // C: Light Red
+		0x00FF55FF,     // D: Light Magenta
+		0x00FFFF55,     // E: Yellow
+		0x00FFFFFF,     // F: White
+		0x00000000,     // 0: Black
+		0x000000AA,     // 1: Blue
+		0x0000AA00,     // 2: Green
+		0x0000AAAA,     // 3: Cyan
+		0x00AA0000,     // 4: Red
+		0x00AA00AA,     // 5: Magenta
+		0x00AA5500,     // 6: Brown
+		0x00AAAAAA,     // 7: Light Gray
+	};
+
+	// Calculate the CGA palette.
+	for (int i = 0; i < 16; i++) {
+		int r = ((PalCGA[i] >> 16) & 0xFF);
+		int g = ((PalCGA[i] >> 8) & 0xFF);
+		int b = ((PalCGA[i] >> 0) & 0xFF);
+
+		// Reduce color components to original color depth.
+		r >>= (8 - RBits);
+		g >>= (8 - GBits);
+		b >>= (8 - BBits);
+		
+		// TODO: Make this configurable?
+#if 0	
+		if (GMask == 0x3F) {
+			// 16-bit color. (RGB565)
+			// Mask off the LSB of the green component.
+			g &= ~1;
+		}
+#endif
+
+		// Combine the color components.
+		palFullCGA[i] = (r << (BBits + GBits)) |
+			     (g << (BBits)) |
+			     (b);
+	}
+}
+
+/**
  * Recalculate the full VDP palette.
  */
 void VdpPalettePrivate::recalcFull(void)
 {
+	if (isAppOs) {
+		// App-based OS.
+		// TODO: 32X?
+		switch (q->m_bpp) {
+			case MdFb::BPP_15:
+				T_recalcFull_CGA<uint16_t, 5, 5, 5, 0x1F, 0x1F, 0x1F>(palFullSMS.u16);
+				for (int i = 0; i < 0x100; i += 10) {
+					memcpy(&q->m_palActive.u16[i], &palFullSMS.u16[0], sizeof(q->m_palActive.u16[0]) * 16);
+				}
+				break;
+			case MdFb::BPP_16:
+				T_recalcFull_CGA<uint16_t, 5, 6, 5, 0x1F, 0x3F, 0x1F>(palFullSMS.u16);
+				for (int i = 0; i < 0x100; i += 10) {
+					memcpy(&q->m_palActive.u16[i], &palFullSMS.u16[0], sizeof(q->m_palActive.u16[0]) * 16);
+				}
+				break;
+			case MdFb::BPP_32:
+			default:
+				T_recalcFull_CGA<uint32_t, 8, 8, 8, 0xFF, 0xFF, 0xFF>(palFullSMS.u32);
+				for (int i = 0; i < 0x100; i += 10) {
+					memcpy(&q->m_palActive.u32[i], &palFullSMS.u32[0], sizeof(q->m_palActive.u32[0]) * 16);
+				}
+				break;
+		}
+
+		q->m_dirty.full = false;
+		q->m_dirty.active = false;
+		return;
+	}
+
 	// TODO: Add an AND to each switch() for optimization?
 	switch (q->m_bpp) {
 		case MdFb::BPP_15:

@@ -325,6 +325,8 @@ void VdpPalette::update(void)
 		d->recalcFull();
 	if (!m_dirty.active)
 		return;
+	if (d->isAppOs)
+		return;
 
 	// TODO: Add an AND to each switch() for optimization?
 	if (m_bpp != MdFb::BPP_32) {

@@ -118,7 +118,19 @@ class VdpPalettePrivate
 			int RMask, int GMask, int BMask>
 		FORCE_INLINE void T_recalcFull_TMS9918A(pixel *palFullTMS);
 
+		template<typename pixel,
+			int RBits, int GBits, int BBits,
+			int RMask, int GMask, int BMask>
+		FORCE_INLINE void T_recalcFull_CGA(pixel *palFullCGA);
+
 		void recalcFull(void);
+
+	public:
+		/**
+		 * Is the system running an app-based OS?
+		 * If true, palette will be limited to 16 colors.
+		 */
+		bool isAppOs;
 };
 
 }
