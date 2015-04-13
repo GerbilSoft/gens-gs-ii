@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * IoManager.cpp: I/O manager. (Private Class)                             *
+ * Io4WPM.cpp: EA 4-Way Play Master device.                                *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,69 +21,55 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#define __LIBGENS_IN_IOMANAGER_CLASS__
-#include "IoManager_p.hpp"
-#include "Device.hpp"
-
-#include "macros/common.h"
+#include "Io4WPM.hpp"
 
 // C includes. (C++ namespace)
-#include <cstring>
+#include <cassert>
 
-namespace LibGens {
+namespace LibGens { namespace IO {
+
+Io4WPM::Io4WPM()
+	: Device()
+{
+	// No slave device is associated initially.
+	slave = nullptr;
+}
+
+// Device type.
+// Should be overridden by subclasses.
+IoManager::IoType_t Io4WPM::type(void) const
+{
+	return IoManager::IOT_4WP_MASTER;
+}
 
 /**
- * Device information.
+ * Update the I/O device.
+ * Runs the internal device update.
  */
-const IoManagerPrivate::IoDevInfo IoManagerPrivate::ioDevInfo[IoManager::IOT_MAX] =
+void Io4WPM::update(void)
 {
-	{'NONE', 0, true},	// IOT_NONE
-	{'3BTN', 8, true},	// IOT_3BTN
-	{'6BTN', 12, true},	// IOT_6BTN
-	{'2BTN', 7, true},	// IOT_2BTN
+	// Update the tristate input cache.
+	this->updateTristateInputCache();
 
-	// Miscellaneous Master System peripherals.
-	{'PADL', 2, false},	// IOT_PADDLE
-	{'SPAD', 2, false},	// IOT_SPORTS_PAD
-
-	// Miscellaneous Mega Drive peripherals.
-	{'MOUS', 4, false},	// IOT_MEGA_MOUSE
-	{'XE1A', 8, false},	// IOT_XE_1AP
-	{'ACTV', 0, false},	// IOT_ACTIVATOR
-
-	// Light guns.
-	{'PHAS', 0, false},	// IOT_PHASER
-	{'MENA', 0, false},	// IOT_MENACER
-	{'JUST', 0, false},	// IOT_JUSTIFIER
-
-	// ColecoVision.
-	{'COLV', 20, false},	// IOT_COLECOVISION
-
-	// Multitaps.
-	{'TEAM', 0, true},	// IOT_TEAMPLAYER
-	{'4WPM', 0, true},	// IOT_4WP_MASTER
-	{'4WPS', 0, true},	// IOT_4WP_SLAVE
-	{'MTAP', 0, false},	// IOT_MASTERTAP
-};
-
-IoManagerPrivate::IoManagerPrivate(IoManager *q)
-	: q(q)
-{
-	// Clear the I/O devices array.
-	memset(ioDevices, 0, sizeof(ioDevices));
-
-	// Allocate empty devices for the three physical ports.
-	ioDevices[IoManager::VIRTPORT_1] = new IO::Device();
-	ioDevices[IoManager::VIRTPORT_2] = new IO::Device();
-	ioDevices[IoManager::VIRTPORT_EXT] = new IO::Device();
-}
-
-IoManagerPrivate::~IoManagerPrivate()
-{
-	// Delete all of the I/O devices.
-	for (int i = 0; i < ARRAY_SIZE(ioDevices); i++) {
-		delete ioDevices[i];
+	// TODO: "unlikely()"?
+	if (m_pin58 != 2) {
+		// +5V/GND pins are wrong.
+		// No valid data will be returned.
+		// Also, the IC is probably fried now.
+		this->deviceData = 0xFF;
+		return;
 	}
+
+	// Update the slave port number.
+	assert(slave != nullptr);
+	if (slave) {
+		assert(slave->type() == IoManager::IOT_4WP_SLAVE);
+		const uint8_t player = (this->mdData_tris >> 4) & 0x07;
+		slave->setCurrentPlayer(player);
+	}
+
+	// Device data is always 0x7F.
+	this->deviceData = 0x7F;
 }
 
-}
+} }

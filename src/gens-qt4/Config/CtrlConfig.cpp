@@ -89,13 +89,25 @@ QString CtrlConfigPrivate::PortName(IoManager::VirtPort_t virtPort)
 		case IoManager::VIRTPORT_TP2C:	return QLatin1String("portTP2C");
 		case IoManager::VIRTPORT_TP2D:	return QLatin1String("portTP2D");
 
-		// 4-Way Play.
+		// EA 4-Way Play.
 		case IoManager::VIRTPORT_4WPA:	return QLatin1String("port4WPA");
 		case IoManager::VIRTPORT_4WPB:	return QLatin1String("port4WPB");
 		case IoManager::VIRTPORT_4WPC:	return QLatin1String("port4WPC");
 		case IoManager::VIRTPORT_4WPD:	return QLatin1String("port4WPD");
 
-		// J_Cart
+		// Master Tap, Port 1.
+		case IoManager::VIRTPORT_MTAP1A:	return QLatin1String("portMTAP1A");
+		case IoManager::VIRTPORT_MTAP1B:	return QLatin1String("portMTAP1B");
+		case IoManager::VIRTPORT_MTAP1C:	return QLatin1String("portMTAP1C");
+		case IoManager::VIRTPORT_MTAP1D:	return QLatin1String("portMTAP1D");
+
+		// Master Tap, Port 2.
+		case IoManager::VIRTPORT_MTAP2A:	return QLatin1String("portMTAP2A");
+		case IoManager::VIRTPORT_MTAP2B:	return QLatin1String("portMTAP2B");
+		case IoManager::VIRTPORT_MTAP2C:	return QLatin1String("portMTAP2C");
+		case IoManager::VIRTPORT_MTAP2D:	return QLatin1String("portMTAP2D");
+
+		// J-Cart.
 		case IoManager::VIRTPORT_JCART1:	return QLatin1String("portJCart1");
 		case IoManager::VIRTPORT_JCART2:	return QLatin1String("portJCart2");
 
@@ -132,6 +144,7 @@ int CtrlConfig::load(const QSettings &qSettings, KeyManager *keyManager)
 		ioType = IoManager::StringToIoType(qsFourCC.toStdString());
 
 		// Check if the controller type is valid.
+		// TODO: Use bitfields for faster checking?
 		bool isValidCtrl = true;
 		if (ioType < IoManager::IOT_NONE ||
 		    ioType >= IoManager::IOT_MAX) {
@@ -145,9 +158,17 @@ int CtrlConfig::load(const QSettings &qSettings, KeyManager *keyManager)
 				// Not supported.
 				isValidCtrl = false;
 			}
+		} else if (virtPort >= IoManager::VIRTPORT_MTAP1A &&
+			   virtPort <= IoManager::VIRTPORT_MTAP2D)
+		{
+			// Master Tap supports NONE and 2BTN.
+			if (ioType != IoManager::IOT_NONE && ioType != IoManager::IOT_2BTN) {
+				// Not supported.
+				isValidCtrl = false;
+			}
 		} else if (virtPort > IoManager::VIRTPORT_EXT &&
 			   ioType > IoManager::IOT_6BTN) {
-			// Team Player / 4WP doesn't support this controller.
+			// All other virtual ports support NONE, 3BTN, and 6BTN.
 			isValidCtrl = false;
 		} else if (!IoManager::IsDevTypeUsable(ioType)) {
 			// Device type isn't usable in this build.

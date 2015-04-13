@@ -179,6 +179,16 @@
    <addaction name="actionPort4WPB"/>
    <addaction name="actionPort4WPC"/>
    <addaction name="actionPort4WPD"/>
+   <addaction name="separator"/>
+   <addaction name="actionPortMTAP1A"/>
+   <addaction name="actionPortMTAP1B"/>
+   <addaction name="actionPortMTAP1C"/>
+   <addaction name="actionPortMTAP1D"/>
+   <addaction name="separator"/>
+   <addaction name="actionPortMTAP2A"/>
+   <addaction name="actionPortMTAP2B"/>
+   <addaction name="actionPortMTAP2C"/>
+   <addaction name="actionPortMTAP2D"/>
   </widget>
   <action name="actionPort1">
    <property name="checkable">
@@ -302,6 +312,70 @@
    </property>
    <property name="text">
     <string>4WP-D</string>
+   </property>
+  </action>
+  <action name="actionPortMTAP1A">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MTAP-1A</string>
+   </property>
+  </action>
+  <action name="actionPortMTAP1B">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MTAP-1B</string>
+   </property>
+  </action>
+  <action name="actionPortMTAP1C">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MTAP-1C</string>
+   </property>
+  </action>
+  <action name="actionPortMTAP1D">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MTAP-1D</string>
+   </property>
+  </action>
+  <action name="actionPortMTAP2A">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MTAP-2A</string>
+   </property>
+  </action>
+  <action name="actionPortMTAP2B">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MTAP-2B</string>
+   </property>
+  </action>
+  <action name="actionPortMTAP2C">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MTAP-2C</string>
+   </property>
+  </action>
+  <action name="actionPortMTAP2D">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MTAP-2D</string>
    </property>
   </action>
  </widget>

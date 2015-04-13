@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * IoManager.cpp: I/O manager. (Private Class)                             *
+ * IoXE1AP.hpp: Dempa XE-1Ap analog controller.                            *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,69 +21,52 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#define __LIBGENS_IN_IOMANAGER_CLASS__
-#include "IoManager_p.hpp"
 #include "Device.hpp"
 
-#include "macros/common.h"
+namespace LibGens { namespace IO {
 
-// C includes. (C++ namespace)
-#include <cstring>
-
-namespace LibGens {
-
-/**
- * Device information.
- */
-const IoManagerPrivate::IoDevInfo IoManagerPrivate::ioDevInfo[IoManager::IOT_MAX] =
+class IoXE1AP : public Device
 {
-	{'NONE', 0, true},	// IOT_NONE
-	{'3BTN', 8, true},	// IOT_3BTN
-	{'6BTN', 12, true},	// IOT_6BTN
-	{'2BTN', 7, true},	// IOT_2BTN
+	public:
+		IoXE1AP();
 
-	// Miscellaneous Master System peripherals.
-	{'PADL', 2, false},	// IOT_PADDLE
-	{'SPAD', 2, false},	// IOT_SPORTS_PAD
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		IoXE1AP(const IoXE1AP &);
+		IoXE1AP &operator=(const IoXE1AP &);
 
-	// Miscellaneous Mega Drive peripherals.
-	{'MOUS', 4, false},	// IOT_MEGA_MOUSE
-	{'XE1A', 8, false},	// IOT_XE_1AP
-	{'ACTV', 0, false},	// IOT_ACTIVATOR
+	public:
+		/**
+		 * Reset Device data that only affects the device
+		 * and not the emulation-side registers.
+		 *
+		 * Should be overridden by subclasses that have
+		 * device-specific data.
+		 */
+		virtual void resetDev(void) override;
 
-	// Light guns.
-	{'PHAS', 0, false},	// IOT_PHASER
-	{'MENA', 0, false},	// IOT_MENACER
-	{'JUST', 0, false},	// IOT_JUSTIFIER
+		// Device type.
+		// Should be overridden by subclasses.
+		virtual IoManager::IoType_t type(void) const override;
 
-	// ColecoVision.
-	{'COLV', 20, false},	// IOT_COLECOVISION
+		/**
+		 * Update the I/O device.
+		 * Runs the internal device update.
+		 */
+		virtual void update(void) override;
 
-	// Multitaps.
-	{'TEAM', 0, true},	// IOT_TEAMPLAYER
-	{'4WPM', 0, true},	// IOT_4WP_MASTER
-	{'4WPS', 0, true},	// IOT_4WP_SLAVE
-	{'MTAP', 0, false},	// IOT_MASTERTAP
+		/**
+		 * Device port was read.
+		 * Only applies to devices on physical ports.
+		 * Needed for some devices that have partially-unclocked protocols.
+		 */
+		virtual void update_onRead(void);
+
+	private:
+		// Latency counter.
+		// Needed due to the unclocked protocol.
+		int latency;
 };
 
-IoManagerPrivate::IoManagerPrivate(IoManager *q)
-	: q(q)
-{
-	// Clear the I/O devices array.
-	memset(ioDevices, 0, sizeof(ioDevices));
-
-	// Allocate empty devices for the three physical ports.
-	ioDevices[IoManager::VIRTPORT_1] = new IO::Device();
-	ioDevices[IoManager::VIRTPORT_2] = new IO::Device();
-	ioDevices[IoManager::VIRTPORT_EXT] = new IO::Device();
-}
-
-IoManagerPrivate::~IoManagerPrivate()
-{
-	// Delete all of the I/O devices.
-	for (int i = 0; i < ARRAY_SIZE(ioDevices); i++) {
-		delete ioDevices[i];
-	}
-}
-
-}
+} }
