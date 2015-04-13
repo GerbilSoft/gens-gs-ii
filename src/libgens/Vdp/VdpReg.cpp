@@ -155,6 +155,58 @@ void VdpPrivate::updateVdpAddrCache_m5(unsigned int updateMask)
 }
 
 /**
+ * Set the scroll plane size. (Mode 5 only!)
+ * @param val Register value.
+ * Format: [   0    0 VSZ1 VSZ0    0    0 HSZ1 HSZ0]
+ */
+void VdpPrivate::setM5ScrollSize(uint8_t val)
+{
+	// Convert to a table index.
+	int tmp = (val & 0x3);
+	tmp |= (val & 0x30) >> 2;
+
+	/**
+	 * Scroll size table.
+	 * Format:
+	 * - idx 0: H_Scroll_CMul
+	 * - idx 1: H_Scroll_CMask
+	 * - idx 2: V_Scroll_CMask
+	 * - idx 3: reserved (padding)
+	 */
+	static const struct {
+		uint8_t H_Scroll_CMul;
+		uint8_t H_Scroll_CMask;
+		uint8_t V_Scroll_CMask;
+		uint8_t reserved;
+	} Scroll_Size_Tbl[] = {
+		// V32_H32 (VXX_H32)      // V32_H64 (VXX_H64)
+		{0x05, 0x1F, 0x1F, 0x00}, {0x06, 0x3F, 0x1F, 0x00},
+		// V32_HXX (V??_HXX)      // V32_H128 (V??_H128)
+		{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
+
+		// V64_H32                // V64_H64 (V128_H64)
+		{0x05, 0x1F, 0x3F, 0x00}, {0x06, 0x3F, 0x3F, 0x00},
+		// V64_HXX (V??_HXX)      // V64_H128 (V??_H128)
+		{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
+
+		// VXX_H32 (V32_H32)      // VXX_H64 (V32_H64)
+		{0x05, 0x1F, 0x1F, 0x00}, {0x06, 0x3F, 0x1F, 0x00},
+		// VXX_HXX (V??_HXX)      // VXX_H128 (V??_H128)
+		{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
+
+		// V128_H32               // V128_H64 (V64_H64)
+		{0x05, 0x1F, 0x7F, 0x00}, {0x06, 0x3F, 0x3F, 0x00},
+		// V128_HXX (V??_HXX)     // V128_H128 (V??_H128)
+		{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00}
+	};
+
+	// Get the values from the scroll size table.
+	H_Scroll_CMul  = Scroll_Size_Tbl[tmp].H_Scroll_CMul;
+	H_Scroll_CMask = Scroll_Size_Tbl[tmp].H_Scroll_CMask;
+	V_Scroll_CMask = Scroll_Size_Tbl[tmp].V_Scroll_CMask;
+}
+
+/**
  * Set the value of a register. (Mode 5 only!)
  * @param reg_num Register number.
  * @param val New value for the register.
@@ -314,52 +366,10 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 			}
 			break;
 
-		case 16: {
-			// Scroll Size.
-			int tmp = (val & 0x3);
-			tmp |= (val & 0x30) >> 2;
-
-			/**
-			 * Scroll size table.
-			 * Format:
-			 * - idx 0: H_Scroll_CMul
-			 * - idx 1: H_Scroll_CMask
-			 * - idx 2: V_Scroll_CMask
-			 * - idx 3: reserved (padding)
-			 */
-			static const struct {
-				uint8_t H_Scroll_CMul;
-				uint8_t H_Scroll_CMask;
-				uint8_t V_Scroll_CMask;
-				uint8_t reserved;
-			} Scroll_Size_Tbl[] = {
-				// V32_H32 (VXX_H32)      // V32_H64 (VXX_H64)
-				{0x05, 0x1F, 0x1F, 0x00}, {0x06, 0x3F, 0x1F, 0x00},
-				// V32_HXX (V??_HXX)      // V32_H128 (V??_H128)
-				{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
-
-				// V64_H32                // V64_H64 (V128_H64)
-				{0x05, 0x1F, 0x3F, 0x00}, {0x06, 0x3F, 0x3F, 0x00},
-				// V64_HXX (V??_HXX)      // V64_H128 (V??_H128)
-				{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
-
-				// VXX_H32 (V32_H32)      // VXX_H64 (V32_H64)
-				{0x05, 0x1F, 0x1F, 0x00}, {0x06, 0x3F, 0x1F, 0x00},
-				// VXX_HXX (V??_HXX)      // VXX_H128 (V??_H128)
-				{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
-
-				// V128_H32               // V128_H64 (V64_H64)
-				{0x05, 0x1F, 0x7F, 0x00}, {0x06, 0x3F, 0x3F, 0x00},
-				// V128_HXX (V??_HXX)     // V128_H128 (V??_H128)
-				{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00}
-			};
-
-			// Get the values from the scroll size table.
-			H_Scroll_CMul  = Scroll_Size_Tbl[tmp].H_Scroll_CMul;
-			H_Scroll_CMask = Scroll_Size_Tbl[tmp].H_Scroll_CMask;
-			V_Scroll_CMask = Scroll_Size_Tbl[tmp].V_Scroll_CMask;
+		case 16:
+			// Scroll size.
+			setM5ScrollSize(val);
 			break;
-		}
 
 		case 17:
 			// Window H position.
@@ -454,8 +464,11 @@ void VdpPrivate::resetRegisters(bool bootRomFix)
 		updateVdpMode();
 		updateVdpAddrCache_m5(3);
 
-		// Scroll size isn't updated by the above functions.
-		setReg(16, 0);
+		// Scroll plane size and window position aren't
+		// updated by the above functions.
+		setM5ScrollSize(0);
+		Win_X_Pos = 0;
+		Win_Y_Pos = 0;
 	}
 
 	// Always set Reg.10 to 0xFF to prevent

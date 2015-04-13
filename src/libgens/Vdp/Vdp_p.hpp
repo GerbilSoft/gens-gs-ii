@@ -270,6 +270,13 @@ class VdpPrivate
 		 */
 		void updateVdpAddrCache_m5(unsigned int updateMask);
 
+		/**
+		 * Set the scroll plane size. (Mode 5 only!)
+		 * @param val Register value.
+		 * Format: [   0    0 VSZ1 VSZ0    0    0 HSZ1 HSZ0]
+		 */
+		void setM5ScrollSize(uint8_t val);
+
 		// VDP control struct.
 		struct {
 			/**
