@@ -79,7 +79,7 @@ void IoMasterTap::update(void)
 	this->updateTristateInputCache();
 
 	// TODO: "unlikely()"?
-	if (pin58 != 2) {
+	if (m_pin58 != 2) {
 		// +5V/GND pins are wrong.
 		// No valid data will be returned.
 		// Also, the ICs are probably fried now.

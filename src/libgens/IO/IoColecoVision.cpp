@@ -58,7 +58,7 @@ void IoColecoVision::update(void)
 	// this->mode, bit 0 == pin 8
 
 	uint8_t data = 0xFF;
-	if (!(this->pin58 & 1)) {
+	if (!(m_pin58 & 1)) {
 		// Joystick/quadrature input.
 		// TODO: Get quadrature input from the frontend.
 		// Format: [ x  QA QB TL R L D U]
@@ -66,7 +66,7 @@ void IoColecoVision::update(void)
 		// Low 5 bits of this->buttons match exactly.
 		data &= (0xE0 | (this->buttons & 0x1F));
 	}
-	if (!(this->pin58 & 2)) {
+	if (!(m_pin58 & 2)) {
 		// Keypad input.
 		// Format: [ x        TR 4 3 2 1]
 

@@ -46,7 +46,7 @@ void Io2BTN::update(void)
 	this->updateTristateInputCache();
 
 	// TODO: "unlikely()"?
-	if (pin58 & 1) {
+	if (m_pin58 & 1) {
 		// Ground pin is high.
 		// No valid data will be returned.
 		this->deviceData = 0xFF;

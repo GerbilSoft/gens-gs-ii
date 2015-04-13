@@ -46,7 +46,7 @@ void Io3BTN::update(void)
 	this->updateTristateInputCache();
 
 	// TODO: "unlikely()"?
-	if (pin58 != 2) {
+	if (m_pin58 != 2) {
 		// +5V/GND pins are wrong.
 		// No valid data will be returned.
 		// Also, the IC is probably fried now.

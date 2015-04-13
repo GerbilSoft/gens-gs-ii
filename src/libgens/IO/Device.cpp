@@ -45,7 +45,7 @@ void Device::reset(void)
 	mdData = 0xFF;
 	serCtrl = 0;
 	serLastTx = 0xFF;
-	pin58 = 2;	// Pin 5 == +5V, Pin 8 == GND
+	m_pin58 = 2;	// Pin 5 == +5V, Pin 8 == GND
 	resetDev();
 }
 
@@ -139,11 +139,20 @@ int Device::setSubDevice(int virtPort, Device *ioDevice)
 void Device::setPin58(uint8_t pin58)
 {
 	pin58 &= 3;
-	if (this->pin58 != pin58) {
+	if (m_pin58 != pin58) {
 		// Pin 5/8 status has changed.
-		this->pin58 = pin58;
+		m_pin58 = pin58;
 		update();
 	}
+}
+
+/**
+ * Get the Pin 5/8 status.
+ * @return Pin 5/8 status.
+ */
+uint8_t Device::pin58(void)
+{
+	return m_pin58;
 }
 
 } }

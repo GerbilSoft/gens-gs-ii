@@ -183,6 +183,12 @@ class Device
 		 */
 		void setPin58(uint8_t pin58);
 
+		/**
+		 * Get the Pin 5/8 status.
+		 * @return Pin 5/8 status.
+		 */
+		uint8_t pin58(void);
+
 	protected:
 		/**
 		 * Pin 5/8 status.
@@ -193,7 +199,7 @@ class Device
 		 * Bit 0 == pin 8 (low for joystick)
 		 * Bit 1 == pin 5 (low for keypad)
 		 */
-		uint8_t pin58;
+		uint8_t m_pin58;
 };
 
 } }
