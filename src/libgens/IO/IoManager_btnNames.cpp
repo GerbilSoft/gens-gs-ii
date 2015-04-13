@@ -142,8 +142,8 @@ IoManager::ButtonName_t IoManager::ButtonName(IoType_t ioType, int btnIdx)
 				case BTNI_RIGHT:		return BTNNAME_RIGHT;
 				case BTNI_CV_TL_YELLOW:		return BTNNAME_CV_TL_YELLOW;
 				case BTNI_CV_TR_RED:		return BTNNAME_CV_TR_RED;
-				case BTNI_CV_BLUE:		return BTNNAME_CV_BLUE;
 				case BTNI_CV_PURPLE:		return BTNNAME_CV_PURPLE;
+				case BTNI_CV_BLUE:		return BTNNAME_CV_BLUE;
 				case BTNI_CV_KEYPAD_1:		return BTNNAME_CV_KEYPAD_1;
 				case BTNI_CV_KEYPAD_2:		return BTNNAME_CV_KEYPAD_2;
 				case BTNI_CV_KEYPAD_3:		return BTNNAME_CV_KEYPAD_3;
@@ -181,6 +181,7 @@ int IoManager::FirstLogicalButton(IoType_t ioType)
 		case IOT_SPORTS_PAD:	return BTNI_SPAD_1;
 		case IOT_MEGA_MOUSE:	return BTNI_MOUSE_LEFT;
 		case IOT_XE_1AP:	return BTNI_XE1AP_A;
+		case IOT_COLECOVISION:	return BTNI_UP;
 
 		case IOT_NONE:
 		default:
@@ -291,6 +292,34 @@ int IoManager::NextLogicalButton(IoType_t ioType, int btnIdx)
 					break;
 			}
 			break;
+
+		/** ColecoVision. **/
+
+		case IOT_COLECOVISION:
+			switch (btnIdx) {
+				case BTNI_UP:			return BTNI_DOWN;
+				case BTNI_DOWN:			return BTNI_LEFT;
+				case BTNI_LEFT:			return BTNI_RIGHT;
+				case BTNI_RIGHT:		return BTNI_CV_TL_YELLOW;
+				case BTNI_CV_TL_YELLOW:		return BTNI_CV_TR_RED;
+				case BTNI_CV_TR_RED:		return BTNI_CV_PURPLE;
+				case BTNI_CV_PURPLE:		return BTNI_CV_BLUE;
+				case BTNI_CV_BLUE:		return BTNI_CV_KEYPAD_1;
+				case BTNI_CV_KEYPAD_1:		return BTNI_CV_KEYPAD_2;
+				case BTNI_CV_KEYPAD_2:		return BTNI_CV_KEYPAD_3;
+				case BTNI_CV_KEYPAD_3:		return BTNI_CV_KEYPAD_4;
+				case BTNI_CV_KEYPAD_4:		return BTNI_CV_KEYPAD_5;
+				case BTNI_CV_KEYPAD_5:		return BTNI_CV_KEYPAD_6;
+				case BTNI_CV_KEYPAD_6:		return BTNI_CV_KEYPAD_7;
+				case BTNI_CV_KEYPAD_7:		return BTNI_CV_KEYPAD_8;
+				case BTNI_CV_KEYPAD_8:		return BTNI_CV_KEYPAD_9;
+				case BTNI_CV_KEYPAD_9:		return BTNI_CV_KEYPAD_ASTERISK;
+				case BTNI_CV_KEYPAD_ASTERISK:	return BTNI_CV_KEYPAD_0;
+				case BTNI_CV_KEYPAD_0:		return BTNI_CV_KEYPAD_OCTOTHORPE;
+				case BTNI_CV_KEYPAD_OCTOTHORPE:
+				default:
+					break;
+			}
 
 		default:
 			break;

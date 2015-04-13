@@ -307,8 +307,8 @@ class IoManager
 			// ColecoVision buttons.
 			BTNNAME_CV_TL_YELLOW,
 			BTNNAME_CV_TR_RED,
-			BTNNAME_CV_BLUE,
 			BTNNAME_CV_PURPLE,
+			BTNNAME_CV_BLUE,
 			BTNNAME_CV_KEYPAD_1,
 			BTNNAME_CV_KEYPAD_2,
 			BTNNAME_CV_KEYPAD_3,
@@ -377,8 +377,8 @@ class IoManager
 			// ColecoVision buttons.
 			BTNI_CV_TL_YELLOW		= 4,
 			BTNI_CV_TR_RED			= 5,
-			BTNI_CV_BLUE			= 6,
-			BTNI_CV_PURPLE			= 7,
+			BTNI_CV_PURPLE			= 6,
+			BTNI_CV_BLUE			= 7,
 			BTNI_CV_KEYPAD_1		= 8,
 			BTNI_CV_KEYPAD_2		= 9,
 			BTNI_CV_KEYPAD_3		= 10,
