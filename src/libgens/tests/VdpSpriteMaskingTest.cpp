@@ -211,11 +211,6 @@ void VdpSpriteMaskingTest::SetUp(void)
 	// Determine the parameters for this test.
 	VdpSpriteMaskingTest_mode mode = GetParam();
 
-	// Load VRam.
-	ASSERT_EQ(loadVRam(mode.screenMode), 0)
-		<< "Load VRAM for screen mode "
-		<< (mode.screenMode == SCREEN_MODE_H32 ? "H32" : "H40");
-
 	// Set sprite limits.
 	m_vdp->options.spriteLimits =
 		(mode.spriteLimits == SPRITE_LIMITS_ENABLED);
@@ -223,6 +218,11 @@ void VdpSpriteMaskingTest::SetUp(void)
 	// Set the screen mode.
 	const uint8_t reg0C = (mode.screenMode == SCREEN_MODE_H32) ? 0x00 : 0x81;
 	m_vdp->dbg_setReg(0x0C, reg0C);
+
+	// Load VRam.
+	ASSERT_EQ(loadVRam(mode.screenMode), 0)
+		<< "Load VRAM for screen mode "
+		<< (mode.screenMode == SCREEN_MODE_H32 ? "H32" : "H40");
 }
 
 /**
