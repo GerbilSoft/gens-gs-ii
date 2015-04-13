@@ -291,8 +291,8 @@ FORCE_INLINE void VdpPalette::T_update_TMS9918A(pixel *palActiveTMS,
 #endif
 
 	// Update the background color.
-	// TODO: How is the background color handled in TMS9918A modes?
-	//palActiveTMS[0] = palActiveTMS[d->maskedBgColorIdx];
+	// TODO: Verify this.
+	palActiveTMS[0] = palActiveTMS[d->maskedBgColorIdx];
 }
 
 // TODO: Port to LibGens.
