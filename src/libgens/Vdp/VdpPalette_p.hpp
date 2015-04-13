@@ -89,9 +89,6 @@ class VdpPalettePrivate
 			uint32_t u32[0x10000];
 		} palFull32X;
 
-		/** Static functions. **/
-		static int FUNC_PURE ClampColorComponent(int mask, int c);
-
 		/** Full palette recalculation functions. **/
 
 		template<typename pixel,

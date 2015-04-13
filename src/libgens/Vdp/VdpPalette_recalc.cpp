@@ -54,11 +54,6 @@ void VdpPalettePrivate::T_recalcFull_MD(pixel *palFullMD)
 		g >>= (8 - GBits);
 		b >>= (8 - BBits);
 
-		// Clamp the color components.
-		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
-		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
-		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
-
 		// TODO: Make this configurable?
 #if 0	
 		if (GMask == 0x3F) {
@@ -100,11 +95,6 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_32X(pixel *palFull32X)
 		r >>= (8 - RBits);
 		g >>= (8 - GBits);
 		b >>= (8 - BBits);
-
-		// Clamp the color components.
-		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
-		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
-		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
 
 		// TODO: Make this configurable?
 #if 0	
@@ -158,11 +148,6 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_SMS(pixel *palFullSMS)
 		g >>= (8 - GBits);
 		b >>= (8 - BBits);
 
-		// Clamp the color components.
-		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
-		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
-		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
-		
 		// TODO: Make this configurable?
 #if 0	
 		if (GMask == 0x3F) {
@@ -201,11 +186,6 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_GG(pixel *palFullGG)
 		r >>= (8 - RBits);
 		g >>= (8 - GBits);
 		b >>= (8 - BBits);
-
-		// Clamp the color components.
-		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
-		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
-		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
 
 		// TODO: Make this configurable?
 #if 0	
@@ -275,11 +255,6 @@ FORCE_INLINE void VdpPalettePrivate::T_recalcFull_TMS9918A(pixel *palFullTMS)
 		g >>= (8 - GBits);
 		b >>= (8 - BBits);
 		
-		// Clamp the color components.
-		r = VdpPalettePrivate::ClampColorComponent(RMask, r);
-		g = VdpPalettePrivate::ClampColorComponent(GMask, g);
-		b = VdpPalettePrivate::ClampColorComponent(BMask, b);
-
 		// TODO: Make this configurable?
 #if 0	
 		if (GMask == 0x3F) {

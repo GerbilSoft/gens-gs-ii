@@ -79,21 +79,6 @@ void VdpPalettePrivate::applyBgColorIdxMask(void)
 	}
 }
 
-/**
- * Clamp a color component to [0, mask].
- * @param mask Color component mask. (max value)
- * @param c Color component to clamp.
- * @return Clamped color component.
- */
-int FUNC_PURE VdpPalettePrivate::ClampColorComponent(int mask, int c)
-{
-	if (c < 0)
-		return 0;
-	else if (c > mask)
-		return mask;
-	return c;
-}
-
 /** VdpPalette class. **/
 
 /**
