@@ -61,14 +61,14 @@ void IoColecoVision::update(void)
 	if (!(m_pin58 & 1)) {
 		// Joystick/quadrature input.
 		// TODO: Get quadrature input from the frontend.
-		// Format: [ x  QA QB TL R L D U]
+		// Format: [ x QA QB TL R L D U]
 
 		// Low 5 bits of this->buttons match exactly.
 		data &= (0xE0 | (this->buttons & 0x1F));
 	}
 	if (!(m_pin58 & 2)) {
 		// Keypad input.
-		// Format: [ x        TR 4 3 2 1]
+		// Format: [ x  x  x TR 4 3 2 1]
 
 		// Get the right fire button. (SAC Red)
 		data &= (0xEF | ((this->buttons & (1 << IoManager::BTNI_CV_TR_RED)) >> 1));
