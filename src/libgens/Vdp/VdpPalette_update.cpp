@@ -162,6 +162,7 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *palActiveMD,
 
 /**
  * Recalculate the active palette. (32X)
+ * TODO: Needs testing.
  * @param palActive32X Active 32X palette. (Must have 0x100 entries!)
  * @param palFull32X Full 32X palette. (Must have 0x10000 entries!)
  */
@@ -314,23 +315,6 @@ FORCE_INLINE void VdpPalette::T_update_TMS9918A(pixel *palActiveTMS,
 	// TODO: Verify this.
 	palActiveTMS[0] = palActiveTMS[d->maskedBgColorIdx];
 }
-
-// TODO: Port to LibGens.
-#if 0
-/**
- * Adjust the 32X CRam.
- */
-template<typename pixel>
-static FORCE_INLINE void T_Adjust_CRam_32X(pixel *pal32X, pixel *cramAdjusted32X)
-{
-	for (int i = 0; i < 0x100; i += 4) {
-		cramAdjusted32X[i] = pal32X[_32X_VDP_CRam[i]];
-		cramAdjusted32X[i+1] = pal32X[_32X_VDP_CRam[i+1]];
-		cramAdjusted32X[i+2] = pal32X[_32X_VDP_CRam[i+2]];
-		cramAdjusted32X[i+3] = pal32X[_32X_VDP_CRam[i+3]];
-	}
-}
-#endif
 
 /**
  * Update the active palette.
