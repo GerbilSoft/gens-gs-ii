@@ -159,7 +159,7 @@ void VdpPrivate::updateVdpAddrCache_m5(unsigned int updateMask)
  * @param val Register value.
  * Format: [   0    0 VSZ1 VSZ0    0    0 HSZ1 HSZ0]
  */
-void VdpPrivate::setM5ScrollSize(uint8_t val)
+void VdpPrivate::setScrollSize_m5(uint8_t val)
 {
 	// Convert to a table index.
 	int tmp = (val & 0x3);
@@ -368,7 +368,7 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 
 		case 16:
 			// Scroll size.
-			setM5ScrollSize(val);
+			setScrollSize_m5(val);
 			break;
 
 		case 17:
@@ -466,7 +466,7 @@ void VdpPrivate::resetRegisters(bool bootRomFix)
 
 		// Scroll plane size and window position aren't
 		// updated by the above functions.
-		setM5ScrollSize(0);
+		setScrollSize_m5(0);
 		Win_X_Pos = 0;
 		Win_Y_Pos = 0;
 	}

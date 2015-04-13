@@ -275,7 +275,7 @@ class VdpPrivate
 		 * @param val Register value.
 		 * Format: [   0    0 VSZ1 VSZ0    0    0 HSZ1 HSZ0]
 		 */
-		void setM5ScrollSize(uint8_t val);
+		void setScrollSize_m5(uint8_t val);
 
 		// VDP control struct.
 		struct {
