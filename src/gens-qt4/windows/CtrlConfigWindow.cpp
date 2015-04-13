@@ -248,6 +248,11 @@ QString CtrlConfigWindowPrivate::getShortDeviceName(IoManager::IoType_t ioType) 
 			//: Konami Justifier.
 			return CtrlConfigWindow::tr("Justifier", "shortDeviceName");
 
+		// ColecoVision.
+		case IoManager::IOT_COLECOVISION:
+			//: ColecoVision.
+			return CtrlConfigWindow::tr("ColecoVision", "shortDeviceName");
+
 		// Multitaps.
 		case IoManager::IOT_TEAMPLAYER:
 			//: Sega Team Player. (Specific brand name; only modify if it's different in your region!)
@@ -313,6 +318,11 @@ QString CtrlConfigWindowPrivate::getLongDeviceName(IoManager::IoType_t ioType) c
 		case IoManager::IOT_JUSTIFIER:
 			//: Konami Justifier.
 			return CtrlConfigWindow::tr("Justifier", "longDeviceName");
+
+		// ColecoVision.
+		case IoManager::IOT_COLECOVISION:
+			//: ColecoVision.
+			return CtrlConfigWindow::tr("ColecoVision", "longDeviceName");
 
 		// Multitaps.
 		case IoManager::IOT_TEAMPLAYER:
