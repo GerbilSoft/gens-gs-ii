@@ -237,7 +237,8 @@ inline bool VdpPalette::isDirty(void) const
 inline uint8_t VdpPalette::readCRam_8(uint8_t address) const
 {
 	address &= cram_addr_mask;
-	return m_cram.u8[address ^ U16DATA_U8_INVERT];
+	// FIXME: Use U16DATA_U8_INVERT?
+	return m_cram.u8[address];
 }
 
 /**
@@ -261,7 +262,8 @@ inline uint16_t VdpPalette::readCRam_16(uint8_t address) const
 inline void VdpPalette::writeCRam_8(uint8_t address, uint8_t data)
 {
 	address &= cram_addr_mask;
-	m_cram.u8[address ^ U16DATA_U8_INVERT] = data;
+	// FIXME: Use U16DATA_U8_INVERT?
+	m_cram.u8[address] = data;
 	// TODO: Per-color dirty flag?
 	m_dirty.active = true;
 }

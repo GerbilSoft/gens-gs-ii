@@ -251,10 +251,12 @@ int Test_VdpPalette_DAC::exec(void)
 			}
 
 			// Convert the selected PalMode to uppercase.
+			uint8_t m5m4bits = 0;
 			switch (palMode) {
 				case VdpPalette::PALMODE_MD:
 				default:
 					palMode_str = PALTEST_PALMODE_MD;
+					m5m4bits = 3;	// Mode 5
 					break;
 				/* TODO
 				case VdpPalette::PALMODE_32X:
@@ -263,13 +265,16 @@ int Test_VdpPalette_DAC::exec(void)
 				*/
 				case VdpPalette::PALMODE_SMS:
 					palMode_str = PALTEST_PALMODE_SMS;
+					m5m4bits = 1;	// Mode 4
 					break;
 				case VdpPalette::PALMODE_GG:
 					palMode_str = PALTEST_PALMODE_GG;
+					m5m4bits = 1;	// Mode 4
 					break;
 				/* TODO
 				case VdpPalette::PALMODE_TMS9918:
 					palMode_str = PALTEST_PALMODE_TMS9918;
+					m5m4bits = 0;	// TMS modes
 					break;
 				*/
 			}
@@ -281,6 +286,11 @@ int Test_VdpPalette_DAC::exec(void)
 			vdp15->setPalMode(palMode);
 			vdp16->setPalMode(palMode);
 			vdp32->setPalMode(palMode);
+
+			// Set the M5/M4 bits.
+			vdp15->setM5M4bits(m5m4bits);
+			vdp16->setM5M4bits(m5m4bits);
+			vdp32->setM5M4bits(m5m4bits);
 		} else if (!strcasecmp(token, PALTEST_CMD_SHMODE)) {
 			if (!isInit)
 				goto no_magic;
