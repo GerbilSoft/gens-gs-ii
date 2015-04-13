@@ -25,6 +25,7 @@
  * References:
  * - "VDP 128Kb Extended VRAM mode"
  *   - http://gendev.spritesmind.net/forum/viewtopic.php?t=1368
+ * - http://md.squee.co/VDP
  */
 
 #ifndef __LIBGENS_MD_VDPREG_HPP__
@@ -142,7 +143,7 @@ namespace VdpTypes {
 
 			/**
 			 * Register 12: Mode Set 4.
-			 * [ RS0    0    0    0 S/TE LSM1 LSM0  RS1]
+			 * [ RS0  VSY  HSY  SPR S/TE LSM1 LSM0  RS1]
 			 * 
 			 * RS0/RS1: H resolution. (00 == H32; 11 == H40; others == invalid)
 			 * S/TE: Shadow/Highlight enable. (1 == on; 0 == off)
@@ -151,6 +152,12 @@ namespace VdpTypes {
 			 *   - 01 == interlace mode 1
 			 *   - 10 == invalid (acts like 00)
 			 *   - 11 == interlace mode 2
+			 *
+			 * NOTE: The following bits are not emulated.
+			 *
+			 * SPR: 1 == Enables the external pixel bus.
+			 * HSY: 1 == Messes with horizontal sync.
+			 * VSY: 1 == Replaces the VSync signal with the pixel clock.
 			 */
 			uint8_t Set4;
 
