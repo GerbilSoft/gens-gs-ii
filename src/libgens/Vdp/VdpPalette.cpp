@@ -183,7 +183,7 @@ PAL_PROPERTY_READ(VdpPalette::PalMode_t, palMode);
  */
 void VdpPalette::setPalMode(PalMode_t palMode)
 {
-	if (d->palMode = palMode)
+	if (d->palMode == palMode)
 		return;
 	d->palMode = palMode;
 	// TODO: May need other changes...
