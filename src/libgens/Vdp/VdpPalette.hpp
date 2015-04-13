@@ -57,6 +57,13 @@ class VdpPalette
 			uint32_t u32[0x100];
 		} m_palActive;
 
+		// Active 32X palette. (256-color mode)
+		// TODO: Make this private and add accessors.
+		union {
+			uint16_t u16[0x100];
+			uint32_t u32[0x100];
+		} m_palActive32X;
+
 		/**
 		 * Check if the palette is dirty.
 		 * @return True if the palette is dirty.
@@ -177,6 +184,9 @@ class VdpPalette
 		VdpTypes::CRam_t m_cram;
 		uint8_t cram_addr_mask;
 
+		// 32X Color RAM.
+		VdpTypes::CRam_32X_t m_cram32X;
+
 		// Color depth.
 		MdFb::ColorDepth m_bpp;
 
@@ -203,6 +213,11 @@ class VdpPalette
 					const pixel *palFullMD,
 					const pixel *palFullSMS);
 
+		// TODO: Needs testing.
+		template<typename pixel>
+		FORCE_INLINE void T_update_32X(pixel *palActive32X,
+					 const pixel *palFull32X);
+
 		template<typename pixel>
 		FORCE_INLINE void T_update_SMS(pixel *palActiveSMS,
 					 const pixel *palFullSMS);
@@ -214,9 +229,6 @@ class VdpPalette
 		template<typename pixel>
 		FORCE_INLINE void T_update_TMS9918A(pixel *palActiveTMS,
 					      const pixel *palFullTMS);
-
-		// TODO
-		//static void Adjust_CRam_32X(void);
 };
 
 /**

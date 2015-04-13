@@ -161,6 +161,26 @@ FORCE_INLINE void VdpPalette::T_update_MD(pixel *palActiveMD,
 }
 
 /**
+ * Recalculate the active palette. (32X)
+ * @param palActive32X Active 32X palette. (Must have 0x100 entries!)
+ * @param palFull32X Full 32X palette. (Must have 0x10000 entries!)
+ */
+template<typename pixel>
+FORCE_INLINE void VdpPalette::T_update_32X(pixel *palActive32X,
+				     const pixel *palFull32X)
+{
+	// TODO: Mask the palette offset with 0x7FFF
+	// and shrink it to 32K entries?
+	// TODO: Only mark dirty if 32X VDP is in 256-color mode.
+	for (int i = 0; i < 0x100; i += 4) {
+		palActive32X[i+0] = palFull32X[m_cram32X.u16[i+0]];
+		palActive32X[i+1] = palFull32X[m_cram32X.u16[i+1]];
+		palActive32X[i+2] = palFull32X[m_cram32X.u16[i+2]];
+		palActive32X[i+3] = palFull32X[m_cram32X.u16[i+3]];
+	}
+}
+
+/**
  * Recalculate the active palette. (Sega Master System, Mode 4)
  * TODO: UNTESTED!
  * @param palActiveSMS Active SMS palette. (Must have 0x20 entries!)
@@ -326,8 +346,7 @@ void VdpPalette::update(void)
 	if (m_bpp != MdFb::BPP_32) {
 		switch (d->palMode) {
 			case PALMODE_32X:
-				// TODO: Implement T_update_32X().
-				//T_update_32X<uint16_t>(m_palActive32X.u16, m_palFull32X.u16);
+				T_update_32X<uint16_t>(m_palActive32X.u16, d->palFull32X.u16);
 				// NOTE: 32X falls through to MD, since both 32X and MD palettes must be updated.
 				// TODO: Add a separate dirty flag for the 32X palette?
 				// FALLTHROUGH
@@ -352,8 +371,7 @@ void VdpPalette::update(void)
 	} else {
 		switch (d->palMode) {
 			case PALMODE_32X:
-				// TODO: Implement T_update_32X().
-				//T_update_32X<uint32_t>(m_palActive32X.u32, m_palFull32X.u32);
+				T_update_32X<uint32_t>(m_palActive32X.u32, d->palFull32X.u32);
 				// NOTE: 32X falls through to MD, since both 32X and MD palettes must be updated.
 				// TODO: Add a separate dirty flag for the 32X palette?
 				// FALLTHROUGH

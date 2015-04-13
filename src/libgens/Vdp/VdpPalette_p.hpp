@@ -56,6 +56,8 @@ class VdpPalettePrivate
 		uint8_t maskedBgColorIdx;	// Masked background color index.
 		void applyBgColorIdxMask(void);
 
+		// TODO: Make these variables protected or private?
+
 		/**
 		 * M5/M4 bits.
 		 * Used for Mega Drive and Master System.
