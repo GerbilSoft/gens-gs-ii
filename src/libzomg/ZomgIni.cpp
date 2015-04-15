@@ -2,7 +2,7 @@
  * libzomg: Zipped Original Memory from Genesis.                           *
  * ZomgIni.cpp: ZOMG.ini handler.                                          *
  *                                                                         *
- * Copyright (c) 2013 by David Korth.                                      *
+ * Copyright (c) 2013-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -53,8 +53,8 @@ class ZomgIniPrivate
 
 	public:
 		// Useful functions.
-		static void WriteValue(ostringstream& oss, string key, string value);
-		static void WriteValue(ostringstream& oss, string key, uint32_t value, int width = 0, bool hex = false);
+		static void WriteValue(ostringstream& oss, const string &key, const string &value);
+		static void WriteValue(ostringstream& oss, const string &key, uint32_t value, int width = 0, bool hex = false);
 
 	public:
 		string systemId;
@@ -67,7 +67,6 @@ class ZomgIniPrivate
 		string region;
 		string description;
 		string extensions;
-
 };
 
 /*****************************
@@ -83,7 +82,7 @@ ZomgIniPrivate::ZomgIniPrivate()
  * @param key Key.
  * @param value Value.
  */
-inline void ZomgIniPrivate::WriteValue(ostringstream& oss, string key, string value)
+inline void ZomgIniPrivate::WriteValue(ostringstream& oss, const string &key, const string &value)
 {
 	oss << key << "=";
 	for (size_t i = 0; i < value.length(); i++) {
@@ -118,7 +117,7 @@ inline void ZomgIniPrivate::WriteValue(ostringstream& oss, string key, string va
  * @param width Minimum width of the field.
  * @param hex If true, print in hex (with leading "0x").
  */
-inline void ZomgIniPrivate::WriteValue(ostringstream& oss, string key, uint32_t value, int width, bool hex)
+inline void ZomgIniPrivate::WriteValue(ostringstream& oss, const string &key, uint32_t value, int width, bool hex)
 {
 	std::ios_base::fmtflags old_flags = oss.flags();
 	std::streamsize old_width = oss.width();
@@ -195,56 +194,57 @@ std::string ZomgIni::save(void) const
 }
 
 /** Property get/set functions. **/
+// TODO: Use macros?
 
 // TODO: Use bitfield with system IDs instead of a string.
-string ZomgIni::systemId(void)
+string ZomgIni::systemId(void) const
 	{ return d->systemId; }
-void ZomgIni::setSystemId(string systemId)
+void ZomgIni::setSystemId(const string &systemId)
 	{ d->systemId = systemId; }
 
-string ZomgIni::creator(void)
+string ZomgIni::creator(void) const
 	{ return d->creator; }
-void ZomgIni::setCreator(string creator)
+void ZomgIni::setCreator(const string &creator)
 	{ d->creator = creator; }
 
-string ZomgIni::creatorVersion(void)
+string ZomgIni::creatorVersion(void) const
 	{ return d->creatorVersion; }
-void ZomgIni::setCreatorVersion(string creatorVersion)
+void ZomgIni::setCreatorVersion(const string &creatorVersion)
 	{ d->creatorVersion = creatorVersion; }
 
-string ZomgIni::creatorVcsVersion(void)
+string ZomgIni::creatorVcsVersion(void) const
 	{ return d->creatorVcsVersion; }
-void ZomgIni::setCreatorVcsVersion(string creatorVcsVersion)
+void ZomgIni::setCreatorVcsVersion(const string &creatorVcsVersion)
 	{ d->creatorVcsVersion = creatorVcsVersion; }
 
-string ZomgIni::author(void)
+string ZomgIni::author(void) const
 	{ return d->author; }
-void ZomgIni::setAuthor(string author)
+void ZomgIni::setAuthor(const string &author)
 	{ d->author = author; }
 
-string ZomgIni::romFilename(void)
+string ZomgIni::romFilename(void) const
 	{ return d->romFilename; }
-void ZomgIni::setRomFilename(string romFilename)
+void ZomgIni::setRomFilename(const string &romFilename)
 	{ d->romFilename = romFilename; }
 
-uint32_t ZomgIni::romCrc32(void)
+uint32_t ZomgIni::romCrc32(void) const
 	{ return d->romCrc32; }
 void ZomgIni::setRomCrc32(uint32_t romCrc32)
 	{ d->romCrc32 = romCrc32; }
 
-string ZomgIni::region(void)
+string ZomgIni::region(void) const
 	{ return d->region; }
-void ZomgIni::setRegion(string region)
+void ZomgIni::setRegion(const string &region)
 	{ d->region = region; }
 
-string ZomgIni::description(void)
+string ZomgIni::description(void) const
 	{ return d->description; }
-void ZomgIni::setDescription(string description)
+void ZomgIni::setDescription(const string &description)
 	{ d->description = description; }
 
-string ZomgIni::extensions(void)
+string ZomgIni::extensions(void) const
 	{ return d->extensions; }
-void ZomgIni::setExtensions(string extensions)
+void ZomgIni::setExtensions(const string &extensions)
 	{ d->extensions = extensions; }
 
 }

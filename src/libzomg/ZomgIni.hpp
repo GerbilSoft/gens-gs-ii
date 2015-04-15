@@ -2,7 +2,7 @@
  * libzomg: Zipped Original Memory from Genesis.                           *
  * ZomgIni.hpp: ZOMG.ini handler.                                          *
  *                                                                         *
- * Copyright (c) 2013 by David Korth.                                      *
+ * Copyright (c) 2013-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -62,38 +62,39 @@ class ZomgIni
 		std::string save(void) const;
 
 		/** Property get/set functions. **/
+		// TODO: Use macros?
 
 		// TODO: Use bitfield with system IDs instead of a string.
-		std::string systemId(void);
-		void setSystemId(std::string systemId);
+		std::string systemId(void) const;
+		void setSystemId(const std::string &systemId);
 
-		std::string creator(void);
-		void setCreator(std::string creator);
+		std::string creator(void) const;
+		void setCreator(const std::string &creator);
 
-		std::string creatorVersion(void);
-		void setCreatorVersion(std::string creatorVersion);
+		std::string creatorVersion(void) const;
+		void setCreatorVersion(const std::string &creatorVersion);
 
-		std::string creatorVcsVersion(void);
-		void setCreatorVcsVersion(std::string creatorVcsVersion);
+		std::string creatorVcsVersion(void) const;
+		void setCreatorVcsVersion(const std::string &creatorVcsVersion);
 
-		std::string author(void);
-		void setAuthor(std::string author);
+		std::string author(void) const;
+		void setAuthor(const std::string &author);
 
-		std::string romFilename(void);
-		void setRomFilename(std::string romFilename);
+		std::string romFilename(void) const;
+		void setRomFilename(const std::string &romFilename);
 
-		uint32_t romCrc32(void);
+		uint32_t romCrc32(void) const;
 		void setRomCrc32(uint32_t romCrc32);
 
 		// TODO: Use numeric region codes?
-		std::string region(void);
-		void setRegion(std::string region);
+		std::string region(void) const;
+		void setRegion(const std::string &region);
 
-		std::string description(void);
-		void setDescription(std::string description);
+		std::string description(void) const;
+		void setDescription(const std::string &description);
 
-		std::string extensions(void);
-		void setExtensions(std::string extensions);
+		std::string extensions(void) const;
+		void setExtensions(const std::string &extensions);
 };
 
 }
