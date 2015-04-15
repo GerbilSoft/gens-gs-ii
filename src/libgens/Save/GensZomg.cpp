@@ -56,6 +56,13 @@
 #include <cstring>
 #include <cstdio>
 
+// OS-specific includes.
+#ifdef _WIN32
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
+
 // C++ includes.
 #include <string>
 using std::string;

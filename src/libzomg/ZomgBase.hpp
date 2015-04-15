@@ -66,6 +66,13 @@ class ZomgBase
 		}
 		virtual ~ZomgBase() { }		// NOTE: Can't call close() here because close() is virtual.
 
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibZomg-specific version of Q_DISABLE_COPY().
+		ZomgBase(const ZomgBase &);
+		ZomgBase &operator=(const ZomgBase &);
+
+	public:
 		inline bool isOpen(void) const
 			{ return (m_mode != ZOMG_CLOSED); }
 		virtual void close(void) = 0;
@@ -216,6 +223,7 @@ class ZomgBase
 			{ (void)sram; (void)siz; return 0; }
 
 	protected:
+		// TODO: Move to a private class?
 		std::string m_filename;
 		ZomgFileMode m_mode;
 

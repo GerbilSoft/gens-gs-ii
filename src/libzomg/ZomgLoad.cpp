@@ -27,11 +27,15 @@
 #include "Zomg.hpp"
 #include "zomg_byteswap.h"
 
+// MiniZip
+#include "minizip/unzip.h"
+
 // C includes. (C++ namespace)
 #include <cstdint>
 #include <cstring>
 #include <cassert>
 
+#include "Zomg_p.hpp"
 namespace LibZomg {
 
 /**
@@ -41,13 +45,13 @@ namespace LibZomg {
  * @param len Length of the buffer.
  * @return Length of file loaded, or negative number on error.
  */
-int Zomg::loadFromZomg(const utf8_str *filename, void *buf, int len)
+int ZomgPrivate::loadFromZomg(const utf8_str *filename, void *buf, int len)
 {
-	if (m_mode != ZOMG_LOAD || !m_unz)
+	if (q->m_mode != ZomgBase::ZOMG_LOAD || !this->unz)
 		return -1;
 
 	// Locate the file in the ZOMG file.
-	int ret = unzLocateFile(m_unz, filename, 2);
+	int ret = unzLocateFile(this->unz, filename, 2);
 	if (ret != UNZ_OK) {
 		// File not found.
 		// TODO: Define return codes somewhere.
@@ -55,15 +59,15 @@ int Zomg::loadFromZomg(const utf8_str *filename, void *buf, int len)
 	}
 
 	// Open the current file.
-	ret = unzOpenCurrentFile(m_unz);
+	ret = unzOpenCurrentFile(this->unz);
 	if (ret != UNZ_OK) {
 		// Error opening the current file.
 		return -3;
 	}
 
 	// Read the file.
-	ret = unzReadCurrentFile(m_unz, buf, len);
-	unzCloseCurrentFile(m_unz);	// TODO: Check the return value!
+	ret = unzReadCurrentFile(this->unz, buf, len);
+	unzCloseCurrentFile(this->unz);	// TODO: Check the return value!
 
 	// Return the number of bytes read.
 	return ret;
@@ -94,7 +98,7 @@ int Zomg::loadPreview(void *img_buf, size_t siz)
 		return -4;
 
 	// Load the preview image.
-	int ret = loadFromZomg("preview.png", img_buf, siz);
+	int ret = d->loadFromZomg("preview.png", img_buf, siz);
 	if (ret < 0)
 		return ret;
 
@@ -167,7 +171,7 @@ static inline void LoadMemByteswap(void *mem, size_t siz, ZomgByteorder_t emu_or
  */
 int Zomg::loadVdpReg(uint8_t *reg, size_t siz)
 {
-	return loadFromZomg("common/vdp_reg.bin", reg, siz);
+	return d->loadFromZomg("common/vdp_reg.bin", reg, siz);
 }
 
 /**
@@ -178,7 +182,7 @@ int Zomg::loadVdpReg(uint8_t *reg, size_t siz)
  */
 int Zomg::loadVdpCtrl_8(Zomg_VdpCtrl_8_t *ctrl)
 {
-	int ret = loadFromZomg("common/vdp_ctrl.bin", ctrl, sizeof(*ctrl));
+	int ret = d->loadFromZomg("common/vdp_ctrl.bin", ctrl, sizeof(*ctrl));
 	
 	// Verify that the control registers are valid.
 	if (ret != (int)(sizeof(*ctrl)))
@@ -208,7 +212,7 @@ int Zomg::loadVdpCtrl_8(Zomg_VdpCtrl_8_t *ctrl)
  */
 int Zomg::loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl)
 {
-	int ret = loadFromZomg("common/vdp_ctrl.bin", ctrl, sizeof(*ctrl));
+	int ret = d->loadFromZomg("common/vdp_ctrl.bin", ctrl, sizeof(*ctrl));
 	
 	// Verify that the control registers are valid.
 	if (ret != (int)(sizeof(*ctrl)))
@@ -247,7 +251,7 @@ int Zomg::loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl)
  */
 int Zomg::loadVRam(void *vram, size_t siz, ZomgByteorder_t byteorder)
 {
-	int ret = loadFromZomg("common/VRam.bin", vram, siz);
+	int ret = d->loadFromZomg("common/VRam.bin", vram, siz);
 	// TODO: MD only; Sega 8-bit systems use ZOMG_BYTEORDER_8.
 	// TODO: Clear the rest of vram if ret < siz.
 	LoadMemByteswap<ZOMG_BYTEORDER_16BE>(vram, siz, byteorder);
@@ -264,7 +268,7 @@ int Zomg::loadVRam(void *vram, size_t siz, ZomgByteorder_t byteorder)
  */
 int Zomg::loadCRam(Zomg_CRam_t *cram, ZomgByteorder_t byteorder)
 {
-	int ret = loadFromZomg("common/CRam.bin", cram->md, sizeof(cram->md));
+	int ret = d->loadFromZomg("common/CRam.bin", cram->md, sizeof(cram->md));
 	// TODO: MD only; GG is 16LE; SMS is 8.
 	// TODO: Clear the rest of cram if ret < sizeof(cram->md).
 	LoadMemByteswap<ZOMG_BYTEORDER_16BE>(cram, sizeof(cram->md), byteorder);
@@ -282,7 +286,7 @@ int Zomg::loadCRam(Zomg_CRam_t *cram, ZomgByteorder_t byteorder)
  */
 int Zomg::loadMD_VSRam(uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder)
 {
-	int ret = loadFromZomg("MD/VSRam.bin", vsram, siz);
+	int ret = d->loadFromZomg("MD/VSRam.bin", vsram, siz);
 	// TODO: Clear the rest of vsram if ret < siz.
 	LoadMemByteswap<ZOMG_BYTEORDER_16BE>(vsram, siz, byteorder);
 	return ret;
@@ -299,7 +303,7 @@ int Zomg::loadMD_VSRam(uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder)
  */
 int Zomg::loadMD_VDP_SAT(uint16_t *vdp_sat, size_t siz, ZomgByteorder_t byteorder)
 {
-	int ret = loadFromZomg("MD/vdp_sat.bin", vdp_sat, siz);
+	int ret = d->loadFromZomg("MD/vdp_sat.bin", vdp_sat, siz);
 	// TODO: Clear the rest of the vdp_sat if ret < siz.
 	LoadMemByteswap<ZOMG_BYTEORDER_16BE>(vdp_sat, siz, byteorder);
 	return ret;
@@ -316,7 +320,7 @@ int Zomg::loadMD_VDP_SAT(uint16_t *vdp_sat, size_t siz, ZomgByteorder_t byteorde
  */
 int Zomg::loadPsgReg(Zomg_PsgSave_t *state)
 {
-	int ret = loadFromZomg("common/psg.bin", state, sizeof(*state));
+	int ret = d->loadFromZomg("common/psg.bin", state, sizeof(*state));
 
 	// Byteswap the 16-bit fields.
 	for (int i = 0; i < 4; i++) {
@@ -337,7 +341,7 @@ int Zomg::loadPsgReg(Zomg_PsgSave_t *state)
  */
 int Zomg::loadMD_YM2612_reg(Zomg_Ym2612Save_t *state)
 {
-	return loadFromZomg("MD/YM2612_reg.bin", state, sizeof(*state));
+	return d->loadFromZomg("MD/YM2612_reg.bin", state, sizeof(*state));
 }
 
 /** Z80 **/
@@ -351,7 +355,7 @@ int Zomg::loadMD_YM2612_reg(Zomg_Ym2612Save_t *state)
  */
 int Zomg::loadZ80Mem(uint8_t *mem, size_t siz)
 {
-	return loadFromZomg("common/Z80_mem.bin", mem, siz);
+	return d->loadFromZomg("common/Z80_mem.bin", mem, siz);
 }
 
 /**
@@ -363,7 +367,7 @@ int Zomg::loadZ80Mem(uint8_t *mem, size_t siz)
  */
 int Zomg::loadZ80Reg(Zomg_Z80RegSave_t *state)
 {
-	int ret = loadFromZomg("common/Z80_reg.bin", state, sizeof(*state));
+	int ret = d->loadFromZomg("common/Z80_reg.bin", state, sizeof(*state));
 
 	// Byteswap the 16-bit fields.
 
@@ -399,7 +403,7 @@ int Zomg::loadZ80Reg(Zomg_Z80RegSave_t *state)
  */
 int Zomg::loadM68KMem(uint16_t *mem, size_t siz, ZomgByteorder_t byteorder)
 {
-	int ret = loadFromZomg("MD/M68K_mem.bin", mem, siz);
+	int ret = d->loadFromZomg("MD/M68K_mem.bin", mem, siz);
 	// TODO: Clear the rest of mem if ret < siz.
 	LoadMemByteswap<ZOMG_BYTEORDER_16BE>(mem, siz, byteorder);
 	return ret;
@@ -416,7 +420,7 @@ int Zomg::loadM68KMem(uint16_t *mem, size_t siz, ZomgByteorder_t byteorder)
 int Zomg::loadM68KReg(Zomg_M68KRegSave_t *state)
 {
 	uint8_t data[sizeof(Zomg_M68KRegSave_t)];
-	int ret = loadFromZomg("MD/M68K_reg.bin", &data, sizeof(data));
+	int ret = d->loadFromZomg("MD/M68K_reg.bin", &data, sizeof(data));
 
 	if (ret == (int)sizeof(Zomg_M68KRegSave_Old_t)) {
 		// OLD VERSION. (pre-c43510fe)
@@ -495,7 +499,7 @@ int Zomg::loadM68KReg(Zomg_M68KRegSave_t *state)
  */
 int Zomg::loadMD_IO(Zomg_MD_IoSave_t *state)
 {
-	return loadFromZomg("MD/IO.bin", state, sizeof(*state));
+	return d->loadFromZomg("MD/IO.bin", state, sizeof(*state));
 }
 
 /**
@@ -507,7 +511,7 @@ int Zomg::loadMD_IO(Zomg_MD_IoSave_t *state)
  */
 int Zomg::loadMD_Z80Ctrl(Zomg_MD_Z80CtrlSave_t *state)
 {
-	int ret = loadFromZomg("MD/Z80_ctrl.bin", state, sizeof(*state));
+	int ret = d->loadFromZomg("MD/Z80_ctrl.bin", state, sizeof(*state));
 
 	// Byteswap the 16-bit fields.
 	state->m68k_bank = be16_to_cpu(state->m68k_bank);
@@ -524,7 +528,7 @@ int Zomg::loadMD_Z80Ctrl(Zomg_MD_Z80CtrlSave_t *state)
 int Zomg::loadMD_TimeReg(Zomg_MD_TimeReg_t *state)
 {
 	memset(state, 0xFF, sizeof(*state));
-	int ret = loadFromZomg("MD/TIME_reg.bin", state, sizeof(*state));
+	int ret = d->loadFromZomg("MD/TIME_reg.bin", state, sizeof(*state));
 
 	if (ret <= 0xF1) {
 		// SRAM control register wasn't loaded.
@@ -545,7 +549,7 @@ int Zomg::loadMD_TimeReg(Zomg_MD_TimeReg_t *state)
  */
 int Zomg::loadMD_TMSS_reg(Zomg_MD_TMSS_reg_t *tmss)
 {
-	int ret = loadFromZomg("MD/TMSS_reg.bin", tmss, sizeof(*tmss));
+	int ret = d->loadFromZomg("MD/TMSS_reg.bin", tmss, sizeof(*tmss));
 
 	// Byteswap the 32-bit fields.
 	// TODO: Verify tmss->header?
@@ -567,7 +571,7 @@ int Zomg::loadMD_TMSS_reg(Zomg_MD_TMSS_reg_t *tmss)
  */
 int Zomg::loadSRam(uint8_t *sram, size_t siz)
 {
-	int ret = loadFromZomg("common/SRam.bin", sram, siz);
+	int ret = d->loadFromZomg("common/SRam.bin", sram, siz);
 	if (ret > 0) {
 		// Data was loaded.
 		// If the data is less than the size of the SRAM buffer,

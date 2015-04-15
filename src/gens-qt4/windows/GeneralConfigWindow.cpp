@@ -34,9 +34,6 @@
 #include <cmath>
 #include <cstdlib>
 
-// zlib
-#include <zlib.h>
-
 // Qt4 includes.
 #include <QtGui/QFileDialog>
 #include <QtGui/QKeyEvent>

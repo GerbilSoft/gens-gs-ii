@@ -29,20 +29,26 @@
 
 #include "ZomgBase.hpp"
 
-// MiniZip
-#include "minizip/zip.h"
-#include "minizip/unzip.h"
-
 namespace LibZomg {
 
 class ZomgIni;
-
+class ZomgPrivate;
 class Zomg : public ZomgBase
 {
 	public:
 		Zomg(const utf8_str *filename, ZomgFileMode mode);
 		virtual ~Zomg(void);
 
+	protected:
+		friend class ZomgPrivate;
+		ZomgPrivate *const d;
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibZomg-specific version of Q_DISABLE_COPY().
+		Zomg(const Zomg &);
+		Zomg &operator=(const Zomg &);
+
+	public:
 		virtual void close(void) override;
 
 		/**
@@ -159,20 +165,6 @@ class Zomg : public ZomgBase
 
 		// Miscellaneous
 		virtual int saveSRam(const uint8_t *sram, size_t siz) override;
-
-	protected:
-		unzFile m_unz;
-		zipFile m_zip;
-
-		// Current time in Zip format.
-		// NOTE: Only used when saving ZOMG files.
-		zip_fileinfo m_zipfi;
-
-		int initZomgLoad(const utf8_str *filename);
-		int initZomgSave(const utf8_str *filename);
-
-		int loadFromZomg(const utf8_str *filename, void *buf, int len);
-		int saveToZomg(const utf8_str *filename, const void *buf, int len);
 };
 
 }

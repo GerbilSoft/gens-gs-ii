@@ -2,7 +2,7 @@
  * libzomg: Zipped Original Memory from Genesis.                           *
  * ZomgSave.cpp: Savestate handler. (Saving functions)                     *
  *                                                                         *
- * Copyright (c) 2008-2013 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -28,6 +28,9 @@
 #include "zomg_byteswap.h"
 #include "ZomgIni.hpp"
 
+// MiniZip
+#include "minizip/zip.h"
+
 // C includes. (C++ namespace)
 #include <cstdint>
 #include <cstring>
@@ -38,6 +41,7 @@
 #include <string>
 using std::string;
 
+#include "Zomg_p.hpp"
 namespace LibZomg {
 
 /**
@@ -47,20 +51,20 @@ namespace LibZomg {
  * @param len Length of the buffer.
  * @return 0 on success; non-zero on error.
  */
-int Zomg::saveToZomg(const utf8_str *filename, const void *buf, int len)
+int ZomgPrivate::saveToZomg(const utf8_str *filename, const void *buf, int len)
 {
-	if (m_mode != ZOMG_SAVE || !m_zip)
+	if (q->m_mode != ZomgBase::ZOMG_SAVE || !this->zip)
 		return -1;
 
 	// Open the new file in the ZOMG file.
 	zip_fileinfo zipfi;
-	memcpy(&zipfi.tmz_date, &m_zipfi.tmz_date, sizeof(zipfi.tmz_date));
+	memcpy(&zipfi.tmz_date, &this->zipfi.tmz_date, sizeof(zipfi.tmz_date));
 	zipfi.dosDate = 0;
 	zipfi.internal_fa = 0x0000; // TODO: Set to 0x0001 for text files.
 	zipfi.external_fa = 0x0000; // MS-DOS directory attribute byte.
 
 	int ret = zipOpenNewFileInZip(
-		m_zip,			// zipFile
+		this->zip,		// zipFile
 		filename,		// Filename in the Zip archive
 		&zipfi,			// File information (timestamp, attributes)
 		nullptr,		// extrafield_local
@@ -79,8 +83,8 @@ int Zomg::saveToZomg(const utf8_str *filename, const void *buf, int len)
 	}
 
 	// Write the file.
-	zipWriteInFileInZip(m_zip, buf, len);	// TODO: Check the return value!
-	zipCloseFileInZip(m_zip);		// TODO: Check the return value!
+	zipWriteInFileInZip(this->zip, buf, len);	// TODO: Check the return value!
+	zipCloseFileInZip(this->zip);			// TODO: Check the return value!
 
 	// TODO: What should we return?
 	return 0;
@@ -110,7 +114,7 @@ int Zomg::saveZomgIni(const ZomgIni *zomgIni)
 
 	// Write ZOMG.ini to the ZOMG file.
 	// TODO: Set a flag indicating ZOMG.ini has been saved.
-	return saveToZomg("ZOMG.ini", zomgIniStr.data(), zomgIniStr.size());
+	return d->saveToZomg("ZOMG.ini", zomgIniStr.data(), zomgIniStr.size());
 }
 
 /**
@@ -132,7 +136,7 @@ int Zomg::savePreview(const void *img_buf, size_t siz)
 	}
 	
 	// Write the image buffer to the ZOMG file.
-	return saveToZomg("preview.png", img_buf, siz);
+	return d->saveToZomg("preview.png", img_buf, siz);
 }
 
 namespace {
@@ -236,7 +240,7 @@ inline SaveMemByteswap<zomg_order>::~SaveMemByteswap()
  */
 int Zomg::saveVdpReg(const uint8_t *reg, size_t siz)
 {
-	return saveToZomg("common/vdp_reg.bin", reg, siz);
+	return d->saveToZomg("common/vdp_reg.bin", reg, siz);
 }
 
 /**
@@ -266,10 +270,10 @@ int Zomg::saveVdpCtrl_8(const Zomg_VdpCtrl_8_t *ctrl)
 	bswap_ctrl.reserved2 = 0;
 
 	// Save the file.
-	return saveToZomg("common/vdp_ctrl.bin", &bswap_ctrl, sizeof(bswap_ctrl));
+	return d->saveToZomg("common/vdp_ctrl.bin", &bswap_ctrl, sizeof(bswap_ctrl));
 #else
 	// Save the file as-is.
-	return saveToZomg("common/vdp_ctrl.bin", &ctrl, sizeof(*ctrl));
+	return d->saveToZomg("common/vdp_ctrl.bin", &ctrl, sizeof(*ctrl));
 #endif
 }
 
@@ -307,10 +311,10 @@ int Zomg::saveVdpCtrl_16(const Zomg_VdpCtrl_16_t *ctrl)
 	bswap_ctrl.reserved2 = 0;
 
 	// Save the file.
-	return saveToZomg("common/vdp_ctrl.bin", &bswap_ctrl, sizeof(bswap_ctrl));
+	return d->saveToZomg("common/vdp_ctrl.bin", &bswap_ctrl, sizeof(bswap_ctrl));
 #else
 	// Save the file as-is.
-	return saveToZomg("common/vdp_ctrl.bin", &ctrl, sizeof(*ctrl));
+	return d->saveToZomg("common/vdp_ctrl.bin", &ctrl, sizeof(*ctrl));
 #endif
 }
 
@@ -327,7 +331,7 @@ int Zomg::saveVRam(const void *vram, size_t siz, ZomgByteorder_t byteorder)
 {
 	// TODO: MD-only; update for other systems later.
 	SaveMemByteswap<ZOMG_BYTEORDER_16BE> saveMemByteswap(vram, siz, byteorder);
-	return saveToZomg("common/VRam.bin", saveMemByteswap.data(), saveMemByteswap.size());
+	return d->saveToZomg("common/VRam.bin", saveMemByteswap.data(), saveMemByteswap.size());
 }
 
 /**
@@ -342,7 +346,7 @@ int Zomg::saveCRam(const Zomg_CRam_t *cram, ZomgByteorder_t byteorder)
 {
 	// TODO: MD only; GG is 16LE; SMS is 8.
 	SaveMemByteswap<ZOMG_BYTEORDER_16BE> saveMemByteswap(cram, sizeof(cram->md), byteorder);
-	return saveToZomg("common/CRam.bin", saveMemByteswap.data(), saveMemByteswap.size());
+	return d->saveToZomg("common/CRam.bin", saveMemByteswap.data(), saveMemByteswap.size());
 }
 
 /**
@@ -357,7 +361,7 @@ int Zomg::saveCRam(const Zomg_CRam_t *cram, ZomgByteorder_t byteorder)
 int Zomg::saveMD_VSRam(const uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder)
 {
 	SaveMemByteswap<ZOMG_BYTEORDER_16BE> saveMemByteswap(vsram, siz, byteorder);
-	return saveToZomg("MD/VSRam.bin", saveMemByteswap.data(), saveMemByteswap.size());
+	return d->saveToZomg("MD/VSRam.bin", saveMemByteswap.data(), saveMemByteswap.size());
 }
 
 /**
@@ -373,7 +377,7 @@ int Zomg::saveMD_VDP_SAT(const void *vdp_sat, size_t siz, ZomgByteorder_t byteor
 {
 	// TODO: MD-only; update for other systems later.
 	SaveMemByteswap<ZOMG_BYTEORDER_16BE> saveMemByteswap(vdp_sat, siz, byteorder);
-	return saveToZomg("MD/vdp_sat.bin", saveMemByteswap.data(), saveMemByteswap.size());
+	return d->saveToZomg("MD/vdp_sat.bin", saveMemByteswap.data(), saveMemByteswap.size());
 }
 
 /** Audio **/
@@ -397,9 +401,9 @@ int Zomg::savePsgReg(const Zomg_PsgSave_t *state)
 		bswap_state.tone_ctr[i] = cpu_to_le16(bswap_state.tone_ctr[i]);
 	}
 	bswap_state.lfsr_state = cpu_to_le16(bswap_state.lfsr_state);
-	return saveToZomg("common/psg.bin", &bswap_state, sizeof(bswap_state));
+	return d->saveToZomg("common/psg.bin", &bswap_state, sizeof(bswap_state));
 #else
-	return saveToZomg("common/psg.bin", state, sizeof(*state));
+	return d->saveToZomg("common/psg.bin", state, sizeof(*state));
 #endif
 }
 
@@ -412,7 +416,7 @@ int Zomg::savePsgReg(const Zomg_PsgSave_t *state)
  */
 int Zomg::saveMD_YM2612_reg(const Zomg_Ym2612Save_t *state)
 {
-	return saveToZomg("MD/YM2612_reg.bin", state, sizeof(*state));
+	return d->saveToZomg("MD/YM2612_reg.bin", state, sizeof(*state));
 }
 
 /** Z80 **/
@@ -426,7 +430,7 @@ int Zomg::saveMD_YM2612_reg(const Zomg_Ym2612Save_t *state)
  */
 int Zomg::saveZ80Mem(const uint8_t *mem, size_t siz)
 {
-	return saveToZomg("common/Z80_mem.bin", mem, siz);
+	return d->saveToZomg("common/Z80_mem.bin", mem, siz);
 }
 
 /**
@@ -460,9 +464,9 @@ int Zomg::saveZ80Reg(const Zomg_Z80RegSave_t *state)
 	bswap_state.DE2 = cpu_to_le16(bswap_state.DE2);
 	bswap_state.HL2 = cpu_to_le16(bswap_state.HL2);
 
-	return saveToZomg("common/Z80_reg.bin", &bswap_state, sizeof(bswap_state));
+	return d->saveToZomg("common/Z80_reg.bin", &bswap_state, sizeof(bswap_state));
 #else
-	return saveToZomg("common/Z80_reg.bin", state, sizeof(*state));
+	return d->saveToZomg("common/Z80_reg.bin", state, sizeof(*state));
 #endif
 }
 
@@ -479,7 +483,7 @@ int Zomg::saveZ80Reg(const Zomg_Z80RegSave_t *state)
 int Zomg::saveM68KMem(const uint16_t *mem, size_t siz, ZomgByteorder_t byteorder)
 {
 	SaveMemByteswap<ZOMG_BYTEORDER_16BE> saveMemByteswap(mem, siz, byteorder);
-	return saveToZomg("MD/M68K_mem.bin", saveMemByteswap.data(), saveMemByteswap.size());
+	return d->saveToZomg("MD/M68K_mem.bin", saveMemByteswap.data(), saveMemByteswap.size());
 }
 
 /**
@@ -511,10 +515,10 @@ int Zomg::saveM68KReg(const Zomg_M68KRegSave_t *state)
 	bswap_state.reserved1 = 0;
 	bswap_state.reserved2 = 0;
 
-	return saveToZomg("MD/M68K_reg.bin", &bswap_state, sizeof(bswap_state));
+	return d->saveToZomg("MD/M68K_reg.bin", &bswap_state, sizeof(bswap_state));
 #else
 	// TODO: Make sure the reserved fields are cleared.
-	return saveToZomg("MD/M68K_reg.bin", state, sizeof(*state));
+	return d->saveToZomg("MD/M68K_reg.bin", state, sizeof(*state));
 #endif
 }
 
@@ -528,7 +532,7 @@ int Zomg::saveM68KReg(const Zomg_M68KRegSave_t *state)
  */
 int Zomg::saveMD_IO(const Zomg_MD_IoSave_t *state)
 {
-	return saveToZomg("MD/IO.bin", state, sizeof(*state));
+	return d->saveToZomg("MD/IO.bin", state, sizeof(*state));
 }
 
 /**
@@ -547,9 +551,9 @@ int Zomg::saveMD_Z80Ctrl(const Zomg_MD_Z80CtrlSave_t *state)
 	// Byteswap the 16-bit fields.
 	bswap_state.m68k_bank = be16_to_cpu(bswap_state.m68k_bank);
 
-	return saveToZomg("MD/Z80_ctrl.bin", &bswap_state, sizeof(bswap_state));
+	return d->saveToZomg("MD/Z80_ctrl.bin", &bswap_state, sizeof(bswap_state));
 #else
-	return saveToZomg("MD/Z80_ctrl.bin", state, sizeof(*state));
+	return d->saveToZomg("MD/Z80_ctrl.bin", state, sizeof(*state));
 #endif
 }
 
@@ -561,7 +565,7 @@ int Zomg::saveMD_Z80Ctrl(const Zomg_MD_Z80CtrlSave_t *state)
  */
 int Zomg::saveMD_TimeReg(const Zomg_MD_TimeReg_t *state)
 {
-	return saveToZomg("MD/TIME_reg.bin", state, sizeof(*state));
+	return d->saveToZomg("MD/TIME_reg.bin", state, sizeof(*state));
 }
 
 /**
@@ -577,9 +581,9 @@ int Zomg::saveMD_TMSS_reg(const Zomg_MD_TMSS_reg_t *tmss)
 	bswap_tmss.header = cpu_to_be32(tmss->header);
 	bswap_tmss.a14000 = cpu_to_be32(tmss->a14000);
 	bswap_tmss.n_cart_ce = tmss->n_cart_ce;
-	return saveToZomg("MD/TMSS_reg.bin", &bswap_tmss, sizeof(bswap_tmss));
+	return d->saveToZomg("MD/TMSS_reg.bin", &bswap_tmss, sizeof(bswap_tmss));
 #else
-	return saveToZomg("MD/TMSS_reg.bin", tmss, sizeof(*tmss));
+	return d->saveToZomg("MD/TMSS_reg.bin", tmss, sizeof(*tmss));
 #endif
 }
 
@@ -593,7 +597,7 @@ int Zomg::saveMD_TMSS_reg(const Zomg_MD_TMSS_reg_t *tmss)
  */
 int Zomg::saveSRam(const uint8_t *sram, size_t siz)
 {
-	return saveToZomg("common/SRam.bin", sram, siz);
+	return d->saveToZomg("common/SRam.bin", sram, siz);
 }
 
 }

@@ -25,6 +25,9 @@
 #include "GeneralConfigWindow.hpp"
 #include "gqt4_main.hpp"
 
+// zlib (CRC32)
+#include <zlib.h>
+
 // Qt includes.
 #include <QtGui/QColorDialog>
 #include <QtGui/QFileDialog>
