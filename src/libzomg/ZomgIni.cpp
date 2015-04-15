@@ -82,7 +82,7 @@ ZomgIniPrivate::ZomgIniPrivate()
  * @param key Key.
  * @param value Value.
  */
-inline void ZomgIniPrivate::WriteValue(ostringstream& oss, const string &key, const string &value)
+void ZomgIniPrivate::WriteValue(ostringstream& oss, const string &key, const string &value)
 {
 	oss << key << "=";
 	for (size_t i = 0; i < value.length(); i++) {
@@ -117,7 +117,7 @@ inline void ZomgIniPrivate::WriteValue(ostringstream& oss, const string &key, co
  * @param width Minimum width of the field.
  * @param hex If true, print in hex (with leading "0x").
  */
-inline void ZomgIniPrivate::WriteValue(ostringstream& oss, const string &key, uint32_t value, int width, bool hex)
+void ZomgIniPrivate::WriteValue(ostringstream& oss, const string &key, uint32_t value, int width, bool hex)
 {
 	std::ios_base::fmtflags old_flags = oss.flags();
 	std::streamsize old_width = oss.width();
