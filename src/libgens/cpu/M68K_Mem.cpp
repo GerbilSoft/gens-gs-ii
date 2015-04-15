@@ -355,6 +355,7 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 	// VDP data banks, we can just check if ((address & 0x700E0) == 0).
 	if ((address & 0x700E0) != 0) {
 		// Not a valid VDP address.
+		// TODO: M68K should lock up.
 		return 0x00;
 	}
 
@@ -365,7 +366,7 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 
 	// Check the VDP address.
 	Vdp *vdp = context->m_vdp;
-	uint8_t ret = 0; // TODO: Default to 0xFF?
+	uint8_t ret = 0; // TODO: Default to prefetched data?
 	switch (address & 0xFD) {
 		case 0x00:
 			// VDP data port. (high byte)
@@ -647,6 +648,7 @@ inline uint16_t M68K_Mem::M68K_Read_Word_VDP(uint32_t address)
 	// VDP data banks, we can just check if ((address & 0x700E0) == 0).
 	if ((address & 0x700E0) != 0) {
 		// Not a valid VDP address.
+		// TODO: M68K should lock up.
 		return 0x0000;
 	}
 
@@ -657,7 +659,7 @@ inline uint16_t M68K_Mem::M68K_Read_Word_VDP(uint32_t address)
 
 	// Check the VDP address.
 	Vdp *vdp = context->m_vdp;
-	uint16_t ret = 0; // TODO: Default to 0xFF?
+	uint16_t ret = 0; // TODO: Default to prefetched data?
 	switch (address & 0xFC) {
 		case 0x00:
 			// VDP data port.
@@ -930,6 +932,7 @@ inline void M68K_Mem::M68K_Write_Byte_VDP(uint32_t address, uint8_t data)
 	// VDP data banks, we can just check if ((address & 0x700E0) == 0).
 	if ((address & 0x700E0) != 0) {
 		// Not a valid VDP address.
+		// TODO: M68K should lock up.
 		return;
 	}
 
@@ -1199,6 +1202,7 @@ inline void M68K_Mem::M68K_Write_Word_VDP(uint32_t address, uint16_t data)
 	// VDP data banks, we can just check if ((address & 0x700E0) == 0).
 	if ((address & 0x700E0) != 0) {
 		// Not a valid VDP address.
+		// TODO: M68K should lock up.
 		return;
 	}
 

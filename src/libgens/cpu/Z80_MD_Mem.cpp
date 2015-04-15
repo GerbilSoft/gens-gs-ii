@@ -96,9 +96,9 @@ inline uint8_t Z80_MD_Mem::Z80_ReadB_YM2612(uint32_t address)
  */
 inline uint8_t Z80_MD_Mem::Z80_ReadB_VDP(uint32_t address)
 {
-	if (address < 0x7F00 || address > 0x7F1F) {
-		// Invalid address.
-		// TODO: Crash the system?
+	if (address < 0x7F00) {
+		// Not in VDP range.
+		// Ignore this read.
 		return 0;
 	}
 
@@ -187,12 +187,11 @@ inline uint8_t Z80_MD_Mem::Z80_ReadB_68K_Rom(uint32_t address)
  */
 inline void Z80_MD_Mem::Z80_WriteB_Bank(uint32_t address, uint8_t data)
 {
-	if (address > 0x60FF)
-	{
+	if (address > 0x60FF) {
 		// TODO: Invalid address. This should do something.
 		return;
 	}
-	
+
 	uint32_t bank_address = ((Bank_Z80 & 0xFF0000) >> 1);
 	bank_address |= ((data & 1) << 23);
 	Bank_Z80 = bank_address;
@@ -220,9 +219,9 @@ inline void Z80_MD_Mem::Z80_WriteB_YM2612(uint32_t address, uint8_t data)
  */
 inline void Z80_MD_Mem::Z80_WriteB_VDP(uint32_t address, uint8_t data)
 {
-	if (address < 0x7F00 || address > 0x7F1F) {
-		// Invalid address.
-		// TODO: Crash the system?
+	if (address < 0x7F00) {
+		// Not in VDP range.
+		// Ignore this read.
 		return;
 	}
 
