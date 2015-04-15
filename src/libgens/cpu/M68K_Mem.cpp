@@ -366,28 +366,28 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 	// Check the VDP address.
 	Vdp *vdp = context->m_vdp;
 	uint8_t ret = 0; // TODO: Default to 0xFF?
-	switch (address & 0x1F) {
-		case 0x00: case 0x02:
+	switch (address & 0xFD) {
+		case 0x00:
 			// VDP data port. (high byte)
 			// NOTE: Gens doesn't read the data port here,
 			// but it should still be readable...
 			ret = ((vdp->readDataMD() >> 8) & 0xFF);
 			break;
 
-		case 0x01: case 0x03:
+		case 0x01:
 			// VDP data port. (low byte)
 			// NOTE: Gens doesn't read the data port here,
 			// but it should still be readable...
 			ret = (vdp->readDataMD() & 0xFF);
 			break;
 
-		case 0x04: case 0x06:
+		case 0x04:
 			// VDP control port. (high byte)
 			// FIXME: Unused bits return prefetch data.
 			ret = ((vdp->readCtrlMD() >> 8) & 0xFF);
 			break;
 
-		case 0x05: case 0x07:
+		case 0x05:
 			// VDP control port. (low byte)
 			// FIXME: Unused bits return prefetch data.
 			ret = (vdp->readCtrlMD() & 0xFF);
@@ -403,8 +403,17 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_VDP(uint32_t address)
 			ret = vdp->readHCounter();
 			break;
 
+		case 0x18: case 0x19:
+		case 0x1C: case 0x1D:
+			// Unused read address.
+			// This address is valid, so a lockup
+			// should not occur.
+			break;
+
 		default:
-			// Invalid or unsupported VDP port.
+			// Invalid VDP port.
+			// (PSG is not readable.)
+			// TODO: M68K should lock up.
 			break;
 	}
 
@@ -649,25 +658,33 @@ inline uint16_t M68K_Mem::M68K_Read_Word_VDP(uint32_t address)
 	// Check the VDP address.
 	Vdp *vdp = context->m_vdp;
 	uint16_t ret = 0; // TODO: Default to 0xFF?
-	switch (address & 0x1E) {
-		case 0x00: case 0x02:
+	switch (address & 0xFC) {
+		case 0x00:
 			// VDP data port.
 			ret = vdp->readDataMD();
 			break;
 
-		case 0x04: case 0x06:
+		case 0x04:
 			// VDP control port.
 			// FIXME: Unused bits return prefetch data.
 			ret = vdp->readCtrlMD();
 			break;
 
-		case 0x08:
+		case 0x08: case 0x0C:
 			// HV counter.
 			ret = vdp->readHVCounterMD();
 			break;
 
+		case 0x18: case 0x1C:
+			// Unused read address.
+			// This address is valid, so a lockup
+			// should not occur.
+			break;
+
 		default:
-			// Invalid or unsupported VDP port.
+			// Invalid VDP port.
+			// (PSG is not readable.)
+			// TODO: M68K should lock up.
 			break;
 	}
 
@@ -923,25 +940,33 @@ inline void M68K_Mem::M68K_Write_Byte_VDP(uint32_t address, uint8_t data)
 
 	// Check the VDP address.
 	Vdp *vdp = context->m_vdp;
-	switch (address & 0x1F) {
-		case 0x00: case 0x01: case 0x02: case 0x03:
+	switch (address & 0xFC) {
+		case 0x00:
 			// VDP data port.
 			vdp->writeDataMD_8(data);
 			break;
-		case 0x04: case 0x05: case 0x06: case 0x07:
+		case 0x04:
 			// VDP control port.
 			vdp->writeCtrlMD_8(data);
 			break;
-		case 0x11:
-			// PSG control port.
-			SoundMgr::ms_Psg.write(data);
+		case 0x10: case 0x14:
+			// PSG control port. (Odd addresses only)
+			if (address & 1) {
+				SoundMgr::ms_Psg.write(data);
+			}
 			break;
-		case 0x1C: case 0x1D: case 0x1E: case 0x1F:
+		case 0x18:
+			// Unused write address.
+			// This address is valid, so a lockup
+			// should not occur.
+			break;
+		case 0x1C:
 			// VDP test register.
 			vdp->writeTestRegMD_8(data);
 			break;
 		default:
-			// Invalid or unsupported VDP port.
+			// Invalid VDP port.
+			// TODO: M68K should lock up.
 			break;
 	}
 }
@@ -1184,26 +1209,33 @@ inline void M68K_Mem::M68K_Write_Word_VDP(uint32_t address, uint16_t data)
 
 	// Check the VDP address.
 	Vdp *vdp = context->m_vdp;
-	switch (address & 0x1E) {
-		case 0x00: case 0x02:
+	switch (address & 0xFC) {
+		case 0x00:
 			// VDP data port.
 			vdp->writeDataMD(data);
 			break;
-		case 0x04: case 0x06:
+		case 0x04:
 			// VDP control port.
 			vdp->writeCtrlMD(data);
 			break;
-		case 0x10:
-			// PSG control port.
-			// TODO: mem_m68k.asm doesn't support this for word writes...
-			//SoundMgr::ms_Psg.write(data);
+		case 0x10: case 0x14:
+			// PSG control port. (Odd addresses only)
+			if (address & 1) {
+				SoundMgr::ms_Psg.write(data);
+			}
 			break;
-		case 0x1C: case 0x1E:
+		case 0x18:
+			// Unused write address.
+			// This address is valid, so a lockup
+			// should not occur.
+			break;
+		case 0x1C:
 			// VDP test register.
 			vdp->writeTestRegMD(data);
 			break;
 		default:
-			// Invalid or unsupported VDP port.
+			// Invalid VDP port.
+			// TODO: M68K should lock up.
 			break;
 	}
 }

@@ -109,42 +109,51 @@ inline uint8_t Z80_MD_Mem::Z80_ReadB_VDP(uint32_t address)
 
 	Vdp *vdp = context->m_vdp;
 	uint8_t ret = 0; // TODO: Default to 0xFF?
-	switch (address & 0x1F) {
-		case 0x00: case 0x02:
+	switch (address & 0xFD) {
+		case 0x00:
 			// VDP data port. (high byte)
 			// NOTE: Gens doesn't read the data port here,
 			// but it should still be readable...
 			ret = ((vdp->readDataMD() >> 8) & 0xFF);
 			break;
 
-		case 0x01: case 0x03:
+		case 0x01:
 			// VDP data port. (low byte)
 			// NOTE: Gens doesn't read the data port here,
 			// but it should still be readable...
 			ret = (vdp->readDataMD() & 0xFF);
 			break;
 
-		case 0x04: case 0x06:
+		case 0x04:
 			// VDP control port. (high byte)
 			ret = ((vdp->readCtrlMD() >> 8) & 0xFF);
 			break;
 
-		case 0x05: case 0x07:
+		case 0x05:
 			// VDP control port. (low byte)
 			// FIXME: Unused bits return prefetch data.
 			ret = (vdp->readCtrlMD() & 0xFF);
 			break;
 
-		case 0x08:
+		case 0x08: case 0x0C:
 			// V counter.
 			return vdp->readVCounter();
 
-		case 0x09:
+		case 0x09: case 0x0D:
 			// H counter.
 			return vdp->readHCounter();
 
+		case 0x18: case 0x19:
+		case 0x1C: case 0x1D:
+			// Unused read address.
+			// This address is valid, so a lockup
+			// should not occur.
+			break;
+
 		default:
-			// Invalid or unsupported VDP port.
+			// Invalid VDP port.
+			// (PSG is not readable.)
+			// TODO: Z80 should lock up.
 			break;
 	}
 
@@ -223,25 +232,33 @@ inline void Z80_MD_Mem::Z80_WriteB_VDP(uint32_t address, uint8_t data)
 		return;
 
 	Vdp *vdp = context->m_vdp;
-	switch (address & 0x1F) {
-		case 0x00: case 0x01: case 0x02: case 0x03:
+	switch (address & 0xFC) {
+		case 0x00:
 			// VDP data port.
 			vdp->writeDataMD_8(data);
 			break;
-		case 0x04: case 0x05: case 0x06: case 0x07:
+		case 0x04:
 			// VDP control port.
 			vdp->writeCtrlMD_8(data);
 			break;
-		case 0x11:
-			// PSG control port.
-			SoundMgr::ms_Psg.write(data);
+		case 0x10: case 0x14:
+			// PSG control port. (Odd addresses only)
+			if (address & 1) {
+				SoundMgr::ms_Psg.write(data);
+			}
 			break;
-		case 0x1C: case 0x1D: case 0x1E: case 0x1F:
+		case 0x18:
+			// Unused write address.
+			// This address is valid, so a lockup
+			// should not occur.
+			break;
+		case 0x1C:
 			// VDP test register.
 			vdp->writeTestRegMD_8(data);
 			break;
 		default:
-			// Invalid or unsupported VDP port.
+			// Invalid VDP port.
+			// TODO: Z80 should lock up.
 			break;
 	}
 }
