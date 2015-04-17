@@ -82,6 +82,7 @@ INCLUDE(cmake/platform.cmake)
 
 # Check for required libraries.
 INCLUDE(CheckZLIB)
+INCLUDE(CheckPNG)
 INCLUDE(CheckLZMA)
 INCLUDE(CheckOpenGL)
 

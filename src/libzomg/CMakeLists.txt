@@ -18,6 +18,10 @@ INCLUDE_DIRECTORIES(${MINIZIP_INCLUDE_DIR})
 INCLUDE(CheckLibraryExists)
 CHECK_LIBRARY_EXISTS(c localtime_r "" HAVE_LOCALTIME_R)	# libc: localtime_r()
 
+# libpng.
+# TODO: Add an internal copy of libpng.
+FIND_PACKAGE(PNG REQUIRED)
+
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libzomg.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libzomg.h")
 
@@ -49,4 +53,4 @@ SET(libzomg_SRCS
 ADD_LIBRARY(zomg STATIC ${libzomg_SRCS})
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(zomg)
-TARGET_LINK_LIBRARIES(zomg ${MINIZIP_LIBRARY})
+TARGET_LINK_LIBRARIES(zomg ${MINIZIP_LIBRARY} ${PNG_LIBRARY})
