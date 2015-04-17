@@ -431,9 +431,9 @@ int PngWriter::writeToFile(const _Zomg_Img_Data_t *img_data, const char *filenam
 	PngWriterPrivate::row_buffer_t row;
 	// TODO: Use png_malloc() and png_free()?
 	if (img_data->bpp == 32) {
-		row.row_pointers = (png_byte**)malloc(sizeof(png_byte*) * img_data->h);
+		row.row_pointers = (png_byte**)png_malloc(sizeof(png_byte*) * img_data->h);
 	} else {
-		row.row_buffer = (png_byte*)malloc(sizeof(png_byte*) * img_data->w * 3);
+		row.row_buffer = (png_byte*)png_malloc(sizeof(png_byte*) * img_data->w * 3);
 	}
 
 	png_structp png_ptr;
@@ -455,7 +455,7 @@ int PngWriter::writeToFile(const _Zomg_Img_Data_t *img_data, const char *filenam
 	if (setjmp(png_jmpbuf(png_ptr))) {
 		// PNG write failed.
 		png_destroy_write_struct(&png_ptr, &info_ptr);
-		free(row.p);
+		png_free(row.p);
 		fclose(f);
 		unlink(filename);	// TODO: Unicode version for Windows.
 		// TODO: Better error code?
@@ -470,7 +470,7 @@ int PngWriter::writeToFile(const _Zomg_Img_Data_t *img_data, const char *filenam
 	d->writeToPng(png_ptr, info_ptr, img_data, row);
 
 	// Free the resources, and we're done.
-	free(row.p);
+	png_free(row.p);
 	fclose(f);
 	return 0;
 }
@@ -509,11 +509,10 @@ int PngWriter::writeToZip(const _Zomg_Img_Data_t *img_data, zipFile zfile)
 	// These need to be allocated here so they can be freed
 	// in case an error occurs.
 	PngWriterPrivate::row_buffer_t row;
-	// TODO: Use png_malloc() and png_free()?
 	if (img_data->bpp == 32) {
-		row.row_pointers = (png_byte**)malloc(sizeof(png_byte*) * img_data->h);
+		row.row_pointers = (png_byte**)png_malloc(sizeof(png_byte*) * img_data->h);
 	} else {
-		row.row_buffer = (png_byte*)malloc(sizeof(png_byte*) * img_data->w * 3);
+		row.row_buffer = (png_byte*)png_malloc(sizeof(png_byte*) * img_data->w * 3);
 	}
 
 	png_structp png_ptr;
@@ -535,7 +534,7 @@ int PngWriter::writeToZip(const _Zomg_Img_Data_t *img_data, zipFile zfile)
 	if (setjmp(png_jmpbuf(png_ptr))) {
 		// PNG write failed.
 		png_destroy_write_struct(&png_ptr, &info_ptr);
-		free(row.p);
+		png_free(row.p);
 		// TODO: Better error code?
 		return -ENOMEM;
 	}
@@ -548,7 +547,7 @@ int PngWriter::writeToZip(const _Zomg_Img_Data_t *img_data, zipFile zfile)
 	d->writeToPng(png_ptr, info_ptr, img_data, row);
 
 	// Free the resources, and we're done.
-	free(row.p);
+	png_free(row.p);
 	return 0;
 }
 
