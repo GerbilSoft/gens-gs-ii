@@ -128,11 +128,10 @@ class Zomg : public ZomgBase
 
 		/**
 		 * Save the preview image.
-		 * @param img_buf Image buffer. (Must have a PNG image.)
-		 * @param siz Size of the image buffer.
+		 * @param img_data Image data.
 		 * @return 0 on success; non-zero on error.
 		 */
-		virtual int savePreview(const void *img_buf, size_t siz) override;
+		virtual int savePreview(const _Zomg_Img_Data_t *img_data) override;
 
 		// VDP
 		virtual int saveVdpReg(const uint8_t *reg, size_t siz) override;

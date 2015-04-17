@@ -123,7 +123,6 @@ SET(gens-qt4_COMMON_SRCS
 	VBackend/GLShaderFastBlur.cpp
 	Audio/ARingBuffer.cpp
 	EmuManager_qEmu.cpp
-	Screenshot.cpp
 	VBackend/GLTex2D.cpp
 	actions/GensKeyConfig.cpp
 	actions/GensMenuBar.cpp
@@ -191,7 +190,6 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	VBackend/GensQGLWidget.hpp
 	VBackend/GensQGLWidget_p.hpp
 	EmuManager.hpp
-	Screenshot.hpp
 	actions/GensKeyConfig.hpp
 	actions/GensMenuBar.hpp
 	actions/GensActions.hpp

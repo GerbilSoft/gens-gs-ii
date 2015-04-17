@@ -36,10 +36,14 @@
 #include <cstring>
 #include <cassert>
 #include <cstdlib>
+#include <cerrno>
 
 // C++ includes.
 #include <string>
 using std::string;
+
+// PngWriter.
+#include "PngWriter.hpp"
 
 #include "Zomg_p.hpp"
 namespace LibZomg {
@@ -54,7 +58,7 @@ namespace LibZomg {
 int ZomgPrivate::saveToZomg(const utf8_str *filename, const void *buf, int len)
 {
 	if (q->m_mode != ZomgBase::ZOMG_SAVE || !this->zip)
-		return -1;
+		return -EBADF;
 
 	// Open the new file in the ZOMG file.
 	zip_fileinfo zipfi;
@@ -78,8 +82,7 @@ int ZomgPrivate::saveToZomg(const utf8_str *filename, const void *buf, int len)
 
 	if (ret != UNZ_OK) {
 		// Error opening the new file in the Zip archive.
-		// TODO: Define return codes somewhere.
-		return -2;
+		return -EIO;
 	}
 
 	// Write the file.
@@ -119,24 +122,45 @@ int Zomg::saveZomgIni(const ZomgIni *zomgIni)
 
 /**
  * Save the preview image.
- * @param img_buf Image buffer. (Must have a PNG image.)
- * @param siz Size of the image buffer.
+ * @param img_data Image data.
  * @return 0 on success; non-zero on error.
  */
-int Zomg::savePreview(const void *img_buf, size_t siz)
+int Zomg::savePreview(const _Zomg_Img_Data_t *img_data)
 {
-	// Verify the PNG "magic number".
-	static const uint8_t png_magic[8] = {0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'};
-	
-	if (siz < sizeof(png_magic) ||
-	    memcmp(img_buf, png_magic, sizeof(png_magic)) != 0)
-	{
-		// Invalid "magic number".
-		return -2;
+	if (m_mode != ZomgBase::ZOMG_SAVE || !d->zip)
+		return -EBADF;
+
+	// Open the new file in the ZOMG file.
+	zip_fileinfo zipfi;
+	memcpy(&zipfi.tmz_date, &d->zipfi.tmz_date, sizeof(zipfi.tmz_date));
+	zipfi.dosDate = 0;
+	zipfi.internal_fa = 0x0000; // Binary file.
+	zipfi.external_fa = 0x0000; // MS-DOS directory attribute byte.
+
+	int ret = zipOpenNewFileInZip(
+		d->zip,			// zipFile
+		"preview.png",		// Filename in the Zip archive
+		&zipfi,			// File information (timestamp, attributes)
+		nullptr,		// extrafield_local
+		0,			// size_extrafield_local,
+		nullptr,		// extrafield_global,
+		0,			// size_extrafield_global,
+		nullptr,		// comment
+		Z_DEFLATED,		// method
+		Z_DEFAULT_COMPRESSION	// level
+		);
+
+	if (ret != UNZ_OK) {
+		// Error opening the new file in the Zip archive.
+		return -EIO;
 	}
-	
-	// Write the image buffer to the ZOMG file.
-	return d->saveToZomg("preview.png", img_buf, siz);
+
+	// Write the file.
+	PngWriter pngWriter;	// TODO: Make it static?
+	ret = pngWriter.writeToZip(img_data, d->zip);
+	zipCloseFileInZip(d->zip);	// TODO: Check the return value!
+
+	return ret;
 }
 
 namespace {

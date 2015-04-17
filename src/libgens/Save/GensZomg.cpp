@@ -49,12 +49,15 @@
 #include "libzomg/zomg_md_io.h"
 #include "libzomg/zomg_md_z80_ctrl.h"
 
+// ZOMG image data.
+#include "libzomg/img_data.h"
+
 // C includes.
 #include <stdint.h>
 
 // C includes. (C++ namespace)
-#include <cstring>
 #include <cstdio>
+#include <cstring>
 
 // OS-specific includes.
 #ifdef _WIN32
@@ -90,8 +93,7 @@ using std::string;
 #define U32DATA_U16_INVERT 0
 #endif
 
-namespace LibGens
-{
+namespace LibGens {
 
 /**
  * Load the current state from a ZOMG file.
@@ -214,16 +216,15 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 
 
 /**
- * ZomgSave(): Save the current state to a ZOMG file.
+ * Save the current state to a ZOMG file.
  * @param filename	[in] ZOMG file.
  * @param context	[in] Emulation context.
- * @param img_buf	[in, opt] Buffer containing PNG image for the ZOMG preview image.
- * @param img_siz	[in, opt] Size of img_buf.
+ * @param img_data	[in, opt] Preview image data.
  * @return 0 on success; non-zero on error.
  * TODO: Error code constants.
  */
 int ZomgSave(const utf8_str *filename, const EmuContext *context,
-	     const void *img_buf, size_t img_siz)
+	     const _Zomg_Img_Data_t *img_data)
 {
 	LibZomg::Zomg zomg(filename, LibZomg::Zomg::ZOMG_SAVE);
 	if (!zomg.isOpen())
@@ -291,8 +292,9 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 	}
 
 	// If a preview image was specified, save it.
-	if (img_buf && img_siz > 0)
-		zomg.savePreview(img_buf, img_siz);
+	if (img_data) {
+		zomg.savePreview(img_data);
+	}
 	
 	// TODO: This is MD only!
 	// TODO: Check error codes from the ZOMG functions.

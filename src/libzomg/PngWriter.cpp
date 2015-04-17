@@ -26,8 +26,12 @@
 // libpng
 #include <png.h>
 
+// MiniZip
+#include "minizip/zip.h"
+
 // C includes.
 #include <stdint.h>
+#include <stdlib.h>
 #ifdef _WIN32
 #include <io.h>
 #else
@@ -41,9 +45,13 @@
 
 // C++ includes.
 #include <string>
+#include <vector>
 using std::string;
+using std::vector;
 
 namespace LibZomg {
+
+// TODO: Convert to a static class?
 
 /** PngWriterPrivate **/
 
@@ -108,13 +116,22 @@ class PngWriterPrivate
 		void T_writePNG_rows_16(const Zomg_Img_Data_t *img_data, uint8_t *row_buffer,
 					png_structp png_ptr);
 
+	public:
 		/**
-		 * PNG write transform: Convert 16-bit (565) color to 24-bit color.
+		 * PNG MiniZip write function.
 		 * @param png_ptr PNG pointer.
-		 * @param row_info_ptr Row information pointer.
-		 * @param data Data.
+		 * @param buf Data to write.
+		 * @param len Size of buf.
 		 */
-		static void png_write_transform_fn_16to24(png_structp png_ptr, png_row_infop row_info_ptr, png_bytep data);
+		static void png_io_minizip_write(png_structp png_ptr, png_bytep buf, png_size_t len);
+
+		/**
+		 * PNG MiniZip flush function.
+		 * Required when writing PNG images.
+		 * This implementation is a no-op.
+		 * @param png_ptr PNG pointer.
+		 */
+		static void png_io_minizip_flush(png_structp png_ptr);
 };
 
 PngWriterPrivate::PngWriterPrivate(PngWriter *q)
@@ -162,6 +179,36 @@ void PngWriterPrivate::T_writePNG_rows_16(const Zomg_Img_Data_t *img_data, uint8
 		// Next row.
 		screen += row_adj;
 	}
+}
+
+/**
+ * PNG MiniZip memory write function.
+ * @param png_ptr PNG pointer.
+ * @param buf Data to write.
+ * @param len Size of buf.
+ */
+void PngWriterPrivate::png_io_minizip_write(png_structp png_ptr, png_bytep buf, png_size_t len)
+{
+	void *io_ptr = png_get_io_ptr(png_ptr);
+	if (!io_ptr)
+		return;
+
+	// Assuming io_ptr is a zipFile.
+	zipFile zf = reinterpret_cast<zipFile>(io_ptr);
+	// TODO: Check the return value!
+	zipWriteInFileInZip(zf, buf, len);
+}
+
+/**
+ * PNG MiniZip flush function.
+ * Required when writing PNG images.
+ * This implementation is a no-op.
+ * @param png_ptr PNG pointer.
+ */
+void PngWriterPrivate::png_io_minizip_flush(png_structp png_ptr)
+{
+        // Do nothing!
+        ((void)png_ptr);
 }
 
 /** PngWriter **/
@@ -397,6 +444,221 @@ int PngWriter::writeToFile(const _Zomg_Img_Data_t *img_data, const char *filenam
 	// Free the resources, and we're done.
 	free(row.p);
 	fclose(f);
+	return 0;
+}
+
+/**
+ * Write an image to a PNG file in a ZIP file.
+ * @param img_data Image data.
+ * @param zfile ZIP file. (Must have a file open for writing.)
+ * @return 0 on success; negative errno on error.
+ */
+int PngWriter::writeToZip(const _Zomg_Img_Data_t *img_data, zipFile zfile)
+{
+	// TODO: Convert filename to Unicode or ANSI on Windows.
+	if (!zfile || !img_data || !img_data->data ||
+	    img_data->w <= 0 || img_data->h <= 0 ||
+	    (img_data->bpp != 15 && img_data->bpp != 16 && img_data->bpp != 32)) {
+		// Invalid parameters.
+		return -EINVAL;
+	}
+
+	// Set some sane limits for image size.
+	if (img_data->w > 16384 || img_data->h > 16384) {
+		// Image is too big.
+		// TODO: -ENOSPC?
+		return -ENOMEM;
+	}
+
+	// Calculate the minimum pitch.
+	const unsigned int min_pitch = img_data->w * (img_data->bpp == 32 ? 4 : 2);
+	if (img_data->pitch < min_pitch) {
+		// Invalid parameters.
+		return -EINVAL;
+	}
+
+	// Row pointers and/or buffer.
+	// These need to be allocated here so they can be freed
+	// in case an error occurs.
+	union {
+		void *p;
+
+		// Row pointers. (32-bit color)
+		// Each entry points to the beginning of a row.
+		png_byte **row_pointers;
+
+		// Row buffer. (15-bit or 16-bit color)
+		// libpng doesn't support 15-bit or 16-bit color natively,
+		// so the rows have to be converted.
+		png_byte *row_buffer;
+	} row;
+
+	// TODO: Use png_malloc() and png_free()?
+	if (img_data->bpp == 32) {
+		row.row_pointers = (png_byte**)malloc(sizeof(png_byte*) * img_data->h);
+	} else {
+		row.row_buffer = (png_byte*)malloc(sizeof(png_byte*) * img_data->w * 3);
+	}
+
+	png_structp png_ptr;
+	png_infop info_ptr;
+
+	// Initialize libpng.
+	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+	if (!png_ptr) {
+		return -ENOMEM;
+	}
+	info_ptr = png_create_info_struct(png_ptr);
+	if (!info_ptr) {
+		png_destroy_write_struct(&png_ptr, nullptr);
+		return -ENOMEM;
+	}
+
+	// WARNING: Do NOT initialize any C++ objects past this point!
+#ifdef PNG_SETJMP_SUPPORTED
+	if (setjmp(png_jmpbuf(png_ptr))) {
+		// PNG write failed.
+		png_destroy_write_struct(&png_ptr, &info_ptr);
+		free(row.p);
+		// TODO: Better error code?
+		return -ENOMEM;
+	}
+#endif /* PNG_SETJMP_SUPPORTED */
+
+	// Initialize the custom I/O handler for MiniZip.
+        png_set_write_fn(png_ptr, zfile, d->png_io_minizip_write, d->png_io_minizip_flush);
+
+	// Disable PNG filters.
+	png_set_filter(png_ptr, 0, PNG_FILTER_NONE);
+
+	// Set the compression level to 5. (Levels range from 1 to 9.)
+	// TODO: Add a parameter for this?
+	png_set_compression_level(png_ptr, 5);
+
+	// Set up the PNG header.
+	png_set_IHDR(png_ptr, info_ptr, img_data->w, img_data->h,
+		     8,				// Color depth (per channel).
+		     PNG_COLOR_TYPE_RGB,	// RGB color.
+		     PNG_INTERLACE_NONE,	// No interlacing.
+		     PNG_COMPRESSION_TYPE_DEFAULT,
+		     PNG_FILTER_TYPE_DEFAULT
+		     );
+
+	// Write the sBIT chunk.
+	switch (img_data->bpp) {
+		case 15: {
+			static const png_color_8 sBIT_15 = {5, 5, 5, 0, 0};
+			png_set_sBIT(png_ptr, info_ptr, &sBIT_15);
+			break;
+		}
+		case 16: {
+			static const png_color_8 sBIT_16 = {5, 6, 5, 0, 0};
+			png_set_sBIT(png_ptr, info_ptr, &sBIT_16);
+			break;
+		}
+		case 32:
+		default: {
+			static const png_color_8 sBIT_32 = {8, 8, 8, 0, 0};
+			png_set_sBIT(png_ptr, info_ptr, &sBIT_32);
+			break;
+		}
+	}
+
+	// TODO: Separate function for time and text handling?
+	// TODO: Add emulator and ROM information.
+
+	// Write the current time.
+	// TODO: Use GetSystemTime() on Windows.
+	// TODO: Is there a way to get 64-bit time_t on 32-bit Linux?
+	time_t cur_time = time(nullptr);
+	png_time cur_png_time;
+	png_convert_from_time_t(&cur_png_time, cur_time);
+	png_set_tIME(png_ptr, info_ptr, &cur_png_time);
+
+	// Write the current time as a string.
+	// This is used by Windows for "Date taken:".
+	// NOTE: This must be in LOCAL time.
+	// TODO: Use localtime_r() if available.
+	// Format: "yyyy:MM:dd hh:mm:ss"
+	struct tm *cur_local_time = localtime(&cur_time);
+	char cur_time_str[24];
+	snprintf(cur_time_str, sizeof(cur_time_str), "%04d:%02d:%02d %02d:%02d:%02d",
+		 cur_local_time->tm_year+1900, cur_local_time->tm_mon+1, cur_local_time->tm_mday,
+		 cur_local_time->tm_hour, cur_local_time->tm_min, cur_local_time->tm_sec);
+
+	png_text txt_png_time;
+	txt_png_time.compression = PNG_TEXT_COMPRESSION_NONE;
+	// FIXME: Needs to be non-const...
+	txt_png_time.key = (png_charp)"Creation Time";
+	txt_png_time.text = cur_time_str;
+	txt_png_time.text_length = strlen(cur_time_str);
+	txt_png_time.itxt_length = 0;
+	txt_png_time.lang = nullptr;
+	txt_png_time.lang_key = nullptr;
+	png_set_text(png_ptr, info_ptr, &txt_png_time, 1);
+
+	// Write the PNG header to the file.
+	png_write_info(png_ptr, info_ptr);
+
+	// TODO: Other text fields.
+
+#if ZOMG_BYTEORDER == ZOMG_LIL_ENDIAN
+	// PNG stores data in big-endian.
+	// On little-endian systems, byteswapping needs to be enabled.
+	// TODO: Check if this really isn't needed on big-endian systems.
+	// NOTE: This apparently only affects 16-bit pixels, which we don't use...
+	//png_set_swap(png_ptr);
+#endif /* ZOMG_BYTEORDER == ZOMG_LIL_ENDIAN */
+
+	// Write the image.
+	switch (img_data->bpp) {
+		case 15: {
+			// 15-bit color. (555)
+			d->T_writePNG_rows_16<uint16_t,
+					   d->MASK_RED_15, d->MASK_GREEN_15, d->MASK_BLUE_15,
+					   d->SHIFT_RED_15, d->SHIFT_GREEN_15, d->SHIFT_BLUE_15>
+					  (img_data, row.row_buffer, png_ptr);
+			break;
+		}
+
+		case 16: {
+			// 16-bit color. (565)
+			d->T_writePNG_rows_16<uint16_t,
+					   d->MASK_RED_16, d->MASK_GREEN_16, d->MASK_BLUE_16,
+					   d->SHIFT_RED_16, d->SHIFT_GREEN_16, d->SHIFT_BLUE_16>
+					  (img_data, row.row_buffer, png_ptr);
+			// TODO
+			break;
+		}
+
+		case 32:
+		default:
+			// Initialize the row pointers array.
+			// TODO: const uint8_t*.
+			uint8_t *data = (uint8_t*)img_data->data + ((img_data->h - 1) * img_data->pitch);
+			for (int y = img_data->h - 1; y >= 0; y--, data -= img_data->pitch) {
+				row.row_pointers[y] = data;
+			}
+
+			// libpng expects RGB data with no alpha channel, i.e. 24-bit.
+			// However, there is an option to automatically convert 32-bit
+			// without alpha channel to 24-bit, so we'll use that.
+			png_set_filler(png_ptr, 0, PNG_FILLER_AFTER);
+
+			// We're using "BGR" color.
+			png_set_bgr(png_ptr);
+
+			// Write the rows.
+			png_write_rows(png_ptr, row.row_pointers, img_data->h);
+			break;
+	}
+
+	// Finished writing the PNG image.
+	png_write_end(png_ptr, info_ptr);
+	png_destroy_write_struct(&png_ptr, &info_ptr);
+
+	// Free the resources, and we're done.
+	free(row.p);
 	return 0;
 }
 

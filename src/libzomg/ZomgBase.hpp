@@ -46,6 +46,10 @@
 #include "zomg_md_time_reg.h"
 #include "zomg_md_tmss_reg.h"
 
+// Image data struct.
+// Used for preview images.
+extern "C" struct _Zomg_Img_Data_t;
+
 namespace LibZomg {
 
 class ZomgBase
@@ -165,12 +169,11 @@ class ZomgBase
 
 		/**
 		 * Save the preview image.
-		 * @param img_buf Image buffer. (Must have a PNG image.)
-		 * @param siz Size of the image buffer.
+		 * @param img_data Image data.
 		 * @return 0 on success; non-zero on error.
 		 */
-		virtual int savePreview(const void *img_buf, size_t siz)
-			{ (void)img_buf; (void)siz; return 0; }
+		virtual int savePreview(const _Zomg_Img_Data_t *img_data)
+			{ (void)img_data; return 0; }
 
 		// VDP
 		virtual int saveVdpReg(const uint8_t *reg, size_t siz)

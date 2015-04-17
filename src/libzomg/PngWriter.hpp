@@ -22,6 +22,8 @@
 #ifndef __LIBZOMG_PNGWRITER_HPP__
 #define __LIBZOMG_PNGWRITER_HPP__
 
+#include "minizip/zip.h"
+
 // Image data struct.
 extern "C" struct _Zomg_Img_Data_t;
 
@@ -51,6 +53,14 @@ class PngWriter
 		 * @return 0 on success; negative errno on error.
 		 */
 		int writeToFile(const _Zomg_Img_Data_t *img_data, const char *filename);
+
+		/**
+		 * Write an image to a PNG file in a ZIP file.
+		 * @param img_data Image data.
+		 * @param zfile ZIP file. (Must have a file open for writing.)
+		 * @return 0 on success; negative errno on error.
+		 */
+		int writeToZip(const _Zomg_Img_Data_t *img_data, zipFile zfile);
 };
 
 }
