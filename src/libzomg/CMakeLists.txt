@@ -18,6 +18,10 @@ INCLUDE_DIRECTORIES(${MINIZIP_INCLUDE_DIR})
 INCLUDE(CheckLibraryExists)
 CHECK_LIBRARY_EXISTS(c localtime_r "" HAVE_LOCALTIME_R)	# libc: localtime_r()
 
+# libpng
+INCLUDE(CheckPNG)
+INCLUDE_DIRECTORIES(${PNG_INCLUDE_DIR})
+
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libzomg.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libzomg.h")
 
@@ -40,6 +44,7 @@ SET(libzomg_SRCS
 	ZomgSave.cpp
 	zomg_byteswap.c
 	ZomgIni.cpp
+	PngWriter.cpp
 	)
 
 # Headers.

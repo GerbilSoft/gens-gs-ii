@@ -32,6 +32,9 @@
 
 // LibGens video includes.
 #include "libgens/Vdp/Vdp.hpp"
+#include "libgens/Util/MdFb.hpp"
+using LibGens::Vdp;
+using LibGens::MdFb;
 
 // LibGens CPU includes.
 #include "libgens/cpu/M68K.hpp"
@@ -53,8 +56,11 @@
 // Screenshot handler.
 #include "Screenshot.hpp"
 
-namespace GensQt4
-{
+// LibZomg's image writer class.
+#include "libzomg/PngWriter.hpp"
+#include "libzomg/img_data.h"
+
+namespace GensQt4 {
 
 /** Emulation Request Queue: Submission functions. **/
 
@@ -502,10 +508,35 @@ void EmuManager::doScreenShot(void)
 				scrFilenameSuffix;
 	} while (QFile::exists(scrFilename));
 
-	// Create the screenshot.
-	LibGens::MdFb *fb = gqt4_emuContext->m_vdp->MD_Screen;
-	Screenshot ss(m_rom, fb, this);
-	int ret = ss.save(scrFilename);
+	// Take the screenshot.
+	// NOTE: LibZomg doesn't depend on LibGens, so it can't use MdFb directly.
+	// TODO: Store VPix and HPixBegin in the MdFb.
+	Vdp *vdp = gqt4_emuContext->m_vdp;
+	MdFb *fb = vdp->MD_Screen->ref();
+	const int startY = ((240 - vdp->getVPix()) / 2);
+	const int startX = (vdp->getHPixBegin());
+
+	// TODO: Option to save the full framebuffer, not just active display?
+	Zomg_Img_Data_t img_data;
+	img_data.w = vdp->getHPix();
+	img_data.h = vdp->getVPix();
+
+	const MdFb::ColorDepth bpp = fb->bpp();
+	if (bpp == MdFb::BPP_32) {
+		img_data.data = (void*)(fb->lineBuf32(startY) + startX);
+		img_data.pitch = (fb->pxPitch() * sizeof(uint32_t));
+		img_data.bpp = 32;
+	} else {
+		img_data.data = (void*)(fb->lineBuf16(startY) + startX);
+		img_data.pitch = (fb->pxPitch() * sizeof(uint16_t));
+		img_data.bpp = (bpp == MdFb::BPP_16 ? 16 : 15);
+	}
+
+	LibZomg::PngWriter pngWriter;
+	int ret = pngWriter.writeToFile(&img_data, scrFilename.toUtf8().constData());
+
+	// Done using the framebuffer.
+	fb->unref();
 
 	QString osdMsg;
 	if (ret == 0) {
@@ -567,7 +598,7 @@ void EmuManager::doAudioStereo(bool newStereo)
 void EmuManager::doSaveState(QString filename, int saveSlot)
 {
 	// Create the preview image.
-	LibGens::MdFb *fb = gqt4_emuContext->m_vdp->MD_Screen;
+	MdFb *fb = gqt4_emuContext->m_vdp->MD_Screen;
 	Screenshot ss(m_rom, fb, this);
 	QBuffer imgBuf;
 	ss.save(&imgBuf);
