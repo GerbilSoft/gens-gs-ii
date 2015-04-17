@@ -97,19 +97,6 @@ class PngWriterPrivate
 		static const uint8_t SHIFT_GREEN_32     = 8;
 		static const uint8_t SHIFT_BLUE_32      = 0;
 
-		union row_buffer_t{
-			void *p;
-
-			// Row pointers. (32-bit color)
-			// Each entry points to the beginning of a row.
-			png_byte **row_pointers;
-
-			// Row buffer. (15-bit or 16-bit color)
-			// libpng doesn't support 15-bit or 16-bit color natively,
-			// so the rows have to be converted.
-			png_byte *row_buffer;
-		};
-
 		/**
 		 * Write 16-bit PNG rows.
 		 * @param pixel Typename.
@@ -151,11 +138,10 @@ class PngWriterPrivate
 		 * @param png_ptr PNG pointer.
 		 * @param info_ptr PNG info pointer.
 		 * @param img_data PNG image data.
-		 * @param row_buffer Row buffer and/or pointers, depending on color depth.
+		 * @return 0 on success; negative errno on error.
 		 */
-		static void writeToPng(png_structp png_ptr, png_infop info_ptr,
-				       const Zomg_Img_Data_t *img_data,
-				       row_buffer_t row);
+		static int writeToPng(png_structp png_ptr, png_infop info_ptr,
+				      const Zomg_Img_Data_t *img_data);
 };
 
 PngWriterPrivate::PngWriterPrivate(PngWriter *q)
@@ -240,12 +226,44 @@ void PngWriterPrivate::png_io_minizip_flush(png_structp png_ptr)
  * @param png_ptr PNG pointer.
  * @param info_ptr PNG info pointer.
  * @param img_data PNG image data.
- * @param row Row buffer and/or pointers, depending on color depth.
+ * @return 0 on success; negative errno on error.
  */
-void PngWriterPrivate::writeToPng(png_structp png_ptr, png_infop info_ptr,
-				  const Zomg_Img_Data_t *img_data,
-				  row_buffer_t row)
+int PngWriterPrivate::writeToPng(png_structp png_ptr, png_infop info_ptr,
+				 const Zomg_Img_Data_t *img_data)
 {
+	// Row pointers and/or buffer.
+	// These need to be allocated here so they can be freed
+	// in case an error occurs.
+	union {
+		void *p;
+
+		// Row pointers. (32-bit color)
+		// Each entry points to the beginning of a row.
+		png_byte **row_pointers;
+
+		// Row buffer. (15-bit or 16-bit color)
+		// libpng doesn't support 15-bit or 16-bit color natively,
+		// so the rows have to be converted.
+		png_byte *row_buffer;
+	} row;
+
+	if (img_data->bpp == 32) {
+		row.row_pointers = (png_byte**)png_malloc(png_ptr, sizeof(png_byte*) * img_data->h);
+	} else {
+		row.row_buffer = (png_byte*)png_malloc(png_ptr, sizeof(png_byte*) * img_data->w * 3);
+	}
+
+	// WARNING: Do NOT initialize any C++ objects past this point!
+#ifdef PNG_SETJMP_SUPPORTED
+	if (setjmp(png_jmpbuf(png_ptr))) {
+		// PNG write failed.
+		png_destroy_write_struct(&png_ptr, &info_ptr);
+		png_free(png_ptr, row.p);
+		// TODO: Better error code?
+		return -ENOMEM;
+	}
+#endif /* PNG_SETJMP_SUPPORTED */
+
 	// Disable PNG filters.
 	png_set_filter(png_ptr, 0, PNG_FILTER_NONE);
 
@@ -371,9 +389,12 @@ void PngWriterPrivate::writeToPng(png_structp png_ptr, png_infop info_ptr,
 			break;
 	}
 
+	// Free the row pointers.
+	png_free(png_ptr, row.p);
+
 	// Finished writing the PNG image.
 	png_write_end(png_ptr, info_ptr);
-	png_destroy_write_struct(&png_ptr, &info_ptr);
+	return 0;
 }
 
 /** PngWriter **/
@@ -425,17 +446,6 @@ int PngWriter::writeToFile(const _Zomg_Img_Data_t *img_data, const char *filenam
 		return -errno;
 	}
 
-	// Row pointers and/or buffer.
-	// These need to be allocated here so they can be freed
-	// in case an error occurs.
-	PngWriterPrivate::row_buffer_t row;
-	// TODO: Use png_malloc() and png_free()?
-	if (img_data->bpp == 32) {
-		row.row_pointers = (png_byte**)png_malloc(sizeof(png_byte*) * img_data->h);
-	} else {
-		row.row_buffer = (png_byte*)png_malloc(sizeof(png_byte*) * img_data->w * 3);
-	}
-
 	png_structp png_ptr;
 	png_infop info_ptr;
 
@@ -450,29 +460,20 @@ int PngWriter::writeToFile(const _Zomg_Img_Data_t *img_data, const char *filenam
 		return -ENOMEM;
 	}
 
-	// WARNING: Do NOT initialize any C++ objects past this point!
-#ifdef PNG_SETJMP_SUPPORTED
-	if (setjmp(png_jmpbuf(png_ptr))) {
-		// PNG write failed.
-		png_destroy_write_struct(&png_ptr, &info_ptr);
-		png_free(row.p);
-		fclose(f);
-		unlink(filename);	// TODO: Unicode version for Windows.
-		// TODO: Better error code?
-		return -ENOMEM;
-	}
-#endif /* PNG_SETJMP_SUPPORTED */
-
 	// Initialize standard file I/O.
 	png_init_io(png_ptr, f);
 
 	// Write to PNG.
-	d->writeToPng(png_ptr, info_ptr, img_data, row);
-
-	// Free the resources, and we're done.
-	png_free(row.p);
+	int ret = d->writeToPng(png_ptr, info_ptr, img_data);
 	fclose(f);
-	return 0;
+	if (ret != 0) {
+		// Failed to write the PNG file.
+		// Delete it so we don't end up with a half-written image.
+		unlink(filename);
+	}
+
+	png_destroy_write_struct(&png_ptr, &info_ptr);
+	return ret;
 }
 
 /**
@@ -505,16 +506,6 @@ int PngWriter::writeToZip(const _Zomg_Img_Data_t *img_data, zipFile zfile)
 		return -EINVAL;
 	}
 
-	// Row pointers and/or buffer.
-	// These need to be allocated here so they can be freed
-	// in case an error occurs.
-	PngWriterPrivate::row_buffer_t row;
-	if (img_data->bpp == 32) {
-		row.row_pointers = (png_byte**)png_malloc(sizeof(png_byte*) * img_data->h);
-	} else {
-		row.row_buffer = (png_byte*)png_malloc(sizeof(png_byte*) * img_data->w * 3);
-	}
-
 	png_structp png_ptr;
 	png_infop info_ptr;
 
@@ -529,26 +520,14 @@ int PngWriter::writeToZip(const _Zomg_Img_Data_t *img_data, zipFile zfile)
 		return -ENOMEM;
 	}
 
-	// WARNING: Do NOT initialize any C++ objects past this point!
-#ifdef PNG_SETJMP_SUPPORTED
-	if (setjmp(png_jmpbuf(png_ptr))) {
-		// PNG write failed.
-		png_destroy_write_struct(&png_ptr, &info_ptr);
-		png_free(row.p);
-		// TODO: Better error code?
-		return -ENOMEM;
-	}
-#endif /* PNG_SETJMP_SUPPORTED */
-
 	// Initialize the custom I/O handler for MiniZip.
         png_set_write_fn(png_ptr, zfile, d->png_io_minizip_write, d->png_io_minizip_flush);
 
 	// Write to PNG.
-	d->writeToPng(png_ptr, info_ptr, img_data, row);
-
-	// Free the resources, and we're done.
-	png_free(row.p);
-	return 0;
+	// TODO: If it fails, delete the file from the ZIP?
+	int ret = d->writeToPng(png_ptr, info_ptr, img_data);
+	png_destroy_write_struct(&png_ptr, &info_ptr);
+	return ret;
 }
 
 }
