@@ -77,7 +77,6 @@ SET(libgens_SRCS
 	Decompressor/DcGzip.cpp
 	Decompressor/DcZip.cpp
 	EmuContext.cpp
-	Data/mcd_rom_db.c
 	Data/32X/fw_32x.c
 	Util/MdFb.cpp
 	Cartridge/RomCartridgeMD.cpp

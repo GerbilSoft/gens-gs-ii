@@ -42,9 +42,11 @@
 #include <QtGui/QKeyEvent>
 
 // libgens
-#include "libgens/Data/mcd_rom_db.h"
 #include "libgens/Decompressor/DcRar.hpp"
 #include "libgens/macros/common.h"
+
+// ROM database.
+#include "../RomDB/mcd_rom_db.h"
 
 // EmuManager is needed for region code strings.
 #include "EmuManager.hpp"

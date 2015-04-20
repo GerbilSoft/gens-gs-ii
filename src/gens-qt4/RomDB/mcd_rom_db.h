@@ -1,8 +1,8 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
- * mcd_rom_db.c: Sega CD Boot ROM database.                                *
+ * gens-qt4: Gens Qt4 UI.                                                  *
+ * mcd_rom_db.h: Sega CD Boot ROM database.                                *
  *                                                                         *
- * Copyright (c) 2011 by David Korth                                       *
+ * Copyright (c) 2011-2015 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -19,14 +19,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_MCD_ROM_DB_H__
-#define __LIBGENS_MCD_ROM_DB_H__
+#ifndef __GENSQT4_MCD_ROM_DB_H__
+#define __GENSQT4_MCD_ROM_DB_H__
 
 // C includes.
 #include <stdint.h>
 
 // Common macros. (Used for utf8_str.)
-#include "../macros/common.h"
+#include "libgens/macros/common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,8 +40,8 @@ extern "C" {
  * lg_mcd_rom_InitSP: Initial SP. (0xFFFFFD00)
  * lg_mcd_rom_InitHINT: Initial HINT vector. (0xFFFFFD0C)
  */
-extern const uint8_t lg_mcd_rom_InitSP[4];
-extern const uint8_t lg_mcd_rom_InitHINT[4];
+extern const uint8_t mcd_rom_InitSP[4];
+extern const uint8_t mcd_rom_InitHINT[4];
 
 // Region codes.
 // Matches the country code found in later MD games.
@@ -69,56 +69,56 @@ typedef enum
 } MCD_RomStatus_t;
 
 /**
- * lg_mcd_rom_FindByCRC32(): Find a Sega CD Boot ROM by CRC32.
+ * Find a Sega CD Boot ROM by CRC32.
  * @param rom_crc32 Sega CD Boot ROM CRC32.
  * @return ROM ID, or -1 if not found.
  */
-int lg_mcd_rom_FindByCRC32(uint32_t rom_crc32);
+int mcd_rom_FindByCRC32(uint32_t rom_crc32);
 
 /**
- * lg_mcd_rom_GetDescription(): Get a Boot ROM's description.
+ * Get a Boot ROM's description.
  * @param rom_id Boot ROM ID.
  * @return Boot ROM description, or NULL if the ID is invalid.
  */
-const utf8_str *lg_mcd_rom_GetDescription(int rom_id);
+const utf8_str *mcd_rom_GetDescription(int rom_id);
 
 /**
- * lg_mcd_rom_GetDescription(): Get a Boot ROM's notes.
+ * Get a Boot ROM's notes.
  * @param rom_id Boot ROM ID.
  * @return Boot ROM notes, or NULL if the ID is invalid.
  */
-const utf8_str *lg_mcd_rom_GetNotes(int rom_id);
+const utf8_str *mcd_rom_GetNotes(int rom_id);
 
 /**
- * lg_mcd_rom_GetRegion(): Get a Boot ROM's region code.
+ * Get a Boot ROM's region code.
  * @param rom_id Boot ROM ID.
  * @return Boot ROM region code, or MCD_REGION_INVALID if the ID is invalid.
  */
-int lg_mcd_rom_GetRegion(int rom_id);
+int mcd_rom_GetRegion(int rom_id);
 
 /**
- * lg_mcd_rom_GetPrimaryRegion(): Get a Boot ROM's primary region code.
+ * Get a Boot ROM's primary region code.
  * @param rom_id Boot ROM ID.
  * @return Boot ROM primary region code, or MCD_REGION_INVALID if the ID is invalid.
  */
-int lg_mcd_rom_GetPrimaryRegion(int rom_id);
+int mcd_rom_GetPrimaryRegion(int rom_id);
 
 /**
- * lg_mcd_rom_GetSupportStatus(): Get a Boot ROM's support status.
+ * Get a Boot ROM's support status.
  * @param rom_id Boot ROM ID.
  * @return ROM support status, or RomStatus_MAX if the ID is invalid.
  */
-MCD_RomStatus_t lg_mcd_rom_GetSupportStatus(int rom_id);
+MCD_RomStatus_t mcd_rom_GetSupportStatus(int rom_id);
 
 /**
- * lg_mcd_rom_GetRegionCodeString(): Get a string describing a primary region code.
+ * Get a string describing a primary region code.
  * @param region_code Primary region code.
  * @return Region code string, or NULL if the region code is invalid.
  */
-const utf8_str *lg_mcd_rom_GetRegionCodeString(int region_code);
+const utf8_str *mcd_rom_GetRegionCodeString(int region_code);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __LIBGENS_MCD_ROM_DB_H__ */
+#endif /* __GENSQT4_MCD_ROM_DB_H__ */

@@ -1,8 +1,8 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
+ * gens-qt4: Gens Qt4 UI.                                                  *
  * mcd_rom_db.c: Sega CD Boot ROM database.                                *
  *                                                                         *
- * Copyright (c) 2011 by David Korth                                       *
+ * Copyright (c) 2011-2015 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -27,11 +27,11 @@
 
 /**
  * ROM fixup data.
- * lg_mcd_rom_InitSP: Initial SP. (0xFFFFFD00)
- * lg_mcd_rom_InitHINT: Initial HINT vector. (0xFFFFFD0C)
+ * mcd_rom_InitSP: Initial SP. (0xFFFFFD00)
+ * mcd_rom_InitHINT: Initial HINT vector. (0xFFFFFD0C)
  */
-const uint8_t lg_mcd_rom_InitSP[4] = {0xFF, 0xFF, 0xFD, 0x00};
-const uint8_t lg_mcd_rom_InitHINT[4] = {0xFF, 0xFF, 0xFD, 0x0C};
+const uint8_t mcd_rom_InitSP[4] = {0xFF, 0xFF, 0xFD, 0x00};
+const uint8_t mcd_rom_InitHINT[4] = {0xFF, 0xFF, 0xFD, 0x0C};
 
 /**
  * mcd_rom_db_t: Sega CD Boot ROM database entry.
@@ -513,7 +513,7 @@ static const mcd_rom_db_t McdRomDatabase[] = {
  * @param rom_crc32 Sega CD Boot ROM CRC32.
  * @return ROM ID, or -1 if not found.
  */
-int lg_mcd_rom_FindByCRC32(uint32_t rom_crc32)
+int mcd_rom_FindByCRC32(uint32_t rom_crc32)
 {
 	const mcd_rom_db_t *db_entry = &McdRomDatabase[0];
 
@@ -536,7 +536,7 @@ int lg_mcd_rom_FindByCRC32(uint32_t rom_crc32)
  * @param rom_id Boot ROM ID.
  * @return Boot ROM description, or NULL if the ID is invalid.
  */
-const utf8_str *lg_mcd_rom_GetDescription(int rom_id)
+const utf8_str *mcd_rom_GetDescription(int rom_id)
 {
 	if (rom_id < 0 || rom_id >= MCD_ROM_DATABASE_ENTRIES)
 		return NULL;
@@ -550,7 +550,7 @@ const utf8_str *lg_mcd_rom_GetDescription(int rom_id)
  * @param rom_id Boot ROM ID.
  * @return Boot ROM notes, or NULL if the ID is invalid.
  */
-const utf8_str *lg_mcd_rom_GetNotes(int rom_id)
+const utf8_str *mcd_rom_GetNotes(int rom_id)
 {
 	if (rom_id < 0 || rom_id >= MCD_ROM_DATABASE_ENTRIES)
 		return NULL;
@@ -563,7 +563,7 @@ const utf8_str *lg_mcd_rom_GetNotes(int rom_id)
  * @param rom_id Boot ROM ID.
  * @return Boot ROM region code, or MCD_REGION_INVALID if the ID is invalid.
  */
-int lg_mcd_rom_GetRegion(int rom_id)
+int mcd_rom_GetRegion(int rom_id)
 {
 	if (rom_id < 0 || rom_id >= MCD_ROM_DATABASE_ENTRIES)
 		return MCD_REGION_INVALID;
@@ -576,7 +576,7 @@ int lg_mcd_rom_GetRegion(int rom_id)
  * @param rom_id Boot ROM ID.
  * @return Boot ROM primary region code, or MCD_REGION_INVALID if the ID is invalid.
  */
-int lg_mcd_rom_GetPrimaryRegion(int rom_id)
+int mcd_rom_GetPrimaryRegion(int rom_id)
 {
 	if (rom_id < 0 || rom_id >= MCD_ROM_DATABASE_ENTRIES)
 		return MCD_REGION_INVALID;
@@ -589,7 +589,7 @@ int lg_mcd_rom_GetPrimaryRegion(int rom_id)
  * @param rom_id Boot ROM ID.
  * @return ROM support status, or RomStatus_MAX if the ID is invalid.
  */
-MCD_RomStatus_t lg_mcd_rom_GetSupportStatus(int rom_id)
+MCD_RomStatus_t mcd_rom_GetSupportStatus(int rom_id)
 {
 	if (rom_id < 0 || rom_id >= MCD_ROM_DATABASE_ENTRIES)
 		return RomStatus_MAX;
@@ -602,7 +602,7 @@ MCD_RomStatus_t lg_mcd_rom_GetSupportStatus(int rom_id)
  * @param region_code Primary region code.
  * @return Region code string, or NULL if the region code is invalid.
  */
-const utf8_str *lg_mcd_rom_GetRegionCodeString(int region_code)
+const utf8_str *mcd_rom_GetRegionCodeString(int region_code)
 {
 	switch (region_code) {
 		case MCD_REGION_JAPAN:		return "Japan";

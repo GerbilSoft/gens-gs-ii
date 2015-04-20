@@ -33,8 +33,8 @@
 // Gens widgets.
 #include "widgets/GensLineEdit.hpp"
 
-// libgens: Sega CD Boot ROM database.
-#include "libgens/Data/mcd_rom_db.h"
+// ROM database.
+#include "../RomDB/mcd_rom_db.h"
 
 // crc32()
 #include <zlib.h>
@@ -468,16 +468,16 @@ QString GeneralConfigWindowPrivate::mcdUpdateRomFileStatus(GensLineEdit *txtRomF
 		goto rom_identified;
 	}
 
-	// Fix up the ROM's Initial SP and Initial HINT vector.
-	memcpy(&rom_data[0x00], lg_mcd_rom_InitSP, sizeof(lg_mcd_rom_InitSP));
-	memcpy(&rom_data[0x70], lg_mcd_rom_InitHINT, sizeof(lg_mcd_rom_InitHINT));
+	// Fix up the ROM's Initial SP and Initial HINT vectors.
+	memcpy(&rom_data[0x00], mcd_rom_InitSP, sizeof(mcd_rom_InitSP));
+	memcpy(&rom_data[0x70], mcd_rom_InitHINT, sizeof(mcd_rom_InitHINT));
 
 	// Calculate the CRC32 using zlib.
-	// NOTE: rom->rom_crc32() will be incorrect if the ROM is too bi.
+	// NOTE: rom->rom_crc32() will be incorrect if the ROM is too big.
 	rom_crc32 = crc32(0, rom_data, MCD_ROM_FILESIZE);
 
 	// Look up the CRC32 in the Sega CD Boot ROM database.
-	boot_rom_id = lg_mcd_rom_FindByCRC32(rom_crc32);
+	boot_rom_id = mcd_rom_FindByCRC32(rom_crc32);
 	if (boot_rom_id < 0) {
 		// Boot ROM was not found in the database.
 		filename_icon = QStyle::SP_MessageBoxWarning;
@@ -485,15 +485,15 @@ QString GeneralConfigWindowPrivate::mcdUpdateRomFileStatus(GensLineEdit *txtRomF
 	}
 
 	// ROM found. Get the description and other information.
-	rom_id = QString::fromUtf8(lg_mcd_rom_GetDescription(boot_rom_id));
+	rom_id = QString::fromUtf8(mcd_rom_GetDescription(boot_rom_id));
 
 	// Check the region code.
-	boot_rom_region_code = lg_mcd_rom_GetRegion(boot_rom_id);
+	boot_rom_region_code = mcd_rom_GetRegion(boot_rom_id);
 	if ((boot_rom_region_code & region_code) == 0) {
 		// ROM doesn't support this region.
-		int boot_rom_region_primary = lg_mcd_rom_GetPrimaryRegion(boot_rom_id);
-		QString expected_region = QString::fromUtf8(lg_mcd_rom_GetRegionCodeString(region_code));
-		QString boot_rom_region = QString::fromUtf8(lg_mcd_rom_GetRegionCodeString(boot_rom_region_primary));
+		int boot_rom_region_primary = mcd_rom_GetPrimaryRegion(boot_rom_id);
+		QString expected_region = QString::fromUtf8(mcd_rom_GetRegionCodeString(region_code));
+		QString boot_rom_region = QString::fromUtf8(mcd_rom_GetRegionCodeString(boot_rom_region_primary));
 
 		rom_notes += sWarning +
 			     GeneralConfigWindow::tr("Region code is incorrect.") + sLineBreak +
@@ -505,7 +505,7 @@ QString GeneralConfigWindowPrivate::mcdUpdateRomFileStatus(GensLineEdit *txtRomF
 	}
 
 	// Check the ROM's support status.
-	boot_rom_status = lg_mcd_rom_GetSupportStatus(boot_rom_id);
+	boot_rom_status = mcd_rom_GetSupportStatus(boot_rom_id);
 	switch (boot_rom_status) {
 		case RomStatus_Recommended:
 		case RomStatus_Supported:
@@ -530,7 +530,7 @@ QString GeneralConfigWindowPrivate::mcdUpdateRomFileStatus(GensLineEdit *txtRomF
 	}
 
 	// Get the ROM's notes.
-	rom_notes += QString::fromUtf8(lg_mcd_rom_GetNotes(boot_rom_id)).replace(QChar(L'\n'), sLineBreak);
+	rom_notes += QString::fromUtf8(mcd_rom_GetNotes(boot_rom_id)).replace(QChar(L'\n'), sLineBreak);
 
 rom_identified:
 	// Free the ROM data buffer if it was allocated.

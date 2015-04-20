@@ -168,6 +168,10 @@ SET(gens-qt4_CONFIG_SRCS
 	ConfigHandler.cpp
 	)
 
+SET(gens-qt4_ROMDB_SRCS
+	RomDB/mcd_rom_db.c
+	)
+
 SET(gens-qt4_WIDGET_H
 	widgets/GensLineEdit.hpp
 	widgets/GensZipDirModel.hpp
@@ -368,6 +372,7 @@ ADD_EXECUTABLE(gens-qt4
 	${gens-qt4_WINDOW_SRCS}
 	${gens-qt4_WIDGET_SRCS} ${gens-qt4_WIDGET_H}
 	${gens-qt4_CONFIG_SRCS}
+	${gens-qt4_ROMDB_SRCS}
 	${gens-qt4_DBUS_SRCS}
 	${gens-qt4_PLATFORM_SRCS}
 	${gens-qt4_PLATFORM_UI_SRCS}
