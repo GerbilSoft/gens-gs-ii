@@ -57,12 +57,10 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context);
  * Save the current state to a ZOMG file.
  * @param filename	[in] ZOMG file.
  * @param context	[in] Emulation context.
- * @param img_data	[in, opt] Preview image data.
  * @return 0 on success; non-zero on error.
  * TODO: Error code constants.
  */
-int ZomgSave(const utf8_str *filename, const EmuContext *context,
-	     const _Zomg_Img_Data_t *img_data);
+int ZomgSave(const utf8_str *filename, const EmuContext *context);
 
 }
 

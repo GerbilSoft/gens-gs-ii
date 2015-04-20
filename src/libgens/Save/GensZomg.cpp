@@ -219,12 +219,10 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
  * Save the current state to a ZOMG file.
  * @param filename	[in] ZOMG file.
  * @param context	[in] Emulation context.
- * @param img_data	[in, opt] Preview image data.
  * @return 0 on success; non-zero on error.
  * TODO: Error code constants.
  */
-int ZomgSave(const utf8_str *filename, const EmuContext *context,
-	     const _Zomg_Img_Data_t *img_data)
+int ZomgSave(const utf8_str *filename, const EmuContext *context)
 {
 	LibZomg::Zomg zomg(filename, LibZomg::Zomg::ZOMG_SAVE);
 	if (!zomg.isOpen())
@@ -291,11 +289,34 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 		return ret;
 	}
 
-	// If a preview image was specified, save it.
-	if (img_data) {
-		zomg.savePreview(img_data);
+	// Create the preview image.
+	// TODO: Separate function to create an img_data from an MdFb.
+	// NOTE: LibZomg doesn't depend on LibGens, so it can't use MdFb directly.
+	// TODO: Store VPix and HPixBegin in the MdFb.
+	Vdp *vdp = context->m_vdp;
+	MdFb *fb = vdp->MD_Screen->ref();
+	const int startY = ((240 - vdp->getVPix()) / 2);
+	const int startX = (vdp->getHPixBegin());
+
+	// TODO: Option to save the full framebuffer, not just active display?
+	Zomg_Img_Data_t img_data;
+	img_data.w = vdp->getHPix();
+	img_data.h = vdp->getVPix();
+
+	const MdFb::ColorDepth bpp = fb->bpp();
+	if (bpp == MdFb::BPP_32) {
+		img_data.data = (void*)(fb->lineBuf32(startY) + startX);
+		img_data.pitch = (fb->pxPitch() * sizeof(uint32_t));
+		img_data.bpp = 32;
+	} else {
+		img_data.data = (void*)(fb->lineBuf16(startY) + startX);
+		img_data.pitch = (fb->pxPitch() * sizeof(uint16_t));
+		img_data.bpp = (bpp == MdFb::BPP_16 ? 16 : 15);
 	}
-	
+
+	zomg.savePreview(&img_data);
+	fb->unref();
+
 	// TODO: This is MD only!
 	// TODO: Check error codes from the ZOMG functions.
 	// TODO: Load everything first, *then* copy it to LibGens.
