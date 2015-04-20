@@ -70,11 +70,10 @@ class Zomg : public ZomgBase
 
 		/**
 		 * Load the preview image.
-		 * @param img_buf Image buffer.
-		 * @param siz Size of the image buffer.
-		 * @return Bytes read on success; negative on error.
+		 * @param img_data Image data. (Caller must free img_data->data.)
+		 * @return 0 on success; non-zero on error.
 		 */
-		virtual int loadPreview(void *img_buf, size_t siz) override;
+		virtual int loadPreview(_Zomg_Img_Data_t *img_data) override;
 
 		// VDP
 		virtual int loadVdpReg(uint8_t *reg, size_t siz) override;

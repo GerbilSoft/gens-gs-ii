@@ -44,6 +44,7 @@ using std::string;
 
 // PngWriter.
 #include "PngWriter.hpp"
+#include "img_data.h"
 
 #include "Zomg_p.hpp"
 namespace LibZomg {
@@ -125,7 +126,7 @@ int Zomg::saveZomgIni(const ZomgIni *zomgIni)
  * @param img_data Image data.
  * @return 0 on success; non-zero on error.
  */
-int Zomg::savePreview(const _Zomg_Img_Data_t *img_data)
+int Zomg::savePreview(const Zomg_Img_Data_t *img_data)
 {
 	if (m_mode != ZomgBase::ZOMG_SAVE || !d->zip)
 		return -EBADF;

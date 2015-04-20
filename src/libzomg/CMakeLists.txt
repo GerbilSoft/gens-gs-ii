@@ -45,6 +45,7 @@ SET(libzomg_SRCS
 	zomg_byteswap.c
 	ZomgIni.cpp
 	PngWriter.cpp
+	PngReader.cpp
 	)
 
 # Headers.
@@ -53,6 +54,8 @@ SET(libzomg_H
 	Zomg.hpp
 	Zomg_p.hpp
 	ZomgIni.hpp
+	PngWriter.hpp
+	PngReader.hpp
 	)
 
 # ZOMG struct headers.

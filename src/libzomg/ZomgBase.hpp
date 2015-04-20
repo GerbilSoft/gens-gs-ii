@@ -64,9 +64,7 @@ class ZomgBase
 		ZomgBase(const utf8_str *filename, ZomgFileMode mode)
 		{
 			(void)filename; (void)mode;	// Unused parameters.
-			
 			m_mode = ZOMG_CLOSED;	// No file open initially.
-			m_preview_size = 0;	// Assume no preview image by default.
 		}
 		virtual ~ZomgBase() { }		// NOTE: Can't call close() here because close() is virtual.
 
@@ -93,20 +91,12 @@ class ZomgBase
 		// (once FORMAT.ini is implemented)
 
 		/**
-		 * Get the size of the preview image.
-		 * @return Size of the preview image, or 0 if none was found.
-		 */
-		inline size_t getPreviewSize(void) const
-			{ return m_preview_size; }
-
-		/**
 		 * Load the preview image.
-		 * @param img_buf Image buffer.
-		 * @param siz Size of the image buffer.
+		 * @param img_data Image data. (Caller must free img_data->data.)
 		 * @return Bytes read on success; negative on error.
 		 */
-		virtual int loadPreview(void *img_buf, size_t siz)
-			{ (void)img_buf; (void)siz; return 0; }
+		virtual int loadPreview(_Zomg_Img_Data_t *img_data)
+			{ (void)img_data; return 0; }
 
 		// VDP
 		virtual int loadVdpReg(uint8_t *reg, size_t siz)
@@ -229,9 +219,6 @@ class ZomgBase
 		// TODO: Move to a private class?
 		std::string m_filename;
 		ZomgFileMode m_mode;
-
-		// PNG preview image.
-		size_t m_preview_size;
 };
 
 }

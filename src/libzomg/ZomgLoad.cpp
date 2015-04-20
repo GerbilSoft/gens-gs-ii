@@ -35,6 +35,10 @@
 #include <cstring>
 #include <cassert>
 
+// PngReader.
+#include "PngReader.hpp"
+#include "img_data.h"
+
 #include "Zomg_p.hpp"
 namespace LibZomg {
 
@@ -48,21 +52,20 @@ namespace LibZomg {
 int ZomgPrivate::loadFromZomg(const utf8_str *filename, void *buf, int len)
 {
 	if (q->m_mode != ZomgBase::ZOMG_LOAD || !this->unz)
-		return -1;
+		return -EBADF;
 
 	// Locate the file in the ZOMG file.
 	int ret = unzLocateFile(this->unz, filename, 2);
 	if (ret != UNZ_OK) {
 		// File not found.
-		// TODO: Define return codes somewhere.
-		return -2;
+		return -ENOENT;
 	}
 
 	// Open the current file.
 	ret = unzOpenCurrentFile(this->unz);
 	if (ret != UNZ_OK) {
 		// Error opening the current file.
-		return -3;
+		return -EIO;
 	}
 
 	// Read the file.
@@ -85,29 +88,75 @@ int ZomgPrivate::loadFromZomg(const utf8_str *filename, void *buf, int len)
 
 /**
  * Load the preview image.
- * @param img_buf Image buffer.
- * @param siz Size of the image buffer.
+ * @param img_data Image data. (Caller must free img_data->data.)
  * @return 0 on success; non-zero on error.
  */
-int Zomg::loadPreview(void *img_buf, size_t siz)
+int Zomg::loadPreview(Zomg_Img_Data_t *img_data)
 {
-	static const uint8_t png_magic[8] = {0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'};
-	
-	// Make sure a preview image is available to load.
-	if (m_preview_size == 0 || siz < sizeof(png_magic) || siz < m_preview_size)
-		return -4;
-
 	// Load the preview image.
-	int ret = d->loadFromZomg("preview.png", img_buf, siz);
-	if (ret < 0)
-		return ret;
+	// TODO: Function to automatically allocate memory for this.
+	// TODO: Improve API.
+	// (Maybe use a C++ class for img_data that frees itself automatically?)
+	if (m_mode != ZomgBase::ZOMG_LOAD || !d->unz)
+		return -EBADF;
 
-	// Verify the PNG "magic number".
-	if (memcmp(img_buf, png_magic, sizeof(png_magic)) != 0) {
-		// Invalid "magic number".
-		// Clear the image buffer.
-		memset(img_buf, 0x00, siz);
-		return -5;
+	// Locate the file in the ZOMG file.
+	int ret = unzLocateFile(d->unz, "preview.png", 2);
+	if (ret != UNZ_OK) {
+		// File not found.
+		return -ENOENT;
+	}
+
+	// Check the size of the current file.
+	// We'll apply a hard limit of 4 MB.
+	// (Screenshots shouldn't be more than 600 KB,
+	// and that's assuming 320x480, 32-bit color,
+	// raw bitmap format.)
+	unz_file_info64 file_info;
+	ret = unzGetCurrentFileInfo64(d->unz, &file_info, nullptr, 0, nullptr, 0, nullptr, 0);
+	if (ret != UNZ_OK) {
+		// Error getting the file information.
+		return -EIO;
+	}
+
+	// Check the filesize.
+	if (file_info.uncompressed_size > 4*1024*1024) {
+		// File is too big.
+		return -ENOMEM;
+	}
+
+	// Open the current file.
+	ret = unzOpenCurrentFile(d->unz);
+	if (ret != UNZ_OK) {
+		// Error opening the current file.
+		return -EIO;
+	}
+
+	// Allocate a memory buffer.
+	int len = (int)file_info.uncompressed_size;
+	uint8_t *buf = (uint8_t*)malloc(len);
+	if (!buf) {
+		// Error allocating memory.
+		unzCloseCurrentFile(d->unz);    // TODO: Check the return value!
+		return -ENOMEM;
+	}
+
+	// Read the image data.
+	ret = unzReadCurrentFile(d->unz, buf, len);
+	unzCloseCurrentFile(d->unz);    // TODO: Check the return value!
+	if (ret != len) {
+		// Error reading the image data.
+		free(buf);
+		return -EIO;
+	}
+
+	// Convert from PNG format to 32-bit xBGR.
+	PngReader pngReader;    // TODO: Make it static?
+	ret = pngReader.readFromMem(img_data, buf, len);
+	free(buf);
+	if (ret < 0) {
+		// Error decoding the image.
+		return -EIO;    // TODO: Better error code?
 	}
 
 	// Preview image loaded.

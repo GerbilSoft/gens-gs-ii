@@ -50,8 +50,8 @@ namespace LibZomg {
 
 ZomgPrivate::ZomgPrivate(Zomg *q)
 	: q(q)
-	, unz(nullptr)
-	, zip(nullptr)
+	, unz(nullptr)	// TODO: Combine with zip into a union?
+	, zip(nullptr)	// Need to double-check all users.
 { }
 
 ZomgPrivate::~ZomgPrivate()
@@ -76,19 +76,6 @@ int ZomgPrivate::initZomgLoad(const utf8_str *filename)
 #endif
 	if (!this->unz)
 		return -1;
-
-	// Check for a PNG preview image.
-	// TODO: Add a mode flag to indicate if we want to load the preview image automatically?
-	int ret = unzLocateFile(this->unz, "preview.png", 2);
-	if (ret == UNZ_OK) {
-		// Preview image found.
-		// Get the filesize.
-		unz_file_info unzfi;
-		ret = unzGetCurrentFileInfo(this->unz, &unzfi, nullptr, 0, nullptr, 0, nullptr, 0);
-		if (ret == UNZ_OK) {
-			q->m_preview_size = unzfi.uncompressed_size;
-		}
-	}
 
 	return 0;
 }

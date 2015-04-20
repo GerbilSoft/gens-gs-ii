@@ -725,24 +725,22 @@ void EmuManager::doSaveSlot(int newSaveSlot)
 		//: OSD message indicating a savestate exists in the selected slot.
 		osdMsg = osdMsg.arg(tr("OCCUPIED", "osd"));
 
-		// Check if the savestate has a preview image.
+		// Attempt to load a preview image from the savestate.
 		QString nativeFilename = QDir::toNativeSeparators(filename);
 		LibZomg::Zomg zomg(nativeFilename.toUtf8().constData(), LibZomg::Zomg::ZOMG_LOAD);
-		if (zomg.getPreviewSize() > 0) {
-			// Preview image found.
-			QByteArray img_ByteArray;
-			img_ByteArray.resize(zomg.getPreviewSize());
-			int ret = zomg.loadPreview(img_ByteArray.data(), img_ByteArray.size());
 
-			if (ret == 0) {
-				// Preview image loaded from the ZOMG file.
-
-				// Convert the preview image to a QImage.
-				QBuffer imgBuf(&img_ByteArray);
-				imgBuf.open(QIODevice::ReadOnly);
-				QImageReader imgReader(&imgBuf, "png");
-				imgPreview = imgReader.read();
-			}
+		Zomg_Img_Data_t img_data;
+		int ret = zomg.loadPreview(&img_data);
+		if (ret == 0) {
+			// Preview image loaded from the ZOMG file.
+			// TODO: If we construct a QImage using the raw data directly,
+			// a copy won't be needed, but it won't be deleted.
+			// Figure out a more efficient way to handle this.
+			// (Store imgPreview locally?)
+			// TODO: Add LOAD parameters to img_data for e.g. not swapping BGR.
+			imgPreview = QImage(img_data.w, img_data.h, QImage::Format_RGB32);
+			memcpy(imgPreview.bits(), img_data.data, img_data.pitch * img_data.h);
+			free(img_data.data);
 		}
 
 		// Close the savestate.
