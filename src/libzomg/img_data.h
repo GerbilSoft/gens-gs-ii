@@ -34,9 +34,9 @@ extern "C" {
  */
 typedef struct _Zomg_Img_Data_t {
 	void *data;		// Image data.
-	int w;			// Width.
-	int h;			// Height.
-	unsigned int pitch;	// Pitch, in bytes.
+	uint32_t w;		// Width.
+	uint32_t h;		// Height.
+	uint32_t pitch;		// Pitch, in bytes.
 	uint8_t bpp;		// Color depth. (15, 16, 32) [TODO: Use an enum?]
 } Zomg_Img_Data_t;
 

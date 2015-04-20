@@ -192,19 +192,18 @@ void PngWriterPrivate::T_writePNG_rows_16(const Zomg_Img_Data_t *img_data, uint8
 }
 
 /**
- * PNG MiniZip memory write function.
+ * PNG MiniZip write function.
  * @param png_ptr PNG pointer.
  * @param buf Data to write.
  * @param len Size of buf.
  */
 void PngWriterPrivate::png_io_minizip_write(png_structp png_ptr, png_bytep buf, png_size_t len)
 {
-	void *io_ptr = png_get_io_ptr(png_ptr);
-	if (!io_ptr)
+	// Assuming io_ptr is a zipFile.
+	zipFile zf = reinterpret_cast<zipFile>(png_get_io_ptr(png_ptr));
+	if (!zf)
 		return;
 
-	// Assuming io_ptr is a zipFile.
-	zipFile zf = reinterpret_cast<zipFile>(io_ptr);
 	// TODO: Check the return value!
 	zipWriteInFileInZip(zf, buf, len);
 }
@@ -252,12 +251,15 @@ int PngWriterPrivate::writeToPng(png_structp png_ptr, png_infop info_ptr,
 	} else {
 		row.row_buffer = (png_byte*)png_malloc(png_ptr, sizeof(png_byte*) * img_data->w * 3);
 	}
+	if (!row.p) {
+		// Not enough memory is available.
+		return -ENOMEM;
+	}
 
 	// WARNING: Do NOT initialize any C++ objects past this point!
 #ifdef PNG_SETJMP_SUPPORTED
 	if (setjmp(png_jmpbuf(png_ptr))) {
 		// PNG write failed.
-		png_destroy_write_struct(&png_ptr, &info_ptr);
 		png_free(png_ptr, row.p);
 		// TODO: Better error code?
 		return -ENOMEM;
@@ -338,14 +340,6 @@ int PngWriterPrivate::writeToPng(png_structp png_ptr, png_infop info_ptr,
 
 	// TODO: Other text fields.
 
-#if ZOMG_BYTEORDER == ZOMG_LIL_ENDIAN
-	// PNG stores data in big-endian.
-	// On little-endian systems, byteswapping needs to be enabled.
-	// TODO: Check if this really isn't needed on big-endian systems.
-	// NOTE: This apparently only affects 16-bit pixels, which we don't use...
-	//png_set_swap(png_ptr);
-#endif /* ZOMG_BYTEORDER == ZOMG_LIL_ENDIAN */
-
 	// Write the image.
 	switch (img_data->bpp) {
 		case 15: {
@@ -384,8 +378,8 @@ int PngWriterPrivate::writeToPng(png_structp png_ptr, png_infop info_ptr,
 			// We're using "BGR" color.
 			png_set_bgr(png_ptr);
 
-			// Write the rows.
-			png_write_rows(png_ptr, row.row_pointers, img_data->h);
+			// Write the image.
+			png_write_image(png_ptr, row.row_pointers);
 			break;
 	}
 
