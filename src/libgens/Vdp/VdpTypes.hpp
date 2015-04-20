@@ -68,7 +68,7 @@ namespace VdpTypes {
 	 * Color RAM. (32X)
 	 */
 	union CRam_32X_t {
-		uint8_t  u8[256 << 1];
+		uint8_t  u8[256<<1];
 		uint16_t u16[256];
 	};
 
