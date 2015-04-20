@@ -397,7 +397,28 @@ const McdRomDBPrivate::mcd_rom_db_t McdRomDBPrivate::McdRomDatabase[] = {
 			"Gens/GS II does not support the hardware changes in the Mega CD model 2.")
 	},
 
-	/** Sega CD: Model 2 (ROM revision X) **/
+	/** Sega CD: Model 2 / Aiwa CSD G1M **/
+
+	// Aiwa CSD-G1M (J) Boot ROM v2.11c
+	// 1993/05/28 14:00
+	{
+		0x8052C7A0,		// CRC32 (with original HINT vector)
+
+		// md5sum
+		{0x7E, 0x85, 0xDD, 0x6A, 0xE3, 0xEC, 0xF5, 0x1E,
+		 0xAC, 0x71, 0xCD, 0x6C, 0xED, 0x8F, 0xDC, 0x6D},
+
+		// Region code and ROM support status.
+		McdRomDB::MCD_REGION_JAPAN,
+		McdRomDB::MCD_REGION_JAPAN,
+		McdRomDB::RomStatus_Unsupported,
+
+		// Description and notes.
+		QT_TRANSLATE_NOOP("GensQt4::McdRomDB",
+			"Aiwa CSD-G1M (J) v2.11c"),
+		QT_TRANSLATE_NOOP("GensQt4::McdRomDB",
+			"Gens/GS II does not support the hardware changes in the Aiwa CSD-G1M.")
+	},
 
 	// Sega CD 2 (U) Boot ROM v2.11X
 	// 1993/06/21 16:00
@@ -441,6 +462,27 @@ const McdRomDBPrivate::mcd_rom_db_t McdRomDBPrivate::McdRomDatabase[] = {
 			"Sega CDX (U) v2.21X"),
 		QT_TRANSLATE_NOOP("GensQt4::McdRomDB",
 			"Gens/GS II does not support the hardware changes in the Sega CDX.")
+	},
+
+	// Sega Multi-Mega (E) Boot ROM v2.21X
+	// 1993/09/16 14:00
+	{
+		0xAACB851E,		// CRC32 (with original HINT vector)
+
+		// md5sum
+		{0xD9, 0x1B, 0x0F, 0xD4, 0x88, 0xD2, 0x96, 0x24,
+		 0xC4, 0xEF, 0x2E, 0xE7, 0xB1, 0x9E, 0xFF, 0xF0},
+
+		// Region code and ROM support status.
+		McdRomDB::MCD_REGION_EUROPE,
+		McdRomDB::MCD_REGION_EUROPE,
+		McdRomDB::RomStatus_Unsupported,
+
+		// Description and notes.
+		QT_TRANSLATE_NOOP("GensQt4::McdRomDB",
+			"Sega Multi-Mega (E) v2.21X"),
+		QT_TRANSLATE_NOOP("GensQt4::McdRomDB",
+			"Gens/GS II does not support the hardware changes in the Sega Multi-Mega.")
 	},
 
 	/** Pioneer LaserActive **/
@@ -504,6 +546,27 @@ const McdRomDBPrivate::mcd_rom_db_t McdRomDBPrivate::McdRomDatabase[] = {
 		// Description and notes.
 		QT_TRANSLATE_NOOP("GensQt4::McdRomDB",
 			"Pioneer LaserActive (U) v1.04"),
+		QT_TRANSLATE_NOOP("GensQt4::McdRomDB",
+			"Gens/GS II does not support the hardware changes in the Pioneer LaserActive.")
+	},
+
+	// Pioneer LaserActive (J) Boot ROM v1.05
+	// 1993/10/07 11:00
+	{
+		0x474AAA44,		// CRC32 (with original HINT vector)
+
+		// md5sum
+		{0x92, 0x7D, 0xF7, 0x73, 0xF9, 0xA1, 0xC7, 0xDE,
+		 0x94, 0xA7, 0x24, 0x20, 0xB2, 0xD5, 0x38, 0xDD},
+
+		// Region code and ROM support status.
+		McdRomDB::MCD_REGION_JAPAN,
+		McdRomDB::MCD_REGION_JAPAN,
+		McdRomDB::RomStatus_Unsupported,
+
+		// Description and notes.
+		QT_TRANSLATE_NOOP("GensQt4::McdRomDB",
+			"Pioneer LaserActive (J) v1.05"),
 		QT_TRANSLATE_NOOP("GensQt4::McdRomDB",
 			"Gens/GS II does not support the hardware changes in the Pioneer LaserActive.")
 	},
