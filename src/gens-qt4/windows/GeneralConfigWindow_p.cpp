@@ -34,7 +34,7 @@
 #include "widgets/GensLineEdit.hpp"
 
 // ROM database.
-#include "../RomDB/mcd_rom_db.h"
+#include "../RomDB/McdRomDB.hpp"
 
 // crc32()
 #include <zlib.h>
@@ -163,23 +163,28 @@ void GeneralConfigWindowPrivate::updateRomFileStatus(void)
 	// TODO: Update the display for the last selected ROM.
 	QString sNewRomStatus;
 	sNewRomStatus = mdUpdateTmssRomFileStatus(ui.txtMDTMSSRom);
-	if (!sNewRomStatus.isEmpty())
+	if (!sNewRomStatus.isEmpty()) {
 		sMDTmssRomStatus = sNewRomStatus;
+	}
 
 	// Update Sega CD Boot ROM file status.
 	// TODO: Update the display for the last selected ROM.
-	sNewRomStatus = mcdUpdateRomFileStatus(ui.txtMcdRomUSA, MCD_REGION_USA);
-	if (!sNewRomStatus.isEmpty())
+	sNewRomStatus = mcdUpdateRomFileStatus(ui.txtMcdRomUSA, McdRomDB::MCD_REGION_USA);
+	if (!sNewRomStatus.isEmpty()) {
 		sMcdRomStatus_USA = sNewRomStatus;
-	sNewRomStatus = mcdUpdateRomFileStatus(ui.txtMcdRomEUR, MCD_REGION_EUROPE);
-	if (!sNewRomStatus.isEmpty())
+	}
+	sNewRomStatus = mcdUpdateRomFileStatus(ui.txtMcdRomEUR, McdRomDB::MCD_REGION_EUROPE);
+	if (!sNewRomStatus.isEmpty()) {
 		sMcdRomStatus_EUR = sNewRomStatus;
-	sNewRomStatus = mcdUpdateRomFileStatus(ui.txtMcdRomJPN, MCD_REGION_JAPAN);
-	if (!sNewRomStatus.isEmpty())
+	}
+	sNewRomStatus = mcdUpdateRomFileStatus(ui.txtMcdRomJPN, McdRomDB::MCD_REGION_JAPAN);
+	if (!sNewRomStatus.isEmpty()) {
 		sMcdRomStatus_JPN = sNewRomStatus;
-	sNewRomStatus = mcdUpdateRomFileStatus(ui.txtMcdRomAsia, MCD_REGION_ASIA);
-	if (!sNewRomStatus.isEmpty())
+	}
+	sNewRomStatus = mcdUpdateRomFileStatus(ui.txtMcdRomAsia, McdRomDB::MCD_REGION_ASIA);
+	if (!sNewRomStatus.isEmpty()) {
 		sMcdRomStatus_Asia = sNewRomStatus;
+	}
 }
 
 /**
@@ -390,9 +395,9 @@ QString GeneralConfigWindowPrivate::mcdUpdateRomFileStatus(GensLineEdit *txtRomF
 	uint8_t *rom_data = nullptr;
 	int data_len;
 	uint32_t rom_crc32;
-	int boot_rom_id;
+	McdRomDB::McdBootRomInfo boot_rom_info;
 	int boot_rom_region_code;
-	MCD_RomStatus_t boot_rom_status;
+	McdRomDB::MCD_RomStatus_t boot_rom_status;
 
 	// Line break string.
 	static const QString sLineBreak = QLatin1String("<br/>\n");
@@ -469,31 +474,31 @@ QString GeneralConfigWindowPrivate::mcdUpdateRomFileStatus(GensLineEdit *txtRomF
 	}
 
 	// Fix up the ROM's Initial SP and Initial HINT vectors.
-	memcpy(&rom_data[0x00], mcd_rom_InitSP, sizeof(mcd_rom_InitSP));
-	memcpy(&rom_data[0x70], mcd_rom_InitHINT, sizeof(mcd_rom_InitHINT));
+	memcpy(&rom_data[0x00], McdRomDB::InitSP, sizeof(McdRomDB::InitSP));
+	memcpy(&rom_data[0x70], McdRomDB::InitHINT, sizeof(McdRomDB::InitHINT));
 
 	// Calculate the CRC32 using zlib.
 	// NOTE: rom->rom_crc32() will be incorrect if the ROM is too big.
 	rom_crc32 = crc32(0, rom_data, MCD_ROM_FILESIZE);
 
 	// Look up the CRC32 in the Sega CD Boot ROM database.
-	boot_rom_id = mcd_rom_FindByCRC32(rom_crc32);
-	if (boot_rom_id < 0) {
+	boot_rom_info = McdRomDB::findByCrc32(rom_crc32);
+	if (!boot_rom_info.isValid()) {
 		// Boot ROM was not found in the database.
 		filename_icon = QStyle::SP_MessageBoxWarning;
 		goto rom_identified;
 	}
 
 	// ROM found. Get the description and other information.
-	rom_id = QString::fromUtf8(mcd_rom_GetDescription(boot_rom_id));
+	rom_id = boot_rom_info.description();
 
 	// Check the region code.
-	boot_rom_region_code = mcd_rom_GetRegion(boot_rom_id);
+	boot_rom_region_code = boot_rom_info.region();
 	if ((boot_rom_region_code & region_code) == 0) {
 		// ROM doesn't support this region.
-		int boot_rom_region_primary = mcd_rom_GetPrimaryRegion(boot_rom_id);
-		QString expected_region = QString::fromUtf8(mcd_rom_GetRegionCodeString(region_code));
-		QString boot_rom_region = QString::fromUtf8(mcd_rom_GetRegionCodeString(boot_rom_region_primary));
+		int boot_rom_region_primary = boot_rom_info.primaryRegion();
+		QString expected_region = McdRomDB::regionCodeString(region_code);
+		QString boot_rom_region = McdRomDB::regionCodeString(boot_rom_region_primary);
 
 		rom_notes += sWarning +
 			     GeneralConfigWindow::tr("Region code is incorrect.") + sLineBreak +
@@ -505,15 +510,15 @@ QString GeneralConfigWindowPrivate::mcdUpdateRomFileStatus(GensLineEdit *txtRomF
 	}
 
 	// Check the ROM's support status.
-	boot_rom_status = mcd_rom_GetSupportStatus(boot_rom_id);
+	boot_rom_status = boot_rom_info.supportStatus();
 	switch (boot_rom_status) {
-		case RomStatus_Recommended:
-		case RomStatus_Supported:
+		case McdRomDB::RomStatus_Recommended:
+		case McdRomDB::RomStatus_Supported:
 			// ROM is either recommended or supported.
 			// TODO: Make a distinction between the two?
 			break;
 
-		case RomStatus_Unsupported:
+		case McdRomDB::RomStatus_Unsupported:
 		default:
 			// ROM is unsupported.
 			rom_notes += sWarning +
@@ -521,7 +526,7 @@ QString GeneralConfigWindowPrivate::mcdUpdateRomFileStatus(GensLineEdit *txtRomF
 			filename_icon = QStyle::SP_MessageBoxWarning;
 			break;
 
-		case RomStatus_Broken:
+		case McdRomDB::RomStatus_Broken:
 			// ROM is known to be broken.
 			rom_notes += sWarning +
 				     GeneralConfigWindow::tr("This Boot ROM is known to be broken on all emulators.") + sLineBreak;
@@ -530,7 +535,7 @@ QString GeneralConfigWindowPrivate::mcdUpdateRomFileStatus(GensLineEdit *txtRomF
 	}
 
 	// Get the ROM's notes.
-	rom_notes += QString::fromUtf8(mcd_rom_GetNotes(boot_rom_id)).replace(QChar(L'\n'), sLineBreak);
+	rom_notes += boot_rom_info.notes().replace(QChar(L'\n'), sLineBreak);
 
 rom_identified:
 	// Free the ROM data buffer if it was allocated.

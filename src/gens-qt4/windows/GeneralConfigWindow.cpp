@@ -46,7 +46,7 @@
 #include "libgens/macros/common.h"
 
 // ROM database.
-#include "../RomDB/mcd_rom_db.h"
+#include "../RomDB/McdRomDB.hpp"
 
 // EmuManager is needed for region code strings.
 #include "EmuManager.hpp"
@@ -599,7 +599,7 @@ void GeneralConfigWindow::on_txtMcdRomAsia_focusIn(void)
 void GeneralConfigWindow::on_txtMcdRomUSA_textChanged(void)
 {
 	Q_D(GeneralConfigWindow);
-	QString sNewRomStatus = d->mcdUpdateRomFileStatus(d->ui.txtMcdRomUSA, MCD_REGION_USA);
+	QString sNewRomStatus = d->mcdUpdateRomFileStatus(d->ui.txtMcdRomUSA, McdRomDB::MCD_REGION_USA);
 	if (!sNewRomStatus.isEmpty()) {
 		d->sMcdRomStatus_USA = sNewRomStatus;
 		d->mcdDisplayRomFileStatus(tr("Sega CD (U)"), d->sMcdRomStatus_USA);
@@ -616,7 +616,7 @@ void GeneralConfigWindow::on_txtMcdRomUSA_textChanged(void)
 void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
 {
 	Q_D(GeneralConfigWindow);
-	QString sNewRomStatus = d->mcdUpdateRomFileStatus(d->ui.txtMcdRomEUR, MCD_REGION_EUROPE);
+	QString sNewRomStatus = d->mcdUpdateRomFileStatus(d->ui.txtMcdRomEUR, McdRomDB::MCD_REGION_EUROPE);
 	if (!sNewRomStatus.isEmpty()) {
 		d->sMcdRomStatus_EUR = sNewRomStatus;
 		d->mcdDisplayRomFileStatus(tr("Mega CD (E)"), d->sMcdRomStatus_EUR);
@@ -633,7 +633,7 @@ void GeneralConfigWindow::on_txtMcdRomEUR_textChanged(void)
 void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 {
 	Q_D(GeneralConfigWindow);
-	QString sNewRomStatus = d->mcdUpdateRomFileStatus(d->ui.txtMcdRomJPN, MCD_REGION_JAPAN);
+	QString sNewRomStatus = d->mcdUpdateRomFileStatus(d->ui.txtMcdRomJPN, McdRomDB::MCD_REGION_JAPAN);
 	if (!sNewRomStatus.isEmpty()) {
 		d->sMcdRomStatus_JPN = sNewRomStatus;
 		d->mcdDisplayRomFileStatus(tr("Mega CD (J)"), d->sMcdRomStatus_JPN);
@@ -650,7 +650,7 @@ void GeneralConfigWindow::on_txtMcdRomJPN_textChanged(void)
 void GeneralConfigWindow::on_txtMcdRomAsia_textChanged(void)
 {
 	Q_D(GeneralConfigWindow);
-	QString sNewRomStatus = d->mcdUpdateRomFileStatus(d->ui.txtMcdRomAsia, MCD_REGION_ASIA);
+	QString sNewRomStatus = d->mcdUpdateRomFileStatus(d->ui.txtMcdRomAsia, McdRomDB::MCD_REGION_ASIA);
 	if (!sNewRomStatus.isEmpty()) {
 		d->sMcdRomStatus_Asia = sNewRomStatus;
 		d->mcdDisplayRomFileStatus(tr("Mega CD (Asia)"), d->sMcdRomStatus_Asia);
