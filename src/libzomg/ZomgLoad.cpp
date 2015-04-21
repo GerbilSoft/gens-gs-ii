@@ -229,7 +229,7 @@ int Zomg::loadVdpReg(uint8_t *reg, size_t siz)
  * @param ctrl Destination buffer for VDP control registers.
  * @return Number of bytes read on success; negative on error.
  */
-int Zomg::loadVdpCtrl_8(Zomg_VdpCtrl_8_t *ctrl)
+int Zomg::loadVdpCtrl_8(Zomg_VDP_ctrl_8_t *ctrl)
 {
 	int ret = d->loadFromZomg("common/vdp_ctrl.bin", ctrl, sizeof(*ctrl));
 
@@ -255,17 +255,17 @@ int Zomg::loadVdpCtrl_8(Zomg_VdpCtrl_8_t *ctrl)
  * @param ctrl Destination buffer for VDP control registers.
  * @return Number of bytes read on success; negative on error.
  */
-int Zomg::loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl)
+int Zomg::loadVdpCtrl_16(Zomg_VDP_ctrl_16_t *ctrl)
 {
-	uint8_t data[sizeof(Zomg_VdpCtrl_16_t)];
+	uint8_t data[sizeof(Zomg_VDP_ctrl_16_t)];
 	int ret = d->loadFromZomg("common/vdp_ctrl.bin", &data, sizeof(data));
 
-	if (ret == (int)sizeof(Zomg_VdpCtrl_16_old_t)) {
+	if (ret == (int)sizeof(Zomg_VDP_ctrl_16_old_t)) {
 		// OLD VERSION. (pre-10abf8f3)
 		// DEPRECATED: Remove this once ZOMG is completed.
 		fprintf(stderr, "Zomg::loadVdpCtrl_16(): %s: WARNING: Deprecated (pre-10abf8f3) 24-byte common/vdp_ctrl.bin found.\n",
 			m_filename.c_str());
-		Zomg_VdpCtrl_16_old_t old_ctrl;
+		Zomg_VDP_ctrl_16_old_t old_ctrl;
 		memcpy(&old_ctrl, &data, sizeof(old_ctrl));
 
 		// Verify the header.
@@ -286,7 +286,7 @@ int Zomg::loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl)
 		ctrl->addr_hi_latch = (ctrl->address & 0xC000);
 		// FIXME: This wasn't present in the old version...
 		ctrl->data_read_buffer = 0;
-	} else if (ret == (int)sizeof(Zomg_VdpCtrl_16_t)) {
+	} else if (ret == (int)sizeof(Zomg_VDP_ctrl_16_t)) {
 		// New version. (10abf8f3 or later)
 		memcpy(ctrl, &data, sizeof(*ctrl));
 

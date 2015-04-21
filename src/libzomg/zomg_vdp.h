@@ -64,7 +64,7 @@ typedef struct _Zomg_VDP_ctrl_8_t
 	uint8_t status;			// 8-bit: VDP status register.
 
 	uint8_t data_read_buffer;	// 8-bit: Data read buffer.
-} Zomg_VdpCtrl_8_t;
+} Zomg_VDP_ctrl_8_t;
 #pragma pack()
 
 /**
@@ -125,7 +125,7 @@ typedef struct _Zomg_VDP_ctrl_16_t
 	uint16_t data_read_buffer;	// 16BE: Data read buffer. (TODO)
 
 	uint8_t dma_TBD[16];		// TODO: Reserved for DMA status.
-} Zomg_VdpCtrl_16_t;
+} Zomg_VDP_ctrl_16_t;
 #pragma pack()
 
 /**
@@ -151,7 +151,7 @@ typedef struct _Zomg_VDP_ctrl_16_old_t
 	uint8_t reserved2;
 
 	// TODO: DMA status registers,
-} Zomg_VdpCtrl_16_old_t;
+} Zomg_VDP_ctrl_16_old_t;
 #pragma pack()
 
 #pragma pack(1)

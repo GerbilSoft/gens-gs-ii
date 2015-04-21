@@ -382,7 +382,7 @@ void Vdp::zomgSaveMD(LibZomg::Zomg *zomg) const
 	zomg->saveVdpReg(d->VDP_Reg.reg, 24);
 
 	// Save the internal registers.
-	Zomg_VdpCtrl_16_t ctrl_reg;
+	Zomg_VDP_ctrl_16_t ctrl_reg;
 	ctrl_reg.header		= ZOMG_VDPCTRL_16_HEADER;
 	ctrl_reg.ctrl_latch	= !!(d->VDP_Ctrl.ctrl_latch);
 	const uint8_t ctrl_mask = (d->is128KB() ? 0x07 : 0x03);
@@ -456,7 +456,7 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 
 	// Load the internal registers.
 	// NOTE: LibZomg verifies that the header is correct.
-	Zomg_VdpCtrl_16_t ctrl_reg;
+	Zomg_VDP_ctrl_16_t ctrl_reg;
 	int ret = zomg->loadVdpCtrl_16(&ctrl_reg);
 	if (ret > 0) {
 		d->VDP_Ctrl.ctrl_latch = !!ctrl_reg.ctrl_latch;

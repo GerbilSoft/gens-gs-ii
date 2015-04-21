@@ -101,9 +101,9 @@ class ZomgBase
 		// VDP
 		virtual int loadVdpReg(uint8_t *reg, size_t siz)
 			{ (void)reg; (void)siz; return 0; }
-		virtual int loadVdpCtrl_8(Zomg_VdpCtrl_8_t *ctrl)
+		virtual int loadVdpCtrl_8(Zomg_VDP_ctrl_8_t *ctrl)
 			{ (void)ctrl; return 0; }
-		virtual int loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl)
+		virtual int loadVdpCtrl_16(Zomg_VDP_ctrl_16_t *ctrl)
 			{ (void)ctrl; return 0; }
 		virtual int loadVRam(void *vram, size_t siz, ZomgByteorder_t byteorder)
 			{ (void)vram; (void)siz; (void)byteorder; return 0; }
@@ -168,9 +168,9 @@ class ZomgBase
 		// VDP
 		virtual int saveVdpReg(const uint8_t *reg, size_t siz)
 			{ (void)reg; (void)siz; return 0; }
-		virtual int saveVdpCtrl_8(const Zomg_VdpCtrl_8_t *ctrl)
+		virtual int saveVdpCtrl_8(const Zomg_VDP_ctrl_8_t *ctrl)
 			{ (void)ctrl; return 0; }
-		virtual int saveVdpCtrl_16(const Zomg_VdpCtrl_16_t *ctrl)
+		virtual int saveVdpCtrl_16(const Zomg_VDP_ctrl_16_t *ctrl)
 			{ (void)ctrl; return 0; }
 		virtual int saveVRam(const void *vram, size_t siz, ZomgByteorder_t byteorder)
 			{ (void)vram; (void)siz; (void)byteorder; return 0; }

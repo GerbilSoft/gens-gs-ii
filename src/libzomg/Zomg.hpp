@@ -77,8 +77,8 @@ class Zomg : public ZomgBase
 
 		// VDP
 		virtual int loadVdpReg(uint8_t *reg, size_t siz) override;
-		virtual int loadVdpCtrl_8(Zomg_VdpCtrl_8_t *ctrl) override;
-		virtual int loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl) override;
+		virtual int loadVdpCtrl_8(Zomg_VDP_ctrl_8_t *ctrl) override;
+		virtual int loadVdpCtrl_16(Zomg_VDP_ctrl_16_t *ctrl) override;
 		virtual int loadVRam(void *vram, size_t siz, ZomgByteorder_t byteorder) override;
 		virtual int loadCRam(Zomg_CRam_t *cram, ZomgByteorder_t byteorder) override;
 		/// MD-specific
@@ -134,8 +134,8 @@ class Zomg : public ZomgBase
 
 		// VDP
 		virtual int saveVdpReg(const uint8_t *reg, size_t siz) override;
-		virtual int saveVdpCtrl_8(const Zomg_VdpCtrl_8_t *ctrl) override;
-		virtual int saveVdpCtrl_16(const Zomg_VdpCtrl_16_t *ctrl) override;
+		virtual int saveVdpCtrl_8(const Zomg_VDP_ctrl_8_t *ctrl) override;
+		virtual int saveVdpCtrl_16(const Zomg_VDP_ctrl_16_t *ctrl) override;
 		virtual int saveVRam(const void *vram, size_t siz, ZomgByteorder_t byteorder) override;
 		virtual int saveCRam(const Zomg_CRam_t *cram, ZomgByteorder_t byteorder) override;
 		/// MD-specific

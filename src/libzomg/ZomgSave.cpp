@@ -274,14 +274,14 @@ int Zomg::saveVdpReg(const uint8_t *reg, size_t siz)
  * @param ctrl Source buffer for VDP control registers.
  * @return 0 on success; non-zero on error.
  */
-int Zomg::saveVdpCtrl_8(const Zomg_VdpCtrl_8_t *ctrl)
+int Zomg::saveVdpCtrl_8(const Zomg_VDP_ctrl_8_t *ctrl)
 {
 	// Verify the header.
 	if (ctrl->header != ZOMG_VDPCTRL_8_HEADER)
 		return -1;
 
 #if ZOMG_BYTEORDER == ZOMG_LIL_ENDIAN
-	Zomg_VdpCtrl_8_t bswap_ctrl;
+	Zomg_VDP_ctrl_8_t bswap_ctrl;
 	memcpy(&bswap_ctrl, ctrl, sizeof(bswap_ctrl));
 
 	// Byteswap the header.
@@ -304,14 +304,14 @@ int Zomg::saveVdpCtrl_8(const Zomg_VdpCtrl_8_t *ctrl)
  * @param ctrl Source buffer for VDP control registers.
  * @return 0 on success; non-zero on error.
  */
-int Zomg::saveVdpCtrl_16(const Zomg_VdpCtrl_16_t *ctrl)
+int Zomg::saveVdpCtrl_16(const Zomg_VDP_ctrl_16_t *ctrl)
 {
 	// Verify the header.
 	if (ctrl->header != ZOMG_VDPCTRL_16_HEADER)
 		return -1;
 
 #if ZOMG_BYTEORDER == ZOMG_LIL_ENDIAN
-	Zomg_VdpCtrl_16_t bswap_ctrl;
+	Zomg_VDP_ctrl_16_t bswap_ctrl;
 	memcpy(&bswap_ctrl, ctrl, sizeof(bswap_ctrl));
 
 	// Byteswap the header.
