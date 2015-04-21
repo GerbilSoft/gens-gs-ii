@@ -265,7 +265,7 @@ int Zomg::loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl)
 		// DEPRECATED: Remove this once ZOMG is completed.
 		fprintf(stderr, "Zomg::loadVdpCtrl_16(): %s: WARNING: Deprecated (pre-10abf8f3) 24-byte common/vdp_ctrl.bin found.\n",
 			m_filename.c_str());
-		Zomg_VdpCtrl_16_t old_ctrl;
+		Zomg_VdpCtrl_16_old_t old_ctrl;
 		memcpy(&old_ctrl, &data, sizeof(old_ctrl));
 
 		// Verify the header.
