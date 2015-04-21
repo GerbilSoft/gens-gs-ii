@@ -276,6 +276,12 @@ the last pair of control words. This indicates the destination for the
 next read or write operation, as well as the read/write mode and (on MD)
 DMA access mode.
 
+The "addr_hi_latch" field contains the A15-A14 bits (or A16-A14 in 128 KB mode)
+that were last written in the second command word. These bits are latched, and
+are automatically reapplied when the first command word is written. Note that
+this field contains the bits right-shifted by 14, so A16-A14 are equivalent to
+bits 2-0 in the "addr_hi_latch" field.
+
 TODO: Define the DMA control values.
 
 ***WARNING***: The layout of _ZOMG_VDP_ctrl_16_t has changed:
