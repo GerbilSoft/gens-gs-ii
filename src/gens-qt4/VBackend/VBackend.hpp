@@ -252,30 +252,32 @@ class VBackend : public QWidget
 		// FPS manager.
 		FpsManager m_fpsManager;
 
+		// Timing manager.
+		LibGens::Timing m_timing;
+
 		// Preview image.
 		struct PreviewImage {
-			PreviewImage() : endTime(0.0), visible(false) { }
+			PreviewImage() : endTime(0), visible(false) { }
 
 			void clear(void)
 				{ this->visible = false; this->img = QImage(); }
 
-			void set(int duration, const QImage& img)
-			{
+			void set(LibGens::Timing &timing, int duration, const QImage& img) {
 				this->img = img;
 				this->visible = true;
-				this->endTime = LibGens::Timing::GetTimeD() + ((double)duration / 1000.0);
+				this->endTime = timing.getTime() + (duration * 1000);
 			}
 
 			QImage img;
-			double endTime;
+			uint64_t endTime;
 			bool visible;
 		};
 		PreviewImage m_previewImg;
 
 		struct RecOsd {
 			QString component;
-			int duration;		// ms
-			double lastUpdate;	// ms
+			uint64_t lastUpdate;	// usec
+			int duration;		// msec
 			bool isRecording;	// True if recording; false if stopped.
 		};
 		QList<RecOsd> m_osdRecList;

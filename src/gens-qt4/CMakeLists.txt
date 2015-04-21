@@ -167,16 +167,8 @@ SET(gens-qt4_CONFIG_SRCS
 	ConfigHandler.cpp
 	)
 
-SET(gens-qt4_WIDGET_H
-	widgets/GensLineEdit.hpp
-	widgets/GensZipDirModel.hpp
-	widgets/GensZipDirItem.hpp
-	widgets/GensColorComboBox.hpp
-	widgets/GensKeySequenceWidget.hpp
-	widgets/GensCtrlCfgWidget.hpp
-	widgets/GensCtrlKeyWidget.hpp
-	widgets/GensColorButton.hpp
-	widgets/KeyNames.hpp
+SET(gens-qt4_ROMDB_SRCS
+	RomDB/McdRomDB.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -225,6 +217,10 @@ SET(gens-qt4_CONFIG_MOC_HEADERS
 	Config/PathConfig.hpp
 	Config/RecentRoms.hpp
 	ConfigHandler.hpp
+	)
+
+SET(gens-qt4_ROMDB_MOC_HEADERS
+	RomDB/McdRomDB.hpp
 	)
 
 # UI files.
@@ -314,6 +310,7 @@ QT4_WRAP_CPP(gens-qt4_MOC_SOURCES
 		${gens-qt4_WINDOW_MOC_HEADERS}
 		${gens-qt4_WIDGET_MOC_HEADERS}
 		${gens-qt4_CONFIG_MOC_HEADERS}
+		${gens-qt4_ROMDB_MOC_HEADERS}
 		${gens-qt4_DBUS_MOC_HEADERS}
 		${gens-qt4_PLATFORM_MOC_HEADERS}
 		)
@@ -362,12 +359,13 @@ ADD_SUBDIRECTORY(translations)
 ADD_EXECUTABLE(gens-qt4
 	WIN32
 	${gens-qt4_SRCS}
-	${gens-qt4_COMMON_SRCS}
-	${gens-qt4_WINDOW_SRCS}
-	${gens-qt4_WIDGET_SRCS} ${gens-qt4_WIDGET_H}
-	${gens-qt4_CONFIG_SRCS}
-	${gens-qt4_DBUS_SRCS}
-	${gens-qt4_PLATFORM_SRCS}
+	${gens-qt4_COMMON_SRCS} ${gens-qt4_COMMON_MOC_HEADERS}
+	${gens-qt4_WINDOW_SRCS} ${gens-qt4_WINDOW_MOC_HEADERS}
+	${gens-qt4_WIDGET_SRCS} ${gens-qt4_WIDGET_MOC_HEADERS}
+	${gens-qt4_CONFIG_SRCS} ${gens-qt4_CONFIG_MOC_HEADERS}
+	${gens-qt4_ROMDB_SRCS} ${gens-qt4_ROMDB_MOC_HEADERS}
+	${gens-qt4_DBUS_SRCS} ${gens-qt4_DBUS_MOC_HEADERS}
+	${gens-qt4_PLATFORM_SRCS} ${gens-qt4_PLATFORM_MOC_HEADERS}
 	${gens-qt4_PLATFORM_UI_SRCS}
 	${gens-qt4_MOC_SOURCES}
 	${gens-qt4_UIS_H}

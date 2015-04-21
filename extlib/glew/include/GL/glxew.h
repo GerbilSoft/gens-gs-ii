@@ -1,5 +1,6 @@
 /*
 ** The OpenGL Extension Wrangler Library
+** Copyright (C) 2008-2015, Nigel Stewart <nigels[]users sourceforge net>
 ** Copyright (C) 2002-2008, Milan Ikits <milan ikits[]ieee org>
 ** Copyright (C) 2002-2008, Marcelo E. Magallon <mmagallo[]debian org>
 ** Copyright (C) 2002, Lev Povalahev
@@ -200,12 +201,12 @@ typedef Display* ( * PFNGLXGETCURRENTDISPLAYPROC) (void);
 #ifndef GLX_VERSION_1_3
 #define GLX_VERSION_1_3 1
 
-#define GLX_RGBA_BIT 0x00000001
 #define GLX_FRONT_LEFT_BUFFER_BIT 0x00000001
+#define GLX_RGBA_BIT 0x00000001
 #define GLX_WINDOW_BIT 0x00000001
 #define GLX_COLOR_INDEX_BIT 0x00000002
-#define GLX_PIXMAP_BIT 0x00000002
 #define GLX_FRONT_RIGHT_BUFFER_BIT 0x00000002
+#define GLX_PIXMAP_BIT 0x00000002
 #define GLX_BACK_LEFT_BUFFER_BIT 0x00000004
 #define GLX_PBUFFER_BIT 0x00000004
 #define GLX_BACK_RIGHT_BUFFER_BIT 0x00000008

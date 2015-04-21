@@ -92,6 +92,10 @@ class GensCtrlCfgWidgetPrivate
 
 		IoManager::IoType_t m_ioType;
 		int numButtons;		// Cached from IoManager.
+
+		// Logical to physical button mapping
+		// Index == logical button ID.
+		// Value == physical button ID.
 		int btnIdx[IoManager::BTNI_MAX];
 
 		// Are we changing all buttons?
@@ -328,6 +332,41 @@ QString GensCtrlCfgWidgetPrivate::buttonName_l(IoManager::ButtonName_t buttonNam
 			//: XE-1 AP: D button.
 			return GensCtrlCfgWidget::tr("D", "controllers/XE1A");
 
+		/** ColecoVision buttons. **/
+
+		case IoManager::BTNNAME_CV_TL_YELLOW:
+			return GensCtrlCfgWidget::tr("TL/Yellow", "controllers/COLV");
+		case IoManager::BTNNAME_CV_TR_RED:
+			return GensCtrlCfgWidget::tr("TR/Red", "controllers/COLV");
+		case IoManager::BTNNAME_CV_PURPLE:
+			return GensCtrlCfgWidget::tr("Purple", "controllers/COLV");
+		case IoManager::BTNNAME_CV_BLUE:
+			return GensCtrlCfgWidget::tr("Blue", "controllers/COLV");
+		case IoManager::BTNNAME_CV_KEYPAD_1:
+			return GensCtrlCfgWidget::tr("1", "controllers/COLV");
+		case IoManager::BTNNAME_CV_KEYPAD_2:
+			return GensCtrlCfgWidget::tr("2", "controllers/COLV");
+		case IoManager::BTNNAME_CV_KEYPAD_3:
+			return GensCtrlCfgWidget::tr("3", "controllers/COLV");
+		case IoManager::BTNNAME_CV_KEYPAD_4:
+			return GensCtrlCfgWidget::tr("4", "controllers/COLV");
+		case IoManager::BTNNAME_CV_KEYPAD_5:
+			return GensCtrlCfgWidget::tr("5", "controllers/COLV");
+		case IoManager::BTNNAME_CV_KEYPAD_6:
+			return GensCtrlCfgWidget::tr("6", "controllers/COLV");
+		case IoManager::BTNNAME_CV_KEYPAD_7:
+			return GensCtrlCfgWidget::tr("7", "controllers/COLV");
+		case IoManager::BTNNAME_CV_KEYPAD_8:
+			return GensCtrlCfgWidget::tr("8", "controllers/COLV");
+		case IoManager::BTNNAME_CV_KEYPAD_9:
+			return GensCtrlCfgWidget::tr("9", "controllers/COLV");
+		case IoManager::BTNNAME_CV_KEYPAD_ASTERISK:
+			return GensCtrlCfgWidget::tr("*", "controllers/COLV");
+		case IoManager::BTNNAME_CV_KEYPAD_0:
+			return GensCtrlCfgWidget::tr("0", "controllers/COLV");
+		case IoManager::BTNNAME_CV_KEYPAD_OCTOTHORPE:
+			return GensCtrlCfgWidget::tr("#", "controllers/COLV");
+
 		default:
 			return QString();
 	}
@@ -400,7 +439,8 @@ QVector<GensKey_t> GensCtrlCfgWidget::keyMap(void) const
 	Q_D(const GensCtrlCfgWidget);
 	QVector<GensKey_t> keyMap(d->numButtons);
 	for (int i = 0; i < d->numButtons; i++) {
-		keyMap[i] = d->ui.btnCfg[d->btnIdx[i]]->key();
+		const int btnIdx = d->btnIdx[i];
+		keyMap[btnIdx] = d->ui.btnCfg[i]->key();
 	}
 
 	return keyMap;
@@ -416,7 +456,8 @@ void GensCtrlCfgWidget::setKeyMap(const QVector<GensKey_t> &keyMap)
 	const int maxButtons = std::min(d->numButtons, keyMap.count());
 
 	for (int i = 0; i < maxButtons; i++) {
-		d->ui.btnCfg[d->btnIdx[i]]->setKey(keyMap[i]);
+		const int btnIdx = d->btnIdx[i];
+		d->ui.btnCfg[i]->setKey(keyMap[btnIdx]);
 	}
 
 	if (maxButtons < d->numButtons) {

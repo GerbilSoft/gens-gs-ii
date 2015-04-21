@@ -56,6 +56,7 @@ SET(libgens_SRCS
 	cpu/M68K.cpp
 	cpu/M68K_Mem.cpp
 	sound/Psg.cpp
+	sound/PsgDebug.cpp
 	sound/Ym2612.cpp
 	macros/log_msg.c
 	Util/byteswap.c
@@ -69,24 +70,20 @@ SET(libgens_SRCS
 	cpu/Z80.cpp
 	cpu/Z80_MD_Mem.cpp
 	Save/SRam.cpp
-	Save/EEPRom.cpp
 	credits.c
 	lg_osd.c
-	Save/EEPRom_File.cpp
 	sound/SoundMgr.cpp
 	Decompressor/Decompressor.cpp
 	Decompressor/DcGzip.cpp
 	Decompressor/DcZip.cpp
 	EmuContext.cpp
-	Save/EEPRom_DB.cpp
-	Data/mcd_rom_db.c
 	Data/32X/fw_32x.c
 	Util/MdFb.cpp
-	IO/IoManager.cpp
-	IO/IoManager_p.cpp
-	IO/IoManager_p_update.cpp
-	IO/IoManager_btnNames.cpp
 	Cartridge/RomCartridgeMD.cpp
+	Save/EEPRomI2C.cpp
+	Save/EEPRomI2C_File.cpp
+	Save/EEPRomI2C_DB.cpp
+	Save/EEPRomI2C_Debug.cpp
 	MD/TmssReg.cpp
 	)
 
@@ -120,6 +117,42 @@ SET(libgens_VDP_H
 	Vdp/VdpStructs.hpp
 	)
 
+SET(libgens_IO_SRCS
+	IO/IoManager.cpp
+	IO/IoManager_p.cpp
+	IO/IoManager_btnNames.cpp
+	IO/Device.cpp
+	IO/Io3BTN.cpp
+	IO/Io6BTN.cpp
+	IO/Io2BTN.cpp
+	IO/IoMegaMouse.cpp
+	IO/IoXE1AP.cpp
+	IO/IoColecoVision.cpp
+	# Multitaps
+	IO/IoTeamPlayer.cpp
+	IO/Io4WPM.cpp
+	IO/Io4WPS.cpp
+	IO/IoMasterTap.cpp
+	)
+
+# TODO: All headers, or just public headers?
+SET(libgens_IO_H
+	IO/IoManager.hpp
+	IO/IoManager_p.hpp
+	IO/Device.hpp
+	IO/Io3BTN.hpp
+	IO/Io6BTN.hpp
+	IO/Io2BTN.hpp
+	IO/IoMegaMouse.hpp
+	IO/IoXE1AP.hpp
+	IO/IoColecoVision.hpp
+	# Multitaps
+	IO/IoTeamPlayer.hpp
+	IO/Io4WPM.hpp
+	IO/Io4WPS.hpp
+	IO/IoMasterTap.hpp
+	)
+
 IF(HAVE_LZMA)
 	SET(libgens_OPTIONAL_SRCS Decompressor/Dc7z.cpp)
 ELSE()
@@ -145,6 +178,8 @@ ADD_LIBRARY(gens STATIC
 	${libgens_SRCS}
 	${libgens_VDP_SRCS}
 	${libgens_VDP_H}
+	${libgens_IO_SRCS}
+	${libgens_IO_H}
 	${libgens_OPTIONAL_SRCS}
 	${libgens_COMPAT_SRCS}
 	)

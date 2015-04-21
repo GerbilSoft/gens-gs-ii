@@ -509,6 +509,8 @@ int main(int argc, char *argv[])
 	fprintf(stderr, "\n");
 	fprintf(stderr, "LibGens: VDP Sprite Masking & Overflow Test ROM.\n"
 			"Original ROM (c) 2009 by Nemesis.\n\n");
+	fflush(nullptr);
+
 	int ret = RUN_ALL_TESTS();
 	LibGens::End();
 	return ret;

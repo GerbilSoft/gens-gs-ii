@@ -30,10 +30,6 @@
 // ROM image class.
 #include "Rom.hpp"
 
-// SRam and EEPRom.
-#include "Save/SRam.hpp"
-#include "Save/EEPRom.hpp"
-
 // Region code.
 // TODO: Make the region code non-console-specific.
 #include "MD/SysVersion.hpp"

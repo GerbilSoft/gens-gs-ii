@@ -31,6 +31,18 @@
 // MiniZip
 #include "minizip/zip.h"
 
+// ZOMG save structs.
+#include "zomg_vdp.h"
+#include "zomg_psg.h"
+#include "zomg_ym2612.h"
+#include "zomg_m68k.h"
+#include "zomg_z80.h"
+#include "zomg_md_io.h"
+#include "zomg_md_z80_ctrl.h"
+#include "zomg_md_time_reg.h"
+#include "zomg_md_tmss_reg.h"
+#include "zomg_eeprom.h"
+
 // C includes. (C++ namespace)
 #include <cstdint>
 #include <cstring>
@@ -620,7 +632,62 @@ int Zomg::saveMD_TMSS_reg(const Zomg_MD_TMSS_reg_t *tmss)
  */
 int Zomg::saveSRam(const uint8_t *sram, size_t siz)
 {
+	// TODO: Don't allow >65,536?
 	return d->saveToZomg("common/SRam.bin", sram, siz);
+}
+
+/**
+ * Save the EEPROM control data.
+ * @param ctrl EEPROM control data.
+ * @return 0 on success; non-zero on error.
+ */
+int Zomg::saveEEPRomCtrl(const Zomg_EPR_ctrl_t *ctrl)
+{
+	// TODO: Handle other types of EEPROM.
+	if (ctrl->epr_type != ZOMG_EPR_TYPE_I2C)
+		return -1;
+
+#if ZOMG_BYTEORDER == ZOMG_LIL_ENDIAN
+	Zomg_EPR_ctrl_t bswap_eeprom;
+	memcpy(&bswap_eeprom, ctrl, sizeof(bswap_eeprom));
+
+	// Swap the fields.
+	bswap_eeprom.header	= cpu_to_be32(bswap_eeprom.header);
+	bswap_eeprom.epr_type	= cpu_to_be32(bswap_eeprom.epr_type);
+
+	// I2C EEPROM.
+	bswap_eeprom.i2c.size		= cpu_to_be32(bswap_eeprom.i2c.size);
+	bswap_eeprom.i2c.page_size	= cpu_to_be16(bswap_eeprom.i2c.page_size);
+	bswap_eeprom.i2c.address	= cpu_to_be32(bswap_eeprom.i2c.address);
+
+	return d->saveToZomg("common/EPR_ctrl.bin", &bswap_eeprom, sizeof(bswap_eeprom));
+#else
+	return d->saveToZomg("common/EPR_ctrl.bin", ctrl, sizeof(*ctrl));
+#endif
+}
+
+/**
+ * Save the EEPROM page cache.
+ * @param cache EEPROM page cache.
+ * @param siz Size of EEPROM page cache.
+ * @return 0 on success; non-zero on error.
+ */
+int Zomg::saveEEPRomCache(const uint8_t *cache, size_t siz)
+{
+	// TODO: Don't allow >256?
+	return d->saveToZomg("common/EPR_cache.bin", cache, siz);
+}
+
+/**
+ * Save EEPROM.
+ * @param sram Pointer to EEPROM buffer.
+ * @param siz Size of EEPROM buffer.
+ * @return 0 on success; non-zero on error.
+ */
+int Zomg::saveEEPRom(const uint8_t *eeprom, size_t siz)
+{
+	// TODO: Don't allow >65,536?
+	return d->saveToZomg("common/EEPRom.bin", eeprom, siz);
 }
 
 }

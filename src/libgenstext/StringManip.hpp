@@ -2,7 +2,7 @@
  * libgenstext: Gens/GS II Text Manipulation Library.                      *
  * StringManip.hpp: String manipulation functions.                         *
  *                                                                         *
- * Copyright (c) 2010-2013 by David Korth.                                 *
+ * Copyright (c) 2010-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -25,8 +25,7 @@
 // C++ includes.
 #include <string>
 
-namespace LibGensText
-{
+namespace LibGensText {
 
 /**
  * Remove excess spaces from a string.
@@ -36,7 +35,14 @@ namespace LibGensText
  * @param src String. (UTF-8)
  * @return String with excess spaces removed. (UTF-8)
  */
-std::string SpaceElim(const std::string& src);
+std::string SpaceElim(const std::string &src);
+
+/**
+ * Get the filename portion of a path without its extension.
+ * @param filename Original filename.
+ * @return Filename without directories or its extension.
+ */
+std::string FilenameNoExt(const std::string &filename);
 
 }
 

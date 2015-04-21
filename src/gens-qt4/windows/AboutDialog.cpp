@@ -380,8 +380,9 @@ QString AboutDialogPrivate::GetDebugInfo(void)
 	sDebugInfo += sLineBreak;
 
 	//: Timing method: Function used to handle emulation timing.
+	LibGens::Timing timing;
 	sDebugInfo += AboutDialog::tr("Timing method:") +
-		QLatin1String(LibGens::Timing::GetTimingMethodName(LibGens::Timing::GetTimingMethod())) +
+		QLatin1String(timing.GetTimingMethodName(timing.getTimingMethod())) +
 		QLatin1String("()") + sLineBreak + sLineBreak;
 
 	//: Save directory: Directory where configuration and savestate files are saved.

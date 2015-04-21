@@ -68,8 +68,7 @@
 #define FILENAME_CASE_SENSITIVE Qt::CaseSensitive
 #endif
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 EmuManager::EmuManager(QObject *parent, VBackend *vBackend)
 	: QObject(parent)
@@ -78,8 +77,8 @@ EmuManager::EmuManager(QObject *parent, VBackend *vBackend)
 	, m_romClosedFb(nullptr)
 {
 	// Initialize timing information.
-	m_lastTime = 0.0;
-	m_lastTime_fps = 0.0;
+	m_lastTime = 0;
+	m_lastTime_fps = 0;
 	m_frames = 0;
 
 	// No ROM is loaded at startup.
@@ -440,7 +439,7 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	m_audio->open();
 
 	// Initialize timing information.
-	m_lastTime = LibGens::Timing::GetTimeD();
+	m_lastTime = 0;
 	m_lastTime_fps = m_lastTime;
 	m_frames = 0;
 
@@ -693,23 +692,25 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 	if (!wasFastFrame)
 		m_frames++;
 
-	double timeDiff;
-	double thisTime = LibGens::Timing::GetTimeD();
+	uint64_t timeDiff;
+	uint64_t thisTime = m_timing.getTime();
 	
-	if (m_lastTime < 0.001) {
+	if (m_lastTime < 1000) {
+		// Just started.
 		m_lastTime = thisTime;
 		m_lastTime_fps = m_lastTime;
-		timeDiff = 0.0;
+		timeDiff = 0;
 	} else {
 		// Get the time difference.
 		timeDiff = (thisTime - m_lastTime);
 
 		// Check the FPS counter.
-		double timeDiff_fps = (thisTime - m_lastTime_fps);
-		if (timeDiff_fps >= 0.250) {
+		uint64_t timeDiff_fps = (thisTime - m_lastTime_fps);
+		if (timeDiff_fps >= 250000) {
+			// More than 250ms since last FPS update.
 			// Push the current fps.
 			// (Updated four times per second.)
-			double fps = ((double)m_frames / timeDiff_fps);
+			double fps = ((double)m_frames / (timeDiff_fps / 1000000.0));
 			emit updateFps(fps);
 
 			// Reset the timer and frame counter.
@@ -754,9 +755,9 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 
 	// Check if we're higher or lower than the required framerate.
 	bool doFastFrame = false;
-	const double frameRate = (1.0 /
-			(gqt4_emuContext->versionRegisterObject()->isPal() ? 50.0 : 60.0));
-	const double threshold = 0.001;
+	const uint64_t frameRate = (1000000 /
+			(gqt4_emuContext->versionRegisterObject()->isPal() ? 50 : 60));
+	const uint64_t threshold = 1000;
 	if (timeDiff > (frameRate + threshold)) {
 		// Lower than the required framerate.
 		// Do a fast frame.
@@ -766,7 +767,7 @@ void EmuManager::emuFrameDone(bool wasFastFrame)
 		// Higher than the required framerate.
 		// Wait for the required amount of time.
 		do {
-			thisTime = LibGens::Timing::GetTimeD();
+			thisTime = m_timing.getTime();
 			timeDiff = (thisTime - m_lastTime);
 
 			// NOTE: Putting usleep(0) here reduces CPU usage,

@@ -21,13 +21,10 @@
 #ifndef __CXX11_COMPAT_H__
 #define __CXX11_COMPAT_H__
 
-/* Define to 1 if C++ 2011 is supported. */
-#cmakedefine HAVE_CXX_2011 1
-
-#if !defined(HAVE_CXX_2011) || !defined(__cplusplus)
+#if !defined(__cplusplus)
 
 /**
- * Either C++ 2011 is not supported, or we're compiling C code.
+ * We're compiling C code.
  * Provide replacements for C++ 2011 functionality.
  */
 #define CXX11_COMPAT_NULLPTR
@@ -127,7 +124,6 @@ namespace std {
 /**
  * MSVC prefixes some POSIX/C99 functions with underscores,
  * and has completely different names for others.
- * Instead, it has _snprintf().
  */
 #define snprintf(str, size, format, ...) _snprintf(str, size, format, __VA_ARGS__)
 #define vsnprintf(str, size, format, ap) _vsnprintf(str, size, format, ap)

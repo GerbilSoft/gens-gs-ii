@@ -29,6 +29,7 @@
 
 // ZOMG savestate handler.
 #include "libgens/Save/GensZomg.hpp"
+#include "libzomg/Zomg.hpp"
 
 // LibGens includes.
 #include "libgens/MD/EmuMD.hpp"

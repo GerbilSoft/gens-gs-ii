@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -191,21 +191,7 @@ RomPrivate::RomPrivate(Rom *q, const utf8_str *filename,
 	this->filename = string(filename);
 
 	// Remove the directories and extension from the ROM filename.
-	// TODO: Remove all extensions (e.g. ".gen.gz")?
-	string tmpFilename = this->filename;
-
-	// Get the filename portion.
-	size_t dirSep = tmpFilename.rfind(LG_PATH_SEP_CHR);
-	if (dirSep != string::npos)
-		tmpFilename.erase(0, dirSep+1);
-
-	// Remove the file extension.
-	size_t extSep = tmpFilename.rfind('.');
-	if (extSep != string::npos)
-		tmpFilename.erase(extSep, (tmpFilename.size() - extSep));
-
-	// Save the truncated filename.
-	filenameBaseNoExt = tmpFilename;
+	filenameBaseNoExt = LibGensText::FilenameNoExt(this->filename);
 
 	// Open the ROM file.
 	file = fopen(filename, "rb");
@@ -706,28 +692,58 @@ int Rom::romSize(void) const
  * Get the ROM filename.
  * @return ROM filename (UTF-8), or empty string on error.
  */
-const string Rom::filename(void) const
+string Rom::filename(void) const
 	{ return d->filename; }
 
 /**
- * Get the ROM filename. (basename, no extension)
+ * Get the ROM filename.
+ * (Basename, no extension)
+ * TODO: Rename to filename_baseNoExt()?
  * @return ROM filename (UTF-8), or nullptr on error.
  */
-const string Rom::filenameBaseNoExt(void) const
+string Rom::filenameBaseNoExt(void) const
 	{ return d->filenameBaseNoExt; }
+
+/**
+ * Get the ROM filename of the selected file in a multi-file archive.
+ * @return ROM filename (UTF-8), or empty string on error.
+ */
+string Rom::z_filename(void) const
+{
+	// TODO: Cache it?
+	if (d->z_entry_sel && d->z_entry_sel->filename) {
+		return string(d->z_entry_sel->filename);
+	}
+	return string();
+}
+
+/**
+ * Get the ROM filename of the selected file in a multi-file archive.
+ * (Basename, no extension.)
+ * @return ROM filename (UTF-8), or empty string on error.
+ */
+string Rom::z_filename_baseNoExt(void) const
+{
+	// TODO: Cache it?
+	string tmp = z_filename();
+	if (!tmp.empty()) {
+		tmp = LibGensText::FilenameNoExt(tmp);
+	}
+	return tmp;
+}
 
 /**
  * Get the Japanese (domestic) ROM name.
  * @return Japanese (domestic) ROM name (UTF-8), or empty string on error.
  */
-const string Rom::romNameJP(void) const
+string Rom::romNameJP(void) const
 	{ return d->romNameJP; }
 
 /**
  * Get the American (overseas) ROM name.
  * @return American (overseas) ROM name (UTF-8), or empty string on error.
  */
-const string Rom::romNameUS(void) const
+string Rom::romNameUS(void) const
 	{ return d->romNameUS; }
 
 /**

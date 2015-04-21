@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville                       *
  * Copyright (c) 2003-2004 by Stéphane Akhoun                              *
- * Copyright (c) 2008-2010 by David Korth                                  *
+ * Copyright (c) 2008-2015 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -26,117 +26,69 @@
 
 // C includes.
 #include <stdint.h>
-#include <stdio.h>
 
 // LibGens includes.
 #include "../macros/common.h"
 
-// ZOMG PSG struct.
-#include "libzomg/zomg_psg.h"
+struct _Zomg_PsgSave_t;
 
-namespace LibGens
-{
+namespace LibGens {
 
+class PsgPrivate;
 class Psg
 {
 	public:
 		Psg();
 		Psg(int clock, int rate);
-		
+		~Psg();
+
+	protected:
+		friend class PsgPrivate;
+		PsgPrivate *const d;
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		Psg(const Psg &);
+		Psg &operator=(const Psg &);
+
+	public:
 		void reInit(int clock, int rate);
+
+		/**
+		 * Reset the PSG state.
+		 */
+		void reset(void);
 		
 		/**
-		 * reset(): Reset the PSG state.
+		 * Write to the PSG's data port.
+		 * @param data Data value.
 		 */
-		inline void reset(void) { zomgRestore(&ms_psgStateInit); }
-		
-		/* PSG manipulation functions. */
 		void write(uint8_t data);
-		void update(int32_t *bufL, int32_t *bufR, int length);
-		
+
 		/** ZOMG savestate functions. **/
-		void zomgSave(Zomg_PsgSave_t *state);
-		void zomgRestore(const Zomg_PsgSave_t *state);
+		void zomgSave(_Zomg_PsgSave_t *state);
+		void zomgRestore(const _Zomg_PsgSave_t *state);
 		
 		/** Gens-specific code. */
-		int getReg(int regID);
 		void specialUpdate(void);
-		
+
+		/** FIXME: This sound mixing code needs to be totally redone. **/
+
 		// PSG write length.
-		inline void addWriteLen(int len) { m_writeLen += len; }
-		inline void clearWriteLen(void) { m_writeLen = 0; }
-		
+		void addWriteLen(int len);
+		void clearWriteLen(void);
+
 		// Reset buffer pointers.
 		void resetBufferPtrs(void);
-	
-	protected:
-		int m_curChan;	// Current channel.
-		int m_curReg;	// Current register.
-		
-		unsigned int m_reg[8];		// Registers.
-		unsigned int m_counter[4];	// Counters for the four channels.
-		unsigned int m_cntStep[4];	// Counter steps when using interpolation.
-		
-		unsigned int m_volume[4];	// Volume for each channel.
-		
-		/* Noise channel variables. */
-		unsigned int m_lfsrMask;	// Linear Feedback Shift Register mask.
-		unsigned int m_lfsr;		// Linear Feedback Shift Register contents.
-		
-		/* Lookup tables. */
-		unsigned int m_stepTable[1024];
-		unsigned int m_volumeTable[16];
-		unsigned int m_noiseStepTable[4];
-		
-		/* LFSR constants. */
-		static const unsigned int LFSR_MASK_WHITE	= 0x0009;
-		static const unsigned int LFSR_MASK_PERIODIC	= 0x0001;
-		static const unsigned int LFSR_INIT		= 0x8000;
-		
-		/** parity16() and LFSR16_Shift() from http://www.smspower.org/dev/docs/wiki/Sound/PSG#noisegeneration **/
-		
-		/**
-		* parity16(): Get the parity of a 16-bit value.
-		* @param n Value to check.
-		* @return Parity.
-		*/
-		static inline unsigned int FUNC_PURE parity16(unsigned int n)
-		{
-			n ^= n >> 8;
-			n ^= n >> 4;
-			n ^= n >> 2;
-			n ^= n >> 1;
-			return (n & 1);
-		}
-		
-		/**
-		* LFSR16_Shift(): Shift the Linear Feedback Shift Register. (16-bit LFSR)
-		* @param LFSR Current LFSR contents.
-		* @param LFSR_Mask LFSR mask.
-		* @return Shifted LFSR value.
-		*/
-		static inline unsigned int FUNC_PURE LFSR16_Shift(unsigned int LFSR, unsigned int LFSR_Mask)
-		{
-			return (LFSR >> 1) |
-				(((LFSR_Mask > 1)
-					? parity16(LFSR & LFSR_Mask)
-					: (LFSR & LFSR_Mask)) << 15);
-		}
-		
-		/* Maximum output. (default = 0x7FFF) */
-		static const unsigned int MAX_OUTPUT = 0x4FFF;
-		
-		/* Initial PSG state. */
-		static const Zomg_PsgSave_t ms_psgStateInit;
-		
-		// PSG write length. (for audio output)
-		int m_writeLen;
-		bool m_enabled;
-		
-		// PSG buffer pointers.
-		// TODO: Figure out how to get rid of these!
-		int32_t *m_bufPtrL;
-		int32_t *m_bufPtrR;
+
+	public:
+		// Super secret debug stuff!
+		// For use by MDP plugins and test suites.
+		// Return value is an MDP error code.
+		int dbg_getReg(int reg_num, uint16_t *out) const;
+		int dbg_setReg(int reg_num, uint16_t val);
+		int dbg_getRegNumLatch(uint8_t *out) const;
+		int dbg_setRegNumLatch(uint8_t val);
 };
 
 /* Gens */

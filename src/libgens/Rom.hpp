@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -30,11 +30,6 @@
 // C++ includes.
 #include <string>
 
-// LibGens includes.
-#include "Save/SRam.hpp"
-#include "Save/EEPRom.hpp"
-#include "macros/common.h"
-
 // Decompressor subsystem.
 #include "Decompressor/Decompressor.hpp"
 
@@ -47,8 +42,7 @@
  */
 #define ROM_HEADER_SIZE 65536
 
-namespace LibGens
-{
+namespace LibGens {
 
 class RomPrivate;
 
@@ -56,8 +50,7 @@ class Rom
 {
 	public:
 		// TODO: Use MDP headers for system identifiers.
-		enum MDP_SYSTEM_ID
-		{
+		enum MDP_SYSTEM_ID {
 			/*! BEGIN: MDP v1.0 system IDs. !*/
 			MDP_SYSTEM_UNKNOWN = 0,
 			MDP_SYSTEM_MD      = 1,
@@ -73,8 +66,7 @@ class Rom
 			MDP_SYSTEM_MAX
 		};
 
-		enum RomFormat
-		{
+		enum RomFormat {
 			RFMT_UNKNOWN = 0,
 
 			RFMT_BINARY,		// Plain binary ROM image.
@@ -144,13 +136,27 @@ class Rom
 		 * Get the ROM filename.
 		 * @return ROM filename (UTF-8), or empty string on error.
 		 */
-		const std::string filename(void) const;
+		std::string filename(void) const;
 
 		/**
-		 * Get the ROM filename. (basename, no extension)
+		 * Get the ROM filename.
+		 * (Basename, no extension)
 		 * @return ROM filename (UTF-8), or empty string on error.
 		 */
-		const std::string filenameBaseNoExt(void) const;
+		std::string filenameBaseNoExt(void) const;
+
+		/**
+		 * Get the ROM filename of the selected file in a multi-file archive.
+		 * @return ROM filename (UTF-8), or empty string on error.
+		 */
+		std::string z_filename(void) const;
+
+		/**
+		 * Get the ROM filename of the selected file in a multi-file archive.
+		 * (Basename, no extension.)
+		 * @return ROM filename (UTF-8), or empty string on error.
+		 */
+		std::string z_filename_baseNoExt(void) const;
 
 		/********************
 		 * ROM header data. *
@@ -160,13 +166,13 @@ class Rom
 		 * Get the Japanese (domestic) ROM name.
 		 * @return Japanese (domestic) ROM name (UTF-8), or empty string on error.
 		 */
-		const std::string romNameJP(void) const;
+		std::string romNameJP(void) const;
 
 		/**
 		 * Get the American (overseas) ROM name.
 		 * @return American (overseas) ROM name (UTF-8), or empty string on error.
 		 */
-		const std::string romNameUS(void) const;
+		std::string romNameUS(void) const;
 
 		/**
 		 * Get the ROM checksum.
@@ -237,8 +243,7 @@ class Rom
 		/**
 		 * Mappers.
 		 */
-		enum Mapper
-		{
+		enum Mapper {
 			/**
 			 * Standard MD mapper.
 			 * Can represent either of the following:

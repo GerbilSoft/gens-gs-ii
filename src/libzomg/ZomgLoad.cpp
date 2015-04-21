@@ -30,6 +30,18 @@
 // MiniZip
 #include "minizip/unzip.h"
 
+// ZOMG save structs.
+#include "zomg_vdp.h"
+#include "zomg_psg.h"
+#include "zomg_ym2612.h"
+#include "zomg_m68k.h"
+#include "zomg_z80.h"
+#include "zomg_md_io.h"
+#include "zomg_md_z80_ctrl.h"
+#include "zomg_md_time_reg.h"
+#include "zomg_md_tmss_reg.h"
+#include "zomg_eeprom.h"
+
 // C includes. (C++ namespace)
 #include <cstdint>
 #include <cstring>
@@ -661,6 +673,45 @@ int Zomg::loadSRam(uint8_t *sram, size_t siz)
 	}
 
 	return ret;
+}
+
+/**
+ * Load the EEPROM control data.
+ * @param ctrl EEPROM control data.
+ * @return Number of bytes read on success; negative on error.
+ */
+int Zomg::loadEEPRomCtrl(Zomg_EPR_ctrl_t *ctrl)
+{
+	// TODO
+	return 0;
+}
+
+/**
+ * Load the EEPROM page cache.
+ * @param cache Pointer to EEPROM page cache buffer.
+ * @param siz Size of EEPROM page cache buffer.
+ * @return Number of bytes read on success; negative on error.
+ */
+int Zomg::loadEEPRomCache(uint8_t *cache, size_t siz)
+{
+	int ret = d->loadFromZomg("common/EPR_cache.bin", cache, siz);
+	if (ret != (int)siz)
+		return -1;
+	return ret;
+}
+
+/**
+ * Load EEPROM.
+ * @param eeprom Pointer to SRAM buffer.
+ * @param siz Size of SRAM buffer.
+ * @return Number of bytes read on success; negative on error.
+ * NOTE: If the loaded EEPROM file is smaller than the specified EEPROM buffer,
+ * the remainder of the EEPROM buffer is initialized to 0xFF.
+ */
+int Zomg::loadEEPRom(uint8_t *eeprom, size_t siz)
+{
+	// TODO
+	return 0;
 }
 
 }

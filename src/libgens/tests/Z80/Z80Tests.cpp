@@ -234,8 +234,9 @@ TEST_F(Z80Tests, zexall)
 int main(int argc, char *argv[])
 {
 	fprintf(stderr, "LibGens test suite: Z80 tests.\n\n");
+	//LibGens::Init(); /* not needed for Z80 tests */
+	fflush(nullptr);
 
 	::testing::InitGoogleTest(&argc, argv);
-	//LibGens::Init(); /* not needed for Z80 tests */
 	return RUN_ALL_TESTS();
 }

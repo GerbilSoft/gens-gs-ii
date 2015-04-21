@@ -822,7 +822,7 @@ void GLBackend::printOsdText(void)
 
 	// TODO: Adjust for visible texture size.
 	int y = (240 - ms_Osd_chrH);
-	const double curTime = LibGens::Timing::GetTimeD();
+	const uint64_t curTime = m_timing.getTime();
 
 	// Check if the FPS should be drawn.
 	if (isRunning() && !isPaused() && osdFpsEnabled()) {
@@ -855,7 +855,7 @@ void GLBackend::printOsdText(void)
 					// Message has *not* been displayed.
 					// Reset its end time.
 					m_osdList[i].endTime =
-						curTime + ((double)m_osdList[i].duration / 1000.0);
+						curTime + (m_osdList[i].duration * 1000);
 				}
 			}
 
@@ -1073,7 +1073,7 @@ void GLBackend::showOsdPreview(void)
 	}
 
 	// Check if the duration has elapsed.
-	const double curTime = LibGens::Timing::GetTimeD();
+	const uint64_t curTime = m_timing.getTime();
 	if (curTime >= m_previewImg.endTime) {
 		// Preview duration has elapsed.
 		// TODO: Combine this code with the !m_preview_show code.

@@ -26,6 +26,7 @@
 
 // C includes
 #include <signal.h>
+#include <unistd.h>
 
 // LibGens includes.
 #include "libgens/lg_main.hpp"

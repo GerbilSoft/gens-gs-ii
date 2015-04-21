@@ -32,8 +32,16 @@
 #include "../cpu/M68K.hpp"
 #include "../lg_osd.h"
 
+// ZOMG
+#include "libzomg/Zomg.hpp"
+#include "libzomg/zomg_md_time_reg.h"
+
 // C includes. (C++ namespace)
 #include <cstdlib>
+
+// C++ includes.
+#include <string>
+using std::string;
 
 /**
  * References:
@@ -121,7 +129,7 @@ class RomCartridgeMDPrivate
 		 * @param crc32 ROM CRC32.
 		 * @return Index in MD_RomFixups[], or -1 if no fixup is required.
 		 */
-		static int CheckRomFixups(const std::string serialNumber, uint16_t checksum, uint32_t crc32);
+		static int CheckRomFixups(const string serialNumber, uint16_t checksum, uint32_t crc32);
 
 		// ROM fixup ID.
 		// If less than 0, no fixup should be applied.
@@ -263,7 +271,7 @@ const RomCartridgeMDPrivate::MD_RomFixup_t RomCartridgeMDPrivate::MD_RomFixups[]
  * @param crc32 ROM CRC32.
  * @return Index in MD_RomFixups[], or -1 if no fixup is required.
  */
-int RomCartridgeMDPrivate::CheckRomFixups(const std::string serialNumber, uint16_t checksum, uint32_t crc32)
+int RomCartridgeMDPrivate::CheckRomFixups(const string serialNumber, uint16_t checksum, uint32_t crc32)
 {
 	const char *serialNumber_c_str = serialNumber.c_str();
 
@@ -696,8 +704,15 @@ int RomCartridgeMD::initSRam(void)
 	m_SRam.setEnd(sramEndAddr);
 
 	// Load the SRam file.
-	// TODO: Use internal filename for multi-file?
-	m_SRam.setFilename(d->rom->filename());
+	// NOTE: SRam::setFilename() uses LibGensText::FilenameNoExt().
+	string rom_filename;
+	if (d->rom->isMultiFile()) {
+		rom_filename = d->rom->z_filename();
+	}
+	if (rom_filename.empty()) {
+		rom_filename = d->rom->filename();
+	}
+	m_SRam.setFilename(rom_filename);
 	return m_SRam.load();
 }
 
@@ -720,9 +735,16 @@ int RomCartridgeMD::initEEPRom(void)
 	if (d->eprType < 0)
 		return -1;
 
-	// Load the EEProm file.
-	// TODO: Use internal filename for multi-file?
-	m_EEPRom.setFilename(d->rom->filename());
+	// Load the EEPRom file.
+	// NOTE: EEPRomI2C::setFilename() uses LibGensText::FilenameNoExt().
+	string rom_filename;
+	if (d->rom->isMultiFile()) {
+		rom_filename = d->rom->z_filename();
+	}
+	if (rom_filename.empty()) {
+		rom_filename = d->rom->filename();
+	}
+	m_EEPRom.setFilename(rom_filename);
 	return m_EEPRom.load();
 }
 
@@ -937,7 +959,7 @@ uint16_t RomCartridgeMD::readWord(uint32_t address)
 	if (EmuContext::GetSaveDataEnable()) {
 		if (m_EEPRom.isEEPRomTypeSet()) {
 			// EEPRom is enabled.
-			if (m_EEPRom.isReadBytePort(address)) {
+			if (m_EEPRom.isReadWordPort(address)) {
 				// EEPRom read port.
 				return m_EEPRom.readWord(address);
 			}
@@ -1231,7 +1253,7 @@ void RomCartridgeMD::writeWord_TIME(uint8_t address, uint16_t data)
 void RomCartridgeMD::initMemoryMap(void)
 {
 	// Check for a ROM fixup.
-	const std::string serialNumber = d->rom->rom_serial();
+	const string serialNumber = d->rom->rom_serial();
 	const uint16_t checksum = d->rom->checksum();
 	const uint32_t crc32 = d->rom->rom_crc32();
 	d->romFixup = d->CheckRomFixups(serialNumber, checksum, crc32);
@@ -1239,7 +1261,7 @@ void RomCartridgeMD::initMemoryMap(void)
 	// Check for EEPROM.
 	// TODO: Change DetectEEPRomType to use a full serial?
 	const char *eep_serial = (serialNumber.c_str() + 3);
-	d->eprType = EEPRom::DetectEEPRomType(
+	d->eprType = EEPRomI2C::DetectEEPRomType(
 			eep_serial,
 			(serialNumber.size() - 3),
 			checksum);
@@ -1326,32 +1348,33 @@ void RomCartridgeMD::updateMarsBanking(void)
 	m_cartBanks[19] = bank_start + 1;
 }
 
-
 /** ZOMG savestate functions. **/
 
 /**
- * Save the /TIME register state.
- * @param state Zomg_MD_TimeReg_t struct to save to.
+ * Save the cartridge data, including /TIME, SRAM, and/or EEPROM.
+ * @param zomg ZOMG savestate to save to.
  */
 void RomCartridgeMD::zomgSave(LibZomg::Zomg *zomg) const
 {
 	// Save the MD /TIME registers.
 	Zomg_MD_TimeReg_t md_time_reg_save;
 	memset(md_time_reg_save.reg, 0xFF, sizeof(md_time_reg_save.reg));
-	
+
 	// SRAM / EEPROM control registers.
 	if (!m_EEPRom.isEEPRomTypeSet()) {
 		// EEPRom is disabled. Use SRam.
 		// Save SRam control registers to the /TIME register bank.
 		md_time_reg_save.SRAM_ctrl = m_SRam.zomgReadCtrl();
-		
+
 		// Save SRAM.
 		// TODO: Make this optional.
-		m_SRam.saveToZomg(zomg);
+		m_SRam.zomgSave(zomg);
 	} else {
-		// TODO: EEPRom saving.
+		// Save the EEPROM control registers and data.
+		// TODO: Make saving EEPROM data optional?
+		m_EEPRom.zomgSave(zomg);
 	}
-	
+
 	// Check if we have to save any bankswitching registers.
 	switch (m_mapper.type) {
 		case MAPPER_MD_SSF2: {
@@ -1372,11 +1395,11 @@ void RomCartridgeMD::zomgSave(LibZomg::Zomg *zomg) const
 }
 
 /**
- * Restore the /TIME register state.
+ * Restore the cartridge data, including /TIME, SRAM, and/or EEPROM.
  * @param zomg ZOMG savestate to restore from.
- * (TODO: Do we really want to pass the whole save file?)
+ * @param loadSaveData If true, load the save data in addition to the state.
  */
-void RomCartridgeMD::zomgRestore(LibZomg::Zomg *zomg)
+void RomCartridgeMD::zomgRestore(LibZomg::Zomg *zomg, bool loadSaveData)
 {
 	Zomg_MD_TimeReg_t md_time_reg_save;
 	int ret = zomg->loadMD_TimeReg(&md_time_reg_save);
@@ -1402,10 +1425,12 @@ void RomCartridgeMD::zomgRestore(LibZomg::Zomg *zomg)
 		}
 
 		// Load SRAM.
-		// TODO: Make this optional.
-		m_SRam.loadFromZomg(zomg);
+		if (loadSaveData) {
+			m_SRam.zomgRestore(zomg);
+		}
 	} else {
-		// TODO: EEPRom loading.
+		// Load EEPROM.
+		m_EEPRom.zomgRestore(zomg, loadSaveData);
 	}
 
 	// Check if we have to restore any bankswitching registers.

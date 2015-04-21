@@ -102,7 +102,7 @@ void VBackend::osd_printqs(const int duration, const QString &msg, bool forceVbD
 	osdMsg.msg = msg;
 	osdMsg.duration = duration;
 	osdMsg.hasDisplayed = false;
-	osdMsg.endTime = LibGens::Timing::GetTimeD() + ((double)duration / 1000.0);
+	osdMsg.endTime = m_timing.getTime() + (duration * 1000);
 	m_osdList.append(osdMsg);
 	setOsdListDirty();
 
@@ -163,10 +163,11 @@ void VBackend::osd_show_preview(int duration, const QImage& img)
 	bool oldPreviewImg_visible = m_previewImg.visible;
 
 	// TODO: Mark as dirty.
-	if (img.isNull())
+	if (img.isNull()) {
 		m_previewImg.clear();
-	else
-		m_previewImg.set(duration, img);
+	} else {
+		m_previewImg.set(m_timing, duration, img);
+	}
 
 	// TODO: Only if running?
 	if (m_previewImg.visible || oldPreviewImg_visible) {
@@ -226,7 +227,7 @@ int VBackend::recSetStatus(const QString &component, bool isRecording)
 			break;
 	}
 
-	const double curTime = LibGens::Timing::GetTimeD();
+	const uint64_t curTime = m_timing.getTime();
 
 	if (recIdx >= m_osdRecList.size()) {
 		// Not found. Add a new component.
@@ -275,7 +276,7 @@ int VBackend::recSetDuration(const QString &component, int duration)
 		return -1;
 
 	// Set the recording duration.
-	const double curTime = LibGens::Timing::GetTimeD();
+	const uint64_t curTime = m_timing.getTimeD();
 	m_osdRecList[recIdx].duration = duration;
 	m_osdRecList[recIdx].lastUpdate = curTime;
 
@@ -380,7 +381,7 @@ int VBackend::osd_process_int(bool updateVBackend)
 	int msgRemaining = 0;
 
 	// Get the current time.
-	const double curTime = LibGens::Timing::GetTimeD();
+	const uint64_t curTime = m_timing.getTime();
 
 	if (!osdMsgEnabled()) {
 		// Messages are disabled. Clear the message list.
@@ -402,7 +403,7 @@ int VBackend::osd_process_int(bool updateVBackend)
 					// Message has *not* been displayed.
 					// Reset its end time.
 					m_osdList[i].endTime =
-						curTime + ((double)m_osdList[i].duration / 1000.0);
+						curTime + (m_osdList[i].duration * 1000);
 				}
 			}
 		}
