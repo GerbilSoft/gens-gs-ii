@@ -250,14 +250,14 @@ The data_latch field is used for some VDPs that latch certain data writes.
 typedef struct _ZOMG_VDP_ctrl_16_t {
 	uint32_t header;		// 32BE: Should be 'MD  ' (0x4D442020)
 
-	uint8_t reserved;		// 8-bit; Reserved.
+	uint8_t reserved1;		// 8-bit; Reserved.
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
 	uint8_t addr_hi_latch;		// 8-bit: Latch for A16-A14.
 	uint8_t code;			// 8-bit: VDP access code. (CD5-CD0)
 
 	uint32_t address;		// 32BE: VDP address counter.
 	uint16_t status;		// 16BE: VDP status register.
-	uint16_t reserved;		// Reserved.
+	uint16_t reserved2;		// Reserved.
 
 	uint16_t data_fifo[4];		// 16BE: Data FIFO. (4 words)
 	uint8_t data_fifo_index;	// 8-bit: Current FIFO index.
