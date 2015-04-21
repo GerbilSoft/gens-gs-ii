@@ -296,18 +296,24 @@ class VdpPrivate
 			// shifted A16-A14 positions for performance reasons.
 			// Reference: http://gendev.spritesmind.net/forum/viewtopic.php?t=1277&p=17430#17430
 			uint32_t address;	// Address counter.
-			uint32_t addr_hi_latch;	// Latch for A16-A14. (TODO: Save to ZOMG.)
+			uint32_t addr_hi_latch;	// Latch for A16-A14.
 			uint8_t code;		// Access code. (CD5-CD0)
 
 			// TODO: Address LSB latch for MD Mode 4?
 
-			// Game Gear: CRAM latch.
-			// Writes to even CRAM addresses go here.
-			// Writes to odd CRAM addresses act as a word write,
-			// with the written data as the even byte and
-			// this latch as the odd byte.
-			// NOTE: Game Gear CRAM is LE16.
-			uint8_t cram_latch_gg;
+			/**
+			 * Data latch.
+			 * - Mega Drive in SMS mode: Control word latch.
+			 *   First byte of the control word is latched,
+			 *   compared to SMS where it's applied immediately.
+			 * - Game Gear: CRAM latch.
+			 *   Writes to even CRAM addresses go here.
+			 *   Writes to odd CRAM addresses act as a word write,
+			 *   with the written data as the even byte and
+			 *   this latch as the odd byte.
+			 *   NOTE: Game Gear CRAM is LE16.
+			 */
+			uint8_t data_latch;
 
 			void reset(void)
 			{
@@ -317,7 +323,7 @@ class VdpPrivate
 				address = 0;
 				addr_hi_latch = 0;
 				code = 0;
-				cram_latch_gg = 0;
+				data_latch = 0;
 			}
 		} VDP_Ctrl;
 

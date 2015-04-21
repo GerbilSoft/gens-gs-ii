@@ -290,10 +290,6 @@ int Zomg::saveVdpCtrl_8(const Zomg_VdpCtrl_8_t *ctrl)
 	// Byteswap the fields.
 	bswap_ctrl.address = cpu_to_be16(bswap_ctrl.address);
 
-	// Clear the reserved fields.
-	memset(&bswap_ctrl.reserved1, 0, sizeof(bswap_ctrl.reserved1));
-	bswap_ctrl.reserved2 = 0;
-
 	// Save the file.
 	return d->saveToZomg("common/vdp_ctrl.bin", &bswap_ctrl, sizeof(bswap_ctrl));
 #else
@@ -322,17 +318,19 @@ int Zomg::saveVdpCtrl_16(const Zomg_VdpCtrl_16_t *ctrl)
 	bswap_ctrl.header = cpu_to_be32(bswap_ctrl.header);
 
 	// Byteswap the fields.
-	bswap_ctrl.address	= cpu_to_be16(bswap_ctrl.address);
+	bswap_ctrl.address	= cpu_to_be32(bswap_ctrl.address);
 	bswap_ctrl.status	= cpu_to_be16(bswap_ctrl.status);
+	bswap_ctrl.data_read_buffer = cpu_to_be16(bswap_ctrl.data_read_buffer);
 
-	// FIFO
-	for (int i = 0; i < 4; i++)
+	// Byteswap the FIFO.
+	for (int i = 0; i < 4; i++) {
 		bswap_ctrl.data_fifo[i] = cpu_to_be16(bswap_ctrl.data_fifo[i]);
+	}
 
 	// DMA (TODO)
 
 	// Clear the reserved fields.
-	memset(&bswap_ctrl.reserved1, 0, sizeof(bswap_ctrl.reserved1));
+	bswap_ctrl.reserved1 = 0;
 	bswap_ctrl.reserved2 = 0;
 
 	// Save the file.

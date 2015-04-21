@@ -383,17 +383,22 @@ void Vdp::zomgSaveMD(LibZomg::Zomg *zomg) const
 
 	// Save the internal registers.
 	Zomg_VdpCtrl_16_t ctrl_reg;
-	ctrl_reg.header = ZOMG_VDPCTRL_16_HEADER;
-	ctrl_reg.ctrl_latch = !!(d->VDP_Ctrl.ctrl_latch);
-	ctrl_reg.code = d->VDP_Ctrl.code;
-	ctrl_reg.address = d->VDP_Ctrl.address;
+	ctrl_reg.header		= ZOMG_VDPCTRL_16_HEADER;
+	ctrl_reg.ctrl_latch	= !!(d->VDP_Ctrl.ctrl_latch);
+	const uint8_t ctrl_mask = (d->is128KB() ? 0x07 : 0x03);
+	ctrl_reg.addr_hi_latch	= (d->VDP_Ctrl.addr_hi_latch >> 14) & ctrl_mask;
+	ctrl_reg.code		= d->VDP_Ctrl.code;
+	ctrl_reg.address	= d->VDP_Ctrl.address;
 	ctrl_reg.status = d->Reg_Status.read_raw();
 
-	// TODO: Implement the FIFO.
-	memset(ctrl_reg.data_fifo, 0x00, sizeof(ctrl_reg.data_fifo));
+	// TODO: Implement the FIFO and data read buffer.
+	memset(ctrl_reg.data_fifo, 0, sizeof(ctrl_reg.data_fifo));
+	ctrl_reg.data_fifo_index = 0;
 	ctrl_reg.data_fifo_count = 0;
+	ctrl_reg.data_read_buffer = 0;
 
 	// Make sure reserved fields are zero.
+	ctrl_reg.reserved1 = 0;
 	ctrl_reg.reserved2 = 0;
 
 	zomg->saveVdpCtrl_16(&ctrl_reg);
@@ -456,14 +461,16 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 	if (ret > 0) {
 		d->VDP_Ctrl.ctrl_latch = !!ctrl_reg.ctrl_latch;
 		d->VDP_Ctrl.code = ctrl_reg.code;
-		d->VDP_Ctrl.address = ctrl_reg.address;
+		d->VDP_Ctrl.address = ctrl_reg.address & d->VRam_Mask;
+		const uint8_t ctrl_mask = (d->is128KB() ? 0x07 : 0x03);
+		d->VDP_Ctrl.addr_hi_latch = (uint32_t)(ctrl_reg.addr_hi_latch & ctrl_mask) << 14;
 
 		// TODO: Do we want to load the NTSC/PAL bit from the savestate?
 		uint16_t status = d->Reg_Status.read_raw() & VdpStatus::VDP_STATUS_PAL;
 		status |= ctrl_reg.status & ~VdpStatus::VDP_STATUS_PAL;
 		d->Reg_Status.write_raw(status);
 
-		// TODO: Implement the FIFO.
+		// TODO: Implement the FIFO and data read buffer.
 	} else {
 		// TODO: Handle this error...
 		LOG_MSG(vdp_m5, LOG_MSG_LEVEL_WARNING,

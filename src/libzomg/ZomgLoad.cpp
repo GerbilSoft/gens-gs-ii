@@ -257,31 +257,64 @@ int Zomg::loadVdpCtrl_8(Zomg_VdpCtrl_8_t *ctrl)
  */
 int Zomg::loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl)
 {
-	int ret = d->loadFromZomg("common/vdp_ctrl.bin", ctrl, sizeof(*ctrl));
+	uint8_t data[sizeof(Zomg_VdpCtrl_16_t)];
+	int ret = d->loadFromZomg("common/vdp_ctrl.bin", &data, sizeof(data));
 
-	// Verify that the control registers are valid.
-	if (ret != (int)(sizeof(*ctrl)))
+	if (ret == (int)sizeof(Zomg_VdpCtrl_16_old_t)) {
+		// OLD VERSION. (pre-10abf8f3)
+		// DEPRECATED: Remove this once ZOMG is completed.
+		fprintf(stderr, "Zomg::loadVdpCtrl_16(): %s: WARNING: Deprecated (pre-10abf8f3) 24-byte common/vdp_ctrl.bin found.\n",
+			m_filename.c_str());
+		Zomg_VdpCtrl_16_t old_ctrl;
+		memcpy(&old_ctrl, &data, sizeof(old_ctrl));
+
+		// Verify the header.
+		ctrl->header = be32_to_cpu(old_ctrl.header);
+		if (ctrl->header != ZOMG_VDPCTRL_16_HEADER)
+			return -2;
+
+		// Byteswap the fields.
+		ctrl->address	= (uint32_t)be16_to_cpu(old_ctrl.address);
+		ctrl->status	= be16_to_cpu(old_ctrl.status);
+
+		// Bytesswap the FIFO.
+		for (int i = 0; i < 4; i++) {
+			ctrl->data_fifo[i] = be16_to_cpu(old_ctrl.data_fifo[i]);
+		}
+		
+		// addr_hi_latch isn't present in the old version.
+		ctrl->addr_hi_latch = (ctrl->address & 0xC000);
+		// FIXME: This wasn't present in the old version...
+		ctrl->data_read_buffer = 0;
+	} else if (ret == (int)sizeof(Zomg_VdpCtrl_16_t)) {
+		// New version. (10abf8f3 or later)
+		memcpy(ctrl, &data, sizeof(*ctrl));
+
+		// Verify the header.
+		ctrl->header = be32_to_cpu(ctrl->header);
+		if (ctrl->header != ZOMG_VDPCTRL_16_HEADER)
+			return -2;
+
+#if ZOMG_BYTEORDER == ZOMG_LIL_ENDIAN
+		// Byteswapping is required.
+
+		// Byteswap the fields.
+		ctrl->address	= be32_to_cpu(ctrl->address);
+		ctrl->status	= be16_to_cpu(ctrl->status);
+		ctrl->data_read_buffer = be16_to_cpu(ctrl->data_read_buffer);
+
+		// Bytesswap the FIFO.
+		for (int i = 0; i < 4; i++) {
+			ctrl->data_fifo[i] = be16_to_cpu(ctrl->data_fifo[i]);
+		}
+#endif	
+	} else {
+		// Invalid size.
+		fprintf(stderr, "Zomg::loadVdpCtrl_16(): %s: ERROR: Invalid common/vdp_ctrl.bin found. (%d bytes)\n",
+			m_filename.c_str(), ret);
 		return -1;
+	}
 
-	// Verify the header.
-	ctrl->header = be32_to_cpu(ctrl->header);
-	if (ctrl->header != ZOMG_VDPCTRL_16_HEADER)
-		return -2;
-
-	// Byteswap the fields.
-	ctrl->address		= be16_to_cpu(ctrl->address);
-	ctrl->status		= be16_to_cpu(ctrl->status);
-	
-	// FIFO
-	for (int i = 0; i < 4; i++)
-		ctrl->data_fifo[i] = be16_to_cpu(ctrl->data_fifo[i]);
-	
-	// DMA (TODO)
-	
-	// Clear the reserved fields.
-	memset(&ctrl->reserved1, 0, sizeof(ctrl->reserved1));
-	ctrl->reserved2 = 0;
-	
 	// Return the number of bytes read.
 	return ret;
 }
