@@ -574,7 +574,7 @@ int Zomg::saveMD_Z80Ctrl(const Zomg_MD_Z80CtrlSave_t *state)
 	memcpy(&bswap_state, state, sizeof(bswap_state));
 
 	// Byteswap the 16-bit fields.
-	bswap_state.m68k_bank = be16_to_cpu(bswap_state.m68k_bank);
+	bswap_state.m68k_bank = cpu_to_be16(bswap_state.m68k_bank);
 
 	return d->saveToZomg("MD/Z80_ctrl.bin", &bswap_state, sizeof(bswap_state));
 #else

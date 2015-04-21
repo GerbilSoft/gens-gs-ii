@@ -232,22 +232,18 @@ int Zomg::loadVdpReg(uint8_t *reg, size_t siz)
 int Zomg::loadVdpCtrl_8(Zomg_VdpCtrl_8_t *ctrl)
 {
 	int ret = d->loadFromZomg("common/vdp_ctrl.bin", ctrl, sizeof(*ctrl));
-	
+
 	// Verify that the control registers are valid.
 	if (ret != (int)(sizeof(*ctrl)))
 		return -1;
-	
+
 	// Verify the header.
 	ctrl->header = be32_to_cpu(ctrl->header);
 	if (ctrl->header != ZOMG_VDPCTRL_8_HEADER)
 		return -2;
-	
+
 	// Byteswap the fields.
 	ctrl->address = be16_to_cpu(ctrl->address);
-	
-	// Clear the reserved fields.
-	memset(&ctrl->reserved1, 0, sizeof(ctrl->reserved1));
-	ctrl->reserved2 = 0;
 
 	// Return the number of bytes read.
 	return ret;
@@ -262,16 +258,16 @@ int Zomg::loadVdpCtrl_8(Zomg_VdpCtrl_8_t *ctrl)
 int Zomg::loadVdpCtrl_16(Zomg_VdpCtrl_16_t *ctrl)
 {
 	int ret = d->loadFromZomg("common/vdp_ctrl.bin", ctrl, sizeof(*ctrl));
-	
+
 	// Verify that the control registers are valid.
 	if (ret != (int)(sizeof(*ctrl)))
 		return -1;
-	
+
 	// Verify the header.
 	ctrl->header = be32_to_cpu(ctrl->header);
 	if (ctrl->header != ZOMG_VDPCTRL_16_HEADER)
 		return -2;
-	
+
 	// Byteswap the fields.
 	ctrl->address		= be16_to_cpu(ctrl->address);
 	ctrl->status		= be16_to_cpu(ctrl->status);
@@ -514,15 +510,15 @@ int Zomg::loadM68KReg(Zomg_M68KRegSave_t *state)
 
 		// Byteswap the main registers.
 		for (int i = 0; i < 8; i++)
-			state->dreg[i] = cpu_to_be32(state->dreg[i]);
+			state->dreg[i] = be32_to_cpu(state->dreg[i]);
 		for (int i = 0; i < 7; i++)
-			state->areg[i] = cpu_to_be32(state->areg[i]);
+			state->areg[i] = be32_to_cpu(state->areg[i]);
 
 		// Byteswap the other registers.
-		state->ssp = cpu_to_be32(state->ssp);
-		state->usp = cpu_to_be32(state->usp);
-		state->pc  = cpu_to_be32(state->pc);
-		state->sr  = cpu_to_be16(state->sr);
+		state->ssp = be32_to_cpu(state->ssp);
+		state->usp = be32_to_cpu(state->usp);
+		state->pc  = be32_to_cpu(state->pc);
+		state->sr  = be16_to_cpu(state->sr);
 #endif	
 	} else {
 		// Invalid size.
