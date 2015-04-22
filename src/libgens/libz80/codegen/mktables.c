@@ -11,10 +11,11 @@
  * This utility generates most of the emulation code from the opcode specification
  *
  */
-#include "stdio.h"
-#include "regex.h"
-#include "stdlib.h"
-#include "string.h"
+#include <stdio.h>
+#include <regex.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 
 /* =========================================================
