@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
- * Z80Tests.cpp: ZEXDOC/ZEXALL using a minimal CP/M emulator.              *
+ * Z80Test.cpp: ZEXDOC/ZEXALL using a minimal CP/M emulator.               *
  *                                                                         *
  * Copyright (c) 2014 by David Korth.                                      *
  *                                                                         *
@@ -44,31 +44,28 @@ extern "C" {
 
 namespace LibGens { namespace Tests {
 
-class Z80Tests : public ::testing::Test
+class Z80Test : public ::testing::Test
 {
 	protected:
-		Z80Tests()
-			: ::testing::Test()
-			, m_Z80(nullptr)
-			, halt(false) { }
-		virtual ~Z80Tests() { }
+		Z80Test() : m_Z80(nullptr) { }
+		virtual ~Z80Test() { }
 
 		virtual void SetUp(void) override;
 		virtual void TearDown(void) override;
 
 	protected:
 		mdZ80_context *m_Z80;
-		static Z80Tests *curZ80Tests;
+		static Z80Test *curZ80Test;
 
 		// System state.
 		bool halt;
 
 		// FIXME: Pass the context in these functions.
 		static uint8_t FASTCALL Z80_ReadB_static(uint32_t adr) {
-			return curZ80Tests->Z80_ReadB(adr);
+			return curZ80Test->Z80_ReadB(adr);
 		}
 		static void FASTCALL Z80_WriteB_static(uint32_t adr, uint8_t data) {
-			curZ80Tests->Z80_WriteB(adr, data);
+			curZ80Test->Z80_WriteB(adr, data);
 		}
 
 		uint8_t Z80_ReadB(uint32_t adr);
@@ -76,22 +73,22 @@ class Z80Tests : public ::testing::Test
 
 		// FIXME: Pass the context in these functions.
 		static uint8_t FASTCALL Z80_InB_static(uint32_t adr) {
-			return curZ80Tests->Z80_InB(adr);
+			return curZ80Test->Z80_InB(adr);
 		}
 		static void FASTCALL Z80_OutB_static(uint32_t adr, uint8_t data) {
-			curZ80Tests->Z80_OutB(adr, data);
+			curZ80Test->Z80_OutB(adr, data);
 		}
 
 		uint8_t Z80_InB(uint32_t adr);
 		void Z80_OutB(uint32_t adr, uint8_t data);
 };
 
-Z80Tests *Z80Tests::curZ80Tests;
+Z80Test *Z80Test::curZ80Test;
 
-void Z80Tests::SetUp()
+void Z80Test::SetUp()
 {
-	// Set the current Z80Tests.
-	curZ80Tests = this;
+	// Set the current Z80Test.
+	curZ80Test = this;
 	halt = false;
 
 	// Initialize Z80 memory.
@@ -126,36 +123,36 @@ void Z80Tests::SetUp()
 	mdZ80_Set_Out(m_Z80, Z80_OutB_static);
 }
 
-void Z80Tests::TearDown(void)
+void Z80Test::TearDown(void)
 {
 	mdZ80_free(m_Z80);
 
-	curZ80Tests = nullptr;
+	curZ80Test = nullptr;
 	halt = false;
 }
 
 // Memory read/write functions.
 
-uint8_t Z80Tests::Z80_ReadB(uint32_t adr)
+uint8_t Z80Test::Z80_ReadB(uint32_t adr)
 {
 	return Ram_Z80[adr & 0xFFFF];
 }
 
-void Z80Tests::Z80_WriteB(uint32_t adr, uint8_t data)
+void Z80Test::Z80_WriteB(uint32_t adr, uint8_t data)
 {
 	Ram_Z80[adr & 0xFFFF] = data;
 }
 
 // I/O functions.
 
-uint8_t Z80Tests::Z80_InB(uint32_t adr)
+uint8_t Z80Test::Z80_InB(uint32_t adr)
 {
 	// No input ports...
 	((void)adr);
 	return 0xFF;
 }
 
-void Z80Tests::Z80_OutB(uint32_t adr, uint8_t data)
+void Z80Test::Z80_OutB(uint32_t adr, uint8_t data)
 {
 	switch (adr & 0xFF) {
 		case 0x01:
@@ -182,7 +179,7 @@ void Z80Tests::Z80_OutB(uint32_t adr, uint8_t data)
 /**
  * Run ZEXDOC.
  */
-TEST_F(Z80Tests, zexdoc)
+TEST_F(Z80Test, zexdoc)
 {
 	// Load ZEXDOC.
 	FILE *f = fopen("zexdoc.com", "rb");
@@ -208,7 +205,7 @@ TEST_F(Z80Tests, zexdoc)
 /**
  * Run ZEXALL.
  */
-TEST_F(Z80Tests, zexall)
+TEST_F(Z80Test, zexall)
 {
 	// Load ZEXALL.
 	FILE *f = fopen("zexall.com", "rb");
