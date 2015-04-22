@@ -102,8 +102,8 @@ void Z80Test::SetUp()
 	Ram_Z80[6] = 0x00;
 	Ram_Z80[7] = 0xF0;
 
-	// Load BDOS.
-	FILE *f = fopen("bdos.bin", "rb");
+	// Load BIOS.
+	FILE *f = fopen("bios.bin", "rb");
 	ASSERT_TRUE(f != nullptr);
 	fread(&Ram_Z80[0xF000], 1, 1068, f);
 	fclose(f);
