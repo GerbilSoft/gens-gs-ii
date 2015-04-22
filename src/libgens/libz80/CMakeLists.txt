@@ -46,3 +46,9 @@ SET_SOURCE_FILES_PROPERTIES(z80.c
 	PROPERTIES OBJECT_DEPENDS
 		${CMAKE_CURRENT_BINARY_DIR}/codegen/opcodes_decl.h
 	)
+
+# libz80 test suite based on FUSE.
+# (Free Unix Spectrum Emulator)
+IF(BUILD_TESTING)
+	ADD_SUBDIRECTORY(fuse_tests)
+ENDIF(BUILD_TESTING)
