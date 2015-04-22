@@ -24,23 +24,15 @@
 
 #include "lg_main.hpp"
 
-#include "mdZ80/mdZ80.h"
-#include "mdZ80/mdZ80_flags.h"
+#include "libz80/z80.h"
 
 // C includes. (C++ namespace)
 #include <cstdio>
 #include <cstring>
 using namespace std;
 
-// NOTE: This test suite uses mdZ80 directly.
+// NOTE: This test suite uses libz80 directly.
 // The Z80 class is currently hard-coded for MD only.
-
-// NOTE: Due to limitations in mdZ80 right now,
-// the first 8 KB must be RAM, and must be
-// accessible as Ram_Z80.
-extern "C" {
-	uint8_t Ram_Z80[65536];
-}
 
 namespace LibGens { namespace Tests {
 
@@ -54,33 +46,36 @@ class Z80Test : public ::testing::Test
 		virtual void TearDown(void) override;
 
 	protected:
-		mdZ80_context *m_Z80;
+		Z80Context *m_Z80;
 		static Z80Test *curZ80Test;
+
+		// Z80 RAM.
+		uint8_t Ram_Z80[65536];
 
 		// System state.
 		bool halt;
 
+		// TODO: Use param as the Z80Test context.
+		static uint8_t Z80_ReadB_static(int param, uint16_t address) {
+			return curZ80Test->Z80_ReadB(address);
+		}
+		static void Z80_WriteB_static(int param, uint16_t address, uint8_t data) {
+			curZ80Test->Z80_WriteB(address, data);
+		}
+
+		uint8_t Z80_ReadB(uint16_t address);
+		void Z80_WriteB(uint16_t address, uint8_t data);
+
 		// FIXME: Pass the context in these functions.
-		static uint8_t FASTCALL Z80_ReadB_static(uint32_t adr) {
-			return curZ80Test->Z80_ReadB(adr);
+		static uint8_t Z80_InB_static(int param, uint16_t address) {
+			return curZ80Test->Z80_InB(address);
 		}
-		static void FASTCALL Z80_WriteB_static(uint32_t adr, uint8_t data) {
-			curZ80Test->Z80_WriteB(adr, data);
-		}
-
-		uint8_t Z80_ReadB(uint32_t adr);
-		void Z80_WriteB(uint32_t adr, uint8_t data);
-
-		// FIXME: Pass the context in these functions.
-		static uint8_t FASTCALL Z80_InB_static(uint32_t adr) {
-			return curZ80Test->Z80_InB(adr);
-		}
-		static void FASTCALL Z80_OutB_static(uint32_t adr, uint8_t data) {
-			curZ80Test->Z80_OutB(adr, data);
+		static void Z80_OutB_static(int param, uint16_t address, uint8_t data) {
+			curZ80Test->Z80_OutB(address, data);
 		}
 
-		uint8_t Z80_InB(uint32_t adr);
-		void Z80_OutB(uint32_t adr, uint8_t data);
+		uint8_t Z80_InB(uint16_t address);
+		void Z80_OutB(uint16_t address, uint8_t data);
 };
 
 Z80Test *Z80Test::curZ80Test;
@@ -109,23 +104,21 @@ void Z80Test::SetUp()
 	fclose(f);
 
 	// Initialize the Z80 emulator for CP/M.
-	m_Z80 = mdZ80_new();
+	m_Z80 = (Z80Context*)calloc(1, sizeof(Z80Context));
 
-	// Set instruction fetch handlers.
-	mdZ80_Add_Fetch(m_Z80, 0x00, 0xFF, Ram_Z80);
-	
 	// Set memory read/write handlers.
-	mdZ80_Set_ReadB(m_Z80, Z80_ReadB_static);
-	mdZ80_Set_WriteB(m_Z80, Z80_WriteB_static);
+	m_Z80->memRead = Z80_ReadB_static;
+	m_Z80->memWrite = Z80_WriteB_static;
 
 	// Set I/O handlers.
-	mdZ80_Set_In(m_Z80, Z80_InB_static);
-	mdZ80_Set_Out(m_Z80, Z80_OutB_static);
+	m_Z80->ioRead = Z80_InB_static;
+	m_Z80->ioWrite = Z80_OutB_static;
 }
 
 void Z80Test::TearDown(void)
 {
-	mdZ80_free(m_Z80);
+	free(m_Z80);
+	m_Z80 = nullptr;
 
 	curZ80Test = nullptr;
 	halt = false;
@@ -133,28 +126,28 @@ void Z80Test::TearDown(void)
 
 // Memory read/write functions.
 
-uint8_t Z80Test::Z80_ReadB(uint32_t adr)
+uint8_t Z80Test::Z80_ReadB(uint16_t address)
 {
-	return Ram_Z80[adr & 0xFFFF];
+	return Ram_Z80[address & 0xFFFF];
 }
 
-void Z80Test::Z80_WriteB(uint32_t adr, uint8_t data)
+void Z80Test::Z80_WriteB(uint16_t address, uint8_t data)
 {
-	Ram_Z80[adr & 0xFFFF] = data;
+	Ram_Z80[address & 0xFFFF] = data;
 }
 
 // I/O functions.
 
-uint8_t Z80Test::Z80_InB(uint32_t adr)
+uint8_t Z80Test::Z80_InB(uint16_t address)
 {
 	// No input ports...
-	((void)adr);
+	((void)address);
 	return 0xFF;
 }
 
-void Z80Test::Z80_OutB(uint32_t adr, uint8_t data)
+void Z80Test::Z80_OutB(uint16_t address, uint8_t data)
 {
-	switch (adr & 0xFF) {
+	switch (address & 0xFF) {
 		case 0x01:
 			// stdout
 			// TODO: Lines beginning with '*' should be in red and trigger an error.
@@ -187,15 +180,13 @@ TEST_F(Z80Test, zexdoc)
 	fread(&Ram_Z80[0x0100], 1, 8585, f);
 	fclose(f);
 
-	// Run the Z80 until it's halted.
-	// TODO: Add function to mdZ80 to see if HALT instruction was used?
-	// For now, rely on port FFh.
-	mdZ80_set_PC(m_Z80, 0);
+	// Reset the Z80.
+	Z80RESET(m_Z80);
 
+	// Run the Z80 until it's halted.
 	// TODO: Just check for HALTED status instead of using port 0xFF?
-	while (!halt && !(mdZ80_get_Status(m_Z80) & Z80_STATE_HALTED)) {
-		z80_Exec(m_Z80, 100);
-		mdZ80_clear_odo(m_Z80);
+	while (!halt && !m_Z80->halted) {
+		Z80ExecuteTStates(m_Z80, 100);
 	}
 	printf("\n");
 
@@ -213,15 +204,13 @@ TEST_F(Z80Test, zexall)
 	fread(&Ram_Z80[0x0100], 1, 8585, f);
 	fclose(f);
 
-	// Run the Z80 until it's halted.
-	// TODO: Add function to mdZ80 to see if HALT instruction was used?
-	// For now, rely on port FFh.
-	mdZ80_set_PC(m_Z80, 0);
+	// Reset the Z80.
+	Z80RESET(m_Z80);
 
+	// Run the Z80 until it's halted.
 	// TODO: Just check for HALTED status instead of using port 0xFF?
-	while (!halt && !(mdZ80_get_Status(m_Z80) & Z80_STATE_HALTED)) {
-		z80_Exec(m_Z80, 100);
-		mdZ80_clear_odo(m_Z80);
+	while (!halt && !m_Z80->halted) {
+		Z80ExecuteTStates(m_Z80, 100);
 	}
 	printf("\n");
 
@@ -234,9 +223,12 @@ TEST_F(Z80Test, zexall)
 int main(int argc, char *argv[])
 {
 	fprintf(stderr, "LibGens test suite: Z80 tests.\n\n");
+
+	::testing::InitGoogleTest(&argc, argv);
 	//LibGens::Init(); /* not needed for Z80 tests */
 	fflush(nullptr);
 
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
+	int ret = RUN_ALL_TESTS();
+	//LibGens::End(); /* not needed for Z80 tests */
+	return ret;
 }
