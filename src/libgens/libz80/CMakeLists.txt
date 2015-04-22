@@ -46,14 +46,3 @@ SET_SOURCE_FILES_PROPERTIES(z80.c
 	PROPERTIES OBJECT_DEPENDS
 		${CMAKE_CURRENT_BINARY_DIR}/codegen/opcodes_decl.h
 	)
-
-#ENABLE_LANGUAGE(ASM_NASM)
-#ADD_LIBRARY(starscream STATIC
-#	${CMAKE_CURRENT_BINARY_DIR}/main68k.asm
-#	${CMAKE_CURRENT_BINARY_DIR}/sub68k.asm
-#	asm-wrapper.asm
-#
-#	# Dummy C file to force CMake to handle this as a C library.
-#	# (CMake's NMake generator can't handle a pure ASM_NASM library.)
-#	dummy.c
-#	)
