@@ -26,8 +26,6 @@
 #ifndef _LIBZ80_Z80_H_
 #define _LIBZ80_Z80_H_
 
-#include "stdio.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -89,15 +87,15 @@ typedef struct
 	byte	IFF1;	/**< Interrupt Flipflop 1 */
 	byte	IFF2;	/**< Interrupt Flipflop 2 */
 	byte	IM;		/**< Instruction mode */
-	
+
 	Z80DataIn	memRead;
 	Z80DataOut	memWrite;
-	int			memParam;
-	
+	int		memParam;
+
 	Z80DataIn	ioRead;
 	Z80DataOut	ioWrite;
-	int			ioParam;
-	
+	int		ioParam;
+
 	byte		halted;
 	unsigned	tstates;
 
