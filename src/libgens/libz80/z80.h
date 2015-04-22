@@ -23,10 +23,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _Z80_H_
-#define _Z80_H_
+#ifndef _LIBZ80_Z80_H_
+#define _LIBZ80_Z80_H_
 
 #include "stdio.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef unsigned short ushort;
 typedef unsigned char byte;
@@ -162,5 +166,8 @@ void Z80INT (Z80Context* ctx, byte value);
 /** Generates a non-maskable interrupt. */
 void Z80NMI (Z80Context* ctx);
 
-
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* _LIBZ80_Z80_H_ */
