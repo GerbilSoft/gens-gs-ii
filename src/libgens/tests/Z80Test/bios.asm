@@ -1,7 +1,7 @@
-; Z80 BDOS for Gens ZEX Machine.
-; Limited BDOS with init, text printing, and halt.
+; Z80 BIOS for Gens ZEX Machine.
+; Limited BIOS with init, text printing, and halt.
 ; Assemble with Macro Assembler AS:
-; asmx -C Z80 -o bdos.bin -b F000h-FFFFh -e -w bdos.asm
+; asmx -C Z80 -o bios.bin -b F000h-FFFFh -e -w bios.asm
 
 ; Gens ZEX Machine I/O ports:
 ; - 01h: stdout
