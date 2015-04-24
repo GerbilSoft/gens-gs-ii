@@ -351,7 +351,7 @@ OP_ADC_HL:
         src = zR16((Opcode >> 4) & 3);
 
 OP_SBC_HL:
-        res = zHL - src + (zF & CZ80_CF);
+        res = zHL - (src + (zF & CZ80_CF));
 #if CZ80_DEBUG
         zF = (((src ^ zHL ^ res) >> 8) & CZ80_HF) | CZ80_NF |           // H/N flag
             (((src ^ zHL) & (zHL ^ res) & 0x8000) >> 13) |              // V flag
