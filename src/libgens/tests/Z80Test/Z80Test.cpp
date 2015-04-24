@@ -2,7 +2,7 @@
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
  * Z80Test.cpp: ZEXDOC/ZEXALL using a minimal CP/M emulator.               *
  *                                                                         *
- * Copyright (c) 2014 by David Korth.                                      *
+ * Copyright (c) 2014-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -24,7 +24,7 @@
 
 #include "lg_main.hpp"
 
-#include "libz80/z80.h"
+#include "cz80/cz80.h"
 
 // C includes. (C++ namespace)
 #include <cstdio>
@@ -39,15 +39,14 @@ namespace LibGens { namespace Tests {
 class Z80Test : public ::testing::Test
 {
 	protected:
-		Z80Test() : m_Z80(nullptr) { }
+		Z80Test() { }
 		virtual ~Z80Test() { }
 
 		virtual void SetUp(void) override;
 		virtual void TearDown(void) override;
 
 	protected:
-		Z80Context *m_Z80;
-		static Z80Test *curZ80Test;
+		cz80_struc m_Z80;
 
 		// Z80 RAM.
 		uint8_t Ram_Z80[65536];
@@ -55,35 +54,29 @@ class Z80Test : public ::testing::Test
 		// System state.
 		bool halt;
 
-		// TODO: Use param as the Z80Test context.
-		static uint8_t Z80_ReadB_static(int param, uint16_t address) {
-			return curZ80Test->Z80_ReadB(address);
+		static uint8_t FASTCALL Z80_ReadB_static(void *ctx, uint16_t address) {
+			return ((Z80Test*)ctx)->Z80_ReadB(address);
 		}
-		static void Z80_WriteB_static(int param, uint16_t address, uint8_t data) {
-			curZ80Test->Z80_WriteB(address, data);
+		static void FASTCALL Z80_WriteB_static(void *ctx, uint16_t address, uint8_t data) {
+			((Z80Test*)ctx)->Z80_WriteB(address, data);
 		}
 
 		uint8_t Z80_ReadB(uint16_t address);
 		void Z80_WriteB(uint16_t address, uint8_t data);
 
-		// FIXME: Pass the context in these functions.
-		static uint8_t Z80_InB_static(int param, uint16_t address) {
-			return curZ80Test->Z80_InB(address);
+		static uint8_t FASTCALL Z80_INPort_static(void *ctx, uint16_t address) {
+			return ((Z80Test*)ctx)->Z80_INPort(address);
 		}
-		static void Z80_OutB_static(int param, uint16_t address, uint8_t data) {
-			curZ80Test->Z80_OutB(address, data);
+		static void Z80_OUTPort_static(void *ctx, uint16_t address, uint8_t data) {
+			((Z80Test*)ctx)->Z80_OUTPort(address, data);
 		}
 
-		uint8_t Z80_InB(uint16_t address);
-		void Z80_OutB(uint16_t address, uint8_t data);
+		uint8_t Z80_INPort(uint16_t address);
+		void Z80_OUTPort(uint16_t address, uint8_t data);
 };
-
-Z80Test *Z80Test::curZ80Test;
 
 void Z80Test::SetUp()
 {
-	// Set the current Z80Test.
-	curZ80Test = this;
 	halt = false;
 
 	// Initialize Z80 memory.
@@ -104,23 +97,21 @@ void Z80Test::SetUp()
 	fclose(f);
 
 	// Initialize the Z80 emulator for CP/M.
-	m_Z80 = (Z80Context*)calloc(1, sizeof(Z80Context));
+	Cz80_Init(&m_Z80);
+	Cz80_Set_Ctx(&m_Z80, this);
 
-	// Set memory read/write handlers.
-	m_Z80->memRead = Z80_ReadB_static;
-	m_Z80->memWrite = Z80_WriteB_static;
+	// Set fetch, memory, and I/O handlers.
+	Cz80_Set_Fetch(&m_Z80, 0x0000, 0xFFFF, Ram_Z80);
+	Cz80_Set_ReadB(&m_Z80, Z80_ReadB_static);
+	Cz80_Set_WriteB(&m_Z80, Z80_WriteB_static);
+	Cz80_Set_INPort(&m_Z80, Z80_INPort_static);
+	Cz80_Set_OUTPort(&m_Z80, Z80_OUTPort_static);
 
-	// Set I/O handlers.
-	m_Z80->ioRead = Z80_InB_static;
-	m_Z80->ioWrite = Z80_OutB_static;
+	Cz80_Reset(&m_Z80);
 }
 
 void Z80Test::TearDown(void)
 {
-	free(m_Z80);
-	m_Z80 = nullptr;
-
-	curZ80Test = nullptr;
 	halt = false;
 }
 
@@ -138,14 +129,14 @@ void Z80Test::Z80_WriteB(uint16_t address, uint8_t data)
 
 // I/O functions.
 
-uint8_t Z80Test::Z80_InB(uint16_t address)
+uint8_t Z80Test::Z80_INPort(uint16_t address)
 {
 	// No input ports...
 	((void)address);
 	return 0xFF;
 }
 
-void Z80Test::Z80_OutB(uint16_t address, uint8_t data)
+void Z80Test::Z80_OUTPort(uint16_t address, uint8_t data)
 {
 	switch (address & 0xFF) {
 		case 0x01:
@@ -181,12 +172,14 @@ TEST_F(Z80Test, zexdoc)
 	fclose(f);
 
 	// Reset the Z80.
-	Z80RESET(m_Z80);
+	Cz80_Reset(&m_Z80);
 
 	// Run the Z80 until it's halted.
 	// TODO: Just check for HALTED status instead of using port 0xFF?
-	while (!halt && !m_Z80->halted) {
-		Z80ExecuteTStates(m_Z80, 100);
+	while (!halt && !(m_Z80.Status & CZ80_HALTED)) {
+		Cz80_Release_Cycle(&m_Z80);
+		if (Cz80_Exec(&m_Z80, 100) < 0)
+			break;
 	}
 	printf("\n");
 
@@ -205,12 +198,14 @@ TEST_F(Z80Test, zexall)
 	fclose(f);
 
 	// Reset the Z80.
-	Z80RESET(m_Z80);
+	Cz80_Reset(&m_Z80);
 
 	// Run the Z80 until it's halted.
 	// TODO: Just check for HALTED status instead of using port 0xFF?
-	while (!halt && !m_Z80->halted) {
-		Z80ExecuteTStates(m_Z80, 100);
+	while (!halt && !(m_Z80.Status & CZ80_HALTED)) {
+		Cz80_Release_Cycle(&m_Z80);
+		if (Cz80_Exec(&m_Z80, 100) < 0)
+			break;
 	}
 	printf("\n");
 
