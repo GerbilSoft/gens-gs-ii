@@ -34,22 +34,44 @@ UNSET(GENS_CXX_NO_EXCEPTIONS_CXXFLAG)
 # ../lib/libmingwex.a(lib32_libmingwex_a-log.o): defined in
 # discarded section `.text' of lib32_libmingw32_a-merr.o (symbol from plugin)
 IF(ENABLE_LTO)
-	CHECK_C_COMPILER_FLAG("-flto" CFLAG_LTO)
-	IF(CFLAG_LTO)
-		SET(GENS_CFLAGS_LTO "-flto")
-		IF(MINGW)
-			# MinGW. Disable LTO partitioning, since it
-			# causes problems with Qt.
-			# Reference: http://sourceware.org/bugzilla/show_bug.cgi?id=12762
-			CHECK_C_COMPILER_FLAG("-flto-partition=none" CFLAG_LTO_PARTITION)
-			IF(CFLAG_LTO_PARTITION)
-				SET(GENS_CFLAGS_LTO "${GENS_CFLAGS_LTO} -flto-partition=none")
-			ENDIF(CFLAG_LTO_PARTITION)
-			UNSET(CFLAG_LTO_PARTITION)
-		ENDIF(MINGW)
-		SET(GENS_LDFLAGS_LTO "${GENS_CFLAGS_LTO} -fuse-linker-plugin")
-	ENDIF(CFLAG_LTO)
-	UNSET(CFLAG_LTO)
+	# We need two wrappers in order for LTO to work properly:
+	# - gcc-ar: static library archiver
+	# - gcc-ranlib: static library indexer
+	# Without these wrappers, all sorts of undefined refernce errors
+	# occur in gcc-4.9 due to "slim" LTO objects, and possibly
+	# earlier versions for various reasons.
+	IF("${CMAKE_AR}" MATCHES "gcc-ar$")
+		# Already using the gcc-ar wrapper.
+		SET(GCC_WRAPPER_AR "${CMAKE_AR}")
+	ELSE()
+		# Replace ar with gcc-ar.
+		STRING(REGEX REPLACE "ar$" "gcc-ar" GCC_WRAPPER_AR "${CMAKE_AR}")
+	ENDIF()
+	IF("${CMAKE_RANLIB}" MATCHES "gcc-ranlib$")
+		# Already using the gcc-ranlib wrapper.
+		SET(GCC_WRAPPER_RANLIB "${CMAKE_RANLIB}")
+	ELSE()
+		# Replace ranlib with gcc-ranlib.
+		STRING(REGEX REPLACE "ranlib$" "gcc-ranlib" GCC_WRAPPER_RANLIB "${CMAKE_RANLIB}")
+	ENDIF()
+
+	IF(EXISTS "${GCC_WRAPPER_AR}" AND EXISTS "${GCC_WRAPPER_RANLIB}")
+		# Found gcc binutils wrappers.
+		SET(CMAKE_AR "${GCC_WRAPPER_AR}")
+		SET(CMAKE_RANLIB "${GCC_WRAPPER_RANLIB}")
+		SET(HAS_BINUTILS_WRAPPERS 1)
+	ELSE()
+		MESSAGE(FATAL_ERROR "gcc binutils wrappers not found; cannot enable LTO.")
+	ENDIF()
+
+	IF(HAS_BINUTILS_WRAPPERS)
+		CHECK_C_COMPILER_FLAG("-flto" CFLAG_LTO)
+		IF(CFLAG_LTO)
+			SET(GENS_CFLAGS_LTO "-flto")
+			SET(GENS_LDFLAGS_LTO "${GENS_CFLAGS_LTO} -fuse-linker-plugin")
+		ENDIF(CFLAG_LTO)
+		UNSET(CFLAG_LTO)
+	ENDIF(HAS_BINUTILS_WRAPPERS)
 ENDIF(ENABLE_LTO)
 SET(GENS_C_FLAGS_COMMON "${GENS_C_FLAGS_COMMON} ${GENS_CFLAGS_LTO}")
 SET(GENS_CXX_FLAGS_COMMON "${GENS_CXX_FLAGS_COMMON} ${GENS_CFLAGS_LTO}")
