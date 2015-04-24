@@ -48,7 +48,7 @@ extern "C" {
 #endif
 #define CZ80_USE_JUMPTABLE      0
 #define CZ80_SIZE_OPT           0
-#define CZ80_USE_WORD_HANDLER   1
+#define CZ80_USE_WORD_HANDLER   0
 #define CZ80_EXACT              1
 #define CZ80_DEBUG              0
 
