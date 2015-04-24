@@ -46,7 +46,14 @@ extern "C" {
 #else
 #define CZ80_LITTLE_ENDIAN      1
 #endif
+
+/* Enable Jump Table optimizations on gcc. */
+#ifdef __GNUC__
+#define CZ80_USE_JUMPTABLE      1
+#else
 #define CZ80_USE_JUMPTABLE      0
+#endif
+
 #define CZ80_SIZE_OPT           0
 #define CZ80_USE_WORD_HANDLER   0
 #define CZ80_EXACT              1
