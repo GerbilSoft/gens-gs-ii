@@ -22,8 +22,6 @@
 // shared global variable
 //////////////////////////
 
-cz80_struc CZ80;
-
 static uint8_t SZXY[256];            // zero and sign flags
 static uint8_t SZXYP[256];           // zero, sign and parity flags
 static uint8_t SZXY_BIT[256];        // zero, sign and parity/overflow (=zero) flags for BIT opcode
