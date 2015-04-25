@@ -922,42 +922,34 @@ OP_DI:
     // 16 BITS ARITHMETIC
 
     OP(0x03):   // INC  BC
-OP_INC_BC:
         zBC++;
         RET(6)
-        
+
     OP(0x13):   // INC  DE
-OP_INC_DE:
         zDE++;
         RET(6)
-        
+
     OP(0x23):   // INC  HL
-OP_INC_xx:
         data->W++;
         RET(6)
 
     OP(0x33):   // INC  SP
-OP_INC_SP:
         zSP++;
         RET(6)
 
     OP(0x0b):   // DEC  BC
-OP_DEC_BC:
         zBC--;
         RET(6)
 
     OP(0x1b):   // DEC  DE
-OP_DEC_DE:
         zDE--;
         RET(6)
 
     OP(0x2b):   // DEC  HL
-OP_DEC_xx:
         data->W--;
         RET(6)
 
     OP(0x3b):   // DEC  SP
-OP_DEC_SP:
         zSP--;
         RET(6)
 
