@@ -13,12 +13,13 @@ int FASTCALL Cz80_Exec(cz80_struc *cpu, int cycles)
 #endif
 
     cz80_struc *CPU;
-    uint16_t PC;
+    register uint16_t PC, WZ;
     int CCnt;
     uint8_t Opcode;
 
     CPU = cpu;
     PC = CPU->PC;
+    WZ = CPU->WZ;
 
     if (CPU->Status & (CZ80_RUNNING | CZ80_DISABLE | CZ80_FAULTED))
     {
@@ -66,6 +67,7 @@ Cz80_Exec_End:
 Cz80_Exec_Really_End:
     CPU->Status &= ~CZ80_RUNNING;
     CPU->PC = PC;
+    CPU->WZ = WZ;
     
     // number of executed cycles
     CCnt = CPU->CycleToDo - CCnt;
