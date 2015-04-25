@@ -224,49 +224,55 @@ OP_NOP:
 
     // PUSH / POP
 
-    OP(0xf1):   // POP  AF
-OP_POP_AF:
-    {
-        uint16_t res;
-
-        PRE_IO
-        POP_16(res)
-        zA = res >> 8;
-        zF = res & 0xFF;
-        POST_IO
-        RET(10)
+    // AF is stored reversed on the stack.
+#define OPJ_POP_AF(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint16_t res; \
+        PRE_IO \
+        POP_16(res) \
+        zA = res >> 8; \
+        zF = res & 0xFF; \
+        POST_IO \
+        RET(10) \
     }
+#define OP_POP_AF(Opcode) OPJ_POP_AF(OP, Opcode)
 
-    OP(0xc1):   // POP  BC
-    OP(0xd1):   // POP  DE
-OP_POP_RR:
-        data = pzR16((Opcode >> 4) & 3);
+    OP_POP_AF(0xf1)   // POP  AF
 
-    OP(0xe1):   // POP  HL
-OP_POP:
-        PRE_IO
-        POP_16(data->W)
-        POST_IO
+#define OPJ_POP_RR(JmpType, Opcode, RR) \
+    JmpType(Opcode): \
+        PRE_IO \
+        POP_16(z##RR) \
+        POST_IO \
         RET(10)
+#define OP_POP_RR(Opcode, RR) OPJ_POP_RR(OP, Opcode, RR)
 
-    OP(0xf5):   // PUSH AF
-OP_PUSH_AF:
-        PRE_IO
-        PUSH_16((zA << 8) | zF);
-        POST_IO
+    OP_POP_RR(0xc1, BC)   // POP  BC
+    OP_POP_RR(0xd1, DE)   // POP  DE
+    OP_POP_RR(0xe1, HL)   // POP  HL
+
+    // AF is stored reversed on the stack.
+#define OPJ_PUSH_AF(JmpType, Opcode) \
+    JmpType(Opcode): \
+        PRE_IO \
+        PUSH_16((zA << 8) | zF); \
+        POST_IO \
         RET(11)
+#define OP_PUSH_AF(Opcode) OPJ_PUSH_AF(OP, Opcode)
 
-    OP(0xc5):   // PUSH BC
-    OP(0xd5):   // PUSH DE
-OP_PUSH_RR:
-        data = pzR16((Opcode >> 4) & 3);
+    OP_PUSH_AF(0xf5)   // PUSH AF
 
-    OP(0xe5):   // PUSH HL
-OP_PUSH:
-        PRE_IO
-        PUSH_16(data->W);
-        POST_IO
+#define OPJ_PUSH_RR(JmpType, Opcode, RR) \
+    JmpType(Opcode): \
+        PRE_IO \
+        PUSH_16(z##RR); \
+        POST_IO \
         RET(11)
+#define OP_PUSH_RR(Opcode, RR) OPJ_PUSH_RR(OP, Opcode, RR)
+
+    OP_PUSH_RR(0xc5, BC)   // PUSH BC
+    OP_PUSH_RR(0xd5, DE)   // PUSH DE
+    OP_PUSH_RR(0xe5, HL)   // PUSH HL
 
     // EXCHANGE & BLOCK TRANSFERT / SEARCH
 

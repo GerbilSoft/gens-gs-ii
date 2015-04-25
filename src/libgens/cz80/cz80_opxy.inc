@@ -208,29 +208,43 @@ switch (Opcode)
         zSP = data->W;
         RET(6)
 
-
     // PUSH / POP
 
-    OPXY(0xf1): // POP  AF
-        goto OP_POP_AF;
+#define OPXY_POP_AF(Opcode) OPJ_POP_AF(OPXY, Opcode)
 
-    OPXY(0xc1): // POP  BC
-    OPXY(0xd1): // POP  DE
-        goto OP_POP_RR;
+    OPXY_POP_AF(0xf1) // POP  AF
 
-    OPXY(0xe1): // POP  IX
-        goto OP_POP;
+#define OPXY_POP_RR(Opcode, RR) OPJ_POP_RR(OPXY, Opcode, RR)
 
-    OPXY(0xf5): // PUSH AF
-        goto OP_PUSH_AF;
+    OPXY_POP_RR(0xc1, BC) // POP  BC
+    OPXY_POP_RR(0xd1, DE) // POP  DE
 
-    OPXY(0xc5): // PUSH BC
-    OPXY(0xd5): // PUSH DE
-        goto OP_PUSH_RR;
+#define OPXY_POP_XY(Opcode) \
+    OPXY(Opcode): \
+        PRE_IO \
+        POP_16(data->W) \
+        POST_IO \
+        RET(10)
 
-    OPXY(0xe5): // PUSH IX
-        goto OP_PUSH;
+    OPXY_POP_XY(0xe1) // POP  IX
 
+#define OPXY_PUSH_AF(Opcode) OPJ_PUSH_AF(OPXY, Opcode)
+
+    OPXY_PUSH_AF(0xf5) // PUSH AF
+
+#define OPXY_PUSH_RR(Opcode, RR) OPJ_PUSH_RR(OPXY, Opcode, RR)
+
+    OPXY_PUSH_RR(0xc5, BC) // PUSH BC
+    OPXY_PUSH_RR(0xd5, DE) // PUSH DE
+
+#define OPXY_PUSH_XY(Opcode) \
+    OPXY(Opcode): \
+        PRE_IO \
+        PUSH_16(data->W); \
+        POST_IO \
+        RET(11)
+
+    OPXY_PUSH_XY(0xe5) // PUSH IX
 
     // EXCHANGE
 
