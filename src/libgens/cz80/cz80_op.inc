@@ -1049,24 +1049,22 @@ OP_RRA:
 
     // JUMP
 
+#define DO_JP() do { \
+    zWZ = GET_WORD; \
+    SET_PC(zWZ); \
+    RET(10) \
+} while (0)
+
 #define OPJ_JP_NCOND(JmpType, Opcode, Cond) \
     JmpType(Opcode): \
-        if (!(zF & Cond)) { \
-            zWZ = GET_WORD; \
-            SET_PC(zWZ); \
-            RET(10) \
-        } \
+        if (!(zF & Cond)) DO_JP(); \
         FETCH_WORD(zWZ) \
         RET(10)
 #define OP_JP_NCOND(Opcode, Cond) OPJ_JP_NCOND(OP, Opcode, Cond)
 
 #define OPJ_JP_COND(JmpType, Opcode, Cond) \
     JmpType(Opcode): \
-        if (zF & Cond) { \
-            zWZ = GET_WORD; \
-            SET_PC(zWZ); \
-            RET(10) \
-        } \
+        if (zF & Cond) DO_JP(); \
         FETCH_WORD(zWZ) \
         RET(10)
 #define OP_JP_COND(Opcode, Cond) OPJ_JP_COND(OP, Opcode, Cond)
@@ -1082,9 +1080,7 @@ OP_RRA:
 
 #define OPJ_JP(JmpType, Opcode) \
     JmpType(Opcode): \
-        zWZ = GET_WORD; \
-        SET_PC(zWZ); \
-        RET(10)
+        DO_JP();
 #define OP_JP(Opcode) OPJ_JP(OP, Opcode)
 
     OP_JP(0xc3)   // JP   nn
@@ -1097,29 +1093,25 @@ OP_RRA:
 #define OP_JP_mHL(Opcode) OPJ_JP_mHL(OP, Opcode)
 
     OP_JP_mHL(0xe9)   // JP   (xx)
-    
+
+#define DO_JR() do { \
+    int8_t val = FETCH_BYTE_S; \
+    /* no rebase needed here... */ \
+    PC += val; \
+    zWZ = PC; \
+    RET(12) \
+} while (0)
+
 #define OPJ_JR_NCOND(JmpType, Opcode, Cond) \
     JmpType(Opcode): \
-        if (!(zF & Cond)) { \
-            int8_t val = FETCH_BYTE_S; \
-            /* no rebase needed here... */ \
-            PC += val; \
-            zWZ = PC; \
-            RET(12) \
-        } \
+        if (!(zF & Cond)) DO_JR(); \
         PC++; \
         RET(7)
 #define OP_JR_NCOND(Opcode, Cond) OPJ_JR_NCOND(OP, Opcode, Cond)
 
 #define OPJ_JR_COND(JmpType, Opcode, Cond) \
     JmpType(Opcode): \
-        if (zF & Cond) { \
-            int8_t val = FETCH_BYTE_S; \
-            /* no rebase needed here... */ \
-            PC += val; \
-            zWZ = PC; \
-            RET(12) \
-        } \
+        if (zF & Cond) DO_JR(); \
         PC++; \
         RET(7)
 #define OP_JR_COND(Opcode, Cond) OPJ_JR_COND(OP, Opcode, Cond)
@@ -1147,13 +1139,8 @@ OP_RRA:
     OP_DJNZ(0x10)   // DJNZ n
 
 #define OPJ_JR(JmpType, Opcode) \
-    JmpType(Opcode): { \
-        int8_t val = FETCH_BYTE_S; \
-        /* no rebase needed here... */ \
-        PC += val; \
-        zWZ = PC; \
-        RET(12) \
-    }
+    JmpType(Opcode): \
+        DO_JR();
 #define OP_JR(Opcode) OPJ_JR(OP, Opcode)
 
     OP_JR(0x18)   // JR   n
