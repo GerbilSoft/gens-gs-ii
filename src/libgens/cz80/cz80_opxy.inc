@@ -725,17 +725,16 @@ switch (Opcode)
 
     OPXY_RET(0xc9)   // RET
 
+#define OPXY_RST(Opcode) OPJ_RST(OPXY, Opcode)
 
-    OPXY(0xc7): // RST  0
-    OPXY(0xcf): // RST  1
-    OPXY(0xd7): // RST  2
-    OPXY(0xdf): // RST  3
-    OPXY(0xe7): // RST  4
-    OPXY(0xef): // RST  5
-    OPXY(0xf7): // RST  6
-    OPXY(0xff): // RST  7
-        goto OP_RST;
-
+    OPXY_RST(0xc7)   // RST  0
+    OPXY_RST(0xcf)   // RST  1
+    OPXY_RST(0xd7)   // RST  2
+    OPXY_RST(0xdf)   // RST  3
+    OPXY_RST(0xe7)   // RST  4
+    OPXY_RST(0xef)   // RST  5
+    OPXY_RST(0xf7)   // RST  6
+    OPXY_RST(0xff)   // RST  7
 
     // INPUT & OUTPUT
 

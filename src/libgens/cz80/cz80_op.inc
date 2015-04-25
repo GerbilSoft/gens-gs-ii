@@ -1236,25 +1236,22 @@ OP_RRA:
 
     OP_RET(0xc9)   // RET
 
-
-    OP(0xc7):   // RST  0
-    OP(0xcf):   // RST  1
-    OP(0xd7):   // RST  2
-    OP(0xdf):   // RST  3
-    OP(0xe7):   // RST  4
-    OP(0xef):   // RST  5
-    OP(0xf7):   // RST  6
-    OP(0xff):   // RST  7
-OP_RST:
-    {
-        uint16_t src;
-
-        src = PC;
-        PUSH_16(src);
-        zWZ = Opcode & 0x38;
-        SET_PC(zWZ);
+#define OPJ_RST(JmpType, Opcode) \
+    JmpType(Opcode): \
+        PUSH_16(PC); \
+        zWZ = Opcode & 0x38; \
+        SET_PC(zWZ); \
         RET(11)
-    }
+#define OP_RST(Opcode) OPJ_RST(OP, Opcode)
+
+    OP_RST(0xc7)   // RST  0
+    OP_RST(0xcf)   // RST  1
+    OP_RST(0xd7)   // RST  2
+    OP_RST(0xdf)   // RST  3
+    OP_RST(0xe7)   // RST  4
+    OP_RST(0xef)   // RST  5
+    OP_RST(0xf7)   // RST  6
+    OP_RST(0xff)   // RST  7
 
     // INPUT & OUTPUT
 
