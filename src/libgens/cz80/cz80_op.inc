@@ -1147,67 +1147,46 @@ OP_RRA:
 
     // CALL & RETURN
 
-    OP(0xd4):   // CALL NC,nn
-OP_CALL_NC:
-        if (!(zF & CZ80_CF)) goto OP_CALL;
-        FETCH_WORD(zWZ)
+#define DO_CALL() do { \
+    uint16_t oldRPC; \
+    PRE_IO \
+    FETCH_WORD(zWZ) \
+    oldRPC = PC; \
+    PUSH_16(oldRPC); \
+    SET_PC(zWZ); \
+    POST_IO \
+    RET(17) \
+} while (0)
+
+#define OPJ_CALL_NCOND(JmpType, Opcode, Cond) \
+    JmpType(Opcode): \
+        if (!(zF & Cond)) DO_CALL(); \
+        FETCH_WORD(zWZ) \
         RET(10)
+#define OP_CALL_NCOND(Opcode, Cond) OPJ_CALL_NCOND(OP, Opcode, Cond)
 
-    OP(0xdc):   // CALL C,nn
-OP_CALL_C:
-        if (zF & CZ80_CF) goto OP_CALL;
-        FETCH_WORD(zWZ)
+#define OPJ_CALL_COND(JmpType, Opcode, Cond) \
+    JmpType(Opcode): \
+        if (zF & Cond) DO_CALL(); \
+        FETCH_WORD(zWZ) \
         RET(10)
+#define OP_CALL_COND(Opcode, Cond) OPJ_CALL_COND(OP, Opcode, Cond)
 
-    OP(0xe4):   // CALL PO,nn
-OP_CALL_PO:
-        if (!(zF & CZ80_VF)) goto OP_CALL;
-        FETCH_WORD(zWZ)
-        RET(10)
+    OP_CALL_NCOND(0xd4, CZ80_CF)   // CALL NC,nn
+    OP_CALL_COND( 0xdc, CZ80_CF)   // CALL C,nn
+    OP_CALL_NCOND(0xe4, CZ80_VF)   // CALL PO,nn
+    OP_CALL_COND( 0xec, CZ80_VF)   // CALL PE,nn
+    OP_CALL_NCOND(0xf4, CZ80_SF)   // CALL P,nn
+    OP_CALL_COND( 0xfc, CZ80_SF)   // CALL M,nn
+    OP_CALL_NCOND(0xc4, CZ80_ZF)   // CALL NZ,nn
+    OP_CALL_COND( 0xcc, CZ80_ZF)   // CALL Z,nn
 
-    OP(0xec):   // CALL PE,nn
-OP_CALL_PE:
-        if (zF & CZ80_VF) goto OP_CALL;
-        FETCH_WORD(zWZ)
-        RET(10)
+#define OPJ_CALL(JmpType, Opcode) \
+    JmpType(Opcode): \
+        DO_CALL();
+#define OP_CALL(Opcode) OPJ_CALL(OP, Opcode)
 
-    OP(0xf4):   // CALL P,nn
-OP_CALL_P:
-        if (!(zF & CZ80_SF)) goto OP_CALL;
-        FETCH_WORD(zWZ)
-        RET(10)
-
-    OP(0xfc):   // CALL M,nn
-OP_CALL_M:
-        if (zF & CZ80_SF) goto OP_CALL;
-        FETCH_WORD(zWZ)
-        RET(10)
-
-    OP(0xcc):   // CALL Z,nn
-OP_CALL_Z:
-        if (zF & CZ80_ZF) goto OP_CALL;
-        FETCH_WORD(zWZ)
-        RET(10)
-
-    OP(0xc4):   // CALL NZ,nn
-OP_CALL_NZ:
-        if (!(zF & CZ80_ZF)) goto OP_CALL;
-        FETCH_WORD(zWZ)
-        RET(10)
-
-    OP(0xcd):   // CALL nn
-OP_CALL:
-    {
-        uint16_t oldRPC;
-
-        PRE_IO
-        FETCH_WORD(zWZ)
-        oldRPC = PC;
-        PUSH_16(oldRPC);
-        SET_PC(zWZ);
-        POST_IO
-        RET(17)
-    }
+    OP_CALL(0xcd)   // CALL nn
 
     OP(0xd0):   // RET  NC
 OP_RET_NC:
