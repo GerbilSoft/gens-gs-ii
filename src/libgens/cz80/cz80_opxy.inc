@@ -329,7 +329,7 @@ switch (Opcode)
 
     OPXY_ADD_A_n(0xc6) // ADD  A,n
 
-    OPXY(0x86): { // ADD  A,(IX+o)
+    OPXY(0x86): { // ADD  A,(IX+d)
         uint8_t val;
         PRE_IO
 	CALC_EA_XY_D();
@@ -361,7 +361,7 @@ switch (Opcode)
 
     OPXY_ADC_A_n(0xce) // ADC  A,n
 
-    OPXY(0x8e): { // ADC  A,(IX+o)
+    OPXY(0x8e): { // ADC  A,(IX+d)
         uint8_t val;
         PRE_IO
 	CALC_EA_XY_D();
@@ -393,7 +393,7 @@ switch (Opcode)
 
     OPXY_SUB_A_n(0xd6) // SUB  A,n
 
-    OPXY(0x96): { // SUB  A,(IX+o)
+    OPXY(0x96): { // SUB  A,(IX+d)
         uint8_t val;
         PRE_IO
 	CALC_EA_XY_D();
@@ -425,7 +425,7 @@ switch (Opcode)
 
     OPXY_SBC_A_n(0xde) // SBC  A,n
 
-    OPXY(0x9e): { // SBC  A,(IX+o)
+    OPXY(0x9e): { // SBC  A,(IX+d)
         uint8_t val;
         PRE_IO
 	CALC_EA_XY_D();
@@ -438,11 +438,11 @@ switch (Opcode)
 
 #define OPXY_CP_A_R(Opcode) OPJ_CP_A_R(OPXY, Opcode)
 
-    OPXY_CP_A_R(0xb8) // CP  A,B
-    OPXY_CP_A_R(0xb9) // CP  A,C
-    OPXY_CP_A_R(0xba) // CP  A,D
-    OPXY_CP_A_R(0xbb) // CP  A,E
-    OPXY_CP_A_R(0xbf) // CP  A,A
+    OPXY_CP_A_R(0xb8) // CP   A,B
+    OPXY_CP_A_R(0xb9) // CP   A,C
+    OPXY_CP_A_R(0xba) // CP   A,D
+    OPXY_CP_A_R(0xbb) // CP   A,E
+    OPXY_CP_A_R(0xbf) // CP   A,A
 
 #define OPXY_CP_A_XY(Opcode, HL) \
     OPXY(Opcode): { \
@@ -450,14 +450,14 @@ switch (Opcode)
         OP_CP_INT(val, 4); \
     }
 
-    OPXY_CP_A_XY(0xbc, H) // CP  A,HX
-    OPXY_CP_A_XY(0xbd, L) // CP  A,LX
+    OPXY_CP_A_XY(0xbc, H) // CP   A,HX
+    OPXY_CP_A_XY(0xbd, L) // CP   A,LX
 
 #define OPXY_CP_A_n(Opcode) OPJ_CP_A_n(OPXY, Opcode)
 
-    OPXY_CP_A_n(0xfe) // CP  A,n
+    OPXY_CP_A_n(0xfe) // CP   A,n
 
-    OPXY(0xbe): { // CP  A,(IX+o)
+    OPXY(0xbe): { // CP  A,(IX+d)
         uint8_t val;
         PRE_IO
 	CALC_EA_XY_D();
@@ -468,103 +468,111 @@ switch (Opcode)
 
     // AND
 
-    OPXY(0xa0): // AND  B
-    OPXY(0xa1): // AND  C
-    OPXY(0xa2): // AND  D
-    OPXY(0xa3): // AND  E
-        goto OP_AND_R;
+#define OPXY_AND_A_R(Opcode) OPJ_AND_A_R(OPXY, Opcode)
 
-    OPXY(0xa7): // AND  A
-        goto OP_AND_A;
+    OPXY_AND_A_R(0xa0) // AND  A,B
+    OPXY_AND_A_R(0xa1) // AND  A,C
+    OPXY_AND_A_R(0xa2) // AND  A,D
+    OPXY_AND_A_R(0xa3) // AND  A,E
 
-    OPXY(0xa4): // AND  HX
-        goto OP_AND_IxH;
+#define OPXY_AND_A_A(Opcode) OPJ_AND_A_A(OPXY, Opcode)
 
-    OPXY(0xa5): // AND  LX
-        goto OP_AND_IxL;
+    OPXY_AND_A_A(0xa7) // AND  A,A
 
-    OPXY(0xe6): // AND  A,n
-        goto OP_AND_imm;
+#define OPXY_AND_A_XY(Opcode, HL) \
+    OPXY(Opcode): { \
+        uint8_t val = data->B.HL; \
+        OP_AND_INT(val, 4); \
+    }
 
-    OPXY(0xa6): // AND  (IX+o)
-    {
+    OPXY_AND_A_XY(0xa4, H) // AND  A,HX
+    OPXY_AND_A_XY(0xa5, L) // AND  A,LX
+
+#define OPXY_AND_A_n(Opcode) OPJ_AND_A_n(OPXY, Opcode)
+
+    OPXY_AND_A_n(0xe6) // AND  A,n
+
+    OPXY(0xa6): { // AND  (IX+d)
         uint8_t val;
 
         PRE_IO
-        CALC_EA_XY_D();
+	CALC_EA_XY_D();
         READ_BYTE(zWZ, val)
         POST_IO
-        zA = zA & val;
-        zF = SZXYP[zA] | CZ80_HF;
-        RET(15)
+        OP_AND_INT(val, 15);
     }
 
     // XOR
 
-    OPXY(0xa8): // XOR  B
-    OPXY(0xa9): // XOR  C
-    OPXY(0xaa): // XOR  D
-    OPXY(0xab): // XOR  E
-        goto OP_XOR_R;
+#define OPXY_XOR_A_R(Opcode) OPJ_XOR_A_R(OPXY, Opcode)
 
-    OPXY(0xaf): // XOR  A
-        goto OP_XOR_A;
+    OPXY_XOR_A_R(0xa8) // XOR  A,B
+    OPXY_XOR_A_R(0xa9) // XOR  A,C
+    OPXY_XOR_A_R(0xaa) // XOR  A,D
+    OPXY_XOR_A_R(0xab) // XOR  A,E
 
-    OPXY(0xac): // XOR  HX
-        goto OP_XOR_IxH;
+#define OPXY_XOR_A_A(Opcode) OPJ_XOR_A_A(OPXY, Opcode)
 
-    OPXY(0xad): // XOR  LX
-        goto OP_XOR_IxL;
+    OPXY_XOR_A_A(0xaf) // XOR  A,A
 
-    OPXY(0xee): // XOR  A,n
-        goto OP_XOR_imm;
+#define OPXY_XOR_A_XY(Opcode, HL) \
+    OPXY(Opcode): { \
+        uint8_t val = data->B.HL; \
+        OP_XOR_INT(val, 4); \
+    }
 
-    OPXY(0xae): // XOR  (IX+o)
-    {
+    OPXY_XOR_A_XY(0xac, H) // XOR  A,HX
+    OPXY_XOR_A_XY(0xad, L) // XOR  A,LX
+
+#define OPXY_XOR_A_n(Opcode) OPJ_XOR_A_n(OPXY, Opcode)
+
+    OPXY_XOR_A_n(0xee) // XOR  A,n
+
+    OPXY(0xae): { // XOR  (IX+d)
         uint8_t val;
 
         PRE_IO
-        CALC_EA_XY_D();
+	CALC_EA_XY_D();
         READ_BYTE(zWZ, val)
         POST_IO
-        zA = zA ^ val;
-        zF = SZXYP[zA];
-        RET(15)
+        OP_XOR_INT(val, 15);
     }
 
     // OR
 
-    OPXY(0xb0): // OR   B
-    OPXY(0xb1): // OR   C
-    OPXY(0xb2): // OR   D
-    OPXY(0xb3): // OR   E
-        goto OP_OR_R;
+#define OPXY_OR_A_R(Opcode) OPJ_OR_A_R(OPXY, Opcode)
 
-    OPXY(0xb7): // OR   A
-        goto OP_OR_A;
+    OPXY_OR_A_R(0xb0) // OR  A,B
+    OPXY_OR_A_R(0xb1) // OR  A,C
+    OPXY_OR_A_R(0xb2) // OR  A,D
+    OPXY_OR_A_R(0xb3) // OR  A,E
 
-    OPXY(0xb4): // OR   HX
-        goto OP_OR_IxH;
+#define OPXY_OR_A_A(Opcode) OPJ_OR_A_A(OPXY, Opcode)
 
-    OPXY(0xb5): // OR   LX
-        goto OP_OR_IxL;
+    OPXY_OR_A_A(0xb7) // OR  A,A
 
-    OPXY(0xf6): // OR   A,n
-        goto OP_OR_imm;
+#define OPXY_OR_A_XY(Opcode, HL) \
+    OPXY(Opcode): { \
+        uint8_t val = data->B.HL; \
+        OP_OR_INT(val, 4); \
+    }
 
-    OPXY(0xb6): // OR   (IX+o)
-    {
+    OPXY_OR_A_XY(0xb4, H) // OR  A,HX
+    OPXY_OR_A_XY(0xb5, L) // OR  A,LX
+
+#define OPXY_OR_A_n(Opcode) OPJ_OR_A_n(OPXY, Opcode)
+
+    OPXY_OR_A_n(0xf6) // OR  A,n
+
+    OPXY(0xb6): { // OR  (IX+d)
         uint8_t val;
 
         PRE_IO
-        CALC_EA_XY_D();
+	CALC_EA_XY_D();
         READ_BYTE(zWZ, val)
         POST_IO
-        zA = zA | val;
-        zF = SZXYP[zA];
-        RET(15)
+        OP_OR_INT(val, 15);
     }
-
 
     // MISC ARITHMETIC & CPU CONTROL
 

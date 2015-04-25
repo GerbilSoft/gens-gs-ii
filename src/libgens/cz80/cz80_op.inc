@@ -644,150 +644,178 @@ OP_DEC_m:
     }
 #define OP_CP_A_R(Opcode) OPJ_CP_A_R(OP, Opcode)
 
-    OP_CP_A_R(0xb8)   // CP  A,B
-    OP_CP_A_R(0xb9)   // CP  A,C
-    OP_CP_A_R(0xba)   // CP  A,D
-    OP_CP_A_R(0xbb)   // CP  A,E
-    OP_CP_A_R(0xbc)   // CP  A,H
-    OP_CP_A_R(0xbd)   // CP  A,L
-    OP_CP_A_R(0xbf)   // CP  A,A
-    
+    OP_CP_A_R(0xb8)   // CP   A,B
+    OP_CP_A_R(0xb9)   // CP   A,C
+    OP_CP_A_R(0xba)   // CP   A,D
+    OP_CP_A_R(0xbb)   // CP   A,E
+    OP_CP_A_R(0xbc)   // CP   A,H
+    OP_CP_A_R(0xbd)   // CP   A,L
+    OP_CP_A_R(0xbf)   // CP   A,A
+
     // AND
 
-    {
-        uint8_t val;
+#define OP_AND_INT(val, cycles) do { \
+        zA &= val; \
+        zF = SZXYP[zA] | CZ80_HF; \
+        RET(cycles); \
+    } while (0)
 
-    OP(0xa6):   // AND  (HL)
-/* OP_AND_mHL: */
-        PRE_IO
-        READ_BYTE(zHL, val)
-        POST_IO
-        goto OP_AND_;
+#define OPJ_AND_A_mHL(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val; \
+        PRE_IO \
+        READ_BYTE(zHL, val) \
+        POST_IO \
+        OP_AND_INT(val, 7); \
+    }
+#define OP_AND_A_mHL(Opcode) OPJ_AND_A_mHL(OP, Opcode)
 
-    OP(0xe6):   // AND  A,n
-OP_AND_imm:
-        val = FETCH_BYTE;
+    OP_AND_A_mHL(0xa6)  // AND  A,(HL)
 
-OP_AND_:
-        zA = zA & val;
-        zF = SZXYP[zA] | CZ80_HF;
-        RET(7)
+#define OPJ_AND_A_n(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val = FETCH_BYTE; \
+        OP_AND_INT(val, 7); \
+    }
+#define OP_AND_A_n(Opcode) OPJ_AND_A_n(OP, Opcode)
 
-OP_AND_IxL:
-        val = data->B.L;
-        goto OP_AND;
+    OP_AND_A_n(0xe6)   // AND  A,n
 
-OP_AND_IxH:
-        val = data->B.H;
-        goto OP_AND;
+#define OPJ_AND_A_R(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val = zR8(Opcode & 7); \
+        OP_AND_INT(val, 4); \
+    }
+#define OP_AND_A_R(Opcode) OPJ_AND_A_R(OP, Opcode)
 
-    OP(0xa0):   // AND  B
-    OP(0xa1):   // AND  C
-    OP(0xa2):   // AND  D
-    OP(0xa3):   // AND  E
-    OP(0xa4):   // AND  H
-    OP(0xa5):   // AND  L
-OP_AND_R:
-        val = zR8(Opcode & 7);
+    OP_AND_A_R(0xa0)   // AND  A,B
+    OP_AND_A_R(0xa1)   // AND  A,C
+    OP_AND_A_R(0xa2)   // AND  A,D
+    OP_AND_A_R(0xa3)   // AND  A,E
+    OP_AND_A_R(0xa4)   // AND  A,H
+    OP_AND_A_R(0xa5)   // AND  A,L
 
-OP_AND:
-        zA = zA & val;
-        
-    OP(0xa7):   // AND  A
-OP_AND_A:
-        zF = SZXYP[zA] | CZ80_HF;
-        RET(4)
+    // Special case for AND A,A, which is
+    // effectively a NOP.
+#define OPJ_AND_A_A(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        zF = SZXYP[zA] | CZ80_HF; \
+        RET(4) \
+    }
+#define OP_AND_A_A(Opcode) OPJ_AND_A_A(OP, Opcode)
+
+    OP_AND_A_A(0xa7)   // AND  A,A
 
     // XOR
 
-    OP(0xae):   // XOR  (HL)
-/* OP_XOR_mHL: */
-        PRE_IO
-        READ_BYTE(zHL, val)
-        POST_IO
-        goto OP_XOR_;
+#define OP_XOR_INT(val, cycles) do { \
+        zA ^= val; \
+        zF = SZXYP[zA]; \
+        RET(cycles); \
+    } while (0)
 
-    OP(0xee):   // XOR  A,n
-OP_XOR_imm:
-        val = FETCH_BYTE;
-        
-OP_XOR_:
-        zA = zA ^ val;
-        zF = SZXYP[zA];
-        RET(7)
+#define OPJ_XOR_A_mHL(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val; \
+        PRE_IO \
+        READ_BYTE(zHL, val) \
+        POST_IO \
+        OP_XOR_INT(val, 7); \
+    }
+#define OP_XOR_A_mHL(Opcode) OPJ_XOR_A_mHL(OP, Opcode)
 
-OP_XOR_IxL:
-        val = data->B.L;
-        goto OP_XOR;
+    OP_XOR_A_mHL(0xae)  // XOR  A,(HL)
 
-OP_XOR_IxH:
-        val = data->B.H;
-        goto OP_XOR;
+#define OPJ_XOR_A_n(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val = FETCH_BYTE; \
+        OP_XOR_INT(val, 7); \
+    }
+#define OP_XOR_A_n(Opcode) OPJ_XOR_A_n(OP, Opcode)
 
-    OP(0xa8):   // XOR  B
-    OP(0xa9):   // XOR  C
-    OP(0xaa):   // XOR  D
-    OP(0xab):   // XOR  E
-    OP(0xac):   // XOR  H
-    OP(0xad):   // XOR  L
-OP_XOR_R:
-        val = zR8(Opcode & 7);
+    OP_XOR_A_n(0xee)   // XOR  A,n
 
-OP_XOR:
-        zA = zA ^ val;
-        zF = SZXYP[zA];
-        RET(4)
+#define OPJ_XOR_A_R(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val = zR8(Opcode & 7); \
+        OP_XOR_INT(val, 4); \
+    }
+#define OP_XOR_A_R(Opcode) OPJ_XOR_A_R(OP, Opcode)
 
-    OP(0xaf):   // XOR  A
-OP_XOR_A:
-        zA = 0;
-        zF = SZXYP[zA];
-        RET(4)
-        
+    OP_XOR_A_R(0xa8)   // XOR  A,B
+    OP_XOR_A_R(0xa9)   // XOR  A,C
+    OP_XOR_A_R(0xaa)   // XOR  A,D
+    OP_XOR_A_R(0xab)   // XOR  A,E
+    OP_XOR_A_R(0xac)   // XOR  A,H
+    OP_XOR_A_R(0xad)   // XOR  A,L
+
+    // Special case for XOR A,A, which
+    // clears the register.
+    // TODO: Assign the full zFA in one shot?
+#define OPJ_XOR_A_A(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        zA = 0; \
+        zF = SZXYP[0]; \
+        RET(4) \
+    }
+#define OP_XOR_A_A(Opcode) OPJ_XOR_A_A(OP, Opcode)
+
+    OP_XOR_A_A(0xaf)   // XOR  A,A
+
     // OR
 
-    OP(0xb6):   // OR   (HL)
-/* OP_OR_mHL: */
-        PRE_IO
-        READ_BYTE(zHL, val)
-        POST_IO
-        goto OP_OR_;
-    
-    OP(0xf6):   // OR   A,n
-OP_OR_imm:
-        val = FETCH_BYTE;
+#define OP_OR_INT(val, cycles) do { \
+        zA |= val; \
+        zF = SZXYP[zA]; \
+        RET(cycles); \
+    } while (0)
 
-OP_OR_:
-        zA = zA | val;
-        zF = SZXYP[zA];
-        RET(7)
-
-OP_OR_IxL:
-        val = data->B.L;
-        goto OP_OR;
-
-OP_OR_IxH:
-        val = data->B.H;
-        goto OP_OR;
-
-    OP(0xb0):   // OR   B
-    OP(0xb1):   // OR   C
-    OP(0xb2):   // OR   D
-    OP(0xb3):   // OR   E
-    OP(0xb4):   // OR   H
-    OP(0xb5):   // OR   L
-OP_OR_R:
-        val = zR8(Opcode & 7);
-
-OP_OR:
-        zA = zA | val;
-
-    OP(0xb7):   // OR   A
-OP_OR_A:
-        zF = SZXYP[zA];
-        RET(4)
+#define OPJ_OR_A_mHL(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val; \
+        PRE_IO \
+        READ_BYTE(zHL, val) \
+        POST_IO \
+        OP_OR_INT(val, 7); \
     }
+#define OP_OR_A_mHL(Opcode) OPJ_OR_A_mHL(OP, Opcode)
 
+    OP_OR_A_mHL(0xb6)  // OR   A,(HL)
+
+#define OPJ_OR_A_n(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val = FETCH_BYTE; \
+        OP_OR_INT(val, 7); \
+    }
+#define OP_OR_A_n(Opcode) OPJ_OR_A_n(OP, Opcode)
+
+    OP_OR_A_n(0xf6)   // OR   A,n
+
+#define OPJ_OR_A_R(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val = zR8(Opcode & 7); \
+        OP_OR_INT(val, 4); \
+    }
+#define OP_OR_A_R(Opcode) OPJ_OR_A_R(OP, Opcode)
+
+    OP_OR_A_R(0xb0)   // OR   A,B
+    OP_OR_A_R(0xb1)   // OR   A,C
+    OP_OR_A_R(0xb2)   // OR   A,D
+    OP_OR_A_R(0xb3)   // OR   A,E
+    OP_OR_A_R(0xb4)   // OR   A,H
+    OP_OR_A_R(0xb5)   // OR   A,L
+
+    // Special case for XOR A,A, which is
+    // effectively a NOP.
+    // TODO: Assign the full zFA in one shot?
+#define OPJ_OR_A_A(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        zF = SZXYP[zA]; \
+        RET(4) \
+    }
+#define OP_OR_A_A(Opcode) OPJ_OR_A_A(OP, Opcode)
+
+    OP_OR_A_A(0xb7)   // OR  A,A
 
     // MISC ARITHMETIC & CPU CONTROL
 
