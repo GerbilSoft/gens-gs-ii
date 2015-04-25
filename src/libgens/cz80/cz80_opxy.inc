@@ -709,34 +709,21 @@ switch (Opcode)
 
     OPXY_CALL(0xcd) // CALL   nn
 
+#define OPXY_RET_NCOND(Opcode, Cond) OPJ_RET_NCOND(OPXY, Opcode, Cond)
+#define OPXY_RET_COND( Opcode, Cond) OPJ_RET_COND( OPXY, Opcode, Cond)
 
-    OPXY(0xc9): // RET
-        goto OP_RET;
+    OPXY_RET_NCOND(0xd0, CZ80_CF)   // RET  NC
+    OPXY_RET_COND( 0xd8, CZ80_CF)   // RET  C
+    OPXY_RET_NCOND(0xe0, CZ80_VF)   // RET  PO
+    OPXY_RET_COND( 0xe8, CZ80_VF)   // RET  PE
+    OPXY_RET_NCOND(0xf0, CZ80_SF)   // RET  P
+    OPXY_RET_COND( 0xf8, CZ80_SF)   // RET  M
+    OPXY_RET_NCOND(0xc0, CZ80_ZF)   // RET  NZ
+    OPXY_RET_COND( 0xc8, CZ80_ZF)   // RET  Z
 
+#define OPXY_RET(Opcode) OPJ_RET(OPXY, Opcode)
 
-    OPXY(0xd0): // RET  NC
-        goto OP_RET_NC;
-
-    OPXY(0xd8): // RET  C
-        goto OP_RET_C;
-
-    OPXY(0xe0): // RET  PO
-        goto OP_RET_PO;
-
-    OPXY(0xe8): // RET  PE
-        goto OP_RET_PE;
-
-    OPXY(0xf0): // RET  P
-        goto OP_RET_P;
-
-    OPXY(0xf8): // RET  M
-        goto OP_RET_M;
-
-    OPXY(0xc0): // RET  NZ
-        goto OP_RET_NZ;
-
-    OPXY(0xc8): // RET  Z
-        goto OP_RET_Z;
+    OPXY_RET(0xc9)   // RET
 
 
     OPXY(0xc7): // RST  0
