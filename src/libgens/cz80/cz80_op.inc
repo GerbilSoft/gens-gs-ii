@@ -1188,56 +1188,53 @@ OP_RRA:
 
     OP_CALL(0xcd)   // CALL nn
 
-    OP(0xd0):   // RET  NC
-OP_RET_NC:
-        if (!(zF & CZ80_CF)) goto OP_RET_COND;
+#define DO_RET() do { \
+    PRE_IO \
+    POP_16(zWZ); \
+    SET_PC(zWZ); \
+    POST_IO \
+    RET(10) \
+} while (0)
+
+#define OPJ_RET_NCOND(JmpType, Opcode, Cond) \
+    JmpType(Opcode): \
+        if (!(zF & Cond)) { \
+            /* FIXME: mdZ80 and CZ80 both take 17 cycles */ \
+            /* on a successful conditional RET; other Z80 */ \
+            /* documentation says 11. */ \
+            CCnt--; \
+            DO_RET(); \
+        } \
         RET(5)
+#define OP_RET_NCOND(Opcode, Cond) OPJ_RET_NCOND(OP, Opcode, Cond)
 
-    OP(0xd8):   // RET  C
-OP_RET_C:
-        if (zF & CZ80_CF) goto OP_RET_COND;
+#define OPJ_RET_COND(JmpType, Opcode, Cond) \
+    JmpType(Opcode): \
+        if (zF & Cond) { \
+            /* FIXME: mdZ80 and CZ80 both take 17 cycles */ \
+            /* on a successful conditional RET; other Z80 */ \
+            /* documentation says 11. */ \
+            CCnt--; \
+            DO_RET(); \
+        } \
         RET(5)
+#define OP_RET_COND(Opcode, Cond) OPJ_RET_COND(OP, Opcode, Cond)
 
-    OP(0xe0):   // RET  PO
-OP_RET_PO:
-        if (!(zF & CZ80_VF)) goto OP_RET_COND;
-        RET(5)
+    OP_RET_NCOND(0xd0, CZ80_CF)   // RET  NC
+    OP_RET_COND( 0xd8, CZ80_CF)   // RET  C
+    OP_RET_NCOND(0xe0, CZ80_VF)   // RET  PO
+    OP_RET_COND( 0xe8, CZ80_VF)   // RET  PE
+    OP_RET_NCOND(0xf0, CZ80_SF)   // RET  P
+    OP_RET_COND( 0xf8, CZ80_SF)   // RET  M
+    OP_RET_NCOND(0xc0, CZ80_ZF)   // RET  NZ
+    OP_RET_COND( 0xc8, CZ80_ZF)   // RET  Z
 
-    OP(0xe8):   // RET  PE
-OP_RET_PE:
-        if (zF & CZ80_VF) goto OP_RET_COND;
-        RET(5)
+#define OPJ_RET(JmpType, Opcode) \
+    JmpType(Opcode): \
+        DO_RET();
+#define OP_RET(Opcode) OPJ_RET(OP, Opcode)
 
-    OP(0xf0):   // RET  P
-OP_RET_P:
-        if (!(zF & CZ80_SF)) goto OP_RET_COND;
-        RET(5)
-
-    OP(0xf8):   // RET  M
-OP_RET_M:
-        if (zF & CZ80_SF) goto OP_RET_COND;
-        RET(5)
-
-    OP(0xc0):   // RET  NZ
-OP_RET_NZ:
-        if (!(zF & CZ80_ZF)) goto OP_RET_COND;
-        RET(5)
-
-    OP(0xc8):   // RET  Z
-OP_RET_Z:
-        if (zF & CZ80_ZF) goto OP_RET_COND;
-        RET(5)
-
-OP_RET_COND:
-        CCnt -= 7;
-
-    OP(0xc9):   // RET
-OP_RET:
-        PRE_IO
-        POP_16(zWZ);
-        SET_PC(zWZ);
-        POST_IO
-        RET(10)
+    OP_RET(0xc9)   // RET
 
 
     OP(0xc7):   // RST  0
