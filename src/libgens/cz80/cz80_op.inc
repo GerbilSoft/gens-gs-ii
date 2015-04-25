@@ -27,149 +27,150 @@ switch (Opcode)
 OP_NOP:
         RET(4)
 
-    OP(0x41):   // LD   B,C
-    OP(0x42):   // LD   B,D
-    OP(0x43):   // LD   B,E
-    OP(0x44):   // LD   B,H
-    OP(0x45):   // LD   B,L
-    OP(0x47):   // LD   B,A
+#define OPJ_LD_R_R_FN(JmpType, Opcode) \
+    JmpType(Opcode): \
+        zR8((Opcode >> 3) & 7) = zR8(Opcode & 7); \
+	RET(4)
+#define OP_LD_R_R_FN(Opcode) OPJ_LD_R_R_FN(OP, Opcode)
 
-    OP(0x48):   // LD   C,B
-    OP(0x4a):   // LD   C,D
-    OP(0x4b):   // LD   C,E
-    OP(0x4c):   // LD   C,H
-    OP(0x4d):   // LD   C,L
-    OP(0x4f):   // LD   C,A
+    OP_LD_R_R_FN(0x41)   // LD   B,C
+    OP_LD_R_R_FN(0x42)   // LD   B,D
+    OP_LD_R_R_FN(0x43)   // LD   B,E
+    OP_LD_R_R_FN(0x44)   // LD   B,H
+    OP_LD_R_R_FN(0x45)   // LD   B,L
+    OP_LD_R_R_FN(0x47)   // LD   B,A
 
-    OP(0x50):   // LD   D,B
-    OP(0x51):   // LD   D,C
-    OP(0x53):   // LD   D,E
-    OP(0x54):   // LD   D,H
-    OP(0x55):   // LD   D,L
-    OP(0x57):   // LD   D,A
+    OP_LD_R_R_FN(0x48)   // LD   C,B
+    OP_LD_R_R_FN(0x4a)   // LD   C,D
+    OP_LD_R_R_FN(0x4b)   // LD   C,E
+    OP_LD_R_R_FN(0x4c)   // LD   C,H
+    OP_LD_R_R_FN(0x4d)   // LD   C,L
+    OP_LD_R_R_FN(0x4f)   // LD   C,A
 
-    OP(0x58):   // LD   E,B
-    OP(0x59):   // LD   E,C
-    OP(0x5a):   // LD   E,D
-    OP(0x5c):   // LD   E,H
-    OP(0x5d):   // LD   E,L
-    OP(0x5f):   // LD   E,A
+    OP_LD_R_R_FN(0x50)   // LD   D,B
+    OP_LD_R_R_FN(0x51)   // LD   D,C
+    OP_LD_R_R_FN(0x53)   // LD   D,E
+    OP_LD_R_R_FN(0x54)   // LD   D,H
+    OP_LD_R_R_FN(0x55)   // LD   D,L
+    OP_LD_R_R_FN(0x57)   // LD   D,A
 
-    OP(0x60):   // LD   H,B
-    OP(0x61):   // LD   H,C
-    OP(0x62):   // LD   H,D
-    OP(0x63):   // LD   H,E
-    OP(0x65):   // LD   H,L
-    OP(0x67):   // LD   H,A
+    OP_LD_R_R_FN(0x58)   // LD   E,B
+    OP_LD_R_R_FN(0x59)   // LD   E,C
+    OP_LD_R_R_FN(0x5a)   // LD   E,D
+    OP_LD_R_R_FN(0x5c)   // LD   E,H
+    OP_LD_R_R_FN(0x5d)   // LD   E,L
+    OP_LD_R_R_FN(0x5f)   // LD   E,A
 
-    OP(0x68):   // LD   L,B
-    OP(0x69):   // LD   L,C
-    OP(0x6a):   // LD   L,D
-    OP(0x6b):   // LD   L,E
-    OP(0x6c):   // LD   L,H
-    OP(0x6f):   // LD   L,A
+    OP_LD_R_R_FN(0x60)   // LD   H,B
+    OP_LD_R_R_FN(0x61)   // LD   H,C
+    OP_LD_R_R_FN(0x62)   // LD   H,D
+    OP_LD_R_R_FN(0x63)   // LD   H,E
+    OP_LD_R_R_FN(0x65)   // LD   H,L
+    OP_LD_R_R_FN(0x67)   // LD   H,A
 
-    OP(0x78):   // LD   A,B
-    OP(0x79):   // LD   A,C
-    OP(0x7a):   // LD   A,D
-    OP(0x7b):   // LD   A,E
-    OP(0x7c):   // LD   A,H
-    OP(0x7d):   // LD   A,L
-OP_LD_R_R:
-        zR8((Opcode >> 3) & 7) = zR8(Opcode & 7);
-        RET(4)
+    OP_LD_R_R_FN(0x68)   // LD   L,B
+    OP_LD_R_R_FN(0x69)   // LD   L,C
+    OP_LD_R_R_FN(0x6a)   // LD   L,D
+    OP_LD_R_R_FN(0x6b)   // LD   L,E
+    OP_LD_R_R_FN(0x6c)   // LD   L,H
+    OP_LD_R_R_FN(0x6f)   // LD   L,A
 
-    OP(0x06):   // LD   B,#imm
-    OP(0x0e):   // LD   C,#imm
-    OP(0x16):   // LD   D,#imm
-    OP(0x1e):   // LD   E,#imm
-    OP(0x26):   // LD   H,#imm
-    OP(0x2e):   // LD   L,#imm
-    OP(0x3e):   // LD   A,#imm
-OP_LD_R_imm:
-        zR8(Opcode >> 3) = FETCH_BYTE;
+    OP_LD_R_R_FN(0x78)   // LD   A,B
+    OP_LD_R_R_FN(0x79)   // LD   A,C
+    OP_LD_R_R_FN(0x7a)   // LD   A,D
+    OP_LD_R_R_FN(0x7b)   // LD   A,E
+    OP_LD_R_R_FN(0x7c)   // LD   A,H
+    OP_LD_R_R_FN(0x7d)   // LD   A,L
+
+#define OPJ_LD_R_n_FN(JmpType, Opcode) \
+    JmpType(Opcode): \
+        zR8((Opcode >> 3) & 7) = FETCH_BYTE; \
+	RET(7)
+#define OP_LD_R_n_FN(Opcode) OPJ_LD_R_n_FN(OP, Opcode)
+
+    OP_LD_R_n_FN(0x06)   // LD   B,#imm
+    OP_LD_R_n_FN(0x0e)   // LD   C,#imm
+    OP_LD_R_n_FN(0x16)   // LD   D,#imm
+    OP_LD_R_n_FN(0x1e)   // LD   E,#imm
+    OP_LD_R_n_FN(0x26)   // LD   H,#imm
+    OP_LD_R_n_FN(0x2e)   // LD   L,#imm
+    OP_LD_R_n_FN(0x3e)   // LD   A,#imm
+
+#define OPJ_LD_R_mHL_FN(JmpType, Opcode) \
+    JmpType(Opcode): \
+        PRE_IO \
+        zWZ = zHL + 1; \
+        READ_BYTE(zHL, zR8((Opcode >> 3) & 7)) \
+        POST_IO \
         RET(7)
+#define OP_LD_R_mHL_FN(Opcode) OPJ_LD_R_mHL_FN(OP, Opcode)
 
-    OP(0x46):   // LD   B,(HL)
-    OP(0x4e):   // LD   C,(HL)
-    OP(0x56):   // LD   D,(HL)
-    OP(0x5e):   // LD   E,(HL)
-    OP(0x66):   // LD   H,(HL)
-    OP(0x6e):   // LD   L,(HL)
-    OP(0x7e):   // LD   A,(HL)
-/* OP_LD_R_mHL: */
-        PRE_IO
-        zWZ = zHL + 1;
-        READ_BYTE(zHL, zR8((Opcode >> 3) & 7))
-        POST_IO
-        RET(7)
+    OP_LD_R_mHL_FN(0x46)   // LD   B,(HL)
+    OP_LD_R_mHL_FN(0x4e)   // LD   C,(HL)
+    OP_LD_R_mHL_FN(0x56)   // LD   D,(HL)
+    OP_LD_R_mHL_FN(0x5e)   // LD   E,(HL)
+    OP_LD_R_mHL_FN(0x66)   // LD   H,(HL)
+    OP_LD_R_mHL_FN(0x6e)   // LD   L,(HL)
+    OP_LD_R_mHL_FN(0x7e)   // LD   A,(HL)
 
-    OP(0x70):   // LD   (HL),B
-    OP(0x71):   // LD   (HL),C
-    OP(0x72):   // LD   (HL),D
-    OP(0x73):   // LD   (HL),E
-    OP(0x74):   // LD   (HL),H
-    OP(0x75):   // LD   (HL),L
-    OP(0x77):   // LD   (HL),A
-/* OP_LD_mHL_R: */
-        PRE_IO
-        zWZ = (zA << 8) | ((zlHL + 1) & 0xFF);
-        WRITE_BYTE(zHL, zR8(Opcode & 7))
-        POST_IO
+#define OPJ_LD_mHL_R_FN(JmpType, Opcode) \
+    JmpType(Opcode): \
+        PRE_IO \
+        zWZ = (zA << 8) | ((zlHL + 1) & 0xFF); \
+	WRITE_BYTE(zHL, zR8(Opcode & 7)) \
+        POST_IO \
         RET(7)
+#define OP_LD_mHL_R_FN(Opcode) OPJ_LD_mHL_R_FN(OP, Opcode)
+
+    OP_LD_mHL_R_FN(0x70)   // LD   (HL),B
+    OP_LD_mHL_R_FN(0x71)   // LD   (HL),C
+    OP_LD_mHL_R_FN(0x72)   // LD   (HL),D
+    OP_LD_mHL_R_FN(0x73)   // LD   (HL),E
+    OP_LD_mHL_R_FN(0x74)   // LD   (HL),H
+    OP_LD_mHL_R_FN(0x75)   // LD   (HL),L
+    OP_LD_mHL_R_FN(0x77)   // LD   (HL),A
 
     OP(0x36):   // LD (HL), #imm
-/* OP_LD_mHL_imm: */
         PRE_IO
         WRITE_BYTE(zHL, FETCH_BYTE)
         POST_IO
         RET(10)
 
-    {
+#define OPJ_LD_A_mRR_FN(JmpType, Opcode, RR) \
+    JmpType(Opcode): \
+        PRE_IO \
+	zWZ = z##RR + 1; \
+	READ_BYTE(z##RR, zA) \
+        POST_IO \
+	RET(7)
+#define OP_LD_A_mRR_FN(Opcode, RR) OPJ_LD_A_mRR_FN(OP, Opcode, RR)
+
+    OP_LD_A_mRR_FN(0x0a, BC)   // LD   A,(BC)
+    OP_LD_A_mRR_FN(0x1a, DE)   // LD   A,(DE)
+
+    OP(0x3a): {  // LD   A,(nn)
         uint16_t adr;
-    
-    OP(0x0a):   // LD   A,(BC)
-OP_LOAD_A_mBC:
-        adr = zBC;
-        goto OP_LOAD_A_mxx;
-        
-    OP(0x1a):   // LD   A,(DE)
-OP_LOAD_A_mDE:
-        adr = zDE;
-
-OP_LOAD_A_mxx:
-        PRE_IO
-        zWZ = adr + 1;
-        READ_BYTE(adr, zA)
-        POST_IO
-        RET(7)
-
-    OP(0x3a):   // LD   A,(nn)
-OP_LOAD_A_mNN:
         PRE_IO
         FETCH_WORD(adr)
         READ_BYTE(adr, zA)
         POST_IO
         RET(13)
+    }
 
-    OP(0x02):   // LD   (BC),A
-OP_LOAD_mBC_A:
-        adr = zBC;
-        goto OP_LOAD_mxx_A;
+#define OPJ_LD_mRR_A_FN(JmpType, Opcode, RR) \
+    JmpType(Opcode): \
+        PRE_IO \
+        zWZ = (zA << 8) | ((z##RR + 1) & 0xFF); \
+	WRITE_BYTE(z##RR, zA) \
+        POST_IO \
+	RET(7)
+#define OP_LD_mRR_A_FN(Opcode, RR) OPJ_LD_mRR_A_FN(OP, Opcode, RR)
 
-    OP(0x12):   // LD   (DE),A
-OP_LOAD_mDE_A:
-        adr = zDE;
+    OP_LD_mRR_A_FN(0x02, BC)   // LD   (BC),A
+    OP_LD_mRR_A_FN(0x12, DE)   // LD   (DE),A
 
-OP_LOAD_mxx_A:
-        PRE_IO
-        zWZ = (zA << 8) | ((adr + 1) & 0xFF);
-        WRITE_BYTE(adr, zA)
-        POST_IO
-        RET(7)
-
-    OP(0x32):   // LD   (nn),A
-OP_LOAD_mNN_A:
+    OP(0x32): {  // LD   (nn),A
+        uint16_t adr;
         PRE_IO
         FETCH_WORD(adr)
         WRITE_BYTE(adr, zA)
