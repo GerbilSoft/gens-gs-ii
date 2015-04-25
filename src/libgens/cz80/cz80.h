@@ -123,6 +123,14 @@ extern "C" {
 #define zlSP            CPU->SP.B.L
 #define zhSP            CPU->SP.B.H
 
+// WZ register. Internal register used for address calculations.
+// This register must be emulated correctly in order to emulate
+// flag bits 3 and 5 for the BIT n,(HL) instruction.
+// NOTE: Stored as local variable for performance reasons.
+#define zWZ		WZ
+
+// Program Counter.
+// NOTE: Stored as local variable for performance reasons.
 #define zPC             PC
 
 #define zI              CPU->I
@@ -213,6 +221,8 @@ typedef struct
     union16 IX;
     union16 IY;
     union16 SP;
+    
+    uint16_t WZ;
     uint16_t PC;
     
     union16 BC2;
@@ -307,6 +317,8 @@ uint16_t     FASTCALL Cz80_Get_AF2(cz80_struc *cpu);
 uint16_t     FASTCALL Cz80_Get_IX(cz80_struc *cpu);
 uint16_t     FASTCALL Cz80_Get_IY(cz80_struc *cpu);
 uint16_t     FASTCALL Cz80_Get_SP(cz80_struc *cpu);
+
+uint16_t     FASTCALL Cz80_Get_WZ(cz80_struc *cpu);
 uint16_t     FASTCALL Cz80_Get_PC(cz80_struc *cpu);
 
 uint16_t     FASTCALL Cz80_Get_R(cz80_struc *cpu);
@@ -327,6 +339,8 @@ void    FASTCALL Cz80_Set_AF2(cz80_struc *cpu, uint16_t value);
 void    FASTCALL Cz80_Set_IX(cz80_struc *cpu, uint16_t value);
 void    FASTCALL Cz80_Set_IY(cz80_struc *cpu, uint16_t value);
 void    FASTCALL Cz80_Set_SP(cz80_struc *cpu, uint16_t value);
+
+void    FASTCALL Cz80_Set_WZ(cz80_struc *cpu, uint16_t value);
 void    FASTCALL Cz80_Set_PC(cz80_struc *cpu, uint16_t value);
 
 void    FASTCALL Cz80_Set_R(cz80_struc *cpu, uint16_t value);

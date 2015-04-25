@@ -360,6 +360,12 @@ uint16_t FASTCALL Cz80_Get_SP(cz80_struc *cpu)
     return zSP;
 }
 
+uint16_t FASTCALL Cz80_Get_WZ(cz80_struc *cpu)
+{
+    cz80_struc *CPU = cpu;
+    return CPU->WZ;
+}
+
 uint16_t FASTCALL Cz80_Get_PC(cz80_struc *cpu)
 {
     cz80_struc *CPU = cpu;
@@ -461,6 +467,12 @@ void FASTCALL Cz80_Set_SP(cz80_struc *cpu, uint16_t value)
 {
     cz80_struc *CPU = cpu;
     zSP = value;
+}
+
+void FASTCALL Cz80_Set_WZ(cz80_struc *cpu, uint16_t value)
+{
+    cz80_struc *CPU = cpu;
+    CPU->WZ = value;
 }
 
 void FASTCALL Cz80_Set_PC(cz80_struc *cpu, uint16_t val)

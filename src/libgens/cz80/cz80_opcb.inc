@@ -333,8 +333,12 @@ switch (Opcode)
     OPCB(0x7d): // BIT  7,L
     OPCB(0x7f): // BIT  7,A
     {
+        uint8_t src = zR8(Opcode & 7);
+        uint8_t bitm = 1 << ((Opcode >> 3) & 7);
+        // TODO: Remove XF/YF flags from SZXY_BIT[].
         zF = (zF & CZ80_CF) | CZ80_HF |
-            SZXY_BIT[zR8(Opcode & 7) & (1 << ((Opcode >> 3) & 7))];
+            (SZXY_BIT[src & bitm] & ~(CZ80_YF| CZ80_XF)) |
+            (src & (CZ80_YF| CZ80_XF));
     }
     RET(4 + 4)
 
@@ -353,7 +357,10 @@ switch (Opcode)
         PRE_IO
         bitm = 1 << ((Opcode >> 3) & 7);
         READ_BYTE(zHL, src)
-        zF = (zF & CZ80_CF) | CZ80_HF | SZXY_BIT[src & bitm];
+        // TODO: Remove XF/YF flags from SZXY_BIT[].
+        zF = (zF & CZ80_CF) | CZ80_HF |                         // C/H flag
+             (SZXY_BIT[src & bitm] & ~(CZ80_YF | CZ80_XF)) |    // Z/V/N flag
+             ((zWZ >> 8) & (CZ80_YF | CZ80_XF));                // X/Y flag
         POST_IO
         RET(8 + 4)
     }

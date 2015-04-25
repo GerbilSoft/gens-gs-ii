@@ -125,9 +125,6 @@ switch (Opcode)
     OPXY(0x32): // LD   (nn),A
         goto OP_LOAD_mNN_A;
 
-    {
-        uint16_t adr;
-
     OPXY(0x46): // LD   B,(IX+o)
     OPXY(0x56): // LD   D,(IX+o)
     OPXY(0x5e): // LD   E,(IX+o)
@@ -136,8 +133,8 @@ switch (Opcode)
     OPXY(0x4e): // LD   C,(IX+o)
     OPXY(0x7e): // LD   A,(IX+o)
         PRE_IO
-        adr = data->W + FETCH_BYTE_S;
-        READ_BYTE(adr, zR8((Opcode >> 3) & 7))
+        CALC_EA_XY_D();
+        READ_BYTE(zWZ, zR8((Opcode >> 3) & 7))
         POST_IO
         RET(15)
 
@@ -149,18 +146,17 @@ switch (Opcode)
     OPXY(0x75): // LD   (IX+o),L
     OPXY(0x77): // LD   (IX+o),A
         PRE_IO
-        adr = data->W + FETCH_BYTE_S;
-        WRITE_BYTE(adr, zR8(Opcode & 7))
+        CALC_EA_XY_D();
+        WRITE_BYTE(zWZ, zR8(Opcode & 7))
         POST_IO
         RET(15)
 
     OPXY(0x36): // LD   (IX+o),#imm
         PRE_IO
-        adr = data->W + FETCH_BYTE_S;
-        WRITE_BYTE(adr, FETCH_BYTE)
+        CALC_EA_XY_D();
+        WRITE_BYTE(zWZ, FETCH_BYTE)
         POST_IO
         RET(15)
-    }
 
     // 16 BITS LOAD
 
@@ -399,7 +395,8 @@ switch (Opcode)
         uint8_t val;
 
         PRE_IO
-        READ_BYTE(data->W + FETCH_BYTE_S, val)
+        CALC_EA_XY_D();
+        READ_BYTE(zWZ, val)
         POST_IO
         zA = zA & val;
         zF = SZXYP[zA] | CZ80_HF;
@@ -431,7 +428,8 @@ switch (Opcode)
         uint8_t val;
 
         PRE_IO
-        READ_BYTE(data->W + FETCH_BYTE_S, val)
+        CALC_EA_XY_D();
+        READ_BYTE(zWZ, val)
         POST_IO
         zA = zA ^ val;
         zF = SZXYP[zA];
@@ -463,7 +461,8 @@ switch (Opcode)
         uint8_t val;
 
         PRE_IO
-        READ_BYTE(data->W + FETCH_BYTE_S, val)
+        CALC_EA_XY_D();
+        READ_BYTE(zWZ, val)
         POST_IO
         zA = zA | val;
         zF = SZXYP[zA];
@@ -690,11 +689,10 @@ switch (Opcode)
 
     OPXY(0xcb): // XYCB PREFIXE
     {
-        uint16_t adr;
         uint8_t src;
         uint8_t res;
 
-        adr = data->W + FETCH_BYTE_S;
+        CALC_EA_XY_D();
         Opcode = FETCH_BYTE;
         #include "cz80_opxycb.inc"
     }

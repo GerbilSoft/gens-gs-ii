@@ -99,6 +99,7 @@ OP_LD_R_imm:
     OP(0x7e):   // LD   A,(HL)
 /* OP_LD_R_mHL: */
         PRE_IO
+        zWZ = zHL + 1;
         READ_BYTE(zHL, zR8((Opcode >> 3) & 7))
         POST_IO
         RET(7)
@@ -112,6 +113,7 @@ OP_LD_R_imm:
     OP(0x77):   // LD   (HL),A
 /* OP_LD_mHL_R: */
         PRE_IO
+        zWZ = (zA << 8) | ((zlHL + 1) & 0xFF);
         WRITE_BYTE(zHL, zR8(Opcode & 7))
         POST_IO
         RET(7)
@@ -192,25 +194,23 @@ OP_LD_SP_xx:
         zSP = data->W;
         RET(6)
 
-    {
-        uint16_t adr;
-
     OP(0x2a):   // LD   HL,(nn)
 OP_LD_xx_mNN:
         PRE_IO
-        FETCH_WORD(adr)
-        READ_WORD_LE(adr, data->W)
+        FETCH_WORD(zWZ)
+        READ_WORD_LE(zWZ, data->W)
+        zWZ++;
         POST_IO
         RET(16)
 
     OP(0x22):   // LD   (nn),HL
 OP_LD_mNN_xx:
         PRE_IO
-        FETCH_WORD(adr)
-        WRITE_WORD_LE(adr, data->W)
+        FETCH_WORD(zWZ)
+        WRITE_WORD_LE(zWZ, data->W)
+        zWZ++;
         POST_IO
         RET(16)
-    }
 
     // PUSH / POP
 
@@ -302,6 +302,7 @@ OP_EX_xx_mSP:
         tmp = data->W;
         READ_WORD_LE(adr, data->W)
         WRITE_WORD_LE(adr, tmp)
+        zWZ = data->W;
         POST_IO
         RET(19)
     }
@@ -950,6 +951,7 @@ OP_ADD16_xx_DE:
         src = zDE;
 
 OP_ADD16:
+        zWZ = data->W + 1;
         res = src + data->W;
 #if CZ80_DEBUG
         zF = (zF & (CZ80_SF | CZ80_ZF | CZ80_VF)) |     // S/Z/V flag
@@ -1014,66 +1016,62 @@ OP_RRA:
     OP(0xd2):   // JP   NC,nn
 OP_JP_NC:
         if (!(zF & CZ80_CF)) goto OP_JP;
-        PC += 2;
+        FETCH_WORD(zWZ)
         RET(10);
 
     OP(0xda):   // JP   C,nn
 OP_JP_C:
         if (zF & CZ80_CF) goto OP_JP;
-        PC += 2;
+        FETCH_WORD(zWZ)
         RET(10);
 
     OP(0xe2):   // JP   PO,nn
 OP_JP_PO:
         if (!(zF & CZ80_VF)) goto OP_JP;
-        PC += 2;
+        FETCH_WORD(zWZ)
         RET(10);
 
     OP(0xea):   // JP   PE,nn
 OP_JP_PE:
         if (zF & CZ80_VF) goto OP_JP;
-        PC += 2;
+        FETCH_WORD(zWZ)
         RET(10);
 
     OP(0xf2):   // JP   P,nn
 OP_JP_P:
         if (!(zF & CZ80_SF)) goto OP_JP;
-        PC += 2;
+        FETCH_WORD(zWZ)
         RET(10);
 
     OP(0xfa):   // JP   M,nn
 OP_JP_M:
         if (zF & CZ80_SF) goto OP_JP;
-        PC += 2;
+        FETCH_WORD(zWZ)
         RET(10);
 
     OP(0xca):   // JP   Z,nn
 OP_JP_Z:
         if (zF & CZ80_ZF) goto OP_JP;
-        PC += 2;
+        FETCH_WORD(zWZ)
         RET(10);
 
     OP(0xc2):   // JP   NZ,nn
 OP_JP_NZ:
         if (!(zF & CZ80_ZF)) goto OP_JP;
-        PC += 2;
+        FETCH_WORD(zWZ)
         RET(10);
-
-    {
-        uint16_t newPC;
 
     OP(0xc3):   // JP   nn
 OP_JP:
-        newPC = GET_WORD;
-        SET_PC(newPC);
+        zWZ = GET_WORD;
+        SET_PC(zWZ);
         RET(10)
 
     OP(0xe9):   // JP   (xx)
 OP_JP_xx:
-        newPC = data->W;
-        SET_PC(newPC);
+        zWZ = data->W;
+        SET_PC(zWZ);
         RET(4)
-    }
 
     
     OP(0x38):   // JR   C,n
@@ -1115,6 +1113,7 @@ OP_JR:
         adr = FETCH_BYTE_S;
         // no rebase needed here...
         PC += adr;
+        zWZ = PC;
         RET(12)
     }
 
@@ -1123,62 +1122,61 @@ OP_JR:
     OP(0xd4):   // CALL NC,nn
 OP_CALL_NC:
         if (!(zF & CZ80_CF)) goto OP_CALL;
-        PC += 2;
+        FETCH_WORD(zWZ)
         RET(10)
 
     OP(0xdc):   // CALL C,nn
 OP_CALL_C:
         if (zF & CZ80_CF) goto OP_CALL;
-        PC += 2;
+        FETCH_WORD(zWZ)
         RET(10)
 
     OP(0xe4):   // CALL PO,nn
 OP_CALL_PO:
         if (!(zF & CZ80_VF)) goto OP_CALL;
-        PC += 2;
+        FETCH_WORD(zWZ)
         RET(10)
 
     OP(0xec):   // CALL PE,nn
 OP_CALL_PE:
         if (zF & CZ80_VF) goto OP_CALL;
-        PC += 2;
+        FETCH_WORD(zWZ)
         RET(10)
 
     OP(0xf4):   // CALL P,nn
 OP_CALL_P:
         if (!(zF & CZ80_SF)) goto OP_CALL;
-        PC += 2;
+        FETCH_WORD(zWZ)
         RET(10)
 
     OP(0xfc):   // CALL M,nn
 OP_CALL_M:
         if (zF & CZ80_SF) goto OP_CALL;
-        PC += 2;
+        FETCH_WORD(zWZ)
         RET(10)
 
     OP(0xcc):   // CALL Z,nn
 OP_CALL_Z:
         if (zF & CZ80_ZF) goto OP_CALL;
-        PC += 2;
+        FETCH_WORD(zWZ)
         RET(10)
 
     OP(0xc4):   // CALL NZ,nn
 OP_CALL_NZ:
         if (!(zF & CZ80_ZF)) goto OP_CALL;
-        PC += 2;
+        FETCH_WORD(zWZ)
         RET(10)
 
     OP(0xcd):   // CALL nn
 OP_CALL:
     {
         uint16_t oldRPC;
-        uint16_t newPC;
 
         PRE_IO
-        FETCH_WORD(newPC);
+        FETCH_WORD(zWZ)
         oldRPC = PC;
         PUSH_16(oldRPC);
-        SET_PC(newPC);
+        SET_PC(zWZ);
         POST_IO
         RET(17)
     }
@@ -1228,15 +1226,11 @@ OP_RET_COND:
 
     OP(0xc9):   // RET
 OP_RET:
-    {
-        uint16_t newPC;
-
         PRE_IO
-        POP_16(newPC);
-        SET_PC(newPC);
+        POP_16(zWZ);
+        SET_PC(zWZ);
         POST_IO
         RET(10)
-    }
 
 
     OP(0xc7):   // RST  0
@@ -1250,12 +1244,11 @@ OP_RET:
 OP_RST:
     {
         uint16_t src;
-        uint16_t newPC;
 
         src = PC;
         PUSH_16(src);
-        newPC = Opcode & 0x38;
-        SET_PC(newPC);
+        zWZ = Opcode & 0x38;
+        SET_PC(zWZ);
         RET(11)
     }
 
@@ -1267,12 +1260,14 @@ OP_RST:
     OP(0xd3):   // OUT  (n),A
 OP_OUT_mN_A:
         adr = (zA << 8) | FETCH_BYTE;
+        zWZ = (zA << 8) | ((adr + 1) & 0xFF);
         OUT(adr, zA)
         RET(11)
 
     OP(0xdb):   // IN   A,(n)
 OP_IN_A_mN:
         adr = (zA << 8) | FETCH_BYTE;
+        zWZ = adr + 1;
         IN(adr, zA)
         RET(11)
     }

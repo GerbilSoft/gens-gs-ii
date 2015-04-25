@@ -37,6 +37,14 @@
 #define FETCH_BYTE_S            \
 	(((int8_t *)CPU->BasePC)[PC++])
 
+/**
+ * Calculate the effective address when using (XY+d) addressing.
+ * This updates the WZ register.
+ */
+#define CALC_EA_XY_D() do { \
+    zWZ = data->W + FETCH_BYTE_S; \
+} while (0)
+
 #define FETCH_WORD(A)           \
     A = GET_WORD;               \
     PC += 2;
@@ -130,14 +138,12 @@
 #define CHECK_INT                                           \
     if (CPU->Status & (zIFF1 | CZ80_HAS_NMI))               \
     {                                                       \
-        uint16_t newPC;                                     \
-                                                            \
         if (CPU->Status & CZ80_HAS_NMI)                     \
         {                                                   \
             /* NMI */                                       \
             CPU->Status &= ~(CZ80_HALTED | CZ80_HAS_NMI);   \
             zIFF1 = 0;                                      \
-            newPC = 0x66;                                   \
+            zWZ = 0x66;                                     \
         }                                                   \
         else                                                \
         {                                                   \
@@ -145,7 +151,7 @@
             CPU->Status &= ~(CZ80_HALTED | CZ80_HAS_INT);   \
             zIFF= 0;                                        \
                                                             \
-            if (zIM == 1) newPC = 0x38;                     \
+            if (zIM == 1) zWZ = 0x38;                       \
             else                                            \
             {                                               \
                 uint16_t adr;                               \
@@ -154,7 +160,7 @@
                 if (zIM == 0) goto Cz80_Exec_IM0;           \
                                                             \
                 adr = Opcode | (zI << 8);                   \
-                READ_WORD(adr, newPC)                       \
+                READ_WORD(adr, zWZ)                         \
                 CCnt -= 8;                                  \
             }                                               \
         }                                                   \
@@ -163,7 +169,7 @@
             uint16_t src = PC;                              \
                                                             \
             PUSH_16(src)                                    \
-            SET_PC(newPC)                                   \
+            SET_PC(zWZ)                                     \
             CCnt -= 11;                                     \
         }                                                   \
     }
