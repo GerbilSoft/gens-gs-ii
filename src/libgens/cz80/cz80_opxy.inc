@@ -306,111 +306,165 @@ switch (Opcode)
     OPXY(0x35): // DEC  (IX+o)
         goto OP_DEC_mIx;
 
-
     // ADD
 
-    OPXY(0x80): // ADD  A,B
-    OPXY(0x81): // ADD  A,C
-    OPXY(0x82): // ADD  A,D
-    OPXY(0x83): // ADD  A,E
-    OPXY(0x87): // ADD  A,A
-        goto OP_ADD_R;
+#define OPXY_ADD_A_R(Opcode) OPJ_ADD_A_R(OPXY, Opcode)
 
-    OPXY(0x84): // ADD  A,HX
-        goto OP_ADD_IxH;
+    OPXY_ADD_A_R(0x80) // ADD  A,B
+    OPXY_ADD_A_R(0x81) // ADD  A,C
+    OPXY_ADD_A_R(0x82) // ADD  A,D
+    OPXY_ADD_A_R(0x83) // ADD  A,E
+    OPXY_ADD_A_R(0x87) // ADD  A,A
 
-    OPXY(0x85): // ADD  A,LX
-        goto OP_ADD_IxL;
+#define OPXY_ADD_A_XY(Opcode, HL) \
+    OPXY(Opcode): { \
+        uint8_t val = data->B.HL; \
+        OP_ADD_INT(val, 4); \
+    }
 
-    OPXY(0xc6): // ADD  A,n
-        goto OP_ADD_imm;
+    OPXY_ADD_A_XY(0x84, H) // ADD  A,HX
+    OPXY_ADD_A_XY(0x85, L) // ADD  A,LX
 
-    OPXY(0x86): // ADD  A,(IX+o)
-        goto OP_ADD_mIx;
+#define OPXY_ADD_A_n(Opcode) OPJ_ADD_A_n(OPXY, Opcode)
+
+    OPXY_ADD_A_n(0xc6) // ADD  A,n
+
+    OPXY(0x86): { // ADD  A,(IX+o)
+        uint8_t val;
+        PRE_IO
+	CALC_EA_XY_D();
+        READ_BYTE(zWZ, val)
+        POST_IO
+        OP_ADD_INT(val, 15);
+    }
 
     // ADC
 
-    OPXY(0x88): // ADC  A,B
-    OPXY(0x89): // ADC  A,C
-    OPXY(0x8a): // ADC  A,D
-    OPXY(0x8b): // ADC  A,E
-    OPXY(0x8f): // ADC  A,A
-        goto OP_ADC_R;
+#define OPXY_ADC_A_R(Opcode) OPJ_ADC_A_R(OPXY, Opcode)
 
-    OPXY(0xce): // ADC  A,n
-        goto OP_ADC_imm;
+    OPXY_ADC_A_R(0x88) // ADC  A,B
+    OPXY_ADC_A_R(0x89) // ADC  A,C
+    OPXY_ADC_A_R(0x8a) // ADC  A,D
+    OPXY_ADC_A_R(0x8b) // ADC  A,E
+    OPXY_ADC_A_R(0x8f) // ADC  A,A
 
-    OPXY(0x8c): // ADC  A,HX
-        goto OP_ADC_IxH;
+#define OPXY_ADC_A_XY(Opcode, HL) \
+    OPXY(Opcode): { \
+        uint8_t val = data->B.HL; \
+        OP_ADC_INT(val, 4); \
+    }
 
-    OPXY(0x8d): // ADC  A,LX
-        goto OP_ADC_IxL;
+    OPXY_ADC_A_XY(0x8c, H) // ADC  A,HX
+    OPXY_ADC_A_XY(0x8d, L) // ADC  A,LX
 
-    OPXY(0x8e): // ADC  A,(IX+o)
-        goto OP_ADC_mIx;
+#define OPXY_ADC_A_n(Opcode) OPJ_ADC_A_n(OPXY, Opcode)
+
+    OPXY_ADC_A_n(0xce) // ADC  A,n
+
+    OPXY(0x8e): { // ADC  A,(IX+o)
+        uint8_t val;
+        PRE_IO
+	CALC_EA_XY_D();
+        READ_BYTE(zWZ, val)
+        POST_IO
+        OP_ADC_INT(val, 15);
+    }
 
     // SUB
 
-    OPXY(0x90): // SUB  B
-    OPXY(0x91): // SUB  C
-    OPXY(0x92): // SUB  D
-    OPXY(0x93): // SUB  E
-    OPXY(0x97): // SUB  A
-        goto OP_SUB_R;
+#define OPXY_SUB_A_R(Opcode) OPJ_SUB_A_R(OPXY, Opcode)
 
-    OPXY(0x94): // SUB  HX
-        goto OP_SUB_IxH;
+    OPXY_SUB_A_R(0x90) // SUB  A,B
+    OPXY_SUB_A_R(0x91) // SUB  A,C
+    OPXY_SUB_A_R(0x92) // SUB  A,D
+    OPXY_SUB_A_R(0x93) // SUB  A,E
+    OPXY_SUB_A_R(0x97) // SUB  A,A
 
-    OPXY(0x95): // SUB  LX
-        goto OP_SUB_IxL;
+#define OPXY_SUB_A_XY(Opcode, HL) \
+    OPXY(Opcode): { \
+        uint8_t val = data->B.HL; \
+        OP_SUB_INT(val, 4); \
+    }
 
-    OPXY(0xd6): // SUB  A,n
-        goto OP_SUB_imm;
+    OPXY_SUB_A_XY(0x94, H) // SUB  A,HX
+    OPXY_SUB_A_XY(0x95, L) // SUB  A,LX
 
-    OPXY(0x96): // SUB  (IX+o)
-        goto OP_SUB_mIx;
+#define OPXY_SUB_A_n(Opcode) OPJ_SUB_A_n(OPXY, Opcode)
+
+    OPXY_SUB_A_n(0xd6) // SUB  A,n
+
+    OPXY(0x96): { // SUB  A,(IX+o)
+        uint8_t val;
+        PRE_IO
+	CALC_EA_XY_D();
+        READ_BYTE(zWZ, val)
+        POST_IO
+        OP_SUB_INT(val, 15);
+    }
 
     // SBC
 
-    OPXY(0x98): // SBC  A,B
-    OPXY(0x99): // SBC  A,C
-    OPXY(0x9a): // SBC  A,D
-    OPXY(0x9b): // SBC  A,E
-    OPXY(0x9f): // SBC  A,A
-        goto OP_SBC_R;
+#define OPXY_SBC_A_R(Opcode) OPJ_SBC_A_R(OPXY, Opcode)
 
-    OPXY(0x9c): // SBC  A,HX
-        goto OP_SBC_IxH;
+    OPXY_SBC_A_R(0x98) // SBC  A,B
+    OPXY_SBC_A_R(0x99) // SBC  A,C
+    OPXY_SBC_A_R(0x9a) // SBC  A,D
+    OPXY_SBC_A_R(0x9b) // SBC  A,E
+    OPXY_SBC_A_R(0x9f) // SBC  A,A
 
-    OPXY(0x9d): // SBC  A,LX
-        goto OP_SBC_IxL;
+#define OPXY_SBC_A_XY(Opcode, HL) \
+    OPXY(Opcode): { \
+        uint8_t val = data->B.HL; \
+        OP_SBC_INT(val, 4); \
+    }
 
-    OPXY(0xde): // SBC  A,n
-        goto OP_SBC_imm;
+    OPXY_SBC_A_XY(0x9c, H) // SBC  A,HX
+    OPXY_SBC_A_XY(0x9d, L) // SBC  A,LX
 
-    OPXY(0x9e): // SBC  A,(IX+o)
-        goto OP_SBC_mIx;
+#define OPXY_SBC_A_n(Opcode) OPJ_SBC_A_n(OPXY, Opcode)
+
+    OPXY_SBC_A_n(0xde) // SBC  A,n
+
+    OPXY(0x9e): { // SBC  A,(IX+o)
+        uint8_t val;
+        PRE_IO
+	CALC_EA_XY_D();
+        READ_BYTE(zWZ, val)
+        POST_IO
+        OP_SBC_INT(val, 15);
+    }
 
     // CP
 
-    OPXY(0xb8): // CP   B
-    OPXY(0xb9): // CP   C
-    OPXY(0xba): // CP   D
-    OPXY(0xbb): // CP   E
-    OPXY(0xbf): // CP   A
-        goto OP_CP_R;
+#define OPXY_CP_A_R(Opcode) OPJ_CP_A_R(OPXY, Opcode)
 
-    OPXY(0xbc): // CP   HX
-        goto OP_CP_IxH;
+    OPXY_CP_A_R(0xb8) // CP  A,B
+    OPXY_CP_A_R(0xb9) // CP  A,C
+    OPXY_CP_A_R(0xba) // CP  A,D
+    OPXY_CP_A_R(0xbb) // CP  A,E
+    OPXY_CP_A_R(0xbf) // CP  A,A
 
-    OPXY(0xbd): // CP   LX
-        goto OP_CP_IxL;
+#define OPXY_CP_A_XY(Opcode, HL) \
+    OPXY(Opcode): { \
+        uint8_t val = data->B.HL; \
+        OP_CP_INT(val, 4); \
+    }
 
-    OPXY(0xfe): // CP   n
-        goto OP_CP_imm;
+    OPXY_CP_A_XY(0xbc, H) // CP  A,HX
+    OPXY_CP_A_XY(0xbd, L) // CP  A,LX
 
-    OPXY(0xbe): // CP   (IX+o)
-        goto OP_CP_mIx;
+#define OPXY_CP_A_n(Opcode) OPJ_CP_A_n(OPXY, Opcode)
+
+    OPXY_CP_A_n(0xfe) // CP  A,n
+
+    OPXY(0xbe): { // CP  A,(IX+o)
+        uint8_t val;
+        PRE_IO
+	CALC_EA_XY_D();
+        READ_BYTE(zWZ, val)
+        POST_IO
+        OP_CP_INT(val, 15);
+    }
 
     // AND
 
