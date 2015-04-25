@@ -139,6 +139,7 @@ OP_LOAD_A_mDE:
 
 OP_LOAD_A_mxx:
         PRE_IO
+        zWZ = adr + 1;
         READ_BYTE(adr, zA)
         POST_IO
         RET(7)
@@ -162,6 +163,7 @@ OP_LOAD_mDE_A:
 
 OP_LOAD_mxx_A:
         PRE_IO
+        zWZ = (zA << 8) | ((adr + 1) & 0xFF);
         WRITE_BYTE(adr, zA)
         POST_IO
         RET(7)
