@@ -195,37 +195,19 @@ switch (Opcode)
     OPED(0xb7):
         goto OP_NOP;
 
-    OPED(0x43): // LD   (w),BC
-        data = pzBC;
-        goto OP_LD_mNN_xx;
+#define OPED_LD_mNN_RR_FN(Opcode, RR) OPJ_LD_mNN_RR_FN(OPED, Opcode, RR)
 
-    OPED(0x53): // LD   (w),DE
-        data = pzDE;
-        goto OP_LD_mNN_xx;
+    OPED_LD_mNN_RR_FN(0x43, BC) // LD   (nn),BC
+    OPED_LD_mNN_RR_FN(0x53, DE) // LD   (nn),DE
+    OPED_LD_mNN_RR_FN(0x63, HL) // LD   (nn),HL
+    OPED_LD_mNN_RR_FN(0x73, SP) // LD   (nn),SP
 
-    OPED(0x63): // LD   (w),HL
-        data = pzHL;
-        goto OP_LD_mNN_xx;
+#define OPED_LD_RR_mNN_FN(Opcode, RR) OPJ_LD_RR_mNN_FN(OPED, Opcode, RR)
 
-    OPED(0x73): // LD   (w),SP
-        data = pzSP;
-        goto OP_LD_mNN_xx;
-
-    OPED(0x4b): // LD   BC,(w)
-        data = pzBC;
-        goto OP_LD_xx_mNN;
-
-    OPED(0x5b): // LD   DE,(w)
-        data = pzDE;
-        goto OP_LD_xx_mNN;
-
-    OPED(0x6b): // LD   HL,(w)
-        data = pzHL;
-        goto OP_LD_xx_mNN;
-
-    OPED(0x7b): // LD   SP,(w)
-        data = pzSP;
-        goto OP_LD_xx_mNN;
+    OPED_LD_RR_mNN_FN(0x4b, BC) // LD   BC,(nn)
+    OPED_LD_RR_mNN_FN(0x5b, DE) // LD   DE,(nn)
+    OPED_LD_RR_mNN_FN(0x6b, HL) // LD   HL,(nn)
+    OPED_LD_RR_mNN_FN(0x7b, SP) // LD   SP,(nn)
 
 
     OPED(0x47): // LD   I,A
