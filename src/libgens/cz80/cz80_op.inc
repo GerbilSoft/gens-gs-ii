@@ -393,272 +393,264 @@ OP_DEC_m:
         RET(11)
     }
 
-    {
-        uint8_t val;
-        uint16_t res;
-
     // ADD
 
-OP_ADD_mIx:
-        PRE_IO
-        READ_BYTE(data->W + FETCH_BYTE_S, val)
-        POST_IO
-        CCnt -= 11;
-        goto OP_ADD;
+// TODO: Should 'cycles' include the base 4 cycles, or not?
+// Currently, it does; if cycles = 0, no cycles will be used.
+#define OP_ADD_INT(val, cycles) do { \
+        /* bench : maybe use src instead of zA in zF calculation */ \
+        uint16_t res = zA + val; \
+        zF = SZXY[res & 0xFF] |                                 /* S/Z/X/Y flag */ \
+            ((zA ^ res ^ val) & CZ80_HF) |                      /* H flag */ \
+            (((val ^ zA ^ 0x80) & (val ^ res) & 0x80) >> 5) |   /* V flag */ \
+            ((res >> 8) & CZ80_CF);                             /* C flag */ \
+        zA = (uint8_t)res; \
+        RET(cycles) \
+    } while (0)
 
-    OP(0xc6):   // ADD  A,n
-OP_ADD_imm:
-        val = FETCH_BYTE;
-        CCnt -= 3;
-        goto OP_ADD;
+#define OPJ_ADD_A_n(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val = FETCH_BYTE; \
+        OP_ADD_INT(val, 7); \
+    }
+#define OP_ADD_A_n(Opcode) OPJ_ADD_A_n(OP, Opcode)
 
-    OP(0x86):   // ADD  A,(HL)
-/* OP_ADD_mHL: */
-        PRE_IO
-        READ_BYTE(zHL, val)
-        POST_IO
-        CCnt -= 3;
-        goto OP_ADD;
+    OP_ADD_A_n(0xc6)   // ADD  A,n
 
-OP_ADD_IxH:
-        val = data->B.H;
-        goto OP_ADD;
+#define OPJ_ADD_A_mRR(JmpType, Opcode, RR) \
+    JmpType(Opcode): { \
+        uint8_t val; \
+        PRE_IO \
+        READ_BYTE(z##RR, val) \
+        POST_IO \
+        OP_ADD_INT(val, 7); \
+    }
+#define OP_ADD_A_mRR(Opcode, RR) OPJ_ADD_A_mRR(OP, Opcode, RR)
 
-OP_ADD_IxL:
-        val = data->B.L;
-        goto OP_ADD;
+    OP_ADD_A_mRR(0x86, HL)   // ADD  A,(HL)
 
-    OP(0x80):   // ADD  A,B
-    OP(0x81):   // ADD  A,C
-    OP(0x82):   // ADD  A,D
-    OP(0x83):   // ADD  A,E
-    OP(0x84):   // ADD  A,H
-    OP(0x85):   // ADD  A,L
-    OP(0x87):   // ADD  A,A
-OP_ADD_R:
-        val = zR8(Opcode & 7);
+#define OPJ_ADD_A_R(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val = zR8(Opcode & 7); \
+        OP_ADD_INT(val, 4); \
+    }
+#define OP_ADD_A_R(Opcode) OPJ_ADD_A_R(OP, Opcode)
 
-OP_ADD:
-// bench : maybe use src instead of zA in zF calculation
-        res = zA + val;
-        zF = SZXY[res & 0xFF] |                                 // S/Z/X/Y flag
-            ((zA ^ res ^ val) & CZ80_HF) |                      // H flag
-            (((val ^ zA ^ 0x80) & (val ^ res) & 0x80) >> 5) |   // V flag
-            ((res >> 8) & CZ80_CF);                             // C flag
-        zA = res;
-        RET(4)
+    OP_ADD_A_R(0x80)   // ADD  A,B
+    OP_ADD_A_R(0x81)   // ADD  A,C
+    OP_ADD_A_R(0x82)   // ADD  A,D
+    OP_ADD_A_R(0x83)   // ADD  A,E
+    OP_ADD_A_R(0x84)   // ADD  A,H
+    OP_ADD_A_R(0x85)   // ADD  A,L
+    OP_ADD_A_R(0x87)   // ADD  A,A
 
     // ADC
 
-OP_ADC_mIx:
-        PRE_IO
-        READ_BYTE(data->W + FETCH_BYTE_S, val)
-        POST_IO
-        CCnt -= 11;
-        goto OP_ADC;
+#define OP_ADC_INT(val, cycles) do { \
+        /* bench : maybe use src instead of zA in zF calculation */ \
+        uint16_t res = (zA + val) + (zF & CZ80_CF); \
+        zF = SZXY[res & 0xFF] |                                 /* S/Z/X/Y flag */ \
+            ((zA ^ res ^ val) & CZ80_HF) |                      /* H flag */ \
+            (((val ^ zA ^ 0x80) & (val ^ res) & 0x80) >> 5) |   /* V flag */ \
+            ((res >> 8) & CZ80_CF);                             /* C flag */ \
+        zA = (uint8_t)res; \
+        RET(cycles) \
+    } while (0)
 
-    OP(0xce):   // ADC  A,n
-OP_ADC_imm:
-        val = FETCH_BYTE;
-        CCnt -= 3;
-        goto OP_ADC;
+#define OPJ_ADC_A_n(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val = FETCH_BYTE; \
+        OP_ADC_INT(val, 7); \
+    }
+#define OP_ADC_A_n(Opcode) OPJ_ADC_A_n(OP, Opcode)
 
-    OP(0x8e):   // ADC  A,(HL)
-/* OP_ADC_mHL: */
-        PRE_IO
-        READ_BYTE(zHL, val)
-        POST_IO
-        CCnt -= 3;
-        goto OP_ADC;
+    OP_ADC_A_n(0xce)   // ADC  A,n
 
-OP_ADC_IxH:
-        val = data->B.H;
-        goto OP_ADC;
+#define OPJ_ADC_A_mRR(JmpType, Opcode, RR) \
+    JmpType(Opcode): { \
+        uint8_t val; \
+        PRE_IO \
+        READ_BYTE(z##RR, val) \
+        POST_IO \
+        OP_ADC_INT(val, 7); \
+    }
+#define OP_ADC_A_mRR(Opcode, RR) OPJ_ADC_A_mRR(OP, Opcode, RR)
 
-OP_ADC_IxL:
-        val = data->B.L;
-        goto OP_ADC;
+    OP_ADC_A_mRR(0x8e, HL)   // ADC  A,(HL)
 
-    OP(0x88):   // ADC  A,B
-    OP(0x89):   // ADC  A,C
-    OP(0x8a):   // ADC  A,D
-    OP(0x8b):   // ADC  A,E
-    OP(0x8c):   // ADC  A,H
-    OP(0x8d):   // ADC  A,L
-    OP(0x8f):   // ADC  A,A
-OP_ADC_R:
-        val = zR8(Opcode & 7);
+#define OPJ_ADC_A_R(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val = zR8(Opcode & 7); \
+        OP_ADC_INT(val, 4); \
+    }
+#define OP_ADC_A_R(Opcode) OPJ_ADC_A_R(OP, Opcode)
 
-OP_ADC:
-// bench : maybe use src instead of zA in zF calculation
-        res = (zA + val) + (zF & CZ80_CF);
-        zF = SZXY[res & 0xFF] |                                 // S/Z/X/Y flag
-            ((zA ^ res ^ val) & CZ80_HF) |                      // H flag
-            (((val ^ zA ^ 0x80) & (val ^ res) & 0x80) >> 5) |   // V flag
-            ((res >> 8) & CZ80_CF);                             // C flag
-        zA = res;
-        RET(4)
+    OP_ADC_A_R(0x88)   // ADC  A,B
+    OP_ADC_A_R(0x89)   // ADC  A,C
+    OP_ADC_A_R(0x8a)   // ADC  A,D
+    OP_ADC_A_R(0x8b)   // ADC  A,E
+    OP_ADC_A_R(0x8c)   // ADC  A,H
+    OP_ADC_A_R(0x8d)   // ADC  A,L
+    OP_ADC_A_R(0x8f)   // ADC  A,A
 
     // SUB
 
-OP_SUB_mIx:
-        PRE_IO
-        READ_BYTE(data->W + FETCH_BYTE_S, val)
-        POST_IO
-        CCnt -= 11;
-        goto OP_SUB;
+#define OP_SUB_INT(val, cycles) do { \
+        /* bench : maybe use src instead of zA in zF calculation */ \
+        uint16_t res = zA - val; \
+        zF = SZXY[res & 0xFF] |                             /* S/Z/X/Y flag */ \
+            ((zA ^ res ^ val) & CZ80_HF) |                  /* H flag */ \
+            (((val ^ zA) & (zA ^ res) & 0x80) >> 5) |       /* V flag */ \
+            ((res >> 8) & CZ80_CF) | CZ80_NF;               /* C/N flag */ \
+        zA = (uint8_t)res; \
+        RET(cycles) \
+    } while (0)
 
-    OP(0xd6):   // SUB  A,n
-OP_SUB_imm:
-        val = FETCH_BYTE;
-        CCnt -= 3;
-        goto OP_SUB;
+#define OPJ_SUB_A_n(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val = FETCH_BYTE; \
+        OP_SUB_INT(val, 7); \
+    }
+#define OP_SUB_A_n(Opcode) OPJ_SUB_A_n(OP, Opcode)
 
-    OP(0x96):   // SUB  (HL)
-/* OP_SUB_mHL: */
-        PRE_IO
-        READ_BYTE(zHL, val)
-        POST_IO
-        CCnt -= 3;
-        goto OP_SUB;
+    OP_SUB_A_n(0xd6)   // SUB  A,n
 
-OP_SUB_IxH:
-        val = data->B.H;
-        goto OP_SUB;
+#define OPJ_SUB_A_mRR(JmpType, Opcode, RR) \
+    JmpType(Opcode): { \
+        uint8_t val; \
+        PRE_IO \
+        READ_BYTE(z##RR, val) \
+        POST_IO \
+        OP_SUB_INT(val, 7); \
+    }
+#define OP_SUB_A_mRR(Opcode, RR) OPJ_SUB_A_mRR(OP, Opcode, RR)
 
-OP_SUB_IxL:
-        val = data->B.L;
-        goto OP_SUB;
+    OP_SUB_A_mRR(0x96, HL)   // SUB  A,(HL)
 
-    OP(0x90):   // SUB  B
-    OP(0x91):   // SUB  C
-    OP(0x92):   // SUB  D
-    OP(0x93):   // SUB  E
-    OP(0x94):   // SUB  H
-    OP(0x95):   // SUB  L
-    OP(0x97):   // SUB  A
-OP_SUB_R:
-        val = zR8(Opcode & 7);
+#define OPJ_SUB_A_R(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val = zR8(Opcode & 7); \
+        OP_SUB_INT(val, 4); \
+    }
+#define OP_SUB_A_R(Opcode) OPJ_SUB_A_R(OP, Opcode)
 
-OP_SUB:
-// bench : maybe use src instead of zA in zF calculation
-        res = zA - val;
-        zF = SZXY[res & 0xFF] |                             // S/Z/X/Y flag
-            ((zA ^ res ^ val) & CZ80_HF) |                  // H flag
-            (((val ^ zA) & (zA ^ res) & 0x80) >> 5) |       // V flag
-            ((res >> 8) & CZ80_CF) | CZ80_NF;               // C/N flag
-        zA = res;
-        RET(4)
+    OP_SUB_A_R(0x90)   // SUB  A,B
+    OP_SUB_A_R(0x91)   // SUB  A,C
+    OP_SUB_A_R(0x92)   // SUB  A,D
+    OP_SUB_A_R(0x93)   // SUB  A,E
+    OP_SUB_A_R(0x94)   // SUB  A,H
+    OP_SUB_A_R(0x95)   // SUB  A,L
+    OP_SUB_A_R(0x97)   // SUB  A,A
 
     // SBC
 
-OP_SBC_mIx:
-        PRE_IO
-        READ_BYTE(data->W + FETCH_BYTE_S, val)
-        POST_IO
-        CCnt -= 11;
-        goto OP_SBC;
+#define OP_SBC_INT(val, cycles) do { \
+        /* bench : maybe use src instead of zA in zF calculation */ \
+        uint16_t res = zA - (val + (zF & CZ80_CF)); \
+        zF = SZXY[res & 0xFF] |                             /* S/Z/X/Y flag */ \
+            ((zA ^ res ^ val) & CZ80_HF) |                  /* H flag */ \
+            (((val ^ zA) & (zA ^ res) & 0x80) >> 5) |       /* V flag */ \
+            ((res >> 8) & CZ80_CF) | CZ80_NF;               /* C/N flag */ \
+        zA = (uint8_t)res; \
+        RET(cycles) \
+    } while (0)
 
-    OP(0xde):   // SBC  A,n
-OP_SBC_imm:
-        val = FETCH_BYTE;
-        CCnt -= 3;
-        goto OP_SBC;
+#define OPJ_SBC_A_n(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val = FETCH_BYTE; \
+        OP_SBC_INT(val, 7); \
+    }
+#define OP_SBC_A_n(Opcode) OPJ_SBC_A_n(OP, Opcode)
 
-    OP(0x9e):   // SBC  A,(HL)
-/* OP_SBC_mHL: */
-        PRE_IO
-        READ_BYTE(zHL, val)
-        POST_IO
-        CCnt -= 3;
-        goto OP_SBC;
+    OP_SBC_A_n(0xde)   // SBC  A,n
 
-OP_SBC_IxH:
-        val = data->B.H;
-        goto OP_SBC;
+#define OPJ_SBC_A_mRR(JmpType, Opcode, RR) \
+    JmpType(Opcode): { \
+        uint8_t val; \
+        PRE_IO \
+        READ_BYTE(z##RR, val) \
+        POST_IO \
+        OP_SBC_INT(val, 7); \
+    }
+#define OP_SBC_A_mRR(Opcode, RR) OPJ_SBC_A_mRR(OP, Opcode, RR)
 
-OP_SBC_IxL:
-        val = data->B.L;
-        goto OP_SBC;
+    OP_SBC_A_mRR(0x9e, HL)   // SBC  A,(HL)
 
-    OP(0x98):   // SBC  A,B
-    OP(0x99):   // SBC  A,C
-    OP(0x9a):   // SBC  A,D
-    OP(0x9b):   // SBC  A,E
-    OP(0x9c):   // SBC  A,H
-    OP(0x9d):   // SBC  A,L
-    OP(0x9f):   // SBC  A,A
-OP_SBC_R:
-        val = zR8(Opcode & 7);
+#define OPJ_SBC_A_R(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val = zR8(Opcode & 7); \
+        OP_SBC_INT(val, 4); \
+    }
+#define OP_SBC_A_R(Opcode) OPJ_SBC_A_R(OP, Opcode)
 
-OP_SBC:
-// bench : maybe use src instead of zA in zF calculation
-        res = zA - (val + (zF & CZ80_CF));
-        zF = SZXY[res & 0xFF] |                             // S/Z/X/Y flag
-            ((zA ^ res ^ val) & CZ80_HF) |                  // H flag
-            (((val ^ zA) & (zA ^ res) & 0x80) >> 5) |       // V flag
-            ((res >> 8) & CZ80_CF) | CZ80_NF;               // C/N flag
-        zA = res;
-        RET(4)
+    OP_SBC_A_R(0x98)   // SBC  A,B
+    OP_SBC_A_R(0x99)   // SBC  A,C
+    OP_SBC_A_R(0x9a)   // SBC  A,D
+    OP_SBC_A_R(0x9b)   // SBC  A,E
+    OP_SBC_A_R(0x9c)   // SBC  A,H
+    OP_SBC_A_R(0x9d)   // SBC  A,L
+    OP_SBC_A_R(0x9f)   // SBC  A,A
 
     // CP
 
-OP_CP_mIx:
-        PRE_IO
-        READ_BYTE(data->W + FETCH_BYTE_S, val)
-        POST_IO
-        CCnt -= 11;
-        goto OP_CP;
-
-    OP(0xfe):   // CP   n
-OP_CP_imm:
-        val = FETCH_BYTE;
-        CCnt -= 3;
-        goto OP_CP;
-
-    OP(0xbe):   // CP   (HL)
-/* OP_CP_mHL: */
-        PRE_IO
-        READ_BYTE(zHL, val)
-        POST_IO
-        CCnt -= 3;
-        goto OP_CP;
-
-OP_CP_IxH:
-        val = data->B.H;
-        goto OP_CP;
-
-OP_CP_IxL:
-        val = data->B.L;
-        goto OP_CP;
-
-    OP(0xb8):   // CP   B
-    OP(0xb9):   // CP   C
-    OP(0xba):   // CP   D
-    OP(0xbb):   // CP   E
-    OP(0xbc):   // CP   H
-    OP(0xbd):   // CP   L
-    OP(0xbf):   // CP   A
-OP_CP_R:
-        val = zR8(Opcode & 7);
-
-OP_CP:
-// bench : maybe use src instead of zA in zF calculation
-        res = zA - val;
 #if CZ80_DEBUG
-        zF = SZXY[res & 0xFF] |                             // S/Z/X/Y flag
-            ((zA ^ res ^ val) & CZ80_HF) |                  // H flag
-            (((val ^ zA) & (zA ^ res) & 0x80) >> 5) |       // V flag
-            ((res >> 8) & CZ80_CF) | CZ80_NF;               // C/N flag
-#else
-        zF = (SZXY[res & 0xFF] & ~(CZ80_XF | CZ80_YF)) |    // S/Z flag
-            (val & (CZ80_XF | CZ80_YF)) |                   // X/Y flag
-            ((zA ^ res ^ val) & CZ80_HF) |                  // H flag
-            (((val ^ zA) & (zA ^ res) & 0x80) >> 5) |       // V flag
-            ((res >> 8) & CZ80_CF) | CZ80_NF;               // C/N flag
-#endif
-        RET(4)
+#define OP_CP_INT(val, cycles) do { \
+        /* bench : maybe use src instead of zA in zF calculation */ \
+        uint16_t res = zA - val; \
+        zF = SZXY[res & 0xFF] |                             /* S/Z/X/Y flag */ \
+            ((zA ^ res ^ val) & CZ80_HF) |                  /* H flag */ \
+            (((val ^ zA) & (zA ^ res) & 0x80) >> 5) |       /* V flag */ \
+            ((res >> 8) & CZ80_CF) | CZ80_NF;               /* C/N flag */ \
+        RET(cycles) \
+    } while (0)
+#else /* CZ80_DEBUG */
+#define OP_CP_INT(val, cycles) do { \
+        /* bench : maybe use src instead of zA in zF calculation */ \
+        uint16_t res = zA - val; \
+        zF = (SZXY[res & 0xFF] & ~(CZ80_XF | CZ80_YF)) |    /* S/Z flag */ \
+            (val & (CZ80_XF | CZ80_YF)) |                   /* X/Y flag */ \
+            ((zA ^ res ^ val) & CZ80_HF) |                  /* H flag */ \
+            (((val ^ zA) & (zA ^ res) & 0x80) >> 5) |       /* V flag */ \
+            ((res >> 8) & CZ80_CF) | CZ80_NF;               /* C/N flag */ \
+        RET(cycles) \
+    } while (0)
+#endif /* CZ80_DEBUG */
+
+#define OPJ_CP_A_n(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val = FETCH_BYTE; \
+        OP_CP_INT(val, 7); \
     }
+#define OP_CP_A_n(Opcode) OPJ_CP_A_n(OP, Opcode)
+
+    OP_CP_A_n(0xfe)   // CP  A,n
+
+#define OPJ_CP_A_mRR(JmpType, Opcode, RR) \
+    JmpType(Opcode): { \
+        uint8_t val; \
+        PRE_IO \
+        READ_BYTE(z##RR, val) \
+        POST_IO \
+        OP_CP_INT(val, 7); \
+    }
+#define OP_CP_A_mRR(Opcode, RR) OPJ_CP_A_mRR(OP, Opcode, RR)
+
+    OP_CP_A_mRR(0xbe, HL)   // CP  A,(HL)
+
+#define OPJ_CP_A_R(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t val = zR8(Opcode & 7); \
+        OP_CP_INT(val, 4); \
+    }
+#define OP_CP_A_R(Opcode) OPJ_CP_A_R(OP, Opcode)
+
+    OP_CP_A_R(0xb8)   // CP  A,B
+    OP_CP_A_R(0xb9)   // CP  A,C
+    OP_CP_A_R(0xba)   // CP  A,D
+    OP_CP_A_R(0xbb)   // CP  A,E
+    OP_CP_A_R(0xbc)   // CP  A,H
+    OP_CP_A_R(0xbd)   // CP  A,L
+    OP_CP_A_R(0xbf)   // CP  A,A
     
     // AND
 
