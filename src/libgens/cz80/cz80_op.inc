@@ -180,40 +180,47 @@ OP_NOP:
 
     // 16 BITS LOAD
 
-    OP(0x01):   // LD   BC,nn
-    OP(0x11):   // LD   DE,nn
-    OP(0x21):   // LD   HL,nn
-OP_LOAD_RR_imm16:
-        FETCH_WORD(zR16(Opcode >> 4))
+#define OPJ_LD_RR_nn_FN(JmpType, Opcode) \
+    JmpType(Opcode): \
+        FETCH_WORD(zR16(Opcode >> 4)) \
         RET(10)
+#define OP_LD_RR_nn_FN(Opcode) OPJ_LD_RR_nn_FN(OP, Opcode)
+
+    OP_LD_RR_nn_FN(0x01)   // LD   BC,nn
+    OP_LD_RR_nn_FN(0x11)   // LD   DE,nn
+    OP_LD_RR_nn_FN(0x21)   // LD   HL,nn
 
     OP(0x31):   // LD   SP,nn
-OP_LOAD_SP_imm16:
         FETCH_WORD(zSP)
         RET(10)
 
     OP(0xf9):   // LD   SP,HL
-OP_LD_SP_xx:
         zSP = data->W;
         RET(6)
 
-    OP(0x2a):   // LD   HL,(nn)
-OP_LD_xx_mNN:
-        PRE_IO
-        FETCH_WORD(zWZ)
-        READ_WORD_LE(zWZ, data->W)
-        zWZ++;
-        POST_IO
+#define OPJ_LD_RR_mNN_FN(JmpType, Opcode, RR) \
+    JmpType(Opcode): \
+        PRE_IO \
+        FETCH_WORD(zWZ) \
+        READ_WORD_LE(zWZ, z##RR) \
+	zWZ++; \
+        POST_IO \
         RET(16)
+#define OP_LD_RR_mNN_FN(Opcode, RR) OPJ_LD_RR_mNN_FN(OP, Opcode, RR)
 
-    OP(0x22):   // LD   (nn),HL
-OP_LD_mNN_xx:
-        PRE_IO
-        FETCH_WORD(zWZ)
-        WRITE_WORD_LE(zWZ, data->W)
-        zWZ++;
-        POST_IO
+    OP_LD_RR_mNN_FN(0x2a, HL)   // LD   HL,(nn)
+
+#define OPJ_LD_mNN_RR_FN(JmpType, Opcode, RR) \
+    JmpType(Opcode): \
+        PRE_IO \
+        FETCH_WORD(zWZ) \
+        WRITE_WORD_LE(zWZ, z##RR) \
+	zWZ++; \
+        POST_IO \
         RET(16)
+#define OP_LD_mNN_RR_FN(Opcode, RR) OPJ_LD_mNN_RR_FN(OP, Opcode, RR)
+
+    OP_LD_mNN_RR_FN(0x22, HL)   // LD   (nn),HL
 
     // PUSH / POP
 

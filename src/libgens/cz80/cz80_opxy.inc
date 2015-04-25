@@ -175,25 +175,38 @@ switch (Opcode)
 
     // 16 BITS LOAD
 
-    OPXY(0x01): // LD   BC,nn
-    OPXY(0x11): // LD   DE,nn
-        goto OP_LOAD_RR_imm16;
+#define OPXY_LD_RR_nn_FN(Opcode) OPJ_LD_RR_nn_FN(OPXY, Opcode)
+
+    OPXY_LD_RR_nn_FN(0x01)   // LD   BC,nn
+    OPXY_LD_RR_nn_FN(0x11)   // LD   DE,nn
 
     OPXY(0x21): // LD   IX,nn
         FETCH_WORD(data->W)
         RET(10)
 
     OPXY(0x31): // LD   SP,nn
-        goto OP_LOAD_SP_imm16;
+        FETCH_WORD(zSP)
+        RET(10)
 
-    OPXY(0x2a): // LD   IX,(w)
-        goto OP_LD_xx_mNN;
+    OPXY(0x2a):   // LD   IX,(nn)
+        PRE_IO
+        FETCH_WORD(zWZ)
+        READ_WORD_LE(zWZ, data->W)
+	zWZ++;
+        POST_IO
+        RET(16)
 
-    OPXY(0x22): // LD   (w),IX
-        goto OP_LD_mNN_xx;
+    OPXY(0x22):   // LD   (nn),IX
+        PRE_IO
+        FETCH_WORD(zWZ)
+        WRITE_WORD_LE(zWZ, data->W)
+	zWZ++;
+        POST_IO
+        RET(16)
 
     OPXY(0xf9): // LD   SP,IX
-        goto OP_LD_SP_xx;
+        zSP = data->W;
+        RET(6)
 
 
     // PUSH / POP
