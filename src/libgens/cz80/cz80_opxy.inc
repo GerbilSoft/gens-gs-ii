@@ -653,61 +653,43 @@ switch (Opcode)
     OPXY(0x1f): // RRA
         goto OP_RRA;
 
-
     // JUMP
 
-    OPXY(0xc3): // JP   nn
-        goto OP_JP;
+#define OPXY_JP_NCOND(Opcode, Cond) OPJ_JP_NCOND(OPXY, Opcode, Cond)
+#define OPXY_JP_COND( Opcode, Cond) OPJ_JP_COND( OPXY, Opcode, Cond)
 
-    OPXY(0xe9): // JP   (IX)
-        goto OP_JP_xx;
+    OPXY_JP_NCOND(0xd2, CZ80_CF)   // JP   NC,nn
+    OPXY_JP_COND( 0xda, CZ80_CF)   // JP   C,nn
+    OPXY_JP_NCOND(0xe2, CZ80_VF)   // JP   PO,nn
+    OPXY_JP_COND( 0xea, CZ80_VF)   // JP   PE,nn
+    OPXY_JP_NCOND(0xf2, CZ80_SF)   // JP   P,nn
+    OPXY_JP_COND( 0xfa, CZ80_SF)   // JP   M,nn
+    OPXY_JP_NCOND(0xc2, CZ80_ZF)   // JP   NZ,nn
+    OPXY_JP_COND( 0xca, CZ80_ZF)   // JP   Z,nn
 
+#define OPXY_JP(Opcode) OPJ_JP(OPXY, Opcode)
 
-    OPXY(0xd2): // JP   NC,nn
-        goto OP_JP_NC;
+    OPXY_JP(0xc3) // JP   nn
 
-    OPXY(0xda): // JP   C,nn
-        goto OP_JP_C;
+#define OPXY_JP_mHL(Opcode) OPJ_JP_mHL(OPXY, Opcode)
 
-    OPXY(0xe2): // JP   PO,nn
-        goto OP_JP_PO;
+    OPXY_JP_mHL(0xe9) // JP   (IX)
 
-    OPXY(0xea): // JP   PE,nn
-        goto OP_JP_PE;
+#define OPXY_JR_NCOND(Opcode, Cond) OPJ_JR_NCOND(OPXY, Opcode, Cond)
+#define OPXY_JR_COND( Opcode, Cond) OPJ_JR_COND( OPXY, Opcode, Cond)
 
-    OPXY(0xf2): // JP   P,nn
-        goto OP_JP_P;
+    OPXY_JR_NCOND(0x30, CZ80_CF)   // JR   NC,n
+    OPXY_JR_COND( 0x38, CZ80_CF)   // JR   C,n
+    OPXY_JR_NCOND(0x20, CZ80_ZF)   // JR   NZ,n
+    OPXY_JR_COND( 0x28, CZ80_ZF)   // JR   Z,n
 
-    OPXY(0xfa): // JP   M,nn
-        goto OP_JP_M;
+#define OPXY_DJNZ(Opcode) OPJ_DJNZ(OPXY, Opcode)
 
-    OPXY(0xca): // JP   Z,nn
-        goto OP_JP_Z;
+    OPXY_DJNZ(0x10)   // DJNZ n
 
-    OPXY(0xc2): // JP   NZ,nn
-        goto OP_JP_NZ;
+#define OPXY_JR(Opcode) OPJ_JR(OPXY, Opcode)
 
-
-    OPXY(0x18): // JR   n
-        goto OP_JR;
-
-
-    OPXY(0x38): // JR   C,n
-        goto OP_JR_C;
-
-    OPXY(0x30): // JR   NC,n
-        goto OP_JR_NC;
-
-    OPXY(0x28): // JR   Z,n
-        goto OP_JR_Z;
-
-    OPXY(0x20): // JR   NZ,n
-        goto OP_JR_NZ;
-
-
-    OPXY(0x10): // DJNZ n
-        goto OP_DJNZ;
-
+    OPXY_JR(0x18)   // JR   n
 
     // CALL & RETURN
 

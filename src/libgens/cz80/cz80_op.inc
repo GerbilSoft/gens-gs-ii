@@ -1049,109 +1049,114 @@ OP_RRA:
 
     // JUMP
 
-    OP(0xd2):   // JP   NC,nn
-OP_JP_NC:
-        if (!(zF & CZ80_CF)) goto OP_JP;
-        FETCH_WORD(zWZ)
-        RET(10);
-
-    OP(0xda):   // JP   C,nn
-OP_JP_C:
-        if (zF & CZ80_CF) goto OP_JP;
-        FETCH_WORD(zWZ)
-        RET(10);
-
-    OP(0xe2):   // JP   PO,nn
-OP_JP_PO:
-        if (!(zF & CZ80_VF)) goto OP_JP;
-        FETCH_WORD(zWZ)
-        RET(10);
-
-    OP(0xea):   // JP   PE,nn
-OP_JP_PE:
-        if (zF & CZ80_VF) goto OP_JP;
-        FETCH_WORD(zWZ)
-        RET(10);
-
-    OP(0xf2):   // JP   P,nn
-OP_JP_P:
-        if (!(zF & CZ80_SF)) goto OP_JP;
-        FETCH_WORD(zWZ)
-        RET(10);
-
-    OP(0xfa):   // JP   M,nn
-OP_JP_M:
-        if (zF & CZ80_SF) goto OP_JP;
-        FETCH_WORD(zWZ)
-        RET(10);
-
-    OP(0xca):   // JP   Z,nn
-OP_JP_Z:
-        if (zF & CZ80_ZF) goto OP_JP;
-        FETCH_WORD(zWZ)
-        RET(10);
-
-    OP(0xc2):   // JP   NZ,nn
-OP_JP_NZ:
-        if (!(zF & CZ80_ZF)) goto OP_JP;
-        FETCH_WORD(zWZ)
-        RET(10);
-
-    OP(0xc3):   // JP   nn
-OP_JP:
-        zWZ = GET_WORD;
-        SET_PC(zWZ);
+#define OPJ_JP_NCOND(JmpType, Opcode, Cond) \
+    JmpType(Opcode): \
+        if (!(zF & Cond)) { \
+            zWZ = GET_WORD; \
+            SET_PC(zWZ); \
+            RET(10) \
+        } \
+        FETCH_WORD(zWZ) \
         RET(10)
+#define OP_JP_NCOND(Opcode, Cond) OPJ_JP_NCOND(OP, Opcode, Cond)
 
-    OP(0xe9):   // JP   (xx)
-OP_JP_xx:
-        zWZ = data->W;
-        SET_PC(zWZ);
+#define OPJ_JP_COND(JmpType, Opcode, Cond) \
+    JmpType(Opcode): \
+        if (zF & Cond) { \
+            zWZ = GET_WORD; \
+            SET_PC(zWZ); \
+            RET(10) \
+        } \
+        FETCH_WORD(zWZ) \
+        RET(10)
+#define OP_JP_COND(Opcode, Cond) OPJ_JP_COND(OP, Opcode, Cond)
+
+    OP_JP_NCOND(0xd2, CZ80_CF)   // JP   NC,nn
+    OP_JP_COND( 0xda, CZ80_CF)   // JP   C,nn
+    OP_JP_NCOND(0xe2, CZ80_VF)   // JP   PO,nn
+    OP_JP_COND( 0xea, CZ80_VF)   // JP   PE,nn
+    OP_JP_NCOND(0xf2, CZ80_SF)   // JP   P,nn
+    OP_JP_COND( 0xfa, CZ80_SF)   // JP   M,nn
+    OP_JP_NCOND(0xc2, CZ80_ZF)   // JP   NZ,nn
+    OP_JP_COND( 0xca, CZ80_ZF)   // JP   Z,nn
+
+#define OPJ_JP(JmpType, Opcode) \
+    JmpType(Opcode): \
+        zWZ = GET_WORD; \
+        SET_PC(zWZ); \
+        RET(10)
+#define OP_JP(Opcode) OPJ_JP(OP, Opcode)
+
+    OP_JP(0xc3)   // JP   nn
+
+#define OPJ_JP_mHL(JmpType, Opcode) \
+    JmpType(Opcode): \
+        zWZ = data->W; \
+        SET_PC(zWZ); \
         RET(4)
+#define OP_JP_mHL(Opcode) OPJ_JP_mHL(OP, Opcode)
 
+    OP_JP_mHL(0xe9)   // JP   (xx)
     
-    OP(0x38):   // JR   C,n
-OP_JR_C:
-        if (zF & CZ80_CF) goto OP_JR;
-        PC++;
+#define OPJ_JR_NCOND(JmpType, Opcode, Cond) \
+    JmpType(Opcode): \
+        if (!(zF & Cond)) { \
+            int8_t val = FETCH_BYTE_S; \
+            /* no rebase needed here... */ \
+            PC += val; \
+            zWZ = PC; \
+            RET(12) \
+        } \
+        PC++; \
         RET(7)
+#define OP_JR_NCOND(Opcode, Cond) OPJ_JR_NCOND(OP, Opcode, Cond)
 
-    OP(0x30):   // JR   NC,n
-OP_JR_NC:
-        if (!(zF & CZ80_CF)) goto OP_JR;
-        PC++;
+#define OPJ_JR_COND(JmpType, Opcode, Cond) \
+    JmpType(Opcode): \
+        if (zF & Cond) { \
+            int8_t val = FETCH_BYTE_S; \
+            /* no rebase needed here... */ \
+            PC += val; \
+            zWZ = PC; \
+            RET(12) \
+        } \
+        PC++; \
         RET(7)
+#define OP_JR_COND(Opcode, Cond) OPJ_JR_COND(OP, Opcode, Cond)
 
-    OP(0x28):   // JR   Z,n
-OP_JR_Z:
-        if (zF & CZ80_ZF) goto OP_JR;
-        PC++;
-        RET(7)
+    OP_JR_NCOND(0x30, CZ80_CF)   // JR   NC,n
+    OP_JR_COND( 0x38, CZ80_CF)   // JR   C,n
+    OP_JR_NCOND(0x20, CZ80_ZF)   // JR   NZ,n
+    OP_JR_COND( 0x28, CZ80_ZF)   // JR   Z,n
 
-    OP(0x20):   // JR   NZ,n
-OP_JR_NZ:
-        if (!(zF & CZ80_ZF)) goto OP_JR;
-        PC++;
-        RET(7)
+#define OPJ_DJNZ(JmpType, Opcode) \
+    JmpType(Opcode): \
+        if (--zB) { \
+            int8_t val = FETCH_BYTE_S; \
+            /* no rebase needed here... */ \
+            PC += val; \
+            zWZ = PC; \
+            RET(13) \
+        } \
+        PC++; \
+        /* FIXME: mdZ80 and CZ80 both have 10 here; */ \
+        /* everything else says 8. */ \
+        RET(8)
+#define OP_DJNZ(Opcode) OPJ_DJNZ(OP, Opcode)
 
-    OP(0x10):   // DJNZ n
-OP_DJNZ:
-        CCnt--;
-        if (--zB) goto OP_JR;
-        PC++;
-        RET(9)
+    OP_DJNZ(0x10)   // DJNZ n
 
-    OP(0x18):   // JR   n
-OP_JR:
-    {
-        uintptr_t adr;
-
-        adr = FETCH_BYTE_S;
-        // no rebase needed here...
-        PC += adr;
-        zWZ = PC;
-        RET(12)
+#define OPJ_JR(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        int8_t val = FETCH_BYTE_S; \
+        /* no rebase needed here... */ \
+        PC += val; \
+        zWZ = PC; \
+        RET(12) \
     }
+#define OP_JR(Opcode) OPJ_JR(OP, Opcode)
+
+    OP_JR(0x18)   // JR   n
 
     // CALL & RETURN
 
