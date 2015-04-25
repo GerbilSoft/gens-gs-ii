@@ -693,33 +693,21 @@ switch (Opcode)
 
     // CALL & RETURN
 
-    OPXY(0xcd): // CALL nn
-        goto OP_CALL;
+#define OPXY_CALL_NCOND(Opcode, Cond) OPJ_CALL_NCOND(OPXY, Opcode, Cond)
+#define OPXY_CALL_COND( Opcode, Cond) OPJ_CALL_COND( OPXY, Opcode, Cond)
 
+    OPXY_CALL_NCOND(0xd4, CZ80_CF)   // CALL NC,nn
+    OPXY_CALL_COND( 0xdc, CZ80_CF)   // CALL C,nn
+    OPXY_CALL_NCOND(0xe4, CZ80_VF)   // CALL PO,nn
+    OPXY_CALL_COND( 0xec, CZ80_VF)   // CALL PE,nn
+    OPXY_CALL_NCOND(0xf4, CZ80_SF)   // CALL P,nn
+    OPXY_CALL_COND( 0xfc, CZ80_SF)   // CALL M,nn
+    OPXY_CALL_NCOND(0xc4, CZ80_ZF)   // CALL NZ,nn
+    OPXY_CALL_COND( 0xcc, CZ80_ZF)   // CALL Z,nn
 
-    OPXY(0xd4): // CALL NC,nn
-        goto OP_CALL_NC;
+#define OPXY_CALL(Opcode) OPJ_CALL(OPXY, Opcode)
 
-    OPXY(0xdc): // CALL C,nn
-        goto OP_CALL_C;
-
-    OPXY(0xe4): // CALL PO,nn
-        goto OP_CALL_PO;
-
-    OPXY(0xec): // CALL PE,nn
-        goto OP_CALL_PE;
-
-    OPXY(0xf4): // CALL P,nn
-        goto OP_CALL_P;
-
-    OPXY(0xfc): // CALL M,nn
-        goto OP_CALL_M;
-
-    OPXY(0xcc): // CALL Z,nn
-        goto OP_CALL_Z;
-
-    OPXY(0xc4): // CALL NZ,nn
-        goto OP_CALL_NZ;
+    OPXY_CALL(0xcd) // CALL   nn
 
 
     OPXY(0xc9): // RET
