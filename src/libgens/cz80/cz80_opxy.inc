@@ -601,28 +601,36 @@ switch (Opcode)
     // 16 BITS ARITHMETIC
 
     OPXY(0x03): // INC  BC
-        goto OP_INC_BC;
+        zBC++;
+        RET(6)
 
     OPXY(0x13): // INC  DE
-        goto OP_INC_DE;
+        zDE++;
+        RET(6)
 
-    OPXY(0x23): // INC  IX
-        goto OP_INC_xx;
+    OPXY(0x23): // INC  HL
+        data->W++;
+        RET(6)
 
     OPXY(0x33): // INC  SP
-        goto OP_INC_SP;
+        zSP++;
+        RET(6)
 
     OPXY(0x0b): // DEC  BC
-        goto OP_DEC_BC;
+        zBC--;
+        RET(6)
 
     OPXY(0x1b): // DEC  DE
-        goto OP_DEC_DE;
+        zDE--;
+        RET(6)
 
-    OPXY(0x2b): // DEC  IX
-        goto OP_DEC_xx;
+    OPXY(0x2b): // DEC  HL
+        data->W--;
+        RET(6)
 
     OPXY(0x3b): // DEC  SP
-        goto OP_DEC_SP;
+        zSP--;
+        RET(6)
 
     // ADD16
 
