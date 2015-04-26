@@ -26,67 +26,67 @@ switch (Opcode)
     OPXY(0x7f): // LD   A,A
         RET(4)
 
-#define OPXY_LD_R_R_FN(Opcode) OPJ_LD_R_R_FN(OPXY, Opcode)
+#define OPXY_LD_R_R(Opcode) OPJ_LD_R_R(OPXY, Opcode)
 
-    OPXY_LD_R_R_FN(0x41) // LD   B,C
-    OPXY_LD_R_R_FN(0x42) // LD   B,D
-    OPXY_LD_R_R_FN(0x43) // LD   B,E
-    OPXY_LD_R_R_FN(0x47) // LD   B,A
+    OPXY_LD_R_R(0x41) // LD   B,C
+    OPXY_LD_R_R(0x42) // LD   B,D
+    OPXY_LD_R_R(0x43) // LD   B,E
+    OPXY_LD_R_R(0x47) // LD   B,A
 
-    OPXY_LD_R_R_FN(0x48) // LD   C,B
-    OPXY_LD_R_R_FN(0x4a) // LD   C,D
-    OPXY_LD_R_R_FN(0x4b) // LD   C,E
-    OPXY_LD_R_R_FN(0x4f) // LD   C,A
+    OPXY_LD_R_R(0x48) // LD   C,B
+    OPXY_LD_R_R(0x4a) // LD   C,D
+    OPXY_LD_R_R(0x4b) // LD   C,E
+    OPXY_LD_R_R(0x4f) // LD   C,A
 
-    OPXY_LD_R_R_FN(0x50) // LD   D,B
-    OPXY_LD_R_R_FN(0x51) // LD   D,C
-    OPXY_LD_R_R_FN(0x53) // LD   D,E
-    OPXY_LD_R_R_FN(0x57) // LD   D,A
+    OPXY_LD_R_R(0x50) // LD   D,B
+    OPXY_LD_R_R(0x51) // LD   D,C
+    OPXY_LD_R_R(0x53) // LD   D,E
+    OPXY_LD_R_R(0x57) // LD   D,A
 
-    OPXY_LD_R_R_FN(0x58) // LD   E,B
-    OPXY_LD_R_R_FN(0x59) // LD   E,C
-    OPXY_LD_R_R_FN(0x5a) // LD   E,D
-    OPXY_LD_R_R_FN(0x5f) // LD   E,A
+    OPXY_LD_R_R(0x58) // LD   E,B
+    OPXY_LD_R_R(0x59) // LD   E,C
+    OPXY_LD_R_R(0x5a) // LD   E,D
+    OPXY_LD_R_R(0x5f) // LD   E,A
 
-    OPXY_LD_R_R_FN(0x78) // LD   A,B
-    OPXY_LD_R_R_FN(0x79) // LD   A,C
-    OPXY_LD_R_R_FN(0x7a) // LD   A,D
-    OPXY_LD_R_R_FN(0x7b) // LD   A,E
+    OPXY_LD_R_R(0x78) // LD   A,B
+    OPXY_LD_R_R(0x79) // LD   A,C
+    OPXY_LD_R_R(0x7a) // LD   A,D
+    OPXY_LD_R_R(0x7b) // LD   A,E
 
-#define OPXY_LD_R_XY_FN(Opcode, HL) \
+#define OPXY_LD_R_XY(Opcode, HL) \
     OPXY(Opcode): \
         zR8((Opcode >> 3) & 7) = data->B.HL; \
 	RET(4)
 
     // TODO: Add byte indexes to data and extract the index from Opcode?
-    OPXY_LD_R_XY_FN(0x44, H) // LD   B,HX
-    OPXY_LD_R_XY_FN(0x4c, H) // LD   C,HX
-    OPXY_LD_R_XY_FN(0x54, H) // LD   D,HX
-    OPXY_LD_R_XY_FN(0x5c, H) // LD   E,HX
-    OPXY_LD_R_XY_FN(0x7c, H) // LD   A,HX
+    OPXY_LD_R_XY(0x44, H) // LD   B,HX
+    OPXY_LD_R_XY(0x4c, H) // LD   C,HX
+    OPXY_LD_R_XY(0x54, H) // LD   D,HX
+    OPXY_LD_R_XY(0x5c, H) // LD   E,HX
+    OPXY_LD_R_XY(0x7c, H) // LD   A,HX
 
-    OPXY_LD_R_XY_FN(0x45, L) // LD   B,LX
-    OPXY_LD_R_XY_FN(0x4d, L) // LD   C,LX
-    OPXY_LD_R_XY_FN(0x55, L) // LD   D,LX
-    OPXY_LD_R_XY_FN(0x5d, L) // LD   E,LX
-    OPXY_LD_R_XY_FN(0x7d, L) // LD   A,LX
+    OPXY_LD_R_XY(0x45, L) // LD   B,LX
+    OPXY_LD_R_XY(0x4d, L) // LD   C,LX
+    OPXY_LD_R_XY(0x55, L) // LD   D,LX
+    OPXY_LD_R_XY(0x5d, L) // LD   E,LX
+    OPXY_LD_R_XY(0x7d, L) // LD   A,LX
 
-#define OPXY_LD_XY_R_FN(Opcode, HL) \
+#define OPXY_LD_XY_R(Opcode, HL) \
     OPXY(Opcode): \
         data->B.HL = zR8(Opcode & 7); \
 	RET(4)
 
-    OPXY_LD_XY_R_FN(0x60, H) // LD   HX,B
-    OPXY_LD_XY_R_FN(0x61, H) // LD   HX,C
-    OPXY_LD_XY_R_FN(0x62, H) // LD   HX,D
-    OPXY_LD_XY_R_FN(0x63, H) // LD   HX,E
-    OPXY_LD_XY_R_FN(0x67, H) // LD   HX,A
+    OPXY_LD_XY_R(0x60, H) // LD   HX,B
+    OPXY_LD_XY_R(0x61, H) // LD   HX,C
+    OPXY_LD_XY_R(0x62, H) // LD   HX,D
+    OPXY_LD_XY_R(0x63, H) // LD   HX,E
+    OPXY_LD_XY_R(0x67, H) // LD   HX,A
 
-    OPXY_LD_XY_R_FN(0x68, L) // LD   LX,B
-    OPXY_LD_XY_R_FN(0x69, L) // LD   LX,C
-    OPXY_LD_XY_R_FN(0x6a, L) // LD   LX,D
-    OPXY_LD_XY_R_FN(0x6b, L) // LD   LX,E
-    OPXY_LD_XY_R_FN(0x6f, L) // LD   LX,A
+    OPXY_LD_XY_R(0x68, L) // LD   LX,B
+    OPXY_LD_XY_R(0x69, L) // LD   LX,C
+    OPXY_LD_XY_R(0x6a, L) // LD   LX,D
+    OPXY_LD_XY_R(0x6b, L) // LD   LX,E
+    OPXY_LD_XY_R(0x6f, L) // LD   LX,A
 
     OPXY(0x65): // LD   HX,LX
         data->B.H = data->B.L;
@@ -96,13 +96,13 @@ switch (Opcode)
         data->B.L = data->B.H;
         RET(4)
 
-#define OPXY_LD_R_n_FN(Opcode) OPJ_LD_R_n_FN(OPXY, Opcode)
+#define OPXY_LD_R_n(Opcode) OPJ_LD_R_n(OPXY, Opcode)
 
-    OPXY_LD_R_n_FN(0x06) // LD   B,#imm
-    OPXY_LD_R_n_FN(0x0e) // LD   C,#imm
-    OPXY_LD_R_n_FN(0x16) // LD   D,#imm
-    OPXY_LD_R_n_FN(0x1e) // LD   E,#imm
-    OPXY_LD_R_n_FN(0x3e) // LD   A,#imm
+    OPXY_LD_R_n(0x06) // LD   B,#imm
+    OPXY_LD_R_n(0x0e) // LD   C,#imm
+    OPXY_LD_R_n(0x16) // LD   D,#imm
+    OPXY_LD_R_n(0x1e) // LD   E,#imm
+    OPXY_LD_R_n(0x3e) // LD   A,#imm
 
     OPXY(0x26): // LD   HX,#imm
         data->B.H = FETCH_BYTE;
@@ -112,10 +112,10 @@ switch (Opcode)
         data->B.L = FETCH_BYTE;
         RET(7)
 
-#define OPXY_LD_A_mRR_FN(Opcode, RR) OPJ_LD_A_mRR_FN(OPXY, Opcode, RR)
+#define OPXY_LD_A_mRR(Opcode, RR) OPJ_LD_A_mRR(OPXY, Opcode, RR)
 
-    OPXY_LD_A_mRR_FN(0x0a, BC) // LD   A,(BC)
-    OPXY_LD_A_mRR_FN(0x1a, DE) // LD   A,(DE)
+    OPXY_LD_A_mRR(0x0a, BC) // LD   A,(BC)
+    OPXY_LD_A_mRR(0x1a, DE) // LD   A,(DE)
 
     OPXY(0x3a): {  // LD   A,(nn)
         uint16_t adr;
@@ -126,10 +126,10 @@ switch (Opcode)
         RET(13)
     }
 
-#define OPXY_LD_mRR_A_FN(Opcode, RR) OPJ_LD_mRR_A_FN(OPXY, Opcode, RR)
+#define OPXY_LD_mRR_A(Opcode, RR) OPJ_LD_mRR_A(OPXY, Opcode, RR)
 
-    OPXY_LD_mRR_A_FN(0x02, BC) // LD   (BC),A
-    OPXY_LD_mRR_A_FN(0x12, DE) // LD   (DE),A
+    OPXY_LD_mRR_A(0x02, BC) // LD   (BC),A
+    OPXY_LD_mRR_A(0x12, DE) // LD   (DE),A
 
     OPXY(0x32): {  // LD   (nn),A
         uint16_t adr;
@@ -175,10 +175,10 @@ switch (Opcode)
 
     // 16 BITS LOAD
 
-#define OPXY_LD_RR_nn_FN(Opcode) OPJ_LD_RR_nn_FN(OPXY, Opcode)
+#define OPXY_LD_RR_nn(Opcode) OPJ_LD_RR_nn(OPXY, Opcode)
 
-    OPXY_LD_RR_nn_FN(0x01)   // LD   BC,nn
-    OPXY_LD_RR_nn_FN(0x11)   // LD   DE,nn
+    OPXY_LD_RR_nn(0x01)   // LD   BC,nn
+    OPXY_LD_RR_nn(0x11)   // LD   DE,nn
 
     OPXY(0x21): // LD   IX,nn
         FETCH_WORD(data->W)
