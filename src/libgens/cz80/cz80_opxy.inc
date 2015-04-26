@@ -634,18 +634,12 @@ switch (Opcode)
 
     // ADD16
 
-    OPXY(0x09): // ADD  IX,BC
-        goto OP_ADD16_xx_BC;
+#define OPXY_ADD_RR_RR(Opcode, RRsrc) OPJ_ADD_RR_RR(OPXY, Opcode, RRsrc)
 
-    OPXY(0x19): // ADD  IX,DE
-        goto OP_ADD16_xx_DE;
-
-    OPXY(0x29): // ADD  IX,IX
-        goto OP_ADD16_xx_xx;
-
-    OPXY(0x39): // ADD  IX,SP
-        goto OP_ADD16_xx_SP;
-
+    OPXY_ADD_RR_RR(0x39, zSP)       // ADD  IX,SP
+    OPXY_ADD_RR_RR(0x29, data->W)   // ADD  IX,IX (TODO: Optimization?)
+    OPXY_ADD_RR_RR(0x09, zBC)       // ADD  IX,BC
+    OPXY_ADD_RR_RR(0x19, zDE)       // ADD  IX,DE
 
     // ROTATE
 
