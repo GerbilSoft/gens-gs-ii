@@ -358,53 +358,52 @@ switch (Opcode)
     OPED_SBC_HL_RR(0x52, DE) // SBC  HL,DE
     OPED_SBC_HL_RR(0x62, HL) // SBC  HL,HL
 
-    {
+#define OPJ_IN_R_mBC(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t res; \
+        IN(zBC, res); \
+        zWZ = zBC + 1; \
+        zR8((Opcode >> 3) & 7) = res; \
+        zF = (zF & CZ80_CF) | SZXYP[res]; \
+        RET(8) \
+    }
+
+#define OPED_IN_R_mBC(Opcode) OPJ_IN_R_mBC(OPED, Opcode)
+
+    OPED_IN_R_mBC(0x40) // IN   B,(C)
+    OPED_IN_R_mBC(0x48) // IN   C,(C)
+    OPED_IN_R_mBC(0x50) // IN   D,(C)
+    OPED_IN_R_mBC(0x58) // IN   E,(C)
+    OPED_IN_R_mBC(0x60) // IN   H,(C)
+    OPED_IN_R_mBC(0x68) // IN   L,(C)
+    OPED_IN_R_mBC(0x78) // IN   A,(C)
+
+    OPED(0x70): { // IN   0,(C)
         uint8_t res;
-
-    OPED(0x40): // IN   B,(C)
-    OPED(0x48): // IN   C,(C)
-    OPED(0x50): // IN   D,(C)
-    OPED(0x58): // IN   E,(C)
-    OPED(0x60): // IN   H,(C)
-    OPED(0x68): // IN   L,(C)
-    OPED(0x78): // IN   A,(C)
-
-        IN(zBC, res);
-        zWZ = zBC + 1;
-        zR8((Opcode >> 3) & 7) = res;
-        zF = (zF & CZ80_CF) | SZXYP[res];
-        RET(8)
-
-    OPED(0x70): // IN   0,(C)
-
         IN(zBC, res);
         zWZ = zBC + 1;
         zF = (zF & CZ80_CF) | SZXYP[res];
         RET(8)
     }
 
-
-    {
-        uint8_t src;
-
-    OPED(0x71): // OUT  (C),0
-        src = 0;
-        goto OP_OUT_mBC;
-
-    OPED(0x51): // OUT  (C),D
-    OPED(0x41): // OUT  (C),B
-    OPED(0x49): // OUT  (C),C
-    OPED(0x59): // OUT  (C),E
-    OPED(0x61): // OUT  (C),H
-    OPED(0x69): // OUT  (C),L
-    OPED(0x79): // OUT  (C),E
-        src = zR8((Opcode >> 3) & 7);
-
-OP_OUT_mBC:
-        OUT(zBC, src);
-        zWZ = zBC + 1;
-        RET(8)
+#define OPJ_OUT_mBC_R(JmpType, Opcode, RRsrc) \
+    JmpType(Opcode): { \
+        uint8_t src = RRsrc; \
+        OUT(zBC, src); \
+        zWZ = zBC + 1; \
+        RET(8) \
     }
+
+#define OPED_OUT_mBC_R(Opcode, RRsrc) OPJ_OUT_mBC_R(OPED, Opcode, RRsrc)
+
+    OPED_OUT_mBC_R(0x71,  0) // OUT  (C),0
+    OPED_OUT_mBC_R(0x41, zB) // OUT  (C),B
+    OPED_OUT_mBC_R(0x49, zC) // OUT  (C),C
+    OPED_OUT_mBC_R(0x51, zD) // OUT  (C),D
+    OPED_OUT_mBC_R(0x59, zE) // OUT  (C),E
+    OPED_OUT_mBC_R(0x61, zH) // OUT  (C),H
+    OPED_OUT_mBC_R(0x69, zL) // OUT  (C),L
+    OPED_OUT_mBC_R(0x79, zA) // OUT  (C),A
 
     OPED(0x4d): // RETI
     OPED(0x5d): // RETI
