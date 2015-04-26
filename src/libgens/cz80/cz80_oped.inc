@@ -195,19 +195,19 @@ switch (Opcode)
     OPED(0xb7):
         RET(4)
 
-#define OPED_LD_mNN_RR_FN(Opcode, RR) OPJ_LD_mNN_RR_FN(OPED, Opcode, RR)
+#define OPED_LD_mNN_RR(Opcode, RR) OPJ_LD_mNN_RR(OPED, Opcode, RR)
 
-    OPED_LD_mNN_RR_FN(0x43, BC) // LD   (nn),BC
-    OPED_LD_mNN_RR_FN(0x53, DE) // LD   (nn),DE
-    OPED_LD_mNN_RR_FN(0x63, HL) // LD   (nn),HL
-    OPED_LD_mNN_RR_FN(0x73, SP) // LD   (nn),SP
+    OPED_LD_mNN_RR(0x43, BC) // LD   (nn),BC
+    OPED_LD_mNN_RR(0x53, DE) // LD   (nn),DE
+    OPED_LD_mNN_RR(0x63, HL) // LD   (nn),HL
+    OPED_LD_mNN_RR(0x73, SP) // LD   (nn),SP
 
-#define OPED_LD_RR_mNN_FN(Opcode, RR) OPJ_LD_RR_mNN_FN(OPED, Opcode, RR)
+#define OPED_LD_RR_mNN(Opcode, RR) OPJ_LD_RR_mNN(OPED, Opcode, RR)
 
-    OPED_LD_RR_mNN_FN(0x4b, BC) // LD   BC,(nn)
-    OPED_LD_RR_mNN_FN(0x5b, DE) // LD   DE,(nn)
-    OPED_LD_RR_mNN_FN(0x6b, HL) // LD   HL,(nn)
-    OPED_LD_RR_mNN_FN(0x7b, SP) // LD   SP,(nn)
+    OPED_LD_RR_mNN(0x4b, BC) // LD   BC,(nn)
+    OPED_LD_RR_mNN(0x5b, DE) // LD   DE,(nn)
+    OPED_LD_RR_mNN(0x6b, HL) // LD   HL,(nn)
+    OPED_LD_RR_mNN(0x7b, SP) // LD   SP,(nn)
 
 
     OPED(0x47): // LD   I,A

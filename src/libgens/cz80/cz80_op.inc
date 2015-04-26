@@ -26,108 +26,108 @@ switch (Opcode)
     OP(0x7f):   // LD   A,A
         RET(4)
 
-#define OPJ_LD_R_R_FN(JmpType, Opcode) \
+#define OPJ_LD_R_R(JmpType, Opcode) \
     JmpType(Opcode): \
         zR8((Opcode >> 3) & 7) = zR8(Opcode & 7); \
 	RET(4)
-#define OP_LD_R_R_FN(Opcode) OPJ_LD_R_R_FN(OP, Opcode)
+#define OP_LD_R_R(Opcode) OPJ_LD_R_R(OP, Opcode)
 
-    OP_LD_R_R_FN(0x41)   // LD   B,C
-    OP_LD_R_R_FN(0x42)   // LD   B,D
-    OP_LD_R_R_FN(0x43)   // LD   B,E
-    OP_LD_R_R_FN(0x44)   // LD   B,H
-    OP_LD_R_R_FN(0x45)   // LD   B,L
-    OP_LD_R_R_FN(0x47)   // LD   B,A
+    OP_LD_R_R(0x41)   // LD   B,C
+    OP_LD_R_R(0x42)   // LD   B,D
+    OP_LD_R_R(0x43)   // LD   B,E
+    OP_LD_R_R(0x44)   // LD   B,H
+    OP_LD_R_R(0x45)   // LD   B,L
+    OP_LD_R_R(0x47)   // LD   B,A
 
-    OP_LD_R_R_FN(0x48)   // LD   C,B
-    OP_LD_R_R_FN(0x4a)   // LD   C,D
-    OP_LD_R_R_FN(0x4b)   // LD   C,E
-    OP_LD_R_R_FN(0x4c)   // LD   C,H
-    OP_LD_R_R_FN(0x4d)   // LD   C,L
-    OP_LD_R_R_FN(0x4f)   // LD   C,A
+    OP_LD_R_R(0x48)   // LD   C,B
+    OP_LD_R_R(0x4a)   // LD   C,D
+    OP_LD_R_R(0x4b)   // LD   C,E
+    OP_LD_R_R(0x4c)   // LD   C,H
+    OP_LD_R_R(0x4d)   // LD   C,L
+    OP_LD_R_R(0x4f)   // LD   C,A
 
-    OP_LD_R_R_FN(0x50)   // LD   D,B
-    OP_LD_R_R_FN(0x51)   // LD   D,C
-    OP_LD_R_R_FN(0x53)   // LD   D,E
-    OP_LD_R_R_FN(0x54)   // LD   D,H
-    OP_LD_R_R_FN(0x55)   // LD   D,L
-    OP_LD_R_R_FN(0x57)   // LD   D,A
+    OP_LD_R_R(0x50)   // LD   D,B
+    OP_LD_R_R(0x51)   // LD   D,C
+    OP_LD_R_R(0x53)   // LD   D,E
+    OP_LD_R_R(0x54)   // LD   D,H
+    OP_LD_R_R(0x55)   // LD   D,L
+    OP_LD_R_R(0x57)   // LD   D,A
 
-    OP_LD_R_R_FN(0x58)   // LD   E,B
-    OP_LD_R_R_FN(0x59)   // LD   E,C
-    OP_LD_R_R_FN(0x5a)   // LD   E,D
-    OP_LD_R_R_FN(0x5c)   // LD   E,H
-    OP_LD_R_R_FN(0x5d)   // LD   E,L
-    OP_LD_R_R_FN(0x5f)   // LD   E,A
+    OP_LD_R_R(0x58)   // LD   E,B
+    OP_LD_R_R(0x59)   // LD   E,C
+    OP_LD_R_R(0x5a)   // LD   E,D
+    OP_LD_R_R(0x5c)   // LD   E,H
+    OP_LD_R_R(0x5d)   // LD   E,L
+    OP_LD_R_R(0x5f)   // LD   E,A
 
-    OP_LD_R_R_FN(0x60)   // LD   H,B
-    OP_LD_R_R_FN(0x61)   // LD   H,C
-    OP_LD_R_R_FN(0x62)   // LD   H,D
-    OP_LD_R_R_FN(0x63)   // LD   H,E
-    OP_LD_R_R_FN(0x65)   // LD   H,L
-    OP_LD_R_R_FN(0x67)   // LD   H,A
+    OP_LD_R_R(0x60)   // LD   H,B
+    OP_LD_R_R(0x61)   // LD   H,C
+    OP_LD_R_R(0x62)   // LD   H,D
+    OP_LD_R_R(0x63)   // LD   H,E
+    OP_LD_R_R(0x65)   // LD   H,L
+    OP_LD_R_R(0x67)   // LD   H,A
 
-    OP_LD_R_R_FN(0x68)   // LD   L,B
-    OP_LD_R_R_FN(0x69)   // LD   L,C
-    OP_LD_R_R_FN(0x6a)   // LD   L,D
-    OP_LD_R_R_FN(0x6b)   // LD   L,E
-    OP_LD_R_R_FN(0x6c)   // LD   L,H
-    OP_LD_R_R_FN(0x6f)   // LD   L,A
+    OP_LD_R_R(0x68)   // LD   L,B
+    OP_LD_R_R(0x69)   // LD   L,C
+    OP_LD_R_R(0x6a)   // LD   L,D
+    OP_LD_R_R(0x6b)   // LD   L,E
+    OP_LD_R_R(0x6c)   // LD   L,H
+    OP_LD_R_R(0x6f)   // LD   L,A
 
-    OP_LD_R_R_FN(0x78)   // LD   A,B
-    OP_LD_R_R_FN(0x79)   // LD   A,C
-    OP_LD_R_R_FN(0x7a)   // LD   A,D
-    OP_LD_R_R_FN(0x7b)   // LD   A,E
-    OP_LD_R_R_FN(0x7c)   // LD   A,H
-    OP_LD_R_R_FN(0x7d)   // LD   A,L
+    OP_LD_R_R(0x78)   // LD   A,B
+    OP_LD_R_R(0x79)   // LD   A,C
+    OP_LD_R_R(0x7a)   // LD   A,D
+    OP_LD_R_R(0x7b)   // LD   A,E
+    OP_LD_R_R(0x7c)   // LD   A,H
+    OP_LD_R_R(0x7d)   // LD   A,L
 
-#define OPJ_LD_R_n_FN(JmpType, Opcode) \
+#define OPJ_LD_R_n(JmpType, Opcode) \
     JmpType(Opcode): \
         zR8((Opcode >> 3) & 7) = FETCH_BYTE; \
 	RET(7)
-#define OP_LD_R_n_FN(Opcode) OPJ_LD_R_n_FN(OP, Opcode)
+#define OP_LD_R_n(Opcode) OPJ_LD_R_n(OP, Opcode)
 
-    OP_LD_R_n_FN(0x06)   // LD   B,#imm
-    OP_LD_R_n_FN(0x0e)   // LD   C,#imm
-    OP_LD_R_n_FN(0x16)   // LD   D,#imm
-    OP_LD_R_n_FN(0x1e)   // LD   E,#imm
-    OP_LD_R_n_FN(0x26)   // LD   H,#imm
-    OP_LD_R_n_FN(0x2e)   // LD   L,#imm
-    OP_LD_R_n_FN(0x3e)   // LD   A,#imm
+    OP_LD_R_n(0x06)   // LD   B,#imm
+    OP_LD_R_n(0x0e)   // LD   C,#imm
+    OP_LD_R_n(0x16)   // LD   D,#imm
+    OP_LD_R_n(0x1e)   // LD   E,#imm
+    OP_LD_R_n(0x26)   // LD   H,#imm
+    OP_LD_R_n(0x2e)   // LD   L,#imm
+    OP_LD_R_n(0x3e)   // LD   A,#imm
 
-#define OPJ_LD_R_mHL_FN(JmpType, Opcode) \
+#define OPJ_LD_R_mHL(JmpType, Opcode) \
     JmpType(Opcode): \
         PRE_IO \
         zWZ = zHL + 1; \
         READ_BYTE(zHL, zR8((Opcode >> 3) & 7)) \
         POST_IO \
         RET(7)
-#define OP_LD_R_mHL_FN(Opcode) OPJ_LD_R_mHL_FN(OP, Opcode)
+#define OP_LD_R_mHL(Opcode) OPJ_LD_R_mHL(OP, Opcode)
 
-    OP_LD_R_mHL_FN(0x46)   // LD   B,(HL)
-    OP_LD_R_mHL_FN(0x4e)   // LD   C,(HL)
-    OP_LD_R_mHL_FN(0x56)   // LD   D,(HL)
-    OP_LD_R_mHL_FN(0x5e)   // LD   E,(HL)
-    OP_LD_R_mHL_FN(0x66)   // LD   H,(HL)
-    OP_LD_R_mHL_FN(0x6e)   // LD   L,(HL)
-    OP_LD_R_mHL_FN(0x7e)   // LD   A,(HL)
+    OP_LD_R_mHL(0x46)   // LD   B,(HL)
+    OP_LD_R_mHL(0x4e)   // LD   C,(HL)
+    OP_LD_R_mHL(0x56)   // LD   D,(HL)
+    OP_LD_R_mHL(0x5e)   // LD   E,(HL)
+    OP_LD_R_mHL(0x66)   // LD   H,(HL)
+    OP_LD_R_mHL(0x6e)   // LD   L,(HL)
+    OP_LD_R_mHL(0x7e)   // LD   A,(HL)
 
-#define OPJ_LD_mHL_R_FN(JmpType, Opcode) \
+#define OPJ_LD_mHL_R(JmpType, Opcode) \
     JmpType(Opcode): \
         PRE_IO \
         zWZ = (zA << 8) | ((zlHL + 1) & 0xFF); \
 	WRITE_BYTE(zHL, zR8(Opcode & 7)) \
         POST_IO \
         RET(7)
-#define OP_LD_mHL_R_FN(Opcode) OPJ_LD_mHL_R_FN(OP, Opcode)
+#define OP_LD_mHL_R(Opcode) OPJ_LD_mHL_R(OP, Opcode)
 
-    OP_LD_mHL_R_FN(0x70)   // LD   (HL),B
-    OP_LD_mHL_R_FN(0x71)   // LD   (HL),C
-    OP_LD_mHL_R_FN(0x72)   // LD   (HL),D
-    OP_LD_mHL_R_FN(0x73)   // LD   (HL),E
-    OP_LD_mHL_R_FN(0x74)   // LD   (HL),H
-    OP_LD_mHL_R_FN(0x75)   // LD   (HL),L
-    OP_LD_mHL_R_FN(0x77)   // LD   (HL),A
+    OP_LD_mHL_R(0x70)   // LD   (HL),B
+    OP_LD_mHL_R(0x71)   // LD   (HL),C
+    OP_LD_mHL_R(0x72)   // LD   (HL),D
+    OP_LD_mHL_R(0x73)   // LD   (HL),E
+    OP_LD_mHL_R(0x74)   // LD   (HL),H
+    OP_LD_mHL_R(0x75)   // LD   (HL),L
+    OP_LD_mHL_R(0x77)   // LD   (HL),A
 
     OP(0x36):   // LD (HL), #imm
         PRE_IO
@@ -135,17 +135,17 @@ switch (Opcode)
         POST_IO
         RET(10)
 
-#define OPJ_LD_A_mRR_FN(JmpType, Opcode, RR) \
+#define OPJ_LD_A_mRR(JmpType, Opcode, RR) \
     JmpType(Opcode): \
         PRE_IO \
 	zWZ = z##RR + 1; \
 	READ_BYTE(z##RR, zA) \
         POST_IO \
 	RET(7)
-#define OP_LD_A_mRR_FN(Opcode, RR) OPJ_LD_A_mRR_FN(OP, Opcode, RR)
+#define OP_LD_A_mRR(Opcode, RR) OPJ_LD_A_mRR(OP, Opcode, RR)
 
-    OP_LD_A_mRR_FN(0x0a, BC)   // LD   A,(BC)
-    OP_LD_A_mRR_FN(0x1a, DE)   // LD   A,(DE)
+    OP_LD_A_mRR(0x0a, BC)   // LD   A,(BC)
+    OP_LD_A_mRR(0x1a, DE)   // LD   A,(DE)
 
     OP(0x3a): {  // LD   A,(nn)
         uint16_t adr;
@@ -156,17 +156,17 @@ switch (Opcode)
         RET(13)
     }
 
-#define OPJ_LD_mRR_A_FN(JmpType, Opcode, RR) \
+#define OPJ_LD_mRR_A(JmpType, Opcode, RR) \
     JmpType(Opcode): \
         PRE_IO \
         zWZ = (zA << 8) | ((z##RR + 1) & 0xFF); \
 	WRITE_BYTE(z##RR, zA) \
         POST_IO \
 	RET(7)
-#define OP_LD_mRR_A_FN(Opcode, RR) OPJ_LD_mRR_A_FN(OP, Opcode, RR)
+#define OP_LD_mRR_A(Opcode, RR) OPJ_LD_mRR_A(OP, Opcode, RR)
 
-    OP_LD_mRR_A_FN(0x02, BC)   // LD   (BC),A
-    OP_LD_mRR_A_FN(0x12, DE)   // LD   (DE),A
+    OP_LD_mRR_A(0x02, BC)   // LD   (BC),A
+    OP_LD_mRR_A(0x12, DE)   // LD   (DE),A
 
     OP(0x32): {  // LD   (nn),A
         uint16_t adr;
@@ -179,15 +179,15 @@ switch (Opcode)
 
     // 16 BITS LOAD
 
-#define OPJ_LD_RR_nn_FN(JmpType, Opcode) \
+#define OPJ_LD_RR_nn(JmpType, Opcode) \
     JmpType(Opcode): \
         FETCH_WORD(zR16(Opcode >> 4)) \
         RET(10)
-#define OP_LD_RR_nn_FN(Opcode) OPJ_LD_RR_nn_FN(OP, Opcode)
+#define OP_LD_RR_nn(Opcode) OPJ_LD_RR_nn(OP, Opcode)
 
-    OP_LD_RR_nn_FN(0x01)   // LD   BC,nn
-    OP_LD_RR_nn_FN(0x11)   // LD   DE,nn
-    OP_LD_RR_nn_FN(0x21)   // LD   HL,nn
+    OP_LD_RR_nn(0x01)   // LD   BC,nn
+    OP_LD_RR_nn(0x11)   // LD   DE,nn
+    OP_LD_RR_nn(0x21)   // LD   HL,nn
 
     OP(0x31):   // LD   SP,nn
         FETCH_WORD(zSP)
@@ -197,7 +197,7 @@ switch (Opcode)
         zSP = data->W;
         RET(6)
 
-#define OPJ_LD_RR_mNN_FN(JmpType, Opcode, RR) \
+#define OPJ_LD_RR_mNN(JmpType, Opcode, RR) \
     JmpType(Opcode): \
         PRE_IO \
         FETCH_WORD(zWZ) \
@@ -205,11 +205,11 @@ switch (Opcode)
 	zWZ++; \
         POST_IO \
         RET(16)
-#define OP_LD_RR_mNN_FN(Opcode, RR) OPJ_LD_RR_mNN_FN(OP, Opcode, RR)
+#define OP_LD_RR_mNN(Opcode, RR) OPJ_LD_RR_mNN(OP, Opcode, RR)
 
-    OP_LD_RR_mNN_FN(0x2a, HL)   // LD   HL,(nn)
+    OP_LD_RR_mNN(0x2a, HL)   // LD   HL,(nn)
 
-#define OPJ_LD_mNN_RR_FN(JmpType, Opcode, RR) \
+#define OPJ_LD_mNN_RR(JmpType, Opcode, RR) \
     JmpType(Opcode): \
         PRE_IO \
         FETCH_WORD(zWZ) \
@@ -217,9 +217,9 @@ switch (Opcode)
 	zWZ++; \
         POST_IO \
         RET(16)
-#define OP_LD_mNN_RR_FN(Opcode, RR) OPJ_LD_mNN_RR_FN(OP, Opcode, RR)
+#define OP_LD_mNN_RR(Opcode, RR) OPJ_LD_mNN_RR(OP, Opcode, RR)
 
-    OP_LD_mNN_RR_FN(0x22, HL)   // LD   (nn),HL
+    OP_LD_mNN_RR(0x22, HL)   // LD   (nn),HL
 
     // PUSH / POP
 
