@@ -26,8 +26,18 @@ extern "C" {
 /* Compiler dependant defines */
 /******************************/
 
-#ifndef FASTCALL
-#define FASTCALL
+#ifdef _MSC_VER
+
+// MSVC: Enable FASTCALL on i386.
+// (Copied from MinGW-w64's winnt.h.)
+#if defined (__i386__) && !defined (__WIDL__)
+#define CZ80CALL __fastcall
+#else
+#define CZ80CALL
+#endif
+
+#else
+#define CZ80CALL
 #endif
 
 
@@ -177,16 +187,16 @@ extern "C" {
 #define CZ80_DISABLE    0x40
 
 
-typedef uint8_t FASTCALL CZ80_READ(void *ctx, uint16_t adr);
-typedef void FASTCALL CZ80_WRITE(void *ctx, uint16_t adr, uint8_t data);
+typedef uint8_t CZ80CALL CZ80_READ(void *ctx, uint16_t adr);
+typedef void CZ80CALL CZ80_WRITE(void *ctx, uint16_t adr, uint8_t data);
 
 #if CZ80_USE_WORD_HANDLER
-typedef uint16_t FASTCALL CZ80_READ_WORD(void *ctx, uint16_t adr);
-typedef void FASTCALL CZ80_WRITE_WORD(void *ctx, uint16_t adr, uint16_t data);
+typedef uint16_t CZ80CALL CZ80_READ_WORD(void *ctx, uint16_t adr);
+typedef void CZ80CALL CZ80_WRITE_WORD(void *ctx, uint16_t adr, uint16_t data);
 #endif
 
-typedef void FASTCALL CZ80_RETI_CALLBACK(void *ctx);
-typedef uint8_t FASTCALL CZ80_INT_CALLBACK(void *ctx, uint8_t param);
+typedef void CZ80CALL CZ80_RETI_CALLBACK(void *ctx);
+typedef uint8_t CZ80CALL CZ80_INT_CALLBACK(void *ctx, uint8_t param);
 
 typedef union
 {
@@ -291,62 +301,62 @@ uint16_t Cz80_Read_Word(cz80_struc *cpu, uint16_t adr);
 void    Cz80_Write_Byte(cz80_struc *cpu, uint16_t adr, uint8_t data);
 void    Cz80_Write_Word(cz80_struc *cpu, uint16_t adr, uint16_t data);
 
-int     FASTCALL Cz80_Exec(cz80_struc *cpu, int cycles);
+int     CZ80CALL Cz80_Exec(cz80_struc *cpu, int cycles);
 
-void    FASTCALL Cz80_Set_IRQ(cz80_struc *cpu, uint8_t vector);
-void    FASTCALL Cz80_Set_NMI(cz80_struc *cpu);
-void    FASTCALL Cz80_Clear_IRQ(cz80_struc *cpu);
-void    FASTCALL Cz80_Clear_NMI(cz80_struc *cpu);
+void    CZ80CALL Cz80_Set_IRQ(cz80_struc *cpu, uint8_t vector);
+void    CZ80CALL Cz80_Set_NMI(cz80_struc *cpu);
+void    CZ80CALL Cz80_Clear_IRQ(cz80_struc *cpu);
+void    CZ80CALL Cz80_Clear_NMI(cz80_struc *cpu);
 
-int     FASTCALL Cz80_Get_CycleToDo(cz80_struc *cpu);
-int     FASTCALL Cz80_Get_CycleRemaining(cz80_struc *cpu);
-int     FASTCALL Cz80_Get_CycleDone(cz80_struc *cpu);
-void    FASTCALL Cz80_Release_Cycle(cz80_struc *cpu);
-void    FASTCALL Cz80_Add_Cycle(cz80_struc *cpu, unsigned int cycle);
+int     CZ80CALL Cz80_Get_CycleToDo(cz80_struc *cpu);
+int     CZ80CALL Cz80_Get_CycleRemaining(cz80_struc *cpu);
+int     CZ80CALL Cz80_Get_CycleDone(cz80_struc *cpu);
+void    CZ80CALL Cz80_Release_Cycle(cz80_struc *cpu);
+void    CZ80CALL Cz80_Add_Cycle(cz80_struc *cpu, unsigned int cycle);
 
-uint16_t     FASTCALL Cz80_Get_BC(cz80_struc *cpu);
-uint16_t     FASTCALL Cz80_Get_DE(cz80_struc *cpu);
-uint16_t     FASTCALL Cz80_Get_HL(cz80_struc *cpu);
-uint16_t     FASTCALL Cz80_Get_AF(cz80_struc *cpu);
+uint16_t     CZ80CALL Cz80_Get_BC(cz80_struc *cpu);
+uint16_t     CZ80CALL Cz80_Get_DE(cz80_struc *cpu);
+uint16_t     CZ80CALL Cz80_Get_HL(cz80_struc *cpu);
+uint16_t     CZ80CALL Cz80_Get_AF(cz80_struc *cpu);
 
-uint16_t     FASTCALL Cz80_Get_BC2(cz80_struc *cpu);
-uint16_t     FASTCALL Cz80_Get_DE2(cz80_struc *cpu);
-uint16_t     FASTCALL Cz80_Get_HL2(cz80_struc *cpu);
-uint16_t     FASTCALL Cz80_Get_AF2(cz80_struc *cpu);
+uint16_t     CZ80CALL Cz80_Get_BC2(cz80_struc *cpu);
+uint16_t     CZ80CALL Cz80_Get_DE2(cz80_struc *cpu);
+uint16_t     CZ80CALL Cz80_Get_HL2(cz80_struc *cpu);
+uint16_t     CZ80CALL Cz80_Get_AF2(cz80_struc *cpu);
 
-uint16_t     FASTCALL Cz80_Get_IX(cz80_struc *cpu);
-uint16_t     FASTCALL Cz80_Get_IY(cz80_struc *cpu);
-uint16_t     FASTCALL Cz80_Get_SP(cz80_struc *cpu);
+uint16_t     CZ80CALL Cz80_Get_IX(cz80_struc *cpu);
+uint16_t     CZ80CALL Cz80_Get_IY(cz80_struc *cpu);
+uint16_t     CZ80CALL Cz80_Get_SP(cz80_struc *cpu);
 
-uint16_t     FASTCALL Cz80_Get_WZ(cz80_struc *cpu);
-uint16_t     FASTCALL Cz80_Get_PC(cz80_struc *cpu);
+uint16_t     CZ80CALL Cz80_Get_WZ(cz80_struc *cpu);
+uint16_t     CZ80CALL Cz80_Get_PC(cz80_struc *cpu);
 
-uint16_t     FASTCALL Cz80_Get_R(cz80_struc *cpu);
-uint16_t     FASTCALL Cz80_Get_IFF(cz80_struc *cpu);
-uint8_t      FASTCALL Cz80_Get_IM(cz80_struc *cpu);
-uint8_t      FASTCALL Cz80_Get_I(cz80_struc *cpu);
+uint16_t     CZ80CALL Cz80_Get_R(cz80_struc *cpu);
+uint16_t     CZ80CALL Cz80_Get_IFF(cz80_struc *cpu);
+uint8_t      CZ80CALL Cz80_Get_IM(cz80_struc *cpu);
+uint8_t      CZ80CALL Cz80_Get_I(cz80_struc *cpu);
 
-void    FASTCALL Cz80_Set_BC(cz80_struc *cpu, uint16_t value);
-void    FASTCALL Cz80_Set_DE(cz80_struc *cpu, uint16_t value);
-void    FASTCALL Cz80_Set_HL(cz80_struc *cpu, uint16_t value);
-void    FASTCALL Cz80_Set_AF(cz80_struc *cpu, uint16_t value);
+void    CZ80CALL Cz80_Set_BC(cz80_struc *cpu, uint16_t value);
+void    CZ80CALL Cz80_Set_DE(cz80_struc *cpu, uint16_t value);
+void    CZ80CALL Cz80_Set_HL(cz80_struc *cpu, uint16_t value);
+void    CZ80CALL Cz80_Set_AF(cz80_struc *cpu, uint16_t value);
 
-void    FASTCALL Cz80_Set_BC2(cz80_struc *cpu, uint16_t value);
-void    FASTCALL Cz80_Set_DE2(cz80_struc *cpu, uint16_t value);
-void    FASTCALL Cz80_Set_HL2(cz80_struc *cpu, uint16_t value);
-void    FASTCALL Cz80_Set_AF2(cz80_struc *cpu, uint16_t value);
+void    CZ80CALL Cz80_Set_BC2(cz80_struc *cpu, uint16_t value);
+void    CZ80CALL Cz80_Set_DE2(cz80_struc *cpu, uint16_t value);
+void    CZ80CALL Cz80_Set_HL2(cz80_struc *cpu, uint16_t value);
+void    CZ80CALL Cz80_Set_AF2(cz80_struc *cpu, uint16_t value);
 
-void    FASTCALL Cz80_Set_IX(cz80_struc *cpu, uint16_t value);
-void    FASTCALL Cz80_Set_IY(cz80_struc *cpu, uint16_t value);
-void    FASTCALL Cz80_Set_SP(cz80_struc *cpu, uint16_t value);
+void    CZ80CALL Cz80_Set_IX(cz80_struc *cpu, uint16_t value);
+void    CZ80CALL Cz80_Set_IY(cz80_struc *cpu, uint16_t value);
+void    CZ80CALL Cz80_Set_SP(cz80_struc *cpu, uint16_t value);
 
-void    FASTCALL Cz80_Set_WZ(cz80_struc *cpu, uint16_t value);
-void    FASTCALL Cz80_Set_PC(cz80_struc *cpu, uint16_t value);
+void    CZ80CALL Cz80_Set_WZ(cz80_struc *cpu, uint16_t value);
+void    CZ80CALL Cz80_Set_PC(cz80_struc *cpu, uint16_t value);
 
-void    FASTCALL Cz80_Set_R(cz80_struc *cpu, uint16_t value);
-void    FASTCALL Cz80_Set_IFF(cz80_struc *cpu, uint16_t value);
-void    FASTCALL Cz80_Set_IM(cz80_struc *cpu, uint8_t value);
-void    FASTCALL Cz80_Set_I(cz80_struc *cpu, uint8_t value);
+void    CZ80CALL Cz80_Set_R(cz80_struc *cpu, uint16_t value);
+void    CZ80CALL Cz80_Set_IFF(cz80_struc *cpu, uint16_t value);
+void    CZ80CALL Cz80_Set_IM(cz80_struc *cpu, uint8_t value);
+void    CZ80CALL Cz80_Set_I(cz80_struc *cpu, uint8_t value);
 
 #ifdef __cplusplus
 }

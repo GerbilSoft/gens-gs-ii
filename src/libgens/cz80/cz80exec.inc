@@ -6,7 +6,7 @@
 /*                                                                              */
 /********************************************************************************/
 
-int FASTCALL Cz80_Exec(cz80_struc *cpu, int cycles)
+int CZ80CALL Cz80_Exec(cz80_struc *cpu, int cycles)
 {
 #if CZ80_USE_JUMPTABLE
     #include "cz80jmp.inc"
