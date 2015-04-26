@@ -54,20 +54,20 @@ class Z80Test : public ::testing::Test
 		// System state.
 		bool halt;
 
-		static uint8_t FASTCALL Z80_ReadB_static(void *ctx, uint16_t address) {
+		static uint8_t CZ80CALL Z80_ReadB_static(void *ctx, uint16_t address) {
 			return ((Z80Test*)ctx)->Z80_ReadB(address);
 		}
-		static void FASTCALL Z80_WriteB_static(void *ctx, uint16_t address, uint8_t data) {
+		static void CZ80CALL Z80_WriteB_static(void *ctx, uint16_t address, uint8_t data) {
 			((Z80Test*)ctx)->Z80_WriteB(address, data);
 		}
 
 		uint8_t Z80_ReadB(uint16_t address);
 		void Z80_WriteB(uint16_t address, uint8_t data);
 
-		static uint8_t FASTCALL Z80_INPort_static(void *ctx, uint16_t address) {
+		static uint8_t CZ80CALL Z80_INPort_static(void *ctx, uint16_t address) {
 			return ((Z80Test*)ctx)->Z80_INPort(address);
 		}
-		static void Z80_OUTPort_static(void *ctx, uint16_t address, uint8_t data) {
+		static void CZ80CALL Z80_OUTPort_static(void *ctx, uint16_t address, uint8_t data) {
 			((Z80Test*)ctx)->Z80_OUTPort(address, data);
 		}
 
