@@ -955,45 +955,40 @@ OP_DI:
 
     // ADD16
 
-    {
-        uint16_t src;
-        uint32_t res;
-
-    OP(0x39):   // ADD  xx,SP
-OP_ADD16_xx_SP:
-        src = zSP;
-        goto OP_ADD16;
-
-    OP(0x29):   // ADD  xx,xx
-OP_ADD16_xx_xx:
-        src = data->W;
-        goto OP_ADD16;
-
-    OP(0x09):   // ADD  xx,BC
-OP_ADD16_xx_BC:
-        src = zBC;
-        goto OP_ADD16;
-
-    OP(0x19):   // ADD  xx,DE
-OP_ADD16_xx_DE:
-        src = zDE;
-
-OP_ADD16:
-        zWZ = data->W + 1;
-        res = src + data->W;
+// NOTE: Destination is always HL, IX, or IY.
 #if CZ80_DEBUG
-        zF = (zF & (CZ80_SF | CZ80_ZF | CZ80_VF)) |     // S/Z/V flag
-            (((src ^ data->W ^ res) >> 8) & CZ80_HF) |  // H flag
-            ((res >> 16) & CZ80_CF);                    // C flag
-#else
-        zF = (zF & (CZ80_SF | CZ80_ZF | CZ80_VF)) |     // S/Z/V flag
-            (((src ^ data->W ^ res) >> 8) & CZ80_HF) |  // H flag
-            ((res >> 8) & (CZ80_XF | CZ80_YF)) |        // X/Y flag
-            ((res >> 16) & CZ80_CF);                    // C flag
-#endif
-        data->W = res;
-        RET(11)
+#define OPJ_ADD_RR_RR(JmpType, Opcode, RRsrc) \
+    JmpType(Opcode): { \
+        uint16_t src = RRsrc; \
+        uint32_t res = src + data->W; \
+        zWZ = data->W + 1; \
+        zF = (zF & (CZ80_SF | CZ80_ZF | CZ80_VF)) |     /* S/Z/V flag */ \
+            (((src ^ data->W ^ res) >> 8) & CZ80_HF) |  /* H flag */ \
+            ((res >> 16) & CZ80_CF);                    /* C flag */ \
+        data->W = (uint16_t)res; \
+        RET(11) \
     }
+#else
+#define OPJ_ADD_RR_RR(JmpType, Opcode, RRsrc) \
+    JmpType(Opcode): { \
+        uint16_t src = RRsrc; \
+        uint32_t res = src + data->W; \
+        zWZ = data->W + 1; \
+        zF = (zF & (CZ80_SF | CZ80_ZF | CZ80_VF)) |     /* S/Z/V flag */ \
+            (((src ^ data->W ^ res) >> 8) & CZ80_HF) |  /* H flag */ \
+            ((res >> 8) & (CZ80_XF | CZ80_YF)) |        /* X/Y flag */ \
+            ((res >> 16) & CZ80_CF);                    /* C flag */ \
+        data->W = (uint16_t)res; \
+        RET(11) \
+    }
+#endif
+
+#define OP_ADD_RR_RR(Opcode, RRsrc) OPJ_ADD_RR_RR(OP, Opcode, RRsrc)
+
+    OP_ADD_RR_RR(0x39, zSP)       // ADD  HL,SP
+    OP_ADD_RR_RR(0x29, data->W)   // ADD  HL,HL (TODO: Optimization?)
+    OP_ADD_RR_RR(0x09, zBC)       // ADD  HL,BC
+    OP_ADD_RR_RR(0x19, zDE)       // ADD  HL,DE
 
     // ROTATE
 
