@@ -575,15 +575,11 @@ OP_CPX:
         do
         {
             PRE_IO();
+            zWZ--;
             READ_BYTE(zHL--, val);
             res = zA - val;
             POST_IO();
             zBC--;
-            if (zBC) {
-                // WZ is not changed if BC == 1
-                // *before* the decrement.
-                zWZ = zPC + 1;
-            }
             CCnt -= 21;
         } while ((zBC) && (res) && (CCnt > -4));
         goto OP_CPXR;
@@ -592,15 +588,11 @@ OP_CPX:
         do
         {
             PRE_IO();
+            zWZ++;
             READ_BYTE(zHL++, val);
             res = zA - val;
             POST_IO();
             zBC--;
-            if (zBC) {
-                // WZ is not changed if BC == 1
-                // *before* the decrement.
-                zWZ = zPC + 1;
-            }
             CCnt -= 21;
         } while ((zBC) && (res) && (CCnt > -4));
 
@@ -616,6 +608,9 @@ OP_CPXR:
 #endif
         if (zBC) F |= CZ80_PF;
         zF = F;
+
+        // Update WZ if BC != 1 (before decrement).
+        if (!zBC) zWZ = zPC + 1;
 
         // NOTE: We have to check both BC != 0 and res != 0;
         // however, res is modified if CZ80_HF is set.
