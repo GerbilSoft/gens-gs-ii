@@ -555,7 +555,7 @@ OP_CPX:
         F = (zF & CZ80_CF) | (SZXY[res] & ~(CZ80_YF | CZ80_XF)) |
             ((zA ^ val ^ res) & CZ80_HF) | CZ80_NF;
         if (F & CZ80_HF) res--;
-        F |= (res & CZ80_XF) | ((res >> 4) & CZ80_YF);
+        F |= (res & CZ80_XF) | ((res << 4) & CZ80_YF);
 #else
         F = (zF & CZ80_CF) | SZXY[res] |
             ((zA ^ val ^ res) & CZ80_HF) | CZ80_NF;
@@ -609,7 +609,7 @@ OP_CPXR:
         F = (zF & CZ80_CF) | (SZXY[res] & ~(CZ80_YF | CZ80_XF)) |
             ((zA ^ val ^ res) & CZ80_HF) | CZ80_NF;
         if (F & CZ80_HF) res--;
-        F |= (res & CZ80_XF) | ((res >> 4) & CZ80_YF);
+        F |= (res & CZ80_XF) | ((res << 4) & CZ80_YF);
 #else
         F = (zF & CZ80_CF) | SZXY[res] |
             ((zA ^ val ^ res) & CZ80_HF) | CZ80_NF;
