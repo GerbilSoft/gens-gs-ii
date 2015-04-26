@@ -193,7 +193,7 @@ switch (Opcode)
     OPED(0xb5):
     OPED(0xb6):
     OPED(0xb7):
-        goto OP_NOP;
+        RET(4)
 
 #define OPED_LD_mNN_RR_FN(Opcode, RR) OPJ_LD_mNN_RR_FN(OPED, Opcode, RR)
 
