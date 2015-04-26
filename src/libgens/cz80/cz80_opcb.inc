@@ -151,21 +151,24 @@ switch (Opcode)
         RET(11 + 4)
     }
 
+    // SHIFT
 
-    OPCB(0x20): // SLA  B
-    OPCB(0x21): // SLA  C
-    OPCB(0x22): // SLA  D
-    OPCB(0x23): // SLA  E
-    OPCB(0x24): // SLA  H
-    OPCB(0x25): // SLA  L
-    OPCB(0x27): // SLA  A
-    {
-        uint8_t src = zR8(Opcode & 7);
-
-        zR8(Opcode & 7) = src << 1;
-        zF = SZXYP[zR8(Opcode & 7)] | (src >> 7);
+#define OPJ_SLA_R(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t src = zR8(Opcode & 7); \
+        zR8(Opcode & 7) = src << 1; \
+        zF = SZXYP[zR8(Opcode & 7)] | (src >> 7); \
+        RET(4 + 4) \
     }
-    RET(4 + 4)
+#define OPCB_SLA_R(Opcode) OPJ_SLA_R(OPCB, Opcode)
+
+    OPCB_SLA_R(0x20) // SLA  B
+    OPCB_SLA_R(0x21) // SLA  C
+    OPCB_SLA_R(0x22) // SLA  D
+    OPCB_SLA_R(0x23) // SLA  E
+    OPCB_SLA_R(0x24) // SLA  H
+    OPCB_SLA_R(0x25) // SLA  L
+    OPCB_SLA_R(0x27) // SLA  A
 
     OPCB(0x26): // SLA  (HL)
     {
@@ -183,21 +186,22 @@ switch (Opcode)
         RET(11 + 4)
     }
 
-
-    OPCB(0x28): // SRA  B
-    OPCB(0x29): // SRA  C
-    OPCB(0x2a): // SRA  D
-    OPCB(0x2b): // SRA  E
-    OPCB(0x2c): // SRA  H
-    OPCB(0x2d): // SRA  L
-    OPCB(0x2f): // SRA  A
-    {
-        int8_t src = zR8(Opcode & 7);
-
-        zR8(Opcode & 7) = src >> 1;
-        zF = SZXYP[zR8(Opcode & 7)] | (src & CZ80_CF);
+#define OPJ_SRA_R(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        int8_t src = zR8(Opcode & 7); \
+        zR8(Opcode & 7) = src >> 1; \
+        zF = SZXYP[zR8(Opcode & 7)] | (src & CZ80_CF); \
+        RET(4 + 4) \
     }
-    RET(4 + 4)
+#define OPCB_SRA_R(Opcode) OPJ_SRA_R(OPCB, Opcode)
+
+    OPCB_SRA_R(0x28) // SRA  B
+    OPCB_SRA_R(0x29) // SRA  C
+    OPCB_SRA_R(0x2a) // SRA  D
+    OPCB_SRA_R(0x2b) // SRA  E
+    OPCB_SRA_R(0x2c) // SRA  H
+    OPCB_SRA_R(0x2d) // SRA  L
+    OPCB_SRA_R(0x2f) // SRA  A
 
     OPCB(0x2e): // SRA  (HL)
     {
@@ -215,21 +219,22 @@ switch (Opcode)
         RET(11 + 4)
     }
 
-
-    OPCB(0x30): // SLL  B
-    OPCB(0x31): // SLL  C
-    OPCB(0x32): // SLL  D
-    OPCB(0x33): // SLL  E
-    OPCB(0x34): // SLL  H
-    OPCB(0x35): // SLL  L
-    OPCB(0x37): // SLL  A
-    {
-        uint8_t src = zR8(Opcode & 7);
-
-        zR8(Opcode & 7) = (src << 1) | 1;
-        zF = SZXYP[zR8(Opcode & 7)] | (src >> 7);
+#define OPJ_SLL_R(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t src = zR8(Opcode & 7); \
+        zR8(Opcode & 7) = (src << 1) | 1; \
+        zF = SZXYP[zR8(Opcode & 7)] | (src >> 7); \
+        RET(4 + 4) \
     }
-    RET(4 + 4)
+#define OPCB_SLL_R(Opcode) OPJ_SLL_R(OPCB, Opcode)
+
+    OPCB_SLL_R(0x30) // SLL  B
+    OPCB_SLL_R(0x31) // SLL  C
+    OPCB_SLL_R(0x32) // SLL  D
+    OPCB_SLL_R(0x33) // SLL  E
+    OPCB_SLL_R(0x34) // SLL  H
+    OPCB_SLL_R(0x35) // SLL  L
+    OPCB_SLL_R(0x37) // SLL  A
 
     OPCB(0x36): // SLL  (HL)
     {
@@ -247,21 +252,22 @@ switch (Opcode)
         RET(11 + 4)
     }
 
-
-    OPCB(0x38): // SRL  B
-    OPCB(0x39): // SRL  C
-    OPCB(0x3a): // SRL  D
-    OPCB(0x3b): // SRL  E
-    OPCB(0x3c): // SRL  H
-    OPCB(0x3d): // SRL  L
-    OPCB(0x3f): // SRL  A
-    {
-        uint8_t src = zR8(Opcode & 7);
-
-        zR8(Opcode & 7) = src >> 1;
-        zF = SZXYP[zR8(Opcode & 7)] | (src & CZ80_CF);
+#define OPJ_SRL_R(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t src = zR8(Opcode & 7); \
+        zR8(Opcode & 7) = src >> 1; \
+        zF = SZXYP[zR8(Opcode & 7)] | (src & CZ80_CF); \
+        RET(4 + 4) \
     }
-    RET(4 + 4)
+#define OPCB_SRL_R(Opcode) OPJ_SRL_R(OPCB, Opcode)
+
+    OPCB_SRL_R(0x38) // SRL  B
+    OPCB_SRL_R(0x39) // SRL  C
+    OPCB_SRL_R(0x3a) // SRL  D
+    OPCB_SRL_R(0x3b) // SRL  E
+    OPCB_SRL_R(0x3c) // SRL  H
+    OPCB_SRL_R(0x3d) // SRL  L
+    OPCB_SRL_R(0x3f) // SRL  A
 
     OPCB(0x3e): // SRL  (HL)
     {
