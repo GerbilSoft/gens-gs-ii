@@ -30,7 +30,7 @@ extern "C" {
 
 // MSVC: Enable FASTCALL on i386.
 // (Copied from MinGW-w64's winnt.h.)
-#if defined (__i386__) && !defined (__WIDL__)
+#if defined (_M_IX86)
 #define CZ80CALL __fastcall
 #else
 #define CZ80CALL
