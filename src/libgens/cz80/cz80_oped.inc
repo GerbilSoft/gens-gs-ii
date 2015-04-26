@@ -300,61 +300,63 @@ switch (Opcode)
         RET(14)
     }
 
-
-    {
-        uint16_t src;
-        uint32_t res;
-
-    OPED(0x7a): // ADC  HL,SP
-        src = zSP;
-        goto OP_ADC_HL;
-
-    OPED(0x4a): // ADC  HL,BC
-    OPED(0x5a): // ADC  HL,DE
-    OPED(0x6a): // ADC  HL,HL
-        src = zR16((Opcode >> 4) & 3);
-
-OP_ADC_HL:
-        zWZ = zHL + 1;
-        res = zHL + src + (zF & CZ80_CF);
-        zF = (((src ^ zHL ^ res) >> 8) & CZ80_HF) |                     // H flag
-            (((src ^ zHL ^ 0x8000) & (src ^ res) & 0x8000) >> 13) |     // V flag
-            ((res >> 8) & (CZ80_SF | CZ80_XF | CZ80_YF)) |              // S/X/Y flag
-            ((res >> 16) & CZ80_CF) |                                   // C flag
-            ((res & 0xFFFF) ? 0 : CZ80_ZF);                             // Z flag
-        zHL = res;
-        RET(11)
-        
-
-    OPED(0x72): // SBC  HL,SP
-        src = zSP;
-        goto OP_SBC_HL;
-
-    OPED(0x42): // SBC  HL,BC
-    OPED(0x52): // SBC  HL,DE
-    OPED(0x62): // SBC  HL,HL
-        src = zR16((Opcode >> 4) & 3);
-
-OP_SBC_HL:
-        zWZ = zHL + 1;
-        res = zHL - (src + (zF & CZ80_CF));
-#if CZ80_DEBUG
-        zF = (((src ^ zHL ^ res) >> 8) & CZ80_HF) | CZ80_NF |           // H/N flag
-            (((src ^ zHL) & (zHL ^ res) & 0x8000) >> 13) |              // V flag
-            ((res >> 8) & CZ80_SF) |                                    // S flag
-            ((res >> 16) & CZ80_CF) |                                   // C flag
-            ((res & 0xFFFF) ? 0 : CZ80_ZF);                             // Z flag
-#else
-        zF = (((src ^ zHL ^ res) >> 8) & CZ80_HF) | CZ80_NF |           // H/N flag
-            (((src ^ zHL) & (zHL ^ res) & 0x8000) >> 13) |              // V flag
-            ((res >> 8) & (CZ80_SF | CZ80_XF | CZ80_YF)) |              // S/X/Y flag
-            ((res >> 16) & CZ80_CF) |                                   // C flag
-            ((res & 0xFFFF) ? 0 : CZ80_ZF);                             // Z flag
-#endif
-        zHL = res;
-        RET(11)
+#define OPJ_ADC_HL_RR(JmpType, Opcode, RR) \
+    JmpType(Opcode): { \
+        uint16_t src = z##RR; \
+        uint32_t res = zHL + src + (zF & CZ80_CF); \
+        zWZ = zHL + 1; \
+        zF = (((src ^ zHL ^ res) >> 8) & CZ80_HF) |                     /* H flag */ \
+            (((src ^ zHL ^ 0x8000) & (src ^ res) & 0x8000) >> 13) |     /* V flag */ \
+            ((res >> 8) & (CZ80_SF | CZ80_XF | CZ80_YF)) |              /* S/X/Y flag */ \
+            ((res >> 16) & CZ80_CF) |                                   /* C flag */ \
+            ((res & 0xFFFF) ? 0 : CZ80_ZF);                             /* Z flag */ \
+        zHL = res; \
+        RET(11) \
     }
 
+#define OPED_ADC_HL_RR(Opcode, RR) OPJ_ADC_HL_RR(OPED, Opcode, RR)
+
+    OPED_ADC_HL_RR(0x7a, SP) // ADC  HL,SP
+    OPED_ADC_HL_RR(0x4a, BC) // ADC  HL,BC
+    OPED_ADC_HL_RR(0x5a, DE) // ADC  HL,DE
+    OPED_ADC_HL_RR(0x6a, HL) // ADC  HL,HL
+        
+#if CZ80_DEBUG
+#define OPJ_SBC_HL_RR(JmpType, Opcode, RR) \
+    JmpType(Opcode): { \
+        uint16_t src = z##RR; \
+        uint32_t res = zHL - (src + (zF & CZ80_CF)); \
+        zWZ = data->W + 1; \
+        zF = (((src ^ zHL ^ res) >> 8) & CZ80_HF) | CZ80_NF |           /* H/N flag */ \
+            (((src ^ zHL) & (zHL ^ res) & 0x8000) >> 13) |              /* V flag */ \
+            ((res >> 8) & CZ80_SF) |                                    /* S flag */ \
+            ((res >> 16) & CZ80_CF) |                                   /* C flag */ \
+            ((res & 0xFFFF) ? 0 : CZ80_ZF);                             /* Z flag */ \
+        data->W = (uint16_t)res; \
+        RET(11) \
+    }
+#else
+#define OPJ_SBC_HL_RR(JmpType, Opcode, RR) \
+    JmpType(Opcode): { \
+        uint16_t src = z##RR; \
+        uint32_t res = zHL - (src + (zF & CZ80_CF)); \
+        zWZ = data->W + 1; \
+        zF = (((src ^ zHL ^ res) >> 8) & CZ80_HF) | CZ80_NF |           /* H/N flag */ \
+            (((src ^ zHL) & (zHL ^ res) & 0x8000) >> 13) |              /* V flag */ \
+            ((res >> 8) & (CZ80_SF | CZ80_XF | CZ80_YF)) |              /* S/X/Y flag */ \
+            ((res >> 16) & CZ80_CF) |                                   /* C flag */ \
+            ((res & 0xFFFF) ? 0 : CZ80_ZF);                             /* Z flag */ \
+        data->W = (uint16_t)res; \
+        RET(11) \
+    }
+#endif
+
+#define OPED_SBC_HL_RR(Opcode, RR) OPJ_SBC_HL_RR(OPED, Opcode, RR)
+
+    OPED_SBC_HL_RR(0x72, SP) // SBC  HL,SP
+    OPED_SBC_HL_RR(0x42, BC) // SBC  HL,BC
+    OPED_SBC_HL_RR(0x52, DE) // SBC  HL,DE
+    OPED_SBC_HL_RR(0x62, HL) // SBC  HL,HL
 
     {
         uint8_t res;
