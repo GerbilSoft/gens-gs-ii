@@ -24,7 +24,7 @@ switch (Opcode)
     OPXY(0x64): // LD   H,H
     OPXY(0x6d): // LD   L,L
     OPXY(0x7f): // LD   A,A
-        goto OP_NOP;
+        RET(4)
 
 #define OPXY_LD_R_R_FN(Opcode) OPJ_LD_R_R_FN(OPXY, Opcode)
 

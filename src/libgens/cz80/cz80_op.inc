@@ -14,7 +14,7 @@ switch (Opcode)
 #endif
 
     // 8 BITS LOAD
-    
+
     OP(0x00):   // NOP
 
     OP(0x40):   // LD   B,B
@@ -24,7 +24,6 @@ switch (Opcode)
     OP(0x64):   // LD   H,H
     OP(0x6d):   // LD   L,L
     OP(0x7f):   // LD   A,A
-OP_NOP:
         RET(4)
 
 #define OPJ_LD_R_R_FN(JmpType, Opcode) \
