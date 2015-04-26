@@ -614,19 +614,22 @@ OP_CPXR:
         F = (zF & CZ80_CF) | SZXY[res] |
             ((zA ^ val ^ res) & CZ80_HF) | CZ80_NF;
 #endif
+        if (zBC) F |= CZ80_PF;
+        zF = F;
 
-        if (zBC)
+        // NOTE: We have to check both BC != 0 and res != 0;
+        // however, res is modified if CZ80_HF is set.
+        // Check CZ80_ZF instead.
+        if (zBC && !(F & CZ80_ZF))
         {
             // instruction not yet completed...
             // we will continu it at next CZ80_Exec
-            zF = F | CZ80_PF;
             zPC -= 2;
             CCnt += 4;
             goto Cz80_Exec_End;
         }
 
         // instruction completed...
-        zF = F;
         RET(-(3 + 4));
     }
 
