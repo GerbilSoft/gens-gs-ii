@@ -44,7 +44,7 @@ Cz80_Exec_Check:
 
 Cz80_Exec:
     {
-        Opcode = FETCH_BYTE;
+        Opcode = FETCH_BYTE();
     Cz80_Exec_IM0:
         {
             union16 *data = pzHL;
@@ -54,7 +54,7 @@ Cz80_Exec:
     }
 
 Cz80_Exec_End:
-    CHECK_INT
+    CHECK_INT();
     if ((CCnt += CPU->CycleSup) > 0)
     {
         CPU->CycleSup = 0;
@@ -77,4 +77,3 @@ Cz80_Exec_Really_End:
 
     return CCnt;
 }
-

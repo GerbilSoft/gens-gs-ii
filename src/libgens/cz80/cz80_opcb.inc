@@ -24,7 +24,7 @@ switch (Opcode)
         uint8_t src = zR8(Opcode & 7); \
         zR8(Opcode & 7) = (src << 1) | (src >> 7); \
         zF = SZXYP[zR8(Opcode & 7)] | (src >> 7); \
-        RET(4 + 4) \
+        RET(4 + 4); \
     }
 #define OPCB_RLC_R(Opcode) OPJ_RLC_R(OPCB, Opcode)
 
@@ -42,14 +42,14 @@ switch (Opcode)
         uint8_t src;
         uint8_t res;
 
-        PRE_IO
+        PRE_IO();
         adr = zHL;
-        READ_BYTE(adr, src)
+        READ_BYTE(adr, src);
         res = ((src << 1) | (src >> 7)) & 0xFF;
         zF = SZXYP[res] | (src >> 7);
-        WRITE_BYTE(adr, res)
-        POST_IO
-        RET(11 + 4)
+        WRITE_BYTE(adr, res);
+        POST_IO();
+        RET(11 + 4);
     }
 
 #define OPJ_RRC_R(JmpType, Opcode) \
@@ -57,7 +57,7 @@ switch (Opcode)
         uint8_t src = zR8(Opcode & 7); \
         zR8(Opcode & 7) = (src >> 1) | (src << 7); \
         zF = SZXYP[zR8(Opcode & 7)] | (src & CZ80_CF); \
-        RET(4 + 4) \
+        RET(4 + 4); \
     }
 #define OPCB_RRC_R(Opcode) OPJ_RRC_R(OPCB, Opcode)
 
@@ -75,14 +75,14 @@ switch (Opcode)
         uint8_t src;
         uint8_t res;
 
-        PRE_IO
+        PRE_IO();
         adr = zHL;
-        READ_BYTE(adr, src)
+        READ_BYTE(adr, src);
         res = ((src >> 1) | (src << 7)) & 0xFF;
         zF = SZXYP[res] | (src & CZ80_CF);
-        WRITE_BYTE(adr, res)
-        POST_IO
-        RET(11 + 4)
+        WRITE_BYTE(adr, res);
+        POST_IO();
+        RET(11 + 4);
     }
 
 #define OPJ_RL_R(JmpType, Opcode) \
@@ -90,7 +90,7 @@ switch (Opcode)
         uint8_t src = zR8(Opcode & 7); \
         zR8(Opcode & 7) = (src << 1) | (zF & CZ80_CF); \
         zF = SZXYP[zR8(Opcode & 7)] | (src >> 7); \
-        RET(4 + 4) \
+        RET(4 + 4); \
     }
 #define OPCB_RL_R(Opcode) OPJ_RL_R(OPCB, Opcode)
 
@@ -108,14 +108,14 @@ switch (Opcode)
         uint8_t src;
         uint8_t res;
 
-        PRE_IO
+        PRE_IO();
         adr = zHL;
-        READ_BYTE(adr, src)
+        READ_BYTE(adr, src);
         res = ((src << 1) | (zF & CZ80_CF)) & 0xFF;
         zF = SZXYP[res] | (src >> 7);
-        WRITE_BYTE(adr, res)
-        POST_IO
-        RET(11 + 4)
+        WRITE_BYTE(adr, res);
+        POST_IO();
+        RET(11 + 4);
     }
 
 #define OPJ_RR_R(JmpType, Opcode) \
@@ -123,7 +123,7 @@ switch (Opcode)
         uint8_t src = zR8(Opcode & 7); \
         zR8(Opcode & 7) = (src >> 1) | (zF << 7); \
         zF = SZXYP[zR8(Opcode & 7)] | (src & CZ80_CF); \
-        RET(4 + 4) \
+        RET(4 + 4); \
     }
 #define OPCB_RR_R(Opcode) OPJ_RR_R(OPCB, Opcode)
 
@@ -141,14 +141,14 @@ switch (Opcode)
         uint8_t src;
         uint8_t res;
 
-        PRE_IO
+        PRE_IO();
         adr = zHL;
-        READ_BYTE(adr, src)
+        READ_BYTE(adr, src);
         res = ((src >> 1) | (zF << 7)) & 0xFF;
         zF = SZXYP[res] | (src & CZ80_CF);
-        WRITE_BYTE(adr, res)
-        POST_IO
-        RET(11 + 4)
+        WRITE_BYTE(adr, res);
+        POST_IO();
+        RET(11 + 4);
     }
 
     // SHIFT
@@ -158,7 +158,7 @@ switch (Opcode)
         uint8_t src = zR8(Opcode & 7); \
         zR8(Opcode & 7) = src << 1; \
         zF = SZXYP[zR8(Opcode & 7)] | (src >> 7); \
-        RET(4 + 4) \
+        RET(4 + 4); \
     }
 #define OPCB_SLA_R(Opcode) OPJ_SLA_R(OPCB, Opcode)
 
@@ -176,14 +176,14 @@ switch (Opcode)
         uint8_t src;
         uint8_t res;
 
-        PRE_IO
+        PRE_IO();
         adr = zHL;
-        READ_BYTE(adr, src)
+        READ_BYTE(adr, src);
         res = (src << 1) & 0xFF;
         zF = SZXYP[res] | (src >> 7);
-        WRITE_BYTE(adr, res)
-        POST_IO
-        RET(11 + 4)
+        WRITE_BYTE(adr, res);
+        POST_IO();
+        RET(11 + 4);
     }
 
 #define OPJ_SRA_R(JmpType, Opcode) \
@@ -191,7 +191,7 @@ switch (Opcode)
         int8_t src = zR8(Opcode & 7); \
         zR8(Opcode & 7) = src >> 1; \
         zF = SZXYP[zR8(Opcode & 7)] | (src & CZ80_CF); \
-        RET(4 + 4) \
+        RET(4 + 4); \
     }
 #define OPCB_SRA_R(Opcode) OPJ_SRA_R(OPCB, Opcode)
 
@@ -209,14 +209,14 @@ switch (Opcode)
         uint8_t src;
         uint8_t res;
 
-        PRE_IO
+        PRE_IO();
         adr = zHL;
-        READ_BYTE(adr, src)
+        READ_BYTE(adr, src);
         res = (uint8_t)(((int8_t)(src)) >> 1);
         zF = SZXYP[res] | (src & CZ80_CF);
-        WRITE_BYTE(adr, res)
-        POST_IO
-        RET(11 + 4)
+        WRITE_BYTE(adr, res);
+        POST_IO();
+        RET(11 + 4);
     }
 
 #define OPJ_SLL_R(JmpType, Opcode) \
@@ -224,7 +224,7 @@ switch (Opcode)
         uint8_t src = zR8(Opcode & 7); \
         zR8(Opcode & 7) = (src << 1) | 1; \
         zF = SZXYP[zR8(Opcode & 7)] | (src >> 7); \
-        RET(4 + 4) \
+        RET(4 + 4); \
     }
 #define OPCB_SLL_R(Opcode) OPJ_SLL_R(OPCB, Opcode)
 
@@ -242,14 +242,14 @@ switch (Opcode)
         uint8_t src;
         uint8_t res;
 
-        PRE_IO
+        PRE_IO();
         adr = zHL;
-        READ_BYTE(adr, src)
+        READ_BYTE(adr, src);
         res = ((src << 1) | 1) & 0xFF;
         zF = SZXYP[res] | (src >> 7);
-        WRITE_BYTE(adr, res)
-        POST_IO
-        RET(11 + 4)
+        WRITE_BYTE(adr, res);
+        POST_IO();
+        RET(11 + 4);
     }
 
 #define OPJ_SRL_R(JmpType, Opcode) \
@@ -257,7 +257,7 @@ switch (Opcode)
         uint8_t src = zR8(Opcode & 7); \
         zR8(Opcode & 7) = src >> 1; \
         zF = SZXYP[zR8(Opcode & 7)] | (src & CZ80_CF); \
-        RET(4 + 4) \
+        RET(4 + 4); \
     }
 #define OPCB_SRL_R(Opcode) OPJ_SRL_R(OPCB, Opcode)
 
@@ -275,14 +275,14 @@ switch (Opcode)
         uint8_t src;
         uint8_t res;
 
-        PRE_IO
+        PRE_IO();
         adr = zHL;
-        READ_BYTE(adr, src)
+        READ_BYTE(adr, src);
         res = src >> 1;
         zF = SZXYP[res] | (src & CZ80_CF);
-        WRITE_BYTE(adr, res)
-        POST_IO
-        RET(11 + 4)
+        WRITE_BYTE(adr, res);
+        POST_IO();
+        RET(11 + 4);
     }
 
     // BIT
@@ -295,7 +295,7 @@ switch (Opcode)
         zF = (zF & CZ80_CF) | CZ80_HF | \
             (SZXY_BIT[src & bitm] & ~(CZ80_YF| CZ80_XF)) | \
             (src & (CZ80_YF| CZ80_XF)); \
-        RET(4 + 4) \
+        RET(4 + 4); \
     }
 #define OPCB_BIT_N_R(Opcode) OPJ_BIT_N_R(OPCB, Opcode)
 
@@ -367,14 +367,14 @@ switch (Opcode)
     JmpType(Opcode): { \
         uint8_t src; \
         uint8_t bitm = 1 << ((Opcode >> 3) & 7); \
-        PRE_IO \
-        READ_BYTE(zHL, src) \
+        PRE_IO(); \
+        READ_BYTE(zHL, src); \
         /* TODO: Remove XF/YF flags from SZXY_BIT[]. */ \
         zF = (zF & CZ80_CF) | CZ80_HF |                         /* C/H flag */ \
              (SZXY_BIT[src & bitm] & ~(CZ80_YF | CZ80_XF)) |    /* Z/V/N flag */ \
              ((zWZ >> 8) & (CZ80_YF | CZ80_XF));                /* X/Y flag */ \
-        POST_IO \
-        RET(8 + 4) \
+        POST_IO(); \
+        RET(8 + 4); \
     }
 #define OPCB_BIT_N_mHL(Opcode) OPJ_BIT_N_mHL(OPCB, Opcode)
 
@@ -392,7 +392,7 @@ switch (Opcode)
 #define OPJ_RES_N_R(JmpType, Opcode) \
     JmpType(Opcode): \
         zR8(Opcode & 7) &= ~(1 << ((Opcode >> 3) & 7)); \
-        RET(4 + 4)
+        RET(4 + 4);
 #define OPCB_RES_N_R(Opcode) OPJ_RES_N_R(OPCB, Opcode)
 
     OPCB_RES_N_R(0x80) // RES  0,B
@@ -464,12 +464,12 @@ switch (Opcode)
         uint16_t adr = zHL; \
         uint8_t res; \
         uint8_t bitm = (uint8_t)~(1 << ((Opcode >> 3) & 7)); \
-        PRE_IO \
-        READ_BYTE(adr, res) \
+        PRE_IO(); \
+        READ_BYTE(adr, res); \
         res &= bitm; \
-        WRITE_BYTE(adr, res) \
-        POST_IO \
-        RET(11 + 4) \
+        WRITE_BYTE(adr, res); \
+        POST_IO(); \
+        RET(11 + 4); \
     }
 #define OPCB_RES_N_mHL(Opcode) OPJ_RES_N_mHL(OPCB, Opcode)
 
@@ -487,7 +487,7 @@ switch (Opcode)
 #define OPJ_SET_N_R(JmpType, Opcode) \
     JmpType(Opcode): \
         zR8(Opcode & 7) |= (1 << ((Opcode >> 3) & 7)); \
-        RET(4 + 4)
+        RET(4 + 4);
 #define OPCB_SET_N_R(Opcode) OPJ_SET_N_R(OPCB, Opcode)
 
     OPCB_SET_N_R(0xc0) // SET  0,B
@@ -559,12 +559,12 @@ switch (Opcode)
         uint16_t adr = zHL; \
         uint8_t res; \
         uint8_t bitm = 1 << ((Opcode >> 3) & 7); \
-        PRE_IO \
-        READ_BYTE(adr, res) \
+        PRE_IO(); \
+        READ_BYTE(adr, res); \
         res |= bitm; \
-        WRITE_BYTE(adr, res) \
-        POST_IO \
-        RET(11 + 4) \
+        WRITE_BYTE(adr, res); \
+        POST_IO(); \
+        RET(11 + 4); \
     }
 #define OPCB_SET_N_mHL(Opcode) OPJ_SET_N_mHL(OPCB, Opcode)
 
@@ -581,4 +581,3 @@ switch (Opcode)
 #else
 }
 #endif
-

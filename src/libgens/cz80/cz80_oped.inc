@@ -193,7 +193,7 @@ switch (Opcode)
     OPED(0xb5):
     OPED(0xb6):
     OPED(0xb7):
-        RET(4)
+        RET(4);
 
 #define OPED_LD_mNN_RR(Opcode, RR) OPJ_LD_mNN_RR(OPED, Opcode, RR)
 
@@ -212,12 +212,12 @@ switch (Opcode)
 
     OPED(0x47): // LD   I,A
         zI = zA;
-        RET(5)
+        RET(5);
 
     OPED(0x4f): // LD   R,A
         zR = zA - ((CPU->CycleToDo - CCnt) / 4);
         zR2 = zA & 0x80;
-        RET(5)
+        RET(5);
 
     OPED(0x57): // LD   A,I
     {
@@ -229,7 +229,7 @@ switch (Opcode)
         F |= zIFF2;
         if (!zA) F |= CZ80_ZF;
         zF = F;
-        RET(5)
+        RET(5);
     }
 
     OPED(0x5f): // LD   A,R
@@ -242,7 +242,7 @@ switch (Opcode)
         F |= zIFF2;
         if (!zA) F |= CZ80_ZF;
         zF = F;
-        RET(5)
+        RET(5);
     }
 
     OPED(0x5c): // NEG
@@ -264,7 +264,7 @@ switch (Opcode)
             (((val & res) & 0x80) >> 5) |           // V flag
             ((res >> 8) & CZ80_CF) | CZ80_NF;       // C/N flag
         zA = res;
-        RET(4)
+        RET(4);
     }
 
 
@@ -273,15 +273,15 @@ switch (Opcode)
         uint16_t adr;
         uint8_t src;
 
-        PRE_IO
+        PRE_IO();
         adr = zHL;
         zWZ = adr + 1;
-        READ_BYTE(adr, src)
-        WRITE_BYTE(adr, (src >> 4) | (zA << 4))
+        READ_BYTE(adr, src);
+        WRITE_BYTE(adr, (src >> 4) | (zA << 4));
         zA = (zA & 0xF0) | (src & 0x0F);
         zF = SZXYP[zA] | (zF & CZ80_CF);
-        POST_IO
-        RET(14)
+        POST_IO();
+        RET(14);
     }
 
     OPED(0x6f): // RLD  (HL)
@@ -289,15 +289,15 @@ switch (Opcode)
         uint16_t adr;
         uint8_t src;
 
-        PRE_IO
+        PRE_IO();
         adr = zHL;
         zWZ = adr + 1;
-        READ_BYTE(adr, src)
-        WRITE_BYTE(adr, (src << 4) | (zA & 0x0F))
+        READ_BYTE(adr, src);
+        WRITE_BYTE(adr, (src << 4) | (zA & 0x0F));
         zA = (zA & 0xF0) | (src >> 4);
         zF = SZXYP[zA] | (zF & CZ80_CF);
-        POST_IO
-        RET(14)
+        POST_IO();
+        RET(14);
     }
 
 #define OPJ_ADC_HL_RR(JmpType, Opcode, RR) \
@@ -311,7 +311,7 @@ switch (Opcode)
             ((res >> 16) & CZ80_CF) |                                   /* C flag */ \
             ((res & 0xFFFF) ? 0 : CZ80_ZF);                             /* Z flag */ \
         zHL = res; \
-        RET(11) \
+        RET(11); \
     }
 
 #define OPED_ADC_HL_RR(Opcode, RR) OPJ_ADC_HL_RR(OPED, Opcode, RR)
@@ -333,7 +333,7 @@ switch (Opcode)
             ((res >> 16) & CZ80_CF) |                                   /* C flag */ \
             ((res & 0xFFFF) ? 0 : CZ80_ZF);                             /* Z flag */ \
         data->W = (uint16_t)res; \
-        RET(11) \
+        RET(11); \
     }
 #else
 #define OPJ_SBC_HL_RR(JmpType, Opcode, RR) \
@@ -347,7 +347,7 @@ switch (Opcode)
             ((res >> 16) & CZ80_CF) |                                   /* C flag */ \
             ((res & 0xFFFF) ? 0 : CZ80_ZF);                             /* Z flag */ \
         data->W = (uint16_t)res; \
-        RET(11) \
+        RET(11); \
     }
 #endif
 
@@ -365,7 +365,7 @@ switch (Opcode)
         zWZ = zBC + 1; \
         zR8((Opcode >> 3) & 7) = res; \
         zF = (zF & CZ80_CF) | SZXYP[res]; \
-        RET(8) \
+        RET(8); \
     }
 
 #define OPED_IN_R_mBC(Opcode) OPJ_IN_R_mBC(OPED, Opcode)
@@ -383,7 +383,7 @@ switch (Opcode)
         IN(zBC, res);
         zWZ = zBC + 1;
         zF = (zF & CZ80_CF) | SZXYP[res];
-        RET(8)
+        RET(8);
     }
 
 #define OPJ_OUT_mBC_R(JmpType, Opcode, RRsrc) \
@@ -391,7 +391,7 @@ switch (Opcode)
         uint8_t src = RRsrc; \
         OUT(zBC, src); \
         zWZ = zBC + 1; \
-        RET(8) \
+        RET(8); \
     }
 
 #define OPED_OUT_mBC_R(Opcode, RRsrc) OPJ_OUT_mBC_R(OPED, Opcode, RRsrc)
@@ -415,10 +415,10 @@ switch (Opcode)
     OPED(0x55): // RETN;
     OPED(0x65): // RETN;
     OPED(0x75): // RETN;
-        PRE_IO
+        PRE_IO();
         POP_16(zWZ);
         SET_PC(zWZ);
-        POST_IO
+        POST_IO();
         zIFF1 = zIFF2;
         CCnt -= 10;
         // we need to test for interrupt
@@ -429,17 +429,17 @@ switch (Opcode)
     OPED(0x66): // IM   0
     OPED(0x6e): // IM   0
         zIM = 0;
-        RET(4)
+        RET(4);
 
     OPED(0x76): // IM   1
     OPED(0x56): // IM   1
         zIM = 1;
-        RET(4)
+        RET(4);
 
     OPED(0x5e): // IM   2
     OPED(0x7e): // IM   2
         zIM = 2;
-        RET(4)
+        RET(4);
 
 
     {
@@ -447,15 +447,15 @@ switch (Opcode)
         uint8_t F;
 
     OPED(0xa8): // LDD
-        PRE_IO
-        READ_BYTE(zHL--, val)
-        WRITE_BYTE(zDE--, val)
+        PRE_IO();
+        READ_BYTE(zHL--, val);
+        WRITE_BYTE(zDE--, val);
         goto OP_LDX;
 
     OPED(0xa0): // LDI
-        PRE_IO
-        READ_BYTE(zHL++, val)
-        WRITE_BYTE(zDE++, val)
+        PRE_IO();
+        READ_BYTE(zHL++, val);
+        WRITE_BYTE(zDE++, val);
 
 OP_LDX:
 #if CZ80_EXACT
@@ -467,8 +467,8 @@ OP_LDX:
 #endif
         if (--zBC) F |= CZ80_PF;
         zF = F;
-        POST_IO
-        RET(12)
+        POST_IO();
+        RET(12);
     }
 
     {
@@ -478,10 +478,10 @@ OP_LDX:
     OPED(0xb8): // LDDR
         do
         {
-            PRE_IO
-            READ_BYTE(zHL--, val)
-            WRITE_BYTE(zDE--, val)
-            POST_IO
+            PRE_IO();
+            READ_BYTE(zHL--, val);
+            WRITE_BYTE(zDE--, val);
+            POST_IO();
             zBC--;
             if (zBC) {
                 // WZ is not changed if BC == 1
@@ -495,10 +495,10 @@ OP_LDX:
     OPED(0xb0): // LDIR
         do
         {
-            PRE_IO
-            READ_BYTE(zHL++, val)
-            WRITE_BYTE(zDE++, val)
-            POST_IO
+            PRE_IO();
+            READ_BYTE(zHL++, val);
+            WRITE_BYTE(zDE++, val);
+            POST_IO();
             zBC--;
             if (zBC) {
                 // WZ is not changed if BC == 1
@@ -529,7 +529,7 @@ OP_LDXR:
 
         // instruction completed...
         zF = F;
-        RET(-(5 + 4))
+        RET(-(5 + 4));
     }
 
 
@@ -539,15 +539,15 @@ OP_LDXR:
         uint8_t F;
 
     OPED(0xa9): // CPD
-        PRE_IO
+        PRE_IO();
         zWZ--;
-        READ_BYTE(zHL--, val)
+        READ_BYTE(zHL--, val);
         goto OP_CPX;
 
     OPED(0xa1): // CPI
-        PRE_IO
+        PRE_IO();
         zWZ++;
-        READ_BYTE(zHL++, val)
+        READ_BYTE(zHL++, val);
 
 OP_CPX:
         res = zA - val;
@@ -562,8 +562,8 @@ OP_CPX:
 #endif
         if (--zBC) F |= CZ80_PF;
         zF = F;
-        POST_IO
-        RET(12)
+        POST_IO();
+        RET(12);
     }
 
     {
@@ -574,10 +574,10 @@ OP_CPX:
     OPED(0xb9): // CPDR
         do
         {
-            PRE_IO
-            READ_BYTE(zHL--, val)
+            PRE_IO();
+            READ_BYTE(zHL--, val);
             res = zA - val;
-            POST_IO
+            POST_IO();
             zBC--;
             if (zBC) {
                 // WZ is not changed if BC == 1
@@ -591,10 +591,10 @@ OP_CPX:
     OPED(0xb1): // CPIR
         do
         {
-            PRE_IO
-            READ_BYTE(zHL++, val)
+            PRE_IO();
+            READ_BYTE(zHL++, val);
             res = zA - val;
-            POST_IO
+            POST_IO();
             zBC--;
             if (zBC) {
                 // WZ is not changed if BC == 1
@@ -627,7 +627,7 @@ OP_CPXR:
 
         // instruction completed...
         zF = F;
-        RET(-(3 + 4))
+        RET(-(3 + 4));
     }
 
 
@@ -638,10 +638,10 @@ OP_CPXR:
 #endif
 
     OPED(0xaa): // IND
-        PRE_IO
+        PRE_IO();
         zWZ = zBC - 1;
-        IN(zBC, val)
-        WRITE_BYTE(zHL--, val)
+        IN(zBC, val);
+        WRITE_BYTE(zHL--, val);
 #if CZ80_EXACT
         if ((((zC - 1) & 0xFF) + val) & 0x100)
         {
@@ -653,10 +653,10 @@ OP_CPXR:
         goto OP_INX;
 
     OPED(0xa2): // INI
-        PRE_IO
+        PRE_IO();
         zWZ = zBC + 1;
-        IN(zBC, val)
-        WRITE_BYTE(zHL++, val)
+        IN(zBC, val);
+        WRITE_BYTE(zHL++, val);
 #if CZ80_EXACT
         if ((((zC + 1) & 0xFF) + val) & 0x100)
         {
@@ -673,8 +673,8 @@ OP_INX:
 #else
         zF = SZXY[--zB] + ((val >> 6) & CZ80_NF);
 #endif
-        POST_IO
-        RET(12)
+        POST_IO();
+        RET(12);
     }
 
     {
@@ -686,10 +686,10 @@ OP_INX:
     OPED(0xba): // INDR
         do
         {
-            PRE_IO
-            IN(zBC, val)
-            WRITE_BYTE(zHL--, val)
-            POST_IO
+            PRE_IO();
+            IN(zBC, val);
+            WRITE_BYTE(zHL--, val);
+            POST_IO();
             zB--;
             CCnt -= 21;
         } while ((zB) && (CCnt > -4));
@@ -706,10 +706,10 @@ OP_INX:
     OPED(0xb2): // INIR
         do
         {
-            PRE_IO
-            IN(zBC, val)
-            WRITE_BYTE(zHL++, val)
-            POST_IO
+            PRE_IO();
+            IN(zBC, val);
+            WRITE_BYTE(zHL++, val);
+            POST_IO();
             zB--;
             CCnt -= 21;
         } while ((zB) && (CCnt > -4));
@@ -740,7 +740,7 @@ OP_INXR:
         }
 
         // instruction completed...
-        RET(-(5 + 4))
+        RET(-(5 + 4));
     }
 
 
@@ -751,17 +751,17 @@ OP_INXR:
 #endif
 
     OPED(0xab): // OUTD
-        PRE_IO
+        PRE_IO();
         zWZ = zBC - 1;
-        READ_BYTE(zHL--, val)
-        OUT(zBC, val)
+        READ_BYTE(zHL--, val);
+        OUT(zBC, val);
         goto OP_OUTX;
 
     OPED(0xa3): // OUTI
-        PRE_IO
+        PRE_IO();
         zWZ = zBC + 1;
-        READ_BYTE(zHL++, val)
-        OUT(zBC, val)
+        READ_BYTE(zHL++, val);
+        OUT(zBC, val);
 
 OP_OUTX:
 #if CZ80_EXACT
@@ -772,8 +772,8 @@ OP_OUTX:
 #else
         zF = SZXY[--zB] + ((val >> 6) & CZ80_NF);
 #endif
-        POST_IO
-        RET(12)
+        POST_IO();
+        RET(12);
     }
 
 
@@ -786,10 +786,10 @@ OP_OUTX:
     OPED(0xbb): // OUTDR
         do
         {
-            PRE_IO
-            READ_BYTE(zHL--, val)
-            OUT(zBC, val)
-            POST_IO
+            PRE_IO();
+            READ_BYTE(zHL--, val);
+            OUT(zBC, val);
+            POST_IO();
             zB--;
             CCnt -= 21;
         } while ((zB) && (CCnt > -4));
@@ -798,10 +798,10 @@ OP_OUTX:
     OPED(0xb3): // OUTIR
         do
         {
-            PRE_IO
-            READ_BYTE(zHL++, val)
-            OUT(zBC, val)
-            POST_IO
+            PRE_IO();
+            READ_BYTE(zHL++, val);
+            OUT(zBC, val);
+            POST_IO();
             zB--;
             CCnt -= 21;
         } while ((zB) && (CCnt > -4));
@@ -826,11 +826,10 @@ OP_OUTXR:
         }
 
         // instruction not yet completed...
-        RET(-(5 + 4))
+        RET(-(5 + 4));
     }
 
 #if CZ80_USE_JUMPTABLE
 #else
 }
 #endif
-
