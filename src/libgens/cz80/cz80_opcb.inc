@@ -13,20 +13,28 @@ switch (Opcode)
 {
 #endif
 
-    OPCB(0x00): // RLC  B
-    OPCB(0x01): // RLC  C
-    OPCB(0x02): // RLC  D
-    OPCB(0x03): // RLC  E
-    OPCB(0x04): // RLC  H
-    OPCB(0x05): // RLC  L
-    OPCB(0x07): // RLC  A
-    {
-        uint8_t src = zR8(Opcode);
-        
-        zR8(Opcode) = (src << 1) | (src >> 7);
-        zF = SZXYP[zR8(Opcode)] | (src >> 7);
-        RET(4 + 4)
+    // ROTATE
+
+    // NOTE: These opcodes have slightly different flag semantics
+    // compared to the no-prefix rotate instructions, so they
+    // can't be combined.
+
+#define OPJ_RLC_R(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t src = zR8(Opcode & 7); \
+        zR8(Opcode & 7) = (src << 1) | (src >> 7); \
+        zF = SZXYP[zR8(Opcode & 7)] | (src >> 7); \
+        RET(4 + 4) \
     }
+#define OPCB_RLC_R(Opcode) OPJ_RLC_R(OPCB, Opcode)
+
+    OPCB_RLC_R(0x00) // RLC  B
+    OPCB_RLC_R(0x01) // RLC  C
+    OPCB_RLC_R(0x02) // RLC  D
+    OPCB_RLC_R(0x03) // RLC  E
+    OPCB_RLC_R(0x04) // RLC  H
+    OPCB_RLC_R(0x05) // RLC  L
+    OPCB_RLC_R(0x07) // RLC  A
 
     OPCB(0x06): // RLC  (HL)
     {
@@ -44,21 +52,22 @@ switch (Opcode)
         RET(11 + 4)
     }
 
-
-    OPCB(0x08): // RRC  B
-    OPCB(0x09): // RRC  C
-    OPCB(0x0a): // RRC  D
-    OPCB(0x0b): // RRC  E
-    OPCB(0x0c): // RRC  H
-    OPCB(0x0d): // RRC  L
-    OPCB(0x0f): // RRC  A
-    {
-        uint8_t src = zR8(Opcode & 7);
-
-        zR8(Opcode & 7) = (src >> 1) | (src << 7);
-        zF = SZXYP[zR8(Opcode & 7)] | (src & CZ80_CF);
-        RET(4 + 4)
+#define OPJ_RRC_R(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t src = zR8(Opcode & 7); \
+        zR8(Opcode & 7) = (src >> 1) | (src << 7); \
+        zF = SZXYP[zR8(Opcode & 7)] | (src & CZ80_CF); \
+        RET(4 + 4) \
     }
+#define OPCB_RRC_R(Opcode) OPJ_RRC_R(OPCB, Opcode)
+
+    OPCB_RRC_R(0x08) // RRC  B
+    OPCB_RRC_R(0x09) // RRC  C
+    OPCB_RRC_R(0x0a) // RRC  D
+    OPCB_RRC_R(0x0b) // RRC  E
+    OPCB_RRC_R(0x0c) // RRC  H
+    OPCB_RRC_R(0x0d) // RRC  L
+    OPCB_RRC_R(0x0f) // RRC  A
 
     OPCB(0x0e): // RRC  (HL)
     {
@@ -76,21 +85,22 @@ switch (Opcode)
         RET(11 + 4)
     }
 
-
-    OPCB(0x10): // RL   B
-    OPCB(0x11): // RL   C
-    OPCB(0x12): // RL   D
-    OPCB(0x13): // RL   E
-    OPCB(0x14): // RL   H
-    OPCB(0x15): // RL   L
-    OPCB(0x17): // RL   A
-    {
-        uint8_t src = zR8(Opcode & 7);
-
-        zR8(Opcode & 7) = (src << 1) | (zF & CZ80_CF);
-        zF = SZXYP[zR8(Opcode & 7)] | (src >> 7);
+#define OPJ_RL_R(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t src = zR8(Opcode & 7); \
+        zR8(Opcode & 7) = (src << 1) | (zF & CZ80_CF); \
+        zF = SZXYP[zR8(Opcode & 7)] | (src >> 7); \
+        RET(4 + 4) \
     }
-    RET(4 + 4)
+#define OPCB_RL_R(Opcode) OPJ_RL_R(OPCB, Opcode)
+
+    OPCB_RL_R(0x10) // RL   B
+    OPCB_RL_R(0x11) // RL   C
+    OPCB_RL_R(0x12) // RL   D
+    OPCB_RL_R(0x13) // RL   E
+    OPCB_RL_R(0x14) // RL   H
+    OPCB_RL_R(0x15) // RL   L
+    OPCB_RL_R(0x17) // RL   A
 
     OPCB(0x16): // RL   (HL)
     {
@@ -108,21 +118,22 @@ switch (Opcode)
         RET(11 + 4)
     }
 
-
-    OPCB(0x18): // RR   B
-    OPCB(0x19): // RR   C
-    OPCB(0x1a): // RR   D
-    OPCB(0x1b): // RR   E
-    OPCB(0x1c): // RR   H
-    OPCB(0x1d): // RR   L
-    OPCB(0x1f): // RR   A
-    {
-        uint8_t src = zR8(Opcode & 7);
-
-        zR8(Opcode & 7) = (src >> 1) | (zF << 7);
-        zF = SZXYP[zR8(Opcode & 7)] | (src & CZ80_CF);
+#define OPJ_RR_R(JmpType, Opcode) \
+    JmpType(Opcode): { \
+        uint8_t src = zR8(Opcode & 7); \
+        zR8(Opcode & 7) = (src >> 1) | (zF << 7); \
+        zF = SZXYP[zR8(Opcode & 7)] | (src & CZ80_CF); \
+        RET(4 + 4) \
     }
-    RET(4 + 4)
+#define OPCB_RR_R(Opcode) OPJ_RR_R(OPCB, Opcode)
+
+    OPCB_RR_R(0x18) // RR   B
+    OPCB_RR_R(0x19) // RR   C
+    OPCB_RR_R(0x1a) // RR   D
+    OPCB_RR_R(0x1b) // RR   E
+    OPCB_RR_R(0x1c) // RR   H
+    OPCB_RR_R(0x1d) // RR   L
+    OPCB_RR_R(0x1f) // RR   A
 
     OPCB(0x1e): // RR   (HL)
     {

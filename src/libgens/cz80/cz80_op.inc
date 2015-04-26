@@ -994,7 +994,11 @@ OP_DI:
     {
         uint8_t A;
         uint8_t F;
-        
+
+        // NOTE: These opcodes have slightly different flag semantics
+        // compared to the CB-prefix rotate instructions, so they
+        // can't be combined.
+
     OP(0x07):   // RLCA
 OP_RLCA:
         A = zA;
