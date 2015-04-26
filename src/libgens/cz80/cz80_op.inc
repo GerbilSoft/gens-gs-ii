@@ -24,12 +24,12 @@ switch (Opcode)
     OP(0x64):   // LD   H,H
     OP(0x6d):   // LD   L,L
     OP(0x7f):   // LD   A,A
-        RET(4)
+        RET(4);
 
 #define OPJ_LD_R_R(JmpType, Opcode) \
     JmpType(Opcode): \
         zR8((Opcode >> 3) & 7) = zR8(Opcode & 7); \
-	RET(4)
+	RET(4);
 #define OP_LD_R_R(Opcode) OPJ_LD_R_R(OP, Opcode)
 
     OP_LD_R_R(0x41)   // LD   B,C
@@ -83,8 +83,8 @@ switch (Opcode)
 
 #define OPJ_LD_R_n(JmpType, Opcode) \
     JmpType(Opcode): \
-        zR8((Opcode >> 3) & 7) = FETCH_BYTE; \
-	RET(7)
+        zR8((Opcode >> 3) & 7) = FETCH_BYTE(); \
+	RET(7);
 #define OP_LD_R_n(Opcode) OPJ_LD_R_n(OP, Opcode)
 
     OP_LD_R_n(0x06)   // LD   B,#imm
@@ -97,11 +97,11 @@ switch (Opcode)
 
 #define OPJ_LD_R_mHL(JmpType, Opcode) \
     JmpType(Opcode): \
-        PRE_IO \
+        PRE_IO(); \
         zWZ = zHL + 1; \
-        READ_BYTE(zHL, zR8((Opcode >> 3) & 7)) \
-        POST_IO \
-        RET(7)
+        READ_BYTE(zHL, zR8((Opcode >> 3) & 7)); \
+        POST_IO(); \
+        RET(7);
 #define OP_LD_R_mHL(Opcode) OPJ_LD_R_mHL(OP, Opcode)
 
     OP_LD_R_mHL(0x46)   // LD   B,(HL)
@@ -114,11 +114,11 @@ switch (Opcode)
 
 #define OPJ_LD_mHL_R(JmpType, Opcode) \
     JmpType(Opcode): \
-        PRE_IO \
+        PRE_IO(); \
         zWZ = (zA << 8) | ((zlHL + 1) & 0xFF); \
-	WRITE_BYTE(zHL, zR8(Opcode & 7)) \
-        POST_IO \
-        RET(7)
+	WRITE_BYTE(zHL, zR8(Opcode & 7)); \
+        POST_IO(); \
+        RET(7);
 #define OP_LD_mHL_R(Opcode) OPJ_LD_mHL_R(OP, Opcode)
 
     OP_LD_mHL_R(0x70)   // LD   (HL),B
@@ -130,18 +130,18 @@ switch (Opcode)
     OP_LD_mHL_R(0x77)   // LD   (HL),A
 
     OP(0x36):   // LD (HL), #imm
-        PRE_IO
-        WRITE_BYTE(zHL, FETCH_BYTE)
-        POST_IO
-        RET(10)
+        PRE_IO();
+        WRITE_BYTE(zHL, FETCH_BYTE());
+        POST_IO();
+        RET(10);
 
 #define OPJ_LD_A_mRR(JmpType, Opcode, RR) \
     JmpType(Opcode): \
-        PRE_IO \
+        PRE_IO(); \
 	zWZ = z##RR + 1; \
-	READ_BYTE(z##RR, zA) \
-        POST_IO \
-	RET(7)
+	READ_BYTE(z##RR, zA); \
+        POST_IO(); \
+	RET(7);
 #define OP_LD_A_mRR(Opcode, RR) OPJ_LD_A_mRR(OP, Opcode, RR)
 
     OP_LD_A_mRR(0x0a, BC)   // LD   A,(BC)
@@ -149,20 +149,20 @@ switch (Opcode)
 
     OP(0x3a): {  // LD   A,(nn)
         uint16_t adr;
-        PRE_IO
-        FETCH_WORD(adr)
-        READ_BYTE(adr, zA)
-        POST_IO
-        RET(13)
+        PRE_IO();
+        FETCH_WORD(adr);
+        READ_BYTE(adr, zA);
+        POST_IO();
+        RET(13);
     }
 
 #define OPJ_LD_mRR_A(JmpType, Opcode, RR) \
     JmpType(Opcode): \
-        PRE_IO \
+        PRE_IO(); \
         zWZ = (zA << 8) | ((z##RR + 1) & 0xFF); \
-	WRITE_BYTE(z##RR, zA) \
-        POST_IO \
-	RET(7)
+	WRITE_BYTE(z##RR, zA); \
+        POST_IO(); \
+	RET(7);
 #define OP_LD_mRR_A(Opcode, RR) OPJ_LD_mRR_A(OP, Opcode, RR)
 
     OP_LD_mRR_A(0x02, BC)   // LD   (BC),A
@@ -170,19 +170,19 @@ switch (Opcode)
 
     OP(0x32): {  // LD   (nn),A
         uint16_t adr;
-        PRE_IO
-        FETCH_WORD(adr)
-        WRITE_BYTE(adr, zA)
-        POST_IO
-        RET(13)
+        PRE_IO();
+        FETCH_WORD(adr);
+        WRITE_BYTE(adr, zA);
+        POST_IO();
+        RET(13);
     }
 
     // 16 BITS LOAD
 
 #define OPJ_LD_RR_nn(JmpType, Opcode) \
     JmpType(Opcode): \
-        FETCH_WORD(zR16(Opcode >> 4)) \
-        RET(10)
+        FETCH_WORD(zR16(Opcode >> 4)); \
+        RET(10);
 #define OP_LD_RR_nn(Opcode) OPJ_LD_RR_nn(OP, Opcode)
 
     OP_LD_RR_nn(0x01)   // LD   BC,nn
@@ -190,33 +190,33 @@ switch (Opcode)
     OP_LD_RR_nn(0x21)   // LD   HL,nn
 
     OP(0x31):   // LD   SP,nn
-        FETCH_WORD(zSP)
-        RET(10)
+        FETCH_WORD(zSP);
+        RET(10);
 
     OP(0xf9):   // LD   SP,HL
         zSP = data->W;
-        RET(6)
+        RET(6);
 
 #define OPJ_LD_RR_mNN(JmpType, Opcode, RR) \
     JmpType(Opcode): \
-        PRE_IO \
-        FETCH_WORD(zWZ) \
-        READ_WORD_LE(zWZ, z##RR) \
+        PRE_IO(); \
+        FETCH_WORD(zWZ); \
+        READ_WORD_LE(zWZ, z##RR); \
 	zWZ++; \
-        POST_IO \
-        RET(16)
+        POST_IO(); \
+        RET(16);
 #define OP_LD_RR_mNN(Opcode, RR) OPJ_LD_RR_mNN(OP, Opcode, RR)
 
     OP_LD_RR_mNN(0x2a, HL)   // LD   HL,(nn)
 
 #define OPJ_LD_mNN_RR(JmpType, Opcode, RR) \
     JmpType(Opcode): \
-        PRE_IO \
-        FETCH_WORD(zWZ) \
-        WRITE_WORD_LE(zWZ, z##RR) \
+        PRE_IO(); \
+        FETCH_WORD(zWZ); \
+        WRITE_WORD_LE(zWZ, z##RR); \
 	zWZ++; \
-        POST_IO \
-        RET(16)
+        POST_IO(); \
+        RET(16);
 #define OP_LD_mNN_RR(Opcode, RR) OPJ_LD_mNN_RR(OP, Opcode, RR)
 
     OP_LD_mNN_RR(0x22, HL)   // LD   (nn),HL
@@ -227,12 +227,12 @@ switch (Opcode)
 #define OPJ_POP_AF(JmpType, Opcode) \
     JmpType(Opcode): { \
         uint16_t res; \
-        PRE_IO \
-        POP_16(res) \
+        PRE_IO(); \
+        POP_16(res); \
         zA = res >> 8; \
         zF = res & 0xFF; \
-        POST_IO \
-        RET(10) \
+        POST_IO(); \
+        RET(10); \
     }
 #define OP_POP_AF(Opcode) OPJ_POP_AF(OP, Opcode)
 
@@ -240,10 +240,10 @@ switch (Opcode)
 
 #define OPJ_POP_RR(JmpType, Opcode, RR) \
     JmpType(Opcode): \
-        PRE_IO \
-        POP_16(z##RR) \
-        POST_IO \
-        RET(10)
+        PRE_IO(); \
+        POP_16(z##RR); \
+        POST_IO(); \
+        RET(10);
 #define OP_POP_RR(Opcode, RR) OPJ_POP_RR(OP, Opcode, RR)
 
     OP_POP_RR(0xc1, BC)   // POP  BC
@@ -253,20 +253,20 @@ switch (Opcode)
     // AF is stored reversed on the stack.
 #define OPJ_PUSH_AF(JmpType, Opcode) \
     JmpType(Opcode): \
-        PRE_IO \
+        PRE_IO(); \
         PUSH_16((zA << 8) | zF); \
-        POST_IO \
-        RET(11)
+        POST_IO(); \
+        RET(11);
 #define OP_PUSH_AF(Opcode) OPJ_PUSH_AF(OP, Opcode)
 
     OP_PUSH_AF(0xf5)   // PUSH AF
 
 #define OPJ_PUSH_RR(JmpType, Opcode, RR) \
     JmpType(Opcode): \
-        PRE_IO \
+        PRE_IO(); \
         PUSH_16(z##RR); \
-        POST_IO \
-        RET(11)
+        POST_IO(); \
+        RET(11);
 #define OP_PUSH_RR(Opcode, RR) OPJ_PUSH_RR(OP, Opcode, RR)
 
     OP_PUSH_RR(0xc5, BC)   // PUSH BC
@@ -283,14 +283,14 @@ OP_EX_AF_AF2:
         tmp = zFA;
         zFA = zFA2;
         zFA2 = tmp;
-        RET(4)
+        RET(4);
 
     OP(0xeb):   // EX   DE,HL
 OP_EX_DE_HL:
         tmp = zDE;
         zDE = zHL;
         zHL = tmp;
-        RET(4)
+        RET(4);
 
     OP(0xd9):   // EXX
 OP_EXX:
@@ -303,7 +303,7 @@ OP_EXX:
         tmp = zHL;
         zHL = zHL2;
         zHL2 = tmp;
-        RET(4)
+        RET(4);
     }
 
     OP(0xe3):   // EX   HL,(SP)
@@ -312,14 +312,14 @@ OP_EXX:
         uint16_t tmp;
         
 OP_EX_xx_mSP:
-        PRE_IO
+        PRE_IO();
         adr = zSP;
         tmp = data->W;
-        READ_WORD_LE(adr, data->W)
-        WRITE_WORD_LE(adr, tmp)
+        READ_WORD_LE(adr, data->W);
+        WRITE_WORD_LE(adr, tmp);
         zWZ = data->W;
-        POST_IO
-        RET(19)
+        POST_IO();
+        RET(19);
     }
 
     // 8 BITS ARITHMETIC
@@ -334,14 +334,14 @@ OP_EX_xx_mSP:
 OP_INC_R:
         zR8(Opcode >> 3)++;
         zF = (zF & CZ80_CF) | SZXYHV_inc[zR8(Opcode >> 3)];
-        RET(4)
+        RET(4);
 
     {
         uint16_t adr;
         uint16_t res;
         
 OP_INC_mIx:
-        adr = data->W + FETCH_BYTE_S;
+        adr = data->W + FETCH_BYTE_S();
         CCnt -= 11;
         goto OP_INC_m;
 
@@ -349,13 +349,13 @@ OP_INC_mIx:
         adr = zHL;
         
 OP_INC_m:
-        PRE_IO
-        READ_BYTE(adr, res)
+        PRE_IO();
+        READ_BYTE(adr, res);
         res = (res + 1) & 0xFF;
-        WRITE_BYTE(adr, res)
+        WRITE_BYTE(adr, res);
         zF = (zF & CZ80_CF) | SZXYHV_inc[res];
-        POST_IO
-        RET(11)
+        POST_IO();
+        RET(11);
     }
 
     OP(0x05):   // DEC  B
@@ -368,14 +368,14 @@ OP_INC_m:
 OP_DEC_R:
         zR8(Opcode >> 3)--;
         zF = (zF & CZ80_CF) | SZXYHV_dec[zR8(Opcode >> 3)];
-        RET(4)
+        RET(4);
 
     {
         uint16_t adr;
         uint16_t res;
 
 OP_DEC_mIx:
-        adr = data->W + FETCH_BYTE_S;
+        adr = data->W + FETCH_BYTE_S();
         CCnt -= 11;
         goto OP_DEC_m;
 
@@ -383,13 +383,13 @@ OP_DEC_mIx:
         adr = zHL;
 
 OP_DEC_m:
-        PRE_IO
-        READ_BYTE(adr, res)
+        PRE_IO();
+        READ_BYTE(adr, res);
         res = (res - 1) & 0xFF;
-        WRITE_BYTE(adr, res)
+        WRITE_BYTE(adr, res);
         zF = (zF & CZ80_CF) | SZXYHV_dec[res];
-        POST_IO
-        RET(11)
+        POST_IO();
+        RET(11);
     }
 
     // ADD
@@ -404,12 +404,12 @@ OP_DEC_m:
             (((val ^ zA ^ 0x80) & (val ^ res) & 0x80) >> 5) |   /* V flag */ \
             ((res >> 8) & CZ80_CF);                             /* C flag */ \
         zA = (uint8_t)res; \
-        RET(cycles) \
+        RET(cycles); \
     } while (0)
 
 #define OPJ_ADD_A_n(JmpType, Opcode) \
     JmpType(Opcode): { \
-        uint8_t val = FETCH_BYTE; \
+        uint8_t val = FETCH_BYTE(); \
         OP_ADD_INT(val, 7); \
     }
 #define OP_ADD_A_n(Opcode) OPJ_ADD_A_n(OP, Opcode)
@@ -419,9 +419,9 @@ OP_DEC_m:
 #define OPJ_ADD_A_mRR(JmpType, Opcode, RR) \
     JmpType(Opcode): { \
         uint8_t val; \
-        PRE_IO \
-        READ_BYTE(z##RR, val) \
-        POST_IO \
+        PRE_IO(); \
+        READ_BYTE(z##RR, val); \
+        POST_IO(); \
         OP_ADD_INT(val, 7); \
     }
 #define OP_ADD_A_mRR(Opcode, RR) OPJ_ADD_A_mRR(OP, Opcode, RR)
@@ -453,12 +453,12 @@ OP_DEC_m:
             (((val ^ zA ^ 0x80) & (val ^ res) & 0x80) >> 5) |   /* V flag */ \
             ((res >> 8) & CZ80_CF);                             /* C flag */ \
         zA = (uint8_t)res; \
-        RET(cycles) \
+        RET(cycles); \
     } while (0)
 
 #define OPJ_ADC_A_n(JmpType, Opcode) \
     JmpType(Opcode): { \
-        uint8_t val = FETCH_BYTE; \
+        uint8_t val = FETCH_BYTE(); \
         OP_ADC_INT(val, 7); \
     }
 #define OP_ADC_A_n(Opcode) OPJ_ADC_A_n(OP, Opcode)
@@ -468,9 +468,9 @@ OP_DEC_m:
 #define OPJ_ADC_A_mRR(JmpType, Opcode, RR) \
     JmpType(Opcode): { \
         uint8_t val; \
-        PRE_IO \
-        READ_BYTE(z##RR, val) \
-        POST_IO \
+        PRE_IO(); \
+        READ_BYTE(z##RR, val); \
+        POST_IO(); \
         OP_ADC_INT(val, 7); \
     }
 #define OP_ADC_A_mRR(Opcode, RR) OPJ_ADC_A_mRR(OP, Opcode, RR)
@@ -502,12 +502,12 @@ OP_DEC_m:
             (((val ^ zA) & (zA ^ res) & 0x80) >> 5) |       /* V flag */ \
             ((res >> 8) & CZ80_CF) | CZ80_NF;               /* C/N flag */ \
         zA = (uint8_t)res; \
-        RET(cycles) \
+        RET(cycles); \
     } while (0)
 
 #define OPJ_SUB_A_n(JmpType, Opcode) \
     JmpType(Opcode): { \
-        uint8_t val = FETCH_BYTE; \
+        uint8_t val = FETCH_BYTE(); \
         OP_SUB_INT(val, 7); \
     }
 #define OP_SUB_A_n(Opcode) OPJ_SUB_A_n(OP, Opcode)
@@ -517,9 +517,9 @@ OP_DEC_m:
 #define OPJ_SUB_A_mRR(JmpType, Opcode, RR) \
     JmpType(Opcode): { \
         uint8_t val; \
-        PRE_IO \
-        READ_BYTE(z##RR, val) \
-        POST_IO \
+        PRE_IO(); \
+        READ_BYTE(z##RR, val); \
+        POST_IO(); \
         OP_SUB_INT(val, 7); \
     }
 #define OP_SUB_A_mRR(Opcode, RR) OPJ_SUB_A_mRR(OP, Opcode, RR)
@@ -551,12 +551,12 @@ OP_DEC_m:
             (((val ^ zA) & (zA ^ res) & 0x80) >> 5) |       /* V flag */ \
             ((res >> 8) & CZ80_CF) | CZ80_NF;               /* C/N flag */ \
         zA = (uint8_t)res; \
-        RET(cycles) \
+        RET(cycles); \
     } while (0)
 
 #define OPJ_SBC_A_n(JmpType, Opcode) \
     JmpType(Opcode): { \
-        uint8_t val = FETCH_BYTE; \
+        uint8_t val = FETCH_BYTE(); \
         OP_SBC_INT(val, 7); \
     }
 #define OP_SBC_A_n(Opcode) OPJ_SBC_A_n(OP, Opcode)
@@ -566,9 +566,9 @@ OP_DEC_m:
 #define OPJ_SBC_A_mRR(JmpType, Opcode, RR) \
     JmpType(Opcode): { \
         uint8_t val; \
-        PRE_IO \
-        READ_BYTE(z##RR, val) \
-        POST_IO \
+        PRE_IO(); \
+        READ_BYTE(z##RR, val); \
+        POST_IO(); \
         OP_SBC_INT(val, 7); \
     }
 #define OP_SBC_A_mRR(Opcode, RR) OPJ_SBC_A_mRR(OP, Opcode, RR)
@@ -600,7 +600,7 @@ OP_DEC_m:
             ((zA ^ res ^ val) & CZ80_HF) |                  /* H flag */ \
             (((val ^ zA) & (zA ^ res) & 0x80) >> 5) |       /* V flag */ \
             ((res >> 8) & CZ80_CF) | CZ80_NF;               /* C/N flag */ \
-        RET(cycles) \
+        RET(cycles); \
     } while (0)
 #else /* CZ80_DEBUG */
 #define OP_CP_INT(val, cycles) do { \
@@ -611,13 +611,13 @@ OP_DEC_m:
             ((zA ^ res ^ val) & CZ80_HF) |                  /* H flag */ \
             (((val ^ zA) & (zA ^ res) & 0x80) >> 5) |       /* V flag */ \
             ((res >> 8) & CZ80_CF) | CZ80_NF;               /* C/N flag */ \
-        RET(cycles) \
+        RET(cycles); \
     } while (0)
 #endif /* CZ80_DEBUG */
 
 #define OPJ_CP_A_n(JmpType, Opcode) \
     JmpType(Opcode): { \
-        uint8_t val = FETCH_BYTE; \
+        uint8_t val = FETCH_BYTE(); \
         OP_CP_INT(val, 7); \
     }
 #define OP_CP_A_n(Opcode) OPJ_CP_A_n(OP, Opcode)
@@ -627,9 +627,9 @@ OP_DEC_m:
 #define OPJ_CP_A_mRR(JmpType, Opcode, RR) \
     JmpType(Opcode): { \
         uint8_t val; \
-        PRE_IO \
-        READ_BYTE(z##RR, val) \
-        POST_IO \
+        PRE_IO(); \
+        READ_BYTE(z##RR, val); \
+        POST_IO(); \
         OP_CP_INT(val, 7); \
     }
 #define OP_CP_A_mRR(Opcode, RR) OPJ_CP_A_mRR(OP, Opcode, RR)
@@ -662,9 +662,9 @@ OP_DEC_m:
 #define OPJ_AND_A_mHL(JmpType, Opcode) \
     JmpType(Opcode): { \
         uint8_t val; \
-        PRE_IO \
-        READ_BYTE(zHL, val) \
-        POST_IO \
+        PRE_IO(); \
+        READ_BYTE(zHL, val); \
+        POST_IO(); \
         OP_AND_INT(val, 7); \
     }
 #define OP_AND_A_mHL(Opcode) OPJ_AND_A_mHL(OP, Opcode)
@@ -673,7 +673,7 @@ OP_DEC_m:
 
 #define OPJ_AND_A_n(JmpType, Opcode) \
     JmpType(Opcode): { \
-        uint8_t val = FETCH_BYTE; \
+        uint8_t val = FETCH_BYTE(); \
         OP_AND_INT(val, 7); \
     }
 #define OP_AND_A_n(Opcode) OPJ_AND_A_n(OP, Opcode)
@@ -699,7 +699,7 @@ OP_DEC_m:
 #define OPJ_AND_A_A(JmpType, Opcode) \
     JmpType(Opcode): { \
         zF = SZXYP[zA] | CZ80_HF; \
-        RET(4) \
+        RET(4); \
     }
 #define OP_AND_A_A(Opcode) OPJ_AND_A_A(OP, Opcode)
 
@@ -716,9 +716,9 @@ OP_DEC_m:
 #define OPJ_XOR_A_mHL(JmpType, Opcode) \
     JmpType(Opcode): { \
         uint8_t val; \
-        PRE_IO \
-        READ_BYTE(zHL, val) \
-        POST_IO \
+        PRE_IO(); \
+        READ_BYTE(zHL, val); \
+        POST_IO(); \
         OP_XOR_INT(val, 7); \
     }
 #define OP_XOR_A_mHL(Opcode) OPJ_XOR_A_mHL(OP, Opcode)
@@ -727,7 +727,7 @@ OP_DEC_m:
 
 #define OPJ_XOR_A_n(JmpType, Opcode) \
     JmpType(Opcode): { \
-        uint8_t val = FETCH_BYTE; \
+        uint8_t val = FETCH_BYTE(); \
         OP_XOR_INT(val, 7); \
     }
 #define OP_XOR_A_n(Opcode) OPJ_XOR_A_n(OP, Opcode)
@@ -755,7 +755,7 @@ OP_DEC_m:
     JmpType(Opcode): { \
         zA = 0; \
         zF = SZXYP[0]; \
-        RET(4) \
+        RET(4); \
     }
 #define OP_XOR_A_A(Opcode) OPJ_XOR_A_A(OP, Opcode)
 
@@ -772,9 +772,9 @@ OP_DEC_m:
 #define OPJ_OR_A_mHL(JmpType, Opcode) \
     JmpType(Opcode): { \
         uint8_t val; \
-        PRE_IO \
-        READ_BYTE(zHL, val) \
-        POST_IO \
+        PRE_IO(); \
+        READ_BYTE(zHL, val); \
+        POST_IO(); \
         OP_OR_INT(val, 7); \
     }
 #define OP_OR_A_mHL(Opcode) OPJ_OR_A_mHL(OP, Opcode)
@@ -783,7 +783,7 @@ OP_DEC_m:
 
 #define OPJ_OR_A_n(JmpType, Opcode) \
     JmpType(Opcode): { \
-        uint8_t val = FETCH_BYTE; \
+        uint8_t val = FETCH_BYTE(); \
         OP_OR_INT(val, 7); \
     }
 #define OP_OR_A_n(Opcode) OPJ_OR_A_n(OP, Opcode)
@@ -810,7 +810,7 @@ OP_DEC_m:
 #define OPJ_OR_A_A(JmpType, Opcode) \
     JmpType(Opcode): { \
         zF = SZXYP[zA]; \
-        RET(4) \
+        RET(4); \
     }
 #define OP_OR_A_A(Opcode) OPJ_OR_A_A(OP, Opcode)
 
@@ -860,7 +860,7 @@ OP_DAA:
         if (cf || (lo <= 9 ? hi >= 10 : hi >= 9)) _F |= CZ80_CF;
         if (nf ? hf && lo <= 5 : lo >= 10) _F |= CZ80_HF;
         zF = _F;
-        RET(4)
+        RET(4);
     }
 
     OP(0x2f):   // CPL
@@ -869,14 +869,14 @@ OP_CPL:
         zF = (zF & (CZ80_SF | CZ80_ZF | CZ80_PF | CZ80_CF)) |
             CZ80_HF | CZ80_NF |
             (zA & (CZ80_XF | CZ80_YF));
-        RET(4)
+        RET(4);
 
     OP(0x37):   // SCF
 OP_SCF:
         zF = (zF & (CZ80_SF | CZ80_ZF | CZ80_PF)) |
             (zA & (CZ80_XF | CZ80_YF)) |
             CZ80_CF;
-        RET(4)
+        RET(4);
 
     OP(0x3f):   // CCF
 OP_CCF:
@@ -884,7 +884,7 @@ OP_CCF:
             ((zF & CZ80_CF) << 4) |
             (zA & (CZ80_XF | CZ80_YF))) ^
             CZ80_CF;
-        RET(4)
+        RET(4);
 
     OP(0x76):   // HALT
 OP_HALT:
@@ -898,7 +898,7 @@ OP_HALT:
 OP_DI:
         zIFF = 0;
 #if CZ80_DEBUG
-        RET(4)
+        RET(4);
 #else
         CCnt -= 4;
         // can't take interrupt after DI so we force next instruction execution
@@ -909,7 +909,7 @@ OP_DI:
     OP_EI:
         zIFF = CZ80_IFF | (CZ80_IFF << 8);
 #if CZ80_DEBUG
-        RET(4)
+        RET(4);
 #else
         // release remaining cycles...
         CPU->CycleSup += CCnt - 4;
@@ -922,35 +922,35 @@ OP_DI:
 
     OP(0x03):   // INC  BC
         zBC++;
-        RET(6)
+        RET(6);
 
     OP(0x13):   // INC  DE
         zDE++;
-        RET(6)
+        RET(6);
 
     OP(0x23):   // INC  HL
         data->W++;
-        RET(6)
+        RET(6);
 
     OP(0x33):   // INC  SP
         zSP++;
-        RET(6)
+        RET(6);
 
     OP(0x0b):   // DEC  BC
         zBC--;
-        RET(6)
+        RET(6);
 
     OP(0x1b):   // DEC  DE
         zDE--;
-        RET(6)
+        RET(6);
 
     OP(0x2b):   // DEC  HL
         data->W--;
-        RET(6)
+        RET(6);
 
     OP(0x3b):   // DEC  SP
         zSP--;
-        RET(6)
+        RET(6);
 
     // ADD16
 
@@ -965,7 +965,7 @@ OP_DI:
             (((src ^ data->W ^ res) >> 8) & CZ80_HF) |  /* H flag */ \
             ((res >> 16) & CZ80_CF);                    /* C flag */ \
         data->W = (uint16_t)res; \
-        RET(11) \
+        RET(11); \
     }
 #else
 #define OPJ_ADD_RR_RR(JmpType, Opcode, RRsrc) \
@@ -978,7 +978,7 @@ OP_DI:
             ((res >> 8) & (CZ80_XF | CZ80_YF)) |        /* X/Y flag */ \
             ((res >> 16) & CZ80_CF);                    /* C flag */ \
         data->W = (uint16_t)res; \
-        RET(11) \
+        RET(11); \
     }
 #endif
 
@@ -1005,7 +1005,7 @@ OP_RLCA:
         zA = (A << 1) | (A >> 7);
         zF = (zF & (CZ80_SF | CZ80_ZF | CZ80_PF)) |     // S/Z/P flag
             (zA & (CZ80_XF | CZ80_YF | CZ80_CF));       // X/Y/C
-        RET(4)
+        RET(4);
 
     OP(0x0f):   // RRCA
 OP_RRCA:
@@ -1014,7 +1014,7 @@ OP_RRCA:
         zF = (zF & (CZ80_SF | CZ80_ZF | CZ80_PF)) |     // S/Z/P flag
             (zA & (CZ80_XF | CZ80_YF)) |                // X/Y flag
             (A & CZ80_CF);                              // C flag
-        RET(4)
+        RET(4);
 
     OP(0x17):   // RLA
 OP_RLA:
@@ -1024,7 +1024,7 @@ OP_RLA:
         zF = (F & (CZ80_SF | CZ80_ZF | CZ80_PF)) |      // S/Z/P flag
             (zA & (CZ80_XF | CZ80_YF)) |                // X/Y flag
             (A >> 7);                                   // C flag
-        RET(4)
+        RET(4);
 
     OP(0x1f):   // RRA
 OP_RRA:
@@ -1034,29 +1034,29 @@ OP_RRA:
         zF = (F & (CZ80_SF | CZ80_ZF | CZ80_PF)) |      // S/Z/P flag
             (zA & (CZ80_XF | CZ80_YF)) |                // X/Y flag
             (A & CZ80_CF);                              // C flag
-        RET(4)
+        RET(4);
     }
 
     // JUMP
 
 #define DO_JP() do { \
-    zWZ = GET_WORD; \
+    zWZ = GET_WORD(); \
     SET_PC(zWZ); \
-    RET(10) \
+    RET(10); \
 } while (0)
 
 #define OPJ_JP_NCOND(JmpType, Opcode, Cond) \
     JmpType(Opcode): \
         if (!(zF & Cond)) DO_JP(); \
-        FETCH_WORD(zWZ) \
-        RET(10)
+        FETCH_WORD(zWZ); \
+        RET(10);
 #define OP_JP_NCOND(Opcode, Cond) OPJ_JP_NCOND(OP, Opcode, Cond)
 
 #define OPJ_JP_COND(JmpType, Opcode, Cond) \
     JmpType(Opcode): \
         if (zF & Cond) DO_JP(); \
-        FETCH_WORD(zWZ) \
-        RET(10)
+        FETCH_WORD(zWZ); \
+        RET(10);
 #define OP_JP_COND(Opcode, Cond) OPJ_JP_COND(OP, Opcode, Cond)
 
     OP_JP_NCOND(0xd2, CZ80_CF)   // JP   NC,nn
@@ -1079,31 +1079,31 @@ OP_RRA:
     JmpType(Opcode): \
         zWZ = data->W; \
         SET_PC(zWZ); \
-        RET(4)
+        RET(4);
 #define OP_JP_mHL(Opcode) OPJ_JP_mHL(OP, Opcode)
 
     OP_JP_mHL(0xe9)   // JP   (xx)
 
 #define DO_JR() do { \
-    int8_t val = FETCH_BYTE_S; \
+    int8_t val = FETCH_BYTE_S(); \
     /* no rebase needed here... */ \
     PC += val; \
     zWZ = PC; \
-    RET(12) \
+    RET(12); \
 } while (0)
 
 #define OPJ_JR_NCOND(JmpType, Opcode, Cond) \
     JmpType(Opcode): \
         if (!(zF & Cond)) DO_JR(); \
         PC++; \
-        RET(7)
+        RET(7);
 #define OP_JR_NCOND(Opcode, Cond) OPJ_JR_NCOND(OP, Opcode, Cond)
 
 #define OPJ_JR_COND(JmpType, Opcode, Cond) \
     JmpType(Opcode): \
         if (zF & Cond) DO_JR(); \
         PC++; \
-        RET(7)
+        RET(7);
 #define OP_JR_COND(Opcode, Cond) OPJ_JR_COND(OP, Opcode, Cond)
 
     OP_JR_NCOND(0x30, CZ80_CF)   // JR   NC,n
@@ -1114,16 +1114,16 @@ OP_RRA:
 #define OPJ_DJNZ(JmpType, Opcode) \
     JmpType(Opcode): \
         if (--zB) { \
-            int8_t val = FETCH_BYTE_S; \
+            int8_t val = FETCH_BYTE_S(); \
             /* no rebase needed here... */ \
             PC += val; \
             zWZ = PC; \
-            RET(13) \
+            RET(13); \
         } \
         PC++; \
         /* FIXME: mdZ80 and CZ80 both have 10 here; */ \
         /* everything else says 8. */ \
-        RET(8)
+        RET(8);
 #define OP_DJNZ(Opcode) OPJ_DJNZ(OP, Opcode)
 
     OP_DJNZ(0x10)   // DJNZ n
@@ -1139,27 +1139,27 @@ OP_RRA:
 
 #define DO_CALL() do { \
     uint16_t oldRPC; \
-    PRE_IO \
-    FETCH_WORD(zWZ) \
+    PRE_IO(); \
+    FETCH_WORD(zWZ); \
     oldRPC = PC; \
     PUSH_16(oldRPC); \
     SET_PC(zWZ); \
-    POST_IO \
-    RET(17) \
+    POST_IO(); \
+    RET(17); \
 } while (0)
 
 #define OPJ_CALL_NCOND(JmpType, Opcode, Cond) \
     JmpType(Opcode): \
         if (!(zF & Cond)) DO_CALL(); \
-        FETCH_WORD(zWZ) \
-        RET(10)
+        FETCH_WORD(zWZ); \
+        RET(10);
 #define OP_CALL_NCOND(Opcode, Cond) OPJ_CALL_NCOND(OP, Opcode, Cond)
 
 #define OPJ_CALL_COND(JmpType, Opcode, Cond) \
     JmpType(Opcode): \
         if (zF & Cond) DO_CALL(); \
-        FETCH_WORD(zWZ) \
-        RET(10)
+        FETCH_WORD(zWZ); \
+        RET(10);
 #define OP_CALL_COND(Opcode, Cond) OPJ_CALL_COND(OP, Opcode, Cond)
 
     OP_CALL_NCOND(0xd4, CZ80_CF)   // CALL NC,nn
@@ -1179,11 +1179,11 @@ OP_RRA:
     OP_CALL(0xcd)   // CALL nn
 
 #define DO_RET() do { \
-    PRE_IO \
+    PRE_IO(); \
     POP_16(zWZ); \
     SET_PC(zWZ); \
-    POST_IO \
-    RET(10) \
+    POST_IO(); \
+    RET(10); \
 } while (0)
 
 #define OPJ_RET_NCOND(JmpType, Opcode, Cond) \
@@ -1195,7 +1195,7 @@ OP_RRA:
             CCnt--; \
             DO_RET(); \
         } \
-        RET(5)
+        RET(5);
 #define OP_RET_NCOND(Opcode, Cond) OPJ_RET_NCOND(OP, Opcode, Cond)
 
 #define OPJ_RET_COND(JmpType, Opcode, Cond) \
@@ -1207,7 +1207,7 @@ OP_RRA:
             CCnt--; \
             DO_RET(); \
         } \
-        RET(5)
+        RET(5);
 #define OP_RET_COND(Opcode, Cond) OPJ_RET_COND(OP, Opcode, Cond)
 
     OP_RET_NCOND(0xd0, CZ80_CF)   // RET  NC
@@ -1231,7 +1231,7 @@ OP_RRA:
         PUSH_16(PC); \
         zWZ = Opcode & 0x38; \
         SET_PC(zWZ); \
-        RET(11)
+        RET(11);
 #define OP_RST(Opcode) OPJ_RST(OP, Opcode)
 
     OP_RST(0xc7)   // RST  0
@@ -1250,30 +1250,30 @@ OP_RRA:
         
     OP(0xd3):   // OUT  (n),A
 OP_OUT_mN_A:
-        adr = (zA << 8) | FETCH_BYTE;
+        adr = (zA << 8) | FETCH_BYTE();
         zWZ = (zA << 8) | ((adr + 1) & 0xFF);
-        OUT(adr, zA)
-        RET(11)
+        OUT(adr, zA);
+        RET(11);
 
     OP(0xdb):   // IN   A,(n)
 OP_IN_A_mN:
-        adr = (zA << 8) | FETCH_BYTE;
+        adr = (zA << 8) | FETCH_BYTE();
         zWZ = adr + 1;
-        IN(adr, zA)
-        RET(11)
+        IN(adr, zA);
+        RET(11);
     }
     
     // PREFIXE
     
     OP(0xcb):   // CB PREFIXE (BIT & SHIFT INSTRUCTIONS)
 /* CB_PREFIXE: */
-        Opcode = FETCH_BYTE;
+        Opcode = FETCH_BYTE();
         #include "cz80_opcb.inc"
 
     OP(0xed):   // ED PREFIXE
 ED_PREFIXE:
         CCnt -= 4;
-        Opcode = FETCH_BYTE;
+        Opcode = FETCH_BYTE();
         #include "cz80_oped.inc"
 
     OP(0xdd):   // DD PREFIXE (IX)
@@ -1287,11 +1287,10 @@ FD_PREFIXE:
         
 XY_PREFIXE:
         CCnt -= 4;
-        Opcode = FETCH_BYTE;
+        Opcode = FETCH_BYTE();
         #include "cz80_opxy.inc"
 
 #if CZ80_USE_JUMPTABLE
 #else
 }
 #endif
-

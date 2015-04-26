@@ -21,24 +21,24 @@ switch (Opcode)
     OPXYCB(0x05):   // RLC  (Ix+d), L
     OPXYCB(0x07):   // RLC  (Ix+d), A
 #if CZ80_EXACT
-        PRE_IO
-        READ_BYTE(zWZ, src)
+        PRE_IO();
+        READ_BYTE(zWZ, src);
         res = ((src << 1) | (src >> 7)) & 0xFF;
         zR8(Opcode) = res;
         zF = SZXYP[res] | (src >> 7);
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
 #endif
 
     OPXYCB(0x06):   // RLC  (Ix+d)
-        PRE_IO
-        READ_BYTE(zWZ, src)
+        PRE_IO();
+        READ_BYTE(zWZ, src);
         res = ((src << 1) | (src >> 7)) & 0xFF;
         zF = SZXYP[res] | (src >> 7);
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
 
 
     OPXYCB(0x08):   // RRC  (Ix+d), B
@@ -49,24 +49,24 @@ switch (Opcode)
     OPXYCB(0x0d):   // RRC  (Ix+d), L
     OPXYCB(0x0f):   // RRC  (Ix+d), A
 #if CZ80_EXACT
-        PRE_IO
-        READ_BYTE(zWZ, src)
+        PRE_IO();
+        READ_BYTE(zWZ, src);
         res = ((src >> 1) | (src << 7)) & 0xFF;
         zR8(Opcode & 7) = res;
         zF = SZXYP[res] | (src & CZ80_CF);
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
 #endif
 
     OPXYCB(0x0e):   // RRC  (Ix+d)
-        PRE_IO
-        READ_BYTE(zWZ, src)
+        PRE_IO();
+        READ_BYTE(zWZ, src);
         res = ((src >> 1) | (src << 7)) & 0xFF;
         zF = SZXYP[res] | (src & CZ80_CF);
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
 
 
     OPXYCB(0x10):   // RL   (Ix+d), B
@@ -77,24 +77,24 @@ switch (Opcode)
     OPXYCB(0x15):   // RL   (Ix+d), L
     OPXYCB(0x17):   // RL   (Ix+d), A
 #if CZ80_EXACT
-        PRE_IO
-        READ_BYTE(zWZ, src)
+        PRE_IO();
+        READ_BYTE(zWZ, src);
         res = ((src << 1) | (zF & CZ80_CF)) & 0xFF;
         zR8(Opcode & 7) = res;
         zF = SZXYP[res] | (src >> 7);
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
 #endif
 
     OPXYCB(0x16):   // RL   (Ix+d)
-        PRE_IO
-        READ_BYTE(zWZ, src)
+        PRE_IO();
+        READ_BYTE(zWZ, src);
         res = ((src << 1) | (zF & CZ80_CF)) & 0xFF;
         zF = SZXYP[res] | (src >> 7);
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
 
 
     OPXYCB(0x18):   // RR   (Ix+d), B
@@ -105,24 +105,24 @@ switch (Opcode)
     OPXYCB(0x1d):   // RR   (Ix+d), L
     OPXYCB(0x1f):   // RR   (Ix+d), A
 #if CZ80_EXACT
-        PRE_IO
-        READ_BYTE(zWZ, src)
+        PRE_IO();
+        READ_BYTE(zWZ, src);
         res = ((src >> 1) | (zF << 7)) & 0xFF;
         zR8(Opcode & 7) = res;
         zF = SZXYP[res] | (src & CZ80_CF);
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
 #endif
 
     OPXYCB(0x1e):   // RR   (Ix+d)
-        PRE_IO
-        READ_BYTE(zWZ, src)
+        PRE_IO();
+        READ_BYTE(zWZ, src);
         res = ((src >> 1) | (zF << 7)) & 0xFF;
         zF = SZXYP[res] | (src & CZ80_CF);
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
 
 
     OPXYCB(0x20):   // SLA  (Ix+d), B
@@ -133,24 +133,24 @@ switch (Opcode)
     OPXYCB(0x25):   // SLA  (Ix+d), L
     OPXYCB(0x27):   // SLA  (Ix+d), A
 #if CZ80_EXACT
-        PRE_IO
-        READ_BYTE(zWZ, src)
+        PRE_IO();
+        READ_BYTE(zWZ, src);
         res = (src << 1) & 0xFF;
         zR8(Opcode & 7) = res;
         zF = SZXYP[res] | (src >> 7);
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
 #endif
 
     OPXYCB(0x26):   // SLA  (Ix+d)
-        PRE_IO
-        READ_BYTE(zWZ, src)
+        PRE_IO();
+        READ_BYTE(zWZ, src);
         res = (src << 1) & 0xFF;
         zF = SZXYP[res] | (src >> 7);
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
 
 
     OPXYCB(0x28):   // SRA  (Ix+d), B
@@ -161,24 +161,24 @@ switch (Opcode)
     OPXYCB(0x2d):   // SRA  (Ix+d), L
     OPXYCB(0x2f):   // SRA  (Ix+d), A
 #if CZ80_EXACT
-        PRE_IO
-        READ_BYTE(zWZ, src)
+        PRE_IO();
+        READ_BYTE(zWZ, src);
         res = (uint8_t)(((int8_t)(src)) >> 1);
         zR8(Opcode & 7) = res;
         zF = SZXYP[res] | (src & CZ80_CF);
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
 #endif
 
     OPXYCB(0x2e):   // SRA  (Ix+d)
-        PRE_IO
-        READ_BYTE(zWZ, src)
+        PRE_IO();
+        READ_BYTE(zWZ, src);
         res = (uint8_t)(((int8_t)(src)) >> 1);
         zF = SZXYP[res] | (src & CZ80_CF);
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
 
 
     OPXYCB(0x30):   // SLL  (Ix+d), B
@@ -189,24 +189,24 @@ switch (Opcode)
     OPXYCB(0x35):   // SLL  (Ix+d), L
     OPXYCB(0x37):   // SLL  (Ix+d), A
 #if CZ80_EXACT
-        PRE_IO
-        READ_BYTE(zWZ, src)
+        PRE_IO();
+        READ_BYTE(zWZ, src);
         res = ((src << 1) | 1) & 0xFF;
         zR8(Opcode & 7) = res;
         zF = SZXYP[res] | (src >> 7);
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
 #endif
 
     OPXYCB(0x36):   // SLL  (Ix+d)
-        PRE_IO
-        READ_BYTE(zWZ, src)
+        PRE_IO();
+        READ_BYTE(zWZ, src);
         res = ((src << 1) | 1) & 0xFF;
         zF = SZXYP[res] | (src >> 7);
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
 
 
     OPXYCB(0x38):   // SRL  (Ix+d), B
@@ -217,24 +217,24 @@ switch (Opcode)
     OPXYCB(0x3d):   // SRL  (Ix+d), L
     OPXYCB(0x3f):   // SRL  (Ix+d), A
 #if CZ80_EXACT
-        PRE_IO
-        READ_BYTE(zWZ, src)
+        PRE_IO();
+        READ_BYTE(zWZ, src);
         res = src >> 1;
         zR8(Opcode & 7) = res;
         zF = SZXYP[res] | (src & CZ80_CF);
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
 #endif
 
     OPXYCB(0x3e):   // SRL  (Ix+d)
-        PRE_IO
-        READ_BYTE(zWZ, src)
+        PRE_IO();
+        READ_BYTE(zWZ, src);
         res = src >> 1;
         zF = SZXYP[res] | (src & CZ80_CF);
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
 
 
     OPXYCB(0x40):   // BIT  0,(Ix+d)
@@ -312,15 +312,15 @@ switch (Opcode)
     {
         uint8_t bitm;
         
-        PRE_IO
+        PRE_IO();
         bitm = 1 << ((Opcode >> 3) & 7);
-        READ_BYTE(zWZ, src)
+        READ_BYTE(zWZ, src);
         // TODO: Remove XF/YF flags from SZXY_BIT[].
         zF = (zF & CZ80_CF) | CZ80_HF |                         // C/H flag
              (SZXY_BIT[src & bitm] & ~(CZ80_YF | CZ80_XF)) |    // Z/V/N flag
              ((zWZ >> 8) & (CZ80_YF | CZ80_XF));                // X/Y flag
-        POST_IO
-        RET(12 + 4)
+        POST_IO();
+        RET(12 + 4);
     }
 
     OPXYCB(0x80):   // RES  0,(Ix+d),B
@@ -387,13 +387,13 @@ switch (Opcode)
     OPXYCB(0xbd):   // RES  7,(Ix+d),L
     OPXYCB(0xbf):   // RES  7,(Ix+d),A
 #if CZ80_EXACT
-        PRE_IO
-        READ_BYTE(zWZ, res)
+        PRE_IO();
+        READ_BYTE(zWZ, res);
         res &= ~(1 << ((Opcode >> 3) & 7));
         zR8(Opcode & 7) = res;
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
 #endif
 
     OPXYCB(0x86):   // RES  0,(Ix+d)
@@ -407,13 +407,13 @@ switch (Opcode)
     {
         uint8_t bitm;
 
-        PRE_IO
+        PRE_IO();
         bitm = ~(1 << ((Opcode >> 3) & 7));
-        READ_BYTE(zWZ, res)
+        READ_BYTE(zWZ, res);
         res &= bitm;
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
     }
 
 
@@ -481,13 +481,13 @@ switch (Opcode)
     OPXYCB(0xfd):   // SET  7,(Ix+d),L
     OPXYCB(0xff):   // SET  7,(Ix+d),A
 #if CZ80_EXACT
-        PRE_IO
-        READ_BYTE(zWZ, res)
+        PRE_IO();
+        READ_BYTE(zWZ, res);
         res |= 1 << ((Opcode >> 3) & 7);
         zR8(Opcode & 7) = res;
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
 #endif
 
     OPXYCB(0xc6):   // SET  0,(Ix+d)
@@ -501,17 +501,16 @@ switch (Opcode)
     {
         uint8_t bitm;
 
-        PRE_IO
+        PRE_IO();
         bitm = 1 << ((Opcode >> 3) & 7);
-        READ_BYTE(zWZ, res)
+        READ_BYTE(zWZ, res);
         res |= bitm;
-        WRITE_BYTE(zWZ, res)
-        POST_IO
-        RET(15 + 4)
+        WRITE_BYTE(zWZ, res);
+        POST_IO();
+        RET(15 + 4);
     }
 
 #if CZ80_USE_JUMPTABLE
 #else
 }
 #endif
-

@@ -24,7 +24,7 @@ switch (Opcode)
     OPXY(0x64): // LD   H,H
     OPXY(0x6d): // LD   L,L
     OPXY(0x7f): // LD   A,A
-        RET(4)
+        RET(4);
 
 #define OPXY_LD_R_R(Opcode) OPJ_LD_R_R(OPXY, Opcode)
 
@@ -56,7 +56,7 @@ switch (Opcode)
 #define OPXY_LD_R_XY(Opcode, HL) \
     OPXY(Opcode): \
         zR8((Opcode >> 3) & 7) = data->B.HL; \
-	RET(4)
+	RET(4);
 
     // TODO: Add byte indexes to data and extract the index from Opcode?
     OPXY_LD_R_XY(0x44, H) // LD   B,HX
@@ -74,7 +74,7 @@ switch (Opcode)
 #define OPXY_LD_XY_R(Opcode, HL) \
     OPXY(Opcode): \
         data->B.HL = zR8(Opcode & 7); \
-	RET(4)
+	RET(4);
 
     OPXY_LD_XY_R(0x60, H) // LD   HX,B
     OPXY_LD_XY_R(0x61, H) // LD   HX,C
@@ -90,11 +90,11 @@ switch (Opcode)
 
     OPXY(0x65): // LD   HX,LX
         data->B.H = data->B.L;
-        RET(4)
+        RET(4);
 
     OPXY(0x6c): // LD   LX,HX
         data->B.L = data->B.H;
-        RET(4)
+        RET(4);
 
 #define OPXY_LD_R_n(Opcode) OPJ_LD_R_n(OPXY, Opcode)
 
@@ -105,12 +105,12 @@ switch (Opcode)
     OPXY_LD_R_n(0x3e) // LD   A,#imm
 
     OPXY(0x26): // LD   HX,#imm
-        data->B.H = FETCH_BYTE;
-        RET(7)
+        data->B.H = FETCH_BYTE();
+        RET(7);
 
     OPXY(0x2e): // LD   LX,#imm
-        data->B.L = FETCH_BYTE;
-        RET(7)
+        data->B.L = FETCH_BYTE();
+        RET(7);
 
 #define OPXY_LD_A_mRR(Opcode, RR) OPJ_LD_A_mRR(OPXY, Opcode, RR)
 
@@ -119,11 +119,11 @@ switch (Opcode)
 
     OPXY(0x3a): {  // LD   A,(nn)
         uint16_t adr;
-        PRE_IO
-        FETCH_WORD(adr)
-        READ_BYTE(adr, zA)
-        POST_IO
-        RET(13)
+        PRE_IO();
+        FETCH_WORD(adr);
+        READ_BYTE(adr, zA);
+        POST_IO();
+        RET(13);
     }
 
 #define OPXY_LD_mRR_A(Opcode, RR) OPJ_LD_mRR_A(OPXY, Opcode, RR)
@@ -133,11 +133,11 @@ switch (Opcode)
 
     OPXY(0x32): {  // LD   (nn),A
         uint16_t adr;
-        PRE_IO
-        FETCH_WORD(adr)
-        WRITE_BYTE(adr, zA)
-        POST_IO
-        RET(13)
+        PRE_IO();
+        FETCH_WORD(adr);
+        WRITE_BYTE(adr, zA);
+        POST_IO();
+        RET(13);
     }
 
     OPXY(0x46): // LD   B,(IX+d)
@@ -147,11 +147,11 @@ switch (Opcode)
     OPXY(0x6e): // LD   L,(IX+d)
     OPXY(0x4e): // LD   C,(IX+d)
     OPXY(0x7e): // LD   A,(IX+d)
-        PRE_IO
+        PRE_IO();
 	CALC_EA_XY_D();
-        READ_BYTE(zWZ, zR8((Opcode >> 3) & 7))
-        POST_IO
-        RET(15)
+        READ_BYTE(zWZ, zR8((Opcode >> 3) & 7));
+        POST_IO();
+        RET(15);
 
     OPXY(0x70): // LD   (IX+d),B
     OPXY(0x71): // LD   (IX+d),C
@@ -160,18 +160,18 @@ switch (Opcode)
     OPXY(0x74): // LD   (IX+d),H
     OPXY(0x75): // LD   (IX+d),L
     OPXY(0x77): // LD   (IX+d),A
-        PRE_IO
+        PRE_IO();
         CALC_EA_XY_D();
-        WRITE_BYTE(zWZ, zR8(Opcode & 7))
-        POST_IO
-        RET(15)
+        WRITE_BYTE(zWZ, zR8(Opcode & 7));
+        POST_IO();
+        RET(15);
 
     OPXY(0x36): // LD   (IX+d),#imm
-        PRE_IO
+        PRE_IO();
         CALC_EA_XY_D();
-        WRITE_BYTE(zWZ, FETCH_BYTE)
-        POST_IO
-        RET(15)
+        WRITE_BYTE(zWZ, FETCH_BYTE());
+        POST_IO();
+        RET(15);
 
     // 16 BITS LOAD
 
@@ -181,32 +181,32 @@ switch (Opcode)
     OPXY_LD_RR_nn(0x11)   // LD   DE,nn
 
     OPXY(0x21): // LD   IX,nn
-        FETCH_WORD(data->W)
-        RET(10)
+        FETCH_WORD(data->W);
+        RET(10);
 
     OPXY(0x31): // LD   SP,nn
-        FETCH_WORD(zSP)
-        RET(10)
+        FETCH_WORD(zSP);
+        RET(10);
 
     OPXY(0x2a):   // LD   IX,(nn)
-        PRE_IO
-        FETCH_WORD(zWZ)
-        READ_WORD_LE(zWZ, data->W)
+        PRE_IO();
+        FETCH_WORD(zWZ);
+        READ_WORD_LE(zWZ, data->W);
 	zWZ++;
-        POST_IO
-        RET(16)
+        POST_IO();
+        RET(16);
 
     OPXY(0x22):   // LD   (nn),IX
-        PRE_IO
-        FETCH_WORD(zWZ)
-        WRITE_WORD_LE(zWZ, data->W)
+        PRE_IO();
+        FETCH_WORD(zWZ);
+        WRITE_WORD_LE(zWZ, data->W);
 	zWZ++;
-        POST_IO
-        RET(16)
+        POST_IO();
+        RET(16);
 
     OPXY(0xf9): // LD   SP,IX
         zSP = data->W;
-        RET(6)
+        RET(6);
 
     // PUSH / POP
 
@@ -221,10 +221,10 @@ switch (Opcode)
 
 #define OPXY_POP_XY(Opcode) \
     OPXY(Opcode): \
-        PRE_IO \
-        POP_16(data->W) \
-        POST_IO \
-        RET(10)
+        PRE_IO(); \
+        POP_16(data->W); \
+        POST_IO(); \
+        RET(10);
 
     OPXY_POP_XY(0xe1) // POP  IX
 
@@ -239,10 +239,10 @@ switch (Opcode)
 
 #define OPXY_PUSH_XY(Opcode) \
     OPXY(Opcode): \
-        PRE_IO \
+        PRE_IO(); \
         PUSH_16(data->W); \
-        POST_IO \
-        RET(11)
+        POST_IO(); \
+        RET(11);
 
     OPXY_PUSH_XY(0xe5) // PUSH IX
 
@@ -274,12 +274,12 @@ switch (Opcode)
     OPXY(0x24): // INC  HX
         data->B.H++;
         zF = (zF & CZ80_CF) | SZXYHV_inc[data->B.H];
-        RET(4)
+        RET(4);
 
     OPXY(0x2c): // INC  LX
         data->B.L++;
         zF = (zF & CZ80_CF) | SZXYHV_inc[data->B.L];
-        RET(4)
+        RET(4);
 
     OPXY(0x34): // INC  (IX+o)
         goto OP_INC_mIx;
@@ -296,12 +296,12 @@ switch (Opcode)
     OPXY(0x25): // DEC  HX
         data->B.H--;
         zF = (zF & CZ80_CF) | SZXYHV_dec[data->B.H];
-        RET(4)
+        RET(4);
 
     OPXY(0x2d): // DEC  LX
         data->B.L--;
         zF = (zF & CZ80_CF) | SZXYHV_dec[data->B.L];
-        RET(4)
+        RET(4);
 
     OPXY(0x35): // DEC  (IX+o)
         goto OP_DEC_mIx;
@@ -331,10 +331,10 @@ switch (Opcode)
 
     OPXY(0x86): { // ADD  A,(IX+d)
         uint8_t val;
-        PRE_IO
+        PRE_IO();
 	CALC_EA_XY_D();
-        READ_BYTE(zWZ, val)
-        POST_IO
+        READ_BYTE(zWZ, val);
+        POST_IO();
         OP_ADD_INT(val, 15);
     }
 
@@ -363,10 +363,10 @@ switch (Opcode)
 
     OPXY(0x8e): { // ADC  A,(IX+d)
         uint8_t val;
-        PRE_IO
+        PRE_IO();
 	CALC_EA_XY_D();
-        READ_BYTE(zWZ, val)
-        POST_IO
+        READ_BYTE(zWZ, val);
+        POST_IO();
         OP_ADC_INT(val, 15);
     }
 
@@ -395,10 +395,10 @@ switch (Opcode)
 
     OPXY(0x96): { // SUB  A,(IX+d)
         uint8_t val;
-        PRE_IO
+        PRE_IO();
 	CALC_EA_XY_D();
-        READ_BYTE(zWZ, val)
-        POST_IO
+        READ_BYTE(zWZ, val);
+        POST_IO();
         OP_SUB_INT(val, 15);
     }
 
@@ -427,10 +427,10 @@ switch (Opcode)
 
     OPXY(0x9e): { // SBC  A,(IX+d)
         uint8_t val;
-        PRE_IO
+        PRE_IO();
 	CALC_EA_XY_D();
-        READ_BYTE(zWZ, val)
-        POST_IO
+        READ_BYTE(zWZ, val);
+        POST_IO();
         OP_SBC_INT(val, 15);
     }
 
@@ -459,10 +459,10 @@ switch (Opcode)
 
     OPXY(0xbe): { // CP  A,(IX+d)
         uint8_t val;
-        PRE_IO
+        PRE_IO();
 	CALC_EA_XY_D();
-        READ_BYTE(zWZ, val)
-        POST_IO
+        READ_BYTE(zWZ, val);
+        POST_IO();
         OP_CP_INT(val, 15);
     }
 
@@ -495,10 +495,10 @@ switch (Opcode)
     OPXY(0xa6): { // AND  (IX+d)
         uint8_t val;
 
-        PRE_IO
+        PRE_IO();
 	CALC_EA_XY_D();
-        READ_BYTE(zWZ, val)
-        POST_IO
+        READ_BYTE(zWZ, val);
+        POST_IO();
         OP_AND_INT(val, 15);
     }
 
@@ -531,10 +531,10 @@ switch (Opcode)
     OPXY(0xae): { // XOR  (IX+d)
         uint8_t val;
 
-        PRE_IO
+        PRE_IO();
 	CALC_EA_XY_D();
-        READ_BYTE(zWZ, val)
-        POST_IO
+        READ_BYTE(zWZ, val);
+        POST_IO();
         OP_XOR_INT(val, 15);
     }
 
@@ -567,10 +567,10 @@ switch (Opcode)
     OPXY(0xb6): { // OR  (IX+d)
         uint8_t val;
 
-        PRE_IO
+        PRE_IO();
 	CALC_EA_XY_D();
-        READ_BYTE(zWZ, val)
-        POST_IO
+        READ_BYTE(zWZ, val);
+        POST_IO();
         OP_OR_INT(val, 15);
     }
 
@@ -602,35 +602,35 @@ switch (Opcode)
 
     OPXY(0x03): // INC  BC
         zBC++;
-        RET(6)
+        RET(6);
 
     OPXY(0x13): // INC  DE
         zDE++;
-        RET(6)
+        RET(6);
 
     OPXY(0x23): // INC  HL
         data->W++;
-        RET(6)
+        RET(6);
 
     OPXY(0x33): // INC  SP
         zSP++;
-        RET(6)
+        RET(6);
 
     OPXY(0x0b): // DEC  BC
         zBC--;
-        RET(6)
+        RET(6);
 
     OPXY(0x1b): // DEC  DE
         zDE--;
-        RET(6)
+        RET(6);
 
     OPXY(0x2b): // DEC  HL
         data->W--;
-        RET(6)
+        RET(6);
 
     OPXY(0x3b): // DEC  SP
         zSP--;
-        RET(6)
+        RET(6);
 
     // ADD16
 
@@ -755,7 +755,7 @@ switch (Opcode)
         uint8_t res;
 
         CALC_EA_XY_D();
-        Opcode = FETCH_BYTE;
+        Opcode = FETCH_BYTE();
         #include "cz80_opxycb.inc"
     }
 
@@ -772,4 +772,3 @@ switch (Opcode)
 #else
 }
 #endif
-
