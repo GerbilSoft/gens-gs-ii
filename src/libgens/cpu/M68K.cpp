@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -39,36 +39,36 @@ STARSCREAM_PROGRAMREGION M68K::M68K_Fetch[] =
 {
 #ifdef GENS_ENABLE_EMULATION
 	// 32 entries for RAM, including mirrors.
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
 
 	// 64 entries for ROM handlers.
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
-	{-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
+	{~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0}, {~0U, ~0U, 0},
 #endif /* GENS_ENABLE_EMULATION */
 	
 	// Terminator.
-	{-1, -1, 0}
+	{~0U, ~0U, 0}
 };
 
 // M68K Starscream has a hack for RAM mirroring for data read.
@@ -80,7 +80,7 @@ STARSCREAM_DATAREGION M68K::M68K_Read_Byte[4] =
 	{0xFF0000, 0xFFFFFF, NULL, &Ram_68k.u8[0]},
 	{0xA00000, 0xFEFFFF, (void*)M68K_Mem::M68K_RB, NULL},
 #endif /* GENS_ENABLE_EMULATION */
-	{-1, -1, NULL, NULL}
+	{~0U, ~0U, NULL, NULL}
 };
 
 // M68K Starscream has a hack for RAM mirroring for data read.
@@ -92,7 +92,7 @@ STARSCREAM_DATAREGION M68K::M68K_Read_Word[4] =
 	{0xFF0000, 0xFFFFFF, NULL, &Ram_68k.u8[0]},
 	{0xA00000, 0xFEFFFF, (void*)M68K_Mem::M68K_RW, NULL},
 #endif /* GENS_ENABLE_EMULATION */
-	{-1, -1, NULL, NULL}
+	{~0U, ~0U, NULL, NULL}
 };
 
 // M68K Starscream has a hack for RAM mirroring for data write.
@@ -102,7 +102,7 @@ STARSCREAM_DATAREGION M68K::M68K_Write_Byte[3] =
 	{0xFF0000, 0xFFFFFF, NULL, &Ram_68k.u8[0]},
 	{0x000000, 0xFEFFFF, (void*)M68K_Mem::M68K_WB, NULL},
 #endif /* GENS_ENABLE_EMULATION */
-	{-1, -1, NULL, NULL}
+	{~0U, ~0U, NULL, NULL}
 };
 
 // M68K Starscream has a hack for RAM mirroring for data write.
@@ -112,7 +112,7 @@ STARSCREAM_DATAREGION M68K::M68K_Write_Word[3] =
 	{0xFF0000, 0xFFFFFF, NULL, &Ram_68k.u8[0]},
 	{0x000000, 0xFEFFFF, (void*)M68K_Mem::M68K_WW, NULL},
 #endif /* GENS_ENABLE_EMULATION */
-	{-1, -1, NULL, NULL}
+	{~0U, ~0U, NULL, NULL}
 };
 
 // Last system ID.
