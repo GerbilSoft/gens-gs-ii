@@ -202,7 +202,7 @@ switch (Opcode)
         PRE_IO();
         FETCH_WORD(zWZ);
         READ_WORD_LE(zWZ, data->W);
-	zWZ++;
+	EXACT_ONLY(zWZ++);
         POST_IO();
         RET(16);
 
@@ -210,7 +210,7 @@ switch (Opcode)
         PRE_IO();
         FETCH_WORD(zWZ);
         WRITE_WORD_LE(zWZ, data->W);
-	zWZ++;
+	EXACT_ONLY(zWZ++);
         POST_IO();
         RET(16);
 
@@ -508,7 +508,6 @@ switch (Opcode)
 
     OPXY(0xa6): { // AND  (Ix+d)
         uint8_t val;
-
         PRE_IO();
 	CALC_EA_XY_D();
         READ_BYTE(zWZ, val);
@@ -544,7 +543,6 @@ switch (Opcode)
 
     OPXY(0xae): { // XOR  (Ix+d)
         uint8_t val;
-
         PRE_IO();
 	CALC_EA_XY_D();
         READ_BYTE(zWZ, val);
@@ -580,7 +578,6 @@ switch (Opcode)
 
     OPXY(0xb6): { // OR  (Ix+d)
         uint8_t val;
-
         PRE_IO();
 	CALC_EA_XY_D();
         READ_BYTE(zWZ, val);

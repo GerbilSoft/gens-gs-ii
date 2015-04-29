@@ -279,7 +279,7 @@ switch (Opcode)
 
         PRE_IO();
         adr = zHL;
-        zWZ = adr + 1;
+        EXACT_ONLY(zWZ = adr + 1);
         READ_BYTE(adr, src);
         WRITE_BYTE(adr, (src >> 4) | (zA << 4));
         zA = (zA & 0xF0) | (src & 0x0F);
@@ -295,7 +295,7 @@ switch (Opcode)
 
         PRE_IO();
         adr = zHL;
-        zWZ = adr + 1;
+        EXACT_ONLY(zWZ = adr + 1);
         READ_BYTE(adr, src);
         WRITE_BYTE(adr, (src << 4) | (zA & 0x0F));
         zA = (zA & 0xF0) | (src >> 4);
@@ -308,7 +308,7 @@ switch (Opcode)
     JmpType(Opcode): { \
         uint16_t src = z##RR; \
         uint32_t res = zHL + src + (zF & CZ80_CF); \
-        zWZ = zHL + 1; \
+        EXACT_ONLY(zWZ = zHL + 1); \
         zF = (((src ^ zHL ^ res) >> 8) & CZ80_HF) |                     /* H flag */ \
             (((src ^ zHL ^ 0x8000) & (src ^ res) & 0x8000) >> 13) |     /* V flag */ \
             ((res >> 8) & (CZ80_SF | CZ80_XF | CZ80_YF)) |              /* S/X/Y flag */ \
@@ -330,7 +330,7 @@ switch (Opcode)
     JmpType(Opcode): { \
         uint16_t src = z##RR; \
         uint32_t res = zHL - (src + (zF & CZ80_CF)); \
-        zWZ = data->W + 1; \
+        EXACT_ONLY(zWZ = data->W + 1); \
         zF = (((src ^ zHL ^ res) >> 8) & CZ80_HF) | CZ80_NF |           /* H/N flag */ \
             (((src ^ zHL) & (zHL ^ res) & 0x8000) >> 13) |              /* V flag */ \
             ((res >> 8) & CZ80_SF) |                                    /* S flag */ \
@@ -344,7 +344,7 @@ switch (Opcode)
     JmpType(Opcode): { \
         uint16_t src = z##RR; \
         uint32_t res = zHL - (src + (zF & CZ80_CF)); \
-        zWZ = data->W + 1; \
+        EXACT_ONLY(zWZ = data->W + 1); \
         zF = (((src ^ zHL ^ res) >> 8) & CZ80_HF) | CZ80_NF |           /* H/N flag */ \
             (((src ^ zHL) & (zHL ^ res) & 0x8000) >> 13) |              /* V flag */ \
             ((res >> 8) & (CZ80_SF | CZ80_XF | CZ80_YF)) |              /* S/X/Y flag */ \
@@ -366,7 +366,7 @@ switch (Opcode)
     JmpType(Opcode): { \
         uint8_t res; \
         IN(zBC, res); \
-        zWZ = zBC + 1; \
+        EXACT_ONLY(zWZ = zBC + 1); \
         zR8((Opcode >> 3) & 7) = res; \
         zF = (zF & CZ80_CF) | SZXYP[res]; \
         RET(8); \
@@ -385,7 +385,7 @@ switch (Opcode)
     OPED(0x70): { // IN   0,(C)
         uint8_t res;
         IN(zBC, res);
-        zWZ = zBC + 1;
+        EXACT_ONLY(zWZ = zBC + 1);
         zF = (zF & CZ80_CF) | SZXYP[res];
         RET(8);
     }
@@ -394,7 +394,7 @@ switch (Opcode)
     JmpType(Opcode): { \
         uint8_t src = RRsrc; \
         OUT(zBC, src); \
-        zWZ = zBC + 1; \
+        EXACT_ONLY(zWZ = zBC + 1); \
         RET(8); \
     }
 
@@ -490,11 +490,13 @@ OP_LDX:
             WRITE_BYTE(zDE--, val);
             POST_IO();
             zBC--;
+#if CZ80_EXACT
             if (zBC) {
                 // WZ is not changed if BC == 1
                 // *before* the decrement.
                 zWZ = zPC + 1;
             }
+#endif
             CCnt -= 21;
         } while ((zBC) && (CCnt > -4));
         goto OP_LDXR;
@@ -507,11 +509,13 @@ OP_LDX:
             WRITE_BYTE(zDE++, val);
             POST_IO();
             zBC--;
+#if CZ80_EXACT
             if (zBC) {
                 // WZ is not changed if BC == 1
                 // *before* the decrement.
                 zWZ = zPC + 1;
             }
+#endif
             CCnt -= 21;
         } while ((zBC) && (CCnt > -4));
 
@@ -550,13 +554,13 @@ OP_LDXR:
 
     OPED(0xa9): // CPD
         PRE_IO();
-        zWZ--;
+        EXACT_ONLY(zWZ--);
         READ_BYTE(zHL--, val);
         goto OP_CPX;
 
     OPED(0xa1): // CPI
         PRE_IO();
-        zWZ++;
+        EXACT_ONLY(zWZ++);
         READ_BYTE(zHL++, val);
 
 OP_CPX:
@@ -585,7 +589,7 @@ OP_CPX:
         do
         {
             PRE_IO();
-            zWZ--;
+            EXACT_ONLY(zWZ--);
             READ_BYTE(zHL--, val);
             res = zA - val;
             POST_IO();
@@ -598,7 +602,7 @@ OP_CPX:
         do
         {
             PRE_IO();
-            zWZ++;
+            EXACT_ONLY(zWZ++);
             READ_BYTE(zHL++, val);
             res = zA - val;
             POST_IO();
@@ -619,8 +623,10 @@ OP_CPXR:
         if (zBC) F |= CZ80_PF;
         zF = F;
 
+#if CZ80_EXACT
         // Update WZ if BC != 1 (before decrement).
         if (!zBC) zWZ = zPC + 1;
+#endif
 
         // NOTE: We have to check both BC != 0 and res != 0;
         // however, res is modified if CZ80_HF is set.
@@ -650,7 +656,7 @@ OP_CPXR:
 
     OPED(0xaa): // IND
         PRE_IO();
-        zWZ = zBC - 1;
+        EXACT_ONLY(zWZ = zBC - 1);
         IN(zBC, val);
         WRITE_BYTE(zHL--, val);
 #if CZ80_EXACT
@@ -665,7 +671,7 @@ OP_CPXR:
 
     OPED(0xa2): // INI
         PRE_IO();
-        zWZ = zBC + 1;
+        EXACT_ONLY(zWZ = zBC + 1);
         IN(zBC, val);
         WRITE_BYTE(zHL++, val);
 #if CZ80_EXACT
@@ -766,14 +772,14 @@ OP_INXR:
 
     OPED(0xab): // OUTD
         PRE_IO();
-        zWZ = zBC - 1;
+        EXACT_ONLY(zWZ = zBC - 1);
         READ_BYTE(zHL--, val);
         OUT(zBC, val);
         goto OP_OUTX;
 
     OPED(0xa3): // OUTI
         PRE_IO();
-        zWZ = zBC + 1;
+        EXACT_ONLY(zWZ = zBC + 1);
         READ_BYTE(zHL++, val);
         OUT(zBC, val);
 

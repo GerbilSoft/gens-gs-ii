@@ -66,8 +66,11 @@ extern "C" {
 
 #define CZ80_SIZE_OPT           0
 #define CZ80_USE_WORD_HANDLER   0
-#define CZ80_EXACT              1
+// TODO: Remove this.
 #define CZ80_DEBUG              0
+// Emulate the YF and XF flags exactly.
+// This also enables proper WZ register emulation.
+#define CZ80_EXACT              1
 
 // use zR8 for B/C/D/E/H/L registers only
 // use zR16 for BC/DE/HL registers only
@@ -235,8 +238,10 @@ typedef struct
     union16 IX;
     union16 IY;
     union16 SP;
-    
+
+#if CZ80_EXACT
     uint16_t WZ;
+#endif
     uint16_t PC;
     
     union16 BC2;
@@ -332,7 +337,9 @@ uint16_t     CZ80CALL Cz80_Get_IX(cz80_struc *cpu);
 uint16_t     CZ80CALL Cz80_Get_IY(cz80_struc *cpu);
 uint16_t     CZ80CALL Cz80_Get_SP(cz80_struc *cpu);
 
+#if CZ80_EXACT
 uint16_t     CZ80CALL Cz80_Get_WZ(cz80_struc *cpu);
+#endif
 uint16_t     CZ80CALL Cz80_Get_PC(cz80_struc *cpu);
 
 uint16_t     CZ80CALL Cz80_Get_R(cz80_struc *cpu);
@@ -354,7 +361,9 @@ void    CZ80CALL Cz80_Set_IX(cz80_struc *cpu, uint16_t value);
 void    CZ80CALL Cz80_Set_IY(cz80_struc *cpu, uint16_t value);
 void    CZ80CALL Cz80_Set_SP(cz80_struc *cpu, uint16_t value);
 
+#if CZ80_EXACT
 void    CZ80CALL Cz80_Set_WZ(cz80_struc *cpu, uint16_t value);
+#endif
 void    CZ80CALL Cz80_Set_PC(cz80_struc *cpu, uint16_t value);
 
 void    CZ80CALL Cz80_Set_R(cz80_struc *cpu, uint16_t value);

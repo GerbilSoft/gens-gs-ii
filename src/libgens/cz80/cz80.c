@@ -360,11 +360,13 @@ uint16_t CZ80CALL Cz80_Get_SP(cz80_struc *cpu)
     return zSP;
 }
 
+#if CZ80_EXACT
 uint16_t CZ80CALL Cz80_Get_WZ(cz80_struc *cpu)
 {
     cz80_struc *CPU = cpu;
     return CPU->WZ;
 }
+#endif
 
 uint16_t CZ80CALL Cz80_Get_PC(cz80_struc *cpu)
 {
@@ -469,11 +471,13 @@ void CZ80CALL Cz80_Set_SP(cz80_struc *cpu, uint16_t value)
     zSP = value;
 }
 
+#if CZ80_EXACT
 void CZ80CALL Cz80_Set_WZ(cz80_struc *cpu, uint16_t value)
 {
     cz80_struc *CPU = cpu;
     CPU->WZ = value;
 }
+#endif
 
 void CZ80CALL Cz80_Set_PC(cz80_struc *cpu, uint16_t val)
 {
