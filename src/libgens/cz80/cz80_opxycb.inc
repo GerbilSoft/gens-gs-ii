@@ -163,7 +163,6 @@ switch (Opcode)
     // BIT
 
     // NOTE: The source register field is ignored.
-#if CZ80_EXACT
 #define OPXYCB_BIT_N_mXYd(Opcode, Op1, Op2, Op3, Op4, Op5, Op6, Op7) \
     OPXYCB(Opcode): \
     OPXYCB(Op1): \
@@ -183,27 +182,6 @@ switch (Opcode)
         POST_IO(); \
         RET(12 + 4); \
     }
-#else
-#define OPXYCB_BIT_N_mXYd(Opcode, Op1, Op2, Op3, Op4, Op5, Op6, Op7) \
-    OPXYCB(Opcode): \
-    OPXYCB(Op1): \
-    OPXYCB(Op2): \
-    OPXYCB(Op3): \
-    OPXYCB(Op4): \
-    OPXYCB(Op5): \
-    OPXYCB(Op6): \
-    OPXYCB(Op7): { \
-        const uint8_t bitm = 1 << ((Opcode >> 3) & 7); \
-        PRE_IO(); \
-        READ_BYTE(zWZ, src); \
-        /* TODO: Remove XF/YF flags from SZXY_BIT[]. */ \
-        zF = (zF & CZ80_CF) | CZ80_HF |                         /* C/H flag */ \
-             (SZXY_BIT[src & bitm] & ~(CZ80_YF | CZ80_XF)) |    /* Z/V/N flag */ \
-             (src & (CZ80_YF | CZ80_XF));                       /* X/Y flag */ \
-        POST_IO(); \
-        RET(12 + 4); \
-    }
-#endif
 
     OPXYCB_BIT_N_mXYd(0x46, 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x47)   // BIT  0,(Ix+d)
     OPXYCB_BIT_N_mXYd(0x4e, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4f)   // BIT  1,(Ix+d)
