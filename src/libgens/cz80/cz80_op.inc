@@ -329,78 +329,80 @@ OP_EX_xx_mSP:
 
     // 8 BITS ARITHMETIC
 
-    OP(0x04):   // INC  B
-    OP(0x0c):   // INC  C
-    OP(0x14):   // INC  D
-    OP(0x1c):   // INC  E
-    OP(0x24):   // INC  H
-    OP(0x2c):   // INC  L
-    OP(0x3c):   // INC  A
-OP_INC_R:
-        zR8(Opcode >> 3)++;
-        zF = (zF & CZ80_CF) | SZXYHV_inc[zR8(Opcode >> 3)];
+    // INC
+
+#define OPJ_INC_R(JmpType, Opcode) \
+    JmpType(Opcode): \
+        zR8(Opcode >> 3)++; \
+        zF = (zF & CZ80_CF) | SZXYHV_inc[zR8(Opcode >> 3)]; \
         RET(4);
+#define OP_INC_R(Opcode) OPJ_INC_R(OP, Opcode)
 
-    {
-        uint16_t adr;
-        uint8_t res;
-        
-OP_INC_mIx:
-        adr = data->W + FETCH_BYTE_S();
-        CCnt -= 8; // 23 total: 4 for FD/DD, 11 for DEC_m, 8 here
-        goto OP_INC_m;
+    OP_INC_R(0x04)   // INC  B
+    OP_INC_R(0x0c)   // INC  C
+    OP_INC_R(0x14)   // INC  D
+    OP_INC_R(0x1c)   // INC  E
+    OP_INC_R(0x24)   // INC  H
+    OP_INC_R(0x2c)   // INC  L
+    OP_INC_R(0x3c)   // INC  A
 
-    OP(0x34):   // INC  (HL)
-        adr = zHL;
-        
-OP_INC_m:
-        PRE_IO();
-        READ_BYTE(adr, res);
-        res = (res + 1) & 0xFF;
-        WRITE_BYTE(adr, res);
-        zF = (zF & CZ80_CF) | SZXYHV_inc[res];
-        POST_IO();
-        RET(11);
+// TODO: Should 'cycles' include the base 4 cycles, or not?
+// Currently, it does not; if cycles = 0, no cycles will be used.
+#define OP_INC_mRR_INT(adr, cycles) do { \
+        uint8_t res; \
+        PRE_IO(); \
+        READ_BYTE(adr, res); \
+        res++; \
+        WRITE_BYTE(adr, res); \
+        zF = (zF & CZ80_CF) | SZXYHV_inc[res]; \
+        POST_IO(); \
+        RET(cycles); \
+    } while (0)
+
+    OP(0x34): {  // INC  (HL)
+        const uint16_t adr = zHL;
+	OP_INC_mRR_INT(adr, 11);
     }
 
-    OP(0x05):   // DEC  B
-    OP(0x0d):   // DEC  C
-    OP(0x15):   // DEC  D
-    OP(0x1d):   // DEC  E
-    OP(0x25):   // DEC  H
-    OP(0x2d):   // DEC  L
-    OP(0x3d):   // DEC  A
-OP_DEC_R:
-        zR8(Opcode >> 3)--;
-        zF = (zF & CZ80_CF) | SZXYHV_dec[zR8(Opcode >> 3)];
+    // DEC
+
+#define OPJ_DEC_R(JmpType, Opcode) \
+    JmpType(Opcode): \
+        zR8(Opcode >> 3)--; \
+        zF = (zF & CZ80_CF) | SZXYHV_dec[zR8(Opcode >> 3)]; \
         RET(4);
+#define OP_DEC_R(Opcode) OPJ_DEC_R(OP, Opcode)
 
-    {
-        uint16_t adr;
-        uint8_t res;
+    OP_DEC_R(0x05)   // DEC  B
+    OP_DEC_R(0x0d)   // DEC  C
+    OP_DEC_R(0x15)   // DEC  D
+    OP_DEC_R(0x1d)   // DEC  E
+    OP_DEC_R(0x25)   // DEC  H
+    OP_DEC_R(0x2d)   // DEC  L
+    OP_DEC_R(0x3d)   // DEC  A
 
-OP_DEC_mIx:
-        adr = data->W + FETCH_BYTE_S();
-        CCnt -= 8; // 23 total: 4 for FD/DD, 11 for DEC_m, 8 here
-        goto OP_DEC_m;
+// TODO: Should 'cycles' include the base 4 cycles, or not?
+// Currently, it does not; if cycles = 0, no cycles will be used.
+#define OP_DEC_mRR_INT(adr, cycles) do { \
+        uint8_t res; \
+        PRE_IO(); \
+        READ_BYTE(adr, res); \
+        res--; \
+        WRITE_BYTE(adr, res); \
+        zF = (zF & CZ80_CF) | SZXYHV_dec[res]; \
+        POST_IO(); \
+        RET(cycles); \
+    } while (0)
 
-    OP(0x35):   // DEC  (HL)
-        adr = zHL;
-
-OP_DEC_m:
-        PRE_IO();
-        READ_BYTE(adr, res);
-        res = (res - 1) & 0xFF;
-        WRITE_BYTE(adr, res);
-        zF = (zF & CZ80_CF) | SZXYHV_dec[res];
-        POST_IO();
-        RET(11);
+    OP(0x35): {  // DEC  (HL)
+        const uint16_t adr = zHL;
+	OP_DEC_mRR_INT(adr, 11);
     }
 
     // ADD
 
 // TODO: Should 'cycles' include the base 4 cycles, or not?
-// Currently, it does; if cycles = 0, no cycles will be used.
+// Currently, it does not; if cycles = 0, no cycles will be used.
 #define OP_ADD_INT(val, cycles) do { \
         /* bench : maybe use src instead of zA in zF calculation */ \
         uint16_t res = zA + val; \

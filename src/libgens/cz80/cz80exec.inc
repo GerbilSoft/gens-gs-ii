@@ -13,6 +13,7 @@ int CZ80CALL Cz80_Exec(cz80_struc *cpu, int cycles)
 #endif
 
     cz80_struc *CPU;
+    // TODO: Make AF a register variable?
     register uint16_t PC, WZ;
     int CCnt;
     uint8_t Opcode;
