@@ -143,12 +143,14 @@ void Z80Test::Z80_OUTPort(uint16_t address, uint8_t data)
 			// stdout
 			// TODO: Lines beginning with '*' should be in red and trigger an error.
 			fputc(data, stdout);
+			fflush(stdout);
 			break;
 
 		case 0x02:
 			// stderr
 			// TODO: Make this red?
 			fputc(data, stdout);
+			fflush(stdout);
 			break;
 
 		case 0xFF:
