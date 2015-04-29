@@ -826,45 +826,25 @@ OP_DEC_m:
     OP(0x27):   // DAA
 OP_DAA:
     {
-        uint8_t _F;
-        uint8_t cf, nf, hf, lo, hi, diff;
-        
-        _F = zF;
-        cf = _F & CZ80_CF;
-        nf = _F & CZ80_NF;
-        hf = _F & CZ80_HF;
-        lo = zA & 0x0F;
-        hi = zA >> 4;
-
-        if (cf)
-        {
-            diff = (lo <= 9 && !hf) ? 0x60 : 0x66;
+        // New and improved DAA with fewer branches.
+        // Reference: http://wikiti.brandonw.net/?title=Z80_Instruction_Set
+        // NOTE: Using bitwise OR to improve performance.
+        uint8_t tmp = zA;
+        if (zF & CZ80_NF) {
+            // Previous operation was a subtraction.
+            if ((zF & CZ80_HF) | ((zA & 0x0F) > 9)) tmp -= 0x06;
+            if ((zF & CZ80_CF) | (zA > 0x99)) tmp -= 0x60;
+        } else {
+            // Previous operation was an addition.
+            if ((zF & CZ80_HF) | ((zA & 0x0F) > 9)) tmp += 0x06;
+            if ((zF & CZ80_CF) | (zA > 0x99)) tmp += 0x60;
         }
-        else
-        {
-            if (lo >= 10)
-            {
-                diff = hi <= 8 ? 0x06 : 0x66;
-            }
-            else
-            {
-                if (hi >= 10)
-                {
-                    diff = hf ? 0x66 : 0x60;
-                }
-                else
-                {
-                    diff = hf ? 0x06 : 0x00;
-                }
-            }
-        }
-        if (nf) zA -= diff;
-        else zA += diff;
 
-        _F = SZXYP[zA] | (_F & CZ80_NF);
-        if (cf || (lo <= 9 ? hi >= 10 : hi >= 9)) _F |= CZ80_CF;
-        if (nf ? hf && lo <= 5 : lo >= 10) _F |= CZ80_HF;
-        zF = _F;
+        zF = SZXYP[tmp] |                /* Standard flags for the adjusted A */
+            (zF & (CZ80_CF | CZ80_NF)) | /* Keep existing CF/NF flags */
+            (zA > 0x99) |                /* Set CF if A > 0x99 (BCD carry) */
+            ((zA ^ tmp) & CZ80_HF);      /* Set HF if A and tmp have differing HF */
+        zA = tmp;
         RET(4);
     }
 
