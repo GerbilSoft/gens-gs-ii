@@ -23,14 +23,13 @@ switch (Opcode)
     // compared to the no-prefix rotate instructions, so they
     // can't be combined.
 
-#define OPJ_RLC_R(JmpType, Opcode) \
-    JmpType(Opcode): { \
+#define OPCB_RLC_R(Opcode) \
+    OPCB(Opcode): { \
         uint8_t src = zR8(Opcode & 7); \
         zR8(Opcode & 7) = (src << 1) | (src >> 7); \
         zF = SZXYP[zR8(Opcode & 7)] | (src >> 7); \
         RET(4 + 4); \
     }
-#define OPCB_RLC_R(Opcode) OPJ_RLC_R(OPCB, Opcode)
 
     OPCB_RLC_R(0x00) // RLC  B
     OPCB_RLC_R(0x01) // RLC  C
@@ -56,14 +55,13 @@ switch (Opcode)
         RET(11 + 4);
     }
 
-#define OPJ_RRC_R(JmpType, Opcode) \
-    JmpType(Opcode): { \
+#define OPCB_RRC_R(Opcode) \
+    OPCB(Opcode): { \
         uint8_t src = zR8(Opcode & 7); \
         zR8(Opcode & 7) = (src >> 1) | (src << 7); \
         zF = SZXYP[zR8(Opcode & 7)] | (src & CZ80_CF); \
         RET(4 + 4); \
     }
-#define OPCB_RRC_R(Opcode) OPJ_RRC_R(OPCB, Opcode)
 
     OPCB_RRC_R(0x08) // RRC  B
     OPCB_RRC_R(0x09) // RRC  C
@@ -89,14 +87,13 @@ switch (Opcode)
         RET(11 + 4);
     }
 
-#define OPJ_RL_R(JmpType, Opcode) \
-    JmpType(Opcode): { \
+#define OPCB_RL_R(Opcode) \
+    OPCB(Opcode): { \
         uint8_t src = zR8(Opcode & 7); \
         zR8(Opcode & 7) = (src << 1) | (zF & CZ80_CF); \
         zF = SZXYP[zR8(Opcode & 7)] | (src >> 7); \
         RET(4 + 4); \
     }
-#define OPCB_RL_R(Opcode) OPJ_RL_R(OPCB, Opcode)
 
     OPCB_RL_R(0x10) // RL   B
     OPCB_RL_R(0x11) // RL   C
@@ -122,14 +119,13 @@ switch (Opcode)
         RET(11 + 4);
     }
 
-#define OPJ_RR_R(JmpType, Opcode) \
-    JmpType(Opcode): { \
+#define OPCB_RR_R(Opcode) \
+    OPCB(Opcode): { \
         uint8_t src = zR8(Opcode & 7); \
         zR8(Opcode & 7) = (src >> 1) | (zF << 7); \
         zF = SZXYP[zR8(Opcode & 7)] | (src & CZ80_CF); \
         RET(4 + 4); \
     }
-#define OPCB_RR_R(Opcode) OPJ_RR_R(OPCB, Opcode)
 
     OPCB_RR_R(0x18) // RR   B
     OPCB_RR_R(0x19) // RR   C
@@ -157,14 +153,13 @@ switch (Opcode)
 
     // SHIFT
 
-#define OPJ_SLA_R(JmpType, Opcode) \
-    JmpType(Opcode): { \
+#define OPCB_SLA_R(Opcode) \
+    OPCB(Opcode): { \
         uint8_t src = zR8(Opcode & 7); \
         zR8(Opcode & 7) = src << 1; \
         zF = SZXYP[zR8(Opcode & 7)] | (src >> 7); \
         RET(4 + 4); \
     }
-#define OPCB_SLA_R(Opcode) OPJ_SLA_R(OPCB, Opcode)
 
     OPCB_SLA_R(0x20) // SLA  B
     OPCB_SLA_R(0x21) // SLA  C
@@ -190,14 +185,13 @@ switch (Opcode)
         RET(11 + 4);
     }
 
-#define OPJ_SRA_R(JmpType, Opcode) \
-    JmpType(Opcode): { \
+#define OPCB_SRA_R(Opcode) \
+    OPCB(Opcode): { \
         int8_t src = zR8(Opcode & 7); \
         zR8(Opcode & 7) = src >> 1; \
         zF = SZXYP[zR8(Opcode & 7)] | (src & CZ80_CF); \
         RET(4 + 4); \
     }
-#define OPCB_SRA_R(Opcode) OPJ_SRA_R(OPCB, Opcode)
 
     OPCB_SRA_R(0x28) // SRA  B
     OPCB_SRA_R(0x29) // SRA  C
@@ -223,14 +217,13 @@ switch (Opcode)
         RET(11 + 4);
     }
 
-#define OPJ_SLL_R(JmpType, Opcode) \
-    JmpType(Opcode): { \
+#define OPCB_SLL_R(Opcode) \
+    OPCB(Opcode): { \
         uint8_t src = zR8(Opcode & 7); \
         zR8(Opcode & 7) = (src << 1) | 1; \
         zF = SZXYP[zR8(Opcode & 7)] | (src >> 7); \
         RET(4 + 4); \
     }
-#define OPCB_SLL_R(Opcode) OPJ_SLL_R(OPCB, Opcode)
 
     OPCB_SLL_R(0x30) // SLL  B
     OPCB_SLL_R(0x31) // SLL  C
@@ -256,14 +249,13 @@ switch (Opcode)
         RET(11 + 4);
     }
 
-#define OPJ_SRL_R(JmpType, Opcode) \
-    JmpType(Opcode): { \
+#define OPCB_SRL_R(Opcode) \
+    OPCB(Opcode): { \
         uint8_t src = zR8(Opcode & 7); \
         zR8(Opcode & 7) = src >> 1; \
         zF = SZXYP[zR8(Opcode & 7)] | (src & CZ80_CF); \
         RET(4 + 4); \
     }
-#define OPCB_SRL_R(Opcode) OPJ_SRL_R(OPCB, Opcode)
 
     OPCB_SRL_R(0x38) // SRL  B
     OPCB_SRL_R(0x39) // SRL  C
@@ -291,8 +283,8 @@ switch (Opcode)
 
     // BIT
 
-#define OPJ_BIT_N_R(JmpType, Opcode) \
-    JmpType(Opcode): { \
+#define OPCB_BIT_N_R(Opcode) \
+    OPCB(Opcode): { \
         uint8_t src = zR8(Opcode & 7); \
         uint8_t bitm = 1 << ((Opcode >> 3) & 7); \
         /* TODO: Remove XF/YF flags from SZXY_BIT[]. */ \
@@ -301,7 +293,6 @@ switch (Opcode)
             (src & (CZ80_YF| CZ80_XF)); \
         RET(4 + 4); \
     }
-#define OPCB_BIT_N_R(Opcode) OPJ_BIT_N_R(OPCB, Opcode)
 
     OPCB_BIT_N_R(0x40) // BIT  0,B
     OPCB_BIT_N_R(0x41) // BIT  0,C
@@ -367,8 +358,8 @@ switch (Opcode)
     OPCB_BIT_N_R(0x7d) // BIT  7,L
     OPCB_BIT_N_R(0x7f) // BIT  7,A
 
-#define OPJ_BIT_N_mHL(JmpType, Opcode) \
-    JmpType(Opcode): { \
+#define OPCB_BIT_N_mHL(Opcode) \
+    OPCB(Opcode): { \
         uint8_t src; \
         uint8_t bitm = 1 << ((Opcode >> 3) & 7); \
         PRE_IO(); \
@@ -380,7 +371,6 @@ switch (Opcode)
         POST_IO(); \
         RET(8 + 4); \
     }
-#define OPCB_BIT_N_mHL(Opcode) OPJ_BIT_N_mHL(OPCB, Opcode)
 
     OPCB_BIT_N_mHL(0x46) // BIT  0,(HL)
     OPCB_BIT_N_mHL(0x4e) // BIT  1,(HL)
@@ -393,11 +383,10 @@ switch (Opcode)
 
     // RES
 
-#define OPJ_RES_N_R(JmpType, Opcode) \
-    JmpType(Opcode): \
+#define OPCB_RES_N_R(Opcode) \
+    OPCB(Opcode): \
         zR8(Opcode & 7) &= ~(1 << ((Opcode >> 3) & 7)); \
         RET(4 + 4);
-#define OPCB_RES_N_R(Opcode) OPJ_RES_N_R(OPCB, Opcode)
 
     OPCB_RES_N_R(0x80) // RES  0,B
     OPCB_RES_N_R(0x81) // RES  0,C
@@ -463,8 +452,8 @@ switch (Opcode)
     OPCB_RES_N_R(0xbd) // RES  7,L
     OPCB_RES_N_R(0xbf) // RES  7,A
 
-#define OPJ_RES_N_mHL(JmpType, Opcode) \
-    JmpType(Opcode): { \
+#define OPCB_RES_N_mHL(Opcode) \
+    OPCB(Opcode): { \
         uint16_t adr = zHL; \
         uint8_t res; \
         uint8_t bitm = (uint8_t)~(1 << ((Opcode >> 3) & 7)); \
@@ -475,7 +464,6 @@ switch (Opcode)
         POST_IO(); \
         RET(11 + 4); \
     }
-#define OPCB_RES_N_mHL(Opcode) OPJ_RES_N_mHL(OPCB, Opcode)
 
     OPCB_RES_N_mHL(0x86) // RES  0,(HL)
     OPCB_RES_N_mHL(0x8e) // RES  1,(HL)
@@ -488,11 +476,10 @@ switch (Opcode)
 
     // SET
 
-#define OPJ_SET_N_R(JmpType, Opcode) \
-    JmpType(Opcode): \
+#define OPCB_SET_N_R(Opcode) \
+    OPCB(Opcode): \
         zR8(Opcode & 7) |= (1 << ((Opcode >> 3) & 7)); \
         RET(4 + 4);
-#define OPCB_SET_N_R(Opcode) OPJ_SET_N_R(OPCB, Opcode)
 
     OPCB_SET_N_R(0xc0) // SET  0,B
     OPCB_SET_N_R(0xc1) // SET  0,C
@@ -558,8 +545,8 @@ switch (Opcode)
     OPCB_SET_N_R(0xfd) // SET  7,L
     OPCB_SET_N_R(0xff) // SET  7,A
 
-#define OPJ_SET_N_mHL(JmpType, Opcode) \
-    JmpType(Opcode): { \
+#define OPCB_SET_N_mHL(Opcode) \
+    OPCB(Opcode): { \
         uint16_t adr = zHL; \
         uint8_t res; \
         uint8_t bitm = 1 << ((Opcode >> 3) & 7); \
@@ -570,7 +557,6 @@ switch (Opcode)
         POST_IO(); \
         RET(11 + 4); \
     }
-#define OPCB_SET_N_mHL(Opcode) OPJ_SET_N_mHL(OPCB, Opcode)
 
     OPCB_SET_N_mHL(0xc6) // SET  0,(HL)
     OPCB_SET_N_mHL(0xce) // SET  1,(HL)
