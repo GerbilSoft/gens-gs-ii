@@ -146,6 +146,10 @@ extern "C" {
 #define zI              CPU->I
 #define zIM             CPU->IM
 
+// R register.
+// For performance reasons, the high bit is stored
+// in zR2, since the Z80 only modifies the low 7 bits
+// during the refresh cycle.
 #define zwR             CPU->R.W
 #define zR1             CPU->R.B.L
 #define zR2             CPU->R.B.H

@@ -144,31 +144,37 @@ switch (Opcode)
         RET(13);
     }
 
-    OPXY(0x46): // LD   B,(Ix+d)
-    OPXY(0x56): // LD   D,(Ix+d)
-    OPXY(0x5e): // LD   E,(Ix+d)
-    OPXY(0x66): // LD   H,(Ix+d)
-    OPXY(0x6e): // LD   L,(Ix+d)
-    OPXY(0x4e): // LD   C,(Ix+d)
-    OPXY(0x7e): // LD   A,(Ix+d)
-        PRE_IO();
-	CALC_EA_XY_D();
-        READ_BYTE(zWZ, zR8((Opcode >> 3) & 7));
-        POST_IO();
+#define OPXY_LD_R_mXYd(Opcode) \
+    OPXY(Opcode): \
+        PRE_IO(); \
+	CALC_EA_XY_D(); \
+        READ_BYTE(zWZ, zR8((Opcode >> 3) & 7)); \
+        POST_IO(); \
         RET(15);
 
-    OPXY(0x70): // LD   (Ix+d),B
-    OPXY(0x71): // LD   (Ix+d),C
-    OPXY(0x72): // LD   (Ix+d),D
-    OPXY(0x73): // LD   (Ix+d),E
-    OPXY(0x74): // LD   (Ix+d),H
-    OPXY(0x75): // LD   (Ix+d),L
-    OPXY(0x77): // LD   (Ix+d),A
-        PRE_IO();
-        CALC_EA_XY_D();
-        WRITE_BYTE(zWZ, zR8(Opcode & 7));
-        POST_IO();
+    OPXY_LD_R_mXYd(0x46) // LD   B,(Ix+d)
+    OPXY_LD_R_mXYd(0x4e) // LD   C,(Ix+d)
+    OPXY_LD_R_mXYd(0x56) // LD   D,(Ix+d)
+    OPXY_LD_R_mXYd(0x5e) // LD   E,(Ix+d)
+    OPXY_LD_R_mXYd(0x66) // LD   H,(Ix+d)
+    OPXY_LD_R_mXYd(0x6e) // LD   L,(Ix+d)
+    OPXY_LD_R_mXYd(0x7e) // LD   A,(Ix+d)
+
+#define OPXY_LD_mXYd_R(Opcode) \
+    OPXY(Opcode): \
+        PRE_IO(); \
+	CALC_EA_XY_D(); \
+        WRITE_BYTE(zWZ, zR8(Opcode & 7)); \
+        POST_IO(); \
         RET(15);
+
+    OPXY_LD_mXYd_R(0x70) // LD   (Ix+d),B
+    OPXY_LD_mXYd_R(0x71) // LD   (Ix+d),C
+    OPXY_LD_mXYd_R(0x72) // LD   (Ix+d),D
+    OPXY_LD_mXYd_R(0x73) // LD   (Ix+d),E
+    OPXY_LD_mXYd_R(0x74) // LD   (Ix+d),H
+    OPXY_LD_mXYd_R(0x75) // LD   (Ix+d),L
+    OPXY_LD_mXYd_R(0x77) // LD   (Ix+d),A
 
     OPXY(0x36): // LD   (Ix+d),#imm
         PRE_IO();
@@ -264,51 +270,55 @@ switch (Opcode)
     OPXY(0xe3): // EX   (SP),IX
         goto OP_EX_xx_mSP;
 
-
     // 8 BITS ARITHMETIC
+
     // INC
 
-    OPXY(0x04): // INC  B
-    OPXY(0x0c): // INC  C
-    OPXY(0x14): // INC  D
-    OPXY(0x1c): // INC  E
-    OPXY(0x3c): // INC  A
-        goto OP_INC_R;
+#define OPXY_INC_R(Opcode) OPJ_INC_R(OPXY, Opcode)
 
-    OPXY(0x24): // INC  HX
-        data->B.H++;
-        zF = (zF & CZ80_CF) | SZXYHV_inc[data->B.H];
-        RET(4);
+    OPXY_INC_R(0x04) // INC  B
+    OPXY_INC_R(0x0c) // INC  C
+    OPXY_INC_R(0x14) // INC  D
+    OPXY_INC_R(0x1c) // INC  E
+    OPXY_INC_R(0x3c) // INC  A
 
-    OPXY(0x2c): // INC  LX
-        data->B.L++;
-        zF = (zF & CZ80_CF) | SZXYHV_inc[data->B.L];
-        RET(4);
+#define OPXY_INC_XY(Opcode, HL) \
+    OPXY(Opcode): \
+        data->B.HL++; \
+        zF = (zF & CZ80_CF) | SZXYHV_inc[data->B.HL]; \
+	RET(4);
 
-    OPXY(0x34): // INC  (IX+o)
-        goto OP_INC_mIx;
+    OPXY_INC_XY(0x24, H) // INC  HX
+    OPXY_INC_XY(0x2c, L) // INC  LX
+
+    OPXY(0x34): { // INC  (Ix+d)
+        const uint16_t adr = data->W + FETCH_BYTE_S();
+	OP_INC_mRR_INT(adr, 23);
+    }
 
     // DEC
 
-    OPXY(0x05): // DEC  B
-    OPXY(0x0d): // DEC  C
-    OPXY(0x15): // DEC  D
-    OPXY(0x1d): // DEC  E
-    OPXY(0x3d): // DEC  A
-        goto OP_DEC_R;
+#define OPXY_DEC_R(Opcode) OPJ_DEC_R(OPXY, Opcode)
 
-    OPXY(0x25): // DEC  HX
-        data->B.H--;
-        zF = (zF & CZ80_CF) | SZXYHV_dec[data->B.H];
-        RET(4);
+    OPXY_DEC_R(0x05) // DEC  B
+    OPXY_DEC_R(0x0d) // DEC  C
+    OPXY_DEC_R(0x15) // DEC  D
+    OPXY_DEC_R(0x1d) // DEC  E
+    OPXY_DEC_R(0x3d) // DEC  A
 
-    OPXY(0x2d): // DEC  LX
-        data->B.L--;
-        zF = (zF & CZ80_CF) | SZXYHV_dec[data->B.L];
-        RET(4);
+#define OPXY_DEC_XY(Opcode, HL) \
+    OPXY(Opcode): \
+        data->B.HL--; \
+        zF = (zF & CZ80_CF) | SZXYHV_dec[data->B.HL]; \
+	RET(4);
 
-    OPXY(0x35): // DEC  (IX+o)
-        goto OP_DEC_mIx;
+    OPXY_DEC_XY(0x25, H) // DEC  HX
+    OPXY_DEC_XY(0x2d, L) // DEC  LX
+
+    OPXY(0x35): { // DEC  (Ix+d)
+        const uint16_t adr = data->W + FETCH_BYTE_S();
+	OP_DEC_mRR_INT(adr, 23);
+    }
 
     // ADD
 
@@ -755,6 +765,8 @@ switch (Opcode)
 
     OPXY(0xcb): // XYCB PREFIXE
     {
+        // TODO: Move these into the individual opcodes?
+        // (Compare disassembly and performance...)
         uint8_t src;
         uint8_t res;
 
