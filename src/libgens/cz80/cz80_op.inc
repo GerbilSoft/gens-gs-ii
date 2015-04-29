@@ -338,7 +338,7 @@ OP_INC_R:
 
     {
         uint16_t adr;
-        uint16_t res;
+        uint8_t res;
         
 OP_INC_mIx:
         adr = data->W + FETCH_BYTE_S();
@@ -372,7 +372,7 @@ OP_DEC_R:
 
     {
         uint16_t adr;
-        uint16_t res;
+        uint8_t res;
 
 OP_DEC_mIx:
         adr = data->W + FETCH_BYTE_S();

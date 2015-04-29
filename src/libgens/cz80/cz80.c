@@ -422,8 +422,8 @@ void CZ80CALL Cz80_Set_HL(cz80_struc *cpu, uint16_t value)
 void CZ80CALL Cz80_Set_AF(cz80_struc *cpu, uint16_t val)
 {
     cz80_struc *CPU = cpu;
-    zF = val;
-    zA = val >> 8;
+    zF = (uint8_t)(val & 0xFF);
+    zA = (uint8_t)(val >> 8);
 }
 
 void CZ80CALL Cz80_Set_BC2(cz80_struc *cpu, uint16_t value)
@@ -447,8 +447,8 @@ void CZ80CALL Cz80_Set_HL2(cz80_struc *cpu, uint16_t value)
 void CZ80CALL Cz80_Set_AF2(cz80_struc *cpu, uint16_t val)
 {
     cz80_struc *CPU = cpu;
-    zF2 = val;
-    zA2 = val >> 8;
+    zF2 = (uint8_t)(val & 0xFF);
+    zA2 = (uint8_t)(val >> 8);
 }
 
 void CZ80CALL Cz80_Set_IX(cz80_struc *cpu, uint16_t value)

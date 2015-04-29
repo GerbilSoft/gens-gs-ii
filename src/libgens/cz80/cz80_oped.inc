@@ -263,7 +263,7 @@ switch (Opcode)
             ((res ^ val) & CZ80_HF) |               // H flag
             (((val & res) & 0x80) >> 5) |           // V flag
             ((res >> 8) & CZ80_CF) | CZ80_NF;       // C/N flag
-        zA = res;
+        zA = (uint8_t)(res & 0xFF);
         RET(4);
     }
 
