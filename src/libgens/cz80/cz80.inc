@@ -136,18 +136,18 @@
 #define WRITE_WORD_LE(A, D) WRITE_WORD(A, D);
 #elif CZ80_LITTLE_ENDIAN
 #define WRITE_WORD(A, D) do { \
-    CPU->Write_Byte(CPU->ctx, (A), (D)); \
-    CPU->Write_Byte(CPU->ctx, ((A) + 1), ((D) >> 8)); \
+    CPU->Write_Byte(CPU->ctx, (A), (uint8_t)((D) & 0xFF)); \
+    CPU->Write_Byte(CPU->ctx, ((A) + 1), (uint8_t)((D) >> 8)); \
 } while (0)
 #define WRITE_WORD_LE(A, D) WRITE_WORD(A, D);
 #else
 #define WRITE_WORD(A, D) do { \
-    CPU->Write_Byte(CPU->ctx, (A), ((D) >> 8)); \
-    CPU->Write_Byte(CPU->ctx, ((A) + 1), (D)); \
+    CPU->Write_Byte(CPU->ctx, (A), (uint8_t)((D) >> 8)); \
+    CPU->Write_Byte(CPU->ctx, ((A) + 1), (uint8_t)((D) & 0xFF)); \
 } while (0)
 #define WRITE_WORD_LE(A, D) do { \
-    CPU->Write_Byte(CPU->ctx, (A), (D)); \
-    CPU->Write_Byte(CPU->ctx, ((A) + 1), ((D) >> 8)); \
+    CPU->Write_Byte(CPU->ctx, (A), (uint8_t)((D) & 0xFF))); \
+    CPU->Write_Byte(CPU->ctx, ((A) + 1), (uint8_t)((D) >> 8)); \
 } while (0)
 #endif
 
