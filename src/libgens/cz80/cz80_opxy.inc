@@ -6,6 +6,10 @@
 /*                                                                              */
 /********************************************************************************/
 
+// NOTE: The main jump table already subtracts 4 cycles from the counter
+// before executing FD/DD-prefixed instructions. Consequently, the cycle
+// timings listed below do not include these 4 cycles.
+
 #if CZ80_USE_JUMPTABLE
     DO_JMPTBL_OPXY(Opcode);
 #else
@@ -140,33 +144,33 @@ switch (Opcode)
         RET(13);
     }
 
-    OPXY(0x46): // LD   B,(IX+d)
-    OPXY(0x56): // LD   D,(IX+d)
-    OPXY(0x5e): // LD   E,(IX+d)
-    OPXY(0x66): // LD   H,(IX+d)
-    OPXY(0x6e): // LD   L,(IX+d)
-    OPXY(0x4e): // LD   C,(IX+d)
-    OPXY(0x7e): // LD   A,(IX+d)
+    OPXY(0x46): // LD   B,(Ix+d)
+    OPXY(0x56): // LD   D,(Ix+d)
+    OPXY(0x5e): // LD   E,(Ix+d)
+    OPXY(0x66): // LD   H,(Ix+d)
+    OPXY(0x6e): // LD   L,(Ix+d)
+    OPXY(0x4e): // LD   C,(Ix+d)
+    OPXY(0x7e): // LD   A,(Ix+d)
         PRE_IO();
 	CALC_EA_XY_D();
         READ_BYTE(zWZ, zR8((Opcode >> 3) & 7));
         POST_IO();
         RET(15);
 
-    OPXY(0x70): // LD   (IX+d),B
-    OPXY(0x71): // LD   (IX+d),C
-    OPXY(0x72): // LD   (IX+d),D
-    OPXY(0x73): // LD   (IX+d),E
-    OPXY(0x74): // LD   (IX+d),H
-    OPXY(0x75): // LD   (IX+d),L
-    OPXY(0x77): // LD   (IX+d),A
+    OPXY(0x70): // LD   (Ix+d),B
+    OPXY(0x71): // LD   (Ix+d),C
+    OPXY(0x72): // LD   (Ix+d),D
+    OPXY(0x73): // LD   (Ix+d),E
+    OPXY(0x74): // LD   (Ix+d),H
+    OPXY(0x75): // LD   (Ix+d),L
+    OPXY(0x77): // LD   (Ix+d),A
         PRE_IO();
         CALC_EA_XY_D();
         WRITE_BYTE(zWZ, zR8(Opcode & 7));
         POST_IO();
         RET(15);
 
-    OPXY(0x36): // LD   (IX+d),#imm
+    OPXY(0x36): // LD   (Ix+d),#imm
         PRE_IO();
         CALC_EA_XY_D();
         WRITE_BYTE(zWZ, FETCH_BYTE());
@@ -329,7 +333,7 @@ switch (Opcode)
 
     OPXY_ADD_A_n(0xc6) // ADD  A,n
 
-    OPXY(0x86): { // ADD  A,(IX+d)
+    OPXY(0x86): { // ADD  A,(Ix+d)
         uint8_t val;
         PRE_IO();
 	CALC_EA_XY_D();
@@ -361,7 +365,7 @@ switch (Opcode)
 
     OPXY_ADC_A_n(0xce) // ADC  A,n
 
-    OPXY(0x8e): { // ADC  A,(IX+d)
+    OPXY(0x8e): { // ADC  A,(Ix+d)
         uint8_t val;
         PRE_IO();
 	CALC_EA_XY_D();
@@ -393,7 +397,7 @@ switch (Opcode)
 
     OPXY_SUB_A_n(0xd6) // SUB  A,n
 
-    OPXY(0x96): { // SUB  A,(IX+d)
+    OPXY(0x96): { // SUB  A,(Ix+d)
         uint8_t val;
         PRE_IO();
 	CALC_EA_XY_D();
@@ -425,7 +429,7 @@ switch (Opcode)
 
     OPXY_SBC_A_n(0xde) // SBC  A,n
 
-    OPXY(0x9e): { // SBC  A,(IX+d)
+    OPXY(0x9e): { // SBC  A,(Ix+d)
         uint8_t val;
         PRE_IO();
 	CALC_EA_XY_D();
@@ -457,7 +461,7 @@ switch (Opcode)
 
     OPXY_CP_A_n(0xfe) // CP   A,n
 
-    OPXY(0xbe): { // CP  A,(IX+d)
+    OPXY(0xbe): { // CP  A,(Ix+d)
         uint8_t val;
         PRE_IO();
 	CALC_EA_XY_D();
@@ -492,7 +496,7 @@ switch (Opcode)
 
     OPXY_AND_A_n(0xe6) // AND  A,n
 
-    OPXY(0xa6): { // AND  (IX+d)
+    OPXY(0xa6): { // AND  (Ix+d)
         uint8_t val;
 
         PRE_IO();
@@ -528,7 +532,7 @@ switch (Opcode)
 
     OPXY_XOR_A_n(0xee) // XOR  A,n
 
-    OPXY(0xae): { // XOR  (IX+d)
+    OPXY(0xae): { // XOR  (Ix+d)
         uint8_t val;
 
         PRE_IO();
@@ -564,7 +568,7 @@ switch (Opcode)
 
     OPXY_OR_A_n(0xf6) // OR  A,n
 
-    OPXY(0xb6): { // OR  (IX+d)
+    OPXY(0xb6): { // OR  (Ix+d)
         uint8_t val;
 
         PRE_IO();
@@ -608,7 +612,7 @@ switch (Opcode)
         zDE++;
         RET(6);
 
-    OPXY(0x23): // INC  HL
+    OPXY(0x23): // INC  Ix
         data->W++;
         RET(6);
 
@@ -624,7 +628,7 @@ switch (Opcode)
         zDE--;
         RET(6);
 
-    OPXY(0x2b): // DEC  HL
+    OPXY(0x2b): // DEC  Ix
         data->W--;
         RET(6);
 

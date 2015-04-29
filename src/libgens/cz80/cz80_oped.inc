@@ -6,6 +6,10 @@
 /*                                                                              */
 /********************************************************************************/
 
+// NOTE: The main jump table already subtracts 4 cycles from the counter
+// before executing ED-prefixed instructions. Consequently, the cycle
+// timings listed below do not include these 4 cycles.
+
 #if CZ80_USE_JUMPTABLE
     DO_JMPTBL_OPED(Opcode);
 #else
@@ -245,10 +249,10 @@ switch (Opcode)
         RET(5);
     }
 
-    OPED(0x5c): // NEG
-    OPED(0x54): // NEG
-    OPED(0x4c): // NEG
     OPED(0x44): // NEG
+    OPED(0x4c): // NEG
+    OPED(0x54): // NEG
+    OPED(0x5c): // NEG
     OPED(0x64): // NEG
     OPED(0x6c): // NEG
     OPED(0x74): // NEG
@@ -424,15 +428,18 @@ switch (Opcode)
         // we need to test for interrupt
         goto Cz80_Exec_End;
 
+    OPED(0x4e): // IM   ?
+    OPED(0x6e): // IM   ?
+        // This is an undefined state.
+        // We're handling it as IM 0.
+
     OPED(0x46): // IM   0
-    OPED(0x4e): // IM   0
     OPED(0x66): // IM   0
-    OPED(0x6e): // IM   0
         zIM = 0;
         RET(4);
 
-    OPED(0x76): // IM   1
     OPED(0x56): // IM   1
+    OPED(0x76): // IM   1
         zIM = 1;
         RET(4);
 
@@ -523,11 +530,14 @@ OP_LDXR:
             // we will continu it at next CZ80_Exec
             zF = F | CZ80_PF;
             zPC -= 2;
-            CCnt += 4;
+            CCnt += 4; // Restore 4 cycles from the CB jump table.
             goto Cz80_Exec_End;
         }
 
-        // instruction completed...
+        // Instruction completed.
+        // Restore 4 cycles from CB jump table,
+        // plus 5 cycle difference for ending the loop.
+        // (Timing is 21/16.)
         zF = F;
         RET(-(5 + 4));
     }
@@ -620,12 +630,15 @@ OP_CPXR:
             // instruction not yet completed...
             // we will continu it at next CZ80_Exec
             zPC -= 2;
-            CCnt += 4;
+            CCnt += 4; // Restore 4 cycles from the CB jump table.
             goto Cz80_Exec_End;
         }
 
-        // instruction completed...
-        RET(-(3 + 4));
+        // Instruction completed.
+        // Restore 4 cycles from CB jump table,
+        // plus 5 cycle difference for ending the loop.
+        // (Timing is 21/16.)
+        RET(-(5 + 4));
     }
 
 
@@ -733,11 +746,14 @@ OP_INXR:
             // instruction not yet completed...
             // we will continu it at next CZ80_Exec
             zPC -= 2;
-            CCnt += 4;
+            CCnt += 4; // Restore 4 cycles from the CB jump table.
             goto Cz80_Exec_End;
         }
 
-        // instruction completed...
+        // Instruction completed.
+        // Restore 4 cycles from CB jump table,
+        // plus 5 cycle difference for ending the loop.
+        // (Timing is 21/16.)
         RET(-(5 + 4));
     }
 
@@ -819,11 +835,14 @@ OP_OUTXR:
             // instruction not yet completed...
             // we will continu it at next CZ80_Exec
             zPC -= 2;
-            CCnt += 4;
+            CCnt += 4; // Restore 4 cycles from the CB jump table.
             goto Cz80_Exec;
         }
 
-        // instruction not yet completed...
+        // Instruction completed.
+        // Restore 4 cycles from CB jump table,
+        // plus 5 cycle difference for ending the loop.
+        // (Timing is 21/16.)
         RET(-(5 + 4));
     }
 

@@ -6,6 +6,10 @@
 /*                                                                              */
 /********************************************************************************/
 
+// NOTE: The main jump table does NOT subtract 4 cycles from the counter
+// before executing CB-prefixed instructions. Consequently, all instructions
+// here will have a +4 to compensate for the CB opcode.
+
 #if CZ80_USE_JUMPTABLE
     DO_JMPTBL_OPCB(Opcode);
 #else

@@ -73,6 +73,7 @@ Cz80_Exec_Really_End:
     CCnt = CPU->CycleToDo - CCnt;
     
     // update R register
+    // FIXME: This is incorrect.
     zR = (zR + (CCnt >> 2)) & 0x7F;
 
     return CCnt;
