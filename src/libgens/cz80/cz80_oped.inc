@@ -7,7 +7,7 @@
 /********************************************************************************/
 
 #if CZ80_USE_JUMPTABLE
-    goto *JumpTableED[Opcode];
+    DO_JMPTBL_OPED(Opcode);
 #else
 switch (Opcode)
 {
