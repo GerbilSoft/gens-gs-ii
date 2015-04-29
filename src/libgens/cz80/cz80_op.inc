@@ -6,6 +6,11 @@
 /*                                                                              */
 /********************************************************************************/
 
+// 2015/04/28: Instruction timings updated from:
+// - http://wikiti.brandonw.net/?title=Z80_Instruction_Set
+// - http://www.z80.info/z80undoc.txt
+// - http://www.z80.info/z80undoc3.txt
+
 #if CZ80_USE_JUMPTABLE
     DO_JMPTBL_OP(Opcode);
 #else
@@ -342,7 +347,7 @@ OP_INC_R:
         
 OP_INC_mIx:
         adr = data->W + FETCH_BYTE_S();
-        CCnt -= 11;
+        CCnt -= 8; // 23 total: 4 for FD/DD, 11 for DEC_m, 8 here
         goto OP_INC_m;
 
     OP(0x34):   // INC  (HL)
@@ -376,7 +381,7 @@ OP_DEC_R:
 
 OP_DEC_mIx:
         adr = data->W + FETCH_BYTE_S();
-        CCnt -= 11;
+        CCnt -= 8; // 23 total: 4 for FD/DD, 11 for DEC_m, 8 here
         goto OP_DEC_m;
 
     OP(0x35):   // DEC  (HL)
@@ -1121,8 +1126,6 @@ OP_RRA:
             RET(13); \
         } \
         PC++; \
-        /* FIXME: mdZ80 and CZ80 both have 10 here; */ \
-        /* everything else says 8. */ \
         RET(8);
 #define OP_DJNZ(Opcode) OPJ_DJNZ(OP, Opcode)
 
@@ -1189,10 +1192,7 @@ OP_RRA:
 #define OPJ_RET_NCOND(JmpType, Opcode, Cond) \
     JmpType(Opcode): \
         if (!(zF & Cond)) { \
-            /* FIXME: mdZ80 and CZ80 both take 17 cycles */ \
-            /* on a successful conditional RET; other Z80 */ \
-            /* documentation says 11. */ \
-            CCnt--; \
+            CCnt--; /* 11 cycles for RET cc if cc is true */ \
             DO_RET(); \
         } \
         RET(5);
@@ -1201,10 +1201,7 @@ OP_RRA:
 #define OPJ_RET_COND(JmpType, Opcode, Cond) \
     JmpType(Opcode): \
         if (zF & Cond) { \
-            /* FIXME: mdZ80 and CZ80 both take 17 cycles */ \
-            /* on a successful conditional RET; other Z80 */ \
-            /* documentation says 11. */ \
-            CCnt--; \
+            CCnt--; /* 11 cycles for RET cc if cc is true */ \
             DO_RET(); \
         } \
         RET(5);
