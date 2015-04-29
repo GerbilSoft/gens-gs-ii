@@ -103,7 +103,7 @@ switch (Opcode)
 #define OPJ_LD_R_mHL(JmpType, Opcode) \
     JmpType(Opcode): \
         PRE_IO(); \
-        zWZ = zHL + 1; \
+        EXACT_ONLY(zWZ = zHL + 1); \
         READ_BYTE(zHL, zR8((Opcode >> 3) & 7)); \
         POST_IO(); \
         RET(7);
@@ -120,7 +120,7 @@ switch (Opcode)
 #define OPJ_LD_mHL_R(JmpType, Opcode) \
     JmpType(Opcode): \
         PRE_IO(); \
-        zWZ = (zA << 8) | ((zlHL + 1) & 0xFF); \
+        EXACT_ONLY(zWZ = (zA << 8) | ((zlHL + 1) & 0xFF)); \
 	WRITE_BYTE(zHL, zR8(Opcode & 7)); \
         POST_IO(); \
         RET(7);
@@ -143,7 +143,7 @@ switch (Opcode)
 #define OPJ_LD_A_mRR(JmpType, Opcode, RR) \
     JmpType(Opcode): \
         PRE_IO(); \
-	zWZ = z##RR + 1; \
+	EXACT_ONLY(zWZ = z##RR + 1); \
 	READ_BYTE(z##RR, zA); \
         POST_IO(); \
 	RET(7);
@@ -164,7 +164,7 @@ switch (Opcode)
 #define OPJ_LD_mRR_A(JmpType, Opcode, RR) \
     JmpType(Opcode): \
         PRE_IO(); \
-        zWZ = (zA << 8) | ((z##RR + 1) & 0xFF); \
+        EXACT_ONLY(zWZ = (zA << 8) | ((z##RR + 1) & 0xFF)); \
 	WRITE_BYTE(z##RR, zA); \
         POST_IO(); \
 	RET(7);
@@ -207,7 +207,7 @@ switch (Opcode)
         PRE_IO(); \
         FETCH_WORD(zWZ); \
         READ_WORD_LE(zWZ, z##RR); \
-	zWZ++; \
+	EXACT_ONLY(zWZ++); \
         POST_IO(); \
         RET(16);
 #define OP_LD_RR_mNN(Opcode, RR) OPJ_LD_RR_mNN(OP, Opcode, RR)
@@ -219,7 +219,7 @@ switch (Opcode)
         PRE_IO(); \
         FETCH_WORD(zWZ); \
         WRITE_WORD_LE(zWZ, z##RR); \
-	zWZ++; \
+	EXACT_ONLY(zWZ++); \
         POST_IO(); \
         RET(16);
 #define OP_LD_mNN_RR(Opcode, RR) OPJ_LD_mNN_RR(OP, Opcode, RR)
@@ -322,7 +322,7 @@ OP_EX_xx_mSP:
         tmp = data->W;
         READ_WORD_LE(adr, data->W);
         WRITE_WORD_LE(adr, tmp);
-        zWZ = data->W;
+        EXACT_ONLY(zWZ = data->W);
         POST_IO();
         RET(19);
     }
@@ -947,7 +947,7 @@ OP_DI:
     JmpType(Opcode): { \
         uint16_t src = RRsrc; \
         uint32_t res = src + data->W; \
-        zWZ = data->W + 1; \
+        EXACT_ONLY(zWZ = data->W + 1); \
         zF = (zF & (CZ80_SF | CZ80_ZF | CZ80_VF)) |     /* S/Z/V flag */ \
             (((src ^ data->W ^ res) >> 8) & CZ80_HF) |  /* H flag */ \
             ((res >> 16) & CZ80_CF);                    /* C flag */ \
@@ -959,7 +959,7 @@ OP_DI:
     JmpType(Opcode): { \
         uint16_t src = RRsrc; \
         uint32_t res = src + data->W; \
-        zWZ = data->W + 1; \
+        EXACT_ONLY(zWZ = data->W + 1); \
         zF = (zF & (CZ80_SF | CZ80_ZF | CZ80_VF)) |     /* S/Z/V flag */ \
             (((src ^ data->W ^ res) >> 8) & CZ80_HF) |  /* H flag */ \
             ((res >> 8) & (CZ80_XF | CZ80_YF)) |        /* X/Y flag */ \
@@ -1026,23 +1026,27 @@ OP_RRA:
 
     // JUMP
 
+// TODO: Don't use zWZ if !CZ80_EXACT?
 #define DO_JP() do { \
     zWZ = GET_WORD(); \
     SET_PC(zWZ); \
     RET(10); \
 } while (0)
 
+// TODO: FETCH_WORD_WZ() macro?
 #define OPJ_JP_NCOND(JmpType, Opcode, Cond) \
     JmpType(Opcode): \
         if (!(zF & Cond)) DO_JP(); \
-        FETCH_WORD(zWZ); \
+        EXACT_ONLY(FETCH_WORD(zWZ)); \
+        INEXACT_ONLY(PC += 2); \
         RET(10);
 #define OP_JP_NCOND(Opcode, Cond) OPJ_JP_NCOND(OP, Opcode, Cond)
 
 #define OPJ_JP_COND(JmpType, Opcode, Cond) \
     JmpType(Opcode): \
         if (zF & Cond) DO_JP(); \
-        FETCH_WORD(zWZ); \
+        EXACT_ONLY(FETCH_WORD(zWZ)); \
+        INEXACT_ONLY(PC += 2); \
         RET(10);
 #define OP_JP_COND(Opcode, Cond) OPJ_JP_COND(OP, Opcode, Cond)
 
@@ -1062,11 +1066,18 @@ OP_RRA:
 
     OP_JP(0xc3)   // JP   nn
 
+#if CZ80_EXACT
 #define OPJ_JP_mHL(JmpType, Opcode) \
     JmpType(Opcode): \
         zWZ = data->W; \
         SET_PC(zWZ); \
         RET(4);
+#else
+#define OPJ_JP_mHL(JmpType, Opcode) \
+    JmpType(Opcode): \
+        SET_PC(data->W); \
+        RET(4);
+#endif
 #define OP_JP_mHL(Opcode) OPJ_JP_mHL(OP, Opcode)
 
     OP_JP_mHL(0xe9)   // JP   (xx)
@@ -1075,7 +1086,7 @@ OP_RRA:
     int8_t val = FETCH_BYTE_S(); \
     /* no rebase needed here... */ \
     PC += val; \
-    zWZ = PC; \
+    EXACT_ONLY(zWZ = PC); \
     RET(12); \
 } while (0)
 
@@ -1104,7 +1115,7 @@ OP_RRA:
             int8_t val = FETCH_BYTE_S(); \
             /* no rebase needed here... */ \
             PC += val; \
-            zWZ = PC; \
+            EXACT_ONLY(zWZ = PC); \
             RET(13); \
         } \
         PC++; \
@@ -1122,6 +1133,7 @@ OP_RRA:
 
     // CALL & RETURN
 
+// TODO: Don't use zWZ if !CZ80_EXACT?
 #define DO_CALL() do { \
     uint16_t oldRPC; \
     PRE_IO(); \
@@ -1136,14 +1148,16 @@ OP_RRA:
 #define OPJ_CALL_NCOND(JmpType, Opcode, Cond) \
     JmpType(Opcode): \
         if (!(zF & Cond)) DO_CALL(); \
-        FETCH_WORD(zWZ); \
+        EXACT_ONLY(FETCH_WORD(zWZ)); \
+        INEXACT_ONLY(PC += 2); \
         RET(10);
 #define OP_CALL_NCOND(Opcode, Cond) OPJ_CALL_NCOND(OP, Opcode, Cond)
 
 #define OPJ_CALL_COND(JmpType, Opcode, Cond) \
     JmpType(Opcode): \
         if (zF & Cond) DO_CALL(); \
-        FETCH_WORD(zWZ); \
+        EXACT_ONLY(FETCH_WORD(zWZ)); \
+        INEXACT_ONLY(PC += 2); \
         RET(10);
 #define OP_CALL_COND(Opcode, Cond) OPJ_CALL_COND(OP, Opcode, Cond)
 
@@ -1163,6 +1177,7 @@ OP_RRA:
 
     OP_CALL(0xcd)   // CALL nn
 
+// TODO: Don't use zWZ if !CZ80_EXACT?
 #define DO_RET() do { \
     PRE_IO(); \
     POP_16(zWZ); \
@@ -1205,12 +1220,20 @@ OP_RRA:
 
     OP_RET(0xc9)   // RET
 
+#if CZ80_EXACT
 #define OPJ_RST(JmpType, Opcode) \
     JmpType(Opcode): \
         PUSH_16(PC); \
         zWZ = Opcode & 0x38; \
         SET_PC(zWZ); \
         RET(11);
+#else
+#define OPJ_RST(JmpType, Opcode) \
+    JmpType(Opcode): \
+        PUSH_16(PC); \
+        SET_PC(Opcode & 0x38); \
+        RET(11);
+#endif
 #define OP_RST(Opcode) OPJ_RST(OP, Opcode)
 
     OP_RST(0xc7)   // RST  0
@@ -1230,14 +1253,14 @@ OP_RRA:
     OP(0xd3):   // OUT  (n),A
 OP_OUT_mN_A:
         adr = (zA << 8) | FETCH_BYTE();
-        zWZ = (zA << 8) | ((adr + 1) & 0xFF);
+        EXACT_ONLY(zWZ = (zA << 8) | ((adr + 1) & 0xFF));
         OUT(adr, zA);
         RET(11);
 
     OP(0xdb):   // IN   A,(n)
 OP_IN_A_mN:
         adr = (zA << 8) | FETCH_BYTE();
-        zWZ = adr + 1;
+        EXACT_ONLY(zWZ = adr + 1);
         IN(adr, zA);
         RET(11);
     }

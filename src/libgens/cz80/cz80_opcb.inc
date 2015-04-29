@@ -358,6 +358,7 @@ switch (Opcode)
     OPCB_BIT_N_R(0x7d) // BIT  7,L
     OPCB_BIT_N_R(0x7f) // BIT  7,A
 
+#if CZ80_EXACT
 #define OPCB_BIT_N_mHL(Opcode) \
     OPCB(Opcode): { \
         uint8_t src; \
@@ -371,6 +372,21 @@ switch (Opcode)
         POST_IO(); \
         RET(8 + 4); \
     }
+#else
+#define OPCB_BIT_N_mHL(Opcode) \
+    OPCB(Opcode): { \
+        uint8_t src; \
+        uint8_t bitm = 1 << ((Opcode >> 3) & 7); \
+        PRE_IO(); \
+        READ_BYTE(zHL, src); \
+        /* TODO: Remove XF/YF flags from SZXY_BIT[]. */ \
+        zF = (zF & CZ80_CF) | CZ80_HF |                         /* C/H flag */ \
+             (SZXY_BIT[src & bitm] & ~(CZ80_YF | CZ80_XF)) |    /* Z/V/N flag */ \
+             (src & (CZ80_YF | CZ80_XF));                       /* X/Y flag */ \
+        POST_IO(); \
+        RET(8 + 4); \
+    }
+#endif
 
     OPCB_BIT_N_mHL(0x46) // BIT  0,(HL)
     OPCB_BIT_N_mHL(0x4e) // BIT  1,(HL)

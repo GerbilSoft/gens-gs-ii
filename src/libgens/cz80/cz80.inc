@@ -21,6 +21,14 @@
 #define OPXYCB(A) case A
 #endif
 
+#if CZ80_EXACT
+#define EXACT_ONLY(x) do { x; } while (0)
+#define INEXACT_ONLY(x) do { } while (0)
+#else
+#define EXACT_ONLY(x) do { } while (0)
+#define INEXACT_ONLY(x) do { x; } while (0)
+#endif
+
 /**
  * Get the byte at the program counter.
  */

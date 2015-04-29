@@ -20,7 +20,11 @@ int CZ80CALL Cz80_Exec(cz80_struc *cpu, int cycles)
 
     CPU = cpu;
     PC = CPU->PC;
+#if CZ80_EXACT
     WZ = CPU->WZ;
+#else
+    WZ = PC; /* close approximation? or PC+1...*/
+#endif
 
     if (CPU->Status & (CZ80_RUNNING | CZ80_DISABLE | CZ80_FAULTED))
     {
@@ -68,7 +72,9 @@ Cz80_Exec_End:
 Cz80_Exec_Really_End:
     CPU->Status &= ~CZ80_RUNNING;
     CPU->PC = PC;
+#if CZ80_EXACT
     CPU->WZ = WZ;
+#endif
     
     // number of executed cycles
     CCnt = CPU->CycleToDo - CCnt;
