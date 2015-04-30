@@ -288,6 +288,7 @@ typedef struct
 
 void    Cz80_Init(cz80_struc *cpu);
 uint8_t Cz80_Reset(cz80_struc *cpu);
+uint8_t Cz80_Soft_Reset(cz80_struc *cpu);
 
 void    Cz80_Set_Fetch(cz80_struc *cpu, uint16_t low_adr, uint16_t high_adr, void *fetch_adr);
 

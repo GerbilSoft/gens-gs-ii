@@ -80,18 +80,28 @@ void Cz80_Init(cz80_struc *cpu)
 uint8_t Cz80_Reset(cz80_struc *cpu)
 {
     cz80_struc *CPU = cpu;
-    
+
+    // Clear all registers.
+    // TODO: Initialize all other registers to random values?
     memset(CPU, 0, offsetof(cz80_struc, CycleSup));
 
+    // Initialize registers as if /RESET was pulsed.
+    return Cz80_Soft_Reset(cpu);
+}
+
+uint8_t Cz80_Soft_Reset(cz80_struc *cpu)
+{
+    cz80_struc *CPU = cpu;
+
+    // TODO: Should take 3 clock cycles if running?
     Cz80_Set_PC(CPU, 0);
-    zIX = 0xFFFF;
-    zIY = 0xFFFF;
-#if CZ80_DEBUG
-    zF = CZ80_ZF;
-#else
-    zSP = 0xFFFF;
+    EXACT_ONLY(CPU->WZ = 0); /* TODO: Is this correct? */
     zFA = 0xFFFF;
-#endif
+    zSP = 0xFFFF;
+    zwR = 0;
+    zIFF = 0;
+    zI = 0;
+    zIM = 0;
 
     return CPU->Status;
 }
