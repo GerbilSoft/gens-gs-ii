@@ -53,6 +53,7 @@ Cz80_Exec:
     Cz80_Exec_IM0:
         {
             union16 *data = pzHL;
+            INC_R_EXACT();	// TODO: Does this include IM0 interrupts?
 
             #include "cz80_op.inc"
         }
@@ -79,9 +80,10 @@ Cz80_Exec_Really_End:
     // number of executed cycles
     CCnt = CPU->CycleToDo - CCnt;
     
+#if !CZ80_EXACT_R
     // update R register
-    // FIXME: This is incorrect.
     zR = (zR + (CCnt >> 2)) & 0x7F;
+#endif
 
     return CCnt;
 }

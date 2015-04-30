@@ -219,7 +219,11 @@ switch (Opcode)
         RET(5);
 
     OPED(0x4f): // LD   R,A
+#if CZ80_EXACT_R
+        zR = zA;
+#else
         zR = zA - ((CPU->CycleToDo - CCnt) / 4);
+#endif
         zR2 = zA & 0x80;
         RET(5);
 
@@ -240,7 +244,11 @@ switch (Opcode)
     {
         uint8_t F;
 
-        zA = zR2 + ((zR + ((CPU->CycleToDo - CCnt) / 4)) & 0x7F);
+#if CZ80_EXACT_R
+	zA = (zR & 0x7F) | zR2;
+#else
+	zA = zR2 + ((zR + ((CPU->CycleToDo - CCnt) / 4)) & 0x7F);
+#endif
         F = zF & CZ80_CF;
         F |= zA & (CZ80_SF | CZ80_YF | CZ80_XF);
         F |= zIFF2;
@@ -483,6 +491,7 @@ OP_LDX:
         uint8_t F;
 
     OPED(0xb8): // LDDR
+        ADD_R_EXACT(-2);
         do
         {
             PRE_IO();
@@ -497,11 +506,13 @@ OP_LDX:
                 zWZ = zPC + 1;
             }
 #endif
+            ADD_R_EXACT(2);
             CCnt -= 21;
         } while ((zBC) && (CCnt > -4));
         goto OP_LDXR;
 
     OPED(0xb0): // LDIR
+        ADD_R_EXACT(-2);
         do
         {
             PRE_IO();
@@ -516,6 +527,7 @@ OP_LDX:
                 zWZ = zPC + 1;
             }
 #endif
+            ADD_R_EXACT(2);
             CCnt -= 21;
         } while ((zBC) && (CCnt > -4));
 
@@ -586,6 +598,7 @@ OP_CPX:
         uint8_t F;
 
     OPED(0xb9): // CPDR
+        ADD_R_EXACT(-2);
         do
         {
             PRE_IO();
@@ -594,11 +607,13 @@ OP_CPX:
             res = zA - val;
             POST_IO();
             zBC--;
+            ADD_R_EXACT(2);
             CCnt -= 21;
         } while ((zBC) && (res) && (CCnt > -4));
         goto OP_CPXR;
 
     OPED(0xb1): // CPIR
+        ADD_R_EXACT(-2);
         do
         {
             PRE_IO();
@@ -607,6 +622,7 @@ OP_CPX:
             res = zA - val;
             POST_IO();
             zBC--;
+            ADD_R_EXACT(2);
             CCnt -= 21;
         } while ((zBC) && (res) && (CCnt > -4));
 
@@ -701,6 +717,7 @@ OP_INX:
 #endif
 
     OPED(0xba): // INDR
+        ADD_R_EXACT(-2);
         do
         {
             PRE_IO();
@@ -708,6 +725,7 @@ OP_INX:
             WRITE_BYTE(zHL--, val);
             POST_IO();
             zB--;
+            ADD_R_EXACT(2);
             CCnt -= 21;
         } while ((zB) && (CCnt > -4));
 #if CZ80_EXACT
@@ -721,6 +739,7 @@ OP_INX:
         goto OP_INXR;
 
     OPED(0xb2): // INIR
+        ADD_R_EXACT(-2);
         do
         {
             PRE_IO();
@@ -728,6 +747,7 @@ OP_INX:
             WRITE_BYTE(zHL++, val);
             POST_IO();
             zB--;
+            ADD_R_EXACT(2);
             CCnt -= 21;
         } while ((zB) && (CCnt > -4));
 #if CZ80_EXACT
@@ -804,6 +824,7 @@ OP_OUTX:
 #endif
 
     OPED(0xbb): // OUTDR
+        ADD_R_EXACT(-2);
         do
         {
             PRE_IO();
@@ -811,11 +832,13 @@ OP_OUTX:
             OUT(zBC, val);
             POST_IO();
             zB--;
+            ADD_R_EXACT(2);
             CCnt -= 21;
         } while ((zB) && (CCnt > -4));
         goto OP_OUTXR;
 
     OPED(0xb3): // OUTIR
+        ADD_R_EXACT(-2);
         do
         {
             PRE_IO();
@@ -823,6 +846,7 @@ OP_OUTX:
             OUT(zBC, val);
             POST_IO();
             zB--;
+            ADD_R_EXACT(2);
             CCnt -= 21;
         } while ((zB) && (CCnt > -4));
 

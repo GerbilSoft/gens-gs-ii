@@ -1270,12 +1270,14 @@ OP_IN_A_mN:
     OP(0xcb):   // CB PREFIXE (BIT & SHIFT INSTRUCTIONS)
 /* CB_PREFIXE: */
         Opcode = FETCH_BYTE();
+        INC_R_EXACT();
         #include "cz80_opcb.inc"
 
     OP(0xed):   // ED PREFIXE
 ED_PREFIXE:
         CCnt -= 4;
         Opcode = FETCH_BYTE();
+        INC_R_EXACT();
         #include "cz80_oped.inc"
 
     OP(0xdd):   // DD PREFIXE (IX)
@@ -1290,6 +1292,7 @@ FD_PREFIXE:
 XY_PREFIXE:
         CCnt -= 4;
         Opcode = FETCH_BYTE();
+        INC_R_EXACT();
         #include "cz80_opxy.inc"
 
 #if CZ80_USE_JUMPTABLE

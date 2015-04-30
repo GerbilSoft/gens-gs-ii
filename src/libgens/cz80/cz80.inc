@@ -29,6 +29,16 @@
 #define INEXACT_ONLY(x) do { x; } while (0)
 #endif
 
+#if CZ80_EXACT_R
+// NOTE: 0x7F mask is not applied here for performance reasons.
+// It's applied on reading.
+#define INC_R_EXACT() do { zR++; } while (0)
+#define ADD_R_EXACT(x) do { zR += x; } while (0)
+#else
+#define INC_R_EXACT() do { } while (0)
+#define ADD_R_EXACT(x) do { } while (0)
+#endif
+
 /**
  * Get the byte at the program counter.
  */
@@ -181,6 +191,13 @@
     CPU->OUT_Port(CPU->ctx, (A), (D)); \
 } while (0)
 
+/**
+ * TODO: Verify timing: http://www.z80.info/interrup.htm
+ * - NMI: 11 cycles
+ * - IM0: 2 cycles + instruction
+ * - IM1: 13 cycles
+ * - IM2: 19 cycles
+ */
 #define CHECK_INT() do { \
     if (CPU->Status & (zIFF1 | CZ80_HAS_NMI))               \
     {                                                       \
