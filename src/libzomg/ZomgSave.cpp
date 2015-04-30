@@ -2,7 +2,7 @@
  * libzomg: Zipped Original Memory from Genesis.                           *
  * ZomgSave.cpp: Savestate handler. (Saving functions)                     *
  *                                                                         *
- * Copyright (c) 2008-2013 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -50,8 +50,7 @@
 #include <string>
 using std::string;
 
-namespace LibZomg
-{
+namespace LibZomg {
 
 /**
  * Save a file to the ZOMG file.
@@ -476,6 +475,9 @@ int Zomg::saveZ80Reg(const Zomg_Z80RegSave_t *state)
 	bswap_state.BC2 = cpu_to_le16(bswap_state.BC2);
 	bswap_state.DE2 = cpu_to_le16(bswap_state.DE2);
 	bswap_state.HL2 = cpu_to_le16(bswap_state.HL2);
+
+	// Additional internal state.
+	bswap_state.WZ = cpu_to_le16(bswap_state.WZ);
 
 	return saveToZomg("common/Z80_reg.bin", &bswap_state, sizeof(bswap_state));
 #else

@@ -2,7 +2,7 @@
  * libzomg: Zipped Original Memory from Genesis.                           *
  * ZomgLoad.cpp: Savestate handler. (Loading functions)                    *
  *                                                                         *
- * Copyright (c) 2008-2013 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -40,12 +40,12 @@
 #include "zomg_eeprom.h"
 
 // C includes. (C++ namespace)
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <cassert>
 
-namespace LibZomg
-{
+namespace LibZomg {
 
 /**
  * Load a file from the ZOMG file.
@@ -398,6 +398,17 @@ int Zomg::loadZ80Reg(Zomg_Z80RegSave_t *state)
 	state->BC2 = le16_to_cpu(state->BC2);
 	state->DE2 = le16_to_cpu(state->DE2);
 	state->HL2 = le16_to_cpu(state->HL2);
+
+	if (ret <= offsetof(Zomg_Z80RegSave_t, WZ)) {
+		// Old version (pre-1fb9e426) that doesn't have
+		// WZ, Status, or IntVect registers.
+		state->WZ = 0;
+		state->Status = 0;
+		state->IntVect = 0;
+	} else {
+		// Additional internal state.
+		state->WZ = le16_to_cpu(state->WZ);
+	}
 
 	return ret;
 }
