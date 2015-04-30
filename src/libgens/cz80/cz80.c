@@ -384,10 +384,10 @@ uint16_t CZ80CALL Cz80_Get_PC(cz80_struc *cpu)
     return CPU->PC;
 }
 
-uint16_t CZ80CALL Cz80_Get_R(cz80_struc *cpu)
+uint8_t CZ80CALL Cz80_Get_R(cz80_struc *cpu)
 {
     cz80_struc *CPU = cpu;
-    return zR;
+    return (zR & 0x7F) | (zR2 & 0x80);
 }
 
 uint16_t CZ80CALL Cz80_Get_IFF(cz80_struc *cpu)
@@ -496,10 +496,10 @@ void CZ80CALL Cz80_Set_PC(cz80_struc *cpu, uint16_t val)
 }
 
 
-void CZ80CALL Cz80_Set_R(cz80_struc *cpu, uint16_t value)
+void CZ80CALL Cz80_Set_R(cz80_struc *cpu, uint8_t value)
 {
     cz80_struc *CPU = cpu;
-    zR = value & 0xFF;
+    zR = value & 0x7F;
     zR2 = value & 0x80;
 }
 
