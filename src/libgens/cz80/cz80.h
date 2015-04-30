@@ -64,6 +64,7 @@ extern "C" {
 #define CZ80_USE_JUMPTABLE      0
 #endif
 
+// Emulator Configuration
 #define CZ80_SIZE_OPT           0
 #define CZ80_USE_WORD_HANDLER   0
 // TODO: Remove this.
