@@ -57,7 +57,7 @@ extern "C" {
 #define CZ80_LITTLE_ENDIAN      1
 #endif
 
-/* Enable Jump Table optimizations on gcc. */
+// Enable Jump Table optimizations on gcc.
 #ifdef __GNUC__
 #define CZ80_USE_JUMPTABLE      1
 #else
@@ -71,6 +71,9 @@ extern "C" {
 // Emulate the YF and XF flags exactly.
 // This also enables proper WZ register emulation.
 #define CZ80_EXACT              1
+// Emulate the "R" register exactly.
+// Reference: http://www.z80.info/zip/z80-documented.pdf
+#define CZ80_EXACT_R            1
 
 // use zR8 for B/C/D/E/H/L registers only
 // use zR16 for BC/DE/HL registers only
