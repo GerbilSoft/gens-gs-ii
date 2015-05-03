@@ -220,7 +220,7 @@ void VdpSpriteMaskingTest::SetUp(void)
 	m_vdp->dbg_setReg(0x0C, reg0C);
 
 	// Load VRam.
-	ASSERT_EQ(loadVRam(mode.screenMode), 0)
+	ASSERT_EQ(0, loadVRam(mode.screenMode))
 		<< "Load VRAM for screen mode "
 		<< (mode.screenMode == SCREEN_MODE_H32 ? "H32" : "H40");
 }
