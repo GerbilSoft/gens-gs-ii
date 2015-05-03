@@ -215,8 +215,7 @@ LibGens::Rom *VdpFIFOTesting::loadRom(void)
 		if (in_pos >= in_len)
 			break;
 		strm.avail_in = (in_len - in_pos);
-		// TODO: Define ZLIB_CONST in ZLIB_CFLAGS in CMake.
-		strm.next_in = (Bytef*)&in[in_pos];
+		strm.next_in = &in[in_pos];
 
 		// Run inflate() on input until the output buffer is not full.
 		do {

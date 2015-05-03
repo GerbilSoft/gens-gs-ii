@@ -85,3 +85,7 @@ ADD_LIBRARY(zomg STATIC
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(zomg)
 TARGET_LINK_LIBRARIES(zomg ${MINIZIP_LIBRARY} ${PNG_LIBRARY})
+
+# Set the compile definitions.
+# Set the compile definitions.
+ADD_DEFINITIONS(${ZLIB_DEFINITIONS})

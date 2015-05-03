@@ -242,6 +242,9 @@ IF(WIN32)
 	TARGET_LINK_LIBRARIES(gens version)
 ENDIF(WIN32)
 
+# Set the compile definitions.
+ADD_DEFINITIONS(${ZLIB_DEFINITIONS})
+
 # Test suite.
 IF(BUILD_TESTING)
 	ADD_SUBDIRECTORY(tests)
