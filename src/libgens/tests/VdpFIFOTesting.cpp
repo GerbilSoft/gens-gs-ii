@@ -232,6 +232,7 @@ LibGens::Rom *VdpFIFOTesting::loadRom(void)
 					// fall through
 				case Z_DATA_ERROR:
 				case Z_MEM_ERROR:
+				case Z_STREAM_ERROR:
 					// Error occurred while decoding the stream.
 					inflateEnd(&strm);
 					fprintf(stderr, "ERR: %d\n", ret);
