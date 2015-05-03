@@ -80,6 +80,7 @@ namespace VdpTypes {
 			/**
 			 * Register 3: Pattern name table base address for Window.
 			 * NOTE: WD16 is only valid in 128 KB mode.
+			 * NOTE: WD11 is ignored in H40.
 			 * [   x WD16 WD15 WD14 WD13 WD12 WD11    x]
 			 */
 			uint8_t Pat_Win_Adr;
@@ -94,6 +95,7 @@ namespace VdpTypes {
 			/**
 			 * Register 5: Sprite Attribute Table base address.
 			 * NOTE: AT16 is only valid in 128 KB mode.
+			 * NOTE: AT9 is ignored in H40.
 			 * [AT16 AT15 AT14 AT13 AT12 AT11 AT10  AT9]
 			 */
 			uint8_t Spr_Att_Adr;
