@@ -469,11 +469,14 @@ on NTSC models.</string>
               <item>
                <widget class="QCheckBox" name="chkZeroLengthDMA">
                 <property name="toolTip">
-                 <string>The Genesis VDP has a bug where a DMA transfer with a length
-of 0 results in a transfer of 128 KB. Older versions of Gens did
-not handle this properly, and simply ignored zero-length
-transfers. This was incorrectly used by some hacks, so those
-hacks will break in emulators that handle this correctly.
+                 <string>
+The Genesis VDP doesn't check the DMA transfer length until after
+it decrements it. If the transfer length is 0, this means it will
+wrap around to 0xFFFF (65535), resulting in a transfer of 128 KB.
+Older versions of Gens did not handle this properly, and simply
+ignored zero-length transfers. This was incorrectly used by some
+hacks, so those hacks will break in emulators that handle this
+function correctly.
 
 If you want to play one of these hacks, enable this option.
 Be warned that it may break commercial games and other
@@ -500,21 +503,34 @@ this option will more accurately simulate the Genesis 3.</string>
                 </property>
                </widget>
               </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="chkUpdatePaletteInVBlankOnly">
-             <property name="toolTip">
-              <string>If enabled, the palette will only be updated during the
+              <item>
+               <widget class="QCheckBox" name="chkUpdatePaletteInVBlankOnly">
+                <property name="toolTip">
+                 <string>If enabled, the palette will only be updated during the
 Vertical Blanking interval. This simulates the behavior of
 the Genecyst emulator, which e.g. only rendered underwater
 levels using the underwater palette if the entire screen
 was submerged.</string>
-             </property>
-             <property name="text">
-              <string>&amp;Update the palette in VBlank only.</string>
-             </property>
+                </property>
+                <property name="text">
+                 <string>&amp;Update the palette in VBlank only.</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="chkEnableInterlacedMode">
+                <property name="toolTip">
+                 <string>Disabling Interlaced mode will result in garbage appearing
+on the screen if a game attempts to use it. This simulates
+the behavior of the Genecyst emulator when playing games
+that used Interlaced mode, e.g. Sonic 2's 2P VS mode.</string>
+                </property>
+                <property name="text">
+                 <string>Enable &amp;Interlaced mode.</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </widget>
            </item>
            <item>
@@ -1245,6 +1261,7 @@ This option requires a valid TMSS ROM in order to function properly.</string>
   <tabstop>chkZeroLengthDMA</tabstop>
   <tabstop>chkVScrollBug</tabstop>
   <tabstop>chkUpdatePaletteInVBlankOnly</tabstop>
+  <tabstop>chkEnableInterlacedMode</tabstop>
   <tabstop>cboRegionCurrent</tabstop>
   <tabstop>lstRegionDetect</tabstop>
   <tabstop>btnRegionDetectUp</tabstop>

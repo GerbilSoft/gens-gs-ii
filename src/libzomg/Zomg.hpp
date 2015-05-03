@@ -29,20 +29,26 @@
 
 #include "ZomgBase.hpp"
 
-// MiniZip
-#include "minizip/zip.h"
-#include "minizip/unzip.h"
-
 namespace LibZomg {
 
 class ZomgIni;
-
+class ZomgPrivate;
 class Zomg : public ZomgBase
 {
 	public:
 		Zomg(const utf8_str *filename, ZomgFileMode mode);
 		virtual ~Zomg(void);
 
+	protected:
+		friend class ZomgPrivate;
+		ZomgPrivate *const d;
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibZomg-specific version of Q_DISABLE_COPY().
+		Zomg(const Zomg &);
+		Zomg &operator=(const Zomg &);
+
+	public:
 		virtual void close(void) override;
 
 		/**
@@ -64,20 +70,20 @@ class Zomg : public ZomgBase
 
 		/**
 		 * Load the preview image.
-		 * @param img_buf Image buffer.
-		 * @param siz Size of the image buffer.
-		 * @return Bytes read on success; negative on error.
+		 * @param img_data Image data. (Caller must free img_data->data.)
+		 * @return 0 on success; non-zero on error.
 		 */
-		virtual int loadPreview(void *img_buf, size_t siz) override;
+		virtual int loadPreview(_Zomg_Img_Data_t *img_data) override;
 
 		// VDP
 		virtual int loadVdpReg(uint8_t *reg, size_t siz) override;
-		virtual int loadVdpCtrl_8(_Zomg_VdpCtrl_8_t *ctrl) override;
-		virtual int loadVdpCtrl_16(_Zomg_VdpCtrl_16_t *ctrl) override;
+		virtual int loadVdpCtrl_8(_Zomg_VDP_ctrl_8_t *ctrl) override;
+		virtual int loadVdpCtrl_16(_Zomg_VDP_ctrl_16_t *ctrl) override;
 		virtual int loadVRam(void *vram, size_t siz, ZomgByteorder_t byteorder) override;
 		virtual int loadCRam(_Zomg_CRam_t *cram, ZomgByteorder_t byteorder) override;
 		/// MD-specific
 		virtual int loadMD_VSRam(uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder) override;
+		virtual int loadMD_VDP_SAT(uint16_t *vdp_sat, size_t siz, ZomgByteorder_t byteorder) override;
 
 		// Audio
 		virtual int loadPsgReg(_Zomg_PsgSave_t *state) override;
@@ -124,20 +130,20 @@ class Zomg : public ZomgBase
 
 		/**
 		 * Save the preview image.
-		 * @param img_buf Image buffer. (Must have a PNG image.)
-		 * @param siz Size of the image buffer.
+		 * @param img_data Image data.
 		 * @return 0 on success; non-zero on error.
 		 */
-		virtual int savePreview(const void *img_buf, size_t siz) override;
+		virtual int savePreview(const _Zomg_Img_Data_t *img_data) override;
 
 		// VDP
 		virtual int saveVdpReg(const uint8_t *reg, size_t siz) override;
-		virtual int saveVdpCtrl_8(const _Zomg_VdpCtrl_8_t *ctrl) override;
-		virtual int saveVdpCtrl_16(const _Zomg_VdpCtrl_16_t *ctrl) override;
+		virtual int saveVdpCtrl_8(const _Zomg_VDP_ctrl_8_t *ctrl) override;
+		virtual int saveVdpCtrl_16(const _Zomg_VDP_ctrl_16_t *ctrl) override;
 		virtual int saveVRam(const void *vram, size_t siz, ZomgByteorder_t byteorder) override;
 		virtual int saveCRam(const _Zomg_CRam_t *cram, ZomgByteorder_t byteorder) override;
 		/// MD-specific
 		virtual int saveMD_VSRam(const uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder) override;
+		virtual int saveMD_VDP_SAT(const void *vdp_sat, size_t siz, ZomgByteorder_t byteorder) override;
 
 		// Audio
 		virtual int savePsgReg(const _Zomg_PsgSave_t *state) override;
@@ -163,20 +169,6 @@ class Zomg : public ZomgBase
 		virtual int saveEEPRomCtrl(const _Zomg_EPR_ctrl_t *ctrl) override;
 		virtual int saveEEPRomCache(const uint8_t *cache, size_t siz) override;
 		virtual int saveEEPRom(const uint8_t *eeprom, size_t siz) override;
-
-	protected:
-		unzFile m_unz;
-		zipFile m_zip;
-
-		// Current time in Zip format.
-		// NOTE: Only used when saving ZOMG files.
-		zip_fileinfo m_zipfi;
-
-		int initZomgLoad(const utf8_str *filename);
-		int initZomgSave(const utf8_str *filename);
-
-		int loadFromZomg(const utf8_str *filename, void *buf, int len);
-		int saveToZomg(const utf8_str *filename, const void *buf, int len);
 };
 
 }

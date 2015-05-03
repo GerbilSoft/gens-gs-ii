@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -109,6 +109,10 @@ EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
 	// TODO: Move Vdp::SysStatus to EmuContext.
 	m_vdp->SysStatus.data = 0;
 	m_vdp->SysStatus.Genesis = 1;
+	// If TMSS is disabled, initialize the VDP registers.
+	if (!M68K_Mem::tmss_reg.isTmssEnabled()) {
+		m_vdp->doFakeBootRomInit();
+	}
 
 	// Reset the controllers.
 	m_ioManager->reset();
@@ -185,10 +189,15 @@ int EmuMD::hardReset(void)
 	// This includes clearing RAM.
 	M68K::InitSys(M68K::SYSID_MD);
 	Z80::ReInit();
-	m_vdp->reset();
 	SoundMgr::ms_Psg.reset();
 	SoundMgr::ms_Ym2612.reset();
 
+	// Reset the VDP.
+	m_vdp->reset();
+	// If TMSS is disabled, initialize the VDP registers.
+	if (!M68K_Mem::tmss_reg.isTmssEnabled()) {
+		m_vdp->doFakeBootRomInit();
+	}
 	// Make sure the VDP's video mode bit is set properly.
 	m_vdp->setVideoMode(m_sysVersion.isPal());
 
@@ -343,42 +352,39 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 	M68K_Mem::Cycles_Z80 += M68K_Mem::CPL_Z80;
 
 	if (m_vdp->DMAT_Length)
-		M68K::AddCycles(m_vdp->Update_DMA());
+		M68K::AddCycles(m_vdp->updateDMA());
 
 	switch (LineType) {
 		case LINETYPE_ACTIVEDISPLAY:
 			// In visible area.
-			m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_HBLANK, true);	// HBlank = 1
+			m_vdp->setStatusBit(VdpStatus::VDP_STATUS_HBLANK, true);	// HBlank = 1
 			M68K::Exec(M68K_Mem::Cycles_M68K - 404);
-			m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_HBLANK, false);	// HBlank = 0
+			m_vdp->setStatusBit(VdpStatus::VDP_STATUS_HBLANK, false);	// HBlank = 0
 
-			if (--m_vdp->HInt_Counter < 0) {
-				m_vdp->VDP_Int |= 0x4;
-				m_vdp->Update_IRQ_Line();
-				m_vdp->HInt_Counter = m_vdp->VDP_Reg.m5.H_Int;
-			}
-
+			// Decrement the HInt counter.
+			// If it goes below 0, an HBLANK interrupt will occur.
+			// The counter will then be reloaded.
+			m_vdp->decrementHIntCounter(true);
 			break;
 
 		case LINETYPE_VBLANKLINE: {
 			// VBlank line!
-			if (--m_vdp->HInt_Counter < 0) {
-				m_vdp->VDP_Int |= 0x4;
-				m_vdp->Update_IRQ_Line();
-			}
+			// Decrement the HInt counter.
+			// If it goes below 0, an HBLANK interrupt will occur.
+			m_vdp->decrementHIntCounter(false);
 
 #if 0
 			// TODO: Congratulations! (LibGens)
 			CONGRATULATIONS_PRECHECK();
 #endif
 			// VBlank = 1 et HBlank = 1 (retour de balayage vertical en cours)
-			m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_HBLANK, true);
-			m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_VBLANK, true);
+			m_vdp->setStatusBit(VdpStatus::VDP_STATUS_HBLANK, true);
+			m_vdp->setStatusBit(VdpStatus::VDP_STATUS_VBLANK, true);
 
 			// If we're using NTSC V30 and this is an "even" frame,
 			// don't set the VBlank flag.
 			if (m_vdp->VDP_Lines.NTSC_V30.VBlank_Div != 0)
-				m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_VBLANK, false);
+				m_vdp->setStatusBit(VdpStatus::VDP_STATUS_VBLANK, false);
 
 			M68K::Exec(M68K_Mem::Cycles_M68K - 360);
 			Z80::Exec(168);
@@ -387,12 +393,10 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 			CONGRATULATIONS_POSTCHECK();
 #endif
 
-			m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_HBLANK, false);	// HBlank = 0
+			m_vdp->setStatusBit(VdpStatus::VDP_STATUS_HBLANK, false);	// HBlank = 0
 			if (m_vdp->VDP_Lines.NTSC_V30.VBlank_Div == 0) {
-				m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_F, true);	// V Int happened
-
-				m_vdp->VDP_Int |= 0x8;
-				m_vdp->Update_IRQ_Line();
+				m_vdp->setStatusBit(VdpStatus::VDP_STATUS_F, true);	// V Int happened
+				m_vdp->updateIRQLine(0x8);
 
 				// Z80 interrupt.
 				// TODO: Does this trigger on all VBlanks,
@@ -410,7 +414,7 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 
 	if (VDP) {
 		// VDP needs to be updated.
-		m_vdp->Render_Line();
+		m_vdp->renderLine();
 	}
 
 	M68K::Exec(M68K_Mem::Cycles_M68K);
@@ -451,22 +455,18 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 #endif
 
 	// Set the VRam flag to force a VRam update.
-	m_vdp->MarkVRamDirty();
+	// FIXME: Is this necessary?
+	//m_vdp->MarkVRamDirty();
 
-	// Interlaced frame status.
-	// Both Interlaced Modes 1 and 2 set this bit on odd frames.
-	// This bit is cleared on even frames and if not running in interlaced mode.
-	if (m_vdp->VDP_Reg.m5.Set4 & 0x06)
-		m_vdp->Reg_Status.toggleBit(VdpStatus::VDP_STATUS_ODD);
-	else
-		m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_ODD, false);
+	// Start the frame.
+	// This initializes the "Interlaced" flag as well as
+	// the HINT counter, and clears the VBLANK flag.
+	m_vdp->startFrame();
 
 	/** Main execution loops. **/
 
 	/** Visible line 0. **/
 	m_vdp->VDP_Lines.currentLine = 0;
-	m_vdp->HInt_Counter = m_vdp->VDP_Reg.m5.H_Int;			// Initialize HInt_Counter.
-	m_vdp->Reg_Status.setBit(VdpStatus::VDP_STATUS_VBLANK, false);	// Clear VBlank flag.
 
 	/** Loop 1: Active display. **/
 	do {

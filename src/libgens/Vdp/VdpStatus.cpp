@@ -38,7 +38,9 @@ VdpStatus::VdpStatus(bool isPal)
  */
 void VdpStatus::reset(bool isPal)
 {
-	m_status = VDP_STATUS_EMPTY;
+	// High bits are always 001101.
+	// Also, FIFO is empty on startup.
+	m_status = 0x3400 | VDP_STATUS_EMPTY;
 	if (isPal)
 		m_status |= VDP_STATUS_PAL;
 }
@@ -55,21 +57,15 @@ uint16_t VdpStatus::read(void)
 	// The original status register will be returned to the CPU.
 	const uint16_t status_orig = m_status;
 	
-	// Toggle the upper 8 bits of VDP_Status.
-	// This sort-of simulates the unimplemented bits,
-	// and toggles the EMPTY/FULL FIFO flags.
+	// Toggle the VDP FIFO flags.
+	// This is needed for some games that expect the FIFO
+	// state to change instead of remaining perpetually
+	// empty or half-full.
 	// TODO: Implement the FIFO.
-	m_status ^= 0xFF00;
+	m_status ^= (VDP_STATUS_FULL | VDP_STATUS_EMPTY);
 	
 	// Mask the SOVR ("Sprite Overflow") and C ("Collision between non-zero pixels in two sprites") bits.
 	m_status &= ~(VDP_STATUS_SOVR | VDP_STATUS_COLLISION);
-	
-	// Check if we're currently in VBlank.
-	if (!(m_status & VDP_STATUS_VBLANK))
-	{
-		// Not in VBlank. Mask the F bit. ("Vertical Interrupt Happened")
-		m_status &= ~VDP_STATUS_F;
-	}
 	
 	// Return the original VDP status.
 	return status_orig;

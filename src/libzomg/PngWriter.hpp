@@ -1,10 +1,8 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
- * VdpRend_static.hpp: VDP rendering class. (Static member init)           *
+ * libzomg: Zipped Original Memory from Genesis.                           *
+ * PngWriter.hpp: PNG image writer.                                        *
  *                                                                         *
- * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
- * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,33 +19,50 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_MD_VDPREND_STATIC_HPP__
-#define __LIBGENS_MD_VDPREND_STATIC_HPP__
+#ifndef __LIBZOMG_PNGWRITER_HPP__
+#define __LIBZOMG_PNGWRITER_HPP__
 
-#include "Vdp.hpp"
-#include "VdpPalette.hpp"
+#include "minizip/zip.h"
 
-namespace LibGens
+// Image data struct.
+extern "C" struct _Zomg_Img_Data_t;
+
+namespace LibZomg {
+
+class PngWriterPrivate;
+class PngWriter
 {
+	public:
+		PngWriter();
+		~PngWriter();
 
-/** Static member initialization. **/
+	protected:
+		friend class PngWriterPrivate;
+		PngWriterPrivate *const d;
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibZomg-specific version of Q_DISABLE_COPY().
+		PngWriter(const PngWriter &);
+		PngWriter &operator=(const PngWriter &);
 
-// Palette manager.
-VdpPalette Vdp::m_palette;
+	public:
+		/**
+		 * Write an image to a PNG file.
+		 * @param img_data Image data.
+		 * @param filename PNG file.
+		 * @return 0 on success; negative errno on error.
+		 */
+		int writeToFile(const _Zomg_Img_Data_t *img_data, const char *filename);
 
-// MD framebuffer.
-MdFb Vdp::MD_Screen;
-
-// Sprite structs.
-Vdp::Sprite_Struct_t Vdp::Sprite_Struct[128];
-unsigned int Vdp::Sprite_Visible[128];
-
-// VDP layer control.
-unsigned int Vdp::VDP_Layers = VdpTypes::VDP_LAYERS_DEFAULT;
-
-// Line buffer for current line.
-Vdp::LineBuf_t Vdp::LineBuf;
+		/**
+		 * Write an image to a PNG file in a ZIP file.
+		 * @param img_data Image data.
+		 * @param zfile ZIP file. (Must have a file open for writing.)
+		 * @return 0 on success; negative errno on error.
+		 */
+		int writeToZip(const _Zomg_Img_Data_t *img_data, zipFile zfile);
+};
 
 }
 
-#endif /* __LIBGENS_MD_VDPREND_STATIC_HPP__ */
+#endif /* __LIBZOMG_PNGWRITER_HPP__ */

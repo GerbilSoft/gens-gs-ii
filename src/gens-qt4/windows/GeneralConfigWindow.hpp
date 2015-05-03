@@ -135,6 +135,7 @@ class GeneralConfigWindow : public QMainWindow
 		void on_chkZeroLengthDMA_toggled(bool checked);
 		void on_chkVScrollBug_toggled(bool checked);
 		void on_chkUpdatePaletteInVBlankOnly_toggled(bool checked);
+		void on_chkEnableInterlacedMode_toggled(bool checked);
 
 		/** System. **/
 		void on_cboRegionCurrent_currentIndexChanged(int index);

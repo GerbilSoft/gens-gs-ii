@@ -5,7 +5,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -30,8 +30,7 @@
 // TODO: Do the Gens Logo effect in GL?
 #include "libgens/Effects/CrazyEffect.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 IdleThread::IdleThread(QObject *parent)
 	: QThread(parent)
@@ -104,9 +103,12 @@ void IdleThread::run(void)
 				if (!m_crazyEffect)
 					m_crazyEffect = new LibGens::CrazyEffect();
 
+				// FIXME: MdFb?
+#if 0
 				m_crazyEffect->run(
 					(LibGens::CrazyEffect::ColorMask)gqt4_cfg->getInt(
 						QLatin1String("Intro_Effect/introColor")));
+#endif
 				emit frameDone();
 				usleep(20000);
 				break;

@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -26,11 +26,10 @@
 
 #include <stdint.h>
 
-namespace LibGens
-{
+namespace LibGens {
 
-namespace VdpTypes
-{
+namespace VdpTypes {
+
 	/**
 	 * Video RAM.
 	 * SMS/GG: 16 KB.
@@ -66,41 +65,17 @@ namespace VdpTypes
 	};
 
 	/**
-	 * Interlaced display mode. (See VdpReg_t.m5.Set4)
-	 * Source: http://wiki.megadrive.org/index.php?title=VDPRegs_Addendum (Jorge)
+	 * Color RAM. (32X)
 	 */
-	enum Interlaced_t {
-		/**
-		 * Interlaced mode is off. [LSM1 LSM0] == [0 0]
-		 */
-		INTERLACED_OFF		= 0,
-
-		/**
-		 * Interlaced Mode 1. [LSM1 LSM0] == [0 1]
-		 * The display is interlaced, but the image
-		 * is exactly the same as INTERLACED_OFF.
-		 */
-		INTERLACED_MODE_1	= 1,	// [LSM1 LSM0] == [0 1]
-
-		/**
-		 * Interlaced mode is off. [LSM1 LSM0] = [1 0]
-		 * Although LSM1 is set, the screen is still non-interlaced,
-		 * and the image is regular resolution.
-		 */
-		INTERLACED_OFF2		= 2,
-
-		/**
-		 * Interlaced Mode 2. [LSM1 LSM0] = [1 1]
-		 * The display is interlaced, and the vertical resolution
-		 * is doubled. (x448, x480)
-		 */
-		INTERLACED_MODE_2	= 3,
+	union CRam_32X_t {
+		uint8_t  u8[256<<1];
+		uint16_t u16[256];
 	};
 
 	/**
 	 * Interlaced rendering mode.
 	 * This controls the way INTERLACED_MODE_2 is rendered onscreen.
-	 * TODO: Make Interlaced_t and IntRend_Mode_t less confusing.
+	 * TODO: Make IntRend_Mode_t less confusing.
 	 */
 	enum IntRend_Mode_t {
 		INTREND_EVEN	= 0,	// Even lines only. (Old Gens)
@@ -197,8 +172,18 @@ namespace VdpTypes
 		 * This is similar to Genecyst.
 		 */
 		bool updatePaletteInVBlankOnly;
+
+		/**
+		 * Enable Interlaced mode.
+		 * This allows Interlaced Mode 2 to function normally.
+		 * If disabled, this will result in garbage appearing
+		 * on the screen if a game attempts to use IM2, e.g.
+		 * Sonic 2's 2P VS mode.
+		 * This is similar to Genecyst.
+		 */
+		bool enableInterlacedMode;
 	};
-	
+
 	// VDP layer flags.
 	enum VdpLayerFlags {
 		VDP_LAYER_SCROLLA_LOW		= (1 << 0),
@@ -221,6 +206,73 @@ namespace VdpTypes
 			VDP_LAYER_SCROLLB_HIGH	|
 			VDP_LAYER_SPRITE_LOW	|
 			VDP_LAYER_SPRITE_HIGH);
+
+	/**
+	 * VDP mode.
+	 * Bitfield using the M1-M5 bits from the VDP registers.
+	 */
+	enum VDP_Mode_t {
+		// Individual mode bits.
+		VDP_MODE_M1 = (1 << 0),	// Text
+		VDP_MODE_M2 = (1 << 1),	// Multicolor
+		VDP_MODE_M3 = (1 << 2),	// Graphic II
+		VDP_MODE_M4 = (1 << 3),	// Sega Master System
+		VDP_MODE_M5 = (1 << 4),	// Sega Mega Drive
+
+		// TMS9918 modes.
+		VDP_MODE_TMS_GRAPHIC_I		= 0,
+		VDP_MODE_TMS_TEXT		= VDP_MODE_M1,
+		VDP_MODE_TMS_MULTICOLOR		= VDP_MODE_M2,
+		VDP_MODE_TMS_GRAPHIC_II		= VDP_MODE_M3,
+		VDP_MODE_TMS_INVALID_M1_M2	= VDP_MODE_M1 | VDP_MODE_M2,
+		VDP_MODE_TMS_TEXT_EXT		= VDP_MODE_M1 | VDP_MODE_M3,
+		VDP_MODE_TMS_MULTICOLOR_EXT	= VDP_MODE_M2 | VDP_MODE_M3,
+		VDP_MODE_TMS_INVALID_M1_M2_M3	= VDP_MODE_M1 | VDP_MODE_M2 | VDP_MODE_M3,
+
+		// Sega Master System II modes.
+		VDP_MODE_M4_224 = VDP_MODE_M4 | VDP_MODE_M3 | VDP_MODE_M1,
+		VDP_MODE_M4_240 = VDP_MODE_M4 | VDP_MODE_M3 | VDP_MODE_M2,
+	};
+
+	// VDP models.
+	enum VDP_Model_t {
+		// TMS9918A
+		// Used on SG-1000, SG-1000 MkII,
+		// Othello MultiVision, ColecoVision,
+		// and others.
+		VDP_MODEL_TMS9918A = 0,
+
+		// Sega Master System, model 1 (315-5124)
+		VDP_MODEL_SMS1,
+
+		// Sega Master System, model 2 (315-5246)
+		// Fixes 'unused' register bits,
+		// and adds 224-line and 240-line modes.
+		VDP_MODEL_SMS2,
+
+		// Sega Game Gear (315-5378)
+		// Same as SMS2, but has expanded CRAM.
+		VDP_MODEL_GG,
+
+		// Sega Mega Drive (315-5313), in MkIII mode.
+		// Same as SMS2, except: [see msvdp-20021112.txt]
+		// - Does not support 224-line or 240-line modes.
+		// - TMS9918A modes do not work. (screen is black)
+		// - First byte of command word is latched, and
+		//   is not processed until the next byte is received.
+		// - Data port writes do not update the read buffer.
+		// - Data writes always go to CRAM if CD1=1. (CD0 is ignored)
+		//   Other VDP models require CD1=1, CD0=1.
+		// - MAG bit does not function.
+		// - Mode 5 is supported, but with limitations.
+		VDP_MODEL_MD_PBC,
+
+		// Sega Mega Drive (315-5313) in native mode.
+		// Uses a completely different 16-bit interface.
+		VDP_MODEL_MD,
+
+		VDP_MODEL_MAX
+	};
 }
 
 }

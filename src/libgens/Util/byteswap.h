@@ -75,6 +75,22 @@
 	#define cpu_to_le32(x)	__swab32(x)
 #endif
 
+/**
+ * Address inversion flags for byteswapped addressing.
+ * - U16DATA_U8_INVERT: Access U8 data in host-endian 16-bit data.
+ * - U32DATA_U8_INVERT: Access U8 data in host-endian 32-bit data.
+ * - U32DATA_U16_INVERT: Access U16 data in host-endian 32-bit data.
+ */
+#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+	#define U16DATA_U8_INVERT 1
+	#define U32DATA_U8_INVERT 3
+	#define U32DATA_U16_INVERT 1
+#else /* GENS_BYTEORDER = GENS_BIG_ENDIAN */
+	#define U16DATA_U8_INVERT 0
+	#define U32DATA_U8_INVERT 0
+	#define U32DATA_U16_INVERT 0
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

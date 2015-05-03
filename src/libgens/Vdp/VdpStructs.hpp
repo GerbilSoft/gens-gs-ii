@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -31,11 +31,10 @@
 // It's located in the binary directory.
 #include "libgens/Util/byteorder.h"
 
-namespace LibGens
-{
+namespace LibGens {
 
-namespace VdpStructs
-{
+namespace VdpStructs {
+
 	// Sprite attribute table entry. (M5)
 	// NOTE: VRAM is 16-bit host-endian.
 	#pragma pack(1)
@@ -66,6 +65,25 @@ namespace VdpStructs
 		} xn[64];
 	};
 	#pragma pack()
+
+	// Sprite attribute table entry. (TMS9918A)
+	// NOTE: VRAM is 16-bit host-endian.
+	#pragma pack(1)
+	struct PACKED SprEntry_tms {
+#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+		uint8_t x;              // X position.
+		uint8_t y;              // Y position, plus one.
+		uint8_t color_ec;       // Color and EC bit.
+		uint8_t sprite;         // Sprite pattern.
+#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
+		uint8_t y;              // Y position, plus one.
+		uint8_t x;              // X position.
+		uint8_t sprite;         // Sprite pattern.
+		uint8_t color_ec;       // Color and EC bit.
+#endif
+	};
+	#pragma pack()
+
 }
 
 }

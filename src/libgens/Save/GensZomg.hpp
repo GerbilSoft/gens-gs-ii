@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -38,11 +38,14 @@
 // Emulation context.
 #include "../EmuContext.hpp"
 
-namespace LibGens
-{
+// Image data struct.
+// Used for preview images.
+extern "C" struct _Zomg_Img_Data_t;
+
+namespace LibGens {
 
 /**
- * ZomgLoad(): Load the current state from a ZOMG file.
+ * Load the current state from a ZOMG file.
  * @param filename	[in] ZOMG file.
  * @param context	[out] Emulation context.
  * @return 0 on success; non-zero on error.
@@ -51,16 +54,13 @@ namespace LibGens
 int ZomgLoad(const utf8_str *filename, EmuContext *context);
 
 /**
- * ZomgSave(): Save the current state to a ZOMG file.
+ * Save the current state to a ZOMG file.
  * @param filename	[in] ZOMG file.
  * @param context	[in] Emulation context.
- * @param img_buf	[in, opt] Buffer containing PNG image for the ZOMG preview image.
- * @param img_siz	[in, opt] Size of img_buf.
  * @return 0 on success; non-zero on error.
  * TODO: Error code constants.
  */
-int ZomgSave(const utf8_str *filename, const EmuContext *context,
-	     const void *img_buf, size_t img_siz);
+int ZomgSave(const utf8_str *filename, const EmuContext *context);
 
 }
 

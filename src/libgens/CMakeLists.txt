@@ -73,9 +73,6 @@ SET(libgens_SRCS
 	credits.c
 	lg_osd.c
 	sound/SoundMgr.cpp
-	Decompressor/Decompressor.cpp
-	Decompressor/DcGzip.cpp
-	Decompressor/DcZip.cpp
 	EmuContext.cpp
 	Data/32X/fw_32x.c
 	Util/MdFb.cpp
@@ -90,21 +87,28 @@ SET(libgens_SRCS
 SET(libgens_VDP_SRCS
 	Vdp/Vdp.cpp
 	Vdp/VdpIo.cpp
+	Vdp/VdpDma.cpp
 	Vdp/VdpRend.cpp
 	Vdp/VdpRend_m5.cpp
 	Vdp/VdpPalette.cpp
+	Vdp/VdpPalette_recalc.cpp
+	Vdp/VdpPalette_update.cpp
 	Vdp/VdpRend_Err.cpp
 	Vdp/VGA_charset.c
 	Vdp/VdpStatus.cpp
+	Vdp/VdpDebug.cpp
+	Vdp/VdpReg.cpp
+	Vdp/VdpRend_m4.cpp
+	Vdp/VdpRend_tms.cpp
+	Vdp/VdpCache.cpp
 	)
 
 # TODO: All headers, or just public headers?
 SET(libgens_VDP_H
 	Vdp/Vdp.hpp
-	Vdp/VdpIo_static.hpp
-	Vdp/VdpIo_static.hpp
-	Vdp/VdpRend_static.hpp
+	Vdp/Vdp_p.hpp
 	Vdp/VdpPalette.hpp
+	Vdp/VdpPalette_p.hpp
 	Vdp/VdpRend_Err_p.hpp
 	Vdp/VGA_charset.h
 	Vdp/VdpStatus.hpp
@@ -148,21 +152,55 @@ SET(libgens_IO_H
 	IO/IoMasterTap.hpp
 	)
 
+# TODO: Completely rework the decompressor subsystem.
+SET(libgens_DECOMPRESSOR_SRCS
+	Decompressor/Decompressor.cpp
+	Decompressor/DcGzip.cpp
+	Decompressor/DcZip.cpp
+	Decompressor/DcMemFake.cpp
+	)
+SET(libgens_DECOMPRESSOR_H
+	Decompressor/Decompressor.hpp
+	Decompressor/DcGzip.hpp
+	Decompressor/DcZip.hpp
+	Decompressor/DcMemFake.hpp
+	)
+
 IF(HAVE_LZMA)
-	SET(libgens_OPTIONAL_SRCS Decompressor/Dc7z.cpp)
-ELSE()
-	SET(libgens_OPTIONAL_SRCS "")
+	SET(libgens_DECOMPRESSOR_SRCS
+		${libgens_DECOMPRESSOR_SRCS}
+		Decompressor/Dc7z.cpp
+		)
+	SET(libgens_DECOMPRESSOR_H
+		${libgens_DECOMPRESSOR_H}
+		Decompressor/Dc7z.hpp
+		)
 ENDIF()
 
 # Platform-specific sources.
 IF(WIN32)
-	SET(libgens_COMPAT_SRCS
+	SET(libgens_DECOMPRESSOR_SRCS
+		${libgens_DECOMPRESSOR_SRCS}
 		Decompressor/DcRar_Win32.cpp
 		Decompressor/UnRAR_dll.cpp
+		)
+	SET(libgens_DECOMPRESSOR_H
+		${libgens_DECOMPRESSOR_H}
+		Decompressor/DcRar.hpp
+		Decompressor/UnRAR_dll.hpp
+		)
+	SET(libgens_COMPAT_SRCS
 		Win32/W32U_mini.c
 		)
 ELSE()
-	SET(libgens_COMPAT_SRCS Decompressor/DcRar_Unix.cpp)
+	SET(libgens_DECOMPRESSOR_SRCS
+		${libgens_DECOMPRESSOR_SRCS}
+		Decompressor/DcRar_Unix.cpp
+		)
+	SET(libgens_DECOMPRESSOR_H
+		${libgens_DECOMPRESSOR_H}
+		Decompressor/DcRar.hpp
+		)
 ENDIF()
 
 ######################
@@ -175,7 +213,8 @@ ADD_LIBRARY(gens STATIC
 	${libgens_VDP_H}
 	${libgens_IO_SRCS}
 	${libgens_IO_H}
-	${libgens_OPTIONAL_SRCS}
+	${libgens_DECOMPRESSOR_SRCS}
+	${libgens_DECOMPRESSOR_H}
 	${libgens_COMPAT_SRCS}
 	)
 INCLUDE(SetMSVCDebugPath)
@@ -204,6 +243,9 @@ IF(WIN32)
 	# - VerQueryValue()
 	TARGET_LINK_LIBRARIES(gens version)
 ENDIF(WIN32)
+
+# Set the compile definitions.
+ADD_DEFINITIONS(${ZLIB_DEFINITIONS})
 
 # Test suite.
 IF(BUILD_TESTING)

@@ -80,6 +80,7 @@ void GeneralConfigWindow::apply(void)
 		SetValByPath_bool("VDP/zeroLengthDMA", d->ui.chkZeroLengthDMA->isChecked());
 		SetValByPath_bool("VDP/vscrollBug", d->ui.chkVScrollBug->isChecked());
 		SetValByPath_bool("VDP/updatePaletteInVBlankOnly", d->ui.chkUpdatePaletteInVBlankOnly->isChecked());
+		SetValByPath_bool("VDP/enableInterlacedMode", d->ui.chkEnableInterlacedMode->isChecked());
 	}
 
 	/** System. **/
@@ -160,6 +161,8 @@ void GeneralConfigWindow::on_chkVScrollBug_toggled(bool checked)
 	{ GENERIC_OPTION("VDP/vscrollBug", checked); }
 void GeneralConfigWindow::on_chkUpdatePaletteInVBlankOnly_toggled(bool checked)
 	{ GENERIC_OPTION("VDP/updatePaletteInVBlankOnly", checked); }
+void GeneralConfigWindow::on_chkEnableInterlacedMode_toggled(bool checked)
+	{ GENERIC_OPTION("VDP/enableInterlacedMode", checked); }
 
 /** Sega Genesis. **/
 void GeneralConfigWindow::on_chkMDTMSS_toggled(bool checked)

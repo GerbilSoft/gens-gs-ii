@@ -1,10 +1,9 @@
 /***************************************************************************
- * gens-qt4: Gens Qt4 UI.                                                  *
- * Screenshot.hpp: Screenshot handler.                                     *
+ * libgens/tests: Gens Emulation Library. (Test Suite)                     *
+ * VdpFIFOTesting_data.h: VDP FIFO Test ROM.                               *
  *                                                                         *
- * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
- * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2015 by David Korth.                                      *
+ * Original ROM Copyright (c) 2013 by Nemesis.                             *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,53 +20,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_SCREENSHOT_HPP__
-#define __GENS_QT4_SCREENSHOT_HPP__
+#ifndef __LIBGENS_TESTS_VDPFIFOTESTING_DATA_H__
+#define __LIBGENS_TESTS_VDPFIFOTESTING_DATA_H__
 
-// LibGens includes.
-#include "libgens/Rom.hpp"
-#include "libgens/EmuContext.hpp"
+// C includes.
+#include <stdint.h>
 
-// Qt includes.
-#include <QtCore/QObject>
-#include <QtCore/QString>
-#include <QtGui/QImage>
-class QIODevice;
-class QImageWriter;
-
-namespace GensQt4
-{
-
-class Screenshot : public QObject
-{
-	Q_OBJECT
-	
-	public:
-		Screenshot(LibGens::Rom *rom, LibGens::EmuContext *context, QObject *parent = 0);
-		~Screenshot();
-		
-		QImage get(void);
-		int save(const QString &filename);
-		int save(QIODevice *device);
-	
-	protected:
-		LibGens::Rom *m_rom;
-		LibGens::EmuContext *m_context;
-		QImage m_img;
-		
-		void update(void);
-		int save_int(QImageWriter& writer);
-};
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * Get the internal image.
- * @return QImage with screenshot, or empty QImage if either ROM or EmuContext isn't set.
+ * ROM for VdpFIFOTesting.
+ * Original version; does NOT have the required patch to disable input.
+ *
+ * Data is gzipped; original size is 524,288.
  */
-inline QImage Screenshot::get(void)
-{
-	return m_img;
-}
+extern const uint8_t test_vdpfifotesting_rom[12004];
+static const unsigned int test_vdpfifotesting_rom_sz = 524288;
 
+#ifdef __cplusplus
 }
+#endif
 
-#endif /* __GENS_QT4_SCREENSHOT_HPP__ */
+#endif /* __LIBGENS_TESTS_VDPFIFOTESTING_DATA_H__ */

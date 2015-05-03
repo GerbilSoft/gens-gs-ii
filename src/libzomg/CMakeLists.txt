@@ -18,6 +18,10 @@ INCLUDE_DIRECTORIES(${MINIZIP_INCLUDE_DIR})
 INCLUDE(CheckLibraryExists)
 CHECK_LIBRARY_EXISTS(c localtime_r "" HAVE_LOCALTIME_R)	# libc: localtime_r()
 
+# libpng
+INCLUDE(CheckPNG)
+INCLUDE_DIRECTORIES(${PNG_INCLUDE_DIR})
+
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libzomg.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libzomg.h")
 
@@ -40,13 +44,47 @@ SET(libzomg_SRCS
 	ZomgSave.cpp
 	zomg_byteswap.c
 	ZomgIni.cpp
+	PngWriter.cpp
+	PngReader.cpp
+	)
+
+# Headers.
+SET(libzomg_H
+	ZomgBase.hpp
+	Zomg.hpp
+	Zomg_p.hpp
+	ZomgIni.hpp
+	PngWriter.hpp
+	PngReader.hpp
+	)
+
+# ZOMG struct headers.
+SET(libzomg_struct_H
+	zomg_byteswap.h
+	zomg_common.h
+	zomg_vdp.h
+	zomg_psg.h
+	zomg_ym2612.h
+	zomg_m68k.h
+	zomg_z80.h
+	zomg_md_io.h
+	zomg_md_z80_ctrl.h
+	zomg_md_time_reg.h
+	zomg_md_tmss_reg.h
 	)
 
 ######################
 # Build the library. #
 ######################
 
-ADD_LIBRARY(zomg STATIC ${libzomg_SRCS})
+ADD_LIBRARY(zomg STATIC
+	${libzomg_SRCS}
+	${libzomg_H}
+	${libzomg_struct_H}
+	)
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(zomg)
-TARGET_LINK_LIBRARIES(zomg ${MINIZIP_LIBRARY})
+TARGET_LINK_LIBRARIES(zomg ${MINIZIP_LIBRARY} ${PNG_LIBRARY})
+
+# Set the compile definitions.
+ADD_DEFINITIONS(${ZLIB_DEFINITIONS} ${PNG_DEFINITIONS})

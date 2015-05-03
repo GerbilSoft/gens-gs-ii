@@ -47,7 +47,7 @@ namespace LibGens { namespace Tests {
 class Z80Tests : public ::testing::Test
 {
 	protected:
-		Z80Tests() { }
+		Z80Tests() : m_Z80(nullptr) { }
 		virtual ~Z80Tests() { }
 
 		virtual void SetUp(void) override;
@@ -104,6 +104,7 @@ void Z80Tests::SetUp()
 
 	// Load BDOS.
 	FILE *f = fopen("bdos.bin", "rb");
+	ASSERT_TRUE(f != nullptr);
 	fread(&Ram_Z80[0xF000], 1, 1068, f);
 	fclose(f);
 
@@ -182,6 +183,7 @@ TEST_F(Z80Tests, zexdoc)
 {
 	// Load ZEXDOC.
 	FILE *f = fopen("zexdoc.com", "rb");
+	ASSERT_TRUE(f != nullptr);
 	fread(&Ram_Z80[0x0100], 1, 8585, f);
 	fclose(f);
 
@@ -207,6 +209,7 @@ TEST_F(Z80Tests, zexall)
 {
 	// Load ZEXALL.
 	FILE *f = fopen("zexall.com", "rb");
+	ASSERT_TRUE(f != nullptr);
 	fread(&Ram_Z80[0x0100], 1, 8585, f);
 	fclose(f);
 

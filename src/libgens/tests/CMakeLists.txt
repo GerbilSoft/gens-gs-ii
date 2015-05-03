@@ -10,6 +10,9 @@ INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../")
 # Google Test.
 INCLUDE_DIRECTORIES(${GTEST_INCLUDE_DIR})
 
+# Some tests use ZLIB.
+ADD_DEFINITIONS(${ZLIB_DEFINITIONS})
+
 # TestSuite base sources.
 SET(TESTSUITE_BASE_SRC
 	TestSuite.cpp
@@ -41,7 +44,7 @@ ADD_TEST(NAME test_VdpPalette_DAC_SMS
 ENDIF(NOT MSVC)
 
 # Byteswap test.
-ADD_EXECUTABLE(ByteswapTest ByteswapTest.cpp ${TESTSUITE_BASE_SRC})
+ADD_EXECUTABLE(ByteswapTest ByteswapTest.cpp)
 TARGET_LINK_LIBRARIES(ByteswapTest gens ${GTEST_LIBRARY})
 ADD_TEST(NAME ByteswapTest
 	COMMAND ByteswapTest)
@@ -51,7 +54,6 @@ INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 ADD_EXECUTABLE(VdpSpriteMaskingTest
 	VdpSpriteMaskingTest.cpp
 	VdpSpriteMaskingTest_data.c
-	${TESTSUITE_BASE_SRC}
 	)
 TARGET_LINK_LIBRARIES(VdpSpriteMaskingTest gens ${ZLIB_LIBRARY} ${GTEST_LIBRARY})
 ADD_TEST(NAME VdpSpriteMaskingTest
@@ -78,3 +80,13 @@ ADD_EXECUTABLE(PsgRegisterTest
 TARGET_LINK_LIBRARIES(PsgRegisterTest gens ${GTEST_LIBRARY})
 ADD_TEST(NAME PsgRegisterTest
 	COMMAND PsgRegisterTest)
+
+# VDP FIFO Testing
+INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+ADD_EXECUTABLE(VdpFIFOTesting
+	VdpFIFOTesting.cpp
+	VdpFIFOTesting_data.c
+	)
+TARGET_LINK_LIBRARIES(VdpFIFOTesting gens ${GTEST_LIBRARY})
+ADD_TEST(NAME VdpFIFOTesting
+	COMMAND VdpFIFOTesting)

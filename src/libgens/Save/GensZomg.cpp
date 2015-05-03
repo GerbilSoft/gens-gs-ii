@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -50,12 +50,22 @@
 #include "libzomg/zomg_md_z80_ctrl.h"
 #include "libzomg/zomg_md_tmss_reg.h"
 
+// ZOMG image data.
+#include "libzomg/img_data.h"
+
 // C includes.
 #include <stdint.h>
 
 // C includes. (C++ namespace)
-#include <cstring>
 #include <cstdio>
+#include <cstring>
+
+// OS-specific includes.
+#ifdef _WIN32
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 
 // C++ includes.
 #include <string>
@@ -84,8 +94,7 @@ using std::string;
 #define U32DATA_U16_INVERT 0
 #endif
 
-namespace LibGens
-{
+namespace LibGens {
 
 /**
  * Load the current state from a ZOMG file.
@@ -212,16 +221,13 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 
 
 /**
- * ZomgSave(): Save the current state to a ZOMG file.
+ * Save the current state to a ZOMG file.
  * @param filename	[in] ZOMG file.
  * @param context	[in] Emulation context.
- * @param img_buf	[in, opt] Buffer containing PNG image for the ZOMG preview image.
- * @param img_siz	[in, opt] Size of img_buf.
  * @return 0 on success; non-zero on error.
  * TODO: Error code constants.
  */
-int ZomgSave(const utf8_str *filename, const EmuContext *context,
-	     const void *img_buf, size_t img_siz)
+int ZomgSave(const utf8_str *filename, const EmuContext *context)
 {
 	LibZomg::Zomg zomg(filename, LibZomg::Zomg::ZOMG_SAVE);
 	if (!zomg.isOpen())
@@ -288,10 +294,34 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context,
 		return ret;
 	}
 
-	// If a preview image was specified, save it.
-	if (img_buf && img_siz > 0)
-		zomg.savePreview(img_buf, img_siz);
-	
+	// Create the preview image.
+	// TODO: Separate function to create an img_data from an MdFb.
+	// NOTE: LibZomg doesn't depend on LibGens, so it can't use MdFb directly.
+	// TODO: Store VPix and HPixBegin in the MdFb.
+	Vdp *vdp = context->m_vdp;
+	MdFb *fb = vdp->MD_Screen->ref();
+	const int startY = ((240 - vdp->getVPix()) / 2);
+	const int startX = (vdp->getHPixBegin());
+
+	// TODO: Option to save the full framebuffer, not just active display?
+	Zomg_Img_Data_t img_data;
+	img_data.w = vdp->getHPix();
+	img_data.h = vdp->getVPix();
+
+	const MdFb::ColorDepth bpp = fb->bpp();
+	if (bpp == MdFb::BPP_32) {
+		img_data.data = (void*)(fb->lineBuf32(startY) + startX);
+		img_data.pitch = (fb->pxPitch() * sizeof(uint32_t));
+		img_data.bpp = 32;
+	} else {
+		img_data.data = (void*)(fb->lineBuf16(startY) + startX);
+		img_data.pitch = (fb->pxPitch() * sizeof(uint16_t));
+		img_data.bpp = (bpp == MdFb::BPP_16 ? 16 : 15);
+	}
+
+	zomg.savePreview(&img_data);
+	fb->unref();
+
 	// TODO: This is MD only!
 	// TODO: Check error codes from the ZOMG functions.
 	// TODO: Load everything first, *then* copy it to LibGens.

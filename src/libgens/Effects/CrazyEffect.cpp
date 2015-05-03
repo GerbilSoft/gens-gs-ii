@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,12 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-/**
- * NOTE: The video effects here are applied to MD_Screen[].
- */
-
 #include "CrazyEffect.hpp"
-#include "Vdp/Vdp.hpp"
+#include "Util/MdFb.hpp"
 
 // C includes.
 #include <math.h>
@@ -158,32 +154,30 @@ inline void CrazyEffect::T_doCrazyEffect(pixel *screen)
 
 
 /**
- * run(): Run the "Crazy" effect.
+ * Run the "Crazy" effect.
+ * @param fb MdFb to apply the effect to.
  */
-void CrazyEffect::run(void)
+void CrazyEffect::run(MdFb *fb)
 {
-	// TODO: Update to not use the Vdp class.
-#if 0
-	switch (Vdp::m_palette.bpp())
-	{
-		case VdpPalette::BPP_15:
+	// FIXME: Add a bpp value to fb.
+	switch (2 /*fb.bpp()*/) {
+		case 0: /*VdpPalette::BPP_15:*/
 			T_doCrazyEffect<uint16_t, 0x7C00, 0x03E0, 0x001F,
-					0x0400, 0x0020, 0x0001>(Vdp::MD_Screen.fb16());
+					0x0400, 0x0020, 0x0001>(fb->fb16());
 			break;
 		
-		case VdpPalette::BPP_16:
+		case 1: /*VdpPalette::BPP_16:*/
 			T_doCrazyEffect<uint16_t, 0xF800, 0x07C0, 0x001F,
-					0x0800, 0x0040, 0x0001>(Vdp::MD_Screen.fb16());
+					0x0800, 0x0040, 0x0001>(fb->fb16());
 			break;
 		
-		case VdpPalette::BPP_32:
+		case 2: /*VdpPalette::BPP_32:*/
 		default:
 			T_doCrazyEffect<uint32_t, CRAZY_MASK32_R, CRAZY_MASK32_G, CRAZY_MASK32_B,
 					CRAZY_ADD32_R, CRAZY_ADD32_G, CRAZY_ADD32_B>
-					(Vdp::MD_Screen.fb32());
+					(fb->fb32());
 			break;
 	}
-#endif
 }
 
 }

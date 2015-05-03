@@ -2,7 +2,7 @@
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
  * VdpSpriteMaskingTest.cpp: Sprite Masking & Overflow Test ROM.           *
  *                                                                         *
- * Copyright (c) 2011-2013 by David Korth.                                 *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  * Original ROM Copyright (c) 2009 by Nemesis.                             *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
@@ -51,14 +51,12 @@ using namespace std;
 
 namespace LibGens { namespace Tests {
 
-enum ScreenMode
-{
+enum ScreenMode {
 	SCREEN_MODE_H32 = 0,
 	SCREEN_MODE_H40 = 1,
 };
 
-enum SpriteLimits
-{
+enum SpriteLimits {
 	SPRITE_LIMITS_DISABLED = 0,
 	SPRITE_LIMITS_ENABLED  = 1,
 };
@@ -109,22 +107,19 @@ class VdpSpriteMaskingTest : public ::testing::TestWithParam<VdpSpriteMaskingTes
 		static const uint8_t PX_MAX_THRESH = 0xE0;
 
 	public:
-		enum SpriteTestResult
-		{
+		enum SpriteTestResult {
 			TEST_PASSED = 0,
 			TEST_FAILED = 1,
 			TEST_UNKNOWN = 2,
 		};
 
-		enum TestMinMax
-		{
+		enum TestMinMax {
 			TEST_UNBOUNDED = 0,	// Test is unbounded. (equivalent to TEST_MIN)
 			TEST_MIN = 1,		// Test minimum bounds.
 			TEST_MAX = 2,		// Test maximum bounds.
 		};
 
-		struct TestNames
-		{
+		struct TestNames {
 			const char *name;
 			bool isMinMax;
 		};
@@ -134,7 +129,6 @@ class VdpSpriteMaskingTest : public ::testing::TestWithParam<VdpSpriteMaskingTes
 	protected:
 		SpriteTestResult checkSpriteTest(int test, TestMinMax testMinMax);
 };
-
 
 const VdpSpriteMaskingTest::TestNames VdpSpriteMaskingTest::SpriteTestNames[9] =
 {
@@ -148,7 +142,6 @@ const VdpSpriteMaskingTest::TestNames VdpSpriteMaskingTest::SpriteTestNames[9] =
 	{"Mask S1, X=40; S2, X=0", false},
 	{"Max Sprites per Frame", true},
 };
-
 
 /**
  * Formatting function for VdpSpriteMaskingTest.
@@ -185,7 +178,6 @@ inline ::std::ostream& operator<<(::std::ostream& os, const VdpSpriteMaskingTest
 	return os << "Unknown";
 }
 
-
 /**
  * Set up the Vdp for testing.
  */
@@ -196,46 +188,42 @@ void VdpSpriteMaskingTest::SetUp(void)
 	m_vdp->setNtsc();
 
 	// Set initial registers.
-	m_vdp->setReg(0x00, 0x04);	// Enable the palette. (?)
-	m_vdp->setReg(0x01, 0x44);	// Enable the display, set Mode 5.
-	m_vdp->setReg(0x02, 0x30);	// Set scroll A name table base to 0xC000.
-	m_vdp->setReg(0x04, 0x05);	// Set scroll B name table base to 0xA000.
-	m_vdp->setReg(0x05, 0x70);	// Set the sprite table base to 0xE000.
-	m_vdp->setReg(0x0D, 0x3F);	// Set the HScroll table base to 0xFC00.
-	m_vdp->setReg(0x10, 0x01);	// Set the scroll size to V32 H64.
-	m_vdp->setReg(0x0F, 0x02);	// Set the auto-increment value to 2.
+	m_vdp->dbg_setReg(0x00, 0x04);	// Enable the palette. (?)
+	m_vdp->dbg_setReg(0x01, 0x44);	// Enable the display, set Mode 5.
+	m_vdp->dbg_setReg(0x02, 0x30);	// Set scroll A name table base to 0xC000.
+	m_vdp->dbg_setReg(0x04, 0x05);	// Set scroll B name table base to 0xA000.
+	m_vdp->dbg_setReg(0x05, 0x70);	// Set the sprite table base to 0xE000.
+	m_vdp->dbg_setReg(0x0D, 0x3F);	// Set the HScroll table base to 0xFC00.
+	m_vdp->dbg_setReg(0x10, 0x01);	// Set the scroll size to V32 H64.
+	m_vdp->dbg_setReg(0x0F, 0x02);	// Set the auto-increment value to 2.
 
 	// Initialize CRam.
-	LibGens::VdpPalette *palette = &m_vdp->m_palette;
-	palette->setBpp(LibGens::VdpPalette::BPP_32);
-	for (int i = 0; i < ARRAY_SIZE(test_spritemask_cram); i++)
-		palette->writeCRam_16((i<<1), test_spritemask_cram[i]);
+	// FIXME: Needs to be byteswapped?
+	m_vdp->dbg_writeCRam_16(0, test_spritemask_cram, ARRAY_SIZE(test_spritemask_cram));
+	// FIXME: Move MD_Screen out of m_vdp.
+	m_vdp->MD_Screen->setBpp(LibGens::MdFb::BPP_32);
 
 	// Initialize VSRam.
-	memset(m_vdp->VSRam.u16, 0x00, sizeof(m_vdp->VSRam.u16));
+	uint16_t vsblock[40];
+	memset(vsblock, 0, sizeof(vsblock));
+	m_vdp->dbg_writeVSRam_16(0, vsblock, ARRAY_SIZE(vsblock));
 
 	// Determine the parameters for this test.
 	VdpSpriteMaskingTest_mode mode = GetParam();
-
-	// Load VRam.
-	ASSERT_EQ(loadVRam(mode.screenMode), 0)
-		<< "Load VRAM for screen mode "
-		<< (mode.screenMode == SCREEN_MODE_H32 ? "H32" : "H40");
 
 	// Set sprite limits.
 	m_vdp->options.spriteLimits =
 		(mode.spriteLimits == SPRITE_LIMITS_ENABLED);
 
 	// Set the screen mode.
-	if (mode.screenMode == SCREEN_MODE_H32)
-		m_vdp->setReg(0x0C, 0x00);
-	else
-		m_vdp->setReg(0x0C, 0x81);
+	const uint8_t reg0C = (mode.screenMode == SCREEN_MODE_H32) ? 0x00 : 0x81;
+	m_vdp->dbg_setReg(0x0C, reg0C);
 
-	// Set the VRam dirty flag.
-	m_vdp->MarkVRamDirty();
+	// Load VRam.
+	ASSERT_EQ(0, loadVRam(mode.screenMode))
+		<< "Load VRAM for screen mode "
+		<< (mode.screenMode == SCREEN_MODE_H32 ? "H32" : "H40");
 }
-
 
 /**
  * Tear down the Vdp.
@@ -245,7 +233,6 @@ void VdpSpriteMaskingTest::TearDown(void)
 	delete m_vdp;
 	m_vdp = nullptr;
 }
-
 
 /**
  * Load VRam.
@@ -260,20 +247,23 @@ int VdpSpriteMaskingTest::loadVRam(ScreenMode screenMode)
 	z_stream strm;
 
 	// VRAM buffer. (slightly more than 64 KB)
-	uint8_t out[(64*1024) + 1024];
-	const unsigned int out_len = sizeof(out);
+	// TODO: Use H40 or H32 depending on test mode?
+	// Then again, it's the same regardless...
+	const unsigned int buf_siz = test_spritemask_vram_h40_sz;
+	const unsigned int out_len = buf_siz + 64;
+	uint8_t *out = (uint8_t*)malloc(out_len);
 	unsigned int out_pos = 0;
 
 	// Data to decode.
-	uint8_t in[16384];
-	unsigned int in_len;
 	unsigned int in_pos = 0;
+	const uint8_t *in;
+	unsigned int in_len;
 	if (screenMode == SCREEN_MODE_H40) {
+		in = test_spritemask_vram_h40;
 		in_len = sizeof(test_spritemask_vram_h40);
-		memcpy(in, test_spritemask_vram_h40, in_len);
 	} else {
+		in = test_spritemask_vram_h32;
 		in_len = sizeof(test_spritemask_vram_h32);
-		memcpy(in, test_spritemask_vram_h32, in_len);
 	}
 
 	// Allocate the zlib inflate state.
@@ -283,8 +273,10 @@ int VdpSpriteMaskingTest::loadVRam(ScreenMode screenMode)
 	strm.avail_in = 0;
 	strm.next_in = Z_NULL;
 	ret = inflateInit2(&strm, 15+16);
-	if (ret != Z_OK)
+	if (ret != Z_OK) {
+		free(out);
 		return ret;
+	}
 
 	// Decompress the stream.
 	unsigned int avail_out_before;
@@ -309,6 +301,7 @@ int VdpSpriteMaskingTest::loadVRam(ScreenMode screenMode)
 					// fall through
 				case Z_DATA_ERROR:
 				case Z_MEM_ERROR:
+				case Z_STREAM_ERROR:
 					// Error occurred while decoding the stream.
 					inflateEnd(&strm);
 					fprintf(stderr, "ERR: %d\n", ret);
@@ -327,29 +320,35 @@ int VdpSpriteMaskingTest::loadVRam(ScreenMode screenMode)
 	inflateEnd(&strm);
 
 	// If we didn't actually finish reading the compressed data, something went wrong.
-	if (ret != Z_STREAM_END)
+	if (ret != Z_STREAM_END) {
+		free(out);
 		return Z_DATA_ERROR;
+	}
 
 	// VRAM data is 64 KB.
-	if (out_pos != 65536)
+	if (out_pos != buf_siz) {
+		free(out);
 		return Z_DATA_ERROR;
+	}
 
 	// First two bytes of both VRAM dumps is 0xDD.
-	if (out[0] != 0xDD || out[1] != 0xDD)
+	if (out[0] != 0xDD || out[1] != 0xDD) {
+		free(out);
 		return Z_DATA_ERROR;
+	}
 
 	// Data was read successfully.
 
 	// Byteswap VRam to host-endian.
-	be16_to_cpu_array(out, 65536);
+	be16_to_cpu_array(out, out_pos);
 
 	// Copy VRam to the VDP.
-	memcpy(m_vdp->VRam.u8, out, 65536);
+	m_vdp->dbg_writeVRam_16(0, (uint16_t*)out, out_pos);
 
 	// VRam loaded.
+	free(out);
 	return 0;
 }
-
 
 /**
  * Check a sprite test using screen scraping.
@@ -364,7 +363,7 @@ VdpSpriteMaskingTest::SpriteTestResult VdpSpriteMaskingTest::checkSpriteTest(int
 
 	// X position: min == 216, max == 232
 	// Add HPixBegin() for H32 mode.
-	const int x = ((testMinMax <= TEST_MIN ? 216 : 232) + m_vdp->GetHPixBegin());
+	const int x = ((testMinMax <= TEST_MIN ? 216 : 232) + m_vdp->getHPixBegin());
 
 	// Y position: 48+8+((test-1)*8)
 	const int y = (48 + 8 + ((test-1) * 8));
@@ -387,7 +386,6 @@ VdpSpriteMaskingTest::SpriteTestResult VdpSpriteMaskingTest::checkSpriteTest(int
 	return TEST_UNKNOWN;
 }
 
-
 /**
  * Run a sprite test.
  */
@@ -400,7 +398,7 @@ TEST_P(VdpSpriteMaskingTest, spriteMaskingTest)
 	for (; m_vdp->VDP_Lines.currentLine < m_vdp->VDP_Lines.totalDisplayLines;
 	     m_vdp->VDP_Lines.currentLine++)
 	{
-		m_vdp->Render_Line();
+		m_vdp->renderLine();
 	}
 
 	// Check the test.
@@ -432,27 +430,26 @@ TEST_P(VdpSpriteMaskingTest, spriteMaskingTest)
 
 		// If sprite limits are on, all tests should passed.
 		// If sprite limits are off, tests 1, 2, 3, should fail;
-		// test 9 should fail only for H32; others should pass.
+		// others should pass.
 		//
-		// NOTE: Test 9 doesn't fail in H40 because Gens currently
-		// limits sprites to a maximum of 80 regardless of sprite limits.
-		// This matches H40's limit. It might change in the future.
+		// NOTE: Test 9 previously failed in H32 because Gens allowed
+		// up to 80 sprites per frame as a hard limit. The SAT cache
+		// uses the sprite table mask, so it's impossible to write to
+		// any sprite over 63 in H32 mode now.
 		if (mode.spriteLimits == SPRITE_LIMITS_DISABLED) {
-			if (mode.test == 9 && mode.screenMode == SCREEN_MODE_H32)
-				expected = TEST_FAILED;
-			else if (mode.test <= 3)
+			if (mode.test <= 3)
 				expected = TEST_FAILED;
 			else
 				expected = TEST_PASSED;
-		} else
+		} else {
 			expected = TEST_PASSED;
+		}
 
 		actual = checkSpriteTest(mode.test, TEST_MAX);
 		EXPECT_EQ(expected, actual)
 			<< "Test " << mode.test << ": " << SpriteTestNames[mode.test-1].name << " (max)";
 	}
 }
-
 
 // Test cases.
 // NOTE: Test case numbers start with 0 in Google Test.
@@ -516,16 +513,18 @@ INSTANTIATE_TEST_CASE_P(ScreenH40SpriteLimit, VdpSpriteMaskingTest,
 
 } }
 
-
 int main(int argc, char *argv[])
 {
 	fprintf(stderr, "LibGens test suite: VDP Sprite Masking & Overflow tests.\n\n");
+
+	::testing::InitGoogleTest(&argc, argv);
 	LibGens::Init();
 	fprintf(stderr, "\n");
 	fprintf(stderr, "LibGens: VDP Sprite Masking & Overflow Test ROM.\n"
 			"Original ROM (c) 2009 by Nemesis.\n\n");
 	fflush(nullptr);
 
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
+	int ret = RUN_ALL_TESTS();
+	LibGens::End();
+	return ret;
 }

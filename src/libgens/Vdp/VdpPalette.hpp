@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -27,257 +27,275 @@
 #include <stdint.h>
 
 #include "VdpTypes.hpp"
+// ColorDepth is in MdFb.
+#include "../Util/MdFb.hpp"
 
 // ZOMG CRam struct.
 #include "libzomg/zomg_vdp.h"
 
-// Needed for FORCE_INLINE.
 #include "../macros/common.h"
+#include "../Util/byteswap.h"
 
-namespace LibGens
-{
+namespace LibGens {
 
 class VdpPalettePrivate;
-
 class VdpPalette
 {
 	public:
 		VdpPalette();
 		~VdpPalette();
-		
+
 		/**
-		 * reset(): Reset the palette, including CRam.
+		 * Reset the palette, including CRam.
 		 */
 		void reset();
-		
+
 		// Active MD palette.
 		// TODO: Make this private and add accessors.
-		union ActivePalette_t
-		{
+		union {
 			uint16_t u16[0x100];
 			uint32_t u32[0x100];
-		};
-		ActivePalette_t m_palActive;
-		
+		} m_palActive;
+
+		// Active 32X palette. (256-color mode)
+		// TODO: Make this private and add accessors.
+		union {
+			uint16_t u16[0x100];
+			uint32_t u32[0x100];
+		} m_palActive32X;
+
 		/**
-		 * isDirty(): Check if the palette is dirty.
+		 * Check if the palette is dirty.
 		 * @return True if the palette is dirty.
 		 */
 		bool isDirty(void) const;
-		
+
 		/** CRam functions. **/
-		
+
 		/**
-		 * readCRam_8(): Read 8-bit data from CRam.
+		 * Read 8-bit data from CRam.
 		 * @param address CRam address.
 		 * @return CRam data. (8-bit)
+		 * TODO: Endianness? Assuming host-endian for now.
 		 */
 		uint8_t readCRam_8(uint8_t address) const;
-		
+
 		/**
-		 * readCRam_16(): Read 16-bit data from CRam.
+		 * Read 16-bit data from CRam.
 		 * @param address CRam address. (Must be 16-bit aligned!)
 		 * @return CRam data. (16-bit)
 		 * TODO: Endianness? Assuming host-endian for now.
 		 */
 		uint16_t readCRam_16(uint8_t address) const;
-		
+
 		/**
-		 * writeCRam_8(): Write 8-bit data to CRam.
+		 * Write 8-bit data to CRam.
 		 * @param address CRam address.
 		 * @param data CRam data. (8-bit)
+		 * TODO: Endianness? Assuming host-endian for now.
 		 */
 		void writeCRam_8(uint8_t address, uint8_t data);
-		
+
 		/**
-		 * writeCRam_16(): Write 16-bit data to CRam.
+		 * Write 16-bit data to CRam.
 		 * @param address CRam address. (Must be 16-bit aligned!)
 		 * @param data CRam data. (16-bit)
 		 * TODO: Endianness? Assuming host-endian for now.
 		 */
 		void writeCRam_16(uint8_t address, uint16_t data);
-		
+
 		/** Properties. **/
-		
+
 		// Color depth.
-		enum ColorDepth
-		{
-			// RGB color modes.
-			BPP_15,
-			BPP_16,
-			BPP_32,
-			
-			BPP_MAX
-		};
-		ColorDepth bpp(void) const;
-		void setBpp(ColorDepth newBpp);
-		
+		MdFb::ColorDepth bpp(void) const;
+		void setBpp(MdFb::ColorDepth newBpp);
+
 		// Palette mode.
-		enum PalMode_t
-		{
-			PALMODE_MD,
-			PALMODE_32X,
+		enum PalMode_t {
+			// TMS9918A: Hard-coded 16-color palette.
+			PALMODE_TMS9918A,
+
+			// Sega Master System: 6-bit CRAM.
+			// Uses a hard-coded color ROM when in TMS9918A modes.
 			PALMODE_SMS,
+
+			// Sega Game Gear: 12-bit CRAM.
 			PALMODE_GG,
-			PALMODE_TMS9918,
-			
+
+			// Sega Mega Drive: 9-bit CRAM.
+			// Usage depends on M5/M4 bits:
+			// - M5=1,M4=1: 3-bit DAC
+			// - M5=1,M4=0: 3-bit DAC, LSB only
+			// - M5=0,M4=1: 2-bit DAC, high 2 bits only
+			// - M5=0,M4=0: Black screen.
+			PALMODE_MD,
+
+			// Sega 32X: MD + 15-bit RGB
+			PALMODE_32X,
+
 			PALMODE_MAX
 		};
 		PalMode_t palMode(void) const;
-		void setPalMode(PalMode_t newPalMode);
-		
+		void setPalMode(PalMode_t palMode);
+
 		/**
-		 * bgColorIdx: Background color index.
+		 * Background color index.
 		 */
 		uint8_t bgColorIdx(void) const;
-		void setBgColorIdx(uint8_t newBgColorIdx);
-		
-		/** MD-specific properties. **/
-		
+		void setBgColorIdx(uint8_t bgColorIdx);
+
 		/**
-		 * mdColorMask: Set if color masking is enabled. (Mode 5 only)
-		 * False: Full color range is used.
-		 * True: Only LSBs are used.
+		 * Set the M5/M4 bits.
+		 * Used for Mega Drive and Master System modes.
+		 * @param m5m4bits M5/M4 bits. [ x  x  x  x  x  x M5 M4]
 		 */
-		bool mdColorMask(void) const;
-		void setMdColorMask(bool newMdColorMask);
-		
+		uint8_t m5m4bits(void) const;
+		void setM5M4bits(uint8_t m5m4bits);
+
+		/** MD-specific properties. **/
+
 		/**
-		 * mdShadowHighlight(): Set if the Shadow/Highlight functionality is enabled. (Mode 5 only)
+		 * Set if the Shadow/Highlight functionality is enabled. (Mode 5 only)
 		 * False: Shadow/Highlight is disabled.
 		 * True: Shadow/Highlight is enabled.
 		 */
 		bool mdShadowHighlight(void) const;
 		void setMdShadowHighlight(bool newMdShadowHighlight);
-		
-		/** SMS-specific functions. **/
-		
+
 		/**
-		 * initSegaTMSPalette(): Initialize CRam with the SMS TMS9918 palette.
-		 * Only used on Sega Master System!
-		 * Palette mode must be set to PALMODE_SMS.
+		 * Update the active palette.
 		 */
-		void initSegaTMSPalette(void);
-		
-		/** Palette recalculation functions. **/
 		void update(void);
-		
-		// TODO
-		//static void Adjust_CRam_32X(void);
-		
+
 		/** ZOMG savestate functions. **/
 		void zomgSaveCRam(Zomg_CRam_t *cram) const;
 		void zomgRestoreCRam(const Zomg_CRam_t *cram);
-	
+
 	private:
 		friend class VdpPalettePrivate;
 		VdpPalettePrivate *const d;
-		
+
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
 		VdpPalette(const VdpPalette &);
 		VdpPalette &operator=(const VdpPalette &);
-		
+
 		// Color RAM.
 		VdpTypes::CRam_t m_cram;
-		
+		uint8_t cram_addr_mask;
+
+		// 32X Color RAM.
+		VdpTypes::CRam_32X_t m_cram32X;
+
 		// Color depth.
-		ColorDepth m_bpp;
-		
+		MdFb::ColorDepth m_bpp;
+
 		/**
 		 * Dirty flags.
 		 */
-		union PalDirty_t
-		{
+		union {
 			uint8_t data;
-			struct
-			{
+			struct {
 				bool active	:1;
 				bool full	:1;
+				// TODO: Add a separate bit for 32X CRAM.
 			};
-		};
-		PalDirty_t m_dirty;
-		
+		} m_dirty;
+
 		/** Active palette recalculation functions. **/
-		
+
 		template<typename pixel>
-		FORCE_INLINE void T_update_MD(pixel *MD_palette,
-					const pixel *palette);
-		
+		FORCE_INLINE void T_update_MD_M4(pixel *palActiveMD,
+					   const pixel *palFullSMS);
+
 		template<typename pixel>
-		FORCE_INLINE void T_update_SMS(pixel *SMS_palette,
-					const pixel *palette);
-		
+		FORCE_INLINE void T_update_MD(pixel *palActiveMD,
+					const pixel *palFullMD,
+					const pixel *palFullSMS);
+
+		// TODO: Needs testing.
 		template<typename pixel>
-		FORCE_INLINE void T_update_GG(pixel *GG_palette,
-					const pixel *palette);
-		
+		FORCE_INLINE void T_update_32X(pixel *palActive32X,
+					 const pixel *palFull32X);
+
 		template<typename pixel>
-		FORCE_INLINE void T_update_TMS9918(pixel *TMS_palette,
-					const pixel *palette);
+		FORCE_INLINE void T_update_SMS(pixel *palActiveSMS,
+					 const pixel *palFullSMS);
+
+		template<typename pixel>
+		FORCE_INLINE void T_update_GG(pixel *palActiveGG,
+					const pixel *palFullGG);
+
+		template<typename pixel>
+		FORCE_INLINE void T_update_TMS9918A(pixel *palActiveTMS,
+					      const pixel *palFullTMS);
 };
 
 /**
- * isDirty(): Check if the palette is dirty.
+ * Check if the palette is dirty.
  * @return True if the palette is dirty.
  */
 inline bool VdpPalette::isDirty(void) const
 	{ return !!(m_dirty.data); }
 
-
 /** CRam functions. **/
 
 /**
- * readCRam_8(): Read 8-bit data from CRam.
+ * Read 8-bit data from CRam.
  * @param address CRam address.
  * @return CRam data. (8-bit)
+ * TODO: Endianness? Assuming host-endian for now.
  */
 inline uint8_t VdpPalette::readCRam_8(uint8_t address) const
 {
-	// TODO: Apply address masking based on system ID.
-	return m_cram.u8[address & 0x7F];
+	address &= cram_addr_mask;
+	// FIXME: Use U16DATA_U8_INVERT?
+	return m_cram.u8[address];
 }
 
 /**
- * readCRam_16(): Read 16-bit data from CRam.
+ * Read 16-bit data from CRam.
  * @param address CRam address. (Must be 16-bit aligned!)
  * @return CRam data. (16-bit)
  * TODO: Endianness? Assuming host-endian for now.
  */
 inline uint16_t VdpPalette::readCRam_16(uint8_t address) const
 {
-	// TODO: Apply address masking based on system ID.
-	return m_cram.u16[(address & 0x7F) >> 1];
+	address &= cram_addr_mask;
+	return m_cram.u16[address >> 1];
 }
 
 /**
- * writeCRam_8(): Write 8-bit data to CRam.
+ * Write 8-bit data to CRam.
  * @param address CRam address.
  * @param data CRam data. (8-bit)
+ * TODO: Endianness? Assuming host-endian for now.
  */
 inline void VdpPalette::writeCRam_8(uint8_t address, uint8_t data)
 {
-	// TODO: Apply address masking based on system ID.
-	m_cram.u8[address & 0x7F] = data;
+	address &= cram_addr_mask;
+	// FIXME: Use U16DATA_U8_INVERT?
+	m_cram.u8[address] = data;
+	// TODO: Per-color dirty flag?
 	m_dirty.active = true;
 }
 
 /**
- * writeCRam_16(): Write 16-bit data to CRam.
+ * Write 16-bit data to CRam.
  * @param address CRam address. (Must be 16-bit aligned!)
  * @param data CRam data. (16-bit)
  * TODO: Endianness? Assuming host-endian for now.
  */
 inline void VdpPalette::writeCRam_16(uint8_t address, uint16_t data)
 {
-	// TODO: Apply address masking based on system ID.
-	m_cram.u16[(address & 0x7F) >> 1] = data;
+	address &= cram_addr_mask;
+	m_cram.u16[address >> 1] = data;
+	// TODO: Per-color dirty flag?
 	m_dirty.active = true;
 }
 
-
 /** Properties. **/
-inline VdpPalette::ColorDepth VdpPalette::bpp(void) const
+inline MdFb::ColorDepth VdpPalette::bpp(void) const
 	{ return m_bpp; }
 
 }

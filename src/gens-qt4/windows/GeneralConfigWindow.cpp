@@ -34,9 +34,6 @@
 #include <cmath>
 #include <cstdlib>
 
-// zlib
-#include <zlib.h>
-
 // Qt4 includes.
 #include <QtGui/QFileDialog>
 #include <QtGui/QKeyEvent>
@@ -391,6 +388,7 @@ void GeneralConfigWindow::reload(void)
 		d->ui.chkZeroLengthDMA->setChecked(ValByPath_bool("VDP/zeroLengthDMA"));
 		d->ui.chkVScrollBug->setChecked(ValByPath_bool("VDP/vscrollBug"));
 		d->ui.chkUpdatePaletteInVBlankOnly->setChecked(ValByPath_bool("VDP/updatePaletteInVBlankOnly"));
+		d->ui.chkEnableInterlacedMode->setChecked(ValByPath_bool("VDP/enableInterlacedMode"));
 	}
 
 	/** System. **/

@@ -5,6 +5,8 @@
 #ifndef __MINIZIP_IOWIN32U_H__
 #define __MINIZIP_IOWIN32U_H__
 
+#include "ioapi.h"
+
 /* _MZ_OF() */
 #include "mz_of.h"
 
