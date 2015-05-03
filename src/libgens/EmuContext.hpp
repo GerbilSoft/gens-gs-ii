@@ -71,19 +71,19 @@ class EmuContext
 		virtual int autoSaveData(int framesElapsed) = 0;
 
 		/**
-		 * softReset(): Perform a soft reset.
+		 * Perform a soft reset.
 		 * @return 0 on success; non-zero on error.
 		 */
 		virtual int softReset(void) = 0;
 
 		/**
-		 * hardReset(): Perform a hard reset.
+		 * Perform a hard reset.
 		 * @return 0 on success; non-zero on error.
 		 */
 		virtual int hardReset(void) = 0;
 
 		/**
-		 * setRegion(): Set the region code.
+		 * Set the region code.
 		 * @param region Region code.
 		 * @return 0 on success; non-zero on error.
 		 */
@@ -121,6 +121,22 @@ class EmuContext
 
 		// Static functions. Temporarily needed for SRam/EEPRom.
 		static inline bool GetSaveDataEnable(void) { return m_instance->m_saveDataEnable; }
+
+		/**
+		 * Load the current state from a ZOMG file.
+		 * @param filename	[in] ZOMG file.
+		 * @return 0 on success; non-zero on error.
+		 * TODO: Error code constants.
+		 */
+		virtual int zomgLoad(const utf8_str *filename) = 0;
+
+		/**
+		 * Save the current state to a ZOMG file.
+		 * @param filename	[in] ZOMG file.
+		 * @return 0 on success; non-zero on error.
+		 * TODO: Error code constants.
+		 */
+		virtual int zomgSave(const utf8_str *filename) const = 0;
 
 		/**
 		 * Global settings.

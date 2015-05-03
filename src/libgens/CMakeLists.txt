@@ -52,7 +52,7 @@ CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/Util/byteorder.h.in" "${CMAKE_CURREN
 SET(libgens_SRCS
 	lg_main.cpp
 	MD/EmuMD.cpp
-	Save/GensZomg.cpp
+	MD/EmuMD_zomg.cpp
 	cpu/M68K.cpp
 	cpu/M68K_Mem.cpp
 	sound/Psg.cpp

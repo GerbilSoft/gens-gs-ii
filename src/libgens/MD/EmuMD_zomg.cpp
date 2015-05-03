@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * Zomg.cpp: Zipped Original Memory from Genesis savestate handler.        *
+ * EmuMD.cpp: MD emulation code: ZOMG savestate handler.                   *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -26,7 +26,7 @@
  * and is subject to change.
  */
 
-#include "GensZomg.hpp"
+#include "EmuMD.hpp"
 #include "lg_main.hpp"
 
 #include "Vdp/Vdp.hpp"
@@ -55,6 +55,7 @@
 
 // C includes.
 #include <stdint.h>
+#include <error.h>
 
 // C includes. (C++ namespace)
 #include <cstdio>
@@ -77,52 +78,34 @@ using std::string;
 #endif
 
 #include "Util/byteswap.h"
-// TODO: Move to byteswap.h.
-/**
- * Address inversion flags for byteswapped addressing.
- * - U16DATA_U8_INVERT: Access U8 data in host-endian 16-bit data.
- * - U32DATA_U8_INVERT: Access U8 data in host-endian 32-bit data.
- * - U32DATA_U16_INVERT: Access U16 data in host-endian 32-bit data.
- */
-#if GENS_BYTEORDER == GENS_LIL_ENDIAN
-#define U16DATA_U8_INVERT 1
-#define U32DATA_U8_INVERT 3
-#define U32DATA_U16_INVERT 1
-#else /* GENS_BYTEORDER = GENS_BIG_ENDIAN */
-#define U16DATA_U8_INVERT 0
-#define U32DATA_U8_INVERT 0
-#define U32DATA_U16_INVERT 0
-#endif
 
 namespace LibGens {
 
 /**
  * Load the current state from a ZOMG file.
  * @param filename	[in] ZOMG file.
- * @param context	[out] Emulation context.
  * @return 0 on success; non-zero on error.
  * TODO: Error code constants.
  */
-int ZomgLoad(const utf8_str *filename, EmuContext *context)
+int EmuMD::zomgLoad(const utf8_str *filename)
 {
 	// Make sure the file exists.
 	if (access(filename, F_OK))
-		return -1;
+		return -ENOENT;
 
 	// Make sure this is a ZOMG file.
 	if (!LibZomg::Zomg::DetectFormat(filename))
-		return -2;
+		return -EINVAL;
 
 	LibZomg::Zomg zomg(filename, LibZomg::Zomg::ZOMG_LOAD);
 	if (!zomg.isOpen())
-		return -3;
+		return -EIO;
 
-	// TODO: This is MD only!
 	// TODO: Check error codes from the ZOMG functions.
 	// TODO: Load everything first, *then* copy it to LibGens.
 
 	/** VDP **/
-	context->m_vdp->zomgRestoreMD(&zomg);
+	m_vdp->zomgRestoreMD(&zomg);
 
 	/** Audio **/
 
@@ -165,11 +148,11 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 	// TODO: Create/use the version register function in M68K_Mem.cpp.
 	Zomg_MD_IoSave_t md_io_save;
 	zomg.loadMD_IO(&md_io_save);
-	context->m_ioManager->zomgRestoreMD(&md_io_save);
+	m_ioManager->zomgRestoreMD(&md_io_save);
 
 	// TODO: Set MD version register.
 	//md_io.version_reg = ((M68K_Mem::ms_Region.region() << 6) | 0x20);
-	//md_io_save.version_reg = context->readVersionRegister_MD();
+	//md_io_save.version_reg = readVersionRegister_MD();
 
 	// Load the Z80 control registers.
 	Zomg_MD_Z80CtrlSave_t md_z80_ctrl_save;
@@ -223,23 +206,20 @@ int ZomgLoad(const utf8_str *filename, EmuContext *context)
 /**
  * Save the current state to a ZOMG file.
  * @param filename	[in] ZOMG file.
- * @param context	[in] Emulation context.
  * @return 0 on success; non-zero on error.
  * TODO: Error code constants.
  */
-int ZomgSave(const utf8_str *filename, const EmuContext *context)
+int EmuMD::zomgSave(const utf8_str *filename) const
 {
 	LibZomg::Zomg zomg(filename, LibZomg::Zomg::ZOMG_SAVE);
 	if (!zomg.isOpen())
-		return -1;
+		return -ENOENT;
 
 	// Rom object has some useful ROM information.
-	const LibGens::Rom *rom = context->rom();
-	if (!rom)
+	if (!m_rom)
 		return -2;
 
 	// Create ZOMG.ini.
-	// TODO: Get System ID and Region from the emulated system information.
 	LibZomg::ZomgIni zomgIni;
 	zomgIni.setSystemId("MD");
 	zomgIni.setCreator("Gens/GS II");
@@ -259,7 +239,7 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context)
 	zomgIni.setAuthor("Joe User");
 
 	// TODO: Move base path triming code to LibGensText later?
-	string rom_filename(rom->filename());
+	string rom_filename(m_rom->filename());
 #ifdef _WIN32
 	const char chr_slash = '\\';
 #else
@@ -282,7 +262,7 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context)
 	zomgIni.setRomFilename(rom_filename);
 
 	// ROM CRC32.
-	zomgIni.setRomCrc32(rom->rom_crc32());
+	zomgIni.setRomCrc32(m_rom->rom_crc32());
 
 	zomgIni.setDescription("Some description; should probably\nbe left\\blank.");
 	zomgIni.setExtensions("EXT,THAT,DOESNT,EXIST,LOL");
@@ -298,15 +278,14 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context)
 	// TODO: Separate function to create an img_data from an MdFb.
 	// NOTE: LibZomg doesn't depend on LibGens, so it can't use MdFb directly.
 	// TODO: Store VPix and HPixBegin in the MdFb.
-	Vdp *vdp = context->m_vdp;
-	MdFb *fb = vdp->MD_Screen->ref();
-	const int startY = ((240 - vdp->getVPix()) / 2);
-	const int startX = (vdp->getHPixBegin());
+	MdFb *fb = m_vdp->MD_Screen->ref();
+	const int startY = ((240 - m_vdp->getVPix()) / 2);
+	const int startX = (m_vdp->getHPixBegin());
 
 	// TODO: Option to save the full framebuffer, not just active display?
 	Zomg_Img_Data_t img_data;
-	img_data.w = vdp->getHPix();
-	img_data.h = vdp->getVPix();
+	img_data.w = m_vdp->getHPix();
+	img_data.h = m_vdp->getVPix();
 
 	const MdFb::ColorDepth bpp = fb->bpp();
 	if (bpp == MdFb::BPP_32) {
@@ -327,7 +306,7 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context)
 	// TODO: Load everything first, *then* copy it to LibGens.
 	
 	/** VDP **/
-	context->m_vdp->zomgSaveMD(&zomg);
+	m_vdp->zomgSaveMD(&zomg);
 	
 	/** Audio **/
 	
@@ -369,8 +348,8 @@ int ZomgSave(const utf8_str *filename, const EmuContext *context)
 	// Save the I/O registers. ($A10001-$A1001F, odd bytes)
 	// TODO: Create/use the version register function in M68K_Mem.cpp.
 	Zomg_MD_IoSave_t md_io_save;
-	context->m_ioManager->zomgSaveMD(&md_io_save);
-	md_io_save.version_reg = context->readVersionRegister_MD();
+	m_ioManager->zomgSaveMD(&md_io_save);
+	md_io_save.version_reg = readVersionRegister_MD();
 	zomg.saveMD_IO(&md_io_save);
 
 	// Save the Z80 control registers.

@@ -28,7 +28,6 @@
 #include <cstring>
 
 // ZOMG savestate handler.
-#include "libgens/Save/GensZomg.hpp"
 #include "libzomg/Zomg.hpp"
 
 // LibGens includes.
@@ -601,13 +600,9 @@ void EmuManager::doSaveState(QString filename, int saveSlot)
 {
 	// Save the ZOMG file.
 	const QString nativeFilename = QDir::toNativeSeparators(filename);
-	int ret = LibGens::ZomgSave(
-				nativeFilename.toUtf8().constData(),	// ZOMG filename.
-				gqt4_emuContext				// Emulation context.
-				);
+	int ret = gqt4_emuContext->zomgSave(nativeFilename.toUtf8().constData());
 
 	QString osdMsg;
-
 	if (ret == 0) {
 		// Savestate saved.
 		if (saveSlot >= 0) {
@@ -638,10 +633,9 @@ void EmuManager::doLoadState(QString filename, int saveSlot)
 
 	// Load the ZOMG file.
 	const QString nativeFilename = QDir::toNativeSeparators(filename);
-	int ret = LibGens::ZomgLoad(nativeFilename.toUtf8().constData(), gqt4_emuContext);
+	int ret = gqt4_emuContext->zomgLoad(nativeFilename.toUtf8().constData());
 
 	QString osdMsg;
-
 	if (ret == 0) {
 		// Savestate loaded.
 		if (saveSlot >= 0) {
