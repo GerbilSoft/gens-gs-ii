@@ -224,7 +224,7 @@ LibGens::Rom *VdpFIFOTesting::loadRom(void)
 			strm.next_out = &out[out_pos];
 
 			ret = inflate(&strm, Z_NO_FLUSH);
-			assert(ret != Z_STREAM_ERROR);  // make sure the state isn't clobbered
+			assert(ret != Z_STREAM_ERROR);	// make sure the state isn't clobbered
 			switch (ret) {
 				case Z_NEED_DICT:
 					ret = Z_DATA_ERROR;
