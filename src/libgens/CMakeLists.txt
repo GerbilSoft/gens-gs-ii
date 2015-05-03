@@ -87,6 +87,7 @@ SET(libgens_SRCS
 SET(libgens_VDP_SRCS
 	Vdp/Vdp.cpp
 	Vdp/VdpIo.cpp
+	Vdp/VdpDma.cpp
 	Vdp/VdpRend.cpp
 	Vdp/VdpRend_m5.cpp
 	Vdp/VdpPalette.cpp

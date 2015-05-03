@@ -416,6 +416,8 @@ class VdpPrivate
 		template<DMA_Src_t src_component, DMA_Dest_t dest_component>
 		inline void T_DMA_Loop(void);
 
+		void processDmaCtrlWrite(void);
+
 	/*!**************************************************************
 	 * VdpRend: Rendering functions and variables.                  *
 	 ****************************************************************/
