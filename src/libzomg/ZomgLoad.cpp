@@ -601,6 +601,7 @@ int Zomg::loadMD_TMSS_reg(Zomg_MD_TMSS_reg_t *tmss)
  */
 int Zomg::loadSRam(uint8_t *sram, size_t siz)
 {
+	// TODO: Don't allow >65,536?
 	int ret = loadFromZomg("common/SRam.bin", sram, siz);
 	if (ret > 0) {
 		// Data was loaded.
@@ -622,8 +623,35 @@ int Zomg::loadSRam(uint8_t *sram, size_t siz)
  */
 int Zomg::loadEEPRomCtrl(Zomg_EPR_ctrl_t *ctrl)
 {
-	// TODO
-	return 0;
+	int ret = loadFromZomg("common/EPR_ctrl.bin", ctrl, sizeof(*ctrl));
+	if (ret < 8)
+		return -1;
+
+	// Check the EEPROM header.
+	ctrl->header    = be32_to_cpu(ctrl->header);
+	ctrl->epr_type  = be32_to_cpu(ctrl->epr_type);
+	if (ctrl->header != ZOMG_EPR_CTRL_HEADER)
+		return -2;
+
+	switch (ctrl->epr_type) {
+		case ZOMG_EPR_TYPE_I2C:
+			// TODO: Verify that this is correct.
+			if (ret != (12 + (int)sizeof(ctrl->i2c)))
+				return -3;
+
+			// Byteswap the I2C fields.
+			ctrl->i2c.size          = be32_to_cpu(ctrl->i2c.size);
+			ctrl->i2c.page_size     = be16_to_cpu(ctrl->i2c.page_size);
+			ctrl->i2c.address       = be32_to_cpu(ctrl->i2c.address);
+			break;
+
+		default:
+			// TODO: Handle other types of EEPROM.
+			return -4;
+	}
+
+	// Done.
+	return ret;
 }
 
 /**
@@ -634,6 +662,7 @@ int Zomg::loadEEPRomCtrl(Zomg_EPR_ctrl_t *ctrl)
  */
 int Zomg::loadEEPRomCache(uint8_t *cache, size_t siz)
 {
+	// TODO: Don't allow >256?
 	int ret = loadFromZomg("common/EPR_cache.bin", cache, siz);
 	if (ret != (int)siz)
 		return -1;
@@ -642,16 +671,27 @@ int Zomg::loadEEPRomCache(uint8_t *cache, size_t siz)
 
 /**
  * Load EEPROM.
- * @param eeprom Pointer to SRAM buffer.
- * @param siz Size of SRAM buffer.
+ * @param eeprom Pointer to EEPROM buffer.
+ * @param siz Size of EEPROM buffer.
  * @return Number of bytes read on success; negative on error.
  * NOTE: If the loaded EEPROM file is smaller than the specified EEPROM buffer,
  * the remainder of the EEPROM buffer is initialized to 0xFF.
  */
 int Zomg::loadEEPRom(uint8_t *eeprom, size_t siz)
 {
-	// TODO
-	return 0;
+	// TODO: Don't allow >65,536?
+	int ret = loadFromZomg("common/EEPRom.bin", eeprom, siz);
+	if (ret > 0) {
+		// Data was loaded.
+		// If the data is less than the size of the EEPROM buffer,
+		// set the rest of the EEPROM buffer to 0xFF.
+		if (ret < (int)siz) {
+			int diff = ((int)siz - ret);
+			memset(&eeprom[ret], 0xFF, diff);
+		}
+	}
+
+	return ret;
 }
 
 }
