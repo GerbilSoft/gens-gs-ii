@@ -185,7 +185,7 @@ LibGens::Rom *VdpFIFOTesting::loadRom(void)
 	z_stream strm;
 
 	// ROM buffer. (slightly more than 512 KB)
-	const unsigned int buf_siz = (512*1024);
+	const unsigned int buf_siz = test_vdpfifotesting_rom_sz;
 	const unsigned int out_len = buf_siz + 64;
 	uint8_t *out = (uint8_t*)malloc(out_len);
 	unsigned int out_pos = 0;

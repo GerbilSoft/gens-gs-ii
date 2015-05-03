@@ -37,6 +37,7 @@ extern "C" {
  * Data is gzipped; original size is 524,288.
  */
 extern const uint8_t test_vdpfifotesting_rom[12004];
+static const unsigned int test_vdpfifotesting_rom_sz = 524288;
 
 #ifdef __cplusplus
 }
