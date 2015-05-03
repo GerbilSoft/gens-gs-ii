@@ -247,20 +247,23 @@ int VdpSpriteMaskingTest::loadVRam(ScreenMode screenMode)
 	z_stream strm;
 
 	// VRAM buffer. (slightly more than 64 KB)
-	uint8_t out[(64*1024) + 1024];
-	const unsigned int out_len = sizeof(out);
+	// TODO: Use H40 or H32 depending on test mode?
+	// Then again, it's the same regardless...
+	const unsigned int buf_siz = test_spritemask_vram_h40_sz;
+	const unsigned int out_len = buf_siz + 64;
+	uint8_t *out = (uint8_t*)malloc(out_len);
 	unsigned int out_pos = 0;
 
 	// Data to decode.
-	uint8_t in[16384];
-	unsigned int in_len;
 	unsigned int in_pos = 0;
+	const uint8_t *in;
+	unsigned int in_len;
 	if (screenMode == SCREEN_MODE_H40) {
+		in = test_spritemask_vram_h40;
 		in_len = sizeof(test_spritemask_vram_h40);
-		memcpy(in, test_spritemask_vram_h40, in_len);
 	} else {
+		in = test_spritemask_vram_h32;
 		in_len = sizeof(test_spritemask_vram_h32);
-		memcpy(in, test_spritemask_vram_h32, in_len);
 	}
 
 	// Allocate the zlib inflate state.
@@ -270,8 +273,10 @@ int VdpSpriteMaskingTest::loadVRam(ScreenMode screenMode)
 	strm.avail_in = 0;
 	strm.next_in = Z_NULL;
 	ret = inflateInit2(&strm, 15+16);
-	if (ret != Z_OK)
+	if (ret != Z_OK) {
+		free(out);
 		return ret;
+	}
 
 	// Decompress the stream.
 	unsigned int avail_out_before;
@@ -280,7 +285,8 @@ int VdpSpriteMaskingTest::loadVRam(ScreenMode screenMode)
 		if (in_pos >= in_len)
 			break;
 		strm.avail_in = (in_len - in_pos);
-		strm.next_in = &in[in_pos];
+		// TODO: Define ZLIB_CONST in ZLIB_CFLAGS in CMake.
+		strm.next_in = (Bytef*)&in[in_pos];
 
 		// Run inflate() on input until the output buffer is not full.
 		do {
@@ -296,6 +302,7 @@ int VdpSpriteMaskingTest::loadVRam(ScreenMode screenMode)
 					// fall through
 				case Z_DATA_ERROR:
 				case Z_MEM_ERROR:
+				case Z_STREAM_ERROR:
 					// Error occurred while decoding the stream.
 					inflateEnd(&strm);
 					fprintf(stderr, "ERR: %d\n", ret);
@@ -314,26 +321,33 @@ int VdpSpriteMaskingTest::loadVRam(ScreenMode screenMode)
 	inflateEnd(&strm);
 
 	// If we didn't actually finish reading the compressed data, something went wrong.
-	if (ret != Z_STREAM_END)
+	if (ret != Z_STREAM_END) {
+		free(out);
 		return Z_DATA_ERROR;
+	}
 
 	// VRAM data is 64 KB.
-	if (out_pos != 65536)
+	if (out_pos != buf_siz) {
+		free(out);
 		return Z_DATA_ERROR;
+	}
 
 	// First two bytes of both VRAM dumps is 0xDD.
-	if (out[0] != 0xDD || out[1] != 0xDD)
+	if (out[0] != 0xDD || out[1] != 0xDD) {
+		free(out);
 		return Z_DATA_ERROR;
+	}
 
 	// Data was read successfully.
 
 	// Byteswap VRam to host-endian.
-	be16_to_cpu_array(out, 65536);
+	be16_to_cpu_array(out, out_pos);
 
 	// Copy VRam to the VDP.
-	m_vdp->dbg_writeVRam_16(0, (uint16_t*)out, 65536);
+	m_vdp->dbg_writeVRam_16(0, (uint16_t*)out, out_pos);
 
 	// VRam loaded.
+	free(out);
 	return 0;
 }
 

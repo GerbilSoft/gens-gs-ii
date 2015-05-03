@@ -35,12 +35,14 @@ extern "C" {
  * Contents are GZipped and must be decoded using zlib.
  */
 extern const uint8_t test_spritemask_vram_h32[1452];
+static const unsigned int test_spritemask_vram_h32_sz = 65536;
 
 /**
  * VRAM for H40 (320x224) sprite masking test.
  * Contents are GZipped and must be decoded using zlib.
  */
 extern const uint8_t test_spritemask_vram_h40[1476];
+static const unsigned int test_spritemask_vram_h40_sz = 65536;
 
 /**
  * CRAM for all tests. (host-endian)
