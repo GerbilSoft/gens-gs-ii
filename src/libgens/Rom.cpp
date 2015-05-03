@@ -24,6 +24,7 @@
 #include <libgens/config.libgens.h>
 
 #include "Rom.hpp"
+#include "Decompressor/DcMemFake.hpp"
 
 // C includes. (C++ namespace)
 #include <cstring>
@@ -49,8 +50,7 @@ using std::u16string;
 // Needed for checking CRC32s for "Xin Qi Gai Wang Zi" (Beggar Prince).
 #include <zlib.h>
 
-namespace LibGens
-{
+namespace LibGens {
 
 /**
  * Rom private class.
@@ -59,6 +59,9 @@ class RomPrivate
 {
 	public:
 		RomPrivate(Rom *q, const utf8_str *filename,
+				Rom::MDP_SYSTEM_ID sysOverride = Rom::MDP_SYSTEM_UNKNOWN,
+				Rom::RomFormat fmtOverride = Rom::RFMT_UNKNOWN);
+		RomPrivate(Rom *q, const uint8_t *rom_data, unsigned int rom_size,
 				Rom::MDP_SYSTEM_ID sysOverride = Rom::MDP_SYSTEM_UNKNOWN,
 				Rom::RomFormat fmtOverride = Rom::RFMT_UNKNOWN);
 		~RomPrivate();
@@ -124,8 +127,7 @@ class RomPrivate
 		 * 
 		 * NOTE: Strings are NOT null-terminated!
 		 */
-		struct MD_RomHeader
-		{
+		struct MD_RomHeader {
 			char consoleName[16];
 			char copyright[16];
 			char romNameJP[48];	// Japanese ROM name.
@@ -158,7 +160,6 @@ class RomPrivate
 
 		uint32_t rom_crc32;	// ROM CRC32.
 };
-
 
 /**
  * Initialize a new RomPrivate object.
@@ -236,6 +237,66 @@ RomPrivate::RomPrivate(Rom *q, const utf8_str *filename,
 	}
 }
 
+/**
+ * Initialize a new RomPrivate object.
+ * @param q Rom object that owns this RomPrivate object.
+ * @param rom_data ROM data in memory. (NOTE: Must remain valid as long as Rom is open.)
+ * @param rom_size Size of rom_data.
+ * @param sysOverride System override.
+ * @param fmtOverride ROM format override.
+ */
+RomPrivate::RomPrivate(Rom *q, const uint8_t *rom_data, unsigned int rom_size,
+			Rom::MDP_SYSTEM_ID sysOverride,
+			Rom::RomFormat fmtOverride)
+	: q(q)
+	, file(nullptr)
+	, decomp(nullptr)
+	, z_entry_list(nullptr)
+	, z_entry_sel(nullptr)
+	, sysId(Rom::MDP_SYSTEM_UNKNOWN)
+	, romFormat(Rom::RFMT_UNKNOWN)
+	, sysId_override(sysOverride)
+	, romFormat_override(fmtOverride)
+	, romSize(0)
+	, regionCode(0)
+	, rom_crc32(0)
+{
+	// TODO: Support decompression from RAM.
+	// For now, use a pseudo-decompressor that provides the same
+	// interface, but just reads from memory.
+	if (!rom_data || rom_size == 0)
+		return;
+
+	// "Open" the file using the fake decompressor.
+	decomp = new DcMemFake(rom_data, rom_size);
+
+	// Get the list of files in the archive.
+	int ret = decomp->getFileInfo(&z_entry_list);
+	if (ret != 0) { // TODO: MDP_ERR_OK
+		// Error getting the list of files.
+		z_entry_list = nullptr;
+
+		// Delete the decompressor.
+		delete decomp;
+		decomp = nullptr;
+
+		// Close the file.
+		fclose(file);
+		file = nullptr;
+		return;
+	}
+
+	if (!isMultiFile()) {
+		// Archive is not multi-file.
+		// Load the ROM header.
+		z_entry_sel = z_entry_list;
+		loadRomHeader(sysOverride, fmtOverride);
+	} else {
+		// Archive is multi-file.
+		// We can't continue until the user selects a file to load.
+		z_entry_sel = nullptr;
+	}
+}
 
 /**
  * Destroy the RomPrivate object.
@@ -249,10 +310,10 @@ RomPrivate::~RomPrivate()
 	delete decomp;
 
 	// If the file is open, close it.
-	if (file)
+	if (file) {
 		fclose(file);
+	}
 }
-
 
 /**
  * Detect a ROM's format.
@@ -328,7 +389,6 @@ Rom::RomFormat RomPrivate::DetectFormat(const uint8_t *header, size_t header_siz
 	// Assuming plain binary ROM.
 	return Rom::RFMT_BINARY;
 }
-
 
 /**
  * Detect a ROM's system ID.
@@ -410,7 +470,6 @@ Rom::MDP_SYSTEM_ID RomPrivate::DetectSystem(const uint8_t *header, size_t header
 	return Rom::MDP_SYSTEM_MD;
 }
 
-
 /**
  * Detect an MD region code.
  * @param countryCodes Country codes section of MD ROM header.
@@ -467,7 +526,6 @@ int RomPrivate::DetectRegionCodeMD(const char countryCodes[16])
 	return code;
 }
 
-
 /**
  * Load the ROM header from the selected ROM file.
  * @param sysOverride System override.
@@ -521,7 +579,6 @@ int RomPrivate::loadRomHeader(Rom::MDP_SYSTEM_ID sysOverride, Rom::RomFormat fmt
 	// ROM header loaded.
 	return 0;
 }
-
 
 /**
  * Read the Mega Drive ROM header.
@@ -584,9 +641,7 @@ void RomPrivate::readHeaderMD(const uint8_t *header, size_t header_size)
 	}
 }
 
-
 /** Rom class. **/
-
 
 /**
  * Initialize a new RomPrivate object.
@@ -598,9 +653,21 @@ Rom::Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverr
 	: d(new RomPrivate(this, filename, sysOverride, fmtOverride))
 { }
 
-Rom::~Rom()
-	{ delete d; }
+/**
+ * Initialize a new RomPrivate object.
+ * @param rom_data ROM data in memory. (NOTE: Must remain valid as long as Rom is open.)
+ * @param rom_size Size of rom_data.
+ * @param sysOverride System override.
+ * @param fmtOverride ROM format override.
+ */
+Rom::Rom(const uint8_t *rom_data, unsigned int rom_size, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
+	: d(new RomPrivate(this, rom_data, rom_size, sysOverride, fmtOverride))
+{ }
 
+Rom::~Rom()
+{
+	delete d;
+}
 
 /**
  * Load the ROM image into a buffer.
@@ -642,26 +709,27 @@ int Rom::loadRom(void *buf, size_t siz)
 	return ret_siz;
 }
 
-
 /**
  * Property accessors.
  */
-
 
 /**
  * Check if the ROM file is open.
  * @return True if the ROM file is open; false if not.
  */
 bool Rom::isOpen(void) const
-	{ return (d->file != nullptr); }
+{
+	// NOTE: We're checking decomp, since DcMemFake is
+	// memory-backed and doesn't have an actual file.
+	return (d->decomp != nullptr);
+}
 
 /**
  * Close the opened ROM file.
  */
 void Rom::close(void)
 {
-	if (d->file)
-	{
+	if (d->file) {
 		fclose(d->file);
 		d->file = NULL;
 	}
@@ -781,12 +849,15 @@ std::string Rom::rom_serial(void) const
 int Rom::romSramInfo(uint32_t *sramInfo, uint32_t *sramStartAddr, uint32_t *sramEndAddr) const
 {
 	// TODO: Return non-zero if the ROM wasn't loaded at all.
-	if (sramInfo)
+	if (sramInfo) {
 		*sramInfo = d->m_mdHeader.sramInfo;
-	if (sramStartAddr)
+	}
+	if (sramStartAddr) {
 		*sramStartAddr = d->m_mdHeader.sramStartAddr;
-	if (sramEndAddr)
+	}
+	if (sramEndAddr) {
 		*sramEndAddr = d->m_mdHeader.sramEndAddr;
+	}
 	return 0;
 }
 

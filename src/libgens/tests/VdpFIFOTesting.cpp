@@ -39,12 +39,14 @@
 // ARRAY_SIZE(x)
 #include "macros/common.h"
 
+// Test ROM data.
+#include "VdpFIFOTesting_data.h"
+
 // C includes. (C++ namespace)
 #include <cstdio>
 #include <cstring>
 #include <cassert>
 #include <cstdlib>
-using namespace std;
 
 // ZLib.
 #define CHUNK 4096
@@ -93,6 +95,12 @@ class VdpFIFOTesting : public ::testing::TestWithParam<VdpFIFOTesting_mode>
 
 		virtual void SetUp(void) override;
 
+		/**
+		 * Load the ROM, and patch it to run correctly.
+		 * @return Rom* on success; nullptr on error.
+		 */
+		LibGens::Rom *loadRom(void);
+
 	protected:
 		static EmuMD *m_context;
 		static Rom *m_rom;
@@ -128,16 +136,10 @@ void VdpFIFOTesting::SetUp(void)
 	// Initialize the emulation context.
 	static const utf8_str filename[] = "VDPFIFOTesting.bin";
 
-	// NOTE: A modified version of the ROM with the controller check
-	// NOP'd out is required.
-	// At address $000F46, write: 70 00 4E 71
-	// TODO: Add internal copy of VDPFIFOTesting.bin.
-	// TODO: Add function to load a ROM image from RAM.
-
 	// TODO: Add debug functions to RomCartridgeMD.
 	if (!m_context) {
 		// VDP hasn't been created yet.
-		m_rom = new LibGens::Rom(filename);
+		m_rom = loadRom();
 		EXPECT_TRUE(m_rom->isOpen());
 		if (!m_rom->isOpen()) {
 			delete m_rom;
@@ -169,6 +171,117 @@ void VdpFIFOTesting::SetUp(void)
 		m_context->m_vdp->MD_Screen->setBpp(LibGens::MdFb::BPP_32);
 	}
 
+}
+
+/**
+ * Load the ROM, and patch it to run correctly.
+ * @return Rom* on success; nullptr on error.
+ */
+LibGens::Rom *VdpFIFOTesting::loadRom(void)
+{
+	// Based on zlib example code:
+	// http://www.zlib.net/zlib_how.html
+	int ret;
+	z_stream strm;
+
+	// ROM buffer. (slightly more than 512 KB)
+	const unsigned int buf_siz = (512*1024);
+	const unsigned int out_len = buf_siz + 64;
+	uint8_t *out = (uint8_t*)malloc(out_len);
+	unsigned int out_pos = 0;
+
+	// Data to decode.
+	const uint8_t *in = test_vdpfifotesting_rom;
+	unsigned int in_len = sizeof(test_vdpfifotesting_rom);
+	unsigned int in_pos = 0;
+
+	// Allocate the zlib inflate state.
+	strm.zalloc = Z_NULL;
+	strm.zfree = Z_NULL;
+
+	strm.opaque = Z_NULL;
+	strm.avail_in = 0;
+	strm.next_in = Z_NULL;
+	ret = inflateInit2(&strm, 15+16);
+	if (ret != Z_OK) {
+		free(out);
+		return nullptr;
+	}
+
+	// Decompress the stream.
+	unsigned int avail_out_before;
+	unsigned int avail_out_after;
+	do {
+		if (in_pos >= in_len)
+			break;
+		strm.avail_in = (in_len - in_pos);
+		// TODO: Define ZLIB_CONST in ZLIB_CFLAGS in CMake.
+		strm.next_in = (Bytef*)&in[in_pos];
+
+		// Run inflate() on input until the output buffer is not full.
+		do {
+			avail_out_before = (out_len - out_pos);
+			strm.avail_out = avail_out_before;
+			strm.next_out = &out[out_pos];
+
+			ret = inflate(&strm, Z_NO_FLUSH);
+			assert(ret != Z_STREAM_ERROR);  // make sure the state isn't clobbered
+			switch (ret) {
+				case Z_NEED_DICT:
+					ret = Z_DATA_ERROR;
+					// fall through
+				case Z_DATA_ERROR:
+				case Z_MEM_ERROR:
+					// Error occurred while decoding the stream.
+					inflateEnd(&strm);
+					fprintf(stderr, "ERR: %d\n", ret);
+					free(out);
+					return nullptr;
+				default:
+					break;
+			}
+
+			// Increase the output position.
+			avail_out_after = (avail_out_before - strm.avail_out);
+			out_pos += avail_out_after;
+		} while (strm.avail_out == 0 && avail_out_after > 0);
+	} while (ret != Z_STREAM_END && avail_out_after > 0);
+
+	// Close the stream.
+	inflateEnd(&strm);
+
+	// If we didn't actually finish reading the compressed data, something went wrong.
+	if (ret != Z_STREAM_END) {
+		free(out);
+		return nullptr;
+	}
+
+	// ROM data is 512 KB.
+	if (out_pos != buf_siz) {
+		free(out);
+		return nullptr;
+	}
+
+	// TODO: Verify the ROM data?
+	/*
+	// First two bytes of both VRAM dumps is 0xDD.
+	if (out[0] != 0xDD || out[1] != 0xDD) {
+		free(out);
+		return nullptr;
+	}
+	*/
+
+	// Data was read successfully.
+
+	// Patch the controller check out of the ROM.
+	// At address $000F46, write: 70 00 4E 71
+	static const uint8_t patch[4] = {0x70, 0x00, 0x4E, 0x71};
+	memcpy(&out[0xF46], patch, sizeof(patch));
+
+	// Load the ROM.
+	// NOTE: "out" is never freed.
+	// Not a big deal for a unit test...
+	return new LibGens::Rom(out, out_pos);
 }
 
 /**

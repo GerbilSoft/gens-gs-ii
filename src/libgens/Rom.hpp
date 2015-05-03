@@ -82,7 +82,12 @@ class Rom
 			RFMT_CD_BIN_2352,	// CD-ROM image, BIN format. (2352-byte sectors)
 		};
 
-		Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride = MDP_SYSTEM_UNKNOWN, RomFormat fmtOverride = RFMT_UNKNOWN);
+		Rom(const utf8_str *filename,
+			MDP_SYSTEM_ID sysOverride = MDP_SYSTEM_UNKNOWN,
+			RomFormat fmtOverride = RFMT_UNKNOWN);
+		Rom(const uint8_t *rom_data, unsigned int rom_size,
+			MDP_SYSTEM_ID sysOverride = MDP_SYSTEM_UNKNOWN,
+			RomFormat fmtOverride = RFMT_UNKNOWN);
 		~Rom();
 
 	private:
