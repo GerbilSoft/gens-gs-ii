@@ -499,6 +499,9 @@ int Zomg::saveZ80Reg(const Zomg_Z80RegSave_t *state)
 	bswap_state.DE2 = cpu_to_le16(bswap_state.DE2);
 	bswap_state.HL2 = cpu_to_le16(bswap_state.HL2);
 
+	// Additional internal state.
+	bswap_state.WZ = cpu_to_le16(bswap_state.WZ);
+
 	return d->saveToZomg("common/Z80_reg.bin", &bswap_state, sizeof(bswap_state));
 #else
 	return d->saveToZomg("common/Z80_reg.bin", state, sizeof(*state));
@@ -651,14 +654,21 @@ int Zomg::saveEEPRomCtrl(const Zomg_EPR_ctrl_t *ctrl)
 	Zomg_EPR_ctrl_t bswap_eeprom;
 	memcpy(&bswap_eeprom, ctrl, sizeof(bswap_eeprom));
 
-	// Swap the fields.
-	bswap_eeprom.header	= cpu_to_be32(bswap_eeprom.header);
-	bswap_eeprom.epr_type	= cpu_to_be32(bswap_eeprom.epr_type);
+	// Byteswap the header fields.
+	bswap_eeprom.header     = cpu_to_be32(bswap_eeprom.header);
+	bswap_eeprom.epr_type   = cpu_to_be32(bswap_eeprom.epr_type);
+ 
+	switch (ctrl->epr_type) {
+		case ZOMG_EPR_TYPE_I2C:
+			// Byteswap the I2C fields.
+			bswap_eeprom.i2c.size           = cpu_to_be32(bswap_eeprom.i2c.size);
+			bswap_eeprom.i2c.page_size      = cpu_to_be16(bswap_eeprom.i2c.page_size);
+			bswap_eeprom.i2c.address        = cpu_to_be32(bswap_eeprom.i2c.address);
+			break;
 
-	// I2C EEPROM.
-	bswap_eeprom.i2c.size		= cpu_to_be32(bswap_eeprom.i2c.size);
-	bswap_eeprom.i2c.page_size	= cpu_to_be16(bswap_eeprom.i2c.page_size);
-	bswap_eeprom.i2c.address	= cpu_to_be32(bswap_eeprom.i2c.address);
+		default:
+			return -1;
+       }
 
 	return d->saveToZomg("common/EPR_ctrl.bin", &bswap_eeprom, sizeof(bswap_eeprom));
 #else

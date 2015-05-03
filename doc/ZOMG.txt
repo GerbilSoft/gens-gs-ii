@@ -162,7 +162,7 @@ components that are common throughout the Sega 8-bit and 16-bit hardware line.
 | CRam.bin       |    32; 64; 128 |   Varies   |
 | psg.bin        |             23 |    8-bit   |
 | Z80_mem.bin    |    1, 2, 8 KiB |    8-bit   |
-| Z80_reg.bin    |             28 |     LE     |
+| Z80_reg.bin    |             32 |     LE     |
 | SRAM.bin       |   up to 65,536 |    8-bit   |
 | EPR_ctrl.bin   |         Varies |   Varies   |
 | EPR_cache.bin  |      up to 256 |    8-bit   |
@@ -457,7 +457,35 @@ typedef struct _ZOMG_Z80_reg_t {
 	uint8_t R;	// 8-bit: R register.
 	uint8_t I;	// 8-bit: I register.
 	uint8_t IM;	// 8-bit: IM register. (0, 1, 2)
+
+	// Additional internal state.
+	uint16_t WZ;		// 16LE: Internal address register.
+	uint8_t Status;		// 8-bit: CPU status. (bitfield)
+	uint8_t IntVect;	// 8-bit: Pending interrupt vector. (IM0, IM2)
 } ZOMG_Z80_reg_t;
+
+NOTE: The WZ, Status, and IntVect fields were added after this file was
+already implemented. If a savestate is loaded and Z80_reg.bin is missing
+these fields (i.e. it's 28 bytes), these fields should be assumed to be 0.
+
+Status is a bitfield that may have the following bits set:
+
+enum Zomg_Z80CPUStatus_t {
+	// CPU is halted.
+	// Will resume on the next interrupt.
+	ZOMG_Z80_STATUS_HALTED  = (1 << 0),
+
+	// CPU has locked up.
+	// This usually occurs on Mega Drive if the Z80 accesses
+	// invalid area in the 68000 banking area.
+	ZOMG_Z80_STATUS_FAULTED = (1 << 1),
+
+	// Interrupt is pending.
+	ZOMG_Z80_STATUS_INT_PENDING = (1 << 2),
+
+	// NMI is pending.
+	ZOMG_Z80_STATUS_NMI_PENDING = (1 << 3),
+};
 
 ----------------------------------------------------------------
 
