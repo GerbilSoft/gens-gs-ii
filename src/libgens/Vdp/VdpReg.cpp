@@ -161,49 +161,36 @@ void VdpPrivate::updateVdpAddrCache_m5(unsigned int updateMask)
  */
 void VdpPrivate::setScrollSize_m5(uint8_t val)
 {
-	// Convert to a table index.
-	int tmp = (val & 0x3);
-	tmp |= (val & 0x30) >> 2;
-
 	/**
-	 * Scroll size table.
-	 * Format:
-	 * - idx 0: H_Scroll_CMul
-	 * - idx 1: H_Scroll_CMask
-	 * - idx 2: V_Scroll_CMask
-	 * - idx 3: reserved (padding)
+	 * Scroll size values:
+	 * - 0: 32-cell
+	 * - 1: 64-cell
+	 * - 2: prohibited
+	 * - 3: 128-cell
+	 *
+	 * Note that there is a hard-coded limit of 8,192 bytes
+	 * per name table. Anything above this will wrap around.
+	 * This is enforced when appending the name table base address.
 	 */
-	static const struct {
-		uint8_t H_Scroll_CMul;
-		uint8_t H_Scroll_CMask;
-		uint8_t V_Scroll_CMask;
-		uint8_t reserved;
-	} Scroll_Size_Tbl[] = {
-		// V32_H32 (VXX_H32)      // V32_H64 (VXX_H64)
-		{0x05, 0x1F, 0x1F, 0x00}, {0x06, 0x3F, 0x1F, 0x00},
-		// V32_HXX (V??_HXX)      // V32_H128 (V??_H128)
-		{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
 
-		// V64_H32                // V64_H64 (V128_H64)
-		{0x05, 0x1F, 0x3F, 0x00}, {0x06, 0x3F, 0x3F, 0x00},
-		// V64_HXX (V??_HXX)      // V64_H128 (V??_H128)
-		{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
+	// Horizontal nametable shift. This represents the horizontal
+	// size of the nametable in cells as a power of two.
+	static const uint8_t H_Scroll_CMul_tbl[4] = {5, 6, 0, 7};
 
-		// VXX_H32 (V32_H32)      // VXX_H64 (V32_H64)
-		{0x05, 0x1F, 0x1F, 0x00}, {0x06, 0x3F, 0x1F, 0x00},
-		// VXX_HXX (V??_HXX)      // VXX_H128 (V??_H128)
-		{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
+	// Horizontal nametable mask. This represents the total
+	// number of cells in a row, minus one.
+	// FIXME: What's the correct value for index 2?
+	static const uint8_t H_Scroll_CMask_tbl[4] = {0x1F, 0x3F, 0x5F, 0x7F};
 
-		// V128_H32               // V128_H64 (V64_H64)
-		{0x05, 0x1F, 0x7F, 0x00}, {0x06, 0x3F, 0x3F, 0x00},
-		// V128_HXX (V??_HXX)     // V128_H128 (V??_H128)
-		{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00}
-	};
+	// Vertical nametable mask. This represents the total
+	// number of cells in a column, minus one.
+	// Note that a value of 2 will cause the first row to repeat itself.
+	static const uint8_t V_Scroll_CMask_tbl[4] = {0x1F, 0x3F, 0x0F, 0x7F};	// Get the values from the scroll size table.
 
-	// Get the values from the scroll size table.
-	H_Scroll_CMul  = Scroll_Size_Tbl[tmp].H_Scroll_CMul;
-	H_Scroll_CMask = Scroll_Size_Tbl[tmp].H_Scroll_CMask;
-	V_Scroll_CMask = Scroll_Size_Tbl[tmp].V_Scroll_CMask;
+	// Get the values from the scroll size tables.
+	H_Scroll_CMul  = H_Scroll_CMul_tbl[val & 3];
+	H_Scroll_CMask = H_Scroll_CMask_tbl[val & 3];
+	V_Scroll_CMask = V_Scroll_CMask_tbl[(val >> 4) & 3];
 }
 
 /**

@@ -613,6 +613,7 @@ FORCE_INLINE uint16_t VdpPrivate::T_Get_Nametable_Word(unsigned int x, unsigned 
 	const unsigned int offset = ((y << H_Scroll_CMul) + x) * 2;
 
 	// Return the pattern information.
+	// NOTE: Nametable will wrap around after 8,192 bytes.
 	return (plane ? ScrA_Tbl_Addr_u16(offset) : ScrB_Tbl_Addr_u16(offset));
 }
 
@@ -843,6 +844,7 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_ScrollA_Window(void)
 
 		// TODO: See if we need to handle address wraparound.
 		// NOTE: Multiply by 2 for 16-bit access.
+		// NOTE: Nametable will wrap around after 8,192 bytes.
 		const uint16_t *Win_Row_Addr = Win_Tbl_Addr_Ptr16((y_cell_offset << H_Win_Shift) * 2) + Win_Start;
 
 		// Loop through the cells.
