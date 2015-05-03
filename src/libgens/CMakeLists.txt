@@ -100,6 +100,7 @@ SET(libgens_VDP_SRCS
 	Vdp/VdpReg.cpp
 	Vdp/VdpRend_m4.cpp
 	Vdp/VdpRend_tms.cpp
+	Vdp/VdpCache.cpp
 	)
 
 # TODO: All headers, or just public headers?
