@@ -478,7 +478,7 @@ int Zomg::loadZ80Reg(Zomg_Z80RegSave_t *state)
 	state->DE2 = le16_to_cpu(state->DE2);
 	state->HL2 = le16_to_cpu(state->HL2);
 
-	if (ret <= offsetof(Zomg_Z80RegSave_t, WZ)) {
+	if (ret <= (int)offsetof(Zomg_Z80RegSave_t, WZ)) {
 		// Old version (pre-1fb9e426) that doesn't have
 		// WZ, Status, or IntVect registers.
 		state->WZ = 0;
