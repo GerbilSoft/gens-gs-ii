@@ -94,25 +94,16 @@ class VdpPrivate
 		}
 
 		// Window row shift. (H40 == 6, H32 == 5)
-		unsigned int H_Win_Shift;
+		uint8_t H_Win_Shift;
 
-		// VDP scroll. (convenience values)
-		unsigned int V_Scroll_MMask;
-		unsigned int H_Scroll_Mask;
+		// Scroll mode masks. (Reg.11)
+		uint8_t V_Scroll_MMask;
+		uint8_t H_Scroll_Mask;
 
-		unsigned int H_Scroll_CMul;
-		unsigned int H_Scroll_CMask;
-		unsigned int V_Scroll_CMask;
-
-		/**
-		 * Scroll_Size_t: Convenience enum for dealing with scroll plane sizes.
-		 */
-		enum Scroll_Size_t {
-			V32_H32 = 0, V32_H64,  V32_HXX,  V32_H128,
-			V64_H32,     V64_H64,  V64_HXX,  V64_H128,
-			VXX_H32,     VXX_H64,  VXX_HXX,  VXX_H128,
-			V128_H32,    V128_H64, V128_HXX, V128_H128
-		};
+		// Scroll size masks. (Reg.16)
+		uint8_t H_Scroll_CMul;
+		uint8_t H_Scroll_CMask;
+		uint8_t V_Scroll_CMask;
 
 		// VDP window. (convenience values)
 		unsigned int Win_X_Pos;
