@@ -166,6 +166,23 @@ void VdpPrivate::setScrollSize_m5(uint8_t val)
 	tmp |= (val & 0x30) >> 2;
 
 	/**
+	 * Scroll size values:
+	 * - 0: 32-cell
+	 * - 1: 64-cell
+	 * - 2: prohibited
+	 * - 3: 128-cell
+	 *
+	 * Note that there is a hard-coded limit of 8,192 bytes
+	 * per name table. Anything above this will wrap around.
+	 *
+	 * All HSZ=2 entries result in the first row repeating
+	 * itself for the entire scroll plane.
+	 *
+	 * All VSZ=2 entries result in a 128-cell vertical plane,
+	 * with rows 0-31==32-63 and 64-95==96-127.
+	 */
+
+	/**
 	 * Scroll size table.
 	 * Format:
 	 * - idx 0: H_Scroll_CMul
@@ -179,25 +196,25 @@ void VdpPrivate::setScrollSize_m5(uint8_t val)
 		uint8_t V_Scroll_CMask;
 		uint8_t reserved;
 	} Scroll_Size_Tbl[] = {
-		// V32_H32 (VXX_H32)      // V32_H64 (VXX_H64)
+		// V32_H32                // V32_H64
 		{0x05, 0x1F, 0x1F, 0x00}, {0x06, 0x3F, 0x1F, 0x00},
-		// V32_HXX (V??_HXX)      // V32_H128 (V??_H128)
-		{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
+		// V32_HXX                // V32_H128
+		{0x05, 0x1F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
 
-		// V64_H32                // V64_H64 (V128_H64)
+		// V64_H32                // V64_H64
 		{0x05, 0x1F, 0x3F, 0x00}, {0x06, 0x3F, 0x3F, 0x00},
-		// V64_HXX (V??_HXX)      // V64_H128 (V??_H128)
-		{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
+		// V64_HXX                // V64_H128 [V32_H128]
+		{0x05, 0x1F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
 
-		// VXX_H32 (V32_H32)      // VXX_H64 (V32_H64)
-		{0x05, 0x1F, 0x1F, 0x00}, {0x06, 0x3F, 0x1F, 0x00},
-		// VXX_HXX (V??_HXX)      // VXX_H128 (V??_H128)
-		{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
+		// VXX_H32                // VXX_H64 [V32_H64]
+		{0x05, 0x1F, 0x5F, 0x00}, {0x06, 0x3F, 0x1F, 0x00},
+		// VXX_HXX                // VXX_H128 [V32_H128]
+		{0x05, 0x1F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00},
 
-		// V128_H32               // V128_H64 (V64_H64)
+		// V128_H32               // V128_H64 [V64_H64]
 		{0x05, 0x1F, 0x7F, 0x00}, {0x06, 0x3F, 0x3F, 0x00},
-		// V128_HXX (V??_HXX)     // V128_H128 (V??_H128)
-		{0x06, 0x3F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00}
+		// V128_HXX               // V128_H128 [V32_H128]
+		{0x05, 0x1F, 0x00, 0x00}, {0x07, 0x7F, 0x1F, 0x00}
 	};
 
 	// Get the values from the scroll size table.
