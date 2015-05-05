@@ -94,16 +94,25 @@ class VdpPrivate
 		}
 
 		// Window row shift. (H40 == 6, H32 == 5)
-		uint8_t H_Win_Shift;
+		unsigned int H_Win_Shift;
 
-		// Scroll mode masks. (Reg.11)
-		uint8_t V_Scroll_MMask;
-		uint8_t H_Scroll_Mask;
+		// VDP scroll. (convenience values)
+		unsigned int V_Scroll_MMask;
+		unsigned int H_Scroll_Mask;
 
-		// Scroll size masks. (Reg.16)
-		uint8_t H_Scroll_CMul;
-		uint8_t H_Scroll_CMask;
-		uint8_t V_Scroll_CMask;
+		unsigned int H_Scroll_CMul;
+		unsigned int H_Scroll_CMask;
+		unsigned int V_Scroll_CMask;
+
+		/**
+		 * Scroll_Size_t: Convenience enum for dealing with scroll plane sizes.
+		 */
+		enum Scroll_Size_t {
+			V32_H32 = 0, V32_H64,  V32_HXX,  V32_H128,
+			V64_H32,     V64_H64,  V64_HXX,  V64_H128,
+			VXX_H32,     VXX_H64,  VXX_HXX,  VXX_H128,
+			V128_H32,    V128_H64, V128_HXX, V128_H128
+		};
 
 		// VDP window. (convenience values)
 		unsigned int Win_X_Pos;
@@ -212,22 +221,18 @@ class VdpPrivate
 		/** VDP address functions: Get Pointers. **/
 		// FIXME: "& VRam_Mask" is probably not needed,
 		// since the table addresses are already masked.
-
-		// Name Tables.
-		// NOTE: Name table offsets are masked, since the VDP is limited
-		// to 8,192 bytes per name table.
+		// Name Tables
 		inline uint16_t *ScrA_Tbl_Addr_Ptr16(uint32_t offset)
-			{ return &VRam.u16[((ScrA_Tbl_Addr + (offset & 0x1FFF)) & VRam_Mask) >> 1]; }
+			{ return &VRam.u16[((ScrA_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
 		inline uint16_t *ScrB_Tbl_Addr_Ptr16(uint32_t offset)
-			{ return &VRam.u16[((ScrB_Tbl_Addr + (offset & 0x1FFF)) & VRam_Mask) >> 1]; }
+			{ return &VRam.u16[((ScrB_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
 		inline uint16_t *Win_Tbl_Addr_Ptr16(uint32_t offset)
-			{ return &VRam.u16[((Win_Tbl_Addr + (offset & 0x1FFF)) & VRam_Mask) >> 1]; }
+			{ return &VRam.u16[((Win_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
 		inline VdpStructs::SprEntry_m5 *Spr_Tbl_Addr_PtrM5(uint32_t link)
 			{ return (VdpStructs::SprEntry_m5*)&VRam.u16[((Spr_Tbl_Addr + (link*8)) & VRam_Mask) >> 1]; }
 		inline uint16_t *H_Scroll_Tbl_Addr_Ptr16(uint32_t offset)
 			{ return &VRam.u16[((H_Scroll_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
-
-		// Pattern Generators.
+		// Pattern Generators
 		inline uint16_t *ScrA_Gen_Addr_Ptr16(uint32_t offset)
 			{ return &VRam.u16[((ScrA_Gen_Addr + offset) & VRam_Mask) >> 1]; }
 		inline uint16_t *ScrB_Gen_Addr_Ptr16(uint32_t offset)
@@ -238,16 +243,13 @@ class VdpPrivate
 			{ return &VRam.u16[((Spr_Gen_Addr + offset) & VRam_Mask) >> 1]; }
 
 		/** VDP address functions: Get Values. **/
-
-		// Name Tables.
-		// NOTE: Name table offsets are masked, since the VDP is limited
-		// to 8,192 bytes per name table.
+		// Name Tables
 		inline uint16_t ScrA_Tbl_Addr_u16(uint32_t offset) const
-			{ return VRam.u16[((ScrA_Tbl_Addr + (offset & 0x1FFF)) & VRam_Mask) >> 1]; }
+			{ return VRam.u16[((ScrA_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
 		inline uint16_t ScrB_Tbl_Addr_u16(uint32_t offset) const
-			{ return VRam.u16[((ScrB_Tbl_Addr + (offset & 0x1FFF)) & VRam_Mask) >> 1]; }
+			{ return VRam.u16[((ScrB_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
 		inline uint16_t Win_Tbl_Addr_u16(uint32_t offset) const
-			{ return VRam.u16[((Win_Tbl_Addr + (offset & 0x1FFF)) & VRam_Mask) >> 1]; }
+			{ return VRam.u16[((Win_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
 		inline uint16_t Spr_Tbl_Addr_u16(uint32_t offset) const
 			{ return VRam.u16[((Spr_Tbl_Addr + offset) & VRam_Mask) >> 1]; }
 		inline uint16_t H_Scroll_Tbl_Addr_u16(uint32_t offset) const
