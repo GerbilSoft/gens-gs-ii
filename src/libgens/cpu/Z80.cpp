@@ -213,8 +213,6 @@ void Z80::ZomgRestoreReg(const Zomg_Z80RegSave_t *state)
 
 	// Interrupt Vector. (IM 2)
 	mdZ80_set_IntVect(ms_Z80, state->IntVect);
-
-	// TODO: Load WZ, IntVect, and Status.
 #endif /* GENS_ENABLE_EMULATION */
 }
 
