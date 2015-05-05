@@ -25,6 +25,8 @@
 #include "Z80_MD_Mem.hpp"
 #include "M68K_Mem.hpp"
 
+#include "mdZ80/mdZ80_flags.h"
+
 // C includes.
 #include <string.h>
 
@@ -132,11 +134,26 @@ void Z80::ZomgSaveReg(Zomg_Z80RegSave_t *state)
 	// since CZ80 supports WZ.
 	state->WZ = 0;
 
-	// TODO: Save IntVect, which indicates the pending
-	// interrupt for IM 0 and IM 2.
-	// TODO: Save Status.
-	state->Status = 0;
-	state->IntVect = 0;
+	// Status.
+	uint8_t mdZ80_status = mdZ80_get_Status(ms_Z80);
+	uint8_t IntLine = mdZ80_get_IntLine(ms_Z80);
+	uint8_t zomg_status = 0;
+	if (mdZ80_status & Z80_STATE_HALTED) {
+		zomg_status |= ZOMG_Z80_STATUS_HALTED;
+	}
+	if (mdZ80_status & Z80_STATE_FAULTED) {
+		zomg_status |= ZOMG_Z80_STATUS_FAULTED;
+	}
+	// Interrupt lines.
+	if (IntLine & 0x01) {
+		zomg_status |= ZOMG_Z80_STATUS_INT_PENDING;
+	}
+	if (IntLine & 0x80) {
+		zomg_status |= ZOMG_Z80_STATUS_NMI_PENDING;
+	}
+
+	// Interrupt Vector. (IM 2)
+	state->IntVect = mdZ80_get_IntVect(ms_Z80);
 #else
 	memset(state, 0x00, sizeof(*state));
 #endif /* GENS_ENABLE_EMULATION */
@@ -172,6 +189,30 @@ void Z80::ZomgRestoreReg(const Zomg_Z80RegSave_t *state)
 	mdZ80_set_R(ms_Z80, state->R);
 	mdZ80_set_I(ms_Z80, state->I);
 	mdZ80_set_IM(ms_Z80, state->IM);
+
+	// TODO: Load WZ.
+
+	// Status.
+	uint8_t mdZ80_status = 0;
+	uint8_t IntLine = 0;
+	if (state->Status & ZOMG_Z80_STATUS_HALTED) {
+		mdZ80_status |= ZOMG_Z80_STATUS_HALTED;
+	}
+	if (state->Status & ZOMG_Z80_STATUS_FAULTED) {
+		mdZ80_status |= Z80_STATE_FAULTED;
+	}
+	// Interrupt lines.
+	if (state->Status & ZOMG_Z80_STATUS_INT_PENDING) {
+		IntLine |= 0x01;
+	}
+	if (state->Status & ZOMG_Z80_STATUS_NMI_PENDING) {
+		IntLine |= 0x80;
+	}
+	mdZ80_set_Status(ms_Z80, mdZ80_status);
+	mdZ80_set_IntLine(ms_Z80, IntLine);
+
+	// Interrupt Vector. (IM 2)
+	mdZ80_set_IntVect(ms_Z80, state->IntVect);
 
 	// TODO: Load WZ, IntVect, and Status.
 #endif /* GENS_ENABLE_EMULATION */
