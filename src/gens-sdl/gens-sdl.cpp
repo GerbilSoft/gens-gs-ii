@@ -178,13 +178,6 @@ int main(int argc, char *argv[])
 		SDL_Event event;
 		if (SDL_PollEvent(&event)) {
 			switch (event.type) {
-				case SDL_USEREVENT: {
-					char title[1024];
-					snprintf(title, sizeof(title), "gens-sdl - %0.1f fps", event.user.code / 10.0);
-					SDL_WM_SetCaption(title, NULL);
-					break;
-				}
-
 				case SDL_QUIT:
 					running = 0;
 					break;
