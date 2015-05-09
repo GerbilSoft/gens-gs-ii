@@ -22,6 +22,7 @@ SET(gens-sdl_SRCS
 	gens-sdl.cpp
 	SdlHandler.cpp
 	RingBuffer.cpp
+	Config.cpp
 	)
 
 # Headers.
@@ -29,6 +30,7 @@ SET(gens-sdl_H
 	gens-sdl.cpp
 	SdlHandler.hpp
 	RingBuffer.hpp
+	Config.hpp
 	)
 
 # Main target.
