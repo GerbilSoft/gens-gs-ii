@@ -33,6 +33,8 @@ namespace LibGens {
 
 namespace GensSdl {
 
+class RingBuffer;
+
 class SdlHandler {
 	public:
 		SdlHandler();
@@ -107,12 +109,15 @@ class SdlHandler {
 		int m_framesRendered;
 
 		// Audio.
-		static const int SEGMENTS_TO_BUFFER = 4;
-		uint8_t *m_audioBuffer;
-		int m_audioBufferLen;		// Length of the audio buffer.
-		int m_audioBufferUsed;		// Current number of bytes used in the buffer.
-		int m_sampleSize;		// Sample size. (Should be 4)
-		uint8_t *m_audioWritePos;	// Write position within the buffer.
+		RingBuffer *m_audioBuffer;
+		int m_sampleSize;
+
+		// Segment buffer.
+		int16_t *m_segBuffer;
+		// Length of m_segBuffer, in bytes.
+		unsigned int m_segBufferLen;
+		// Number of samples in m_segBuffer.
+		unsigned int m_segBufferSamples;
 };
 
 }

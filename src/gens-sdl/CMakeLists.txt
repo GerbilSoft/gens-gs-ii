@@ -21,10 +21,21 @@ INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIR})
 SET(gens-sdl_SRCS
 	gens-sdl.cpp
 	SdlHandler.cpp
+	RingBuffer.cpp
+	)
+
+# Headers.
+SET(gens-sdl_H
+	gens-sdl.cpp
+	SdlHandler.hpp
+	RingBuffer.hpp
 	)
 
 # Main target.
-ADD_EXECUTABLE(gens-sdl ${gens-sdl_SRCS})
+ADD_EXECUTABLE(gens-sdl
+	${gens-sdl_SRCS}
+	${gens-sdl_H}
+	)
 TARGET_LINK_LIBRARIES(gens-sdl gens genskeys)
 
 # Additional libraries.

@@ -28,6 +28,8 @@ using LibGens::SoundMgr;
 #include <SDL.h>
 #include <cstdio>
 
+#include "RingBuffer.hpp"
+
 namespace GensSdl {
 
 SdlHandler::SdlHandler()
@@ -36,10 +38,10 @@ SdlHandler::SdlHandler()
 	, m_md(nullptr)
 	, m_framesRendered(0)
 	, m_audioBuffer(nullptr)
-	, m_audioBufferLen(0)
-	, m_audioBufferUsed(0)
 	, m_sampleSize(0)
-	, m_audioWritePos(nullptr)
+	, m_segBuffer(nullptr)
+	, m_segBufferLen(0)
+	, m_segBufferSamples(0)
 { }
 
 SdlHandler::~SdlHandler()
@@ -162,11 +164,10 @@ int SdlHandler::init_audio(void)
 
 	// Number of samples to buffer.
 	// FIXME: Should be segment size, rounded up to pow2.
-	static const int BUFFER_SIZE = 1024;
 	wanted_spec.freq	= 44100;
 	wanted_spec.format	= AUDIO_S16LSB;
 	wanted_spec.channels	= 2;
-	wanted_spec.samples	= BUFFER_SIZE;
+	wanted_spec.samples	= 0;
 	wanted_spec.callback	= sdl_audio_callback;
 	wanted_spec.userdata	= this;
 	ret = SDL_OpenAudio(&wanted_spec, &actual_spec);
@@ -176,23 +177,26 @@ int SdlHandler::init_audio(void)
 		return ret;
 	}
 
-	// Allocate the buffer.
-	m_sampleSize = 4;
-	m_audioBufferUsed = 0;
-	m_audioBufferLen = actual_spec.samples * m_sampleSize * SEGMENTS_TO_BUFFER;
-	m_audioBuffer = (uint8_t*)calloc(m_audioBufferLen, 1);
-	if (!m_audioBuffer) {
-		fprintf(stderr, "%s: calloc() failed for audio buffer\n", __func__);
-		SDL_CloseAudio();
-		m_sampleSize = 0;
-		m_audioBufferLen = 0;
-		return -1;
-	}
-	m_audioWritePos = m_audioBuffer;
-
-	// Reinitialize SoundMgr.
+	// Initialize SoundMgr.
 	// TODO: NTSC/PAL setting.
 	SoundMgr::ReInit(actual_spec.freq, false, true);
+
+	// TODO: Verify the actual spec has the correct
+	// number of channels and the right format.
+	// Allocate the RingBuffer.
+	if (m_audioBuffer) {
+		delete m_audioBuffer;
+	}
+	// Buffer should be (SegLength * 8) + actual samples.
+	int samples = (SoundMgr::GetSegLength() * 8) + actual_spec.samples;
+	m_audioBuffer = new RingBuffer(samples);
+
+	// Segment buffer.
+	// Needed to convert "int32_t" to int16_t.
+	m_sampleSize = 4; // TODO: Move to RingBuffer?
+	m_segBufferSamples = SoundMgr::GetSegLength();
+	m_segBufferLen = m_segBufferSamples * m_sampleSize;
+	m_segBuffer = (int16_t*)calloc(1, m_segBufferLen);
 
 	// Audio is initialized.
 	return 0;
@@ -207,10 +211,11 @@ void SdlHandler::end_audio(void)
 	SDL_CloseAudio();
 	free(m_audioBuffer);
 	m_audioBuffer = nullptr;
-	m_audioBufferLen = 0;
-	m_audioBufferUsed = 0;
 	m_sampleSize = 0;
-	m_audioWritePos = nullptr;
+	free(m_segBuffer);
+	m_segBuffer = nullptr;
+	m_segBufferLen = 0;
+	m_segBufferSamples = 0;
 }
 
 /**
@@ -222,35 +227,17 @@ void SdlHandler::end_audio(void)
 void SdlHandler::sdl_audio_callback(void *userdata, uint8_t *stream, int len)
 {
 	SdlHandler *handler = (SdlHandler*)userdata;
-	//printf("requesting %d bytes; buffer has %d bytes used\n", len, handler->m_audioBufferUsed);
-	if (handler->m_audioBufferUsed < len) {
-		// Not enough audio data.
-		// Copy over what's available?
-		memcpy(stream, handler->m_audioBuffer, handler->m_audioBufferUsed);
-		memset(stream + handler->m_audioBufferUsed, 0,
-		       len - handler->m_audioBufferUsed);
-		handler->m_audioBufferUsed = 0;
-		handler->m_audioWritePos = handler->m_audioBuffer;
-	} else {
-		// Copy our emulated audio to the SDL buffer.
-		memcpy(stream, handler->m_audioBuffer, len);
-		handler->m_audioBufferUsed -= len;
 
-		// Compesate for desynchronization.
-		// FIXME: This causes audio to randomly speed up...
-		/*
-		do {
-			handler->m_audioBufferUsed -= len;
-		} while (handler->m_audioBufferUsed > (2 * len));
-		*/
-
-		// Adjust the buffer contents.
-		memmove(handler->m_audioBuffer,
-			handler->m_audioWritePos - handler->m_audioBufferUsed,
-			handler->m_audioBufferUsed);
-
-		handler->m_audioWritePos = handler->m_audioBuffer + handler->m_audioBufferUsed;
+	// Read data from the RingBuffer.
+	unsigned int wrote = handler->m_audioBuffer->read(stream, len);
+	//printf("callback: request %d, read %u\n", len, wrote);
+	if ((int)wrote == len) {
+		// Correct amount of data read.
+		return;
 	}
+
+	// Not enough data. Fill the remaining space with silence.
+	memset(&stream[wrote], 0, ((unsigned int)len - wrote));
 }
 
 /**
@@ -261,46 +248,43 @@ void SdlHandler::update_audio(void)
 	// Mostly copied from GensQt4's ABackend.
 	// TODO: Reimplement the MMX version.
 	// TODO: Move to LibGens.
-	const int SegLength = LibGens::SoundMgr::GetSegLength();
-	const int SegBytes = SegLength * m_sampleSize;
-	// FIXME: This keeps running over for some reason.
-	if (SegLength * m_sampleSize > m_audioBufferLen - m_audioBufferUsed) {
-		// Not enough space left in the buffer...
-		// TODO: What should we do here?
-		printf("audio buffer out of space; %d/%d bytes used, needs %d more bytes\n",
-		       m_audioBufferUsed, m_audioBufferLen, SegBytes);
-		return;
-	}
 
-	SDL_LockAudio();
-	int16_t *dest = (int16_t*)m_audioWritePos;
+	// Convert from "int32_t" to int16_t.
+	int16_t *dest = m_segBuffer;
 
 	// Source buffer pointers.
 	int32_t *srcL = &SoundMgr::ms_SegBufL[0];
 	int32_t *srcR = &SoundMgr::ms_SegBufR[0];
 
-	for (int i = SegLength; i > 0; i--, srcL++, srcR++, dest += 2) {
-		if (*srcL < -0x8000)
+	for (int i = SoundMgr::GetSegLength() - 1; i >= 0;
+	     i--, srcL++, srcR++, dest += 2)
+	{
+		if (*srcL < -0x8000) {
 			*dest = -0x8000;
-		else if (*srcL > 0x7FFF)
+		} else if (*srcL > 0x7FFF) {
 			*dest = 0x7FFF;
-		else
+		} else {
 			*dest = (int16_t)(*srcL);
-		
-		if (*srcR < -0x8000)
+		}
+
+		if (*srcR < -0x8000) {
 			*(dest+1) = -0x8000;
-		else if (*srcR > 0x7FFF)
+		} else if (*srcR > 0x7FFF) {
 			*(dest+1) = 0x7FFF;
-		else
+		} else {
 			*(dest+1) = (int16_t)(*srcR);
+		}
 	}
 
 	// Clear the segment buffers.
-	memset(SoundMgr::ms_SegBufL, 0x00, SegLength*sizeof(SoundMgr::ms_SegBufL[0]));
-	memset(SoundMgr::ms_SegBufR, 0x00, SegLength*sizeof(SoundMgr::ms_SegBufR[0]));
+	// These buffers are additive, so if they aren't cleared,
+	// we'll end up with static.
+	memset(SoundMgr::ms_SegBufL, 0, m_segBufferSamples * sizeof(SoundMgr::ms_SegBufL[0]));
+	memset(SoundMgr::ms_SegBufR, 0, m_segBufferSamples * sizeof(SoundMgr::ms_SegBufL[0]));
 
-	m_audioWritePos = (uint8_t*)dest;
-	m_audioBufferUsed += (SegLength * m_sampleSize);
+	// Write to the ringbuffer.
+	SDL_LockAudio();
+	m_audioBuffer->write(reinterpret_cast<uint8_t*>(m_segBuffer), m_segBufferLen);
 	SDL_UnlockAudio();
 }
 
