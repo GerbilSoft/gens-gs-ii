@@ -160,6 +160,9 @@ int main(int argc, char *argv[])
 	// Set the SDL video source.
 	sdlHandler->set_video_source(context->m_vdp->MD_Screen);
 
+	// Set the window title.
+	SDL_WM_SetCaption("Gens/GS II [SDL]", nullptr);
+
 	// Start audio.
 	SDL_PauseAudio(0);
 
@@ -225,6 +228,13 @@ int main(int argc, char *argv[])
 				fps = (frames - frames_old);
 			}
 			frames_old = frames;
+
+			// Update the window title.
+			// TODO: Average the FPS over multiple seconds
+			// and/or quarter-seconds.
+			char win_title[256];
+			snprintf(win_title, sizeof(win_title), "Gens/GS II [SDL] - %d fps", fps);
+			SDL_WM_SetCaption(win_title, nullptr);
 		}
 
 		// Frameskip.
@@ -272,12 +282,16 @@ int main(int argc, char *argv[])
 				context->execFrame();
 				sdlHandler->update_audio();
 				sdlHandler->update_video();
+				// Increment the frame counter.
+				frames++;
 			}
 		} else {
 			// Run a frame and render it.
 			context->execFrame();
 			sdlHandler->update_audio();
 			sdlHandler->update_video();
+			// Increment the frame counter.
+			frames++;
 		}
 
 		// Update the I/O manager.
