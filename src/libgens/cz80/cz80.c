@@ -17,7 +17,8 @@
 // include macro file
 //////////////////////
 
-#include "cz80.inc"
+#define IS_IN_CZ80 1
+#include "cz80.inc.c"
 
 // shared global variable
 //////////////////////////
@@ -108,7 +109,7 @@ uint8_t Cz80_Soft_Reset(cz80_struc *cpu)
 
 /////////////////////////////////
 
-#include "cz80exec.inc"
+#include "cz80exec.inc.c"
 
 /////////////////////////////////
 

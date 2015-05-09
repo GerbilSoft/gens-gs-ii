@@ -9,7 +9,7 @@
 int CZ80CALL Cz80_Exec(cz80_struc *cpu, int cycles)
 {
 #if CZ80_USE_JUMPTABLE
-    #include "cz80jmp.inc"
+    #include "cz80jmp.inc.c"
 #endif
 
     cz80_struc *CPU;
@@ -55,7 +55,7 @@ Cz80_Exec:
             union16 *data = pzHL;
             INC_R_EXACT();	// TODO: Does this include IM0 interrupts?
 
-            #include "cz80_op.inc"
+            #include "cz80_op.inc.c"
         }
     }
 

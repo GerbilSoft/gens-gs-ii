@@ -6,6 +6,10 @@
 /*                                                                              */
 /********************************************************************************/
 
+#ifndef IS_IN_CZ80
+#error Do not compile this file by itself - compile cz80.c instead
+#endif
+
 // NOTE: Only enable on 64-bit or shared library builds.
 // Otherwise, this just adds overhead.
 #define CZ80_USE_RELATIVE_JUMPTABLE 0

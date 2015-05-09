@@ -6,6 +6,10 @@
 /*                                                                              */
 /********************************************************************************/
 
+#ifndef IS_IN_CZ80
+#error Do not compile this file by itself - compile cz80.c instead
+#endif
+
 // 2015/04/28: Instruction timings updated from:
 // - http://wikiti.brandonw.net/?title=Z80_Instruction_Set
 // - http://www.z80.info/z80undoc.txt
@@ -1271,14 +1275,14 @@ OP_IN_A_mN:
 /* CB_PREFIXE: */
         Opcode = FETCH_BYTE();
         INC_R_EXACT();
-        #include "cz80_opcb.inc"
+        #include "cz80_opcb.inc.c"
 
     OP(0xed):   // ED PREFIXE
 ED_PREFIXE:
         CCnt -= 4;
         Opcode = FETCH_BYTE();
         INC_R_EXACT();
-        #include "cz80_oped.inc"
+        #include "cz80_oped.inc.c"
 
     OP(0xdd):   // DD PREFIXE (IX)
 DD_PREFIXE:
@@ -1293,7 +1297,7 @@ XY_PREFIXE:
         CCnt -= 4;
         Opcode = FETCH_BYTE();
         INC_R_EXACT();
-        #include "cz80_opxy.inc"
+        #include "cz80_opxy.inc.c"
 
 #if CZ80_USE_JUMPTABLE
 #else
