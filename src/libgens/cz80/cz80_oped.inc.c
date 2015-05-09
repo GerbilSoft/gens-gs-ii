@@ -6,6 +6,10 @@
 /*                                                                              */
 /********************************************************************************/
 
+#ifndef IS_IN_CZ80
+#error Do not compile this file by itself - compile cz80.c instead
+#endif
+
 // NOTE: The main jump table already subtracts 4 cycles from the counter
 // before executing ED-prefixed instructions. Consequently, the cycle
 // timings listed below do not include these 4 cycles.

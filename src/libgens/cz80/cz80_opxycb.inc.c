@@ -6,6 +6,10 @@
 /*                                                                              */
 /********************************************************************************/
 
+#ifndef IS_IN_CZ80
+#error Do not compile this file by itself - compile cz80.c instead
+#endif
+
 #if CZ80_USE_JUMPTABLE
     DO_JMPTBL_OPXYCB(Opcode);
 #else
