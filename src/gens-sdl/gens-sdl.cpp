@@ -25,6 +25,7 @@ using GensSdl::SdlHandler;
 
 // LibGens
 #include "libgens/lg_main.hpp"
+#include "libgens/lg_osd.h"
 #include "libgens/Rom.hpp"
 #include "libgens/MD/EmuMD.hpp"
 #include "libgens/Util/MdFb.hpp"
@@ -89,6 +90,45 @@ static const GensKey_t keyMap[] = {
 	SDLK_e, SDLK_w, SDLK_q, SDLK_RSHIFT		// ZYXM
 };
 
+namespace GensSdl {
+
+/**
+ * Onscreen Display handler.
+ * @param osd_type OSD type.
+ * @param param Parameter.
+ */
+static void gsdl_osd(OsdType osd_type, int param)
+{
+	// NOTE: We're not using any sort of translation system
+	// in the SDL frontend, so we'll just use the plural form.
+	// Most SRAM/EEPROM chips are larger than 1 byte, after all...
+	switch (osd_type) {
+		case OSD_SRAM_LOAD:
+			printf("SRAM loaded. (%d bytes)\n", param);
+			break;
+		case OSD_SRAM_SAVE:
+			printf("SRAM saved. (%d bytes)\n", param);
+			break;
+		case OSD_SRAM_AUTOSAVE:
+			printf("SRAM autosaved. (%d bytes)\n", param);
+			break;
+		case OSD_EEPROM_LOAD:
+			printf("EEPROM loaded. (%d bytes)\n", param);
+			break;
+		case OSD_EEPROM_SAVE:
+			printf("EEPROM saved. (%d bytes)\n", param);
+			break;
+		case OSD_EEPROM_AUTOSAVE:
+			printf("EEPROM autosaved. (%d bytes)\n", param);
+			break;
+		default:
+			// Unknown OSD type.
+			break;
+	}
+}
+
+}
+
 // Don't use SDL_main.
 #undef main
 int main(int argc, char *argv[])
@@ -127,6 +167,9 @@ int main(int argc, char *argv[])
 	// Initialize LibGens.
 	LibGens::Init();
 
+	// Register the LibGens OSD handler.
+	lg_set_osd_fn(GensSdl::gsdl_osd);
+
 	// Load the ROM image.
 	rom = new Rom(rom_filename);
 	if (!rom->isOpen()) {
@@ -140,6 +183,9 @@ int main(int argc, char *argv[])
 		// Select the first file.
 		rom->select_z_entry(rom->get_z_entry_list());
 	}
+
+	// Set the SRAM/EEPROM path.
+	LibGens::EmuContext::SetPathSRam(GensSdl::getConfigDir("SRAM").c_str());
 
 	// Create the emulation context.
 	context = new EmuMD(rom);
@@ -239,6 +285,8 @@ int main(int argc, char *argv[])
 							new_clk = start_clk;
 							// Pause audio.
 							SDL_PauseAudio(paused);
+							// Autosave SRAM/EEPROM.
+							context->autoSaveData(-1);
 							// TODO: Reset the audio ringbuffer?
 							// Update the window title.
 							if (paused) {
@@ -345,6 +393,10 @@ int main(int argc, char *argv[])
 				sdlHandler->update_video();
 				// Increment the frame counter.
 				frames++;
+
+				// Autosave SRAM/EEPROM.
+				// TODO: EmuContext::execFrame() should probably do this itself...
+				context->autoSaveData(1);
 			}
 		} else {
 			// Run a frame and render it.
@@ -353,11 +405,22 @@ int main(int argc, char *argv[])
 			sdlHandler->update_video();
 			// Increment the frame counter.
 			frames++;
+
+			// Autosave SRAM/EEPROM.
+			// TODO: EmuContext::execFrame() should probably do this itself...
+			context->autoSaveData(1);
 		}
 
 		// Update the I/O manager.
 		keyManager->updateIoManager(context->m_ioManager);
 	}
+
+	// Save SRAM/EEPROM, if necessary.
+	// TODO: Move to EmuContext::~EmuContext()?
+	context->saveData();
+
+	// Unregister the LibGens OSD handler.
+	lg_set_osd_fn(nullptr);
 
 	// NOTE: Deleting sdlHandler can cause crashes on Windows
 	// due to the timer callback trying to post the semaphore
