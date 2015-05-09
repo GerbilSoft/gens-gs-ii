@@ -31,13 +31,32 @@
 #define DIR_SEP_CHR '/'
 #endif
 
+// C++ includes.
+#include <string>
+
+namespace LibGens {
+	class MdFb;
+	class Vdp;
+}
+
 namespace GensSdl {
 
 /**
  * Get the configuration directory.
- * @return Configuration directory, or nullptr on error.
+ * @param subdir [in, opt] If not null, append a subdirectory.
+ * @return Configuration directory, or empty string on error.
  */
-const utf8_str *getConfigDir(void);
+const std::string getConfigDir(const utf8_str *subdir = nullptr);
+
+/**
+ * Take a screenshot.
+ * @param fb MdFb.
+ * @param vdp Vdp. (TODO: Move required variables to MdFb.)
+ * @return 0 on success; non-zero on error.
+ */
+int doScreenShot(const LibGens::MdFb *fb,
+		 const LibGens::Vdp *vdp,
+		 const utf8_str *basename);
 
 }
 

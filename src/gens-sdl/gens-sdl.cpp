@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 	rom_filename = argv[1];
 
 	// Make sure we have a valid configuration directory.
-	if (GensSdl::getConfigDir() == nullptr) {
+	if (GensSdl::getConfigDir().empty()) {
 		fprintf(stderr, "*** WARNING: Could not find a usable configuration directory.\n"
 				"Save functionality will be disabled.\n\n");
 	}
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
 	// TODO: Close the ROM, or let EmuContext do it?
 
 	// Set the color depth.
-	MdFb *fb = context->m_vdp->MD_Screen;
+	MdFb *fb = context->m_vdp->MD_Screen->ref();
 	fb->setBpp(MdFb::BPP_32);
 
 	// Set the SDL video source.
@@ -214,6 +214,7 @@ int main(int argc, char *argv[])
 
 				case SDL_KEYDOWN:
 					// SDL keycodes nearly match GensKey.
+					// TODO: Split out into a separate function?
 					switch (event.key.keysym.sym) {
 						case SDLK_TAB:
 							// Check for Shift.
@@ -244,6 +245,12 @@ int main(int argc, char *argv[])
 								SDL_WM_SetCaption("Gens/GS II [SDL] [Paused]", nullptr);
 							} else {
 								SDL_WM_SetCaption("Gens/GS II [SDL]", nullptr);
+							}
+							break;
+						case SDLK_BACKSPACE:
+							if (event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
+								// Take a screenshot.
+								GensSdl::doScreenShot(fb, context->m_vdp, rom->filenameBaseNoExt().c_str());
 							}
 							break;
 						default:
@@ -363,5 +370,6 @@ int main(int argc, char *argv[])
 	delete keyManager;
 	delete context;
 	delete rom;
+	fb->unref();
 	return EXIT_SUCCESS;
 }

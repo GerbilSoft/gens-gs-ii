@@ -38,7 +38,7 @@ ADD_EXECUTABLE(gens-sdl
 	${gens-sdl_SRCS}
 	${gens-sdl_H}
 	)
-TARGET_LINK_LIBRARIES(gens-sdl gens genskeys)
+TARGET_LINK_LIBRARIES(gens-sdl gens genskeys zomg)
 
 # Additional libraries.
 TARGET_LINK_LIBRARIES(gens-sdl ${SDL_LIBRARY})

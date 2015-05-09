@@ -21,6 +21,16 @@
 
 #include "Config.hpp"
 
+// LibGens
+#include "libgens/Util/MdFb.hpp"
+#include "libgens/Vdp/Vdp.hpp"
+using LibGens::MdFb;
+using LibGens::Vdp;
+
+// LibZomg
+#include "libzomg/PngWriter.hpp"
+#include "libzomg/img_data.h"
+
 #ifdef _WIN32
 // Windows
 #define WIN32_LEAN_AND_MEAN
@@ -40,6 +50,7 @@
 
 // C includes. (C++ namespace)
 #include <cstring>
+#include <cerrno>
 
 // C++ includes.
 #include <string>
@@ -81,9 +92,10 @@ static int mkdir_recursive(const char *dir) {
 
 /**
  * Get the configuration directory.
+ * @param subdir [in, opt] If not null, append a subdirectory.
  * @return Configuration directory, or nullptr on error.
  */
-const utf8_str *getConfigDir(void)
+const std::string getConfigDir(const utf8_str *subdir)
 {
 	static string config_dir;
 	if (config_dir.empty()) {
@@ -116,15 +128,90 @@ const utf8_str *getConfigDir(void)
 #endif
 	}
 
-	if (!config_dir.empty()) {
+	string ret = config_dir;
+	if (!ret.empty()) {
+		if (subdir) {
+			// Append the subdirectory.
+			ret += DIR_SEP_CHR;
+			ret += subdir;
+		}
+
 		// Make sure the directory exists.
-		if (access(config_dir.c_str(), F_OK) != 0) {
+		if (access(ret.c_str(), F_OK) != 0) {
 			// Directory does not exist. Create it.
-			mkdir_recursive(config_dir.c_str());
+			mkdir_recursive(ret.c_str());
 		}
 	}
 
-	return (!config_dir.empty() ? config_dir.c_str() : nullptr);
+	return ret;
+}
+
+/**
+ * Take a screenshot.
+ * @param fb MdFb.
+ * @param vdp Vdp. (TODO: Move required variables to MdFb.)
+ * @param basename Basename for the screenshot.
+ * @return 0 on success; non-zero on error.
+ */
+int doScreenShot(const MdFb *fb, const Vdp *vdp, const utf8_str *basename)
+{
+	const string configDir = getConfigDir("Screenshots");
+	if (configDir.empty() || !basename || !fb || !vdp)
+		return -EINVAL;
+
+	string romFilename(configDir);
+	romFilename += DIR_SEP_CHR;
+	romFilename += basename;
+
+	// Add the current directory, number, and .png extension.
+	const utf8_str scrFilenameSuffix[] = ".png";
+	utf8_str scrFilename[260];
+	int scrNumber = -1;
+	do {
+		// TODO: Figure out how to optimize this!
+		scrNumber++;
+		snprintf(scrFilename, sizeof(scrFilename), "%s_%03d%s",
+			 romFilename.c_str(), scrNumber, scrFilenameSuffix);
+	} while (!access(scrFilename, F_OK));
+
+	// Take the screenshot.
+	// TODO: Separate function to create an img_data from an MdFb.
+	// NOTE: LibZomg doesn't depend on LibGens, so it can't use MdFb directly.
+	// TODO: Store VPix and HPixBegin in the MdFb.
+	fb->ref();
+	const int startY = ((240 - vdp->getVPix()) / 2);
+	const int startX = (vdp->getHPixBegin());
+
+	// TODO: Option to save the full framebuffer, not just active display?
+	Zomg_Img_Data_t img_data;
+	img_data.w = vdp->getHPix();
+	img_data.h = vdp->getVPix();
+
+	const MdFb::ColorDepth bpp = fb->bpp();
+	if (bpp == MdFb::BPP_32) {
+		img_data.data = (void*)(fb->lineBuf32(startY) + startX);
+		img_data.pitch = (fb->pxPitch() * sizeof(uint32_t));
+		img_data.bpp = 32;
+	} else {
+		img_data.data = (void*)(fb->lineBuf16(startY) + startX);
+		img_data.pitch = (fb->pxPitch() * sizeof(uint16_t));
+		img_data.bpp = (bpp == MdFb::BPP_16 ? 16 : 15);
+	}
+
+	LibZomg::PngWriter pngWriter;
+	int ret = pngWriter.writeToFile(&img_data, scrFilename);
+
+	// Done using the framebuffer.
+	fb->unref();
+
+	if (ret == 0) {
+		printf("Screenshot %d saved.\n", scrNumber);
+	} else {
+		// TODO: Print the actual error.
+		printf("Error saving screenshot: %s\n", strerror(-ret));
+	}
+
+	return ret;
 }
 
 }
