@@ -167,7 +167,7 @@ int SdlHandler::init_audio(void)
 	wanted_spec.freq	= 44100;
 	wanted_spec.format	= AUDIO_S16LSB;
 	wanted_spec.channels	= 2;
-	wanted_spec.samples	= 0;
+	wanted_spec.samples	= 1024;
 	wanted_spec.callback	= sdl_audio_callback;
 	wanted_spec.userdata	= this;
 	ret = SDL_OpenAudio(&wanted_spec, &actual_spec);
