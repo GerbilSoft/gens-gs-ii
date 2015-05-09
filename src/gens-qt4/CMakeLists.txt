@@ -123,7 +123,6 @@ SET(gens-qt4_COMMON_SRCS
 	VBackend/GLShaderFastBlur.cpp
 	Audio/ARingBuffer.cpp
 	EmuManager_qEmu.cpp
-	Screenshot.cpp
 	VBackend/GLTex2D.cpp
 	actions/GensKeyConfig.cpp
 	actions/GensMenuBar.cpp
@@ -168,16 +167,8 @@ SET(gens-qt4_CONFIG_SRCS
 	ConfigHandler.cpp
 	)
 
-SET(gens-qt4_WIDGET_H
-	widgets/GensLineEdit.hpp
-	widgets/GensZipDirModel.hpp
-	widgets/GensZipDirItem.hpp
-	widgets/GensColorComboBox.hpp
-	widgets/GensKeySequenceWidget.hpp
-	widgets/GensCtrlCfgWidget.hpp
-	widgets/GensCtrlKeyWidget.hpp
-	widgets/GensColorButton.hpp
-	widgets/KeyNames.hpp
+SET(gens-qt4_ROMDB_SRCS
+	RomDB/McdRomDB.cpp
 	)
 
 # Headers with Qt4 objects.
@@ -191,7 +182,6 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	VBackend/GensQGLWidget.hpp
 	VBackend/GensQGLWidget_p.hpp
 	EmuManager.hpp
-	Screenshot.hpp
 	actions/GensKeyConfig.hpp
 	actions/GensMenuBar.hpp
 	actions/GensActions.hpp
@@ -227,6 +217,10 @@ SET(gens-qt4_CONFIG_MOC_HEADERS
 	Config/PathConfig.hpp
 	Config/RecentRoms.hpp
 	ConfigHandler.hpp
+	)
+
+SET(gens-qt4_ROMDB_MOC_HEADERS
+	RomDB/McdRomDB.hpp
 	)
 
 # UI files.
@@ -316,6 +310,7 @@ QT4_WRAP_CPP(gens-qt4_MOC_SOURCES
 		${gens-qt4_WINDOW_MOC_HEADERS}
 		${gens-qt4_WIDGET_MOC_HEADERS}
 		${gens-qt4_CONFIG_MOC_HEADERS}
+		${gens-qt4_ROMDB_MOC_HEADERS}
 		${gens-qt4_DBUS_MOC_HEADERS}
 		${gens-qt4_PLATFORM_MOC_HEADERS}
 		)
@@ -364,12 +359,13 @@ ADD_SUBDIRECTORY(translations)
 ADD_EXECUTABLE(gens-qt4
 	WIN32
 	${gens-qt4_SRCS}
-	${gens-qt4_COMMON_SRCS}
-	${gens-qt4_WINDOW_SRCS}
-	${gens-qt4_WIDGET_SRCS} ${gens-qt4_WIDGET_H}
-	${gens-qt4_CONFIG_SRCS}
-	${gens-qt4_DBUS_SRCS}
-	${gens-qt4_PLATFORM_SRCS}
+	${gens-qt4_COMMON_SRCS} ${gens-qt4_COMMON_MOC_HEADERS}
+	${gens-qt4_WINDOW_SRCS} ${gens-qt4_WINDOW_MOC_HEADERS}
+	${gens-qt4_WIDGET_SRCS} ${gens-qt4_WIDGET_MOC_HEADERS}
+	${gens-qt4_CONFIG_SRCS} ${gens-qt4_CONFIG_MOC_HEADERS}
+	${gens-qt4_ROMDB_SRCS} ${gens-qt4_ROMDB_MOC_HEADERS}
+	${gens-qt4_DBUS_SRCS} ${gens-qt4_DBUS_MOC_HEADERS}
+	${gens-qt4_PLATFORM_SRCS} ${gens-qt4_PLATFORM_MOC_HEADERS}
 	${gens-qt4_PLATFORM_UI_SRCS}
 	${gens-qt4_MOC_SOURCES}
 	${gens-qt4_UIS_H}
@@ -381,7 +377,6 @@ TARGET_LINK_LIBRARIES(gens-qt4 gens ${ZLIB_LIBRARY} genscd genskeys)
 ADD_DEPENDENCIES(gens-qt4 translations_target)
 
 # Additional libraries.
-SET(GENS-QT4_COMPILE_DEFS "")
 IF(APPLE AND APPLE_LIBS)
 	TARGET_LINK_LIBRARIES(gens-qt4 ${APPLE_LIBS})
 ENDIF(APPLE AND APPLE_LIBS)
@@ -391,7 +386,7 @@ IF(QT_QTDBUS_FOUND)
 ENDIF(QT_QTDBUS_FOUND)
 IF(HAVE_GLEW)
 	TARGET_LINK_LIBRARIES(gens-qt4 ${GLEW_LIBRARY})
-	SET(GENS-QT4_COMPILE_DEFS "${GENS-QT4_COMPILE_DEFS};${GLEW_COMPILE_DEFINITIONS}")
+	ADD_DEFINITIONS(${GLEW_COMPILE_DEFINITIONS})
 ENDIF(HAVE_GLEW)
 TARGET_LINK_LIBRARIES(gens-qt4 ${OPENGL_gl_LIBRARY})
 IF(HAVE_PORTAUDIO)
@@ -413,10 +408,15 @@ ENDIF(COMPRESS_EXE)
 # Qt options:
 # - Fast QString concatenation. (Qt 4.6+, plus 4.8-specific version)
 # - Disable implicit QString ASCII casts.
-SET(GENS-QT4_COMPILE_DEFS "${GENS-QT4_COMPILE_DEFS};QT_USE_FAST_CONCATENATION;QT_USE_FAST_OPERATOR_PLUS;QT_USE_QSTRINGBUILDER;QT_NO_CAST_FROM_ASCII;QT_NO_CAST_TO_ASCII")
+ADD_DEFINITIONS(-DQT_USE_FAST_CONCATENATION
+	-DQT_USE_FAST_OPERATOR_PLUS
+	-DQT_USE_QSTRINGBUILDER
+	-DQT_NO_CAST_FROM_ASCII
+	-DQT_NO_CAST_TO_ASCII
+	)
 
-# Set the compile definitions.
-SET_TARGET_PROPERTIES(gens-qt4 PROPERTIES COMPILE_DEFINITIONS "${GENS-QT4_COMPILE_DEFS}")
+# ZLIB definitions.
+ADD_DEFINITIONS(${ZLIB_DEFINITIONS})
 
 # Mac OS X bundle information.
 # TODO: Add "NO-EMU" if necessary.

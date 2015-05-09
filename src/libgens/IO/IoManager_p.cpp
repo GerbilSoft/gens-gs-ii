@@ -23,6 +23,12 @@
 
 #define __LIBGENS_IN_IOMANAGER_CLASS__
 #include "IoManager_p.hpp"
+#include "Device.hpp"
+
+#include "macros/common.h"
+
+// C includes. (C++ namespace)
+#include <cstring>
 
 namespace LibGens {
 
@@ -35,9 +41,6 @@ const IoManagerPrivate::IoDevInfo IoManagerPrivate::ioDevInfo[IoManager::IOT_MAX
 	{'3BTN', 8, true},	// IOT_3BTN
 	{'6BTN', 12, true},	// IOT_6BTN
 	{'2BTN', 7, true},	// IOT_2BTN
-	{'TEAM', 0, true},	// IOT_TEAMPLAYER
-	{'4WPM', 0, true},	// IOT_4WP_MASTER
-	{'4WPS', 0, true},	// IOT_4WP_SLAVE
 
 	// Miscellaneous Master System peripherals.
 	{'PADL', 2, false},	// IOT_PADDLE
@@ -52,52 +55,34 @@ const IoManagerPrivate::IoDevInfo IoManagerPrivate::ioDevInfo[IoManager::IOT_MAX
 	{'PHAS', 0, false},	// IOT_PHASER
 	{'MENA', 0, false},	// IOT_MENACER
 	{'JUST', 0, false},	// IOT_JUSTIFIER
+
+	// ColecoVision.
+	{'COLV', 20, false},	// IOT_COLECOVISION
+
+	// Multitaps.
+	{'TEAM', 0, true},	// IOT_TEAMPLAYER
+	{'4WPM', 0, true},	// IOT_4WP_MASTER
+	{'4WPS', 0, true},	// IOT_4WP_SLAVE
+	{'MTAP', 0, false},	// IOT_MASTERTAP
 };
 
 IoManagerPrivate::IoManagerPrivate(IoManager *q)
 	: q(q)
-	, ea4wp_curPlayer(7)
-{ }
-
-/**
- * Reset all devices.
- */
-void IoManagerPrivate::reset(void)
 {
-	for (int i = 0; i < ARRAY_SIZE(ioDevices); i++)
-		ioDevices[i].reset();
+	// Clear the I/O devices array.
+	memset(ioDevices, 0, sizeof(ioDevices));
 
-	// Rebuild Team Player controller index tables for TP devices.
-	for (int i = IoManager::VIRTPORT_1;
-	     i <= IoManager::VIRTPORT_2; i++) {
-		if (ioDevices[i].type == IoManager::IOT_TEAMPLAYER)
-			rebuildCtrlIndexTable(i);
-	}
-
-	// EA 4-Way Play.
-	ea4wp_curPlayer = 7;
+	// Allocate empty devices for the three physical ports.
+	ioDevices[IoManager::VIRTPORT_1] = new IO::Device();
+	ioDevices[IoManager::VIRTPORT_2] = new IO::Device();
+	ioDevices[IoManager::VIRTPORT_EXT] = new IO::Device();
 }
 
-/**
- * Update the scanline counter for all controllers.
- * This is used by the 6-button controller,
- * which resets its internal counter after
- * around 25 scanlines of no TH rising edges.
- */
-void IoManagerPrivate::doScanline(void)
+IoManagerPrivate::~IoManagerPrivate()
 {
+	// Delete all of the I/O devices.
 	for (int i = 0; i < ARRAY_SIZE(ioDevices); i++) {
-		IoDevice *const dev = &ioDevices[i];
-		if (dev->type != IoManager::IOT_6BTN)
-			continue;
-
-		dev->scanlines++;
-		if (dev->scanlines > SCANLINE_COUNT_MAX_6BTN) {
-			// Scanline counter has reached its maximum value.
-			// Reset both counters.
-			dev->counter = 0;
-			dev->scanlines = 0;
-		}
+		delete ioDevices[i];
 	}
 }
 

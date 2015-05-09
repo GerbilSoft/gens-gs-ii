@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -150,13 +150,13 @@ int Test_VdpPalette_DAC::exec(void)
 
 	// Initialize three VdpPalette objects.
 	VdpPalette *vdp15 = new VdpPalette();
-	vdp15->setBpp(VdpPalette::BPP_15);
+	vdp15->setBpp(MdFb::BPP_15);
 
 	VdpPalette *vdp16 = new VdpPalette();
-	vdp16->setBpp(VdpPalette::BPP_16);
+	vdp16->setBpp(MdFb::BPP_16);
 
 	VdpPalette *vdp32 = new VdpPalette();
-	vdp32->setBpp(VdpPalette::BPP_32);
+	vdp32->setBpp(MdFb::BPP_32);
 
 	/**
 	 * Default settings:
@@ -251,10 +251,12 @@ int Test_VdpPalette_DAC::exec(void)
 			}
 
 			// Convert the selected PalMode to uppercase.
+			uint8_t m5m4bits = 0;
 			switch (palMode) {
 				case VdpPalette::PALMODE_MD:
 				default:
 					palMode_str = PALTEST_PALMODE_MD;
+					m5m4bits = 3;	// Mode 5
 					break;
 				/* TODO
 				case VdpPalette::PALMODE_32X:
@@ -263,13 +265,16 @@ int Test_VdpPalette_DAC::exec(void)
 				*/
 				case VdpPalette::PALMODE_SMS:
 					palMode_str = PALTEST_PALMODE_SMS;
+					m5m4bits = 1;	// Mode 4
 					break;
 				case VdpPalette::PALMODE_GG:
 					palMode_str = PALTEST_PALMODE_GG;
+					m5m4bits = 1;	// Mode 4
 					break;
 				/* TODO
 				case VdpPalette::PALMODE_TMS9918:
 					palMode_str = PALTEST_PALMODE_TMS9918;
+					m5m4bits = 0;	// TMS modes
 					break;
 				*/
 			}
@@ -281,6 +286,11 @@ int Test_VdpPalette_DAC::exec(void)
 			vdp15->setPalMode(palMode);
 			vdp16->setPalMode(palMode);
 			vdp32->setPalMode(palMode);
+
+			// Set the M5/M4 bits.
+			vdp15->setM5M4bits(m5m4bits);
+			vdp16->setM5M4bits(m5m4bits);
+			vdp32->setM5M4bits(m5m4bits);
 		} else if (!strcasecmp(token, PALTEST_CMD_SHMODE)) {
 			if (!isInit)
 				goto no_magic;

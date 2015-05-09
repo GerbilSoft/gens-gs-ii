@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -38,7 +38,6 @@
 
 // LibGens includes.
 #include "libgens/Util/MdFb.hpp"
-#include "libgens/Vdp/VdpPalette.hpp"
 #include "libgens/Util/Timing.hpp"
 
 // paused_t, StretchMode_t
@@ -85,9 +84,8 @@ class VBackend : public QWidget
 		/**
 		 * Video Backend update function.
 		 * @param fb Source framebuffer.
-		 * @param bpp Framebuffer color depth.
 		 */
-		void vbUpdate(const LibGens::MdFb *fb, LibGens::VdpPalette::ColorDepth bpp);
+		void vbUpdate(const LibGens::MdFb *fb);
 
 	protected:
 		/**
@@ -95,9 +93,8 @@ class VBackend : public QWidget
 		 */
 		virtual void vbUpdate_int(void) = 0;
 
-		// Current MdFb and color depth.
+		// Current MdFb.
 		const LibGens::MdFb *m_srcFb;
-		LibGens::VdpPalette::ColorDepth m_srcBpp;
 
 	public:
 		void setKeyHandler(KeyHandlerQt *newKeyHandler);
@@ -139,7 +136,7 @@ class VBackend : public QWidget
 		bool m_mdScreenDirty;	// MD Screen dirty: texture must be reuploaded.
 
 		// Color depth information.
-		LibGens::VdpPalette::ColorDepth m_lastBpp;
+		LibGens::MdFb::ColorDepth m_lastBpp;
 
 		// Effects.
 		void updatePausedEffect(bool fromMdScreen = true);
@@ -240,8 +237,7 @@ class VBackend : public QWidget
 
 	protected:
 		// OSD message struct.
-		struct OsdMessage
-		{
+		struct OsdMessage {
 			QString msg;
 			int duration;
 			bool hasDisplayed;
@@ -278,8 +274,7 @@ class VBackend : public QWidget
 		};
 		PreviewImage m_previewImg;
 
-		struct RecOsd
-		{
+		struct RecOsd {
 			QString component;
 			uint64_t lastUpdate;	// usec
 			int duration;		// msec

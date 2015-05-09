@@ -7,6 +7,7 @@ cmake_minimum_required(VERSION 2.6.0)
 # TODO: Test on all archs and fix Z_PREFIX issues.
 # FIXME: Building 32-bit on 64-bit Linux results in CMAKE_SYSTEM_PROCESSOR == x86_64.
 # TODO: If MASM, only enable on cmake-2.6.3+
+# TODO: Can't use MASM because of conflicts with NASM in cmake.
 # TODO: If nasm/yasm, only enable on cmake-2.8.4+
 # TODO: Symbol redefinitions.
 IF(0)
@@ -36,6 +37,15 @@ IF(USE_INTERNAL_ZLIB)
 	# Use the internal copy of zlib. (statically-linked)
 	ADD_SUBDIRECTORY(zlib)
 ENDIF(USE_INTERNAL_ZLIB)
+
+IF(USE_INTERNAL_PNG)
+	# Use the internal copy of libpng. (statically-linked)
+	SET(PNG_SHARED OFF)
+	SET(PNG_STATIC ON)
+	SET(PNG_TESTS OFF)
+	SET(PNG_DEBUG OFF)
+	ADD_SUBDIRECTORY(libpng)
+ENDIF(USE_INTERNAL_PNG)
 
 # MiniZip
 IF(USE_INTERNAL_MINIZIP)

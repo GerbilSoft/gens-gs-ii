@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -27,16 +27,16 @@
 #include <stdint.h>
 #include "../macros/common.h"
 
-namespace LibGens
-{
+namespace LibGens {
+
+class MdFb;
 
 class CrazyEffect
 {
 	public:
 		CrazyEffect();
-		
-		enum ColorMask
-		{
+
+		enum ColorMask {
 			CM_BLACK	= 0,
 			CM_BLUE		= 1,
 			CM_GREEN	= 2,
@@ -46,22 +46,23 @@ class CrazyEffect
 			CM_YELLOW	= 6,
 			CM_WHITE	= 7,
 		};
-		
+
 		// Color mask property.
 		ColorMask colorMask(void);
 		void setColorMask(ColorMask newColorMask);
-		
+
 		/**
-		 * run(): Run the "Crazy Effect" on the MD screen.
+		 * Run the "Crazy Effect" on the MD screen.
+		 * @param fb MdFb to apply the effect to. 
 		 */
-		void run();
-		void run(ColorMask newColorMask);
-	
+		void run(MdFb *fb);
+		void run(MdFb *fb, ColorMask newColorMask);
+
 	private:
 		template<typename pixel, pixel Rmask, pixel Gmask, pixel Bmask,
 				  pixel Radd, pixel Gadd, pixel Badd>
 		void T_doCrazyEffect(pixel *screen);
-		
+
 		// Color mask.
 		ColorMask m_colorMask;
 };
@@ -78,10 +79,10 @@ inline void CrazyEffect::setColorMask(CrazyEffect::ColorMask newColorMask)
 }
 
 
-inline void CrazyEffect::run(ColorMask newColorMask)
+inline void CrazyEffect::run(MdFb *fb, ColorMask newColorMask)
 {
 	setColorMask(newColorMask);
-	run();
+	run(fb);
 }
 
 }

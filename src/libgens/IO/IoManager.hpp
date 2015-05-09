@@ -122,27 +122,39 @@ class IoManager
 			VIRTPORT_2	= 1,	// Player 2
 			VIRTPORT_EXT	= 2,	// Extension port
 
-			// Team Player 1
+			// Team Player, Port 1
 			VIRTPORT_TP1A	= 3,	// TP-1A
 			VIRTPORT_TP1B	= 4,	// TP-1B
 			VIRTPORT_TP1C	= 5,	// TP-1C
 			VIRTPORT_TP1D	= 6,	// TP-1D
 
-			// Team Player 2
+			// Team Player, Port 2
 			VIRTPORT_TP2A	= 7,	// TP-1A
 			VIRTPORT_TP2B	= 8,	// TP-1B
 			VIRTPORT_TP2C	= 9,	// TP-1C
 			VIRTPORT_TP2D	= 10,	// TP-1D
 
-			// 4-Way Play
+			// EA 4-Way Play
 			VIRTPORT_4WPA	= 11,	// 4WP-A
 			VIRTPORT_4WPB	= 12,	// 4WP-B
 			VIRTPORT_4WPC	= 13,	// 4WP-C
 			VIRTPORT_4WPD	= 14,	// 4WP-D
 
+			// Master Tap, Port 1
+			VIRTPORT_MTAP1A	= 15,	// MTAP-1A
+			VIRTPORT_MTAP1B	= 16,	// MTAP-1B
+			VIRTPORT_MTAP1C	= 17,	// MTAP-1C
+			VIRTPORT_MTAP1D	= 18,	// MTAP-1D
+
+			// Master Tap, Port 2
+			VIRTPORT_MTAP2A	= 19,	// MTAP-2A
+			VIRTPORT_MTAP2B	= 20,	// MTAP-2B
+			VIRTPORT_MTAP2C	= 21,	// MTAP-2C
+			VIRTPORT_MTAP2D	= 22,	// MTAP-2D
+
 			// J-Cart (TODO)
-			VIRTPORT_JCART1	= 15,
-			VIRTPORT_JCART2	= 16,
+			VIRTPORT_JCART1	= 23,
+			VIRTPORT_JCART2	= 24,
 
 			VIRTPORT_MAX
 		};
@@ -152,9 +164,6 @@ class IoManager
 			IOT_3BTN,
 			IOT_6BTN,
 			IOT_2BTN,
-			IOT_TEAMPLAYER,
-			IOT_4WP_MASTER,
-			IOT_4WP_SLAVE,
 
 			// Miscellaneous Master System peripherals.
 			IOT_PADDLE,
@@ -169,6 +178,15 @@ class IoManager
 			IOT_PHASER,
 			IOT_MENACER,
 			IOT_JUSTIFIER,
+
+			// ColecoVision.
+			IOT_COLECOVISION,
+
+			// Multitaps.
+			IOT_TEAMPLAYER,
+			IOT_4WP_MASTER,
+			IOT_4WP_SLAVE,
+			IOT_MASTERTAP,
 
 			IOT_MAX
 		};
@@ -286,6 +304,24 @@ class IoManager
 			BTNNAME_E1,
 			BTNNAME_D,
 
+			// ColecoVision buttons.
+			BTNNAME_CV_TL_YELLOW,
+			BTNNAME_CV_TR_RED,
+			BTNNAME_CV_PURPLE,
+			BTNNAME_CV_BLUE,
+			BTNNAME_CV_KEYPAD_1,
+			BTNNAME_CV_KEYPAD_2,
+			BTNNAME_CV_KEYPAD_3,
+			BTNNAME_CV_KEYPAD_4,
+			BTNNAME_CV_KEYPAD_5,
+			BTNNAME_CV_KEYPAD_6,
+			BTNNAME_CV_KEYPAD_7,
+			BTNNAME_CV_KEYPAD_8,
+			BTNNAME_CV_KEYPAD_9,
+			BTNNAME_CV_KEYPAD_ASTERISK,
+			BTNNAME_CV_KEYPAD_0,
+			BTNNAME_CV_KEYPAD_OCTOTHORPE,
+
 			BTNNAME_MAX
 		};
 
@@ -338,7 +374,25 @@ class IoManager
 			BTNI_XE1AP_B		= 6,
 			BTNI_XE1AP_A		= 7,
 
-			BTNI_MAX	= 12
+			// ColecoVision buttons.
+			BTNI_CV_TL_YELLOW		= 4,
+			BTNI_CV_TR_RED			= 5,
+			BTNI_CV_PURPLE			= 6,
+			BTNI_CV_BLUE			= 7,
+			BTNI_CV_KEYPAD_1		= 8,
+			BTNI_CV_KEYPAD_2		= 9,
+			BTNI_CV_KEYPAD_3		= 10,
+			BTNI_CV_KEYPAD_4		= 11,
+			BTNI_CV_KEYPAD_5		= 12,
+			BTNI_CV_KEYPAD_6		= 13,
+			BTNI_CV_KEYPAD_7		= 14,
+			BTNI_CV_KEYPAD_8		= 15,
+			BTNI_CV_KEYPAD_9		= 16,
+			BTNI_CV_KEYPAD_ASTERISK		= 17,
+			BTNI_CV_KEYPAD_0		= 18,
+			BTNI_CV_KEYPAD_OCTOTHORPE	= 19,
+
+			BTNI_MAX	= 20
 		};
 
 		// Get button names.

@@ -210,18 +210,11 @@ class EmuManager : public QObject
 		LibGens::MdFb *romClosedFb(void);
 
 		/**
-		 * Get the bpp for the MdFb from the last closed ROM.
-		 * @return Color depth.
-		 */
-		LibGens::VdpPalette::ColorDepth romClosedBpp(void);
-
-		/**
 		 * Reset the last closed ROM MdFb.
 		 */
 		void clearRomClosedFb(void);
 	private:
 		LibGens::MdFb *m_romClosedFb;
-		LibGens::VdpPalette::ColorDepth m_romClosedBpp;
 
 	/** Translatable string functions. **/
 
@@ -314,7 +307,8 @@ class EmuManager : public QObject
 				RQT_PS_SPRITELIMITS,
 				RQT_PS_ZEROLENGTHDMA,
 				RQT_PS_VSCROLLBUG,
-				RQT_PS_UPDATEPALETTEINVBLANKONLY
+				RQT_PS_UPDATEPALETTEINVBLANKONLY,
+				RQT_PS_ENABLEINTERLACEDMODE
 			};
 
 			RequestType rqType;
@@ -445,6 +439,7 @@ class EmuManager : public QObject
 		void zeroLengthDMA_changed_slot(const QVariant &zeroLengthDMA);
 		void vscrollBug_changed_slot(const QVariant &vscrollBug);
 		void updatePaletteInVBlankOnly_changed_slot(const QVariant &updatePaletteInVBlankOnly);
+		void enableInterlacedMode_changed_slot(const QVariant &enableInterlacedMode);
 
 	/** Emulation Request Queue: Processing functions. **/
 
@@ -487,13 +482,6 @@ inline int EmuManager::closeRom(void)
  */
 inline LibGens::MdFb *EmuManager::romClosedFb(void)
 	{ return m_romClosedFb; }
-
-/**
- * Get the bpp for the MdFb from the last closed ROM.
- * @return Color depth.
- */
-inline LibGens::VdpPalette::ColorDepth EmuManager::romClosedBpp(void)
-	{ return m_romClosedBpp; }
 
 /**
  * Reset the last closed ROM MdFb.

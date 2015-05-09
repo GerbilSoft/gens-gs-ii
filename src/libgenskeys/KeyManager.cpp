@@ -98,22 +98,38 @@ const IoManager::IoType_t KeyManagerPrivate::def_ioTypes[IoManager::VIRTPORT_MAX
 	IoManager::IOT_3BTN,	// Port 2
 
 	// Team Player, Port 1.
-	IoManager::IOT_NONE,	// Port TP1A
-	IoManager::IOT_NONE,	// Port TP1B
-	IoManager::IOT_NONE,	// Port TP1C
-	IoManager::IOT_NONE,	// Port TP1D
+	IoManager::IOT_NONE,	// Port TP-1A
+	IoManager::IOT_NONE,	// Port TP-1B
+	IoManager::IOT_NONE,	// Port TP-1C
+	IoManager::IOT_NONE,	// Port TP-1D
 
 	// Team Player, Port 2.
-	IoManager::IOT_NONE,	// Port TP2A
-	IoManager::IOT_NONE,	// Port TP2B
-	IoManager::IOT_NONE,	// Port TP2C
-	IoManager::IOT_NONE,	// Port TP2D
+	IoManager::IOT_NONE,	// Port TP-2A
+	IoManager::IOT_NONE,	// Port TP-2B
+	IoManager::IOT_NONE,	// Port TP-2C
+	IoManager::IOT_NONE,	// Port TP-2D
 
-	// 4-Way Play.
-	IoManager::IOT_NONE,	// Port 4WPA
-	IoManager::IOT_NONE,	// Port 4WPB
-	IoManager::IOT_NONE,	// Port 4WPC
-	IoManager::IOT_NONE,	// Port 4WPD
+	// EA 4-Way Play.
+	IoManager::IOT_NONE,	// Port 4WP-A
+	IoManager::IOT_NONE,	// Port 4WP-B
+	IoManager::IOT_NONE,	// Port 4WP-C
+	IoManager::IOT_NONE,	// Port 4WP-D
+
+	// Master Tap, Port 1.
+	IoManager::IOT_NONE,	// Port MTAP-1A
+	IoManager::IOT_NONE,	// Port MTAP-1B
+	IoManager::IOT_NONE,	// Port MTAP-1C
+	IoManager::IOT_NONE,	// Port MTAP-1D
+
+	// Master Tap, Port 2.
+	IoManager::IOT_NONE,	// Port MTAP-2A
+	IoManager::IOT_NONE,	// Port MTAP-2B
+	IoManager::IOT_NONE,	// Port MTAP-2C
+	IoManager::IOT_NONE,	// Port MTAP-2D
+
+	// J-Cart.
+	IoManager::IOT_NONE,	// Port JCART-1
+	IoManager::IOT_NONE,	// Port JCART-2
 };
 
 const GensKey_t KeyManagerPrivate::def_keyMap[IoManager::VIRTPORT_MAX][IoManager::BTNI_MAX] =
@@ -138,22 +154,38 @@ const GensKey_t KeyManagerPrivate::def_keyMap[IoManager::VIRTPORT_MAX][IoManager
 	// Other ports are left undefined.
 
 	// Team Player, Port 1.
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP1A
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP1B
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP1C
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP1D
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP-1A
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP-1B
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP-1C
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP-1D
 
 	// Team Player, Port 2.
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP2A
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP2B
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP2C
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP2D
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP-2A
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP-2B
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP-2C
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port TP-2D
 
-	// 4-Way Play.
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port 4WPA
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port 4WPB
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port 4WPC
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port 4WPD
+	// EA 4-Way Play.
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port 4WP-A
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port 4WP-B
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port 4WP-C
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port 4WP-D
+
+	// Master Tap, Port 1.
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port MTAP-1A
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port MTAP-1B
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port MTAP-1C
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port MTAP-1D
+
+	// Master Tap, Port 2.
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port MTAP-2A
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port MTAP-2B
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port MTAP-2C
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port MTAP-2D
+
+	// J-Cart.
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port JCART-1
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Port JCART-2
 };
 
 KeyManagerPrivate::KeyManagerPrivate(KeyManager *q)

@@ -4,7 +4,7 @@
  *                                                                            *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                         *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                                *
- * Copyright (c) 2008-2014 by David Korth.                                    *
+ * Copyright (c) 2008-2015 by David Korth.                                    *
  *                                                                            *
  * This program is free software; you can redistribute it and/or modify       *
  * it under the terms of the GNU General Public License as published by       *
@@ -24,8 +24,10 @@
 #include "EmuManager.hpp"
 #include "gqt4_main.hpp"
 
+// C includes. (C++ namespace)
+#include <cstring>
+
 // ZOMG savestate handler.
-#include "libgens/Save/GensZomg.hpp"
 #include "libzomg/Zomg.hpp"
 
 // LibGens includes.
@@ -33,6 +35,9 @@
 
 // LibGens video includes.
 #include "libgens/Vdp/Vdp.hpp"
+#include "libgens/Util/MdFb.hpp"
+using LibGens::Vdp;
+using LibGens::MdFb;
 
 // LibGens CPU includes.
 #include "libgens/cpu/M68K.hpp"
@@ -51,11 +56,11 @@
 #include <QtGui/QImage>
 #include <QtGui/QImageReader>
 
-// Screenshot handler.
-#include "Screenshot.hpp"
+// LibZomg's image writer class.
+#include "libzomg/PngWriter.hpp"
+#include "libzomg/img_data.h"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 /** Emulation Request Queue: Submission functions. **/
 
@@ -387,6 +392,8 @@ void EmuManager::vscrollBug_changed_slot(const QVariant &vscrollBug)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_VSCROLLBUG, (int)vscrollBug.toBool()); }
 void EmuManager::updatePaletteInVBlankOnly_changed_slot(const QVariant &updatePaletteInVBlankOnly)
 	{ changePaletteSetting(EmuRequest_t::RQT_PS_UPDATEPALETTEINVBLANKONLY, (int)updatePaletteInVBlankOnly.toBool()); }
+void EmuManager::enableInterlacedMode_changed_slot(const QVariant &enableInterlacedMode)
+	{ changePaletteSetting(EmuRequest_t::RQT_PS_ENABLEINTERLACEDMODE, (int)enableInterlacedMode.toBool()); }
 
 /** Emulation Request Queue: Processing functions. **/
 
@@ -501,9 +508,36 @@ void EmuManager::doScreenShot(void)
 				scrFilenameSuffix;
 	} while (QFile::exists(scrFilename));
 
-	// Create the screenshot.
-	Screenshot ss(m_rom, gqt4_emuContext, this);
-	int ret = ss.save(scrFilename);
+	// Take the screenshot.
+	// TODO: Separate function to create an img_data from an MdFb.
+	// NOTE: LibZomg doesn't depend on LibGens, so it can't use MdFb directly.
+	// TODO: Store VPix and HPixBegin in the MdFb.
+	Vdp *vdp = gqt4_emuContext->m_vdp;
+	MdFb *fb = vdp->MD_Screen->ref();
+	const int startY = ((240 - vdp->getVPix()) / 2);
+	const int startX = (vdp->getHPixBegin());
+
+	// TODO: Option to save the full framebuffer, not just active display?
+	Zomg_Img_Data_t img_data;
+	img_data.w = vdp->getHPix();
+	img_data.h = vdp->getVPix();
+
+	const MdFb::ColorDepth bpp = fb->bpp();
+	if (bpp == MdFb::BPP_32) {
+		img_data.data = (void*)(fb->lineBuf32(startY) + startX);
+		img_data.pitch = (fb->pxPitch() * sizeof(uint32_t));
+		img_data.bpp = 32;
+	} else {
+		img_data.data = (void*)(fb->lineBuf16(startY) + startX);
+		img_data.pitch = (fb->pxPitch() * sizeof(uint16_t));
+		img_data.bpp = (bpp == MdFb::BPP_16 ? 16 : 15);
+	}
+
+	LibZomg::PngWriter pngWriter;
+	int ret = pngWriter.writeToFile(&img_data, scrFilename.toUtf8().constData());
+
+	// Done using the framebuffer.
+	fb->unref();
 
 	QString osdMsg;
 	if (ret == 0) {
@@ -513,7 +547,7 @@ void EmuManager::doScreenShot(void)
 	} else {
 		// TODO: Print the actual error.
 		//: OSD message indicating an error occurred while saving a screenshot.
-		osdMsg = tr("Error saving screenshot.");
+		osdMsg = tr("Error saving screenshot: %1").arg(QLatin1String(strerror(-ret)));
 	}
 
 	emit osdPrintMsg(1500, osdMsg);
@@ -564,22 +598,11 @@ void EmuManager::doAudioStereo(bool newStereo)
  */
 void EmuManager::doSaveState(QString filename, int saveSlot)
 {
-	// Create the preview image.
-	Screenshot ss(m_rom, gqt4_emuContext, this);
-	QBuffer imgBuf;
-	ss.save(&imgBuf);
-
 	// Save the ZOMG file.
 	const QString nativeFilename = QDir::toNativeSeparators(filename);
-	int ret = LibGens::ZomgSave(
-				nativeFilename.toUtf8().constData(),	// ZOMG filename.
-				gqt4_emuContext,		// Emulation context.
-				imgBuf.buffer().constData(),	// Preview image.
-				imgBuf.buffer().size()		// Size of preview image.
-				);
+	int ret = gqt4_emuContext->zomgSave(nativeFilename.toUtf8().constData());
 
 	QString osdMsg;
-
 	if (ret == 0) {
 		// Savestate saved.
 		if (saveSlot >= 0) {
@@ -610,10 +633,9 @@ void EmuManager::doLoadState(QString filename, int saveSlot)
 
 	// Load the ZOMG file.
 	const QString nativeFilename = QDir::toNativeSeparators(filename);
-	int ret = LibGens::ZomgLoad(nativeFilename.toUtf8().constData(), gqt4_emuContext);
+	int ret = gqt4_emuContext->zomgLoad(nativeFilename.toUtf8().constData());
 
 	QString osdMsg;
-
 	if (ret == 0) {
 		// Savestate loaded.
 		if (saveSlot >= 0) {
@@ -669,24 +691,22 @@ void EmuManager::doSaveSlot(int newSaveSlot)
 		//: OSD message indicating a savestate exists in the selected slot.
 		osdMsg = osdMsg.arg(tr("OCCUPIED", "osd"));
 
-		// Check if the savestate has a preview image.
+		// Attempt to load a preview image from the savestate.
 		QString nativeFilename = QDir::toNativeSeparators(filename);
 		LibZomg::Zomg zomg(nativeFilename.toUtf8().constData(), LibZomg::Zomg::ZOMG_LOAD);
-		if (zomg.getPreviewSize() > 0) {
-			// Preview image found.
-			QByteArray img_ByteArray;
-			img_ByteArray.resize(zomg.getPreviewSize());
-			int ret = zomg.loadPreview(img_ByteArray.data(), img_ByteArray.size());
 
-			if (ret == 0) {
-				// Preview image loaded from the ZOMG file.
-
-				// Convert the preview image to a QImage.
-				QBuffer imgBuf(&img_ByteArray);
-				imgBuf.open(QIODevice::ReadOnly);
-				QImageReader imgReader(&imgBuf, "png");
-				imgPreview = imgReader.read();
-			}
+		Zomg_Img_Data_t img_data;
+		int ret = zomg.loadPreview(&img_data);
+		if (ret == 0) {
+			// Preview image loaded from the ZOMG file.
+			// TODO: If we construct a QImage using the raw data directly,
+			// a copy won't be needed, but it won't be deleted.
+			// Figure out a more efficient way to handle this.
+			// (Store imgPreview locally?)
+			// TODO: Add LOAD parameters to img_data for e.g. not swapping BGR.
+			imgPreview = QImage(img_data.w, img_data.h, QImage::Format_RGB32);
+			memcpy(imgPreview.bits(), img_data.data, img_data.pitch * img_data.h);
+			free(img_data.data);
 		}
 
 		// Close the savestate.
@@ -821,6 +841,9 @@ void EmuManager::doChangePaletteSetting(EmuRequest_t::PaletteSettingType type, i
 			break;
 		case EmuRequest_t::RQT_PS_UPDATEPALETTEINVBLANKONLY:
 			options->updatePaletteInVBlankOnly = !!val;
+			break;
+		case EmuRequest_t::RQT_PS_ENABLEINTERLACEDMODE:
+			options->enableInterlacedMode = !!val;
 			break;
 		default:
 			break;

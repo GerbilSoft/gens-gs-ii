@@ -1,12 +1,19 @@
 # Check for zlib.
 # If zlib isn't found, extlib/zlib/ will be used instead.
+IF(NOT HAVE_ZLIB)
+
 IF(WIN32)
 	MESSAGE(STATUS "Win32: using internal ZLIB")
-ELSE(WIN32)
+ELSEIF(USE_INTERNAL_PNG)
+	# Internal PNG is in use.
+	# Always use internal ZLIB.
+	MESSAGE(STATUS "Using internal ZLIB due to internal PNG dependency.")
+ELSE()
 	# Only search for zlib on non-Win32 platforms.
 	# Use the built-in zlib on Win32.
 	FIND_PACKAGE(ZLIB)
-ENDIF(WIN32)
+ENDIF()
+SET(ZLIB_DEFINITIONS -DZLIB_CONST)
 SET(HAVE_ZLIB 1)
 
 IF(NOT ZLIB_FOUND)
@@ -55,3 +62,6 @@ ELSE(MINIZIP_FOUND)
 		MESSAGE(STATUS "MINIZIP library not found; using internal MINIZIP.")
 	ENDIF(NOT WIN32)
 ENDIF(MINIZIP_FOUND)
+SET(MINIZIP_DEFINITIONS -DSTRICTZIPUNZIP)
+
+ENDIF(NOT HAVE_ZLIB)

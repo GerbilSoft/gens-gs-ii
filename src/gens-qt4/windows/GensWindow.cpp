@@ -4,7 +4,7 @@
  *                                                                            *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                         *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                                *
- * Copyright (c) 2008-2014 by David Korth.                                    *
+ * Copyright (c) 2008-2015 by David Korth.                                    *
  *                                                                            *
  * This program is free software; you can redistribute it and/or modify       *
  * it under the terms of the GNU General Public License as published by       *
@@ -605,24 +605,30 @@ void GensWindow::osd(OsdType osd_type, int param)
  * TODO: Should this be a public function or a slot?
  * @param newBpp Color depth.
  */
-void GensWindow::setBpp(LibGens::VdpPalette::ColorDepth newBpp)
+void GensWindow::setBpp(LibGens::MdFb::ColorDepth bpp)
 {
 	// TODO: Move to GensConfig/qEmu.
-#if 0
 	// TODO: bpp changes should be pushed to the emulation queue.
 	// TODO: Maybe this should be a slot called by GensConfig.
-	if (LibGens::Vdp::m_palette.bpp() == newBpp)
+	// FIXME: Sometimes there's a frame of "weirdness" between color depth changes.
+
+	if (!gqt4_emuContext)
+		return;
+
+	// TODO: If no ROM is loaded, use the 'rom closed FB'?
+	LibGens::MdFb *fb = gqt4_emuContext->m_vdp->MD_Screen;
+	if (fb->bpp() == bpp)
 		return;
 
 	int bppVal;
-	switch (newBpp) {
-		case LibGens::VdpPalette::BPP_15:
+	switch (bpp) {
+		case LibGens::MdFb::BPP_15:
 			bppVal = 15;
 			break;
-		case LibGens::VdpPalette::BPP_16:
+		case LibGens::MdFb::BPP_16:
 			bppVal = 16;
 			break;
-		case LibGens::VdpPalette::BPP_32:
+		case LibGens::MdFb::BPP_32:
 			bppVal = 32;
 			break;
 		default:
@@ -630,14 +636,14 @@ void GensWindow::setBpp(LibGens::VdpPalette::ColorDepth newBpp)
 	}
 
 	// Set the color depth.
-	LibGens::Vdp::m_palette.setBpp(newBpp);
-	m_vBackend->setVbDirty();
-	//m_vBackend->vbUpdate();	// TODO: Don't update immediately?
+	Q_D(GensWindow);
+	fb->setBpp(bpp);
+	d->ui.vBackend->setVbDirty();
+	//d->ui.vBackend->vbUpdate();	// TODO: Don't update immediately?
 
 	//: OSD message indicating color depth change.
 	const QString msg = tr("Color depth set to %1-bit.", "osd").arg(bppVal);
-	m_vBackend->osd_printqs(1500, msg);
-#endif
+	d->ui.vBackend->osd_printqs(1500, msg);
 }
 
 /**

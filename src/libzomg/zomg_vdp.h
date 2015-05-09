@@ -51,21 +51,20 @@ typedef union _vdp_reg
  */
 #define ZOMG_VDPCTRL_8_HEADER	0x534D5320
 #pragma pack(1)
-typedef struct _Zomg_VdpCtrl_8_t
+typedef struct _Zomg_VDP_ctrl_8_t
 {
-	uint32_t header;		// 32BE: Should be "SMS " (0x534D5320)
+	uint32_t header;		// 32BE: Should be 'SMS ' (0x534D5320)
 
-	uint8_t ctrl_byte[2];		// 8-bit: VDP control bytes.
-	uint16_t reserved1;
+	uint8_t type;			// 8-bit: Emulated VDP type.
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
+	uint8_t data_latch;		// 8-bit: Data latch. Function depends on VDP type.
 	uint8_t code;			// 8-bit: VDP access code. (CD1-CD0)
 
 	uint16_t address;		// 16BE: VDP address counter.
 	uint8_t status;			// 8-bit: VDP status register.
-	uint8_t reserved2;
 
 	uint8_t data_read_buffer;	// 8-bit: Data read buffer.
-} Zomg_VdpCtrl_8_t;
+} Zomg_VDP_ctrl_8_t;
 #pragma pack()
 
 /**
@@ -76,7 +75,7 @@ typedef struct _Zomg_VdpCtrl_8_t
 #pragma pack(1)
 typedef union _Zomg_VRam_t
 {
-	uint8_t sms[16384];	// TMS9918/SMS/GG
+	uint8_t sms[16384];	// TMS9918A/SMS/GG
 	uint16_t md[32768];	// MD
 } _Zomg_VRam_t;
 #pragma pack()
@@ -106,11 +105,41 @@ typedef union _Zomg_CRam_t
  */
 #define ZOMG_VDPCTRL_16_HEADER	0x4D442020
 #pragma pack(1)
-typedef struct _Zomg_VdpCtrl_16_t
+typedef struct _Zomg_VDP_ctrl_16_t
+{
+	uint32_t header;		// 32BE: Should be 'MD  ' (0x4D442020)
+
+	uint8_t reserved1;		// 8-bit; Reserved.
+	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
+	uint8_t addr_hi_latch;		// 8-bit: Latch for A16-A14.
+	uint8_t code;			// 8-bit: VDP access code. (CD5-CD0)
+
+	uint32_t address;		// 32BE: VDP address counter.
+	uint16_t status;		// 16BE: VDP status register.
+	uint16_t reserved2;		// Reserved.
+
+	uint16_t data_fifo[4];		// 16BE: Data FIFO. (4 words)
+	uint8_t data_fifo_index;	// 8-bit: Current FIFO index.
+	uint8_t data_fifo_count;	// 8-bit: Number of words currently in the FIFO.
+
+	uint16_t data_read_buffer;	// 16BE: Data read buffer. (TODO)
+
+	uint8_t dma_TBD[16];		// TODO: Reserved for DMA status.
+} Zomg_VDP_ctrl_16_t;
+#pragma pack()
+
+/**
+ * VDP control registers. (16-bit) (OLD VERSION; pre-10abf8f3)
+ * File: common/vdp_ctrl.bin
+ * NOTE: Byteswapping is done in Zomg.cpp when saving/loading.
+ */
+#define ZOMG_VDPCTRL_16_HEADER	0x4D442020
+#pragma pack(1)
+typedef struct _Zomg_VDP_ctrl_16_old_t
 {
 	uint32_t header;		// 32BE: Should be "MD  " (0x4D442020)
+	uint8_t reserved1[4];		// Reserved.
 
-	uint16_t ctrl_word[2];		// 16BE: VDP control words.
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
 	uint8_t code;			// 8-bit: VDP access code. (CD5-CD0)
 
@@ -122,7 +151,7 @@ typedef struct _Zomg_VdpCtrl_16_t
 	uint8_t reserved2;
 
 	// TODO: DMA status registers,
-} Zomg_VdpCtrl_16_t;
+} Zomg_VDP_ctrl_16_old_t;
 #pragma pack()
 
 #pragma pack(1)

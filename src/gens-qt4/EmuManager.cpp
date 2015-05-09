@@ -125,6 +125,8 @@ EmuManager::EmuManager(QObject *parent, VBackend *vBackend)
 					this, SLOT(vscrollBug_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("VDP/updatePaletteInVBlankOnly"),
 					this, SLOT(updatePaletteInVBlankOnly_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("VDP/enableInterlacedMode"),
+					this, SLOT(enableInterlacedMode_changed_slot(QVariant)));
 
 	// Region code settings.
 	gqt4_cfg->registerChangeNotification(QLatin1String("System/regionCode"),
@@ -467,6 +469,8 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 			gqt4_cfg->get(QLatin1String("VDP/vscrollBug")).toBool();
 	options->updatePaletteInVBlankOnly =
 			gqt4_cfg->get(QLatin1String("VDP/updatePaletteInVBlankOnly")).toBool();
+	options->enableInterlacedMode =
+			gqt4_cfg->get(QLatin1String("VDP/enableInterlacedMode")).toBool();
 
 	// Start the emulation thread.
 	m_paused.data = 0;
@@ -557,9 +561,7 @@ int EmuManager::closeRom(bool emitStateChanged)
 			if (introStyle != 0) {
 				// Intro Effect is enabled.
 				// Save the previous source framebuffer.
-
 				m_romClosedFb = gqt4_emuContext->m_vdp->MD_Screen->ref();
-				m_romClosedBpp = gqt4_emuContext->m_vdp->m_palette.bpp();
 			}
 
 			// Unreference the last previous source framebuffer.
@@ -833,10 +835,10 @@ void EmuManager::updateVBackend(void)
 
 	if (gqt4_emuContext) {
 		const LibGens::Vdp *vdp = gqt4_emuContext->m_vdp;
-		m_vBackend->vbUpdate(vdp->MD_Screen, vdp->m_palette.bpp());
+		m_vBackend->vbUpdate(vdp->MD_Screen);
 	} else {
-		// TODO: Get color depth from ConfigStore.
-		m_vBackend->vbUpdate(nullptr, LibGens::VdpPalette::BPP_32);
+		// TODO: Create blank MdFb with default color depth from ConfigStore?
+		m_vBackend->vbUpdate(nullptr);
 	}
 }
 

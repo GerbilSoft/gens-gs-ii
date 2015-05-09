@@ -5,7 +5,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -37,11 +37,7 @@
 #include "windows/GeneralConfigWindow.hpp"
 #include "windows/McdControlWindow.hpp"
 
-// LibGens includes.
-#include "libgens/Vdp/VdpPalette.hpp"
-
-namespace GensQt4
-{
+namespace GensQt4 {
 
 GensActions::GensActions(GensWindow *parent)
 	: QObject(parent)
@@ -49,9 +45,8 @@ GensActions::GensActions(GensWindow *parent)
 	m_parent = parent;
 }
 
-
 /**
- * checkEventKey(): Check for non-menu event keys.
+ * Check for non-menu event keys.
  * @param key Gens Keycode. (WITH MODIFIERS)
  * @return True if an event key was processed; false if not.
  */
@@ -66,45 +61,42 @@ bool GensActions::checkEventKey(GensKey_t key)
 	return doAction(action, !m_parent->menuItemCheckState(action));
 }
 
-
 /**
- * doAction(): Do an action.
+ * Do an action.
  * @param action Action ID. (from GensMenuBar_menus.hpp)
  * @param state Menu item check state.
  * @return True if handled; false if not.
  */
 bool GensActions::doAction(int action, bool state)
 {
-	switch (MNUID_MENU(action))
-	{
+	switch (MNUID_MENU(action)) {
 		case IDM_FILE_MENU:
 			// File menu.
-			switch (MNUID_ITEM(action))
-			{
+			switch (MNUID_ITEM(action)) {
 				case MNUID_ITEM(IDM_FILE_OPEN):
 					m_parent->openRom();
 					return true;
-				
+
 				case MNUID_ITEM(IDM_FILE_CLOSE):
 					m_parent->closeRom();
 					return true;
-				
+
 				case MNUID_ITEM(IDM_FILE_SAVESTATE):
 					m_parent->saveState();
 					return true;
-				
+
 				case MNUID_ITEM(IDM_FILE_LOADSTATE):
 					m_parent->loadState();
 					return true;
-				
+
 				case MNUID_ITEM(IDM_FILE_GENCONFIG):
 					GeneralConfigWindow::ShowSingle(m_parent);
 					return true;
-				
+
 				case MNUID_ITEM(IDM_FILE_MCDCONTROL):
 					McdControlWindow::ShowSingle(m_parent);
 					return true;
-				
+
 				case MNUID_ITEM(IDM_FILE_QUIT):
 					// Quit.
 					m_parent->setIdleThreadAllowed(false);
@@ -112,148 +104,127 @@ bool GensActions::doAction(int action, bool state)
 					QuitGens();
 					m_parent->close();
 					return true;
-				
+
 				default:
 					break;
 			}
 			break;
-		
-		case IDM_FILE_RECENT_MENU:
-		{
+
+		case IDM_FILE_RECENT_MENU: {
 			// File, Recent ROMs.
 			int romID = MNUID_ITEM(action);
 			const RecentRom_t rom = gqt4_cfg->recentRomsEntry(romID);
-			if (rom.filename.isEmpty())
-			{
+			if (rom.filename.isEmpty()) {
 				// Invalid ROM ID.
 				break;
 			}
-			
+
 			// Load the ROM.
 			m_parent->openRom(rom.filename, rom.z_filename);
 			break;
 		}
-		
+
 		case IDM_HELP_MENU:
 			// Help menu.
-			switch (MNUID_ITEM(action))
-			{
+			switch (MNUID_ITEM(action)) {
 				case MNUID_ITEM(IDM_HELP_ABOUT):
 					// About Gens/GS II.
 					AboutDialog::ShowSingle(m_parent);
 					return true;
-				
+
 				default:
 					break;
 			}
 			break;
-		
+
 		case IDM_GRAPHICS_MENU:
 			// Graphics.
-			switch (MNUID_ITEM(action))
-			{
+			switch (MNUID_ITEM(action)) {
 #ifndef Q_WS_MAC
 				case MNUID_ITEM(IDM_GRAPHICS_MENUBAR):
 					// Show Menu Bar.
 					gqt4_cfg->set(QLatin1String("GensWindow/showMenuBar"), state);
 					break;
 #endif /* !Q_WS_MAC */
-				
-				case MNUID_ITEM(IDM_GRAPHICS_STRETCH):
-				{
+
+				case MNUID_ITEM(IDM_GRAPHICS_STRETCH): {
 					// Next stretch mode.
 					int stretch_tmp = (int)m_parent->stretchMode();
 					stretch_tmp = (stretch_tmp + 1) % 4;
 					m_parent->setStretchMode((StretchMode_t)stretch_tmp);
 					return true;
 				}
-				
+
 				case MNUID_ITEM(IDM_GRAPHICS_SCRSHOT):
 					m_parent->screenShot();
 					return true;
-				
+
 				default:
 					break;
 			}
 			break;
-		
+
 		case IDM_GRAPHICS_RES_MENU:
 			// Graphics, Resolution.
-			switch (MNUID_ITEM(action))
-			{
+			switch (MNUID_ITEM(action)) {
 				case MNUID_ITEM(IDM_GRAPHICS_RES_1X):
 					m_parent->rescale(1);
 					return true;
-				
 				case MNUID_ITEM(IDM_GRAPHICS_RES_2X):
 					m_parent->rescale(2);
 					return true;
-				
 				case MNUID_ITEM(IDM_GRAPHICS_RES_3X):
 					m_parent->rescale(3);
 					return true;
-				
 				case MNUID_ITEM(IDM_GRAPHICS_RES_4X):
 					m_parent->rescale(4);
 					return true;
-				
 				default:
 					break;
 			}
 			break;
-		
+
 		case IDM_GRAPHICS_BPP_MENU:
 			// Graphics, Color Depth.
-			switch (MNUID_ITEM(action))
-			{
+			switch (MNUID_ITEM(action)) {
 				case MNUID_ITEM(IDM_GRAPHICS_BPP_15):
-					m_parent->setBpp(LibGens::VdpPalette::BPP_15);
+					m_parent->setBpp(LibGens::MdFb::BPP_15);
 					return true;
-				
 				case MNUID_ITEM(IDM_GRAPHICS_BPP_16):
-					m_parent->setBpp(LibGens::VdpPalette::BPP_16);
+					m_parent->setBpp(LibGens::MdFb::BPP_16);
 					return true;
-				
 				case MNUID_ITEM(IDM_GRAPHICS_BPP_32):
-					m_parent->setBpp(LibGens::VdpPalette::BPP_32);
+					m_parent->setBpp(LibGens::MdFb::BPP_32);
 					return true;
-				
 				default:
 					break;
 			}
 			break;
-		
+
 		case IDM_GRAPHICS_STRETCH_MENU:
 			// Graphics, Stretch Mode.
-			switch (MNUID_ITEM(action))
-			{
+			switch (MNUID_ITEM(action)) {
 				case MNUID_ITEM(IDM_GRAPHICS_STRETCH_NONE):
 					m_parent->setStretchMode(STRETCH_NONE);
 					return true;
-				
 				case MNUID_ITEM(IDM_GRAPHICS_STRETCH_H):
 					m_parent->setStretchMode(STRETCH_H);
 					return true;
-				
 				case MNUID_ITEM(IDM_GRAPHICS_STRETCH_V):
 					m_parent->setStretchMode(STRETCH_V);
 					return true;
-				
 				case MNUID_ITEM(IDM_GRAPHICS_STRETCH_FULL):
 					m_parent->setStretchMode(STRETCH_FULL);
 					return true;
-				
 				default:
 					break;
 			}
 			break;
-		
+
 		case IDM_SYSTEM_MENU:
 			// System menu.
-			switch (MNUID_ITEM(action))
-			{
-				case MNUID_ITEM(IDM_SYSTEM_REGION):
-				{
+			switch (MNUID_ITEM(action)) {
+				case MNUID_ITEM(IDM_SYSTEM_REGION): {
 					// Switch to the next region setting.
 					int region = gqt4_cfg->getInt(QLatin1String("System/regionCode")) + 1;
 					if (region > (int)LibGens::SysVersion::REGION_EU_PAL)
@@ -261,37 +232,37 @@ bool GensActions::doAction(int action, bool state)
 					gqt4_cfg->set(QLatin1String("System/regionCode"), region);
 					break;
 				}
-					
+
 				case MNUID_ITEM(IDM_SYSTEM_HARDRESET):
 					// Hard Reset.
 					emit actionResetEmulator(true);
 					return true;
-				
+
 				case MNUID_ITEM(IDM_SYSTEM_SOFTRESET):
 					// Soft Reset.
 					emit actionResetEmulator(false);
 					return true;
-				
+
 				case MNUID_ITEM(IDM_SYSTEM_PAUSE):
 					// Set manual Paused state.
 					emit actionSetPaused(state);
 					return true;
-				
+
 				case MNUID_ITEM(IDM_SYSTEM_CPURESET_M68K):
 					// Reset Main 68000.
 					emit actionResetCpu(EmuManager::RQT_CPU_M68K);
 					return true;
-				
+
 				case MNUID_ITEM(IDM_SYSTEM_CPURESET_Z80):
 					// Reset Z80.
 					emit actionResetCpu(EmuManager::RQT_CPU_Z80);
 					return true;
-				
+
 				default:
 					break;
 			}
 			break;
-		
+
 		case IDM_SYSTEM_REGION_MENU:
 			// System, Region menu.
 			if (MNUID_ITEM(action) < MNUID_ITEM(IDM_SYSTEM_REGION_AUTODETECT) ||
@@ -300,35 +271,33 @@ bool GensActions::doAction(int action, bool state)
 				// Invalid region.
 				break;
 			}
-			
+
 			// Set the region code.
 			gqt4_cfg->set(QLatin1String("System/regionCode"),
 					(MNUID_ITEM(action) - MNUID_ITEM(IDM_SYSTEM_REGION_AUTODETECT) - 1));
 			break;
-		
+
 		case IDM_OPTIONS_MENU:
 			// Options menu.
-			switch (MNUID_ITEM(action))
-			{
+			switch (MNUID_ITEM(action)) {
 				case MNUID_ITEM(IDM_OPTIONS_ENABLESRAM):
 					// Enable SRam/EEPRom.
 					gqt4_cfg->set(QLatin1String("Options/enableSRam"), state);
 					break;
-				
+
 				case MNUID_ITEM(IDM_OPTIONS_CONTROLLERS):
 					// Controller Configuration.
 					CtrlConfigWindow::ShowSingle(m_parent);
 					return true;
-				
+
 				default:
 					break;
 			}
 			break;
-		
+
 		case IDM_SOUNDTEST_MENU:
 			// Audio Testing
-			switch (MNUID_ITEM(action))
-			{
+			switch (MNUID_ITEM(action)) {
 				case MNUID_ITEM(IDM_SOUNDTEST_11025):
 					m_parent->setAudioRate(11025);
 					return true;
@@ -357,16 +326,15 @@ bool GensActions::doAction(int action, bool state)
 					break;
 			}
 			break;
-		
+
 		case IDM_NOMENU:
 			// Non-Menu Actions.
-			switch (MNUID_ITEM(action))
-			{
+			switch (MNUID_ITEM(action)) {
 				case MNUID_ITEM(IDM_NOMENU_FASTBLUR):
 					// Toggle Fast Blur.
 					m_parent->toggleFastBlur();
 					return true;
-				
+
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_0):
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_1):
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_2):
@@ -380,40 +348,37 @@ bool GensActions::doAction(int action, bool state)
 					// Save slot selection.
 					gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), (action - IDM_NOMENU_SAVESLOT_0));
 					return true;
-				
-				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_PREV):
-				{
+
+				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_PREV): {
 					// Previous Save Slot.
 					int saveSlot = gqt4_cfg->getInt(QLatin1String("Savestates/saveSlot"));
 					saveSlot = ((saveSlot + 9) % 10);
 					gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), saveSlot);
 					return true;
 				}
-				
-				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_NEXT):
-				{
+
+				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_NEXT): {
 					// Next Save Slot.
 					int saveSlot = gqt4_cfg->getInt(QLatin1String("Savestates/saveSlot"));
 					saveSlot = ((saveSlot + 1) % 10);
 					gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), saveSlot);
 				}
-				
+
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_LOADFROM):
 				case MNUID_ITEM(IDM_NOMENU_SAVESLOT_SAVEAS):
 					// TODO
 					return false;
-				
+
 				default:
 					break;
 			}
-		
+
 		default:
 			break;
 	}
-	
+
 	// Action wasn't handled.
 	return false;
 }
 
 }
-

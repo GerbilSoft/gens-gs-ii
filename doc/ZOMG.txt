@@ -1,6 +1,6 @@
 Zipped Original Memory from Genesis
 Version 0.1, Draft Revision 0
-Copyright (c) 2008-2010 by David Korth.
+Copyright (c) 2008-2015 by David Korth.
 
 ================================================================
 
@@ -162,7 +162,7 @@ components that are common throughout the Sega 8-bit and 16-bit hardware line.
 | CRam.bin       |    32; 64; 128 |   Varies   |
 | psg.bin        |             23 |    8-bit   |
 | Z80_mem.bin    |    1, 2, 8 KiB |    8-bit   |
-| Z80_reg.bin    |             28 |     LE     |
+| Z80_reg.bin    |             32 |     LE     |
 | SRAM.bin       |   up to 65,536 |    8-bit   |
 | EPR_ctrl.bin   |         Varies |   Varies   |
 | EPR_cache.bin  |      up to 256 |    8-bit   |
@@ -205,34 +205,105 @@ match the expected value, the program should cancel loading the savestate.
 TODO: Some emulators do not support the FIFO. Figure out how to implement
 the FIFO in these emulators.
 
-TODO: Internal DMA registers: DMA destination, etc.
-
 C equivalent for vdp_ctrl.bin:
 
 // 8-bit VDP (Master System)
-typedef struct _ZOMG_VDP_ctrl_8_t
-{
-	uint32_t header;		// 32BE: Should be 'SMS '. (0x534D5320)
+typedef struct _ZOMG_VDP_ctrl_8_t {
+	uint32_t header;		// 32BE: Should be 'SMS ' (0x534D5320)
 
-	uint8_t ctrl_byte[2];		// 8-bit: VDP control bytes.
-	uint16_t reserved1;
+	uint8_t type;			// 8-bit: Emulated VDP type.
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
+	uint8_t data_latch;		// 8-bit: Data latch. Function depends on VDP type.
 	uint8_t code;			// 8-bit: VDP access code. (CD1-CD0)
 
 	uint16_t address;		// 16BE: VDP address counter.
 	uint8_t status;			// 8-bit: VDP status register.
-	uint8_t reserved2;
 
 	uint8_t data_read_buffer;	// 8-bit: Data read buffer.
 } ZOMG_VDP_ctrl_8_t;
 
-TODO: Definitions of "access" for Sega 8-bit. It'll probably be the same
-as the low byte of "access" for Sega Mega Drive.
+Emulated VDP type can be one of the following:
+[TODO: Use an enum.]
+- 0: TMS9918A
+     Original Texas Instruments VDP used in the SG-1000, SG-1000 MkII,
+     and ColecoVision. Supports modes 0-3.
+- 1: SMS1 (315-5124)
+- 2: SMS2 (315-5246)
+     Fixes nametable mirroring bugs present in TMS9918A and SMS1.
+     Adds 224-line and 240-line (PAL only) video modes.
+- 3: Game Gear (315-5378)
+     Has a 160x144 viewable window. Expands CRAM to 12-bit color.
+     This VDP uses data_latch; see the next section.
+- 4: Mega Drive (315-5313)
+     Similar to SMS2, except the TMS9918A video modes are not available,
+     nor are the extended-resolution modes. This VDP uses data_latch;
+     see the next section.
+
+The data_latch field is used for some VDPs that latch certain data writes.
+
+- Game Gear: CRAM writes to even addresses are latched. When an odd
+  address is written, the latched value and odd address are both written
+  to CRAM at the same time. data_latch contains this latched value.
+
+- Mega Drive: The first byte of the control word is latched, and is only
+  applied once the second byte is written. Previous VDPs applied the first
+  byte immediately. data_latch contains the first control byte.
 
 // 16-bit VDP (Mega Drive)
-typedef struct _ZOMG_VDP_ctrl_16_t
-{
-	uint32_t header;		// 32BE: Should be 'MD  '. (0x4D442020)
+typedef struct _ZOMG_VDP_ctrl_16_t {
+	uint32_t header;		// 32BE: Should be 'MD  ' (0x4D442020)
+
+	uint8_t reserved1;		// 8-bit; Reserved.
+	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
+	uint8_t addr_hi_latch;		// 8-bit: Latch for A16-A14.
+	uint8_t code;			// 8-bit: VDP access code. (CD5-CD0)
+
+	uint32_t address;		// 32BE: VDP address counter.
+	uint16_t status;		// 16BE: VDP status register.
+	uint16_t reserved2;		// Reserved.
+
+	uint16_t data_fifo[4];		// 16BE: Data FIFO. (4 words)
+	uint8_t data_fifo_index;	// 8-bit: Current FIFO index.
+	uint8_t data_fifo_count;	// 8-bit: Number of words currently in the FIFO.
+
+	uint16_t data_read_buffer;	// 16BE: Data read buffer. (TODO)
+
+	uint8_t dma_TBD[16];		// TODO: Reserved for DMA status.
+} ZOMG_VDP_ctrl_16_t;
+
+NOTE: The internal data buffer *does* exist on MD, though it has less of an
+effect due to misuse than the SMS version. Actual functionality is TBD.
+
+The "code" field contains the CD5-CD0 bits (CD1-CD0 for Sega 8-bit) from
+the last pair of control words. This indicates the destination for the
+next read or write operation, as well as the read/write mode and (on MD)
+DMA access mode.
+
+The "addr_hi_latch" field contains the A15-A14 bits (or A16-A14 in 128 KB mode)
+that were last written in the second command word. These bits are latched, and
+are automatically reapplied when the first command word is written. Note that
+this field contains the bits right-shifted by 14, so A16-A14 are equivalent to
+bits 2-0 in the "addr_hi_latch" field.
+
+TODO: Define the DMA control values.
+
+***WARNING***: The layout of _ZOMG_VDP_ctrl_16_t has changed:
+
+- Reserved space has been removed.
+
+- Address register is now 32-bit. The VDP actually supports addressing
+  up to 128 KB with certain mode flags. For alignment and performance
+  reasons, we're using a uint32_t instead of storing the high bit
+  separately.
+
+- The control words are no longer stored, since it's unnecessary.
+  It was only stored in the previous version as a reference.
+
+Previous revisions of the ZOMG specification used the following
+layout for the 16-bit vdp_ctrl.bin:
+
+typedef struct _ZOMG_VDP_ctrl_16_OLD_t {
+	uint32_t header;		// 32BE: Should be 'MD  ' (0x4D442020)
 
 	uint16_t ctrl_word[2];		// 16BE: VDP control words.
 	uint8_t ctrl_latch;		// 8-bit: Control latch. 0 == first word; 1 == second.
@@ -246,18 +317,9 @@ typedef struct _ZOMG_VDP_ctrl_16_t
 	uint8_t reserved2;
 } ZOMG_VDP_ctrl_16_t;
 
-The "ctrl_byte" and "ctrl_word" fields are strictly for reference and
-debugging. It contains the last two control bytes or words written to
-the VDP. The VDP does not actually store these control words.
-
-The "code" field contains the CD5-CD0 bits (CD1-CD0 for Sega 8-bit) from
-the last pair of control words. This indicates the destination for the
-next read or write operation, as well as the read/write mode and (on MD)
-DMA access mode.
-
-Note that on MD, this field should never be equal to 0x02 (register write),
-since both the code and address registers are cleared after a register
-write command is executed.
+To differentiate between old and new versions, check the size of the
+data from the savestate. The new version is 42 bytes, while the old
+version is 24 bytes.
 
 ----------------------------------------------------------------
 
@@ -335,8 +397,7 @@ set the field to 0xFF.
 
 C equivalent for psg.bin:
 
-typedef struct _ZOMG_psg_t
-{
+typedef struct _ZOMG_psg_t {
 	uint16_t tone_reg[4];	// 16LE: Tone values for each channel.
 	uint8_t vol_reg[4];	// 8-bit: Volume values for each channel.
 
@@ -374,8 +435,7 @@ This file contains the registers found in the Z80 CPU.
 
 C equivalent for Z80_reg.bin:
 
-typedef struct _ZOMG_Z80_reg_t
-{
+typedef struct _ZOMG_Z80_reg_t {
 	// Main register set.
 	uint16_t AF;	// 16LE: AF register.
 	uint16_t BC;	// 16LE: BC register.
@@ -397,7 +457,35 @@ typedef struct _ZOMG_Z80_reg_t
 	uint8_t R;	// 8-bit: R register.
 	uint8_t I;	// 8-bit: I register.
 	uint8_t IM;	// 8-bit: IM register. (0, 1, 2)
+
+	// Additional internal state.
+	uint16_t WZ;		// 16LE: Internal address register.
+	uint8_t Status;		// 8-bit: CPU status. (bitfield)
+	uint8_t IntVect;	// 8-bit: Pending interrupt vector. (IM0, IM2)
 } ZOMG_Z80_reg_t;
+
+NOTE: The WZ, Status, and IntVect fields were added after this file was
+already implemented. If a savestate is loaded and Z80_reg.bin is missing
+these fields (i.e. it's 28 bytes), these fields should be assumed to be 0.
+
+Status is a bitfield that may have the following bits set:
+
+enum Zomg_Z80CPUStatus_t {
+	// CPU is halted.
+	// Will resume on the next interrupt.
+	ZOMG_Z80_STATUS_HALTED  = (1 << 0),
+
+	// CPU has locked up.
+	// This usually occurs on Mega Drive if the Z80 accesses
+	// invalid area in the 68000 banking area.
+	ZOMG_Z80_STATUS_FAULTED = (1 << 1),
+
+	// Interrupt is pending.
+	ZOMG_Z80_STATUS_INT_PENDING = (1 << 2),
+
+	// NMI is pending.
+	ZOMG_Z80_STATUS_NMI_PENDING = (1 << 3),
+};
 
 ----------------------------------------------------------------
 
@@ -683,6 +771,7 @@ components that are specific to the Sega Mega Drive hardware.
 | Z80_ctrl.bin   |              4 |   Varies   |
 | TIME_reg.bin   |            256 |    8-bit   |
 | TMSS_reg.bin   |              9 |   Varies   |
+| vdp_sat.bin    |            320 |  16-bit BE |
 +----------------+----------------+------------+
 
 ----------------------------------------------------------------
@@ -741,8 +830,7 @@ be set to 0 for now.
 
 C equivalent for M68K_reg.bin:
 
-typedef struct _ZOMG_M68K_reg_t
-{
+typedef struct _ZOMG_M68K_reg_t {
 	uint32_t dreg[8];	// 32BE: Data registers.
 	uint32_t areg[7];	// 32BE: Address registers. (a0-a6)
 	uint32_t ssp;		// 32BE: Supervisor stack pointer. (a7/super)
@@ -763,8 +851,7 @@ typedef struct _ZOMG_M68K_reg_t
 Previous revisions of the ZOMG specification used the following
 layout for M68K_reg.bin:
 
-typedef struct _ZOMG_M68K_reg_OLD_t
-{
+typedef struct _ZOMG_M68K_reg_OLD_t {
 	uint32_t areg[8];	// 32BE: Address registers.
 	uint32_t dreg[8];	// 32BE: Data registers.
 	uint32_t pc;		// 32BE: Program counter.
@@ -810,8 +897,7 @@ Notes:
 
 C equivalent for IO.bin:
 
-typedef struct _ZOMG_MD_IO_t
-{
+typedef struct _ZOMG_MD_IO_t {
 	uint8_t version_reg;	// $A10001: Version register.
 	uint8_t port1_data;	// $A10003: Control Port 1: Data.
 	uint8_t port2_data;	// $A10005: Control Port 2: Data.
@@ -841,8 +927,7 @@ page (0x8000-0xFFFF in Z80 space).
 
 C equivalent for Z80_ctrl.bin:
 
-typedef struct _ZOMG_MD_Z80_ctrl_t
-{
+typedef struct _ZOMG_MD_Z80_ctrl_t {
 	uint8_t busreq;		// 8-bit: BUSREQ state.
 				// 0 == Z80 has the bus.
 				// 1 == M68K has the bus.
@@ -885,13 +970,10 @@ instead of SRAM for saving. In this case, SRAM_ctrl should be 0.
 
 C equivalent for TIME_reg.bin:
 
-typedef struct _ZOMG_MD_TIME_reg_t
-{
-	union
-	{
+typedef struct _ZOMG_MD_TIME_reg_t {
+	union {
 		uint8_t reg[256];			// All registers.
-		struct
-		{
+		struct {
 			uint8_t reserved_00_EF[240];	// $A13000 - $A130EF: Reserved.
 			uint8_t reserved_F0;		// $A130F0: Reserved.
 			uint8_t SRAM_ctrl;		// $A130F1: SRAM control.
@@ -974,3 +1056,28 @@ typedef struct _Zomg_MD_TMSS_reg_t {
 	uint32_t a14000;	// 32BE:  $A14000 - 'SEGA' register
 	uint8_t n_cart_ce;	// 8-bit: $A14101 - ROM mapping
 } Zomg_MD_TMSS_reg_t;
+
+----------------------------------------------------------------
+
+5.9. vdp_sat.bin: VDP Sprite Attribute Table cache.
+
+The Mega Drive VDP has an internal cache for the Spirte Attribute Table.
+This cache can hold up to 80 sprite entries (640 bytes), and is updated
+whenever a VRAM write occurs in the Sprite Attribute Table area.
+
+NOTE: Changing the Sprite Attribute Table base address will result in
+the cache getting desynchronized with the contents of VRAM, which can
+cause unusual effects onscreen due to the Y, size, and link fields
+being read from the cache, while the attribute and X fields are read
+from VRAM.
+
+NOTE 2: The SAT cache in ZOMG is only 320 bytes. Only the first three
+fields (Y position, size, and link) are stored in the cache.
+
+NOTE 3: If this file is missing, the cache can be created by copying
+the Sprite Attribute Table from VRAM. This may not be as accurate, but
+it's "good enough" in most cases.
+
+C equivalent for vdp_sat.bin:
+
+uint16_t vdp_sat[160];	// 16BE: VDP Sprite Attribute Table cache.

@@ -82,7 +82,12 @@ class Rom
 			RFMT_CD_BIN_2352,	// CD-ROM image, BIN format. (2352-byte sectors)
 		};
 
-		Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride = MDP_SYSTEM_UNKNOWN, RomFormat fmtOverride = RFMT_UNKNOWN);
+		Rom(const utf8_str *filename,
+			MDP_SYSTEM_ID sysOverride = MDP_SYSTEM_UNKNOWN,
+			RomFormat fmtOverride = RFMT_UNKNOWN);
+		Rom(const uint8_t *rom_data, unsigned int rom_size,
+			MDP_SYSTEM_ID sysOverride = MDP_SYSTEM_UNKNOWN,
+			RomFormat fmtOverride = RFMT_UNKNOWN);
 		~Rom();
 
 	private:
@@ -239,33 +244,6 @@ class Rom
 		 * @return True if a ROM has been selected.
 		 */
 		bool isRomSelected(void) const;
-
-		/**
-		 * Mappers.
-		 */
-		enum Mapper {
-			/**
-			 * Standard MD mapper.
-			 * Can represent either of the following:
-			 * - No mapper. (<= 4 MB)
-			 * - Super Street Fighet 2 mapper. (> 4 MB)
-			 * - Flat addressing. (> 4 MB, <= 10 MB)
-			 */
-			MAPPER_STANDARD = 0,
-
-			/**
-			 * Gamtec read-only copy protection mapper.
-			 * Has read-only registers above $400000.
-			 * Used in 777 Casino.
-			 */
-			MAPPER_GAMTEC_REG_RO = 1,
-
-			/**
-			 * Gamtec read-write copy protection mapper.
-			 * Has writable registers above $400000.
-			 */
-			MAPPER_GAMTEC_REG_RW = 2,
-		};
 };
 
 }

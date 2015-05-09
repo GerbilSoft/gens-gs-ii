@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville                       *
  * Copyright (c) 2003-2004 by Stéphane Akhoun                              *
- * Copyright (c) 2008-2009 by David Korth                                  *
+ * Copyright (c) 2008-2015 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -69,6 +69,7 @@
 #include <windows.h>
 #define HANG() do { Sleep(INFINITE); } while (1)
 #else
+#include <unistd.h>
 #define HANG() do { sleep(1000); } while (1)
 #endif
 
@@ -76,20 +77,12 @@
 #define RICKROLL
 #ifdef RICKROLL
 #include <QtGui/QIcon>
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
-#endif /* _WIN32 */
 #endif /* RICKROLL */
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 /**
- * Init(): Initialize the signal handler.
+ * Initialize the signal handler.
  */
 void SigHandler::Init(void)
 {
@@ -111,7 +104,7 @@ void SigHandler::Init(void)
 
 
 /**
- * End(): Shut down the signal handler.
+ * Shut down the signal handler.
  */
 void SigHandler::End(void)
 {
@@ -123,7 +116,7 @@ void SigHandler::End(void)
 
 #ifdef HAVE_SIGACTION
 /**
- * SigHandler_get_siginfo(): Get the signal information from a received signal.
+ * Get the signal information from a received signal.
  * @param signum	[in] Signal number.
  * @param si_code	[in] Signal information code.
  * @return Pointer to gens_signal_t, or nullptr if not found.
@@ -175,7 +168,7 @@ const gens_signal_t *SigHandler::GetSigInfo(int signum, int si_code)
 
 
 /**
- * SignalHandler(): Signal handler.
+ * Signal handler.
  * @param signum	[in] Signal number.
  * @param info		[in] Signal information. (ONLY if sigaction() is available.)
  * @param context	[in] Context. (ONLY if sigaction() is available.)
@@ -206,8 +199,7 @@ void SigHandler::SignalHandler(int signum)
 		// SIGHUP, SIGUSR1, SIGUSR2. Ignore this signal.
 		const char *signame;
 		
-		switch (signum)
-		{
+		switch (signum) {
 #ifdef SIGHUP
 			case SIGHUP:
 				signame = "SIGHUP";
@@ -243,7 +235,7 @@ void SigHandler::SignalHandler(int signum)
 			break;
 		}
 	}
-	
+
 #ifdef HAVE_SIGACTION
 	// Note: If context is nullptr, then info is invalid.
 	// This may happen if SIGILL is sent to the program via kill/pkill/killall.

@@ -2,7 +2,7 @@
  * libgens: Gens Emulation Library.                                        *
  * VdpRend_Err.cpp: VDP error message class.                               *
  *                                                                         *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -30,11 +30,11 @@
 #include "VdpPalette.hpp"
 #include "VGA_charset.h"
 
-namespace LibGens
-{
-
-// Private class.
+// Private classes.
+#include "Vdp_p.hpp"
 #include "VdpRend_Err_p.hpp"
+
+namespace LibGens {
 
 /**
  * Initialize the VdpRend_Err_Private object.
@@ -42,18 +42,18 @@ namespace LibGens
  */
 VdpRend_Err_Private::VdpRend_Err_Private(Vdp *q)
 	: q(q)
+	, curVdpMode(~0)
 	, lastVdpMode(~0)
 	, lastHPix(~0)
 	, lastVPix(~0)
-	, lastBpp(VdpPalette::BPP_32)
+	, lastBpp(MdFb::BPP_32)
 	, lastBorderColor(~0)
 { }
 
 /**
  * 15-bit Color Bar colors.
  */
-const uint16_t VdpRend_Err_Private::ColorBarsPalette_15[22] =
-{
+const uint16_t VdpRend_Err_Private::ColorBarsPalette_15[22] = {
 	// Primary Color Bars.
 	0x6318, 0x6300, 0x0318, 0x0300,	// Gray, Yellow, Cyan, Green
 	0x6018, 0x6000, 0x0018,		// Magenta, Red, Blue
@@ -70,8 +70,7 @@ const uint16_t VdpRend_Err_Private::ColorBarsPalette_15[22] =
 /**
  * 16-bit Color Bar colors.
  */
-const uint16_t VdpRend_Err_Private::ColorBarsPalette_16[22] =
-{
+const uint16_t VdpRend_Err_Private::ColorBarsPalette_16[22] = {
 	// Primary Color Bars.
 	0xC618, 0xC600, 0x0618, 0x600,	// Gray, Yellow, Cyan, Green
 	0xC018, 0xC000, 0x0018,		// Magenta, Red, Blue
@@ -88,8 +87,7 @@ const uint16_t VdpRend_Err_Private::ColorBarsPalette_16[22] =
 /**
  * 32-bit Color Bar colors.
  */
-const uint32_t VdpRend_Err_Private::ColorBarsPalette_32[22] =
-{
+const uint32_t VdpRend_Err_Private::ColorBarsPalette_32[22] = {
 	// Primary Color Bars.
 	0xC0C0C0, 0xC0C000, 0x00C0C0, 0x00C000,	// Gray, Yellow, Cyan, Green
 	0xC000C0, 0xC00000, 0x0000C0,		// Magenta, Red, Blue
@@ -103,9 +101,7 @@ const uint32_t VdpRend_Err_Private::ColorBarsPalette_32[22] =
 	0x090909, 0x131313, 0x1D1D1D, 0x131313,	// -4, NTSC Black, +4, NTSC Black
 };
 
-
 /** Templated color bar functions. **/
-
 
 /**
  * Draw color bars.
@@ -119,7 +115,7 @@ inline void VdpRend_Err_Private::T_DrawColorBars(MdFb *fb, const pixel palette[2
 	// Go to the correct position in the screen.
 	// TODO: Update to use MdFb.
 	pixel *screen = fb->lineBuf<pixel>(q->VDP_Lines.Border.borderSize);
-	const int HPix = q->GetHPix();			// Get horizontal pixel count.
+	const int HPix = q->getHPix();			// Get horizontal pixel count.
 	const int pitch_diff = (fb->pxPitch() - HPix);	// Calculate pitch difference.
 
 	// X bar positions.
@@ -205,10 +201,10 @@ inline void VdpRend_Err_Private::T_DrawColorBars_Border(MdFb *fb, const pixel bg
 		*(screen + 3) = bg_color;
 	}
 
-	const int HPix = q->GetHPix();
+	const int HPix = q->getHPix();
 	if (HPix < 320) {
 		// Draw the left and right borders.
-		const int HPixBegin = q->GetHPixBegin();
+		const int HPixBegin = q->getHPixBegin();
 
 		for (int y = q->VDP_Lines.totalVisibleLines; y != 0; y--) {
 			// Left border.
@@ -268,53 +264,48 @@ inline void VdpRend_Err_Private::T_DrawChr(pixel *screen, int chr)
 	if (chr < 0x20)
 		return;
 	chr = (chr & 0x7F) - 0x20;
-	
+
 	// Draw the shadowed character first.
 	pixel *scr_ptr = (screen + 1 + 336);
-	for (unsigned int row = 0; row < 16; row++)
-	{
+	for (unsigned int row = 0; row < 16; row++) {
 		unsigned int chr_data = VGA_charset_ASCII[chr][row];
-		if (chr_data == 0)
-		{
+		if (chr_data == 0) {
 			// Empty line.
 			scr_ptr += 336;
 			continue;
 		}
-		
+
 		for (unsigned int col = 8; col != 0; col--, scr_ptr++)
 		{
 			if (chr_data & 0x80)
 				*scr_ptr = 0;
 			chr_data <<= 1;
 		}
-		
+
 		// Next line.
 		scr_ptr += (336 - 8);
 	}
-	
+
 	// Draw the normal character.
 	scr_ptr = screen;
-	for (unsigned int row = 0; row < 16; row++)
-	{
+	for (unsigned int row = 0; row < 16; row++) {
 		unsigned int chr_data = VGA_charset_ASCII[chr][row];
 		if (chr_data == 0){
 			// Empty line.
 			scr_ptr += 336;
 			continue;
 		}
-		
-		for (unsigned int col = 8; col != 0; col--, scr_ptr++)
-		{
+
+		for (unsigned int col = 8; col != 0; col--, scr_ptr++) {
 			if (chr_data & 0x80)
 				*scr_ptr = text_color;
 			chr_data <<= 1;
 		}
-		
+
 		// Next line.
 		scr_ptr += (336 - 8);
 	}
 }
-
 
 /**
  * Draw text. (ASCII only!)
@@ -329,13 +320,11 @@ template<typename pixel, pixel text_color>
 inline void VdpRend_Err_Private::T_DrawText(MdFb *fb, int x, int y, const char *str)
 {
 	pixel *screen = fb->lineBuf<pixel>(y) + x;
-	
-	for (; *str != 0x00; screen += 8, str++)
-	{
+
+	for (; *str != 0x00; screen += 8, str++) {
 		T_DrawChr<pixel, text_color>(screen, *str);
 	}
 }
-
 
 /**
  * Draw the VDP error message..
@@ -349,7 +338,7 @@ inline void VdpRend_Err_Private::T_DrawVDPErrorMessage(MdFb *fb)
 	// Determine the starting position.
 	const int barY_1 = ((q->VDP_Lines.totalVisibleLines * 2) / 3);
 	int y = q->VDP_Lines.Border.borderSize + ((barY_1 - (16*5)) / 2);
-	int x = ((q->GetHPix() - (29*8)) / 2) + q->GetHPixBegin();
+	int x = ((q->getHPix() - (29*8)) / 2) + q->getHPixBegin();
 
 	T_DrawText<pixel, text_color>(fb, x, y,    "Gens/GS II does not currently");
 	T_DrawText<pixel, text_color>(fb, x+((8*7)/2), y+16, "support this VDP mode.");
@@ -357,14 +346,14 @@ inline void VdpRend_Err_Private::T_DrawVDPErrorMessage(MdFb *fb)
 
 	// Mode bits.
 	char buf[32];
-	const uint8_t vdpMode = q->VDP_Mode;
+	const uint8_t vdpMode = curVdpMode;
 	snprintf(buf, sizeof(buf), "Mode Bits: %d%d%d%d%d",
-			(vdpMode & VDP_MODE_M5) >> 4,
-			(vdpMode & VDP_MODE_M4) >> 3,
-			(vdpMode & VDP_MODE_M3) >> 2,
-			(vdpMode & VDP_MODE_M2) >> 1,
-			(vdpMode & VDP_MODE_M1));
-	x = ((q->GetHPix() - (16*8)) / 2) + q->GetHPixBegin();
+			(vdpMode & VdpTypes::VDP_MODE_M5) >> 4,
+			(vdpMode & VdpTypes::VDP_MODE_M4) >> 3,
+			(vdpMode & VdpTypes::VDP_MODE_M3) >> 2,
+			(vdpMode & VdpTypes::VDP_MODE_M2) >> 1,
+			(vdpMode & VdpTypes::VDP_MODE_M1));
+	x = ((q->getHPix() - (16*8)) / 2) + q->getHPixBegin();
 	T_DrawText<pixel, text_color>(fb, x, y, buf);
 
 	// TMS9918 modes.
@@ -380,10 +369,10 @@ inline void VdpRend_Err_Private::T_DrawVDPErrorMessage(MdFb *fb)
 	};
 	const char *cur_mode;
 
-	if (vdpMode & VDP_MODE_M5) {
+	if (vdpMode & VdpTypes::VDP_MODE_M5) {
 		// Mode 5. (SHOULDN'T HAPPEN!)
 		cur_mode = "5 (Mega Drive)";
-	} else if (vdpMode & VDP_MODE_M4) {
+	} else if (vdpMode & VdpTypes::VDP_MODE_M4) {
 		// Mode 4.
 		cur_mode = "4 (SMS/GG)";
 	} else {
@@ -393,7 +382,7 @@ inline void VdpRend_Err_Private::T_DrawVDPErrorMessage(MdFb *fb)
 
 	// Determine the horizontal starting position.
 	// TODO: Don't use strlen().
-	x = ((q->GetHPix() - ((10+strlen(cur_mode))*8)) / 2) + q->GetHPixBegin();
+	x = ((q->getHPix() - ((10+strlen(cur_mode))*8)) / 2) + q->getHPixBegin();
 	T_DrawText<pixel, text_color>(fb, x, y+16, "VDP Mode:");
 	T_DrawText<pixel, text_color>(fb, x+(8*10), y+16, cur_mode);
 }
@@ -403,32 +392,35 @@ inline void VdpRend_Err_Private::T_DrawVDPErrorMessage(MdFb *fb)
 /**
  * Draw a render error message.
  */
-void Vdp::Render_Line_Err(void)
+void VdpPrivate::renderLine_Err(void)
 {
 	bool updateBorders = false;
 
-	if (d_err->lastVdpMode != VDP_Mode ||
-	    d_err->lastHPix != GetHPix() ||
-	    d_err->lastVPix != GetVPix() ||
-	    d_err->lastBpp != m_palette.bpp())
+	// Store the current VDP mode.
+	d_err->curVdpMode = VDP_Mode;
+
+	if (d_err->lastVdpMode != d_err->curVdpMode ||
+	    d_err->lastHPix != q->getHPix() ||
+	    d_err->lastVPix != q->getVPix() ||
+	    d_err->lastBpp != palette.bpp())
 	{
 		// VDP mode has changed.
 		// Redraw the color bars and reprint the error message.
-		switch (m_palette.bpp()) {
-			case VdpPalette::BPP_15:
-				d_err->T_DrawColorBars<uint16_t>(MD_Screen, VdpRend_Err_Private::ColorBarsPalette_15);
-				d_err->T_DrawVDPErrorMessage<uint16_t, 0x7FFF>(MD_Screen);
+		switch (palette.bpp()) {
+			case MdFb::BPP_15:
+				d_err->T_DrawColorBars<uint16_t>(q->MD_Screen, VdpRend_Err_Private::ColorBarsPalette_15);
+				d_err->T_DrawVDPErrorMessage<uint16_t, 0x7FFF>(q->MD_Screen);
 				break;
 
-			case VdpPalette::BPP_16:
-				d_err->T_DrawColorBars<uint16_t>(MD_Screen, VdpRend_Err_Private::ColorBarsPalette_16);
-				d_err->T_DrawVDPErrorMessage<uint16_t, 0xFFFF>(MD_Screen);
+			case MdFb::BPP_16:
+				d_err->T_DrawColorBars<uint16_t>(q->MD_Screen, VdpRend_Err_Private::ColorBarsPalette_16);
+				d_err->T_DrawVDPErrorMessage<uint16_t, 0xFFFF>(q->MD_Screen);
 				break;
 
-			case VdpPalette::BPP_32:
+			case MdFb::BPP_32:
 			default:
-				d_err->T_DrawColorBars<uint32_t>(MD_Screen, VdpRend_Err_Private::ColorBarsPalette_32);
-				d_err->T_DrawVDPErrorMessage<uint32_t, 0xFFFFFF>(MD_Screen);
+				d_err->T_DrawColorBars<uint32_t>(q->MD_Screen, VdpRend_Err_Private::ColorBarsPalette_32);
+				d_err->T_DrawVDPErrorMessage<uint32_t, 0xFFFFFF>(q->MD_Screen);
 				break;
 		}
 
@@ -437,24 +429,24 @@ void Vdp::Render_Line_Err(void)
 	}
 
 	// Update the palette.
-	m_palette.update();
+	palette.update();
 
 	// Get the current border color.
 	uint32_t newBorderColor;
-	if (m_palette.bpp() != VdpPalette::BPP_32)
-		newBorderColor = (uint32_t)m_palette.m_palActive.u16[0];
+	if (palette.bpp() != MdFb::BPP_32)
+		newBorderColor = (uint32_t)palette.m_palActive.u16[0];
 	else
-		newBorderColor = m_palette.m_palActive.u32[0];
+		newBorderColor = palette.m_palActive.u32[0];
 
 	// Check if we need to update the borders.
 	if (updateBorders || newBorderColor != d_err->lastBorderColor) {
 		// TODO: Check for horizontal borders too.
-		if (VDP_Lines.Border.borderSize != 0) {
+		if (q->VDP_Lines.Border.borderSize != 0) {
 			// Update the color bar borders.
-			if (m_palette.bpp() != VdpPalette::BPP_32)
-				d_err->T_DrawColorBars_Border<uint16_t>(MD_Screen, (uint16_t)newBorderColor);
+			if (palette.bpp() != MdFb::BPP_32)
+				d_err->T_DrawColorBars_Border<uint16_t>(q->MD_Screen, (uint16_t)newBorderColor);
 			else
-				d_err->T_DrawColorBars_Border<uint32_t>(MD_Screen, newBorderColor);
+				d_err->T_DrawColorBars_Border<uint32_t>(q->MD_Screen, newBorderColor);
 		}
 
 		// Save the new border color.
@@ -465,19 +457,19 @@ void Vdp::Render_Line_Err(void)
 /**
  * Update the VDP Render Error cache.
  */
-void Vdp::Update_Err(void)
+void VdpPrivate::updateErr(void)
 {
 	// Save the VDP mode.
 	d_err->lastVdpMode = VDP_Mode;
-	d_err->lastHPix = GetHPix();
-	d_err->lastVPix = GetVPix();
-	d_err->lastBpp = m_palette.bpp();
-	
+	d_err->lastHPix = q->getHPix();
+	d_err->lastVPix = q->getVPix();
+	d_err->lastBpp = palette.bpp();
+
 	// Check border color.
-	if (m_palette.bpp() != VdpPalette::BPP_32)
-		d_err->lastBorderColor = (uint32_t)m_palette.m_palActive.u16[0];
+	if (palette.bpp() != MdFb::BPP_32)
+		d_err->lastBorderColor = (uint32_t)palette.m_palActive.u16[0];
 	else
-		d_err->lastBorderColor = m_palette.m_palActive.u32[0];
+		d_err->lastBorderColor = palette.m_palActive.u32[0];
 }
 
 }
