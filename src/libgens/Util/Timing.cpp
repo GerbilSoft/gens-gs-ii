@@ -202,13 +202,11 @@ uint64_t Timing::getTime(void)
 	}
 #elif defined(__APPLE__)
 	// Mach absolute time. (Mac OS X)
-	// TODO: http://stackoverflow.com/questions/23378063/how-can-i-use-mach-absolute-time-without-overflowing
-#if 0
 	uint64_t abs_time = mach_absolute_time();
+	// d_abs_time contains time in nanoseconds.
 	double d_abs_time = (double)abs_time * (double)m_timebase_info.numer / (double)m_timebase_info.denom;
-	return (d_abs_time / 1.0e9);
-#endif
-	return 0;
+	// Convert to microseconds.
+	return (uint64_t)(d_abs_time / 1000.0);
 #elif defined(HAVE_LIBRT)
 	// librt is available: use clock_gettime().
 	struct timespec ts;
