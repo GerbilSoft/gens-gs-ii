@@ -193,7 +193,7 @@ uint64_t Timing::getTime(void)
 			return ((uint64_t)GetTickCount() * 1000);
 		case TM_GETTICKCOUNT64:
 			// GetTickCount64().
-			return (m_pGetTickCount64() * 1000.0);
+			return (m_pGetTickCount64() * 1000);
 		case TM_QUERYPERFORMANCECOUNTER:
 			// QueryPerformanceCounter().
 			QueryPerformanceCounter(&perf_ctr);
