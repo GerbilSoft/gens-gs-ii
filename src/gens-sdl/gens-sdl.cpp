@@ -126,15 +126,28 @@ int main(int argc, char *argv[])
 	sdlHandler = new SdlHandler();
 	if (sdlHandler->init_video() < 0)
 		return EXIT_FAILURE;
-	if (sdlHandler->init_timers() < 0)
-		return EXIT_FAILURE;
 	if (sdlHandler->init_audio() < 0)
 		return EXIT_FAILURE;
 
 	// Start the frame timer.
 	// TODO: Region code?
+	LibGens::Timing timing;
 	bool isPal = false;
-	sdlHandler->start_timer(isPal);
+	const unsigned int usec_per_frame = (1000000 / (isPal ? 50 : 60));
+	uint64_t start_clk = timing.getTime();
+	uint64_t old_clk = start_clk;
+	uint64_t fps_clk = start_clk;
+	uint64_t new_clk = start_clk;
+	// Microsecond counter for frameskip.
+	uint64_t usec_frameskip = 0;
+
+	// Frame counters.
+	unsigned int frames = 0;
+	unsigned int frames_old = 0;
+	unsigned int fps = 0;	// TODO: float or double?
+
+	// Enable frameskip.
+	bool frameskip = true;
 
 	// TODO: Close the ROM, or let EmuContext do it?
 
@@ -153,7 +166,6 @@ int main(int argc, char *argv[])
 	keyManager->setKeyMap(IoManager::VIRTPORT_1, keyMap, ARRAY_SIZE(keyMap));
 	keyManager->setIoType(IoManager::VIRTPORT_2, IoManager::IOT_NONE);
 
-	LibGens::Timing timing;
 	bool running = true;
 	while (running) {
 		SDL_Event event;
@@ -196,34 +208,73 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		// Get the high-resolution time for synchronization.
-		uint64_t time_start = timing.getTime();
+		// New start time.
+		new_clk = timing.getTime();
+
+		// Update the FPS counter.
+		unsigned int fps_tmp = ((new_clk - fps_clk) & 0x3FFFFF);
+		if (fps_tmp >= 1000000) {
+			// More than 1 second has passed.
+			fps_clk = new_clk;
+			if (frames_old > frames) {
+				fps = (frames_old - frames);
+			} else {
+				fps = (frames - frames_old);
+			}
+			frames_old = frames;
+		}
+
+		// Frameskip.
+		if (frameskip) {
+			// Determine how many frames to run.
+			usec_frameskip += ((new_clk - old_clk) & 0x3FFFFF); // no more than 4 secs
+			unsigned int frames_todo = (usec_frameskip / usec_per_frame);
+			usec_frameskip %= usec_per_frame;
+			old_clk = new_clk;
+
+			if (frames_todo == 0) {
+				// No frames to do yet.
+				// Wait until the next frame.
+				uint64_t usec_sleep = (usec_per_frame - usec_frameskip);
+				if (usec_sleep > 1000) {
+					// Never sleep for longer than the 50 Hz value
+					// so events are checked often enough.
+					if (usec_sleep > (1000000 / 50)) {
+						usec_sleep = (1000000 / 50);
+					}
+					usec_sleep -= 1000;
+					// TODO: Just yield on Windows?
+					usleep(usec_sleep);
+				}
+			} else {
+				// Draw frames.
+				for (; frames_todo != 1; frames_todo--) {
+					// Run a frame without rendering.
+					context->execFrameFast();
+					sdlHandler->update_audio();
+				}
+				frames_todo = 0;
+
+				// Run a frame and render it.
+				context->execFrame();
+				sdlHandler->update_video();
+				sdlHandler->update_audio();
+			}
+		} else {
+			// Run a frame and render it.
+			context->execFrame();
+			sdlHandler->update_video();
+			sdlHandler->update_audio();
+		}
 
 		// Update the I/O manager.
 		keyManager->updateIoManager(context->m_ioManager);
-
-		// Run a frame.
-		context->execFrame();
-		sdlHandler->update_video();
-		sdlHandler->update_audio();
-
-		// Wait some time after the frame is finished:
-		// - NTSC: 16ms
-		// - PAL: 19.5ms
-		uint64_t time_wait = (isPal ? 19500 : 16000);
-		while (time_start + time_wait > timing.getTime()) {
-			yield();
-		}
-
-		// Synchronize.
-		sdlHandler->wait_for_frame_sync();
 	}
 
 	// NOTE: Deleting sdlHandler can cause crashes on Windows
 	// due to the timer callback trying to post the semaphore
 	// after it's been deleted.
 	// Shut down the SDL functions manually.
-	sdlHandler->end_timers();
 	sdlHandler->end_audio();
 	sdlHandler->end_video();
 	//delete sdlHandler;

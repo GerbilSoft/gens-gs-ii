@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-sdl: Gens/GS II basic SDL frontend.                                *
- * SdlHandler.hpp: SDL library handler.                                    *
+ * SdlHandler.cpp: SDL library handler.                                    *
  *                                                                         *
  * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
@@ -34,9 +34,6 @@ SdlHandler::SdlHandler()
 	: m_screen(nullptr)
 	, m_fb(nullptr)
 	, m_md(nullptr)
-	, m_sem(nullptr)
-	, m_ticks(0)
-	, m_timer(nullptr)
 	, m_framesRendered(0)
 	, m_audioBuffer(nullptr)
 	, m_audioBufferLen(0)
@@ -49,7 +46,6 @@ SdlHandler::~SdlHandler()
 {
 	// Shut. Down. EVERYTHING.
 	end_video();
-	end_timers();
 	end_audio();
 }
 
@@ -141,106 +137,6 @@ void SdlHandler::update_video(void)
 	// Update the screen.
 	SDL_UpdateRect(m_screen, 0, 0, 0, 0);
 	m_framesRendered++;
-}
-
-/**
- * Initialize SDL timers and threads.
- * @return 0 on success; non-zero on error.
- */
-int SdlHandler::init_timers(void)
-{
-	int ret = SDL_InitSubSystem(SDL_INIT_TIMER | SDL_INIT_EVENTTHREAD);
-	if (ret < 0) {
-		fprintf(stderr, "%s failed: %d - %s\n",
-			__func__, ret, SDL_GetError());
-		return ret;
-	}
-
-	m_sem = SDL_CreateSemaphore(0);
-	m_ticks = 0;
-	return 0;
-}
-
-/**
- * Shut down SDL timers and threads.
- */
-void SdlHandler::end_timers(void)
-{
-	if (m_sem) {
-		SDL_DestroySemaphore(m_sem);
-		m_sem = nullptr;
-	}
-}
-
-/**
- * Start and/or restart the synchronization timer.
- * @param isPal If true, use PAL timing.
- */
-void SdlHandler::start_timer(bool isPal)
-{
-	if (m_timer) {
-		// Timer is already set.
-		// Stop it first.
-		SDL_RemoveTimer(m_timer);
-	}
-
-	// Synchronize on every three frames:
-	// - NTSC: 60 Hz == 50 ms
-	// - PAL: 50 Hz == 60 ms
-	m_isPal = isPal;
-	m_timer = SDL_AddTimer(m_isPal ? 60 : 50, sdl_timer_callback, this);
-}
-
-/**
- * SDL synchronization timer callback.
- * @param interval Timer interval.
- * @param param SdlHandler class pointer.
- * @return Timer interval to use.
- */
-uint32_t SdlHandler::sdl_timer_callback(uint32_t interval, void *param)
-{
-	SdlHandler *handler = (SdlHandler*)param;
-	// TODO: Skip frames if it's running too slowly?
-	SDL_SemPost(handler->m_sem);
-	handler->m_ticks++;
-	if (handler->m_ticks == (handler->m_isPal ? 50 : 20)) {
-		SDL_Event event;
-		SDL_UserEvent userevent;
-
-		int frameRate;
-		if (handler->m_isPal) {
-			frameRate = handler->m_framesRendered * 10 / 3;
-		} else {
-			frameRate = handler->m_framesRendered * 10;
-		}
-
-		userevent.type = SDL_USEREVENT;
-		userevent.code = frameRate;
-		userevent.data1 = NULL;
-		userevent.data2 = NULL;
-
-		event.type = SDL_USEREVENT;
-		event.user = userevent;
-		SDL_PushEvent(&event);
-
-		// Clear the tick and frame rendering count.
-		handler->m_ticks = 0;
-		handler->m_framesRendered = 0;
-	}
-
-	return interval;
-}
-
-/**
- * Wait for frame synchronization.
- * On every third frame, wait for the timer.
- */
-void SdlHandler::wait_for_frame_sync(void)
-{
-	if (m_framesRendered % 3 == 0) {
-		// Third frame.
-		SDL_SemWait(m_sem);
-	}
 }
 
 /**

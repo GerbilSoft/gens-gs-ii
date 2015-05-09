@@ -70,29 +70,6 @@ class SdlHandler {
 		void update_video(void);
 
 		/**
-		 * Initialize SDL timers and threads.
-		 * @return 0 on success; non-zero on error.
-		 */
-		int init_timers(void);
-
-		/**
-		 * Shut down SDL timers and threads.
-		 */
-		void end_timers(void);
-
-		/**
-		 * Start and/or restart the synchronization timer.
-		 * @param isPal If true, use PAL timing.
-		 */
-		void start_timer(bool isPal);
-
-		/**
-		 * Wait for frame synchronization.
-		 * On every third frame, wait for the timer.
-		 */
-		void wait_for_frame_sync(void);
-
-		/**
 		 * Initialize SDL audio.
 		 * @return 0 on success; non-zero on error.
 		 */
@@ -110,14 +87,6 @@ class SdlHandler {
 
 	private:
 		/**
-		 * SDL synchronization timer callback.
-		 * @param interval Timer interval.
-		 * @param param SdlHandler class pointer.
-		 * @return Timer interval to use.
-		 */
-		static uint32_t sdl_timer_callback(uint32_t interval, void *param);
-
-		/**
 		 * SDL audio callback.
 		 * @param userdata SdlHandler class pointer.
 		 * @param stream SDL audio stream.
@@ -133,12 +102,6 @@ class SdlHandler {
 		// MD screen buffer.
 		// Points to data on an MdFb.
 		SDL_Surface *m_md;
-
-		// Timers and threads.
-		SDL_sem *m_sem;
-		unsigned int m_ticks;
-		SDL_TimerID m_timer;
-		bool m_isPal;
 
 		// Frames rendered.
 		int m_framesRendered;
