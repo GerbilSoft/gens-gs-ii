@@ -55,11 +55,11 @@
 
 // C includes.
 #include <stdint.h>
-#include <error.h>
 
 // C includes. (C++ namespace)
 #include <cstdio>
 #include <cstring>
+#include <cerrno>
 
 // OS-specific includes.
 #ifdef _WIN32
