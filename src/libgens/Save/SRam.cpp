@@ -25,6 +25,10 @@
 #include "macros/common.h"
 #include "libgenstext/StringManip.hpp"
 
+#ifdef _WIN32
+#include "../Win32/W32U_mini.h"
+#endif
+
 // ZOMG
 #include "libzomg/Zomg.hpp"
 
