@@ -26,12 +26,12 @@ using GensSdl::SdlHandler;
 #include "libgens/lg_main.hpp"
 #include "libgens/Rom.hpp"
 #include "libgens/MD/EmuMD.hpp"
-#include "libgens/Vdp/VdpPalette.hpp"
+#include "libgens/Util/MdFb.hpp"
 #include "libgens/Util/Timing.hpp"
 using LibGens::Rom;
 using LibGens::EmuContext;
 using LibGens::EmuMD;
-using LibGens::VdpPalette;
+using LibGens::MdFb;
 using LibGens::Timing;
 
 // LibGensKeys
@@ -155,10 +155,11 @@ int main(int argc, char *argv[])
 	// TODO: Close the ROM, or let EmuContext do it?
 
 	// Set the color depth.
-	context->m_vdp->m_palette.setBpp(VdpPalette::BPP_32);
+	MdFb *fb = context->m_vdp->MD_Screen;
+	fb->setBpp(MdFb::BPP_32);
 
 	// Set the SDL video source.
-	sdlHandler->set_video_source(context->m_vdp->MD_Screen);
+	sdlHandler->set_video_source(fb);
 
 	// Set the window title.
 	SDL_WM_SetCaption("Gens/GS II [SDL]", nullptr);
