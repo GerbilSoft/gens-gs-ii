@@ -257,14 +257,14 @@ int main(int argc, char *argv[])
 
 				// Run a frame and render it.
 				context->execFrame();
-				sdlHandler->update_video();
 				sdlHandler->update_audio();
+				sdlHandler->update_video();
 			}
 		} else {
 			// Run a frame and render it.
 			context->execFrame();
-			sdlHandler->update_video();
 			sdlHandler->update_audio();
+			sdlHandler->update_video();
 		}
 
 		// Update the I/O manager.
