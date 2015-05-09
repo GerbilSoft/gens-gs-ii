@@ -117,6 +117,16 @@ FILE *W32U_fopen(const utf8_str *filename, const utf8_str *mode);
  */
 int W32U_access(const utf8_str *path, int mode);
 
+// Redefine mkdir() as W32U_mkdir().
+#define mkdir(path, mode) W32U_mkdir(path)
+
+/**
+ * Create a directory.
+ * @param path Pathname.
+ * @return 0 on success; -1 on error.
+ */
+int W32U_mkdir(const utf8_str *path);
+
 #ifdef __cplusplus
 }
 #endif

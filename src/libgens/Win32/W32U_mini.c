@@ -209,3 +209,43 @@ fail:
 	free(pathW);
 	return ret;
 }
+
+/**
+ * Create a directory.
+ * @param path Pathname.
+ * @return 0 on success; -1 on error.
+ */
+int W32U_mkdir(const utf8_str *path)
+{
+	wchar_t *pathW;
+	int ret = -1;
+
+	pathW = W32U_mbs_to_UTF16(path, CP_UTF8);
+	if (!pathW) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (W32U_IsUnicode) {
+		// Unicode version.
+		ret = _wmkdir(pathW);
+	} else {
+		// ANSI version.
+		char *pathA;
+
+		// Convert the filename from UTF-16 to ANSI.
+		pathA = W32U_UTF16_to_mbs(pathW, CP_ACP);
+		if (!pathA) {
+			errno = EINVAL;
+			goto fail;
+		}
+
+		// Create the directory.
+		ret = _mkdir(pathA);
+		free(pathA);
+	}
+
+fail:
+	free(pathW);
+	return ret;
+}
