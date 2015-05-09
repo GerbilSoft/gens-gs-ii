@@ -48,6 +48,7 @@ using LibGensKeys::KeyManager;
 #define NOMINMAX
 #include <windows.h>
 #define yield() do { Sleep(0); } while (0)
+#define usleep(usec) Sleep((DWORD)((usec) / 1000))
 #else
 #include <unistd.h>
 #define yield() do { usleep(0); } while (0)
@@ -73,6 +74,8 @@ static const GensKey_t keyMap[] = {
 	SDLK_e, SDLK_w, SDLK_q, SDLK_RSHIFT		// ZYXM
 };
 
+// Don't use SDL_main.
+#undef main
 int main(int argc, char *argv[])
 {
 	if (argc < 2) {
@@ -228,7 +231,7 @@ int main(int argc, char *argv[])
 		if (frameskip) {
 			// Determine how many frames to run.
 			usec_frameskip += ((new_clk - old_clk) & 0x3FFFFF); // no more than 4 secs
-			unsigned int frames_todo = (usec_frameskip / usec_per_frame);
+			unsigned int frames_todo = (unsigned int)(usec_frameskip / usec_per_frame);
 			usec_frameskip %= usec_per_frame;
 			old_clk = new_clk;
 
@@ -243,8 +246,18 @@ int main(int argc, char *argv[])
 						usec_sleep = (1000000 / 50);
 					}
 					usec_sleep -= 1000;
-					// TODO: Just yield on Windows?
+
+#ifdef _WIN32
+					// Win32: Use a yield() loop.
+					// FIXME: Doesn't work properly on VBox/WinXP...
+					uint64_t yield_end = timing.getTime() + usec_sleep;
+					do {
+						yield();
+					} while (yield_end > timing.getTime());
+#else /* !_WIN32 */
+					// Linux: Use usleep().
 					usleep(usec_sleep);
+#endif /* _WIN32 */
 				}
 			} else {
 				// Draw frames.
