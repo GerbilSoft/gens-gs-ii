@@ -415,6 +415,10 @@ int main(int argc, char *argv[])
 		keyManager->updateIoManager(context->m_ioManager);
 	}
 
+	// Pause audio and wait 50ms for SDL to catch up.
+	SDL_PauseAudio(1);
+	usleep(50000);
+
 	// Save SRAM/EEPROM, if necessary.
 	// TODO: Move to EmuContext::~EmuContext()?
 	context->saveData();
