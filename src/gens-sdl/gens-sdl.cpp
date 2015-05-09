@@ -174,9 +174,13 @@ int main(int argc, char *argv[])
 	keyManager->setIoType(IoManager::VIRTPORT_2, IoManager::IOT_NONE);
 
 	bool running = true;
+	bool paused = false;
 	while (running) {
 		SDL_Event event;
-		if (SDL_PollEvent(&event)) {
+		int ret = (paused
+			? SDL_WaitEvent(&event)
+			: SDL_PollEvent(&event));
+		if (ret) {
 			switch (event.type) {
 				case SDL_QUIT:
 					running = 0;
@@ -184,19 +188,43 @@ int main(int argc, char *argv[])
 
 				case SDL_KEYDOWN:
 					// SDL keycodes nearly match GensKey.
-					if (event.key.keysym.sym == SDLK_TAB) {
-						// Check for Shift.
-						if (event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
-							// Hard Reset.
-							context->hardReset();
-						} else {
-							// Soft Reset.
-							context->softReset();
-						}
-					} else {
-						keyManager->keyDown(event.key.keysym.sym);
+					switch (event.key.keysym.sym) {
+						case SDLK_TAB:
+							// Check for Shift.
+							if (event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
+								// Hard Reset.
+								context->hardReset();
+							} else {
+								// Soft Reset.
+								context->softReset();
+							}
+							break;
+						case SDLK_ESCAPE:
+							// Pause emulation.
+							// TODO: Apply the pause effect.
+							paused = !paused;
+							// Reset the clocks and counters.
+							frames_old = frames;
+							fps = 0;
+							start_clk = timing.getTime();
+							old_clk = start_clk;
+							fps_clk = start_clk;
+							new_clk = start_clk;
+							// Pause audio.
+							SDL_PauseAudio(paused);
+							// TODO: Reset the audio ringbuffer?
+							// Update the window title.
+							if (paused) {
+								SDL_WM_SetCaption("Gens/GS II [SDL] [Paused]", nullptr);
+							} else {
+								SDL_WM_SetCaption("Gens/GS II [SDL]", nullptr);
+							}
+							break;
+						default:
+							// Send the key to the KeyManager.
+							keyManager->keyDown(event.key.keysym.sym);
+							break;
 					}
-					break;
 
 				case SDL_KEYUP:
 					// SDL keycodes nearly match GensKey.
@@ -206,6 +234,11 @@ int main(int argc, char *argv[])
 				default:
 					break;
 			}
+		}
+
+		if (paused) {
+			// Don't do anything.
+			continue;
 		}
 
 		// New start time.
