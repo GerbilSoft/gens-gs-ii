@@ -258,6 +258,7 @@ int main(int argc, char *argv[])
 							keyManager->keyDown(event.key.keysym.sym);
 							break;
 					}
+					break;
 
 				case SDL_KEYUP:
 					// SDL keycodes nearly match GensKey.
