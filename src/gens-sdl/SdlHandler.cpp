@@ -187,8 +187,8 @@ int SdlHandler::init_audio(void)
 	if (m_audioBuffer) {
 		delete m_audioBuffer;
 	}
-	// Buffer should be (SegLength * 8) + actual samples.
-	int samples = (SoundMgr::GetSegLength() * 8) + actual_spec.samples;
+	// Buffer should be (SegLength * 4) + actual samples.
+	int samples = (SoundMgr::GetSegLength() * 4) + actual_spec.samples;
 	m_audioBuffer = new RingBuffer(samples);
 
 	// Segment buffer.
