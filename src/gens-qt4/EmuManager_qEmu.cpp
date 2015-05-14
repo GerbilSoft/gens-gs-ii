@@ -512,23 +512,22 @@ void EmuManager::doScreenShot(void)
 	// TODO: Separate function to create an img_data from an MdFb.
 	// NOTE: LibZomg doesn't depend on LibGens, so it can't use MdFb directly.
 	// TODO: Store VPix and HPixBegin in the MdFb.
-	Vdp *vdp = gqt4_emuContext->m_vdp;
-	MdFb *fb = vdp->MD_Screen->ref();
-	const int startY = ((240 - vdp->getVPix()) / 2);
-	const int startX = (vdp->getHPixBegin());
+	MdFb *fb = gqt4_emuContext->m_vdp->MD_Screen->ref();
+	const int imgXStart = fb->imgXStart();
+	const int imgYStart = fb->imgYStart();
 
 	// TODO: Option to save the full framebuffer, not just active display?
 	Zomg_Img_Data_t img_data;
-	img_data.w = vdp->getHPix();
-	img_data.h = vdp->getVPix();
+	img_data.w = fb->imgWidth();
+	img_data.h = fb->imgHeight();
 
 	const MdFb::ColorDepth bpp = fb->bpp();
 	if (bpp == MdFb::BPP_32) {
-		img_data.data = (void*)(fb->lineBuf32(startY) + startX);
+		img_data.data = (void*)(fb->lineBuf32(imgYStart) + imgXStart);
 		img_data.pitch = (fb->pxPitch() * sizeof(uint32_t));
 		img_data.bpp = 32;
 	} else {
-		img_data.data = (void*)(fb->lineBuf16(startY) + startX);
+		img_data.data = (void*)(fb->lineBuf16(imgYStart) + imgXStart);
 		img_data.pitch = (fb->pxPitch() * sizeof(uint16_t));
 		img_data.bpp = (bpp == MdFb::BPP_16 ? 16 : 15);
 	}
