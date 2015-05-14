@@ -569,8 +569,11 @@ class VdpPrivate
 
 		FORCE_INLINE void Update_Sprite_Line_Cache_m5(int line);
 
+		// FIXME: FORCE_INLINE cannot be used here because this function
+		// is used in Vdp.cpp. gcc-5.1 fails in release builds due to
+		// the function definition not being available there.
 		template<bool interlaced>
-		FORCE_INLINE unsigned int T_Update_Sprite_Line_Cache_m5(int line);
+		unsigned int T_Update_Sprite_Line_Cache_m5(int line);
 
 		template<bool interlaced, bool h_s>
 		FORCE_INLINE void T_Render_Line_Sprite(void);
