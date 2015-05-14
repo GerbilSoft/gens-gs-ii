@@ -56,7 +56,12 @@ SdlGLBackend::SdlGLBackend()
 	// window isn't ridiculously tiny.
 	// FIXME: SDL window resizing is broken.
 	m_winW = 640; m_winH = 480;
-	m_screen = SDL_SetVideoMode(m_winW, m_winH, 32,
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, true);
+	m_screen = SDL_SetVideoMode(m_winW, m_winH, 16,
 		SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_OPENGL /*| SDL_RESIZABLE*/);
 
 	// Initialize OpenGL.
