@@ -52,9 +52,10 @@ SdlGLBackend::SdlGLBackend()
 	// Initialize the SDL window.
 	// NOTE: Starting with 2x resolution so the
 	// window isn't ridiculously tiny.
+	// FIXME: SDL window resizing is broken.
 	m_winW = 640; m_winH = 480;
 	m_screen = SDL_SetVideoMode(m_winW, m_winH, 32,
-		SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_OPENGL | SDL_RESIZABLE);
+		SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_OPENGL /*| SDL_RESIZABLE*/);
 
 	// Initialize OpenGL.
 	initGL();
@@ -180,6 +181,13 @@ void SdlGLBackend::update(bool fb_dirty)
  */
 void SdlGLBackend::resize(int width, int height)
 {
+	// FIXME: Figure out a way to handle this without SDL_SetVideoMode.
+	// SDL 2.0 might fix this.
+	if (m_winW != width || m_winH != height) {
+		m_screen = SDL_SetVideoMode(m_winW, m_winH, 32,
+			SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_OPENGL /*| SDL_RESIZABLE*/);
+	}
+
 	// Save the window size for later.
 	m_winW = width;
 	m_winH = height;
