@@ -29,13 +29,12 @@ using LibGens::SoundMgr;
 #include <cstdio>
 
 #include "RingBuffer.hpp"
+#include "SdlSWBackend.hpp"
 
 namespace GensSdl {
 
 SdlHandler::SdlHandler()
-	: m_screen(nullptr)
-	, m_fb(nullptr)
-	, m_md(nullptr)
+	: m_vBackend(nullptr)
 	, m_framesRendered(0)
 	, m_audioBuffer(nullptr)
 	, m_sampleSize(0)
@@ -58,10 +57,11 @@ SdlHandler::~SdlHandler()
  */
 int SdlHandler::init_video(void)
 {
-	if (m_screen) {
+	if (m_vBackend) {
 		// Video is already initialized.
 		// Shut it down, then reinitialize it.
-		end_video();
+		delete m_vBackend;
+		SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	}
 
 	int ret = SDL_InitSubSystem(SDL_INIT_VIDEO);
@@ -71,9 +71,9 @@ int SdlHandler::init_video(void)
 		return ret;
 	}
 
-	// Create the screen surface.
-	// TODO: Fullscreen option.
-	m_screen = SDL_SetVideoMode(320, 240, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
+	// Initialize the video backend.
+	// TODO: Fullscreen; GL; VSync.
+	m_vBackend = new SdlSWBackend();
 	return 0;
 }
 
@@ -82,18 +82,9 @@ int SdlHandler::init_video(void)
  */
 void SdlHandler::end_video(void)
 {
-	if (m_screen) {
-		SDL_FreeSurface(m_screen);
-		m_screen = nullptr;
-	}
-	// Delete m_md before unreferencing m_fb.
-	if (m_md) {
-		SDL_FreeSurface(m_md);
-		m_md = nullptr;
-	}
-	if (m_fb) {
-		m_fb->unref();
-		m_fb = nullptr;
+	if (m_vBackend) {
+		delete m_vBackend;
+		m_vBackend = nullptr;
 	}
 }
 
@@ -104,17 +95,8 @@ void SdlHandler::end_video(void)
  */
 void SdlHandler::set_video_source(LibGens::MdFb *fb)
 {
-	// Free the existing MD surface first.
-	if (m_md) {
-		SDL_FreeSurface(m_md);
-		m_md = nullptr;
-		m_fb->unref();
-		m_fb = nullptr;
-	}
-
-	if (fb) {
-		m_fb = fb->ref();
-		m_md = SDL_CreateRGBSurfaceFrom(m_fb->fb32(), 320, 240, 32, 336*4, 0, 0, 0, 0);
+	if (m_vBackend) {
+		m_vBackend->set_video_source(fb);
 	}
 }
 
@@ -123,21 +105,11 @@ void SdlHandler::set_video_source(LibGens::MdFb *fb)
  */
 void SdlHandler::update_video(void)
 {
-	if (!m_md) {
-		// No source surface.
-		SDL_FillRect(m_screen, nullptr, 0);
-	} else {
-		// Source surface is available.
-		SDL_Rect rect;
-		rect.x = 0;
-		rect.y = 0;
-		rect.w = 320;
-		rect.h = 240;
-		SDL_BlitSurface(m_md, &rect, m_screen, &rect);
+	if (m_vBackend) {
+		m_vBackend->update();
 	}
 
 	// Update the screen.
-	SDL_UpdateRect(m_screen, 0, 0, 0, 0);
 	m_framesRendered++;
 }
 
