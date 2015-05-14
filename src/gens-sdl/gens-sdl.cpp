@@ -127,6 +127,35 @@ static void gsdl_osd(OsdType osd_type, int param)
 	}
 }
 
+static LibGens::Timing timing;
+
+// Frameskip timers.
+static uint64_t start_clk;
+static uint64_t old_clk;
+static uint64_t fps_clk;
+static uint64_t new_clk;
+// Microsecond counter for frameskip.
+static uint64_t usec_frameskip;
+
+// Frame counters.
+unsigned int frames = 0;
+unsigned int frames_old = 0;
+unsigned int fps = 0;	// TODO: float or double?
+
+// Reset frameskip timers.
+static void reset_frameskip_timers(void) {
+	start_clk = timing.getTime();
+	old_clk = start_clk;
+	fps_clk = start_clk;
+	fps_clk = start_clk;
+	new_clk = start_clk;
+	usec_frameskip = 0;
+
+	// Frame counter.
+	frames_old = frames;
+	fps = 0;
+}
+
 }
 
 // Don't use SDL_main.
@@ -206,15 +235,9 @@ int main(int argc, char *argv[])
 
 	// Start the frame timer.
 	// TODO: Region code?
-	LibGens::Timing timing;
 	bool isPal = false;
 	const unsigned int usec_per_frame = (1000000 / (isPal ? 50 : 60));
-	uint64_t start_clk = timing.getTime();
-	uint64_t old_clk = start_clk;
-	uint64_t fps_clk = start_clk;
-	uint64_t new_clk = start_clk;
-	// Microsecond counter for frameskip.
-	uint64_t usec_frameskip = 0;
+	GensSdl::reset_frameskip_timers();
 
 	// Frame counters.
 	unsigned int frames = 0;
@@ -277,12 +300,7 @@ int main(int argc, char *argv[])
 							// TODO: Apply the pause effect.
 							paused = !paused;
 							// Reset the clocks and counters.
-							frames_old = frames;
-							fps = 0;
-							start_clk = timing.getTime();
-							old_clk = start_clk;
-							fps_clk = start_clk;
-							new_clk = start_clk;
+							GensSdl::reset_frameskip_timers();
 							// Pause audio.
 							SDL_PauseAudio(paused);
 							// Autosave SRAM/EEPROM.
@@ -329,13 +347,13 @@ int main(int argc, char *argv[])
 		}
 
 		// New start time.
-		new_clk = timing.getTime();
+		GensSdl::new_clk = GensSdl::timing.getTime();
 
 		// Update the FPS counter.
-		unsigned int fps_tmp = ((new_clk - fps_clk) & 0x3FFFFF);
+		unsigned int fps_tmp = ((GensSdl::new_clk - GensSdl::fps_clk) & 0x3FFFFF);
 		if (fps_tmp >= 1000000) {
 			// More than 1 second has passed.
-			fps_clk = new_clk;
+			GensSdl::fps_clk = GensSdl::new_clk;
 			if (frames_old > frames) {
 				fps = (frames_old - frames);
 			} else {
@@ -354,15 +372,15 @@ int main(int argc, char *argv[])
 		// Frameskip.
 		if (frameskip) {
 			// Determine how many frames to run.
-			usec_frameskip += ((new_clk - old_clk) & 0x3FFFFF); // no more than 4 secs
-			unsigned int frames_todo = (unsigned int)(usec_frameskip / usec_per_frame);
-			usec_frameskip %= usec_per_frame;
-			old_clk = new_clk;
+			GensSdl::usec_frameskip += ((GensSdl::new_clk - GensSdl::old_clk) & 0x3FFFFF); // no more than 4 secs
+			unsigned int frames_todo = (unsigned int)(GensSdl::usec_frameskip / usec_per_frame);
+			GensSdl::usec_frameskip %= usec_per_frame;
+			GensSdl::old_clk = GensSdl::new_clk;
 
 			if (frames_todo == 0) {
 				// No frames to do yet.
 				// Wait until the next frame.
-				uint64_t usec_sleep = (usec_per_frame - usec_frameskip);
+				uint64_t usec_sleep = (usec_per_frame - GensSdl::usec_frameskip);
 				if (usec_sleep > 1000) {
 					// Never sleep for longer than the 50 Hz value
 					// so events are checked often enough.
