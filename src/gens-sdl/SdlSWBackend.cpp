@@ -22,13 +22,7 @@
 #include "SdlSWBackend.hpp"
 #include "libgens/Util/MdFb.hpp"
 
-#include "libgens/sound/SoundMgr.hpp"
-using LibGens::SoundMgr;
-
 #include <SDL.h>
-#include <cstdio>
-
-#include "RingBuffer.hpp"
 
 namespace GensSdl {
 
