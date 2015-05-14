@@ -182,6 +182,9 @@ void SdlGLBackend::update(bool fb_dirty)
 
 	// Swap the GL buffers.
 	SDL_GL_SwapBuffers();
+
+	// VBackend is no longer dirty.
+	clearDirty();
 }
 
 /**

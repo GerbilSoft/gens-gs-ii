@@ -63,6 +63,15 @@ class VBackend {
 		 */
 		virtual void resize(int width, int height) = 0;
 
+		/**
+		 * Is the VBackend dirty?
+		 * This is true if any of the properties have changed
+		 * and the image hasn't been updated.
+		 * TODO: Also OSD?
+		 * @return True if dirty; false if not.
+		 */
+		bool isDirty(void) const;
+
 	public:
 		/** Properties. **/
 
@@ -78,13 +87,32 @@ class VBackend {
 		StretchMode_t stretchMode(void) const;
 		void setStretchMode(StretchMode_t stretchMode);
 
+	private:
+		// Dirty flag.
+		bool m_dirty;
+
 	protected:
 		// MdFb object.
 		LibGens::MdFb *m_fb;
 
+		// Dirty flag functions.
+		void setDirty(void);
+		void clearDirty(void);
+
 		// Properties.
 		StretchMode_t m_stretchMode;
 };
+
+/** Property accessors. **/
+
+inline bool VBackend::isDirty(void) const
+	{ return m_dirty; }
+inline void VBackend::setDirty(void)
+	{ m_dirty = true; }
+inline void VBackend::clearDirty(void)
+	{ m_dirty = false; }
+inline VBackend::StretchMode_t VBackend::stretchMode(void) const
+	{ return m_stretchMode; }
 
 }
 

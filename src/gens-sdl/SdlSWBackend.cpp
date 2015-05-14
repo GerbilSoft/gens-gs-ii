@@ -93,6 +93,9 @@ void SdlSWBackend::update(bool fb_dirty)
 
 	// Update the screen.
 	SDL_Flip(m_screen);
+
+	// VBackend is no longer dirty.
+	clearDirty();
 }
 
 /**

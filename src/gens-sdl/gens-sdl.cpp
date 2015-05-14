@@ -385,8 +385,10 @@ int main(int argc, char *argv[])
 		}
 
 		if (GensSdl::paused) {
-			// Emulatoin is paused.
-			// Don't do anything.
+			// Emulation is paused.
+			// Only update video if the VBackend is dirty.
+			sdlHandler->update_video_paused();
+			// Don't run any frames.
 			continue;
 		}
 

@@ -116,6 +116,19 @@ void SdlHandler::update_video(void)
 }
 
 /**
+ * Update video while emulation is paused.
+ * If the VBackend is dirty, video is updated;
+ * otherwise, nothing happens.
+ * NOTE: This function does NOT update the frame counter.
+ */
+void SdlHandler::update_video_paused(void)
+{
+	if (m_vBackend && m_vBackend->isDirty()) {
+		m_vBackend->update(false);
+	}
+}
+
+/**
  * Resize the video renderer.
  * @param width Width.
  * @param height Height.

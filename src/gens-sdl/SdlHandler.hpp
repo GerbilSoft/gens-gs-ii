@@ -68,9 +68,17 @@ class SdlHandler {
 		void set_video_source(LibGens::MdFb *fb);
 
 		/**
-		 * Update SDL video.
+		 * Update video.
 		 */
 		void update_video(void);
+
+		/**
+		 * Update video while emulation is paused.
+		 * If the VBackend is dirty, video is updated;
+		 * otherwise, nothing happens.
+		 * NOTE: This function does NOT update the frame counter.
+		 */
+		void update_video_paused(void);
 
 		/**
 		 * Resize the video renderer.

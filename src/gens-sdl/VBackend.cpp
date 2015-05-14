@@ -25,7 +25,8 @@
 namespace GensSdl {
 
 VBackend::VBackend()
-	: m_fb(nullptr)
+	: m_dirty(true)
+	, m_fb(nullptr)
 	, m_stretchMode(STRETCH_H)
 { }
 
@@ -37,15 +38,10 @@ VBackend::~VBackend()
 	}
 }
 
-VBackend::StretchMode_t VBackend::stretchMode(void) const
-{
-	return m_stretchMode;
-}
-
 void VBackend::setStretchMode(StretchMode_t stretchMode)
 {
 	m_stretchMode = stretchMode;
-	// TODO: Mark as dirty?
+	setDirty();
 }
 
 }
