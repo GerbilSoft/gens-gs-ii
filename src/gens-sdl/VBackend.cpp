@@ -37,4 +37,15 @@ VBackend::~VBackend()
 	}
 }
 
+VBackend::StretchMode_t VBackend::stretchMode(void) const
+{
+	return m_stretchMode;
+}
+
+void VBackend::setStretchMode(StretchMode_t stretchMode)
+{
+	m_stretchMode = stretchMode;
+	// TODO: Mark as dirty?
+}
+
 }

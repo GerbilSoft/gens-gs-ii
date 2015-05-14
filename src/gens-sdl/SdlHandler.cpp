@@ -128,6 +128,15 @@ void SdlHandler::resize_video(int width, int height)
 }
 
 /**
+ * Get the Video Backend.
+ * @return Video Backend.
+ */
+VBackend *SdlHandler::vBackend(void) const
+{
+	return m_vBackend;
+}
+
+/**
  * Initialize SDL audio.
  * @return 0 on success; non-zero on error.
  */

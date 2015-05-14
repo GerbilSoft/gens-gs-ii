@@ -80,6 +80,12 @@ class SdlHandler {
 		void resize_video(int width, int height);
 
 		/**
+		 * Get the Video Backend.
+		 * @return Video Backend.
+		 */
+		VBackend *vBackend(void) const;
+
+		/**
 		 * Initialize SDL audio.
 		 * @return 0 on success; non-zero on error.
 		 */

@@ -160,7 +160,10 @@ void SdlGLBackend::update(bool fb_dirty)
 
 	// Check if the MD resolution has changed.
 	// If it has, recalculate the texture rectangle.
-	if (m_fb->imgWidth() != m_prevMD_W || m_fb->imgHeight() != m_prevMD_H) {
+	if (m_stretchMode != m_prevStretchMode ||
+	    m_fb->imgWidth() != m_prevMD_W ||
+	    m_fb->imgHeight() != m_prevMD_H)
+	{
 		recalcTexRectF();
 	}
 
@@ -361,6 +364,7 @@ void SdlGLBackend::recalcTexRectF(void)
 	// Save the current MD screen resolution.
 	m_prevMD_W = m_fb->imgWidth();
 	m_prevMD_H = m_fb->imgHeight();
+	m_prevStretchMode = m_stretchMode;
 
 	if (m_stretchMode == STRETCH_H || m_stretchMode == STRETCH_FULL) {
 		// Horizontal stretch.

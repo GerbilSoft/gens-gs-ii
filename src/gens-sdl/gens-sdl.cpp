@@ -21,7 +21,9 @@
 
 #include "SdlHandler.hpp"
 #include "Config.hpp"
+#include "VBackend.hpp"
 using GensSdl::SdlHandler;
+using GensSdl::VBackend;
 
 // LibGens
 #include "libgens/lg_main.hpp"
@@ -213,6 +215,18 @@ static void processSdlEvent(const SDL_Event &event) {
 						// Take a screenshot.
 						GensSdl::doScreenShot(context->m_vdp->MD_Screen,
 							rom->filenameBaseNoExt().c_str());
+					}
+					break;
+
+				case SDLK_F2:
+					if (event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
+						// Change stretch mode parameters.
+						// TODO: OSD message, but only if the backend supports it?
+						int stretchMode = (int)sdlHandler->vBackend()->stretchMode();
+						stretchMode++;
+						stretchMode &= 3;
+						sdlHandler->vBackend()->setStretchMode((VBackend::StretchMode_t)stretchMode);
+						// TODO: Update video if paused.
 					}
 					break;
 
