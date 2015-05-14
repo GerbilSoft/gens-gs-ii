@@ -116,6 +116,18 @@ void SdlHandler::update_video(void)
 }
 
 /**
+ * Resize the video renderer.
+ * @param width Width.
+ * @param height Height.
+ */
+void SdlHandler::resize_video(int width, int height)
+{
+	if (m_vBackend) {
+		m_vBackend->resize(width, height);
+	}
+}
+
+/**
  * Initialize SDL audio.
  * @return 0 on success; non-zero on error.
  */

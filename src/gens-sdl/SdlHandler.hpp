@@ -73,6 +73,13 @@ class SdlHandler {
 		void update_video(void);
 
 		/**
+		 * Resize the video renderer.
+		 * @param width Width.
+		 * @param height Height.
+		 */
+		void resize_video(int width, int height);
+
+		/**
 		 * Initialize SDL audio.
 		 * @return 0 on success; non-zero on error.
 		 */

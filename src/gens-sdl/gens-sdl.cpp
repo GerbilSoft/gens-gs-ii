@@ -313,6 +313,11 @@ int main(int argc, char *argv[])
 					keyManager->keyUp(event.key.keysym.sym);
 					break;
 
+				case SDL_VIDEORESIZE:
+					// Resize the video renderer.
+					sdlHandler->resize_video(event.resize.w, event.resize.h);
+					break;
+
 				default:
 					break;
 			}

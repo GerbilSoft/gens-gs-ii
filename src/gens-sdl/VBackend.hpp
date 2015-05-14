@@ -55,6 +55,13 @@ class VBackend {
 		 */
 		virtual void update(bool fb_dirty) = 0;
 
+		/**
+		 * Viewing area has been resized.
+		 * @param width Width.
+		 * @param height Height.
+		 */
+		virtual void resize(int width, int height) = 0;
+
 	protected:
 		// MdFb object.
 		LibGens::MdFb *m_fb;

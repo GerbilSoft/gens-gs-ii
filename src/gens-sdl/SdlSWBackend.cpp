@@ -22,6 +22,9 @@
 #include "SdlSWBackend.hpp"
 #include "libgens/Util/MdFb.hpp"
 
+// C includes. (C++ namespace)
+#include <cassert>
+
 #include <SDL.h>
 
 namespace GensSdl {
@@ -90,6 +93,20 @@ void SdlSWBackend::update(bool fb_dirty)
 
 	// Update the screen.
 	SDL_Flip(m_screen);
+}
+
+/**
+ * Viewing area has been resized.
+ * @param width Width.
+ * @param height Height.
+ */
+void SdlSWBackend::resize(int width, int height)
+{
+	// Can't resize this...
+	((void)width);
+	((void)height);
+	assert(false);
+	return;
 }
 
 }

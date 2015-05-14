@@ -48,10 +48,13 @@ SdlGLBackend::SdlGLBackend()
 	, m_texType(0)
 	, m_texW(0), m_texH(0)
 	, m_texVisW(0), m_texVisH(0)
-	, m_winW(0), m_winH(0)
 {
 	// Initialize the SDL window.
-	m_screen = SDL_SetVideoMode(320, 240, 32, SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_OPENGL);
+	// NOTE: Starting with 2x resolution so the
+	// window isn't ridiculously tiny.
+	m_winW = 640; m_winH = 480;
+	m_screen = SDL_SetVideoMode(m_winW, m_winH, 32,
+		SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_OPENGL | SDL_RESIZABLE);
 
 	// Initialize OpenGL.
 	initGL();
@@ -171,8 +174,7 @@ void SdlGLBackend::update(bool fb_dirty)
 }
 
 /**
- * Resize the OpenGL viewport.
- * TODO: Make this a VBackend function.
+ * Viewing area has been resized.
  * @param width Width.
  * @param height Height.
  */
@@ -237,7 +239,9 @@ void SdlGLBackend::initGL(void)
 	glEnable(GL_CULL_FACE);
 
 	// Initialize the GL viewport and projection.
-	resize(320, 240);
+	// TODO: Should width and height be function parameters,
+	// which are then copied to m_winW and m_winH here?
+	resize(m_winW, m_winH);
 
 	// Allocate textures.
 	reallocTexture();

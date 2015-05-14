@@ -61,6 +61,13 @@ class SdlSWBackend : public VBackend {
 		 */
 		virtual void update(bool fb_dirty) final;
 
+		/**
+		 * Viewing area has been resized.
+		 * @param width Width.
+		 * @param height Height.
+		 */
+		virtual void resize(int width, int height) final;
+
 	private:
 		// Screen buffer.
 		SDL_Surface *m_screen;

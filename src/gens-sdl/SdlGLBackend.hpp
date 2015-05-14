@@ -65,8 +65,7 @@ class SdlGLBackend : public VBackend {
 		virtual void update(bool fb_dirty) final;
 
 		/**
-		 * Resize the OpenGL viewport.
-		 * TODO: Make this a VBackend function.
+		 * Viewing area has been resized.
 		 * @param width Width.
 		 * @param height Height.
 		 */
