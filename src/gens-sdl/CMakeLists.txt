@@ -26,6 +26,7 @@ SET(gens-sdl_SRCS
 	SdlHandler.cpp
 	RingBuffer.cpp
 	Config.cpp
+	VBackend.cpp
 	SdlSWBackend.cpp
 	)
 
@@ -35,6 +36,7 @@ SET(gens-sdl_H
 	SdlHandler.hpp
 	RingBuffer.hpp
 	Config.hpp
+	VBackend.hpp
 	SdlSWBackend.hpp
 	)
 

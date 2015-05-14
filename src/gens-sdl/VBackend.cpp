@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-sdl: Gens/GS II basic SDL frontend.                                *
- * SdlSWBackend.cpp: SDL software rendeirng backend.                       *
+ * VBackend.hpp: Video Backend base class.                                 *
  *                                                                         *
  * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
@@ -19,73 +19,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "SdlSWBackend.hpp"
+#include "VBackend.hpp"
 #include "libgens/Util/MdFb.hpp"
-
-#include <SDL.h>
 
 namespace GensSdl {
 
-SdlSWBackend::SdlSWBackend()
-	: m_screen(nullptr)
-	, m_md(nullptr)
-{
-	// Initialize the SDL window.
-	m_screen = SDL_SetVideoMode(320, 240, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
-}
+VBackend::VBackend()
+	: m_fb(nullptr)
+{ }
 
-SdlSWBackend::~SdlSWBackend()
+VBackend::~VBackend()
 {
-	if (m_md) {
-		SDL_FreeSurface(m_md);
-		m_md = nullptr;
-	}
-
-	SDL_FreeSurface(m_screen);
-}
-
-/**
- * Set the SDL video source to an MdFb.
- * If nullptr, removes the SDL video source.
- * @param fb MdFb.
- */
-void SdlSWBackend::set_video_source(LibGens::MdFb *fb)
-{
-	// Free the existing MD surface first.
-	if (m_md) {
-		SDL_FreeSurface(m_md);
-		m_md = nullptr;
+	if (m_fb) {
 		m_fb->unref();
 		m_fb = nullptr;
 	}
-
-	if (fb) {
-		m_fb = fb->ref();
-		m_md = SDL_CreateRGBSurfaceFrom(m_fb->fb32(), 320, 240, 32, 336*4, 0, 0, 0, 0);
-	}
-}
-
-
-/**
- * Update SDL video.
- */
-void SdlSWBackend::update(void)
-{
-	if (!m_md) {
-		// No source surface.
-		SDL_FillRect(m_screen, nullptr, 0);
-	} else {
-		// Source surface is available.
-		SDL_Rect rect;
-		rect.x = 0;
-		rect.y = 0;
-		rect.w = 320;
-		rect.h = 240;
-		SDL_BlitSurface(m_md, &rect, m_screen, &rect);
-	}
-
-	// Update the screen.
-	SDL_UpdateRect(m_screen, 0, 0, 0, 0);
 }
 
 }

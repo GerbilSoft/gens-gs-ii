@@ -27,13 +27,16 @@
 // SDL
 #include <SDL.h>
 
+// Video Backend.
+#include "VBackend.hpp"
+
 namespace LibGens {
 	class MdFb;
 }
 
 namespace GensSdl {
 
-class SdlSWBackend {
+class SdlSWBackend : public VBackend {
 	public:
 		SdlSWBackend();
 		virtual ~SdlSWBackend();
@@ -50,18 +53,16 @@ class SdlSWBackend {
 		 * If nullptr, removes the SDL video source.
 		 * @param fb MdFb.
 		 */
-		void set_video_source(LibGens::MdFb *fb);
+		virtual void set_video_source(LibGens::MdFb *fb) final;
 
 		/**
 		 * Update SDL video.
 		 */
-		void update(void);
+		virtual void update(void) final;
 
 	private:
 		// Screen buffer.
 		SDL_Surface *m_screen;
-		// MdFb object.
-		LibGens::MdFb *m_fb;
 		// MD screen buffer.
 		// Points to data on an MdFb.
 		SDL_Surface *m_md;
