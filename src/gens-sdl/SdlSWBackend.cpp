@@ -85,7 +85,7 @@ void SdlSWBackend::update(void)
 	}
 
 	// Update the screen.
-	SDL_UpdateRect(m_screen, 0, 0, 0, 0);
+	SDL_Flip(m_screen);
 }
 
 }
