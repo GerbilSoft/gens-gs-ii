@@ -76,6 +76,7 @@ using std::string;
 
 #include <SDL.h>
 
+// TODO: Move to GensSdl?
 static SdlHandler *sdlHandler = nullptr;
 static Rom *rom = nullptr;
 static EmuMD *context = nullptr;
@@ -129,6 +130,13 @@ static void gsdl_osd(OsdType osd_type, int param)
 
 static LibGens::Timing timing;
 
+// Emulation state.
+static bool running = true;
+static bool paused = false;
+
+// Enable frameskip.
+static bool frameskip = true;
+
 // Frameskip timers.
 static uint64_t start_clk;
 static uint64_t old_clk;
@@ -154,6 +162,80 @@ static void reset_frameskip_timers(void) {
 	// Frame counter.
 	frames_old = frames;
 	fps = 0;
+}
+
+/**
+ * Process an SDL event.
+ * @param event SDL event.
+ */
+static void processSdlEvent(const SDL_Event &event) {
+	switch (event.type) {
+		case SDL_QUIT:
+			running = 0;
+			break;
+
+		case SDL_KEYDOWN:
+			// SDL keycodes nearly match GensKey.
+			// TODO: Split out into a separate function?
+			switch (event.key.keysym.sym) {
+				case SDLK_TAB:
+					// Check for Shift.
+					if (event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
+						// Hard Reset.
+						context->hardReset();
+					} else {
+						// Soft Reset.
+						context->softReset();
+					}
+					break;
+
+				case SDLK_ESCAPE:
+					// Pause emulation.
+					// TODO: Apply the pause effect.
+					paused = !paused;
+					// Reset the clocks and counters.
+					GensSdl::reset_frameskip_timers();
+					// Pause audio.
+					SDL_PauseAudio(paused);
+					// Autosave SRAM/EEPROM.
+					context->autoSaveData(-1);
+					// TODO: Reset the audio ringbuffer?
+					// Update the window title.
+					if (paused) {
+						SDL_WM_SetCaption("Gens/GS II [SDL] [Paused]", nullptr);
+					} else {
+						SDL_WM_SetCaption("Gens/GS II [SDL]", nullptr);
+					}
+					break;
+
+				case SDLK_BACKSPACE:
+					if (event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
+						// Take a screenshot.
+						GensSdl::doScreenShot(context->m_vdp->MD_Screen,
+							context->m_vdp, rom->filenameBaseNoExt().c_str());
+					}
+					break;
+
+				default:
+					// Send the key to the KeyManager.
+					keyManager->keyDown(event.key.keysym.sym);
+					break;
+			}
+			break;
+
+		case SDL_KEYUP:
+			// SDL keycodes nearly match GensKey.
+			keyManager->keyUp(event.key.keysym.sym);
+			break;
+
+		case SDL_VIDEORESIZE:
+			// Resize the video renderer.
+			sdlHandler->resize_video(event.resize.w, event.resize.h);
+			break;
+
+		default:
+			break;
+	}
 }
 
 }
@@ -245,7 +327,7 @@ int main(int argc, char *argv[])
 	unsigned int fps = 0;	// TODO: float or double?
 
 	// Enable frameskip.
-	bool frameskip = true;
+	GensSdl::frameskip = true;
 
 	// TODO: Close the ROM, or let EmuContext do it?
 
@@ -268,80 +350,28 @@ int main(int argc, char *argv[])
 	keyManager->setKeyMap(IoManager::VIRTPORT_1, keyMap, ARRAY_SIZE(keyMap));
 	keyManager->setIoType(IoManager::VIRTPORT_2, IoManager::IOT_NONE);
 
-	bool running = true;
-	bool paused = false;
-	while (running) {
+	while (GensSdl::running) {
 		SDL_Event event;
-		int ret = (paused
-			? SDL_WaitEvent(&event)
-			: SDL_PollEvent(&event));
-		if (ret) {
-			switch (event.type) {
-				case SDL_QUIT:
-					running = 0;
-					break;
-
-				case SDL_KEYDOWN:
-					// SDL keycodes nearly match GensKey.
-					// TODO: Split out into a separate function?
-					switch (event.key.keysym.sym) {
-						case SDLK_TAB:
-							// Check for Shift.
-							if (event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
-								// Hard Reset.
-								context->hardReset();
-							} else {
-								// Soft Reset.
-								context->softReset();
-							}
-							break;
-						case SDLK_ESCAPE:
-							// Pause emulation.
-							// TODO: Apply the pause effect.
-							paused = !paused;
-							// Reset the clocks and counters.
-							GensSdl::reset_frameskip_timers();
-							// Pause audio.
-							SDL_PauseAudio(paused);
-							// Autosave SRAM/EEPROM.
-							context->autoSaveData(-1);
-							// TODO: Reset the audio ringbuffer?
-							// Update the window title.
-							if (paused) {
-								SDL_WM_SetCaption("Gens/GS II [SDL] [Paused]", nullptr);
-							} else {
-								SDL_WM_SetCaption("Gens/GS II [SDL]", nullptr);
-							}
-							break;
-						case SDLK_BACKSPACE:
-							if (event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
-								// Take a screenshot.
-								GensSdl::doScreenShot(fb, context->m_vdp, rom->filenameBaseNoExt().c_str());
-							}
-							break;
-						default:
-							// Send the key to the KeyManager.
-							keyManager->keyDown(event.key.keysym.sym);
-							break;
-					}
-					break;
-
-				case SDL_KEYUP:
-					// SDL keycodes nearly match GensKey.
-					keyManager->keyUp(event.key.keysym.sym);
-					break;
-
-				case SDL_VIDEORESIZE:
-					// Resize the video renderer.
-					sdlHandler->resize_video(event.resize.w, event.resize.h);
-					break;
-
-				default:
-					break;
-			}
+		int ret;
+		if (GensSdl::paused) {
+			// Emulation is paused.
+			// Wait for an SDL event.
+			ret = SDL_WaitEvent(&event);
+		} else {
+			// Emulation is running.
+			// Poll for an SDL event,
+			// since we don't want to block frames.
+			ret = SDL_PollEvent(&event);
 		}
 
-		if (paused) {
+		if (ret) {
+			// An SDL event has been received.
+			// Process it.
+			GensSdl::processSdlEvent(event);
+		}
+
+		if (GensSdl::paused) {
+			// Emulatoin is paused.
 			// Don't do anything.
 			continue;
 		}
@@ -370,7 +400,7 @@ int main(int argc, char *argv[])
 		}
 
 		// Frameskip.
-		if (frameskip) {
+		if (GensSdl::frameskip) {
 			// Determine how many frames to run.
 			GensSdl::usec_frameskip += ((GensSdl::new_clk - GensSdl::old_clk) & 0x3FFFFF); // no more than 4 secs
 			unsigned int frames_todo = (unsigned int)(GensSdl::usec_frameskip / usec_per_frame);
