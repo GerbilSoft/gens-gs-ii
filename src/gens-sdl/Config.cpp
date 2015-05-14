@@ -23,9 +23,7 @@
 
 // LibGens
 #include "libgens/Util/MdFb.hpp"
-#include "libgens/Vdp/Vdp.hpp"
 using LibGens::MdFb;
-using LibGens::Vdp;
 
 // LibZomg
 #include "libzomg/PngWriter.hpp"
@@ -149,14 +147,13 @@ const std::string getConfigDir(const utf8_str *subdir)
 /**
  * Take a screenshot.
  * @param fb MdFb.
- * @param vdp Vdp. (TODO: Move required variables to MdFb.)
  * @param basename Basename for the screenshot.
  * @return 0 on success; non-zero on error.
  */
-int doScreenShot(const MdFb *fb, const Vdp *vdp, const utf8_str *basename)
+int doScreenShot(const MdFb *fb, const utf8_str *basename)
 {
 	const string configDir = getConfigDir("Screenshots");
-	if (configDir.empty() || !basename || !fb || !vdp)
+	if (configDir.empty() || !basename || !fb)
 		return -EINVAL;
 
 	string romFilename(configDir);
@@ -177,23 +174,22 @@ int doScreenShot(const MdFb *fb, const Vdp *vdp, const utf8_str *basename)
 	// Take the screenshot.
 	// TODO: Separate function to create an img_data from an MdFb.
 	// NOTE: LibZomg doesn't depend on LibGens, so it can't use MdFb directly.
-	// TODO: Store VPix and HPixBegin in the MdFb.
 	fb->ref();
-	const int startY = ((240 - vdp->getVPix()) / 2);
-	const int startX = (vdp->getHPixBegin());
+	const int imgXStart = fb->imgXStart();
+	const int imgYStart = fb->imgYStart();
 
 	// TODO: Option to save the full framebuffer, not just active display?
 	Zomg_Img_Data_t img_data;
-	img_data.w = vdp->getHPix();
-	img_data.h = vdp->getVPix();
+	img_data.w = fb->imgWidth();
+	img_data.h = fb->imgHeight();
 
 	const MdFb::ColorDepth bpp = fb->bpp();
 	if (bpp == MdFb::BPP_32) {
-		img_data.data = (void*)(fb->lineBuf32(startY) + startX);
+		img_data.data = (void*)(fb->lineBuf32(imgYStart) + imgXStart);
 		img_data.pitch = (fb->pxPitch() * sizeof(uint32_t));
 		img_data.bpp = 32;
 	} else {
-		img_data.data = (void*)(fb->lineBuf16(startY) + startX);
+		img_data.data = (void*)(fb->lineBuf16(imgYStart) + imgXStart);
 		img_data.pitch = (fb->pxPitch() * sizeof(uint16_t));
 		img_data.bpp = (bpp == MdFb::BPP_16 ? 16 : 15);
 	}

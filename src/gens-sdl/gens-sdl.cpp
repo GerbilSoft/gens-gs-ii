@@ -212,7 +212,7 @@ static void processSdlEvent(const SDL_Event &event) {
 					if (event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
 						// Take a screenshot.
 						GensSdl::doScreenShot(context->m_vdp->MD_Screen,
-							context->m_vdp, rom->filenameBaseNoExt().c_str());
+							rom->filenameBaseNoExt().c_str());
 					}
 					break;
 

@@ -51,11 +51,9 @@ const std::string getConfigDir(const utf8_str *subdir = nullptr);
 /**
  * Take a screenshot.
  * @param fb MdFb.
- * @param vdp Vdp. (TODO: Move required variables to MdFb.)
  * @return 0 on success; non-zero on error.
  */
 int doScreenShot(const LibGens::MdFb *fb,
-		 const LibGens::Vdp *vdp,
 		 const utf8_str *basename);
 
 }
