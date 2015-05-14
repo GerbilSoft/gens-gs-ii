@@ -26,6 +26,7 @@
 
 namespace LibGens {
 	class MdFb;
+	class EmuContext;
 }
 
 namespace GensSdl {
@@ -62,9 +63,27 @@ class VBackend {
 		 */
 		virtual void resize(int width, int height) = 0;
 
+	public:
+		/** Properties. **/
+
+		// Stretch mode.
+		enum StretchMode_t {
+			STRETCH_NONE = 0,
+			STRETCH_H,
+			STRETCH_V,
+			STRETCH_FULL,
+
+			STRETCH_MAX
+		};
+		StretchMode_t stretchMode(void) const;
+		void setStretchMode(StretchMode_t stretchMode);
+
 	protected:
 		// MdFb object.
 		LibGens::MdFb *m_fb;
+
+		// Properties.
+		StretchMode_t m_stretchMode;
 };
 
 }

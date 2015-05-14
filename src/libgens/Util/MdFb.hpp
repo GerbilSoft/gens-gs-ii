@@ -30,8 +30,7 @@
 
 #include <vector>
 
-namespace LibGens
-{
+namespace LibGens {
 
 class MdFb
 {
@@ -126,7 +125,22 @@ class MdFb
 		 * @return Number of lines.
 		 */
 		int numLines(void) const;
-	
+
+		/** Internal image parameters. **/
+
+		// Image size.
+		// If the size is less than the framebuffer size,
+		// the image is centered within the framebuffer.
+		int imgWidth(void) const;
+		int imgHeight(void) const;
+		int imgXStart(void) const;
+		int imgYStart(void) const;
+
+		void setImgWidth(int imgWidth);
+		void setImgHeight(int imgHeight);
+		void setImgXStart(int imgXStart);
+		void setImgYStart(int imgYStart);
+
 	private:
 		/**
 		 * Number of visible pixels per line.
@@ -177,6 +191,16 @@ class MdFb
 		 * Reinitialize the framebuffer.
 		 */
 		void reinitFb(void);
+
+		/** Internal image parameters. **/
+
+		// Image size.
+		// If the size is less than the framebuffer size,
+		// the image is centered within the framebuffer.
+		int m_imgWidth;
+		int m_imgHeight;
+		int m_imgXStart;
+		int m_imgYStart;
 };
 
 
@@ -321,6 +345,44 @@ inline int MdFb::pxStart(void) const
 
 inline int MdFb::numLines(void) const
 	{ return m_numLines; }
+
+/** Internal image parameters. **/
+
+// Image size.
+// If the size is less than the framebuffer size,
+// the image is centered within the framebuffer.
+inline int MdFb::imgWidth(void) const
+	{ return m_imgWidth; }
+inline int MdFb::imgHeight(void) const
+	{ return m_imgHeight; }
+inline int MdFb::imgXStart(void) const
+	{ return m_imgXStart; }
+inline int MdFb::imgYStart(void) const
+	{ return m_imgYStart; }
+
+inline void MdFb::setImgWidth(int imgWidth)
+{
+	assert(imgWidth >= 0 && imgWidth <= m_pxPerLine);
+	m_imgWidth = imgWidth;
+}
+
+inline void MdFb::setImgHeight(int imgHeight)
+{
+	assert(imgHeight >= 0 && imgHeight <= m_numLines);
+	m_imgHeight = imgHeight;
+}
+
+inline void MdFb::setImgXStart(int imgXStart)
+{
+	assert(imgXStart >= 0 && imgXStart <= m_pxPerLine);
+	m_imgXStart = imgXStart;
+}
+
+inline void MdFb::setImgYStart(int imgYStart)
+{
+	assert(imgYStart >= 0 && imgYStart <= m_numLines);
+	m_imgYStart = imgYStart;
+}
 
 }
 

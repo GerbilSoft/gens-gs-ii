@@ -93,6 +93,10 @@ class SdlGLBackend : public VBackend {
 		// Window size.
 		int m_winW, m_winH;
 
+		// Previous stretch mode parameters.
+		int m_prevMD_W, m_prevMD_H;
+		StretchMode_t m_prevStretchMode;
+
 		// Find the next highest power of two. (signed integers)
 		// http://en.wikipedia.org/wiki/Power_of_two#Algorithm_to_find_the_next-highest_power_of_two
 		template <class T>

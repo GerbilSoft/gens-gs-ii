@@ -26,6 +26,7 @@ namespace GensSdl {
 
 VBackend::VBackend()
 	: m_fb(nullptr)
+	, m_stretchMode(STRETCH_H)
 { }
 
 VBackend::~VBackend()

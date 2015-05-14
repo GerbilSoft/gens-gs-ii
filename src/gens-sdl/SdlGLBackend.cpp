@@ -48,6 +48,8 @@ SdlGLBackend::SdlGLBackend()
 	, m_texType(0)
 	, m_texW(0), m_texH(0)
 	, m_texVisW(0), m_texVisH(0)
+	, m_prevMD_W(0), m_prevMD_H(0)
+	, m_prevStretchMode(STRETCH_MAX)
 {
 	// Initialize the SDL window.
 	// NOTE: Starting with 2x resolution so the
@@ -154,8 +156,13 @@ void SdlGLBackend::update(bool fb_dirty)
 
 	// TODO:
 	// - Aspect ratio constraint.
-	// - Stretch mode.
 	// - Recalculate texRectF if the active display size changes.
+
+	// Check if the MD resolution has changed.
+	// If it has, recalculate the texture rectangle.
+	if (m_fb->imgWidth() != m_prevMD_W || m_fb->imgHeight() != m_prevMD_H) {
+		recalcTexRectF();
+	}
 
 	// Draw the texture.
 	glEnableClientState(GL_VERTEX_ARRAY);
@@ -346,11 +353,36 @@ void SdlGLBackend::recalcTexRectF(void)
 	if (!m_fb)
 		return;
 
+	// Default to no stretch.
 	double x = 0.0, y = 0.0;
 	double w = (double)m_texVisW / (double)m_texW;
 	double h = (double)m_texVisH / (double)m_texH;
 
-	// TODO: Stretch mode. Currently using STRETCH_NONE.
+	// Save the current MD screen resolution.
+	m_prevMD_W = m_fb->imgWidth();
+	m_prevMD_H = m_fb->imgHeight();
+
+	if (m_stretchMode == STRETCH_H || m_stretchMode == STRETCH_FULL) {
+		// Horizontal stretch.
+		const int imgXStart = m_fb->imgXStart();
+		if (imgXStart > 0) {
+			// Less than 320 pixels wide.
+			// Adjust horizontal stretch.
+			x = (double)imgXStart / (double)m_texW;
+			w -= x;
+		}
+	}
+
+	if (m_stretchMode == STRETCH_V || m_stretchMode == STRETCH_FULL) {
+		// Vertical stretch.
+		const int imgYStart = m_fb->imgYStart();
+		if (imgYStart > 0) {
+			// Less than 240 pixels tall.
+			// Adjust vertical stretch.
+			y = (double)imgYStart / (double)m_texH;
+			h -= y;
+		}
+	}
 
 	// Set the texture rectangle coordinates.
 	m_texRectF[0][0] = x;

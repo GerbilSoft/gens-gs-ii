@@ -268,6 +268,10 @@ void Vdp::updateVdpLines(bool resetCurrent)
 		VDP_Lines.Border.borderEndTop = -1;
 	}
 
+	// Update the MdFb image parameters.
+	MD_Screen->setImgHeight(VDP_Lines.totalVisibleLines);
+	MD_Screen->setImgYStart(VDP_Lines.Border.borderSize);
+
 	if (resetCurrent) {
 		// Reset VDP_Lines.currentLine.
 		// NOTE: VDP starts at visible line 0.

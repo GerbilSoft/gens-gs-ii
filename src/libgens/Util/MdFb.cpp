@@ -33,12 +33,19 @@ namespace LibGens
 
 MdFb::MdFb()
 	: m_refcnt(1)
+	// Framebuffer parameters.
 	, m_pxPerLine(320)
 	, m_pxPitch(336)
 	, m_pxStart(8)
 	, m_numLines(240)
+	// Color depth.
 	, m_bpp(BPP_32)
 	, m_fb(nullptr)
+	// Image parameters.
+	, m_imgWidth(m_pxPerLine)
+	, m_imgHeight(m_numLines)
+	, m_imgXStart(0)
+	, m_imgYStart(0)
 {
 	reinitFb();
 }
