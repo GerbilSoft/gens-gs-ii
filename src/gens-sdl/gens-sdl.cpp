@@ -198,7 +198,7 @@ static void processSdlEvent(const SDL_Event &event) {
 					// Reset the clocks and counters.
 					GensSdl::reset_frameskip_timers();
 					// Pause audio.
-					SDL_PauseAudio(paused);
+					sdlHandler->pause_audio(paused);
 					// Autosave SRAM/EEPROM.
 					context->autoSaveData(-1);
 					// TODO: Reset the audio ringbuffer?
@@ -356,7 +356,7 @@ int main(int argc, char *argv[])
 	SDL_WM_SetCaption("Gens/GS II [SDL]", nullptr);
 
 	// Start audio.
-	SDL_PauseAudio(0);
+	sdlHandler->pause_audio(false);
 
 	// Initialize the I/O Manager with a default key layout.
 	keyManager = new KeyManager();
@@ -485,7 +485,7 @@ int main(int argc, char *argv[])
 	}
 
 	// Pause audio and wait 50ms for SDL to catch up.
-	SDL_PauseAudio(1);
+	sdlHandler->pause_audio(true);
 	usleep(50000);
 
 	// Save SRAM/EEPROM, if necessary.

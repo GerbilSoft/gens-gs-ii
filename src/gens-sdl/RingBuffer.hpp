@@ -53,6 +53,11 @@ class RingBuffer
 		 */
 		unsigned int read(uint8_t *dst, unsigned int size);
 
+		/**
+		 * Clear the buffer.
+		 */
+		void clear(void);
+
 	protected:
 		unsigned int m_i;	// Data start index.
 		unsigned int m_s;	// Data size, in bytes.

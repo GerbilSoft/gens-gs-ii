@@ -211,6 +211,30 @@ int SdlHandler::init_audio(void)
 }
 
 /**
+ * Pause SDL audio.
+ * This resets the audio ringbuffer.
+ * @param paused True to pause; false to unpause.
+ */
+void SdlHandler::pause_audio(bool pause)
+{
+	if (pause) {
+		if (SDL_GetAudioStatus() == SDL_AUDIO_PLAYING) {
+			// Pause audio.
+			SDL_PauseAudio(1);
+			// Clear the ringbuffer.
+			m_audioBuffer->clear();
+		}
+	} else {
+		if (SDL_GetAudioStatus() == SDL_AUDIO_PAUSED) {
+			// Clear the ringbuffer.
+			m_audioBuffer->clear();
+			// Unpause audio.
+			SDL_PauseAudio(0);
+		}
+	}
+}
+
+/**
  * Shut down SDL audio.
  */
 void SdlHandler::end_audio(void)

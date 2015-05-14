@@ -105,6 +105,13 @@ class SdlHandler {
 		void end_audio(void);
 
 		/**
+		 * Pause SDL audio.
+		 * This resets the audio ringbuffer.
+		 * @param paused True to pause; false to unpause.
+		 */
+		void pause_audio(bool pause);
+
+		/**
 		 * Update SDL audio using SoundMgr.
 		 */
 		void update_audio(void);

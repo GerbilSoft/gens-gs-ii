@@ -105,4 +105,15 @@ unsigned int RingBuffer::read(uint8_t *dst, unsigned int size)
 	return size;
 }
 
+/**
+ * Clear the buffer.
+ */
+void RingBuffer::clear(void)
+{
+	m_i = 0;
+	m_s = 0;
+	// TODO: Is this clear necessary?
+	memset(&m_data, 0, sizeof(m_data));
+}
+
 }
