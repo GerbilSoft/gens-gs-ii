@@ -34,7 +34,7 @@ namespace LibGens {
 namespace GensSdl {
 
 class RingBuffer;
-class SdlSWBackend;
+class VBackend;
 
 class SdlHandler {
 	public:
@@ -99,8 +99,7 @@ class SdlHandler {
 
 	private:
 		// Video backend.
-		// TODO: Create a common base class.
-		SdlSWBackend *m_vBackend;
+		VBackend *m_vBackend;
 
 		// Frames rendered.
 		int m_framesRendered;

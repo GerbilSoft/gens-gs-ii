@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-sdl: Gens/GS II basic SDL frontend.                                *
- * SdlSWBackend.hpp: SDL software rendeirng backend.                       *
+ * SdlGLBackend.hpp: SDL OpenGL rendeirng backend.                         *
  *                                                                         *
  * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
@@ -19,33 +19,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_SDL_SDLSWBACKEND_HPP__
-#define __GENS_SDL_SDLSWBACKEND_HPP__
+#ifndef __GENS_SDL_SDLGLBACKEND_HPP__
+#define __GENS_SDL_SDLGLBACKEND_HPP__
 
+// C includes.
 #include <stdint.h>
+// C includes. (C++ namespace)
+#include <climits>
 
 // SDL
 #include <SDL.h>
+// OpenGL
+#include <GL/gl.h>
 
 // Video Backend.
 #include "VBackend.hpp"
-
-namespace LibGens {
-	class MdFb;
-}
+// LibGens includes.
+#include "libgens/Util/MdFb.hpp"
 
 namespace GensSdl {
 
-class SdlSWBackend : public VBackend {
+class SdlGLBackend : public VBackend {
 	public:
-		SdlSWBackend();
-		virtual ~SdlSWBackend();
+		SdlGLBackend();
+		virtual ~SdlGLBackend();
 
 	private:
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add GensSdl-specific version of Q_DISABLE_COPY().
-		SdlSWBackend(const SdlSWBackend &);
-		SdlSWBackend &operator=(const SdlSWBackend &);
+		SdlGLBackend(const SdlGLBackend &);
+		SdlGLBackend &operator=(const SdlGLBackend &);
 
 	public:
 		/**
@@ -61,14 +64,63 @@ class SdlSWBackend : public VBackend {
 		 */
 		virtual void update(bool fb_dirty) final;
 
+		/**
+		 * Resize the OpenGL viewport.
+		 * TODO: Make this a VBackend function.
+		 * @param width Width.
+		 * @param height Height.
+		 */
+		virtual void resize(int width, int height) final;
+
 	private:
 		// Screen buffer.
 		SDL_Surface *m_screen;
-		// MD screen buffer.
-		// Points to data on an MdFb.
-		SDL_Surface *m_md;
+
+		// Last MdFb bpp.
+		LibGens::MdFb::ColorDepth m_lastBpp;
+
+		// OpenGL texture.
+		GLuint m_tex;			// Texture name.
+		int m_colorComponents;		// Number of color components. (3 == RGB; 4 == BGRA)
+		GLenum m_texFormat;		// Texture format. (GL_RGB, GL_BGRA)
+		GLenum m_texType;		// Texture type. (GL_UNSIGNED_BYTE, etc.)
+		// TODO: Size type?
+		int m_texW, m_texH;		// Texture size. (1x == 512x256 for pow2 textures.)
+		int m_texVisW, m_texVisH;	// Texture visible size. (1x == 320x240)
+
+		// Texture rectangle.
+		GLdouble m_texRectF[4][2];
+
+		// Window size.
+		int m_winW, m_winH;
+
+		// Find the next highest power of two. (signed integers)
+		// http://en.wikipedia.org/wiki/Power_of_two#Algorithm_to_find_the_next-highest_power_of_two
+		template <class T>
+		static inline T next_pow2s(T k)
+		{
+			k--;
+			for (int i = 1; i < (int)(sizeof(T)*CHAR_BIT); i <<= 1)
+				k = k | k >> i;
+			return k + 1;
+		}
+
+		/**
+		 * Initialize OpenGL.
+		 */
+		void initGL(void);
+
+		/**
+		 * Reallocate the OpenGL texture.
+		 */
+		void reallocTexture(void);
+
+		/**
+		 * Recalculate the texture rectangle.
+		 */
+		void recalcTexRectF(void);
 };
 
 }
 
-#endif /* __GENS_SDL_SDLHANDLER_HPP__ */
+#endif /* __GENS_SDL_SDLGLBACKEND_HPP__ */

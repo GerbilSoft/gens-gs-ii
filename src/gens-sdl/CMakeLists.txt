@@ -20,6 +20,10 @@ INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIR})
 # ZLIB include directory.
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 
+# Include the OpenGL directory.
+# TODO: FIND_PACKAGE(OpenGL) here even though it's in the root CMakeLists.txt?
+INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
+
 # Sources.
 SET(gens-sdl_SRCS
 	gens-sdl.cpp
@@ -28,6 +32,7 @@ SET(gens-sdl_SRCS
 	Config.cpp
 	VBackend.cpp
 	SdlSWBackend.cpp
+	SdlGLBackend.cpp
 	)
 
 # Headers.
@@ -38,6 +43,7 @@ SET(gens-sdl_H
 	Config.hpp
 	VBackend.hpp
 	SdlSWBackend.hpp
+	SdlGLBackend.hpp
 	)
 
 # Main target.
@@ -48,7 +54,10 @@ ADD_EXECUTABLE(gens-sdl
 TARGET_LINK_LIBRARIES(gens-sdl gens genskeys zomg)
 
 # Additional libraries.
-TARGET_LINK_LIBRARIES(gens-sdl ${SDL_LIBRARY})
+TARGET_LINK_LIBRARIES(gens-sdl
+	${SDL_LIBRARY}
+	${OPENGL_gl_LIBRARY}
+	)
 
 # Split debug information.
 INCLUDE(SetMSVCDebugPath)

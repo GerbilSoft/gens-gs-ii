@@ -30,6 +30,7 @@ using LibGens::SoundMgr;
 
 #include "RingBuffer.hpp"
 #include "SdlSWBackend.hpp"
+#include "SdlGLBackend.hpp"
 
 namespace GensSdl {
 
@@ -72,8 +73,8 @@ int SdlHandler::init_video(void)
 	}
 
 	// Initialize the video backend.
-	// TODO: Fullscreen; GL; VSync.
-	m_vBackend = new SdlSWBackend();
+	// TODO: Fullscreen; GL vs. SW selection; VSync.
+	m_vBackend = new SdlGLBackend();
 	return 0;
 }
 
@@ -106,7 +107,8 @@ void SdlHandler::set_video_source(LibGens::MdFb *fb)
 void SdlHandler::update_video(void)
 {
 	if (m_vBackend) {
-		m_vBackend->update();
+		// TODO: Don't set fb_dirty == true when paused.
+		m_vBackend->update(true);
 	}
 
 	// Update the screen.

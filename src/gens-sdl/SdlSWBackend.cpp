@@ -67,10 +67,14 @@ void SdlSWBackend::set_video_source(LibGens::MdFb *fb)
 
 
 /**
- * Update SDL video.
+ * Update video.
+ * @param fb_dirty If true, MdFb was updated.
  */
-void SdlSWBackend::update(void)
+void SdlSWBackend::update(bool fb_dirty)
 {
+	// We always have to draw the MdFb in software mode.
+	((void)fb_dirty);
+
 	if (!m_md) {
 		// No source surface.
 		SDL_FillRect(m_screen, nullptr, 0);

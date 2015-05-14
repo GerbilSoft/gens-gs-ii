@@ -51,8 +51,9 @@ class VBackend {
 
 		/**
 		 * Update video.
+		 * @param fb_dirty If true, MdFb was updated.
 		 */
-		virtual void update(void) = 0;
+		virtual void update(bool fb_dirty) = 0;
 
 	protected:
 		// MdFb object.
