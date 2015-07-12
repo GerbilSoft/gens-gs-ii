@@ -326,6 +326,89 @@ int main(int argc, char *argv[])
 		rom->select_z_entry(rom->get_z_entry_list());
 	}
 
+	// Check the ROM format.
+	// TODO: Split into a separate function?
+	if (rom->romFormat() != Rom::RFMT_BINARY) {
+		const char *rom_format;
+		switch (rom->romFormat()) {
+			case Rom::RFMT_UNKNOWN:
+			default:
+				rom_format = "Unknown";
+				break;
+			case Rom::RFMT_BINARY:
+				rom_format = "Binary";
+				break;
+			case Rom::RFMT_SMD:
+				rom_format = "Super Magic Drive";
+				break;
+			case Rom::RFMT_SMD_SPLIT:
+				rom_format = "Super Magic Drive (split)";
+				break;
+			case Rom::RFMT_MGD:
+				rom_format = "Multi Game Doctor";
+				break;
+			case Rom::RFMT_CD_CUE:
+				rom_format = "CUE sheet";
+				break;
+			case Rom::RFMT_CD_ISO_2048:
+				rom_format = "ISO-9660(2048)";
+				break;
+			case Rom::RFMT_CD_ISO_2352:
+				rom_format = "ISO-9660(2352)";
+				break;
+			case Rom::RFMT_CD_BIN_2048:
+				rom_format = "BIN/CUE(2048)";
+				break;
+			case Rom::RFMT_CD_BIN_2352:
+				rom_format = "BIN/CUE(2352)";
+				break;
+		}
+
+		fprintf(stderr, "Error loading ROM file %s: ROM is in %s format.\nOnly plain binary ROMs are supported.\n",
+			rom_filename, rom_format);
+		return EXIT_FAILURE;
+	}
+
+	// Check the ROM system.
+	// TODO: Split into a separate function?
+	if (rom->sysId() != Rom::MDP_SYSTEM_MD) {
+		const char *rom_sysId;
+		switch (rom->sysId()) {
+			case Rom::MDP_SYSTEM_UNKNOWN:
+			default:
+				rom_sysId = "Unknown";
+				break;
+			case Rom::MDP_SYSTEM_MD:
+				rom_sysId = "Mega Drive";
+				break;
+			case Rom::MDP_SYSTEM_MCD:
+				rom_sysId = "Mega CD";
+				break;
+			case Rom::MDP_SYSTEM_32X:
+				rom_sysId = "32X";
+				break;
+			case Rom::MDP_SYSTEM_MCD32X:
+				rom_sysId = "Mega CD 32X";
+				break;
+			case Rom::MDP_SYSTEM_SMS:
+				rom_sysId = "Sega Master System";
+				break;
+			case Rom::MDP_SYSTEM_GG:
+				rom_sysId = "Game Gear";
+				break;
+			case Rom::MDP_SYSTEM_SG1000:
+				rom_sysId = "SG-1000";
+				break;
+			case Rom::MDP_SYSTEM_PICO:
+				rom_sysId = "Pico";
+				break;
+		}
+
+		fprintf(stderr, "Error loading ROM file %s: ROM is for %s.\nOnly Mega Drive ROMs are supported.\n",
+			rom_filename, rom_sysId);
+		return EXIT_FAILURE;
+	}
+
 	// Set the SRAM/EEPROM path.
 	LibGens::EmuContext::SetPathSRam(GensSdl::getConfigDir("SRAM").c_str());
 
