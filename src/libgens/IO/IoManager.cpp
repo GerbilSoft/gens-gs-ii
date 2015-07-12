@@ -759,8 +759,8 @@ uint8_t IoManager::picoReadButtons(void) const
 		/**
 		 * Button layout: PudBRLDU
 		 * - P = pen button
-		 * - u = page down
-		 * - d = page up
+		 * - d = page down
+		 * - u = page up
 		 * - B = red button
 		 * - RLDU = D-pad
 		 *
