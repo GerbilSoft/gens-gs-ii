@@ -134,7 +134,6 @@ void SdlSWBackend::resize(int width, int height)
 	// TODO: Aspect ratio constraints?
 	((void)width);
 	((void)height);
-	assert(false);
 	return;
 }
 
