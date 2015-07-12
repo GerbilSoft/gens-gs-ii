@@ -204,9 +204,9 @@ static void processSdlEvent(const SDL_Event &event) {
 					// TODO: Reset the audio ringbuffer?
 					// Update the window title.
 					if (paused) {
-						SDL_WM_SetCaption("Gens/GS II [SDL] [Paused]", nullptr);
+						sdlHandler->set_window_title("Gens/GS II [SDL] [Paused]");
 					} else {
-						SDL_WM_SetCaption("Gens/GS II [SDL]", nullptr);
+						sdlHandler->set_window_title("Gens/GS II [SDL]");
 					}
 					break;
 
@@ -242,9 +242,9 @@ static void processSdlEvent(const SDL_Event &event) {
 			keyManager->keyUp(event.key.keysym.sym);
 			break;
 
-		case SDL_VIDEORESIZE:
+		case SDL_WINDOWEVENT_RESIZED:
 			// Resize the video renderer.
-			sdlHandler->resize_video(event.resize.w, event.resize.h);
+			sdlHandler->resize_video(event.window.data1, event.window.data2);
 			break;
 
 		default:
@@ -353,7 +353,7 @@ int main(int argc, char *argv[])
 	sdlHandler->set_video_source(fb);
 
 	// Set the window title.
-	SDL_WM_SetCaption("Gens/GS II [SDL]", nullptr);
+	sdlHandler->set_window_title("Gens/GS II [SDL]");
 
 	// Start audio.
 	sdlHandler->pause_audio(false);
@@ -412,7 +412,7 @@ int main(int argc, char *argv[])
 			// and/or quarter-seconds.
 			char win_title[256];
 			snprintf(win_title, sizeof(win_title), "Gens/GS II [SDL] - %d fps", fps);
-			SDL_WM_SetCaption(win_title, nullptr);
+			sdlHandler->set_window_title(win_title);
 		}
 
 		// Frameskip.

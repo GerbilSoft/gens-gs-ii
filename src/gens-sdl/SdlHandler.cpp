@@ -74,7 +74,7 @@ int SdlHandler::init_video(void)
 
 	// Initialize the video backend.
 	// TODO: Fullscreen; GL vs. SW selection; VSync.
-	m_vBackend = new SdlGLBackend();
+	m_vBackend = new SdlSWBackend();
 	return 0;
 }
 
@@ -86,6 +86,18 @@ void SdlHandler::end_video(void)
 	if (m_vBackend) {
 		delete m_vBackend;
 		m_vBackend = nullptr;
+	}
+}
+
+/**
+ * Set the window title.
+ * TODO: Set based on "paused" and fps values?
+ * @param title Window title.
+ */
+void SdlHandler::set_window_title(const char *title)
+{
+	if (m_vBackend) {
+		m_vBackend->set_window_title(title);
 	}
 }
 

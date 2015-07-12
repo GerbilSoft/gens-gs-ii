@@ -44,6 +44,13 @@ class VBackend {
 
 	public:
 		/**
+		 * Set the window title.
+		 * TODO: Set based on "paused" and fps values?
+		 * @param title Window title.
+		 */
+		virtual void set_window_title(const char *title) = 0;
+
+		/**
 		 * Set the video source to an MdFb.
 		 * If nullptr, removes the video source.
 		 * @param fb MdFb.

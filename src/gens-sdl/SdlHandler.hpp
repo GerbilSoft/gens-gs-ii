@@ -61,6 +61,13 @@ class SdlHandler {
 		void end_video(void);
 
 		/**
+		 * Set the window title.
+		 * TODO: Set based on "paused" and fps values?
+		 * @param title Window title.
+		 */
+		void set_window_title(const char *title);
+
+		/**
 		 * Set the SDL video source to an MdFb.
 		 * If nullptr, removes the SDL video source.
 		 * @param fb MdFb.

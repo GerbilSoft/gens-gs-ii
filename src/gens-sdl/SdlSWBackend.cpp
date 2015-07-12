@@ -31,20 +31,52 @@ namespace GensSdl {
 
 SdlSWBackend::SdlSWBackend()
 	: m_screen(nullptr)
-	, m_md(nullptr)
+	, m_renderer(nullptr)
+	, m_texture(nullptr)
+	, m_fb(nullptr)
 {
 	// Initialize the SDL window.
-	m_screen = SDL_SetVideoMode(320, 240, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
+	m_screen = SDL_CreateWindow("Gens/GS II [SDL]",
+				SDL_WINDOWPOS_UNDEFINED,
+				SDL_WINDOWPOS_UNDEFINED,
+				320, 240, SDL_WINDOW_RESIZABLE);
+
+	// Create a renderer.
+	// TODO: Parameter for enabling/disabling VSync?
+	m_renderer = SDL_CreateRenderer(m_screen, -1, SDL_RENDERER_PRESENTVSYNC);
+
+	// Clear the screen.
+	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
+	SDL_RenderClear(m_renderer);
+	SDL_RenderPresent(m_renderer);
+
+	// Create a texture.
+	m_texture = SDL_CreateTexture(m_renderer,
+			SDL_PIXELFORMAT_ARGB8888,
+			SDL_TEXTUREACCESS_STREAMING,
+			320, 240);
 }
 
 SdlSWBackend::~SdlSWBackend()
 {
-	if (m_md) {
-		SDL_FreeSurface(m_md);
-		m_md = nullptr;
+	if (m_fb) {
+		m_fb->unref();
+		m_fb = nullptr;
 	}
 
-	SDL_FreeSurface(m_screen);
+	SDL_DestroyTexture(m_texture);
+	SDL_DestroyRenderer(m_renderer);
+	SDL_DestroyWindow(m_screen);
+}
+
+/**
+ * Set the window title.
+ * TODO: Set based on "paused" and fps values?
+ * @param title Window title.
+ */
+void SdlSWBackend::set_window_title(const char *title)
+{
+	SDL_SetWindowTitle(m_screen, title);
 }
 
 /**
@@ -55,16 +87,13 @@ SdlSWBackend::~SdlSWBackend()
 void SdlSWBackend::set_video_source(LibGens::MdFb *fb)
 {
 	// Free the existing MD surface first.
-	if (m_md) {
-		SDL_FreeSurface(m_md);
-		m_md = nullptr;
+	if (m_fb) {
 		m_fb->unref();
 		m_fb = nullptr;
 	}
 
 	if (fb) {
 		m_fb = fb->ref();
-		m_md = SDL_CreateRGBSurfaceFrom(m_fb->fb32(), 320, 240, 32, 336*4, 0, 0, 0, 0);
 	}
 }
 
@@ -76,23 +105,19 @@ void SdlSWBackend::set_video_source(LibGens::MdFb *fb)
 void SdlSWBackend::update(bool fb_dirty)
 {
 	// We always have to draw the MdFb in software mode.
+	// TODO: Is this true with SDL2?
 	((void)fb_dirty);
 
-	if (!m_md) {
-		// No source surface.
-		SDL_FillRect(m_screen, nullptr, 0);
-	} else {
+	// Clear the screen before doing anything else.
+	SDL_RenderClear(m_renderer);
+	if (m_fb) {
 		// Source surface is available.
-		SDL_Rect rect;
-		rect.x = 0;
-		rect.y = 0;
-		rect.w = 320;
-		rect.h = 240;
-		SDL_BlitSurface(m_md, &rect, m_screen, &rect);
+		SDL_UpdateTexture(m_texture, nullptr, m_fb->fb32(), m_fb->pxPitch() * sizeof(uint32_t));
+		SDL_RenderCopy(m_renderer, m_texture, nullptr, nullptr);
 	}
 
 	// Update the screen.
-	SDL_Flip(m_screen);
+	SDL_RenderPresent(m_renderer);
 
 	// VBackend is no longer dirty.
 	clearDirty();
