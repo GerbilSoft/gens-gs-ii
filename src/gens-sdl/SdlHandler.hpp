@@ -140,6 +140,7 @@ class SdlHandler {
 		int m_framesRendered;
 
 		// Audio.
+		SDL_AudioDeviceID m_audioDevice;
 		RingBuffer *m_audioBuffer;
 		int m_sampleSize;
 

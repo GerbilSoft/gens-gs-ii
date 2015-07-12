@@ -37,6 +37,7 @@ namespace GensSdl {
 SdlHandler::SdlHandler()
 	: m_vBackend(nullptr)
 	, m_framesRendered(0)
+	, m_audioDevice(0)
 	, m_audioBuffer(nullptr)
 	, m_sampleSize(0)
 	, m_segBuffer(nullptr)
@@ -190,10 +191,10 @@ int SdlHandler::init_audio(void)
 	wanted_spec.samples	= 1024;
 	wanted_spec.callback	= sdl_audio_callback;
 	wanted_spec.userdata	= this;
-	ret = SDL_OpenAudio(&wanted_spec, &actual_spec);
-	if (ret < 0) {
-		fprintf(stderr, "%s: SDL_OpenAudio() failed: %d - %s\n",
-			__func__, ret, SDL_GetError());
+	m_audioDevice = SDL_OpenAudioDevice(nullptr, 0, &wanted_spec, &actual_spec, 0);
+	if (m_audioDevice <= 0) {
+		fprintf(stderr, "%s: SDL_OpenAudioDevice() failed: %d - %s\n",
+			__func__, m_audioDevice, SDL_GetError());
 		return ret;
 	}
 
@@ -229,19 +230,22 @@ int SdlHandler::init_audio(void)
  */
 void SdlHandler::pause_audio(bool pause)
 {
+	if (m_audioDevice <= 0)
+		return;
+
 	if (pause) {
-		if (SDL_GetAudioStatus() == SDL_AUDIO_PLAYING) {
+		if (SDL_GetAudioDeviceStatus(m_audioDevice) == SDL_AUDIO_PLAYING) {
 			// Pause audio.
-			SDL_PauseAudio(1);
+			SDL_PauseAudioDevice(m_audioDevice, 1);
 			// Clear the ringbuffer.
 			m_audioBuffer->clear();
 		}
 	} else {
-		if (SDL_GetAudioStatus() == SDL_AUDIO_PAUSED) {
+		if (SDL_GetAudioDeviceStatus(m_audioDevice) == SDL_AUDIO_PAUSED) {
 			// Clear the ringbuffer.
 			m_audioBuffer->clear();
 			// Unpause audio.
-			SDL_PauseAudio(0);
+			SDL_PauseAudioDevice(m_audioDevice, 0);
 		}
 	}
 }
@@ -251,8 +255,15 @@ void SdlHandler::pause_audio(bool pause)
  */
 void SdlHandler::end_audio(void)
 {
-	SDL_PauseAudio(1);
-	SDL_CloseAudio();
+	if (m_audioDevice <= 0)
+		return;
+
+	// Stop SDL audio.
+	SDL_PauseAudioDevice(m_audioDevice, 1);
+	SDL_CloseAudioDevice(m_audioDevice);
+	m_audioDevice = 0;
+
+	// Free the buffers.
 	free(m_audioBuffer);
 	m_audioBuffer = nullptr;
 	m_sampleSize = 0;
@@ -327,9 +338,11 @@ void SdlHandler::update_audio(void)
 	memset(SoundMgr::ms_SegBufR, 0, m_segBufferSamples * sizeof(SoundMgr::ms_SegBufL[0]));
 
 	// Write to the ringbuffer.
-	SDL_LockAudio();
-	m_audioBuffer->write(reinterpret_cast<uint8_t*>(m_segBuffer), m_segBufferLen);
-	SDL_UnlockAudio();
+	if (m_audioDevice > 0) {
+		SDL_LockAudioDevice(m_audioDevice);
+		m_audioBuffer->write(reinterpret_cast<uint8_t*>(m_segBuffer), m_segBufferLen);
+		SDL_UnlockAudioDevice(m_audioDevice);
+	}
 }
 
 }
