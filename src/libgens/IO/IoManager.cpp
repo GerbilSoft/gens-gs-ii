@@ -39,6 +39,9 @@
 #include "Io4WPS.hpp"
 #include "IoMasterTap.hpp"
 
+// Sega Pico.
+#include "IoPico.hpp"
+
 // C includes. (C++ namespace)
 #include <cassert>
 
@@ -276,6 +279,7 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 	// Create a new device.
 	// TODO: Copy MD-side data from old device using a pseudo-copy constructor...
 	// TODO: Don't create TP/4WP sub-devices if the main devices are missing?
+	// TODO: Factory class?
 	IO::Device *dev = nullptr;
 	switch (ioType) {
 		case IOT_NONE:
@@ -315,6 +319,10 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 			break;
 		case IOT_MASTERTAP:
 			dev = new IO::IoMasterTap();
+			break;
+		// TODO: ColecoVision.
+		case IOT_PICO:
+			dev = new IO::IoPico();
 			break;
 		default:
 			// TODO: Handle Team Player correctly.

@@ -145,6 +145,7 @@ SET(libgens_IO_SRCS
 	IO/IoMegaMouse.cpp
 	IO/IoXE1AP.cpp
 	IO/IoColecoVision.cpp
+	IO/IoPico.cpp
 	# Multitaps
 	IO/IoTeamPlayer.cpp
 	IO/Io4WPM.cpp
@@ -163,6 +164,7 @@ SET(libgens_IO_H
 	IO/IoMegaMouse.hpp
 	IO/IoXE1AP.hpp
 	IO/IoColecoVision.hpp
+	IO/IoPico.hpp
 	# Multitaps
 	IO/IoTeamPlayer.hpp
 	IO/Io4WPM.hpp

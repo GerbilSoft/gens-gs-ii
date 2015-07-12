@@ -198,6 +198,9 @@ class IoManager
 			// ColecoVision.
 			IOT_COLECOVISION,
 
+			// Sega Pico.
+			IOT_PICO,
+
 			// Multitaps.
 			IOT_TEAMPLAYER,
 			IOT_4WP_MASTER,
@@ -338,6 +341,12 @@ class IoManager
 			BTNNAME_CV_KEYPAD_0,
 			BTNNAME_CV_KEYPAD_OCTOTHORPE,
 
+			// Sega Pico buttons.
+			BTNNAME_PICO_BUTTON,	// Red button
+			BTNNAME_PICO_PAGEDOWN,	// Page Down
+			BTNNAME_PICO_PAGEUP,	// Page Up
+			BTNNAME_PICO_PEN,	// Pen button
+
 			BTNNAME_MAX
 		};
 
@@ -407,6 +416,12 @@ class IoManager
 			BTNI_CV_KEYPAD_ASTERISK		= 17,
 			BTNI_CV_KEYPAD_0		= 18,
 			BTNI_CV_KEYPAD_OCTOTHORPE	= 19,
+
+			// Sega Pico buttons.
+			BTNI_PICO_BUTTON	= 4,	// Red button
+			BTNI_PICO_PAGEDOWN	= 5,	// Page Down
+			BTNI_PICO_PAGEUP	= 6,	// Page Up
+			BTNI_PICO_PEN		= 7,	// Pen button
 
 			BTNI_MAX	= 20
 		};
