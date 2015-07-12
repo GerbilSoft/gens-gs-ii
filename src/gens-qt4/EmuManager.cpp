@@ -29,6 +29,12 @@
 // LibGens includes.
 #include "libgens/Util/Timing.hpp"
 #include "libgens/EmuContext/EmuMD.hpp"
+#include "libgens/EmuContext/EmuPico.hpp"
+#include "libgens/Rom.hpp"
+using LibGens::EmuContext;
+using LibGens::EmuMD;
+using LibGens::EmuPico;
+using LibGens::Rom;
 
 // LibGens Sound Manager.
 // Needed for LibGens::SoundMgr::MAX_SAMPLING_RATE.
@@ -323,51 +329,29 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	const QChar chrNewline(L'\n');
 	const QChar chrSpace(L' ');
 
-	// Check the system ID.
-	if (rom->sysId() != LibGens::Rom::MDP_SYSTEM_MD) {
-		// Only MD ROM images are supported.
-		const LibGens::Rom::MDP_SYSTEM_ID errSysId = rom->sysId();
-		delete rom;
-
-		// TODO: Specify GensWindow as parent window.
-		// TODO: Move this out of EmuManager and simply use return codes?
-		// (how would we indicate what system the ROM is for...)
-		QMessageBox::critical(nullptr,
-				//: A ROM image was selected for a system that Gens/GS II does not currently support. (error title)
-				tr("Unsupported System"),
-				//: A ROM image was selected for a system that Gens/GS II does not currently support. (error description)
-				tr("The selected ROM image is designed for a system that"
-				   " is not currently supported by Gens/GS II.") +
-				chrNewline + chrNewline +
-				//: Indicate what system the ROM image is for.
-				tr("Selected ROM's system: %1").arg(SysName_l(errSysId)) +
-				chrNewline + chrNewline +
-				//: List of systems that Gens/GS II currently supports.
-				tr("Supported systems:") + chrNewline +
-				chrBullet + chrSpace + SysName_l(LibGens::Rom::MDP_SYSTEM_MD)
-				);
-
-		return 3;
-	}
-
 	// Check the ROM format.
 	// TODO: Remove this once all ROM formats are supported.
-	if (rom->romFormat() != LibGens::Rom::RFMT_BINARY) {
-		// Only binary ROM images are supported.r
-		LibGens::Rom::RomFormat errRomFormat = rom->romFormat();
-		delete rom;
+	switch (rom->romFormat()) {
+		case Rom::RFMT_BINARY:
+			// ROM format is supported.
+			break;
 
-		// Get the ROM format.
-		QString sRomFormat = RomFormat(errRomFormat);
-		if (sRomFormat.isEmpty()) {
-			//: Unknown ROM format. (EmuManager::RomFormat() returned an empty string.)
-			sRomFormat = tr("(unknown)", "rom-format");
-		}
+		default: {
+			// ROM format is not supported.
+			const Rom::RomFormat errRomFormat = rom->romFormat();
+			delete rom;
 
-		// TODO: Specify GensWindow as parent window.
-		// TODO: Move this out of EmuManager and simply use return codes?
-		// (how would we indicate what format the ROM was in...)
-		QMessageBox::critical(nullptr,
+			// Get the ROM format.
+			QString sRomFormat = RomFormat(errRomFormat);
+			if (sRomFormat.isEmpty()) {
+				//: Unknown ROM format. (EmuManager::RomFormat() returned an empty string.)
+				sRomFormat = tr("(unknown)", "rom-format");
+			}
+
+			// TODO: Specify GensWindow as parent window.
+			// TODO: Move this out of EmuManager and simply use return codes?
+			// (how would we indicate what format the ROM was in...)
+			QMessageBox::critical(nullptr,
 				//: A ROM image was selected in a format that Gens/GS II does not currently support. (error title)
 				tr("Unsupported ROM Format"),
 				//: A ROM image was selected in a format that Gens/GS II does not currently support. (error description)
@@ -380,8 +364,42 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 				tr("Supported ROM formats:") + chrNewline +
 				chrBullet + chrSpace + RomFormat(LibGens::Rom::RFMT_BINARY)
 				);
+			return 3;
+		}
+	}
 
-		return 4;
+	// Check the system ID.
+	switch (rom->sysId()) {
+		case Rom::MDP_SYSTEM_MD:
+		case Rom::MDP_SYSTEM_PICO:
+			// System is supported.
+			break;
+
+		default: {
+			// System is not supported.
+			const LibGens::Rom::MDP_SYSTEM_ID errSysId = rom->sysId();
+			delete rom;
+
+			// TODO: Specify GensWindow as parent window.
+			// TODO: Move this out of EmuManager and simply use return codes?
+			// (how would we indicate what system the ROM is for...)
+			QMessageBox::critical(nullptr,
+				//: A ROM image was selected for a system that Gens/GS II does not currently support. (error title)
+				tr("Unsupported System"),
+				//: A ROM image was selected for a system that Gens/GS II does not currently support. (error description)
+				tr("The selected ROM image is designed for a system that"
+				   " is not currently supported by Gens/GS II.") +
+				chrNewline + chrNewline +
+				//: Indicate what system the ROM image is for.
+				tr("Selected ROM's system: %1").arg(SysName_l(errSysId)) +
+				chrNewline + chrNewline +
+				//: List of systems that Gens/GS II currently supports.
+				tr("Supported systems:") + chrNewline +
+				chrBullet + chrSpace + SysName_l(LibGens::Rom::MDP_SYSTEM_MD) + chrNewline +
+				chrBullet + chrSpace + SysName_l(LibGens::Rom::MDP_SYSTEM_PICO)
+				);
+			return 4;
+		}
 	}
 
 	// Determine the system region code.
@@ -405,28 +423,43 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	// Autofix Checksum.
 	// NOTE: This must be set *before* creating the emulation context!
 	// Otherwise, it won't work until Hard Reset.
-	LibGens::EmuContext::SetAutoFixChecksum(
+	EmuContext::SetAutoFixChecksum(
 			gqt4_cfg->get(QLatin1String("autoFixChecksum")).toBool());
 
-	// Create a new MD emulation context.
+	// Delete any existing emulation context.
 	// FIXME: Delete gqt4_emuContext after VBackend is finished using it. (MEMORY LEAK)
 	m_vBackend->setEmuContext(nullptr);
 	delete gqt4_emuContext;
-	gqt4_emuContext = new LibGens::EmuMD(rom, lg_region);
-	m_vBackend->setEmuContext(gqt4_emuContext);
-	rom->close();	// TODO: Let EmuMD handle this...
 
-	if (!gqt4_emuContext->isRomOpened()) {
+	// Create the emulation context.
+	// TODO: Move the emuContext to GensWindow.
+	// TODO: Factory class that uses rom->sysId()?
+	switch (rom->sysId()) {
+		case Rom::MDP_SYSTEM_MD:
+			gqt4_emuContext = new EmuMD(rom);
+			break;
+		case Rom::MDP_SYSTEM_PICO:
+			gqt4_emuContext = new EmuPico(rom);
+			break;
+		default:
+			gqt4_emuContext = nullptr;
+			break;
+	}
+	rom->close();	// TODO: Let EmuContext handle this...
+
+	if (!gqt4_emuContext || !gqt4_emuContext->isRomOpened()) {
 		// Error loading the ROM image in EmuMD.
 		// TODO: EmuMD error code constants.
 		// TODO: Show an error message.
 		fprintf(stderr, "Error: Initialization of gqt4_emuContext failed. (TODO: Error code.)\n");
-		m_vBackend->setEmuContext(nullptr);
 		delete gqt4_emuContext;
 		gqt4_emuContext = nullptr;
 		delete rom;
 		return 5;
 	}
+
+	// Set the VBackend's emulation context.
+	m_vBackend->setEmuContext(gqt4_emuContext);
 
 	// Save the Rom class pointer as m_rom.
 	m_rom = rom;
