@@ -60,7 +60,7 @@ const IoManagerPrivate::IoDevInfo IoManagerPrivate::ioDevInfo[IoManager::IOT_MAX
 	{'COLV', 20, false},	// IOT_COLECOVISION
 
 	// Sega Pico.
-	{'PICO', 0, true},	// IOT_PICO
+	{'PICO', 8, true},	// IOT_PICO
 
 	// Multitaps.
 	{'TEAM', 0, true},	// IOT_TEAMPLAYER
