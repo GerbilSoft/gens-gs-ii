@@ -129,10 +129,10 @@ GensKey_t SdlHandler::scancodeToGensKey(SDL_Scancode scancode)
 
 		// 0xF0
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 		// 0x100
-		0, KEYV_MODE
+		0, KEYV_MODE, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, KEYV_BACK, KEYV_FORWARD,
 
 		// TODO: Add remaining keys.
 	};
