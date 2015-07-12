@@ -31,6 +31,7 @@ namespace LibGens { namespace IO {
 
 IoPico::IoPico()
 	: Device()
+	, m_page_num(0)
 { }
 
 // Device type.
@@ -72,6 +73,59 @@ void IoPico::update(void)
 	// Pico is input-only, so all 8 bits are input.
 	// Update the latched data to match the device data.
 	this->mdData = this->deviceData;
+
+	// Check for page control buttons.
+	// TODO: If both buttons are pressed, do nothing?
+	if ((this->buttons_prev & 0x20) &&
+	    (!this->buttons & 0x20))
+	{
+		// Page Down was pressed.
+		if (m_page_num < (PICO_MAX_PAGES - 1)) {
+			m_page_num++;
+			// TODO: OSD message.
+		}
+	}
+	if ((this->buttons_prev & 0x40) &&
+	    (!this->buttons & 0x40))
+	{
+		// Page Up was pressed.
+		if (m_page_num > 0) {
+			m_page_num--;
+			// TODO: OSD message.
+		}
+	}
+}
+
+/** Pico-specific functions. **/
+
+/**
+ * Get the current page number.
+ * @return Page number. (0 == title; 1-7 == regular page)
+ */
+uint8_t IoPico::picoCurPageNum(void) const
+{
+	return m_page_num & 7;
+}
+
+/**
+ * Set the current page number.
+ * @param pg Page number. (0 == title; 1-7 == regular page)
+ */
+void IoPico::setPicoCurPageNum(uint8_t pg)
+{
+	if (/*pg >= 0 &&*/ pg <= PICO_MAX_PAGES) {
+		m_page_num = pg;
+	}
+}
+
+/**
+ * Get the current page register value.
+ * @return Page register value.
+ */
+uint8_t IoPico::picoCurPageReg(void) const
+{
+	static const uint8_t pg_reg[8] = {0x00, 0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x7F};
+	return pg_reg[m_page_num & 7];
 }
 
 } }

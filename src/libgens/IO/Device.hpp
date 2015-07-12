@@ -85,6 +85,7 @@ class Device
 			IOPIN_TH	= 0x40	// D6
 		};
 
+	protected:
 		/**
 		 * Controller bitfield.
 		 * Format:
@@ -95,6 +96,9 @@ class Device
 		 */
 		uint32_t buttons;
 
+		// Previous buttons value.
+		uint32_t buttons_prev;
+
 		/**
 		 * Update the tristate cache for data coming from the MD.
 		 * NOTE: "In" == MD to controller; "Out" == controller to MD.
@@ -102,6 +106,16 @@ class Device
 		inline void updateTristateInputCache(void) {
 			// TODO: Apply the device data?
 			mdData_tris = (~ctrl | mdData);
+		}
+
+	public:
+		/**
+		 * Get the buttons bitfield.
+		 * Used by some multitaps.
+		 * @return Buttons bitfield.
+		 */
+		inline uint32_t getButtons(void) const {
+			return this->buttons;
 		}
 
 		/**

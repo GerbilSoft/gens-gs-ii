@@ -49,6 +49,35 @@ class IoPico : public Device
 		 * Runs the internal device update.
 		 */
 		virtual void update(void) override;
+
+		/** Pico-specific functions. **/
+
+		// FIXME: Huckle & Lowly's Busiest Day Ever don't have
+		// page 5; page 6 is the "paint" section. May need to
+		// add an "unusable page" feature.
+		static const uint8_t PICO_MAX_PAGES = 8;
+
+		/**
+		 * Get the current page number.
+		 * @return Page number. (0 == title; 1-7 == regular page)
+		 */
+		uint8_t picoCurPageNum(void) const;
+
+		/**
+		 * Set the current page number.
+		 * @param pg Page number. (0 == title; 1-7 == regular page)
+		 */
+		void setPicoCurPageNum(uint8_t pg);
+
+		/**
+		 * Get the current page register value.
+		 * @return Page register value.
+		 */
+		uint8_t picoCurPageReg(void) const;
+
+	private:
+		// Page number.
+		uint8_t m_page_num;
 };
 
 } }

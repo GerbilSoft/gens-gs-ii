@@ -59,6 +59,7 @@ void Device::reset(void)
 void Device::resetDev(void) {
 	counter = 0;
 	buttons = ~0;
+	buttons_prev = ~0;
 	deviceData = 0xFF;
 	updateTristateInputCache();
 }
@@ -78,6 +79,7 @@ IoManager::IoType_t Device::type(void) const
 void Device::update(uint32_t buttons)
 {
 	// Save the buttons and update the device.
+	this->buttons_prev = this->buttons;
 	this->buttons = buttons;
 	update();
 }

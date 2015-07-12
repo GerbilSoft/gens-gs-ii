@@ -779,7 +779,7 @@ uint8_t IoManager::picoReadButtons(void) const
 		 * - Create new controller based on Io3BTN that handles this?
 		 */
 		
-		ret &= (dev->buttons | 0x60);
+		ret &= (dev->getButtons() | 0x60);
 	}
 	return ret;
 }
