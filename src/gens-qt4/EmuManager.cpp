@@ -171,31 +171,42 @@ EmuManager::~EmuManager()
 int EmuManager::openRom(void)
 {
 	// TODO: Proper compressed file support.
+#ifdef HAVE_ZLIB
 	#define ZLIB_EXT " *.zip *.zsg *.gz"
+#else
+	#define ZLIB_EXT ""
+#endif
+#ifdef HAVE_LZMA
 	#define LZMA_EXT " *.7z"
+#else
+	#define LZMA_EXT ""
+#endif
 	#define RAR_EXT " *.rar"
 
 	// TODO: Set the default filename.
 	QString filename = QFileDialog::getOpenFileName(nullptr,
 			tr("Open ROM"),		// Dialog title
 			QString(),		// Default filename.
+			tr("All supported ROM images") +
+			QLatin1String(
+				" (*.bin *.gen *.md *.smd *.pco"
+				ZLIB_EXT LZMA_EXT RAR_EXT
+				");;") +
 			tr("Sega Genesis ROM images") +
 			QLatin1String(
 				" (*.bin *.gen *.md *.smd"
-#ifdef HAVE_ZLIB
-				ZLIB_EXT
-#endif /* HAVE_ZLIB */
-#ifdef HAVE_LZMA
-				LZMA_EXT
-#endif /* HAVE_LZMA */
-				RAR_EXT
-				");;"
-				) +
+				ZLIB_EXT LZMA_EXT RAR_EXT
+				");;") +
+			tr("Sega Pico ROM images") +
+			QLatin1String(
+				" (*.bin *.pco"
+				ZLIB_EXT LZMA_EXT RAR_EXT
+				");;") +
 #if 0
 			tr("Sega Genesis / 32X ROMs; Sega CD disc images") +
 			"(*.bin *.smd *.gen *.32x *.cue *.iso *.raw" ZLIB_EXT LZMA_EXT RAR_EXT ");;" +
 #endif
-			tr("All Files") + QLatin1String(" (*.*)"));
+			tr("All files") + QLatin1String(" (*.*)"));
 
 	if (filename.isEmpty())
 		return -1;
