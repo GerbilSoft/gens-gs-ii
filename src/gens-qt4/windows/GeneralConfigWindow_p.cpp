@@ -117,8 +117,16 @@ uint16_t GeneralConfigWindowPrivate::regionCodeOrder(void) const
 void GeneralConfigWindowPrivate::selectRomFile(const QString &rom_desc, QLineEdit *txtRomFile)
 {
 	// TODO: Proper compressed file support.
+#ifdef HAVE_ZLIB
 	#define ZLIB_EXT " *.zip *.zsg *.gz"
+#else
+	#define ZLIB_EXT ""
+#endif
+#ifdef HAVE_LZMA
 	#define LZMA_EXT " *.7z"
+#else
+	#define LZMA_EXT ""
+#endif
 	#define RAR_EXT " *.rar"
 
 	// Create the dialog title.
@@ -129,18 +137,12 @@ void GeneralConfigWindowPrivate::selectRomFile(const QString &rom_desc, QLineEdi
 	Q_Q(GeneralConfigWindow);
 	QString filename = QFileDialog::getOpenFileName(q, title,
 			txtRomFile->text(),	// Default filename.
-			GeneralConfigWindow::tr("ROM Images") +
+			GeneralConfigWindow::tr("ROM images") +
 			QLatin1String(
 				" (*.bin *.gen *.md *.smd"
-#ifdef HAVE_ZLIB
-				ZLIB_EXT
-#endif /* HAVE_ZLIB */
-#ifdef HAVE_LZMA
-				LZMA_EXT
-#endif /* HAVE_LZMA */
-				RAR_EXT
+				ZLIB_EXT LZMA_EXT RAR_EXT
 				");;") +
-			GeneralConfigWindow::tr("All Files") + QLatin1String(" (*.*)"));
+			GeneralConfigWindow::tr("All files") + QLatin1String(" (*.*)"));
 
 	if (filename.isEmpty())
 		return;
