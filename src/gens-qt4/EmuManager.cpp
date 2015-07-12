@@ -184,6 +184,8 @@ int EmuManager::openRom(void)
 	#define RAR_EXT " *.rar"
 
 	// TODO: Set the default filename.
+	// TODO: Check what filter is selected and use it to
+	// override system autodetection.
 	QString filename = QFileDialog::getOpenFileName(nullptr,
 			tr("Open ROM"),		// Dialog title
 			QString(),		// Default filename.
