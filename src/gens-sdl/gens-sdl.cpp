@@ -228,6 +228,19 @@ static void processSdlEvent(const SDL_Event &event) {
 					}
 					break;
 
+				case SDLK_RETURN:
+					// Check for Alt+Enter.
+					if ((event.key.keysym.mod & KMOD_ALT) &&
+					    !(event.key.keysym.mod & ~KMOD_ALT))
+					{
+						// Alt+Enter. Toggle fullscreen.
+						sdlHandler->toggle_fullscreen();
+					} else {
+						// Not Alt+Enter.
+						// Send the key to the KeyManager.
+						keyManager->keyDown(SdlHandler::scancodeToGensKey(event.key.keysym.scancode));
+					}
+					break;
 				default:
 					// Send the key to the KeyManager.
 					keyManager->keyDown(SdlHandler::scancodeToGensKey(event.key.keysym.scancode));

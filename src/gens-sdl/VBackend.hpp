@@ -71,6 +71,11 @@ class VBackend {
 		virtual void resize(int width, int height) = 0;
 
 		/**
+		 * Toggle fullscreen.
+		 */
+		virtual void toggle_fullscreen(void) = 0;
+
+		/**
 		 * Is the VBackend dirty?
 		 * This is true if any of the properties have changed
 		 * and the image hasn't been updated.
@@ -97,6 +102,12 @@ class VBackend {
 	private:
 		// Dirty flag.
 		bool m_dirty;
+
+	protected:
+		// Is fullscreen?
+		// TODO: Is there a way to check if SDL is fullscreen
+		// without maintaining the state here?
+		bool m_fullscreen;
 
 	protected:
 		// MdFb object.

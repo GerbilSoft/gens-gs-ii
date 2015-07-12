@@ -154,6 +154,16 @@ void SdlHandler::resize_video(int width, int height)
 }
 
 /**
+ * Toggle fullscreen.
+ */
+void SdlHandler::toggle_fullscreen(void)
+{
+	if (m_vBackend) {
+		m_vBackend->toggle_fullscreen();
+	}
+}
+
+/**
  * Get the Video Backend.
  * @return Video Backend.
  */

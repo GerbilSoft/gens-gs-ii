@@ -96,6 +96,11 @@ class SdlHandler {
 		void resize_video(int width, int height);
 
 		/**
+		 * Toggle fullscreen.
+		 */
+		void toggle_fullscreen(void);
+		
+		/**
 		 * Get the Video Backend.
 		 * @return Video Backend.
 		 */

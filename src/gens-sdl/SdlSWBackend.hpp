@@ -75,6 +75,11 @@ class SdlSWBackend : public VBackend {
 		 */
 		virtual void resize(int width, int height) final;
 
+		/**
+		 * Toggle fullscreen.
+		 */
+		virtual void toggle_fullscreen(void) final;
+
 	private:
 		// Screen context.
 		SDL_Window *m_screen;

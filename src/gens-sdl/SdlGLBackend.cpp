@@ -263,6 +263,21 @@ void SdlGLBackend::resize(int width, int height)
 	glLoadIdentity();
 }
 
+/**
+ * Toggle fullscreen.
+ */
+void SdlGLBackend::toggle_fullscreen(void)
+{
+	m_fullscreen = !m_fullscreen;
+	if (m_fullscreen) {
+		// Switched to windowed fullscreen.
+		SDL_SetWindowFullscreen(m_screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
+	} else {
+		// Switch to windowed mode.
+		SDL_SetWindowFullscreen(m_screen, 0);
+	}
+}
+
 /** OpenGL functions. **/
 
 /**

@@ -130,11 +130,27 @@ void SdlSWBackend::update(bool fb_dirty)
  */
 void SdlSWBackend::resize(int width, int height)
 {
-	// Can't resize this...
+	// SDL 2.0 automatically handles resize for standard rendering.
+	// TODO: Aspect ratio constraints?
 	((void)width);
 	((void)height);
 	assert(false);
 	return;
+}
+
+/**
+ * Toggle fullscreen.
+ */
+void SdlSWBackend::toggle_fullscreen(void)
+{
+	m_fullscreen = !m_fullscreen;
+	if (m_fullscreen) {
+		// Switched to windowed fullscreen.
+		SDL_SetWindowFullscreen(m_screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
+	} else {
+		// Switch to windowed mode.
+		SDL_SetWindowFullscreen(m_screen, 0);
+	}
 }
 
 }

@@ -26,6 +26,7 @@ namespace GensSdl {
 
 VBackend::VBackend()
 	: m_dirty(true)
+	, m_fullscreen(false)
 	, m_fb(nullptr)
 	, m_stretchMode(STRETCH_H)
 { }
