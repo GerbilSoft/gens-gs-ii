@@ -500,7 +500,7 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Pico_IO(uint32_t address)
 			break;
 		case 0x0D:
 			// Page register.
-			ret = ioManager->picoGetPageRegister();
+			ret = ioManager->picoCurPageReg();
 			break;
 		case 0x10: case 0x11:
 			// ADPCM data register. (word)
@@ -841,7 +841,7 @@ inline uint16_t M68K_Mem::M68K_Read_Word_Pico_IO(uint32_t address)
 			break;
 		case 0x0C:
 			// Page register.
-			ret = 0xFF00 | ioManager->picoGetPageRegister();
+			ret = 0xFF00 | ioManager->picoCurPageReg();
 			break;
 		case 0x10:
 			// ADPCM data register. (word)

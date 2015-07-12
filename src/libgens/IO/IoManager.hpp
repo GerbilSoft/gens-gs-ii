@@ -110,10 +110,9 @@ class IoManager
 		// page 5; page 6 is the "paint" section. May need to
 		// add an "unusable page" feature.
 		static const uint8_t PICO_MAX_PAGES = 8;
-		uint8_t picoNextPage(void);
-		uint8_t picoPrevPage(void);
-		uint8_t picoCurPage(void) const;
-		uint8_t picoGetPageRegister(void) const;
+		uint8_t picoCurPageNum(void) const;
+		int setPicoCurPageNum(uint8_t pg);
+		uint8_t picoCurPageReg(void) const;
 
 		/**
 		 * Update an I/O device.

@@ -785,7 +785,7 @@ uint8_t IoManager::picoReadButtons(void) const
  * [Pico] Get the current page number.
  * @return 0 for title page; 1-7 for regular pages.
  */
-uint8_t IoManager::picoCurPage(void) const
+uint8_t IoManager::picoCurPageNum(void) const
 {
 	uint8_t ret = 0;
 	const IO::Device *dev = d->ioDevices[VIRTPORT_1];
@@ -797,10 +797,27 @@ uint8_t IoManager::picoCurPage(void) const
 }
 
 /**
+ * [Pico] Set the current page number.
+ * @param pg 0 for title page; 1-7 for regular pages.
+ * @return 0 on success; non-zero on error. (e.g. not emulating Pico)
+ * TODO: Error code definitions?
+ */
+int IoManager::setPicoCurPageNum(uint8_t pg)
+{
+	IO::Device *dev = d->ioDevices[VIRTPORT_1];
+	if (dev && dev->type() == IOT_PICO) {
+		IO::IoPico *pico = (IO::IoPico*)dev;
+		pico->setPicoCurPageNum(pg);
+		return 0;
+	}
+	return -1;
+}
+
+/**
  * [Pico] Get the page register value.
  * @return Page number as represented by the page register.
  */
-uint8_t IoManager::picoGetPageRegister(void) const
+uint8_t IoManager::picoCurPageReg(void) const
 {
 	uint8_t ret = 0;
 	const IO::Device *dev = d->ioDevices[VIRTPORT_1];
