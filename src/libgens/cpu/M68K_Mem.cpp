@@ -1142,7 +1142,31 @@ inline void M68K_Mem::M68K_Write_Byte_VDP(uint32_t address, uint8_t data)
  */
 inline void M68K_Mem::M68K_Write_Byte_Pico_IO(uint32_t address, uint8_t data)
 {
-	// TODO
+	// I/O area is $800000-$80001F.
+	// TODO: Check for mirroring?
+	if (address > 0x80001F) {
+		// Invalid area.
+		return;
+	}
+
+	switch (address & 0x1E) {
+		case 0x10:
+			// ADPCM data register. (word)
+			// TODO
+			break;
+		case 0x12:
+			// ADPCM control register. (word)
+			// TODO
+			break;
+		case 0x18: case 0x1A: case 0x1C: case 0x1E:
+			// TMSS register.
+			// Odd bytes here contain "SEGA".
+			// NOTE: TMSS ROM is not present!
+			tmss_reg.a14000.b[((address >> 1) & 3) ^ U32DATA_U8_INVERT] = data;
+			break;
+		default:
+			break;
+	}
 }
 
 
@@ -1422,7 +1446,31 @@ inline void M68K_Mem::M68K_Write_Word_VDP(uint32_t address, uint16_t data)
  */
 inline void M68K_Mem::M68K_Write_Word_Pico_IO(uint32_t address, uint16_t data)
 {
-	// TODO
+	// I/O area is $800000-$80001F.
+	// TODO: Check for mirroring?
+	if (address > 0x80001F) {
+		// Invalid area.
+		return;
+	}
+
+	switch (address & 0x1E) {
+		case 0x10:
+			// ADPCM data register. (word)
+			// TODO
+			break;
+		case 0x12:
+			// ADPCM control register. (word)
+			// TODO
+			break;
+		case 0x18: case 0x1A: case 0x1C: case 0x1E:
+			// TMSS register.
+			// Odd bytes here contain "SEGA".
+			// NOTE: TMSS ROM is not present!
+			tmss_reg.a14000.b[((address >> 1) & 3) ^ U32DATA_U8_INVERT] = (data & 0xFF);
+			break;
+		default:
+			break;
+	}
 }
 
 
