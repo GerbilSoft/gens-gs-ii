@@ -71,7 +71,6 @@ const IoManagerPrivate::IoDevInfo IoManagerPrivate::ioDevInfo[IoManager::IOT_MAX
 
 IoManagerPrivate::IoManagerPrivate(IoManager *q)
 	: q(q)
-	, pico_page(0)
 {
 	// Clear the I/O devices array.
 	memset(ioDevices, 0, sizeof(ioDevices));

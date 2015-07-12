@@ -90,14 +90,19 @@ static Rom *rom = nullptr;
 static EmuContext *context = nullptr;
 static const char *rom_filename = nullptr;
 static bool isPico = false;
-static bool picoWasPrevPressed = false;
-static bool picoWasNextPressed = false;
 
 static KeyManager *keyManager = nullptr;
-static const GensKey_t keyMap[] = {
+// MD 6-button keyMap.
+static const GensKey_t keyMap_md[] = {
 	KEYV_UP, KEYV_DOWN, KEYV_LEFT, KEYV_RIGHT,	// UDLR
 	KEYV_s, KEYV_d, KEYV_a, KEYV_RETURN,		// BCAS
 	KEYV_e, KEYV_w, KEYV_q, KEYV_RSHIFT		// ZYXM
+};
+// Sega Pico keyMap.
+static const GensKey_t keyMap_pico[] = {
+	KEYV_UP, KEYV_DOWN, KEYV_LEFT, KEYV_RIGHT,		// UDLR
+	KEYV_SPACE, KEYV_PAGEDOWN, KEYV_PAGEUP, KEYV_RETURN	// BCAS
+	, 0, 0, 0, 0
 };
 
 namespace GensSdl {
@@ -433,9 +438,17 @@ int main(int argc, char *argv[])
 
 	// Initialize the I/O Manager with a default key layout.
 	keyManager = new KeyManager();
-	keyManager->setIoType(IoManager::VIRTPORT_1, IoManager::IOT_6BTN);
-	keyManager->setKeyMap(IoManager::VIRTPORT_1, keyMap, ARRAY_SIZE(keyMap));
-	keyManager->setIoType(IoManager::VIRTPORT_2, IoManager::IOT_NONE);
+	if (!isPico) {
+		// Standard Mega Drive controllers.
+		keyManager->setIoType(IoManager::VIRTPORT_1, IoManager::IOT_6BTN);
+		keyManager->setKeyMap(IoManager::VIRTPORT_1, keyMap_md, ARRAY_SIZE(keyMap_md));
+		keyManager->setIoType(IoManager::VIRTPORT_2, IoManager::IOT_NONE);
+	} else {
+		// Sega Pico controller.
+		keyManager->setIoType(IoManager::VIRTPORT_1, IoManager::IOT_PICO);
+		keyManager->setKeyMap(IoManager::VIRTPORT_1, keyMap_pico, ARRAY_SIZE(keyMap_pico));
+		keyManager->setIoType(IoManager::VIRTPORT_2, IoManager::IOT_NONE);
+	}
 
 	while (GensSdl::running) {
 		SDL_Event event;
@@ -555,29 +568,6 @@ int main(int argc, char *argv[])
 
 		// Update the I/O manager.
 		keyManager->updateIoManager(context->m_ioManager);
-
-		// Check for Pico page control buttons.
-		// TODO: Create an IoPico controller instead of reusing Io3BTN?
-		if (isPico) {
-			// FIXME: We can't easily access the button bitfields.
-			// Check the keystate manually.
-			bool picoPrevPressed = keyManager->isKeyPressed(keyMap[6]);
-			if (!picoWasPrevPressed && picoPrevPressed) {
-				// Previous page.
-				uint8_t pg = context->m_ioManager->picoPrevPage();
-				printf("Pico: Page set to %u.\n", pg);
-			}
-
-			bool picoNextPressed = keyManager->isKeyPressed(keyMap[5]);
-			if (!picoWasNextPressed && picoNextPressed) {
-				// Next page.
-				uint8_t pg = context->m_ioManager->picoNextPage();
-				printf("Pico: Page set to %u.\n", pg);
-			}
-
-			picoWasPrevPressed = picoPrevPressed;
-			picoWasNextPressed = picoNextPressed;
-		}
 	}
 
 	// Pause audio and wait 50ms for SDL to catch up.

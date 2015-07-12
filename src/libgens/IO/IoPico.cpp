@@ -34,6 +34,19 @@ IoPico::IoPico()
 	, m_page_num(0)
 { }
 
+/**
+ * Reset Device data that only affects the device
+ * and not the emulation-side registers.
+ *
+ * Should be overridden by subclasses that have
+ * device-specific data.
+ */
+void IoPico::resetDev(void)
+{
+	Device::resetDev();	// TODO: typedef super?
+	m_page_num = 0;		// Reset to title page.
+}
+
 // Device type.
 // Should be overridden by subclasses.
 IoManager::IoType_t IoPico::type(void) const
@@ -77,7 +90,7 @@ void IoPico::update(void)
 	// Check for page control buttons.
 	// TODO: If both buttons are pressed, do nothing?
 	if ((this->buttons_prev & 0x20) &&
-	    (!this->buttons & 0x20))
+	    !(this->buttons & 0x20))
 	{
 		// Page Down was pressed.
 		if (m_page_num < (PICO_MAX_PAGES - 1)) {
@@ -86,7 +99,7 @@ void IoPico::update(void)
 		}
 	}
 	if ((this->buttons_prev & 0x40) &&
-	    (!this->buttons & 0x40))
+	    !(this->buttons & 0x40))
 	{
 		// Page Up was pressed.
 		if (m_page_num > 0) {

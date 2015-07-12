@@ -136,16 +136,6 @@ class IoManagerPrivate
 		};
 
 		static const IoDevInfo ioDevInfo[IoManager::IOT_MAX];
-
-		/**
-		 * Sega Pico page register.
-		 * Valid page values:
-		 * [00, 01, 03, 07, 0F, 1F, 3F]
-		 * - 00 = book closed
-		 * - Opening a page causes another sensor to be uncovered.
-		 * - 6 pages is the maximum.
-		 */
-		uint8_t pico_page;
 };
 
 }

@@ -75,9 +75,6 @@ void IoManager::reset(void)
 			dev->reset();
 		}
 	}
-
-	// Pico page register.
-	d->pico_page = 0;
 }
 
 /**
@@ -785,36 +782,18 @@ uint8_t IoManager::picoReadButtons(void) const
 }
 
 /**
- * [Pico] Go to the next page.
- * @return New page number: 0 for title page; 1-5 for regular pages.
- */
-uint8_t IoManager::picoNextPage(void)
-{
-	if (d->pico_page < (PICO_MAX_PAGES - 1)) {
-		d->pico_page++;
-	}
-	return d->pico_page;
-}
-
-/**
- * [Pico] Go to the previous page.
- * @return New page number: 0 for title page; 1-5 for regular pages.
- */
-uint8_t IoManager::picoPrevPage(void)
-{
-	if (d->pico_page > 0) {
-		d->pico_page--;
-	}
-	return d->pico_page;
-}
-
-/**
  * [Pico] Get the current page number.
- * @return 0 for title page; 1-5 for regular pages.
+ * @return 0 for title page; 1-7 for regular pages.
  */
 uint8_t IoManager::picoCurPage(void) const
 {
-	return d->pico_page;
+	uint8_t ret = 0;
+	const IO::Device *dev = d->ioDevices[VIRTPORT_1];
+	if (dev && dev->type() == IOT_PICO) {
+		const IO::IoPico *pico = (const IO::IoPico*)dev;
+		ret = pico->picoCurPageNum();
+	}
+	return ret;
 }
 
 /**
@@ -823,8 +802,13 @@ uint8_t IoManager::picoCurPage(void) const
  */
 uint8_t IoManager::picoGetPageRegister(void) const
 {
-	static const uint8_t pg_reg[8] = {0x00, 0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x7F};
-	return pg_reg[d->pico_page & 0x7];
+	uint8_t ret = 0;
+	const IO::Device *dev = d->ioDevices[VIRTPORT_1];
+	if (dev && dev->type() == IOT_PICO) {
+		const IO::IoPico *pico = (const IO::IoPico*)dev;
+		ret = pico->picoCurPageReg();
+	}
+	return ret;
 }
 
 /**
