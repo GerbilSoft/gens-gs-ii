@@ -85,12 +85,10 @@ static EmuMD *context = nullptr;
 static const char *rom_filename = nullptr;
 
 static KeyManager *keyManager = nullptr;
-// NOTE: Using SDL keycodes here.
-// TODO: Proper SDL to GensKey conversion.
 static const GensKey_t keyMap[] = {
-	SDLK_UP, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT,	// UDLR
-	SDLK_s, SDLK_d, SDLK_a, SDLK_RETURN,		// BCAS
-	SDLK_e, SDLK_w, SDLK_q, SDLK_RSHIFT		// ZYXM
+	KEYV_UP, KEYV_DOWN, KEYV_LEFT, KEYV_RIGHT,	// UDLR
+	KEYV_s, KEYV_d, KEYV_a, KEYV_RETURN,		// BCAS
+	KEYV_e, KEYV_w, KEYV_q, KEYV_RSHIFT		// ZYXM
 };
 
 namespace GensSdl {
@@ -232,14 +230,14 @@ static void processSdlEvent(const SDL_Event &event) {
 
 				default:
 					// Send the key to the KeyManager.
-					keyManager->keyDown(event.key.keysym.sym);
+					keyManager->keyDown(SdlHandler::scancodeToGensKey(event.key.keysym.scancode));
 					break;
 			}
 			break;
 
 		case SDL_KEYUP:
 			// SDL keycodes nearly match GensKey.
-			keyManager->keyUp(event.key.keysym.sym);
+			keyManager->keyUp(SdlHandler::scancodeToGensKey(event.key.keysym.scancode));
 			break;
 
 		case SDL_WINDOWEVENT_RESIZED:

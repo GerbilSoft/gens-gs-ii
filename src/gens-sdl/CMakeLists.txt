@@ -29,6 +29,7 @@ INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
 SET(gens-sdl_SRCS
 	gens-sdl.cpp
 	SdlHandler.cpp
+	SdlHandler_scancode.cpp
 	RingBuffer.cpp
 	Config.cpp
 	VBackend.cpp

@@ -27,6 +27,7 @@
 // SDL
 #include <SDL.h>
 
+#include "libgenskeys/GensKey_t.h"
 namespace LibGens {
 	class MdFb;
 }
@@ -122,6 +123,13 @@ class SdlHandler {
 		 * Update SDL audio using SoundMgr.
 		 */
 		void update_audio(void);
+
+		/**
+		 * Convert an SDL2 scancode to a Gens keycode.
+		 * @param scancode SDL2 scancode.
+		 * @return Gens keycode, or 0 if unsupported.
+		 */
+		static GensKey_t scancodeToGensKey(SDL_Scancode scancode);
 
 	private:
 		/**
