@@ -1,3 +1,9 @@
+# Source:
+# - http://www.willusher.io/sdl2%20tutorials/2014/03/06/lesson-0-cmake/
+# - https://github.com/Twinklebear/TwinklebearDev-Lessons/blob/master/cmake/FindSDL2.cmake
+#   - https://github.com/Twinklebear/TwinklebearDev-Lessons/raw/master/cmake/FindSDL2.cmake
+#   - commit: 541dfda968ae94f260dc939a8fa54b548ff776de
+
 # Locate SDL2 library
 # This module defines
 # SDL2_LIBRARY, the name of the library to link against
