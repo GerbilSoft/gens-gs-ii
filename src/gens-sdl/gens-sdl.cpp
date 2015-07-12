@@ -136,6 +136,15 @@ static void gsdl_osd(OsdType osd_type, int param)
 		case OSD_EEPROM_AUTOSAVE:
 			printf("EEPROM autosaved. (%d bytes)\n", param);
 			break;
+		case OSD_PICO_PAGESET:
+			printf("Pico: Page set to page %d.\n", param);
+			break;
+		case OSD_PICO_PAGEUP:
+			printf("Pico: PgUp to page %d.\n", param);
+			break;
+		case OSD_PICO_PAGEDOWN:
+			printf("Pico: PgDn to page %d.\n", param);
+			break;
 		default:
 			// Unknown OSD type.
 			break;

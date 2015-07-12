@@ -22,9 +22,9 @@
  ***************************************************************************/
 
 #include "IoPico.hpp"
+#include "lg_osd.h"
 
 // TODO: Add support for:
-// - PageUp/PageDown: Read the page control register.
 // - Pen position.
 
 namespace LibGens { namespace IO {
@@ -95,8 +95,7 @@ void IoPico::update(void)
 		// Page Down was pressed.
 		if (m_page_num < (PICO_MAX_PAGES - 1)) {
 			m_page_num++;
-			// TODO: OSD message.
-			printf("IoPico: PgDn -> page %d\n", m_page_num);
+			lg_osd(OSD_PICO_PAGEDOWN, m_page_num);
 		}
 	}
 	if ((this->buttons_prev & 0x40) &&
@@ -105,8 +104,7 @@ void IoPico::update(void)
 		// Page Up was pressed.
 		if (m_page_num > 0) {
 			m_page_num--;
-			// TODO: OSD message.
-			printf("IoPico: PgUp -> page %d\n", m_page_num);
+			lg_osd(OSD_PICO_PAGEUP, m_page_num);
 		}
 	}
 }
@@ -128,8 +126,12 @@ uint8_t IoPico::picoCurPageNum(void) const
  */
 void IoPico::setPicoCurPageNum(uint8_t pg)
 {
+	if (m_page_num == pg)
+		return;
+
 	if (/*pg >= 0 &&*/ pg <= PICO_MAX_PAGES) {
 		m_page_num = pg;
+		lg_osd(OSD_PICO_PAGESET, m_page_num);
 	}
 }
 
