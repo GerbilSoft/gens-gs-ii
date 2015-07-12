@@ -96,6 +96,7 @@ void IoPico::update(void)
 		if (m_page_num < (PICO_MAX_PAGES - 1)) {
 			m_page_num++;
 			// TODO: OSD message.
+			printf("IoPico: PgDn -> page %d\n", m_page_num);
 		}
 	}
 	if ((this->buttons_prev & 0x40) &&
@@ -105,6 +106,7 @@ void IoPico::update(void)
 		if (m_page_num > 0) {
 			m_page_num--;
 			// TODO: OSD message.
+			printf("IoPico: PgUp -> page %d\n", m_page_num);
 		}
 	}
 }
