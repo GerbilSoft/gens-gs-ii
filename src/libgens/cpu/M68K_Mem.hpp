@@ -82,18 +82,20 @@ class M68K_Mem
 		#define Z80_STATE_ENABLED	(1 << 0)
 		#define Z80_STATE_BUSREQ	(1 << 1)
 		#define Z80_STATE_RESET		(1 << 2)
-		
+
 		static unsigned int Z80_State;
 		static int Last_BUS_REQ_Cnt;
 		static int Last_BUS_REQ_St;
 		static int Bank_M68K; // NOTE: This is for Sega CD, not Z80!
 		static int Fake_Fetch;
-		
+
+		// Cycles per line.
+		// TODO: Replace with 3420 machine cycles per line.
 		static int CPL_M68K;
 		static int CPL_Z80;
 		static int Cycles_M68K;
 		static int Cycles_Z80;
-		
+
 		/** System initialization functions. **/
 	public:
 		static void UpdateTmssMapping(void);	// FIXME: Needs to be private?
@@ -119,8 +121,8 @@ class M68K_Mem
 
 		/** Bus acquisition timing. **/
 		static const int CYCLE_FOR_TAKE_Z80_BUS_GENESIS = 16;
-		
 
+		// Main 68000 bank IDs.
 		enum M68KBank_t {
 			// ROM cartridge.
 			M68K_BANK_CARTRIDGE = 0,	// M68K: $000000 - $9FFFFF
@@ -167,22 +169,26 @@ class M68K_Mem
 		static uint8_t M68K_Read_Byte_Misc(uint32_t address);
 		static uint8_t M68K_Read_Byte_VDP(uint32_t address);
 		static uint8_t M68K_Read_Byte_TMSS_Rom(uint32_t address);
+		static uint8_t M68K_Read_Byte_Pico_IO(uint32_t address);
 
 		/** Read Word functions. **/
 		static uint16_t M68K_Read_Word_Ram(uint32_t address);
 		static uint16_t M68K_Read_Word_Misc(uint32_t address);
 		static uint16_t M68K_Read_Word_VDP(uint32_t address);
 		static uint16_t M68K_Read_Word_TMSS_Rom(uint32_t address);
+		static uint16_t M68K_Read_Word_Pico_IO(uint32_t address);
 
 		/** Write Byte functions. **/
 		static void M68K_Write_Byte_Ram(uint32_t address, uint8_t data);
 		static void M68K_Write_Byte_Misc(uint32_t address, uint8_t data);
 		static void M68K_Write_Byte_VDP(uint32_t address, uint8_t data);
+		static void M68K_Write_Byte_Pico_IO(uint32_t address, uint8_t data);
 
 		/** Write Word functions. **/
 		static void M68K_Write_Word_Ram(uint32_t address, uint16_t data);
 		static void M68K_Write_Word_Misc(uint32_t address, uint16_t data);
 		static void M68K_Write_Word_VDP(uint32_t address, uint16_t data);
+		static void M68K_Write_Word_Pico_IO(uint32_t address, uint16_t data);
 };
 
 }

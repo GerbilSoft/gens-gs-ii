@@ -89,6 +89,7 @@ static SdlHandler *sdlHandler = nullptr;
 static Rom *rom = nullptr;
 static EmuContext *context = nullptr;
 static const char *rom_filename = nullptr;
+static bool isPico = false;
 
 static KeyManager *keyManager = nullptr;
 static const GensKey_t keyMap[] = {
@@ -247,6 +248,30 @@ static void processSdlEvent(const SDL_Event &event) {
 						keyManager->keyDown(SdlHandler::scancodeToGensKey(event.key.keysym.scancode));
 					}
 					break;
+
+				// Pico page controls.
+				// TODO: Move to KeyManager?
+				case SDLK_PAGEUP:
+					// Previous page.
+					if (isPico) {
+						uint8_t pg = context->m_ioManager->picoPrevPage();
+						printf("Pico: Page set to %u.\n", pg);
+					} else {
+						// Not Pico.
+						keyManager->keyDown(SdlHandler::scancodeToGensKey(event.key.keysym.scancode));
+					}
+					break;
+				case SDLK_PAGEDOWN:
+					// Next page.
+					if (isPico) {
+						uint8_t pg = context->m_ioManager->picoNextPage();
+						printf("Pico: Page set to %u.\n", pg);
+					} else {
+						// Not Pico.
+						keyManager->keyDown(SdlHandler::scancodeToGensKey(event.key.keysym.scancode));
+					}
+					break;
+
 				default:
 					// Send the key to the KeyManager.
 					keyManager->keyDown(SdlHandler::scancodeToGensKey(event.key.keysym.scancode));
@@ -350,8 +375,13 @@ int main(int argc, char *argv[])
 	// TODO: Split into a separate function?
 	switch (rom->sysId()) {
 		case Rom::MDP_SYSTEM_MD:
+			// System is supported.
+			isPico = false;
+			break;
+
 		case Rom::MDP_SYSTEM_PICO:
 			// System is supported.
+			isPico = true;
 			break;
 
 		default:

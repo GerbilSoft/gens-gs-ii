@@ -72,6 +72,9 @@ void IoManager::reset(void)
 			dev->reset();
 		}
 	}
+
+	// Pico page register.
+	d->pico_page = 0;
 }
 
 /**
@@ -738,6 +741,70 @@ uint8_t IoManager::readStartGG(void) const
 
 	// Start is not pressed.
 	return 0xFF;
+}
+
+/** Pico-side I/O functions. **/
+
+/**
+ * Read Sega Pico buttons.
+ * This maps to Controller 1's button field.
+ * Note that Controller 1 must be 2BTN, 3BTN, or 6BTN to work correctly.
+ * Button 5 is adjusted to match the bitfield.
+ */
+uint8_t IoManager::picoReadButtons(void) const
+{
+	uint8_t ret = 0xFF;
+	const IO::Device *dev = d->ioDevices[VIRTPORT_1];
+	if (dev) {
+		// First 5 buttons: UDLR, button
+		ret &= (dev->buttons | 0xE0);
+		// 6th button: Pen (moves to bit 7)
+		ret &= ((dev->buttons << 2) | 0x7F);
+	}
+	return ret;
+}
+
+/**
+ * [Pico] Go to the next page.
+ * @return New page number: 0 for title page; 1-5 for regular pages.
+ */
+uint8_t IoManager::picoNextPage(void)
+{
+	if (d->pico_page < (PICO_MAX_PAGES - 1)) {
+		d->pico_page++;
+	}
+	return d->pico_page;
+}
+
+/**
+ * [Pico] Go to the previous page.
+ * @return New page number: 0 for title page; 1-5 for regular pages.
+ */
+uint8_t IoManager::picoPrevPage(void)
+{
+	if (d->pico_page > 0) {
+		d->pico_page--;
+	}
+	return d->pico_page;
+}
+
+/**
+ * [Pico] Get the current page number.
+ * @return 0 for title page; 1-5 for regular pages.
+ */
+uint8_t IoManager::picoCurPage(void) const
+{
+	return d->pico_page;
+}
+
+/**
+ * [Pico] Get the page register value.
+ * @return Page number as represented by the page register.
+ */
+uint8_t IoManager::picoGetPageRegister(void) const
+{
+	static const uint8_t pg_reg[8] = {0x00, 0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x7F};
+	return pg_reg[d->pico_page & 0x7];
 }
 
 /**

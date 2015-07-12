@@ -126,6 +126,9 @@ int EmuPico::zomgLoad(const utf8_str *filename)
 	// TODO: Make the 'loadSaveData' parameter user-configurable.
 	M68K_Mem::ms_RomCartridge->zomgRestore(&zomg, false);
 
+	// TODO: Load TMSS.
+	// Pico TMSS only has one register, the 'SEGA' register.
+
 	// Close the savestate.
 	zomg.close();
 
@@ -265,6 +268,9 @@ int EmuPico::zomgSave(const utf8_str *filename) const
 	// - SRAM data.
 	// - EEPROM control and data.
 	M68K_Mem::ms_RomCartridge->zomgSave(&zomg);
+
+	// TODO: Save TMSS.
+	// Pico TMSS only has one register, the 'SEGA' register.
 
 	// Close the savestate.
 	zomg.close();

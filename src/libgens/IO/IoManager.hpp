@@ -100,6 +100,22 @@ class IoManager
 		uint8_t readStartGG(void) const;
 
 		/**
+		 * Sega Pico I/O functions.
+		 * Button read is mapped to Port 1.
+		 */
+		uint8_t picoReadButtons(void) const;
+
+		// Page register.
+		// FIXME: Huckle & Lowly's Busiest Day Ever don't have
+		// page 5; page 6 is the "paint" section. May need to
+		// add an "unusable page" feature.
+		static const uint8_t PICO_MAX_PAGES = 8;
+		uint8_t picoNextPage(void);
+		uint8_t picoPrevPage(void);
+		uint8_t picoCurPage(void) const;
+		uint8_t picoGetPageRegister(void) const;
+
+		/**
 		 * Update an I/O device.
 		 * @param virtPort Virtual port.
 		 * @param buttons New button state.
