@@ -90,6 +90,8 @@ static Rom *rom = nullptr;
 static EmuContext *context = nullptr;
 static const char *rom_filename = nullptr;
 static bool isPico = false;
+static bool picoWasPrevPressed = false;
+static bool picoWasNextPressed = false;
 
 static KeyManager *keyManager = nullptr;
 static const GensKey_t keyMap[] = {
@@ -245,29 +247,6 @@ static void processSdlEvent(const SDL_Event &event) {
 					} else {
 						// Not Alt+Enter.
 						// Send the key to the KeyManager.
-						keyManager->keyDown(SdlHandler::scancodeToGensKey(event.key.keysym.scancode));
-					}
-					break;
-
-				// Pico page controls.
-				// TODO: Move to KeyManager?
-				case SDLK_PAGEUP:
-					// Previous page.
-					if (isPico) {
-						uint8_t pg = context->m_ioManager->picoPrevPage();
-						printf("Pico: Page set to %u.\n", pg);
-					} else {
-						// Not Pico.
-						keyManager->keyDown(SdlHandler::scancodeToGensKey(event.key.keysym.scancode));
-					}
-					break;
-				case SDLK_PAGEDOWN:
-					// Next page.
-					if (isPico) {
-						uint8_t pg = context->m_ioManager->picoNextPage();
-						printf("Pico: Page set to %u.\n", pg);
-					} else {
-						// Not Pico.
 						keyManager->keyDown(SdlHandler::scancodeToGensKey(event.key.keysym.scancode));
 					}
 					break;
@@ -576,6 +555,29 @@ int main(int argc, char *argv[])
 
 		// Update the I/O manager.
 		keyManager->updateIoManager(context->m_ioManager);
+
+		// Check for Pico page control buttons.
+		// TODO: Create an IoPico controller instead of reusing Io3BTN?
+		if (isPico) {
+			// FIXME: We can't easily access the button bitfields.
+			// Check the keystate manually.
+			bool picoPrevPressed = keyManager->isKeyPressed(keyMap[6]);
+			if (!picoWasPrevPressed && picoPrevPressed) {
+				// Previous page.
+				uint8_t pg = context->m_ioManager->picoPrevPage();
+				printf("Pico: Page set to %u.\n", pg);
+			}
+
+			bool picoNextPressed = keyManager->isKeyPressed(keyMap[5]);
+			if (!picoWasNextPressed && picoNextPressed) {
+				// Next page.
+				uint8_t pg = context->m_ioManager->picoNextPage();
+				printf("Pico: Page set to %u.\n", pg);
+			}
+
+			picoWasPrevPressed = picoPrevPressed;
+			picoWasNextPressed = picoNextPressed;
+		}
 	}
 
 	// Pause audio and wait 50ms for SDL to catch up.

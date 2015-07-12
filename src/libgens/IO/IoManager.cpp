@@ -756,10 +756,22 @@ uint8_t IoManager::picoReadButtons(void) const
 	uint8_t ret = 0xFF;
 	const IO::Device *dev = d->ioDevices[VIRTPORT_1];
 	if (dev) {
-		// First 5 buttons: UDLR, button
-		ret &= (dev->buttons | 0xE0);
-		// 6th button: Pen (moves to bit 7)
-		ret &= ((dev->buttons << 2) | 0x7F);
+		/**
+		 * Button layout: PudBRLDU
+		 * - P = pen button
+		 * - u = page down
+		 * - d = page up
+		 * - B = red button
+		 * - RLDU = D-pad
+		 *
+		 * Page buttons are not included here.
+		 * TODO:
+		 * - Call picoNextPage() / picoPrevPage() here?
+		 * - Add functionality to KeyManager?
+		 * - Create new controller based on Io3BTN that handles this?
+		 */
+		
+		ret &= (dev->buttons | 0x60);
 	}
 	return ret;
 }
