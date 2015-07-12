@@ -65,7 +65,7 @@ void gqt4_osd(OsdType osd_type, int param);
 #include "Config/ConfigStore.hpp"
 
 #include "EmuThread.hpp"
-#include "libgens/EmuContext.hpp"
+#include "libgens/EmuContext/EmuContext.hpp"
 
 class QTranslator;
 

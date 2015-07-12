@@ -51,8 +51,6 @@ CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/Util/byteorder.h.in" "${CMAKE_CURREN
 # Sources.
 SET(libgens_SRCS
 	lg_main.cpp
-	MD/EmuMD.cpp
-	MD/EmuMD_zomg.cpp
 	cpu/M68K.cpp
 	cpu/M68K_Mem.cpp
 	sound/Psg.cpp
@@ -73,7 +71,6 @@ SET(libgens_SRCS
 	credits.c
 	lg_osd.c
 	sound/SoundMgr.cpp
-	EmuContext.cpp
 	Data/32X/fw_32x.c
 	Util/MdFb.cpp
 	Cartridge/RomCartridgeMD.cpp
@@ -81,7 +78,21 @@ SET(libgens_SRCS
 	Save/EEPRomI2C_File.cpp
 	Save/EEPRomI2C_DB.cpp
 	Save/EEPRomI2C_Debug.cpp
-	MD/TmssReg.cpp
+	)
+
+SET(libgens_EMUCONTEXT_SRCS
+	EmuContext/EmuContext.cpp
+	EmuContext/EmuMD.cpp
+	EmuContext/EmuMD_zomg.cpp
+	EmuContext/TmssReg.cpp
+	)
+
+# TODO: All headers, or just public headers?
+SET(libgens_EMUCONTEXT_H
+	EmuContext/EmuContext.hpp
+	EmuContext/EmuMD.hpp
+	EmuContext/SysVersion.hpp
+	EmuContext/TmssReg.hpp
 	)
 
 SET(libgens_VDP_SRCS
@@ -209,6 +220,8 @@ ENDIF()
 
 ADD_LIBRARY(gens STATIC
 	${libgens_SRCS}
+	${libgens_EMUCONTEXT_SRCS}
+	${libgens_EMUCONTEXT_H}
 	${libgens_VDP_SRCS}
 	${libgens_VDP_H}
 	${libgens_IO_SRCS}

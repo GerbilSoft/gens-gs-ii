@@ -53,7 +53,7 @@
 #include "Vdp/Vdp.hpp"
 
 // TODO: Get rid of EmuContext.
-#include "../EmuContext.hpp"
+#include "EmuContext/EmuContext.hpp"
 
 #if 0
 // GSX v7 savestate functionality.

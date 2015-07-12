@@ -21,10 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_MD_EMUMD_HPP__
-#define __LIBGENS_MD_EMUMD_HPP__
+#ifndef __LIBGENS_EMUCONTEXT_EMUMD_HPP__
+#define __LIBGENS_EMUCONTEXT_EMUMD_HPP__
 
-#include "../EmuContext.hpp"
+#include "EmuContext.hpp"
 
 // Needed for FORCE_INLINE.
 #include "../macros/common.h"
@@ -124,4 +124,4 @@ class EmuMD : public EmuContext
 
 }
 
-#endif /* __LIBGENS_MD_EMUMD_HPP__ */
+#endif /* __LIBGENS_EMUCONTEXT_EMUMD_HPP__ */

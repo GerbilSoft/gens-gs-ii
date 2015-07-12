@@ -29,7 +29,7 @@ using GensSdl::VBackend;
 #include "libgens/lg_main.hpp"
 #include "libgens/lg_osd.h"
 #include "libgens/Rom.hpp"
-#include "libgens/MD/EmuMD.hpp"
+#include "libgens/EmuContext/EmuMD.hpp"
 #include "libgens/Util/MdFb.hpp"
 #include "libgens/Util/Timing.hpp"
 using LibGens::Rom;

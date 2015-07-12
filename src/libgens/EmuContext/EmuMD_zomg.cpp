@@ -35,7 +35,6 @@
 #include "cpu/M68K.hpp"
 #include "cpu/Z80_MD_Mem.hpp"
 #include "cpu/Z80.hpp"
-#include "MD/EmuMD.hpp"
 #include "Cartridge/RomCartridgeMD.hpp"
 
 // ZOMG save structs.

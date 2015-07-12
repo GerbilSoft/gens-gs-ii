@@ -47,7 +47,7 @@ extern Ram_68k_t Ram_68k;
 #include "libzomg/zomg_md_time_reg.h"
 
 // TMSS register.
-#include "libgens/MD/TmssReg.hpp"
+#include "libgens/EmuContext/TmssReg.hpp"
 
 namespace LibGens {
 

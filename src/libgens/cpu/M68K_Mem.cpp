@@ -39,7 +39,7 @@
 // MD emulator.
 // Required to access controller I/O ports.
 // TODO: SMS/GG?
-#include "MD/EmuMD.hpp"
+#include "EmuContext/EmuMD.hpp"
 
 // Sound Manager.
 #include "sound/SoundMgr.hpp"
@@ -49,11 +49,11 @@
 Ram_68k_t Ram_68k;
 
 // EmuContext
-#include "../EmuContext.hpp"
+#include "EmuContext/EmuContext.hpp"
 
 // Miscellaneous.
-#include "../Util/byteswap.h"
-#include "../macros/log_msg.h"
+#include "Util/byteswap.h"
+#include "macros/log_msg.h"
 
 // C wrapper functions for Starscream.
 #ifdef __cplusplus

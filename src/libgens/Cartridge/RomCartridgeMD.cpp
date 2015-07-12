@@ -25,12 +25,12 @@
 
 #include <libgens/config.libgens.h>
 
-#include "../EmuContext.hpp"
-#include "../Util/byteswap.h"
-#include "../macros/common.h"
-#include "../Rom.hpp"
-#include "../cpu/M68K.hpp"
-#include "../lg_osd.h"
+#include "EmuContext/EmuContext.hpp"
+#include "Util/byteswap.h"
+#include "macros/common.h"
+#include "Rom.hpp"
+#include "cpu/M68K.hpp"
+#include "lg_osd.h"
 
 // ZOMG
 #include "libzomg/Zomg.hpp"

@@ -28,7 +28,7 @@
 
 // LibGens includes.
 #include "libgens/Util/Timing.hpp"
-#include "libgens/MD/EmuMD.hpp"
+#include "libgens/EmuContext/EmuMD.hpp"
 
 // LibGens Sound Manager.
 // Needed for LibGens::SoundMgr::MAX_SAMPLING_RATE.

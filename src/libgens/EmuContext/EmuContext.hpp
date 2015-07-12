@@ -25,23 +25,22 @@
 #define __LIBGENS_EMUCONTEXT_HPP__
 
 // Controller I/O manager.
-#include "IO/IoManager.hpp"
+#include "../IO/IoManager.hpp"
 
 // ROM image class.
-#include "Rom.hpp"
+#include "../Rom.hpp"
 
 // Region code.
 // TODO: Make the region code non-console-specific.
-#include "MD/SysVersion.hpp"
+#include "SysVersion.hpp"
 
 // VDP.
-#include "Vdp/Vdp.hpp"
+#include "../Vdp/Vdp.hpp"
 
 // C++ includes.
 #include <string>
 
-namespace LibGens
-{
+namespace LibGens {
 
 class EmuContext
 {
