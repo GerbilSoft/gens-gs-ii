@@ -240,9 +240,15 @@ static void processSdlEvent(const SDL_Event &event) {
 			keyManager->keyUp(SdlHandler::scancodeToGensKey(event.key.keysym.scancode));
 			break;
 
-		case SDL_WINDOWEVENT_RESIZED:
-			// Resize the video renderer.
-			sdlHandler->resize_video(event.window.data1, event.window.data2);
+		case SDL_WINDOWEVENT:
+			switch (event.window.event) {
+				case SDL_WINDOWEVENT_RESIZED:
+					// Resize the video renderer.
+					sdlHandler->resize_video(event.window.data1, event.window.data2);
+					break;
+				default:
+					break;
+			}
 			break;
 
 		default:

@@ -75,7 +75,7 @@ int SdlHandler::init_video(void)
 
 	// Initialize the video backend.
 	// TODO: Fullscreen; GL vs. SW selection; VSync.
-	m_vBackend = new SdlSWBackend();
+	m_vBackend = new SdlGLBackend();
 	return 0;
 }
 

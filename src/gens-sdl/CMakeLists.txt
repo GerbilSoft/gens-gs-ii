@@ -34,7 +34,7 @@ SET(gens-sdl_SRCS
 	Config.cpp
 	VBackend.cpp
 	SdlSWBackend.cpp
-	#SdlGLBackend.cpp
+	SdlGLBackend.cpp
 	)
 
 # Headers.

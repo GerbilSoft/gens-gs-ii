@@ -41,6 +41,7 @@ namespace GensSdl {
 
 SdlGLBackend::SdlGLBackend()
 	: m_screen(nullptr)
+	, m_glContext(nullptr)
 	, m_lastBpp(MdFb::BPP_MAX)
 	, m_tex(0)
 	, m_colorComponents(0)
@@ -61,8 +62,16 @@ SdlGLBackend::SdlGLBackend()
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, true);
-	m_screen = SDL_SetVideoMode(m_winW, m_winH, 16,
-		SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_OPENGL /*| SDL_RESIZABLE*/);
+	// TODO: Make sure m_screen, m_glContext, etc. were created successfully.
+	// TODO: Rename m_screen to m_window?
+	m_screen = SDL_CreateWindow("Gens/GS II [SDL]",
+		SDL_WINDOWPOS_UNDEFINED,
+		SDL_WINDOWPOS_UNDEFINED,
+		m_winW, m_winH,
+		SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+
+	// Create the OpenGL context.
+	m_glContext = SDL_GL_CreateContext(m_screen);
 
 	// Initialize OpenGL.
 	initGL();
@@ -74,7 +83,22 @@ SdlGLBackend::~SdlGLBackend()
 		glDeleteTextures(1, &m_tex);
 	}
 
-	SDL_FreeSurface(m_screen);
+	if (m_glContext) {
+		SDL_GL_DeleteContext(m_glContext);
+	}
+	if (m_screen) {
+		SDL_DestroyWindow(m_screen);
+	}
+}
+
+/**
+ * Set the window title.
+ * TODO: Set based on "paused" and fps values?
+ * @param title Window title.
+ */
+void SdlGLBackend::set_window_title(const char *title)
+{
+	SDL_SetWindowTitle(m_screen, title);
 }
 
 /**
@@ -186,7 +210,7 @@ void SdlGLBackend::update(bool fb_dirty)
 	glDisable(GL_TEXTURE_2D);
 
 	// Swap the GL buffers.
-	SDL_GL_SwapBuffers();
+	SDL_GL_SwapWindow(m_screen);
 
 	// VBackend is no longer dirty.
 	clearDirty();
@@ -199,13 +223,6 @@ void SdlGLBackend::update(bool fb_dirty)
  */
 void SdlGLBackend::resize(int width, int height)
 {
-	// FIXME: Figure out a way to handle this without SDL_SetVideoMode.
-	// SDL 2.0 might fix this.
-	if (m_winW != width || m_winH != height) {
-		m_screen = SDL_SetVideoMode(m_winW, m_winH, 32,
-			SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_OPENGL /*| SDL_RESIZABLE*/);
-	}
-
 	// Save the window size for later.
 	m_winW = width;
 	m_winH = height;

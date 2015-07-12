@@ -52,6 +52,13 @@ class SdlGLBackend : public VBackend {
 
 	public:
 		/**
+		 * Set the window title.
+		 * TODO: Set based on "paused" and fps values?
+		 * @param title Window title.
+		 */
+		virtual void set_window_title(const char *title) final;
+
+		/**
 		 * Set the SDL video source to an MdFb.
 		 * If nullptr, removes the SDL video source.
 		 * @param fb MdFb.
@@ -72,8 +79,9 @@ class SdlGLBackend : public VBackend {
 		virtual void resize(int width, int height) final;
 
 	private:
-		// Screen buffer.
-		SDL_Surface *m_screen;
+		// Screen context.
+		SDL_Window *m_screen;
+		SDL_GLContext m_glContext;
 
 		// Last MdFb bpp.
 		LibGens::MdFb::ColorDepth m_lastBpp;
