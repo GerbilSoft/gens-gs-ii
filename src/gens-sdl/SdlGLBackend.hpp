@@ -85,7 +85,7 @@ class SdlGLBackend : public VBackend {
 
 	private:
 		// Screen context.
-		SDL_Window *m_screen;
+		SDL_Window *m_window;
 		SDL_GLContext m_glContext;
 
 		// Last MdFb bpp.

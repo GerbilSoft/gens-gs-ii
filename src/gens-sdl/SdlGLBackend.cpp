@@ -40,7 +40,7 @@ using LibGens::MdFb;
 namespace GensSdl {
 
 SdlGLBackend::SdlGLBackend()
-	: m_screen(nullptr)
+	: m_window(nullptr)
 	, m_glContext(nullptr)
 	, m_lastBpp(MdFb::BPP_MAX)
 	, m_tex(0)
@@ -62,16 +62,16 @@ SdlGLBackend::SdlGLBackend()
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, true);
-	// TODO: Make sure m_screen, m_glContext, etc. were created successfully.
-	// TODO: Rename m_screen to m_window?
-	m_screen = SDL_CreateWindow("Gens/GS II [SDL]",
+	// TODO: Make sure m_window, m_glContext, etc. were created successfully.
+	// TODO: Rename m_window to m_window?
+	m_window = SDL_CreateWindow("Gens/GS II [SDL]",
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
 		m_winW, m_winH,
 		SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
 	// Create the OpenGL context.
-	m_glContext = SDL_GL_CreateContext(m_screen);
+	m_glContext = SDL_GL_CreateContext(m_window);
 
 	// Initialize OpenGL.
 	initGL();
@@ -86,8 +86,8 @@ SdlGLBackend::~SdlGLBackend()
 	if (m_glContext) {
 		SDL_GL_DeleteContext(m_glContext);
 	}
-	if (m_screen) {
-		SDL_DestroyWindow(m_screen);
+	if (m_window) {
+		SDL_DestroyWindow(m_window);
 	}
 }
 
@@ -98,7 +98,7 @@ SdlGLBackend::~SdlGLBackend()
  */
 void SdlGLBackend::set_window_title(const char *title)
 {
-	SDL_SetWindowTitle(m_screen, title);
+	SDL_SetWindowTitle(m_window, title);
 }
 
 /**
@@ -210,7 +210,7 @@ void SdlGLBackend::update(bool fb_dirty)
 	glDisable(GL_TEXTURE_2D);
 
 	// Swap the GL buffers.
-	SDL_GL_SwapWindow(m_screen);
+	SDL_GL_SwapWindow(m_window);
 
 	// VBackend is no longer dirty.
 	clearDirty();
@@ -271,10 +271,10 @@ void SdlGLBackend::toggle_fullscreen(void)
 	m_fullscreen = !m_fullscreen;
 	if (m_fullscreen) {
 		// Switched to windowed fullscreen.
-		SDL_SetWindowFullscreen(m_screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 	} else {
 		// Switch to windowed mode.
-		SDL_SetWindowFullscreen(m_screen, 0);
+		SDL_SetWindowFullscreen(m_window, 0);
 	}
 }
 

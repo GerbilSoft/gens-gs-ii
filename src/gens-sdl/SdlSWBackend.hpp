@@ -82,7 +82,7 @@ class SdlSWBackend : public VBackend {
 
 	private:
 		// Screen context.
-		SDL_Window *m_screen;
+		SDL_Window *m_window;
 		SDL_Renderer *m_renderer;
 		SDL_Texture *m_texture;
 

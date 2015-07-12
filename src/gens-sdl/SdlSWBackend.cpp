@@ -30,20 +30,20 @@
 namespace GensSdl {
 
 SdlSWBackend::SdlSWBackend()
-	: m_screen(nullptr)
+	: m_window(nullptr)
 	, m_renderer(nullptr)
 	, m_texture(nullptr)
 	, m_fb(nullptr)
 {
 	// Initialize the SDL window.
-	m_screen = SDL_CreateWindow("Gens/GS II [SDL]",
+	m_window = SDL_CreateWindow("Gens/GS II [SDL]",
 				SDL_WINDOWPOS_UNDEFINED,
 				SDL_WINDOWPOS_UNDEFINED,
 				320, 240, SDL_WINDOW_RESIZABLE);
 
 	// Create a renderer.
 	// TODO: Parameter for enabling/disabling VSync?
-	m_renderer = SDL_CreateRenderer(m_screen, -1, SDL_RENDERER_PRESENTVSYNC);
+	m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_PRESENTVSYNC);
 
 	// Clear the screen.
 	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
@@ -66,7 +66,7 @@ SdlSWBackend::~SdlSWBackend()
 
 	SDL_DestroyTexture(m_texture);
 	SDL_DestroyRenderer(m_renderer);
-	SDL_DestroyWindow(m_screen);
+	SDL_DestroyWindow(m_window);
 }
 
 /**
@@ -76,7 +76,7 @@ SdlSWBackend::~SdlSWBackend()
  */
 void SdlSWBackend::set_window_title(const char *title)
 {
-	SDL_SetWindowTitle(m_screen, title);
+	SDL_SetWindowTitle(m_window, title);
 }
 
 /**
@@ -146,10 +146,10 @@ void SdlSWBackend::toggle_fullscreen(void)
 	m_fullscreen = !m_fullscreen;
 	if (m_fullscreen) {
 		// Switched to windowed fullscreen.
-		SDL_SetWindowFullscreen(m_screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 	} else {
 		// Switch to windowed mode.
-		SDL_SetWindowFullscreen(m_screen, 0);
+		SDL_SetWindowFullscreen(m_window, 0);
 	}
 }
 
