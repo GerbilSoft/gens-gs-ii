@@ -131,7 +131,29 @@ const uint8_t M68K_Mem::msc_M68KBank_Def_MD[8] =
 	M68K_BANK_CARTRIDGE,
 
 	// $A00000 - $BFFFFF: I/O area.
-	M68K_BANK_IO,
+	M68K_BANK_MD_IO,
+
+	// $C00000 - $DFFFFF: VDP. (specialized mirroring)
+	M68K_BANK_VDP,
+
+	// $E00000 - $FFFFFF: RAM. (64K mirroring)
+	M68K_BANK_RAM
+};
+
+/**
+ * Default M68K bank type IDs for Pico.
+ */
+const uint8_t M68K_Mem::msc_M68KBank_Def_Pico[8] =
+{
+	// $000000 - $9FFFFF: ROM cartridge.
+	M68K_BANK_CARTRIDGE, M68K_BANK_CARTRIDGE,
+	M68K_BANK_CARTRIDGE, M68K_BANK_CARTRIDGE,
+
+	// $800000 - $9FFFFF: I/O area.
+	M68K_BANK_PICO_IO,
+
+	// $A00000 - $BFFFFF: Unused.
+	M68K_BANK_UNUSED,
 
 	// $C00000 - $DFFFFF: VDP. (specialized mirroring)
 	M68K_BANK_VDP,
@@ -1282,6 +1304,10 @@ void M68K_Mem::InitSys(M68K::SysID system)
 			UpdateTmssMapping();
 			break;
 
+		case M68K::SYSID_PICO:
+			memcpy(ms_M68KBank_Type, msc_M68KBank_Def_Pico, sizeof(ms_M68KBank_Type));
+			break;
+
 		default:
 			// Unknown system ID.
 			LOG_MSG(68k, LOG_MSG_LEVEL_ERROR,
@@ -1339,10 +1365,11 @@ uint8_t M68K_Mem::M68K_RB(uint32_t address)
 			return ms_RomCartridge->readByte(address);
 
 		// Other MD banks.
-		case M68K_BANK_IO:		return M68K_Read_Byte_Misc(address);
+		case M68K_BANK_MD_IO:		return M68K_Read_Byte_Misc(address);
 		case M68K_BANK_VDP:		return M68K_Read_Byte_VDP(address);
 		case M68K_BANK_RAM:		return M68K_Read_Byte_Ram(address);
 		case M68K_BANK_TMSS_ROM:	return M68K_Read_Byte_TMSS_Rom(address);
+		case M68K_BANK_PICO_IO:		/* TODO */ break;
 	}
 
 	// Should not get here...
@@ -1370,10 +1397,11 @@ uint16_t M68K_Mem::M68K_RW(uint32_t address)
 			return ms_RomCartridge->readWord(address);
 
 		// Other MD banks.
-		case M68K_BANK_IO:		return M68K_Read_Word_Misc(address);
+		case M68K_BANK_MD_IO:		return M68K_Read_Word_Misc(address);
 		case M68K_BANK_VDP:		return M68K_Read_Word_VDP(address);
 		case M68K_BANK_RAM:		return M68K_Read_Word_Ram(address);
 		case M68K_BANK_TMSS_ROM:	return M68K_Read_Word_TMSS_Rom(address);
+		case M68K_BANK_PICO_IO:		/* TODO */ break;
 	}
 	
 	// Should not get here...
@@ -1405,9 +1433,10 @@ void M68K_Mem::M68K_WB(uint32_t address, uint8_t data)
 			break;
 
 		// Other MD banks.
-		case M68K_BANK_IO:	M68K_Write_Byte_Misc(address, data); break;
+		case M68K_BANK_MD_IO:	M68K_Write_Byte_Misc(address, data); break;
 		case M68K_BANK_VDP:	M68K_Write_Byte_VDP(address, data); break;
 		case M68K_BANK_RAM:	M68K_Write_Byte_Ram(address, data); break;
+		case M68K_BANK_PICO_IO:	/* TODO */ break;
 	}
 }
 
@@ -1436,9 +1465,10 @@ void M68K_Mem::M68K_WW(uint32_t address, uint16_t data)
 			break;
 
 		// Other MD banks.
-		case M68K_BANK_IO:	M68K_Write_Word_Misc(address, data); break;
+		case M68K_BANK_MD_IO:	M68K_Write_Word_Misc(address, data); break;
 		case M68K_BANK_VDP:	M68K_Write_Word_VDP(address, data); break;
 		case M68K_BANK_RAM:	M68K_Write_Word_Ram(address, data); break;
+		case M68K_BANK_PICO_IO:	/* TODO */ break;
 	}
 }
 

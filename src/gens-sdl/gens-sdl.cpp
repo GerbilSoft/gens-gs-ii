@@ -31,14 +31,18 @@ using GensSdl::VBackend;
 #include "libgens/lg_main.hpp"
 #include "libgens/lg_osd.h"
 #include "libgens/Rom.hpp"
-#include "libgens/EmuContext/EmuMD.hpp"
 #include "libgens/Util/MdFb.hpp"
 #include "libgens/Util/Timing.hpp"
 using LibGens::Rom;
-using LibGens::EmuContext;
-using LibGens::EmuMD;
 using LibGens::MdFb;
 using LibGens::Timing;
+
+// Emulation Context.
+#include "libgens/EmuContext/EmuMD.hpp"
+#include "libgens/EmuContext/EmuPico.hpp"
+using LibGens::EmuContext;
+using LibGens::EmuMD;
+using LibGens::EmuPico;
 
 // LibGensKeys
 #include "libgens/IO/IoManager.hpp"
@@ -83,7 +87,7 @@ using std::string;
 // TODO: Move to GensSdl?
 static SdlHandler *sdlHandler = nullptr;
 static Rom *rom = nullptr;
-static EmuMD *context = nullptr;
+static EmuContext *context = nullptr;
 static const char *rom_filename = nullptr;
 
 static KeyManager *keyManager = nullptr;
@@ -329,28 +333,52 @@ int main(int argc, char *argv[])
 	}
 
 	// Check the ROM format.
-	if (rom->romFormat() != Rom::RFMT_BINARY) {
-		const char *rom_format = GensSdl::romFormatToString(rom->romFormat());
-		fprintf(stderr, "Error loading ROM file %s: ROM is in %s format.\nOnly plain binary ROMs are supported.\n",
-			rom_filename, rom_format);
-		return EXIT_FAILURE;
+	switch (rom->romFormat()) {
+		case Rom::RFMT_BINARY:
+			// ROM format is supported.
+			break;
+
+		default:
+			// ROM format is not supported.
+			const char *rom_format = GensSdl::romFormatToString(rom->romFormat());
+			fprintf(stderr, "Error loading ROM file %s: ROM is in %s format.\nOnly plain binary ROMs are supported.\n",
+				rom_filename, rom_format);
+			return EXIT_FAILURE;
 	}
 
 	// Check the ROM system.
 	// TODO: Split into a separate function?
-	if (rom->sysId() != Rom::MDP_SYSTEM_MD) {
-		const char *rom_sysId = GensSdl::sysIdToString(rom->sysId());
-		fprintf(stderr, "Error loading ROM file %s: ROM is for %s.\nOnly Mega Drive ROMs are supported.\n",
-			rom_filename, rom_sysId);
-		return EXIT_FAILURE;
+	switch (rom->sysId()) {
+		case Rom::MDP_SYSTEM_MD:
+		case Rom::MDP_SYSTEM_PICO:
+			// System is supported.
+			break;
+
+		default:
+			// System is not supported.
+			const char *rom_sysId = GensSdl::sysIdToString(rom->sysId());
+			fprintf(stderr, "Error loading ROM file %s: ROM is for %s.\nOnly Mega Drive ROMs are supported.\n",
+				rom_filename, rom_sysId);
+			return EXIT_FAILURE;
 	}
 
 	// Set the SRAM/EEPROM path.
 	LibGens::EmuContext::SetPathSRam(GensSdl::getConfigDir("SRAM").c_str());
 
 	// Create the emulation context.
-	context = new EmuMD(rom);
-	if (!context->isRomOpened()) {
+	// TODO: Factory class that uses rom->sysId()?
+	switch (rom->sysId()) {
+		case Rom::MDP_SYSTEM_MD:
+			context = new EmuMD(rom);
+			break;
+		case Rom::MDP_SYSTEM_PICO:
+			context = new EmuPico(rom);
+			break;
+		default:
+			context = nullptr;
+			break;
+	}
+	if (!context || !context->isRomOpened()) {
 		// Error loading the ROM into EmuMD.
 		// TODO: Error code?
 		fprintf(stderr, "Error initializing EmuContext for %s: (TODO get error code)\n",

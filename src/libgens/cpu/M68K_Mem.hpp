@@ -125,8 +125,8 @@ class M68K_Mem
 			// ROM cartridge.
 			M68K_BANK_CARTRIDGE = 0,	// M68K: $000000 - $9FFFFF
 
-			// I/O area.
-			M68K_BANK_IO,		// M68K: $A00000 - $BFFFFF
+			// I/O area. (MD)
+			M68K_BANK_MD_IO,	// M68K: $A00000 - $BFFFFF
 
 			// VDP area.
 			M68K_BANK_VDP,		// M68K: $C00000 - $DFFFFF (specialized mirroring)
@@ -137,6 +137,9 @@ class M68K_Mem
 			// TMSS ROM.
 			// Only if system version > 0 and $A14101 == 0.
 			M68K_BANK_TMSS_ROM,	// M68K: $000000 - $3FFFFF (mirrored every 2 KB)
+
+			// I/O area. (Pico)
+			M68K_BANK_PICO_IO,	// M68K: $800000 - $9FFFFF
 
 			// Unused bank. (Return 0xFF)
 			M68K_BANK_UNUSED = 0xFF
@@ -153,6 +156,11 @@ class M68K_Mem
 		 * Default M68K bank type IDs for MD.
 		 */
 		static const uint8_t msc_M68KBank_Def_MD[8];
+
+		/**
+		 * Default M68K bank type IDs for Pico.
+		 */
+		static const uint8_t msc_M68KBank_Def_Pico[8];
 
 		/** Read Byte functions. **/
 		static uint8_t M68K_Read_Byte_Ram(uint32_t address);
