@@ -85,6 +85,10 @@ SET(libgens_EMUCONTEXT_SRCS
 	EmuContext/EmuMD.cpp
 	EmuContext/EmuMD_zomg.cpp
 	EmuContext/TmssReg.cpp
+
+	# Pico
+	EmuContext/EmuPico.cpp
+	EmuContext/EmuPico_zomg.cpp
 	)
 
 # TODO: All headers, or just public headers?
@@ -93,6 +97,9 @@ SET(libgens_EMUCONTEXT_H
 	EmuContext/EmuMD.hpp
 	EmuContext/SysVersion.hpp
 	EmuContext/TmssReg.hpp
+
+	# Pico
+	EmuContext/EmuPico.hpp
 	)
 
 SET(libgens_VDP_SRCS
