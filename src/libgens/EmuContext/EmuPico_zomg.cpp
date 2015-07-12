@@ -26,7 +26,7 @@
  * and is subject to change.
  */
 
-#include "EmuMD.hpp"
+#include "EmuPico.hpp"
 #include "lg_main.hpp"
 
 #include "Vdp/Vdp.hpp"
@@ -79,7 +79,7 @@ namespace LibGens {
  * @return 0 on success; non-zero on error.
  * TODO: Error code constants.
  */
-int EmuMD::zomgLoad(const utf8_str *filename)
+int EmuPico::zomgLoad(const utf8_str *filename)
 {
 	// Make sure the file exists.
 	if (access(filename, F_OK))
@@ -140,7 +140,7 @@ int EmuMD::zomgLoad(const utf8_str *filename)
  * @return 0 on success; non-zero on error.
  * TODO: Error code constants.
  */
-int EmuMD::zomgSave(const utf8_str *filename) const
+int EmuPico::zomgSave(const utf8_str *filename) const
 {
 	LibZomg::Zomg zomg(filename, LibZomg::Zomg::ZOMG_SAVE);
 	if (!zomg.isOpen())
