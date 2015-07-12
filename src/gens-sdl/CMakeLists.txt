@@ -35,6 +35,7 @@ SET(gens-sdl_SRCS
 	VBackend.cpp
 	SdlSWBackend.cpp
 	SdlGLBackend.cpp
+	GLBackend.cpp
 	)
 
 # Headers.
@@ -46,6 +47,7 @@ SET(gens-sdl_H
 	VBackend.hpp
 	SdlSWBackend.hpp
 	SdlGLBackend.hpp
+	GLBackend.hpp
 	)
 
 # Main target.
