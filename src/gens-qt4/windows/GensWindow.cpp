@@ -587,6 +587,15 @@ void GensWindow::osd(OsdType osd_type, int param)
 		case OSD_EEPROM_AUTOSAVE:
 			msg = tr("EEPROM autosaved. (%n byte(s))", "Onscreen Display", param);
 			break;
+		case OSD_PICO_PAGESET:
+			msg = tr("Pico: Page set to page %n.", "Onscreen Display", param);
+			break;
+		case OSD_PICO_PAGEUP:
+			msg = tr("Pico: PgUp set to page %n.", "Onscreen Display", param);
+			break;
+		case OSD_PICO_PAGEDOWN:
+			msg = tr("Pico: PgDn set to page %n.", "Onscreen Display", param);
+			break;
 		default:
 			// Unknown OSD type.
 			break;
