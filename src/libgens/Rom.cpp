@@ -601,14 +601,15 @@ int RomPrivate::loadRomHeader(Rom::MDP_SYSTEM_ID sysOverride, Rom::RomFormat fmt
 			if (romSize > 512) {
 				romSize -= 512;
 			}
-			break;
 
 			// Deinterleave the ROM header.
 			// Note that the actual SMD data starts at byte 512.
+			static const size_t BIN_HEADER_SIZE = 65536;
 			uint8_t *smd_header = header;
-			header = (uint8_t*)malloc(ROM_HEADER_SIZE);
+			header = (uint8_t*)malloc(BIN_HEADER_SIZE);
+			header_size = BIN_HEADER_SIZE;
 			// TODO: Use pointer arithmetic?
-			for (size_t i = 0; i < 65536; i += 16384) {
+			for (size_t i = 0; i < BIN_HEADER_SIZE; i += 16384) {
 				DecodeSMDBlock(&header[i], &smd_header[i + 512]);
 			}
 			free(smd_header);
@@ -805,7 +806,6 @@ int Rom::loadRom(void *buf, size_t siz)
 				memmove(buf_write, buf_read, remain);
 			}
 
-			const uint8_t *x = (const uint8_t*)buf;
 			free(smd_block);
 			break;
                }
