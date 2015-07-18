@@ -29,8 +29,6 @@
 
 // SDL
 #include <SDL.h>
-// OpenGL
-#include <GL/gl.h>
 
 // Video Backend.
 #include "VBackend.hpp"

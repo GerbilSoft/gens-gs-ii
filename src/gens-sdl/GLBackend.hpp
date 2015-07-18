@@ -27,8 +27,6 @@
 // C includes. (C++ namespace)
 #include <climits>
 
-// SDL
-#include <SDL.h>
 // OpenGL
 #include <GL/gl.h>
 
