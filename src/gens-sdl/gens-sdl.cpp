@@ -510,10 +510,10 @@ int main(int argc, char *argv[])
 #ifdef _WIN32
 					// Win32: Use a yield() loop.
 					// FIXME: Doesn't work properly on VBox/WinXP...
-					uint64_t yield_end = timing.getTime() + usec_sleep;
+					uint64_t yield_end = GensSdl::timing.getTime() + usec_sleep;
 					do {
 						yield();
-					} while (yield_end > timing.getTime());
+					} while (yield_end > GensSdl::timing.getTime());
 #else /* !_WIN32 */
 					// Linux: Use usleep().
 					usleep(usec_sleep);
