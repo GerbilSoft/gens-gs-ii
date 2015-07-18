@@ -27,13 +27,12 @@
 #include "lg_main.hpp"
 
 // LibGens VDP.
-#include "MD/EmuMD.hpp"
+#include "EmuContext/EmuMD.hpp"
 #include "Rom.hpp"
 
 #include "Vdp/Vdp.hpp"
 #include "cpu/M68K.hpp"
 #include "libzomg/zomg_m68k.h"
-#include "MD/SysVersion.hpp"
 #include "Util/byteswap.h"
 
 // ARRAY_SIZE(x)

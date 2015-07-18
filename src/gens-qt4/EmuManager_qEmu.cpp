@@ -31,7 +31,8 @@
 #include "libzomg/Zomg.hpp"
 
 // LibGens includes.
-#include "libgens/MD/EmuMD.hpp"
+#include "libgens/EmuContext/EmuContext.hpp"
+using LibGens::EmuContext;
 
 // LibGens video includes.
 #include "libgens/Vdp/Vdp.hpp"
@@ -451,7 +452,7 @@ void EmuManager::processQEmuRequest(void)
 			case EmuRequest_t::RQT_AUTOFIX_CHANGE:
 				// Set the Auto Fix Checksum setting.
 				// TODO: Apply changes immediately?
-				LibGens::EmuContext::SetAutoFixChecksum(rq.autoFixChecksum);
+				EmuContext::SetAutoFixChecksum(rq.autoFixChecksum);
 				break;
 
 			case EmuRequest_t::RQT_PALETTE_SETTING:

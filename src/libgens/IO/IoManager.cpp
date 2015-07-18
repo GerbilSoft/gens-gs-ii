@@ -39,6 +39,9 @@
 #include "Io4WPS.hpp"
 #include "IoMasterTap.hpp"
 
+// Sega Pico.
+#include "IoPico.hpp"
+
 // C includes. (C++ namespace)
 #include <cassert>
 
@@ -273,6 +276,7 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 	// Create a new device.
 	// TODO: Copy MD-side data from old device using a pseudo-copy constructor...
 	// TODO: Don't create TP/4WP sub-devices if the main devices are missing?
+	// TODO: Factory class?
 	IO::Device *dev = nullptr;
 	switch (ioType) {
 		case IOT_NONE:
@@ -312,6 +316,10 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 			break;
 		case IOT_MASTERTAP:
 			dev = new IO::IoMasterTap();
+			break;
+		// TODO: ColecoVision.
+		case IOT_PICO:
+			dev = new IO::IoPico();
 			break;
 		default:
 			// TODO: Handle Team Player correctly.
@@ -738,6 +746,86 @@ uint8_t IoManager::readStartGG(void) const
 
 	// Start is not pressed.
 	return 0xFF;
+}
+
+/** Pico-side I/O functions. **/
+
+/**
+ * Read Sega Pico buttons.
+ * This maps to Controller 1's button field.
+ * Note that Controller 1 must be 2BTN, 3BTN, or 6BTN to work correctly.
+ * Button 5 is adjusted to match the bitfield.
+ */
+uint8_t IoManager::picoReadButtons(void) const
+{
+	uint8_t ret = 0xFF;
+	const IO::Device *dev = d->ioDevices[VIRTPORT_1];
+	if (dev) {
+		/**
+		 * Button layout: PudBRLDU
+		 * - P = pen button
+		 * - d = page down
+		 * - u = page up
+		 * - B = red button
+		 * - RLDU = D-pad
+		 *
+		 * Page buttons are not included here.
+		 * TODO:
+		 * - Call picoNextPage() / picoPrevPage() here?
+		 * - Add functionality to KeyManager?
+		 * - Create new controller based on Io3BTN that handles this?
+		 */
+		
+		ret &= (dev->getButtons() | 0x60);
+	}
+	return ret;
+}
+
+/**
+ * [Pico] Get the current page number.
+ * @return 0 for title page; 1-7 for regular pages.
+ */
+uint8_t IoManager::picoCurPageNum(void) const
+{
+	uint8_t ret = 0;
+	const IO::Device *dev = d->ioDevices[VIRTPORT_1];
+	if (dev && dev->type() == IOT_PICO) {
+		const IO::IoPico *pico = (const IO::IoPico*)dev;
+		ret = pico->picoCurPageNum();
+	}
+	return ret;
+}
+
+/**
+ * [Pico] Set the current page number.
+ * @param pg 0 for title page; 1-7 for regular pages.
+ * @return 0 on success; non-zero on error. (e.g. not emulating Pico)
+ * TODO: Error code definitions?
+ */
+int IoManager::setPicoCurPageNum(uint8_t pg)
+{
+	IO::Device *dev = d->ioDevices[VIRTPORT_1];
+	if (dev && dev->type() == IOT_PICO) {
+		IO::IoPico *pico = (IO::IoPico*)dev;
+		pico->setPicoCurPageNum(pg);
+		return 0;
+	}
+	return -1;
+}
+
+/**
+ * [Pico] Get the page register value.
+ * @return Page number as represented by the page register.
+ */
+uint8_t IoManager::picoCurPageReg(void) const
+{
+	uint8_t ret = 0;
+	const IO::Device *dev = d->ioDevices[VIRTPORT_1];
+	if (dev && dev->type() == IOT_PICO) {
+		const IO::IoPico *pico = (const IO::IoPico*)dev;
+		ret = pico->picoCurPageReg();
+	}
+	return ret;
 }
 
 /**

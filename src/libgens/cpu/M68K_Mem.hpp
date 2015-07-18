@@ -47,7 +47,7 @@ extern Ram_68k_t Ram_68k;
 #include "libzomg/zomg_md_time_reg.h"
 
 // TMSS register.
-#include "libgens/MD/TmssReg.hpp"
+#include "libgens/EmuContext/TmssReg.hpp"
 
 namespace LibGens {
 
@@ -82,18 +82,20 @@ class M68K_Mem
 		#define Z80_STATE_ENABLED	(1 << 0)
 		#define Z80_STATE_BUSREQ	(1 << 1)
 		#define Z80_STATE_RESET		(1 << 2)
-		
+
 		static unsigned int Z80_State;
 		static int Last_BUS_REQ_Cnt;
 		static int Last_BUS_REQ_St;
 		static int Bank_M68K; // NOTE: This is for Sega CD, not Z80!
 		static int Fake_Fetch;
-		
+
+		// Cycles per line.
+		// TODO: Replace with 3420 machine cycles per line.
 		static int CPL_M68K;
 		static int CPL_Z80;
 		static int Cycles_M68K;
 		static int Cycles_Z80;
-		
+
 		/** System initialization functions. **/
 	public:
 		static void UpdateTmssMapping(void);	// FIXME: Needs to be private?
@@ -119,14 +121,14 @@ class M68K_Mem
 
 		/** Bus acquisition timing. **/
 		static const int CYCLE_FOR_TAKE_Z80_BUS_GENESIS = 16;
-		
 
+		// Main 68000 bank IDs.
 		enum M68KBank_t {
 			// ROM cartridge.
 			M68K_BANK_CARTRIDGE = 0,	// M68K: $000000 - $9FFFFF
 
-			// I/O area.
-			M68K_BANK_IO,		// M68K: $A00000 - $BFFFFF
+			// I/O area. (MD)
+			M68K_BANK_MD_IO,	// M68K: $A00000 - $BFFFFF
 
 			// VDP area.
 			M68K_BANK_VDP,		// M68K: $C00000 - $DFFFFF (specialized mirroring)
@@ -137,6 +139,9 @@ class M68K_Mem
 			// TMSS ROM.
 			// Only if system version > 0 and $A14101 == 0.
 			M68K_BANK_TMSS_ROM,	// M68K: $000000 - $3FFFFF (mirrored every 2 KB)
+
+			// I/O area. (Pico)
+			M68K_BANK_PICO_IO,	// M68K: $800000 - $9FFFFF
 
 			// Unused bank. (Return 0xFF)
 			M68K_BANK_UNUSED = 0xFF
@@ -154,27 +159,36 @@ class M68K_Mem
 		 */
 		static const uint8_t msc_M68KBank_Def_MD[8];
 
+		/**
+		 * Default M68K bank type IDs for Pico.
+		 */
+		static const uint8_t msc_M68KBank_Def_Pico[8];
+
 		/** Read Byte functions. **/
 		static uint8_t M68K_Read_Byte_Ram(uint32_t address);
 		static uint8_t M68K_Read_Byte_Misc(uint32_t address);
 		static uint8_t M68K_Read_Byte_VDP(uint32_t address);
 		static uint8_t M68K_Read_Byte_TMSS_Rom(uint32_t address);
+		static uint8_t M68K_Read_Byte_Pico_IO(uint32_t address);
 
 		/** Read Word functions. **/
 		static uint16_t M68K_Read_Word_Ram(uint32_t address);
 		static uint16_t M68K_Read_Word_Misc(uint32_t address);
 		static uint16_t M68K_Read_Word_VDP(uint32_t address);
 		static uint16_t M68K_Read_Word_TMSS_Rom(uint32_t address);
+		static uint16_t M68K_Read_Word_Pico_IO(uint32_t address);
 
 		/** Write Byte functions. **/
 		static void M68K_Write_Byte_Ram(uint32_t address, uint8_t data);
 		static void M68K_Write_Byte_Misc(uint32_t address, uint8_t data);
 		static void M68K_Write_Byte_VDP(uint32_t address, uint8_t data);
+		static void M68K_Write_Byte_Pico_IO(uint32_t address, uint8_t data);
 
 		/** Write Word functions. **/
 		static void M68K_Write_Word_Ram(uint32_t address, uint16_t data);
 		static void M68K_Write_Word_Misc(uint32_t address, uint16_t data);
 		static void M68K_Write_Word_VDP(uint32_t address, uint16_t data);
+		static void M68K_Write_Word_Pico_IO(uint32_t address, uint16_t data);
 };
 
 }

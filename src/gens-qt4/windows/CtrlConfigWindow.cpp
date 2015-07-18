@@ -32,9 +32,6 @@
 #include "libgens/IO/IoManager.hpp"
 using LibGens::IoManager;
 
-// EmuMD has the I/O devices.
-#include "libgens/MD/EmuMD.hpp"
-
 // LibGensKeys: Key Manager
 #include "libgenskeys/KeyManager.hpp"
 using LibGensKeys::KeyManager;

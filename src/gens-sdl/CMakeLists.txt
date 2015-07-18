@@ -36,6 +36,7 @@ SET(gens-sdl_SRCS
 	SdlSWBackend.cpp
 	SdlGLBackend.cpp
 	GLBackend.cpp
+	str_lookup.cpp
 	)
 
 # Headers.
@@ -48,6 +49,7 @@ SET(gens-sdl_H
 	SdlSWBackend.hpp
 	SdlGLBackend.hpp
 	GLBackend.hpp
+	str_lookup.hpp
 	)
 
 # Main target.

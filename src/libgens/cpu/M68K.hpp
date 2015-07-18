@@ -55,6 +55,9 @@ class M68K
 			SYSID_MCD,
 			SYSID_32X,
 
+			// TODO: Not implemented...
+			SYSID_PICO,
+
 			SYSID_MAX
 		};
 		

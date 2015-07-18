@@ -399,20 +399,19 @@ Rom::RomFormat RomPrivate::DetectFormat(const uint8_t *header, size_t header_siz
  */
 Rom::MDP_SYSTEM_ID RomPrivate::DetectSystem(const uint8_t *header, size_t header_size, Rom::RomFormat fmt)
 {
-	if (fmt >= Rom::RFMT_CD_CUE)
-	{
+	if (fmt >= Rom::RFMT_CD_CUE) {
 		// CD-ROM. Assume Sega CD.
 		// TODO: Sega CD 32X detection.
 		return Rom::MDP_SYSTEM_MCD;
 	}
-	
+
 	// TODO: SMS/GG/SG-1000 detection.
-	
-	if (fmt == Rom::RFMT_SMD && header_size >= 0x4200)
-	{
+
+	if (fmt == Rom::RFMT_SMD && header_size >= 0x4200) {
 		// SMD format check.
-		if (header[0x0300] == 0xF9)
-		{
+
+		// Check for 32X.
+		if (header[0x0300] == 0xF9) {
 			if ((header[0x0282] == '3' && header[0x0283] == 'X') ||
 			    (header[0x0407] == 'A' && header[0x0408] == 'S'))
 			{
@@ -420,17 +419,17 @@ Rom::MDP_SYSTEM_ID RomPrivate::DetectSystem(const uint8_t *header, size_t header
 				return Rom::MDP_SYSTEM_32X;
 			}
 		}
-		else
-		{
-			// Assume MD.
-			return Rom::MDP_SYSTEM_MD;
-		}
-	}
-	else if (fmt == Rom::RFMT_MGD && header_size >= 0x200)
-	{
+
+		// TODO: Check for Pico?
+		// Then again, SMD doesn't support Pico...
+
+		// Assume MD.
+		return Rom::MDP_SYSTEM_MD;
+	} else if (fmt == Rom::RFMT_MGD && header_size >= 0x200) {
 		// MGD format check.
-		if (header[0x100] == 0xF9)
-		{
+
+		// Check for 32X.
+		if (header[0x100] == 0xF9) {
 			if ((header[0x0082] == '3' && header[0x0083] == 'X') ||
 			    (header[0x0207] == 'A' && header[0x0208] == 'S'))
 			{
@@ -438,19 +437,19 @@ Rom::MDP_SYSTEM_ID RomPrivate::DetectSystem(const uint8_t *header, size_t header
 				return Rom::MDP_SYSTEM_32X;
 			}
 		}
-		else
-		{
-			// Assume MD.
-			return Rom::MDP_SYSTEM_MD;
-		}
-	}
-	else
-	{
+
+		// TODO: Check for Pico?
+		// Then again, MGD doesn't support Pico...
+
+		// Assume MD.
+		return Rom::MDP_SYSTEM_MD;
+	} else {
 		// Plain binary format check.
+
+		// Check for 32X.
 		const char _32X_magic[] = {'3', '2', 'X'};
 		const char mars_magic[] = {'M', 'A', 'R', 'S'};
-		if (header_size >= 0x412 && header[0x0200] == 0x4E)
-		{
+		if (header_size >= 0x412 && header[0x0200] == 0x4E) {
 			if (!memcmp(&header[0x0105], _32X_magic, sizeof(_32X_magic)) ||
 			    !memcmp(&header[0x040E], mars_magic, sizeof(mars_magic)))
 			{
@@ -458,11 +457,18 @@ Rom::MDP_SYSTEM_ID RomPrivate::DetectSystem(const uint8_t *header, size_t header
 				return Rom::MDP_SYSTEM_32X;
 			}
 		}
-		else
-		{
-			// Assume MD.
-			return Rom::MDP_SYSTEM_MD;
+
+		// Check for Pico.
+		const char pico_magic[] = {'P', 'I', 'C', 'O'};
+		if (header_size >= 0x200) {
+			if (!memcmp(&header[0x0105], pico_magic, sizeof(pico_magic))) {
+				// Pico ROM.
+				return Rom::MDP_SYSTEM_PICO;
+			}
 		}
+
+		// Assume MD.
+		return Rom::MDP_SYSTEM_MD;
 	}
 	
 	// If all else fails, assume MD.

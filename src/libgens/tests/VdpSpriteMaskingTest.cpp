@@ -29,7 +29,6 @@
 // LibGens VDP.
 #include "Vdp/Vdp.hpp"
 #include "cpu/M68K_Mem.hpp"
-#include "MD/SysVersion.hpp"
 #include "Util/byteswap.h"
 
 // ARRAY_SIZE(x)

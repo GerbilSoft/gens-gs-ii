@@ -25,18 +25,24 @@
 using GensSdl::SdlHandler;
 using GensSdl::VBackend;
 
+#include "str_lookup.hpp"
+
 // LibGens
 #include "libgens/lg_main.hpp"
 #include "libgens/lg_osd.h"
 #include "libgens/Rom.hpp"
-#include "libgens/MD/EmuMD.hpp"
 #include "libgens/Util/MdFb.hpp"
 #include "libgens/Util/Timing.hpp"
 using LibGens::Rom;
-using LibGens::EmuContext;
-using LibGens::EmuMD;
 using LibGens::MdFb;
 using LibGens::Timing;
+
+// Emulation Context.
+#include "libgens/EmuContext/EmuMD.hpp"
+#include "libgens/EmuContext/EmuPico.hpp"
+using LibGens::EmuContext;
+using LibGens::EmuMD;
+using LibGens::EmuPico;
 
 // LibGensKeys
 #include "libgens/IO/IoManager.hpp"
@@ -81,14 +87,22 @@ using std::string;
 // TODO: Move to GensSdl?
 static SdlHandler *sdlHandler = nullptr;
 static Rom *rom = nullptr;
-static EmuMD *context = nullptr;
+static EmuContext *context = nullptr;
 static const char *rom_filename = nullptr;
+static bool isPico = false;
 
 static KeyManager *keyManager = nullptr;
-static const GensKey_t keyMap[] = {
+// MD 6-button keyMap.
+static const GensKey_t keyMap_md[] = {
 	KEYV_UP, KEYV_DOWN, KEYV_LEFT, KEYV_RIGHT,	// UDLR
 	KEYV_s, KEYV_d, KEYV_a, KEYV_RETURN,		// BCAS
 	KEYV_e, KEYV_w, KEYV_q, KEYV_RSHIFT		// ZYXM
+};
+// Sega Pico keyMap.
+static const GensKey_t keyMap_pico[] = {
+	KEYV_UP, KEYV_DOWN, KEYV_LEFT, KEYV_RIGHT,		// UDLR
+	KEYV_SPACE, KEYV_PAGEDOWN, KEYV_PAGEUP, KEYV_RETURN	// BCAS
+	, 0, 0, 0, 0
 };
 
 namespace GensSdl {
@@ -121,6 +135,15 @@ static void gsdl_osd(OsdType osd_type, int param)
 			break;
 		case OSD_EEPROM_AUTOSAVE:
 			printf("EEPROM autosaved. (%d bytes)\n", param);
+			break;
+		case OSD_PICO_PAGESET:
+			printf("Pico: Page set to page %d.\n", param);
+			break;
+		case OSD_PICO_PAGEUP:
+			printf("Pico: PgUp to page %d.\n", param);
+			break;
+		case OSD_PICO_PAGEDOWN:
+			printf("Pico: PgDn to page %d.\n", param);
 			break;
 		default:
 			// Unknown OSD type.
@@ -241,6 +264,7 @@ static void processSdlEvent(const SDL_Event &event) {
 						keyManager->keyDown(SdlHandler::scancodeToGensKey(event.key.keysym.scancode));
 					}
 					break;
+
 				default:
 					// Send the key to the KeyManager.
 					keyManager->keyDown(SdlHandler::scancodeToGensKey(event.key.keysym.scancode));
@@ -326,12 +350,58 @@ int main(int argc, char *argv[])
 		rom->select_z_entry(rom->get_z_entry_list());
 	}
 
+	// Check the ROM format.
+	switch (rom->romFormat()) {
+		case Rom::RFMT_BINARY:
+			// ROM format is supported.
+			break;
+
+		default:
+			// ROM format is not supported.
+			const char *rom_format = GensSdl::romFormatToString(rom->romFormat());
+			fprintf(stderr, "Error loading ROM file %s: ROM is in %s format.\nOnly plain binary ROMs are supported.\n",
+				rom_filename, rom_format);
+			return EXIT_FAILURE;
+	}
+
+	// Check the ROM system.
+	// TODO: Split into a separate function?
+	switch (rom->sysId()) {
+		case Rom::MDP_SYSTEM_MD:
+			// System is supported.
+			isPico = false;
+			break;
+
+		case Rom::MDP_SYSTEM_PICO:
+			// System is supported.
+			isPico = true;
+			break;
+
+		default:
+			// System is not supported.
+			const char *rom_sysId = GensSdl::sysIdToString(rom->sysId());
+			fprintf(stderr, "Error loading ROM file %s: ROM is for %s.\nOnly Mega Drive ROMs are supported.\n",
+				rom_filename, rom_sysId);
+			return EXIT_FAILURE;
+	}
+
 	// Set the SRAM/EEPROM path.
 	LibGens::EmuContext::SetPathSRam(GensSdl::getConfigDir("SRAM").c_str());
 
 	// Create the emulation context.
-	context = new EmuMD(rom);
-	if (!context->isRomOpened()) {
+	// TODO: Factory class that uses rom->sysId()?
+	switch (rom->sysId()) {
+		case Rom::MDP_SYSTEM_MD:
+			context = new EmuMD(rom);
+			break;
+		case Rom::MDP_SYSTEM_PICO:
+			context = new EmuPico(rom);
+			break;
+		default:
+			context = nullptr;
+			break;
+	}
+	if (!context || !context->isRomOpened()) {
 		// Error loading the ROM into EmuMD.
 		// TODO: Error code?
 		fprintf(stderr, "Error initializing EmuContext for %s: (TODO get error code)\n",
@@ -377,9 +447,17 @@ int main(int argc, char *argv[])
 
 	// Initialize the I/O Manager with a default key layout.
 	keyManager = new KeyManager();
-	keyManager->setIoType(IoManager::VIRTPORT_1, IoManager::IOT_6BTN);
-	keyManager->setKeyMap(IoManager::VIRTPORT_1, keyMap, ARRAY_SIZE(keyMap));
-	keyManager->setIoType(IoManager::VIRTPORT_2, IoManager::IOT_NONE);
+	if (!isPico) {
+		// Standard Mega Drive controllers.
+		keyManager->setIoType(IoManager::VIRTPORT_1, IoManager::IOT_6BTN);
+		keyManager->setKeyMap(IoManager::VIRTPORT_1, keyMap_md, ARRAY_SIZE(keyMap_md));
+		keyManager->setIoType(IoManager::VIRTPORT_2, IoManager::IOT_NONE);
+	} else {
+		// Sega Pico controller.
+		keyManager->setIoType(IoManager::VIRTPORT_1, IoManager::IOT_PICO);
+		keyManager->setKeyMap(IoManager::VIRTPORT_1, keyMap_pico, ARRAY_SIZE(keyMap_pico));
+		keyManager->setIoType(IoManager::VIRTPORT_2, IoManager::IOT_NONE);
+	}
 
 	while (GensSdl::running) {
 		SDL_Event event;

@@ -175,7 +175,7 @@ void IoTeamPlayer::update(void)
 				case TP_PT_3BTN:
 				case TP_PT_6BTN: {
 					const int shift = state * 4;
-					data = (tpDev->buttons >> shift) & 0xF;
+					data = (tpDev->getButtons() >> shift) & 0xF;
 					break;
 				}
 
@@ -189,7 +189,7 @@ void IoTeamPlayer::update(void)
 							break;
 						case 1:	// MOUSE_BUTTONS
 							// NOTE: Active high!
-							data = ~mouse->buttons & 0xF;
+							data = ~mouse->getButtons() & 0xF;
 							break;
 						case 2:	// MOUSE_X_MSN
 							data = mouse->latch.relX >> 4;

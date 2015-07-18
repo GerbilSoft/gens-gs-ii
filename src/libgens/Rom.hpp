@@ -33,10 +33,6 @@
 // Decompressor subsystem.
 #include "Decompressor/Decompressor.hpp"
 
-// SysVersion::RegionCode_t
-// TODO: Move somewhere else.
-#include "MD/SysVersion.hpp"
-
 /**
  * ROM_HEADER_SIZE: Number of bytes used for ROM type detection.
  */

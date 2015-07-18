@@ -43,14 +43,16 @@
 // paused_t, StretchMode_t
 #include "gqt4_datatypes.h"
 
-// Emulation Context.
-#include "libgens/EmuContext.hpp"
-
 // FPS manager.
 #include "FpsManager.hpp"
 
 // gqt4_cfg
 #include "gqt4_main.hpp"
+
+// LibGens classes.
+namespace LibGens {
+	class EmuContext;
+}
 
 // TODO: Minimum gcc version, other compilers?
 #ifdef __GNUC__

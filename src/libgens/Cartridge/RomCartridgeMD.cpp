@@ -25,12 +25,12 @@
 
 #include <libgens/config.libgens.h>
 
-#include "../EmuContext.hpp"
-#include "../Util/byteswap.h"
-#include "../macros/common.h"
-#include "../Rom.hpp"
-#include "../cpu/M68K.hpp"
-#include "../lg_osd.h"
+#include "EmuContext/EmuContext.hpp"
+#include "Util/byteswap.h"
+#include "macros/common.h"
+#include "Rom.hpp"
+#include "cpu/M68K.hpp"
+#include "lg_osd.h"
 
 // ZOMG
 #include "libzomg/Zomg.hpp"
@@ -417,20 +417,32 @@ int RomCartridgeMD::loadRom(void)
 	// otherwise, d->rom->rom_crc32() will return 0.
 	initMemoryMap();
 
-	// Initialize EEPRom.
-	// EEPRom is only used if the ROM is in the EEPRom class's database.
-	// Otherwise, SRam is used.
-	int cartSaveSize = initEEPRom();
-	if (cartSaveSize >= 0) {
-		// EEPRom was initialized.
-		if (cartSaveSize > 0)
-			lg_osd(OSD_EEPROM_LOAD, cartSaveSize);
+	if (d->rom->sysId() != Rom::MDP_SYSTEM_PICO) {
+		// Initialize EEPRom.
+		// EEPRom is only used if the ROM is in the EEPRom class's database.
+		// Otherwise, SRam is used.
+		int cartSaveSize = initEEPRom();
+		if (cartSaveSize >= 0) {
+			// EEPRom was initialized.
+			if (cartSaveSize > 0)
+				lg_osd(OSD_EEPROM_LOAD, cartSaveSize);
+		} else {
+			// EEPRom was not initialized.
+			// Initialize SRam.
+			cartSaveSize = initSRam();
+			if (cartSaveSize > 0)
+				lg_osd(OSD_SRAM_LOAD, cartSaveSize);
+		}
 	} else {
-		// EEPRom was not initialized.
-		// Initialize SRam.
-		cartSaveSize = initSRam();
-		if (cartSaveSize > 0)
-			lg_osd(OSD_SRAM_LOAD, cartSaveSize);
+		// Pico cartridges don't have SRAM/EEPROM.
+		m_SRam.reset();
+		m_SRam.setOn(false);
+		m_SRam.setWrite(false);
+		m_SRam.setStart(1);
+		m_SRam.setEnd(0);
+
+		d->eprType = -1;
+		m_EEPRom.setEEPRomType(-1);
 	}
 
 	// ...and we're done here.
