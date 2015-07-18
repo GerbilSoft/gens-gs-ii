@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * FindCdromWin32.cpp: Find CD-ROM drives: Win32 version.                  *
  *                                                                         *
- * Copyright (c) 2011-2014 by David Korth.                                 *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -37,12 +37,7 @@
 #endif /* _WIN32_WINNT */
 
 // Win32 includes.
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
 #include <windows.h>
-
 #include <shellapi.h>
 #include <commctrl.h>
 #include <commoncontrols.h>
@@ -54,8 +49,7 @@ static const GUID Gens_IID_IImageList = {0x46EB5926, 0x582E, 0x4017, {0x9F, 0xDF
 #define MAKE_FUNCPTR(f) typeof(f) * p##f
 #endif
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class FindCdromWin32Private
 {

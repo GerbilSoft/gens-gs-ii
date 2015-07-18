@@ -5,7 +5,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -35,10 +35,6 @@
 #include <string.h>
 
 // Win32 includes.
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
 #include <windows.h>
 
 // DEP policy (requires _WIN32_WINNT >= 0x0600)
@@ -129,8 +125,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
 // QtGui includes.
 #include <QtGui/QFont>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 /**
  * winEventFilter(): Win32 event filter.

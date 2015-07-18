@@ -2,7 +2,7 @@
  * libgenstext: Gens/GS II Text Manipulation Library.                      *
  * Encoding.cpp: Character encoding functions.                             *
  *                                                                         *
- * Copyright (c) 2009-2013 by David Korth.                                 *
+ * Copyright (c) 2009-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -26,10 +26,6 @@
 
 // Determine which character set decoder to use.
 #if defined(_WIN32)
-# define WIN32_LEAN_AND_MEAN
-# ifndef NOMINMAX
-#  define NOMINMAX
-# endif
 # include <windows.h>
 #elif defined(HAVE_ICONV)
 #  include <iconv.h>
@@ -49,8 +45,7 @@ using std::u16string;
 #include <cstdlib>
 #include <cstring>
 
-namespace LibGensText
-{
+namespace LibGensText {
 
 #if defined(_WIN32)
 /**

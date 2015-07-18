@@ -62,10 +62,6 @@
 
 // HANG() macro.
 #ifdef Q_OS_WIN32
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
 #include <windows.h>
 #define HANG() do { Sleep(INFINITE); } while (1)
 #else

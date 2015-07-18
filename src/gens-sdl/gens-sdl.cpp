@@ -54,8 +54,6 @@ using LibGensKeys::KeyManager;
 // OS-specific includes.
 #ifdef _WIN32
 // Windows
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
 #include <windows.h>
 #include "libgens/Win32/W32U_mini.h"
 #else

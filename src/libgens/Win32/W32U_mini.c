@@ -24,10 +24,18 @@
 #include "W32U_mini.h"
 
 // C includes.
+#include <wchar.h>
 #include <stdlib.h>
 #include <errno.h>
+
 // Win32 includes.
 #include <io.h>
+
+// direct.h calls some "deprecated" functions directly.
+#ifdef mkdir
+#undef mkdir
+#endif
+#include <direct.h>
 
 /**
  * Indicates if the system is Unicode.
@@ -156,12 +164,9 @@ fail:
 	return fRet;
 }
 
-// Make sure access() and _access() aren't redefined.
+// Make sure access() isn't redefined.
 #ifdef access
 #undef access
-#endif
-#ifdef _access
-#undef _access
 #endif
 
 /**
@@ -209,6 +214,11 @@ fail:
 	free(pathW);
 	return ret;
 }
+
+// Make sure mkdir() isn't redefined.
+#ifdef mkdir
+#undef mkdir
+#endif
 
 /**
  * Create a directory.
