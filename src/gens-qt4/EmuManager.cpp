@@ -343,76 +343,64 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	const QChar chrSpace(L' ');
 
 	// Check the ROM format.
-	// TODO: Remove this once all ROM formats are supported.
-	switch (rom->romFormat()) {
-		case Rom::RFMT_BINARY:
-			// ROM format is supported.
-			break;
+	if (!EmuContextFactory::isRomFormatSupported(rom)) {
+		// ROM format is not supported.
+		const Rom::RomFormat errRomFormat = rom->romFormat();
+		delete rom;
 
-		default: {
-			// ROM format is not supported.
-			const Rom::RomFormat errRomFormat = rom->romFormat();
-			delete rom;
-
-			// Get the ROM format.
-			QString sRomFormat = RomFormat(errRomFormat);
-			if (sRomFormat.isEmpty()) {
-				//: Unknown ROM format. (EmuManager::RomFormat() returned an empty string.)
-				sRomFormat = tr("(unknown)", "rom-format");
-			}
-
-			// TODO: Specify GensWindow as parent window.
-			// TODO: Move this out of EmuManager and simply use return codes?
-			// (how would we indicate what format the ROM was in...)
-			QMessageBox::critical(nullptr,
-				//: A ROM image was selected in a format that Gens/GS II does not currently support. (error title)
-				tr("Unsupported ROM Format"),
-				//: A ROM image was selected in a format that Gens/GS II does not currently support. (error description)
-				tr("The selected ROM image is in a format that is not currently supported by Gens/GS II.") +
-				chrNewline + chrNewline +
-				//: Indicate what format the ROM image is in.
-				tr("Selected ROM image format: %1").arg(sRomFormat) +
-				chrNewline + chrNewline +
-				//: List of ROM formats that Gens/GS II currently supports.
-				tr("Supported ROM formats:") + chrNewline +
-				chrBullet + chrSpace + RomFormat(LibGens::Rom::RFMT_BINARY)
-				);
-			return 3;
+		// Get the ROM format.
+		QString sRomFormat = RomFormat(errRomFormat);
+		if (sRomFormat.isEmpty()) {
+			//: Unknown ROM format. (EmuManager::RomFormat() returned an empty string.)
+			sRomFormat = tr("(unknown)", "rom-format");
 		}
+
+		// TODO: Specify GensWindow as parent window.
+		// TODO: Move this out of EmuManager and simply use return codes?
+		// (how would we indicate what format the ROM was in...)
+		QMessageBox::critical(nullptr,
+			//: A ROM image was selected in a format that Gens/GS II does not currently support. (error title)
+			tr("Unsupported ROM Format"),
+			//: A ROM image was selected in a format that Gens/GS II does not currently support. (error description)
+			tr("The selected ROM image is in a format that is not currently supported by Gens/GS II.") +
+			chrNewline + chrNewline +
+			//: Indicate what format the ROM image is in.
+			tr("Selected ROM image format: %1").arg(sRomFormat) +
+			chrNewline + chrNewline +
+			//: List of ROM formats that Gens/GS II currently supports.
+			tr("Supported ROM formats:") + chrNewline +
+			chrBullet + chrSpace + RomFormat(LibGens::Rom::RFMT_BINARY) + chrNewline +
+			chrBullet + chrSpace + RomFormat(LibGens::Rom::RFMT_SMD)
+			// NOTE: Not listing RFMT_SMD_SPLIT because it isn't fully supported.
+			);
+		return 3;
 	}
 
 	// Check the system ID.
-	switch (rom->sysId()) {
-		case Rom::MDP_SYSTEM_MD:
-		case Rom::MDP_SYSTEM_PICO:
-			// System is supported.
-			break;
+	if (!EmuContextFactory::isRomSystemSupported(rom)) {
+		// System is not supported.
+		const LibGens::Rom::MDP_SYSTEM_ID errSysId = rom->sysId();
+		delete rom;
 
-		default: {
-			// System is not supported.
-			const LibGens::Rom::MDP_SYSTEM_ID errSysId = rom->sysId();
-			delete rom;
-
-			// TODO: Specify GensWindow as parent window.
-			// TODO: Move this out of EmuManager and simply use return codes?
-			// (how would we indicate what system the ROM is for...)
-			QMessageBox::critical(nullptr,
-				//: A ROM image was selected for a system that Gens/GS II does not currently support. (error title)
-				tr("Unsupported System"),
-				//: A ROM image was selected for a system that Gens/GS II does not currently support. (error description)
-				tr("The selected ROM image is designed for a system that"
-				   " is not currently supported by Gens/GS II.") +
-				chrNewline + chrNewline +
-				//: Indicate what system the ROM image is for.
-				tr("Selected ROM's system: %1").arg(SysName_l(errSysId)) +
-				chrNewline + chrNewline +
-				//: List of systems that Gens/GS II currently supports.
-				tr("Supported systems:") + chrNewline +
-				chrBullet + chrSpace + SysName_l(LibGens::Rom::MDP_SYSTEM_MD) + chrNewline +
-				chrBullet + chrSpace + SysName_l(LibGens::Rom::MDP_SYSTEM_PICO)
-				);
-			return 4;
-		}
+		// TODO: Specify GensWindow as parent window.
+		// TODO: Move this out of EmuManager and simply use return codes?
+		// (how would we indicate what system the ROM is for...)
+		QMessageBox::critical(nullptr,
+			//: A ROM image was selected for a system that Gens/GS II does not currently support. (error title)
+			tr("Unsupported System"),
+			//: A ROM image was selected for a system that Gens/GS II does not currently support. (error description)
+			tr("The selected ROM image is designed for a system that"
+				" is not currently supported by Gens/GS II.") +
+			chrNewline + chrNewline +
+			//: Indicate what system the ROM image is for.
+			tr("Selected ROM's system: %1").arg(SysName_l(errSysId)) +
+			chrNewline + chrNewline +
+			//: List of systems that Gens/GS II currently supports.
+			tr("Supported systems:") + chrNewline +
+			chrBullet + chrSpace + SysName_l(LibGens::Rom::MDP_SYSTEM_MD) + chrNewline +
+			chrBullet + chrSpace + SysName_l(LibGens::Rom::MDP_SYSTEM_PICO)
+			);
+		return 4;
 	}
 
 	// Determine the system region code.
