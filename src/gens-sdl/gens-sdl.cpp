@@ -362,7 +362,7 @@ int main(int argc, char *argv[])
 	if (!EmuContextFactory::isRomSystemSupported(rom)) {
 		// System is not supported.
 		const char *rom_sysId = GensSdl::sysIdToString(rom->sysId());
-		fprintf(stderr, "Error loading ROM file %s: ROM is for %s.\nOnly Mega Drive ROMs are supported.\n",
+		fprintf(stderr, "Error loading ROM file %s: ROM is for %s.\nOnly Mega Drive and Pico ROMs are supported.\n",
 			rom_filename, rom_sysId);
 		return EXIT_FAILURE;
 	}
