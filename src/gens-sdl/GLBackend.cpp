@@ -37,6 +37,17 @@ using LibGens::MdFb;
 #define SDLGL_UNSIGNED_BYTE GL_UNSIGNED_BYTE
 #endif
 
+// MSVC ships with *ancient* GL headers.
+// TODO: Use GLEW.
+#if !defined(GL_BGRA) && defined(GL_BGRA_EXT)
+#define GL_BGRA GL_BGRA_EXT
+#endif
+
+#if defined(GL_UNSIGNED_SHORT_1_5_5_5_REV) && \
+    defined(GL_UNSIGNED_SHORT_5_6_5)
+#define GL_HEADER_HAS_PACKED_PIXELS
+#endif
+
 namespace GensSdl {
 
 GLBackend::GLBackend()
@@ -289,6 +300,41 @@ void GLBackend::reallocTexture(void)
 	// Get the current color depth.
 	m_lastBpp = m_fb->bpp();
 
+	// Determine the texture format and type.
+	// TODO: If using 15/16, make sure PACKED PIXELS are supported.
+	switch (m_lastBpp) {
+#ifdef GL_HEADER_HAS_PACKED_PIXELS
+		// TODO: Verify that packed pixels is actually supported using GLEW.
+		case MdFb::BPP_15:
+			m_colorComponents = 4;
+			m_texFormat = GL_BGRA;
+			m_texType = GL_UNSIGNED_SHORT_1_5_5_5_REV;
+			break;
+
+		case MdFb::BPP_16:
+			m_colorComponents = 3;
+			m_texFormat = GL_RGB;
+			m_texType = GL_UNSIGNED_SHORT_5_6_5;
+			break;
+#else /* !GL_HEADER_HAS_PACKED_PIXELS */
+		case MdFb::BPP_15:
+		case MdFb::BPP_16:
+			// GL_EXT_packed_pixels / GL_APPLE_packed_pixels
+			// is required for 15-bit and 16-bit color.
+			// TODO: Error code?
+			m_tex = 0;
+			m_lastBpp = MdFb::BPP_MAX;
+			return;
+#endif /* GL_HEADER_HAS_PACKED_PIXELS */
+
+		case MdFb::BPP_32:
+		default:
+			m_colorComponents = 4;
+			m_texFormat = GL_BGRA;
+			m_texType = SDLGL_UNSIGNED_BYTE;
+			break;
+	}
+
 	// Create and initialize a GL texture.
 	// TODO: Add support for NPOT textures and/or GL_TEXTURE_RECTANGLE_ARB.
 	glEnable(GL_TEXTURE_2D);
@@ -301,29 +347,6 @@ void GLBackend::reallocTexture(void)
 	// TODO: Make it selectable: GL_LINEAR, GL_NEAREST
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	// Determine the texture format and type.
-	// TODO: If using 15/16, make sure PACKED PIXELS are supported.
-	switch (m_lastBpp) {
-		case MdFb::BPP_15:
-			m_colorComponents = 4;
-			m_texFormat = GL_BGRA;
-			m_texType = GL_UNSIGNED_SHORT_1_5_5_5_REV;
-			break;
-
-		case MdFb::BPP_16:
-			m_colorComponents = 3;
-			m_texFormat = GL_RGB;
-			m_texType = GL_UNSIGNED_SHORT_5_6_5;
-			break;
-
-		case MdFb::BPP_32:
-		default:
-			m_colorComponents = 4;
-			m_texFormat = GL_BGRA;
-			m_texType = SDLGL_UNSIGNED_BYTE;
-			break;
-	}
 
 	// TODO: Determine texture size based on MDP renderer.
 	m_texVisW = m_fb->pxPerLine();
