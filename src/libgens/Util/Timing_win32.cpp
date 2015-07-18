@@ -99,6 +99,9 @@ Timing::Timing()
 			m_tMethod = TM_GETTICKCOUNT;
 		}
 	}
+
+	// Reset the timer base.
+	resetBase();
 }
 
 /**
@@ -115,29 +118,57 @@ Timing::~Timing()
 }
 
 /**
+ * Reset the timer base.
+ * This will invalidate all previous timer values
+ * when compared to new timer values.
+ */
+void Timing::resetBase(void)
+{
+	switch (m_tMethod) {
+		case TM_GETTICKCOUNT:
+		default:
+			m_timer_base = GetTickCount();
+			break;
+		case TM_GETTICKCOUNT64:
+			m_timer_base = d->pGetTickCount64();
+			break;
+		case TM_QUERYPERFORMANCECOUNTER: {
+			LARGE_INTEGER perf_ctr;
+			QueryPerformanceCounter(&perf_ctr);
+			m_timer_base = perf_ctr.QuadPart;
+			break;
+		}
+	}
+}
+
+/**
  * Get the current time.
  * @return Current time. (double-precision floating point)
  */
 double Timing::getTimeD(void)
 {
-	// Win32-specific timer functions.
-	LARGE_INTEGER perf_ctr;
+	double timer;
 	switch (m_tMethod) {
 		case TM_GETTICKCOUNT:
 		default:
-			// GetTickCount().
 			// FIXME: Prevent overflow.
-			return ((double)GetTickCount() / 1000.0);
+			timer = (double)(GetTickCount() - m_timer_base) / 1000.0;
+			break;
 
 		case TM_GETTICKCOUNT64:
-			// GetTickCount64().
-			return ((double)d->pGetTickCount64() / 1000.0);
+			timer = (double)(d->pGetTickCount64() - m_timer_base) / 1000.0;
+			break;
 
-		case TM_QUERYPERFORMANCECOUNTER:
-			// QueryPerformanceCounter().
+		case TM_QUERYPERFORMANCECOUNTER: {
+			LARGE_INTEGER perf_ctr;
 			QueryPerformanceCounter(&perf_ctr);
-			return (((double)(perf_ctr.QuadPart)) / ((double)(d->perfFreq.QuadPart)));
+			timer = (((double)(perf_ctr.QuadPart - m_timer_base)) /
+				 ((double)(d->perfFreq.QuadPart)));
+			break;
+		}
 	}
+
+	return timer;
 }
 
 /**
@@ -146,27 +177,28 @@ double Timing::getTimeD(void)
  */
 uint64_t Timing::getTime(void)
 {
-	// Win32-specific timer functions.
-	// TODO: Should TM_GETTIMEOFDAY / TM_CLOCK_GETTIME be supported here?
-	// TODO: Prevent overflow.
-	LARGE_INTEGER perf_ctr;
+	uint64_t timer;
 	switch (m_tMethod) {
 		case TM_GETTICKCOUNT:
 		default:
-			// GetTickCount().
 			// FIXME: Prevent overflow.
-			return ((uint64_t)GetTickCount() * 1000);
+			timer = (uint64_t)(GetTickCount() - m_timer_base) * 1000;
+			break;
 
 		case TM_GETTICKCOUNT64:
-			// GetTickCount64().
-			return (d->pGetTickCount64() * 1000);
+			timer = (d->pGetTickCount64() - m_timer_base) * 1000;
+			break;
 
-		case TM_QUERYPERFORMANCECOUNTER:
-			// QueryPerformanceCounter().
+		case TM_QUERYPERFORMANCECOUNTER: {
+			LARGE_INTEGER perf_ctr;
 			QueryPerformanceCounter(&perf_ctr);
 			const uint64_t divisor = d->perfFreq.QuadPart / 1000000;
-			return (perf_ctr.QuadPart / divisor);
+			timer = (perf_ctr.QuadPart - m_timer_base) / divisor;
+			break;
+		}
 	}
+
+	return timer;
 }
 
 }

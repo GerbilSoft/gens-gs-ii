@@ -45,22 +45,15 @@ Timing::Timing()
 #if defined(HAVE_CLOCK_GETTIME)
 	// Use clock_gettime().
 	m_tMethod = TM_CLOCK_GETTIME;
-
-	// Initialize the base value for seconds.
-	struct timespec ts;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-	m_timer_base = ts.tv_sec;
 #else
 	// clock_gettime() is not available.
 	// Fall back to gettimeofday().
 	// NOTE: gettimeofday() is not guaranteed to be monotonic.
 	m_tMethod = TM_GETTIMEOFDAY;
+#endif
 
-	// Initialize the base value for seconds.
-	struct timeval tv;
-	gettimeofday(&tv, nullptr);
-	m_timer_base = tv.tv_sec;
-#endif /* _WIN32 */
+	// Reset the timer base.
+	resetBase();
 }
 
 /**
@@ -68,6 +61,24 @@ Timing::Timing()
  */
 Timing::~Timing()
 { }
+
+/**
+ * Reset the timer base.
+ * This will invalidate all previous timer values
+ * when compared to new timer values.
+ */
+void Timing::resetBase(void)
+{
+#if defined(HAVE_CLOCK_GETTIME)
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	m_timer_base = ts.tv_sec;
+#else
+	struct timeval tv;
+	gettimeofday(&tv, nullptr);
+	m_timer_base = tv.tv_sec;
+#endif
+}
 
 /**
  * Get the current time.

@@ -61,6 +61,9 @@ Timing::Timing(void)
 	// Get the Mach timebase information.
 	mach_timebase_info(&d->timebase_info);
 	m_tMethod = TM_MACH_ABSOLUTE_TIME;
+
+	// Reset the timer base.
+	resetBase();
 }
 
 /**
@@ -72,13 +75,23 @@ Timing::~Timing()
 }
 
 /**
+ * Reset the timer base.
+ * This will invalidate all previous timer values
+ * when compared to new timer values.
+ */
+void Timing::resetBase(void)
+{
+	m_timer_base = mach_absolute_time();
+}
+
+/**
  * Get the current time.
  * @return Current time. (double-precision floating point)
  */
 double Timing::getTimeD(void)
 {
 	// Mach absolute time. (Mac OS X)
-	uint64_t abs_time = mach_absolute_time();
+	uint64_t abs_time = mach_absolute_time() - m_timer_base;
 	double d_abs_time = (double)abs_time * (double)m_timebase_info.numer / (double)m_timebase_info.denom;
 	return (d_abs_time / 1.0e9);
 }
@@ -90,7 +103,7 @@ double Timing::getTimeD(void)
 uint64_t Timing::getTime(void)
 {
 	// Mach absolute time. (Mac OS X)
-	uint64_t abs_time = mach_absolute_time();
+	uint64_t abs_time = mach_absolute_time() - m_timer_base;
 	// d_abs_time contains time in nanoseconds.
 	double d_abs_time = (double)abs_time * (double)m_timebase_info.numer / (double)m_timebase_info.denom;
 	// Convert to microseconds.

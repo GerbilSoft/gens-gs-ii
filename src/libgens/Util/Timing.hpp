@@ -79,6 +79,13 @@ class Timing
 		static const char *GetTimingMethodName(TimingMethod tMethod);
 
 		/**
+		 * Reset the timer base.
+		 * This will invalidate all previous timer values
+		 * when compared to new timer values.
+		 */
+		void resetBase(void);
+
+		/**
 		 * Get the elapsed time in seconds.
 		 * @return Elapsed time, in seconds.
 		 */
