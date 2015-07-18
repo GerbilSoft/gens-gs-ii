@@ -134,8 +134,8 @@ void GLBackend::update(bool fb_dirty)
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 8); // TODO: 16 on amd64?
 
 		glTexSubImage2D(GL_TEXTURE_2D, 0,
-				0, 0,			// x/y offset
-				m_texW, m_texH,		// width/height
+				0, 0,					// x/y offset
+				m_fb->pxPerLine(), m_fb->numLines(),	// width/height
 				m_texFormat, m_texType, screen);
 
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
