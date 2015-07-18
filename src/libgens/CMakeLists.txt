@@ -74,7 +74,6 @@ SET(libgens_SRCS
 	Effects/CrazyEffect.cpp
 	Effects/PausedEffect.cpp
 	Effects/FastBlur.cpp
-	Util/Timing.cpp
 	cpu/Z80.cpp
 	cpu/Z80_MD_Mem.cpp
 	Save/SRam.cpp
@@ -89,6 +88,30 @@ SET(libgens_SRCS
 	Save/EEPRomI2C_DB.cpp
 	Save/EEPRomI2C_Debug.cpp
 	)
+
+# OS-specific timing functions.
+SET(libgens_TIMING_SRCS
+	Util/Timing.cpp
+	)
+SET(libgens_TIMING_H
+	Util/Timing.hpp
+	)
+IF(WIN32)
+	SET(libgens_TIMING_SRCS
+		${libgens_TIMING_SRCS}
+		Util/Timing_win32.cpp
+		)
+ELSEIF(APPLE)
+	SET(libgens_TIMING_SRCS
+		${libgens_TIMING_SRCS}
+		Util/Timing_mac.cpp
+		)
+ELSE()
+	SET(libgens_TIMING_SRCS
+		${libgens_TIMING_SRCS}
+		Util/Timing_unix.cpp
+		)
+ENDIF()
 
 SET(libgens_EMUCONTEXT_SRCS
 	EmuContext/EmuContext.cpp
@@ -245,6 +268,8 @@ ENDIF()
 
 ADD_LIBRARY(gens STATIC
 	${libgens_SRCS}
+	${libgens_TIMING_SRCS}
+	${libgens_TIMING_H}
 	${libgens_EMUCONTEXT_SRCS}
 	${libgens_EMUCONTEXT_H}
 	${libgens_VDP_SRCS}

@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * Timing.hpp: Timing functions.                                           *
+ * Timing_mac.cpp: Timing functions. (Mac OS X)                            *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -23,31 +23,78 @@
 
 #include "Timing.hpp"
 
+#ifndef __APPLE__
+#error This file is only for Windows systems.
+#endif
+
+#include <mach/mach_time.h>
+
 namespace LibGens {
 
-/**
- * Get the name of a timing method.
- * @param tMethod Timing method.
- * @return Timing method name. (ASCII)
- */
-const char *Timing::GetTimingMethodName(TimingMethod tMethod)
+class TimingPrivate
 {
-	switch (tMethod) {
-		default:
-			return "(unknown)";
-		case TM_GETTIMEOFDAY:
-			return "gettimeofday";
-		case TM_CLOCK_GETTIME:
-			return "clock_gettime";
-		case TM_GETTICKCOUNT:
-			return "GetTickCount";
-		case TM_GETTICKCOUNT64:
-			return "GetTickCount64";
-		case TM_QUERYPERFORMANCECOUNTER:
-			return "QueryPerformanceCounter";
-		case TM_MACH_ABSOLUTE_TIME:
-			return "mach_absolute_time";
-	}
+	public:
+		TimingPrivate();
+
+	public:
+		// TODO: The following should probably be static,
+		// since they're not going to change while the
+		// system is running.
+
+		// Mach timebase information.
+		mach_timebase_info_data_t timebase_info;
+};
+
+TimingPrivate::TimingPrivate()
+{
+	// TODO: Initialize timebase_info here?
+}
+
+/**
+ * Initialize the timing subsystem.
+ */
+Timing::Timing(void)
+	: d(new TimingPrivate())
+	, m_tMethod(TM_UNKNOWN)
+	, m_timer_base(0)
+{
+	// Get the Mach timebase information.
+	mach_timebase_info(&d->timebase_info);
+	m_tMethod = TM_MACH_ABSOLUTE_TIME;
+}
+
+/**
+ * Shut down the timing subsystem.
+ */
+Timing::~Timing()
+{
+	delete d;
+}
+
+/**
+ * Get the current time.
+ * @return Current time. (double-precision floating point)
+ */
+double Timing::getTimeD(void)
+{
+	// Mach absolute time. (Mac OS X)
+	uint64_t abs_time = mach_absolute_time();
+	double d_abs_time = (double)abs_time * (double)m_timebase_info.numer / (double)m_timebase_info.denom;
+	return (d_abs_time / 1.0e9);
+}
+
+/**
+ * Get the elapsed time in microseconds.
+ * @return Elapsed time, in microseconds.
+ */
+uint64_t Timing::getTime(void)
+{
+	// Mach absolute time. (Mac OS X)
+	uint64_t abs_time = mach_absolute_time();
+	// d_abs_time contains time in nanoseconds.
+	double d_abs_time = (double)abs_time * (double)m_timebase_info.numer / (double)m_timebase_info.denom;
+	// Convert to microseconds.
+	return (uint64_t)(d_abs_time / 1000.0);
 }
 
 }
