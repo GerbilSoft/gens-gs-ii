@@ -1031,8 +1031,8 @@ void GLBackend::printOsdLine(int x, int y, const QString &msg)
 	glTexCoordPointer(2, GL_FLOAT, 0, txc);
 	glDrawArrays(GL_QUADS, 0, msg.size()*4);
 
-	delete txc;
-	delete vtx;
+	delete[] txc;
+	delete[] vtx;
 }
 
 /**
