@@ -39,12 +39,11 @@ bool EmuContextFactory::isRomFormatSupported(const Rom *rom)
 {
 	switch (rom->romFormat()) {
 		case Rom::RFMT_BINARY:
-			return true;
-
 		case Rom::RFMT_SMD:
 		case Rom::RFMT_SMD_SPLIT:
-			// TODO: Add support.
-			return false;
+			// NOTE: Split SMD isn't fully supported.
+			// Only the first segment will be loaded.
+			return true;
 
 		default:
 			break;

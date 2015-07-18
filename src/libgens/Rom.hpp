@@ -33,15 +33,9 @@
 // Decompressor subsystem.
 #include "Decompressor/Decompressor.hpp"
 
-/**
- * ROM_HEADER_SIZE: Number of bytes used for ROM type detection.
- */
-#define ROM_HEADER_SIZE 65536
-
 namespace LibGens {
 
 class RomPrivate;
-
 class Rom
 {
 	public:

@@ -26,6 +26,8 @@
 #include <libgens/config.libgens.h>
 
 #include "EmuContext/EmuContext.hpp"
+#include "EmuContext/EmuContextFactory.hpp"
+
 #include "Util/byteswap.h"
 #include "macros/common.h"
 #include "Rom.hpp"
@@ -364,10 +366,10 @@ int RomCartridgeMD::loadRom(void)
 	if (!d->rom || !d->rom->isOpen())
 		return -1;
 
-	// Verify that this is a binary ROM image.
-	if (d->rom->romFormat() != Rom::RFMT_BINARY) {
-		// Not a binary ROM image.
-		// TODO: Support SMD, MGD formats?
+	// Verify that this format is supported.
+	// TODO: Move isRomFormatSupported() to RomCartridgeMD?
+	if (!EmuContextFactory::isRomFormatSupported(d->rom)) {
+		// ROM format is not supported.
 		return -2;
 	}
 
@@ -395,11 +397,26 @@ int RomCartridgeMD::loadRom(void)
 	// NOTE: malloc() is rounded up to the nearest 512 KB.
 	// TODO: Store the rounded-up size.
 	m_romData_size = d->rom->romSize();
-	const uint32_t rnd_512k = ((m_romData_size + 0x7FFFF) & ~0x7FFFF);
+	uint32_t rnd_512k = ((m_romData_size + 0x7FFFF) & ~0x7FFFF);
+	switch (d->rom->romFormat()) {
+		case Rom::RFMT_SMD:
+		case Rom::RFMT_SMD_SPLIT:
+			// ROM buffer needs an extra 512 bytes for the header.
+			// TODO: Add a generic function to return this.
+			// TODO: Eliminate this by loading the ROM directly
+			// after the header.
+			rnd_512k += 512;
+			break;
+
+		default:
+			break;
+	}
 	m_romData = malloc(rnd_512k);
 
 	// Load the ROM image.
-	int ret = d->rom->loadRom(m_romData, m_romData_size);
+	// NOTE: Passing the size of the entire ROM buffer,
+	// not the expected size of the ROM.
+	int ret = d->rom->loadRom(m_romData, rnd_512k);
 	if (ret != (int)m_romData_size) {
 		// Error loading the ROM.
 		// TODO: Set an error number somewhere.

@@ -353,7 +353,7 @@ int main(int argc, char *argv[])
 	if (!EmuContextFactory::isRomFormatSupported(rom)) {
 		// ROM format is not supported.
 		const char *rom_format = GensSdl::romFormatToString(rom->romFormat());
-		fprintf(stderr, "Error loading ROM file %s: ROM is in %s format.\nOnly plain binary ROMs are supported.\n",
+		fprintf(stderr, "Error loading ROM file %s: ROM is in %s format.\nOnly plain binary and SMD-format ROMs are supported.\n",
 			rom_filename, rom_format);
 		return EXIT_FAILURE;
 	}
