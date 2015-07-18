@@ -1,10 +1,10 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * EmuPico.cpp: MD emulation code.                                         *
+ * EmuPico.cpp: Pico emulation code.                                       *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -29,8 +29,7 @@
 // Needed for FORCE_INLINE.
 #include "../macros/common.h"
 
-namespace LibGens
-{
+namespace LibGens {
 
 class EmuPico : public EmuContext
 {
@@ -38,6 +37,13 @@ class EmuPico : public EmuContext
 		EmuPico(Rom *rom, SysVersion::RegionCode_t region = SysVersion::REGION_US_NTSC);
 		~EmuPico();
 
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		EmuPico(const EmuPico &);
+		EmuPico &operator=(const EmuPico &);
+
+	public:
 		/**
 		 * Perform a soft reset.
 		 * @return 0 on success; non-zero on error.

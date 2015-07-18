@@ -82,6 +82,9 @@ SET(libgens_SRCS
 
 SET(libgens_EMUCONTEXT_SRCS
 	EmuContext/EmuContext.cpp
+	EmuContext/EmuContextFactory.cpp
+
+	# MD
 	EmuContext/EmuMD.cpp
 	EmuContext/EmuMD_zomg.cpp
 	EmuContext/TmssReg.cpp
@@ -94,6 +97,9 @@ SET(libgens_EMUCONTEXT_SRCS
 # TODO: All headers, or just public headers?
 SET(libgens_EMUCONTEXT_H
 	EmuContext/EmuContext.hpp
+	EmuContext/EmuContextFactory.hpp
+
+	# MD
 	EmuContext/EmuMD.hpp
 	EmuContext/SysVersion.hpp
 	EmuContext/TmssReg.hpp

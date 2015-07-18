@@ -28,13 +28,13 @@
 
 // LibGens includes.
 #include "libgens/Util/Timing.hpp"
-#include "libgens/EmuContext/EmuMD.hpp"
-#include "libgens/EmuContext/EmuPico.hpp"
 #include "libgens/Rom.hpp"
-using LibGens::EmuContext;
-using LibGens::EmuMD;
-using LibGens::EmuPico;
 using LibGens::Rom;
+
+#include "libgens/EmuContext/EmuContext.hpp"
+#include "libgens/EmuContext/EmuContextFactory.hpp"
+using LibGens::EmuContext;
+using LibGens::EmuContextFactory;
 
 // LibGens Sound Manager.
 // Needed for LibGens::SoundMgr::MAX_SAMPLING_RATE.
@@ -446,18 +446,7 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 
 	// Create the emulation context.
 	// TODO: Move the emuContext to GensWindow.
-	// TODO: Factory class that uses rom->sysId()?
-	switch (rom->sysId()) {
-		case Rom::MDP_SYSTEM_MD:
-			gqt4_emuContext = new EmuMD(rom);
-			break;
-		case Rom::MDP_SYSTEM_PICO:
-			gqt4_emuContext = new EmuPico(rom);
-			break;
-		default:
-			gqt4_emuContext = nullptr;
-			break;
-	}
+	gqt4_emuContext = EmuContextFactory::createContext(rom);
 	rom->close();	// TODO: Let EmuContext handle this...
 
 	if (!gqt4_emuContext || !gqt4_emuContext->isRomOpened()) {

@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_EMUCONTEXT_HPP__
-#define __LIBGENS_EMUCONTEXT_HPP__
+#ifndef __LIBGENS_EMUCONTEXT_EMUCONTEXT_HPP__
+#define __LIBGENS_EMUCONTEXT_EMUCONTEXT_HPP__
 
 // Controller I/O manager.
 #include "../IO/IoManager.hpp"
@@ -48,6 +48,12 @@ class EmuContext
 		EmuContext(Rom *rom, SysVersion::RegionCode_t region = SysVersion::REGION_US_NTSC);
 		EmuContext(MdFb *fb, Rom *rom, SysVersion::RegionCode_t region = SysVersion::REGION_US_NTSC);
 		virtual ~EmuContext();
+
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		EmuContext(const EmuContext &);
+		EmuContext &operator=(const EmuContext &);
 
 	private:
 		void init(MdFb *fb, Rom *rom, SysVersion::RegionCode_t region);
@@ -227,4 +233,4 @@ inline const Rom *EmuContext::rom(void) const
 
 }
 
-#endif /* __LIBGENS_EMUCONTEXT_HPP__ */
+#endif /* __LIBGENS_EMUCONTEXT_EMUCONTEXT_HPP__ */
