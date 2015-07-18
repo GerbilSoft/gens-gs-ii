@@ -62,9 +62,9 @@ class Timing
 		enum TimingMethod {
 			TM_UNKNOWN,
 			TM_GETTIMEOFDAY,
-#ifdef HAVE_LIBRT
+#ifdef HAVE_CLOCK_GETTIME
 			TM_CLOCK_GETTIME,
-#endif /* HAVE_LIBRT */
+#endif /* HAVE_CLOCK_GETTIME */
 #ifdef _WIN32
 			TM_GETTICKCOUNT,
 			TM_GETTICKCOUNT64,

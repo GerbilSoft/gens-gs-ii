@@ -70,7 +70,7 @@ Timing::Timing(void)
 	// Get the Mach timebase information.
 	mach_timebase_info(&m_timebase_info);
 	m_tMethod = TM_MACH_ABSOLUTE_TIME;
-#elif defined(HAVE_LIBRT)
+#elif defined(HAVE_CLOCK_GETTIME)
 	m_tMethod = TM_CLOCK_GETTIME;
 
 	// Initialize the base value for seconds.
@@ -112,10 +112,10 @@ const char *Timing::GetTimingMethodName(TimingMethod tMethod)
 		default:
 			// TODO: Default timing method on Win32 is currently GetTickCount().
 			return "gettimeofday";
-#ifdef HAVE_LIBRT
+#ifdef HAVE_CLOCK_GETTIME
 		case TM_CLOCK_GETTIME:
 			return "clock_gettime";
-#endif /* HAVE_LIBRT */
+#endif /* HAVE_CLOCK_GETTIME */
 #ifdef _WIN32
 		case TM_GETTICKCOUNT:
 			return "GetTickCount";
@@ -160,8 +160,8 @@ double Timing::getTimeD(void)
 	uint64_t abs_time = mach_absolute_time();
 	double d_abs_time = (double)abs_time * (double)m_timebase_info.numer / (double)m_timebase_info.denom;
 	return (d_abs_time / 1.0e9);
-#elif defined(HAVE_LIBRT)
-	// librt is available: use clock_gettime().
+#elif defined(HAVE_CLOCK_GETTIME)
+	// Use clock_gettime().
 	struct timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 	ts.tv_sec -= m_tv_sec_base;
@@ -207,8 +207,8 @@ uint64_t Timing::getTime(void)
 	double d_abs_time = (double)abs_time * (double)m_timebase_info.numer / (double)m_timebase_info.denom;
 	// Convert to microseconds.
 	return (uint64_t)(d_abs_time / 1000.0);
-#elif defined(HAVE_LIBRT)
-	// librt is available: use clock_gettime().
+#elif defined(HAVE_CLOCK_GETTIME)
+	// Use clock_gettime().
 	struct timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 	ts.tv_sec -= m_tv_sec_base;

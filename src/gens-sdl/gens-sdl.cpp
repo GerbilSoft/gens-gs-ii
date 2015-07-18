@@ -69,7 +69,7 @@ using LibGensKeys::KeyManager;
 #define yield() do { Sleep(0); } while (0)
 #define usleep(usec) Sleep((DWORD)((usec) / 1000))
 #else
-// // Linux, Unix, Mac OS X
+// Linux, Unix, Mac OS X
 #define yield() do { usleep(0); } while (0)
 #endif
 
