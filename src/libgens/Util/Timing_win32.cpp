@@ -187,10 +187,18 @@ uint64_t Timing::getTime(void)
 			break;
 
 		case TM_QUERYPERFORMANCECOUNTER: {
+			// Convert to microseconds *before* dividing.
+			// This fixes issues that caused a "low" framerate
+			// with fast music on Windows VMs and PCs.
+			// Wine didn't have this issue, since it emulates
+			// a system frequency of 10,000,000 Hz.
+			// Reference: https://msdn.microsoft.com/en-us/library/windows/desktop/dn553408%28v=vs.85%29.aspx
+			// FIXME: Prevent overflow, which will happen after
+			// (2^64 / 1,000,000) microseconds, or slightly over 7 months.
 			LARGE_INTEGER perf_ctr;
 			QueryPerformanceCounter(&perf_ctr);
-			const uint64_t divisor = d->perfFreq.QuadPart / 1000000;
-			timer = (perf_ctr.QuadPart - m_timer_base) / divisor;
+			perf_ctr.QuadPart *= 1000000;
+			timer = (perf_ctr.QuadPart - m_timer_base) / d->perfFreq.QuadPart;
 			break;
 		}
 	}
