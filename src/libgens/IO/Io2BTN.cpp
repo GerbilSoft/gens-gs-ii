@@ -27,7 +27,22 @@ namespace LibGens { namespace IO {
 
 Io2BTN::Io2BTN()
 	: Device()
-{ }
+{
+	// resetDev() can't be called from the base constructor.
+	resetDev();
+}
+
+/**
+ * Reset Device data that only affects the device
+ * and not the emulation-side registers.
+ *
+ * Should be overridden by subclasses that have
+ * device-specific data.
+ */
+void Io2BTN::resetDev(void)
+{
+	this->pause = false;
+}
 
 // Device type.
 // Should be overridden by subclasses.

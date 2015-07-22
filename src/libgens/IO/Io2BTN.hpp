@@ -40,6 +40,15 @@ class Io2BTN : public Device
 		Io2BTN &operator=(const Io2BTN &);
 
 	public:
+		/**
+		 * Reset Device data that only affects the device
+		 * and not the emulation-side registers.
+		 *
+		 * Should be overridden by subclasses that have
+		 * device-specific data.
+		 */
+		virtual void resetDev(void) override;
+
 		// Device type.
 		// Should be overridden by subclasses.
 		virtual IoManager::IoType_t type(void) const override;

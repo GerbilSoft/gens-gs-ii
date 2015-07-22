@@ -27,7 +27,10 @@ namespace LibGens { namespace IO {
 
 IoXE1AP::IoXE1AP()
 	: Device()
-{ }
+{
+	// resetDev() can't be called from the base constructor.
+	resetDev();
+}
 
 /**
  * Reset Device data that only affects the device
