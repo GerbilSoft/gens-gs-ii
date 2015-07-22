@@ -188,12 +188,15 @@ std::string Metadata::toZomgIni(void) const
 	d->WriteValue(oss, "Creator", d->creatorInfo.creator);
 	d->WriteValue(oss, "CreatorVersion", d->creatorInfo.creatorVersion);
 	d->WriteValue(oss, "CreatorVcsVersion", d->creatorInfo.creatorVcsVersion);
+	// TODO
+	d->WriteValue(oss, "CreationTime", "" /*FormatCreationTime()*/);
 	d->WriteValue(oss, "OS", d->sysInfo.osVersion);
 	d->WriteValue(oss, "CPU", d->sysInfo.cpu);
 	d->WriteValue(oss, "Author", d->sysInfo.username);
 	d->WriteValue(oss, "ROM", d->romFilename);
 	d->WriteValue(oss, "ROM_CRC32", d->romCrc32, 8, true);
-	// TODO: ROM size.
+	// TODO
+	d->WriteValue(oss, "ROM_Size", "" /*d->romSize, 1, false*/);
 	d->WriteValue(oss, "Region", d->region);
 	d->WriteValue(oss, "Description", d->description);
 	d->WriteValue(oss, "Extensions", d->extensions);
