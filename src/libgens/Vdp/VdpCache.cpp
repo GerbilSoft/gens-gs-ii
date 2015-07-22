@@ -78,15 +78,15 @@ void VdpCache::init_m4_lut(void)
 		// index: abcd efgh abcd efgh
 		// value: aa00 bb00 cc00 dd00 ee00 ff00 gg00 hh00
 		uint32_t lut_entry = 0;
-		for (int x = 7; x >= 0; x++) {
-			lut_entry <<= 8;
+		for (int x = 7; x >= 0; x--) {
+			lut_entry <<= 4;
 			if (lut_idx & (1 << (x+8))) {
 				// Bitplane 0.
-				lut_entry |= 0x0080;
+				lut_entry |= 0x0008;
 			}
 			if (lut_idx & (1 << x)) {
 				// Bitplane 1.
-				lut_entry |= 0x0040;
+				lut_entry |= 0x0004;
 			}
 		}
 		m4_lut[lut_idx] = lut_entry;
