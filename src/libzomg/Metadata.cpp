@@ -244,6 +244,8 @@ int Metadata::toPngData(png_structp png_ptr, png_infop info_ptr, int metaFlags) 
 	// Text chunks are stored in the order defined by the PNG specification.
 	// - http://www.libpng.org/pub/png/spec/1.2/PNG-Chunks.html
 	// - http://www.w3.org/TR/PNG-Chunks.html
+	// NOTE: We're not using zTXt here because we want the metadata
+	// to be easily extracted using hex editors, scripts, etc.
 	// TODO: Use iTXt for UTF-8 where applicable. (Check that libpng supports iTXt first!)
 	// TODO: Flag field to indicate if Author, Emulator, and/or ROM information should be saved
 	// NOTE: Text fields are defined as png_charp, so they can't be const.
