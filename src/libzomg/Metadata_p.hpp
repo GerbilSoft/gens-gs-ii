@@ -48,6 +48,12 @@ class MetadataPrivate
 
 	public:
 		/**
+		 * Get the current time.
+		 * This function is implemented in OS-specific files.
+		 */
+		void init_ctime(void);
+
+		/**
 		 * Initialize system-specific metadata.
 		 * This function is implemented in OS-specific files.
 		 */

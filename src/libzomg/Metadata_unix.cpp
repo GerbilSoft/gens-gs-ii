@@ -39,7 +39,20 @@ using std::string;
 namespace LibZomg {
 
 /**
+ * Get the current time.
+ * This function is implemented in OS-specific files.
+ */
+void MetadataPrivate::init_ctime(void)
+{
+	// TODO: Is there a way to get 64-bit time_t on 32-bit Linux?
+	// TODO: Use clock_gettime() for nanoseconds.
+	ctime.seconds = time(nullptr);
+	ctime.nano = 0;
+}
+
+/**
  * Initialize system-specific metadata.
+ * This function is implemented in OS-specific files.
  */
 void MetadataPrivate::InitSystemMetadata(void)
 {

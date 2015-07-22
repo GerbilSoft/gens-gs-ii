@@ -54,14 +54,7 @@ MetadataPrivate::MetadataPrivate()
 	: romCrc32(0)
 {
 	// Get the current time.
-	// TODO: Is there a way to get 64-bit time_t on 32-bit Linux?
-#ifdef _WIN32
-#error TODO: Missing Win32 implementation.
-#else
-	// TODO: Use clock_gettime() for nanoseconds.
-	ctime.seconds = time(nullptr);
-	ctime.nano = 0;
-#endif
+	init_ctime();
 }
 
 /**
