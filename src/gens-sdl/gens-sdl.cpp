@@ -231,8 +231,7 @@ static void processSdlEvent(const SDL_Event &event) {
 				case SDLK_BACKSPACE:
 					if (event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
 						// Take a screenshot.
-						GensSdl::doScreenShot(context->m_vdp->MD_Screen,
-							rom->filenameBaseNoExt().c_str());
+						GensSdl::doScreenShot(context->m_vdp->MD_Screen, rom);
 					}
 					break;
 
