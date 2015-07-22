@@ -37,6 +37,9 @@
 // Sound Manager.
 #include "sound/SoundMgr.hpp"
 
+// LibZomg metadata.
+#include "libzomg/Metadata.hpp"
+
 // C includes. (C++ namespace)
 #include <cstdio>
 
@@ -53,7 +56,10 @@ namespace LibGens {
 
 static bool ms_IsInit = false;
 
-// libgens version. (TODO: Use MDP version macros.)
+// libgens version.
+// TODO: Use MDP version macros.
+// TODO: Use version info from CMake.
+// TODO: Stringified version with "+" if it's a dev version.
 const unsigned int version = 0x00000000U;
 const char *const version_desc = "Development Build";	// ASCII
 
@@ -82,29 +88,29 @@ int Init(void)
 	// TODO: Reference counting?
 	if (ms_IsInit)
 		return 0;
-	
+
 	// Print the Gens/GS startup message.
 	fprintf(stderr, "Gens/GS II");
 	if (version_desc) {
 		fprintf(stderr, " (%s)", version_desc);
 	}
 	fputc('\n', stderr);
-	
+
 #if !defined(GENS_ENABLE_EMULATION)
 	fprintf(stderr, "[NO-EMULATION BUILD; CPU emulation disabled.]\n");
 #endif
-	
+
 	// VCS version.
 	if (version_vcs) {
 		fprintf(stderr, "(%s)\n", version_vcs);
 	}
-	
+
 	fprintf(stderr, "\n"
 		"Copyright (c) 1999-2002 by Stéphane Dallongeville.\n"
 		"Copyright (c) 2003-2004 by Stéphane Akhoun.\n"
 		"Copyright (c) 2008-2015 by David Korth.\n"
 		"\n");
-	
+
 	// GNU GPLv2 notice.
 	// References:
 	// * http://www.gnu.org/licenses/gpl-howto.html
@@ -124,24 +130,35 @@ int Init(void)
 		"along with this program; if not, write to the Free Software\n"
 		"Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA\n"
 		"\n");
-	
+
 	// TODO: Clear LibGens variables.
-	
+
 	// Detect CPU flags.
 	LibGens_GetCPUFlags();
-	
+
 	// Win32 Unicode Translation Layer.
 #ifdef _WIN32
 	W32U_Init();
 #endif
-	
+
 	// Initialize LibGens subsystems.
 	M68K::Init();
 	M68K_Mem::Init();
 	Z80::Init();
 	Z80_MD_Mem::Init();
-	
+
 	SoundMgr::Init();
+
+	// LibGens version.
+	// TODO: Add easy "MDP version to string" function.
+	// TODO: Use version string from CMake?
+	char lg_version_str[16];
+	snprintf(lg_version_str, sizeof(lg_version_str), "%d.%d.%d",
+		(LibGens::version >> 24),
+		((LibGens::version >> 16) & 0xFF),
+		(LibGens::version & 0xFF));
+	// Initialize LibZomg metadata.
+	LibZomg::Metadata::InitProgramMetadata("Gens/GS II", lg_version_str, version_vcs);
 
 	fflush(nullptr);	
 	ms_IsInit = true;

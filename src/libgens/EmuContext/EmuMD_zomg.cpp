@@ -221,21 +221,7 @@ int EmuMD::zomgSave(const utf8_str *filename) const
 	// Create ZOMG.ini.
 	LibZomg::Metadata metadata;
 	metadata.setSystemId("MD");
-	metadata.setCreator("Gens/GS II");
-
-	// LibGens version.
-	// TODO: Add easy "MDP version to string" function.
-	char lg_version_str[16];
-	snprintf(lg_version_str, sizeof(lg_version_str), "%d.%d.%d",
-		(LibGens::version >> 24),
-		((LibGens::version >> 16) & 0xFF),
-		(LibGens::version & 0xFF));
-	metadata.setCreatorVersion(string(lg_version_str));
-	if (LibGens::version_vcs)
-		metadata.setCreatorVcsVersion(string(LibGens::version_vcs));
-
-	// TODO: Get username for debugging builds. Make this optional later.
-	metadata.setAuthor("Joe User");
+	// TODO: System metadata flags, e.g. save author name.
 
 	// TODO: Move base path triming code to LibGensText later?
 	string rom_filename(m_rom->filename());

@@ -49,6 +49,19 @@ class Metadata
 
 	public:
 		/**
+		 * Initialize the system and program metadata.
+		 * This function should only be run once at program startup.
+		 * System information will be obtained by the Metadata class.
+		 *
+		 * @param creator		[in, opt] Emulator name.
+		 * @param creatorVersion	[in, opt] Emulator version.
+		 * @param creatorVcsVersion	[in, opt] Emulator's version control version, e.g. git tag.
+		 */
+		static void InitProgramMetadata(const char *creator,
+						const char *creatorVersion,
+						const char *creatorVcsVersion);
+
+		/**
 		 * Clear the loaded metadata.
 		 */
 		void clear(void);
@@ -65,18 +78,6 @@ class Metadata
 		// TODO: Use MDP system ID enumeration instead of a string.
 		std::string systemId(void) const;
 		void setSystemId(const std::string &systemId);
-
-		std::string creator(void) const;
-		void setCreator(const std::string &creator);
-
-		std::string creatorVersion(void) const;
-		void setCreatorVersion(const std::string &creatorVersion);
-
-		std::string creatorVcsVersion(void) const;
-		void setCreatorVcsVersion(const std::string &creatorVcsVersion);
-
-		std::string author(void) const;
-		void setAuthor(const std::string &author);
 
 		std::string romFilename(void) const;
 		void setRomFilename(const std::string &romFilename);

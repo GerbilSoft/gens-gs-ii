@@ -21,6 +21,10 @@
 
 #include "Metadata.hpp"
 
+// C includes. (C++ namespace)
+#include <ctime>
+#include <cstring>
+
 // C++ includes.
 #include <string>
 #include <algorithm>
@@ -29,6 +33,22 @@
 using std::string;
 using std::swap;
 using std::ostringstream;
+
+// System-specific includes.
+#if defined(_WIN32)
+// TODO: Windows.
+#else
+// All Unix-like systems.
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
+#if defined(__APPLE__)
+// TODO: Mac OS X.
+#else
+// TODO: Check for existence of this header.
+#include <sys/utsname.h>
+#endif
+#endif /* all unix */
 
 // Platform-dependent newline constant.
 #ifdef _WIN32
@@ -51,16 +71,43 @@ class MetadataPrivate
 		MetadataPrivate &operator=(const MetadataPrivate &);
 
 	public:
+		// Initialize system metadata.
+		static void InitSystemMetadata(void);
+
 		// Useful functions.
 		static void WriteValue(ostringstream& oss, const string &key, const string &value);
 		static void WriteValue(ostringstream& oss, const string &key, uint32_t value, int width = 0, bool hex = false);
 
 	public:
+		// System-specific metadata.
+		// Should be initialized at program startup.
+		// TODO: If the program doesn't initialize it, initialize on first Metadata use?
+		struct SysInfo_t {
+			string osVersion;
+			string username;
+			string cpu;	// TODO
+		};
+		static SysInfo_t sysInfo;
+
+		// Program-specific metadata.
+		// Should be initialized at program startup.
+		struct CreatorInfo_t {
+			string creator;
+			string creatorVersion;
+			string creatorVcsVersion;
+		};
+		static CreatorInfo_t creatorInfo;
+
+		// NOTE: MSVC uses 64-bit time_t by default.
+		// FIXME: 64-bit time_t for Linux?
+		// FIXME: What about MinGW?
+
+		// Per-file metadata.
+		struct {
+			time_t seconds;
+			uint32_t nano;
+		} ctime;
 		string systemId;
-		string creator;
-		string creatorVersion;
-		string creatorVcsVersion;
-		string author;
 		string romFilename;
 		uint32_t romCrc32;
 		string region;
@@ -68,13 +115,89 @@ class MetadataPrivate
 		string extensions;
 };
 
+MetadataPrivate::SysInfo_t MetadataPrivate::sysInfo;
+MetadataPrivate::CreatorInfo_t MetadataPrivate::creatorInfo;
+
 /******************************
  * MetadataPrivate functions. *
  ******************************/
 
 MetadataPrivate::MetadataPrivate()
 	: romCrc32(0)
-{ }
+{
+	// Get the current time.
+	// TODO: Is there a way to get 64-bit time_t on 32-bit Linux?
+#ifdef _WIN32
+#error TODO: Missing Win32 implementation.
+#else
+	// TODO: Use clock_gettime() for nanoseconds.
+	ctime.seconds = time(nullptr);
+	ctime.nano = 0;
+#endif
+}
+
+/**
+ * Initialize system-specific metadata.
+ * TODO: Split into OS-specific files?
+ */
+void MetadataPrivate::InitSystemMetadata(void)
+{
+	// OS version.
+	ostringstream oss;
+
+#if defined(_WIN32)
+#error TODO: Missing Win32 implementation.
+#elif defined(__APPLE__)
+#error TODO: Missing Mac OS X implementation.
+#else
+	// TODO: Check for lsb_release.
+	// For now, just use uname.
+	struct utsname sys;
+	int ret = uname(&sys);
+	if (!ret) {
+		sysInfo.osVersion = string(sys.sysname) + ' ' + string(sys.release);
+	} else {
+		sysInfo.osVersion = "Unknown Unix-like OS";
+	}
+#endif
+
+	// Username.
+#if defined(_WIN32)
+#error TODO: Missing Win32 implementation.
+#else
+	// Assuming OS X is compatible with the POSIX version.
+	// TODO: Use getpwuid_r() if it's available.
+	// NOTE: Assuming UTF-8 encoding.
+	struct passwd *pwd = getpwuid(getuid());
+	if (pwd) {
+		// User information retrieved.
+		// Check for a display name.
+		if (pwd->pw_gecos && pwd->pw_gecos[0]) {
+			// Find the first comma.
+			char *comma = strchr(pwd->pw_gecos, ',');
+			if (!comma) {
+				// No comma. Use the entire field.
+				sysInfo.username = string(pwd->pw_gecos);
+			} else {
+				// Found a comma.
+				sysInfo.username = string(pwd->pw_gecos, (comma - pwd->pw_gecos));
+			}
+		} else {
+			// No display name.
+			// Check the username.
+			if (pwd->pw_name && pwd->pw_name[0]) {
+				// Username is valid.
+				sysInfo.username = string(pwd->pw_name);
+			}
+		}
+	} else {
+		// Could not retrieve user information.
+		sysInfo.username = string();
+	}
+#endif
+
+	// TODO: CPU information.
+}
 
 /**
  * Write an INI value to an ostringstream.
@@ -163,6 +286,31 @@ void Metadata::clear(void)
 }
 
 /**
+ * Initialize the system and program metadata.
+ * This function should only be run once at program startup.
+ * System information will be obtained by the Metadata class.
+ *
+ * @param creator              	[in, opt] Emulator name.
+ * @param creatorVersion       	[in, opt] Emulator version.
+ * @param creatorVcsVersion    	[in, opt] Emulator's version control version, e.g. git tag.
+ */
+void Metadata::InitProgramMetadata(const char *creator,
+				const char *creatorVersion,
+				const char *creatorVcsVersion)
+{
+	// Save creator information.
+	MetadataPrivate::creatorInfo.creator =
+		(creator ? string(creator) : string());
+	MetadataPrivate::creatorInfo.creatorVersion =
+		(creatorVersion ? string(creatorVersion) : string());
+	MetadataPrivate::creatorInfo.creatorVcsVersion =
+		(creatorVcsVersion ? string(creatorVcsVersion) : string());
+
+       // Initialize system metadata.
+	MetadataPrivate::InitSystemMetadata();
+}
+
+/**
  * Export the metadata as ZOMG.ini.
  * @return String representation of ZOMG.ini.
  */
@@ -174,16 +322,20 @@ std::string Metadata::toZomgIni(void) const
 	oss << "[ZOMG]" << NL;
 
 	// Write the ZOMG properties.
+	// TODO: Make parts optional, e.g. Creator, Author, ROM Info.
 	d->WriteValue(oss, "FileType", "Zipped Original Memory from Genesis");
 	// TODO: Get the ZomgVersion from somewhere.
 	d->WriteValue(oss, "Version", "0.1-DEV-UNSTABLE");
 	d->WriteValue(oss, "System", d->systemId);
-	d->WriteValue(oss, "Creator", d->creator);
-	d->WriteValue(oss, "CreatorVersion", d->creatorVersion);
-	d->WriteValue(oss, "CreatorVcsVersion", d->creatorVcsVersion);
-	d->WriteValue(oss, "Author", d->author);
+	d->WriteValue(oss, "Creator", d->creatorInfo.creator);
+	d->WriteValue(oss, "CreatorVersion", d->creatorInfo.creatorVersion);
+	d->WriteValue(oss, "CreatorVcsVersion", d->creatorInfo.creatorVcsVersion);
+	d->WriteValue(oss, "OS", d->sysInfo.osVersion);
+	d->WriteValue(oss, "CPU", d->sysInfo.cpu);
+	d->WriteValue(oss, "Author", d->sysInfo.username);
 	d->WriteValue(oss, "ROM", d->romFilename);
 	d->WriteValue(oss, "ROM_CRC32", d->romCrc32, 8, true);
+	// TODO: ROM size.
 	d->WriteValue(oss, "Region", d->region);
 	d->WriteValue(oss, "Description", d->description);
 	d->WriteValue(oss, "Extensions", d->extensions);
@@ -200,26 +352,6 @@ string Metadata::systemId(void) const
 	{ return d->systemId; }
 void Metadata::setSystemId(const string &systemId)
 	{ d->systemId = systemId; }
-
-string Metadata::creator(void) const
-	{ return d->creator; }
-void Metadata::setCreator(const string &creator)
-	{ d->creator = creator; }
-
-string Metadata::creatorVersion(void) const
-	{ return d->creatorVersion; }
-void Metadata::setCreatorVersion(const string &creatorVersion)
-	{ d->creatorVersion = creatorVersion; }
-
-string Metadata::creatorVcsVersion(void) const
-	{ return d->creatorVcsVersion; }
-void Metadata::setCreatorVcsVersion(const string &creatorVcsVersion)
-	{ d->creatorVcsVersion = creatorVcsVersion; }
-
-string Metadata::author(void) const
-	{ return d->author; }
-void Metadata::setAuthor(const string &author)
-	{ d->author = author; }
 
 string Metadata::romFilename(void) const
 	{ return d->romFilename; }
