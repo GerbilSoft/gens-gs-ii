@@ -62,20 +62,21 @@ class IoPico : public Device
 	public:
 		/** Pico-specific functions. **/
 
-		// FIXME: Huckle & Lowly's Busiest Day Ever don't have
+		// Page 0 = title; pages 1-6 = regular pages.
+		// FIXME: "Huckle & Lowly's Busiest Day Ever" doesn't have
 		// page 5; page 6 is the "paint" section. May need to
 		// add an "unusable page" feature.
-		static const uint8_t PICO_MAX_PAGES = 8;
+		static const uint8_t PICO_MAX_PAGES = 7;
 
 		/**
 		 * Get the current page number.
-		 * @return Page number. (0 == title; 1-7 == regular page)
+		 * @return Page number. (0 == title; 1-6 == regular page)
 		 */
 		uint8_t picoCurPageNum(void) const;
 
 		/**
 		 * Set the current page number.
-		 * @param pg Page number. (0 == title; 1-7 == regular page)
+		 * @param pg Page number. (0 == title; 1-6 == regular page)
 		 */
 		void setPicoCurPageNum(uint8_t pg);
 
