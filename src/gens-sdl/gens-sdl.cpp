@@ -481,7 +481,7 @@ int main(int argc, char *argv[])
 			// TODO: Average the FPS over multiple seconds
 			// and/or quarter-seconds.
 			char win_title[256];
-			snprintf(win_title, sizeof(win_title), "Gens/GS II [SDL] - %d fps", fps);
+			snprintf(win_title, sizeof(win_title), "Gens/GS II [SDL] - %u fps", fps);
 			sdlHandler->set_window_title(win_title);
 		}
 
