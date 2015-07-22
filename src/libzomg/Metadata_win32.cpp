@@ -35,6 +35,8 @@
 using std::string;
 using std::ostringstream;
 
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
+
 namespace LibZomg {
 
 /**
@@ -60,6 +62,91 @@ void MetadataPrivate::init_ctime(void)
 	// - http://stackoverflow.com/questions/19709580/c-convert-filetime-to-seconds
 	ctime.seconds = (largeInteger.QuadPart / 10000000ULL) - 11644473600ULL;
 	ctime.nano = (largeInteger.QuadPart % 10000000ULL) * 100;
+}
+
+/**
+ * Get the Windows username. (Unicode version)
+ * The display name is checked first.
+ * If it's empty or invalid, the username is checked.
+ * @return Windows username.
+ */
+static inline string getUserName_unicode(void)
+{
+	string ret;
+	wchar_t username[256];
+	DWORD cchUsername = ARRAY_SIZE(username);
+	if (!GetUserNameExW(NameDisplay, username, &cchUsername)) {
+		// Error retrieving display name.
+		if (!GetUserNameW(username, &cchUsername)) {
+			// Error retrieving username.
+			// TODO: Check Registered Owner in the registry?
+			cchUsername = 0;
+		}
+	}
+
+	if (cchUsername > 0) {
+		// Try to convert from UTF-16 to UTF-8.
+		// FIXME: If this fails, do a naive low-byte conversion?
+
+		// Next, try to convert from UTF-16 to UTF-8.
+		int cbMbs = WideCharToMultiByte(CP_UTF8, 0, username, cchUsername, nullptr, 0, nullptr, nullptr);
+		if (cbMbs > 0) {
+			char *mbs = (char*)malloc(cbMbs);
+			WideCharToMultiByte(CP_UTF8, 0, username, cchUsername, mbs, cbMbs, nullptr, nullptr);
+
+			// Save the UTF-8 string.
+			ret = string(mbs, cbMbs);
+			free(mbs);
+		}
+	}
+
+	return ret;
+}
+
+/**
+ * Get the Windows username. (ANSI version)
+ * The display name is checked first.
+ * If it's empty or invalid, the username is checked.
+ * @return Windows username.
+ */
+static inline string getUserName_ansi(void)
+{
+	string ret;
+	char username[256];
+	DWORD cbUsername = ARRAY_SIZE(username);
+	if (!GetUserNameExA(NameDisplay, username, &cbUsername)) {
+		// Error retrieving display name.
+		if (!GetUserNameA(username, &cbUsername)) {
+			// Error retrieving username.
+			// TODO: Check Registered Owner in the registry?
+			cbUsername = 0;
+		}
+	}
+
+	if (cbUsername > 0) {
+		// Try to convert from ANSI to UTF-8.
+
+		// First, convert from ANSI to UTF-16
+		int cchWcs = MultiByteToWideChar(CP_ACP, 0, username, cbUsername, nullptr, 0);
+		if (cchWcs > 0) {
+			wchar_t *wcs = (wchar_t*)malloc(cchWcs * sizeof(wchar_t));
+			MultiByteToWideChar(CP_ACP, 0, username, cbUsername, wcs, cchWcs);
+
+			// Next, try to convert from UTF-16 to UTF-8.
+			int cbMbs = WideCharToMultiByte(CP_UTF8, 0, wcs, cchWcs, nullptr, 0, nullptr, nullptr);
+			if (cbMbs > 0) {
+				char *mbs = (char*)malloc(cbMbs);
+				WideCharToMultiByte(CP_UTF8, 0, wcs, cchWcs, mbs, cbMbs, nullptr, nullptr);
+
+				// Save the UTF-8 string.
+				ret = string(mbs, cbMbs);
+				free(mbs);
+			}
+			free(wcs);
+		}
+	}
+
+	return ret;
 }
 
 /**
@@ -149,24 +236,12 @@ void MetadataPrivate::InitSystemMetadata(void)
 	sysInfo.osVersion = oss.str();
 
 	// Get the username.
-	// TODO: Use Unicode versions if available.
-	char username_buf[256];
-	DWORD cbUsername_buf = sizeof(username_buf);
-	if (GetUserNameExA(NameDisplay, username_buf, &cbUsername_buf)) {
-		// User's display name retrieved.
-		sysInfo.username = string(username_buf, cbUsername_buf);
-	} else if (GetUserNameA(username_buf, &cbUsername_buf)) {
-		// User's login username retrieved.
-		if (cbUsername_buf > 0) {
-			sysInfo.username = string(username_buf, cbUsername_buf);
-		} else {
-			// Invalid size...
-			sysInfo.username = string();
-		}
+	if (GetModuleHandleW(nullptr)) {
+		// OS supports Unicode.
+		sysInfo.username = getUserName_unicode();
 	} else {
-		// Error retrieving username.
-		// TODO: Check Registered Owner in the registry?
-		sysInfo.username = string();
+		// OS does not support Unicode.
+		sysInfo.username = getUserName_ansi();
 	}
 
 	// TODO: CPU information.
