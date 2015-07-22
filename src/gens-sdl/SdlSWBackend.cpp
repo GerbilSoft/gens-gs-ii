@@ -33,7 +33,6 @@ SdlSWBackend::SdlSWBackend()
 	: m_window(nullptr)
 	, m_renderer(nullptr)
 	, m_texture(nullptr)
-	, m_fb(nullptr)
 {
 	// Initialize the SDL window.
 	m_window = SDL_CreateWindow("Gens/GS II [SDL]",
