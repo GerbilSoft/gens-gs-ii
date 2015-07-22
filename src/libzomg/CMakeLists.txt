@@ -47,6 +47,18 @@ SET(libzomg_SRCS
 	PngWriter.cpp
 	PngReader.cpp
 	)
+IF(WIN32)
+	# TODO
+	#SET(libzomg_SRCS
+	#	${libzomg_SRCS}
+	#	Metadata_win32.cpp
+	#	)
+ELSE()
+	SET(libzomg_SRCS
+		${libzomg_SRCS}
+		Metadata_unix.cpp
+		)
+ENDIF()
 
 # Headers.
 SET(libzomg_H

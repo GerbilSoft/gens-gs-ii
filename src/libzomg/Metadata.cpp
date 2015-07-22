@@ -23,7 +23,6 @@
 
 // C includes. (C++ namespace)
 #include <ctime>
-#include <cstring>
 
 // C++ includes.
 #include <string>
@@ -34,86 +33,15 @@ using std::string;
 using std::swap;
 using std::ostringstream;
 
-// System-specific includes.
-#if defined(_WIN32)
-// TODO: Windows.
-#else
-// All Unix-like systems.
-#include <unistd.h>
-#include <sys/types.h>
-#include <pwd.h>
-#if defined(__APPLE__)
-// TODO: Mac OS X.
-#else
-// TODO: Check for existence of this header.
-#include <sys/utsname.h>
-#endif
-#endif /* all unix */
-
 // Platform-dependent newline constant.
 #ifdef _WIN32
 #define NL "\r\n"
 #else
 #define NL "\n"
 #endif
-		
+
+#include "Metadata_p.hpp"
 namespace LibZomg {
-
-class MetadataPrivate
-{
-	public:
-		MetadataPrivate();
-
-	private:
-		// Q_DISABLE_COPY() equivalent.
-		// TODO: Add LibZomg-specific version of Q_DISABLE_COPY().
-		MetadataPrivate(const MetadataPrivate &);
-		MetadataPrivate &operator=(const MetadataPrivate &);
-
-	public:
-		// Initialize system metadata.
-		static void InitSystemMetadata(void);
-
-		// Useful functions.
-		static void WriteValue(ostringstream& oss, const string &key, const string &value);
-		static void WriteValue(ostringstream& oss, const string &key, uint32_t value, int width = 0, bool hex = false);
-
-	public:
-		// System-specific metadata.
-		// Should be initialized at program startup.
-		// TODO: If the program doesn't initialize it, initialize on first Metadata use?
-		struct SysInfo_t {
-			string osVersion;
-			string username;
-			string cpu;	// TODO
-		};
-		static SysInfo_t sysInfo;
-
-		// Program-specific metadata.
-		// Should be initialized at program startup.
-		struct CreatorInfo_t {
-			string creator;
-			string creatorVersion;
-			string creatorVcsVersion;
-		};
-		static CreatorInfo_t creatorInfo;
-
-		// NOTE: MSVC uses 64-bit time_t by default.
-		// FIXME: 64-bit time_t for Linux?
-		// FIXME: What about MinGW?
-
-		// Per-file metadata.
-		struct {
-			time_t seconds;
-			uint32_t nano;
-		} ctime;
-		string systemId;
-		string romFilename;
-		uint32_t romCrc32;
-		string region;
-		string description;
-		string extensions;
-};
 
 MetadataPrivate::SysInfo_t MetadataPrivate::sysInfo;
 MetadataPrivate::CreatorInfo_t MetadataPrivate::creatorInfo;
@@ -134,69 +62,6 @@ MetadataPrivate::MetadataPrivate()
 	ctime.seconds = time(nullptr);
 	ctime.nano = 0;
 #endif
-}
-
-/**
- * Initialize system-specific metadata.
- * TODO: Split into OS-specific files?
- */
-void MetadataPrivate::InitSystemMetadata(void)
-{
-	// OS version.
-	ostringstream oss;
-
-#if defined(_WIN32)
-#error TODO: Missing Win32 implementation.
-#elif defined(__APPLE__)
-#error TODO: Missing Mac OS X implementation.
-#else
-	// TODO: Check for lsb_release.
-	// For now, just use uname.
-	struct utsname sys;
-	int ret = uname(&sys);
-	if (!ret) {
-		sysInfo.osVersion = string(sys.sysname) + ' ' + string(sys.release);
-	} else {
-		sysInfo.osVersion = "Unknown Unix-like OS";
-	}
-#endif
-
-	// Username.
-#if defined(_WIN32)
-#error TODO: Missing Win32 implementation.
-#else
-	// Assuming OS X is compatible with the POSIX version.
-	// TODO: Use getpwuid_r() if it's available.
-	// NOTE: Assuming UTF-8 encoding.
-	struct passwd *pwd = getpwuid(getuid());
-	if (pwd) {
-		// User information retrieved.
-		// Check for a display name.
-		if (pwd->pw_gecos && pwd->pw_gecos[0]) {
-			// Find the first comma.
-			char *comma = strchr(pwd->pw_gecos, ',');
-			if (!comma) {
-				// No comma. Use the entire field.
-				sysInfo.username = string(pwd->pw_gecos);
-			} else {
-				// Found a comma.
-				sysInfo.username = string(pwd->pw_gecos, (comma - pwd->pw_gecos));
-			}
-		} else {
-			// No display name.
-			// Check the username.
-			if (pwd->pw_name && pwd->pw_name[0]) {
-				// Username is valid.
-				sysInfo.username = string(pwd->pw_name);
-			}
-		}
-	} else {
-		// Could not retrieve user information.
-		sysInfo.username = string();
-	}
-#endif
-
-	// TODO: CPU information.
 }
 
 /**
