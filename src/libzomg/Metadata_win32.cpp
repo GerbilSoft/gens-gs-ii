@@ -75,9 +75,11 @@ static inline string getUserName_unicode(void)
 	string ret;
 	wchar_t username[256];
 	DWORD cchUsername = ARRAY_SIZE(username);
-	if (!GetUserNameExW(NameDisplay, username, &cchUsername)) {
+	int wret = GetUserNameExW(NameDisplay, username, &cchUsername);
+	if (wret == 0 || cchUsername == 0) {
 		// Error retrieving display name.
-		if (!GetUserNameW(username, &cchUsername)) {
+		wret = GetUserNameW(username, &cchUsername);
+		if (wret == 0 || cchUsername == 0) {
 			// Error retrieving username.
 			// TODO: Check Registered Owner in the registry?
 			cchUsername = 0;
@@ -114,9 +116,11 @@ static inline string getUserName_ansi(void)
 	string ret;
 	char username[256];
 	DWORD cbUsername = ARRAY_SIZE(username);
-	if (!GetUserNameExA(NameDisplay, username, &cbUsername)) {
+	int wret = GetUserNameExA(NameDisplay, username, &cbUsername);
+	if (wret == 0 || cbUsername == 0) {
 		// Error retrieving display name.
-		if (!GetUserNameA(username, &cbUsername)) {
+		wret = GetUserNameA(username, &cbUsername);
+		if (wret == 0 || cbUsername == 0) {
 			// Error retrieving username.
 			// TODO: Check Registered Owner in the registry?
 			cbUsername = 0;
@@ -125,6 +129,7 @@ static inline string getUserName_ansi(void)
 
 	if (cbUsername > 0) {
 		// Try to convert from ANSI to UTF-8.
+		// FIXME: If this fails, use the ANSI text as-is?
 
 		// First, convert from ANSI to UTF-16
 		int cchWcs = MultiByteToWideChar(CP_ACP, 0, username, cbUsername, nullptr, 0);
