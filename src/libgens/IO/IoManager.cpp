@@ -28,18 +28,10 @@
 
 // I/O devices.
 #include "Device.hpp"
-#include "Io3BTN.hpp"
-#include "Io6BTN.hpp"
+#include "DeviceFactory.hpp"
+// Special access to Io2BTN for "pause".
 #include "Io2BTN.hpp"
-#include "IoMegaMouse.hpp"
-
-// Multitaps.
-#include "IoTeamPlayer.hpp"
-#include "Io4WPM.hpp"
-#include "Io4WPS.hpp"
-#include "IoMasterTap.hpp"
-
-// Sega Pico.
+// Special access to IoPico for the page register.
 #include "IoPico.hpp"
 
 // C includes. (C++ namespace)
@@ -276,55 +268,10 @@ void IoManager::setDevType(VirtPort_t virtPort, IoType_t ioType)
 	// Create a new device.
 	// TODO: Copy MD-side data from old device using a pseudo-copy constructor...
 	// TODO: Don't create TP/4WP sub-devices if the main devices are missing?
-	// TODO: Factory class?
-	IO::Device *dev = nullptr;
-	switch (ioType) {
-		case IOT_NONE:
-			if (virtPort <= VIRTPORT_EXT) {
-				// Must have a generic Device.
-				dev = new IO::Device();
-			}
-			break;
-		case IOT_3BTN:
-			dev = new IO::Io3BTN();
-			break;
-		case IOT_6BTN:
-			dev = new IO::Io6BTN();
-			break;
-		case IOT_2BTN:
-			dev = new IO::Io2BTN();
-			break;
-		case IOT_MEGA_MOUSE:
-			dev = new IO::IoMegaMouse();
-			break;
-		case IOT_TEAMPLAYER:
-			dev = new IO::IoTeamPlayer();
-			break;
-		case IOT_4WP_MASTER:
-			if (virtPort != VIRTPORT_2) {
-				// EA 4-Way Play Master device must be on port 2.
-				return;
-			}
-			dev = new IO::Io4WPM();
-			break;
-		case IOT_4WP_SLAVE:
-			if (virtPort != VIRTPORT_1) {
-				// EA 4-Way Play Slave device must be on port 1.
-				return;
-			}
-			dev = new IO::Io4WPS();
-			break;
-		case IOT_MASTERTAP:
-			dev = new IO::IoMasterTap();
-			break;
-		// TODO: ColecoVision.
-		case IOT_PICO:
-			dev = new IO::IoPico();
-			break;
-		default:
-			// TODO: Handle Team Player correctly.
-			return;
-	}
+	// NOTE: If the device is not supported in a given virtPort,
+	// DeviceFactory will return nullptr.
+	// TODO: DeviceFactory::createDeviceWithData()?
+	IO::Device *dev = IO::DeviceFactory::createDevice(ioType, virtPort);
 
 	if (dev && old_dev) {
 		// Copy data from the old device.

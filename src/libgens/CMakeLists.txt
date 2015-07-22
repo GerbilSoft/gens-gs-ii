@@ -178,6 +178,8 @@ SET(libgens_IO_SRCS
 	IO/IoManager_p.cpp
 	IO/IoManager_btnNames.cpp
 	IO/Device.cpp
+	IO/DeviceFactory.cpp
+	# Standard controllers
 	IO/Io3BTN.cpp
 	IO/Io6BTN.cpp
 	IO/Io2BTN.cpp
@@ -197,6 +199,8 @@ SET(libgens_IO_H
 	IO/IoManager.hpp
 	IO/IoManager_p.hpp
 	IO/Device.hpp
+	IO/DeviceFactory.hpp
+	# Standard controllers
 	IO/Io3BTN.hpp
 	IO/Io6BTN.hpp
 	IO/Io2BTN.hpp
