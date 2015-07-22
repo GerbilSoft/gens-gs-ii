@@ -84,7 +84,7 @@ class MetadataPrivate
 		static CreatorInfo_t creatorInfo;
 
 		// NOTE: MSVC uses 64-bit time_t by default.
-		// FIXME: 64-bit time_t for Linux?
+		// FIXME: 64-bit time_t for 32-bit Linux?
 		// FIXME: What about MinGW?
 
 		// Per-file metadata.

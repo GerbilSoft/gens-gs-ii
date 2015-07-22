@@ -48,11 +48,10 @@ SET(libzomg_SRCS
 	PngReader.cpp
 	)
 IF(WIN32)
-	# TODO
-	#SET(libzomg_SRCS
-	#	${libzomg_SRCS}
-	#	Metadata_win32.cpp
-	#	)
+	SET(libzomg_SRCS
+		${libzomg_SRCS}
+		Metadata_win32.cpp
+		)
 ELSE()
 	SET(libzomg_SRCS
 		${libzomg_SRCS}
@@ -97,6 +96,11 @@ ADD_LIBRARY(zomg STATIC
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(zomg)
 TARGET_LINK_LIBRARIES(zomg ${MINIZIP_LIBRARY} ${PNG_LIBRARY})
+IF(WIN32)
+	# Secur32.dll is required for Metadata.cpp, which calls these functions:
+	# - GetUserNameEx()
+	TARGET_LINK_LIBRARIES(zomg secur32)
+ENDIF(WIN32)
 
 # Set the compile definitions.
 ADD_DEFINITIONS(${ZLIB_DEFINITIONS} ${MINIZIP_DEFINITIONS} ${PNG_DEFINITIONS})
