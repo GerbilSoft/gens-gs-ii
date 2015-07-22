@@ -170,10 +170,16 @@ void Metadata::InitProgramMetadata(const char *creator,
 
 /**
  * Export the metadata as ZOMG.ini.
+ * @param metaFlags Metadata to export. (See MetadataFlags for values.)
  * @return String representation of ZOMG.ini.
  */
-std::string Metadata::toZomgIni(void) const
+std::string Metadata::toZomgIni(int metaFlags) const
 {
+	if (metaFlags < 0) {
+		// Use the default metadata flags.
+		metaFlags = MetadataPrivate::MetadataFlagsDefault;
+	}
+
 	ostringstream oss;
 
 	// Write the ZOMG section header.
@@ -185,19 +191,29 @@ std::string Metadata::toZomgIni(void) const
 	// TODO: Get the ZomgVersion from somewhere.
 	d->WriteValue(oss, "Version", "0.1-DEV-UNSTABLE");
 	d->WriteValue(oss, "System", d->systemId);
-	d->WriteValue(oss, "Creator", d->creatorInfo.creator);
-	d->WriteValue(oss, "CreatorVersion", d->creatorInfo.creatorVersion);
-	d->WriteValue(oss, "CreatorVcsVersion", d->creatorInfo.creatorVcsVersion);
-	// TODO
-	d->WriteValue(oss, "CreationTime", "" /*FormatCreationTime()*/);
-	d->WriteValue(oss, "OS", d->sysInfo.osVersion);
-	d->WriteValue(oss, "CPU", d->sysInfo.cpu);
-	d->WriteValue(oss, "Author", d->sysInfo.username);
-	d->WriteValue(oss, "ROM", d->romFilename);
-	d->WriteValue(oss, "ROM_CRC32", d->romCrc32, 8, true);
-	// TODO
-	d->WriteValue(oss, "ROM_Size", "" /*d->romSize, 1, false*/);
-	d->WriteValue(oss, "Region", d->region);
+	if (metaFlags & MF_Emulator) {
+		d->WriteValue(oss, "Creator", d->creatorInfo.creator);
+		d->WriteValue(oss, "CreatorVersion", d->creatorInfo.creatorVersion);
+		d->WriteValue(oss, "CreatorVcsVersion", d->creatorInfo.creatorVcsVersion);
+	}
+	if (metaFlags & MF_CreationTime) {
+		// TODO
+		d->WriteValue(oss, "CreationTime", "" /*FormatCreationTime()*/);
+	}
+	if (metaFlags & MF_OSandCPU) {
+		d->WriteValue(oss, "OS", d->sysInfo.osVersion);
+		d->WriteValue(oss, "CPU", d->sysInfo.cpu);
+	}
+	if (metaFlags & MF_Author) {
+		d->WriteValue(oss, "Author", d->sysInfo.username);
+	}
+	if (metaFlags & MF_RomInfo) {
+		d->WriteValue(oss, "ROM", d->romFilename);
+		d->WriteValue(oss, "ROM_CRC32", d->romCrc32, 8, true);
+		// TODO
+		d->WriteValue(oss, "ROM_Size", "" /*d->romSize, 1, false*/);
+		d->WriteValue(oss, "Region", d->region);
+	}
 	d->WriteValue(oss, "Description", d->description);
 	d->WriteValue(oss, "Extensions", d->extensions);
 

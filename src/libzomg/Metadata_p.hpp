@@ -32,9 +32,9 @@
 #include <string>
 #include <sstream>
 
+#include "Metadata.hpp"
 namespace LibZomg {
 
-class Metadata;
 class MetadataPrivate
 {
 	public:
@@ -70,6 +70,8 @@ class MetadataPrivate
 		struct SysInfo_t {
 			std::string osVersion;
 			std::string username;
+			// TODO: Custom username override.
+			//std::string username_custom;
 			std::string cpu;	// TODO
 		};
 		static SysInfo_t sysInfo;
@@ -82,6 +84,13 @@ class MetadataPrivate
 			std::string creatorVcsVersion;
 		};
 		static CreatorInfo_t creatorInfo;
+
+		// Default metadata export flags.
+		static const int MetadataFlagsDefault =
+			Metadata::MF_CreationTime |
+			Metadata::MF_Emulator |
+			Metadata::MF_OSandCPU |
+			Metadata::MF_RomInfo;
 
 		// NOTE: MSVC uses 64-bit time_t by default.
 		// FIXME: 64-bit time_t for 32-bit Linux?

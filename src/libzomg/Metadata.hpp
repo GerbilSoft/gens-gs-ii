@@ -66,11 +66,25 @@ class Metadata
 		 */
 		void clear(void);
 
+		enum MetadataFlags {
+			// Default is everything except Author.
+			// (CreationTime, Emulator, OSandCPU, and RomInfo.)
+			MF_Default	= -1,
+
+			MF_None		= 0,
+			MF_CreationTime	= (1 << 0),
+			MF_Emulator	= (1 << 1),
+			MF_OSandCPU	= (1 << 2),
+			MF_Author	= (1 << 3),
+			MF_RomInfo	= (1 << 4),
+		};
+
 		/**
 		 * Export the metadata as ZOMG.ini.
+		 * @param metaFlags Metadata to export. (See MetadataFlags for values.)
 		 * @return String representation of ZOMG.ini.
 		 */
-		std::string toZomgIni(void) const;
+		std::string toZomgIni(int metaFlags = MF_Default) const;
 
 		/** Property get/set functions. **/
 		// TODO: Use macros?
