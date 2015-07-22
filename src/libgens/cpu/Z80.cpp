@@ -151,6 +151,7 @@ void Z80::ZomgSaveReg(Zomg_Z80RegSave_t *state)
 	if (IntLine & 0x80) {
 		zomg_status |= ZOMG_Z80_STATUS_NMI_PENDING;
 	}
+	state->Status = zomg_status;
 
 	// Interrupt Vector. (IM 2)
 	state->IntVect = mdZ80_get_IntVect(ms_Z80);
