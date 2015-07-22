@@ -89,6 +89,7 @@ void VdpCache::init_m4_lut(void)
 				lut_entry |= 0x0040;
 			}
 		}
+		m4_lut[lut_idx] = lut_entry;
 	}
 }
 
