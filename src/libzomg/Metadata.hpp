@@ -1,6 +1,6 @@
 /***************************************************************************
  * libzomg: Zipped Original Memory from Genesis.                           *
- * ZomgIni.hpp: ZOMG.ini handler.                                          *
+ * Metadata.cpp: Metadata handler for savestates and screenshots.          *
  *                                                                         *
  * Copyright (c) 2013-2015 by David Korth.                                 *
  *                                                                         *
@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBZOMG_ZOMGINI_HPP__
-#define __LIBZOMG_ZOMGINI_HPP__
+#ifndef __LIBZOMG_METADATA_HPP__
+#define __LIBZOMG_METADATA_HPP__
 
 // C includes.
 #include <stdint.h>
@@ -28,43 +28,41 @@
 // C++ includes.
 #include <string>
 
-namespace LibZomg
-{
+namespace LibZomg {
 
-class ZomgIniPrivate;
-
-class ZomgIni
+class MetadataPrivate;
+class Metadata
 {
 	public:
-		ZomgIni();
-		~ZomgIni();
+		Metadata();
+		~Metadata();
 
 	private:
-		friend class CdDrivePrivate;
+		friend class MetadataPrivate;
 		// NOTE: Non-const to allow clear() to work more efficiently.
-		ZomgIniPrivate *d;
+		MetadataPrivate *d;
 
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibZomg-specific version of Q_DISABLE_COPY().
-		ZomgIni(const ZomgIni &);
-		ZomgIni &operator=(const ZomgIni &);
+		Metadata(const Metadata &);
+		Metadata &operator=(const Metadata &);
 
 	public:
 		/**
-		 * Clear the loaded ZOMG.ini data.
+		 * Clear the loaded metadata.
 		 */
 		void clear(void);
 
 		/**
-		 * Save the ZOMG.ini file.
+		 * Export the metadata as ZOMG.ini.
 		 * @return String representation of ZOMG.ini.
 		 */
-		std::string save(void) const;
+		std::string toZomgIni(void) const;
 
 		/** Property get/set functions. **/
 		// TODO: Use macros?
 
-		// TODO: Use bitfield with system IDs instead of a string.
+		// TODO: Use MDP system ID enumeration instead of a string.
 		std::string systemId(void) const;
 		void setSystemId(const std::string &systemId);
 
@@ -99,4 +97,4 @@ class ZomgIni
 
 }
 
-#endif /* __LIBZOMG_ZOMGINI_HPP__ */
+#endif /* __LIBZOMG_METADATA_HPP__ */

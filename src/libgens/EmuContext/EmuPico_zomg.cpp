@@ -37,7 +37,7 @@
 
 // ZOMG save structs.
 #include "libzomg/Zomg.hpp"
-#include "libzomg/ZomgIni.hpp"
+#include "libzomg/Metadata.hpp"
 #include "libzomg/zomg_vdp.h"
 #include "libzomg/zomg_psg.h"
 #include "libzomg/zomg_m68k.h"
@@ -155,9 +155,9 @@ int EmuPico::zomgSave(const utf8_str *filename) const
 
 	// Create ZOMG.ini.
 	// TODO: More information...
-	LibZomg::ZomgIni zomgIni;
-	zomgIni.setSystemId("Pico");
-	zomgIni.setCreator("Gens/GS II");
+	LibZomg::Metadata metadata;
+	metadata.setSystemId("Pico");
+	metadata.setCreator("Gens/GS II");
 
 	// LibGens version.
 	// TODO: Add easy "MDP version to string" function.
@@ -166,12 +166,12 @@ int EmuPico::zomgSave(const utf8_str *filename) const
 		(LibGens::version >> 24),
 		((LibGens::version >> 16) & 0xFF),
 		(LibGens::version & 0xFF));
-	zomgIni.setCreatorVersion(string(lg_version_str));
+	metadata.setCreatorVersion(string(lg_version_str));
 	if (LibGens::version_vcs)
-		zomgIni.setCreatorVcsVersion(string(LibGens::version_vcs));
+		metadata.setCreatorVcsVersion(string(LibGens::version_vcs));
 
 	// TODO: Get username for debugging builds. Make this optional later.
-	zomgIni.setAuthor("Joe User");
+	metadata.setAuthor("Joe User");
 
 	// TODO: Move base path triming code to LibGensText later?
 	string rom_filename(m_rom->filename());
@@ -194,16 +194,16 @@ int EmuPico::zomgSave(const utf8_str *filename) const
 			rom_filename = rom_filename.substr(slash_pos + 1);
 		}
 	}
-	zomgIni.setRomFilename(rom_filename);
+	metadata.setRomFilename(rom_filename);
 
 	// ROM CRC32.
-	zomgIni.setRomCrc32(m_rom->rom_crc32());
+	metadata.setRomCrc32(m_rom->rom_crc32());
 
-	zomgIni.setDescription("Some description; should probably\nbe left\\blank.");
-	zomgIni.setExtensions("EXT,THAT,DOESNT,EXIST,LOL");
+	metadata.setDescription("Some description; should probably\nbe left\\blank.");
+	metadata.setExtensions("EXT,THAT,DOESNT,EXIST,LOL");
 
 	// Save ZOMG.ini.
-	int ret = zomg.saveZomgIni(&zomgIni);
+	int ret = zomg.saveZomgIni(&metadata);
 	if (ret != 0) {
 		// Error saving ZOMG.ini.
 		return ret;

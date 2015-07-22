@@ -1,6 +1,6 @@
 /***************************************************************************
  * libzomg: Zipped Original Memory from Genesis.                           *
- * ZomgIni.cpp: ZOMG.ini handler.                                          *
+ * Metadata.cpp: Metadata handler for savestates and screenshots.          *
  *                                                                         *
  * Copyright (c) 2013-2015 by David Korth.                                 *
  *                                                                         *
@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "ZomgIni.hpp"
+#include "Metadata.hpp"
 
 // C++ includes.
 #include <string>
@@ -37,19 +37,18 @@ using std::ostringstream;
 #define NL "\n"
 #endif
 		
-namespace LibZomg
-{
+namespace LibZomg {
 
-class ZomgIniPrivate
+class MetadataPrivate
 {
 	public:
-		ZomgIniPrivate();
+		MetadataPrivate();
 
 	private:
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibZomg-specific version of Q_DISABLE_COPY().
-		ZomgIniPrivate(const ZomgIniPrivate &);
-		ZomgIniPrivate &operator=(const ZomgIniPrivate &);
+		MetadataPrivate(const MetadataPrivate &);
+		MetadataPrivate &operator=(const MetadataPrivate &);
 
 	public:
 		// Useful functions.
@@ -69,11 +68,11 @@ class ZomgIniPrivate
 		string extensions;
 };
 
-/*****************************
- * ZomgIniPrivate functions. *
- *****************************/
+/******************************
+ * MetadataPrivate functions. *
+ ******************************/
 
-ZomgIniPrivate::ZomgIniPrivate()
+MetadataPrivate::MetadataPrivate()
 	: romCrc32(0)
 { }
 
@@ -82,7 +81,7 @@ ZomgIniPrivate::ZomgIniPrivate()
  * @param key Key.
  * @param value Value.
  */
-void ZomgIniPrivate::WriteValue(ostringstream& oss, const string &key, const string &value)
+void MetadataPrivate::WriteValue(ostringstream& oss, const string &key, const string &value)
 {
 	oss << key << "=";
 	for (size_t i = 0; i < value.length(); i++) {
@@ -117,7 +116,7 @@ void ZomgIniPrivate::WriteValue(ostringstream& oss, const string &key, const str
  * @param width Minimum width of the field.
  * @param hex If true, print in hex (with leading "0x").
  */
-void ZomgIniPrivate::WriteValue(ostringstream& oss, const string &key, uint32_t value, int width, bool hex)
+void MetadataPrivate::WriteValue(ostringstream& oss, const string &key, uint32_t value, int width, bool hex)
 {
 	std::ios_base::fmtflags old_flags = oss.flags();
 	std::streamsize old_width = oss.width();
@@ -141,14 +140,14 @@ void ZomgIniPrivate::WriteValue(ostringstream& oss, const string &key, uint32_t 
 }
 
 /**********************
- * ZomgIni functions. *
+ * Metadata functions. *
  **********************/
 
-ZomgIni::ZomgIni()
-	: d(new ZomgIniPrivate())
+Metadata::Metadata()
+	: d(new MetadataPrivate())
 { }
 
-ZomgIni::~ZomgIni()
+Metadata::~Metadata()
 {
 	delete d;
 }
@@ -156,18 +155,18 @@ ZomgIni::~ZomgIni()
 /**
  * Clear the loaded ZOMG.ini data.
  */
-void ZomgIni::clear(void)
+void Metadata::clear(void)
 {
 	// Swap the private class with a new instance.
-	ZomgIni empty;
+	Metadata empty;
 	swap(d, empty.d);
 }
 
 /**
- * Save the ZOMG.ini file.
+ * Export the metadata as ZOMG.ini.
  * @return String representation of ZOMG.ini.
  */
-std::string ZomgIni::save(void) const
+std::string Metadata::toZomgIni(void) const
 {
 	ostringstream oss;
 
@@ -197,54 +196,54 @@ std::string ZomgIni::save(void) const
 // TODO: Use macros?
 
 // TODO: Use bitfield with system IDs instead of a string.
-string ZomgIni::systemId(void) const
+string Metadata::systemId(void) const
 	{ return d->systemId; }
-void ZomgIni::setSystemId(const string &systemId)
+void Metadata::setSystemId(const string &systemId)
 	{ d->systemId = systemId; }
 
-string ZomgIni::creator(void) const
+string Metadata::creator(void) const
 	{ return d->creator; }
-void ZomgIni::setCreator(const string &creator)
+void Metadata::setCreator(const string &creator)
 	{ d->creator = creator; }
 
-string ZomgIni::creatorVersion(void) const
+string Metadata::creatorVersion(void) const
 	{ return d->creatorVersion; }
-void ZomgIni::setCreatorVersion(const string &creatorVersion)
+void Metadata::setCreatorVersion(const string &creatorVersion)
 	{ d->creatorVersion = creatorVersion; }
 
-string ZomgIni::creatorVcsVersion(void) const
+string Metadata::creatorVcsVersion(void) const
 	{ return d->creatorVcsVersion; }
-void ZomgIni::setCreatorVcsVersion(const string &creatorVcsVersion)
+void Metadata::setCreatorVcsVersion(const string &creatorVcsVersion)
 	{ d->creatorVcsVersion = creatorVcsVersion; }
 
-string ZomgIni::author(void) const
+string Metadata::author(void) const
 	{ return d->author; }
-void ZomgIni::setAuthor(const string &author)
+void Metadata::setAuthor(const string &author)
 	{ d->author = author; }
 
-string ZomgIni::romFilename(void) const
+string Metadata::romFilename(void) const
 	{ return d->romFilename; }
-void ZomgIni::setRomFilename(const string &romFilename)
+void Metadata::setRomFilename(const string &romFilename)
 	{ d->romFilename = romFilename; }
 
-uint32_t ZomgIni::romCrc32(void) const
+uint32_t Metadata::romCrc32(void) const
 	{ return d->romCrc32; }
-void ZomgIni::setRomCrc32(uint32_t romCrc32)
+void Metadata::setRomCrc32(uint32_t romCrc32)
 	{ d->romCrc32 = romCrc32; }
 
-string ZomgIni::region(void) const
+string Metadata::region(void) const
 	{ return d->region; }
-void ZomgIni::setRegion(const string &region)
+void Metadata::setRegion(const string &region)
 	{ d->region = region; }
 
-string ZomgIni::description(void) const
+string Metadata::description(void) const
 	{ return d->description; }
-void ZomgIni::setDescription(const string &description)
+void Metadata::setDescription(const string &description)
 	{ d->description = description; }
 
-string ZomgIni::extensions(void) const
+string Metadata::extensions(void) const
 	{ return d->extensions; }
-void ZomgIni::setExtensions(const string &extensions)
+void Metadata::setExtensions(const string &extensions)
 	{ d->extensions = extensions; }
 
 }

@@ -26,7 +26,7 @@
 
 #include "Zomg.hpp"
 #include "zomg_byteswap.h"
-#include "ZomgIni.hpp"
+#include "Metadata.hpp"
 
 // MiniZip
 #include "minizip/zip.h"
@@ -119,12 +119,12 @@ int ZomgPrivate::saveToZomg(const utf8_str *filename, const void *buf, int len)
 /**
  * Save ZOMG.ini.
  * This function MUST be called before any other function when saving!
- * @param zomgIni ZomgIni class with information about the savestate.
+ * @param metadata Metadata class with information about the savestate.
  * @return 0 on success; non-zero on error.
  */
-int Zomg::saveZomgIni(const ZomgIni *zomgIni)
+int Zomg::saveZomgIni(const Metadata *metadata)
 {
-	string zomgIniStr = zomgIni->save();
+	string zomgIniStr = metadata->toZomgIni();
 	if (zomgIniStr.empty())
 		return -1;
 

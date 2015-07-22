@@ -31,7 +31,8 @@
 
 namespace LibZomg {
 
-class ZomgIni;
+class Metadata;
+
 class ZomgPrivate;
 class Zomg : public ZomgBase
 {
@@ -123,10 +124,10 @@ class Zomg : public ZomgBase
 		/**
 		 * Save ZOMG.ini.
 		 * This function MUST be called before any other function when saving!
-		 * @param zomgIni ZomgIni class with information about the savestate.
+		 * @param metadata Metadata class with information about the savestate.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int saveZomgIni(const ZomgIni *zomgIni);
+		int saveZomgIni(const Metadata *metadata);
 
 		/**
 		 * Save the preview image.

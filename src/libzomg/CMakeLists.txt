@@ -43,7 +43,7 @@ SET(libzomg_SRCS
 	ZomgLoad.cpp
 	ZomgSave.cpp
 	zomg_byteswap.c
-	ZomgIni.cpp
+	Metadata.cpp
 	PngWriter.cpp
 	PngReader.cpp
 	)
@@ -53,7 +53,7 @@ SET(libzomg_H
 	ZomgBase.hpp
 	Zomg.hpp
 	Zomg_p.hpp
-	ZomgIni.hpp
+	Metadata.hpp
 	PngWriter.hpp
 	PngReader.hpp
 	)
