@@ -36,7 +36,7 @@
 
 namespace LibGens {
 	class MdFb;
-	class Vdp;
+	class Rom;
 }
 
 namespace GensSdl {
@@ -50,11 +50,11 @@ const std::string getConfigDir(const utf8_str *subdir = nullptr);
 
 /**
  * Take a screenshot.
- * @param fb MdFb.
+ * @param fb	[in] MdFb.
+ * @param rom	[in] ROM object.
  * @return 0 on success; non-zero on error.
  */
-int doScreenShot(const LibGens::MdFb *fb,
-		 const utf8_str *basename);
+int doScreenShot(const LibGens::MdFb *fb, const LibGens::Rom *rom);
 
 }
 

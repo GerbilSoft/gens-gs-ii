@@ -23,11 +23,16 @@
 
 // LibGens
 #include "libgens/Util/MdFb.hpp"
+#include "libgens/Rom.hpp"
 using LibGens::MdFb;
+using LibGens::Rom;
 
 // LibZomg
 #include "libzomg/PngWriter.hpp"
 #include "libzomg/img_data.h"
+#include "libzomg/Metadata.hpp"
+using LibZomg::PngWriter;
+using LibZomg::Metadata;
 
 #ifdef _WIN32
 // Windows
@@ -144,16 +149,18 @@ const std::string getConfigDir(const utf8_str *subdir)
 
 /**
  * Take a screenshot.
- * @param fb MdFb.
- * @param basename Basename for the screenshot.
+ * @param fb	[in] MdFb.
+ * @param rom	[in] ROM object.
  * @return 0 on success; non-zero on error.
  */
-int doScreenShot(const MdFb *fb, const utf8_str *basename)
+int doScreenShot(const MdFb *fb, const Rom *rom)
 {
 	const string configDir = getConfigDir("Screenshots");
-	if (configDir.empty() || !basename || !fb)
+	if (configDir.empty() || !fb || !rom)
 		return -EINVAL;
 
+	// TODO: Include z_file information?
+	string basename = rom->filenameBaseNoExt();
 	string romFilename(configDir);
 	romFilename += DIR_SEP_CHR;
 	romFilename += basename;
@@ -192,8 +199,19 @@ int doScreenShot(const MdFb *fb, const utf8_str *basename)
 		img_data.bpp = (bpp == MdFb::BPP_16 ? 16 : 15);
 	}
 
-	LibZomg::PngWriter pngWriter;
-	int ret = pngWriter.writeToFile(&img_data, scrFilename);
+	// Set up metadata.
+	Metadata metadata;
+	metadata.setSystemId("MD");	// TODO: Pass MDP system ID directly.
+	//metadata.setRegion();		// TODO: Get region code.
+	metadata.setRomFilename(basename);	// TODO: With extension; also, z_file?
+	metadata.setRomCrc32(rom->rom_crc32());
+	//metadata.setRomSize(rom->romSize());	// TODO; also, include SMD header?
+	// TODO: Add more metadata.
+
+	// Write the PNG image.
+	PngWriter pngWriter;
+	int ret = pngWriter.writeToFile(&img_data, scrFilename,
+				&metadata, Metadata::MF_Default);
 
 	// Done using the framebuffer.
 	fb->unref();

@@ -37,7 +37,7 @@
 
 // ZOMG save structs.
 #include "libzomg/Zomg.hpp"
-#include "libzomg/ZomgIni.hpp"
+#include "libzomg/Metadata.hpp"
 #include "libzomg/zomg_vdp.h"
 #include "libzomg/zomg_psg.h"
 #include "libzomg/zomg_m68k.h"
@@ -155,23 +155,9 @@ int EmuPico::zomgSave(const utf8_str *filename) const
 
 	// Create ZOMG.ini.
 	// TODO: More information...
-	LibZomg::ZomgIni zomgIni;
-	zomgIni.setSystemId("Pico");
-	zomgIni.setCreator("Gens/GS II");
-
-	// LibGens version.
-	// TODO: Add easy "MDP version to string" function.
-	char lg_version_str[16];
-	snprintf(lg_version_str, sizeof(lg_version_str), "%d.%d.%d",
-		(LibGens::version >> 24),
-		((LibGens::version >> 16) & 0xFF),
-		(LibGens::version & 0xFF));
-	zomgIni.setCreatorVersion(string(lg_version_str));
-	if (LibGens::version_vcs)
-		zomgIni.setCreatorVcsVersion(string(LibGens::version_vcs));
-
-	// TODO: Get username for debugging builds. Make this optional later.
-	zomgIni.setAuthor("Joe User");
+	LibZomg::Metadata metadata;
+	metadata.setSystemId("Pico");
+	// TODO: System metadata flags, e.g. save author name.
 
 	// TODO: Move base path triming code to LibGensText later?
 	string rom_filename(m_rom->filename());
@@ -194,16 +180,16 @@ int EmuPico::zomgSave(const utf8_str *filename) const
 			rom_filename = rom_filename.substr(slash_pos + 1);
 		}
 	}
-	zomgIni.setRomFilename(rom_filename);
+	metadata.setRomFilename(rom_filename);
 
 	// ROM CRC32.
-	zomgIni.setRomCrc32(m_rom->rom_crc32());
+	metadata.setRomCrc32(m_rom->rom_crc32());
 
-	zomgIni.setDescription("Some description; should probably\nbe left\\blank.");
-	zomgIni.setExtensions("EXT,THAT,DOESNT,EXIST,LOL");
+	metadata.setDescription("Some description; should probably\nbe left\\blank.");
+	metadata.setExtensions("EXT,THAT,DOESNT,EXIST,LOL");
 
 	// Save ZOMG.ini.
-	int ret = zomg.saveZomgIni(&zomgIni);
+	int ret = zomg.saveZomgIni(&metadata);
 	if (ret != 0) {
 		// Error saving ZOMG.ini.
 		return ret;
