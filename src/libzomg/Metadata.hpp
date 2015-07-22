@@ -28,6 +28,18 @@
 // C++ includes.
 #include <string>
 
+// PNG structs.
+// NOTE: Copied fron png.h to avoid having to include it here.
+extern "C" {
+struct png_struct_def;
+typedef struct png_struct_def png_struct;
+typedef png_struct * png_structp;
+
+struct png_info_def;
+typedef struct png_info_def png_info;
+typedef png_info * png_infop;
+}
+
 namespace LibZomg {
 
 class MetadataPrivate;
@@ -86,7 +98,16 @@ class Metadata
 		 */
 		std::string toZomgIni(int metaFlags = MF_Default) const;
 
-		/** Property get/set functions. **/
+		/**
+		 * Export the metadata in PNG chunks.
+		 * @param png_ptr PNG pointer.
+		 * @param info_ptr PNG info pointer.
+		 * @param metaFlags Metadata to export. (See MetadataFlags for values.)
+		 * @return 0 on success; non-zero on error.
+		 */
+		int toPngData(png_structp png_ptr, png_infop info_ptr, int metaFlags = MF_Default) const;
+
+		/** File metadata functions. **/
 		// TODO: Use macros?
 
 		// TODO: Use MDP system ID enumeration instead of a string.

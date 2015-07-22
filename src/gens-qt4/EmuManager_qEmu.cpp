@@ -533,6 +533,7 @@ void EmuManager::doScreenShot(void)
 		img_data.bpp = (bpp == MdFb::BPP_16 ? 16 : 15);
 	}
 
+	// TODO: Add more metadata.
 	LibZomg::PngWriter pngWriter;
 	int ret = pngWriter.writeToFile(&img_data, scrFilename.toUtf8().constData());
 
