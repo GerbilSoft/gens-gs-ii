@@ -67,7 +67,7 @@ void GensWindowPrivate::initMenuBar(void)
 	QSignalMapper *mapper;
 	QActionGroup *actgrp;
 
-	// Macros to make everything easier.
+	// QSignalMapper macros.
 	#define initMapper(_slot) do { \
 		mapper = new QSignalMapper(q); \
 		QObject::connect(mapper, SIGNAL(mapped(int)), \
@@ -77,6 +77,16 @@ void GensWindowPrivate::initMenuBar(void)
 		mapper->setMapping(_widget, _id); \
 		QObject::connect(_widget, _signal, mapper, \
 			SLOT(map()), Qt::UniqueConnection); \
+	} while (0)
+
+	// QActionGroup macros.
+	#define initActGrp() do { \
+		actgrp = new QActionGroup(q); \
+		actgrp->setExclusive(true); \
+	} while (0)
+	#define doMappingExc(_widget, _id, _signal) do { \
+		doMapping(_widget, _id, _signal); \
+		actgrp->addAction(_widget); \
 	} while (0)
 
 	// Graphics, Resolution.
@@ -89,45 +99,27 @@ void GensWindowPrivate::initMenuBar(void)
 
 	// Graphics, Color Depth.
 	initMapper(SLOT(map_actionGraphicsBpp_triggered(int)));
-	doMapping(ui.actionGraphicsBpp15, MdFb::BPP_15, SIGNAL(triggered()));
-	doMapping(ui.actionGraphicsBpp16, MdFb::BPP_16, SIGNAL(triggered()));
-	doMapping(ui.actionGraphicsBpp32, MdFb::BPP_32, SIGNAL(triggered()));
-
-	actgrp = new QActionGroup(q);
-	actgrp->setExclusive(true);
-	actgrp->addAction(ui.actionGraphicsBpp15);
-	actgrp->addAction(ui.actionGraphicsBpp16);
-	actgrp->addAction(ui.actionGraphicsBpp32);
+	initActGrp();
+	doMappingExc(ui.actionGraphicsBpp15, MdFb::BPP_15, SIGNAL(triggered()));
+	doMappingExc(ui.actionGraphicsBpp16, MdFb::BPP_16, SIGNAL(triggered()));
+	doMappingExc(ui.actionGraphicsBpp32, MdFb::BPP_32, SIGNAL(triggered()));
 
 	// Graphics, Stretch Mode.
 	initMapper(SLOT(map_actionGraphicsStretch_triggered(int)));
-	doMapping(ui.actionGraphicsStretchNone,       STRETCH_NONE, SIGNAL(triggered()));
-	doMapping(ui.actionGraphicsStretchHorizontal, STRETCH_H,    SIGNAL(triggered()));
-	doMapping(ui.actionGraphicsStretchVertical,   STRETCH_V,    SIGNAL(triggered()));
-	doMapping(ui.actionGraphicsStretchFull,       STRETCH_FULL, SIGNAL(triggered()));
-
-	actgrp = new QActionGroup(q);
-	actgrp->setExclusive(true);
-	actgrp->addAction(ui.actionGraphicsStretchNone);
-	actgrp->addAction(ui.actionGraphicsStretchHorizontal);
-	actgrp->addAction(ui.actionGraphicsStretchVertical);
-	actgrp->addAction(ui.actionGraphicsStretchFull);
+	initActGrp();
+	doMappingExc(ui.actionGraphicsStretchNone,       STRETCH_NONE, SIGNAL(triggered()));
+	doMappingExc(ui.actionGraphicsStretchHorizontal, STRETCH_H,    SIGNAL(triggered()));
+	doMappingExc(ui.actionGraphicsStretchVertical,   STRETCH_V,    SIGNAL(triggered()));
+	doMappingExc(ui.actionGraphicsStretchFull,       STRETCH_FULL, SIGNAL(triggered()));
 
 	// System, Region.
 	initMapper(SLOT(map_actionSystemRegion_triggered(int)));
-	doMapping(ui.actionSystemRegionAuto, SysVersion::REGION_AUTO,     SIGNAL(triggered()));
-	doMapping(ui.actionSystemRegionJPN,  SysVersion::REGION_JP_NTSC,  SIGNAL(triggered()));
-	doMapping(ui.actionSystemRegionAsia, SysVersion::REGION_ASIA_PAL, SIGNAL(triggered()));
-	doMapping(ui.actionSystemRegionUSA,  SysVersion::REGION_US_NTSC,  SIGNAL(triggered()));
-	doMapping(ui.actionSystemRegionEUR,  SysVersion::REGION_EU_PAL,   SIGNAL(triggered()));
-
-	actgrp = new QActionGroup(q);
-	actgrp->setExclusive(true);
-	actgrp->addAction(ui.actionSystemRegionAuto);
-	actgrp->addAction(ui.actionSystemRegionJPN);
-	actgrp->addAction(ui.actionSystemRegionAsia);
-	actgrp->addAction(ui.actionSystemRegionUSA);
-	actgrp->addAction(ui.actionSystemRegionEUR);
+	initActGrp();
+	doMappingExc(ui.actionSystemRegionAuto, SysVersion::REGION_AUTO,     SIGNAL(triggered()));
+	doMappingExc(ui.actionSystemRegionJPN,  SysVersion::REGION_JP_NTSC,  SIGNAL(triggered()));
+	doMappingExc(ui.actionSystemRegionAsia, SysVersion::REGION_ASIA_PAL, SIGNAL(triggered()));
+	doMappingExc(ui.actionSystemRegionUSA,  SysVersion::REGION_US_NTSC,  SIGNAL(triggered()));
+	doMappingExc(ui.actionSystemRegionEUR,  SysVersion::REGION_EU_PAL,   SIGNAL(triggered()));
 }
 
 /**
