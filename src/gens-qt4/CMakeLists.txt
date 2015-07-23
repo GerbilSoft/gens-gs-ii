@@ -136,7 +136,7 @@ SET(gens-qt4_COMMON_SRCS
 
 SET(gens-qt4_WINDOW_SRCS
 	windows/GensWindow.cpp
-	windows/GensWindow_menus.cpp
+	windows/GensWindow_menu_slots.cpp
 	windows/AboutDialog.cpp
 	windows/CtrlConfigWindow.cpp
 	windows/ZipSelectDialog.cpp
