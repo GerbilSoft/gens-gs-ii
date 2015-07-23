@@ -37,8 +37,10 @@ using LibGens::EmuContext;
 // LibGens video includes.
 #include "libgens/Vdp/Vdp.hpp"
 #include "libgens/Util/MdFb.hpp"
+#include "libgens/Util/Screenshot.hpp"
 using LibGens::Vdp;
 using LibGens::MdFb;
+using LibGens::Screenshot;
 
 // LibGens CPU includes.
 #include "libgens/cpu/M68K.hpp"
@@ -58,7 +60,6 @@ using LibGens::MdFb;
 #include <QtGui/QImageReader>
 
 // LibZomg's image writer class.
-#include "libzomg/PngWriter.hpp"
 #include "libzomg/img_data.h"
 
 namespace GensQt4 {
@@ -510,42 +511,9 @@ void EmuManager::doScreenShot(void)
 	} while (QFile::exists(scrFilename));
 
 	// Take the screenshot.
-	// TODO: Separate function to create an img_data from an MdFb.
-	// NOTE: LibZomg doesn't depend on LibGens, so it can't use MdFb directly.
-	// TODO: Store VPix and HPixBegin in the MdFb.
 	MdFb *fb = gqt4_emuContext->m_vdp->MD_Screen->ref();
-	const int imgXStart = fb->imgXStart();
-	const int imgYStart = fb->imgYStart();
-
-	// TODO: Option to save the full framebuffer, not just active display?
-	// NOTE: Zeroing the struct in case new stuff is added later.
-	Zomg_Img_Data_t img_data;
-	memset(&img_data, 0, sizeof(img_data));
-	img_data.w = fb->imgWidth();
-	img_data.h = fb->imgHeight();
-
-	// Aspect ratio.
-	// Vertical is always 4.
-	// Horizontal is 4 for H40, 5 for H32.
-	// TODO: Handle Interlaced mode 2x rendering?
-	img_data.phys_y = 4;
-	// TODO: Formula to automatically scale for any width?
-	img_data.phys_x = (img_data.w == 256 ? 5 : 4);
-
-	const MdFb::ColorDepth bpp = fb->bpp();
-	if (bpp == MdFb::BPP_32) {
-		img_data.data = (void*)(fb->lineBuf32(imgYStart) + imgXStart);
-		img_data.pitch = (fb->pxPitch() * sizeof(uint32_t));
-		img_data.bpp = 32;
-	} else {
-		img_data.data = (void*)(fb->lineBuf16(imgYStart) + imgXStart);
-		img_data.pitch = (fb->pxPitch() * sizeof(uint16_t));
-		img_data.bpp = (bpp == MdFb::BPP_16 ? 16 : 15);
-	}
-
-	// TODO: Add more metadata.
-	LibZomg::PngWriter pngWriter;
-	int ret = pngWriter.writeToFile(&img_data, scrFilename.toUtf8().constData());
+	int ret = Screenshot::toFile(fb, m_rom, scrFilename.toUtf8().constData());
+	fb->unref();
 
 	// Done using the framebuffer.
 	fb->unref();
