@@ -662,7 +662,7 @@ QString EmuManager::romName(void)
 
 		// Return the ROM filename, without extensions.
 		// TODO: Also the zfilename?
-		return QString::fromUtf8(m_rom->filenameBaseNoExt().c_str());
+		return QString::fromUtf8(m_rom->filename_baseNoExt().c_str());
 	}
 
 	// Return the ROM name.
@@ -695,7 +695,7 @@ QString EmuManager::getSaveStateFilename(void)
 
 	const QString filename =
 		gqt4_cfg->configPath(PathConfig::GCPATH_SAVESTATES) +
-		QString::fromUtf8(m_rom->filenameBaseNoExt().c_str()) +
+		QString::fromUtf8(m_rom->filename_baseNoExt().c_str()) +
 		QChar(L'.') + QString::number(m_saveSlot) +
 		QLatin1String(".zomg");
 	return filename;

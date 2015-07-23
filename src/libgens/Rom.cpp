@@ -103,7 +103,7 @@ class RomPrivate
 
 		// ROM information.
 		std::string filename;		// ROM filename.
-		std::string filenameBaseNoExt;	// ROM filename. (basename; no extension)
+		std::string filename_baseNoExt;	// ROM filename. (Basename, no extension.)
 		unsigned int romSize;		// ROM size.
 
 		// ROM names.
@@ -200,7 +200,7 @@ RomPrivate::RomPrivate(Rom *q, const utf8_str *filename,
 	this->filename = string(filename);
 
 	// Remove the directories and extension from the ROM filename.
-	filenameBaseNoExt = LibGensText::FilenameNoExt(this->filename);
+	filename_baseNoExt = LibGensText::FilenameBaseNoExt(this->filename);
 
 	// Open the ROM file.
 	file = fopen(filename, "rb");
@@ -879,12 +879,11 @@ string Rom::filename(void) const
 
 /**
  * Get the ROM filename.
- * (Basename, no extension)
- * TODO: Rename to filename_baseNoExt()?
+ * (Basename, no extension.)
  * @return ROM filename (UTF-8), or nullptr on error.
  */
-string Rom::filenameBaseNoExt(void) const
-	{ return d->filenameBaseNoExt; }
+string Rom::filename_baseNoExt(void) const
+	{ return d->filename_baseNoExt; }
 
 /**
  * Get the ROM filename of the selected file in a multi-file archive.
@@ -909,7 +908,7 @@ string Rom::z_filename_baseNoExt(void) const
 	// TODO: Cache it?
 	string tmp = z_filename();
 	if (!tmp.empty()) {
-		tmp = LibGensText::FilenameNoExt(tmp);
+		tmp = LibGensText::FilenameBaseNoExt(tmp);
 	}
 	return tmp;
 }

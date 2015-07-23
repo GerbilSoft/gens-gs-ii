@@ -158,7 +158,7 @@ void ScreenshotPrivate::toImgData(Zomg_Img_Data_t *img_data,
 
 	//metadata.setRegion();		// TODO: Get region code.
 	// TODO: Save ROM filename with extension; also, z_file?
-	metadata->setRomFilename(rom->filenameBaseNoExt());
+	metadata->setRomFilename(rom->filename_baseNoExt());
 	metadata->setRomCrc32(rom->rom_crc32());
 	//metadata->setRomSize(rom->romSize());	// TODO; also, include SMD header?
 	// TODO: Add more metadata.

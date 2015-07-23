@@ -156,7 +156,7 @@ int doScreenShot(const MdFb *fb, const Rom *rom)
 		return -EINVAL;
 
 	// TODO: Include z_file information?
-	string basename = rom->filenameBaseNoExt();
+	string basename = rom->filename_baseNoExt();
 	string romFilename(configDir);
 	romFilename += DIR_SEP_CHR;
 	romFilename += basename;

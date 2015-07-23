@@ -125,11 +125,11 @@ string SpaceElim(const string& src)
 }
 
 /**
- * Get the filename portion of a path without its extension.
+ * Get the filename portion of a path, without its extension.
  * @param filename Original filename.
  * @return Filename without directories or its extension.
  */
-string FilenameNoExt(const string &filename)
+string FilenameBaseNoExt(const string &filename)
 {
 	// Remove the directories and extension from the ROM filename.
 	// TODO: Remove all extensions (e.g. ".gen.gz")?

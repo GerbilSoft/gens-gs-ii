@@ -233,7 +233,7 @@ void SRam::setFilename(const string& filename)
 	}
 
 	// Remove any subdirectories and extensions from the ROM filename.
-	d->filename = LibGensText::FilenameNoExt(filename);
+	d->filename = LibGensText::FilenameBaseNoExt(filename);
 	// Append our extension.
 	d->filename += '.';
 	d->filename += d->fileExt;

@@ -135,10 +135,10 @@ class Rom
 
 		/**
 		 * Get the ROM filename.
-		 * (Basename, no extension)
+		 * (Basename, no extension.)
 		 * @return ROM filename (UTF-8), or empty string on error.
 		 */
-		std::string filenameBaseNoExt(void) const;
+		std::string filename_baseNoExt(void) const;
 
 		/**
 		 * Get the ROM filename of the selected file in a multi-file archive.

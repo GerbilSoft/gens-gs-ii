@@ -493,7 +493,7 @@ void EmuManager::doScreenShot(void)
 	// Get the ROM filename (without extension).
 	// TODO: Remove all extensions, not just the base?
 	// Otherwise, S1.bin.gz will save as S1.bin_000.png.
-	const QString romFilename = QString::fromUtf8(m_rom->filenameBaseNoExt().c_str());
+	const QString romFilename = QString::fromUtf8(m_rom->filename_baseNoExt().c_str());
 
 	// Add the current directory, number, and .png extension.
 	// TODO: Enumerate QImageWriter for supported image formats.
