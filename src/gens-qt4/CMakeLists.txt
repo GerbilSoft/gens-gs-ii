@@ -128,7 +128,6 @@ SET(gens-qt4_COMMON_SRCS
 	actions/GensMenuBar.cpp
 	actions/GensMenuBar_menus.cpp
 	actions/GensMenuBar_sync.cpp
-	actions/GensActions.cpp
 	EmuManager_str.cpp
 	actions/RecentRomsMenu.cpp
 	cdrom/FindCdromDrives.cpp
@@ -137,6 +136,7 @@ SET(gens-qt4_COMMON_SRCS
 
 SET(gens-qt4_WINDOW_SRCS
 	windows/GensWindow.cpp
+	windows/GensWindow_menus.cpp
 	windows/AboutDialog.cpp
 	windows/CtrlConfigWindow.cpp
 	windows/ZipSelectDialog.cpp
@@ -195,7 +195,6 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	EmuManager.hpp
 	actions/GensKeyConfig.hpp
 	actions/GensMenuBar.hpp
-	actions/GensActions.hpp
 	Input/KeyHandlerQt.hpp
 	actions/RecentRomsMenu.hpp
 	cdrom/FindCdromDrives.hpp

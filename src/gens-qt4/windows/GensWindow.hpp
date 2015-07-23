@@ -78,38 +78,9 @@ class GensWindow : public QMainWindow
 		void setBpp(LibGens::MdFb::ColorDepth bpp);
 
 		// Idle thread.
+		// TODO: Rename to isIdleThreadAllowed().
 		bool idleThreadAllowed(void);
-		void setIdleThreadAllowed(bool newIdleThreadAllowed);
-
-		// Wrapper for GensActions.
-		bool menuItemCheckState(int action);
-
-	public slots:
-		/** Wrapper functions for GensActions. **/
-		/** TODO: Have GensActions emit signals, and link them to EmuManager slots. **/
-
-		// NOTE: Calling m_emuManager functions directly via
-		// friend classes, or using inline functions here,
-		// results in wacky memory corruption on Mac OS X.
-		// (Mac OS X 10.5.7, PowerPC, gcc-4.0.1)
-		// Specifically, the m_emuManager pointer is misread as
-		// e.g. 0x101b4 when it should be 0x1b43210. It looks like
-		// it's off by two bytes when reading the address from
-		// the GensWindow instance.
-		void openRom(void);
-		void openRom(const QString &filename, const QString &z_filename = QString());
-		void closeRom(void);
-		void saveState(void);
-		void loadState(void);
-		void screenShot(void);
-		void setAudioRate(int newRate);
-		void setStereo(bool newStereo);
-
-		/** VBackend properties. **/
-		// TODO: Allow GensActions to access m_vBackend directly?
-		void toggleFastBlur(void);
-		StretchMode_t stretchMode(void);
-		void setStretchMode(StretchMode_t newStretchMode);
+		void setIdleThreadAllowed(bool idleThreadAllowed);
 
 	protected:
 		// QMainWindow virtual functions.
@@ -186,6 +157,77 @@ class GensWindow : public QMainWindow
 		 * @param pos Position to show the context menu. (widget coordinates)
 		 */
 		void showContextMenu(const QPoint& pos);
+
+	private slots:
+		/** Menu slots. **/
+
+		// NOTE: Calling m_emuManager functions directly via
+		// friend classes, or using inline functions here,
+		// results in wacky memory corruption on Mac OS X.
+		// (Mac OS X 10.5.7, PowerPC, gcc-4.0.1)
+		// Specifically, the m_emuManager pointer is misread as
+		// e.g. 0x101b4 when it should be 0x1b43210. It looks like
+		// it's off by two bytes when reading the address from
+		// the GensWindow instance.
+
+		// File
+		void on_actionFileOpenROM_triggered(void);
+		void on_actionFileCloseROM_triggered(void);
+		void on_actionFileSaveState_triggered(void);
+		void on_actionFileLoadState_triggered(void);
+		void on_actionFileGeneralConfiguration_triggered(void);
+		void on_actionFileSegaCDControlPanel_triggered(void);
+		void on_actionFileExit_triggered(void);
+
+		// Graphics
+		void on_actionGraphicsShowMenuBar_toggled(bool checked);
+		//void on_mnuGraphicsResolution_triggered(void);
+		void on_actionGraphicsResolution1x_triggered(void);
+		void on_actionGraphicsResolution2x_triggered(void);
+		void on_actionGraphicsResolution3x_triggered(void);
+		void on_actionGraphicsResolution4x_triggered(void);
+		//void on_mnuGraphicsBpp_triggered(void);
+		void on_actionGraphicsBpp15_triggered(void);
+		void on_actionGraphicsBpp16_triggered(void);
+		void on_actionGraphicsBpp32_triggered(void);
+		//void on_mnuGraphicsStretch_triggered(void);
+		void on_actionGraphicsStretchNone_triggered(void);
+		void on_actionGraphicsStretchHorizontal_triggered(void);
+		void on_actionGraphicsStretchVertical_triggered(void);
+		void on_actionGraphicsStretchFull_triggered(void);
+		void on_actionGraphicsScreenshot_triggered(void);
+
+		// System
+		//void on_mnuSystemRegion_triggered(void);
+		void on_actionSystemRegionAuto_triggered(void);
+		void on_actionSystemRegionJPN_triggered(void);
+		void on_actionSystemRegionAsia_triggered(void);
+		void on_actionSystemRegionUSA_triggered(void);
+		void on_actionSystemRegionEUR_triggered(void);
+		void on_actionSystemHardReset_triggered(void);
+		void on_actionSystemSoftReset_triggered(void);
+		void on_actionSystemPause_toggled(bool checked);
+		void on_actionSystemResetM68K_triggered(void);
+		void on_actionSystemResetS68K_triggered(void);
+		void on_actionSystemResetMSH2_triggered(void);
+		void on_actionSystemResetSSH2_triggered(void);
+		void on_actionSystemResetZ80_triggered(void);
+
+		// Options
+		void on_actionOptionsSRAM_toggled(bool checked);
+		void on_actionOptionsControllers_triggered(void);
+		// SoundTest; remove this later.
+		void on_actionSound11_triggered(void);
+		void on_actionSound16_triggered(void);
+		void on_actionSound22_triggered(void);
+		void on_actionSound32_triggered(void);
+		void on_actionSound44_triggered(void);
+		void on_actionSound48_triggered(void);
+		void on_actionSoundMono_triggered(void);
+		void on_actionSoundStereo_triggered(void);
+
+		// Help
+		void on_actionHelpAbout_triggered(void);
 };
 
 }

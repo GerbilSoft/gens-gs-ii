@@ -73,7 +73,6 @@ GensWindowPrivate::~GensWindowPrivate()
 	delete emuManager;
 	delete keyHandler;
 	// TODO: Remove this.
-	//delete gensActions;
 	//delete gensMenuBar;
 }
 
@@ -264,13 +263,10 @@ GensWindow::GensWindow()
 	d->emuManager = new EmuManager();
 	// Initialize the menu bar.
 	//gensMenuBar = new GensMenuBar(GensWindow, emuManager);
-	// Initialize the Gens Action Manager.
-	//gensActions = new GensActions(GensWindow);
 
 	// Initialize the Key Manager and KeyHandlerQt.
 	d->emuManager->setKeyManager(gqt4_cfg->m_keyManager);
-	// TODO: Update KeyHandlerQt to not use gensActions.
-	d->keyHandler = new KeyHandlerQt(this, nullptr /*gensActions*/, gqt4_cfg->m_keyManager);
+	d->keyHandler = new KeyHandlerQt(this, gqt4_cfg->m_keyManager);
 
 	// Create the Video Backend.
 	// TODO: Allow selection of all available VBackend classes.
@@ -283,12 +279,6 @@ GensWindow::GensWindow()
 	// Enable drag and drop.
 	this->setAcceptDrops(true);
 
-	/*
-	// Connect the GensMenuBar's triggered() signal.
-	QObject::connect(gensMenuBar, SIGNAL(triggered(int,bool)),
-		gensActions, SLOT(doAction(int,bool)));
-	*/
-
 	// Connect Emulation Manager signals to GensWindow.
 	QObject::connect(d->emuManager, SIGNAL(updateFps(double)),
 		this, SLOT(updateFps(double)));
@@ -298,16 +288,6 @@ GensWindow::GensWindow()
 		this, SLOT(osdPrintMsg(int,QString)));
 	QObject::connect(d->emuManager, SIGNAL(osdShowPreview(int,QImage)),
 		this, SLOT(osdShowPreview(int,QImage)));
-
-	/* TODO
-	// Gens Action Manager signals.
-	QObject::connect(gensActions, SIGNAL(actionSetPaused(bool)),
-		emuManager, SLOT(pauseRequest(bool)));
-	QObject::connect(gensActions, SIGNAL(actionResetEmulator(bool)),
-		emuManager, SLOT(resetEmulator(bool)));
-	QObject::connect(gensActions, SIGNAL(actionResetCpu(int)),
-		emuManager, SLOT(resetCpu(int)));
-	*/
 
        // Auto Pause: Application Focus Changed signal, and setting change signal.
        QObject::connect(gqt4_app, SIGNAL(focusChanged(QWidget*,QWidget*)),
@@ -714,88 +694,18 @@ void GensWindow::showMenuBar_changed_slot(const QVariant &newShowMenuBar)
 	d->initMenuBar();
 }
 
-/** Wrapper functions for GensActions. **/
-/** TODO: Have GensActions emit signals, and link them to EmuManager slots. **/
-
-void GensWindow::openRom(void)
-{
-	Q_D(GensWindow);
-	d->emuManager->openRom();
-}
-void GensWindow::openRom(const QString &filename, const QString &z_filename)
-{
-	Q_D(GensWindow);
-	d->emuManager->openRom(filename, z_filename);
-}
-void GensWindow::closeRom(void)
-{
-	Q_D(GensWindow);
-	d->emuManager->closeRom();
-}
-void GensWindow::saveState(void)
-{
-	Q_D(GensWindow);
-	d->emuManager->saveState();
-}
-void GensWindow::loadState(void)
-{
-	Q_D(GensWindow);
-	d->emuManager->loadState();
-}
-void GensWindow::screenShot(void)
-{
-	Q_D(GensWindow);
-	d->emuManager->screenShot();
-}
-void GensWindow::setAudioRate(int newRate)
-{
-	Q_D(GensWindow);
-	d->emuManager->setAudioRate(newRate);
-}
-void GensWindow::setStereo(bool newStereo)
-{
-	Q_D(GensWindow);
-	d->emuManager->setStereo(newStereo);
-}
-
-/** VBackend properties. **/
-void GensWindow::toggleFastBlur(void)
-{
-	Q_D(GensWindow);
-	d->vBackend->setFastBlur(!d->vBackend->fastBlur());
-}
-StretchMode_t GensWindow::stretchMode(void)
-{
-	Q_D(GensWindow);
-	return d->vBackend->stretchMode();
-}
-void GensWindow::setStretchMode(StretchMode_t newStretchMode)
-{
-	Q_D(GensWindow);
-	d->vBackend->setStretchMode(newStretchMode);
-}
-
+// TODO: Rename to isIdleThreadAllowed().
 bool GensWindow::idleThreadAllowed(void)
 {
 	Q_D(GensWindow);
 	return d->idleThreadAllowed;
 }
 
-void GensWindow::setIdleThreadAllowed(bool newIdleThreadAllowed)
+void GensWindow::setIdleThreadAllowed(bool idleThreadAllowed)
 {
 	Q_D(GensWindow);
-	d->idleThreadAllowed = newIdleThreadAllowed;
+	d->idleThreadAllowed = idleThreadAllowed;
 	d->checkIdleThread();
-}
-
-// Wrapper for GensActions.
-bool GensWindow::menuItemCheckState(int action)
-{
-	/* TODO: Obsolete.
-	Q_D(GensWindow);
-	return d->ui.gensMenuBar->menuItemCheckState(action);
-	*/
-	return false;
 }
 
 /**

@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -23,13 +23,16 @@
 
 #include "KeyHandlerQt.hpp"
 
+// Key Manager.
+#include "libgenskeys/KeyManager.hpp"
+
 // Qt includes
 #include <QtCore/qglobal.h>
 #include <QtGui/QKeyEvent>
 #include <QtGui/QMouseEvent>
 
-// C includes.
-#include <string.h>
+// C includes. (C++ namespace)
+#include <cstring>
 
 // Native virtual keycodes.
 #if defined(Q_WS_X11)
@@ -42,90 +45,23 @@
 #include <windows.h>
 #endif
 
-#include <stdio.h>
-namespace GensQt4
-{
+namespace GensQt4 {
 
 /**
  * Initialize KeyHandlerQt.
- * @param gensActions Gens Actions Manager.
  * @param keyManager Key Manager.
- * NOTE: This class does NOT delete gensActions or keyManager on shutdown!
+ * NOTE: This class does NOT delete keyManager on shutdown!
  */
-KeyHandlerQt::KeyHandlerQt(QObject *parent, GensActions *gensActions, LibGensKeys::KeyManager *keyManager)
+KeyHandlerQt::KeyHandlerQt(QObject *parent, LibGensKeys::KeyManager *keyManager)
 	: QObject(parent)
-	, m_gensActions(gensActions)
 	, m_keyManager(keyManager)
-{
-	if (m_gensActions) {
-		// Connect the Gens Actions object's "destroyed" signal.
-		connect(m_gensActions, SIGNAL(destroyed()),
-			this, SLOT(gensActionsDestroyed()));
-	}
-}
+{ }
 
 /**
  * Shut down KeyHandlerQt.
  */
 KeyHandlerQt::~KeyHandlerQt(void)
 { }
-
-/**
- * Get the GensActions object.
- * @return GensActions object.
- */
-GensActions *KeyHandlerQt::gensActions(void) const
-{
-	return m_gensActions;
-}
-
-/**
- * Set the GensActions object.
- * @param gensActions New GensActions object.
- */
-void KeyHandlerQt::setGensActions(GensActions *gensActions)
-{
-	if (m_gensActions) {
-		// Disconnect the existing key handler's "destroyed" signal.
-		disconnect(m_gensActions, SIGNAL(destroyed()),
-			   this, SLOT(gensActionsDestroyed()));
-	}
-
-	m_gensActions = gensActions;
-
-	if (m_gensActions) {
-		// Connect the new key handler's "destroyed" signal.
-		connect(m_gensActions, SIGNAL(destroyed()),
-			this, SLOT(gensActionsDestroyed()));
-	}
-}
-
-/**
- * Get the KeyManager object.
- * @return KeyManager object.
- */
-LibGensKeys::KeyManager *KeyHandlerQt::keyManager(void) const
-{
-	return m_keyManager;
-}
-
-/**
- * Set the KeyManager object.
- * @return KeyManager object.
- */
-void KeyHandlerQt::setKeyManager(LibGensKeys::KeyManager *keyManager)
-{
-	m_keyManager = keyManager;
-}
-
-/**
- * GensActions object was destroyed.
- */
-void KeyHandlerQt::gensActionsDestroyed(void)
-{
-	m_gensActions = nullptr;
-}
-
 
 /**
  * Key press handler.
@@ -142,6 +78,8 @@ void KeyHandlerQt::keyPressEvent(QKeyEvent *event)
 	if (gensKey == KEYV_UNKNOWN)
 		return;
 
+	// TODO: Update this to work with the new menu system
+#if 0
 	// If this is an event key, don't handle it as a controller key.
 	// We need to apply the modifiers for this to work.
 	// Qt's modifiers conveniently map to GensKeyMod_t.
@@ -151,13 +89,13 @@ void KeyHandlerQt::keyPressEvent(QKeyEvent *event)
 		// Key was handled as an event key.
 		return;
 	}
+#endif
 
 	// Not an event key. Mark it as pressed.
 	if (m_keyManager) {
 		m_keyManager->keyDown(gensKey);
 	}
 }
-
 
 /**
  * Key release handler.
