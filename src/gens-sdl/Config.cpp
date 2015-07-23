@@ -29,13 +29,6 @@ using LibGens::Rom;
 using LibGens::MdFb;
 using LibGens::Screenshot;
 
-// LibZomg
-#include "libzomg/PngWriter.hpp"
-#include "libzomg/img_data.h"
-#include "libzomg/Metadata.hpp"
-using LibZomg::PngWriter;
-using LibZomg::Metadata;
-
 #ifdef _WIN32
 // Windows
 #include <windows.h>
