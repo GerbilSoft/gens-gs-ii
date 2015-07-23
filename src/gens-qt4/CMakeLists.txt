@@ -10,10 +10,13 @@ cmake_minimum_required(VERSION 2.6)
 # 4.6.0: QPixmap::fromWinHICON() [Win32] (fallbacks to QPixmap::fromWinHBITMAP() are in place)
 IF(WIN32)
 	SET(GENS_QT4_MIN_VERSION 4.2.0)
+	SET(GENS_QT4_COMPONENTS QtCore QtGui QtOpenGL)
 ELSEIF(APPLE)
 	SET(GENS_QT4_MIN_VERSION 4.3.0)
+	SET(GENS_QT4_COMPONENTS QtCore QtGui QtOpenGL)
 ELSE()
 	SET(GENS_QT4_MIN_VERSION 4.2.0)
+	SET(GENS_QT4_COMPONENTS QtCore QtGui QtOpenGL QtDBus)
 ENDIF()
 
 # Find Qt4.
@@ -23,7 +26,7 @@ ENDIF()
 # - QtOpenGl
 # - QtDBus (Unix only, and not Mac OS X)
 FIND_PACKAGE(Qt4 ${GENS_QT4_MIN_VERSION}
-	COMPONENTS QtCore QtGui QtOpenGL QtDBus)
+	COMPONENTS ${GENS_QT4_COMPONENTS})
 IF(NOT QT_QTCORE_FOUND)
 	MESSAGE(FATAL_ERROR "QtCore not found! Please install Qt ${GENS_QT4_MIN_VERSION} or higher.")
 ELSEIF(NOT QT_QTGUI_FOUND)
