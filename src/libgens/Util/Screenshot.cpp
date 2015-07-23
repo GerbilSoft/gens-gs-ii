@@ -173,7 +173,7 @@ void ScreenshotPrivate::toImgData(Zomg_Img_Data_t *img_data,
  */
 int Screenshot::toFile(const MdFb *fb, const Rom *rom, const utf8_str *filename)
 {
-	if (!fb || !filename || !filename[0])
+	if (!fb || !rom || !filename || !filename[0])
 		return -EINVAL;
 
 	// TODO: metaFlags.
