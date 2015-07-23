@@ -62,6 +62,15 @@ void GensWindowPrivate::initMenuBar(void)
 	// TODO: Set standard shortcuts?
 	// TODO: Rename "Quit" to "Exit" on Windows.
 
+	// Hide the "Show Menu Bar" item if we're using a global menu bar.
+	// TODO: On Linux, this may change at runtime...
+	if (isGlobalMenuBar()) {
+		// NOTE: QAction::setVisible(false) does NOT work.
+		// Remove the QAction from the menu.
+		// TODO: Re-add if it changes at runtime.
+		ui.mnuGraphics->removeAction(ui.actionGraphicsShowMenuBar);
+	}
+
 	// Create QSignalMappers and QActionGroups for submenus
 	// with lots of similar items.
 	QSignalMapper *mapper;
